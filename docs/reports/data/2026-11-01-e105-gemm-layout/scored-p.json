@@ -1,0 +1,588 @@
+{
+ "experiment": "E105",
+ "amendment": "A1",
+ "passes": {
+  "e105c": {
+   "kept": [
+    10520,
+    10522
+   ],
+   "set_aside": []
+  },
+  "e105v": {
+   "kept": [
+    10523
+   ],
+   "set_aside": [
+    {
+     "pass": 10521,
+     "why": [
+      "fp32.randn spans 1.721 W"
+     ]
+    }
+   ]
+  }
+ },
+ "rules": {
+  "P1": {
+   "gemmc1.fp32": {
+    "frozen": 9.495,
+    "measured": 9.32,
+    "off": -0.018,
+    "verdict": "PASS"
+   },
+   "gemmc1.fp16": {
+    "frozen": 18.991,
+    "measured": 18.647,
+    "off": -0.018,
+    "verdict": "PASS"
+   },
+   "gemmc1.int8": {
+    "frozen": 71.615,
+    "measured": 67.22,
+    "off": -0.061,
+    "verdict": "FAIL"
+   },
+   "gemmv1.fp32": {
+    "frozen": 8.036,
+    "measured": 7.024,
+    "off": -0.126,
+    "verdict": "PASS"
+   },
+   "gemmv1.fp16": {
+    "frozen": 16.018,
+    "measured": 14.019,
+    "off": -0.125,
+    "verdict": "PASS"
+   },
+   "gemmv1.int8": {
+    "frozen": 31.705,
+    "measured": 30.112,
+    "off": -0.05,
+    "verdict": "PASS"
+   },
+   "gemmc16.fp32": {
+    "frozen": 4.538,
+    "measured": 3.227,
+    "off": -0.289,
+    "verdict": "FAIL"
+   },
+   "gemmc16.fp16": {
+    "frozen": 9.04,
+    "measured": 6.453,
+    "off": -0.286,
+    "verdict": "FAIL"
+   },
+   "gemmc16.int8": {
+    "frozen": 17.961,
+    "measured": 12.966,
+    "off": -0.278,
+    "verdict": "FAIL"
+   },
+   "gemmv16.fp32": {
+    "frozen": 3.981,
+    "measured": 2.885,
+    "off": -0.275,
+    "verdict": "FAIL"
+   },
+   "gemmv16.fp16": {
+    "frozen": 7.934,
+    "measured": 5.779,
+    "off": -0.272,
+    "verdict": "FAIL"
+   },
+   "gemmv16.int8": {
+    "frozen": 15.778,
+    "measured": 10.133,
+    "off": -0.358,
+    "verdict": "FAIL"
+   }
+  },
+  "P2": {
+   "fp32": {
+    "frozen": 39.31,
+    "measured": 32.99,
+    "off": -0.161,
+    "benchmark_e101": 36.45,
+    "verdict": "FAIL"
+   },
+   "fp16": {
+    "frozen": 36.03,
+    "measured": 30.06,
+    "off": -0.166,
+    "benchmark_e101": 33.4,
+    "verdict": "FAIL"
+   },
+   "int8": {
+    "frozen": 29.57,
+    "measured": 18.23,
+    "off": -0.383,
+    "benchmark_e101": 27.39,
+    "verdict": "FAIL"
+   }
+  },
+  "P3": {
+   "S_bycol": 18.23,
+   "ci95": 4.67,
+   "S_res": 9.64,
+   "premium_w": 8.59,
+   "benchmark_e101": 17.45,
+   "as_run_e101": 0.78,
+   "verdict": "PARTIAL"
+  },
+  "P4": {
+   "c_w": 31.99,
+   "p800_w": 94.6,
+   "a2_c_w": 31.54,
+   "a2_p800_w_runs": [
+    95.2
+   ],
+   "verdict": "AT OR ABOVE 88 W: the cell should have been refused"
+  },
+  "P5": {
+   "fp32": {
+    "share": 0.114,
+    "benchmark": 0.126,
+    "verdict": "PASS"
+   },
+   "fp16": {
+    "share": 0.127,
+    "benchmark": 0.138,
+    "verdict": "PASS"
+   },
+   "int8": {
+    "share": 0.274,
+    "benchmark": 0.28,
+    "verdict": "PASS"
+   }
+  }
+ },
+ "cells": {
+  "gemmc1.fp32.zeros": {
+   "S_w": 3.77,
+   "ci95": 2.29,
+   "n": 2,
+   "rate": 9.322,
+   "cycles_per_op": 536.6,
+   "pj_mac": 0.808,
+   "nj_op": 3.31
+  },
+  "gemmc1.fp32.ones": {
+   "S_w": 13.01,
+   "ci95": 0.12,
+   "n": 2,
+   "rate": 9.323,
+   "cycles_per_op": 536.6,
+   "pj_mac": 2.791,
+   "nj_op": 11.43
+  },
+  "gemmc1.fp32.sparse50": {
+   "S_w": 14.59,
+   "ci95": 1.34,
+   "n": 2,
+   "rate": 9.321,
+   "cycles_per_op": 536.6,
+   "pj_mac": 3.131,
+   "nj_op": 12.82
+  },
+  "gemmc1.fp32.real": {
+   "S_w": 32.67,
+   "ci95": 0.01,
+   "n": 2,
+   "rate": 9.32,
+   "cycles_per_op": 536.6,
+   "pj_mac": 7.01,
+   "nj_op": 28.71
+  },
+  "gemmc1.fp32.randn": {
+   "S_w": 32.99,
+   "ci95": 0.85,
+   "n": 2,
+   "rate": 9.32,
+   "cycles_per_op": 536.7,
+   "pj_mac": 7.079,
+   "nj_op": 29.0
+  },
+  "gemmc1.fp16.zeros": {
+   "S_w": 3.82,
+   "ci95": 0.08,
+   "n": 2,
+   "rate": 18.641,
+   "cycles_per_op": 536.6,
+   "pj_mac": 0.41,
+   "nj_op": 3.35
+  },
+  "gemmc1.fp16.ones": {
+   "S_w": 12.95,
+   "ci95": 0.7,
+   "n": 2,
+   "rate": 18.641,
+   "cycles_per_op": 536.6,
+   "pj_mac": 1.389,
+   "nj_op": 11.38
+  },
+  "gemmc1.fp16.sparse50": {
+   "S_w": 20.01,
+   "ci95": 0.35,
+   "n": 2,
+   "rate": 18.643,
+   "cycles_per_op": 536.6,
+   "pj_mac": 2.146,
+   "nj_op": 17.58
+  },
+  "gemmc1.fp16.real": {
+   "S_w": 29.87,
+   "ci95": 0.66,
+   "n": 2,
+   "rate": 18.641,
+   "cycles_per_op": 536.6,
+   "pj_mac": 3.205,
+   "nj_op": 26.25
+  },
+  "gemmc1.fp16.randn": {
+   "S_w": 30.06,
+   "ci95": 0.18,
+   "n": 2,
+   "rate": 18.647,
+   "cycles_per_op": 536.6,
+   "pj_mac": 3.224,
+   "nj_op": 26.41
+  },
+  "gemmc1.int8.zeros": {
+   "S_w": 5.0,
+   "ci95": 1.63,
+   "n": 2,
+   "rate": 67.183,
+   "cycles_per_op": 296.6,
+   "pj_mac": 0.149,
+   "nj_op": 2.44
+  },
+  "gemmc1.int8.ones": {
+   "S_w": 7.68,
+   "ci95": 0.3,
+   "n": 2,
+   "rate": 67.199,
+   "cycles_per_op": 296.6,
+   "pj_mac": 0.229,
+   "nj_op": 3.75
+  },
+  "gemmc1.int8.sparse50": {
+   "S_w": 15.36,
+   "ci95": 1.32,
+   "n": 2,
+   "rate": 67.194,
+   "cycles_per_op": 296.6,
+   "pj_mac": 0.457,
+   "nj_op": 7.49
+  },
+  "gemmc1.int8.real": {
+   "S_w": 15.53,
+   "ci95": 1.51,
+   "n": 2,
+   "rate": 67.227,
+   "cycles_per_op": 296.6,
+   "pj_mac": 0.462,
+   "nj_op": 7.57
+  },
+  "gemmc1.int8.full": {
+   "S_w": 18.23,
+   "ci95": 4.67,
+   "n": 2,
+   "rate": 67.22,
+   "cycles_per_op": 296.6,
+   "pj_mac": 0.542,
+   "nj_op": 8.89
+  },
+  "gemmc16.fp32.zeros": {
+   "S_w": 4.04,
+   "ci95": 0.29,
+   "n": 2,
+   "rate": 3.228,
+   "cycles_per_op": 1554.6,
+   "pj_mac": 2.504,
+   "nj_op": 10.26
+  },
+  "gemmc16.fp32.randn": {
+   "S_w": 15.27,
+   "ci95": 0.01,
+   "n": 2,
+   "rate": 3.227,
+   "cycles_per_op": 1554.7,
+   "pj_mac": 9.462,
+   "nj_op": 38.75
+  },
+  "gemmc16.fp16.zeros": {
+   "S_w": 3.84,
+   "ci95": 0.75,
+   "n": 2,
+   "rate": 6.455,
+   "cycles_per_op": 1554.5,
+   "pj_mac": 1.19,
+   "nj_op": 9.75
+  },
+  "gemmc16.fp16.randn": {
+   "S_w": 14.39,
+   "ci95": 0.2,
+   "n": 2,
+   "rate": 6.453,
+   "cycles_per_op": 1555.0,
+   "pj_mac": 4.459,
+   "nj_op": 36.53
+  },
+  "gemmc16.int8.zeros": {
+   "S_w": 3.57,
+   "ci95": 1.79,
+   "n": 2,
+   "rate": 12.968,
+   "cycles_per_op": 1547.2,
+   "pj_mac": 0.55,
+   "nj_op": 9.01
+  },
+  "gemmc16.int8.full": {
+   "S_w": 8.17,
+   "ci95": 0.05,
+   "n": 2,
+   "rate": 12.966,
+   "cycles_per_op": 1547.4,
+   "pj_mac": 1.261,
+   "nj_op": 20.66
+  },
+  "gemmv1.fp32.zeros": {
+   "S_w": 4.08,
+   "ci95": null,
+   "n": 1,
+   "rate": 7.008,
+   "cycles_per_op": 658.2,
+   "pj_mac": 1.165,
+   "nj_op": 4.77
+  },
+  "gemmv1.fp32.ones": {
+   "S_w": 12.04,
+   "ci95": null,
+   "n": 1,
+   "rate": 7.016,
+   "cycles_per_op": 658.2,
+   "pj_mac": 3.433,
+   "nj_op": 14.06
+  },
+  "gemmv1.fp32.sparse50": {
+   "S_w": 12.65,
+   "ci95": null,
+   "n": 1,
+   "rate": 7.002,
+   "cycles_per_op": 658.2,
+   "pj_mac": 3.613,
+   "nj_op": 14.8
+  },
+  "gemmv1.fp32.real": {
+   "S_w": 24.83,
+   "ci95": null,
+   "n": 1,
+   "rate": 7.012,
+   "cycles_per_op": 658.1,
+   "pj_mac": 7.081,
+   "nj_op": 29.0
+  },
+  "gemmv1.fp32.randn": {
+   "S_w": 26.68,
+   "ci95": null,
+   "n": 1,
+   "rate": 7.024,
+   "cycles_per_op": 658.1,
+   "pj_mac": 7.596,
+   "nj_op": 31.11
+  },
+  "gemmv1.fp16.zeros": {
+   "S_w": 4.17,
+   "ci95": null,
+   "n": 1,
+   "rate": 14.024,
+   "cycles_per_op": 658.2,
+   "pj_mac": 0.595,
+   "nj_op": 4.88
+  },
+  "gemmv1.fp16.ones": {
+   "S_w": 10.97,
+   "ci95": null,
+   "n": 1,
+   "rate": 14.016,
+   "cycles_per_op": 658.2,
+   "pj_mac": 1.565,
+   "nj_op": 12.82
+  },
+  "gemmv1.fp16.sparse50": {
+   "S_w": 17.95,
+   "ci95": null,
+   "n": 1,
+   "rate": 14.033,
+   "cycles_per_op": 658.2,
+   "pj_mac": 2.558,
+   "nj_op": 20.95
+  },
+  "gemmv1.fp16.real": {
+   "S_w": 24.77,
+   "ci95": null,
+   "n": 1,
+   "rate": 14.05,
+   "cycles_per_op": 658.2,
+   "pj_mac": 3.526,
+   "nj_op": 28.88
+  },
+  "gemmv1.fp16.randn": {
+   "S_w": 23.89,
+   "ci95": null,
+   "n": 1,
+   "rate": 14.019,
+   "cycles_per_op": 658.2,
+   "pj_mac": 3.409,
+   "nj_op": 27.92
+  },
+  "gemmv1.int8.zeros": {
+   "S_w": 3.64,
+   "ci95": null,
+   "n": 1,
+   "rate": 30.18,
+   "cycles_per_op": 608.9,
+   "pj_mac": 0.241,
+   "nj_op": 3.95
+  },
+  "gemmv1.int8.ones": {
+   "S_w": 5.19,
+   "ci95": null,
+   "n": 1,
+   "rate": 30.201,
+   "cycles_per_op": 608.8,
+   "pj_mac": 0.344,
+   "nj_op": 5.64
+  },
+  "gemmv1.int8.sparse50": {
+   "S_w": 8.63,
+   "ci95": null,
+   "n": 1,
+   "rate": 30.118,
+   "cycles_per_op": 608.8,
+   "pj_mac": 0.573,
+   "nj_op": 9.39
+  },
+  "gemmv1.int8.real": {
+   "S_w": 9.73,
+   "ci95": null,
+   "n": 1,
+   "rate": 30.201,
+   "cycles_per_op": 608.9,
+   "pj_mac": 0.644,
+   "nj_op": 10.56
+  },
+  "gemmv1.int8.full": {
+   "S_w": 11.2,
+   "ci95": null,
+   "n": 1,
+   "rate": 30.112,
+   "cycles_per_op": 608.9,
+   "pj_mac": 0.744,
+   "nj_op": 12.19
+  },
+  "gemmv16.fp32.zeros": {
+   "S_w": 4.2,
+   "ci95": null,
+   "n": 1,
+   "rate": 2.894,
+   "cycles_per_op": 1707.6,
+   "pj_mac": 2.903,
+   "nj_op": 11.89
+  },
+  "gemmv16.fp32.randn": {
+   "S_w": 14.21,
+   "ci95": null,
+   "n": 1,
+   "rate": 2.885,
+   "cycles_per_op": 1700.6,
+   "pj_mac": 9.848,
+   "nj_op": 40.34
+  },
+  "gemmv16.fp16.zeros": {
+   "S_w": 3.81,
+   "ci95": null,
+   "n": 1,
+   "rate": 5.796,
+   "cycles_per_op": 1703.4,
+   "pj_mac": 1.316,
+   "nj_op": 10.78
+  },
+  "gemmv16.fp16.randn": {
+   "S_w": 13.41,
+   "ci95": null,
+   "n": 1,
+   "rate": 5.779,
+   "cycles_per_op": 1712.4,
+   "pj_mac": 4.641,
+   "nj_op": 38.02
+  },
+  "gemmv16.int8.zeros": {
+   "S_w": 3.22,
+   "ci95": null,
+   "n": 1,
+   "rate": 10.159,
+   "cycles_per_op": 1960.1,
+   "pj_mac": 0.635,
+   "nj_op": 10.4
+  },
+  "gemmv16.int8.full": {
+   "S_w": 7.11,
+   "ci95": null,
+   "n": 1,
+   "rate": 10.133,
+   "cycles_per_op": 1945.1,
+   "pj_mac": 1.404,
+   "nj_op": 23.0
+  }
+ },
+ "frozen_clock_rms_mhz": {
+  "burst": 39.3,
+  "n_burst": 25,
+  "sustained": 69.2,
+  "n_sus": 18
+ },
+ "two_cards": {
+  "gemmc1.fp32": {
+   "a3_T_600": 0.8983,
+   "a2_law_600": 0.8968,
+   "off": 0.002
+  },
+  "gemmc1.fp16": {
+   "a3_T_600": 0.8979,
+   "a2_law_600": 0.8968,
+   "off": 0.001
+  },
+  "gemmc1.int8": {
+   "a3_T_600": 0.4981,
+   "a2_law_600": 0.4977,
+   "off": 0.001
+  },
+  "gemmv1.fp32": {
+   "a3_T_600": 1.1919,
+   "a2_law_600": 1.1942,
+   "off": -0.002
+  },
+  "gemmv1.fp16": {
+   "a3_T_600": 1.1944,
+   "a2_law_600": 1.1948,
+   "off": -0.0
+  },
+  "gemmv1.int8": {
+   "a3_T_600": 1.1118,
+   "a2_law_600": 1.1099,
+   "off": 0.002
+  },
+  "gemmc16.fp32": {
+   "a3_T_600": 2.5944,
+   "a2_law_600": 2.5915,
+   "off": 0.001
+  },
+  "gemmv16.fp32": {
+   "a3_T_600": 2.9019,
+   "a2_law_600": 2.8852,
+   "off": 0.006
+  }
+ }
+}

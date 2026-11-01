@@ -1,0 +1,2025 @@
+{
+ "experiment": "E105",
+ "sessions": [
+  "s1"
+ ],
+ "runs": 57,
+ "skipped": [
+  {
+   "run": "A-12-gemmc1-fp32-randn-r1",
+   "label": "gemmc1-fp32-randn",
+   "block": "A",
+   "t_ms": 1793547972838,
+   "why": "estimate 87.83 W >= 87.83 W, the estimate of a run that read 93.0 W",
+   "est_w": 87.83,
+   "how": "probe gemmc1-fp32-sparse50 rho 0.8101"
+  }
+ ],
+ "fits": {
+  "gemm1.fp32": {
+   "n": 498,
+   "span_mhz": 200.2,
+   "C": 354.75,
+   "C_ci": 1.88,
+   "M": 0.8261,
+   "M_ci": 0.0025,
+   "rms_ns": 3.14
+  },
+  "gemmc1.fp32": {
+   "n": 851,
+   "span_mhz": 200.3,
+   "C": 526.91,
+   "C_ci": 0.31,
+   "M": 0.0186,
+   "M_ci": 0.0004,
+   "rms_ns": 0.62
+  },
+  "gemmv1.fp32": {
+   "n": 997,
+   "span_mhz": 200.3,
+   "C": 407.15,
+   "C_ci": 1.04,
+   "M": 0.5156,
+   "M_ci": 0.0014,
+   "rms_ns": 2.46
+  },
+  "gemmc1.int8": {
+   "n": 867,
+   "span_mhz": 200.2,
+   "C": 289.49,
+   "C_ci": 0.03,
+   "M": 0.0152,
+   "M_ci": 0.0,
+   "rms_ns": 0.05
+  },
+  "gemmv1.int8": {
+   "n": 200,
+   "span_mhz": 200.2,
+   "C": 345.66,
+   "C_ci": 3.49,
+   "M": 0.5338,
+   "M_ci": 0.0045,
+   "rms_ns": 2.55
+  },
+  "gemmc16.fp32": {
+   "n": 183,
+   "span_mhz": 200.1,
+   "C": 374.19,
+   "C_ci": 6.54,
+   "M": 1.9679,
+   "M_ci": 0.0084,
+   "rms_ns": 4.81
+  },
+  "gemmv16.fp32": {
+   "n": 26,
+   "span_mhz": 200.0,
+   "C": 271.28,
+   "C_ci": 48.4,
+   "M": 2.4331,
+   "M_ci": 0.0642,
+   "rms_ns": 17.41
+  },
+  "gemmh1.fp32": {
+   "n": 16,
+   "span_mhz": 199.8,
+   "C": 526.27,
+   "C_ci": 4.53,
+   "M": 0.0352,
+   "M_ci": 0.006,
+   "rms_ns": 1.19
+  },
+  "gemmc1.fp32.half": {
+   "n": 183,
+   "span_mhz": 200.1,
+   "C": 527.15,
+   "C_ci": 0.74,
+   "M": 0.0172,
+   "M_ci": 0.001,
+   "rms_ns": 0.5
+  },
+  "gemmc1.fp16": {
+   "n": 494,
+   "span_mhz": 201.0,
+   "C": 527.3,
+   "C_ci": 0.32,
+   "M": 0.018,
+   "M_ci": 0.0005,
+   "rms_ns": 0.6
+  },
+  "gemmv1.fp16": {
+   "n": 190,
+   "span_mhz": 200.1,
+   "C": 410.05,
+   "C_ci": 2.14,
+   "M": 0.5114,
+   "M_ci": 0.0032,
+   "rms_ns": 2.17
+  }
+ },
+ "t800_us": {
+  "gemm1-fp32-zeros": 1.2697,
+  "gemm1-fp32-sparse25": 1.2694,
+  "gemm1-fp32-randn": 1.2688,
+  "gemmc1-fp32-zeros": 0.6779,
+  "gemmc1-fp32-ones": 0.6781,
+  "gemmc1-fp32-sparse50": 0.678,
+  "gemmc1-fp32-sparse25": 0.6783,
+  "gemmc1-fp32-randn": 0.6768,
+  "gemmv1-fp32-zeros": 1.0243,
+  "gemmv1-fp32-ones": 1.026,
+  "gemmv1-fp32-sparse50": 1.0222,
+  "gemmv1-fp32-sparse25": 1.0245,
+  "gemmv1-fp32-randn": 1.0278,
+  "gemmc1-int8-zeros": 0.3775,
+  "gemmc1-int8-sparse50": 0.3775,
+  "gemmc1-int8-full": 0.3781,
+  "gemmv1-int8-zeros": 0.9639,
+  "gemmv1-int8-sparse50": 0.9642,
+  "gemmv1-int8-full": 0.9665,
+  "gemmc16-fp32-zeros": 2.435,
+  "gemmc16-fp32-randn": 2.4363,
+  "gemmv16-fp32-zeros": 2.7739,
+  "gemmv16-fp32-randn": 2.7707,
+  "gemmh1-fp32-zeros": 0.6938,
+  "gemmc1-fp32-randn-half": 0.677,
+  "gemmc1-fp16-zeros": 0.6779,
+  "gemmc1-fp16-sparse50": 0.6781,
+  "gemmv1-fp16-zeros": 1.0225,
+  "gemmv1-fp16-sparse50": 1.0222,
+  "gemmv1-fp16-randn": 1.024
+ },
+ "cells": {
+  "gemm1-fp32-randn": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 791.45,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 756.6,
+   "burst_mhz_runs": [
+    756.6
+   ],
+   "burst_rate": 6.423,
+   "burst_rate_runs": [
+    6.423
+   ],
+   "burst_w": 63.89,
+   "c_w_runs": [
+    22.445
+   ],
+   "burst_p800_w_runs": [
+    75.52
+   ],
+   "burst_die_max": [
+    63
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 22.445,
+   "sus_mhz": 631.5,
+   "sus_mhz_runs": [
+    631.5
+   ],
+   "sus_rate": 6.019,
+   "sus_rate_runs": [
+    6.019
+   ],
+   "sus_w": 53.93,
+   "sus_die": 65.8,
+   "sus_die_start": [
+    58
+   ],
+   "sus_limit_runs": [
+    "thermal"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 22.98,
+    "p800_w": 77.4,
+    "admitted_at_estimate": true,
+    "burst_mhz": 733.0,
+    "sus_mhz": 613.2,
+    "burst_rate_T_us": 1.3077,
+    "sus_rate_T_us": 1.3995
+   }
+  },
+  "gemm1-fp32-sparse25": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 865.49,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 6.629,
+   "burst_rate_runs": [
+    6.629
+   ],
+   "burst_w": 57.45,
+   "c_w_runs": [
+    17.104
+   ],
+   "burst_p800_w_runs": [
+    59.8
+   ],
+   "burst_die_max": [
+    54
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    47
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 17.104,
+   "sus_mhz": 788.2,
+   "sus_mhz_runs": [
+    788.2
+   ],
+   "sus_rate": 6.545,
+   "sus_rate_runs": [
+    6.545
+   ],
+   "sus_w": 60.78,
+   "sus_die": 63.8,
+   "sus_die_start": [
+    49
+   ],
+   "sus_limit_runs": [
+    "none"
+   ],
+   "idle_resets_sus": 1,
+   "frozen": {
+    "c_w": 15.99,
+    "p800_w": 64.1,
+    "admitted_at_estimate": true,
+    "burst_mhz": 797.4,
+    "sus_mhz": 688.0,
+    "burst_rate_T_us": 1.2698,
+    "sus_rate_T_us": 1.3385
+   }
+  },
+  "gemm1-fp32-zeros": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 867.02,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 6.611,
+   "burst_rate_runs": [
+    6.611
+   ],
+   "burst_w": 34.8,
+   "c_w_runs": [
+    4.362
+   ],
+   "burst_p800_w_runs": [
+    35.56
+   ],
+   "burst_die_max": [
+    49
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    46
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 4.362,
+   "sus_mhz": 788.3,
+   "sus_mhz_runs": [
+    788.3
+   ],
+   "sus_rate": 6.551,
+   "sus_rate_runs": [
+    6.551
+   ],
+   "sus_w": 37.0,
+   "sus_die": 56.3,
+   "sus_die_start": [
+    55
+   ],
+   "sus_limit_runs": [
+    "none"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 2.69,
+    "p800_w": 38.7,
+    "admitted_at_estimate": true,
+    "burst_mhz": 800.0,
+    "sus_mhz": 800.0,
+    "burst_rate_T_us": 1.2684,
+    "sus_rate_T_us": 1.2684
+   }
+  },
+  "gemmc1-fp16-randn": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 537.02,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 692,
+   "burst_mhz_runs": [
+    692
+   ],
+   "burst_rate": 21.037,
+   "burst_rate_runs": [
+    21.037
+   ],
+   "burst_w": 70.47,
+   "c_w_runs": [
+    28.729
+   ],
+   "burst_p800_w_runs": [
+    89.3
+   ],
+   "burst_die_max": [
+    63
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 28.729,
+   "sus_mhz": 602.1,
+   "sus_mhz_runs": [
+    602.1
+   ],
+   "sus_rate": 18.746,
+   "sus_rate_runs": [
+    18.746
+   ],
+   "sus_w": 57.23,
+   "sus_die": 66.1,
+   "sus_die_start": [
+    57
+   ],
+   "sus_limit_runs": [
+    "thermal"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 34.77,
+    "p800_w": 99.9,
+    "admitted_at_estimate": false,
+    "burst_mhz": 635.0,
+    "sus_mhz": 600.0,
+    "burst_rate_T_us": 0.8331,
+    "sus_rate_T_us": 0.8817
+   }
+  },
+  "gemmc1-fp16-sparse50": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 538.19,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 775,
+   "burst_mhz_runs": [
+    775
+   ],
+   "burst_rate": 23.696,
+   "burst_rate_runs": [
+    23.696
+   ],
+   "burst_w": 64.88,
+   "c_w_runs": [
+    18.837
+   ],
+   "burst_p800_w_runs": [
+    69.09
+   ],
+   "burst_die_max": [
+    61
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    54
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 18.837,
+   "sus_mhz": 679.7,
+   "sus_mhz_runs": [
+    679.7
+   ],
+   "sus_rate": 20.767,
+   "sus_rate_runs": [
+    20.767
+   ],
+   "sus_w": 56.84,
+   "sus_die": 65.5,
+   "sus_die_start": [
+    55
+   ],
+   "sus_limit_runs": [
+    "thermal"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 24.07,
+    "p800_w": 79.5,
+    "admitted_at_estimate": true,
+    "burst_mhz": 723.0,
+    "sus_mhz": 607.1,
+    "burst_rate_T_us": 0.7317,
+    "sus_rate_T_us": 0.8714
+   }
+  },
+  "gemmc1-fp16-zeros": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 539.48,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 24.748,
+   "burst_rate_runs": [
+    24.748
+   ],
+   "burst_w": 38.77,
+   "c_w_runs": [
+    3.16
+   ],
+   "burst_p800_w_runs": [
+    38.34
+   ],
+   "burst_die_max": [
+    57
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    55
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 3.16,
+   "sus_mhz": 800,
+   "sus_mhz_runs": [
+    800
+   ],
+   "sus_rate": 24.746,
+   "sus_rate_runs": [
+    24.746
+   ],
+   "sus_w": 38.65,
+   "sus_die": 57,
+   "sus_die_start": [
+    55
+   ],
+   "sus_limit_runs": [
+    "none"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 3.63,
+    "p800_w": 40.5,
+    "admitted_at_estimate": true,
+    "burst_mhz": 800.0,
+    "sus_mhz": 800.0,
+    "burst_rate_T_us": 0.6613,
+    "sus_rate_T_us": 0.6613
+   }
+  },
+  "gemmc1-fp32-ones": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 539.3,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 12.371,
+   "burst_rate_runs": [
+    12.371
+   ],
+   "burst_w": 56.57,
+   "c_w_runs": [
+    12.113
+   ],
+   "burst_p800_w_runs": [
+    55.74
+   ],
+   "burst_die_max": [
+    59
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    54
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 12.113,
+   "sus_mhz": 779.6,
+   "sus_mhz_runs": [
+    779.6
+   ],
+   "sus_rate": 11.986,
+   "sus_rate_runs": [
+    11.986
+   ],
+   "sus_w": 57.52,
+   "sus_die": 64.9,
+   "sus_die_start": [
+    55
+   ],
+   "sus_limit_runs": [
+    "thermal"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 15.38,
+    "p800_w": 62.9,
+    "admitted_at_estimate": true,
+    "burst_mhz": 798.8,
+    "sus_mhz": 696.0,
+    "burst_rate_T_us": 0.6622,
+    "sus_rate_T_us": 0.7601
+   }
+  },
+  "gemmc1-fp32-randn": {
+   "n_burst": 1,
+   "n_sus": 0,
+   "cycles_per_op": 537.42,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 653.8,
+   "burst_mhz_runs": [
+    653.8
+   ],
+   "burst_rate": 9.997,
+   "burst_rate_runs": [
+    9.997
+   ],
+   "burst_w": 67.6,
+   "c_w_runs": [
+    31.54
+   ],
+   "burst_p800_w_runs": [
+    95.2
+   ],
+   "burst_die_max": [
+    63
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 31.54,
+   "frozen": {
+    "c_w": 37.94,
+    "p800_w": 105.9,
+    "admitted_at_estimate": false,
+    "burst_mhz": 616.3,
+    "sus_mhz": 600.0,
+    "burst_rate_T_us": 0.8584,
+    "sus_rate_T_us": 0.8817
+   }
+  },
+  "gemmc1-fp32-randn-half": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 539.05,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 6.195,
+   "burst_rate_runs": [
+    6.195
+   ],
+   "burst_w": 60.75,
+   "c_w_runs": [
+    14.534
+   ],
+   "burst_p800_w_runs": [
+    60.55
+   ],
+   "burst_die_max": [
+    60
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    54
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 14.534,
+   "sus_mhz": 748.6,
+   "sus_mhz_runs": [
+    748.6
+   ],
+   "sus_rate": 5.72,
+   "sus_rate_runs": [
+    5.72
+   ],
+   "sus_w": 58.31,
+   "sus_die": 65.2,
+   "sus_die_start": [
+    53
+   ],
+   "sus_limit_runs": [
+    "thermal"
+   ],
+   "idle_resets_sus": 0
+  },
+  "gemmc1-fp32-sparse25": {
+   "n_burst": 1,
+   "n_sus": 2,
+   "cycles_per_op": 537.81,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 749.0,
+   "burst_mhz_runs": [
+    749.0
+   ],
+   "burst_rate": 11.416,
+   "burst_rate_runs": [
+    11.416
+   ],
+   "burst_w": 67.12,
+   "c_w_runs": [
+    21.442
+   ],
+   "burst_p800_w_runs": [
+    74.83
+   ],
+   "burst_die_max": [
+    62
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    55
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 21.442,
+   "sus_mhz": 658.7,
+   "sus_mhz_runs": [
+    656.7,
+    660.6
+   ],
+   "sus_rate": 10.101,
+   "sus_rate_runs": [
+    10.087,
+    10.114
+   ],
+   "sus_w": 57.17,
+   "sus_die": 65.6,
+   "sus_die_start": [
+    56,
+    55
+   ],
+   "sus_limit_runs": [
+    "thermal",
+    "thermal"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 26.41,
+    "p800_w": 83.9,
+    "admitted_at_estimate": true,
+    "burst_mhz": 702.4,
+    "sus_mhz": 601.0,
+    "burst_rate_T_us": 0.7532,
+    "sus_rate_T_us": 0.8802
+   }
+  },
+  "gemmc1-fp32-sparse50": {
+   "n_burst": 1,
+   "n_sus": 0,
+   "cycles_per_op": 539.2,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 12.372,
+   "burst_rate_runs": [
+    12.372
+   ],
+   "burst_w": 59.78,
+   "c_w_runs": [
+    13.68
+   ],
+   "burst_p800_w_runs": [
+    58.92
+   ],
+   "burst_die_max": [
+    60
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    55
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 13.68,
+   "frozen": {
+    "c_w": 18.17,
+    "p800_w": 68.2,
+    "admitted_at_estimate": true,
+    "burst_mhz": 783.1,
+    "sus_mhz": 660.0,
+    "burst_rate_T_us": 0.6755,
+    "sus_rate_T_us": 0.8015
+   }
+  },
+  "gemmc1-fp32-zeros": {
+   "n_burst": 1,
+   "n_sus": 2,
+   "cycles_per_op": 539.48,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 12.374,
+   "burst_rate_runs": [
+    12.374
+   ],
+   "burst_w": 38.8,
+   "c_w_runs": [
+    3.232
+   ],
+   "burst_p800_w_runs": [
+    38.51
+   ],
+   "burst_die_max": [
+    58
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 3.232,
+   "sus_mhz": 797.7,
+   "sus_mhz_runs": [
+    800,
+    795.4
+   ],
+   "sus_rate": 12.334,
+   "sus_rate_runs": [
+    12.374,
+    12.294
+   ],
+   "sus_w": 38.75,
+   "sus_die": 57.55,
+   "sus_die_start": [
+    55,
+    58
+   ],
+   "sus_limit_runs": [
+    "none",
+    "none"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 4.45,
+    "p800_w": 42.1,
+    "admitted_at_estimate": true,
+    "burst_mhz": 800.0,
+    "sus_mhz": 800.0,
+    "burst_rate_T_us": 0.6613,
+    "sus_rate_T_us": 0.6613
+   }
+  },
+  "gemmc1-int8-full": {
+   "n_burst": 1,
+   "n_sus": 2,
+   "cycles_per_op": 297.75,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 788.2,
+   "burst_mhz_runs": [
+    788.2
+   ],
+   "burst_rate": 86.954,
+   "burst_rate_runs": [
+    86.954
+   ],
+   "burst_w": 65.68,
+   "c_w_runs": [
+    17.243
+   ],
+   "burst_p800_w_runs": [
+    66.78
+   ],
+   "burst_die_max": [
+    63
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 17.243,
+   "sus_mhz": 680.2,
+   "sus_mhz_runs": [
+    679.7,
+    680.7
+   ],
+   "sus_rate": 74.826,
+   "sus_rate_runs": [
+    74.768,
+    74.884
+   ],
+   "sus_w": 54.16,
+   "sus_die": 65.5,
+   "sus_die_start": [
+    57,
+    58
+   ],
+   "sus_limit_runs": [
+    "thermal",
+    "thermal"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 28.66,
+    "p800_w": 88.2,
+    "admitted_at_estimate": false,
+    "burst_mhz": 682.6,
+    "sus_mhz": 600.0,
+    "burst_rate_T_us": 0.4109,
+    "sus_rate_T_us": 0.4675
+   }
+  },
+  "gemmc1-int8-sparse50": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 298.36,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 88.868,
+   "burst_rate_runs": [
+    88.868
+   ],
+   "burst_w": 60.74,
+   "c_w_runs": [
+    14.186
+   ],
+   "burst_p800_w_runs": [
+    59.58
+   ],
+   "burst_die_max": [
+    61
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    54
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 14.186,
+   "sus_mhz": 744.1,
+   "sus_mhz_runs": [
+    744.1
+   ],
+   "sus_rate": 81.495,
+   "sus_rate_runs": [
+    81.495
+   ],
+   "sus_w": 56.52,
+   "sus_die": 65.3,
+   "sus_die_start": [
+    55
+   ],
+   "sus_limit_runs": [
+    "thermal"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 23.67,
+    "p800_w": 78.7,
+    "admitted_at_estimate": true,
+    "burst_mhz": 726.6,
+    "sus_mhz": 609.0,
+    "burst_rate_T_us": 0.386,
+    "sus_rate_T_us": 0.4606
+   }
+  },
+  "gemmc1-int8-zeros": {
+   "n_burst": 1,
+   "n_sus": 2,
+   "cycles_per_op": 298.6,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 88.877,
+   "burst_rate_runs": [
+    88.877
+   ],
+   "burst_w": 40.96,
+   "c_w_runs": [
+    4.134
+   ],
+   "burst_p800_w_runs": [
+    40.53
+   ],
+   "burst_die_max": [
+    58
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 4.134,
+   "sus_mhz": 786.2,
+   "sus_mhz_runs": [
+    783.6,
+    788.7
+   ],
+   "sus_rate": 87.266,
+   "sus_rate_runs": [
+    86.963,
+    87.57
+   ],
+   "sus_w": 40.36,
+   "sus_die": 58.5,
+   "sus_die_start": [
+    55,
+    58
+   ],
+   "sus_limit_runs": [
+    "none",
+    "none"
+   ],
+   "idle_resets_sus": 1,
+   "frozen": {
+    "c_w": 7.55,
+    "p800_w": 48.0,
+    "admitted_at_estimate": true,
+    "burst_mhz": 800.0,
+    "sus_mhz": 797.9,
+    "burst_rate_T_us": 0.3506,
+    "sus_rate_T_us": 0.3515
+   }
+  },
+  "gemmc16-fp32-randn": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 1913.1,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 3.437,
+   "burst_rate_runs": [
+    3.437
+   ],
+   "burst_w": 53.33,
+   "c_w_runs": [
+    10.373
+   ],
+   "burst_p800_w_runs": [
+    52.79
+   ],
+   "burst_die_max": [
+    59
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    55
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 10.373,
+   "sus_mhz": 791.2,
+   "sus_mhz_runs": [
+    791.2
+   ],
+   "sus_rate": 3.433,
+   "sus_rate_runs": [
+    3.433
+   ],
+   "sus_w": 54.74,
+   "sus_die": 63.2,
+   "sus_die_start": [
+    55
+   ],
+   "sus_limit_runs": [
+    "none"
+   ],
+   "idle_resets_sus": 1
+  },
+  "gemmc16-fp32-zeros": {
+   "n_burst": 1,
+   "n_sus": 0,
+   "cycles_per_op": 1910.31,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 3.445,
+   "burst_rate_runs": [
+    3.445
+   ],
+   "burst_w": 36.25,
+   "c_w_runs": [
+    2.413
+   ],
+   "burst_p800_w_runs": [
+    36.31
+   ],
+   "burst_die_max": [
+    57
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 2.413
+  },
+  "gemmh1-fp32-zeros": {
+   "n_burst": 1,
+   "n_sus": 0,
+   "cycles_per_op": 549.36,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 12.089,
+   "burst_rate_runs": [
+    12.089
+   ],
+   "burst_w": 38.84,
+   "c_w_runs": [
+    3.579
+   ],
+   "burst_p800_w_runs": [
+    38.7
+   ],
+   "burst_die_max": [
+    57
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    55
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 3.579
+  },
+  "gemmv1-fp16-randn": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 688.49,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 749.0,
+   "burst_mhz_runs": [
+    749.0
+   ],
+   "burst_rate": 15.662,
+   "burst_rate_runs": [
+    15.662
+   ],
+   "burst_w": 63.05,
+   "c_w_runs": [
+    23.312
+   ],
+   "burst_p800_w_runs": [
+    76.47
+   ],
+   "burst_die_max": [
+    63
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 23.312,
+   "sus_mhz": 636.2,
+   "sus_mhz_runs": [
+    636.2
+   ],
+   "sus_rate": 14.43,
+   "sus_rate_runs": [
+    14.43
+   ],
+   "sus_w": 55.93,
+   "sus_die": 65.7,
+   "sus_die_start": [
+    57
+   ],
+   "sus_limit_runs": [
+    "thermal"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 26.07,
+    "p800_w": 83.3,
+    "admitted_at_estimate": true,
+    "burst_mhz": 705.3,
+    "sus_mhz": 601.4,
+    "burst_rate_T_us": 0.9585,
+    "sus_rate_T_us": 1.044
+   }
+  },
+  "gemmv1-fp16-sparse50": {
+   "n_burst": 1,
+   "n_sus": 0,
+   "cycles_per_op": 725.13,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 16.411,
+   "burst_rate_runs": [
+    16.411
+   ],
+   "burst_w": 60.19,
+   "c_w_runs": [
+    15.792
+   ],
+   "burst_p800_w_runs": [
+    62.12
+   ],
+   "burst_die_max": [
+    61
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    55
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 15.792,
+   "frozen": {
+    "c_w": 18.05,
+    "p800_w": 68.0,
+    "admitted_at_estimate": true,
+    "burst_mhz": 784.3,
+    "sus_mhz": 661.4,
+    "burst_rate_T_us": 0.9087,
+    "sus_rate_T_us": 0.9913
+   }
+  },
+  "gemmv1-fp16-zeros": {
+   "n_burst": 1,
+   "n_sus": 0,
+   "cycles_per_op": 727.19,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 16.411,
+   "burst_rate_runs": [
+    16.411
+   ],
+   "burst_w": 37.94,
+   "c_w_runs": [
+    3.442
+   ],
+   "burst_p800_w_runs": [
+    38.5
+   ],
+   "burst_die_max": [
+    57
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 3.442,
+   "frozen": {
+    "c_w": 2.72,
+    "p800_w": 38.8,
+    "admitted_at_estimate": true,
+    "burst_mhz": 800.0,
+    "sus_mhz": 800.0,
+    "burst_rate_T_us": 0.9,
+    "sus_rate_T_us": 0.9
+   }
+  },
+  "gemmv1-fp32-ones": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 734.64,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 8.168,
+   "burst_rate_runs": [
+    8.168
+   ],
+   "burst_w": 49.52,
+   "c_w_runs": [
+    10.451
+   ],
+   "burst_p800_w_runs": [
+    46.5
+   ],
+   "burst_die_max": [
+    58
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    53
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 10.451,
+   "sus_mhz": 793.8,
+   "sus_mhz_runs": [
+    793.8
+   ],
+   "sus_rate": 8.143,
+   "sus_rate_runs": [
+    8.143
+   ],
+   "sus_w": 52.42,
+   "sus_die": 64.0,
+   "sus_die_start": [
+    58
+   ],
+   "sus_limit_runs": [
+    "none"
+   ],
+   "idle_resets_sus": 1,
+   "frozen": {
+    "c_w": 11.54,
+    "p800_w": 55.6,
+    "admitted_at_estimate": true,
+    "burst_mhz": 800.0,
+    "sus_mhz": 747.3,
+    "burst_rate_T_us": 0.8984,
+    "sus_rate_T_us": 0.9287
+   }
+  },
+  "gemmv1-fp32-randn": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 679.52,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 725,
+   "burst_mhz_runs": [
+    725
+   ],
+   "burst_rate": 7.669,
+   "burst_rate_runs": [
+    7.669
+   ],
+   "burst_w": 67.8,
+   "c_w_runs": [
+    25.309
+   ],
+   "burst_p800_w_runs": [
+    80.32
+   ],
+   "burst_die_max": [
+    63
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 25.309,
+   "sus_mhz": 617.4,
+   "sus_mhz_runs": [
+    617.4
+   ],
+   "sus_rate": 7.116,
+   "sus_rate_runs": [
+    7.116
+   ],
+   "sus_w": 56.18,
+   "sus_die": 65.9,
+   "sus_die_start": [
+    57
+   ],
+   "sus_limit_runs": [
+    "thermal"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 28.46,
+    "p800_w": 87.8,
+    "admitted_at_estimate": true,
+    "burst_mhz": 684.3,
+    "sus_mhz": 600.1,
+    "burst_rate_T_us": 0.9711,
+    "sus_rate_T_us": 1.0418
+   }
+  },
+  "gemmv1-fp32-sparse25": {
+   "n_burst": 1,
+   "n_sus": 2,
+   "cycles_per_op": 707.64,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 8.207,
+   "burst_rate_runs": [
+    8.207
+   ],
+   "burst_w": 61.64,
+   "c_w_runs": [
+    12.119
+   ],
+   "burst_p800_w_runs": [
+    58.18
+   ],
+   "burst_die_max": [
+    60
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    54
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 12.119,
+   "sus_mhz": 693.8,
+   "sus_mhz_runs": [
+    714.8,
+    672.9
+   ],
+   "sus_rate": 7.521,
+   "sus_rate_runs": [
+    7.641,
+    7.401
+   ],
+   "sus_w": 55.55,
+   "sus_die": 65.6,
+   "sus_die_start": [
+    55,
+    58
+   ],
+   "sus_limit_runs": [
+    "thermal",
+    "thermal"
+   ],
+   "idle_resets_sus": 0,
+   "frozen": {
+    "c_w": 19.8,
+    "p800_w": 71.3,
+    "admitted_at_estimate": true,
+    "burst_mhz": 765.7,
+    "sus_mhz": 641.4,
+    "burst_rate_T_us": 0.9176,
+    "sus_rate_T_us": 1.0048
+   }
+  },
+  "gemmv1-fp32-sparse50": {
+   "n_burst": 1,
+   "n_sus": 0,
+   "cycles_per_op": 725.41,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 8.206,
+   "burst_rate_runs": [
+    8.206
+   ],
+   "burst_w": 53.04,
+   "c_w_runs": [
+    12.059
+   ],
+   "burst_p800_w_runs": [
+    54.2
+   ],
+   "burst_die_max": [
+    58
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    54
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 12.059,
+   "frozen": {
+    "c_w": 13.63,
+    "p800_w": 59.6,
+    "admitted_at_estimate": true,
+    "burst_mhz": 800.0,
+    "sus_mhz": 718.6,
+    "burst_rate_T_us": 0.8984,
+    "sus_rate_T_us": 0.9471
+   }
+  },
+  "gemmv1-fp32-zeros": {
+   "n_burst": 1,
+   "n_sus": 2,
+   "cycles_per_op": 734.9,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 756,
+   "burst_mhz_runs": [
+    756
+   ],
+   "burst_rate": 7.907,
+   "burst_rate_runs": [
+    7.907
+   ],
+   "burst_w": 35.92,
+   "c_w_runs": [
+    3.458
+   ],
+   "burst_p800_w_runs": [
+    38.41
+   ],
+   "burst_die_max": [
+    57
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 1,
+   "c_w": 3.458,
+   "sus_mhz": 794.6,
+   "sus_mhz_runs": [
+    794.9,
+    794.4
+   ],
+   "sus_rate": 8.148,
+   "sus_rate_runs": [
+    8.149,
+    8.148
+   ],
+   "sus_w": 37.94,
+   "sus_die": 57.4,
+   "sus_die_start": [
+    55,
+    58
+   ],
+   "sus_limit_runs": [
+    "none",
+    "none"
+   ],
+   "idle_resets_sus": 1,
+   "frozen": {
+    "c_w": 3.33,
+    "p800_w": 40.0,
+    "admitted_at_estimate": true,
+    "burst_mhz": 800.0,
+    "sus_mhz": 800.0,
+    "burst_rate_T_us": 0.8984,
+    "sus_rate_T_us": 0.8984
+   }
+  },
+  "gemmv1-int8-full": {
+   "n_burst": 1,
+   "n_sus": 1,
+   "cycles_per_op": 688.62,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 34.807,
+   "burst_rate_runs": [
+    34.807
+   ],
+   "burst_w": 48.86,
+   "c_w_runs": [
+    9.811
+   ],
+   "burst_p800_w_runs": [
+    50.49
+   ],
+   "burst_die_max": [
+    59
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    55
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 9.811,
+   "sus_mhz": 794.9,
+   "sus_mhz_runs": [
+    794.9
+   ],
+   "sus_rate": 34.613,
+   "sus_rate_runs": [
+    34.613
+   ],
+   "sus_w": 50.08,
+   "sus_die": 62.3,
+   "sus_die_start": [
+    55
+   ],
+   "sus_limit_runs": [
+    "none"
+   ],
+   "idle_resets_sus": 1,
+   "frozen": {
+    "c_w": 21.49,
+    "p800_w": 74.6,
+    "admitted_at_estimate": true,
+    "burst_mhz": 747.6,
+    "sus_mhz": 624.8,
+    "burst_rate_T_us": 0.9389,
+    "sus_rate_T_us": 1.0325
+   }
+  },
+  "gemmv1-int8-sparse50": {
+   "n_burst": 1,
+   "n_sus": 0,
+   "cycles_per_op": 679.6,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 34.798,
+   "burst_rate_runs": [
+    34.798
+   ],
+   "burst_w": 45.73,
+   "c_w_runs": [
+    5.469
+   ],
+   "burst_p800_w_runs": [
+    42.11
+   ],
+   "burst_die_max": [
+    59
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    55
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 5.469,
+   "frozen": {
+    "c_w": 17.75,
+    "p800_w": 67.4,
+    "admitted_at_estimate": true,
+    "burst_mhz": 787.0,
+    "sus_mhz": 665.2,
+    "burst_rate_T_us": 0.9151,
+    "sus_rate_T_us": 0.9979
+   }
+  },
+  "gemmv1-int8-zeros": {
+   "n_burst": 1,
+   "n_sus": 0,
+   "cycles_per_op": 665.26,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 756.9,
+   "burst_mhz_runs": [
+    756.9
+   ],
+   "burst_rate": 33.678,
+   "burst_rate_runs": [
+    33.678
+   ],
+   "burst_w": 34.86,
+   "c_w_runs": [
+    2.437
+   ],
+   "burst_p800_w_runs": [
+    37.52
+   ],
+   "burst_die_max": [
+    57
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 1,
+   "c_w": 2.437,
+   "frozen": {
+    "c_w": 5.66,
+    "p800_w": 44.4,
+    "admitted_at_estimate": true,
+    "burst_mhz": 800.0,
+    "sus_mhz": 800.0,
+    "burst_rate_T_us": 0.9078,
+    "sus_rate_T_us": 0.9078
+   }
+  },
+  "gemmv16-fp32-randn": {
+   "n_burst": 1,
+   "n_sus": 0,
+   "cycles_per_op": 2094.7,
+   "checks": [
+    "approx"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 3.027,
+   "burst_rate_runs": [
+    3.027
+   ],
+   "burst_w": 51.67,
+   "c_w_runs": [
+    12.634
+   ],
+   "burst_p800_w_runs": [
+    51.28
+   ],
+   "burst_die_max": [
+    59
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    55
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 12.634
+  },
+  "gemmv16-fp32-zeros": {
+   "n_burst": 1,
+   "n_sus": 0,
+   "cycles_per_op": 2089.02,
+   "checks": [
+    "exact"
+   ],
+   "burst_mhz": 800,
+   "burst_mhz_runs": [
+    800
+   ],
+   "burst_rate": 3.024,
+   "burst_rate_runs": [
+    3.024
+   ],
+   "burst_w": 36.11,
+   "c_w_runs": [
+    2.467
+   ],
+   "burst_p800_w_runs": [
+    36.22
+   ],
+   "burst_die_max": [
+    57
+   ],
+   "burst_board_max": [
+    null
+   ],
+   "burst_die_start": [
+    56
+   ],
+   "idle_resets_burst": 0,
+   "c_w": 2.467
+  }
+ },
+ "gaps": {
+  "gemm1-fp32-randn": {
+   "burst_rate": 1.0293,
+   "burst_clock": 1.0574,
+   "sus_rate": 1.0884,
+   "sus_clock": 1.2483
+  },
+  "gemm1-fp32-sparse25": {
+   "burst_rate": 0.9973,
+   "burst_clock": 1.0,
+   "sus_rate": 1.0009,
+   "sus_clock": 1.0001
+  },
+  "gemmc1-fp16-randn": {
+   "burst_rate": 1.1764,
+   "burst_clock": 1.1561,
+   "sus_rate": 1.3201,
+   "sus_clock": 1.3287
+  },
+  "gemmc1-fp16-sparse50": {
+   "burst_rate": 1.0444,
+   "burst_clock": 1.0323,
+   "sus_rate": 1.1916,
+   "sus_clock": 1.177
+  },
+  "gemmc1-fp32-ones": {
+   "burst_rate": 1.0002,
+   "burst_clock": 1.0,
+   "sus_rate": 1.029,
+   "sus_clock": 1.0232
+  },
+  "gemmc1-fp32-randn": {
+   "burst_rate": 1.2378,
+   "burst_clock": 1.2236,
+   "sus_rate": null,
+   "sus_clock": null
+  },
+  "gemmc1-fp32-sparse25": {
+   "burst_rate": 1.0839,
+   "burst_clock": 1.0681,
+   "sus_rate": 1.2211,
+   "sus_clock": 1.211
+  },
+  "gemmc1-fp32-sparse50": {
+   "burst_rate": 1.0002,
+   "burst_clock": 1.0,
+   "sus_rate": null,
+   "sus_clock": null
+  },
+  "gemmc1-int8-full": {
+   "burst_rate": 1.0221,
+   "burst_clock": 1.015,
+   "sus_rate": 1.1663,
+   "sus_clock": 1.1558
+  },
+  "gemmc1-int8-sparse50": {
+   "burst_rate": 1.0001,
+   "burst_clock": 1.0,
+   "sus_rate": 1.0708,
+   "sus_clock": 1.0566
+  },
+  "gemmc16-fp32-randn": {
+   "burst_rate": 1.0023,
+   "burst_clock": 1.0,
+   "sus_rate": null,
+   "sus_clock": null
+  },
+  "gemmv1-fp16-randn": {
+   "burst_rate": 1.0478,
+   "burst_clock": 1.0681,
+   "sus_rate": null,
+   "sus_clock": null
+  },
+  "gemmv1-fp16-sparse50": {
+   "burst_rate": 1.0,
+   "burst_clock": 1.0,
+   "sus_rate": null,
+   "sus_clock": null
+  },
+  "gemmv1-fp32-ones": {
+   "burst_rate": 0.968,
+   "burst_clock": 0.945,
+   "sus_rate": 1.0006,
+   "sus_clock": 1.001
+  },
+  "gemmv1-fp32-randn": {
+   "burst_rate": 1.031,
+   "burst_clock": 1.0428,
+   "sus_rate": 1.145,
+   "sus_clock": 1.287
+  },
+  "gemmv1-fp32-sparse25": {
+   "burst_rate": 0.9634,
+   "burst_clock": 0.945,
+   "sus_rate": 1.0834,
+   "sus_clock": 1.1453
+  },
+  "gemmv1-fp32-sparse50": {
+   "burst_rate": 0.9636,
+   "burst_clock": 0.945,
+   "sus_rate": null,
+   "sus_clock": null
+  },
+  "gemmv1-int8-full": {
+   "burst_rate": 0.9676,
+   "burst_clock": 0.9461,
+   "sus_rate": null,
+   "sus_clock": null
+  },
+  "gemmv1-int8-sparse50": {
+   "burst_rate": 0.9678,
+   "burst_clock": 0.9461,
+   "sus_rate": null,
+   "sus_clock": null
+  },
+  "gemmv16-fp32-randn": {
+   "burst_rate": 0.999,
+   "burst_clock": 1.0,
+   "sus_rate": null,
+   "sus_clock": null
+  }
+ },
+ "rules": {
+  "R1": {
+   "verdict": "PASS",
+   "C": 526.91,
+   "M": 0.0186,
+   "fit": {
+    "n": 851,
+    "span_mhz": 200.3,
+    "C": 526.91,
+    "C_ci": 0.31,
+    "M": 0.0186,
+    "M_ci": 0.0004,
+    "rms_ns": 0.62
+   }
+  },
+  "R2": {
+   "verdict": "PASS",
+   "ratio": 0.624,
+   "M_vendor": 0.5156,
+   "M_as_run": 0.8261,
+   "C_vendor": 407.15,
+   "desk": 0.559
+  },
+  "R3": {
+   "verdict": "PASS",
+   "C": 354.75,
+   "M": 0.8261
+  },
+  "R4": {
+   "verdict": "COMES BACK",
+   "rate": 1.2211,
+   "clock": 1.211,
+   "burst_rate": 1.0839,
+   "burst_clock": 1.0681,
+   "randn": {
+    "verdict": null,
+    "rate": null,
+    "clock": null
+   },
+   "sparse50": {
+    "verdict": null,
+    "rate": null,
+    "clock": null
+   }
+  },
+  "R5": {
+   "verdict": "COMES BACK",
+   "top": "full",
+   "rate": 1.1663,
+   "clock": 1.1558,
+   "burst_rate": 1.0221,
+   "burst_clock": 1.015
+  },
+  "R6": {
+   "verdict": "PASS",
+   "as_run": 1.0009,
+   "vendor": 1.0834,
+   "bycol": 1.2211
+  },
+  "R7": {
+   "cells": {
+    "gemm1": {
+     "T": 1.2697,
+     "frozen": 1.2684,
+     "verdict": "PASS"
+    },
+    "gemmv1": {
+     "T": 1.0243,
+     "frozen": 0.8984,
+     "verdict": "FAIL"
+    },
+    "gemmc1": {
+     "T": 0.6779,
+     "frozen": 0.6613,
+     "verdict": "PASS"
+    }
+   },
+   "order": true
+  },
+  "R8": {
+   "gemmc16": {
+    "T": 2.435,
+    "frozen": 1.7014,
+    "T_verdict": "FAIL",
+    "gap_burst": 1.0023,
+    "gap_sus": null,
+    "gap_verdict": "PASS"
+   },
+   "gemmv16": {
+    "T": 2.7739,
+    "frozen": 1.9594,
+    "T_verdict": "FAIL",
+    "gap_burst": 0.999,
+    "gap_sus": null,
+    "gap_verdict": "PASS"
+   }
+  },
+  "R9": {
+   "T": 0.6938,
+   "frozen": 0.6613,
+   "verdict": "PASS"
+  }
+ },
+ "config_after": [
+  "{\"tdp_w\": 65, \"temp_threshold_c\": 65}"
+ ],
+ "dry": false
+}
