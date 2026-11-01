@@ -1255,7 +1255,8 @@ slope; the registered leakage arms move fp32 random's D by +0.62 / −0.56 W (1.
 re-drawing a kind's rule moves its gated fraction. (5) **Every RTL toggle count from Q130 is provisional**, and so is the toggle recount's: neither RTL bench
 computes a·b+c on a multiply-add. **How to read ±:** a ± or a bracketed range is a 95% interval over independent
 passes unless the row labels it otherwise; the others are INV's standard errors, RTL's and E64's 1σ, KS's sd over 400
-tile draws, GOV's band edges (the die line's rms residual), E83's one-run figures (1σ) and E65's published SE.
+tile draws, GOV's band edges (the die line's rms residual), E83's one-run figures and E81's per-line spread (1σ),
+E65's published SE, and a rule's registered tolerance (±0.30 W, ±0.35 W).
 
 ### The kinds matrix at a pinned clock (E78 on aifoundry3, E82 on aifoundry1's card 1)
 
@@ -1317,7 +1318,7 @@ tile draws, GOV's band edges (the die line's rms residual), E83's one-run figure
 | Claim | Value | Kind | Source | Verify at |
 |---|---|---|---|---|
 | **The hub's DRAM pattern question, answered** | at E75's k256 counts, E75's two-value image is **1.636 W [1.600, 1.671] cheaper than random bits** per 75 GB/s of 64 B lines. **61% is the arrangement** — the same ones scattered inside each line cost **+0.996 W [0.936, 1.055]** — and **39% the period**: 8,192 distinct random lines against a fixed scattered two-line cycle cost **+0.640 W [0.574, 0.706]** (58 / 42 at E71's slope) | M | Q130, E81 | `E81/dp.json`, `headline.contrasts_W`, `headline.shares`; `E81/dp-leak0.3803.json` |
-| Only a long period costs | a scattered four-line cycle costs what a two-line one does: **+0.030 W [−0.061, +0.122]**; four lines to random lines **+0.610 W [0.496, 0.723]**. The step to random lines also randomizes which bits change and spreads the per-line counts by ±11 bits, so repetition is likely, not isolated | M | Q130, E81 | `E81/dp.json`, `headline.contrasts_W.per_s_2to4`, `.per_s_4tolong` |
+| Only a long period costs | a scattered four-line cycle costs what a two-line one does: **+0.030 W [−0.061, +0.122]**; four lines to random lines **+0.610 W [0.496, 0.723]**. The step to random lines also randomizes which bits change and spreads the per-line counts by ±11 bits (a binomial 1σ), so repetition is likely, not isolated | M | Q130, E81 | `E81/dp.json`, `headline.contrasts_W.per_s_2to4`, `.per_s_4tolong` |
 | The chord, re-read | at random's own counts a contiguous two-value image costs **64%** of the zeros-to-random chord, measured directly (E75's 36.6% came from a two-count model); random floats cost **0.280 W [0.226, 0.334]** less than random bits | M | Q130, E81 | `E81/dp.json`, `headline` |
 | The compute rail sees the data, not the pattern | the step from zeros to data adds **+0.075 to +0.153 W** on the minion rail; no arrangement or period contrast moves it by more than 0.08 W. Post hoc (D4) | M | Q130, E81 | `E81/posthoc-rail.txt` |
 | The registered tally | **8 of 10 pass; P4 (no period effect) fails, and P5 (closure within ±0.35 W) fails by 0.0007 W** (+0.351; two board-meter dip samples pull it down 0.85 W) | M | Q130, E81 | `E81/dp.json`, `scored` |
