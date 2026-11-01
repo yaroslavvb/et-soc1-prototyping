@@ -1,0 +1,33 @@
+E87 frozen predictions (Q130(n)'s points; Amendment 1's scoring intervals; frozen D-propagated ranges)
+tile                   c W        c amended burst      MHz          scoring           frozen sus lim   share | sus MHz          scoring
+fp32/l0_mlp_up      25.454 [23.085, 27.823] power    710.7   [681.3, 740.5]   [691.8, 730.0] thermal   0.000 |   602.5   [600.0, 621.7]  frozen [600.2, 611.1]  a-adj(E83) 602.4
+fp32/l6_mlp_down    25.367 [22.998, 27.735] power    711.5   [682.1, 741.3]   [692.6, 730.8] thermal   0.000 |   602.7   [600.0, 622.1]  frozen [600.3, 611.7]  a-adj(E83) 602.6
+fp32/l6_attn_qk     25.453 [23.084, 27.822] power    710.7   [681.3, 740.5]   [691.8, 730.0] thermal   0.000 |   602.5   [600.0, 621.7]  frozen [600.2, 611.1]  a-adj(E83) 602.4
+fp16/l0_mlp_up      22.710 [20.401, 25.019] power    735.6   [706.0, 767.0]   [719.3, 753.4] thermal   0.000 |   615.0   [600.0, 641.0]  frozen [605.3, 629.9]  a-adj(E83) 614.8
+fp16/l6_mlp_down    22.360 [20.051, 24.669] power    738.9   [709.2, 770.7]   [722.4, 757.1] thermal   0.000 |   617.6   [600.0, 644.4]  frozen [606.8, 633.3]  a-adj(E83) 617.4
+fp16/l6_attn_qk     22.537 [20.228, 24.846] power    737.2   [707.6, 768.8]   [720.8, 755.2] thermal   0.000 |   616.2   [600.0, 642.7]  frozen [606.0, 631.5]  a-adj(E83) 616.1
+int8/l0_mlp_up       7.905      [6.61, 9.2] none     800.0   [800.0, 800.0]   [800.0, 800.0] none      0.962 |   796.2   [775.3, 800.0]  frozen [788.7, 799.2]  a-adj(E83) 796.2
+int8/l6_mlp_down     7.211   [5.916, 8.506] none     800.0   [800.0, 800.0]   [800.0, 800.0] none      0.989 |   798.9   [780.9, 800.0]  frozen [795.1, 799.9]  a-adj(E83) 798.9
+int8/l6_attn_qk      7.767   [6.472, 9.062] none     800.0   [800.0, 800.0]   [800.0, 800.0] none      0.970 |   797.0   [776.7, 800.0]  frozen [790.3, 799.4]  a-adj(E83) 796.9
+
+like with like (S3, S4): ratio of (c - c_zeros) to the same-session reference's
+  fp32/l0_mlp_up     ref fp32/randn predicted 0.9894 (model-fit ref 0.9926); S3 interval [0.8918, 1.087]; frozen [0.9006, 1.0781]
+  fp32/l6_mlp_down   ref fp32/randn predicted 0.9858 (model-fit ref 0.9890); S3 interval [0.8882, 1.0834]; frozen [0.897, 1.0745]
+  fp32/l6_attn_qk    ref fp32/randn predicted 0.9893 (model-fit ref 0.9926); S3 interval [0.8917, 1.0869]; frozen [0.9006, 1.0781]
+  fp16/l0_mlp_up     ref fp16/randn predicted 0.9798 (model-fit ref 0.9985); S3 interval [0.8736, 1.0859]; frozen [0.8984, 1.0612]
+  fp16/l6_mlp_down   ref fp16/randn predicted 0.9637 (model-fit ref 0.9821); S3 interval [0.8575, 1.0698]; frozen [0.8823, 1.0451]
+  fp16/l6_attn_qk    ref fp16/randn predicted 0.9718 (model-fit ref 0.9904); S3 interval [0.8657, 1.0779]; frozen [0.8904, 1.0532]
+  int8/l0_mlp_up     ref int8/full  predicted 0.8347 (model-fit ref 0.8365); S3 interval [0.6478, 1.0216]; frozen [0.7088, 0.9604]
+  int8/l6_mlp_down   ref int8/full  predicted 0.7345 (model-fit ref 0.7361); S3 interval [0.5476, 0.9214]; frozen [0.6088, 0.8603]
+  int8/l6_attn_qk    ref int8/full  predicted 0.8147 (model-fit ref 0.8165); S3 interval [0.6278, 1.0016]; frozen [0.6889, 0.9404]
+
+anchors (R5): tie cell, E80 and E83 beside it
+  fp32/randn   tie E80: burst 711.9 sustained 604.3 | E83 burst 714.7 sus 612.0 c 25.59
+  fp32/zeros   tie E83: burst 800 sustained 789.3 | E83 burst 800 sus 789.3 c 1.716
+  fp16/randn   tie E80: burst 730.6 sustained 609.5 | E83 burst 724.8 sus 609.0 c 23.052
+  fp16/zeros   tie E80: burst 800 sustained 789.8 | E83 burst 800 sus 800 c 1.739
+  int8/full    tie E80: burst 800 sustained 793.4 | E83 burst 800 sus 786.5 c 8.982
+  int8/zeros   tie E80: burst 800 sustained 800 | E83 burst 800 sus 788.8 c 2.357
+
+bars {"R1_rms_mhz": 25.0, "R2_right_of_9": 7, "R3_rms_mhz": 25.0, "R4_inside_of_9": 7, "R5_mhz": 25.0, "S1_rms_mhz": 15.0, "S2_mhz": 15.0, "S3_inside_of_9": 7, "S4_ratio_below": {"fp32": 1.0, "fp16": 1.0, "int8": 0.9}}
+relation {"source": "tools/claims-v3/kspeed/e83/predictions.json", "burst": {"W_star_w": 66.15, "sigma_w": 2.75}, "sustained": {"W_star_w": 49.75, "sigma_w": 1.95}, "a_adj_e83": {"W_star_sus_adj_w": 49.724, "source": "docs/reports/data/2026-10-31-e83-kinds-speed-rest/results.json posthoc.a_adj.W_star_adj_w"}}
