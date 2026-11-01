@@ -36,7 +36,7 @@ three, so all 13 claims and the three cross-card rules read NOT SCORED.**
 | **E91-R4** | each tile on its predicted side of `nn_like` / `gauss_q` | the sign | all nine; int8 `l0_mlp_up` −0.214 ± 0.147 W below `gauss_q` | **PASS** | PASS at 0.1994, 0.3803; INCONCLUSIVE at 0.545, 0 |
 | **E91-R5** | E82's seven card-1 cells within their bands | ±0.50 / ±0.25 W | `fp32.randn` −0.502 W, `int8.gauss_q` −0.276 W outside; the other five inside | **FAIL** | PASS at 0.1994, 0.3803; FAIL at 0.545, 0 |
 | **E91-S1** | each tile's D÷random inside its ratio interval | ≥ 7 of 9 | 9 of 9 | **PASS** | PASS at all four |
-| **E91-X1** | Spearman ρ, card 1 against aifoundry3 (E86), per type | ≥ 0.90 | fp32 0.900, fp16 1.000, int8 1.000 | **PASS** | PASS at 0.1994 on both and none on both |
+| **E91-X1** | Spearman ρ, card 1 against aifoundry3 (E86), per type | ≥ 0.90 | fp32 0.900, fp16 1.000, int8 1.000; fp32 sits exactly on the threshold (five kinds, one adjacent swap: `l0_mlp_up` and `l6_mlp_down`) | **PASS** | PASS at 0.1994 on both and none on both |
 | **E91-X2a / X2b / X3** | E82's one-scale rules, band [0.88, 0.99] | ≥ 80% of point ratios inside / ≥ 80% of intervals overlapping / the median inside | 0 of 15 inside; 0.133 overlapping; median D(aifoundry3)/D(card 1) 1.0520 (IQR 1.0492–1.0587) over 15 kinds | **FAIL** ×3 (expected) | FAIL at both resolved pairings |
 | **E91-X4** | median over the nine real tiles of D(aifoundry3)/D(card 1) | [1.0008, 1.0608] | 1.0542 (fp32 1.0519, fp16 1.0576, int8 1.0791) | **PASS** | PASS at both resolved pairings |
 
@@ -52,8 +52,9 @@ E91's three kept passes on 31 Oct read 0.9915 ± 0.0050, 0.9833 ± 0.0015 and 0.
 idle (S) card 1 gives 0.9906 ± 0.0057, 0.9823 ± 0.0036 and 0.8687 ± 0.0092; of the whole board 0.9959 ± 0.0012, 0.9929 ± 0.0009
 and 0.9722 ± 0.0023 ([`readme-numbers.txt`](readme-numbers.txt) § A1). So the int8 tiles save 9.5–23% of the power above int8's
 zeros, 8–17% of the power above idle and 1.6–3.6% of the whole board; the fp16 tiles 0.7–3.5% over the zeros level, and the fp32
-tiles 0.4–1.7%. Card 1 idles at 33.0 W against aifoundry3's 25.9 W, which pulls its whole-board shares toward 1, so that column
-does not compare the cards.
+tiles 0.7–1.7% (`l6_mlp_down`, `l6_attn_qk`). fp32 `l0_mlp_up`'s 0.45% is not resolved: 0.9955 ± 0.0047 reaches 1.0002, and R3
+reads it INCONCLUSIVE per tile ([`corrections-check.txt`](corrections-check.txt) C7). Card 1 idles at 33.0 W against
+aifoundry3's 25.9 W, which pulls its whole-board shares toward 1, so that column does not compare the cards.
 
 | tile | D (W) | ±95% | E91 point | in | D ÷ random | S ÷ random | whole board ÷ random | E86 D ÷ random (aifoundry3) | card 1 − aifoundry3 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -68,18 +69,34 @@ does not compare the cards.
 | int8 `l6_attn_qk` | 5.137 | 0.180 | 5.598 | yes | 0.7732 ± 0.0237 | 0.8313 ± 0.0216 | 0.9642 ± 0.0033 | 0.7820 | −0.0088 ± 0.0607 |
 
 Sources: D, the E91 point and the last two columns from [`a-e91-rerun/results.md`](a-e91-rerun/results.md) (the nine real
-tiles' table); S and whole board from `readme-numbers.txt` § A1. Energy per operation over idle (S ÷ the MAC rate):
-fp32 5.41–5.49 pJ/MAC, fp16 2.41–2.47, int8 0.238–0.264 (`a-e91-rerun/scored.json` › `tiles.*.pj_mac_S`). The 2 s die rise on
-the firmware's whole-degree reading: fp32 2.72–2.86 °C, fp16 2.30–2.50 °C, int8 0.53–1.00 °C (`tiles.*.dT_win`).
+tiles' table); S and whole board from `readme-numbers.txt` § A1. Energy per operation over idle (S ÷ the MAC rate), ± 95%,
+in the table's tile order: fp32 5.488 ± 0.039, 5.468 ± 0.021 and 5.413 ± 0.031 pJ/MAC; fp16 2.454 ± 0.007, 2.470 ± 0.011 and
+2.407 ± 0.012; int8 0.264 ± 0.003, 0.244 ± 0.007 and 0.238 ± 0.006 (`a-e91-rerun/scored.json` › `tiles.*.pj_mac_S`). The 2 s
+die rise, read by the firmware in whole degrees (1 °C resolution): fp32 2.86 ± 0.49, 2.77 ± 0.34 and 2.72 ± 0.37 °C; fp16
+2.33 ± 0.37, 2.30 ± 0.46 and 2.50 ± 0.48 °C; int8 0.53 ± 0.63, 1.00 and 0.98 ± 0.06 °C. int8 `l6_mlp_down` read 1 °C in all
+five passes, so its interval has no width at that resolution (`tiles.*.dT_win`; per pass in
+[`corrections-check.txt`](corrections-check.txt) C6).
 
-**2. The card scale on the real tiles is the six synthetic kinds' again, and both depend on the leakage slope.** X4's median
-over the nine real tiles is 1.0542; X3's over all 15 kinds 1.0520 (`cross_card.primary`). E82 measured 1.031 on this card over
-32 synthetic kinds with the dips kept, at its own slope. This session's `auto` slope is **0.414 W/°C** (97 runs; E91's was 0.422
-on 31 Oct, E86's 0.229 on aifoundry3; `readme-numbers.txt` § A1): with card 1's dips removed the estimator has now returned
-about 0.42 in two sessions, and a steeper slope subtracts more for each run's window warming. That is also why R5 fails: at
-`auto` `fp32.randn` reads 0.502 W below E82's cell, and at 0.1994 W/°C R5 passes (`rules.E91-R5.at_arms`). A ratio inside one
-pass is nearly unaffected: at 0.1994 W/°C the three-tile means are 0.9905 ± 0.0062, 0.9817 ± 0.0061 and 0.8352 ± 0.0194
-(`readme-numbers.txt` § A1, the arms' own reductions), and R3 passes there too.
+**2. The card scale on the real tiles is the six synthetic kinds' again, and about half of the gap between the cards comes
+from the leakage slope.**
+The scale is D(aifoundry3, E86) / D(card 1): switching power over each format's zeros, not absolute watts. In absolute watts
+card 1's board draws more, since it idles at 33.0 W against aifoundry3's 25.9 W. At the registered pairing, card 1's `auto`
+slope (0.414 W/°C) against E86's (0.229), X4's median over the nine real tiles is 1.0542: card 1 reads them 5.1% lower, 4.0–7.4%
+per tile (ratios 1.0416–1.0794). The six synthetic kinds run beside them (fp32 and fp16 `randn` and `nn_like`, int8 `full` and
+`gauss_q`) give 1.0514, and the two medians stay within 0.003 at every resolved pairing (+0.0028, +0.0012, −0.0016, and +0.0011
+with the dips removed on both cards). X3's 1.0520 is not that comparison, since nine of its 15 kinds are the real tiles. At one
+slope on both cards the gap is about half as large: 1.028 at 0.1994 W/°C and 1.023 with no correction (card 1 2.7% and 2.3%
+lower, against 5.1%). That is close to E82's 1.031 over its 32 synthetic kinds, measured at nearly one slope (its own 0.241
+against E78's 0.1994) ([`corrections-check.txt`](corrections-check.txt) C1, C2; `a-e91-rerun/scored.json` › `cross_card.primary`,
+`.pairs`).
+This session's `auto` slope is **0.414 W/°C** (97 runs; E91's was 0.422 on 31 Oct, E86's 0.229 on aifoundry3;
+`readme-numbers.txt` § A1): with card 1's dips removed the estimator has now returned about 0.42 in two sessions, and a steeper
+slope subtracts more for each run's window warming. That is also why R5 fails: at `auto` `fp32.randn` reads 0.502 W below E82's
+cell, and at 0.1994 W/°C R5 passes (`rules.E91-R5.at_arms`). D is linear in the slope: the line through the 0.1994 and 0.3803
+arms gives the `auto` and 0.545 reductions to 0.000 W. So read at E82's 0.2414 W/°C, every R5 cell would lie inside its band
+(`fp32.randn` +0.02 W, `int8.gauss_q` −0.11 W) and R5 would pass; the registered R5, at `auto`, stays FAIL
+(`corrections-check.txt` C5). A ratio inside one pass is nearly unaffected: at 0.1994 W/°C the three-tile means are 0.9905 ±
+0.0062, 0.9817 ± 0.0061 and 0.8352 ± 0.0194 (`readme-numbers.txt` § A1, the arms' own reductions), and R3 passes there too.
 
 **3. (b), registered: NOT SCORED.** Pass 11252 departs from its `fp32.zeros` straight line by −0.253 W against E78's 0.25 W
 limit, and the departure is the same at `auto` (0.417), 0.1994 and 0.3803 W/°C. The dips-kept arm keeps no pass (`fp16.randn`
@@ -93,7 +110,11 @@ passed the run gates, and 106 sit in the two kept passes.
 **4. What (b)'s data show, reported and never a verdict.** On the two kept passes of the registered reduction, every one of the
 33 tiles' ratio to random sits within **0.009 (fp32), 0.006 (fp16) and 0.016 (int8)** of its ratio on aifoundry3 (E95's
 dips-removed arm; median differences 0.002, 0.003 and 0.009), and the median D(aifoundry3)/D(card 1) over the 24 tiles above
-5 W is 1.045 (`readme-numbers.txt` § B1, B2). A **post-hoc view**, written after the data, raises that one gate limit from
+5 W is 1.045 (`readme-numbers.txt` § B1, B2). Those are point differences on two passes, and two passes' own intervals are far
+wider: card 1's per-tile 95% half-widths have medians of ±0.025, ±0.038 and ±0.122 and reach ±0.105, ±0.098 and ±0.222 (t = 12.7
+at two passes), wider than X5's registered bands of 0.03, 0.03 and 0.06 ([`corrections-check.txt`](corrections-check.txt) C3).
+So they do not bound how far the cards differ, and they stay out of the blog and the kinds page until a scored session
+replicates E95's pass. A **post-hoc view**, written after the data, raises that one gate limit from
 0.25 to 0.26 W and changes nothing else ([`tools/claims-v3/e112/posthoc_gate_e112b.py`](../../../../tools/claims-v3/e112/posthoc_gate_e112b.py),
 output in [`b-e95-card1/posthoc-gate026/`](b-e95-card1/posthoc-gate026/)). With pass 11252 back, E95's claims would read 10 PASS,
 1 FAIL (C1), 2 INCONCLUSIVE (C7, C8), and X1, X4 and X5 would PASS (ρ 0.993 / 0.973 / 0.967; median 1.0432; 33 of 33 tiles within
@@ -123,15 +144,16 @@ C1 FAILS on the same cell as on aifoundry3: GPT-2's fp16 attention tile reads 0.
 | int8 T5 block 0 (ReLU) | 2.200 ± 0.487 | 0.3267 ± 0.0666 | 0.3034 ± 0.0136 | +0.0233 |
 
 All 33 rows are in `posthoc-gate026/results-posthoc-gate026.md` (the cross-card table) and the registered two-pass rows in
-`b-e95-card1/results.md`. In the same session, E86's three tiles in (b)'s post-hoc passes read +0.048, +0.170 and +0.025 W from
-(a)'s readings of the same tiles (`fp16.real_l6_mlp_down`, `int8.real_l6_mlp_down`, `fp16.real_l6_attn_qk`), within the reported
-±0.50 W.
+`b-e95-card1/results.md`. In the same session, E86's three tiles in (b) read 0.000, +0.162 and −0.052 W from (a)'s readings of
+the same tiles (`fp16.real_l6_mlp_down`, `int8.real_l6_mlp_down`, `fp16.real_l6_attn_qk`) on the registered reduction's two kept
+passes (NOT SCORED with two; `b-e95-card1/scored.json` › `same_session_tie_reported`), and +0.048, +0.170 and +0.025 W in the
+post-hoc three-pass view: all inside the reported ±0.50 W (`corrections-check.txt` C7).
 
 **5. Checks (reported).** (a): idle consistency median |S − S0 − D| 0.068 W (≤ 0.15); rail lag re-fit 1.00 s (in [0.80, 1.15]);
-duty 0.9958–0.9964; carry-over 0.0029 ± 0.0007 W/W (n 155; ≤ 0.01); 160 of 160 runs kept; cycles per op 546 / 546 / 318 at
-600 MHz; dips removed 10, 9, 14, 5, 13 per pass (`a-e91-rerun/scored.json` › `checks`, `dip_samples_removed`). (b): 0.074 W;
-0.975 s; 0.9955–0.9967; 0.0038 ± 0.0008 W/W (n 104); dips removed 26, 30, 27 (`b-e95-card1/scored.json` › `checks`;
-`e112b.json` › `reducer.dip_samples_removed`). The smoke (11201): 7 of 7 runs ok, cycles per op 546 / 546 / 318, 599.2–599.5
+duty 0.9958–0.9964; carry-over 0.0029 W/W, standard error 0.0007 (one SE, not a 95% interval; n 155; ≤ 0.01); 160 of 160 runs
+kept; cycles per op 546 / 546 / 318 at 600 MHz; dips removed 10, 9, 14, 5, 13 per pass (`a-e91-rerun/scored.json` › `checks`,
+`dip_samples_removed`). (b): 0.074 W; 0.975 s; 0.9955–0.9967; carry-over 0.0038 W/W, SE 0.0008 (n 104); dips removed 26, 30,
+27 (`b-e95-card1/scored.json` › `checks`; `e112b.json` › `reducer.dip_samples_removed`). The smoke (11201): 7 of 7 runs ok, cycles per op 546 / 546 / 318, 599.2–599.5
 MHz ([`logs/smoke.txt`](logs/smoke.txt)).
 
 ## Registered against what happened
@@ -162,20 +184,52 @@ MHz ([`logs/smoke.txt`](logs/smoke.txt)).
 
 ## What it changes for the blog material and the hub
 
-- **Item 7, "another card":** answered for Q130(n)'s nine GPT-2 tiles on a registered reading. On card 1 they cost 0.98–0.996
-  (fp32), 0.965–0.993 (fp16) and 0.77–0.90 (int8) of random data over each format's zeros. Their three-tile means differ
-  from aifoundry3's by +0.3 ± 1.1, −0.5 ± 1.5 and −0.0 ± 5.4 points (95%). It is **not answered** for E95's thirty tiles,
-  which are run and described but not scored. Descriptively each of their ratios to random matches aifoundry3's within 0.009–0.016 on two passes.
+- **Item 7, "another card":** answered for Q130(n)'s nine GPT-2 tiles on a registered reading (7 of E91's 11 rules pass; R5's
+  tie to E82's watts fails at the session's own leakage slope and passes at 0.1994; X2a / X2b / X3 fail as registered). On
+  card 1 they cost 0.98–0.996 (fp32), 0.965–0.993 (fp16) and 0.77–0.90 (int8) of random data over each format's zeros. Their
+  three-tile means differ from aifoundry3's by +0.3 ± 1.1, −0.5 ± 1.5 and −0.0 ± 5.4 points (95%). It is **not answered** for
+  E95's thirty tiles, which are run and described but not scored. Their ratios to random lie within 0.009–0.016 of
+  aifoundry3's on two passes whose own 95% intervals are about ±0.025–0.12 (medians), so that is no replication either; it
+  stays out of the blog and section 11 until a scored session replicates E95's pass.
 - **The final critic's replicates:** "E91 not re-run" is done, and E91's registration scores (7 PASS, 4 FAIL; the three
   one-scale rules fail as registered).
 - **For the instrument record:** card 1's leakage estimator with the dips removed returned 0.414 and 0.417 W/°C in this
-  session's two halves, after E91's 0.422. That moves absolute D by about 0.5 W in fp32 and decides R5. Ratios inside a pass
-  are not affected. The zeros-line gate's margin is thin: it set aside 11252 by 0.003 W, as it set aside E91's first pass by
-  0.038 W.
+  session's two halves, after E91's 0.422. That moves absolute D by about 0.5 W in fp32, makes about half of the gap between
+  the cards (result 2) and decides R5. Ratios inside a pass are not affected. These numbers extend the bullet Q132 added to
+  [`14-card-behaviour.md`](../../../findings/14-card-behaviour.md) that morning ("A session's automatic leakage slope wanders,
+  so register one", `578e09d9`, 08:56 PST); they belong in it, not in a new line. E112's registration (12:51) did not cite that
+  bullet. (a) re-ran E91's registration unchanged, and its primary is `auto`; (b) chose `auto` to pair like with like with
+  E95's dips-removed arm; no arm froze E82's 0.2414. The registered verdicts stand. Read at 0.2414, R5 would pass, as at
+  0.1994 and 0.3803 on either side (result 2), and (b) would keep the same two passes and stay NOT SCORED: its third pass is set
+  aside by the same −0.253 W at 0.1994, 0.3803 and `auto` (`corrections-check.txt` C5). The zeros-line gate's margin is thin:
+  it set aside 11252 by 0.003 W, as it set aside E91's first pass by 0.038 W.
 - **For the runbooks:** the exact-seconds budget anchored on the claim did its job: (a)'s spare started with its projected end
   166 s inside the limit. (b)'s spare could not have run in its place: at claim + 2,980 s its projected end was claim + 3,482 s,
   2 s past the limit (`readme-numbers.txt` § B4). A second-card replicate of E95's 53-run pass needs a session of its own, about
   40 card-minutes for four passes at this card's 491–502 s a pass.
+
+## Corrections after verification (Sun 1 Nov 2026)
+
+An independent verifier checked E112 after the data commit (`a5e587bd`). It re-ran `collect_e112.sh` on the committed raw
+passes: both `scored.json` files and both `results.md` files came back byte-identical, and 55 of 56 outputs matched after path
+normalisation (only `du`'s size line in `collect.log` differs). It re-derived the headline numbers from `e91.json`'s per-pass data
+without the scorer. It found these sound: the registration before the claim, the frozen inputs (all 47 harness hashes), the gates
+at every arm, the queue's budget arithmetic and the card conduct (nothing set, no `--reset-ms`, the lock and timeouts held, one
+session on aifoundry1, the claim and its release). Verdict: holds with fixes. It found one major and six minor faults in how E112
+was stated and handed on. Each is corrected above, desk only: no card was touched, nothing was re-run, and no registered
+prediction, rule, reduction, number or verdict changed ((a) 7 PASS, 4 FAIL; (b) NOT SCORED). Every new number is printed by
+[`corrections-check.py`](corrections-check.py) into [`corrections-check.txt`](corrections-check.txt) (standard library, post hoc,
+deciding nothing), under the section named.
+
+| # | what was wrong | what changed |
+|---|---|---|
+| C1 | **Major: the blog point handed on said the second card reads "every real tile about 5% lower in absolute watts (median ratio 1.054)".** The ratio is of D, power over each format's zeros, not absolute watts; in absolute watts card 1 draws more (idle 33.0 W against 25.9 W). It is 4.0–7.4% per tile (ratios 1.0416–1.0794), not about 5% for every tile. About half of the gap comes from the leakage estimator: the registered pairing sets card 1's `auto` slope, 0.414 W/°C, against aifoundry3's 0.229 | Result 2 says what the scale is and gives it at one slope on both cards: 1.028 at 0.1994 W/°C and 1.023 uncorrected (card 1 2.7% and 2.3% lower), close to E82's 1.031 on synthetic kinds; 1.054 (5.1% lower, 4.0–7.4% per tile) with each session's own slope. The blog point handed on is rewritten the same way, and the card-scale table cell carries 1.028 and 1.023 beside 1.0542 (C1) |
+| C2 | **Result 2 compared the real tiles with X3's 15-kind median, 1.0520, which contains them** (nine of the 15), the point E91's verifier made of E91 (its C5). It also did not say how much the slope moves the scale | Result 2 compares them with the six synthetic kinds run beside them: 1.0514 at the registered pairing, within 0.003 of the real tiles' median at every resolved pairing (+0.0028, +0.0012, −0.0016, +0.0011). It gives the common-slope X4 values (C2) |
+| C3 | **(b)'s two-pass agreement, "within 0.009 / 0.006 / 0.016", was quoted without the two passes' uncertainty**, in result 4, in What it changes, and in the blog point, kinds-page line and table cells handed on | Result 4 and What it changes give card 1's per-tile 95% half-widths at two passes (medians ±0.025, ±0.038, ±0.122; up to ±0.105, ±0.098, ±0.222; t = 12.7), wider than X5's bands. They keep the figure out of the blog and section 11 until a scored session replicates E95's pass; the handed-on blog point and kinds-page line drop it (C3) |
+| C4 | **The handed-on kinds-page line said "within +0.3 ± 1.1, −0.5 ± 1.5 and −0.0 ± 5.4 points"**, which reads as a bound where these are differences with 95% intervals; and "registered" with no tally reads as if every registered rule passed | The line says "differ from aifoundry3's by … (95%)" and carries the tally: 7 of E91's 11 rules pass, R5's tie to E82's watts fails at the session's own slope and passes at 0.1994, and X2a / X2b / X3 fail as registered. What it changes carries the same (C4) |
+| C5 | **Q132's lesson on the slope was not engaged.** `14-card-behaviour.md`'s bullet "A session's automatic leakage slope wanders, so register one" (`578e09d9`, 08:56 PST, four hours before E112's registration) was not cited; (b) registered `auto` without it, and no arm froze E82's 0.2414. The records note handed on proposed a new line rather than extending that bullet | What it changes cites the bullet and asks the records to extend it with 0.414 and 0.417 W/°C. No verdict moves: D is linear in the slope (the line through the 0.1994 and 0.3803 arms gives the `auto` and 0.545 reductions to 0.000 W), so read at 0.2414 R5 would pass and (b) would keep the same two passes and stay NOT SCORED. The registered verdicts, at `auto`, stand (C5) |
+| C6 | **The handed-on table cells gave pJ/MAC with no interval and the die rise with only a phrase**, though `scored.json` holds both | The paragraph under the tile table gives each tile's pJ/MAC and die rise with its 95% interval. It says int8 `l6_mlp_down` read 1 °C in all five passes, so its interval has no width at the reading's 1 °C resolution; the table cells handed on carry the same (C6) |
+| C7 | **Four labels.** The carry-over figures (0.0029 ± 0.0007 and 0.0038 ± 0.0008 W/W) are standard errors, though the header calls the intervals 95%. X1's fp32 ρ of 0.900 sits exactly on its threshold (five kinds, one adjacent swap), unremarked. "fp32 tiles 0.4–1.7%" included `l0_mlp_up`, whose 0.9955 ± 0.0047 is not resolved below 1. The same-session tie was quoted only from the post-hoc view | Check 5 labels the SEs. The rule table notes X1's fp32 edge. Result 1 says fp32 0.7–1.7% and marks `l0_mlp_up`'s 0.45% unresolved (R3 per tile INCONCLUSIVE). Result 4 quotes the registered two-pass tie first (0.000, +0.162, −0.052 W, NOT SCORED with two passes) and the post-hoc one beside it (C7) |
 
 ## Files
 
@@ -187,9 +241,11 @@ MHz ([`logs/smoke.txt`](logs/smoke.txt)).
 | `aifoundry1-c1/kinds/p11210`–`p11214`, `p11250`–`p11252`, `kinds-smoke-p11201` | raw passes as the box wrote them: 10 Hz telemetry, launch records, marks, dumped tiles, config reads, manifests |
 | `logs/` | the queue log, the box's setup, the smoke, the session's config reads, the two dry passes, push and claim times |
 | `readme-numbers.py`, `readme-numbers.txt` | every derived number above that `results.md` does not print (standard library only) |
+| `corrections-check.py`, `corrections-check.txt` | added with the corrections after verification: every number they quote, from committed files (standard library, post hoc, deciding nothing) |
 | `code.sha256` | the code and frozen files as reduced |
 
 Reproduce on the Intel: copy `aifoundry1:nekko/build/claims-v3/aifoundry1-c1/{kinds,kinds-smoke}/p112*` to
 `build/e112-raw/{kinds,kinds-smoke}/`, then `PY=/usr/bin/python3 nice -n 10 bash tools/claims-v3/e112/collect_e112.sh
 build/e112-raw` (about 20 s), and for the post-hoc view `E112A=<out>/a-e91-rerun/e91.json python3
-tools/claims-v3/e112/posthoc_gate_e112b.py <out>/b-e95-card1/posthoc-gate026 build/e112-raw/kinds/p1125{0,1,2}`.
+tools/claims-v3/e112/posthoc_gate_e112b.py <out>/b-e95-card1/posthoc-gate026 build/e112-raw/kinds/p1125{0,1,2}`; the
+corrections' numbers, `python3 docs/reports/data/2026-11-01-e112-real-replicates/corrections-check.py`.

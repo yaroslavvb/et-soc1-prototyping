@@ -1,0 +1,110 @@
+== C1: the card scale D(aifoundry3, E86) / D(card 1, E112a) - what the 5% is
+  leakage slopes (W/C): card 1 E112a auto 0.4137 (97 runs); aifoundry3 E86 auto 0.2290 (133 runs); E82 auto 0.2414 (313 runs)
+  idle levels (W, whole board): card 1 E112a 33.009; aifoundry3 E86 25.873 - card 1's board draws MORE in total; D is power over each format's zeros, not absolute watts
+  X4 = median over the nine real tiles, at each pairing (ratio; card 1 lower by):
+    primary: card 1 auto (dips removed) against E86 registered (auto): 1.0542 (5.1% lower); per type fp32 1.0519, fp16 1.0576, int8 1.0791
+    own idle slopes (card 1 0.545, aifoundry3 0.3803): NOT SCORED (too few passes in one of the two reductions)
+    0.3803 on both: NOT SCORED (too few passes in one of the two reductions)
+    0.1994 on both (Q130(n)'s D scope): 1.0280 (2.7% lower); per type fp32 1.0268, fp16 1.0308, int8 1.0262
+    no correction on both: 1.0232 (2.3% lower); per type fp32 1.0232, fp16 1.0300, int8 0.9917
+    reported: both dips removed (E91 primary, E86 post hoc): 1.0550 (5.2% lower); per type fp32 1.0515, fp16 1.0550, int8 1.0837
+    reported: E91 dips kept, E86 registered: NOT SCORED (too few passes in one of the two reductions)
+  E82 on synthetic kinds (its own slope 0.2414 against E78's 0.1994, dips kept): median 1.0308 over 32 kinds (3.0% lower) (E82 scored.json > cross_card.primary.x3)
+  per tile at the primary pairing (ratio +- its 95% half-width; card 1 lower by):
+    fp32.real_l0_mlp_up      1.0416 +- 0.0335 (4.0% lower)
+    fp32.real_l6_mlp_down    1.0519 +- 0.0061 (4.9% lower)
+    fp32.real_l6_attn_qk     1.0520 +- 0.0066 (4.9% lower)
+    fp16.real_l0_mlp_up      1.0599 +- 0.0133 (5.6% lower)
+    fp16.real_l6_mlp_down    1.0542 +- 0.0083 (5.1% lower)
+    fp16.real_l6_attn_qk     1.0576 +- 0.0128 (5.4% lower)
+    int8.real_l0_mlp_up      1.0470 +- 0.1037 (4.5% lower)
+    int8.real_l6_mlp_down    1.0794 +- 0.0676 (7.4% lower)
+    int8.real_l6_attn_qk     1.0791 +- 0.0722 (7.3% lower)
+  range 1.0416-1.0794: card 1 reads 4.0-7.4% lower per tile
+
+== C2: the real tiles' scale beside the six synthetic kinds run with them (X3's 15 kinds contain the nine real tiles)
+  six synthetic kinds: fp32.randn, fp16.randn, int8.full, fp32.nn_like, fp16.nn_like, int8.gauss_q
+    primary: card 1 auto (dips removed) against E86 registered (auto): real-tile median (X4) 1.0542; six synthetic kinds' median 1.0514; gap +0.0028; X3 over all 15 (for reference) 1.0520
+    own idle slopes (card 1 0.545, aifoundry3 0.3803): NOT RESOLVED (0 of 6 synthetic kinds resolved)
+    0.3803 on both: NOT RESOLVED (0 of 6 synthetic kinds resolved)
+    0.1994 on both (Q130(n)'s D scope): real-tile median (X4) 1.0280; six synthetic kinds' median 1.0268; gap +0.0012; X3 over all 15 (for reference) 1.0271
+    no correction on both: real-tile median (X4) 1.0232; six synthetic kinds' median 1.0249; gap -0.0016; X3 over all 15 (for reference) 1.0238
+    reported: both dips removed (E91 primary, E86 post hoc): real-tile median (X4) 1.0550; six synthetic kinds' median 1.0540; gap +0.0011; X3 over all 15 (for reference) 1.0549
+    reported: E91 dips kept, E86 registered: NOT RESOLVED (0 of 6 synthetic kinds resolved)
+  the six at the primary pairing, each:
+    fp32.randn     1.0514
+    fp16.randn     1.0515
+    int8.full      1.0673
+    fp32.nn_like   1.0432
+    fp16.nn_like   1.0575
+    int8.gauss_q   1.0386
+
+== C3: (b)'s per-tile ratio to random, registered reduction, two kept passes - the agreement and the two-pass intervals
+  X5's registered bands: {"fp32": 0.03, "fp16": 0.03, "int8": 0.06}
+  fp32: 11 tiles; max |diff| 0.0089; median |diff| 0.0018; card 1's own 95% half-width per tile (n 2, t 12.706): median 0.0254, range 0.0034-0.1053
+  fp16: 10 tiles; max |diff| 0.0061; median |diff| 0.0033; card 1's own 95% half-width per tile (n 2, t 12.706): median 0.0383, range 0.0105-0.0978
+  int8: 12 tiles; max |diff| 0.0156; median |diff| 0.0094; card 1's own 95% half-width per tile (n 2, t 12.706): median 0.1222, range 0.0094-0.2217
+  so the observed agreement (a point difference) lies far inside two passes' own intervals: it does not bound the
+  difference, and E112(b) is NOT SCORED (b-e95-card1/scored.json > tally)
+
+== C4: the item-7 line - differences with intervals, and E91's tally
+  fp32: {"rho_card1": 0.9904793141778112, "ci95_card1": 0.003154889182711547, "rho_a3_e86": 0.9877517237907065, "ci95_a3": 0.010294891921219225, "diff": 0.0027275903871046836, "diff_ci95": 0.010767456776081118}
+  fp16: {"rho_card1": 0.9818144231805072, "ci95_card1": 0.003852428467178864, "rho_a3_e86": 0.9872386557715799, "ci95_a3": 0.014167323520543193, "diff": -0.00542423259107272, "diff_ci95": 0.014681766270802244}
+  int8: {"rho_card1": 0.8264939692736222, "ci95_card1": 0.02061848366408592, "rho_a3_e86": 0.8269485045512693, "ci95_a3": 0.050120420759299664, "diff": -0.0004545352776471612, "diff_ci95": 0.054195741951701466}
+  tally: {"PASS": 7, "FAIL": 4}
+  R5 at auto, cells outside their bands: fp32.randn -0.502 W (band +-0.5); int8.gauss_q -0.276 W (band +-0.25); at the arms {"dips_kept": "NOT SCORED", "leak0.1994": "PASS", "leak0.545": "FAIL", "leak0.3803": "PASS", "leak0": "FAIL"}
+
+== C5: the leakage slope - every session's automatic slope, and the verdicts at E82's frozen 0.2414 W/C
+  automatic slopes (W/C): E112a 0.4137, E112b 0.4172, E91 0.4219 (card 1, dips removed); E82 0.2414 (card 1, dips kept); E86 0.2290 (aifoundry3)
+  (a) e91-leak0.1994.json: slope 0.1994, kept [11210, 11211, 11212, 11213, 11214]
+  (a) e91-leak0.3803.json: slope 0.3803, kept [11210, 11211, 11212, 11213, 11214]
+  (a) e91.json: slope 0.4137, kept [11210, 11211, 11212, 11213, 11214]
+  (a) e91-leak0.545.json: slope 0.5450, kept [11210, 11211, 11212, 11213, 11214]
+  R5's cells, D(card 1) - E82's cell (W): at 0.1994 and 0.3803 (all five passes kept at both), the line through them
+  checked at auto and 0.545 (also five passes), and read at 0.2414:
+    fp32.randn     0.1994 +0.150; 0.3803 -0.401; auto line -0.502 / reduced -0.502; 0.545 line -0.902 / reduced -0.902; at 0.2414 +0.023 (band +-0.5: inside)
+    fp16.randn     0.1994 +0.124; 0.3803 -0.355; auto line -0.444 / reduced -0.444; 0.545 line -0.792 / reduced -0.792; at 0.2414 +0.013 (band +-0.5: inside)
+    int8.full      0.1994 -0.023; 0.3803 -0.194; auto line -0.225 / reduced -0.225; 0.545 line -0.350 / reduced -0.350; at 0.2414 -0.062 (band +-0.25: inside)
+    fp32.nn_like   0.1994 +0.040; 0.3803 -0.270; auto line -0.327 / reduced -0.327; 0.545 line -0.552 / reduced -0.552; at 0.2414 -0.032 (band +-0.5: inside)
+    fp16.nn_like   0.1994 +0.248; 0.3803 -0.127; auto line -0.197 / reduced -0.197; 0.545 line -0.469 / reduced -0.469; at 0.2414 +0.161 (band +-0.5: inside)
+    int8.gauss_q   0.1994 -0.065; 0.3803 -0.243; auto line -0.276 / reduced -0.276; 0.545 line -0.405 / reduced -0.405; at 0.2414 -0.106 (band +-0.25: inside)
+    anchor_pi      0.1994 +0.086; 0.3803 -0.137; auto line -0.179 / reduced -0.179; 0.545 line -0.341 / reduced -0.341; at 0.2414 +0.034 (band +-0.5: inside)
+  largest gap between the line and a reduction: 0.0000 W (D is linear in the slope: p80 = P - k * dT)
+  so at 0.2414 every R5 cell is inside its band (R5 would read PASS there); the
+  registered R5 (at auto) stays FAIL
+  (b)'s pass gate, the departure that set 11252 aside, at each reduction:
+    e112b-leak0.1994.json: slope 0.1994, kept [11250, 11251], set aside [{"pass": 11252, "why": ["fp32.zeros departs -0.253 W from its straight line"]}]
+    e112b-leak0.3803.json: slope 0.3803, kept [11250, 11251], set aside [{"pass": 11252, "why": ["fp32.zeros departs -0.253 W from its straight line"]}]
+    e112b.json: slope 0.4172, kept [11250, 11251], set aside [{"pass": 11252, "why": ["fp32.zeros departs -0.253 W from its straight line"]}]
+  the departure is the same -0.253 W at 0.1994, 0.3803 and auto, and both kept passes are kept at both ends, so at 0.2414
+  (b) keeps the same two passes and stays NOT SCORED
+
+== C6: intervals for pJ per MAC over idle and the 2 s die rise (95% over five passes)
+  fp32.real_l0_mlp_up      pJ/MAC (S) 5.488 +- 0.039; die rise 2.86 +- 0.49 C (per pass 2.45, 2.58, 3.30, 3.25, 2.70)
+  fp32.real_l6_mlp_down    pJ/MAC (S) 5.468 +- 0.021; die rise 2.77 +- 0.34 C (per pass 2.60, 2.45, 3.06, 2.70, 3.05)
+  fp32.real_l6_attn_qk     pJ/MAC (S) 5.413 +- 0.031; die rise 2.72 +- 0.37 C (per pass 2.50, 2.58, 2.45, 3.15, 2.90)
+  fp16.real_l0_mlp_up      pJ/MAC (S) 2.454 +- 0.007; die rise 2.33 +- 0.37 C (per pass 2.45, 2.20, 2.40, 1.90, 2.70)
+  fp16.real_l6_mlp_down    pJ/MAC (S) 2.470 +- 0.011; die rise 2.30 +- 0.46 C (per pass 2.85, 2.45, 2.26, 2.05, 1.90)
+  fp16.real_l6_attn_qk     pJ/MAC (S) 2.407 +- 0.012; die rise 2.50 +- 0.48 C (per pass 2.35, 1.95, 2.85, 2.45, 2.89)
+  int8.real_l0_mlp_up      pJ/MAC (S) 0.264 +- 0.003; die rise 0.53 +- 0.63 C (per pass 0.00, 1.00, 0.00, 1.00, 0.65)
+  int8.real_l6_mlp_down    pJ/MAC (S) 0.244 +- 0.007; die rise 1.00 +- 0.00 C (per pass 1.00, 1.00, 1.00, 1.00, 1.00)
+  int8.real_l6_attn_qk     pJ/MAC (S) 0.238 +- 0.006; die rise 0.98 +- 0.06 C (per pass 1.00, 1.00, 1.00, 0.90, 1.00)
+  the firmware reads the die in whole degrees (1 C resolution), and a window's rise is a difference of such readings
+  averaged over its samples; int8 l6_mlp_down's zero-width interval is five passes that each read 1.00 C
+
+== C7: labels
+  (a) carry-over 0.0029 W/W +- 0.0007 (one SE, n 155); 95% about +- 0.0014; limit 0.01
+  (b) carry-over 0.0038 W/W +- 0.0008 (one SE, n 104); 95% about +- 0.0016; limit 0.01
+  X1 fp32: 5 kinds; rank by D on card 1 ['fp32.nn_like', 'fp32.real_l6_attn_qk', 'fp32.real_l6_mlp_down', 'fp32.real_l0_mlp_up', 'fp32.randn']; on aifoundry3 ['fp32.nn_like', 'fp32.real_l6_attn_qk', 'fp32.real_l0_mlp_up', 'fp32.real_l6_mlp_down', 'fp32.randn']; sum d^2 2; Spearman 0.900 against the threshold 0.90 (scored 0.9): one adjacent swap gives exactly 0.90, on the edge
+    fp32.nn_like           card 1 12.408 W, aifoundry3 12.944 W
+    fp32.randn             card 1 23.484 W, aifoundry3 24.691 W
+    fp32.real_l0_mlp_up    card 1 23.379 W, aifoundry3 24.353 W
+    fp32.real_l6_mlp_down  card 1 23.326 W, aifoundry3 24.537 W
+    fp32.real_l6_attn_qk   card 1 23.077 W, aifoundry3 24.278 W
+  R3 per tile, fp32: {"fp32.real_l0_mlp_up": "INCONCLUSIVE", "fp32.real_l6_mlp_down": "PASS", "fp32.real_l6_attn_qk": "PASS"}
+    fp32.real_l0_mlp_up    D / random 0.9955 +- 0.0047: upper bound 1.0002 (not resolved below 1); saving 0.45%
+    fp32.real_l6_mlp_down  D / random 0.9933 +- 0.0046: upper bound 0.9979 (resolved below 1); saving 0.67%
+    fp32.real_l6_attn_qk   D / random 0.9827 +- 0.0028: upper bound 0.9855 (resolved below 1); saving 1.73%
+  same-session tie (E86's three tiles in (b) against (a)'s same-session D, band +-0.50 W, reported):
+    registered reduction, two kept passes: fp16.real_l6_mlp_down +0.000 W (verdict NOT SCORED); int8.real_l6_mlp_down +0.162 W (verdict NOT SCORED); fp16.real_l6_attn_qk -0.052 W (verdict NOT SCORED)
+    post hoc, three passes (gate limit 0.26 W): fp16.real_l6_mlp_down +0.048 W (verdict PASS); int8.real_l6_mlp_down +0.170 W (verdict PASS); fp16.real_l6_attn_qk +0.025 W (verdict PASS)
