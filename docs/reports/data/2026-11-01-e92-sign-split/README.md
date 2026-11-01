@@ -157,7 +157,7 @@ INCONCLUSIVE ones are wide intervals from the dips. **The dips-removed arm, all 
 sensitivity arm, and it moves no primary verdict. The core rule's contrast, `h_sub` − `h_add`, is CONFIRMED in fp32 and fp16 in every arm.
 
 **The dips.** The board meter's launch-gap dips were unusually frequent: 39 in four passes, 22 in power windows (E90: 19 in three, 4), up to 21.5 W deep, on a handful of runs each
-(`dips-arm/dips.json`; `posthoc-check.txt` F). They set pass 9211 aside and widen the primary's intervals; they do not move its means by much except where noted. The rail shows none of it.
+(`dips-arm/dips.json`; `posthoc-check.txt` F). They set pass 9211 aside and widen the primary's intervals; they do not move its means by much except where noted. The rail shows none of it. A cruder reading agrees, with no reduction at all: the median board power in each run's window, all four passes, no gate and no correction, gives `h_sub` − `h_add` +4.66 ± 0.60 W (fp32) and +6.70 ± 0.24 W (fp16), `wr_h_sub` − `wr_h_add` +1.06 ± 0.10 W, `h_allsub` − `h_add` +0.05 ± 0.12 W ([`crude-check.txt`](crude-check.txt), labelled post hoc).
 **Checks:** leakage slope 0.1396 W/°C over 194 runs (E90: 0.2203); idle consistency median |S − S0 − D| 0.085 W; carry-over 0.0003 ± 0.0023 W/W; rail lag 1.0 s; duty 0.9958–0.9966;
 cycles per op 546.001 / 546.001 / 318.0; every dumped tile equal to its registered sha256; the tie's drift 0.24–0.43 W a pass; 600 MHz, 521.6 mV throughout.
 
@@ -196,5 +196,5 @@ leave-one-out rms is in-family. The watts are the board's; the rail figures are 
 
 `e92.json` (the registered reduction: every item, per pass), `runs.csv`, `reduce.txt`, the leakage arms (`e92-leak0.1994 / 0.3803 / 0 .json`, `.csv`, `.txt`), `scored.json` and `results.md` (every rule, the factorial, the budget, the ladder), `dips-arm/` (the registered dips-removed arm:
 `dips.json`, `e92-nodips.json`, `scored-nodips.json`, `results-nodips.md`), `code.sha256`, `logs/` (the queue and dry-run logs, the session's start and end config reads, the binaries' sha256), `aifoundry3/kinds/` (the four passes' raw data and the smoke, `kinds-smoke-p9201`),
-`posthoc-check.py` / `.txt` (labelled post hoc: every number above beyond `scored.json`, from committed files, standard library only), `posthoc-fit.json` / `.txt` / `posthoc-fit-nodips.txt` (labelled post hoc). The tiles and the registration are in `tools/claims-v3/kinds/` (`E92.md`, `e92/`,
+`posthoc-check.py` / `.txt` (labelled post hoc: every number above beyond `scored.json`, from committed files, standard library only), `crude-check.py` / `.txt` (labelled post hoc: raw medians), `posthoc-fit.json` / `.txt` / `posthoc-fit-nodips.txt` (labelled post hoc). The tiles and the registration are in `tools/claims-v3/kinds/` (`E92.md`, `e92/`,
 `predictions-e92.json`, `make_e92.py`, `make_predictions_e92.py`, `e92_common.py`, `run_e92.py`, `reduce_e92.py`, `score_e92.py`, `posthoc_dips_e92.py`, `posthoc_fit_e92.py`, `block_e92.sh`, `queue_e92.sh`, `run_e92.sh`, `collect_e92.sh`, `selftest_e92.py`).
