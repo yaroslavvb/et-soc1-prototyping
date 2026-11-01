@@ -1,0 +1,50 @@
+{
+ "experiment": "E111",
+ "request": "Q133",
+ "card": "aifoundry2",
+ "order_seed": 98,
+ "note": "E98's runner and blocks (run_e98.py's run_kspeed.py over E64's run_hpl.py, unchanged): REST holds no launch; SUS is E98's nine runs in E98's order behind E98's 57 C gate; nothing is set on the card",
+ "tools": {
+  "heater": "build/sparsity_t2/host/sparsity_host",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 85,
+  "board_cap_w": 97,
+  "cap_consecutive": 3,
+  "note": "E98's stops, unchanged: 85 C on the die mean or the hottest sensor (the lab's 85-90 C stop for long full-load runs, AGENT.md section 4), 97 W on three samples"
+ },
+ "caps": {
+  "max_card_min": 15
+ },
+ "step": "END",
+ "blocks": [
+  {
+   "name": "REST",
+   "title": "the rest reading: no launch, the 10 Hz sampler on the idle card; the last 60 s are the reading",
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 20
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 0
+   },
+   "tail_s": 20,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest"
+    }
+   ]
+  }
+ ]
+}

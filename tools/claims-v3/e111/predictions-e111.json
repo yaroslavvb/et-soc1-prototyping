@@ -1,0 +1,356 @@
+{
+ "experiment": "E111",
+ "request": "Q133",
+ "card": "aifoundry2 card 0, release 1.4.0 / BL2 0.22.0 (E69's reading of 27 Oct), its own governor, TDP 65 W, threshold 65 C, nothing set",
+ "frozen_before_the_claim": true,
+ "sources": {
+  "e98_results": "1a4fac1b0037e1b1372d96ec67e4b0a3e6325f0ba1a2890b15f920c63d2790f0",
+  "e98_predictions": "53c1142942c39bcabf37c7defde34fc0063afe9c6d380749e048a1de7607ff67",
+  "camera_lines": "57abf835c0353e912d599c40e22562646364ba7495695ec5f721afa387eaed02",
+  "e73_models": "419c43186c10da4693dfe1f0e2d57c44ceae83464d872357d67f89a9ceaf771a",
+  "e73_fit": "402143d0fda64edcf2cc21285575b6cbe7654737d4e15b4d623220f6e8c4f3bb"
+ },
+ "t975": {
+  "1": 12.706,
+  "2": 4.303,
+  "3": 3.182,
+  "4": 2.776,
+  "5": 2.571,
+  "6": 2.447,
+  "7": 2.365,
+  "8": 2.306
+ },
+ "partA": {
+  "holds": {
+   "H-I8": {
+    "step": "W1",
+    "run": "HOLD-00-int8-neg_ones-hold-r1",
+    "kind": "int8/neg_ones",
+    "clock_mhz": 800,
+    "idle_before": "W1",
+    "idle_after": "W2"
+   },
+   "H-F32": {
+    "step": "W2",
+    "run": "HOLDF-00-fp32-randn-hold-r1",
+    "kind": "fp32/randn",
+    "clock_mhz": 600,
+    "idle_before": "W2",
+    "idle_after": "END"
+   }
+  },
+  "plateau_s": 300,
+  "previous_s": 300,
+  "slope_window_s": 600,
+  "slope_bin_s": 30,
+  "steady_bar_c_per_min": 0.02,
+  "k_fine_w_per_c": 0.442,
+  "k_note": "E64's 0.442 W/C at a fixed clock (E98 constants l_800_w_per_c), used for both holds, frozen",
+  "fine_min_share": 0.7,
+  "clock_share_min": 0.9,
+  "idle_window_s": 60,
+  "bands": {
+   "prior_aifoundry2": [
+    0.62,
+    0.82
+   ],
+   "lab_model_sept": [
+    1.25,
+    1.7
+   ],
+   "e97_aifoundry3_plateau": [
+    0.86,
+    0.95
+   ],
+   "line_76s": [
+    0.4,
+    0.52
+   ],
+   "linearity_ratio": [
+    0.9,
+    1.11
+   ]
+  },
+  "predicted": {
+   "H-I8": {
+    "c": 0.73,
+    "die_at_rest_47": 61.9,
+    "w_at_rest_47": 42.1,
+    "verdicts": {
+     "A1": "PASS",
+     "A2_prior": "PASS",
+     "A2_lab": "FAIL",
+     "A2_e97": "FAIL",
+     "A2_line": "FAIL"
+    }
+   },
+   "H-F32": {
+    "c": 0.72,
+    "die_at_rest_47": 72.9,
+    "w_at_rest_47": 57.1,
+    "verdicts": {
+     "A1": "PASS",
+     "A2_prior": "PASS",
+     "A2_lab": "FAIL",
+     "A2_e97": "FAIL",
+     "A2_line": "FAIL",
+     "A3": "PASS"
+    }
+   }
+  },
+  "prior": {
+   "e98_holds_5p5min": {
+    "P1": {
+     "hold_die": 60.4154,
+     "hold_w": 40.9446,
+     "rest_die_raw": 46.8667,
+     "rest_w": 22.1105,
+     "c": 0.7194
+    },
+    "P3": {
+     "hold_die": 58.0486,
+     "hold_w": 39.9813,
+     "rest_die_raw": 46.0904,
+     "rest_w": 21.8971,
+     "c": 0.6613
+    },
+    "P6": {
+     "hold_die": 58.795,
+     "hold_w": 40.3586,
+     "rest_die_raw": 46.1958,
+     "rest_w": 21.9486,
+     "c": 0.6844
+    },
+    "P7": {
+     "hold_die": 58.485,
+     "hold_w": 39.9241,
+     "rest_die_raw": 45.6786,
+     "rest_w": 21.8771,
+     "c": 0.7096
+    }
+   },
+   "camera_sessions_near_steady": {
+    "E63-s1": {
+     "w": 35.495,
+     "die": 55.528,
+     "rest_w": 21.952,
+     "rest_die": 46.11,
+     "harts": 256,
+     "c": 0.6954
+    },
+    "E73": {
+     "w": 34.882,
+     "die": 56.09,
+     "rest_w": 22.17,
+     "rest_die": 47.09,
+     "harts": 192,
+     "c": 0.708
+    },
+    "E85": {
+     "w": 32.796,
+     "die": 55.06,
+     "rest_w": 22.334,
+     "rest_die": 47.55,
+     "harts": 192,
+     "c": 0.7179
+    }
+   },
+   "fan_swap_9oct_heavy_run": 0.68,
+   "range_of_the_near_steady_readings": [
+    0.68,
+    0.7179
+   ]
+  },
+  "proxy_c_per_c_of_rest_die": {
+   "a1-nic": 0.92,
+   "a1-nvme": 0.91,
+   "a3-nic": 0.903,
+   "a1c0-die": 0.89,
+   "a1c1-die": 1.1,
+   "note": "E98 section 5's nine-day relations (a3-nic: Q132(g)'s r against a2's idle W, used as a slope of 0.903 C per C as a stand-in); an arm, never a verdict"
+  }
+ },
+ "partB": {
+  "e98_targets": {
+   "fine_line_w_per_w_desk": 0.6,
+   "from_rest_line_slope": 0.89,
+   "from_rest_w_per_w_room": 2.14,
+   "hold_band": [
+    1.0,
+    1.25
+   ],
+   "hold_floor": 0.25,
+   "hold_slope_path": 2.08,
+   "hold_slope_room": 1.12,
+   "hold_w_band": [
+    1.91,
+    2.39
+   ],
+   "hold_w_per_w_if_line_slope": 0.6,
+   "hold_w_per_w_path": 3.97,
+   "hold_w_per_w_room": 2.14,
+   "line_slope": 0.25,
+   "trip_mhz_per_c": -12.0,
+   "trip_w_per_c": -1.0
+  },
+  "e98_gates": {
+   "min_gated_runs_per_probe": 6,
+   "min_probes": 4,
+   "min_rest_range_c": 0.75,
+   "rest_history_window_min": 20,
+   "rest_min": 15,
+   "rest_min_rows": 60,
+   "rest_skip_after_busy_min": 10
+  },
+  "e98_constants": {
+   "gain_hold": 1.253,
+   "gain_rest": 1.118,
+   "k_line_c_per_w": 0.4573,
+   "l_800_w_per_c": 0.442,
+   "line_slope_desk": 0.25,
+   "p_hold_w": 41.0,
+   "p_rest_w": 22.1,
+   "rest_w_per_c": 0.2315
+  },
+  "e98_probes": [
+   "P1",
+   "P2",
+   "P3",
+   "P6",
+   "P7"
+  ],
+  "baseline_probes": [
+   "P3",
+   "P6",
+   "P7"
+  ],
+  "hold39_processes": 39,
+  "b3_min_lead_c": 0.5,
+  "b3_noise_per_probe_c": {
+   "hold": 0.375,
+   "line": 0.089,
+   "note": "E98's measured hold scatter among its later probes (README section 2) and its positional line scatter (C4), frozen"
+  },
+  "p1_lead_per_c": {
+   "line": 0.5211,
+   "hold": 2.2497,
+   "note": "E98's contrast, P1 minus the mean of P3, P6 and P7 (checks.txt K1): line +0.457 C, hold +1.973 C, rest die +0.877 C"
+  }
+ },
+ "partC": {
+  "block": "E111-F05",
+  "f0_hz": 0.005,
+  "laps_analysed": 5,
+  "detect": {
+   "roi_min_se": 3.0,
+   "board_min_se": 5.0
+  },
+  "lag_threshold_deg": 40.0,
+  "models_at_0p005": {
+   "P1D": {
+    "lag_deg": 28.48,
+    "lag_95": [
+     22.2,
+     34.3
+    ],
+    "h3_over_h1": [
+     0.5458232798472152,
+     0.6187653455000227,
+     0.7180732700727119
+    ],
+    "chi2": 21.67,
+    "dof": 25,
+    "aic": 27.67
+   },
+   "P2": {
+    "lag_deg": 27.88,
+    "lag_95": [
+     21.4,
+     33.9
+    ],
+    "h3_over_h1": [
+     0.5466671509972549,
+     0.6242523942473601,
+     0.7318300980851269
+    ],
+    "chi2": 23.15,
+    "dof": 25,
+    "aic": 29.15
+   },
+   "P1D+slow": {
+    "lag_deg": 62.92,
+    "lag_95": [
+     52.5,
+     82.9
+    ],
+    "h3_over_h1": [
+     0.3986291598913528,
+     0.5786140316098323,
+     0.6546355235496716
+    ],
+    "chi2": 13.63,
+    "dof": 23,
+    "aic": 23.63
+   },
+   "P1D*pole": {
+    "lag_deg": 28.42,
+    "lag_95": [
+     23.0,
+     37.2
+    ],
+    "h3_over_h1": [
+     0.542765830459522,
+     0.6164766530565466,
+     0.7138154103131267
+    ],
+    "chi2": 21.66,
+    "dof": 24,
+    "aic": 29.66
+   },
+   "P1D+diff": {
+    "lag_deg": 51.08,
+    "lag_95": [
+     49.9,
+     52.3
+    ],
+    "h3_over_h1": [
+     0.5454599591709752,
+     0.559367826224406,
+     0.569544016218668
+    ],
+    "chi2": 12.35,
+    "dof": 24,
+    "aic": 20.35
+   }
+  },
+  "e73_0p025_lag": {
+   "deg": 75.6,
+   "se": 7.82
+  },
+  "e73_0p01_lag": {
+   "deg": 59.36,
+   "se": 4.31
+  },
+  "hold": {
+   "share_790_min": 0.95,
+   "die_mean_max_c": 65.0
+  },
+  "predicted": {
+   "C1": "PASS",
+   "C2": "SLOW or P1D: the registered question, no prediction of the side",
+   "C3": "INSIDE (the 0.025 Hz lag within 3 SE of E73's)",
+   "C4": "PASS"
+  }
+ },
+ "budget": {
+  "card_min": 120,
+  "plan_min": {
+   "SMOKE": 1.0,
+   "W1": 43.0,
+   "W2": 48.4,
+   "END": 2.3,
+   "CAM": 21.5
+  },
+  "hold_processes": 190
+ }
+}
