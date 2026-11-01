@@ -1,0 +1,1357 @@
+{
+ "experiment": "Q130(n)",
+ "amendment": 1,
+ "written": "Sat 31 Oct 2026, after verification and before any card ran a real tile",
+ "amends": {
+  "file": "tools/claims-v3/kinds/real/predictions-real.json",
+  "sha256": "bab33beee0bcefa3d1aae5bd9af72e2d1c1da0f76bb0947aa2f7a39c6b024941",
+  "unchanged": "its points, its frozen intervals and its bytes stay as committed in 7d5b99af"
+ },
+ "real_json_sha256": "eb36f4cd0d88d928d2c0c92165f4a48e23727221d5ac047bff3de3c8e0ad83c0",
+ "generator": "tools/claims-v3/kinds/real/amend_real.py",
+ "build": {
+  "python": "3.11.13",
+  "numpy": "1.26.4"
+ },
+ "D_scope": "D is board power (the board meter, as E78 measured it; rail D is 0.80-0.87 of it) over the type's own zeros, at E78's primary leakage slope (auto, 0.1994 W/C). E78's registered leakage arms move random data's D by about +-0.6 W. E86 computes D the same way.",
+ "scoring": "E86 scores (a) against tiles.<key>.a_aifoundry3_600mhz.scoring_interval_w; E91 against tiles.<key>.e91_aifoundry1_card1_600mhz.scoring_interval_w; E87 against tiles.<key>.b_aifoundry2_governor.{burst,sus}_scoring_interval_mhz. Each also reports how its data falls against the frozen intervals in predictions-real.json.",
+ "why": {
+  "a": "the feature set was the lowest-LOO of 11 candidates (after 5 OLS models tried on E78 in the lane's scratch), so its own LOO rms is biased low; the nested LOO redoes the choice in each fold",
+  "b": "burst_mhz_pi95 and sus_mhz_pi95 in predictions-real.json are D-propagated ranges (the clock at the two ends of (a)'s frozen interval), not 95% prediction intervals: they leave out the relation's own error, which E83 measured",
+  "e91": "E82's single per-type scale is approximate (X3 FAIL); its spread is not in the interval"
+ },
+ "relation_error_mhz": {
+  "burst": 10.6,
+  "sustained": 8.4,
+  "what": "E83's relation rms on each kind's measured power, over the kinds it puts below 800 MHz (9 bursts, 18 sustained cells), post hoc; over all 33 kinds 7.9 / 7.5 MHz",
+  "source": "docs/reports/data/2026-10-31-e83-kinds-speed-rest/README.md, Results 1 and rule E83-S1"
+ },
+ "nested_loo": {
+  "fp32": {
+   "n_kinds": 18,
+   "selected": "u,N_sig,A,B,Vs_sig",
+   "terms_nonzero": 4,
+   "t975": 2.145,
+   "loo_rms_w_frozen": 1.023,
+   "pi95_halfwidth_w_frozen": 2.1943,
+   "nested_loo_rms_w": 1.1249,
+   "nested_pi95_halfwidth_w": 2.413,
+   "widening": 1.1,
+   "nested_max_abs_w": 2.573,
+   "chosen_per_fold": {
+    "u,N_sig,A,B,Vs_sig": 17,
+    "u,N_pop,A,B,Vp_pop": 1
+   },
+   "nested_residual_w": {
+    "a_randn_b_zeros": -0.616,
+    "a_zeros_b_randn": -0.81,
+    "bf16trunc": -0.921,
+    "fp16grid": -0.924,
+    "neg_ones": 0.215,
+    "nn_like": -0.963,
+    "ones": 0.045,
+    "pi": -0.275,
+    "pow2": 2.573,
+    "randn": -0.109,
+    "randn_large": 0.031,
+    "randn_small": -0.313,
+    "randn_sorted": -2.037,
+    "smallint": -0.96,
+    "sparse50": -1.655,
+    "sparse90": -0.363,
+    "uniform01": 2.076,
+    "zeros": 0.0
+   },
+   "candidates_by_loo": [
+    [
+     "u,N_sig,A,B,Vs_sig",
+     1.023
+    ],
+    [
+     "u,N_pop,A,B,Vp_pop",
+     1.2317
+    ],
+    [
+     "u,A,B",
+     1.5525
+    ],
+    [
+     "u,A,B,Vp_sig",
+     1.5525
+    ],
+    [
+     "u,A,B,Vp_pop",
+     1.5525
+    ],
+    [
+     "u,A,B,Vs_sig",
+     1.5527
+    ],
+    [
+     "u,A,B,Vs_pop",
+     1.5535
+    ],
+    [
+     "u,Vs_pop",
+     2.3696
+    ],
+    [
+     "u,Vs_sig",
+     2.4215
+    ],
+    [
+     "u,Vp_pop",
+     2.9042
+    ],
+    [
+     "u,Vp_sig",
+     2.9778
+    ]
+   ],
+   "runner_up": "u,N_pop,A,B,Vp_pop"
+  },
+  "fp16": {
+   "n_kinds": 17,
+   "selected": "u,N_sig,A,B,Vs_sig",
+   "terms_nonzero": 4,
+   "t975": 2.16,
+   "loo_rms_w_frozen": 0.8351,
+   "pi95_halfwidth_w_frozen": 1.8038,
+   "nested_loo_rms_w": 1.0889,
+   "nested_pi95_halfwidth_w": 2.3521,
+   "widening": 1.304,
+   "nested_max_abs_w": 2.2644,
+   "chosen_per_fold": {
+    "u,N_sig,A,B,Vs_sig": 12,
+    "u,N_pop,A,B,Vp_pop": 3,
+    "u,A,B": 2
+   },
+   "nested_residual_w": {
+    "a_randn_b_zeros": -0.659,
+    "a_zeros_b_randn": -0.782,
+    "fp8grid": -0.464,
+    "neg_ones": 2.09,
+    "nn_like": -0.391,
+    "ones": 1.981,
+    "pair_half_zero": 0.695,
+    "randn": -0.532,
+    "randn_small": 0.179,
+    "randn_sorted": -0.971,
+    "smallint": 0.313,
+    "sparse50": -0.813,
+    "sparse90": -0.65,
+    "uniform01": 2.264,
+    "wsparse50": -1.468,
+    "wsparse90": -0.494,
+    "zeros": 0.0
+   },
+   "candidates_by_loo": [
+    [
+     "u,N_sig,A,B,Vs_sig",
+     0.8351
+    ],
+    [
+     "u,N_pop,A,B,Vp_pop",
+     0.8419
+    ],
+    [
+     "u,A,B",
+     1.414
+    ],
+    [
+     "u,A,B,Vs_sig",
+     1.414
+    ],
+    [
+     "u,A,B,Vp_sig",
+     1.414
+    ],
+    [
+     "u,A,B,Vs_pop",
+     1.414
+    ],
+    [
+     "u,A,B,Vp_pop",
+     1.414
+    ],
+    [
+     "u,Vs_pop",
+     2.7453
+    ],
+    [
+     "u,Vs_sig",
+     2.8427
+    ],
+    [
+     "u,Vp_pop",
+     3.1503
+    ],
+    [
+     "u,Vp_sig",
+     3.2548
+    ]
+   ],
+   "runner_up": "u,N_pop,A,B,Vp_pop"
+  },
+  "int8": {
+   "n_kinds": 16,
+   "selected": "u,N_pop,A,B,Vp_pop",
+   "terms_nonzero": 4,
+   "t975": 2.179,
+   "loo_rms_w_frozen": 0.4073,
+   "pi95_halfwidth_w_frozen": 0.8875,
+   "nested_loo_rms_w": 0.6055,
+   "nested_pi95_halfwidth_w": 1.3193,
+   "widening": 1.487,
+   "nested_max_abs_w": 1.8167,
+   "chosen_per_fold": {
+    "u,A,B,Vs_sig": 7,
+    "u,N_pop,A,B,Vp_pop": 7,
+    "u,N_sig,A,B,Vs_sig": 1,
+    "u,A,B,Vp_sig": 1
+   },
+   "nested_residual_w": {
+    "a_full_b_zeros": -0.497,
+    "a_zeros_b_full": -0.305,
+    "full": 0.024,
+    "gauss_q": 0.021,
+    "highbit": 1.817,
+    "neg_ones": -0.093,
+    "ones": 0.024,
+    "pos": 0.789,
+    "smallint": 0.507,
+    "sorted": -0.61,
+    "sparse50": -0.273,
+    "sparse90": -0.441,
+    "ternary": 0.261,
+    "wsparse50": -0.681,
+    "wsparse90": -0.402,
+    "zeros": 0.0
+   },
+   "candidates_by_loo": [
+    [
+     "u,N_pop,A,B,Vp_pop",
+     0.4073
+    ],
+    [
+     "u,A,B,Vs_sig",
+     0.4086
+    ],
+    [
+     "u,A,B,Vp_sig",
+     0.4184
+    ],
+    [
+     "u,A,B,Vs_pop",
+     0.4379
+    ],
+    [
+     "u,A,B,Vp_pop",
+     0.4778
+    ],
+    [
+     "u,N_sig,A,B,Vs_sig",
+     0.5907
+    ],
+    [
+     "u,A,B",
+     0.6078
+    ],
+    [
+     "u,Vs_pop",
+     1.0636
+    ],
+    [
+     "u,Vp_pop",
+     1.2202
+    ],
+    [
+     "u,Vs_sig",
+     1.6774
+    ],
+    [
+     "u,Vp_sig",
+     1.8867
+    ]
+   ],
+   "runner_up": "u,A,B,Vs_sig"
+  }
+ },
+ "model_terms_on_reference_kinds": {
+  "what": "beta x feature for each term of the selected model, on E78's random reference kind and its sorted twin. A post-hoc fit's split, not a mechanism: beta_B = 0 in all three types, while E65 measured flipped B bits on silicon at 83-1,008 fJ each (docs/findings/05-claims.md, E65)",
+  "per_type": {
+   "fp32": {
+    "randn": {
+     "measured_w": 24.725,
+     "fit_w": 24.643,
+     "terms_w": {
+      "u": 8.287,
+      "N_sig": 5.662,
+      "A": 5.119,
+      "B": 0.0,
+      "Vs_sig": 5.575
+     }
+    },
+    "randn_sorted": {
+     "measured_w": 23.384,
+     "fit_w": 23.298,
+     "terms_w": {
+      "u": 8.287,
+      "N_sig": 5.662,
+      "A": 3.774,
+      "B": 0.0,
+      "Vs_sig": 5.575
+     }
+    }
+   },
+   "fp16": {
+    "randn": {
+     "measured_w": 22.162,
+     "fit_w": 21.746,
+     "terms_w": {
+      "u": 8.415,
+      "N_sig": 5.676,
+      "A": 7.421,
+      "B": 0.0,
+      "Vs_sig": 0.234
+     }
+    },
+    "randn_sorted": {
+     "measured_w": 20.748,
+     "fit_w": 19.991,
+     "terms_w": {
+      "u": 8.415,
+      "N_sig": 5.676,
+      "A": 5.667,
+      "B": 0.0,
+      "Vs_sig": 0.234
+     }
+    }
+   },
+   "int8": {
+    "full": {
+     "measured_w": 7.056,
+     "fit_w": 7.041,
+     "terms_w": {
+      "u": 1.591,
+      "N_pop": 1.186,
+      "A": 2.95,
+      "B": 0.0,
+      "Vp_pop": 1.315
+     }
+    },
+    "sorted": {
+     "measured_w": 6.588,
+     "fit_w": 6.364,
+     "terms_w": {
+      "u": 1.591,
+      "N_pop": 1.186,
+      "A": 2.273,
+      "B": 0.0,
+      "Vp_pop": 1.315
+     }
+    }
+   }
+  }
+ },
+ "tiles": {
+  "fp32/l0_mlp_up": {
+   "a_aifoundry3_600mhz": {
+    "D_w": 24.462,
+    "frozen_pi95_w": [
+     22.268,
+     26.656
+    ],
+    "scoring_interval_w": [
+     22.049,
+     26.875
+    ],
+    "scoring_halfwidth_w": 2.413,
+    "D_band_over_20_windows_w": [
+     24.326,
+     24.581
+    ],
+    "band_share_of_width": {
+     "frozen": 0.058,
+     "amended": 0.053
+    }
+   },
+   "e91_aifoundry1_card1_600mhz": {
+    "D_w": 23.749,
+    "frozen_pi95_w": [
+     21.619,
+     25.879
+    ],
+    "scoring_interval_w": [
+     21.406,
+     26.092
+    ],
+    "card_scale_e82": 1.03,
+    "excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)"
+   },
+   "b_aifoundry2_governor": {
+    "burst_mhz": 710.7,
+    "burst_limit": "power",
+    "burst_D_propagated_range_frozen_mhz": [
+     691.8,
+     730.0
+    ],
+    "burst_D_propagated_range_amended_mhz": [
+     689.9,
+     732.0
+    ],
+    "burst_scoring_interval_mhz": [
+     681.3,
+     740.5
+    ],
+    "sus_mhz": 602.5,
+    "sus_limit": "thermal",
+    "sus_D_propagated_range_frozen_mhz": [
+     600.2,
+     611.1
+    ],
+    "sus_D_propagated_range_amended_mhz": [
+     600.2,
+     612.5
+    ],
+    "sus_scoring_interval_mhz": [
+     600.0,
+     621.7
+    ],
+    "check_point_reproduces_frozen": true
+   },
+   "like_with_like": {
+    "ref_kind": "randn",
+    "ref_model_fit_w": 24.6433,
+    "ref_measured_w": 24.7249,
+    "ratio_to_ref_model_fit": 0.9926,
+    "ratio_to_ref_measured": 0.9894,
+    "anchored_on_measured_ref_w": 24.543
+   },
+   "runner_up_informational": {
+    "model": "u,N_pop,A,B,Vp_pop",
+    "loo_rms_w": 1.2317,
+    "D_w": 24.654
+   },
+   "model_columns_outside_e78_range": {},
+   "nearest_e78_kind": {
+    "used_terms_z (committed metric)": "randn_small",
+    "all_model_columns_z": "randn_small"
+   }
+  },
+  "fp32/l6_mlp_down": {
+   "a_aifoundry3_600mhz": {
+    "D_w": 24.373,
+    "frozen_pi95_w": [
+     22.178,
+     26.567
+    ],
+    "scoring_interval_w": [
+     21.96,
+     26.786
+    ],
+    "scoring_halfwidth_w": 2.413,
+    "D_band_over_20_windows_w": [
+     24.239,
+     24.483
+    ],
+    "band_share_of_width": {
+     "frozen": 0.056,
+     "amended": 0.051
+    }
+   },
+   "e91_aifoundry1_card1_600mhz": {
+    "D_w": 23.663,
+    "frozen_pi95_w": [
+     21.532,
+     25.793
+    ],
+    "scoring_interval_w": [
+     21.32,
+     26.005
+    ],
+    "card_scale_e82": 1.03,
+    "excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)"
+   },
+   "b_aifoundry2_governor": {
+    "burst_mhz": 711.5,
+    "burst_limit": "power",
+    "burst_D_propagated_range_frozen_mhz": [
+     692.6,
+     730.8
+    ],
+    "burst_D_propagated_range_amended_mhz": [
+     690.7,
+     732.8
+    ],
+    "burst_scoring_interval_mhz": [
+     682.1,
+     741.3
+    ],
+    "sus_mhz": 602.7,
+    "sus_limit": "thermal",
+    "sus_D_propagated_range_frozen_mhz": [
+     600.3,
+     611.7
+    ],
+    "sus_D_propagated_range_amended_mhz": [
+     600.2,
+     613.0
+    ],
+    "sus_scoring_interval_mhz": [
+     600.0,
+     622.1
+    ],
+    "check_point_reproduces_frozen": true
+   },
+   "like_with_like": {
+    "ref_kind": "randn",
+    "ref_model_fit_w": 24.6433,
+    "ref_measured_w": 24.7249,
+    "ratio_to_ref_model_fit": 0.989,
+    "ratio_to_ref_measured": 0.9858,
+    "anchored_on_measured_ref_w": 24.454
+   },
+   "runner_up_informational": {
+    "model": "u,N_pop,A,B,Vp_pop",
+    "loo_rms_w": 1.2317,
+    "D_w": 24.541
+   },
+   "model_columns_outside_e78_range": {
+    "Vs_sig": {
+     "tile": 18.0784,
+     "e78_range": [
+      0.0,
+      18.0624
+     ],
+     "beyond_pct": 0.09,
+     "beta": 0.310279
+    }
+   },
+   "nearest_e78_kind": {
+    "used_terms_z (committed metric)": "uniform01",
+    "all_model_columns_z": "randn_small"
+   }
+  },
+  "fp32/l6_attn_qk": {
+   "a_aifoundry3_600mhz": {
+    "D_w": 24.461,
+    "frozen_pi95_w": [
+     22.267,
+     26.656
+    ],
+    "scoring_interval_w": [
+     22.048,
+     26.874
+    ],
+    "scoring_halfwidth_w": 2.413,
+    "D_band_over_20_windows_w": [
+     24.322,
+     25.075
+    ],
+    "band_share_of_width": {
+     "frozen": 0.172,
+     "amended": 0.156
+    }
+   },
+   "e91_aifoundry1_card1_600mhz": {
+    "D_w": 23.748,
+    "frozen_pi95_w": [
+     21.618,
+     25.879
+    ],
+    "scoring_interval_w": [
+     21.405,
+     26.091
+    ],
+    "card_scale_e82": 1.03,
+    "excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)"
+   },
+   "b_aifoundry2_governor": {
+    "burst_mhz": 710.7,
+    "burst_limit": "power",
+    "burst_D_propagated_range_frozen_mhz": [
+     691.8,
+     730.0
+    ],
+    "burst_D_propagated_range_amended_mhz": [
+     690.0,
+     732.0
+    ],
+    "burst_scoring_interval_mhz": [
+     681.3,
+     740.5
+    ],
+    "sus_mhz": 602.5,
+    "sus_limit": "thermal",
+    "sus_D_propagated_range_frozen_mhz": [
+     600.2,
+     611.1
+    ],
+    "sus_D_propagated_range_amended_mhz": [
+     600.2,
+     612.5
+    ],
+    "sus_scoring_interval_mhz": [
+     600.0,
+     621.7
+    ],
+    "check_point_reproduces_frozen": true
+   },
+   "like_with_like": {
+    "ref_kind": "randn",
+    "ref_model_fit_w": 24.6433,
+    "ref_measured_w": 24.7249,
+    "ratio_to_ref_model_fit": 0.9926,
+    "ratio_to_ref_measured": 0.9893,
+    "anchored_on_measured_ref_w": 24.542
+   },
+   "runner_up_informational": {
+    "model": "u,N_pop,A,B,Vp_pop",
+    "loo_rms_w": 1.2317,
+    "D_w": 24.68
+   },
+   "model_columns_outside_e78_range": {
+    "B": {
+     "tile": 5.67,
+     "e78_range": [
+      0.0,
+      5.6368
+     ],
+     "beyond_pct": 0.59,
+     "beta": 0.0
+    }
+   },
+   "nearest_e78_kind": {
+    "used_terms_z (committed metric)": "randn_small",
+    "all_model_columns_z": "randn_small"
+   }
+  },
+  "fp16/l0_mlp_up": {
+   "a_aifoundry3_600mhz": {
+    "D_w": 21.714,
+    "frozen_pi95_w": [
+     19.911,
+     23.518
+    ],
+    "scoring_interval_w": [
+     19.362,
+     24.066
+    ],
+    "scoring_halfwidth_w": 2.3521,
+    "D_band_over_20_windows_w": [
+     21.498,
+     21.854
+    ],
+    "band_share_of_width": {
+     "frozen": 0.099,
+     "amended": 0.076
+    }
+   },
+   "e91_aifoundry1_card1_600mhz": {
+    "D_w": 21.016,
+    "frozen_pi95_w": [
+     19.271,
+     22.762
+    ],
+    "scoring_interval_w": [
+     18.739,
+     23.292
+    ],
+    "card_scale_e82": 1.0332,
+    "excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)"
+   },
+   "b_aifoundry2_governor": {
+    "burst_mhz": 735.6,
+    "burst_limit": "power",
+    "burst_D_propagated_range_frozen_mhz": [
+     719.3,
+     753.4
+    ],
+    "burst_D_propagated_range_amended_mhz": [
+     714.5,
+     759.1
+    ],
+    "burst_scoring_interval_mhz": [
+     706.0,
+     767.0
+    ],
+    "sus_mhz": 615.0,
+    "sus_limit": "thermal",
+    "sus_D_propagated_range_frozen_mhz": [
+     605.3,
+     629.9
+    ],
+    "sus_D_propagated_range_amended_mhz": [
+     603.6,
+     635.1
+    ],
+    "sus_scoring_interval_mhz": [
+     600.0,
+     641.0
+    ],
+    "check_point_reproduces_frozen": true
+   },
+   "like_with_like": {
+    "ref_kind": "randn",
+    "ref_model_fit_w": 21.7456,
+    "ref_measured_w": 22.1624,
+    "ratio_to_ref_model_fit": 0.9985,
+    "ratio_to_ref_measured": 0.9798,
+    "anchored_on_measured_ref_w": 22.13
+   },
+   "runner_up_informational": {
+    "model": "u,N_pop,A,B,Vp_pop",
+    "loo_rms_w": 0.8419,
+    "D_w": 21.702
+   },
+   "model_columns_outside_e78_range": {},
+   "nearest_e78_kind": {
+    "used_terms_z (committed metric)": "randn",
+    "all_model_columns_z": "randn"
+   }
+  },
+  "fp16/l6_mlp_down": {
+   "a_aifoundry3_600mhz": {
+    "D_w": 21.357,
+    "frozen_pi95_w": [
+     19.553,
+     23.161
+    ],
+    "scoring_interval_w": [
+     19.005,
+     23.709
+    ],
+    "scoring_halfwidth_w": 2.3521,
+    "D_band_over_20_windows_w": [
+     21.194,
+     21.572
+    ],
+    "band_share_of_width": {
+     "frozen": 0.105,
+     "amended": 0.08
+    }
+   },
+   "e91_aifoundry1_card1_600mhz": {
+    "D_w": 20.67,
+    "frozen_pi95_w": [
+     18.924,
+     22.416
+    ],
+    "scoring_interval_w": [
+     18.394,
+     22.946
+    ],
+    "card_scale_e82": 1.0332,
+    "excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)"
+   },
+   "b_aifoundry2_governor": {
+    "burst_mhz": 738.9,
+    "burst_limit": "power",
+    "burst_D_propagated_range_frozen_mhz": [
+     722.4,
+     757.1
+    ],
+    "burst_D_propagated_range_amended_mhz": [
+     717.6,
+     763.0
+    ],
+    "burst_scoring_interval_mhz": [
+     709.2,
+     770.7
+    ],
+    "sus_mhz": 617.6,
+    "sus_limit": "thermal",
+    "sus_D_propagated_range_frozen_mhz": [
+     606.8,
+     633.3
+    ],
+    "sus_D_propagated_range_amended_mhz": [
+     604.7,
+     638.7
+    ],
+    "sus_scoring_interval_mhz": [
+     600.0,
+     644.4
+    ],
+    "check_point_reproduces_frozen": true
+   },
+   "like_with_like": {
+    "ref_kind": "randn",
+    "ref_model_fit_w": 21.7456,
+    "ref_measured_w": 22.1624,
+    "ratio_to_ref_model_fit": 0.9821,
+    "ratio_to_ref_measured": 0.9637,
+    "anchored_on_measured_ref_w": 21.766
+   },
+   "runner_up_informational": {
+    "model": "u,N_pop,A,B,Vp_pop",
+    "loo_rms_w": 0.8419,
+    "D_w": 21.33
+   },
+   "model_columns_outside_e78_range": {},
+   "nearest_e78_kind": {
+    "used_terms_z (committed metric)": "uniform01",
+    "all_model_columns_z": "randn"
+   }
+  },
+  "fp16/l6_attn_qk": {
+   "a_aifoundry3_600mhz": {
+    "D_w": 21.537,
+    "frozen_pi95_w": [
+     19.733,
+     23.341
+    ],
+    "scoring_interval_w": [
+     19.185,
+     23.889
+    ],
+    "scoring_halfwidth_w": 2.3521,
+    "D_band_over_20_windows_w": [
+     21.26,
+     22.263
+    ],
+    "band_share_of_width": {
+     "frozen": 0.278,
+     "amended": 0.213
+    }
+   },
+   "e91_aifoundry1_card1_600mhz": {
+    "D_w": 20.844,
+    "frozen_pi95_w": [
+     19.098,
+     22.59
+    ],
+    "scoring_interval_w": [
+     18.568,
+     23.121
+    ],
+    "card_scale_e82": 1.0332,
+    "excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)"
+   },
+   "b_aifoundry2_governor": {
+    "burst_mhz": 737.2,
+    "burst_limit": "power",
+    "burst_D_propagated_range_frozen_mhz": [
+     720.8,
+     755.2
+    ],
+    "burst_D_propagated_range_amended_mhz": [
+     716.1,
+     761.0
+    ],
+    "burst_scoring_interval_mhz": [
+     707.6,
+     768.8
+    ],
+    "sus_mhz": 616.2,
+    "sus_limit": "thermal",
+    "sus_D_propagated_range_frozen_mhz": [
+     606.0,
+     631.5
+    ],
+    "sus_D_propagated_range_amended_mhz": [
+     604.1,
+     636.9
+    ],
+    "sus_scoring_interval_mhz": [
+     600.0,
+     642.7
+    ],
+    "check_point_reproduces_frozen": true
+   },
+   "like_with_like": {
+    "ref_kind": "randn",
+    "ref_model_fit_w": 21.7456,
+    "ref_measured_w": 22.1624,
+    "ratio_to_ref_model_fit": 0.9904,
+    "ratio_to_ref_measured": 0.9718,
+    "anchored_on_measured_ref_w": 21.95
+   },
+   "runner_up_informational": {
+    "model": "u,N_pop,A,B,Vp_pop",
+    "loo_rms_w": 0.8419,
+    "D_w": 21.518
+   },
+   "model_columns_outside_e78_range": {},
+   "nearest_e78_kind": {
+    "used_terms_z (committed metric)": "randn",
+    "all_model_columns_z": "randn"
+   }
+  },
+  "int8/l0_mlp_up": {
+   "a_aifoundry3_600mhz": {
+    "D_w": 5.89,
+    "frozen_pi95_w": [
+     5.002,
+     6.777
+    ],
+    "scoring_interval_w": [
+     4.571,
+     7.209
+    ],
+    "scoring_halfwidth_w": 1.3193,
+    "D_band_over_20_windows_w": [
+     5.673,
+     6.073
+    ],
+    "band_share_of_width": {
+     "frozen": 0.225,
+     "amended": 0.152
+    }
+   },
+   "e91_aifoundry1_card1_600mhz": {
+    "D_w": 5.735,
+    "frozen_pi95_w": [
+     4.87,
+     6.598
+    ],
+    "scoring_interval_w": [
+     4.451,
+     7.019
+    ],
+    "card_scale_e82": 1.0271,
+    "excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)"
+   },
+   "b_aifoundry2_governor": {
+    "burst_mhz": 800.0,
+    "burst_limit": "none",
+    "burst_D_propagated_range_frozen_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_amended_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 796.2,
+    "sus_limit": "none",
+    "sus_D_propagated_range_frozen_mhz": [
+     788.7,
+     799.2
+    ],
+    "sus_D_propagated_range_amended_mhz": [
+     783.3,
+     799.7
+    ],
+    "sus_scoring_interval_mhz": [
+     775.3,
+     800.0
+    ],
+    "check_point_reproduces_frozen": true
+   },
+   "like_with_like": {
+    "ref_kind": "full",
+    "ref_model_fit_w": 7.041,
+    "ref_measured_w": 7.0565,
+    "ratio_to_ref_model_fit": 0.8365,
+    "ratio_to_ref_measured": 0.8347,
+    "anchored_on_measured_ref_w": 5.903
+   },
+   "runner_up_informational": {
+    "model": "u,A,B,Vs_sig",
+    "loo_rms_w": 0.4086,
+    "D_w": 5.938
+   },
+   "model_columns_outside_e78_range": {},
+   "nearest_e78_kind": {
+    "used_terms_z (committed metric)": "gauss_q",
+    "all_model_columns_z": "gauss_q"
+   }
+  },
+  "int8/l6_mlp_down": {
+   "a_aifoundry3_600mhz": {
+    "D_w": 5.183,
+    "frozen_pi95_w": [
+     4.296,
+     6.071
+    ],
+    "scoring_interval_w": [
+     3.864,
+     6.502
+    ],
+    "scoring_halfwidth_w": 1.3193,
+    "D_band_over_20_windows_w": [
+     5.017,
+     5.313
+    ],
+    "band_share_of_width": {
+     "frozen": 0.167,
+     "amended": 0.112
+    }
+   },
+   "e91_aifoundry1_card1_600mhz": {
+    "D_w": 5.046,
+    "frozen_pi95_w": [
+     4.183,
+     5.911
+    ],
+    "scoring_interval_w": [
+     3.762,
+     6.331
+    ],
+    "card_scale_e82": 1.0271,
+    "excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)"
+   },
+   "b_aifoundry2_governor": {
+    "burst_mhz": 800.0,
+    "burst_limit": "none",
+    "burst_D_propagated_range_frozen_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_amended_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 798.9,
+    "sus_limit": "none",
+    "sus_D_propagated_range_frozen_mhz": [
+     795.1,
+     799.9
+    ],
+    "sus_D_propagated_range_amended_mhz": [
+     791.6,
+     800.0
+    ],
+    "sus_scoring_interval_mhz": [
+     780.9,
+     800.0
+    ],
+    "check_point_reproduces_frozen": true
+   },
+   "like_with_like": {
+    "ref_kind": "full",
+    "ref_model_fit_w": 7.041,
+    "ref_measured_w": 7.0565,
+    "ratio_to_ref_model_fit": 0.7361,
+    "ratio_to_ref_measured": 0.7345,
+    "anchored_on_measured_ref_w": 5.194
+   },
+   "runner_up_informational": {
+    "model": "u,A,B,Vs_sig",
+    "loo_rms_w": 0.4086,
+    "D_w": 4.968
+   },
+   "model_columns_outside_e78_range": {},
+   "nearest_e78_kind": {
+    "used_terms_z (committed metric)": "sparse50",
+    "all_model_columns_z": "ternary"
+   }
+  },
+  "int8/l6_attn_qk": {
+   "a_aifoundry3_600mhz": {
+    "D_w": 5.749,
+    "frozen_pi95_w": [
+     4.861,
+     6.636
+    ],
+    "scoring_interval_w": [
+     4.43,
+     7.068
+    ],
+    "scoring_halfwidth_w": 1.3193,
+    "D_band_over_20_windows_w": [
+     5.592,
+     6.073
+    ],
+    "band_share_of_width": {
+     "frozen": 0.271,
+     "amended": 0.182
+    }
+   },
+   "e91_aifoundry1_card1_600mhz": {
+    "D_w": 5.598,
+    "frozen_pi95_w": [
+     4.733,
+     6.461
+    ],
+    "scoring_interval_w": [
+     4.313,
+     6.882
+    ],
+    "card_scale_e82": 1.0271,
+    "excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)"
+   },
+   "b_aifoundry2_governor": {
+    "burst_mhz": 800.0,
+    "burst_limit": "none",
+    "burst_D_propagated_range_frozen_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_D_propagated_range_amended_mhz": [
+     800.0,
+     800.0
+    ],
+    "burst_scoring_interval_mhz": [
+     800.0,
+     800.0
+    ],
+    "sus_mhz": 797.0,
+    "sus_limit": "none",
+    "sus_D_propagated_range_frozen_mhz": [
+     790.3,
+     799.4
+    ],
+    "sus_D_propagated_range_amended_mhz": [
+     785.2,
+     799.8
+    ],
+    "sus_scoring_interval_mhz": [
+     776.7,
+     800.0
+    ],
+    "check_point_reproduces_frozen": true
+   },
+   "like_with_like": {
+    "ref_kind": "full",
+    "ref_model_fit_w": 7.041,
+    "ref_measured_w": 7.0565,
+    "ratio_to_ref_model_fit": 0.8165,
+    "ratio_to_ref_measured": 0.8147,
+    "anchored_on_measured_ref_w": 5.762
+   },
+   "runner_up_informational": {
+    "model": "u,A,B,Vs_sig",
+    "loo_rms_w": 0.4086,
+    "D_w": 5.719
+   },
+   "model_columns_outside_e78_range": {
+    "B": {
+     "tile": 0.418,
+     "e78_range": [
+      0.0,
+      0.4158
+     ],
+     "beyond_pct": 0.53,
+     "beta": 0.0
+    }
+   },
+   "nearest_e78_kind": {
+    "used_terms_z (committed metric)": "sparse50",
+    "all_model_columns_z": "gauss_q"
+   }
+  }
+ },
+ "calibration_sensitivity": {
+  "note": "int8 only: the committed window of each product, the activations re-quantised; weights stay per output channel; for l6_attn_qk both q and k change (both are activations). D from the committed predictor. Informational, never scored.",
+  "activation_max_abs": {
+   "l0_mlp_up": {
+    "max": 2.6809,
+    "token": 0,
+    "dim": 674,
+    "max_over_tokens_1_to_127": 1.9612,
+    "p99.9": 1.2121
+   },
+   "l6_mlp_down": {
+    "max": 4.6207,
+    "token": 26,
+    "dim": 2081,
+    "max_over_tokens_1_to_127": 4.6207,
+    "p99.9": 1.6288
+   },
+   "l6_attn_qk": {
+    "max": 9.6347,
+    "token": 45,
+    "dim": 367,
+    "max_over_tokens_1_to_127": 9.6347,
+    "p99.9": 7.2584
+   }
+  },
+  "products": {
+   "l0_mlp_up": {
+    "per-tensor max-abs (committed)": {
+     "D_w": 5.89,
+     "x_full_measured": 0.835,
+     "x_full_model_fit": 0.837,
+     "bus_bits_per_op": 59716,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 6.33,
+     "window_A_zero_byte_frac": 0.0576,
+     "whole_A_sd_steps": 6.99,
+     "features_outside_e78_range": [],
+     "reproduces_committed_tile": true
+    },
+    "per-tensor max-abs, token 0 left out": {
+     "D_w": 6.016,
+     "x_full_measured": 0.853,
+     "x_full_model_fit": 0.854,
+     "bus_bits_per_op": 61412,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 8.65,
+     "window_A_zero_byte_frac": 0.0439,
+     "whole_A_sd_steps": 9.54,
+     "features_outside_e78_range": []
+    },
+    "per-token max-abs (vector-wise)": {
+     "D_w": 6.129,
+     "x_full_measured": 0.869,
+     "x_full_model_fit": 0.87,
+     "bus_bits_per_op": 62340,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 14.86,
+     "window_A_zero_byte_frac": 0.0312,
+     "whole_A_sd_steps": 15.93,
+     "features_outside_e78_range": []
+    },
+    "per-tensor 99.99th percentile clip": {
+     "D_w": 6.079,
+     "x_full_measured": 0.861,
+     "x_full_model_fit": 0.863,
+     "bus_bits_per_op": 62372,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 10.15,
+     "window_A_zero_byte_frac": 0.0342,
+     "whole_A_sd_steps": 11.19,
+     "features_outside_e78_range": []
+    },
+    "per-tensor 99.9th percentile clip": {
+     "D_w": 6.103,
+     "x_full_measured": 0.865,
+     "x_full_model_fit": 0.867,
+     "bus_bits_per_op": 61924,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 13.99,
+     "window_A_zero_byte_frac": 0.0254,
+     "whole_A_sd_steps": 15.22,
+     "features_outside_e78_range": []
+    }
+   },
+   "l6_mlp_down": {
+    "per-tensor max-abs (committed)": {
+     "D_w": 5.183,
+     "x_full_measured": 0.735,
+     "x_full_model_fit": 0.736,
+     "bus_bits_per_op": 45684,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 4.48,
+     "window_A_zero_byte_frac": 0.0928,
+     "whole_A_sd_steps": 5.23,
+     "features_outside_e78_range": [],
+     "reproduces_committed_tile": true
+    },
+    "per-tensor max-abs, token 0 left out": {
+     "D_w": 5.183,
+     "x_full_measured": 0.735,
+     "x_full_model_fit": 0.736,
+     "bus_bits_per_op": 45684,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 4.48,
+     "window_A_zero_byte_frac": 0.0928,
+     "whole_A_sd_steps": 5.23,
+     "features_outside_e78_range": []
+    },
+    "per-token max-abs (vector-wise)": {
+     "D_w": 5.354,
+     "x_full_measured": 0.759,
+     "x_full_model_fit": 0.76,
+     "bus_bits_per_op": 46996,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 9.56,
+     "window_A_zero_byte_frac": 0.0449,
+     "whole_A_sd_steps": 10.61,
+     "features_outside_e78_range": []
+    },
+    "per-tensor 99.99th percentile clip": {
+     "D_w": 5.224,
+     "x_full_measured": 0.74,
+     "x_full_model_fit": 0.742,
+     "bus_bits_per_op": 44500,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 7.34,
+     "window_A_zero_byte_frac": 0.0537,
+     "whole_A_sd_steps": 8.54,
+     "features_outside_e78_range": []
+    },
+    "per-tensor 99.9th percentile clip": {
+     "D_w": 5.427,
+     "x_full_measured": 0.769,
+     "x_full_model_fit": 0.771,
+     "bus_bits_per_op": 47092,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 12.41,
+     "window_A_zero_byte_frac": 0.0303,
+     "whole_A_sd_steps": 14.3,
+     "features_outside_e78_range": []
+    }
+   },
+   "l6_attn_qk": {
+    "per-tensor max-abs (committed)": {
+     "D_w": 5.749,
+     "x_full_measured": 0.815,
+     "x_full_model_fit": 0.817,
+     "bus_bits_per_op": 57300,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 15.98,
+     "window_A_zero_byte_frac": 0.0312,
+     "whole_A_sd_steps": 18.66,
+     "features_outside_e78_range": [],
+     "reproduces_committed_tile": true
+    },
+    "per-tensor max-abs, token 0 left out": {
+     "D_w": 5.749,
+     "x_full_measured": 0.815,
+     "x_full_model_fit": 0.817,
+     "bus_bits_per_op": 57300,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 15.98,
+     "window_A_zero_byte_frac": 0.0312,
+     "whole_A_sd_steps": 18.66,
+     "features_outside_e78_range": []
+    },
+    "per-token max-abs (vector-wise)": {
+     "D_w": 5.939,
+     "x_full_measured": 0.842,
+     "x_full_model_fit": 0.843,
+     "bus_bits_per_op": 59252,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 20.64,
+     "window_A_zero_byte_frac": 0.0234,
+     "whole_A_sd_steps": 23.98,
+     "features_outside_e78_range": []
+    },
+    "per-tensor 99.99th percentile clip": {
+     "D_w": 5.799,
+     "x_full_measured": 0.822,
+     "x_full_model_fit": 0.824,
+     "bus_bits_per_op": 57854,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 16.87,
+     "window_A_zero_byte_frac": 0.0303,
+     "whole_A_sd_steps": 19.69,
+     "features_outside_e78_range": []
+    },
+    "per-tensor 99.9th percentile clip": {
+     "D_w": 5.912,
+     "x_full_measured": 0.838,
+     "x_full_model_fit": 0.84,
+     "bus_bits_per_op": 59036,
+     "gated_lane_frac": 0.0,
+     "window_A_sd_steps": 21.23,
+     "window_A_zero_byte_frac": 0.0244,
+     "whole_A_sd_steps": 24.68,
+     "features_outside_e78_range": []
+    }
+   }
+  },
+  "range": {
+   "D_w": [
+    5.183,
+    6.129
+   ],
+   "x_full_measured": [
+    0.735,
+    0.869
+   ]
+  }
+ }
+}

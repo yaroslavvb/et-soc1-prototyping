@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.9"
-# dependencies = ["numpy"]
+# requires-python = ">=3.9,<3.13"
+# dependencies = ["numpy==1.26.4"]
 # ///
+# The committed tiles, real.json and predictions-real.json were made with numpy 1.26.4 (its bundled OpenBLAS
+# 0.3.23.dev) on CPython 3.11.13, x86_64 macOS; `uv run --python 3.11 make_real.py --hf-dir <dir> --out <dir>`
+# reproduces them there byte for byte. Another BLAS changes low-order bits of the fp32/fp16 tiles
+# (rebuild-check.txt). Pinned Sat 31 Oct 2026 after verification; no line of code changed.
 """Q130(n): real tensors from a public model, cut as kinds tiles, with FROZEN predictions for E86, E87 and E91.
 
     python3 tools/claims-v3/kinds/real/make_real.py --hf-dir <dir> [--out tools/claims-v3/kinds/real]

@@ -1,0 +1,34 @@
+# Q130(n): make_real.py re-run on three numpy builds, against the committed files (Sat 31 Oct 2026, ~19:10 PDT)
+#
+# Same script (7d5b99af), same model, tokenizer and text, output to a scratch directory each time.
+# 'same' = byte-identical to the committed file. D in W (prediction (a)); bus = bus_bits_per_op;
+# window = rows / k / cols of the chosen window. The committed files came from build 1.
+
+build 1: numpy 1.26.4, its bundled OpenBLAS 0.3.23.dev, CPython 3.11.13 (uv), x86_64 macOS
+  same (11): predictions-real.json, real.json, tiles/fp32/l0_mlp_up.bin, tiles/fp32/l6_mlp_down.bin, tiles/fp32/l6_attn_qk.bin, tiles/fp16/l0_mlp_up.bin, tiles/fp16/l6_mlp_down.bin, tiles/fp16/l6_attn_qk.bin, tiles/int8/l0_mlp_up.bin, tiles/int8/l6_mlp_down.bin, tiles/int8/l6_attn_qk.bin
+  differ (0): -
+
+build 2: numpy 2.5.4, Accelerate, CPython 3.13.11 (uv), x86_64 macOS
+  same (3): tiles/int8/l0_mlp_up.bin, tiles/int8/l6_mlp_down.bin, tiles/int8/l6_attn_qk.bin
+  differ (8): predictions-real.json, real.json, tiles/fp32/l0_mlp_up.bin, tiles/fp32/l6_mlp_down.bin, tiles/fp32/l6_attn_qk.bin, tiles/fp16/l0_mlp_up.bin, tiles/fp16/l6_mlp_down.bin, tiles/fp16/l6_attn_qk.bin
+    fp32/l0_mlp_up     D 24.462 -> 24.471 (+0.009); bus 82508 -> 82412; window 96-112 / 272-288 / 928-944
+    fp16/l0_mlp_up     D 21.714 -> 21.705 (-0.009); bus 84748 -> 84790; window 0-16 / 0-32 / 2032-2048 -> 112-128 / 224-256 / 1072-1088
+    fp32/l6_mlp_down   D 24.373 -> 24.408 (+0.035); bus 81588 -> 80830; window 112-128 / 896-912 / 576-592 -> 96-112 / 1728-1744 / 736-752
+    fp16/l6_mlp_down   D 21.357 -> 21.370 (+0.013); bus 83370 -> 83418; window 16-32 / 1088-1120 / 336-352
+    fp32/l6_attn_qk    D 24.461 -> 24.469 (+0.008); bus 83948 -> 84386; window 48-64 / 48-64 / 0-16
+    fp16/l6_attn_qk    D 21.537 -> 21.541 (+0.004); bus 81324 -> 81396; window 64-80 / 288-320 / 32-48
+  largest |change in D|: 0.035 W
+
+build 3: numpy 2.5.4, conda-forge (libblas 3.9.0), CPython 3.15.2, x86_64 macOS
+  same (3): tiles/int8/l0_mlp_up.bin, tiles/int8/l6_mlp_down.bin, tiles/int8/l6_attn_qk.bin
+  differ (8): predictions-real.json, real.json, tiles/fp32/l0_mlp_up.bin, tiles/fp32/l6_mlp_down.bin, tiles/fp32/l6_attn_qk.bin, tiles/fp16/l0_mlp_up.bin, tiles/fp16/l6_mlp_down.bin, tiles/fp16/l6_attn_qk.bin
+    fp32/l0_mlp_up     D 24.462 -> 24.466 (+0.004); bus 82508 -> 82444; window 96-112 / 272-288 / 928-944
+    fp16/l0_mlp_up     D 21.714 -> 21.713 (-0.001); bus 84748 -> 84822; window 0-16 / 0-32 / 2032-2048 -> 112-128 / 224-256 / 1072-1088
+    fp32/l6_mlp_down   D 24.373 -> 24.399 (+0.026); bus 81588 -> 81732; window 112-128 / 896-912 / 576-592
+    fp16/l6_mlp_down   D 21.357 -> 21.353 (-0.004); bus 83370 -> 83354; window 16-32 / 1088-1120 / 336-352
+    fp32/l6_attn_qk    D 24.461 -> 24.470 (+0.009); bus 83948 -> 84706; window 48-64 / 48-64 / 0-16
+    fp16/l6_attn_qk    D 21.537 -> 21.541 (+0.004); bus 81324 -> 81340; window 64-80 / 288-320 / 32-48
+  largest |change in D|: 0.026 W
+
+# The int8 tiles are byte-identical on every build (integer quantisation of the same values rounds the same way);
+# the fp32 and fp16 tiles carry low-order mantissa bits of float32 sums, which depend on the BLAS. The committed sha256s are authoritative.
