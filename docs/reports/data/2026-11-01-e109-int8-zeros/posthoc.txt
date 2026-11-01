@@ -1,0 +1,24 @@
+E109 POST HOC (posthoc_check_e109.py): not registered; per pass, mean ± 95% over passes
+
+## the registered reduction (e109.json), passes 10910, 10911
+S over idle, zeros: fp32 +1.830 ± 0.460 W, int8 +2.452 ± 0.120 W
+S over idle, zeros with no micro-op issued (m0): fp32 +0.386 ± 0.397 W, int8 +2.093 ± 0.190 W; int8 - fp32 +1.708 ± 0.588 W
+the most a scratchpad read could cost if all of m0's S were reads: fp32 +1.19 ± 1.23 pJ, int8 +4.85 ± 0.44 pJ
+int8's extra reads a second at fp32's ceiling: +0.128 ± 0.133 W (of the m0 gap above)
+the lanes on zeros, U: fp32 +1.486 ± 0.767 W, int8 +0.409 ± 0.334 W
+  per register-bit clock edge the mask removes in the bench: fp32 +0.352 ± 0.183 fJ, int8 +0.474 ± 0.387 fJ
+  per clocked (enabled) bit it removes: fp32 +3.04 ± 1.58 fJ, int8 +17.47 ± 14.26 fJ (M4's a: 1.066 fJ)
+the bench's register activity a second in the no-issue loop (first pass's rates): fp32 2.534e+15 edges, 6.714e+14 clocked; int8 2.511e+15 edges, 7.233e+14 clocked; reads 3.238e+11 and 4.313e+11
+item 15: a live -0 lane with random B over a constant live lane (pi x pi), transport taken out: +3.835 ± 0.262 W
+
+## three passes, E78's random-anchor span gate lifted (e109-3pass.json), passes 10910, 10911, 10912
+S over idle, zeros: fp32 +1.857 ± 0.148 W, int8 +2.458 ± 0.034 W
+S over idle, zeros with no micro-op issued (m0): fp32 +0.376 ± 0.089 W, int8 +2.111 ± 0.083 W; int8 - fp32 +1.735 ± 0.164 W
+the most a scratchpad read could cost if all of m0's S were reads: fp32 +1.16 ± 0.27 pJ, int8 +4.89 ± 0.19 pJ
+int8's extra reads a second at fp32's ceiling: +0.124 ± 0.030 W (of the m0 gap above)
+the lanes on zeros, U: fp32 +1.507 ± 0.175 W, int8 +0.419 ± 0.079 W
+  per register-bit clock edge the mask removes in the bench: fp32 +0.357 ± 0.042 fJ, int8 +0.486 ± 0.092 fJ
+  per clocked (enabled) bit it removes: fp32 +3.08 ± 0.36 fJ, int8 +17.92 ± 3.38 fJ (M4's a: 1.066 fJ)
+the bench's register activity a second in the no-issue loop (first pass's rates): fp32 2.534e+15 edges, 6.714e+14 clocked; int8 2.511e+15 edges, 7.233e+14 clocked; reads 3.238e+11 and 4.313e+11
+item 15: a live -0 lane with random B over a constant live lane (pi x pi), transport taken out: +3.922 ± 0.378 W
+

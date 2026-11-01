@@ -12,6 +12,8 @@ item 11, with an arm for item 15.
 | `block_e109.sh`, `queue_e109.sh` | one pass as a lib.sh block; the registered passes, detached on the box |
 | `score_e109.py`, `selftest_e109.py` | the registered rules; synthetic data through them (`selftest.txt`) |
 | `desk/` | the RTL bench for every arm (`bench_e109.sh`, `tb_patch_e109.py`, `bench_arms_e109.py`, `bench-arms.*`) and the sys_emu check |
+| `session_e109.sh`, `smoke_gate_e109.py` | the card session as it ran: the config reads, the smoke and its registered gate, the queue |
+| `posthoc_e109.py`, `posthoc_check_e109.py` | **post hoc**, written after the data: the reduction with E78's random-anchor span gate lifted, and the readings in the data README's `posthoc.txt` |
 
-Run the passes from the tree that holds `build/e109` (aifoundry3: `~/aifoundry`): `bash tools/claims-v3/e109/block_e109.sh 10901 --smoke`, then
-`setsid nohup bash tools/claims-v3/e109/queue_e109.sh > build/e109/queue.out 2>&1 < /dev/null &`.
+Run the session from the tree that holds `build/e109` (aifoundry3: `~/aifoundry`): `setsid nohup bash tools/claims-v3/e109/session_e109.sh > build/e109/session.out 2>&1 < /dev/null &`.
+The data and results: [`docs/reports/data/2026-11-01-e109-int8-zeros/`](../../../docs/reports/data/2026-11-01-e109-int8-zeros/README.md).
