@@ -1,0 +1,162 @@
+# C1. fp16: the frozen share in each arm, and the dips in fp16.c_abs
+  primary: fp16.c_abs D per kept pass [7.627, 8.473, 7.752], mean +7.951 +- 1.135
+  primary: fp16.ones - c_abs +0.517 +- 1.124
+  primary: frozen share fp16 1.052 +- 0.285; fp32 0.495 +- 0.228
+  primary: fp16 frozen s_abs - c_abs +5.073 +- 1.239; moving part -0.246 +- 1.374; h_sub - c_abs +7.810 +- 1.411; gamma 7.218 W, 1677 fJ
+  dips-removed: fp16.c_abs D per kept pass [8.582, 8.415, 8.468, 8.307], mean +8.443 +- 0.182
+  dips-removed: fp16.ones - c_abs +0.013 +- 0.193
+  dips-removed: frozen share fp16 0.924 +- 0.019; fp32 0.503 +- 0.053
+  dips-removed: fp16 frozen s_abs - c_abs +4.587 +- 0.116; moving part +0.378 +- 0.096; h_sub - c_abs +7.294 +- 0.121; gamma 6.962 W, 1617 fJ
+  raw medians (crude-check.txt): fp16 s_abs - c_abs 4.731 / signs - ones 5.070 = 0.933; fp32 2.427 / 5.185 = 0.468
+  the moving-sum part per result bit: (signs - ones) - (s_abs - c_abs), over the result bits it adds, at each tile's measured rate
+    primary fp32: +2.474 +- 1.597 W over 74,301 result bits: 29.7 fJ a bit
+    primary fp16: -0.246 +- 1.374 W over 58,544 result bits: -3.8 fJ a bit
+    primary fp32 w_c - c_abs, no alternation: +3.987 +- 0.171 W over 98,780 result bits and 88,500 adder bits: 29.7 fJ a result bit after 7 fJ per adder bit
+    dips-removed fp32: +2.497 +- 0.367 W over 74,301 result bits: 30.0 fJ a bit
+    dips-removed fp16: +0.378 +- 0.096 W over 58,544 result bits: 5.8 fJ a bit
+    dips-removed fp32 w_c - c_abs, no alternation: +4.007 +- 0.116 W over 98,780 result bits and 88,500 adder bits: 29.9 fJ a result bit after 7 fJ per adder bit
+  the verifier's post-hoc arithmetic, fp32's two prices on fp16 (dips-removed): bits 0.317 + 4.290 x 0.636 = 2.730 (the switch; a fall of 1.56 W) + 58,544 x 30 fJ x 1.121e9 = 1.969 (the sums) = 5.02 W; measured +4.965 +- 0.089
+
+# C2. R2 at the registered level
+  primary INCONCLUSIVE {'fp32.h_sub-h_add': 'CONFIRMED', 'fp16.h_sub-h_add': 'CONFIRMED', 'fp32.c_alt-c_abs': 'CONFIRMED', 'fp16.c_alt-c_abs': 'INCONCLUSIVE'} ; leakage arms {'leak0.1994': 'INCONCLUSIVE', 'leak0.3803': 'INCONCLUSIVE', 'leak0': 'INCONCLUSIVE'} ; dips-removed CONFIRMED
+  fp32.h_sub-h_add: 4.425 +- 0.443, [3.98, 4.87]; confirmed inside [1.86, 7.44], refuted below 0.93 or above 14.88
+  fp16.h_sub-h_add: 6.856 +- 0.405, [6.45, 7.26]; confirmed inside [2.01, 8.05], refuted below 1.01 or above 16.10
+  fp32.c_alt-c_abs: 5.076 +- 0.446, [4.63, 5.52]; confirmed inside [1.86, 7.44], refuted below 0.93 or above 14.88
+  fp16.c_alt-c_abs: 7.766 +- 1.583, [6.18, 9.35]; confirmed inside [2.01, 8.05], refuted below 1.01 or above 16.10
+  the lowest lower bound of the four: 3.98 W (fp32.h_sub-h_add)
+  leak0.1994: h_sub - h_add verdicts fp32 CONFIRMED, fp16 CONFIRMED; c_alt fp16 INCONCLUSIVE 7.708 +- 1.551
+  leak0.3803: h_sub - h_add verdicts fp32 CONFIRMED, fp16 CONFIRMED; c_alt fp16 INCONCLUSIVE 7.534 +- 1.458
+  leak0: h_sub - h_add verdicts fp32 CONFIRMED, fp16 CONFIRMED; c_alt fp16 INCONCLUSIVE 7.900 +- 1.660
+
+# C3. the fp32 split: what is measured, what is modelled
+  primary: measured signs - ones +4.851 +- 1.128, s_abs - c_abs +2.377 +- 0.556; bits (price list x flips, modelled) 0.569 (s_abs), 0.592 (signs)
+    upper: all of s_abs - c_abs beyond its bits 1.808, [1.25, 2.36]; gamma x s_abs' rate 0.5417 = 2.56 W overshoots it
+    lower: the w premium 2.785 x signs' rate 0.5125 = 1.427 W; the residual (moving part) 2.474 +- 1.597
+    at w_c's price 29.7 fJ a result bit, signs' 74,301 result bits are 2.478 W: bits 0.592 + switch 1.427 + sums 2.478 = 4.498 W against 4.851, 0.35 W unaccounted
+  dips-removed: measured signs - ones +5.016 +- 0.219, s_abs - c_abs +2.520 +- 0.171; bits (price list x flips, modelled) 0.569 (s_abs), 0.592 (signs)
+    upper: all of s_abs - c_abs beyond its bits 1.951, [1.78, 2.12]; gamma x s_abs' rate 0.5417 = 2.55 W overshoots it
+    lower: the w premium 2.797 x signs' rate 0.5125 = 1.434 W; the residual (moving part) 2.497 +- 0.367
+    at w_c's price 29.9 fJ a result bit, signs' 74,301 result bits are 2.493 W: bits 0.592 + switch 1.434 + sums 2.493 = 4.519 W against 5.016, 0.50 W unaccounted
+
+# C4. the premium over the adder bits, with the model's e88 part: (premium - e88) / d adder bits, at the tile's measured rate
+  registered f 6.68 fJ (card 1); card scale 1.0308. Column 'scaled' divides the premium by the scale first.
+  frozen, magnitude 1              primary       premium +4.425 +- 0.443; e88 -0.406; d adder bits 560,592; premium / bits  7.04; (premium - e88) / bits  7.69 +-  0.70 fJ; scaled  7.48
+  frozen, magnitude 1              dips-removed  premium +4.396 +- 0.247; e88 -0.406; d adder bits 560,592; premium / bits  6.99; (premium - e88) / bits  7.64 +-  0.39 fJ; scaled  7.43
+  frozen, random magnitudes        primary       premium +4.381 +- 0.644; e88 -0.406; d adder bits 560,592; premium / bits  6.97; (premium - e88) / bits  7.62 +-  1.02 fJ; scaled  7.41
+  frozen, random magnitudes        dips-removed  premium +4.460 +- 0.425; e88 -0.406; d adder bits 560,592; premium / bits  7.10; (premium - e88) / bits  7.74 +-  0.68 fJ; scaled  7.53
+  moving sums, magnitude 1         primary       premium +2.785 +- 0.356; e88 -0.167; d adder bits 343,288; premium / bits  7.24; (premium - e88) / bits  7.67 +-  0.92 fJ; scaled  7.45
+  moving sums, magnitude 1         dips-removed  premium +2.797 +- 0.189; e88 -0.167; d adder bits 343,288; premium / bits  7.27; (premium - e88) / bits  7.70 +-  0.49 fJ; scaled  7.49
+  moving sums, random magnitudes   primary       premium +0.407 +- 3.186; e88 -0.538; d adder bits 155,761; premium / bits  2.33; (premium - e88) / bits  5.41 +- 18.25 fJ; scaled  5.34
+  moving sums, random magnitudes   dips-removed  premium +1.106 +- 0.181; e88 -0.538; d adder bits 155,761; premium / bits  6.34; (premium - e88) / bits  9.42 +-  1.04 fJ; scaled  9.23
+  wr, dips-removed: [0.925, 1.287] against e88+flops 0.652 and E90 read as linear 2.57: the model misses by 0.45 W, 1.70x
+  the count on fp32.h_sub, per op: csa_in3 199,680 (combinational: txfma_f3.v:430, no flop), comb_s 199,672, comb_c 39,352, comb_add 121,920; total 560,624
+  7 fJ per bit at 0.5216 V is 25.7 fF (E = C V^2): a proxy for everything downstream of those bits, not a flop's price
+  fp16's premium with the model's e88 part, fJ per adder bit:
+    both             primary 12.16; dips-removed 12.09
+    sum signs only   primary 11.98; dips-removed 11.14
+    high product     primary 12.50; dips-removed 11.61
+    low product      primary 16.82; dips-removed 15.83
+    random signs     primary 13.63; dips-removed 12.24
+
+# C5. the post-hoc refit: in-sample, and across families (posthoc-fit.json's rows, E92's designs = its tiles less .signs)
+  fp32: 47 tiles, 22 E92 designs, 25 others
+    four prices     in-sample, all tiles: rms 1.304 W. Fit on the others, predict E92's designs: rms 2.370 W. Fit on the designs, predict the others: rms 15.649 W. Result-bit price 32.6 (all), 47.7 (others), 28.2 (designs).
+    + adder bits    in-sample, all tiles: rms 0.288 W. Fit on the others, predict E92's designs: rms 1.428 W. Fit on the designs, predict the others: rms 0.676 W. Its price 7.7 fJ (all), 12.5 (others), 7.3 (designs). Result-bit price 26.5 (all), 14.9 (others), 26.3 (designs).
+    + alternations  in-sample, all tiles: rms 0.535 W. Fit on the others, predict E92's designs: rms 0.849 W. Fit on the designs, predict the others: rms 4.352 W. Its price 856.3 fJ (all), 717.2 (others), 858.5 (designs). Result-bit price 30.4 (all), 33.2 (others), 29.6 (designs).
+    h_sub - h_add: measured +4.42; the fit on the others alone says +7.72 W
+  fp16: 34 tiles, 8 E92 designs, 26 others
+    four prices     in-sample, all tiles: rms 1.788 W. Fit on the others, predict E92's designs: rms 5.114 W. Fit on the designs, predict the others: rms 28.011 W. Result-bit price 27.9 (all), 59.0 (others), -187.5 (designs).
+    + adder bits    in-sample, all tiles: rms 0.485 W. Fit on the others, predict E92's designs: rms 2.743 W. Fit on the designs, predict the others: rms 2.475 W. Its price 10.8 fJ (all), 5.4 (others), 11.9 (designs). Result-bit price 5.6 (all), 32.9 (others), -0.4 (designs).
+    + alternations  in-sample, all tiles: rms 0.738 W. Fit on the others, predict E92's designs: rms 3.343 W. Fit on the designs, predict the others: rms 10.325 W. Its price 740.1 fJ (all), 311.6 (others), 841.4 (designs). Result-bit price 9.0 (all), 39.8 (others), -82.9 (designs).
+    h_sub - h_add: measured +6.86; the fit on the others alone says +2.94 W
+  posthoc-fit.json fp32: four prices: rms 1.304, leave-one-out 1.433, E86 held out 0.452 W
+  posthoc-fit.json fp32: four prices + flops: rms 0.288, leave-one-out 0.325, E86 held out 0.174 W
+  posthoc-fit.json fp32: four prices + alternations: rms 0.535, leave-one-out 0.619, E86 held out 0.139 W
+  posthoc-fit.json fp16: four prices: rms 1.788, leave-one-out 1.995, E86 held out 0.891 W
+  posthoc-fit.json fp16: four prices + flops: rms 0.485, leave-one-out 0.577, E86 held out 0.524 W
+  posthoc-fit.json fp16: four prices + alternations: rms 0.738, leave-one-out 0.867, E86 held out 0.713 W
+
+# C6. fp16's alternation over fp32's
+  primary: per-pass ratio +1.552 +- 0.250 [1.663, 1.466, 1.528]
+  dips-removed: per-pass ratio +1.552 +- 0.131 [1.663, 1.55, 1.466, 1.528]
+  the bench, frozen (de545f0c, nets_hier2): 6.44 / 3.22 = 2.00
+  fp32 h_sub - h_add: bench / measured 0.729 (primary)
+
+# C7. the pin: this directory's copy of the bench's frozen file
+  sha256 80d5e3c29e5ef7a1, variants ['nets_hier2', 'nets_hier']; nets_hier2 carries d_unit_hier2_by_stage_per_op: True
+
+# C8. a lane alternation against a sign flip, by regime
+  primary: gamma 1099 fJ per lane alternation; h_add - c_abs (all four sign paths moving, the adder only adds) 122 fJ per lane-micro-op; alpha (B and product) 51 fJ; beta (C and result) 71 fJ
+    frozen, magnitude 1        premium per alternation   1028 fJ, 8.5x the 122 fJ
+    moving sums, magnitude 1   premium per alternation    647 fJ, 5.3x the 122 fJ
+    moving sums, random        premium per alternation     95 fJ, 0.8x the 122 fJ
+  dips-removed: gamma 1092 fJ per lane alternation; h_add - c_abs (all four sign paths moving, the adder only adds) 117 fJ per lane-micro-op; alpha (B and product) 45 fJ; beta (C and result) 72 fJ
+    frozen, magnitude 1        premium per alternation   1021 fJ, 8.7x the 117 fJ
+    moving sums, magnitude 1   premium per alternation    650 fJ, 5.5x the 117 fJ
+    moving sums, random        premium per alternation    257 fJ, 2.2x the 117 fJ
+
+# C9. the rail per pass, primary
+  i_sub - i_add [1.89, 1.965, 1.937] +1.931 +- 0.095
+  i_sub - i_add over h_sub - h_add on the rail: 0.557
+  wr_h_sub - wr_h_add [0.189, 0.932, 0.655] board [1.015, 1.272, -1.066]
+
+# C10. wording: the counts and times behind it
+  fp32.c_alt: B sign flips 256, product sign flips 256, all from the k = 0 row; beta 0.326 W
+  rail: fp32 h_sub - h_add +3.463 +- 0.461; fp16 +5.375 +- 0.116
+  fp16 h_allsub - h_add high end 0.505 W against 0.50 W: INCONCLUSIVE
+  queue: 00:18:04 p9210 starts (elapsed 0 card-min)
+  queue: 00:27:38 p9210 rc=0 (9 min)
+  queue: 00:27:53 p9211 starts (elapsed 9 card-min)
+  queue: 00:36:51 p9211 rc=0 (8 min)
+  queue: 00:37:06 p9212 starts (elapsed 19 card-min)
+  queue: 00:46:00 p9212 rc=0 (8 min)
+  queue: 00:46:15 p9213 starts (elapsed 28 card-min)
+  queue: 00:55:09 p9213 rc=0 (8 min)
+  the bench's file was committed at 00:43:14 PDT (de545f0c): 9210 and 9211 had finished and 9212 was running; no pass was pulled before 00:55:57
+
+# C11. registered reported items: each against E65's 0.563 W, and E88's contrasts on this card
+  fp32.h_add - fp32.c_abs: primary +0.558 +- 0.143; dips-removed +0.538 +- 0.100; result bits 8,719 against 527
+  fp32.w_h_add - fp32.w_c: primary +0.550 +- 0.311; dips-removed +0.532 +- 0.175; result bits 107,498 against 99,306
+  fp32.r_h_add - fp32.r_abs: primary +0.578 +- 0.522; dips-removed +0.510 +- 0.347; result bits 8,719 against 527
+  fp32.wr_h_add - fp32.r_walk: primary +1.622 +- 1.937; dips-removed +1.188 +- 0.178; result bits 121,679 against 108,962
+  fp32.i_add - fp32.c_abs: primary -0.031 +- 1.345; dips-removed +0.263 +- 0.136; result bits 4,623 against 527
+  E88's M32 on this card: primary +8.886 +- 0.138; dips-removed +8.884 +- 0.073; E88 on card 1: 8.614 +- 0.175
+  E88's R32 on this card: primary +4.589 +- 2.040; dips-removed +5.006 +- 0.205; E88 on card 1: 5.042 +- 0.193
+  E88's W32 on this card: primary +0.062 +- 0.425; dips-removed +0.052 +- 0.226; E88 on card 1: 0.100 +- 0.311
+  E65 bit_31 0.5629 W; E67 abit_31 0.5607 W; its post-hoc clean price 0.2970 W (predictions-e90.json)
+  rest of the registered budget: gamma at signs' rate fp32 2.424 +- 0.069 (2.410 +- 0.054), fp16 3.850 +- 0.446 (3.713 +- 0.066)
+  frozen left after bits and gamma at s_abs' rate: fp32 -0.754 +- 0.484 (-0.597 +- 0.188), fp16 +1.185 +- 0.830 (+0.827 +- 0.126)
+
+# C12. the dips: E92.md's words and posthoc_dips_e92.py's rule
+  board_w[i] < min(board_w[i-2], board_w[i+2]) - 4.0 W (E82 amendment A2; E92's registered dips-removed arm)
+  39 dips, depth below the lower neighbour 4.04-23.89 W
+  22 in power windows, depth 4.04-21.52 W, 24-148 ms after a launch boundary
+  31 in runs, 148 ms at most after a launch boundary
+  contrasts whose mean moves by 0.25 W or more between the primary and the dips-removed arm:
+    fp16.h_add-c_abs           +0.954 -> +0.482
+    fp16.c_alt-c_abs           +7.766 -> +7.258
+    fp32.i_sub-i_add           +2.494 -> +2.169
+    fp16.s_abs-c_abs           +5.073 -> +4.587
+    fp16.h_sub-c_abs           +7.810 -> +7.294
+    fp32.wr_h_sub-wr_h_add     +0.407 -> +1.106
+    fp16.hh_sub-c_abs          +6.871 -> +6.403
+    fp16.hl_sub-c_abs          +5.829 -> +5.501
+    fp32.wr_h_add-r_walk       +1.622 -> +1.188
+    fp16.ones-c_abs            +0.517 -> +0.013
+    fp32.r_walk-r_abs          +4.589 -> +5.006
+  fp32 wr_h_sub - wr_h_add 0.407 -> 1.106; raw median 1.064 +- 0.103
+
+# C13. the carried dip in the table cells
+  primary: fp16.c_abs D 7.951 +- 1.135; S 9.820 +- 1.373; pJ/MAC by S 1.0691 +- 0.1488
+  dips-removed: fp16.c_abs D 8.443 +- 0.182; S 10.315 +- 0.240; pJ/MAC by S 1.1232 +- 0.0259
+
+# Frozen files: no change. Their sha256, for the record
+  e18ce85a69944199  e92.json
+  0321b4ca6056908f  scored.json
+  5feab51b03bbfe22  results.md
+  2f05a2e9034f20a0  dips-arm/e92-nodips.json
+  856e6ce4549b973b  dips-arm/scored-nodips.json
+  55278ca676416548  runs.csv
+  aee4f31bcc4c486f  tools/claims-v3/kinds/E92.md
+  e366f1481d0c52cb  tools/claims-v3/kinds/predictions-e92.json
+  be979e0a9b128435  tools/claims-v3/kinds/e92/e92.json

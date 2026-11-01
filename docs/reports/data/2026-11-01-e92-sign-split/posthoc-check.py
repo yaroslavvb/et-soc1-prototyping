@@ -173,8 +173,8 @@ for r, nm in ((s, "primary"), (sn, "dips-removed")):
         inside = sum(1 for v in cc.values() if v["e88_inside"])
         print(f"    {nm} {ty}: n {len(cc)}, e88+flops rms {math.sqrt(st.fmean(x * x for x in e1)):.3f} W, e88 rms {math.sqrt(st.fmean(x * x for x in e2)):.3f} W, inside e88's band {inside} of {len(cc)}")
 print()
-print("# K. the RTL bench's prediction, frozen in Q132(b) (commit de545f0c, 00:43:14 PDT, written from E78's fit and RTL counts; no E92 data read): ../2026-11-01-q132-rtl-bench/e92-bench-prediction.json")
-bench = json.load(open(os.path.join(HERE, "..", "2026-11-01-q132-rtl-bench", "e92-bench-prediction.json")))["variants"]["nets_hier2"]
+print("# K. the RTL bench's prediction, frozen in Q132(b) (commit de545f0c, 00:43:14 PDT, written from E78's fit and RTL counts; no E92 data read): bench-prediction-de545f0c.json, that commit's e92-bench-prediction.json")
+bench = json.load(open(os.path.join(HERE, "bench-prediction-de545f0c.json")))["variants"]["nets_hier2"]
 errs = {"primary": {"fp32": [], "fp16": []}, "dips": {"fp32": [], "fp16": []}}
 for c in bench["contrasts_w"]:
     k = c["contrast"]
