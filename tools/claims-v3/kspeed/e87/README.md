@@ -225,3 +225,11 @@ it was stopped, and `reduce_e87.py` reduced it; the toy card's clocks are not a 
 ## Amendments
 
 None yet.
+
+## Results (added after the data, Sat 31 Oct 2026; nothing above changed)
+
+[`docs/reports/data/2026-10-31-e87-real-tensors-speed/`](../../../../docs/reports/data/2026-10-31-e87-real-tensors-speed/README.md).
+The session ran 19:49–20:25 PDT, all 47 runs in 35.5 card-minutes (35.8 with the smoke); all nine rules pass (R1–R5,
+S1–S4). One file was added to this folder after the pre-registration and decides nothing:
+[`tables_e87.py`](tables_e87.py), which formats `results.json` into the data folder's `tables.md` and `cells.json`,
+written while the session ran and before any result was read.

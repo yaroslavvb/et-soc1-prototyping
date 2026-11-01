@@ -1,0 +1,36 @@
+K1  like-with-like ratios, pass by pass (c from each round's bursts alone)
+    fp32/l0_mlp_up     pass1 0.9954  pass2 0.9953  half-spread 0.0001  cell 0.9953  predicted 0.9894
+    fp32/l6_mlp_down   pass1 0.9958  pass2 0.9936  half-spread 0.0011  cell 0.9948  predicted 0.9858
+    fp32/l6_attn_qk    pass1 0.9860  pass2 0.9840  half-spread 0.0010  cell 0.985  predicted 0.9893
+    fp32 mean over the three tiles: 0.9917 (pass-1 rounds 0.9924, pass-2 rounds 0.9910); between-tile sd 0.0058, so the mean's standard error 0.0034; t against 1.000 = 2.48 on 2 df
+      c per pass: ref {1: 25.539, 2: 25.631}  zeros {1: 1.705, 2: 1.395}
+    fp16/l0_mlp_up     pass1 0.9904  pass2 0.9864  half-spread 0.0020  cell 0.9884  predicted 0.9798
+    fp16/l6_mlp_down   pass1 0.9895  pass2 0.9895  half-spread 0.0000  cell 0.9895  predicted 0.9637
+    fp16/l6_attn_qk    pass1 0.9622  pass2 0.9626  half-spread 0.0002  cell 0.9624  predicted 0.9718
+    fp16 mean over the three tiles: 0.9801 (pass-1 rounds 0.9807, pass-2 rounds 0.9795); between-tile sd 0.0153, so the mean's standard error 0.0089; t against 1.000 = 2.25 on 2 df
+      c per pass: ref {1: 23.142, 2: 23.155}  zeros {1: 2.001, 2: 1.499}
+    int8/l0_mlp_up     pass1 0.9243  pass2 0.8852  half-spread 0.0196  cell 0.904  predicted 0.8347
+    int8/l6_mlp_down   pass1 0.8087  pass2 0.7976  half-spread 0.0055  cell 0.8029  predicted 0.7345
+    int8/l6_attn_qk    pass1 0.7911  pass2 0.8032  half-spread 0.0060  cell 0.7974  predicted 0.8147
+    int8 mean over the three tiles: 0.8348 (pass-1 rounds 0.8414, pass-2 rounds 0.8287); between-tile sd 0.0600, so the mean's standard error 0.0347; t against 1.000 = 4.77 on 2 df
+      c per pass: ref {1: 8.865, 2: 8.897}  zeros {1: 2.416, 2: 1.971}
+
+K2  the anchors' switching term c (W, E64's basis) in three sessions on aifoundry2
+    fp32/randn   E80 25.55  E83 25.59  E87 25.585  (E87 passes [25.539, 25.631])
+    fp32/zeros   E80 None  E83 1.716  E87 1.55  (E87 passes [1.705, 1.395])
+    fp16/randn   E80 23.072  E83 23.052  E87 23.148  (E87 passes [23.142, 23.155])
+    fp16/zeros   E80 1.609  E83 1.739  E87 1.75  (E87 passes [2.001, 1.499])
+    int8/full    E80 8.985  E83 8.982  E87 8.881  (E87 passes [8.865, 8.897])
+    int8/zeros   E80 2.49  E83 2.357  E87 2.194  (E87 passes [2.416, 1.971])
+
+K3  idle resets (A1's detector, posthoc_idle.flags)
+    BURST-06-int8-real-l0_mlp_up-r2      dips 1  burst 754  without 800  sus None  without None
+    SUS-14-int8-zeros-r1                 dips 2  burst 784.5  without None  sus 788.5  without 793.8
+    SUS-13-int8-full-r1                  dips 1  burst 783.3  without None  sus 774.7  without 774.2
+    totals {'burst_runs': 1, 'sus_dips': 3, 'work_processes': 183}
+
+K4  the heat path
+    E87 die line 41.691 + 0.4562 C/W (n 17, rms 0.422 C), shift at E80's slope +0.515 C; E83's -0.149 C; so E87 runs +0.664 C warmer than E83 at E80's slope
+    a-adj E87: W*_adj 48.474 W (registered 49.75; E83's 49.724)
+    int8 sustained, same session: real [794.4, 793.6, 800] (['none', 'none', 'none']), board W [51.6, 50.2, 50.7], die [64.5, 64.3, 64.5]; int8 full 774.7 (thermal), 51.41 W, 65.1 C
+    int8 full sustained in three sessions: E80 793.4 [796.7, 790.0], E83 786.5, E87 774.7
