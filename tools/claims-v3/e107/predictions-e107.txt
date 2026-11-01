@@ -1,0 +1,41 @@
+E107 frozen numbers (make_predictions_e107.py), aifoundry3 at 600 MHz. T us per op of one minion; S W over idle.
+
+fp32: T(c1) 0.9000, T(c16) 2.5991, E101 as run 1.4152; an L3-served missing line 3.578 ns
+fp16: T(c1) 0.8999, T(c16) 2.5995, E101 as run 1.4153; an L3-served missing line 3.579 ns
+int8: T(c1) 0.4993, T(c16) 2.5877, E101 as run 1.4242; an L3-served missing line 6.423 ns
+
+arm                    fp32                fp16                int8
+c1       T 0.900 f 0.000  T 0.900 f 0.000  T 0.499 f 0.000
+c16      T 2.599 f 1.000  T 2.599 f 1.000  T 2.588 f 1.000
+c16r2    T 1.750 f 0.500  T 1.750 f 0.500  T 1.544 f 0.500
+c16r4    T 1.325 f 0.250  T 1.325 f 0.250  T 1.021 f 0.250
+c16r8    T 1.112 f 0.125  T 1.112 f 0.125  T 0.760 f 0.125
+c16r32   T 0.953 f 0.031  T 0.953 f 0.031  T 0.565 f 0.031
+c4s      T 1.358 f 0.270  T 1.358 f 0.270  T 1.321 f 0.394
+c8s      T 1.358 f 0.270  T 1.358 f 0.270  T 1.321 f 0.394
+c8       T 2.599 f 1.000  T 2.599 f 1.000  T 2.588 f 1.000
+c16s     T 1.919 f 0.600  T 1.920 f 0.600  T 1.752 f 0.600
+
+S over idle, W (zeros / random)
+c1         3.77 /  32.99    3.82 /  30.05    5.00 /  18.23
+c16        4.04 /  15.27    3.84 /  14.39    3.57 /   8.18
+c16r2      3.97 /  19.83    3.83 /  18.42    3.80 /   9.80
+c16r4      3.90 /  24.30    3.83 /  22.37    4.09 /  11.86
+c16r8      3.85 /  27.82    3.82 /  25.48    4.39 /  13.95
+c16r32     3.79 /  31.48    3.82 /  28.72    4.79 /  16.79
+c4s        4.18 /  25.40    4.44 /  23.10    3.83 /  10.76
+c8s        4.18 /  25.40    4.44 /  23.10    3.83 /  10.76
+c8         4.04 /  15.27    3.84 /  14.39    3.57 /   8.18
+c16s       3.99 /  18.59    3.84 /  17.33    3.73 /   9.32
+
+R1_tie: T(c1) within 2% and T(c16) within 3% of E105's aifoundry3 values, in each format
+R2_kind: in every arm and format, each kind's T within 1% of that arm's zeros
+R3_reuse: per format, fit T(R) = Tinf + D / R over R in {1, 2, 4, 8, 32} (c16, c16r2, c16r4, c16r8, c16r32)
+R4_walk: f8 = (T(c8s) - T(c1)) / (T(c16) - T(c1)), the share of the cold walk's excess left when its blocks stay in the L3
+R4b_resident: |T(c4s) - T(c8s)| <= 0.05 T(c8s): the 26 MB walk behaves as the 14 MB one; if not, R4 is read on c4s and labelled
+R4c_dram_check: the DDR rail's droop, mV over the idle just before the run, window [t0+2 s, t0+4 s) against [t0-1.5 s, t0-0.1 s): droop(c8s) - droop(c1) <= 0.5 (droop(c16) - droop(c1)) on fp32 zeros and on fp32 random: the 8-block walk left DRAM
+R5_c_in_l3: f8c = (T(c8) - T(c1)) / (T(c16) - T(c1)) against f8, fp32
+R6_c_traffic: f16s = (T(c16s) - T(c1)) / (T(c16) - T(c1)), fp32
+R7_power: S over idle, zeros and random in every format on the eight new arms (48 cells), against the frozen S_w: PASS at rms <= 2.0 W
+R8_energy_order: random fp32's energy per op rises along the repeat ladder: c1 < c16r32 < c16r8 < c16r4 < c16r2 < c16, means
+clock: every kept run's sampled clock is 600 MHz (reduce_e78.py's gate); a pass with TDP other than 0 or a threshold other than 65 C is reported apart

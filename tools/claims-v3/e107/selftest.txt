@@ -1,0 +1,14 @@
+frozen world: {'R1_tie': 'PASS', 'R2_kind': 'PASS', 'R3_reuse': 'REUSE IS THE VARIABLE', 'R4b_resident': 'PASS', 'R4_walk': 'DRAM SETS MOST OF IT', 'R4c_dram_check': 'PASS', 'R5_c_in_l3': 'C ALLOCATES', 'R6_c_traffic': 'PART OF THE LIMIT', 'R7_power': 'PASS', 'R8_energy_order': 'PASS'}
+ok  R1 fails: c1 5% slow: R1_tie -> FAIL (want FAIL)
+ok  R2 fails: random 2% slower than zeros in c8s fp32: R2_kind -> FAIL (want FAIL)
+ok  R3: every repeat as slow as the cold walk: R3_reuse -> NOT THE VARIABLE (want NOT THE VARIABLE)
+ok  R3: the law's shape off (R=4 at R=2's time): R3_reuse -> PARTIAL (want PARTIAL)
+ok  R4: the L3 walk as slow as DRAM's: R4_walk -> NOT DRAM (want NOT DRAM)
+ok  R4: between: R4_walk -> SHARED (want SHARED)
+ok  R4b: 26 MB not resident (c8s at c16, c4s frozen): R4b_resident -> FAIL (want FAIL)
+ok  R4c: c8s droops as c16 does: R4c_dram_check -> FAIL (want FAIL)
+ok  R5: c8 as fast as c8s: R5_c_in_l3 -> C DOES NOT DISPLACE (want C DOES NOT DISPLACE)
+ok  R6: c16s as slow as c16: R6_c_traffic -> NOT THE LIMIT (want NOT THE LIMIT)
+ok  R7: every S 3 W high: R7_power -> FAIL (want FAIL)
+ok  R8: c16r4 above c16r2: R8_energy_order -> FAIL (want FAIL)
+ALL OK

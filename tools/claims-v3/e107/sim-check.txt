@@ -1,0 +1,18 @@
+E107: rgm107's gemm arms in sys_emu on aifoundry3 (/opt/et, one shire, 32 minions, --seed 7), Sun 1 Nov 2026 10:58-11:12 PST, card idle (et-who: no holder).
+The simulator checks loops, cooperative groups and the host's check of C; its cycle counts mean nothing.
+
+rgm107 gemmc1   fp32 zeros     rc=0   check=exact  words=8192 exact=8192 within=8192, 64 ops per minion, one pass
+rgm107 gemmc2   fp32 zeros     rc=0   check=exact  words=8192 exact=8192 within=8192, 128 ops per minion, one pass over two blocks
+rgm107 gemmc1r2 fp32 zeros     rc=134 (dev::Exception from DeviceSysEmu::checkSysemuLastError, before the first launch record)
+rgm107 gemmc2s  fp32 zeros     rc=134 (the same)
+rgm107 gemmc2r2 fp32 randn     rc=134 (the same)
+rgm107 gemmc2r2s int8 full     rc=134 (the same)
+rgm105 gemmc1   fp32 zeros     rc=0   check=exact (E105's binary, unchanged)
+rgm105 gemmc2   fp32 zeros     rc=0   check=exact
+rgm105 gemmc1 --iters 2        rc=134 (the same exception): E105's own binary, which ran 5,485-11,425 passes per launch on both cards in E105, aborts
+                               in sys_emu on its second pass
+
+So sys_emu aborts any SP_GEMM launch whose C tiles are stored twice, whatever binary, and every new E107 path stores a C tile twice in one launch
+(a repeat re-stores its block's C; a shared C re-stores block 0's). The new paths could not be checked in the simulator. What was checked there: the
+build, the new grammar's parse, one pass over two blocks with the check exact. The card's smoke (block_e107.sh --smoke) runs every new arm once and
+the host checks its C against its own reference after the power window, as in E101 and E105.

@@ -1,0 +1,429 @@
+{
+ "experiment": "E107",
+ "question": "section 11 item 1 of the kinds page as of 1fe8377a18af: where a large GEMM falls",
+ "card": "aifoundry3 card 0, 600 MHz pinned (TDP 0 / 65 C), nothing set",
+ "sources": {
+  "e105c": "docs/reports/data/2026-11-01-e105-gemm-layout/e105c.json",
+  "e101": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json",
+  "desk_l2": "tools/claims-v3/kspeed/e105/desk/l2sim.txt (by column: 0% steady, 66.7% one pass cold; packed: 75% steady)"
+ },
+ "arms": {
+  "c1": {
+   "values_arm": "gemmc1",
+   "blocks": 1,
+   "repeats": 1,
+   "c_shared": false,
+   "ab_mb": 3,
+   "l3_footprint_mb": 5,
+   "what": "one block repeated: its tiles in the L2 (E105's gemmc1, the warm end)"
+  },
+  "c16": {
+   "values_arm": "gemmc16",
+   "blocks": 16,
+   "repeats": 1,
+   "c_shared": false,
+   "ab_mb": 48,
+   "l3_footprint_mb": 80,
+   "what": "16 fresh blocks, each once a pass (E105's gemmc16, the cold end)"
+  },
+  "c16r2": {
+   "values_arm": "gemmc16r2",
+   "blocks": 16,
+   "repeats": 2,
+   "c_shared": false,
+   "ab_mb": 48,
+   "l3_footprint_mb": 80,
+   "what": "16 blocks, each twice before the walk moves on"
+  },
+  "c16r4": {
+   "values_arm": "gemmc16r4",
+   "blocks": 16,
+   "repeats": 4,
+   "c_shared": false,
+   "ab_mb": 48,
+   "l3_footprint_mb": 80,
+   "what": "16 blocks, each 4 times"
+  },
+  "c16r8": {
+   "values_arm": "gemmc16r8",
+   "blocks": 16,
+   "repeats": 8,
+   "c_shared": false,
+   "ab_mb": 48,
+   "l3_footprint_mb": 80,
+   "what": "16 blocks, each 8 times"
+  },
+  "c16r32": {
+   "values_arm": "gemmc16r32",
+   "blocks": 16,
+   "repeats": 32,
+   "c_shared": false,
+   "ab_mb": 48,
+   "l3_footprint_mb": 80,
+   "what": "16 blocks, each 32 times"
+  },
+  "c4s": {
+   "values_arm": "gemmc4s",
+   "blocks": 4,
+   "repeats": 1,
+   "c_shared": true,
+   "ab_mb": 12,
+   "l3_footprint_mb": 14,
+   "what": "4 blocks, C shared: overflows the L2 and fits the L3 with room"
+  },
+  "c8s": {
+   "values_arm": "gemmc8s",
+   "blocks": 8,
+   "repeats": 1,
+   "c_shared": true,
+   "ab_mb": 24,
+   "l3_footprint_mb": 26,
+   "what": "8 blocks, C shared: 24 MB of A + B overflow the L2 and fit the L3 (section 11 item 1)"
+  },
+  "c8": {
+   "values_arm": "gemmc8",
+   "blocks": 8,
+   "repeats": 1,
+   "c_shared": false,
+   "ab_mb": 24,
+   "l3_footprint_mb": 40,
+   "what": "8 blocks, C per block: the same walk with 16 MB of C beside it, 40 MB against the 32 MB L3"
+  },
+  "c16s": {
+   "values_arm": "gemmc16s",
+   "blocks": 16,
+   "repeats": 1,
+   "c_shared": true,
+   "ab_mb": 48,
+   "l3_footprint_mb": 50,
+   "what": "16 blocks, C shared: the cold walk without C's 32 MB"
+  }
+ },
+ "ends": {
+  "fp32": {
+   "T_c1": 0.8999515109225663,
+   "T_c16": 2.599054484329318,
+   "T_asrun_e101": 1.415215210432145,
+   "us_per_missing_line_l3": 0.003578220135483185
+  },
+  "fp16": {
+   "T_c1": 0.8998763880556786,
+   "T_c16": 2.5994713342048934,
+   "T_asrun_e101": 1.4152562321665347,
+   "us_per_missing_line_l3": 0.003579026695214279
+  },
+  "int8": {
+   "T_c1": 0.4993131328524858,
+   "T_c16": 2.5877478073311235,
+   "T_asrun_e101": 1.4242326534150198,
+   "us_per_missing_line_l3": 0.006423052226128708
+  }
+ },
+ "energy_inputs_nj_op": {
+  "fp32.zeros": {
+   "E_c1": 3.3089761472493002,
+   "E_c16": 10.257023480739207,
+   "E_asrun_e101": 5.819942732702528
+  },
+  "fp32.randn": {
+   "E_c1": 28.996156044961644,
+   "E_c16": 38.75458458673597,
+   "E_asrun_e101": 34.271703019163965
+  },
+  "fp16.zeros": {
+   "E_c1": 3.354726951446674,
+   "E_c16": 9.749956532006513,
+   "E_asrun_e101": 6.201398299594138
+  },
+  "fp16.randn": {
+   "E_c1": 26.409601522610995,
+   "E_c16": 36.531625356011446,
+   "E_asrun_e101": 31.1661208774667
+  },
+  "int8.zeros": {
+   "E_c1": 2.4367203904145183,
+   "E_c16": 9.010842240099324,
+   "E_asrun_e101": 5.253287006076336
+  },
+  "int8.full": {
+   "E_c1": 8.887702079830044,
+   "E_c16": 20.658797716243257,
+   "E_asrun_e101": 14.51684476901975
+  }
+ },
+ "predictions": {
+  "T_us": {
+   "c1.fp32": 0.9,
+   "c16.fp32": 2.5991,
+   "c16r2.fp32": 1.7495,
+   "c16r4.fp32": 1.3247,
+   "c16r8.fp32": 1.1123,
+   "c16r32.fp32": 0.953,
+   "c4s.fp32": 1.358,
+   "c8s.fp32": 1.358,
+   "c8.fp32": 2.5991,
+   "c16s.fp32": 1.9194,
+   "c1.fp16": 0.8999,
+   "c16.fp16": 2.5995,
+   "c16r2.fp16": 1.7497,
+   "c16r4.fp16": 1.3248,
+   "c16r8.fp16": 1.1123,
+   "c16r32.fp16": 0.953,
+   "c4s.fp16": 1.358,
+   "c8s.fp16": 1.358,
+   "c8.fp16": 2.5995,
+   "c16s.fp16": 1.9196,
+   "c1.int8": 0.4993,
+   "c16.int8": 2.5877,
+   "c16r2.int8": 1.5435,
+   "c16r4.int8": 1.0214,
+   "c16r8.int8": 0.7604,
+   "c16r32.int8": 0.5646,
+   "c4s.int8": 1.3215,
+   "c8s.int8": 1.3215,
+   "c8.int8": 2.5877,
+   "c16s.int8": 1.7524
+  },
+  "f": {
+   "c1.fp32": 0.0,
+   "c16.fp32": 1.0,
+   "c16r2.fp32": 0.5,
+   "c16r4.fp32": 0.25,
+   "c16r8.fp32": 0.125,
+   "c16r32.fp32": 0.0312,
+   "c4s.fp32": 0.2696,
+   "c8s.fp32": 0.2696,
+   "c8.fp32": 1.0,
+   "c16s.fp32": 0.6,
+   "c1.fp16": 0.0,
+   "c16.fp16": 1.0,
+   "c16r2.fp16": 0.5,
+   "c16r4.fp16": 0.25,
+   "c16r8.fp16": 0.125,
+   "c16r32.fp16": 0.0312,
+   "c4s.fp16": 0.2695,
+   "c8s.fp16": 0.2695,
+   "c8.fp16": 1.0,
+   "c16s.fp16": 0.6,
+   "c1.int8": 0.0,
+   "c16.int8": 1.0,
+   "c16r2.int8": 0.5,
+   "c16r4.int8": 0.25,
+   "c16r8.int8": 0.125,
+   "c16r32.int8": 0.0312,
+   "c4s.int8": 0.3937,
+   "c8s.int8": 0.3937,
+   "c8.int8": 1.0,
+   "c16s.int8": 0.6
+  },
+  "S_w": {
+   "c1.fp32.zeros": 3.765,
+   "c16.fp32.zeros": 4.041,
+   "c16r2.fp32.zeros": 3.97,
+   "c16r4.fp32.zeros": 3.9,
+   "c16r8.fp32.zeros": 3.846,
+   "c16r32.fp32.zeros": 3.789,
+   "c4s.fp32.zeros": 4.178,
+   "c8s.fp32.zeros": 4.178,
+   "c8.fp32.zeros": 4.041,
+   "c16s.fp32.zeros": 3.989,
+   "c1.fp32.randn": 32.993,
+   "c16.fp32.randn": 15.269,
+   "c16r2.fp32.randn": 19.828,
+   "c16r4.fp32.randn": 24.3,
+   "c16r8.fp32.randn": 27.816,
+   "c16r32.fp32.randn": 31.482,
+   "c4s.fp32.randn": 25.401,
+   "c8s.fp32.randn": 25.401,
+   "c8.fp32.randn": 15.269,
+   "c16s.fp32.randn": 18.593,
+   "c1.fp16.zeros": 3.817,
+   "c16.fp16.zeros": 3.841,
+   "c16r2.fp16.zeros": 3.835,
+   "c16r4.fp16.zeros": 3.829,
+   "c16r8.fp16.zeros": 3.824,
+   "c16r32.fp16.zeros": 3.819,
+   "c4s.fp16.zeros": 4.438,
+   "c8s.fp16.zeros": 4.438,
+   "c8.fp16.zeros": 3.841,
+   "c16s.fp16.zeros": 3.836,
+   "c1.fp16.randn": 30.052,
+   "c16.fp16.randn": 14.391,
+   "c16r2.fp16.randn": 18.418,
+   "c16r4.fp16.randn": 22.37,
+   "c16r8.fp16.randn": 25.477,
+   "c16r32.fp16.randn": 28.717,
+   "c4s.fp16.randn": 23.102,
+   "c8s.fp16.randn": 23.102,
+   "c8.fp16.randn": 14.391,
+   "c16s.fp16.randn": 17.327,
+   "c1.int8.zeros": 4.997,
+   "c16.int8.zeros": 3.566,
+   "c16r2.int8.zeros": 3.797,
+   "c16r4.int8.zeros": 4.091,
+   "c16r8.int8.zeros": 4.388,
+   "c16r32.int8.zeros": 4.792,
+   "c4s.int8.zeros": 3.828,
+   "c8s.int8.zeros": 3.828,
+   "c8.int8.zeros": 3.566,
+   "c16s.int8.zeros": 3.729,
+   "c1.int8.full": 18.227,
+   "c16.int8.full": 8.175,
+   "c16r2.int8.full": 9.801,
+   "c16r4.int8.full": 11.86,
+   "c16r8.int8.full": 13.951,
+   "c16r32.int8.full": 16.787,
+   "c4s.int8.full": 10.764,
+   "c8s.int8.full": 10.764,
+   "c8.int8.full": 8.175,
+   "c16s.int8.full": 9.321
+  },
+  "E_nj_op": {
+   "c1.fp32.zeros": 3.309,
+   "c16.fp32.zeros": 10.257,
+   "c16r2.fp32.zeros": 6.783,
+   "c16r4.fp32.zeros": 5.046,
+   "c16r8.fp32.zeros": 4.177,
+   "c16r32.fp32.zeros": 3.526,
+   "c4s.fp32.zeros": 5.541,
+   "c8s.fp32.zeros": 5.541,
+   "c8.fp32.zeros": 10.257,
+   "c16s.fp32.zeros": 7.478,
+   "c1.fp32.randn": 28.996,
+   "c16.fp32.randn": 38.755,
+   "c16r2.fp32.randn": 33.875,
+   "c16r4.fp32.randn": 31.436,
+   "c16r8.fp32.randn": 30.216,
+   "c16r32.fp32.randn": 29.301,
+   "c4s.fp32.randn": 33.686,
+   "c8s.fp32.randn": 33.686,
+   "c8.fp32.randn": 38.755,
+   "c16s.fp32.randn": 34.851,
+   "c1.fp16.zeros": 3.355,
+   "c16.fp16.zeros": 9.75,
+   "c16r2.fp16.zeros": 6.552,
+   "c16r4.fp16.zeros": 4.954,
+   "c16r8.fp16.zeros": 4.154,
+   "c16r32.fp16.zeros": 3.555,
+   "c4s.fp16.zeros": 5.885,
+   "c8s.fp16.zeros": 5.885,
+   "c8.fp16.zeros": 9.75,
+   "c16s.fp16.zeros": 7.192,
+   "c1.fp16.randn": 26.41,
+   "c16.fp16.randn": 36.532,
+   "c16r2.fp16.randn": 31.471,
+   "c16r4.fp16.randn": 28.94,
+   "c16r8.fp16.randn": 27.675,
+   "c16r32.fp16.randn": 26.726,
+   "c4s.fp16.randn": 30.638,
+   "c8s.fp16.randn": 30.638,
+   "c8.fp16.randn": 36.532,
+   "c16s.fp16.randn": 32.483,
+   "c1.int8.zeros": 2.437,
+   "c16.int8.zeros": 9.011,
+   "c16r2.int8.zeros": 5.724,
+   "c16r4.int8.zeros": 4.08,
+   "c16r8.int8.zeros": 3.258,
+   "c16r32.int8.zeros": 2.642,
+   "c4s.int8.zeros": 4.94,
+   "c8s.int8.zeros": 4.94,
+   "c8.int8.zeros": 9.011,
+   "c16s.int8.zeros": 6.381,
+   "c1.int8.full": 8.888,
+   "c16.int8.full": 20.659,
+   "c16r2.int8.full": 14.773,
+   "c16r4.int8.full": 11.83,
+   "c16r8.int8.full": 10.359,
+   "c16r32.int8.full": 9.256,
+   "c4s.int8.full": 13.891,
+   "c8s.int8.full": 13.891,
+   "c8.int8.full": 20.659,
+   "c16s.int8.full": 15.95
+  }
+ },
+ "rules": {
+  "R1_tie": {
+   "text": "T(c1) within 2% and T(c16) within 3% of E105's aifoundry3 values, in each format",
+   "c1_rel": 0.02,
+   "c16_rel": 0.03,
+   "fail_means": "the rebuilt arms are not E105's: every other verdict is labelled"
+  },
+  "R2_kind": {
+   "text": "in every arm and format, each kind's T within 1% of that arm's zeros",
+   "rel": 0.01
+  },
+  "R3_reuse": {
+   "text": "per format, fit T(R) = Tinf + D / R over R in {1, 2, 4, 8, 32} (c16, c16r2, c16r4, c16r8, c16r32)",
+   "REUSE": "|Tinf - T(c1)| <= 0.05 T(c1) and every point within 3% of the fit: reuse is the variable, a block's first pass costs the same whatever follows it",
+   "NOT_REUSE": "T(c16r32) - T(c1) >= 0.5 (T(c16) - T(c1)): 32 passes over a block leave more than half the cold excess",
+   "PARTIAL": "otherwise",
+   "tinf_rel": 0.05,
+   "point_rel": 0.03,
+   "not_frac": 0.5,
+   "primary": "fp32",
+   "frozen": "REUSE in all three formats"
+  },
+  "R4_walk": {
+   "text": "f8 = (T(c8s) - T(c1)) / (T(c16) - T(c1)), the share of the cold walk's excess left when its blocks stay in the L3",
+   "DRAM": "f8 <= 0.50: DRAM (the walk's misses past the L3) sets most of the cold walk's pace",
+   "NOT_DRAM": "f8 >= 0.85: it does not",
+   "SHARED": "between",
+   "dram_max": 0.5,
+   "notdram_min": 0.85,
+   "primary": "fp32",
+   "frozen": {
+    "fp32": 0.2696,
+    "fp16": 0.2695,
+    "int8": 0.3937
+   }
+  },
+  "R4b_resident": {
+   "text": "|T(c4s) - T(c8s)| <= 0.05 T(c8s): the 26 MB walk behaves as the 14 MB one; if not, R4 is read on c4s and labelled",
+   "rel": 0.05
+  },
+  "R4c_dram_check": {
+   "text": "the DDR rail's droop, mV over the idle just before the run, window [t0+2 s, t0+4 s) against [t0-1.5 s, t0-0.1 s): droop(c8s) - droop(c1) <= 0.5 (droop(c16) - droop(c1)) on fp32 zeros and on fp32 random: the 8-block walk left DRAM",
+   "frac": 0.5
+  },
+  "R5_c_in_l3": {
+   "text": "f8c = (T(c8) - T(c1)) / (T(c16) - T(c1)) against f8, fp32",
+   "C_ALLOCATES": "f8c >= f8 + 0.30: C's 16 MB push the walk out of the L3",
+   "C_DOES_NOT": "|f8c - f8| <= 0.10",
+   "PARTIAL": "otherwise",
+   "frozen": 1.0
+  },
+  "R6_c_traffic": {
+   "text": "f16s = (T(c16s) - T(c1)) / (T(c16) - T(c1)), fp32",
+   "PART": "f16s <= 0.85: C's 32 MB of stores are part of the cold walk's limit",
+   "NOT": "f16s >= 0.95",
+   "PARTIAL": "between",
+   "frozen": 0.6
+  },
+  "R7_power": {
+   "text": "S over idle, zeros and random in every format on the eight new arms (48 cells), against the frozen S_w: PASS at rms <= 2.0 W",
+   "rms_w": 2.0
+  },
+  "R8_energy_order": {
+   "text": "random fp32's energy per op rises along the repeat ladder: c1 < c16r32 < c16r8 < c16r4 < c16r2 < c16, means"
+  },
+  "clock": "every kept run's sampled clock is 600 MHz (reduce_e78.py's gate); a pass with TDP other than 0 or a threshold other than 65 C is reported apart"
+ },
+ "speed_half": "not measured here: aifoundry3's clock is pinned, so what a clock gap buys needs a governed card (aifoundry2). Reported as a labelled bound only: if no more than the FMA's 529 cycles of an fp32 op follow the clock (true of every fp32 arm E105 fitted), x1.333 of clock buys at most T600 / (T600 - 529 (1/600 - 1/800) us).",
+ "passes": [
+  10710,
+  10711,
+  10712
+ ],
+ "smoke_pass": 10701,
+ "cap_card_minutes": 60,
+ "queue_deadline_min": 54,
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa"
+  }
+ }
+}
