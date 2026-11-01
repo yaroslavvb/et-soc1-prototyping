@@ -3,7 +3,7 @@
 **Dated note, Sun 1 Nov 2026 (week 44):** the claim posts of the night of 31 October to 1 November have gone from #community-lab, by a
 hand or tool not identified, so a claim id cited in E92–E106 or in their data READMEs may no longer open. The ids stay as the record of
 what was posted; the times beside them are from the lanes' own logs. **And:** "item N of section 11" in E92–E106 and their READMEs is the list
-the kinds page carried until 31 October; its rebuild, `1fe8377a18af`, ranks that section afresh and prints each item's "old item N".
+the kinds page carried until 31 October; its rebuild, now `5450fa1ebd61`, ranks that section afresh and prints each item's "old item N".
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite

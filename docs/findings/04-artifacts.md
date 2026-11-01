@@ -46,10 +46,12 @@ gained nine GPT-2 rows. Its verifier's wording fixes followed in place at about 
 and unlisted. The claims for those experiments are in [05-claims.md](05-claims.md), "Q130 additions". **Rebuilt in place on
 Sun 1 Nov 2026 (week 44) at 09:54 PST as `1fe8377a18af`** (Q132, over `9729b0fe0afe`; its data pinned at lab `17cc3911`,
 its source and charts committed in the owner's private research log at `86ba7e6`): regimes, real tensors, the heat plateau and
-signs, with section 11 ranked afresh. Section 11's items now print their old numbers as "old item N", and the READMEs' "item N of
+signs, with section 11 ranked afresh. **The page verifier's faults went in at 10:39 PST as `5450fa1ebd61`, the live version**
+(over `94fcc41786b5`; source `1e0c7e4`, data pinned at lab `9f2a6ef6`): chip against kernel in section 1, and every sentence that
+had gone past what its verifier allowed. Section 11's items now print their old numbers as "old item N", and the READMEs' "item N of
 section 11" keep meaning that old list. **Old to new:** 1 → 3 and 14; 2 → 5; 3 → 7; 5 → 2; 6 → 6; 8 → 9, its extrapolation half
-closed; 9 → 8; 12 → 10, 11, 13 and 15; 7 → closed, what it leaves 12; 4, 10 and 11 → closed. New items: 1, 4, and the gap by
-column, closed. Public and unlisted still; the claims are in [05-claims.md](05-claims.md), "Q132".
+closed; 9 → 8; 12 → 10, 11, 13 and 15; 7 → closed, what it leaves 12; 4, 10 and 11 → closed. New items: 1, 4, and, closed, the gap
+in a repeated GEMM-pattern block whose tiles fit. Public and unlisted still; the claims are in [05-claims.md](05-claims.md), "Q132".
 
 **A24 · From matmul speed to one transistor switch** (27 October 2026, Q128). The nine-step chain on one
 page: speed, the governor, board watts, picojoules per multiply-add, femtojoules per flipped operand bit,
