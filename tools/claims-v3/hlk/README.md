@@ -247,3 +247,7 @@ clock excursions cluster just after the resets. The data README's
 [Corrections after verification](../../../docs/reports/data/2026-10-31-e85-camera-kinds/README.md#corrections-after-verification-sat-31-oct-2026)
 covers this (C1, C9) and the other corrections. A later camera run on this tool should drop `--reset-ms`, as `kspeed`
 does, or pre-register it, and should run a ~1 min smoke run under the claim before `go` (C7).
+
+*Dated note, Sat 31 Oct 2026, about 22:3x PDT: the owner's ruling of 31 October 2026 allows the statistics reset
+([AGENT.md](../../../AGENT.md) §5), so the question above is closed. The advice above stands for measurement reasons:
+the reset restarts the PMIC's running average, and post hoc the clock excursions cluster after it.*

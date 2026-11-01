@@ -31,6 +31,13 @@ they do is for the orchestrator and the owner to rule (C1). The lab knew of two 
   found this in the firmware source (deviation 1). It was not checked here for this card's build, and nothing in E85
   switched the trace back on.
 
+*Dated note, Sat 31 Oct 2026, about 22:3x PDT, added after the corrections without editing them: the owner has ruled
+on the question this paragraph and C1 leave to the orchestrator and the owner. Asked whether the camera runner's
+once-a-second statistics reset may be used, he answered "Yes, you can do the statistics reset." So the reset is
+allowed (the owner's ruling of 31 October 2026, [AGENT.md](../../../../AGENT.md) §5) and later runs may use
+`--reset-ms`; because it restarts the PMIC's running average, a run that tests the governor's power loop still samples
+without it. Every other PMIC command stays forbidden.*
+
 The runner held the card lock for the whole session, every launch ran under `timeout 10`, `et-who` was empty before and
 after, and nobody else was logged in. The camera stayed on preset `visualize` with its automatic shutter on. The card
 runs release 1.4.0 / BL2 0.22.0: that is E69's reading of 27 Oct, which E80 and E83 cite for this card the same day.
@@ -246,6 +253,9 @@ number below from committed files, and [`corrections-check.txt`](corrections-che
 | C7 | There was no smoke run, though Q130 asks for a dry run, a smoke run, then the real run. | This is now stated in Departures (b): the 2 s operand check stood in for the smoke run, and the card-side runner first ran in the registered session. Future runs: a ~1 min smoke run under the claim before `go`. |
 | C8 | Small numbers were off: int8's per-lap scatter was "about 120 mK against 60–90"; int8's camera-read step read 1.80 here and 1.79 elsewhere; the push was given as 15:52:32; the workflow result said "45 allowed". | The scatter is now given as SE × √laps: 120 mK against 77 and 53 (unweighted: 115 against 103 and 95). The camera-read step is 1.79 (the value is 1.7948). The push was at 15:52:31 (GitHub's push record). The runner's cap was 44 card-minutes (`session.json` `caps.max_card_min`), inside the 45 planned. |
 | C9 | Found while fixing C1: the first version called the reset flag harmless. | Post hoc, the clock excursions cluster just after the resets. 13 late ramps fell in the 47 launches whose 1.5 s check sample came right after a reset, against 10 in the other 193 (one-sided Fisher p 3.5 × 10⁻⁵). 4 of the 6 mid-launch idle-reset dips did too (P 0.012 against an 18% base rate; the window was chosen after the data). Each reset call held the sampler ~121 ms, against its usual 78 ms sleep. This is suggestive only, and no verdict moves (Post hoc item 5). |
+
+*Dated note, Sat 31 Oct 2026, about 22:3x PDT: C1 left the reset's status to the orchestrator and the owner; the
+owner's ruling of 31 October 2026 allows it (the dated note under the safety paragraph, above).*
 
 ## Files
 

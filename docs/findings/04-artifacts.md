@@ -30,15 +30,20 @@ fp32 / fp16 / int8 (switching power, energy per op and per multiply-add, burst a
 die's rise and the limiting test, with estimates marked apart from measurements), and sections on speed, heat, power,
 the formats, zeros, transistors, the literature and what is open, with three charts. The table and the charts are
 generated from this repository's committed data (E78, E80, E83 and the Q130 desk directories, read at commit
-`734e997f`) by a chart builder that lives, with the page's source, in the owner's private research log rather than in
+`734e997f`; since the rebuild below, these and E84, E86, E87, E89, E91 and the real tiles, read at `803fd16a`) by a
+chart builder that lives, with the page's source, in the owner's private research log rather than in
 this repository; the page is recorded here because every figure on it cites a file here. Space
 `8e61a8e0-f541-4d1e-87b2-15ee2a335e37`, public, unlisted, linked from
 [the Horace hub](https://spacesheep.dev/@yaroslavvb/horace-hub). First deployed at 16:37 PDT (`f94dca088ed2`, then
 `71fdb0e4dbff` at 16:40), corrected after its verifier and redeployed at 17:30 PDT as `759156cadf12`: the zero gate with
 its A side (one zero A word gates a whole micro-op), the leakage loop's gain scoped to the minute-long runs, five
-idle-reset burst cells marked with their reset-free means, and E82's missed band. 🛑 When this entry was written (22:4x
-PDT, `759156cadf12` still live) the page named E84 and E85 "running, results to follow" and carried none of E86–E91 or
-Q130(n): until it is rebuilt, [05-claims.md](05-claims.md), "Q130 additions", is the record for those.
+idle-reset burst cells marked with their reset-free means, and E82's missed band. **Rebuilt in place at 22:53 PDT as
+`df55db86ada8`** (Q130(p), over `759156cadf12`, which still named E84 and E85 "running, results to follow"): E84 on
+card 0 beside aifoundry2 in a generated cross-card speed table, E85's camera per kind, E88's split, E89's fine heat
+reading, E90's signs, and a section on the real tensors (Q130(n), E86, E87, E91) with its own chart; the kinds table
+gained nine GPT-2 rows. Its verifier's wording fixes followed in place at about 23:32 PDT as `9729b0fe0afe`
+(every real-tensor ratio names its baseline; the real-tensor section is scoped to three GPT-2 tiles). Still public
+and unlisted. The claims for those experiments are in [05-claims.md](05-claims.md), "Q130 additions".
 
 **A24 · From matmul speed to one transistor switch** (27 October 2026, Q128). The nine-step chain on one
 page: speed, the governor, board watts, picojoules per multiply-add, femtojoules per flipped operand bit,
@@ -911,7 +916,7 @@ Q130(g), sourced only to public material.
 
 On the owner's *"feel free to keep using the lab"* (about 18:1x), Q130's evening round added one desk tree and six card
 experiments, each with its harness committed before its claim, then verified and corrected in its own commit. Their
-claims are in [05-claims.md](05-claims.md), "Q130 additions"; A25 (above) does not carry them yet.
+claims are in [05-claims.md](05-claims.md), "Q130 additions"; A25 (above) carries them since its rebuild at 22:53 PDT.
 
 | What | Where | What is in it |
 |---|---|---|

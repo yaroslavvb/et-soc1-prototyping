@@ -3841,9 +3841,9 @@ E63 amendment A1's geometry unchanged (192 minions, six a shire, at 800 MHz); ea
 (departure b); released 16:39. TDP 65 W / 65 °C read at both ends. 🛑 **One write:** the sampler, inherited from E63's
 runner, ran `ettelem sample --every-ms 100 --reset-ms 1000`, which sends the SP a statistics reset that the SP forwards
 to the PMIC (0x47): **2,205 resets** in the session. No governor, TDP, threshold, clock, card reset, PCIe, driver or
-firmware command was sent. Whether the reset counts as PMIC work under Q130's and AGENT.md's rules is a **ruling owed by
-the owner**; E52's, E62's, E63's and E73's sessions recorded the same flag, E64, E80 and E83 ran without it, and E86–E91
-sampled without it.
+firmware command was sent. Whether the reset counts as PMIC work under Q130's and AGENT.md's rules was put to the
+owner, and **the owner's ruling of 31 October 2026 allows it** (AGENT.md §5); E52's, E62's, E63's and E73's sessions
+recorded the same flag, E64, E80 and E83 ran without it, and E86–E91 sampled without it.
 
 **Results** (camera signal at 0.05 Hz; mK per W of the board's fundamental).
 - **The camera weighs fp32 and fp16 random data as the meter does:** fp32 random 267.6 ± 19.9 mK (52.10 ± 3.82 mK/W),
@@ -3866,8 +3866,9 @@ command" now names the statistics reset; "−29%/h" is −29 ± 29 %/h; "8 of 9 
 firmware is named from E69's read (release 1.4.0 / BL2 0.22.0, not read by E85).
 **What it changes.** The camera, blind to watts, weighs whole kinds of numbers, not only flipped bits, at the reference
 rung's mK per W within about 25% in fp32 and fp16. int8's heat stays unseen by the camera (E89 measured it on the die's
-sensors). The statistics reset is a PMIC command older lab runs inherited: until the owner rules, runners sample without
-it ([14-card-behaviour.md](14-card-behaviour.md), the telemetry table).
+sensors). The statistics reset is a PMIC command older lab runs inherited, allowed by the owner's ruling of
+31 October 2026; it restarts the PMIC's running average, so a run that tests the governor's power loop samples
+without it ([14-card-behaviour.md](14-card-behaviour.md), the telemetry table).
 **Report:** no page of its own; the data README is the public record.
 
 ## E86 — the real GPT-2 tiles' energy beside E78's anchors (Q130, evening round; card runs 2026-10-31, 20:07–20:41 PDT, aifoundry3) — pre-registered
@@ -4145,6 +4146,8 @@ independent pass, not a lap or a burst inside one: E89's lap-unit verdicts were 
 of 24 pass, 1 inconclusive). (11) Register a spare pass inside the budget and the budget in seconds, and implement it as
 an exact check, never a whole-minute floor: E91 lost its registered minimum by 1 s. (12) A short session's automatic
 leakage slope can decide its gates (E91: 0.422 W/°C against 0.20–0.24 elsewhere): register the slope, or a check on it.
-(13) The sampler's `--reset-ms` sends the PMIC a statistics reset (E85 C1): sample without it until the owner rules.
+(13) The sampler's `--reset-ms` sends the PMIC a statistics reset (E85 C1). The owner's ruling of 31 October 2026 allows
+it: record it in the run's sampler arguments, and leave it out of a run that tests the governor's power loop, because it
+restarts the PMIC's running average (E41).
 (14) A version string does not say what a management command returns: on aifoundry3, command 74 group 0 returned whole
 degrees on 7 Oct and raw 12-bit codes on 31 Oct (E89 A1), so probe a command read-only before the passes rely on it.
