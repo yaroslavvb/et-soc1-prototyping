@@ -384,7 +384,10 @@ nets = merged-net toggles of the whole VPU (`nets_map`); unit = the multiply-add
 | `analysis.json`, `analyze.py`, `make_tables.py` | every fit and out-of-sample score above |
 | `e92-bench-prediction-frozen.json` | the prediction as frozen at `de545f0c`, byte for byte |
 | `e92-bench-prediction.json`, `predict_e92.py`, `e92-prediction-scored.json`, `score_e92_prediction.py` | every variant of the prediction (its `nets_hier2` is checked against the frozen file), and the score |
-| `counts-e94e95.json`, `predict_e94_e95.py`, `e94-e95-bench-prediction.json`, `e94-e95-bench-prediction.md` | the frozen predictions for E94 and E95 (§10) |
+| `counts-e94e95.json`, `predict_e94_e95.py`, `e94-e95-bench-prediction.json`, `e94-e95-bench-prediction.md` | M2's frozen predictions for E94 and E95 (§10) |
+| `predict_m4.py`, `m4-bench-prediction.json`, `m4-bench-prediction.md` | M4 and I3, frozen for E95 (§11) |
+| `score_frozen.py`, `scored-frozen.json` | those frozen predictions against E95 and E94 (§12) |
+| `counts-e103-pool.json`, `simple-e103-pool.json` | the bench and the simple predictors on E103's 215 candidates |
 | `fcheck/` | the functional check's output |
 | `old-benches/` | the old benches with and without the flag; the recount redone; `use_prev_sigs`; the flip |
 | `optimiser-sensitivity/` | the same three kinds with Verilator's optimisations off and on, before the map existed |
@@ -417,6 +420,23 @@ Rerun: `run_kinds.py … --types fp32,fp16,int8 --only __none__ --extra-tiles <t
 
 ## 11. A second model, frozen for E95: the operand bus gets its own price
 
-[`m4-bench-prediction.md`](m4-bench-prediction.md) (`predict_m4.py`). Reading the frozen §10 predictions against E94's published data (post hoc by the clock, as §10 says): fp32 rms 0.44 W, bias −0.37; fp16 0.40 W, bias −0.16; int8 0.34 W, bias −0.33; every tile inside its interval. The misses sit on gated kinds, as §6 named. So I compared forms on what had been read, holding out whole experiments, and one change stands out: **the lane's operand bus costs about four to five times a local net.** Fitted on E78 alone, M4 is k_core 1.62 fJ (multiplier, adder and normaliser), k_bus 7.53 fJ, k_rest 2.22 fJ (every other net), a 1.07 fJ per clocked bit: E78 fit 0.136 W against M2's 0.357 W, E86 0.145 against 0.198, E90 0.220 against 0.483, E92 0.242 against 0.436, card 1 with E82's scale: E88 0.214 against 0.452, E94 0.178 against 0.415. It does not help everywhere: E70's spread ladder gets worse, 0.369 against 0.172, and E60's low-bit ladder stays near 1 W. int8's own form, I3 (nets, bus 16.7 fJ, clocks), fits E78 at 0.181 W against 0.287 W.
+[`m4-bench-prediction.md`](m4-bench-prediction.md) (`predict_m4.py`). Reading the frozen §10 predictions against E94's published data (post hoc by the clock, as §10 says): fp32 rms 0.44 W, bias −0.37; fp16 0.40 W, bias −0.16; int8 0.34 W, bias −0.33; every tile inside its interval. The misses sit on gated kinds, as §6 named. So I compared forms on what had been read, holding out whole experiments, and one change stands out: **the lane's operand bus costs about four to five times a local net.** Fitted on E78 alone, M4 is k_core 1.62 fJ (multiplier, adder and normaliser), k_bus 7.53 fJ, k_rest 2.22 fJ (every other net), a 1.07 fJ per clocked bit: E78 fit 0.136 W against M2's 0.357 W, E86 0.145 against 0.193, E90 0.220 against 0.482, E92 0.242 against 0.434, card 1 with E82's scale: E88 0.214 against 0.452, E94 0.178 against 0.416. It does not help everywhere: E70's spread ladder gets worse, 0.369 against 0.172, and E60's low-bit ladder stays near 1 W. int8's own form, I3 (nets, bus 16.7 fJ, clocks), fits E78 at 0.181 W against 0.287 W.
 
 **The form was chosen after reading E94, so E94 does not test it. E95 does:** this section's commit precedes E95's data on main, and I read none of it. §10's M2 stands as committed.
+
+## 12. The frozen models against E95 and E94
+
+[`scored-frozen.json`](scored-frozen.json), `score_frozen.py`. **E95 is the clean test:** M2 went up in `2b7ece4a` at 01:03:01 PST and M4 in `b995463e` at 01:08:31 PST, and E95's data commit `ab23b1aa` came at 01:37:06 PST, on aifoundry3 card 0, E78's card, with no scale.
+
+| E95, 30 blind tiles | n | M4 or I3: rms (W), bias, r | M2: rms (W), bias, r | Q130(n)'s (a): rms (W) | inside M4's 95% |
+|---|---:|---:|---:|---:|---:|
+| floats | 19 | **0.158**, +0.116, 0.9999 | 0.415, +0.041, 0.9996 | 0.610 | 19 |
+| fp32 | 11 | **0.102**, +0.078, 1.0000 | 0.424, +0.138, 0.9996 | 0.506 | 11 |
+| fp16 | 8 | **0.212**, +0.169, 0.9999 | 0.403, −0.093, 0.9999 | 0.730 | 8 |
+| int8 | 11 | **0.166**, +0.004, 0.9942 | 0.285, −0.249, 0.9953 | 0.824 | 11 |
+| floats, gate closing ≥ 10% | 7 | **0.082**, +0.053 | 0.482, −0.356 | 0.806 | 7 |
+| floats, dense | 12 | **0.189**, +0.153 | 0.371, +0.272 | 0.458 | 12 |
+
+So the bus term did what it was added for: M2's 0.36 W shortfall on real gated tiles is gone, blind. **The largest misses:** `fp16.r2_bert_l6_up`, 21.74 W measured, 22.13 W predicted, and the other dense fp16 tiles, all 0.1–0.4 W high; int8's calibrations, ±0.3 W. These are real tensors, which E78's kinds resemble: E103 is the test built to hurt it.
+
+**E94, by the clock post hoc for M2 and no test at all for M4** (§10, §11). M2 on the 51 draws: fp32 0.437 W, bias −0.373; fp16 0.397 W, −0.159; int8 0.338 W, −0.332; all 51 inside the interval. M4 on them, for the record: 0.183, 0.174 and 0.283 W. **Within one rule, the bench says which draw costs more:** centred on the rule's mean, M2's error is 0.03–0.07 W where the draws themselves spread by 0.47–0.53 W (`fp32.nn_like`, `fp32.sparse50`, `fp16.nn_like`; `scored-frozen.json` `e94.within_rule`). I read no E94 data before M2's commit, but nothing shows that from outside.
