@@ -121,7 +121,13 @@ def point(a, typ, kind, path, n0, warm, ops):
 
 def job(args):
     typ, kind, path, a, n0 = args
-    return typ, kind, n0, point(a, typ, kind, path, n0, 1, a.ops)
+    try:
+        return typ, kind, n0, point(a, typ, kind, path, n0, 1, a.ops)
+    except Exception as e:
+        if not a.keep_going:
+            raise
+        print(f"FAILED {typ}.{kind} n0={n0}: {e}", flush=True)
+        return typ, kind, n0, None
 
 
 def mean_rows(rows):
@@ -148,6 +154,7 @@ def main():
     ap.add_argument("--ops", type=int, default=2)
     ap.add_argument("--jobs", type=int, default=8)
     ap.add_argument("--tmp", default=None)
+    ap.add_argument("--keep-going", action="store_true", help="drop a tile whose run fails, and say so, instead of stopping")
     a = ap.parse_args()
     only = set(x for x in a.only.split(",") if x)
     work = []
@@ -170,6 +177,8 @@ def main():
     res = {"_bench": "rtl-sim/fma_toggle_v2 (vpu_top, -fno-dfg)", "_units": "per TensorFMA op on one minion", "_points": a.points, "rows": {}}
     for typ, name, path in tiles:
         rows = [r for t, k, _, r in done if t == typ and k == name]
+        if any(r is None for r in rows):
+            continue
         rows.sort(key=lambda r: r["n0"])
         res["rows"][f"{typ}.{name}"] = {"type": typ, "kind": name, "macs_per_op": MACS.get(typ), "points": rows, "mean": mean_rows(rows)}
         m = res["rows"][f"{typ}.{name}"]["mean"]
