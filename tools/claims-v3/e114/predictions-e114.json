@@ -1,0 +1,331 @@
+{
+ "experiment": "E114",
+ "request": "Q133",
+ "card": "aifoundry1-c0",
+ "frozen": "written by make_predictions_e114.py from the sources below and committed with E114.md before the #community-lab claim and before any E114 device access; any change after it goes in E114.md's Amendments, dated, before the data it touches",
+ "sources": {
+  "E84": {
+   "path": "docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/results.json",
+   "sha256": "69c76c753a76a0e4b31dd7949a6dd9610c5a86f5aad82a0769d314664249c2ce"
+  },
+  "aifoundry2": {
+   "E80": {
+    "path": "docs/reports/data/2026-10-31-e80-kinds-speed/results.json",
+    "sha256": "f8ab6fc08ef73a5f0e91fe518c2d33162fe14687235ab763ac50639dd49ae6fd"
+   },
+   "E83": {
+    "path": "docs/reports/data/2026-10-31-e83-kinds-speed-rest/results.json",
+    "sha256": "3717f1767bdb76f536b7af8dbedf01865984638e649f892c2893e47d59676b3e"
+   },
+   "E87": {
+    "path": "docs/reports/data/2026-10-31-e87-real-tensors-speed/results.json",
+    "sha256": "274750b3a21011cb44af52c0535ba891bf76c489038e78b32d9acbf04c631f04"
+   },
+   "E96": {
+    "path": "docs/reports/data/2026-11-01-e96-real-tensors-speed/results.json",
+    "sha256": "20fe5674d78f497a23338458b10e3fe003a56b6670f166650ad436ea2a6c6026"
+   }
+  }
+ },
+ "e84_start_config": {
+  "tdp_w": 65,
+  "temp_threshold_c": 65,
+  "power_state": 3,
+  "power_state_name": "low_power",
+  "minion_mhz": 600,
+  "minion_mv": 519
+ },
+ "e84_firmware": {
+  "release": "1.4.0",
+  "bl1": "0.22.0",
+  "bl2": "0.22.0",
+  "pmic": "1.6.1",
+  "minions": "0.25.1",
+  "source": "E84 README amendment A1 and ident/ident-154200.out"
+ },
+ "kinds": {
+  "fp16/zeros": {
+   "type": "fp16",
+   "tile": "tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+   "e84_sus_limit": "none",
+   "e84_sus_rate": 24.354,
+   "e84_sus_mhz": 794.1,
+   "e84_sus_mhz_nonramp": 794.1,
+   "e84_sus_w": 29.6,
+   "e84_sus_die": 56.0,
+   "e84_sus_die_max": 57,
+   "e84_sus_die_start": 57,
+   "e84_sus_ramp_share": 0.0,
+   "e84_run": "SUS-05-fp16-zeros-r1"
+  },
+  "fp16/ones": {
+   "type": "fp16",
+   "tile": "tools/claims-v3/kinds/tiles/fp16/ones.bin",
+   "e84_sus_limit": "none",
+   "e84_sus_rate": 24.395,
+   "e84_sus_mhz": 795.6,
+   "e84_sus_mhz_nonramp": 800,
+   "e84_sus_w": 46.72,
+   "e84_sus_die": 63.9,
+   "e84_sus_die_max": 65,
+   "e84_sus_die_start": 53,
+   "e84_sus_ramp_share": 0.026,
+   "e84_run": "SUS-06-fp16-ones-r1"
+  },
+  "fp16/randn": {
+   "type": "fp16",
+   "tile": "tools/claims-v3/kinds/tiles/fp16/randn.bin",
+   "e84_sus_limit": "thermal",
+   "e84_sus_rate": 19.107,
+   "e84_sus_mhz": 631.9,
+   "e84_sus_mhz_nonramp": 631.9,
+   "e84_sus_w": 49.04,
+   "e84_sus_die": 65.8,
+   "e84_sus_die_max": 67,
+   "e84_sus_die_start": 53,
+   "e84_sus_ramp_share": 0.0,
+   "e84_run": "SUS-07-fp16-randn-r1"
+  },
+  "int8/zeros": {
+   "type": "int8",
+   "tile": "tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "e84_sus_limit": "none",
+   "e84_sus_rate": 83.709,
+   "e84_sus_mhz": 794.6,
+   "e84_sus_mhz_nonramp": 800,
+   "e84_sus_w": 30.87,
+   "e84_sus_die": 56.9,
+   "e84_sus_die_max": 57,
+   "e84_sus_die_start": 57,
+   "e84_sus_ramp_share": 0.031,
+   "e84_run": "SUS-08-int8-zeros-r1"
+  },
+  "int8/full": {
+   "type": "int8",
+   "tile": "tools/claims-v3/kinds/tiles/int8/full.bin",
+   "e84_sus_limit": "none",
+   "e84_sus_rate": 83.078,
+   "e84_sus_mhz": 788.7,
+   "e84_sus_mhz_nonramp": 800,
+   "e84_sus_w": 44.42,
+   "e84_sus_die": 62.8,
+   "e84_sus_die_max": 64,
+   "e84_sus_die_start": 53,
+   "e84_sus_ramp_share": 0.062,
+   "e84_run": "SUS-09-int8-full-r1"
+  }
+ },
+ "e84_ratio_zeros_over_heavy_sus_rate": {
+  "fp16": 1.2746,
+  "int8": 1.0076
+ },
+ "e84_die_line": {
+  "a_c": 41.78,
+  "b_c_per_w": 0.4753,
+  "n_runs": 13,
+  "what": "die = a + b x board W over E84's 13 sustained runs (per-run sus_w_mean, sus_die_mean), E84 corrections-check C1"
+ },
+ "aifoundry2_pool": {
+  "fp16": {
+   "zeros_runs": [
+    {
+     "exp": "E80",
+     "rate": 24.227
+    },
+    {
+     "exp": "E83",
+     "rate": 24.556
+    },
+    {
+     "exp": "E87",
+     "rate": 24.557
+    },
+    {
+     "exp": "E96",
+     "rate": 24.556
+    }
+   ],
+   "heavy_runs": [
+    {
+     "exp": "E80",
+     "rate": 18.68
+    },
+    {
+     "exp": "E83",
+     "rate": 18.654
+    },
+    {
+     "exp": "E87",
+     "rate": 18.543
+    },
+    {
+     "exp": "E87",
+     "rate": 18.835
+    },
+    {
+     "exp": "E96",
+     "rate": 18.514
+    },
+    {
+     "exp": "E96",
+     "rate": 18.748
+    }
+   ],
+   "zeros_mean": 24.474,
+   "zeros_sd": 0.1647,
+   "n_zeros": 4,
+   "heavy_mean": 18.6623,
+   "heavy_sd": 0.1215,
+   "n_heavy": 6,
+   "ratio_of_means": 1.3114
+  },
+  "int8": {
+   "zeros_runs": [
+    {
+     "exp": "E80",
+     "rate": 84.328
+    },
+    {
+     "exp": "E83",
+     "rate": 83.086
+    },
+    {
+     "exp": "E87",
+     "rate": 83.028
+    },
+    {
+     "exp": "E96",
+     "rate": 83.695
+    }
+   ],
+   "heavy_runs": [
+    {
+     "exp": "E80",
+     "rate": 83.922
+    },
+    {
+     "exp": "E80",
+     "rate": 83.163
+    },
+    {
+     "exp": "E83",
+     "rate": 82.269
+    },
+    {
+     "exp": "E87",
+     "rate": 80.853
+    },
+    {
+     "exp": "E96",
+     "rate": 83.309
+    },
+    {
+     "exp": "E96",
+     "rate": 83.448
+    },
+    {
+     "exp": "E96",
+     "rate": 81.472
+    },
+    {
+     "exp": "E96",
+     "rate": 83.65
+    }
+   ],
+   "zeros_mean": 83.5343,
+   "zeros_sd": 0.6091,
+   "n_zeros": 4,
+   "heavy_mean": 82.7608,
+   "heavy_sd": 1.1095,
+   "n_heavy": 8,
+   "ratio_of_means": 1.0093
+  }
+ },
+ "expected": {
+  "what": "context, never a verdict: where each E114 cell mean is expected to fall (E84's single run, with run-to-run and day-to-day room)",
+  "fp16/zeros": {
+   "sus_rate": "24.20-24.56",
+   "sus_mhz": "788-800",
+   "limit": "none"
+  },
+  "fp16/ones": {
+   "sus_rate": "23.80-24.56",
+   "sus_mhz": "775-800",
+   "limit": "none (E84's die maxed at 65 C, so a thermal run is possible)"
+  },
+  "fp16/randn": {
+   "sus_rate": "18.50-19.70",
+   "sus_mhz": "610-655",
+   "limit": "thermal"
+  },
+  "int8/zeros": {
+   "sus_rate": "83.00-84.33",
+   "sus_mhz": "788-800",
+   "limit": "none"
+  },
+  "int8/full": {
+   "sus_rate": "82.00-84.00",
+   "sus_mhz": "780-797",
+   "limit": "none"
+  },
+  "rho_fp16": "1.22-1.33 (E84 1.2746)",
+  "rho_int8": "0.995-1.020 (E84 1.0076)"
+ },
+ "rules": {
+  "E114-R1": {
+   "says": "E84's single sustained run of each of the five kinds lies inside E114's 95% prediction interval for one new run, on the kernel's sustained rate: mean +- t(0.975, n-1) x sd x sqrt(1 + 1/n) over the kind's E114 runs",
+   "need_kinds": 4,
+   "of": 5,
+   "min_runs_per_kind": 3,
+   "kind": "primary",
+   "pass": ">= 4 of 5 kinds inside; FAIL when >= 2 scored kinds are outside; otherwise UNDER-RESOLVED",
+   "expected": "PASS"
+  },
+  "E114-R2": {
+   "says": "fp16 zeros faster than fp16 random data, sustained, replicated: rho16 = the mean over passes of rate(fp16 zeros, pass p) / rate(fp16 randn, pass p), with its 95% interval t(0.975, n-1) x sd / sqrt(n)",
+   "bar": 1.15,
+   "min_pairs": 3,
+   "kind": "primary",
+   "pass": "PASS when the interval's lower end >= 1.15; FAIL when its upper end < 1.15; otherwise INCONCLUSIVE; UNDER-RESOLVED below three pairs",
+   "expected": "PASS",
+   "expected_point": 1.2746
+  },
+  "E114-R3": {
+   "says": "int8 zeros against int8 full, sustained: rho8 = the mean over passes of rate(int8 zeros, pass p) / rate(int8 full, pass p), with its 95% interval",
+   "bar": 0.02,
+   "min_pairs": 3,
+   "kind": "primary (a reading, scored against the frozen one)",
+   "readings": "FASTER when the interval's lower end > 1; SLOWER when its upper end < 1; SAME_WITHIN_BAR when it holds 1 and lies inside [0.98, 1.02]; otherwise INCONCLUSIVE; UNDER-RESOLVED below three pairs",
+   "expected": "SAME_WITHIN_BAR",
+   "expected_point": 1.0076
+  },
+  "E114-R4": {
+   "says": "the limiting test replicates: each E114 run's sustained limit (reduce_e84.py's label, unchanged) equals E84's for its kind (fp16 randn thermal, the other four none)",
+   "max_mismatch": 1,
+   "min_runs": 14,
+   "kind": "primary",
+   "pass": "PASS when at most 1 run of >= 14 differs; FAIL when >= 2 differ; otherwise UNDER-RESOLVED",
+   "expected": "PASS"
+  },
+  "E114-S1": {
+   "says": "card 0's rho (R2's and R3's statistic) against aifoundry2's ratio of mean sustained rates over its committed runs (E80, E83, E87, E96): delta = rho(card 0) - rho(aifoundry2), 95% interval t(0.975, df) x sqrt(se_c0^2 + se_a2^2), df = the smaller of card 0's pairs and aifoundry2's smaller run count, minus 1; se_a2 by the delta method",
+   "bars": {
+    "fp16": 0.05,
+    "int8": 0.02
+   },
+   "kind": "secondary",
+   "readings": "ALIKE when the interval lies inside +-bar; DIFFERENT when it excludes 0; otherwise INCONCLUSIVE",
+   "expected": {
+    "fp16": "DIFFERENT (card 0 lower: its random fp16 draws less power and throttles less, while both cards' zeros sit near the 800 MHz cap; at three pairs the interval may not resolve it)",
+    "int8": "INCONCLUSIVE"
+   }
+  }
+ },
+ "context_never_a_verdict": [
+  "each cell's sampled clock, non-ramp clock, board W, die mean and max, ramp share and limit, with 95% intervals and prediction intervals; E84's single run beside each",
+  "pass-paired zeros minus heavy sustained clock per format (E84-P1's form, -10 MHz)",
+  "today's heat path against 31 Oct's: each run's die minus E84's die line at its board W, mean and 95% interval",
+  "rho as the ratio of the two cells' mean rates, delta-method interval, beside R2's and R3's mean of pass ratios",
+  "card 0's idle level per run (idle_w, idle_mhz) and the cooling gate's reading and hold"
+ ]
+}

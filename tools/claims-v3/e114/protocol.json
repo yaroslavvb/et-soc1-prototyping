@@ -1,0 +1,47 @@
+{
+ "experiment": "E114",
+ "request": "Q133",
+ "card": "aifoundry1-c0",
+ "order_seed": 114,
+ "note": "E84's sustained shape (tools/claims-v3/kspeed/e84/protocol.json SUS: nine back-to-back 8 s processes from a die reading <= 57 C, E80's and E64's SUS) on E84's five fp16 and int8 kinds that bear on its fp16/int8 sustained cells, three passes each, on aifoundry1 card 0 under its own governor, run by E84's runner (tools/claims-v3/kspeed/e84/run_e84.py) unchanged; no fp32 (random fp32 trips card 0's 75 W PMIC alarm, E84); nothing is set on the card",
+ "tools": {
+  "heater": "build/sparsity/host/sparsity_host",
+  "kernel": "build/sparsity/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-e84/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "predictions": "tools/claims-v3/e114/predictions-e114.json",
+ "sampler": {"every_ms": 100},
+ "safety": {"abs_stop_c": 85, "board_cap_w": 97, "cap_consecutive": 3},
+ "caps": {"max_card_min": 24},
+ "blocks": [
+  {
+   "name": "SMOKE",
+   "title": "one 2 s launch of fp16 randn and of int8 full (not analysed): the file path, ET_DEVICES=0 and the trace ring on card 0; no fp32",
+   "default": false,
+   "start": {"mode": "cool", "max_c": 99, "max_wait_s": 5},
+   "launch": {"seconds": 2, "budget": 3.5, "processes": 1},
+   "tail_s": 3,
+   "runs": [
+    {"type": "fp16", "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin", "label": "fp16-randn"},
+    {"type": "int8", "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin", "label": "int8-full"}
+   ]
+  },
+  {
+   "name": "SUS",
+   "title": "sustained: nine back-to-back 8 s processes (~76 s) from a die reading <= 57 C (E84's SUS, unchanged), the five kinds once per pass, three passes, each pass shuffled",
+   "passes": 3,
+   "shuffle": true,
+   "start": {"mode": "cool", "max_c": 57, "max_wait_s": 300},
+   "launch": {"seconds": 8, "budget": 9.5, "processes": 9},
+   "tail_s": 6,
+   "runs": [
+    {"type": "fp16", "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin", "label": "fp16-zeros"},
+    {"type": "fp16", "values": "file:tools/claims-v3/kinds/tiles/fp16/ones.bin", "label": "fp16-ones"},
+    {"type": "fp16", "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin", "label": "fp16-randn"},
+    {"type": "int8", "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin", "label": "int8-zeros"},
+    {"type": "int8", "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin", "label": "int8-full"}
+   ]
+  }
+ ]
+}
