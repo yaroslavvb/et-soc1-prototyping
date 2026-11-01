@@ -1,0 +1,57 @@
+# [A] R2 and R3 follow from R1: the frozen distance between M4 and each comparator, before any data, minus M4's measured error, is the least that comparator can read
+  rms(M4 - q130n): 3.814 W, without z_dn_ab 2.582 W. At R1's PASS line 0.60 W, q130n reads at least 3.21 W, a gap of at least 2.61 W. Measured: M4 0.314, q130n 3.960 W
+  rms(M4 - flop): 1.801 W, without z_dn_ab 0.986 W. At R1's PASS line 0.60 W, flop reads at least 1.20 W, a gap of at least 0.60 W. Measured: M4 0.314, flop 1.775 W
+  rms(M4 - M2): 0.379 W, without z_dn_ab 0.383 W. At R1's PASS line 0.60 W, M2 reads at least -0.22 W, a gap of at least -0.82 W. Measured: M4 0.314, M2 0.579 W
+
+# [B] how the tiles were picked
+  float pool 189; ranks by disagreement of the 23 chosen: [1, 10, 11, 14, 16, 22, 23, 27, 31, 34, 39, 40, 43, 44, 45, 59, 71, 76, 79, 80, 84, 120, 155]; in the top 23: 7
+  pool tiles never eligible by QUOTAS: 36; the largest: [('fp16.z_dn_ab', 9.74), ('fp32.h_ab_lo', 8.6), ('fp16.z_dn_a', 8.57), ('fp16.z_dn_b', 8.45), ('fp32.h_b_lo_pi', 6.54), ('fp32.h_b_lo', 6.26)]
+  of which by stem: ['h_ab/fp16', 'h_ab/fp32', 'h_b/fp16', 'h_b/fp32', 'i_neg/int8', 'o_anti/fp32', 'o_sort/fp32', 's_arow/fp32', 's_bhalf/fp32', 'z_b/fp16', 'z_dn/fp16']
+  median |M4 - M2|: chosen 0.292 W, float pool 0.252 W
+  leverage in M4's count space: E78 median 0.130, max 0.255; the 23 tiles median 0.118, inside E78's max 21 of 23; outside: ['fp16.g_relu_shift15', 'fp32.g_relu_shift15']
+  r(|miss|, leverage) -0.19
+
+# [C] the card scale
+  frozen scale 0.9722: rms 0.314 W; no scale: rms 0.474 W; fitted on E103 itself: 0.9773, rms 0.303 W
+  E82 with dips removed was reduced at leak {'mode': 'auto', 'k_w_per_c': 0.25411764705882567, 'n_runs': 313}; E103's primary at {'mode': '0.2414', 'k_w_per_c': 0.2414, 'n_runs': -1}
+
+# [D] runs: planned against kept
+  planned 150; runs 148, kept 148
+  from run.log: [('p10310', '02:26:22 [aifoundry1-c1] pass 10310 #8 fp32.c_near_rand: launch reading not reached (hot 59.0 C, now 59.0 C after 0 heats, 1.7 s, quiet 1.86'), ('p10312', '02:47:46 [aifoundry1-c1] pass 10312 #35 fp32.x_e_g: launch reading not reached (hot 59.0 C, now 59.0 C after 0 heats, 1.7 s, quiet 1.86 s): ')]
+  tiles with fewer than 3 passes: {'fp32.c_near_rand': 2, 'fp32.x_e_g': 2}
+  fp32.c_near_rand: D 19.152, n 2, se 0.049, ci95 0.621
+  fp32.x_e_g: D 14.787, n 2, se 0.031, ci95 0.396
+
+# [E] the intervals, by format, and the arms
+  fp32: 8 of 13 inside; median half-width 0.38 W
+  fp16: 10 of 10 inside; median half-width 0.38 W
+  int8: 7 of 7 inside; median half-width 0.57 W
+  arm-sensitive verdicts: {'E103-R1': {'leak0.545': 'INCONCLUSIVE', 'leak0': 'INCONCLUSIVE'}, 'E103-R4': {'dips_kept': 'INCONCLUSIVE', 'auto': 'INCONCLUSIVE', 'leak0.3803': 'INCONCLUSIVE', 'leak0.545': 'INCONCLUSIVE'}, 'E103-R5': {'dips_kept': 'INCONCLUSIVE', 'leak0.545': 'INCONCLUSIVE'}, 'E103-R6': {'leak0.545': 'INCONCLUSIVE'}, 'E103-R7': {'dips_kept': 'INCONCLUSIVE', 'leak0.3803': 'INCONCLUSIVE', 'leak0.545': 'FAIL', 'leak0': 'FAIL'}, 'E103-R8': {'auto': 'PERSISTS', 'leak0.3803': 'PERSISTS', 'leak0.545': 'PERSISTS'}, 'E103-S1': {'leak0.545': 'FAIL', 'leak0': 'FAIL'}}
+
+# [F] fp32.c_near_rand: how near does it cancel, along a launch? (replay_c_near_rand.py, run on the mini)
+A all 1: True
+op       0: MACs losing >= 8 bits 50.0%, >= 4 bits 50.0%; median |C| 2.071e-06
+op    1000: MACs losing >= 8 bits 27.7%, >= 4 bits 48.4%; median |C| 0.002029
+op    5000: MACs losing >= 8 bits 4.7%, >= 4 bits 43.4%; median |C| 0.01013
+op   20000: MACs losing >= 8 bits 0.8%, >= 4 bits 25.8%; median |C| 0.04053
+op   91575: MACs losing >= 8 bits 0.0%, >= 4 bits 3.5%; median |C| 0.1895
+op  274725: MACs losing >= 8 bits 0.0%, >= 4 bits 1.2%; median |C| 0.5775
+op  457875: MACs losing >= 8 bits 0.0%, >= 4 bits 1.2%; median |C| 0.9563
+  M4 at the bench's three launch points: [17.73, 18.28, 18.77] W
+  one launch's record: {'iters': 533941, 'launch': 0, 'cycles_per_op': 546.001, 't_start_ms': 1793528767889, 't_end_ms': 1793528768376, 'result': 'unchecked'}
+  ops in that launch at 600 MHz: 535164
+
+# [G] the verifier's comparators, recomputed; post hoc. Constants from E78 alone, scale from E82 with dips removed through the origin, as M4
+  M4, frozen                                             E103 floats  0.314  without z_dn_ab  0.320  E95 floats  0.158
+  M2, frozen                                             E103 floats  0.579  without z_dn_ab  0.590  E95 floats  0.415
+  clocked bits + register bits that change, 2 constants  E103 floats  0.734  without z_dn_ab  0.714  E95 floats  0.629
+  E92's flop-price form refit on E78 alone, per format   E103 floats  1.716  without z_dn_ab  0.740  E95 floats  0.266
+  u + (A+B), 2 constants, pooled                         E103 floats  2.941  without z_dn_ab  1.692  E95 floats  1.692
+  u + (A+B), per format                                  E103 floats  3.098  without z_dn_ab  1.475  E95 floats  1.300
+  clocked bits + bus nets, 2 constants                   E103 floats  2.816  without z_dn_ab  2.581  E95 floats  3.049
+  u alone                                                E103 floats  4.642  without z_dn_ab  4.426  E95 floats  3.956
+  frozen: flop price E103 1.775, without z_dn_ab 0.913; Q130(n) 3.960, without z_dn_ab 2.788
+  E95 floats, frozen: M4 0.158, Q130(n) 0.610: 3.9x
+
+# [H] M4's form search, as committed in model-form-search/: forms tried
+  floats: explore1 11 forms, explore2 3 more (14 distinct); int8: 5 forms. Chosen: 'core,bus,rest' and 'nets-bus,bus,clk'
