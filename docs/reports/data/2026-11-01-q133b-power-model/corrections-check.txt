@@ -1,0 +1,88 @@
+== C1. The model search, as first run and as committed (fit_m5.py's own code; post hoc)
+   the first fit, 11:05:47-11:10:07 PST: forms F0-F8, E91's anchors kept, 258 float / 75 int8 rows (the 31 tiles of
+   counts-q133b-train.json not yet counted): nested 0.216 W, picks F7_M4_gtr 120 / F2_stages 4, F0 plain 0.215 W
+   (its printed output; the run is not repeated here because its rows no longer exist on disk)
+   committed: F0-F12, committed rows (a check of this code against loko.json)
+      rows 283, kinds 151: nested 0.2006 W, picks {'F10_add_by_format': 150, 'F12_core_by_format_gtr': 1}; F0 plain 0.2113 W, F10 plain 0.1983
+      nested pools by format|card: {'fp16|a3': '0.1655 (n 52)', 'fp16|c1': '0.1976 (n 81)', 'fp32|a3': '0.1862 (n 65)', 'fp32|c1': '0.2314 (n 85)'}
+      reproduces loko.json's nested_loko.all exactly
+   A: F0-F8 only (the forms written before any fit ran), committed rows
+      rows 283, kinds 151: nested 0.2141 W, picks {'F8_stages_abits_gtr': 2, 'F2_stages': 149}; F0 plain 0.2113 W
+      nested pools by format|card: {'fp16|a3': '0.1817 (n 52)', 'fp16|c1': '0.2055 (n 81)', 'fp32|a3': '0.1850 (n 65)', 'fp32|c1': '0.2570 (n 85)'}
+   B: F0-F12, E91's three anchor rows kept (the row rule before 11:17:14)
+      rows 285, kinds 151: nested 0.2032 W, picks {'F10_add_by_format': 149, 'F12_core_by_format_gtr': 2}; F0 plain 0.2128 W, F10 plain 0.1994
+      nested pools by format|card: {'fp16|a3': '0.1653 (n 52)', 'fp16|c1': '0.1998 (n 82)', 'fp32|a3': '0.1850 (n 65)', 'fp32|c1': '0.2373 (n 86)'}
+   C: F0-F8, E91's anchor rows kept (the first fit's procedure on the final tiles)
+      rows 285, kinds 151: nested 0.2198 W, picks {'F8_stages_abits_gtr': 3, 'F2_stages': 145, 'F7_M4_gtr': 3}; F0 plain 0.2128 W
+      nested pools by format|card: {'fp16|a3': '0.1835 (n 52)', 'fp16|c1': '0.2131 (n 82)', 'fp32|a3': '0.1865 (n 65)', 'fp32|c1': '0.2648 (n 86)'}
+   int8, committed rows: rows 78, nested 0.2623 W, picks {'I0_I3': 42, 'I4_abits_bbits': 1, 'I3_gtr': 1}, I0 plain 0.2526 W
+   int8, E91 int8.full kept: rows 79, nested 0.2602 W, picks {'I0_I3': 42, 'I4_abits_bbits': 1, 'I3_gtr': 1}, I0 plain 0.2507 W
+   E91's rows the 11:17:14 change removed: [('E91', 'fp16.randn', 21.01121107840645), ('E91', 'fp32.randn', 23.39061972081572), ('E91', 'int8.full', 6.701010039036537)]
+   float rows whose tiles were counted after the forms changed (11:35-12:00): n 27; nested 0.194, M4's form refitted (plain) 0.195, chosen form plain 0.194, M4 frozen 0.205 W
+   int8 rows whose tiles were counted after the forms changed (11:35-12:00): n 4; nested 0.244, M4's form refitted (plain) 0.244, chosen form plain 0.244, M4 frozen 0.312 W
+
+== C2. What the per-format term buys (loko.json, m5.json, check-e102.json; post hoc)
+   rms(M5's nested) - rms(M4's form refitted, plain LOKO): -0.0107 W; paired bootstrap over 151 kinds (20,000, seed 1): 95% CI [-0.0278, +0.0070] W, P(d >= 0) = 0.116
+   add32 1.6195, add16 1.4981 fJ: difference 0.1215 +- 0.0300 fJ (1 s.e., jackknife by kind), z 4.05, correlation 0.822; add16 / add32 = 0.9250
+   group                                               n  M5 nested  F10 plain  M4 form refit  M4 frozen
+   E103, all                                          23      0.280      0.280          0.326      0.312
+   E103's A-side tiles (h_a_*, o_a_*)                  5      0.170      0.170          0.179      0.260
+   real tensors (E86, E91, E95)                       37      0.196      0.196          0.211      0.246
+   fp16 sign tiles, E92                               10      0.239      0.239          0.276      0.306
+   fp16 sign tiles, E104                              11      0.296      0.296          0.315      0.363
+   fp32 sign tiles, E92                               24      0.231      0.231          0.212      0.203
+   fp32 sign tiles, E104                               9      0.263      0.263          0.201      0.218
+   E106                                               10      0.133      0.133          0.108      0.077
+   E94's draws                                        45      0.197      0.187          0.204      0.175
+   all fp32                                          150      0.213      0.209          0.222      0.209
+   all fp16                                          133      0.186      0.186          0.199      0.222
+   all floats                                        283      0.201      0.198          0.211      0.215
+   floats outside E78 (M4 never fitted on them)      250      0.206      0.204          0.218      0.223
+   floats outside E78 and E82 (nor its card scale)   217      0.212      0.210          0.223      0.232
+   E102's single-bit prices (check_e102.py's reading; neither model fitted on them), rms W: M5 / M4's form refitted on all rows / M4 frozen
+      fp32 B balanced  n 11: 0.260 / 0.225 / 0.227  (M5 - M4 frozen +0.033)
+      fp32 B all-in    n 10: 0.230 / 0.212 / 0.207  (M5 - M4 frozen +0.023)
+      fp32 A balanced  n 11: 0.130 / 0.123 / 0.129  (M5 - M4 frozen +0.001)
+      fp32 A all-in    n 10: 0.254 / 0.237 / 0.238  (M5 - M4 frozen +0.016)
+      fp16 balanced    n  8: 0.100 / 0.100 / 0.101  (M5 - M4 frozen -0.001)
+      fp16 all-in      n  6: 0.230 / 0.243 / 0.241  (M5 - M4 frozen -0.012)
+      int8 B           n 13: 0.102 / 0.102 / 0.101  (M5 - M4 frozen +0.001)
+      M5 and M4 frozen reproduce check-e102.json exactly; int8's 'refit' is M5's own int8 (I3 refitted)
+
+== C3. Figures the blog points need
+   float: D over the type's zeros runs 0.58 to 24.76 W over 283 rows
+   int8: D over the type's zeros runs 0.31 to 7.06 W over 78 rows
+   M5's float constants: 6 (mult, add32, add16, bus, rest, clk) plus the card-1 scale 0.9711; int8: 3 plus 0.9735
+   E92   fp32.w_h_add           D  12.97  nested -0.452  M4 frozen -0.289 W (D - prediction)
+   E103  fp32.c_near_rand       D  19.15  nested +0.741  M4 frozen +0.886 W (D - prediction)
+   E103  fp32.s_bhalf_alt       D  23.91  nested +0.474  M4 frozen +0.450 W (D - prediction)
+   E103  fp32.x_e_g             D  14.79  nested +0.558  M4 frozen +0.616 W (D - prediction)
+   E104  fp16.w_h_add           D  12.49  nested -0.590  M4 frozen -0.578 W (D - prediction)
+   E104  fp32.w_h_add           D  12.39  nested -0.646  M4 frozen -0.502 W (D - prediction)
+   E88   int8.r_cancel          D   4.86  nested +0.846  M4 frozen +0.762 W (D - prediction)
+   E103  int8.i_a127_bfull      D   2.43  nested -0.794  M4 frozen -0.725 W (D - prediction)
+   int8's largest nested miss: E88 int8.r_cancel +0.846 W
+
+== C4. int8 out of sample (loko.json row_errors): M5 nested / I3's form refitted, plain LOKO / M4 frozen
+   all                                        n  78: 0.262 / 0.253 / 0.243 W
+   outside E78 (M4 never fitted on them)      n  63: 0.270 / 0.258 / 0.256 W
+   outside E78 and E82 (nor its card scale)   n  48: 0.285 / 0.270 / 0.278 W
+   E78 only (M4 in-sample)                    n  15: 0.229 / 0.229 / 0.181 W
+
+== C5. The contrast intervals' stand-in, tried on the training rows (nested errors, pairs of kinds in one experiment, type and card)
+   float: 1680 pairs; the difference inside t x sqrt(pool_i^2 + pool_j^2) for 1604 (0.955); rms(difference) / rms(quadrature of the two errors) = 1.000 (1 = uncorrelated, below 1 = positively correlated)
+   int8: 353 pairs; the difference inside t x sqrt(pool_i^2 + pool_j^2) for 345 (0.977); rms(difference) / rms(quadrature of the two errors) = 0.914 (1 = uncorrelated, below 1 = positively correlated)
+
+== C7. Intervals: the constants' 1 s.e. and 1.96 s.e. (jackknife by kind), and the nested rms with a 95% bootstrap over kinds
+   float: mult 1.555 +- 0.024 (95% +- 0.048); add32 1.620 +- 0.037 (95% +- 0.073); add16 1.498 +- 0.052 (95% +- 0.102); bus 7.567 +- 0.840 (95% +- 1.646); rest 2.415 +- 0.096 (95% +- 0.187); clk 1.054 +- 0.004 (95% +- 0.008) fJ
+   float: card-1 scale 0.9711 +- 0.0013 (1 s.e.)
+   int8: nets_nobus 3.261 +- 0.211 (95% +- 0.413); bus 14.035 +- 3.081 (95% +- 6.039); clk 1.945 +- 0.170 (95% +- 0.333) fJ
+   int8: card-1 scale 0.9735 +- 0.0029 (1 s.e.)
+   floats: nested rms 0.201 W, 95% bootstrap over 151 kinds (10,000, seed 7) [0.180, 0.222], n 283 rows
+   fp32  : nested rms 0.213 W, 95% bootstrap over 85 kinds (10,000, seed 7) [0.182, 0.246], n 150 rows
+   fp16  : nested rms 0.186 W, 95% bootstrap over 66 kinds (10,000, seed 7) [0.161, 0.213], n 133 rows
+   int8  : nested rms 0.262 W, 95% bootstrap over 44 kinds (10,000, seed 7) [0.210, 0.320], n 78 rows
+
+== C8. M4's forms refitted on E78's rows alone (rows.json), against M4 as frozen (predictions-blind3.json models.M4)
+   float: 33 E78 rows -> core 1.624, bus 7.533, rest 2.222, clk 1.066 fJ; M4 as frozen 1.624, 7.533, 2.222, 1.066 fJ
+   int8: 15 E78 rows -> nets_nobus 3.092, bus 16.737, clk 1.795 fJ; M4 as frozen 3.092, 16.737, 1.795 fJ

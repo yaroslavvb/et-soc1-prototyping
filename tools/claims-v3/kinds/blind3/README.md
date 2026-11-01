@@ -118,8 +118,13 @@ Reproduce: `python3 tools/claims-v3/kinds/blind3/make_blind3.py --check` (a pyth
 1. 10:40 brief read; 10:42 `git log` subjects; 10:44 no Agent tool, so the fallback.
 2. 10:45-10:49 the machinery listed above.
 3. 10:51 pool generated and hashed (`blind3.json` `60dfbf12…`); 10:52 novelty checked; this README written.
-4. 10:53:35 the pool alone committed and pushed (`a9167033`), before any of the model's files were opened.
+4. This commit: the pool alone, before any of the model's files were opened.
+   *(Dated note, Sun 1 Nov 2026, after verification: `64b4124e` reworded this item in place to "10:53:35 the pool alone
+   committed and pushed (`a9167033`), before any of the model's files were opened". The original wording is restored above;
+   "this commit" is `a9167033`, pushed 10:53:35 PST.)*
 5. 12:01:48 M5 fitted and frozen; 12:04 these predictions frozen from it and from M4; committed before E115's claim.
+6. After verification: the amendment at the end of this file and the contrasts' intervals (`contrasts-blind3.json`),
+   committed before E115's claim, with no pool file, count or prediction changed.
 
 ## The frozen predictions (added 12:04 PST, after the pool's commit `a9167033` and before any card ran a tile)
 
@@ -179,3 +184,25 @@ over the priority-1 float tiles, beside M4's on the same tiles and the paired di
 on a card with no scale of its own, the `new` footing and the anchor ratios are the frozen predictions for it.
 
 M5 and M4 differ by at most 0.20 W on any tile here (`fp16.s_inword0` 0.20, `fp16.a_mant_b_randn` 0.19 W; the rest 0.13 W or less), well inside either interval: this pool was built blind to the model, so it tests the open cases themselves, and it can hardly tell M5 from M4. The model, its leave-one-kind-out scores and every file behind these numbers are in [`docs/reports/data/2026-11-01-q133b-power-model/`](../../../../docs/reports/data/2026-11-01-q133b-power-model/README.md).
+
+## Amendment after verification (Sun 1 Nov 2026, before E115's claim)
+
+*Appended after an independent verifier's read. Nothing above changed but § Order's item 4, restored to its original wording with a dated note (C6 of the model's [corrections](../../../../docs/reports/data/2026-11-01-q133b-power-model/README.md#corrections-after-verification-sun-1-nov-2026)), and item 6, appended. No pool file, count or prediction changed.*
+
+**How M5 was chosen.** "The form chosen by nested leave-one-kind-out over thirteen experiments", above, needs one qualification: the candidate forms were widened after the first fit's results had been read. M5's own form, the adder priced per float format, was added then, and E91's anchor rows were dropped (the model's README, C1 and § Order). Run as first written, the procedure scores 0.214 W, worse than M4's form refitted (0.211 W). The 0.011 W gain of M5's procedure over M4's form refitted is not resolved by a paired bootstrap over kinds (95% CI −0.028 to +0.007 W, C2), and on E102 M5 is no better than M4. None of this touches the pool, committed before any of it (`a9167033`), or the predictions, frozen before any card ran a tile: they stay blind predictions, and E115 decides whether the per-format term helps.
+
+**The contrasts' 95% intervals**, frozen here before E115's claim: [`contrasts-blind3.json`](contrasts-blind3.json) (sha256 `399128b9ff83f1a357e6c20cdfd359f11eeb2a7d1d6415516e63cbae4a628578`) and [`contrasts-blind3.md`](contrasts-blind3.md), written by [`contrasts_blind3.py`](../../../../docs/reports/data/2026-11-01-q133b-power-model/contrasts_blind3.py) (sha256 `7f82fbbafb8daa2aff64aabb137c9a1ba8d9e48e496d1a3cc3f05fec928b8269`) from `predictions-blind3.json` (`5f28091a…`), which it reads and does not change. Each point is the difference of the two tiles' frozen predictions. Each interval is the two tiles' frozen 95% half-widths in quadrature; on a new card, it is a3's interval widened by one card's step on the contrast, the rule the tiles' own `new` footing uses. On pairs of training kinds in one experiment, type and card this stand-in is about right, not conservative: 95.5% of 1,680 float differences fall inside it (the model's `corrections-check.txt` C5). W over the type's own zeros at 600 MHz:
+
+| contrast | **M5, a3 [95%]** | M5, c1 [95%] | M5, new card [95%] | M4, a3 [95%] |
+|---|---:|---:|---:|---:|
+| `g_blanes_alt` − `g_blanes_steady` (fp32) | **+0.78** [+0.23, +1.34] | +0.76 [+0.09, +1.43] | +0.78 [+0.23, +1.34] | +0.73 [+0.21, +1.24] |
+| `a_lo8_b_randn` − `a_lo8_b_pi` (fp32) | **+11.55** [+10.97, +12.12] | +11.21 [+10.52, +11.90] | +11.55 [+10.67, +12.42] | +11.36 [+10.80, +11.92] |
+| `m_blines_eq` − `m_bpair_eq` (fp32) | **+8.38** [+7.82, +8.94] | +8.14 [+7.46, +8.82] | +8.38 [+7.64, +9.12] | +8.31 [+7.76, +8.86] |
+| `s_drift12` − `s_pair0` (fp32) | **+0.06** [−0.50, +0.63] | +0.06 [−0.63, +0.75] | +0.06 [−0.50, +0.63] | +0.08 [−0.48, +0.65] |
+| `s_bridge` − `s_pair0` (fp32) | **+0.68** [+0.12, +1.24] | +0.66 [−0.02, +1.34] | +0.68 [+0.12, +1.24] | +0.65 [+0.11, +1.19] |
+| `x_logu_s50` − `x_logu_bsteady` (fp32) | **−5.61** [−6.16, −5.06] | −5.45 [−6.12, −4.78] | −5.61 [−6.25, −4.97] | −5.62 [−6.12, −5.12] |
+| `s_wpair0` − `s_inword0` (fp16) | **+4.76** [+4.26, +5.26] | +4.62 [+4.04, +5.21] | +4.76 [+4.19, +5.33] | +4.68 [+4.15, +5.20] |
+
+**Reading the memory-path pair.** The bench has no memory path, so its +8.38 W for `m_blines_eq` − `m_bpair_eq` is all compute and the operand bus: 2.99 W multiplier, 2.05 W adder, 2.61 W other nets, 0.74 W bus (`contrasts-blind3.json` › `M5_terms_w_a3`). Only `m_bpair_eq`'s B lines change (3,552 bits an op against 0), while `m_blines_eq`'s B half-lines change about twice as often (3,680 against 1,776; `blind3.json` › `stats`). A card reading below the interval would fit a cost for B lines that change, a reading above it a cost for half-lines that change, and either could instead be compute the bench misprices.
+
+**For E115's registration**, in place of "the contrasts above, measured against predicted": each contrast against its interval here, on the footing of the card that runs it.
