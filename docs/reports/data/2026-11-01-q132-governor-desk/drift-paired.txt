@@ -1,0 +1,41 @@
+k = 0.4573 C per W (pooled within-session slope on aifoundry2, die-lines.txt)
+E64 kinds: ['fp16/ones', 'fp16/randn', 'fp16/zeros', 'fp32/ones', 'fp32/randn', 'fp32/zeros', 'int8/ones', 'int8/randn', 'int8/zeros']
+E69 kinds: ['fp32/ones']
+E80 kinds: ['fp16/fp8grid', 'fp16/nn_like', 'fp16/ones', 'fp16/randn', 'fp16/smallint', 'fp16/sparse50', 'fp16/zeros', 'fp32/bf16trunc', 'fp32/nn_like', 'fp32/randn', 'fp32/smallint', 'fp32/sparse90', 'int8/full', 'int8/gauss_q', 'int8/neg_ones', 'int8/smallint', 'int8/sparse50', 'int8/zeros']
+E83 kinds: ['fp16/a_randn_b_zeros', 'fp16/a_zeros_b_randn', 'fp16/neg_ones', 'fp16/pair_half_zero', 'fp16/randn', 'fp16/randn_small', 'fp16/randn_sorted', 'fp16/sparse90', 'fp16/uniform01', 'fp16/wsparse50', 'fp16/wsparse90', 'fp16/zeros', 'fp32/a_randn_b_zeros', 'fp32/a_zeros_b_randn', 'fp32/fp16grid', 'fp32/neg_ones', 'fp32/ones', 'fp32/pi', 'fp32/pow2', 'fp32/randn', 'fp32/randn_large', 'fp32/randn_small', 'fp32/randn_sorted', 'fp32/sparse50', 'fp32/uniform01', 'fp32/zeros', 'int8/a_full_b_zeros', 'int8/a_zeros_b_full', 'int8/full', 'int8/highbit', 'int8/ones', 'int8/pos', 'int8/sorted', 'int8/sparse90', 'int8/ternary', 'int8/wsparse50', 'int8/wsparse90', 'int8/zeros']
+E87 kinds: ['fp16/l0_mlp_up', 'fp16/l6_attn_qk', 'fp16/l6_mlp_down', 'fp16/randn', 'fp16/zeros', 'fp32/l0_mlp_up', 'fp32/l6_attn_qk', 'fp32/l6_mlp_down', 'fp32/randn', 'fp32/zeros', 'int8/full', 'int8/l0_mlp_up', 'int8/l6_attn_qk', 'int8/l6_mlp_down', 'int8/zeros']
+
+Paired on shared kinds: (die - k W) in B minus in A; each kind's runs averaged first.
+E64 - E80: +1.12 C +- 0.33 s.e. over 5 kinds: fp16/ones +2.40, fp16/randn +0.56, fp16/zeros +0.87, fp32/randn +1.02, int8/zeros +0.77
+E83 - E80: -0.10 C +- 0.20 s.e. over 5 kinds: fp16/randn +0.09, fp16/zeros +0.02, fp32/randn -0.49, int8/full +0.48, int8/zeros -0.62
+E87 - E80: +0.41 C +- 0.20 s.e. over 5 kinds: fp16/randn -0.09, fp16/zeros -0.00, fp32/randn +0.57, int8/full +1.00, int8/zeros +0.59
+E87 - E83: +0.39 C +- 0.26 s.e. over 6 kinds: fp16/randn -0.18, fp16/zeros -0.02, fp32/randn +1.06, fp32/zeros -0.23, int8/full +0.53, int8/zeros +1.22
+E64 - E83: +1.31 C +- 0.27 s.e. over 7 kinds: fp16/randn +0.47, fp16/zeros +0.84, fp32/ones +2.26, fp32/randn +1.51, fp32/zeros +0.56, int8/ones +2.12, int8/zeros +1.39
+E64 - E87: +0.59 C +- 0.13 s.e. over 5 kinds: fp16/randn +0.65, fp16/zeros +0.87, fp32/randn +0.45, fp32/zeros +0.79, int8/zeros +0.17
+E80 E69 no shared kinds
+E87 E69 no shared kinds
+
+The room at rest, 30 to 5 min before each session's first run (a card held or above its idle bar is left out)
+exp   first run          a2 W   a2 die  a2 nic a2 nvme a2 cpu | a3 W   a3 die a3 nic a3 nvme | a1c0 W a1c0 die a1c1 W a1 nic a1 nvme
+E64   Fri 23 Oct 20:37   22.693 49.28 46.59 39.34 36.74 | 24.087 53 45.74 38.9 (load 0.06) | 19.469 49.23 31.139 54.68 45.02 (load 0.23)
+E69   Tue 27 Oct 14:24   22.099 46.67 44.42 37.55 34.96 | 23.523 50.24 43.35 37.13 (load 0.76) | 18.652 46.88 30.052 55.58 44.37 (load 4.56)
+E80   Sat 31 Oct 12:22   21.762 45.58 43.2 36.17 33.53 | 23.221 49.39 42.39 35.9 (load 0.61) | 18.515 46.44 29.978 52.01 42.77 (load 0.65)
+E83   Sat 31 Oct 13:46   22.025 46.42 43.99 36.9 34.6 | 25.501 57.11 43.74 37.48 (load 0.78) | 18.658 47.09 30.352 52.89 43.67 (load 0.54)
+E87   Sat 31 Oct 19:49   22.174 47.15 44.81 37.9 35.91 | 25.136 56.11 44.86 37.94 (load 0.81) | 18.68 48 30.682 54.2 44.54 (load 0.66)
+E84   Sat 31 Oct 15:43   22.226 47.04 44.53 37.82 34.53 | 23.624 50.85 43.57 37.11 (load 0.82) | 18.794 47.68 30.409 53.33 43.9 (load 0.8)
+
+The line's shift from E80 (shared kinds, above) against each reading's shift from E80 at rest. Through the origin, weighted by the shift's s.e.
+E80 is a common baseline, so the three points are not independent; n = 4 sessions; post hoc.
+reading              E83     E87     E64    slope   s.e.   chi2   slope on 31 Oct alone, and E64 predicted by it (measured +1.12)
+a2 card idle die   +0.84   +1.57   +3.70    0.256  0.070   2.78   +0.177 +- 0.114, predicts +0.65 +- 0.42
+a2 card idle W     +0.26   +0.41   +0.93    0.951  0.269   3.61   +0.595 +- 0.416, predicts +0.55 +- 0.39
+a2 NIC             +0.79   +1.61   +3.39    0.268  0.074   2.87   +0.181 +- 0.114, predicts +0.61 +- 0.38
+a2 NVMe            +0.73   +1.73   +3.17    0.272  0.075   2.94   +0.181 +- 0.108, predicts +0.57 +- 0.34
+a2 CPU             +1.07   +2.38   +3.21    0.210  0.062   4.69   +0.128 +- 0.078, predicts +0.41 +- 0.25
+a3 NIC             +1.35   +2.47   +3.35    0.190  0.058   5.45   +0.111 +- 0.072, predicts +0.37 +- 0.24
+a3 NVMe            +1.58   +2.04   +3.00    0.194  0.064   6.85   +0.101 +- 0.079, predicts +0.30 +- 0.24
+a1 NIC             +0.88   +2.19   +2.67    0.237  0.071   4.88   +0.146 +- 0.086, predicts +0.39 +- 0.23
+a1 NVMe            +0.90   +1.77   +2.25    0.273  0.084   5.51   +0.161 +- 0.103, predicts +0.36 +- 0.23
+a1c0 idle die      +0.65   +1.56   +2.79    0.305  0.084   3.01   +0.202 +- 0.121, predicts +0.56 +- 0.34
+a1c0 idle W        +0.14   +0.16   +0.95    1.168  0.322   2.99   +1.109 +- 0.930, predicts +1.06 +- 0.89
+a1c1 idle W        +0.37   +0.70   +1.16    0.652  0.189   4.25   +0.396 +- 0.255, predicts +0.46 +- 0.30

@@ -1,0 +1,52 @@
+Sustained runs with W and die: 106
+pooled within-session slope on aifoundry2: 0.4573 C/W over 93 runs
+
+exp   box         start             end            n   free line (a + k W, rms C)        65.5C at W   offset at pooled k   first-gate idle (die, W)
+E64   aifoundry2  Fri 23 Oct 20:53  21:08     9    41.88 + 0.4696 W, rms 0.31  (s.e. k 0.017)     50.3       42.44 +- 0.11     [57.0, 70.0, 25.17, 600.0]
+E69   aifoundry2  Tue 27 Oct 14:28  14:38     4    33.21 + 0.5701 W, rms 1.50  (s.e. k 0.627)     56.6       39.09 +- 0.76     [54.0, 73.0, 24.13, 600.0]
+E80   aifoundry2  Sat 31 Oct 12:29  13:02    21    42.23 + 0.4349 W, rms 0.56  (s.e. k 0.020)     53.5       41.11 +- 0.13     [56.0, 65.0, 24.43, 600.0]
+E83   aifoundry2  Sat 31 Oct 14:02  15:07    42    40.76 + 0.4631 W, rms 0.70  (s.e. k 0.015)     53.4       41.03 +- 0.11     [54.0, 69.0, 24.13, 600.0]
+E87   aifoundry2  Sat 31 Oct 19:57  20:25    17    41.69 + 0.4562 W, rms 0.42  (s.e. k 0.017)     52.2       41.63 +- 0.10     [55.0, 66.0, 24.2, 600.0]
+E84   aifoundry1  Sat 31 Oct 15:48  16:06    13    41.78 + 0.4753 W, rms 0.64  (s.e. k 0.024)     49.9       42.49 +- 0.18     [53.0, 67.0, 19.84, 600.0]
+
+The proxies by session (mean over the session's sustained-run spans; 'pre' = the 15 min before each run)
+exp   | a2 nvme nic cpu (own box in E64-E87) | a3 nvme nic cpu load, die W | a1 nvme nic cpu load, c0 die W, c1 die W
+E64   | 40.8 47.7 40.03 | 38.9 45.9 36.75 l0.38, {'die': 53, 'w': 24.18} | 45.9 55.3 45.38 l0.03, {'die': 50, 'w': 19.56}, {'die': 54.8, 'w': 31.4}
+E69   | 37.9 45.09 37.9 | 37.9 44.11 37.65 l0.84, {'die': 57.16, 'w': 25.61} | 44.02 55.31 49.98 l0.83, {'die': 47, 'w': 18.67}, {'die': 51.73, 'w': 30.27}
+E80   | 37.81 44.83 37.19 | 36.79 42.72 33.55 l0.7, {'die': 50.06, 'w': 23.38} | 43.76 52.78 42.4 l0.69, {'die': 47.17, 'w': 18.7}, {'die': 52, 'w': 30.39}
+E83   | 38.72 45.52 38.18 | 37.2 43.47 34.81 l0.68, {'die': 51.69, 'w': 23.9} | 44.73 54.46 47.31 l0.75, {'die': 47.57, 'w': 18.84}, {'die': 54.85, 'w': 31.45}
+E87   | 38.9 45.85 38.25 | 37.9 44.15 35.46 l0.64, {'die': 52.57, 'w': 24.08} | 43.9 53.45 43.06 l0.53, {'die': 47.69, 'w': 18.61}, {'die': 52.43, 'w': 30.44}
+E84   | 38.22 45.34 38.53 | 36.9 43.42 33.68 l0.64, {'die': 50.85, 'w': 23.53} | 45.74 55.56 51.02 l0.77, {'die': None, 'w': None}, {'die': None, 'w': None}
+
+Run-level, aifoundry2 only: (die - k W) against each proxy (k the pooled slope); r2 over the runs where the proxy exists.
+A proxy from the same box is heated by the card itself, so it is shown only for its 'pre' window.
+proxy                     n     r2   slope C per unit   rms C  sessions
+a1c0-idle-die            60  0.334     0.569 +- 0.105   0.822  E64,E69,E80,E83,E87
+a1c0-idle-die-pre        93  0.224     0.552 +- 0.108   0.802  E64,E69,E80,E83,E87
+a1c0-idle-w              60  0.178     1.313 +- 0.371   0.913  E64,E69,E80,E83,E87
+a2-nic-pre               93  0.168     0.419 +- 0.098   0.830  E64,E69,E80,E83,E87
+a2-nvme-pre              93  0.152     0.410 +- 0.101   0.838  E64,E69,E80,E83,E87
+a2-cpu-pre               93  0.144     0.296 +- 0.076   0.842  E64,E69,E80,E83,E87
+a3-nic-pre               93  0.130     0.363 +- 0.099   0.849  E64,E69,E80,E83,E87
+a1c0-idle-w-pre          93  0.125     1.167 +- 0.323   0.851  E64,E69,E80,E83,E87
+a3-nic                   93  0.112     0.337 +- 0.099   0.858  E64,E69,E80,E83,E87
+a1-cpu-pre               90  0.099    -0.102 +- 0.033   0.803  E64,E69,E80,E83,E87
+a3-nvme-pre              93  0.092     0.371 +- 0.122   0.867  E64,E69,E80,E83,E87
+a1c1-idle-die            60  0.077     0.189 +- 0.086   0.967  E64,E69,E80,E83,E87
+a3-nvme                  93  0.071     0.346 +- 0.132   0.878  E64,E69,E80,E83,E87
+a1-nvme                  93  0.066     0.330 +- 0.130   0.880  E64,E69,E80,E83,E87
+a1c1-idle-w              60  0.054     0.398 +- 0.220   0.980  E64,E69,E80,E83,E87
+a3c0-idle-w              73  0.051    -0.263 +- 0.135   0.867  E64,E69,E80,E83,E87
+a3c0-idle-w-pre          93  0.048    -0.292 +- 0.137   0.888  E64,E69,E80,E83,E87
+a1-nvme-pre              90  0.039     0.218 +- 0.116   0.830  E64,E69,E80,E83,E87
+a3c0-idle-die            73  0.038    -0.069 +- 0.041   0.873  E64,E69,E80,E83,E87
+a3c0-idle-die-pre        93  0.033    -0.074 +- 0.042   0.895  E64,E69,E80,E83,E87
+a1-cpu                   93  0.023    -0.048 +- 0.033   0.900  E64,E69,E80,E83,E87
+a1c1-idle-die-pre        93  0.006     0.036 +- 0.047   0.907  E64,E69,E80,E83,E87
+a3-cpu                   93  0.005    -0.035 +- 0.050   0.908  E64,E69,E80,E83,E87
+a1c1-idle-w-pre          93  0.002     0.047 +- 0.117   0.909  E64,E69,E80,E83,E87
+a1-nic-pre               90  0.001     0.023 +- 0.099   0.846  E64,E69,E80,E83,E87
+a1-nic                   93  0.000     0.019 +- 0.109   0.910  E64,E69,E80,E83,E87
+a3-cpu-pre               93  0.000     0.004 +- 0.065   0.910  E64,E69,E80,E83,E87
+
+rms of (die - k W) with one intercept and no proxy: 0.910 C over 93 runs

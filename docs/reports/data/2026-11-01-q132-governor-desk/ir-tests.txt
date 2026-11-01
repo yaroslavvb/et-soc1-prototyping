@@ -1,0 +1,76 @@
+hits: 25 (flagged 26; left out: [('E83', 'BURST-06-fp32-randn_large-r1', 276.7, 0.6346)])
+
+Rates and the expectation from a 2 ms window on a 1 s heartbeat (exposed boundaries x 2 ms / 1000.01 ms)
+session box         exposed  hits  expected  95% interval of the count   seconds at 800 MHz between kernels  hits per heartbeat
+E64     aifoundry2     1141     2       2.3     0.2-  7.2                     488.6   0.409%
+E69     aifoundry2      616     2       1.2     0.2-  7.2                     259.8   0.77%
+E80     aifoundry2     2070     5       4.1     1.6- 11.7                     888.1   0.563%
+E83     aifoundry2     5096     7      10.2     2.8- 14.4                    2189.2   0.32%
+E87     aifoundry2     1223     6       2.4     2.2- 13.1                     528.1   1.136%
+E84     aifoundry1     1635     3       3.3     0.6-  8.8                     688.2   0.436%
+all                   11781    25      23.5    16.2- 36.9
+
+Every boundary's host gap (start stamp minus previous end stamp, ms) over the population, and at the hits:
+   population: mean 1.294 max 2 | hits: mean 1.2 max 2
+
+Covariates over the population
+time since the process started, s: hits 25 of 11781 boundaries; Monte Carlo p 0.138
+    0-1.5                    boundaries   1126  hits   4  rate 0.36%   expected 2.4
+    1.5-3                    boundaries   2711  hits   2  rate 0.07%   expected 5.8
+    3-5                      boundaries   3448  hits   7  rate 0.20%   expected 7.3
+    5-7                      boundaries   3122  hits   6  rate 0.19%   expected 6.6
+    7-9.5                    boundaries   1374  hits   6  rate 0.44%   expected 2.9
+position in the session (fraction): hits 25 of 11781 boundaries; Monte Carlo p 0.653
+    0-0.25                   boundaries   2299  hits   7  rate 0.30%   expected 4.9
+    0.25-0.5                 boundaries   2956  hits   7  rate 0.24%   expected 6.3
+    0.5-0.75                 boundaries   3342  hits   5  rate 0.15%   expected 7.1
+    0.75-1.01                boundaries   3184  hits   6  rate 0.19%   expected 6.8
+die at the boundary, C: hits 25 of 11781 boundaries; Monte Carlo p 0.914
+    40-56                    boundaries    785  hits   2  rate 0.25%   expected 1.7
+    56-58                    boundaries   1992  hits   6  rate 0.30%   expected 4.2
+    58-60                    boundaries   3478  hits   8  rate 0.23%   expected 7.4
+    60-62                    boundaries   1429  hits   2  rate 0.14%   expected 3.0
+    62-64                    boundaries   1733  hits   3  rate 0.17%   expected 3.7
+    64-70                    boundaries   2364  hits   4  rate 0.17%   expected 5.0
+board W at the boundary: hits 25 of 11781 boundaries; Monte Carlo p 0.930
+    20-36                    boundaries   1918  hits   3  rate 0.16%   expected 4.1
+    36-40                    boundaries   3141  hits   7  rate 0.22%   expected 6.7
+    40-45                    boundaries   1041  hits   2  rate 0.19%   expected 2.2
+    45-50                    boundaries   1342  hits   4  rate 0.30%   expected 2.8
+    50-55                    boundaries   3137  hits   5  rate 0.16%   expected 6.7
+    55-62                    boundaries    596  hits   2  rate 0.34%   expected 1.3
+    62-100                   boundaries    606  hits   2  rate 0.33%   expected 1.3
+number format: hits 25 of 11781 boundaries; Monte Carlo p 0.486
+    fp16                     boundaries   2787  hits   5  rate 0.18%   expected 5.9
+    fp32                     boundaries   3826  hits   6  rate 0.16%   expected 8.1
+    int8                     boundaries   5168  hits  14  rate 0.27%   expected 11.0
+block (BURST, SUS, HOT...): hits 25 of 11781 boundaries; Monte Carlo p 0.155
+    BACK                     boundaries      2  hits   0  rate 0.00%   expected 0.0
+    BURST                    boundaries   1781  hits   7  rate 0.39%   expected 3.8
+    HOT                      boundaries     86  hits   1  rate 1.16%   expected 0.2
+    LAD                      boundaries    176  hits   0  rate 0.00%   expected 0.4
+    MIN                      boundaries     59  hits   0  rate 0.00%   expected 0.1
+    SUS                      boundaries   9677  hits  17  rate 0.18%   expected 20.5
+session (and so date and time of day): hits 25 of 11781 boundaries; Monte Carlo p 0.254
+    E64                      boundaries   1141  hits   2  rate 0.18%   expected 2.4
+    E69                      boundaries    616  hits   2  rate 0.32%   expected 1.3
+    E80                      boundaries   2070  hits   5  rate 0.24%   expected 4.4
+    E83                      boundaries   5096  hits   7  rate 0.14%   expected 10.8
+    E84                      boundaries   1635  hits   3  rate 0.18%   expected 3.5
+    E87                      boundaries   1223  hits   6  rate 0.49%   expected 2.6
+hour of day, PDT: hits 25 of 11781 boundaries; Monte Carlo p 0.048
+    12-14                    boundaries   2694  hits   8  rate 0.30%   expected 5.7
+    14-16                    boundaries   6475  hits   8  rate 0.12%   expected 13.7
+    16-18                    boundaries    248  hits   1  rate 0.40%   expected 0.5
+    18-20                    boundaries    350  hits   3  rate 0.86%   expected 0.7
+    20-21                    boundaries   1608  hits   5  rate 0.31%   expected 3.4
+    21-22                    boundaries    406  hits   0  rate 0.00%   expected 0.9
+length of the kernel before, s (all are at 800 MHz, so this is iteration count): hits 25 of 11780 boundaries; Monte Carlo p 0.124
+    0.3-0.37                 boundaries   5273  hits  16  rate 0.30%   expected 11.2
+    0.37-0.45                boundaries     28  hits   0  rate 0.00%   expected 0.1
+    0.45-0.6                 boundaries   6479  hits   9  rate 0.14%   expected 13.8
+    0.6-1.0                  boundaries      0  hits   0  rate 0.00%   expected 0.0
+
+How long a hit lasts: first 600 reading to first 700, and to first 800 (s), over the hits that recover inside their process
+   at 600 MHz: median 1.10, range 1.00-1.20, n 20; to 800 MHz: median 1.30, range 1.20-1.40, n 20
+   the sampler's command at the first 600 reading: [20, 42, 58, 58, 62, 64, 71, 75, 78, 81, 84, 86, 92, 95, 96, 98, 101, 103, 111, 113, 118, 120, 125, 128, 165] ms; on the reading before: [17, 20, 21, 21, 21, 21, 21, 21, 21, 21, 21, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 23] ms

@@ -1,0 +1,33 @@
+(die - 0.4573 W) for every kind with replicate runs in one session
+  E69 fp32/ones              39.18 41.47 38.36 37.37  W 54.7 51.9 50.0 52.1  die 64.2 65.2 61.2 61.2  MHz 800 763 770 790
+  E80 fp16/ones              39.65 41.28  W 54.1 52.3  die 64.4 65.2  MHz 793 770
+  E80 fp32/randn             40.98 41.46  W 54.7 53.7  die 66.0 66.0  MHz 608 600
+  E80 int8/full              40.46 40.71  W 53.5 52.9  die 64.9 64.9  MHz 797 790
+  E83 fp16/wsparse50         41.18 39.32  W 51.6 50.5  die 64.8 62.4  MHz 793 795
+  E83 fp32/ones              41.12 39.99  W 52.4 54.2  die 65.1 64.8  MHz 772 793
+  E83 fp32/sparse50          40.03 41.39  W 52.0 51.6  die 63.8 65.0  MHz 800 787
+  E83 int8/ternary           41.01 39.98  W 48.5 48.4  die 63.2 62.1  MHz 794 800
+  E87 fp16/randn             42.44 41.51  W 51.5 53.3  die 66.0 65.9  MHz 605 615
+  E87 fp32/randn             41.73 41.85  W 53.7 53.9  die 66.3 66.5  MHz 600 600
+  E84 fp32/randn             41.45 41.45  W 45.6 44.9  die 62.3 62.0  MHz 548 548
+  E84 fp32/zeros             41.60 42.56  W 29.3 29.6  die 55.0 56.1  MHz 794 795
+replicate ranges: median 0.99 max 4.1 n 12
+
+Anchors present in E64, E80, E83, E87 (sessions on aifoundry2), mean W, die, MHz, die - k W
+  fp32/zeros       E64 36.4 W 59.0 C 800 MHz 42.37 | E83 35.2 W 57.9 C 789 MHz 41.81 | E87 35.7 W 57.9 C 800 MHz 41.58
+  fp16/zeros       E64 36.1 W 59.0 C 794 MHz 42.50 | E80 35.1 W 57.7 C 790 MHz 41.63 | E83 35.8 W 58.0 C 800 MHz 41.65 | E87 35.8 W 58.0 C 800 MHz 41.63
+  int8/zeros       E64 37.6 W 59.0 C 800 MHz 41.82 | E80 37.0 W 58.0 C 800 MHz 41.06 | E83 36.0 W 56.9 C 789 MHz 40.43 | E87 36.6 W 58.4 C 788 MHz 41.65
+  fp32/sparse90    E80 36.8 W 58.0 C 800 MHz 41.16
+  fp16/sparse90    E83 39.0 W 59.1 C 800 MHz 41.25
+  int8/neg_ones    E80 41.0 W 60.0 C 797 MHz 41.24
+  fp16/neg_ones    E83 54.1 W 64.7 C 790 MHz 39.96
+  fp32/neg_ones    E83 52.0 W 65.1 C 767 MHz 41.31
+  int8/sparse50    E80 49.0 W 63.6 C 789 MHz 41.18
+  int8/smallint    E80 51.0 W 64.4 C 795 MHz 41.07
+  int8/gauss_q     E80 52.1 W 64.6 C 794 MHz 40.79
+  int8/full        E80 53.2 W 64.9 C 793 MHz 40.59 | E83 52.3 W 65.0 C 786 MHz 41.06 | E87 51.4 W 65.1 C 775 MHz 41.59
+  int8/randn       E64 50.7 W 65.3 C 763 MHz 42.13
+  fp16/ones        E64 49.3 W 65.4 C 737 MHz 42.86 | E80 53.2 W 64.8 C 782 MHz 40.47
+  fp32/ones        E64 49.4 W 65.4 C 738 MHz 42.82 | E83 53.3 W 64.9 C 782 MHz 40.56
+  fp32/randn       E64 54.4 W 67.1 C 600 MHz 42.24 | E80 54.2 W 66.0 C 604 MHz 41.22 | E83 55.3 W 66.0 C 612 MHz 40.73 | E87 53.8 W 66.4 C 600 MHz 41.79
+  fp16/randn       E64 51.3 W 66.1 C 600 MHz 42.62 | E80 52.3 W 66.0 C 610 MHz 42.06 | E83 52.1 W 66.0 C 609 MHz 42.16 | E87 52.4 W 66.0 C 610 MHz 41.97

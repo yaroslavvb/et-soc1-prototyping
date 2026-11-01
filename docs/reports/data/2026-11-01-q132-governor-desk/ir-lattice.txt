@@ -1,0 +1,29 @@
+kernel-rule hits the sampler rule did not flag (out of sample for the lattice): [('E69', 'BURST-01-tdp65-ones-r1', 3, 1.381, 1.1), ('E83', 'BURST-17-fp16-randn_small-r2', 3, 1.411, 4.4), ('E87', 'SUS-08-int8-real-l6_attn_qk-r1', 1, 0.622, -26.3), ('E84', 'SUS-05-fp16-zeros-r1', 1, 0.636, -0.9)]
+clean mid-launch resets: 21 of 26 flagged (the others: [('E69', 'BURST-01-tdp65-ones-r1', 1.1, 0.6005), ('E83', 'BURST-06-fp32-randn_large-', 276.7, 0.7391), ('E83', 'BURST-17-fp16-randn_small-', 4.4, 0.6018), ('E87', 'SUS-08-int8-real-l6_attn_q', -26.3, 0.5918), ('E84', 'SUS-05-fp16-zeros-r1', -0.9, 0.5997)])
+x, the time the hit kernel ran at 800 MHz before the fall: min -0.0, median 3.9, max 13.9 ms; the kernels are 0.473-0.644 s long
+the kernel before the hit: g 0.7998-0.8002 GHz
+
+1. The ring's own POWER_IDLE records
+  E64 aifoundry2: 69 records, period 1.000003 s on the SP's tick, R 0.9791, residual p10/50/90 [-78.3, -3.2, 13.1] ms, min/max [-95.1, 44.1] ms
+  E69 aifoundry2: 34 records, period 1.000003 s on the SP's tick, R 0.9872, residual p10/50/90 [-17.3, -4.0, 17.6] ms, min/max [-76.5, 65.4] ms
+  E80 aifoundry2: 74 records, period 1.000000 s on the SP's tick, R 0.9950, residual p10/50/90 [-10.6, -1.5, 10.3] ms, min/max [-59.0, 74.6] ms
+  E83 aifoundry2: 162 records, period 1.000001 s on the SP's tick, R 0.9946, residual p10/50/90 [-13.5, -3.3, 16.4] ms, min/max [-71.9, 75.6] ms
+  E87 aifoundry2: 61 records, period 0.999999 s on the SP's tick, R 0.9833, residual p10/50/90 [-69.2, -5.1, 13.1] ms, min/max [-83.5, 37.2] ms
+  E84 aifoundry1: 62 records, period 0.999994 s on the SP's tick, R 0.9956, residual p10/50/90 [-15.8, 0.7, 17.1] ms, min/max [-23.0, 54.0] ms
+
+2. The hits on the host clock (start stamps of the hit kernels)
+  E80: 5 hits, period 1000.0102 ms, rms 0.63 ms, residuals [1.0, -0.6, -0.7, -0.2, 0.4], leave-one-out [1.77, -0.94, -0.84, -0.2, 1.69]
+     exposed boundaries (kernel before at 800 MHz): 2070; by distance from the lattice, kernel start stamp minus lattice point, ms: boundaries / hits
+     [-12]3/0  [-10]1/0  [-9]3/0  [-8]4/0  [-7]2/0  [-6]3/0  [-5]2/0  [-4]2/0  [-3]3/0  [-2]2/0  [-1]3/3  [0]1/1  [1]3/1  [2]3/0  [3]2/0  [5]2/0  [6]2/0  [7]1/0  [8]2/0  [10]4/0  [11]3/0
+     every boundary within 2.5 ms: -2.0 (next g 0.800); -2.0 (next g 0.800); -1.7 (next g 0.800); -0.7 FELL (next g 0.601); -0.6 FELL (next g 0.602); -0.2 FELL (next g 0.602); +0.4 FELL (next g 0.602); +1.0 FELL (next g 0.604); +1.5 (next g 0.800); +2.0 (next g 0.800)
+     within 1.2 ms of the lattice: {'boundaries': 5, 'fell': 5}; beyond: {'boundaries': 2065, 'fell': 0, 'max_abs_d_fell': 1.03}
+  E83: 6 hits, period 1000.0098 ms, rms 0.50 ms, residuals [-0.1, -0.3, 1.0, -0.6, 0.2, -0.2], leave-one-out [-0.16, -0.53, 1.2, -0.72, 0.31, -0.45]
+     exposed boundaries (kernel before at 800 MHz): 5096; by distance from the lattice, kernel start stamp minus lattice point, ms: boundaries / hits
+     [-12]5/0  [-11]8/0  [-10]5/0  [-9]3/0  [-8]3/0  [-7]3/0  [-6]2/0  [-5]4/0  [-4]2/0  [-3]3/0  [-2]5/0  [-1]6/5  [0]3/2  [1]5/0  [2]3/0  [3]7/0  [4]3/0  [5]8/0  [6]6/0  [7]5/0  [8]1/0  [9]7/0  [10]12/0  [11]8/0
+     every boundary within 2.5 ms: -2.4 (next g 0.800); -2.1 (next g 0.800); -2.0 (next g 0.800); -1.5 (next g 0.800); -1.3 (next g 0.800); -1.2 (next g 0.800); -1.1 (next g 0.800); -0.7 (next g 0.800); -0.6 FELL (next g 0.606); -0.3 FELL (next g 0.602); -0.2 FELL (next g 0.600); -0.1 FELL (next g 0.602); -0.0 FELL (not used in the fit) (next g 0.602); +0.2 FELL (next g 0.601); +0.6 (next g 0.800); +1.0 FELL (next g 0.600); +1.1 (next g 0.800); +1.3 (next g 0.800); +1.6 (next g 0.800); +1.7 (next g 0.800); +1.9 (next g 0.800); +2.4 (next g 0.800)
+     within 1.2 ms of the lattice: {'boundaries': 12, 'fell': 7}; beyond: {'boundaries': 5084, 'fell': 0, 'max_abs_d_fell': 0.98}
+  E87: 5 hits, period 1000.0105 ms, rms 0.67 ms, residuals [-0.6, 0.3, 0.9, -0.9, 0.4], leave-one-out [-1.11, 0.35, 1.19, -1.34, 1.41]
+     exposed boundaries (kernel before at 800 MHz): 1223; by distance from the lattice, kernel start stamp minus lattice point, ms: boundaries / hits
+     [-12]1/0  [-11]2/0  [-10]1/0  [-8]2/0  [-7]2/0  [-4]2/0  [-3]2/0  [-2]1/0  [-1]2/2  [0]4/4  [1]2/0  [3]1/0  [5]2/0  [6]1/0  [7]1/0  [8]2/0  [9]1/0
+     every boundary within 2.5 ms: -1.6 (next g 0.800); -0.9 FELL (next g 0.601); -0.6 FELL (next g 0.602); +0.3 FELL (next g 0.602); +0.4 FELL (not used in the fit) (next g 0.592); +0.4 FELL (next g 0.601); +0.9 FELL (next g 0.601); +1.0 (next g 0.800); +1.6 (next g 0.800)
+     within 1.2 ms of the lattice: {'boundaries': 7, 'fell': 6}; beyond: {'boundaries': 1216, 'fell': 0, 'max_abs_d_fell': 0.93}

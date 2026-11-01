@@ -1,0 +1,55 @@
+5-minute bins: 2453; with aifoundry2's card idle 30 min and its host quiet: 2182
+from Thu Oct 22 17:00:00 2026 to Sat Oct 31 23:50:00 2026
+
+Each reading against aifoundry2's idle WATTS (fine-grained, 0.01 W, follows the die through leakage) and idle DIE (1 C steps).
+reading            n    r(W) W per unit   rms W |  r(die) die per unit  rms die | sd of reading
+a2-nic          2182   0.978     0.2560   0.078 |   0.971        1.074    0.377 | 1.428
+a2-nvme         2182   0.955     0.2727   0.110 |   0.949        1.145    0.499 | 1.310
+a1c0-die        2150   0.951     0.2607   0.113 |   0.936        1.075    0.539 | 1.338
+a1c1-die        2150   0.942     0.2100   0.123 |   0.925        0.863    0.585 | 1.645
+a1c1-w          2150   0.934     0.4858   0.131 |   0.922        2.009    0.594 | 0.705
+a3c0-w          2090   0.923     0.8704   0.143 |   0.914        3.663    0.642 | 0.394
+a1-nvme         2181   0.922     0.2551   0.143 |   0.915        1.065    0.627 | 1.337
+a1-nic          2181   0.919     0.2505   0.146 |   0.914        1.049    0.631 | 1.357
+a3c0-die        2090   0.918     0.2350   0.147 |   0.915        0.996    0.638 | 1.451
+a3-nic          2077   0.903     0.2750   0.152 |   0.900        1.160    0.655 | 1.164
+a3-nvme         2077   0.899     0.2950   0.155 |   0.898        1.248    0.659 | 1.080
+a1-cpu          2181   0.871     0.2383   0.182 |   0.859        0.988    0.797 | 1.352
+a1c0-w          2150   0.850     1.0332   0.193 |   0.829        4.217    0.860 | 0.302
+a2-cpu          2182   0.831     0.2006   0.208 |   0.815        0.832    0.916 | 1.548
+a3-cpu          2077   0.508     0.0914   0.305 |   0.496        0.378    1.303 | 1.968
+outside-air     2171   0.108     0.0114   0.372 |   0.092        0.041    1.576 | 3.568
+
+Outside air (Open-Meteo's hourly model at the lab's latitude and longitude, not a station at the lab) against aifoundry2's idle W, with the air leading by L hours:
+   L0: 0.108  L1: 0.306  L2: 0.481  L3: 0.619  L4: 0.709  L5: 0.735  L6: 0.706  L7: 0.627  L8: 0.507  L9: 0.371  L10: 0.231  L11: 0.084  L12: -0.073
+
+aifoundry2's idle watts against its own die: {'n': 2182, 'r': 0.978, 'y_per_x': 0.2315, 'rms_y': 0.0771, 'sd_x': 1.58, 'sd_y': 0.374}
+a1c0 idle watts against its own die: {'n': 2379, 'r': 0.825, 'y_per_x': 0.1868, 'rms_y': 0.1696, 'sd_x': 1.326, 'sd_y': 0.3}
+a1c1 idle watts against its own die: {'n': 2379, 'r': 0.979, 'y_per_x': 0.4192, 'rms_y': 0.1426, 'sd_x': 1.63, 'sd_y': 0.698}
+a3c0 idle watts against its own die: {'n': 2237, 'r': 0.976, 'y_per_x': 0.2651, 'rms_y': 0.0867, 'sd_x': 1.451, 'sd_y': 0.394}
+
+Hour of day (PDT), means over the rows above: a2 idle die, a2 idle W, a3 idle W, a3 nvme, a3 nic, a2 nvme, a2 nic, outside air
+00: die 48.45 W 22.5 | a3 W 23.82 nvme 38.24 nic 44.75 | a2 nvme 38.78 nic 45.88 | air 11.46 | n 84
+01: die 48.5 W 22.49 | a3 W 23.78 nvme 38.05 nic 44.53 | a2 nvme 38.64 nic 45.74 | air 11.11 | n 84
+02: die 48.18 W 22.42 | a3 W 23.75 nvme 37.84 nic 44.39 | a2 nvme 38.52 nic 45.56 | air 10.75 | n 84
+03: die 48.08 W 22.38 | a3 W 23.71 nvme 37.77 nic 44.21 | a2 nvme 38.33 nic 45.39 | air 10.4 | n 84
+04: die 47.48 W 22.26 | a3 W 23.62 nvme 37.47 nic 43.98 | a2 nvme 38.0 nic 45.04 | air 10.2 | n 84
+05: die 47.06 W 22.14 | a3 W 23.55 nvme 37.29 nic 43.7 | a2 nvme 37.61 nic 44.62 | air 10.06 | n 84
+06: die 46.84 W 22.11 | a3 W 23.48 nvme 37.08 nic 43.46 | a2 nvme 37.56 nic 44.44 | air 9.98 | n 89
+07: die 46.69 W 22.08 | a3 W 23.43 nvme 36.84 nic 43.28 | a2 nvme 37.47 nic 44.3 | air 9.97 | n 96
+08: die 46.54 W 22.03 | a3 W 23.39 nvme 36.72 nic 43.14 | a2 nvme 37.25 nic 44.1 | air 11.14 | n 96
+09: die 46.35 W 21.99 | a3 W 23.37 nvme 36.73 nic 43.08 | a2 nvme 37.15 nic 43.97 | air 13.55 | n 96
+10: die 46.33 W 21.99 | a3 W 23.4 nvme 36.75 nic 43.14 | a2 nvme 37.14 nic 43.98 | air 15.39 | n 96
+11: die 46.08 W 21.94 | a3 W 23.33 nvme 36.6 nic 42.93 | a2 nvme 36.84 nic 43.74 | air 16.97 | n 98
+12: die 46.48 W 22.02 | a3 W 23.41 nvme 36.61 nic 43.04 | a2 nvme 37.02 nic 43.9 | air 18.52 | n 99
+13: die 47.18 W 22.21 | a3 W 23.59 nvme 37.22 nic 43.61 | a2 nvme 37.65 nic 44.67 | air 19.46 | n 85
+14: die 47.93 W 22.36 | a3 W 23.74 nvme 37.64 nic 44.12 | a2 nvme 38.35 nic 45.26 | air 20.18 | n 78
+15: die 48.69 W 22.56 | a3 W 23.94 nvme 38.06 nic 44.52 | a2 nvme 38.78 nic 45.96 | air 19.98 | n 86
+16: die 49.54 W 22.76 | a3 W 24.22 nvme 38.53 nic 44.98 | a2 nvme 39.57 nic 46.77 | air 19.24 | n 83
+17: die 49.25 W 22.7 | a3 W 24.07 nvme 38.72 nic 45.24 | a2 nvme 39.38 nic 46.62 | air 17.22 | n 96
+18: die 49.11 W 22.66 | a3 W 24.02 nvme 38.76 nic 45.25 | a2 nvme 39.2 nic 46.44 | air 15.4 | n 108
+19: die 49.25 W 22.71 | a3 W 24.16 nvme 38.72 nic 45.32 | a2 nvme 39.41 nic 46.63 | air 14.38 | n 104
+20: die 49.59 W 22.77 | a3 W 24.15 nvme 38.66 nic 45.32 | a2 nvme 39.58 nic 46.8 | air 13.7 | n 90
+21: die 49.09 W 22.66 | a3 W 24.17 nvme 38.46 nic 44.94 | a2 nvme 39.42 nic 46.43 | air 12.69 | n 87
+22: die 48.85 W 22.59 | a3 W 24.0 nvme 38.24 nic 44.81 | a2 nvme 39.06 nic 46.19 | air 12.32 | n 96
+23: die 48.56 W 22.53 | a3 W 23.86 nvme 38.12 nic 44.74 | a2 nvme 38.95 nic 45.94 | air 12.05 | n 95
