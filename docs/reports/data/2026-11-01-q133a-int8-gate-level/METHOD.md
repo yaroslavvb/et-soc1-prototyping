@@ -23,9 +23,10 @@ tool, not the RTL: yosys's booth pass recodes the second operand of `x * y`, che
 ([`netlists/recoded_operand.txt`](netlists/recoded_operand.txt), `booth_operand.py`). As the RTL is written that is B, from TenB
 (`vpu_lane_tima.v`: `f1_in1` = `tena_rd_data`, `f1_in2` = `tenb_out`).
 
-**The primary arm was named before any count was set beside a card:** `booth_tree`, the float unit's own kind of multiplier (radix-4 Booth
-and carry-save trees ending in one carry-propagate add, which core-et writes out structurally for `txfma_top`), and what a datapath
-synthesis does with a sum of products. `plain` is the open flow's recipe unchanged; `booth_swap` asks which operand the recoder sits on.
+**The primary arm is `booth_tree`**, the float unit's own kind of multiplier (radix-4 Booth and carry-save trees ending in one
+carry-propagate add, which core-et writes out structurally for `txfma_top`), and what a datapath synthesis does with a sum of products. It
+was chosen when the arms were built, and it was built and run first, but the choice was not registered: no timestamped record shows it came
+before any count was set beside a card (corrected after verification; this read "named before any count was set beside a card"). `plain` is the open flow's recipe unchanged; `booth_swap` asks which operand the recoder sits on.
 
 **The float unit**, for a like-for-like comparison: `txfma_top` as txfma/synth.sh's `flat` netlist and nothing else
 ([`synth_txfma_flat.sh`](../../../../tools/open-flow/tima/synth_txfma_flat.sh)): 16,063 cells, 2,127.4 µm², 1,953 flip-flops, 13 latches
@@ -67,7 +68,8 @@ core-et's `vpu_top`, its micro-op stream, zero gate, clock gates and register fi
 bench's, unchanged: `run_kinds.py` puts each tile through a coverage run behind the functional check (every accumulator word against
 `accum.c`'s software after each measured op) and a VCD run of one whole op, which `settle_count` reads; **`nets_hier`** is one count per
 net per cycle, a name merged only with the same waveform in an ancestor scope, over `.lane_tima.tima.` (int8) or `.txfma.` (floats) for the
-unit and `.dut.` for the whole VPU. Per TensorFMA op on one minion; per MAC divides by 16,384 (int8), 8,192 (fp16) or 4,096 (fp32).
+unit and `.dut.` for the whole VPU. **`nets_map`**, Q132(b)'s primary since its §4, applies one list of merges learned once
+(`train_maps.py`) to every run, so a regular stream cannot fold a fan-out that switches in step; `nets_hier` can, and reads low there. Per TensorFMA op on one minion; per MAC divides by 16,384 (int8), 8,192 (fp16) or 4,096 (fp32).
 
 **The unit's registers stop reporting to the register accounting** in a gate run (they are flip-flop cells, not the `FF` macros), so the
 clocked-bit term of every fit takes them from Q132(b)'s RTL run of the same tile: the same 92 bits a unit, the same stimulus.
@@ -85,4 +87,10 @@ committed counts point for point (README result 2).
 | float netlist | all 35 fp32 and fp16 kinds of `tools/claims-v3/kinds` (E78's 33 and the two zeros), in three batches; E102's all-in B lists, fp32 at bits 0, 11, 16, 22 and fp16 at 0, 9, with their zero tiles | the middle | one stream (fp32 `randn`) |
 
 The middle launch point is 471,698 ops into a 0.5 s launch in int8 and 274,725 in the floats. "One stream" maps exist because `run_kinds.py`
-needs a map for each binary; their `nets_map` is not quoted anywhere, and every count here is `nets_hier`, which uses no map.
+needs a map for each binary. **Which merge is quoted where** (corrected after verification; this said no `nets_map` was quoted):
+
+- kinds and fits are `nets_hier`, which uses no map, the convention the brief asked for;
+- single bits are `nets_map` (README, Departures): `booth_tree`'s map is `train_maps.py`'s, and the others' are one-stream maps, quoted with
+  that caveat;
+- every RTL-side number also appears in Q132(b)'s primary, `nets_map`, read from Q132(b)'s committed counts, which its trained map made
+  (`analysis.json` `merges`). The RTL control's own one-stream `nets_map` is never used.

@@ -3,9 +3,12 @@
 
     python3 analyze.py            (from this directory; reads runs/, Q132(b)'s, E78's, E79's and E102's committed files)
 
-Writes analysis.json and tables.md. Every count is nets_hier (settle_count.cpp's `hier`: one count per net, merging a name
+Writes analysis.json and tables.md. Kinds and fits are nets_hier (settle_count.cpp's `hier`: one count per net, merging a name
 only with the same waveform in an ancestor scope), per TensorFMA op on one minion unless it says per MAC (16,384 an int8 op).
+Single bits are nets_map (the merge learned once and applied to every run). Section `merges` (added after verification) gives
+every RTL-side number in Q132(b)'s primary merge, nets_map, beside nets_hier, from Q132(b)'s committed counts and trained map.
 The RTL reference is Q132(b)'s committed counts, after the control run here reproduced them (section `control`).
+Each fit carries a jackknife standard error over kinds (`coef_jackknife_se_fJ`, from the leave-one-out refits).
 
 SPDX-License-Identifier: Apache-2.0
 """
@@ -82,11 +85,15 @@ def fit_report(rows, cols):
     X = np.array([[r[c] * r["rate"] for c in cols] for r in rows], float)
     res = stats([r["D"] for r in rows], X @ b)
     res["coef_fJ"] = {c: float(x) * 1e15 for c, x in zip(cols, b)}
-    loo = []
+    loo, bs = [], []
     for i in range(len(rows)):
         bi = fit(rows[:i] + rows[i + 1:], cols)
+        bs.append(bi)
         loo.append(float(np.array([rows[i][c] * rows[i]["rate"] for c in cols]) @ bi))
     res["loo"] = stats([r["D"] for r in rows], loo)
+    bs, n = np.array(bs), len(rows)                # jackknife over kinds, from the same leave-one-out refits
+    res["coef_jackknife_se_fJ"] = {c: float(np.sqrt((n - 1) / n * ((bs[:, j] - bs[:, j].mean()) ** 2).sum())) * 1e15
+                                   for j, c in enumerate(cols)}
     res["resid_w"] = {r["kind"]: float(r["D"] - q) for r, q in zip(rows, X @ b)}
     return res
 
@@ -166,7 +173,8 @@ def main():
             continue
         r = {"rtl": {"unit_per_mac": u(ref["mean"]) / MACS["int8"], "unit_per_mac_mid": u(at(ref, MID)) / MACS["int8"],
                      "vpu_per_mac": v(ref["mean"]) / MACS["int8"], "by_stage_per_mac": {s: ref["mean"]["unit"]["by_stage_hier1"].get(s, 0) / MACS["int8"] for s in STAGES},
-                     "ff_clocked": ref["mean"]["ff"]["all"]["clocked"], "ff_clocked_tima": ref["mean"]["ff"]["tima"]["clocked"]}}
+                     "ff_clocked": ref["mean"]["ff"]["all"]["clocked"], "ff_clocked_tima": ref["mean"]["ff"]["tima"]["clocked"],
+                     "unit_per_mac_points": [u(p) / MACS["int8"] for p in ref["points"]]}}
         for a in ARMS:
             c = runs[a]["kinds"]
             row = c["rows"].get("int8." + k) if c else None
@@ -180,7 +188,8 @@ def main():
                     "by_stage_per_mac": {s: m["unit"]["by_stage_hier1"].get(s, 0) / MACS["int8"] for s in STAGES},
                     "check_mismatch_max": max(p["check_mismatch"] for p in row["points"]),
                     "valid_slots": m["valid_slots"], "gate_over_rtl": u(m) / u(ref["mean"]) if u(ref["mean"]) else None,
-                    "gate_over_rtl_mid": (u(pm) / u(at(ref, MID))) if pm and u(at(ref, MID)) else None}
+                    "gate_over_rtl_mid": (u(pm) / u(at(ref, MID))) if pm and u(at(ref, MID)) else None,
+                    "unit_per_mac_points": [u(p) / MACS["int8"] for p in row["points"]]}
         kinds[k] = r
     out["kinds"] = kinds
 
@@ -447,6 +456,139 @@ def main():
                              "rms_vs_rail_fJ": float(np.sqrt(np.mean((np.array(pf) - np.array(card_r)) ** 2)))}
             priced["arms"][a] = row
         out["bits"]["priced_at_one_k"] = priced
+
+    # a random fp32 and fp16 MAC at gate level over int8's full, for each int8 netlist (the middle point on both sides)
+    if fg:
+        over = {}
+        for a in ARMS:
+            i = kinds.get("full", {}).get(a, {}).get("unit_per_mac_mid")
+            if i:
+                over[a] = {"int8_full_unit_per_mac_mid": i,
+                           **{t: out["float_gate"]["kinds"][f"{t}.randn"]["gate_unit_per_mac"] / i for t in ("fp32", "fp16")}}
+        out["float_gate"]["randn_over_int8_full_mid"] = over
+
+    # ---- 7. both merges (added after verification): every RTL-side number in Q132(b)'s primary merge, nets_map, beside nets_hier ----
+    # Q132(b) section 4 made nets_map primary: nets_hier folds a fan-out of nets that switch in step into one ancestor-scope name and
+    # reads low on regular streams. The RTL side's nets_map here is Q132(b)'s committed counts, made with its trained map (train_maps.py,
+    # 18 tiles of random and gated data in three formats), never this lane's control, whose map was learned on one stream. The gate
+    # side's is each binary's own map: train_maps.py's for booth_tree, one stream for the others. The nets_hier half repeats the
+    # sections above with the same code, and `self_check_max_abs_diff` says how far it is from them (0 when they agree).
+    if fg:
+        MERGES = ("nets_hier", "nets_map")
+        NOMUL = ("zeros", "a_randn_b_zeros", "a_zeros_b_randn")     # a lane with a zero operand does not multiply
+        CONST = ("ones", "neg_ones", "pi")                          # constant streams: the same value in every element
+        mg = {"_what": "Q132(b)'s primary merge (nets_map) beside nets_hier, for the float unit, int8's unit and the model M2; "
+                       "per MAC in the unit unless named; the floats and the cross-format test at the middle launch point",
+              "map_source": {"rtl": "Q132(b)'s committed counts (counts-v2.json): its train_maps.py map, 18 tiles of random and gated data in three formats",
+                             "booth_tree": "train_maps.py's map, learned on this binary",
+                             "plain": "one stream (int8 full)", "booth": "one stream (int8 full)", "booth_swap": "one stream (int8 full)",
+                             "f_txfma_flat": "one stream (fp32 randn)"},
+              "q132b_primary": {"fit_fp32_fp16_vpu_map": q132a["fit_e78"]["fp32+fp16"]["vpu_map"]["coef_fJ"],
+                                "fit_int8_vpu_map": q132a["fit_e78"]["int8"]["vpu_map"]["coef_fJ"],
+                                "float_to_int8_vpu_map": {k: q132a["across_formats"]["vpu_map"]["float_to_int8"][k] for k in ("rms_w", "bias_w", "pearson_r")},
+                                "float_to_int8_vpu_hier": {k: q132a["across_formats"]["vpu_hier"]["float_to_int8"][k] for k in ("rms_w", "bias_w", "pearson_r")},
+                                "note": "Q132(b)'s fits are on three-point means; the cross-format rows here are at the middle point"}}
+        fu = {}
+        for mgn in MERGES:
+            per = {}
+            for key, row in fg["rows"].items():
+                t, k = key.split(".", 1)
+                ref = v2.get(key)
+                p, q = at(row, FMID[t]), (at(ref, FMID[t]) if ref else None)
+                if not p or not q:
+                    continue
+                g, r = p["unit"][mgn] / MACS[t], q["unit"][mgn] / MACS[t]
+                per[key] = {"gate_unit_per_mac": g, "rtl_unit_per_mac": r, "gate_over_rtl": g / r if r else None}
+            mul = {key: x["gate_over_rtl"] for key, x in per.items() if key.split(".", 1)[1] not in NOMUL and x["gate_over_rtl"]}
+            var = {key: x for key, x in mul.items() if key.split(".", 1)[1] not in CONST}
+            fu[mgn] = {"kinds": per, "n_multiply": len(mul), "median_gate_over_rtl_multiply": float(np.median(list(mul.values()))),
+                       "n_varying": len(var), "varying_kinds": sorted(var),
+                       "range_gate_over_rtl_varying": [float(min(var.values())), float(max(var.values()))],
+                       "randn": {t: dict(per[f"{t}.randn"], rtl_misses_share=1 - per[f"{t}.randn"]["rtl_unit_per_mac"] / per[f"{t}.randn"]["gate_unit_per_mac"])
+                                 for t in ("fp32", "fp16")}}
+        mg["float_unit"] = fu
+        iu = {}
+        for mgn in MERGES:
+            per = {}
+            for k in KINDS:
+                ref = v2.get("int8." + k)
+                if not ref:
+                    continue
+                e = {"rtl_unit_per_mac": ref["mean"]["unit"][mgn] / MACS["int8"], "rtl_unit_per_mac_mid": at(ref, MID)["unit"][mgn] / MACS["int8"]}
+                for a in ARMS:
+                    c = runs[a]["kinds"]
+                    row = c["rows"].get("int8." + k) if c else None
+                    if not row:
+                        continue
+                    pm = at(row, MID)
+                    e[a + "_unit_per_mac_mid"] = pm["unit"][mgn] / MACS["int8"] if pm else None
+                    if len(row["points"]) == 3:
+                        e[a + "_unit_per_mac"] = row["mean"]["unit"][mgn] / MACS["int8"]
+                if e.get("booth_tree_unit_per_mac") is not None and e["rtl_unit_per_mac"]:
+                    e["booth_tree_over_rtl"] = e["booth_tree_unit_per_mac"] / e["rtl_unit_per_mac"]
+                per[k] = e
+            iu[mgn] = per
+        mg["int8_unit"] = iu
+
+        def int8_rows(a, mgn, cross):
+            """M2's rows for int8. cross=False: as section 4 (three-point means where an arm has them, the RTL's mean clocked bits);
+            cross=True: as section 6's cross-format test (every count at the middle point)."""
+            rows, zr = [], v2.get("int8.zeros")
+            c = runs[a]["kinds"] if a != "rtl" else None
+            for k in KINDS:
+                item, ref = e78.get("int8." + k), v2.get("int8." + k)
+                if not item or not ref or k == "zeros":
+                    continue
+                if a == "rtl":
+                    g, gz = (at(ref, MID), at(zr, MID)) if cross else (ref["mean"], zr["mean"])
+                else:
+                    gr, gzr = c["rows"]["int8." + k], c["rows"]["int8.zeros"]
+                    g, gz = (gr["mean"], gzr["mean"]) if (len(gr["points"]) == 3 and not cross) else (at(gr, MID), at(gzr, MID))
+                dclk = ((at(ref, MID)["ff"]["all"]["clocked"] - at(zr, MID)["ff"]["all"]["clocked"]) if cross else
+                        (ref["mean"]["ff"]["all"]["clocked"] - zr["mean"]["ff"]["all"]["clocked"]))
+                rows.append({"kind": "int8." + k, "D": item["D"]["mean"], "rate": item["rate"]["mean"],
+                             "dnets_vpu": g["vpu"][mgn] - gz["vpu"][mgn], "dclk": dclk})
+            return rows
+
+        def float_rows(mgn, gate):
+            rows = []
+            for key in out["float_gate"]["cross_format"]["float_kinds"]:
+                t = key.split(".")[0]
+                item, ref, zr = e78[key], v2[key], v2[f"{t}.zeros"]
+                src, srcz = (fg["rows"][key], fg["rows"][f"{t}.zeros"]) if gate else (ref, zr)
+                p, pz = at(src, FMID[t]), at(srcz, FMID[t])
+                rows.append({"kind": key, "D": item["D"]["mean"], "rate": item["rate"]["mean"], "dnets_vpu": p["vpu"][mgn] - pz["vpu"][mgn],
+                             "dclk": at(ref, FMID[t])["ff"]["all"]["clocked"] - at(zr, FMID[t])["ff"]["all"]["clocked"]})
+            return rows
+
+        cols = ["dnets_vpu", "dclk"]
+        m2 = {}
+        for mgn in MERGES:
+            fgf, frf = fit_report(float_rows(mgn, True), cols), fit_report(float_rows(mgn, False), cols)
+            m2[mgn] = {"floats_gate_fit": fgf, "floats_rtl_fit_same_kinds": frf,
+                       "int8_alone": {a: fit_report(int8_rows(a, mgn, False), cols) for a in ["rtl"] + ARMS if a == "rtl" or runs[a]["kinds"]},
+                       "to_int8": {a: apply(int8_rows(a, mgn, True), cols, fgf["coef_fJ"]) for a in ARMS if runs[a]["kinds"]},
+                       "rtl_to_int8_same_kinds": apply(int8_rows("rtl", mgn, True), cols, frf["coef_fJ"])}
+        mg["m2"] = m2
+        # how far each int8 netlist's k and a sit from the floats' gate-level fit, in combined jackknife standard errors (same merge)
+        sep = {}
+        for mgn in MERGES:
+            fl0 = m2[mgn]["floats_gate_fit"]
+            sep[mgn] = {a: {c: {"int8": f["coef_fJ"][c], "floats": fl0["coef_fJ"][c],
+                                "z": (f["coef_fJ"][c] - fl0["coef_fJ"][c]) / float(np.hypot(f["coef_jackknife_se_fJ"][c], fl0["coef_jackknife_se_fJ"][c]))}
+                            for c in cols}
+                        for a, f in m2[mgn]["int8_alone"].items() if a != "rtl"}
+        mg["int8_vs_floats_gate_fit"] = sep
+        # the nets_hier half against the sections above, which it repeats
+        h, xt = m2["nets_hier"], out["float_gate"]["cross_format"]
+        diffs = [abs(h["floats_gate_fit"]["coef_fJ"][c] - xt["floats_gate_fit"]["coef_fJ"][c]) for c in cols]
+        diffs += [abs(h["floats_rtl_fit_same_kinds"]["coef_fJ"][c] - xt["floats_rtl_fit_same_kinds"]["coef_fJ"][c]) for c in cols]
+        diffs += [abs(h["int8_alone"][a]["coef_fJ"][c] - out["model"]["arms"][a]["int8_alone"]["coef_fJ"][c]) for a in h["int8_alone"] for c in cols]
+        diffs += [abs(h["to_int8"][a][s] - xt["to_int8"][a][s]) for a in h["to_int8"] for s in ("rms_w", "bias_w")]
+        diffs += [abs(h["rtl_to_int8_same_kinds"][s] - xt["rtl_to_int8_same_kinds"][s]) for s in ("rms_w", "bias_w")]
+        diffs += [abs(fu["nets_hier"]["kinds"][key]["gate_unit_per_mac"] - out["float_gate"]["kinds"][key]["gate_unit_per_mac"]) for key in fu["nets_hier"]["kinds"]]
+        mg["self_check_max_abs_diff"] = float(max(diffs))
+        out["merges"] = mg
     json.dump(out, open(os.path.join(HERE, "analysis.json"), "w"), indent=1)
     write_tables(out)
 
@@ -458,7 +600,9 @@ def fmt(x, nd=1):
 
 
 def write_tables(o):
-    L = ["# Q133(a) tables", "", "Generated by `analyze.py` from `analysis.json`. nets_hier throughout; per TensorFMA op on one minion unless per MAC.", ""]
+    L = ["# Q133(a) tables", "", "Generated by `analyze.py` from `analysis.json`. nets_hier unless a table says nets_map (Q132(b)'s primary merge; "
+         "the last section sets the two side by side); per TensorFMA op on one minion unless per MAC. "
+         "± is a jackknife standard error over kinds.", ""]
     c = o["control"]
     L += ["## The control", "", f"{len(c['points'])} tile-points of Q132(b)'s bench rebuilt here, against its committed counts; largest difference:", ""]
     L += ["| " + " | ".join(c["max_abs_diff"]) + " |", "|" + "---:|" * len(c["max_abs_diff"]),
@@ -483,12 +627,14 @@ def write_tables(o):
         if "booth_tree" in r:
             L.append(f"| {k} | " + " | ".join(fmt(r["booth_tree"]["by_stage_per_mac"][s]) for s in STAGES) + " | "
                      + " | ".join(fmt(r["rtl"]["by_stage_per_mac"][s]) for s in STAGES) + " |")
-    L += ["", "## Beside E78's watts (int8, 15 kinds)", "", "| counts | int8 alone: rms (W) | LOO rms | k (fJ) | a (fJ) | floats' constants: rms (W) | bias (W) | r |",
+    L += ["", "## Beside E78's watts (int8, 15 kinds)", "", "The last three columns put Q132(b)'s fp32+fp16 vpu_hier constants (RTL counts) on each count.", "",
+          "| counts | int8 alone: rms (W) | LOO rms | k (fJ) | a (fJ) | floats' constants: rms (W) | bias (W) | r |",
           "|---|---:|---:|---:|---:|---:|---:|---:|"]
     for a, m in o["model"]["arms"].items():
         f, x = m["int8_alone"], m["float_constants_applied"]
-        L.append(f"| {a} | {f['rms_w']:.3f} | {f['loo']['rms_w']:.3f} | {f['coef_fJ']['dnets_vpu']:.3f} | {f['coef_fJ']['dclk']:.3f} | "
-                 f"{x['rms_w']:.3f} | {x['bias_w']:+.3f} | {x['pearson_r']:.4f} |")
+        se = f["coef_jackknife_se_fJ"]
+        L.append(f"| {a} | {f['rms_w']:.3f} | {f['loo']['rms_w']:.3f} | {f['coef_fJ']['dnets_vpu']:.3f} ± {se['dnets_vpu']:.3f} | "
+                 f"{f['coef_fJ']['dclk']:.3f} ± {se['dclk']:.3f} | {x['rms_w']:.3f} | {x['bias_w']:+.3f} | {x['pearson_r']:.4f} |")
     L += ["", "## Single bits: merged-net toggles in the unit per flipped bit (middle point)", ""]
     b = o["bits"]
     L += ["| list, arm | bit 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | odd ÷ even | MSB ÷ rest | Spearman vs card |", "|---|" + "---:|" * 11]
@@ -528,7 +674,9 @@ def write_tables(o):
         if "floats_gate_fit" in x:
             L += ["", "## One price across formats", "", "| fit | n | k (fJ) | a (fJ) | rms (W) | LOO rms (W) |", "|---|---:|---:|---:|---:|---:|"]
             for nm, f in (("floats, gates", x["floats_gate_fit"]), ("floats, RTL, same kinds", x["floats_rtl_fit_same_kinds"])):
-                L.append(f"| {nm} | {f['n']} | {f['coef_fJ']['dnets_vpu']:.3f} | {f['coef_fJ']['dclk']:.3f} | {f['rms_w']:.3f} | {f['loo']['rms_w']:.3f} |")
+                se = f["coef_jackknife_se_fJ"]
+                L.append(f"| {nm} | {f['n']} | {f['coef_fJ']['dnets_vpu']:.3f} ± {se['dnets_vpu']:.3f} | {f['coef_fJ']['dclk']:.3f} ± {se['dclk']:.3f} | "
+                         f"{f['rms_w']:.3f} | {f['loo']['rms_w']:.3f} |")
             L += ["", "| floats' constants put on int8 | rms (W) | bias (W) | r |", "|---|---:|---:|---:|"]
             t = x["rtl_to_int8_same_kinds"]
             L.append(f"| RTL both sides | {t['rms_w']:.3f} | {t['bias_w']:+.3f} | {t['pearson_r']:.4f} |")
@@ -544,6 +692,43 @@ def write_tables(o):
                 gu, ru = r["gate_unit_map_per_flip"], r["rtl_unit_map_per_flip"]
                 L.append(f"| {k2} | {r['flips_per_op']} | {fmt(gu)} | {fmt(ru)} | {fmt(gu / ru if ru else None, 2)} | {fmt(r['gate_vpu_map_per_flip'])} | {fmt(r['rtl_vpu_map_per_flip'])} | "
                          f"{fmt(r['gate_vpu_map_per_flip'] * kgf if kgf else None, 0)} | {fmt(r['rtl_vpu_map_per_flip'] * krf if krf else None, 0)} | {fmt(r['card_board_fJ'], 0)} | {fmt(r['card_rail_fJ'], 0)} |")
+    mg = o.get("merges")
+    if mg:
+        L += ["", "## Both merges: Q132(b)'s primary, `nets_map`, beside `nets_hier` (added after verification)", "",
+              "The RTL side's `nets_map` is Q132(b)'s committed counts and trained map; the gate side's is train_maps.py's for booth_tree and "
+              f"one stream for the other netlists and the float unit. The `nets_hier` half repeats the sections above (largest difference {mg['self_check_max_abs_diff']:.3g}).", "",
+              "| per MAC in the unit (middle point) | merge | gates | RTL | gates ÷ RTL | share of the gates' count the RTL misses |", "|---|---|---:|---:|---:|---:|"]
+        for t in ("fp32", "fp16"):
+            for mgn in ("nets_map", "nets_hier"):
+                x = mg["float_unit"][mgn]["randn"][t]
+                L.append(f"| {t} randn | {mgn} | {fmt(x['gate_unit_per_mac'])} | {fmt(x['rtl_unit_per_mac'])} | {x['gate_over_rtl']:.2f} | {100 * x['rtl_misses_share']:.0f}% |")
+        for mgn in ("nets_map", "nets_hier"):
+            x = mg["int8_unit"][mgn]["full"]
+            L.append(f"| int8 full, booth_tree | {mgn} | {fmt(x['booth_tree_unit_per_mac_mid'])} | {fmt(x['rtl_unit_per_mac_mid'])} | "
+                     f"{x['booth_tree_unit_per_mac_mid'] / x['rtl_unit_per_mac_mid']:.2f} | {100 * (1 - x['rtl_unit_per_mac_mid'] / x['booth_tree_unit_per_mac_mid']):.0f}% |")
+        L += ["", "| float unit, gates ÷ RTL | nets_map | nets_hier |", "|---|---:|---:|"]
+        fm, fh = mg["float_unit"]["nets_map"], mg["float_unit"]["nets_hier"]
+        L.append(f"| median over the {fm['n_multiply']} kinds whose lanes multiply | {fm['median_gate_over_rtl_multiply']:.2f} | {fh['median_gate_over_rtl_multiply']:.2f} |")
+        L.append(f"| range over the {fm['n_varying']} of them that carry varying data | {fm['range_gate_over_rtl_varying'][0]:.2f}–{fm['range_gate_over_rtl_varying'][1]:.2f} | "
+                 f"{fh['range_gate_over_rtl_varying'][0]:.2f}–{fh['range_gate_over_rtl_varying'][1]:.2f} |")
+        L += ["", "M2 on E78 in each merge (int8 alone: three-point means where an arm has them, as in the section above; floats at the middle point):", "",
+              "| fit | merge | n | k (fJ) | a (fJ) | rms (W) | LOO rms (W) |", "|---|---|---:|---:|---:|---:|---:|"]
+        for mgn in ("nets_map", "nets_hier"):
+            m2 = mg["m2"][mgn]
+            fits = [("floats, RTL", m2["floats_rtl_fit_same_kinds"]), ("floats, gates", m2["floats_gate_fit"])]
+            fits += [(f"int8, {a}", f) for a, f in m2["int8_alone"].items()]
+            for nm, f in fits:
+                se = f["coef_jackknife_se_fJ"]
+                L.append(f"| {nm} | {mgn} | {f['n']} | {f['coef_fJ']['dnets_vpu']:.3f} ± {se['dnets_vpu']:.3f} | {f['coef_fJ']['dclk']:.3f} ± {se['dclk']:.3f} | "
+                         f"{f['rms_w']:.3f} | {f['loo']['rms_w']:.3f} |")
+        L += ["", "The floats' two constants put on int8's 15 kinds, every count at the middle point:", "",
+              "| counts | merge | rms (W) | bias (W) | worst (W) | r |", "|---|---|---:|---:|---:|---:|"]
+        for mgn in ("nets_map", "nets_hier"):
+            m2 = mg["m2"][mgn]
+            t = m2["rtl_to_int8_same_kinds"]
+            L.append(f"| RTL both sides | {mgn} | {t['rms_w']:.3f} | {t['bias_w']:+.3f} | {t['worst_w']:.2f} | {t['pearson_r']:.4f} |")
+            for a, t in m2["to_int8"].items():
+                L.append(f"| gates both sides, int8 {a} | {mgn} | {t['rms_w']:.3f} | {t['bias_w']:+.3f} | {t['worst_w']:.2f} | {t['pearson_r']:.4f} |")
     open(os.path.join(HERE, "tables.md"), "w").write("\n".join(L) + "\n")
 
 
