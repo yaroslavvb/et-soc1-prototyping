@@ -41,7 +41,9 @@ So a raised cap on such a build is not merely uninterpretable: above 65.5 W ther
 power throttle at all**, and the power arm pushes the wrong way. What still guards such a build:
 
 1. the **thermal** arm, which is evaluated first in the same function and is unaffected;
-2. the boot-time PMIC catastrophic power alarm (the firmware's hardware threshold constant);
+2. the boot-time PMIC catastrophic power alarm (the firmware's hardware threshold constant). *Dated note, Sun 1 Nov 2026
+   (week 44): the firmware writes that threshold, and only aifoundry1's card 0 has been seen to act on it (E84). On the
+   other three cards no measurement here shows it acting: treat it as unverified, and the host's abort below as the guard;*
 3. whatever the host harness enforces — in this workflow, the 85 W board-power abort.
 
 **Lowering** the cap or the threshold keeps the average under the wrap and is unaffected either way. That is one

@@ -388,8 +388,11 @@ effectively **no firmware power throttle at all and the power arm pushes the clo
 cap**. In 0.22.0 both locals are 32-bit (`thermal_pwr_mgmt.c:869-871`) and the changelog carries `[SW-22147] Fix
 conversion in check_power_throttle_conditions` under *Unreleased*, so **the gate is answered for the card E69 used
 and open for every other card until its own build is read**. What still guards an affected build: the **thermal**
-arm, which is evaluated first in the same function and is unaffected; the boot-time PMIC catastrophic power alarm;
-and whatever the host harness enforces — in Q129, an 85 W board-power abort. The full reading, with every citation in
+arm, which is evaluated first in the same function and is unaffected; and whatever the host harness enforces — in
+Q129, an 85 W board-power abort. (This named a third guard, the boot-time PMIC catastrophic power alarm. **Dated note,
+Sun 1 Nov 2026 (week 44):** the firmware writes that threshold, and only aifoundry1's card 0 has been seen to act on it
+(E84, below). On the other three cards no measurement here shows it acting: treat it as unverified. Host-side aborts
+are the guard.) The full reading, with every citation in
 the open `et-platform` repository, is
 [`../reports/data/2026-10-27-q129-throttle-wrap-gate/`](../reports/data/2026-10-27-q129-throttle-wrap-gate/README.md).
 A first pass over the firmware had reported this hazard with the wrong mechanism (saturation), the wrong field (both
@@ -411,7 +414,7 @@ E84 ran E80's speed design on aifoundry1's card 0 under its own governor (releas
 65 W / 65 °C, nothing set) and dumped the service processor's trace ring after every run. In all four fp32 random-data
 runs, and in no other run of the 35 or of the smoke, the ring holds lines like
 `Pmic_Controller_Handle_Pmic_Error_Event: (step 250 mW) power = 75750 mW, alarm set point = 75000 mW`, the PMIC's power
-reading at 75.00–76.25 W, each followed by a power-status record in throttle state 3 (POWER_SAFE) and
+reading at 75.00–76.25 W (the host driver's counter reads up to 76.75 W, Q132(g)), each followed by a power-status record in throttle state 3 (POWER_SAFE) and
 `New OP: Freq 300 MNN 400`. The governor's power arm then climbs back one point a pass, 300 → 600 → 700 → 800 MHz,
 because its running average (44–48 W) is far under the 65 W TDP, and at 800 MHz the alarm trips again within 0.1–0.6 s:
 a median 1.106 s from one safe state to the next. On the board the same data read 72–75 W at 800 MHz. Over a sustained
@@ -427,6 +430,20 @@ operating-point changes is one candidate).
   such a line or a 300 MHz operating point, and none of their 93,276 telemetry readings is at 300 MHz, though its fp32
   random data read 80–88 W at 800 MHz. Whether its PMIC (1.5.0), or card 1's (1.3.0), has another set point or raises no
   alarm was not checked.
+- **Dated note, Sun 1 Nov 2026 (week 44), Q132(g): aifoundry2 is no longer untested. It does not alarm at any reading it
+  reports, on a reading not shown to be card 0's quantity.** The alarm's value comes from the PMIC, and the same kind at
+  the same clock reads 5–10 W higher on aifoundry2 with the three rails within about 1 W (a2 ≈ 2.46 + 1.117 × c0), so card
+  0's 75 W is about 84–86 W on its reading. It read 85 W or more 654 times in 37 runs (longest 0.8 s), and 75 W or more
+  2,907 times in 95 runs, up to 88.88 W; 120,637 readings, none at 300 MHz; 300 rings, no alarm line, though only 23 of
+  the runs at 75 W or more have a ring reaching back. The host driver's PMIC event counter reads **0 since its 26 Oct
+  boot**, covering 460 of the 654, against **177 on card 0**, all inside E84's four fp32 random-data runs. PMIC 1.6.1
+  alarms; PMIC 1.5.0 did not at those readings; **firmware or board, unknown**. aifoundry3 and card 1 never read above
+  56.43 and 61.30 W, so they are untested. Not tested on any card: an alarm on the slow average, which the 65 W arm never
+  let past 68.91 W; that needs a governor move or a PMIC read. E101 then read 101.15 W on aifoundry2, one held reading on
+  three samples, about 88 W on card 0's scale if the same line holds there: none of that session's 25,074 samples reads
+  300 MHz and its 82 rings hold no alarm line (post hoc, read with `tools/claims-v3/hpl/sptrace_full.py`). E84's "hotter
+  per board watt" compares readings on these two scales. Data:
+  [`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §a.
 - **For a run on card 0:** expect fp32 random data at 800 MHz to cycle through 300 MHz, and register a label and a stop
   or a count for the alarm (E84's labels had no PMIC category, so its limit rule scored the alarm runs as misses); Q130's
   evening round left card 0 out for this reason. 30 of E60's 33 300 MHz episodes on this card (20 October) match the
@@ -447,21 +464,96 @@ dip, so the work continued at the lower clock. It is not the thermal loop (the d
 power test: the six dips the sampler caught a reading for started at 34.1–41.6 W, against the firmware's 65 W TDP,
 and the other two have no reading (corrected 26 Oct 2026 from "36–42 W", which three of the six are under).
 Its shape is the governor's idle reset and climb (above: launch to
-800 MHz a median 0.67 s, at most 1.2 s), as if the service processor saw the card idle for an instant; why it fires
-mid-launch is not known. E62's back-to-back launches showed nothing like it. For a power measurement: allow for a ~1 s
-step to 600 MHz in about one launch in 45 when launches follow idle gaps, or read the clock per sample, as E60's
-amendment A2 window does. Data: `docs/reports/data/2026-10-23-e63-camera-hamming-ladder/s*/dips.json`.
+800 MHz a median 0.67 s, at most 1.2 s), as if the service processor saw the card idle for an instant. That reading was
+right; this section said "why it fires mid-launch is not known" until 1 November 2026 (next paragraph). E62's back-to-back
+launches showed nothing like it. For a power measurement: allow for a ~1 s step to 600 MHz in about one launch in 45 when
+launches follow idle gaps, or read the clock per sample, as E60's amendment A2 window does. Data:
+`docs/reports/data/2026-10-23-e63-camera-hamming-ladder/s*/dips.json`.
 
-**A possible trigger, post hoc (E85, 31 October 2026; suggestive only).** E85's sampler, inherited from E63's runner,
+**What fires it (Sun 1 Nov 2026, week 44; E100 and Q132(g): a registered test on one card and one kind, with a matching
+public source, not shown in the card's binary).** A check once a second on the card's clock reads idle in the gap between
+two kernels, and sends the clock to 600 MHz until the next check. In public source at et-platform `836a4ab` that is the
+Master Minion's heartbeat: it sends a snapshot of that instant, busy only if a kernel slot reads `KERNEL_STATE_IN_USE`
+(`device-minion-runtime/src/MasterMinion/src/services/sp_iface.c:76-100`, `workers/kw.c:1915-1930`); the SP passes it on
+(`rtos_task/command_dispatcher.c:476`) and on any busy-to-idle edge notifies POWER_IDLE at once, with no debounce
+(`services/thermal_pwr_mgmt.c:3110-3124`), which sets the boot point (`:2177-2180`); the power branch climbs only while the
+state is not idle (`:879-880`, `:910-919`). So a launch's *internal* kernel boundaries count, not just a host's idle gap.
+- **Tested from outside.** On aifoundry2, int8 zeros at about 35 W, falls per about 146 heartbeats at 800 MHz: 3, 3, 10 and
+  33 at added gaps of 0, 5, 20 and 100 ms, each inside its frozen band, and 0 in 126 heartbeats inside 50 kernels of about
+  4 s. A lattice fitted on one round predicted the other: **39 of 39 heartbeats in a gap fell, 0 of 234 inside a kernel**
+  (234 is one tied lattice's count). All 61 falls first read −1.9 to +117.9 ms from the other round's lattice point. All
+  five rules passed.
+- **What it costs:** a fall lasts one heartbeat, a median 1.10 s at 600 MHz, about 0.3 s of full-speed work. The climb's
+  "launch to 800 MHz a median 0.67 s" above is the first heartbeat inside a kernel plus about 0.3 s.
+- **How often:** about 1 in 500 kernel boundaries with the sparsity host's stock launches, post hoc over 25 falls in six
+  sessions, with no dependence visible on die, power, format or session position. E100's own no-gap arm, 1 in 152 at
+  800 MHz, 95% about 1 in 52 to 1 in 735, is compatible and adds no further support. Runs on a fixed grid (E63, E73, E85)
+  hold one phase against the heartbeat, so they pile up at one time in the process.
+- **What it does not show.** That the check is that heartbeat is read from source and tested from outside; any other
+  once-a-second card-side check reading the same state would look the same. The cards report minions 0.25.1 against a
+  public changelog at 0.24.0 plus unreleased, and the binary was not read. One card, one kind. N's 0 of 126 alone does not
+  separate a long kernel from no added gap (Fisher p 0.25), so "a long kernel avoids them" rests on the lattice table.
+  Data: [`2026-11-01-e100-idle-reset`](../reports/data/2026-11-01-e100-idle-reset/README.md),
+  [`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §b.
+
+**E85's "possible trigger", which gives way to the above (31 October 2026, post hoc; dated note, 1 November).** E100 saw
+no rise in falls with the statistics reset (12 against 10, Fisher p 0.83, both inside one band), and its falls sit on the
+heartbeat's lattice with the reset's phase anywhere. The reset can delay the service processor by about 100 ms: two falls
+first read about 105 and 118 ms after a lattice point in a gap, each right at a reset, n = 2. E85's own text: its sampler,
+inherited from E63's runner,
 sent the card a statistics reset once a second (`--reset-ms 1000`; the telemetry table, below), and each reset call held
 the sampler about 121 ms against its 78 ms sleep. Late clock ramps fell in 13 of the 47 launches whose 1.5 s check sample
 came right after a reset, against 10 of the other 193 (one-sided Fisher p 3.5 × 10⁻⁵), and 4 of E85's 6 mid-launch
 idle-reset dips began right after a reset (P 0.012, in a window chosen after the data); at all six the sampler's command
 took 42–134 ms against a median of 22, as at E63's dips, whose sessions ran the same flag. So a reset may delay the SP's
-governor pass. E64's, E78's and E80's runners sample without it, as E86–E91 did; a run of the same design without
-`--reset-ms` would decide it. Data: `docs/reports/data/2026-10-31-e85-camera-kinds/corrections-check.txt` [C9].
+governor pass. E64's, E78's and E80's runners sample without it, as E86–E91 did. Data: `docs/reports/data/2026-10-31-e85-camera-kinds/corrections-check.txt` [C9].
+
+## A hot start does not hold the clock down, and a real kernel can read over 100 W (aifoundry2, 1 November 2026, E101)
+
+E101's speed session chose a start heated to the 65 °C trip for the cells above the limit, on the assumption that a die
+at the trip holds the clock low. It does not. Under the resident heater at the trip the clock cycled 600–700–800–700–600
+MHz about once a second, the board 53–67–87–68 W, and the work met that cycle on a rising edge. `mm16`, the benchmark's
+loop, on fp16 random, read **101.15 W** on the board on three samples, one held PMIC reading, at 700 MHz, over the
+registered 97 W stop: the session ended at run 82 of 96. Earlier in that session `mm16` on int8 random read 90.07 W from a
+cool start; 88.88 W had been this card's highest working reading before that night. **So budget a real kernel's random
+data past 100 W on this card's board, keep a board stop on it, and never count on a hot die to slow it.** The resident
+loop's numbers do not bound a streaming kernel's: int8's benchmark runs +17.45 ± 0.14 W over its resident loop at 600 MHz on
+aifoundry3 (R4). Data: [`2026-11-01-e101-real-matmul`](../reports/data/2026-11-01-e101-real-matmul/README.md), session 2,
+`aifoundry2/s1/tel/`.
+
+## The heat path moves with the hour and the day, and a hold settles slowly (1 November 2026; Q132(g), E98 on aifoundry2, E97 on aifoundry3)
+
+- **The rest die cycles by about 3.5 °C a day.** Nine days of the boxes' own 5 s history: aifoundry2 at rest reads 46.1 °C at
+  11:00 PDT and 49.6 °C at 20:00 PDT, and the other boxes follow it at r 0.90–0.95. So compare a sustained speed near
+  the trip at the same hour, or read the rest die beside it.
+- **The die line's height moves with how warm the card idles.** On one night of aifoundry2 the warmest of four probes sat
+  0.46 °C above the other three for 0.88 °C of idle die; one contrast, cause not measured. Post hoc over four sessions the
+  line moves about 0.25–0.35 °C per °C of rest die, 95% roughly 0–0.6, and E98's registered reading is 0.50 [0.31, 0.70], so
+  quote none of these as a rate. Whether the rest die accounts for the 3 W at the trip between 23 and 31 October is not
+  shown: every session that says so is measured against E64. No inlet was read, and the fans are unread.
+- **What the night showed.** By morning the card idled about 1 °C cooler, and a card on another box that never ran fell by
+  about as much. A held 41 W load read 2 °C hotter on the warm probe, which cannot tell the room from the heat path.
+  Hosts' NIC and NVMe sensors are a free, coarse stand-in for an inlet reading, not a calibrated one.
+- **A hold settles at about 0.9 °C per board watt on aifoundry3, and that is a plateau, not a steady state** (E97, three
+  single holds, one session). The registered steadiness test failed on two of three, and the plateau moved three times in
+  about an hour by 0.3–0.8 °C, uniformly across the sensors, cause not established. On the die's own sensors 45% of the rise
+  arrives by 60 s and 90% by 5 minutes; E73's 95% in 49 s is the camera on the back of another card. About a third of the
+  board's rise over idle is the idle power's climb with temperature, and the loop gain works out to about 0.4 at the trip's
+  temperature on this card (derived). The lab model's 1.47 °C/W is aifoundry2's September fit, not this card's, and nobody
+  has measured aifoundry2's steady coefficient since October's cooling change. A rest to within 0.1 °C takes about 9 minutes
+  on this card after rises of 7–20 °C. Random fp32 at full duty reaches the lab's 78 °C stop 221 s from rest, with no
+  measured plateau below it.
+
+Data: [`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §c,
+[`2026-11-01-e98-heat-path-drift`](../reports/data/2026-11-01-e98-heat-path-drift/README.md),
+[`2026-11-01-e97-heat-low-power-steady`](../reports/data/2026-11-01-e97-heat-low-power-steady/README.md).
 
 ## Nothing limits the die's temperature (aifoundry2, aifoundry3, aifoundry1's card 1)
+
+**Dated note, Sun 1 Nov 2026 (week 44):** what follows reads what the firmware writes, not what a PMIC does with it. Only
+aifoundry1's card 0 has been seen to act on a PMIC alarm, the 75 W power alarm (E84). On aifoundry2, aifoundry3 and
+aifoundry1's card 1 no measurement here shows a power or temperature alarm acting: treat it as unverified, and take
+host-side aborts as the guard.
 
 The one hardware trip in the firmware is a PMIC alarm at 75 °C or 75 W (`TEMP_THRESHOLD_HW_CATASTROPHIC`,
 `POWER_THRESHOLD_HW_CATASTROPHIC`), written into the PMIC as its own alarm thresholds. It takes its temperature from
@@ -535,8 +627,8 @@ it is the owner's call (the lab rules below).
 
 | Field | Meaning | Gotcha |
 |---|---|---|
-| `board_w` | board power, 10 mW steps | refreshed once per service-processor pass, and a poller lengthens the pass: under ettelem at 10 Hz a new value every 156 ms on aifoundry2, 158 on aifoundry1's card 1 and 263 on aifoundry3; with nothing polling the pass is 133, 135 and 224 ms (E41, 26 September); near-instantaneous otherwise. 🛑 **It can read a launch gap:** on aifoundry1's card 1 (E82) and on aifoundry3 (E78, E81, E86, E90) a reading sometimes lands in the 1–2 ms gap between two launches and is then held for one pass — one or two samples 4–20 W low, 12–151 ms after a launch boundary, with the minion rail unmoved (E82: 85 samples in 61 events over seven passes; E86: 13 in power windows over five passes, 1–7 a pass in E78's). One dip pair in a 20-sample window lowers a run's mean by 0.4–1.2 W, and the registered gates have set passes aside for them (E82, E86): remove them by E82 amendment A2's rule (`board_w[i] < min(board_w[i−2], board_w[i+2]) − 4.0 W`) or register a gate |
-| `sp.minion_w`, `sram_w`, `noc_w` | per-rail power | **the PMIC's running average, first-order, published one SP pass late** (E58, pre-registered): τ minion 1.06 s, SRAM 1.01, NoC 1.04 on aifoundry3; minion 1.08 and NoC 1.08 on aifoundry1's card 1, but **its SRAM rail 0.54 s**, so the cards' SRAM meters differ. (E27's single-parameter τ ≈ 1.15–1.22 s folded the SP's pass into τ; a step reaches 55–57% after 1 s and 83–84% after 2 s as read.) The published rail split (the last 0.6 s of a burst, divided by 0.94) assumes τ near 1.1 s: on the catalogue's 3.2 s bursts it errs by −1.8 to −4.3% on every rail but card 1's SRAM rail, where it errs by +5.5% (offline, `tools/claims-v3/tau/PREREG.md`). `tools/ettelem/deconv.py` undoes the filter with each card's τ (a burst's energy within 0.3% of the step on aifoundry3). The SP copies the reading each pass (so on aifoundry3 the copy changes only every 263 ms under ettelem); not a moving average. Skip 2–3 s after any change before averaging. `ettelem sample --reset-ms` resets the statistics on a schedule, and the reset also restarts the running average: with a reset every second, one second after a burst the rail has fallen 93% of the way on every card (E41). 🛑 **The reset is a PMIC command:** it is `DM_CMD_SET_STATS_RUN_CONTROL`, which the SP forwards to the PMIC as the PMIC's own statistics reset (0x47; `tools/ettelem/ettelem.cpp`, `resetStats`). E85 sent it 2,205 times in one session (its C1), as E52's, E62's, E63's and E73's samplers had sent it before, and its control word switches the SP's statistics trace off (`tools/claims-v3/tel/README.md`, deviation 1). **Allowed by the owner's ruling of 31 October 2026** (AGENT.md §5); E64's, E78's and E80's runners sample without it |
+| `board_w` | board power, 10 mW steps | refreshed once per service-processor pass, and a poller lengthens the pass: under ettelem at 10 Hz a new value every 156 ms on aifoundry2, 158 on aifoundry1's card 1 and 263 on aifoundry3; with nothing polling the pass is 133, 135 and 224 ms (E41, 26 September); near-instantaneous otherwise. 🛑 **It can read a launch gap:** on aifoundry1's card 1 (E82) and on aifoundry3 (E78, E81, E86, E90) a reading sometimes lands in the 1–2 ms gap between two launches and is then held for one pass — one or two samples 4–20 W low, 12–151 ms after a launch boundary, with the minion rail unmoved (E82: 85 samples in 61 events over seven passes; E86: 13 in power windows over five passes, 1–7 a pass in E78's). One dip pair in a 20-sample window lowers a run's mean by 0.4–1.2 W, and the registered gates have set passes aside for them (E82, E86): remove them by E82 amendment A2's rule (`board_w[i] < min(board_w[i−2], board_w[i+2]) − 4.0 W`) or register a gate. On aifoundry3 they are routine (1 November 2026): E92 39 dips, 22 in power windows, which made seven of its ten rules INCONCLUSIVE, mostly on interval width, and moved every fp16 contrast over `c_abs` by 0.3–0.5 W; E95 60, 17 in windows; E99 112, 21 in windows. E78's random-anchor gate set E92's 9211 and E95's 9513 aside on them |
+| `sp.minion_w`, `sram_w`, `noc_w` | per-rail power | **the PMIC's running average, first-order, published one SP pass late** (E58, pre-registered): τ minion 1.06 s, SRAM 1.01, NoC 1.04 on aifoundry3; minion 1.08 and NoC 1.08 on aifoundry1's card 1, but **its SRAM rail 0.54 s**, so the cards' SRAM meters differ. (E27's single-parameter τ ≈ 1.15–1.22 s folded the SP's pass into τ; a step reaches 55–57% after 1 s and 83–84% after 2 s as read.) The published rail split (the last 0.6 s of a burst, divided by 0.94) assumes τ near 1.1 s: on the catalogue's 3.2 s bursts it errs by −1.8 to −4.3% on every rail but card 1's SRAM rail, where it errs by +5.5% (offline, `tools/claims-v3/tau/PREREG.md`). `tools/ettelem/deconv.py` undoes the filter with each card's τ (a burst's energy within 0.3% of the step on aifoundry3). The SP copies the reading each pass (so on aifoundry3 the copy changes only every 263 ms under ettelem); not a moving average. Skip 2–3 s after any change before averaging. `ettelem sample --reset-ms` resets the statistics on a schedule, and the reset also restarts the running average: with a reset every second, one second after a burst the rail has fallen 93% of the way on every card (E41). 🛑 **The reset is a PMIC command:** it is `DM_CMD_SET_STATS_RUN_CONTROL`, which the SP forwards to the PMIC as the PMIC's own statistics reset (0x47; `tools/ettelem/ettelem.cpp`, `resetStats`). E85 sent it 2,205 times in one session (its C1), as E52's, E62's, E63's and E73's samplers had sent it before, and its control word switches the SP's statistics trace off (`tools/claims-v3/tel/README.md`, deviation 1); whether E85's resets, or E100's arm R, left aifoundry2's trace off has not been read on the card. **Allowed by the owner's ruling of 31 October 2026** (AGENT.md §5); E64's, E78's and E80's runners sample without it |
 | `temp_c.minshire[0]` | die temperature | **whole degrees**, and it is the *integer mean of 34 shire sensors, each truncated to a whole degree*, so it reads about 1 °C below the mean of the same sensors' readings (E89). Hot spots are hotter. On aifoundry3's firmware build each sensor's raw 12-bit code can be read ("The sensor reads whole degrees", below) |
 | `die_mv.*` | on-die voltage per rail | the minion rail droops ~1 mV under 18 W more load: the regulator senses at the die |
 | `mhz.minion`, `mhz.noc`, `mhz.ddr` | clocks | the only reliable way to catch the governor |
@@ -581,7 +673,11 @@ whole-degree reading cannot. 🛑 Two traps. The command exists only on the ther
 and its group 0 returned whole degrees then and raw codes on 31 October, with the card reporting release 1.4.0 / BL2
 0.22.0 (E79): probe what a card returns, read-only, before a run relies on it. And **group 6 resets the sensors'
 latches — a write: never send it** (`tools/claims-v3/e89/pvt_sample.py` refuses every group but 0 and 4). Data:
-`docs/reports/data/2026-10-31-e89-heat-low-power/README.md`, result 3 and "Joins and traps".
+`docs/reports/data/2026-10-31-e89-heat-low-power/README.md`, result 3 and "Joins and traps". **Read again on 1 November
+2026 (E97):** still raw codes (1,960–2,004 at a 53 °C reading, read-only probe first), all 150,295 samples carry 34 sensors,
+the rebuilt mean equals the firmware's in 98.3%, no fault bit, and the high latch never moved backwards. "A read" rests on
+behaviour: the handler's source is not in the firmware copy we hold. The command was never sent to aifoundry2 (E98). And no
+kind is read per sensor by this: every launch runs on all 32 shires.
 
 ## The measurement protocol that made results repeatable
 
@@ -1076,7 +1172,13 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
   `KernelLaunchCmIfaceMulticastFailed` until the chip was reset. `sys_emu` tracks partners separately and does not
   catch it.
 - **The environment is not stationary.** Mid-session the lab's airflow changed and the die fell 12 °C under an
-  unchanged workload. Record enough telemetry to notice. Other users are part of the environment too
+  unchanged workload. Record enough telemetry to notice. **Host compute on any box beside a settled reading (1 November
+  2026):** E97's plateau on aifoundry3 moved +0.796 °C within a minute of a CPU burst on aifoundry1, this same run's own
+  desk compute, 6 of 16 threads for about 2 min 15 s. That does not show the burst moved the die: two more moves have no
+  burst, a chance match is roughly 1 in 10, and the idle did not follow other lanes' card sessions, which carry more heat.
+  It is all the evidence the record holds for the rule, which stands: no host compute on any box beside a card run, and read
+  an inlet beside a settled reading. **A login stops a queue:** the runners' other-user check ended E98's P2 mid-run on
+  another lab user's login, so register a spare probe. Other users are part of the environment too
   (2026-09-25): CI runners on aifoundry1 and aifoundry2 can take a card at any time, and a demo service on aifoundry3
   can launch on its card without taking the card lock. Check `et-who` before and after a run. The hosts reach the
   network over Wi-Fi only and roam between access points: aifoundry2 lost its Tailscale connection for 12 minutes on
@@ -1084,6 +1186,13 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
 - **aifoundry3 can be heated.** Earlier sessions never took it past about 61–66 °C, but those were short bursts:
   150 back-to-back 2 s random fp32 matmul launches took its die from 55 to 88 °C (V3-IDLE, pass 1, 2026-09-25).
   Its heat sink is faster than aifoundry2's, not unbounded.
+- **A session's automatic leakage slope wanders, so register one** (1 November 2026). E91's 0.422 W/°C on aifoundry1's
+  card 1, against 0.20–0.24 elsewhere, is still unexplained; E93, E94, E103 and E104 froze E82's 0.2414 W/°C, and the
+  automatic slope read 0.2959 on E95, 0.3298 on E101's first session and 0.0046 on E99 on aifoundry3.
+- **The launch-reading rule now skips runs** (1 November 2026). E78's runner skips an item whose die reading has not come
+  back to its launch reading in the wait, which low-power tiles trigger: 5 of 265 in E95, one pass each of E103's largest and
+  third-largest misses, `fp16.z_sub` in E104, which left it no interval. A retry needs its own registration. On aifoundry1's card
+  1 a run takes 8.9 s, not 10.2 s, with 2 s quiet at 58 °C (E93), so budget by that.
 - **A sampler killed mid-request poisons the management queue** (both cards, 2026-09-24). The reply to its
   last command stays queued. The next process to open `/dev/et0_mgmt` dies of `std::bad_function_call` on
   that reply and leaves its own behind, so retrying never recovers. Drain it once with
