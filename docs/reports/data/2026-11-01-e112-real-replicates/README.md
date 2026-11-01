@@ -217,7 +217,8 @@ without the scorer. It found these sound: the registration before the claim, the
 at every arm, the queue's budget arithmetic and the card conduct (nothing set, no `--reset-ms`, the lock and timeouts held, one
 session on aifoundry1, the claim and its release). Verdict: holds with fixes. It found one major and six minor faults in how E112
 was stated and handed on. Each is corrected above, desk only: no card was touched, nothing was re-run, and no registered
-prediction, rule, reduction, number or verdict changed ((a) 7 PASS, 4 FAIL; (b) NOT SCORED). Every new number is printed by
+prediction, rule, reduction, measured number or verdict changed ((a) 7 PASS, 4 FAIL; (b) NOT SCORED). One summary range was
+restated: result 1's fp32 saving now leaves out the unresolved tile (C7). Every new number is printed by
 [`corrections-check.py`](corrections-check.py) into [`corrections-check.txt`](corrections-check.txt) (standard library, post hoc,
 deciding nothing), under the section named.
 
