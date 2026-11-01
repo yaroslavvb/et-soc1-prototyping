@@ -1,0 +1,108 @@
+E93 corrections after verification: the desk check (Sun 1 Nov 2026, PDT). Post hoc throughout; no registered
+number changes and no verdict moves. The frozen outputs' sha256 (compare with the data commit 9105d764):
+   20b19340d9e0cff24461697de99908e2cd5e53563a4b56442a4c896e044da437  scored.json
+   db3053c0f7b337c9e69c0fb72dd89358b1798f0daec8ca3c267e2b6f78df2029  results.md
+   04ec3a93b6a382985a50c217bfa3cd6b082b6d183315c7b2e177e90573461c1a  e93.json
+   cde17c720fe3cd40d09ca8f3be5df7426358367969196bade0af1c21d76e61ad  e93-dipskept.json
+   1e499ad312490ef11ca60f5c2cfbe1dc7e732a17d349fefc35ec9f1f8a081091  e93-auto.json
+   5b399e83cc002b57924caa5009c9e78adf9dd406ca1c5c4916e3a01a644d42ae  e93-leak0.1994.json
+   7a6bab76b2cd0f6d454976ce8798875c8ed58156f9671d3a40420cf53465cf76  e93-leak0.3803.json
+   88160d5fc73dff1a6a40182fdedb4493fb1d32c68cd69ca0b77ffae39e3893fa  e93-leak0.545.json
+   aa5b94dea1bbea0542d6dbc3d109bbb6ae5f9d8485e9e3110bcc8d9ad0e20dbf  e93-leak0.json
+   020bb188f011147292525e6a6decb2c491ffb54e1c200069a0c27ccb6c0f8387  tools/claims-v3/kinds/predictions-e93.json
+   3e35e62ceaed071e0e8b8a634a7ffd48c50b41f1ff8ebb8c5631a03196e2f56f  tools/claims-v3/kinds/score_e93.py
+   9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337  tools/claims-v3/kinds/kinds.json
+Passes kept: [9310, 9311, 9312, 9313, 9314]; t(0.975, 4) = 2.776; tally {'PASS': 23, 'FAIL': 1}
+
+C1. THE FLUSH IS THE DOCUMENTS' STATEMENT; POWER AGREES
+   runs.jsonl `result` over the five passes' launch records: {'unchecked': 1980}  (no result and no flag is read)
+   E88's operand-bus price: fp32 19.3 fJ/bit, fp16 24.7 fJ/bit
+   fp32 both sides: dnr_both - dn1_both: 1.405 +- 0.083 W over 70,976 raw bits an op = 17.6 +- 1.0 fJ/bit
+   fp32 A side: a_dnr_b_randn - a_nz_b_randn: 0.674 +- 0.191 W over 23,408 raw bits an op = 25.6 +- 7.3 fJ/bit
+   fp32 B side: a_randn_b_dnr - a_randn_b_nz: 0.903 +- 0.187 W over 47,568 raw bits an op = 16.9 +- 3.5 fJ/bit
+   fp16 both sides: dnr_both - nz_both: 1.227 +- 0.286 W over 60,770 raw bits an op = 17.9 +- 4.2 fJ/bit
+   fp16 A side: a_dnr_b_randn - a_nz_b_randn: 0.483 +- 0.215 W over 20,624 raw bits an op = 20.8 +- 9.3 fJ/bit
+   fp16.a_dnr_b_randn: flushed reading 0.572 W, unflushed 4.382 W
+   fp16.dnr_both: flushed reading 1.686 W, unflushed 5.478 W
+   fp32.a_dnr_b_randn: flushed reading 0.508 W, unflushed 7.369 W
+   fp32.dnr_both: flushed reading 1.541 W, unflushed 8.412 W
+   fp32 flushed reading 1.541 W (the bus price alone); unflushed 8.412 W, of which the partial-product term 6.871 W = 583,710 bits x 10.46 fJ
+   R4-fp32-both's high end 1.488 W: below the bus price alone by 0.053 W, and 22% of the partial-product term with no bus price at all
+   the price's source: pp = (M - a x bus) / 592,224: M = 8.614 W, a x bus = 1.643 W, so all 6.971 W of r_abs's non-bus operand-side power, exponent path included, goes to Booth bits
+   the yardstick: E88 fp32.r_abs (this card, frozen result, 75,694 bus bits) 16.536 +- 0.103 W; E93 fp32.dnr_both (frozen result, 70,976 bus bits) 9.418 +- 0.073 W; difference 7.12 W, across sessions; r_abs's exponents also move
+
+C2. ITEM 2 STAYS OPEN: THE RESIDUAL OVER THE CLOCKED LANE PLUS THE BUS PRICE DOES NOT SCALE
+   tile: D - F - a x bus; product-sign flips per lane-cycle; A, B exponent bits per lane-cycle
+   fp32.a_nz_b_randn      12.114 - 7.922 - 1.211 = 2.980 W; flips 0.507; exponent bits A 0.000, B 1.575
+   fp16.a_nz_b_randn      12.480 - 7.955 - 1.548 = 2.976 W; flips 0.972; exponent bits A 0.000, B 2.783
+   fp16.a_randn_b_nz      11.725 - 7.955 - 0.779 = 2.991 W; flips 0.512; exponent bits A 1.465, B 0.000
+   fp32.a_randn_b_nz      12.422 - 7.922 - 0.606 = 3.893 W; flips 0.258; exponent bits A 0.746, B 0.000
+   fp32.a_dnr_b_randn     12.788 - 7.922 - 1.719 = 3.146 W; flips 0.507; exponent bits A 0.000, B 1.575
+   fp16.a_dnr_b_randn     12.963 - 7.955 - 2.120 = 2.888 W; flips 0.972; exponent bits A 0.000, B 2.783
+   E88 fp32.s_abs: sign cost 2.524 W; flips 0.508; exponent bits A 0.020, B 0.020
+   fp32.a_nz_b_randn reads +0.456 W from its high arm 11.658 W, which already holds the sign price
+
+C3. R5's SHORTFALL
+   predicted contrast 13.497 - 10.396 = 3.101 W; measured 0.308 +- 0.158 (n 5) W; shortfall 2.793 W
+   of it: a_nz_b_randn above its point +1.718 W; a_randn_b_nz below its point +1.075 W
+   the registered failure readings: the partial products do not swing as the public Booth generator says, or something keeps them from reaching the tree on a zero operand
+   a_randn_b_nz over F + bus: 3.893 W against 4.338 W priced for its partial products
+   fp32 what the bus price leaves: 3.893 - 2.980 = +0.913 W
+   fp16: measured -0.755 +- 0.158 (n 5) W; E88's bus price alone gives -0.769 W; residuals 2.991 and 2.976 W, leaving +0.014 W
+
+C4. A ZERO THE GATE SEES IS ALMOST FREE, NOT FREE (D over the type's all-zero level)
+   E93 fp32.a_zeros_b_randn 0.75 +- 0.12 (n 5) W; int8.a_zeros_b_full 0.40 +- 0.25 (n 5) W
+   E82 fp32.a_randn_b_zeros 0.63 +- 0.05 W
+   E82 fp16.a_zeros_b_randn 0.76 +- 0.10 W
+   E82 fp16.a_randn_b_zeros 0.62 +- 0.15 W
+   E82 int8.a_full_b_zeros 0.36 +- 0.16 W
+   E82 int8.a_zeros_b_full 0.34 +- 0.09 W
+   against random data: fp32.randn 24.01 +- 0.08 (n 5), int8.full 6.96 +- 0.20 (n 5) W
+   gated units in the half-gated tile (reported, assuming half of int8.full is the data units'): 1.55 +- 0.31 W
+
+C5. EACH FORMAT'S OWN PREDICTION FOR THE ONE-SIDED CONTRAST (a_randn_b_nz - a_nz_b_randn)
+   fp32: point +3.10 W; no sign cost +3.73 W, sign cost on both +2.47 W; measured 0.308 +- 0.158 (n 5) W; scored: yes (R5-fp32)
+   fp16: point +1.02 W; no sign cost +1.65 W, sign cost on both +0.39 W; measured -0.755 +- 0.158 (n 5) W; scored: no
+
+C6. THE MASKED TILE
+   zero words given -0.0: A 61 of 131, B 63 of 138: 46% over both operands
+   gate share 0.774 -> 0.485
+   D: 6.93 +- 0.22 -> 12.75 +- 0.15 W, 1.84x
+   S: 8.78 +- 0.29 -> 14.61 +- 0.17 W, 1.66x
+
+C7. fp16's R4 BASELINE
+   R4-fp32-both: fp32.dnr_both - fp32.dn1_both: 1.405 +- 0.083 W
+   R4-fp16-both: fp16.dnr_both - fp16.nz_both: 1.227 +- 0.286 W
+   fp16 tiles with a constant denormal in E93: []
+
+C8. THE BANDS AND THE LAW'S RESIDUAL
+   int8.b_pairs_rtl's reference (predictions-e93.json): live share 0.5 x E82 int8.full (6.87 W) + 0.5 x E82's fully gated tiles (0.35 W), under the RTL's reading; under A4's it would read as int8.b_pairs_alt reads here
+   int8.b_pairs_rtl: read 4.255 W, point 3.609 W, residual +0.646 W
+   E82 int8.wsparse50: gated 0.6436; law 0.3564 x 6.869 + 0.6436 x 0.349 = 2.673 W; read 2.925 +- 0.288 W; residual +0.252 +- 0.288 W (the kind's own interval)
+
+C9. gated_lane_frac_alt_grouping: STOP QUOTING IT; kinds.json STAYS PINNED AND UNCHANGED
+   reducers that refuse a changed kinds.json: ['reduce_e82.py', 'reduce_e86.py', 'reduce_e90.py', 'reduce_e91.py', 'reduce_e92.py', 'reduce_e93.py', 'reduce_e94.py', 'reduce_e95.py']
+   kinds.json occurrences of the field: 33
+   tools/claims-v3/kinds/real/real.json: 6
+   tools/claims-v3/kinds/real2/real2.json: 22
+   hlp/README.md:274: **A6, Sat 31 Oct 2026, 10:13:39 PDT (commit `23197287`, while block B's last pass was ru...
+   hlp/README.md:276: eight contiguous bytes of columns 2*l* and 2*l*+1". `external/core-et` says it exactly, and says it better:
+   q130-rtl-formats/README.md:146: **The int8 gate pair is columns (l, l+8), not (2l, 2l+1): the RTL address path settles i
+
+C10. WHAT THE THREE int8 TILES CAN AND CANNOT PICK
+   perfect pairings of 16 columns: 15!! = 2,027,025; those giving (b_pairs_rtl, b_pairs_alt, b_unpaired) = (0.5, 0, 0): 16
+   the RTL's (l, l+8) among them: True
+   (l, l+8)               shares (rtl, alt, unpaired) = (0.500, 0.000, 0.000)
+   (2l, 2l+1)             shares (rtl, alt, unpaired) = (0.000, 0.500, 0.000)
+   (l, l+2)               shares (rtl, alt, unpaired) = (0.500, 0.000, 0.500)
+   (l, l+4)               shares (rtl, alt, unpaired) = (0.500, 0.500, 0.500)
+   (l, 15-l)              shares (rtl, alt, unpaired) = (0.000, 0.500, 0.500)
+   (l, 14-l), 7 with 15   shares (rtl, alt, unpaired) = (0.500, 0.250, 0.000)
+   measured D, W: b_pairs_rtl 4.255 +- 0.189, b_pairs_alt 5.582 +- 0.138, b_unpaired 5.504 +- 0.143
+
+C11. SMALL THINGS
+   int8.full's B equals a_3of4_b_full's: False; a_zeros_b_full's B equals a_3of4_b_full's: True
+   R2-fp32: -0.147 +- 0.138 W, inside the registered +-1.0 W, its interval just excluding 0
+   first block t0 00:12:31.284 PDT; last block t1 00:45:34.395 PDT; 33.1 min
+   the claim's Discord id decodes to 00:12:27.684 PDT
+   d470f6a9's push by origin/main's reflog on the Intel's clone: 00:11:18 PDT (not in the repository; `git reflog show origin/main`)
