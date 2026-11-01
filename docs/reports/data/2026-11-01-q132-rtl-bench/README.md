@@ -157,6 +157,7 @@ int8 zeros' extra 0.61 W is not explained here. The RTL clocks fewer bits a seco
 ## 6. What this cannot say
 
 - **RTL, not silicon, and not a netlist.** core-et is the Erbium branch, a later revision of the same lineage. Zero delay, so no glitches: k absorbs them.
+- **fp16's reference is a model read off the same RTL,** so that check shows the bench runs the RTL's window arithmetic consistently, not that silicon does the same. fp32's reference is exact arithmetic, independent of the RTL. No card has had C read back for these vectors; a short card run on near-cancelling fp16 sums would test the window.
 - **k and a are fitting constants at 600 MHz and 522 mV.** A merged net is a floor on wires (the open netlist counts 3,299 switching nets where this counts 1,816), so 1.87 fJ is not the energy of a wire. Leakage arms move them to 1.92, 1.12 and 1.83, 1.07 fJ.
 - **The scratchpad, the dcache and the core are not modelled**, and it shows: the fit under-predicts every kind whose operands move on gated lanes, by 0.17–0.65 W (`sparse50`, `wsparse50`, one operand all zero). That is the term most clearly missing.
 - **On the A side the prediction runs high by 15–20%** (E67 measured / predicted 0.842; E70's A ladder 0.802), and **on high-toggle bit ladders with a busy partner too** (E60 `lb`, 0.871). The B side does not. Unexplained.
