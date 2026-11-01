@@ -177,11 +177,17 @@ claiming a machine on the AI Foundry Discord (#community-lab: "using aifoundryN"
 at most one small link to the public spacesheep page that describes the run, **and how long they hold the card**:
 `<ai> **Claude says:** using aifoundry3 for 1.5 h, until ~14:30 PDT [doc](<https://spacesheep.dev/@yaroslavvb/…>)` when
 they reserve it — the duration in digits after `for` (`for 2 h`, `for 1.5 h`; the reservation reader parses that form
-and misses `~2 h` or `about 2 h`) and the clock time it ends — and they edit that same post to append ` — released`
-when they release it, keeping its words (the lab dashboard's reservation reader closes a claim at the edit that adds
-"released" to it). A run that will overrun its estimate by more than 15 minutes replaces the post's text with the same
-line and a new estimate. No plan, numbers or progress in the channel, and no second post: the page holds it (the
-owner's rules of 28 October 2026; the estimate since 31 October 2026).
+and misses `~2 h` or `about 2 h`) and the clock time it ends, in the zone `date +%Z` prints (PST from 1 November
+2026) — and they edit that same post to append ` — released` when they release it, keeping its words (the lab
+dashboard's reservation reader closes a claim at the edit that adds "released" to it). A run that will overrun its
+estimate by more than 15 minutes replaces the post's text with the same line and a new estimate, its `for <N> h` still
+counted from the post's own time: the reader draws a hold as the post's time plus N, so a 13:00 post that will now end
+at 15:30 reads `for 2.5 h, until ~15:30`, never the time left. No plan, numbers or progress in the channel, and no
+second post: the page holds it (the owner's rules of 28 October 2026; the estimate since 31 October 2026). The owner's
+two newest card posts in the channel stay, and each older one is deleted once its card is released, except one that a
+record cites by id (this repo's data READMEs and findings, the owner's research log), which stays so the citation
+still opens (the owner's rule of 31 October 2026). Only the Intel deletes them, through the Discord client with its
+`delete_msg.mjs`; an agent here never deletes a post.
 
 ## 5. The lab's etiquette, and why
 
@@ -434,6 +440,20 @@ copy it here too.
 *Every edit to this file adds one line here, newest first, in the same commit (the owner's rule of 10 October 2026 for
 agent instruction files). It starts on 14 October 2026; earlier changes are in `git log -- AGENT.md`.*
 
+- **2026-10-31 (Sat, week 44)** — Section 4: the owner's two newest card posts in #community-lab stay, and each
+  older one is deleted once its card is released, except one a record cites by id (this repo's data READMEs and
+  findings, the owner's research log); only the Intel deletes them, through the Discord client. *Why:* preference —
+  the owner's words at 16:42 that day, *"delete the older ones because it's just spamming the chat"*, correcting the
+  reservation rule written earlier that day; constraint — this repo's data READMEs cite card posts by id as claim
+  times, and a deleted post's link no longer opens; re-check: `git grep -n -F <post id> -- docs` names a post's
+  citations, and the Intel's `delete_msg.mjs --plan` gives each kept post's reason.
+- **2026-10-31 (Sat, week 44)** — Section 4: the reservation post's clock time is written in the zone `date +%Z`
+  prints (PST from 1 November 2026), and a re-estimate's `for <N> h` is still counted from the post's own time, never
+  the time left. *Why:* preference — the owner's words that morning, *"estimate when I'm, holding the card until, and
+  then update it"*; constraint — Pacific time leaves daylight saving at 02:00 on Sun 1 Nov 2026, and the reservation
+  reader draws a hold as the post's time plus its stated hours, so a re-estimate written as the time left shows the
+  card free while it is still held; re-check: `TZ=America/Los_Angeles date -d '2026-11-01 12:00' +%Z` prints PST, and
+  the reader's `parse()` sets a claim's limit to its post time plus the stated duration.
 - **2026-10-31 (Sat, week 44, Q130 records)** — Section 3's index reads Q1–Q130, E1–E85 (E77 reserved and not
   registered; E84 and E85 in progress when recorded) and A1–A24, where it read Q1–Q66, E1–E59 and A1–A21,
   and its note on governor text now says the `353f20e` description is the cards' own BL2 0.22.0 and the loops and
