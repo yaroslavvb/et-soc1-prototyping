@@ -1,0 +1,53 @@
+C1. Where the bench puts fp16's h_sub - u_sub (by_block_cov, net toggles an op on one minion; the grouping is E104's verifier's)
+  fp16.h_sub - fp16.u_sub: net toggles +5.64 M; flop toggles all +593468, in the FMA +444340
+    adder and normaliser                                         2177 k   38.6 %
+    the FMA's fraction, exponent, control and early stages       1766 k   31.3 %
+    VPU lane, bypass, register file, top                         1555 k   27.6 %
+    the rest                                                      139 k    2.5 %
+  fp32.h_sub - fp32.u_sub: net toggles +0.65 M; flop toggles all +54244, in the FMA +54244
+    adder and normaliser                                          545 k   84.3 %
+    the FMA's fraction, exponent, control and early stages         96 k   14.9 %
+    VPU lane, bypass, register file, top                            5 k    0.7 %
+    the rest                                                        1 k    0.1 %
+  M4's frozen terms for the contrast, W: core +1.19, operand bus +0.43, rest +1.65, clock +0.00; total +3.27
+C3. 28.5 fJ is a lump. E92's 29.7 fJ takes 7 fJ per adder bit off first; on the same accounting h_sub - u_sub less fp32's has nothing left to price
+  fp16 h_sub - u_sub less fp32's: 2.910 +- 0.552 W over 91208 result bits: 28.5 fJ a bit, nothing taken off
+  FMA flop toggles it adds: 390096 an op (one minion, the bench). On E92's accounting, 7 fJ each at 1.121e9 ops/s: 3.06 W, more than the 2.91 W there is
+  E92's w_c - c_abs: 3.987 W, 98,780 result bits, 88,500 adder bits: raw 36.0 fJ a result bit, 29.7 after 7 fJ per adder bit
+  fp32 w_h_add - h_add, the same bits in both formats (92136): 3.677 +- 0.695 W (all three 3.763 +- 0.395), 35.6 fJ a bit, raw: alike, and the primary cannot separate them
+  fp16 w_h_add - h_add, the same bits in both formats (92136): 4.036 +- 3.302 W (all three 3.987 +- 0.680), 39.1 fJ a bit, raw: alike, and the primary cannot separate them
+C4. u_sub's alternations against h_sub's
+  fp32: u_sub alternations 3472, h_sub 3840: 0.904; subtracting lane-micro-ops 1792 against 1920: 0.933
+  fp16: u_sub alternations 3472, h_sub 3840: 0.904; subtracting lane-micro-ops 1792 against 1920: 0.933
+  the frozen reading at 0.904 of the alternations: u_sub - h_add 5.99 W (registered at 14/15: 6.18), h_sub - u_sub 0.63 W (registered: 0.44). The frozen file stays; R4's +-1 W band holds either way
+  the split at h_sub's own alternations: the 368 alternations u_sub lacks are 0.249 W by fp32's control, 0.377 W at fp16's own price. Adder 3.80-3.93 W, halves 2.78-2.91 W; as run 3.554 and 3.159 W
+C5. C has been read off the card before, on tiles the host checks: results in docs/reports/data/2026-09-18-sparsity-aifoundry3/
+  fma-fp16-elem.jsonl: {'both': 2, 'math': 8}
+  fma-fp32-elem-all.jsonl: {'both': 4}
+  fma-int8-elem.jsonl: {'both': 10}
+C6. The denominators of 110
+  110 reads on 44 tiles. Agree with all three: 69 reads on 33 tiles. Separate frozen from the RTL: 41 reads on 11 tiles: ['fp16.c_alt', 'fp16.h_allsub', 'fp16.h_sub', 'fp16.hh_sub', 'fp16.hl_sub', 'fp16.r_abs', 'fp16.r_walk', 'fp16.s_abs', 'fp16.u_sub', 'fp32.bj_6', 'fp32.pm_pi']. Separate the manual from the RTL: 21 reads on 5 tiles: ['fp16.hh_sub', 'fp16.hl_sub', 'fp16.r_abs', 'fp16.r_walk', 'fp16.s_abs']. All three different: 11 reads
+C7. The two formats' budgets are similar, not shown equal: z_s - c_abs, fp16 over fp32, per pass; shares are posthoc-check.txt E
+  primary: 1.249 +- 0.789 (n=2)
+  all three: 1.313 +- 0.315 (n=3)
+C8. fJ per lane alternation with intervals, and against E92's 1,099 fJ. The 1,099 is gamma, with beta (the C sign term) added back, on aifoundry3. E104's premium is over h_add, whose sums swing in sign on every lane micro-op
+  fp32 u_sub - h_add primary  :   965 +-  381 fJ; with E92's dips-arm beta and the B flips it lacks x 0.9722 (+0.353 W):  1056 fJ
+  fp32 u_sub - h_add all three:   933 +-  159 fJ; with E92's dips-arm beta and the B flips it lacks x 0.9722 (+0.353 W):  1023 fJ
+    E92's gamma, dips arm, 1092 fJ x 0.9722: 1062 fJ
+  fp16 u_sub - h_add primary  :   913 +-   74 fJ; with E92's dips-arm beta and the B flips it lacks x 0.9722 (+0.255 W):   979 fJ
+  fp16 u_sub - h_add all three:   894 +-   86 fJ; with E92's dips-arm beta and the B flips it lacks x 0.9722 (+0.255 W):   959 fJ
+    E92's gamma, dips arm, 1617 fJ x 0.9722: 1572 fJ: fp16's gamma held the parting halves too (E92 C14)
+  like against like, fp32 h_sub - h_add here: 931 +- 98 fJ; E92's 4.425 and 4.396 W x 0.9722 at the same count: 999, 993 fJ
+  moving sums at magnitude 1, fp32, all three: 488 fJ
+  moving sums at magnitude 1, fp16, all three: 756 fJ
+C11. Small statements. u_sub's result bits; Drail's temperature term
+  fp16.u_sub: result bits 11688 an op (C bus 3732, result bus 3732, store 4224)
+  fp32.u_sub: result bits 272 an op (C bus 8, result bus 8, store 256)
+  Drail on fp16.h_sub, pass 10411: 12.963 W at the primary's slope, 13.354 W at leak 0: the rail's D does carry a temperature term, 0.81 k
+The carry by 0.9722, for result 5: E92's dips arm x 0.9722 against E104's all-three means, the contrasts both ran
+  fp32.h_sub - h_add: carried 4.273, here 3.898, ratio 0.912
+  fp32.h_add - c_abs: carried 0.523, here 0.525, ratio 1.004
+  fp16.h_sub - h_add: carried 6.623, here 6.660, ratio 1.006
+  fp16.c_alt - c_abs: carried 7.056, here 7.014, ratio 0.994
+  fp16.s_abs - c_abs: carried 4.460, here 4.467, ratio 1.002
+  fp16.h_add - c_abs: carried 0.468, here 0.535, ratio 1.143

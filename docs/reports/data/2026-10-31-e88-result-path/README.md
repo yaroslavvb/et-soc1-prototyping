@@ -99,8 +99,7 @@ measured in watts.
 **4. The operand bits, with the result frozen, cost 8.61 ± 0.18 W in fp32, 6.19 ± 0.17 W in fp16 and 3.14 ± 0.21
 W in int8** (M32, M16, M8: H3 PASS). int8 is the one format where the multiplier side is the largest share (0.47).
 In fp16 and int8 this side is measured by cancellation, so it holds the products and whatever part of the in-lane
-dot-product adder switches before the sum cancels to zero; where the freeze sits moves 0.39 ± 0.11 W in fp16 (A16,
-§6).
+dot-product adder switches before the sum cancels to zero. `r_abs`, the absorbed design, is 0.39 ± 0.11 W above it in fp16 (A16, §6), and it is not a freeze: it walks.
 
 **5. Random signs: 4.78 W above a constant in fp32, and the frozen-result design does not freeze them. H4's first
 half FAILS.** ±1.0 operands with the result frozen (`s_abs`) cost **2.52 ± 0.19 W** over the constant (M32s; H4
@@ -112,7 +111,7 @@ the sum cannot change. That reading is a hypothesis this experiment does not tes
 signs cost half of their 4.8 W with the result frozen.
 
 **6. In fp16 an absorbed design costs 0.39 ± 0.11 W more than a cancelled one, and only the cancelled one is frozen.** `r_abs` costs **0.39 ± 0.11 W** more than `r_cancel` (A16; H6 PASS, |·| ≤ 1 W).
-*Corrected Sun 1 Nov 2026 after [E104](../2026-11-01-e104-c-readback/README.md) read the accumulators back. This result said "two ways of freezing agree … cancellation stops about as much of the result path as absorption". They do not: `fp16.r_cancel` holds 0, and `fp16.r_abs` walks one unit a micro-op in one word (4f7fffe9 at n = 2, E104-R3), because fp16 truncates each aligned product separately, so the note "below half an ulp" does not hold there. `r_abs` writes about 8,000 more store bits an op than `r_cancel`, 0.28–0.49 W at 30–52 fJ, so A16 is about that walk. A16 and H6 stand as numbers, the fit stands, and at E88's price R16abs's model falls from 7.23 to about 6.77 W against 5.90 ± 0.14 W. fp32's frozen tiles, and fp16's by cancellation, read back as held.*
+*Corrected Sun 1 Nov 2026 after [E104](../2026-11-01-e104-c-readback/README.md) read the accumulators back. This result said "two ways of freezing agree … cancellation stops about as much of the result path as absorption". They do not: `fp16.r_cancel` holds 0, and `fp16.r_abs` walks one unit a micro-op in one word (4f7fffe9 at n = 2, E104-R3), because fp16 truncates each aligned product separately, so the note "below half an ulp" does not hold there. `r_abs` writes about 8,000 more store bits an op than `r_cancel`, 0.28–0.49 W at 30–52 fJ, about the size of A16: a size match, not a finding. A16 and H6 stand as numbers, the fit stands, and at E88's price R16abs's model falls from 7.23 to about 6.77 W against 5.90 ± 0.14 W. fp32's frozen tiles, and fp16's by cancellation, read back as held.*
 
 **7. The model with a result-path term, fitted on E82 before E88 existed, puts 17 of 19 contrasts inside its
 registered bands, and the bands are wide (±0.75 to ±1.80 W).** Its frozen

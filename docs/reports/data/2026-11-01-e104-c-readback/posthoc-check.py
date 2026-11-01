@@ -4,7 +4,7 @@
     python3 posthoc-check.py > posthoc-check.txt
 
 A: the runs a pass skipped. B: every contrast in the primary (two kept passes) and in the arm that keeps all three (E78's pass gates opened), per pass. C: the ratios fp16 over fp32 in three regimes, in the same two reductions.
-D: per lane alternation, in fJ. E: how much of ±1 − +1 remains in a sum that truly holds, in both formats, against E92's values carried by the card scale. F: the read-back per tile. G: h_sub's walk in ulps per op against the RTL's −15. H: the same contrasts on the minion rail, which the board meter's dips do not touch. I: M4's misses, contrast by contrast. J: E88's fp16 r_abs: the store bits it writes against r_cancel's, priced. K: the result path's price per result bit in both formats, on real sums.
+D: per lane alternation, in fJ. E: how much of ±1 − +1 remains in a sum that truly holds, in both formats, against E92's values carried by the card scale. F: the read-back per tile. G: h_sub's walk in ulps per op against the RTL's −15. H: the same contrasts on the minion rail, which the board meter's dips do not touch. I: M4's misses, contrast by contrast. J: E88's fp16 r_abs: the store bits it writes against r_cancel's, priced. K: that lump per result bit in both formats, on the sums the card holds.
 """
 import json
 import math
@@ -111,7 +111,7 @@ for r in by["fp16.h_sub"]:
     print(f"  n {r['n']:7d} C00 {a:.6e} C08 {b:.6e} C08/C00 {b / a:.5f} deficit {(a - b) / ulp(w):12.0f} ulps of C08's binade")
 
 
-print("H. The same contrasts on the minion rail: Drail in each reduction, per pass (the rail has no temperature term in any arm)")
+print("H. The same contrasts on the minion rail: Drail in each reduction, per pass (Drail carries E78's rail term, 0.81 k, so it moves with the leakage slope)")
 
 
 def pr(res, plus, minus):
@@ -158,7 +158,7 @@ b = k["cbus"] + k["rbus"] + k["store"]
 print(f"  at {rate['fp16'] / 1e9:.3f}e9 ops a second: {b * rate['fp16'] * 30e-15:.3f} W at 30 fJ, {b * rate['fp16'] * 51.75e-15:.3f} W at 51.75 fJ; E88's A16 is 0.388 ± 0.111 W")
 
 
-print("K. POST HOC. The result path's price on real sums. Result bits are e104.json's counts_real (C read + result bus + store, RTL's arithmetic, two op indices over a launch; a count on a tile with two words moves with n, so these are rough)")
+print("K. POST HOC. A lump: everything that moves when the halves part, over the result bits, nothing taken off. Result bits are e104.json's counts_real (C read + result bus + store, RTL's arithmetic, two op indices over a launch; a count on a tile with two words moves with n, so these are rough)")
 
 
 def bits(t):

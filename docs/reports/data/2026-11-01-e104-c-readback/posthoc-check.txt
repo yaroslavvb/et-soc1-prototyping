@@ -103,7 +103,7 @@ G. POST HOC. fp16.h_sub on the card: C[0][0] and C[0][8], and the deficit of C[0
   n    1000 C00 2.147484e+12 C08 2.146189e+12 C08/C00 0.99940 deficit         9881 ulps of C08's binade
   n  199874 C00 4.292261e+14 C08 3.758607e+14 C08/C00 0.87567 deficit      1590415 ulps of C08's binade
   n  541999 C00 1.163934e+15 C08 8.234461e+14 C08/C00 0.70747 deficit      5073665 ulps of C08's binade
-H. The same contrasts on the minion rail: Drail in each reduction, per pass (the rail has no temperature term in any arm)
+H. The same contrasts on the minion rail: Drail in each reduction, per pass (Drail carries E78's rail term, 0.81 k, so it moves with the leakage slope)
   fp16 h_sub - h_add           primary   5.395 ±  0.221 (n=2) | all three   5.436 ±  0.182 (n=3)
   fp16 u_sub - h_add           primary   2.862 ±  0.522 (n=2) | all three   2.784 ±  0.353 (n=3)
   fp16 h_sub - u_sub           primary   2.532 ±  0.301 (n=2) | all three   2.652 ±  0.518 (n=3)
@@ -149,7 +149,7 @@ J. E88's fp16.r_abs against r_cancel: result-path bits an op on the RTL's arithm
   fp16.r_abs: cbus 248 rbus 248 store 7936 total 8432
   fp16.r_cancel: cbus 0 rbus 0 store 0 total 0
   at 1.121e9 ops a second: 0.284 W at 30 fJ, 0.489 W at 51.75 fJ; E88's A16 is 0.388 ± 0.111 W
-K. POST HOC. The result path's price on real sums. Result bits are e104.json's counts_real (C read + result bus + store, RTL's arithmetic, two op indices over a launch; a count on a tile with two words moves with n, so these are rough)
+K. POST HOC. A lump: everything that moves when the halves part, over the result bits, nothing taken off. Result bits are e104.json's counts_real (C read + result bus + store, RTL's arithmetic, two op indices over a launch; a count on a tile with two words moves with n, so these are rough)
   fp16 h_sub - u_sub       primary  3.159 ± 0.507 (n=2) | all three  3.183 ± 0.141 (n=3) | result bits   102896 -   11688 =    91208 |   30.9 fJ a bit, all three   31.1
   fp32 h_sub - u_sub       primary  0.249 ± 1.059 (n=2) | all three  0.268 ± 0.222 (n=3) | result bits      272 -     272 =        0 |    nan fJ a bit, all three    nan
   fp16 w_h_add - h_add     primary  4.036 ± 3.302 (n=2) | all three  3.987 ± 0.680 (n=3) | result bits   100600 -    8464 =    92136 |   39.1 fJ a bit, all three   38.6
