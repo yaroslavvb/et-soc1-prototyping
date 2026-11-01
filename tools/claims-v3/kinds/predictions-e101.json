@@ -1,0 +1,1757 @@
+{
+ "experiment": "E101",
+ "request": "Q132",
+ "date": "2026-11-01",
+ "what": "frozen predictions and decision rules for E101, the same kinds of numbers in a matmul that streams its operands",
+ "inputs_sha256": {
+  "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json": "b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5",
+  "tools/claims-v3/kinds/real2/predictions-real2.json": "0957e0c295990ac95cded56430697fb0683c9cf451d90f6943c8ff8d6a0b021a",
+  "tools/claims-v3/kspeed/e87/predictions.json": "025f4e15950e75c3b21ea405ea15f04487cd1e56db4a7b308b19aa2ab7565ae8",
+  "docs/reports/data/2026-09-25-claims-v3/results/mmb.json": "12c44a9ddaa6b3fcc297d093db62de3d6281edfd00bd71289acdb00ec840ef1c",
+  "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+  "tools/claims-v3/kinds/real2/real2.json": "6e259fd2e9edaa3d4fdeb663461ec39389ec8c24436c114719536a51d26c8715"
+ },
+ "inputs": {
+  "E75": {
+   "l2_pj_per_bit": [
+    0.274,
+    0.183,
+    0.366
+   ],
+   "l1_pj_per_bit": [
+    0.0492,
+    0.0482,
+    0.0501
+   ],
+   "dram_chord_w_per_75GBps": 3.25,
+   "lines_per_s_75GBps": 1172900000.0,
+   "source": "03-experiments.md E75 (docs/reports/data/2026-10-28-e75-memory-flip-ladder/); E81 repeats the DRAM chord"
+  },
+  "E39": {
+   "int8_ones_tenb_minus_l1_w": [
+    2.4,
+    1.71,
+    3.1
+   ],
+   "int8_random_tenb_minus_l1_w": [
+    6.04,
+    3.65,
+    8.43
+   ],
+   "fp16_random_tenb_minus_l1_w": 2.2,
+   "source": "05-claims.md:481, aifoundry3, 99% over 3 blocks; these values are the register's"
+  },
+  "e37_leak_w": 0.8,
+  "e46_l3_pj_b": 14.7,
+  "cpo": {
+   "res": {
+    "fp32": 546.0,
+    "fp16": 546.0,
+    "int8": 318.0
+   },
+   "tenb": {
+    "fp32": 529.0,
+    "fp16": 529.0,
+    "int8": 270.0
+   },
+   "mm16": {
+    "fp32": 529.0,
+    "fp16": 529.0,
+    "int8": 280.35
+   },
+   "gemm1": {
+    "fp32": 529.0,
+    "fp16": 529.0,
+    "int8": 280.35
+   },
+   "gemmnc1": {
+    "fp32": 529.0,
+    "fp16": 529.0,
+    "int8": 280.35
+   }
+  },
+  "duty": 0.996
+ },
+ "bits_per_line": {
+  "fp32": {
+   "zeros": [
+    0.0,
+    0.0
+   ],
+   "ones": [
+    0.0,
+    0.0
+   ],
+   "random": [
+    221.8,
+    215.9
+   ],
+   "sparse50": [
+    202.8,
+    194.5
+   ],
+   "real": [
+    213.8,
+    255.1
+   ],
+   "e37": [
+    68.0,
+    76.1
+   ]
+  },
+  "fp16": {
+   "zeros": [
+    0.0,
+    0.0
+   ],
+   "ones": [
+    0.0,
+    0.0
+   ],
+   "random": [
+    217.0,
+    214.1
+   ],
+   "sparse50": [
+    200.5,
+    182.4
+   ],
+   "real": [
+    205.9,
+    247.4
+   ],
+   "e37": [
+    99.8,
+    92.9
+   ]
+  },
+  "int8": {
+   "zeros": [
+    0.0,
+    0.0
+   ],
+   "ones": [
+    0.0,
+    0.0
+   ],
+   "random": [
+    257.0,
+    254.0
+   ],
+   "sparse50": [
+    196.8,
+    200.5
+   ],
+   "real": [
+    167.2,
+    257.2
+   ],
+   "e37": [
+    251.2,
+    245.2
+   ]
+  }
+ },
+ "S_res": {
+  "fp32": {
+   "zeros": [
+    1.986,
+    1.927,
+    2.045
+   ],
+   "ones": [
+    10.288,
+    10.08,
+    10.496
+   ],
+   "random": [
+    26.701,
+    26.647,
+    26.754
+   ],
+   "sparse50": [
+    9.243,
+    9.095,
+    9.39
+   ],
+   "real": [
+    26.47,
+    24.009,
+    28.931
+   ],
+   "e37": [
+    15.984,
+    12.984,
+    18.984
+   ]
+  },
+  "fp16": {
+   "zeros": [
+    1.987,
+    1.935,
+    2.039
+   ],
+   "ones": [
+    10.376,
+    10.295,
+    10.456
+   ],
+   "random": [
+    24.102,
+    24.072,
+    24.132
+   ],
+   "sparse50": [
+    15.22,
+    14.645,
+    15.794
+   ],
+   "real": [
+    23.495,
+    20.34,
+    26.65
+   ],
+   "e37": [
+    18.926,
+    15.926,
+    21.926
+   ]
+  },
+  "int8": {
+   "zeros": [
+    2.605,
+    2.577,
+    2.634
+   ],
+   "ones": [
+    4.146,
+    4.068,
+    4.224
+   ],
+   "random": [
+    9.648,
+    9.567,
+    9.73
+   ],
+   "sparse50": [
+    8.061,
+    7.936,
+    8.187
+   ],
+   "real": [
+    8.032,
+    7.01,
+    9.054
+   ],
+   "e37": [
+    8.178,
+    7.178,
+    9.178
+   ]
+  }
+ },
+ "E_base_nj_per_op": {
+  "mm16": [
+   4.669,
+   3.034,
+   5.936
+  ],
+  "gemmnc1": [
+   5.139,
+   3.505,
+   6.406
+  ],
+  "gemm1": [
+   3.3,
+   1.5,
+   6.1
+  ],
+  "tenb": [
+   0.734,
+   0.429,
+   1.043
+  ]
+ },
+ "e_base_from_e37_by_format": {
+  "fp32": 5.436,
+  "fp16": 3.534,
+  "int8": 5.037
+ },
+ "cells": {
+  "tenb.fp32.randn": {
+   "arm": "tenb",
+   "type": "fp32",
+   "kind": "random",
+   "tier": 2,
+   "S_w": 29.5,
+   "S_lo_w": 28.73,
+   "S_hi_w": 30.28,
+   "S_res_w": 26.701,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 221.8,
+   "bits_b": 215.9
+  },
+  "tenb.int8.full": {
+   "arm": "tenb",
+   "type": "int8",
+   "kind": "random",
+   "tier": 2,
+   "S_w": 15.55,
+   "S_lo_w": 13.93,
+   "S_hi_w": 17.19,
+   "S_res_w": 9.648,
+   "r": 1.1778,
+   "rate_gops": 2.2665,
+   "bits_a": 257.0,
+   "bits_b": 254.0
+  },
+  "mm16.fp32.zeros": {
+   "arm": "mm16",
+   "type": "fp32",
+   "kind": "zeros",
+   "tier": 1,
+   "S_w": 7.45,
+   "S_lo_w": 5.5,
+   "S_hi_w": 8.98,
+   "S_res_w": 1.986,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "mm16.fp32.ones": {
+   "arm": "mm16",
+   "type": "fp32",
+   "kind": "ones",
+   "tier": 1,
+   "S_w": 16.02,
+   "S_lo_w": 13.91,
+   "S_hi_w": 17.7,
+   "S_res_w": 10.288,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "mm16.fp32.randn": {
+   "arm": "mm16",
+   "type": "fp32",
+   "kind": "random",
+   "tier": 1,
+   "S_w": 35.38,
+   "S_lo_w": 32.69,
+   "S_hi_w": 37.65,
+   "S_res_w": 26.701,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 221.8,
+   "bits_b": 215.9
+  },
+  "mm16.fp32.sparse50": {
+   "arm": "mm16",
+   "type": "fp32",
+   "kind": "sparse50",
+   "tier": 1,
+   "S_w": 17.14,
+   "S_lo_w": 14.42,
+   "S_hi_w": 19.44,
+   "S_res_w": 9.243,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 202.8,
+   "bits_b": 194.5
+  },
+  "mm16.fp32.e37": {
+   "arm": "mm16",
+   "type": "fp32",
+   "kind": "e37",
+   "tier": 1,
+   "S_w": 22.69,
+   "S_lo_w": 17.46,
+   "S_hi_w": 27.5,
+   "S_res_w": 15.984,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 68.0,
+   "bits_b": 76.1
+  },
+  "mm16.fp32.real": {
+   "arm": "mm16",
+   "type": "fp32",
+   "kind": "real",
+   "tier": 2,
+   "S_w": 35.29,
+   "S_lo_w": 30.07,
+   "S_hi_w": 40.1,
+   "S_res_w": 26.47,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 213.8,
+   "bits_b": 255.1
+  },
+  "mm16.fp16.zeros": {
+   "arm": "mm16",
+   "type": "fp16",
+   "kind": "zeros",
+   "tier": 1,
+   "S_w": 7.45,
+   "S_lo_w": 5.51,
+   "S_hi_w": 8.97,
+   "S_res_w": 1.987,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "mm16.fp16.ones": {
+   "arm": "mm16",
+   "type": "fp16",
+   "kind": "ones",
+   "tier": 1,
+   "S_w": 16.11,
+   "S_lo_w": 14.14,
+   "S_hi_w": 17.66,
+   "S_res_w": 10.376,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "mm16.fp16.randn": {
+   "arm": "mm16",
+   "type": "fp16",
+   "kind": "random",
+   "tier": 1,
+   "S_w": 32.66,
+   "S_lo_w": 30.01,
+   "S_hi_w": 34.9,
+   "S_res_w": 24.102,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 217.0,
+   "bits_b": 214.1
+  },
+  "mm16.fp16.sparse50": {
+   "arm": "mm16",
+   "type": "fp16",
+   "kind": "sparse50",
+   "tier": 1,
+   "S_w": 23.23,
+   "S_lo_w": 20.1,
+   "S_hi_w": 25.95,
+   "S_res_w": 15.22,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 200.5,
+   "bits_b": 182.4
+  },
+  "mm16.fp16.e37": {
+   "arm": "mm16",
+   "type": "fp16",
+   "kind": "e37",
+   "tier": 1,
+   "S_w": 26.0,
+   "S_lo_w": 20.69,
+   "S_hi_w": 30.89,
+   "S_res_w": 18.926,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 99.8,
+   "bits_b": 92.9
+  },
+  "mm16.fp16.real": {
+   "arm": "mm16",
+   "type": "fp16",
+   "kind": "real",
+   "tier": 2,
+   "S_w": 32.14,
+   "S_lo_w": 26.22,
+   "S_hi_w": 37.63,
+   "S_res_w": 23.495,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 205.9,
+   "bits_b": 247.4
+  },
+  "mm16.int8.zeros": {
+   "arm": "mm16",
+   "type": "int8",
+   "kind": "zeros",
+   "tier": 1,
+   "S_w": 13.15,
+   "S_lo_w": 9.55,
+   "S_hi_w": 15.94,
+   "S_res_w": 2.605,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "mm16.int8.ones": {
+   "arm": "mm16",
+   "type": "int8",
+   "kind": "ones",
+   "tier": 1,
+   "S_w": 14.89,
+   "S_lo_w": 11.24,
+   "S_hi_w": 17.75,
+   "S_res_w": 4.146,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "mm16.int8.full": {
+   "arm": "mm16",
+   "type": "int8",
+   "kind": "random",
+   "tier": 1,
+   "S_w": 26.47,
+   "S_lo_w": 21.17,
+   "S_hi_w": 30.97,
+   "S_res_w": 9.648,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 257.0,
+   "bits_b": 254.0
+  },
+  "mm16.int8.sparse50": {
+   "arm": "mm16",
+   "type": "int8",
+   "kind": "sparse50",
+   "tier": 1,
+   "S_w": 23.47,
+   "S_lo_w": 18.49,
+   "S_hi_w": 27.67,
+   "S_res_w": 8.061,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 196.8,
+   "bits_b": 200.5
+  },
+  "mm16.int8.e37": {
+   "arm": "mm16",
+   "type": "int8",
+   "kind": "e37",
+   "tier": 1,
+   "S_w": 24.65,
+   "S_lo_w": 18.36,
+   "S_hi_w": 30.15,
+   "S_res_w": 8.178,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 251.2,
+   "bits_b": 245.2
+  },
+  "mm16.int8.real": {
+   "arm": "mm16",
+   "type": "int8",
+   "kind": "real",
+   "tier": 2,
+   "S_w": 23.65,
+   "S_lo_w": 17.57,
+   "S_hi_w": 28.95,
+   "S_res_w": 8.032,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 167.2,
+   "bits_b": 257.2
+  },
+  "gemm1.fp32.zeros": {
+   "arm": "gemm1",
+   "type": "fp32",
+   "kind": "zeros",
+   "tier": 1,
+   "S_w": 5.87,
+   "S_lo_w": 3.72,
+   "S_hi_w": 9.17,
+   "S_res_w": 1.986,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "gemm1.fp32.ones": {
+   "arm": "gemm1",
+   "type": "fp32",
+   "kind": "ones",
+   "tier": 1,
+   "S_w": 14.44,
+   "S_lo_w": 12.14,
+   "S_hi_w": 17.89,
+   "S_res_w": 10.288,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "gemm1.fp32.randn": {
+   "arm": "gemm1",
+   "type": "fp32",
+   "kind": "random",
+   "tier": 1,
+   "S_w": 31.99,
+   "S_lo_w": 29.71,
+   "S_hi_w": 37.84,
+   "S_res_w": 26.701,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 221.8,
+   "bits_b": 215.9
+  },
+  "gemm1.fp32.sparse50": {
+   "arm": "gemm1",
+   "type": "fp32",
+   "kind": "sparse50",
+   "tier": 1,
+   "S_w": 13.92,
+   "S_lo_w": 11.55,
+   "S_hi_w": 19.63,
+   "S_res_w": 9.243,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 202.8,
+   "bits_b": 194.5
+  },
+  "gemm1.fp32.real": {
+   "arm": "gemm1",
+   "type": "fp32",
+   "kind": "real",
+   "tier": 2,
+   "S_w": 31.79,
+   "S_lo_w": 27.01,
+   "S_hi_w": 40.29,
+   "S_res_w": 26.47,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 213.8,
+   "bits_b": 255.1
+  },
+  "gemm1.fp16.zeros": {
+   "arm": "gemm1",
+   "type": "fp16",
+   "kind": "zeros",
+   "tier": 1,
+   "S_w": 5.87,
+   "S_lo_w": 3.73,
+   "S_hi_w": 9.16,
+   "S_res_w": 1.987,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "gemm1.fp16.ones": {
+   "arm": "gemm1",
+   "type": "fp16",
+   "kind": "ones",
+   "tier": 1,
+   "S_w": 14.53,
+   "S_lo_w": 12.36,
+   "S_hi_w": 17.85,
+   "S_res_w": 10.376,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "gemm1.fp16.randn": {
+   "arm": "gemm1",
+   "type": "fp16",
+   "kind": "random",
+   "tier": 1,
+   "S_w": 29.3,
+   "S_lo_w": 27.05,
+   "S_hi_w": 35.09,
+   "S_res_w": 24.102,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 217.0,
+   "bits_b": 214.1
+  },
+  "gemm1.fp16.sparse50": {
+   "arm": "gemm1",
+   "type": "fp16",
+   "kind": "sparse50",
+   "tier": 1,
+   "S_w": 20.07,
+   "S_lo_w": 17.27,
+   "S_hi_w": 26.14,
+   "S_res_w": 15.22,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 200.5,
+   "bits_b": 182.4
+  },
+  "gemm1.fp16.real": {
+   "arm": "gemm1",
+   "type": "fp16",
+   "kind": "real",
+   "tier": 2,
+   "S_w": 28.7,
+   "S_lo_w": 23.21,
+   "S_hi_w": 37.82,
+   "S_res_w": 23.495,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 205.9,
+   "bits_b": 247.4
+  },
+  "gemm1.int8.zeros": {
+   "arm": "gemm1",
+   "type": "int8",
+   "kind": "zeros",
+   "tier": 1,
+   "S_w": 10.16,
+   "S_lo_w": 6.2,
+   "S_hi_w": 16.3,
+   "S_res_w": 2.605,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "gemm1.int8.ones": {
+   "arm": "gemm1",
+   "type": "int8",
+   "kind": "ones",
+   "tier": 1,
+   "S_w": 11.91,
+   "S_lo_w": 7.89,
+   "S_hi_w": 18.11,
+   "S_res_w": 4.146,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 0.0,
+   "bits_b": 0.0
+  },
+  "gemm1.int8.full": {
+   "arm": "gemm1",
+   "type": "int8",
+   "kind": "random",
+   "tier": 1,
+   "S_w": 19.5,
+   "S_lo_w": 15.17,
+   "S_hi_w": 31.33,
+   "S_res_w": 9.648,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 257.0,
+   "bits_b": 254.0
+  },
+  "gemm1.int8.sparse50": {
+   "arm": "gemm1",
+   "type": "int8",
+   "kind": "sparse50",
+   "tier": 1,
+   "S_w": 17.4,
+   "S_lo_w": 13.08,
+   "S_hi_w": 28.02,
+   "S_res_w": 8.061,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 196.8,
+   "bits_b": 200.5
+  },
+  "gemm1.int8.real": {
+   "arm": "gemm1",
+   "type": "int8",
+   "kind": "real",
+   "tier": 2,
+   "S_w": 17.42,
+   "S_lo_w": 12.05,
+   "S_hi_w": 29.3,
+   "S_res_w": 8.032,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 167.2,
+   "bits_b": 257.2
+  },
+  "gemmnc1.fp32.randn": {
+   "arm": "gemmnc1",
+   "type": "fp32",
+   "kind": "random",
+   "tier": 2,
+   "S_w": 35.93,
+   "S_lo_w": 33.24,
+   "S_hi_w": 38.2,
+   "S_res_w": 26.701,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 221.8,
+   "bits_b": 215.9
+  },
+  "gemmnc1.fp16.randn": {
+   "arm": "gemmnc1",
+   "type": "fp16",
+   "kind": "random",
+   "tier": 2,
+   "S_w": 33.21,
+   "S_lo_w": 30.55,
+   "S_hi_w": 35.44,
+   "S_res_w": 24.102,
+   "r": 1.0321,
+   "rate_gops": 1.1568,
+   "bits_a": 217.0,
+   "bits_b": 214.1
+  },
+  "gemmnc1.int8.full": {
+   "arm": "gemmnc1",
+   "type": "int8",
+   "kind": "random",
+   "tier": 2,
+   "S_w": 27.49,
+   "S_lo_w": 22.2,
+   "S_hi_w": 32.0,
+   "S_res_w": 9.648,
+   "r": 1.1343,
+   "rate_gops": 2.1828,
+   "bits_a": 257.0,
+   "bits_b": 254.0
+  }
+ },
+ "tie_e37": {
+  "fp32": {
+   "S_e37_w": 24.379,
+   "S_w": 23.579,
+   "band_w": 1.5,
+   "cpo": 529.0
+  },
+  "fp16": {
+   "S_e37_w": 25.49,
+   "S_w": 24.69,
+   "band_w": 1.5,
+   "cpo": 529.0
+  },
+  "int8": {
+   "S_e37_w": 26.253,
+   "S_w": 25.453,
+   "band_w": 1.5,
+   "cpo": 280.35
+  }
+ },
+ "kernel_clause": {
+  "fp32": {
+   "mm16_minus_res_w": 7.59,
+   "lo": 3.09,
+   "hi": 12.09
+  },
+  "fp16": {
+   "mm16_minus_res_w": 5.76,
+   "lo": 1.26,
+   "hi": 10.26
+  },
+  "int8": {
+   "mm16_minus_res_w": 17.28,
+   "lo": 14.78,
+   "hi": 19.78
+  }
+ },
+ "memory_path": {
+  "mm16.fp32": {
+   "M_w": 2.42,
+   "lo": 1.68,
+   "hi": 3.17,
+   "const_w": 0.0,
+   "const_band_w": 1.0
+  },
+  "mm16.fp16": {
+   "M_w": 2.38,
+   "lo": 1.65,
+   "hi": 3.12,
+   "const_w": 0.0,
+   "const_band_w": 1.0
+  },
+  "mm16.int8": {
+   "M_w": 5.33,
+   "lo": 3.7,
+   "hi": 6.98,
+   "const_w": 0.0,
+   "const_band_w": 1.0
+  },
+  "gemm1.fp32": {
+   "M_w": 0.62,
+   "lo": 0.47,
+   "hi": 3.17,
+   "const_w": 0.0,
+   "const_band_w": 1.0
+  },
+  "gemm1.fp16": {
+   "M_w": 0.61,
+   "lo": 0.47,
+   "hi": 3.12,
+   "const_w": 0.0,
+   "const_band_w": 1.0
+  },
+  "gemm1.int8": {
+   "M_w": 1.36,
+   "lo": 1.04,
+   "hi": 6.98,
+   "const_w": 0.0,
+   "const_band_w": 1.0
+  }
+ },
+ "dram": {
+  "cpo_e37": [
+   15144.5,
+   15662.7
+  ],
+  "ops_per_s": 39896104,
+  "lines_per_s": 1276675325,
+  "GBps": 81.7,
+  "dram_chord_w": 3.54,
+  "fma_w": 0.88,
+  "random_minus_zeros_w": 4.42,
+  "lo": 3.31,
+  "hi": 5.52,
+  "zeros_S_lo_w": 3.0,
+  "zeros_S_hi_w": 8.36,
+  "why": "E75's zeros-to-random chord at DRAM, scaled to the lines per second E37's private pools reached, plus the multiply-adds' own part at that rate; +-25%, about E75's +14% against the catalogue and E81's 1.636 W of the 3.250 W chord being arrangement"
+ },
+ "clock": {
+  "relation": {
+   "burst": {
+    "W_star_w": 66.15,
+    "sigma_w": 2.75
+   },
+   "sustained": {
+    "W_star_w": 49.75,
+    "sigma_w": 1.95
+   },
+   "xfer": 1.0186548642106485,
+   "c_zeros_w": {
+    "fp32": 1.44,
+    "fp16": 1.394,
+    "int8": 2.123
+   },
+   "rms_mhz": {
+    "burst": 10.6,
+    "sustained": 8.4
+   },
+   "B_registered_w": {
+    "600": 25.455614671708208,
+    "700": 28.243261128820862,
+    "800": 33.60956684526229
+   },
+   "s_f": {
+    "600": 1.0,
+    "700": 1.408193628120374,
+    "800": 1.90517380064275
+   }
+  },
+  "cells": {
+   "mm16.fp32.zeros": {
+    "c_w": 6.8,
+    "burst_mhz": 800.0,
+    "burst_lo": 779.2,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 799.6,
+    "sus_lo": 777.0,
+    "sus_hi": 800.0,
+    "sus_share800": 0.996,
+    "board_w_at_800": 46.6,
+    "board_w_at_700": 37.8,
+    "board_w_at_600": 32.3
+   },
+   "mm16.fp32.ones": {
+    "c_w": 15.22,
+    "burst_mhz": 799.1,
+    "burst_lo": 772.7,
+    "burst_hi": 800.0,
+    "burst_share800": 0.991,
+    "sus_mhz": 698.1,
+    "sus_lo": 660.0,
+    "sus_hi": 741.4,
+    "sus_share800": 0.063,
+    "board_w_at_800": 62.6,
+    "board_w_at_700": 49.7,
+    "board_w_at_600": 40.7
+   },
+   "mm16.fp32.randn": {
+    "c_w": 34.22,
+    "burst_mhz": 638.7,
+    "burst_lo": 603.6,
+    "burst_hi": 678.9,
+    "burst_share800": 0.0,
+    "sus_mhz": 600.0,
+    "sus_lo": 600.0,
+    "sus_hi": 616.5,
+    "sus_share800": 0.0,
+    "board_w_at_800": 98.8,
+    "board_w_at_700": 76.4,
+    "board_w_at_600": 59.7
+   },
+   "mm16.fp32.sparse50": {
+    "c_w": 16.32,
+    "burst_mhz": 796.2,
+    "burst_lo": 758.3,
+    "burst_hi": 800.0,
+    "burst_share800": 0.962,
+    "sus_mhz": 683.7,
+    "sus_lo": 638.7,
+    "sus_hi": 734.9,
+    "sus_share800": 0.018,
+    "board_w_at_800": 64.7,
+    "board_w_at_700": 51.2,
+    "board_w_at_600": 41.8
+   },
+   "mm16.fp32.e37": {
+    "c_w": 21.77,
+    "burst_mhz": 744.8,
+    "burst_lo": 680.9,
+    "burst_hi": 800.0,
+    "burst_share800": 0.449,
+    "sus_mhz": 622.4,
+    "sus_lo": 600.0,
+    "sus_hi": 696.0,
+    "sus_share800": 0.0,
+    "board_w_at_800": 75.1,
+    "board_w_at_700": 58.9,
+    "board_w_at_600": 47.2
+   },
+   "mm16.fp32.real": {
+    "c_w": 34.13,
+    "burst_mhz": 639.3,
+    "burst_lo": 600.0,
+    "burst_hi": 700.3,
+    "burst_share800": 0.0,
+    "sus_mhz": 600.0,
+    "sus_lo": 600.0,
+    "sus_hi": 616.5,
+    "sus_share800": 0.0,
+    "board_w_at_800": 98.6,
+    "board_w_at_700": 76.3,
+    "board_w_at_600": 59.6
+   },
+   "mm16.fp16.zeros": {
+    "c_w": 6.76,
+    "burst_mhz": 800.0,
+    "burst_lo": 779.2,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 799.6,
+    "sus_lo": 777.4,
+    "sus_hi": 800.0,
+    "sus_share800": 0.996,
+    "board_w_at_800": 46.5,
+    "board_w_at_700": 37.8,
+    "board_w_at_600": 32.2
+   },
+   "mm16.fp16.ones": {
+    "c_w": 15.26,
+    "burst_mhz": 799.0,
+    "burst_lo": 773.2,
+    "burst_hi": 800.0,
+    "burst_share800": 0.99,
+    "sus_mhz": 697.6,
+    "sus_lo": 661.1,
+    "sus_hi": 739.1,
+    "sus_share800": 0.06,
+    "board_w_at_800": 62.7,
+    "board_w_at_700": 49.7,
+    "board_w_at_600": 40.7
+   },
+   "mm16.fp16.randn": {
+    "c_w": 31.51,
+    "burst_mhz": 658.7,
+    "burst_lo": 621.5,
+    "burst_hi": 701.2,
+    "burst_share800": 0.0,
+    "sus_mhz": 600.0,
+    "sus_lo": 600.0,
+    "sus_hi": 616.5,
+    "sus_share800": 0.0,
+    "board_w_at_800": 93.6,
+    "board_w_at_700": 72.6,
+    "board_w_at_600": 57.0
+   },
+   "mm16.fp16.sparse50": {
+    "c_w": 22.25,
+    "burst_mhz": 740.0,
+    "burst_lo": 694.7,
+    "burst_hi": 793.4,
+    "burst_share800": 0.401,
+    "sus_mhz": 618.4,
+    "sus_lo": 600.0,
+    "sus_hi": 664.7,
+    "sus_share800": 0.0,
+    "board_w_at_800": 76.0,
+    "board_w_at_700": 59.6,
+    "board_w_at_600": 47.7
+   },
+   "mm16.fp16.e37": {
+    "c_w": 24.97,
+    "burst_mhz": 715.0,
+    "burst_lo": 652.2,
+    "burst_hi": 787.0,
+    "burst_share800": 0.167,
+    "sus_mhz": 603.7,
+    "sus_lo": 600.0,
+    "sus_hi": 658.3,
+    "sus_share800": 0.0,
+    "board_w_at_800": 81.2,
+    "board_w_at_700": 63.4,
+    "board_w_at_600": 50.4
+   },
+   "mm16.fp16.real": {
+    "c_w": 30.99,
+    "burst_mhz": 662.8,
+    "burst_lo": 604.0,
+    "burst_hi": 733.9,
+    "burst_share800": 0.001,
+    "sus_mhz": 600.0,
+    "sus_lo": 600.0,
+    "sus_hi": 619.6,
+    "sus_share800": 0.0,
+    "board_w_at_800": 92.7,
+    "board_w_at_700": 71.9,
+    "board_w_at_600": 56.5
+   },
+   "mm16.int8.zeros": {
+    "c_w": 12.47,
+    "burst_mhz": 800.0,
+    "burst_lo": 778.3,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 734.0,
+    "sus_lo": 681.7,
+    "sus_hi": 800.0,
+    "sus_share800": 0.342,
+    "board_w_at_800": 57.4,
+    "board_w_at_700": 45.8,
+    "board_w_at_600": 37.9
+   },
+   "mm16.int8.ones": {
+    "c_w": 14.18,
+    "burst_mhz": 799.8,
+    "burst_lo": 771.9,
+    "burst_hi": 800.0,
+    "burst_share800": 0.998,
+    "sus_mhz": 711.5,
+    "sus_lo": 658.4,
+    "sus_hi": 778.2,
+    "sus_share800": 0.143,
+    "board_w_at_800": 60.6,
+    "board_w_at_700": 48.2,
+    "board_w_at_600": 39.6
+   },
+   "mm16.int8.full": {
+    "c_w": 25.55,
+    "burst_mhz": 709.9,
+    "burst_lo": 650.5,
+    "burst_hi": 780.5,
+    "burst_share800": 0.128,
+    "sus_mhz": 602.3,
+    "sus_lo": 600.0,
+    "sus_hi": 652.2,
+    "sus_share800": 0.0,
+    "board_w_at_800": 82.3,
+    "board_w_at_700": 64.2,
+    "board_w_at_600": 51.0
+   },
+   "mm16.int8.sparse50": {
+    "c_w": 22.61,
+    "burst_mhz": 736.6,
+    "burst_lo": 678.8,
+    "burst_hi": 800.0,
+    "burst_share800": 0.366,
+    "sus_mhz": 615.8,
+    "sus_lo": 600.0,
+    "sus_hi": 682.0,
+    "sus_share800": 0.0,
+    "board_w_at_800": 76.7,
+    "board_w_at_700": 60.1,
+    "board_w_at_600": 48.1
+   },
+   "mm16.int8.e37": {
+    "c_w": 23.76,
+    "burst_mhz": 725.7,
+    "burst_lo": 657.4,
+    "burst_hi": 800.0,
+    "burst_share800": 0.262,
+    "sus_mhz": 608.5,
+    "sus_lo": 600.0,
+    "sus_hi": 683.6,
+    "sus_share800": 0.0,
+    "board_w_at_800": 78.9,
+    "board_w_at_700": 61.7,
+    "board_w_at_600": 49.2
+   },
+   "mm16.int8.real": {
+    "c_w": 22.78,
+    "burst_mhz": 734.9,
+    "burst_lo": 667.7,
+    "burst_hi": 800.0,
+    "burst_share800": 0.35,
+    "sus_mhz": 614.5,
+    "sus_lo": 600.0,
+    "sus_hi": 693.6,
+    "sus_share800": 0.0,
+    "board_w_at_800": 77.0,
+    "board_w_at_700": 60.3,
+    "board_w_at_600": 48.2
+   },
+   "gemm1.fp32.zeros": {
+    "c_w": 5.25,
+    "burst_mhz": 800.0,
+    "burst_lo": 779.2,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 800.0,
+    "sus_lo": 775.3,
+    "sus_hi": 800.0,
+    "sus_share800": 1.0,
+    "board_w_at_800": 43.6,
+    "board_w_at_700": 35.6,
+    "board_w_at_600": 30.7
+   },
+   "gemm1.fp32.ones": {
+    "c_w": 13.67,
+    "burst_mhz": 800.0,
+    "burst_lo": 771.5,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 718.2,
+    "sus_lo": 657.6,
+    "sus_hi": 765.8,
+    "sus_share800": 0.195,
+    "board_w_at_800": 59.6,
+    "board_w_at_700": 47.5,
+    "board_w_at_600": 39.1
+   },
+   "gemm1.fp32.randn": {
+    "c_w": 30.89,
+    "burst_mhz": 663.6,
+    "burst_lo": 602.5,
+    "burst_hi": 703.4,
+    "burst_share800": 0.001,
+    "sus_mhz": 600.0,
+    "sus_lo": 600.0,
+    "sus_hi": 616.5,
+    "sus_share800": 0.0,
+    "board_w_at_800": 92.5,
+    "board_w_at_700": 71.7,
+    "board_w_at_600": 56.4
+   },
+   "gemm1.fp32.sparse50": {
+    "c_w": 13.16,
+    "burst_mhz": 800.0,
+    "burst_lo": 756.3,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 724.8,
+    "sus_lo": 636.5,
+    "sus_hi": 774.6,
+    "sus_share800": 0.255,
+    "board_w_at_800": 58.7,
+    "board_w_at_700": 46.8,
+    "board_w_at_600": 38.6
+   },
+   "gemm1.fp32.real": {
+    "c_w": 30.7,
+    "burst_mhz": 665.2,
+    "burst_lo": 600.0,
+    "burst_hi": 726.7,
+    "burst_share800": 0.001,
+    "sus_mhz": 600.0,
+    "sus_lo": 600.0,
+    "sus_hi": 617.9,
+    "sus_share800": 0.0,
+    "board_w_at_800": 92.1,
+    "board_w_at_700": 71.5,
+    "board_w_at_600": 56.2
+   },
+   "gemm1.fp16.zeros": {
+    "c_w": 5.21,
+    "burst_mhz": 800.0,
+    "burst_lo": 779.2,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 800.0,
+    "sus_lo": 775.8,
+    "sus_hi": 800.0,
+    "sus_share800": 1.0,
+    "board_w_at_800": 43.5,
+    "board_w_at_700": 35.6,
+    "board_w_at_600": 30.7
+   },
+   "gemm1.fp16.ones": {
+    "c_w": 13.71,
+    "burst_mhz": 799.9,
+    "burst_lo": 772.1,
+    "burst_hi": 800.0,
+    "burst_share800": 0.999,
+    "sus_mhz": 717.6,
+    "sus_lo": 658.7,
+    "sus_hi": 763.3,
+    "sus_share800": 0.191,
+    "board_w_at_800": 59.7,
+    "board_w_at_700": 47.5,
+    "board_w_at_600": 39.2
+   },
+   "gemm1.fp16.randn": {
+    "c_w": 28.21,
+    "burst_mhz": 686.6,
+    "burst_lo": 620.2,
+    "burst_hi": 726.7,
+    "burst_share800": 0.021,
+    "sus_mhz": 600.1,
+    "sus_lo": 600.0,
+    "sus_hi": 618.0,
+    "sus_share800": 0.0,
+    "board_w_at_800": 87.3,
+    "board_w_at_700": 68.0,
+    "board_w_at_600": 53.7
+   },
+   "gemm1.fp16.sparse50": {
+    "c_w": 19.15,
+    "burst_mhz": 773.0,
+    "burst_lo": 693.0,
+    "burst_hi": 800.0,
+    "burst_share800": 0.73,
+    "sus_mhz": 648.6,
+    "sus_lo": 600.0,
+    "sus_hi": 699.1,
+    "sus_share800": 0.0,
+    "board_w_at_800": 70.1,
+    "board_w_at_700": 55.2,
+    "board_w_at_600": 44.6
+   },
+   "gemm1.fp16.real": {
+    "c_w": 27.62,
+    "burst_mhz": 691.7,
+    "burst_lo": 602.9,
+    "burst_hi": 761.0,
+    "burst_share800": 0.035,
+    "sus_mhz": 600.2,
+    "sus_lo": 600.0,
+    "sus_hi": 635.1,
+    "sus_share800": 0.0,
+    "board_w_at_800": 86.2,
+    "board_w_at_700": 67.1,
+    "board_w_at_600": 53.1
+   },
+   "gemm1.int8.zeros": {
+    "c_w": 9.54,
+    "burst_mhz": 800.0,
+    "burst_lo": 777.7,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 778.4,
+    "sus_lo": 677.1,
+    "sus_hi": 800.0,
+    "sus_share800": 0.784,
+    "board_w_at_800": 51.8,
+    "board_w_at_700": 41.7,
+    "board_w_at_600": 35.0
+   },
+   "gemm1.int8.ones": {
+    "c_w": 11.26,
+    "burst_mhz": 800.0,
+    "burst_lo": 769.5,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 751.6,
+    "sus_lo": 653.8,
+    "sus_hi": 800.0,
+    "sus_share800": 0.516,
+    "board_w_at_800": 55.1,
+    "board_w_at_700": 44.1,
+    "board_w_at_600": 36.7
+   },
+   "gemm1.int8.full": {
+    "c_w": 18.71,
+    "burst_mhz": 777.7,
+    "burst_lo": 647.6,
+    "burst_hi": 800.0,
+    "burst_share800": 0.777,
+    "sus_mhz": 653.6,
+    "sus_lo": 600.0,
+    "sus_hi": 724.4,
+    "sus_share800": 0.0,
+    "board_w_at_800": 69.3,
+    "board_w_at_700": 54.6,
+    "board_w_at_600": 44.2
+   },
+   "gemm1.int8.sparse50": {
+    "c_w": 16.65,
+    "burst_mhz": 794.7,
+    "burst_lo": 675.8,
+    "burst_hi": 800.0,
+    "burst_share800": 0.947,
+    "sus_mhz": 679.3,
+    "sus_lo": 600.0,
+    "sus_hi": 751.4,
+    "sus_share800": 0.012,
+    "board_w_at_800": 65.3,
+    "board_w_at_700": 51.7,
+    "board_w_at_600": 42.1
+   },
+   "gemm1.int8.real": {
+    "c_w": 16.67,
+    "burst_mhz": 794.6,
+    "burst_lo": 664.7,
+    "burst_hi": 800.0,
+    "burst_share800": 0.946,
+    "sus_mhz": 679.0,
+    "sus_lo": 600.0,
+    "sus_hi": 766.0,
+    "sus_share800": 0.011,
+    "board_w_at_800": 65.4,
+    "board_w_at_700": 51.7,
+    "board_w_at_600": 42.1
+   },
+   "res.fp32.zeros": {
+    "c_w": 1.44,
+    "burst_mhz": 800.0,
+    "burst_lo": 779.2,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 800.0,
+    "sus_lo": 783.5,
+    "sus_hi": 800.0,
+    "sus_share800": 1.0,
+    "board_w_at_800": 36.4,
+    "board_w_at_700": 30.3,
+    "board_w_at_600": 26.9
+   },
+   "res.fp32.randn": {
+    "c_w": 25.7,
+    "burst_mhz": 708.6,
+    "burst_lo": 687.3,
+    "burst_hi": 729.8,
+    "burst_share800": 0.119,
+    "sus_mhz": 602.0,
+    "sus_lo": 600.0,
+    "sus_hi": 618.6,
+    "sus_share800": 0.0,
+    "board_w_at_800": 82.6,
+    "board_w_at_700": 64.4,
+    "board_w_at_600": 51.2
+   },
+   "res.fp16.zeros": {
+    "c_w": 1.39,
+    "burst_mhz": 800.0,
+    "burst_lo": 779.2,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 800.0,
+    "sus_lo": 783.5,
+    "sus_hi": 800.0,
+    "sus_share800": 1.0,
+    "board_w_at_800": 36.3,
+    "board_w_at_700": 30.2,
+    "board_w_at_600": 26.8
+   },
+   "res.fp16.randn": {
+    "c_w": 23.1,
+    "burst_mhz": 731.8,
+    "burst_lo": 710.8,
+    "burst_hi": 752.9,
+    "burst_share800": 0.32,
+    "sus_mhz": 612.3,
+    "sus_lo": 600.0,
+    "sus_hi": 629.0,
+    "sus_share800": 0.0,
+    "board_w_at_800": 77.6,
+    "board_w_at_700": 60.8,
+    "board_w_at_600": 48.6
+   },
+   "res.int8.zeros": {
+    "c_w": 2.12,
+    "burst_mhz": 800.0,
+    "burst_lo": 779.2,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 800.0,
+    "sus_lo": 783.5,
+    "sus_hi": 800.0,
+    "sus_share800": 1.0,
+    "board_w_at_800": 37.7,
+    "board_w_at_700": 31.2,
+    "board_w_at_600": 27.6
+   },
+   "res.int8.full": {
+    "c_w": 9.04,
+    "burst_mhz": 800.0,
+    "burst_lo": 779.2,
+    "burst_hi": 800.0,
+    "burst_share800": 1.0,
+    "sus_mhz": 785.5,
+    "sus_lo": 768.0,
+    "sus_hi": 800.0,
+    "sus_share800": 0.855,
+    "board_w_at_800": 50.8,
+    "board_w_at_700": 41.0,
+    "board_w_at_600": 34.5
+   }
+  },
+  "gaps": {
+   "res.fp32": {
+    "burst_clock_ratio": 1.129,
+    "sus_clock_ratio": 1.329,
+    "burst_top_rate": 10.89,
+    "sus_top_rate": 9.25
+   },
+   "res.fp16": {
+    "burst_clock_ratio": 1.093,
+    "sus_clock_ratio": 1.307,
+    "burst_top_rate": 22.49,
+    "sus_top_rate": 18.81
+   },
+   "res.int8": {
+    "burst_clock_ratio": 1.0,
+    "sus_clock_ratio": 1.018,
+    "burst_top_rate": 84.41,
+    "sus_top_rate": 82.88
+   },
+   "mm16.fp32": {
+    "burst_clock_ratio": 1.253,
+    "sus_clock_ratio": 1.333,
+    "burst_top_rate": 10.13,
+    "sus_top_rate": 9.51
+   },
+   "mm16.fp16": {
+    "burst_clock_ratio": 1.215,
+    "sus_clock_ratio": 1.333,
+    "burst_top_rate": 20.89,
+    "sus_top_rate": 19.03
+   },
+   "mm16.int8": {
+    "burst_clock_ratio": 1.127,
+    "sus_clock_ratio": 1.219,
+    "burst_top_rate": 84.97,
+    "sus_top_rate": 72.09
+   },
+   "gemm1.fp32": {
+    "burst_clock_ratio": 1.206,
+    "sus_clock_ratio": 1.333,
+    "burst_top_rate": 10.52,
+    "sus_top_rate": 9.51
+   },
+   "gemm1.fp16": {
+    "burst_clock_ratio": 1.165,
+    "sus_clock_ratio": 1.333,
+    "burst_top_rate": 21.78,
+    "sus_top_rate": 19.03
+   },
+   "gemm1.int8": {
+    "burst_clock_ratio": 1.029,
+    "sus_clock_ratio": 1.191,
+    "burst_top_rate": 93.08,
+    "sus_top_rate": 78.23
+   }
+  }
+ },
+ "rules": {
+  "min_passes": 3,
+  "kinds_for_rank": [
+   "zeros",
+   "ones",
+   "random",
+   "sparse50",
+   "real"
+  ],
+  "R1_tie_e37": {
+   "what": "mm16 on E37's fill reads E37's board watts over idle (leakage difference taken off) within the band, and every mm16 cell runs E37's cycles per op within the share",
+   "band_w": 1.5,
+   "cpo_rel": 0.005,
+   "means": {
+    "PASS": "the ported loop is E37's benchmark, so its numbers tie to E37's 24-26 W",
+    "FAIL": "the port differs from E37's benchmark: every mm16 number carries that difference, and the README says which way"
+   }
+  },
+  "R2_tie_e78": {
+   "what": "the resident cells read E78's S within the band, on the new binary",
+   "band_w": 0.6,
+   "cells": [
+    "fp32.zeros",
+    "fp32.randn",
+    "fp16.zeros",
+    "fp16.randn",
+    "int8.zeros",
+    "int8.full",
+    "fp32.ones",
+    "fp16.ones",
+    "int8.ones",
+    "fp32.sparse50",
+    "fp16.sparse50",
+    "int8.sparse50"
+   ],
+   "means": {
+    "PASS": "the session sits in E78's frame and the arms can be read against the kinds page",
+    "FAIL": "the session drifted from E78: read the arms against this session's resident cells only"
+   }
+  },
+  "R3_premium": {
+   "what": "S(mm16) - r S(res), paired per pass, in each of zeros, ones, random, sparse50 and each format: the 95% lower bound is above the bar: a real matmul pays the memory path whatever the data",
+   "bar_w": 1.0,
+   "means": {
+    "PASS": "every per-kind watt on the page is low for a matmul that streams",
+    "FAIL": "in that cell streaming costs nothing the loop did not: the page's number stands for it"
+   }
+  },
+  "R3b_model": {
+   "what": "rms of measured S minus the frozen S over the 12 cells of R3 (mm16), over the 12 of gemm1",
+   "mm16_rms_w": 3.0,
+   "gemm1_rms_w": 4.0,
+   "means": {
+    "PASS": "resident power plus E37's path cost plus E75's prices predicts a streamed cell",
+    "FAIL": "the three published numbers do not add up to a streamed cell, and the residuals say which term is off"
+   }
+  },
+  "R4_clause": {
+   "what": "E39's kernel clause on one fill: S(mm16.int8.e37) - S(res.int8.e37), paired: PASS if the 95% interval overlaps the frozen range and the mean is inside it; FAIL if the interval lies outside; else INCONCLUSIVE. fp32 and fp16 are reported",
+   "means": {
+    "PASS": "the +18 W of the claims register is the kernel, not the different fill",
+    "FAIL": "part of the +18 W was the fill"
+   }
+  },
+  "R5_memory_data": {
+   "what": "M = [S(arm, random) - S(arm, zeros)] - r [S(res, random) - S(res, zeros)], paired, mm16 in each format, against E75's prices times the tile's changed bits. Three-way as R4. gemm1 is reported",
+   "means": {
+    "PASS": "the memory path's data-dependent power is the size E75's prices say",
+    "FAIL": "E75's prices, measured on bare loads, do not carry over to a matmul's loads"
+   }
+  },
+  "R5b_memory_constant": {
+   "what": "[S(mm16, ones) - S(mm16, zeros)] - r [S(res, ones) - S(res, zeros)], paired: PASS if the 95% interval lies inside the band, FAIL if wholly outside, else INCONCLUSIVE",
+   "band_w": 1.0,
+   "means": {
+    "PASS": "a constant costs the memory path what zeros do",
+    "FAIL": "the path pays for the constant itself, not only for changes"
+   }
+  },
+  "R6_rank": {
+   "what": "Spearman rho between S(res) and S(arm) over the five kinds within each format, for mm16 and gemm1",
+   "rho": 0.9,
+   "rho_four_kinds": 0.8,
+   "means": {
+    "PASS": "the kinds rank as on the page",
+    "FAIL": "streaming reorders the kinds, and the table on the page is the loop's"
+   }
+  },
+  "R7_gate": {
+   "what": "zeros' share S(arm, zeros) / S(arm, random) per format. R7a: the 95% lower bound is above the resident share E78 measured. R7b: the upper bound is below the bar",
+   "bar": 0.75,
+   "means": {
+    "R7a": "zeros' 5-7% of random is the loop's figure",
+    "R7b": "the gate still saves a quarter or more in a real matmul",
+    "FAIL_R7b": "in that format zeros hardly save power once the operands stream"
+   }
+  },
+  "R8_coop": {
+   "what": "S(mm16, random) - S(gemm1, random) and S(gemmnc1, random) - S(gemm1, random), paired, per format: PASS if the 95% lower bound is above 0, FAIL if the upper bound is below 0, else INCONCLUSIVE",
+   "means": {
+    "PASS": "the production pattern draws less than the benchmark: E37's watts overstate a cooperative GEMM",
+    "FAIL": "cooperative loads do not save board power"
+   }
+  },
+  "R9_correct": {
+   "what": "no check record reads wrong; every zeros run reads exact; every int8 run reads exact",
+   "means": {
+    "PASS": "the kernels compute what they should on every kind",
+    "FAIL": "a kernel takes a different path on some data: that is a finding, reported with the cells"
+   }
+  },
+  "R9b_cycles": {
+   "what": "within each arm and format the cycles per op of every kind agree within the share: the data does not change the count",
+   "cpo_rel": 0.01,
+   "means": {
+    "PASS": "as in the loop, the data never changes the cycle count, streaming or not",
+    "FAIL": "the data changes the cycle count in a streamed matmul: the page's first sentence is the loop's"
+   }
+  },
+  "R10_heat": {
+   "what": "the OLS slope of the die's rise on S over every cell with S >= 12 W, all arms, lies in the band",
+   "band_c_per_w": [
+    0.1,
+    0.14
+   ],
+   "min_s_w": 12.0,
+   "means": {
+    "PASS": "a watt spent on the memory path heats the die sensor as a watt on the lanes does",
+    "FAIL": "the memory path's watts reach the sensor differently, and the heat line must carry the arm"
+   }
+  },
+  "R11_dram": {
+   "what": "S(mmp64.fp32.randn) - S(mmp64.fp32.zeros), paired, three-way against the frozen range; its cycles per op inside E37's range +- 10%",
+   "means": {
+    "PASS": "the DRAM path's data dependence, at E37's traffic, is the size E75 and E81 say",
+    "FAIL": "it is not"
+   }
+  },
+  "R12_gemm16": {
+   "what": "S(gemm16, random) - S(gemm16, zeros), paired, per format: the 95% lower bound is above 0; the cycles per op and its ratio to gemm1's are reported, with no band: nothing predicted them",
+   "means": {
+    "PASS": "the kinds still set the power of a GEMM past the L3",
+    "FAIL": "past the L3 the memory path's stalls hide the kinds"
+   }
+  },
+  "S1_fp32_burst": {
+   "what": "aifoundry2: zeros over random fp32, TFLOPS, 1.5-6.5 s of a 6 s burst from a cool die, gemm1 (and mm16 where the cool burst is allowed). GROWS >= 1.20 (the frozen prediction: 1.21, mm16 1.25); SURVIVES in [1.10, 1.20); SHRINKS < 1.10",
+   "grows": 1.2,
+   "survives": 1.1,
+   "means": {
+    "GROWS": "the page's x1.13-1.15 understates a matmul that streams",
+    "SURVIVES": "the page's x1.13-1.15 stands",
+    "SHRINKS": "the page's burst gap belongs to the loop"
+   }
+  },
+  "S2_fp32_sustained": {
+   "what": "aifoundry2: the same over the last 40 s of about 76 s. SURVIVES in [1.20, 1.40] (the frozen prediction: 1.33); else FAILS",
+   "lo": 1.2,
+   "hi": 1.4,
+   "means": {
+    "SURVIVES": "the page's x1.29-1.33 stands",
+    "FAILS": "the sustained gap belongs to the loop: the README says which way it moved"
+   }
+  },
+  "S3_int8": {
+   "what": "aifoundry2: zeros over random int8, sustained, gemm1 and mm16. The frozen prediction: 1.19 and 1.22. SLOWS >= 1.05; HARDLY < 1.03; between: INCONCLUSIVE. The burst is reported (1.03 and 1.13 predicted)",
+   "slows": 1.05,
+   "hardly": 1.03,
+   "means": {
+    "SLOWS": "'int8 hardly slows' belongs to the loop: a real int8 matmul meets the trip",
+    "HARDLY": "int8 hardly slows in a real matmul too"
+   }
+  },
+  "S4_relation": {
+   "what": "aifoundry2: rms of measured minus frozen clock (E83's relation on the frozen S) over the cells, burst and sustained",
+   "rms_mhz": 40.0,
+   "means": {
+    "PASS": "the chain kind -> watts -> clock carries over to a matmul that streams",
+    "FAIL": "it does not, on the frozen S; the relation on session 1's measured S is scored beside it, labelled"
+   }
+  },
+  "S5_real": {
+   "what": "aifoundry2: the real set against random, in each format, gemm1: burst and sustained clocks within the bar",
+   "bar_mhz": 25.0,
+   "means": {
+    "PASS": "real float tensors stream at random data's speed",
+    "FAIL": "real tensors and random data part once the operands stream"
+   }
+  }
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa"
+  },
+  "e101_files_sha256": {
+   "tools/claims-v3/kinds/e101_common.py": "ccf64dc5eefac2ee0a04ae3f9b7ba8878b56c456dbb1249d7f6a10420b16bd30",
+   "tools/claims-v3/kinds/run_e101.py": "5716176cdf273510d025095a3e98af7f8d379792579558e5c0eb6ab983f8cd62",
+   "tools/claims-v3/kinds/reduce_e101.py": "4292147bc058ed767620bae15aa53b93a2470c6f4cf84c50a4df79d453913542",
+   "tools/claims-v3/kinds/block_e101.sh": "73ad632a2b513976b2f6c544ff33306f432519446ec4ed4586d357be076fe2c1",
+   "tools/claims-v3/kinds/queue_e101.sh": "37a8d9338c29d4e91204ed13fa42bbfec58a11006e1b3dcdc2e9e83819b2c44a",
+   "tools/claims-v3/kinds/run_e101.sh": "2b00da22012cc0f5ea320e4145e419048f17da4e3d85d13dc5378369af660e7c",
+   "tools/claims-v3/rgm/host/main.cpp": "67ada5141966ca7d944b339aebe0204ab06aa24077db41f245fbe11d3e735d68",
+   "tools/claims-v3/rgm/kernel/sparsity.c": "aaec8f20d154d29800aced555667fa45a5c9fa818dc298cba18dc8e628c1070a",
+   "tools/claims-v3/rgm/sparsity_args.h": "416d1eeb5c0f72f2428066dbec79fbe1b440bf4052ee5078b5e30cde3c1b49dd"
+  }
+ }
+}

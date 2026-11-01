@@ -1,0 +1,15 @@
+E101: the arms in sys_emu (et-platform's simulator, the VM's /opt/et), one shire, all 32 minions, --seed 7 or 8. The simulator checks loops, cooperative groups and results; its cycle counts mean nothing.
+Each line: the case; the process's exit code; the host's check of C on 32 minions x 256 words against its own reference (exact: every word equal; approx: every word inside 1e-4 of the sum of the absolute products).
+
+mm16-fp32-randn          rc=0 check=approx  words=8192 exact=0 within=8192
+gemm1-fp32-randn         rc=0 check=approx  words=8192 exact=0 within=8192
+gemm1-int8-full          rc=0 check=exact   words=8192 exact=8192 within=8192
+gemm1-fp16-randn         rc=0 check=approx  words=8192 exact=0 within=8192
+gemm1-fp32-zeros         rc=0 check=exact   words=8192 exact=8192 within=8192
+gemm1-fp32-ones          rc=0 check=exact   words=8192 exact=8192 within=8192
+gemmnc1-int8-sparse      rc=0 check=exact   words=8192 exact=8192 within=8192
+mm16-int8-e37            rc=0 check=exact   words=8192 exact=8192 within=8192
+mm16-fp16-e37            rc=0 check=exact   words=8192 exact=8192 within=8192
+tenb-fp16                rc=0 check=approx  words=8192 exact=0 within=8192
+mmp2-fp32                rc=0 check=approx  words=8192 exact=0 within=8192
+res-fp32                 rc=0 (the resident path through --values file:, unchanged; a file: run prints no check)
