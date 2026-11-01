@@ -1,0 +1,13 @@
+E107, POST HOC (Sun 1 Nov 2026 ~12:55 PST, after the verifier's review; labelled): the kernels' entry_point, the symbol the README's R1 paragraph names.
+Read with tools/claims-v3/e107/elfsym_e107.py (standard library) from copies of the two kernel ELFs taken off aifoundry3 at 11:32 PST; each copy's
+sha256 equals the committed hash of the binary that ran:
+  e105.elf = rgm105 (E105's binary), the box's build/e105/kernel/sparsity.elf; sha256 in docs/reports/data/2026-11-01-e105-gemm-layout/aifoundry3/binaries.sha256
+  e107.elf = rgm107 (E107's binary), the box's build/e107/kernel/sparsity.elf; sha256 in logs/e107-binaries.sha256
+Re-derive: this reader on any copy of the two ELFs, or on the box the nm -S of /opt/et's RISC-V toolchain (it prints the same st_size, in hex).
+e105.elf  sha256 90c9dfa62bade30f6db4986d160c7fea9c442f87fde1f3632934c4d489919713  (19376 bytes)
+   entry_point  value 0x80058019ce  size 6592 bytes  type 2
+e107.elf  sha256 5342d50206642f8a1fa5b14931973878d3a8bb5300cb4a001814f842ba78e20d  (19328 bytes)
+   entry_point  value 0x80058019ce  size 6554 bytes  type 2
+
+rgm107's entry_point is 38 bytes shorter than rgm105's (6,554 against 6,592). The kernels' sources differ only by the repeat loop, the layout mask and the
+shared-C select (README, R1). Which instructions make int8's repeated block 6.6 cycles faster per op in rgm107 was not traced.
