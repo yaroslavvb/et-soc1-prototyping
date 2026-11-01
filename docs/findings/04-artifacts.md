@@ -43,7 +43,11 @@ card 0 beside aifoundry2 in a generated cross-card speed table, E85's camera per
 reading, E90's signs, and a section on the real tensors (Q130(n), E86, E87, E91) with its own chart; the kinds table
 gained nine GPT-2 rows. Its verifier's wording fixes followed in place at about 23:32 PDT as `9729b0fe0afe`
 (every real-tensor ratio names its baseline; the real-tensor section is scoped to three GPT-2 tiles). Still public
-and unlisted. The claims for those experiments are in [05-claims.md](05-claims.md), "Q130 additions".
+and unlisted. The claims for those experiments are in [05-claims.md](05-claims.md), "Q130 additions". **Rebuilt in place on
+Sun 1 Nov 2026 (week 44) at 09:54 PST as `1fe8377a18af`** (Q132, over `9729b0fe0afe`; its data pinned at lab `17cc3911`,
+its source and charts committed in the owner's private research log): regimes, real tensors, the heat plateau and signs, with
+section 11 ranked afresh. Section 11's items now print their old numbers as "old item N", and the READMEs' "item N of section
+11" keep meaning that old list. Public and unlisted still; the claims are in [05-claims.md](05-claims.md), "Q132".
 
 **A24 · From matmul speed to one transistor switch** (27 October 2026, Q128). The nine-step chain on one
 page: speed, the governor, board watts, picojoules per multiply-add, femtojoules per flipped operand bit,

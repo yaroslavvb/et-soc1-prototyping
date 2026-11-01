@@ -1545,7 +1545,8 @@ under `docs/reports/data/` unless a path is given: `E92` `2026-11-01-e92-sign-sp
 `2026-11-01-e101-real-matmul/`, `E102` `2026-11-01-e102-balanced-bit-prices/`, `E103`
 `2026-11-01-e103-model-blind-test/`, `E104` `2026-11-01-e104-c-readback/`, `E105` `2026-11-01-e105-gemm-layout/`, `E106`
 `2026-11-01-e106-held-signs/`, `QB` `2026-11-01-q132-rtl-bench/` (Q132(b)), `QG` `2026-11-01-q132-governor-desk/` (Q132(g)),
-and `RT2` `tools/claims-v3/kinds/real2/` (Q132(r), the second real-tile set).
+and `RT2` `tools/claims-v3/kinds/real2/` (Q132(r), the second real-tile set). "Item N" here is the list the kinds page carried until
+31 October; its rebuild, `1fe8377a18af`, ranks section 11 afresh and prints each item's "old item N".
 🛑 **The Q130 section's things to carry hold here, and four more.** (9) **Each result is one card's,** board power at
 600 MHz unless a row says otherwise, on the card its row names. (10) **Every per-kind number outside E101 and E105 is the resident
 loop's:** one 16 × 16 TensorFMA repeating on tiles held in the minions. (11) **"Frozen" in fp16 is E104's word to give:**
