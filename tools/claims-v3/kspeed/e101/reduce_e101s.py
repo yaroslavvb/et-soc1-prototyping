@@ -5,7 +5,7 @@ tools/claims-v3/kinds/rules-e101.json scored against predictions-e101.json's fro
     python3 reduce_e101s.py <RUNDIR> [<RUNDIR> ...] [--e101 <session 1's e101.json>] [--out results.json] > reduce.txt
 
 PER RUN: E80's, E83's, E87's and E96's reduction, imported unchanged: reduce_hpl.run_metrics (E64's registered per-run metrics) plus reduce_kspeed.burst_extra and reduce_kspeed.sus_limit; beside them, labelled, E80 amendment A1's idle-reset view
-(posthoc_idle.flags, through reduce_e83.a1_view, unchanged). PER CELL: the burst cell is the mean of its two BURST runs; the sustained cell the mean of its SUS runs; the cell's c the mean of its burst runs' c.
+(posthoc_idle.flags, through reduce_e83.a1_view, unchanged). PER CELL: the burst cell is the mean of its two runs, in BURST or, labelled by its start, WARM; the sustained cell the mean of its SUS and SUSX runs; the cell's c the mean of its burst runs' c.
 
 THE RULES (rules-e101.json). All speed ratios are zeros over random of the kernel's own rate (TFLOPS, or TOPS in int8) in the same window, so a ratio carries the cycle count too.
   S1  fp32 burst, gemm1 and mm16: GROWS >= 1.20, SURVIVES [1.10, 1.20), SHRINKS < 1.10. A cell started warm is labelled.
@@ -73,7 +73,9 @@ def main():
         fit = R.fit_clock(evs, launches, sess)
         for r in rr:
             procs = byrun.get(r["run"], [])
-            m = R.run_metrics(rd, r, procs, evs.get(r["run"]), fit)
+            blk = {"SUSX": "SUS", "WARM": "BURST"}.get(r["block"], r["block"])    # what run_metrics and a1_view know them as
+            m = R.run_metrics(rd, dict(r, block=blk), procs, evs.get(r["run"]), fit)
+            m["block_orig"] = r["block"]
             m["session"] = os.path.basename(os.path.normpath(rd))
             m["dry"] = bool(sess.get("dry"))
             m["cell"] = base_label(r["label"])

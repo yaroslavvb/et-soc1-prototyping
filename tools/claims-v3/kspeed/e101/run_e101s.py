@@ -4,6 +4,8 @@
   1. a run's value may be an arm of tools/claims-v3/rgm's host, `<arm>:<gen>:<files>` (tools/claims-v3/kinds/e101_common.py writes them), or `file:` a tile of rgm/tiles or kinds/real2/tiles. Before the session every file a
      value names is checked against e101_common's registered sha256 (kinds.json, real2.json, the e37 tiles). Every other check of a run is run_hpl.py's, unchanged.
   2. under --dry the toy card draws each cell's switching term c from protocol.json's `dry_c_w`, so a dry session exercises the gates, the safety paths and reduce_e101s.py with plausible numbers. No device is touched under --dry.
+  3. a `hot` start first waits until the reading is 2 C below its hot_c, so run_hpl's own gate always heats with at least one resident launch: a die still hot from the run before would otherwise pass the gate at once and start the work from
+     whatever the clock has recovered to, off the very condition the hot start is there to make.
 
 Everything that touches the card -- the card lock held for the session, the other-user checks before every launch process, `timeout 10` on every launch and config read, the sampler WITHOUT --reset-ms, the trace ring, residencies and `ettelem config`
 after every run, the safety stops (85 C; 97 W on three samples), and the end of the session unless the TDP and the threshold read back 65 -- is run_hpl.py's own code. Nothing is set on the card.
@@ -88,7 +90,26 @@ def verify_tiles(root, runs):
     return out, kinds_sha, kinds_rev
 
 
+_base_gate = H.Session.gate
+
+
+def _gate(self, r):
+    """run_hpl's gate; before a hot start, the wait of addition 3."""
+    st = r.start
+    if st["mode"] != "hot":
+        return _base_gate(self, r)
+    ok, _, _ = self.wait_until(lambda x: True, 10, f"{r.name} first reading")
+    if not ok:
+        raise H.EndSession(f"error:no_reading:{r.name}", H.EXIT_ERR)
+    hot = H.num(st["hot_c"])
+    ok, held, _ = self.wait_until(lambda x: x[0] <= hot - 2, 300, f"{r.name} below the hot gate")
+    g = _base_gate(self, r)
+    g["below_gate_reached"], g["below_gate_held_s"] = ok, held
+    return g
+
+
 H.Run.check = _check
+H.Session.gate = _gate
 K.verify_tiles = verify_tiles
 
 

@@ -8,12 +8,13 @@ THE RULE (E101.md, "Why the plan depends on session 1"). A cell's c on aifoundry
   P_800 <= 88 W: a COOL BURST (die <= 55 C) and a COOL SUSTAINED start (die <= 57 C), E80's.
   P_800 >  88 W: a WARM BURST (E64's `hot` start at 60 C, resident random fp32 launches of 2 s, so the power loop has taken the clock off 800 MHz when the work starts), labelled, and a HOT SUSTAINED start (66 C, resident random fp32
   launches of 8 s, in the thermal loop).
-The session still ends on 97 W x 3 samples or 85 C (run_hpl.py), whatever this file says.
+The session still ends on 97 W x 3 samples or 85 C (run_hpl.py), whatever this file says. So the warm bursts are a block of their own, WARM, near the end of the session, in ascending P_800: if one trips the stop, only what follows it is lost.
 
-THE BLOCKS. SMOKE: the idle card with no launch for the rest reading, then 2 s of gemm1 fp32 zeros, mm16 int8 zeros, gemm1 fp16 zeros, each below every limit. BURST: 33 cells x 2 passes, each pass shuffled (order_seed 101), the cells above the limit in the last third
-of their pass. SUS: nine 8 s processes, about 76 s, in the fixed order below, so a cut by the slot takes its tail:
+THE BLOCKS. SMOKE: the idle card with no launch for the rest reading, then 2 s of gemm1 fp32 zeros, mm16 int8 zeros, gemm1 fp16 zeros, each below every limit. BURST: the 33 cells below the limit x 2 passes, each pass shuffled (order_seed 101).
+SUS: nine 8 s processes, about 76 s, in the fixed order below:
   G1  gemm1 zeros and random in each format        G2  gemm1 ones, sparse50, real in each format        G3  mm16 zeros and random in each format
-  G4  resident fp32 random and int8 full           G5  replicates: gemm1 fp32 random, fp32 zeros, int8 full, int8 zeros        G6  mm16 ones in each format, if the clock allows
+  G4  resident fp32 random and int8 full           G5  replicates: gemm1 fp32 random, fp32 zeros, int8 full, int8 zeros
+WARM: the cells above the limit x 2 passes. SUSX: mm16 ones in each format, if the clock allows, so a cut by the slot takes the tail.
 """
 import argparse
 import json
@@ -97,10 +98,11 @@ def main():
                     burst_low.append(r)
     rng = random.Random(ORDER_SEED)
     burst_runs = []
-    for _pass in (1, 2):         # each pass shuffled, the cells above the limit last in it
+    for _pass in (1, 2):         # each pass shuffled
         rng.shuffle(burst_low)
-        rng.shuffle(burst_high)
-        burst_runs += [dict(x) for x in burst_low] + [dict(x) for x in burst_high]
+        burst_runs += [dict(x) for x in burst_low]
+    burst_high.sort(key=lambda x: modes[x["label"]]["p800_w"])
+    warm_runs = [dict(x) for x in burst_high] * 2      # ascending, twice; run_hpl names runs by their index
 
     def sus(arm, t, k, suffix=""):
         r, high, c = cell(arm, t, k)
@@ -114,11 +116,11 @@ def main():
     G3 = [sus("mm16", t, k) for t in TYPES for k in ("zeros", "random")]
     G4 = [sus("res", "fp32", "random"), sus("res", "int8", "random")]
     G5 = [sus("gemm1", "fp32", "random", "-rep2"), sus("gemm1", "fp32", "zeros", "-rep2"), sus("gemm1", "int8", "random", "-rep2"), sus("gemm1", "int8", "zeros", "-rep2")]
-    G6 = [sus("mm16", t, "ones") for t in TYPES]
+    G6 = [sus("mm16", t, "ones") for t in TYPES]        # the block SUSX
     for g in (G1, G2, G3, G4, G5):
         rng.shuffle(g)
     order = []
-    for name, g in (("G1", G1), ("G2", G2), ("G3", G3), ("G4", G4), ("G5", G5), ("G6", G6)):
+    for name, g in (("G1", G1), ("G2", G2), ("G3", G3), ("G4", G4), ("G5", G5)):
         for x in g:
             order.append(dict(x, group=name))
     smoke = []
@@ -146,7 +148,11 @@ def main():
                      "passes": 1, "shuffle": False, "start": {"mode": "cool", "max_c": 55, "max_wait_s": 300}, "launch": burst["launch"], "tail_s": burst["tail_s"],
                      "runs": burst_runs},
                     {"name": "SUS", "title": "sustained: nine back-to-back 8 s processes (~76 s) from a die reading <= 57 C, or the hot start above the limit, in the order make_protocol_e101s.py fixed",
-                     "passes": 1, "shuffle": False, "start": {"mode": "cool", "max_c": 57, "max_wait_s": 300}, "launch": susd["launch"], "tail_s": susd["tail_s"], "runs": order}]}
+                     "passes": 1, "shuffle": False, "start": {"mode": "cool", "max_c": 57, "max_wait_s": 300}, "launch": susd["launch"], "tail_s": susd["tail_s"], "runs": order},
+                    {"name": "WARM", "title": "the cells above the limit: one 6 s process right after resident random fp32 has taken the clock off 800 MHz (the rule above), labelled; a block of its own near the end, because a safety stop ends the session",
+                     "passes": 1, "shuffle": False, "start": {"mode": "cool", "max_c": 55, "max_wait_s": 300}, "launch": burst["launch"], "tail_s": burst["tail_s"], "runs": warm_runs},
+                    {"name": "SUSX", "title": "sustained, mm16 ones, if the clock allows",
+                     "passes": 1, "shuffle": False, "start": {"mode": "cool", "max_c": 57, "max_wait_s": 300}, "launch": susd["launch"], "tail_s": susd["tail_s"], "runs": [dict(x, group="G6") for x in G6]}]}
     src = "the frozen S (dry run before session 1)" if a.from_frozen else "session 1's measured S"
     note = f"E80's design on E101's streaming arms; nothing is set on the card; start modes by the rule of E101.md from {src}"
     full = proto({"launch": {"seconds": 6, "budget": 7.5, "processes": 1}, "tail_s": 4}, {"launch": {"seconds": 8, "budget": 9.5, "processes": 9}, "tail_s": 6}, 75, 72, note)
@@ -154,7 +160,7 @@ def main():
     json.dump(full, open(os.path.join(HERE, "protocol.json"), "w"), indent=1)
     json.dump(dryp, open(os.path.join(HERE, "protocol-dry.json"), "w"), indent=1)
     json.dump({"limit_p800_w": LIMIT_W, "source": src, "modes": modes}, open(os.path.join(HERE, "start-modes.json"), "w"), indent=1)
-    print(f"source: {src}; cool burst cells {len(burst_low)}, warm burst cells {len(burst_high)}, x 2 passes; sustained {len(order)} runs")
+    print(f"source: {src}; cool burst cells {len(burst_low)}, warm burst cells {len(burst_high)}, x 2 passes; sustained {len(order)} runs, then {len(G6)} if the clock allows")
     for k in sorted(modes, key=lambda x: -modes[x]["p800_w"]):
         print(f"  {k:26s} S {modes[k]['S_w']:6.2f} W ({modes[k]['source']}), c {modes[k]['c_w']:6.2f} W, P800 {modes[k]['p800_w']:6.1f} W: {modes[k]['mode']}")
     print("sustained order:", [x["label"] for x in order])
