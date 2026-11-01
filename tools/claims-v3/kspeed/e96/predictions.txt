@@ -1,0 +1,71 @@
+E96 frozen predictions: Q132(r)'s points and scoring intervals (predictions-real2.json sha256 0957e0c29599...)
+tile                               gp  gate     c W   burst          scoring b lim       sus          scoring s lim     s run
+fp32/resnet18_l2c1                 Z  0.191  20.742   755.5   [718.7, 793.9] power     631.8   [603.0, 670.1] thermal     yes
+fp32/resnet18_l3c1                 Z  0.445  14.842   799.5   [774.4, 800.0] none      703.0   [659.7, 747.3] thermal     yes
+fp32/vgg16_fc2                     Z  0.723   8.335   800.0   [800.0, 800.0] none      793.2   [746.1, 800.0] none        yes
+fp32/t5small_l0_down               Z  0.949   2.596   800.0   [800.0, 800.0] none      800.0   [800.0, 800.0] none        yes
+fp32/gpt2_l3_mlp_down              N  0.000  25.363   711.5   [681.8, 741.6] power     602.7   [600.0, 622.3] thermal      no
+fp32/gpt2_l9_attn_qk               N  0.000  25.476   710.5   [680.9, 740.6] power     602.4   [600.0, 621.8] thermal      no
+fp32/bert_l6_up                    N  0.000  25.394   711.3   [681.6, 741.3] power     602.6   [600.0, 622.2] thermal     yes
+fp32/vit_l5_down                   N  0.000  25.400   711.2   [681.5, 741.3] power     602.6   [600.0, 622.1] thermal      no
+fp32/t5small_l0_up                 T  0.000  23.485   728.3   [698.4, 759.8] power     610.1   [600.0, 634.9] thermal     yes
+fp32/vit_l11_down                  M  0.000  21.489   747.6   [716.5, 781.0] power     624.8   [601.2, 654.4] thermal     yes
+fp16/resnet18_l3c1                 Z  0.367  14.342   799.8   [776.7, 800.0] none      709.5   [666.0, 754.7] thermal     yes
+fp16/vgg16_fc2                     Z  0.551  10.061   800.0   [800.0, 800.0] none      770.3   [722.1, 800.0] thermal     yes
+fp16/t5small_l0_down               Z  0.871   3.710   800.0   [800.0, 800.0] none      800.0   [783.5, 800.0] none        yes
+fp16/gpt2_l9_attn_qk               N  0.000  22.508   737.5   [702.6, 776.1] power     616.5   [600.0, 649.9] thermal      no
+fp16/bert_l6_up                    N  0.000  22.508   737.5   [702.6, 776.1] power     616.5   [600.0, 649.9] thermal      no
+fp16/vit_l5_down                   N  0.000  22.634   736.3   [701.4, 774.7] power     615.5   [600.0, 648.6] thermal     yes
+fp16/gpt2_l6_mlp_down_fp16fwd      F  0.000  22.258   739.9   [704.8, 778.8] power     618.4   [600.0, 652.6] thermal      no
+int8/resnet18_l3c1                 Z  0.176   5.673   800.0   [800.0, 800.0] none      800.0   [783.5, 800.0] none         no
+int8/vgg16_fc2                     Z  0.336   4.778   800.0   [800.0, 800.0] none      800.0   [800.0, 800.0] none         no
+int8/gpt2_l6_down_per_token        C  0.000   7.379   800.0   [800.0, 800.0] none      798.5   [781.0, 800.0] none         no
+int8/gpt2_l6_down_p9999            C  0.000   7.251   800.0   [800.0, 800.0] none      798.8   [781.6, 800.0] none         no
+int8/gpt2_l6_down_p999             C  0.000   7.451   800.0   [800.0, 800.0] none      798.2   [780.7, 800.0] none         no
+int8/gpt2_l11_down_maxabs          C  0.637   3.262   800.0   [800.0, 800.0] none      800.0   [800.0, 800.0] none         no
+int8/gpt2_l11_down_p999            C  0.000   7.183   800.0   [800.0, 800.0] none      799.0   [781.9, 800.0] none         no
+int8/vgg16_fc2_asym                C  0.000   6.149   800.0   [800.0, 800.0] none      799.9   [783.4, 800.0] none         no
+
+sustained_first kept: ['fp32/resnet18_l2c1', 'fp32/resnet18_l3c1', 'fp16/resnet18_l3c1', 'fp32/vgg16_fc2', 'fp16/vgg16_fc2', 'fp32/t5small_l0_down', 'fp16/t5small_l0_down', 'fp32/t5small_l0_up', 'fp32/vit_l11_down', 'fp32/bert_l6_up', 'fp16/vit_l5_down']
+sustained_first cut, burst only: ['int8/vgg16_fc2', 'int8/vgg16_fc2_asym', 'int8/gpt2_l11_down_maxabs', 'int8/gpt2_l11_down_p999']
+
+the arm: E87's three real int8 tiles against int8 full; bar +-15 MHz; at least 3 whole rounds
+  int8/l0_mlp_up       E87 c 8.239 sus 794.4 W 51.6 die 64.5 none; relation on E87's c 794.0 (share 0.94)
+  int8/l6_mlp_down     E87 c 7.563 sus 793.6 W 50.2 die 64.3 none; relation on E87's c 797.9 (share 0.979)
+  int8/l6_attn_qk      E87 c 7.526 sus 800 W 50.7 die 64.5 none; relation on E87's c 798.0 (share 0.98)
+  int8/full            E87 c 8.881 sus 774.7 W 51.41 die 65.1 thermal; relation on E87's c 787.5
+  expected: {"clock_difference_relation_mhz": 9.1, "clock_relation_real_mhz": 796.6, "clock_relation_full_mhz": 787.5, "clock_difference_relation_at_e87_w_star_mhz": 14.0, "w_star_e87_w": 48.474, "board_w_difference_at_fixed_800_w": -2.11, "die_difference_at_fixed_800_c": -0.96}
+  one run's sigma: {"clamp": 5.6, "slope": 15.6, "source": "E83 corrections-check C3", "int8_full_across_sessions": 9.2, "int8_full_runs": [796.7, 790.0, 786.5, 774.7]}
+
+the arm's rule, how often each verdict comes up (simulation, seed 96; a full run ~ N(785, s) clamped at 800, a real tile the same + delta)
+  rounds 3 sigma   5.6 true delta   0.0: median half-width  13.3 MHz {"DIFFERENT": 0.006, "DIFFERENT_SMALL": 0.043, "INCONCLUSIVE": 0.566, "SAME_WITHIN_BAR": 0.385}
+  rounds 3 sigma   5.6 true delta  12.0: median half-width  12.8 MHz {"DIFFERENT": 0.329, "DIFFERENT_BEYOND_BAR": 0.003, "DIFFERENT_SMALL": 0.072, "INCONCLUSIVE": 0.563, "SAME_WITHIN_BAR": 0.032}
+  rounds 3 sigma   5.6 true delta  21.0: median half-width  11.7 MHz {"DIFFERENT": 0.596, "DIFFERENT_BEYOND_BAR": 0.021, "DIFFERENT_SMALL": 0.029, "INCONCLUSIVE": 0.353, "SAME_WITHIN_BAR": 0.002}
+  rounds 3 sigma   9.2 true delta   0.0: median half-width  21.3 MHz {"DIFFERENT": 0.026, "DIFFERENT_BEYOND_BAR": 0.0, "DIFFERENT_SMALL": 0.025, "INCONCLUSIVE": 0.828, "SAME_WITHIN_BAR": 0.121}
+  rounds 3 sigma   9.2 true delta  12.0: median half-width  20.2 MHz {"DIFFERENT": 0.143, "DIFFERENT_BEYOND_BAR": 0.005, "DIFFERENT_SMALL": 0.028, "INCONCLUSIVE": 0.768, "SAME_WITHIN_BAR": 0.056}
+  rounds 3 sigma   9.2 true delta  21.0: median half-width  18.8 MHz {"DIFFERENT": 0.26, "DIFFERENT_BEYOND_BAR": 0.019, "DIFFERENT_SMALL": 0.022, "INCONCLUSIVE": 0.678, "SAME_WITHIN_BAR": 0.022}
+  rounds 3 sigma  15.6 true delta   0.0: median half-width  32.1 MHz {"DIFFERENT": 0.041, "DIFFERENT_BEYOND_BAR": 0.002, "DIFFERENT_SMALL": 0.011, "INCONCLUSIVE": 0.903, "SAME_WITHIN_BAR": 0.042}
+  rounds 3 sigma  15.6 true delta  12.0: median half-width  30.2 MHz {"DIFFERENT": 0.066, "DIFFERENT_BEYOND_BAR": 0.005, "DIFFERENT_SMALL": 0.011, "INCONCLUSIVE": 0.868, "SAME_WITHIN_BAR": 0.049}
+  rounds 3 sigma  15.6 true delta  21.0: median half-width  29.2 MHz {"DIFFERENT": 0.095, "DIFFERENT_BEYOND_BAR": 0.012, "DIFFERENT_SMALL": 0.007, "INCONCLUSIVE": 0.839, "SAME_WITHIN_BAR": 0.047}
+  rounds 4 sigma   5.6 true delta   0.0: median half-width   9.2 MHz {"DIFFERENT": 0.005, "DIFFERENT_SMALL": 0.047, "INCONCLUSIVE": 0.24, "SAME_WITHIN_BAR": 0.709}
+  rounds 4 sigma   5.6 true delta  12.0: median half-width   8.6 MHz {"DIFFERENT": 0.566, "DIFFERENT_BEYOND_BAR": 0.002, "DIFFERENT_SMALL": 0.107, "INCONCLUSIVE": 0.283, "SAME_WITHIN_BAR": 0.043}
+  rounds 4 sigma   5.6 true delta  21.0: median half-width   8.0 MHz {"DIFFERENT": 0.863, "DIFFERENT_BEYOND_BAR": 0.02, "DIFFERENT_SMALL": 0.03, "INCONCLUSIVE": 0.085, "SAME_WITHIN_BAR": 0.002}
+  rounds 4 sigma   9.2 true delta   0.0: median half-width  14.7 MHz {"DIFFERENT": 0.027, "DIFFERENT_BEYOND_BAR": 0.0, "DIFFERENT_SMALL": 0.025, "INCONCLUSIVE": 0.688, "SAME_WITHIN_BAR": 0.259}
+  rounds 4 sigma   9.2 true delta  12.0: median half-width  13.8 MHz {"DIFFERENT": 0.241, "DIFFERENT_BEYOND_BAR": 0.004, "DIFFERENT_SMALL": 0.03, "INCONCLUSIVE": 0.637, "SAME_WITHIN_BAR": 0.087}
+  rounds 4 sigma   9.2 true delta  21.0: median half-width  13.0 MHz {"DIFFERENT": 0.47, "DIFFERENT_BEYOND_BAR": 0.014, "DIFFERENT_SMALL": 0.023, "INCONCLUSIVE": 0.47, "SAME_WITHIN_BAR": 0.024}
+  rounds 4 sigma  15.6 true delta   0.0: median half-width  22.0 MHz {"DIFFERENT": 0.047, "DIFFERENT_BEYOND_BAR": 0.001, "DIFFERENT_SMALL": 0.009, "INCONCLUSIVE": 0.878, "SAME_WITHIN_BAR": 0.065}
+  rounds 4 sigma  15.6 true delta  12.0: median half-width  20.7 MHz {"DIFFERENT": 0.085, "DIFFERENT_BEYOND_BAR": 0.003, "DIFFERENT_SMALL": 0.008, "INCONCLUSIVE": 0.821, "SAME_WITHIN_BAR": 0.084}
+  rounds 4 sigma  15.6 true delta  21.0: median half-width  19.9 MHz {"DIFFERENT": 0.153, "DIFFERENT_BEYOND_BAR": 0.011, "DIFFERENT_SMALL": 0.006, "INCONCLUSIVE": 0.769, "SAME_WITHIN_BAR": 0.06}
+
+anchors (E96-T): the tie cell, the mean of the earlier sessions' cells; each session beside it
+  fp32/randn   tie burst 710.9 sustained 605.5 | E87 706.0 600.1 | E80 711.9 604.3 | E83 714.7 612.0
+  fp32/zeros   tie burst 800 sustained 794.6 | E87 800 800 | E80 None None | E83 800 789.3
+  fp16/randn   tie burst 725.5 sustained 609.5 | E87 721.2 610.0 | E80 730.6 609.5 | E83 724.8 609.0
+  fp16/zeros   tie burst 800 sustained 796.6 | E87 800 800 | E80 800 789.8 | E83 800 800
+  int8/full    tie burst 800 sustained 784.9 | E87 800 774.7 | E80 800 793.4 | E83 800 786.5
+  int8/zeros   tie burst 800 sustained 792.4 | E87 800 788.5 | E80 800 800 | E83 800 788.8
+
+the line die - 0.4573 W, E87's session, kinds ['fp16/zeros', 'int8/zeros', 'int8/full', 'fp32/randn']: 41.665 C
+bars {"S1_pass_share": 0.8, "S1_fail_share": 0.6, "S2_pass_mhz": 40.0, "S2_fail_mhz": 15.0, "S2b_pass_mhz": 50.0, "S2b_fail_mhz": 15.0, "S3_mhz": 15.0, "S4_pass_share": 0.8, "S4_fail_share": 0.6, "S5_pass_rms_mhz": 15.0, "S5_fail_rms_mhz": 25.0, "T_mhz": 25.0, "I1_bar_mhz": 15.0}
+populations {"S1_burst": 20, "S1_sus": 7, "S4": 7, "S5_burst": 20, "S5_sus": 7, "T_rows": 9, "I_rounds": 3}
+relation {"source": "tools/claims-v3/kinds/real2/predictions-real2.json relation_e83", "burst": {"W_star_w": 66.15, "sigma_w": 2.75}, "sustained": {"W_star_w": 49.75, "sigma_w": 1.95}, "random_kind_from_relation_mhz": {"fp32": {"burst_mhz": 708.5, "sus_mhz": 602.0}, "fp16": {"burst_mhz": 731.4, "sus_mhz": 612.0}, "int8": {"burst_mhz": 800.0, "sus_mhz": 785.4}}, "relation_rms_mhz": {"burst": 10.6, "sustained": 8.4}}

@@ -1,0 +1,488 @@
+{
+ "experiment": "E96",
+ "request": "Q132",
+ "card": "aifoundry2",
+ "order_seed": 96,
+ "note": "THE DRY SHAPE, toy card only: the same order with short runs, for the queue and the reducer",
+ "tools": {
+  "heater": "build/sparsity_t2/host/sparsity_host",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "real_tiles": [
+  "tools/claims-v3/kinds/real2/predictions-real2.json",
+  "tools/claims-v3/kinds/real/predictions-real.json"
+ ],
+ "predictions": "tools/claims-v3/kspeed/e96/predictions.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 85,
+  "board_cap_w": 97,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 72
+ },
+ "blocks": [
+  {
+   "name": "SMOKE",
+   "title": "the idle card with no launch (its last 60 s are the session's rest reading), then one 2 s launch of a real2 tile at each gating level (not analysed)",
+   "default": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 5
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 1
+   },
+   "tail_s": 3,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest",
+     "launch": {
+      "seconds": 2,
+      "budget": 3.5,
+      "processes": 0
+     },
+     "tail_s": 3
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vgg16_fc2.bin",
+     "label": "fp32-r2-vgg16_fc2"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/t5small_l0_down.bin",
+     "label": "fp16-r2-t5small_l0_down"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_maxabs.bin",
+     "label": "int8-r2-gpt2_l11_down_maxabs"
+    }
+   ]
+  },
+  {
+   "name": "BURST",
+   "title": "a burst on a cool die: one 6 s process from a die reading <= 55 C (E80's, E83's and E87's BURST)",
+   "passes": 2,
+   "shuffle": true,
+   "start": {
+    "mode": "cool",
+    "max_c": 55,
+    "max_wait_s": 300
+   },
+   "launch": {
+    "seconds": 2.5,
+    "budget": 4,
+    "processes": 1
+   },
+   "tail_s": 0.5,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/resnet18_l2c1.bin",
+     "label": "fp32-r2-resnet18_l2c1"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/resnet18_l3c1.bin",
+     "label": "fp32-r2-resnet18_l3c1"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vgg16_fc2.bin",
+     "label": "fp32-r2-vgg16_fc2"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/t5small_l0_down.bin",
+     "label": "fp32-r2-t5small_l0_down"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin",
+     "label": "fp32-r2-gpt2_l3_mlp_down"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin",
+     "label": "fp32-r2-gpt2_l9_attn_qk"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin",
+     "label": "fp32-r2-bert_l6_up"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin",
+     "label": "fp32-r2-vit_l5_down"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/t5small_l0_up.bin",
+     "label": "fp32-r2-t5small_l0_up"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vit_l11_down.bin",
+     "label": "fp32-r2-vit_l11_down"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/resnet18_l3c1.bin",
+     "label": "fp16-r2-resnet18_l3c1"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/vgg16_fc2.bin",
+     "label": "fp16-r2-vgg16_fc2"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/t5small_l0_down.bin",
+     "label": "fp16-r2-t5small_l0_down"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin",
+     "label": "fp16-r2-gpt2_l9_attn_qk"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin",
+     "label": "fp16-r2-bert_l6_up"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin",
+     "label": "fp16-r2-vit_l5_down"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin",
+     "label": "fp16-r2-gpt2_l6_mlp_down_fp16fwd"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/int8/resnet18_l3c1.bin",
+     "label": "int8-r2-resnet18_l3c1"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/int8/vgg16_fc2.bin",
+     "label": "int8-r2-vgg16_fc2"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin",
+     "label": "int8-r2-gpt2_l6_down_per_token"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin",
+     "label": "int8-r2-gpt2_l6_down_p9999"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin",
+     "label": "int8-r2-gpt2_l6_down_p999"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_maxabs.bin",
+     "label": "int8-r2-gpt2_l11_down_maxabs"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin",
+     "label": "int8-r2-gpt2_l11_down_p999"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/int8/vgg16_fc2_asym.bin",
+     "label": "int8-r2-vgg16_fc2_asym"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "fp32-randn"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "fp32-zeros"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "fp16-randn"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "fp16-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "int8-full"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "int8-zeros"
+    }
+   ]
+  },
+  {
+   "name": "SUS",
+   "title": "sustained: nine back-to-back 8 s processes (~76 s) from a die reading <= 57 C (E80's, E83's and E87's SUS), in the order make_protocol_e96.py fixed",
+   "passes": 1,
+   "shuffle": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 57,
+    "max_wait_s": 300
+   },
+   "launch": {
+    "seconds": 2.5,
+    "budget": 4,
+    "processes": 2
+   },
+   "tail_s": 0.5,
+   "runs": [
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_mlp_down.bin",
+     "label": "int8-real-l6_mlp_down-round1",
+     "round": 1,
+     "group": "R1"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_attn_qk.bin",
+     "label": "int8-real-l6_attn_qk-round1",
+     "round": 1,
+     "group": "R1"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l0_mlp_up.bin",
+     "label": "int8-real-l0_mlp_up-round1",
+     "round": 1,
+     "group": "R1"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "int8-full-round1",
+     "round": 1,
+     "group": "R1"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/resnet18_l3c1.bin",
+     "label": "fp32-r2-resnet18_l3c1",
+     "group": "Ga"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "fp16-randn",
+     "group": "Ga"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/t5small_l0_down.bin",
+     "label": "fp16-r2-t5small_l0_down",
+     "group": "Ga"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "fp32-randn",
+     "group": "Ga"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l0_mlp_up.bin",
+     "label": "int8-real-l0_mlp_up-round2",
+     "round": 2,
+     "group": "R2"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_mlp_down.bin",
+     "label": "int8-real-l6_mlp_down-round2",
+     "round": 2,
+     "group": "R2"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_attn_qk.bin",
+     "label": "int8-real-l6_attn_qk-round2",
+     "round": 2,
+     "group": "R2"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "int8-full-round2",
+     "round": 2,
+     "group": "R2"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/vgg16_fc2.bin",
+     "label": "fp16-r2-vgg16_fc2",
+     "group": "Gb"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "fp16-zeros",
+     "group": "Gb"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/resnet18_l2c1.bin",
+     "label": "fp32-r2-resnet18_l2c1",
+     "group": "Gb"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/t5small_l0_down.bin",
+     "label": "fp32-r2-t5small_l0_down",
+     "group": "Gb"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "int8-zeros",
+     "group": "Gb"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_attn_qk.bin",
+     "label": "int8-real-l6_attn_qk-round3",
+     "round": 3,
+     "group": "R3"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l0_mlp_up.bin",
+     "label": "int8-real-l0_mlp_up-round3",
+     "round": 3,
+     "group": "R3"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "int8-full-round3",
+     "round": 3,
+     "group": "R3"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_mlp_down.bin",
+     "label": "int8-real-l6_mlp_down-round3",
+     "round": 3,
+     "group": "R3"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vgg16_fc2.bin",
+     "label": "fp32-r2-vgg16_fc2",
+     "group": "Gc"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "fp32-randn-rep2",
+     "group": "Gc"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/resnet18_l3c1.bin",
+     "label": "fp16-r2-resnet18_l3c1",
+     "group": "Gc"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "fp16-randn-rep2",
+     "group": "Gc"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_mlp_down.bin",
+     "label": "int8-real-l6_mlp_down-round4",
+     "round": 4,
+     "group": "R4"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "int8-full-round4",
+     "round": 4,
+     "group": "R4"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l0_mlp_up.bin",
+     "label": "int8-real-l0_mlp_up-round4",
+     "round": 4,
+     "group": "R4"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_attn_qk.bin",
+     "label": "int8-real-l6_attn_qk-round4",
+     "round": 4,
+     "group": "R4"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/t5small_l0_up.bin",
+     "label": "fp32-r2-t5small_l0_up",
+     "group": "G3"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vit_l11_down.bin",
+     "label": "fp32-r2-vit_l11_down",
+     "group": "G3"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin",
+     "label": "fp32-r2-bert_l6_up",
+     "group": "G3"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin",
+     "label": "fp16-r2-vit_l5_down",
+     "group": "G3"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "fp32-zeros",
+     "group": "G3"
+    }
+   ]
+  }
+ ]
+}
