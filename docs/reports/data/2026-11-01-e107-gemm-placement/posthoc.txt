@@ -1,0 +1,47 @@
+E107 POST HOC (posthoc_e107.py), labelled, never a verdict. aifoundry3, 600 MHz.
+
+1. The price of a missing line (128 a cold pass by column misses per shire-op): ns of T, and nJ per minion-op of energy
+   fp32: L3-served 4.15 ns (c4s 4.15), the DRAM walk 13.25 ns, x3.20; energy per missing line per minion-op, zeros 0.367 / 1.625 nJ, random 1.525 / 2.616 nJ (L3 / DRAM walk)
+   fp16: L3-served 4.14 ns (c4s 4.15), the DRAM walk 13.25 ns, x3.20; energy per missing line per minion-op, zeros 0.469 / 1.680 nJ, random 1.004 / 2.488 nJ (L3 / DRAM walk)
+   int8: L3-served 7.44 ns (c4s 7.44), the DRAM walk 16.36 ns, x2.20; energy per missing line per minion-op, zeros 0.431 / 1.699 nJ, random 1.072 / 2.955 nJ (L3 / DRAM walk)
+
+2. One fresh block's first pass, us per minion (64 ops): (T(c16) - T(c1)) x 64 more than a warm pass; on the ladder R T(R) - (R - 1) T(c1) per op
+   fp32: +108.5 us a block; first-pass T by R R=1: 2.5958, R=2: 2.5795, R=4: 2.5734, R=8: 2.5544, R=32: 2.4086
+   fp16: +108.5 us a block; first-pass T by R R=1: 2.5954, R=2: 2.5806, R=4: 2.5741, R=8: 2.5535, R=32: 2.4067
+   int8: +134.0 us a block; first-pass T by R R=1: 2.5822, R=2: 2.5535, R=4: 2.5301, R=8: 2.4894, R=32: 2.2152
+
+3. Traffic at 600 MHz (fp32 T): L2-miss traffic 128 x 64 B per shire per op x 32 shires; past the L3 in c16, 3 MB + 2 MB per block of 64 x T
+   c8s: L2-miss traffic 183 GB/s
+   c4s: L2-miss traffic 183 GB/s
+   c16: L2-miss traffic 101 GB/s
+   c8: L2-miss traffic 104 GB/s
+   c16s: L2-miss traffic 111 GB/s
+   c16 past the L3: A + B 18.9 GB/s, C's stores 12.6 GB/s
+
+4. The vendor's binary, one launch at 600 MHz (desk prediction): 64 x (T(c1) + 154 x price)
+   fp32: 93-98 us (E101's packed price to c8s's), against the FMA-bound 58.2 us
+
+5. The speed half, a bound: x1.333 of clock buys at most (fp32)
+   c1 x1.324, c16 x1.093, c16r2 x1.145, c16r4 x1.201, c16r8 x1.249, c16r32 x1.303, c4s x1.182, c8s x1.182, c8 x1.096, c16s x1.103
+
+6. Rails over the idle just before each run, per minion-op (rails_e107.py): SRAM, NoC nJ; DDR droop mV
+   c1      fp32 zeros  SRAM  0.58  NoC  0.13  DDR droop  0.48 mV
+   c1      fp32 randn  SRAM  1.77  NoC  0.29  DDR droop  1.00 mV
+   c16r32  fp32 zeros  SRAM  0.27  NoC -0.07  DDR droop  0.58 mV
+   c16r32  fp32 randn  SRAM  2.10  NoC  0.51  DDR droop  0.76 mV
+   c16r8   fp32 zeros  SRAM  0.65  NoC  0.28  DDR droop  0.95 mV
+   c16r8   fp32 randn  SRAM  2.22  NoC  0.77  DDR droop  1.95 mV
+   c16r4   fp32 zeros  SRAM  0.70  NoC  0.43  DDR droop  0.95 mV
+   c16r4   fp32 randn  SRAM  2.09  NoC  0.93  DDR droop  2.00 mV
+   c16r2   fp32 zeros  SRAM  0.88  NoC  0.75  DDR droop  1.93 mV
+   c16r2   fp32 randn  SRAM  2.57  NoC  1.54  DDR droop  2.88 mV
+   c16     fp32 zeros  SRAM  1.14  NoC  1.45  DDR droop  1.90 mV
+   c16     fp32 randn  SRAM  2.88  NoC  2.60  DDR droop  3.07 mV
+   c4s     fp32 zeros  SRAM  0.84  NoC  0.90  DDR droop  0.54 mV
+   c4s     fp32 randn  SRAM  3.28  NoC  2.43  DDR droop  0.92 mV
+   c8s     fp32 zeros  SRAM  0.89  NoC  0.92  DDR droop  0.60 mV
+   c8s     fp32 randn  SRAM  3.28  NoC  2.43  DDR droop  0.79 mV
+   c8      fp32 zeros  SRAM  1.29  NoC  1.48  DDR droop  1.89 mV
+   c8      fp32 randn  SRAM  3.63  NoC  3.16  DDR droop  3.02 mV
+   c16s    fp32 zeros  SRAM  0.88  NoC  1.00  DDR droop  1.91 mV
+   c16s    fp32 randn  SRAM  3.51  NoC  2.81  DDR droop  2.68 mV
