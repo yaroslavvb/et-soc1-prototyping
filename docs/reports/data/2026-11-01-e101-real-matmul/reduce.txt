@@ -1,0 +1,86 @@
+E78 aifoundry3: 600 MHz, 521.7 mV, leak 0.3298 W/C (228 runs), runs kept 311/311, passes [10110, 10111, 10112, 10113], idle-invalid runs 0
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.001, 'tenb:fp32': 529.001, 'tenb:int8': 270.001, 'mm16:fp32': 529.002, 'mm16:fp16': 529.002, 'mm16:int8': 280.302, 'gemm1:fp32': 740.14975, 'gemm1:fp16': 740.149, 'gemm1:int8': 738.47325, 'gemm16:fp32': 1488.8297499999999, 'gemm16:fp16': 1489.12725, 'gemm16:int8': 1487.31725, 'gemmnc1:fp32': 677.25725, 'gemmnc1:fp16': 677.2627500000001, 'gemmnc1:int8': 675.269, 'mmp64:fp32': 15357.187}; idle level 25.805334901173055
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 24.324  0.029    26.427      23577    5.756
+    res.fp32.real              23.764  0.025    25.932      23132    5.647
+    res.fp32.e37               14.343  0.039    16.441      14667    3.581
+    anchor_pi                   8.248  0.051    10.295       9183    2.242
+    fp32.ones                   8.114  0.333    10.204       9105    2.223
+    fp32.sparse50               7.171  0.108     9.268       8267    2.018
+    fp32.zeros                  0.000  0.000     2.130       1900    0.464
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 21.771  0.307    23.782      21218    2.590
+    res.fp16.real              20.877  0.153    22.894      20429    2.494
+    res.fp16.e37               15.043  0.969    17.051      15209    1.857
+    fp16.sparse50              13.308  0.148    15.343      13691    1.671
+    fp16.ones                   8.321  0.158    10.371       9253    1.130
+    fp16.zeros                  0.000  0.000     2.025       1807    0.221
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.157  0.128     9.656       5015    0.306
+    res.int8.e37                5.860  0.242     8.394       4360    0.266
+    res.int8.real               5.823  0.171     8.327       4323    0.264
+    int8.sparse50               5.452  0.268     8.042       4177    0.255
+    int8.ones                   1.565  0.213     4.154       2158    0.132
+    int8.zeros                  0.000  0.000     2.538       1318    0.080
+  tenb:fp32: kind  D(over tenb:fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    tenb.fp32.randn            26.757  0.082    28.847      24924    6.085
+  tenb:int8: kind  D(over tenb:int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    tenb.int8.full             13.143  0.187    15.680       6912    0.422
+  mm16:fp32: kind  D(over mm16:fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    mm16.fp32.randn            34.329  0.037    36.452      31490    7.688
+    mm16.fp32.real             33.630  0.078    35.766      30896    7.543
+    mm16.fp32.e37              20.607  0.129    22.659      19575    4.779
+    mm16.fp32.sparse50         15.706  0.296    17.730      15315    3.739
+    mm16.fp32.ones             12.912  0.081    15.023      12977    3.168
+    mm16.fp32.zeros             2.514  0.039     4.599       3972    0.970
+  mm16:fp16: kind  D(over mm16:fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    mm16.fp16.randn            31.386  0.216    33.399      28848    3.522
+    mm16.fp16.real             30.841  0.418    32.863      28391    3.466
+    mm16.fp16.e37              21.775  0.130    23.825      20584    2.513
+    mm16.fp16.sparse50         21.047  0.890    23.102      19956    2.436
+    mm16.fp16.ones             13.030  0.293    14.970      12933    1.579
+    mm16.fp16.zeros             2.620  0.104     4.618       3991    0.487
+  mm16:int8: kind  D(over mm16:int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    mm16.int8.full             24.937  0.178    27.386      12544    0.766
+    mm16.int8.e37              23.309  0.266    25.840      11842    0.723
+    mm16.int8.real             23.055  0.139    25.510      11692    0.714
+    mm16.int8.sparse50         20.386  0.070    22.941      10513    0.642
+    mm16.int8.ones              9.416  0.446    11.923       5462    0.333
+    mm16.int8.zeros             5.015  0.026     7.655       3506    0.214
+  gemm1:fp32: kind  D(over gemm1:fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    gemm1.fp32.randn           22.644  0.348    24.796      34272    8.367
+    gemm1.fp32.real            21.813  1.584    23.913      33044    8.067
+    gemm1.fp32.sparse50        10.554  0.286    12.645      17482    4.268
+    gemm1.fp32.ones             8.390  0.637    10.593      14641    3.574
+    gemm1.fp32.zeros            2.149  0.220     4.211       5820    1.421
+  gemm1:fp16: kind  D(over gemm1:fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    gemm1.fp16.randn           20.581  1.401    22.550      31166    3.804
+    gemm1.fp16.real            19.925  1.807    21.910      30279    3.696
+    gemm1.fp16.sparse50        14.409  0.981    16.451      22742    2.776
+    gemm1.fp16.ones             9.173  0.649    11.209      15494    1.891
+    gemm1.fp16.zeros            2.447  0.289     4.487       6201    0.757
+  gemm1:int8: kind  D(over gemm1:int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    gemm1.int8.full             7.745  1.002    10.437      14517    0.886
+    gemm1.int8.real             7.275  0.564     9.803      13635    0.832
+    gemm1.int8.sparse50         6.560  0.457     9.066      12610    0.770
+    gemm1.int8.ones             2.504  0.397     5.211       7246    0.442
+    gemm1.int8.zeros            1.223  0.165     3.777       5253    0.321
+  gemm16:fp32: kind  D(over gemm16:fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    gemm16.fp32.randn          14.877  0.742    17.004      41348   10.095
+    gemm16.fp32.zeros           2.703  0.080     4.780      11623    2.838
+  gemm16:fp16: kind  D(over gemm16:fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    gemm16.fp16.randn          14.228  0.134    16.227      39462    4.817
+    gemm16.fp16.zeros           2.803  0.169     4.743      11536    1.408
+  gemm16:int8: kind  D(over gemm16:int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    gemm16.int8.full            7.231  0.278     9.807      23820    1.454
+    gemm16.int8.zeros           1.943  0.172     4.499      10928    0.667
+  gemmnc1:fp32: kind  D(over gemmnc1:fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    gemmnc1.fp32.randn         28.208  1.047    30.347      40112    9.793
+  gemmnc1:fp16: kind  D(over gemmnc1:fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    gemmnc1.fp16.randn         26.040  2.152    28.096      37120    4.531
+  gemmnc1:int8: kind  D(over gemmnc1:int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    gemmnc1.int8.full          12.934  0.510    15.495      20487    1.250
+  mmp64:fp32: kind  D(over mmp64:fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    mmp64.fp32.randn            8.699  0.188    10.761     285751   69.764
+    mmp64.fp32.zeros            4.556  0.249     6.597     175088   42.746
+  idle consistency median |S - S0 - D| 0.06443341743430864 W; carry-over {'slope_w_per_w': -0.0003566371344483226, 'se': 0.001738279319479413, 'n': 307}; pi built-in - file None; rail tau re-fit median 1.0

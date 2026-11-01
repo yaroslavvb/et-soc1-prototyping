@@ -1,0 +1,40 @@
+E101, POST HOC, labelled: what the memory path costs per op. E_path = [S(arm) - r S(res)] / rate, nJ per op; never a verdict.
+
+               zeros      ones  sparse50       e37      real    random   cycles  Gop/s  T(FL)OP/s
+tenb fp32                                                                 1.36      529.0  1.157    9.48
+tenb int8                                                                 1.90      270.0  2.269   74.34
+mm16 fp32               2.07      3.88      7.05      4.92      7.78      7.93      529.0  1.158    9.48
+mm16 fp16               2.18      3.69      6.28      5.38      7.98      7.65      529.0  1.157   18.96
+mm16 int8               2.19      3.30      6.33      7.48      7.36      7.53      280.3  2.183   71.54
+gemm1 fp32              3.65      4.24      8.03                6.61      7.33      740.2  0.724    5.93
+gemm1 fp16              4.14      4.92      7.10                6.94      6.92      740.2  0.724   11.85
+gemm1 int8              3.73      4.76      7.79                8.65      8.73      738.5  0.719   23.56
+gemmnc1 fp32                                                             11.95      677.3  0.757    6.20
+gemmnc1 fp16                                                             11.79      677.3  0.757   12.40
+gemmnc1 int8                                                             14.47      675.3  0.756   24.78
+gemm16 fp32             9.72                                             17.78     1488.9  0.411    3.37
+gemm16 fp16             9.73                                             18.26     1489.1  0.411    6.74
+gemm16 int8             9.61                                             18.81     1487.2  0.412   13.49
+mmp64 fp32            173.07                                            260.84    15313.9  0.038    0.31
+
+mm16's 18 cells, least squares: {'pj_const': 2700.4, 'pj_per_changed_bit': 0.4321, 'pj_per_one': 0.2236, 'se': [209.0718, 0.0703, 0.0683], 'rms_nj_op': 0.451}
+with E75's changed-bit prices held: {'pj_const': 2697.0, 'pj_per_one': 0.3361, 'rms_nj_op': 0.5}
+
+  mm16.fp32.zeros        changed       0 ones       0  E_path   2.07 fit   2.70 E75 held   2.70
+  mm16.fp32.ones         changed       0 ones    3584  E_path   3.88 fit   3.50 E75 held   3.90
+  mm16.fp32.sparse50     changed    6356 ones    4296  E_path   7.05 fit   6.41 E75 held   6.04
+  mm16.fp32.e37          changed    2306 ones    2248  E_path   4.92 fit   4.20 E75 held   4.14
+  mm16.fp32.real         changed    6943 ones    8731  E_path   7.78 fit   7.65 E75 held   7.70
+  mm16.fp32.randn        changed    7002 ones    8965  E_path   7.93 fit   7.73 E75 held   7.80
+  mm16.fp16.zeros        changed       0 ones       0  E_path   2.18 fit   2.70 E75 held   2.70
+  mm16.fp16.ones         changed       0 ones    4096  E_path   3.69 fit   3.62 E75 held   4.07
+  mm16.fp16.sparse50     changed    6126 ones    4508  E_path   6.28 fit   6.36 E75 held   6.05
+  mm16.fp16.e37          changed    3082 ones    3078  E_path   5.38 fit   4.72 E75 held   4.66
+  mm16.fp16.real         changed    6948 ones    8080  E_path   7.98 fit   7.51 E75 held   7.48
+  mm16.fp16.randn        changed    6898 ones    8591  E_path   7.65 fit   7.60 E75 held   7.64
+  mm16.int8.zeros        changed       0 ones       0  E_path   2.19 fit   2.70 E75 held   2.70
+  mm16.int8.ones         changed       0 ones    2048  E_path   3.30 fit   3.16 E75 held   3.38
+  mm16.int8.sparse50     changed    6356 ones    4261  E_path   6.33 fit   6.40 E75 held   6.03
+  mm16.int8.e37          changed    7944 ones    8960  E_path   7.48 fit   8.14 E75 held   8.08
+  mm16.int8.real         changed    6661 ones    9780  E_path   7.36 fit   7.76 E75 held   7.93
+  mm16.int8.full         changed    8176 ones    8372  E_path   7.53 fit   8.11 E75 held   7.95
