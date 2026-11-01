@@ -139,6 +139,14 @@ femtofarad-per-wire range of a standard-cell input, which is where the recap pre
 > unit's register count.** The unit has **2,071**, exactly the figure the chip diagram quotes. The paragraphs
 > below are rewritten; the measurement itself did not change, only what it is a count of.
 
+> **Dated note, Sun 1 Nov 2026 (week 44), Q132(b).** This file's 595.2 and this paragraph's 602.5 are the same subset
+> over two windows: 595.2 is this recount's 512-cycle window, with and without the fix below, and 602.5 is the
+> 519-cycle window of `toggles-5052.json`. The subset is only the 838 bits this bench's counter could see. The old
+> bench's multiply-add also returned wrong values (Verilator 5.052's data-flow-graph optimiser; `-fno-dfg` fixes it). On
+> the fixed bench the whole unit reads **1,739.8** clocked bits per multiply-add and 1,932 across the VPU; this file's
+> 1,301 `nets_hier` reads 1,429 with only the flag changed and 1,431 on the new bench, and 1,816 with one learned merge,
+> still a floor: [`2026-11-01-q132-rtl-bench`](../2026-11-01-q132-rtl-bench/README.md) §3.
+
 The bench counts **602.5** register bits clocked per multiply-add; the chip's netlist
 says 1,586 of 1,851 flip-flops. **Neither the numerator nor the denominator is the whole unit**, because
 `ff_present` and `ff_clocked` see only the registers `ff_acct.sv` stands in for.

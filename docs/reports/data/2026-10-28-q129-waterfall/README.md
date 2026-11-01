@@ -1,5 +1,15 @@
 # Q129's waterfall — one random fp32 multiply-add, rebuilt bottom up
 
+*Dated note, Sun 1 Nov 2026 (week 44), Q132(o). **This waterfall has not been rebuilt on Q130(i)'s corrected transport
+row.** Its largest added row, the lane's transport at 1.261–1.484 pJ, stands below as of 28 Oct; most of that row's
+zero-operand floor (0.654 pJ) was a bench artefact, 0.1977–0.3699 pJ by Q130(i), which on the ledger-scope directory's
+footing puts transport plus internal energy at 0.913–1.085 pJ and the bottom-up total at 2.86–3.03 pJ, 49–52% of the
+board (`2026-10-31-q130-zeros-transport/`; [05-claims.md](../../../findings/05-claims.md), "The zero-operand transport"). So
+the closures below (68.6–72.4% of the board, bottom-up rows only) are Q129's, not current. The toggle counts behind the
+arithmetic row are also the old bench's: its fixed version moves the recount's nets by +9.8% and Q132(b) gives the map
+([`2026-11-01-q132-rtl-bench`](../2026-11-01-q132-rtl-bench/README.md) §3), and Q130(i)'s own simulation reproduces byte for byte
+with the flag (§14 there). A rebuild is still owed.*
+
 ## Results
 
 *Desk work on the Intel, Wed 28 Oct 2026 (week 44). No card, no simulation, no re-reduction: every number

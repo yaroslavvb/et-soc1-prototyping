@@ -1,12 +1,12 @@
 # Lab machine accounts
 
-The AI Foundry lab machines are x86_64 Ubuntu 24.04 boxes on the lab's Tailscale tailnet (updated 2026-10-09):
+The AI Foundry lab machines are x86_64 Ubuntu 24.04 boxes on the lab's Tailscale tailnet (updated 2026-11-01: every card reports release 1.4.0 / BL2 0.22.0, read 27–31 October 2026):
 
 | Machine | ET-SoC-1 cards | Device nodes |
 |---|---|---|
-| `aifoundry1` | 2: card 0 (firmware 1.4.1; back in service since 2 October 2026, when its broken fan was replaced: from 25 September until then it overheated under load and took no sustained work) and card 1 (firmware 1.2.0; its clock stays at 600 MHz); select one with `ET_DEVICES=<n>` and take its lock, `etsoc-shire<n>.lock` | `/dev/et0_{mgmt,ops}`, `/dev/et1_{mgmt,ops}` |
-| `aifoundry2` | 1 (firmware 1.3.1; **back in service since 9 October 2026**, when the stalling fan under the card was replaced by a two-fan 92 mm PCI-slot bracket in the slot beside it: it idles at 51 °C and 23 W, and long full-load runs keep a temperature stop. Out of service from 7 to 9 October and from 2 to 6 October, when idle it heated until it dropped off the PCIe bus) | `/dev/et0_{mgmt,ops}` |
-| `aifoundry3` | 1 (firmware 1.3.1; pinned at 600 MHz at every boot) | `/dev/et0_{mgmt,ops}` |
+| `aifoundry1` | 2: card 0 (firmware 1.4.0, read 31 October 2026; its PMIC's 75 W alarm drops fp32 random data at 800 MHz to 300 MHz about once a second; back in service since 2 October 2026, when its broken fan was replaced: from 25 September until then it overheated under load and took no sustained work) and card 1 (firmware 1.4.0, read 31 October 2026; its clock stays at 600 MHz); select one with `ET_DEVICES=<n>` and take its lock, `etsoc-shire<n>.lock` | `/dev/et0_{mgmt,ops}`, `/dev/et1_{mgmt,ops}` |
+| `aifoundry2` | 1 (firmware 1.4.0, read 27 October 2026; **back in service since 9 October 2026**, when the stalling fan under the card was replaced by a two-fan 92 mm PCI-slot bracket in the slot beside it: it idles at 51 °C and 23 W, and long full-load runs keep a temperature stop. Out of service from 7 to 9 October and from 2 to 6 October, when idle it heated until it dropped off the PCIe bus) | `/dev/et0_{mgmt,ops}` |
+| `aifoundry3` | 1 (firmware 1.4.0, read 31 October 2026; pinned at 600 MHz at every boot) | `/dev/et0_{mgmt,ops}` |
 
 How the four cards and the three hosts differ, and what that does to measurements, is in
 [findings/14-card-behaviour.md](findings/14-card-behaviour.md). The device nodes are mode 0666, so any local account

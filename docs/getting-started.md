@@ -592,7 +592,7 @@ as [`findings/04-artifacts.md`](findings/04-artifacts.md), "Rebuilding the versi
 | `/opt/et` on aifoundry2 | et-platform `353f20e` (Dec 2025): runtime 0.19.0, GCC 15.1 | installed by the lab |
 | `/opt/et` on aifoundry3 | the same, except `libetrt.so`: a patched Release `-O3` build of `836a4ab` (2026-07-23) | installed by the lab |
 | `/opt/et` on aifoundry1 | a build of an et-platform fork (May 2026): its runtime and device layer differ, and the device layer honours `ET_DEVICES=<n>`; `libDM.so`, `dev_mngt_service`, `et-powertop` and GCC 15.1 as on the others | installed by the lab |
-| Card firmware | 1.3.1 on aifoundry2 and aifoundry3 (a build of about mid-May 2024); 1.4.1 and 1.2.0 on aifoundry1's cards 0 and 1 | flashed by the lab; read with `dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` (`docs/reports/data/2026-09-25-claims-v3/firmware.md` for aifoundry2 and aifoundry3, `AMENDMENTS.md` A2 there for aifoundry1) |
+| Card firmware | release 1.4.0 / BL2 0.22.0 on all four cards, as read 27–31 October 2026 (E69, E79, E82 A1, E84 A1; PMIC 1.5.0, 1.5.0, 1.3.0, 1.6.1 on aifoundry2, aifoundry3 and aifoundry1's cards 1 and 0). On 25 September they read 1.3.1 on aifoundry2 and aifoundry3 (a build of about mid-May 2024), 1.4.1 and 1.2.0 on aifoundry1's cards 0 and 1 | flashed by the lab; read with `dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` (`docs/reports/data/2026-09-25-claims-v3/firmware.md` for aifoundry2 and aifoundry3, `AMENDMENTS.md` A2 there for aifoundry1, on 25 September; [14-card-behaviour.md](findings/14-card-behaviour.md) for the reads since) |
 
 `UPSTREAM_LATEST=1 scripts/clone-upstream.sh` and `TOOLCHAIN_REF=et scripts/provision-vm.sh` build the branch tips
 instead of the pins.

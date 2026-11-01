@@ -32,11 +32,17 @@ price of a zero falls as the format narrows:
 |---|---|---|---|
 | fp32 | 1 | be the element | ~p of words |
 | fp16 | 2 (packed pair) | its partner half must be zero too | ~p² of words |
-| int8 | 4 (byte group) | all four bytes of the word must be zero | ~p⁴ of words |
+| int8 | 4 (byte group) | all four bytes of the A word, or all eight bytes of the two B words a lane alternates between (columns *l* and *l* + 8) | ~p⁴ of A words, **~p⁸ of B pairs** (corrected below) |
 
 **A zero is worth most in fp32, less in fp16 and least in int8** — and in the narrow formats *grouping* buys power
 where density does not. A zeroed column, a zeroed pair, a zeroed 4-byte group pay; the same number of zeros
 scattered does not.
+
+*Corrected Sun 1 Nov 2026 (week 44), Q132(o). This table's int8 row read "all four bytes of the word must be zero, ~p⁴ of
+words". p⁴ is int8's word-zero rate. The rule is `A_zero | (tenB_zero[raddr] & tenB_zero[raddr|1])` (`vpu_ctrl.v:1229-1234`):
+a B-side decision needs two words, eight bytes, so ~p⁸ of B pairs, and an A word gates a micro-op on its own four bytes,
+so ~p⁴ of A words. With both operands sparse a lane gates at p⁴ + p⁸ − p¹², 6.6% at p = ½, the 6.7 ± 1.5% of `kinds.json`.
+Both rules were read at power resolution on one card by [E93](../2026-11-01-e93-zero-gate-silicon/README.md) (R6a–c, R7).*
 
 ## What this corrects
 

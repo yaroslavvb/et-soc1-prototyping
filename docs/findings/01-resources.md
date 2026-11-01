@@ -67,7 +67,12 @@ has the differences.
   statistic's minimum and maximum a literal 0 on every other pass (`services/thermal_pwr_mgmt.c:2995–3001` and
   `:663–664` at `ffca4cbb4`), so that statistic (`sp.system_c`), 0 on the three cards throughout the check, shows only
   that the PMIC gave 0 at each reset; the telemetry above is the evidence. So the 75 °C alarm does not act on the
-  die's temperature on these cards. Do not rely on it.
+  die's temperature on these cards. Do not rely on it. **Dated note, Sun 1 Nov 2026 (week 44), Q132:** these constants
+  are what the firmware writes, not what a PMIC does with them. Only one alarm has been seen to act here, the 75 W power
+  alarm on aifoundry1's card 0, whose PMIC reports 1.6.1 (E84). aifoundry2, which reads 5–10 W above card 0 at the same
+  kind and clock, read 85 W or more 654 times with no alarm (Q132(g); firmware or board, unknown), and no measurement
+  here shows a power or temperature alarm acting on the other three cards: treat it as **unverified on them**. Host-side
+  aborts are the guard.
   **Correction (28 September):** this entry used to argue that "the PMIC reading tracked the minion-shire reading
   within a degree". That host field (`temp_c.pmic`, `pmic_sys`) is filled with the same 34-shire mean
   (`get_module_current_temperature()`; 3,679 of 3,681 samples agree on 20 September, [05-claims.md](05-claims.md)),
@@ -138,9 +143,17 @@ and 23 W, where it had heated at idle until it dropped off the PCIe bus (out of 
 
 <https://www.thonking.ai/p/strangely-matrix-multiplications> (April 2024).
 
-- **Authoritative for:** the A100 measurements this whole line of work reproduces: an 8192³ **bf16** matmul at
-  257 TFLOPS on random data against 295 TFLOPS on zeros, with a 330 W power limit and 88 W idle, and the
-  mechanism sentence, "A small amount of power is consumed whenever a transistor *switches states*."
+- **Authoritative for:** the A100 measurements this whole line of work reproduces: a matmul at 257 TFLOPS on random
+  data against 295 TFLOPS on zeros, with a 330 W power limit and 88 W idle, and the mechanism sentence, "A small
+  amount of power is consumed whenever a transistor *switches states*."
+- **The pair's format and size are not in the post** (corrected Sun 1 Nov 2026, week 44, Q132(g); this entry said "an
+  8192³ bf16 matmul"). The post names no format anywhere and the pair's own snippet has a bare `N`, though the runs
+  earlier in the same story are 8192 × 8192 × 8192. A gist he posted the day before, with the post's title and link as
+  its description, holds `mm_weird.py`, which multiplies `torch.bfloat16` at 8192³, and 258 TFLOPS at 83% fits the
+  A100's 16-bit peak of 312. Nothing found ties the pair to that script: its recorded runs read zeros/randn ×1.21–1.22
+  and the post's chart ×1.22, against the pair's ×1.148, told in a passage that opens "It's 2022". And bf16 is not
+  fp16: 8 exponent and 7 mantissa bits against 5 and 10
+  ([`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §d).
 - **Note on direction:** the post's finding is that **predictable data uses less power**. An earlier draft of
   our report had this reversed; it was corrected before publication.
 

@@ -38,9 +38,9 @@ An A100 draws 330–400 W under a matmul. This card draws 38–64 W, and Esperan
 | | A100 (SXM4) | ET-SoC-1 card | Note |
 |---|---|---|---|
 | Process, transistors, die | 7 nm · 54.2 B · 826 mm² | 7 nm · >24 B · 570 mm² | same process generation |
-| Dense matmul, measured | 257 TFLOPS at 330 W | 9.18 TFLOPS at 63.9 W | A100: R8's 8192³ run, **bf16** on tensor cores, random data. ET: fp32 `TensorFMA`, random data, 80 °C |
-| Board energy per FLOP | **1.28 pJ** (bf16) | **7.0 pJ** (fp32) | the A100's tensor cores are 5.4× better |
-| Board energy per FLOP, 16-bit inputs (fp16 here, bf16 on the A100) | 1.28 pJ | 3.3 pJ (fp16, 61.1 W at 18.4 TFLOPS, E15) | the closest like for like: the A100 is ~2.6× better |
+| Dense matmul, measured | 257 TFLOPS at 330 W | 9.18 TFLOPS at 63.9 W | A100: R8's pair, random data, a 16-bit format on tensor cores by its utilisation; the post names neither format nor size for the pair (corrected Sun 1 Nov 2026, below). ET: fp32 `TensorFMA`, random data, 80 °C |
+| Board energy per FLOP | **1.28 pJ** (16-bit, format not stated) | **7.0 pJ** (fp32) | the A100's tensor cores are 5.4× better |
+| Board energy per FLOP, 16-bit inputs (fp16 here; on the A100 a 16-bit format the post does not name) | 1.28 pJ | 3.3 pJ (fp16, 61.1 W at 18.4 TFLOPS, E15) | the closest like for like: the A100 is ~2.6× better; bf16 is not fp16 |
 | Board energy per FLOP, fp32 by datasheet | 20.5 pJ (19.5 TFLOPS at 400 W, CUDA cores) | 7.0 pJ | this card is ~2.9× better (in the matmul benchmark 2.8–3.9× by card, 3.3× on aifoundry2, E37; 3.4× in its first run, R4) |
 | Idle | 88 W | 26.7 W at 62 °C, 36.3 W at 80 °C | |
 | Power per transistor under load | 6.1 nW | 2.7 nW | |

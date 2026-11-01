@@ -131,9 +131,10 @@ multiplying by zero, because `x · 0` is −0.0 for every negative x.
 
 ## Relation to the GPU result this reproduces
 
-Horace He measured an A100 doing an 8192³ matmul at 257 TFLOPS on random data and 295 on zeros, and explained
+Horace He measured an A100's matmul at 257 TFLOPS on random data and 295 on zeros, and explained
 it as: predictable data flips fewer transistors, draws less power, and a power-limited GPU then clocks higher
-(R8).
+(R8). (His post gives that pair no format or size; 8192³ bf16 is a script he published the day before, and nothing
+found ties the pair to it: [01-resources.md](01-resources.md), R8, corrected Sun 1 Nov 2026.)
 
 On this card the *cause* is the same and much larger — 25 W of data-dependent power at identical FLOPs — but
 the *effect* is different, because a hot die is pinned at 600 MHz by the firmware. Speed only moves when the
