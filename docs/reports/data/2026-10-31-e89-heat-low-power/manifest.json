@@ -46,8 +46,29 @@
   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
   "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json": "b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5"
  },
+ "corrections_after_verification": {
+  "date": "2026-10-31",
+  "after": "the Q130 workflow's verification of this directory (verdict: holds with fixes)",
+  "readme_section": "Corrections after verification",
+  "check": "corrections-check.py (output corrections-check.txt), reads committed files only; it re-runs the registered reducer with only its trend order changed, into a temporary directory",
+  "numbers_changed": "none in e89.json, scored.json, results.md, tables.txt or posthoc.txt",
+  "verdicts_changed": "none (registered, lap unit: 24 PASS); reported beside them, pass unit: 23 PASS, 1 INCONCLUSIVE (E89-R4 i8neg1)",
+  "frozen_inputs_changed": "none",
+  "card_touched": false,
+  "items": {
+   "C1": "six of E78's 16 int8 kinds were measured, not every one; the ten others (ones, sparse90, ternary, highbit, sorted, pos, wsparse50, wsparse90, a_full_b_zeros, a_zeros_b_full) and fifteen float kinds stay S x 0.118 extrapolations; Horace hub Status item 7 narrowed, not closed",
+   "C2": "the 2 s rises are over each type's zeros (D), E78's heat cells over idle (S); the column 'E78's extrapolation, D x 0.118' renamed; derived over-idle rises added (random int8 1.20 +- 0.07 C, int8 -1 0.56 +- 0.03 C, fp32 ones 1.29-1.32 C), 4.5-13.9% above E78's S x 0.118",
+   "C3": "the per-minion-rail r (0.980-1.008) is post hoc and descriptive; the registered result is per board W (r 1.041-1.113); 'exactly' dropped; i8neg1's post hoc interval excludes 1",
+   "C4": "the E85 camera side-by-side dropped: card, geometry and clock, frequency (3.00x), drive (2.82x) and what is measured all differ; 0.90 C is the 1/60 Hz component's amplitude",
+   "C5": "pass-unit verdicts 23 PASS, 1 INCONCLUSIVE (R4 i8neg1 1.153 [0.380, 1.925]), named as departure D7; with a linear or cubic trend r is 1.015-1.117, intervals 1.8-6.3x wider, none excludes 1, i8zero's R2 INCONCLUSIVE",
+   "C6": "the 2 s step after a 30 s reference half is 7-21% larger than after the lead-in in 7 of 8 blocks; the reference's 0.1181 is the mean of 0.1138 and 0.1224, agreement with E78's 0.118 within about 4%",
+   "C7": "pass 8911's idle bracket drifted 0.79 C (a cooling die, 13.8 s after 8910's fp32 randn block); about a line its noise matches 8910's (0.0081 vs 0.0050 C, 0.53 vs 0.52 codes)",
+   "C8": "wording: the mean's step 0.0018 C vs its noise 0.005-0.008 C; command 74 is the 7 Oct thermal build's; one conversion for every sensor (not a true temperature); every launch on all 32 shires (the pattern cannot show where heat goes); the per-board-W difference post hoc, 0.164 vs 0.111-0.122 of the swing outside the metered rails",
+   "C9": "disclosed: command 74 group 0 kept being sent after its behaviour changed; 460 latch reads never moved backwards, holds stayed (48, 87) C, no fault bits"
+  }
+ },
  "files": {
-  "README.md": "6405cee6074bee65236b38aefdeca187ab996cffae53ac1d10e8938f6d64e61d",
+  "README.md": "cac81d3be6b5409540ed26245bddde936db031b71ad3888054e5024e7c0662e6",
   "e89.json": "647c3200353e97e5e241329aa9e27688a5363664e557bcccc8d51410548a93ec",
   "posthoc.txt": "b49c4d999f3d7911d7ceb4751f92e03414bd78379255d70fc7365205e3a254f8",
   "posthoc_e89.py": "026331f2cb9b05c863b82a4ea22b9dd5f7c6d30b6e1ffa08bcb3dceb94c4ed3f",
@@ -122,6 +143,8 @@
   "aifoundry3/e89-smoke/p8901/tiles/int8.zeros.p8901.bin": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
   "logs/box-harness.sha256": "0b131a8b2b36b718ffff93d38ecec5e336e9a4e719e7db58e1db8a004195483f",
   "logs/e89-dry.log": "4db72663b7d6a78741518d148ef66c8b0aba1cb385bc448ff592613750b65a4b",
-  "logs/e89-queue.log": "614212816f496ee0b6ce7568d890a57c5aa216aea66adaa1d1a79bf80706612b"
+  "logs/e89-queue.log": "614212816f496ee0b6ce7568d890a57c5aa216aea66adaa1d1a79bf80706612b",
+  "corrections-check.py": "0057d46a0821f13fe807003955ea6a67a85bb30fd43a8bfade2858e6048c17fd",
+  "corrections-check.txt": "019e9a4b1514113aebab4ad21a2079bd1623683c0377f339f9a3f4c91ca05e96"
  }
 }

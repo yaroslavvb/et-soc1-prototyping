@@ -1,0 +1,145 @@
+[C1] coverage: E78's int8 kinds against E89's blocks
+  E78 int8 kinds: 16; E89 int8 blocks: 6 (full, gauss_q, smallint, sparse50, neg_ones, zeros)
+  not measured by E89 (10): a_full_b_zeros, a_zeros_b_full, highbit, ones, pos, sorted, sparse90, ternary, wsparse50, wsparse90
+  E89's 2 s coefficient on its six int8 blocks: 0.1207-0.1361 degC/W; reference 0.1181
+  | int8 kind (not measured) | E78 S (W) | E78 D (W) | S x 0.118 (degC, E78's extrapolation) | S x E89's int8 coefficients (degC) |
+  | a_full_b_zeros | 3.115 | 0.497 | 0.37 | 0.38-0.42 |
+  | a_zeros_b_full | 2.900 | 0.305 | 0.34 | 0.35-0.39 |
+  | highbit | 5.853 | 3.233 | 0.69 | 0.71-0.80 |
+  | ones | 4.146 | 1.561 | 0.49 | 0.50-0.56 |
+  | pos | 8.733 | 6.171 | 1.03 | 1.05-1.19 |
+  | sorted | 9.170 | 6.588 | 1.08 | 1.11-1.25 |
+  | sparse90 | 3.763 | 1.145 | 0.44 | 0.45-0.51 |
+  | ternary | 7.727 | 5.186 | 0.91 | 0.93-1.05 |
+  | wsparse50 | 5.743 | 3.142 | 0.68 | 0.69-0.78 |
+  | wsparse90 | 3.079 | 0.538 | 0.36 | 0.37-0.42 |
+  E78 kinds at or below 12 W of S (the built-in pi tie left out): 32; measured by E89: 7; still extrapolated: 25 (10 int8, 15 fp32/fp16)
+  the fp32/fp16 kinds still extrapolated: fp16.a_randn_b_zeros, fp16.a_zeros_b_randn, fp16.neg_ones, fp16.ones, fp16.sparse90, fp16.wsparse50, fp16.wsparse90, fp16.zeros, fp32.a_randn_b_zeros, fp32.a_zeros_b_randn, fp32.neg_ones, fp32.pi, fp32.sparse50, fp32.sparse90, fp32.zeros
+
+[C2] the 2 s rise: over the type's zeros (D) as measured, against E78's over-idle (S) cells
+  int8 zeros over idle, measured: 0.340 +- 0.006 degC
+  fp32 zeros over idle, not measured by E89: E78 S 1.986 W x 0.1181-0.1304 degC/W (the reference's and int8 zeros' 2 s coefficients) = 0.235-0.259 degC
+  | block | over | E78 D (W) | E78 S (W) | step2 measured (degC) | E78 coefficient x this step's W (degC) | over idle, derived (degC) | E78's over-idle S x 0.118 (degC) | derived / (S x 0.118) |
+  | i8full | int8 zeros | 7.056 | 9.648 | 0.863 +- 0.073 | 0.833 (D) | 1.203 +- 0.073 (sum; +- in quadrature) | 1.139 | 1.056 |
+  | i8gauss | int8 zeros | 6.598 | 9.161 | 0.820 +- 0.151 | 0.779 (D) | 1.160 +- 0.151 (sum; +- in quadrature) | 1.081 | 1.073 |
+  | i8small | int8 zeros | 6.003 | 8.628 | 0.725 +- 0.073 | 0.708 (D) | 1.064 +- 0.074 (sum; +- in quadrature) | 1.018 | 1.045 |
+  | i8sp50 | int8 zeros | 5.463 | 8.061 | 0.673 +- 0.078 | 0.645 (D) | 1.013 +- 0.078 (sum; +- in quadrature) | 0.951 | 1.065 |
+  | i8neg1 | int8 zeros | 1.628 | 4.176 | 0.222 +- 0.026 | 0.192 (D) | 0.561 +- 0.026 (sum; +- in quadrature) | 0.493 | 1.139 |
+  | i8zero | idle | 0.000 | 2.605 | 0.340 +- 0.006 | 0.307 (S) | 0.340 +- 0.006 (measured) | 0.307 | 1.105 |
+  | f32ones | fp32 zeros | 8.257 | 10.288 | 1.059 +- 0.164 | 0.974 (D) | 1.293-1.318 (plus fp32 zeros' 0.235-0.259) | 1.214 | 1.065-1.085 |
+  | f32randn | fp32 zeros | 24.725 | 26.701 | 2.920 +- 0.194 | 2.918 (D) | 3.154-3.179 (plus fp32 zeros' 0.235-0.259) | 3.151 | 1.001-1.009 |
+  E78's measured over-idle 2 s rise for fp32 randn (resolved): 3.16 +- 0.08 degC (e78.json items.fp32.randn.dT_win); E89 derived 3.154-3.179
+  each kind's 2 s coefficient against E78's 0.118: +2.3% to +15.3%
+
+[C3] registered per board W against the post hoc per minion-rail W
+  i8full: r_H 1.050 [1.019, 1.080] (registered, lap unit)  excludes 1
+  i8gauss: r_H 1.041 [0.989, 1.092] (registered, lap unit)
+  i8small: r_H 1.059 [1.017, 1.100] (registered, lap unit)  excludes 1
+  i8sp50: r_H 1.065 [1.038, 1.091] (registered, lap unit)  excludes 1
+  i8neg1: r_H 1.043 [0.965, 1.120] (registered, lap unit)
+  i8zero: r_H 1.113 [1.065, 1.160] (registered, lap unit)  excludes 1
+  f32ones: r_H 1.063 [1.031, 1.095] (registered, lap unit)  excludes 1
+  registered: r 1.041-1.113; intervals excluding 1: 5 of 7
+  i8full: per minion-rail W r 0.992 [0.979, 1.005] (posthoc.txt POST HOC 2, descriptive)
+  i8gauss: per minion-rail W r 0.988 [0.963, 1.012] (posthoc.txt POST HOC 2, descriptive)
+  i8small: per minion-rail W r 1.002 [0.997, 1.008] (posthoc.txt POST HOC 2, descriptive)
+  i8sp50: per minion-rail W r 1.008 [0.984, 1.033] (posthoc.txt POST HOC 2, descriptive)
+  i8neg1: per minion-rail W r 0.980 [0.963, 0.996] (posthoc.txt POST HOC 2, descriptive)  excludes 1
+  i8zero: per minion-rail W r 0.991 [0.958, 1.024] (posthoc.txt POST HOC 2, descriptive)
+  f32ones: per minion-rail W r 1.003 [0.987, 1.018] (posthoc.txt POST HOC 2, descriptive)
+  post hoc: r 0.980-1.008; intervals excluding 1: 1 of 7 (their intervals take the reference as a fixed number)
+
+[C4] E85's camera and E89's die sensors on random int8: the conditions
+  E85 (aifoundry2; 192 minions at 800 MHz, the camera on the back of the board, E85 README): ROI amplitude 64.5 mK at 0.0500 Hz, board step 2.450 W, board fundamental 1.534 W; not detected (E85-R1 FAIL)
+  E89 (aifoundry3; 1,024 minions at 600 MHz, the 34 on-die sensors): the temperature fundamental's amplitude 0.899 +- 0.026 degC at 0.0167 Hz, board fundamental 4.327 W (a square wave of about 6.80 W peak to peak)
+  frequency ratio 3.00x; drive ratio (board fundamentals) 2.82x
+
+[C5] the unit of replication: the rules scored with the pass as the unit (n = 2, t(0.975, 1) = 12.706)
+  E89-R0: PASS (a share of samples; the unit does not enter)
+  E89-R1 i8full: T_fund 0.899 [0.819, 0.978] -> PASS
+  E89-R1 i8gauss: T_fund 0.837 [0.767, 0.907] -> PASS
+  E89-R1 i8small: T_fund 0.776 [0.675, 0.876] -> PASS
+  E89-R1 i8sp50: T_fund 0.718 [0.660, 0.776] -> PASS
+  E89-R1 i8neg1: T_fund 0.232 [0.229, 0.235] -> PASS
+  E89-R1 i8zero: T_fund 0.360 [0.325, 0.394] -> PASS
+  E89-R1 f32ones: T_fund 1.071 [0.992, 1.150] -> PASS
+  E89-R1 f32randn: T_fund 3.032 [3.001, 3.063] -> PASS
+  E89-R2 i8full: r 1.050 [1.006, 1.094] band [0.8, 1.25] -> PASS  (excludes 1)
+  E89-R2 i8gauss: r 1.041 [0.874, 1.208] band [0.8, 1.25] -> PASS
+  E89-R2 i8small: r 1.059 [0.915, 1.202] band [0.8, 1.25] -> PASS
+  E89-R2 i8sp50: r 1.065 [1.044, 1.085] band [0.8, 1.25] -> PASS  (excludes 1)
+  E89-R2 i8neg1: r 1.043 [0.858, 1.228] band [0.8, 1.25] -> PASS
+  E89-R2 i8zero: r 1.113 [1.079, 1.146] band [0.8, 1.25] -> PASS  (excludes 1)
+  E89-R2 f32ones: r 1.063 [0.998, 1.127] band [0.8, 1.25] -> PASS
+  E89-R3 f32randn: H 0.1979 +- 0.0037 overlaps [0.141, 0.264] -> PASS
+  E89-R4 i8full: r 1.035 [0.997, 1.074] band [0.7, 1.43] -> PASS
+  E89-R4 i8gauss: r 1.052 [0.883, 1.222] band [0.7, 1.43] -> PASS
+  E89-R4 i8small: r 1.022 [0.738, 1.306] band [0.7, 1.43] -> PASS
+  E89-R4 i8sp50: r 1.043 [0.704, 1.383] band [0.7, 1.43] -> PASS
+  E89-R4 i8neg1: r 1.153 [0.380, 1.925] band [0.7, 1.43] -> INCONCLUSIVE
+  E89-R4 i8zero: r 1.104 [1.047, 1.162] band [0.7, 1.43] -> PASS
+  E89-R4 f32ones: r 1.086 [1.026, 1.145] band [0.7, 1.43] -> PASS
+  pass-unit tally: {'PASS': 23, 'INCONCLUSIVE': 1} (registered, lap unit: {'PASS': 24})
+
+[C5] the trend model: the registered reducer re-run with only its trend's polynomial order changed
+  check: the quadratic re-run reproduces the committed r_H to within 1e-12
+  quadratic (registered): r 1.041-1.113; H_ref 0.1979 +- 0.0041; intervals excluding 1: 5 of 7; R2 on this fit: PASS x7
+    i8full: 1.050 [1.019, 1.080]
+    i8gauss: 1.041 [0.989, 1.092]
+    i8small: 1.059 [1.017, 1.100]
+    i8sp50: 1.065 [1.038, 1.091]
+    i8neg1: 1.043 [0.965, 1.120]
+    i8zero: 1.113 [1.065, 1.160]
+    f32ones: 1.063 [1.031, 1.095]
+  linear: r 1.015-1.062; H_ref 0.2000 +- 0.0118; intervals excluding 1: 0 of 7; R2 on this fit: i8zero INCONCLUSIVE
+    i8full: 1.056 [0.924, 1.188]
+    i8gauss: 1.041 [0.942, 1.139]
+    i8small: 1.058 [0.976, 1.141]
+    i8sp50: 1.058 [0.982, 1.134]
+    i8neg1: 1.015 [0.866, 1.164]
+    i8zero: 1.062 [0.784, 1.341]
+    f32ones: 1.057 [0.994, 1.120]
+  cubic: r 1.045-1.117; H_ref 0.2075 +- 0.0265; intervals excluding 1: 0 of 7; R2 on this fit: i8zero INCONCLUSIVE
+    i8full: 1.045 [0.881, 1.210]
+    i8gauss: 1.049 [0.881, 1.217]
+    i8small: 1.058 [0.902, 1.214]
+    i8sp50: 1.068 [0.903, 1.233]
+    i8neg1: 1.054 [0.915, 1.192]
+    i8zero: 1.117 [0.937, 1.297]
+    f32ones: 1.059 [0.872, 1.246]
+  interval width against the quadratic, order 1: 1.9-5.9x
+  interval width against the quadratic, order 3: 1.8-6.3x
+
+[C6] the 2 s step by cycle (cycle 0 follows the 20 s lead-in; cycle 1 follows a 30 s reference half)
+  i8full: cycle 0 0.815, 0.835 | cycle 1 0.915, 0.886 degC; mean c1/c0 1.092; per W of E78's D: c0 0.1169, c1 0.1276  (c1 > c0 in both passes)
+  i8gauss: cycle 0 0.731, 0.750 | cycle 1 0.929, 0.869 degC; mean c1/c0 1.214; per W of E78's D: c0 0.1123, c1 0.1363  (c1 > c0 in both passes)
+  i8small: cycle 0 0.692, 0.691 | cycle 1 0.726, 0.790 degC; mean c1/c0 1.096; per W of E78's D: c0 0.1152, c1 0.1262  (c1 > c0 in both passes)
+  i8sp50: cycle 0 0.643, 0.637 | cycle 1 0.669, 0.744 degC; mean c1/c0 1.104; per W of E78's D: c0 0.1171, c1 0.1293  (c1 > c0 in both passes)
+  i8neg1: cycle 0 0.226, 0.202 | cycle 1 0.241, 0.218 degC; mean c1/c0 1.072; per W of E78's D: c0 0.1314, c1 0.1409  (c1 > c0 in both passes)
+  i8zero: cycle 0 0.342, 0.339 | cycle 1 0.335, 0.343 degC; mean c1/c0 0.997; per W of E78's S: c0 0.1306, c1 0.1302
+  f32ones: cycle 0 0.974, 0.965 | cycle 1 1.152, 1.144 degC; mean c1/c0 1.184; per W of E78's D: c0 0.1174, c1 0.1390  (c1 > c0 in both passes)
+  f32randn: cycle 0 2.807, 2.822 | cycle 1 3.025, 3.026 degC; mean c1/c0 1.075; per W of E78's D: c0 0.1138, c1 0.1224  (c1 > c0 in both passes)
+  blocks with cycle 1 above cycle 0 in both passes: 7 of 8
+  reference's 2 s coefficient: cycle 0 0.1138, cycle 1 0.1224, mean 0.1181 degC/W; against E78's 0.118: -3.5% and +3.7%
+
+[C7] the idle brackets (the 34-sensor mean, the firmware's conversion)
+  p8910: 150 samples over 14.9 s; mean 52.37 degC; SD 0.0076 degC; slope -0.080 degC/min (a -0.020 degC drift over the bracket); SD about a straight line 0.0050 degC; per-sensor SD about a straight line, median 0.52 codes
+  p8911: 150 samples over 14.9 s; mean 59.66 degC; SD 0.2296 degC; slope -3.169 degC/min (a -0.787 degC drift over the bracket); SD about a straight line 0.0081 degC; per-sensor SD about a straight line, median 0.53 codes
+  pass 8911's idle bracket began 13.8 s after pass 8910's last block (f32randn) ended
+
+[C8] wording
+  one code = 0.060889 degC (G/H/CAL5 = 57400/249400/4096, one set of constants for every sensor); the 34-sensor mean's step = 0.0018 degC
+  board swing outside the three metered rails (1 - minion - SRAM - NoC shares, posthoc.txt POST HOC 2):
+    i8full: minion 0.859, SRAM 0.009, NoC 0.014; SRAM + NoC 0.023; outside 0.118
+    i8gauss: minion 0.856, SRAM 0.008, NoC 0.014; SRAM + NoC 0.022; outside 0.122
+    i8small: minion 0.858, SRAM 0.008, NoC 0.014; SRAM + NoC 0.022; outside 0.120
+    i8sp50: minion 0.858, SRAM 0.008, NoC 0.014; SRAM + NoC 0.022; outside 0.120
+    i8neg1: minion 0.864, SRAM 0.011, NoC 0.014; SRAM + NoC 0.025; outside 0.111
+    i8zero: minion 0.912, SRAM 0.012, NoC 0.014; SRAM + NoC 0.026; outside 0.062
+    f32ones: minion 0.861, SRAM 0.008, NoC 0.014; SRAM + NoC 0.022; outside 0.117
+    f32randn: minion 0.812, SRAM 0.009, NoC 0.015; SRAM + NoC 0.024; outside 0.164
+  launch records by (shire_mask, minions), both passes: {('0xffffffff', 1024): 4306}
+
+[C9] command 74: the sensors' latches, the firmware's peak-holds and fault bits over both passes
+  latch reads 460; a high latch below its previous read: 0; a low latch above its previous read: 0; highest latch code 2543 (87.5 degC)
+  the firmware's minshire [min, max] holds seen: [(48, 87)]; samples with a fault bit: 0
