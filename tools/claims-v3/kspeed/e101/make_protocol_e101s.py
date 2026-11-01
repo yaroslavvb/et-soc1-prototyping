@@ -160,6 +160,26 @@ def main():
     json.dump(full, open(os.path.join(HERE, "protocol.json"), "w"), indent=1)
     json.dump(dryp, open(os.path.join(HERE, "protocol-dry.json"), "w"), indent=1)
     json.dump({"limit_p800_w": LIMIT_W, "source": src, "modes": modes}, open(os.path.join(HERE, "start-modes.json"), "w"), indent=1)
+    # E83's relation on these S: a second set of clocks, frozen before the slot, labelled beside the first (predictions-e101.json clock.cells)
+    sys.path.insert(0, os.path.join(HERE, "..", "e83"))
+    import predict_e83 as PE
+    rel = PE.Rel({int(k): v for k, v in REL["B_registered_w"].items()})
+    Wb, sb, Ws, ss = REL["burst"]["W_star_w"], REL["burst"]["sigma_w"], REL["sustained"]["W_star_w"], REL["sustained"]["sigma_w"]
+    second = {}
+    for lab, m in modes.items():
+        fb, shb = rel.f(m["c_w"], Wb, sb)
+        fs, shs = rel.f(m["c_w"], Ws, ss)
+        second[lab] = {"S_w": m["S_w"], "c_w": m["c_w"], "p800_w": m["p800_w"], "mode": m["mode"], "burst_mhz": round(fb, 1), "burst_share800": round(shb, 3), "sus_mhz": round(fs, 1), "sus_share800": round(shs, 3)}
+    gaps = {}
+    for arm in ("gemm1", "mm16", "res"):
+        for t in TYPES:
+            z, r_ = second.get(f"{arm}-{t}-zeros"), second.get(f"{arm}-{t}-{e101.RANDOM_KIND[t]}")
+            if z and r_:
+                gaps[f"{arm}.{t}"] = {"burst_clock_ratio": round(z["burst_mhz"] / r_["burst_mhz"], 3), "sus_clock_ratio": round(z["sus_mhz"] / r_["sus_mhz"], 3)}
+    json.dump({"what": "E83's relation on session 1's measured S: labelled, frozen before session 2, no rule", "source": src, "cells": second, "gaps": gaps}, open(os.path.join(HERE, "predictions-session1.json"), "w"), indent=1)
+    print("gaps on session 1's S:", json.dumps(gaps))
+    for k in sorted(second):
+        print(f"  {k:26s} burst {second[k]['burst_mhz']:6.1f} sus {second[k]['sus_mhz']:6.1f}")
     print(f"source: {src}; cool burst cells {len(burst_low)}, warm burst cells {len(burst_high)}, x 2 passes; sustained {len(order)} runs, then {len(G6)} if the clock allows")
     for k in sorted(modes, key=lambda x: -modes[x]["p800_w"]):
         print(f"  {k:26s} S {modes[k]['S_w']:6.2f} W ({modes[k]['source']}), c {modes[k]['c_w']:6.2f} W, P800 {modes[k]['p800_w']:6.1f} W: {modes[k]['mode']}")

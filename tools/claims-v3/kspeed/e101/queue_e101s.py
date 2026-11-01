@@ -15,9 +15,11 @@ Every time is epoch ms (clocks went back at 02:00 PDT that night; no local time 
      non-blocking lock with timeout 10 (snapshot-start), and the last 40 min of the box's own 5 s history (history-before.jsonl).
   4. Runs the smoke session (block SMOKE: the rest reading, then three 2 s launches). A session refused at its start because the
      collector's reader was open at that instant (exit 3, no run recorded) is retried up to 5 times.
-  5. Checks the smoke: exit 0, every launch rc 0 and ok, the cycles per op session 1 measured (protocol.json smoke_cycles, within 2%), the config 65 W / 65 C. A failure ends the queue with QUEUE-HALT and no session.
-  6. Runs the session (blocks BURST and SUS), with --max-card-min set so that it ends by itself 3 min before the slot's end
-     (the runner's own cap: exit 0, the end queries run).
+  5. Checks the smoke: exit 0, every launch rc 0 and ok, the cycles per op at least 98% of what session 1 measured at 600 MHz and at most 160% of it (protocol.json smoke_cycles: at 800 MHz the minions gain on a memory path that may not, and nothing has measured by how much), the config 65 W / 65 C. A failure ends the queue with QUEUE-HALT and no session.
+  6. Runs the session (blocks BURST, SUS, WARM, SUSX), with --max-card-min set so that it ends by itself 3 min before the slot's end
+     (the runner's own cap: exit 0, the end queries run). A login by another user ends a session at once, by E64's own check (exit 3): what it recorded stays, the
+     run in flight is lost. The queue then waits again as in step 2, until nobody else is logged in, and starts the next session, s2, s3, with the runs already
+     recorded skipped (E101_SKIP_DONE); nothing starts after the slot's end minus 25 min. No login name goes in a record of the queue's; E64's end reason holds one, scrubbed at collection.
   7. Records snapshot-end, the same as snapshot-start, and exits.
 
 The hard stop, as E98's queue: at slot_end - 120 s a running session's stop-file is touched (the launch loop ends at its next ~0.5 s
@@ -39,7 +41,7 @@ LOCK = "/run/lock/etsoc-shire0.lock"
 ET_LIB = "/opt/et/lib"
 POLL_S = 20
 GRACE_MIN_BEFORE_NEXT_REST = 20
-CYC_REL = 0.02
+CYC_LO, CYC_HI = 0.98, 1.60
 
 
 def now_ms():
@@ -79,6 +81,7 @@ class Queue:
         self.give_up_ms = self.end_ms - a.give_up_min * 60000
         self.ettelem = os.path.join(self.root, "build/ettelem-hpl/ettelem")
         self.e98_status = os.path.join(self.root, "build/e98/runs/status.json")
+        self.skip_done = []
 
     def rec(self, kind, **kw):
         d = dict(t_ms=now_ms(), zone=time.strftime("%Z"), kind=kind, **kw)
@@ -211,9 +214,12 @@ class Queue:
         self.rec("session_start", name=name, cap_min=cap_min)
         self.status(state="running", session=name, t0_ms=now_ms())
         os.makedirs(self.runs, exist_ok=True)
+        env = dict(os.environ)
+        if self.skip_done and name != "smoke":
+            env["E101_SKIP_DONE"] = ",".join(os.path.join(self.runs, n) for n in self.skip_done)
         with open(os.path.join(self.runs, f"{name}.out"), "ab") as f:
             proc = subprocess.Popen(cmd, stdout=f, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, cwd=self.root,
-                                    start_new_session=True)
+                                    start_new_session=True, env=env)
         stopped, termed = False, False
         while proc.poll() is None:
             now = now_ms()
@@ -281,8 +287,8 @@ class Queue:
             lab = next((r["label"] for r in runs if r["run"] == L.get("run")), None)
             want = json.load(open(self.a.protocol))["smoke_cycles"].get(lab)
             cyc = sp[-1].get("cycles_per_op")
-            if not self.a.dry and (cyc is None or want is None or abs(cyc / want - 1) > CYC_REL):
-                return f"smoke: {L.get('run')} {cyc} cycles per op, expected {want}"
+            if not self.a.dry and (cyc is None or want is None or not CYC_LO <= cyc / want <= CYC_HI):
+                return f"smoke: {L.get('run')} {cyc} cycles per op, session 1's {want}"
         return None
 
     def run(self):
@@ -308,8 +314,24 @@ class Queue:
         if now_ms() >= self.stop_ms or self.stopped():
             self.rec("stop", why="no time left, or QUEUE-STOP, before the session")
         else:
-            rc = self.session_retry("s1", None, cap)
-            self.rec("s1_end", rc=rc)
+            k = 1
+            while True:
+                name = f"s{k}"
+                rc = self.session_retry(name, None, cap)
+                self.rec(f"{name}_end", rc=rc)
+                self.skip_done.append(name)
+                if rc != 3 or k >= 6 or self.stopped():
+                    break
+                why = self.why_not_free()
+                while why is not None and now_ms() < self.give_up_ms and not self.stopped():
+                    self.status(state="waiting for the card", why=why)
+                    time.sleep(POLL_S)
+                    why = self.why_not_free()
+                if why is not None or now_ms() >= self.give_up_ms or self.stopped():
+                    self.rec("no_resume", why=why)
+                    break
+                k += 1
+                self.rec("resume", name=f"s{k}")
         s1 = self.snapshot("end")
         self.rec("queue_end", snapshot=s1, card_free_ms=now_ms(), before_slot_end_s=round((self.end_ms - now_ms()) / 1000.0, 1))
         self.status(state="ended", why="done")

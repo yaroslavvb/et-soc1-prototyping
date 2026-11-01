@@ -1,0 +1,735 @@
+{
+ "experiment": "E101",
+ "session": 2,
+ "request": "Q132",
+ "card": "aifoundry2",
+ "order_seed": 101,
+ "note": "THE DRY SHAPE, toy card only: the same order with short runs, for the queue and the reducer",
+ "tools": {
+  "heater": "build/e101/host/sparsity_host",
+  "kernel": "build/e101/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "predictions": "tools/claims-v3/kinds/predictions-e101.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 85,
+  "board_cap_w": 97,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 72
+ },
+ "smoke_cycles": {
+  "gemm1-fp32-zeros": 740.1625,
+  "mm16-int8-zeros": 280.3025,
+  "gemm1-fp16-zeros": 740.16875
+ },
+ "dry_c_w": {
+  "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.483,
+  "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin": 9.748,
+  "gemm1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 23.691,
+  "gemm1:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin": 11.763,
+  "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin,tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin": 22.825,
+  "gemm1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.81,
+  "gemm1:tiles:tools/claims-v3/kinds/tiles/fp16/ones.bin": 10.409,
+  "gemm1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 21.543,
+  "gemm1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin": 15.555,
+  "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin,tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin": 20.914,
+  "gemm1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 3.34,
+  "gemm1:tiles:tools/claims-v3/kinds/tiles/int8/ones.bin": 4.748,
+  "gemm1:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 9.878,
+  "gemm1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin": 8.532,
+  "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin": 9.256,
+  "mm16:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.864,
+  "mm16:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin": 14.097,
+  "mm16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 35.134,
+  "mm16:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin": 16.754,
+  "mm16:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.939,
+  "mm16:tiles:tools/claims-v3/kinds/tiles/fp16/ones.bin": 14.102,
+  "mm16:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 32.193,
+  "mm16:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin": 22.084,
+  "mm16:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 7.146,
+  "mm16:tiles:tools/claims-v3/kinds/tiles/int8/ones.bin": 11.337,
+  "mm16:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 26.517,
+  "mm16:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin": 22.153,
+  "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 1.44,
+  "file:tools/claims-v3/kinds/tiles/fp32/randn.bin": 25.292,
+  "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 1.394,
+  "file:tools/claims-v3/kinds/tiles/fp16/randn.bin": 22.752,
+  "file:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.123,
+  "file:tools/claims-v3/kinds/tiles/int8/full.bin": 9.111
+ },
+ "limit_p800_w": 88.0,
+ "blocks": [
+  {
+   "name": "SMOKE",
+   "title": "the idle card with no launch (its last 60 s are the session's rest reading), then one 2 s launch of three cells below every limit (not analysed)",
+   "default": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 5
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 1
+   },
+   "tail_s": 3,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest",
+     "launch": {
+      "seconds": 2,
+      "budget": 3.5,
+      "processes": 0
+     },
+     "tail_s": 3
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemm1-fp32-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "mm16-int8-zeros"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "gemm1-fp16-zeros"
+    }
+   ]
+  },
+  {
+   "name": "BURST",
+   "title": "one 6 s process from a die reading <= 55 C, the first block's cells; the cells above the limit from a warm start (make_protocol_e101s.py), run last in a pass",
+   "passes": 1,
+   "shuffle": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 55,
+    "max_wait_s": 300
+   },
+   "launch": {
+    "seconds": 2.5,
+    "budget": 4,
+    "processes": 1
+   },
+   "tail_s": 0.5,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemm1-fp32-zeros"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin",
+     "label": "gemm1-fp16-sparse50"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "gemm1-int8-full"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/int8/ones.bin",
+     "label": "mm16-int8-ones"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "res-int8-zeros"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "res-fp32-randn"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "res-int8-full"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "gemm1-fp16-zeros"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "res-fp32-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+     "label": "gemm1-int8-sparse50"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemm1-fp32-randn"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+     "label": "gemm1-fp32-sparse50"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin,tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin",
+     "label": "gemm1-fp32-real"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+     "label": "mm16-int8-sparse50"
+    },
+    {
+     "type": "fp16",
+     "values": "mm16:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin",
+     "label": "mm16-fp16-sparse50"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "gemm1-int8-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "mm16-int8-full"
+    },
+    {
+     "type": "fp32",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "mm16-fp32-zeros"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin,tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin",
+     "label": "gemm1-fp16-real"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "gemm1-fp16-randn"
+    },
+    {
+     "type": "fp16",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+     "label": "mm16-fp16-ones"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "res-fp16-randn"
+    },
+    {
+     "type": "fp32",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+     "label": "mm16-fp32-ones"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "mm16-int8-zeros"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+     "label": "gemm1-fp32-ones"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin",
+     "label": "gemm1-int8-real"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/int8/ones.bin",
+     "label": "gemm1-int8-ones"
+    },
+    {
+     "type": "fp32",
+     "values": "mm16:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+     "label": "mm16-fp32-sparse50"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+     "label": "gemm1-fp16-ones"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "res-fp16-zeros"
+    },
+    {
+     "type": "fp16",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "mm16-fp16-zeros"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "res-fp16-randn"
+    },
+    {
+     "type": "fp32",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "mm16-fp32-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/int8/ones.bin",
+     "label": "gemm1-int8-ones"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "res-fp32-randn"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+     "label": "gemm1-fp16-ones"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin",
+     "label": "gemm1-int8-real"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "res-int8-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "mm16-int8-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "mm16-int8-full"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemm1-fp32-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "gemm1-int8-zeros"
+    },
+    {
+     "type": "fp32",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+     "label": "mm16-fp32-ones"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+     "label": "gemm1-fp32-sparse50"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+     "label": "gemm1-fp32-ones"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin",
+     "label": "gemm1-fp16-sparse50"
+    },
+    {
+     "type": "fp32",
+     "values": "mm16:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+     "label": "mm16-fp32-sparse50"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "gemm1-fp16-zeros"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin,tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin",
+     "label": "gemm1-fp16-real"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin,tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin",
+     "label": "gemm1-fp32-real"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "res-fp32-zeros"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemm1-fp32-randn"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "gemm1-fp16-randn"
+    },
+    {
+     "type": "fp16",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+     "label": "mm16-fp16-ones"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/int8/ones.bin",
+     "label": "mm16-int8-ones"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "res-fp16-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+     "label": "gemm1-int8-sparse50"
+    },
+    {
+     "type": "fp16",
+     "values": "mm16:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin",
+     "label": "mm16-fp16-sparse50"
+    },
+    {
+     "type": "fp16",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "mm16-fp16-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "gemm1-int8-full"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "res-int8-full"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+     "label": "mm16-int8-sparse50"
+    }
+   ]
+  },
+  {
+   "name": "SUS",
+   "title": "sustained: nine back-to-back 8 s processes (~76 s) from a die reading <= 57 C, or the hot start above the limit, in the order make_protocol_e101s.py fixed",
+   "passes": 1,
+   "shuffle": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 57,
+    "max_wait_s": 300
+   },
+   "launch": {
+    "seconds": 2.5,
+    "budget": 4,
+    "processes": 2
+   },
+   "tail_s": 0.5,
+   "runs": [
+    {
+     "type": "int8",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "gemm1-int8-zeros",
+     "group": "G1"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "gemm1-fp16-randn",
+     "group": "G1"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "gemm1-int8-full",
+     "group": "G1"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemm1-fp32-randn",
+     "group": "G1"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "gemm1-fp16-zeros",
+     "group": "G1"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemm1-fp32-zeros",
+     "group": "G1"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/int8/ones.bin",
+     "label": "gemm1-int8-ones",
+     "group": "G2"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin,tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin",
+     "label": "gemm1-fp16-real",
+     "group": "G2"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+     "label": "gemm1-int8-sparse50",
+     "group": "G2"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin",
+     "label": "gemm1-int8-real",
+     "group": "G2"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+     "label": "gemm1-fp16-ones",
+     "group": "G2"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+     "label": "gemm1-fp32-sparse50",
+     "group": "G2"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+     "label": "gemm1-fp32-ones",
+     "group": "G2"
+    },
+    {
+     "type": "fp16",
+     "values": "gemm1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin",
+     "label": "gemm1-fp16-sparse50",
+     "group": "G2"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin,tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin",
+     "label": "gemm1-fp32-real",
+     "group": "G2"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "mm16-int8-full",
+     "group": "G3"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "mm16-int8-zeros",
+     "group": "G3"
+    },
+    {
+     "type": "fp32",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "mm16-fp32-zeros",
+     "group": "G3"
+    },
+    {
+     "type": "fp16",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "mm16-fp16-zeros",
+     "group": "G3"
+    },
+    {
+     "type": "fp16",
+     "values": "mm16:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "mm16-fp16-randn",
+     "start": {
+      "mode": "hot",
+      "hot_c": 66,
+      "heat_s": 8,
+      "max_heats": 8
+     },
+     "group": "G3"
+    },
+    {
+     "type": "fp32",
+     "values": "mm16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "mm16-fp32-randn",
+     "start": {
+      "mode": "hot",
+      "hot_c": 66,
+      "heat_s": 8,
+      "max_heats": 8
+     },
+     "group": "G3"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "res-int8-full",
+     "group": "G4"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "res-fp32-randn",
+     "group": "G4"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "gemm1-int8-full-rep2",
+     "group": "G5"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemm1-fp32-zeros-rep2",
+     "group": "G5"
+    },
+    {
+     "type": "int8",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "gemm1-int8-zeros-rep2",
+     "group": "G5"
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemm1-fp32-randn-rep2",
+     "group": "G5"
+    }
+   ]
+  },
+  {
+   "name": "WARM",
+   "title": "the cells above the limit: one 6 s process right after resident random fp32 has taken the clock off 800 MHz (the rule above), labelled; a block of its own near the end, because a safety stop ends the session",
+   "passes": 1,
+   "shuffle": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 55,
+    "max_wait_s": 300
+   },
+   "launch": {
+    "seconds": 2.5,
+    "budget": 4,
+    "processes": 1
+   },
+   "tail_s": 0.5,
+   "runs": [
+    {
+     "type": "fp16",
+     "values": "mm16:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "mm16-fp16-randn",
+     "start": {
+      "mode": "hot",
+      "hot_c": 60,
+      "heat_s": 2,
+      "max_heats": 12
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "mm16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "mm16-fp32-randn",
+     "start": {
+      "mode": "hot",
+      "hot_c": 60,
+      "heat_s": 2,
+      "max_heats": 12
+     }
+    },
+    {
+     "type": "fp16",
+     "values": "mm16:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "mm16-fp16-randn",
+     "start": {
+      "mode": "hot",
+      "hot_c": 60,
+      "heat_s": 2,
+      "max_heats": 12
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "mm16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "mm16-fp32-randn",
+     "start": {
+      "mode": "hot",
+      "hot_c": 60,
+      "heat_s": 2,
+      "max_heats": 12
+     }
+    }
+   ]
+  },
+  {
+   "name": "SUSX",
+   "title": "sustained, mm16 ones, if the clock allows",
+   "passes": 1,
+   "shuffle": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 57,
+    "max_wait_s": 300
+   },
+   "launch": {
+    "seconds": 2.5,
+    "budget": 4,
+    "processes": 2
+   },
+   "tail_s": 0.5,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+     "label": "mm16-fp32-ones",
+     "group": "G6"
+    },
+    {
+     "type": "fp16",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+     "label": "mm16-fp16-ones",
+     "group": "G6"
+    },
+    {
+     "type": "int8",
+     "values": "mm16:tiles:tools/claims-v3/kinds/tiles/int8/ones.bin",
+     "label": "mm16-int8-ones",
+     "group": "G6"
+    }
+   ]
+  }
+ ]
+}

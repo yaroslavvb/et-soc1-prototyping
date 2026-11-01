@@ -6,6 +6,7 @@
   2. under --dry the toy card draws each cell's switching term c from protocol.json's `dry_c_w`, so a dry session exercises the gates, the safety paths and reduce_e101s.py with plausible numbers. No device is touched under --dry.
   3. a `hot` start first waits until the reading is 2 C below its hot_c, so run_hpl's own gate always heats with at least one resident launch: a die still hot from the run before would otherwise pass the gate at once and start the work from
      whatever the clock has recovered to, off the very condition the hot start is there to make.
+  4. a session started after another user's login ended the one before (queue_e101s.py) skips the runs the earlier sessions recorded: E101_SKIP_DONE names their directories. A run the login cut is not in runs.jsonl and runs again, whole.
 
 Everything that touches the card -- the card lock held for the session, the other-user checks before every launch process, `timeout 10` on every launch and config read, the sampler WITHOUT --reset-ms, the trace ring, residencies and `ettelem config`
 after every run, the safety stops (85 C; 97 W on three samples), and the end of the session unless the TDP and the threshold read back 65 -- is run_hpl.py's own code. Nothing is set on the card.
@@ -108,6 +109,25 @@ def _gate(self, r):
     return g
 
 
+_base_load = H.load_protocol
+
+
+def _load(path, only=None):
+    """run_hpl's load_protocol, less the runs earlier sessions recorded (addition 4)."""
+    proto, runs, bad = _base_load(path, only)
+    done = set()
+    for d in filter(None, os.environ.get("E101_SKIP_DONE", "").split(",")):
+        p = os.path.join(d, "runs.jsonl")
+        if os.path.exists(p):
+            for ln in open(p):
+                try:
+                    done.add(json.loads(ln)["run"])
+                except (ValueError, KeyError):
+                    pass
+    return proto, [r for r in runs if r.name not in done], bad
+
+
+H.load_protocol = _load
 H.Run.check = _check
 H.Session.gate = _gate
 K.verify_tiles = verify_tiles

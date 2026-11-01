@@ -1,0 +1,69 @@
+gaps on session 1's S: {"gemm1.fp32": {"burst_clock_ratio": 1.101, "sus_clock_ratio": 1.314}, "gemm1.fp16": {"burst_clock_ratio": 1.071, "sus_clock_ratio": 1.281}, "gemm1.int8": {"burst_clock_ratio": 1.0, "sus_clock_ratio": 1.035}, "mm16.fp32": {"burst_clock_ratio": 1.265, "sus_clock_ratio": 1.333}, "mm16.fp16": {"burst_clock_ratio": 1.224, "sus_clock_ratio": 1.333}, "mm16.int8": {"burst_clock_ratio": 1.141, "sus_clock_ratio": 1.33}, "res.fp32": {"burst_clock_ratio": 1.123, "sus_clock_ratio": 1.327}, "res.fp16": {"burst_clock_ratio": 1.088, "sus_clock_ratio": 1.301}, "res.int8": {"burst_clock_ratio": 1.0, "sus_clock_ratio": 1.02}}
+  gemm1-fp16-ones            burst  800.0 sus  764.8
+  gemm1-fp16-randn           burst  747.1 sus  624.4
+  gemm1-fp16-real            burst  753.7 sus  630.2
+  gemm1-fp16-sparse50        burst  798.5 sus  693.6
+  gemm1-fp16-zeros           burst  800.0 sus  800.0
+  gemm1-fp32-ones            burst  800.0 sus  775.2
+  gemm1-fp32-randn           burst  726.4 sus  608.9
+  gemm1-fp32-real            burst  734.5 sus  614.2
+  gemm1-fp32-sparse50        burst  800.0 sus  744.1
+  gemm1-fp32-zeros           burst  800.0 sus  800.0
+  gemm1-int8-full            burst  800.0 sus  773.2
+  gemm1-int8-ones            burst  800.0 sus  800.0
+  gemm1-int8-real            burst  800.0 sus  782.5
+  gemm1-int8-sparse50        burst  800.0 sus  791.4
+  gemm1-int8-zeros           burst  800.0 sus  800.0
+  mm16-fp16-ones             burst  799.9 sus  712.6
+  mm16-fp16-randn            burst  653.4 sus  600.0
+  mm16-fp16-sparse50         burst  741.7 sus  619.8
+  mm16-fp16-zeros            burst  800.0 sus  800.0
+  mm16-fp32-ones             burst  799.9 sus  712.6
+  mm16-fp32-randn            burst  632.6 sus  600.0
+  mm16-fp32-sparse50         burst  794.1 sus  678.0
+  mm16-fp32-zeros            burst  800.0 sus  800.0
+  mm16-int8-full             burst  701.4 sus  600.9
+  mm16-int8-ones             burst  800.0 sus  750.3
+  mm16-int8-sparse50         burst  741.0 sus  619.2
+  mm16-int8-zeros            burst  800.0 sus  799.0
+  res-fp16-randn             burst  735.2 sus  614.7
+  res-fp16-zeros             burst  800.0 sus  800.0
+  res-fp32-randn             burst  712.2 sus  602.9
+  res-fp32-zeros             burst  800.0 sus  800.0
+  res-int8-full              burst  800.0 sus  784.6
+  res-int8-zeros             burst  800.0 sus  800.0
+source: session 1's measured S; cool burst cells 31, warm burst cells 2, x 2 passes; sustained 27 runs, then 3 if the clock allows
+  mm16-fp32-randn            S  36.45 W (session 1), c  35.13 W, P800  100.5 W: warm/hot
+  mm16-fp16-randn            S  33.40 W (session 1), c  32.19 W, P800   94.9 W: warm/hot
+  mm16-int8-full             S  27.39 W (session 1), c  26.52 W, P800   84.1 W: cool
+  res-fp32-randn             S  26.43 W (session 1), c  25.29 W, P800   81.8 W: cool
+  gemm1-fp32-randn           S  24.80 W (session 1), c  23.69 W, P800   78.7 W: cool
+  gemm1-fp32-real            S  23.91 W (session 1), c  22.82 W, P800   77.1 W: cool
+  res-fp16-randn             S  23.78 W (session 1), c  22.75 W, P800   77.0 W: cool
+  mm16-int8-sparse50         S  22.94 W (session 1), c  22.15 W, P800   75.8 W: cool
+  mm16-fp16-sparse50         S  23.10 W (session 1), c  22.08 W, P800   75.7 W: cool
+  gemm1-fp16-randn           S  22.55 W (session 1), c  21.54 W, P800   74.7 W: cool
+  gemm1-fp16-real            S  21.91 W (session 1), c  20.91 W, P800   73.5 W: cool
+  mm16-fp32-sparse50         S  17.73 W (session 1), c  16.75 W, P800   65.5 W: cool
+  gemm1-fp16-sparse50        S  16.45 W (session 1), c  15.56 W, P800   63.2 W: cool
+  mm16-fp32-ones             S  15.02 W (session 1), c  14.10 W, P800   60.5 W: cool
+  mm16-fp16-ones             S  14.97 W (session 1), c  14.10 W, P800   60.5 W: cool
+  gemm1-fp32-sparse50        S  12.65 W (session 1), c  11.76 W, P800   56.0 W: cool
+  mm16-int8-ones             S  11.92 W (session 1), c  11.34 W, P800   55.2 W: cool
+  gemm1-fp16-ones            S  11.21 W (session 1), c  10.41 W, P800   53.4 W: cool
+  gemm1-int8-full            S  10.44 W (session 1), c   9.88 W, P800   52.4 W: cool
+  gemm1-fp32-ones            S  10.59 W (session 1), c   9.75 W, P800   52.2 W: cool
+  gemm1-int8-real            S   9.80 W (session 1), c   9.26 W, P800   51.2 W: cool
+  res-int8-full              S   9.66 W (session 1), c   9.11 W, P800   51.0 W: cool
+  gemm1-int8-sparse50        S   9.07 W (session 1), c   8.53 W, P800   49.9 W: cool
+  mm16-int8-zeros            S   7.65 W (session 1), c   7.15 W, P800   47.2 W: cool
+  gemm1-int8-ones            S   5.21 W (session 1), c   4.75 W, P800   42.7 W: cool
+  mm16-fp16-zeros            S   4.62 W (session 1), c   3.94 W, P800   41.1 W: cool
+  mm16-fp32-zeros            S   4.60 W (session 1), c   3.86 W, P800   41.0 W: cool
+  gemm1-fp16-zeros           S   4.49 W (session 1), c   3.81 W, P800   40.9 W: cool
+  gemm1-fp32-zeros           S   4.21 W (session 1), c   3.48 W, P800   40.2 W: cool
+  gemm1-int8-zeros           S   3.78 W (session 1), c   3.34 W, P800   40.0 W: cool
+  res-int8-zeros             S   2.54 W (session 1), c   2.12 W, P800   37.7 W: cool
+  res-fp32-zeros             S   2.13 W (session 1), c   1.44 W, P800   36.4 W: cool
+  res-fp16-zeros             S   2.03 W (session 1), c   1.39 W, P800   36.3 W: cool
+sustained order: ['gemm1-int8-zeros', 'gemm1-fp16-randn', 'gemm1-int8-full', 'gemm1-fp32-randn', 'gemm1-fp16-zeros', 'gemm1-fp32-zeros', 'gemm1-int8-ones', 'gemm1-fp16-real', 'gemm1-int8-sparse50', 'gemm1-int8-real', 'gemm1-fp16-ones', 'gemm1-fp32-sparse50', 'gemm1-fp32-ones', 'gemm1-fp16-sparse50', 'gemm1-fp32-real', 'mm16-int8-full', 'mm16-int8-zeros', 'mm16-fp32-zeros', 'mm16-fp16-zeros', 'mm16-fp16-randn', 'mm16-fp32-randn', 'res-int8-full', 'res-fp32-randn', 'gemm1-int8-full-rep2', 'gemm1-fp32-zeros-rep2', 'gemm1-int8-zeros-rep2', 'gemm1-fp32-randn-rep2']
