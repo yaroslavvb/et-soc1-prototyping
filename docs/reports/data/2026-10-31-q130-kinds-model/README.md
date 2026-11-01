@@ -1,5 +1,7 @@
 # Q130(c) — the explanation model: every kind's power and clock, predicted before E78 and E80 run
 
+*Dated 1 Nov 2026: this model's failure on the card is followed by [Q132(b)](../2026-11-01-q132-rtl-bench/README.md)'s model and its blind test, [E103](../2026-11-01-e103-model-blind-test/README.md): it narrows the question, for this kernel over zeros at 600 MHz, and does not close it.*
+
 *Sat 31 Oct 2026 (week 44), desk lane of Q130, on the Intel. **No card was touched, claimed or set.** Every
 number here is a prediction computed from already-committed measurements by [`model.py`](model.py), frozen for
 **E78** (aifoundry3, 600 MHz pinned) and **E80** (aifoundry2, its own governor, no governor move). Model id

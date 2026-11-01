@@ -1,5 +1,7 @@
 # E99 — which mechanism carries the DRAM pattern effect (Q132)
 
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): "The memory path" (part of old item 12).*
+
 *Corrected after verification, Sun 1 Nov 2026, at the desk, with no card touched and nothing re-run (§ [Corrections after verification](#corrections-after-verification-sun-1-nov-2026), C1–C10). A verifier rebuilt every number from the raw telemetry and found them right, and found two readings that were not: where a one pays, and what the period ladder says. New, post hoc and labelled: the NoC and SRAM rails, which the registered reducer did not read (`tools/claims-v3/dm/posthoc_rails.py`, `posthoc-rails.txt`). No number in `dm*.json`, `runs.csv` or `dips.json`, no scored verdict and no registered file changed.*
 
 ## Results

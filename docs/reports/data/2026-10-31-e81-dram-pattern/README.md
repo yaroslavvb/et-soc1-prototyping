@@ -1,5 +1,7 @@
 # E81 — the DRAM pattern question: is a two-value image cheap because it repeats? (Q130)
 
+*Dated 1 Nov 2026: which mechanism carries this effect is taken up by [E99](../2026-11-01-e99-dram-mechanism/README.md): read data-bus inversion behaves as live and the 1 W floor is gone, on one card; narrowed, not closed.*
+
 *Corrected after verification, Sat 31 Oct 2026 (§ [Corrections after verification](#corrections-after-verification),
 C1–C8). The compute-rail statement is narrowed: going from zeros to data adds 0.075–0.153 W on the minion rail, and
 the pattern effects never reach it. The intervals are now said to be statistical at the registered leakage slope,

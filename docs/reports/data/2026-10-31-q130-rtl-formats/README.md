@@ -1,5 +1,7 @@
 # Q130(b): how each number format is multiplied, and what each kind of number switches
 
+*Dated 1 Nov 2026: the fault this README reports, no multiply-add returning a·b + c, is fixed by [Q132(b)](../2026-11-01-q132-rtl-bench/README.md), with the bench [`rtl-sim/fma_toggle_v2/`](../../../../rtl-sim/fma_toggle_v2/README.md): Verilator 5.052's data-flow-graph optimiser was the cause, and `-fno-dfg` fixes it. This README's counts stay as they were.*
+
 *Sat 31 Oct 2026 (week 44), on the Intel. Desk compute only: no card was opened and nothing was measured in watts
 here. Everything below is one of three things: a reading of the public RTL (`external/core-et`, Apache-2.0), a
 Verilator replay of the Q130(s) kinds tiles through that RTL, or a reduction of committed card data (E64, E36). The

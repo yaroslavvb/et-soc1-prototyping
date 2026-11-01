@@ -1,5 +1,7 @@
 # E93: the zero gate on silicon — negative zero, denormals, int8's eight-byte rule and its column pairing (Q132, aifoundry1 card 1, 600 MHz)
 
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): "The zero gate on silicon" (old item 4).*
+
 *Sun 1 Nov 2026 (week 44), Q132. Pre-registered in `d470f6a9` (pushed 00:11:18 PDT by origin/main's reflog, before the claim and the first launch):
 [`tools/claims-v3/kinds/E93.md`](../../../../tools/claims-v3/kinds/E93.md), frozen numbers in
 [`predictions-e93.json`](../../../../tools/claims-v3/kinds/predictions-e93.json) (sha256 `020bb188…`), scorer `score_e93.py` (sha256 `3e35e62c…`) committed

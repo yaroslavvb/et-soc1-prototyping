@@ -1,5 +1,7 @@
 # E95: more real tensors' energy, and exact zeros letting the gate act (aifoundry3 card 0, 600 MHz)
 
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): "More real tensors" (old item 3), its energy half.*
+
 *Sun 1 Nov 2026 (week 44), Q132, item 3 of the kinds page's section 11. **Every tile's prediction and the claims C1–C12 are Q132(r)'s, frozen in
 [`real2/predictions-real2.json`](../../../../tools/claims-v3/kinds/real2/predictions-real2.json) (commit `6ae4c3d5`, sha256 `0957e0c2…`) before any card ran these tiles.**
 E95's own pre-registration is `89bd34cb` (committed 00:49:44, pushed 00:49:49 PDT by origin/main's reflog, before the claim and the first launch):

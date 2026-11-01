@@ -1,5 +1,7 @@
 # E86: the real tensors' energy (GPT-2 small's numbers on aifoundry3, 600 MHz)
 
+*Dated 1 Nov 2026: more real tensors are taken up by [E95](../2026-11-01-e95-real-tensors-energy/README.md) (energy) and [E96](../2026-11-01-e96-real-tensors-speed/README.md) (speed): these three tiles' reading is not a rule across models, and real int8 sustains near the cap with no difference that counts.*
+
 *Sat 31 Oct 2026 (week 44), Q130's evening round. Pre-registered in `190c1ac4` (committed 20:05:44, pushed 20:05:48
 PDT, before the claim and the first launch): [`tools/claims-v3/kinds/E86.md`](../../../../tools/claims-v3/kinds/E86.md),
 frozen numbers in `predictions-e86.json` (sha256 `e1f173c1…`). aifoundry3 card 0 at 600 MHz, 521.6 mV mean, TDP 0 /

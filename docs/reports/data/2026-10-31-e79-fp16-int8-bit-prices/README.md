@@ -1,5 +1,7 @@
 # E79 — the fp16 and int8 single-bit price lists (Q130, aifoundry3, 2026-10-31)
 
+*Dated 1 Nov 2026: the balanced price at more positions, the A side and int8's B list are taken up by [E102](../2026-11-01-e102-balanced-bit-prices/README.md): answered for what ran, on one card and one base word per side, and the all-in ratio depends on the bit.*
+
 *Pre-registered in [`tools/claims-v3/hlp/README.md`](../../../../tools/claims-v3/hlp/README.md) with
 [`predictions.json`](../../../../tools/claims-v3/hlp/predictions.json), committed as **`2a72d352`** at
 **09:24:58 PDT — 1 min 56 s before the card was claimed** (09:26:54 PDT, from the Discord message's own

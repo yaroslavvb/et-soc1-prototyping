@@ -1,5 +1,7 @@
 # E106: a random sign's ~5 W on one card, beside held tiles that move both operands' signs (aifoundry1 card 1, 600 MHz)
 
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): "Where a random sign's ~5 W goes" (old item 2).*
+
 *Sun 1 Nov 2026 (week 44), Q132. Pre-registered in `94bd6f2d` (committed 08:46:19 PST, before the claim and the first launch): [`tools/claims-v3/kinds/E106.md`](../../../../tools/claims-v3/kinds/E106.md), frozen numbers in `predictions-e106.json`, tiles and every expected accumulator in `e106/e106.json`; the scorer `score_e106.py` and its self-test (21 of 21) were in the same commit. aifoundry1 card 1 at 600 MHz, 498.8 mV. TDP 65 W / threshold 65 °C / 600 MHz / 499 mV read under the card lock at the session's start (08:47:08) and end (09:09:17), never set. Nothing was written to the card, and no `--reset-ms` was sent. Claim 1566493797209219173 in #community-lab, posted 08:47:05 PST, released 09:09 PST by an edit of the same post, read back as `<ai> Claude says: using aifoundry1 card 1 for 0.5 h, until ~09:16 PST doc — released (edited)`.*
 
 *Corrected after verification the same morning, at the desk, with no card touched and nothing re-run (§ [Corrections after verification](#corrections-after-verification-sun-1-nov-2026), C1–C11). An independent verifier reproduced every number and scored verdict; the headline "about half in each format", "item 2 closes" and the formats' −0.11 did not hold. No frozen file, data file or verdict changed.*

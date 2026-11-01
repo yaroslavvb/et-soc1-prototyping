@@ -1,5 +1,7 @@
 # Q130: the chip has one zero test, and it is 32 bits wide
 
+*Dated 1 Nov 2026: the rule read here is tested on silicon by [E93](../2026-11-01-e93-zero-gate-silicon/README.md), at power resolution on one card: `-0` and denormal words leave the lane on, and int8's eight-byte B rule, its pairing and its A word read as the RTL says.*
+
 *Desk pass, Sat 31 Oct 2026 (week 44). No card, no simulation: this is a correction, settled from the public RTL,
 the two public document sets and this repo's own earlier measurements. It exists because a documentary pass earlier
 today got the sign of the zero-price prediction backwards and a review caught it; the corrected mechanism is written

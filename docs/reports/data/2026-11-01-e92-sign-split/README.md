@@ -1,5 +1,7 @@
 # E92: where a random sign's cost goes (aifoundry3, 600 MHz)
 
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): "Where a random sign's ~5 W goes" (old item 2).*
+
 *Sun 1 Nov 2026 (week 44), Q132, item 2 of the kinds page's section 11. Pre-registered in `6b8f23f1` (committed 00:16:46
 PDT and pushed by 00:16:51, before the claim and the first launch):
 [`tools/claims-v3/kinds/E92.md`](../../../../tools/claims-v3/kinds/E92.md), frozen numbers in `predictions-e92.json`, tiles and

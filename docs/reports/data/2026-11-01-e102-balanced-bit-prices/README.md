@@ -1,5 +1,7 @@
 # E102: single-bit prices in a balanced layout, the A side, and int8's B side (aifoundry1 card 1, 600 MHz)
 
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): "Smaller, and carried", its single-bit prices (part of old item 12).*
+
 *Sun 1 Nov 2026 (week 44), Q132, the first half of item 12 of the kinds page's section 11. Pre-registered in `47060961` (committed 01:25:56 PST and pushed by 01:26:02, before the claim and the first launch):
 [`tools/claims-v3/kinds/E102.md`](../../../../tools/claims-v3/kinds/E102.md), frozen numbers in `predictions-e102.json`, tiles and counts in `e102/e102.json`, the scorer `score_e102.py` and its self-test in the same commit, the RTL bench's counts of the frozen tiles in [`bench/`](bench/). Amendment A1 `f4c07ead` (02:42:26 PST), written after session 1's data was read and before any data it adds.
 aifoundry1 card 1 (`V3_DEVICE=1`) at 600 MHz, 499.0 mV mean; TDP 65, threshold 65 °C, 600 MHz and 499 mV read under the card lock at both ends of both smokes and of every block, and at the end of each session (02:22:17, 03:08:30 PST); never set. Nothing was written to the card, and no `--reset-ms` was sent.*

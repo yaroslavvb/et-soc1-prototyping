@@ -161,7 +161,7 @@ is a median 1.106 s from one safe state to the next.
 point: E80's 64 dumps (59 in the session), E64's 58 and E83's 125, all committed before E84's data. None of their
 93,276 telemetry readings is at 300 MHz, though fp32 random data there read 80–88 W at 800 MHz
 ([`corrections-check.txt`](corrections-check.txt) C12). Whether its PMIC firmware (1.5.0) has another set point, or
-does not raise the alarm, was not checked.
+does not raise the alarm, was not checked. *Dated 1 Nov 2026: [Q132(g)](../2026-11-01-q132-governor-desk/README.md) §a takes this up: aifoundry2 shows no alarm at any reading it reports, on a reading not shown to be card 0's quantity, firmware or board unknown.*
 
 **A check on the reading.** Earlier alarm lines stay in the 4 KB ring for a few runs, so the raw dumps of seven later
 runs still contain them. The ring reader keeps only entries newer than the previous dump (`sptrace_full.since`). Every

@@ -1,5 +1,7 @@
 # E100 data: the idle reset against launch gaps, and one long launch with no gap (Q132, Sun 1 Nov 2026, week 44, aifoundry2)
 
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): "The governor's one-second idle reset" (old item 10).*
+
 *Pre-registration [`tools/claims-v3/e100/`](../../../../tools/claims-v3/e100/README.md), commit `5e12c4bd` (00:49:28 PDT), pushed 00:49:33 PDT, 40 minutes before the first launch and about 10 minutes after the night's shared claim (C8). Smoke 01:30:00-01:30:21 PDT, session 01:30:21-01:53:51 PDT: 54 of 54 runs, 170 processes, every one rc 0, exit 0, 23.5 card-minutes (0.4 for the smoke). The clocks in the logs read PDT: the session ended before 02:00 PDT went back. No amendment. Nothing was set on the card.*
 
 *Corrected after verification, Sun 1 Nov 2026, at the desk, with no card touched and nothing re-run: wrong sentences are replaced in place below, and § [Corrections after verification](#corrections-after-verification-sun-1-nov-2026) lists C1-C10. Every registered number and verdict stands.*

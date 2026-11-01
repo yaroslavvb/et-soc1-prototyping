@@ -1,5 +1,7 @@
 # Q132(b): the RTL bench returns correct multiply-adds, and what each kind of number switches
 
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): "The RTL bench's multiply-add" (old item 7) and "A power model across kinds" (old item 6).*
+
 *Sun 1 Nov 2026 (week 44). Compute on a desk machine: Verilator 5.052 from Homebrew, Apple clang, core-et `b38a1a31`
 ([`versions.txt`](versions.txt)). **No card was opened and nothing was measured in watts here**: every watt below comes from a committed
 experiment, named where it is used. The bench is [`rtl-sim/fma_toggle_v2/`](../../../../rtl-sim/fma_toggle_v2/). The two old benches are

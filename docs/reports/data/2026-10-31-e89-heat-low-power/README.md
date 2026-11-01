@@ -1,5 +1,7 @@
 # E89 — heat below 12 W of switching, measured on the die's 34 sensors one by one (Q130, aifoundry3, 2026-10-31)
 
+*Dated 1 Nov 2026: the kinds this left at S × 0.118, and the steady rise it did not attempt, are taken up by [E97](../2026-11-01-e97-heat-low-power-steady/README.md): none of E78's 51 stays extrapolated on this card, and a settled plateau of about 0.9 °C per board W, not a steady state.*
+
 *Pre-registered in [`tools/claims-v3/e89/E89.md`](../../../../tools/claims-v3/e89/E89.md) with
 [`predictions-e89.json`](../../../../tools/claims-v3/e89/predictions-e89.json), committed as **`850421ec`** and pushed at
 **18:58:18 PDT**, 39 s before the card was claimed in `#community-lab` (18:58:57 PDT, message `1566270291833790485`)

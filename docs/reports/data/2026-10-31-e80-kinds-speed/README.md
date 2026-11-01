@@ -206,7 +206,7 @@ tested out of sample there.
 [`corrections-check.txt`](corrections-check.txt) C6). At least five times in 225 work processes (2.2%), the clock fell
 from 800 MHz straight to 600 MHz while the work ran on: the kernel's own cycle counters read 0.60 GHz through each
 dip. It fell twice in bursts (int8 neg_ones and fp32 nn_like, pass 1 each) and three times in sustained runs (fp16
-ones' first, fp16 sparse50, int8 neg_ones).
+ones' first, fp16 sparse50, int8 neg_ones). *Dated 1 Nov 2026: [E100](../2026-11-01-e100-idle-reset/README.md) tested this: a once-a-second check reads idle in the gap between two kernels, answered at the level of behaviour on one card and one kind, not shown in the card's binary.*
 
 - **What the ring shows.** No power or thermal line sits at any of the five.
   - A POWER_IDLE power-status record (throttle state 0) sits at three: both bursts, and fp16 ones' run.

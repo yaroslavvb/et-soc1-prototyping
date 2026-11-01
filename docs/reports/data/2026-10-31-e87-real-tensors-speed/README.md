@@ -1,5 +1,7 @@
 # E87 data: the speed of real GPT-2 tensors under aifoundry2's own governor (Q130, Sat 31 Oct 2026)
 
+*Dated 1 Nov 2026: more real tensors are taken up by [E95](../2026-11-01-e95-real-tensors-energy/README.md) (energy) and [E96](../2026-11-01-e96-real-tensors-speed/README.md) (speed): these three tiles' reading is not a rule across models, and real int8 sustains near the cap with no difference that counts.*
+
 Q130(n)'s nine real tiles, cut from GPT-2 small (layer 0's MLP up-projection, layer 6's MLP down-projection and layer
 6's attention QKᵀ, each in fp32, fp16 and int8; [`tools/claims-v3/kinds/real/`](../../../../tools/claims-v3/kinds/real/README.md)),
 on aifoundry2 card 0 under the card's own governor. E80's anchors ran again in the same session: fp32 randn, fp16

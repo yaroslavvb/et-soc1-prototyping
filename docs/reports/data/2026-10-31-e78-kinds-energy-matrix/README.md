@@ -494,6 +494,7 @@ section in brackets); it gives the same output on Python 3.9, 3.12 and 3.14.
     0.376–0.491 for fp16 sparse50 (0.414), and a random fp32 tile's bus bits vary by 1.4% (sd).
   - Two committed tiles sit just outside their rule's band (2 of 82 checks, against about 4 expected by chance).
     fp16 nn_like gates 0.195 (draws 0.199–0.305), and fp16 uniform01 moves 77,948 bits an op (draws 73,534–77,624).
+  - *Dated 1 Nov 2026: [E94](../2026-11-01-e94-tile-spread/README.md) measured the tile draw, with the draw as the unit: two rows need a correction, on card 1, fp16 nn_like and fp32 sparse50 near its band.*
 
   The tables' note now says what ± covers.
 - **C6 — an interim look, not disclosed before.** Between 13:48:03 and 13:48:06 PDT, during pass 7814, the lane copied

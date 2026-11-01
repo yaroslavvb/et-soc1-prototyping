@@ -1,5 +1,7 @@
 # E88 — what the result path costs against the operand bits (Q130, aifoundry1 card 1, 2026-10-31)
 
+*Dated 1 Nov 2026: where a random sign's cost goes, which this left open, is taken up by [E92](../2026-11-01-e92-sign-split/README.md), [E104](../2026-11-01-e104-c-readback/README.md) and [E106](../2026-11-01-e106-held-signs/README.md). The adder alternating is a real cost and not most of the step; on one card a held tile keeps a bracket, 0.19–0.45 in fp16 and about 0.35–0.56 in fp32.*
+
 *Pre-registered in [`tools/claims-v3/rpath/E88.md`](../../../../tools/claims-v3/rpath/E88.md) with
 [`predictions-e88.json`](../../../../tools/claims-v3/rpath/predictions-e88.json), commit **`3dd99088`** (18:53:19 PDT),
 1 min 14 s before the card was claimed in `#community-lab` (18:54:33 PDT, message `1566269185057751163`, "using

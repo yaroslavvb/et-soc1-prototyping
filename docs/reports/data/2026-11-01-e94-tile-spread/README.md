@@ -1,5 +1,7 @@
 # E94: tile-to-tile spread — what a kind of number costs (aifoundry1 card 1, 600 MHz)
 
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): "Tile-to-tile spread" (old item 11).*
+
 *Sun 1 Nov 2026 (week 44), Q132 (lane `a1c1-e94-spread`). Pre-registered in `f45f0b34` (committed 00:59:38, on origin/main at 00:59:44 PDT, before the claim and
 the first launch): [`tools/claims-v3/kinds/E94.md`](../../../../tools/claims-v3/kinds/E94.md), frozen numbers in
 `predictions-e94.json` (sha256 `7810782d…`), the scorer `score_e94.py` (sha256 `3baa1190…`) and its self-test in the same commit.

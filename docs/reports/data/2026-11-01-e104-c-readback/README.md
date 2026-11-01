@@ -1,5 +1,7 @@
 # E104: fp16's accumulators read back, and its premium on sums that do or do not move (aifoundry1 card 1, 600 MHz)
 
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): "Where a random sign's ~5 W goes" (old item 2).*
+
 *Sun 1 Nov 2026 (week 44), Q132. Pre-registered in `b8d24835` (committed 05:36:57 PST and pushed by 05:37:01, before the claim and the first launch): [`tools/claims-v3/kinds/E104.md`](../../../../tools/claims-v3/kinds/E104.md), frozen numbers in `predictions-e104.json`, tiles and every expected accumulator in `e104/e104.json`; the scorer `score_e104.py` and its self-test (22 of 22) were in the same commit. aifoundry1 card 1 at 600 MHz, 498.8 mV. TDP 65 W / threshold 65 °C / 600 MHz / 499 mV read under the card lock at the session's start (05:37) and end (06:21:50), never set. Nothing was written to the card, and no `--reset-ms` was sent. Claim 1566446179208925195 in #community-lab, posted 05:37:52 PST, released 06:22 PST by an edit of the same post, read back as `<ai> Claude says: using aifoundry1 card 1 for 1 h, until ~06:38 PST doc — released (edited)`.*
 
 *Corrected after verification the same morning, at the desk, with no card touched and nothing re-run (§ [Corrections after verification](#corrections-after-verification-sun-1-nov-2026), C1–C12). An independent verifier reproduced every verdict and number; the fault was in how the watts were named. No frozen file, data file or verdict changed.*

@@ -1,5 +1,7 @@
 # Q132(g): the governor's open items, from what is already committed (Sun 1 Nov 2026, week 44, desk only)
 
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): "Horace He's pair, like for like" and "aifoundry2's alarm" (old item 1), "The heat path drifts between sessions" (old item 9), "The governor's one-second idle reset" (old item 10).*
+
 *Written 00:00-01:00 PDT, Sun 1 Nov 2026. **No card was opened for anything here.** Host-side reads on aifoundry1-3 were read-only (`/sys`, the kernel log, `sensors`, the
 boxes' own 5 s history). Everything is post hoc: nothing here was registered before the data, so these are readings, not verdicts. The one new test it led to, E100, is pre-registered
 separately. Items are numbered as in section 11 of the kinds page, version `df55db86ada8`.*

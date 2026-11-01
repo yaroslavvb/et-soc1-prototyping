@@ -1,5 +1,7 @@
 # E90: sign patterns and tile-to-tile spread (aifoundry3, 600 MHz)
 
+*Dated 1 Nov 2026: where a random sign's cost goes, which this left open, is taken up by [E92](../2026-11-01-e92-sign-split/README.md), [E104](../2026-11-01-e104-c-readback/README.md) and [E106](../2026-11-01-e106-held-signs/README.md). The adder alternating is a real cost and not most of the step; on one card a held tile keeps a bracket, 0.19–0.45 in fp16 and about 0.35–0.56 in fp32. Tile spread, with the draw as the unit: [E94](../2026-11-01-e94-tile-spread/README.md).*
+
 *Sat 31 Oct 2026 (week 44), Q130's evening round (optional lane; the Q130 critic's items 6 and 13). Pre-registered
 in `6f737d61` (pushed 21:06:14 PDT, before the claim and the first launch):
 [`tools/claims-v3/kinds/E90.md`](../../../../tools/claims-v3/kinds/E90.md), frozen numbers in `predictions-e90.json`
