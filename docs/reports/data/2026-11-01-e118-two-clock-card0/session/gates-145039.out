@@ -1,0 +1,46 @@
+2026-11-01 14:50:39 PST
+aifoundry1
+ 14:50:39 up 6 days, 48 min,  2 users,  load average: 0.61, 0.54, 0.58
+== card 0's lines in et-who (none expected)
+== card 1's lines (none expected)
+== other users' device processes or CI workers: 0
+== driver module
+Module                  Size  Used by
+et_soc1               143360  0
+== kernel log before
+kernel log (dmesg): card 0 (0000:01:00.0) lines 714; card 0 Error Event Detected 701; card 0 Tried to open same device 0; AER 21
+[520656.762068] ET 0000:01:00.0: Error Event Detected
+[520656.762073] ET 0000:01:00.0: Error Event Detected
+== gov_e118.py gates (ettelem-e118 config and uptime under card 0's lock; the vmin-LUT read under both locks)
+{
+ "config": {
+  "tdp_w": 65,
+  "temp_threshold_c": 65,
+  "power_state": 3,
+  "power_state_name": "low_power",
+  "minion_mhz": 600
+ },
+ "uptime": {
+  "t_ms": 1793573439729,
+  "rc": 0,
+  "day": 6,
+  "hours": 0,
+  "mins": 49
+ },
+ "continuity": "module uptime 8689 min; E84's 7240 min + 1448.7 min since = 8688.7",
+ "vmin_floor_mhz": 600,
+ "lut_points_mhz": [
+  600,
+  700,
+  800
+ ],
+ "verdict": [
+  "PASS"
+ ]
+}
+gates rc=0
+== SP ring before the pin (read only, card 0's lock)
+{"event": "ring", "tag": "before-pin", "rc": 0, "t_start": "2026-11-01T14:50:39.774-0800", "file": "ring-before-pin.bin", "sha256": "4df35ccf1b0f3612647e435cfa63d43283722908c1a040227d9c20e1255ec630", "stdout_tail": "Opening device 0\nsptrace: rc 0, 8192 bytes\n", "t_iso": "2026-11-01T14:50:39.781-0800"}
+ring rc=0
+== et-who after
+2026-11-01 14:50:40 PST

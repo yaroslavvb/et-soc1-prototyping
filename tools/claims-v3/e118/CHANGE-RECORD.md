@@ -250,10 +250,37 @@ not overlap.
 
 ## Set log, activation, final handoff
 
-⟨RUN AGENT: as E72's record — originals, LUT floor, watchdog armed, both sets with argv/rc/ms timestamps and the locks
-held, read-backs, restore, the return burst and its ring dump, module uptime after, card 1 untouched (its `et-who`
-lines before and after), error-event counts, the telemetry profile used, the claim's release edit read back. Outbound
-OTA: **N-A**. Signoff UTC and PST.⟩
+The machine-readable record is `session/gov.jsonl` in the data directory
+(`docs/reports/data/2026-11-01-e118-two-clock-card0/`): one line per event with argv, rc and millisecond timestamps;
+`session/steps.jsonl` and `session/session.log` order the session; `session/guard.jsonl` is the envelope guard's log.
+Filled from them after the session (all times PST, UTC−8):
+
+| Item | Value |
+|---|---|
+| Originals, read before any set (card 0's lock) | **14:50:39.730** — TDP **65 W**, threshold **65 °C**, `low_power`, 600 MHz (`ettelem-e118 config`: the TDP, threshold, power-state and frequency GETs) |
+| vmin-LUT floor (both locks) | **600 MHz**, points 600 / 700 / 800, parsed in code at 14:50:39.730 (file digest `5bdceb58…` in `gov.jsonl`; the calibration bytes are not copied) |
+| SP ring before the pin | 14:50:39.774, 8,192 bytes, `4df35ccf…` |
+| The GO | commit `f37fa285`, pushed 14:51:51 PST, before the write |
+| Watchdog armed (before the set) | **14:52:00.933**, 4,500 s deadline, detached |
+| Sets sent (both locks held for each) | **two**: `-l 0` at **14:52:00.933** (read back TDP **0**, threshold 65 °C, `low_power`, 600 MHz; the read opened `/dev/et0_mgmt` at `0000:01:00.0`) and `-l 65` at **15:12:37.217** (read back TDP **65**, threshold **65 °C**) |
+| Command exit statuses | both **rc 0**; `gov_e118.py` could send only these two values of this one command |
+| Read-back mismatches | **0**; the threshold read 65 °C at every read |
+| Restore | 15:12:37.241, **`ok: true`**; `release` written; the watchdog logged *"released by the session, nothing to do"* at 15:12:41 and exited |
+| Read-back after the restore | 15:12:37.279: TDP 65 W, 65 °C, 600 MHz, power state `max_power`. *The power state is not a knob: the firmware re-derives it each service-processor pass from the SoC power against the TDP (`thermal_pwr_mgmt.c` `get_power_state`, called at `:859`), and this read came 38 ms after the write, before the next pass, so it still showed the pinned era's state; the closing read below shows it re-derived* |
+| Return burst (normal stepping) | 15:12:38–15:13:01, `anchor_pi`, `xin_h16`, `lq_h8`, `anchor_pi` (block.sh's smoke): clocks **600 → 700 → 800 MHz** (117 / 2 / 97 samples) |
+| SP ring after the pinned passes / after the burst | 15:12:37.182 and 15:13:01.483; between the dump before the pin and the dump after the pinned passes **zero** new entries (covered); between that dump and the one after the burst exactly **one**, `Power throttle up event, current pwr 23370  tdp level: 65000` |
+| The 800 MHz control | 15:13:02–15:17:23, three passes at the card's own 65 W / 65 °C, the `pi` heater, launch at 57 °C after 58 °C |
+| Closing read-back | **15:17:33.805**: TDP **65 W**, threshold **65 °C**, `low_power`, 600 MHz — **equal to the originals** in every field read |
+| Module uptime | 8,689 min at the gates, 8,711 min after the restore, 8,716 min at the close: no service-processor reset at any point |
+| Card 1 | untouched: no `et-who` line for `/dev/et1_*` or its lock before (14:50:39) or after (15:17:51); our tools opened card 0 only, except the three stock-CLI calls (LUT read, set, restore), each with both locks held |
+| Kernel log, card 0 | `Error Event Detected` **701 before and 701 after**; `Tried to open same device` 0 and 0; AER lines 21 and 21. By wall-clock window (dmesg stamps): 120 such lines fell inside the previous session on this card (14:18:10–14:39:48), **0** inside E118 (14:50:39–15:17:34) |
+| Envelope | never approached: highest single board reading **52.75 W** (the 800 MHz control), highest die reading **61 °C**; the guard tripped **0** times; no 300 MHz reading |
+| Telemetry profile | **no-PMIC-read** throughout (`ettelem-e118`, sha256 `a8481df7…`): no `GET_ASIC_VOLTAGE`, `GET_MODULE_VOLTAGE`, statistics reset or revisions query was sent |
+| Card time | first card read 14:50:39, last 15:17:33.8: **26.9 card-minutes** of the 45 allowed |
+
+Activation and outbound OTA: **N-A** (no image, no reset). **Final handoff:** card 0 at TDP 65 W / 65 °C, its own
+governor stepping normally (shown by the burst and by the control's 800 MHz runs), no process of ours on the host, the
+watchdog gone, card 1 untouched. The claim's release edit is recorded in the data README.
 
 ## Corrections after verification (Sun 1 Nov 2026, desk only, nothing run)
 
