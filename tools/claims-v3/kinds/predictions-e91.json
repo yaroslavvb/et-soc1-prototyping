@@ -1,0 +1,906 @@
+{
+ "experiment": "E91",
+ "title": "the real tensors' energy replicated: E86's nine real GPT-2 tiles beside E78's anchors and comparison kinds, on aifoundry1 card 1 (600 MHz) in E82's frame",
+ "request": "Q130 evening round (workflow q130-evening, lane a1c1-e91-real-replicate), Sat 31 Oct 2026",
+ "date": "2026-10-31",
+ "registration": "tools/claims-v3/kinds/E91.md",
+ "replicates": {
+  "E86": "tools/claims-v3/kinds/E86.md (registration 190c1ac4, data a3c0b60d)",
+  "frame": "tools/claims-v3/kinds/E82.md (card 1, config gate 65/65, leakage arm 0.545) and tools/claims-v3/rpath/E88.md (card 1's meter dips removed as the primary reduction)"
+ },
+ "card": {
+  "host": "aifoundry1",
+  "card": 1,
+  "V3_DEVICE": 1,
+  "card_name": "aifoundry1-c1",
+  "lock": "/run/lock/etsoc-shire1.lock",
+  "clock_mhz": 600,
+  "minion_mv_approx": 499,
+  "firmware": "release 1.4.0, BL2 0.22.0 (E82 A1, read 13:45 PDT)",
+  "config_gate": {
+   "expected": {
+    "tdp_w": 65,
+    "temp_threshold_c": 65
+   },
+   "note": "E82's substitution: a read equal to card 1's 65/65 is handed to E78's gate as the (0, 65) it accepts; any other read sets the pass apart"
+  },
+  "writes": "nothing (no governor, TDP, threshold or clock set; no reset; no --reset-ms)"
+ },
+ "inputs_frozen": {
+  "predictions_real": {
+   "path": "tools/claims-v3/kinds/real/predictions-real.json",
+   "sha256": "bab33beee0bcefa3d1aae5bd9af72e2d1c1da0f76bb0947aa2f7a39c6b024941",
+   "commit": "7d5b99af"
+  },
+  "amendment_1": {
+   "path": "tools/claims-v3/kinds/real/amendment-1.json",
+   "sha256": "f32e8a9087a9cf3bf60f29ff623c1a375537b43696df0dca24972ba220bc0d9e",
+   "commit": "99620cc2"
+  },
+  "real_json": {
+   "path": "tools/claims-v3/kinds/real/real.json",
+   "sha256": "eb36f4cd0d88d928d2c0c92165f4a48e23727221d5ac047bff3de3c8e0ad83c0",
+   "commit": "7d5b99af"
+  },
+  "e82_reduction": {
+   "path": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json",
+   "sha256": "4794f5ac4ccfde95f45535aa855fa06c8d85b7d7716c9b63bd508ded1ade8601",
+   "commit": "0a041356"
+  },
+  "e82_scored": {
+   "path": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/scored.json",
+   "sha256": "498d5c70f01778248c7800d7d1d7e07b033db35f29b897d40f5a21787bef0b53",
+   "commit": "0a041356"
+  },
+  "e82_nodips": {
+   "path": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/posthoc/e82-nodips.json",
+   "sha256": "fad9057411234444a13595402589bf7173f1d0298d2dcc2104a9e1d6ab142d74",
+   "commit": "0a041356"
+  },
+  "predictions_e82": {
+   "path": "tools/claims-v3/kinds/predictions-e82.json",
+   "sha256": "feb48c459a466fa58a3ea54a95376c2af8ea5461770408978a6be042cf3882f7",
+   "commit": "06bc042e"
+  },
+  "e86_reduction": {
+   "path": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json",
+   "sha256": "e5cc743acdc6bd47ec0b32603ed433ef09daf3f9d08c3163d66c1854eaedca40",
+   "commit": "a3c0b60d"
+  },
+  "e86_leak0.1994": {
+   "path": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86-leak0.1994.json",
+   "sha256": "a01c3c9ccb5f095d85d245471b57b902d3d554fabd40c9c6fd35f0a151e93899",
+   "commit": "a3c0b60d"
+  },
+  "e86_leak0.3803": {
+   "path": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86-leak0.3803.json",
+   "sha256": "fe46d25b540215610b10c8102942b4c932411558b351ebe381c14a376cf6771d",
+   "commit": "a3c0b60d"
+  },
+  "e86_leak0": {
+   "path": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86-leak0.json",
+   "sha256": "c2a80afa57b5ed338eb4b25c8eb74828ae2fe2474fd2d7081325e73e3c623e7a",
+   "commit": "a3c0b60d"
+  },
+  "e86_nodips": {
+   "path": "docs/reports/data/2026-10-31-e86-real-tensors-energy/posthoc/e86-nodips.json",
+   "sha256": "b1bd37b80cc0128dabf052015d9ff49d9afbd230edc6781bd06a8dacd403761a",
+   "commit": "a3c0b60d"
+  },
+  "e86_scored": {
+   "path": "docs/reports/data/2026-10-31-e86-real-tensors-energy/scored.json",
+   "sha256": "1de068588aa741e10b4650f26f7939da04757aafd752195e6ac4e9d133def337",
+   "commit": "a3c0b60d"
+  },
+  "predictions_e86": {
+   "path": "tools/claims-v3/kinds/predictions-e86.json",
+   "sha256": "e1f173c17de85209288290ef6e45bcee34ee21ae6f3f8696bab5ecd78e64677b",
+   "commit": "190c1ac4"
+  },
+  "predictions_e78": {
+   "path": "tools/claims-v3/kinds/predictions-e78.json",
+   "sha256": "83d504bbde46917dd11e87af2dc1e06b4e3f4144a624fe9f2ef21ec4cda248fe",
+   "commit": "cfd94285"
+  }
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+   "tools/claims-v3/kinds/e86_common.py": "55e21e974094eb762f3381cb2930a10c1f2deeb55f7940fb1397f8fab3113b0a",
+   "tools/claims-v3/kinds/run_e86.py": "14464bee57806b9434c366388b5a396343e3b6a8d54378df9f945a3285d23bd4",
+   "tools/claims-v3/kinds/block_e86.sh": "c19dd813e32700c8f782f372f973dcbdcab695fede5eeb6e550afe953b77014d",
+   "tools/claims-v3/kinds/queue_e86.sh": "63f5c79537246c1832e1386dac2d7b1598d699ae0b746dadcc0b8c4cc36efda6"
+  },
+  "reused_desk_sha256": {
+   "tools/claims-v3/kinds/score_e86.py": "7b12e98753ce02720d03d38af74c83aadcf22d3c8fade12f9e11e09641e9304b",
+   "tools/claims-v3/kinds/score_e82.py": "9aaeadb564eb7fa7ae71bce86d6bf236a9210e6559770254ff1d34f467d418cd",
+   "tools/claims-v3/kinds/score_e78.py": "5f41917f5af3424cb098dfa355e512f83f32c9d62921ed4d63482d3394f4434e"
+  },
+  "e91_files_sha256": {
+   "tools/claims-v3/kinds/run_e91.sh": "b50201198fa2093b34e0578fd9a9c7623b6b2ddf7461e3508b5faf46b13423c5",
+   "tools/claims-v3/kinds/reduce_e91.py": "d14472edf9c79b33e9659234b18730932bb00b7d1979e9d6c00a45ef53d13545",
+   "tools/claims-v3/kinds/score_e91.py": "865c92b4c8927585635ed7fccb3b14f3637ac8e08477baffd62eb1844032ee48",
+   "tools/claims-v3/kinds/collect_e91.sh": "00c378f3d909c9e1629fd06384359f36ec3e59a09c6396e09a82df380c033cf9",
+   "tools/claims-v3/kinds/selftest_e91.py": "3e64cd37b0d07e8342b2d479dd3f90d97363d5d75a33b7b5611b55833b962a35"
+  },
+  "binary": "build/sparsity/host/sparsity_host in aifoundry1's ~/nekko (built 28 Sep 20:56; E82 and E88 ran it)",
+  "data_dir": "docs/reports/data/2026-10-31-e91-real-tensors-aifoundry1/",
+  "raw_data_on_box": "~/nekko/build/claims-v3/aifoundry1-c1/kinds/p91<nn>/ and kinds-smoke/p9101/"
+ },
+ "plan": {
+  "passes_planned": [
+   9110,
+   9111,
+   9112,
+   9113,
+   9114,
+   9115
+  ],
+  "passes_min": 4,
+  "smoke": 9101,
+  "runs_per_pass": 32,
+  "pass": "E86's: the tie (anchor_pi), three segments of E78's six anchors and four of the twelve E86 items, the tie; the twelve shuffled by Random('E86|aifoundry1-c1|<pass>') and dealt round-robin (e86_common.pass_order, unchanged, with this card's name)",
+  "anchors_three_per_pass": [
+   "fp32.zeros",
+   "fp32.randn",
+   "fp16.zeros",
+   "fp16.randn",
+   "int8.zeros",
+   "int8.full"
+  ],
+  "once_per_pass": [
+   "fp16.real_l0_mlp_up",
+   "fp16.real_l6_attn_qk",
+   "fp16.real_l6_mlp_down",
+   "fp32.real_l0_mlp_up",
+   "fp32.real_l6_attn_qk",
+   "fp32.real_l6_mlp_down",
+   "int8.real_l0_mlp_up",
+   "int8.real_l6_attn_qk",
+   "int8.real_l6_mlp_down",
+   "fp16.nn_like",
+   "fp32.nn_like",
+   "int8.gauss_q"
+  ],
+  "smoke_items": "e86_common.SMOKE_ITEMS (seven 2 s runs, no preheat)",
+  "run": "sparsity_host --test fma --type <t> --pattern none --values file:<tile> --shires 0xffffffff --per-shire 32 --seconds 4; E78's launch reading (heat to 59 C, launch at 58 C after 2.0 s quiet)"
+ },
+ "card_budget": {
+  "max_card_min": 35,
+  "counted": "from the claim post to its release edit",
+  "queue_budget_min": 30,
+  "first_pass_estimate_s": 390,
+  "deadline_local": "22:25",
+  "no_new_session_after": "21:45 PDT",
+  "runs_end_by": "22:30 PDT",
+  "how": "queue_e86.sh unchanged, with E86_BUDGET_MIN=30 E86_DEADLINE=22:25 E86_FIRST_S=390"
+ },
+ "analysis": {
+  "reduction": "reduce_e78.py unchanged (via reduce_e91.py) with E86's items installed, E82's config-gate substitution, and card 1's board-meter launch-gap dips removed from the telemetry first (E82 A2's definition: board_w[i] < min(board_w[i-2], board_w[i+2]) - 4.0 W; E88's registered primary on this card): D = p80 - Zhat_type(t0); one value per (pass, item); the pass the unit of replication",
+  "dips_why": "on card 1 the dips set aside 2 of 7 E82 passes and 3 of 6 E88 passes (dips kept); E91 has about five passes, so the registered E78 reduction with dips kept could leave fewer than four. E86 (aifoundry3) set one of five aside for the same reason",
+  "leak_primary": "auto (E78's registered estimator, on E91's own runs)",
+  "arms": {
+   "dips_kept": "the same reduction on the raw telemetry (E82's frame unchanged)",
+   "leak": [
+    0.1994,
+    0.545,
+    0.3803,
+    0.0
+   ]
+  },
+  "arms_why": "0.1994 W/C: Q130(n)'s D scope (E86's arm); 0.545: card 1's idle slope (E82's arm); 0.3803 (E71) and 0: E78's arms. Arms are reported; a verdict that moves is marked arm-sensitive",
+  "min_kept_passes": 4,
+  "min_passes_per_quantity": 3
+ },
+ "tiles": {
+  "fp32.real_l0_mlp_up": {
+   "type": "fp32",
+   "matrix": "l0_mlp_up",
+   "what": "layer 0 MLP up-projection: A = ln_2 output (tokens x 768), B = h.0.mlp.c_fc.weight (768 x 3072)",
+   "file": "tools/claims-v3/kinds/real/tiles/fp32/l0_mlp_up.bin",
+   "sha256": "6d592ffe2d7854bb4e26dd28d61f80d734152acfd12b9e64df2ef10884bfdfb6",
+   "sha256_a": "0858047c336d99a9ef7d24b543a0e921b615551a9d472ac0ac5501e5eca431f4",
+   "sha256_b": "9fb2fd8833684c6dda66641038283365756b60767b02f51e92a300c6660b7b42",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 82508,
+   "D_frozen_w": 23.749,
+   "D_frozen_pi95_w": [
+    21.619,
+    25.879
+   ],
+   "D_scoring_interval_w": [
+    21.406,
+    26.092
+   ],
+   "card_scale_e82": 1.03,
+   "interval_excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)",
+   "a3_D_frozen_w": 24.462,
+   "a3_D_scoring_interval_w": [
+    22.049,
+    26.875
+   ],
+   "ref": "fp32.randn",
+   "ref_D_w": 23.9869,
+   "ref_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp32.randn.D.mean",
+   "ratio_scoring_interval": [
+    0.8924,
+    1.08776
+   ],
+   "ratio_frozen_interval": [
+    0.90128,
+    1.07888
+   ],
+   "ratio_predicted_anchored": 0.9894,
+   "compare": "fp32.nn_like",
+   "compare_D_w": 12.7347,
+   "compare_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp32.nn_like.D.mean",
+   "order_vs_ref_predicted": "below",
+   "order_vs_compare_predicted": "above",
+   "provisional": false
+  },
+  "fp32.real_l6_mlp_down": {
+   "type": "fp32",
+   "matrix": "l6_mlp_down",
+   "what": "layer 6 MLP down-projection: A = GELU output (tokens x 3072), B = h.6.mlp.c_proj.weight (3072 x 768)",
+   "file": "tools/claims-v3/kinds/real/tiles/fp32/l6_mlp_down.bin",
+   "sha256": "fa0270cb9480245c16fd3ebd1826fd98826face2f4db0f991697aa04a3914acd",
+   "sha256_a": "37dc516a37355af2092dd92dabb09b831affe6de5fe9557464b9400ba4a4d4ab",
+   "sha256_b": "9595fb26aac58e0fa8c65fad118d8cd4a4506dc794a715086afc215c718817ff",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 81588,
+   "D_frozen_w": 23.663,
+   "D_frozen_pi95_w": [
+    21.532,
+    25.793
+   ],
+   "D_scoring_interval_w": [
+    21.32,
+    26.005
+   ],
+   "card_scale_e82": 1.03,
+   "interval_excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)",
+   "a3_D_frozen_w": 24.373,
+   "a3_D_scoring_interval_w": [
+    21.96,
+    26.786
+   ],
+   "ref": "fp32.randn",
+   "ref_D_w": 23.9869,
+   "ref_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp32.randn.D.mean",
+   "ratio_scoring_interval": [
+    0.88882,
+    1.08413
+   ],
+   "ratio_frozen_interval": [
+    0.89766,
+    1.07529
+   ],
+   "ratio_predicted_anchored": 0.9858,
+   "compare": "fp32.nn_like",
+   "compare_D_w": 12.7347,
+   "compare_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp32.nn_like.D.mean",
+   "order_vs_ref_predicted": "below",
+   "order_vs_compare_predicted": "above",
+   "provisional": false
+  },
+  "fp32.real_l6_attn_qk": {
+   "type": "fp32",
+   "matrix": "l6_attn_qk",
+   "what": "layer 6 attention scores: A = queries (tokens x 768, 12 heads of 64), B = keys transposed (768 x tokens); a window's K block lies inside one head because 64 is a multiple of every K",
+   "file": "tools/claims-v3/kinds/real/tiles/fp32/l6_attn_qk.bin",
+   "sha256": "3bfdf870e6f96347f111ad6cf921486dc72fee880c7fc1b1a9db0088cbab171c",
+   "sha256_a": "fd88a291d265a7029c189f5b9a33f20c7f19fea8d539ddb0eba2feb1630288b2",
+   "sha256_b": "36fb5943d6970c5c8731ae38c4a689be3cc9e54f348f4435bfd9a21eb5b1c8f3",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 83948,
+   "D_frozen_w": 23.748,
+   "D_frozen_pi95_w": [
+    21.618,
+    25.879
+   ],
+   "D_scoring_interval_w": [
+    21.405,
+    26.091
+   ],
+   "card_scale_e82": 1.03,
+   "interval_excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)",
+   "a3_D_frozen_w": 24.461,
+   "a3_D_scoring_interval_w": [
+    22.048,
+    26.874
+   ],
+   "ref": "fp32.randn",
+   "ref_D_w": 23.9869,
+   "ref_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp32.randn.D.mean",
+   "ratio_scoring_interval": [
+    0.89236,
+    1.08772
+   ],
+   "ratio_frozen_interval": [
+    0.90124,
+    1.07888
+   ],
+   "ratio_predicted_anchored": 0.9893,
+   "compare": "fp32.nn_like",
+   "compare_D_w": 12.7347,
+   "compare_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp32.nn_like.D.mean",
+   "order_vs_ref_predicted": "below",
+   "order_vs_compare_predicted": "above",
+   "provisional": false
+  },
+  "fp16.real_l0_mlp_up": {
+   "type": "fp16",
+   "matrix": "l0_mlp_up",
+   "what": "layer 0 MLP up-projection: A = ln_2 output (tokens x 768), B = h.0.mlp.c_fc.weight (768 x 3072)",
+   "file": "tools/claims-v3/kinds/real/tiles/fp16/l0_mlp_up.bin",
+   "sha256": "521996390983cb6e52c62de7d2b3c2584956dc216867cbe373df4a67459f3e28",
+   "sha256_a": "c955c65306422321827557fd11f5e6aa67bacc1d09596d7631cedbf5c0ebbcbf",
+   "sha256_b": "6e2d07514da9a1cee8bc60d9ecd128e1437db1dbdf7f0bf35986cdf1021ce35d",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 84748,
+   "D_frozen_w": 21.016,
+   "D_frozen_pi95_w": [
+    19.271,
+    22.762
+   ],
+   "D_scoring_interval_w": [
+    18.739,
+    23.292
+   ],
+   "card_scale_e82": 1.0332,
+   "interval_excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)",
+   "a3_D_frozen_w": 21.714,
+   "a3_D_scoring_interval_w": [
+    19.362,
+    24.066
+   ],
+   "ref": "fp16.randn",
+   "ref_D_w": 21.4415,
+   "ref_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp16.randn.D.mean",
+   "ratio_scoring_interval": [
+    0.87396,
+    1.0863
+   ],
+   "ratio_frozen_interval": [
+    0.89877,
+    1.06159
+   ],
+   "ratio_predicted_anchored": 0.9798,
+   "compare": "fp16.nn_like",
+   "compare_D_w": 16.8985,
+   "compare_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp16.nn_like.D.mean",
+   "order_vs_ref_predicted": "below",
+   "order_vs_compare_predicted": "above",
+   "provisional": false
+  },
+  "fp16.real_l6_mlp_down": {
+   "type": "fp16",
+   "matrix": "l6_mlp_down",
+   "what": "layer 6 MLP down-projection: A = GELU output (tokens x 3072), B = h.6.mlp.c_proj.weight (3072 x 768)",
+   "file": "tools/claims-v3/kinds/real/tiles/fp16/l6_mlp_down.bin",
+   "sha256": "193c36e9ef5b3bedae7ffc9f9cf30ad84743306a7bd1a1b7dd753dc1bf65b90a",
+   "sha256_a": "910d0a3e3432c6181f751104a24e89b6154670923cf69880c9fd6305d0499d36",
+   "sha256_b": "2eca120e25228a37596eefc6670e25a1527a32568e7894828889905674b63266",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 83370,
+   "D_frozen_w": 20.67,
+   "D_frozen_pi95_w": [
+    18.924,
+    22.416
+   ],
+   "D_scoring_interval_w": [
+    18.394,
+    22.946
+   ],
+   "card_scale_e82": 1.0332,
+   "interval_excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)",
+   "a3_D_frozen_w": 21.357,
+   "a3_D_scoring_interval_w": [
+    19.005,
+    23.709
+   ],
+   "ref": "fp16.randn",
+   "ref_D_w": 21.4415,
+   "ref_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp16.randn.D.mean",
+   "ratio_scoring_interval": [
+    0.85787,
+    1.07017
+   ],
+   "ratio_frozen_interval": [
+    0.88259,
+    1.04545
+   ],
+   "ratio_predicted_anchored": 0.9637,
+   "compare": "fp16.nn_like",
+   "compare_D_w": 16.8985,
+   "compare_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp16.nn_like.D.mean",
+   "order_vs_ref_predicted": "below",
+   "order_vs_compare_predicted": "above",
+   "provisional": false
+  },
+  "fp16.real_l6_attn_qk": {
+   "type": "fp16",
+   "matrix": "l6_attn_qk",
+   "what": "layer 6 attention scores: A = queries (tokens x 768, 12 heads of 64), B = keys transposed (768 x tokens); a window's K block lies inside one head because 64 is a multiple of every K",
+   "file": "tools/claims-v3/kinds/real/tiles/fp16/l6_attn_qk.bin",
+   "sha256": "b3b4644304f0870637a4e4a5515e35d46f4c008a7f536a773152150fc5974596",
+   "sha256_a": "48ed63fa8c3ec88d7186bf6c03652188264db0837d9eddfbb3546760fa6d9f09",
+   "sha256_b": "dcbcf2be098b3e778f3e4a37c5e4c96734c14da51472f06963f86f10479ae04b",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 81324,
+   "D_frozen_w": 20.844,
+   "D_frozen_pi95_w": [
+    19.098,
+    22.59
+   ],
+   "D_scoring_interval_w": [
+    18.568,
+    23.121
+   ],
+   "card_scale_e82": 1.0332,
+   "interval_excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)",
+   "a3_D_frozen_w": 21.537,
+   "a3_D_scoring_interval_w": [
+    19.185,
+    23.889
+   ],
+   "ref": "fp16.randn",
+   "ref_D_w": 21.4415,
+   "ref_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp16.randn.D.mean",
+   "ratio_scoring_interval": [
+    0.86598,
+    1.07833
+   ],
+   "ratio_frozen_interval": [
+    0.8907,
+    1.05356
+   ],
+   "ratio_predicted_anchored": 0.9718,
+   "compare": "fp16.nn_like",
+   "compare_D_w": 16.8985,
+   "compare_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp16.nn_like.D.mean",
+   "order_vs_ref_predicted": "below",
+   "order_vs_compare_predicted": "above",
+   "provisional": false
+  },
+  "int8.real_l0_mlp_up": {
+   "type": "int8",
+   "matrix": "l0_mlp_up",
+   "what": "layer 0 MLP up-projection: A = ln_2 output (tokens x 768), B = h.0.mlp.c_fc.weight (768 x 3072)",
+   "file": "tools/claims-v3/kinds/real/tiles/int8/l0_mlp_up.bin",
+   "sha256": "2734a6f44f485d6b129801effa750dba5678822690eade70f51562df3dd7f52f",
+   "sha256_a": "7da09487c75eb183ce593b048e7e546d62d84ed215489744d7aa2c8e98b053ad",
+   "sha256_b": "c239066818c7b0d6d95d8fa30dc41c4928bbb8164184839436b511ce83fffaad",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 59716,
+   "D_frozen_w": 5.735,
+   "D_frozen_pi95_w": [
+    4.87,
+    6.598
+   ],
+   "D_scoring_interval_w": [
+    4.451,
+    7.019
+   ],
+   "card_scale_e82": 1.0271,
+   "interval_excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)",
+   "a3_D_frozen_w": 5.89,
+   "a3_D_scoring_interval_w": [
+    4.571,
+    7.209
+   ],
+   "ref": "int8.full",
+   "ref_D_w": 6.8688,
+   "ref_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.int8.full.D.mean",
+   "ratio_scoring_interval": [
+    0.648,
+    1.02186
+   ],
+   "ratio_frozen_interval": [
+    0.709,
+    0.96057
+   ],
+   "ratio_predicted_anchored": 0.8347,
+   "compare": "int8.gauss_q",
+   "compare_D_w": 6.4987,
+   "compare_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.int8.gauss_q.D.mean",
+   "order_vs_ref_predicted": "below",
+   "order_vs_compare_predicted": "below",
+   "provisional": true
+  },
+  "int8.real_l6_mlp_down": {
+   "type": "int8",
+   "matrix": "l6_mlp_down",
+   "what": "layer 6 MLP down-projection: A = GELU output (tokens x 3072), B = h.6.mlp.c_proj.weight (3072 x 768)",
+   "file": "tools/claims-v3/kinds/real/tiles/int8/l6_mlp_down.bin",
+   "sha256": "3af027ef38e00cce862b16e79f7778bd5384da93164539621790fef1d1a03558",
+   "sha256_a": "27bc00a671028cc59eeec8c5121890dbf3b684d0a97ceb97efbfa4c8513cb4ee",
+   "sha256_b": "98128b56c7e44e132316a48719bdddbcb8c0fadebafcdf872a3b3733ae1bb9dd",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 45684,
+   "D_frozen_w": 5.046,
+   "D_frozen_pi95_w": [
+    4.183,
+    5.911
+   ],
+   "D_scoring_interval_w": [
+    3.762,
+    6.331
+   ],
+   "card_scale_e82": 1.0271,
+   "interval_excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)",
+   "a3_D_frozen_w": 5.183,
+   "a3_D_scoring_interval_w": [
+    3.864,
+    6.502
+   ],
+   "ref": "int8.full",
+   "ref_D_w": 6.8688,
+   "ref_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.int8.full.D.mean",
+   "ratio_scoring_interval": [
+    0.54769,
+    0.9217
+   ],
+   "ratio_frozen_interval": [
+    0.60898,
+    0.86055
+   ],
+   "ratio_predicted_anchored": 0.7345,
+   "compare": "int8.gauss_q",
+   "compare_D_w": 6.4987,
+   "compare_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.int8.gauss_q.D.mean",
+   "order_vs_ref_predicted": "below",
+   "order_vs_compare_predicted": "below",
+   "provisional": true
+  },
+  "int8.real_l6_attn_qk": {
+   "type": "int8",
+   "matrix": "l6_attn_qk",
+   "what": "layer 6 attention scores: A = queries (tokens x 768, 12 heads of 64), B = keys transposed (768 x tokens); a window's K block lies inside one head because 64 is a multiple of every K",
+   "file": "tools/claims-v3/kinds/real/tiles/int8/l6_attn_qk.bin",
+   "sha256": "50879e493c403d90bf8d9fc42e70e8e653eb4d789dadb3f40a5c2342438ff4fe",
+   "sha256_a": "42a26ed241a9f8dd4b966c0065a5a0aa1c1b9535ae9b62f47abf95a268b3fc0d",
+   "sha256_b": "09011c4048d257b55067bb3f7c68d5199bf539588a8381449d1b53c6f6b7fb36",
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 57300,
+   "D_frozen_w": 5.598,
+   "D_frozen_pi95_w": [
+    4.733,
+    6.461
+   ],
+   "D_scoring_interval_w": [
+    4.313,
+    6.882
+   ],
+   "card_scale_e82": 1.0271,
+   "interval_excludes": "the card-scale spread (E82's per-kind ratios: IQR 1.025-1.034 over 32 kinds; X3 FAIL)",
+   "a3_D_frozen_w": 5.749,
+   "a3_D_scoring_interval_w": [
+    4.43,
+    7.068
+   ],
+   "ref": "int8.full",
+   "ref_D_w": 6.8688,
+   "ref_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.int8.full.D.mean",
+   "ratio_scoring_interval": [
+    0.62791,
+    1.00191
+   ],
+   "ratio_frozen_interval": [
+    0.68905,
+    0.94062
+   ],
+   "ratio_predicted_anchored": 0.8147,
+   "compare": "int8.gauss_q",
+   "compare_D_w": 6.4987,
+   "compare_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.int8.gauss_q.D.mean",
+   "order_vs_ref_predicted": "below",
+   "order_vs_compare_predicted": "below",
+   "provisional": true
+  }
+ },
+ "e82_reference": {
+  "fp32.randn": {
+   "D_w": 23.9869,
+   "ci95_w": 0.1062,
+   "n": 5,
+   "band_w": 0.5,
+   "S_w": 25.8191
+  },
+  "fp16.randn": {
+   "D_w": 21.4415,
+   "ci95_w": 0.1848,
+   "n": 5,
+   "band_w": 0.5,
+   "S_w": 23.3039
+  },
+  "int8.full": {
+   "D_w": 6.8688,
+   "ci95_w": 0.0994,
+   "n": 5,
+   "band_w": 0.25,
+   "S_w": 9.2903
+  },
+  "fp32.nn_like": {
+   "D_w": 12.7347,
+   "ci95_w": 0.185,
+   "n": 5,
+   "band_w": 0.5,
+   "S_w": 14.5821
+  },
+  "fp16.nn_like": {
+   "D_w": 16.8985,
+   "ci95_w": 0.4417,
+   "n": 5,
+   "band_w": 0.5,
+   "S_w": 18.7848
+  },
+  "int8.gauss_q": {
+   "D_w": 6.4987,
+   "ci95_w": 0.0449,
+   "n": 4,
+   "band_w": 0.25,
+   "S_w": 8.9513
+  },
+  "anchor_pi": {
+   "D_w": 8.0954,
+   "ci95_w": 0.2927,
+   "n": 5,
+   "band_w": 0.5,
+   "S_w": 9.9171
+  }
+ },
+ "e82_reference_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json (E82's registered reduction of card 1, 5 kept passes, dips kept); its post-hoc dips-removed view is reported beside",
+ "rules": {
+  "E91-R1": {
+   "name": "Amendment 1's intervals",
+   "what": "each real tile's D (mean over kept passes) inside Amendment 1's E91 scoring interval (tiles.<name>.D_scoring_interval_w = amendment-1.json tiles.<key>.e91_aifoundry1_card1_600mhz.scoring_interval_w)",
+   "pass_if": "at least 7 of the 9 inside; fewer: FAIL",
+   "min_resolved": 8,
+   "beside": "the count inside the frozen E91 intervals; the count whose own 95% interval overlaps; the count inside aifoundry3's (unscaled) intervals; every arm"
+  },
+  "E91-R2": {
+   "name": "accuracy per format",
+   "what": "rms over a format's three tiles of (D - D_frozen_w), D_frozen_w the E91 point (Q130(n)'s frozen point / E82's per-type scale)",
+   "bound_w": {
+    "fp32": 2.0,
+    "fp16": 2.0,
+    "int8": 1.0
+   },
+   "pass_if": "rms <= bound in each format separately (E78-R2's bounds, copied)",
+   "beside": "mean error per format; the nested-LOO rms Amendment 1 expects",
+   "nested_loo_rms_w": {
+    "fp32": 1.1249,
+    "fp16": 1.0889,
+    "int8": 0.6055
+   }
+  },
+  "E91-R3": {
+   "name": "real against random, the predicted direction",
+   "what": "per pass, per format, rho = mean over the three real tiles of D(real)/D(ref) (ref = randn fp32/fp16, full int8, the pass's mean of its three runs); over passes the mean and its 95% interval t(0.975, n-1) x SE",
+   "threshold": {
+    "fp32": 1.0,
+    "fp16": 1.0,
+    "int8": 0.9
+   },
+   "verdict": "per format PASS if the upper bound < threshold, FAIL if the lower bound > threshold, else INCONCLUSIVE; the rule passes only if all three formats pass",
+   "beside": "per tile the paired difference D(real) - D(ref), three-way at 95%"
+  },
+  "E91-R4": {
+   "name": "real against nn_like / gauss_q, the predicted order",
+   "what": "per tile, paired per pass: D(real) - D(compare); predicted side from the E91 point against E82's measured compare on card 1 (tiles.<name>.order_vs_compare_predicted)",
+   "verdict": "per tile PASS if the 95% interval lies on the predicted side of 0, FAIL if on the other, else INCONCLUSIVE; per format PASS if its three tiles pass, FAIL if any fails; the rule passes only if all three formats pass"
+  },
+  "E91-R5": {
+   "name": "the session tie on card 1",
+   "what": "D of each e82_reference cell (fp32/fp16 randn, int8 full, fp32/fp16 nn_like, int8 gauss_q, anchor_pi) within band_w of E82's (card 1, the same protocol, 6-7 h earlier)",
+   "pass_if": "all seven inside their bands (E86-R5's bands, copied)",
+   "meaning": "a failure means the session moved, not that a model did; S1 is then the reading"
+  },
+  "E91-S1": {
+   "name": "like with like",
+   "what": "per tile, the per-pass ratio D(real)/D(ref), averaged over passes, inside tiles.<name>.ratio_scoring_interval (the E91 scoring interval over E82's D(ref) on card 1)",
+   "pass_if": "at least 7 of the 9 inside",
+   "min_resolved": 8,
+   "beside": "the frozen ratio interval; the anchored D = ratio x E78's D(ref)"
+  },
+  "E91-X1": "cross_card.X1 (E82's, copied)",
+  "E91-X2a": "cross_card.X2.X2a (E82's, copied)",
+  "E91-X2b": "cross_card.X2.X2b (E82's, copied)",
+  "E91-X3": "cross_card.X3 (E82's, copied)",
+  "E91-X4": "cross_card.X4 (E91's: E82's measured scale)",
+  "E91-C": {
+   "name": "checks, reported, never a verdict",
+   "what": "E78-R5's: idle consistency median |S - S0 - D| <= 0.15 W; rail lag re-fit median in [0.80, 1.15] s; duty in [0.990, 1.000]; carry-over |beta| <= 0.01 W/W or < 3 SE; the dumped tiles equal their registered sha256 (a run gate)"
+  }
+ },
+ "cross_card": {
+  "against": "E86's committed reduction of aifoundry3 card 0 (docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json, a3c0b60d, 4 kept passes) and its leakage arms; E86's post-hoc dips-removed view (posthoc/e86-nodips.json) only in a reported pair",
+  "quantity": "D, each kind's switching power over its own type's zeros (mean over kept passes), on each card",
+  "orientation": "every ratio is D(aifoundry3, E86) / D(card 1, E91), as E82's D(aifoundry3) / D(card 1)",
+  "band": [
+   0.88,
+   0.99
+  ],
+  "band_source": "predictions-e82.json cross_card.band, copied: e82_desk_checks.txt [2]: aifoundry3 / card 1 in September read 0.887 (registered values), 0.955 and 0.965 (at the launch temperatures, note C2), per pattern 0.897-0.915; [0.88, 0.99] covers them",
+  "min_passes_each": 4,
+  "X1": {
+   "name": "rank",
+   "what": "Spearman rho of D(card 1) against D(aifoundry3) within each type, over every kind but the type's zeros (D of zeros is 0 by construction)",
+   "threshold": 0.9,
+   "min_resolved_frac": 0.75,
+   "pass_if": "rho >= 0.90 in each type; X1 passes only if all three do",
+   "sets": {
+    "fp32": [
+     "fp32.nn_like",
+     "fp32.randn",
+     "fp32.real_l0_mlp_up",
+     "fp32.real_l6_attn_qk",
+     "fp32.real_l6_mlp_down"
+    ],
+    "fp16": [
+     "fp16.nn_like",
+     "fp16.randn",
+     "fp16.real_l0_mlp_up",
+     "fp16.real_l6_attn_qk",
+     "fp16.real_l6_mlp_down"
+    ],
+    "int8": [
+     "int8.full",
+     "int8.gauss_q",
+     "int8.real_l0_mlp_up",
+     "int8.real_l6_attn_qk",
+     "int8.real_l6_mlp_down"
+    ]
+   },
+   "copied_from": "predictions-e82.json cross_card.X1 (threshold, min_resolved_frac, pass_if)",
+   "power": "this freeze's power block: five kinds a type, four of them (the three real tiles and random data) within 1.7% (fp32) and 2.9% (fp16) of each other on E86, so their order is within the noise; X1 can fail on noise in fp32 and fp16"
+  },
+  "eligible_kinds": [
+   "fp16.nn_like",
+   "fp16.randn",
+   "fp16.real_l0_mlp_up",
+   "fp16.real_l6_attn_qk",
+   "fp16.real_l6_mlp_down",
+   "fp32.nn_like",
+   "fp32.randn",
+   "fp32.real_l0_mlp_up",
+   "fp32.real_l6_attn_qk",
+   "fp32.real_l6_mlp_down",
+   "int8.full",
+   "int8.gauss_q",
+   "int8.real_l0_mlp_up",
+   "int8.real_l6_attn_qk",
+   "int8.real_l6_mlp_down"
+  ],
+  "eligible_rule": "every non-zero E91 kind: the nine real tiles (frozen points 5.18-24.46 W) and the six E78 kinds in E82's own eligible list (each type's random kind and its comparison kind); E82's rule was a frozen prediction >= 5.0 W, and all fifteen meet it",
+  "X2": {
+   "name": "one scale, kind by kind",
+   "X2a": "the ratio of means D(aifoundry3)/D(card 1) lies inside the band, for >= 80% of the resolved eligible kinds (the orchestrator's form)",
+   "X2b": "the ratio's 95% interval (delta method from the two cards' t intervals) overlaps the band, for >= 80% of the resolved eligible kinds",
+   "min_frac": 0.8,
+   "min_resolved_frac": 0.75,
+   "non_positive": "a kind with D <= 0 on either card counts as outside the band in both"
+  },
+  "X3": {
+   "name": "the card scale",
+   "what": "the median over the resolved eligible kinds of D(aifoundry3)/D(card 1)",
+   "pass_if": "inside the band [0.88, 0.99]"
+  },
+  "X4": {
+   "name": "the real tiles share the card scale E82 measured",
+   "what": "the median over the nine real tiles of D(aifoundry3, E86) / D(card 1, E91)",
+   "band": [
+    1.0008,
+    1.0608
+   ],
+   "band_source": "E82's measured median ratio over its 32 eligible kinds, 1.0308 (docs/reports/data/2026-10-31-e82-kinds-aifoundry1/scored.json cross_card.primary.x3.median_ratio), +- 0.03: 2.5x the 1.2% sd of E82's per-kind ratios (its README result 1); E82's IQR 1.0249-1.0339",
+   "pass_if": "inside the band; else FAIL; NOT SCORED with fewer than 7 of the 9 resolved on both cards",
+   "min_resolved": 7
+  },
+  "expectation": "E82 measured the card scale at 1.031 (X2a, X2b and X3 FAIL against September's band). If the real tiles share it, X2a, X2b and X3 fail again here, and X4 passes; the rules are kept as E82 registered them so that both experiments are scored alike",
+  "arms": {
+   "own idle slopes (card 1 0.545, aifoundry3 0.3803)": [
+    "leak0.545",
+    "e86-leak0.3803.json"
+   ],
+   "0.3803 on both": [
+    "leak0.3803",
+    "e86-leak0.3803.json"
+   ],
+   "0.1994 on both (Q130(n)'s D scope)": [
+    "leak0.1994",
+    "e86-leak0.1994.json"
+   ],
+   "no correction on both": [
+    "leak0",
+    "e86-leak0.json"
+   ]
+  },
+  "reported_pairs": {
+   "both dips removed (E91 primary, E86 post hoc)": [
+    "primary",
+    "posthoc/e86-nodips.json"
+   ],
+   "E91 dips kept, E86 registered": [
+    "dips_kept",
+    "e86.json"
+   ]
+  },
+  "power": {
+   "model": "card 1 reads E86's committed D / scale (x a per-kind factor N(1, dev)), with E86's per-pass scatter per item, 5 kept passes on card 1 (4 in the second row); aifoundry3 = E86's committed means and intervals, fixed; 4000 draws, seed 91. Rates of PASS",
+   "scale_e82_median_dev0_n5": {
+    "X1": 0.146,
+    "X2a": 0.0,
+    "X2b": 0.0,
+    "X3": 0.0,
+    "X4": 1.0,
+    "X1_fp32": 0.416,
+    "X1_fp16": 0.45,
+    "X1_int8": 0.771
+   },
+   "scale_e82_median_dev0_n4": {
+    "X1": 0.115,
+    "X2a": 0.0,
+    "X2b": 0.0,
+    "X3": 0.0,
+    "X4": 1.0,
+    "X1_fp32": 0.38,
+    "X1_fp16": 0.422,
+    "X1_int8": 0.742
+   },
+   "scale_e82_median_dev0.012_n5": {
+    "X1": 0.017,
+    "X2a": 0.0,
+    "X2b": 0.0,
+    "X3": 0.0,
+    "X4": 1.0,
+    "X1_fp32": 0.127,
+    "X1_fp16": 0.196,
+    "X1_int8": 0.699
+   },
+   "scale_0.96_dev0_n5": {
+    "X1": 0.166,
+    "X2a": 1.0,
+    "X2b": 1.0,
+    "X3": 1.0,
+    "X4": 0.0,
+    "X1_fp32": 0.444,
+    "X1_fp16": 0.465,
+    "X1_int8": 0.796
+   },
+   "scale_1.00_dev0_n5": {
+    "X1": 0.154,
+    "X2a": 0.0,
+    "X2b": 0.208,
+    "X3": 0.0,
+    "X4": 0.261,
+    "X1_fp32": 0.427,
+    "X1_fp16": 0.456,
+    "X1_int8": 0.78
+   },
+   "scale_1.07_dev0_n5": {
+    "X1": 0.134,
+    "X2a": 0.0,
+    "X2b": 0.0,
+    "X3": 0.0,
+    "X4": 0.0,
+    "X1_fp32": 0.403,
+    "X1_fp16": 0.442,
+    "X1_int8": 0.755
+   }
+  }
+ },
+ "reported_never_a_verdict": [
+  "per tile, D(real)/D(ref) on card 1 against E86's on aifoundry3: the difference and its 95% interval (two independent experiments, intervals added in quadrature)",
+  "every rule at the dips-kept arm and the four leakage arms",
+  "the dip samples removed per pass, and where they fell",
+  "S, pJ per op / MAC / flop, the heat column dT, D32, the rail, for every tile and comparison kind",
+  "the session tie against E82's post-hoc dips-removed cells"
+ ],
+ "not_scored_if": "fewer than 4 kept passes: every rule NOT SCORED; a quantity with fewer than 3 kept passes is unresolved and never counts as inside or PASS"
+}
