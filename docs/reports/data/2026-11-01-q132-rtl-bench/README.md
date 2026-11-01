@@ -384,6 +384,7 @@ nets = merged-net toggles of the whole VPU (`nets_map`); unit = the multiply-add
 | `analysis.json`, `analyze.py`, `make_tables.py` | every fit and out-of-sample score above |
 | `e92-bench-prediction-frozen.json` | the prediction as frozen at `de545f0c`, byte for byte |
 | `e92-bench-prediction.json`, `predict_e92.py`, `e92-prediction-scored.json`, `score_e92_prediction.py` | every variant of the prediction (its `nets_hier2` is checked against the frozen file), and the score |
+| `counts-e94e95.json`, `predict_e94_e95.py`, `e94-e95-bench-prediction.json`, `e94-e95-bench-prediction.md` | the frozen predictions for E94 and E95 (§10) |
 | `fcheck/` | the functional check's output |
 | `old-benches/` | the old benches with and without the flag; the recount redone; `use_prev_sigs`; the flip |
 | `optimiser-sensitivity/` | the same three kinds with Verilator's optimisations off and on, before the map existed |
@@ -397,3 +398,19 @@ python3 run_kinds.py --bin obj_vpu/Vtb --accum ./accum --settle ./settle_count -
 ```
 
 A clean build from the committed files reproduced `counts-v2.json`'s fp32 `randn` exactly, register for register and net for net. Installed for this: `brew install verilator` on the mini, and numpy under `uv` for the analysis. Nothing ran on a lab host.
+
+## 10. Frozen predictions for E94 and E95
+
+[`e94-e95-bench-prediction.md`](e94-e95-bench-prediction.md) gives every tile's predicted D with a 95% interval; the JSON beside it holds the same with both merges and each launch point. The commit holding these files is the freeze.
+
+**What was frozen before what.** E95: the commit precedes any E95 data on main, and I read none of its data. E94: **post hoc by the clock**. Its data commit, `a3824bb8` at 01:55:23 PDT, landed 11 seconds after this bench run started and before this commit. I read none of it, and `predict_e94_e95.py` opens neither data directory, but nothing proves that from outside. E95's three partner tiles from E86 are marked: E86 read them on that card, and k and a did not use them. (02:00 PDT became 01:00 PST during this work.)
+
+**The model, unchanged from §Results 5.** Floats: k = 1.871 fJ, a = 1.092 fJ, fitted on E78's 33 fp32 and fp16 kinds alone. E95 runs on E78's card, so no scale. E94 runs on aifoundry1 card 1: one scale from E82 alone, 0.9711 ± 0.0043. `nets_hier2`'s prediction stands beside it in every row.
+
+**int8 has its own empirical terms.** k = 3.735 fJ and a = 2.133 fJ, fitted on E78's 15 int8 kinds alone (rms 0.287 W, leave-one-out 0.331 W). Its multiply and adds are behavioural RTL with no nets inside them, so these are fitting constants on the counts that exist, not comparable with the float constants, and the float constants fail on int8 (bias −1.8 W). Card 1's int8 scale, from E82 alone: 0.9736 ± 0.0242.
+
+**The interval** is t(0.975, n − 2) × √(s² + x′Cx + m²). s is the rms of out-of-sample errors already read on that card: 0.411 W over 87 (floats, aifoundry3: E78 leave-one-out, E86, E90, E92's tiles under this merge, which E92 had by then published), 0.355 W over 19 (int8, aifoundry3), 0.391 W over 47 (floats, card 1: E82 after its scale, E88), 0.282 W over 20 (int8, card 1). C is the coefficients' jackknife covariance on E78, and m the tile's standard error over its three launch points. No correction for the known bias: gated kinds have run 0.17–0.65 W low, and only the interval covers that. Offsets get √2 × s, which is conservative.
+
+**Every tile passes the functional check:** 0 of 256 words wrong at all three launch points, all 84 tiles.
+
+Rerun: `run_kinds.py … --types fp32,fp16,int8 --only __none__ --extra-tiles <type>:<name>:<path>,…` over `tools/claims-v3/kinds/e94/tiles`, `real2/tiles` (named `r2_<name>`), and `real/tiles`' three partners (named `real_<name>`), writing `counts-e94e95.json`; then `predict_e94_e95.py`.
