@@ -1,0 +1,6 @@
+# Which operand registers a B-only flip moves, in the primary netlist (booth_tree) inside the bench: one op (+warm=1 +first=1) of
+# E102's int8 hq (the B list's zero) and bk_5 (B bit 5 flipped in 512 bytes), VCD, toggles of the 16 units' flip-flop outputs named
+# f2_in1_q* (the A word and signs, from TenA: f1_in1) and f2_in2_q* (the B word and signs, from TenB: f1_in2). 1,152 identifiers = 16 x 72.
+hq:   A registers 0 toggles, B registers 0 toggles
+bk_5: A registers 0 toggles, B registers 1,024 toggles (E102's designed flips per op: 1,024)
+# So the tile's B matrix reaches f1_in2, the second operand of the RTL's product, which yosys's booth pass recodes (recoded_operand.txt).

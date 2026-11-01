@@ -1,0 +1,17 @@
+plugin -i slang
+read_slang --std 1800-2017 --single-unit --compat vcs --allow-use-before-declare --relax-enum-conversions --top tima_top -I $SCRATCH/core-et/rtl/inc -I $SCRATCH/core-et/rtl \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/tima/tima_top.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/tima/tima_adder.v \
+  --error-limit=200
+hierarchy -check -top tima_top
+synth -top tima_top -flatten -booth
+opt -purge
+dfflibmap  -liberty $SCRATCH/work/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib -dont_use *x1p*_ASAP7* -dont_use *xp*_ASAP7* -dont_use SDF* -dont_use ICG*
+opt
+abc  -liberty $SCRATCH/work/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib -D 1250 -dont_use *x1p*_ASAP7* -dont_use *xp*_ASAP7* -dont_use SDF* -dont_use ICG*
+setundef -zero
+opt_clean -purge
+hilomap -singleton -hicell TIEHIx1_ASAP7_75t_R H -locell TIELOx1_ASAP7_75t_R L
+tee -o $SCRATCH/work/tima/syn/stat_booth.txt stat  -liberty $SCRATCH/work/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib
+write_verilog -noattr -noexpr -nohex -nodec $SCRATCH/work/tima/syn/tima_booth.v
+write_json $SCRATCH/work/tima/syn/tima_booth.json

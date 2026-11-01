@@ -1,0 +1,6 @@
+# Yosys 0.70+221 (git sha1 33177a407, Release, Clang /usr/local/osxcross/target/bin/x86_64-apple-darwin25.5-clang++ 21.1.8)
+# input pins of the cells the booth pass creates, by operand: encoder cells (bur_enc*) and the rest
+p = a * b: encoder cells read {'b': 23}; other cells read {'b': 61, 'a': 110}; recoded operand: b
+p = b * a: encoder cells read {'a': 23}; other cells read {'a': 61, 'b': 110}; recoded operand: a
+# so `x * y` recodes y, the second operand: in tima_top.v as written that is f2_in2_part, the B operand (booth,
+# booth_tree), and in the swapped copy (booth_swap) it is f2_in1_part, the A operand.

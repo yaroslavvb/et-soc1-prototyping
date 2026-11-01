@@ -1,0 +1,152 @@
+plugin -i slang
+read_slang --std 1800-2017 --single-unit --compat vcs --allow-use-before-declare --relax-enum-conversions  --top txfma_top -I $SCRATCH/core-et/rtl/inc -I $SCRATCH/core-et/rtl \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_top.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_4_2_compressor.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_4_2_compressor_array.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_adder.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_align_shf.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_booth_ppg_32r4.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_booth_ppg_32r4_msb.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_booth_ppg_32r4_norm.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_c0.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_c1.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_c2.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_c3.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_c4.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_c5.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_c6.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_csa.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_e1.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_e2.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_e4.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_e5.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_e6.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_ediff_opdorder_logic.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_exp_special_detect.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_f0.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_f1.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_f2.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_f3.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_f4.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_f5.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_f6.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_frac_zero_detect.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_lxd.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_norm_shf.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_rnd_adder.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_trz.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_trz2.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_wallace1.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfma_wallace2.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfmactl_top.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfmaexp_top.v \
+  $SCRATCH/core-et/rtl/shire/minion/vpu/txfma_7s/txfmafrac_top.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_dly_buf_a.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_dly_buf_b.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_dly_ctl.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_dly_mux.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_gate.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_gate_n.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_mux2.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_mux8.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_muxn.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_or.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_stop.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_clk_stop_tdr.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_and.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_and2b.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_ao21.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_aoi21.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_buf.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_inv.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_mux2.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_mux8.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_nand.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_nand3.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_nor.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_nor2b.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_or.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_rsff.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_tie0.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_tie1.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_vm_vin_hi.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_combo_vm_vin_lo.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_dft_d_buf.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_dft_ff_ne_r.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_dft_ff_pe_en_r.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_dft_ff_pe_r.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_dft_occ_insert.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_eco_ports.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_ff.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_ff_async_reset.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_ff_async_set.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/et_via_prog_buf.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/gf_clkmux.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/gf_clkmux_tdr.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/gf_clkmux_wrap.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/rf_latch_1r_1w.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/rf_latch_1r_1w_dec.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/rf_latch_1r_1w_diff_widths.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/rf_latch_1r_1w_par.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/rf_latch_1r_1w_reg.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/rf_latch_1r_2w_par.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/rf_latch_2r_1w.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/rf_latch_3r_1w.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/rf_latch_3r_2w.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/rf_latch_7r_1w.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/rf_latch_single_1r_1w_par.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/sys_gasket_hiv.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/sys_gasket_lov.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/sys_gasket_lov_tdr_cntl.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/sys_gasket_noc_reset.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/sys_gasket_noc_reset_sync.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/sys_gasket_pshire_top.v \
+  $SCRATCH/core-et/rtl/libs/rf_latches/sys_gasket_reset.v \
+  $SCRATCH/core-et/rtl/libs/compressors/r32cmp.v \
+  $SCRATCH/core-et/rtl/libs/compressors/r42cmp.v \
+  $SCRATCH/core-et/rtl/libs/floating_point/fp_add_3st.v \
+  $SCRATCH/core-et/rtl/libs/floating_point/fp_classify.v \
+  $SCRATCH/core-et/rtl/libs/floating_point/fp_comp.v \
+  $SCRATCH/core-et/rtl/libs/floating_point/fp_convert.v \
+  $SCRATCH/core-et/rtl/libs/floating_point/fp_fixed_mult_1st.v \
+  $SCRATCH/core-et/rtl/libs/floating_point/fp_from_int.v \
+  $SCRATCH/core-et/rtl/libs/floating_point/fp_from_norm_3st.v \
+  $SCRATCH/core-et/rtl/libs/floating_point/fp_normalize.v \
+  $SCRATCH/core-et/rtl/libs/floating_point/fp_to_int.v \
+  $SCRATCH/core-et/rtl/libs/floating_point/fp_to_norm.v \
+  $SCRATCH/core-et/rtl/libs/floating_point/leading_zero_counter.v \
+  $SCRATCH/core-et/rtl/libs/fixed_point/ufixed2ufixed.v \
+  $SCRATCH/core-et/rtl/libs/registers/apb_ff.v \
+  $SCRATCH/core-et/rtl/libs/registers/async_reg.v \
+  $SCRATCH/core-et/rtl/libs/registers/delay_pipe.v \
+  $SCRATCH/core-et/rtl/libs/registers/delay_register.v \
+  $SCRATCH/core-et/rtl/libs/registers/en_ff.v \
+  $SCRATCH/core-et/rtl/libs/registers/en_ff_gated_struct.v \
+  $SCRATCH/core-et/rtl/libs/registers/et_tdr_reg.v \
+  $SCRATCH/core-et/rtl/libs/registers/ff.v \
+  $SCRATCH/core-et/rtl/libs/registers/jtag_tdr_reg.v \
+  $SCRATCH/core-et/rtl/libs/registers/rlatch.v \
+  $SCRATCH/core-et/rtl/libs/registers/rlatchn.v \
+  $SCRATCH/core-et/rtl/libs/registers/rregs.v \
+  $SCRATCH/core-et/rtl/libs/registers/rregs_m.v \
+  $SCRATCH/core-et/rtl/libs/registers/rregsce_sr_m.v \
+  $SCRATCH/core-et/rtl/libs/registers/rregsn.v \
+  $SCRATCH/core-et/rtl/libs/registers/rregsn_m.v \
+  $SCRATCH/core-et/rtl/libs/registers/rregsnce_sr_m.v \
+  $SCRATCH/core-et/rtl/libs/registers/rst_en_ff.v \
+  $SCRATCH/core-et/rtl/libs/registers/rst_ff.v \
+  $SCRATCH/core-et/rtl/libs/registers/shift_reg2d.v \
+  $SCRATCH/core-et/rtl/libs/registers/sync_reg.v \
+  --error-limit=200
+hierarchy -check -top txfma_top
+synth -top txfma_top -flatten
+opt -purge
+dfflibmap  -liberty $SCRATCH/work/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib -dont_use *x1p*_ASAP7* -dont_use *xp*_ASAP7* -dont_use SDF* -dont_use ICG*
+opt
+abc  -liberty $SCRATCH/work/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib -D 1250 -dont_use *x1p*_ASAP7* -dont_use *xp*_ASAP7* -dont_use SDF* -dont_use ICG*
+setundef -zero
+opt_clean -purge
+hilomap -singleton -hicell TIEHIx1_ASAP7_75t_R H -locell TIELOx1_ASAP7_75t_R L
+tee -o $SCRATCH/work/syn/stat_flat.txt stat  -liberty $SCRATCH/work/lib/asap7sc7p5t_AO_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_OA_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib -liberty $SCRATCH/work/lib/asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib
+write_verilog -noattr -noexpr -nohex -nodec $SCRATCH/work/syn/txfma_flat.v
+write_json $SCRATCH/work/syn/txfma_flat.json

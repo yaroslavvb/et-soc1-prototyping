@@ -1,0 +1,13 @@
+# Q133(a) tool versions and sources, Sun 1 Nov 2026
+synthesis (tools/open-flow/tima/setup_darwin.sh, synth_tima.sh):
+Yosys 0.70+221 (git sha1 33177a407, Release, Clang 21.1.8)
+oss-cad-suite 2026-10-26 darwin-x64 (sha256 of the tarball: 0abf2e6ff04c937738939434b72d3b6666940e496f48fc930d33e7c89528ae4a); the published run (2026-10-26-open-netlist) used the same release's linux-x64 build, Yosys sha 33177a407 there too
+orfs asap7 platform 64939f3717ad7c694199ba04cb98924b98022868 (ASAP7 RVT, TT corner, NLDM liberty: asap7sc7p5t_AO_RVT_TT_nldm_211120.lib asap7sc7p5t_INVBUF_RVT_TT_nldm_220122.lib asap7sc7p5t_OA_RVT_TT_nldm_211120.lib asap7sc7p5t_SEQ_RVT_TT_nldm_220123.lib asap7sc7p5t_SIMPLE_RVT_TT_nldm_211120.lib )
+asap7sc7p5t_28 e5bd25da72cd297b8c0ec6f77600e0cbaa1124d0
+core-et b38a1a31da67efe00c61e983e64b892c58080115 (branch erbium; the lab's external/core-et is the same commit: b38a1a31da67efe00c61e983e64b892c58080115)
+bench (rtl-sim/tima_gate/Makefile around rtl-sim/fma_toggle_v2):
+Verilator 5.052 2026-09-05 rev conda-forge build 
+flags: -fno-dfg (Q132(b)'s fix), --coverage-toggle, --trace; compiler: Apple clang 21.0.0 (clang-2100.1.1.101)
+OpenROAD: not used (a zero-delay toggle count needs no placement or routing); the pinned build is a linux-64 package
+host: the Intel, Darwin 25.6.0 x86_64, 16 logical cpus, shared with other lanes' benches during these runs (load average 40-75)
+analysis: Python 3.15.2 with numpy 2.5.4 (the conda-forge env that holds the bench Verilator); the bench's own scripts (run_kinds.py, train_maps.py) under the system Python 3.13.11
