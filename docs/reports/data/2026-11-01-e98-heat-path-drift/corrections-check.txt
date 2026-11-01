@@ -1,0 +1,96 @@
+C1. fp16 ones across sessions, on the raw rest die: what E64 carries
+  all six          ['E64', 'E80', 'P1', 'P3', 'P6', 'P7'] MHz/C -13.754 [-18.84, -8.669]; W/C -1.238 [-1.783, -0.694]; leverage {'E64': 0.909, 'E80': 0.279, 'P1': 0.173, 'P3': 0.195, 'P6': 0.185, 'P7': 0.258}
+  without E64      ['E80', 'P1', 'P3', 'P6', 'P7'] MHz/C -9.523 [-28.162, 9.116]; W/C -0.777 [-2.765, 1.212]; leverage {'E80': 0.442, 'P1': 0.79, 'P3': 0.2, 'P6': 0.212, 'P7': 0.356}
+  the night alone  ['P1', 'P3', 'P6', 'P7'] MHz/C -14.631 [-38.436, 9.175]; W/C -1.294 [-4.002, 1.413]; leverage {'P1': 0.846, 'P3': 0.269, 'P6': 0.25, 'P7': 0.635}
+  E64 to E80 alone: +44.5 MHz, +3.93 W over 3.70 C: -12.0 MHz/C, -1.06 W/C
+  the night's step: -15.56 MHz for +0.88 C of raw rest die, +0.877 C W-derived; one probe against three
+  E69 (held out of the fit) minus E64, fp32 ones, from E69's README: +25.5 MHz, +2.51 W, for a rest die 2.61 C cooler (the desk's 46.67 C): -9.8 MHz/C, -0.96 W/C. Against E64 again.
+
+C2. The rate. Like for like on the trip kinds, and what the rest die's own noise adds
+  mean line of int8 full and fp32 randn on the raw rest die: the night 0.939 [0.502, 1.376], earlier five 0.381 [0.111, 0.65]
+  at 0.939 E64's line would sit 3.47 C above E80's; it sits 1.28 C above
+  frozen rates: line 0.50 against 0.25; hold 2.19 against the room's 1.12
+  rest-die noise of the contrast: P1's 10 min of rows about 0.06 W, a 20 min mean about 0.04 W (tools/claims-v3/kspeed/e98/desk/rest_window.txt): 0.278 C of 0.877 C = 32% at 1 sigma on every ratio
+
+C3. S4's other readings, and its width
+  20 min, W-derived (registered)   MHz/C -17.458 [-29.217, -5.698], residual 2.1638 MHz; W/C -1.603 [-3.26, 0.055]
+  raw history die                  MHz/C -14.631 [-38.436, 9.175], residual 4.7208 MHz; W/C -1.294 [-4.002, 1.413]
+  60 s rest                        MHz/C -9.418 [-40.628, 21.791], residual 7.3737 MHz; W/C -1.004 [-3.603, 1.595]
+  half-width on the registered 16 MHz a probe (README, S4's line): +-87 MHz/C
+
+C4. R1's interval, the positions' scatter on n - 2 (checks.txt K2 used rms over n), and how near the label sits to its edge
+  per position s (n - 2): [0.366, 0.326, 0.181, 0.362, 0.123, 0.181, 0.1, 0.217]; a probe's s, as if independent: 0.0892 C; half-width 0.485: [0.018, 0.987] (a lower bound: positions within a probe are not independent)
+  R1 at k 0.4: 0.477 [0.245, 0.709]
+  R1 at k 0.4573: 0.502 [0.304, 0.7]
+  R1 at k 0.5: 0.521 [0.346, 0.695]
+  R1 with every sample of the window, not only those inside kernels: 0.501 [0.27, 0.732]
+  the sessions' own k: E64 0.4696, E69 0.5701, E80 0.4349, E83 0.4631, E87 0.4562; E96 0.4539 (its README); the frozen k 0.4573
+
+C5. What ran beside the probes, and what the boxes' history says it could do to this card's idle reading
+  rows: [('aifoundry1', 153074), ('aifoundry2', 153081), ('aifoundry3', 153078)], 00:00:02 on the first day to 15:22:03 on the last
+  60 min differences of a2's idle W (rested 15 min at both ends) on each box's held share (30 min before), with the hour of day, n 176:
+    aifoundry1 held +1: -0.182 W [-0.504, +0.139], -0.79 C [-2.18, +0.60]
+    aifoundry3 held +1: -0.100 W [-0.212, +0.013], -0.43 C [-0.92, +0.05]
+    P1's extra degree (hold's lead minus the rest die's): 1.97 - 0.88 = 1.10 C. Upper limits at P1's hold's end, aifoundry1 alone 0.60 C = 55%; both 0.65 C = 60%. Best estimates are both below 0.
+    P1 hold's last 2 min   E94: mean board 41.6 W over 1198 samples
+    P1 hold's last 2 min   E99: mean board 33.4 W over 1083 samples
+    P1 work                E94: mean board 41.1 W over 12126 samples
+    P1 work                E99: mean board 34.7 W over 8439 samples
+    P3 hold's last 2 min   E97: mean board 30.7 W over 1200 samples
+    P3 work                E97: mean board 29.1 W over 12564 samples
+    P6 hold's last 2 min   E97: mean board 45.9 W over 1200 samples
+    P6 work                E97: mean board 43.9 W over 12660 samples
+    P7 work                E97: mean board 23.3 W over 2512 samples
+    idle: aifoundry1 card 1 about 30 W, aifoundry3 about 23.5 W (K4). Hold die: P1 60.42, P3 58.05, P6 58.80, P7 58.48
+
+C6. aifoundry2's own NIC and NVMe through the hold's last 2 min (self-heated, one contrast)
+  P1: rest NIC 44.36 NVMe 37.67; hold's end NIC 45.75 NVMe 38.90 (n 24)
+  P3: rest NIC 43.92 NVMe 36.90; hold's end NIC 44.55 NVMe 37.90 (n 24)
+  P6: rest NIC 43.57 NVMe 36.90; hold's end NIC 44.67 NVMe 37.90 (n 25)
+  P7: rest NIC 43.57 NVMe 36.90; hold's end NIC 44.43 NVMe 37.90 (n 25)
+  P1 minus the later probes: NIC +0.67 at rest, +1.20 at the hold's end; NVMe +0.77, +1.00. The NIC's extra +0.53 C; the NIC rises 0.054 C per card W, so the card's extra 0.92 W is worth 0.05 C; left over 0.48 C of the die's extra 1.10 C
+
+C7. The shared fall, on rows clean of aifoundry1's own run
+  aifoundry1's held intervals, UTC, gaps under 3 min merged: 07:12:35-07:45:30 (33 min), 08:00:45-08:39:20 (39 min), 09:27:05-09:27:55 (1 min), 09:33:05-10:50:05 (77 min), 10:54:40-11:07:50 (13 min), 13:37:55-13:38:40 (1 min), 13:47:30-14:08:05 (21 min)
+  before P2's rest window ends at 09:30:00: its last run 08:00:45-08:39:20, 39 min long, ended 51 min before
+  before P3's rest window ends at 11:40:00: its last run 10:54:40-11:07:50, 13 min long, ended 32 min before
+  rows with card 0 held tonight: 0 of 6025
+  skip 0 min after aifoundry1's own held rows: rows per probe [('P1', 173), ('P2', 229), ('P3', 240), ('P6', 154), ('P7', 240)]
+  skip 15 min after aifoundry1's own held rows: rows per probe [('P1', 0), ('P2', 205), ('P3', 206), ('P6', 35), ('P7', 203)]
+    a1 card 0 die  [('P2', 47.673), ('P3', 46.971), ('P7', 47)] on the rest die 0.877 [-0.609, 2.364], n 3
+    a1 card 0 W    [('P2', 18.635), ('P3', 18.421), ('P7', 18.459)] on the rest die 0.245 [-0.598, 1.089], n 3
+    a1 card 1 W    [('P2', 30.4), ('P3', 29.99), ('P7', 30.085)] on the rest die 0.455 [-1.442, 2.351], n 3
+    a1 NIC         [('P2', 53.451), ('P3', 52.688), ('P7', 52.761)] on the rest die 0.922 [-1.232, 3.076], n 3
+  a1 card 0, 06:00-07:00 UTC, nothing held: 18.66 W, 47.8 C, n 622
+
+C8. Words: what the runs before the hold did, the gate, the trip labels, int8 full
+  P1: indexes 5-8 mean W 52.43; gate held [1.4, 17.0, 19.6, 26.1, 18.4] = 82.5 s; limit, indexes 5-8: ['thermal', 'thermal', 'thermal', 'thermal']
+  P3: indexes 5-8 mean W 53.82; gate held [0.0, 11.8, 12.4, 16.2, 11.8] = 52.2 s; limit, indexes 5-8: ['none', 'none', 'thermal', 'thermal']
+  P6: indexes 5-8 mean W 53.45; gate held [0.2, 14.0, 14.6, 16.8, 12.6] = 58.2 s; limit, indexes 5-8: ['thermal', 'thermal', 'thermal', 'thermal']
+  P7: indexes 5-8 mean W 53.83; gate held [0.0, 10.6, 11.0, 15.0, 12.2] = 48.8 s; limit, indexes 5-8: ['none', 'none', 'thermal', 'thermal']
+  int8 full clock on the raw rest die: E80 793.4 at 45.58, P7 800.0 at 45.68, P3 793.6 at 46.09, P6 783.9 at 46.20, E83 786.5 at 46.42, E96 789.4 at 46.79, P1 773.4 at 46.87, E87 774.7 at 47.15, E64 763.2 at 49.28
+
+C9. fp16 ones by index
+  P1: index 5 777.5 MHz (thermal), index 8 765.2 MHz (thermal)
+  P3: index 5 793.9 MHz (none), index 8 785.9 MHz (thermal)
+  P6: index 5 785.9 MHz (thermal), index 8 781.6 MHz (thermal)
+  P7: index 5 791.6 MHz (none), index 8 782.6 MHz (thermal)
+
+C10. E96, the only other warm session of the night, against P1 on the same two trip kinds
+  rest die: E96 46.79, P1 46.87. Line: E96 41.13 (int8 full 40.77 on 4 runs, fp32 randn 41.48 on 2); P1 41.75. Difference 0.63 C; one run's rms 0.42 C, so about 0.35 C on this difference, 1.8 sigma
+
+C11. The discriminator's 1.12 and 2.08 assume one R
+  R 0.4573 at rest, 0.4573 in the hold: room 1.12, path 2.08
+  R 1.1 at rest, 0.65 in the hold: room 1.05, path 1.94
+  R 1.47 at rest, 1.47 in the hold: room 1.88, path 3.49
+
+C12. Leave one probe out, and whether being first is carryover
+  without P1: R1 0.285, R2 1.476, S4 MHz -14.153; x range 0.31 C
+  without P3: R1 0.505, R2 1.984, S4 MHz -15.967; x range 1.01 C
+  without P6: R1 0.498, R2 2.183, S4 MHz -17.458; x range 1.01 C
+  without P7: R1 0.528, R2 2.506, S4 MHz -19.535; x range 0.92 C
+  aifoundry2's held intervals from 31 Oct 17:00 PDT, UTC: 02:49:53-03:25:18, 07:39:28-07:40:03, 08:00:03-08:21:23, 08:30:03-08:53:48, 09:30:03-09:37:53, 10:05:03-10:06:33, 10:06:43-11:15:18, 11:40:03-12:00:58, 12:20:03-12:21:33, 12:21:43-13:03:33, 13:55:03-14:16:03, 14:40:03-15:00:53
+  P2's lead over P3, P6, P7 on the runs it has, against P1's: index 0: +1.56, +0.73, index 1: +1.14, +0.46, index 2: +0.62, +0.39
+
+C13. The open test: a probe at E64's own idle die
+  nine-day hour means of the idle die, PDT: [(11, 46.08), (16, 49.54), (17, 49.25), (18, 49.11), (19, 49.25), (20, 49.59)]; range to the 11:00 low 3.5 C, against the night's 1.01 C. E64's rest 49.28 C, E64's fp16 ones 737.1 MHz, 49.28 W; 31 Oct's evening only reached 47.15 C (E87)
