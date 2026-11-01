@@ -1,0 +1,17 @@
+L2: 2,048 sets (address bits 16:6), 4 ways, LRU. One shire's distinct lines of one block. Bases random, 4 KB aligned.
+layout   order shr    A miss   B miss      all lines/op  lines-per-set histogram (lines: count of sets) [sets used, distinct lines]
+port     line  24      25.0%   100.0%    75.0%    144.0  ({2: 1536, 10: 512}, 2048, 8192)
+port     tile  24      25.0%   100.0%    75.0%    144.0  ({2: 1536, 10: 512}, 2048, 8192)
+vendor   line  24      43.9%    40.9%    41.9%     80.5  ({2: 652, 3: 248, 4: 248, 5: 248, 6: 652}, 2048, 8192)
+vendor   tile  24      43.9%    40.9%    41.9%     80.5  ({2: 652, 3: 248, 4: 248, 5: 248, 6: 652}, 2048, 8192)
+
+mm16, 16 pairs: A miss 0.0% B miss 0.0%, occupancy ({1: 512}, 512, 512)
+port: B tile offsets (KB) within a 128 KB way, shire s0=0: [0, 1, 2, 3, 4, 5, 6, 7, 32, 33, 34, 35, 36, 37, 38, 39, 64, 65, 66, 67, 68, 69, 70, 71, 96, 97, 98, 99, 100, 101, 102, 103] -> 32 KB of 128 KB
+
+Variants: port A with vendor B; vendor A with port B
+portA+vendB  A 43.9% B 40.9% all 41.9%
+vendA+portB  A 25.0% B 100.0% all 75.0%
+
+One-edit variants of the port (line order):
+port A + B column-major    A 0.0% B 0.0% all 0.0%  occupancy ({4: 2048}, 2048, 8192)
+half K, port's B order     A 25.0% B 50.0% all 41.7%  occupancy ({1: 1536, 5: 512}, 2048, 4096)

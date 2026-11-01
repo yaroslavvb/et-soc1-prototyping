@@ -1,0 +1,69 @@
+E105 frozen predictions (no E105 data exists). T = C/f + M; miss share from the desk L2 model.
+layout          miss       C   M us  T800 us  T600 us
+gemm1.fp32     0.750   344.3  0.838   1.2684   1.4118
+gemm1.fp16     0.750   348.8  0.831   1.2670   1.4123
+gemm1.int8     0.750   355.8  0.828   1.2728   1.4210
+gemmv1.fp32    0.419   344.3  0.468   0.8984   1.0418
+gemmv1.fp16    0.419   348.8  0.464   0.9000   1.0453
+gemmv1.int8    0.419   355.8  0.463   0.9078   1.0560
+gemmc1.fp32    0.000   529.0  0.000   0.6613   0.8817
+gemmc1.fp16    0.000   529.0  0.000   0.6613   0.8817
+gemmc1.int8    0.000   280.5  0.000   0.3506   0.4675
+gemmh1.fp32    0.000   529.0  0.000   0.6613   0.8817
+gemmh1.fp16    0.000   529.0  0.000   0.6613   0.8817
+gemmh1.int8    0.000   280.5  0.000   0.3506   0.4675
+gemm16.fp32    1.000   344.3  1.906   2.3364   2.4798
+gemm16.fp16    1.000   348.8  1.906   2.3420   2.4873
+gemm16.int8    1.000   355.8  1.906   2.3508   2.4990
+gemmv16.fp32   0.802   344.3  1.529   1.9594   2.1028
+gemmv16.fp16   0.802   348.8  1.529   1.9650   2.1103
+gemmv16.int8   0.802   355.8  1.529   1.9737   2.1220
+gemmc16.fp32   0.667   344.3  1.271   1.7014   1.8448
+gemmc16.fp16   0.667   348.8  1.271   1.7070   1.8523
+gemmc16.int8   0.667   355.8  1.271   1.7157   1.8640
+rho {'gemmc1': 1.08, 'gemmh1': 1.08, 'gemmv1': 0.81, 'gemm1': 0.654}; limit 88.0 W; c_ref {"fp32": {"zeros": 4.117, "ones": 14.242, "sparse50": 16.828, "randn": 35.13, "sparse25": 24.45}, "fp16": {"zeros": 3.359, "ones": 14.34, "sparse50": 22.285, "randn": 32.19}, "int8": {"zeros": 6.992, "ones": 11.612, "sparse50": 21.919, "full": 26.535}}
+cell                          c W   P800  adm  burst    sus
+gemm1-fp32-zeros             2.69   38.7    T  800.0  800.0
+gemm1-fp32-ones              9.31   51.3    T  800.0  781.8
+gemm1-fp32-sparse25         15.99   64.1    T  797.4  688.0
+gemm1-fp32-randn            22.98   77.4    T  733.0  613.2
+gemm1-int8-zeros             4.57   42.3    T  800.0  800.0
+gemm1-int8-full             17.35   66.7    T  790.2  670.2
+gemmc1-fp32-zeros            4.45   42.1    T  800.0  800.0
+gemmc1-fp32-ones            15.38   62.9    T  798.8  696.0
+gemmc1-fp32-sparse50        18.17   68.2    T  783.1  660.0
+gemmc1-fp32-sparse25        26.41   83.9    T  702.4  601.0
+gemmc1-fp32-randn           37.94  105.9    F  616.3  600.0
+gemmc1-int8-zeros            7.55   48.0    T  800.0  797.9
+gemmc1-int8-sparse50        23.67   78.7    T  726.6  609.0
+gemmc1-int8-full            28.66   88.2    F  682.6  600.0
+gemmc1-fp16-zeros            3.63   40.5    T  800.0  800.0
+gemmc1-fp16-sparse50        24.07   79.5    T  723.0  607.1
+gemmc1-fp16-randn           34.77   99.9    F  635.0  600.0
+gemmv1-fp32-zeros            3.33   40.0    T  800.0  800.0
+gemmv1-fp32-ones            11.54   55.6    T  800.0  747.3
+gemmv1-fp32-sparse50        13.63   59.6    T  800.0  718.6
+gemmv1-fp32-sparse25        19.80   71.3    T  765.7  641.4
+gemmv1-fp32-randn           28.46   87.8    T  684.3  600.1
+gemmv1-int8-zeros            5.66   44.4    T  800.0  800.0
+gemmv1-int8-sparse50        17.75   67.4    T  787.0  665.2
+gemmv1-int8-full            21.49   74.6    T  747.6  624.8
+gemmv1-fp16-zeros            2.72   38.8    T  800.0  800.0
+gemmv1-fp16-sparse50        18.05   68.0    T  784.3  661.4
+gemmv1-fp16-randn           26.07   83.3    T  705.3  601.4
+zeros / kind, burst and sustained, clock and rate:
+  gemm1.fp32.sparse25      burst clock x1.003 rate x1.001   sus clock x1.163 rate x1.055
+  gemm1.fp32.randn         burst clock x1.091 rate x1.031   sus clock x1.305 rate x1.103
+  gemmc1.fp32.sparse50     burst clock x1.022 rate x1.021   sus clock x1.212 rate x1.212
+  gemmc1.fp32.sparse25     burst clock x1.139 rate x1.139   sus clock x1.331 rate x1.331
+  gemmc1.fp32.randn        burst clock x1.298 rate x1.298   sus clock x1.333 rate x1.333
+  gemmv1.fp32.sparse50     burst clock x1.000 rate x1.000   sus clock x1.113 rate x1.054
+  gemmv1.fp32.sparse25     burst clock x1.045 rate x1.021   sus clock x1.247 rate x1.118
+  gemmv1.fp32.randn        burst clock x1.169 rate x1.081   sus clock x1.333 rate x1.160
+  gemmc1.int8.sparse50     burst clock x1.101 rate x1.101   sus clock x1.310 rate x1.310
+  gemmc1.int8.full         burst clock x1.172 rate x1.172   sus clock x1.330 rate x1.330
+  gemmv1.int8.sparse50     burst clock x1.017 rate x1.008   sus clock x1.203 rate x1.099
+  gemmv1.int8.full         burst clock x1.070 rate x1.034   sus clock x1.280 rate x1.137
+  gemmc1.fp16.sparse50     burst clock x1.107 rate x1.106   sus clock x1.318 rate x1.318
+  gemmc1.fp16.randn        burst clock x1.260 rate x1.260   sus clock x1.333 rate x1.333
+  gemmv1.fp16.randn        burst clock x1.134 rate x1.065   sus clock x1.330 rate x1.160

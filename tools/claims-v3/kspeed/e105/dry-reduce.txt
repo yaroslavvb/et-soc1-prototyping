@@ -1,0 +1,134 @@
+E105: 15 runs; 4 refused by the rule; config after every run: ['{"tdp_w": 65, "temp_threshold_c": 65}']
+fit T = C/f + M
+  gemm1.fp32         n   42 span  200.0 MHz  C   546.0 +-   0.0  M  0.0000 +- 0.0000 us  rms 0.00 ns
+  gemmc1.fp32        n   30 span  100.0 MHz  C   546.0 +-   0.0  M -0.0000 +- 0.0000 us  rms 0.00 ns
+  gemmv1.fp32        n   48 span  200.0 MHz  C   546.0 +-   0.0  M -0.0000 +- 0.0000 us  rms 0.00 ns
+cell                          burst    rate    sus    rate      W   die     cyc      c   fz b   fz s n
+gemm1-fp32-randn              700.0  10.755  667.2  10.242  59.57  63.3   546.0  15.85  733.0  613.2 1/1
+gemm1-fp32-sparse25           800.0  12.291  771.1  11.779  61.05  62.4   546.0  12.01  797.4  688.0 1/1
+gemm1-fp32-zeros              786.7  12.291    0.0   0.000   0.00   0.0   546.0   1.67  800.0  800.0 1/0
+gemmc1-fp32-ones              800.0  12.291    0.0   0.000   0.00   0.0   546.0  11.46  798.8  696.0 1/0
+gemmc1-fp32-sparse50          700.0  10.755    0.0   0.000   0.00   0.0   546.0  18.57  783.1  660.0 1/0
+gemmc1-fp32-zeros             800.0  12.291  800.0  12.291  39.95  57.2   546.0   2.94  800.0  800.0 1/1
+gemmv1-fp32-ones              800.0  12.291    0.0   0.000   0.00   0.0   546.0   8.53  800.0  747.3 1/0
+gemmv1-fp32-sparse25          700.0  10.755  687.7  10.499  57.26  62.4   546.0  20.16  765.7  641.4 1/1
+gemmv1-fp32-sparse50          800.0  12.291    0.0   0.000   0.00   0.0   546.0  10.02  800.0  718.6 1/0
+gemmv1-fp32-zeros             800.0  12.291  800.0  12.291  37.46  56.4   546.0   2.17  800.0  800.0 1/1
+refused: A-09-gemmc1-fp32-sparse25-r1 probe gemmc1-fp32-sparse50 has no measure
+refused: A-10-gemmc1-fp32-sparse25-r1 probe gemmc1-fp32-sparse50 has no measure
+refused: A-11-gemmc1-fp32-randn-r1 probe gemmc1-fp32-sparse50 has no measure
+refused: A-12-gemmc1-fp32-randn-r1 probe gemmc1-fp32-sparse50 has no measure
+{
+ "R1": {
+  "verdict": "PASS",
+  "C": 546.0,
+  "M": -0.0,
+  "fit": {
+   "n": 30,
+   "span_mhz": 100.0,
+   "C": 546.0,
+   "C_ci": 0.0,
+   "M": -0.0,
+   "M_ci": 0.0,
+   "rms_ns": 0.0
+  }
+ },
+ "R2": {
+  "verdict": null,
+  "fit_vendor": {
+   "n": 48,
+   "span_mhz": 200.0,
+   "C": 546.0,
+   "C_ci": 0.0,
+   "M": -0.0,
+   "M_ci": 0.0,
+   "rms_ns": 0.0
+  },
+  "fit_as_run": {
+   "n": 42,
+   "span_mhz": 200.0,
+   "C": 546.0,
+   "C_ci": 0.0,
+   "M": 0.0,
+   "M_ci": 0.0,
+   "rms_ns": 0.0
+  }
+ },
+ "R3": {
+  "verdict": "FAIL",
+  "C": 546.0,
+  "M": 0.0
+ },
+ "R4": {
+  "verdict": null,
+  "rate": null,
+  "clock": null,
+  "randn": {
+   "verdict": null,
+   "rate": null,
+   "clock": null
+  },
+  "sparse50": {
+   "verdict": null,
+   "rate": null,
+   "clock": null
+  }
+ },
+ "R5": {
+  "verdict": null,
+  "top": "sparse50",
+  "rate": null,
+  "clock": null,
+  "burst_rate": null,
+  "burst_clock": null
+ },
+ "R6": {
+  "verdict": null,
+  "as_run": null,
+  "vendor": 1.1707,
+  "bycol": null
+ },
+ "R7": {
+  "cells": {
+   "gemm1": {
+    "T": 0.6825,
+    "frozen": 1.2684,
+    "verdict": "FAIL"
+   },
+   "gemmv1": {
+    "T": 0.6825,
+    "frozen": 0.8984,
+    "verdict": "FAIL"
+   },
+   "gemmc1": {
+    "T": 0.6825,
+    "frozen": 0.6613,
+    "verdict": "PASS"
+   }
+  },
+  "order": false
+ },
+ "R8": {
+  "gemmc16": {
+   "T": null,
+   "frozen": 1.7014,
+   "T_verdict": null,
+   "gap_burst": null,
+   "gap_sus": null,
+   "gap_verdict": null
+  },
+  "gemmv16": {
+   "T": null,
+   "frozen": 1.9594,
+   "T_verdict": null,
+   "gap_burst": null,
+   "gap_sus": null,
+   "gap_verdict": null
+  }
+ },
+ "R9": {
+  "T": null,
+  "frozen": 0.6613,
+  "verdict": null
+ }
+}

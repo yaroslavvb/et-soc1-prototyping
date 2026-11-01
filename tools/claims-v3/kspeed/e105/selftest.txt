@@ -1,0 +1,22 @@
+the desk model holds               ok  {"R1": "PASS", "R2": "PASS", "R3": "PASS", "R4": "COMES BACK", "R5": "COMES BACK", "R6": "PASS", "R7c": "PASS", "R9": "PASS"}  R4 rate 1.2903 clock 1.2903, R5 1.3333, R6 1.0985 1.1391 1.2903
+by column changes nothing          ok  {"R1": "FAIL", "R2": "FAIL", "R3": "PASS", "R4": "PARTIAL", "R5": "PARTIAL", "R6": "FAIL", "R7c": "FAIL", "R9": "FAIL"}  R4 rate 1.128 clock 1.2903, R5 1.0983, R6 1.0985 1.0985 1.128
+by column half way                 ok  {"R1": "PARTIAL", "R2": "PASS", "R3": "PASS", "R4": "PARTIAL", "R5": "COMES BACK", "R6": "PASS", "R7c": "FAIL", "R9": "FAIL"}  R4 rate 1.1997 clock 1.2903, R5 1.1796, R6 1.0985 1.1391 1.1997
+strides as good as by column       ok  {"R1": "PASS", "R2": "FAIL", "R3": "PASS", "R4": "COMES BACK", "R5": "COMES BACK", "R6": "PASS", "R7c": "PASS", "R9": "PASS"}  R4 rate 1.2903 clock 1.2903, R5 1.3333, R6 1.0985 1.2774 1.2903
+the rebuilt arm is not the old one ok  {"R1": "PASS", "R2": "PASS", "R3": "FAIL", "R4": "COMES BACK", "R5": "COMES BACK", "R6": "PASS", "R7c": "PASS", "R9": "PASS"}  R4 rate 1.2903 clock 1.2903, R5 1.3333, R6 1.1213 1.1711 1.2903
+no span: {'n': 8, 'span_mhz': 0.0, 'C': None, 'M': None} -> None
+admission rule, no probe measured yet:
+  gemmc1-fp32-zeros              est 42.7 (fixed) -> admitted: ok
+  gemmc1-fp32-sparse25           est None (probe gemmc1-fp32-sparse50 has no measure) -> probe gemmc1-fp32-sparse50 has no measure: ok
+  gemmc1-fp32-randn              est None (probe gemmc1-fp32-sparse50 has no measure) -> probe gemmc1-fp32-sparse50 has no measure: ok
+  no-such-cell                   est None (not in the table) -> not in the admission table: ok
+the probe reads rho 1.08, the model's by-column guess:
+  gemmc1-fp32-sparse25           est 83.92 (probe gemmc1-fp32-sparse50 rho 1.08) -> admitted: ok
+  gemmc1-fp32-sparse25-rep2      est 83.92 (probe gemmc1-fp32-sparse50 rho 1.08) -> admitted: ok
+  gemmc1-fp32-randn              est 105.89 (probe gemmc1-fp32-sparse50 rho 1.08) -> estimate 105.89 W > 88.0 W: ok
+  gemmc1-fp32-randn-half         est 69.76 (probe gemmc1-fp32-sparse50 rho 1.08) -> admitted: ok
+the probe reads rho 0.75, misses still holding the rate down:
+  gemmc1-fp32-randn              est 83.81 (probe gemmc1-fp32-sparse50 rho 0.75) -> admitted: ok
+a run at 80 W read 93 W, so nothing at or above 80 W goes on:
+  gemmc1-fp32-randn              est 83.81 (probe gemmc1-fp32-sparse50 rho 0.75) -> estimate 83.81 W >= 80.0 W, the estimate of a run that read 93.0 W: ok
+  gemmc1-fp32-zeros              est 42.7 (fixed) -> admitted: ok
+selftest PASS

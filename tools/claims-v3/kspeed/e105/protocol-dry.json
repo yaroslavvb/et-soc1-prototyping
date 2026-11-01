@@ -1,0 +1,1274 @@
+{
+ "experiment": "E105",
+ "request": "Q132",
+ "card": "aifoundry2",
+ "order_seed": 105,
+ "note": "E80's design on E105's layouts; every start is cool; nothing is set on the card",
+ "tools": {
+  "heater": "build/e105/host/sparsity_host",
+  "kernel": "build/e105/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "predictions": "tools/claims-v3/kspeed/e105/predictions-e105.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 85,
+  "board_cap_w": 97,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 52
+ },
+ "smoke_cycles": {
+  "gemm1-fp32-zeros": 1014.7,
+  "gemmc1-fp32-zeros": 529.0,
+  "gemmv1-fp32-zeros": 718.7,
+  "gemmc1-int8-zeros": 280.5,
+  "gemmv1-int8-zeros": 726.2
+ },
+ "dry_c_w": {
+  "zeros": 15.0,
+  "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.69,
+  "gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 4.45,
+  "gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.33,
+  "gemmc1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 7.55,
+  "gemmv1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 5.66,
+  "gemm1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin": 15.99,
+  "gemm1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 22.98,
+  "gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin": 15.38,
+  "gemmc1:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin": 18.17,
+  "gemmc1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin": 26.41,
+  "gemmc1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 37.94,
+  "gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin": 11.54,
+  "gemmv1:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin": 13.63,
+  "gemmv1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin": 19.8,
+  "gemmv1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 28.46,
+  "gemmc1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin": 23.67,
+  "gemmc1:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 28.66,
+  "gemmv1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin": 17.75,
+  "gemmv1:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 21.49,
+  "gemmc16:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 15.0,
+  "gemmc16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 15.0,
+  "gemmv16:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 15.0,
+  "gemmv16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 15.0,
+  "gemmh1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 15.0,
+  "gemmc1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.63,
+  "gemmc1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin": 24.07,
+  "gemmc1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 34.77,
+  "gemmv1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 2.72,
+  "gemmv1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin": 18.05,
+  "gemmv1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 26.07
+ },
+ "limit_p800_w": 88.0,
+ "peak_lock_w": 93.0,
+ "relation": {
+  "B800": 33.60956684526229,
+  "s800": 1.90517380064275
+ },
+ "admission": {
+  "gemm1-fp32-zeros": {
+   "c_ref_w": 4.117,
+   "fixed_p800_w": 42.7
+  },
+  "gemm1-fp32-ones": {
+   "c_ref_w": 14.242,
+   "fixed_p800_w": 65.1
+  },
+  "gemm1-fp32-sparse50": {
+   "c_ref_w": 16.828,
+   "fixed_p800_w": 70.8
+  },
+  "gemm1-fp16-zeros": {
+   "c_ref_w": 3.359,
+   "fixed_p800_w": 41.0
+  },
+  "gemm1-fp16-ones": {
+   "c_ref_w": 14.34,
+   "fixed_p800_w": 65.3
+  },
+  "gemm1-fp16-sparse50": {
+   "c_ref_w": 22.285,
+   "fixed_p800_w": 82.9
+  },
+  "gemm1-int8-zeros": {
+   "c_ref_w": 6.992,
+   "fixed_p800_w": 49.1
+  },
+  "gemm1-int8-ones": {
+   "c_ref_w": 11.612,
+   "fixed_p800_w": 59.3
+  },
+  "gemm1-int8-sparse50": {
+   "c_ref_w": 21.919,
+   "fixed_p800_w": 82.1
+  },
+  "gemmc1-fp32-zeros": {
+   "c_ref_w": 4.117,
+   "fixed_p800_w": 42.7
+  },
+  "gemmc1-fp32-ones": {
+   "c_ref_w": 14.242,
+   "fixed_p800_w": 65.1
+  },
+  "gemmc1-fp32-sparse50": {
+   "c_ref_w": 16.828,
+   "fixed_p800_w": 70.8
+  },
+  "gemmc1-fp16-zeros": {
+   "c_ref_w": 3.359,
+   "fixed_p800_w": 41.0
+  },
+  "gemmc1-fp16-ones": {
+   "c_ref_w": 14.34,
+   "fixed_p800_w": 65.3
+  },
+  "gemmc1-fp16-sparse50": {
+   "c_ref_w": 22.285,
+   "fixed_p800_w": 82.9
+  },
+  "gemmc1-int8-zeros": {
+   "c_ref_w": 6.992,
+   "fixed_p800_w": 49.1
+  },
+  "gemmc1-int8-ones": {
+   "c_ref_w": 11.612,
+   "fixed_p800_w": 59.3
+  },
+  "gemmc1-int8-sparse50": {
+   "c_ref_w": 21.919,
+   "fixed_p800_w": 82.1
+  },
+  "gemmv1-fp32-zeros": {
+   "c_ref_w": 4.117,
+   "fixed_p800_w": 42.7
+  },
+  "gemmv1-fp32-ones": {
+   "c_ref_w": 14.242,
+   "fixed_p800_w": 65.1
+  },
+  "gemmv1-fp32-sparse50": {
+   "c_ref_w": 16.828,
+   "fixed_p800_w": 70.8
+  },
+  "gemmv1-fp16-zeros": {
+   "c_ref_w": 3.359,
+   "fixed_p800_w": 41.0
+  },
+  "gemmv1-fp16-ones": {
+   "c_ref_w": 14.34,
+   "fixed_p800_w": 65.3
+  },
+  "gemmv1-fp16-sparse50": {
+   "c_ref_w": 22.285,
+   "fixed_p800_w": 82.9
+  },
+  "gemmv1-int8-zeros": {
+   "c_ref_w": 6.992,
+   "fixed_p800_w": 49.1
+  },
+  "gemmv1-int8-ones": {
+   "c_ref_w": 11.612,
+   "fixed_p800_w": 59.3
+  },
+  "gemmv1-int8-sparse50": {
+   "c_ref_w": 21.919,
+   "fixed_p800_w": 82.1
+  },
+  "gemm1-fp32-randn": {
+   "c_ref_w": 35.13,
+   "fixed_p800_w": 74.0
+  },
+  "gemm1-fp32-sparse25": {
+   "c_ref_w": 24.45,
+   "fixed_p800_w": 70.0
+  },
+  "gemmc1-fp32-sparse25": {
+   "c_ref_w": 24.45,
+   "probe": "gemmc1-fp32-sparse50"
+  },
+  "gemmc1-fp32-randn": {
+   "c_ref_w": 35.13,
+   "probe": "gemmc1-fp32-sparse50"
+  },
+  "gemmc1-int8-full": {
+   "c_ref_w": 26.535,
+   "probe": "gemmc1-int8-sparse50"
+  },
+  "gemmc1-fp16-randn": {
+   "c_ref_w": 32.19,
+   "probe": "gemmc1-fp16-sparse50"
+  },
+  "gemmv1-fp32-sparse25": {
+   "c_ref_w": 24.45,
+   "probe": "gemmv1-fp32-sparse50"
+  },
+  "gemmv1-fp32-randn": {
+   "c_ref_w": 35.13,
+   "probe": "gemmv1-fp32-sparse50"
+  },
+  "gemmv1-int8-full": {
+   "c_ref_w": 26.535,
+   "probe": "gemmv1-int8-sparse50"
+  },
+  "gemmv1-fp16-randn": {
+   "c_ref_w": 32.19,
+   "probe": "gemmv1-fp16-sparse50"
+  },
+  "gemmc1-fp32-randn-half": {
+   "c_ref_w": 17.57,
+   "probe": "gemmc1-fp32-sparse50"
+  },
+  "gemmc16-fp32-zeros": {
+   "c_ref_w": 5.0,
+   "fixed_p800_w": 45.0
+  },
+  "gemmc16-fp32-randn": {
+   "c_ref_w": 23.0,
+   "fixed_p800_w": 77.0
+  },
+  "gemmv16-fp32-zeros": {
+   "c_ref_w": 5.0,
+   "fixed_p800_w": 45.0
+  },
+  "gemmv16-fp32-randn": {
+   "c_ref_w": 23.0,
+   "fixed_p800_w": 77.0
+  },
+  "gemmh1-fp32-zeros": {
+   "c_ref_w": 4.117,
+   "fixed_p800_w": 45.0
+  },
+  "rest": {
+   "fixed_p800_w": 30.0
+  }
+ },
+ "blocks": [
+  {
+   "name": "SMOKE",
+   "title": "the idle card with no launch (its last 45 s are the session's rest reading), then a 2 s launch of each layout's zeros",
+   "default": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 5
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 1
+   },
+   "tail_s": 3,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest",
+     "launch": {
+      "seconds": 2,
+      "budget": 3.5,
+      "processes": 0
+     },
+     "tail_s": 3
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemm1-fp32-zeros"
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemmc1-fp32-zeros"
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemmv1-fp32-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "gemmc1-int8-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "gemmv1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "gemmv1-int8-zeros"
+    }
+   ]
+  },
+  {
+   "name": "A",
+   "title": "block A",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemm1-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemm1-fp32-sparse25",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemm1-fp32-sparse25",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemm1-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemm1-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemmc1-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemmc1-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+     "label": "gemmc1-fp32-ones",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+     "label": "gemmc1-fp32-sparse50",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmc1-fp32-sparse25",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmc1-fp32-sparse25",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmc1-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmc1-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemmv1-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemmv1-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+     "label": "gemmv1-fp32-ones",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+     "label": "gemmv1-fp32-sparse50",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmv1-fp32-sparse25",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmv1-fp32-sparse25",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmv1-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmv1-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    }
+   ]
+  },
+  {
+   "name": "B",
+   "title": "block B",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "int8",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "gemmc1-int8-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "gemmc1-int8-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmc1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+     "label": "gemmc1-int8-sparse50",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmc1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+     "label": "gemmc1-int8-sparse50",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmc1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "gemmc1-int8-full",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmc1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "gemmc1-int8-full",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmv1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "gemmv1-int8-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmv1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+     "label": "gemmv1-int8-sparse50",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmv1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "gemmv1-int8-full",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmv1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "gemmv1-int8-full",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    }
+   ]
+  },
+  {
+   "name": "C",
+   "title": "block C",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "gemmc16:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemmc16-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmc16-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmc16-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv16:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemmv16-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmv16-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    }
+   ]
+  },
+  {
+   "name": "D",
+   "title": "block D",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "gemmh1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemmh1-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmc1-fp32-randn-half",
+     "mask": "0x0000ffff",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmc1-fp32-sparse25-rep2",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemmc1-fp32-zeros-rep2",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+     "label": "gemmc1-fp32-ones",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin",
+     "label": "gemmv1-fp32-ones",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmc1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "gemmc1-int8-full-rep2",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "gemmc1-int8-zeros-rep2",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemm1-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmc1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmc1-fp32-randn-half",
+     "mask": "0x0000ffff",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "gemmv1-fp32-sparse25-rep2",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "gemmv1-fp32-zeros-rep2",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    }
+   ]
+  },
+  {
+   "name": "E",
+   "title": "block E",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp16",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "gemmc1-fp16-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp16",
+     "values": "gemmc1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "gemmc1-fp16-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp16",
+     "values": "gemmc1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin",
+     "label": "gemmc1-fp16-sparse50",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp16",
+     "values": "gemmc1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin",
+     "label": "gemmc1-fp16-sparse50",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp16",
+     "values": "gemmc1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "gemmc1-fp16-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp16",
+     "values": "gemmc1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "gemmc1-fp16-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp16",
+     "values": "gemmv1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "gemmv1-fp16-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp16",
+     "values": "gemmv1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin",
+     "label": "gemmv1-fp16-sparse50",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp16",
+     "values": "gemmv1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "gemmv1-fp16-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp16",
+     "values": "gemmv1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "label": "gemmv1-fp16-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    }
+   ]
+  }
+ ]
+}

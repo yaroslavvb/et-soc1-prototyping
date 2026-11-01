@@ -1,0 +1,71 @@
+block SMOKE:
+  rest                           burst             zeros                                                        fixed 30.0
+  gemm1-fp32-zeros               burst             gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin       fixed 42.7
+  gemmc1-fp32-zeros              burst             gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      fixed 42.7
+  gemmv1-fp32-zeros              burst             gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      fixed 42.7
+  gemmc1-int8-zeros              burst             gemmc1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin      fixed 49.1
+  gemmv1-int8-zeros              burst             gemmv1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin      fixed 49.1
+block A:
+  gemm1-fp32-zeros               burst             gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin       fixed 42.7
+  gemm1-fp32-sparse25            burst             gemm1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin    fixed 70.0
+  gemm1-fp32-sparse25            sus               gemm1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin    fixed 70.0
+  gemm1-fp32-randn               burst             gemm1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin       fixed 74.0
+  gemm1-fp32-randn               sus               gemm1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin       fixed 74.0
+  gemmc1-fp32-zeros              burst             gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      fixed 42.7
+  gemmc1-fp32-zeros              sus               gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      fixed 42.7
+  gemmc1-fp32-ones               burst             gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin       fixed 65.1
+  gemmc1-fp32-sparse50           burst             gemmc1:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bi fixed 70.8
+  gemmc1-fp32-sparse25           burst             gemmc1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin   probe gemmc1-fp32-sparse50
+  gemmc1-fp32-sparse25           sus               gemmc1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin   probe gemmc1-fp32-sparse50
+  gemmc1-fp32-randn              burst             gemmc1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin      probe gemmc1-fp32-sparse50
+  gemmc1-fp32-randn              sus               gemmc1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin      probe gemmc1-fp32-sparse50
+  gemmv1-fp32-zeros              burst             gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      fixed 42.7
+  gemmv1-fp32-zeros              sus               gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      fixed 42.7
+  gemmv1-fp32-ones               burst             gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin       fixed 65.1
+  gemmv1-fp32-sparse50           burst             gemmv1:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bi fixed 70.8
+  gemmv1-fp32-sparse25           burst             gemmv1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin   probe gemmv1-fp32-sparse50
+  gemmv1-fp32-sparse25           sus               gemmv1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin   probe gemmv1-fp32-sparse50
+  gemmv1-fp32-randn              burst             gemmv1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin      probe gemmv1-fp32-sparse50
+  gemmv1-fp32-randn              sus               gemmv1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin      probe gemmv1-fp32-sparse50
+block B:
+  gemmc1-int8-zeros              burst             gemmc1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin      fixed 49.1
+  gemmc1-int8-zeros              sus               gemmc1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin      fixed 49.1
+  gemmc1-int8-sparse50           burst             gemmc1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bi fixed 82.1
+  gemmc1-int8-sparse50           sus               gemmc1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bi fixed 82.1
+  gemmc1-int8-full               burst             gemmc1:randn:tools/claims-v3/kinds/tiles/int8/full.bin       probe gemmc1-int8-sparse50
+  gemmc1-int8-full               sus               gemmc1:randn:tools/claims-v3/kinds/tiles/int8/full.bin       probe gemmc1-int8-sparse50
+  gemmv1-int8-zeros              burst             gemmv1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin      fixed 49.1
+  gemmv1-int8-sparse50           burst             gemmv1:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bi fixed 82.1
+  gemmv1-int8-full               burst             gemmv1:randn:tools/claims-v3/kinds/tiles/int8/full.bin       probe gemmv1-int8-sparse50
+  gemmv1-int8-full               sus               gemmv1:randn:tools/claims-v3/kinds/tiles/int8/full.bin       probe gemmv1-int8-sparse50
+block C:
+  gemmc16-fp32-zeros             burst             gemmc16:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin     fixed 45.0
+  gemmc16-fp32-randn             burst             gemmc16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin     fixed 77.0
+  gemmc16-fp32-randn             sus               gemmc16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin     fixed 77.0
+  gemmv16-fp32-zeros             burst             gemmv16:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin     fixed 45.0
+  gemmv16-fp32-randn             burst             gemmv16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin     fixed 77.0
+block D:
+  gemmh1-fp32-zeros              burst             gemmh1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      fixed 45.0
+  gemmc1-fp32-randn-half         burst 0x0000ffff  gemmc1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin      probe gemmc1-fp32-sparse50
+  gemmc1-fp32-sparse25-rep2      sus               gemmc1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin   probe gemmc1-fp32-sparse50
+  gemmc1-fp32-zeros-rep2         sus               gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      fixed 42.7
+  gemmc1-fp32-ones               sus               gemmc1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin       fixed 65.1
+  gemmv1-fp32-ones               sus               gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin       fixed 65.1
+  gemmc1-int8-full-rep2          sus               gemmc1:randn:tools/claims-v3/kinds/tiles/int8/full.bin       probe gemmc1-int8-sparse50
+  gemmc1-int8-zeros-rep2         sus               gemmc1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin      fixed 49.1
+  gemm1-fp32-zeros               sus               gemm1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin       fixed 42.7
+  gemmc1-fp32-randn-half         sus   0x0000ffff  gemmc1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin      probe gemmc1-fp32-sparse50
+  gemmv1-fp32-sparse25-rep2      sus               gemmv1:sparse25:tools/claims-v3/kinds/tiles/fp32/randn.bin   probe gemmv1-fp32-sparse50
+  gemmv1-fp32-zeros-rep2         sus               gemmv1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      fixed 42.7
+block E:
+  gemmc1-fp16-zeros              burst             gemmc1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin      fixed 41.0
+  gemmc1-fp16-zeros              sus               gemmc1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin      fixed 41.0
+  gemmc1-fp16-sparse50           burst             gemmc1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bi fixed 82.9
+  gemmc1-fp16-sparse50           sus               gemmc1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bi fixed 82.9
+  gemmc1-fp16-randn              burst             gemmc1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin      probe gemmc1-fp16-sparse50
+  gemmc1-fp16-randn              sus               gemmc1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin      probe gemmc1-fp16-sparse50
+  gemmv1-fp16-zeros              burst             gemmv1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin      fixed 41.0
+  gemmv1-fp16-sparse50           burst             gemmv1:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bi fixed 82.9
+  gemmv1-fp16-randn              burst             gemmv1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin      probe gemmv1-fp16-sparse50
+  gemmv1-fp16-randn              sus               gemmv1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin      probe gemmv1-fp16-sparse50
+{'burst': 31, 'sus': 27} about 86 card-minutes at 40 s a burst and 145 s a sustained run; the cap and the slot cut the tail
