@@ -1,0 +1,98 @@
+E108 corrections-check (labelled post hoc; no rule depends on it)
+passes [10810, 10811, 10812, 10813], leak 0.2414, rate 1.121e+09 op/s (fp32.randn)
+
+C1. R7 and M4's bus term
+  M4's bus term is k_bus (7.533 fJ) x the bench's lane_operand_bus stage over zeros (predict_m4.py x_float; settle_count.cpp stage_of: .lane.bypass, .lane.txfma_trans_top, .lane_tima.* and other .lane.* nets, not .lane.rf)
+  tile          M4 bus W   lane_operand_bus toggles an op   over zeros   W per 1,000 over zeros   designed bus bits an op
+  fp32.s_abs       0.025                             8,314        3,050                  0.00821                     3,364
+  fp32.s_walk      0.295                            41,192       35,928                  0.00821                     3,204
+  fp32.c_mx_f      0.316                            43,734       38,470                  0.00821                     4,076
+  fp32.z_s         0.025                             8,314        3,050                  0.00821                     2,420
+  fp32.b_B_z       0.324                            44,697       39,433                  0.00821                     3,008
+  fp32.b_B_w       0.341                            46,773       41,509                  0.00821                     2,260
+  over s_abs: c_mx_f's bus term 0.291 W on 35,420 stage toggles, s_walk's 0.270 W on 32,878; designed bus bits c_mx_f +712, s_walk -160
+  c_mx_f's own extra designed bus bits over s_abs (712 an op) at the same price per toggle: 0.0058 W
+  R7 as scored, (c_mx_f - s_abs) / (s_walk - s_abs): 1.133 ± 0.090 (n 4)
+  withdrawn: the term off the numerator only (0.291 W): 1.003 ± 0.091 (n 4)
+  the term off both sides (0.291 / 0.270 W): 1.141 ± 0.102 (n 4)
+  only c_mx_f's excess over s_walk off (0.021 W): 1.124 ± 0.090 (n 4)
+
+C2. R12, the tile contrast b_B_w - b_B_z, and the alternation counts
+  eff_sub alternations an op: z_s 2,268, b_B_z 1,800, b_B_w 2,016, h_sub 3,840, h_add 0, m_h_sub 3,840, w_h_add 0
+  R12 as scored: 0.970 ± 0.013 (n 4); b_B_w - b_B_z 0.091 ± 0.040 (n 4) W (M4 0.111)
+  z_s's cap: z_s - c_abs = 1.985 ± 0.145 (n 4) W over 2,268 alternations an op: at most 781 fJ an alternation on zero products (838 at the interval's top), even if B's sign bits cost nothing
+  R9's prices: held (h_sub - h_add) 967 fJ, walking (m_h_sub - w_h_add) 465 fJ an alternation; E104: about 900-1,050 fJ for absorbed products on a sum that does not part, 488-756 fJ on moving sums at magnitude 1, 257 fJ for E92's random magnitudes
+  withdrawn: b_B_z's 468 missing alternations priced at 913 fJ in the numerator only: 1.130 ± 0.016 (n 4)
+  withdrawn: b_B_z's 468 missing alternations priced at 1056 fJ in the numerator only: 1.155 ± 0.016 (n 4)
+  one rate for every alternation (fJ):
+         0  R12 0.970 ± 0.013 (n 4)  walk net of alternations 0.091 ± 0.040 (n 4) W
+       257  R12 0.991 ± 0.013 (n 4)  walk net of alternations 0.029 ± 0.040 (n 4) W
+       465  R12 1.007 ± 0.013 (n 4)  walk net of alternations -0.022 ± 0.040 (n 4) W
+       781  R12 1.031 ± 0.013 (n 4)  walk net of alternations -0.098 ± 0.040 (n 4) W
+       913  R12 1.040 ± 0.013 (n 4)  walk net of alternations -0.130 ± 0.040 (n 4) W
+      1056  R12 1.050 ± 0.013 (n 4)  walk net of alternations -0.165 ± 0.040 (n 4) W
+  a held price on z_s and a walking price on b_B_w, with b_B_z at either (fJ):
+    z_s   781  b_B_w  257  b_B_z at the held    price  R12 0.753 ± 0.010 (n 4)  walk 1.086 ± 0.040 (n 4) W
+    z_s   781  b_B_w  257  b_B_z at the walking price  R12 0.994 ± 0.009 (n 4)  walk 0.029 ± 0.040 (n 4) W
+    z_s   781  b_B_w  465  b_B_z at the held    price  R12 0.843 ± 0.010 (n 4)  walk 0.616 ± 0.040 (n 4) W
+    z_s   781  b_B_w  465  b_B_z at the walking price  R12 1.006 ± 0.010 (n 4)  walk -0.022 ± 0.040 (n 4) W
+    z_s   781  b_B_w  488  b_B_z at the held    price  R12 0.855 ± 0.010 (n 4)  walk 0.564 ± 0.040 (n 4) W
+    z_s   781  b_B_w  488  b_B_z at the walking price  R12 1.007 ± 0.010 (n 4)  walk -0.027 ± 0.040 (n 4) W
+    z_s   781  b_B_w  756  b_B_z at the held    price  R12 1.013 ± 0.012 (n 4)  walk -0.042 ± 0.040 (n 4) W
+    z_s   781  b_B_w  756  b_B_z at the walking price  R12 1.028 ± 0.012 (n 4)  walk -0.092 ± 0.040 (n 4) W
+    z_s   967  b_B_w  257  b_B_z at the held    price  R12 0.700 ± 0.010 (n 4)  walk 1.461 ± 0.040 (n 4) W
+    z_s   967  b_B_w  257  b_B_z at the walking price  R12 0.994 ± 0.008 (n 4)  walk 0.029 ± 0.040 (n 4) W
+    z_s   967  b_B_w  465  b_B_z at the held    price  R12 0.775 ± 0.010 (n 4)  walk 0.991 ± 0.040 (n 4) W
+    z_s   967  b_B_w  465  b_B_z at the walking price  R12 1.005 ± 0.009 (n 4)  walk -0.022 ± 0.040 (n 4) W
+    z_s   967  b_B_w  488  b_B_z at the held    price  R12 0.784 ± 0.010 (n 4)  walk 0.939 ± 0.040 (n 4) W
+    z_s   967  b_B_w  488  b_B_z at the walking price  R12 1.006 ± 0.009 (n 4)  walk -0.027 ± 0.040 (n 4) W
+    z_s   967  b_B_w  756  b_B_z at the held    price  R12 0.911 ± 0.010 (n 4)  walk 0.334 ± 0.040 (n 4) W
+    z_s   967  b_B_w  756  b_B_z at the walking price  R12 1.025 ± 0.011 (n 4)  walk -0.092 ± 0.040 (n 4) W
+    z_s   913  b_B_w  257  b_B_z at the held    price  R12 0.715 ± 0.010 (n 4)  walk 1.352 ± 0.040 (n 4) W
+    z_s   913  b_B_w  257  b_B_z at the walking price  R12 0.994 ± 0.008 (n 4)  walk 0.029 ± 0.040 (n 4) W
+    z_s   913  b_B_w  465  b_B_z at the held    price  R12 0.793 ± 0.010 (n 4)  walk 0.882 ± 0.040 (n 4) W
+    z_s   913  b_B_w  465  b_B_z at the walking price  R12 1.005 ± 0.009 (n 4)  walk -0.022 ± 0.040 (n 4) W
+    z_s   913  b_B_w  488  b_B_z at the held    price  R12 0.803 ± 0.010 (n 4)  walk 0.830 ± 0.040 (n 4) W
+    z_s   913  b_B_w  488  b_B_z at the walking price  R12 1.006 ± 0.009 (n 4)  walk -0.027 ± 0.040 (n 4) W
+    z_s   913  b_B_w  756  b_B_z at the held    price  R12 0.938 ± 0.011 (n 4)  walk 0.225 ± 0.040 (n 4) W
+    z_s   913  b_B_w  756  b_B_z at the walking price  R12 1.026 ± 0.011 (n 4)  walk -0.092 ± 0.040 (n 4) W
+    z_s  1056  b_B_w  257  b_B_z at the held    price  R12 0.678 ± 0.009 (n 4)  walk 1.641 ± 0.040 (n 4) W
+    z_s  1056  b_B_w  257  b_B_z at the walking price  R12 0.994 ± 0.008 (n 4)  walk 0.029 ± 0.040 (n 4) W
+    z_s  1056  b_B_w  465  b_B_z at the held    price  R12 0.747 ± 0.009 (n 4)  walk 1.171 ± 0.040 (n 4) W
+    z_s  1056  b_B_w  465  b_B_z at the walking price  R12 1.005 ± 0.009 (n 4)  walk -0.022 ± 0.040 (n 4) W
+    z_s  1056  b_B_w  488  b_B_z at the held    price  R12 0.756 ± 0.009 (n 4)  walk 1.119 ± 0.040 (n 4) W
+    z_s  1056  b_B_w  488  b_B_z at the walking price  R12 1.006 ± 0.009 (n 4)  walk -0.027 ± 0.040 (n 4) W
+    z_s  1056  b_B_w  756  b_B_z at the held    price  R12 0.871 ± 0.010 (n 4)  walk 0.513 ± 0.040 (n 4) W
+    z_s  1056  b_B_w  756  b_B_z at the walking price  R12 1.023 ± 0.010 (n 4)  walk -0.092 ± 0.040 (n 4) W
+  every pricing above: R12 0.678 to 1.050 (lowest 0.678 ± 0.009, so its interval's foot 0.669 > 0.65: MOST); walk -0.165 to +1.641 W
+  pricings within z_s's cap: R12 0.753 to 1.031 (lowest 0.753 ± 0.010, so its interval's foot 0.744 > 0.65: MOST); walk -0.098 to +1.086 W
+
+C3. E106's fp16 held share on cancelling products (x_s), the low end item 5's line keeps
+  E106 scored.json primary.rules.E106-R5: share 0.187 ± 0.040 (n 3), held 0.887 ± 0.369 W, verdict LITTLE; E108 did not rerun x_s
+
+C4. the arms that move R3, R4, R5, R7 and R9
+  dipskept: keeps passes [10810, 10813], sets aside [(10811, 'fp32.randn spans 1.111 W'), (10812, 'fp16.randn spans 1.102 W')]; t(0.975, 1) = 12.706
+  leak0: keeps passes [10810, 10812, 10813], sets aside [(10811, 'fp16.zeros departs -0.262 W from its straight line')]; t(0.975, 2) = 4.303
+  primary: keeps [10810, 10811, 10812, 10813]; t(0.975, 3) = 3.182
+  E108-R3 formats_z       primary 0.012 ± 0.022; dipskept 0.122 ± 1.272 (n 2; mean moves +0.110; interval x59.0); leak0 0.028 ± 0.078 (n 3; mean moves +0.016; interval x3.6)
+  E108-R4 design_fp32     primary 0.103 ± 0.037; dipskept 0.183 ± 1.003 (n 2; mean moves +0.080; interval x27.3); leak0 0.113 ± 0.076 (n 3; mean moves +0.010; interval x2.1)
+  E108-R5 A_vs_B_priced   primary -0.031 ± 0.339; dipskept -0.275 ± 1.379 (n 2; mean moves -0.244; interval x4.1); leak0 -0.014 ± 0.726 (n 3; mean moves +0.017; interval x2.1)
+  E108-R7 fp32.share_het  primary 1.133 ± 0.090; dipskept 1.052 ± 1.109 (n 2; mean moves -0.081; interval x12.4); leak0 1.105 ± 0.128 (n 3; mean moves -0.028; interval x1.4)
+  E108-R9 fp32.alt_ratio  primary 0.485 ± 0.185; dipskept 0.553 ± 0.902 (n 2; mean moves +0.068; interval x4.9); leak0 0.531 ± 0.321 (n 3; mean moves +0.045; interval x1.7)
+  scored.json arm dips_kept: E108-R3 INCONCLUSIVE, E108-R4 INCONCLUSIVE, E108-R5 INCONCLUSIVE, E108-R7 INCONCLUSIVE, E108-R9 INCONCLUSIVE, E108-R12 MOST
+  scored.json arm leak0: E108-R3 INCONCLUSIVE, E108-R4 ABSORBED HIGHER, E108-R5 INCONCLUSIVE, E108-R7 MOST, E108-R9 INCONCLUSIVE, E108-R12 MOST
+
+C5. watts per lane C-read and result bit (board watts / (bits x op rate)), all six contrasts
+  fp32.c_sg_f   - fp32.s_abs 0.160 ± 0.337 (n 4) W on    4,096 bits an op:  34.9 fJ a bit
+  fp32.c_ex_f   - fp32.s_abs 0.793 ± 0.478 (n 4) W on   13,760 bits an op:  51.4 fJ a bit
+  fp32.c_mx_f   - fp32.s_abs 2.532 ± 0.292 (n 4) W on   64,391 bits an op:  35.1 fJ a bit
+  fp32.s_walk   - fp32.s_abs 2.235 ± 0.169 (n 4) W on   63,257 bits an op:  31.5 fJ a bit
+  fp32.b_B_z    - fp32.z_s   2.907 ± 0.120 (n 4) W on   61,168 bits an op:  42.4 fJ a bit
+  fp32.b_B_w    - fp32.z_s   2.998 ± 0.124 (n 4) W on   74,012 bits an op:  36.1 fJ a bit
+  range 31.5-51.4 fJ; the two smallest differences (c_sg_f, c_ex_f) give 34.9 and 51.4
+
+C6. M4 on the new tiles and the reused ones (D - M4, W)
+  new     8 tiles: rms 0.0839 W, mean -0.0770 W, M4 high on 8, inside the frozen 95% interval 8
+         b_A_f -0.047, b_A_w -0.102, b_B_f -0.068, b_B_w -0.083, b_B_z -0.063, c_ex_f -0.106, c_mx_f -0.019, c_sg_f -0.129
+  reused 17 tiles: rms 0.1767 W, mean -0.0859 W, M4 high on 11, inside the frozen 95% interval 17
+  all    25 tiles: rms 0.1532 W, mean -0.0830 W

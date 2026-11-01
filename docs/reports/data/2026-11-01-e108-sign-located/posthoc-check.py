@@ -81,12 +81,18 @@ for name in ("fp32.share_het", "fp32.share_het_z"):
 for name in ("fp32.walk_given_het", "fp32.Bz_walk", "fp32.rest", "fp32.Bz_rest"):
     m, c, n = mci(per_pass(P, name).values())
     print(f"  {name}: {f(m, c, n)} W")
-# M4's own bus term for c_mx_f over s_abs (the k = 0 row's mantissa bits on the B bus), as E88's r_het correction
+# M4's bus term over s_abs. Corrected after verification (Sun 1 Nov 2026, README C1): the term is the bench's lane_operand_bus stage, which in
+# c_mx_f and s_walk is mostly the lane's nets carrying the differing C words, not c_mx_f's k = 0 bus bits; so it comes off both sides, or only
+# c_mx_f's excess over s_walk does. The withdrawn numerator-only figure is in corrections-check.txt C1.
 tb = REG["tiles"]
 bus = tb["fp32.c_mx_f"]["pred"]["terms_w"][1] - tb["fp32.s_abs"]["pred"]["terms_w"][1]
-print(f"  M4's bus term, c_mx_f less s_abs: {bus:.3f} W (taken off c_mx_f - s_abs below, as E88 did for r_het)")
-v = {p: (P["per_pass"][p]["fp32.c_mx_f"]["D"] - P["per_pass"][p]["fp32.s_abs"]["D"] - bus) / (P["per_pass"][p]["fp32.s_walk"]["D"] - P["per_pass"][p]["fp32.s_abs"]["D"]) for p in P["per_pass"]}
-print(f"  share_het with that bus term off: {f(*mci(v.values()))}")
+busw = tb["fp32.s_walk"]["pred"]["terms_w"][1] - tb["fp32.s_abs"]["pred"]["terms_w"][1]
+print(f"  M4's bus term over s_abs: c_mx_f {bus:.3f} W, s_walk {busw:.3f} W (the lane's operand-bus nets, mostly carrying the differing C words)")
+pp = P["per_pass"]
+v = {p: (pp[p]["fp32.c_mx_f"]["D"] - pp[p]["fp32.s_abs"]["D"] - bus) / (pp[p]["fp32.s_walk"]["D"] - pp[p]["fp32.s_abs"]["D"] - busw) for p in pp}
+print(f"  share_het with the term off both sides: {f(*mci(v.values()))}")
+v = {p: (pp[p]["fp32.c_mx_f"]["D"] - pp[p]["fp32.s_abs"]["D"] - (bus - busw)) / (pp[p]["fp32.s_walk"]["D"] - pp[p]["fp32.s_abs"]["D"]) for p in pp}
+print(f"  share_het with only c_mx_f's excess over s_walk ({bus - busw:.3f} W) off: {f(*mci(v.values()))}")
 print("\nD. beside earlier sessions")
 E106 = json.load(open(os.path.join(ROOT, "docs/reports/data/2026-11-01-e106-held-signs/scored.json")))["primary"]["contrasts"]
 E104 = json.load(open(os.path.join(ROOT, "docs/reports/data/2026-11-01-e104-c-readback/scored.json")))["primary"]["contrasts"]
@@ -109,15 +115,17 @@ for mine, theirs, src in (("fp32.step", E106["fp32.step"], "E106"), ("fp16.step"
 print("\nE. alternations an op, and R12 priced at a per-alternation figure (post hoc)")
 for n in ("fp32.z_s", "fp32.b_B_z", "fp32.b_B_w", "fp32.s_abs", "fp32.c_mx_f", "fp32.s_walk", "fp32.b_B_f"):
     print(f"  {n:14s} alt {cnt[n]['alt1']:6.0f}  store {cnt[n]['store']:7.0f}  C {cnt[n]['cbus']:7.0f}  result {cnt[n]['rbus']:7.0f}")
-for fj in (913.0, 1056.0):     # E104's per lane alternation, absorbed products, halves together (fp16 913, fp32 by baseline 1,056)
-    adj = {}
+# Corrected after verification (Sun 1 Nov 2026, README C2): both sides' counts are priced, at one rate here; z_s's own held part caps that rate on
+# zero products at about 781 fJ. Two-price forms (R9's held and walking prices, E104's ranges) and the withdrawn one-sided figures are in
+# corrections-check.txt C2.
+for fj in (0.0, 465.0, 781.0):
+    adj, walk = {}, {}
     for p, it in P["per_pass"].items():
-        dz = (cnt["fp32.z_s"]["alt1"] - cnt["fp32.b_B_z"]["alt1"]) * fj * 1e-15 * it["fp32.b_B_z"]["rate"]
-        dw = (cnt["fp32.b_B_w"]["alt1"] - cnt["fp32.b_B_z"]["alt1"]) * fj * 1e-15 * it["fp32.b_B_z"]["rate"]
-        het = it["fp32.b_B_z"]["D"] - it["fp32.z_s"]["D"] + dz
-        rest = it["fp32.b_B_w"]["D"] - it["fp32.z_s"]["D"]
-        adj[p] = het / rest
-    print(f"  share_het_z with b_B_z's {cnt['fp32.z_s']['alt1'] - cnt['fp32.b_B_z']['alt1']:.0f} missing alternations priced at {fj:.0f} fJ: {f(*mci(adj.values()))}")
+        k = fj * 1e-15 * it["fp32.b_B_z"]["rate"]
+        het = it["fp32.b_B_z"]["D"] - it["fp32.z_s"]["D"] + (cnt["fp32.z_s"]["alt1"] - cnt["fp32.b_B_z"]["alt1"]) * k
+        rest = it["fp32.b_B_w"]["D"] - it["fp32.z_s"]["D"] + (cnt["fp32.z_s"]["alt1"] - cnt["fp32.b_B_w"]["alt1"]) * k
+        adj[p], walk[p] = het / rest, rest - het
+    print(f"  share_het_z with every tile's alternations priced at one rate, {fj:.0f} fJ: {f(*mci(adj.values()))}; b_B_w - b_B_z net of them {f(*mci(walk.values()))} W")
 print("\nF. every tile: D, rail, S, M4 miss")
 for n in sorted(REG["tiles"]):
     it = P["items"].get(n)

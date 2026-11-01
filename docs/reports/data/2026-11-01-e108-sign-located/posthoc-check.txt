@@ -110,8 +110,9 @@ C. the rest located
   fp32.Bz_walk: 0.091 ± 0.040 (n 4) W
   fp32.rest: 2.235 ± 0.169 (n 4) W
   fp32.Bz_rest: 2.998 ± 0.124 (n 4) W
-  M4's bus term, c_mx_f less s_abs: 0.291 W (taken off c_mx_f - s_abs below, as E88 did for r_het)
-  share_het with that bus term off: 1.003 ± 0.091 (n 4)
+  M4's bus term over s_abs: c_mx_f 0.291 W, s_walk 0.270 W (the lane's operand-bus nets, mostly carrying the differing C words)
+  share_het with the term off both sides: 1.141 ± 0.102 (n 4)
+  share_het with only c_mx_f's excess over s_walk (0.021 W) off: 1.124 ± 0.090 (n 4)
 
 D. beside earlier sessions
   fp32.step        here 4.798 ± 0.318 (n 4)  E106 4.792 ± 0.421
@@ -134,8 +135,9 @@ E. alternations an op, and R12 priced at a per-alternation figure (post hoc)
   fp32.c_mx_f    alt   1954  store     503  C   32032  result   32374
   fp32.s_walk    alt   1972  store   12642  C   31551  result   31722
   fp32.b_B_f     alt   2260  store     256  C       8  result       8
-  share_het_z with b_B_z's 468 missing alternations priced at 913 fJ: 1.130 ± 0.016 (n 4)
-  share_het_z with b_B_z's 468 missing alternations priced at 1056 fJ: 1.155 ± 0.016 (n 4)
+  share_het_z with every tile's alternations priced at one rate, 0 fJ: 0.970 ± 0.013 (n 4); b_B_w - b_B_z net of them 0.091 ± 0.040 (n 4) W
+  share_het_z with every tile's alternations priced at one rate, 465 fJ: 1.007 ± 0.013 (n 4); b_B_w - b_B_z net of them -0.022 ± 0.040 (n 4) W
+  share_het_z with every tile's alternations priced at one rate, 781 fJ: 1.031 ± 0.013 (n 4); b_B_w - b_B_z net of them -0.098 ± 0.040 (n 4) W
 
 F. every tile: D, rail, S, M4 miss
   fp16.c_abs     D   8.066 ± 0.109  rail   7.188 ± 0.081  S   9.774  M4   8.04  D-M4 +0.024
