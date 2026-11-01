@@ -1,0 +1,71 @@
+E110 corrections after verification: post hoc, deciding nothing (95 % t over the six headline passes [11011, 11012, 11013, 11014, 11015, 11016])
+
+C1  R6 with the rails as read and at E99's settling (rails / 0.935; the board is not a rail and is unchanged)
+    e110.json as reduced: X 0.997 [0.749, 1.244]  regulators 0.387 [0.244, 0.529]  f 0.163 [0.116, 0.211]  off 1.383 [1.240, 1.527] pJ
+    rails / 1.000:
+      DRAM one, pJ: board 3.32 [3.24, 3.40]  NoC 1.61 [1.53, 1.69]  SRAM 0.14 [0.06, 0.22]  minion 0.18 [0.11, 0.26]  off 1.38 [1.24, 1.53]
+      L2 one, pJ: board 0.815 [0.782, 0.848], rails 0.681 [0.657, 0.705];  f (off/board at L2) 0.163 [0.116, 0.211]
+      regulators' share R 0.39 [0.24, 0.53] pJ   remainder X 1.00 [0.75, 1.24] pJ   R + X = off 1.383
+    rails / 0.935:
+      DRAM one, pJ: board 3.32 [3.24, 3.40]  NoC 1.73 [1.64, 1.81]  SRAM 0.15 [0.07, 0.24]  minion 0.19 [0.11, 0.27]  off 1.25 [1.10, 1.40]
+      L2 one, pJ: board 0.815 [0.782, 0.848], rails 0.728 [0.703, 0.754];  f (off/board at L2) 0.105 [0.054, 0.156]
+      regulators' share R 0.25 [0.11, 0.39] pJ   remainder X 1.00 [0.75, 1.24] pJ   R + X = off 1.249
+    X = board_DRAM - rails_DRAM * board_L2 / rails_L2, so one factor on every rail cancels in X; R and off move with it.
+    reading 6, D's share on the NoC and SRAM rails (headline means): 56.1 % as read, 60.0 % at rails / 0.935
+
+C2  The encoded side
+    the board, E_w by the registration's formula (ew-readme-formula.json), primary arm:
+      E32   +0.037 [-0.080, +0.154]  absent
+      E64   +0.185 [+0.077, +0.293]  absent
+      E128  +0.156 [+0.110, +0.203]  absent
+      E256  +0.246 [+0.168, +0.325]  unresolved
+    the DDR die rail (e110.json headline.contrasts.ddr_mv, mV; R5's rule: moves at <= -0.30 with the interval below 0, still inside +-0.30), with each contrast's 64-bit toggles a line over its base (gen/counts.json):
+      S64   -1.01 [-1.03, -0.99] mV  moves      board +0.358 W   r64 448  e64  56  r64+e64 504
+      V64   -0.99 [-1.03, -0.95] mV  moves      board +0.651 W   r64 448  e64 448  r64+e64 896
+      S128  -0.08 [-0.18, +0.01] mV  still      board +0.135 W   r64 192  e64  24  r64+e64 216
+      V128  -0.59 [-0.94, -0.24] mV  moves      board +0.337 W   r64 192  e64 192  r64+e64 384
+      S256  -0.02 [-0.05, +0.00] mV  still      board +0.758 W   r64  64  e64   8  r64+e64  72
+      V256  +0.01 [-0.01, +0.03] mV  still      board +1.020 W   r64  64  e64  64  r64+e64 128
+    moves: V64 896, S64 504, V128 384;  still: S128 216, V256 128, S256 72
+    r64 + k*e64 orders them (every moving rung above every still one) for k in (0.01, 47.99) on a 0.01 grid, open at both ends: k = 0 (raw only) ties V128 with S128, k = 48 ties S64 with V256
+    the die rail's E128 by the registration's formula: -0.51 [-0.87, -0.15] mV (the frozen code's, e110.json ddr_mv.E128: -0.50 [-0.86, -0.14])
+    the die rail is read raw (reduce_e110.py: die_mv.ddr over [t0+1 s, t0+3 s)); the leakage slope corrects board power only
+
+C3  Margins to the class boundaries (E81's rule: present at mean >= 0.25 W with the interval excluding 0; absent inside +-0.30 W)
+    e110.json              readme_formula  E64 hi +0.293 (0.30 - hi = +0.007 W)   E256 mean +0.246 (0.25 - mean = +0.004 W)   R3 RAW, R4 RAW256
+    e110.json              frozen_code     E64 hi +0.220 (0.30 - hi = +0.080 W)   E256 mean +0.235 (0.25 - mean = +0.015 W)   R3 RAW, R4 RAW256
+    e110-leak0.2936.json   readme_formula  E64 hi +0.381 (0.30 - hi = -0.081 W)   E256 mean +0.154 (0.25 - mean = +0.096 W)   R3 UNRESOLVED, R4 RAW256
+    e110-leak0.2936.json   frozen_code     E64 hi +0.304 (0.30 - hi = -0.004 W)   E256 mean +0.142 (0.25 - mean = +0.108 W)   R3 UNRESOLVED, R4 RAW256
+    e110-leak0.3803.json   readme_formula  E64 hi +0.428 (0.30 - hi = -0.128 W)   E256 mean +0.125 (0.25 - mean = +0.125 W)   R3 UNRESOLVED, R4 RAW256
+    e110-leak0.3803.json   frozen_code     E64 hi +0.351 (0.30 - hi = -0.051 W)   E256 mean +0.113 (0.25 - mean = +0.137 W)   R3 UNRESOLVED, R4 RAW256
+    e110-unfiltered.json   readme_formula  E64 hi +0.253 (0.30 - hi = +0.047 W)   E256 mean +0.243 (0.25 - mean = +0.007 W)   R3 RAW, R4 RAW256
+    e110-unfiltered.json   frozen_code     E64 hi +0.174 (0.30 - hi = +0.126 W)   E256 mean +0.232 (0.25 - mean = +0.018 W)   R3 RAW, R4 RAW256
+    A positive 0.30 - hi keeps E64 absent; past the band (its mean below 0.25 W) R3 would read UNRESOLVED, as it does at both sensitivities. A negative 0.25 - mean, with E256's interval above 0, would make R4 read ENCODED256, a FAIL.
+
+C4  The registered price solve, pass by pass: c_w = [S_w/n_w - S_(w/2)/n_(w/2)] / w / line rate, pJ a toggled bit
+    within-line edges (registered)
+      16: +0.007 [-0.100, +0.114] (e110.json 0.007)
+      32: -0.069 [-0.185, +0.047] (e110.json -0.069)
+      64: +0.715 [+0.611, +0.818] (e110.json 0.715)
+      128: -0.042 [-0.154, +0.071] (e110.json -0.042)
+      256: +2.376 [+2.241, +2.511] (e110.json 2.376)
+    line edges counted too (n = 512/w)
+      16: +0.007 [-0.097, +0.110] (e110.json 0.007)
+      32: -0.065 [-0.173, +0.043] (e110.json -0.065)
+      64: +0.627 [+0.535, +0.719] (e110.json 0.627)
+      128: -0.074 [-0.159, +0.011] (e110.json -0.074)
+      256: +1.151 [+1.094, +1.207] (e110.json 1.151)
+
+C5  The frozen L2 prediction (predictions.json prediction.l2), reported, not scored: no rule uses it
+    frozen: l2_ones 3.28 W, 1.20 pJ a one;  measured: l2_ones 2.226 [2.136, 2.317] W, 0.815 [0.782, 0.848] pJ a one;  measured/frozen 0.68 (W), 0.68 (pJ)
+    frozen value outside the measured interval: True
+    the first ones over zeros (headline.over_zeros.board): l2_u1 +0.830 [+0.764, +0.897] W over l2_zeros, dm_u1 +0.555 [+0.448, +0.662] W over dp_zeros
+    as a price over zeros: l2_u1's 64 ones 2.13 pJ a one, against the marginal 0.815
+    E75's L2 k = 0 rung (256 ones, no changes) over its zeros (desk/e75_levels.txt): +1.978 W, 1.27 pJ a one at E75's 6.098e+09 lines/s; x 448 ones at that price: 3.46 W
+    (the registration's text does not derive prediction.l2; these only show that a price over zeros runs high)
+
+C7  Conditions under the blog's prices
+    within-line edges: 64-bit 0.71 pJ, 256-bit 2.38 pJ;  with each path's line edge counted: 64-bit 0.63 pJ, 256-bit 1.15 pJ
+    DRAM: the price of a one is marginal, from 64 to 512 ones a line (dm_u8 - dm_u1, 448 ones; high pins 64 on both: held equal)
+    L2: the price of a one is marginal, from 64 to 512 ones a line (l2_u8 - l2_u1, 448 ones; no pins at this level)
+    the first ones over zeros cost more: see C5's over_zeros line (dm_u1 also carries 64 high pins a line)
