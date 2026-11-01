@@ -1,0 +1,24 @@
+E78 aifoundry1-c1: 600 MHz, 498.8 mV, leak 0.0000 W/C (-1 runs), runs kept 60/90, passes [10610, 10611], idle-invalid runs 0
+  passes set aside: [{'pass': 10612, 'why': ['fp32.zeros departs +0.333 W from its straight line']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 33.142250000000004
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 24.616  2.074    26.138      23318    5.693
+    fp32.signs                 13.199  1.222    14.808      13205    3.224
+    fp32.s_abs                 11.007  3.324    12.432      11089    2.707
+    fp32.ones                   8.474  3.157     9.811       8751    2.137
+    anchor_pi                   8.467  1.418     9.840       8779    2.143
+    fp32.c_abs                  8.309  1.414     9.730       8680    2.119
+    fp32.zeros                  0.000  0.000     1.528       1363    0.333
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 22.140  0.224    23.625      21076    2.573
+    fp16.signs                 13.071  3.371    14.684      13096    1.599
+    fp16.z_ss                  10.370  0.451    11.904      10619    1.296
+    fp16.x_s                    9.274  2.827    10.769       9608    1.173
+    fp16.ones                   8.511  2.608     9.910       8843    1.080
+    fp16.c_abs                  8.430  0.093     9.752       8702    1.062
+    fp16.x_c                    8.414  1.922     9.790       8733    1.066
+    fp16.zeros                  0.000  0.000     1.506       1344    0.164
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   6.932  0.034     9.263       4813    0.294
+    int8.zeros                  0.000  0.000     2.067       1074    0.066
+  idle consistency median |S - S0 - D| 0.12199999999999633 W; carry-over {'slope_w_per_w': 0.007814616592900399, 'se': 0.0021918589766364784, 'n': 58}; pi built-in - file None; rail tau re-fit median None

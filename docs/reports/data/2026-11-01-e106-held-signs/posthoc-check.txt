@@ -1,0 +1,68 @@
+A. The board, primary, per pass
+  fp32.step       4.792 ± 0.421 (n=3) M4  4.80 ± 0.55 | 10:4.612 11:4.816 12:4.948
+  fp16.step       4.716 ± 1.118 (n=3) M4  4.85 ± 0.55 | 10:4.199 11:5.018 12:4.931
+  fp32.held       2.668 ± 0.210 (n=3) M4  2.62 ± 0.55 | 10:2.725 11:2.571 12:2.709
+  fp16.held_z     2.091 ± 0.442 (n=3) M4  2.22 ± 0.50 | 10:2.004 11:1.972 12:2.295
+  fp16.held_x     0.887 ± 0.369 (n=3) M4  1.09 ± 0.49 | 10:0.720 11:0.935 12:1.006
+  fp32.rest       2.124 ± 0.509 (n=3) M4  2.18 ± 0.78 | 10:1.887 11:2.245 12:2.240
+  fp16.rest_z     2.625 ± 1.058 (n=3) M4  2.63 ± 0.74 | 10:2.194 11:3.046 12:2.636
+  share fp32.s_abs 0.557 ± 0.074 (n=3) M4 0.546 | of means 0.557
+  share fp16.z_ss  0.445 ± 0.113 (n=3) M4 0.458 | of means 0.443
+  share fp16.x_s   0.187 ± 0.040 (n=3) M4 0.224 | of means 0.188
+B. The rail, primary, per pass
+  fp32.step       4.401 ± 0.561 (n=3) | 10:4.662 11:4.285 12:4.257
+  fp16.step       3.954 ± 0.255 (n=3) | 10:3.904 11:3.885 12:4.072
+  fp32.held       2.036 ± 1.179 (n=3) | 10:2.493 11:1.546 12:2.070
+  fp16.held_z     1.787 ± 0.442 (n=3) | 10:1.894 11:1.582 12:1.886
+  fp16.held_x     0.758 ± 0.441 (n=3) | 10:0.554 11:0.868 12:0.853
+  fp32.rest       2.365 ± 0.806 (n=3) | 10:2.169 11:2.740 12:2.187
+  fp16.rest_z     2.167 ± 0.366 (n=3) | 10:2.010 11:2.303 12:2.186
+  share fp32.s_abs 0.461 ± 0.223 (n=3)
+  share fp16.z_ss  0.452 ± 0.100 (n=3)
+  share fp16.x_s   0.192 ± 0.109 (n=3)
+  fp16's z_ss share less fp32's, rail: -0.009 ± 0.123 (n=3)
+C. The arms: R3, R4, R5 and R6's numbers
+  dips_kept   passes [10610, 10612]: fp32 0.569 ± 0.276 INCONCLUSIVE; z_ss 0.471 ± 0.076 ABOUT HALF; x_s 0.188 ± 0.206 INCONCLUSIVE; difference -0.098 ± 0.200 INCONCLUSIVE
+  gates_off   passes [10610, 10611, 10612]: fp32 0.557 ± 0.074 ABOUT HALF; z_ss 0.445 ± 0.113 ABOUT HALF; x_s 0.187 ± 0.040 LITTLE; difference -0.112 ± 0.073 INCONCLUSIVE
+  auto        passes [10610, 10611, 10612]: fp32 0.558 ± 0.086 ABOUT HALF; z_ss 0.444 ± 0.117 ABOUT HALF; x_s 0.188 ± 0.033 LITTLE; difference -0.114 ± 0.075 INCONCLUSIVE
+  leak0.1994  passes [10610, 10611, 10612]: fp32 0.558 ± 0.084 ABOUT HALF; z_ss 0.444 ± 0.116 ABOUT HALF; x_s 0.188 ± 0.034 LITTLE; difference -0.114 ± 0.074 INCONCLUSIVE
+  leak0.3803  passes [10610, 10611, 10612]: fp32 0.556 ± 0.040 ABOUT HALF; z_ss 0.449 ± 0.104 ABOUT HALF; x_s 0.185 ± 0.061 LITTLE; difference -0.107 ± 0.074 INCONCLUSIVE
+  leak0.545   passes [10610, 10611, 10612]: fp32 0.554 ± 0.016 ABOUT HALF; z_ss 0.453 ± 0.095 ABOUT HALF; x_s 0.183 ± 0.086 LITTLE; difference -0.100 ± 0.084 INCONCLUSIVE
+  leak0       passes [10610, 10611]: fp32 0.573 ± 0.639 INCONCLUSIVE; z_ss 0.431 ± 0.643 INCONCLUSIVE; x_s 0.189 ± 0.050 LITTLE; difference -0.142 ± 0.004 ALIKE
+D. fp16: z_ss (A's signs moving, this session) against E104's z_s (A's signs still, same B), each over c_abs in its own session
+  z_ss - c_abs here 2.091 ± 0.442 (n=3)
+  z_s - c_abs, E104 primary 2.153 ± 0.330 (n=2)
+  z_s - c_abs, E104 all three 2.172 ± 0.103 (n=3)
+E. The carry E104 used, against this session: E92's dips-removed step x 0.9722, and E88's held part on this card
+  fp32 step: carried 4.877, here 4.792 ± 0.421, here/carried 0.983
+  fp16 step: carried 4.827, here 4.716 ± 1.118, here/carried 0.977
+  fp32 s_abs - c_abs: here 2.668 ± 0.210; E88 on this card 2.524 ± 0.185; E92 on aifoundry3 2.520 ± 0.171 x 0.9722 = 2.450
+F. Sign flips an op, alternations, and result bits on the sums the card holds: how near each held tile is to signs (make_e106's counts at two op indices)
+  fp16.signs  A flips  2032 B flips  4050 bus  6082 alternations  2070  2026 result bits   63698
+  fp16.z_ss   A flips  1760 B flips  3802 bus  5754 alternations  2030  1828 result bits     272
+  fp16.x_s    A flips  1984 B flips  3480 bus  5752 alternations  1830  1826 result bits     272
+  fp16.c_abs  A flips     0 B flips     0 bus   128 alternations     0     0 result bits     272
+  fp16.x_c    A flips     0 B flips    16 bus   304 alternations    16     0 result bits     272
+  fp16.ones   A flips     0 B flips     0 bus     0 alternations     0     0 result bits    8472
+  fp32.signs  A flips  1072 B flips  2172 bus  3244 alternations  1968     0 result bits   80015
+  fp32.s_abs  A flips   944 B flips  2260 bus  3364 alternations  2080     0 result bits     272
+  fp32.c_abs  A flips     0 B flips     0 bus   160 alternations     0     0 result bits     272
+  fp32.ones   A flips     0 B flips     0 bus     0 alternations     0     0 result bits    8472
+G. Modelled, not measured: the sign bits by E92's price list x s_abs' flips, fp32 0.569, fp16 0.297 W, x 0.9722; what is left of the held part
+  fp32: sign bits 0.55 W; the held part less them 2.12 W
+  fp16: sign bits 0.29 W; the held part less them 1.80 W
+H. A second reading of the rest. The alternation's price falls on moving sums, so part of the rest may be the adder alternating at its moving price: E104's m premium (all-three means) x signs' alternation rate. Modelled, and not additive with the held part
+  fp32: step 4.79 W = sign bits 0.55 + the switch at its moving price 1.08 (premium 2.099, 1968 of 3,840 alternations) + what is left 3.16
+  fp16: step 4.72 W = sign bits 0.29 + the switch at its moving price 1.75 (premium 3.253, 2070 of 3,840 alternations) + what is left 2.67
+I. The read-back
+  fp16.c_abs  n 2,1000,199874,541999   minions 1024 equals fl,manual,rtl | at the last n: C00 588452f0 C08 588452f0, 1 words
+  fp16.ones   n 2,1000,199874,541999   minions 1024 equals fl,manual,rtl | at the last n: C00 4b8452f0 C08 4b8452f0, 1 words
+  fp16.signs  n 2,1000,199874,541999   minions 1024 equals fl,manual,rtl | at the last n: C00 4a467c68 C08 c98452f0, 15 words
+  fp16.x_c    n 2,1000,199874,541999   minions 1024 equals fl,manual,rtl | at the last n: C00 4b0452f0 C08 4b0452f0, 1 words
+  fp16.x_s    n 2,1000,199874,541999   minions 1024 equals fl,manual,rtl | at the last n: C00 4b0452f0 C08 4b0452f0, 1 words
+  fp16.z_ss   n 2,1000,199874,541999   minions 1024 equals fl,manual,rtl | at the last n: C00 588452f0 C08 588452f0, 1 words
+  fp32.c_abs  n 2,1000,199874,541999   minions 1024 equals fl,manual,rtl | at the last n: C00 7b0452f0 C08 7b0452f0, 1 words
+  fp32.ones   n 2,1000,199874,541999   minions 1024 equals fl,manual,rtl | at the last n: C00 4b0452f0 C08 4b0452f0, 1 words
+  fp32.s_abs  n 2,1000,199874,541999   minions 1024 equals fl,manual,rtl | at the last n: C00 7b0452f0 C08 7b0452f0, 1 words
+  fp32.signs  n 2,1000,199874,541999   minions 1024 equals fl,manual,rtl | at the last n: C00 c98452f0 C08 00000000, 11 words
+  40 reads; all 1,024 minions on one C in 40
