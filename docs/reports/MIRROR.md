@@ -231,6 +231,19 @@ python3 scripts/check-mirror.py --only "$SLUG"
 
 ## Checking that live equals repo
 
+**The first-visit pass, 2026-10-31 (Sat, week 44), Q131:** the chip diagram at version `821bbe049645` equals source commit `a2832266`
+(`check-mirror.py --via https --only et-soc1-chip-diagram`, **exit 0**, 1/1 equal, 7 folder files equal, 0 warnings; the rollback
+target is `1bc01254c64a`, the version `cb1f6e4d` built, which was live until this deploy; the deploy carried `base_sha`).
+The dashboard card now reads meta.json's new `card_description` (it still said eleven flows and a 17-step tour), read back
+from `spacesheep list --json`. The GitHub Pages mirror rebuilt from `a2832266` (`gh-pages` `587cb17e`). Tests on exactly the
+deployed bytes, run on the mini (heavy browser runs go to the mini or a lab box since 31 October, the owner's rule), one
+browser at a time, each run with its own server started and stopped inside the same script: `zoom_test.mjs` **793 passed / 0
+failed** (791 before plus T21's two new checks: #facts opens its fold, and the fw.map-match fact link lands on its row),
+`--phone` **630 / 0** (628 before), `check_page.sh` OK at 1280 and 390 px, light and dark; on the Intel `guard_test.py` 6/6 and
+`zoom_static.py` every T9/T10/T14 check PASS but Pillow's. The page is 1,496,957 bytes against the 1.5e6 budget, 3,043 to
+spare, after `1d22e20e` stripped 13,907 bytes of CSS comments at build time (`"strip_css_comments": true` in its meta.json).
+The memory levels page, its `facts.json` and `ladder-img/` did not change, and it was not redeployed.
+
 **The two facts' own sources, 2026-10-31 (Sat, week 44), Q130(f) after verification:** a second pass the same day,
 on two faults found when the morning's fix was verified. `tfma.lab` and `tfma.owner.why` now end their `source` with
 the directory that corrected them (`docs/reports/data/2026-10-26-toggle-recount/`), and `tfma.owner.why` no longer
