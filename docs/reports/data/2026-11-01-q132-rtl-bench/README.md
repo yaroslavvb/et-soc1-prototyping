@@ -414,3 +414,9 @@ A clean build from the committed files reproduced `counts-v2.json`'s fp32 `randn
 **Every tile passes the functional check:** 0 of 256 words wrong at all three launch points, all 84 tiles.
 
 Rerun: `run_kinds.py … --types fp32,fp16,int8 --only __none__ --extra-tiles <type>:<name>:<path>,…` over `tools/claims-v3/kinds/e94/tiles`, `real2/tiles` (named `r2_<name>`), and `real/tiles`' three partners (named `real_<name>`), writing `counts-e94e95.json`; then `predict_e94_e95.py`.
+
+## 11. A second model, frozen for E95: the operand bus gets its own price
+
+[`m4-bench-prediction.md`](m4-bench-prediction.md) (`predict_m4.py`). Reading the frozen §10 predictions against E94's published data (post hoc by the clock, as §10 says): fp32 rms 0.44 W, bias −0.37; fp16 0.40 W, bias −0.16; int8 0.34 W, bias −0.33; every tile inside its interval. The misses sit on gated kinds, as §6 named. So I compared forms on what had been read, holding out whole experiments, and one change stands out: **the lane's operand bus costs about four to five times a local net.** Fitted on E78 alone, M4 is k_core 1.62 fJ (multiplier, adder and normaliser), k_bus 7.53 fJ, k_rest 2.22 fJ (every other net), a 1.07 fJ per clocked bit: E78 fit 0.136 W against M2's 0.357 W, E86 0.145 against 0.198, E90 0.220 against 0.483, E92 0.242 against 0.436, card 1 with E82's scale: E88 0.214 against 0.452, E94 0.178 against 0.415. It does not help everywhere: E70's spread ladder gets worse, 0.369 against 0.172, and E60's low-bit ladder stays near 1 W. int8's own form, I3 (nets, bus 16.7 fJ, clocks), fits E78 at 0.181 W against 0.287 W.
+
+**The form was chosen after reading E94, so E94 does not test it. E95 does:** this section's commit precedes E95's data on main, and I read none of it. §10's M2 stands as committed.
