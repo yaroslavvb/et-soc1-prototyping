@@ -1,0 +1,15 @@
+A  (1,1) x (1,1): both add                                    C 0x58000000 -> RTL 0x58000000 (+0 ulp), fp16_model 0x58000000
+A  (1,1) x (-1,-1): both subtract                             C 0x58000000 -> RTL 0x57ffffff (-1 ulp), fp16_model 0x57ffffff
+A  (1,1) x (lo 1, hi -1): high subtracts                      C 0x58000000 -> RTL 0x57ffffff (-1 ulp), fp16_model 0x57ffffff
+A  (1,1) x (lo -1, hi 1): low subtracts                       C 0x58000000 -> RTL 0x57ffffff (-1 ulp), fp16_model 0x57ffffff
+A  (-0,-0) x (1,1): zero products, both eff_sub set           C 0x58000000 -> RTL 0x58000000 (+0 ulp), fp16_model 0x58000000
+A  (-0,-0) x (-1,-1): zero products, both add                 C 0x58000000 -> RTL 0x58000000 (+0 ulp), fp16_model 0x58000000
+A  (1,1) x (lo 1, hi -1) on a small C: the products cancel    C 0x4b000000 -> RTL 0x4b000000 (+0 ulp), fp16_model 0x4b000000
+A  fp32 1 x 1 on 2^100: adds                                  C 0x71800000 -> RTL 0x71800000 (+0 ulp)
+A  fp32 1 x -1 on 2^100: absorbed subtract, RNE               C 0x71800000 -> RTL 0x71800000 (+0 ulp)
+A  fp32 -0 x 1 on 2^100: zero product, eff_sub set            C 0x71800000 -> RTL 0x71800000 (+0 ulp)
+A  fp32 -0 x -1 on 2^100: zero product, adds                  C 0x71800000 -> RTL 0x71800000 (+0 ulp)
+fp16.x_c       start:    0 of 1536 words off accum | from fl: words off fl after op 1-4 [0, 0, 0, 0] C[0][0] ulps [0, 0, 0, 0] C[0][8] ulps [0, 0, 0, 0] | from real: off accum [0, 0, 0, 0] | real != fl at n: 0 words
+fp16.x_s       start:    0 of 1536 words off accum | from fl: words off fl after op 1-4 [0, 0, 0, 0] C[0][0] ulps [0, 0, 0, 0] C[0][8] ulps [0, 0, 0, 0] | from real: off accum [0, 0, 0, 0] | real != fl at n: 0 words
+fp16.z_ss      start:    0 of 1536 words off accum | from fl: words off fl after op 1-4 [0, 0, 0, 0] C[0][0] ulps [0, 0, 0, 0] C[0][8] ulps [0, 0, 0, 0] | from real: off accum [0, 0, 0, 0] | real != fl at n: 0 words
+desk rc=0

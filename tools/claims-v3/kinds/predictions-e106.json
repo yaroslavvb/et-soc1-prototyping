@@ -1,0 +1,589 @@
+{
+ "experiment": "E106",
+ "title": "a random sign's ~5 W split on one card: signs and ones beside held tiles with both operands' signs moving, read back, aifoundry1 card 1 at 600 MHz",
+ "request": "Q132: item 2's last line, E104's verifier's suggestion",
+ "date": "2026-11-01",
+ "registration": "tools/claims-v3/kinds/E106.md",
+ "card": {
+  "name": "aifoundry1-c1",
+  "device": 1,
+  "clock_mhz": 600,
+  "config_gate": {
+   "expected": {
+    "tdp_w": 65,
+    "temp_threshold_c": 65
+   }
+  }
+ },
+ "inputs_frozen": {
+  "counts_e78": {
+   "path": "docs/reports/data/2026-11-01-q132-rtl-bench/counts-v2.json",
+   "sha256": "422bdeac130a12d352f77e2e635eae2592188e7548d8196c9e033f5228986f45"
+  },
+  "counts_e92": {
+   "path": "docs/reports/data/2026-11-01-q132-rtl-bench/counts-e92.json",
+   "sha256": "429e708061c1587b76168b5d9380b7100cb7aafdabb66b36bb3eb8eb81ef7678"
+  },
+  "counts_e106": {
+   "path": "docs/reports/data/2026-11-01-e106-held-signs/desk/counts-e106.json",
+   "sha256": "9d53fd3a0fbd175e6dbd279e3440a43a42419a9b9ad7612048b276105b255cd6"
+  },
+  "desk_check": {
+   "path": "docs/reports/data/2026-11-01-e106-held-signs/desk/desk-e106.txt",
+   "sha256": "cc6685fbaabee6ab872aab1b37c668ebced35ceb670cb1e8d8ccd91f8929f25f"
+  },
+  "selection_e103": {
+   "path": "tools/claims-v3/kinds/e103/selection.json",
+   "sha256": "dfa66f2c24254db7b6f8dadadccf42766c772e3028bb864fe5fb3bd5e3b91251"
+  }
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337"
+  },
+  "e106_json_sha256": "c6d72f56b9a6f0e7e055ec7db565596553065d1e9b6605a129a0bdebdf880970",
+  "e106_files_sha256": {
+   "tools/claims-v3/kinds/e106_common.py": "69bfef08382c233c15a56b8a0eba375f84cedced045b5d3fab240f9fc6601a6a",
+   "tools/claims-v3/kinds/run_e106.py": "c79c8fdcf7aacbabcbe0093b4a8153e950f0c74f04e46320f0cc8a178844c448",
+   "tools/claims-v3/kinds/block_e106.sh": "ddd6467099d929b71e92fccb07eb841bc113b949cfb4a07b6f3e120103ff9f6e",
+   "tools/claims-v3/kinds/queue_e106.sh": "c39192b32635a1c504688775fc685f3e7f0c63959208c0b6a9b3b453ce38d7ff",
+   "tools/claims-v3/kinds/run_e106.sh": "bbcab06df19a0d1939f71c534cfbf6fae0d06371c5c9659506f4f19dde13ff70",
+   "tools/claims-v3/kinds/reduce_e106.py": "716f5d31bfe82418cbe25868b7dbae5187b92b3d1a193cd3ef382d722e46ff0c",
+   "tools/claims-v3/kinds/score_e106.py": "032d8bc870b1fb67b7ccdb3fba5b0e27f8f1c0aa45f64d6d53fe48992011a308",
+   "tools/claims-v3/kinds/collect_e106.sh": "08e0fa549497d3286d999b49a45f1ad682f5a5dca071c21d90f6cd9bc4edfc28",
+   "tools/claims-v3/kinds/readback_e106.py": "615c945aa0b76dfcee8918b300354421263057049b76b5cccc9b5976ad5fd2b5",
+   "tools/claims-v3/kinds/block_readback_e106.sh": "fc73a4eeefdfd389147e979d9b8a840f10cac6d9afb713a06f7d05c2a306d925"
+  }
+ },
+ "plan": {
+  "passes": [
+   10610,
+   10611,
+   10612,
+   10613
+  ],
+  "smoke": 10601,
+  "readback": 10602,
+  "runs_per_pass": 30,
+  "items_per_pass": "the tie twice, E78's six anchors three times, E106's 8 tiles and E78's two ones once",
+  "reduction_primary": "dips removed, leak 0.2414 (E82's)",
+  "min_kept_passes_scored": 2,
+  "min_tile_passes": 2
+ },
+ "card_budget": {
+  "card_minutes_about": 20,
+  "queue_budget_s": 1250,
+  "first_pass_estimate_s": 310,
+  "queue_deadline": "2026-11-01 10:30 PST"
+ },
+ "model": {
+  "name": "M4",
+  "coef_fJ": {
+   "a_clocked": 1.0660910178957255,
+   "k_bus": 7.533039550355875,
+   "k_core": 1.624383735237168,
+   "k_rest": 2.222188844199022
+  },
+  "card1_scale": 0.9722467829213307,
+  "card1_scale_se": 0.0018618294751800036,
+  "interval_pool": {
+   "n": 88,
+   "rms_w": 0.17561079622126327
+  }
+ },
+ "e92_step_on_aifoundry3_w": {
+  "fp32": 5.016,
+  "fp16": 4.965
+ },
+ "tiles": {
+  "fp16.c_abs": {
+   "type": "fp16",
+   "kind": "c_abs",
+   "group": "held baseline",
+   "pred": {
+    "M": 8.041986041710304,
+    "lo95": 7.6679524129153,
+    "hi95": 8.416019670505309,
+    "half95": 0.3740336287950044,
+    "launch_points_w": [
+     8.047185586397948,
+     8.033542882722204,
+     8.045229656010763
+    ],
+    "terms_w": [
+     0.0009110187640308173,
+     0.0026925063725517853,
+     0.0633752171588722,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.signs": {
+   "type": "fp16",
+   "kind": "signs",
+   "group": "the +-1 side of the step",
+   "pred": {
+    "M": 12.922942700907225,
+    "lo95": 12.501020752420613,
+    "hi95": 13.344864649393836,
+    "half95": 0.4219219484866105,
+    "launch_points_w": [
+     12.746147311638937,
+     12.897427630009213,
+     13.125253161073525
+    ],
+    "terms_w": [
+     2.466348468465714,
+     0.3039111842278549,
+     2.177675748798806,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.x_c": {
+   "type": "fp16",
+   "kind": "x_c",
+   "group": "held baseline",
+   "pred": {
+    "M": 8.069262989083327,
+    "lo95": 7.695439645581586,
+    "hi95": 8.443086332585068,
+    "half95": 0.3738233435017413,
+    "launch_points_w": [
+     8.07020090369182,
+     8.06463433764179,
+     8.072953725916376
+    ],
+    "terms_w": [
+     0.011682753580187938,
+     0.0059760507293222555,
+     0.07659688535896805,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.x_s": {
+   "type": "fp16",
+   "kind": "x_s",
+   "group": "held, both operands' signs moving",
+   "pred": {
+    "M": 9.156760825983092,
+    "lo95": 8.78395292976586,
+    "hi95": 9.529568722200324,
+    "half95": 0.37280789621723154,
+    "launch_points_w": [
+     9.157698740591584,
+     9.152132174541553,
+     9.160451562816139
+    ],
+    "terms_w": [
+     0.8381809257247625,
+     0.039829393047625804,
+     0.3037432077958533,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.z_ss": {
+   "type": "fp16",
+   "kind": "z_ss",
+   "group": "held, both operands' signs moving",
+   "pred": {
+    "M": 10.265876714211654,
+    "lo95": 9.893374075394062,
+    "hi95": 10.638379353029245,
+    "half95": 0.3725026388175916,
+    "launch_points_w": [
+     10.258800049501348,
+     10.25497757767137,
+     10.28385251546224
+    ],
+    "terms_w": [
+     1.6931808863385784,
+     0.039780139882274246,
+     0.5579083885759503,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp32.c_abs": {
+   "type": "fp32",
+   "kind": "c_abs",
+   "group": "held baseline",
+   "pred": {
+    "M": 8.056201863037735,
+    "lo95": 7.682207974471616,
+    "hi95": 8.430195751603854,
+    "half95": 0.37399388856611876,
+    "launch_points_w": [
+     8.056258242465045,
+     8.050330352059731,
+     8.062016994588433
+    ],
+    "terms_w": [
+     0.0006183529678202225,
+     0.003349177770524875,
+     0.06779943933614839,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp32.signs": {
+   "type": "fp32",
+   "kind": "signs",
+   "group": "the +-1 side of the step",
+   "pred": {
+    "M": 12.877070605905605,
+    "lo95": 12.462914367388993,
+    "hi95": 13.291226844422216,
+    "half95": 0.41415623851661143,
+    "launch_points_w": [
+     12.861031429280725,
+     12.714301979617746,
+     13.055878408818343
+    ],
+    "terms_w": [
+     2.122757355947281,
+     0.30864150733814893,
+     2.461236849656932,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp32.s_abs": {
+   "type": "fp32",
+   "kind": "s_abs",
+   "group": "held, both operands' signs moving",
+   "pred": {
+    "M": 10.675292792158878,
+    "lo95": 10.233925340328218,
+    "hi95": 11.116660243989537,
+    "half95": 0.4413674518306598,
+    "launch_points_w": [
+     10.781802671875825,
+     10.802209020480833,
+     10.44186668411998
+    ],
+    "terms_w": [
+     2.1274292250304874,
+     0.02503674558848252,
+     0.5383919285766663,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp32.ones": {
+   "type": "fp32",
+   "kind": "ones",
+   "group": "the +1 side of the step",
+   "pred": {
+    "M": 8.077701424714338,
+    "lo95": 7.703913256576953,
+    "hi95": 8.451489592851722,
+    "half95": 0.3737881681373851,
+    "launch_points_w": [
+     8.078279896901567,
+     8.071569906613401,
+     8.083254470628043
+    ],
+    "terms_w": [
+     0.010035255035006055,
+     0.0020795548248357045,
+     0.08115172189125296,
+     7.984434892963242
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.ones": {
+   "type": "fp16",
+   "kind": "ones",
+   "group": "the +1 side of the step",
+   "pred": {
+    "M": 8.068792166613445,
+    "lo95": 7.695085396327667,
+    "hi95": 8.442498936899224,
+    "half95": 0.373706770285778,
+    "launch_points_w": [
+     8.067485064264835,
+     8.06360337041213,
+     8.075288065163372
+    ],
+    "terms_w": [
+     0.009015781550771297,
+     0.002079578092621295,
+     0.08268950755520271,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  }
+ },
+ "contrasts": {
+  "fp32.step": {
+   "plus": [
+    "fp32.signs"
+   ],
+   "minus": [
+    "fp32.ones"
+   ],
+   "what": "the sign step on this card",
+   "M": 4.799369181191268,
+   "half95": 0.545427362907953
+  },
+  "fp16.step": {
+   "plus": [
+    "fp16.signs"
+   ],
+   "minus": [
+    "fp16.ones"
+   ],
+   "what": "the sign step on this card",
+   "M": 4.85415053429378,
+   "half95": 0.5479731079439659
+  },
+  "fp32.held": {
+   "plus": [
+    "fp32.s_abs"
+   ],
+   "minus": [
+    "fp32.c_abs"
+   ],
+   "what": "random signs on both operands, absorbed: the sum holds",
+   "M": 2.619090929121143,
+   "half95": 0.548700475761011
+  },
+  "fp16.held_z": {
+   "plus": [
+    "fp16.z_ss"
+   ],
+   "minus": [
+    "fp16.c_abs"
+   ],
+   "what": "random signs on both operands, zero products: the sum holds, both eff_sub flip independently",
+   "M": 2.2238906725013483,
+   "half95": 0.4957673557859408
+  },
+  "fp16.held_x": {
+   "plus": [
+    "fp16.x_s"
+   ],
+   "minus": [
+    "fp16.x_c"
+   ],
+   "what": "random signs on both operands, products cancelling: the sum holds, nonzero aligned operands, eff_sub1 and eff_sub2 in opposite phase",
+   "M": 1.0874978368997634,
+   "half95": 0.4941757007652534
+  },
+  "fp32.rest": {
+   "plus": [
+    "fp32.signs",
+    "fp32.c_abs"
+   ],
+   "minus": [
+    "fp32.ones",
+    "fp32.s_abs"
+   ],
+   "what": "the step less the held part",
+   "M": 2.1802782520701243,
+   "half95": 0.7764034532498844
+  },
+  "fp16.rest_z": {
+   "plus": [
+    "fp16.signs",
+    "fp16.c_abs"
+   ],
+   "minus": [
+    "fp16.ones",
+    "fp16.z_ss"
+   ],
+   "what": "the step less the held part",
+   "M": 2.6302598617924318,
+   "half95": 0.7385715360213758
+  }
+ },
+ "shares": {
+  "fp32.s_abs": {
+   "held": "fp32.held",
+   "step": "fp32.step",
+   "M": 0.5457156618385105,
+   "what": "fp32's held share of the step, on one card"
+  },
+  "fp16.z_ss": {
+   "held": "fp16.held_z",
+   "step": "fp16.step",
+   "M": 0.4581420903183625,
+   "what": "fp16's held share, zero products, independent eff_subs"
+  },
+  "fp16.x_s": {
+   "held": "fp16.held_x",
+   "step": "fp16.step",
+   "M": 0.22403463370506727,
+   "what": "fp16's held share, cancelling products, eff_subs in opposite phase"
+  }
+ },
+ "session_tie": {
+  "reference": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/posthoc/e82-nodips.json items.<cell>.D.mean (dips removed, as E106's primary)",
+  "cells": {
+   "fp32.randn": {
+    "ref_w": 24.0017,
+    "band_w": 0.5
+   },
+   "fp16.randn": {
+    "ref_w": 21.4901,
+    "band_w": 0.5
+   },
+   "anchor_pi": {
+    "ref_w": 8.1353,
+    "band_w": 0.5
+   },
+   "int8.full": {
+    "ref_w": 6.8392,
+    "band_w": 0.25
+   }
+  }
+ },
+ "rules": {
+  "E106-R1": {
+   "kind": "read",
+   "what": "every tile, at every length, every word of all 1,024 minions: the three readings coincide on these tiles, so a miss means the tile is not what it is called, or a sum does not hold",
+   "reads": {
+    "fp16.x_c": [
+     2,
+     1000,
+     199874,
+     541999
+    ],
+    "fp16.x_s": [
+     2,
+     1000,
+     199874,
+     541999
+    ],
+    "fp16.z_ss": [
+     2,
+     1000,
+     199874,
+     541999
+    ],
+    "fp16.ones": [
+     2,
+     1000,
+     199874,
+     541999
+    ],
+    "fp32.ones": [
+     2,
+     1000,
+     199874,
+     541999
+    ],
+    "fp16.signs": [
+     2,
+     1000,
+     199874,
+     541999
+    ],
+    "fp32.signs": [
+     2,
+     1000,
+     199874,
+     541999
+    ],
+    "fp16.c_abs": [
+     2,
+     1000,
+     199874,
+     541999
+    ],
+    "fp32.c_abs": [
+     2,
+     1000,
+     199874,
+     541999
+    ],
+    "fp32.s_abs": [
+     2,
+     1000,
+     199874,
+     541999
+    ]
+   }
+  },
+  "E106-R2": {
+   "kind": "power",
+   "what": "the step on one card: signs - ones in each format against E92's aifoundry3 value carried by the card scale",
+   "carried_w": {
+    "fp32": 4.876789863133395,
+    "fp16": 4.827205277204407
+   },
+   "band_w": 1.0
+  },
+  "E106-R3": {
+   "kind": "power",
+   "what": "fp32's held share on one card: (s_abs - c_abs) / (signs - ones), per pass",
+   "lo": 0.35,
+   "hi": 0.65
+  },
+  "E106-R4": {
+   "kind": "power",
+   "what": "fp16's held share with both operands' signs moving: (z_ss - c_abs) / (signs - ones), per pass",
+   "lo": 0.3,
+   "hi": 0.7
+  },
+  "E106-R5": {
+   "kind": "power",
+   "what": "the same with nonzero aligned operands: (x_s - x_c) / (signs - ones), per pass",
+   "lo": 0.3,
+   "hi": 0.7
+  },
+  "E106-R6": {
+   "kind": "power",
+   "what": "the two formats' shares: fp16's z_ss share less fp32's s_abs share, per pass",
+   "band": 0.15
+  },
+  "E106-R7": {
+   "kind": "power",
+   "what": "the bench's model on E106's tiles: rms(D - M4)",
+   "pass_w": 0.6,
+   "fail_w": 1.0
+  },
+  "E106-S1": {
+   "kind": "power",
+   "what": "the session tie against E82, dips removed: every cell inside its band"
+  }
+ },
+ "not_scored_if": "fewer than 2 kept passes in the primary reduction: every power rule NOT SCORED. The read-back rule needs no pass."
+}

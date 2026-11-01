@@ -1,0 +1,182 @@
+{
+ "_bench": "rtl-sim/fma_toggle_v2 (vpu_top, -fno-dfg)",
+ "part_a": [
+  {
+   "case": "(1,1) x (1,1): both add",
+   "c": "0x58000000",
+   "model": "0x58000000",
+   "rtl": "0x58000000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "(1,1) x (-1,-1): both subtract",
+   "c": "0x58000000",
+   "model": "0x57ffffff",
+   "rtl": "0x57ffffff",
+   "rtl_ulps": -1
+  },
+  {
+   "case": "(1,1) x (lo 1, hi -1): high subtracts",
+   "c": "0x58000000",
+   "model": "0x57ffffff",
+   "rtl": "0x57ffffff",
+   "rtl_ulps": -1
+  },
+  {
+   "case": "(1,1) x (lo -1, hi 1): low subtracts",
+   "c": "0x58000000",
+   "model": "0x57ffffff",
+   "rtl": "0x57ffffff",
+   "rtl_ulps": -1
+  },
+  {
+   "case": "(-0,-0) x (1,1): zero products, both eff_sub set",
+   "c": "0x58000000",
+   "model": "0x58000000",
+   "rtl": "0x58000000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "(-0,-0) x (-1,-1): zero products, both add",
+   "c": "0x58000000",
+   "model": "0x58000000",
+   "rtl": "0x58000000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "(1,1) x (lo 1, hi -1) on a small C: the products cancel",
+   "c": "0x4b000000",
+   "model": "0x4b000000",
+   "rtl": "0x4b000000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "fp32 1 x 1 on 2^100: adds",
+   "c": "0x71800000",
+   "rtl": "0x71800000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "fp32 1 x -1 on 2^100: absorbed subtract, RNE",
+   "c": "0x71800000",
+   "rtl": "0x71800000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "fp32 -0 x 1 on 2^100: zero product, eff_sub set",
+   "c": "0x71800000",
+   "rtl": "0x71800000",
+   "rtl_ulps": 0
+  },
+  {
+   "case": "fp32 -0 x -1 on 2^100: zero product, adds",
+   "c": "0x71800000",
+   "rtl": "0x71800000",
+   "rtl_ulps": 0
+  }
+ ],
+ "tiles": {
+  "fp16.x_c": {
+   "tile": "fp16.x_c",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1245917312,
+   "real_c08": 1245917312,
+   "fl_c00": 1245917312,
+   "fl_c08": 1245917312
+  },
+  "fp16.x_s": {
+   "tile": "fp16.x_s",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1245917312,
+   "real_c08": 1245917312,
+   "fl_c00": 1245917312,
+   "fl_c08": 1245917312
+  },
+  "fp16.z_ss": {
+   "tile": "fp16.z_ss",
+   "start_ops": 6,
+   "start_mismatch_words": 0,
+   "from_fl_words_off_fl_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c00": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_fl_ulps_c08": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "from_real_mismatch_after_op": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "real_words_off_fl_at_n": 0,
+   "real_c00": 1472409728,
+   "real_c08": 1472409728,
+   "fl_c00": 1472409728,
+   "fl_c08": 1472409728
+  }
+ }
+}
