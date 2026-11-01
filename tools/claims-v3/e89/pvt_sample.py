@@ -5,7 +5,9 @@ It replaces `ettelem sample` for E89 only. Each tick it sends six READ requests 
 prints one JSON line with the same keys ettelem prints (board_w, sp, temp_c, die_mv, mhz), so E78's readers work on
 it unchanged, plus one key ettelem has no way to get:
 
-    "pvt": {"st": <status>, "f": <fault mask>, "c": [34 per-sensor readings, whole degrees C]}
+    "pvt": {"st": <status>, "f": <fault mask>, "c": [34 per-sensor readings]}
+(E89 amendment A1: on aifoundry3's firmware of 31 Oct the readings are the sensors' raw 12-bit codes, 0.061 C a code;
+the reducer converts them with the firmware's own formula.)
 
 The per-sensor readings come from DM_CMD_GET_ASIC_PVT_SAMPLES (74), group 0 (minion-shire temperature sensors, three
 words a sensor: current, high, low), a READ the service processor answers only on firmware carrying patch 0003, the
@@ -99,8 +101,9 @@ class Mgmt:
         self.rbuf = ctypes.create_string_buffer(MAX_MSG)
         self.rdesc = RspDesc(ctypes.cast(self.rbuf, ctypes.c_void_p), MAX_MSG, 0)
         self.skipped = 0
+        self.cmd_mismatch = 0
 
-    def request(self, cmd, payload=b"", timeout_s=1.0):
+    def request(self, cmd, payload=b"", timeout_s=0.3):
         """One command; returns (status, reply bytes) or raises TimeoutError."""
         if cmd == CMD_PVT and payload[:1] and payload[0] not in PVT_GROUPS_ALLOWED:
             raise ValueError("refusing command 74 group %d (only reads: %s)" % (payload[0], PVT_GROUPS_ALLOWED))
@@ -123,9 +126,11 @@ class Mgmt:
                 self.skipped += 1
                 continue
             _sz, rtag, rcmd, _fl = struct.unpack_from("<HHHH", data, 0)
-            if rtag != tag or rcmd != cmd:
+            if rtag != tag:                    # E89 A2: match on the tag alone, as libDM does
                 self.skipped += 1
                 continue
+            if rcmd != cmd:
+                self.cmd_mismatch += 1
             _lat, status = struct.unpack_from("<Qi", data, 8)
             return status, data
         raise TimeoutError("no reply to command %d" % cmd)
@@ -226,6 +231,8 @@ def main():
             rec = tick(m, want_hilo=(n % 50 == 0))
             if m.skipped:
                 rec["skipped"] = m.skipped
+            if m.cmd_mismatch:
+                rec["cmd_mismatch"] = m.cmd_mismatch
             pv = rec.get("pvt", {})
             if pv.get("st") == 0 and len(pv.get("c", [])) == N_SENSORS:
                 ok74 += 1

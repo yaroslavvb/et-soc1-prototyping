@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """E89 (Q130): the reducer's self-test. Builds two synthetic passes in the runner's and the sampler's exact formats,
 from the heat model of docs/findings/11-thermal-model.md driven by E78's switching powers on the runner's schedule,
-with 34 sensors truncated to whole degrees, then runs reduce_e89.py on them and checks that it recovers what was put
+with 34 sensors as raw 12-bit codes (amendment A1), then runs reduce_e89.py on them and checks that it recovers what was put
 in: every kind heats by the same degC per W (r = 1), H at 1/60 Hz equals the model's, and the rules score PASS.
 A second case gives int8 kinds 0.70 of the heat per watt; R2 must then FAIL or be INCONCLUSIVE for them.
 
@@ -94,8 +94,9 @@ def build(d, pass_no, t_start, gain_int8=1.0, seed=0):
     offs = rng.uniform(0, 3, 34)
     with gzip.open(os.path.join(d, "telemetry.jsonl.gz"), "wt") as f:
         for i in range(n):
-            c = np.floor(T[i] + offs + rng.normal(0, 0.15, 34)).astype(int).tolist()
-            fw = int(sum(c) // 34)
+            ts = T[i] + offs + rng.normal(0, 0.15, 34)          # each sensor's true reading, degC
+            c = np.round((ts * 1000 - 57400 + 124700) * 4096 / 249400).astype(int).tolist()   # raw 12-bit codes (A1)
+            fw = int(sum(int((57400 + (int(249400 * n / 4096) - 124700)) / 1000) for n in c) / 34)
             bw = 25.9 + P[i] + KLEAK * (T[i] - 52.0) + rng.normal(0, 0.05)
             f.write(json.dumps({"t_ms": int(tt[i] * 1000), "board_w": round(bw, 2),
                                 "temp_c": {"pmic": fw, "ioshire": [fw, 0, 0], "minshire": [fw, 40, 90]},

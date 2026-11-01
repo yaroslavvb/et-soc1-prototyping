@@ -7,8 +7,9 @@ numbers and bands are predictions-e89.json beside it. numpy only.
 
 Writes <out>/e89.json (every number), <out>/scored.json (the registered rules and verdicts) and <out>/results.md.
 
-The thermometer is the mean of the 34 per-sensor readings (`pvt.c`, whole degrees each) in every sample with all 34
-valid (status 0, no fault bit); beside it, the firmware's own integer mean (`temp_c.minshire[0]`), which is the
+The thermometer is the mean of the 34 per-sensor readings (`pvt.c`: raw 12-bit codes on this firmware, converted with
+the firmware's formula, amendment A1) in every sample with all 34 valid (status 0, no fault bit); beside it, the
+firmware's own integer mean (`temp_c.minshire[0]`), which is the
 reading E78 had. For each block (one kind switched against its reference as a square wave of period 2 x half_s) and
 each lap (one full cycle: the kind's half, then the reference's half), a least-squares fit of
     y(tau) = a + b tau + c tau^2 + sum over laps [A_l cos(w tau) + B_l sin(w tau)] 1(tau in lap l),
@@ -81,6 +82,25 @@ def load_pass(d):
     return out
 
 
+# E89 amendment A1 (19:0x, after the probe and the smoke, before the passes): command 74 group 0 returns each sensor's
+# raw 12-bit code on aifoundry3's firmware of 31 Oct (the probe read 1928-1969 with the firmware's mean at 51 C), not
+# whole degrees as on 7 Oct. The firmware's own conversion (et-platform 836a4ab driver/pvt_controller.c
+# pvt_ts_conversion, run mode 1, G/H/CAL5 = 57400/249400/4096) is applied in floating point for the thermometer
+# (0.0609 C a code) and in the firmware's integer arithmetic for E89-R0's check against minshire_avg.
+RAW = True
+G_TS, H_TS, CAL5 = 57400, 249400, 4096
+
+
+def code_to_c(n):
+    return (G_TS + H_TS * n / CAL5 - H_TS / 2) / 1000.0
+
+
+def fw_int(n):
+    """the firmware's per-sensor integer conversion (C int arithmetic, truncation toward zero)"""
+    q = int(H_TS * n / CAL5)
+    return int((G_TS + (q - H_TS // 2)) / 1000)
+
+
 def arrays(tel):
     t, P, Ti, Tm, mhz, mv = [], [], [], [], [], []
     S = []
@@ -92,14 +112,16 @@ def arrays(tel):
         P.append(r["board_w"])
         Ti.append(r["temp_c"]["minshire"][0])
         mhz.append(r.get("mhz", {}).get("minion", np.nan))
-        mv.append(r.get("die_mv", {}).get("minion", np.nan))
+        mv.append(r.get("die_mv", {}).get("minion", (r.get("sp", {}).get("minion_mv") or [np.nan])[0]))
         pv = r.get("pvt") or {}
         c = pv.get("c") or []
         if pv.get("st") == 0 and len(c) == 34 and not pv.get("f"):
-            Tm.append(sum(c) / 34.0)
-            S.append(c)
+            cc = [code_to_c(x) for x in c] if RAW else [float(x) for x in c]
+            Tm.append(sum(cc) / 34.0)
+            S.append(cc)
             n34 += 1
-            if int(sum(c) // 34) == r["temp_c"]["minshire"][0]:
+            fw = int(sum(fw_int(x) for x in c) / 34) if RAW else int(sum(c) // 34)
+            if fw == r["temp_c"]["minshire"][0]:
                 neq += 1
         else:
             Tm.append(np.nan)
