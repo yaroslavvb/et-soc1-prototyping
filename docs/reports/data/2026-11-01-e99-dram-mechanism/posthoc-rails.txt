@@ -1,0 +1,116 @@
+E99 POST HOC, labelled: the three metered rails, headline passes ['9911', '9912', '9913', '9914', '9915'], 1.17294e+09 lines/s
+check: the minion column against dm.json per_pass.rail_W, 29 items x 5 passes: 0 differ
+every class below is E81's rule (pre: >= 0.25 W with the interval above 0; abs: the interval inside +-0.30 W), sized for the board: on one rail, read the interval
+
+== A one: the same high pins, no toggle, more ones (W over the fewer-ones item; class by E81's rule)
+tie27           board +1.195 [+1.048, +1.342] pre  noc +0.601 [+0.543, +0.659] pre  sram +0.051 [-0.006, +0.109] abs  minion +0.058 [-0.010, +0.126] abs  off +0.486 [+0.350, +0.621] pre
+    per one, pJ: board 3.18 [2.79, 3.58]  noc 1.60 [1.45, 1.75]  sram 0.14 [-0.02, 0.29]  minion 0.15 [-0.03, 0.33]  off 1.29 [0.93, 1.65]
+tie18           board +1.727 [+1.620, +1.833] pre  noc +0.828 [+0.790, +0.865] pre  sram +0.079 [+0.059, +0.099] abs  minion +0.103 [+0.084, +0.123] abs  off +0.716 [+0.590, +0.842] pre
+    per one, pJ: board 3.29 [3.08, 3.49]  noc 1.58 [1.50, 1.65]  sram 0.15 [0.11, 0.19]  minion 0.20 [0.16, 0.23]  off 1.36 [1.12, 1.60]
+tie45           board +0.262 [+0.191, +0.332] pre  noc +0.128 [+0.096, +0.160] abs  sram +0.011 [-0.029, +0.050] abs  minion +0.010 [-0.029, +0.048] abs  off +0.113 [+0.074, +0.153] abs
+    per one, pJ: board 3.48 [2.55, 4.42]  noc 1.70 [1.28, 2.13]  sram 0.14 [-0.38, 0.67]  minion 0.13 [-0.39, 0.64]  off 1.51 [0.98, 2.04]
+
+== floor + one + high, fitted per pass over the eight no-toggle items (w1, u1, u2, u4, u5, u7, u8, l08): floor W, prices pJ, each +-95 %
+board    floor +0.102 [+0.036, +0.168]   one  3.24 +-0.25   high  1.55 +-0.30
+noc      floor +0.021 [-0.008, +0.049]   one  1.60 +-0.08   high  0.04 +-0.15
+sram     floor +0.097 [+0.065, +0.129]   one  0.16 +-0.08   high -0.01 +-0.12
+minion   floor +0.005 [-0.040, +0.049]   one  0.17 +-0.06   high -0.01 +-0.18
+off      floor -0.021 [-0.080, +0.038]   one  1.32 +-0.25   high  1.54 +-0.40
+one on the three rails together: 1.93 pJ; off them: 1.32 pJ of 3.24 (the same fit on the off column: 1.32)
+
+== the rails' lag: mean of 1 - exp(-t/tau) over t = 2..4 s after a step at t0
+minion  tau 1.06 s: reads 93.2 % of a settled step; the one's price corrected for it, 0.19 pJ
+sram    tau 1.01 s: reads 94.0 % of a settled step; the one's price corrected for it, 0.17 pJ
+noc     tau 1.04 s: reads 93.5 % of a settled step; the one's price corrected for it, 1.71 pJ
+E32's board-to-mesh-rail ratio, 192 / 129 fJ per one per hop (03-experiments.md, 05-claims.md), on the NoC rail's price: 2.38 pJ at the board
+
+== The arrangement, the pins and the rest (W, class by E81's rule)
+hi_t0           board +0.386 [+0.293, +0.479] pre  noc +0.010 [-0.027, +0.047] abs  sram +0.002 [-0.025, +0.029] abs  minion -0.012 [-0.056, +0.032] abs  off +0.386 [+0.292, +0.480] pre
+hi_ta           board +0.418 [+0.258, +0.578] pre  noc -0.003 [-0.041, +0.035] abs  sram +0.002 [-0.038, +0.042] abs  minion +0.003 [-0.083, +0.089] abs  off +0.415 [+0.267, +0.564] pre
+hi_r            board +0.910 [+0.774, +1.045] pre  noc +0.011 [-0.047, +0.069] abs  sram +0.002 [-0.046, +0.051] abs  minion -0.009 [-0.058, +0.039] abs  off +0.906 [+0.800, +1.012] pre
+t_enc           board +0.469 [+0.416, +0.523] pre  noc -0.008 [-0.055, +0.040] abs  sram -0.000 [-0.035, +0.034] abs  minion -0.007 [-0.065, +0.051] abs  off +0.484 [+0.419, +0.549] pre
+t_both          board +0.475 [+0.396, +0.554] pre  noc -0.015 [-0.039, +0.009] abs  sram +0.000 [-0.022, +0.022] abs  minion +0.010 [-0.029, +0.050] abs  off +0.479 [+0.394, +0.565] pre
+t_raw           board -0.026 [-0.199, +0.148] abs  noc +0.006 [-0.042, +0.053] abs  sram +0.001 [-0.042, +0.043] abs  minion +0.002 [-0.097, +0.100] abs  off -0.034 [-0.224, +0.157] abs
+half            board +0.850 [+0.785, +0.915] pre  noc +0.020 [-0.023, +0.063] abs  sram +0.006 [-0.016, +0.028] abs  minion +0.019 [-0.036, +0.075] abs  off +0.805 [+0.727, +0.882] pre
+arr_L2          board +0.899 [+0.815, +0.982] pre  noc -0.018 [-0.075, +0.039] abs  sram -0.025 [-0.069, +0.018] abs  minion +0.046 [-0.059, +0.151] abs  off +0.896 [+0.782, +1.010] pre
+L2_vs_r08       board +0.806 [+0.652, +0.959] pre  noc +0.004 [-0.073, +0.081] abs  sram -0.012 [-0.075, +0.051] abs  minion +0.039 [-0.084, +0.163] abs  off +0.774 [+0.638, +0.911] pre
+r08_vs_c2       board +0.093 [-0.059, +0.244] abs  noc -0.022 [-0.084, +0.040] abs  sram -0.013 [-0.055, +0.028] abs  minion +0.007 [-0.037, +0.051] abs  off +0.121 [-0.036, +0.279] abs
+floor_w1        board +0.112 [+0.040, +0.184] abs  noc +0.015 [-0.021, +0.051] abs  sram +0.092 [+0.054, +0.130] abs  minion +0.008 [-0.056, +0.073] abs  off -0.003 [-0.053, +0.046] abs
+ones_u8         board +2.174 [+2.093, +2.254] pre  noc +0.988 [+0.955, +1.021] pre  sram +0.199 [+0.184, +0.214] abs  minion +0.101 [+0.065, +0.137] abs  off +0.887 [+0.809, +0.964] pre
+tie_total       board +1.666 [+1.593, +1.739] pre  noc +0.133 [+0.087, +0.180] abs  sram +0.273 [+0.233, +0.314] pre  minion +0.040 [+0.002, +0.078] abs  off +1.220 [+1.099, +1.340] pre
+D               board +0.755 [+0.670, +0.840] pre  noc +0.138 [+0.058, +0.218] abs  sram +0.297 [+0.239, +0.355] pre  minion +0.008 [-0.152, +0.167] abs  off +0.312 [+0.201, +0.424] pre
+c2_vs_c1        board -0.205 [-0.276, -0.133] abs  noc +0.010 [-0.019, +0.039] abs  sram +0.083 [+0.054, +0.111] abs  minion +0.019 [-0.014, +0.051] abs  off -0.316 [-0.414, -0.218] pre
+c2_vs_l08       board +0.645 [+0.548, +0.742] pre  noc +0.030 [-0.017, +0.078] abs  sram +0.088 [+0.057, +0.120] abs  minion +0.038 [-0.007, +0.083] abs  off +0.489 [+0.368, +0.610] pre
+L1_vs_l08       board +1.503 [+1.461, +1.545] pre  noc +0.008 [-0.030, +0.046] abs  sram +0.016 [-0.014, +0.047] abs  minion +0.014 [-0.015, +0.042] abs  off +1.465 [+1.414, +1.517] pre
+arr_L1          board +0.653 [+0.604, +0.702] pre  noc -0.012 [-0.056, +0.032] abs  sram +0.010 [-0.014, +0.035] abs  minion -0.006 [-0.050, +0.039] abs  off +0.661 [+0.587, +0.734] pre
+
+== The ladder, over dm_L2 (W, class by E81's rule)
+L1_over_L2      board -0.041 [-0.105, +0.024] abs  noc -0.004 [-0.067, +0.058] abs  sram -0.047 [-0.112, +0.019] abs  minion -0.070 [-0.179, +0.038] abs  off +0.081 [-0.018, +0.179] abs
+L3_over_L2      board +0.495 [+0.456, +0.535] pre  noc +0.094 [+0.010, +0.177] abs  sram +0.187 [+0.111, +0.263] abs  minion -0.025 [-0.165, +0.114] abs  off +0.240 [+0.191, +0.289] abs
+L4_over_L2      board +0.152 [+0.110, +0.193] abs  noc -0.007 [-0.053, +0.038] abs  sram +0.043 [+0.009, +0.077] abs  minion +0.004 [-0.097, +0.104] abs  off +0.112 [+0.043, +0.182] abs
+L8_over_L2      board +0.115 [-0.040, +0.271] abs  noc +0.033 [-0.040, +0.107] abs  sram +0.100 [+0.051, +0.148] abs  minion -0.047 [-0.176, +0.082] abs  off +0.029 [-0.156, +0.214] abs
+L16_over_L2     board +0.304 [+0.188, +0.421] pre  noc +0.067 [+0.001, +0.134] abs  sram +0.113 [+0.051, +0.175] abs  minion +0.011 [-0.148, +0.170] abs  off +0.113 [-0.036, +0.263] abs
+L17_over_L2     board +0.628 [+0.585, +0.671] pre  noc +0.128 [+0.059, +0.196] abs  sram +0.231 [+0.184, +0.277] abs  minion -0.019 [-0.140, +0.103] abs  off +0.288 [+0.222, +0.353] pre
+L32_over_L2     board +0.465 [+0.419, +0.511] pre  noc +0.063 [-0.004, +0.130] abs  sram +0.124 [+0.063, +0.184] abs  minion +0.003 [-0.126, +0.132] abs  off +0.275 [+0.219, +0.332] pre
+L256_over_L2    board +0.602 [+0.550, +0.654] pre  noc +0.134 [+0.087, +0.181] abs  sram +0.228 [+0.194, +0.262] abs  minion -0.044 [-0.175, +0.088] abs  off +0.283 [+0.202, +0.365] pre
+L8192_over_L2   board +0.755 [+0.670, +0.840] pre  noc +0.138 [+0.058, +0.218] abs  sram +0.297 [+0.239, +0.355] pre  minion +0.008 [-0.152, +0.167] abs  off +0.312 [+0.201, +0.424] pre
+
+== The ladder's steps
+L8_minus_L4     board -0.037 [-0.183, +0.110] abs  noc +0.041 [+0.006, +0.076] abs  sram +0.056 [+0.029, +0.083] abs  minion -0.051 [-0.090, -0.011] abs  off -0.083 [-0.228, +0.061] abs
+L16_minus_L8    board +0.189 [+0.016, +0.362] unr  noc +0.034 [+0.002, +0.066] abs  sram +0.013 [-0.019, +0.045] abs  minion +0.058 [-0.011, +0.127] abs  off +0.084 [-0.129, +0.297] abs
+L16_minus_L4    board +0.153 [+0.051, +0.254] abs  noc +0.075 [+0.035, +0.115] abs  sram +0.069 [+0.025, +0.114] abs  minion +0.008 [-0.089, +0.104] abs  off +0.001 [-0.112, +0.113] abs
+L32_minus_L16   board +0.161 [+0.077, +0.244] abs  noc -0.004 [-0.052, +0.044] abs  sram +0.011 [-0.024, +0.045] abs  minion -0.008 [-0.104, +0.088] abs  off +0.162 [+0.048, +0.276] abs
+L256_minus_L32  board +0.137 [+0.068, +0.205] abs  noc +0.071 [+0.049, +0.092] abs  sram +0.105 [+0.074, +0.135] abs  minion -0.047 [-0.073, -0.020] abs  off +0.008 [-0.043, +0.059] abs
+L8192_minus_L256  board +0.153 [+0.058, +0.248] abs  noc +0.004 [-0.043, +0.052] abs  sram +0.069 [+0.023, +0.115] abs  minion +0.051 [-0.006, +0.108] abs  off +0.029 [-0.048, +0.106] abs
+L17_minus_L3    board +0.132 [+0.119, +0.146] abs  noc +0.034 [-0.011, +0.079] abs  sram +0.044 [+0.009, +0.079] abs  minion +0.007 [-0.025, +0.039] abs  off +0.048 [-0.008, +0.103] abs
+
+SRAM + NoC share of the board: top step D 57.6 %, h16 59.1 %, tie_total 24.4 %
+off: share of its own D at h3 77 %, h32 88 %
+
+== Path counts on the ladder's ten rungs, floor + counts, the mean over the headline passes, per column: rms W, price pJ per bit [+-95 % over passes]
+board    k_chan           rms 0.093 W  k_chan 1.95 [+-0.10]
+board    k_shire          rms 0.065 W  k_shire 2.06 [+-0.06]
+board    k_shire+k_chan   rms 0.059 W  k_shire 1.54 [+-0.58]  k_chan 0.55 [+-0.61]
+noc      k_chan           rms 0.021 W  k_chan 0.40 [+-0.08]
+noc      k_shire          rms 0.016 W  k_shire 0.42 [+-0.10]
+noc      k_shire+k_chan   rms 0.015 W  k_shire 0.31 [+-0.21]  k_chan 0.11 [+-0.17]
+sram     k_chan           rms 0.045 W  k_chan 0.73 [+-0.06]
+sram     k_shire          rms 0.044 W  k_shire 0.75 [+-0.07]
+sram     k_shire+k_chan   rms 0.041 W  k_shire 0.42 [+-0.25]  k_chan 0.35 [+-0.22]
+minion   k_chan           rms 0.026 W  k_chan 0.01 [+-0.19]
+minion   k_shire          rms 0.026 W  k_shire 0.05 [+-0.19]
+minion   k_shire+k_chan   rms 0.023 W  k_shire 0.27 [+-0.53]  k_chan -0.24 [+-0.52]
+off      k_chan           rms 0.042 W  k_chan 0.81 [+-0.13]
+off      k_shire          rms 0.037 W  k_shire 0.84 [+-0.09]
+off      k_shire+k_chan   rms 0.034 W  k_shire 0.53 [+-0.74]  k_chan 0.33 [+-0.77]
+
+== Every item over dp_zeros, the mean over the headline passes (W)
+item         board     noc    sram  minion     off
+dm_w1       +0.112  +0.015  +0.092  +0.008  -0.003
+dm_u1       +0.447  +0.160  +0.120  -0.003  +0.170
+dm_u2       +0.818  +0.261  +0.117  +0.042  +0.398
+dm_a08      +1.129  +0.504  +0.139  +0.067  +0.419
+dm_l08      +1.155  +0.498  +0.139  +0.065  +0.453
+dm_a26      +1.435  +0.510  +0.152  +0.047  +0.725
+dm_u4       +1.541  +0.508  +0.141  +0.053  +0.839
+dm_a35      +1.547  +0.501  +0.141  +0.070  +0.835
+dp_c2       +1.800  +0.528  +0.227  +0.103  +0.942
+dm_u5       +1.803  +0.636  +0.152  +0.063  +0.952
+dm_r08      +1.893  +0.506  +0.214  +0.110  +1.063
+dp_c1       +2.005  +0.518  +0.145  +0.084  +1.258
+dm_u7       +2.013  +0.862  +0.169  +0.099  +0.883
+dm_a44      +2.016  +0.493  +0.141  +0.063  +1.319
+dm_u8       +2.174  +0.988  +0.199  +0.101  +0.887
+dm_r26      +2.601  +0.524  +0.222  +0.111  +1.745
+dm_L1       +2.658  +0.506  +0.155  +0.079  +1.919
+dm_L2       +2.699  +0.511  +0.202  +0.149  +1.838
+dm_r44      +2.803  +0.518  +0.216  +0.100  +1.969
+dm_L8       +2.814  +0.544  +0.301  +0.102  +1.867
+dm_L4       +2.851  +0.503  +0.245  +0.152  +1.950
+dm_L16      +3.003  +0.578  +0.314  +0.160  +1.951
+dm_L32      +3.164  +0.574  +0.325  +0.152  +2.113
+dm_L3       +3.194  +0.604  +0.389  +0.124  +2.078
+dm_L256     +3.301  +0.644  +0.430  +0.105  +2.121
+dm_L17      +3.326  +0.638  +0.433  +0.130  +2.125
+dm_L8192    +3.454  +0.649  +0.499  +0.157  +2.150
+dp_bern     +3.466  +0.662  +0.500  +0.143  +2.161

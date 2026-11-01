@@ -1,5 +1,7 @@
 # E99 — which mechanism carries the DRAM pattern effect (Q132)
 
+*Corrected after verification, Sun 1 Nov 2026, at the desk, with no card touched and nothing re-run (§ [Corrections after verification](#corrections-after-verification-sun-1-nov-2026), C1–C10). A verifier rebuilt every number from the raw telemetry and found them right, and found two readings that were not: where a one pays, and what the period ladder says. New, post hoc and labelled: the NoC and SRAM rails, which the registered reducer did not read (`tools/claims-v3/dm/posthoc_rails.py`, `posthoc-rails.txt`). No number in `dm*.json`, `runs.csv` or `dips.json`, no scored verdict and no registered file changed.*
+
 ## Results
 
 *Six passes, `p9910`–`p9915`, Sun 1 Nov 2026 01:08:07–01:34:37 PDT on aifoundry3 card 0, 600 MHz, `--harts 1` (1,024 harts), 29 DRAM items and the
@@ -10,35 +12,33 @@ passes, 9911–9915** (df = 4). Every number below is from `dm.json` `headline` 
 Intervals are 95 % t over the five headline passes at the registered `auto` leakage slope (0.0046 W/°C); the two registered sensitivities are in
 § [The leakage footing and the unfiltered arm](#the-leakage-footing-and-the-unfiltered-arm).*
 
-**The firmware's read data-bus inversion is live in the watts, and pins driven high do pay. But they carry a fifth to a quarter of the pattern effect, not all of it.**
-The largest price is not on the pins at all, the "floor" that every earlier fit needed does not exist, and a period that divides 16 is not free.
+**The registered overall reading is PARTIAL: R7, R11 and R12 FAIL, R2 and R4 are UNRESOLVED, and R1, R3, R5, R8 and R13 PASS.** On this card read data-bus inversion behaves as live, and pins driven high do pay: about a quarter (13–33 %) of E81's 1.636 W.
+About half of a one's price is on the NoC rail. High pins, pin toggles and `half` are on no metered rail. The 1 W floor is gone; about 0.1 W remains, on the SRAM rail. On board power the channel count alone does not set the period ladder.
 
-> | what | isolated by (same everything else) | W [95 %] | price | at 0.2936 / 0.3803 W/°C |
+> | what | isolated by | W [95 %] | price | at 0.2936 / 0.3803 W/°C |
 > |---|---|---:|---:|---:|
 > | **a one bit**, with the pins held equal | `tie27`: 448 ones against 128, 128 high pins each, no toggle | +1.195 [1.048, 1.342] | **3.18** [2.79, 3.58] pJ per one | 2.97 / 2.90 |
 > | | `tie18`: 512 against 64, 64 high pins each | +1.727 [1.620, 1.833] | **3.29** [3.08, 3.49] | 3.07 / 3.00 |
 > | | `tie45`: 320 against 256, 256 high pins each: the rule's tie | +0.262 [0.191, 0.332] | **3.48** [2.55, 4.42] | 3.48 / 3.48 |
-> | **a pin driven high**, per beat | `hi_t0`: the same 256 ones, no toggle, 256 high pins against 32 | +0.386 [0.293, 0.479] | **1.47** [1.12, 1.83] pJ | 1.58 / 1.61 |
+> | **a pin driven high**, per beat | `hi_t0`: the same 256 ones, no toggle, 256 high pins against 32 | +0.386 [0.293, 0.479] | **1.47** [1.12, 1.82] pJ | 1.58 / 1.61 |
 > | | `hi_ta`: the same ones, raw and encoded toggles, 224 against 32 | +0.418 [0.258, 0.578] | **1.86** [1.15, 2.57] | 1.69 / 1.64 |
 > | | `tent_S`: free of any linear price of ones | +0.513 [0.312, 0.715] | **1.71** [1.04, 2.38] | 1.63 / 1.61 |
 > | **a pin toggle** after inversion | `t_both`: 0x0F/0xF0 beats against constant 0x0F, the same 256 high pins | +0.475 [0.396, 0.554] | **0.82** [0.68, 0.95] pJ | 0.87 / 0.88 |
 > | **a raw toggle that inversion hides** | `t_raw`: 0x00/0xFF beats against constant lanes: raw +496, only the DMI pin moves | −0.026 [−0.199, +0.148] | **none** (absent) | absent at both |
-> | **a bit that differs between a line's 32 B halves** | `half`: `dp_c1` against `dm_l08`, the same ones and high pins | +0.850 [0.785, 0.915] | **2.83** [2.61, 3.05] pJ | 3.08 / 3.16 |
-> | **one bit in every line**, over an all-zero line | `floor_w1` | +0.112 [0.040, 0.184] | absent: **no floor** | unresolved (+0.21, +0.24) |
+> | **a bit that differs between a line's 32 B halves** | `half`: `dp_c1` against `dm_l08`, the same ones and high pins, not the same everything (below) | +0.850 [0.785, 0.915] | at most **2.83** [2.61, 3.05] pJ | 3.08 / 3.16 |
+> | **one bit in every line**, over an all-zero line | `floor_w1` | +0.112 [0.040, 0.184] | absent by the rule's ±0.30 W: **the 1 W floor is gone**; about 0.1 W remains, on the SRAM rail | unresolved (+0.21, +0.24) |
 
-Each of those holds its other counts equal by construction (`gen/counts.json`, `tools/claims-v3/dm/make_dm.py --check`). Five readings:
+Each of those holds its other counts equal by construction (`gen/counts.json`, `tools/claims-v3/dm/make_dm.py --check`), except `half`: `dp_c1` against `dm_l08` also moves `r32` +32, `r64` +64, `r128` +128, `t_raw` +16 and `t_enc` +2, and `dp_c1` has all its ones in the first 32 B. So 2.83 pJ is an upper bound; the post-hoc fit below gives 2.53. The rails clear the registered risk that the first half goes further: `half` reads NoC +0.020, SRAM +0.006, minion +0.019 W. Five readings:
 
-1. **Read DBI is live on this card.** Nothing was read from the card's memory controller, so this is what the card does. The same +496 raw toggles per line cost nothing when the bytes
-   alternate 0x00/0xFF (`t_raw`), which inversion turns into one moving DMI pin, and +0.475 W when they alternate 0x0F/0xF0 (`t_both`), which it cannot hide: **+0.501 W** [0.327, 0.675] between the two
+1. **Read DBI behaves as live on this card.** Nothing was read from the card's memory controller, so this is what the card does. The same +496 raw toggles per line cost nothing measurable when the bytes
+   alternate 0x00/0xFF (`t_raw`, −0.026 W [−0.199, +0.148]), which inversion turns into one moving DMI pin, and +0.475 W when they alternate 0x0F/0xF0 (`t_both`), which it cannot hide: **+0.501 W** [0.327, 0.675] between the two
    (+0.466 and +0.456 W at the sensitivities, each interval above 0; per-pass differences of `dm.json` `per_pass`). At the same ones and the same raw toggles, the watts climb with the high pins: 1.129, 1.435, 1.547 W
    at 32, 160, 224 high (`dm_a08`, `dm_a26`, `dm_a35`). Whole bytes of ones in random places cost what runs cost, +0.093 W [−0.059, +0.244] over `dp_c2`, while the same raw toggles from scattered bits cost +0.806 W more
-   (`L2_vs_r08`). And the tent has its kink: on constant bytes the step is 4.82 pJ per added one below p = 4, 3.48 across the tie, 1.40 above p = 5 (table below). The mean of the outer two, 3.11, is about the ties' price of a one, and half their difference, 1.71 pJ, is the pin's.
-2. **High pins carry a fifth to a quarter of it.** Of E81's 1.636 W (+1.666 W here), the 177 high pins that random bits add come to 0.31–0.39 W at the prices above. On the arrangement alone (`arr_L2`, +0.899 W), the direct prices give +0.390 W for its 179 high pins and +0.233 W for its 253 encoded toggles,
-   and raw toggles nothing: 0.588 W, 0.311 W short, and **R12 fails**, just outside its ±0.30 W band (by more at the two sensitivities). High pins and encoded toggles are 65 % of the arrangement; the rest needs a path this design did not isolate (post-hoc account, below).
-3. **The largest price is a raw one, and it is not on the pins.** All-0xFF bytes hold every data pin low and still cost +2.174 W over zeros (`ones_u8`). Three independent pairs at equal high pins give 3.18, 3.29 and 3.48 pJ per one, and **E75's 3.255 pJ** [2.97, 3.55], from contiguous images, sits among them. So E75's price
-   was right and it is not a pin's. It is off the compute rail too (`tie18`: rail +0.103 W of the board's +1.727). This experiment does not say where it is paid: the DRAM's internal read path, the PHY and controller, the memory shire and the mesh all carry raw ones.
-4. **The channel reading fails: a period that divides 16 is not free.** Period 8 is free, period 16 is not (`h16` present in the primary arm; +0.22 to +0.24 W and never absent in the three others). That is R11's registered named reading: a path of the 8-way interleave pays. The public datasheet names one candidate, each memory shire's 512-bit AXI port (§7.1.1.1), which carries every 8th line if bits 8:6 pick the shire, as the removal bits imply. Post hoc, the ladder gives the 8-way count more than the channel's, whose own share is not separated from zero (below).
-5. **There is no floor.** All six models frozen before the data needed +0.99 to +1.72 W for any non-zero line, and `floor_w1` reads +0.112 W. An all-zero line is not a special case. What the fits called a floor looks like toggling on wide paths (post hoc, below), which every E75 and E81 image had: `dm_l08` carries the same 256 ones and 32 high pins as E75's images, with every 16-bit word alike, and costs +1.155 W against their +1.77–2.35 W (`posthoc-fit.txt`).
+   (`L2_vs_r08`). And the tent has its kink: on constant bytes the step is 4.82 pJ per added one below p = 4, 3.48 across the tie, 1.40 above p = 5 (table below). The mean of the outer two, 3.11, is about the ties' price of a one, and half their difference, 1.71 pJ, is the pin's. The exact claim is about a 16-bit encoded stage: in all four beat images every piece of 32 bits or wider is constant, so no wider path can tell `t_raw` from `t_both`. The pins, the DRAM's output serializer and the PHY's receive stage all fit, and it is on no metered rail (`t_both`: NoC −0.015, SRAM 0.000, minion +0.010 W).
+2. **High pins carry about a quarter of it (13–33 %).** Of E81's 1.636 W (+1.666 W here), the 177 high pins that random bits add come to 0.31–0.39 W at the three prices' point estimates, and 0.22–0.53 W, 13–33 %, across their 95 % intervals (1.04–2.57 pJ). On the arrangement alone (`arr_L2`, +0.899 W), the direct prices give +0.390 W for its 179 high pins, +0.233 W for its 253 encoded toggles and −0.035 W for its 208 raw toggles: 0.588 W, 0.311 W short, and **R12 fails**, just outside its ±0.30 W band (by more at the two sensitivities, 0.42 and 0.45 W). That FAIL by 0.011 W rests on a raw price of −0.14 pJ [−0.42, +0.14] that is itself consistent with zero: with raw at zero the parts are 0.622 W, 69 % of the arrangement, and the miss is 0.276 W, inside the band. R12 stays FAIL as frozen. The rest needs a path this design did not isolate (post-hoc account, below). All of it is off every metered rail (`arr_L2`: NoC −0.018, SRAM −0.025, minion +0.046 W).
+3. **The largest price is a raw one. It is not on the pins, and about half of it is on the NoC rail.** All-0xFF bytes hold every data pin low and still cost +2.174 W over zeros (`ones_u8`). Three independent pairs at equal high pins give 3.18, 3.29 and 3.48 pJ per one, and **E75's 3.255 pJ** [2.97, 3.55], from contiguous images, sits among them. So E75's price was right and it is not a pin's. Post hoc, the rails say where it goes (table below): fitted over the no-toggle images a one costs 3.24 ± 0.25 pJ at the board, **1.60 ± 0.08 pJ on the NoC rail**, 0.16 ± 0.08 on the SRAM rail, 0.17 ± 0.06 on the minion rail, and about 1.3 pJ off every metered rail. That 1.3 pJ is what stays open.
+4. **On board power the channel count alone does not set the period ladder.** R11 fails in the primary arm because period 16 costs (`h16` +0.304 W; +0.22 to +0.24 W and never absent in the other three arms, where R11 is UNRESOLVED). Period 8 reads +0.115 W [−0.040, +0.271], inside the rule's absent band, and +0.100 [0.051, 0.148] on the SRAM rail, so it is not free. The reducer's registered named reading, "a path of the 8-way interleave pays", is **one candidate, not a finding**: the rails split the ladder (table below). SRAM and NoC carry 58 % of `D` and 59 % of `h16`, with their steps in different places, and off every metered rail an 8-way and a 16-way count fit alike (0.037 against 0.042 W rms). A public example of such a path is each memory shire's 512-bit AXI port (datasheet §7.1.1.1), but the memory shires' logic sits on a rail nothing meters (E30), and off the metered rails L16 − L8 is +0.084 W [−0.129, +0.297].
+5. **The 1 W floor is gone; about 0.1 W remains, on the SRAM rail.** All six models frozen before the data needed +0.99 to +1.72 W for any non-zero line, and `floor_w1` reads +0.112 W [0.040, 0.184]: absent by the rule's ±0.30 W, yet above zero, and about 19 times what one bit and one high pin cost at the measured prices (0.006 W). Fitted over the no-toggle images the floor is +0.102 W [0.036, 0.168] on the board and +0.097 [0.065, 0.129] on the SRAM rail, with the NoC and minion floors consistent with zero. On the board only the primary arm's interval excludes zero (+0.145 [−0.108, +0.397] and +0.158 [−0.189, +0.504] at the sensitivities, +0.050 [−0.074, +0.174] unfiltered). What the fits called a floor looks like toggling on wide paths (post hoc, below), which every E75 and E81 image had: `dm_l08` carries the same 256 ones and 32 high pins as E75's images, with every 16-bit word alike, and costs +1.155 W against their +1.77–2.35 W (`posthoc-fit.txt`).
 
 ### The tent, and the ladder
 
@@ -58,14 +58,52 @@ Each of those holds its other counts equal by construction (`gen/counts.json`, `
 | 3 | 3 | 3 | **+0.495** [0.456, 0.535] | present | 66 % | 67 % |
 | 4 | 1 | 1 | +0.152 [0.110, 0.193] | absent | 20 % | 0 |
 | 8 | 1 | 1 | +0.115 [−0.040, +0.271] | absent | 15 % | 0 |
-| **16** | **1** | **2** | **+0.304** [0.188, 0.421] | **present** | **40 %** | **0: refuted** |
+| **16** | **1** | **2** | **+0.304** [0.188, 0.421] | **present** | **40 %** | **0** (R11 FAIL in this arm) |
 | 17 | 17 | 17 | +0.628 [0.585, 0.671] | present | 83 % | 94 % |
 | 32 | 2 | 4 | +0.465 [0.419, 0.511] | present | 62 % | 50 % |
 | 256 | 16 | 32 | +0.602 [0.550, 0.654] | present | 80 % | 94 % |
 | 8,192 (`D`) | 512 | 1,024 | +0.755 [0.670, 0.840] | present | 100 % | 100 % (E81: +0.640) |
 
 *`h4`'s interval excludes 0 at this slope; it reads +0.033 and −0.002 W at the sensitivities. `dp_bern` − `dm_L8192` = +0.012 W [−0.090, +0.114]: E81's random bits and these lines of one byte distribution cost the same, so the ±11-bit spread E81's note ¹ worried about moves nothing.
-A line's change in one hart's stream costs nothing visible (`h1`), as E75's k-arm said.*
+A line's change in one hart's stream costs little: `h1` is absent on the board, as E75's k-arm said, though the SRAM rail reads `dp_c2` − `dp_c1` +0.083 W [0.054, 0.111].*
+
+### Where it is paid: the metered rails (POST HOC, labelled: `tools/claims-v3/dm/posthoc_rails.py`, `posthoc-rails.txt`, `posthoc-rails.json`)
+
+*Not registered and not scored. The registered reducer reads only the minion rail; this was written after the data, when a verifier pointed out that the telemetry records the NoC and SRAM rails too. It reads `sp.noc_w`, `sp.sram_w` and `sp.minion_w` exactly as the reducer reads the minion rail: window [t0+2 s, t0+4 s), the primary arm's telemetry, raw, within-pass differences, 95 % t, n = 5; its minion column reproduces `dm.json` `per_pass.rail_W` in all 145 item-passes. A rail is the PMIC's running average at the regulator's output (E58, E30), so such a window reads about 93.5 % of a settled step and these rail prices are about 7 % low: the NoC rail's 1.60 pJ would be 1.71. The board is the 12 V input, so "off", the board less the three rails, holds those regulators' own loss as well as what no rail meters: the DDR and I/O rails, the memory shires' logic, the DRAM chips (`docs/findings/14-card-behaviour.md`, E30). Each class below is sized for the board, so on one rail read the interval.*
+
+| | board | NoC rail | SRAM rail | minion rail | off every metered rail |
+|---|---:|---:|---:|---:|---:|
+| `tie18`: 448 more ones, the same high pins, W | +1.727 [1.620, 1.833] | +0.828 [0.790, 0.865] | +0.079 [0.059, 0.099] | +0.103 [0.084, 0.123] | +0.716 [0.590, 0.842] |
+| `tie27`: 320 more ones, the same high pins, W | +1.195 [1.048, 1.342] | +0.601 [0.543, 0.659] | +0.051 [−0.006, +0.109] | +0.058 [−0.010, +0.126] | +0.486 [0.350, 0.621] |
+| **a one**, fitted over the eight no-toggle images, pJ | 3.24 ± 0.25 | **1.60 ± 0.08** | 0.16 ± 0.08 | 0.17 ± 0.06 | 1.32 ± 0.25 |
+| **a high pin**, the same fit, pJ | 1.55 ± 0.30 | 0.04 ± 0.15 | −0.01 ± 0.12 | −0.01 ± 0.18 | **1.54 ± 0.40** |
+| **the floor**, the same fit, W | +0.102 [0.036, 0.168] | +0.021 [−0.008, +0.049] | **+0.097** [0.065, 0.129] | +0.005 [−0.040, +0.049] | −0.021 [−0.080, +0.038] |
+| `hi_t0`, W | +0.386 [0.293, 0.479] | +0.010 [−0.027, +0.047] | +0.002 [−0.025, +0.029] | −0.012 [−0.056, +0.032] | +0.386 [0.292, 0.480] |
+| `hi_ta`, W | +0.418 [0.258, 0.578] | −0.003 [−0.041, +0.035] | +0.002 [−0.038, +0.042] | +0.003 [−0.083, +0.089] | +0.415 [0.267, 0.564] |
+| `t_both`, W | +0.475 [0.396, 0.554] | −0.015 [−0.039, +0.009] | +0.000 [−0.022, +0.022] | +0.010 [−0.029, +0.050] | +0.479 [0.394, 0.565] |
+| `half`, W | +0.850 [0.785, 0.915] | +0.020 [−0.023, +0.063] | +0.006 [−0.016, +0.028] | +0.019 [−0.036, +0.075] | +0.805 [0.727, 0.882] |
+| `arr_L2`, W | +0.899 [0.815, 0.982] | −0.018 [−0.075, +0.039] | −0.025 [−0.069, +0.018] | +0.046 [−0.059, +0.151] | +0.896 [0.782, 1.010] |
+| E81's whole step, `tie_total`, W | +1.666 [1.593, 1.739] | +0.133 [0.087, 0.180] | +0.273 [0.233, 0.314] | +0.040 [0.002, 0.078] | +1.220 [1.099, 1.340] |
+
+*The fit: floor + one + high over `dm_w1`, `dm_u1`, `dm_u2`, `dm_u4`, `dm_u5`, `dm_u7`, `dm_u8`, `dm_l08`, per pass (`posthoc-rails.txt`).*
+
+So **about half of a one's price is on the NoC rail, about 0.3 pJ on the SRAM and minion rails, and about 1.3 pJ off every metered rail; high pins, pin toggles and `half` are on no metered rail.** NoC over zeros follows the ones alone: +0.493 to +0.518 W on `dm_l08`, `dm_a08`, `dm_a44`, `dp_c1` (all 256 ones, high pins 32 to 256), and +0.988 W on `dm_u8`. The lab has measured this before: E32's 129 [127–133] fJ per one per hop on the mesh rail (`docs/findings/03-experiments.md:946`, `05-claims.md:381`), which 1.60 pJ would make 12.4 hop-equivalents; no hop count was measured here. At E32's ratio of board to rail, 192/129, 2.4 of the 3.24 pJ would go with the mesh. That is arithmetic, not a measurement, and it says how much of the open 1.3 pJ may be delivery and the memory shires' logic rather than anything further out.
+
+| over `dm_L2`, W [95 %] | board | NoC rail | SRAM rail | minion rail | off every metered rail |
+|---|---:|---:|---:|---:|---:|
+| period 3 | +0.495 [0.456, 0.535] | +0.094 [0.010, 0.177] | +0.187 [0.111, 0.263] | −0.025 [−0.165, +0.114] | +0.240 [0.191, 0.289] |
+| period 4 | +0.152 [0.110, 0.193] | −0.007 [−0.053, +0.038] | +0.043 [0.009, 0.077] | +0.004 [−0.097, +0.104] | +0.112 [0.043, 0.182] |
+| period 8 | +0.115 [−0.040, +0.271] | +0.033 [−0.040, +0.107] | +0.100 [0.051, 0.148] | −0.047 [−0.176, +0.082] | +0.029 [−0.156, +0.214] |
+| period 16 | +0.304 [0.188, 0.421] | +0.067 [0.001, 0.134] | +0.113 [0.051, 0.175] | +0.011 [−0.148, +0.170] | +0.113 [−0.036, +0.263] |
+| period 17 | +0.628 [0.585, 0.671] | +0.128 [0.059, 0.196] | +0.231 [0.184, 0.277] | −0.019 [−0.140, +0.103] | +0.288 [0.222, 0.353] |
+| period 32 | +0.465 [0.419, 0.511] | +0.063 [−0.004, +0.130] | +0.124 [0.063, 0.184] | +0.003 [−0.126, +0.132] | +0.275 [0.219, 0.332] |
+| period 256 | +0.602 [0.550, 0.654] | +0.134 [0.087, 0.181] | +0.228 [0.194, 0.262] | −0.044 [−0.175, +0.088] | +0.283 [0.202, 0.365] |
+| 8,192 lines, `D` | +0.755 [0.670, 0.840] | +0.138 [0.058, 0.218] | +0.297 [0.239, 0.355] | +0.008 [−0.152, +0.167] | +0.312 [0.201, 0.424] |
+| step, L8 − L4 | −0.037 [−0.183, +0.110] | +0.041 [0.006, 0.076] | +0.056 [0.029, 0.083] | −0.051 [−0.090, −0.011] | −0.083 [−0.228, +0.061] |
+| step, L16 − L8 | +0.189 [0.016, 0.362] | +0.034 [0.002, 0.066] | +0.013 [−0.019, +0.045] | +0.058 [−0.011, +0.127] | +0.084 [−0.129, +0.297] |
+| step, L16 − L4 | +0.153 [0.051, 0.254] | +0.075 [0.035, 0.115] | +0.069 [0.025, 0.114] | +0.008 [−0.089, +0.104] | +0.001 [−0.112, +0.113] |
+
+SRAM and NoC carry 58 % of `D`, 59 % of `h16` and 24 % of E81's whole step. Each column has its own shape. SRAM's step sits between 4 and 8, not between 8 and 16. NoC's L16 − L8 is small and above zero. On the board L16 − L8 is +0.189 W [0.016, 0.362] (+0.198 and +0.200 at the sensitivities, each interval above zero; unfiltered +0.293 [−0.074, +0.660]). Off every metered rail `h4`, `h8` and `h16` are absent by the registered class, and `h17`, `h32`, `h256` and `D` are present. R11 would not pass there as written either: `h3`, +0.240 W [0.191, 0.289], is in the absent band and `h32` is 88 % of `D`, because the rule's absolute thresholds were sized for the board. So this does not rescue the channel reading. It shows that the board's ladder does not decide between the 8-way and the 16-way count.
 
 ### Scoring
 
@@ -80,14 +118,14 @@ A line's change in one hart's stream costs nothing visible (`h1`), as E75's k-ar
 | **R7** encoded toggles (`t_enc`) | +0.469 [0.416, 0.523], present | absent | **FAIL**: encoded toggles pay, about 0.8 pJ each |
 | **R8** raw toggles (`t_raw`) | −0.026 [−0.199, +0.148], absent | absent | **PASS** |
 | **R9** the 32 B halves (`half`) | +0.850 [0.785, 0.915] | reported | **present** (E81's post-hoc term said +0.72 W; `w_hi_chan` said 0) |
-| **R10** the floor (`floor_w1`) | +0.112 [0.040, 0.184] | reported | **absent** (unresolved at the sensitivities: +0.207, +0.236) |
-| **R11** the channel | `h16` present | `h4 h8 h16` absent, `h3 h17` present, `h32` 15–85 % of `D` | **FAIL** (UNRESOLVED at both sensitivities and in the unfiltered arm: `h16` +0.244, +0.225, +0.242, never absent) |
-| **R12** closure | predicted `arr_L2` +0.588, measured +0.899 W | within ±0.30 W | **FAIL**, by 0.011 W (0.42, 0.45 W short at the sensitivities) |
-| **R13** the compute rail | `hi_t0` −0.012, `hi_ta` +0.003, `D` +0.008, `tie_total` +0.040 W | each within ±0.10 W | **PASS**, all four |
+| **R10** the floor (`floor_w1`) | +0.112 [0.040, 0.184] | reported | **absent** by the ±0.30 W rule (unresolved at the sensitivities: +0.207, +0.236). Its interval excludes zero: about 0.1 W remains, on the SRAM rail |
+| **R11** the channel | `h16` present | `h4 h8 h16` absent, `h3 h17` present, `h32` 15–85 % of `D` | **FAIL** (UNRESOLVED at both sensitivities and in the unfiltered arm: `h16` +0.244, +0.225, +0.242, never absent). Its named reading, an 8-way path, is one candidate (reading 4) |
+| **R12** closure | predicted `arr_L2` +0.588 (+0.390 high, +0.233 encoded, −0.035 raw), measured +0.899 W | within ±0.30 W | **FAIL**, by 0.011 W (0.42, 0.45 W short at the sensitivities) |
+| **R13** the minion rail, which the registration calls the compute rail | `hi_t0` −0.012, `hi_ta` +0.003, `D` +0.008, `tie_total` +0.040 W | each within ±0.10 W | **PASS**, all four. It scores the minion rail only: the NoC and SRAM rails are 24 % of `tie_total` and 58 % of `D` |
 
-**The registered overall reading is PARTIAL:** R3 and R5 pass, R2 and R4 are unresolved because the high-pin effect is present at about half the frozen amount, and it is not REFUTED. It reads PARTIAL at all three slopes and in the unfiltered arm. What the rule does not say is that the DBI *signature* is plain and the DBI *share* is small: both come from the same numbers.
+**The registered overall reading is PARTIAL:** R3 and R5 pass, R2 and R4 are unresolved because the high-pin effect is present at about half the frozen amount, and it is not REFUTED. It reads PARTIAL at all three slopes and in the unfiltered arm. What the rule does not say is that the DBI *signature* is plain and the DBI *share* is about a quarter: both come from the same numbers.
 
-**The frozen models.** Every model frozen before the data over-predicts this experiment's structured images, by its floor. On the 28 items they err by 0.55–2.33 W rms (`w_tenc_chan` 0.553, `w_hi_chan` 0.705, `bits` 0.848, `w_traw_chan` 0.877, `dbi` 1.103, `dbi_chan` 2.332). The ones with no pin DC or with raw toggles lose on the contrasts: `w_traw_chan` falls outside its interval on `t_raw` (predicted +1.69 W), `hi_r`, `r08_vs_c2` and `L2_vs_r08`; `w_tenc_chan` on `t_enc` (predicted +1.29 W); the pure `dbi` on `tie27`, `tie18`. Of the models whose intervals can fail, only `w_hi_chan` holds every pin contrast, and it fails on `floor_w1` and `half`. So the shape with ones, high pins and path changes was right, with a floor where wide-path toggles belong.
+**The frozen models.** Every model frozen before the data over-predicts this experiment's structured images, mostly by its floor. On the 28 items they err by 0.55–2.33 W rms (`w_tenc_chan` 0.553, `w_hi_chan` 0.705, `bits` 0.848, `w_traw_chan` 0.877, `dbi` 1.103, `dbi_chan` 2.332). Against every registered contrast (`corrections-check.txt` C10), `w_traw_chan` falls outside its interval on eight (`t_raw`, predicted +1.69 W; `t_both`, `hi_r`, `hi_r26`, `r08_vs_c2`, `L2_vs_r08`, `half`, `floor_w1`), `w_tenc_chan` on five (`t_enc`, predicted +1.29 W; `t_both`, `ones_u8`, `half`, `floor_w1`), the pure `dbi` on three (`tie27`, `tie18`, `floor_w1`) and `dbi_chan` on 16. `bits` falls outside on none, because its ±1.7 W intervals can hardly fail. `w_hi_chan` holds every pin contrast and fails on three: `ones_u8` (+2.17 against +2.92 ± 0.67), `half` and `floor_w1`. So the shape with ones, high pins and path changes was right, with a floor where wide-path toggles belong.
 
 ### The leakage footing and the unfiltered arm
 
@@ -142,19 +180,19 @@ The windows warm at most 1.0 °C over their launch reading (`runs.csv`), and E81
 
 ### What it costs per event (POST HOC, labelled: `tools/claims-v3/dm/posthoc_fit.py`, `posthoc-fit.txt`, `posthoc-fit.json`)
 
-*Chosen after the registered reduction was read, from 28 candidate fits (14 extras, each with and without a floor, all printed). Seven prices on 28 items describe those items; they are not seven measurements. The registered contrasts above are the measurement. Its check is the 18 points of E75 and E81 that it never saw.*
+*Chosen after the registered reduction was read, from 28 candidate fits (14 extras, each with and without a floor, all printed). Seven prices on 28 items describe those items; they are not seven measurements. The registered contrasts above are the measurement. Its check is E75's and E81's 18 points, with a limit: five are byte-identical to fitted items (`dp_c1`, `dp_c2`, `dp_bern`, E75's k0 and k256), and the terms `half`, `k_chan` and `hi` came from earlier fits on those points. The clean part is the 13 points whose images it never fitted (12 images: `dp_random` and `mf_random` are one). It was not chosen by that column: `half` + `r128` is lower there, 0.130 W. `posthoc-fit.txt` prints "18 points it never saw"; that line stands as printed, and this corrects it.*
 
-Fitted on E99 alone, per pass, **with no floor**, to **0.063 W rms**, and predicting **E75's and E81's 18 points to 0.143 W rms**:
+Fitted on E99 alone, per pass, **with no floor**, to **0.063 W rms**, and predicting E75's and E81's 18 points to 0.143 W rms: **0.160 W on the 13 whose images it never fitted**, 0.086 W on the five it did:
 
 | count, per 64 B line | price, pJ [±95 %] | a reading, not measured |
 |---|---:|---|
-| `w` ones | **3.30** [±0.10] | somewhere off the pins and the compute rail |
-| `hi` pins driven high | **1.97** [±0.31] | DC through the terminated pins (the arithmetic from LPDDR4X's 0.6 V and a 40 Ω driver against a like termination gives about 1 pJ a beat at the pad, from memory of the standard) |
-| `t_enc` toggles on the pins | **0.88** [±0.17] | the pins' capacitance |
-| `half` bits differing between the 32 B halves | **2.53** [±0.21] | a 256-bit path, one BL16 burst per word |
-| `r64` raw toggles between consecutive 64-bit pieces | **2.22** [±0.13] | a 64-bit path, four beats, one clock of the 933 MHz controller if 933 × 4 = 3,733 MT/s |
-| `k_shire` bits changed between reads of an 8-way path | **1.85** [±0.46] | line-wide paths of a memory shire |
-| `k_chan` the same for a 16-way path | **0.45** [±0.49] | not separated from zero |
+| `w` ones | **3.30** [±0.10] | off the pins: about half on the NoC rail, about 0.3 pJ on the SRAM and minion rails, about 1.3 pJ off every metered rail |
+| `hi` pins driven high | **1.97** [±0.31] | on no metered rail. DC through the terminated pins fits: with the telemetry's `reg_mv.vddqlp`, 640 mV, half of it across a 40 Ω driver is 1.37 pJ a beat at the pad |
+| `t_enc` toggles on the pins | **0.88** [±0.17] | on no metered rail: the pins' capacitance, or any encoded 16-bit stage |
+| `half` bits differing between the 32 B halves | **2.53** [±0.21] | on no metered rail: a 256-bit path, one BL16 burst per word |
+| `r64` raw toggles between consecutive 64-bit pieces | **2.22** [±0.13] | on no metered rail: a 64-bit path, four beats, one clock of the 933 MHz controller (`DfiFreqRatio_p0 = 1`, `memshire_ddr_init_functions.c:768`) |
+| `k_shire` bits changed between reads of an 8-way path | **1.85** [±0.46] | one candidate; the rails split it (above) |
+| `k_chan` the same for a 16-way path | **0.45** [±0.49] | not separated from zero here; off every metered rail it fits the ladder about as well as `k_shire` |
 
 What it makes of the earlier steps, in watts:
 
@@ -165,7 +203,7 @@ What it makes of the earlier steps, in watts:
 | E81's whole step | +1.636 | +1.531 | 0 | +0.410 | +0.263 | +0.167 | +0.691 |
 | zeros to random floats (E75's 3.25 W chord) | +3.222 | +3.086 | **+1.115** (35 %) | +0.475 (15 %) | +0.265 (8 %) | +0.717 (22 %) | +0.514 (16 %) |
 
-So **the 36.6 % E75's two prices explained is the ones (35 % here), and the 63 % they missed is the pins (23 %), raw toggles on wide paths (22 %) and path changes (16 %)**, with 4 % unaccounted. Of E81's 1.636 W, the high pins are 25 %, pin toggles 16 %, the wide raw path 10 % and path changes 42 %. On the ladder alone, an 8-way count fits the ten rungs better than a 16-way one (0.065 against 0.093 W rms), and with both, 1.54 pJ [±0.58] against 0.55 pJ [±0.61]. The choice of widths is the weakest part: `half` + `r32` and `half` + `e64` fit nearly as well (0.076, 0.075 W), so 64 bits and raw against encoded are not settled. E81's post-hoc `beat16` account is refuted: raw toggles at 16-bit steps cost nothing while wider words stand still.
+So **the 36.6 % E75's two prices explained is the ones (35 % here), and the 63 % they missed is the pins (23 %), raw toggles on wide paths (22 %) and path changes (16 %)**, with 4 % unaccounted. Of E81's 1.636 W, the high pins are 25 %, pin toggles 16 %, the wide raw path 10 % and path changes 42 %. On the ladder alone, on the board, an 8-way count fits the ten rungs better than a 16-way one (0.065 against 0.093 W rms), and with both, 1.54 pJ [±0.58] against 0.55 pJ [±0.61]; off every metered rail the two fit alike (0.037, 0.042 W). The ladder is not balanced in the account's own counts: `r64` spans 218.8 to 235 across the rungs, about 0.04 W at its price. The choice of widths is the weakest part: `half` + `r32` and `half` + `e64` fit nearly as well (0.076, 0.075 W), so 64 bits and raw against encoded are not settled. E81's post-hoc `beat16` account is refuted: raw toggles at 16-bit steps cost nothing while wider words stand still.
 
 ### Every item
 
@@ -222,15 +260,42 @@ So **the 36.6 % E75's two prices explained is the ones (35 % here), and the 63 %
 - **D3 (inherited, as E60–E81) — two device processes outside `timeout 10`.** `lib.sh`'s `die_c` in `block_begin`/`block_end` runs `ettelem sample --seconds 1` under `timeout 20`, and the telemetry sampler runs for the whole pass. Every enercat and sparsity launch ran under `timeout 10`.
 - **Not departures, for the record.** E92 released this card at 00:55 PDT, 20 min before the brief expected, so the registration (01:03:40) came after it, not before; the card was idle from then to the claim, and `build_host.sh` compiled in that gap. No pass was read while the queue ran: the lane's waits read only `build/e99-dm.log` and `block.json`. The 4-way item's +0.152 W, inside the "absent" class, is reported as measured. The PHY lines the registration cites are the 933 MHz branch's (`:720-727`, `:787`); the other branches' copies read the same (`:39-46`, `:106` at 1,067 MHz), and all six `INIT4` writes carry `emr2 = 0xf1` (`:4330`, `:4337`, `:4398`, `:4405`, `:4464`, `:4471`).
 
+## Corrections after verification (Sun 1 Nov 2026)
+
+An independent verifier checked E99 after the data commit. It rebuilt the contrasts from the raw telemetry with its own code, in all four arms, and got the same values with intervals, and it found the registration, the scorer, the tally, the harness, the host build, the images and the DBI statement sound. It found two major and eight minor faults in what the prose builds on them. Each was checked against the committed data, and none is rejected. Each is corrected in place, at the desk: no card was touched, nothing was re-run, and no frozen or data file changed (`dm*.json`, `runs.csv`, `dips.json`, `reduce.*`, `posthoc-desk.*`, `posthoc-fit.*`, the raw passes, `gen/`, and the registered files in `tools/claims-v3/dm/`). The scored verdicts stand: `overall_dbi` PARTIAL in every arm, R7, R11 (primary arm) and R12 FAIL. [`corrections-check.py`](corrections-check.py) prints every number below from committed files, and [`corrections-check.txt`](corrections-check.txt) is its output, under the section named.
+
+| # | what was wrong | what changed |
+|---|---|---|
+| C1 (major) | **"This experiment does not say where it is paid."** The committed telemetry records the NoC and SRAM rails, and the registered reducer read only the minion rail. `tie18` is +0.828 W [0.790, 0.865] on the NoC rail of the board's +1.727; fitted, a one is NoC 1.60 ± 0.08, SRAM 0.16 ± 0.08, minion 0.17 ± 0.06 pJ of 3.24 ± 0.25, so about 1.3 pJ is off every metered rail. "Off the compute rail" was loose too: `tie18`'s minion interval excludes zero | A labelled post-hoc script and table (`posthoc_rails.py`, `posthoc-rails.*`, § Where it is paid). Reading 3, the `w` row and What it changes 1 say where it goes, and "still open" narrows to the 1.3 pJ. Added beyond the report: the 1.3 pJ holds the three regulators' own loss, because the rails are output-side (E30), and the rails read about 7 % low |
+| C2 (major) | **"Period 8 is free, period 16 is not, an 8-way path pays (most of it)", with the AXI port as the candidate.** R11's FAIL stands as scored, but its reading does not: `h8` is +0.100 W [0.051, 0.148] on the SRAM rail; SRAM and NoC carry 58 % of `D` and 59 % of `h16`; off every metered rail `h4`, `h8`, `h16` are absent, and an 8-way and a 16-way count fit alike (0.037, 0.042 W rms). "So an 8-way path pays most of it" in What it changes 1 had no post-hoc label | Reading 4, the `k_shire` and `k_chan` rows and What it changes 1. Period 8 is "+0.115 W [−0.040, +0.271], inside the rule's absent band; +0.100 [0.051, 0.148] on the SRAM rail". The 8-way reading is one candidate, with the split beside it, and the AXI port is not a finding |
+| C3 | **"There is no floor", "an all-zero line is not a special case".** R10's class stands, but `floor_w1`'s interval excludes zero, at 19 times the bit's own price. Fitted, the floor is +0.102 W on the board and +0.097 W on the SRAM rail | "The 1 W floor is gone; about 0.1 W remains, on the SRAM rail", in the lead, the table, reading 5, R10, What it changes 3 and Step 1. On the board only the primary arm's interval excludes zero, and reading 5 says so |
+| C4 | **"Off the compute rail" and the blog's "none of this reaches the compute rail" meant the minion rail only.** NoC +0.133 and SRAM +0.273 W are 24 % of `tie_total`, and 58 % of `D`. `tie_total`'s minion interval is [+0.002, +0.078] | R13 is named as the minion rail, all three rails are named, and the arrangement, on no metered rail, is said |
+| C5 | **"And raw toggles nothing: 0.588 W", "65 %".** The parts are 0.390 + 0.233 − 0.035. High and encoded alone are 0.622 W and 69 %, and with raw at zero the miss is 0.276 W, inside ±0.30. So the frozen FAIL by 0.011 W rests on a raw price of −0.14 pJ [−0.42, +0.14] | Reading 2, R12's row and What it changes 1 give the three parts and say so. R12 stays FAIL, and it fails by more at the sensitivities (0.42, 0.45 W) |
+| C6 | **"A fifth to a quarter".** That span was point estimates only. The prices' 95 % intervals, 1.04–2.57 pJ, give 0.22–0.53 W, 13–33 % of 1.636 W | "About a quarter (13–33 %)" |
+| C7 | **"Each of those holds its other counts equal", for `half`.** `dp_c1` − `dm_l08` also moves `r32` +32, `r64` +64, `r128` +128, `t_raw` +16, `t_enc` +2, and `dp_c1` has all its ones in the first 32 B | The sentence names the exception. 2.83 pJ is an upper bound (the fit gives 2.53), and the rails clear the first-half risk |
+| C8 | **"The 18 points it never saw."** Five are byte-identical to fitted items, two are one image, and the terms came from earlier fits on them. Rms is 0.160 W on the 13 whose images it never fitted, 0.086 W on the five. `half` + `r128` is lower out of sample (0.130 W). The ladder is not balanced in `r64` (218.8–235, about 0.04 W) | The account's preamble and closing paragraph say so. `posthoc-fit.txt` and the script's docstring stand as committed |
+| C9 | **Sources left as "inferred" or "from memory", and one claim with no power.** See the dated notes below. `result.md` said `t_raw` absent is "consistent with" in-order lane mapping, and the registration's risk note implies it could test that: under DBI `dm_a08` and `dm_l08` differ by at most 62 DMI toggles, about 0.06 W, against an interval of ±0.17 W | The notes below, the `hi` and `r64` rows, and `result.md`. The registered file stays frozen |
+| C10 | **Wording.** The lead carried neither PARTIAL nor the FAILs. "A line's change … costs nothing visible" against the SRAM rail's `dp_c2` − `dp_c1` +0.083 W. The frozen-models paragraph left out `w_hi_chan`'s third failure, `ones_u8`, and others. One note in Step 1 was repeated three times by the lane's README builder, and `hi_t0`'s upper price was rounded to 1.83 (it is 1.82). The blog sentences named no card or clock | The lead states the overall reading and the FAILs; the sentence, the paragraph, the note and the rounding are fixed; the blog sentences (`result.md`) name aifoundry3 card 0 at 600 MHz and stay inside what the verifier allows |
+
+**Dated notes on the registration's sources, Sun 1 Nov 2026** (`tools/claims-v3/dm/README.md` stays frozen; paths under the lab clone's `external/`, each read):
+
+- **Bits 8:6.** Not only inferred: `core-et/rtl/inc/memshire_defines.vh:21-22` defines `MEMSHIRE_SEL_ADDR_RANGE 8:6` and `MEMSHIRE_MCTL_SEL_ADDR_RANGE 9`. It is defined there and used nowhere else in the open RTL.
+- **Mode register 3.** TI's SPRACU8B states that MR3[6] enables read DBI and MR3[7] write DBI for LPDDR4, which is what `emr2 = 0xf1` sets (read on the web, Sun 1 Nov 2026).
+- **The rule at p > 4.** Its primary text remains unread: JESD209-4 is not in the repo, TI's AM69 manual was reported by a search summary to state it and returned 404 to two fetches, and AMD's UG1087 fields were not reachable. The watts support it: of five encoders over the eleven no-toggle and beat images, the standard rule fits at 0.033 W rms against 0.259 W for no inversion, and `tie45`, +0.262 W [0.191, 0.332], excludes inverting at p = 4 (+0.141), a DMI pin that is free (+0.144) and a reversed DMI level (+0.054) (`corrections-check.txt` C9, post hoc).
+- **The pad arithmetic.** The telemetry's `reg_mv.vddqlp` is 640 mV: half of it across 40 Ω is 1.37 pJ per beat at the pad, closer to the measured 1.5–1.9 pJ than the 0.6 V this README first used. 40 Ω is mode register 3's drive field (RZQ/6, from memory of the standard); that the termination matches it is an assumption.
+- **The controller.** `DFIMISC.phy_dbi_mode = 0` (`memshire_ddr_init_functions.c:4765`); `DfiFreqRatio_p0 = 1` (`:768`), which supports four beats per 933 MHz clock.
+- **The byte order.** High-pin counts need no order at all; every toggle price (0.82 pJ) assumes the in-order mapping, and `t_raw` cannot test it (C9). This assumes too that each fetched line reached the pins; E75 says some hit the L3 (`tools/claims-v3/mf/README.md`), and the line rate, 75.07 GB/s against DRAM's own 76, is consistent with few. Neither is measured here.
+- **What remains unread.** The card's DDR controller registers and mode registers, the BL2 binary (the card reports 0.22.0 by version number, no git hash), and the standard's own text.
+
 ## What it changes
 
-1. **Section 11 item 12's mechanism question is narrowed, not closed.** The arrangement: read DBI is live on the silicon, and high pins plus encoded toggles are 65 % of it by direct prices. The period: the steps do not follow the channel count; period 16 costs, so an 8-way path pays most of it. Still open: where a one pays its 3.3 pJ; which wide paths carry `half` and the 64-bit toggles (post hoc); and that the 8-way path is the memory shire's AXI port, which is inferred.
+1. **Section 11 item 12's mechanism question is narrowed, not closed.** The arrangement: read DBI behaves as live on this card, and high pins plus encoded toggles are 69 % of it by direct prices (65 % with the raw term), all off every metered rail. A one: about half on the NoC rail. The period: on board power the channel count alone does not set the ladder, and 58 % of `D` is on the SRAM and NoC rails. Still open: the 1.3 pJ of a one that is off every metered rail (how much is regulator loss, the memory shires' logic, the DRAM chips); which unmetered paths carry `half` and the 64-bit toggles (post hoc); and what sets the ladder's steps on each rail, the 8-way path being one candidate.
 2. **E81's two candidate encodings are decided.** DBI-DC stands and the 16-bit-toggle account falls: raw toggles at 16-bit steps are free (`t_raw`) when inversion hides them.
-3. **E75's price of a carried one is confirmed by a different design**: 3.18–3.48 pJ against its 3.255, on images with equal high pins and no toggles. **E75's "first ones cost the most" has a reading, post hoc:** there is no floor, only wide-path toggles, which `dm_l08` (+1.155 W) does not have and which E75's contiguous images do.
+3. **E75's price of a carried one is confirmed by a different design**: 3.18–3.48 pJ against its 3.255, on images with equal high pins and no toggles. **E75's "first ones cost the most" has a reading, post hoc:** the 1 W floor is gone, about 0.1 W remains on the SRAM rail, and the rest looks like wide-path toggles, which `dm_l08` (+1.155 W) does not have and which E75's contiguous images do.
 4. **For a power model of real data on this memory** (kinds page section 11 item 6), the zeros-to-random step has now been written as ones, high pins, pin toggles, wide-path toggles and path changes. That is post hoc; a model that uses it should test it on real tiles.
-5. **For the blog material.** At the same number of ones, a byte's pattern moves what the pins carry. Inversion makes 0xFF nearly as cheap on the pins as 0x00, and that is real, but a 0xFF byte still costs about 8 × 3.3 pJ off the pins.
+5. **For the blog material, on aifoundry3 card 0 at 600 MHz.** At the same number of ones, a byte's pattern moves what the pins carry. Inversion makes 0xFF nearly as cheap on the pins as 0x00, and that behaves as real, but a 0xFF byte still costs about 8 × 3 pJ off the pins, about half of it on the NoC rail.
 
-**What would settle the rest, not run here.** A width ladder, 32-, 64-, 128- and 256-bit alternations at equal ones and high pins, registered first, would find the raw path's width. A pin-by-pin tent would test that all pins are alike. Moving a period-16 image by a shire-sized offset would test the 8-way reading by another route.
+**What would settle the rest, not run here.** A width ladder, 32-, 64-, 128- and 256-bit alternations at equal ones and high pins, registered first, would find the raw path's width. A pin-by-pin tent would test that all pins are alike. Moving a period-16 image by a shire-sized offset would test the 8-way reading by another route. A ladder registered per rail, with thresholds sized for each rail, would score what this one reads post hoc.
 
 ## Files
 
@@ -247,10 +312,12 @@ So **the 36.6 % E75's two prices explained is the ones (35 % here), and the 63 %
 | `reduce.sh`, `reduce.txt` | the reduction commands and their printed output |
 | `posthoc-desk.txt`, `posthoc-desk.json` | **post hoc, labelled**: step 1, below |
 | `posthoc-fit.txt`, `posthoc-fit.json` | **post hoc, labelled**: the account above, and all 28 candidate fits |
+| `posthoc-rails.txt`, `posthoc-rails.json` | **post hoc, labelled**: the NoC, SRAM and minion rails per item, contrast and ladder rung, and the fits on them |
+| `corrections-check.py`, `corrections-check.txt` | the desk check behind § Corrections after verification |
 | `ident/` | `ettelem config` at the start and the end of the card session, their times, `et-lab-manifest` |
 | `logs/` | the queue log, the smoke log, the dry run, the setup's output, the build's hashes, the box's harness hashes |
 
-Code: `tools/claims-v3/dm/` (the registration: `README.md`, `dm_enc.py`, `make_dm.py`, `make_host_src.py`, `build_host.sh`, `run_e99.sh`, `make_predictions_e99.py`, `predictions.json`, `reduce_dm.py`, `selftest_dm.py`; post hoc, labelled: `posthoc_desk.py`, `posthoc_fit.py`), with E75's `mf/block.sh`, `queue_mf.sh`, `make_mf.py`, E81's `dp/make_dp.py`, `reduce_dp.py`, `posthoc_dips.py` and the runner `runitems.py`, all unchanged.
+Code: `tools/claims-v3/dm/` (the registration: `README.md`, `dm_enc.py`, `make_dm.py`, `make_host_src.py`, `build_host.sh`, `run_e99.sh`, `make_predictions_e99.py`, `predictions.json`, `reduce_dm.py`, `selftest_dm.py`; post hoc, labelled: `posthoc_desk.py`, `posthoc_fit.py`, `posthoc_rails.py`), with E75's `mf/block.sh`, `queue_mf.sh`, `make_mf.py`, E81's `dp/make_dp.py`, `reduce_dp.py`, `posthoc_dips.py` and the runner `runitems.py`, all unchanged.
 
 ## Reproducing it
 
@@ -268,6 +335,8 @@ Code: `tools/claims-v3/dm/` (the registration: `README.md`, `dm_enc.py`, `make_d
       --e81 docs/reports/data/2026-10-31-e81-dram-pattern --builtins DIR --out $D/posthoc-desk.json > $D/posthoc-desk.txt
     python3 tools/claims-v3/dm/posthoc_fit.py $D --e81 docs/reports/data/2026-10-31-e81-dram-pattern --builtins DIR \
       --out $D/posthoc-fit.json > $D/posthoc-fit.txt
+    python3 tools/claims-v3/dm/posthoc_rails.py $D --out $D/posthoc-rails.json > $D/posthoc-rails.txt
+    ( cd $D && python3 corrections-check.py > corrections-check.txt )
 
 ## Step 1, at the desk: POST HOC, labelled
 
@@ -305,10 +374,7 @@ Four readings, each from `posthoc-desk.txt`:
 4. **Of the 63 % that counting bits missed** (E75's two prices give 36.6 % of the 3.25 W chord), the largest part is a floor. In the ones + high pins + channel model, random floats'
    3.31 W over zeros divide as floor 1.09 W (33 %), ones 0.88 W (27 %), high pins 0.84 W (25 %) and channel changes 0.50 W (15 %). So the floor, the high pins and the channel changes are
    what counting bits missed. Nothing yet says what the floor is, or that it is more than the shape of the response near zero: E75's w128 image already costs 1.405 W over zeros for
-   128 ones and 16 high pins. `dm_w1`, one bit in every line, tests it. *(It did, Sun 1 Nov 2026, 01:35 PDT: there is no floor; § Results.)* *(It did, Sun 1 Nov 2026, 01:35 PDT: there is no floor; § Results.)* *(It did, Sun 1 Nov 2026, 01:35 PDT: there is no floor; § Results.)*
+   128 ones and 16 high pins. `dm_w1`, one bit in every line, tests it. *(It did, Sun 1 Nov 2026: the 1 W floor is gone; about 0.1 W remains, on the SRAM rail; § Results.)*
 
 **Why a registered test.** Images built to hold these counts apart, the same ones with different high pins, the same high pins with different ones, and the same high pins and toggles with different periods, make
 the candidates disagree by up to 1.7 W (`tools/claims-v3/dm/README.md` §3).
-
-
-

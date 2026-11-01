@@ -1,0 +1,139 @@
+E99 corrections-check (desk only; committed files only); headline passes ['9911', '9912', '9913', '9914', '9915'], 1.17294e+09 lines/s, t(0.975, 4) = 2.7764
+the scored verdicts, all four arms, unchanged by these corrections:
+  R2_hi_no_toggles         primary: UNRESOLVED | 0.2936: UNRESOLVED | 0.3803: UNRESOLVED | unfiltered: UNRESOLVED
+  R3_hi_same_toggles       primary: PASS | 0.2936: UNRESOLVED | 0.3803: UNRESOLVED | unfiltered: PASS
+  R4_tent                  primary: UNRESOLVED | 0.2936: UNRESOLVED | 0.3803: UNRESOLVED | unfiltered: UNRESOLVED
+  R5_whole_byte_scatter    primary: PASS | 0.2936: PASS | 0.3803: PASS | unfiltered: UNRESOLVED
+  R6_ties                  primary: ones cost beyond the pins, at the price above | 0.2936: ones cost beyond the pins, at the price above | 0.3803: ones cost beyond the pins, at the price above | unfiltered: ones cost beyond the pins, at the price above
+  R7_encoded_toggles       primary: FAIL | 0.2936: FAIL | 0.3803: FAIL | unfiltered: FAIL
+  R8_raw_toggles           primary: PASS | 0.2936: PASS | 0.3803: PASS | unfiltered: PASS
+  R9_half                  primary: present | 0.2936: present | 0.3803: present | unfiltered: present
+  R10_floor                primary: absent | 0.2936: unresolved | 0.3803: unresolved | unfiltered: absent
+  R11_period_ladder        primary: FAIL | 0.2936: UNRESOLVED | 0.3803: UNRESOLVED | unfiltered: UNRESOLVED
+  R12_closure              primary: FAIL | 0.2936: FAIL | 0.3803: FAIL | unfiltered: FAIL
+  overall_dbi              primary: PARTIAL | 0.2936: PARTIAL | 0.3803: PARTIAL | unfiltered: PARTIAL
+
+== C1  Where a one pays: the rails (W, then per one)
+tie18          board +1.727 [+1.620, +1.833]  noc +0.828 [+0.790, +0.865]  sram +0.079 [+0.059, +0.099]  minion +0.103 [+0.084, +0.123]  off +0.716 [+0.590, +0.842]
+    per one, pJ: board 3.29  noc 1.58  sram 0.15  minion 0.20  off 1.36
+tie27          board +1.195 [+1.048, +1.342]  noc +0.601 [+0.543, +0.659]  sram +0.051 [-0.006, +0.109]  minion +0.058 [-0.010, +0.126]  off +0.486 [+0.350, +0.621]
+    per one, pJ: board 3.18  noc 1.60  sram 0.14  minion 0.15  off 1.29
+tie45          board +0.262 [+0.191, +0.332]  noc +0.128 [+0.096, +0.160]  sram +0.011 [-0.029, +0.050]  minion +0.010 [-0.029, +0.048]  off +0.113 [+0.074, +0.153]
+    per one, pJ: board 3.48  noc 1.70  sram 0.14  minion 0.13  off 1.51
+the fit, floor + one + high over w1, u1, u2, u4, u5, u7, u8, l08, per pass:
+  board   floor +0.102 +-0.066 W   one 3.24 +-0.25 pJ   high +1.55 +-0.30 pJ
+  noc     floor +0.021 +-0.028 W   one 1.60 +-0.08 pJ   high +0.04 +-0.15 pJ
+  sram    floor +0.097 +-0.032 W   one 0.16 +-0.08 pJ   high -0.01 +-0.12 pJ
+  minion  floor +0.005 +-0.044 W   one 0.17 +-0.06 pJ   high -0.01 +-0.18 pJ
+  off     floor -0.021 +-0.059 W   one 1.32 +-0.25 pJ   high +1.54 +-0.40 pJ
+  one, board less the three rails: 1.32 pJ
+NoC over zeros on the 256-one images, high pins 32 to 256: {'dm_l08': 0.498, 'dm_a08': 0.504, 'dm_a44': 0.493, 'dp_c1': 0.518, 'dm_u4': 0.508} | on dm_u8: 0.988
+the same-ones arrangement contrasts, on the rails:
+hi_t0          board +0.386 [+0.293, +0.479]  noc +0.010 [-0.027, +0.047]  sram +0.002 [-0.025, +0.029]  minion -0.012 [-0.056, +0.032]  off +0.386 [+0.292, +0.480]
+hi_ta          board +0.418 [+0.258, +0.578]  noc -0.003 [-0.041, +0.035]  sram +0.002 [-0.038, +0.042]  minion +0.003 [-0.083, +0.089]  off +0.415 [+0.267, +0.564]
+t_both         board +0.475 [+0.396, +0.554]  noc -0.015 [-0.039, +0.009]  sram +0.000 [-0.022, +0.022]  minion +0.010 [-0.029, +0.050]  off +0.479 [+0.394, +0.565]
+t_enc          board +0.469 [+0.416, +0.523]  noc -0.008 [-0.055, +0.040]  sram -0.000 [-0.035, +0.034]  minion -0.007 [-0.065, +0.051]  off +0.484 [+0.419, +0.549]
+t_raw          board -0.026 [-0.199, +0.148]  noc +0.006 [-0.042, +0.053]  sram +0.001 [-0.042, +0.043]  minion +0.002 [-0.097, +0.100]  off -0.034 [-0.224, +0.157]
+half           board +0.850 [+0.785, +0.915]  noc +0.020 [-0.023, +0.063]  sram +0.006 [-0.016, +0.028]  minion +0.019 [-0.036, +0.075]  off +0.805 [+0.727, +0.882]
+arr_L2         board +0.899 [+0.815, +0.982]  noc -0.018 [-0.075, +0.039]  sram -0.025 [-0.069, +0.018]  minion +0.046 [-0.059, +0.151]  off +0.896 [+0.782, +1.010]
+  lag: noc     tau 1.04 s reads 93.5 % over [2, 4) s; the one's price at a settled rail 1.71 pJ
+  lag: sram    tau 1.01 s reads 94.0 % over [2, 4) s; the one's price at a settled rail 0.17 pJ
+  lag: minion  tau 1.06 s reads 93.2 % over [2, 4) s; the one's price at a settled rail 0.19 pJ
+  E32 (docs/findings/03-experiments.md:946): 129 fJ per one per hop on the mesh rail, 192 on the board. NoC price / 129 fJ = 12.4 hop-equivalents; x 192/129 = 2.38 pJ at the board
+
+== C2  The ladder, split by rail (W over dm_L2, class of the off column by E81's rule)
+L1_over_L2     board -0.041 [-0.105, +0.024]  noc -0.004 [-0.067, +0.058]  sram -0.047 [-0.112, +0.019]  minion -0.070 [-0.179, +0.038]  off +0.081 [-0.018, +0.179]   off is absent
+L3_over_L2     board +0.495 [+0.456, +0.535]  noc +0.094 [+0.010, +0.177]  sram +0.187 [+0.111, +0.263]  minion -0.025 [-0.165, +0.114]  off +0.240 [+0.191, +0.289]   off is absent
+L4_over_L2     board +0.152 [+0.110, +0.193]  noc -0.007 [-0.053, +0.038]  sram +0.043 [+0.009, +0.077]  minion +0.004 [-0.097, +0.104]  off +0.112 [+0.043, +0.182]   off is absent
+L8_over_L2     board +0.115 [-0.040, +0.271]  noc +0.033 [-0.040, +0.107]  sram +0.100 [+0.051, +0.148]  minion -0.047 [-0.176, +0.082]  off +0.029 [-0.156, +0.214]   off is absent
+L16_over_L2    board +0.304 [+0.188, +0.421]  noc +0.067 [+0.001, +0.134]  sram +0.113 [+0.051, +0.175]  minion +0.011 [-0.148, +0.170]  off +0.113 [-0.036, +0.263]   off is absent
+L17_over_L2    board +0.628 [+0.585, +0.671]  noc +0.128 [+0.059, +0.196]  sram +0.231 [+0.184, +0.277]  minion -0.019 [-0.140, +0.103]  off +0.288 [+0.222, +0.353]   off is present
+L32_over_L2    board +0.465 [+0.419, +0.511]  noc +0.063 [-0.004, +0.130]  sram +0.124 [+0.063, +0.184]  minion +0.003 [-0.126, +0.132]  off +0.275 [+0.219, +0.332]   off is present
+L256_over_L2   board +0.602 [+0.550, +0.654]  noc +0.134 [+0.087, +0.181]  sram +0.228 [+0.194, +0.262]  minion -0.044 [-0.175, +0.088]  off +0.283 [+0.202, +0.365]   off is present
+L8192_over_L2  board +0.755 [+0.670, +0.840]  noc +0.138 [+0.058, +0.218]  sram +0.297 [+0.239, +0.355]  minion +0.008 [-0.152, +0.167]  off +0.312 [+0.201, +0.424]   off is present
+L8_minus_L4    board -0.037 [-0.183, +0.110]  noc +0.041 [+0.006, +0.076]  sram +0.056 [+0.029, +0.083]  minion -0.051 [-0.090, -0.011]  off -0.083 [-0.228, +0.061]
+L16_minus_L8   board +0.189 [+0.016, +0.362]  noc +0.034 [+0.002, +0.066]  sram +0.013 [-0.019, +0.045]  minion +0.058 [-0.011, +0.127]  off +0.084 [-0.129, +0.297]
+L16_minus_L4   board +0.153 [+0.051, +0.254]  noc +0.075 [+0.035, +0.115]  sram +0.069 [+0.025, +0.114]  minion +0.008 [-0.089, +0.104]  off +0.001 [-0.112, +0.113]
+L32_minus_L16  board +0.161 [+0.077, +0.244]  noc -0.004 [-0.052, +0.044]  sram +0.011 [-0.024, +0.045]  minion -0.008 [-0.104, +0.088]  off +0.162 [+0.048, +0.276]
+SRAM + NoC share of the board: D 57.6 %, h16 59.1 %
+off: h3 / D 77 %, h32 / D 88 %
+path counts on the ten rungs, floor + one count, rms W by column:
+  board   k_shire (8-way) 0.065   k_chan (16-way) 0.093   both 0.059
+  noc     k_shire (8-way) 0.016   k_chan (16-way) 0.021   both 0.015
+  sram    k_shire (8-way) 0.044   k_chan (16-way) 0.045   both 0.041
+  minion  k_shire (8-way) 0.026   k_chan (16-way) 0.026   both 0.023
+  off     k_shire (8-way) 0.037   k_chan (16-way) 0.042   both 0.034
+board, L16 - L8, by arm:
+  primary    +0.189 [+0.016, +0.362]
+  0.2936     +0.198 [+0.048, +0.348]
+  0.3803     +0.200 [+0.006, +0.395]
+  unfiltered +0.293 [-0.074, +0.660]
+board, h8 and h16 by arm (mean, class): {'primary': ('+0.115 absent', '+0.304 present'), '0.2936': ('+0.046 absent', '+0.244 unresolved'), '0.3803': ('+0.025 absent', '+0.225 unresolved'), 'unfiltered': ('-0.051 unresolved', '+0.242 unresolved')}
+the reducer's named reading, as stored and unchanged: ['period 16 costs and period 8 does not: a path of the 8-way interleave pays']
+
+== C3  The floor
+floor_w1, board, by arm: {'primary': '+0.112 [+0.040, +0.184] absent', '0.2936': '+0.207 [-0.036, +0.450] unresolved', '0.3803': '+0.236 [-0.101, +0.572] unresolved', 'unfiltered': '-0.002 [-0.263, +0.259] absent'}
+floor_w1       board +0.112 [+0.040, +0.184]  noc +0.015 [-0.021, +0.051]  sram +0.092 [+0.054, +0.130]  minion +0.008 [-0.056, +0.073]  off -0.003 [-0.053, +0.046]
+  fit, board, primary    floor +0.102 [+0.036, +0.168]   one 3.24 +-0.25 pJ   high 1.55 +-0.30 pJ
+  fit, board, 0.2936     floor +0.145 [-0.108, +0.397]   one 2.96 +-0.29 pJ   high 1.43 +-0.26 pJ
+  fit, board, 0.3803     floor +0.158 [-0.189, +0.504]   one 2.87 +-0.34 pJ   high 1.40 +-0.30 pJ
+  fit, board, unfiltered floor +0.050 [-0.074, +0.174]   one 3.21 +-0.51 pJ   high 1.81 +-0.55 pJ
+one bit and one high pin at 3.3 and 1.7 pJ: 0.0059 W; floor_w1 is 19 times that
+the six frozen floors, W: {'bits': 1.074, 'dbi': 1.719, 'dbi_chan': 1.21, 'w_hi_chan': 1.086, 'w_tenc_chan': 1.077, 'w_traw_chan': 0.987}
+
+== C4  The three rails on E81's step and on the top of the ladder
+tie_total      board +1.666 [+1.593, +1.739]  noc +0.133 [+0.087, +0.180]  sram +0.273 [+0.233, +0.314]  minion +0.040 [+0.002, +0.078]  off +1.220 [+1.099, +1.340]
+L8192_over_L2  board +0.755 [+0.670, +0.840]  noc +0.138 [+0.058, +0.218]  sram +0.297 [+0.239, +0.355]  minion +0.008 [-0.152, +0.167]  off +0.312 [+0.201, +0.424]
+SRAM + NoC share: tie_total 24.4 %, D 57.6 %
+
+== C5  R12's parts
+  primary    high +0.390 encoded +0.233 raw -0.035 = +0.588; measured arr_L2 +0.899, short by 0.311; high + encoded +0.622, 69 % of it, miss 0.276; verdict FAIL
+  0.2936     high +0.355 encoded +0.255 raw -0.010 = +0.599; measured arr_L2 +1.017, short by 0.418; high + encoded +0.610, 60 % of it, miss 0.407; verdict FAIL
+  0.3803     high +0.344 encoded +0.262 raw -0.003 = +0.603; measured arr_L2 +1.053, short by 0.450; high + encoded +0.606, 58 % of it, miss 0.447; verdict FAIL
+  unfiltered high +0.390 encoded +0.233 raw -0.035 = +0.588; measured arr_L2 +0.899, short by 0.311; high + encoded +0.622, 69 % of it, miss 0.276; verdict FAIL
+  the raw price, per pass, pJ: -0.142 [-0.424, 0.140]
+
+== C6  High pins' share of E81's 1.636 W (177 high pins, dp_bern - dp_c2)
+  at 1.04 pJ: 0.216 W, 13.2 %
+  at 1.47 pJ: 0.305 W, 18.7 %
+  at 1.71 pJ: 0.355 W, 21.7 %
+  at 1.86 pJ: 0.386 W, 23.6 %
+  at 2.57 pJ: 0.534 W, 32.6 %
+  the three direct prices [95 %], pJ: hi_t0/224 1.47 [1.12, 1.82], hi_ta/192 1.86 [1.15, 2.57], tent_S/256 1.71 [1.04, 2.38]
+
+== C7  What `half` moves besides half (dp_c1 - dm_l08)
+   {'w': 0.0, 'hi': 0.0, 't_enc': 2.0, 't_raw': 16.0, 'r32': 32.0, 'r64': 64.0, 'r128': 128.0, 'half': 256.0, 'k': 0.0}
+   ones in the first 32 B: dp_c1 256, dm_l08 128
+   half/256: 2.83 pJ [2.61, 3.05]; the post-hoc fit's half: 2.53 +-0.21 pJ
+half           board +0.850 [+0.785, +0.915]  noc +0.020 [-0.023, +0.063]  sram +0.006 [-0.016, +0.028]  minion +0.019 [-0.036, +0.075]  off +0.805 [+0.727, +0.882]
+
+== C8  The 18 points
+   all 18: 0.143 W; the 13 whose images it never fitted: 0.160 W; the 5 byte-identical to fitted items: 0.086 W
+   dp_random and mf_random are one image (the same counts: True)
+   the search, lowest out of sample: [(0.13, 'half+r128'), (0.13, 'half+r128+floor'), (0.143, 'half+r64'), (0.143, 'half+r64+floor')]
+   the search, lowest in sample: [(0.046, 'half+r64+e64+floor'), (0.052, 'half+r64+e64'), (0.061, 'half+r64+floor'), (0.063, 'half+r64')]
+   r64 across the ladder: {1: 235.0, 2: 220.0, 3: 232.0, 4: 218.8, 8: 232.8, 16: 221.1, 17: 225.5, 32: 226.6, 256: 223.6, 8192: 224.7}; span 16.2, 0.042 W at the fit's 2.22 pJ
+
+== C9  Sources
+   telemetry reg_mv.vddqlp 640 mV, reg_mv.vddq 1100 mV, reg_mv.ddr 800 mV
+   half of 0.60 V across 40 ohm: 7.5 mA, 4.50 mW; per beat at 3,733 MT/s: 1.21 pJ at the pad
+   half of 0.64 V across 40 ohm: 8.0 mA, 5.12 mW; per beat at 3,733 MT/s: 1.37 pJ at the pad
+   t_raw's power over the byte order: at most 62 DMI toggles x 0.82 pJ = 0.059 W, against an interval half-width 0.173 W
+   the inversion rule, against the eleven images with no line change and half 0 (u1..u8, l08, a08..a44), floor-free fit of one + high + encoded toggle on the board, and what each rule predicts for tie45, measured +0.262 [+0.191, +0.332]:
+     standard             rms 0.033 W   one 3.39 high 1.80 toggle 0.79 pJ   tie45 +0.255 W
+     no inversion         rms 0.259 W   one 2.03 high 2.03 toggle 0.54 pJ   tie45 +0.305 W
+     inverts at p >= 4    rms 0.050 W   one 3.46 high 1.58 toggle 0.68 pJ   tie45 +0.141 W
+     DMI level reversed   rms 0.053 W   one 3.89 high 1.58 toggle 0.66 pJ   tie45 +0.054 W
+     DMI pin free         rms 0.047 W   one 3.67 high 1.76 toggle 0.66 pJ   tie45 +0.144 W
+
+== C10  Wording
+the frozen models against every registered contrast: outside the 95 % prediction interval
+  bits         0: 
+  dbi          3: tie27 (+1.20 against +0.00 +-0.88); tie18 (+1.73 against +0.00 +-0.88); floor_w1 (+0.11 against +1.73 +-1.08)
+  dbi_chan     16: hi_t0 (+0.39 against +6.04 +-2.78); hi_ta (+0.42 against +5.18 +-2.40); hi_ta26 (+0.31 against +3.45 +-1.63); hi_r (+0.91 against +2.42 +-0.93); t_enc (+0.47 against -6.38 +-3.55); t_raw (-0.03 against -1.04 +-0.72); t_both (+0.48 against -8.28 +-4.49); tie27 (+1.20 against +0.00 +-0.46); tie18 (+1.73 against +0.00 +-0.46)
+  w_hi_chan    3: ones_u8 (+2.17 against +2.92 +-0.67); half (+0.85 against +0.00 +-0.48); floor_w1 (+0.11 against +1.09 +-0.68)
+  w_tenc_chan  5: t_enc (+0.47 against +1.29 +-0.61); t_both (+0.48 against +1.48 +-0.64); ones_u8 (+2.17 against +2.90 +-0.69); half (+0.85 against +0.01 +-0.50); floor_w1 (+0.11 against +1.08 +-0.70)
+  w_traw_chan  8: hi_r (+0.91 against +0.00 +-0.56); hi_r26 (+0.71 against +0.00 +-0.56); t_raw (-0.03 against +1.69 +-0.78); t_both (+0.48 against +1.69 +-0.78); half (+0.85 against +0.05 +-0.57); floor_w1 (+0.11 against +0.99 +-0.80); r08_vs_c2 (+0.09 against +0.71 +-0.61); L2_vs_r08 (+0.81 against +0.00 +-0.56)
+h1 on the board +0.041 [-0.024, +0.105]; L2 - L1 on the SRAM rail 0.047; dp_c2 - dp_c1 on the SRAM rail +0.083 [+0.054, +0.111]
+the note on the floor appears in Step 1: 1 time(s)
+sensitivity range of the price of a one by pair and arm, pJ: {'primary': [3.18, 3.29, 3.48], '0.2936': [2.97, 3.07, 3.48], '0.3803': [2.9, 3.0, 3.48], 'unfiltered': [3.18, 3.1, 3.48]}
