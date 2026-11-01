@@ -45,7 +45,7 @@ ARMS = {
 }
 REPEAT_LADDER = (("c16", 1), ("c16r2", 2), ("c16r4", 4), ("c16r8", 8), ("c16r32", 32))
 SPARSE_ARMS = ("c1", "c16", "c16r4", "c8s", "c8")      # sparse50 in every format here; zeros and random in every format on every arm
-SMOKE_ITEMS = ("anchor_pi", "fp32.zeros", "c1.fp32.randn", "c16.fp32.zeros", "c16r2.int8.full", "c16r4.fp16.randn", "c16r8.fp32.sparse50",
+SMOKE_ITEMS = ("anchor_pi", "fp32.zeros", "c1.fp32.randn", "c16.fp32.zeros", "c16r2.int8.full", "c16r4.fp16.randn", "c16r8.fp32.zeros",
                "c16r32.fp32.randn", "c4s.int8.zeros", "c8s.fp32.randn", "c8.fp16.zeros", "c16s.fp32.randn", "c8s.int8.sparse50")
 
 _e78_load_items = ec.load_items          # the originals, kept before anything replaces them
