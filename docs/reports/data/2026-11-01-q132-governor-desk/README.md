@@ -165,7 +165,7 @@ Hits against each one's share of the 11,781 boundaries, Monte Carlo over 20,000 
 
 ### How sure, and what would settle it
 
-Very sure of the mechanism for these sessions: 0 of 8,365 and 502 of 505 leave little room. Still post hoc, on a chain read from public source and not from the cards' binary, with the zone's width taken from the same falls. **The test is E100** (`tools/claims-v3/e100/`, its own pre-registration and data directory): on aifoundry2, on int8 zeros at about 35 W, added gaps of 0, 5, 20 and 100 ms between 0.37 s kernels, and one 4 s kernel with no gap inside. It predicts 0.8, 2.6, 7.6, 24.4 and 0 falls in 144 heartbeats, and needs a small host change and about 20 card-minutes.
+Very sure of the mechanism for these sessions: 0 of 8,365 and 502 of 505 leave little room. Still post hoc, on a chain read from public source and not from the cards' binary, with the zone's width taken from the same falls. **The test is E100** ([`tools/claims-v3/e100/`](../../../../tools/claims-v3/e100/README.md), pre-registered in `5e12c4bd`; its data go to `2026-11-01-e100-idle-reset/`): on aifoundry2, on int8 zeros at about 35 W, random added gaps averaging 0, 5, 20 and 100 ms between 338 ms kernels, and one 4 s kernel with no gap inside. It predicts 0.9, 3.6, 8.4, 29.0 and 0 falls in 144 heartbeats, with a small host change and about 30 card-minutes.
 
 ## (c) The heat path's drift, looking back (item 9)
 
