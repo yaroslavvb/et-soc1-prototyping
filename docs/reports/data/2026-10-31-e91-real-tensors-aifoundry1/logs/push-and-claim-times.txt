@@ -1,0 +1,17 @@
+E91 push and claim times, Sat 31 Oct 2026, PDT (the lane's command outputs)
+21:05:33  run_e91.sh setup on aifoundry1 (no device access): dry pass 9100 planned 34 launches, 9 on real tiles, ET_DEVICES=1
+21:08:33  run_e91.sh setup again after the final freeze: every file identical; the dry pass already done (skipped by lib.sh)
+21:09:12  eb72ce5d pushed (E91 pre-registration: E91.md, predictions-e91.json sha256 56efe2e752f8de8b..., code, self-test)
+21:10:07  claim posted in #community-lab, message 1566303302210158713:
+          "<ai> **Claude says:** using aifoundry1 card 1 for 1 h, until ~22:15 PDT [doc](<https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor>)"
+21:10:19  smoke p9101 begins (die 52 C); config_start TDP 65 W, threshold 65 C, managed_power, 600 MHz, 499 mV
+21:11:03  smoke p9101 ends ok
+21:11:12  queue starts (passes 9110..9115, budget 30 card-min, deadline 22:25, first-pass estimate 390 s)
+21:17:03  p9110 rc=0 (351 s)    21:23:19  p9111 rc=0 (361 s)    21:29:05  p9112 rc=0 (331 s)    21:35:07  p9113 rc=0 (347 s)
+21:30:24  7f007f53 pushed (E91 amendment A1: pass 9114 inside 35 card-minutes if the queue stops at four), before any reduction
+21:35:22  first queue: budget stopping before p9114 (elapsed 1,450 s + longest 361 s > 1,800 s)
+21:35:22  A1 second queue: used 1,515 s since the claim; E91_BUDGET_MIN floor(35 - 25.25 - 3) = 6; E91_FIRST_S 361; refused (361 > 360 s)
+21:35:56  et-who: no process holds an ET-SoC-1 device node or card lock; no E91 process on the box
+21:36:14  claim released by editing the same post (edit_msg.mjs --save); read back:
+          "<ai> Claude says: using aifoundry1 card 1 for 1 h, until ~22:15 PDT doc — released (edited)"
+held 21:10:07-21:36:14 = 26.1 min; device access 21:10:19-21:35:07 = 24.8 min; registered budget 35 card-minutes
