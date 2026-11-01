@@ -1,0 +1,41 @@
+--- a/workloads/sparsity/host/main.cpp
++++ b/workloads/sparsity/host/main.cpp
+@@ -36,4 +36,5 @@
+ #include <stdexcept>
+ #include <string>
++#include <thread>
+ #include <vector>
+ 
+@@ -136,4 +137,6 @@
+   uint64_t harts = 1;
+   uint64_t iters = 0;
++  uint64_t fixedIters = 0;  // E100: every launch after the calibration one runs this many iterations, with no rescale
++  double gapMs = 0;         // E100: after every launch of a --seconds loop, sleep a random time, uniform in 0 to 2 x this, so no kernel slot is in use
+   uint64_t shireMask = 1;
+   uint64_t perShire = 1;
+@@ -565,5 +568,7 @@
+     return;
+   }
+-  iters = std::max<uint64_t>(1, uint64_t(double(iters) * 0.5 / std::max(wall, 1e-4)));
++  iters = o.fixedIters ? o.fixedIters : std::max<uint64_t>(1, uint64_t(double(iters) * 0.5 / std::max(wall, 1e-4)));
++  std::mt19937_64 gapRng{std::random_device{}()};
++  std::uniform_real_distribution<double> gapDist(0.0, 2.0 * o.gapMs);
+   double spent = 0;
+   for (int n = 0; spent < o.seconds; ++n) {
+@@ -577,4 +582,9 @@
+     }
+     spent += one(iters, n);
++    if (o.gapMs > 0) {
++      const double g = gapDist(gapRng);
++      std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(g));
++      spent += g / 1000.0;
++    }
+   }
+ }
+@@ -994,4 +1004,6 @@
+     else if (a == "--harts") o.harts = std::strtoull(next().c_str(), nullptr, 0);
+     else if (a == "--iters") o.iters = std::strtoull(next().c_str(), nullptr, 0);
++    else if (a == "--fixed-iters") o.fixedIters = std::strtoull(next().c_str(), nullptr, 0);
++    else if (a == "--gap-ms") o.gapMs = std::atof(next().c_str());
+     else if (a == "--shires") o.shireMask = std::strtoull(next().c_str(), nullptr, 0);
+     else if (a == "--per-shire") o.perShire = std::strtoull(next().c_str(), nullptr, 0);

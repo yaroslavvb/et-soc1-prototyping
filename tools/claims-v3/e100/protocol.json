@@ -1,0 +1,422 @@
+{
+ "experiment": "E100",
+ "request": "Q132",
+ "card": "aifoundry2",
+ "order_seed": 100,
+ "title": "The idle reset against launch gaps of different lengths, and one long launch with no gap",
+ "tools": {
+  "heater": "build/e100/host/sparsity_host",
+  "kernel": "build/e100/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 85,
+  "board_cap_w": 97,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 32
+ },
+ "pause_s": [
+  0.0,
+  1.0
+ ],
+ "pause_seed": 100,
+ "blocks": [
+  {
+   "name": "SMOKE",
+   "title": "one short process of each flag and one full-length long kernel (not analysed)",
+   "default": false,
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 1,
+   "runs": [
+    {
+     "label": "smoke-a0",
+     "launch": {
+      "seconds": 2,
+      "budget": 3.5,
+      "processes": 1,
+      "fixed_iters": 850000
+     }
+    },
+    {
+     "label": "smoke-a100",
+     "launch": {
+      "seconds": 2,
+      "budget": 3.5,
+      "processes": 1,
+      "fixed_iters": 850000,
+      "gap_ms": 100
+     }
+    },
+    {
+     "label": "smoke-n",
+     "launch": {
+      "seconds": 4.5,
+      "budget": 7.5,
+      "processes": 1,
+      "one_kernel_iters": 10000000
+     }
+    },
+    {
+     "label": "smoke-r",
+     "sampler_reset_ms": 1000,
+     "launch": {
+      "seconds": 2,
+      "budget": 3.5,
+      "processes": 1,
+      "fixed_iters": 850000,
+      "gap_ms": 20
+     }
+    }
+   ]
+  },
+  {
+   "name": "R1A0",
+   "title": "round 1, arm A0",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 4,
+   "runs": [
+    {
+     "label": "a0",
+     "launch": {
+      "seconds": 7.5,
+      "budget": 9.0,
+      "processes": 3,
+      "fixed_iters": 850000
+     }
+    }
+   ]
+  },
+  {
+   "name": "R1A5",
+   "title": "round 1, arm A5",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 4,
+   "runs": [
+    {
+     "label": "a5",
+     "launch": {
+      "seconds": 7.5,
+      "budget": 9.0,
+      "processes": 3,
+      "fixed_iters": 850000,
+      "gap_ms": 5
+     }
+    }
+   ]
+  },
+  {
+   "name": "R1A20",
+   "title": "round 1, arm A20",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 4,
+   "runs": [
+    {
+     "label": "a20",
+     "launch": {
+      "seconds": 7.5,
+      "budget": 9.0,
+      "processes": 3,
+      "fixed_iters": 850000,
+      "gap_ms": 20
+     }
+    }
+   ]
+  },
+  {
+   "name": "R1A100",
+   "title": "round 1, arm A100",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 6,
+   "runs": [
+    {
+     "label": "a100",
+     "launch": {
+      "seconds": 7.5,
+      "budget": 9.0,
+      "processes": 2,
+      "fixed_iters": 850000,
+      "gap_ms": 100
+     }
+    }
+   ]
+  },
+  {
+   "name": "R1N",
+   "title": "round 1, arm N",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 5,
+   "runs": [
+    {
+     "label": "n",
+     "launch": {
+      "seconds": 4.5,
+      "budget": 7.5,
+      "processes": 5,
+      "one_kernel_iters": 10000000
+     }
+    }
+   ]
+  },
+  {
+   "name": "R1R",
+   "title": "round 1, arm R",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 4,
+   "runs": [
+    {
+     "label": "r",
+     "launch": {
+      "seconds": 7.5,
+      "budget": 9.0,
+      "processes": 3,
+      "fixed_iters": 850000,
+      "gap_ms": 20
+     },
+     "sampler_reset_ms": 1000
+    }
+   ]
+  },
+  {
+   "name": "R2R",
+   "title": "round 2, arm R",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 4,
+   "runs": [
+    {
+     "label": "r",
+     "launch": {
+      "seconds": 7.5,
+      "budget": 9.0,
+      "processes": 3,
+      "fixed_iters": 850000,
+      "gap_ms": 20
+     },
+     "sampler_reset_ms": 1000
+    }
+   ]
+  },
+  {
+   "name": "R2N",
+   "title": "round 2, arm N",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 5,
+   "runs": [
+    {
+     "label": "n",
+     "launch": {
+      "seconds": 4.5,
+      "budget": 7.5,
+      "processes": 5,
+      "one_kernel_iters": 10000000
+     }
+    }
+   ]
+  },
+  {
+   "name": "R2A100",
+   "title": "round 2, arm A100",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 6,
+   "runs": [
+    {
+     "label": "a100",
+     "launch": {
+      "seconds": 7.5,
+      "budget": 9.0,
+      "processes": 2,
+      "fixed_iters": 850000,
+      "gap_ms": 100
+     }
+    }
+   ]
+  },
+  {
+   "name": "R2A20",
+   "title": "round 2, arm A20",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 4,
+   "runs": [
+    {
+     "label": "a20",
+     "launch": {
+      "seconds": 7.5,
+      "budget": 9.0,
+      "processes": 3,
+      "fixed_iters": 850000,
+      "gap_ms": 20
+     }
+    }
+   ]
+  },
+  {
+   "name": "R2A5",
+   "title": "round 2, arm A5",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 4,
+   "runs": [
+    {
+     "label": "a5",
+     "launch": {
+      "seconds": 7.5,
+      "budget": 9.0,
+      "processes": 3,
+      "fixed_iters": 850000,
+      "gap_ms": 5
+     }
+    }
+   ]
+  },
+  {
+   "name": "R2A0",
+   "title": "round 2, arm A0",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "mask": "0xffffffff",
+   "per_shire": 32,
+   "seed": 1,
+   "start": {
+    "mode": "cool",
+    "max_c": 62,
+    "max_wait_s": 120
+   },
+   "tail_s": 2,
+   "passes": 4,
+   "runs": [
+    {
+     "label": "a0",
+     "launch": {
+      "seconds": 7.5,
+      "budget": 9.0,
+      "processes": 3,
+      "fixed_iters": 850000
+     }
+    }
+   ]
+  }
+ ]
+}
