@@ -31,7 +31,12 @@
 //     stream whose add/subtract flag inverts a 52-bit bus, it removes the very nets the stream exists to measure. hier2 lets a
 //     name cover at most one net in each scope below it. hier <= hier2. The first is a floor; the second can count a fanned-out
 //     sign bit once per copy. Quote hier beside the recount's numbers, and read the two together on a regular stream.
-//  2. A STAGE for every merged net, read from the path of its names by stage_of() below, so a count can be split by where the
+//  2. map: the merge learned ONCE, on a training stream that separates nets, and applied to every run. `--train a.vcd b.vcd ...
+//     --write-map m` hashes each bit's waveform over all the training VCDs (random data in every format), applies hier's rule, and
+//     writes one byte per bit: 255 for a name that repeats a net named in an ancestor scope, else the net's stage. `--map m` then
+//     counts, in any run of the same binary, the toggles of the bits that map keeps. A regular stream can no longer merge what it
+//     happens not to separate, and every kind is counted by one rule. This is the count to set beside watts.
+//  3. A STAGE for every merged net, read from the path of its names by stage_of() below, so a count can be split by where the
 //     wire is driven (by_stage_hier for hier2; by_stage_hier1 for hier).
 //
 // SPDX-License-Identifier: Apache-2.0
@@ -132,6 +137,10 @@ int main(int argc, char** argv) {
   long skipCycles = 0, keepCycles = -1;
   bool excludeClocks = true;
   std::string incl = ".txfma";
+  const char* mapPath = nullptr;
+  const char* writeMapPath = nullptr;
+  bool train = false;
+  std::vector<std::string> extraVcds;
 
   for (int i = 1; i < argc; i++) {
     std::string a = argv[i];
@@ -142,10 +151,14 @@ int main(int argc, char** argv) {
     else if (a == "--keep") keepCycles = atol(argv[++i]);
     else if (a == "--keep-clocks") excludeClocks = false;
     else if (a == "--include") incl = argv[++i];
+    else if (a == "--map") mapPath = argv[++i];
+    else if (a == "--write-map") writeMapPath = argv[++i];
+    else if (a == "--train") train = true;
     else if (!vcdPath) vcdPath = argv[i];
+    else if (train) extraVcds.push_back(argv[i]);
     else { fprintf(stderr, "unexpected argument %s\n", argv[i]); return 2; }
   }
-  if (!vcdPath || !outPath) { fprintf(stderr, "usage: settle_count <file.vcd> --out <json> [--modmap f]\n"); return 2; }
+  if (!vcdPath || (!outPath && !train)) { fprintf(stderr, "usage: settle_count <file.vcd> --out <json> [--modmap f] [--map m] | --train a.vcd b.vcd .. --write-map m\n"); return 2; }
 
   std::unordered_map<std::string, std::string> modmap;
   if (modmapPath) {
@@ -261,8 +274,8 @@ int main(int argc, char** argv) {
       return;
     }
     if (sampleIdx == skipCycles) {
-      for (int w = 0; w < nw; w++) { lastSample[w] = cur[w]; initVal[w] = cur[w]; }
-      sampleCount = 1;
+      for (int w = 0; w < nw; w++) { lastSample[w] = cur[w]; if (!sampleCount) initVal[w] = cur[w]; }
+      sampleCount = sampleCount ? sampleCount + 1 : 1;
       rawOn = true;      // from here the raw and the settled count cover the same cycles
       return;
     }
@@ -283,6 +296,8 @@ int main(int argc, char** argv) {
     sampleCount++;
   };
 
+  size_t nextVcd = 0;
+  for (;;) {
   while (!done && (len = getline(&line, &cap, f)) > 0) {
     char c = line[0];
     if (c == '#') {
@@ -344,8 +359,15 @@ int main(int argc, char** argv) {
     if (rawOn) S.raw += changed;
   }
   if (!done && pendingSample) takeSample();
-  free(line);
   fclose(f);
+  if (nextVcd >= extraVcds.size()) break;
+  // the next training VCD: skip its header, and carry on hashing; its first sample only sets the state
+  f = fopen(extraVcds[nextVcd++].c_str(), "r");
+  if (!f) { perror("training vcd"); return 1; }
+  while ((len = getline(&line, &cap, f)) > 0) { const char* q = line; while (*q == ' ' || *q == '\t') q++; if (!strncmp(q, "$enddefinitions", 15)) break; }
+  time = -1; t0 = -1; step = -1; pendingSample = false; sampleIdx = -1; rawOn = false; done = false;
+  }
+  free(line);
 
   // ---- roll up ----
   // settled toggles per id
@@ -404,6 +426,8 @@ int main(int argc, char** argv) {
   }
   long long stageHier[ST_N] = {0}, stageNets[ST_N] = {0};
   long long stageHier2[ST_N] = {0}, stageNets2[ST_N] = {0}, nHier2 = 0, hier2Toggles = 0;
+  std::vector<uint8_t> trainMap;                     // per bit: 254 not seen moving in training, 255 covered, else the net's stage
+  if (train) trainMap.assign(totalBits, 254);
   // scope table for hier2: an id per scope, its depth and its parent
   std::unordered_map<std::string, int> scopeId;
   std::vector<int> scopeParent, scopeDepth;
@@ -422,7 +446,7 @@ int main(int argc, char** argv) {
   for (size_t i = 0; i < sigs.size(); i++) if (!isClock[i]) sigScope[i] = internScope(sigs[i].scope);
   std::vector<int> stampOf(scopeParent.size(), -1), slotOf(scopeParent.size(), -1);
   {
-    struct Member { int sig; uint32_t changes; };
+    struct Member { int sig; uint32_t changes; int bit; };
     std::unordered_map<uint64_t, std::vector<Member>> groups;
     groups.reserve(1 << 18);
     for (size_t i = 0; i < sigs.size(); i++) {
@@ -433,7 +457,7 @@ int main(int argc, char** argv) {
         if (!wchanges[gb]) continue;
         uint64_t key = whash[gb] ^ (getbit(initVal, gb) ? 0x9E3779B97F4A7C15ULL : 0);
         // (no bit-position term: a generate-loop port connects bit i of a bus to bit 0 of a scalar)
-        groups[key].push_back({(int)i, wchanges[gb]});
+        groups[key].push_back({(int)i, wchanges[gb], gb});
       }
     }
     for (auto& kv : groups) {
@@ -456,7 +480,7 @@ int main(int argc, char** argv) {
           if (sk.size() < sj.size() && sj.compare(0, sk.size(), sk) == 0 && sj[sk.size()] == '.')
             covered = true;
         }
-        if (covered) continue;
+        if (covered) { if (train) trainMap[g[j].bit] = 255; continue; }
         nHier++;
         hierToggles += g[j].changes;
         // credit the net to the earliest stage among this member and those it covers
@@ -467,6 +491,7 @@ int main(int argc, char** argv) {
         }
         stageHier[st] += g[j].changes;
         stageNets[st] += 1;
+        if (train) trainMap[g[j].bit] = (uint8_t)st;
         byMod[moduleOf(sj)].hier_settled += g[j].changes;
         byMod[moduleOf(sj)].n_hier += 1;
       }
@@ -515,6 +540,48 @@ int main(int argc, char** argv) {
     }
   }
 
+  if (train) {
+    FILE* m = fopen(writeMapPath, "wb");
+    if (!m) { perror(writeMapPath); return 1; }
+    long long nKeep = 0, nCov = 0, nStill = 0;
+    for (auto b : trainMap) { if (b == 255) nCov++; else if (b == 254) nStill++; else nKeep++; }
+    uint64_t hdr = (uint64_t)totalBits;
+    fwrite(&hdr, 8, 1, m);
+    fwrite(trainMap.data(), 1, trainMap.size(), m);
+    fclose(m);
+    fprintf(stderr, "settle_count: map over %lld bits: %lld nets kept, %lld names covered, %lld never moved in training; %ld samples\n",
+            (long long)totalBits, nKeep, nCov, nStill, sampleCount);
+    return 0;
+  }
+
+  long long mapToggles = 0, nMap = 0;
+  long long stageMap[ST_N] = {0}, stageMapNets[ST_N] = {0};
+  if (mapPath) {
+    FILE* m = fopen(mapPath, "rb");
+    if (!m) { perror(mapPath); return 1; }
+    uint64_t hdr = 0;
+    if (fread(&hdr, 8, 1, m) != 1 || hdr != (uint64_t)totalBits) { fprintf(stderr, "map is for %llu bits, this VCD has %lld\n", (unsigned long long)hdr, (long long)totalBits); return 1; }
+    std::vector<uint8_t> mp(totalBits);
+    if (fread(mp.data(), 1, mp.size(), m) != mp.size()) { fprintf(stderr, "short map\n"); return 1; }
+    fclose(m);
+    for (size_t i = 0; i < sigs.size(); i++) {
+      if (isClock[i]) continue;
+      const Sig& S = sigs[i];
+      for (int b = 0; b < S.width; b++) {
+        int gb = S.off + b;
+        uint32_t ch = wchanges[gb];
+        if (!ch) continue;
+        uint8_t r = mp[gb];
+        if (r == 255) continue;
+        int st = r == 254 ? sigStage[i] : r;
+        nMap++;
+        mapToggles += ch;
+        stageMap[st] += ch;
+        stageMapNets[st] += 1;
+      }
+    }
+  }
+
   FILE* o = fopen(outPath, "w");
   if (!o) { perror(outPath); return 1; }
   fprintf(o, "{\n");
@@ -529,6 +596,12 @@ int main(int argc, char** argv) {
           totNameRaw, totNameSettled, totIdRaw, totIdSettled, distinctToggles, nDistinct,
           hierToggles, nHier);
   fprintf(o, " \"hier2_settled\": %lld,\n \"n_hier2\": %lld,\n", hier2Toggles, nHier2);
+  fprintf(o, " \"map_settled\": %lld,\n \"n_map\": %lld,\n", mapToggles, nMap);
+  fprintf(o, " \"by_stage_map\": {");
+  for (int st = 0; st < ST_N; st++) fprintf(o, "%s\"%s\": %lld", st ? ", " : "", ST_NAME[st], stageMap[st]);
+  fprintf(o, "},\n \"by_stage_n_map\": {");
+  for (int st = 0; st < ST_N; st++) fprintf(o, "%s\"%s\": %lld", st ? ", " : "", ST_NAME[st], stageMapNets[st]);
+  fprintf(o, "},\n");
   fprintf(o, " \"by_stage_hier1\": {");
   for (int st = 0; st < ST_N; st++) fprintf(o, "%s\"%s\": %lld", st ? ", " : "", ST_NAME[st], stageHier[st]);
   fprintf(o, "},\n \"by_stage_hier\": {");

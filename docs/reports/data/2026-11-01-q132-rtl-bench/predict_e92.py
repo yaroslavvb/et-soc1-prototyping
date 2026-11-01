@@ -8,9 +8,10 @@
     predict_e92.py --counts <dir> --e78 <e78.json> --out e92-bench-prediction.json
 
 Coefficients are fitted on E78's fp32 and fp16 kinds and on nothing else. No E92 measurement is read: this script opens no E92 data
-directory, only the bench's counts of E92's frozen tiles (tools/claims-v3/kinds/e92/tiles, commit 6b8f23f1). Two variants: nets_hier2
-(the better fit to E78, and the one whose merge does not collapse a bus that flips with its control bit) and nets_hier (the recount's
-merge, which does collapse it, so it under-predicts every alternating tile).
+directory, only the bench's counts of E92's frozen tiles (tools/claims-v3/kinds/e92/tiles, commit 6b8f23f1). Three variants: nets_map (the recount's merge rule, learned once on
+random data and applied to every tile: the primary), nets_hier2 (the first version of this file's primary, commit de545f0c: its merge
+does not collapse a bus that flips with its control bit) and nets_hier (the recount's merge on each tile's own window, which does collapse
+it, so it under-predicts every alternating tile).
 
 SPDX-License-Identifier: Apache-2.0
 """
@@ -43,7 +44,7 @@ def main():
     rate = {t: e78[f"{t}.randn"]["rate"]["mean"] for t in CPO}
     out = {"_note": "Predictions from RTL counts and E78's fp32/fp16 kinds alone. No E92 measurement exists in this file's inputs.",
            "e92_tiles_commit": "6b8f23f1", "rate_ops_per_s": rate, "variants": {}}
-    for var, nk in (("nets_hier2", "nets_hier2"), ("nets_hier", "nets_hier")):
+    for var, nk in (("nets_map", "nets_map"), ("nets_hier2", "nets_hier2"), ("nets_hier", "nets_hier")):
         X, y = [], []
         for k, v in kinds.items():
             t = v["type"]
@@ -71,7 +72,7 @@ def main():
                 stg[st] = s(x)["unit"]["by_stage"][st] - s(yy)["unit"]["by_stage"][st]
             o["contrasts_w"].append({"rule": rule, "contrast": f"{x}-{yy.split('.')[1]}", "pred_w": D(x) - D(yy),
                                      "d_nets_vpu_per_op": s(x)["vpu"][nk] - s(yy)["vpu"][nk], "d_register_bits_changed_per_op": s(x)["ff"]["all"]["toggles"] - s(yy)["ff"]["all"]["toggles"],
-                                     "d_unit_hier2_by_stage_per_op": stg})
+                                     "d_unit_by_stage_per_op": stg})
         o["contrasts_w"].append({"rule": "R4", "contrast": "(i_sub-i_add) - 0.5*(h_sub-h_add), fp32",
                                  "pred_w": (D("fp32.i_sub") - D("fp32.i_add")) - 0.5 * (D("fp32.h_sub") - D("fp32.h_add"))})
         for m in (2, 4, 6):
@@ -84,7 +85,7 @@ def main():
     for var, o in out["variants"].items():
         print(var, "k", round(o["k_fJ_per_net_toggle"], 3), "a", round(o["a_fJ_per_clocked_bit"], 3), "rms", round(o["fit_rms_w_on_e78"], 3))
         for c in o["contrasts_w"]:
-            st = c.get("d_unit_hier2_by_stage_per_op") or {}
+            st = c.get("d_unit_by_stage_per_op") or {}
             print(f"  {c['rule']:4s} {c['contrast']:44s} {c['pred_w']:7.3f} W   d_nets/op {c.get('d_nets_vpu_per_op', 0):10.0f}  d_regbits/op {c.get('d_register_bits_changed_per_op', 0):9.0f}  adder_norm {st.get('adder_norm', 0):9.0f} result {st.get('result', 0):8.0f} exp {st.get('exponent', 0):8.0f} ctl {st.get('control', 0):8.0f}")
 
 

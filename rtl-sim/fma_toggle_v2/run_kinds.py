@@ -10,8 +10,9 @@ back door), one warm op, then:
   coverage run  `--ops` measured ops: Verilator's toggle coverage by RTL file (`nets`, the old unit), the register counters.
                 Afterwards C is compared with software at every word (C is the software state of n0 + warm + ops ops):
                 `check_mismatch` must be 0, and for fp16 it counts the window model's named residue.
-  VCD run       one whole op, counted by settle_count: names, settled, ids, and `nets_hier` per NET, the recount's method,
-                over the unit alone (.txfma. or .lane_tima.tima.) and over the whole VPU (.dut.), with hier credited by stage.
+  VCD run       one whole op, counted by settle_count: names, settled, ids, `nets_hier` per NET (the recount's method, its merge
+                learned on this run alone), and `nets_map` (the same merge, learned once on random data by train_maps.py and applied
+                to every run), over the unit alone (.txfma. or .lane_tima.tima.) and over the whole VPU (.dut.), by stage.
 
 Numbers are per TensorFMA op on one minion. The launch points are the midpoints of three equal thirds of a 0.5 s launch at
 600 MHz (the host's repeatFor: workloads/sparsity/host/main.cpp:567): C is what it is at that time of a launch, and a time average
@@ -57,15 +58,15 @@ def parse_cov(path):
     return by_block, clock
 
 
-def settle(a, vcd, include, d, tag):
+def settle(a, vcd, include, d, tag, mapf):
     js = os.path.join(d, f"s_{tag}.json")
-    subprocess.run([a.settle, vcd, "--out", js, "--include", include, "--skip", "1"], check=True, capture_output=True)
+    subprocess.run([a.settle, vcd, "--out", js, "--include", include, "--skip", "1", "--map", mapf], check=True, capture_output=True)
     s = json.load(open(js))
     t = s["total"]
     return {"sample_cycles": s["sample_cycles"], "name_settled": t["name_settled"], "name_raw": t["name_raw"], "ids": t["id_settled"],
             "nets_hier": t["hier_settled"], "n_hier": t["n_hier"], "nets_hier2": s["hier2_settled"], "n_hier2": s["n_hier2"],
-            "nets_distinct": t["distinct_settled"], "xz": s["xz_values"],
-            "by_stage": s["by_stage_hier"], "by_stage_n": s["by_stage_n_hier"], "by_stage_hier1": s["by_stage_hier1"]}
+            "nets_map": s["map_settled"], "n_map": s["n_map"], "nets_distinct": t["distinct_settled"], "xz": s["xz_values"],
+            "by_stage": s["by_stage_map"], "by_stage_n": s["by_stage_n_map"], "by_stage_hier2": s["by_stage_hier"], "by_stage_hier1": s["by_stage_hier1"]}
 
 
 def point(a, typ, kind, path, n0, warm, ops):
@@ -112,8 +113,8 @@ def point(a, typ, kind, path, n0, warm, ops):
         subprocess.run(base + ["+ops=1", f"+dump={vcd}", "+dump_ops=1", f"+verilator+coverage+file+{cov}"], capture_output=True, text=True,
                        check=True)
         unit_inc = ".lane_tima.tima." if typ == "int8" else ".txfma."
-        res["unit"] = settle(a, vcd, unit_inc, d, "unit")
-        res["vpu"] = settle(a, vcd, ".dut.", d, "vpu")
+        res["unit"] = settle(a, vcd, unit_inc, d, "unit", os.path.join(a.maps, "unit_int8.map" if typ == "int8" else "unit_float.map"))
+        res["vpu"] = settle(a, vcd, ".dut.", d, "vpu", os.path.join(a.maps, "vpu.map"))
         os.remove(vcd)
     return res
 
@@ -137,6 +138,7 @@ def main():
     ap.add_argument("--bin", required=True)
     ap.add_argument("--accum", required=True)
     ap.add_argument("--settle", required=True)
+    ap.add_argument("--maps", required=True, help="directory of train_maps.py's unit_float.map, unit_int8.map, vpu.map")
     ap.add_argument("--kinds", required=True, help="tools/claims-v3/kinds")
     ap.add_argument("--extra-tiles", default="", help="type:name:path,... tiles outside kinds.json")
     ap.add_argument("--out", required=True)
@@ -172,7 +174,7 @@ def main():
         res["rows"][f"{typ}.{name}"] = {"type": typ, "kind": name, "macs_per_op": MACS.get(typ), "points": rows, "mean": mean_rows(rows)}
         m = res["rows"][f"{typ}.{name}"]["mean"]
         print(f"{typ:5s} {name:18s} check_miss {m['check_mismatch']:6.1f} valid {m['valid_slots']:7.0f} cyc {m['cycles']:6.1f} "
-              f"unit_hier {m['unit']['nets_hier']:10.0f} /MAC {m['unit']['nets_hier'] / MACS[typ]:8.1f} hier2 {m['unit']['nets_hier2']:10.0f} vpu_hier {m['vpu']['nets_hier']:10.0f} vpu_hier2 {m['vpu']['nets_hier2']:10.0f} "
+              f"unit_hier {m['unit']['nets_hier']:10.0f} /MAC {m['unit']['nets_hier'] / MACS[typ]:8.1f} map {m['unit']['nets_map']:10.0f} vpu_hier {m['vpu']['nets_hier']:10.0f} vpu_map {m['vpu']['nets_map']:10.0f} "
               f"ff_clk_txfma {m['ff']['txfma']['clocked']:9.0f} ff_tog_txfma {m['ff']['txfma']['toggles']:9.0f} xz {m['unit']['xz']:.0f}", flush=True)
     json.dump(res, open(a.out, "w"), indent=1)
 
