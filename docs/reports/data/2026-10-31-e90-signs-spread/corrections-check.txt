@@ -1,0 +1,98 @@
+E90 corrections-check (desk only; committed files only)
+kept passes ['9010', '9011', '9012'] (n = 3, t(0.975, 2) = 4.3027)
+
+== C1 Q130(n)'s predictor: the offsets R5 scores against the absolute prices of the same tiles
+draw                  D (W)    predictor point  absolute miss D-point | offset measured  predicted  error
+fp32.sparse50_d1        8.193    6.481           +1.712                |  +0.898           +0.779     +0.119
+fp32.sparse50_d2        8.178    6.586           +1.592                |  +0.884           +0.884     -0.000
+fp32.sparse50_d3        7.622    5.893           +1.729                |  +0.328           +0.191     +0.137
+fp16.nn_like_d1        16.960   16.187           +0.773                |  -0.601           -1.072     +0.471
+fp16.nn_like_d2        16.738   16.071           +0.667                |  -0.823           -1.188     +0.365
+fp16.nn_like_d3        16.372   15.734           +0.638                |  -1.189           -1.525     +0.336
+fp16.uniform01_d1      18.994   21.040           -2.046                |  -0.459           -0.111     -0.348
+fp16.uniform01_d2      19.195   21.116           -1.921                |  -0.257           -0.035     -0.222
+fp16.uniform01_d3      19.292   21.117           -1.825                |  -0.161           -0.034     -0.127
+absolute prices of the nine draws: |miss| 0.638-2.046 W, rms 1.5316 W
+   fp32.sparse50   misses +1.712, +1.592, +1.729 W (measured above the point: underpriced)
+   fp16.nn_like    misses +0.773, +0.667, +0.638 W (measured above the point: underpriced)
+   fp16.uniform01  misses -2.046, -1.921, -1.825 W (measured below the point: overpriced)
+offsets (R5): rms error 0.2765 W (scored.json rules.E90-R5: {"verdict": "PASS", "rms_w": 0.27653436184735264}); no-model baseline 'every draw costs its committed tile' (offset 0): rms 0.7029 W
+every E90 tile against the predictor's frozen 95% interval (scored.json rules.E90-S2.tiles):
+   fp32.signs           D  13.340  point  12.203  miss  +1.137  interval [10.008, 14.397]  inside by 1.057 W
+   fp16.signs           D  13.390  point  13.721  miss  -0.331  interval [11.917, 15.525]  inside by 1.473 W
+   int8.signs           D   5.466  point   5.605  miss  -0.139  interval [4.718, 6.493]  inside by 0.748 W
+   fp32.abs_randn       D  22.852  point  24.443  miss  -1.591  interval [22.249, 26.637]  inside by 0.603 W
+   fp32.negabs_randn    D  22.697  point  24.443  miss  -1.746  interval [22.249, 26.637]  inside by 0.448 W
+   fp16.abs_randn       D  19.547  point  21.243  miss  -1.696  interval [19.439, 23.046]  inside by 0.108 W
+   fp16.negabs_randn    D  19.555  point  21.243  miss  -1.688  interval [19.439, 23.046]  inside by 0.116 W
+   fp32.pm_pi           D  14.957  point  15.753  miss  -0.796  interval [13.558, 17.947]  inside by 1.399 W
+   fp32.sparse50_d1     D   8.193  point   6.481  miss  +1.712  interval [4.287, 8.675]  inside by 0.482 W
+   fp32.sparse50_d2     D   8.178  point   6.586  miss  +1.592  interval [4.392, 8.781]  inside by 0.603 W
+   fp32.sparse50_d3     D   7.622  point   5.893  miss  +1.729  interval [3.698, 8.087]  inside by 0.465 W
+   fp16.nn_like_d1      D  16.960  point  16.187  miss  +0.773  interval [14.383, 17.991]  inside by 1.031 W
+   fp16.nn_like_d2      D  16.738  point  16.071  miss  +0.667  interval [14.267, 17.875]  inside by 1.137 W
+   fp16.nn_like_d3      D  16.372  point  15.734  miss  +0.638  interval [13.930, 17.537]  inside by 1.165 W
+   fp16.uniform01_d1    D  18.994  point  21.040  miss  -2.046  interval [19.236, 22.844]  OUTSIDE by 0.242 W
+   fp16.uniform01_d2    D  19.195  point  21.116  miss  -1.921  interval [19.312, 22.920]  OUTSIDE by 0.117 W
+   fp16.uniform01_d3    D  19.292  point  21.117  miss  -1.825  interval [19.313, 22.920]  OUTSIDE by 0.021 W
+random data of one sign (abs_randn, negabs_randn, uniform01 draws), priced high by: fp32.abs_randn 1.591, fp32.negabs_randn 1.746, fp16.abs_randn 1.696, fp16.negabs_randn 1.688, fp16.uniform01_d1 2.046, fp16.uniform01_d2 1.921, fp16.uniform01_d3 1.825 W
+inside count 14 of 17 (registered: >= 14)
+
+== C2 R4 with the draw as the unit; C3 how far one re-draw moved
+fp32.sparse50: per-draw paired moves +0.898, +0.884, +0.328 W (range 0.328-0.898 in size)
+   R4 as registered (over passes, these three draws): +0.703 +- 0.145 W -> FAIL
+   the draw as the unit (t(0.975, 2) = 4.3027): +0.703 +- 0.808 W [-0.105, +1.511] -> INCONCLUSIVE against +-0.5 W
+   sd between the four tiles 0.440 W; one tile's between-pass sd 0.047 W (ratio 9.4); range 0.898 W
+   gated_lane_frac  band [0.710693, 0.791504] (n = 400 re-draws, kinds.json); committed 0.77417 (inside, z +1.08); draws 0.744873, 0.740723, 0.763428 (inside, inside, inside)
+   bus_bits_per_op  band [70180.0, 81002.0] (n = 400 re-draws, kinds.json); committed 74550 (inside, z -0.32); draws 80246, 72546, 73696 (inside, inside, inside)
+fp16.nn_like: per-draw paired moves -0.601, -0.823, -1.189 W (range 0.601-1.189 in size)
+   R4 as registered (over passes, these three draws): -0.871 +- 0.066 W -> FAIL
+   the draw as the unit (t(0.975, 2) = 4.3027): -0.871 +- 0.738 W [-1.608, -0.133] -> INCONCLUSIVE against +-0.5 W
+   sd between the four tiles 0.498 W; one tile's between-pass sd 0.079 W (ratio 6.3); range 1.189 W
+   gated_lane_frac  band [0.199219, 0.304688] (n = 400 re-draws, kinds.json); committed 0.195312 (BELOW p2.5, z -1.89); draws 0.230469, 0.234375, 0.25 (inside, inside, inside)
+   bus_bits_per_op  band [79664.0, 84702.0] (n = 400 re-draws, kinds.json); committed 84348 (inside, z +1.60); draws 81966, 81590, 80024 (inside, inside, inside)
+fp16.uniform01: per-draw paired moves -0.459, -0.257, -0.161 W (range 0.161-0.459 in size)
+   R4 as registered (over passes, these three draws): -0.292 +- 0.310 W -> INCONCLUSIVE
+   the draw as the unit (t(0.975, 2) = 4.3027): -0.292 +- 0.378 W [-0.670, +0.086] -> INCONCLUSIVE against +-0.5 W
+   sd between the four tiles 0.192 W; one tile's between-pass sd 0.143 W (ratio 1.3); range 0.459 W
+   gated_lane_frac  band [0.0, 0.0] (n = 400 re-draws, kinds.json); committed 0.0 (inside, every re-draw the same); draws 0.0, 0.0, 0.0 (inside, inside, inside)
+   bus_bits_per_op  band [73534.0, 77624.0] (n = 400 re-draws, kinds.json); committed 77948 (ABOVE p97.5, z +2.33); draws 74882, 76294, 74492 (inside, inside, inside)
+largest single move: fp16.nn_like_d3 -1.189 +- 0.031 W
+
+== C4 heat: dT_win per pass (C over the launch reading; whole-degree die reading) and paired differences
+   fp32.signs  per pass ['1.800', '2.000', '2.000'] (runs a pass [1, 1, 1]) -> 1.93 +- 0.29
+   fp32.ones   per pass ['1.000', '1.250', '1.500'] (runs a pass [1, 1, 1]) -> 1.25 +- 0.62
+   fp16.signs  per pass ['2.000', '2.000', '2.000'] (runs a pass [1, 1, 1]) -> 2.00 +- 0.00  <- three identical readings; the reading resolves 1 C
+   fp16.ones   per pass ['1.300', '1.500', '1.300'] (runs a pass [1, 1, 1]) -> 1.37 +- 0.29
+   int8.signs  per pass ['1.000', '1.000', '1.000'] (runs a pass [1, 1, 1]) -> 1.00 +- 0.00  <- three identical readings; the reading resolves 1 C
+   int8.full   per pass ['1.100', '1.117', '1.050'] (runs a pass [3, 3, 3]) -> 1.09 +- 0.09
+   fp32.pm_pi  per pass ['2.000', '2.150', '2.000'] (runs a pass [1, 1, 1]) -> 2.05 +- 0.22
+   anchor_pi   per pass ['0.725', '1.100', '1.200'] (runs a pass [2, 2, 2]) -> 1.01 +- 0.62
+   fp32.randn  per pass ['3.267', '3.167', '3.233'] (runs a pass [3, 3, 3]) -> 3.22 +- 0.13
+   fp16.randn  per pass ['2.900', '3.000', '2.950'] (runs a pass [3, 3, 3]) -> 2.95 +- 0.12
+   fp32.signs - fp32.ones paired per pass ['+0.800', '+0.750', '+0.500'] -> +0.68 +- 0.40 C
+   fp16.signs - fp16.ones paired per pass ['+0.700', '+0.500', '+0.700'] -> +0.63 +- 0.29 C
+   int8.signs - int8.full paired per pass ['-0.100', '-0.117', '-0.050'] -> -0.09 +- 0.09 C
+   fp32.pm_pi - anchor_pi paired per pass ['+1.275', '+1.050', '+0.800'] -> +1.04 +- 0.59 C
+   S (W over idle): int8.signs 7.972, fp32.signs 15.301, fp16.signs 15.371, fp32.pm_pi 16.907 (e90.json items.*.S)
+
+== C5 fp16 against fp32: the sign-bit prices and the two +-1 steps
+   fp32 B: dW 0.5629 W at 4096 flips/op, op rate 1.1211e+09 /s -> 122.6 fJ, se 0.0244 W (n = 5) as frozen; its own README states its interval; source docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/hl.json
+   fp32 A: dW 0.5607 W at 2048 flips/op, op rate 1.1211e+09 /s -> 244.2 fJ, se 0.1815 W (n = 7) as frozen; its own README states its interval; source docs/reports/data/2026-10-27-e67-a-side-bit-prices/hl.json
+   fp16 B: dW 0.3130 W at 8192 flips/op, op rate 1.1206e+09 /s -> 34.1 fJ, ci95 [-22, 90] fJ as frozen; source docs/reports/data/2026-10-31-e79-fp16-int8-bit-prices/README.md
+   fp16 A: dW 0.3270 W at 4096 flips/op, op rate 1.1206e+09 /s -> 71.2 fJ, ci95 [15, 128] fJ as frozen; source docs/reports/data/2026-10-31-e79-fp16-int8-bit-prices/README.md
+   price ratio fp32/fp16, A side: 3.43 (from dW and flips; the op rate cancels: 3.43); the README's own fJ values, E67 247 / E79 71: 3.48
+   price ratio fp32/fp16, B side: 3.59 at the point, but fp16 B is a bound (ci95 [-22, 90] fJ spans 0): at its upper end the ratio is 1.36, and above it there is no ratio
+   fp32 +-1 step per pass ['4.798', '5.214', '5.005'] -> 5.006 +- 0.517 W (scored.json: 5.006 +- 0.517)
+   fp16 +-1 step per pass ['5.199', '4.895', '5.144'] -> 5.079 +- 0.403 W (scored.json: 5.079 +- 0.403)
+   fp16 step minus fp32 step, paired per pass ['+0.401', '-0.319', '+0.139'] -> +0.074 +- 0.906 W [-0.832, +0.979]
+   fp16 step / fp32 step per pass ['1.084', '0.939', '1.028'] -> 1.017 +- 0.181
+   the bits model's ratio P_bits(fp16) / P_bits(fp32) = 0.317 / 0.592 = 0.535: fp16's step would be 2.680 W, -2.325 W from fp32's (outside the paired interval)
+   sign flips per op (e90/e90.json tiles.*.stats): fp32.signs A 1072 + B 2172 = 3244; fp16.signs A 2032 + B 4050 = 6082
+
+== C6 the verdict count (scored.json rules, primary leakage slope)
+   primary rules: {'E90-R1': 'FAIL', 'E90-R2': 'FAIL', 'E90-R3': 'INCONCLUSIVE', 'E90-R4': 'FAIL', 'E90-R5': 'PASS'}
+      PASS: 1 (E90-R5)
+      FAIL: 3 (E90-R1, E90-R2, E90-R4)
+      INCONCLUSIVE: 1 (E90-R3)
+   checks: {'E90-S1': 'PASS', 'E90-S2': 'PASS'}
