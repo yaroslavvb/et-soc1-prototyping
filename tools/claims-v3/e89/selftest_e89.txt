@@ -1,0 +1,19 @@
+== case 1: heat follows power (every kind 1.00 per W)
+  i8full    laps 4 H 0.1858 +- 0.0024  r 0.998 [0.976, 1.019]  T 0.752 C  int-mean T 0.712 +- 0.126  step2/W 0.1046  swing30/W 0.2205
+  i8gauss   laps 4 H 0.1850 +- 0.0063  r 0.994 [0.956, 1.031]  T 0.697 C  int-mean T 0.684 +- 0.189  step2/W 0.1072  swing30/W 0.2194
+  i8small   laps 4 H 0.1868 +- 0.0024  r 1.003 [0.982, 1.025]  T 0.647 C  int-mean T 0.709 +- 0.224  step2/W 0.1070  swing30/W 0.2217
+  i8sp50    laps 4 H 0.1861 +- 0.0061  r 1.000 [0.963, 1.037]  T 0.584 C  int-mean T 0.444 +- 0.208  step2/W 0.1074  swing30/W 0.2232
+  i8neg1    laps 4 H 0.1843 +- 0.0091  r 0.990 [0.938, 1.041]  T 0.169 C  int-mean T 0.007 +- 0.016  step2/W 0.0790  swing30/W 0.1984
+  i8zero    laps 4 H 0.1879 +- 0.0060  r 1.009 [0.972, 1.046]  T 0.280 C  int-mean T 0.135 +- 0.276  step2/W 0.1094  swing30/W 0.2004
+  f32ones   laps 4 H 0.1862 +- 0.0038  r 1.000 [0.973, 1.026]  T 0.886 C  int-mean T 0.825 +- 0.050  step2/W 0.1127  swing30/W 0.2190
+  f32randn  laps 4 H 0.1862 +- 0.0032  r 1.000 [0.976, 1.024]  T 2.636 C  int-mean T 2.631 +- 0.047  step2/W 0.1111  swing30/W 0.2196
+  tally {'PASS': 23, 'INCONCLUSIVE': 1}
+== case 2: int8 heats 0.70 per W
+   i8full FAIL {'r': 0.7, 'se': 0.005, 'lo': 0.685, 'hi': 0.716}
+   i8gauss FAIL {'r': 0.705, 'se': 0.009, 'lo': 0.677, 'hi': 0.732}
+   i8small FAIL {'r': 0.7, 'se': 0.009, 'lo': 0.672, 'hi': 0.728}
+   i8sp50 FAIL {'r': 0.706, 'se': 0.008, 'lo': 0.68, 'hi': 0.732}
+   i8neg1 INCONCLUSIVE {'r': 0.725, 'se': 0.028, 'lo': 0.636, 'hi': 0.813}
+   i8zero FAIL {'r': 0.721, 'se': 0.016, 'lo': 0.669, 'hi': 0.773}
+   f32ones PASS {'r': 0.999, 'se': 0.01, 'lo': 0.968, 'hi': 1.03}
+SELFTEST OK

@@ -1,0 +1,168 @@
+{
+ "experiment": "E89",
+ "card": "aifoundry3 card 0 (600 MHz, pinned by its boot-time TDP 0; never set)",
+ "registration": "tools/claims-v3/e89/E89.md",
+ "harness": {
+  "lib_sh_sha256": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+  "data_dir": "docs/reports/data/2026-10-31-e89-heat-low-power/",
+  "passes": [
+   8910,
+   8911
+  ],
+  "smoke": 8901,
+  "card_budget_min": 45,
+  "half_s": 30.0,
+  "cycles": 2,
+  "lead_s": 20.0,
+  "launch_s": 6.8,
+  "idle_s": 15.0,
+  "gate_c": 62.0,
+  "gate_max_s": 60.0,
+  "max_c": 78.0,
+  "sampler": "tools/claims-v3/e89/pvt_sample.py",
+  "order": "the seven low-power blocks shuffled with Random('E89|aifoundry3|<pass>'), then f32randn"
+ },
+ "model": {
+  "source": "docs/findings/11-thermal-model.md (Foster chain) + E78 leak 0.1994 W/C",
+  "f_lockin_hz": 0.016666666666666666,
+  "H_lockin_C_per_W": 0.1882,
+  "H_lockin_phase_deg": -34.3,
+  "H_dc_C_per_W": 2.074,
+  "duty": 0.9,
+  "e78_resolved_2s_C_per_W": 0.118
+ },
+ "blocks": {
+  "i8full": {
+   "kind": "int8.full",
+   "ref": "int8.zeros",
+   "e78_quantity": "D",
+   "e78_w": 7.0565,
+   "e78_ci95": 0.0595,
+   "e78_dT_win_2s": 1.006,
+   "e78_extrapolation_C": 1.139,
+   "pred_board_fund_W": 4.043,
+   "pred_T_fund_C": 0.761,
+   "pred_r": 1.0
+  },
+  "i8gauss": {
+   "kind": "int8.gauss_q",
+   "ref": "int8.zeros",
+   "e78_quantity": "D",
+   "e78_w": 6.598,
+   "e78_ci95": 0.0692,
+   "e78_dT_win_2s": 1.0,
+   "e78_extrapolation_C": 1.081,
+   "pred_board_fund_W": 3.78,
+   "pred_T_fund_C": 0.712,
+   "pred_r": 1.0
+  },
+  "i8small": {
+   "kind": "int8.smallint",
+   "ref": "int8.zeros",
+   "e78_quantity": "D",
+   "e78_w": 6.0028,
+   "e78_ci95": 0.1425,
+   "e78_dT_win_2s": 1.0,
+   "e78_extrapolation_C": 1.018,
+   "pred_board_fund_W": 3.439,
+   "pred_T_fund_C": 0.647,
+   "pred_r": 1.0
+  },
+  "i8sp50": {
+   "kind": "int8.sparse50",
+   "ref": "int8.zeros",
+   "e78_quantity": "D",
+   "e78_w": 5.4634,
+   "e78_ci95": 0.1458,
+   "e78_dT_win_2s": 1.0,
+   "e78_extrapolation_C": 0.951,
+   "pred_board_fund_W": 3.13,
+   "pred_T_fund_C": 0.589,
+   "pred_r": 1.0
+  },
+  "i8neg1": {
+   "kind": "int8.neg_ones",
+   "ref": "int8.zeros",
+   "e78_quantity": "D",
+   "e78_w": 1.6283,
+   "e78_ci95": 0.1693,
+   "e78_dT_win_2s": 0.808,
+   "e78_extrapolation_C": 0.493,
+   "pred_board_fund_W": 0.933,
+   "pred_T_fund_C": 0.176,
+   "pred_r": 1.0
+  },
+  "i8zero": {
+   "kind": "int8.zeros",
+   "ref": "idle",
+   "e78_quantity": "S",
+   "e78_w": 2.6053,
+   "e78_ci95": 0.0283,
+   "e78_dT_win_2s": 0.215,
+   "e78_extrapolation_C": 0.307,
+   "pred_board_fund_W": 1.493,
+   "pred_T_fund_C": 0.281,
+   "pred_r": 1.0
+  },
+  "f32ones": {
+   "kind": "fp32.ones",
+   "ref": "fp32.zeros",
+   "e78_quantity": "D",
+   "e78_w": 8.2566,
+   "e78_ci95": 0.2209,
+   "e78_dT_win_2s": 1.2,
+   "e78_extrapolation_C": 1.214,
+   "pred_board_fund_W": 4.731,
+   "pred_T_fund_C": 0.89,
+   "pred_r": 1.0
+  },
+  "f32randn": {
+   "kind": "fp32.randn",
+   "ref": "fp32.zeros",
+   "e78_quantity": "D",
+   "e78_w": 24.7249,
+   "e78_ci95": 0.0823,
+   "e78_dT_win_2s": 3.158,
+   "e78_extrapolation_C": 3.151,
+   "pred_board_fund_W": 14.166,
+   "pred_T_fund_C": 2.666,
+   "pred_r": 1.0
+  }
+ },
+ "rules": {
+  "E89-R0": {
+   "what": "the per-sensor reading works: command 74 group 0 answers 34 sensors, and the floor of their mean is the firmware's own minshire_avg",
+   "min_share_with_34": 0.99,
+   "min_share_eq": 0.95,
+   "pred": "PASS"
+  },
+  "E89-R1": {
+   "what": "every block's temperature fundamental (34-sensor mean, on the reference lag) is detected: 95% lower bound over laps > 0",
+   "pred": "PASS for all 8"
+  },
+  "E89-R2": {
+   "what": "heat follows switching power: r = H_K / H_ref inside the band at 95% (laps, delta method, t(0.975, min(n) - 1))",
+   "band": [
+    0.8,
+    1.25
+   ],
+   "pred": "PASS for all 7"
+  },
+  "E89-R3": {
+   "what": "the reference's H at 1/60 Hz against the heat model's",
+   "band": [
+    0.141,
+    0.264
+   ],
+   "pred": "PASS"
+  },
+  "E89-R4": {
+   "what": "E78's 2 s window, now on the fine reading: (step2/W)_K over (step2/W)_ref inside the band at 95% (over the K halves' up-steps)",
+   "band": [
+    0.7,
+    1.43
+   ],
+   "pred": "PASS for all 7"
+  }
+ }
+}
