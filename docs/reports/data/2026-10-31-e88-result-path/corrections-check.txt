@@ -1,0 +1,127 @@
+E88 corrections after verification: the desk check (Sat 31 Oct 2026). Post hoc throughout; no registered
+number changes and no verdict moves. The frozen outputs' sha256 (compare with the data commit f1c7412e):
+   6296cfe99830ac18880677f3766805b51d783906ec641b6e08d7e2854d406b07  scored.json
+   08aeec989a46987a6ed096307ad21ce81d8d1689e489b7be0316c9b8d16c89ac  results.md
+   007eb9cbeb39b8f75da0eb0eb97fd89bd1b23a63a242d079bdee582b4938e21d  e88.json
+   acc27809c37e0a1e79dd484e4c0c21de99e98e38fe91d8fa16913cf76941820f  e88-keepdips.json
+   d7d4e7b08a7ef765d12872994ad8608b38e92d782b37d277803a1c1f99d3dcdc  e88-leak0.545.json
+   25e6266b1dae060d75ebaa0ff1a7177fe2650ee3c29f2f6d306b992862bbf6bf  e88-leak0.3803.json
+   ea032ae0e781283cd5e21f2bb6ff44b9d7a5b7d11379dede45c44952213fa842  e88-leak0.json
+Passes kept: [8810, 8811, 8812, 8814, 8815]; t(0.975, 4) = 2.776
+
+C1 (major). WHAT 'RANDOM' MEANS IN THE SPLIT
+   fp32.r_walk: A[:,0] = B[0,:] = 1.0; A[:,1:], B[1:,:] = |N(0,1)| in fp32 (seed 8801): random positive operands, the accumulators walk and differ from each other  [tools/claims-v3/rpath/e88.json items.fp32.r_walk.rule]
+   fp16.r_walk: A words (x, x), x = |N(0,1)| fp16; B words (u, -u'), u and u' independent |N(0,1)| (seed 8811); k-group 0 = c_cancel's (1, 1) x (1, -1): the accumulators walk  [tools/claims-v3/rpath/e88.json items.fp16.r_walk.rule]
+   int8.r_walk: A words (x, x, y, y), x, y uniform in [-128, 127]; B words (u, -u', v, -v'), u, u', v, v' uniform in [-127, 127], all independent (seed 8821): the int32 accumulators walk  [tools/claims-v3/rpath/e88.json items.int8.r_walk.rule]
+   fp32: r_walk / fp32.randn = 0.906 +- 0.007; as shares of fp32.randn (per pass): (i) 0.333 +- 0.006, (iii) 0.362 +- 0.009, (ii) 0.212 +- 0.008, fp32.randn - r_walk 0.094 +- 0.007
+   fp16: r_walk / fp16.randn = 0.959 +- 0.005; as shares of fp16.randn (per pass): (i) 0.373 +- 0.007, (iii) 0.291 +- 0.008, (ii) 0.295 +- 0.009, fp16.randn - r_walk 0.041 +- 0.005
+   int8: r_walk / int8.full = 0.977 +- 0.025; as shares of int8.full (per pass): (i) 0.251 +- 0.023, (iii) 0.461 +- 0.025, (ii) 0.265 +- 0.040, int8.full - r_walk 0.023 +- 0.025
+   X32 (E78's random tile against r_walk (signs and the k = 0 slice)): 2.241 +- 0.173 W [scored.json primary.contrasts.X32.D]
+
+C2. R32bus IS NOT A PURE BUS SWING: r_het's OWN k = 0 OPERAND TOGGLES
+   r_het: r_abs with B[0, j] = 2^50 m_j, m_j in [1, 2) with 23 random bits (seed 8803): the accumulators frozen but different from each other, so the C read and the result bus swing between the two C elements a lane alternates between
+   r_het - r_abs per op (stream model): live +0.0000, operand-bus bits +2944.0, product bits +2946.0, result bits +95938.9  [tools/claims-v3/rpath/e88.json model.fp32.r_het, model.fp32.r_abs]
+   priced at the frozen fp32 fit: bus 0.064 W + product 0.244 W + result 4.444 W = 4.753 W (the registered prediction 4.753); the operand residue 0.308 +- 0.015 W (1 SE of the fit)
+   M32 measured / predicted = 8.614 / 9.716 = 0.887; the residue scaled by it 0.273 W
+   H5 per-pass share, raw (registered): 0.754 +- 0.018
+   with 0.308 W taken off each pass: 0.693 +- 0.018; with 0.273 W: 0.700 +- 0.018
+   R32bus: raw 3.801 +- 0.168 W; less 0.308 W 3.493 +- 0.168 W; less 0.273 W 3.528 +- 0.168 W
+
+C3. THE MODEL'S 17 OF 19: BAND WIDTHS AND WHERE IT MISSES INSIDE THEM
+   F32     predicted  7.564 [6.478, 8.649] (+-1.09)  measured  7.922  +0.36 W  +5%
+   W32     predicted  0.365 [-0.890, 1.621] (+-1.26)  measured  0.100  -0.27 W  -
+   M32     predicted  9.716 [8.159, 11.272] (+-1.56)  measured  8.614  -1.10 W  -11%
+   R32     predicted  5.017 [3.453, 6.581] (+-1.56)  measured  5.042  +0.03 W  +1%
+   R32bus  predicted  4.753 [3.262, 6.243] (+-1.49)  measured  3.801  -0.95 W  -20%
+   R32sum  predicted  0.264 [-0.996, 1.525] (+-1.26)  measured  1.241  +0.98 W  -
+   M32s    predicted  0.242 [-1.012, 1.496] (+-1.25)  measured  2.524  +2.28 W  -
+   R32s    predicted  3.693 [2.262, 5.124] (+-1.43)  measured  2.259  -1.43 W  -39%
+   X32     predicted  1.483 [0.225, 2.740] (+-1.26)  measured  2.241  +0.76 W  +51%
+   F16     predicted  7.529 [6.408, 8.649] (+-1.12)  measured  7.955  +0.43 W  +6%
+   W16     predicted  0.505 [-0.695, 1.705] (+-1.20)  measured  0.014  -0.49 W  -
+   M16     predicted  5.636 [3.972, 7.301] (+-1.66)  measured  6.190  +0.55 W  +10%
+   R16     predicted  7.359 [5.563, 9.156] (+-1.80)  measured  6.289  -1.07 W  -15%
+   A16     predicted  0.127 [-1.070, 1.324] (+-1.20)  measured  0.388  +0.26 W  -
+   R16abs  predicted  7.232 [5.432, 9.031] (+-1.80)  measured  5.901  -1.33 W  -18%
+   F8      predicted  1.359 [0.608, 2.110] (+-0.75)  measured  1.710  +0.35 W  +26%
+   W8      predicted  0.174 [-0.642, 0.990] (+-0.82)  measured -0.231  -0.40 W  -
+   M8      predicted  2.123 [0.558, 3.689] (+-1.56)  measured  3.145  +1.02 W  +48%
+   R8      predicted  3.066 [1.456, 4.675] (+-1.61)  measured  1.809  -1.26 W  -41%
+   band half-widths: 0.75 (F8) to 1.80 (R16abs)  [tools/claims-v3/rpath/predictions-e88.json contrasts.*.predicted.tol]
+
+C4. D IS BOARD POWER; THE SAME SPLIT ON THE RAIL (Drail)
+   tools/claims-v3/kinds/reduce_e78.py: P = mean board_w over [t0+1 s, t0+3 s), p80 = P - k (T_window - T_launch),
+   D = p80 - the type's zeros p80; Drail = rail80 - the type's zeros rail80 (the same window and correction)
+   fp32 on the rail: (i) 6.98 +- 0.19, (iii) 7.14 +- 0.17, (ii) 3.92 +- 0.29 of 18.03 +- 0.23 W; shares 0.387 +- 0.011 / 0.396 +- 0.011 / 0.217 +- 0.014
+   fp16 on the rail: (i) 6.89 +- 0.11, (iii) 5.28 +- 0.22, (ii) 5.04 +- 0.41 of 17.22 +- 0.22 W; shares 0.400 +- 0.007 / 0.307 +- 0.016 / 0.293 +- 0.020
+   int8 on the rail: (i) 1.47 +- 0.13, (iii) 2.83 +- 0.20, (ii) 1.69 +- 0.17 of 5.98 +- 0.16 W; shares 0.245 +- 0.028 / 0.473 +- 0.022 / 0.282 +- 0.026
+
+C5. THE REGISTERED LEAKAGE-SLOPE ARMS ON THE WATTS AND THE SHARES
+   arm auto (primary)  slope 0.3148 W/C, passes [8810, 8811, 8812, 8814, 8815]
+      fp32: (i) 7.922  (iii) 8.614  (ii) 5.042  total 21.579 W;  shares 0.367 / 0.399 / 0.234
+      fp16: (i) 7.955  (iii) 6.190  (ii) 6.289  total 20.434 W;  shares 0.389 / 0.303 / 0.308
+      int8: (i) 1.710  (iii) 3.145  (ii) 1.809  total 6.665 W;  shares 0.257 / 0.472 / 0.271
+   arm 0.545           slope 0.5450 W/C, passes [8810, 8811, 8812, 8814, 8815]
+      fp32: (i) 7.623  (iii) 8.361  (ii) 4.873  total 20.857 W;  shares 0.366 / 0.401 / 0.234
+      fp16: (i) 7.575  (iii) 6.120  (ii) 6.131  total 19.826 W;  shares 0.382 / 0.309 / 0.309
+      int8: (i) 1.563  (iii) 3.098  (ii) 1.770  total 6.431 W;  shares 0.243 / 0.482 / 0.275
+   arm 0.3803          slope 0.3803 W/C, passes [8810, 8811, 8812, 8814, 8815]
+      fp32: (i) 7.837  (iii) 8.542  (ii) 4.994  total 21.373 W;  shares 0.367 / 0.400 / 0.234
+      fp16: (i) 7.847  (iii) 6.170  (ii) 6.244  total 20.261 W;  shares 0.387 / 0.305 / 0.308
+      int8: (i) 1.668  (iii) 3.132  (ii) 1.798  total 6.598 W;  shares 0.253 / 0.475 / 0.272
+   arm 0               slope 0.0000 W/C, passes [8810, 8811, 8812, 8814, 8815]
+      fp32: (i) 8.331  (iii) 8.961  (ii) 5.273  total 22.565 W;  shares 0.369 / 0.397 / 0.234
+      fp16: (i) 8.475  (iii) 6.287  (ii) 6.504  total 21.265 W;  shares 0.399 / 0.296 / 0.306
+      int8: (i) 1.912  (iii) 3.208  (ii) 1.864  total 6.984 W;  shares 0.274 / 0.460 / 0.266
+   range across the four, as (arm low, arm high) minus the primary:
+      fp32: (i) 7.62-8.33 (-0.30/+0.41); (iii) 8.36-8.96 (-0.25/+0.35); (ii) 4.87-5.27 (-0.17/+0.23); total 20.86-22.57 (-0.72/+0.99); largest share move 0.2 points
+      fp16: (i) 7.58-8.47 (-0.38/+0.52); (iii) 6.12-6.29 (-0.07/+0.10); (ii) 6.13-6.50 (-0.16/+0.22); total 19.83-21.27 (-0.61/+0.83); largest share move 0.9 points
+      int8: (i) 1.56-1.91 (-0.15/+0.20); (iii) 3.10-3.21 (-0.05/+0.06); (ii) 1.77-1.86 (-0.04/+0.05); total 6.43-6.98 (-0.23/+0.32); largest share move 1.7 points
+
+C6. THE DIPS-KEPT ARM HAS THREE PASSES, BELOW THE REGISTERED MINIMUM OF FOUR
+   e88-keepdips.json passes [8811, 8812, 8814], set aside [8810, 8813, 8815]; predictions-e88.json primary.min_passes = 4
+   scored.json arms.dips-kept.tally {'PASS': 26, 'FAIL': 4, 'INCONCLUSIVE': 2, 'not scored': 0} (score_e88.py has no min_passes check); the verdicts it moves: H2-int8, H4-signs-result, P-R8
+
+C7. S AGAINST D: WHERE ONE'S POINT FALLS OUTSIDE THE OTHER'S INTERVAL
+   R32: D 5.042 [4.849, 5.235], S 4.846 [4.723, 4.968]: S inside D's interval False, D inside S's False, intervals overlap True
+   R32bus: D 3.801 [3.633, 3.969], S 3.664 [3.575, 3.754]: S inside D's interval True, D inside S's False, intervals overlap True
+   R16: D 6.289 [6.081, 6.496], S 6.381 [6.334, 6.427]: S inside D's interval True, D inside S's False, intervals overlap True
+   intervals overlap in all 19 contrasts: True
+
+C8. THE CARD'S RESULT WAS NEVER READ BACK
+   launch records' "result" over every pass and the smoke (runs.jsonl): {'unchecked': 2156}
+   workloads/sparsity/host/main.cpp:614: !L.ok ? "no-result" : rawValues ? "unchecked" : checkC(dev, t, type, iters, harts, uint32_t(a.mask));
+   desk emulation instead (make_e88.py --check): 14 of 14 checks ok [tools/claims-v3/rpath/e88.json checks]
+
+C9. THE NUMBERS BEHIND THE BLOG POINTS' WORDING
+   fp32.ones D 8.022 +- 0.185 W, fp32.randn D 23.819 +- 0.144 W, ratio 0.337  [e88.json items.fp32.ones.D, items.fp32.randn.D]
+   M32s (random signs only, result frozen, against constants): 2.524 +- 0.185 W, predicted 0.24
+   R32s (random signs, the result walking against frozen): 2.259 +- 0.158 W, predicted 3.69
+   A16 (two ways of freezing: absorbed against cancelled): 0.388 +- 0.111 W, predicted 0.13
+   s_abs: s_walk's signs with the k = 0 slice 2^50 x 2^50: sign bits move, every +-1 product absorbed
+
+C10. THE ~12 W SENTENCE: S (OVER THE IDLE BRACKET) OF EVERY ITEM
+   fp32.zeros       S   1.87 W   below 12 W
+   fp16.zeros       S   1.88 W   below 12 W
+   int8.zeros       S   2.41 W   below 12 W
+   int8.ones        S   3.93 W   below 12 W
+   int8.c_cancel    S   4.10 W   below 12 W
+   int8.r_cancel    S   7.34 W   below 12 W
+   int8.r_walk      S   9.17 W   below 12 W
+   int8.full        S   9.26 W   below 12 W
+   fp16.ones        S   9.77 W   below 12 W
+   fp32.c_abs       S   9.78 W   below 12 W
+   fp16.c_cancel    S   9.82 W   below 12 W
+   anchor_pi        S   9.87 W   below 12 W
+   fp32.ones        S   9.89 W   below 12 W
+   fp32.s_abs       S  12.30 W   above 12 W
+   fp32.s_walk      S  14.63 W   above 12 W
+   fp16.r_cancel    S  16.04 W   above 12 W
+   fp16.r_abs       S  16.38 W   above 12 W
+   fp32.r_abs       S  18.52 W   above 12 W
+   fp32.r_het       S  22.19 W   above 12 W
+   fp16.r_walk      S  22.42 W   above 12 W
+   fp16.randn       S  23.19 W   above 12 W
+   fp32.r_walk      S  23.37 W   above 12 W
+   fp32.randn       S  25.64 W   above 12 W
+   tools/claims-v3/rpath/E88.md line 3: *Written Sat 31 Oct 2026 (week 44), ~18:55 PDT, on the Intel, before a
