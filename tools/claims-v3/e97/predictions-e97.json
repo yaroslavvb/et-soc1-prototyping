@@ -1,0 +1,1099 @@
+{
+ "experiment": "E97",
+ "card": "aifoundry3 card 0 (600 MHz, pinned by its boot-time TDP 0; never set)",
+ "registration": "tools/claims-v3/e97/E97.md",
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/e89/run_e89.py": "32ca337daa29c3a304328f17183b354964f16b07ad7029c2d7afec2e599079cf",
+   "tools/claims-v3/e89/reduce_e89.py": "9c36a0d768b1078dd2a00842c6fdbd858cdb418c75c4ceada6657777af0dbfd8",
+   "tools/claims-v3/e89/pvt_sample.py": "c4e4aed59fbdc08ca6155c5a8a877105692d87c80b29b00f5bfd09a9b27c2134",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/e86_common.py": "55e21e974094eb762f3381cb2930a10c1f2deeb55f7940fb1397f8fab3113b0a",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+   "tools/claims-v3/kinds/real/real.json": "eb36f4cd0d88d928d2c0c92165f4a48e23727221d5ac047bff3de3c8e0ad83c0"
+  },
+  "block_e89_sh_sha256": "7649e77ff5815712d24ef6aef1b3b4997fd72c7e40897c4a27f628848178f884",
+  "lib_sh_sha256": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+  "data_dir": "docs/reports/data/2026-11-01-e97-heat-low-power-steady/",
+  "passes_A": [
+   9710,
+   9711
+  ],
+  "pass_B": 9720,
+  "smoke": [
+   9701,
+   9702
+  ],
+  "half_s": 30.0,
+  "cycles": 2,
+  "lead_s": 20.0,
+  "launch_s": 6.8,
+  "idle_s": 15.0,
+  "gate_c": 62.0,
+  "gate_max_s": 60.0,
+  "max_c": 78.0,
+  "resume_c": 75.0,
+  "hard_c": 82.0,
+  "max_board_w": 70.0,
+  "deadline": "2026-11-01 07:13 PST",
+  "sampler": "tools/claims-v3/e89/pvt_sample.py",
+  "order": "the 28 low-power blocks shuffled with Random('E97|aifoundry3|<pass>'), then f32randn",
+  "order_9710": [
+   "f32arbz",
+   "f16zero",
+   "f32neg1",
+   "i8r6qk",
+   "f32pi",
+   "i8ones",
+   "i8tern",
+   "f16wsp50",
+   "f16ones",
+   "i8pos",
+   "i8afbz",
+   "i8high",
+   "f16neg1",
+   "f16sp90",
+   "i8wsp90",
+   "f16wsp90",
+   "f32sp50",
+   "i8azbf",
+   "f16arbz",
+   "i8sp90",
+   "f16azbr",
+   "f32zero",
+   "f32sp90",
+   "i8wsp50",
+   "i8r0up",
+   "i8sort",
+   "i8r6dn",
+   "f32azbr",
+   "f32randn"
+  ],
+  "order_9711": [
+   "i8r0up",
+   "f32azbr",
+   "f16sp90",
+   "f16ones",
+   "f16neg1",
+   "i8sp90",
+   "i8sort",
+   "f32neg1",
+   "f32sp90",
+   "f32pi",
+   "f16wsp90",
+   "f32zero",
+   "f16wsp50",
+   "i8r6dn",
+   "i8ones",
+   "f16azbr",
+   "f32arbz",
+   "f16arbz",
+   "i8wsp90",
+   "f16zero",
+   "i8high",
+   "f32sp50",
+   "i8afbz",
+   "i8tern",
+   "i8pos",
+   "i8wsp50",
+   "i8azbf",
+   "i8r6qk",
+   "f32randn"
+  ]
+ },
+ "plan_B": {
+  "hold_s": 1800.0,
+  "chain_s": 900.0,
+  "reduced_launch_s": 3.5,
+  "reduced_period_s": 7.0,
+  "rise_level_C": 0.1,
+  "slope_C_per_5min": 0.05,
+  "rest_min_s": 600.0,
+  "r0_max_s": 1800.0,
+  "r_max_s": 2100.0,
+  "idle_window_s": 120.0,
+  "left_full_s": 8100,
+  "left_chain_s": 3900,
+  "left_h3_s": 2700,
+  "h3_min_s": 900.0,
+  "r3_min_s": 600.0
+ },
+ "e89_coefficients": {
+  "H_ref": 0.1979,
+  "H_against_zeros": 0.2084,
+  "H_against_idle": 0.2202,
+  "step2_C_per_W_mean": 0.1265,
+  "P_fund_over_E78_mean": 0.9724,
+  "int8_zeros_step2_C": 0.3397835443635451,
+  "int8_zeros_step2_ci95": 0.005931051849268437
+ },
+ "blocks": {
+  "f32zero": {
+   "kind": "fp32.zeros",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 1.9858,
+   "w_ci95": 0.0592,
+   "S": 1.9858,
+   "D": 0.0,
+   "extrapolation_S_x_0118_C": 0.234,
+   "pred_board_fund_W": 1.229,
+   "pred_T_fund_C": 0.271,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.251
+  },
+  "f16zero": {
+   "kind": "fp16.zeros",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 1.9872,
+   "w_ci95": 0.0518,
+   "S": 1.9872,
+   "D": 0.0,
+   "extrapolation_S_x_0118_C": 0.234,
+   "pred_board_fund_W": 1.23,
+   "pred_T_fund_C": 0.271,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.251
+  },
+  "f32sp90": {
+   "kind": "fp32.sparse90",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 2.5088,
+   "w_ci95": 0.1377,
+   "S": 2.5088,
+   "D": 0.577,
+   "extrapolation_S_x_0118_C": 0.296,
+   "pred_board_fund_W": 1.553,
+   "pred_T_fund_C": 0.342,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.317
+  },
+  "f32arbz": {
+   "kind": "fp32.a_randn_b_zeros",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 2.5737,
+   "w_ci95": 0.1688,
+   "S": 2.5737,
+   "D": 0.6162,
+   "extrapolation_S_x_0118_C": 0.304,
+   "pred_board_fund_W": 1.593,
+   "pred_T_fund_C": 0.351,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.325
+  },
+  "f32azbr": {
+   "kind": "fp32.a_zeros_b_randn",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 2.8388,
+   "w_ci95": 0.0388,
+   "S": 2.8388,
+   "D": 0.8104,
+   "extrapolation_S_x_0118_C": 0.335,
+   "pred_board_fund_W": 1.757,
+   "pred_T_fund_C": 0.387,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.359
+  },
+  "f16sp90": {
+   "kind": "fp16.sparse90",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 3.3801,
+   "w_ci95": 0.086,
+   "S": 3.3801,
+   "D": 1.4097,
+   "extrapolation_S_x_0118_C": 0.399,
+   "pred_board_fund_W": 2.092,
+   "pred_T_fund_C": 0.461,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.427
+  },
+  "f16wsp90": {
+   "kind": "fp16.wsparse90",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 2.6434,
+   "w_ci95": 0.1094,
+   "S": 2.6434,
+   "D": 0.7432,
+   "extrapolation_S_x_0118_C": 0.312,
+   "pred_board_fund_W": 1.636,
+   "pred_T_fund_C": 0.36,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.334
+  },
+  "f16arbz": {
+   "kind": "fp16.a_randn_b_zeros",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 2.6689,
+   "w_ci95": 0.0846,
+   "S": 2.6689,
+   "D": 0.6586,
+   "extrapolation_S_x_0118_C": 0.315,
+   "pred_board_fund_W": 1.652,
+   "pred_T_fund_C": 0.364,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.338
+  },
+  "f16azbr": {
+   "kind": "fp16.a_zeros_b_randn",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 2.7128,
+   "w_ci95": 0.0538,
+   "S": 2.7128,
+   "D": 0.7822,
+   "extrapolation_S_x_0118_C": 0.32,
+   "pred_board_fund_W": 1.679,
+   "pred_T_fund_C": 0.37,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.343
+  },
+  "i8azbf": {
+   "kind": "int8.a_zeros_b_full",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 2.9003,
+   "w_ci95": 0.0624,
+   "S": 2.9003,
+   "D": 0.3055,
+   "extrapolation_S_x_0118_C": 0.342,
+   "pred_board_fund_W": 1.795,
+   "pred_T_fund_C": 0.395,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.367
+  },
+  "i8afbz": {
+   "kind": "int8.a_full_b_zeros",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 3.1151,
+   "w_ci95": 0.0343,
+   "S": 3.1151,
+   "D": 0.4973,
+   "extrapolation_S_x_0118_C": 0.368,
+   "pred_board_fund_W": 1.928,
+   "pred_T_fund_C": 0.425,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.394
+  },
+  "i8wsp90": {
+   "kind": "int8.wsparse90",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 3.0794,
+   "w_ci95": 0.0691,
+   "S": 3.0794,
+   "D": 0.5384,
+   "extrapolation_S_x_0118_C": 0.363,
+   "pred_board_fund_W": 1.906,
+   "pred_T_fund_C": 0.42,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.389
+  },
+  "i8sp90": {
+   "kind": "int8.sparse90",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 3.763,
+   "w_ci95": 0.0832,
+   "S": 3.763,
+   "D": 1.1449,
+   "extrapolation_S_x_0118_C": 0.444,
+   "pred_board_fund_W": 2.329,
+   "pred_T_fund_C": 0.513,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.476
+  },
+  "i8ones": {
+   "kind": "int8.ones",
+   "ref": "idle",
+   "w_source": "e78.json",
+   "w_quantity": "S",
+   "w": 4.1457,
+   "w_ci95": 0.078,
+   "S": 4.1457,
+   "D": 1.5612,
+   "extrapolation_S_x_0118_C": 0.489,
+   "pred_board_fund_W": 2.566,
+   "pred_T_fund_C": 0.565,
+   "pred_H": 0.2202,
+   "pred_r_board": 1.113,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.524
+  },
+  "i8wsp50": {
+   "kind": "int8.wsparse50",
+   "ref": "int8.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 3.1417,
+   "w_ci95": 0.0558,
+   "S": 5.7431,
+   "D": 3.1417,
+   "extrapolation_S_x_0118_C": 0.678,
+   "pred_board_fund_W": 1.945,
+   "pred_T_fund_C": 0.405,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.397
+  },
+  "i8high": {
+   "kind": "int8.highbit",
+   "ref": "int8.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 3.2332,
+   "w_ci95": 0.0364,
+   "S": 5.8525,
+   "D": 3.2332,
+   "extrapolation_S_x_0118_C": 0.691,
+   "pred_board_fund_W": 2.001,
+   "pred_T_fund_C": 0.417,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.409
+  },
+  "i8tern": {
+   "kind": "int8.ternary",
+   "ref": "int8.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 5.1863,
+   "w_ci95": 0.0506,
+   "S": 7.7267,
+   "D": 5.1863,
+   "extrapolation_S_x_0118_C": 0.912,
+   "pred_board_fund_W": 3.21,
+   "pred_T_fund_C": 0.669,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.656
+  },
+  "i8pos": {
+   "kind": "int8.pos",
+   "ref": "int8.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 6.171,
+   "w_ci95": 0.2061,
+   "S": 8.7325,
+   "D": 6.171,
+   "extrapolation_S_x_0118_C": 1.03,
+   "pred_board_fund_W": 3.82,
+   "pred_T_fund_C": 0.796,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.78
+  },
+  "i8sort": {
+   "kind": "int8.sorted",
+   "ref": "int8.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 6.5884,
+   "w_ci95": 0.0726,
+   "S": 9.1699,
+   "D": 6.5884,
+   "extrapolation_S_x_0118_C": 1.082,
+   "pred_board_fund_W": 4.078,
+   "pred_T_fund_C": 0.85,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.833
+  },
+  "f16wsp50": {
+   "kind": "fp16.wsparse50",
+   "ref": "fp16.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 7.0577,
+   "w_ci95": 0.0345,
+   "S": 9.0904,
+   "D": 7.0577,
+   "extrapolation_S_x_0118_C": 1.073,
+   "pred_board_fund_W": 4.369,
+   "pred_T_fund_C": 0.911,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.893
+  },
+  "f32sp50": {
+   "kind": "fp32.sparse50",
+   "ref": "fp32.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 7.3019,
+   "w_ci95": 0.0626,
+   "S": 9.2426,
+   "D": 7.3019,
+   "extrapolation_S_x_0118_C": 1.091,
+   "pred_board_fund_W": 4.52,
+   "pred_T_fund_C": 0.942,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.923
+  },
+  "f32neg1": {
+   "kind": "fp32.neg_ones",
+   "ref": "fp32.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 8.1433,
+   "w_ci95": 0.4076,
+   "S": 10.1164,
+   "D": 8.1433,
+   "extrapolation_S_x_0118_C": 1.194,
+   "pred_board_fund_W": 5.041,
+   "pred_T_fund_C": 1.051,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 1.03
+  },
+  "f16neg1": {
+   "kind": "fp16.neg_ones",
+   "ref": "fp16.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 8.3815,
+   "w_ci95": 0.1331,
+   "S": 10.3549,
+   "D": 8.3815,
+   "extrapolation_S_x_0118_C": 1.222,
+   "pred_board_fund_W": 5.188,
+   "pred_T_fund_C": 1.081,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 1.06
+  },
+  "f16ones": {
+   "kind": "fp16.ones",
+   "ref": "fp16.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 8.4483,
+   "w_ci95": 0.0819,
+   "S": 10.3758,
+   "D": 8.4483,
+   "extrapolation_S_x_0118_C": 1.224,
+   "pred_board_fund_W": 5.23,
+   "pred_T_fund_C": 1.09,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 1.068
+  },
+  "f32pi": {
+   "kind": "fp32.pi",
+   "ref": "fp32.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 8.4702,
+   "w_ci95": 0.1132,
+   "S": 10.3965,
+   "D": 8.4702,
+   "extrapolation_S_x_0118_C": 1.227,
+   "pred_board_fund_W": 5.243,
+   "pred_T_fund_C": 1.093,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 1.071
+  },
+  "i8r0up": {
+   "kind": "int8.real_l0_mlp_up",
+   "ref": "int8.zeros",
+   "w_source": "e86.json",
+   "w_quantity": "D",
+   "w": 6.2912,
+   "w_ci95": 0.6175,
+   "S": 8.8356,
+   "D": 6.2912,
+   "extrapolation_S_x_0118_C": 1.043,
+   "pred_board_fund_W": 3.894,
+   "pred_T_fund_C": 0.812,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.796
+  },
+  "i8r6dn": {
+   "kind": "int8.real_l6_mlp_down",
+   "ref": "int8.zeros",
+   "w_source": "e86.json",
+   "w_quantity": "D",
+   "w": 5.7476,
+   "w_ci95": 0.2622,
+   "S": 8.2959,
+   "D": 5.7476,
+   "extrapolation_S_x_0118_C": 0.979,
+   "pred_board_fund_W": 3.558,
+   "pred_T_fund_C": 0.742,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.727
+  },
+  "i8r6qk": {
+   "kind": "int8.real_l6_attn_qk",
+   "ref": "int8.zeros",
+   "w_source": "e86.json",
+   "w_quantity": "D",
+   "w": 5.5426,
+   "w_ci95": 0.3161,
+   "S": 8.1817,
+   "D": 5.5426,
+   "extrapolation_S_x_0118_C": 0.965,
+   "pred_board_fund_W": 3.431,
+   "pred_T_fund_C": 0.715,
+   "pred_H": 0.2084,
+   "pred_r_board": 1.053,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 0.701
+  },
+  "f32randn": {
+   "kind": "fp32.randn",
+   "ref": "fp32.zeros",
+   "w_source": "e78.json",
+   "w_quantity": "D",
+   "w": 24.7249,
+   "w_ci95": 0.0823,
+   "S": 26.7006,
+   "D": 24.7249,
+   "extrapolation_S_x_0118_C": 3.151,
+   "pred_board_fund_W": 15.305,
+   "pred_T_fund_C": 3.029,
+   "pred_H": 0.1979,
+   "pred_r_board": 1.0,
+   "pred_r_minion": 1.0,
+   "pred_step2_C": 2.918
+  }
+ },
+ "heat_paths": {
+  "e89_fit": {
+   "source": "desk/chain_e89.json (lab_grid): the Foster chain fitted to E89's raw passes on this card",
+   "tau": [
+    1.5,
+    4.0,
+    60.0,
+    150.0,
+    400.0,
+    2500.0
+   ],
+   "R": [
+    0.0968,
+    0.0594,
+    0.3159,
+    0.3887,
+    0.0,
+    0.0
+   ],
+   "R_total_C_per_board_W": 0.8607
+  },
+  "lab_model": {
+   "source": "docs/findings/11-thermal-model.md (aifoundry2, September)",
+   "tau": [
+    1.5,
+    4.0,
+    60.0,
+    150.0,
+    400.0,
+    2500.0
+   ],
+   "R": [
+    0.106,
+    0.05,
+    0.234,
+    0.136,
+    0.86,
+    0.081
+   ],
+   "R_total_C_per_board_W": 1.467,
+   "open_loop_30min": 1.418
+  },
+  "e73_one_pole": {
+   "source": "docs/reports/data/2026-10-27-e73-camera-frequencies/README.md (aifoundry2, the camera on the back of the board)",
+   "G0_mK_per_W": [
+    250.5,
+    300.0
+   ],
+   "G0_ci_mK_per_W": [
+    217.0,
+    292.0
+   ],
+   "tau_s": 16.0,
+   "lag_s": 1.0,
+   "shares": "63% of a step in 17 s, 95% in 49 s"
+  }
+ },
+ "leak_law": {
+  "source": "E71 on this card, in the published law's form",
+  "A_W": 23.85,
+  "L_C": 36.0,
+  "e71_slopes": {
+   "51-58": 0.32,
+   "54-58": 0.3276,
+   "58-62": 0.3803,
+   "58-65": 0.3957,
+   "56-66": 0.3858
+  },
+  "slope_at_C": {
+   "52": 0.3044,
+   "55": 0.3308,
+   "60": 0.3801,
+   "62": 0.4018,
+   "65": 0.4367,
+   "70": 0.5018,
+   "72": 0.5305,
+   "75": 0.5766,
+   "78": 0.6267
+  }
+ },
+ "launch_coverage_natural": 0.9736,
+ "compute_share_reduced": 0.5611,
+ "t_idle_C": 51.4,
+ "stop_mean_C": 79.0,
+ "holds": {
+  "e89_fit": {
+   "H1": {
+    "item": "int8.full",
+    "S_E78_W": 9.648,
+    "S_eff_natural_W": 9.393,
+    "stop_time_s": null,
+    "rise_60s_C": 5.183,
+    "rise_300s_C": 10.083,
+    "rise_30min_C": 11.617,
+    "die_mean_30min_C": 63.02,
+    "dP_board_30min_W": 13.497,
+    "rise_per_board_W_30min": 0.8607,
+    "rise_per_S_eff_30min": 1.2367,
+    "share_60s": 0.446,
+    "share_300s": 0.868,
+    "leak_share_of_dP": 0.304,
+    "loop_gain": 0.356,
+    "k_W_per_C": 0.4133,
+    "rise_2h_no_stop_C": 11.62
+   },
+   "H2": {
+    "item": "fp32.ones",
+    "S_E78_W": 10.288,
+    "S_eff_natural_W": 10.017,
+    "stop_time_s": null,
+    "rise_60s_C": 5.53,
+    "rise_300s_C": 10.784,
+    "rise_30min_C": 12.455,
+    "die_mean_30min_C": 63.85,
+    "dP_board_30min_W": 14.471,
+    "rise_per_board_W_30min": 0.8607,
+    "rise_per_S_eff_30min": 1.2434,
+    "share_60s": 0.444,
+    "share_300s": 0.866,
+    "leak_share_of_dP": 0.308,
+    "loop_gain": 0.364,
+    "k_W_per_C": 0.4231,
+    "rise_2h_no_stop_C": 12.46
+   },
+   "H3": {
+    "item": "fp32.randn",
+    "S_E78_W": 26.701,
+    "S_eff_natural_W": 25.995,
+    "stop_time_s": 220.5,
+    "rise_60s_C": 14.588,
+    "rise_300s_C": 22.803,
+    "rise_30min_C": 19.616,
+    "die_mean_30min_C": 71.02,
+    "dP_board_30min_W": 22.789,
+    "rise_per_board_W_30min": 0.8608,
+    "rise_per_S_eff_30min": 1.3092,
+    "share_60s": 0.744,
+    "share_300s": 1.162,
+    "leak_share_of_dP": 0.343,
+    "loop_gain": 0.444,
+    "k_W_per_C": 0.5162,
+    "rise_2h_no_stop_C": null
+   }
+  },
+  "lab_model": {
+   "H1": {
+    "item": "int8.full",
+    "S_E78_W": 9.648,
+    "S_eff_natural_W": 9.393,
+    "stop_time_s": 1301.5,
+    "rise_60s_C": 5.01,
+    "rise_300s_C": 12.442,
+    "rise_30min_C": 22.802,
+    "die_mean_30min_C": 74.2,
+    "dP_board_30min_W": 14.94,
+    "rise_per_board_W_30min": 1.5262,
+    "rise_per_S_eff_30min": 4.2116,
+    "share_60s": 0.22,
+    "share_300s": 0.546,
+    "leak_share_of_dP": 0.638,
+    "loop_gain": 0.827,
+    "k_W_per_C": 0.5639,
+    "rise_2h_no_stop_C": null
+   },
+   "H2": {
+    "item": "fp32.ones",
+    "S_E78_W": 10.288,
+    "S_eff_natural_W": 10.017,
+    "stop_time_s": 1104.0,
+    "rise_60s_C": 5.346,
+    "rise_300s_C": 13.316,
+    "rise_30min_C": 22.765,
+    "die_mean_30min_C": 74.16,
+    "dP_board_30min_W": 15.278,
+    "rise_per_board_W_30min": 1.49,
+    "rise_per_S_eff_30min": 3.9432,
+    "share_60s": 0.235,
+    "share_300s": 0.585,
+    "leak_share_of_dP": 0.622,
+    "loop_gain": 0.826,
+    "k_W_per_C": 0.5634,
+    "rise_2h_no_stop_C": null
+   },
+   "H3": {
+    "item": "fp32.randn",
+    "S_E78_W": 26.701,
+    "S_eff_natural_W": 25.995,
+    "stop_time_s": 180.0,
+    "rise_60s_C": 14.08,
+    "rise_300s_C": 22.865,
+    "rise_30min_C": 1.917,
+    "die_mean_30min_C": 53.32,
+    "dP_board_30min_W": 0.589,
+    "rise_per_board_W_30min": 3.2526,
+    "rise_per_S_eff_30min": 0.128,
+    "share_60s": 7.344,
+    "share_300s": 11.926,
+    "leak_share_of_dP": -24.419,
+    "loop_gain": 0.463,
+    "k_W_per_C": 0.3157,
+    "rise_2h_no_stop_C": null
+   }
+  },
+  "e73_one_pole": {
+   "H1": {
+    "item": "int8.full",
+    "S_E78_W": 9.648,
+    "S_eff_natural_W": 9.393,
+    "stop_time_s": null,
+    "rise_60s_C": 2.735,
+    "rise_300s_C": 2.828,
+    "rise_30min_C": 2.828,
+    "die_mean_30min_C": 54.23,
+    "dP_board_30min_W": 10.274,
+    "rise_per_board_W_30min": 0.2752,
+    "rise_per_S_eff_30min": 0.3011,
+    "share_60s": 0.967,
+    "share_300s": 1.0,
+    "leak_share_of_dP": 0.086,
+    "loop_gain": 0.089,
+    "k_W_per_C": 0.3238,
+    "rise_2h_no_stop_C": 2.83
+   },
+   "H2": {
+    "item": "fp32.ones",
+    "S_E78_W": 10.288,
+    "S_eff_natural_W": 10.017,
+    "stop_time_s": null,
+    "rise_60s_C": 2.917,
+    "rise_300s_C": 3.016,
+    "rise_30min_C": 3.016,
+    "die_mean_30min_C": 54.42,
+    "dP_board_30min_W": 10.958,
+    "rise_per_board_W_30min": 0.2752,
+    "rise_per_S_eff_30min": 0.3011,
+    "share_60s": 0.967,
+    "share_300s": 1.0,
+    "leak_share_of_dP": 0.086,
+    "loop_gain": 0.09,
+    "k_W_per_C": 0.3255,
+    "rise_2h_no_stop_C": 3.02
+   },
+   "H3": {
+    "item": "fp32.randn",
+    "S_E78_W": 26.701,
+    "S_eff_natural_W": 25.995,
+    "stop_time_s": null,
+    "rise_60s_C": 7.611,
+    "rise_300s_C": 7.881,
+    "rise_30min_C": 7.881,
+    "die_mean_30min_C": 59.28,
+    "dP_board_30min_W": 28.632,
+    "rise_per_board_W_30min": 0.2752,
+    "rise_per_S_eff_30min": 0.3032,
+    "share_60s": 0.966,
+    "share_300s": 1.0,
+    "leak_share_of_dP": 0.092,
+    "loop_gain": 0.103,
+    "k_W_per_C": 0.3726,
+    "rise_2h_no_stop_C": 7.88
+   }
+  }
+ },
+ "rules": {
+  "E97-R0": {
+   "what": "the per-sensor reading works: 34 valid sensors, and the firmware's integer mean rebuilt from the codes equals minshire_avg (E89-R0)",
+   "min_share_with_34": 0.99,
+   "min_share_eq": 0.95,
+   "pred": "PASS"
+  },
+  "E97-R1": {
+   "what": "each block's temperature fundamental is detected: the 95% lower bound > 0 (FAIL: upper bound < 0)",
+   "pred": "PASS x29"
+  },
+  "E97-R2": {
+   "what": "heat per board W: r = H_K / H_ref inside the band at 95% (FAIL: wholly outside)",
+   "band": [
+    0.8,
+    1.25
+   ],
+   "pred": "PASS x28 with the lap as the unit; with the pass as the unit (primary) PASS or INCONCLUSIVE, no FAIL"
+  },
+  "E97-R3": {
+   "what": "the session's tie: H_ref against E89's, the same card and reading: the point inside the band, and the passes within 0.006 degC/W",
+   "band": [
+    0.188,
+    0.2078
+   ],
+   "max_pass_spread": 0.006,
+   "pred": "PASS"
+  },
+  "E97-R4": {
+   "what": "the 2 s window: (step2/W)_K over (step2/W)_ref inside the band at 95% (FAIL: wholly outside)",
+   "band": [
+    0.7,
+    1.43
+   ],
+   "pred": "PASS x28 with the lap as the unit, INCONCLUSIVE allowed for the weakest with the pass as the unit; no FAIL"
+  },
+  "E97-R5": {
+   "what": "heat per minion-rail W: r on the SP's minion rail, the reference's SE included, inside the band at 95% (FAIL: wholly outside)",
+   "band": [
+    0.9,
+    1.11
+   ],
+   "pred": "PASS, INCONCLUSIVE allowed with the pass as the unit; no FAIL"
+  },
+  "E97-R6": {
+   "what": "one coefficient per minion-rail W: every block's point r_minion inside the band (FAIL: three or more outside; else INCONCLUSIVE)",
+   "band": [
+    0.93,
+    1.07
+   ],
+   "pred": "PASS"
+  },
+  "E97-R7": {
+   "what": "the extrapolation's bias over the 25 kinds: the 2 s rise over idle / (S x 0.118): the median inside the band and at least 80% of the kinds inside the wide band (FAIL: the median outside)",
+   "band": [
+    1.0,
+    1.2
+   ],
+   "wide_band": [
+    0.85,
+    1.3
+   ],
+   "pred": "PASS, median about 1.09"
+  },
+  "E97-B1": {
+   "what": "a hold is steady: |slope| over its last 10 minutes (5 for a chained hold) at most this, degC per minute",
+   "max_abs_slope": 0.02,
+   "pred": "PASS for each hold that ran"
+  },
+  "E97-B2a": {
+   "what": "the rise per board W at the hold's end against the lab's thermal model, 1.42-1.47 degC/W open loop",
+   "band": [
+    1.25,
+    1.7
+   ],
+   "pred": "FAIL for each hold: the model is aifoundry2's, in September"
+  },
+  "E97-B2b": {
+   "what": "the rise per board W against E73's zero-frequency gain, 250-300 mK/W",
+   "band": [
+    0.217,
+    0.35
+   ],
+   "pred": "FAIL for each hold: the camera's band and place are not the die's steady rise"
+  },
+  "E97-B2c": {
+   "what": "the rise per board W against the chain fitted to E89 on this card, 0.86 degC/W",
+   "band": [
+    0.7,
+    1.05
+   ],
+   "pred": "PASS for each hold"
+  },
+  "E97-B3": {
+   "what": "linear in board power: rise per board W, H3 over H1 and H2 over H1 (a band each)",
+   "band_H3_H1": [
+    0.85,
+    1.15
+   ],
+   "band_H2_H1": [
+    0.9,
+    1.11
+   ],
+   "pred": "PASS; H3/H1 about 0.95-1.00 (E89's r carried over), H2/H1 about 1.00"
+  },
+  "E97-B4": {
+   "what": "linear in minion-rail power: rise per minion-rail W, H3 over H1 and H2 over H1",
+   "band": [
+    0.9,
+    1.11
+   ],
+   "pred": "PASS, about 1.00"
+  },
+  "E97-B5": {
+   "what": "not linear in switching power: rise per W of E78's S at the hold's compute share, H3 over H1: leakage's feedback predicts more than 1",
+   "band": [
+    1.02,
+    1.25
+   ],
+   "pred_ratio": 1.059,
+   "pred": "PASS"
+  },
+  "E97-B6": {
+   "what": "how much of H1's rise arrives by 60 s and by 5 min, as shares of its steady rise",
+   "band_60s": [
+    0.33,
+    0.57
+   ],
+   "band_300s": [
+    0.77,
+    0.97
+   ],
+   "alternatives": {
+    "lab_model": {
+     "share_60s": 0.22,
+     "share_300s": 0.546
+    },
+    "e73_one_pole": {
+     "share_60s_at_least": 0.9
+    }
+   },
+   "pred": "PASS on the E89 chain's bands"
+  },
+  "E97-B7": {
+   "what": "the idle law on the cooling curves against E71's slopes on this card: 51-58 and 58-62 C of the firmware's reading, each within 10%",
+   "band_51_58": [
+    0.288,
+    0.352
+   ],
+   "band_58_62": [
+    0.3423,
+    0.4183
+   ],
+   "pred": "PASS"
+  },
+  "E97-B8": {
+   "what": "leakage's contribution at each hold's end: its share of the board's rise, and the loop gain k(T) x rise per board W",
+   "leak_share_band": {
+    "H1": [
+     0.224,
+     0.384
+    ],
+    "H2": [
+     0.228,
+     0.388
+    ],
+    "H3": [
+     0.263,
+     0.423
+    ]
+   },
+   "loop_gain_band": {
+    "H1": [
+     0.256,
+     0.456
+    ],
+    "H2": [
+     0.264,
+     0.464
+    ],
+    "H3": [
+     0.344,
+     0.544
+    ]
+   },
+   "page_section_4": "0.5-0.6 near the trip on the lab model's 1.47 degC/W",
+   "pred": "PASS, so this card's loop near 62-72 C is well under the page's 0.5-0.6"
+  },
+  "E97-B9": {
+   "what": "closure: (the board's rise minus leakage's) over E78's S at the hold's compute share",
+   "band": [
+    0.85,
+    1.15
+   ],
+   "pred": "PASS"
+  },
+  "E97-B10": {
+   "what": "fp32 random at its natural chain reaches the lab's 78 C reading: seconds from the hold's start (FAIL: no stop in the hold, which then is a steady state at full duty)",
+   "band_s": [
+    150.0,
+    480.0
+   ],
+   "pred_s": 220.5,
+   "pred": "PASS"
+  },
+  "E97-B0": {
+   "what": "a hold's gates: every sample at 600 MHz, minion 515-530 mV, at least 5 samples a second, at most 1% of launches failed, every record's cycles per op within 0.5% of 546 (fp32) / 318 (int8). A hold failing one scores no rule",
+   "pred": "PASS"
+  }
+ }
+}

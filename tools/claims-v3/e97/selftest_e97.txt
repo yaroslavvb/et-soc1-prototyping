@@ -1,0 +1,92 @@
+# E97 selftest_e97.py, on the Intel at the desk, Sun 1 Nov 2026; nothing here is data. Part B first (run_plan on a simulated card), then Part A (synthetic passes through E89's reducer and score_e97.py).
+== Part B, 143 min left, the E89 chain: the on-time plan (chain)
+   decision: chain: H2 for 15 min on H1, R1, H3, R3 (94.0 min left)
+   rest R0: slope, 1140 s, idle 52.81502331303597
+   rest R1: level, 634 s, idle 52.960506951066925
+   rest R2: level, 967 s, idle 52.64417890440048
+   hold H1 int8.full: 1800 s, time, 247 launches, stop None, gates True; dT 11.09+-0.07, dP 13.00, R_ol 0.853 [0.847, 0.859], slope -0.004414762353288416, share 0.9407866819699605, leak 0.2994179165521091, loop 0.34755677904031235, closure 1.0033000506617455, shares60/300 0.4522466899338905/0.8787130365543124
+   hold H2 fp32.ones: 900 s, time, 124 launches, stop None, gates True; dT 11.81+-0.07, dP 13.91, R_ol 0.849 [0.844, 0.855], slope -0.002385142949673999, share 0.9412399895985921, leak 0.301432218424546, loop 0.35244031439861623, closure 1.0031852717282823, shares60/300 None/None
+   hold H3 fp32.randn: 1800 s, time, 253 launches, stop 204.40000009536743, gates True; dT 18.93+-0.16, dP 22.14, R_ol 0.855 [0.845, 0.865], slope 0.0022539124840170025, share 0.5558099881807963, leak 0.3330175338299637, loop 0.41532115401769215, closure 0.9949792371472935, shares60/300 None/None
+   verdicts {"E97-B0": {"PASS": 3}, "E97-B1": {"PASS": 3}, "E97-B2a": {"FAIL": 3}, "E97-B2b": {"FAIL": 3}, "E97-B2c": {"PASS": 3}, "E97-B3": {"PASS": 2}, "E97-B4": {"PASS": 2}, "E97-B5": {"PASS": 1}, "E97-B6": {"PASS": 2}, "E97-B7": {"PASS": 2}, "E97-B8": {"PASS": 6}, "E97-B9": {"PASS": 3}, "E97-B10": {"PASS": 1}}
+   exit 0, ended -1338 s against the deadline
+== Part B, 210 min left: the full plan
+   decision: full: R1, H2 for 30 min, R2, H3, R3 (161.0 min left)
+   rest R0: slope, 1140 s, idle 52.81502331303597
+   rest R1: level, 656 s, idle 52.943650022479865
+   rest R2: level, 601 s, idle 52.96193335252016
+   rest R3: level, 934 s, idle 52.60259220737363
+   hold H1 int8.full: 1800 s, time, 247 launches, stop None, gates True; dT 11.08+-0.06, dP 12.99, R_ol 0.852 [0.847, 0.858], slope -0.004969927030718233, share 0.9407866819699605, leak 0.2992877241771087, loop 0.34674197192593503, closure 1.0030693089524683, shares60/300 0.45281998039685123/0.879673703810284
+   hold H2 fp32.ones: 1800 s, time, 247 launches, stop None, gates True; dT 11.72+-0.01, dP 13.87, R_ol 0.845 [0.844, 0.847], slope -0.0021296945528111646, share 0.9407900015513102, leak 0.30001671795357643, loop 0.34983183044380195, closure 1.0029558199053774, shares60/300 0.4471410794222522/0.8732146316550464
+   hold H3 fp32.randn: 1800 s, time, 253 launches, stop 204.40000009536743, gates True; dT 18.88+-0.18, dP 22.11, R_ol 0.854 [0.843, 0.865], slope 0.0033670053822908697, share 0.5558099953333536, leak 0.3318744270608973, loop 0.4128966515695132, closure 0.9954142240348162, shares60/300 None/None
+   verdicts {"E97-B0": {"PASS": 3}, "E97-B1": {"PASS": 3}, "E97-B2a": {"FAIL": 3}, "E97-B2b": {"FAIL": 3}, "E97-B2c": {"PASS": 3}, "E97-B3": {"PASS": 2}, "E97-B4": {"PASS": 2}, "E97-B5": {"PASS": 1}, "E97-B6": {"PASS": 2}, "E97-B7": {"PASS": 2}, "E97-B8": {"PASS": 6}, "E97-B9": {"PASS": 3}, "E97-B10": {"PASS": 1}}
+   exit 0, ended -3868 s against the deadline
+== Part B, 75 min left: no time for H2's rest; the chain or none
+   decision: no H2, no H3: a last rest (26.0 min left)
+   rest R0: slope, 1140 s, idle 52.81502331303597
+   rest R1: level, 956 s, idle 52.74298296987721
+   hold H1 int8.full: 1800 s, time, 247 launches, stop None, gates True; dT 11.21+-0.04, dP 13.03, R_ol 0.860 [0.857, 0.863], slope -0.00014415789919055799, share 0.9407866819699605, leak 0.2984718280860984, loop 0.3396384621817449, closure 1.0074003565006655, shares60/300 0.44788887039855557/0.871410604706051
+   verdicts {"E97-B0": {"PASS": 1}, "E97-B1": {"PASS": 1}, "E97-B2a": {"FAIL": 1}, "E97-B2b": {"FAIL": 1}, "E97-B2c": {"PASS": 1}, "E97-B6": {"PASS": 2}, "E97-B7": {"PASS": 1, "NOT SCORED": 1}, "E97-B8": {"PASS": 2}, "E97-B9": {"PASS": 1}}
+   exit 0, ended -604 s against the deadline
+== Part B, 50 min left: H1 and a last rest
+   decision: no H2, no H3: a last rest (10.0 min left)
+   rest R0: cap, 600 s, idle 53.05010288569611
+   rest R1: deadline, 600 s, idle 53.05436566030051
+   hold H1 int8.full: 1800 s, time, 247 launches, stop None, gates True; dT 11.14+-0.14, dP 13.03, R_ol 0.855 [0.844, 0.866], slope 0.005357418029612718, share 0.9421166825294495, leak 0.3010386975816691, loop 0.34950056082635145, closure 1.0019443871788258, shares60/300 0.44128894656823914/0.8622581017189822
+   verdicts {"E97-B0": {"PASS": 1}, "E97-B1": {"PASS": 1}, "E97-B2a": {"FAIL": 1}, "E97-B2b": {"FAIL": 1}, "E97-B2c": {"PASS": 1}, "E97-B6": {"PASS": 2}, "E97-B7": {"PASS": 1, "NOT SCORED": 1}, "E97-B8": {"PASS": 2}, "E97-B9": {"PASS": 1}}
+   exit 0, ended 0 s against the deadline
+== Part B, 20 min left: no hold fits
+   decision: no hold fits (20.0 min left)
+   verdicts {"E97-B7": {"NOT SCORED": 2}}
+   exit 0, ended -1200 s against the deadline
+== Part B, 143 min left, the lab model's chain (the die runs hotter; the stop in H1 too)
+   decision: chain: H2 for 15 min on H1, R1, H3, R3 (83.0 min left)
+   rest R0: cap, 1800 s, idle 53.537128618307136
+   rest R1: cap, 1679 s, idle 54.832127878566894
+   rest R2: deadline, 2117 s, idle 53.815193259289764
+   hold H1 int8.full: 1800 s, time, 248 launches, stop 1182.5989999771118, gates True; dT 20.57+-0.17, dP 13.75, R_ol 1.496 [1.480, 1.513], slope -0.33073504430980066, share 0.553419988155365, leak 0.6119763036503316, loop 0.7904252072095915, closure 0.9991497819607638, shares60/300 None/None
+   hold H2 fp32.ones: 900 s, time, 125 launches, stop 197.09999990463257, gates True; dT 21.28+-0.14, dP 14.46, R_ol 1.471 [1.457, 1.486], slope -0.14526228213772982, share 0.5516000151634216, leak 0.6069076898804677, loop 0.7883871676939408, closure 1.0016650255698374, shares60/300 None/None
+   hold H3 fp32.randn: 283 s, stop, 39 launches, stop 153.29899978637695, gates True; dT 17.96+-2.61, dP 26.86, R_ol 0.669 [0.560, 0.778], slope 4.688291003957999, share 0.7180000034968058, leak 0.27329678862106715, loop 0.342911041517209, closure 1.0181866596499896, shares60/300 None/None
+   verdicts {"E97-B0": {"PASS": 3}, "E97-B7": {"PASS": 2}, "E97-B10": {"PASS": 1}}
+   exit 0, ended 0 s against the deadline
+== Part B, the clock leaves 600 MHz 40 minutes in: the holds end, a last rest runs
+   decision: no later hold: the last hold ended on a card condition (102.5 min left)
+   rest R0: slope, 1140 s, idle 52.81502331303597
+   rest R1: level, 967 s, idle 52.75894671724004
+   hold H1 int8.full: 1292 s, clock, 177 launches, stop None, gates False; dT 11.20+-0.03, dP 13.04, R_ol 0.859 [0.856, 0.861], slope 0.014428276869518907, share 0.9422400156656902, leak 0.3022306460719717, loop 0.3516985462863237, closure 1.0010335347851311, shares60/300 0.44830255143012926/0.8721953683542331
+   verdicts {"E97-B0": {"FAIL": 1}, "E97-B7": {"NOT SCORED": 2}}
+   exit 0, ended -5181 s against the deadline
+== Part B, another user 40 minutes in: exit 3
+   exit 3
+== Part A, world 1: heat follows power, one coefficient
+   r board, pass mean over 28 blocks: 0.998-1.013; H_ref 0.1943
+   tally {"E97-R0": {"PASS": 1}, "E97-R1": {"PASS": 29}, "E97-R2": {"PASS": 28}, "E97-R4": {"PASS": 28}, "E97-R5": {"PASS": 28}, "E97-R3": {"PASS": 1}, "E97-R6": {"PASS": 1}, "E97-R7": {"FAIL": 1}}
+   cells 28; the 2 s rise over idle / (S x 0.118): 0.920-1.048 (the chain's own 2 s is about 0.93-1.0 of 0.118 per W)
+== Part A, world 2: int8 heats 0.70 per W
+   E97-R2 i8azbf FAIL {'r': 0.719, 'lo': 0.716, 'hi': 0.721}
+   E97-R2 i8afbz FAIL {'r': 0.718, 'lo': 0.693, 'hi': 0.743}
+   E97-R2 i8wsp90 FAIL {'r': 0.712, 'lo': 0.707, 'hi': 0.717}
+   E97-R2 i8sp90 FAIL {'r': 0.715, 'lo': 0.673, 'hi': 0.757}
+   E97-R2 i8ones FAIL {'r': 0.717, 'lo': 0.699, 'hi': 0.734}
+   E97-R2 i8wsp50 FAIL {'r': 0.721, 'lo': 0.683, 'hi': 0.759}
+   E97-R2 i8high FAIL {'r': 0.717, 'lo': 0.711, 'hi': 0.724}
+   E97-R2 i8tern FAIL {'r': 0.716, 'lo': 0.713, 'hi': 0.718}
+   E97-R2 i8pos FAIL {'r': 0.718, 'lo': 0.699, 'hi': 0.738}
+   E97-R2 i8sort FAIL {'r': 0.716, 'lo': 0.705, 'hi': 0.726}
+   E97-R2 i8r0up FAIL {'r': 0.714, 'lo': 0.687, 'hi': 0.741}
+   E97-R2 i8r6dn FAIL {'r': 0.718, 'lo': 0.713, 'hi': 0.723}
+   E97-R2 i8r6qk FAIL {'r': 0.717, 'lo': 0.681, 'hi': 0.753}
+   E97-R5 i8azbf FAIL {'r': 0.719, 'lo': 0.699, 'hi': 0.739}
+   E97-R5 i8afbz FAIL {'r': 0.719, 'lo': 0.704, 'hi': 0.733}
+   E97-R5 i8wsp90 FAIL {'r': 0.712, 'lo': 0.705, 'hi': 0.719}
+   E97-R5 i8sp90 FAIL {'r': 0.715, 'lo': 0.667, 'hi': 0.763}
+   E97-R5 i8ones FAIL {'r': 0.717, 'lo': 0.706, 'hi': 0.727}
+   E97-R5 i8wsp50 FAIL {'r': 0.722, 'lo': 0.684, 'hi': 0.76}
+   E97-R5 i8high FAIL {'r': 0.717, 'lo': 0.714, 'hi': 0.72}
+   E97-R5 i8tern FAIL {'r': 0.716, 'lo': 0.712, 'hi': 0.719}
+   E97-R5 i8pos FAIL {'r': 0.718, 'lo': 0.701, 'hi': 0.736}
+   E97-R5 i8sort FAIL {'r': 0.716, 'lo': 0.702, 'hi': 0.73}
+   E97-R5 i8r0up FAIL {'r': 0.714, 'lo': 0.693, 'hi': 0.736}
+   E97-R5 i8r6dn FAIL {'r': 0.718, 'lo': 0.717, 'hi': 0.72}
+   E97-R5 i8r6qk FAIL {'r': 0.717, 'lo': 0.687, 'hi': 0.747}
+SELFTEST OK
+selftest rc=0
