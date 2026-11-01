@@ -6,7 +6,7 @@ what was posted; the times beside them are from the lanes' own logs.
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E104**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E106**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
@@ -4655,8 +4655,7 @@ heater at 65 °C the clock cycled 600–700–800–700–600 MHz about once a s
 not "a real GEMM", and "the memory sets the pace" described that port's misses.
 **What it changes.** The critic's top item narrows and does not close. Every headline gap and the page's pJ figures are
 the resident loop's. "int8 hardly slows" needs its arm. Where the clock sets the pace the gap shows; where a fixed time
-per op dominates it all but goes. Open: the layout runs (E105), the vendor's binary's pace, the benchmark's random fp32
-and fp16 speed, which needs a start that does not meet the 97 W stop.
+per op dominates it all but goes. Open: the layout runs (dated note, 1 Nov 2026: E105 ran them, below, and the gap comes back in a repeated block whose tiles fit), the vendor's binary's pace, the benchmark's random fp32 and fp16 speed, which needs a start that does not meet the 97 W stop.
 **Report:** no page of its own; the data README is the public record.
 
 ## E102 — balanced bit prices, the A side and int8's B side, and a fault in two lab tools (Q132; card runs 2026-11-01, 01:27–03:08 PST, aifoundry1's card 1) — pre-registered; status partial
@@ -4798,10 +4797,129 @@ R8 PASS, S1 PASS; every outcome as expected and frozen. Corrected after verifica
 place the measurement does not show, and the first §5.4 text was false twice (`u_sub`'s operands are not fixed; fp16's
 `u_sub` walks 7 ulps an op).
 **What it changes.** Item 2 narrows and does not close: the named guess comes off the list, tested on silicon in both
-formats on designed tiles with C read back, and the adder alternating is a real cost. It is not most of the step. Kept
-open: the split is an estimate by subtraction across two cards; fp16 has no held tile with both operands' signs moving;
-the moving-sum ratio is unresolved. E92's README (C14–C24) and E88's result 6 are corrected on it. This also answers "no
+formats on designed tiles with C read back, and the adder alternating is a real cost. It is not most of the step. Kept open: the split is an estimate by subtraction across two cards; fp16 has no held tile with both operands' signs moving; the moving-sum ratio is unresolved (dated note, 1 Nov 2026: E106 ran the first two on one card, below, and reads a bracket by held tile). E92's README (C14–C24) and E88's result 6 are corrected on it. This also answers "no
 card has read C back" in the bench's and E103's READMEs, for these tiles.
+**Report:** no page of its own; the data README is the public record.
+
+## E105 — does the gap come back when the tiles fit the L2? The port's layout (Q132; card runs 2026-11-01, 07:36–08:26 PST, aifoundry2, and 07:36–08:11 PST, aifoundry3) — pre-registered
+
+**Asked:** the first open item E101's verifier left: its `gemm1` is one port of the vendor's GEMM pattern, whose packed
+tiles miss the L2 on most lines, so is that why its speed gap all but vanished? **Pre-registered** in
+[`tools/claims-v3/kspeed/e105/E105.md`](../../tools/claims-v3/kspeed/e105/E105.md) with `predictions-e105.json`, rules
+and self-test (`3ad06644`, before either claim and any launch); A1 `6a347e4b` added a power arm before any launch; A2
+`3e577e7f`, pushed 5.7 min after the fix it records, a queue path fix with no effect on data. Binary:
+[`tools/claims-v3/rgm105/`](../../tools/claims-v3/rgm105/README.md), E101's kernel plus one field: the same partition,
+op order, cooperative loads and tile contents, only the addresses differ. Data:
+[`docs/reports/data/2026-11-01-e105-gemm-layout/`](../reports/data/2026-11-01-e105-gemm-layout/README.md) (`18b28633`;
+corrected after verification in `a4331272`, C1–C9, no frozen file, data file or verdict changed). **aifoundry2 under its
+own governor:** claim `1566475985451491350`, posted 07:36:18, released 08:38 PST; queue 07:36:27–08:25:57, **48.1
+card-minutes**, 57 runs recorded, 1 refused by the power rule, none wrong in any check of C; 65 W / 65 °C read after
+every run and at both ends. **aifoundry3 at its pinned 600 MHz:** claim `1566472292924661822`, posted 07:21:38 PST,
+which could not be released, because by 08:40 PST it had gone from the channel; queue 07:36:04–08:11:21, **35.3
+card-minutes**, four passes, TDP 0 / 65 °C / 600 MHz at both ends of each; E78's gate set `p10521` aside, so strides'
+watts rest on one pass, by column's on two. Nothing set on either card, no `--reset-ms`, no `mm16`, no hot start.
+
+**Results** (T = wall ÷ ops per minion; board power; one kernel on each card, one session).
+- **Yes, for a repeated block.** What ×1.333 of clock buys, fp32: as run ×1.115, the vendor's strides ×1.165, **B packed
+  by column ×1.324** (half K ×1.316, two launches at 600 MHz); fp16 by column ×1.324, int8 by column ×1.319. **In a walk
+  over fresh blocks past the L2 and the L3: ×1.064 by column, ×1.041 with strides** (two launches at 600 MHz).
+- **The line T = C/f + M runs through two clocks,** since only 600 and 800 MHz held for a whole launch. By column C
+  526.9, M 0.019 µs; strides 407.1, 0.516; as run 354.8, 0.826 (E101's 344.3, 0.838); cold by column 374.2, 1.968; cold
+  strides unresolved, 225 and 321 in its two runs. C is the clock-following share of the op, and a count of nothing
+  except by column. M is the wait outside the minion clock, not all memory time. C rises as misses fall, so the frozen
+  premise, C fixed and M carrying the misses, is false. T at 800 MHz on zeros: 0.678, 1.024, 1.270 µs; 12.37, 8.21, 6.61
+  TFLOPS. T at 600 MHz crosses cards within 0.6%; aifoundry3 has no slope of its own.
+- **Zeros ÷ kind, rate (sampled clock), aifoundry2.** By column: fp32 random ×1.238 (×1.224) burst, one run, **sustained
+  refused**; fp32 sparse25 ×1.084, ×1.221 (×1.211) sustained, two runs; fp16 random ×1.176, **×1.320 (×1.329)**
+  sustained, one run; int8 full ×1.022, **×1.166 (×1.156)** sustained, two runs, ×1.188 on dip-free zeros. As run: fp32
+  random ×1.029 (×1.057), ×1.088 (×1.248). Strides: fp32 random ×1.145 (×1.287) sustained. Cold: ×1.002 and ×0.999 in
+  the burst, both kinds at 800 MHz, so there was no clock gap to pass. For sustained fp32 random by column the law gives
+  ×1.32: expected, not measured.
+- **The kind still never changes the count at a given clock:** T at or above 790 MHz reads 0.6768–0.6783 µs by column
+  across kinds, 1.0222–1.0278 with strides.
+- **Power at 600 MHz on aifoundry3, S over idle, random.** By column fp32 32.99 W, 7.08 pJ per multiply-add; fp16 30.06
+  W, 3.22 pJ; int8 18.23 ± 4.67 W, 0.54 pJ. Strides fp32 26.68 W, 7.60 pJ. Cold by column fp32 15.27 W, 9.46 pJ. At the
+  benchmark's rate by column draws less than the benchmark, 33.0 against 36.5 W and 18.2 against 27.4 W, and why is not
+  measured. int8's premium over the loop is 8.6 W by column (as run 0.8, benchmark 17.45): P3 PARTIAL. Zeros' share by
+  column 11.4%, 12.7%, 27.4% (P5).
+- **The cold walk:** by column 3.23 TFLOPS at 600 MHz, no faster than as run's 3.37 (E101), strides 2.88. M does not
+  scale with the desk model's miss share: 1.97 µs against 1.27 frozen. **What limits the walk is not measured:** DRAM,
+  the L3 and the walk are not separable from these arms.
+- **The power rule did not do what it was for.** It estimated by-column random fp32 at 87.83 W from its sparse50 probe
+  (rho 0.81), 0.17 W under the 88 W limit; the true share was 0.90, and the burst read 95.2 W at 800 MHz and **peaked at
+  96.25 W, 0.75 W under the session's 97 W stop**. The 93 W lock then refused its sustained run; fp16 random went on
+  under the lock and read 91.91 and 94.32 W. The estimate ran 3.2–8.4 W under the reading on 19 of 63 runs, the
+  high-power cells. **So sustained random fp32 by column could not be expected to complete under the 97 W stop on this
+  card** (fp16's sustained read +2.41 W over its burst, on a hot die; the same on fp32 gives about 98.7 W, an
+  extrapolation), and the refusal is not a gap to fill by rerunning.
+
+**Scored.** aifoundry2: R1, R2, R3 and R9 PASS; **R4 and R5 COME BACK, their sizes missed** (×1.221 and ×1.166 against
+×1.33 frozen); R6 PASS on as-run's soft cell; R7 as run and by column PASS, **strides FAIL (+14%)**; **R8's cold T FAIL
+twice (+43%, +42%)**; R8's cold gap PASS as registered, which says nothing about the pace (C3). aifoundry3: P1 by column
+fp32 and fp16 PASS, **int8 FAIL (−6.1%)**, strides PASS ×3, **cold FAIL in all six**; **P2 FAIL ×3** (−16%, −17%, −38%);
+P3 PARTIAL; **P4: the cell should have been refused and was not**; P5 PASS ×3. `score_e105p.py` was first committed with
+the data, after the passes; the verifier found all five rules implemented as frozen. Corrected after verification: "the
+regime is set by how often a tile is reused" goes, since `gemm1`, `gemmv1` and `gemmc1` run the same loop and differ
+only in addresses, so the variable there is set aliasing; "DRAM's bandwidth is the likely limit" goes.
+**What it changes.** "Does the gap come back when the tiles fit" closes for a repeated block, and sustained fp32 random
+stays unmeasured. On this chip the pace depends on whether an op's tiles are in the L2 when it needs them: with a
+repeated block whose tiles all fit, T = 527/f + 0.02 µs and the clock sets the pace; where they alias, 0.5–0.8 µs of
+each op ignores the clock; where a walk overflows the L2 and the L3, about 2–2.4 µs does. Whether reuse itself is the
+variable is untested. **E105 does not place a large GEMM, on this chip or any other,** and does not show it lies between
+these conditions. Next, in order: a sweep of block repeats; 8 blocks, 24 MB of A + B, which overflow the L2 and fit the
+L3; the vendor's binary, which was not run (about 58 µs per launch against about 2 ms of launch overhead, and no cycle
+counter). For a future power rule: estimate from the same kind's S on a pinned card (P4's relation read 94.6 W against
+95.2 W measured), not from a lower kind's rho, and lock by layout and format.
+**Report:** no page of its own; the data README is the public record.
+
+## E106 — a random sign's ~5 W on one card, beside held tiles that move both operands' signs (Q132; card runs 2026-11-01, 08:47–09:09 PST, aifoundry1's card 1) — pre-registered
+
+**Asked:** the line E104 left on item 2: its share of a random sign's ~5 W was an estimate across two cards, and fp16
+had no held tile with both operands' signs moving. **Pre-registered** in
+[`tools/claims-v3/kinds/E106.md`](../../tools/claims-v3/kinds/E106.md) with `predictions-e106.json`, every expected
+accumulator in `e106/e106.json`, the scorer and self-test (`94bd6f2d`, committed 08:46:19 PST, pushed 08:46:23, before
+the claim at 08:47:05 and the first launch), no amendment: 40 reads of 10 tiles with E104's read-back host, then `signs`
+and `ones` in both formats beside held tiles with both operands' signs moving (fp32 `s_abs` over `c_abs`; fp16 `z_ss`
+over `c_abs` and `x_s` over `x_c`), in E82's frame, E78's runner and reduction unchanged. Data:
+[`docs/reports/data/2026-11-01-e106-held-signs/`](../reports/data/2026-11-01-e106-held-signs/README.md) (`7057219e`;
+corrected after verification in `17cc3911`, C1–C11, no frozen file, data file or verdict changed; `E106.md`, frozen,
+keeps its first title and its statement decided at registration). Claim `1566493797209219173`, released 09:09 PST;
+**about 18 card-minutes**. Passes 10610–10612, 90 runs, none failed or skipped, all kept; the registered budget rule
+stopped before a fourth, which cost t: 4.30 against 3.18, half-widths 1.56× wider. The session ran after the brief's
+07:15 PST window, on the coordinator's message of about 08:37 PST. 600 MHz, 498.8 mV, TDP 65 W / 65 °C at both ends,
+nothing set, no `--reset-ms`.
+
+**Results** (one card, one session, board power, designed tiles).
+- **The step, on one card:** `signs` − `ones` **4.792 ± 0.421 W (fp32), 4.716 ± 1.118 W (fp16)**, 0.98 of E92's steps
+  carried by card scale (R2 PASS). fp16's wide interval is one low pass, a meter dip the registered test misses by 0.44
+  and 0.17 W; post hoc, with it caught, 4.843 ± 0.575 W, and no verdict moves.
+- **What a held tile keeps is a bracket, not a number.** fp32 `s_abs` − `c_abs`, absorbed products, whose adder output
+  swings: **2.668 ± 0.210 W, 0.557 ± 0.074 of the step.** fp16 `z_ss` − `c_abs`, zero products, whose two `eff_sub` flip
+  as `signs`' do and whose adder output never swings: **2.091 ± 0.442 W, 0.445 ± 0.113**. fp16 `x_s` − `x_c`, products
+  that cancel, which by construction leave the carry-save adder's outputs still: **0.887 ± 0.369 W, 0.187 ± 0.040.**
+  With E104's fp32 `z_s` on zero products, across sessions, about 0.35: so **0.19–0.45 in fp16 and about 0.35–0.56 in
+  fp32, depending on what the adder is given.** I judged `z_ss` the nearer twin before the data; neither end bounds
+  `signs`.
+- **The formats are not separated.** R6's −0.112 ± 0.073 is absorbed against zero products. Like for like, on zero
+  products, they read about 0.45 and 0.35, not resolved; fp16 cannot hold an absorbed subtraction on random signs, so
+  absorbed products have no like for like.
+- **The rest, by subtraction:** 2.124 ± 0.509 W (fp32), 2.625 ± 1.058 W (fp16, 3.83 ± 0.78 W against the cancelling
+  tile). It goes with what each held tile lacks: moving sums, and in fp16 the adder's output swing. It is not one
+  mechanism, and part of it may be the adder alternating at its lower price on moving sums.
+- **Read back:** 40 of 40 reads, at op ends, at four lengths, all 1,024 minions, equal the registered words. On these
+  tiles the three readings coincide, so this is a tile and read-path check, and holding inside an op rests on the RTL's
+  arithmetic and the desk.
+- **The bench's model, frozen before the run:** rms(D − M4) 0.076 W over 10 tiles, five of them baselines, all inside
+  their intervals, each share within 0.04. These tiles are simpler than E103's or E104's. Session tie PASS.
+
+**Scored:** R1, R2, R7, S1 **PASS**; R3 **ABOUT HALF** (fp32 `s_abs`), R4 **ABOUT HALF** (`z_ss` alone, on a band wider
+than R3's), **R5 LITTLE** (`x_s`), which by the registration's own words makes fp16's held part a bracket; **R6
+INCONCLUSIVE**. Arms: R3 and R5 INCONCLUSIVE with dips kept, R3 and R4 at leakage 0. Every outcome was as expected and
+frozen, and R2's ±1 W is wide against 0.1 W misses.
+**What it changes.** Item 2 narrows to a bracket, and does not close: "where a random sign's ~5 W goes: on one card, a
+bracket by held tile, 0.19–0.45 in fp16 and about 0.35–0.56 in fp32 (E106, E104). The rest is by subtraction and not
+located; `signs` itself cannot be held; the moving-sum ratio is unresolved (E104-R6)." What did go: "across two cards"
+and "no held tile with both operands' signs moving".
 **Report:** no page of its own; the data README is the public record.
 
 **Lane lessons from E78–E83, recorded for the next registration.** (1) A heat column read from a 2 s window over a
@@ -4854,3 +4972,10 @@ launch, which meets the launch and not the claim. (24) A burst of host CPU besid
 coordinator's to prevent: E104's desk compute on aifoundry1's CPU, its own cards idle, fell inside E97's hold on
 aifoundry3. (25) Mask a lab user's login before reduction, and read the committed tree back with compressed files
 decompressed (E98).
+(26) A rule that admits cells by estimate must be tested on the cell it exists to catch: E105's rule, on a lower kind's
+rho, admitted random fp32 at 87.83 W, and it peaked at 96.25 W. Estimate from the same kind's S on a pinned card, and
+lock by layout and format. (27) A registered branch that says a result "would make it a bracket" binds the headline when
+it fires: E106's R5 read LITTLE, so fp16's held part is 0.19–0.45, not "about half". (28) A proxy for a state is a twin,
+not the state: `z_ss` and `x_s` hold, and neither bounds `signs`; say what each lacks. (29) A claim post may not outlast
+its run: tonight's went from the channel, so a lane's release has to be read back at once, and its times belong in the
+lane's own log.
