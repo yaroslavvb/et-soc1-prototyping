@@ -1,0 +1,277 @@
+{
+ "experiment": "E95",
+ "title": "more real tensors' energy, and exact zeros letting the gate act (aifoundry3 card 0, 600 MHz)",
+ "request": "Q132, item 3 of the kinds page's section 11",
+ "date": "2026-11-01",
+ "registration": "tools/claims-v3/kinds/E95.md",
+ "card": "aifoundry3 card 0",
+ "predictions_and_claims": "tools/claims-v3/kinds/real2/predictions-real2.json: tiles.*, gate_law, known_misses and claims.E95 (C1-C12), unchanged; E95 adds no prediction",
+ "inputs_frozen": {
+  "predictions_real2": {
+   "path": "tools/claims-v3/kinds/real2/predictions-real2.json",
+   "sha256": "0957e0c295990ac95cded56430697fb0683c9cf451d90f6943c8ff8d6a0b021a"
+  },
+  "real2_json": {
+   "path": "tools/claims-v3/kinds/real2/real2.json",
+   "sha256": "6e259fd2e9edaa3d4fdeb663461ec39389ec8c24436c114719536a51d26c8715"
+  },
+  "real_json": {
+   "path": "tools/claims-v3/kinds/real/real.json",
+   "sha256": "eb36f4cd0d88d928d2c0c92165f4a48e23727221d5ac047bff3de3c8e0ad83c0"
+  },
+  "predictions_e86": {
+   "path": "tools/claims-v3/kinds/predictions-e86.json",
+   "sha256": "e1f173c17de85209288290ef6e45bcee34ee21ae6f3f8696bab5ecd78e64677b"
+  },
+  "e78_reduction": {
+   "path": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json",
+   "sha256": "b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5"
+  },
+  "e86_reduction": {
+   "path": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json",
+   "sha256": "e5cc743acdc6bd47ec0b32603ed433ef09daf3f9d08c3163d66c1854eaedca40"
+  },
+  "e86_scored": {
+   "path": "docs/reports/data/2026-10-31-e86-real-tensors-energy/scored.json",
+   "sha256": "1de068588aa741e10b4650f26f7939da04757aafd752195e6ac4e9d133def337"
+  }
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337"
+  },
+  "e95_files_sha256": {
+   "tools/claims-v3/kinds/e95_common.py": "53e6182b00e4df828024b2317d5a8339989caf358569b1422853b2ec07a88263",
+   "tools/claims-v3/kinds/run_e95.py": "cea93f7e457798521d8bd54fd388ced8871fcd670b56a862de18328fd73cf17d",
+   "tools/claims-v3/kinds/reduce_e95.py": "bfa5ead20594d74997b636687dbd3ae7cbadc0de6ac63025cda065cadb751805",
+   "tools/claims-v3/kinds/block_e95.sh": "5c659ffcf45672df24ea9f60ac71ca0dbd9154eed372a3b38c856ddb8216b057",
+   "tools/claims-v3/kinds/queue_e95.sh": "a4b331434e0720064a8c3ed67a754c3e77c845ad3f08635f0b63e02533126b78",
+   "tools/claims-v3/kinds/run_e95.sh": "adc2967cc3e60307316ba2d5a104277282b048054a34ecd66d29fb71d8ae8494"
+  },
+  "real2_json_sha256": "6e259fd2e9edaa3d4fdeb663461ec39389ec8c24436c114719536a51d26c8715"
+ },
+ "plan": {
+  "passes": [
+   9510,
+   9511,
+   9512,
+   9513
+  ],
+  "smoke": 9501,
+  "runs_per_pass": 53,
+  "min_kept_passes": 3,
+  "items_per_pass": "the tie twice, E78's six anchors three times, the 25 tier-1 and 5 tier-2 real2 tiles and E86's three once",
+  "smoke_items": [
+   "anchor_pi",
+   "fp32.r2_vgg16_fc2",
+   "fp32.zeros",
+   "fp32.randn",
+   "fp16.r2_t5small_l0_down",
+   "int8.r2_gpt2_l11_down_maxabs",
+   "int8.zeros"
+  ]
+ },
+ "card_budget": {
+  "card_minutes_max": 45,
+  "queue_budget_min": 41,
+  "queue_deadline": "2026-11-01 06:45 PST",
+  "every_run_ends_by": "07:15 PST"
+ },
+ "items": {
+  "tier1_new": [
+   "fp32/resnet18_l2c1",
+   "fp32/resnet18_l3c1",
+   "fp32/vgg16_fc2",
+   "fp32/t5small_l0_down",
+   "fp32/gpt2_l3_mlp_down",
+   "fp32/gpt2_l9_attn_qk",
+   "fp32/bert_l6_up",
+   "fp32/vit_l5_down",
+   "fp32/t5small_l0_up",
+   "fp32/vit_l11_down",
+   "fp16/resnet18_l3c1",
+   "fp16/vgg16_fc2",
+   "fp16/t5small_l0_down",
+   "fp16/gpt2_l9_attn_qk",
+   "fp16/bert_l6_up",
+   "fp16/vit_l5_down",
+   "fp16/gpt2_l6_mlp_down_fp16fwd",
+   "int8/resnet18_l3c1",
+   "int8/vgg16_fc2",
+   "int8/gpt2_l6_down_per_token",
+   "int8/gpt2_l6_down_p9999",
+   "int8/gpt2_l6_down_p999",
+   "int8/gpt2_l11_down_maxabs",
+   "int8/gpt2_l11_down_p999",
+   "int8/vgg16_fc2_asym"
+  ],
+  "tier2_new": [
+   "fp32/gpt2_l6_mlp_down_bf16fwd",
+   "fp16/gpt2_l6_attn_qk_fp16fwd",
+   "int8/t5small_l0_down",
+   "int8/vit_l11_down",
+   "int8/gpt2_l11_down_asym"
+  ],
+  "e86_partners": [
+   "fp16.real_l6_mlp_down",
+   "int8.real_l6_mlp_down",
+   "fp16.real_l6_attn_qk"
+  ],
+  "e86_partner_frozen_points_w": {
+   "fp16.real_l6_mlp_down": 21.357,
+   "int8.real_l6_mlp_down": 5.183,
+   "fp16.real_l6_attn_qk": 21.537
+  }
+ },
+ "anchors": [
+  "fp32.zeros",
+  "fp32.randn",
+  "fp16.zeros",
+  "fp16.randn",
+  "int8.zeros",
+  "int8.full"
+ ],
+ "tie": "anchor_pi",
+ "leakage": {
+  "primary": "auto",
+  "arms": [
+   0.1994,
+   0.3803,
+   0
+  ]
+ },
+ "session_tie": {
+  "fp32.randn": {
+   "D_w": 24.7249,
+   "ci95_w": 0.0823,
+   "ref": "E78",
+   "band_w": 0.5,
+   "source": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp32.randn.D.mean"
+  },
+  "fp16.randn": {
+   "D_w": 22.1624,
+   "ci95_w": 0.0545,
+   "ref": "E78",
+   "band_w": 0.5,
+   "source": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp16.randn.D.mean"
+  },
+  "anchor_pi": {
+   "D_w": 8.3603,
+   "ci95_w": 0.0716,
+   "ref": "E78",
+   "band_w": 0.5,
+   "source": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.anchor_pi.D.mean"
+  },
+  "int8.full": {
+   "D_w": 7.0565,
+   "ci95_w": 0.0595,
+   "ref": "E78",
+   "band_w": 0.25,
+   "source": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.int8.full.D.mean"
+  },
+  "fp16.real_l6_mlp_down": {
+   "D_w": 21.9821,
+   "ci95_w": 0.1628,
+   "ref": "E86",
+   "band_w": 0.5,
+   "source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/scored.json tiles.fp16.real_l6_mlp_down.D.mean"
+  },
+  "fp16.real_l6_attn_qk": {
+   "D_w": 21.4378,
+   "ci95_w": 0.2515,
+   "ref": "E86",
+   "band_w": 0.5,
+   "source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/scored.json tiles.fp16.real_l6_attn_qk.D.mean"
+  },
+  "int8.real_l6_mlp_down": {
+   "D_w": 5.7476,
+   "ci95_w": 0.2622,
+   "ref": "E86",
+   "band_w": 0.5,
+   "source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/scored.json tiles.int8.real_l6_mlp_down.D.mean"
+  }
+ },
+ "e78_beside": {
+  "fp32.randn": {
+   "D_w": 24.7249,
+   "ci95_w": 0.0823
+  },
+  "fp16.randn": {
+   "D_w": 22.1624,
+   "ci95_w": 0.0545
+  },
+  "int8.full": {
+   "D_w": 7.0565,
+   "ci95_w": 0.0595
+  },
+  "fp32.zeros": {
+   "D_w": 0.0,
+   "ci95_w": 0.0
+  },
+  "fp16.zeros": {
+   "D_w": 0.0,
+   "ci95_w": 0.0
+  },
+  "int8.zeros": {
+   "D_w": 0.0,
+   "ci95_w": 0.0
+  },
+  "anchor_pi": {
+   "D_w": 8.3603,
+   "ci95_w": 0.0716
+  },
+  "fp32.bf16trunc": {
+   "D_w": 18.1359,
+   "ci95_w": 0.0465
+  },
+  "fp32.fp16grid": {
+   "D_w": 19.6238,
+   "ci95_w": 0.0647
+  },
+  "fp32.nn_like": {
+   "D_w": 13.0356,
+   "ci95_w": 0.0662
+  },
+  "fp16.nn_like": {
+   "D_w": 17.602,
+   "ci95_w": 0.1185
+  },
+  "int8.gauss_q": {
+   "D_w": 6.598,
+   "ci95_w": 0.0692
+  },
+  "fp32.sparse50": {
+   "D_w": 7.3019,
+   "ci95_w": 0.0626
+  },
+  "fp16.sparse50": {
+   "D_w": 13.196,
+   "ci95_w": 0.5399
+  },
+  "int8.sparse50": {
+   "D_w": 5.4634,
+   "ci95_w": 0.1458
+  },
+  "fp32.a_randn_b_zeros": {
+   "D_w": 0.6162,
+   "ci95_w": 0.1218
+  },
+  "fp32.a_zeros_b_randn": {
+   "D_w": 0.8104,
+   "ci95_w": 0.0645
+  },
+  "fp16.a_randn_b_zeros": {
+   "D_w": 0.6586,
+   "ci95_w": 0.08
+  },
+  "fp16.a_zeros_b_randn": {
+   "D_w": 0.7822,
+   "ci95_w": 0.0633
+  }
+ },
+ "not_scored_if": "fewer than 3 kept passes: every frozen claim reads NOT SCORED (claims.conventions). The registered dips-removed arm (posthoc_dips_e95.py, E86's method) is then the reading reported, labelled as that arm; it is always reported beside, and it moves no verdict of the primary"
+}
