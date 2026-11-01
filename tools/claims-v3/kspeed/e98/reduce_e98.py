@@ -419,6 +419,7 @@ def main():
     line_nd, _ = probe_line(cnt_line, "line_nodip", GATED_IDX, P)
     un = [i for i in GATED_IDX if cnt_line and cnt_line[0]["runs"].get(i, {}).get("kind") in ("fp16/zeros", "int8/zeros", "int8/neg_ones", "int8/sparse50")]
     line_un, _ = probe_line(cnt_line, "line", un or [1, 2, 3, 4], P)
+    line_an, _ = probe_line(cnt_line, "line", [5, 6, 7, 8], P)       # A2: the runs the gate actually held in P1
     fine_i = [1, 2, 3]
     fine, _ = probe_line(cnt_line, "fine_w", fine_i, P)
     px = {p["probe"]: p["rest_die_w_derived"] for p in cnt}
@@ -489,6 +490,8 @@ def main():
         "R1_on_history_die": fit(phd, line, names_line),
         "R1_dips_left_out": fit(px, line_nd, names_line),
         "R1_unclamped_only": fit(px, line_un, names_line),
+        "R1_unanchored_idx1to4_A2": fit(px, line_un, names_line),
+        "R1_anchored_idx5to8_A2": fit(px, line_an, names_line),
         "R2_on_60s_rest": fit(p60, hold_die, names_hold),
         "R2_on_history_die": fit(phd, hold_die, names_hold),
         "R2_ioshire": fit(px, hold_io, names_hold),
