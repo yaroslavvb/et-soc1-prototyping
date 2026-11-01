@@ -1,0 +1,70 @@
+Q132(g) corrections-check. Inputs: drift-paired.json, camera-lines.json, pmic-check.json, ir-lattice.json, ir-hits.json, ir-tests.json, the committed telemetry of E64, E69, E80, E83, E84, E87.
+
+======== C1. The split between the hour and the day: not unique, and 'most' does not stand
+rest die at each session's start, 30-5 min before its first run: {'E80': 45.58, 'E83': 46.42, 'E87': 47.15, 'E64': 49.28, 'E69': 46.67, 'E84': 47.04} (the rest die is a proxy: the room itself was never read)
+E64 - E80: line +1.122 +- 0.328 C on 5 kinds, rest die +3.70 C
+same hour, different day, E64 - E87 (both about 20:00): line +0.587 +- 0.125 C = 52% of E64 - E80; rest die +2.13 C = 58%
+same day, different hour, E87 - E80: line +0.415 +- 0.204 C = 37%; rest die +1.57 C = 42%
+the other path, through 23 Oct's own noon (E63 s1, rest die 46.11 C): 23 Oct noon to 23 Oct 20:37 is +3.17 C = 86% of the rest die, the day (31 Oct noon to 23 Oct noon) +0.53 C = 14%. No line was measured at 23 Oct noon on these kinds
+so the hour's share of the rest die is 42% on one path and 86% on the other: the split is not unique
+
+======== C2. The slope: what the interval is on four sessions
+inputs: rest die [45.58, 46.42, 47.15, 49.28] ; shifts from E80 [0.0, -0.104, 0.415, 1.122] ; their s.e. [0.202, 0.204, 0.328]
+through the origin, weighted, E80 held exact, the three shifts independent (what the README quoted; drift-paired.txt reads the same to rounding): 0.256 +- 0.070, a formal 1 sigma
+free intercept, ordinary least squares on the four sessions: 0.336 +- 0.073 on 2 dof; 95% with t(2) = 4.303: 0.02 to 0.65; residuals [0.15, -0.23, 0.04, 0.03] C
+free intercept, weighted with those s.e. split per session (E80, E83, E87 0.14, E64 0.30): 0.311, s.e. 0.081, chi2 3.96 on 2 dof
+through the origin, generalised least squares, E80's noise shared (s0 = 0.14): 0.309 +- 0.082
+31 Oct alone (E83 and E87 over E80): 0.177 +- 0.114, not separated from 0; it gives E64 +0.65 +- 0.42 against +1.12 +- 0.33
+E64 - E80 by kind: {'fp16/ones': 2.397, 'fp16/randn': 0.557, 'fp16/zeros': 0.866, 'fp32/randn': 1.022, 'int8/zeros': 0.767}; mean 1.12, median 0.87, mean without fp16 ones 0.80: one kind carries part of it
+E64 - E87 by kind (the same-hour pair): {'fp16/randn': 0.651, 'fp16/zeros': 0.867, 'fp32/randn': 0.451, 'fp32/zeros': 0.794, 'int8/zeros': 0.175}; it has no fp16 ones
+
+======== C3. The two cards' readings: not shown to be one quantity
+last 40 s of sustained runs, readings at 800 MHz only, medians. kind: card 0 board W, rails sum | aifoundry2 per session board W, rails sum | a2 minus c0
+  fp16/ones      c0  47.32 W, rails  34.97 | a2 {'E80': 55.15}, rails  35.87 | board +7.83 W, rails +0.90 W
+  fp16/zeros     c0  29.81 W, rails  19.39 | a2 {'E80': 35.68, 'E83': 35.79, 'E87': 35.84}, rails  20.49 | board +5.98 W, rails +1.11 W
+  fp32/ones      c0  47.73 W, rails  35.15 | a2 {'E83': 55.36}, rails  35.74 | board +7.63 W, rails +0.58 W
+  fp32/sparse90  c0  30.89 W, rails  20.34 | a2 {'E80': 36.89}, rails  21.39 | board +6.00 W, rails +1.05 W
+  fp32/zeros     c0  29.66 W, rails  19.18 | a2 {'E83': 35.77, 'E87': 35.76}, rails  20.46 | board +6.11 W, rails +1.27 W
+  int8/full      c0  45.49 W, rails  33.33 | a2 {'E80': 53.92, 'E83': 53.99, 'E87': 54.07}, rails  34.39 | board +8.50 W, rails +1.06 W
+  int8/neg_ones  c0  34.74 W, rails  23.90 | a2 {'E80': 41.21}, rails  25.10 | board +6.47 W, rails +1.20 W
+  int8/zeros     c0  31.15 W, rails  20.61 | a2 {'E80': 37.08, 'E83': 36.66, 'E87': 37.29}, rails  21.54 | board +5.93 W, rails +0.93 W
+a2 = 2.46 + 1.117 x c0 over 8 kinds; board gap 5.9 to 8.5 W, rails gap +0.58 to +1.27 W
+card 0's 75 W on aifoundry2's reading: 86.2 W; 76.75 W: 88.2 W; aifoundry2's 88.88 W on card 0's reading: 77.4 W; aifoundry2's 75 W on card 0's: 64.9 W (if the offset is the instrument; nothing here says whether it is real input power or a calibration)
+E84's README, p800, the median in a run's first second at 800 MHz, card 0 against aifoundry2: fp32 zeros 29.6, 34.1; int8 full 42.2, 48.9; fp16 randn 68.6, 76.1; fp32 randn 73.0, 82.7; and its text gives 4.5-9.8 W over all kinds, zeros 4.5-5.1 W. Fit on those four: a2 = 2.06 + 1.094 x c0, so card 0's 75 W is 84.1 W on aifoundry2's
+the register's top, 78.75 W, on card 0's reading, is 90.4 W on aifoundry2's, and the setter's cap, 78 W, is 89.6 W: so 'a set point above 88.88 W cannot be written' rules out 'set higher' only if the two readings are one quantity
+card 0 in E84, from pmic-check.json: {'readings': 13543, 'readings_ge75': 2, 'runs_ge75': 1, 'longest_ge75_s': 0.2}
+
+======== C4, C5. Counts by threshold, every telemetry file of aifoundry2's sessions (three E69 runs have telemetry and no row in runs.jsonl)
+readings 120637, at 300 MHz 0
+all five sessions: >= 75 W: 2907 readings in 95 runs, longest 1.5 s; >= 85 W: 654 readings in 37 runs, longest 0.8 s; >= 86 W: 462 readings in 25 runs, longest 0.7 s; >= 88 W: 36 readings in 7 runs, longest 0.3 s
+since aifoundry2's boot of 26 Oct, which the driver's counter covers (E69, E80, E83, E87; not E64): >= 75 W: 2508 in 73 runs, longest 1.5 s; >= 85 W: 460 in 23 runs, longest 0.6 s; >= 86 W: 301 in 12 runs, longest 0.5 s; >= 88 W: 31 in 5 runs, longest 0.3 s
+pmic-check.json counts only runs with a row in runs.jsonl: 120366 readings, 2891 >= 75 W, 93 runs; of those runs the ring reaches back to the previous dump in 23
+driver counter PmicCeEvent on aifoundry2: host/err-aifoundry2.txt reads 0, since its boot of 26 Oct 15:13 PDT
+
+======== C6. What tests the idle-reset lattice out of sample
+E80: 5 falls fix the lattice, residuals [1.03, -0.57, -0.67, -0.16, 0.37] ms; leave-one-out [1.77, -0.94, -0.84, -0.2, 1.69] ms; within 1.2 ms {'boundaries': 5, 'fell': 5}; beyond {'boundaries': 2065, 'fell': 0, 'max_abs_d_fell': 1.03}
+E83: 6 falls fix the lattice, residuals [-0.1, -0.32, 0.98, -0.6, 0.22, -0.18] ms; leave-one-out [-0.16, -0.53, 1.2, -0.72, 0.31, -0.45] ms; within 1.2 ms {'boundaries': 12, 'fell': 7}; beyond {'boundaries': 5084, 'fell': 0, 'max_abs_d_fell': 0.98}
+E87: 5 falls fix the lattice, residuals [-0.62, 0.25, 0.87, -0.93, 0.42] ms; leave-one-out [-1.11, 0.35, 1.19, -1.34, 1.41] ms; within 1.2 ms {'boundaries': 7, 'fell': 6}; beyond {'boundaries': 1216, 'fell': 0, 'max_abs_d_fell': 0.93}
+so 16 of the 18 near-lattice falls fixed the lattice. Out of sample: leave-one-out residuals (largest 1.77 ms), the two kernel-rule falls not in any fit, and the process gaps: ir-gaps.json
+process gaps: point in gap and fell 91, in gap no fall 2, no point and fell 1, no point no fall 411: 502 of 505
+
+======== C7. The 25 falls' x
+25 falls, x [-26.3, -0.9, -0.0, 1.1, 1.2, 1.6, 1.7, 1.8, 2.1, 2.8, 3.0, 3.7, 3.8, 3.9, 3.9, 4.1, 4.3, 4.3, 4.4, 4.5, 5.1, 5.1, 8.7, 12.4, 13.9] ms: 24 within -1 to 14 ms; the other: [('E87', 'SUS-08-int8-real-l6_attn_qk-r1', 1, -26.3, 0.5918)]
+
+======== C8. No dependence visible, from 25 falls; E100's A0 beside the rate
+Monte Carlo p: {'since_launch': 0.1378, 'session_position': 0.6533, 'die': 0.9137, 'power': 0.93025, 'format': 0.48625, 'block': 0.15515, 'session': 0.254, 'hour': 0.04825, 'kernel_len': 0.12405}
+format: {'fp16': {'boundaries': 2787, 'hits': 5}, 'fp32': {'boundaries': 3826, 'hits': 6}, 'int8': {'boundaries': 5168, 'hits': 14}}
+all six sessions: 25 falls in 11781 boundaries, 1 in 471
+E100's A0, its corrections-check.txt says: A0's boundaries: 507 in all, 455 with the kernel before at 800 MHz (the desk reading's denominator). 3 falls: 1 in 169 and 1 in 152; a Poisson 95% on 3 is 0.62-8.77, so at 800 MHz about 1 in 52 to 1 in 735 (over all boundaries about 1 in 58 to 1 in 819)
+compatible with about 1 in 500, and no further support
+
+======== C9. Near-steady blocks against the 76 s line: unexplained
+E73: offset 40.14 at rest 47.09; against E63 s1 (39.30 at 46.11): 0.86 C per C
+E85: offset 40.06 at rest 47.55; against E63 s1 (39.30 at 46.11): 0.53 C per C
+
+======== C10. Horace He's pair: the arithmetic (the post and the gist as read on 1 Nov 2026; neither is committed here, the gist's numbers are in README section d)
+the post's text, 295 / 257 = 1.148; 258 / 312 = 0.827, the post's '83% flop utilization' on the A100's 16-bit peak of 312
+the gist's two comment images: 292.30 / 239.41 = 1.221; 291.63 / 240.43 = 1.213
+the post's chart, from horace-chart.txt: 287.69 / 236.47 = 1.2166
+in the post: no format is named anywhere; the story opens "It's 2022"; its first run is 8192 x 8192 x 8192 (python mm_bench.py, not public); the pair's snippet that follows has a bare N. The post does not link the gist; the gist's description is the post's title and link
+formats: bf16 has 8 exponent and 7 mantissa bits, fp16 5 and 10

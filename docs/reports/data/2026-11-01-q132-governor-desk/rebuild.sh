@@ -19,3 +19,4 @@ python3 rep_noise.py "$R" > rep-noise.txt
 python3 camera_lines.py "$R" "$S" > camera-lines.txt
 python3 cam_scene.py "$R" "$S" > cam-scene.txt
 python3 other_cards_max.py "$R" > other-cards-max.txt
+python3 corrections-check.py > corrections-check.txt
