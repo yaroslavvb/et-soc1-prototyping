@@ -1,0 +1,5204 @@
+{
+ "experiment": "E102",
+ "title": "single-bit prices in a balanced layout, the A side, and int8's B side (aifoundry1 card 1, 600 MHz)",
+ "request": "Q132, the first half of item 12 of the kinds page's section 11",
+ "date": "2026-11-01",
+ "registration": "tools/claims-v3/kinds/E102.md",
+ "card": {
+  "name": "aifoundry1-c1",
+  "device": 1,
+  "clock_mhz": 600,
+  "config_gate": {
+   "expected": {
+    "tdp_w": 65,
+    "temp_threshold_c": 65
+   }
+  }
+ },
+ "inputs_frozen": {
+  "e102_json": {
+   "path": "tools/claims-v3/kinds/e102/e102.json",
+   "sha256": "9b0940e7a6329c942ca9c2619277b9ce0ba3de1c3b042c280567026361c3d87c"
+  },
+  "bench_counts": {
+   "path": "docs/reports/data/2026-11-01-e102-balanced-bit-prices/bench/counts-e102.json",
+   "sha256": "117e73af4a7d8a728487e4c69b815dc2010e5020894891bd23ffd112005e0c52"
+  },
+  "bench_backtest": {
+   "path": "docs/reports/data/2026-11-01-e102-balanced-bit-prices/bench/backtest-hl-hlp.json",
+   "sha256": "4d8ac671bc671fb81d186357a0a8280af090995f071cce737cbc3607c1034ebf"
+  },
+  "bench_prediction": {
+   "path": "docs/reports/data/2026-11-01-q132-rtl-bench/e92-bench-prediction.json",
+   "sha256": "c9ea3ab11a6ec6362464b0f96fdfd2a1021d395d0437d7327d0b596e1c09696d"
+  },
+  "bench_kinds": {
+   "path": "docs/reports/data/2026-11-01-q132-rtl-bench/counts-v2.json",
+   "sha256": "422bdeac130a12d352f77e2e635eae2592188e7548d8196c9e033f5228986f45"
+  },
+  "e65": {
+   "path": "docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder/hl.json",
+   "sha256": "b4ad71eaef92233e815a6f721a9f396e3ee27aeab1a73cf58cd89f6149b12130"
+  },
+  "e67": {
+   "path": "docs/reports/data/2026-10-27-e67-a-side-bit-prices/hl.json",
+   "sha256": "d6dbdc0ecca301510206a3609321ea66f7a7756a45682616d7a31f85650323e9"
+  },
+  "e78": {
+   "path": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json",
+   "sha256": "b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5"
+  },
+  "e79": {
+   "path": "docs/reports/data/2026-10-31-e79-fp16-int8-bit-prices/hlp.json",
+   "sha256": "4452bc256c3a379bdd6669195ac900eda18f3368d76862ad988c14bab2329525"
+  },
+  "e79_runs": {
+   "path": "docs/reports/data/2026-10-31-e79-fp16-int8-bit-prices/runs.csv",
+   "sha256": "45e7dc0cb9724dfa1df12964ef66ab0611e3f11cc3182bdf57e46bc7e02c3e4a"
+  },
+  "e82": {
+   "path": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json",
+   "sha256": "4794f5ac4ccfde95f45535aa855fa06c8d85b7d7716c9b63bd508ded1ade8601"
+  },
+  "e82_nodips": {
+   "path": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/posthoc/e82-nodips.json",
+   "sha256": "fad9057411234444a13595402589bf7173f1d0298d2dcc2104a9e1d6ab142d74"
+  },
+  "e82_scored": {
+   "path": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/scored.json",
+   "sha256": "498d5c70f01778248c7800d7d1d7e07b033db35f29b897d40f5a21787bef0b53"
+  },
+  "e88_fit": {
+   "path": "tools/claims-v3/rpath/e88.json",
+   "sha256": "59a7b0efbc2cc0d936dbf725c386eda2fdb88f64d9523925a21f9f0ee9e3ca42"
+  },
+  "e92_predictions": {
+   "path": "tools/claims-v3/kinds/predictions-e92.json",
+   "sha256": "e366f1481d0c52cb680c59fdcfdd1be4e44f035f3e45b2bd45d4db90937e05b6"
+  },
+  "e93_runs": {
+   "path": "docs/reports/data/2026-11-01-e93-zero-gate-silicon/runs.csv",
+   "sha256": "daffa9f5efd2c6c097c7f6bd33515fe817232045853f2259875e577a627caf16"
+  }
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337"
+  },
+  "e102_files_sha256": {
+   "tools/claims-v3/kinds/e102_common.py": "58f194291b19a3a763ce26b5df8fe748f96e7f2e1a46cc57ae1b85f399e00797",
+   "tools/claims-v3/kinds/run_e102.py": "af03166e41df6ca204e21286b7416a8530b878f5bddb19afaed31fcfcd9f16b6",
+   "tools/claims-v3/kinds/reduce_e102.py": "fecb0a509fb2bebe45891858d3b6cd0ad229b98c823357a6d3149e039bb92363",
+   "tools/claims-v3/kinds/block_e102.sh": "d56a8d8fde494ef58f36e92c6eefb573f7abcd6217f966bb404ebdf8f34b4a61",
+   "tools/claims-v3/kinds/queue_e102.sh": "e83fa51ad4b66681a0862803c8b7411f78de6d0c2c2e649c8749feaa8e8d8a88",
+   "tools/claims-v3/kinds/run_e102.sh": "d4e576eff040403b1fe4d576e48e6cf7b6f8a306b97b8cbdd086e8f5f3d0ab82",
+   "tools/claims-v3/kinds/make_e102.py": "9df93e009aad6bbf2cec1127e43b34c0c4916d7afc8c16a685cb4bf8fe47c837"
+  },
+  "desk_files_sha256": {
+   "tools/claims-v3/kinds/score_e102.py": "cc928e3333533250dff91733c2a8bce830cd603a8b86ddd1f60e74a1c5da8c11",
+   "tools/claims-v3/kinds/collect_e102.sh": "aa0b0b85c9c769239b07438dfeeda6fcd93d027c31046a85a335090b580b9c34",
+   "tools/claims-v3/kinds/selftest_e102.py": "1bbee31432121f132738fa385422805f691688db082a559303d2534ce870c623"
+  },
+  "e102_json_sha256": "9b0940e7a6329c942ca9c2619277b9ce0ba3de1c3b042c280567026361c3d87c"
+ },
+ "plan": {
+  "smoke": 10201,
+  "sequence": [
+   10210,
+   10220,
+   10221,
+   10230,
+   10211,
+   10222,
+   10231,
+   10212,
+   10223,
+   10232,
+   10233,
+   10234
+  ],
+  "blocks": {
+   "G": "E78's protocol, launch 58 C after 59 C, 2 s quiet, 41 runs",
+   "T": "a float train, no heater, 0.2 s between runs, 56 runs",
+   "I": "an int8 train, 25 runs"
+  },
+  "passes_planned": {
+   "G": 3,
+   "T": 4,
+   "I": 5
+  },
+  "reduction_primary": "dips removed (E82 A2), leak 0.2414 (E82's) in block G; no temperature term in the trains"
+ },
+ "card_budget": {
+  "card_minutes_about": 57,
+  "queue_budget_s": 3400,
+  "queue_deadline": "2026-11-01 07:00 PST",
+  "every_run_ends_by": "07:15 PST",
+  "first_estimates_s": {
+   "G": 440,
+   "T": 320,
+   "I": 150
+  }
+ },
+ "analysis": {
+  "primary_arm_float": "rail",
+  "primary_arm_int8": "rail",
+  "min_passes": 3,
+  "fp32_mantissa_positions": [
+   0,
+   6,
+   11,
+   16,
+   20,
+   22
+  ],
+  "rate_ops_per_s": {
+   "fp32": 1120932074.4284387,
+   "fp16": 1120784080.4548328,
+   "int8": 1924859890.7497387
+  },
+  "rail_over_board": 0.81,
+  "rail_over_board_source": "E79 result 2, median over its steps of 1 W or more",
+  "gates": {
+   "train_zero_mid_departure_rail_w": 0.25
+  },
+  "card_scale": {
+   "per_type": {
+    "fp16": 1.0332317789299006,
+    "fp32": 1.0300166370596864,
+    "int8": 1.0270624349933122
+   },
+   "source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/scored.json cross_card.primary.x3.per_type_median"
+  },
+  "noise_from_e93_w": {
+   "p_raw": 0.0996,
+   "rail_raw": 0.0412
+  },
+  "resolution_half_width_w": {
+   "G.board": {
+    "passes": 3,
+    "own_zero_reads": 2,
+    "sigma_w": 0.0996,
+    "half_width_w": 0.303
+   },
+   "G.rail": {
+    "passes": 3,
+    "own_zero_reads": 2,
+    "sigma_w": 0.0412,
+    "half_width_w": 0.125
+   },
+   "T.board": {
+    "passes": 4,
+    "own_zero_reads": 3,
+    "sigma_w": 0.0996,
+    "half_width_w": 0.183
+   },
+   "T.rail": {
+    "passes": 4,
+    "own_zero_reads": 3,
+    "sigma_w": 0.0412,
+    "half_width_w": 0.076
+   },
+   "I.board": {
+    "passes": 5,
+    "own_zero_reads": 4,
+    "sigma_w": 0.0996,
+    "half_width_w": 0.138
+   },
+   "I.rail": {
+    "passes": 5,
+    "own_zero_reads": 4,
+    "sigma_w": 0.0412,
+    "half_width_w": 0.057
+   }
+  },
+  "resolution_half_width_fJ": {
+   "fp32 B balanced (T)": {
+    "board": 41.1,
+    "rail": 17.1
+   },
+   "fp32 A balanced (T)": {
+    "board": 85.0,
+    "rail": 35.3
+   },
+   "int8 single bit (I)": {
+    "board": 70.0,
+    "rail": 28.9
+   },
+   "int8 3-bit mask, per bit (I)": {
+    "board": 23.3,
+    "rail": 9.6
+   },
+   "int8 4-bit mask, per bit (I)": {
+    "board": 17.5,
+    "rail": 7.2
+   },
+   "int8 ff, per bit (I)": {
+    "board": 8.8,
+    "rail": 3.6
+   }
+  }
+ },
+ "bench": {
+  "source": "rtl-sim/fma_toggle_v2, core-et@b38a1a31, -fno-dfg, the Q132(b) bench",
+  "variants": {
+   "nets_map": {
+    "k_fJ_per_net_toggle": 1.87053508737111,
+    "a_fJ_per_clocked_bit": 1.092369150055667,
+    "fit_rms_w_on_e78": 0.3571710883276683
+   },
+   "nets_hier2": {
+    "k_fJ_per_net_toggle": 1.8268190265516426,
+    "a_fJ_per_clocked_bit": 1.0817541328626843,
+    "fit_rms_w_on_e78": 0.28267233211773574
+   }
+  },
+  "int8_fit": {
+   "k_fJ_per_net_toggle": 3.735198821172308,
+   "a_fJ_per_clocked_bit": 2.1332164542968544,
+   "fit_rms_w_on_e78": 0.2869520256555772,
+   "n_fit": 15
+  },
+  "functional_check_mismatches": 0.0
+ },
+ "positions": {
+  "fp32.hq": {
+   "block": "GT",
+   "layout": "zero",
+   "side": "b",
+   "bit": null,
+   "mask": null,
+   "zero": null,
+   "designed_flips_per_op": 0,
+   "flops": 815.0,
+   "flops_from_fl_nS": 783.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 338.19,
+    "rbus": 338.69,
+    "store": 10838.0,
+    "prod": 0.0,
+    "dsum": 0.0,
+    "res_bits_per_op": 11514.88,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 352.25,
+    "rbus": 352.25,
+    "store": 11272.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 352.25,
+    "comb_c": 110.5,
+    "comb_add": 352.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 815.0,
+    "res_bits_per_op": 11976.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 111281.66666666667,
+   "by_stage_vpu_map": {
+    "control": 3612.0,
+    "exponent": 251.33333333333334,
+    "operand": 1484.6666666666667,
+    "multiplier": 994.0,
+    "adder_norm": 6183.666666666667,
+    "result": 764.0,
+    "vpu_sequencer": 67526.66666666667,
+    "lane_operand_bus": 5587.333333333333,
+    "c_regfile": 23854.0,
+    "other": 1024.0
+   }
+  },
+  "fp32.hq_e64": {
+   "block": "G",
+   "layout": "zero",
+   "side": "b",
+   "bit": null,
+   "mask": null,
+   "zero": null,
+   "designed_flips_per_op": 0,
+   "flops": 815.0,
+   "flops_from_fl_nS": 783.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 338.19,
+    "rbus": 338.69,
+    "store": 10838.0,
+    "prod": 0.0,
+    "dsum": 0.0,
+    "res_bits_per_op": 11514.88,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 352.25,
+    "rbus": 352.25,
+    "store": 11272.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 352.25,
+    "comb_c": 110.5,
+    "comb_add": 352.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 815.0,
+    "res_bits_per_op": 11976.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 116047.66666666667,
+   "by_stage_vpu_map": {
+    "control": 3612.0,
+    "exponent": 251.33333333333334,
+    "operand": 1488.0,
+    "multiplier": 994.0,
+    "adder_norm": 6183.666666666667,
+    "result": 764.0,
+    "vpu_sequencer": 72129.33333333333,
+    "lane_operand_bus": 5587.333333333333,
+    "c_regfile": 24014.0,
+    "other": 1024.0
+   }
+  },
+  "fp32.aq": {
+   "block": "GT",
+   "layout": "zero",
+   "side": "a",
+   "bit": null,
+   "mask": null,
+   "zero": null,
+   "designed_flips_per_op": 0,
+   "flops": 792.0,
+   "flops_from_fl_nS": 764.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 347.0,
+    "rbus": 350.5,
+    "store": 11216.0,
+    "prod": 0.0,
+    "dsum": 0.0,
+    "res_bits_per_op": 11913.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 356.0,
+    "rbus": 356.0,
+    "store": 11392.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 356.0,
+    "comb_c": 80.0,
+    "comb_add": 356.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 792.0,
+    "res_bits_per_op": 12104.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 109997.33333333333,
+   "by_stage_vpu_map": {
+    "control": 3594.0,
+    "exponent": 213.33333333333334,
+    "operand": 1546.6666666666667,
+    "multiplier": 1016.0,
+    "adder_norm": 6285.333333333333,
+    "result": 848.0,
+    "vpu_sequencer": 67216.66666666667,
+    "lane_operand_bus": 5592.0,
+    "c_regfile": 22661.333333333332,
+    "other": 1024.0
+   }
+  },
+  "fp32.aq_e64": {
+   "block": "T",
+   "layout": "zero",
+   "side": "a",
+   "bit": null,
+   "mask": null,
+   "zero": null,
+   "designed_flips_per_op": 0,
+   "flops": 792.0,
+   "flops_from_fl_nS": 764.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 347.0,
+    "rbus": 350.5,
+    "store": 11216.0,
+    "prod": 0.0,
+    "dsum": 0.0,
+    "res_bits_per_op": 11913.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 356.0,
+    "rbus": 356.0,
+    "store": 11392.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 356.0,
+    "comb_c": 80.0,
+    "comb_add": 356.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 792.0,
+    "res_bits_per_op": 12104.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 115240.0,
+   "by_stage_vpu_map": {
+    "control": 3594.0,
+    "exponent": 213.33333333333334,
+    "operand": 1557.3333333333333,
+    "multiplier": 1016.0,
+    "adder_norm": 6285.333333333333,
+    "result": 848.0,
+    "vpu_sequencer": 71936.66666666667,
+    "lane_operand_bus": 5592.0,
+    "c_regfile": 23173.333333333332,
+    "other": 1024.0
+   }
+  },
+  "fp32.bj_0": {
+   "block": "T",
+   "layout": "bj",
+   "side": "b",
+   "bit": 0,
+   "mask": "0x1",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 4096,
+   "flops": 13103.0,
+   "flops_from_fl_nS": 32682.5,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 7891.31,
+    "rbus": 7903.56,
+    "store": 10832.0,
+    "prod": 4096.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 26626.88,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 352.25,
+    "rbus": 352.25,
+    "store": 11272.0,
+    "csa3": 4096.0,
+    "csa2": 0.0,
+    "comb_s": 4448.25,
+    "comb_c": 110.5,
+    "comb_add": 4448.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 13103.0,
+    "res_bits_per_op": 11976.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 529194.3333333334,
+   "by_stage_vpu_map": {
+    "control": 20849.333333333332,
+    "exponent": 188155.33333333334,
+    "operand": 30156.666666666668,
+    "multiplier": 100834.0,
+    "adder_norm": 85885.0,
+    "result": 764.0,
+    "vpu_sequencer": 67476.66666666667,
+    "lane_operand_bus": 10195.333333333334,
+    "c_regfile": 23854.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.8507,
+    "bench_hier2": 0.5216,
+    "e88": 1.1288,
+    "e88_flops": 1.3685,
+    "e88_flops_exact": 0.5211,
+    "all_in_list": 0.6072
+   },
+   "pred_fJ": {
+    "bench_map": 185.3,
+    "bench_hier2": 113.6,
+    "e88": 245.8,
+    "e88_flops": 298.1,
+    "e88_flops_exact": 113.5,
+    "all_in_list": 132.3
+   }
+  },
+  "fp32.bp_0": {
+   "block": "T",
+   "layout": "bp",
+   "side": "b",
+   "bit": 0,
+   "mask": "0x1",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 3968,
+   "flops": 12719.0,
+   "flops_from_fl_nS": 12688.5,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 338.12,
+    "rbus": 338.5,
+    "store": 10832.0,
+    "prod": 3968.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 11508.62,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 352.25,
+    "rbus": 352.25,
+    "store": 11272.0,
+    "csa3": 3968.0,
+    "csa2": 0.0,
+    "comb_s": 4320.25,
+    "comb_c": 110.5,
+    "comb_add": 4320.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 12719.0,
+    "res_bits_per_op": 11976.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 516149.0,
+   "by_stage_vpu_map": {
+    "control": 20310.666666666668,
+    "exponent": 182283.33333333334,
+    "operand": 29516.666666666668,
+    "multiplier": 97714.0,
+    "adder_norm": 83394.33333333333,
+    "result": 764.0,
+    "vpu_sequencer": 67476.66666666667,
+    "lane_operand_bus": 9811.333333333334,
+    "c_regfile": 23854.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.8242,
+    "bench_hier2": 0.6113,
+    "e88": 0.415,
+    "e88_flops": 0.5045,
+    "e88_flops_exact": 0.5048,
+    "ratio_hypothesis": 0.084
+   },
+   "pred_fJ": {
+    "bench_map": 185.3,
+    "bench_hier2": 137.4,
+    "e88": 93.3,
+    "e88_flops": 113.4,
+    "e88_flops_exact": 113.5,
+    "ratio_hypothesis": 18.9
+   }
+  },
+  "fp32.aj_0": {
+   "block": "T",
+   "layout": "aj",
+   "side": "a",
+   "bit": 0,
+   "mask": "0x1",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 2048,
+   "flops": 6936.0,
+   "flops_from_fl_nS": 15336.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 4249.0,
+    "rbus": 4275.0,
+    "store": 11240.0,
+    "prod": 2048.0,
+    "dsum": 2048.0,
+    "res_bits_per_op": 19764.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 356.0,
+    "rbus": 356.0,
+    "store": 11392.0,
+    "csa3": 2048.0,
+    "csa2": 0.0,
+    "comb_s": 2404.0,
+    "comb_c": 80.0,
+    "comb_add": 2404.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 6936.0,
+    "res_bits_per_op": 12104.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 333656.0,
+   "by_stage_vpu_map": {
+    "control": 10420.666666666666,
+    "exponent": 79402.66666666667,
+    "operand": 16138.666666666666,
+    "multiplier": 82936.0,
+    "adder_norm": 43832.0,
+    "result": 848.0,
+    "vpu_sequencer": 70800.66666666667,
+    "lane_operand_bus": 5592.0,
+    "c_regfile": 22661.333333333332,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.4553,
+    "bench_hier2": 0.2182,
+    "e88": 0.578,
+    "e88_flops": 0.6875,
+    "e88_flops_exact": 0.2605,
+    "all_in_list": 0.4455
+   },
+   "pred_fJ": {
+    "bench_map": 198.3,
+    "bench_hier2": 95.0,
+    "e88": 251.8,
+    "e88_flops": 299.5,
+    "e88_flops_exact": 113.5,
+    "all_in_list": 194.1
+   }
+  },
+  "fp32.ap_0": {
+   "block": "T",
+   "layout": "ap",
+   "side": "a",
+   "bit": 0,
+   "mask": "0x1",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 1920,
+   "flops": 6552.0,
+   "flops_from_fl_nS": 6524.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 347.0,
+    "rbus": 352.0,
+    "store": 11264.0,
+    "prod": 1920.0,
+    "dsum": 1920.0,
+    "res_bits_per_op": 11963.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 356.0,
+    "rbus": 356.0,
+    "store": 11392.0,
+    "csa3": 1920.0,
+    "csa2": 0.0,
+    "comb_s": 2276.0,
+    "comb_c": 80.0,
+    "comb_add": 2276.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 6552.0,
+    "res_bits_per_op": 12104.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 319937.3333333333,
+   "by_stage_vpu_map": {
+    "control": 9994.0,
+    "exponent": 74453.33333333333,
+    "operand": 15260.666666666666,
+    "multiplier": 77816.0,
+    "adder_norm": 41485.333333333336,
+    "result": 848.0,
+    "vpu_sequencer": 70802.66666666667,
+    "lane_operand_bus": 5592.0,
+    "c_regfile": 22661.333333333332,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.4274,
+    "bench_hier2": 0.2754,
+    "e88": 0.2033,
+    "e88_flops": 0.2465,
+    "e88_flops_exact": 0.2442,
+    "ratio_hypothesis": 0.0597
+   },
+   "pred_fJ": {
+    "bench_map": 198.6,
+    "bench_hier2": 128.0,
+    "e88": 94.4,
+    "e88_flops": 114.6,
+    "e88_flops_exact": 113.5,
+    "ratio_hypothesis": 27.7
+   }
+  },
+  "fp32.bj_6": {
+   "block": "T",
+   "layout": "bj",
+   "side": "b",
+   "bit": 6,
+   "mask": "0x40",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 4096,
+   "flops": 13103.0,
+   "flops_from_fl_nS": 54162.5,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 20347.19,
+    "rbus": 20310.81,
+    "store": 10862.0,
+    "prod": 4096.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 51520.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 352.25,
+    "rbus": 352.25,
+    "store": 11272.0,
+    "csa3": 4096.0,
+    "csa2": 0.0,
+    "comb_s": 4448.25,
+    "comb_c": 110.5,
+    "comb_add": 4448.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 13103.0,
+    "res_bits_per_op": 11976.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 318839.6666666667,
+   "by_stage_vpu_map": {
+    "control": 3612.0,
+    "exponent": 251.33333333333334,
+    "operand": 30156.666666666668,
+    "multiplier": 95714.0,
+    "adder_norm": 85543.66666666667,
+    "result": 764.0,
+    "vpu_sequencer": 67724.66666666667,
+    "lane_operand_bus": 10195.333333333334,
+    "c_regfile": 23854.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.4225,
+    "bench_hier2": 0.2215,
+    "e88": 2.2819,
+    "e88_flops": 2.683,
+    "e88_flops_exact": 0.5211,
+    "all_in_list": 0.3697
+   },
+   "pred_fJ": {
+    "bench_map": 92.0,
+    "bench_hier2": 48.2,
+    "e88": 497.0,
+    "e88_flops": 584.4,
+    "e88_flops_exact": 113.5,
+    "all_in_list": 80.5
+   }
+  },
+  "fp32.bp_6": {
+   "block": "T",
+   "layout": "bp",
+   "side": "b",
+   "bit": 6,
+   "mask": "0x40",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 3968,
+   "flops": 12719.0,
+   "flops_from_fl_nS": 12693.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 338.75,
+    "rbus": 339.25,
+    "store": 10856.0,
+    "prod": 3968.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 11534.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 352.25,
+    "rbus": 352.25,
+    "store": 11272.0,
+    "csa3": 3968.0,
+    "csa2": 0.0,
+    "comb_s": 4320.25,
+    "comb_c": 110.5,
+    "comb_add": 4320.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 12719.0,
+    "res_bits_per_op": 11976.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 312375.6666666667,
+   "by_stage_vpu_map": {
+    "control": 3612.0,
+    "exponent": 251.33333333333334,
+    "operand": 29516.666666666668,
+    "multiplier": 92754.0,
+    "adder_norm": 83063.66666666667,
+    "result": 764.0,
+    "vpu_sequencer": 67724.66666666667,
+    "lane_operand_bus": 9811.333333333334,
+    "c_regfile": 23854.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.4094,
+    "bench_hier2": 0.294,
+    "e88": 0.4162,
+    "e88_flops": 0.5057,
+    "e88_flops_exact": 0.5048,
+    "ratio_hypothesis": 0.0512
+   },
+   "pred_fJ": {
+    "bench_map": 92.0,
+    "bench_hier2": 66.1,
+    "e88": 93.6,
+    "e88_flops": 113.7,
+    "e88_flops_exact": 113.5,
+    "ratio_hypothesis": 11.5
+   }
+  },
+  "fp32.aj_6": {
+   "block": "T",
+   "layout": "aj",
+   "side": "a",
+   "bit": 6,
+   "mask": "0x40",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 2048,
+   "flops": 6936.0,
+   "flops_from_fl_nS": 25662.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 9838.0,
+    "rbus": 9757.5,
+    "store": 11296.0,
+    "prod": 2048.0,
+    "dsum": 2048.0,
+    "res_bits_per_op": 30891.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 356.0,
+    "rbus": 356.0,
+    "store": 11392.0,
+    "csa3": 2048.0,
+    "csa2": 0.0,
+    "comb_s": 2404.0,
+    "comb_c": 80.0,
+    "comb_add": 2404.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 6936.0,
+    "res_bits_per_op": 12104.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 244165.33333333334,
+   "by_stage_vpu_map": {
+    "control": 3594.0,
+    "exponent": 213.33333333333334,
+    "operand": 16138.666666666666,
+    "multiplier": 76792.0,
+    "adder_norm": 47245.333333333336,
+    "result": 848.0,
+    "vpu_sequencer": 70056.66666666667,
+    "lane_operand_bus": 5592.0,
+    "c_regfile": 22661.333333333332,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.2731,
+    "bench_hier2": 0.1385,
+    "e88": 1.0935,
+    "e88_flops": 1.2806,
+    "e88_flops_exact": 0.2605,
+    "all_in_list": 0.9614
+   },
+   "pred_fJ": {
+    "bench_map": 119.0,
+    "bench_hier2": 60.3,
+    "e88": 476.3,
+    "e88_flops": 557.8,
+    "e88_flops_exact": 113.5,
+    "all_in_list": 418.8
+   }
+  },
+  "fp32.ap_6": {
+   "block": "T",
+   "layout": "ap",
+   "side": "a",
+   "bit": 6,
+   "mask": "0x40",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 1920,
+   "flops": 6552.0,
+   "flops_from_fl_nS": 6544.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 359.0,
+    "rbus": 356.0,
+    "store": 11392.0,
+    "prod": 1920.0,
+    "dsum": 1920.0,
+    "res_bits_per_op": 12107.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 356.0,
+    "rbus": 356.0,
+    "store": 11392.0,
+    "csa3": 1920.0,
+    "csa2": 0.0,
+    "comb_s": 2276.0,
+    "comb_c": 80.0,
+    "comb_add": 2276.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 6552.0,
+    "res_bits_per_op": 12104.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 235993.33333333334,
+   "by_stage_vpu_map": {
+    "control": 3594.0,
+    "exponent": 213.33333333333334,
+    "operand": 15260.666666666666,
+    "multiplier": 72056.0,
+    "adder_norm": 44685.333333333336,
+    "result": 848.0,
+    "vpu_sequencer": 70058.66666666667,
+    "lane_operand_bus": 5592.0,
+    "c_regfile": 22661.333333333332,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.2565,
+    "bench_hier2": 0.1612,
+    "e88": 0.2099,
+    "e88_flops": 0.2534,
+    "e88_flops_exact": 0.2442,
+    "ratio_hypothesis": 0.1288
+   },
+   "pred_fJ": {
+    "bench_map": 119.2,
+    "bench_hier2": 74.9,
+    "e88": 97.5,
+    "e88_flops": 117.7,
+    "e88_flops_exact": 113.5,
+    "ratio_hypothesis": 59.8
+   }
+  },
+  "fp32.bj_11": {
+   "block": "T",
+   "layout": "bj",
+   "side": "b",
+   "bit": 11,
+   "mask": "0x800",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 4096,
+   "flops": 37851.75,
+   "flops_from_fl_nS": 73064.75,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 30683.12,
+    "rbus": 30697.38,
+    "store": 10837.0,
+    "prod": 4096.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 72217.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 11304.5,
+    "rbus": 11303.75,
+    "store": 11256.0,
+    "csa3": 4096.0,
+    "csa2": 0.0,
+    "comb_s": 15400.5,
+    "comb_c": 2275.5,
+    "comb_add": 16079.75,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 37851.75,
+    "res_bits_per_op": 33864.25,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 675798.6666666666,
+   "by_stage_vpu_map": {
+    "control": 10016.666666666666,
+    "exponent": 6693.333333333333,
+    "operand": 64467.0,
+    "multiplier": 123690.0,
+    "adder_norm": 289236.3333333333,
+    "result": 25982.0,
+    "vpu_sequencer": 78384.66666666667,
+    "lane_operand_bus": 20640.666666666668,
+    "c_regfile": 55664.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 1.1492,
+    "bench_hier2": 1.0237,
+    "e88": 3.2407,
+    "e88_flops": 3.7839,
+    "e88_flops_exact": 1.721,
+    "all_in_list": 1.0656
+   },
+   "pred_fJ": {
+    "bench_map": 250.3,
+    "bench_hier2": 223.0,
+    "e88": 705.8,
+    "e88_flops": 824.1,
+    "e88_flops_exact": 374.8,
+    "all_in_list": 232.1
+   }
+  },
+  "fp32.bp_11": {
+   "block": "T",
+   "layout": "bp",
+   "side": "b",
+   "bit": 11,
+   "mask": "0x800",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 3968,
+   "flops": 12718.0,
+   "flops_from_fl_nS": 12687.75,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 338.81,
+    "rbus": 339.06,
+    "store": 10850.0,
+    "prod": 3968.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 11527.88,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 353.0,
+    "rbus": 350.5,
+    "store": 11216.0,
+    "csa3": 3968.0,
+    "csa2": 0.0,
+    "comb_s": 4321.0,
+    "comb_c": 110.5,
+    "comb_add": 4318.5,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 12718.0,
+    "res_bits_per_op": 11919.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 307259.0,
+   "by_stage_vpu_map": {
+    "control": 6920.333333333333,
+    "exponent": 252.66666666666666,
+    "operand": 25548.333333333332,
+    "multiplier": 88292.0,
+    "adder_norm": 83253.0,
+    "result": 766.6666666666666,
+    "vpu_sequencer": 67569.33333333333,
+    "lane_operand_bus": 9812.0,
+    "c_regfile": 23820.666666666668,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.3989,
+    "bench_hier2": 0.2917,
+    "e88": 0.4159,
+    "e88_flops": 0.5054,
+    "e88_flops_exact": 0.5021,
+    "ratio_hypothesis": 0.1475
+   },
+   "pred_fJ": {
+    "bench_map": 89.7,
+    "bench_hier2": 65.6,
+    "e88": 93.5,
+    "e88_flops": 113.6,
+    "e88_flops_exact": 112.9,
+    "ratio_hypothesis": 33.2
+   }
+  },
+  "fp32.aj_11": {
+   "block": "T",
+   "layout": "aj",
+   "side": "a",
+   "bit": 11,
+   "mask": "0x800",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 2048,
+   "flops": 14536.0,
+   "flops_from_fl_nS": 39228.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 14899.0,
+    "rbus": 14968.0,
+    "store": 11400.0,
+    "prod": 2048.0,
+    "dsum": 2048.0,
+    "res_bits_per_op": 41267.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 4156.0,
+    "rbus": 4156.0,
+    "store": 11392.0,
+    "csa3": 2048.0,
+    "csa2": 0.0,
+    "comb_s": 6204.0,
+    "comb_c": 80.0,
+    "comb_add": 6204.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 14536.0,
+    "res_bits_per_op": 19704.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 631514.6666666666,
+   "by_stage_vpu_map": {
+    "control": 4650.0,
+    "exponent": 1813.3333333333333,
+    "operand": 27722.666666666668,
+    "multiplier": 362376.0,
+    "adder_norm": 107989.33333333333,
+    "result": 8282.666666666666,
+    "vpu_sequencer": 74566.0,
+    "lane_operand_bus": 9229.333333333334,
+    "c_regfile": 33861.333333333336,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 1.0616,
+    "bench_hier2": 0.5727,
+    "e88": 1.5741,
+    "e88_flops": 1.8632,
+    "e88_flops_exact": 0.6697,
+    "all_in_list": 1.2226
+   },
+   "pred_fJ": {
+    "bench_map": 462.4,
+    "bench_hier2": 249.5,
+    "e88": 685.7,
+    "e88_flops": 811.6,
+    "e88_flops_exact": 291.7,
+    "all_in_list": 532.6
+   }
+  },
+  "fp32.ap_11": {
+   "block": "T",
+   "layout": "ap",
+   "side": "a",
+   "bit": 11,
+   "mask": "0x800",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 1920,
+   "flops": 6552.0,
+   "flops_from_fl_nS": 6528.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 361.0,
+    "rbus": 362.5,
+    "store": 11600.0,
+    "prod": 1920.0,
+    "dsum": 1920.0,
+    "res_bits_per_op": 12323.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 356.0,
+    "rbus": 356.0,
+    "store": 11392.0,
+    "csa3": 1920.0,
+    "csa2": 0.0,
+    "comb_s": 2276.0,
+    "comb_c": 80.0,
+    "comb_add": 2276.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 6552.0,
+    "res_bits_per_op": 12104.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 490305.3333333333,
+   "by_stage_vpu_map": {
+    "control": 3599.3333333333335,
+    "exponent": 224.0,
+    "operand": 13346.0,
+    "multiplier": 329336.0,
+    "adder_norm": 42765.333333333336,
+    "result": 848.0,
+    "vpu_sequencer": 70925.33333333333,
+    "lane_operand_bus": 5592.0,
+    "c_regfile": 22645.333333333332,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.7742,
+    "bench_hier2": 0.3379,
+    "e88": 0.22,
+    "e88_flops": 0.2633,
+    "e88_flops_exact": 0.2442,
+    "ratio_hypothesis": 0.1637
+   },
+   "pred_fJ": {
+    "bench_map": 359.7,
+    "bench_hier2": 157.0,
+    "e88": 102.2,
+    "e88_flops": 122.3,
+    "e88_flops_exact": 113.5,
+    "ratio_hypothesis": 76.1
+   }
+  },
+  "fp32.bj_16": {
+   "block": "G",
+   "layout": "bj",
+   "side": "b",
+   "bit": 16,
+   "mask": "0x10000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 4096,
+   "flops": 81241.75,
+   "flops_from_fl_nS": 97628.5,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 41439.19,
+    "rbus": 41447.56,
+    "store": 10894.0,
+    "prod": 4096.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 93780.75,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 32844.5,
+    "rbus": 32812.25,
+    "store": 11144.0,
+    "csa3": 4096.0,
+    "csa2": 0.0,
+    "comb_s": 36940.5,
+    "comb_c": 3515.5,
+    "comb_add": 36689.75,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 81241.75,
+    "res_bits_per_op": 76800.75,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 1319895.6666666667,
+   "by_stage_vpu_map": {
+    "control": 10465.0,
+    "exponent": 11689.333333333334,
+    "operand": 112130.66666666667,
+    "multiplier": 183384.0,
+    "adder_norm": 689614.0,
+    "result": 64453.333333333336,
+    "vpu_sequencer": 96408.0,
+    "lane_operand_bus": 39861.333333333336,
+    "c_regfile": 110866.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 2.4603,
+    "bench_hier2": 2.3374,
+    "e88": 4.2396,
+    "e88_flops": 4.9674,
+    "e88_flops_exact": 4.036,
+    "all_in_list": 2.7124
+   },
+   "pred_fJ": {
+    "bench_map": 535.9,
+    "bench_hier2": 509.1,
+    "e88": 923.4,
+    "e88_flops": 1081.9,
+    "e88_flops_exact": 879.1,
+    "all_in_list": 590.8
+   }
+  },
+  "fp32.bp_16": {
+   "block": "T",
+   "layout": "bp",
+   "side": "b",
+   "bit": 16,
+   "mask": "0x10000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 3968,
+   "flops": 12715.0,
+   "flops_from_fl_nS": 12703.5,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 341.06,
+    "rbus": 341.19,
+    "store": 10918.0,
+    "prod": 3968.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 11600.25,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 350.75,
+    "rbus": 348.5,
+    "store": 11152.0,
+    "csa3": 3968.0,
+    "csa2": 0.0,
+    "comb_s": 4318.75,
+    "comb_c": 110.5,
+    "comb_add": 4317.75,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 12715.0,
+    "res_bits_per_op": 11851.25,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 380448.3333333333,
+   "by_stage_vpu_map": {
+    "control": 3615.6666666666665,
+    "exponent": 3738.6666666666665,
+    "operand": 25539.666666666668,
+    "multiplier": 90274.0,
+    "adder_norm": 155170.33333333334,
+    "result": 763.3333333333334,
+    "vpu_sequencer": 67004.0,
+    "lane_operand_bus": 9811.333333333334,
+    "c_regfile": 23507.333333333332,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.5479,
+    "bench_hier2": 0.4583,
+    "e88": 0.4193,
+    "e88_flops": 0.5089,
+    "e88_flops_exact": 0.4989,
+    "ratio_hypothesis": 0.3754
+   },
+   "pred_fJ": {
+    "bench_map": 123.2,
+    "bench_hier2": 103.0,
+    "e88": 94.3,
+    "e88_flops": 114.4,
+    "e88_flops_exact": 112.2,
+    "ratio_hypothesis": 84.4
+   }
+  },
+  "fp32.aj_16": {
+   "block": "G",
+   "layout": "aj",
+   "side": "a",
+   "bit": 16,
+   "mask": "0x10000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 2048,
+   "flops": 35848.0,
+   "flops_from_fl_nS": 53938.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 22299.0,
+    "rbus": 22345.5,
+    "store": 11264.0,
+    "prod": 2048.0,
+    "dsum": 2048.0,
+    "res_bits_per_op": 55908.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 13820.0,
+    "rbus": 14012.0,
+    "store": 11136.0,
+    "csa3": 2048.0,
+    "csa2": 0.0,
+    "comb_s": 15868.0,
+    "comb_c": 1968.0,
+    "comb_add": 15964.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 35848.0,
+    "res_bits_per_op": 38968.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 699136.0,
+   "by_stage_vpu_map": {
+    "control": 7047.333333333333,
+    "exponent": 2773.3333333333335,
+    "operand": 57362.666666666664,
+    "multiplier": 94136.0,
+    "adder_norm": 334344.0,
+    "result": 31184.0,
+    "vpu_sequencer": 84702.0,
+    "lane_operand_bus": 20130.666666666668,
+    "c_regfile": 66432.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 1.1993,
+    "bench_hier2": 1.0991,
+    "e88": 2.2524,
+    "e88_flops": 2.652,
+    "e88_flops_exact": 1.7222,
+    "all_in_list": 1.8253
+   },
+   "pred_fJ": {
+    "bench_map": 522.4,
+    "bench_hier2": 478.8,
+    "e88": 981.1,
+    "e88_flops": 1155.2,
+    "e88_flops_exact": 750.2,
+    "all_in_list": 795.1
+   }
+  },
+  "fp32.ap_16": {
+   "block": "T",
+   "layout": "ap",
+   "side": "a",
+   "bit": 16,
+   "mask": "0x10000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 1920,
+   "flops": 6556.0,
+   "flops_from_fl_nS": 6548.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 360.0,
+    "rbus": 361.0,
+    "store": 11552.0,
+    "prod": 1920.0,
+    "dsum": 1920.0,
+    "res_bits_per_op": 12273.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 358.0,
+    "rbus": 358.0,
+    "store": 11456.0,
+    "csa3": 1920.0,
+    "csa2": 0.0,
+    "comb_s": 2278.0,
+    "comb_c": 80.0,
+    "comb_add": 2278.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 6556.0,
+    "res_bits_per_op": 12172.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 239441.33333333334,
+   "by_stage_vpu_map": {
+    "control": 3596.6666666666665,
+    "exponent": 202.66666666666666,
+    "operand": 15231.333333333334,
+    "multiplier": 47120.0,
+    "adder_norm": 72976.0,
+    "result": 864.0,
+    "vpu_sequencer": 70053.33333333333,
+    "lane_operand_bus": 5600.0,
+    "c_regfile": 22773.333333333332,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.2635,
+    "bench_hier2": 0.2177,
+    "e88": 0.2176,
+    "e88_flops": 0.2611,
+    "e88_flops_exact": 0.2474,
+    "ratio_hypothesis": 0.2445
+   },
+   "pred_fJ": {
+    "bench_map": 122.4,
+    "bench_hier2": 101.2,
+    "e88": 101.1,
+    "e88_flops": 121.3,
+    "e88_flops_exact": 115.0,
+    "ratio_hypothesis": 113.6
+   }
+  },
+  "fp32.bj_20": {
+   "block": "G",
+   "layout": "bj",
+   "side": "b",
+   "bit": 20,
+   "mask": "0x100000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 4096,
+   "flops": 124471.5,
+   "flops_from_fl_nS": 125112.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 47232.62,
+    "rbus": 47280.62,
+    "store": 10495.0,
+    "prod": 4096.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 105008.25,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 49244.5,
+    "rbus": 49221.5,
+    "store": 10652.0,
+    "csa3": 9216.0,
+    "csa2": 0.0,
+    "comb_s": 55278.5,
+    "comb_c": 3954.0,
+    "comb_add": 56023.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 124471.5,
+    "res_bits_per_op": 109118.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 1943323.0,
+   "by_stage_vpu_map": {
+    "control": 22847.0,
+    "exponent": 37676.0,
+    "operand": 146055.33333333334,
+    "multiplier": 235983.0,
+    "adder_norm": 1028182.0,
+    "result": 136776.66666666666,
+    "vpu_sequencer": 114174.0,
+    "lane_operand_bus": 57903.666666666664,
+    "c_regfile": 162701.33333333334,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 3.7294,
+    "bench_hier2": 3.4127,
+    "e88": 4.7597,
+    "e88_flops": 5.694,
+    "e88_flops_exact": 5.858,
+    "all_in_list": 3.8572
+   },
+   "pred_fJ": {
+    "bench_map": 812.3,
+    "bench_hier2": 743.3,
+    "e88": 1036.7,
+    "e88_flops": 1240.2,
+    "e88_flops_exact": 1275.9,
+    "all_in_list": 840.1
+   }
+  },
+  "fp32.bp_20": {
+   "block": "T",
+   "layout": "bp",
+   "side": "b",
+   "bit": 20,
+   "mask": "0x100000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 3968,
+   "flops": 20076.5,
+   "flops_from_fl_nS": 14117.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 1693.25,
+    "rbus": 1694.38,
+    "store": 10592.0,
+    "prod": 3968.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 13979.62,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 4329.75,
+    "rbus": 4332.25,
+    "store": 10664.0,
+    "csa3": 3968.0,
+    "csa2": 0.0,
+    "comb_s": 7305.75,
+    "comb_c": 2119.0,
+    "comb_add": 6683.75,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 20076.5,
+    "res_bits_per_op": 19326.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 494383.6666666667,
+   "by_stage_vpu_map": {
+    "control": 4977.333333333333,
+    "exponent": 4184.0,
+    "operand": 39270.0,
+    "multiplier": 104549.0,
+    "adder_norm": 210651.66666666666,
+    "result": 11641.333333333334,
+    "vpu_sequencer": 71048.66666666667,
+    "lane_operand_bus": 13536.333333333334,
+    "c_regfile": 33501.333333333336,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.7799,
+    "bench_hier2": 0.6927,
+    "e88": 0.5295,
+    "e88_flops": 0.6297,
+    "e88_flops_exact": 0.9005,
+    "ratio_hypothesis": 0.5338
+   },
+   "pred_fJ": {
+    "bench_map": 175.3,
+    "bench_hier2": 155.7,
+    "e88": 119.0,
+    "e88_flops": 141.6,
+    "e88_flops_exact": 202.5,
+    "ratio_hypothesis": 120.0
+   }
+  },
+  "fp32.aj_20": {
+   "block": "G",
+   "layout": "aj",
+   "side": "a",
+   "bit": 20,
+   "mask": "0x100000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 2048,
+   "flops": 65044.0,
+   "flops_from_fl_nS": 44314.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 22795.5,
+    "rbus": 22835.0,
+    "store": 11992.0,
+    "prod": 2048.0,
+    "dsum": 2048.0,
+    "res_bits_per_op": 57622.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 22994.0,
+    "rbus": 23018.0,
+    "store": 12192.0,
+    "csa3": 7168.0,
+    "csa2": 0.0,
+    "comb_s": 28322.0,
+    "comb_c": 1776.0,
+    "comb_add": 27778.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 65044.0,
+    "res_bits_per_op": 58204.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 1522517.3333333333,
+   "by_stage_vpu_map": {
+    "control": 23356.666666666668,
+    "exponent": 48501.333333333336,
+    "operand": 81890.66666666667,
+    "multiplier": 435034.6666666667,
+    "adder_norm": 608381.3333333334,
+    "result": 83488.0,
+    "vpu_sequencer": 98494.0,
+    "lane_operand_bus": 33904.0,
+    "c_regfile": 108442.66666666667,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 2.8754,
+    "bench_hier2": 2.1279,
+    "e88": 2.3318,
+    "e88_flops": 2.6591,
+    "e88_flops_exact": 2.8327,
+    "all_in_list": 2.4431
+   },
+   "pred_fJ": {
+    "bench_map": 1252.5,
+    "bench_hier2": 926.9,
+    "e88": 1015.7,
+    "e88_flops": 1158.3,
+    "e88_flops_exact": 1233.9,
+    "all_in_list": 1064.2
+   }
+  },
+  "fp32.ap_20": {
+   "block": "T",
+   "layout": "ap",
+   "side": "a",
+   "bit": 20,
+   "mask": "0x100000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 1920,
+   "flops": 6910.0,
+   "flops_from_fl_nS": 6936.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 1031.5,
+    "rbus": 1030.0,
+    "store": 12032.0,
+    "prod": 1920.0,
+    "dsum": 1920.0,
+    "res_bits_per_op": 14093.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 836.0,
+    "rbus": 836.0,
+    "store": 12032.0,
+    "csa3": 1920.0,
+    "csa2": 0.0,
+    "comb_s": 2276.0,
+    "comb_c": 470.0,
+    "comb_add": 2244.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 6910.0,
+    "res_bits_per_op": 13704.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 544225.3333333334,
+   "by_stage_vpu_map": {
+    "control": 3698.0,
+    "exponent": 1034.6666666666667,
+    "operand": 17675.333333333332,
+    "multiplier": 336880.0,
+    "adder_norm": 75965.33333333333,
+    "result": 2672.0,
+    "vpu_sequencer": 71808.0,
+    "lane_operand_bus": 6172.0,
+    "c_regfile": 27296.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.8839,
+    "bench_hier2": 0.4337,
+    "e88": 0.3019,
+    "e88_flops": 0.3483,
+    "e88_flops_exact": 0.3211,
+    "ratio_hypothesis": 0.3272
+   },
+   "pred_fJ": {
+    "bench_map": 410.7,
+    "bench_hier2": 201.5,
+    "e88": 140.3,
+    "e88_flops": 161.8,
+    "e88_flops_exact": 149.2,
+    "ratio_hypothesis": 152.0
+   }
+  },
+  "fp32.bj_22": {
+   "block": "G",
+   "layout": "bj",
+   "side": "b",
+   "bit": 22,
+   "mask": "0x400000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 4096,
+   "flops": 188561.0,
+   "flops_from_fl_nS": 176770.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 50102.81,
+    "rbus": 50135.69,
+    "store": 10924.0,
+    "prod": 4096.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 111162.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 50260.25,
+    "rbus": 50213.25,
+    "store": 11144.0,
+    "csa3": 34048.0,
+    "csa2": 0.0,
+    "comb_s": 74438.25,
+    "comb_c": 5431.5,
+    "comb_add": 74643.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 188561.0,
+    "res_bits_per_op": 111617.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 2411345.3333333335,
+   "by_stage_vpu_map": {
+    "control": 74953.33333333333,
+    "exponent": 145854.66666666666,
+    "operand": 127050.33333333333,
+    "multiplier": 217154.33333333334,
+    "adder_norm": 1348968.3333333333,
+    "result": 144274.0,
+    "vpu_sequencer": 117365.33333333333,
+    "lane_operand_bus": 61319.0,
+    "c_regfile": 173382.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 4.6821,
+    "bench_hier2": 4.0061,
+    "e88": 5.0448,
+    "e88_flops": 6.3673,
+    "e88_flops_exact": 6.4554,
+    "all_in_list": 4.4923,
+    "e79_measured": 4.6893
+   },
+   "pred_fJ": {
+    "bench_map": 1019.8,
+    "bench_hier2": 872.5,
+    "e88": 1098.8,
+    "e88_flops": 1386.8,
+    "e88_flops_exact": 1406.0,
+    "all_in_list": 978.4,
+    "e79_measured": 1021.3
+   }
+  },
+  "fp32.bp_22": {
+   "block": "GT",
+   "layout": "bp",
+   "side": "b",
+   "bit": 22,
+   "mask": "0x400000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 3968,
+   "flops": 18029.75,
+   "flops_from_fl_nS": 17478.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 4351.06,
+    "rbus": 4352.62,
+    "store": 10974.0,
+    "prod": 3968.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 19677.69,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 4400.75,
+    "rbus": 4402.25,
+    "store": 10808.0,
+    "csa3": 3968.0,
+    "csa2": 0.0,
+    "comb_s": 5764.75,
+    "comb_c": 2738.5,
+    "comb_add": 5558.5,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 18029.75,
+    "res_bits_per_op": 19611.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 438489.3333333333,
+   "by_stage_vpu_map": {
+    "control": 9471.666666666666,
+    "exponent": 4037.3333333333335,
+    "operand": 23631.0,
+    "multiplier": 92993.0,
+    "adder_norm": 178097.33333333334,
+    "result": 10876.666666666666,
+    "vpu_sequencer": 70958.0,
+    "lane_operand_bus": 13363.0,
+    "c_regfile": 34037.333333333336,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.6661,
+    "bench_hier2": 0.6451,
+    "e88": 0.7935,
+    "e88_flops": 0.9189,
+    "e88_flops_exact": 0.8983,
+    "ratio_hypothesis": 0.6217,
+    "e79_measured": 0.6492
+   },
+   "pred_fJ": {
+    "bench_map": 149.8,
+    "bench_hier2": 145.0,
+    "e88": 178.4,
+    "e88_flops": 206.6,
+    "e88_flops_exact": 202.0,
+    "ratio_hypothesis": 139.8,
+    "e79_measured": 146.0
+   }
+  },
+  "fp32.aj_22": {
+   "block": "G",
+   "layout": "aj",
+   "side": "a",
+   "bit": 22,
+   "mask": "0x400000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 2048,
+   "flops": 73356.0,
+   "flops_from_fl_nS": 70180.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 24494.0,
+    "rbus": 24508.0,
+    "store": 9864.0,
+    "prod": 2048.0,
+    "dsum": 2048.0,
+    "res_bits_per_op": 58866.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 25076.0,
+    "rbus": 25268.0,
+    "store": 9664.0,
+    "csa3": 10240.0,
+    "csa2": 0.0,
+    "comb_s": 30196.0,
+    "comb_c": 3072.0,
+    "comb_add": 29848.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 73356.0,
+    "res_bits_per_op": 60008.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 1856069.3333333333,
+   "by_stage_vpu_map": {
+    "control": 27778.0,
+    "exponent": 36010.666666666664,
+    "operand": 70677.33333333333,
+    "multiplier": 826162.6666666666,
+    "adder_norm": 586077.3333333334,
+    "result": 75354.66666666667,
+    "vpu_sequencer": 97995.33333333333,
+    "lane_operand_bus": 32488.0,
+    "c_regfile": 102501.33333333333,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 3.5544,
+    "bench_hier2": 2.4195,
+    "e88": 2.3894,
+    "e88_flops": 2.911,
+    "e88_flops_exact": 2.9788,
+    "all_in_list": 3.164
+   },
+   "pred_fJ": {
+    "bench_map": 1548.3,
+    "bench_hier2": 1053.9,
+    "e88": 1040.8,
+    "e88_flops": 1268.1,
+    "e88_flops_exact": 1297.6,
+    "all_in_list": 1378.3
+   }
+  },
+  "fp32.ap_22": {
+   "block": "GT",
+   "layout": "ap",
+   "side": "a",
+   "bit": 22,
+   "mask": "0x400000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 1920,
+   "flops": 9424.0,
+   "flops_from_fl_nS": 9748.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 2242.0,
+    "rbus": 2244.0,
+    "store": 9872.0,
+    "prod": 1920.0,
+    "dsum": 1920.0,
+    "res_bits_per_op": 14358.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 2114.0,
+    "rbus": 2114.0,
+    "store": 8768.0,
+    "csa3": 1920.0,
+    "csa2": 0.0,
+    "comb_s": 3074.0,
+    "comb_c": 1328.0,
+    "comb_add": 3102.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 9424.0,
+    "res_bits_per_op": 12996.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 942457.3333333334,
+   "by_stage_vpu_map": {
+    "control": 6556.666666666667,
+    "exponent": 1802.6666666666667,
+    "operand": 15146.0,
+    "multiplier": 709848.0,
+    "adder_norm": 93888.0,
+    "result": 6202.666666666667,
+    "vpu_sequencer": 72909.33333333333,
+    "lane_operand_bus": 7549.333333333333,
+    "c_regfile": 27530.666666666668,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 1.6946,
+    "bench_hier2": 0.8498,
+    "e88": 0.3142,
+    "e88_flops": 0.3817,
+    "e88_flops_exact": 0.3071,
+    "ratio_hypothesis": 0.4238
+   },
+   "pred_fJ": {
+    "bench_map": 787.4,
+    "bench_hier2": 394.8,
+    "e88": 146.0,
+    "e88_flops": 177.4,
+    "e88_flops_exact": 142.7,
+    "ratio_hypothesis": 196.9
+   }
+  },
+  "fp32.bj_23": {
+   "block": "G",
+   "layout": "bj",
+   "side": "b",
+   "bit": 23,
+   "mask": "0x800000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 4096,
+   "flops": 815.0,
+   "flops_from_fl_nS": 783.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 7186.19,
+    "rbus": 7186.69,
+    "store": 10838.0,
+    "prod": 4096.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 25210.88,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 6368.25,
+    "rbus": 6368.25,
+    "store": 11272.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 352.25,
+    "comb_c": 110.5,
+    "comb_add": 352.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 815.0,
+    "res_bits_per_op": 24008.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 456405.0,
+   "by_stage_vpu_map": {
+    "control": 41841.333333333336,
+    "exponent": 211024.66666666666,
+    "operand": 24176.0,
+    "multiplier": 994.0,
+    "adder_norm": 16935.666666666668,
+    "result": 19708.0,
+    "vpu_sequencer": 73969.33333333333,
+    "lane_operand_bus": 16510.0,
+    "c_regfile": 42030.0,
+    "other": 9216.0
+   },
+   "pred_w": {
+    "bench_map": 0.7025,
+    "bench_hier2": 0.3839,
+    "e88": 1.0632,
+    "e88_flops": 1.0632,
+    "e88_flops_exact": 0.9861,
+    "all_in_list": 0.773
+   },
+   "pred_fJ": {
+    "bench_map": 153.0,
+    "bench_hier2": 83.6,
+    "e88": 231.6,
+    "e88_flops": 231.6,
+    "e88_flops_exact": 214.8,
+    "all_in_list": 168.4
+   }
+  },
+  "fp32.bp_23": {
+   "block": "G",
+   "layout": "bp",
+   "side": "b",
+   "bit": 23,
+   "mask": "0x800000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 3968,
+   "flops": 156523.0,
+   "flops_from_fl_nS": 157546.25,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 5290.56,
+    "rbus": 5290.25,
+    "store": 10906.0,
+    "prod": 3968.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 21486.81,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 6682.25,
+    "rbus": 6682.75,
+    "store": 10552.0,
+    "csa3": 51584.0,
+    "csa2": 0.0,
+    "comb_s": 51151.75,
+    "comb_c": 4134.5,
+    "comb_add": 49652.75,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 156523.0,
+    "res_bits_per_op": 23917.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 1303403.3333333333,
+   "by_stage_vpu_map": {
+    "control": 64404.666666666664,
+    "exponent": 122354.0,
+    "operand": 42127.0,
+    "multiplier": 20314.0,
+    "adder_norm": 896995.6666666666,
+    "result": 17101.333333333332,
+    "vpu_sequencer": 73824.66666666667,
+    "lane_operand_bus": 15747.333333333334,
+    "c_regfile": 41574.666666666664,
+    "other": 8960.0
+   },
+   "pred_w": {
+    "bench_map": 2.4267,
+    "bench_hier2": 1.7663,
+    "e88": 0.8773,
+    "e88_flops": 2.0553,
+    "e88_flops_exact": 2.1386,
+    "ratio_hypothesis": 0.107
+   },
+   "pred_fJ": {
+    "bench_map": 545.6,
+    "bench_hier2": 397.1,
+    "e88": 197.2,
+    "e88_flops": 462.1,
+    "e88_flops_exact": 480.8,
+    "ratio_hypothesis": 24.1
+   }
+  },
+  "fp32.aj_23": {
+   "block": "T",
+   "layout": "aj",
+   "side": "a",
+   "bit": 23,
+   "mask": "0x800000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 2048,
+   "flops": 792.0,
+   "flops_from_fl_nS": 764.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 3547.0,
+    "rbus": 3550.5,
+    "store": 11216.0,
+    "prod": 2048.0,
+    "dsum": 2048.0,
+    "res_bits_per_op": 18313.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 2916.0,
+    "rbus": 2916.0,
+    "store": 11392.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 356.0,
+    "comb_c": 80.0,
+    "comb_add": 356.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 792.0,
+    "res_bits_per_op": 17224.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 312600.0,
+   "by_stage_vpu_map": {
+    "control": 36362.0,
+    "exponent": 113706.66666666667,
+    "operand": 16138.666666666666,
+    "multiplier": 1016.0,
+    "adder_norm": 11746.666666666666,
+    "result": 13136.0,
+    "vpu_sequencer": 74880.66666666667,
+    "lane_operand_bus": 9688.0,
+    "c_regfile": 34901.333333333336,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.4124,
+    "bench_hier2": 0.2113,
+    "e88": 0.5108,
+    "e88_flops": 0.5108,
+    "e88_flops_exact": 0.4515,
+    "all_in_list": 0.6181
+   },
+   "pred_fJ": {
+    "bench_map": 179.7,
+    "bench_hier2": 92.0,
+    "e88": 222.5,
+    "e88_flops": 222.5,
+    "e88_flops_exact": 196.7,
+    "all_in_list": 269.2
+   }
+  },
+  "fp32.ap_23": {
+   "block": "T",
+   "layout": "ap",
+   "side": "a",
+   "bit": 23,
+   "mask": "0x800000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 1920,
+   "flops": 58620.0,
+   "flops_from_fl_nS": 58240.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 2632.0,
+    "rbus": 2633.0,
+    "store": 11040.0,
+    "prod": 1920.0,
+    "dsum": 1920.0,
+    "res_bits_per_op": 16305.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 2302.0,
+    "rbus": 2302.0,
+    "store": 11200.0,
+    "csa3": 19200.0,
+    "csa2": 0.0,
+    "comb_s": 18382.0,
+    "comb_c": 2000.0,
+    "comb_add": 19038.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 58620.0,
+    "res_bits_per_op": 15804.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 571585.3333333334,
+   "by_stage_vpu_map": {
+    "control": 37714.0,
+    "exponent": 44405.333333333336,
+    "operand": 17530.0,
+    "multiplier": 5704.0,
+    "adder_norm": 353098.6666666667,
+    "result": 3973.3333333333335,
+    "vpu_sequencer": 72888.0,
+    "lane_operand_bus": 7040.0,
+    "c_regfile": 28208.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.9396,
+    "bench_hier2": 0.6612,
+    "e88": 0.4044,
+    "e88_flops": 0.8363,
+    "e88_flops_exact": 0.8069,
+    "ratio_hypothesis": 0.0828
+   },
+   "pred_fJ": {
+    "bench_map": 436.6,
+    "bench_hier2": 307.2,
+    "e88": 187.9,
+    "e88_flops": 388.6,
+    "e88_flops_exact": 374.9,
+    "ratio_hypothesis": 38.5
+   }
+  },
+  "fp32.bj_27": {
+   "block": "G",
+   "layout": "bj",
+   "side": "b",
+   "bit": 27,
+   "mask": "0x8000000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 4096,
+   "flops": 815.0,
+   "flops_from_fl_nS": 783.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 4434.19,
+    "rbus": 4434.69,
+    "store": 10838.0,
+    "prod": 4096.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 19706.88,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 4448.25,
+    "rbus": 4448.25,
+    "store": 11272.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 352.25,
+    "comb_c": 110.5,
+    "comb_add": 352.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 815.0,
+    "res_bits_per_op": 20168.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 322593.6666666667,
+   "by_stage_vpu_map": {
+    "control": 24092.0,
+    "exponent": 142075.33333333334,
+    "operand": 20924.666666666668,
+    "multiplier": 994.0,
+    "adder_norm": 14375.666666666666,
+    "result": 764.0,
+    "vpu_sequencer": 71750.66666666667,
+    "lane_operand_bus": 11219.333333333334,
+    "c_regfile": 35374.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.4302,
+    "bench_hier2": 0.2845,
+    "e88": 0.8082,
+    "e88_flops": 0.8082,
+    "e88_flops_exact": 0.8082,
+    "all_in_list": 0.4946
+   },
+   "pred_fJ": {
+    "bench_map": 93.7,
+    "bench_hier2": 62.0,
+    "e88": 176.0,
+    "e88_flops": 176.0,
+    "e88_flops_exact": 176.0,
+    "all_in_list": 107.7
+   }
+  },
+  "fp32.bp_27": {
+   "block": "G",
+   "layout": "bp",
+   "side": "b",
+   "bit": 27,
+   "mask": "0x8000000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 3968,
+   "flops": 166343.0,
+   "flops_from_fl_nS": 165297.5,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 6829.75,
+    "rbus": 6831.0,
+    "store": 6624.0,
+    "prod": 3968.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 20284.75,
+    "chg_rate": 0.5,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 6532.0,
+    "rbus": 6534.0,
+    "store": 6336.0,
+    "csa3": 53320.0,
+    "csa2": 0.0,
+    "comb_s": 55171.0,
+    "comb_c": 4802.5,
+    "comb_add": 53049.5,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 166343.0,
+    "res_bits_per_op": 19402.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 1353160.3333333333,
+   "by_stage_vpu_map": {
+    "control": 93005.33333333333,
+    "exponent": 152726.0,
+    "operand": 34927.333333333336,
+    "multiplier": 19279.0,
+    "adder_norm": 912378.3333333334,
+    "result": 14784.0,
+    "vpu_sequencer": 73376.66666666667,
+    "lane_operand_bus": 15738.333333333334,
+    "c_regfile": 35921.333333333336,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 2.528,
+    "bench_hier2": 1.7988,
+    "e88": 0.8216,
+    "e88_flops": 2.0579,
+    "e88_flops_exact": 2.0032,
+    "ratio_hypothesis": 0.0684
+   },
+   "pred_fJ": {
+    "bench_map": 568.4,
+    "bench_hier2": 404.4,
+    "e88": 184.7,
+    "e88_flops": 462.7,
+    "e88_flops_exact": 450.4,
+    "ratio_hypothesis": 15.4
+   }
+  },
+  "fp32.aj_27": {
+   "block": "T",
+   "layout": "aj",
+   "side": "a",
+   "bit": 27,
+   "mask": "0x8000000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 2048,
+   "flops": 792.0,
+   "flops_from_fl_nS": 764.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 2395.0,
+    "rbus": 2398.5,
+    "store": 11216.0,
+    "prod": 2048.0,
+    "dsum": 2048.0,
+    "res_bits_per_op": 16009.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 2404.0,
+    "rbus": 2404.0,
+    "store": 11392.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 356.0,
+    "comb_c": 80.0,
+    "comb_add": 356.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 792.0,
+    "res_bits_per_op": 16200.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 239901.33333333334,
+   "by_stage_vpu_map": {
+    "control": 28170.0,
+    "exponent": 77269.33333333333,
+    "operand": 13562.666666666666,
+    "multiplier": 1016.0,
+    "adder_norm": 10381.333333333334,
+    "result": 848.0,
+    "vpu_sequencer": 72768.66666666667,
+    "lane_operand_bus": 6104.0,
+    "c_regfile": 28757.333333333332,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.2644,
+    "bench_hier2": 0.1432,
+    "e88": 0.4041,
+    "e88_flops": 0.4041,
+    "e88_flops_exact": 0.4041,
+    "all_in_list": 0.5152
+   },
+   "pred_fJ": {
+    "bench_map": 115.2,
+    "bench_hier2": 62.4,
+    "e88": 176.0,
+    "e88_flops": 176.0,
+    "e88_flops_exact": 176.0,
+    "all_in_list": 224.4
+   }
+  },
+  "fp32.ap_27": {
+   "block": "T",
+   "layout": "ap",
+   "side": "a",
+   "bit": 27,
+   "mask": "0x8000000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 1920,
+   "flops": 70088.0,
+   "flops_from_fl_nS": 69806.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 3396.5,
+    "rbus": 3400.0,
+    "store": 6400.0,
+    "prod": 1920.0,
+    "dsum": 1920.0,
+    "res_bits_per_op": 13196.5,
+    "chg_rate": 0.5,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 3468.0,
+    "rbus": 3468.0,
+    "store": 6528.0,
+    "csa3": 21120.0,
+    "csa2": 0.0,
+    "comb_s": 23628.0,
+    "comb_c": 2432.0,
+    "comb_add": 22908.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 70088.0,
+    "res_bits_per_op": 13464.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 705401.3333333334,
+   "by_stage_vpu_map": {
+    "control": 62412.666666666664,
+    "exponent": 82826.66666666667,
+    "operand": 19667.333333333332,
+    "multiplier": 9248.0,
+    "adder_norm": 414874.6666666667,
+    "result": 6890.666666666667,
+    "vpu_sequencer": 73832.0,
+    "lane_operand_bus": 8278.666666666666,
+    "c_regfile": 26346.666666666668,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 1.212,
+    "bench_hier2": 0.8576,
+    "e88": 0.2604,
+    "e88_flops": 0.7792,
+    "e88_flops_exact": 0.7847,
+    "ratio_hypothesis": 0.069
+   },
+   "pred_fJ": {
+    "bench_map": 563.2,
+    "bench_hier2": 398.5,
+    "e88": 121.0,
+    "e88_flops": 362.1,
+    "e88_flops_exact": 364.6,
+    "ratio_hypothesis": 32.1
+   }
+  },
+  "fp32.bj_30": {
+   "block": "G",
+   "layout": "bj",
+   "side": "b",
+   "bit": 30,
+   "mask": "0x40000000",
+   "zero": "fp32.hq_e64",
+   "designed_flips_per_op": 4096,
+   "flops": 815.0,
+   "flops_from_fl_nS": 783.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 4434.19,
+    "rbus": 4434.69,
+    "store": 10838.0,
+    "prod": 16384.0,
+    "dsum": 16384.0,
+    "res_bits_per_op": 19706.88,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 4448.25,
+    "rbus": 4448.25,
+    "store": 11272.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 352.25,
+    "comb_c": 110.5,
+    "comb_add": 352.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 815.0,
+    "res_bits_per_op": 20168.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 591071.6666666666,
+   "by_stage_vpu_map": {
+    "control": 76998.66666666667,
+    "exponent": 333563.3333333333,
+    "operand": 17888.0,
+    "multiplier": 994.0,
+    "adder_norm": 20349.0,
+    "result": 13052.0,
+    "vpu_sequencer": 76609.33333333333,
+    "lane_operand_bus": 14291.333333333334,
+    "c_regfile": 36302.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.967,
+    "bench_hier2": 0.5373,
+    "e88": 1.8276,
+    "e88_flops": 1.8276,
+    "e88_flops_exact": 1.8276,
+    "all_in_list": 0.7156
+   },
+   "pred_fJ": {
+    "bench_map": 210.6,
+    "bench_hier2": 117.0,
+    "e88": 398.1,
+    "e88_flops": 398.1,
+    "e88_flops_exact": 398.1,
+    "all_in_list": 155.9
+   }
+  },
+  "fp32.bp_30": {
+   "block": "G",
+   "layout": "bp",
+   "side": "b",
+   "bit": 30,
+   "mask": "0x40000000",
+   "zero": "fp32.hq_e64",
+   "designed_flips_per_op": 3968,
+   "flops": 139438.0,
+   "flops_from_fl_nS": 139143.5,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 6351.12,
+    "rbus": 6351.12,
+    "store": 6556.0,
+    "prod": 15872.0,
+    "dsum": 15872.0,
+    "res_bits_per_op": 19258.25,
+    "chg_rate": 0.5,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 6138.0,
+    "rbus": 6138.0,
+    "store": 6336.0,
+    "csa3": 44640.0,
+    "csa2": 0.0,
+    "comb_s": 46097.0,
+    "comb_c": 4603.5,
+    "comb_add": 44097.5,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 139438.0,
+    "res_bits_per_op": 18612.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 1225469.6666666667,
+   "by_stage_vpu_map": {
+    "control": 87165.66666666667,
+    "exponent": 194690.33333333334,
+    "operand": 33553.333333333336,
+    "multiplier": 18104.0,
+    "adder_norm": 747895.6666666666,
+    "result": 13888.0,
+    "vpu_sequencer": 77960.0,
+    "lane_operand_bus": 15357.333333333334,
+    "c_regfile": 35831.333333333336,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 2.2584,
+    "bench_hier2": 1.6012,
+    "e88": 1.7616,
+    "e88_flops": 2.8013,
+    "e88_flops_exact": 2.752,
+    "ratio_hypothesis": 0.099
+   },
+   "pred_fJ": {
+    "bench_map": 507.7,
+    "bench_hier2": 360.0,
+    "e88": 396.0,
+    "e88_flops": 629.8,
+    "e88_flops_exact": 618.7,
+    "ratio_hypothesis": 22.3
+   }
+  },
+  "fp32.aj_30": {
+   "block": "T",
+   "layout": "aj",
+   "side": "a",
+   "bit": 30,
+   "mask": "0x40000000",
+   "zero": "fp32.aq_e64",
+   "designed_flips_per_op": 2048,
+   "flops": 792.0,
+   "flops_from_fl_nS": 764.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 2395.0,
+    "rbus": 2398.5,
+    "store": 11216.0,
+    "prod": 8192.0,
+    "dsum": 8192.0,
+    "res_bits_per_op": 16009.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 2404.0,
+    "rbus": 2404.0,
+    "store": 11392.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 356.0,
+    "comb_c": 80.0,
+    "comb_add": 356.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 792.0,
+    "res_bits_per_op": 16200.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 371490.6666666667,
+   "by_stage_vpu_map": {
+    "control": 52746.0,
+    "exponent": 170624.0,
+    "operand": 12069.333333333334,
+    "multiplier": 1016.0,
+    "adder_norm": 12429.333333333334,
+    "result": 6992.0,
+    "vpu_sequencer": 77632.66666666667,
+    "lane_operand_bus": 7640.0,
+    "c_regfile": 29317.333333333332,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.5216,
+    "bench_hier2": 0.2631,
+    "e88": 0.9138,
+    "e88_flops": 0.9138,
+    "e88_flops_exact": 0.9138,
+    "all_in_list": 0.391
+   },
+   "pred_fJ": {
+    "bench_map": 227.2,
+    "bench_hier2": 114.6,
+    "e88": 398.1,
+    "e88_flops": 398.1,
+    "e88_flops_exact": 398.1,
+    "all_in_list": 170.3
+   }
+  },
+  "fp32.ap_30": {
+   "block": "T",
+   "layout": "ap",
+   "side": "a",
+   "bit": 30,
+   "mask": "0x40000000",
+   "zero": "fp32.aq_e64",
+   "designed_flips_per_op": 1920,
+   "flops": 75000.0,
+   "flops_from_fl_nS": 74160.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 2857.5,
+    "rbus": 2857.5,
+    "store": 6096.0,
+    "prod": 7680.0,
+    "dsum": 7680.0,
+    "res_bits_per_op": 11811.0,
+    "chg_rate": 0.5,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 3060.0,
+    "rbus": 3060.0,
+    "store": 6528.0,
+    "csa3": 23040.0,
+    "csa2": 0.0,
+    "comb_s": 25140.0,
+    "comb_c": 2400.0,
+    "comb_add": 24420.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 75000.0,
+    "res_bits_per_op": 12648.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 708153.3333333334,
+   "by_stage_vpu_map": {
+    "control": 59938.0,
+    "exponent": 102160.0,
+    "operand": 18320.666666666668,
+    "multiplier": 8160.0,
+    "adder_norm": 400160.0,
+    "result": 6080.0,
+    "vpu_sequencer": 78328.0,
+    "lane_operand_bus": 7924.0,
+    "c_regfile": 26058.666666666668,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 1.207,
+    "bench_hier2": 0.8168,
+    "e88": 0.6741,
+    "e88_flops": 1.2256,
+    "e88_flops_exact": 1.2617,
+    "ratio_hypothesis": 0.0524
+   },
+   "pred_fJ": {
+    "bench_map": 560.8,
+    "bench_hier2": 379.5,
+    "e88": 313.2,
+    "e88_flops": 569.5,
+    "e88_flops_exact": 586.2,
+    "ratio_hypothesis": 24.3
+   }
+  },
+  "fp32.bj_31": {
+   "block": "G",
+   "layout": "bj",
+   "side": "b",
+   "bit": 31,
+   "mask": "0x80000000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 4096,
+   "flops": 815.0,
+   "flops_from_fl_nS": 783.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 4434.19,
+    "rbus": 4434.69,
+    "store": 10838.0,
+    "prod": 4096.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 19706.88,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 4448.25,
+    "rbus": 4448.25,
+    "store": 11272.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 352.25,
+    "comb_c": 110.5,
+    "comb_add": 352.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 815.0,
+    "res_bits_per_op": 20168.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 426049.6666666667,
+   "by_stage_vpu_map": {
+    "control": 212849.33333333334,
+    "exponent": 251.33333333333334,
+    "operand": 9692.666666666666,
+    "multiplier": 994.0,
+    "adder_norm": 7207.666666666667,
+    "result": 71590.66666666667,
+    "vpu_sequencer": 72006.66666666667,
+    "lane_operand_bus": 14291.333333333334,
+    "c_regfile": 36142.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.6408,
+    "bench_hier2": 0.4074,
+    "e88": 0.8082,
+    "e88_flops": 0.8082,
+    "e88_flops_exact": 0.8082,
+    "all_in_list": 0.5464
+   },
+   "pred_fJ": {
+    "bench_map": 139.6,
+    "bench_hier2": 88.7,
+    "e88": 176.0,
+    "e88_flops": 176.0,
+    "e88_flops_exact": 176.0,
+    "all_in_list": 119.0
+   }
+  },
+  "fp32.bp_31": {
+   "block": "G",
+   "layout": "bp",
+   "side": "b",
+   "bit": 31,
+   "mask": "0x80000000",
+   "zero": "fp32.hq",
+   "designed_flips_per_op": 3968,
+   "flops": 237472.0,
+   "flops_from_fl_nS": 237472.0,
+   "alt": 2048.0,
+   "stream": {
+    "cbus": 4256.0,
+    "rbus": 4256.0,
+    "store": 72704.0,
+    "prod": 3968.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 81216.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 4256.0,
+    "rbus": 4256.0,
+    "store": 72704.0,
+    "csa3": 106496.0,
+    "csa2": 0.0,
+    "comb_s": 106496.0,
+    "comb_c": 23040.0,
+    "comb_add": 1440.0,
+    "N_alt1": 2048.0,
+    "N_alt2": 0.0,
+    "flops": 237472.0,
+    "res_bits_per_op": 81216.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 1348072.0,
+   "by_stage_vpu_map": {
+    "control": 208482.0,
+    "exponent": 66992.0,
+    "operand": 11492.0,
+    "multiplier": 4320.0,
+    "adder_norm": 839712.0,
+    "result": 41728.0,
+    "vpu_sequencer": 69614.0,
+    "lane_operand_bus": 13440.0,
+    "c_regfile": 91268.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 2.5177,
+    "bench_hier2": 2.0748,
+    "e88": 3.6442,
+    "e88_flops": 5.4228,
+    "e88_flops_exact": 5.4012,
+    "ratio_hypothesis": 0.0756
+   },
+   "pred_fJ": {
+    "bench_map": 566.0,
+    "bench_hier2": 466.5,
+    "e88": 819.3,
+    "e88_flops": 1219.2,
+    "e88_flops_exact": 1214.3,
+    "ratio_hypothesis": 17.0
+   }
+  },
+  "fp32.aj_31": {
+   "block": "T",
+   "layout": "aj",
+   "side": "a",
+   "bit": 31,
+   "mask": "0x80000000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 2048,
+   "flops": 792.0,
+   "flops_from_fl_nS": 764.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 2395.0,
+    "rbus": 2398.5,
+    "store": 11216.0,
+    "prod": 2048.0,
+    "dsum": 2048.0,
+    "res_bits_per_op": 16009.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 2404.0,
+    "rbus": 2404.0,
+    "store": 11392.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 356.0,
+    "comb_c": 80.0,
+    "comb_add": 356.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 792.0,
+    "res_bits_per_op": 16200.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 261373.33333333334,
+   "by_stage_vpu_map": {
+    "control": 107359.33333333333,
+    "exponent": 213.33333333333334,
+    "operand": 7962.666666666667,
+    "multiplier": 1016.0,
+    "adder_norm": 6285.333333333333,
+    "result": 28154.666666666668,
+    "vpu_sequencer": 72912.66666666667,
+    "lane_operand_bus": 7640.0,
+    "c_regfile": 28805.333333333332,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 0.3081,
+    "bench_hier2": 0.1953,
+    "e88": 0.4041,
+    "e88_flops": 0.4041,
+    "e88_flops_exact": 0.4041,
+    "all_in_list": 0.5444
+   },
+   "pred_fJ": {
+    "bench_map": 134.2,
+    "bench_hier2": 85.1,
+    "e88": 176.0,
+    "e88_flops": 176.0,
+    "e88_flops_exact": 176.0,
+    "all_in_list": 237.1
+   }
+  },
+  "fp32.ap_31": {
+   "block": "T",
+   "layout": "ap",
+   "side": "a",
+   "bit": 31,
+   "mask": "0x80000000",
+   "zero": "fp32.aq",
+   "designed_flips_per_op": 1920,
+   "flops": 120320.0,
+   "flops_from_fl_nS": 120320.0,
+   "alt": 1024.0,
+   "stream": {
+    "cbus": 3328.0,
+    "rbus": 3328.0,
+    "store": 75776.0,
+    "prod": 1920.0,
+    "dsum": 1920.0,
+    "res_bits_per_op": 82432.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 3328.0,
+    "rbus": 3328.0,
+    "store": 75776.0,
+    "csa3": 53248.0,
+    "csa2": 0.0,
+    "comb_s": 53248.0,
+    "comb_c": 12288.0,
+    "comb_add": 1536.0,
+    "N_alt1": 1024.0,
+    "N_alt2": 0.0,
+    "flops": 120320.0,
+    "res_bits_per_op": 82432.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 844540.0,
+   "by_stage_vpu_map": {
+    "control": 123698.0,
+    "exponent": 69184.0,
+    "operand": 10658.0,
+    "multiplier": 4672.0,
+    "adder_norm": 434976.0,
+    "result": 27680.0,
+    "vpu_sequencer": 72536.0,
+    "lane_operand_bus": 8304.0,
+    "c_regfile": 91808.0,
+    "other": 1024.0
+   },
+   "pred_w": {
+    "bench_map": 1.4953,
+    "bench_hier2": 1.2438,
+    "e88": 3.4677,
+    "e88_flops": 4.3661,
+    "e88_flops_exact": 4.3571,
+    "ratio_hypothesis": 0.0729
+   },
+   "pred_fJ": {
+    "bench_map": 694.8,
+    "bench_hier2": 577.9,
+    "e88": 1611.2,
+    "e88_flops": 2028.7,
+    "e88_flops_exact": 2024.5,
+    "ratio_hypothesis": 33.9
+   }
+  },
+  "fp16.hq": {
+   "block": "GT",
+   "layout": "zero",
+   "side": "b",
+   "bit": null,
+   "mask": null,
+   "zero": null,
+   "designed_flips_per_op": 0,
+   "flops": 684.0,
+   "flops_from_fl_nS": 674.25,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 336.5,
+    "rbus": 336.56,
+    "store": 10770.0,
+    "prod": 0.0,
+    "dsum": 0.0,
+    "res_bits_per_op": 11443.06,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 341.25,
+    "rbus": 342.75,
+    "store": 10968.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 341.25,
+    "comb_c": 0.0,
+    "comb_add": 342.75,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 684.0,
+    "res_bits_per_op": 11652.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 112362.33333333333,
+   "by_stage_vpu_map": {
+    "control": 5292.0,
+    "exponent": 642.0,
+    "operand": 1402.3333333333333,
+    "multiplier": 1011.0,
+    "adder_norm": 5878.666666666667,
+    "result": 800.0,
+    "vpu_sequencer": 68258.66666666667,
+    "lane_operand_bus": 5587.666666666667,
+    "c_regfile": 22978.0,
+    "other": 512.0
+   }
+  },
+  "fp16.aq": {
+   "block": "GT",
+   "layout": "zero",
+   "side": "a",
+   "bit": null,
+   "mask": null,
+   "zero": null,
+   "designed_flips_per_op": 0,
+   "flops": 710.0,
+   "flops_from_fl_nS": 696.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 360.0,
+    "rbus": 357.5,
+    "store": 11440.0,
+    "prod": 0.0,
+    "dsum": 0.0,
+    "res_bits_per_op": 12157.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 354.0,
+    "rbus": 356.0,
+    "store": 11392.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 354.0,
+    "comb_c": 0.0,
+    "comb_add": 356.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 710.0,
+    "res_bits_per_op": 12102.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 112684.0,
+   "by_stage_vpu_map": {
+    "control": 5180.666666666667,
+    "exponent": 394.6666666666667,
+    "operand": 1616.0,
+    "multiplier": 1088.0,
+    "adder_norm": 6152.0,
+    "result": 794.6666666666666,
+    "vpu_sequencer": 66143.33333333333,
+    "lane_operand_bus": 5613.333333333333,
+    "c_regfile": 25189.333333333332,
+    "other": 512.0
+   }
+  },
+  "fp16.bj_0": {
+   "block": "G",
+   "layout": "bj",
+   "side": "b",
+   "bit": 0,
+   "mask": "0x1",
+   "zero": "fp16.hq",
+   "designed_flips_per_op": 8192,
+   "flops": 31279.75,
+   "flops_from_fl_nS": 67966.25,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 34740.31,
+    "rbus": 34784.06,
+    "store": 10792.0,
+    "prod": 8192.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 80316.38,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 15375.0,
+    "rbus": 15440.75,
+    "store": 10904.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 15375.0,
+    "comb_c": 0.0,
+    "comb_add": 15904.75,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 31279.75,
+    "res_bits_per_op": 41719.75,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 1045415.0,
+   "by_stage_vpu_map": {
+    "control": 19623.0,
+    "exponent": 95858.33333333333,
+    "operand": 102667.66666666667,
+    "multiplier": 304686.0,
+    "adder_norm": 303435.3333333333,
+    "result": 36427.333333333336,
+    "vpu_sequencer": 83528.0,
+    "lane_operand_bus": 30034.0,
+    "c_regfile": 68643.33333333333,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 1.8932,
+    "bench_hier2": 1.5882,
+    "e88": 4.555,
+    "e88_flops": 5.0607,
+    "e88_flops_exact": 2.525,
+    "all_in_list": 1.8204,
+    "e79_measured": 1.8204
+   },
+   "pred_fJ": {
+    "bench_map": 206.2,
+    "bench_hier2": 173.0,
+    "e88": 496.1,
+    "e88_flops": 551.2,
+    "e88_flops_exact": 275.0,
+    "all_in_list": 198.3,
+    "e79_measured": 198.3
+   }
+  },
+  "fp16.bj_9": {
+   "block": "G",
+   "layout": "bj",
+   "side": "b",
+   "bit": 9,
+   "mask": "0x200",
+   "zero": "fp16.hq",
+   "designed_flips_per_op": 8192,
+   "flops": 110302.5,
+   "flops_from_fl_nS": 112212.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 48657.12,
+    "rbus": 48736.19,
+    "store": 10604.0,
+    "prod": 8192.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 107997.31,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 46315.25,
+    "rbus": 46138.75,
+    "store": 10888.0,
+    "csa3": 6784.0,
+    "csa2": 6784.0,
+    "comb_s": 44139.25,
+    "comb_c": 6784.0,
+    "comb_add": 45811.25,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 110302.5,
+    "res_bits_per_op": 103342.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 2337837.0,
+   "by_stage_vpu_map": {
+    "control": 110992.0,
+    "exponent": 177366.66666666666,
+    "operand": 151482.33333333334,
+    "multiplier": 322498.3333333333,
+    "adder_norm": 1060544.6666666667,
+    "result": 152649.33333333334,
+    "vpu_sequencer": 119244.0,
+    "lane_operand_bus": 66993.66666666667,
+    "c_regfile": 175554.0,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 4.5156,
+    "bench_hier2": 3.8961,
+    "e88": 6.1671,
+    "e88_flops": 7.0052,
+    "e88_flops_exact": 6.7075,
+    "all_in_list": 4.3897,
+    "e79_measured": 4.3897
+   },
+   "pred_fJ": {
+    "bench_map": 491.8,
+    "bench_hier2": 424.3,
+    "e88": 671.7,
+    "e88_flops": 763.0,
+    "e88_flops_exact": 730.6,
+    "all_in_list": 478.1,
+    "e79_measured": 478.1
+   }
+  },
+  "fp16.bj_12": {
+   "block": "T",
+   "layout": "bj",
+   "side": "b",
+   "bit": 12,
+   "mask": "0x1000",
+   "zero": "fp16.hq",
+   "designed_flips_per_op": 8192,
+   "flops": 684.0,
+   "flops_from_fl_nS": 674.25,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 5072.5,
+    "rbus": 5072.56,
+    "store": 10770.0,
+    "prod": 8192.0,
+    "dsum": 36864.0,
+    "res_bits_per_op": 20915.06,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 4437.25,
+    "rbus": 4438.75,
+    "store": 10968.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 341.25,
+    "comb_c": 0.0,
+    "comb_add": 342.75,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 684.0,
+    "res_bits_per_op": 19844.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 335834.3333333333,
+   "by_stage_vpu_map": {
+    "control": 13484.0,
+    "exponent": 133250.0,
+    "operand": 38250.333333333336,
+    "multiplier": 1011.0,
+    "adder_norm": 9974.666666666666,
+    "result": 13088.0,
+    "vpu_sequencer": 72866.66666666667,
+    "lane_operand_bus": 18899.666666666668,
+    "c_regfile": 34498.0,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 0.4534,
+    "bench_hier2": 0.3175,
+    "e88": 1.0956,
+    "e88_flops": 1.0956,
+    "e88_flops_exact": 1.0211,
+    "all_in_list": 0.569,
+    "e79_measured": 0.569
+   },
+   "pred_fJ": {
+    "bench_map": 49.4,
+    "bench_hier2": 34.6,
+    "e88": 119.3,
+    "e88_flops": 119.3,
+    "e88_flops_exact": 111.2,
+    "all_in_list": 62.0,
+    "e79_measured": 62.0
+   }
+  },
+  "fp16.bj_15": {
+   "block": "G",
+   "layout": "bj",
+   "side": "b",
+   "bit": 15,
+   "mask": "0x8000",
+   "zero": "fp16.hq",
+   "designed_flips_per_op": 8192,
+   "flops": 684.0,
+   "flops_from_fl_nS": 674.25,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 4432.5,
+    "rbus": 4432.56,
+    "store": 10770.0,
+    "prod": 8192.0,
+    "dsum": 4096.0,
+    "res_bits_per_op": 19635.06,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 4437.25,
+    "rbus": 4438.75,
+    "store": 10968.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 341.25,
+    "comb_c": 0.0,
+    "comb_add": 342.75,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 684.0,
+    "res_bits_per_op": 19844.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 389967.6666666667,
+   "by_stage_vpu_map": {
+    "control": 148652.0,
+    "exponent": 642.0,
+    "operand": 34186.333333333336,
+    "multiplier": 1011.0,
+    "adder_norm": 5878.666666666667,
+    "result": 71797.33333333333,
+    "vpu_sequencer": 73122.66666666667,
+    "lane_operand_bus": 18899.666666666668,
+    "c_regfile": 35266.0,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 0.5633,
+    "bench_hier2": 0.3873,
+    "e88": 1.0211,
+    "e88_flops": 1.0211,
+    "e88_flops_exact": 1.0211,
+    "all_in_list": 0.3025,
+    "e79_measured": 0.3025
+   },
+   "pred_fJ": {
+    "bench_map": 61.3,
+    "bench_hier2": 42.2,
+    "e88": 111.2,
+    "e88_flops": 111.2,
+    "e88_flops_exact": 111.2,
+    "all_in_list": 32.9,
+    "e79_measured": 32.9
+   }
+  },
+  "fp16.bp_0": {
+   "block": "T",
+   "layout": "bp",
+   "side": "b",
+   "bit": 0,
+   "mask": "0x1",
+   "zero": "fp16.hq",
+   "designed_flips_per_op": 7936,
+   "flops": 679.25,
+   "flops_from_fl_nS": 672.5,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 336.38,
+    "rbus": 337.81,
+    "store": 10810.0,
+    "prod": 7936.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 11484.19,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 340.25,
+    "rbus": 339.0,
+    "store": 10848.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 340.25,
+    "comb_c": 0.0,
+    "comb_add": 339.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 679.25,
+    "res_bits_per_op": 11527.25,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 527619.0,
+   "by_stage_vpu_map": {
+    "control": 9909.333333333334,
+    "exponent": 76975.33333333333,
+    "operand": 53513.0,
+    "multiplier": 250003.0,
+    "adder_norm": 30534.666666666668,
+    "result": 806.6666666666666,
+    "vpu_sequencer": 68216.66666666667,
+    "lane_operand_bus": 14035.666666666666,
+    "c_regfile": 23112.666666666668,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 0.8426,
+    "bench_hier2": 0.5141,
+    "e88": 0.5294,
+    "e88_flops": 0.5294,
+    "e88_flops_exact": 0.5197,
+    "ratio_hypothesis": 0.3149
+   },
+   "pred_fJ": {
+    "bench_map": 94.7,
+    "bench_hier2": 57.8,
+    "e88": 59.5,
+    "e88_flops": 59.5,
+    "e88_flops_exact": 58.4,
+    "ratio_hypothesis": 35.4
+   }
+  },
+  "fp16.bp_9": {
+   "block": "GT",
+   "layout": "bp",
+   "side": "b",
+   "bit": 9,
+   "mask": "0x200",
+   "zero": "fp16.hq",
+   "designed_flips_per_op": 7936,
+   "flops": 22341.5,
+   "flops_from_fl_nS": 21933.75,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 4248.44,
+    "rbus": 4247.75,
+    "store": 10416.0,
+    "prod": 7936.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 18912.19,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 4651.75,
+    "rbus": 4650.0,
+    "store": 10800.0,
+    "csa3": 3968.0,
+    "csa2": 3968.0,
+    "comb_s": 4651.75,
+    "comb_c": 3968.0,
+    "comb_add": 5785.75,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 22341.5,
+    "res_bits_per_op": 20101.75,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 570872.6666666666,
+   "by_stage_vpu_map": {
+    "control": 18454.333333333332,
+    "exponent": 13492.0,
+    "operand": 37343.333333333336,
+    "multiplier": 180791.0,
+    "adder_norm": 187669.66666666666,
+    "result": 12582.0,
+    "vpu_sequencer": 71161.33333333333,
+    "lane_operand_bus": 17049.0,
+    "c_regfile": 31818.0,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 0.9303,
+    "bench_hier2": 0.7904,
+    "e88": 0.962,
+    "e88_flops": 1.1218,
+    "e88_flops_exact": 1.1819,
+    "ratio_hypothesis": 0.7594,
+    "e79_measured": 0.7562
+   },
+   "pred_fJ": {
+    "bench_map": 104.6,
+    "bench_hier2": 88.9,
+    "e88": 108.2,
+    "e88_flops": 126.1,
+    "e88_flops_exact": 132.9,
+    "ratio_hypothesis": 85.4,
+    "e79_measured": 85.0
+   }
+  },
+  "fp16.bp_12": {
+   "block": "T",
+   "layout": "bp",
+   "side": "b",
+   "bit": 12,
+   "mask": "0x1000",
+   "zero": "fp16.hq",
+   "designed_flips_per_op": 7936,
+   "flops": 52186.0,
+   "flops_from_fl_nS": 48463.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 6419.5,
+    "rbus": 6417.75,
+    "store": 7660.0,
+    "prod": 7936.0,
+    "dsum": 35712.0,
+    "res_bits_per_op": 20497.25,
+    "chg_rate": 0.660156,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 8115.25,
+    "rbus": 8165.25,
+    "store": 7560.0,
+    "csa3": 10788.0,
+    "csa2": 10788.0,
+    "comb_s": 8115.25,
+    "comb_c": 10788.0,
+    "comb_add": 11706.75,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 52186.0,
+    "res_bits_per_op": 23840.5,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 855176.3333333334,
+   "by_stage_vpu_map": {
+    "control": 83111.33333333333,
+    "exponent": 185746.33333333334,
+    "operand": 61517.666666666664,
+    "multiplier": 23978.0,
+    "adder_norm": 335063.6666666667,
+    "result": 26002.0,
+    "vpu_sequencer": 76314.66666666667,
+    "lane_operand_bus": 21528.666666666668,
+    "c_regfile": 41402.0,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 1.5072,
+    "bench_hier2": 1.2758,
+    "e88": 1.0543,
+    "e88_flops": 1.4134,
+    "e88_flops_exact": 1.6239,
+    "ratio_hypothesis": 0.0984
+   },
+   "pred_fJ": {
+    "bench_map": 169.5,
+    "bench_hier2": 143.4,
+    "e88": 118.5,
+    "e88_flops": 158.9,
+    "e88_flops_exact": 182.6,
+    "ratio_hypothesis": 11.1
+   }
+  },
+  "fp16.bp_15": {
+   "block": "G",
+   "layout": "bp",
+   "side": "b",
+   "bit": 15,
+   "mask": "0x8000",
+   "zero": "fp16.hq",
+   "designed_flips_per_op": 7936,
+   "flops": 299200.0,
+   "flops_from_fl_nS": 299200.0,
+   "alt": 2048.0,
+   "stream": {
+    "cbus": 2880.0,
+    "rbus": 2880.0,
+    "store": 28672.0,
+    "prod": 7936.0,
+    "dsum": 3968.0,
+    "res_bits_per_op": 34432.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 2880.0,
+    "rbus": 2880.0,
+    "store": 28672.0,
+    "csa3": 106496.0,
+    "csa2": 59392.0,
+    "comb_s": 49984.0,
+    "comb_c": 59392.0,
+    "comb_add": 23936.0,
+    "N_alt1": 2048.0,
+    "N_alt2": 2048.0,
+    "flops": 299200.0,
+    "res_bits_per_op": 34432.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 1241228.0,
+   "by_stage_vpu_map": {
+    "control": 177890.0,
+    "exponent": 51552.0,
+    "operand": 32264.0,
+    "multiplier": 2512.0,
+    "adder_norm": 827648.0,
+    "result": 25760.0,
+    "vpu_sequencer": 67002.0,
+    "lane_operand_bus": 16592.0,
+    "c_regfile": 39496.0,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 2.2905,
+    "bench_hier2": 1.9402,
+    "e88": 1.8658,
+    "e88_flops": 4.1092,
+    "e88_flops_exact": 4.0969,
+    "ratio_hypothesis": 0.0523
+   },
+   "pred_fJ": {
+    "bench_map": 257.5,
+    "bench_hier2": 218.1,
+    "e88": 209.8,
+    "e88_flops": 462.0,
+    "e88_flops_exact": 460.6,
+    "ratio_hypothesis": 5.9
+   }
+  },
+  "fp16.aj_9": {
+   "block": "G",
+   "layout": "aj",
+   "side": "a",
+   "bit": 9,
+   "mask": "0x200",
+   "zero": "fp16.aq",
+   "designed_flips_per_op": 4096,
+   "flops": 52626.0,
+   "flops_from_fl_nS": 55960.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 23478.5,
+    "rbus": 23476.5,
+    "store": 10032.0,
+    "prod": 4096.0,
+    "dsum": 2048.0,
+    "res_bits_per_op": 56987.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 22760.0,
+    "rbus": 22662.0,
+    "store": 9696.0,
+    "csa3": 2560.0,
+    "csa2": 2560.0,
+    "comb_s": 22248.0,
+    "comb_c": 2560.0,
+    "comb_add": 22698.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 52626.0,
+    "res_bits_per_op": 55118.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 1721726.6666666667,
+   "by_stage_vpu_map": {
+    "control": 55239.333333333336,
+    "exponent": 79920.0,
+    "operand": 82722.66666666667,
+    "multiplier": 620792.0,
+    "adder_norm": 550696.0,
+    "result": 85754.66666666667,
+    "vpu_sequencer": 101684.66666666667,
+    "lane_operand_bus": 33930.666666666664,
+    "c_regfile": 110474.66666666667,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 3.2648,
+    "bench_hier2": 2.4314,
+    "e88": 2.8828,
+    "e88_flops": 3.298,
+    "e88_flops_exact": 3.1673,
+    "all_in_list": 2.7555,
+    "e79_measured": 2.7555
+   },
+   "pred_fJ": {
+    "bench_map": 711.2,
+    "bench_hier2": 529.6,
+    "e88": 628.0,
+    "e88_flops": 718.4,
+    "e88_flops_exact": 689.9,
+    "all_in_list": 600.2,
+    "e79_measured": 600.2
+   }
+  },
+  "fp16.aj_12": {
+   "block": "T",
+   "layout": "aj",
+   "side": "a",
+   "bit": 12,
+   "mask": "0x1000",
+   "zero": "fp16.aq",
+   "designed_flips_per_op": 4096,
+   "flops": 710.0,
+   "flops_from_fl_nS": 696.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 2664.0,
+    "rbus": 2661.5,
+    "store": 11440.0,
+    "prod": 4096.0,
+    "dsum": 18432.0,
+    "res_bits_per_op": 16765.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 2402.0,
+    "rbus": 2404.0,
+    "store": 11392.0,
+    "csa3": 0.0,
+    "csa2": 0.0,
+    "comb_s": 354.0,
+    "comb_c": 0.0,
+    "comb_add": 356.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 710.0,
+    "res_bits_per_op": 16198.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 235164.0,
+   "by_stage_vpu_map": {
+    "control": 11324.666666666666,
+    "exponent": 70282.66666666667,
+    "operand": 22592.0,
+    "multiplier": 1088.0,
+    "adder_norm": 8200.0,
+    "result": 6938.666666666667,
+    "vpu_sequencer": 75279.33333333333,
+    "lane_operand_bus": 7661.333333333333,
+    "c_regfile": 31285.333333333332,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 0.2485,
+    "bench_hier2": 0.1641,
+    "e88": 0.5404,
+    "e88_flops": 0.5404,
+    "e88_flops_exact": 0.5105,
+    "all_in_list": 0.3258,
+    "e79_measured": 0.3258
+   },
+   "pred_fJ": {
+    "bench_map": 54.1,
+    "bench_hier2": 35.7,
+    "e88": 117.7,
+    "e88_flops": 117.7,
+    "e88_flops_exact": 111.2,
+    "all_in_list": 71.0,
+    "e79_measured": 71.0
+   }
+  },
+  "fp16.ap_9": {
+   "block": "GT",
+   "layout": "ap",
+   "side": "a",
+   "bit": 9,
+   "mask": "0x200",
+   "zero": "fp16.aq",
+   "designed_flips_per_op": 3840,
+   "flops": 10744.0,
+   "flops_from_fl_nS": 11222.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 2289.5,
+    "rbus": 2282.5,
+    "store": 9584.0,
+    "prod": 3840.0,
+    "dsum": 1920.0,
+    "res_bits_per_op": 14156.0,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 2266.0,
+    "rbus": 2266.0,
+    "store": 9536.0,
+    "csa3": 1920.0,
+    "csa2": 1920.0,
+    "comb_s": 2266.0,
+    "comb_c": 1920.0,
+    "comb_add": 2718.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 10744.0,
+    "res_bits_per_op": 14068.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 744273.3333333334,
+   "by_stage_vpu_map": {
+    "control": 10815.333333333334,
+    "exponent": 6229.333333333333,
+    "operand": 20885.333333333332,
+    "multiplier": 510640.0,
+    "adder_norm": 83504.0,
+    "result": 5237.333333333333,
+    "vpu_sequencer": 73555.33333333333,
+    "lane_operand_bus": 6446.666666666667,
+    "c_regfile": 26448.0,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 1.2815,
+    "bench_hier2": 0.7398,
+    "e88": 0.3714,
+    "e88_flops": 0.4505,
+    "e88_flops_exact": 0.4449,
+    "ratio_hypothesis": 0.4613
+   },
+   "pred_fJ": {
+    "bench_map": 297.8,
+    "bench_hier2": 171.9,
+    "e88": 86.3,
+    "e88_flops": 104.7,
+    "e88_flops_exact": 103.4,
+    "ratio_hypothesis": 107.2
+   }
+  },
+  "fp16.ap_12": {
+   "block": "T",
+   "layout": "ap",
+   "side": "a",
+   "bit": 12,
+   "mask": "0x1000",
+   "zero": "fp16.aq",
+   "designed_flips_per_op": 3840,
+   "flops": 26580.0,
+   "flops_from_fl_nS": 26022.0,
+   "alt": 0.0,
+   "stream": {
+    "cbus": 3710.0,
+    "rbus": 3711.0,
+    "store": 7952.0,
+    "prod": 3840.0,
+    "dsum": 17280.0,
+    "res_bits_per_op": 15373.0,
+    "chg_rate": 0.65625,
+    "live_frac": 1.0
+   },
+   "exact": {
+    "cbus": 5250.0,
+    "rbus": 5246.0,
+    "store": 7104.0,
+    "csa3": 5280.0,
+    "csa2": 5280.0,
+    "comb_s": 5250.0,
+    "comb_c": 5280.0,
+    "comb_add": 5490.0,
+    "N_alt1": 0.0,
+    "N_alt2": 0.0,
+    "flops": 26580.0,
+    "res_bits_per_op": 17600.0,
+    "op_indices": [
+     66625,
+     199875,
+     333125,
+     466375
+    ]
+   },
+   "vpu_nets_map": 464276.0,
+   "by_stage_vpu_map": {
+    "control": 43626.0,
+    "exponent": 89306.66666666667,
+    "operand": 32366.666666666668,
+    "multiplier": 12040.0,
+    "adder_norm": 160709.33333333334,
+    "result": 13141.333333333334,
+    "vpu_sequencer": 75347.33333333333,
+    "lane_operand_bus": 9146.666666666666,
+    "c_regfile": 28080.0,
+    "other": 512.0
+   },
+   "pred_w": {
+    "bench_map": 0.7134,
+    "bench_hier2": 0.5866,
+    "e88": 0.4423,
+    "e88_flops": 0.6326,
+    "e88_flops_exact": 0.7696,
+    "ratio_hypothesis": 0.0545
+   },
+   "pred_fJ": {
+    "bench_map": 165.8,
+    "bench_hier2": 136.3,
+    "e88": 102.8,
+    "e88_flops": 147.0,
+    "e88_flops_exact": 178.8,
+    "ratio_hypothesis": 12.7
+   }
+  },
+  "int8.hq": {
+   "block": "I",
+   "layout": "zero",
+   "side": "b",
+   "bit": null,
+   "mask": null,
+   "zero": null,
+   "designed_flips_per_op": 0,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1331.5,
+    "rbus": 1330.62,
+    "store": 21290.0,
+    "prod": 0.0,
+    "dsum": 0.0,
+    "res_bits_per_op": 23952.12,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 54882.666666666664,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 0.0,
+    "multiplier": 0.0,
+    "adder_norm": 2646.6666666666665,
+    "result": 0.0,
+    "vpu_sequencer": 23820.0,
+    "lane_operand_bus": 27392.0,
+    "c_regfile": 0.0,
+    "other": 0.0
+   }
+  },
+  "int8.bk_0": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": 0,
+   "mask": "0x1",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 1024,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1295.88,
+    "rbus": 1292.62,
+    "store": 20682.0,
+    "prod": 1024.0,
+    "dsum": 256.0,
+    "res_bits_per_op": 23270.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 60922.0,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 3072.0,
+    "multiplier": 1792.0,
+    "adder_norm": 3096.6666666666665,
+    "result": 0.0,
+    "vpu_sequencer": 23948.0,
+    "lane_operand_bus": 27989.333333333332,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.0212,
+    "bench_hier2": 0.0225,
+    "bench_int8fit": 0.0423,
+    "e88": 0.0085,
+    "e79_measured": 0.0652
+   },
+   "pred_fJ": {
+    "bench_map": 10.7,
+    "bench_hier2": 11.4,
+    "bench_int8fit": 21.4,
+    "e88": 4.3,
+    "e79_measured": 33.1
+   }
+  },
+  "int8.bk_1": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": 1,
+   "mask": "0x2",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 1024,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1267.12,
+    "rbus": 1267.5,
+    "store": 20280.0,
+    "prod": 1024.0,
+    "dsum": 256.0,
+    "res_bits_per_op": 22814.62,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 59975.333333333336,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 3072.0,
+    "multiplier": 1792.0,
+    "adder_norm": 3019.3333333333335,
+    "result": 0.0,
+    "vpu_sequencer": 23548.0,
+    "lane_operand_bus": 27520.0,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.0179,
+    "bench_hier2": 0.0182,
+    "bench_int8fit": 0.0357,
+    "e88": -0.0002,
+    "e79_measured": 0.1446
+   },
+   "pred_fJ": {
+    "bench_map": 9.1,
+    "bench_hier2": 9.2,
+    "bench_int8fit": 18.1,
+    "e88": -0.1,
+    "e79_measured": 73.4
+   }
+  },
+  "int8.bk_2": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": 2,
+   "mask": "0x4",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 1024,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1339.62,
+    "rbus": 1338.88,
+    "store": 21422.0,
+    "prod": 1024.0,
+    "dsum": 256.0,
+    "res_bits_per_op": 24100.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 61074.0,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 3072.0,
+    "multiplier": 1792.0,
+    "adder_norm": 2992.6666666666665,
+    "result": 0.0,
+    "vpu_sequencer": 23628.0,
+    "lane_operand_bus": 28565.333333333332,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.0217,
+    "bench_hier2": 0.0207,
+    "bench_int8fit": 0.0433,
+    "e88": 0.0241,
+    "e79_measured": 0.0579
+   },
+   "pred_fJ": {
+    "bench_map": 11.0,
+    "bench_hier2": 10.5,
+    "bench_int8fit": 22.0,
+    "e88": 12.2,
+    "e79_measured": 29.4
+   }
+  },
+  "int8.bk_3": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": 3,
+   "mask": "0x8",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 1024,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1327.12,
+    "rbus": 1327.5,
+    "store": 21240.0,
+    "prod": 1024.0,
+    "dsum": 256.0,
+    "res_bits_per_op": 23894.62,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 61496.666666666664,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 3072.0,
+    "multiplier": 1792.0,
+    "adder_norm": 3132.6666666666665,
+    "result": 0.0,
+    "vpu_sequencer": 24092.0,
+    "lane_operand_bus": 28384.0,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.0232,
+    "bench_hier2": 0.0226,
+    "bench_int8fit": 0.0463,
+    "e88": 0.0202,
+    "e79_measured": 0.1754
+   },
+   "pred_fJ": {
+    "bench_map": 11.8,
+    "bench_hier2": 11.5,
+    "bench_int8fit": 23.5,
+    "e88": 10.3,
+    "e79_measured": 89.0
+   }
+  },
+  "int8.bk_4": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": 4,
+   "mask": "0x10",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 1024,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1276.75,
+    "rbus": 1274.38,
+    "store": 20390.0,
+    "prod": 1024.0,
+    "dsum": 256.0,
+    "res_bits_per_op": 22941.12,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 60510.0,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 3072.0,
+    "multiplier": 1792.0,
+    "adder_norm": 3042.0,
+    "result": 0.0,
+    "vpu_sequencer": 24028.0,
+    "lane_operand_bus": 27552.0,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.0197,
+    "bench_hier2": 0.0193,
+    "bench_int8fit": 0.0394,
+    "e88": 0.0022,
+    "e79_measured": 0.0736
+   },
+   "pred_fJ": {
+    "bench_map": 10.0,
+    "bench_hier2": 9.8,
+    "bench_int8fit": 20.0,
+    "e88": 1.1,
+    "e79_measured": 37.4
+   }
+  },
+  "int8.bk_5": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": 5,
+   "mask": "0x20",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 1024,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1303.25,
+    "rbus": 1302.38,
+    "store": 20838.0,
+    "prod": 1024.0,
+    "dsum": 256.0,
+    "res_bits_per_op": 23443.62,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 61489.333333333336,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 3072.0,
+    "multiplier": 1792.0,
+    "adder_norm": 3141.3333333333335,
+    "result": 0.0,
+    "vpu_sequencer": 24236.0,
+    "lane_operand_bus": 28224.0,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.0232,
+    "bench_hier2": 0.0227,
+    "bench_int8fit": 0.0462,
+    "e88": 0.0117,
+    "e79_measured": 0.1897
+   },
+   "pred_fJ": {
+    "bench_map": 11.8,
+    "bench_hier2": 11.5,
+    "bench_int8fit": 23.5,
+    "e88": 5.9,
+    "e79_measured": 96.3
+   }
+  },
+  "int8.bk_6": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": 6,
+   "mask": "0x40",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 1024,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1282.25,
+    "rbus": 1281.25,
+    "store": 20500.0,
+    "prod": 1024.0,
+    "dsum": 256.0,
+    "res_bits_per_op": 23063.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 60632.666666666664,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 3072.0,
+    "multiplier": 1792.0,
+    "adder_norm": 3095.3333333333335,
+    "result": 0.0,
+    "vpu_sequencer": 23820.0,
+    "lane_operand_bus": 27829.333333333332,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.0202,
+    "bench_hier2": 0.02,
+    "bench_int8fit": 0.0403,
+    "e88": 0.0045,
+    "e79_measured": 0.1198
+   },
+   "pred_fJ": {
+    "bench_map": 10.2,
+    "bench_hier2": 10.1,
+    "bench_int8fit": 20.4,
+    "e88": 2.3,
+    "e79_measured": 60.8
+   }
+  },
+  "int8.bk_7": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": 7,
+   "mask": "0x80",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 1024,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1275.88,
+    "rbus": 1276.0,
+    "store": 20416.0,
+    "prod": 11264.0,
+    "dsum": 2560.0,
+    "res_bits_per_op": 22967.88,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 81792.66666666667,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 5120.0,
+    "multiplier": 22272.0,
+    "adder_norm": 2970.0,
+    "result": 0.0,
+    "vpu_sequencer": 23516.0,
+    "lane_operand_bus": 26890.666666666668,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.0943,
+    "bench_hier2": 0.0924,
+    "bench_int8fit": 0.1884,
+    "e88": 0.1042,
+    "e79_measured": 0.0423
+   },
+   "pred_fJ": {
+    "bench_map": 47.9,
+    "bench_hier2": 46.9,
+    "bench_int8fit": 95.6,
+    "e88": 52.9,
+    "e79_measured": 21.5
+   }
+  },
+  "int8.bk_15": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": null,
+   "mask": "0x15",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 3072,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1256.75,
+    "rbus": 1251.38,
+    "store": 20022.0,
+    "prod": 3072.0,
+    "dsum": 768.0,
+    "res_bits_per_op": 22530.12,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 72628.0,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 9216.0,
+    "multiplier": 5376.0,
+    "adder_norm": 3661.3333333333335,
+    "result": 0.0,
+    "vpu_sequencer": 23964.0,
+    "lane_operand_bus": 29386.666666666668,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.0622,
+    "bench_hier2": 0.0623,
+    "bench_int8fit": 0.1242,
+    "e88": 0.0371,
+    "e79_measured": 0.1968
+   },
+   "pred_fJ": {
+    "bench_map": 10.5,
+    "bench_hier2": 10.5,
+    "bench_int8fit": 21.0,
+    "e88": 6.3,
+    "e79_measured": 33.3
+   }
+  },
+  "int8.bk_2a": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": null,
+   "mask": "0x2a",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 3072,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1223.5,
+    "rbus": 1222.0,
+    "store": 19552.0,
+    "prod": 3072.0,
+    "dsum": 768.0,
+    "res_bits_per_op": 21997.5,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 72338.66666666667,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 9216.0,
+    "multiplier": 5376.0,
+    "adder_norm": 3676.0,
+    "result": 0.0,
+    "vpu_sequencer": 24236.0,
+    "lane_operand_bus": 28810.666666666668,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.0612,
+    "bench_hier2": 0.0605,
+    "bench_int8fit": 0.1222,
+    "e88": 0.0271,
+    "e79_measured": 0.5097
+   },
+   "pred_fJ": {
+    "bench_map": 10.3,
+    "bench_hier2": 10.2,
+    "bench_int8fit": 20.7,
+    "e88": 4.6,
+    "e79_measured": 86.2
+   }
+  },
+  "int8.bk_0f": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": null,
+   "mask": "0xf",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 4096,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1287.75,
+    "rbus": 1288.38,
+    "store": 20614.0,
+    "prod": 4096.0,
+    "dsum": 1024.0,
+    "res_bits_per_op": 23190.12,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 78796.0,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 12288.0,
+    "multiplier": 7168.0,
+    "adder_norm": 3520.0,
+    "result": 0.0,
+    "vpu_sequencer": 23756.0,
+    "lane_operand_bus": 31040.0,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.0838,
+    "bench_hier2": 0.0837,
+    "bench_int8fit": 0.1674,
+    "e88": 0.0709,
+    "e79_measured": 0.4431
+   },
+   "pred_fJ": {
+    "bench_map": 10.6,
+    "bench_hier2": 10.6,
+    "bench_int8fit": 21.2,
+    "e88": 9.0,
+    "e79_measured": 56.2
+   }
+  },
+  "int8.bk_f0": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": null,
+   "mask": "0xf0",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 4096,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1309.0,
+    "rbus": 1309.25,
+    "store": 20948.0,
+    "prod": 14336.0,
+    "dsum": 3328.0,
+    "res_bits_per_op": 23566.25,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 101136.66666666667,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 14336.0,
+    "multiplier": 27648.0,
+    "adder_norm": 3524.6666666666665,
+    "result": 0.0,
+    "vpu_sequencer": 24140.0,
+    "lane_operand_bus": 30464.0,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.1622,
+    "bench_hier2": 0.1577,
+    "bench_int8fit": 0.3238,
+    "e88": 0.1795,
+    "e79_measured": 0.4254
+   },
+   "pred_fJ": {
+    "bench_map": 20.6,
+    "bench_hier2": 20.0,
+    "bench_int8fit": 41.1,
+    "e88": 22.8,
+    "e79_measured": 54.0
+   }
+  },
+  "int8.bk_ff": {
+   "block": "I",
+   "layout": "bk",
+   "side": "b",
+   "bit": null,
+   "mask": "0xff",
+   "zero": "int8.hq",
+   "designed_flips_per_op": 8192,
+   "flops": null,
+   "flops_from_fl_nS": null,
+   "alt": null,
+   "stream": {
+    "cbus": 1234.0,
+    "rbus": 1233.75,
+    "store": 19740.0,
+    "prod": 18432.0,
+    "dsum": 4352.0,
+    "res_bits_per_op": 22207.75,
+    "chg_rate": 1.0,
+    "live_frac": 1.0
+   },
+   "exact": null,
+   "vpu_nets_map": 124778.0,
+   "by_stage_vpu_map": {
+    "control": 1024.0,
+    "exponent": 0.0,
+    "operand": 26624.0,
+    "multiplier": 34816.0,
+    "adder_norm": 4179.333333333333,
+    "result": 0.0,
+    "vpu_sequencer": 24076.0,
+    "lane_operand_bus": 34058.666666666664,
+    "c_regfile": 0.0,
+    "other": 0.0
+   },
+   "pred_w": {
+    "bench_map": 0.245,
+    "bench_hier2": 0.2386,
+    "bench_int8fit": 0.4893,
+    "e88": 0.2392,
+    "e79_measured": 0.8685
+   },
+   "pred_fJ": {
+    "bench_map": 15.5,
+    "bench_hier2": 15.1,
+    "bench_int8fit": 31.0,
+    "e88": 15.2,
+    "e79_measured": 55.1
+   }
+  }
+ },
+ "session_tie": {
+  "reference": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/posthoc/e82-nodips.json items.<cell>.D.mean (dips removed, as E102's primary)",
+  "cells": {
+   "fp32.randn": {
+    "ref_w": 24.0017,
+    "band_w": 0.5
+   },
+   "fp16.randn": {
+    "ref_w": 21.4901,
+    "band_w": 0.5
+   },
+   "anchor_pi": {
+    "ref_w": 8.1353,
+    "band_w": 0.5
+   },
+   "int8.full": {
+    "ref_w": 6.8392,
+    "band_w": 0.25
+   }
+  }
+ },
+ "rules": {
+  "E102-R1": {
+   "what": "fp32 B: does the per-bit ratio all-in / balanced stay near 5-7x across the mantissa?",
+   "expected": "POSITION",
+   "constant_low_lower_bound_at_least": 4.0,
+   "position_low_upper_bound_below": 4.0,
+   "position_top_lower_bound_at_least": 4.0,
+   "rule": "CONSTANT if the ratio's lower bound is >= 4 at bits 0 and 6; POSITION if its upper bound is < 4 at both and its lower bound >= 4 at bit 22; else INCONCLUSIVE"
+  },
+  "E102-R2": {
+   "what": "fp32 A: the same on the A side",
+   "expected": "POSITION",
+   "constant_low_lower_bound_at_least": 4.0,
+   "position_low_upper_bound_below": 4.0,
+   "position_top_lower_bound_at_least": 1.2,
+   "rule": "CONSTANT if the ratio's lower bound is >= 4 at bits 0 and 6; POSITION if its upper bound is < 4 at both and its lower bound >= 1.2 at bit 22; else INCONCLUSIVE"
+  },
+  "E102-R3": {
+   "what": "fp32 exponent: which layout is dearer (E79 result 1b's open question)",
+   "expected": "INVERTED",
+   "positions": [
+    23,
+    27
+   ],
+   "composite_ratio_lower_bound_at_least": 3.0,
+   "rule": "on the B side: INVERTED if balanced - all-in has a lower bound > 0 W at both bits; COMPOSITE if the ratio's lower bound is >= 3 at both; else INCONCLUSIVE. The A side is reported beside it."
+  },
+  "E102-R4": {
+   "what": "the sign: the balanced layout makes the adder alternate (E92), so it is the dear one",
+   "expected": "CONFIRMED",
+   "min_w": {
+    "fp32 B": 1.0,
+    "fp32 A": 0.5,
+    "fp16 B": 1.0
+   },
+   "refuted_below_w": 0.3,
+   "rule": "per list: CONFIRMED if balanced - all-in has a lower bound >= its floor; REFUTED if its upper bound is < 0.3 W; else INCONCLUSIVE. All three CONFIRMED confirms the rule; any REFUTED refutes it."
+  },
+  "E102-R5": {
+   "what": "the ties to E79's numbers, board arm, gate protocol, carried by E82's scale",
+   "cells": {
+    "fp32 bj_22": {
+     "kind": "price",
+     "block": "G",
+     "item": "fp32.bj_22",
+     "value_e79_scaled": 1021.4,
+     "band": [
+      766.0,
+      1276.7
+     ]
+    },
+    "fp32 bp_22": {
+     "kind": "price",
+     "block": "G",
+     "item": "fp32.bp_22",
+     "value_e79_scaled": 145.9,
+     "band": [
+      73.0,
+      218.9
+     ]
+    },
+    "fp16 bj_9": {
+     "kind": "price",
+     "block": "G",
+     "item": "fp16.bj_9",
+     "value_e79_scaled": 478.1,
+     "band": [
+      358.5,
+      597.6
+     ]
+    },
+    "fp16 bp_9": {
+     "kind": "price",
+     "block": "G",
+     "item": "fp16.bp_9",
+     "value_e79_scaled": 85.0,
+     "band": [
+      42.5,
+      127.5
+     ]
+    },
+    "fp32 ratio at 22": {
+     "kind": "ratio",
+     "block": "G",
+     "top": "fp32.bj_22",
+     "bot": "fp32.bp_22",
+     "value_e79": 7.0,
+     "band": [
+      3.5,
+      14.0
+     ]
+    },
+    "fp16 ratio at 9": {
+     "kind": "ratio",
+     "block": "G",
+     "top": "fp16.bj_9",
+     "bot": "fp16.bp_9",
+     "value_e79": 5.6,
+     "band": [
+      2.8,
+      11.2
+     ]
+    }
+   },
+   "rule": "per cell: CONFIRMED if the interval lies inside the band, REFUTED if wholly outside, else INCONCLUSIVE; any REFUTED refutes the rule"
+  },
+  "E102-R6": {
+   "what": "the train reads what the gate reads: four items in both protocols, pooled per pass",
+   "items": [
+    "fp32.bp_22",
+    "fp32.ap_22",
+    "fp16.bp_9",
+    "fp16.ap_9"
+   ],
+   "band_w": {
+    "board": 0.3,
+    "rail": 0.15
+   },
+   "rule": "the four items' mean step in the trains minus the same in the gate, inside +-0.15 W on the rail: CONFIRMED; wholly outside: REFUTED, and every train price carries that caveat; else INCONCLUSIVE. Item by item is reported beside it."
+  },
+  "E102-R7": {
+   "what": "what a composite is: at E92's frozen price per flop bit, the adder's flops carry a share of the all-in excess",
+   "expected": "CONFIRMED",
+   "positions": [
+    16,
+    20,
+    22
+   ],
+   "fJ_per_flop_bit": 6.68,
+   "share_band": [
+    0.15,
+    0.5
+   ],
+   "rule": "excess = step(bj) - (flips bj / flips bp) step(bp), board arm; share = (the same difference of the flop count, make_e92's reading on the real accumulators) x 6.68 fJ x rate / excess. CONFIRMED if the share is in [0.15, 0.50] at all three, REFUTED if outside at all three, else INCONCLUSIVE"
+  },
+  "E102-R8": {
+   "what": "int8 B's level: bk_ff, all eight bits, per flipped bit",
+   "expected": "open: E79's list with no temperature term says E79-LEVEL (55 fJ board), the bench says BENCH-LEVEL (16 at the float coefficients, 31 at its int8 fit)",
+   "e79_level_lower_bound_at_least_fJ": {
+    "rail": 35,
+    "board": 43
+   },
+   "bench_level_upper_bound_below_fJ": {
+    "rail": 35,
+    "board": 43
+   },
+   "rule": "BOUND if the interval contains zero (below this design's resolution, and that is the result); E79-LEVEL if the lower bound is >= 35 rail-fJ (43 board); BENCH-LEVEL if the upper bound is < 35 (43); else RESOLVED-BETWEEN"
+  },
+  "E102-R9": {
+   "what": "int8 B's odd/even shape (E79 result 4b): the odd magnitude bits 1,3,5 against the even 0,2,4 (three bits each)",
+   "expected": "open: E79's list with no temperature term says SHAPE (+0.25 W on the rail), the bench says FLAT (0.00 W)",
+   "band_w": {
+    "rail": 0.1,
+    "board": 0.12
+   },
+   "rule": "bk_2a - bk_15, watts, paired: SHAPE if the lower bound is >= +0.10 W (rail); FLAT if the interval lies inside +-0.10 W; else INCONCLUSIVE"
+  },
+  "E102-R10": {
+   "what": "int8 B's rise toward the high bits: the high nibble against the low (four bits each)",
+   "expected": "open: the bench says RISE (+0.06 W on the rail, all of it the MSB), E79's list says FLAT (-0.01 W)",
+   "band_w": {
+    "rail": 0.1,
+    "board": 0.12
+   },
+   "rule": "bk_f0 - bk_0f, watts, paired: RISE if the lower bound is > 0; FLAT if the interval lies inside +-0.10 W; else INCONCLUSIVE"
+  },
+  "E102-R11": {
+   "what": "int8 B's additivity at line boundaries: ff against 0f + f0",
+   "band_w": {
+    "rail": 0.15,
+    "board": 0.2
+   },
+   "rule": "bk_ff - (bk_0f + bk_f0), watts, paired: CONFIRMED if the interval lies inside +-0.15 W (rail), REFUTED if wholly outside, else INCONCLUSIVE. ff against its eight singles is reported beside it."
+  },
+  "E102-R12": {
+   "what": "the int8 single-bit list: what this design resolved, against what it said it could",
+   "registered_half_width_fJ": {
+    "board": 70.0,
+    "rail": 28.9
+   },
+   "rule": "reported: positions whose interval excludes zero, and the median half-width"
+  },
+  "E102-S1": {
+   "what": "the session tie (a check on the session): E82's anchors in block G",
+   "rule": "each cell's D within its band of E82's dips-removed value; a failure means the session moved"
+  }
+ }
+}
