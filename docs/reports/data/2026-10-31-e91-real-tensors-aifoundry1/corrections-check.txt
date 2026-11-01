@@ -1,0 +1,187 @@
+E91 corrections-check (desk only; committed files only)
+
+== C1 the baseline behind the ratios (per kept pass, then the mean over passes; 95%, t(0.975, n-1) x SE)
+D = board power over the type's own all-zeros level (the registered ratio); S = over idle; p80 = the window's whole board power (leakage-corrected), i.e. idle plus S
+card 1, E91 primary (dips removed, leakage auto): kept passes ['9111', '9112', '9113'] (n = 3); idle level 32.986 W; leakage auto 0.4219 W/C
+  fp32 (random kind fp32.randn: D 23.391 W, S 25.342 W, p80 58.369 W; the type's zeros S 2.008 W over idle)
+     l0_mlp_up    D 0.9969 +- 0.0025; S 0.9942 +- 0.0100; p80 0.9983 +- 0.0005
+     l6_mlp_down  D 0.9922 +- 0.0043; S 0.9886 +- 0.0164; p80 0.9970 +- 0.0018
+     l6_attn_qk   D 0.9853 +- 0.0101; S 0.9925 +- 0.0148; p80 0.9939 +- 0.0039
+     three-tile mean, D  : 0.9915 +- 0.0050 (tiles 0.9853-0.9969; saving 0.3-1.5%)
+     three-tile mean, S  : 0.9918 +- 0.0094 (tiles 0.9886-0.9942; saving 0.6-1.1%)
+     three-tile mean, p80: 0.9964 +- 0.0019 (tiles 0.9939-0.9983; saving 0.2-0.6%)
+  fp16 (random kind fp16.randn: D 21.011 W, S 23.029 W, p80 55.967 W; the type's zeros S 1.980 W over idle)
+     l0_mlp_up    D 0.9911 +- 0.0033; S 0.9860 +- 0.0105; p80 0.9965 +- 0.0014
+     l6_mlp_down  D 0.9931 +- 0.0040; S 0.9900 +- 0.0277; p80 0.9970 +- 0.0025
+     l6_attn_qk   D 0.9657 +- 0.0115; S 0.9666 +- 0.0057; p80 0.9868 +- 0.0034
+     three-tile mean, D  : 0.9833 +- 0.0015 (tiles 0.9657-0.9931; saving 0.7-3.4%)
+     three-tile mean, S  : 0.9809 +- 0.0047 (tiles 0.9666-0.9900; saving 1.0-3.3%)
+     three-tile mean, p80: 0.9934 +- 0.0004 (tiles 0.9868-0.9970; saving 0.3-1.3%)
+  int8 (random kind int8.full: D 6.701 W, S 9.189 W, p80 42.166 W; the type's zeros S 2.483 W over idle)
+     l0_mlp_up    D 0.8935 +- 0.0691; S 0.9123 +- 0.0442; p80 0.9829 +- 0.0087
+     l6_mlp_down  D 0.8241 +- 0.0390; S 0.8649 +- 0.0280; p80 0.9707 +- 0.0041
+     l6_attn_qk   D 0.8078 +- 0.0407; S 0.8605 +- 0.0330; p80 0.9688 +- 0.0027
+     three-tile mean, D  : 0.8418 +- 0.0437 (tiles 0.8078-0.8935; saving 10.7-19.2%)
+     three-tile mean, S  : 0.8793 +- 0.0012 (tiles 0.8605-0.9123; saving 8.8-13.9%)
+     three-tile mean, p80: 0.9741 +- 0.0047 (tiles 0.9688-0.9829; saving 1.7-3.1%)
+card 1, E91 registered arm 0.1994 W/C (dips removed): kept passes ['9110', '9111', '9112', '9113'] (n = 4); idle level 33.153 W; leakage 0.1994 0.1994 W/C
+  fp32 (random kind fp32.randn: D 24.116 W, S 25.924 W, p80 59.098 W; the type's zeros S 1.804 W over idle)
+     l0_mlp_up    D 0.9946 +- 0.0040; S 0.9949 +- 0.0046; p80 0.9980 +- 0.0012
+     l6_mlp_down  D 0.9912 +- 0.0031; S 0.9903 +- 0.0054; p80 0.9967 +- 0.0017
+     l6_attn_qk   D 0.9855 +- 0.0074; S 0.9912 +- 0.0071; p80 0.9944 +- 0.0025
+     three-tile mean, D  : 0.9904 +- 0.0031 (tiles 0.9855-0.9946; saving 0.5-1.5%)
+     three-tile mean, S  : 0.9922 +- 0.0044 (tiles 0.9903-0.9949; saving 0.5-1.0%)
+     three-tile mean, p80: 0.9964 +- 0.0007 (tiles 0.9944-0.9980; saving 0.2-0.6%)
+  fp16 (random kind fp16.randn: D 21.713 W, S 23.533 W, p80 56.660 W; the type's zeros S 1.809 W over idle)
+     l0_mlp_up    D 0.9868 +- 0.0085; S 0.9841 +- 0.0078; p80 0.9945 +- 0.0046
+     l6_mlp_down  D 0.9911 +- 0.0081; S 0.9894 +- 0.0125; p80 0.9966 +- 0.0029
+     l6_attn_qk   D 0.9655 +- 0.0057; S 0.9659 +- 0.0049; p80 0.9870 +- 0.0018
+     three-tile mean, D  : 0.9811 +- 0.0057 (tiles 0.9655-0.9911; saving 0.9-3.5%)
+     three-tile mean, S  : 0.9798 +- 0.0052 (tiles 0.9659-0.9894; saving 1.1-3.4%)
+     three-tile mean, p80: 0.9927 +- 0.0018 (tiles 0.9870-0.9966; saving 0.3-1.3%)
+  int8 (random kind int8.full: D 6.943 W, S 9.289 W, p80 42.461 W; the type's zeros S 2.359 W over idle)
+     l0_mlp_up    D 0.8922 +- 0.0208; S 0.9176 +- 0.0111; p80 0.9825 +- 0.0030
+     l6_mlp_down  D 0.8121 +- 0.0072; S 0.8636 +- 0.0182; p80 0.9692 +- 0.0011
+     l6_attn_qk   D 0.8042 +- 0.0160; S 0.8541 +- 0.0212; p80 0.9674 +- 0.0016
+     three-tile mean, D  : 0.8362 +- 0.0051 (tiles 0.8042-0.8922; saving 10.8-19.6%)
+     three-tile mean, S  : 0.8784 +- 0.0118 (tiles 0.8541-0.9176; saving 8.2-14.6%)
+     three-tile mean, p80: 0.9730 +- 0.0005 (tiles 0.9674-0.9825; saving 1.8-3.3%)
+aifoundry3, E86 registered reduction: kept passes ['8610', '8611', '8612', '8613'] (n = 4); idle level 25.873 W; leakage auto 0.2290 W/C
+  fp32 (random kind fp32.randn: D 24.691 W, S 26.665 W, p80 52.537 W; the type's zeros S 1.998 W over idle)
+     l0_mlp_up    D 0.9863 +- 0.0310; S 0.9891 +- 0.0295; p80 0.9939 +- 0.0139
+     l6_mlp_down  D 0.9937 +- 0.0012; S 0.9963 +- 0.0060; p80 0.9974 +- 0.0010
+     l6_attn_qk   D 0.9833 +- 0.0023; S 0.9852 +- 0.0062; p80 0.9923 +- 0.0016
+     three-tile mean, D  : 0.9878 +- 0.0103 (tiles 0.9833-0.9937; saving 0.6-1.7%)
+     three-tile mean, S  : 0.9902 +- 0.0090 (tiles 0.9852-0.9963; saving 0.4-1.5%)
+     three-tile mean, p80: 0.9945 +- 0.0040 (tiles 0.9923-0.9974; saving 0.3-0.8%)
+  fp16 (random kind fp16.randn: D 22.078 W, S 24.003 W, p80 49.899 W; the type's zeros S 1.966 W over idle)
+     l0_mlp_up    D 0.9950 +- 0.0162; S 0.9937 +- 0.0095; p80 0.9975 +- 0.0062
+     l6_mlp_down  D 0.9957 +- 0.0175; S 0.9967 +- 0.0177; p80 0.9983 +- 0.0072
+     l6_attn_qk   D 0.9710 +- 0.0120; S 0.9722 +- 0.0084; p80 0.9868 +- 0.0040
+     three-tile mean, D  : 0.9872 +- 0.0142 (tiles 0.9710-0.9957; saving 0.4-2.9%)
+     three-tile mean, S  : 0.9875 +- 0.0107 (tiles 0.9722-0.9967; saving 0.3-2.8%)
+     three-tile mean, p80: 0.9942 +- 0.0057 (tiles 0.9868-0.9983; saving 0.2-1.3%)
+  int8 (random kind int8.full: D 7.090 W, S 9.604 W, p80 35.507 W; the type's zeros S 2.527 W over idle)
+     l0_mlp_up    D 0.8879 +- 0.1022; S 0.9202 +- 0.0823; p80 0.9767 +- 0.0215
+     l6_mlp_down  D 0.8109 +- 0.0441; S 0.8639 +- 0.0268; p80 0.9624 +- 0.0066
+     l6_attn_qk   D 0.7820 +- 0.0558; S 0.8520 +- 0.0200; p80 0.9578 +- 0.0089
+     three-tile mean, D  : 0.8269 +- 0.0501 (tiles 0.7820-0.8879; saving 11.2-21.8%)
+     three-tile mean, S  : 0.8787 +- 0.0316 (tiles 0.8520-0.9202; saving 8.0-14.8%)
+     three-tile mean, p80: 0.9657 +- 0.0110 (tiles 0.9578-0.9767; saving 2.3-4.2%)
+card 1 (E91 primary, 3 passes) - aifoundry3 (E86 registered, 4 passes), three-tile means (95% half-widths in quadrature):
+  fp32: D +0.0037 +- 0.0115; S +0.0016 +- 0.0130; p80 +0.0019 +- 0.0045
+  fp16: D -0.0040 +- 0.0142; S -0.0067 +- 0.0117; p80 -0.0008 +- 0.0057
+  int8: D +0.0148 +- 0.0665; S +0.0006 +- 0.0316; p80 +0.0085 +- 0.0120
+  per tile, D: fp32 l0_mlp_up +0.0106; fp32 l6_mlp_down -0.0015; fp32 l6_attn_qk +0.0020; fp16 l0_mlp_up -0.0039; fp16 l6_mlp_down -0.0027; fp16 l6_attn_qk -0.0053; int8 l0_mlp_up +0.0055; int8 l6_mlp_down +0.0132; int8 l6_attn_qk +0.0258
+  scored.json replication_of_e86.rho_by_type: fp32 +0.0037 +- 0.0115; fp16 -0.0040 +- 0.0142; int8 +0.0148 +- 0.0665
+
+== C2 the cross-card scale D(aifoundry3) / D(card 1), beside E82's
+E82 (E78's kinds, card 1 vs aifoundry3) scored.json cross_card.primary x3: median 1.0308 over n 32 kinds, IQR 1.0249-1.0339
+  primary (E91 auto, dips removed; E86 registered): median over all 15 kinds 1.0535; nine real tiles 1.0535; X3 1.0535 (n 15); verdicts X1 NOT SCORED, X2a NOT SCORED, X2b NOT SCORED, X3 NOT SCORED, X4 NOT SCORED
+  own idle slopes (card 1 0.545, aifoundry3 0.3803): unresolved (too few kept passes; x3 n 0)
+  0.3803 on both: unresolved (too few kept passes; x3 n 0)
+  0.1994 on both (Q130(n)'s D scope): median over all 15 kinds 1.0230; nine real tiles 1.0247; X3 1.0230 (n 15); verdicts X1 PASS, X2a FAIL, X2b FAIL, X3 FAIL, X4 PASS
+  no correction on both: median over all 15 kinds 1.0184; nine real tiles 1.0184; X3 1.0184 (n 15); verdicts X1 PASS, X2a FAIL, X2b FAIL, X3 FAIL, X4 PASS
+  reported: both dips removed (E91 primary, E86 post hoc): median over all 15 kinds 1.0547; nine real tiles 1.0539; X3 1.0547 (n 15); verdicts X1 NOT SCORED, X2a NOT SCORED, X2b NOT SCORED, X3 NOT SCORED, X4 NOT SCORED
+  reported: E91 dips kept, E86 registered: median over all 15 kinds 1.0322; nine real tiles 1.0321; X3 1.0322 (n 15); verdicts X1 NOT SCORED, X2a NOT SCORED, X2b NOT SCORED, X3 NOT SCORED, X4 NOT SCORED
+  range over the resolved pairings: all kinds 1.0184-1.0547; real tiles 1.0184-1.0539
+
+== C3 A1 as registered and as carried out
+claim message 1566303302210158713: posted 21:10:07.755 PDT (Discord id >> 22, + 2015-01-01 epoch)
+A1 (tools/claims-v3/kinds/E91.md, Amendments): E91_BUDGET_MIN = 35 - the card-minutes used since the claim (21:10:07) - 3; no rounding is given
+queue_e86.sh: starts a pass only if [ $((el + longest)) -le $((BUDGET_MIN * 60)) ], bash integer arithmetic, so the budget must be whole minutes
+the lane's helper, logs/a1-second-queue.sh (last written 21:30:54 PDT, after A1 was pushed at 21:30:24): budget = max(0, math.floor(35 - (now - claim) / 60.0 - 3)), with the claim at 21:10:07
+  at 21:35:22 (helper's clock): used 1515 s = 25.25 min; A1's budget 35 - 25.25 - 3 = 6.75 min = 405 s; floored 6 min = 360 s; pass 361 s: floored refused by 1 s; exact fits with 44 s to spare
+  first queue (logs/e91-queue-1.log): elapsed 1,450 s + longest 361 s = 1,811 s > 1,800 s (30 card-min): stopped by 11 s
+  A1's exact budget at 21:35:22, the refusal (logs/e91-queue.log): 405.8 s (holds the 361 s pass)
+  A1's exact budget at 21:35:26, the helper's output complete (lane scratch file time): 401.8 s (holds the 361 s pass)
+  A1's exact budget at 21:35:56, the lane's closing et-who read (logs/push-and-claim-times.txt): 371.8 s (holds the 361 s pass)
+  A1's exact budget falls below 361 s at 21:36:06.8 PDT; the release was read back at 21:36:14
+
+== C4 the registered arms (scored.json arms and rules.*.at_arms)
+  dips_kept: leakage auto (0.2767 W/C); dips kept; kept [9111, 9112, 9113]; R1 NOT SCORED, R2 NOT SCORED, R3 NOT SCORED, R4 NOT SCORED, R5 NOT SCORED, S1 NOT SCORED
+  leak0.1994: leakage 0.1994 (0.1994 W/C); dips removed; kept [9110, 9111, 9112, 9113]; R1 PASS, R2 PASS, R3 PASS, R4 PASS, R5 PASS, S1 PASS
+  leak0.545: leakage 0.545 (0.5450 W/C); dips removed; kept [9112, 9113]; R1 NOT SCORED, R2 NOT SCORED, R3 NOT SCORED, R4 NOT SCORED, R5 NOT SCORED, S1 NOT SCORED
+  leak0.3803: leakage 0.3803 (0.3803 W/C); dips removed; kept [9111, 9112, 9113]; R1 NOT SCORED, R2 NOT SCORED, R3 NOT SCORED, R4 NOT SCORED, R5 NOT SCORED, S1 NOT SCORED
+  leak0: leakage 0 (0.0000 W/C); dips removed; kept [9110, 9111, 9112, 9113]; R1 PASS, R2 PASS, R3 PASS, R4 INCONCLUSIVE, R5 FAIL, S1 PASS
+  E91-X1: own idle slopes (card 1 0.545, aifoundry3 0.3803): NOT SCORED; 0.3803 on both: NOT SCORED; 0.1994 on both (Q130(n)'s D scope): PASS; no correction on both: PASS
+  E91-X2a: own idle slopes (card 1 0.545, aifoundry3 0.3803): NOT SCORED; 0.3803 on both: NOT SCORED; 0.1994 on both (Q130(n)'s D scope): FAIL; no correction on both: FAIL
+  E91-X2b: own idle slopes (card 1 0.545, aifoundry3 0.3803): NOT SCORED; 0.3803 on both: NOT SCORED; 0.1994 on both (Q130(n)'s D scope): FAIL; no correction on both: FAIL
+  E91-X3: own idle slopes (card 1 0.545, aifoundry3 0.3803): NOT SCORED; 0.3803 on both: NOT SCORED; 0.1994 on both (Q130(n)'s D scope): FAIL; no correction on both: FAIL
+  E91-X4: own idle slopes (card 1 0.545, aifoundry3 0.3803): NOT SCORED; 0.3803 on both: NOT SCORED; 0.1994 on both (Q130(n)'s D scope): PASS; no correction on both: PASS
+  registered tally (primary): {'NOT SCORED': 11}
+
+== C5 the real tiles' scale against the six synthetic kinds beside them, at every resolved pairing
+  primary (E91 auto, dips removed; E86 registered): real tiles 1.0535; six synthetic kinds 1.0532; all 15 1.0535; real - synthetic +0.0003; real - all 15 +0.0000
+  0.1994 on both (Q130(n)'s D scope): real tiles 1.0247; six synthetic kinds 1.0226; all 15 1.0230; real - synthetic +0.0021; real - all 15 +0.0017
+  no correction on both: real tiles 1.0184; six synthetic kinds 1.0169; all 15 1.0184; real - synthetic +0.0015; real - all 15 +0.0000
+  reported: both dips removed (E91 primary, E86 post hoc): real tiles 1.0539; six synthetic kinds 1.0550; all 15 1.0547; real - synthetic -0.0011; real - all 15 -0.0007
+  reported: E91 dips kept, E86 registered: real tiles 1.0321; six synthetic kinds 1.0343; all 15 1.0322; real - synthetic -0.0023; real - all 15 -0.0001
+  the six synthetic kinds: fp16.nn_like, fp16.randn, fp32.nn_like, fp32.randn, int8.full, int8.gauss_q
+  largest |real - synthetic|: 0.0023
+
+== C6 machine paths in the committed files (lines holding a home-directory path, a lab box's or a Mac's)
+  aifoundry1-c1: 1241 lines in 10 file(s), 0 of them a Mac's
+  logs: 5 lines in 2 file(s), 0 of them a Mac's
+  the reductions, scores and their logs (e91*, runs*, reduce*, score*, scored*, results*, code.sha256): 34 files; with a machine path: none
+  e91.json dirs: ['build/claims-v3/aifoundry1-c1-e91/kinds/p9110', 'build/claims-v3/aifoundry1-c1-e91/kinds/p9111', 'build/claims-v3/aifoundry1-c1-e91/kinds/p9112', 'build/claims-v3/aifoundry1-c1-e91/kinds/p9113']
+
+== C7 the 2 s die rise per pass (e91.json per_pass dT_win; one run a pass for each real tile; whole-degree readings averaged over the window)
+  fp32.real_l0_mlp_up    per pass ['3.35', '2.75', '3.40'] -> 3.17 +- 0.90 C
+  fp32.real_l6_mlp_down  per pass ['3.45', '2.80', '2.95'] -> 3.07 +- 0.85 C
+  fp32.real_l6_attn_qk   per pass ['3.50', '3.40', '3.40'] -> 3.43 +- 0.14 C
+  fp32.randn             per pass ['3.45', '3.07', '3.23'] -> 3.25 +- 0.47 C
+  fp16.real_l0_mlp_up    per pass ['2.85', '2.90', '2.90'] -> 2.88 +- 0.07 C
+  fp16.real_l6_mlp_down  per pass ['3.20', '2.55', '3.20'] -> 2.98 +- 0.93 C
+  fp16.real_l6_attn_qk   per pass ['3.20', '3.05', '2.85'] -> 3.03 +- 0.44 C
+  fp16.randn             per pass ['2.98', '3.03', '3.16'] -> 3.06 +- 0.22 C
+  int8.real_l0_mlp_up    per pass ['1.40', '1.00', '1.25'] -> 1.22 +- 0.50 C
+  int8.real_l6_mlp_down  per pass ['1.00', '1.00', '1.00'] -> 1.00 +- 0.00 C
+  int8.real_l6_attn_qk   per pass ['1.00', '1.00', '1.00'] -> 1.00 +- 0.00 C
+  int8.full              per pass ['1.33', '1.00', '1.65'] -> 1.33 +- 0.81 C
+
+== C9 the 21:05 dry pass (logs/dry-p9100/, copied read-only from aifoundry1 after verification)
+  block.json: pass 9100, card aifoundry1-c1, 21:05:34-21:05:42 PDT, status ok, die 80 C (stubbed)
+  plan.json: 32 runs, 9 of them on real tiles
+  marks.jsonl: {'burnin': 2, 'run': 32}; launches recorded 0
+  run.log header: 21:05:37 [aifoundry1-c1] E78 pass 9100: 32 runs of 19 items (tiers 1,2), about 5 min; launch at 58 C after 59 C, 2 s quiet; cap 78 C; ET_DEVICES=1; tiles verified against kinds.json
+  config_start.json {"dry":true}, config_end.json {"dry":true}
+  logs/e91-dry.log (committed with the data): 2026-10-31T21:08:33 [aifoundry1-c1] kinds p9100 already done
+
+== C10 push and claim times: logs/push-and-claim-times.txt
+      E91 push and claim times, Sat 31 Oct 2026, PDT (the lane's command outputs)
+      21:05:33  run_e91.sh setup on aifoundry1 (no device access): dry pass 9100 planned 34 launches, 9 on real tiles, ET_DEVICES=1
+      21:08:33  run_e91.sh setup again after the final freeze: every file identical; the dry pass already done (skipped by lib.sh)
+      21:09:12  eb72ce5d pushed (E91 pre-registration: E91.md, predictions-e91.json sha256 56efe2e752f8de8b..., code, self-test)
+      21:10:07  claim posted in #community-lab, message 1566303302210158713:
+                "<ai> **Claude says:** using aifoundry1 card 1 for 1 h, until ~22:15 PDT [doc](<https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-to-transistor>)"
+      21:10:19  smoke p9101 begins (die 52 C); config_start TDP 65 W, threshold 65 C, managed_power, 600 MHz, 499 mV
+      21:11:03  smoke p9101 ends ok
+      21:11:12  queue starts (passes 9110..9115, budget 30 card-min, deadline 22:25, first-pass estimate 390 s)
+      21:17:03  p9110 rc=0 (351 s)    21:23:19  p9111 rc=0 (361 s)    21:29:05  p9112 rc=0 (331 s)    21:35:07  p9113 rc=0 (347 s)
+      21:30:24  7f007f53 pushed (E91 amendment A1: pass 9114 inside 35 card-minutes if the queue stops at four), before any reduction
+      21:35:22  first queue: budget stopping before p9114 (elapsed 1,450 s + longest 361 s > 1,800 s)
+      21:35:22  A1 second queue: used 1,515 s since the claim; E91_BUDGET_MIN floor(35 - 25.25 - 3) = 6; E91_FIRST_S 361; refused (361 > 360 s)
+      21:35:56  et-who: no process holds an ET-SoC-1 device node or card lock; no E91 process on the box
+      21:36:14  claim released by editing the same post (edit_msg.mjs --save); read back:
+                "<ai> Claude says: using aifoundry1 card 1 for 1 h, until ~22:15 PDT doc — released (edited)"
+      held 21:10:07-21:36:14 = 26.1 min; device access 21:10:19-21:35:07 = 24.8 min; registered budget 35 card-minutes
+      
+      Added after verification, Sat 31 Oct 2026 ~22:10 PDT, at the desk (no card touched, nothing re-run). Push times are
+      GitHub's activity record for the repository (UTC, shown here in PDT); commit times are git's.
+      21:05:34-21:05:42  the dry pass 9100 (V3_DRY; block.json t0/t1): 32 runs planned (9 on real tiles) and 2 burn-ins,
+                ET_DEVICES=1 in its run.log header, no device opened. Its stdout log (logs/e91-dry.log) was overwritten by
+                the 21:08:33 skip line; the pass directory's block.json, plan.json, run.log, marks.jsonl and config reads
+                were copied read-only from aifoundry1 into logs/dry-p9100/ at 22:05
+      21:09:09  eb72ce5d committed; pushed 21:09:11 (GitHub 04:09:11Z). The 21:09:12 above is when the lane's command returned
+      21:10:07.755  the claim's post time, from its message id (Discord id >> 22, plus the 2015-01-01 epoch)
+      21:30:22  7f007f53 (A1) committed; pushed 21:30:24 (GitHub 04:30:24Z)
+      21:30:54  the lane's A1 helper last written (logs/a1-second-queue.sh, 30 s after A1's push): it floors A1's budget,
+                35 - used - 3 card-minutes, to whole minutes, because queue_e86.sh's rule is bash integer arithmetic. A1
+                itself gives no rounding
+      21:35:22  the helper (logs/a1-second-queue.out): used 1,515 s; A1's exact budget 1,920 - 1,515 = 405 s holds the 361 s
+                pass; floored, 6 min = 360 s does not, so the second queue refused p9114 by 1 s
+      21:35:26  the helper's output complete; A1's exact budget, counted from 21:10:07.755, 401.8 s
+      21:35:56  the closing et-who read; A1's exact budget 371.8 s
+      21:36:06.8  A1's exact budget falls below the 361 s pass
+      21:41:16  7c0af0c1 (data) committed; pushed 21:41:18 (GitHub 04:41:18Z)
