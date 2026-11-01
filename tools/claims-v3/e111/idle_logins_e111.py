@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """E111 amendment A1 (Sun 1 Nov 2026, before the claim and the first launch): on aifoundry2, a user who is only logged in, and
-whose every session has been idle for at least 120 minutes, does not block. E60's departure D1 for aifoundry3 and aifoundry1 (a
+whose every session has been idle for at least 120 minutes, does not block. Amendment A3 (the owner's ruling of 1 November 2026,
+about 15:00 PST, before W1B, END2 and the camera block ran): the same user also blocks if any of their live processes started
+under 120 minutes ago ("a new process"). E60's departure D1 for aifoundry3 and aifoundry1 (a
 user who is only logged in does not block), with an idle guard that aifoundry3's form does not have.
 
 What still blocks, unchanged, in every check before every launch process: any other user with a session idle under 120 minutes
@@ -20,6 +22,7 @@ import subprocess
 import time
 
 MIN_IDLE_MIN = 120
+MIN_PROC_AGE_MIN = 120   # amendment A3 (the owner's ruling of 1 November 2026): a process of a logged-in other user started under this is activity
 _HHMM = re.compile(r"^\d{1,2}:\d\d$")
 
 
@@ -60,9 +63,40 @@ def sessions():
     return out
 
 
+def young_processes(users):
+    """Amendment A3: {user: how many of their live processes started under MIN_PROC_AGE_MIN ago}, for the given logged-in users;
+    None if `ps` or a user's uid cannot be read (the caller then blocks them all: fail closed)."""
+    import pwd
+    uids = {}
+    for u in users:
+        try:
+            uids[pwd.getpwnam(u).pw_uid] = u
+        except KeyError:
+            return None
+    try:
+        r = subprocess.run(["ps", "-eo", "uid=,etimes=,stat="], capture_output=True, timeout=10, stdin=subprocess.DEVNULL)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if r.returncode != 0:
+        return None
+    out = {u: 0 for u in users}
+    for ln in r.stdout.decode(errors="replace").splitlines():
+        f = ln.split()
+        if len(f) < 3:
+            continue
+        try:
+            uid, et = int(f[0]), int(f[1])
+        except ValueError:
+            continue
+        if uid in uids and not f[2].startswith("Z") and et < MIN_PROC_AGE_MIN * 60:
+            out[uids[uid]] += 1
+    return out
+
+
 def decide():
-    """(blocking users, record): a user blocks unless every one of their sessions reads idle >= MIN_IDLE_MIN. Fails closed: an
-    unreadable `who -u`, or a session whose idle cannot be read, blocks."""
+    """(blocking users, record): a user blocks unless every one of their sessions reads idle >= MIN_IDLE_MIN (A1) and none of their
+    live processes started under MIN_PROC_AGE_MIN ago (A3). Fails closed: an unreadable `who -u`, a session whose idle cannot be
+    read, or an unreadable `ps`, blocks."""
     me = _me()
     ss = sessions()
     if ss is None:
@@ -72,11 +106,15 @@ def decide():
         if u == me:
             continue
         users.setdefault(u, []).append(idle)
-    blocking = sorted(u for u, idles in users.items() if any(i is None or i < MIN_IDLE_MIN for i in idles))
+    young = young_processes(sorted(users)) if users else {}
+    blocking = sorted(u for u, idles in users.items()
+                      if any(i is None or i < MIN_IDLE_MIN for i in idles) or young is None or young.get(u, 0) > 0)
     ignored = [u for u in users if u not in blocking]
     rec = {"t_ms": int(time.time() * 1000), "other_users": len(users), "other_sessions": sum(len(v) for v in users.values()),
            "blocking_users": len(blocking), "ignored_idle_users": len(ignored),
-           "ignored_min_idle_min": min((min(users[u]) for u in ignored), default=None), "rule_min_idle_min": MIN_IDLE_MIN}
+           "ignored_min_idle_min": min((min(users[u]) for u in ignored), default=None), "rule_min_idle_min": MIN_IDLE_MIN,
+           "young_process_users": (None if young is None else sum(1 for v in young.values() if v > 0)),
+           "rule_min_proc_age_min": MIN_PROC_AGE_MIN}
     p = os.environ.get("E111_IDLE_LOG")
     if p:
         try:

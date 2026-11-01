@@ -127,7 +127,8 @@ for f in ("lockin.json",):
 
 # 6 (amendment A1) ---------------------------------------------------------------------------------
 import idle_logins_e111 as IL  # noqa: E402
-_orig = IL.sessions
+_orig, _oy = IL.sessions, IL.young_processes
+IL.young_processes = lambda users: {u: 0 for u in users}     # part 6 is A1's rule alone; A3's process rule is part 7
 me = IL._me()
 for desc, ss, want in (("one idle 203 min", [("u1", 203, ""), (me, 0, "")], 0), ("one at 119 min", [("u1", 119, "")], 1),
                        ("a new login (.)", [("u1", 0, "")], 1), ("idle unreadable", [("u1", None, "")], 1),
@@ -136,12 +137,28 @@ for desc, ss, want in (("one idle 203 min", [("u1", 203, ""), (me, 0, "")], 0), 
     check(f"6 A1: {desc} -> {want} blocking", len(IL.decide()[0]) == want)
 IL.sessions = lambda: None
 check("6 A1: who -u unreadable blocks", len(IL.decide()[0]) == 1)
-IL.sessions = _orig
+IL.sessions, IL.young_processes = _orig, _oy
 line = "someone   pts/8        Nov  1 10:12 02:33     3526857 (host)"
 import re as _re  # noqa: E402
 f = line.split()
 idle = next((f[i + 1] for i in range(2, len(f) - 1) if IL._HHMM.match(f[i])), None)
 check("6 A1: the idle column is read after the login time", idle == "02:33")
+
+# 7 (amendment A3: a new process of a logged-in user is activity) -------------------------------------
+_s, _y = IL.sessions, IL.young_processes
+for desc, ss, young, want in (("idle 203 min, no young process", [("u1", 203, "")], {"u1": 0}, 0),
+                              ("idle 203 min, one process under 120 min", [("u1", 203, "")], {"u1": 1}, 1),
+                              ("idle 203 min, ps unreadable", [("u1", 203, "")], None, 1),
+                              ("no other user, ps unreadable", [(me, 0, "")], None, 0)):
+    IL.sessions = lambda ss=ss: ss
+    IL.young_processes = lambda users, young=young: young
+    check(f"7 A3: {desc} -> {want} blocking", len(IL.decide()[0]) == want)
+IL.sessions, IL.young_processes = _s, _y
+if sys.platform.startswith("linux"):
+    yp = IL.young_processes([me])
+    check("7 A3: young_processes reads this machine's ps for a real user", isinstance(yp, dict) and me in yp, json.dumps(yp))
+else:
+    print(f"SKIP  7 A3: young_processes on a real ps (needs Linux ps etimes; this is {sys.platform}; checked on aifoundry2 instead)")
 
 # 5 ------------------------------------------------------------------------------------------------
 if len(sys.argv) > 1:
