@@ -1,0 +1,77 @@
+E100 corrections-check. Inputs: s1/, results.json, posthoc.json, tools/claims-v3/e100/reduce_e100.py (frozen), the desk reading's ir-tests.json.
+the frozen scorer's fits reproduce results.json: round 1 p 1793521822379 q 1000.0070 (results {'p_ms': 1793521822379, 'q_ms': 1000.007}), round 2 p 1793522530386 q 1000.0030 (results {'p_ms': 1793522530386, 'q_ms': 1000.003})
+
+======== C1. 'Nothing to do with the numbers': E100 ran one kind
+E100's load in every arm: int8 zeros. The kinds come from the desk reading's 25 falls, post hoc: format p 0.48625 {'fp16': {'boundaries': 2787, 'hits': 5}, 'fp32': {'boundaries': 3826, 'hits': 6}, 'int8': {'boundaries': 5168, 'hits': 14}} ; power p 0.93025 ; die p 0.9137
+
+======== C2. Every fall against the other round's lattice
+falls 61: {'A0': 3, 'A5': 3, 'A20': 10, 'A100': 33, 'R': 12}
+first 600 reading minus the other round's nearest lattice point: min -1.9 ms, median 36.2 ms, max 117.9 ms, over all 61 falls; more than 250 ms away: 0
+scope of that lattice point, by arm: [(('A0', 'edge'), 2), (('A0', 'kernel'), 1), (('A100', 'edge'), 1), (('A100', 'gap'), 32), (('A20', 'edge'), 3), (('A20', 'gap'), 7), (('A5', 'edge'), 1), (('A5', 'gap'), 2), (('R', 'edge'), 1), (('R', 'gap'), 11)]
+scored as the frozen table scores them: 52 in a gap, 1 inside a kernel, 8 left out (a point within 1 ms of a kernel's edge)
+  A20: 10 falls, 7 in the registered table, 3 left out
+  A100: 33 falls, 32 in the registered table, 1 left out
+D3's table holds [39, 0, 0, 234] over A20 and A100, whose falls number 43
+  gap-centred, A100: point in gap, fell 32, stayed 0; no point, stayed 254, fell 1
+  gap-centred, A20: point in gap, fell 8, stayed 0; no point, stayed 414, fell 2
+  gap-centred, R: point in gap, fell 11, stayed 0; no point, stayed 398, fell 1
+  gap-centred, A5: point in gap, fell 2, stayed 0; no point, stayed 429, fell 1
+  the no-point falls, (arm, gap in ms, nearest lattice point's distance from the gap's edge in ms): [('A100', 131, 0.7), ('A20', 34, 0.3), ('A20', 35, 1.0), ('R', 40, 0.1), ('A5', 8, 1.4)]
+what scores a lattice: moving each by a phase, cross-round table on A20 and A100, pooled (gap fell, gap no fall, kernel fell, kernel no fall):
+   -10 ms: (31, 7, 9, 234)
+    -5 ms: (36, 4, 4, 235)
+    -1 ms: (39, 0, 3, 235)
+    +0 ms: (39, 0, 0, 234)
+    +1 ms: (40, 0, 0, 238)
+    +5 ms: (40, 2, 0, 235)
+   +10 ms: (38, 9, 4, 231)
+  +500 ms: (0, 27, 0, 268)
+random phases, 400 draws: sensitivity >= 0.9 in 1.75%, specificity >= 0.95 in 73%: specificity is cheap, the sensitivity carries it
+
+======== C4. The statistics reset: what carries 'no rise seen'
+R 12 falls in 146.7 heartbeats against A20 10 in 146.6: two-sided Fisher p 0.83; R's 95% count 6.2-21.0. So D5 passes and could not see a rise of less than about a factor of 2
+R's falls against the other round's lattice: {'gap': 11, 'edge': 1}
+  (first 600 reading after the lattice point in ms, since_reset_ms at that reading): [(4.3, 0), (15.6, 200), (23.0, 1000), (31.7, 1000), (37.1, 800), (41.2, 800), (64.1, 900), (75.1, 100), (89.9, 400), (90.3, 800), (104.5, 0), (117.9, 0)]
+  the reset's phase against the lattice wanders: since_reset_ms takes [0, 100, 200, 400, 800, 900, 1000]
+  the late ones:
+   R2R-00-r-r3 kernel 11: clock 0.648 GHz; lattice point 5.5 ms before the kernel's start stamp, scope gap; the fall first read 104.5 ms after the point; since_reset_ms 0
+   R2R-00-r-r1 kernel 15: clock 0.658 GHz; lattice point 1.9 ms before the kernel's start stamp, scope gap; the fall first read 117.9 ms after the point; since_reset_ms 0
+  n = 2, post hoc.
+
+======== C5. A0's one 'kernel and fell'
+  R1A0-00-a0-r4 kernel 18: on the other round's lattice (period 1000.003) the point is 5.2 ms inside the kernel; on the whole-session lattice 0.8 ms inside
+
+======== C6. The two periods are tie-breaks
+round 1: objective 27, 10 ties at a 2 ms phase step, over periods 1000.007-1000.016; out-of-sample tables over the ties, (tp, fn, fp, tn), all of them: [((20, 0, 0, 117), 2), ((19, 0, 1, 116), 2), ((19, 0, 1, 114), 2), ((17, 0, 0, 112), 1), ((18, 0, 0, 116), 1), ((18, 0, 0, 117), 1), ((19, 0, 2, 114), 1)]
+   over those ties: tp 17-20, fn 0-0, fp 0-2, tn 112-117; lowest specificity 0.983; sensitivity 1.000 at its lowest; registered bars 0.90, 0.95
+round 2: objective 26, 5 ties at a 2 ms phase step, over periods 1000.003-1000.01; out-of-sample tables over the ties, (tp, fn, fp, tn), all of them: [((20, 0, 0, 124), 3), ((22, 0, 0, 122), 1), ((22, 0, 0, 124), 1)]
+   over those ties: tp 20-22, fn 0-0, fp 0-0, tn 122-124; lowest specificity 1.000; sensitivity 1.000 at its lowest; registered bars 0.90, 0.95
+the registered text says within 0.006 ms of 1000.010; the scorer's refinement reaches 0.007 (its 1000.003). With the refinement held to 1000.004-1000.016: round 1 q 1000.0070 (17, 0, 0, 112), round 2 q 1000.0050 (22, 0, 0, 124), pooled (39, 0, 0, 236)
+the whole session, every period at a 1 ms phase step (a wider range, in sample): (period, objective, table)
+  1000.004: 48 (51, 0, 1, 872)
+  1000.005: 48 (51, 0, 1, 872)
+  1000.006: 50 (53, 0, 1, 870)
+  1000.007: 53 (53, 0, 0, 870)
+  1000.008: 53 (53, 0, 0, 875)
+  1000.009: 51 (51, 0, 0, 876)
+  1000.010: 51 (51, 0, 0, 877)
+  1000.011: 48 (48, 0, 0, 874)
+  1000.012: 45 (48, 0, 1, 873)
+  best at [1000.007, 1000.008] ; the fits of 31 October: 1000.0098-1000.0105 ms (the desk reading's ir-lattice.txt). posthoc.json: {'p_ms': 1793521822379, 'q_ms': 1000.007, 'table': [53, 0, 0, 870]}
+
+======== C7. N's process gaps, and what N alone can say
+N: 40 gaps between processes, 30 with a fall
+N: kernels 50, wall 3.975 to 4.285 s
+N 0 in 126.1 against A0 3 in 146.3: two-sided Fisher p 0.25; N's upper limit per heartbeat: one-sided 95% 2.4%, two-sided 95% 2.9%, against A0's 2.05%. So N alone does not separate a long kernel from A0; the lattice table does (0 of 234 points inside a kernel)
+A0's boundaries: 507 in all, 455 with the kernel before at 800 MHz (the desk reading's denominator). 3 falls: 1 in 169 and 1 in 152; a Poisson 95% on 3 is 0.62-8.77, so at 800 MHz about 1 in 52 to 1 in 735 (over all boundaries about 1 in 58 to 1 in 819)
+
+======== C8. The order of things
+the night's shared claim, from its snowflake: 00:39:09.971 PDT
+E100's pre-registration 5e12c4bd, commit time: 2026-11-01T00:49:28-07:00
+E98's pre-registration c8e84226, commit time: 2026-11-01T00:38:18-07:00 ; lines naming E100 in its tree: 14
+the two pushes, from the origin reflog of the clone that made them (not in a fresh clone): 5e12c4bd 00:49:33 PDT, c8e84226 00:38:23 PDT
+first launch of E100, smoke: 01:30:02 PDT; slot start 01:30:00 PDT
+so the pre-registration came after the shared claim, whose lane's own pre-registration named E100 and its slot, and before E100's first launch
+
+======== C9. The die
+highest minshire[0] 57 C, the array's highest 58 C
