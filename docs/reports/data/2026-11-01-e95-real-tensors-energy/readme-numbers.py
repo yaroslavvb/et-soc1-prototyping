@@ -51,7 +51,7 @@ for n in ("fp32.randn", "fp16.randn", "int8.full", "fp32.r2_vit_l5_down", "fp32.
     a = E["items"][n]["D"]["mean"]
     b = A["items"][n]["D"]["mean"]
     print(f"| {n} | {a:.3f} | {b:.3f} | {a - b:+.3f} |")
-print("\n## The same numbers in three formats (r = D over the same pass's random kind of that format)")
+print("\n## Nested windows of one layer in three formats (r = D over the same pass's random kind of that format)")
 print("| layer | format | gate closes | live share | r primary | r dips-removed | D W | r ÷ live share | a live lane's cost ÷ random's | pJ/MAC (D) | pJ/MAC (S) |\n|---|---|---|---|---|---|---|---|---|---|---|")
 for lay, ty in (("vgg16_fc2", "fp32"), ("vgg16_fc2", "fp16"), ("vgg16_fc2", "int8"), ("resnet18_l3c1", "fp32"), ("resnet18_l3c1", "fp16"), ("resnet18_l3c1", "int8"),
                 ("t5small_l0_down", "fp32"), ("t5small_l0_down", "fp16"), ("t5small_l0_down", "int8"), ("resnet18_l2c1", "fp32"), ("gpt2_l11_down_maxabs", "int8"), ("vit_l11_down", "int8")):

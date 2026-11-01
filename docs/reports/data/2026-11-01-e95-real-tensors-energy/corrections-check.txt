@@ -1,0 +1,118 @@
+# E95: corrections-check (corrections-check.py). Nothing here changes a number in e95*.json, runs*.csv, scored*.json, results*.md or the arms.
+
+## C1 int8: the five gated tiles
+| tile | ReLU | g | live | D W | r | r - live | (a) | (c) | (c') | D-(a) | D-(c) | D-(c') | between (a) and (c) | live lane / random, (D - gG) / ((1 - g)L) | M4 bus term W |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| int8.r2_resnet18_l3c1 | yes | 0.176 | 0.824 | 4.350 ± 0.231 | 0.6130 | -0.211 | 3.616 | 5.887 | 4.901 | +0.734 | -1.537 | -0.551 | yes | 0.736 | 1.14 |
+| int8.r2_vgg16_fc2 | yes | 0.336 | 0.664 | 3.912 ± 0.170 | 0.5513 | -0.113 | 2.705 | 4.821 | 4.027 | +1.207 | -0.909 | -0.115 | yes | 0.806 | 1.07 |
+| int8.r2_t5small_l0_down | yes | 0.766 | 0.234 | 2.172 ± 0.132 | 0.3061 | +0.072 | 0.793 | 1.961 | 1.681 | +1.379 | +0.211 | +0.491 | no, above (c) | 1.128 | 0.71 |
+| int8.r2_vit_l11_down | no | 0.547 | 0.453 | 2.889 ± 0.136 | 0.4072 | -0.046 | 1.767 | 3.417 | 2.875 | +1.122 | -0.528 | +0.014 | yes | 0.835 | 0.84 |
+| int8.r2_gpt2_l11_down_maxabs | no | 0.637 | 0.363 | 2.357 ± 0.201 | 0.3321 | -0.031 | 1.16 | 2.819 | 2.385 | +1.197 | -0.462 | -0.028 | yes | 0.820 | 0.77 |
+rms: (a) 1.148, (c) 0.863, (c') 0.334 W
+all five: slope 4.011 W = 0.568 of E78's L (7.0565); ± 0.159 over the tiles (df 3); over E95's own random D (7.095 W) 0.565; intercept 1.099 W, G 0.4014 W
+the three ReLU tiles alone: slope 3.766 W = 0.534 of E78's L (7.0565); ± 0.505 over the tiles (df 1); over E95's own random D (7.095 W) 0.531; intercept 1.315 W, G 0.4014 W
+  without int8/resnet18_l3c1: 0.600
+  without int8/vgg16_fc2: 0.547
+  without int8/t5small_l0_down: 0.618
+  without int8/vit_l11_down: 0.567
+  without int8/gpt2_l11_down_maxabs: 0.542
+leave-one-out range 0.542..0.618
+if a live lane cost (c')'s L, 5.86 W, the slope would be (5.86 - 0.4014) / 7.0565 = 0.774 of L; the line's intercept 1.10 W against G 0.4014 W
+ungated real int8 tiles, r and bus bits (bits move, gate 0):
+  int8.r2_gpt2_l11_down_asym: r 0.5698, bus 14114, M4 bus term 1.46 W (a model, not a measurement)
+  int8.r2_vgg16_fc2_asym: r 0.6669, bus 22836, M4 bus term 1.41 W (a model, not a measurement)
+  int8.r2_gpt2_l11_down_p999: r 0.7779, bus 42146, M4 bus term 1.27 W (a model, not a measurement)
+  int8.real_l6_mlp_down: r 0.7999, bus 45684, M4 bus term 1.22 W (a model, not a measurement)
+  int8.r2_gpt2_l6_down_per_token: r 0.7785, bus 46996, M4 bus term 1.28 W (a model, not a measurement)
+  int8.r2_gpt2_l6_down_p9999: r 0.7954, bus 44500, M4 bus term 1.27 W (a model, not a measurement)
+  int8.r2_gpt2_l6_down_p999: r 0.8177, bus 47092, M4 bus term 1.32 W (a model, not a measurement)
+C5 stays INCONCLUSIVE: INCONCLUSIVE
+
+## C2 C1's registered reading
+primary: PASS 2, INCONCLUSIVE 3, FAIL 1 of 6: gpt2/fp32 0.9835 ± 0.0369 [0.9466, 1.0204] INCONCLUSIVE; gpt2/fp16 0.9568 ± 0.0110 [0.9458, 0.9678] FAIL; bert/fp32 0.9994 ± 0.0067 [0.9927, 1.0061] PASS; bert/fp16 0.9924 ± 0.0127 [0.9796, 1.0051] INCONCLUSIVE; vit/fp32 1.0040 ± 0.0114 [0.9926, 1.0153] PASS; vit/fp16 0.9859 ± 0.0091 [0.9767, 0.9950] INCONCLUSIVE
+dips removed: PASS 4, INCONCLUSIVE 1, FAIL 1 of 6: gpt2/fp32 0.9873 ± 0.0035 [0.9839, 0.9908] PASS; gpt2/fp16 0.9562 ± 0.0060 [0.9502, 0.9622] FAIL; bert/fp32 0.9942 ± 0.0029 [0.9912, 0.9971] PASS; bert/fp16 0.9964 ± 0.0020 [0.9944, 0.9984] PASS; vit/fp32 0.9985 ± 0.0043 [0.9942, 1.0028] PASS; vit/fp16 0.9862 ± 0.0063 [0.9799, 0.9925] INCONCLUSIVE
+fp32.r2_gpt2_l3_mlp_down, dips removed: r 0.9957 ± 0.0046 [0.9911, 1.0003]; primary 0.9999 ± 0.0093
+fp32.r2_gpt2_l9_attn_qk, dips removed: r 0.9799 ± 0.0030 [0.9769, 0.9829]; primary 0.9736 ± 0.0418
+fp32.r2_bert_l6_up, dips removed: r 0.9942 ± 0.0029 [0.9912, 0.9971]; primary 0.9994 ± 0.0067
+fp32.r2_vit_l5_down, dips removed: r 0.9985 ± 0.0043 [0.9942, 1.0028]; primary 1.0040 ± 0.0114
+other fp32 tiles with no zero word, primary then dips removed:
+  fp32.r2_gpt2_l6_mlp_down_bf16fwd: gate 0.0, r 0.7331 ± 0.0080; 0.7297 ± 0.0019
+  fp32.r2_vit_l11_down: gate 0.0, r 0.8208 ± 0.0397; 0.8259 ± 0.0042
+  fp32.r2_t5small_l0_up: gate 0.0, r 0.8903 ± 0.0138; 0.8857 ± 0.0066
+
+## C3 GPT-2's fp16 attention tiles: two windows, three tiles, one model
+fp16.real_l6_attn_qk window {'rows': [64, 80], 'k': [288, 320], 'cols': [32, 48]}
+fp16.r2_gpt2_l6_attn_qk_fp16fwd window {'rows': [64, 80], 'k': [288, 320], 'cols': [32, 48]}
+fp16.r2_gpt2_l9_attn_qk window {'rows': [112, 128], 'k': [640, 672], 'cols': [0, 16]}
+  fp16.r2_gpt2_l9_attn_qk: r 0.9568 ± 0.0110, dips removed 0.9562 ± 0.0060; M2's nets per op 6,111,178
+  fp16.real_l6_attn_qk: r 0.9675 ± 0.0055, dips removed 0.9672 ± 0.0038; M2's nets per op 6,229,779
+  fp16.r2_gpt2_l6_attn_qk_fp16fwd: r 0.9665 ± 0.0050, dips removed 0.9660 ± 0.0037; M2's nets per op 6,211,899
+  fp16.r2_bert_l6_up: r 0.9924 ± 0.0127, dips removed 0.9964 ± 0.0020; M2's nets per op 6,577,169
+  fp16.r2_vit_l5_down: r 0.9859 ± 0.0091, dips removed 0.9862 ± 0.0063; M2's nets per op 6,446,526
+  fp16.real_l6_mlp_down: r 0.9958 ± 0.0040, dips removed 0.9951 ± 0.0032; M2's nets per op 6,546,911
+  fp16.r2_gpt2_l6_mlp_down_fp16fwd: r 0.9955 ± 0.0026, dips removed 0.9947 ± 0.0028; M2's nets per op 6,544,020
+
+## C4 the fp16 forward pass: a bound, not an equality
+28 pairs of dense fp16 tiles; paired SD over kept passes: min 0.020 (fp16.r2_gpt2_l6_mlp_down_fp16fwd - fp16.real_l6_mlp_down), median 0.096, max 0.227 W
+C11's pair SD 0.020 W, rank 1 of 28; the attention pair's 0.094 W
+an interval on the median paired SD at n 4: ± 0.152 W, 0.70% of D; (a')'s -0.104 W lies inside it
+measured: -0.005 ± 0.032 W; -0.021 ± 0.149 W; dips removed -0.009 ± 0.024 -0.027 ± 0.102
+MLP tile, A rounded against A from the fp16 pass: {'bits_differing_per_element': 2.404, 'sign_differs': 0.0, 'exponent_differs': 0.0078, 'identical': 0.143, 'B_identical': True}
+attention tile: {'bits_differing_per_element': 2.664, 'sign_differs': 0.001953125, 'exponent_differs': 0.0098, 'identical': 0.066, 'B_identical': False}
+bus bits 83370 -> 82986, -0.46%; M2 offset -0.006 W; M4 -0.000 W
+
+## C5 the bench: which model, chosen how
+14 regressions compared in the bench lane's two runs (01:05:27 and 01:06:48 PST, between M2's commit and M4's; copied from its session record, not in this repository): ['M2 nets,clk', 'M2u unit,clk', 'bus', 'bus+op', 'clkt,clkr', 'core,bus,exp+ctl,clk', 'core,bus,op,clk', 'core,bus,rest', 'mult', 'mult,add', 'mult,add,bus', 'mult,bus', 'scp', 'tog']; M4 is 'core,bus,rest'
+30 blind tiles: M2 0.373, M4 0.161, (a) 0.696 W rms; each tile's D SE over passes: median 0.048, rms 0.097 W; M4 net of that 0.129 W
+constants fitted on E78 alone: floats 4 on 33 kinds, int8 3 on 15 (bench-prediction-m4-b995463e.json families)
+
+## C6 'the same numbers' are nested windows, each ratio over its own format's random
+vgg16_fc2 zero-word share: fp32: tile 0.723, on fp32's 16 k 0.723; fp16: tile 0.551, on fp32's 16 k 0.508; int8: tile 0.336, on fp32's 16 k 0.234
+resnet18_l3c1 zero-word share: fp32: tile 0.445, on fp32's 16 k 0.445; fp16: tile 0.367, on fp32's 16 k 0.258; int8: tile 0.176, on fp32's 16 k 0.109
+t5small_l0_down zero-word share: fp32: tile 0.949, on fp32's 16 k 0.949; fp16: tile 0.871, on fp32's 16 k 0.898; int8: tile 0.766, on fp32's 16 k 0.828
+vgg16_fc2: zero elements in A fp32 0.723, fp16 0.748, int8 0.765
+resnet18_l3c1: zero elements in A fp32 0.445, fp16 0.549, int8 0.536
+t5small_l0_down: zero elements in A fp32 0.949, fp16 0.934, int8 0.935
+vgg16_fc2: fp32 D 7.81 W, r 0.321 over random 24.3 W, live 0.277; fp16 D 10.10 W, r 0.461 over random 21.9 W, live 0.449; int8 D 3.91 W, r 0.551 over random 7.1 W, live 0.664
+resnet18_l3c1: fp32 D 14.06 W, r 0.578 over random 24.3 W, live 0.555; fp16 D 13.96 W, r 0.637 over random 21.9 W, live 0.633; int8 D 4.35 W, r 0.613 over random 7.1 W, live 0.824
+t5small_l0_down: fp32 D 1.63 W, r 0.067 over random 24.3 W, live 0.051; fp16 D 3.53 W, r 0.161 over random 21.9 W, live 0.129; int8 D 2.17 W, r 0.306 over random 7.1 W, live 0.234
+
+## C7 layer 11: a few huge activations, and the gate about half of the lever
+the verifier's own forward pass (copied; not in this repository): top |A| 44.08, 43.37, 28.46, 28.29, 13.72, 13.36, 13.07, 13.06; 4 above 20, 19 above 10, 96 above 5, of 393,216; p99.9 3.144
+capture.json products.gpt2_l11_mlp_down.stats.A: max_abs 44.07791 shape [128, 3072]
+A's scale: max-abs 0.3471, asymmetric 0.1735 (ratio 2.00), p99.9 clip 0.024754862438036224
+max-abs -> asymmetric +1.688 ± 0.452 W (gate 0.637 -> 0, scale halves); asymmetric -> p99.9 +1.475 ± 0.305 W (gate 0 on both); max-abs -> p99.9 +3.163 ± 0.147 W; the first step's share 0.53
+
+## C8 E86's window: the bound on C7's rank
+primary p9999 -0.057 ± 0.637 (n 3); per_token -0.232 ± 1.516 (n 3); p999 +0.054 ± 0.371 (n 2) ; verdict UNDER-RESOLVED
+dips removed p9999 -0.058 ± 0.335 (n 4); per_token +0.000 ± 0.273 (n 4); p999 +0.014 ± 0.183 (n 3) ; verdict INCONCLUSIVE
+dips removed, the four means [5.696, 5.659, 5.715, 5.772], spread 0.113 W; 0.3 W is 5.3% of D
+
+## C10 the float slopes, over the tiles
+fp32, 4 tiles: slope 23.624 W = 0.955 of E78's L (24.7249); ± 0.140 over the tiles (df 2); over E95's own random D (24.321 W) 0.971; intercept 0.802 W, G 0.7133 W
+fp16, 3 tiles: slope 20.679 W = 0.933 of E78's L (22.1624); ± 0.071 over the tiles (df 1); over E95's own random D (21.906 W) 0.944; intercept 0.847 W, G 0.7204 W
+registered: C3b on the point, 0.955 and 0.933 of E78's L, band [0.85, 1.25], PASS. results.md's per-pass ±0.005, ±0.007, ±0.026 are measurement only: five or fewer fixed tiles re-measured
+r - live share, in points of random: {'fp32/resnet18_l2c1': 0.0001, 'fp32/resnet18_l3c1': 0.0234, 'fp32/vgg16_fc2': 0.0436, 'fp32/t5small_l0_down': 0.0163, 'fp16/resnet18_l3c1': 0.0043, 'fp16/vgg16_fc2': 0.0119, 'fp16/t5small_l0_down': 0.0321}
+primary slope 0.2959 W/C, E78's 0.1994; L is E78's D at its slope, r is E95's D over E95's random
+
+## C11 C3a's and C12's intervals are wide
+fp32/vgg16_fc2 law [4.806, 9.94] half 2.567 (a) [3.88, 10.168] half 3.144
+fp32/t5small_l0_down law [0.0, 4.5] half 2.567 (a) [0.0, 4.322] half 3.144
+fp16/vgg16_fc2 law [9.19, 11.516] half 1.163 (a) [5.685, 11.973] half 3.144
+int8/vgg16_fc2 law [3.763, 5.879] half 1.058 (a) [1.595, 3.815] half 1.11
+(a)'s half-widths by class: {'float_ungated/fp32': 2.461, 'float_ungated/fp16': 3.155, 'float_gated': 3.144, 'int8_ungated': 1.022, 'int8_gated': 1.11}
+
+## C12 -0.0's scope
+tile: 0.640625 of A's words; the whole block: 0.545355
+C9: D 19.959 ± 0.851 W; dips removed 20.180 ± 0.081 W; if the gate took it 9.342 W
+
+## C13 small things
+pass 9510, fp32.randn's span at 0.2286 W/C: 1.024 W
+pass 9510, fp32.randn's span at 0.25 W/C: 1.006 W
+pass 9510, fp32.randn's span at 0.26 W/C: 0.997 W
+pass 9510, fp32.randn's span at 0.27 W/C: 0.989 W
+pass 9510, fp32.randn's span at 0.2959 W/C: 0.967 W
+pass 9510, fp32.randn's span at 0.1994 W/C: 1.049 W
+pass 9510, fp32.randn's span at 0.0 W/C: 1.218 W
+at 0.3803 the gates keep [9510, 9511, 9512] and set aside [(9513, ['fp16.randn spans 1.776 W']), (9514, ['int8.zeros departs -0.279 W from its straight line'])]
+dips: 60, depth under the lower neighbour 4.2..25.6 W; definition: board_w[i] < min(board_w[i-2], board_w[i+2]) - 4.0 W (E95.md's '5-20 W' is a paraphrase)

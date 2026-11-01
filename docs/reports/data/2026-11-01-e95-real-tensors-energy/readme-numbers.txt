@@ -39,7 +39,7 @@ int8.real_l6_mlp_down: n 3, values [5.5624, 5.6368, 5.8066]
 | int8.r2_vgg16_fc2 | 3.912 | 3.958 | -0.046 |
 | fp32.r2_t5small_l0_up | 21.651 | 21.862 | -0.210 |
 
-## The same numbers in three formats (r = D over the same pass's random kind of that format)
+## Nested windows of one layer in three formats (r = D over the same pass's random kind of that format)
 | layer | format | gate closes | live share | r primary | r dips-removed | D W | r ÷ live share | a live lane's cost ÷ random's | pJ/MAC (D) | pJ/MAC (S) |
 |---|---|---|---|---|---|---|---|---|---|---|
 | vgg16_fc2 | fp32 | 0.723 | 0.277 | 0.3210 ± 0.0118 | 0.3222 ± 0.0024 | 7.806 ± 0.230 | 1.157 | 1.063 | 1.700 | 2.139 |
