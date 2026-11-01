@@ -1,0 +1,16 @@
+E114 on aifoundry1 card 0: sustained cells (last 40 s of nine 8 s processes), mean +- 95% interval [prediction interval]; E84's single run beside
+fp16/zeros  n=3 rate 24.286 +- 0.7817 [pi 1.5634] runs [24.363, 23.94, 24.555] e84 24.354 | MHz 791.9 +- 23.1764 runs [794.0, 781.7, 800] e84 794.1 | W 28.69 die 53.5 max [54, 53, 55] | limits ['none', 'none', 'none'] ramp [0.034, 0.065, 0.0]
+fp16/ones   n=3 rate 24.3737 +- 0.055 [pi 0.11] runs [24.399, 24.364, 24.358] e84 24.395 | MHz 794.8 +- 1.739 runs [795.6, 794.5, 794.3] e84 795.6 | W 45.9233 die 62.1667 max [63, 64, 62] | limits ['none', 'none', 'none'] ramp [0.026, 0.031, 0.031]
+fp16/randn  n=3 rate 19.7293 +- 0.9055 [pi 1.811] runs [20.15, 19.508, 19.53] e84 19.107 | MHz 657.2667 +- 33.5757 runs [672.8, 648.2, 650.8] e84 631.9 | W 52.36 die 65.5 max [66, 67, 66] | limits ['thermal', 'thermal', 'thermal'] ramp [0.0, 0.0, 0.0]
+int8/zeros  n=3 rate 82.7907 +- 1.1725 [pi 2.3449] runs [82.254, 82.977, 83.141] e84 83.709 | MHz 787.1 +- 8.6952 runs [783.1, 788.6, 789.6] e84 794.6 | W 29.7433 die 54.2667 max [55, 55, 55] | limits ['none', 'none', 'none'] ramp [0.062, 0.062, 0.057]
+int8/full   n=3 rate 83.4667 +- 0.8024 [pi 1.6049] runs [83.094, 83.64, 83.666] e84 83.078 | MHz 792.7333 +- 6.7597 runs [789.6, 794.5, 794.1] e84 788.7 | W 43.64 die 60.3667 max [61, 61, 61] | limits ['none', 'none', 'none'] ramp [0.057, 0.031, 0.034]
+rho fp16: 1.2312 +- 0.0605 (pairs [1.20908, 1.22719, 1.2573]), ratio of means {'ratio': 1.231, 'se_delta': 0.016}, e84 1.2746
+rho int8: 0.9919 +- 0.0048 (pairs [0.98989, 0.99207, 0.99373]), ratio of means {'ratio': 0.9919, 'se_delta': 0.0039}, e84 1.0076
+E114-R1 PASS {"scored": 5, "inside": 5, "need": 4, "expected": "PASS"}
+E114-R2 PASS {"rho16": 1.2312, "ci95": 0.0605, "lo": 1.1707, "hi": 1.2917, "n_pairs": 3, "bar": 1.15, "expected": "PASS", "e84": 1.2746}
+E114-R3 WRONG {"rho8": 0.9919, "ci95": 0.0048, "lo": 0.9871, "hi": 0.9967, "n_pairs": 3, "bar": 0.02, "reading": "SLOWER", "expected": "SAME_WITHIN_BAR", "e84": 1.0076}
+E114-R4 PASS {"runs": 15, "mismatches": [], "expected": "PASS"}
+E114-S1 fp16: DIFFERENT (expected DIFFERENT (card 0 lower: its random fp16) delta -0.0802 +- 0.0653
+E114-S1 int8: INCONCLUSIVE (expected INCONCLUSIVE) delta -0.0174 +- 0.0264
+die vs E84's line: {"n": 15, "mean": -1.6659, "sd": 0.5948, "ci95": 0.3294, "pi95": 1.3177, "line": {"a_c": 41.78, "b_c_per_w": 0.4753, "n_runs": 13, "what": "die = a + b x board W over E84's 13 sustained runs (per-run sus_w_mean, sus_die_mean), E84 corrections-check C1"}, "e114_own_line": {"a_c": 39.361, "b_c_per_w": 0.4941, "n": 15}}
+config after every run: ['{"tdp_w": 65, "temp_threshold_c": 65}'] idle W [18.65, 21.14]

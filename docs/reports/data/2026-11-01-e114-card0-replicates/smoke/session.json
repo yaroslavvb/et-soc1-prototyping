@@ -1,0 +1,129 @@
+{
+ "experiment": "E114",
+ "host": "aifoundry1",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793571491034,
+ "protocol": {
+  "experiment": "E114",
+  "request": "Q133",
+  "card": "aifoundry1-c0",
+  "order_seed": 114,
+  "note": "E84's sustained shape (tools/claims-v3/kspeed/e84/protocol.json SUS: nine back-to-back 8 s processes from a die reading <= 57 C, E80's and E64's SUS) on E84's five fp16 and int8 kinds that bear on its fp16/int8 sustained cells, three passes each, on aifoundry1 card 0 under its own governor, run by E84's runner (tools/claims-v3/kspeed/e84/run_e84.py) unchanged; no fp32 (random fp32 trips card 0's 75 W PMIC alarm, E84); nothing is set on the card",
+  "tools": {
+   "heater": "build/sparsity/host/sparsity_host",
+   "kernel": "build/sparsity/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-e84/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "predictions": "tools/claims-v3/e114/predictions-e114.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 85,
+   "board_cap_w": 97,
+   "cap_consecutive": 3
+  },
+  "caps": {
+   "max_card_min": 24
+  },
+  "blocks": [
+   {
+    "name": "SMOKE",
+    "title": "one 2 s launch of fp16 randn and of int8 full (not analysed): the file path, ET_DEVICES=0 and the trace ring on card 0; no fp32",
+    "default": false,
+    "start": {
+     "mode": "cool",
+     "max_c": 99,
+     "max_wait_s": 5
+    },
+    "launch": {
+     "seconds": 2,
+     "budget": 3.5,
+     "processes": 1
+    },
+    "tail_s": 3,
+    "runs": [
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "fp16-randn"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full"
+     }
+    ]
+   },
+   {
+    "name": "SUS",
+    "title": "sustained: nine back-to-back 8 s processes (~76 s) from a die reading <= 57 C (E84's SUS, unchanged), the five kinds once per pass, three passes, each pass shuffled",
+    "passes": 3,
+    "shuffle": true,
+    "start": {
+     "mode": "cool",
+     "max_c": 57,
+     "max_wait_s": 300
+    },
+    "launch": {
+     "seconds": 8,
+     "budget": 9.5,
+     "processes": 9
+    },
+    "tail_s": 6,
+    "runs": [
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+      "label": "fp16-zeros"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+      "label": "fp16-ones"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "fp16-randn"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "int8-zeros"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full"
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "SMOKE-00-fp16-randn-r1",
+  "SMOKE-01-int8-full-r1"
+ ],
+ "sha256": {
+  "heater": "e0fbecce35f252c546e6e8390f6a4694519674dc4d6dea359b0db9c4d1a3fbbe",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "87c1c38c995f0e3c6f442f361398dfc561ef1d4ed8b2304b9e9242d4a133dcc8",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "tools/claims-v3/kspeed/e84/run_e84.py",
+  "--protocol",
+  "tools/claims-v3/e114/protocol.json",
+  "--out",
+  "/home/yaroslavvb/nekko/build/e114/runs/smoke",
+  "--only",
+  "SMOKE",
+  "--max-card-min",
+  "5"
+ ],
+ "git_head": "",
+ "git_dirty_hpl": ""
+}
