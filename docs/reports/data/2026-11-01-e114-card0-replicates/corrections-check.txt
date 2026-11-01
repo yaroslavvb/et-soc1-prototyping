@@ -1,0 +1,91 @@
+== 0. The registered outputs are unchanged by these corrections (sha256)
+   results.json: 2a4a11334d13c36b4f74739b6edd61ca3e0e92c39be1e068ef47aa3075035b20
+   reduce.txt: c1c082ec36b9b9ba5bda21157a8aea9bb7892ebcfccf997e474e50882b7513ae
+   posthoc/climb.txt: f202e618c2e12061ecf8cef539ae4ad451521c5423bb958af98fc9562bf7ca83
+   posthoc/climb.json: 5e8d9d23f1e7ada6bf9e80f83b4414ca80b3ab6f64a13ab52caac49fe287afb8
+
+== C2 (post hoc). Every fall below 800 MHz that reaches the last 40 s while kernels run, for the four kinds at the cap.
+   An EPISODE is a run of consecutive samples below 800 MHz (10 Hz; no 800 MHz sample between them and no hole over 1 s).
+   It counts when one of its samples
+   lies in the window between a process's first kernel and its last kernel's end. Its ONSET is its first sample: AT A
+   START when that comes before, or within 0.2 s of, a process's first kernel (the fall happened in the 0.33 s gap
+   between processes); INSIDE a process otherwise, with the hit kernel (the first kernel there with g_eff < 0.79 GHz,
+   Q132(g)'s ir_lib.g_eff), the gap before it and x_ms (its time at 800 MHz before the fall).
+-- E114
+   int8/zeros SUS-03-int8-zeros-r1     rate  82.254  sampled MHz  783.1  falls 3 (at a start 2, inside 1); low samples in the window 36
+        {'at': 'inside', 'proc': 5, 'onset_s': 4.04, 'kernel': 10, 'gap_before_ms': 2, 'x_ms': 14.1, 'g_before': 0.8001, 'n_low': 12, 'n_low_in_window': 12, 'min_mhz': 600, 'starts_before_window': False}
+   int8/full  SUS-04-int8-full-r1      rate  83.094  sampled MHz  789.6  falls 2 (at a start 2, inside 0); low samples in the window 22
+   fp16/zeros SUS-00-fp16-zeros-r1     rate  24.363  sampled MHz  794.0  falls 1 (at a start 1, inside 0); low samples in the window 13
+   fp16/ones  SUS-01-fp16-ones-r1      rate  24.399  sampled MHz  795.6  falls 1 (at a start 1, inside 0); low samples in the window 10
+   fp16/ones  SUS-01-fp16-ones-r2      rate  24.364  sampled MHz  794.5  falls 1 (at a start 1, inside 0); low samples in the window 12
+   int8/zeros SUS-03-int8-zeros-r2     rate  82.977  sampled MHz  788.6  falls 2 (at a start 2, inside 0); low samples in the window 24
+   fp16/zeros SUS-00-fp16-zeros-r2     rate  23.940  sampled MHz  781.7  falls 3 (at a start 2, inside 1); low samples in the window 39
+        {'at': 'inside', 'proc': 8, 'onset_s': 7.03, 'kernel': 18, 'gap_before_ms': 1, 'x_ms': 12.2, 'g_before': 0.8, 'n_low': 14, 'n_low_in_window': 14, 'min_mhz': 600, 'starts_before_window': False}
+   int8/full  SUS-04-int8-full-r2      rate  83.640  sampled MHz  794.5  falls 1 (at a start 1, inside 0); low samples in the window 12
+   int8/zeros SUS-03-int8-zeros-r3     rate  83.141  sampled MHz  789.6  falls 2 (at a start 2, inside 0); low samples in the window 22
+   fp16/ones  SUS-01-fp16-ones-r3      rate  24.358  sampled MHz  794.3  falls 1 (at a start 1, inside 0); low samples in the window 12
+   fp16/zeros SUS-00-fp16-zeros-r3     rate  24.555  sampled MHz  800.0  falls 0 (at a start 0, inside 0); low samples in the window 0
+   int8/full  SUS-04-int8-full-r3      rate  83.666  sampled MHz  794.1  falls 1 (at a start 1, inside 0); low samples in the window 13
+-- E84
+   fp16/ones  SUS-06-fp16-ones-r1      rate  24.395  sampled MHz  795.6  falls 1 (at a start 1, inside 0); low samples in the window 10
+   fp16/zeros SUS-05-fp16-zeros-r1     rate  24.354  sampled MHz  794.1  falls 1 (at a start 0, inside 1); low samples in the window 13
+        {'at': 'inside', 'proc': 6, 'onset_s': 0.5, 'kernel': 1, 'gap_before_ms': 2, 'x_ms': -0.9, 'g_before': 0.7999, 'n_low': 13, 'n_low_in_window': 13, 'min_mhz': 600, 'starts_before_window': False}
+   int8/full  SUS-09-int8-full-r1      rate  83.078  sampled MHz  788.7  falls 2 (at a start 2, inside 0); low samples in the window 24
+   int8/zeros SUS-08-int8-zeros-r1     rate  83.709  sampled MHz  794.6  falls 1 (at a start 1, inside 0); low samples in the window 12
+
+-- int8 pass pairs: zeros against full. rho = rate ratio; clock ratio = sampled-MHz ratio; rate per clock = rho / clock ratio
+   E114 pass 1: rho 0.98989  clock ratio 0.99177  rate per clock 0.9981  falls zeros 3 (2 at a start, 1 inside), full 2 (2, 0): zeros minus full +1; low samples in the window 36 against 22
+   E114 pass 2: rho 0.99207  clock ratio 0.99257  rate per clock 0.9995  falls zeros 2 (2 at a start, 0 inside), full 1 (1, 0): zeros minus full +1; low samples in the window 24 against 12
+   E114 pass 3: rho 0.99373  clock ratio 0.99433  rate per clock 0.9994  falls zeros 2 (2 at a start, 0 inside), full 1 (1, 0): zeros minus full +1; low samples in the window 22 against 13
+   E84  pass 1: rho 1.00760  clock ratio 1.00748  rate per clock 1.0001  falls zeros 1 (1 at a start, 0 inside), full 2 (2, 0): zeros minus full -1; low samples in the window 12 against 24
+-- fp16 zeros against ones, the same passes (both at the cap; a check that the data do not set the rate at a given clock)
+   E114 pass 1: zeros/ones rate 0.99852  clock 0.99799  rate per clock 1.0005; falls 1 against 1
+   E114 pass 2: zeros/ones rate 0.98260  clock 0.98389  rate per clock 0.9987; falls 3 against 1
+   E114 pass 3: zeros/ones rate 1.00809  clock 1.00718  rate per clock 1.0009; falls 0 against 1
+   E84  pass 1: zeros/ones rate 0.99832  clock 0.99811  rate per clock 1.0002; falls 1 against 1
+-- falls inside a process, in the window, all four kinds: 3: [('E114', 'SUS-03-int8-zeros-r1', 4.04), ('E114', 'SUS-00-fp16-zeros-r2', 7.03), ('E84', 'SUS-05-fp16-zeros-r1', 0.5)]
+-- episodes that began before the window and reach into it: 0 []
+
+== C3. Today's die against E84's die line, with the line's own fit error
+   E84's line over its 13 sustained runs: 41.780 + 0.4753 C per W, residual sd 0.696 C (df 11)
+   E114, 15 runs: mean die minus that line -1.667 C, sd 0.595; within-session se 0.154, 95% +-0.329 (t 2.145, df 14): the README's +-0.33
+   the line's own se at E114's mean board W (40.07 W, E84's mean 39.29 W): 0.194 C
+   combined se 0.247 C; Welch-Satterthwaite df 22.3, t 2.074: 95% +-0.513 C (-> -2.18 to -1.15); with t(13) 2.160: +-0.534
+
+== C4. Random fp16 today against E84's single run, in matched units; the window against the run
+   rate 19.7293 against 19.107 TFLOPS: +3.3%; sampled clock 657.2667 against 631.9 MHz: +4.0% (+25.4 MHz)
+   rho16 today 1.2312 (95% 1.1707-1.2917); E84's single pair 1.2746
+   work per run, first kernel of the first process to the end of the ninth: 76.1-78.8 s (median 77.0); the rules read the last 40 s
+
+== C1. What E114 asked of the PMIC, by count (et-platform 836a4ab; E118's CHANGE-RECORD lists the handlers)
+   the revisions query (DM_CMD_GET_MODULE_FIRMWARE_REVISIONS) in ident/ident-141810.out: 1 call, 'PMIC Firmware versions' line present: True
+   sampler readings in the 15 sustained runs: 12695 (each one sends GET_ASIC_VOLTAGE and GET_MODULE_VOLTAGE, which read PMIC voltage registers; no write); smoke runs: 2
+   ettelem config reads in the session: 17 (after each of the 15 runs, and the start and end queries), plus the start and closing reads in ident/; each sends GET_ASIC_VOLTAGE
+
+== C8 (post hoc). Card 0's error events in the host's kernel log, from other lanes' committed reads
+   Q132(g), host/err-aifoundry1.txt: 2026-11-01 00:13:31 PDT, host up 465086.39 s: card 0's events 575 ({('0000:01:00.0', 'SP Runtime Error'): 252, ('0000:01:00.0', 'Power Management IC Errors'): 177, ('0000:01:00.0', 'Thermal Throttling Error'): 146})
+   E118, tools/claims-v3/e118/CHANGE-RECORD.md (read 14:50:39 PST): card 0's 'Error Event Detected' 701, the last at host uptime 520,656 s; between the two reads 126
+   host boot from Q132(g)'s read: 26 Oct 15:02:04.610000 PDT; the last event (stamp 520656.762068 s) at 14:39:41.372068 PST by that boot time
+   E114 last run's after-run read: residency states 2 rc 0 at 14:39:43.392000, 3 rc 0 at 14:39:43.393000, 4 rc -5 at 14:39:43.395000, 5 rc -5 at 14:39:43.396000, 6 rc -5 at 14:39:43.397000
+   E114 session's end read: residency states 2 rc 0 at 14:39:43.418000, 3 rc 0 at 14:39:43.419000, 4 rc -5 at 14:39:43.421000, 5 rc -5 at 14:39:43.422000, 6 rc -5 at 14:39:43.424000
+   E114's residency reads that returned an error (states 4-6, rc -5), every run plus start and end: 51
+   E114's own trace-ring dumps (s1/sp/*.bin, 8 KB each, the latest records only), counts of the service processor's
+   'Unexpected power throtlling state' and 'thermal pwr mgmt error: get_throttle_time()' lines (E77's amendment A1 ties
+   them to reads of throttle states 5 and 6):
+      SUS-00-fp16-zeros-r1       3 and 3
+      SUS-00-fp16-zeros-r2       3 and 3
+      SUS-00-fp16-zeros-r3       3 and 3
+      SUS-01-fp16-ones-r1        6 and 6
+      SUS-01-fp16-ones-r2        3 and 3
+      SUS-01-fp16-ones-r3        3 and 4
+      SUS-02-fp16-randn-r1       0 and 0
+      SUS-02-fp16-randn-r2       0 and 0
+      SUS-02-fp16-randn-r3       0 and 0
+      SUS-03-int8-zeros-r1       3 and 3
+      SUS-03-int8-zeros-r2       3 and 4
+      SUS-03-int8-zeros-r3       6 and 6
+      SUS-04-int8-full-r1        3 and 3
+      SUS-04-int8-full-r2        3 and 4
+      SUS-04-int8-full-r3        6 and 6
+      end                        7 and 8
+      start                      18 and 18

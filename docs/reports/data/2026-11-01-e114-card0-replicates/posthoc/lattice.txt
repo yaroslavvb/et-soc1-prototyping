@@ -1,0 +1,22 @@
+E114 session 2026-11-01-e114-card0-replicates/s1: 15 sustained runs, 135 processes, 2652 kernels
+
+1. Falls inside a process, rules S and K: 6; clean (x -40..40 ms, kernel before >= 0.79 GHz): 5
+   {'run': 'SUS-03-int8-zeros-r1', 'proc': 2, 'how': 'S', 'j': None}
+   {'run': 'SUS-03-int8-zeros-r1', 'kind': 'int8/zeros', 'proc': 2, 'how': 'K', 'kernel': 16, 'k_t0': 1793571618768, 'x_ms': 15.6, 'k_g': 0.6051, 'prev_g': 0.8002, 'gap_before_ms': 2, 'since_proc_s': 7.656}
+   {'run': 'SUS-03-int8-zeros-r1', 'kind': 'int8/zeros', 'proc': 5, 'how': 'S', 'kernel': 10, 'k_t0': 1793571640768, 'x_ms': 14.1, 'k_g': 0.6059, 'prev_g': 0.8001, 'gap_before_ms': 2, 'since_proc_s': 4.08}
+   {'run': 'SUS-04-int8-full-r1', 'kind': 'int8/full', 'proc': 1, 'how': 'S', 'kernel': 7, 'k_t0': 1793571690770, 'x_ms': 6.1, 'k_g': 0.602, 'prev_g': 0.8, 'gap_before_ms': 1, 'since_proc_s': 3.415}
+   {'run': 'SUS-00-fp16-zeros-r2', 'kind': 'fp16/zeros', 'proc': 8, 'how': 'S', 'kernel': 18, 'k_t0': 1793572266781, 'x_ms': 12.2, 'k_g': 0.6051, 'prev_g': 0.8, 'gap_before_ms': 1, 'since_proc_s': 7.074}
+   {'run': 'SUS-04-int8-full-r3', 'kind': 'int8/full', 'proc': 3, 'how': 'S', 'kernel': 7, 'k_t0': 1793572728789, 'x_ms': 4.5, 'k_g': 0.6019, 'prev_g': 0.8001, 'gap_before_ms': 1, 'since_proc_s': 2.951}
+
+2. Lattice from the 5 clean falls: period 1000.0191 ms, R 1.0000, residuals [-0.13, -0.55, 0.49, 0.5, -0.31] ms, the falls 1110 s apart (beats [0, 22, 72, 648, 1110])
+   Q132(g)'s E84 lattice on this card, 31 Oct: 1000.0186 ms from 3 falls (its ir-gaps.txt); aifoundry2's three sessions 1000.0098-1000.0105 ms
+
+3. Gaps between processes whose earlier process ended at 800 MHz: 95; gap median 331 ms, range 326-339 ms
+   lattice point in the gap and the clock fell 31; in the gap, no fall 0; not in the gap, fell 0; not in the gap, no fall 64  -> 95 of 95 predicted
+   where the lattice point sits in the gaps that hold one (ms after the last kernel's end): min 0.9, median 170.0, max 324.6
+   gaps left out (the earlier process's last kernel under 0.79 GHz: random fp16 at its trip): 25
+   of these gaps, the next process's climb was long (> 0.4 s, posthoc/climb.json) after 31; fell and long 31; fell 31
+
+4. Later process starts that began at 600 MHz, no limit in reach during the climb: 35 (median, sd, min, max, s)
+   first 800 reading from the process's first kernel (1.262, 0.151, 0.548, 1.389); from the first lattice point inside a kernel (0.389, 0.052, 0.277, 0.503); that lattice point from the first kernel (0.838, 0.164, 0.052, 0.994)
+   Q132(g) on E84's first processes, the same measure: from that heartbeat median 0.383 s, sd 0.188 (its ir-gaps.txt)
