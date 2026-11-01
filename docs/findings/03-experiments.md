@@ -4359,7 +4359,7 @@ session 02:06:38–03:15:20 PST, 96 of 96 runs, exit 0, **68.7 card-minutes** (7
   not data alone. The sustained rank rests on five tiles, one run each; the 87–95% tiles are cap-limited and rank
   nothing.
 - **Tiles with no exact zeros:** GPT-2, BERT and ViT burst within 15 MHz of random, −3.4 MHz in fp32 and +10.2 in fp16
-  (S3): three models, not six, and fp16's +1% is not established (+1.3σ here; E87 +9.0 ± 5.0). Sustained they sit at the
+  (S3): three models, not six, and fp16's +1% is not established (+1.3σ here; with E87's +7.8 MHz on three other tiles the two sessions read +9.0 ± 5.0, 1σ). Sustained they sit at the
   floor with random, no more. T5-small's bf16-grid tile bursts +21.3 MHz and ViT's −0.0 tile +36.3, on fewer moving
   bits; that tile reads 21.4 W of switching, where a gate that took −0.0 would give 10.6 W.
 - **Real int8 in four paired rounds, near the cap, on a cool night:** +6.1 MHz, 95% [−0.8, +13.1], against int8 full,
