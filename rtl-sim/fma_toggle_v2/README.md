@@ -9,7 +9,7 @@ count that is quoted. Results and the reasoning: [`docs/reports/data/2026-11-01-
 **Not the stimulus: the simulator.** Verilator 5.052's data-flow-graph optimiser miscompiles core-et's `casez` blocks that have a wildcard arm
 and part-select targets. One of them is the mux in front of the alignment shifter (`txfma_f3.v:160-170`). With the pass on, that mux reads 0, so
 nothing reaches the adder but the larger operand, and a multiply-add returns c alone, or a·b alone when c is 0. **`-fno-dfg` is the fix**, in
-this Makefile's `VOPT`. [`verilator_dfg_reproducer.sv`](verilator_dfg_reproducer.sv) shows it in 20 lines with no RTL from this project: `al=0000`
+this Makefile's `VOPT`. [`verilator_dfg_reproducer.sv`](verilator_dfg_reproducer.sv) shows it in 25 lines of code with no RTL from this project: `al=0000`
 with the pass, `al=4000` without. [`tb_prev.sv`](tb_prev.sv) shows that `use_prev_sigs` has nothing to do with it: the result is wrong with the
 flag on and off when the pass is on, and right with the flag on and off when it is off.
 
@@ -53,7 +53,8 @@ The mini's Verilator came from Homebrew (`brew install verilator`, 5.052). For a
 `core-et` at `b38a1a31`. numpy is needed only by the analysis scripts in the data directory.
 
 **No count may be quoted from a run that fails the check.** `run_kinds.py` compares every accumulator word with software after each measured op
-and records `check_mismatch`.
+and records `check_mismatch`. A pass tests arithmetic, order and the gate at the end of an op: it does not validate the toggle counts, and fp16's software
+is a model read off this same RTL. See the data directory's Result 3.
 
 ## Files
 

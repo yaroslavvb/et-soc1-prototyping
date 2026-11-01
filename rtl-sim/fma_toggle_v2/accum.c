@@ -4,7 +4,7 @@
 //   writes accum_<n>.bin (1024 bytes, C[row][col] row-major, little-endian) in the current directory
 //
 // fp32: FMADD with round-to-nearest-even, denormal operands read as zero, denormal results flushed (the rules
-// fcheck_unit.py checks against the RTL, 20,000 of 20,000 exact). fp16: the fixed-point window of fp16_model.py.
+// fcheck_unit.py checks against the RTL, 40,000 of 40,000 exact). fp16: the fixed-point window of fp16_model.py.
 // int8: exact, closed form. The order and the zero gate are the RTL's: for k, for row i, for column j, skip a word pair
 // whose A or B word is zero (first pass: a multiply, not gated, in the first A column of op 0 only).
 // SPDX-License-Identifier: Apache-2.0

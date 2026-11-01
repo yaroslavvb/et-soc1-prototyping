@@ -12,7 +12,7 @@ PY ?= python3
 
 # -fno-dfg IS THE FIX. Verilator 5.052's data-flow-graph pass miscompiles core-et's casez blocks with a wildcard arm and part-select
 # targets, among them the mux in front of the alignment shifter (txfma_f3.v:160-170): with the pass on, the shifter's input reads 0,
-# and a multiply-add returns only its larger operand. verilator_dfg_reproducer.sv shows it in 20 lines.
+# and a multiply-add returns only its larger operand. verilator_dfg_reproducer.sv shows it in 25 lines of code.
 VOPT := -fno-dfg
 
 VCOMMON := -Wno-fatal -Wno-lint -Wno-style --top-module tb -j 10 $(MKFLAGS) $(VOPT) \

@@ -1,0 +1,44 @@
+# [A] how far the count moves with every Verilator optimisation off (counts-O0.json against counts-O3.json, one build each, the merges of that run)
+  fp32.ones    unit nets_hier +4.6%, nets_hier2 +38.6%; vpu nets_hier +14.6%, nets_hier2 +48.8%; clocked +0.0%
+  fp32.randn   unit nets_hier +3.0%, nets_hier2 +33.6%; vpu nets_hier +3.2%, nets_hier2 +34.8%; clocked +0.0%
+  fp16.ones    unit nets_hier +8.9%, nets_hier2 +49.3%; vpu nets_hier +14.8%, nets_hier2 +50.3%; clocked +0.0%
+  fp16.randn   unit nets_hier +5.9%, nets_hier2 +30.1%; vpu nets_hier +5.8%, nets_hier2 +31.8%; clocked +0.0%
+  int8.full    unit nets_hier +35.0%, nets_hier2 +35.0%; vpu nets_hier +4.1%, nets_hier2 +22.4%; clocked +0.0%
+  int8.ones    unit nets_hier +49.2%, nets_hier2 +49.2%; vpu nets_hier +1.1%, nets_hier2 +13.8%; clocked +0.0%
+
+# [A2] nets_map, its merge learned again on the -O0 binary (train_maps.py), against this README's default build
+  fp32.ones      unit map      5.4 vs      5.1 (+6.0%); vpu map     25.7 vs     23.9 (+7.6%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'adder_norm': '1.3 vs 1.2', 'lane_operand_bus': '1.4 vs 1.3', 'operand': '0.3 vs 0.3', 'exponent': '0.4 vs 0.4'}
+  fp32.randn     unit map   1874.6 vs   1816.1 (+3.2%); vpu map   1998.5 vs   1930.7 (+3.5%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'multiplier': '898.4 vs 881.3', 'adder_norm': '607.2 vs 570.1', 'lane_operand_bus': '30.5 vs 30.5', 'operand': '149.9 vs 149.7', 'exponent': '107.7 vs 103.7'}
+  fp32.sparse50  unit map    467.0 vs    452.8 (+3.1%); vpu map    560.2 vs    538.4 (+4.1%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'multiplier': '212.7 vs 208.1', 'adder_norm': '135.3 vs 127.2', 'lane_operand_bus': '29.1 vs 29.1', 'operand': '61.9 vs 61.9', 'exponent': '24.1 vs 23.4'}
+  fp32.zeros     unit map      0.0 vs      0.0 (-100.0%); vpu map     15.9 vs     14.2 (+11.9%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'lane_operand_bus': '1.3 vs 1.3'}
+  fp16.ones      unit map      2.8 vs      2.6 (+7.1%); vpu map     12.9 vs     11.9 (+7.8%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'adder_norm': '0.6 vs 0.5', 'lane_operand_bus': '0.7 vs 0.7', 'operand': '0.1 vs 0.1', 'exponent': '0.2 vs 0.2'}
+  fp16.randn     unit map    783.8 vs    746.5 (+5.0%); vpu map    846.3 vs    804.5 (+5.2%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'multiplier': '300.1 vs 291.9', 'adder_norm': '285.1 vs 259.3', 'lane_operand_bus': '15.7 vs 15.7', 'operand': '73.3 vs 73.3', 'exponent': '68.0 vs 64.9'}
+  fp16.sparse50  unit map    444.7 vs    421.5 (+5.5%); vpu map    498.9 vs    471.9 (+5.7%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'multiplier': '147.9 vs 142.7', 'adder_norm': '154.7 vs 139.4', 'lane_operand_bus': '14.2 vs 14.2', 'operand': '46.8 vs 46.6', 'exponent': '49.9 vs 47.9'}
+  fp16.zeros     unit map      0.0 vs      0.0 (-100.0%); vpu map      8.0 vs      7.1 (+11.8%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'lane_operand_bus': '0.6 vs 0.6'}
+  int8.full      unit map     48.0 vs     35.6 (+34.9%); vpu map     47.1 vs     45.4 (+3.8%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'multiplier': '17.2 vs 17.2', 'adder_norm': '8.1 vs 8.1', 'lane_operand_bus': '3.2 vs 3.2', 'operand': '12.2 vs 12.2'}
+  int8.ones      unit map      0.2 vs      0.1 (+50.0%); vpu map      1.9 vs      1.9 (-0.9%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'adder_norm': '0.1 vs 0.1', 'lane_operand_bus': '0.7 vs 0.7'}
+  int8.sparse50  unit map     38.3 vs     26.8 (+42.6%); vpu map     35.8 vs     34.5 (+3.8%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'multiplier': '10.9 vs 10.9', 'adder_norm': '8.1 vs 8.1', 'lane_operand_bus': '2.2 vs 2.2', 'operand': '9.3 vs 9.3'}
+  int8.zeros     unit map      0.0 vs      0.0 (-100.0%); vpu map      1.1 vs      1.2 (-1.5%); clocked +0.0%; by stage, -O0 vs default, per MAC: {'lane_operand_bus': '0.1 vs 0.1'}
+
+# [B] the merges: is nets_map at or above nets_hier in every kind, unit and VPU?
+  unit: 51 of 51 at or above; below: []
+  VPU: 51 of 51 at or above; below: []
+  fp32 randn per MAC: unit hier 1431.4, hier2 1803.2, map 1816.1
+
+# [C] what the functional check covers
+  fcheck/fcheck-unit-fp32.json: {'exact': 40000}; by class {'aligned|n': 5657, 'cancel|n': 7849, 'random|n': 26494}; against exact RTZ {}
+  fcheck/fcheck-unit-fp16.json: {'exact': 39701, 'window_cancel': 299}; by class {'aligned|n': 10227, 'cancel|n': 8746, 'cancel|window_cancel': 299, 'random|n': 21027}; against exact RTZ {'equal': 33793, 'differ': 6207}
+  kinds {'fp32': 18, 'fp16': 17, 'int8': 16}; 768 words a kind (3 launch points x 256): 39168 words; by format [('fp32', 13824), ('fp16', 13056), ('int8', 12288)]
+  kinds with no valid slot, where C stays 0: {'fp32': ['a_randn_b_zeros', 'a_zeros_b_randn', 'zeros'], 'fp16': ['a_randn_b_zeros', 'a_zeros_b_randn', 'zeros'], 'int8': ['a_full_b_zeros', 'a_zeros_b_full', 'zeros']}; 6912 words; leaving 32256, of which fp16 10752
+  mismatches over all kinds: 0
+  'result' on every card record: E103's runs.jsonl says ['unchecked']
+
+# [D] two terms on single B bits (E65), by the merge
+  vpu_map: rms 0.128 W, measured/predicted 1.020; E70 spread 0.172 W
+  vpu_hier2: rms 0.303 W, measured/predicted 1.142; E70 spread 1.312 W
+  vpu_hier: rms 1.118 W, measured/predicted 2.300; E70 spread 4.793 W
+  M4: E65 0.185 W, E70 spread 0.369 W
+
+# [E] the reproducer's length, and accum.c's comment
+  verilator_dfg_reproducer.sv: 33 lines, 25 of code
+  accum.c: ['// fcheck_unit.py checks against the RTL, 20,000 of 20,000 exact). fp16: the fixed-point window of fp16_model.py.']

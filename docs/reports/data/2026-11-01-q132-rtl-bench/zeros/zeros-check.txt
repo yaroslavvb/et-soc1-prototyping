@@ -1,0 +1,82 @@
+# (1) per second, chip-wide, on E78's rates
+                                             fp32 zeros   fp16 zeros   int8 zeros  int8/fp32
+TensorFMA ops                                 1.121e+09    1.121e+09    1.926e+09      1.718
+cycles an op (bench; card 546, 546, 318)            545          545          317      0.582
+register bits clocked, enable high            1.168e+15    1.168e+15    7.610e+14      0.652
+register bits seeing a clock edge             6.786e+15    6.785e+15    3.435e+15      0.506
+  of which the multiply-add unit's            4.214e+15    4.213e+15    8.617e+14      0.204
+register bits that change                     3.878e+13    3.878e+13    1.714e+13      0.442
+merged nets toggling (nets_map)               6.530e+13    6.543e+13    3.672e+13      0.562
+clock-net toggles (coverage)                  4.717e+14    4.717e+14    3.409e+14      0.723
+scratchpad line reads                         3.228e+11    3.228e+11    4.313e+11      1.336
+measured S, E78, W over idle                      1.986        1.987        2.605      1.312
+S(int8 zeros) - S(fp32 zeros) = 0.619 W; 95% half-widths 0.028, 0.059
+
+# priced at M4's float constants, an extrapolation: M4 was fitted over zeros, so its a has never been tested on the bits that stay clocked on zeros
+fp32 zeros: clocked 1.245 W + nets 0.176 W = 1.421 W, of S 1.986 W; left 0.565 W
+int8 zeros: clocked 0.811 W + nets 0.098 W = 0.909 W, of S 2.605 W; left 1.696 W
+the count says int8 - fp32 = -0.512 W, against the measured +0.619 W: 1.132 W unexplained, and the sign is wrong
+to close that by the integer unit's clock alone at a = 1.066 fJ, it would need 135 more register bits on a slot's clock, where the RTL has 109
+
+# what points the right way: scratchpad reads, 1.336x, and ops, 1.718x. Neither is priced by this bench: the dcache and the core are not in it
+if all of S(zeros) scaled with reads: 2.654 W for int8, measured 2.605 W. One number; a coincidence is not excluded
+S = c x clocked + r x reads, two equations, two unknowns: c = 0.060 fJ a bit, r = 5.93 pJ a line. That c is far below M4's a, so this reading needs the bits clocked on zeros to be nearly free
+S = c + e x ops: e = 770 pJ an op on one minion, c = 1.123 W
+
+# is the gap a property of the formats, not of one session? S, W over idle, each committed session with both zeros
+  e78.json       fp32 1.986  int8 2.605  diff +0.619  ratio 1.312
+  e82.json       fp32 1.841  int8 2.402  diff +0.561  ratio 1.304
+  e86.json       fp32 1.998  int8 2.527  diff +0.529  ratio 1.265
+  e88.json       fp32 1.867  int8 2.407  diff +0.540  ratio 1.289
+  e90.json       fp32 1.993  int8 2.513  diff +0.520  ratio 1.261
+  e91.json       fp32 2.008  int8 2.483  diff +0.475  ratio 1.236
+  e101.json      fp32 2.130  int8 2.538  diff +0.408  ratio 1.191
+  e102.json      fp32 1.893  int8 2.422  diff +0.528  ratio 1.279
+  e103.json      fp32 1.869  int8 2.348  diff +0.479  ratio 1.256
+  e92.json       fp32 1.988  int8 2.594  diff +0.606  ratio 1.305
+  e93.json       fp32 1.876  int8 2.368  diff +0.492  ratio 1.262
+  e94.json       fp32 1.826  int8 2.326  diff +0.499  ratio 1.273
+  e95.json       fp32 1.989  int8 2.541  diff +0.551  ratio 1.277
+
+# which clocks stay on with every slot gated: rising edges in one op, a lane or a unit (vcd_clocks.py). fp32's op is 559 cycles in this window, int8's 331
+  lane.clock_txfma                                                       fp32  534.0  int8    0.0  (8 instances)
+  lane.txfma_trans_top.txfma.txfmafrac0_top.opa_frf_clk                  fp32    0.0  int8    0.0  (8 instances)
+  lane.txfma_trans_top.txfma.txfmafrac0_top.opb_frf_clk                  fp32    0.0  int8    0.0  (8 instances)
+  lane.txfma_trans_top.txfma.txfmafrac0_top.opc_frf_clk                  fp32    0.0  int8    0.0  (8 instances)
+  lane.txfma_trans_top.txfma.txfmafrac0_top.ctrl_frf_clk                 fp32    0.0  int8    0.0  (8 instances)
+  lane.LANE_TIMA.lane_tima.tima_clock                                    fp32    0.0  int8  304.0  (16 instances)
+  lane.LANE_TIMA.lane_tima.f2_tima_in3_en                                fp32    0.0  int8    1.0  (16 instances)
+  lane.clock_bypass                                                      fp32    0.0  int8    0.0  (8 instances)
+  lane.rf.vpu_64x32_3r2w_vpurf.rd_enable0                                fp32    0.0  int8    0.0  (8 instances)
+  lane.rf.vpu_64x32_3r2w_vpurf.rd_enable1                                fp32    0.0  int8    0.0  (8 instances)
+  lane.rf.vpu_64x32_3r2w_vpurf.rd_enable2                                fp32   16.0  int8    0.0  (8 instances)
+  lane.rf.vpu_64x32_3r2w_vpurf.wr_enable0                                fp32    0.0  int8    0.0  (8 instances)
+  lane.rf.vpu_64x32_3r2w_vpurf.wr_enable1                                fp32    0.0  int8    0.0  (8 instances)
+
+# register bits by block, per op (acct-*.txt): clocked with enable high / seeing a clock edge
+  fp32
+         25632 /    2388048  VPU_LANES.lane.txfma_trans_top.txfma.txfmactl0_top
+             0 /     798864  VPU_LANES.lane.txfma_trans_top.txfma.txfmaexp0_top
+        352144 /     758030  ctrl
+        276842 /     538716  shire/minion/vpu/vpu_ctrl.v
+        297019 /     495012  shire/minion/vpu/vpu_mask.v
+         36413 /     492292  shire/minion/vpu/txfma_7s/txfma_c0.v
+             0 /     393024  VPU_LANES.lane.txfma_trans_top.txfma
+         36297 /     109480  shire/minion/vpu/vpu_tensorquant.v
+         23729 /     108052  shire/minion/vpu/vpu_tensorfma.v
+  int8
+         36020 /     445214  ctrl
+         95188 /     277958  shire/minion/vpu/vpu_ctrl.v
+         12877 /     277118  shire/minion/vpu/vpu_tensorquant.v
+         32682 /     270698  shire/minion/vpu/tima/tima_top.v
+        135975 /     248218  shire/minion/vpu/vpu_mask.v
+         30820 /     211192  shire/minion/vpu/vpu_tensorfma.v
+         45405 /      58887  shire/minion/vpu/vpu_lane.v
+         12508 /      22076  shire/minion/vpu/vpu_rf.v
+             0 /          0  shire/minion/vpu/vpu_tensorreduce.v
+
+# (2) Q130(i)'s reading
+  its simulation, its own run.sh, with and without -fno-dfg: see q130i-rerun.txt: identical to each other and to its committed counts.txt
+  the recount's bench on zeros, faulty against flag: {'nets': (52, 52), 'clock_nets': (149215, 149214), 'ff_clocked': (24576, 24576), 'ff_toggles': (0, 0), 'bus': (0, 0), 'nets_hier': (16, 16)}
+  the whole VPU on fp32 zeros at M4's constants, an extrapolation: nets 0.038 pJ a multiply-add, clocked bits 0.271 pJ, together 0.310 pJ; S on E78's card 0.433 pJ
+  per multiply-add on fp32 zeros: merged nets 14.2, bus nets 1.29, register bits clocked 254.4, seeing an edge 1478.1, changing 8.45

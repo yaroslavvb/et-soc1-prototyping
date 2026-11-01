@@ -3,14 +3,14 @@
 *Sun 1 Nov 2026 (week 44). Desk compute on the mini: Verilator 5.052 from Homebrew, Apple clang, core-et `b38a1a31`
 ([`versions.txt`](versions.txt)). **No card was opened and nothing was measured in watts here**: every watt below comes from a committed
 experiment, named where it is used. The bench is [`rtl-sim/fma_toggle_v2/`](../../../../rtl-sim/fma_toggle_v2/). The two old benches are
-untouched, as the record. This closes item 7 of section 11 of the kinds page, and narrows items 2, 6 and 12 (§7).*
+untouched, as the record. This closes item 7 of section 11 of the kinds page, and narrows items 2, 6 and 12 (§7). Corrected after verification the same day: [Corrections](#corrections-after-verification).*
 
 ## Results
 
 **1. The fault was the simulator, not the stimulus.** Verilator 5.052's data-flow-graph optimiser miscompiles `casez` blocks with a wildcard arm
 and part-select targets. One of them is the mux in front of the alignment shifter (`txfma_f3.v:160-170`). With the pass on, the shifter's input
 reads 0, so a multiply-add returns only its larger operand: c alone, or a·b alone when c = 0, the pattern Q130(b) §0 row 1 reported. **`-fno-dfg`
-fixes it.** A 20-line file with no RTL of this project reproduces it, `al=0000` against `al=4000`
+fixes it.** A small file, 25 lines of code with no RTL of this project, reproduces it, `al=0000` against `al=4000`
 ([`verilator_dfg_reproducer.sv`](../../../../rtl-sim/fma_toggle_v2/verilator_dfg_reproducer.sv)). The two old benches, with that one flag added and
 nothing else changed, compute fp32 and fp16 right on ungated data ([`old-benches/fcheck-with-and-without-flag.json`](old-benches/fcheck-with-and-without-flag.json)):
 A = B = 1, C0 = 5 goes from C = 5 and 37 to the correct 37 and 69. The operand-staging guess is ruled out directly: `use_prev_sigs` on or off makes no
@@ -39,6 +39,13 @@ sum that lost bits, so only 33,793 of those 40,000 vectors equal the exact sum r
 computes that window, read off `txfma_f3.v`, `txfma_c2.v`, `txfma_f4.v` and `txfma_f5.v`. **The residue is sums that cancel to within one unit of the window,**
 where the leading-one logic has nothing to normalise. The vectors are built to hit it, and it is 0 of 22,016 words in whole ops.
 
+**What this check covers, and what it does not.** It compares C at the end of an op, so it tests arithmetic, order and the gate. **A pass does not validate the toggle counts:** wrong latency, bypass or clock gating that leaves the arithmetic right would pass it. Separate evidence for the timing is 538 and 310 cycles against the card's 546 and 318, registers identical at -O0 (which rules out optimiser races only), and the flip's 1,946; nothing ties cycle-level toggles to silicon except the fit, and a fit can absorb systematic error.
+- **The 40,000:** in fp32, 26,494 are random vectors and 13,506 are built to align or cancel.
+- **The 39,168 words:** 6,912 belong to the 9 kinds with no valid slot, where C stays 0. That leaves 32,256 with content, and 10,752 of those are fp16's.
+- **fp16's reference is a model read off the same RTL,** so those words cannot catch a fault in the RTL's own arithmetic or a difference from silicon. They can catch a simulator fault. fp32's reference is exact rational arithmetic, independent except for the flush rules read from the RTL. Order and gate come from the RTL in every format.
+- **int8's figure does not test this fix:** with the pass on, in the verifier's control, one unit reads fp32 2,324 and fp16 1,795 of 4,000 exact, whole ops 6,048 and 5,828 of 7,680 words wrong, and int8 0 of 6,656 wrong.
+- **No card has checked C:** `runs.jsonl` reads `"result": "unchecked"` on every record.
+
 **4. The counts.** All 51 kinds, per multiply-add (table in §8; [`counts-v2.json`](counts-v2.json) `rows.<type>.<kind>.mean`):
 
 | random data, per multiply-add | fp32 `randn` | fp16 `randn` | int8 `full` |
@@ -49,10 +56,12 @@ where the leading-one logic has nothing to normalise. The vectors are built to h
 | register bits clocked, whole VPU | **1,932** | 965 | 47 |
 | register bits that change | 429 | 188 | 7.7 |
 
+**Quote about 1,800 merged nets, a floor, for a random fp32 multiply-add in the unit;** an open netlist counts 3,299 wires. The two merges are not an uncertainty band: the map's merges are a subset of each run's, so it reads at or above `nets_hier` on all 51 kinds by construction, and 1,431 stays only as the like-for-like correction of "about 1,300".
+
 Per op, fp32 switches 1.20× what fp16 does (whole VPU, `nets_map`), with exactly the same bits clocked; per multiply-add that is 2.4×, because fp16 does twice as many. int8
 is still **not comparable**: its multiply, product sum and add are behavioural RTL, so no nets inside them exist to count.
 
-**5. Beside E78: two terms predict it.** D = rate × (k × merged-net toggles + a × clocked register bits), each over the type's zeros. Fitted on E78's fp32 and fp16 kinds:
+**5. Beside E78: two terms predict it. This model is M2;** §11 adds M4, which separates the operand bus, and the two READMEs must not quote "the constants" without naming one. D = rate × (k × merged-net toggles + a × clocked register bits), each over the type's zeros. Fitted on E78's fp32 and fp16 kinds:
 **k = 1.871 ± 0.021 fJ, a = 1.092 ± 0.014 fJ, rms 0.357 W, r = 0.9994, ρ = 0.991** over 33 kinds; **leave-one-out rms 0.375 W**. Either term alone fails (nets 3.64 W, clocks 4.85 W).
 **Out of sample, with those two numbers frozen:**
 
@@ -162,28 +171,29 @@ int8 zeros' extra 0.61 W is not explained here. The RTL clocks fewer bits a seco
 - **The scratchpad, the dcache and the core are not modelled**, and it shows: the fit under-predicts every kind whose operands move on gated lanes, by 0.17–0.65 W (`sparse50`, `wsparse50`, one operand all zero). That is the term most clearly missing.
 - **On the A side the prediction runs high by 15–20%** (E67 measured / predicted 0.842; E70's A ladder 0.802), and **on high-toggle bit ladders with a busy partner too** (E60 `lb`, 0.871). The B side does not. Unexplained.
 - **int8's multiply is one line of behavioural RTL**, so its k and a are not comparable with the float ones. A gate-level count of `tima_top` would be.
-- **Counts carry some of the tool.** Every Verilator optimisation off, against this build: registers identical; merged nets +3.2% (fp32 `randn`), +5.9% (fp16), int8's unit +35% ([`optimiser-sensitivity/`](optimiser-sensitivity/); the recount found about 10% across versions).
+- **Counts carry some of the tool.** With every Verilator optimisation off, registers are identical. `nets_hier` moves +3.2% (fp32 `randn`, VPU) and +5.8% (fp16), but that is the merge §4 says cannot be used on a regular stream. **`nets_hier2` moves +34.8% and +31.8%, and +48.8% on `fp32.ones`** ([`optimiser-sensitivity/`](optimiser-sensitivity/)). **`nets_map`, its merge learned again on the -O0 binary, moves +3.5% and +5.2%** (`counts-O0-map.json`), multiplier +2–3%, adder and normaliser +7–10%, lane bus unchanged, so the primary count is much steadier than hier2. No constant has been refitted at -O0, and "1.6 fJ" still means "at this build". int8's unit moves +35%, on small numbers.
 - **The fit came after E78's data, and the choice of merge after E65's** (§4). E92 is the only blind test. The frozen variant under-predicted fp32's alternation by 27%, put fp16 over fp32 at 2.00 where the card says 1.55 ± 0.25, and had the right order and the right near-zeros.
 
 ## 7. Section 11, and what a reader can be told
 
-- **Item 7 closes.** Every per-kind toggle count now has a functional check behind it.
-- **Item 6 narrows to its named gaps:** two constants predict float kinds and B-side single bits to an rms of 0.13–0.48 W; gated kinds' operand transport, the A side's 15–20% and int8 across formats remain.
+- **Item 7 closes as worded:** the multiply-add now returns right values, and fp32 and fp16 counts exist. int8's counts below the multiply-add remain not comparable.
+- **Item 6 narrows; it does not close.** The wording is in [E103's README](../2026-11-01-e103-model-blind-test/README.md).
 - **Item 2 narrows,** with E92: the count of adder toggles is in Result 6. The frozen count ran 27% low on fp32's alternation, the post hoc one 7% high. Where the power goes on silicon stays unmeasured.
-- **Item 12, in part:** E79's list and its layout probe are predicted. int8 zeros' 0.61 W stays open.
+- **Item 12:** E79's list and its layout probe are predicted; int8 zeros' 0.61 W and zeros' transport are §14.
 
 **For the blog, each from a committed file:**
 
-- The lab's simulator was computing the multiply-add wrong because of a bug in one optimisation pass of the simulator, and a one-line build flag fixes it (`verilator_dfg_reproducer.sv`).
-- The vector unit is now simulated whole. In fp32 its multiply-add unit returns the exact answer on 40,000 hand-built hard cases. fp16's arithmetic is not exact by design: it keeps a fixed window, and the unit matches a model of that window, read off the RTL, on 39,701 of 40,000, the rest being sums that cancel to almost nothing (`fcheck/`).
-- All 51 kinds' accumulators, 39,168 words in three formats, match software (`counts-v2.json` `check_mismatch`).
-- A random 32-bit float multiply-add flips about 1,400 to 1,800 merged nets in the multiply-add unit and clocks about 1,740 of its register bits (`counts-v2.json`).
+- One optimisation pass of Verilator 5.052 miscompiled the bench, and a one-line flag fixes it; a small file with no project RTL shows it (`verilator_dfg_reproducer.sv`).
+- In fp32 the simulated unit matches exact arithmetic on 40,000 random and corner cases. fp16 matches a model of its window read off the same RTL. No card has read C back (`fcheck/`).
+- A random 32-bit float multiply-add flips about 1,800 merged nets in the multiply-add unit, a floor; an open netlist counts 3,299 wires (`counts-v2.json`).
 - Multiplying the same number over and over flips almost nothing and still draws a third of what random data draws over an all-zero matmul. By the fit, that third is a working lane's registers being clocked anyway (`analysis.json` `split`).
-- Two constants turn those counts into watts. They predict single-bit flips they were not fitted on to about a tenth of a watt on the B side, and run 15–20% high on the A side (`analysis.json` `other_experiments`).
+- Fitted constants turn those counts into watts. On single B-side bit flips they did not see they read 0.13–0.30 W rms, depending on the model and the merge, and 0.24–0.30 W with a flip on the A side (`corrections-check.txt` D, `analysis.json`, E103's `score_all.json`).
 - In the simulation, a high mantissa bit switches twenty times as much after the multiplier as a low bit does, and only twice as much inside it (`counts-hl.json`).
 - Hold the running sum still and fix the numbers: making the adder alternate between adding and subtracting costs one card 4.4 W in fp32 at 600 MHz, and a simulation frozen before that data was read said 3.2 W and put 89% of the extra net toggles in the adder and normaliser (E92 `scored.json`, `e92-bench-prediction-frozen.json`).
 - Subtracting steadily, with the sum frozen, costs nothing measurable: 0.04 ± 0.35 W (E92 `scored.json`).
 - The public RTL suggests why: an effective subtract inverts a 52-bit bus on its way into the adder (`txfma_c2.v:303`, a reading). With random magnitudes and moving sums the premium is about a quarter as large (E92's dips-removed reading), so it is not the whole of a random sign's cost.
+
+**Any of this, on the RTL's later revision (Erbium), not the ET-SoC-1's own.** A post may not say that the check validates toggle counts, that silicon does the fp16 window, that 1,400–1,800 is a range, or fJ per wire.
 
 **Next:** report the optimiser fault to Verilator, a decision for the owner, since it would go out in his name; a gate-level count of `tima_top`; the dcache's read bus in scope.
 
@@ -390,7 +400,10 @@ nets = merged-net toggles of the whole VPU (`nets_map`); unit = the multiply-add
 | `counts-e103-pool.json`, `simple-e103-pool.json` | the bench and the simple predictors on E103's 215 candidates |
 | `fcheck/` | the functional check's output |
 | `old-benches/` | the old benches with and without the flag; the recount redone; `use_prev_sigs`; the flip |
-| `optimiser-sensitivity/` | the same three kinds with Verilator's optimisations off and on, before the map existed |
+| `optimiser-sensitivity/` | the same three kinds with Verilator's optimisations off and on, before the map existed; `counts-O0-map.json`, five kinds at -O0 with the map learned again on that binary |
+| `model-form-search/` | the search behind M4 and I3, 14 float forms and 5 int8 forms |
+| `zeros/` | §14: which clocks and registers stay on for zeros, and Q130(i) rerun |
+| `corrections-check.py`, `corrections-check.txt` | the corrections' numbers |
 | `versions.txt` | tool versions and core-et's commit |
 
 ```
@@ -422,7 +435,7 @@ Rerun: `run_kinds.py … --types fp32,fp16,int8 --only __none__ --extra-tiles <t
 
 [`m4-bench-prediction.md`](m4-bench-prediction.md) (`predict_m4.py`). Reading the frozen §10 predictions against E94's published data (post hoc by the clock, as §10 says): fp32 rms 0.44 W, bias −0.37; fp16 0.40 W, bias −0.16; int8 0.34 W, bias −0.33; every tile inside its interval. The misses sit on gated kinds, as §6 named. So I compared forms on what had been read, holding out whole experiments, and one change stands out: **the lane's operand bus costs about four to five times a local net.** Fitted on E78 alone, M4 is k_core 1.62 fJ (multiplier, adder and normaliser), k_bus 7.53 fJ, k_rest 2.22 fJ (every other net), a 1.07 fJ per clocked bit: E78 fit 0.136 W against M2's 0.357 W, E86 0.145 against 0.193, E90 0.220 against 0.482, E92 0.242 against 0.434, card 1 with E82's scale: E88 0.214 against 0.452, E94 0.178 against 0.416. It does not help everywhere: E70's spread ladder gets worse, 0.369 against 0.172, and E60's low-bit ladder stays near 1 W. int8's own form, I3 (nets, bus 16.7 fJ, clocks), fits E78 at 0.181 W against 0.287 W.
 
-**The form was chosen after reading E94, so E94 does not test it. E95 does:** this section's commit precedes E95's data on main, and I read none of it. §10's M2 stands as committed.
+**The form was chosen after reading E94, so E94 does not test it. E95 does:** this section's commit precedes E95's data on main, and I read none of it. §10's M2 stands as committed. The search is committed and counted: 14 float forms and 5 int8 forms, on what had been read ([`model-form-search/`](model-form-search/)).
 
 ## 12. The frozen models against E95 and E94
 
@@ -443,4 +456,42 @@ So the bus term did what it was added for: M2's 0.36 W shortfall on real gated t
 
 ## 13. E103
 
-M4 and I3 then met [E103](../2026-11-01-e103-model-blind-test/README.md), 30 tiles chosen where they disagree most with the simple predictors, on another card: 0.314 W rms in floats and 0.365 W in int8, against 3.960 and 0.907 W for Q130(n). That README's Result 4 holds the plain statement of how good the model is, per format, on what, and where it fails.
+M4 and I3 then met [E103](../2026-11-01-e103-model-blind-test/README.md), 30 tiles picked per family where they most disagree with two simple predictors, from a pool I wrote, on a second card with one scale from E82: 0.314 W rms in floats and 0.365 W in int8. Its margin over the best comparators is about 2×, not the 12.6× against Q130(n), whose size the selection sets. That README holds the plain statement of how good the model is, per format, on what, and where it fails.
+
+## 14. Item 12's last two pieces: int8 zeros' 0.61 W, and zeros' transport
+
+*Post hoc. Nothing here was registered, E78's 0.61 W was known first, and no card ran. Everything is in [`zeros/zeros-check.txt`](zeros/zeros-check.txt) (`zeros/zeros_check.py`).*
+
+**int8 zeros: the count does not explain the 0.61 W, and it points the wrong way.** Per second, chip-wide, allowing for int8's higher op rate:
+
+| per second | fp32 zeros | int8 zeros | int8 ÷ fp32 |
+|---|---:|---:|---:|
+| TensorFMA ops | 1.121 × 10⁹ | 1.926 × 10⁹ | 1.72 |
+| register bits clocked, enable high | 1.168 × 10¹⁵ | 0.761 × 10¹⁵ | 0.65 |
+| register bits seeing a clock edge | 6.79 × 10¹⁵ | 3.44 × 10¹⁵ | 0.51 |
+| of which the multiply-add unit's | 4.21 × 10¹⁵ | 0.86 × 10¹⁵ | 0.20 |
+| register bits that change | 3.88 × 10¹³ | 1.71 × 10¹³ | 0.44 |
+| merged nets toggling | 6.53 × 10¹³ | 3.67 × 10¹³ | 0.56 |
+| scratchpad line reads, **not priced: the dcache is not in the bench** | 3.23 × 10¹¹ | 4.31 × 10¹¹ | **1.34** |
+| **measured S, E78, W over idle** | **1.986 ± 0.059** | **2.605 ± 0.028** | **1.31** |
+
+At M4's float constants, an extrapolation because M4 was fitted over zeros and its a has never been tested on the bits that stay clocked there, the count gives fp32 1.42 W of its 1.99 W and int8 0.91 W of its 2.61 W. **So it says int8 − fp32 = −0.51 W against the measured +0.62 W, leaving 1.13 W unexplained.** The gap is a property of the formats: +0.41 to +0.62 W, ratio 1.19–1.31, over 13 committed sessions on two cards.
+
+**Which clocks stay on when every slot is gated,** from the VCD (`zeros/clocks-*.json`, `zeros/acct-*.txt`). In both formats the unit's root clock ignores the gate. fp32's `clock_txfma` rises 534 times in the 559 cycles, on all 8 lanes (`vpu_lane.v:194,221-223`), and feeds 3.76 M register-bit edges an op with their enables low, mostly in `txfmactl0_top` and `txfmaexp0_top`, while the operand clocks of `txfmafrac_top.v:337-356` never rise. int8's `tima_clock` rises 304 times in 331 cycles on all 16 units (`vpu_lane.v:212-214`, `vpu_lane_tima.v`), and feeds 0.45 M, and TenC's read enable stays high whatever the gate says (`vpu_lane.v:432`). So the integer unit keeps its clock on, as the RTL reading suggested, but it is a much smaller load than the float unit's.
+
+**What points the right way is outside the bench:** scratchpad reads, ×1.34, and ops, ×1.72. If all of S(zeros) scaled with reads, int8 would read 2.65 W, near the measured 2.61 W, though the 13 sessions' ratio is below 1.34 in every one. Solving S = c × clocked + r × reads gives c = 0.06 fJ a bit and r = 5.9 pJ a line, which needs the bits clocked on zeros to be nearly free; S = c + e × ops gives 770 pJ an op and 1.12 W. **One number cannot separate these.** A card run that changes the read rate on zeros could.
+
+**The caveat:** int8's arithmetic is behavioural in the public RTL, so its register count may not be the silicon's. For the integer unit's clock alone to close the gap it would need 135 more register bits on a slot's clock, against the RTL's 109: 2.2×. This bench cannot rule that out.
+
+**Zeros' transport: the fixed bench does not change the 0.20–0.37 pJ.** Q130(i) re-prices Q129's gate-level energies by activity ratios from its own structural simulation, and on zeros no multiply-add runs, so the fault's path is never used. Its simulation, its own `run.sh`, reproduces its committed `counts.txt` byte for byte with and without `-fno-dfg` ([`zeros/q130i-rerun.txt`](zeros/q130i-rerun.txt)), and the recount's bench on zeros is unchanged by the flag. **What the fixed bench adds is the whole `vpu_top` confirming its three gating claims directly on fp32 zeros:** `rd_enable0` and `rd_enable1` never rise and `rd_enable2` does; `wr_enable0` and `wr_enable1` never rise; `clock_bypass` never rises. As a different yardstick, at M4's constants, again extrapolated: the whole VPU on fp32 zeros is 0.04 pJ of nets and 0.27 pJ of clocked bits, 0.31 pJ a multiply-add, against E78's 0.43 pJ over idle. No new gate-level energy exists, so the reading stays "narrowed, not closed".
+
+## Corrections after verification
+
+*Sun 1 Nov 2026, against `8c354a91`, from an independent verifier's read. **No frozen file, data file or registered verdict changed.** Wrong sentences are replaced above. Every number here is recomputed in [`corrections-check.txt`](corrections-check.txt) unless it is marked the verifier's. The fix reproduced in its hands: the reproducer on two Verilator builds, the check from a clean copy with a fresh seed (fp32 40,000 of 40,000; fp16 39,774 plus 226 `window_cancel`), and M4's refit.*
+
+- **C1: the optimiser caveat understated by 10×, as written.** "+3.2%, +5.9%" was `nets_hier` only. `nets_hier2`, within 1% of the map at the default build, moves +34.8% and +31.8% (A). **I reran the map at -O0, as it asked, and that narrows it:** learned again on that binary, +3.5% and +5.2% (A2). §6 now quotes all three. The verifier's "'1,816' and the bus's ratio depend on the tool setting" holds for hier2; for the map, by 3–5%, with the lane bus unchanged. No constant has been refitted at -O0.
+- **C2: "about 1,400 to 1,800" was not a band.** The map reads at or above `nets_hier` on 51 of 51 kinds by construction (B). Blind, two terms read E103 1.18 W and E95 0.50 W under `nets_hier`, 0.58 and 0.42 W under `nets_map`, 0.56 and 0.38 W under `nets_hier2` (the verifier's), so map and hier2 are not separated, and choosing the map after the ladders changed little.
+- **C3: "two constants … to about a tenth of a watt" named no model, and its merge was chosen after those ladders.** M2 with the map 0.128 W, M2 with the merge frozen first 0.303 W, M4 0.185 W, on E65. M4 is worse than M2 on E65 and on E70's spread, 0.369 against 0.172 W (D).
+- **C4: the check's wording and scope** are now in Result 3 (C): "hand-built hard cases", the 6,912 trivial words, fp16's 10,752, int8's figure, no card, and that a pass does not validate counts. The control with the pass on is the verifier's. The blog lines add that core-et is a later revision.
+- **C5: small.** The reproducer is 25 lines of code, not 20 (E), fixed here, in `rtl-sim/fma_toggle_v2/README.md` and in the Makefile's comment. `accum.c`'s comment said 20,000 of 20,000, now 40,000, a comment only. M4's form search is committed and counted (§11).
+- **E103's own corrections are in its README.** None of the verifier's faults was rejected; C1 is narrowed by the rerun it asked for.
