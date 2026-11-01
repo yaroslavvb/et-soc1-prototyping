@@ -125,14 +125,14 @@ T = C/f + M per op, over the launches of at least 0.1 s between 590 and 810 MHz,
 
 ## Departures
 
-- **The aifoundry2 start was 07:36, not about 07:20:** E98's claim read released at 07:21, and the Intel's load guard then paused the claim post for about 5 minutes. A2.
+- **The aifoundry2 start was 07:36, not about 07:20:** E98's claim read released at 07:21, and a desk machine's load guard then paused the claim post for about 5 minutes. A2.
 - **The power arm's queue first exited 127 before touching the card,** going one directory short of the root. Fixed and restarted at 07:36:04 PST. A2.
 - **Its claim post, `1566472292924661822`, could not be released by the usual edit.** It was posted at 07:21:38 PST, and at 08:40 PST it was no longer in the channel, nor were the other posts between 31 Oct and aifoundry2's claim; no entry for it is in the card-post archive, and this lane did not delete it. Its queue had ended at 08:11 PST. aifoundry2's claim `1566475985451491350` was edited to read released at 08:38 PST and read back.
 - **One power-arm run was skipped:** `p10520` #25, resident `fp16.sparse50`, did not reach its launch reading. It is not one of E105's cells.
 - **`p10521` was set aside by E78's gate,** so the strides' S rests on one pass and has no interval.
 - **The vendor's binary was not run:** about 58 µs per launch against about 2 ms of launch overhead, and no cycle counter, so timing it needs an instrumented build. It stays open.
 - **`score_e105p.py` was first committed with the data** (C7).
-- The reductions ran on the mini, because the Intel's load guard pauses tool children in its hot tier.
+- The reductions ran on a desk machine, because another's load guard pauses tool children in its hot tier.
 
 ## What E105 says about the page
 

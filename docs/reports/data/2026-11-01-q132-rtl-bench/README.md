@@ -1,6 +1,6 @@
 # Q132(b): the RTL bench returns correct multiply-adds, and what each kind of number switches
 
-*Sun 1 Nov 2026 (week 44). Desk compute on the mini: Verilator 5.052 from Homebrew, Apple clang, core-et `b38a1a31`
+*Sun 1 Nov 2026 (week 44). Compute on a desk machine: Verilator 5.052 from Homebrew, Apple clang, core-et `b38a1a31`
 ([`versions.txt`](versions.txt)). **No card was opened and nothing was measured in watts here**: every watt below comes from a committed
 experiment, named where it is used. The bench is [`rtl-sim/fma_toggle_v2/`](../../../../rtl-sim/fma_toggle_v2/). The two old benches are
 untouched, as the record. This closes item 7 of section 11 of the kinds page, and narrows items 2, 6 and 12 (§7). Corrected after verification the same day: [Corrections](#corrections-after-verification).*
@@ -44,7 +44,7 @@ where the leading-one logic has nothing to normalise. The vectors are built to h
 - **The 39,168 words:** 6,912 belong to the 9 kinds with no valid slot, where C stays 0. That leaves 32,256 with content, and 10,752 of those are fp16's.
 - **fp16's reference is a model read off the same RTL,** so those words cannot catch a fault in the RTL's own arithmetic or a difference from silicon. They can catch a simulator fault. fp32's reference is exact rational arithmetic, independent except for the flush rules read from the RTL. Order and gate come from the RTL in every format.
 - **int8's figure does not test this fix:** with the pass on, in the verifier's control, one unit reads fp32 2,324 and fp16 1,795 of 4,000 exact, whole ops 6,048 and 5,828 of 7,680 words wrong, and int8 0 of 6,656 wrong.
-- **No card has checked C:** `runs.jsonl` reads `"result": "unchecked"` on every record.
+- **No card has checked C:** `runs.jsonl` reads `"result": "unchecked"` on every record. *(Dated 1 Nov 2026: true of those runs; [E104](../2026-11-01-e104-c-readback/README.md) has since read C back on 44 designed tiles.)*
 
 **4. The counts.** All 51 kinds, per multiply-add (table in §8; [`counts-v2.json`](counts-v2.json) `rows.<type>.<kind>.mean`):
 
@@ -166,7 +166,7 @@ int8 zeros' extra 0.61 W is not explained here. The RTL clocks fewer bits a seco
 ## 6. What this cannot say
 
 - **RTL, not silicon, and not a netlist.** core-et is the Erbium branch, a later revision of the same lineage. Zero delay, so no glitches: k absorbs them.
-- **fp16's reference is a model read off the same RTL,** so that check shows the bench runs the RTL's window arithmetic consistently, not that silicon does the same. fp32's reference is exact arithmetic, independent of the RTL. No card has had C read back for these vectors; a short card run on near-cancelling fp16 sums would test the window.
+- **fp16's reference is a model read off the same RTL,** so that check shows the bench runs the RTL's window arithmetic consistently, not that silicon does the same. fp32's reference is exact arithmetic, independent of the RTL. No card has had C read back for these vectors; a short card run on near-cancelling fp16 sums would test the window. *(Dated 1 Nov 2026: [E104](../2026-11-01-e104-c-readback/README.md) has since read C back on 44 other designed tiles, 110 reads, all 1,024 minions, equal to the RTL's arithmetic word for word, fp16's window included. These vectors stay unread.)*
 - **k and a are fitting constants at 600 MHz and 522 mV.** A merged net is a floor on wires (the open netlist counts 3,299 switching nets where this counts 1,816), so 1.87 fJ is not the energy of a wire. Leakage arms move them to 1.92, 1.12 and 1.83, 1.07 fJ.
 - **The scratchpad, the dcache and the core are not modelled**, and it shows: the fit under-predicts every kind whose operands move on gated lanes, by 0.17–0.65 W (`sparse50`, `wsparse50`, one operand all zero). That is the term most clearly missing.
 - **On the A side the prediction runs high by 15–20%** (E67 measured / predicted 0.842; E70's A ladder 0.802), and **on high-toggle bit ladders with a busy partner too** (E60 `lb`, 0.871). The B side does not. Unexplained.
@@ -184,7 +184,7 @@ int8 zeros' extra 0.61 W is not explained here. The RTL clocks fewer bits a seco
 **For the blog, each from a committed file:**
 
 - One optimisation pass of Verilator 5.052 miscompiled the bench, and a one-line flag fixes it; a small file with no project RTL shows it (`verilator_dfg_reproducer.sv`).
-- In fp32 the simulated unit matches exact arithmetic on 40,000 random and corner cases. fp16 matches a model of its window read off the same RTL. No card has read C back (`fcheck/`).
+- In fp32 the simulated unit matches exact arithmetic on 40,000 random and corner cases. fp16 matches a model of its window read off the same RTL. No card has read C back (`fcheck/`). *(Dated 1 Nov 2026: out of date, and not to be quoted: [E104](../2026-11-01-e104-c-readback/README.md) has, on 44 designed tiles.)*
 - A random 32-bit float multiply-add flips about 1,800 merged nets in the multiply-add unit, a floor; an open netlist counts 3,299 wires (`counts-v2.json`).
 - Multiplying the same number over and over flips almost nothing and still draws a third of what random data draws over an all-zero matmul. By the fit, that third is a working lane's registers being clocked anyway (`analysis.json` `split`).
 - Fitted constants turn those counts into watts. On single B-side bit flips they did not see they read 0.13–0.30 W rms, depending on the model and the merge, and 0.24–0.30 W with a flip on the A side (`corrections-check.txt` D, `analysis.json`, E103's `score_all.json`).
@@ -413,7 +413,7 @@ python3 train_maps.py --bin obj_vpu/Vtb --settle ./settle_count --kinds ../../to
 python3 run_kinds.py --bin obj_vpu/Vtb --accum ./accum --settle ./settle_count --maps maps --kinds ../../tools/claims-v3/kinds --out counts-v2.json --jobs 8
 ```
 
-A clean build from the committed files reproduced `counts-v2.json`'s fp32 `randn` exactly, register for register and net for net. Installed for this: `brew install verilator` on the mini, and numpy under `uv` for the analysis. Nothing ran on a lab host.
+A clean build from the committed files reproduced `counts-v2.json`'s fp32 `randn` exactly, register for register and net for net. Installed for this: `brew install verilator` on that machine, and numpy under `uv` for the analysis. Nothing ran on a lab host.
 
 ## 10. Frozen predictions for E94 and E95
 

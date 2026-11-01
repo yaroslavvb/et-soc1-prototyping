@@ -65,9 +65,9 @@ The two rounds' periods came out at 1000.007 and 1000.003 ms. These are tie-brea
 
 - **Ran as registered:** every arm in both rounds, R included, no departure from the frozen files. `e100.json` and `session.json` record the sha256 of the protocol (`7e176833...`), predictions (`a6feb6ac...`), patch (`b123331e...`), runner, patched host (`4625fe5c...`) and kernel (`990807f4...`, a byte copy of the ELF E80 ran).
 - **Card time:** 23.9 card-minutes against "about 30": the gates passed at once.
-- **The tree on the box:** E100's files ran from `build/e100/code/`, so the shared checkout (at `0c187e12` that night) was not touched. Its `run_kspeed.py` and `run_hpl.py` match the Intel's by sha256.
+- **The tree on the box:** E100's files ran from `build/e100/code/`, so the shared checkout (at `0c187e12` that night) was not touched. Its `run_kspeed.py` and `run_hpl.py` match a desk machine's by sha256.
 - **The first spec:** the spec of about 00:35 PDT had fixed gaps and other bands. They were changed before any data and the reason is in the pre-registration.
-- **Dry run and smoke:** the scorer's self-test and `--dry` on the Intel and the box before the slot; the smoke on the card passed `smoke_ok.py` ([`smoke/`](smoke/), [`go.log`](go.log)).
+- **Dry run and smoke:** the scorer's self-test and `--dry` on a desk machine and the box before the slot; the smoke on the card passed `smoke_ok.py` ([`smoke/`](smoke/), [`go.log`](go.log)).
 - **The order:** `5e12c4bd` was pushed at 00:49:33 PDT, 10 min 23 s after the shared claim of 00:39:10 PDT and 40 minutes before E100's first launch. E98's `c8e84226`, pushed at 00:38:23 PDT, named E100 and its slot before that claim, but not E100's rules, so the night's brief, rules pushed before the Discord claim and the first launch, was met for the launch and not for the claim. The tool README's header says "about 00:55 PDT"; it is frozen and stays.
 
 ## Card state and etiquette

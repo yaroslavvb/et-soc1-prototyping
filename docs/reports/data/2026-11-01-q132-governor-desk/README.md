@@ -17,6 +17,7 @@ separately. Items are numbered as in section 11 of the kinds page, version `df55
    driver's PMIC event counter reads **0** since its 26 Oct boot, which covers 460 of the 654, against **177** on card 0, all inside E84's fp32 random-data runs. The public register format tops out
    at 78.75 W, which rules out "set higher" only if the readings are one quantity. What was measured per card: PMIC 1.6.1 alarms; PMIC 1.5.0 did not at readings of 80-88 W; firmware or board,
    unknown. Not tested: the slow average, which the 65 W arm never let past 68.91 W. [§a](#a-does-aifoundry2-have-card-0s-75-w-alarm-item-1)
+   *Dated 1 Nov 2026: "up to 88.88 W" predates [E101](../2026-11-01-e101-real-matmul/README.md)'s 90.07 and 101.15 W on this card (one held reading, on three samples), and E105's 96.25 W. Counted post hoc on nine of that night's sessions: 353 rings, no alarm line, no POWER_SAFE record, no 300 MHz point; 164,208 readings, none at 300 MHz, 407 at 85 W or more ([`rings-tonight.py`](rings-tonight.py), [`rings-tonight.txt`](rings-tonight.txt)). 101.15 W is about 88 W on card 0's scale if the same line holds there.*
 
 2. **Item 10, the idle reset: a once-a-second check on the card's clock that reads idle in the gap between two kernels. In public source that is the Master Minion's heartbeat reading "no kernel in use".**
    No dependence on the data is visible in these 25 falls, post hoc. In six sessions, 24 of them land within 14 ms of a kernel's start with the kernel before at full clock, and the 25th reads x = -26 ms, where the
@@ -29,6 +30,7 @@ separately. Items are numbered as in section 11 of the kinds page, version `df55
    +1.12 C (52%) and 2.13 of the 3.70 C of rest die (58%); the same day at different hours (E87 against E80) is +0.41 C (37%) and 1.57 C (42%). The split is not unique: through 23 Oct's own noon, the hour takes 86% of the
    rest die. Over four sessions on shared kinds the 76 s die line moves **about 0.25-0.35 C per C of rest die, fit 1σ 0.07-0.08 on 2 dof, 95% roughly 0-0.6**, and E64's shift leans on one kind. A slope fitted on 31 Oct alone,
    0.177 ± 0.114, is not separated from 0, and gives E64 +0.65 ± 0.42 C against +1.12 ± 0.33 measured. n = 4, post hoc: E98 tests it overnight. [§c](#c-the-heat-paths-drift-looking-back-item-9)
+   *Dated 1 Nov 2026: [E98](../2026-11-01-e98-heat-path-drift/README.md), that test, read 0.50 on one contrast and bars quoting 0.25, 0.50 or 2.19 per °C as a rate ("May not be said" there). So 0.25-0.35 is this fit's, not a rate to quote.*
 
 4. **Item 1, Horace He's pair: the script's format has a source, and the pair's does not.** His gist `mm_weird.py`, posted the day before the article with the article's title and link as its description, is `torch.bfloat16` at
    8192 x 8192 x 8192. The article names no format anywhere, and tells the pair in a passage that opens "It's 2022", with a bare `N` in its snippet. The gist's printed runs and the article's chart give zeros/randn of **1.21-1.22**,
@@ -310,7 +312,7 @@ The article's unlabelled chart, read from its pixels ([`horace_chart.py`](horace
 - One card, PMIC 1.6.1, alarms at 75 W. aifoundry2, PMIC 1.5.0, read 85 W or more 654 times with none, and it reads 5-10 W above that card at the same kind and clock. Firmware or board, unknown. The slow average is untested: 68.91 W at most ([`pmic-check.txt`](pmic-check.txt), [`host/`](host/), [`corrections-check.txt`](corrections-check.txt) C3-C4).
 - The dip of about a second: the public firmware source has a heartbeat that looks once a second and, between two kernels, sees no kernel in use. It was tested from outside, not read from the binary ([`ir-lattice.txt`](ir-lattice.txt), [`ir-gaps.txt`](ir-gaps.txt), E100).
 - It happens about once per 500 kernel boundaries with stock launches. In these 25 falls no dependence on the kind is visible, post hoc ([`ir-tests.txt`](ir-tests.txt)).
-- Post hoc, four sessions, and E98 tests it: the rest die cycles by about 3.5 C a day, and the die line follows it at about 0.25-0.35 C per C, 95% roughly 0-0.6. About half of "23 to 31 October" remains at the same hour, so a sustained speed near the trip depends on the hour and the day ([`room-proxies.txt`](room-proxies.txt), [`drift-paired.txt`](drift-paired.txt), [`corrections-check.txt`](corrections-check.txt) C1-C2).
+- Post hoc, four sessions, and E98 tests it: the rest die cycles by about 3.5 C a day, and the die line follows it at about 0.25-0.35 C per C, 95% roughly 0-0.6 *(dated 1 Nov 2026: not to be quoted as a rate, by [E98](../2026-11-01-e98-heat-path-drift/README.md)'s bar on any rate)*. About half of "23 to 31 October" remains at the same hour, so a sustained speed near the trip depends on the hour and the day ([`room-proxies.txt`](room-proxies.txt), [`drift-paired.txt`](drift-paired.txt), [`corrections-check.txt`](corrections-check.txt) C1-C2).
 - A script he published the day before the post, with the post's title and link as its description, is bfloat16 at 8192³ ([gist](https://gist.github.com/Chillee/42e4635c59760a74cb3b4ba7ea5ad9f8)). The post's own `mm_bench.py` is not public and the post names no format, so the pair's format is unknown.
 - That script's recorded runs put zeros about 21-22% above random data, and so does the post's chart; the post's text, 295 / 257, says 15%. Nothing found ties that pair to the script ([`horace-chart.txt`](horace-chart.txt), the gist's comments).
 
@@ -342,6 +344,7 @@ An independent verifier checked this reading after the data commit. It re-ran th
 | path | what |
 |---|---|
 | `pmic_check.py`, `pmic-check.{txt,json}`, `other_cards_max.py`, `other-cards-max.txt` | item 1: rings and readings per session; the highest reading on the two cards that never reached 75 W |
+| `rings-tonight.py`, `rings-tonight.txt` | added 1 Nov 2026 by the records (Q132(o)): the same count on aifoundry2's sessions of that night, E96, E98, E100, E101 and E105 |
 | `host/` | read-only host reads of 1 Nov 2026: `err-<box>.txt` (driver counters, kernel-log kinds), `err2-aifoundry1.txt` (the alarm events' times and values), `boards.txt` |
 | `ir_lib.py`, `ir_hits.py`, `ir_lattice.py`, `ir_gaps.py`, `ir_tests.py`, `ir_camera.py`, and their `.txt`, `.json` | item 10 |
 | `die_lines.py`, `drift_paired.py`, `room_proxies.py`, `rest_decay.py`, `rep_noise.py`, `camera_lines.py`, `cam_scene.py`, and their `.txt`, `.json` | item 9 |

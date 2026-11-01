@@ -210,7 +210,7 @@ Every streaming cell's check of C read as at 600 MHz: exact on zeros, ones and i
 | `res` int8 zeros | 800 | 84.30 | 318 |  |  |  |  |  |  | 800 / 800 | 800 / 800 |
 | `res` int8 random | 800 | 84.30 | 318 |  |  |  |  |  |  | 800 / 786 | 800 / 785 |
 
-**Departures, session 2.** The safety stop above: of 96 runs, 14 never ran and one was cut about 0.9 s in, and S1 and S2 stand on `gemm1` alone. The reduction ran on the mini, not the Intel: the Intel's load guard had stopped the reducer in its hot tier; the code and inputs are the committed ones. E98's lane gave up its P4 and P5 for this slot, and the session ended 31 minutes before the slot did, too late to give them back.
+**Departures, session 2.** The safety stop above: of 96 runs, 14 never ran and one was cut about 0.9 s in, and S1 and S2 stand on `gemm1` alone. The reduction ran on a desk machine, because another's load guard had stopped the reducer in its hot tier; the code and inputs are the committed ones. E98's lane gave up its P4 and P5 for this slot, and the session ended 31 minutes before the slot did, too late to give them back.
 
 ## What E101 says about the page
 

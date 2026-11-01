@@ -1,0 +1,22 @@
+P6 rest20 window end, ms 1793541300457 PST 05:55:00 ; the window is the 20 min before it; rows 240 ; registered w 21.9486 die 46.1958
+E97 second move windows, aifoundry2 idle:
+  05:39-05:41 reading 45.792 C, board 21.847 W, NIC 43.379 C, rows 24, held 0
+  05:44-05:46 reading 47.000 C, board 22.128 W, NIC 43.683 C, rows 24, held 0
+  move: reading +1.208 C, board +0.280 W, NIC +0.304 C
+  05:35-05:41 reading 45.861 C, board 21.856 W, NIC 43.428 C, CPU 0.9%, rows 72
+  05:41-05:44 reading 46.111 C, board 21.975 W, NIC 43.469 C, CPU 1.3%, rows 36
+  05:44-05:48 reading 47.000 C, board 22.136 W, NIC 43.717 C, CPU 0.8%, rows 48
+  05:48-05:50 reading 46.250 C, board 21.987 W, NIC 43.737 C, CPU 0.5%, rows 24
+  05:50-05:55 reading 45.983 C, board 21.879 W, NIC 43.610 C, CPU 1.2%, rows 60
+P6 rest W, 20 min 21.9486; leaving out 05:42-05:49 21.8737; difference -0.0749 W; rows 156
+P1 rest_w 22.1105 rest_die_w_derived 95.51
+P3 rest_w 21.8971 rest_die_w_derived 94.588
+P6 rest_w 21.9486 rest_die_w_derived 94.81
+P7 rest_w 21.8771 rest_die_w_derived 94.502
+W to rest-die scale implied by results.json: 4.319 C per W
+so P6 moves -0.324 C of rest die; the contrast P1 minus the mean of P3, P6, P7 goes from 0.877 to 0.985 C
+R1 keys ['fit', 'kinds', 'per_probe', 'target', 'verdict']
+R2 keys ['band', 'fit', 'floor', 'path_slope', 'per_probe', 'verdict']
+R1 per_probe sample {"P1": 39.803, "P3": 39.331, "P6": 39.397, "P7": 39.31}
+R1 y [39.803, 39.331, 39.397, 39.31] slope as registered 0.502; with P6 moved 0.458 (a sensitivity, not a verdict) registered fit {"df": 2, "hi": 0.6998, "icpt": -8.166, "lo": 0.3045, "n": 4, "rms": 0.0257, "se": 0.0459, "slope": 0.5021, "x_range": 1.008}
+R2 y [60.415, 58.049, 58.795, 58.485] slope as registered 2.187; with P6 moved 1.933 (a sensitivity, not a verdict) registered fit {"df": 2, "hi": 3.9021, "icpt": -148.568, "lo": 0.4732, "n": 4, "rms": 0.2231, "se": 0.3984, "slope": 2.1877, "x_range": 1.008}

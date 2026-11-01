@@ -174,6 +174,8 @@ Quoting int8's word-zero rate as its gated rate is the same mistake in a differe
 is 6.25% of words against a 6.7% gated fraction — close by coincidence — but at `p = 0.9` it is 65.6% of
 words against an 82.2% gated fraction, because the A side gates too.
 
+*Dated 1 Nov 2026 (Q132(o)): the table's `p⁸` is the B pair's rate, and 6.7% is no coincidence. An A word gates a micro-op on its own four bytes, `p⁴`, so with both operands sparse a lane gates at `p⁴ + p⁸ − p¹²`: 6.6% at `p = 0.5`, 80.4% at `p = 0.9`, against this file's 6.7% and 82.2%. E93 read both rules at power resolution on one card.*
+
 *Which pair?* The RTL says columns (`l`, `l+8`), twice over: `ex_tensor_zero_mask_ext[l][t]` uses the same
 bit `l` for both TIMAs while `tima0` reads TenB row `raddr` (columns 0-7) and `tima1` row `raddr|1` (columns
 8-15); and the enable mapping `ex_tima_mask[l][t] = ex_fma_mask[(l>>1)+(t<<2)]` puts unit (`l`, `t`) on column
@@ -473,7 +475,8 @@ kinds.
    headline gets *stronger*: the gate is even coarser in int8 than revision 1 claimed. (The zero *test* is
    still 32 bits wide in every type, as the sibling lane Q130(g) says — what needs two of them, ANDed, is an
    int8 *gate decision*. Q130(g)'s int8 row quotes the word-zero rate `~p⁴` as the gating rate; for a lane it
-   is `p⁸`, and that row is worth a second look before E78 reads it.)
+   is `p⁸`, and that row is worth a second look before E78 reads it. Dated 1 Nov 2026: `p⁸` on the B pair; with both
+   operands sparse a lane gates at `p⁴ + p⁸ − p¹²`, the note under the table above, and that row is corrected.)
 3. **`microops_per_op` and the denominators are per type**, not 512/4,096 for all three.
 4. **The claim that an int8 tile replays correctly in `rtl-sim/fma_toggle` is withdrawn.** That bench is
    txfma with the `h` loop and the 32-bit gate — it has no int8 path, so it would report the operand words

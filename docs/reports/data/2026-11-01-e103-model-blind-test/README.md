@@ -21,6 +21,8 @@
 | **E103-R9** | gated float tiles: mean D − M4 | PASS inside ±0.30 W; FAIL if it excludes ±0.30 W | +0.151 ± 0.382 W, n = 5 (M2: +0.598 W) | **INCONCLUSIVE** | PASS |
 | **E103-S1** | the session tie against E82, dips removed | ±0.50 W, int8 ±0.25 W | `fp32.randn` 24.07 (24.00), `fp16.randn` 21.61 (21.49), `anchor_pi` 8.04 (8.14), `int8.full` 6.96 (6.84) | **PASS** | |
 
+*Dated 1 Nov 2026: [E102](../2026-11-01-e102-balanced-bit-prices/README.md) reads R3's null from the sums the RTL's arithmetic gives, at 1.694 W, not 1.775 W: gap +1.380 W [+0.242, +2.522], and without the denormal tile +0.385 W [+0.202, +0.571], not +0.593 ([`fault_e103_null_e102.txt`](../../../../tools/claims-v3/kinds/fault_e103_null_e102.txt)). R3's registered PASS stands, and every frozen file here stays.*
+
 Two things I expected came out better than I said: R1's 0.31 W and R4's PASS. Two came out weaker: R8 and R9 are unresolved, because five tiles do not bound them. **R9's interval is driven by one tile, `fp32.x_e_g`, +0.62 W;** the other four read −0.23 to +0.25 W.
 
 **2. By format, every model, the same tiles** (`scored.json` `primary.reported`; rms in W, bias is predicted minus measured):
@@ -134,7 +136,7 @@ One from the plan, by the harness's own rule: 148 of 150 runs, the two skips nam
 - **The tiles come from my pool,** written by someone who knows the model, and in M4's own count space they are mostly interpolation: 21 of 23 lie inside E78's largest leverage. The hostile part is the families I chose. A pool I did not think of could do worse.
 - **Fit constants, not energies.** 1.62, 7.53 and 2.22 fJ absorb glitches, wire length and whatever the zero-delay bench does not see. No post should quote fJ per wire or the bus's ratio to a core net.
 - **n is small inside each family,** one or two tiles, and three passes on one card in one session.
-- **fp16's window arithmetic is a model read off the RTL,** and no card has read C back (the bench's README §6).
+- **fp16's window arithmetic is a model read off the RTL,** and no card has read C back (the bench's README §6). *(Dated 1 Nov 2026: [E104](../2026-11-01-e104-c-readback/README.md) has since read C back on 44 designed tiles, equal to the RTL's arithmetic word for word; E103's own tiles were not among them.)*
 
 ## Section 11, and what a reader can be told
 
@@ -150,7 +152,7 @@ One from the plan, by the harness's own rule: 148 of 150 runs, the two skips nam
 
 **A post may not say:** "a power model for every kind" or "for the chip"; "the best simple predictor", or 0.31 against 3.96 W as a 12× win; "built to break it" without how the tiles were picked; "four constants" without the card scale, or "on another card" as if nothing had been read there; fJ per wire, "the bus costs 4.6×", or the stage split as physics; "near-cancelling" or "normaliser" as the cause of the miss; 95% intervals for fp32; any other clock, voltage, stream or GEMM, or an unscaled new card.
 
-**Next, if the owner wants more:** a pool written by someone else; the same test at a second clock; a short card run reading C back.
+**Next, if the owner wants more:** a pool written by someone else; the same test at a second clock; a short card run reading C back (dated 1 Nov 2026: [E104](../2026-11-01-e104-c-readback/README.md) ran one).
 
 ## Corrections after verification
 
