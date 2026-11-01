@@ -1,0 +1,165 @@
+E102, corrections after verification (Sun 1 Nov 2026, week 44). Post hoc. C was read back on no card.
+
+[C1] The refit is not evidence for the walk. The real test: prices fitted on the other 29 fp16 tiles, nothing fitted on the five.
+  4 op indices, make_e92's launch, 'four prices + flops':
+    all 34, start's counts                 fit rms 0.486 W; bus 20.8, prod 58.2, res 5.5, flops 10.8; E86 held out 0.526 W
+    all 34, real sums                      fit rms 0.239 W; bus 24.8, prod 41.1, res 33.7, flops 4.8; E86 held out 0.169 W
+    29 without the five, start's counts    fit rms 0.246 W; bus 24.0, prod 40.1, res 33.9, flops 5.3; E86 held out 0.142 W
+    29 without the five, real sums         fit rms 0.243 W; bus 23.9, prod 40.1, res 34.1, flops 5.2; E86 held out 0.141 W
+    the five, measured D minus prediction, at the prices fitted on the 29 from the start's counts:
+      from the start                                      h_sub +3.89, c_alt +4.05, hh_sub +3.63, hl_sub +3.64, s_abs +2.73; rms 3.62 W
+      from real sums                                      h_sub -0.54, c_alt -0.38, hh_sub -0.26, hl_sub -0.25, s_abs -0.41; rms 0.38 W
+      excess over the start: 3.89, 4.05, 3.63, 3.64, 2.73; predicted from the walk's bits: 4.43, 4.43, 3.89, 3.89, 3.14; best scale on the walk 0.91
+      s_abs's excess over h_sub's 0.70 (its walk's predicted share 0.71); hh_sub 0.93, hl_sub 0.93 of h_sub's
+      alternations, per op, from the start: h_sub 7680, c_alt 7680, hh_sub 3840, hl_sub 3840, s_abs 3820
+      alternations in place of flops: fit on 29 rms 0.260 W (bus 23.9, prod 39.5, res 40.7, alt 301.9); five from the start rms 4.39 W, from real sums rms 0.38 W
+      four prices, no fifth: fit on 29 rms 0.430 W (bus 27.4, prod 23.2, res 57.8); five from the start rms 6.40 W, from real sums rms 0.63 W
+  16 op indices, make_e92's launch, 'four prices + flops':
+    all 34, start's counts                 fit rms 0.481 W; bus 20.8, prod 57.8, res 5.9, flops 10.8; E86 held out 0.515 W
+    all 34, real sums                      fit rms 0.229 W; bus 24.4, prod 40.0, res 34.3, flops 5.0; E86 held out 0.176 W
+    29 without the five, start's counts    fit rms 0.242 W; bus 23.9, prod 39.7, res 34.1, flops 5.3; E86 held out 0.143 W
+    29 without the five, real sums         fit rms 0.241 W; bus 23.9, prod 40.0, res 33.8, flops 5.4; E86 held out 0.147 W
+    the five, measured D minus prediction, at the prices fitted on the 29 from the start's counts:
+      from the start                                      h_sub +3.84, c_alt +3.99, hh_sub +3.60, hl_sub +3.62, s_abs +2.71; rms 3.58 W
+      from real sums                                      h_sub -0.36, c_alt -0.21, hh_sub -0.11, hl_sub -0.09, s_abs -0.25; rms 0.23 W
+      from real sums, RTL arithmetic in the counted ops   h_sub -0.67, c_alt -0.51, hh_sub -0.41, hl_sub -0.39, s_abs -0.51; rms 0.51 W
+      excess over the start: 3.84, 3.99, 3.60, 3.62, 2.71; predicted from the walk's bits: 4.20, 4.20, 3.71, 3.71, 2.96; best scale on the walk 0.95
+      and with the RTL's arithmetic in the counted ops: predicted 4.51, 4.51, 4.01, 4.01, 3.22; best scale 0.88
+      s_abs's excess over h_sub's 0.71 (its walk's predicted share 0.70); hh_sub 0.94, hl_sub 0.94 of h_sub's
+      alternations, per op, from the start: h_sub 7680, c_alt 7680, hh_sub 3840, hl_sub 3840, s_abs 3820
+      alternations in place of flops: fit on 29 rms 0.254 W (bus 23.8, prod 39.1, res 41.0, alt 306.3); five from the start rms 4.37 W, from real sums rms 0.33 W
+      four prices, no fifth: fit on 29 rms 0.433 W (bus 27.3, prod 22.4, res 58.5); five from the start rms 6.41 W, from real sums rms 0.64 W
+
+  The RTL bench's frozen prediction, nets_hier2 at de545f0c, against E92's measured (primary; dips removed):
+    h_sub - h_add    bench +6.44 W; measured +6.856 +- 0.405 (3 passes); +6.812 +- 0.246 (4)
+    c_alt - c_abs    bench +6.80 W; measured +7.766 +- 1.583 (3 passes); +7.258 +- 0.212 (4)
+    hh + hl - both   bench +4.04 W; measured +4.890 +- 1.627 (3 passes); +4.611 +- 0.511 (4)
+    hh_sub over c_abs, as a share of h_sub's: bench 0.855; measured 0.88; 0.88
+    hl_sub over c_abs, as a share of h_sub's: bench 0.737; measured 0.75; 0.75
+    bench commit de545f0c 2026-11-01 00:43:14 -0700; E92's first data commit 4e8eb836 2026-11-01 01:06:51 -0700
+    fp16_step lines in that commit's accum.c: 3
+
+[C2] The mechanism for hh_sub and hl_sub. Words at C[0][0] / C[0][8], and how many distinct words in the 256:
+  the start = fl(n S); the manual = corrections-counts.py's own emulator of PRM 9.3.3 ('added with no intermediate rounding. The final sum is calculated using round towards zero'); the RTL = accum.c's port of the window (fp16_model.py)
+  c_abs     n    2: start 0x4f800000 / 0x4f800000 (1); manual 0x4f800000 / 0x4f800000 (1); RTL 0x4f800000 / 0x4f800000 (1)
+  c_abs     n   16: start 0x51000000 / 0x51000000 (1); manual 0x51000000 / 0x51000000 (1); RTL 0x51000000 / 0x51000000 (1)
+  c_abs     n 1000: start 0x53fa0000 / 0x53fa0000 (1); manual 0x53fa0000 / 0x53fa0000 (1); RTL 0x53fa0000 / 0x53fa0000 (1)
+  h_add     n    2: start 0x4f800000 / 0xcf800000 (2); manual 0x4f800000 / 0xcf800000 (2); RTL 0x4f800000 / 0xcf800000 (2)
+  h_add     n   16: start 0x51000000 / 0xd1000000 (2); manual 0x51000000 / 0xd1000000 (2); RTL 0x51000000 / 0xd1000000 (2)
+  h_add     n 1000: start 0x53fa0000 / 0xd3fa0000 (2); manual 0x53fa0000 / 0xd3fa0000 (2); RTL 0x53fa0000 / 0xd3fa0000 (2)
+  h_allsub  n    2: start 0xcf800000 / 0x4f800000 (2); manual 0xcf7fffe9 / 0x4f7fffe9 (2); RTL 0xcf7fffe9 / 0x4f7fffe9 (2)
+  h_allsub  n   16: start 0xd1000000 / 0x51000000 (2); manual 0xd0ffff5f / 0x50ffff5f (2); RTL 0xd0ffff5f / 0x50ffff5f (2)
+  h_allsub  n 1000: start 0xd3fa0000 / 0x53fa0000 (2); manual 0xd3f9d967 / 0x53f9d967 (2); RTL 0xd3f9d967 / 0x53f9d967 (2)
+  h_sub     n    2: start 0x4f800000 / 0x4f800000 (1); manual 0x4f800000 / 0x4f7fffe9 (2); RTL 0x4f800000 / 0x4f7fffe9 (2)
+  h_sub     n   16: start 0x51000000 / 0x51000000 (1); manual 0x51000000 / 0x50ffff5f (2); RTL 0x51000000 / 0x50ffff5f (2)
+  h_sub     n 1000: start 0x53fa0000 / 0x53fa0000 (1); manual 0x53fa0000 / 0x53f9d967 (2); RTL 0x53fa0000 / 0x53f9d967 (2)
+  c_alt     n    2: start 0x4f800000 / 0xcf800000 (2); manual 0x4f800000 / 0xcf7fffe9 (2); RTL 0x4f800000 / 0xcf7fffe9 (2)
+  c_alt     n   16: start 0x51000000 / 0xd1000000 (2); manual 0x51000000 / 0xd0ffff5f (2); RTL 0x51000000 / 0xd0ffff5f (2)
+  c_alt     n 1000: start 0x53fa0000 / 0xd3fa0000 (2); manual 0x53fa0000 / 0xd3f9d967 (2); RTL 0x53fa0000 / 0xd3f9d967 (2)
+  hh_sub    n    2: start 0x4f800000 / 0x4f800000 (1); manual 0x4f800000 / 0x4f800000 (1); RTL 0x4f800000 / 0x4f7fffe9 (2)
+  hh_sub    n   16: start 0x51000000 / 0x51000000 (1); manual 0x51000000 / 0x51000000 (1); RTL 0x51000000 / 0x50ffff5f (2)
+  hh_sub    n 1000: start 0x53fa0000 / 0x53fa0000 (1); manual 0x53fa0000 / 0x53fa0000 (1); RTL 0x53fa0000 / 0x53f9d967 (2)
+  hl_sub    n    2: start 0x4f800000 / 0x4f800000 (1); manual 0x4f800000 / 0x4f800000 (1); RTL 0x4f800000 / 0x4f7fffe9 (2)
+  hl_sub    n   16: start 0x51000000 / 0x51000000 (1); manual 0x51000000 / 0x51000000 (1); RTL 0x51000000 / 0x50ffff5f (2)
+  hl_sub    n 1000: start 0x53fa0000 / 0x53fa0000 (1); manual 0x53fa0000 / 0x53fa0000 (1); RTL 0x53fa0000 / 0x53f9d967 (2)
+  s_abs     n    2: start 0x4f800000 / 0x4f800000 (1); manual 0x4f7ffffa / 0x4f7ffff7 (10); RTL 0x4f7ffff2 / 0x4f7ffff1 (9)
+  s_abs     n   16: start 0x51000000 / 0x51000000 (1); manual 0x50ffffd5 / 0x50ffffbf (10); RTL 0x50ffff9f / 0x50ffff95 (9)
+  s_abs     n 1000: start 0x53fa0000 / 0x53fa0000 (1); manual 0x53f9f5b5 / 0x53f9f08f (10); RTL 0x53f9e8d7 / 0x53f9e645 (9)
+  r_abs     n    2: start 0x4f800000 / 0x4f800000 (1); manual 0x4f7ffff1 / 0x4f7ffff5 (5); RTL 0x4f7fffe9 / 0x4f7fffe9 (1)
+  r_abs     n   16: start 0x51000000 / 0x51000000 (1); manual 0x50ffff95 / 0x50ffffb5 (5); RTL 0x50ffff5f / 0x50ffff5f (1)
+  r_abs     n 1000: start 0x53fa0000 / 0x53fa0000 (1); manual 0x53f9e645 / 0x53f9edfd (5); RTL 0x53f9d967 / 0x53f9d967 (1)
+  r_cancel  n    2: start 0x00000000 / 0x00000000 (1); manual 0x00000000 / 0x00000000 (1); RTL 0x00000000 / 0x00000000 (1)
+  r_cancel  n   16: start 0x00000000 / 0x00000000 (1); manual 0x00000000 / 0x00000000 (1); RTL 0x00000000 / 0x00000000 (1)
+  r_cancel  n 1000: start 0x00000000 / 0x00000000 (1); manual 0x00000000 / 0x00000000 (1); RTL 0x00000000 / 0x00000000 (1)
+  make_e88.emulate_launch at n = 2, which make_e92.self_check reads as proof of the freeze, rounding to nearest: h_sub 0x4f800000 / 0x4f800000; hh_sub 0x4f800000 / 0x4f800000; r_abs 0x4f800000 / 0x4f800000
+  txfma_7s/txfma_c2.v:309: assign align1_neg_cin_f2a_h = align1_neg_f2a_h & ~e_sticky1_f2a_h | trans_log_mul_align1_neg_f2a_h;
+  txfma_7s/txfma_c2.v:310: assign align2_neg_cin_f2a_h = align2_neg_f2a_h & ~e_sticky2_f2a_h;
+  txfma_7s/txfma_f4.v:82: assign comb_add_cleared_f4a_h[`TXFMA_B25:`TXFMA_B30] = {(`TXFMA_B25-`TXFMA_B30+1){ph_ps_clearbuf_f4a_l}} & comb_add_f4a_h[`TXFMA_B25:`TXFMA_B30] |
+  txfma_7s/txfma_f4.v:85: assign comb_add_cleared_f4a_h[`TXFMA_B31:`TXFMA_B47] = {(`TXFMA_B31-`TXFMA_B47+1){(clr_frnd_phps_f4a_l)}} & comb_add_f4a_h[`TXFMA_B31:`TXFMA_B47] |
+  vpu_tensorfma.v:691: //FP1632 ops only support RTZ rm
+  vpu_tensorfma.v:693: fma_inst_s0[`VPU_INST_RM_SEL] = RTZ;
+  fp16_model.py and txfma_top on one absorbed term: fault_e92_fp16_e102.txt part A.
+
+[C3] Tiles the ordinary addition in the counted ops hides. Every fp16 tile of the fault's table, at make_e88's launch and 4 op indices; RTL = fp16_model.model in the two counted ops. W at E88's b + E92's f, then at the 29-tile fit's two prices.
+  fp16.c_alt               res start    8940, real   97276, RTL  104690; flops  547214,  600240,  602950; moved +6.00 W, +3.98 W; E92
+  fp16.h_sub               res start     748, real   89084, RTL   96498; flops  547214,  600240,  602950; moved +6.00 W, +3.98 W; E92
+  fp16.hh_sub              res start     748, real   89084, RTL   96498; flops  467572,  456246,  457168; moved +5.50 W, +3.59 W; E92
+  fp16.hl_sub              res start     748, real   89084, RTL   96498; flops  290932,  279606,  280528; moved +5.50 W, +3.59 W; E92
+  fp16.s_abs               res start     748, real   71292, RTL   79726; flops  314354,  349333,  350276; moved +4.87 W, +3.22 W; E92
+  fp16.r_abs               res start     748, real     612, RTL    8574; flops    1940,    1918,    2536; moved +0.46 W, +0.30 W; E88 items
+  fp16.h_allsub            res start    8940, real    8804, RTL   16766; flops    2246,    2168,    2606; moved +0.46 W, +0.30 W; E92
+  fp16.abs_randn           res start  107759, real  107169, RTL  105714; flops  124206,  124886,  124819; moved -0.11 W, -0.07 W; E90
+  fp16.negabs_randn        res start  107759, real  107169, RTL  105714; flops  124206,  124886,  124819; moved -0.11 W, -0.07 W; E90
+  fp16.randn_small         res start  127018, real  125081, RTL  125230; flops  375121,  374051,  374052; moved -0.11 W, -0.07 W; E88 fit
+  fp16.uniform01_d3        res start  108572, real  108636, RTL  107385; flops  124187,  124202,  124333; moved -0.07 W, -0.04 W; E90
+  fp16.fp8grid             res start  127200, real  126368, RTL  126344; flops  373881,  373308,  373348; moved -0.05 W, -0.04 W; E88 fit
+  fp16.nn_like             res start   99834, real   99158, RTL   99106; flops  299137,  298566,  298424; moved -0.05 W, -0.03 W; E88 fit
+  fp16.randn_sorted        res start  125252, real  126118, RTL  125830; flops  372577,  372910,  372700; moved +0.03 W, +0.02 W; E88 fit
+  fp16.sparse50            res start   73398, real   73856, RTL   73901; flops  221661,  221876,  221757; moved +0.03 W, +0.02 W; E88 fit
+  fp16.uniform01_d1        res start  106707, real  107296, RTL  106194; flops  123763,  124892,  124921; moved -0.02 W, -0.01 W; E90
+  fp16.c_abs               res start     748, real     748, RTL     748; flops      92,      92,      92; moved +0.00 W, +0.00 W; E92
+  fp16.h_add               res start    8940, real    8940, RTL    8940; flops      92,      92,      92; moved +0.00 W, +0.00 W; E92
+  fp16.r_cancel            res start       0, real       0, RTL       0; flops   81092,   81092,   81092; moved +0.00 W, +0.00 W; E88 items
+  the other 30 fp16 tiles: largest fp16.negabs_randn 0.11 W, then fp16.abs_randn 0.11 W, fp16.randn_small 0.11 W
+  fp32's 49 tiles keep the table's 'moved': largest besides pm_pi: fp32.r_het -0.10, fp32.smallint -0.07
+  E88's arm: r_abs res 8574 (ordinary 612, E88's count 748), r_cancel 0. At 30 and 51.75 fJ: 0.29 and 0.50 W.
+    E88 README A16: measured 0.388 ± 0.111; model 0.13
+    E88 README R16abs: measured 5.901 ± 0.144; model 7.23
+    R16abs's model, r_walk - r_abs, with r_abs's walk counted at E88's price: 6.77 W
+  words at n = 541,999: h_allsub 0xd83b3adf / 0x583b3adf (2); h_sub 0x588452f0 / 0x583b3adf (2); r_abs 0x583b3adf / 0x583b3adf (1)
+
+[C4] 'Up to 5.5 W' is one price.
+  h_sub, make_e88's launch, 4 indices: 88,336 result bits x E88's 51.75 fJ = 5.14 W, + 53,026 flop bits x E92's 6.68 fJ = 0.40 W; sum 5.54 W at 1.125e+09 ops/s. E88's fit has no flop term, so its bit price carries what flops carry.
+  the same counts at the 29-tile fit's two prices, 33.9 and 5.3 fJ: 3.68 W. At fp32's 30.0 and 6.68 fJ: 3.38 W.
+  h_sub's real count, ordinary counted ops, launch/indices 533000/4: mean 89,084, per index 58,736 to 115,184
+  h_sub's real count, ordinary counted ops, launch/indices 542000/4: mean 104,888, per index 90,384 to 114,896
+  h_sub's real count, ordinary counted ops, launch/indices 542000/16: mean 99,814, per index 65,808 to 132,752
+  h_sub with the RTL's arithmetic in the counted ops, 128 op indices over 542,000: 102,851
+  fp32 B bit 6 over its zero: at E88's 41.17 fJ + E92's f -2.07 W; at E92's fp32 fit with both terms, 26.5 and 7.7 fJ, -1.49 W
+  fp32.pm_pi: +0.70 W; at that fit's prices +0.48 W
+
+[C5] Balanced mantissa flips, board fJ, by block:
+  B: bit 0 T 152; bit 6 T 113; bit 11 T 87; bit 16 T 105; bit 20 T 164; bit 22 G 176, T 142
+  A: bit 0 T 137; bit 6 T 105; bit 11 T 332; bit 16 T 83; bit 20 T 317; bit 22 G 636, T 597
+
+[C8] Final ratios per bit, all-in over balanced (scored.json's rule cells; README result 1), and the bench's frozen ratio:
+  R1's cells at bits 0, 6, 22, rail: 0 0.92, 6 1.01, 11 2.46, 16 5.81, 20 5.11, 22 5.90; board: 0 0.87, 6 1.05, 11 3.20, 16 5.78, 20 5.31, 22 6.17
+  bit 16: B board **5.78 [4.22, 8.97]**, rail 5.81 [3.76, 12.47], bench 4.35; A board **7.10 [6.07, 8.41]**, rail 7.96 [6.86, 9.13], bench 4.27
+  bit 22: B board **6.17 [4.80, 8.79]** (gate/gate), rail 5.90 [5.11, 6.97], bench 6.81; A board **2.15 [1.92, 2.42]** (gate/gate), rail 2.20 [1.96, 2.53], bench 1.97
+
+[C9] Balanced over all-in at the exponent and sign, board fJ, from README result 1 (the replacement paragraph's 'by 2-5x' reads 2-6x with A's sign):
+  bit 23: B 2.4x, A 1.9x
+  bit 27: B 3.3x, A 3.2x
+  bit 30: B 2.2x, A 2.5x
+  bit 31: B 4.6x, A 5.5x
+
+[C6] int8: the registered masks and the post-hoc singles.
+  bk_2a over bk_15, rail: +0.136 [0.111, 0.161] W, ratio 1.97 [1.69, 2.33] (registered): verdict SHAPE
+  bk_2a over bk_15, board: +0.164 [0.088, 0.240] W, ratio 1.82 [1.48, 2.17] (registered): verdict INCONCLUSIVE
+  every int8 tile: A word 0x01010101 in all 256 A words (A = 1); B base bytes by column mod 8: 93 c3 c6 ac 55 66 1e 8d
+  A word across 14 int8 tile files: 0x01010101
+
+[C7] 'No verdict moves at any registered arm' is hollow for a rail-primary rule: rail_raw carries no temperature term in any arm.
+  scored.json, R9 on the rail by arm: dips kept: +0.136, gates off: +0.136, E79's way at 0.2414 (p80 in the trains): +0.136, E79's way at the session's auto slope: +0.136, E79's way at 0.1994: +0.136, E79's way at 0.3803: +0.136, E79's way at 0.545: +0.136, no temperature term in block G either (0): +0.136
+  E102's I blocks, recomputed here, rail_raw less 0.81 k x the run's reading (reduce_e78.py's --c-rb, E79's rail change per board change); board p_raw less k x the same:
+  arm                  bk_2a - bk_15 [95%]       odd 1,3,5 - even 0,2,4 [95%]   odd/even
+  rail, no term      +0.136 [+0.111, +0.161]     +0.082 [+0.059, +0.106]    2.85
+  rail, k 0.1994     +0.106 [+0.006, +0.205]     +0.076 [+0.038, +0.113]    2.73
+  rail, k 0.2414     +0.099 [-0.019, +0.217]     +0.074 [+0.032, +0.116]    2.71
+  rail, k 0.3803     +0.079 [-0.101, +0.258]     +0.069 [+0.011, +0.128]    2.62
+  rail, k 0.545      +0.054 [-0.200, +0.307]     +0.064 [-0.016, +0.143]    2.52
+  board, no term     +0.164 [+0.088, +0.240]     +0.135 [+0.057, +0.213]    4.32
+  board, k 0.2414    +0.119 [-0.048, +0.285]     +0.124 [+0.023, +0.226]    4.18
+  board, k 0.3803    +0.093 [-0.145, +0.331]     +0.118 [-0.001, +0.238]    4.10
+  board, k 0.545     +0.062 [-0.264, +0.389]     +0.111 [-0.031, +0.254]    3.99
+  E79 on aifoundry3, the same singles (byte-identical tiles), its list, rail column:
+  rail, no term      odd - even +0.084 [+0.059, +0.109]; odd/even 2.84; 4 passes
+  rail, k 0.0834     odd - even +0.061 [+0.016, +0.107]; odd/even 2.40; 4 passes
+  rail, k 0.3803     odd - even -0.019 [-0.145, +0.107]; odd/even 0.49; 4 passes
+  board, no term     odd - even +0.107 [+0.082, +0.132]; odd/even 2.59; 4 passes
+  board, k 0.3803    odd - even -0.020 [-0.129, +0.090]; odd/even 0.65; 4 passes
+  Is the whole-degree reading a real signal inside a list? Per read, item means removed, residual over the own zero against the reading over the zero's:
+    E102 I blocks, rail: +0.013 +- 0.034 W per degC over 100 reads; sd of the reading 0.112 degC (a true leakage of 0.24-0.55 would read about +0.2 to +0.5)
+    E102 I blocks, board: -0.123 +- 0.115 W per degC over 100 reads; sd of the reading 0.112 degC (a true leakage of 0.24-0.55 would read about +0.2 to +0.5)
+    E79 int8 list, rail: -0.115 +- 0.025 W per degC over 36 reads; sd of the reading 0.520 degC (a true leakage of 0.24-0.55 would read about +0.2 to +0.5)
+    E79 int8 list, board: +0.076 +- 0.046 W per degC over 36 reads; sd of the reading 0.520 degC (a true leakage of 0.24-0.55 would read about +0.2 to +0.5)

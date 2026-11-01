@@ -54,7 +54,7 @@ def tiles():
     return [(v["name"], v["path"], ", ".join(dict.fromkeys(v["who"]))) for v in seen.values()], missing
 
 
-def counts(ty, raw, start, accum, launch=None, samples=None, step=None):
+def counts(ty, raw, start, accum, launch=None, samples=None, step=None, ns=None):
     """The C read, result bus, store and adder-flop counts of make_e88.simulate and make_e92.sign_counts, by lane, gate included, at FLOP_SAMPLES op indices spread over make_e88's launch, from one start: "fl" C = fl((n-1) S), or "real" the sum accum.c
     reaches. One code path, so the difference between the two columns is the start and nothing else. The two counted ops add as make_e88 does, in ordinary rounding, unless `step` gives the arithmetic to use instead (fault_e92_fp16_e102.py prints what that changes in fp16)."""
     import subprocess
@@ -66,7 +66,8 @@ def counts(ty, raw, start, accum, launch=None, samples=None, step=None):
     seq = me.stream(ty)
     launch = launch or me.LAUNCH_OPS[ty]
     samples = samples or m92.FLOP_SAMPLES
-    ns = [max(2, int((s_ + 0.5) / samples * launch)) for s_ in range(samples)]
+    ns = ns or [max(2, int((s_ + 0.5) / samples * launch)) for s_ in range(samples)]
+    samples = len(ns)
     dp = m92.dp_fp32 if ty == "fp32" else m92.dp_fp16
     states = {}
     if start == "real":

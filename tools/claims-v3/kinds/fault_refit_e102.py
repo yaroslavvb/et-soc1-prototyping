@@ -10,7 +10,9 @@ store and adder-flop counts start from. Run from the repo's root, once per start
     fault_refit_e102.py real <e92 reduction json> <out json> <out txt>     # the sum accum.c reaches
 
 Everything else is posthoc_fit_e92.main, unchanged: its tile list, its D per tile, its fit, its leave-one-out and its held-out E86 tiles. Live, operand bus and products do not depend on C and come from its own calls. Four op indices over make_e92's launch of 542,000,
-as its flop count has, where its result-bus count has 16: the control shows what that alone does. FAULT_SAMPLES changes the four (the robustness arm is 16), FAULT_WORKERS sets the pool."""
+as its flop count has, where its result-bus count has 16: the control shows what that alone does. FAULT_SAMPLES changes the four (the robustness arm is 16), FAULT_WORKERS sets the pool.
+
+Not evidence for the walk (E102 README, corrections after verification, C1): what the refit moves is the five walking tiles' leverage going away. The test is in corrections-check.py [C1]: prices from the other 29 tiles predict the five."""
 import glob
 import hashlib
 import json
