@@ -1239,8 +1239,8 @@ data record `2026-10-31-q130s-kinds/`), `INV` `2026-10-31-q130-kinds-inventory/`
 `2026-10-31-q130-governor-thermal-branch/` (Q130(d)), `LIT` `2026-10-31-q130-literature/` (Q130(e)), `ZG`
 `2026-10-31-q130-zero-gate-correction/` (Q130(g)), `ZT` `2026-10-31-q130-zeros-transport/` (Q130(i)). Every lane was
 re-derived by a separate adversarial verifier; the rows below carry the corrected figures, E83's from its correction
-commit `734e997f`. E84's data (`d6d1a0c8`) and E85 were unverified or running when this section was written and are not
-here.
+commit `734e997f`. E84 and E85, unverified or running when this section was written, are in "Q130 additions"
+below, with the evening round's Q130(n) and E86–E91.
 
 🛑 **Five things to carry with every figure below.** (1) **Name the meter, the zero a power is measured over and the
 operating point:** every watt and pJ measured on these cards below is the **board** meter's unless a row names the
@@ -1393,9 +1393,132 @@ successor power model** that passes the price-list rungs, fits E70's ladder, car
 gated-lane residual and an accumulator term — a new freeze, made before the data it is scored on. **The RTL toggle
 counts**, until a bench passes the functional check. **The A side's broadcast weight**, which every A-against-B energy
 claim rests on. **The idle reset's firmware cause.** The register file's **read ports, read mux tree and clocking** —
-narrowed by Q130(i), not closed — and **E77**, the rail at one temperature, still reserved. **E84 and E85** were
-unverified or running when this section was written. And a **private-archive search** ran beside Q130 and is kept off this
+narrowed by Q130(i), not closed — and **E77**, the rail at one temperature, still reserved. **E84–E91 and Q130(n)**
+are in "Q130 additions", below, which narrows two items of this list (heat below 12 W, E89; the spread between tile
+draws, E90). And a **private-archive search** ran beside Q130 and is kept off this
 repository, as Q128(c) and Q129's were; its one publishable half is `ZG`.
+
+## Q130 additions: a second card's governor, the camera per kind, real GPT-2 tensors, the result path, heat below 12 W, and signs (31 Oct 2026, afternoon and evening; eight card experiments on four cards, plus Q130(n) at the desk)
+
+The owner's later asks of 31 October — *"feel free to use more cards"* (about 13:1x) and *"feel free to keep using the
+lab"* (about 18:1x) — produced E84 and E85 in the afternoon and, from the Q130 critic's ranked list, Q130(n) and E86–E91
+in the evening. Every lane was re-derived by a separate adversarial verifier and corrected in its own commit, and the
+rows carry the corrected figures. Short names, all under `docs/reports/data/` unless a path is given: `E84`
+`2026-10-31-e84-speed-aifoundry1-card0/`, `E85` `2026-10-31-e85-camera-kinds/`, `E86`
+`2026-10-31-e86-real-tensors-energy/`, `E87` `2026-10-31-e87-real-tensors-speed/`, `E88` `2026-10-31-e88-result-path/`,
+`E89` `2026-10-31-e89-heat-low-power/`, `E90` `2026-10-31-e90-signs-spread/`, `E91`
+`2026-10-31-e91-real-tensors-aifoundry1/`, and `RT` `tools/claims-v3/kinds/real/` (Q130(n), the real tiles).
+🛑 **The Q130 section's five things to carry hold here, and three more.** (6) **Every ratio names its baseline** — D over
+the format's own zeros, S over idle, or the whole board — because int8's real-tile saving is 11–22%, 8–15% or 2–4% by
+those three. (7) **The real tiles are three 16 × 16 windows of one model** (GPT-2 small: layer 0 MLP up, layer 6 MLP down,
+layer 6 attention QKᵀ), int8 with one calibration: draws, not "real tensors" in general. (8) **E91 is not scored**: its
+numbers are exploratory.
+
+### Speed on a second card (E84, aifoundry1's card 0)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **Zeros are at least as fast as random data on a second card** | zeros minus random **+160.6 / +246.2 MHz** (fp32, burst / sustained), **+24.0 / +162.2** (fp16), **0 / +5.9** (int8); int8 the least throttled; **all four registered rules pass** (P1, P2, P3, S1) | M, P→M | Q130, E84 | `E84/results.json`, `rules.E84-P1`, `.E84-P2`, `.E84-P3`, `.E84-S1` |
+| P3's caveat | the limiting test is right for 9 of 11 kinds in the burst and 10 of 11 sustained, resting on the eight kinds predicted `none` (8 of 8); of the three predicted to be limited, 1 of 3 (burst) and 2 of 3 (sustained), because the registered labels have no PMIC category | P→M | Q130, E84 (C10) | `E84/corrections-check.txt` [C10] |
+| 🛑 **Card 0's PMIC over-power alarm: a third speed limit** | fp32 random data at 800 MHz draws 72–75 W on the board (p800 72.4 / 73.6 W); the PMIC's readings reach **75.00–76.25 W against its 75,000 mW set point**, and each alarm is a POWER_SAFE state at **300 MHz**, the power arm climbing back 300 → 600 → 700 → 800, a median **1.106 s** from one safe state to the next; sustained work samples sit 31–32% at 300, 32–34% at 600, 25% at 700 and 10–11% at 800 MHz. Only the four fp32 random runs of 35 logged it; none of aifoundry2's 247 committed rings holds one (its fp32 random data read 80–88 W). Post hoc | M | Q130, E84 | `E84/posthoc/pmic.json`, `summary`, `runs[]`; `E84/corrections-check.txt` [C6], [C7], [C12] |
+| **So zeros run 1.67× faster sustained on card 0** | fp32 zeros ÷ random kernel rate: sustained **1.668×** (replicate pairings 1.655–1.682), burst 1.406× (pass-paired 1.348–1.470); aifoundry2 the same day **1.306×** (runs 1.299–1.313) and 1.148× (E83's zeros over E80's random; 1.293× and 1.142× over E83's own random anchor). The E64-based 1.133× / 1.325× are withdrawn | M | Q130, E84 (C2, C4) | `E84/results.json`, `cells.fp32/zeros`, `cells.fp32/randn`; `E84/corrections-check.txt` [C2], [C4] |
+| fp16 and int8: consistent, not a measured agreement | sustained zeros ÷ random **1.275×** (fp16; aifoundry2 1.297×) and **1.008×** (int8; aifoundry2 1.009×, its two random-data runs 1.005–1.014×), one run each | M | Q130, E84 (C4) | `E84/results.json`, `cells.fp16/*`, `cells.int8/*`; `E84/corrections-check.txt` [C4] |
+| **All-ones data near full clock on both cards; card 0 by drawing less, not by cooling better** | card 0 **793.5 / 795.6 MHz** (fp32 / fp16 ones, one run each) at 47.1 / 46.7 W; aifoundry2 the same day 782.4 / 781.6 MHz at 53.3 / 53.2 W. Per board watt card 0's die runs **1.1–1.5 °C hotter** (die line 41.78 + 0.4753 °C/W, 65.5 °C at 49.9 W, against E83's 53.4 W). "Better cooling", read from E64's 23 Oct 737.9 / 737.1 MHz, is withdrawn | M, F | Q130, E84 (C1) | `E84/corrections-check.txt` [C1] |
+| Card 0's firmware and idle | release **1.4.0, BL1 and BL2 0.22.0, PMIC 1.6.1, minions 0.25.1** (A1, read before any launch), TDP 65 W / 65 °C; idled at **600 MHz / 519 mV, 19.0–21.2 W** between all 35 runs. E60's 20 Oct card-0 telemetry idled at 600 MHz too (6,047 of 6,133 idle readings); 30 of its 33 300 MHz episodes inside the work match the alarm cycle, and its rings were not committed | M | Q130, E84 (A1, C3, C6) | `E84/ident/ident-154200.out`; `E84/corrections-check.txt` [C3], [C6] |
+
+### The thermal camera per kind (E85, aifoundry2)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **The camera weighs fp32 and fp16 random data as the meter does** | at 0.05 Hz, 192 minions, 800 MHz: fp32 random **267.6 ± 19.9 mK** (52.10 ± 3.82 mK/W), fp16 random **227.0 ± 13.6 mK** (50.72 ± 3.21 mK/W); ratio to the registered reference line **0.869 ± 0.118 and 0.923 ± 0.080, pooled 0.895 ± 0.086**; the same lag (−6.2 ± 6.2°, −1.7 ± 4.7°) | M, P→M | Q130, E85 | `E85/analysis/lockin.json`, `blocks.E85-F32`, `.E85-F16`; `E85/analysis/score.json`, `kinds.*.ratio_R`, `rules.E85-R3_pooled` |
+| 🛑 **int8 not detected** | random int8 (a 2.45 W step) **64.5 ± 28.3 mK, p 0.054** (R1 fails); its R2 (tolerance ±1.014), R4 (±40.4°) and R9 passes carry no information; the shutter fired 58 times in its 18 laps | M | Q130, E85 (C3) | `E85/analysis/lockin.json`, `blocks.E85-I8`; `E85/corrections-check.txt` [C3] |
+| The camera's drift is not resolved by E85 | the registered reference line: 56.76 ± 4.27 mK/W at mid-time, slope **−29 ± 29 %/h** (z −1.02); a constant fits the three blocks too (53.67 ± 3.02 mK/W, χ² 1.16 / 2). Post hoc against a constant reference the ratios read 0.971 ± 0.090 and 0.945 ± 0.080, pooled 0.953 ± 0.070 | M, F | Q130, E85 (C2) | `E85/analysis/score.json`, `reference_line`; `E85/corrections-check.txt` [C2] |
+| The registered tally | **8 of 9 rules pass as registered**; R1 fails for int8, and int8's other passes are uninformative | P→M | Q130, E85 | `E85/analysis/score.json`, `rules` |
+| 🛑 **The sampler's statistics reset is a PMIC command** | `ettelem sample --reset-ms 1000` (E63's runner, unchanged) sends `DM_CMD_SET_STATS_RUN_CONTROL`, which the SP forwards to the PMIC as its statistics reset (0x47): **2,205 times** in E85's session. Post hoc and suggestive: late clock ramps in 13 of the 47 launches checked right after a reset against 10 of the other 193 (one-sided Fisher p 3.5 × 10⁻⁵). **A ruling by the owner is owed; until then runners sample without it** | M, R | Q130, E85 (C1, C9) | `E85/session/session.json`, `sampler.args`; `tools/ettelem/ettelem.cpp`, `resetStats`; `E85/corrections-check.txt` [C1], [C9] |
+
+### Real GPT-2 tensors (Q130(n) at the desk; E86, E87 and E91 on three cards)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **Nine tiles from a public model's real weights and activations** | GPT-2 small (revision `607a30d7…`, MIT) on the opening 128 tokens of a public-domain novel; three products (layer 0 MLP up, layer 6 MLP down, layer 6 attention QKᵀ) × fp32 / fp16 / int8, one 16 × 16 window each (the median of 20 candidate windows); fp16 is fp32 activations rounded, int8 per-tensor activations and per-channel weights. **No real tile holds a zero word, so none gates a lane**; real fp32 and fp16 move as many operand-bus bits as random data (81.3–84.7 thousand per op against 82.2 and 84.4 thousand) | D | Q130(n) | `RT/real.json`, `tiles.*.stats`; `RT/README.md` |
+| Frozen predictions, and the amendment they are scored on | `predictions-real.json` (sha256 `bab33bee…`, `7d5b99af`) unchanged; Amendment 1 (`99620cc2`, before any card ran a real tile) replaces the frozen ±2.19 / ±1.80 / ±0.89 W, which came from the selected model's own LOO rms and were too narrow, with a nested LOO's **±2.41 / ±2.35 / ±1.32 W**. Predicted D (board W, aifoundry3, 600 MHz): fp32 24.37–24.46, fp16 21.36–21.71, int8 5.18–5.89 W (0.74–0.84× of full; 0.735–0.869× across five calibrations). The predictor is a post-hoc fit to E78 whose terms are not mechanisms: it prices B-side flips at 0, which E65 contradicts | P, F | Q130(n) | `RT/predictions-real.json`; `RT/amendment-1.json`, `nested_loo`, `calibration_sensitivity` |
+| **Real float tiles cost what random data costs** (aifoundry3) | real ÷ random, per pass: **D 0.983–0.994 (fp32), 0.971–0.996 (fp16)**; over idle 0.985–0.996 and 0.972–0.997; of the whole board 0.992–0.997 and 0.987–0.998; three-tile means of D 0.988 ± 0.010 and 0.987 ± 0.014; layer 6 MLP down in fp32 0.9937 ± 0.0012 | M | Q130, E86 | `E86/scored.json`, `rules.E86-R3.by_type`, `tiles["fp32.real_l6_mlp_down"].ratio_to_ref`; `E86/corrections-check.txt` [C2] |
+| **Real int8 saves through small values** (aifoundry3) | D **0.782–0.888** (three-tile mean 0.827 ± 0.050), over idle 0.852–0.920, of the whole board **0.958–0.977**: savings of 11–22%, 8–15% and 2.3–4.2%. 1–9% of the values are zero, no 32-bit word is; E86 does not split zeros from small magnitudes | M | Q130, E86 (C2, C4) | `E86/corrections-check.txt` [C2], [C4]; `RT/real.json`, `tiles.int8.*.stats` |
+| Energy per multiply-add over idle, real tiles | fp32 **5.72–5.79 pJ** (random 5.81), fp16 2.54–2.61 (2.61), int8 0.259–0.280 (0.304) | M | Q130, E86 | `E86/e86.json`, `items["<type>.real_<matrix>"].pj_mac_S`, `items["fp32.randn"].pj_mac_S` |
+| Heat in 2 s (the whole-degree reading) | the float tiles as random data (every paired interval includes 0); **the int8 tiles warm the die less**: −0.125 ± 0.046, −0.125 ± 0.046 and −0.175 ± 0.157 °C against random int8's 1.125 °C | M | Q130, E86 (C1) | `E86/corrections-check.txt` [C1] |
+| Q130(n)'s predictor on the card, beside a no-model baseline | 9 of 9 inside Amendment 1's intervals (R1), rms **0.155 / 0.393 / 0.417 W** (R2); "each tile costs E78's random kind" scores 0.353 / 0.446 / 1.237 W, so the predictor adds 2.3× in fp32, 3.0× in int8 and 1.13× in fp16. E86's tally: **4 PASS, 2 INCONCLUSIVE** (R3 on fp16's direction; R4 on int8 `l0_mlp_up` against `gauss_q`) | P→M | Q130, E86 (C5) | `E86/scored.json`, `rules`, `tally`; `E86/corrections-check.txt` [C5] |
+| **The real tiles run at random data's speed** (aifoundry2's governor) | burst real − random **−2.7 MHz (fp32)** and **+7.8 MHz (fp16: 1.3σ, not established)**; int8 bursts at 800 MHz; **no int8 real-against-random sustained difference is shown** (single runs land either side of the 65 °C trip: int8 full 793.4 MHz in E80, 786.5 in E83, 774.7 in E87) | M | Q130, E87 (C2, C3) | `E87/results.json`, `rules.E87-S2`; `E87/corrections-check.txt` [C2], [C3] |
+| Like with like, on another card and session | switching above zeros as a share of the same session's random reference: real fp32 **0.985–0.995**, fp16 **0.962–0.990**, int8 **0.797–0.904** | M | Q130, E87 | `E87/results.json`, `posthoc.like_with_like_ratios` |
+| 🛑 **E87's nine passes do not test the power predictor** | all nine registered rules pass (burst rms 10.68 MHz, sustained 6.11 MHz, 9 of 9 limits), but a no-model baseline (each tile = E80's random cell) scores 9.75 / 5.14 MHz. The predictor's evidence on real data is S4's int8 bar (0.835 < 0.9, which "real = random" fails) and the fp32 / fp16 sign (six of six tiles below 1; t 2.48 / 2.25 on 2 df). E83's power-to-clock relation does carry over to real data (S1: 10.1 / 5.2 MHz rms) | P→M | Q130, E87 (C1) | `E87/results.json`, `rules`; `E87/corrections-check.txt` [C1] |
+| E91, the cross-card replicate: **not scored** | all 11 registered rules NOT SCORED (three of four passes kept). Exploratory, D-based three-tile means on card 1 **0.9915 ± 0.0050 / 0.9833 ± 0.0015 / 0.8418 ± 0.0437**; card 1 − aifoundry3 +0.004 ± 0.012 / −0.004 ± 0.014 / +0.015 ± 0.067: fp32 and fp16 within about 1 point, int8 only within its noise | M | Q130, E91 | `E91/scored.json`, `tally`, `rules.E91-R3.by_type`, `replication_of_e86.rho_by_type` |
+| E91's leakage slope and card scale | the session's automatic slope **0.422 W/°C** (0.277 with the dips kept; E78 0.1994, E82 0.241, E86 0.229) decides a gate and moves D by up to 0.7 W; the card scale on the real tiles moves from 1.018 to 1.054 with the slope and the dip treatment, within 0.0025 of the six synthetic kinds' median at every resolved pairing (E82: 1.031) | M, D | Q130, E91 (C2, C5) | `E91/e91.json`, `leak`; `E91/scored.json`, `cross_card`; `E91/corrections-check.txt` [C2], [C5] |
+
+### Where a multiply-add's energy goes (E88, aifoundry1's card 1)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **A random positive fp32 multiply-add, split** | over fp32 zeros (21.6 W on \|N(0, 1)\| operands): **the clocked lane 7.92 ± 0.18 W (37%), the operand-side multiplier 8.61 ± 0.18 W (40%), the result path 5.04 ± 0.19 W (23%)**; 1.73 / 1.88 / 1.10 pJ per multiply-add (board). The registered leakage arms move the parts by up to −0.38 / +0.52 W and the shares by at most 1.7 points; on the minion rail the shares hold within 2 points (6.98 / 7.14 / 3.92 of 18.03 W) | M | Q130, E88 | `E88/scored.json`, `primary.splits.fp32.parts`; `E88/corrections-check.txt` [C4], [C5] |
+| What the split leaves out: random signs | E78's random fp32 (random signs) costs **2.24 ± 0.17 W** more than the split's design; as shares of E78's random fp32, 33 / 36 / 21% **plus 9% unplaced** | M | Q130, E88 (C1) | `E88/scored.json`, `primary.contrasts.X32`; `E88/corrections-check.txt` [C1] |
+| fp16 and int8, in paired-value designs | fp16 **7.96 / 6.19 / 6.29 W (39 / 30 / 31%)**, int8 **1.71 / 3.14 / 1.81 W (26 / 47 / 27%)**; the multiplier side includes the in-lane adder up to where its sum cancels; the designs cost 0.959 and 0.977 of their random anchors | M | Q130, E88 (C1) | `E88/scored.json`, `primary.splits.fp16.parts`, `.int8.parts`; `E88/corrections-check.txt` [C1] |
+| **A constant's accumulator walk costs almost nothing** | freezing it saves **0.10 ± 0.31 W** (fp32), 0.01 ± 0.13 W (fp16) and −0.23 ± 0.25 W (int8) | M | Q130, E88 | `E88/scored.json`, `primary.contrasts.W32`, `.W16`, `.W8` |
+| **About 70% of the fp32 result path is the bus swinging between accumulators** | **0.693 ± 0.018** of the result path (3.49 ± 0.17 W) once the design's own operand toggles (model-priced at 0.27–0.31 W) are taken off; 0.754 ± 0.018 raw (3.801 ± 0.168 W). E79's hypothesis, now measured | M, D | Q130, E88 (C2) | `E88/scored.json`, `primary.contrasts.R32bus`; `E88/corrections-check.txt` [C2] |
+| 🛑 Random signs with the result frozen | **2.52 ± 0.19 W** over a constant remain (registered at ≤ 1 W: FAIL); the adder alternating between adding and subtracting is the registered guess, untested | M | Q130, E88 | `E88/scored.json`, `primary.contrasts.M32s`, `.R32s` |
+| The registered tally, and the model inside its bands | **29 pass, 3 fail of 32** (the three failures are random signs). The stream model's split falls inside 17 of its 19 out-of-sample bands, ±0.75 to ±1.80 W wide, but misplaces the parts (fp32 bus swing 4.75 W predicted against 3.80 measured; int8 result path 3.07 against 1.81 W). The card's result was never read back: frozen against walking rests on the desk emulation (14 of 14) | P→M | Q130, E88 (C3, C8) | `E88/scored.json`, `primary.tally`, `primary.rules`; `E88/corrections-check.txt` [C3], [C8] |
+
+### Heat below 12 W of switching (E89, aifoundry3)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **Low-power kinds heat the die per board watt as random fp32 does, within 4–11%** | random fp32 **0.1979 ± 0.0041 °C per board W** at 1/60 Hz; six int8 kinds (random, `gauss_q`, `smallint`, `sparse50`, −1, zeros) and fp32 ones **1.041–1.113** of it, every interval inside the registered [0.80, 1.25] (R2). Whether they exceed 1 depends on the model: 5 of 7 intervals exclude 1 under the registered one, 3 with the pass as the unit, none with a linear or cubic trend | M, F | Q130, E89 (C3, C5) | `E89/e89.json`, `blocks.f32randn.H_proj_ref_phase`, `blocks.<b>.r_H`; `E89/corrections-check.txt` [C3], [C5] |
+| Per minion-rail watt (post hoc) | **0.980–1.008**; the minion rail carries 0.812 of random fp32's board swing against 0.856–0.912 for the others, and the rest is most likely regulator loss (not measured) | M, D | Q130, E89 (C8) | `E89/posthoc.txt`; `E89/corrections-check.txt` [C8] |
+| E78's 2 s window, on the fine reading | over each type's zeros: random int8 **0.863 ± 0.073 °C**, int8 −1 **0.222 ± 0.026 °C**, fp32 ones 1.059 ± 0.164 °C; int8 zeros over idle **0.340 ± 0.006 °C**. Derived over idle: random int8 about **1.20 ± 0.07 °C** against E78's S × 0.118 = 1.14 (+4.5% to +14% across the seven kinds); each rise carries about ±10% of protocol dependence | M, D | Q130, E89 (C2, C6) | `E89/e89.json`, `blocks.i8full.step2_C`, `blocks.i8neg1.step2_C`, `blocks.i8zero.step2_C`, `blocks.f32ones.step2_C`; `E89/corrections-check.txt` [C2], [C6] |
+| The reference coefficient | random fp32's 2 s rise, **0.1181 ± 0.0079 °C per W** of D, is within about 4% of E78's 0.118 (0.1138 after the lead-in, 0.1224 after a reference half) | M | Q130, E89 (C6) | `E89/e89.json`, `blocks.f32randn.step2_C_per_W_E78` |
+| **A finer die thermometer, on this card's firmware build** | command 74 group 0 returns each of the 34 sensors' **raw 12-bit code (0.061 °C a code)**; the firmware's integer mean rebuilt from them equals its die reading in **98.1% of 22,976 samples**; that reading runs about **1 °C below** the sensors' mean (it truncates twice); at idle the 34-sensor mean moves in 0.0018 °C steps with 0.005–0.008 °C of noise a sample | M | Q130, E89 (A1, C7) | `E89/e89.json`, `instrument.share_eq`; `E89/posthoc.txt`; `E89/corrections-check.txt` [C7] |
+| The registered tally | **24 of 24 pass** (lap unit); with the pass as the unit, 23 pass and R4 for int8 −1 is inconclusive (1.153 [0.380, 1.925]) | P→M | Q130, E89 (C5) | `E89/scored.json`, `tally`; `E89/corrections-check.txt` [C5] |
+
+### Signs and tile-to-tile spread (E90, aifoundry3)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **A random sign costs about 5 W, not its bits' price** | ±1 over +1 **5.006 ± 0.517 W (fp32)** and **5.079 ± 0.403 W (fp16)**, equal within ±0.9 W; ±π over π **6.555 ± 0.343 W**. The registered sign-bit model (E65's, E67's and E79's prices times the designed flips) said 0.592 / 0.317 / 0.680 W: short **8.5× / 16× / 9.6×** (R1 FAIL); 745–1,868 fJ per flipped sign bit against prices of 34–247 fJ | M, P→M | Q130, E90 (C5) | `E90/scored.json`, `steps.fp32`, `steps.fp16`, `rules.E90-R1`; `E90/corrections-check.txt` [C5] |
+| Random signs on random magnitudes | over the same magnitudes all positive: **1.866 ± 0.596 W (fp32, 7.5% of random's D)** and **2.613 ± 0.220 W (fp16, 11.8%)**; R2 fails against the bits model's 0.55 / 0.31 W | M | Q130, E90 | `E90/scored.json`, `steps`, `rules.E90-R2` |
+| A static sign bit | all negative against all positive, identical products: fp16 **+0.008 ± 0.257 W** (inside ±0.30 W), fp32 unresolved (−0.155 ± 1.567 W, a meter dip): R3 INCONCLUSIVE. int8 ±1 costs 5.466 ± 0.220 W, 0.756× int8 full | M | Q130, E90 | `E90/scored.json`, `steps`, `rules.E90-R3`; `E90/e90.json`, `items["int8.signs"].D`, `items["int8.full"].D` |
+| **Tile-to-tile spread: E78's intervals describe the tile, not the rule** | the SD across a rule's four tiles is 0.440 W (fp32 `sparse50`), 0.498 W (fp16 `nn_like`) and 0.192 W (fp16 `uniform01`), against one tile's pass-to-pass 0.047 / 0.079 / 0.143 W; a re-draw moved a cost by up to 1.19 W | M | Q130, E90 (C3) | `E90/scored.json`, `spread`, `draws`; `E90/corrections-check.txt` [C3] |
+| 🛑 R4's FAIL does not show E78's tiles to be atypical | the draws minus E78's tile, +0.703 ± 0.145 W (`sparse50`) and −0.871 ± 0.066 W (`nn_like`), are over passes for three fixed draws (R4 FAIL as registered); with the draw as the unit, +0.70 ± 0.81 and −0.87 ± 0.74 W, not resolved against ±0.5 W. By the 400-draw band the `sparse50` tile is typical and the `nn_like` tile is not | M | Q130, E90 (C2) | `E90/scored.json`, `spread`, `rules.E90-R4`; `E90/corrections-check.txt` [C2] |
+| Q130(n)'s predictor: offsets, not prices | it tracks a re-draw's offset from a measured tile to **0.277 W rms** (R5 PASS; predicting no offset scores 0.703 W), but its absolute prices miss the nine draws by **0.6–2.0 W** (rms 1.53 W) and it prices the seven one-sign random tiles 1.6–2.0 W high | P→M | Q130, E90 (C1) | `E90/scored.json`, `rules.E90-R5`, `rules.E90-S2`; `E90/corrections-check.txt` [C1] |
+| The registered tally | of five primary rules **1 PASS, 3 FAIL, 1 INCONCLUSIVE**; checks S1 and S2 pass; the same at 0.1994 W/°C and in the dips arm. The data commit's subject ("2 PASS") is wrong | P→M | Q130, E90 (C6) | `E90/scored.json`, `rules`; `E90/corrections-check.txt` [C6] |
+
+### What the additions refuted, superseded or withdrew
+
+| Was | Now | Where |
+|---|---|---|
+| (14-card-behaviour.md, AGENT.md §6) aifoundry1's card 0 "idles at 300 MHz" under release 1.4.1 | on 31 Oct it reads **1.4.0 / BL2 0.22.0 / PMIC 1.6.1** and idled at **600 MHz** between all 35 runs; E60's 20 Oct telemetry idled at 600 MHz too; the 25 Sep record stands for its date | E84 (A1, C6) |
+| (E84's first version) card 0 holds all-ones data near 800 MHz because it cools better than aifoundry2 (E64's 23 Oct 738 MHz) | both cards run all-ones data near full clock the same day; card 0 draws ~6 W less and runs 1.1–1.5 °C **hotter** per board watt: "better cooling" withdrawn | E84 (C1) |
+| (E84's first version) fp32 zeros ÷ random on aifoundry2 1.133× / 1.325× (E64-based) | **1.148× / 1.306×** from same-day cells (1.142× / 1.293× over E83's own anchor) | E84 (C2) |
+| (E85's first version) nothing set; no PMIC or reset command | the sampler's **statistics reset**, forwarded to the PMIC, 2,205 times; a ruling is owed | E85 (C1) |
+| (E85's first version) the camera drifts −29%/h; "8 of 9 pass in full"; ×1024/192 full-card equivalents; camera-read watts as a wattmeter | **−29 ± 29 %/h, not resolved**; 8 of 9 **as registered**, int8's passes uninformative; the equivalents dropped (6–14% off); the camera-read watts are the ratio restated | E85 (C2–C5) |
+| (Q130(n), `7d5b99af`) the selected model's own LOO rms (±2.19 / ±1.80 / ±0.89 W) as "the honest measure"; (b)'s clock ranges as 95% intervals; real fp16 "about 1% below random" | the nested LOO's **±2.41 / ±2.35 / ±1.32 W** (Amendment 1); (b) widened by E83's relation error; fp16 0.15–1.8% below the model's own random fit | `RT` (Amendment 1, `99620cc2`) |
+| (E86's first version) the real tiles warm the die as much as random data, int8 included; ratios "of the switching power" with no baseline | **the int8 tiles warm it less** (−0.13 to −0.18 °C); every ratio names D, S or the whole board | E86 (C1, C2) |
+| (E87's first version) kind → power → clock holds out of sample "with power predicted from the numbers alone"; real int8 stays below the thermal trip where random int8 does not; fp16's +7.8 MHz "inside the noise" | the clock rules **do not** test the predictor (a no-model baseline passes them as well); **no int8 sustained difference is shown**; +7.8 MHz is 1.3σ, not established | E87 (C1–C3) |
+| (E88's first version) "a random multiply-add splits 37 / 40 / 23%"; 75% of the result path is the bus swing; the model "predicted 17 of its 19 contrasts" | the split is of **random positive** fp32 operands and paired fp16 / int8 designs (9% of E78's random fp32 unplaced); **about 70%**; inside bands ±0.75–1.80 W wide, misplacing the parts | E88 (C1–C3) |
+| (the blog material, Q130(l) A5) "the lane is clocked and its accumulator still walks" | measured: the clocked lane 37%, the multiplier 40% and the result path 23% of a random positive fp32 multiply-add; a constant's walk about 0.1 W | E88 |
+| (E89's first version) every int8 kind measured; the 2 s rises presented as E78's over-idle cells; "heats exactly as much per watt" (the post-hoc rail result) leading | **six of 16** int8 kinds and fp32 ones; rises over each type's zeros, with derived over-idle values beside; per board watt **4–11% more**, its significance model-dependent; the rail result labelled post hoc | E89 (C1–C5) |
+| (the Q130 section's "Not established") heat for the 32 kinds below about 12 W, every int8 kind among them | **narrowed**: 7 of the 32 measured on the fine reading; 25 stay S × 0.118 estimates, the coefficient now measured on seven kinds | E89 |
+| (the Q130 section's "Not established") the spread between tile draws: every interval is one tile's repeatability | **measured on three rules**: SD 0.19–0.50 W across four tiles, a re-draw up to 1.19 W | E90 |
+| (E90's first version) price a tile with Q130(n)'s predictor (0.28 W rms); E78's `sparse50` and `nn_like` tiles "not typical"; a re-draw moves "up to 0.9 W"; "2 PASS" | offsets only (absolute misses 0.6–2.0 W); **not resolved** with the draw as the unit; **up to 1.19 W**; **1 PASS** | E90 (C1–C3, C6) |
+| (E91's first version) int8 costs "the same fraction" on both cards; "the same ratio as for 51 synthetic kinds"; "within 0.002 of all 15 kinds' median"; A1's spare pass refused by A1's budget | baselines named, int8 agrees only within its noise; E82's 1.031 is over 32 kinds; within 0.0025 of the **six synthetic** kinds; the floor was the lane's helper's, and A1's exact budget held the pass | E91 (C1–C3, C5) |
+
+**Not established by the additions.** Whether card 0's PMIC alarm set point differs from aifoundry2's PMIC 1.5.0 or card
+1's 1.3.0, and why the kernel's effective clock in the alarm cycle sits about 13% below the sampled one (E84). int8's
+camera signal (not detected) and whether the camera's gain drifts within a session (E85). Whether the sampler's
+statistics resets set off the clock excursions (E85, suggestive), and whether E85's resets left aifoundry2's SP
+statistics trace off (unchecked) — and **the owner's ruling on the reset itself**. Real tensors beyond three windows of
+one model, an activation with exact zeros (a ReLU network's), and any int8 real-against-random sustained difference (E86,
+E87). fp16's +7.8 MHz burst gain (E87, 1.3σ). What random signs cost and where: E88 leaves 2.52 W with the result frozen
+and E90 measures about 5 W for a random sign at a fixed magnitude; the adder alternating between add and subtract is the
+registered guess, untested. The ten int8 and fifteen float kinds below 12 W that E89 did not run, and any steady-state
+rise. The rules' means for E90's re-drawn rules, which need more draws. E91's replication, which needs a scored session,
+and why its automatic leakage slope came out at 0.42 W/°C.
 
 ## Ridge points (derived; no card time)
 

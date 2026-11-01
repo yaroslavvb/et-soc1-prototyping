@@ -2,9 +2,9 @@
 
 Three kinds of artifact came out of this work: **published reports** (HTML, deployed to spacesheep.dev),
 **repostable images**, and **tools** that can be re-run. Commits are listed at the end so any artifact can be
-tied to the state of the tree that produced it. Cite as **A1**...**A24** (A9 and A10 were never assigned):
+tied to the state of the tree that produced it. Cite as **A1**...**A25** (A9 and A10 were never assigned):
 A1–A5, A11, A13–A15, A17 and A19 are reports · A6–A8 images · A12 math rendering · A16 the rerun tools · A18 the
-wire tools · A20 the session timeline, page and tools · A21 the sparse parity page and its workload · A22 the heatsink feasibility study · A23 the transistor-heat timeline, its page, data and builder · A24 the matmul-to-transistor chain page, its data block and builder. The public index
+wire tools · A20 the session timeline, page and tools · A21 the sparse parity page and its workload · A22 the heatsink feasibility study · A23 the transistor-heat timeline, its page, data and builder · A24 the matmul-to-transistor chain page, its data block and builder · A25 the kinds-of-numbers page (Q130(k)). The public index
 of every report is the hub, [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability#reports) (A2).
 
 Reports A2–A5, A11, A13–A15 and A17 are assembled by `scripts/build-report.py <name> <data.json> <out.html>` from
@@ -23,6 +23,22 @@ rewrites; the two 2026-09-22 briefs are plain hand-written HTML (the L2 brief is
 the prose in the HTML. Every page with charts carries the shared chart toolkit (A12): the source-built pages get it
 from `scripts/build-report.py`, and the standalone pages from `scripts/paste-chartkit.py PAGE`, which refreshes the
 marked block and changes nothing else (`--check` reports a missing or stale block).
+
+**A25 · Multiplying different numbers: speed, heat and power** (31 October 2026, Q130(k)). The blog follow-up
+material on one page: Horace He's effect beside the ET-SoC-1's, then one generated table of all 51 kinds of numbers ×
+fp32 / fp16 / int8 (switching power, energy per op and per multiply-add, burst and sustained clock, TFLOPS or TOPS, the
+die's rise and the limiting test, with estimates marked apart from measurements), and sections on speed, heat, power,
+the formats, zeros, transistors, the literature and what is open, with three charts. The table and the charts are
+generated from this repository's committed data (E78, E80, E83 and the Q130 desk directories, read at commit
+`734e997f`) by a chart builder that lives, with the page's source, in the owner's private research log rather than in
+this repository; the page is recorded here because every figure on it cites a file here. Space
+`8e61a8e0-f541-4d1e-87b2-15ee2a335e37`, public, unlisted, linked from
+[the Horace hub](https://spacesheep.dev/@yaroslavvb/horace-hub). First deployed at 16:37 PDT (`f94dca088ed2`, then
+`71fdb0e4dbff` at 16:40), corrected after its verifier and redeployed at 17:30 PDT as `759156cadf12`: the zero gate with
+its A side (one zero A word gates a whole micro-op), the leakage loop's gain scoped to the minute-long runs, five
+idle-reset burst cells marked with their reset-free means, and E82's missed band. 🛑 When this entry was written (22:4x
+PDT, `759156cadf12` still live) the page named E84 and E85 "running, results to follow" and carried none of E86–E91 or
+Q130(n): until it is rebuilt, [05-claims.md](05-claims.md), "Q130 additions", is the record for those.
 
 **A24 · From matmul speed to one transistor switch** (27 October 2026, Q128). The nine-step chain on one
 page: speed, the governor, board watts, picojoules per multiply-add, femtojoules per flipped operand bit,
@@ -848,12 +864,12 @@ Nothing in these eighteen directories names a person, an address, a path into a 
 or library identifier beyond the open ASAP7 kit and the open `et-platform` repository. The archive cross-check that
 ran beside them is **not** here, by design; its one publishable half is the throttle-wrap gate above.
 
-## Q130 published no new page: fifteen data directories, seven harness trees, one RTL bench, and two pages corrected in place (31 October 2026)
+## Q130's lanes published no new page: sixteen data directories, seven harness trees, one RTL bench, and two pages corrected in place; the addendum adds six data directories, the real tiles and the kinds page (31 October 2026)
 
 Q130's lanes built **no new space**. Everything they made is in this repository, plus two in-place corrections of
 published pages, so — as with Q126 and Q129 — a reader who knows only the published pages will not find it. The
-blog-material page belongs to Q130's integration lane and is recorded in an addendum together with E84's and E85's
-verified results. The short names are the ones [05-claims.md](05-claims.md), "Q130", uses.
+blog-material page, built by Q130's integration lane, is A25 (above); E84's and E85's rows below carry their verified
+results, and the addendum after the table records the evening round. The short names are the ones [05-claims.md](05-claims.md), "Q130", uses.
 
 | What | Where | What is in it |
 |---|---|---|
@@ -864,8 +880,8 @@ verified results. The short names are the ones [05-claims.md](05-claims.md), "Q1
 | **E81**, the DRAM pattern | [`reports/data/2026-10-31-e81-dram-pattern/`](../reports/data/2026-10-31-e81-dram-pattern/README.md) | `dp.json` and its two leakage arms, `dips.json` and the labelled post-hoc dip view, `runs.csv`, `gen/` (the images' counts and manifest), `passes/`, `ident/`, `logs/`, `posthoc-counts.txt`, `posthoc-rail.txt`. Registration and harness: [`tools/claims-v3/dp/`](../../tools/claims-v3/dp/README.md) (`make_dp.py`, `src_replica.cpp`, `run_e81.sh`, `reduce_dp.py`, `posthoc_*.py`) |
 | **E82**, the matrix on aifoundry1's card 1 | [`reports/data/2026-10-31-e82-kinds-aifoundry1/`](../reports/data/2026-10-31-e82-kinds-aifoundry1/README.md) | `e82.json` and its arms, `scored.json`, `results.md`, `posthoc/` (the dips and a no-dip scoring), `corrections-check.{py,txt}`. Registration: `tools/claims-v3/kinds/E82.md`, `predictions-e82.json`, `reduce_e82.py`, `score_e82.py`, `run_e82.sh`, `collect_e82.sh`, `posthoc_dips_e82.py` |
 | **E83**, speed for the other 33 kinds | [`reports/data/2026-10-31-e83-kinds-speed-rest/`](../reports/data/2026-10-31-e83-kinds-speed-rest/README.md) | `results.json`, `cells.json`, `tables.{py,md}` (its last table is the speed column for all 51 kinds), `reduce.txt`, `s1/`, `smoke/`. `corrections-check.{py,txt}` (corrected after verification in `734e997f`; `cells.json`'s interval field now holds only an uncertainty). Registration: [`tools/claims-v3/kspeed/e83/`](../../tools/claims-v3/kspeed/e83/README.md) |
-| **E84**, a speed replicate on aifoundry1's card 0 — data committed, not yet verified | registration [`tools/claims-v3/kspeed/e84/`](../../tools/claims-v3/kspeed/e84/README.md) (`337b03b2`, amendment A1 `1713a3f9`); data [`reports/data/2026-10-31-e84-speed-aifoundry1-card0/`](../reports/data/2026-10-31-e84-speed-aifoundry1-card0/README.md) (`d6d1a0c8`, 16:13 PDT) | to follow in the addendum, after its verification |
-| **E85**, the camera per kind of number — registered, running | registration [`tools/claims-v3/hlk/`](../../tools/claims-v3/hlk/README.md) (`8b441fd9`) | to follow in the addendum |
+| **E84**, a speed replicate on aifoundry1's card 0 | [`reports/data/2026-10-31-e84-speed-aifoundry1-card0/`](../reports/data/2026-10-31-e84-speed-aifoundry1-card0/README.md) (`d6d1a0c8`, corrected after verification in `70cf9200`) | `results.json` (the registered reduction, the cells and the rules), `reduce.txt`, `posthoc/` (the PMIC's over-power alarm: `pmic.json`, `pmic.txt`), `s1/` and `smoke/` (telemetry, launches, the trace rings), `ident/` (the read-only firmware read of 15:42), `logs/`, `corrections-check.{py,txt}` (C1–C12). Registration and harness: [`tools/claims-v3/kspeed/e84/`](../../tools/claims-v3/kspeed/e84/README.md) (`337b03b2`, amendment A1 `1713a3f9`: `run_e84.{py,sh}`, `protocol.json`, `predictions.json`, `reduce_e84.py`, `collect_e84.sh`, `posthoc_pmic_e84.py`) |
+| **E85**, the camera per kind of number | [`reports/data/2026-10-31-e85-camera-kinds/`](../reports/data/2026-10-31-e85-camera-kinds/README.md) (`cf9eba15`, corrected after verification in `2c77e444`) | `analysis/` (`lockin.json`, `score.json`, `dips.json`), `session/` (`session.json` with the sampler's arguments, `tel.jsonl.gz`, the camera's `done.json`), `pre/` (the config reads, the manifest, the tile check), `posthoc/` (the 20-seed self-test), `heat-follows-the-numbers.png`, `left-on-aifoundry2.sha256` (the 2.73 GB raw stream and the 190 MB reduced cube stay on the host), `corrections-check.{py,txt}` (C1–C9). Registration and harness: [`tools/claims-v3/hlk/`](../../tools/claims-v3/hlk/README.md) (`8b441fd9`: `run_hlk.py`, which imports E63's runner unchanged, `lockin_hlk.py`, `predict_e85.py`, `predictions.json`, `protocol-e85.json`, `selftest_hlk.py`, `figure_e85.py`) |
 | The inventory (Q130(a)) | [`reports/data/2026-10-31-q130-kinds-inventory/`](../reports/data/2026-10-31-q130-kinds-inventory/README.md) (`7d9b73c5`, corrected in `bc0600ce`) | `inventory.json` (every cell of what existed before Q130 with its status and source, the row taxonomy, the holes H1–H10, the zeros-to-random split computed), `tables.md`, `build_inventory.py` |
 | The three formats in the RTL (Q130(b)) | [`reports/data/2026-10-31-q130-rtl-formats/`](../reports/data/2026-10-31-q130-rtl-formats/README.md) (`e05f2a3b`, corrected in `fcfe82a7`); the bench [`rtl-sim/fma_toggle_formats/`](../../rtl-sim/fma_toggle_formats/) | `predictor-r2.json` (frozen for E78, sha256 `977d9ba4…`), `predictor.json` (r1, withdrawn and kept unchanged), `counts.json` (all 51 kinds, provisional), `verification/` (`fcheck.py` and `fcheck.json`, the functional check both benches fail; `hier_probe.py`, `hier-measured.json`, `dump-window.patch`). `tb_fmt.sv`'s header lists the bench's three faults |
 | The kinds model (Q130(c)) | [`reports/data/2026-10-31-q130-kinds-model/`](../reports/data/2026-10-31-q130-kinds-model/README.md) (`2bbe03dd`; amendment A1 `320f3fdd`) | `predictions.json` (frozen, sha256 `c5a66cb6…`), `model.py`, `predictions.txt`, `amend_a1.py`, `amendment-a1.{json,txt}` (sha256 `6ffc701b…`) |
@@ -890,6 +906,27 @@ answer them (`99295452`).
 
 The private-archive search that ran beside Q130 is **not** in this repository, by design; its one publishable half is
 Q130(g), sourced only to public material.
+
+### The addendum: the evening round's six data directories and the real tiles (31 October 2026, 18:39–22:16 PDT)
+
+On the owner's *"feel free to keep using the lab"* (about 18:1x), Q130's evening round added one desk tree and six card
+experiments, each with its harness committed before its claim, then verified and corrected in its own commit. Their
+claims are in [05-claims.md](05-claims.md), "Q130 additions"; A25 (above) does not carry them yet.
+
+| What | Where | What is in it |
+|---|---|---|
+| **The real tiles** (Q130(n)) | [`tools/claims-v3/kinds/real/`](../../tools/claims-v3/kinds/real/README.md) (`7d5b99af`; Amendment 1 `99620cc2`) | `tiles/<type>/{l0_mlp_up,l6_mlp_down,l6_attn_qk}.bin` (nine 2,048 B tiles cut from GPT-2 small's real weights and activations, the A tile then the B tile), `real.json` (provenance, the forward check and per-tile operand statistics), `predictions-real.json` (frozen, sha256 `bab33bee…`), `amendment-1.json` (the nested-LOO intervals E86, E87 and E91 scored on, sha256 `f32e8a90…`), `make_real.py` and `amend_real.py`, `rebuild-check.txt` (which numpy builds reproduce the tiles byte for byte). The model file itself is not committed; its sha256 and revision are in `real.json` |
+| **E86**, the real tiles' energy on aifoundry3 | [`reports/data/2026-10-31-e86-real-tensors-energy/`](../reports/data/2026-10-31-e86-real-tensors-energy/README.md) (`a3c0b60d`, corrected in `65f0ab03`) | `e86.json` and three leakage arms (0, 0.1994, 0.3803 W/°C), `scored.json` and its arms, `results.md`, `runs.csv`, `reduce.txt`, the raw passes under `aifoundry3/`, `posthoc/` (the board-meter dips and a no-dip scoring), `logs/` (with the push and claim times), `code.sha256`, `corrections-check.{py,txt}` (C1–C7). Registration and harness in `tools/claims-v3/kinds/`: `E86.md`, `predictions-e86.json`, `make_predictions_e86.py`, `e86_common.py`, `run_e86.{py,sh}`, `block_e86.sh`, `queue_e86.sh`, `collect_e86.sh`, `reduce_e86.py`, `score_e86.py`, `posthoc_dips_e86.py`, `selftest_e86.*` |
+| **E87**, the real tiles' speed under aifoundry2's governor | [`reports/data/2026-10-31-e87-real-tensors-speed/`](../reports/data/2026-10-31-e87-real-tensors-speed/README.md) (`bc96f37d`, corrected in `8a416ffd`) | `results.json`, `cells.json` (174 cells), `tables.md`, `checks.{py,txt}` (the labelled like-with-like ratios, the anchors' stability, the idle resets), `reduce.txt`, `s1/`, `smoke/`, `final-config.txt` (the read of 20:25:35), `corrections-check.{py,txt}` (C1–C10). Registration and harness: [`tools/claims-v3/kspeed/e87/`](../../tools/claims-v3/kspeed/e87/README.md) (`7f84f454`: `run_e87.py`, `protocol.json`, `predict_e87.py`, `predictions.json`, `reduce_e87.py`, `tables_e87.py`) |
+| **E88**, the result path on aifoundry1's card 1 | [`reports/data/2026-10-31-e88-result-path/`](../reports/data/2026-10-31-e88-result-path/README.md) (`f1c7412e`, corrected in `052429d3`) | `e88.json` and its arms (leakage 0, 0.3803, 0.545 W/°C; dips kept), `scored.json`, `results.md`, `runs*.csv`, `reduce*.txt`, the raw passes under `aifoundry1-c1/`, `logs/`, `code.sha256`, `corrections-check.{py,txt}` (C1–C10). Registration and harness: `tools/claims-v3/rpath/` (`3dd99088`: `E88.md`, `make_e88.py` with its desk emulation `e88.json`, `tiles/`, `predictions-e88.json`, `make_predictions_e88.py`, `e88_common.py`, `run_e88.py`, `run_e88_a1.sh`, `block_e88.sh`, `queue_e88.sh`, `collect_e88.sh`, `reduce_e88.py`, `score_e88.py`, `selftest_e88.*`) |
+| **E89**, heat below 12 W on aifoundry3 | [`reports/data/2026-10-31-e89-heat-low-power/`](../reports/data/2026-10-31-e89-heat-low-power/README.md) (`1bef3fc0`, corrected in `ae24b0af`) | `e89.json` (the lock-in per block and the instrument checks), `scored.json`, `results.md`, `tables.txt` and `tables_e89.py`, `posthoc.txt` and `posthoc_e89.py`, `manifest.json`, `ident/` (the command-74 probes), the raw passes under `aifoundry3/`, `logs/`, `corrections-check.{py,txt}` (C1–C9). Registration and harness: `tools/claims-v3/e89/` (`850421ec`, amendments `ac95a217`: `E89.md`, `pvt_sample.py`, the per-sensor sampler, which refuses every command-74 group but 0 and 4 (group 6, a latch reset, is a write), `run_e89.{py,sh}`, `block_e89.sh`, `queue_e89.sh`, `reduce_e89.py`, `make_predictions_e89.py`, `predictions-e89.json`, `selftest_e89.*`, `desk/` (the heat-path simulations behind D1)) |
+| **E90**, sign patterns and tile spread on aifoundry3 | [`reports/data/2026-10-31-e90-signs-spread/`](../reports/data/2026-10-31-e90-signs-spread/README.md) (`21cd22be`, corrected in `d400802a`) | `e90.json` and three leakage arms, `scored.json`, `results.md`, `runs*.csv`, `reduce*.txt`, `dips-arm/` (the registered dips-removed arm), the raw passes under `aifoundry3/`, `logs/`, `code.sha256`, `corrections-check.{py,txt}` (C1–C7). The seventeen tiles and their seeds: [`tools/claims-v3/kinds/e90/`](../../tools/claims-v3/kinds/e90/) (`e90.json`, `tiles/`); registration and harness in `tools/claims-v3/kinds/`: `E90.md`, `predictions-e90.json`, `make_e90.py`, `make_predictions_e90.py`, `e90_common.py`, `run_e90.{py,sh}`, `block_e90.sh`, `queue_e90.sh`, `collect_e90.sh`, `reduce_e90.py`, `score_e90.py` (committed in `1455065b` before any pass was read), `posthoc_dips_e90.py`, `selftest_e90.*` |
+| **E91**, the real tiles on aifoundry1's card 1 — not scored | [`reports/data/2026-10-31-e91-real-tensors-aifoundry1/`](../reports/data/2026-10-31-e91-real-tensors-aifoundry1/README.md) (`7c0af0c1`, corrected in `803fd16a`) | `e91.json` and its arms (leakage 0, 0.1994, 0.3803, 0.545 W/°C; dips kept), `scored.json` (11 rules NOT SCORED) and the two four-pass arms' scorings, `results*.md`, `runs*.csv`, `reduce*.txt`, the raw passes under `aifoundry1-c1/`, `logs/` (the queues, A1's second queue and its helper, the 21:05 dry pass), `code.sha256`, `corrections-check.{py,txt}` (C1–C10). Registration in `tools/claims-v3/kinds/`: `E91.md`, `predictions-e91.json`, `make_predictions_e91.py`, `run_e91.sh`, `collect_e91.sh`, `reduce_e91.py`, `score_e91.py`, `selftest_e91.*`; it runs E86's harness |
+
+Nothing in these directories names a person other than the owner's public login in the hosts' own raw paths (kept
+verbatim in raw logs, as across this repository), an address, a path into a private tree, or a foundry, process or
+library identifier. The raw camera stream, E85's reduced cube and every run directory stay on the hosts, with their
+sha256 where the README says so.
 
 ## The camera and the details panel (30 September)
 
