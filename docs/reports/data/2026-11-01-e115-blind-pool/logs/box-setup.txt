@@ -1,0 +1,50 @@
+placed
+setup start 15:03:10 PST
+== host (no device access) ==
+aifoundry3
+ 15:03:10 up 6 days, 44 min,  3 users,  load average: 0.65, 0.58, 0.59
+No process holds an ET-SoC-1 device node or card lock.
+== tree ==
+root /home/yaroslavvb/aifoundry
+reused_unchanged_sha256: identical to E115's freeze: all
+e115_files_sha256: identical to E115's freeze: all
+frozen_pool_sha256: identical to E115's freeze: all
+== tiles against their registered sha256 (each file and each half) ==
+{"e115_tiles": 25, "priority_1": 20, "e78_tiles_checked": 6, "problems": []}
+== the binary takes fp16 and int8 with file: operands, --dump-tiles and --stop-file ==
+  fp16: present
+  int8: present
+  file:: present
+  --dump-tiles: present
+  --stop-file: present
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 4006896 Sep 25 07:25 build/ettelem/ettelem
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 3569104 Sep 26 06:15 build/sparsity/host/sparsity_host
+20e760c20e9b99c789ef96f1e4e950d51f534410275bfb933c2aaf96d1090fd0  build/sparsity/host/sparsity_host
+16037641ab75bdbe1209f323641e269c9b897468091243173bfaaaf0b21686e2  build/ettelem/ettelem
+numpy 1.26.4
+-rw-rw-rw- 1 root root 0 Oct 26 15:18 /run/lock/etsoc-shire0.lock
+== the plan of the first pass ==
+{"e115": ["fp16.a_mant_b_randn", "fp16.g_blanes_alt", "fp16.s_inword0", "fp16.s_wpair0", "fp16.x_logu_s50", "fp32.a_colconst_b_randn", "fp32.a_lo8_b_pi", "fp32.a_lo8_b_randn", "fp32.g_arows_alt", "fp32.g_blanes_alt", "fp32.g_blanes_steady", "fp32.m_blines_eq", "fp32.m_bpair_eq", "fp32.s_bridge", "fp32.s_drift12", "fp32.s_pair0", "fp32.x_logu_bsteady", "fp32.x_logu_s50", "fp32.z_single", "int8.a_colconst_b_full", "int8.a_low2_b_full", "int8.g_awords_alt", "int8.g_bpairs_steady", "int8.st_f32bytes", "int8.z_diag"], "compare": [], "anchors": ["fp32.zeros", "fp32.randn", "fp16.zeros", "fp16.randn", "int8.zeros", "int8.full"], "tie": "anchor_pi", "runs_per_pass": 45}
+  0 s-1 anchor_pi
+  1 s+0 int8.g_awords_alt
+  2 s+0 fp32.s_drift12
+  3 s+0 fp32.g_blanes_steady
+  4 s+0 fp32.x_logu_s50
+  5 s+0 fp32.z_single
+  6 s+0 fp16.randn
+  7 s+0 int8.g_bpairs_steady
+== dry run of one whole pass (V3_DRY=1: lib.sh stubs every device call) ==
+dry rc=0
+device launches the pass would make: 47
+of them on blind3 tiles: 25
+15:03:14 [aifoundry3] done
+DRY ettelem config
+2026-11-01T15:03:19 [aifoundry3] kinds p11500 ends: ok tiers 1,2
+== the queue's budget rule on stub blocks (no device: each stub only sleeps) ==
+  15:03:19 queue: passes 11590..11593, budget 10 s from 15:03:19, deadline 2026-11-01 18:50 PST, first-pass estimate 4 s
+  15:03:19 p11590 starts (elapsed 0 s)
+  15:03:22 p11590 rc=0 (3 s)
+  15:03:23 p11591 starts (elapsed 4 s)
+  15:03:26 p11591 rc=0 (3 s)
+  15:03:27 budget: stopping before p11592 (elapsed 8 s, longest pass 3 s, 2 passes done)
+setup end 15:03:27 PST

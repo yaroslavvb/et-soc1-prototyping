@@ -1,0 +1,38 @@
+E78 aifoundry3: 600 MHz, 521.6 mV, leak 0.3803 W/C (-1 runs), runs kept 134/134, passes [11510, 11511, 11512], idle-invalid runs 0
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.793286595024323
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.s_bridge              25.167  0.102    27.292      24341    5.943
+    fp32.s_pair0               24.516  0.099    26.619      23757    5.800
+    fp32.s_drift12             24.356  0.190    26.310      23467    5.729
+    fp32.m_blines_eq           24.294  0.055    26.452      23600    5.762
+    fp32.randn                 24.156  0.008    26.251      23421    5.718
+    fp32.a_colconst_b_randn    22.252  0.019    24.361      21736    5.307
+    fp32.a_lo8_b_randn         21.902  0.291    23.976      21397    5.224
+    fp32.m_bpair_eq            16.070  0.135    18.175      16217    3.959
+    fp32.g_blanes_alt          14.179  0.134    16.326      14565    3.556
+    fp32.g_arows_alt           13.185  0.117    15.249      13603    3.321
+    fp32.x_logu_bsteady        12.822  0.069    14.925      13312    3.250
+    fp32.g_blanes_steady       12.189  0.083    14.339      12787    3.122
+    fp32.a_lo8_b_pi            10.323  0.099    12.447      11105    2.711
+    anchor_pi                   8.185  0.032    10.282       9175    2.240
+    fp32.x_logu_s50             7.952  0.079    10.133       9041    2.207
+    fp32.zeros                  0.000  0.000     2.111       1884    0.460
+    fp32.z_single              -0.061  0.052     2.007       1791    0.437
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 21.649  0.016    23.753      21194    2.587
+    fp16.s_wpair0              21.477  0.048    23.457      20927    2.555
+    fp16.a_mant_b_randn        21.277  0.074    23.356      20848    2.545
+    fp16.s_inword0             16.189  0.181    18.183      16221    1.980
+    fp16.g_blanes_alt          12.892  0.221    14.860      13258    1.618
+    fp16.x_logu_s50             7.478  0.092     9.583       8551    1.044
+    fp16.zeros                  0.000  0.000     2.041       1820    0.222
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   6.973  0.150     9.652       5012    0.306
+    int8.st_f32bytes            6.733  0.133     9.430       4898    0.299
+    int8.a_low2_b_full          4.598  0.375     7.212       3746    0.229
+    int8.g_awords_alt           4.360  0.221     7.038       3656    0.223
+    int8.g_bpairs_steady        3.405  0.267     6.088       3162    0.193
+    int8.a_colconst_b_full      2.291  0.107     4.968       2580    0.157
+    int8.z_diag                 1.761  0.429     4.375       2272    0.139
+    int8.zeros                  0.000  0.000     2.626       1364    0.083
+  idle consistency median |S - S0 - D| 0.07550570245809674 W; carry-over {'slope_w_per_w': 0.0008985809896317025, 'se': 0.0005001593033198463, 'n': 131}; pi built-in - file None; rail tau re-fit median None
