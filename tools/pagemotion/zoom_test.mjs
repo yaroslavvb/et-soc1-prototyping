@@ -51,7 +51,8 @@
 //      writes #flow=<key>-<name> and the page opened with it plays that flow; a key and the tour's slides (#tour=N, a
 //      flow's slide its flow's); a flow held at a stage (&stage=N) opens held there; the scale at rest (#at=, a deep
 //      circuit, the rack, a shire, a level of the easter egg named alone) opens at the same place; a hashchange takes the
-//      stage there by a move; fragments that name nothing warn and open the first view; #facts stays; Copy link (a
+//      stage there by a move; fragments that name nothing warn and open the first view; #facts stays and opens its
+//      fold; a fact's link opens the facts table filtered to that fact, its row on screen; Copy link (a
 //      mocked clipboard, Enter, the spacesheep and GitHub Pages addresses, the forbidden clipboard's selected link);
 //      reduced motion; in a frame (an http page) only ss-hash is posted, and a new fragment in the frame's src moves the
 //      camera without a reload
@@ -479,7 +480,10 @@ const visText = b => b.ev(`[...(function* () { const tw = document.createTreeWal
 T.T14 = async b => {
   for (const sc of ['die', 'rack', 'host', 'shire:0', 'shire:0/minion:0.0.0/vpu/vpu.lane:0/vpu.lane.fma/vpu.lane.fma.tree/fma.tree.col/lib.cmp42/lib.fa/lib.xor/lib.finfet']) {
     await goScene(b, sc);
-    await b.ev(`(() => { const t = document.getElementById('facttab'); t.scrollIntoView(); return 1; })()`); await sleep(400); await b.ev('window.scrollTo(0, 0)'); await sleep(150);
+    // (the text's folds opened first: a closed fold's text is not visible; the facts table's rows come with the lazy file)
+    await b.ev(`(() => { document.querySelectorAll('.prose details').forEach(d => { d.open = true; }); const t = document.getElementById('facttab'); t.scrollIntoView(); return 1; })()`);
+    for (let i = 0; i < 50 && await b.ev(`document.querySelectorAll('#facttab tbody tr').length`) <= 100; i++) await sleep(100);
+    await sleep(400); await b.ev('window.scrollTo(0, 0)'); await sleep(150);
     const txt = (await visText(b)) + ' ' + await b.ev(`document.getElementById('up').getAttribute('aria-label') + ' ' + [...document.querySelectorAll('#crumbs button')].map(x => x.title + ' ' + (x.getAttribute('aria-label') || '')).join(' ')`);
     const hits = HIDDEN.filter(h => txt.includes(h));
     ok(!hits.length, `T14 ${sc}: no level above the rack is named on the page`, hits.join(', '));
@@ -849,10 +853,29 @@ T.T21 = async b => {
     ok(s.flow === 'H' && !s.still && await b.ev('window.__warns.length') > 0 && await hash() === '#flow=8-data-watts', 'T21 #flow=8&stage=99: a warning, flow 8 from its start, the address corrected', JSON.stringify([s.flow, s.stage, await hash()]));
     await moveTo('#at=nowhere', (st) => st.path === D0 && !st.flow, 'a warning, back to the first view');
     ok(b.errs.length === nerr, 'T21 no error from any of them', b.errs.slice(nerr).join(' | '));
-    // #facts (the page's own anchor) still opens the facts table, and is left alone
-    await fresh('#facts'); await sleep(800);
+    // #facts (the page's own anchor) still opens the facts table, and is left alone (its rows come with the lazy file)
+    await fresh('#facts');
+    for (let i = 0; i < 50 && await b.ev(`document.querySelectorAll('#facttab tbody tr').length`) <= 100; i++) await sleep(100);
     const facts = await b.ev(`document.querySelectorAll('#facttab tbody tr').length`);
     ok(await hash() === '#facts' && facts > 100 && await b.ev('window.__warns.length') === 0, 'T21 #facts opens the facts table and stays', `${await hash()} ${facts} rows`);
+    ok(await b.ev(`document.getElementById('facts-more').open`), 'T21 #facts opens its fold');
+    // a fact's link, fw.map-match in #honest-list's first item (its fold opened): the facts table opens, filtered to
+    // that fact, its row on screen; pressed at the centre of its first line box (on a phone a link can wrap). Its
+    // filter keeps 5 rows, L33, L34 and L37 above it (about 740 px), so its row is on screen only if the row's own
+    // scroll comes last; the first link's one row, mesh.shortest-paths, sat right under h2#facts whichever came last
+    await fresh('');
+    const fq = await b.ev(`(() => { const d = document.getElementById('honest-more'), a = document.querySelector('#honest-list a[data-f="fw.map-match"]'); if (!d || !a) return null;
+      d.open = true; a.scrollIntoView({block: 'center'}); return a.dataset.f.split(/\\s+/)[0]; })()`);
+    await sleep(300);
+    const fp = fq && await b.ev(`(() => { const r = document.querySelector('#honest-list a[data-f="fw.map-match"]').getClientRects()[0]; return r ? {x: r.left + r.width / 2, y: r.top + r.height / 2} : null; })()`);
+    if (fp) { if (b.touch) await b.tap(fp.x, fp.y); else await b.click(fp.x, fp.y); }
+    const fval = () => b.ev(`(() => { const i = document.querySelector('#facts-more .ck-filter input'); return i ? i.value : null; })()`);
+    for (let i = 0; fp && i < 50 && await fval() !== fq; i++) await sleep(100);
+    await sleep(300);
+    const fk = await b.ev(`(() => { const d = document.getElementById('facts-more'), i = document.querySelector('#facts-more .ck-filter input'), q = ${JSON.stringify(fq)};
+      const r = [...document.querySelectorAll('#facttab tbody tr')].find(x => x.cells[0] && x.cells[0].textContent === q), rc = r && r.getBoundingClientRect();
+      return {open: !!(d && d.open), filter: i ? i.value : null, row: !!r, top: rc ? Math.round(rc.top) : null, ih: innerHeight, shown: !!rc && rc.height > 0 && rc.bottom > 0 && rc.top < innerHeight}; })()`);
+    ok(!!fp && fk.open && fk.filter === fq && fk.shown, `T21 a fact's link (${fq}) opens the facts table filtered to it, its row on screen`, JSON.stringify(fk));
     // Copy link: a mocked clipboard (headless Chrome may refuse the real one); the keyboard; the hosts; the fallback
     await fresh('#flow=8');
     const mock = good => `(() => { window.__copied = null; Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {writeText: t => ${good ? '(window.__copied = t, Promise.resolve())' : 'Promise.reject(new Error("blocked by the frame"))'}}}); ${good ? '' : 'document.execCommand = () => false;'} return true; })()`;

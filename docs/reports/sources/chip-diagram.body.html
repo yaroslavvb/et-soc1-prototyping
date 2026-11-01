@@ -3,8 +3,10 @@ main{max-width:none;padding:0}
 .prose{max-width:940px;margin:0 auto;padding:28px 16px 72px}
 /* the text under the stage (its fact table has some 800 rows since the deep zoom) is laid out and painted only when
    it is near the screen: the camera's frames never pay for it */
-.prose>.table-wrap,.prose>#summary-text,.prose>#honest-text{content-visibility:auto;contain-intrinsic-size:auto 1200px}
-.prose>.table-wrap.eltab{content-visibility:visible;contain-intrinsic-size:none}
+/* (31 Oct 2026, the first-visit pass: the tables only, inside their folds too; the summary, near the top now, and the
+   honest text, two paragraphs now, are laid out as they come) */
+.prose .table-wrap{content-visibility:auto;contain-intrinsic-size:auto 1200px}
+.prose .table-wrap.eltab{content-visibility:visible;contain-intrinsic-size:none;max-width:42rem}
 /* ---- the stage: one screen at 1920x1080 and 1280x720, nothing inside it scrolls but the details list ---- */
 #stage{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:7px;height:100vh;height:100dvh;min-height:560px;
   padding:10px 16px;background:var(--page);color:var(--ink);overflow:hidden;position:relative;
@@ -129,9 +131,10 @@ html.et-pres [data-ss-ui]{display:none!important}
 .stg:hover{border-color:var(--ink-2);color:var(--ink)}
 .stg .sn{flex:none;font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink-2)}
 .stg .st{min-width:0;overflow:hidden;line-height:1.1;overflow-wrap:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2}
+.stg.fn .st{overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
 /* the tour's still steps: each chip as wide as its name, never a word broken */
 .stages li.tchip{flex:0 1 auto}
-.stages li.tchip .stg{padding:3px 12px}
+.stages li.tchip .stg{padding:3px 8px}
 .stg.past{background:var(--surface);color:var(--ink)}
 .stg.past .sn{color:color-mix(in srgb,var(--c2) 70%,var(--ink))}
 .stg.past::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:color-mix(in srgb,var(--c2) 45%,transparent)}
@@ -422,7 +425,7 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 }
 /* TensorFMA32 (25 October): the twelfth flow button, and the header kept to one row: where the title and the twelve flow
    buttons do not fit side by side the long title gives way to the short one, then the buttons tighten (fitHead) */
-.st-head .st-btn.tf32 .k{color:var(--c2)}
+/* (31 Oct 2026, the first-visit pass: its key is no longer orange, the colour of the current stage; its border stays) */
 .st-head .st-btn.tf32[aria-pressed="false"]{border-color:color-mix(in srgb,var(--c2) 45%,var(--border))}
 #stage .st-head.tight .t-long{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 #stage .st-head.tight .t-short{display:inline}
@@ -441,26 +444,85 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 #stage .st-head.tfk .st-row .tf32 .k{margin-right:0}
 .pn-tfn .pn-stage{margin:2px 0 8px;font-size:.94em;line-height:1.42}
 .pn-tfz{margin-top:0}
+/* first-visit pass: the folds (the template's details.more) as quiet bars, filled and rounded like the Contents card, instead of its side rule */
+.prose details.more{margin:12px 0 20px;border:0;padding:0}
+.prose details.more>summary{min-height:44px;padding:10px 12px 10px 32px;text-indent:-20px;border:1px solid var(--border);border-radius:8px;background:var(--code-bg);font-size:1rem;line-height:1.4}
+.prose details.more>summary::before{display:inline-block;width:20px;text-indent:0;font-size:1.3em;line-height:1;color:var(--c1)}
+.prose details.more>summary .more-hint{color:var(--ink-2)}
+@media (hover:hover){.prose details.more>summary:hover{background:var(--grid)}}
+.prose details.more>summary:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
+.prose details.more[open]{padding-bottom:12px}
+/* reading: about 80 characters a line, lists indented like the text, headings that mark a break */
+.prose p,.prose li{max-width:40rem}
+.prose ul,.prose ol{padding-left:1.4em}
+.prose h2{font-size:1.375rem;line-height:1.3;margin:56px 0 12px;padding-top:24px;border-top:1px solid var(--grid)}
+.prose h3{font-size:1.1rem;margin:32px 0 8px}
+.prose .lede{font-size:1.2rem;line-height:1.5}
+@media (min-width:720px){#toclist{columns:2;column-gap:32px}}
+#toclist>li{margin:0;padding:2.5px 0}
+.prose ul.flows{list-style:none;padding-left:0}
+.prose ul.flows>li{margin:0 0 8px}
+.prose kbd{font:600 .85em system-ui,sans-serif;padding:1px 5px;border:1px solid var(--axis);border-bottom-width:2px;border-radius:4px;background:var(--surface)}
+/* contrast: links 5.31:1 light / 6.61:1 dark; grey labels 4.85:1 (light only: the template's dark rules outrank a plain :root); the outside-source badge 6.24:1 */
+a{color:color-mix(in srgb,var(--c1) 85%,var(--ink))}
+:root{--muted:#6f6e69}
+.kd.outside{color:color-mix(in srgb,var(--c4) 50%,var(--ink))}
+.kd.state{color:var(--ink);border-color:var(--grid);background:var(--code-bg)}
+.num[data-f]{text-decoration-color:color-mix(in srgb,var(--ink-2) 45%,transparent)}
+/* the tables */
+#asktab{table-layout:fixed}
+#asktab th:nth-child(1){width:15%}#asktab th:nth-child(2){width:22%}#asktab th:nth-child(4){width:18%}
+#facttab td:nth-child(5),#asktab td:nth-child(3){-webkit-hyphens:manual;hyphens:manual}
+#facttab code{overflow-wrap:break-word}#facttab th:first-child{width:10em}
+@media (max-width:599px){#facttab td:empty,#facttab td:nth-child(2)::before,#eltab td+td::before{display:none}#eltab td+td{display:inline-block;width:auto;margin-right:10px}}
+#stage.touch .pn-zoom[data-here] .dc{display:none}
+.prose p.small,.prose .byline{max-width:34rem}
+/* the 3D links as buttons */
+.prose .zr{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.prose .zr .st-btn{display:inline-flex;align-items:center;min-height:44px;text-decoration:none}
+@media (max-width:600px){.prose .zr,.prose .kpis{display:grid;grid-template-columns:1fr 1fr}}
+/* the stage */
+.stages li.tchip .st{display:block;white-space:nowrap;text-overflow:ellipsis}
+#crumbs button.egg{border-color:var(--border);border-radius:999px}
+#stage.present #btn-next:not(.dis){background:color-mix(in srgb,var(--c1) 80%,var(--ink));border-color:color-mix(in srgb,var(--c1) 80%,var(--ink));color:var(--page)}
+.dots button{position:relative}
+.dots button::before{content:"";position:absolute;inset:-9px -2px}
+#stage.lg-off .pn-foot.lg{display:none}
+.st-sub{display:none}
+@media (max-width:899px){
+  #stage:not(.present) .st-sub{display:block;flex:1 0 100%;margin:0;color:var(--ink-2);font-size:.85rem;line-height:1.3}
+  .st-head .st-row .st-btn{flex:1 1 auto}
+  #stage:not(.pres):not(:fullscreen) #cap-sub{display:block;-webkit-line-clamp:unset;line-clamp:none;overflow:visible;min-height:0}
+  #stage:not(.pres):not(:fullscreen) .pn-scroll{max-height:none;overflow:visible;overscroll-behavior:auto}
+}
+@media (max-width:600px){
+  #stage:not(.present) .pn{font-size:15px}
+  .pn-foot.lg{font-size:.9em}
+  .pn-kick,.pn-kpi>span{font-size:.86em}
+  .legs{font-size:.93em}
+  #cap-k{font-size:13px}
+  .prose .ck-filter input,.pn-act select{font-size:16px}
+}
 </style>
 
 <section id="stage" aria-label="Interactive schematic of the ET-SoC-1">
 <nav class="skip" aria-label="Skip links"><a href="#bar">Skip to playback</a><a href="#up">Skip to zoom out</a><a href="#pn-body">Skip to the details</a></nav>
 <div class="st-head">
-  <div class="st-title"><h1><span class="t-long">The ET-SoC-1, interactively</span><span class="t-short" aria-hidden="true">ET-SoC-1</span></h1></div>
+  <div class="st-title"><h1><span class="t-long">The ET-SoC-1, interactively</span><span class="t-short" aria-hidden="true">ET-SoC-1</span></h1><p class="st-sub" id="st-sub"></p></div>
   <div class="st-row" role="group" aria-label="Data flows">
     <span class="lab2">Flows</span>
     <button type="button" class="st-btn" data-flow="A" aria-pressed="false" title="A load that misses to DRAM (key 1)"><span class="k">1</span>Load<svg class="ar" viewBox="0 0 16 10" aria-hidden="true"><path d="M1.5 5h12M9.5 1.5 13.5 5l-4 3.5"/></svg><span class="vh"> to </span>DRAM</button>
-    <button type="button" class="st-btn" data-flow="B" aria-pressed="false" title="The latency ladder (key 2)"><span class="k">2</span>Ladder</button>
+    <button type="button" class="st-btn" data-flow="B" aria-pressed="false" title="The latency ladder: the same load found at each level of memory, and what each step further costs (key 2)"><span class="k">2</span>Latency</button>
     <button type="button" class="st-btn" data-flow="C" aria-pressed="false" title="TensorSend between shires (key 3)"><span class="k">3</span>TensorSend</button>
-    <button type="button" class="st-btn" data-flow="D" aria-pressed="false" title="The relay against DRAM (key 4)"><span class="k">4</span>Relay</button>
-    <button type="button" class="st-btn" data-flow="E" aria-pressed="false" title="Gathers and scatters, E48 (key 5)"><span class="k">5</span>Gathers</button>
+    <button type="button" class="st-btn" data-flow="D" aria-pressed="false" title="The relay: results handed to the next shire straight from this shire's memory, or out through DRAM and back (key 4)"><span class="k">4</span>Relay</button>
+    <button type="button" class="st-btn" data-flow="E" aria-pressed="false" title="Gathers and scatters: reading or writing scattered pieces of a table (key 5)"><span class="k">5</span>Gathers</button>
     <button type="button" class="st-btn" data-flow="F" aria-pressed="false" title="The host over PCIe, timed on three cards (key 6)"><span class="k">6</span>Host&#8202;/&#8202;PCIe</button>
     <button type="button" class="st-btn" data-flow="G" aria-pressed="false" title="A matmul on the tensor unit (key 7)"><span class="k">7</span>Matmul</button>
     <button type="button" class="st-btn" data-flow="H" aria-pressed="false" title="The same matmul on different data: watts and heat (key 8)"><span class="k">8</span>Data<svg class="ar" viewBox="0 0 16 10" aria-hidden="true"><path d="M1.5 5h12M9.5 1.5 13.5 5l-4 3.5"/></svg><span class="vh"> to </span>watts</button>
-    <button type="button" class="st-btn" data-flow="I" aria-pressed="false" title="One hot line stops a shire (key 9)"><span class="k">9</span>Hot line</button>
+    <button type="button" class="st-btn" data-flow="I" aria-pressed="false" title="One hot line: every core hammers one memory location, and the shire whose cache bank holds it can be starved (key 9)"><span class="k">9</span>Hot line</button>
     <button type="button" class="st-btn" data-flow="J" aria-pressed="false" title="The allreduce tree (key 0)"><span class="k">0</span>Allreduce</button>
     <button type="button" class="st-btn" data-flow="K" aria-pressed="false" title="One value to every minion: the ways to broadcast, and what each costs (key B)"><span class="k">B</span>Broadcast</button>
-    <button type="button" class="st-btn tf32" data-flow="L" aria-pressed="false" title="7-stage TensorFMA32: 1 input bit flip triggers an avalanche of ~1,040 toggles across a Wallace tree (RTL signal bits, the mean over every fraction bit of a and b; about 300 physical wires). Key M"><span class="k">M</span><span class="tf1">Tensor</span><span class="tf2">FMA32</span></button>
+    <button type="button" class="st-btn tf32" data-flow="L" aria-pressed="false" title="TensorFMA32: one flipped input bit followed through the seven stages of a lane's multiply-add (key M)"><span class="k">M</span><span class="tf1">Tensor</span><span class="tf2">FMA32</span></button>
   </div>
 </div>
 <div class="st-body">
@@ -472,10 +534,10 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
       <span class="pmz" id="pmz"><button type="button" class="pm" data-ci="minus" aria-label="Zoom out (minus key)" title="Zoom out (−, Backspace)">−</button><button type="button" class="pm" data-ci="plus" aria-label="Zoom in (plus key)" title="Zoom in (+)">+</button></span>
     </div>
     <div class="st-svg" id="svgwrap"><svg id="chip" role="group" aria-label="Schematic of the ET-SoC-1, from its rack down to its atoms. Every part is a button: Tab to it and press Space for its details, Enter to zoom into it." xmlns="http://www.w3.org/2000/svg"></svg>
-      <div class="kbd-hint" id="kbd-hint" hidden title="Then F presents, Space pauses and the arrows step">Click here, then press <kbd>F</kbd></div>
+      <div class="kbd-hint" id="kbd-hint" hidden title="Then 1–9, 0, B and M play a flow, T tours, F presents and Space pauses">Click here to use the keys</div>
       <div class="crumb-menu" id="crumb-menu" hidden role="menu" aria-label="Levels further out"></div>
     </div>
-    <div class="zstrip" id="zstrip"><div class="zpill" id="zpill" hidden role="group" aria-label="The selected part"><span class="zs-name"></span><button type="button" class="st-btn" id="zpill-in">Zoom in ▸</button><button type="button" class="st-btn" id="zpill-det">Details ↓</button></div><span class="zs-hint">Tap a part for its details; double-tap it to zoom in.</span></div>
+    <div class="zstrip" id="zstrip"><div class="zpill" id="zpill" hidden role="group" aria-label="The selected part"><span class="zs-name"></span><button type="button" class="st-btn" id="zpill-in">Zoom in ▸</button><button type="button" class="st-btn" id="zpill-det">Details ↓</button></div><span class="zs-hint">Tap a part for its details; double-tap it to zoom in; pinch to enlarge.</span></div>
     <div class="pip" id="pip" hidden role="button" tabindex="0" aria-label="The flow's stage on the die: follow the flow again"><svg id="pipsvg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg><span class="pip-cap" id="pip-cap">On the die · click to return</span></div>
   </div>
   <aside class="pn" id="panel" aria-label="Details">
@@ -520,22 +582,63 @@ svg.ar path{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
 <div id="srctip" role="tooltip"></div>
 </section>
 <div class="prose">
-<p class="byline">27 September 2026, second version the same day, the broadcast flow 28 September, the routes as measured 29 September (replies y first, on three cards), the zoom 30 September, down to the quarks 1 October, the 3D views 14 October, checked against the manuals, the RTL, the firmware and the lab's data the same day, the multiply-add as built and its flow, TensorFMA32 (M), 25 October · every number is a fact with a source: a repository file and field, a manual page, or a source line · the chip's facts: <a href="#facts">the table below</a>, built in the repository's docs/reports/data/2026-09-27-chip-diagram · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+<p class="lede">Esperanto's ET-SoC-1 is a processor made for machine learning: instead of a few big cores it has many
+small, simple ones, called minions, in blocks called shires, joined by an on-chip network, the mesh. This is a schematic
+of it that you can click through: the die with its mesh of shires, a shire with its cache and minions, a minion with its
+vector unit, whose lanes also run the tensor instructions. Twelve animated flows show where data goes and what it costs,
+with the latency, bandwidth, energy and heat measured on the lab's cards, the host link included. The twelfth,
+TensorFMA32, follows one flipped input bit through the seven stages of a lane's multiply-add. An eighteen-slide tour walks
+through the chip and every flow but the broadcast (B).</p>
 
-<p class="lede">A schematic of Esperanto's ET-SoC-1 that you can click through: the die with its mesh of shires, a shire with its
-cache and minions, a minion with its vector unit, whose lanes also run the tensor instructions. Twelve animated flows show where data goes and what it costs,
-with the latency, bandwidth, energy and heat measured on the lab's cards, the host link included, and the twelfth, TensorFMA32, follows one flipped input bit through the seven stages of a lane's multiply-add. A tour steps through it all.</p>
+<p class="byline">First published 27 September 2026 and updated since (<a href="#versions">what changed</a>) · every number is a fact with a source (a repository file, a manual page or a source line): point at it, or see <a href="#facts">the table below</a> · part of the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">ET-SoC-1 measurement reports</a></p>
+
+<details class="more" id="terms"><summary>Terms used on this page</summary>
+<ul>
+<li><b>Minion</b>: one of the chip's small cores, with two threads (<i>harts</i>), a vector unit and its own L1 data cache.</li>
+<li><b>Shire</b>: a block of minions that share one memory on the chip, part cache and part scratchpad; the compute shires
+run the programs, the master shire starts them and a spare waits in reserve. The <b>memory shires</b>, the chip's
+connections to the DRAM chips on the card, and the PCIe and I/O shires hold no minions.</li>
+<li><b>Mesh</b>: the on-chip network that joins the shires; one step across it is a <i>hop</i>.</li>
+<li><b>L1, L2, L3</b>, the caches: a minion's own (L1), its shire's (L2), and the one the whole chip shares, a slice in
+each compute shire (L3); a line's <i>L3 home</i> is the shire whose slice keeps it. A <b>scratchpad</b> is memory a
+program fills and reads itself, with no cache in between.</li>
+<li><b>The lab's cards</b>: the ET-SoC-1 PCIe cards the measurements were made on, in the lab's machines aifoundry1,
+aifoundry2 and aifoundry3; most of the measurements here hold on three of them, aifoundry2, aifoundry3 and aifoundry1
+card 1 (aifoundry1 holds two cards).</li>
+<li><b>E48, E55, E56, E57</b>: the lab's numbered experiments. A <b>rung</b> is a numbered ask on the hub's list of what
+would settle an open question: a document, an experiment or an interface.</li>
+<li><b>AI Foundry</b>: it has open-sourced Esperanto's ET-SoC-1; some asks are documents to request from it.</li>
+<li><b>The Horace runs</b>: the lab's runs of one matmul on zeros, ones and random data (flow 8; the Horace experiment,
+under Related reports).</li>
+<li><b>RTL</b> (register-transfer level): the chip's design as code; a <b>netlist</b>, that design as gates. Flow M counts <i>RTL signal bits</i>, the bits of named RTL signals that change.</li>
+<li><b>Kinds of fact</b>, as the badges name them: <i>measured</i> by the lab, on its cards or, for the multiply-add, on
+its RTL and netlists; <i>documented</i>: a datasheet, a manual, the RTL or the firmware says so; <i>model</i>: computed
+from other facts or by simulating the design; <i>inference</i>: concluded from incomplete evidence; <i>textbook</i>; <i>outside source</i>; <i>the
+owner's word</i>: a statement by the page's author (the owner); <i>speculative</i>; <i>unknown</i>.</li>
+</ul></details>
 
 <h2 id="use">How to use it</h2>
 <ul>
+<li><b>Click</b> (or tap) a part for its details; <b>double-click</b> (double-tap) to go inside it. <b>↑ Zoom out</b>,
+above the drawing (or <kbd>Backspace</kbd>), goes back out, past the package and the card to the rack. The breadcrumb jumps
+to any level (when the row is full, the outer ones fold into its "…" menu); its "?", just before Rack, stands for the levels further out than the rack: press it to see.</li>
+<li><b>Flows.</b> The twelve buttons above the drawing (keys <kbd>1</kbd>–<kbd>9</kbd>, <kbd>0</kbd>, <kbd>B</kbd>,
+<kbd>M</kbd>) play data moving through the chip, stage by stage; the stages show under the drawing. <kbd>Space</kbd>
+pauses, <kbd>←</kbd> and <kbd>→</kbd> step.</li>
+<li><b>Tour</b> (<kbd>T</kbd>): eighteen slides through the chip and every flow but the broadcast (B). <b>Present</b>
+(<kbd>F</kbd>) fills the screen.</li>
+<li>A number with a dotted underline has a source: point at it, or tap it. Every fact is in the table near the end.</li>
+</ul>
+<details class="more" id="use-more"><summary>All the controls <span class="more-hint">· every key and button, the zoom's loop, presenting, links to share</span></summary>
+<ul>
 <li><b>Click</b> any part (or Tab to it and press Space) for what it is, its numbers with their units and card coverage,
-a link to the report that measured them, and, where the drawing infers something, what would settle it. Point at a
+a link to the report that measured them, and, where the drawing infers something, what would settle it. Point at (or tap) a
 number to see its source; from the keyboard, Tab to a fact in the details list.</li>
 <li><b>Zoom in</b> with a double-click on a part (a double-tap on a touch screen, or the <b>Zoom in</b> button that a tap
 shows under the drawing), Enter on a focused part, the + key, or the zoom buttons under the part's text in the details panel.
 A click only selects. A part with no closer drawing says so in the panel and offers the zooms it has.</li>
-<li><b>Zoom out</b> with the wide <b>↑ Zoom out</b> button above the drawing, Backspace or the − key: out past the
-package, the card and its host to the rack the lab's machines stand in. Beside it, the breadcrumb jumps to any level
+<li><b>Zoom out</b> with the wide <b>↑ Zoom out</b> button above the drawing, Backspace, Esc or the − key (Esc first stops a
+playing flow): out past the package, the card and its host to the rack the lab's machines stand in. Beside it, the breadcrumb jumps to any level
 (the outer ones fold into its "…" menu), and the readout gives the size of what you see, in metres and as a power of
 ten. A second press while the camera moves goes one further. Past the rack the button only says "?". Keep pressing and
 the zoom goes round a loop, always outward: past the largest scale it comes back at the smallest, the Planck length, and
@@ -547,12 +650,9 @@ or 1, a DRAM cell just written or 32 ms later. Press the switch in the drawing, 
 Tab to it and press Enter) to glide sideways to that shire, memory shire, PCIe or I/O shire. With no flow or tour on
 the stage, the arrow keys do the same, and in a minion, a memory shire or any scale with neighbours glide to the one
 that way.</li>
-<li><b>Flows</b> 1 to 9, 0, B and M animate a load that misses to DRAM, the latency ladder, TensorSend across the mesh, the
-relay against DRAM, gathers and scatters, the host over PCIe (timed on three cards), a matmul on the tensor unit, the
-same matmul's watts and heat on different data, one hot line stopping a shire, the allreduce tree, one value
-broadcast to every minion four ways (B, which the tour leaves out), and TensorFMA32 (M): one input bit flipped in a lane's fp32 multiply-add,
-followed through its seven stages f0 to f6 and counted, signal by signal, across the Wallace tree; each of its stages offers the way down, level by level,
-to a column, a 4:2 compressor, a full adder and its transistors. Each flow is a
+<li><b>Flows</b> 1 to 9, 0, B and M play the flows listed under <a href="#summary">What the diagram shows</a> (the tour leaves out B);
+each of TensorFMA32's stages offers the way down, level by level, to a column, a 4:2 compressor, a full adder and its
+transistors. Each flow is a
 row of <b>stages</b> under the drawing: click one, or step with the Left and Right arrows. <b>Space</b> pauses
 everything that moves, the camera included; stepping while paused shows each stage's end state. The <b>1×</b> button
 beside Play (or S) plays the flows and the tour at double speed, <b>2×</b>, and back: the stages, the packets, the charts
@@ -562,7 +662,10 @@ stays: a stage on the die then plays in a small picture of the die in the corner
 marks its place. Stepping turns following back on after your own zoom.</li>
 <li><b>Tour</b> (T) steps through eighteen slides: the arrows (or a clicker's PageDown and PageUp) step the stages of
 each flow and move on at its ends; Shift with an arrow, a click on a dot or on a slide's name in the bar, or a flow's
-key jumps to a slide; Q or End tour ends the tour, and T picks it up where it was left. Esc never ends it.</li>
+key jumps to a slide; Q, T or the End tour button ends the tour, and T picks it up where it was left; Home and
+End go to a flow's first and last stage, or, on a still slide, to the tour's first and last slides; B leaves the tour to
+play the broadcast. Esc never ends it. With nothing on the stage, PageDown and the → button start the tour, or, once a
+flow has played, play the last one again.</li>
 <li><b>Presenting</b> (the tour, or F): the panel's text is larger, its fact lists, asks and buttons are hidden, numbers
 lose their dotted underline and the pointer hides when it rests. F (or Present) goes full screen. Where the page's frame forbids that, the stage fills the frame
 instead and offers the browser's own full screen (F11) and a presenter window, a copy of this page in a window of its
@@ -580,31 +683,35 @@ played at 2× adds <code>&amp;speed=2</code> (<code>#flow=8-data-watts&amp;speed
 playing, the scale the camera rests on, as <code>?at=</code> names it (<code>#at=rack</code>,
 <code>#at=shire%3A20/minion%3A20.1.3</code>). On spacesheep it shows in your own address bar. <b>Copy link</b>, under
 the details panel (on a phone, under the caption), copies the link to what is shown; where the page's frame forbids the
-clipboard it shows the link selected, to copy with Ctrl-C. Such a link wins over <code>?flow=</code>, <code>?tour=</code>
+clipboard it shows the link selected, to copy with Ctrl-C (on a phone, press and hold it). Such a link wins over <code>?flow=</code>, <code>?tour=</code>
 and <code>?at=</code>, and changing it in the address bar takes the stage there.</li>
 </ul>
+<p>The camera moves between levels in three ways. Where one level is drawn inside the other it zooms smoothly. Where the
+ratio is huge, or the two pictures are of different kinds, it makes a "powers of ten" jump: it zooms into a marked box
+while the next level grows out of it, and the readout sweeps the decades in between (from a silicon atom to its
+nucleus, from a proton to a quark). Between neighbouring shires it glides sideways. Each level's facts, with their kinds
+and sources, are in its details panel and in the table below.</p>
+</details>
 
-<section data-ss-id="section-physical-scales-3d" data-ss-section>
-<h2 id="physical-scales-3d" data-ss-id="physical-scales-3d-title">Turn the chip's smallest structures in 3D</h2>
-<p data-ss-id="physical-scales-3d-intro">Orbit the wiring, separate the transistor's layers, inspect a silicon fin, and control the channel's conduction. The four views use illustrative geometry and generic FinFET physics.</p>
-<nav aria-label="Interactive 3D structures" data-ss-id="physical-scales-3d-views" class="zr">
-<a class="st-btn" href="https://spacesheep.dev/@yaroslavvb/et-soc1-in-3d#metal" target="_blank" rel="noopener">Metal wiring ↗</a>
-<a class="st-btn" href="https://spacesheep.dev/@yaroslavvb/et-soc1-in-3d#finfet" target="_blank" rel="noopener">FinFET ↗</a>
-<a class="st-btn" href="https://spacesheep.dev/@yaroslavvb/et-soc1-in-3d#fin" target="_blank" rel="noopener">Silicon fin ↗</a>
-<a class="st-btn" href="https://spacesheep.dev/@yaroslavvb/et-soc1-in-3d#channel" target="_blank" rel="noopener">Channel ↗</a>
-</nav>
-</section>
+<h2 id="summary">What the diagram shows</h2>
+<div id="summary-text"><p>The text version of the diagram is written when the page's script runs.</p></div>
 
 <h2 id="ladder">From the rack to the quarks</h2>
-<p>Since 30 September the zoom goes on past the chip in both directions, at the owner's request. Out from the die: the
+<p>The zoom goes on past the chip in both directions. Out from the die: the
 package under its lid, the PCIe card (the vendor's photo), a host computer (an ATX board drawn to scale) and the rack of
-open-frame machines the lab's hosts stand in (the owner's photo, its machines' labels blurred). Most levels say what
-light, or a signal in a fibre, takes to cross them, counted in ticks of the cards' usual 600 MHz clock.</p>
-<p>In from the die, every part opens. The memory system goes down as the <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels">anatomy
-of a memory access</a> draws it (its drawings are reused here): the L1 data cache to an LRAM block, a row and one latch's
+open-frame machines the lab's hosts stand in (the page author's photo, its machines' labels blurred). Most levels say what
+light, or a signal in a fibre, takes to cross them, counted in ticks of the cards' usual 600 MHz clock. In from the die, every part
+opens, down to a FinFET at TSMC N7's published numbers, its fin and its channel, the silicon crystal, an atom, its nucleus
+and a proton's quarks.</p>
+<p class="small">Sizes from the shire down are estimates (marked ≈), the blocks inside a shire are logical drawings, and
+the circuits are textbook circuits, each labelled so, except the multiply-add's multiplier, drawn as built; the honesty
+notes below say more.</p>
+<details class="more" id="ladder-more"><summary>How each level is drawn <span class="more-hint">· the memory system, the circuits, the device, the honesty notes</span></summary>
+<p>The memory system goes down as the page <a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels">Anatomy
+of a memory access, interactively</a> draws it (its drawings are reused here): the L1 data cache to an LRAM block, a row and one latch's
 transistors; the shire cache to a bank, a sub-bank, an SRAM panel and a 6T cell; a mesh hop to its wire and repeaters;
 a memory shire to its PHY and a DQ driver; the DRAM to a bank and its 1T1C cell, and that cell in section (on a DRAM
-process, not the chip's). Since 1 October every transistor-level drawing leads on into the device: the latch's
+process, not the chip's). Every transistor-level drawing leads on into the device: the latch's
 inverters, the 6T cell's transistors, the repeaters, the level shifters and the DQ pin's driver. The blocks whose
 insides are described but not drawn by Esperanto (the mesh stop and its router, the crossbar, the UC block, a
 neighbourhood, the core, the vector unit and its lanes, the tensor sequencer, the PCIe and I/O shires) are logical
@@ -645,15 +752,6 @@ leakage at 80 °C shared over its transistors); roughly a thousand
 electrons on an SRAM bit's node, 45,000-70,000 in a DRAM cell, which leaks and must be refreshed every 32 ms; the band
 gap that keeps pure silicon an insulator; and the energy of a switch, which goes as the voltage squared, the whole of
 the chip's low-voltage design. Numbers that are estimates say so and carry their assumptions.</p>
-<h3 id="electrons">How many electrons?</h3>
-<p>What it takes, in electrons, for the chip to do one small thing: each number with its kind and source (point at it);
-every one is an estimate, its kind says model or inference, and its assumptions are in its source.</p>
-<div class="table-wrap eltab"><table id="eltab" class="stack"><thead><tr><th>What</th><th>Electrons</th><th>Kind</th></tr></thead><tbody></tbody></table></div>
-<p>The camera moves between levels in three ways. Where one level is drawn inside the other it zooms smoothly. Where the
-ratio is huge, or the two pictures are of different kinds, it makes a "powers of ten" jump: it zooms into a marked box
-while the next level grows out of it, and the readout sweeps the decades in between (from a silicon atom to its
-nucleus, from a proton to a quark). Between neighbouring shires it glides sideways. Each level's facts, with their kinds
-and sources, are in its details panel and in the table below.</p>
 <p class="small">Honesty notes. Sizes from the shire down are estimates (marked ≈): no floorplan of the chip's inside is
 published, so the blocks are logical drawings, and the circuits are textbook circuits (each says so) tied to this chip by
 its documents' counts and names. Facts read from core-et's Erbium-branch RTL carry that caveat: the same Minion core
@@ -663,25 +761,45 @@ atom, the nucleus and the proton say what they are: electrons are clouds, not or
 The rack photo is the page author's own, with the machines' tape labels blurred (they carry host names and network
 addresses); which three machines are the lab's is not recorded, so the host shown is "one of the rack's machines". The
 card photo is the vendor's (Apache-2.0), not a lab card.</p>
+</details>
+<h3 id="electrons">How many electrons?</h3>
+<p>What it takes, in electrons, for the chip to do one small thing: each number with its kind and source (point at it);
+every one is an estimate, its kind says model or inference, and its assumptions are in its source.</p>
+<div class="table-wrap eltab"><table id="eltab" class="stack"><thead><tr><th>What</th><th>Electrons</th><th>Kind</th></tr></thead><tbody></tbody></table></div>
 
-<h2 id="summary">What the diagram shows</h2>
-<div id="summary-text"><p>The text version of the diagram is written when the page's script runs.</p></div>
+<section data-ss-id="section-physical-scales-3d" data-ss-section>
+<h2 id="physical-scales-3d" data-ss-id="physical-scales-3d-title">The smallest structures in 3D</h2>
+<p data-ss-id="physical-scales-3d-intro">Orbit the wiring, separate the transistor's layers, inspect a silicon fin, and control the channel's conduction. The four views use illustrative geometry and generic FinFET physics.</p>
+<nav aria-label="Interactive 3D structures" data-ss-id="physical-scales-3d-views" class="zr">
+<a class="st-btn" href="https://spacesheep.dev/@yaroslavvb/et-soc1-in-3d#metal" target="_blank" rel="noopener">Metal wiring ↗</a>
+<a class="st-btn" href="https://spacesheep.dev/@yaroslavvb/et-soc1-in-3d#finfet" target="_blank" rel="noopener">FinFET ↗</a>
+<a class="st-btn" href="https://spacesheep.dev/@yaroslavvb/et-soc1-in-3d#fin" target="_blank" rel="noopener">Silicon fin ↗</a>
+<a class="st-btn" href="https://spacesheep.dev/@yaroslavvb/et-soc1-in-3d#channel" target="_blank" rel="noopener">Channel ↗</a>
+</nav>
+</section>
 
-<h2 id="honest">What is measured, what is specified, what is inferred</h2>
+<h2 id="honest">What is measured, documented or inferred</h2>
 <div id="honest-text"><p>The count of facts by kind is written when the page's script runs.</p></div>
+<details class="more" id="honest-more"><summary>What the drawing assumes, and its inferred facts <span class="more-hint" id="honest-n"></span></summary><div id="honest-list"></div></details>
 
-<h2 id="asks">What would settle the rest: the asks</h2>
-<p>Every part the drawing infers, what would settle it, and the row on the hub's improvement ladder that asks for it
+<h2 id="asks">What would settle the rest</h2>
+<p>Every part the drawing infers, what would settle it, and the hub's numbered ask for it, its "rung"
 (a document to request from AI Foundry, an experiment on the cards, or an interface). The hub collects them with
 everything else the instruments cannot see.</p>
+<details class="more" id="asks-more"><summary>The table <span class="more-hint" id="asks-n">· every inferred part and what would settle it</span></summary>
 <div class="table-wrap wide"><table id="asktab" class="stack"><thead><tr><th>Part</th><th>What is inferred</th><th>What would settle it</th><th>Ask</th></tr></thead><tbody></tbody></table></div>
+</details>
 
 <h2 id="facts">Every fact on this page</h2>
-<p>The facts behind the diagram, the panels and the captions, with their kind, the cards they were measured on and their
-source. Sort by any column or filter the rows.</p>
+<p>The facts behind the diagram, the panels and the captions, each with its kind, the cards it was measured on and its
+source, built from the repository's <code>docs/reports/data/2026-09-27-chip-diagram</code>. Filter the rows, or on a
+wider screen sort them by any column.</p>
+<details class="more" id="facts-more"><summary>The table <span class="more-hint">· every fact, with a filter</span></summary>
 <div class="table-wrap wide"><table id="facttab" class="stack"><thead><tr><th>Fact</th><th>Statement</th><th>Kind</th><th>Cards</th><th>Source</th></tr></thead><tbody></tbody></table></div>
+</details>
 
 <h2 id="versions">Versions</h2>
+<details class="more" id="versions-more"><summary>Every version since the first, 27 September 2026 <span class="more-hint">· the latest last</span></summary>
 <ul>
 <li><b>27 September 2026</b>: the die, a shire and a minion, ten flows and the tour; a second version the same day.</li>
 <li><b>28 September</b>: the broadcast flow (B).</li>
@@ -692,7 +810,7 @@ a host copy lands, the DRAM address map.</li>
 into any part, the wide ↑ Zoom out button and the breadcrumb above the drawing, the panel's zoom buttons, the shires' edge
 arrows as links that glide to the neighbouring shire, and a smoother camera (one ease per move, blended through each
 scale).</li>
-<li><b>1 October</b>: the ladder shared with the memory levels' page; the device at TSMC N7's published numbers (the
+<li><b>1 October</b>: the ladder shared with Anatomy of a memory access, interactively; the device at TSMC N7's published numbers (the
 fin 6 by 52 nm, the gate 16.5 nm, the channel 257,000 atoms); on down to a silicon atom, its nucleus, a proton, a quark
 and the Planck length, with an electron, a dopant atom and a DRAM cell beside them; the electronics drawn in two states
 (the switch, or G); every transistor-level drawing leads on into the device; and Esperanto's and N7's facts placed scale
@@ -705,14 +823,14 @@ down to a transistor drawn as such and its atoms.</li>
 flow, its held stage, the tour's slide or the scale shown, and opening it goes there.</li>
 <li><b>1 October, speed</b>: the replay plays at 1× or 2× (the button beside Play, or S), and a link to a flow or the
 tour played at 2× opens at 2× (<code>&amp;speed=2</code>).</li>
-<li><b>1 October, evening</b>: Up past the top goes straight to the Planck length; the loop runs one way.</li>
+<li><b>1 October, evening</b>: ↑ Zoom out past the top goes straight to the Planck length; the loop runs one way.</li>
 <li><b>1 October, late</b>: four reviews' fixes: the landing after the loop says it is no journey through space and names
 the atom it lands under; facts corrected (an Alexander phase detector's early and late, an atom's inner electrons'
 binding, the nucleus's size against the atom's, the source's active dopants, PCIe's eleven presets, a few attributions);
 the sense amplifier, the multiplexer, the adder's carries, the ROM and the decoder drawn right; the stored bit's box clear
 of the 6T cell; labels fade during moves; the side links of the memory, PCIe and I/O shires drawn as pills.</li>
-<li><b>13–14 October</b>: − and + keep their place in the Up bar; the readout keeps one look while the camera moves,
-and moves are smoother; the wiring, the FinFET, the fin and the channel link to their 3D views (Turn the chip's smallest
+<li><b>13–14 October</b>: − and + keep their place in the bar above the drawing; the readout keeps one look while the camera moves,
+and moves are smoother; the wiring, the FinFET, the fin and the channel link to their 3D views (The smallest
 structures in 3D, above, and "Explore this in 3D" in their panels).</li>
 <li><b>14 October, later</b>: a check of every fact, panel, flow and drawing against the manuals, the core-et documents,
 the RTL, the firmware and the lab's data, with another agent's review folded in: 97 statements, numbers, kinds and
@@ -729,15 +847,25 @@ view moved inside it; a part's panel that is one of the 3D scales' own links tha
 <li><b>25 October</b>: the multiply-add as built, and a twelfth flow, TensorFMA32 (M). The seven pipeline stages, f0 to
 f6; the radix-4 Booth multiplier (a recoded, 16 rows of b, row 17 and a sign row), with Esperanto's own drawings of its
 encoder and of one partial-product bit; the Wallace tree as built, four levels of 64-wide arrays of 4:2 compressors (16
-rows to 8 to 4 in f1, a 353-bit register, then 4 to 2, and 2 with row 17 and the sign row to 2, in f2), replacing a
+rows to 8 to 4 in f1, a 353-bit register (253 flip-flops once synthesis prunes its constant bits), then 4 to 2, and 2 with row 17 and the sign row to 2, in f2), replacing a
 textbook drawing with another schedule (17 to 9, 5, 3 and 2); and down from it one level, one column, one 4:2
 compressor, its two full adders, a full adder's gates and its 28 transistors, then the FinFET. The flow: one input bit of
 a lane's fp32 multiply-add flips and the seven stages pass on its avalanche, counted signal by signal in a simulation of
-the RTL: 1,946 signal bits toggle for the bit shown, 875 of them across the Wallace tree; averaged over every fraction
+the RTL: 1,946 RTL signal bits toggle for the bit shown, 875 of them across the Wallace tree; averaged over every fraction
 bit of a and b, about 1,040 in the tree, about 300 physical wires. Each stage offers the way down. The old addresses of
 the multiply-add's deep scenes lead to their new places. From Esperanto's design files for the ET-SoC-1, prepared on
 23 October.</li>
+<li><b>31 October</b>: TensorFMA32's toggle figures checked against the lab's recount of 26 October: the lab's 21,331
+toggles per random multiply-add is a simulator artefact, 8 to 16 times too large (1,301 nets is the figure to quote), so
+the owner's ~1,050 now rests on this page's own count, about 1,040 RTL signal bits in the Wallace tree when one input bit
+flips, on average (facts tfma.lab and tfma.owner.why); flow M's panel and the label on its drawing say so.</li>
+<li><b>31 October, later</b>: a first-visit pass: the first screen says what the page is; under the stage the overview
+comes first and the reference parts (all the controls, how each level is drawn, the assumptions, the asks, the facts and
+these versions) open on a click or by their link; a fact's link opens the table on that fact; one word for each kind of
+fact; the counts made to agree (twelve flows, an eighteen-slide tour without B); the die's colour key only on the die; a
+glossary.</li>
 </ul>
+</details>
 
 <h2 id="related">Related reports</h2>
 <ul>
@@ -748,6 +876,9 @@ kernel launches.</li>
 map of the 32 compute shires and what messages cost inside a neighbourhood, a shire and across the mesh.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-anatomy">Anatomy of a memory access</a> — one load traced
 from L1 to DRAM; the memory-shire fit the diagram places the memory shires by.</li>
+<li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-levels">Anatomy of a memory access, interactively</a> — each
+level of the memory system animated, from the part that serves an access down to the transistors that switch; the zoom
+here reuses its drawings.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-memory-hierarchy">Memory hierarchy</a> — latency, bandwidth and
 energy at every level.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-horace-experiment">The Horace experiment</a> — the same matmul on different
@@ -761,7 +892,7 @@ round trip through DRAM.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-energy-manual">The energy manual</a> — what each instruction, level
 and message costs.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-matmul-efficiency">Matmul efficiency</a> — the tensor matmul on
-all 1,024 minions against its peak.</li>
+all 1,024 compute minions against its peak.</li>
 <li><a href="https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability">Limits of observability</a> — the hub:
 every report, what the instruments cannot see, and the asks.</li>
 </ul>

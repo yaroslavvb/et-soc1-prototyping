@@ -115,7 +115,9 @@ function lnkWrite() {
   if (window.parent !== window) { try { window.parent.postMessage({type: 'ss-hash', hash: h || '#'}, '*'); } catch (_) { /* no parent */ } }
 }
 function lnkSoon(ms) { if (!LNK || !LNK.ready) return; clearTimeout(LNK.t); LNK.t = setTimeout(lnkWrite, ms || 150); }
-function pageArrived() { lnkSoon(400); }   // (a run of quick moves writes once)
+// (and the die's colour key shows on the die only: inside a shire or a minion its colours mean other things; CSS
+// #stage.lg-off)
+function pageArrived() { lnkSoon(400); $('stage').classList.toggle('lg-off', Z.level !== 0); }   // (a run of quick moves writes once)
 /* at load, before the query's flags (true: the fragment was applied, and they are not); what the address asked for is
    what it says already, so nothing is written until the reader changes something */
 function lnkStart() {
