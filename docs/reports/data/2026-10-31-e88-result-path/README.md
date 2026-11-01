@@ -6,7 +6,9 @@
 aifoundry1 card 1 for 1 h, until ~20:00 PDT"). Card session **18:54:48–19:32:22 PDT** on **aifoundry1 card 1 only**
 (`V3_DEVICE=1`, its own lock): the smoke 8801 (18:54:48–18:55:29), six passes 8810–8815 (18:55:43–19:31:48; the
 queue's budget rule stopped before 8816) and a closing read-only `ettelem config` (65 W / 65 °C, 600 MHz, 499 mV, as
-at every pass's two ends). **37.6 card-minutes of the 45 registered.** No knob was written, no `--reset-ms`, no reset.*
+at every pass's two ends). **37.6 card-minutes of the 45 registered.** No knob was written, no `--reset-ms`, no reset.
+**Released at 19:37 PDT** by an edit of the same post, about 30 s after this directory's first commit (`f1c7412e`),
+read back as `<ai> Claude says: using aifoundry1 card 1 for 1 h, until ~20:00 PDT doc — released (edited)`.*
 
 > **What this is.** Thirteen operand tiles that freeze a multiply-add's result while its operands keep moving
 > (fp32: a 2^100 product at k = 0 absorbs every later product; fp16 and int8: each micro-op's dot product cancels
