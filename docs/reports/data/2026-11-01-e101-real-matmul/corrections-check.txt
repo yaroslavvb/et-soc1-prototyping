@@ -1,0 +1,53 @@
+C1. T = C/f + M, on session 2's launches on aifoundry2 (aifoundry2/s1/launches.jsonl.gz): T = wall / ops per minion, f = cycles_max / wall, launches of at least 0.1 s between 590 and 810 MHz
+  gemm1  fp16  n  900  C   351.4 +-  1.5 cycles  M  0.827 +- 0.002 us  rms 2.9 ns
+  gemm1  fp32  n  898  C   343.6 +-  1.0 cycles  M  0.839 +- 0.001 us  rms 2.5 ns
+  gemm1  int8  n  921  C   356.0 +-  2.5 cycles  M  0.828 +- 0.003 us  rms 3.0 ns
+  mm16   fp16  n  261  C   529.0 +-  0.0 cycles  M -0.000 +- 0.000 us  rms 0.0 ns
+  mm16   fp32  n  262  C   529.0 +-  0.0 cycles  M  0.000 +- 0.000 us  rms 0.0 ns
+  mm16   int8  n  433  C   280.5 +-  0.0 cycles  M -0.000 +- 0.000 us  rms 0.0 ns
+  res    fp16  n   62  C   546.0 +-  0.0 cycles  M  0.000 +- 0.000 us  rms 0.0 ns
+  res    fp32  n   64  C   546.0 +-  0.0 cycles  M  0.000 +- 0.000 us  rms 0.0 ns
+  res    int8  n   67  C   318.0 +-  0.0 cycles  M  0.000 +- 0.000 us  rms 0.0 ns
+  fp32 sus: clocks 789.3 and 621.0 MHz; the law gives x1.093, measured x1.093
+  fp16 sus: clocks 793.9 and 674.9 MHz; the law gives x1.061, measured x1.064
+  fp32 burst: clocks 800 and 755.5 MHz; the law gives x1.020, measured x1.030
+  M's share of the wall per op: 59% at 600 MHz, 66% at 800 MHz
+  the desk L2 model's miss shares: tools/claims-v3/kspeed/e105/desk/l2sim2.txt
+C2. Energy per op, random, int8, nJ (e101.json items.<cell>.pj_op_S): gemm1 14.52 mm16 12.54 ; rate, T(FL)OP/s: gemm1 23.56 mm16 71.54 ratio 3.04
+C3. Runs per pass, and the skipped one:
+  p10110: 77 runs; skipped marks: [('mm16.int8.sparse50', 'None')]
+  p10111: 78 runs; skipped marks: []
+  p10112: 78 runs; skipped marks: []
+  p10113: 78 runs; skipped marks: []
+  total runs 311, of 4 x 78 = 312 planned
+C4. n behind each speed gap (results-speed.json cells.<cell>.n_burst, n_sus; burst rates per run):
+  gemm1-fp32-zeros     burst n 2 runs [6.63, 6.643], sustained n 1
+  gemm1-fp32-randn     burst n 2 runs [6.518, 6.371], sustained n 1
+  gemm1-fp16-zeros     burst n 2 runs [13.194, 13.215], sustained n 1
+  gemm1-fp16-randn     burst n 2 runs [13.059, 13.098], sustained n 1
+  gemm1-int8-zeros     burst n 2 runs [26.263, 26.417], sustained n 1
+  gemm1-int8-full      burst n 2 runs [26.302, 26.426], sustained n 1
+  mm16-int8-zeros      burst n 2 runs [95.6, 95.594], sustained n 1
+  mm16-int8-full       burst n 2 runs [82.574, 81.304], sustained n 1
+  res-fp32-zeros       burst n 2 runs [12.275, 12.275], sustained n 0
+  res-fp32-randn       burst n 2 runs [10.88, 10.553], sustained n 0
+  gemm1 fp32 burst pairs: x1.017 to x1.043
+  sustained cells with n = 1: 19 of 19
+C6. The rate past the L3, fp32, TFLOPS at 600 MHz: 5.93 3.37 ratio 1.76
+C7. Zeros / random, watts, this session (half widths propagated from the items' 95% half widths, not paired):
+  res    fp32:   8.1 +- 0.3 %
+  res    fp16:   8.5 +- 0.9 %
+  res    int8:  26.3 +- 0.9 %
+  mm16   fp32:  12.6 +- 0.4 %
+  mm16   fp16:  13.8 +- 0.3 %
+  mm16   int8:  28.0 +- 0.7 %
+  gemm1  fp32:  17.0 +- 1.2 %
+  gemm1  fp16:  19.9 +- 1.8 %
+  gemm1  int8:  36.2 +- 4.5 %
+  scored.json R7_gate, paired: PASS PASS {'mm16.fp32': (12.6, 0.3, 0.074), 'gemm1.fp32': (17.0, 1.0, 0.074), 'mm16.fp16': (13.8, 0.3, 0.082), 'gemm1.fp16': (19.9, 2.0, 0.082), 'mm16.int8': (28.0, 0.8, 0.27), 'gemm1.int8': (36.3, 4.6, 0.27)}
+  worst upper bound on a share: 0.409
+C10. Lost runs and the highest readings:
+  planned 96, recorded 81; first unrecorded ['SUS-19-mm16-fp16-randn-r1']
+  past the L3, random fp32, pJ per multiply-add: 10.095
+  highest board reading per run: [(101.15, 'SUS-19-mm16-fp16-randn-r1'), (90.07, 'SUS-15-mm16-int8-full-r1'), (87.39, 'BURST-16-mm16-int8-full-r1')]
+  the 101.15 W reading appears on 3 consecutive samples, [-200, -100, 0] ms from the last; clocks [700, 700, 700] MHz, die 66 C
