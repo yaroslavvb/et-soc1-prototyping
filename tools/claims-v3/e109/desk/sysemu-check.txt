@@ -1,0 +1,17 @@
+E109: sp109's arms in sys_emu on aifoundry3 (/opt/et, one shire, one minion, --iters 4), Sun 1 Nov 2026 12:39:28-12:44:58 PST, card idle (et-who: no holder).
+Built 12:39 into build/e109 (cmake -S tools/claims-v3/e109/sp109 -B build/e109 -DCMAKE_PREFIX_PATH=/opt/et; build rc 0). The simulator's cycle counts mean
+nothing (12 a op here); the card's are rule R6.
+
+fp32 shape=16x16m0:small                               rc 0  result both       tensor_errors 0  ok  row_mask 0x0000  arows 16 acols 16
+int8 shape=16x16m0:small                               rc 0  result both       tensor_errors 0  ok  row_mask 0x0000  arows 16 acols 16
+fp32 file:kinds/tiles/fp32/zeros.bin                   rc 0  result unchecked  tensor_errors 0  ok  row_mask 0xffff  arows 16 acols 16
+fp32 shape=16x8:file:kinds/tiles/fp32/zeros.bin        rc 0  result unchecked  tensor_errors 0  ok  row_mask 0xffff  arows 16 acols 8
+fp32 shape=8x16:file:kinds/tiles/fp32/zeros.bin        rc 0  result unchecked  tensor_errors 0  ok  row_mask 0xffff  arows 8  acols 16
+fp32 shape=16x8m0:file:kinds/tiles/fp32/zeros.bin      rc 0  result unchecked  tensor_errors 0  ok  row_mask 0x0000  arows 16 acols 8
+int8 shape=16x8:file:kinds/tiles/int8/zeros.bin        rc 0  result unchecked  tensor_errors 0  ok  row_mask 0xffff  arows 16 acols 8
+int8 shape=8x16:file:kinds/tiles/int8/zeros.bin        rc 0  result unchecked  tensor_errors 0  ok  row_mask 0xffff  arows 8  acols 16
+int8 shape=16x8m0:file:kinds/tiles/int8/zeros.bin      rc 0  result unchecked  tensor_errors 0  ok  row_mask 0x0000  arows 16 acols 8
+fp32 shape=16x16m0:file:kinds/e93/tiles/fp32/a_nz_b_randn.bin  rc 0  result unchecked  tensor_errors 0  ok  row_mask 0x0000  arows 16 acols 16
+
+"both" is the host's check of C against its model of the masked op (masked rows hold 0, workloads/sparsity/host/main.cpp expectC): the mask path runs
+through sp109's prefix exactly as --row-mask does. File tiles are not checked by the host ("unchecked"), as in every E78-frame run.

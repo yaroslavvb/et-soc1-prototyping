@@ -1,0 +1,512 @@
+{
+ "experiment": "E109",
+ "question": "Q133, kinds page section 11 item 11 (int8 zeros' extra 0.61 W), with an arm for item 15 (a live zero on A)",
+ "card": "aifoundry3 card 0, 600 MHz pinned (boot-time TDP 0), E78's frame",
+ "sources": {
+  "q132b_section14": "docs/reports/data/2026-11-01-q132-rtl-bench/README.md section 14; zeros/zeros_check.py",
+  "e78": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json",
+  "m4": "tools/claims-v3/kinds/predictions-e103.json models.float.coef_fJ.a_clocked",
+  "bench": "tools/claims-v3/e109/desk/bench-arms.json (bench_e109.sh, bench_arms_e109.py)"
+ },
+ "readings": {
+  "H_reads": {
+   "what": "Q132(b)'s first: S = c x clocked + r x reads",
+   "r_pj_per_read": 5.933607738615601,
+   "c_fj_per_clocked_bit": 0.0603816649764257
+  },
+  "H_ops": {
+   "what": "Q132(b)'s second: S = c + e x ops",
+   "e_pj_per_op": 769.7229030697772,
+   "c_w": 1.12311570091182
+  },
+  "H_bench": {
+   "what": "the RTL count at M4's clocked-bit price, Q132(b)'s extrapolation (which says int8 - fp32 = -0.51 W at E78's cells)",
+   "a_fj": 1.0660910178957255
+  }
+ },
+ "e78_gap_w": 0.6194323128568877,
+ "duty": {
+  "fp32": 0.9960256806182067,
+  "int8": 0.9966223901439338
+ },
+ "delta_cycles": {
+  "fp32": 7.75,
+  "int8": 7.75
+ },
+ "arms": {
+  "base.fp32.zeros": {
+   "bench_cycles": 538.25,
+   "card_cycles_pred": 546.0,
+   "rate_pred": 1120802524.1242237,
+   "uops_per_op": 512.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 1033939.25,
+   "edges_per_op": 6023384.75,
+   "lane_edges_per_op": 3761120.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  },
+  "m0.fp32.zeros": {
+   "bench_cycles": 536.25,
+   "card_cycles_pred": 544.0,
+   "rate_pred": 1124923121.6393864,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 597104.5,
+   "edges_per_op": 2253858.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  },
+  "k8.fp32.zeros": {
+   "bench_cycles": 274.25,
+   "card_cycles_pred": 282.0,
+   "rate_pred": 2170064461.6022205,
+   "uops_per_op": 256.0,
+   "scp_reads_per_op": 144.0,
+   "clocked_bits_per_op": 522979.25,
+   "edges_per_op": 3055232.75,
+   "lane_edges_per_op": 1902560.0,
+   "b_half_lines_per_op": 16,
+   "a_reads_per_op": 128.0
+  },
+  "r8.fp32.zeros": {
+   "bench_cycles": 282.25,
+   "card_cycles_pred": 290.0,
+   "rate_pred": 2110200614.3856075,
+   "uops_per_op": 256.0,
+   "scp_reads_per_op": 160.0,
+   "clocked_bits_per_op": 533715.25,
+   "edges_per_op": 3145176.75,
+   "lane_edges_per_op": 1958880.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 128.0
+  },
+  "m0k8.fp32.zeros": {
+   "bench_cycles": 272.25,
+   "card_cycles_pred": 280.0,
+   "rate_pred": 2185564922.0422363,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 144.0,
+   "clocked_bits_per_op": 303104.5,
+   "edges_per_op": 1144266.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 16,
+   "a_reads_per_op": 128.0
+  },
+  "base.int8.zeros": {
+   "bench_cycles": 310.25,
+   "card_cycles_pred": 318.0,
+   "rate_pred": 1925549674.542242,
+   "uops_per_op": 256.0,
+   "scp_reads_per_op": 224.0,
+   "clocked_bits_per_op": 387805.0,
+   "edges_per_op": 1751836.75,
+   "lane_edges_per_op": 447856.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 192.0
+  },
+  "m0.int8.zeros": {
+   "bench_cycles": 310.25,
+   "card_cycles_pred": 318.0,
+   "rate_pred": 1925549674.542242,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 224.0,
+   "clocked_bits_per_op": 375651.0,
+   "edges_per_op": 1303980.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 192.0
+  },
+  "k8.int8.zeros": {
+   "bench_cycles": 158.25,
+   "card_cycles_pred": 166.0,
+   "rate_pred": 3688703593.4001985,
+   "uops_per_op": 128.0,
+   "scp_reads_per_op": 112.0,
+   "clocked_bits_per_op": 197565.0,
+   "edges_per_op": 889236.75,
+   "lane_edges_per_op": 224112.0,
+   "b_half_lines_per_op": 16,
+   "a_reads_per_op": 96.0
+  },
+  "r8.int8.zeros": {
+   "bench_cycles": 182.25,
+   "card_cycles_pred": 190.0,
+   "rate_pred": 3222762086.8654366,
+   "uops_per_op": 128.0,
+   "scp_reads_per_op": 128.0,
+   "clocked_bits_per_op": 227869.0,
+   "edges_per_op": 1025436.75,
+   "lane_edges_per_op": 259440.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 96.0
+  },
+  "m0k8.int8.zeros": {
+   "bench_cycles": 158.25,
+   "card_cycles_pred": 166.0,
+   "rate_pred": 3688703593.4001985,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 112.0,
+   "clocked_bits_per_op": 191491.0,
+   "edges_per_op": 665124.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 16,
+   "a_reads_per_op": 96.0
+  },
+  "base.fp32.a_zeros_b_randn": {
+   "bench_cycles": 538.25,
+   "card_cycles_pred": 546.0,
+   "rate_pred": 1120802524.1242237,
+   "uops_per_op": 512.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 1033939.25,
+   "edges_per_op": 6023384.75,
+   "lane_edges_per_op": 3761120.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  },
+  "m0.fp32.a_zeros_b_randn": {
+   "bench_cycles": 536.25,
+   "card_cycles_pred": 544.0,
+   "rate_pred": 1124923121.6393864,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 597104.5,
+   "edges_per_op": 2253858.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  },
+  "base.fp32.a_nz_b_randn": {
+   "bench_cycles": 538.25,
+   "card_cycles_pred": 546.0,
+   "rate_pred": 1120802524.1242237,
+   "uops_per_op": 512.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 7907449.75,
+   "edges_per_op": 10672620.75,
+   "lane_edges_per_op": 8410356.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  },
+  "m0.fp32.a_nz_b_randn": {
+   "bench_cycles": 536.25,
+   "card_cycles_pred": 544.0,
+   "rate_pred": 1124923121.6393864,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 597104.5,
+   "edges_per_op": 2253858.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  }
+ },
+ "predicted_D_w": {
+  "base.fp32.zeros": {
+   "H_reads": 0.0,
+   "H_ops": 0.0,
+   "H_bench": 0.0
+  },
+  "m0.fp32.zeros": {
+   "H_reads": -0.0223730273159346,
+   "H_ops": 0.003171718281753222,
+   "H_bench": -0.5193409761897467
+  },
+  "k8.fp32.zeros": {
+   "H_reads": -0.06257282452622515,
+   "H_ops": 0.8076409445961827,
+   "H_bench": -0.025525456271840996
+  },
+  "r8.fp32.zeros": {
+   "H_reads": 0.08609233355981605,
+   "H_ops": 0.7615623703276855,
+   "H_bench": -0.03474974070593029
+  },
+  "m0k8.fp32.zeros": {
+   "H_reads": -0.07785558131008385,
+   "H_ops": 0.8195720040049901,
+   "H_bench": -0.5291938908389124
+  },
+  "base.int8.zeros": {
+   "H_reads": 0.0,
+   "H_ops": 0.0,
+   "H_bench": 0.0
+  },
+  "m0.int8.zeros": {
+   "H_reads": -0.0014131200000071509,
+   "H_ops": 0.0,
+   "H_bench": -0.024949867477229604
+  },
+  "k8.int8.zeros": {
+   "H_reads": -0.10900798976260617,
+   "H_ops": 1.3571399529822004,
+   "H_bench": -0.019167320885487005
+  },
+  "r8.int8.zeros": {
+   "H_reads": -0.11235560365427233,
+   "H_ops": 0.998494103911558,
+   "H_bench": -0.013187777834304582
+  },
+  "m0k8.int8.zeros": {
+   "H_reads": -0.1103608521748285,
+   "H_ops": 1.3571399529822004,
+   "H_bench": -0.043053288035985515
+  },
+  "base.fp32.a_zeros_b_randn": {
+   "H_reads": 0.0,
+   "H_ops": 0.0,
+   "H_bench": 0.0
+  },
+  "m0.fp32.a_zeros_b_randn": {
+   "H_reads": -0.0223730273159346,
+   "H_ops": 0.003171718281753222,
+   "H_bench": -0.5193409761897467
+  },
+  "base.fp32.a_nz_b_randn": {
+   "H_reads": 0.46517116401366954,
+   "H_ops": 0.0,
+   "H_bench": 8.213003068608469
+  },
+  "m0.fp32.a_nz_b_randn": {
+   "H_reads": -0.0223730273159346,
+   "H_ops": 0.003171718281753222,
+   "H_bench": -0.5193409761897467
+  }
+ },
+ "predicted_quantities": {
+  "H_reads": {
+   "fp32": {
+    "U_w": 0.0223730273159346,
+    "P_w": -0.05548255399414925,
+    "e_op_pj": -52.31035960781107,
+    "Q_w": -0.06257282452622515,
+    "R_w": 0.1486651580860412,
+    "r_B_pj": 4.436273013810157,
+    "U8_w": 0.015282756783858709,
+    "U8_minus_U_scaled_w": -0.006376237745397129
+   },
+   "int8": {
+    "U_w": 0.0014131200000071509,
+    "P_w": -0.10894773217482134,
+    "e_op_pj": -61.79139042233465,
+    "Q_w": -0.10900798976260617,
+    "R_w": -0.003347613891666157,
+    "r_B_pj": -0.7286198561766632,
+    "U8_w": 0.001352862412222322,
+    "U8_minus_U_scaled_w": -6.681901941658647e-07
+   },
+   "gap": {
+    "G_w": 0.6191027945596934,
+    "G_lane_w": -0.02095990731592745,
+    "G_op_w": -0.06035280863095862,
+    "G_rest_w": 0.7004155105065795
+   },
+   "item15": {
+    "R7_w": 0.0,
+    "T_plus_w": 0.0,
+    "R8_w": 0.0
+   }
+  },
+  "H_ops": {
+   "fp32": {
+    "U_w": -0.003171718281753222,
+    "P_w": 0.8164002857232369,
+    "e_op_pj": 769.7229030697773,
+    "Q_w": 0.8076409445961827,
+    "R_w": -0.04607857426849726,
+    "r_B_pj": -7.826125156474305e-15,
+    "U8_w": -0.011931059408807343,
+    "U8_minus_U_scaled_w": -0.008860566178599436
+   },
+   "int8": {
+    "U_w": -0.0,
+    "P_w": 1.3571399529822004,
+    "e_op_pj": 769.7229030697771,
+    "Q_w": 1.3571399529822004,
+    "R_w": -0.35864584907064234,
+    "r_B_pj": 2.516991476853718e-15,
+    "U8_w": 0.0,
+    "U8_minus_U_scaled_w": 0.0
+   },
+   "gap": {
+    "G_w": 0.6194323128568877,
+    "G_lane_w": 0.003171718281753222,
+    "G_op_w": 0.6194323128568875,
+    "G_rest_w": -0.003171718281753
+   },
+   "item15": {
+    "R7_w": 0.0,
+    "T_plus_w": 0.0,
+    "R8_w": 0.0
+   }
+  },
+  "H_bench": {
+   "fp32": {
+    "U_w": 0.5193409761897467,
+    "P_w": -0.009852914649165712,
+    "e_op_pj": -9.289577919164985,
+    "Q_w": -0.025525456271840996,
+    "R_w": -0.009224284434089292,
+    "r_B_pj": -0.2981337768494155,
+    "U8_w": 0.5036684345670714,
+    "U8_minus_U_scaled_w": 0.0009021703833803629
+   },
+   "int8": {
+    "U_w": 0.024949867477229604,
+    "P_w": -0.01810342055875591,
+    "e_op_pj": -10.26763481346087,
+    "Q_w": -0.019167320885487005,
+    "R_w": 0.005979543051182423,
+    "r_B_pj": 0.027101551017202675,
+    "U8_w": 0.02388596715049851,
+    "U8_minus_U_scaled_w": -1.179748130574615e-05
+   },
+   "gap": {
+    "G_w": -0.43934029784499673,
+    "G_lane_w": -0.4943911087125171,
+    "G_op_w": -0.009359058493529401,
+    "G_rest_w": 0.0644098693610498
+   },
+   "item15": {
+    "R7_w": 0.0,
+    "T_plus_w": 0.0,
+    "R8_w": 0.0
+   }
+  }
+ },
+ "rules": {
+  "R0_answer": {
+   "what": "item 11's answer: which share of this session's gap G = S(int8.zeros) - S(fp32.zeros) carries at least half of it",
+   "shares": {
+    "per_op": "G_op = e_op(int8) x O(int8) - e_op(fp32) x O(fp32), O = each format's op rate on zeros, e_op from rule R1",
+    "lanes": "G_lane = U(int8) - U(fp32), U = S(zeros) - S(m0.zeros): what issuing the micro-ops costs on zeros",
+    "per_time": "G_rest = G - G_op - G_lane: what neither moves - the A-word stream and B's reads of the scratchpad, the FSM's busy clocks, the rest"
+   },
+   "line": "a share carries the gap if its 95% lower bound >= G/2 (G = this session's mean gap); if none does, MIXED; if two do (impossible unless one is negative), both are named",
+   "verdicts": [
+    "PER-OP",
+    "LANES",
+    "PER-TIME",
+    "MIXED"
+   ]
+  },
+  "R1_ops": {
+   "what": "Q132(b)'s second reading, S = c + e x ops: per-op work makes the gap",
+   "statistic": "e_op(f) = [D(m0k8.f.zeros) - D(m0.f.zeros)] / [rate(m0k8) - rate(m0)], per pass; G_op as in R0",
+   "line": "PASS if G_op's 95% lower bound >= G/2; FAIL if its upper bound < G/2; else INCONCLUSIVE",
+   "reading_e_op_pj": 769.7229030697772
+  },
+  "R2_lanes": {
+   "what": "the lanes (register clocking, the issued micro-op, int8's TenC read port): U(f) = -D(m0.f.zeros)",
+   "line": "LANES-CARRY if G_lane's 95% lower bound >= G/2; LANES-OPPOSE if its upper bound < 0 (the RTL count's direction: fp32's lanes clock more); else LANES-NEITHER",
+   "rtl_count_prediction": "H_bench: U(fp32) = 0.519 W, U(int8) = 0.025 W, G_lane = -0.494 W (M4's a on the bench's clocked bits, the extrapolation Q132(b) made)"
+  },
+  "R3_per_time": {
+   "what": "the per-time side, where the A-word stream and B's reads are (Q132(b)'s first reading puts the gap here)",
+   "line": "PASS if G_rest's 95% lower bound >= G/2; FAIL if its upper bound < G/2; else INCONCLUSIVE"
+  },
+  "R4_b_reads": {
+   "what": "B-line reuse: r8 against k8 in fp32, the same op rate within 3% and twice B's half-line reads per op",
+   "statistic": "r_B = {[D(r8) - D(k8)] + e_op x [rate(k8) - rate(r8)]} / [B/s(r8) - B/s(k8)], per pass, fp32",
+   "line": "PRICED if the 95% interval of r_B excludes 0 from above; NOT-RESOLVED if it includes 0; H_reads' value of this same statistic (its 5.93 pJ a read less the 3% of A reads a second r8 loses against k8, predicted_quantities.H_reads.fp32.r_B_pj) is named CONSISTENT if inside the interval, else INCONSISTENT",
+   "int8": "reported only: in int8 the RTL's count has r8 read A 13% less often a second than k8 (190 against 166 cycles at the same 96 A reads), so its contrast mixes A and B reads"
+  },
+  "R5_additive": {
+   "what": "the lane side at K = 8 against K = 16: U8(f) = D(k8) - D(m0k8) against U(f) x the issued micro-ops' rate ratio",
+   "line": "PASS per format if the 95% interval of U8 - U x ratio lies inside [-0.15, +0.15] W; FAIL if it lies outside; else INCONCLUSIVE"
+  },
+  "R6_cycles": {
+   "what": "the card's cycles per op for each arm against the RTL's: bench cycles (+period=1) + each format's DELTA (E78's card cycles minus the bench's base)",
+   "line": "PASS per arm if |median measured cycles per op - predicted| <= 2.0; else FAIL",
+   "delta_cycles": {
+    "fp32": 7.75,
+    "int8": 7.75
+   },
+   "predicted": {
+    "m0.fp32.zeros": 544.0,
+    "k8.fp32.zeros": 282.0,
+    "r8.fp32.zeros": 290.0,
+    "m0k8.fp32.zeros": 280.0,
+    "m0.int8.zeros": 318.0,
+    "k8.int8.zeros": 166.0,
+    "r8.int8.zeros": 190.0,
+    "m0k8.int8.zeros": 166.0,
+    "m0.fp32.a_zeros_b_randn": 544.0,
+    "m0.fp32.a_nz_b_randn": 544.0
+   },
+   "check_on_committed_data": "the September fma-rowmask runs (row mask 0x00FF, 16 x 16, fp32) read 544.001 cycles on this card (docs/reports/data/2026-09-18-sparsity-aifoundry3/energy-*/results.json); the bench gives 536.2 + 7.8 = 544.0 for that mask (desk/bench-arms.txt does not list it; bench_arms_e109.py's run() with mask 0xff reproduces it)"
+  },
+  "R7_sign_unseen": {
+   "what": "item 15: with no micro-op issued, A = -0 and A = +0 (both constant words; the B bytes identical) cost the same",
+   "statistic": "D(m0.fp32.a_nz_b_randn) - D(m0.fp32.a_zeros_b_randn)",
+   "line": "PASS if its 95% interval lies inside [-0.25, +0.25] W; FAIL if it lies outside; else INCONCLUSIVE"
+  },
+  "R8_gated_transport": {
+   "what": "item 15: a gated lane's moving B costs only its transport (the RTL: on a gated slot B's random bytes change no counted register; desk/bench-arms.txt: a_zeros_b_randn's counts equal zeros' to the bit, issued and masked)",
+   "statistic": "D(fp32.a_zeros_b_randn) - T_plus, T_plus = D(m0.fp32.a_zeros_b_randn) - D(m0.fp32.zeros)",
+   "line": "PASS if its 95% interval lies inside [-0.25, +0.25] W; FAIL if it lies outside; else INCONCLUSIVE"
+  },
+  "R9_live_split": {
+   "what": "item 15, reported (no verdict): where a live -0 lane with random B spends its watts on this card",
+   "statistics": {
+    "T_minus": "D(m0.fp32.a_nz_b_randn) - D(m0.fp32.zeros): B's random bytes moving to the register files, no micro-op",
+    "L_live": "D(fp32.a_nz_b_randn) - D(m0.fp32.a_nz_b_randn): the live lanes",
+    "X": "L_live - D(anchor_pi): what B's random bytes cost inside a live lane beyond a constant lane (pi x pi)"
+   },
+   "e93_context": "E93 priced a_nz_b_randn on aifoundry1 card 1 at 10.40 W (E88's constant lane 7.92 W + B's bus bits at E88's a + half E88's sign) and read 12.11 W: +1.72 W (E93 R5). E109 runs on another card, so it splits the tile, it does not re-price it"
+  },
+  "R10_tie": {
+   "what": "the session against E78 on this card (one card, 600 MHz pinned, the same tiles and reduction)",
+   "cells": {
+    "fp32.randn D": [
+     24.724927058323647,
+     0.6
+    ],
+    "fp16.randn D": [
+     22.162449221970377,
+     0.6
+    ],
+    "int8.full D": [
+     7.056484747628008,
+     0.3
+    ],
+    "anchor_pi D": [
+     8.360265888204863,
+     0.5
+    ],
+    "fp32.a_zeros_b_randn D": [
+     0.8103868376931361,
+     0.25
+    ],
+    "gap G (S)": [
+     0.6194323128568877,
+     0.2
+    ]
+   },
+   "line": "PASS per cell if |this session's mean - E78's| <= its band; a failed cell labels every verdict, it removes none"
+  }
+ },
+ "passes": [
+  10910,
+  10911,
+  10912,
+  10913
+ ],
+ "smoke_pass": 10901,
+ "min_kept_passes": 3,
+ "cap_card_minutes": 25,
+ "queue_deadline_min": 23,
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+   "tools/claims-v3/kinds/e93/e93.json": "73cb488715fcf0e328bb2a7d88e69f4df22366e7a420d82e22c9914ac2dea3e4",
+   "tools/claims-v3/kinds/e93/tiles/fp32/a_nz_b_randn.bin": "3a321590c5695cca3f84ffec75fbb3c7c9b2e533365f509e980446f15518c715",
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa"
+  }
+ }
+}
