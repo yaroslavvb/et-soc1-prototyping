@@ -36,7 +36,7 @@ passes; pJ per MAC through each pass's measured rate ([`scored.json`](scored.jso
 |---|---|---|---|---|
 | **fp32** (`r_walk`) | **7.92 ± 0.18 W**, 0.367 ± 0.009 · 1.73 ± 0.04 pJ/MAC | **8.61 ± 0.18 W**, 0.399 ± 0.009 · 1.88 ± 0.04 pJ/MAC | **5.04 ± 0.19 W**, 0.234 ± 0.008 · 1.10 ± 0.04 pJ/MAC | 21.58 ± 0.15 W |
 | **fp16** (`r_walk`) | **7.96 ± 0.14 W**, 0.389 ± 0.007 · 0.87 ± 0.02 pJ/MAC | **6.19 ± 0.17 W**, 0.303 ± 0.009 · 0.67 ± 0.02 pJ/MAC | **6.29 ± 0.21 W**, 0.308 ± 0.008 · 0.69 ± 0.02 pJ/MAC | 20.43 ± 0.18 W |
-| **int8** (`r_walk`) | **1.71 ± 0.14 W**, 0.257 ± 0.021 · 0.054 ± 0.004 pJ/MAC | **3.15 ± 0.21 W**, 0.472 ± 0.035 · 0.100 ± 0.007 pJ/MAC | **1.81 ± 0.26 W**, 0.271 ± 0.036 · 0.057 ± 0.008 pJ/MAC | 6.67 ± 0.15 W |
+| **int8** (`r_walk`) | **1.71 ± 0.13 W**, 0.257 ± 0.021 · 0.054 ± 0.004 pJ/MAC | **3.14 ± 0.21 W**, 0.472 ± 0.035 · 0.100 ± 0.007 pJ/MAC | **1.81 ± 0.26 W**, 0.271 ± 0.036 · 0.057 ± 0.008 pJ/MAC | 6.66 ± 0.14 W |
 
 (i) = D(constant operands, frozen result: `fp32.c_abs`, `fp16.c_cancel`, `int8.c_cancel`); (iii) = D(the random
 operands with the result frozen) − (i); (ii) = D(`r_walk`) − D(the same operands frozen). The second figure in each
@@ -46,7 +46,7 @@ random tile, with random signs, costs 2.24 ± 0.17 W more in fp32 (X32, `scored.
 **2. A constant's cost is the lane being clocked; its accumulator's walk costs nothing measurable.** Freezing the
 accumulator of an all-ones tile saves **0.10 ± 0.31 W** in fp32, **0.01 ± 0.13 W** in fp16 and **−0.23 ± 0.25 W**
 in int8 (W32, W16, W8: H1 PASS in all three, `le` 1.0 / 1.0 / 0.5 W). The frozen constant itself costs **7.92 ±
-0.18 W** (fp32), **7.96 ± 0.14 W** (fp16) and **1.71 ± 0.14 W** (int8) over zeros. E78's "the lane is clocked and
+0.18 W** (fp32), **7.96 ± 0.14 W** (fp16) and **1.71 ± 0.13 W** (int8) over zeros. E78's "the lane is clocked and
 its accumulator still walks" (E78 README l.75) keeps its first half only. The stream model says why the walk is
 cheap: in a constant tile every accumulator a lane visits in one k sweep holds the same value, so the C read and the
 result bus change once every 32 micro-ops, and only the register write moves (about 2 bits a micro-op;
@@ -61,7 +61,7 @@ elements every micro-op (columns l and l+8), so the C read and the result bus sw
 or not either value changes. This is E79 Result 5's hypothesis ("the result path swinging between two diverging
 accumulators"), now measured in watts.
 
-**4. The operand bits, with the result frozen, cost 8.61 ± 0.18 W in fp32, 6.19 ± 0.17 W in fp16 and 3.15 ± 0.21
+**4. The operand bits, with the result frozen, cost 8.61 ± 0.18 W in fp32, 6.19 ± 0.17 W in fp16 and 3.14 ± 0.21
 W in int8** (M32, M16, M8: H3 PASS). int8 is the one format where the multiplier side is the largest share (0.47).
 
 **5. Random signs: 4.78 W above a constant in fp32, and the frozen-result design does not freeze them. H4's first
@@ -83,7 +83,7 @@ prices (fp32: clocked lane 7.53 W, 19 fJ per operand-bus bit, 74 fJ per product 
 0.37 / 0.51 / 0.17 W against 0.10 / 0.01 / −0.23. It fails only on the sign pair: M32s (0.24 predicted, 2.52
 measured) and R32s (2.26 measured, 0.003 W below its band's 2.262 low edge; it passes at the no-leakage arm). Inside
 the bands it misses systematically: the fp32 bus swing (4.75 → 3.80 W) and walk (0.26 → 1.24 W) split
-differently, and int8 puts more in the multiplier (2.12 → 3.15 W) and less in the result path (3.07 → 1.81 W) than
+differently, and int8 puts more in the multiplier (2.12 → 3.14 W) and less in the result path (3.07 → 1.81 W) than
 predicted ([`scored.json`](scored.json) `primary.contrasts.*.predicted`).
 
 | contrast | what | D (W) ±95% | predicted (W) [band] | verdict |
