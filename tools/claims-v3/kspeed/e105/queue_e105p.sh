@@ -6,7 +6,7 @@
 #
 # It stops before the next pass on build/e105/STOP-P, after any failed pass, or if a pass would end past E105P_DEADLINE_S (epoch seconds, default its start plus 50 min).
 set -u
-cd "$(dirname "${BASH_SOURCE[0]}")/../../.."
+cd "$(dirname "${BASH_SOURCE[0]}")/../../../.."
 export E101_SPARSITY=build/e105/host/sparsity_host E101_DROP_ARMS=tenb,mm16,gemmnc1,mmp64
 t_start=$(date +%s); deadline=${E105P_DEADLINE_S:-$((t_start + 50 * 60))}; longest=600
 sha256sum build/e105/host/sparsity_host build/e105/kernel/sparsity.elf > build/e105/binaries-p.sha256
