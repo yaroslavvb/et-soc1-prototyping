@@ -1,0 +1,26 @@
+E91: reduce_e78.py unchanged via reduce_e91.py (E86's items; config gate at card 1's 65/65; dips removed)
+E78 aifoundry1-c1: 600 MHz, 498.6 mV, leak 0.4137 W/C (97 runs), runs kept 160/160, passes [11210, 11211, 11212, 11213, 11214], idle-invalid runs 0
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 33.00887942708334
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 23.484  0.043    25.287      22557    5.507
+    fp32.real_l0_mlp_up        23.379  0.097    25.192      22477    5.488
+    fp32.real_l6_mlp_down      23.326  0.108    25.106      22396    5.468
+    fp32.real_l6_attn_qk       23.077  0.062    24.847      22173    5.413
+    fp32.nn_like               12.408  0.089    14.184      12653    3.089
+    anchor_pi                   7.917  0.078     9.709       8663    2.115
+    fp32.zeros                  0.000  0.000     1.791       1598    0.390
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 20.997  0.027    22.846      20380    2.488
+    fp16.real_l6_mlp_down      20.851  0.056    22.684      20231    2.470
+    fp16.real_l0_mlp_up        20.726  0.069    22.537      20104    2.454
+    fp16.real_l6_attn_qk       20.270  0.060    22.102      19715    2.407
+    fp16.nn_like               16.702  0.122    18.548      16547    2.020
+    fp16.zeros                  0.000  0.000     1.891       1687    0.206
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   6.643  0.148     9.037       4695    0.287
+    int8.gauss_q                6.223  0.196     8.525       4429    0.270
+    int8.real_l0_mlp_up         6.009  0.080     8.339       4332    0.264
+    int8.real_l6_mlp_down       5.325  0.229     7.699       4000    0.244
+    int8.real_l6_attn_qk        5.137  0.180     7.512       3902    0.238
+    int8.zeros                  0.000  0.000     2.396       1245    0.076
+  idle consistency median |S - S0 - D| 0.0680814938507801 W; carry-over {'slope_w_per_w': 0.0029449466437267997, 'se': 0.0007077371079274962, 'n': 155}; pi built-in - file None; rail tau re-fit median 1.0

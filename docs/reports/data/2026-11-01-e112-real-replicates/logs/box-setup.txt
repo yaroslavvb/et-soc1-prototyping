@@ -1,0 +1,67 @@
+== host (no device access) ==
+aifoundry1
+ 12:52:13 up 5 days, 22:50,  2 users,  load average: 1.22, 0.80, 0.64
+No process holds an ET-SoC-1 device node or card lock.
+== tree ==
+root /home/yaroslavvb/nekko; V3_DEVICE=1
+card_code_unchanged_sha256: identical to E112's freeze: all
+e91_card_code_sha256_as_e91_froze_it: identical to E112's freeze: all
+e95_harness_as_e95_froze_it: identical to E112's freeze: all
+e112_files_sha256: identical to E112's freeze: all
+the runner's own check (predictions-e86.json): all
+the runner's own check (predictions-e95.json): all
+== tiles against their registered sha256 (each file and each half) ==
+{"real_tiles": 9, "e78_tiles_checked": 9, "problems": []}
+{"real2_tiles": 30, "e86_tiles": 3, "e78_tiles_checked": 6, "problems": []}
+== the binary takes fp16 and int8 with file: operands, --dump-tiles and --stop-file ==
+  fp16: present
+  int8: present
+  file:: present
+  --dump-tiles: present
+  --stop-file: present
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 4021112 Sep 25 15:14 build/ettelem/ettelem
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 3652752 Sep 28 20:56 build/sparsity/host/sparsity_host
+numpy 1.26.4
+-rw-rw-rw- 1 root root 0 Oct 26 15:02 /run/lock/etsoc-shire1.lock
+== the plans of the first passes ==
+{"real": ["fp32.real_l0_mlp_up", "fp32.real_l6_mlp_down", "fp32.real_l6_attn_qk", "fp16.real_l0_mlp_up", "fp16.real_l6_mlp_down", "fp16.real_l6_attn_qk", "int8.real_l0_mlp_up", "int8.real_l6_mlp_down", "int8.real_l6_attn_qk"], "compare": {"fp32": "fp32.nn_like", "fp16": "fp16.nn_like", "int8": "int8.gauss_q"}, "anchors": ["fp32.zeros", "fp32.randn", "fp16.zeros", "fp16.randn", "int8.zeros", "int8.full"], "tie": "anchor_pi", "runs_per_pass": 32}
+  0 s-1 anchor_pi
+  1 s+0 fp32.real_l0_mlp_up
+  2 s+0 int8.real_l6_attn_qk
+  3 s+0 int8.full
+  4 s+0 fp32.zeros
+{"real2": ["fp32.r2_bert_l6_up", "fp32.r2_gpt2_l3_mlp_down", "fp32.r2_gpt2_l6_mlp_down_bf16fwd", "fp32.r2_gpt2_l9_attn_qk", "fp32.r2_resnet18_l2c1", "fp32.r2_resnet18_l3c1", "fp32.r2_t5small_l0_down", "fp32.r2_t5small_l0_up", "fp32.r2_vgg16_fc2", "fp32.r2_vit_l11_down", "fp32.r2_vit_l5_down", "fp16.r2_bert_l6_up", "fp16.r2_gpt2_l6_attn_qk_fp16fwd", "fp16.r2_gpt2_l6_mlp_down_fp16fwd", "fp16.r2_gpt2_l9_attn_qk", "fp16.r2_resnet18_l3c1", "fp16.r2_t5small_l0_down", "fp16.r2_vgg16_fc2", "fp16.r2_vit_l5_down", "int8.r2_gpt2_l11_down_asym", "int8.r2_gpt2_l11_down_maxabs", "int8.r2_gpt2_l11_down_p999", "int8.r2_gpt2_l6_down_p999", "int8.r2_gpt2_l6_down_p9999", "int8.r2_gpt2_l6_down_per_token", "int8.r2_resnet18_l3c1", "int8.r2_t5small_l0_down", "int8.r2_vgg16_fc2", "int8.r2_vgg16_fc2_asym", "int8.r2_vit_l11_down"], "e86": ["fp16.real_l6_mlp_down", "int8.real_l6_mlp_down", "fp16.real_l6_attn_qk"], "anchors": ["fp32.zeros", "fp32.randn", "fp16.zeros", "fp16.randn", "int8.zeros", "int8.full"], "tie": "anchor_pi", "tier1_real2": 25, "tier2_real2": 5, "runs_per_pass": 53}
+  0 s-1 anchor_pi
+  1 s+0 fp16.r2_gpt2_l6_mlp_down_fp16fwd
+  2 s+0 fp32.r2_bert_l6_up
+  3 s+0 fp32.randn
+  4 s+0 fp16.zeros
+== dry runs of one whole pass of each kind (V3_DRY=1: lib.sh stubs every device call) ==
+dry a (block_e86.sh 11200) rc=0
+  device launches the pass would make: 0
+  of them on real/tiles: 0
+2026-11-01T12:52:14 [aifoundry1-c1] kinds p11200 already done
+dry b (block_e95.sh 11240) rc=0
+  device launches the pass would make: 0
+  of them on real2/tiles: 0
+2026-11-01T12:52:14 [aifoundry1-c1] kinds p11240 already done
+== the queue's budget rule on stub blocks (no device: each stub only sleeps) ==
+  12:52:14 queue: a:11210 a:11211 a:11212 a:11213 b:11250 b:11251 b:11252 a:11214 b:11253; budget 40 s from the claim (12:52:14), reserve 4 s, last end 12:52:50, deadline 18:45:00; first estimates a 4 s, b 6 s
+  12:52:14 a:11210 starts at T0+0 s (projected 4 s, end by T0+4 s)
+  12:52:17 a:11210 rc=0 (3 s)
+  12:52:18 a:11211 starts at T0+4 s (projected 3 s, end by T0+7 s)
+  12:52:21 a:11211 rc=0 (3 s)
+  12:52:22 a:11212 starts at T0+8 s (projected 3 s, end by T0+11 s)
+  12:52:25 a:11212 rc=0 (3 s)
+  12:52:26 a:11213 starts at T0+12 s (projected 3 s, end by T0+15 s)
+  12:52:29 a:11213 rc=0 (3 s)
+  12:52:30 b:11250 starts at T0+16 s (projected 6 s, end by T0+22 s)
+  12:52:35 b:11250 rc=0 (5 s)
+  12:52:36 b:11251 starts at T0+22 s (projected 5 s, end by T0+27 s)
+  12:52:41 b:11251 rc=0 (5 s)
+  12:52:42 b:11252 starts at T0+28 s (projected 5 s, end by T0+33 s)
+  12:52:47 b:11252 rc=0 (5 s)
+  12:52:48 budget: skipping a:11214 (now T0+34 s, projected 3 s, ends T0+37 s > T0+36 s)
+  12:52:48 budget: skipping b:11253 (now T0+34 s, projected 5 s, ends T0+39 s > T0+36 s)
+  12:52:48 passes done: 7 (a 4, b 3), skipped 2, at T0+34 s
+  12:52:48 queue done at T0+34 s

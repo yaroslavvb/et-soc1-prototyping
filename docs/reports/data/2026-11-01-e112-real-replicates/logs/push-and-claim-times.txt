@@ -1,0 +1,24 @@
+E112 (Q133), aifoundry1 card 1, Sun 1 Nov 2026 (PST)
+
+pre-registration   commit 0623b052, git commit time 12:51:58 PST; commit_lab.sh printed "COMMIT_LAB: pushed 0623b052" at 12:52:02 PST;
+                   on origin/main by `git branch -r --contains 0623b052` at 12:52 PST
+box setup          run_e112.sh setup (no device access) at 12:50:19 (before the commit, after an rsync of the same files) and 12:52:13
+                   (after it): every hash identical to the freeze; the two dry passes 11200 (34 launches, 9 on real tiles) and 11240
+                   (55 launches, 30 on real2 tiles) ran at 12:50:2x-12:50:36 with ET_DEVICES=1, and read "already done" at 12:52:14
+#community-lab     read at 12:53 PST: every claim released (the last, E108's on card 1, released 12:12); et-who at 12:53: "No process
+                   holds an ET-SoC-1 device node or card lock."
+claim              message 1566555908283302061, Discord's timestamp 2026-11-01T20:53:53.736Z = 12:53:53.736 PST; text
+                   "<ai> **Claude says:** using aifoundry1 card 1 for 1.5 h, until ~14:25 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)"
+budget anchor      E112_T0 = 1793566433 (12:53:53 PST): the queue's last allowed pass end 13:51:53, the card budget's end 13:53:53
+smoke 11201        12:54:09-12:54:53 PST (block begin to end)
+queue start        12:55:11 PST (T0+78 s)
+queue              a:11210 12:55:11-13:00:39 (328 s); a:11211 13:00:54-13:06:14 (320 s); a:11212 13:06:29-13:11:50 (321 s);
+                   a:11213 13:12:05-13:17:39 (334 s); b:11250 13:17:54-13:26:16 (502 s); b:11251 13:26:31-13:34:42 (491 s);
+                   b:11252 13:34:57-13:43:18 (501 s); a:11214 (the spare) 13:43:33-13:48:47 (314 s), started at T0+2980 s with
+                   its projected end T0+3314 s inside T0+3480 s; b:11253 skipped by the budget rule at 13:49:02 (T0+3309 s,
+                   projected 502 s, end T0+3811 s > T0+3480 s)
+session-end read   13:49:02 PST, et-who clean, then `ettelem config` under card 1's lock with timeout 10:
+                   {"tdp_w":65,"temp_threshold_c":65,"power_state":1,"power_state_name":"managed_power","minion_mhz":600,"minion_mv":499}
+release            the same message edited to append " — released", saved at about 13:49:2x PST (the save returned 13:49:24) and read
+                   back: "<ai> Claude says: using aifoundry1 card 1 for 1.5 h, until ~14:25 PST doc — released (edited)"
+card time          12:53:53.7 to about 13:49:24: 55.5 card-minutes of the registered 60

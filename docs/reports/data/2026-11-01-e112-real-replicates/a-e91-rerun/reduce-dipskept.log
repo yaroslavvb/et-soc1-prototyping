@@ -1,0 +1,26 @@
+E78 aifoundry1-c1: 600 MHz, 498.6 mV, leak 0.3991 W/C (97 runs), runs kept 64/160, passes [11210, 11213], idle-invalid runs 0
+  passes set aside: [{'pass': 11211, 'why': ['fp32.randn spans 1.737 W']}, {'pass': 11212, 'why': ['fp32.randn spans 1.811 W']}, {'pass': 11214, 'why': ['fp32.randn spans 2.064 W']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 33.025644680788986
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 23.551  0.463    25.367      22626    5.524
+    fp32.real_l0_mlp_up        23.376  0.242    25.196      22481    5.488
+    fp32.real_l6_mlp_down      23.356  0.299    25.078      22376    5.463
+    fp32.real_l6_attn_qk       23.097  0.718    24.905      22222    5.425
+    fp32.nn_like               12.359  0.205    14.130      12603    3.077
+    anchor_pi                   7.984  0.543     9.769       8716    2.128
+    fp32.zeros                  0.000  0.000     1.774       1583    0.386
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 21.044  0.189    22.870      20402    2.491
+    fp16.real_l6_mlp_down      20.905  0.136    22.746      20286    2.476
+    fp16.real_l0_mlp_up        20.721  0.383    22.559      20124    2.457
+    fp16.real_l6_attn_qk       20.296  0.126    22.069      19684    2.403
+    fp16.nn_like               16.715  0.989    18.516      16519    2.016
+    fp16.zeros                  0.000  0.000     1.884       1681    0.205
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   6.777  0.529     9.055       4704    0.287
+    int8.gauss_q                6.278  1.111     8.540       4437    0.271
+    int8.real_l0_mlp_up         6.049  0.877     8.321       4323    0.264
+    int8.real_l6_mlp_down       5.359  1.515     7.636       3967    0.242
+    int8.real_l6_attn_qk        5.228  0.804     7.591       3944    0.241
+    int8.zeros                  0.000  0.000     2.340       1216    0.074
+  idle consistency median |S - S0 - D| 0.09243896632299453 W; carry-over {'slope_w_per_w': 0.0024974559912802163, 'se': 0.0010541952071484028, 'n': 62}; pi built-in - file None; rail tau re-fit median 0.975

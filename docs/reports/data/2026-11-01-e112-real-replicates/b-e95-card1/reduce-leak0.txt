@@ -1,0 +1,48 @@
+E112b: reduce_e78.py unchanged via reduce_e112b.py (E95's items; config gate at card 1's 65/65; dips removed)
+E78 aifoundry1-c1: 600 MHz, 498.6 mV, leak 0.0000 W/C (-1 runs), runs kept 53/159, passes [11251], idle-invalid runs 0
+  passes set aside: [{'pass': 11250, 'why': ['fp32.zeros departs +0.298 W from its straight line', 'fp16.zeros departs -0.434 W from its straight line', 'int8.zeros departs -0.283 W from its straight line']}, {'pass': 11252, 'why': ['fp32.zeros departs -0.253 W from its straight line']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 33.21536268343815
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.r2_gpt2_l3_mlp_down   24.970  0.000    26.361      23506    5.739
+    fp32.randn                 24.792  0.000    26.134      23322    5.694
+    fp32.r2_vit_l5_down        24.639  0.000    26.143      23336    5.697
+    fp32.r2_bert_l6_up         24.492  0.000    26.117      23311    5.691
+    fp32.r2_gpt2_l9_attn_qk    24.237  0.000    25.682      22926    5.597
+    fp32.r2_t5small_l0_up      22.299  0.000    23.329      20813    5.081
+    fp32.r2_vit_l11_down       20.561  0.000    21.958      19590    4.783
+    fp32.r2_resnet18_l2c1      19.872  0.000    21.404      19091    4.661
+    fp32.r2_gpt2_l6_mlp_down_bf16fwd   18.228  0.000    19.419      17316    4.228
+    fp32.r2_resnet18_l3c1      14.670  0.000    15.851      14142    3.453
+    anchor_pi                   8.499  0.000     9.966       8894    2.171
+    fp32.r2_vgg16_fc2           8.347  0.000     9.570       8538    2.084
+    fp32.r2_t5small_l0_down     2.100  0.000     3.381       3016    0.736
+    fp32.zeros                  0.000  0.000     1.426       1272    0.311
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 22.203  0.000    23.693      21142    2.581
+    fp16.r2_gpt2_l6_mlp_down_fp16fwd   22.138  0.000    23.729      21151    2.582
+    fp16.r2_vit_l5_down        21.937  0.000    23.338      20808    2.540
+    fp16.real_l6_mlp_down      21.855  0.000    23.355      20836    2.543
+    fp16.r2_bert_l6_up         21.809  0.000    23.377      20853    2.546
+    fp16.r2_gpt2_l6_attn_qk_fp16fwd   21.136  0.000    22.920      20444    2.496
+    fp16.real_l6_attn_qk       21.021  0.000    22.854      20388    2.489
+    fp16.r2_gpt2_l9_attn_qk    20.807  0.000    22.502      20072    2.450
+    fp16.r2_resnet18_l3c1      13.872  0.000    15.466      13797    1.684
+    fp16.r2_vgg16_fc2          10.331  0.000    11.652      10392    1.269
+    fp16.r2_t5small_l0_down     3.440  0.000     5.066       4518    0.552
+    fp16.zeros                  0.000  0.000     1.482       1322    0.161
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.094  0.000     9.160       4759    0.290
+    int8.r2_gpt2_l6_down_per_token    6.170  0.000     8.034       4174    0.255
+    int8.r2_gpt2_l6_down_p9999    6.081  0.000     7.862       4085    0.249
+    int8.r2_gpt2_l11_down_p999    6.075  0.000     7.698       3999    0.244
+    int8.real_l6_mlp_down       5.891  0.000     7.929       4119    0.251
+    int8.r2_gpt2_l6_down_p999    5.529  0.000     7.886       4097    0.250
+    int8.r2_vgg16_fc2_asym      4.729  0.000     6.865       3566    0.218
+    int8.r2_resnet18_l3c1       4.631  0.000     6.430       3341    0.204
+    int8.r2_gpt2_l11_down_asym    4.345  0.000     6.411       3331    0.203
+    int8.r2_vgg16_fc2           3.958  0.000     6.076       3156    0.193
+    int8.r2_vit_l11_down        3.150  0.000     5.077       2638    0.161
+    int8.r2_t5small_l0_down     2.634  0.000     4.228       2197    0.134
+    int8.r2_gpt2_l11_down_maxabs    2.375  0.000     4.559       2370    0.145
+    int8.zeros                  0.000  0.000     2.064       1072    0.065
+  idle consistency median |S - S0 - D| 0.14400000000000102 W; carry-over {'slope_w_per_w': 0.004365367685372304, 'se': 0.0015151576112022683, 'n': 52}; pi built-in - file None; rail tau re-fit median None
