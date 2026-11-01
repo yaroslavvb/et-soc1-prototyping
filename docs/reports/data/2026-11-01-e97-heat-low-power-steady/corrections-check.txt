@@ -1,0 +1,132 @@
+[C1] the holds: not steady by the registered test; the plateau, the asymptotes, the range
+  H1: slope over the last 600 s -0.1016 C/min, OLS se 0.0039 (registered reading -0.1016; band |0.02|); verdict FAIL
+  H2: slope over the last 300 s -0.0069 C/min, OLS se 0.0046 (registered reading -0.0069; band |0.02|); verdict PASS
+  H3: slope over the last 600 s +0.0252 C/min, OLS se 0.0097 (registered reading +0.0252; band |0.02|); verdict FAIL
+  H1's reading window, its last 300 s: slope -0.0789 C/min, 0.39 C across the window
+  H1: rolling 300 s windows from 600 s on: rise per board W 0.899-0.936; registered 0.899; with +-0.4 C on its rise [0.869, 0.930]; registered asymptote 12.18 C (tau 130 s, rms 0.32 C), per board W 0.928; 'bound' 0.054 C
+  H2: rolling 300 s windows from 300 s on: rise per board W 0.903-0.921; registered 0.921; with +-0.4 C on its rise [0.893, 0.949]; registered asymptote 13.62 C (tau 500 s, rms 0.10 C), per board W 0.952; 'bound' 0.036 C
+  H3: rolling 300 s windows from 600 s on: rise per board W 0.865-0.884; registered 0.877; with +-0.4 C on its rise [0.859, 0.894]; registered asymptote 19.63 C (tau 160 s, rms 0.99 C), per board W 0.873; 'bound' 0.032 C
+  the three together with +-0.4 C: 0.86-0.95
+  H1's plateau from minute 10, 60 s bins: 11.67-12.77 C (+-0.55)
+  H1 600-900 s, before its move: rise 11.94 C, per board W 0.905
+  H1 1080-1200 s, at its peak: rise 12.76 C, per board W 0.942
+  H1 1500-1800 s, the registered window: rise 11.80 C, per board W 0.899
+  H2 240-480 s, before its move: rise 12.60 C, per board W 0.897
+  H2 600-900 s, the registered window, after its move: rise 13.17 C, per board W 0.921
+  H3 900-1200 s, before its move: rise 19.63 C, per board W 0.868
+  H3 1500-1800 s, the registered window, after its move: rise 19.72 C, per board W 0.877
+  R0: the last six 60 s means [50.651, 50.548, 50.509, 50.451, 50.506, 50.611]; slope over its last 300 s +0.012 C/min
+  R1: the last six 60 s means [52.183, 51.555, 51.163, 50.891, 50.675, 50.583]; slope over its last 300 s -0.244 C/min
+  R2: the last six 60 s means [50.618, 50.57, 50.603, 50.671, 50.677, 50.648]; slope over its last 300 s +0.023 C/min
+
+[C2] the plateau's moves: every sensor, all boxes, each with windows either side
+  the first, in H1, 05:15-05:19 to 05:22-05:24: per sensor mean +0.796 C, sd 0.008, +0.779 to +0.812; board +0.334 W, the idle law's slope there x the move 0.323 W
+    aifoundry1: CPU use 10.3% mean; NIC +1.44 C; NVMe +1.00 C; card 0 reading +0.00 C; held share 0.00
+    aifoundry2: CPU use 1.1% mean; NIC +0.11 C; NVMe +0.00 C; card 0 reading +1.00 C; held share 0.00
+    aifoundry3: CPU use 0.5% mean; NIC +0.17 C; NVMe +0.12 C; card 0 reading +nan C; held share 1.00
+  the second, in H2, 05:39-05:41 to 05:44-05:46: per sensor mean +0.573 C, sd 0.006, +0.557 to +0.581; board +0.306 W, the idle law's slope there x the move 0.237 W
+    aifoundry1: CPU use 0.3% mean; NIC +0.03 C; NVMe +0.96 C; card 0 reading +0.00 C; held share 0.00
+    aifoundry2: CPU use 1.0% mean; NIC +0.30 C; NVMe +0.00 C; card 0 reading +1.21 C; held share 0.00
+    aifoundry3: CPU use 0.9% mean; NIC +0.22 C; NVMe +1.00 C; card 0 reading +nan C; held share 1.00
+  the third, in H3's reduced phase, 06:17-06:20 to 06:22-06:25: per sensor mean +0.276 C, sd 0.005, +0.263 to +0.285; board +0.212 W, the idle law's slope there x the move 0.138 W
+    aifoundry1: CPU use 0.4% mean; NIC -0.15 C; NVMe +0.00 C; card 0 reading +0.00 C; held share 0.00
+    aifoundry2: CPU use 1.4% mean; NIC -0.31 C; NVMe -0.44 C; card 0 reading -1.42 C; held share 0.00
+    aifoundry3: CPU use 0.5% mean; NIC +0.14 C; NVMe +0.28 C; card 0 reading +nan C; held share 1.00
+  the first move's timing, 30 s bins: the die over a straight line through 05:14-05:19; aifoundry1's CPU use; the NICs
+    05:19:00 die -0.073 C; aifoundry1 CPU   0.2%; NIC aifoundry1 52.33 aifoundry2 43.35 aifoundry3 43.70
+    05:19:30 die -0.095 C; aifoundry1 CPU  12.7%; NIC aifoundry1 52.33 aifoundry2 43.33 aifoundry3 43.70
+    05:20:00 die -0.032 C; aifoundry1 CPU  37.8%; NIC aifoundry1 52.30 aifoundry2 43.32 aifoundry3 43.68
+    05:20:30 die +0.087 C; aifoundry1 CPU  37.8%; NIC aifoundry1 52.52 aifoundry2 43.35 aifoundry3 43.70
+    05:21:00 die +0.253 C; aifoundry1 CPU  37.7%; NIC aifoundry1 52.75 aifoundry2 43.40 aifoundry3 43.67
+    05:21:30 die +0.369 C; aifoundry1 CPU  37.8%; NIC aifoundry1 53.03 aifoundry2 43.42 aifoundry3 43.73
+    05:22:00 die +0.470 C; aifoundry1 CPU  19.0%; NIC aifoundry1 53.38 aifoundry2 43.48 aifoundry3 43.75
+    05:22:30 die +0.554 C; aifoundry1 CPU   0.2%; NIC aifoundry1 53.72 aifoundry2 43.50 aifoundry3 43.78
+    05:23:00 die +0.497 C; aifoundry1 CPU   0.2%; NIC aifoundry1 53.98 aifoundry2 43.60 aifoundry3 43.82
+    05:23:30 die +0.432 C; aifoundry1 CPU   0.2%; NIC aifoundry1 54.07 aifoundry2 43.58 aifoundry3 43.82
+  aifoundry1's burst: above 30% CPU 05:19:50-05:22:05, mean 37.8% (6.0 of 16 threads). Elsewhere in the session no minute reaches 10%: E97 README [bursts]; E104's README, item 5, says its accumulators ran on aifoundry1's CPU before its 05:37 claim
+  the idle at the end of R0: 50.56 C; a card held on aifoundry1 for 0.00 of its last 5 minutes, on aifoundry2 for 0.90
+  the idle at the end of R1: 50.63 C; a card held on aifoundry1 for 0.95 of its last 5 minutes, on aifoundry2 for 0.83
+  the idle at the end of R2: 50.66 C; a card held on aifoundry1 for 0.00 of its last 5 minutes, on aifoundry2 for 0.83
+  aifoundry2's NIC at the first move, to its peak: 43.44 C at 05:15-05:19, 43.74 C at 05:25-05:27, +0.30 C
+  aifoundry2's card at the third move: held until 06:16:03, so its reading was falling from its own session and says nothing; at the first two nobody held it
+  three onsets in about 55 minutes of plateau (H1 from minute 10, H2, H3 from minute 10): one per about 18-22 minutes; a chance match within +-1 minute of a given time is about 2/20, roughly 1 in 10
+
+[C3] the extrapolation by baseline: the 2 s rise over idle over S x 0.118
+  | cells | E89's line, median (range) | quadratic | line over [-8, -2) s | cycle 0 on E89's line |
+  | 25 kinds | 1.101 (1.030-1.143) | 1.065 (0.994-1.111) | 1.091 (0.980-1.151) | 1.083 (1.005-1.143) |
+  | direct 14 | 1.103 (1.074-1.143) | 1.082 (0.994-1.111) | 1.117 (1.088-1.151) | 1.107 (1.080-1.143) |
+  | float sums 6 | 1.093 (1.078-1.115) | 1.051 (1.038-1.068) | 0.993 (0.986-1.019) | 1.010 (1.005-1.037) |
+  | int8 sums 5 | 1.074 (1.030-1.118) | 1.073 (1.040-1.105) | 0.999 (0.980-1.007) | 1.044 (1.031-1.056) |
+  | tiles 3 | 1.064 (1.028-1.065) | 1.048 (1.045-1.058) | 1.002 (0.993-1.004) | 1.017 (1.010-1.037) |
+  E97-R7 on baseline line: median 1.101 inside [1.00, 1.20]: True; share in [0.85, 1.30] 1.00
+  E97-R7 on baseline quad: median 1.065 inside [1.00, 1.20]: True; share in [0.85, 1.30] 1.00
+  E97-R7 on baseline gap: median 1.091 inside [1.00, 1.20]: True; share in [0.85, 1.30] 1.00
+  E97-R7 on baseline c0: median 1.083 inside [1.00, 1.20]: True; share in [0.85, 1.30] 1.00
+  float sums, E89's line over the other baselines, median: quad 1.042, gap 1.093, c0 1.076
+  direct cells, the quadratic over E89's line: 0.925-1.000, mean 0.970
+  the nulls: the first launch of a block's lead-in, on all three baselines, where the zeros on both sides of the boundary are the same; and idle to zeros, the zeros' rise over idle
+    fp16.zeros to fp16.zeros, n = 2: E89's line +0.202 C, quadratic +0.047, line over [-8, -2) s -0.096
+    idle to fp16.zeros, n = 2: E89's line +0.260 C, quadratic +0.248, line over [-8, -2) s +0.254
+    idle to fp32.zeros, n = 4: E89's line +0.256 C, quadratic +0.251, line over [-8, -2) s +0.262; sd of E89's line 0.012, 95% +-0.015
+    idle to int8.zeros, n = 7: E89's line +0.334 C, quadratic +0.329, line over [-8, -2) s +0.338; sd of E89's line 0.007, 95% +-0.006
+    int8.zeros to int8.zeros, n = 5: E89's line +0.035 C, quadratic -0.034, line over [-8, -2) s -0.092; sd of E89's line 0.029, 95% +-0.032
+    the zeros' rises over idle measured in blocks: fp32 0.258, fp16 0.259 C (this run); int8 0.340 +- 0.006 (E89)
+  the hold starts: a direct 2 s rise from a rested die, by the registered method
+    H1 int8.full: E89's line 1.159 C, quadratic 1.161 C, S x 0.118 1.138 C, ratio 1.018
+    H3 fp32.randn: E89's line 3.032 C, quadratic 3.030 C, S x 0.118 3.151 C, ratio 0.962
+    the method's null at rest, the last 5 minutes of R0, 99 starts with no launch: mean -0.000 C, sd 0.005
+    E89's int8 full, a sum: 1.20 C (0.863 + 0.340, E89 README); this run's fp32 random, a sum on E89's line: 3.106 C, on the quadratic 3.044 C; E78 measured 3.16 +- 0.08 C
+  cell against S over the 25 kinds, E89's line: +0.009 C + 0.1270 per W of S
+  cell against S over the 25 kinds, cycle 0: +0.041 C + 0.1163 per W of S
+  cell against S over the 25 kinds, quadratic: +0.010 C + 0.1232 per W of S
+  additivity at low S: int8 ones, direct, 0.544 C at S 4.15 W; E89's int8 -1, a sum, 0.56 C at S 4.18 W (E89 README)
+
+[C4] E97-B5 against the wander
+  rise per W of S x share, H3 over H1: 1.040; at +-0.4 C on each rise [0.999, 1.081] (band [1.02, 1.25]); from the leak shares alone 1.054
+
+[C5] what E97-R2 can say with the pass as the unit
+  H_ref by pass 0.1993, 0.1945: relative half-width at t = 12.706 alone 0.153; so a cell can PASS only if r <= 1.084, FAIL only if r > 1.476 or r < 0.694
+  the six PASS cells: [('i8tern', 1.066), ('i8pos', 1.062), ('f16neg1', 1.067), ('f32pi', 1.08), ('i8r0up', 1.073), ('i8r6dn', 1.065)], frames ['fp16.zeros', 'fp32.zeros', 'int8.zeros']; every against-idle cell: ['INCONCLUSIVE'], r 1.082-1.130
+  the reference on the minion rail by pass: 0.2431, 0.2428
+
+[C6] leakage's labels, and the law's form
+  reproduces the pooled law: quadratic coefficients [0.00618, -0.36659, 25.99892] against e97.json [0.00618, -0.36659, 25.99892]; top bin 64.75 C
+  H1: leakage's part 3.91 W of the board's 13.12 W rise over idle (share 0.298); on the three die rails 3.51 W, off them 0.40 W
+  H2: leakage's part 4.48 W of the board's 14.30 W rise over idle (share 0.313); on the three die rails 4.01 W, off them 0.46 W
+  H3: leakage's part 7.51 W of the board's 22.49 W rise over idle (share 0.334); on the three die rails 6.71 W, off them 0.80 W
+  H1 at 62.4 C: loop gain by the law's form: quadratic, pooled 0.36, cubic, pooled 0.36, exponential, pooled 0.37, quadratic, R0 alone 0.36, quadratic, R1 alone 0.34, quadratic, R2 alone 0.35, straight line, pooled 0.31
+  H2 at 63.8 C: loop gain by the law's form: quadratic, pooled 0.39, cubic, pooled 0.39, exponential, pooled 0.39, quadratic, R0 alone 0.38, quadratic, R1 alone 0.37, quadratic, R2 alone 0.38, straight line, pooled 0.32
+  H3 at 70.4 C: loop gain by the law's form: quadratic, pooled 0.44, cubic, pooled 0.45, exponential, pooled 0.47, quadratic, R0 alone 0.43, quadratic, R1 alone 0.41, quadratic, R2 alone 0.42, straight line, pooled 0.30
+  at 65.5 C on 0.90 C per board W: quadratic, pooled 0.40, cubic, pooled 0.40, exponential, pooled 0.41, quadratic, R0 alone 0.39, quadratic, R1 alone 0.37, quadratic, R2 alone 0.39, straight line, pooled 0.31
+  loop gain 1 at 0.87 C per board W: 123 C on the quadratic law, 92 C on the exponential (scale 28 C); no idle reading above 64.8 C, none under load above 78.9 C
+  loop gain 1 at 0.90 C per board W: 120 C on the quadratic law, 91 C on the exponential (scale 28 C); no idle reading above 64.8 C, none under load above 78.9 C
+  loop gain 1 at 0.92 C per board W: 118 C on the quadratic law, 90 C on the exponential (scale 28 C); no idle reading above 64.8 C, none under load above 78.9 C
+  the idle law's slope: 0.399 W/C at 62 C, 0.442 at 65.5 C, 0.498 at 70 C (carried past the top bin)
+  H1: closure in each 300 s window 0.974-0.987; the registered 0.990
+  H2: closure in each 300 s window 0.987-0.990; the registered 0.991
+  H3: closure in each 300 s window 1.002-1.011; the registered 1.001
+  k under load, from H1's own wander (30 s bins, 600-1800 s): 0.427 +- 0.029 W/C (se) over 1.14 C; the idle law at 62.8 C 0.409
+  H3's reduced phase from 5 minutes in, 182 launches: board minus the idle law while a kernel runs 26.87 W, against E78's S 26.70 W; in the gaps' last 1.5 s -0.042 W at a die of 68.8-70.7 C
+  E78's fp32 random S in e78.json: 26.70 W (slope 0.19940337259099877)
+  E78's fp32 random S in e78-leak0.3803.json: 26.28 W (slope 0.3803)
+  E78's fp32 random S in e78-leak0.json: 27.17 W (slope 0.0)
+
+[C7] H3 is another operating point; per die-rail W
+  H3's last 300 s: a 7 s square wave: board 29.4-58.9 W, die mean 68.5-71.9 C, compute share 0.56, after a peak of 78.88 C; 8.0 C above H1's window
+  H1: die rails 11.48 W of 13.12 W; off the rails 1.65 W (0.126); rise per board W 0.899, per die-rail W 1.028
+  H2: die rails 12.50 W of 14.30 W; off the rails 1.79 W (0.126); rise per board W 0.921, per die-rail W 1.053
+  H3: die rails 18.83 W of 22.49 W; off the rails 3.66 W (0.163); rise per board W 0.877, per die-rail W 1.047
+
+[C8] smaller items
+  the three int8 tiles, 2 s rise over idle per W of S, E89's line: l0_mlp_up 0.126, l6_mlp_down 0.126, l6_attn_qk 0.121
+  H1 at 10 min: 11.74 C, 0.981 of the plateau before its first move (11.97 C)
+  r per minion-rail W, points: 0.9868-1.0734; beyond +-5%: [('f32arbz', 1.05), ('f32zero', 1.0734)]; beyond +-7%: [('f32zero', 1.0734)]
+  all 32 kinds below 12 W: 15 read directly, 0.26-0.54 C; 17 sums, 0.56-1.34 C; E89's sums on this run's zeros: i8full 1.20, i8gauss 1.16, i8small 1.06, i8sp50 1.01, i8neg1 0.56, f32ones 1.32
+  the rise's pass-level +- over its lap-level +-: 0.19 (i8high) to 6.87 (f16sp90), median 2.27; int8 wsparse50 lap 0.077, pass 0.294
+  the board's total at the stop: 63.1-63.4 W, 40 W above idle; H3's reduced phase, 22.49 W over idle
+  the heat column's lap-unit +- against the pass-unit: largest pass-unit half-widths i8wsp50 0.294, i8pos 0.256, f16ones 0.185, i8r6qk 0.170; int8 sorted lap 0.002, pass 0.006
+
+[C9] the die's arrival and the frames
+  H1, shares of its registered rise: 10 s 0.21, 30 s 0.32, 60 s 0.45, 120 s 0.64, 300 s 0.90, 600 s 0.99
+  E73's 0.25-0.30 C/W against about 0.9 on the die: 0.28-0.33. S x 0.9 on int8 full gives 8.7 C for 11.8: per board W has the leakage in its denominator; per W of S x share is 1.27-1.33
+  at 60 s, rise per board W: H1 0.505, H3 natural 0.458
