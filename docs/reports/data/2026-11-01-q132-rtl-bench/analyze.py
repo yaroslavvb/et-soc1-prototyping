@@ -115,7 +115,8 @@ def apply_frozen(rows, cols, b, vscale=1.0):
 def ladder(hl_path, base, items, passes=None):
     """Price of each item over its zero in E65/E67's raw runs: per-pass mean difference of p80, then the mean over passes."""
     h = load(hl_path)
-    runs = [r for r in h["runs"] if not r.get("fail") and r.get("on_protocol", True) and r.get("p80") is not None]
+    # aifoundry3 only: E60's file holds three cards at different clocks, and pass numbers repeat between them
+    runs = [r for r in h["runs"] if not r.get("fail") and r.get("on_protocol", True) and r.get("p80") is not None and r.get("card") == "aifoundry3"]
     byp = {}
     for r in runs:
         byp.setdefault(r["pass"], {}).setdefault(r["item"], []).append(r["p80"])
@@ -246,6 +247,38 @@ def main():
             lad["all"] = stats([x for x, _ in allrows], [y for _, y in allrows])
             A = np.array([y for _, y in allrows])[:, None]
             lad["all"]["slope_measured_over_pred"] = float(np.linalg.lstsq(A, np.array([x for x, _ in allrows]), rcond=None)[0][0])
+            # E79: the fp16 and int8 lists, and the layout probe, on the same zero as E79's manifest
+            if os.path.exists(f"{cd}/counts-hlp.json"):
+                hp = load(f"{cd}/counts-hlp.json")["rows"]
+                pr = load(f"{dd}/2026-10-31-e79-fp16-int8-bit-prices/hlp.json")["cards"]["aifoundry3"]["items"]
+                fams = {}
+                for name, x in pr.items():
+                    if not x.get("zero") or x.get("d_p80") is None:
+                        continue
+                    t = x["type"]
+                    kk, zk = f"{t}.{name}", f"{t}.{x['zero']}"
+                    if kk not in hp or zk not in hp:
+                        continue
+                    dW = x["d_p80"]
+                    m, z = hp[kk]["mean"], hp[zk]["mean"]
+                    d = m["vpu"][nk] - z["vpu"][nk]
+                    dc = m["ff"]["all"]["clocked"] - z["ff"]["all"]["clocked"]
+                    rate = 600e6 / CPO[t] * 1024 * 0.9963
+                    co = (b8 if t == "int8" else b)
+                    p = (d * co[0] + dc * co[1]) * rate
+                    fam = x["family"]
+                    fams.setdefault(fam, {})[name] = {"type": t, "D": float(dW), "pred": float(p), "dnets_per_op": d, "stage": {s: m["vpu"]["by_stage"][s] - z["vpu"]["by_stage"][s] for s in m["vpu"]["by_stage"]},
+                                                      "check_mismatch": m["check_mismatch"]}
+                e79 = {}
+                for fam, tb in fams.items():
+                    ys = [v["D"] for v in tb.values()]
+                    ps = [v["pred"] for v in tb.values()]
+                    st = stats(ys, ps) if len(ys) > 2 else {"n": len(ys), "rms_w": float(np.sqrt(((np.array(ys) - np.array(ps)) ** 2).mean()))}
+                    st["items"] = tb
+                    A = np.array(ps)[:, None]
+                    st["slope_measured_over_pred"] = float(np.linalg.lstsq(A, np.array(ys), rcond=None)[0][0]) if np.any(A) else None
+                    e79[fam] = st
+                out["e79"] = e79
             out["ladder"] = lad
         res["other_experiments"][var] = out
     # how far the two coefficients move: jackknife over kinds, and E78's registered leakage arms

@@ -1,32 +1,387 @@
-# Q132(b): the RTL bench returns correct multiply-adds, and what it now counts
+# Q132(b): the RTL bench returns correct multiply-adds, and what each kind of number switches
 
-*Sun 1 Nov 2026 (week 44), desk compute on the mini. No card opened. This first commit pins the bench's prediction for E92 before any
-E92 measurement exists; the full write-up follows in this file.*
+*Sun 1 Nov 2026 (week 44). Desk compute on the mini: Verilator 5.052 from Homebrew, Apple clang, core-et `b38a1a31`
+([`versions.txt`](versions.txt)). **No card was opened and nothing was measured in watts here**: every watt below comes from a committed
+experiment, named where it is used. The bench is [`rtl-sim/fma_toggle_v2/`](../../../../rtl-sim/fma_toggle_v2/). The two old benches are
+untouched, as the record. This closes item 7 of section 11 of the kinds page, and narrows items 2, 6 and 12 (§7).*
 
-**The fault was the simulator, not the stimulus.** Verilator 5.052's DFG optimiser miscompiles core-et's `casez` blocks with a wildcard
-arm and part-select targets, among them the mux in front of the alignment shifter (`txfma_f3.v:160-170`). The shifter's input reads 0, so
-a multiply-add returns only its larger operand: c alone, or a·b alone when c = 0, as Q130(b) §0 row 1 reported. `-fno-dfg` fixes it. The
-20-line reproducer is [`rtl-sim/fma_toggle_v2/verilator_dfg_reproducer.sv`](../../../../rtl-sim/fma_toggle_v2/verilator_dfg_reproducer.sv).
+## Results
 
-**The new bench is core-et's `vpu_top`, whole**, so the micro-op stream, the zero gate, `use_prev_sigs`, the clock gates and the write-back
-are the RTL's own. Functional check ([`fcheck/`](fcheck/)): fp32 40,000 of 40,000 corner vectors exact; fp16 39,701 of 40,000 on the unit's
-own fixed-point window, a named residue of 299 near-total cancellations; all three formats exact on every accumulator word of 60 whole
-TensorFMA runs, and the zero gate's slot count equal to the rule in all 60.
+**1. The fault was the simulator, not the stimulus.** Verilator 5.052's data-flow-graph optimiser miscompiles `casez` blocks with a wildcard arm
+and part-select targets. One of them is the mux in front of the alignment shifter (`txfma_f3.v:160-170`). With the pass on, the shifter's input
+reads 0, so a multiply-add returns only its larger operand: c alone, or a·b alone when c = 0, the pattern Q130(b) §0 row 1 reported. **`-fno-dfg`
+fixes it.** A 20-line file with no RTL of this project reproduces it, `al=0000` against `al=4000`
+([`verilator_dfg_reproducer.sv`](../../../../rtl-sim/fma_toggle_v2/verilator_dfg_reproducer.sv)). The two old benches, with that one flag added and
+nothing else changed, compute fp32 and fp16 right on ungated data ([`old-benches/fcheck-with-and-without-flag.json`](old-benches/fcheck-with-and-without-flag.json)):
+A = B = 1, C0 = 5 goes from C = 5 and 37 to the correct 37 and 69. The operand-staging guess is ruled out directly: `use_prev_sigs` on or off makes no
+difference, wrong both ways with the pass on and right both ways with it off ([`old-benches/use-prev-sigs.txt`](old-benches/use-prev-sigs.txt)).
 
-**The prediction ([`e92-bench-prediction.json`](e92-bench-prediction.json), written by [`predict_e92.py`](predict_e92.py)).** Fitted on E78's
-fp32 and fp16 kinds alone: D = rate × (1.827 fJ × merged-net toggles + 1.082 fJ × clocked register bits), rms 0.283 W on E78. Run on E92's
-frozen tiles (`6b8f23f1`), that says, in watts:
+The old benches had real faults of their own too, on gated kinds and in int8, and the new bench drops them by not doing those jobs (§2).
 
-| contrast | predicted | adder and normaliser: net toggles an op |
-|---|---:|---:|
-| fp32 `h_sub` − `h_add` (the adder alternates) | **+3.22** | +1,364,416 |
-| fp16 `h_sub` − `h_add` | **+6.45** | +1,792,069 |
-| fp32 `c_alt` − `c_abs` | **+3.85** | +1,360,576 |
-| fp16 `c_alt` − `c_abs` | **+6.80** | +1,771,589 |
-| fp32 `h_allsub` − `h_add` (a steady subtract) | **+0.12** | +12,933 |
-| fp16 `h_allsub` − `h_add` | **+0.21** | +9,741 |
-| fp32 `c_neg` − `c_abs` | **+0.02** | +5,253 |
-| fp32 `h_add` − `c_abs` | +0.42 | 0 |
-| fp32 `s_abs` − `c_abs` | +2.00 | +735,474 |
+**2. The new bench is core-et's `vpu_top`, whole.** The micro-op stream, the zero gate, `use_prev_sigs`, the clock gates, the register files and the
+write-back are the RTL's own. **What remains testbench code:** the scratchpad (an array that answers two cycles later and never refuses), the core (one
+start pulse and a control word), and back doors that load and read C. It reproduces the card with nothing tuned: **538 and 310 cycles start to start,
+where E78 measures 546.001 and 318.000**, the same 8 cycles either way, which fits the core's loop ([`fsm-natural-period.txt`](fsm-natural-period.txt)); 512 micro-ops of 8 lanes against 256 of 16 slots.
 
-Every other registered contrast, and the recount's merge beside this one, is in the JSON.
+**3. The functional check passes** ([`fcheck/`](fcheck/), rerun with `make check`, about 1.5 minutes).
+
+| check | fp32 | fp16 | int8 |
+|---|---:|---:|---:|
+| one `txfma_top`, random and corner operands (zeros, denormals, infinities, NaNs, near-cancelling sums) | **40,000 of 40,000 exact** | **39,701 of 40,000** on the unit's own window; residue 299, named below | |
+| whole TensorFMA ops: words of C exact, 22, 22 and 19 cases (launch, all-MADD, gated, corners), 2–4 ops | **22,016 of 22,016** | **22,016 of 22,016** | **18,944 of 18,944** |
+| A = B = 1, C0 = 5, two all-MADD ops (the old probe) | 37 | 69 | 133 |
+| valid column slots against the gate rule, 63 cases | all equal | all equal | all equal |
+| all 51 kinds at 3 points of a launch: 39,168 words of C against software | 0 mismatched | 0 mismatched | 0 mismatched |
+| all 51 kinds: the RTL's valid slots against `kinds.json`'s `gated_lane_frac` | equal | equal | equal |
+
+fp16 is not exact arithmetic, and that is the unit, not the bench: it keeps 25 bits below the largest of its three terms and one's-complements a negative
+sum that lost bits, so only 33,793 of those 40,000 vectors equal the exact sum rounded toward zero. [`fp16_model.py`](../../../../rtl-sim/fma_toggle_v2/fp16_model.py)
+computes that window, read off `txfma_f3.v`, `txfma_c2.v`, `txfma_f4.v` and `txfma_f5.v`. **The residue is sums that cancel to within one unit of the window,**
+where the leading-one logic has nothing to normalise. The vectors are built to hit it, and it is 0 of 22,016 words in whole ops.
+
+**4. The counts.** All 51 kinds, per multiply-add (table in §8; [`counts-v2.json`](counts-v2.json) `rows.<type>.<kind>.mean`):
+
+| random data, per multiply-add | fp32 `randn` | fp16 `randn` | int8 `full` |
+|---|---:|---:|---:|
+| merged nets toggled in the unit, the recount's method (`nets_hier`) | **1,431** | **581** | **35.6** |
+| the same, its merge learned once on random data (`nets_map`, §4) | 1,816 | 747 | 35.6 |
+| the whole VPU (`nets_map`) | 1,931 | 805 | 45.4 |
+| register bits clocked, whole VPU | **1,932** | 965 | 47 |
+| register bits that change | 429 | 188 | 7.7 |
+
+Per op, fp32 switches 1.20× what fp16 does (whole VPU, `nets_map`), with exactly the same bits clocked; per multiply-add that is 2.4×, because fp16 does twice as many. int8
+is still **not comparable**: its multiply, product sum and add are behavioural RTL, so no nets inside them exist to count.
+
+**5. Beside E78: two terms predict it.** D = rate × (k × merged-net toggles + a × clocked register bits), each over the type's zeros. Fitted on E78's fp32 and fp16 kinds:
+**k = 1.871 ± 0.021 fJ, a = 1.092 ± 0.014 fJ, rms 0.357 W, r = 0.9994, ρ = 0.991** over 33 kinds; **leave-one-out rms 0.375 W**. Either term alone fails (nets 3.64 W, clocks 4.85 W).
+**Out of sample, with those two numbers frozen:**
+
+| set | what it is | n | rms (W) | r | measured / predicted |
+|---|---|---:|---:|---:|---:|
+| fp32 → fp16, fp16 → fp32 | fitted on one format, applied to the other | 16, 17 | 0.376, 0.452 | 0.9996, 0.9994 | |
+| E86 | GPT-2 tiles, aifoundry3 | 6 | 0.193 | 0.9988 | |
+| E90 | signs and re-drawn tiles, aifoundry3 | 16 | 0.482 | 0.9985 | |
+| E82, E88 | aifoundry1 card 1, with one card scale (0.971) fitted on E82 | 33, 14 | 0.361, 0.452 | 0.9993, 0.9991 | |
+| **E65** | **one B bit at a time, all 32 positions** | **32** | **0.128** | 0.9956 | 1.024 |
+| E79 | fp16 B bits, all 16 | 16 | 0.132 | 0.9952 | 1.002 |
+| E70 | 2–23 bits at once, low or spread | 16 | 0.281, 0.172 | 0.999 | 1.021, 0.980 |
+| E67 | one A bit at a time, all 32 | 32 | 0.264 | 0.9909 | 0.842 |
+| E92 | **its 32 tiles, frozen before its data: see 6** | 32 | 0.603 | 0.9944 | |
+
+The set's own hardest contrasts come out too: **E65's bit 22, 4.65 W measured, 4.63 W predicted; E79's balanced layout of that bit, 0.669 W measured, 0.686 W predicted**, the 7×
+"all-in price" explained with no new parameter; E70's spread minus low at 8 bits, 3.86 W measured, 4.05 W predicted; E67's two-flip grid, 62–96% of the sum on the card, 64–100% in the bench. Compare
+E78's frozen models: Q130(c) rms 2.27, 1.76 W; Q130(b) r2 1.83, 1.41–1.87 W ([`scored.json`](../2026-10-31-e78-kinds-energy-matrix/scored.json) `rules.E78-R2`). That comparison flatters this fit, which came after E78's data; the out-of-sample rows are the fair ones.
+
+int8 fails across formats (rms 2.2 W, the float coefficients under-predict by 1.8 W) because its arithmetic has no nets; by itself it fits k = 3.74, a = 2.13 fJ, rms 0.287 W, leave-one-out 0.331 W.
+
+**6. The sign question, as a prediction.** The bench's count for E92's frozen tiles was committed in **`de545f0c` at 00:43:14 PDT**, during E92's card session and before its first data commit (`4e8eb836`, 01:06:51 PDT).
+It said the alternation is dear and a steady subtract is free, and the first half came in low. A later variant (`nets_map`, `e7cb1f21`, 01:10:16 PDT) was computed before I read E92's data but after it was on main, so by the clock it is post hoc.
+
+| E92 contrast, paired per pass ([`e92-prediction-scored.json`](e92-prediction-scored.json)) | measured (W, 95%) | **frozen prediction** | post hoc variant | the recount's merge |
+|---|---:|---:|---:|---:|
+| fp32 `h_sub` − `h_add`: the adder alternates, same operands | 4.42 ± 0.44 | **3.22** | 4.72 | 0.33 |
+| fp16 `h_sub` − `h_add` | 6.86 ± 0.40 | **6.44** | 7.19 | 2.25 |
+| fp32 `c_alt` − `c_abs`: alternates, no operand sign moves | 5.08 ± 0.45 | **3.85** | 5.78 | 1.11 |
+| fp32 `h_allsub` − `h_add`: a steady subtract | 0.04 ± 0.35 | **0.12** | 0.05 | 0.21 |
+| fp32 `c_neg` − `c_abs` | 0.02 ± 0.06 | **0.02** | 0.02 | 0.00 |
+| fp16 `h_allsub` − `h_add` | 0.19 ± 0.32 | **0.21** | 0.09 | 0.09 |
+| fp32 `s_abs` − `c_abs`: random signs, frozen sum | 2.38 ± 0.56 | **2.00** | 2.93 | 0.34 |
+| 32 tiles, rms, r | | **0.603 W, 0.9944** | 0.434 W, 0.9982 | 2.184 W, 0.9269 |
+
+**How many adder toggles alternating causes:** in fp32, **+2,218,107 merged-net toggles an op in the adder and normaliser, 578 per alternation**, and +435,871 register bits, against +16,741 for a steady subtract.
+In fp16, +2,317,896, 302 per alternation of one of its two products ([`counts-e92.json`](counts-e92.json), `h_sub` − `h_add`, `unit.by_stage.adder_norm`). At the frozen k that is about 1,100 fJ an alternation
+in fp32, where E92 measures about 1,100. **The sign's cost is in the adder, as the guess said: one inverted 52-bit bus and what it carries, on every change of add and subtract, and nothing when the operation holds** (`txfma_c2.v:303`, `txfma_f3.v`).
+
+The recount's merge misses it by 13×, and that is a finding about the merge (§4), not about the adder.
+
+## 1. Why the old benches failed, and how that was found
+
+One lane with 1.5 × 2.5 + 1, 2 × 3 + 1 and 1 × 1 + 5 returned 3.75, 6 and 5: the larger operand alone. Tracing the stages, the exponents, the operand order and the aligner's control were all right, and the aligner's input was 0 while the mux selecting it had valid inputs.
+`-O0` made it right; `-fno-*` one pass at a time found `-fno-dfg`, and no other pass mattered. The fault needs the `casez` wildcard: the same block as `case … default`, or as if/else, comes out right ([`verilator_dfg_reproducer.sv`](../../../../rtl-sim/fma_toggle_v2/verilator_dfg_reproducer.sv)).
+
+The recount's own table had the clue: `txfma_align_shf`, zero toggles in every VCD column. MUL ops were always right because they do not use that shifter's input, and the recount's C = 0 points are unchanged by the flag (1,192.0 and 1,197.1 against 1,192.1 and 1,197.7, `old-benches/recount-nodfg.json` `randn.points`).
+
+## 2. What else was wrong in the old benches
+
+With the flag on, the old benches are right on ungated data. These faults remain in them, and none is in the new bench, because the RTL now does these jobs.
+
+| fault | effect | evidence |
+|---|---|---|
+| `uop_prev` on after any valid (`fma_toggle/tb.sv:94`). The RTL needs a prior micro-op with **all eight lanes valid** (`vpu_ctrl.v:849-861`). | A lane whose first MADD micro-op was gated keeps the MUL control word (`txfma_c0.v:222`) and returns a·b: 423 of 925 results in `sparse50`. | [`old-benches/fcheck-gated-kinds-with-flag.json`](old-benches/fcheck-gated-kinds-with-flag.json) |
+| int8's C from the EX-stage word | `tima_top.v:111` adds C in F3, two cycles after a and b. Still C = 161 and 165 with the flag. | [`old-benches/fcheck-with-and-without-flag.json`](old-benches/fcheck-with-and-without-flag.json) |
+| a first op entirely MUL | the RTL multiplies only in a launch's first A column (`vpu_tensorfma.v:726`) | |
+
+## 3. What changes, and what does not
+
+| earlier figure | now | source |
+|---|---|---|
+| **1,946** RTL signal bits for one flip (chip diagram `tfma.flip.stages`: a = π, b bit 11, c = 100) | **Unchanged, to the bit: 1,946**, with the fact's results `42cfc1cc`, `42cfc230`. The faulty build gives 1,295 and returns c alone. That research's simulation was not built with this fault. | [`old-benches/flip-nodfg.json`](old-benches/flip-nodfg.json), `flip-dfg.json` |
+| **"about 1,300 physical nets"** per random multiply-add | **1,429**, the recount's own bench, tiles and method with only the flag changed (+9.8%); 1,431 on the new bench over a launch. Still a floor: the merge is learned on each window, and learned over twelve tiles it gives 1,816. | `old-benches/recount-nodfg.json` `randn.mean.nets_hier` ÷ 4,096; `counts-v2.json` |
+| **602.5** register bits clocked | That subset is unchanged, and it was only ever the 838 bits the old counter could see. **The whole unit is now measured: 1,739.8 load per multiply-add**, every data kind alike, which is the chip diagram's "1,739 of 2,071". 1,932 across the VPU. | `counts-v2.json` `fp32.randn.mean.ff.txfma.clocked` ÷ 4,096 |
+| §5.1's first version: "the tree stays level, the stages after it toggle **three times as much** for bit 22 as for bit 0" (the page's verifier dropped it) | Bit 22 against bit 4: **the adder, normaliser and result path 383 against 19 net toggles a multiply-add, 20×; the multiplier 52.5 against 24.5, 2.1×.** So the tree does not stay quite level and the rest moves far more than 3×. Table in §8. | [`counts-hl.json`](counts-hl.json), `analysis.json` `other_experiments.vpu_map.ladder.e65_bit` |
+| Q130(b) r2's 1,557 / 648 / 33.6 per MAC | 1,431 / 581 / 35.6 by the same merge; 2.5× fp32 over fp16 where r2 had 2.4×. int8 stays not comparable. | `counts-v2.json` |
+| r2's k of 2.486 fJ, "fitted to a count from a datapath that computes the wrong sum" | 1.871 fJ, with a second term, a = 1.092 fJ per clocked bit. Both are fitting constants, not energies per wire (§6). | `analysis.json` `coef_spread.vpu_map` |
+| "the replay, with its broken MADD, cannot say how much of the 8.73 W [all-ones over zeros] costs" | **Almost none of it is data.** All-ones fp32 toggles 24 merged nets a multiply-add against random's 1,931 and clocks the same 1,932 bits: 8.41 W of clocking and 0.08 W of nets, against 8.26 W measured. | `analysis.json` `split.fp32.ones` |
+| §0 row 5: the gate's 51-of-51 "two codings of one reading" | Now the RTL's own gate, read from its own valid wires: 51 of 51 equal `kinds.json`. The (l, l+8) pairing and 256 micro-ops of int8 are no longer reconstructed. | `counts-v2.json` `valid_slots` |
+
+**Random data's watts, by the fit** (not a measurement; §8 has all four rows):
+
+| | D measured | register clocking | data nets: multiplier | adder and normaliser | result path | operand bus | exponent, control, sequencer |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| fp32 `randn` | 24.72 | **8.41** | **7.57** | **4.90** | 0.69 | 1.55 | 1.87 |
+| fp16 `randn` | 22.16 | **8.40** | **5.01** | **4.45** | 0.71 | 1.53 | 2.11 |
+
+E88 measured a split of a different stream on another card; the same coefficients and E82's card scale put it at: lane clocked 8.23 W against its 7.92; operand side 9.16 against 8.61; result path 4.85 against 5.04 (fp32); 8.18, 6.56, 5.84 against 7.96, 6.19, 6.29 (fp16) (`analysis.json` `card_scale.vpu_map.e88_pred`).
+
+## 4. Two merges, and why this file's map exists
+
+**The recount's `nets_hier` is reported everywhere, and it cannot be used on a regular stream.** It merges two names with one waveform when one scope is an ancestor of the other, with no bit-position term, learned on each run's own window. A single control bit in a parent scope that flips with a whole bus therefore covers the entire bus. That is precisely what an add/subtract flag does to a 52-bit aligned operand, so on `h_sub` it reports 200,000 net toggles an op against 570,000 register bits that change, which is impossible. The recount's README called this merge "safe on any stimulus"; it is not.
+
+**`nets_map`** ([`train_maps.py`](../../../../rtl-sim/fma_toggle_v2/train_maps.py), `settle_count --train`) applies the same rule once, over 18 tiles of random and gated data in all three formats, and keeps that one list of nets for every run, so a stream cannot merge what it fails to separate. `nets_hier2` is a third, cheaper repair. On E78: rms 0.357 (map), 0.283 (hier2), 0.431 W (hier). On E65's single bits: 0.128 (map, measured/predicted 1.024), 0.311 (hier2, 1.146), 1.127 W (hier, 2.308). **I chose the map as primary after seeing those ladder fits**, so its advantage on them is not independent evidence; E92 is the only blind test, and hier2 is what was frozen for it.
+
+**Stage attribution** credits each merged net to the earliest stage among the names it carries, because a stage drives the next. Stages are read from the scope: f0 and the lane's buses are the operand bus; f1 and f2 the multiplier; f3, f4 and f5 the adder and normaliser; f6 and the C register file the result path.
+
+## 5. Registers and clocks
+
+`macros_acct.vh` instruments the `FF` macro family, the "one line and the obvious next pass" the recount named, so every register in the VPU now reports. Per multiply-add in fp32, on a lane the gate leaves on: 1,739.8 of the unit's bits load and 192.5 more in the rest of the VPU, whatever the numbers; for zeros, 7.3 of the unit's. Of those 1,932, only the data-dependent 429 change. **A lane that is on costs about a third of random fp32's switching power whether or not its numbers change**, and that is what E88 called "the lane clocked".
+
+int8 zeros' extra 0.61 W is not explained here. The RTL clocks fewer bits a second in int8 zeros than in fp32 zeros (0.76 against 1.17 × 10¹⁵), so the VPU's registers point the wrong way. The scratchpad's read rate points the right way, 4.3 against 3.2 × 10¹¹ a second (224 reads an op at 1.72× the rate, against 288), but the dcache is not in this bench, so that is a candidate and nothing more (`counts-v2.json` `scp_reads`, `ff`).
+
+## 6. What this cannot say
+
+- **RTL, not silicon, and not a netlist.** core-et is the Erbium branch, a later revision of the same lineage. Zero delay, so no glitches: k absorbs them.
+- **k and a are fitting constants at 600 MHz and 522 mV.** A merged net is a floor on wires (the open netlist counts 3,299 switching nets where this counts 1,816), so 1.87 fJ is not the energy of a wire. Leakage arms move them to 1.92, 1.12 and 1.83, 1.07 fJ.
+- **The scratchpad, the dcache and the core are not modelled**, and it shows: the fit under-predicts every kind whose operands move on gated lanes, by 0.17–0.65 W (`sparse50`, `wsparse50`, one operand all zero). That is the term most clearly missing.
+- **The A side runs 15–20% over** (E67 measured / predicted 0.842; E70's A ladder 0.802), and **high-toggle bit ladders on a busy partner too** (E60 `lb`, 0.871). The B side does not. Unexplained.
+- **int8's multiply is one line of behavioural RTL**, so its k and a are not comparable with the float ones. A gate-level count of `tima_top` would be.
+- **Counts carry some of the tool.** Every Verilator optimisation off, against this build: registers identical; merged nets +3.2% (fp32 `randn`), +5.9% (fp16), int8's unit +35% ([`optimiser-sensitivity/`](optimiser-sensitivity/); the recount found about 10% across versions).
+- **The fit came after E78's data, and the choice of merge after E65's** (§4). E92 is the only blind test. The frozen variant under-predicted fp32's alternation by 27% and had the right order and the right near-zeros.
+
+## 7. Section 11, and what a reader can be told
+
+- **Item 7 closes.** Every per-kind toggle count now has a functional check behind it.
+- **Item 6 narrows to its named gaps:** two constants predict float kinds and B-side single bits to an rms of 0.13–0.48 W; gated kinds' operand transport, the A side's 15–20% and int8 across formats remain.
+- **Item 2 narrows,** with E92: the count of adder toggles is above, and it matches E92's price per alternation.
+- **Item 12, in part:** E79's list and its layout probe are predicted. int8 zeros' 0.61 W stays open.
+
+**For the blog, each from a committed file:**
+
+- The lab's simulator was computing the multiply-add wrong because of a compiler bug in the simulator, and a one-line build flag fixes it (`verilator_dfg_reproducer.sv`).
+- The unit is now simulated whole, and it returns the exact answer on 40,000 hand-built hard cases and on every accumulator of every kind (`fcheck/`).
+- A random 32-bit float multiply-add flips about 1,400–1,800 merged nets and clocks about 1,900 register bits (`counts-v2.json`).
+- Multiplying the same number over and over flips almost nothing, and still draws a third of what random data draws, because a working lane's registers are clocked anyway (`analysis.json` `split`).
+- Two constants turn those counts into watts, and they predict the measured power of bit flips that were never used to fit them, to about a tenth of a watt on the B side (`analysis.json` `other_experiments`).
+- Flipping a high mantissa bit costs twenty times as much after the multiplier as a low bit does, and only twice as much inside it (`counts-hl.json`).
+- A random sign is expensive because the adder must change between adding and subtracting, which inverts a 52-bit bus each time. Subtracting steadily costs nothing extra (`counts-e92.json`, E92).
+
+**Next:** report the optimiser fault to Verilator, a decision for the owner, since it would go out in his name; a gate-level count of `tima_top`; the dcache's read bus in scope.
+
+## 8. The tables
+
+Generated by [`make_tables.py`](make_tables.py) from [`analysis.json`](analysis.json), written by [`analyze.py`](analyze.py).
+
+### All 51 kinds
+
+Per multiply-add for the counts, watts over the type's own zeros for D. `fit` is the plain two-term fit (fp32 and fp16 pooled; int8 by itself), so `fit − D` is in-sample.
+nets = merged-net toggles of the whole VPU (`nets_map`); unit = the multiply-add unit alone, the first by this file's map, the second by the recount's per-run merge; clocked = register bits clocked; changed = register bits that change.
+
+| kind | D (W) | fit − D | nets | unit (map) | unit (recount) | clocked | changed | slots valid of 4,096 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| fp32.randn_small | 24.76 | +0.28 | 1,950.6 | 1,833.1 | 1,451.0 | 1,932.3 | 436.0 | 4,096 |
+| fp32.randn | 24.72 | +0.15 | 1,930.7 | 1,816.1 | 1,431.4 | 1,932.3 | 428.8 | 4,096 |
+| fp32.randn_large | 24.71 | +0.14 | 1,927.3 | 1,812.3 | 1,432.6 | 1,932.3 | 426.6 | 4,096 |
+| fp32.randn_sorted | 23.38 | +0.47 | 1,811.7 | 1,703.6 | 1,354.1 | 1,932.3 | 407.7 | 4,096 |
+| fp32.uniform01 | 22.65 | +0.84 | 1,768.4 | 1,664.1 | 1,237.3 | 1,932.3 | 364.5 | 4,096 |
+| fp32.fp16grid | 19.62 | +0.07 | 1,327.6 | 1,232.5 | 944.3 | 1,932.3 | 340.1 | 4,096 |
+| fp32.bf16trunc | 18.14 | -0.14 | 1,129.8 | 1,039.2 | 779.3 | 1,932.3 | 308.2 | 4,096 |
+| fp32.smallint | 14.08 | -0.43 | 743.0 | 662.3 | 461.1 | 1,728.5 | 227.3 | 3,614 |
+| fp32.pow2 | 13.98 | -0.38 | 617.8 | 535.2 | 344.4 | 1,932.3 | 213.9 | 4,096 |
+| fp32.nn_like | 13.04 | -0.42 | 1,016.4 | 918.6 | 731.2 | 1,052.8 | 223.9 | 2,016 |
+| fp32.pi | 8.47 | +0.04 | 25.4 | 5.3 | 4.2 | 1,932.3 | 13.4 | 4,096 |
+| fp32.ones | 8.26 | +0.24 | 23.9 | 5.1 | 4.0 | 1,932.3 | 12.8 | 4,096 |
+| fp32.neg_ones | 8.14 | +0.36 | 23.9 | 5.1 | 4.0 | 1,932.3 | 12.8 | 4,096 |
+| fp32.sparse50 | 7.30 | -0.56 | 538.4 | 452.8 | 367.5 | 701.0 | 115.2 | 925 |
+| fp32.a_zeros_b_randn | 0.81 | -0.50 | 50.3 | 14.1 | 14.1 | 254.4 | 8.4 | 0 |
+| fp32.a_randn_b_zeros | 0.62 | -0.33 | 47.3 | 7.2 | 7.2 | 254.4 | 8.4 | 0 |
+| fp32.sparse90 | 0.58 | -0.17 | 52.1 | 24.1 | 12.9 | 270.8 | 12.8 | 34 |
+| fp32.zeros | 0.00 | +0.00 | 14.2 | 0.0 | 0.0 | 254.4 | 8.4 | 0 |
+| fp16.randn_small | 22.21 | -0.08 | 806.2 | 747.2 | 597.4 | 965.3 | 189.2 | 4,096 |
+| fp16.randn | 22.16 | -0.06 | 804.5 | 746.5 | 580.6 | 965.2 | 188.1 | 4,096 |
+| fp16.randn_sorted | 20.75 | +0.24 | 739.4 | 686.3 | 537.7 | 965.2 | 173.9 | 4,096 |
+| fp16.pair_half_zero | 20.12 | -0.43 | 664.1 | 609.7 | 488.4 | 965.2 | 173.6 | 4,096 |
+| fp16.uniform01 | 19.43 | +0.13 | 656.4 | 604.9 | 438.8 | 965.2 | 149.7 | 4,096 |
+| fp16.fp8grid | 18.05 | -0.15 | 560.1 | 512.6 | 386.7 | 965.2 | 148.6 | 4,096 |
+| fp16.nn_like | 17.60 | -0.44 | 615.8 | 561.4 | 450.5 | 796.3 | 150.6 | 3,296 |
+| fp16.smallint | 17.00 | -0.35 | 489.0 | 443.9 | 329.5 | 962.0 | 136.6 | 4,080 |
+| fp16.sparse50 | 13.20 | -0.40 | 471.9 | 421.5 | 345.8 | 607.0 | 118.4 | 2,399 |
+| fp16.ones | 8.45 | +0.04 | 11.9 | 2.6 | 2.1 | 965.2 | 6.4 | 4,096 |
+| fp16.neg_ones | 8.38 | +0.11 | 11.9 | 2.6 | 2.1 | 965.2 | 6.4 | 4,096 |
+| fp16.wsparse50 | 7.06 | -0.65 | 241.6 | 199.9 | 160.2 | 364.3 | 54.2 | 983 |
+| fp16.sparse90 | 1.41 | -0.31 | 48.9 | 31.0 | 23.6 | 165.8 | 11.7 | 160 |
+| fp16.a_zeros_b_randn | 0.78 | -0.47 | 25.2 | 7.1 | 7.1 | 127.2 | 4.2 | 0 |
+| fp16.wsparse90 | 0.74 | -0.29 | 27.8 | 12.0 | 7.6 | 136.8 | 6.5 | 40 |
+| fp16.a_randn_b_zeros | 0.66 | -0.38 | 23.4 | 3.5 | 3.5 | 127.2 | 4.2 | 0 |
+| fp16.zeros | 0.00 | +0.00 | 7.1 | 0.0 | 0.0 | 127.2 | 4.2 | 0 |
+| int8.full | 7.06 | -0.32 | 45.4 | 35.6 | 35.6 | 46.9 | 7.7 | 4,096 |
+| int8.gauss_q | 6.60 | +0.06 | 44.7 | 35.6 | 35.6 | 46.9 | 7.8 | 4,096 |
+| int8.sorted | 6.59 | -0.45 | 40.3 | 31.5 | 31.5 | 46.9 | 6.5 | 4,096 |
+| int8.pos | 6.17 | -0.45 | 36.7 | 27.7 | 27.7 | 46.9 | 6.2 | 4,096 |
+| int8.smallint | 6.00 | +0.58 | 44.0 | 35.3 | 35.3 | 46.9 | 7.8 | 4,096 |
+| int8.sparse50 | 5.46 | -0.11 | 34.5 | 26.8 | 26.8 | 45.3 | 6.3 | 3,808 |
+| int8.ternary | 5.19 | +0.57 | 37.1 | 29.9 | 29.9 | 46.7 | 6.8 | 4,064 |
+| int8.highbit | 3.23 | -0.03 | 15.4 | 12.9 | 12.9 | 46.9 | 2.3 | 4,096 |
+| int8.wsparse50 | 3.14 | +0.07 | 23.8 | 16.7 | 16.7 | 32.2 | 3.2 | 1,460 |
+| int8.neg_ones | 1.63 | +0.04 | 2.3 | 0.1 | 0.1 | 46.9 | 0.6 | 4,096 |
+| int8.ones | 1.56 | +0.06 | 1.9 | 0.1 | 0.1 | 46.9 | 0.6 | 4,096 |
+| int8.sparse90 | 1.14 | +0.11 | 9.5 | 6.6 | 6.6 | 28.2 | 1.3 | 730 |
+| int8.wsparse90 | 0.54 | +0.04 | 5.8 | 2.9 | 2.9 | 24.6 | 0.7 | 82 |
+| int8.a_full_b_zeros | 0.50 | +0.17 | 6.8 | 0.2 | 0.2 | 24.1 | 0.5 | 0 |
+| int8.a_zeros_b_full | 0.31 | -0.05 | 3.3 | 0.4 | 0.4 | 24.1 | 0.5 | 0 |
+| int8.zeros | 0.00 | +0.00 | 1.2 | 0.0 | 0.0 | 24.1 | 0.5 | 0 |
+
+### The fits on E78
+
+| scope | counted as | rms (W) | leave-one-out rms (W) | r | ρ | worst (W) | k (fJ per net toggle) | a (fJ per clocked bit) |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| fp32 | vpu_map | 0.366 | 0.403 | 0.9993 | 0.990 | 0.68 | 1.854 | 1.089 |
+| fp32 | unit_map | 0.511 | 0.557 | 0.9988 | 0.990 | 0.98 | 1.948 | 1.107 |
+| fp32 | vpu_hier | 0.482 | 0.552 | 0.9987 | 0.988 | 0.97 | 2.326 | 1.124 |
+| fp32 | unit_hier | 0.638 | 0.727 | 0.9977 | 0.988 | 1.26 | 2.448 | 1.149 |
+| fp32 | vpu_hier2 | 0.282 | 0.309 | 0.9996 | 0.993 | 0.47 | 1.834 | 1.079 |
+| fp32 | vpu_map_only | 3.994 | 4.045 | 0.9484 | 0.880 | 8.32 | 2.96 | None |
+| fp32 | clk_only | 5.524 | 6.001 | 0.7658 | 0.586 | 9.87 | None | 2.338 |
+| fp32 | ff_toggles_clk | 0.873 | 0.973 | 0.9954 | 0.988 | 1.68 | 8.626 | 0.977 |
+| fp16 | vpu_map | 0.303 | 0.322 | 0.9997 | 0.997 | 0.59 | 1.909 | 1.084 |
+| fp16 | unit_map | 0.436 | 0.458 | 0.9994 | 0.997 | 0.93 | 2.042 | 1.093 |
+| fp16 | vpu_hier | 0.343 | 0.381 | 0.9994 | 0.991 | 0.56 | 2.399 | 1.106 |
+| fp16 | unit_hier | 0.453 | 0.499 | 0.9991 | 0.997 | 0.83 | 2.579 | 1.116 |
+| fp16 | vpu_hier2 | 0.279 | 0.299 | 0.9997 | 0.997 | 0.47 | 1.812 | 1.089 |
+| fp16 | vpu_map_only | 3.095 | 3.131 | 0.9517 | 0.891 | 8.31 | 3.208 | None |
+| fp16 | clk_only | 4.016 | 4.434 | 0.8714 | 0.838 | 9.56 | None | 2.332 |
+| fp16 | ff_toggles_clk | 0.562 | 0.606 | 0.9985 | 0.994 | 1.05 | 8.102 | 1.051 |
+| fp32+fp16 | vpu_map | 0.357 | 0.375 | 0.9994 | 0.991 | 0.84 | 1.871 | 1.092 |
+| fp32+fp16 | unit_map | 0.507 | 0.530 | 0.9989 | 0.991 | 1.01 | 1.975 | 1.11 |
+| fp32+fp16 | vpu_hier | 0.431 | 0.460 | 0.9990 | 0.988 | 0.96 | 2.349 | 1.121 |
+| fp32+fp16 | unit_hier | 0.576 | 0.615 | 0.9982 | 0.991 | 1.24 | 2.487 | 1.143 |
+| fp32+fp16 | vpu_hier2 | 0.283 | 0.294 | 0.9997 | 0.994 | 0.49 | 1.827 | 1.082 |
+| fp32+fp16 | vpu_map_only | 3.636 | 3.670 | 0.9476 | 0.883 | 8.31 | 3.061 | None |
+| fp32+fp16 | clk_only | 4.852 | 5.070 | 0.8171 | 0.717 | 9.85 | None | 2.335 |
+| fp32+fp16 | ff_toggles_clk | 0.753 | 0.793 | 0.9967 | 0.988 | 1.70 | 8.436 | 1.003 |
+| int8 | vpu_map | 0.287 | 0.331 | 0.9934 | 0.968 | 0.58 | 3.735 | 2.133 |
+| int8 | unit_map | 0.368 | 0.418 | 0.9897 | 0.971 | 0.69 | 4.589 | 2.166 |
+| int8 | vpu_hier | 0.276 | 0.315 | 0.9940 | 0.971 | 0.62 | 3.896 | 2.129 |
+| int8 | unit_hier | 0.368 | 0.418 | 0.9897 | 0.971 | 0.69 | 4.589 | 2.166 |
+| int8 | vpu_hier2 | 0.288 | 0.332 | 0.9934 | 0.968 | 0.58 | 3.727 | 2.157 |
+| int8 | vpu_map_only | 0.682 | 0.707 | 0.9693 | 0.882 | 1.45 | 4.967 | None |
+| int8 | clk_only | 1.656 | 1.830 | 0.7548 | 0.657 | 3.47 | None | 7.017 |
+| int8 | ff_toggles_clk | 0.485 | 0.550 | 0.9843 | 0.929 | 0.87 | 21.903 | 2.414 |
+
+### Across formats, coefficients fitted on one and applied to the other
+
+| counted as | fp32 → fp16 rms (W), r | fp16 → fp32 rms (W), r | fp32+fp16 → int8 rms (W), bias (W), r |
+|---|---:|---:|---:|
+| vpu_map | 0.376, 0.9996 | 0.452, 0.9994 | 2.215, -1.813, 0.9934 |
+| vpu_hier | 0.382, 0.9993 | 0.528, 0.9987 | 1.867, -1.528, 0.9935 |
+| vpu_hier2 | 0.285, 0.9997 | 0.292, 0.9996 | 2.261, -1.852, 0.9934 |
+
+### Coefficients frozen on E78's fp32 and fp16 kinds, applied to other experiments
+
+| set | measured on | n | rms (W) | bias (W) | r | ρ | measured / predicted |
+|---|---|---:|---:|---:|---:|---:|---:|
+| e90, floats | aifoundry3, E90 | 16 | 0.482 | -0.065 | 0.9985 | 0.985 | |
+| e86, floats | aifoundry3, E86 | 6 | 0.193 | +0.105 | 0.9988 | 1.000 | |
+| e82, floats, card scale 0.9711 fitted here | aifoundry1 card 1 | 33 | 0.361 | -0.104 | 0.9993 | 0.991 | |
+| e88, floats, E82's card scale | aifoundry1 card 1 | 14 | 0.452 | +0.383 | 0.9991 | 0.991 | |
+| E65, fp32 B, one bit, A = 1.0 | aifoundry3 | 32 | 0.128 | -0.027 | 0.9956 | 0.977 | 1.024 |
+| E65, B, A = π | aifoundry3 | 5 | 0.708 | +0.684 | 0.9984 | 1.000 | 0.888 |
+| E67, fp32 A, one bit, B = 1.0 | aifoundry3 | 32 | 0.264 | +0.164 | 0.9909 | 0.974 | 0.842 |
+| E67, A, B = π | aifoundry3 | 5 | 0.520 | +0.518 | 0.9986 | 1.000 | 0.828 |
+| E67, the interaction grid | aifoundry3 | 24 | 0.938 | +0.820 | 0.9745 | 0.961 | 0.854 |
+| E70, low bits together | aifoundry3 | 9 | 0.281 | +0.032 | 0.9988 | 1.000 | 1.021 |
+| E70, spread bits | aifoundry3 | 7 | 0.172 | +0.141 | 0.9993 | 1.000 | 0.980 |
+| E70, A, low bits | aifoundry3 | 7 | 0.999 | +0.809 | 0.9985 | 1.000 | 0.802 |
+| E60, low bits, A = π | aifoundry3 | 7 | 1.238 | +1.184 | 0.9992 | 1.000 | 0.871 |
+| E60, A's order | aifoundry3 | 8 | 0.522 | +0.518 | 0.9992 | 1.000 | 0.859 |
+| E79, a16 | aifoundry3 | 16 | 0.222 | +0.079 | 0.9839 | 0.959 | 0.923 |
+| E79, a8 | aifoundry3 | 8 | 0.523 | +0.173 | 0.9607 | 0.333 | 0.792 |
+| E79, b16 | aifoundry3 | 16 | 0.132 | -0.005 | 0.9952 | 0.988 | 1.002 |
+| E79, b8 | aifoundry3 | 8 | 0.062 | +0.004 | 0.7091 | 0.833 | 1.396 |
+| E79, b8k | aifoundry3 | 8 | 0.088 | -0.033 | -0.5117 | -0.119 | 0.751 |
+
+### What the coefficients do under other readings
+
+- vpu_map: k 1.871 ± 0.021 fJ, a 1.092 ± 0.014 fJ (jackknife over kinds); leakage arm 0: 1.917, 1.122, rms 0.384 W; arm 0.3803: 1.829, 1.065, rms 0.335 W
+- vpu_hier: k 2.349 ± 0.040 fJ, a 1.121 ± 0.027 fJ (jackknife over kinds); leakage arm 0: 2.406, 1.152, rms 0.460 W; arm 0.3803: 2.296, 1.093, rms 0.405 W
+- vpu_hier2: k 1.827 ± 0.014 fJ, a 1.082 ± 0.011 fJ (jackknife over kinds); leakage arm 0: 1.872, 1.111, rms 0.305 W; arm 0.3803: 1.786, 1.055, rms 0.265 W
+
+### Random data's watts, split by the model
+
+| kind | D | clocked register bits | data nets | multiplier | adder and normaliser | result path (f6 + C register file) | operand bus (f0 + lane) | exponent | control | sequencer |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| fp32.randn | 24.72 | 8.41 | 16.46 | 7.57 | 4.90 | 0.69 | 1.55 | 0.89 | 0.60 | 0.38 |
+| fp16.randn | 22.16 | 8.40 | 13.69 | 5.01 | 4.45 | 0.71 | 1.53 | 1.11 | 0.62 | 0.38 |
+| int8.full | 7.06 | 1.53 | 5.21 | 2.03 | 0.96 | 0.00 | 1.81 | 0.00 | 0.01 | 0.54 |
+| fp32.ones | 8.26 | 8.41 | 0.08 | 0.00 | 0.01 | 0.04 | 0.01 | 0.00 | 0.01 | 0.12 |
+
+(The split is of the fit, not a measurement, and it is over the type's zeros only in total: the stage columns are absolute nets at the fit's k.)
+
+### Merged-net toggles per multiply-add, by stage (the whole VPU, `nets_map`)
+
+| kind | clocked | changed | operand bus | multiplier | adder and normaliser | result path | exponent | control | sequencer | total |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| fp32.randn | 1,932 | 429 | 180.2 | 881.3 | 570.1 | 80.2 | 103.7 | 69.9 | 44.2 | 1,930.7 |
+| fp32.uniform01 | 1,932 | 364 | 174.3 | 885.8 | 515.9 | 72.6 | 56.2 | 21.3 | 41.3 | 1,768.4 |
+| fp32.smallint | 1,729 | 227 | 61.9 | 89.9 | 324.6 | 73.8 | 91.4 | 66.8 | 32.9 | 743.0 |
+| fp32.ones | 1,932 | 13 | 1.6 | 0.2 | 1.2 | 4.9 | 0.4 | 1.0 | 14.3 | 23.9 |
+| fp32.nn_like | 1,053 | 224 | 125.3 | 432.9 | 281.6 | 47.4 | 48.1 | 36.8 | 42.5 | 1,016.4 |
+| fp16.randn | 965 | 188 | 88.9 | 291.9 | 259.3 | 41.5 | 64.9 | 35.9 | 22.1 | 804.5 |
+| fp16.uniform01 | 965 | 150 | 83.5 | 290.4 | 169.1 | 36.7 | 43.0 | 13.3 | 20.3 | 656.4 |
+| fp16.ones | 965 | 6 | 0.8 | 0.1 | 0.5 | 2.4 | 0.2 | 0.7 | 7.2 | 11.9 |
+| int8.full | 47 | 8 | 15.4 | 17.2 | 8.1 | 0.0 | 0.0 | 0.1 | 4.6 | 45.4 |
+| int8.ones | 47 | 1 | 0.7 | 0.0 | 0.1 | 0.0 | 0.0 | 0.1 | 1.1 | 1.9 |
+
+### E65's list: a flip of one B bit, A = 1.0, by stage, per multiply-add over `lq_h0`
+
+| bit | D (W) | predicted (W) | nets | operand bus | multiplier | adder and normaliser | result path | exponent | control |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 0.63 | 0.84 | 97.5 | 8.0 | 26.3 | 19.1 | 0.1 | 39.9 | 3.7 |
+| 2 | 0.41 | 0.46 | 53.8 | 8.1 | 22.9 | 19.2 | -0.3 | 3.4 | 0.3 |
+| 4 | 0.49 | 0.45 | 52.1 | 8.1 | 24.5 | 18.9 | -0.0 | 0.0 | 0.0 |
+| 6 | 0.41 | 0.43 | 50.4 | 8.1 | 22.6 | 19.5 | -0.1 | 0.0 | 0.0 |
+| 8 | 0.53 | 0.47 | 54.5 | 8.8 | 21.8 | 22.5 | 0.9 | 0.1 | 0.1 |
+| 10 | 0.99 | 0.95 | 110.6 | 16.1 | 28.8 | 51.6 | 10.1 | 1.5 | 0.3 |
+| 12 | 1.57 | 1.48 | 172.8 | 24.9 | 33.4 | 87.7 | 19.2 | 1.6 | 2.4 |
+| 14 | 2.09 | 2.15 | 250.5 | 32.3 | 39.8 | 132.0 | 31.3 | 5.2 | 3.7 |
+| 16 | 2.82 | 2.73 | 317.3 | 37.1 | 46.7 | 181.7 | 40.1 | 1.9 | 1.6 |
+| 18 | 3.24 | 3.12 | 363.4 | 42.5 | 53.1 | 204.5 | 51.2 | 1.4 | 1.4 |
+| 20 | 3.96 | 3.85 | 448.0 | 47.6 | 56.5 | 252.4 | 66.0 | 9.1 | 5.1 |
+| 21 | 4.18 | 4.24 | 493.8 | 50.1 | 56.9 | 281.9 | 71.9 | 12.7 | 7.7 |
+| 22 | 4.65 | 4.63 | 538.7 | 44.7 | 52.5 | 311.4 | 71.5 | 30.5 | 15.6 |
+| 23 | 0.78 | 0.73 | 85.3 | 8.4 | -0.0 | 2.5 | 9.6 | 51.8 | 9.0 |
+| 25 | 0.69 | 0.55 | 64.0 | 4.4 | -0.0 | 2.7 | 6.5 | 40.5 | 8.3 |
+| 27 | 0.52 | 0.45 | 51.8 | 6.1 | 0.0 | 2.0 | 3.0 | 34.6 | 5.0 |
+| 29 | 1.06 | 1.21 | 140.4 | 8.1 | -0.0 | 3.8 | 8.4 | 99.1 | 19.0 |
+| 30 | 0.77 | 1.00 | 116.4 | 6.1 | -0.0 | 3.1 | 6.1 | 81.0 | 17.3 |
+| 31 | 0.57 | 0.65 | 75.3 | 4.1 | -0.0 | 0.1 | 18.7 | 0.0 | 50.8 |
+
+## 9. Files, and how to rerun
+
+| file | what |
+|---|---|
+| `counts-v2.json` | all 51 kinds at 3 points of a launch: `rows.<type>.<kind>.points[]` and `.mean`; `unit` and `vpu` each with `nets_hier`, `nets_hier2`, `nets_map`, names, ids, `by_stage`; `ff.{all,txfma,tima,rest}.{clocked,toggles,present}`; `valid_slots`; `check_mismatch` |
+| `counts-e92.json`, `counts-e88.json`, `counts-e90.json`, `counts-e86.json`, `counts-hl.json`, `counts-hlp.json` | the same for E92's, E88's, E90's and E86's tiles, E60–E70's 146 and E79's 73 |
+| `analysis.json`, `analyze.py`, `make_tables.py` | every fit and out-of-sample score above |
+| `e92-bench-prediction.json`, `predict_e92.py`, `e92-prediction-scored.json`, `score_e92_prediction.py` | the prediction and its score |
+| `fcheck/` | the functional check's output |
+| `old-benches/` | the old benches with and without the flag; the recount redone; `use_prev_sigs`; the flip |
+| `optimiser-sensitivity/` | the same three kinds with Verilator's optimisations off and on, before the map existed |
+| `versions.txt` | tool versions and core-et's commit |
+
+```
+cd rtl-sim/fma_toggle_v2
+make CORE_ET=../../external/core-et && make check CORE_ET=../../external/core-et
+python3 train_maps.py --bin obj_vpu/Vtb --settle ./settle_count --kinds ../../tools/claims-v3/kinds --out maps
+python3 run_kinds.py --bin obj_vpu/Vtb --accum ./accum --settle ./settle_count --maps maps --kinds ../../tools/claims-v3/kinds --out counts-v2.json --jobs 8
+```
+
+A clean build from the committed files reproduced `counts-v2.json`'s fp32 `randn` exactly, register for register and net for net. Installed for this: `brew install verilator` on the mini, and numpy under `uv` for the analysis. Nothing ran on a lab host.

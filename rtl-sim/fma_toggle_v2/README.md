@@ -45,7 +45,8 @@ One free-running clock. The chip's PLL, clock tree and wires are not modelled, a
 ```
 make CORE_ET=../../external/core-et          # Verilator 5 on PATH; about 30 s on 10 cores
 make check                                   # the functional check, about 1.5 min
-python3 run_kinds.py --bin obj_vpu/Vtb --accum ./accum --settle ./settle_count --kinds ../../tools/claims-v3/kinds --out counts.json --jobs 8
+python3 train_maps.py --bin obj_vpu/Vtb --settle ./settle_count --kinds ../../tools/claims-v3/kinds --out maps    # 20 s; a map belongs to its binary
+python3 run_kinds.py --bin obj_vpu/Vtb --accum ./accum --settle ./settle_count --maps maps --kinds ../../tools/claims-v3/kinds --out counts.json --jobs 8   # 51 kinds, about 4 min on 10 cores
 ```
 
 The mini's Verilator came from Homebrew (`brew install verilator`, 5.052). For a Mac with conda-forge's Verilator, see `../fma_toggle/README.md`.
@@ -65,7 +66,8 @@ and records `check_mismatch`.
 | `fp16_model.py` | fp16's arithmetic as the RTL's fixed-point window computes it: it is not exact arithmetic |
 | `accum.c` | the accumulators a launch has reached after n ops, in software (the same rules, ported), so an op can start mid-launch |
 | `ff_acct.sv`, `macros_acct.vh`, `acct.cpp` | register accounting for **every** register, including the `FF` macro family the first recount could not see |
-| `settle_count.cpp` | `../fma_toggle/settle_count.cpp` plus `hier2` and a stage for each merged net; its five original counts are computed as before |
+| `settle_count.cpp` | `../fma_toggle/settle_count.cpp` plus `hier2`, the learned merge map, and a stage for each merged net; its five original counts are computed as before |
+| `train_maps.py` | learns once, on random data in every format, which RTL names are one net |
 | `run_kinds.py` | every tile through coverage and a VCD, by stage, behind the check |
 | `tb_flip.sv`, `flip_stages.py` | one flipped operand bit, diffed between two traced runs |
 | `tb_prev.sv` | `use_prev_sigs` on and off, as a direct test |

@@ -35,6 +35,8 @@ def hw(x):
 
 def word(fmt, rng, style):
     """One 32-bit lane word of the tile, by style."""
+    if style == "ones":
+        return {"fp32": 0x3F800000, "fp16": 0x3C003C00, "int8": 0x01010101}[fmt]
     if fmt == "fp32":
         if style == "random":
             return fw(rng.gauss(0, 1))
@@ -150,8 +152,6 @@ def run_case(job):
     words = [word(fmt, rng, style) for _ in range(512)]
     A = [words[16 * i:16 * i + 16] for i in range(16)]
     B = [words[256 + 16 * i:256 + 16 * i + 16] for i in range(16)]
-    if style == "ones5":
-        pass
     if c0kind == "five":
         c0 = 5 if fmt == "int8" else 0x40A00000
         C0 = [[c0] * 16 for _ in range(16)]
@@ -196,7 +196,8 @@ def run_case(job):
     valid_rtl = acct["tima_valid" if fmt == "int8" else "txfma_valid"]
     return {"label": label, "fmt": fmt, "style": style, "seed": seed, "ops": ops, "first": first, "c0": c0kind,
             "tally": dict(tally), "valid_slots_rtl": valid_rtl, "valid_slots_gate_rule": rep.valid,
-            "cycles_per_op": acct["cycles"] / max(1, acct["ops"]), "examples": ex}
+            "cycles_per_op": acct["cycles"] / max(1, acct["ops"]), "examples": ex,
+            "final_c_00": f"{got[ops].get((0, 0), 0):08x}"}
 
 
 def main():
@@ -214,6 +215,8 @@ def main():
                 continue
             for s in range(1, a.seeds + 1):
                 jobs.append((f"{fmt}-{style}-launch-{s}", fmt, style, 100 * s + 1, a.ops, 1, "none", a))
+        # Q130(b)'s probe: A = B = 1, C0 = 5, two all-MADD ops: C must be 37, 69 and 133
+        jobs.append((f"{fmt}-ones5", fmt, "ones", 1, 2, 0, "five", a))
         for s in range(1, a.seeds + 1):
             jobs.append((f"{fmt}-random-allmadd-{s}", fmt, "random", 200 * s + 2, a.ops, 0, "random", a))
             jobs.append((f"{fmt}-gated-allmadd-{s}", fmt, "gated", 300 * s + 3, a.ops, 0, "random", a))
@@ -232,6 +235,8 @@ def main():
     json.dump({"summary": summary, "rows": rows}, open(a.out, "w"), indent=1)
     print(json.dumps(summary, indent=1))
     for r in rows:
+        if r["style"] == "ones":
+            print(r["label"], r["tally"], "C[0][0] =", r["final_c_00"])
         if r["tally"].get("mismatch") or r["valid_slots_rtl"] != r["valid_slots_gate_rule"]:
             print(r["label"], r["tally"], r["valid_slots_rtl"], r["valid_slots_gate_rule"], r["examples"][:2])
 
