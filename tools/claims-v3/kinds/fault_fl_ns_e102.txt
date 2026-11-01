@@ -1,0 +1,106 @@
+Part 1. E102's all-in fp32 B list over its zero, through the same code path as part 4: the near-identical operands where the start overcounts.
+  bit  0: res bits fl   15538, real       0; flops fl   31900, real   12288; those parts of the model, fl  0.96 W, real  0.09 W; E65 measured the whole step at 0.63 W
+  bit  6: res bits fl   37978, real       0; flops fl   53380, real   12288; those parts of the model, fl  2.16 W, real  0.09 W; E65 measured the whole step at 0.38 W
+  bit 11: res bits fl   57823, real   21888; flops fl   72282, real   37037; those parts of the model, fl  3.22 W, real  1.29 W; E65 measured the whole step at 1.10 W
+  bit 16: res bits fl   78408, real   64824; flops fl   96846, real   80427; those parts of the model, fl  4.36 W, real  3.61 W; E65 measured the whole step at 2.79 W
+  bit 20: res bits fl   94907, real   97142; flops fl  124329, real  123656; those parts of the model, fl  5.33 W, real  5.43 W; E65 measured the whole step at 3.97 W
+  bit 22: res bits fl   94932, real   99641; flops fl  175987, real  187746; those parts of the model, fl  5.72 W, real  6.03 W; E65 measured the whole step at 4.63 W
+
+Part 2. make_e88.simulate's result-bus count on E92's integer-sum tiles, the same start, by launch length and how many op indices it samples: the sample alone moves it.
+  w_h_sub    launch/samples 533000/16:  127365.0  launch/samples 533000/4:  137190.0  launch/samples 542000/16:  109025.0  launch/samples 542000/4:  111258.0
+  w_h_add    launch/samples 533000/16:  130459.0  launch/samples 533000/4:  140326.0  launch/samples 542000/16:  107498.5  launch/samples 542000/4:  109140.0
+  wr_h_sub   launch/samples 533000/16:  113190.7  launch/samples 533000/4:  112964.8  launch/samples 542000/16:  112983.5  launch/samples 542000/4:  113502.5
+  wr_h_add   launch/samples 533000/16:  121836.9  launch/samples 533000/4:  121896.8  launch/samples 542000/16:  121679.0  launch/samples 542000/4:  123228.5
+
+Part 3. make_e92.sign_counts as shipped ignores the zero gate; its flops on two tiles with zero words (part 4's fl column is the same start with the gate).
+  fp32.nn_like:    327599
+  fp16.nn_like:    372106
+
+Part 4. 86 float tiles, every one E88's fit and items, E90 and E92 rest on, deduplicated by content. Per op, at four op indices over make_e88's launch, gate included, one code path (fl: C = fl((n-1) S); real: accum.c). res = C read + result bus + store. watts: E88's b x res + E92's f x flops, which is the part of the model the start moves.
+tile                         res fl res real flops fl flops real model W fl model W real  moved W  who rests on it
+fp32.c_abs                      748      748       76         76       0.04         0.04    +0.00  E92, E88 items
+fp32.c_neg                      748      748     2276       2276       0.05         0.05    +0.00  E92
+fp32.c_alt                     8940     8940   555844     555844       4.59         4.59    +0.00  E92
+fp32.h_add                     8940     8940       76         76       0.41         0.41    +0.00  E92
+fp32.h_sub                      748      748   555844     555844       4.21         4.21    +0.00  E92
+fp32.h_allsub                  8940     8940     2276       2276       0.43         0.43    +0.00  E92
+fp32.i_add                     4844     4844       76         76       0.22         0.22    +0.00  E92
+fp32.i_sub                      748      748   277924     277924       2.12         2.12    +0.00  E92
+fp32.h_sub2                     748      748   139018     139018       1.08         1.08    +0.00  E92
+fp32.h_sub4                     748      748   277960     277960       2.12         2.12    +0.00  E92
+fp32.h_sub6                     748      748   416902     416902       3.17         3.17    +0.00  E92
+fp32.s_abs                      748      748   301130     301130       2.30         2.30    +0.00  E92, E88 items
+fp32.k_only                     748      748       76         76       0.04         0.04    +0.00  E92
+fp32.r_abs                      748      748       76         76       0.04         0.04    +0.00  E92, E88 items
+fp32.r_h_add                   8940     8940       76         76       0.41         0.41    +0.00  E92
+fp32.r_h_sub                    748      748   555844     555844       4.21         4.21    +0.00  E92
+fp32.w_c                     132134   132134   122866     122866       7.04         7.04    +0.00  E92
+fp32.w_h_add                 140326   140326   122866     122866       7.42         7.42    +0.00  E92
+fp32.w_h_sub                 137190   137190   431986     431986       9.60         9.60    +0.00  E92
+fp32.r_walk                  108098   108823   246822     247578       6.86         6.90    +0.04  E92, E88 items
+fp32.wr_h_add                121897   122447   244489     244844       7.48         7.51    +0.03  E92
+fp32.wr_h_sub                112965   113484   401261     401403       8.25         8.27    +0.03  E92
+fp32.signs                    75292    75292   244910     244910       5.33         5.33    +0.00  E92, E90
+fp16.c_abs                      748      748       92         92       0.04         0.04    +0.00  E92
+fp16.c_alt                     8940    97276   547214     600240       4.63        10.18    +5.54  E92
+fp16.h_add                     8940     8940       92         92       0.52         0.52    +0.00  E92
+fp16.h_sub                      748    89084   547214     600240       4.16         9.70    +5.54  E92
+fp16.h_allsub                  8940     8804     2246       2168       0.54         0.53    -0.01  E92
+fp16.hh_sub                     748    89084   467572     456246       3.56         8.62    +5.06  E92
+fp16.hl_sub                     748    89084   290932     279606       2.23         7.29    +5.06  E92
+fp16.s_abs                      748    71292   314354     349333       2.41         6.78    +4.37  E92
+fp16.signs                    61068    61068   341035     341035       6.12         6.12    +0.00  E92, E90
+fp32.abs_randn               110483   109826   256182     255702       7.04         7.01    -0.03  E90
+fp32.negabs_randn            110483   109826   256182     255702       7.04         7.01    -0.03  E90
+fp16.abs_randn               107759   107169   124206     124886       7.21         7.18    -0.03  E90
+fp16.negabs_randn            107759   107169   124206     124886       7.21         7.18    -0.03  E90
+fp32.pm_pi                   101754   115393   323297     332062       7.14         7.84    +0.70  E90
+fp32.sparse50_d1              33040    33291    84350      84518       2.16         2.18    +0.01  E90
+fp32.sparse50_d2              33550    33432    86281      86168       2.20         2.20    -0.01  E90
+fp32.sparse50_d3              30860    30882    79087      78958       2.02         2.02    +0.00  E90
+fp16.nn_like_d1               95014    94704   293103     292642       7.74         7.71    -0.02  E90
+fp16.nn_like_d2               94154    94020   290672     290229       7.67         7.66    -0.01  E90
+fp16.nn_like_d3               92444    91976   278617     278188       7.48         7.45    -0.03  E90
+fp16.uniform01_d1            106707   107296   123763     124892       7.14         7.19    +0.04  E90
+fp16.uniform01_d2            104832   105658   122854     123506       7.03         7.08    +0.05  E90
+fp16.uniform01_d3            108572   108636   124187     124202       7.26         7.26    +0.00  E90
+fp32.r_het                    97922    96030   102916     100914       5.31         5.21    -0.10  E88 items
+fp32.s_walk                   73543    73543   245136     245136       5.25         5.25    +0.00  E88 items
+fp16.c_cancel                     0        0        0          0       0.00         0.00    +0.00  E88 items
+fp16.r_walk                  125936   125747   340366     338872       9.89         9.87    -0.02  E88 items
+fp16.r_cancel                     0        0    81092      81092       0.61         0.61    +0.00  E88 items
+fp16.r_abs                      748      612     1940       1918       0.06         0.05    -0.01  E88 items
+fp32.zeros                        0        0        0          0       0.00         0.00    +0.00  E88 items, E88 fit
+fp32.randn                   125382   125002   343872     344373       8.39         8.38    -0.01  E88 items, E88 fit
+fp32.ones                      8894     8894      638        638       0.42         0.42    +0.00  E88 items, E88 fit
+fp16.randn                   127118   127011   377394     377174      10.24        10.23    -0.01  E88 items, E88 fit
+fp16.ones                      8894     8894      510        510       0.52         0.52    +0.00  E88 items, E88 fit
+fp32.neg_ones                  8894     8894      638        638       0.42         0.42    +0.00  E88 fit
+fp32.pi                       11966    12308      814        836       0.56         0.58    +0.02  E88 fit
+fp32.randn_small             129814   129676   345061     345214       8.61         8.60    -0.01  E88 fit
+fp32.randn_large             122687   123464   343630     344008       8.27         8.30    +0.04  E88 fit
+fp32.uniform01               106441   105706   256408     255854       6.86         6.82    -0.04  E88 fit
+fp32.sparse50                 29298    29235    75678      75568       1.93         1.92    -0.00  E88 fit
+fp32.sparse90                  1135     1127     2341       2326       0.07         0.07    -0.00  E88 fit
+fp32.smallint                108755   107361   257163     256223       6.97         6.90    -0.07  E88 fit
+fp32.pow2                    112947   112210   114706     113938       6.09         6.05    -0.04  E88 fit
+fp32.bf16trunc               125714   125686   317376     317546       8.21         8.21    -0.00  E88 fit
+fp32.fp16grid                125750   124835   331640     331094       8.32         8.27    -0.05  E88 fit
+fp32.a_randn_b_zeros              0        0        0          0       0.00         0.00    +0.00  E88 fit
+fp32.a_zeros_b_randn              0        0        0          0       0.00         0.00    +0.00  E88 fit
+fp32.randn_sorted            127428   126948   338783     338459       8.45         8.42    -0.02  E88 fit
+fp32.nn_like                  62208    62038   168911     168778       4.15         4.14    -0.01  E88 fit
+fp16.neg_ones                  8894     8894      510        510       0.52         0.52    +0.00  E88 fit
+fp16.randn_small             127018   125081   375121     374051      10.22        10.10    -0.12  E88 fit
+fp16.uniform01               106594   108156   123087     124216       7.13         7.23    +0.10  E88 fit
+fp16.sparse50                 73398    73856   221661     221876       5.94         5.97    +0.03  E88 fit
+fp16.sparse90                  4472     4368    12836      12775       0.36         0.35    -0.01  E88 fit
+fp16.wsparse50                31110    30996    88448      88300       2.48         2.47    -0.01  E88 fit
+fp16.wsparse90                 1277     1293     3314       3312       0.10         0.10    +0.00  E88 fit
+fp16.smallint                123246   122649   373850     373629       9.99         9.95    -0.04  E88 fit
+fp16.fp8grid                 127200   126368   373881     373308      10.22        10.16    -0.05  E88 fit
+fp16.a_randn_b_zeros              0        0        0          0       0.00         0.00    +0.00  E88 fit
+fp16.a_zeros_b_randn              0        0        0          0       0.00         0.00    +0.00  E88 fit
+fp16.pair_half_zero          120506   120856   379248     379431       9.87         9.89    +0.02  E88 fit
+fp16.randn_sorted            125252   126118   372577     372910      10.09        10.15    +0.05  E88 fit
+fp16.nn_like                  99834    99158   299137     298566       8.06         8.02    -0.04  E88 fit

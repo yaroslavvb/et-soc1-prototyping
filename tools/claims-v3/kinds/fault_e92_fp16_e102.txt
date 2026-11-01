@@ -1,0 +1,57 @@
+Part A. One absorbed fp16 term on an accumulator of 2^49, by fp16_model.model (the RTL's rule):
+  a words (1, 1), both products add            C 0x58000000 -> 0x58000000, +0 ulp; the RTL's txfma_top -> 0x58000000, +0 ulp
+  a words (1, 1), both subtract                C 0x58000000 -> 0x57ffffff, -1 ulp; the RTL's txfma_top -> 0x57ffffff, -1 ulp
+  a words (1, 1), only the high one subtracts  C 0x58000000 -> 0x57ffffff, -1 ulp; the RTL's txfma_top -> 0x57ffffff, -1 ulp
+  a words (1, 1), only the low one subtracts   C 0x58000000 -> 0x57ffffff, -1 ulp; the RTL's txfma_top -> 0x57ffffff, -1 ulp
+And what accum.c's accumulators hold after n ops, against fl(n S), on row 0 of E92's tiles (col 0 and col 8 are in different halves of h_add's and h_sub's B word):
+  c_abs     n  66624: real col 0  1.43074e+14, col 8  1.43074e+14; fl  1.43074e+14,  1.43074e+14; distinct words real 1, fl 1; 0 of 256 differ from fl
+  c_abs     n 199874: real col 0  4.29226e+14, col 8  4.29226e+14; fl  4.29226e+14,  4.29226e+14; distinct words real 1, fl 1; 0 of 256 differ from fl
+  h_add     n  66624: real col 0  1.43074e+14, col 8 -1.43074e+14; fl  1.43074e+14, -1.43074e+14; distinct words real 2, fl 2; 0 of 256 differ from fl
+  h_add     n 199874: real col 0  4.29226e+14, col 8 -4.29226e+14; fl  4.29226e+14, -4.29226e+14; distinct words real 2, fl 2; 0 of 256 differ from fl
+  h_allsub  n  66624: real col 0 -1.37487e+14, col 8  1.37487e+14; fl -1.43074e+14,  1.43074e+14; distinct words real 2, fl 2; 256 of 256 differ from fl
+  h_allsub  n 199874: real col 0 -3.75861e+14, col 8  3.75861e+14; fl -4.29226e+14,  4.29226e+14; distinct words real 2, fl 2; 256 of 256 differ from fl
+  h_sub     n  66624: real col 0  1.43074e+14, col 8  1.37487e+14; fl  1.43074e+14,  1.43074e+14; distinct words real 2, fl 1; 128 of 256 differ from fl
+  h_sub     n 199874: real col 0  4.29226e+14, col 8  3.75861e+14; fl  4.29226e+14,  4.29226e+14; distinct words real 2, fl 1; 128 of 256 differ from fl
+  hh_sub    n  66624: real col 0  1.43074e+14, col 8  1.37487e+14; fl  1.43074e+14,  1.43074e+14; distinct words real 2, fl 1; 128 of 256 differ from fl
+  hh_sub    n 199874: real col 0  4.29226e+14, col 8  3.75861e+14; fl  4.29226e+14,  4.29226e+14; distinct words real 2, fl 1; 128 of 256 differ from fl
+  hl_sub    n  66624: real col 0  1.43074e+14, col 8  1.37487e+14; fl  1.43074e+14,  1.43074e+14; distinct words real 2, fl 1; 128 of 256 differ from fl
+  hl_sub    n 199874: real col 0  4.29226e+14, col 8  3.75861e+14; fl  4.29226e+14,  4.29226e+14; distinct words real 2, fl 1; 128 of 256 differ from fl
+  s_abs     n  66624: real col 0  1.39710e+14, col 8  1.39338e+14; fl  1.43074e+14,  1.43074e+14; distinct words real 9, fl 1; 256 of 256 differ from fl
+  s_abs     n 199874: real col 0  3.96378e+14, col 8  3.92877e+14; fl  4.29226e+14,  4.29226e+14; distinct words real 9, fl 1; 256 of 256 differ from fl
+
+Part B. fp16, watts on aifoundry3. Parts of the model = 30.0 fJ x result bits + 6.68 fJ x flop bits, from each start, at make_e92's launch. * = the same operands on both sides.
+contrast                              measured, primary  measured, dips removed  from fl  from real
+h_sub - h_add *                      6.856 +- 0.405 (3)        6.812 +- 0.246 (4)     3.79       7.88
+c_alt - c_abs *                      7.766 +- 1.583 (3)        7.258 +- 0.212 (4)     4.34       8.43
+h_allsub - h_add *                   0.186 +- 0.319 (3)        0.147 +- 0.204 (4)     0.02       0.04
+h_add - c_abs                        0.954 +- 1.026 (3)        0.482 +- 0.176 (4)     0.28       0.28
+h_sub - c_abs                        7.810 +- 1.411 (3)        7.294 +- 0.121 (4)     4.06       8.16
+hh_sub - c_abs                       6.871 +- 1.584 (3)        6.403 +- 0.423 (4)     3.55       6.96
+hl_sub - c_abs                       5.829 +- 1.149 (3)        5.501 +- 0.237 (4)     2.22       5.63
+s_abs - c_abs                        5.073 +- 1.239 (3)        4.587 +- 0.116 (4)     2.34       5.22
+signs - s_abs                        0.270 +- 0.320 (3)        0.391 +- 0.204 (4)     2.49      -0.38
+hh_sub + hl_sub - h_sub - c_abs      4.890 +- 1.627 (3)        4.611 +- 0.511 (4)     1.71       4.43
+rms, measured (dips removed) - parts, over these contrasts: from fl 2.55 W, from real 0.68 W
+
+Part C. fp16, real sums, the two counted ops by make_e88's ordinary addition and by fp16_model.model:
+  e92/tiles/fp16/h_sub.bin     res    89084 ->    96498; flops   600240 ->   602950
+  e92/tiles/fp16/s_abs.bin     res    71292 ->    79726; flops   349333 ->   350276
+  tiles/fp16/randn.bin         res   127011 ->   127018; flops   377174 ->   377185
+
+Counts at the launch of part B: c_abs res 272 -> 272, flops 64 -> 64; h_add res 8464 -> 8464, flops 64 -> 64; h_allsub res 8464 -> 9144, flops 2212 -> 2184; h_sub res 272 -> 104888, flops 540488 -> 615148; c_alt res 8464 -> 113080, flops 540488 -> 615148; hh_sub res 272 -> 104888, flops 472352 -> 455828; hl_sub res 272 -> 104888, flops 295712 -> 279188; s_abs res 272 -> 76478, flops 312017 -> 351689; signs res 66588 -> 66588, flops 345463 -> 345463
+
+=== Part B again, at 16 op indices
+Part B. fp16, watts on aifoundry3. Parts of the model = 30.0 fJ x result bits + 6.68 fJ x flop bits, from each start, at make_e92's launch. * = the same operands on both sides.
+contrast                              measured, primary  measured, dips removed  from fl  from real
+h_sub - h_add *                      6.856 +- 0.405 (3)        6.812 +- 0.246 (4)     3.82       7.65
+c_alt - c_abs *                      7.766 +- 1.583 (3)        7.258 +- 0.212 (4)     4.37       8.21
+h_allsub - h_add *                   0.186 +- 0.319 (3)        0.147 +- 0.204 (4)     0.02       0.02
+h_add - c_abs                        0.954 +- 1.026 (3)        0.482 +- 0.176 (4)     0.28       0.28
+h_sub - c_abs                        7.810 +- 1.411 (3)        7.294 +- 0.121 (4)     4.09       7.93
+hh_sub - c_abs                       6.871 +- 1.584 (3)        6.403 +- 0.423 (4)     3.56       6.79
+hl_sub - c_abs                       5.829 +- 1.149 (3)        5.501 +- 0.237 (4)     2.23       5.46
+s_abs - c_abs                        5.073 +- 1.239 (3)        4.587 +- 0.116 (4)     2.36       5.04
+signs - s_abs                        0.270 +- 0.320 (3)        0.391 +- 0.204 (4)     2.49      -0.20
+hh_sub + hl_sub - h_sub - c_abs      4.890 +- 1.627 (3)        4.611 +- 0.511 (4)     1.70       4.31
+rms, measured (dips removed) - parts, over these contrasts: from fl 2.53 W, from real 0.53 W
+

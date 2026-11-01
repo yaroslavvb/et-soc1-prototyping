@@ -71,7 +71,7 @@ for blk in "TI":
     dd = [x for x in deps if sc.block_of(x[0]) == blk]
     print(f"  block {blk}, {len(dd)} reads: board {math.sqrt(sum(x[4] ** 2 for x in dd) / len(dd)) / 1.5 ** 0.5:.3f}, rail {math.sqrt(sum(x[3] ** 2 for x in dd) / len(dd)) / 1.5 ** 0.5:.3f}")
 g = []
-for p in (10210, 10211, 10212):
+for p in (10210, 10211, 10212, 10213, 10214):
     for z in ("fp32.hq", "fp32.aq", "fp16.hq", "fp16.aq"):
         rr = sorted([r for r in RUNS if r["pass"] == p and r["item"] == z], key=lambda r: r["t0"])
         if len(rr) == 2:
@@ -145,14 +145,14 @@ for j in ("0", "6", "11"):
     print(f"    B, bit {j:>2s}: rail {f(c['ratio'], 2)} [{f(c['lo'], 2)}, {f(c['hi'], 2)}]")
 
 # ---- [E] post hoc: R3 and R4's legs that a launch skip took below three passes
-sect("[E] POST HOC, labelled, no verdict: the legs a launch skip left at two passes, per pass, watts over the own zero")
+sect("[E] the items R3 and R4's B leg read, per pass (10213 and 10214 are amendment A1's), watts over the own zero; then the mean over bits 23, 27, 30, 31, POST HOC, labelled, no verdict")
 primary_book = sc.Book(RUNS, tiles, reg["analysis"]["gates"], set_aside={x["pass"] for x in res.get("passes_set_aside", [])})
 for it in ("fp32.bj_23", "fp32.bp_23", "fp32.bj_27", "fp32.bp_27", "fp32.bj_30", "fp32.bp_30", "fp32.bj_31", "fp32.bp_31"):
     print(f"  {it}: rail {[(p % 10, round(v, 3)) for p, v in sorted(primary_book.series('G', it, 'rail').items())]}; board {[(p % 10, round(v, 3)) for p, v in sorted(primary_book.series('G', it, 'board').items())]}")
 ex = {}
 for arm in ("rail", "board"):
     pooled = {}
-    for p in (10210, 10211, 10212):
+    for p in (10210, 10211, 10212, 10213, 10214):
         vals = []
         for j in (23, 27, 30, 31):
             a = primary_book.series("G", f"fp32.bp_{j}", arm).get(p)
@@ -369,3 +369,37 @@ for side, aa, bb, js in (("B", "bj", "bp", (0, 9, 12, 15)), ("A", "aj", "ap", (9
 sect("[O] the balanced mantissa's spread, fp32 B and A (train, board fJ, primary) and what a position's bench count says; the mean of the published lists' low floor")
 bp = [P["prices"][f"fp32.bp_{j}@T"]["board"]["fJ"]["mean"] for j in (0, 6, 11, 16, 20, 22)]
 print(f"  B balanced: min {min(bp):.0f}, max {max(bp):.0f}, ratio {max(bp) / min(bp):.2f}; all-in over the same bits: {P['prices']['fp32.bj_0@T']['board']['fJ']['mean']:.0f} to {P['prices']['fp32.bj_22@G']['board']['fJ']['mean']:.0f}")
+
+# ---- [P] amendment A1's dense train, and what its own gate did
+sect("[P] amendment A1's R blocks. The gate set aside 10241, 10242, 10243, because each block's FIRST read follows the idle gap between blocks and its rail window is not yet settled (10240 opened with five settling reads; the others had none): E102-R2a NOT SCORED")
+A1 = json.load(open(os.path.join(HERE, "scored-a1.json")))
+print("  kept", A1["passes_kept"], "set aside", A1["set_aside"])
+for p in (10240, 10241, 10242, 10243):
+    rr = sorted([r for r in RUNS if r["pass"] == p and r["item"] == "fp32.aq"], key=lambda r: r["pos"])
+    print(f"  {p}, fp32.aq on the rail at each position: " + " ".join(f"{r['pos']}:{r['rail']:.3f}" for r in rr))
+sect("[Q] POST HOC, labelled, no verdict: A1's R blocks with the first read after an idle gap treated as what 10240's five settling reads were. Dropped: in 10240 positions 0-4; in the others position 0 and the first pair, positions 1 and 2, which only that read brackets. Every remaining item is then between two zero reads")
+series = {"board": {}, "rail": {}}
+gates = []
+for p in (10240, 10241, 10242, 10243):
+    drop = 4 if p == 10240 else 2
+    rr = sorted([r for r in RUNS if r["pass"] == p and r["pos"] > drop and not r["fail"]], key=lambda r: r["pos"])
+    z = [r for r in rr if r["item"] == "fp32.aq"]
+    for a, b, c in zip(z, z[1:], z[2:]):
+        gates.append((p, b["pos"], round(b["rail"] - (a["rail"] + (c["rail"] - a["rail"]) * (b["t0"] - a["t0"]) / (c["t0"] - a["t0"])), 3)))
+    for arm, key in (("board", "p_raw"), ("rail", "rail")):
+        pts = [(q["t0"], q[key]) for q in z]
+        per = {}
+        for r in rr:
+            if r["item"] != "fp32.aq":
+                per.setdefault(r["item"], []).append(r[key] - sc.interp(pts, r["t0"]))
+        for it, v in per.items():
+            series[arm].setdefault(it, {})[p] = sum(v) / len(v)
+print("  the same gate on what is left (limit 0.25 W), largest:", sorted(gates, key=lambda x: -abs(x[2]))[:3])
+for arm in ("rail", "board"):
+    for j in (0, 6):
+        a, b = series[arm][f"fp32.aj_{j}"], series[arm][f"fp32.ap_{j}"]
+        r = sc.fieller(a, b, 1920 / 2048)
+        ma, mb = sc.mean_ci(a.values()), sc.mean_ci(b.values())
+        tt = 1e15 / RATE["fp32"]
+        print(f"  {arm}, bit {j}: all-in {fi(ma)} W, {ma['mean'] * tt / 2048:.0f} fJ; balanced {fi(mb)} W, {mb['mean'] * tt / 1920:.0f} fJ; ratio per bit {f(r['ratio'], 2)} [{f(r['lo'], 2)}, {f(r['hi'], 2)}], {r['n']} blocks")
+    print(f"    the rule's thresholds on this arm would read: upper bounds {'below' if all(sc.fieller(series[arm][f'fp32.aj_{j}'], series[arm][f'fp32.ap_{j}'], 1920 / 2048)['hi'] is not None and sc.fieller(series[arm][f'fp32.aj_{j}'], series[arm][f'fp32.ap_{j}'], 1920 / 2048)['hi'] < 4 for j in (0, 6)) else 'not all below'} 4 at bits 0 and 6")

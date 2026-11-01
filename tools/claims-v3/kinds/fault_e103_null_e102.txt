@@ -1,0 +1,31 @@
+tile                     group                            D       M flop, scored  flop, fl flop, real   res fl res real flops fl flops real
+fp16.c_near8             near-cancelling sums         17.75   17.55        17.23     17.21      17.26   127995   128932   444789     444036
+fp16.e_ab                exponent spread              13.32   13.68        13.47     13.46      15.02   111758   111308   111311     111034
+fp16.f_hi1               fp16's two elements          15.85   15.93        15.66     15.65      16.35   109234   109614   207010     207095
+fp16.g_bcol500           gate share (named weak spo   11.79   12.02        11.61     11.61      11.39    63028    63507   188935     189001
+fp16.g_relu_shift15      gate share, operands movin    4.24    4.13         4.25      4.25       4.47    19355    19285    53254      53087
+fp16.h_a_all             A side (named weak spot)     12.39   12.48        11.08     11.08      11.58    54354    54802    53610      53484
+fp16.o_a_maxflip_1       order                        11.31   11.37        10.37     10.35      10.52    48876    41408    40700      33220
+fp16.s_arow_adds         sign structure: moving sum   19.42   19.52        18.99     18.99      19.55   111596   113208   122545     125224
+fp16.t_10_1              truncated mantissas          18.51   18.53        17.96     17.95      18.04   125511   125872   376104     376076
+fp16.x_e_s               combinations                 23.49   23.42        26.08     26.07      23.12   109624   111152   619648     619687
+fp32.c_near_rand         near-cancelling sums         19.15   18.26        20.55     20.51      20.48   170596   171094   292062     292081
+fp32.e_a                 exponent spread              10.71   10.69        11.02     10.98      11.04    54800    56824    54808      57228
+fp32.g_bcol500           gate share (named weak spo   14.28   14.04        13.26     13.25      13.25    63148    63254   171832     172217
+fp32.g_relu_shift15      gate share, operands movin    3.06    3.05         3.60      3.61       3.61    11196    11192    27115      27144
+fp32.h_a_all_pi          A side (named weak spot)     14.31   14.81        14.53     14.49      14.48    54914    54768   123894     123788
+fp32.h_a_lo_pi           A side (named weak spot)     10.52   10.71        11.81     11.80      11.51    27018    19104    57454      49284
+fp32.o_a_maxflip_4_pi    A's order (named weak spot   10.32   10.53        11.86     11.91      11.22    35478    16892    72178      52268
+fp32.s_abs               sign structure: moving sum   22.35   22.44        22.39     22.36      22.40   108747   109709   256775     257908
+fp32.s_bhalf_alt         sign structure: moving sum   23.91   23.46        23.66     23.59      23.58   117236   117159   390796     390895
+fp32.t_4_23              truncated mantissas          20.17   19.73        20.64     20.62      20.59   127009   126970   341558     341588
+fp32.x_e_g               combinations                 14.79   14.17        14.16     14.16      14.18    66155    66573   181232     181758
+fp32.x_s_t               combinations                 17.18   17.02        17.41     17.35      17.28   114228   113502   426901     426352
+fp32.z_dn_ab             -0.0 and denormal words       9.42    9.48        16.78     16.79      16.84        0        0        0          0
+
+23 float tiles. rms(D - M) = 0.314 W
+null scored : rms 1.775 W, gap to the model +1.462 [+0.324, +2.567] W; without its worst tile (fp32.z_dn_ab, -7.36 W) 0.913 against the model's 0.320 W, gap +0.593 [+0.255, +0.944] W
+null fl     : rms 1.778 W, gap to the model +1.465 [+0.323, +2.572] W; without its worst tile (fp32.z_dn_ab, -7.37 W) 0.914 against the model's 0.320 W, gap +0.593 [+0.254, +0.944] W
+null real   : rms 1.694 W, gap to the model +1.380 [+0.242, +2.522] W; without its worst tile (fp32.z_dn_ab, -7.42 W) 0.705 against the model's 0.320 W, gap +0.385 [+0.202, +0.571] W
+fp32 (13): rms model 0.392; null scored 2.190, fl 2.194, real 2.162 W
+fp16 (10): rms model 0.162; null scored 1.006, fl 1.008, real 0.723 W
