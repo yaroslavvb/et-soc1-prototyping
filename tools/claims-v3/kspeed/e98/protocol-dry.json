@@ -1,0 +1,178 @@
+{
+ "experiment": "E98",
+ "request": "Q132",
+ "card": "aifoundry2",
+ "order_seed": 98,
+ "note": "the dry run's short shape: same order, 8 s per kind, never on a card",
+ "tools": {
+  "heater": "build/sparsity_t2/host/sparsity_host",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 85,
+  "board_cap_w": 97,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 10
+ },
+ "blocks": [
+  {
+   "name": "SMOKE",
+   "title": "20 s of the idle card, then one 2 s launch of three tiles (not analysed)",
+   "default": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 5
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 1
+   },
+   "tail_s": 3,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest",
+     "launch": {
+      "seconds": 2,
+      "budget": 3.5,
+      "processes": 0
+     },
+     "tail_s": 20
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "fp32-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/neg_ones.bin",
+     "label": "int8-neg_ones"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+     "label": "fp16-ones"
+    }
+   ]
+  },
+  {
+   "name": "REST",
+   "title": "the rest reading: no launch, the 10 Hz sampler on the idle card; the last 60 s are the reading",
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 5
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 0
+   },
+   "tail_s": 10,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest"
+    }
+   ]
+  },
+  {
+   "name": "SUS",
+   "title": "sustained: nine back-to-back 8 s processes (~76 s) from a die reading <= 57 C (E80's, E83's and E87's SUS), in a fixed order",
+   "passes": 1,
+   "shuffle": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 57,
+    "max_wait_s": 300
+   },
+   "launch": {
+    "seconds": 8,
+    "budget": 9.5,
+    "processes": 1
+   },
+   "tail_s": 1,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "fp32-zeros-fromrest"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+     "label": "fp16-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "int8-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/neg_ones.bin",
+     "label": "int8-neg_ones"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+     "label": "int8-sparse50"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+     "label": "fp16-ones"
+    },
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "int8-full"
+    },
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "fp32-randn"
+    },
+    {
+     "type": "fp16",
+     "values": "file:tools/claims-v3/kinds/tiles/fp16/ones.bin",
+     "label": "fp16-ones-rep2"
+    }
+   ]
+  },
+  {
+   "name": "HOLD",
+   "title": "the hold: 39 back-to-back 8 s processes (~5.5 min) of one unclamped kind; the last 120 s are the reading",
+   "start": {
+    "mode": "cool",
+    "max_c": 57,
+    "max_wait_s": 300
+   },
+   "launch": {
+    "seconds": 8,
+    "budget": 9.5,
+    "processes": 2
+   },
+   "tail_s": 1,
+   "runs": [
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/neg_ones.bin",
+     "label": "int8-neg_ones-hold"
+    }
+   ]
+  }
+ ]
+}
