@@ -233,3 +233,9 @@ The session ran 19:49–20:25 PDT, all 47 runs in 35.5 card-minutes (35.8 with t
 S1–S4). One file was added to this folder after the pre-registration and decides nothing:
 [`tables_e87.py`](tables_e87.py), which formats `results.json` into the data folder's `tables.md` and `cells.json`,
 written while the session ran and before any result was read.
+
+*Corrected after verification, Sat 31 Oct 2026:* the data README's statements of what the clock rules test (a no-model
+baseline scores as well, so the power predictor's test is the like-with-like ratio), of fp16's burst difference
+(+7.8 MHz, 1.3 σ, not established) and of int8's sustained comparison (none shown), and seven smaller points. No number
+or verdict changed; see the data README's
+[Corrections after verification](../../../../docs/reports/data/2026-10-31-e87-real-tensors-speed/README.md#corrections-after-verification-sat-31-oct-2026).

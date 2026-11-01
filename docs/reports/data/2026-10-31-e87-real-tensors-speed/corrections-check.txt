@@ -1,0 +1,105 @@
+C1  what the clock rules test: Q130(n)'s frozen points against a no-model baseline (each real tile = E80's cell
+    for its format's random reference, predictions.json anchors.*.tie_*)
+    fp32/l0_mlp_up     burst  708.8  frozen  710.7  baseline  711.9 (E80 fp32/randn)  |  sustained  608.2  frozen  602.5  baseline  604.3
+    fp32/l6_mlp_down   burst  699.0  frozen  711.5  baseline  711.9 (E80 fp32/randn)  |  sustained  600.5  frozen  602.7  baseline  604.3
+    fp32/l6_attn_qk    burst  702.0  frozen  710.7  baseline  711.9 (E80 fp32/randn)  |  sustained  602.8  frozen  602.5  baseline  604.3
+    fp16/l0_mlp_up     burst  727.0  frozen  735.6  baseline  730.6 (E80 fp16/randn)  |  sustained  619.9  frozen  615.0  baseline  609.5
+    fp16/l6_mlp_down   burst  725.5  frozen  738.9  baseline  730.6 (E80 fp16/randn)  |  sustained  602.8  frozen  617.6  baseline  609.5
+    fp16/l6_attn_qk    burst  734.4  frozen  737.2  baseline  730.6 (E80 fp16/randn)  |  sustained  612.3  frozen  616.2  baseline  609.5
+    int8/l0_mlp_up     burst  777.0  frozen  800.0  baseline  800.0 (E80 int8/full)  |  sustained  794.4  frozen  796.2  baseline  793.4
+    int8/l6_mlp_down   burst  800.0  frozen  800.0  baseline  800.0 (E80 int8/full)  |  sustained  793.6  frozen  798.9  baseline  793.4
+    int8/l6_attn_qk    burst  800.0  frozen  800.0  baseline  800.0 (E80 int8/full)  |  sustained  800.0  frozen  797.0  baseline  793.4
+    rms over the nine: burst frozen 10.68, baseline 9.75 MHz; sustained frozen 6.11, baseline 5.14 MHz
+    rms over the six fp32/fp16 tiles: burst frozen 9.10, baseline 7.39 MHz; sustained frozen 7.02, baseline 5.67 MHz
+    reset-free bursts (A1's view) over the nine: frozen 7.43, baseline 6.03 MHz
+    'real = random' (ratio 1.000) lies inside the S3 interval of 8 of 9 tiles (S3's bar is 7): all but ['int8/l6_mlp_down']
+    ... and inside the frozen ratio interval of 6 of 9 (all but ['int8/l0_mlp_up', 'int8/l6_attn_qk', 'int8/l6_mlp_down'])
+    S4 with ratio 1.000 everywhere: fp32 1.000 < 1 False, fp16 1.000 < 1 False, int8 1.000 < 0.9 False; measured fp32 0.9917 < 1.0 True, fp16 0.9801 < 1.0 True, int8 0.8348 < 0.9 True
+    like-with-like ratio errors, measured minus predicted (labelled, post hoc):
+      fp32: Q130(n) +0.0059, +0.0090, -0.0043 (rms 0.0067); 'real = random' -0.0047, -0.0052, -0.0150 (rms 0.0096); cheapest to dearest measured ['l6_attn_qk', 'l6_mlp_down', 'l0_mlp_up'], predicted ['l6_mlp_down', 'l6_attn_qk', 'l0_mlp_up']
+      fp16: Q130(n) +0.0086, +0.0258, -0.0094 (rms 0.0166); 'real = random' -0.0116, -0.0105, -0.0376 (rms 0.0235); cheapest to dearest measured ['l6_attn_qk', 'l0_mlp_up', 'l6_mlp_down'], predicted ['l6_mlp_down', 'l6_attn_qk', 'l0_mlp_up']
+      int8: Q130(n) +0.0693, +0.0684, -0.0173 (rms 0.0571); 'real = random' -0.0960, -0.1971, -0.2026 (rms 0.1723); cheapest to dearest measured ['l6_attn_qk', 'l6_mlp_down', 'l0_mlp_up'], predicted ['l6_mlp_down', 'l6_attn_qk', 'l0_mlp_up']
+
+C2  the burst difference, real tiles' mean minus same-session randn (E87-S2)
+    1 sigma of (mean of three two-pass cells) - (one two-pass cell) = 5.3 x sqrt(1/3 + 1) = 6.12 MHz
+    fp32: real mean 703.27 - randn 706.0 = -2.73 MHz (-0.39%), -0.45 sigma; real passes [698.0, 698, 700, 705.9, 707.8, 709.8], randn passes [706, 705.9]; 2 of 6 real passes above both randn passes
+    fp16: real mean 728.97 - randn 721.2 = +7.77 MHz (+1.08%), +1.27 sigma; real passes [725, 726, 726, 728, 732, 736.7], randn passes [720.4, 722]; 6 of 6 real passes above both randn passes
+    fp32 sustained (labelled): real mean 603.8 - randn 600.1 = +3.7 MHz
+    fp16 sustained (labelled): real mean 611.7 - randn 610.0 = +1.7 MHz
+    registered expectation (pre-registration README, E87-S2): +1 MHz (fp32) and +5 MHz (fp16) on E83's relation
+
+C3  int8 at the 65 C trip
+    E80 int8 full sustained 793.4 MHz, runs [796.7, 790.0], limits ['none', 'none'], share at 800 [0.967, 0.928], board W [53.45, 52.89], die [64.9, 64.9]
+    E83 int8 full sustained 786.5 MHz, runs [786.5], limits ['thermal'], share at 800 [0.865], board W [52.34], die [65.0]
+    E87 int8 full sustained 774.7 MHz, runs [774.7], limits ['thermal'], share at 800 [0.77], board W [51.41], die [65.1]
+    E87 die line: die = 41.691 + 0.4562 x board W (n 17, rms 0.422 C); each sustained run's residual (die - line), its share at 800 MHz and its cell's limit label:
+      SUS-00-fp32-real-l0_mlp_up-r1     54.77 W   66.0 C  residual -0.68 C  share800 0.013  608.2 MHz
+      SUS-01-fp32-real-l6_mlp_down-r1   53.81 W   66.3 C  residual +0.06 C  share800 0.000  600.5 MHz
+      SUS-02-fp32-real-l6_attn_qk-r1    53.87 W   66.1 C  residual -0.17 C  share800 0.005  602.8 MHz
+      SUS-03-fp16-real-l0_mlp_up-r1     53.22 W   65.8 C  residual -0.17 C  share800 0.013  619.9 MHz
+      SUS-04-fp16-real-l6_mlp_down-r1   51.54 W   66.0 C  residual +0.80 C  share800 0.005  602.8 MHz
+      SUS-05-fp16-real-l6_attn_qk-r1    51.63 W   65.9 C  residual +0.66 C  share800 0.018  612.3 MHz
+      SUS-06-int8-real-l0_mlp_up-r1     51.60 W   64.5 C  residual -0.73 C  share800 0.969  794.4 MHz
+      SUS-07-int8-real-l6_mlp_down-r1   50.20 W   64.3 C  residual -0.29 C  share800 0.967  793.6 MHz
+      SUS-08-int8-real-l6_attn_qk-r1    50.70 W   64.5 C  residual -0.32 C  share800 1.000  800 MHz
+      SUS-09-fp32-randn-r1              53.91 W   66.5 C  residual +0.22 C  share800 0.000  600 MHz
+      SUS-10-fp32-zeros-r1              35.69 W   57.9 C  residual -0.07 C  share800 1.000  800 MHz
+      SUS-11-fp16-randn-r1              53.34 W   65.9 C  residual -0.12 C  share800 0.018  615.3 MHz
+      SUS-12-fp16-zeros-r1              35.80 W   58.0 C  residual -0.02 C  share800 1.000  800 MHz
+      SUS-13-int8-full-r1               51.41 W   65.1 C  residual -0.04 C  share800 0.770  774.7 MHz
+      SUS-14-int8-zeros-r1              36.63 W   58.4 C  residual -0.00 C  share800 0.939  788.5 MHz
+      SUS-15-fp32-randn-rep2-r1         53.72 W   66.3 C  residual +0.10 C  share800 0.000  600.3 MHz
+      SUS-16-fp16-randn-rep2-r1         51.53 W   66.0 C  residual +0.80 C  share800 0.005  604.6 MHz
+    residual rms over the 17 runs 0.422 C (posthoc.die_line_e87 rms_c 0.422)
+    switching term c (W, E64's basis): real [8.239, 7.563, 7.526], full 8.881
+    real mean 796.0 - full 774.7 = +21.3 MHz (checks.txt K4); one sustained run's 1 sigma on and near the knee 15.6 / 5.6 MHz (E83 C3)
+
+C4  the fp32 and fp16 ratios across the three tiles
+    fp32: mean 0.9917, between-tile sd 0.0058, t against 1.000 = 2.48 on 2 df, one-sided p 0.066; round 2 alone [0.9953, 0.9936, 0.984] (die starts [56, 56, 56, 56, 56])
+    fp16: mean 0.9801, between-tile sd 0.0153, t against 1.000 = 2.25 on 2 df, one-sided p 0.077; round 2 alone [0.9864, 0.9895, 0.9626] (die starts [56, 55, 56, 56, 56])
+    int8: mean 0.8348, between-tile sd 0.0600, t against 1.000 = 4.77 on 2 df, one-sided p 0.021; round 2 alone [0.8852, 0.7976, 0.8032] (die starts [56, 56, 56, 56, 56])
+
+C5  the like-with-like ratios round by round: |round 1 - round 2| (checks.txt K1 prints half of it)
+    fp32: l0_mlp_up 0.9954 / 0.9953 difference 0.0001 half-spread 0.0001; l6_mlp_down 0.9958 / 0.9936 difference 0.0022 half-spread 0.0011; l6_attn_qk 0.9860 / 0.9840 difference 0.0020 half-spread 0.0010
+    fp16: l0_mlp_up 0.9904 / 0.9864 difference 0.0040 half-spread 0.0020; l6_mlp_down 0.9895 / 0.9895 difference 0.0000 half-spread 0.0000; l6_attn_qk 0.9622 / 0.9626 difference 0.0005 half-spread 0.0002
+    int8: l0_mlp_up 0.9243 / 0.8852 difference 0.0391 half-spread 0.0196; l6_mlp_down 0.8087 / 0.7976 difference 0.0111 half-spread 0.0055; l6_attn_qk 0.7911 / 0.8032 difference 0.0121 half-spread 0.0060
+
+C6  the burst rounds, round 2 minus round 1
+    fp16/l0_mlp_up     die start 56 -> 56 (+0 C)  burst 728 -> 726  limit power
+    fp16/l6_attn_qk    die start 54 -> 56 (+2 C)  burst 736.7 -> 732  limit power
+    fp16/l6_mlp_down   die start 56 -> 55 (-1 C)  burst 726 -> 725  limit power
+    fp16/randn         die start 56 -> 56 (+0 C)  burst 720.4 -> 722  limit power
+    fp16/zeros         die start 49 -> 56 (+7 C)  burst 800 -> 800  limit none
+    fp32/l0_mlp_up     die start 52 -> 56 (+4 C)  burst 709.8 -> 707.8  limit power
+    fp32/l6_attn_qk    die start 56 -> 56 (+0 C)  burst 705.9 -> 698  limit power
+    fp32/l6_mlp_down   die start 56 -> 56 (+0 C)  burst 700 -> 698.0  limit power
+    fp32/randn         die start 50 -> 56 (+6 C)  burst 706 -> 705.9  limit power
+    fp32/zeros         die start 52 -> 56 (+4 C)  burst 800 -> 800  limit none
+    int8/full          die start 54 -> 56 (+2 C)  burst 800 -> 800  limit none
+    int8/l0_mlp_up     die start 51 -> 56 (+5 C)  burst 800 -> 754  limit none
+    int8/l6_attn_qk    die start 56 -> 56 (+0 C)  burst 800 -> 800  limit none
+    int8/l6_mlp_down   die start 54 -> 56 (+2 C)  burst 800 -> 800  limit none
+    int8/zeros         die start 52 -> 56 (+4 C)  burst 800 -> 800  limit none
+    die start: mean +2.33 C over the 15 kinds; +1.38 C over the 8 power-limited kinds ([0, 2, -1, 0, 4, 0, 0, 6])
+    burst clock on the 8 power-limited kinds: mean -2.26 MHz, sd 2.91
+
+C7  p800 (the first second at 800 MHz, board W) and the start temperature
+    fp32/l0_mlp_up: cell p800 82.15 W (fp32/randn 81.91 W); round 1: 81.11 W from 52 C, fp32/randn 80.36 W from 50 C, zeros 33.55 W from 52 C, share above zeros 1.016; round 2: 83.19 W from 56 C, fp32/randn 83.45 W from 56 C, zeros 35.05 W from 56 C, share above zeros 0.995
+    fp32/l6_mlp_down: cell p800 83.1 W (fp32/randn 81.91 W); round 1: 83.22 W from 56 C, fp32/randn 80.36 W from 50 C, zeros 33.55 W from 52 C, share above zeros 1.061; round 2: 82.98 W from 56 C, fp32/randn 83.45 W from 56 C, zeros 35.05 W from 56 C, share above zeros 0.990
+    fp32/l6_attn_qk: cell p800 82.67 W (fp32/randn 81.91 W); round 1: 82.74 W from 56 C, fp32/randn 80.36 W from 50 C, zeros 33.55 W from 52 C, share above zeros 1.051; round 2: 82.6 W from 56 C, fp32/randn 83.45 W from 56 C, zeros 35.05 W from 56 C, share above zeros 0.982
+    fp16/l0_mlp_up: cell p800 77.92 W (fp16/randn 78.41 W); round 1: 77.88 W from 56 C, fp16/randn 78.34 W from 56 C, zeros 32.77 W from 49 C, share above zeros 0.990; round 2: 77.97 W from 56 C, fp16/randn 78.47 W from 56 C, zeros 35.02 W from 56 C, share above zeros 0.988
+    fp16/l6_mlp_down: cell p800 77.81 W (fp16/randn 78.41 W); round 1: 78.14 W from 56 C, fp16/randn 78.34 W from 56 C, zeros 32.77 W from 49 C, share above zeros 0.996; round 2: 77.48 W from 55 C, fp16/randn 78.47 W from 56 C, zeros 35.02 W from 56 C, share above zeros 0.977
+    fp16/l6_attn_qk: cell p800 76.78 W (fp16/randn 78.41 W); round 1: 76.47 W from 54 C, fp16/randn 78.34 W from 56 C, zeros 32.77 W from 49 C, share above zeros 0.959; round 2: 77.08 W from 56 C, fp16/randn 78.47 W from 56 C, zeros 35.02 W from 56 C, share above zeros 0.968
+    int8/l0_mlp_up: cell p800 47.63 W (int8/full 49.52 W); round 1: 46.74 W from 51 C, int8/full 49.02 W from 54 C, zeros 35.04 W from 52 C, share above zeros 0.837; round 2: 48.52 W from 56 C, int8/full 50.01 W from 56 C, zeros 36.41 W from 56 C, share above zeros 0.890
+    int8/l6_mlp_down: cell p800 46.81 W (int8/full 49.52 W); round 1: 46.34 W from 54 C, int8/full 49.02 W from 54 C, zeros 35.04 W from 52 C, share above zeros 0.808; round 2: 47.27 W from 56 C, int8/full 50.01 W from 56 C, zeros 36.41 W from 56 C, share above zeros 0.799
+    int8/l6_attn_qk: cell p800 47.06 W (int8/full 49.52 W); round 1: 47.05 W from 56 C, int8/full 49.02 W from 54 C, zeros 35.04 W from 52 C, share above zeros 0.859; round 2: 47.07 W from 56 C, int8/full 50.01 W from 56 C, zeros 36.41 W from 56 C, share above zeros 0.784
+
+C8  int8 l0_mlp_up's burst passes
+    burst 777 MHz, passes [800, 754], without the reset samples [800, 800]; rate 81.605 TOPS, passes [84.309, 78.9]
+
+C9  the closing config reads
+    s1/queries.jsonl start  19:49:49.772 PDT config_rc 0 {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519}
+    s1/queries.jsonl end    20:25:19.747 PDT config_rc 0 {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519}
+    final-config.txt == 2026-10-31 20:25:35 PDT final read-only config, card lock held, timeout 10
+    final-config.txt {"tdp_w":65,"temp_threshold_c":65,"power_state":3,"power_state_name":"low_power","minion_mhz":600,"minion_mv":519}
+    final-config.txt rc 0
