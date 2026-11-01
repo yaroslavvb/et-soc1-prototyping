@@ -1,0 +1,26 @@
+E78 aifoundry3: 600 MHz, 521.6 mV, leak 0.1994 W/C (-1 runs), runs kept 128/160, passes [8610, 8611, 8612, 8613], idle-invalid runs 0
+  passes set aside: [{'pass': 8614, 'why': ['fp32.randn spans 1.987 W']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.894761649305558
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 24.777  0.105    26.738      23856    5.824
+    fp32.real_l6_mlp_down      24.623  0.066    26.643      23771    5.804
+    fp32.real_l0_mlp_up        24.438  0.773    26.450      23600    5.762
+    fp32.real_l6_attn_qk       24.364  0.142    26.342      23501    5.737
+    fp32.nn_like               12.991  0.435    14.955      13342    3.257
+    anchor_pi                   8.439  0.132    10.453       9325    2.277
+    fp32.zeros                  0.000  0.000     1.985       1771    0.432
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 22.151  0.313    24.063      21469    2.621
+    fp16.real_l6_mlp_down      22.050  0.158    23.986      21396    2.612
+    fp16.real_l0_mlp_up        22.038  0.250    23.910      21331    2.604
+    fp16.real_l6_attn_qk       21.505  0.240    23.396      20871    2.548
+    fp16.nn_like               17.719  0.140    19.552      17441    2.129
+    fp16.zeros                  0.000  0.000     1.954       1743    0.213
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.103  0.219     9.611       4991    0.305
+    int8.gauss_q                6.475  0.284     9.135       4743    0.290
+    int8.real_l0_mlp_up         6.295  0.620     8.839       4592    0.280
+    int8.real_l6_mlp_down       5.758  0.241     8.301       4311    0.263
+    int8.real_l6_attn_qk        5.559  0.302     8.197       4258    0.260
+    int8.zeros                  0.000  0.000     2.522       1310    0.080
+  idle consistency median |S - S0 - D| 0.0646282777557845 W; carry-over {'slope_w_per_w': 0.002514727205356125, 'se': 0.00154517729812752, 'n': 124}; pi built-in - file None; rail tau re-fit median None
