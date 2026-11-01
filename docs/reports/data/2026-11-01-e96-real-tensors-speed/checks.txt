@@ -1,0 +1,147 @@
+K1  the session's timing
+    card free at the slot's start, 0.1 s late, waits {}
+    smoke 1.6 card-min, session 68.7 card-min, in all 70.3; session reason 'done', exit 0
+    card free 279.4 s before the slot's end; slot stop or SIGTERM used: False
+    BURST 62 runs, 13.6 s a run, 14.1 min (plan 14.5 s, 15.0 min); SUS 34 runs, 96.4 s a run, 54.6 min (plan 99.7 s)
+    the gates held 109.8 s before bursts and 444.1 s before sustained runs; not reached: []
+    peaks: die 67 C, board 88.45 W; launches rc [0]; cycles per op [('fp16', 546.001), ('fp32', 546.001), ('int8', 318.0)]
+    config reads {'n': 96, 'tdp_w': [65], 'temp_threshold_c': [65]}
+    epoch ms: first burst launch 1793527599635, last burst's last launch 1793528438860, first sustained launch 1793528444269, last sustained launch 1793531714015; session end 1793531720171
+
+K2  the bursts
+    S2's six gated float tiles, passes: {'fp32/resnet18_l3c1': [800, 800], 'fp32/vgg16_fc2': [800, 800], 'fp32/t5small_l0_down': [800, 800], 'fp16/resnet18_l3c1': [800, 800], 'fp16/vgg16_fc2': [800, 800], 'fp16/t5small_l0_down': [800, 800]}
+    int8, 8 tiles: passes at 800.0: 16 of 16
+    power-limited tiles, 13: pass half-spread rms 6.9 MHz, so one pass's 1 sigma 9.7 (E83 C6's 7.5), a cell's 6.9 (E83's 5.3); largest 25.1 MHz between passes, fp32/gpt2_l9_attn_qk
+    launch die readings 49-56 C; pass 1 mean 54.71, pass 2 mean 55.58
+    like-with-like shares from each pass alone, (c - c_zeros) / (c_ref - c_zeros):
+      fp32/resnet18_l2c1               0.8025 0.8089  round difference 0.0064  cell 0.8058
+      fp32/resnet18_l3c1               0.5675 0.5751  round difference 0.0076  cell 0.5714
+      fp32/vgg16_fc2                   0.3082 0.3216  round difference 0.0133  cell 0.3149
+      fp32/t5small_l0_down             0.0568 0.0756  round difference 0.0188  cell 0.0662
+      fp32/gpt2_l3_mlp_down            0.9947 0.9998  round difference 0.0051  cell 0.9973
+      fp32/gpt2_l9_attn_qk             0.9787 0.9816  round difference 0.0029  cell 0.9802
+      fp32/bert_l6_up                  0.9917 0.9978  round difference 0.0061  cell 0.9948
+      fp32/vit_l5_down                 0.9960 1.0042  round difference 0.0083  cell 1.0001
+      fp32/t5small_l0_up               0.8862 0.8913  round difference 0.0051  cell 0.8887
+      fp32/vit_l11_down                0.8225 0.8304  round difference 0.0079  cell 0.8265
+      fp16/resnet18_l3c1               0.6310 0.6361  round difference 0.0050  cell 0.6336
+      fp16/vgg16_fc2                   0.4614 0.4639  round difference 0.0025  cell 0.4627
+      fp16/t5small_l0_down             0.1580 0.1685  round difference 0.0105  cell 0.1633
+      fp16/gpt2_l9_attn_qk             0.9571 0.9550  round difference 0.0022  cell 0.9561
+      fp16/bert_l6_up                  0.9938 0.9957  round difference 0.0020  cell 0.9948
+      fp16/vit_l5_down                 0.9844 0.9837  round difference 0.0008  cell 0.9841
+      fp16/gpt2_l6_mlp_down_fp16fwd    0.9964 0.9921  round difference 0.0043  cell 0.9943
+      int8/resnet18_l3c1               0.6192 0.6134  round difference 0.0059  cell 0.6164
+      int8/vgg16_fc2                   0.5459 0.3815  round difference 0.1644  cell 0.4644
+      int8/gpt2_l6_down_per_token      0.8476 0.8170  round difference 0.0306  cell 0.8324
+      int8/gpt2_l6_down_p9999          0.7924 0.6069  round difference 0.1856  cell 0.7004
+      int8/gpt2_l6_down_p999           0.8125 0.8294  round difference 0.0169  cell 0.8209
+      int8/gpt2_l11_down_maxabs        0.3376 0.3341  round difference 0.0035  cell 0.336
+      int8/gpt2_l11_down_p999          0.7780 0.6088  round difference 0.1692  cell 0.6941
+      int8/vgg16_fc2_asym              0.6644 0.6701  round difference 0.0056  cell 0.6673
+    int8, from the 800 MHz power alone (each pass referred to 58 C, E64's method); c800 = (P800 - B_800) / s_800; the share (P800 - zeros) / (full - zeros):
+    why: c fits all three clocks a burst touched, and a tile that holds 800 MHz has one or two ramp samples at 700, whose reading can sit at 600's: int8/vgg16_fc2's P700 read 36.96 and then 31.65 W, and its c 5.856 and then 4.756, while its P800 read 44.30 and 44.36 W
+      int8/zeros P800 [37.11, 37.16] c800 1.85; int8/full P800 [50.34, 50.28] c800 8.77
+      int8/resnet18_l3c1               P800 [45.17, 45.13] c800 6.06 (registered c 6.321, (a) 5.673, law 7.902); share 0.608 ((a) 0.512, law 0.834)
+      int8/vgg16_fc2                   P800 [44.3, 44.36] c800 5.63 (registered c 5.306, (a) 4.778, law 6.856); share 0.546 ((a) 0.383, law 0.683)
+      int8/gpt2_l6_down_per_token      P800 [47.83, 47.78] c800 7.45 (registered c 7.764, (a) 7.379, law None); share 0.810 ((a) 0.759, law None)
+      int8/gpt2_l6_down_p9999          P800 [47.59, 47.6] c800 7.34 (registered c 6.882, (a) 7.251, law None); share 0.794 ((a) 0.740, law None)
+      int8/gpt2_l6_down_p999           P800 [47.76, 47.76] c800 7.43 (registered c 7.687, (a) 7.451, law None); share 0.806 ((a) 0.769, law None)
+      int8/gpt2_l11_down_maxabs        P800 [41.61, 41.56] c800 4.19 (registered c 4.449, (a) 3.262, law 4.89); share 0.338 ((a) 0.164, law 0.400)
+      int8/gpt2_l11_down_p999          P800 [47.4, 47.44] c800 7.25 (registered c 6.84, (a) 7.183, law None); share 0.781 ((a) 0.730, law None)
+      int8/vgg16_fc2_asym              P800 [45.86, 45.89] c800 6.44 (registered c 6.661, (a) 6.149, law None); share 0.663 ((a) 0.581, law None)
+
+K3  idle resets and late ramps
+    {'burst_runs': 0, 'sus_dips': 1, 'work_processes': 368}
+    dips: [('SUS-01-int8-real-l6_attn_qk-round1-r1', 1, 793.9, 800)]
+    late ramps (a process's first 800 MHz sample later than 1.2 s with no limit able to hold it): 34 in 368 work processes, in 27 runs
+    fp32/t5small_l0_down: sustained 795.4 MHz, share at 800 0.974, die 59.2, die max 60; 1 late ramps, 0 dips; reset-free 794.5; its samples below 800 lie this many s after a process's start: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1]
+    fp16/t5small_l0_down: sustained 794.9 MHz, share at 800 0.972, die 61.9, die max 62; 0 late ramps, 0 dips; reset-free 794.0; its samples below 800 lie this many s after a process's start: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2]
+    int8/zeros: sustained 794.4 MHz, share at 800 0.969, die 58.0, die max 58; 0 late ramps, 0 dips; reset-free 794.5; its samples below 800 lie this many s after a process's start: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2]
+
+K4  the gate and the clock
+    rms by group {"all": {"burst_vs_frozen": 8.53, "burst_vs_relation_on_measured_c": 7.9, "burst_vs_no_model": 44.46, "sus_vs_frozen": 14.55, "sus_vs_relation_on_measured_c": 10.29, "sus_vs_no_model": 112.24, "n_burst": 25, "n_sus": 11}, "gated float (S2)": {"burst_vs_frozen": 5.41, "burst_vs_relation_on_measured_c": 4.75, "burst_vs_no_model": 81.96, "sus_vs_frozen": 17.65, "sus_vs_relation_on_measured_c": 11.61, "sus_vs_no_model": 140.6, "n_burst": 7, "n_sus": 7}, "no zero word, float": {"burst_vs_frozen": 12.7, "burst_vs_relation_on_measured_c": 11.84, "burst_vs_no_model": 15.44, "sus_vs_frozen": 6.06, "sus_vs_relation_on_measured_c": 7.45, "sus_vs_no_model": 7.11, "n_burst": 10, "n_sus": 4}, "int8": {"burst_vs_frozen": 0.0, "burst_vs_relation_on_measured_c": 0.0, "burst_vs_no_model": 0.0, "sus_vs_frozen": null, "sus_vs_relation_on_measured_c": null, "sus_vs_no_model": null, "n_burst": 8, "n_sus": 0}}
+    seven gated float tiles: sustained, relation on measured c, difference; one run's 1 sigma on the slope is 15.6 MHz (E83 C3)
+      fp32/resnet18_l3c1       c  15.29 burst  800.0 rel  798.9 | sus  677.2 rel  697.1 diff  -19.9 frozen  703.0 limit thermal share at 800 0.187
+      fp32/vgg16_fc2           c   9.15 burst  800.0 rel  800.0 | sus  784.1 rel  784.0 diff   +0.1 frozen  793.2 limit thermal share at 800 0.841
+      fp32/t5small_l0_down     c   3.19 burst  800.0 rel  800.0 | sus  795.4 rel  800.0 diff   -4.6 frozen  800.0 limit none share at 800 0.974
+      fp16/resnet18_l3c1       c  15.15 burst  800.0 rel  799.1 | sus  689.5 rel  699.0 diff   -9.5 frozen  709.5 limit thermal share at 800 0.225
+      fp16/vgg16_fc2           c  11.46 burst  800.0 rel  800.0 | sus  744.8 rel  748.5 diff   -3.7 frozen  770.3 limit thermal share at 800 0.504
+      fp16/t5small_l0_down     c   4.99 burst  800.0 rel  800.0 | sus  794.9 rel  800.0 diff   -5.1 frozen  800.0 limit none share at 800 0.972
+      fp32/resnet18_l2c1       c  20.91 burst  741.2 rel  753.7 | sus  650.1 rel  630.2 diff  +19.9 frozen  631.8 limit thermal share at 800 0.056
+    (a) against the gate law on the measured c, the gated float tiles (int8's c is not fit for this: K2's 800 MHz shares):
+      float: 7 tiles, nearer the gate law on 6; mean miss (a) +0.79 W, gate law -0.01 W; rms (a) 0.89, gate law 0.25
+        fp32/resnet18_l2c1       measured  20.91 (a)  20.74 law  21.20
+        fp32/resnet18_l3c1       measured  15.29 (a)  14.84 law  15.21
+        fp32/vgg16_fc2           measured   9.15 (a)   8.34 law   8.68
+        fp32/t5small_l0_down     measured   3.19 (a)   2.60 law   3.34
+        fp16/resnet18_l3c1       measured  15.15 (a)  14.34 law  15.42
+        fp16/vgg16_fc2           measured  11.46 (a)  10.06 law  11.56
+        fp16/t5small_l0_down     measured   4.99 (a)   3.71 law   4.81
+
+K5  no zero word, against same-session randn
+    fp32: share mean 0.9931, between-tile sd 0.0089, t against 1.000 1.56 on 3 df; burst difference -3.4 MHz, 1 sigma 5.9 (E83 C6's 5.3 MHz a cell), so -0.6 sigma
+       per tile, burst minus randn: [-1.9, -8.7, -1.9, -0.9]; randn's passes [709.8, 698]; tiles' passes {'fp32/gpt2_l3_mlp_down': [698, 705.9], 'fp32/gpt2_l9_attn_qk': [707.8, 682.7], 'fp32/bert_l6_up': [698, 705.9], 'fp32/vit_l5_down': [709.8, 696.1]}
+    fp16: share mean 0.9783, between-tile sd 0.0200, t against 1.000 1.88 on 2 df; burst difference +10.2 MHz, 1 sigma 6.1 (E83 C6's 5.3 MHz a cell), so +1.7 sigma
+       per tile, burst minus randn: [9.9, 8.5, 12.2]; randn's passes [725, 720.4]; tiles' passes {'fp16/gpt2_l9_attn_qk': [731.2, 734], 'fp16/bert_l6_up': [740.8, 721.6], 'fp16/vit_l5_down': [745.8, 724]}
+    fp16's burst difference in two sessions: E87 +7.8, E96 +10.2; their mean +9.0, 1 sigma 4.3; the relation on the measured c's mean gives +4.5 MHz
+    the no-model baseline beside S5, over the no-zero-word float tiles: {'burst_vs_frozen': 12.7, 'burst_vs_relation_on_measured_c': 11.84, 'burst_vs_no_model': 15.44, 'sus_vs_frozen': 6.06, 'sus_vs_relation_on_measured_c': 7.45, 'sus_vs_no_model': 7.11, 'n_burst': 10, 'n_sus': 4}
+
+K6  the int8 arm
+    round 1: full 791.6 MHz 52.66 W 64.7 C none share 0.941 start 58; l0_mlp_up 800 MHz 51.94 W 64.4 C none share 1.0 start 58; l6_mlp_down 800 MHz 49.9 W 62.8 C none share 1.0 start 57; l6_attn_qk 793.9 MHz 49.59 W 63.5 C none share 0.967 start 58
+    round 2: full 793.4 MHz 53.19 W 64.9 C none share 0.934 start 58; l0_mlp_up 789.7 MHz 51.51 W 64.9 C none share 0.923 start 58; l6_mlp_down 800 MHz 50.87 W 64.5 C none share 1.0 start 58; l6_attn_qk 800 MHz 50.39 W 64.2 C none share 1.0 start 58
+    round 3: full 777.2 MHz 51.65 W 65.0 C thermal share 0.821 start 58; l0_mlp_up 789.3 MHz 51.3 W 64.6 C none share 0.941 start 58; l6_mlp_down 789.7 MHz 49.77 W 64.1 C none share 0.944 start 58; l6_attn_qk 789.2 MHz 48.59 W 62.7 C none share 0.941 start 55
+    round 4: full 795.4 MHz 53.32 W 64.9 C none share 0.954 start 58; l0_mlp_up 794.4 MHz 51.57 W 64.5 C none share 0.969 start 58; l6_mlp_down 800 MHz 50.41 W 63.8 C none share 1.0 start 58; l6_attn_qk 800 MHz 50.41 W 64.3 C none share 1.0 start 58
+    I1 SAME_WITHIN_BAR: mean 6.117 MHz, sd 4.367, half-width 6.948, [-0.832, 13.065]; rounds [6.367, 3.167, 12.2, 2.733]
+    I2 BELOW: -2.184 W [-2.686, -1.682]; I3 BELOW: -0.85 C [-1.472, -0.228]
+    expected, frozen: {"clock_difference_relation_mhz": 9.1, "clock_relation_real_mhz": 796.6, "clock_relation_full_mhz": 787.5, "clock_difference_relation_at_e87_w_star_mhz": 14.0, "w_star_e87_w": 48.474, "board_w_difference_at_fixed_800_w": -2.11, "die_difference_at_fixed_800_c": -0.96}
+    the relation on E87's c at E80's W* 49.75: real 796.6, full 787.5, difference +9.1 MHz; measured real 795.5, full 789.4
+    the relation on E87's c at this session's a-adj W* 49.502: real 795.9, full 785.8, difference +10.1 MHz; measured real 795.5, full 789.4
+    trips (limit thermal): full 1 of 4; real 0 of 12; Fisher's exact one-sided p = 0.25 (the one trip landing on a full run by chance, 4 of 16 runs are full)
+    pooled one-run sd 6.07 MHz, per kind {'int8/full': 8.28, 'int8/l0_mlp_up': 5.0, 'int8/l6_mlp_down': 5.15, 'int8/l6_attn_qk': 5.24}: planning sigma was 5.6-15.6, and 9.2 across sessions
+    E87's single runs: real [794.4, 793.6, 800] against full 774.7, a difference of +21.3 MHz
+    labelled: {"clock_dips_left_out": {"mean": 6.617, "lo": -0.397, "hi": 13.631, "reads": "SAME_WITHIN_BAR"}, "fine_w_at_800": {"mean": -2.125, "lo": -2.8, "hi": -1.45, "reads": "BELOW"}, "clock_pooled_two_way": {"mean": 6.117, "lo": 1.232, "hi": 11.001, "reads": "DIFFERENT_SMALL"}}
+    labelled per tile: {"int8/l0_mlp_up": {"mean": 3.95, "lo": -8.0, "hi": 15.9, "reads": "INCONCLUSIVE"}, "int8/l6_mlp_down": {"mean": 8.025, "lo": 2.675, "hi": 13.375, "reads": "DIFFERENT_SMALL"}, "int8/l6_attn_qk": {"mean": 6.375, "lo": -0.214, "hi": 12.964, "reads": "SAME_WITHIN_BAR"}}
+    the first run of each round: {1: 'int8/l6_mlp_down', 2: 'int8/l0_mlp_up', 3: 'int8/l6_attn_qk', 4: 'int8/l6_mlp_down'}; int8 full was never first (the seeded shuffle's chance)
+    with each round's first run left out, mhz: mean +6.513 MHz, 95% [-0.426, +13.451]; rounds [5.35, 6.6, 12.3, 1.8]
+    with each round's first run left out, w: mean -1.975 W, 95% [-2.987, -0.963]; rounds [-1.89, -2.56, -1.12, -2.33]
+    with each round's first run left out, die: mean -0.613 C, 95% [-0.789, -0.436]; rounds [-0.75, -0.55, -0.65, -0.5]
+    where each arm run's samples below 800 MHz fall in the last 40 s (in a process, within 1.5 s of its start, or later):
+      round 1: full ramp 12 later 11 of 400; l0_mlp_up ramp 0 later 1 of 400; l6_mlp_down ramp 0 later 0 of 399; l6_attn_qk ramp 0 later 13 of 400
+      round 2: full ramp 0 later 27 of 400; l0_mlp_up ramp 15 later 18 of 399; l6_mlp_down ramp 0 later 0 of 400; l6_attn_qk ramp 0 later 0 of 399
+      round 3: full ramp 29 later 45 of 399; l0_mlp_up ramp 25 later 0 of 400; l6_mlp_down ramp 24 later 0 of 400; l6_attn_qk ramp 26 later 0 of 399
+      round 4: full ramp 1 later 19 of 400; l0_mlp_up ramp 13 later 0 of 400; l6_mlp_down ramp 0 later 0 of 400; l6_attn_qk ramp 0 later 0 of 400
+      in all, (ramp, later, samples): {'int8/full': (42, 102, 1599), 'int8/l0_mlp_up': (53, 19, 1599), 'int8/l6_mlp_down': (24, 0, 1599), 'int8/l6_attn_qk': (26, 13, 1598)}
+      a run has launch-ramp samples in the window or next to none: bimodal in the data, not by kind; post hoc, it fits Q132(g)'s heartbeat in the gap between kernels
+    POST HOC, the share of the last 40 s below 800 MHz after the launch ramp (the idle-reset dip left out), full minus the mean of the real tiles: rounds [2.67, 5.25, 11.28, 4.75] points of share; mean +5.99, 95% [+0.10, +11.87]; at 100 MHz a step that is +6.0 MHz, the arm's whole +6.1
+
+K7  the heat path
+    die line {"k_c_per_w": 0.4539, "a_c": 41.408, "n": 34, "rms_c": 0.589, "cap_w_at_65_5": 53.08, "a_c_at_e80_slope": 42.353, "shift_c_at_e80_slope": 0.12}
+    the line die - 0.4573 W over the kinds shared by all four sessions, ['fp16/zeros', 'int8/zeros', 'int8/full', 'fp32/randn']:
+      E80: 41.123 C (per kind {'fp16/zeros': 41.63, 'int8/zeros': 41.06, 'int8/full': 40.59, 'fp32/randn': 41.22}), shift from E80 +0.000; rest W 21.76, rest die 45.58, rest die from E80 +0.00
+      E83: 40.970 C (per kind {'fp16/zeros': 41.65, 'int8/zeros': 40.43, 'int8/full': 41.06, 'fp32/randn': 40.73}), shift from E80 -0.153; rest W 22.03, rest die 46.42, rest die from E80 +0.84
+      E87: 41.665 C (per kind {'fp16/zeros': 41.63, 'int8/zeros': 41.65, 'int8/full': 41.59, 'fp32/randn': 41.79}), shift from E80 +0.542; rest W 22.17, rest die 47.15, rest die from E80 +1.57
+      E96: 41.160 C (per kind {'fp16/zeros': 41.15, 'int8/zeros': 41.23, 'int8/full': 40.77, 'fp32/randn': 41.48}), shift from E80 +0.037; rest W 22.145, rest die 46.79, rest die from E80 +1.21
+    E96 over E80: +0.037 C of line for +1.21 C of rest die, +0.03 C per C; the desk's fit was 0.25-0.35, 95% roughly 0-0.6; a point in E98's night, not a test of it
+    carryover: a run's line against the previous run's board W, 33 pairs: slope +0.0427 C per W, s.e. 0.0203; so a run after a zeros run (about 36 W) rather than a full-power one (about 53 W) reads -0.73 C of line
+    the first run of each round, die, W, line: [(1, 'l6_mlp_down', 62.8, 49.9, 39.981), (2, 'l0_mlp_up', 64.9, 51.51, 41.344), (3, 'l6_attn_qk', 62.7, 48.59, 40.48), (4, 'l6_mlp_down', 63.8, 50.41, 40.748)]
+    the runs before each round: [(1, 'the bursts'), (2, 'fp32/randn'), (3, 'int8/zeros'), (4, 'fp16/randn')]
+    the line's trend through the session 0.01103 C/min; range over runs 39.981 to 42.536
+
+K8  the rest readings
+    smoke_last_60s: {"n": 600, "t_first_ms": 1793527516676, "t_last_ms": 1793527576674, "die": 47, "w": 22.146, "mhz": 600, "config": {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519}, "w_first_half": 22.161, "w_second_half": 22.131}
+    history_before_first_session_launch: {"rows": 0, "w": null, "die_raw": null, "nic": null, "nvme": null, "since_busy_min": 0.1, "t_end_ms": 1793527599635}
+    first_launch: {"rows": 204, "w": 22.145, "die_raw": 46.79, "nic": 44.45, "nvme": 37.6, "since_busy_min": 27.0, "t_end_ms": 1793527500058}
+    p2: {"rows": 240, "w": 22.066, "die_raw": 46.67, "nic": 44.43, "nvme": 37.61, "since_busy_min": 36.2, "t_end_ms": 1793525400054}
+    p3: {"rows": 177, "w": 21.897, "die_raw": 46.09, "nic": 43.92, "nvme": 36.9, "since_busy_min": 24.7, "t_end_ms": 1793533200051}
+    E98's P2 ended early, at 1793525874516 (09:37:54 UTC), so the card was idle 27.1 min when this queue took its first snapshot: the 60 s reading is a true rest
+    sensors at the start {"coretemp:Package id 0": 36.0, "coretemp:Core 0": 34.0, "coretemp:Core 1": 32.0, "coretemp:Core 2": 34.0, "coretemp:Core 3": 35.0, "coretemp:Core 4": 34.0, "coretemp:Core 5": 36.0, "nvme:Composite": 36.85, "nvme:Sensor 1": 36.85, "nvme:Sensor 2": 46.85, "acpitz_0:temp1": 16.8, "iwlwifi_1_2:temp1": 44.0, "enp7s0:PHY Temperature": 44.257, "enp7s0:MAC Temperature": 44.205, "acpitz_1:temp1": 27.8}
+    sensors at the end   {"coretemp:Package id 0": 34.0, "coretemp:Core 0": 34.0, "coretemp:Core 1": 33.0, "coretemp:Core 2": 34.0, "coretemp:Core 3": 33.0, "coretemp:Core 4": 34.0, "coretemp:Core 5": 32.0, "nvme:Composite": 38.85, "nvme:Sensor 1": 38.85, "nvme:Sensor 2": 47.85, "acpitz_0:temp1": 16.8, "iwlwifi_1_2:temp1": 45.0, "enp7s0:PHY Temperature": 45.41, "enp7s0:MAC Temperature": 45.419, "acpitz_1:temp1": 27.8}
+    history rows committed 2080, from 1793522903040 to 1793533298039
+
+K9  the other tiles, c only (E95 holds the energy claims)
+    -0.0: fp32/vit_l11_down c 21.404, (a) 21.489, if the gate took -0.0 10.61 W; share 0.8265; burst 740.2 sustained 615.6
+    the bf16 grid: fp32/t5small_l0_up c 22.895, (a) 23.485, share 0.8887; burst 725.2 sustained 603.1
+    int8 calibration, shares from the 800 MHz power (K2): {"int8/gpt2_l6_down_per_token": 0.81, "int8/gpt2_l6_down_p9999": 0.794, "int8/gpt2_l6_down_p999": 0.806, "int8/gpt2_l11_down_maxabs": 0.338, "int8/gpt2_l11_down_p999": 0.781, "int8/vgg16_fc2_asym": 0.663}
+      the lever on GPT-2 layer 11: p99.9 - max-abs +5.84 W at 800 MHz, +3.06 W on c's scale (predicted +3.92); VGG asym - symmetric +1.55 W at 800 MHz, +0.81 on c's scale (predicted +1.37); every one bursts at 800.0, so none of it moves the burst clock
+    the fp16 forward pass: c 22.946, share 0.9943, burst 708.2 (passes [718.4, 698.0]); the rounded tile in E87's session c 22.924, share 0.9895, burst 725.5

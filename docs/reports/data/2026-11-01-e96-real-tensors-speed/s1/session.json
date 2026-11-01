@@ -1,0 +1,629 @@
+{
+ "experiment": "E96",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793527598246,
+ "protocol": {
+  "experiment": "E96",
+  "request": "Q132",
+  "card": "aifoundry2",
+  "order_seed": 96,
+  "note": "E80's, E83's and E87's design on Q132(r)'s real2 tiles, E87's six anchors, and four rounds of E87's three real int8 tiles against int8 full; nothing is set on the card",
+  "tools": {
+   "heater": "build/sparsity_t2/host/sparsity_host",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "real_tiles": [
+   "tools/claims-v3/kinds/real2/predictions-real2.json",
+   "tools/claims-v3/kinds/real/predictions-real.json"
+  ],
+  "predictions": "tools/claims-v3/kspeed/e96/predictions.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 85,
+   "board_cap_w": 97,
+   "cap_consecutive": 3
+  },
+  "caps": {
+   "max_card_min": 72
+  },
+  "blocks": [
+   {
+    "name": "SMOKE",
+    "title": "the idle card with no launch (its last 60 s are the session's rest reading), then one 2 s launch of a real2 tile at each gating level (not analysed)",
+    "default": false,
+    "start": {
+     "mode": "cool",
+     "max_c": 99,
+     "max_wait_s": 5
+    },
+    "launch": {
+     "seconds": 2,
+     "budget": 3.5,
+     "processes": 1
+    },
+    "tail_s": 3,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "zeros",
+      "label": "rest",
+      "launch": {
+       "seconds": 2,
+       "budget": 3.5,
+       "processes": 0
+      },
+      "tail_s": 75
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vgg16_fc2.bin",
+      "label": "fp32-r2-vgg16_fc2"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/t5small_l0_down.bin",
+      "label": "fp16-r2-t5small_l0_down"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_maxabs.bin",
+      "label": "int8-r2-gpt2_l11_down_maxabs"
+     }
+    ]
+   },
+   {
+    "name": "BURST",
+    "title": "a burst on a cool die: one 6 s process from a die reading <= 55 C (E80's, E83's and E87's BURST)",
+    "passes": 2,
+    "shuffle": true,
+    "start": {
+     "mode": "cool",
+     "max_c": 55,
+     "max_wait_s": 300
+    },
+    "launch": {
+     "seconds": 6,
+     "budget": 7.5,
+     "processes": 1
+    },
+    "tail_s": 4,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/resnet18_l2c1.bin",
+      "label": "fp32-r2-resnet18_l2c1"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/resnet18_l3c1.bin",
+      "label": "fp32-r2-resnet18_l3c1"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vgg16_fc2.bin",
+      "label": "fp32-r2-vgg16_fc2"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/t5small_l0_down.bin",
+      "label": "fp32-r2-t5small_l0_down"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin",
+      "label": "fp32-r2-gpt2_l3_mlp_down"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin",
+      "label": "fp32-r2-gpt2_l9_attn_qk"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin",
+      "label": "fp32-r2-bert_l6_up"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin",
+      "label": "fp32-r2-vit_l5_down"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/t5small_l0_up.bin",
+      "label": "fp32-r2-t5small_l0_up"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vit_l11_down.bin",
+      "label": "fp32-r2-vit_l11_down"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/resnet18_l3c1.bin",
+      "label": "fp16-r2-resnet18_l3c1"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/vgg16_fc2.bin",
+      "label": "fp16-r2-vgg16_fc2"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/t5small_l0_down.bin",
+      "label": "fp16-r2-t5small_l0_down"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin",
+      "label": "fp16-r2-gpt2_l9_attn_qk"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin",
+      "label": "fp16-r2-bert_l6_up"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin",
+      "label": "fp16-r2-vit_l5_down"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin",
+      "label": "fp16-r2-gpt2_l6_mlp_down_fp16fwd"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/int8/resnet18_l3c1.bin",
+      "label": "int8-r2-resnet18_l3c1"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/int8/vgg16_fc2.bin",
+      "label": "int8-r2-vgg16_fc2"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin",
+      "label": "int8-r2-gpt2_l6_down_per_token"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin",
+      "label": "int8-r2-gpt2_l6_down_p9999"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin",
+      "label": "int8-r2-gpt2_l6_down_p999"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_maxabs.bin",
+      "label": "int8-r2-gpt2_l11_down_maxabs"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin",
+      "label": "int8-r2-gpt2_l11_down_p999"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/int8/vgg16_fc2_asym.bin",
+      "label": "int8-r2-vgg16_fc2_asym"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "fp32-randn"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "fp32-zeros"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "fp16-randn"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+      "label": "fp16-zeros"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "int8-zeros"
+     }
+    ]
+   },
+   {
+    "name": "SUS",
+    "title": "sustained: nine back-to-back 8 s processes (~76 s) from a die reading <= 57 C (E80's, E83's and E87's SUS), in the order make_protocol_e96.py fixed",
+    "passes": 1,
+    "shuffle": false,
+    "start": {
+     "mode": "cool",
+     "max_c": 57,
+     "max_wait_s": 300
+    },
+    "launch": {
+     "seconds": 8,
+     "budget": 9.5,
+     "processes": 9
+    },
+    "tail_s": 6,
+    "runs": [
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_mlp_down.bin",
+      "label": "int8-real-l6_mlp_down-round1",
+      "round": 1,
+      "group": "R1"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_attn_qk.bin",
+      "label": "int8-real-l6_attn_qk-round1",
+      "round": 1,
+      "group": "R1"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l0_mlp_up.bin",
+      "label": "int8-real-l0_mlp_up-round1",
+      "round": 1,
+      "group": "R1"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full-round1",
+      "round": 1,
+      "group": "R1"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/resnet18_l3c1.bin",
+      "label": "fp32-r2-resnet18_l3c1",
+      "group": "Ga"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "fp16-randn",
+      "group": "Ga"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/t5small_l0_down.bin",
+      "label": "fp16-r2-t5small_l0_down",
+      "group": "Ga"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "fp32-randn",
+      "group": "Ga"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l0_mlp_up.bin",
+      "label": "int8-real-l0_mlp_up-round2",
+      "round": 2,
+      "group": "R2"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_mlp_down.bin",
+      "label": "int8-real-l6_mlp_down-round2",
+      "round": 2,
+      "group": "R2"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_attn_qk.bin",
+      "label": "int8-real-l6_attn_qk-round2",
+      "round": 2,
+      "group": "R2"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full-round2",
+      "round": 2,
+      "group": "R2"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/vgg16_fc2.bin",
+      "label": "fp16-r2-vgg16_fc2",
+      "group": "Gb"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+      "label": "fp16-zeros",
+      "group": "Gb"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/resnet18_l2c1.bin",
+      "label": "fp32-r2-resnet18_l2c1",
+      "group": "Gb"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/t5small_l0_down.bin",
+      "label": "fp32-r2-t5small_l0_down",
+      "group": "Gb"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "int8-zeros",
+      "group": "Gb"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_attn_qk.bin",
+      "label": "int8-real-l6_attn_qk-round3",
+      "round": 3,
+      "group": "R3"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l0_mlp_up.bin",
+      "label": "int8-real-l0_mlp_up-round3",
+      "round": 3,
+      "group": "R3"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full-round3",
+      "round": 3,
+      "group": "R3"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_mlp_down.bin",
+      "label": "int8-real-l6_mlp_down-round3",
+      "round": 3,
+      "group": "R3"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vgg16_fc2.bin",
+      "label": "fp32-r2-vgg16_fc2",
+      "group": "Gc"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "fp32-randn-rep2",
+      "group": "Gc"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/resnet18_l3c1.bin",
+      "label": "fp16-r2-resnet18_l3c1",
+      "group": "Gc"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "fp16-randn-rep2",
+      "group": "Gc"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_mlp_down.bin",
+      "label": "int8-real-l6_mlp_down-round4",
+      "round": 4,
+      "group": "R4"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "int8-full-round4",
+      "round": 4,
+      "group": "R4"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l0_mlp_up.bin",
+      "label": "int8-real-l0_mlp_up-round4",
+      "round": 4,
+      "group": "R4"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/real/tiles/int8/l6_attn_qk.bin",
+      "label": "int8-real-l6_attn_qk-round4",
+      "round": 4,
+      "group": "R4"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/t5small_l0_up.bin",
+      "label": "fp32-r2-t5small_l0_up",
+      "group": "G3"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/vit_l11_down.bin",
+      "label": "fp32-r2-vit_l11_down",
+      "group": "G3"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin",
+      "label": "fp32-r2-bert_l6_up",
+      "group": "G3"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin",
+      "label": "fp16-r2-vit_l5_down",
+      "group": "G3"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "fp32-zeros",
+      "group": "G3"
+     }
+    ]
+   }
+  ],
+  "sustained_first_kept": [
+   "fp32/resnet18_l2c1",
+   "fp32/resnet18_l3c1",
+   "fp16/resnet18_l3c1",
+   "fp32/vgg16_fc2",
+   "fp16/vgg16_fc2",
+   "fp32/t5small_l0_down",
+   "fp16/t5small_l0_down",
+   "fp32/t5small_l0_up",
+   "fp32/vit_l11_down",
+   "fp32/bert_l6_up",
+   "fp16/vit_l5_down"
+  ],
+  "sustained_first_cut": [
+   "int8/vgg16_fc2",
+   "int8/vgg16_fc2_asym",
+   "int8/gpt2_l11_down_maxabs",
+   "int8/gpt2_l11_down_p999"
+  ]
+ },
+ "runs_planned": [
+  "BURST-15-fp16-r2-vit_l5_down-r1",
+  "BURST-19-int8-r2-gpt2_l6_down_per_token-r1",
+  "BURST-26-fp32-zeros-r1",
+  "BURST-14-fp16-r2-bert_l6_up-r1",
+  "BURST-23-int8-r2-gpt2_l11_down_p999-r1",
+  "BURST-27-fp16-randn-r1",
+  "BURST-25-fp32-randn-r1",
+  "BURST-30-int8-zeros-r1",
+  "BURST-07-fp32-r2-vit_l5_down-r1",
+  "BURST-09-fp32-r2-vit_l11_down-r1",
+  "BURST-28-fp16-zeros-r1",
+  "BURST-16-fp16-r2-gpt2_l6_mlp_down_fp16fwd-r1",
+  "BURST-17-int8-r2-resnet18_l3c1-r1",
+  "BURST-04-fp32-r2-gpt2_l3_mlp_down-r1",
+  "BURST-20-int8-r2-gpt2_l6_down_p9999-r1",
+  "BURST-18-int8-r2-vgg16_fc2-r1",
+  "BURST-08-fp32-r2-t5small_l0_up-r1",
+  "BURST-02-fp32-r2-vgg16_fc2-r1",
+  "BURST-24-int8-r2-vgg16_fc2_asym-r1",
+  "BURST-13-fp16-r2-gpt2_l9_attn_qk-r1",
+  "BURST-05-fp32-r2-gpt2_l9_attn_qk-r1",
+  "BURST-00-fp32-r2-resnet18_l2c1-r1",
+  "BURST-22-int8-r2-gpt2_l11_down_maxabs-r1",
+  "BURST-01-fp32-r2-resnet18_l3c1-r1",
+  "BURST-29-int8-full-r1",
+  "BURST-03-fp32-r2-t5small_l0_down-r1",
+  "BURST-06-fp32-r2-bert_l6_up-r1",
+  "BURST-12-fp16-r2-t5small_l0_down-r1",
+  "BURST-21-int8-r2-gpt2_l6_down_p999-r1",
+  "BURST-10-fp16-r2-resnet18_l3c1-r1",
+  "BURST-11-fp16-r2-vgg16_fc2-r1",
+  "BURST-29-int8-full-r2",
+  "BURST-15-fp16-r2-vit_l5_down-r2",
+  "BURST-28-fp16-zeros-r2",
+  "BURST-13-fp16-r2-gpt2_l9_attn_qk-r2",
+  "BURST-22-int8-r2-gpt2_l11_down_maxabs-r2",
+  "BURST-07-fp32-r2-vit_l5_down-r2",
+  "BURST-26-fp32-zeros-r2",
+  "BURST-21-int8-r2-gpt2_l6_down_p999-r2",
+  "BURST-30-int8-zeros-r2",
+  "BURST-20-int8-r2-gpt2_l6_down_p9999-r2",
+  "BURST-23-int8-r2-gpt2_l11_down_p999-r2",
+  "BURST-24-int8-r2-vgg16_fc2_asym-r2",
+  "BURST-19-int8-r2-gpt2_l6_down_per_token-r2",
+  "BURST-12-fp16-r2-t5small_l0_down-r2",
+  "BURST-10-fp16-r2-resnet18_l3c1-r2",
+  "BURST-25-fp32-randn-r2",
+  "BURST-08-fp32-r2-t5small_l0_up-r2",
+  "BURST-09-fp32-r2-vit_l11_down-r2",
+  "BURST-17-int8-r2-resnet18_l3c1-r2",
+  "BURST-27-fp16-randn-r2",
+  "BURST-18-int8-r2-vgg16_fc2-r2",
+  "BURST-04-fp32-r2-gpt2_l3_mlp_down-r2",
+  "BURST-02-fp32-r2-vgg16_fc2-r2",
+  "BURST-11-fp16-r2-vgg16_fc2-r2",
+  "BURST-06-fp32-r2-bert_l6_up-r2",
+  "BURST-16-fp16-r2-gpt2_l6_mlp_down_fp16fwd-r2",
+  "BURST-14-fp16-r2-bert_l6_up-r2",
+  "BURST-03-fp32-r2-t5small_l0_down-r2",
+  "BURST-01-fp32-r2-resnet18_l3c1-r2",
+  "BURST-05-fp32-r2-gpt2_l9_attn_qk-r2",
+  "BURST-00-fp32-r2-resnet18_l2c1-r2",
+  "SUS-00-int8-real-l6_mlp_down-round1-r1",
+  "SUS-01-int8-real-l6_attn_qk-round1-r1",
+  "SUS-02-int8-real-l0_mlp_up-round1-r1",
+  "SUS-03-int8-full-round1-r1",
+  "SUS-04-fp32-r2-resnet18_l3c1-r1",
+  "SUS-05-fp16-randn-r1",
+  "SUS-06-fp16-r2-t5small_l0_down-r1",
+  "SUS-07-fp32-randn-r1",
+  "SUS-08-int8-real-l0_mlp_up-round2-r1",
+  "SUS-09-int8-real-l6_mlp_down-round2-r1",
+  "SUS-10-int8-real-l6_attn_qk-round2-r1",
+  "SUS-11-int8-full-round2-r1",
+  "SUS-12-fp16-r2-vgg16_fc2-r1",
+  "SUS-13-fp16-zeros-r1",
+  "SUS-14-fp32-r2-resnet18_l2c1-r1",
+  "SUS-15-fp32-r2-t5small_l0_down-r1",
+  "SUS-16-int8-zeros-r1",
+  "SUS-17-int8-real-l6_attn_qk-round3-r1",
+  "SUS-18-int8-real-l0_mlp_up-round3-r1",
+  "SUS-19-int8-full-round3-r1",
+  "SUS-20-int8-real-l6_mlp_down-round3-r1",
+  "SUS-21-fp32-r2-vgg16_fc2-r1",
+  "SUS-22-fp32-randn-rep2-r1",
+  "SUS-23-fp16-r2-resnet18_l3c1-r1",
+  "SUS-24-fp16-randn-rep2-r1",
+  "SUS-25-int8-real-l6_mlp_down-round4-r1",
+  "SUS-26-int8-full-round4-r1",
+  "SUS-27-int8-real-l0_mlp_up-round4-r1",
+  "SUS-28-int8-real-l6_attn_qk-round4-r1",
+  "SUS-29-fp32-r2-t5small_l0_up-r1",
+  "SUS-30-fp32-r2-vit_l11_down-r1",
+  "SUS-31-fp32-r2-bert_l6_up-r1",
+  "SUS-32-fp16-r2-vit_l5_down-r1",
+  "SUS-33-fp32-zeros-r1"
+ ],
+ "sha256": {
+  "heater": "7adadf4f1ce331cc028c317561933d6d3209da0f0326b0ce9a124b39b15ac0d2",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "tools/claims-v3/kspeed/e96/run_e96.py",
+  "--protocol",
+  "tools/claims-v3/kspeed/e96/protocol.json",
+  "--out",
+  "build/e96/runs/s1",
+  "--max-card-min",
+  "70.36"
+ ],
+ "git_head": "0c187e1262b0e0f7fb744da4c22211b5dcfa9958",
+ "git_dirty_hpl": ""
+}
