@@ -1,0 +1,58 @@
+== card and host ==
+No process holds an ET-SoC-1 device node or card lock.
+ 10:24:04 up 6 days, 20:05,  3 users,  load average: 0.60, 0.61, 0.62
+== the images, by hash against the Intel's ==
+sha256 check rc=0
+== the host binary (E99's) ==
+f6633f1c0d0b00a84aa3b5590b903222830f4ddcfc95d87c6171672d99a5c11f  build/enercat-e99/host/enercat_host
+file   host f6633f1c0d0b00a84aa3b5590b903222830f4ddcfc95d87c6171672d99a5c11f 3574976 build/enercat-e99/host/enercat_host
+text   host eacec93bb16ee9047a6fbe2a308b68f714b1107c1caf6b372edb892d18ddaa77 build/enercat-e99/host/enercat_host
+code   host 2e7e4c0a198b9456e305dfe807bb0c4d086e5dc0a9d6940891d905dbd0662293 build/enercat-e99/host/enercat_host
+file   kernel 7ca7cc035358184ecb94053142b813e902ad4836dee57fc62b9a5bbce91731b1 80296 build/enercat-e99/host/../kernel/enercat.elf
+code   kernel a5743c3c5198edcb213f89047c38a4fe038ca3f719924ec456b5c73d200e6658 build/enercat-e99/host/../kernel/enercat.elf
+file   host 20e760c20e9b99c789ef96f1e4e950d51f534410275bfb933c2aaf96d1090fd0 3569104 build/sparsity/host/sparsity_host
+text   host 44e35dd24e025cd8c28c857245cd575f273f54a276c79aaf02be6ebf5e46350b build/sparsity/host/sparsity_host
+code   host 0c6106e215b313b9eb3112a1bfabf6c1a8c51ea6966071c826aaa9abd861a3e0 build/sparsity/host/sparsity_host
+present: flw_pat
+present: --operands file:
+present: lines: needs a whole number
+== harness hashes ==
+033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa  tools/claims-v3/lib.sh
+8293b5a0fbf72b68cb2d1ded35fa520711f0bd404246ac36874d8922cb137735  tools/claims-v3/runitems.py
+aa638f73d5253e9d2aef2dce504f5bf485ef15f56f2f02a8bff366888d4cdae5  tools/claims-v3/text_hash.sh
+b653f4a1e555dd0a8eb92e01dbce1f61db288e6809bf7b7567c5a859da890223  tools/claims-v3/mf/block.sh
+7512678064f727d1908452c4abfcfbfaa00fe3eaf8fffd0074b817576ed44c7a  tools/claims-v3/mf/make_mf.py
+42a88db4d0e5f342dd08f9678ea7a8516078c4c767a0868d2ee2cbff06209563  tools/claims-v3/e110/smoke_gate_e110.py
+09045d7b1a901e7486abd5acfc2a84586cb6b7b3abcbdbe0acda020c85380f62  tools/claims-v3/e132/README.md
+640dbfba2df105824b5d4288ad48751a3bee4ed4784deeb0ac0267d9bf18c01b  tools/claims-v3/e132/dmcmd-audit.txt
+53add668faa701109fe7910fc9f10a3a960fd847f195df4260af040171591ea5  tools/claims-v3/e132/gen.sha256
+889c2f2dc143872f829dc712f955a1a3e82fe84dfe40423b8b3f9e07954f8f8e  tools/claims-v3/e132/make_e132.py
+c4d1b1e94eaddf088ba3793e05d29033dfb268e9822eeae32994889ad875820e  tools/claims-v3/e132/make_predictions_e132.py
+a4d46c0530a582a8b23d3683381e4fb0b31b3e9f0fd6ec53aa452c4f9040fd29  tools/claims-v3/e132/predictions.json
+5a4066a2e6336b15d2b7ee7045bf04503d3373b8fb07fae5a7fbb0b2bc11a1dd  tools/claims-v3/e132/predictions.txt
+268aaaff4513bbaf155a0f5e35339ae17c9ab1eb98eb145c71cd374cfef89034  tools/claims-v3/e132/queue_e132.sh
+46ed6c1115012deffeff0ff0e830752f64facf7cdacc92e71675a548477e0de4  tools/claims-v3/e132/reduce_e132.py
+9e9e0b01a424687240f51a20028c04caeda789aa25e7e912f1b1e7824255d384  tools/claims-v3/e132/run_e132.sh
+bb826aaf7919d537c806c78a7232e26619a7eba57c11bca409d351d1daa40c3a  tools/claims-v3/e132/selftest.txt
+b70300a2060e18abe4d17bc1f3cc0f184a437675989f6c9a1fac76a691413a2d  tools/claims-v3/e132/selftest_e132.py
+f1f5b93e7104f85911f824f2509ab3289f721b5dee7029b8bb0069834003b98d  tools/claims-v3/e132/session_e132.sh
+== stop files ==
+ls: cannot access 'build/e132-STOP': No such file or directory
+ls: cannot access 'build/mf-STOP': No such file or directory
+ls: cannot access 'build/claims-v3/STOP': No such file or directory
+== dry run ==
+dry rc=0
+DRY hold10: build/sparsity/host/sparsity_host --test fma --type fp32 --pattern none --values pi --shires 0xffffffff --per-shire 32 --seconds 4.0 --seed 13201 --stop-file /home/yaroslavvb/aifoundry/build/claims-v3-dry/aifoundry3/e132/p13200/STOP
+10:24:09 [aifoundry3] block 13200 #23 anchor_pi: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+10:24:09 [aifoundry3] done
+2026-11-02T10:24:14 [aifoundry3] e132 p13200 ends: ok anchor_pi,dp_zeros,dm_,ab_,eh_,el_,wl_,vl_,c3_
+22
+{"n": 23, "runs_per_block": 24, "blocks": 1, "max_s": 1396, "items": ["anchor_pi", "dp_zeros", "dm_u4", "dm_l08", "dm_a44", "wl_64", "vl_64", "wl_128", "vl_128", "ab_0", "ab_1", "ab_2", "ab_3", "ab_4", "ab_5", "ab_6", "ab_7", "ab_x70", "ab_rnd", "c3_64", "c3_128", "eh_64", "el_64"]}
+--- et-lab-manifest: what it runs
+/usr/local/bin/et-lab-manifest
+/usr/local/bin/et-lab-manifest: POSIX shell script, ASCII text executable
+3:# Reads sysfs and files only; never opens /dev/et*. Card firmware needs a card query, so record it from your tool.
+7:echo "power        profile=$(powerprofilesctl get 2>/dev/null) epp=$(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null) governor=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null)"
+9:echo "et_soc1      version=$(cat /sys/module/et_soc1/version 2>/dev/null) srcversion=$(cat /sys/module/et_soc1/srcversion 2>/dev/null)"
+10:for d in /sys/bus/pci/drivers/ET/0000:*; do [ -e "$d" ] || continue
+12:for f in /opt/et/lib/libetrt.so /opt/et/lib/libdeviceLayer.a /opt/et/bin/dev_mngt_service; do
