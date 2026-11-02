@@ -8,6 +8,12 @@ host reads in host/ (driver event counters and kernel-log ET events, 1 Nov 2026 
 Run from the top of the repository:  python3 docs/reports/data/2026-11-01-q134a-alarm-residency/q134a_residency.py
 Writes reads.csv, sessions.json, runs-80w.txt, replay-card0.json, replay-card0.txt, counters.txt, continuity.txt and
 results.json next to this file. Post hoc desk analysis: nothing here was pre-registered.
+
+Corrected 1 Nov 2026 (PST), after verification: the telemetry tally counts each sample once, keyed on (t_ms, board_w)
+(E111's CAM-RED/ and CAM/tel.jsonl.raw repeat CAM/'s samples), and leaves out the per-launch summary lines, which carry
+a board_w but no t_ms. It now covers every aifoundry2 card session since the 26 Oct start with committed data: E68 and
+E72 have 10 Hz telemetry and were missing, and E66 (an idle run) has none. The residency de-duplication is a guard
+only: no residency list appears in two files, and results.json records how many rows it dropped (0).
 """
 import csv, glob, gzip, itertools, json, os, re, sys
 from collections import Counter, defaultdict
@@ -43,8 +49,10 @@ RES_DIRS = [
     ("E84", "2026-10-31-e84-speed-aifoundry1-card0", "aifoundry1 card 0"),
     ("E114", "2026-11-01-e114-card0-replicates", "aifoundry1 card 0"),
 ]
-TEL_DIRS = [  # aifoundry2 sessions since 26 Oct with committed telemetry (E73 and E85 read no residency)
-    ("E69", "2026-10-27-e69-governor-knob"), ("E73", "2026-10-27-e73-camera-frequencies"),
+TEL_DIRS = [  # every aifoundry2 card session since the 26 Oct SP start with committed data, in time order
+    # (E68, E66, E72, E73 and E85 read no residency; E66 is an idle run with no board_w telemetry)
+    ("E68", "2026-10-27-e68-stage-map"), ("E66", "2026-10-27-e66-idle-long"),
+    ("E69", "2026-10-27-e69-governor-knob"), ("E72", "2026-10-27-e72-600mhz"), ("E73", "2026-10-27-e73-camera-frequencies"),
     ("E80", "2026-10-31-e80-kinds-speed"), ("E83", "2026-10-31-e83-kinds-speed-rest"),
     ("E85", "2026-10-31-e85-camera-kinds"), ("E87", "2026-10-31-e87-real-tensors-speed"),
     ("E96", "2026-11-01-e96-real-tensors-speed"), ("E98", "2026-11-01-e98-heat-path-drift"),
@@ -84,6 +92,9 @@ def load_json_any(fp):
         return [json.loads(l) for l in txt.splitlines() if l.strip().startswith("{")]
 
 
+DROPPED_RES_ROWS = [0]  # residency rows the guard below dropped (0: every residency list is distinct across files)
+
+
 def collect_reads():
     rows, seen = [], set()
     for exp, sub, host in RES_DIRS:
@@ -95,12 +106,13 @@ def collect_reads():
                 walk(doc, {}, got, os.path.relpath(fp, DATA))
             for g in got:
                 key = (host, g["t_ms"], g["state"], g["cumulative_us"], g["rc"])
-                if key in seen:  # runs.jsonl embeds the same query records as queries.jsonl
+                if key in seen:  # a guard against a read copied into a second file; it drops nothing in these dirs
+                    DROPPED_RES_ROWS[0] += 1
                     continue
                 seen.add(key)
                 g.update(exp=exp, host=host)
                 rows.append(g)
-    # one row per read: the states asked in one residency list (duplicates in a second file were dropped above)
+    # one row per read: the states asked in one residency list
     reads = defaultdict(dict)
     for g in rows:
         reads[(g["host"], g["exp"], g["tag"], g["rid"])][g["state"]] = g
@@ -123,12 +135,16 @@ def collect_reads():
 
 def tel_tally():
     sessions, runs = {}, []
+    seen = set()  # (t_ms, board_w): one sample, counted once wherever it is repeated
     for exp, sub in TEL_DIRS:
         files = [f for f in glob.glob(os.path.join(DATA, sub, "**", "*.jsonl*"), recursive=True)
                  if "aifoundry3" not in f and "aifoundry1" not in f]
-        S = dict(files=0, n=0, max_board_w=None, max_avg_w=None, ge75=0, ge80=0, ge85=0, ge_card0_75=0, ge100=0,
-                 avg_ge70=0, avg_ge75=0, mhz300=0, t_first=None, t_last=None)
-        for f in sorted(files):
+        S = dict(files=0, n=0, max_board_w=None, max_avg_w=None, ge75=0, ge80=0, ge84=0, ge85=0, ge_card0_75=0, ge100=0,
+                 avg_ge70=0, avg_ge75=0, mhz300=0, t_first=None, t_last=None, duplicate_lines=0,
+                 launch_lines_no_t_ms=0, launch_lines_max_w=None, duplicates_by_file={})
+        # primaries first, so a repeat is charged to the copy: E111's CAM-RED/tel.jsonl.gz is a byte-for-byte copy of
+        # CAM/tel.jsonl.gz (reduce_hm.py's output dir), and CAM/tel.jsonl.raw an earlier partial dump of the same stream
+        for f in sorted(files, key=lambda p: (("-RED" + os.sep) in p or p.endswith(".raw"), p)):
             op = gzip.open if f.endswith(".gz") else open
             R = dict(n=0, max_board_w=None, max_avg_w=None)
             with op(f, "rt") as fh:
@@ -142,11 +158,20 @@ def tel_tally():
                     b = d.get("board_w")
                     if not isinstance(b, (int, float)):
                         continue
-                    S["n"] += 1; R["n"] += 1
                     t = d.get("t_ms")
-                    if t:
-                        S["t_first"] = t if S["t_first"] is None else min(S["t_first"], t)
-                        S["t_last"] = t if S["t_last"] is None else max(S["t_last"], t)
+                    if t is None:  # a per-launch summary line (board_w with no time of its own), not a sample
+                        S["launch_lines_no_t_ms"] += 1
+                        S["launch_lines_max_w"] = b if S["launch_lines_max_w"] is None else max(S["launch_lines_max_w"], b)
+                        continue
+                    if (t, b) in seen:  # the same sample already counted from another file
+                        S["duplicate_lines"] += 1
+                        k = os.path.relpath(f, DATA)
+                        S["duplicates_by_file"][k] = S["duplicates_by_file"].get(k, 0) + 1
+                        continue
+                    seen.add((t, b))
+                    S["n"] += 1; R["n"] += 1
+                    S["t_first"] = t if S["t_first"] is None else min(S["t_first"], t)
+                    S["t_last"] = t if S["t_last"] is None else max(S["t_last"], t)
                     for X in (S, R):
                         if X["max_board_w"] is None or b > X["max_board_w"]:
                             X["max_board_w"] = b
@@ -156,7 +181,7 @@ def tel_tally():
                             if X["max_avg_w"] is None or a > X["max_avg_w"]:
                                 X["max_avg_w"] = a
                         S["avg_ge70"] += a >= 70; S["avg_ge75"] += a >= 75
-                    S["ge75"] += b >= 75; S["ge80"] += b >= 80; S["ge85"] += b >= 85
+                    S["ge75"] += b >= 75; S["ge80"] += b >= 80; S["ge84"] += b >= 84; S["ge85"] += b >= 85
                     S["ge_card0_75"] += b >= CARD0_75_ON_A2; S["ge100"] += b >= 100
                     S["mhz300"] += (d.get("mhz") or {}).get("minion") == 300
             if R["n"]:
@@ -213,12 +238,13 @@ def replay_card0(H, reads):
         if not steps or steps[-1]["raw3_cumulative_us"] != r["raw3_cumulative_us"]:
             steps.append(rows[-1])
     per, j, prev = [], 0, -1.0
-    lags = []
+    lags, lags_if_ms = [], []
     for ts, t in T:
         inside = [p for p in P if prev < p[0] <= ts]
         per.append(len(inside))
         if inside:
-            lags.append((ts - inside[0][0]) * 1e6 - t)
+            lags.append((ts - inside[0][0]) * 1e6 - t)  # the logged duration read as microseconds
+            lags_if_ms.append((ts - inside[0][0]) - t / 1e3)  # the same, read as the "msec" the syndrome prints (s)
         prev = ts
     lags.sort()
     return dict(throttle_time_events=len(T), pmic_events=len(P), sum_us=cum, mean_us=round(cum / len(T)),
@@ -226,6 +252,8 @@ def replay_card0(H, reads):
                 pmic_per_episode=dict(sorted(Counter(per).items())), episodes_without_pmic=per.count(0),
                 pmic_after_last_episode=len([p for p in P if p[0] > T[-1][0]]),
                 lag_us_median=round(lags[len(lags) // 2]), lag_us_range=[round(lags[0]), round(lags[-1])],
+                lag_if_msec_s_first3=[round(x, 1) for x in lags_if_ms[:3]],
+                lag_if_msec_s_range=[round(min(lags_if_ms), 1), round(max(lags_if_ms), 1)],
                 pmic_watts=dict(sorted(Counter(w for _, w in P).items())), rows=rows)
 
 
@@ -260,7 +288,8 @@ def main():
     json.dump(sessions, open(os.path.join(HERE, "sessions.json"), "w"), indent=1)
     hot = sorted([r for r in runs if r["max_board_w"] is not None and r["max_board_w"] >= 80], key=lambda r: -r["max_board_w"])
     with open(os.path.join(HERE, "runs-80w.txt"), "w") as f:
-        f.write(f"aifoundry2 runs (telemetry files) whose board_w reached 80 W or more, since the 26 Oct SP start: {len(hot)}\n")
+        f.write(f"aifoundry2 runs (telemetry files) whose board_w reached 80 W or more, since the 26 Oct SP start: {len(hot)} "
+                f"(readings = samples, each counted once)\n")
         f.write("max_board_w  max_avg_w  readings  file\n")
         for r in hot:
             f.write(f"{r['max_board_w']:10.2f}  {r['max_avg_w'] if r['max_avg_w'] is not None else float('nan'):9.2f}  {r['n']:8d}  {r['file']}\n")
@@ -271,7 +300,8 @@ def main():
     json.dump(rep, open(os.path.join(HERE, "replay-card0.json"), "w"), indent=1)
     with open(os.path.join(HERE, "replay-card0.txt"), "w") as f:
         f.write("Card 0 (aifoundry1 0000:01:00.0): kernel-log THROTTLE_TIME events replayed through update_residency "
-                "(et-platform 836a4ab thermal_pwr_mgmt.c:351-393) against every committed raw-3 read\n")
+                "(thermal_pwr_mgmt.c:351-393 in et-platform 836a4ab, a public tree that declares BL2 0.22.0) against every "
+                "committed raw-3 read\n")
         f.write(f"THROTTLE_TIME events {rep['throttle_time_events']}, PMIC over-power events {rep['pmic_events']}\n")
         f.write(f"reads reproduced exactly on cumulative, average, maximum and minimum: {rep['exact_reads']} of {rep['reads']}\n")
         for s in rep["steps"]:
@@ -281,6 +311,9 @@ def main():
                 f"PMIC events after the last episode {rep['pmic_after_last_episode']}\n")
         f.write(f"episode end (host arrival) minus first PMIC event minus duration: median {rep['lag_us_median']} us, "
                 f"range {rep['lag_us_range']} us\n")
+        f.write(f"  the same with the duration read as the syndrome's 'msec': {rep['lag_if_msec_s_range'][0]} to "
+                f"{rep['lag_if_msec_s_range'][1]} s (first three {rep['lag_if_msec_s_first3']} s), every episode ending minutes "
+                f"before its own first interrupt; so the unit is microseconds\n")
         f.write(f"alarm values (W, count): {rep['pmic_watts']}\n")
 
     a2c = H2["counters"].get("0000:02:00.0", {}); c0c = H1["counters"].get("0000:01:00.0", {}); c1c = H1["counters"].get("0000:02:00.0", {})
@@ -324,13 +357,18 @@ def main():
         f.write(f"aifoundry1 card 0: host btime {bt1}; raw 2 {c0_2[0]} -> {c0_2[-1]} us monotonic {mono(c0_2)}; "
                 f"raw 3 {c0_3[0]} -> {c0_3[-1]} us monotonic {mono(c0_3)}\n")
 
-    allS = {k: sum(S[k] for S in sessions.values()) for k in ("n", "ge75", "ge80", "ge85", "ge_card0_75", "ge100", "avg_ge70", "avg_ge75", "mhz300")}
+    allS = {k: sum(S[k] for S in sessions.values()) for k in ("n", "ge75", "ge80", "ge84", "ge85", "ge_card0_75", "ge100", "avg_ge70",
+                                                             "avg_ge75", "mhz300", "duplicate_lines", "launch_lines_no_t_ms")}
     allS["max_board_w"] = max(S["max_board_w"] for S in sessions.values() if S["max_board_w"] is not None)
     allS["max_avg_w"] = max(S["max_avg_w"] for S in sessions.values() if S["max_avg_w"] is not None)
+    allS["launch_lines_max_w"] = max(S["launch_lines_max_w"] for S in sessions.values() if S["launch_lines_max_w"] is not None)
+    allS["sessions_checked"] = list(sessions)
+    allS["sessions_with_samples"] = [e for e, S in sessions.items() if S["n"]]
     res = dict(
         aifoundry2=dict(reads=len(a2), raw3_reads_rc0=len(a2_3), raw3_values=sorted(set(a2_3)), first=a2[0]["local"], last=a2[-1]["local"],
                         sessions_with_reads=sorted(per_exp, key=lambda e: int(e[1:])), raw2_first_us=a2_2[0], raw2_last_us=a2_2[-1],
-                        raw2_monotonic=mono(a2_2), invalid_state_reads=invalid, telemetry=allS, runs_ge80=len(hot),
+                        raw2_monotonic=mono(a2_2), invalid_state_reads=invalid, residency_duplicate_rows_dropped=DROPPED_RES_ROWS[0],
+                        telemetry=allS, runs_ge80=len(hot),
                         card0_75w_on_a2_scale=round(CARD0_75_ON_A2, 2), host_counters_1914=a2c, host_btime=bt2, module_uptime=up),
         card0=dict(reads=len(c0), raw3_first_us=c0_3[0], raw3_last_us=c0_3[-1], raw3_monotonic=mono(c0_3), invalid_state_reads=invalid_c0,
                    replay={k: v for k, v in rep.items() if k not in ("rows",)}, host_counters_1915=c0c),
