@@ -108,7 +108,7 @@ esac
 # At et-platform 836a4ab (BL2 0.22.0, the build all four lab cards report) its handler writes the PMIC's
 # firmware-management command register twice, ACTIVE_SLOT then VERSION, and reads the data register after each
 # (device-bootloaders/src/ServiceProcessorBL2/services/firmware_update.c:903 -> driver/pmic_controller.c:952-974,
-# # the two writes at :2543 and :2587): a PMIC command by E85 C1's standard. E84 sent it once, on aifoundry1 card 0 at 15:42:00 PDT on
+# the two writes at :2543 and :2587): a PMIC command by E85 C1's standard. E84 sent it once, on aifoundry1 card 0 at 15:42:00 PDT on
 # 31 Oct 2026 (docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/ident/ident-154200.out); the card answered normally.
 # Under the owner's rules of 2 Nov 2026 (AGENT.md section 5) every device command a run can send is classified before its
 # first launch, and a write outside the allowed statistics reset is NO-GO. So do not reuse this script as it stands:

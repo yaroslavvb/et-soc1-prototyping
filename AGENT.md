@@ -228,15 +228,19 @@ more care for writing commands"*. They bind every run, beside the table above:
    the PMIC's firmware-management command register twice, and `DM_CMD_GET_FRU` writes its FRU command registers.
 3. **Every device command is classified before the first launch.** A run lists every command its harness, sampler, host
    program and helpers can send, each READ or WRITE from the firmware source of the build the card runs
-   ([`tools/claims-v3/dmcmd_table.json`](tools/claims-v3/dmcmd_table.json): et-platform `836a4ab`, BL2 0.22.0, the
-   build all four cards report), and puts the list in its README under "Device commands sent".
-   `python3 tools/claims-v3/dmcmd_audit.py --allow <the writes the run may send> <the run's files>` does it
-   (`--markdown` prints the section) and exits 3 on any write outside the allow-list, any unclassified or run-time-named
-   command, and any residency read of a raw state BL2 0.22.0 does not have (raw 4–6: each read logs two SP Runtime
+   ([`tools/claims-v3/dmcmd_table.json`](tools/claims-v3/dmcmd_table.json): et-platform `836a4ab`, the public source of
+   BL2 0.22.0, the version all four cards report; no card exposes a BL2 hash, and aifoundry3's 0.22.0 is a non-public
+   build that answers command 74, which `836a4ab` lacks, so for an aifoundry3 run the table is the nearest public source
+   with a known divergence, and its README says so), and puts the list in its README under "Device commands sent".
+   `python3 tools/claims-v3/dmcmd_audit.py --allow STATS_RESET <the run's files>` does it (`--markdown` prints the
+   section) and exits 3 on any write outside the allow-list, any unclassified or run-time-named command, an `ettelem`
+   build outside the reviewed ones or one it cannot see (name its source with `--variant-source`), a subcommand that
+   build lacks, and any residency read of a raw state BL2 0.22.0 does not have (raw 4–6: each read logs two SP Runtime
    Errors). An unclassified or disallowed write is NO-GO: stop and report, never launch. The one write a run may send
-   without its own ruling is the statistics reset (`ettelem sample --reset-ms`, the owner's ruling of 31 October 2026);
-   a governor move needs the owner's authorization for that run (the table above); nothing else is allowed
-   ([the audit](docs/reports/data/2026-11-02-q136w-write-audit/README.md)).
+   without its own ruling is the statistics reset (`ettelem sample --reset-ms`, type 1 and control 2, the owner's
+   ruling of 31 October 2026; `STATS_RESET` in the checker); `dev_mngt_service -t SPST:…` and `MMST:…` send other
+   forms of the same command and are not covered. A governor move needs the owner's authorization for that run (the
+   table above); nothing else is allowed ([the audit](docs/reports/data/2026-11-02-q136w-write-audit/README.md)).
 
 ## 6. The traps, in brief
 
@@ -488,6 +492,19 @@ entries move verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelo
 10 October 2026 for agent instruction files). It starts on 14 October 2026; earlier changes are in
 `git log -- AGENT.md`.*
 
+- **2026-11-02 (Mon, week 45, Q136(w), corrections after verification)** — Section 5, rule 3: the table is
+  `836a4ab`, the public source of BL2 0.22.0, and aifoundry3's 0.22.0 is a non-public build (it answers command 74), so
+  for aifoundry3 it is the nearest public source with a known divergence (it said "the build all four cards report");
+  the checker's example allows `STATS_RESET`, the ruled form of the statistics reset (type 1, control 2), and says that
+  `dev_mngt_service -t SPST:…`/`MMST:…` are other forms; the checker also refuses an `ettelem` build outside the
+  reviewed ones, one it cannot see, and a subcommand that build lacks. The 28 October correction entry, the oldest of
+  16, moved verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelog-archive.md). *Why:* constraint — the
+  verifier of Q136(w): `--allow SET_STATS_RUN_CONTROL` passed `SPST:enable` (control 1), `SPST:reset` (control 7) and
+  `MMST` (type 2), an unknown subcommand or build was dropped or read as a reviewed one, and the 31 October E89 run
+  shows aifoundry3's build answering command 74; re-check: `python3 tools/claims-v3/test_dmcmd_audit.py` (the
+  verifier's probes are its TestForms, TestVariants and TestWrappers) and E89's README, "Joins and traps". And
+  preference — the owner's words of that morning, *"take more care for writing commands"*, and his rule of 10 October
+  2026 for agent instruction files, which keeps the newest 15 entries inline.
 - **2026-11-02 (Mon, week 45, Q136(w))** — Section 5 gains "Device commands: the owner's three rules of 2 November
   2026": no power cycles and nothing that risks one; read-only PMIC voltage-register reads allowed (a GET that writes a
   PMIC register, such as the firmware-revisions query, is not one); every command a run can send classified READ or
@@ -624,6 +641,3 @@ entries move verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelo
   owner's words that day, *"when reserving cards, add an estimate of when it's reserved until"*; constraint — the
   dashboard's reservation reader reads a stated duration only as `for/next/in <number> h|min`, and draws an unreleased
   claim without one for 3 h; re-check: the reader's duration pattern.
-- **2026-10-28 (Wed, week 44, correction)** — Section 4: the release is an edit of the reservation post appending
-  " — released", not a second post. *Why:* preference — the owner's words minutes after the entry below: *"No, instead
-  of posting a second time, it should edit the original post to know that it's been released."*

@@ -658,7 +658,7 @@ finish ok "$([ -n "${V3_DRY:-}" ] && echo 'dry run: ')$NB windows kept, $NR set 
 # Line 536 sends DM_CMD_GET_MODULE_FIRMWARE_REVISIONS (the BL2 check) and line 198 DM_CMD_SET_MODULE_VOLTAGE (the NoC rail
 # set this block exists for). Both write the PMIC. At et-platform 836a4ab (BL2 0.22.0) the first writes the PMIC's
 # firmware-management command register twice, ACTIVE_SLOT then VERSION (device-bootloaders/src/ServiceProcessorBL2/services/firmware_update.c:903 -> driver/pmic_controller.c:952-974,
-# # the two writes at :2543 and :2587),
+# the two writes at :2543 and :2587),
 # and the second sets a regulator through pmic_set_voltage (services/thermal_pwr_mgmt.c:3008-3048, the call at :3021).
 # This block never ran on a card: E54's first write was never started (docs/findings/03-experiments.md, E54). Both are
 # PMIC commands, which AGENT.md section 5 forbids (the statistics reset is the one allowed), and under the owner's rules

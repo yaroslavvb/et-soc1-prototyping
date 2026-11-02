@@ -22,3 +22,12 @@ Written by Q136(w), the write-command audit, beside the two files and not inside
   (`DM_CMD_GET_MODULE_UPTIME`, service-processor RAM) against its last committed revisions read instead (E77, E118, E120).
 
 The audit: [`docs/reports/data/2026-11-02-q136w-write-audit/README.md`](../../../docs/reports/data/2026-11-02-q136w-write-audit/README.md).
+
+**Corrected after verification, Mon 2 Nov 2026 (week 45), by Q136(w)'s fix pass; nothing above is edited.** The checker
+line above under-reports two writes. `--allow SET_STATS_RUN_CONTROL` used to pass every form of that command, and lines
+185 and 194 (`dev_mngt_service -t SPST:enable`, type 1, control 1: the SP stats trace switched on, nothing reset) are
+not the statistics reset the owner ruled on (type 1, control 2); and `$ETTELEM` and `$DEVMNGT` come from `lib.sh`, which
+the line does not pass. With the corrected checker, `python3 tools/claims-v3/dmcmd_audit.py --allow STATS_RESET
+tools/claims-v3/tel/block.sh tools/claims-v3/lib.sh` is NO-GO on line 332 (the revisions query), the four `loglevel`
+lines (186, 316, 379, 408) and the two `SPST:enable` lines (185, 194): `SPST_TRACE_CONTROL`, a write outside the ruled
+reset. The audit's "Corrections after verification" lists the change.

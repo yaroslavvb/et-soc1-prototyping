@@ -301,7 +301,7 @@ if __name__ == "__main__":
 # identity() (line 156) sends DM_CMD_GET_MODULE_FIRMWARE_REVISIONS as a read. It is not one. At et-platform 836a4ab
 # (BL2 0.22.0) its handler writes the PMIC's firmware-management command register twice, ACTIVE_SLOT then VERSION, and
 # reads the data register after each (device-bootloaders/src/ServiceProcessorBL2/services/firmware_update.c:903 -> driver/pmic_controller.c:952-974,
-# # the two writes at :2543 and :2587): a PMIC command by E85 C1's standard. E72 sent it on aifoundry2 at
+# the two writes at :2543 and :2587): a PMIC command by E85 C1's standard. E72 sent it on aifoundry2 at
 # 14:59:39 PDT on 27 Oct 2026 (docs/reports/data/2026-10-27-e72-600mhz/gov.jsonl, the identity event) and, by its change
 # record, again at 15:24:48; the card answered normally. The governor move this script exists for
 # (DM_CMD_SET_MODULE_STATIC_TDP_LEVEL, lines 175 and 203) is a write too, made under the owner's authorization for E72.

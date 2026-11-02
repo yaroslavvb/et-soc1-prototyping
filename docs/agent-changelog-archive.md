@@ -4,6 +4,9 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-10-28 (Wed, week 44, correction)** — Section 4: the release is an edit of the reservation post appending
+  " — released", not a second post. *Why:* preference — the owner's words minutes after the entry below: *"No, instead
+  of posting a second time, it should edit the original post to know that it's been released."*
 - **2026-10-28 (Wed, week 44)** — Section 4: the owner's agents post exactly twice per card in #community-lab, a
   one-line reservation and a separate one-line release, each naming the box, with at most one small link to the public
   spacesheep page that describes the run; no detail in the channel and no edit of the reservation. *Why:* preference —
