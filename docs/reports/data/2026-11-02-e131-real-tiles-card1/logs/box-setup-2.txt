@@ -1,0 +1,49 @@
+== 2026-11-02 11:11:44 PST aifoundry1; uptime:  11:11:44 up 6 days, 21:09,  2 users,  load average: 0.40, 0.91, 0.83
+No process holds an ET-SoC-1 device node or card lock.
+== check_e131.py (card code, E131 card files, binaries)
+HARNESS OK: 23 files match predictions-e131.json
+rc=0
+== preflight
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+rc=0
+== bash -n
+ok tools/claims-v3/e131/block_e131.sh
+ok tools/claims-v3/e131/collect_e131.sh
+ok tools/claims-v3/e131/preflight_e131.sh
+ok tools/claims-v3/e131/queue_e131.sh
+ok tools/claims-v3/e131/session_e131.sh
+== tiles
+{"real2_tiles": 30, "e86_tiles": 3, "e78_tiles_checked": 6, "problems": []}
+== order of the first pass
+  0 s-1 anchor_pi
+  1 s+0 int8.r2_gpt2_l11_down_maxabs
+  2 s+0 fp32.r2_resnet18_l2c1
+  3 s+0 fp32.zeros
+== stub queue (each stub block sleeps 1 s; no device)
+  11:11:44 e131: passes 13110 13111 13112 13113 13114; budget 9 s from the anchor (11:11:44), reserve 1 s, last end 11:11:52, deadline 15:50:00; first estimate 2 s
+  11:11:44 p13110 starts at T0+0 s (projected 2 s)
+  stub 13110
+  11:11:45 p13110 rc=0 (1 s)
+  11:11:45 p13111 starts at T0+1 s (projected 1 s)
+  stub 13111
+  11:11:46 p13111 rc=0 (1 s)
+  11:11:46 p13112 starts at T0+2 s (projected 1 s)
+  stub 13112
+  11:11:47 p13112 rc=0 (1 s)
+  11:11:47 p13113 starts at T0+3 s (projected 1 s)
+  stub 13113
+  11:11:48 p13113 rc=0 (1 s)
+  11:11:48 p13114 starts at T0+4 s (projected 1 s)
+  stub 13114
+  11:11:49 p13114 rc=0 (1 s)
+  11:11:49 e131: done, 5 passes, at T0+5 s
+== dry smoke 13101 and dry pass 13110 (V3_DRY=1: lib.sh stubs every device call)
+dry smoke rc=0
+  smoke launches: 0
+dry pass rc=0
+  pass launches: 0
+  of them on real2 tiles: 0
+  of them on E86 tiles: 0
+2026-11-02T11:11:49 [aifoundry1-c1] e131 p13110 already done
+p13110
+rpool/USERDATA/home_2t5qyu  398G  296G  102G  75% /home
