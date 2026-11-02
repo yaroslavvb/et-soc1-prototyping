@@ -1238,6 +1238,14 @@ same scales outward and inward, the loop, a way back from every move and no dead
   Booth groups and the full adder's stages where they are clicked, a cut compressor into its column), and the Booth
   multiplier's and the tree's glides to each other are reported as sideways glides, which T18 checks for their way back.
   The suites on the final build: `zoom_test.mjs` 791/791, `ml_ladder_test.mjs --chip` 149/150 (its one miss, T13's breadcrumb at shire 0, fails the same on the unchanged pages on this Mac), `ml_access_test.mjs` 28/28.
+- **The extremes as pictures (31 October – 1 November, Q135).** The owner: "Improve the images at the higher end of the
+  scale, milky way, observable universe, etc, by generating appropriate prompts, generating images using AGy/antigravity
+  and using them in place of current diagrams ... Look at the extreme levels only (ie, above studio 45, and below
+  individual atoms)". Thirteen pictures drawn by Antigravity from written prompts carry the levels in space (Beyond to
+  Earth) and below the atom (the nucleus to the Planck length) on both pages that share the ladder; each scene keeps its
+  seats, rings, scale bars and numbers over its picture, tagged "AI illustration" and credited in its panel. The maps
+  stay drawn. Where each scene places its picture, and why: `docs/reports/data/2026-10-01-ladder/images/README.md`.
+  Tests on the final build, run on the mini from python's http.server, one run at a time: `zoom_test.mjs` 789 of 793 on the desktop and 626 of 630 on a phone, `ml_ladder_test.mjs` 107 of 139 on the desktop and 100 of 126 on a phone. Every miss is a "no console errors" check catching that server's 404 for `/favicon.ico`, which it does not serve: the committed build before the change fails T7 the same way, and the server's request log names no other 404; so nothing the change touches failed. `zoom_static.py` 0 failed on both pages; `check-mirror.py` exit 0 on both. Live as the chip diagram's `a85232dc109f` and the memory levels' `4a034260b2f4`; the GitHub Pages mirror rebuilt.
 
 ## Four physical scales in 3D (14 October 2026, Q109)
 
