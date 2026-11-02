@@ -1,0 +1,131 @@
+[law] tally {'PASS': 10, 'NO CORRECTION': 7, 'CORRECTION': 1, 'UNRESOLVED': 4, 'REPORTED': 1, 'INCONCLUSIVE': 1}
+   E123-R5                      PASS
+   E123-R2:fp32.nn_like         NO CORRECTION
+   E123-R2:fp16.sparse50        CORRECTION
+   E123-R2:fp16.wsparse50       NO CORRECTION
+   E123-R2:fp32.smallint        NO CORRECTION
+   E123-R2:fp32.sparse90        NO CORRECTION
+   E123-R2:fp16.sparse90        NO CORRECTION
+   E123-R2:fp16.wsparse90       NO CORRECTION
+   E123-R2:fp16.smallint        NO CORRECTION
+   E123-R2:int8.wsparse50       UNRESOLVED
+   E123-R2:int8.sparse90        UNRESOLVED
+   E123-R2:int8.wsparse90       UNRESOLVED
+   E123-R2:int8.ternary         UNRESOLVED
+   E123-R3:fp32.nn_like         PASS
+   E123-R3:fp16.sparse50        PASS
+   E123-R3:fp16.wsparse50       PASS
+   E123-R4:G                    REPORTED
+   E123-R4:LF                   PASS
+   E123-R4:LI                   INCONCLUSIVE
+   E123-R6                      PASS
+   E123-R7:gate_law             PASS
+   E123-R7:q130n                PASS
+   E123-R8                      PASS
+   E123-S1                      PASS
+[off] tally {'PASS': 5, 'CORRECTION': 12, 'REPORTED': 1, 'INCONCLUSIVE': 1, 'FAIL': 5}
+   E123-R5                      PASS
+   E123-R2:fp32.nn_like         CORRECTION
+   E123-R2:fp16.sparse50        CORRECTION
+   E123-R2:fp16.wsparse50       CORRECTION
+   E123-R2:fp32.smallint        CORRECTION
+   E123-R2:fp32.sparse90        CORRECTION
+   E123-R2:fp16.sparse90        CORRECTION
+   E123-R2:fp16.wsparse90       CORRECTION
+   E123-R2:fp16.smallint        CORRECTION
+   E123-R2:int8.wsparse50       CORRECTION
+   E123-R2:int8.sparse90        CORRECTION
+   E123-R2:int8.wsparse90       CORRECTION
+   E123-R2:int8.ternary         CORRECTION
+   E123-R3:fp32.nn_like         PASS
+   E123-R3:fp16.sparse50        PASS
+   E123-R3:fp16.wsparse50       PASS
+   E123-R4:G                    REPORTED
+   E123-R4:LF                   PASS
+   E123-R4:LI                   INCONCLUSIVE
+   E123-R6                      FAIL
+   E123-R7:gate_law             FAIL
+   E123-R7:q130n                FAIL
+   E123-R8                      FAIL
+   E123-S1                      FAIL
+[steep] tally {'FAIL': 7, 'NO CORRECTION': 7, 'UNRESOLVED': 5, 'REPORTED': 1, 'INCONCLUSIVE': 2, 'PASS': 2}
+   E123-R5                      FAIL
+   E123-R2:fp32.nn_like         NO CORRECTION
+   E123-R2:fp16.sparse50        UNRESOLVED
+   E123-R2:fp16.wsparse50       UNRESOLVED
+   E123-R2:fp32.smallint        NO CORRECTION
+   E123-R2:fp32.sparse90        NO CORRECTION
+   E123-R2:fp16.sparse90        NO CORRECTION
+   E123-R2:fp16.wsparse90       NO CORRECTION
+   E123-R2:fp16.smallint        NO CORRECTION
+   E123-R2:int8.wsparse50       UNRESOLVED
+   E123-R2:int8.sparse90        UNRESOLVED
+   E123-R2:int8.wsparse90       NO CORRECTION
+   E123-R2:int8.ternary         UNRESOLVED
+   E123-R3:fp32.nn_like         FAIL
+   E123-R3:fp16.sparse50        FAIL
+   E123-R3:fp16.wsparse50       FAIL
+   E123-R4:G                    REPORTED
+   E123-R4:LF                   INCONCLUSIVE
+   E123-R4:LI                   INCONCLUSIVE
+   E123-R6                      FAIL
+   E123-R7:gate_law             PASS
+   E123-R7:q130n                PASS
+   E123-R8                      FAIL
+   E123-S1                      FAIL
+[wild] tally {'FAIL': 7, 'UNRESOLVED': 12, 'PASS': 2, 'REPORTED': 1, 'INCONCLUSIVE': 2}
+   E123-R5                      FAIL
+   E123-R2:fp32.nn_like         UNRESOLVED
+   E123-R2:fp16.sparse50        UNRESOLVED
+   E123-R2:fp16.wsparse50       UNRESOLVED
+   E123-R2:fp32.smallint        UNRESOLVED
+   E123-R2:fp32.sparse90        UNRESOLVED
+   E123-R2:fp16.sparse90        UNRESOLVED
+   E123-R2:fp16.wsparse90       UNRESOLVED
+   E123-R2:fp16.smallint        UNRESOLVED
+   E123-R2:int8.wsparse50       UNRESOLVED
+   E123-R2:int8.sparse90        UNRESOLVED
+   E123-R2:int8.wsparse90       UNRESOLVED
+   E123-R2:int8.ternary         UNRESOLVED
+   E123-R3:fp32.nn_like         PASS
+   E123-R3:fp16.sparse50        FAIL
+   E123-R3:fp16.wsparse50       FAIL
+   E123-R4:G                    REPORTED
+   E123-R4:LF                   FAIL
+   E123-R4:LI                   FAIL
+   E123-R6                      FAIL
+   E123-R7:gate_law             INCONCLUSIVE
+   E123-R7:q130n                INCONCLUSIVE
+   E123-R8                      FAIL
+   E123-S1                      PASS
+
+ok   law: R5 PASS (the frozen slope is right)
+ok   law: class G uses the frozen slope
+ok   law: fp32.nn_like NO CORRECTION
+ok   law: fp16.wsparse90 NO CORRECTION
+ok   law: fp16.sparse50's offset near +0.52
+ok   law: R6 PASS
+ok   law: R7 gate law PASS
+ok   law: R8 PASS
+ok   law: S1 PASS
+ok   law: R4 LF PASS
+ok   law: R4 LI PASS or INCONCLUSIVE
+ok   law: the kind's S is the committed S less the offset
+ok   law: E94-form secondary present for k >= 3
+ok   law: no E94-form for k = 2
+ok   off: every float rule CORRECTION
+ok   off: every int8 rule CORRECTION
+ok   off: S1 FAIL
+ok   off: R7 gate law FAIL
+ok   steep: R5 FAIL
+ok   steep: class G switches to the fitted slope
+ok   steep: fitted slope recovers fp32.nn_like (NO CORRECTION)
+ok   wild: R4 LF FAIL or INCONCLUSIVE
+ok   wild: R4 LI FAIL
+ok   wild: R6 FAIL or INCONCLUSIVE
+ok   wild: no R2 says NO CORRECTION in class G
+ok   single: scored with the fallback
+ok   single: labelled single pass
+ok   none: NOT SCORED
+
+28 of 28 checks pass

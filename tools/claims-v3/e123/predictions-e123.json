@@ -1,0 +1,1465 @@
+{
+ "experiment": "E123",
+ "title": "E94's tile-spread rows it left: the dagger rows no card re-drew, and fp32 ReLU x small weights, on aifoundry3",
+ "request": "Q134 (Sun 1 Nov 2026, ~19:05 PST): confirmations while the cards are free; E123 optional",
+ "date": "2026-11-01",
+ "registration": "tools/claims-v3/e123/E123.md",
+ "card": {
+  "host": "aifoundry3",
+  "card": 0,
+  "lock": "/run/lock/etsoc-shire0.lock",
+  "clock_mhz": 600,
+  "config_gate": {
+   "expected": {
+    "tdp_w": 0,
+    "temp_threshold_c": 65
+   },
+   "read_only": true
+  },
+  "writes": "none: no governor, TDP, threshold or clock set, no reset, no --reset-ms, no PMIC command"
+ },
+ "inputs_frozen": {
+  "kinds_json": {
+   "path": "tools/claims-v3/kinds/kinds.json",
+   "sha256": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337"
+  },
+  "e123_json": {
+   "path": "tools/claims-v3/e123/e123.json",
+   "sha256": "15af9847342054a4e98eddcd70e1f9a3f73a617e108d956a55b7caa4c578e074"
+  },
+  "e78_reduction": {
+   "path": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json",
+   "sha256": "b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5"
+  },
+  "e94_predictions": {
+   "path": "tools/claims-v3/kinds/predictions-e94.json",
+   "sha256": "7810782d45d2513710f68055500657f5667fe8347948c76628fb30aa90ce671b"
+  },
+  "e94_scored": {
+   "path": "docs/reports/data/2026-11-01-e94-tile-spread/scored.json",
+   "sha256": "e8a7aa0eae4f5e59090825ec72dafe1a8e33b68f2ffb6db344c0bdbb372d542a"
+  }
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337"
+  },
+  "e123_json_sha256": "15af9847342054a4e98eddcd70e1f9a3f73a617e108d956a55b7caa4c578e074",
+  "e123_card_files_sha256": {
+   "tools/claims-v3/e123/e123_common.py": "776cc114c3ab566bc0651eddaa24c73331e066d76f0ec6d0239c8e630edbf4ca",
+   "tools/claims-v3/e123/run_e123.py": "748aae744b1219e428ed83521fe982c3d954af0d44d9974721d88b208fc0ba70",
+   "tools/claims-v3/e123/block_e123.sh": "00b5731cc6e0a4ebc353c2a2b72f46fe1cc4ad8484dad8ad3e92f0571371aa79",
+   "tools/claims-v3/e123/queue_e123.sh": "e7f958dde1c56bed56705c78a444ff3ff003fd756270a4860ffa65c37f44b9c1",
+   "tools/claims-v3/e123/run_e123.sh": "cd9b2386b4814a4ed214b174741840f29031b0de09854db17117639a9661a235",
+   "tools/claims-v3/e123/e123.json": "15af9847342054a4e98eddcd70e1f9a3f73a617e108d956a55b7caa4c578e074",
+   "tools/claims-v3/e123/make_e123.py": "672036f8e456a984d90b204ce091029126bcc6ca182759c0101c7175f92be1ac",
+   "tools/claims-v3/e123/reduce_e123.py": "b37711dbbab62fa5e95d558b77ce6d78fba0fdf77e7fe1cd26083c80d621a8ec"
+  },
+  "desk_files_sha256": {
+   "tools/claims-v3/e123/score_e123.py": "3174d65b39752bbc972762dc2a09500106ce708105127bf7722a2620df721efc",
+   "tools/claims-v3/e123/selftest_e123.py": "fda1b5c0de4b9a73b0aefb92679501e24311bbf4584cd33b0de3b64d9d615f8d",
+   "tools/claims-v3/e123/collect_e123.sh": "4c417912e3a62e583b32ec72deff144a7f81bf0e3a8f5c5db98b023bf7228bc1",
+   "tools/claims-v3/e123/make_predictions_e123.py": "4468fd992ac7be52a155120e9459198d2bfb1e70b4e56c4e81656c4b72153a09",
+   "tools/claims-v3/kinds/score_e94.py": "3baa1190552e8a32aa5c63ce6b35487c06f06b9e0abd5df99c9f669658665ffe"
+  }
+ },
+ "plan": {
+  "passes_planned": [
+   12310,
+   12311
+  ],
+  "smoke_pass": 12301,
+  "items_per_pass": 54,
+  "runs_per_pass": 74,
+  "segments": 3,
+  "smoke_items": [
+   "anchor_pi",
+   "fp32.nn_like_e94d1",
+   "fp32.zeros",
+   "fp32.randn",
+   "fp16.sparse50_e123d1",
+   "fp16.wsparse90_e123d1",
+   "int8.wsparse50_e123d1",
+   "int8.zeros"
+  ],
+  "leak_primary_w_per_c": 0.1994,
+  "leak_primary_source": "E78's own fit on this card (e78.json leak.k_w_per_c 0.19940), as E121's primary",
+  "dips": "removed (E82 A2's definition), as E93, E94 and E121; dips kept is an arm",
+  "arms": [
+   "dips_kept",
+   "gates_off",
+   "auto",
+   "leak0.2414",
+   "leak0.3803",
+   "leak0.545",
+   "leak0"
+  ]
+ },
+ "card_budget": {
+  "claim_to_release_max_min": 35,
+  "queue_budget_s_from_claim": 2100,
+  "reserve_s": 240,
+  "first_pass_estimate_s": 760,
+  "deadline_pass_end": "2026-11-01 23:15 PST",
+  "claim_text_hours": 1,
+  "no_start_after": "2026-11-01 22:30 PST"
+ },
+ "classes": {
+  "G": "float kinds gating 25-75% of lanes (E94 measured a between-draw SD of 0.5-0.7 W on three such rows)",
+  "LF": "the other float dagger rows (E94's desk table predicted 0.32 W or less)",
+  "LI": "the int8 dagger rows E94 did not run (E94's desk table predicted 0.26 W or less)"
+ },
+ "rules_of_number": {
+  "fp32.nn_like": {
+   "type": "fp32",
+   "kind": "nn_like",
+   "class": "G",
+   "committed": "fp32.nn_like",
+   "draws": [
+    "fp32.nn_like_e123d1",
+    "fp32.nn_like_e123d2",
+    "fp32.nn_like_e94d1",
+    "fp32.nn_like_e94d2",
+    "fp32.nn_like_e94d3",
+    "fp32.nn_like_e94d4",
+    "fp32.nn_like_e94d5",
+    "fp32.nn_like_e94d6"
+   ],
+   "fresh": [
+    "fp32.nn_like_e123d1",
+    "fp32.nn_like_e123d2"
+   ],
+   "bridge": [
+    "fp32.nn_like_e94d1",
+    "fp32.nn_like_e94d2",
+    "fp32.nn_like_e94d3",
+    "fp32.nn_like_e94d4",
+    "fp32.nn_like_e94d5",
+    "fp32.nn_like_e94d6"
+   ],
+   "band_w": 0.5,
+   "committed_gate_share": 0.507812,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.500918,
+    "sd": 0.033023,
+    "se_of_mean": 0.0016511499999999999,
+    "p2.5": 0.441406,
+    "p97.5": 0.566406
+   },
+   "cv_slope_w_per_unit": 24.724927058323647,
+   "cv_slope_source": "E78's D of fp32.randn on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp32.randn.D.mean)",
+   "gate_law_slope_w_per_unit": 26.484902494611354,
+   "e78_a3": {
+    "D_w": 13.035551189017772,
+    "D_se_w": 0.025767230695711348,
+    "S_w": 15.034426479206587,
+    "S_se_w": 0.022332216615652597,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.8746,
+    "q130n_sd_w": 0.7951,
+    "gate_law_offset_w": -0.1826,
+    "q130n_offset_w": -0.2165,
+    "measured_by_e94": true
+   }
+  },
+  "fp16.sparse50": {
+   "type": "fp16",
+   "kind": "sparse50",
+   "class": "G",
+   "committed": "fp16.sparse50",
+   "draws": [
+    "fp16.sparse50_e123d1",
+    "fp16.sparse50_e123d2",
+    "fp16.sparse50_e123d3",
+    "fp16.sparse50_e123d4",
+    "fp16.sparse50_e123d5"
+   ],
+   "fresh": [
+    "fp16.sparse50_e123d1",
+    "fp16.sparse50_e123d2",
+    "fp16.sparse50_e123d3",
+    "fp16.sparse50_e123d4",
+    "fp16.sparse50_e123d5"
+   ],
+   "bridge": [],
+   "band_w": 0.5,
+   "committed_gate_share": 0.414307,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.437252,
+    "sd": 0.029412,
+    "se_of_mean": 0.0014706,
+    "p2.5": 0.376465,
+    "p97.5": 0.490723
+   },
+   "cv_slope_w_per_unit": 22.162449221970377,
+   "cv_slope_source": "E78's D of fp16.randn on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp16.randn.D.mean)",
+   "gate_law_slope_w_per_unit": 22.530601579297098,
+   "e78_a3": {
+    "D_w": 13.196015630783256,
+    "D_se_w": 0.21000202643137758,
+    "S_w": 15.219572956816565,
+    "S_se_w": 0.22358179256773103,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.6627,
+    "q130n_sd_w": 0.641,
+    "gate_law_offset_w": 0.517,
+    "q130n_offset_w": 0.4951,
+    "measured_by_e94": false
+   }
+  },
+  "fp16.wsparse50": {
+   "type": "fp16",
+   "kind": "wsparse50",
+   "class": "G",
+   "committed": "fp16.wsparse50",
+   "draws": [
+    "fp16.wsparse50_e123d1",
+    "fp16.wsparse50_e123d2",
+    "fp16.wsparse50_e123d3",
+    "fp16.wsparse50_e123d4",
+    "fp16.wsparse50_e123d5"
+   ],
+   "fresh": [
+    "fp16.wsparse50_e123d1",
+    "fp16.wsparse50_e123d2",
+    "fp16.wsparse50_e123d3",
+    "fp16.wsparse50_e123d4",
+    "fp16.wsparse50_e123d5"
+   ],
+   "bridge": [],
+   "band_w": 0.5,
+   "committed_gate_share": 0.76001,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.749243,
+    "sd": 0.02357,
+    "se_of_mean": 0.0011785,
+    "p2.5": 0.701904,
+    "p97.5": 0.792236
+   },
+   "cv_slope_w_per_unit": 22.162449221970377,
+   "cv_slope_source": "E78's D of fp16.randn on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp16.randn.D.mean)",
+   "gate_law_slope_w_per_unit": 29.40846887769173,
+   "e78_a3": {
+    "D_w": 7.057738445957239,
+    "D_se_w": 0.0134371449361129,
+    "S_w": 9.090402939864383,
+    "S_se_w": 0.03558001986099946,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.6932,
+    "q130n_sd_w": 0.5081,
+    "gate_law_offset_w": -0.3166,
+    "q130n_offset_w": -0.0197,
+    "measured_by_e94": false
+   }
+  },
+  "fp32.smallint": {
+   "type": "fp32",
+   "kind": "smallint",
+   "class": "LF",
+   "committed": "fp32.smallint",
+   "draws": [
+    "fp32.smallint_e123d1",
+    "fp32.smallint_e123d2",
+    "fp32.smallint_e123d3"
+   ],
+   "fresh": [
+    "fp32.smallint_e123d1",
+    "fp32.smallint_e123d2",
+    "fp32.smallint_e123d3"
+   ],
+   "bridge": [],
+   "band_w": 0.5,
+   "committed_gate_share": 0.117676,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.120968,
+    "sd": 0.020033,
+    "se_of_mean": 0.00100165,
+    "p2.5": 0.08374,
+    "p97.5": 0.15918
+   },
+   "cv_slope_w_per_unit": 24.724927058323647,
+   "cv_slope_source": "E78's D of fp32.randn on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp32.randn.D.mean)",
+   "gate_law_slope_w_per_unit": 15.956864207822981,
+   "e78_a3": {
+    "D_w": 14.079124255303205,
+    "D_se_w": 0.022659622679838183,
+    "S_w": 16.02281420190936,
+    "S_se_w": 0.05119756726130259,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.3197,
+    "q130n_sd_w": 0.3139,
+    "gate_law_offset_w": 0.0525,
+    "q130n_offset_w": 0.0991,
+    "measured_by_e94": false
+   }
+  },
+  "fp32.sparse90": {
+   "type": "fp32",
+   "kind": "sparse90",
+   "class": "LF",
+   "committed": "fp32.sparse90",
+   "draws": [
+    "fp32.sparse90_e123d1",
+    "fp32.sparse90_e123d2",
+    "fp32.sparse90_e123d3"
+   ],
+   "fresh": [
+    "fp32.sparse90_e123d1",
+    "fp32.sparse90_e123d2",
+    "fp32.sparse90_e123d3"
+   ],
+   "bridge": [],
+   "band_w": 0.5,
+   "committed_gate_share": 0.991699,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.989976,
+    "sd": 0.002916,
+    "se_of_mean": 0.00014580000000000002,
+    "p2.5": 0.983643,
+    "p97.5": 0.994629
+   },
+   "cv_slope_w_per_unit": 24.724927058323647,
+   "cv_slope_source": "E78's D of fp32.randn on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp32.randn.D.mean)",
+   "gate_law_slope_w_per_unit": 69.51173671485871,
+   "e78_a3": {
+    "D_w": 0.5770169264700424,
+    "D_se_w": 0.02846609455092286,
+    "S_w": 2.5087514052462487,
+    "S_se_w": 0.053565662488501364,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.2027,
+    "q130n_sd_w": 0.0784,
+    "gate_law_offset_w": -0.1198,
+    "q130n_offset_w": -0.0484,
+    "measured_by_e94": false
+   }
+  },
+  "fp16.sparse90": {
+   "type": "fp16",
+   "kind": "sparse90",
+   "class": "LF",
+   "committed": "fp16.sparse90",
+   "draws": [
+    "fp16.sparse90_e123d1",
+    "fp16.sparse90_e123d2",
+    "fp16.sparse90_e123d3"
+   ],
+   "fresh": [
+    "fp16.sparse90_e123d1",
+    "fp16.sparse90_e123d2",
+    "fp16.sparse90_e123d3"
+   ],
+   "bridge": [],
+   "band_w": 0.5,
+   "committed_gate_share": 0.960938,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.963833,
+    "sd": 0.007128,
+    "se_of_mean": 0.0003564,
+    "p2.5": 0.948486,
+    "p97.5": 0.976318
+   },
+   "cv_slope_w_per_unit": 22.162449221970377,
+   "cv_slope_source": "E78's D of fp16.randn on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp16.randn.D.mean)",
+   "gate_law_slope_w_per_unit": 36.08920861037316,
+   "e78_a3": {
+    "D_w": 1.409716666738398,
+    "D_se_w": 0.04398442203306584,
+    "S_w": 3.380114569950035,
+    "S_se_w": 0.03344144616446661,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.2572,
+    "q130n_sd_w": 0.1387,
+    "gate_law_offset_w": 0.1045,
+    "q130n_offset_w": 0.0588,
+    "measured_by_e94": false
+   }
+  },
+  "fp16.wsparse90": {
+   "type": "fp16",
+   "kind": "wsparse90",
+   "class": "LF",
+   "committed": "fp16.wsparse90",
+   "draws": [
+    "fp16.wsparse90_e123d1",
+    "fp16.wsparse90_e123d2",
+    "fp16.wsparse90_e123d3"
+   ],
+   "fresh": [
+    "fp16.wsparse90_e123d1",
+    "fp16.wsparse90_e123d2",
+    "fp16.wsparse90_e123d3"
+   ],
+   "bridge": [],
+   "band_w": 0.5,
+   "committed_gate_share": 0.990234,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.990092,
+    "sd": 0.002991,
+    "se_of_mean": 0.00014955,
+    "p2.5": 0.983643,
+    "p97.5": 0.994629
+   },
+   "cv_slope_w_per_unit": 22.162449221970377,
+   "cv_slope_source": "E78's D of fp16.randn on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp16.randn.D.mean)",
+   "gate_law_slope_w_per_unit": 76.10396914966819,
+   "e78_a3": {
+    "D_w": 0.7432313627156635,
+    "D_se_w": 0.04314647152944028,
+    "S_w": 2.643431798715199,
+    "S_se_w": 0.04256955950599933,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.2276,
+    "q130n_sd_w": 0.0711,
+    "gate_law_offset_w": -0.0108,
+    "q130n_offset_w": 0.0258,
+    "measured_by_e94": false
+   }
+  },
+  "fp16.smallint": {
+   "type": "fp16",
+   "kind": "smallint",
+   "class": "LF",
+   "committed": "fp16.smallint",
+   "draws": [
+    "fp16.smallint_e123d1",
+    "fp16.smallint_e123d2"
+   ],
+   "fresh": [
+    "fp16.smallint_e123d1",
+    "fp16.smallint_e123d2"
+   ],
+   "bridge": [],
+   "band_w": 0.5,
+   "committed_gate_share": 0.003906,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.007593,
+    "sd": 0.005359,
+    "se_of_mean": 0.00026795,
+    "p2.5": 0.0,
+    "p97.5": 0.019531
+   },
+   "cv_slope_w_per_unit": 22.162449221970377,
+   "cv_slope_source": "E78's D of fp16.randn on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp16.randn.D.mean)",
+   "gate_law_slope_w_per_unit": 17.066997697482613,
+   "e78_a3": {
+    "D_w": 17.000334004476247,
+    "D_se_w": 0.11764413753552809,
+    "S_w": 18.925615109743052,
+    "S_se_w": 0.09142597375840479,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.0915,
+    "q130n_sd_w": 0.1466,
+    "gate_law_offset_w": 0.0629,
+    "q130n_offset_w": 0.039,
+    "measured_by_e94": false
+   }
+  },
+  "int8.wsparse50": {
+   "type": "int8",
+   "kind": "wsparse50",
+   "class": "LI",
+   "committed": "int8.wsparse50",
+   "draws": [
+    "int8.wsparse50_e123d1",
+    "int8.wsparse50_e123d2",
+    "int8.wsparse50_e123d3"
+   ],
+   "fresh": [
+    "int8.wsparse50_e123d1",
+    "int8.wsparse50_e123d2",
+    "int8.wsparse50_e123d3"
+   ],
+   "bridge": [],
+   "band_w": 0.25,
+   "committed_gate_share": 0.643555,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.624246,
+    "sd": 0.029108,
+    "se_of_mean": 0.0014554,
+    "p2.5": 0.569336,
+    "p97.5": 0.681152
+   },
+   "cv_slope_w_per_unit": 7.056484747628008,
+   "cv_slope_source": "E78's D of int8.full on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.int8.full.D.mean)",
+   "gate_law_slope_w_per_unit": 8.81396594376481,
+   "e78_a3": {
+    "D_w": 3.1416940908252475,
+    "D_se_w": 0.021706145195678532,
+    "S_w": 5.743133052284082,
+    "S_se_w": 0.034348718473809214,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.2566,
+    "q130n_sd_w": 0.2057,
+    "gate_law_offset_w": -0.1702,
+    "q130n_offset_w": -0.1119,
+    "measured_by_e94": false
+   }
+  },
+  "int8.sparse90": {
+   "type": "int8",
+   "kind": "sparse90",
+   "class": "LI",
+   "committed": "int8.sparse90",
+   "draws": [
+    "int8.sparse90_e123d1",
+    "int8.sparse90_e123d2",
+    "int8.sparse90_e123d3"
+   ],
+   "fresh": [
+    "int8.sparse90_e123d1",
+    "int8.sparse90_e123d2",
+    "int8.sparse90_e123d3"
+   ],
+   "bridge": [],
+   "band_w": 0.25,
+   "committed_gate_share": 0.821777,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.806543,
+    "sd": 0.023374,
+    "se_of_mean": 0.0011687,
+    "p2.5": 0.761719,
+    "p97.5": 0.848145
+   },
+   "cv_slope_w_per_unit": 7.056484747628008,
+   "cv_slope_source": "E78's D of int8.full on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.int8.full.D.mean)",
+   "gate_law_slope_w_per_unit": 6.424112620918264,
+   "e78_a3": {
+    "D_w": 1.144924623637916,
+    "D_se_w": 0.022046032126861095,
+    "S_w": 3.7629663856174163,
+    "S_se_w": 0.03237891758169695,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.1502,
+    "q130n_sd_w": 0.0933,
+    "gate_law_offset_w": -0.0979,
+    "q130n_offset_w": -0.0681,
+    "measured_by_e94": false
+   }
+  },
+  "int8.wsparse90": {
+   "type": "int8",
+   "kind": "wsparse90",
+   "class": "LI",
+   "committed": "int8.wsparse90",
+   "draws": [
+    "int8.wsparse90_e123d1",
+    "int8.wsparse90_e123d2"
+   ],
+   "fresh": [
+    "int8.wsparse90_e123d1",
+    "int8.wsparse90_e123d2"
+   ],
+   "bridge": [],
+   "band_w": 0.25,
+   "committed_gate_share": 0.97998,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.98088,
+    "sd": 0.005673,
+    "se_of_mean": 0.00028365,
+    "p2.5": 0.968262,
+    "p97.5": 0.990234
+   },
+   "cv_slope_w_per_unit": 7.056484747628008,
+   "cv_slope_source": "E78's D of int8.full on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.int8.full.D.mean)",
+   "gate_law_slope_w_per_unit": 26.894185380108695,
+   "e78_a3": {
+    "D_w": 0.5384215913097771,
+    "D_se_w": 0.019945768416793734,
+    "S_w": 3.07936456995003,
+    "S_se_w": 0.026869369733544927,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.1526,
+    "q130n_sd_w": 0.0363,
+    "gate_law_offset_w": 0.0242,
+    "q130n_offset_w": 0.0135,
+    "measured_by_e94": false
+   }
+  },
+  "int8.ternary": {
+   "type": "int8",
+   "kind": "ternary",
+   "class": "LI",
+   "committed": "int8.ternary",
+   "draws": [
+    "int8.ternary_e123d1",
+    "int8.ternary_e123d2"
+   ],
+   "fresh": [
+    "int8.ternary_e123d1",
+    "int8.ternary_e123d2"
+   ],
+   "bridge": [],
+   "band_w": 0.25,
+   "committed_gate_share": 0.007812,
+   "rule_gate_share": {
+    "n": 400,
+    "mean": 0.012744,
+    "sd": 0.007006,
+    "se_of_mean": 0.0003503,
+    "p2.5": 0.0,
+    "p97.5": 0.027344
+   },
+   "cv_slope_w_per_unit": 7.056484747628008,
+   "cv_slope_source": "E78's D of int8.full on aifoundry3 (docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.int8.full.D.mean)",
+   "gate_law_slope_w_per_unit": 5.227099683707889,
+   "e78_a3": {
+    "D_w": 5.1862655809787634,
+    "D_se_w": 0.01966545697186628,
+    "S_w": 7.726727501267895,
+    "S_se_w": 0.03756513397098898,
+    "n_passes": 6
+   },
+   "desk_table_e94": {
+    "gate_law_sd_w": 0.0366,
+    "q130n_sd_w": 0.1022,
+    "gate_law_offset_w": 0.0258,
+    "q130n_offset_w": -0.127,
+    "measured_by_e94": false
+   }
+  }
+ },
+ "tiles": {
+  "fp32.nn_like_e123d1": {
+   "rule_of": "fp32.nn_like",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.460938,
+   "bus_bits_per_op": 80526,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 1.241453319532412,
+   "cv_shift_w": -0.9885025837917785
+  },
+  "fp32.nn_like_e123d2": {
+   "rule_of": "fp32.nn_like",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.488281,
+   "bus_bits_per_op": 80464,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.5172766306222553,
+   "cv_shift_w": -0.3124489032360348
+  },
+  "fp32.nn_like_e94d1": {
+   "rule_of": "fp32.nn_like",
+   "class": "G",
+   "group": "bridge",
+   "gated_lane_frac": 0.550781,
+   "bus_bits_per_op": 79690,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -1.1380297752909527,
+   "cv_shift_w": 1.2328590379091917
+  },
+  "fp32.nn_like_e94d2": {
+   "rule_of": "fp32.nn_like",
+   "class": "G",
+   "group": "bridge",
+   "gated_lane_frac": 0.527344,
+   "bus_bits_per_op": 80728,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.5173031155247482,
+   "cv_shift_w": 0.6533809224432622
+  },
+  "fp32.nn_like_e94d3": {
+   "rule_of": "fp32.nn_like",
+   "class": "G",
+   "group": "bridge",
+   "gated_lane_frac": 0.546875,
+   "bus_bits_per_op": 79810,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -1.034579746147002,
+   "cv_shift_w": 1.1362834728193805
+  },
+  "fp32.nn_like_e94d4": {
+   "rule_of": "fp32.nn_like",
+   "class": "G",
+   "group": "bridge",
+   "gated_lane_frac": 0.488281,
+   "bus_bits_per_op": 81244,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.5172766306222553,
+   "cv_shift_w": -0.3124489032360348
+  },
+  "fp32.nn_like_e94d5": {
+   "rule_of": "fp32.nn_like",
+   "class": "G",
+   "group": "bridge",
+   "gated_lane_frac": 0.527344,
+   "bus_bits_per_op": 82364,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.5173031155247482,
+   "cv_shift_w": 0.6533809224432622
+  },
+  "fp32.nn_like_e94d6": {
+   "rule_of": "fp32.nn_like",
+   "class": "G",
+   "group": "bridge",
+   "gated_lane_frac": 0.5,
+   "bus_bits_per_op": 79338,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.20690005828790436,
+   "cv_shift_w": -0.022697483039540476
+  },
+  "fp16.sparse50_e123d1": {
+   "rule_of": "fp16.sparse50",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.381104,
+   "bus_bits_per_op": 76748,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.7480835642374013,
+   "cv_shift_w": -1.2443771989151922
+  },
+  "fp16.sparse50_e123d2": {
+   "rule_of": "fp16.sparse50",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.444824,
+   "bus_bits_per_op": 72576,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.6875663683954102,
+   "cv_shift_w": 0.1678140655087602
+  },
+  "fp16.sparse50_e123d3": {
+   "rule_of": "fp16.sparse50",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.435059,
+   "bus_bits_per_op": 68624,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.46755504397357367,
+   "cv_shift_w": -0.04860225114378105
+  },
+  "fp16.sparse50_e123d4": {
+   "rule_of": "fp16.sparse50",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.426758,
+   "bus_bits_per_op": 71388,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.28052852026382763,
+   "cv_shift_w": -0.23257274213535598
+  },
+  "fp16.sparse50_e123d5": {
+   "rule_of": "fp16.sparse50",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.442383,
+   "bus_bits_per_op": 74278,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.6325691699403456,
+   "cv_shift_w": 0.11371552695793116
+  },
+  "fp16.wsparse50_e123d1": {
+   "rule_of": "fp16.wsparse50",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.784424,
+   "bus_bits_per_op": 68252,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.7179783591799672,
+   "cv_shift_w": 0.7796971260781402
+  },
+  "fp16.wsparse50_e123d2": {
+   "rule_of": "fp16.wsparse50",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.755615,
+   "bus_bits_per_op": 71144,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.1292502207174525,
+   "cv_shift_w": 0.14121912644239623
+  },
+  "fp16.wsparse50_e123d3": {
+   "rule_of": "fp16.wsparse50",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.701172,
+   "bus_bits_per_op": 74386,
+   "inside_rule_band": {
+    "gated_lane_frac": false,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 1.7303354918256246,
+   "cv_shift_w": -1.0653710965493375
+  },
+  "fp16.wsparse50_e123d4": {
+   "rule_of": "fp16.wsparse50",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.769531,
+   "bus_bits_per_op": 72242,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.27999803218450325,
+   "cv_shift_w": 0.4496317698153344
+  },
+  "fp16.wsparse50_e123d5": {
+   "rule_of": "fp16.wsparse50",
+   "class": "G",
+   "group": "draw",
+   "gated_lane_frac": 0.754395,
+   "bus_bits_per_op": 70886,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.16512855274823632,
+   "cv_shift_w": 0.1141809383915924
+  },
+  "fp32.smallint_e123d1": {
+   "rule_of": "fp32.smallint",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.110596,
+   "bus_bits_per_op": 21560,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.11297459859138519,
+   "cv_shift_w": -0.25644694344893304
+  },
+  "fp32.smallint_e123d2": {
+   "rule_of": "fp32.smallint",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.126465,
+   "bus_bits_per_op": 21854,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.1402448795225575,
+   "cv_shift_w": 0.13591292403960478
+  },
+  "fp32.smallint_e123d3": {
+   "rule_of": "fp32.smallint",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.084717,
+   "bus_bits_per_op": 23004,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.5259222874256358,
+   "cv_shift_w": -0.8963033307912907
+  },
+  "fp32.sparse90_e123d1": {
+   "rule_of": "fp32.sparse90",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.988281,
+   "bus_bits_per_op": 21676,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.23759111609138933,
+   "cv_shift_w": -0.04190875136385863
+  },
+  "fp32.sparse90_e123d2": {
+   "rule_of": "fp32.sparse90",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.994873,
+   "bus_bits_per_op": 15326,
+   "inside_rule_band": {
+    "gated_lane_frac": false,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.2206302523329623,
+   "cv_shift_w": 0.1210779678046119
+  },
+  "fp32.sparse90_e123d3": {
+   "rule_of": "fp32.sparse90",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.990479,
+   "bus_bits_per_op": 20540,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.08480431879212762,
+   "cv_shift_w": 0.012436638310337566
+  },
+  "fp16.sparse90_e123d1": {
+   "rule_of": "fp16.sparse90",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.955322,
+   "bus_bits_per_op": 21300,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.20267699555585394,
+   "cv_shift_w": -0.1886246053281909
+  },
+  "fp16.sparse90_e123d2": {
+   "rule_of": "fp16.sparse90",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.962891,
+   "bus_bits_per_op": 20254,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.07048222441606218,
+   "cv_shift_w": -0.02087702716709606
+  },
+  "fp16.sparse90_e123d3": {
+   "rule_of": "fp16.sparse90",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.965088,
+   "bus_bits_per_op": 18016,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.14977021573304825,
+   "cv_shift_w": 0.0278138737735705
+  },
+  "fp16.wsparse90_e123d1": {
+   "rule_of": "fp16.wsparse90",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.989014,
+   "bus_bits_per_op": 20568,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.09284684236259508,
+   "cv_shift_w": -0.023891120261284586
+  },
+  "fp16.wsparse90_e123d2": {
+   "rule_of": "fp16.wsparse90",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.98877,
+   "bus_bits_per_op": 22652,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.11141621083510743,
+   "cv_shift_w": -0.029298757871443384
+  },
+  "fp16.wsparse90_e123d3": {
+   "rule_of": "fp16.wsparse90",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.991455,
+   "bus_bits_per_op": 17536,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.09292294633174698,
+   "cv_shift_w": 0.030207418289545693
+  },
+  "fp16.smallint_e123d1": {
+   "rule_of": "fp16.smallint",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.003906,
+   "bus_bits_per_op": 37168,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": false
+   },
+   "gate_law_delta_w": 0.0,
+   "cv_shift_w": -0.08171295028140477
+  },
+  "fp16.smallint_e123d2": {
+   "rule_of": "fp16.smallint",
+   "class": "LF",
+   "group": "draw",
+   "gated_lane_frac": 0.007812,
+   "bus_bits_per_op": 34170,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.06666369300636846,
+   "cv_shift_w": 0.004853576379611522
+  },
+  "int8.wsparse50_e123d1": {
+   "rule_of": "int8.wsparse50",
+   "class": "LI",
+   "group": "draw",
+   "gated_lane_frac": 0.636719,
+   "bus_bits_per_op": 48474,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.06025227119157565,
+   "cv_shift_w": 0.08801553425716462
+  },
+  "int8.wsparse50_e123d2": {
+   "rule_of": "int8.wsparse50",
+   "class": "LI",
+   "group": "draw",
+   "gated_lane_frac": 0.65625,
+   "bus_bits_per_op": 48650,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.11189329765609447,
+   "cv_shift_w": 0.225835737863087
+  },
+  "int8.wsparse50_e123d3": {
+   "rule_of": "int8.wsparse50",
+   "class": "LI",
+   "group": "draw",
+   "gated_lane_frac": 0.624512,
+   "bus_bits_per_op": 54310,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.1678443534671138,
+   "cv_shift_w": 0.0018770249428689686
+  },
+  "int8.sparse90_e123d1": {
+   "rule_of": "int8.sparse90",
+   "class": "LI",
+   "group": "draw",
+   "gated_lane_frac": 0.826172,
+   "bus_bits_per_op": 12776,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.028233974968936038,
+   "cv_shift_w": 0.13851173911119022
+  },
+  "int8.sparse90_e123d2": {
+   "rule_of": "int8.sparse90",
+   "class": "LI",
+   "group": "draw",
+   "gated_lane_frac": 0.771973,
+   "bus_bits_per_op": 14810,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.3199465049722131,
+   "cv_shift_w": -0.24394267772550016
+  },
+  "int8.sparse90_e123d3": {
+   "rule_of": "int8.sparse90",
+   "class": "LI",
+   "group": "draw",
+   "gated_lane_frac": 0.804688,
+   "bus_bits_per_op": 12990,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.10978166057887244,
+   "cv_shift_w": -0.013089779206850314
+  },
+  "int8.wsparse90_e123d1": {
+   "rule_of": "int8.wsparse90",
+   "class": "LI",
+   "group": "draw",
+   "gated_lane_frac": 0.990234,
+   "bus_bits_per_op": 10288,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": -0.2757729768876342,
+   "cv_shift_w": 0.0660063583293122
+  },
+  "int8.wsparse90_e123d2": {
+   "rule_of": "int8.wsparse90",
+   "class": "LI",
+   "group": "draw",
+   "gated_lane_frac": 0.979004,
+   "bus_bits_per_op": 14914,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.02624872493098551,
+   "cv_shift_w": -0.013237965386550064
+  },
+  "int8.ternary_e123d1": {
+   "rule_of": "int8.ternary",
+   "class": "LI",
+   "group": "draw",
+   "gated_lane_frac": 0.007812,
+   "bus_bits_per_op": 61914,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.0,
+   "cv_shift_w": -0.034802582775301336
+  },
+  "int8.ternary_e123d2": {
+   "rule_of": "int8.ternary",
+   "class": "LI",
+   "group": "draw",
+   "gated_lane_frac": 0.003906,
+   "bus_bits_per_op": 61738,
+   "inside_rule_band": {
+    "gated_lane_frac": true,
+    "bus_bits_per_op": true
+   },
+   "gate_law_delta_w": 0.02041705136456369,
+   "cv_shift_w": -0.062365212199536335
+  }
+ },
+ "bridge": {
+  "rule": "fp32.nn_like",
+  "card_scale_fp32": 1.0300166370596864,
+  "card_scale_source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/scored.json cross_card.primary.x3.per_type_median",
+  "card1_committed_D_w": 12.803581805791255,
+  "card1_offsets_w": {
+   "fp32.nn_like_e94d1": -1.1176715239610147,
+   "fp32.nn_like_e94d2": -0.5243474665249686,
+   "fp32.nn_like_e94d3": -0.9992260263748456,
+   "fp32.nn_like_e94d4": 0.30356014806743126,
+   "fp32.nn_like_e94d5": -0.39114218483569374,
+   "fp32.nn_like_e94d6": 0.014054913704093508
+  },
+  "card1_source": "docs/reports/data/2026-11-01-e94-tile-spread/scored.json primary.rules_of_number.fp32.nn_like.per_tile"
+ },
+ "session_tie": {
+  "reference": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.<cell>.D.mean (E78's primary on this card, leakage auto = 0.1994 W/C)",
+  "cells": {
+   "fp32.nn_like": {
+    "ref_w": 13.035551189017772,
+    "band_w": 0.5
+   },
+   "fp16.sparse50": {
+    "ref_w": 13.196015630783256,
+    "band_w": 0.5
+   },
+   "fp16.wsparse50": {
+    "ref_w": 7.057738445957239,
+    "band_w": 0.5
+   },
+   "fp32.smallint": {
+    "ref_w": 14.079124255303205,
+    "band_w": 0.5
+   },
+   "fp32.sparse90": {
+    "ref_w": 0.5770169264700424,
+    "band_w": 0.5
+   },
+   "fp16.sparse90": {
+    "ref_w": 1.409716666738398,
+    "band_w": 0.5
+   },
+   "fp16.wsparse90": {
+    "ref_w": 0.7432313627156635,
+    "band_w": 0.5
+   },
+   "fp16.smallint": {
+    "ref_w": 17.000334004476247,
+    "band_w": 0.5
+   },
+   "int8.wsparse50": {
+    "ref_w": 3.1416940908252475,
+    "band_w": 0.25
+   },
+   "int8.sparse90": {
+    "ref_w": 1.144924623637916,
+    "band_w": 0.25
+   },
+   "int8.wsparse90": {
+    "ref_w": 0.5384215913097771,
+    "band_w": 0.25
+   },
+   "int8.ternary": {
+    "ref_w": 5.1862655809787634,
+    "band_w": 0.25
+   },
+   "fp32.randn": {
+    "ref_w": 24.724927058323647,
+    "band_w": 0.5
+   },
+   "fp16.randn": {
+    "ref_w": 22.162449221970377,
+    "band_w": 0.5
+   },
+   "int8.full": {
+    "ref_w": 7.056484747628008,
+    "band_w": 0.25
+   },
+   "anchor_pi": {
+    "ref_w": 8.360265888204863,
+    "band_w": 0.5
+   }
+  }
+ },
+ "single_pass_fallback": {
+  "sigma_w": {
+   "fp32": 0.15,
+   "fp16": 0.15,
+   "int8": 0.12
+  },
+  "df_res": 60,
+  "what": "with exactly one kept pass, N^2 = sigma^2 (one tile's between-pass variance, assumed) and every verdict is labelled 'single pass'"
+ },
+ "thresholds": {
+  "R2_band_w": {
+   "fp32": 0.5,
+   "fp16": 0.5,
+   "int8": 0.25
+  },
+  "R3": "the gate law's expected SD (desk_table_e94.gate_law_sd_w) inside tau's 95% interval: PASS; outside: FAIL",
+  "R4_LF_x_w": 0.5,
+  "R4_LI_x_w": 0.25,
+  "R5": "the slope left after the frozen CV slope, class G, 95% interval contains 0: PASS; excludes 0: FAIL",
+  "R6": {
+   "pass_rms_w": 0.3,
+   "fail_rms_w": 0.6
+  },
+  "R7": {
+   "pass_rms_w": 0.5,
+   "fail_rms_w": 1.0
+  },
+  "R8": {
+   "pass_rms_w": 0.3,
+   "fail_rms_w": 0.6
+  }
+ },
+ "power": {
+  "sims": 4000,
+  "n_passes": 2,
+  "sigma_w": {
+   "fp32": 0.1,
+   "fp16": 0.1,
+   "int8": 0.1
+  },
+  "tau_residual_w": {
+   "G": 0.08,
+   "LF": 0.08,
+   "LI": 0.05
+  },
+  "committed_offset": "desk_table_e94.gate_law_offset_w",
+  "R2_primary": {
+   "frozen slope true": {
+    "fp32.nn_like": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.942,
+     "UNRESOLVED": 0.058
+    },
+    "fp16.sparse50": {
+     "CORRECTION": 0.577,
+     "NO CORRECTION": 0.008,
+     "UNRESOLVED": 0.415
+    },
+    "fp16.wsparse50": {
+     "CORRECTION": 0.017,
+     "NO CORRECTION": 0.453,
+     "UNRESOLVED": 0.529
+    },
+    "fp32.smallint": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.989,
+     "UNRESOLVED": 0.011
+    },
+    "fp32.sparse90": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.961,
+     "UNRESOLVED": 0.039
+    },
+    "fp16.sparse90": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.971,
+     "UNRESOLVED": 0.029
+    },
+    "fp16.wsparse90": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.998,
+     "UNRESOLVED": 0.002
+    },
+    "fp16.smallint": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.967,
+     "UNRESOLVED": 0.033
+    },
+    "int8.wsparse50": {
+     "CORRECTION": 0.165,
+     "NO CORRECTION": 0.059,
+     "UNRESOLVED": 0.775
+    },
+    "int8.sparse90": {
+     "CORRECTION": 0.042,
+     "NO CORRECTION": 0.197,
+     "UNRESOLVED": 0.762
+    },
+    "int8.wsparse90": {
+     "CORRECTION": 0.008,
+     "NO CORRECTION": 0.222,
+     "UNRESOLVED": 0.77
+    },
+    "int8.ternary": {
+     "CORRECTION": 0.007,
+     "NO CORRECTION": 0.215,
+     "UNRESOLVED": 0.778
+    }
+   },
+   "gate-law slope true": {
+    "fp32.nn_like": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.935,
+     "UNRESOLVED": 0.065
+    },
+    "fp16.sparse50": {
+     "CORRECTION": 0.563,
+     "NO CORRECTION": 0.003,
+     "UNRESOLVED": 0.434
+    },
+    "fp16.wsparse50": {
+     "CORRECTION": 0.005,
+     "NO CORRECTION": 0.435,
+     "UNRESOLVED": 0.559
+    },
+    "fp32.smallint": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.723,
+     "UNRESOLVED": 0.277
+    },
+    "fp32.sparse90": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.953,
+     "UNRESOLVED": 0.048
+    },
+    "fp16.sparse90": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.957,
+     "UNRESOLVED": 0.043
+    },
+    "fp16.wsparse90": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.978,
+     "UNRESOLVED": 0.022
+    },
+    "fp16.smallint": {
+     "CORRECTION": 0.0,
+     "NO CORRECTION": 0.858,
+     "UNRESOLVED": 0.142
+    },
+    "int8.wsparse50": {
+     "CORRECTION": 0.102,
+     "NO CORRECTION": 0.058,
+     "UNRESOLVED": 0.84
+    },
+    "int8.sparse90": {
+     "CORRECTION": 0.034,
+     "NO CORRECTION": 0.11,
+     "UNRESOLVED": 0.856
+    },
+    "int8.wsparse90": {
+     "CORRECTION": 0.038,
+     "NO CORRECTION": 0.067,
+     "UNRESOLVED": 0.896
+    },
+    "int8.ternary": {
+     "CORRECTION": 0.009,
+     "NO CORRECTION": 0.088,
+     "UNRESOLVED": 0.903
+    }
+   }
+  }
+ },
+ "not_scored_if": "no pass kept (one kept pass scores with the single-pass fallback)"
+}
