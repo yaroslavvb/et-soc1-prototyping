@@ -14,10 +14,12 @@ beside R2w (keyed at the governor's whole degree), adds a hash guard on the audi
 - *Claimed at 10:14:18 PST by rewriting the day's one `#community-lab` post (message `1566837317765963987`).*
 - *First device access at 10:14:32 PST: the session-start `ettelem config`.*
 - *Card runs 10:14:32–12:40:40 PST on aifoundry2 card 0 only: **80.81 card-minutes of 110**.*
-- *TDP 65 W and threshold 65 °C at all 41 config reads. Nothing was set, and **no WRITE command of any kind** was sent, not even the statistics
-  reset. The residency read was answered unsent 30 times and never sent.*
+- *TDP 65 W and threshold 65 °C at all 42 config reads, from the session-start read (10:14:32) to the session-end read (14:05:44). Nothing was
+  set, and **no WRITE command of any kind** was sent, not even the statistics reset. The residency read was answered unsent 30 times and never
+  sent.*
 - *The card's clause was dropped from the post at 12:41:01 PST.*
-- *W3, the optional afternoon probe, is decided by its registered rule at about 14:05 PST. [Results, 6](#6-the-session) says what happened.*
+- ***W3, the optional afternoon probe, did not run, by its registered rule.** At 14:05:07 PST the free card's 10-minute idle die read 44.925 °C,
+  under the rule's 45.0 (W2's REST idle, 44.0, plus 1.0). `SKIP-W3` was touched at 14:05:29, and the queue ended at 14:05:40.*
 
 ## Results first
 
@@ -128,7 +130,12 @@ sample, at 21.41, 21.45, 21.53 and 21.55 W ([`results.json`](results.json) `A.id
 | END | 11:37:58 → 11:40:00 | 15.0 | 2.03 | 0 |
 | W1B (REST, then H-I8 from rest) | 11:55:00 → 12:23:38 | 15.0 | 28.64 | 0 |
 | END2 | 12:38:38 → 12:40:40 | 15.0 | 2.03 | 0 |
-| W3 (optional) | decided at about 14:05 PST by the W3 rule | — | — | — |
+| W3 (optional) | **not run**: the W3 rule at 14:05:07 (10-minute idle die 44.925 °C < 45.0); `SKIP-W3` 14:05:29; the queue ended 14:05:40 | — | 0 | — |
+
+**The W3 rule's reading.** The reading was taken at 14:05:07 PST from aifoundry2's own 5 s history: 120 rows, none held, die mean 44.925 °C, board
+21.626 W. It is reproducible from [`history/aifoundry2-2026-11-02.jsonl.gz`](history/aifoundry2-2026-11-02.jsonl.gz), 13:55:07–14:05:07. The
+budget would have held W3 (80.81 + 24 ≤ 110), and nobody else held the card. Only the idle rule failed, by 0.075 °C. The afternoon warmed the idle
+from 44.0 °C (the 10-minute mean at 12:49 and at 13:28) to about 44.9 °C by 14:05, not the full degree.
 
 **The peaks and the stops.** W2 peaked at **88.65 W** during H-F32 (10:59:16 PST, at 700 MHz: the governor stepping up from the floor at the trip)
 and at 88.62 W in the probe's own fp32 randn run. It had 372 samples over 85 W: 322 in H-F32, 306 of those at 700 MHz. None was over 93 W. Its die
@@ -144,7 +151,7 @@ mean peaked at 67 °C, and the hottest sensor's running maximum read 69 °C, car
   - no inlet thermometer exists.
 - **Kinds page, item 8.** One cool probe, 2.8 °C below the night's, refutes both readings of the 76 s line's drift: the line moved 0.81 °C per °C of
   rest die, against the room's 0.25 and E111's fit of 0.47. The hold followed the room's reading (0.73 per °C, SUPPORTS on E98-R2's partition). Still
-  open: a warm probe, which W3 may or may not give, and an inlet thermometer.
+  open: a warm probe (W3 did not run: the idle reached 44.9 °C, not 45.0) and an inlet thermometer.
 - **The governor (the speed half).** On this card fp32 random sits at the 600 MHz floor or at the 65 °C trip depending on a 1 °C change in the
   idle. Under the trip the clock leaves the floor in about 11% of samples (mean 612.7 MHz). The die is pinned to within 0.1 °C at the 65/66 boundary
   of the whole-degree mean the governor reads.
@@ -156,9 +163,10 @@ mean peaked at 67 °C, and the hottest sensor's running maximum read 69 °C, car
 | registration, predictions, scorer and self-test on origin before the claim and any device access | `9723d79b` on origin 09:00:52; first session blocked (Tailscale), nothing ran; A1 `f842cc39` on origin 10:12:27; claim 10:14:18; first device access 10:14:32 |
 | the smoke by 11:00 (A1: by 11:30) | 10:14:32, exit 0 |
 | SMOKE, W2, END, W1B, END2 in order, E98's rest rule | as such, every step exit 0; rests 20.0, 15.0, 15.0, 15.0 min |
-| nothing set; config at both ends of every step and session | 41 reads, all TDP 65 W, threshold 65 °C, 600 MHz idle |
+| nothing set; config at both ends of every step and session | 42 reads, all TDP 65 W, threshold 65 °C, 600 MHz idle |
 | no WRITE of any kind; the residency read never sent | none sent; 30 residency reads answered unsent (`*/e133-not-sent.jsonl`); 0 drains |
-| at most 110 card-minutes (less the first session's 0); no step after 15:00; hard stop 16:00 | 80.81 card-minutes for the five morning steps; W3 below |
+| at most 110 card-minutes (less the first session's 0); no step after 15:00; hard stop 16:00 | 80.81 card-minutes; the last step ended 12:40:40; the queue ended 14:05:40 |
+| W3 only if the idle reaches W2's REST idle + 1.0 °C at about 14:05, and the post first | 44.925 °C < 45.0 at 14:05:07: not run, not claimed (`SKIP-W3`) |
 | predicted c 0.672 (H-I8), 0.671 (H-F32); R1 PASS ×2 | 0.700, 0.648; R1 INCONCLUSIVE (H-I8), PASS (H-F32) |
 | predicted R2 AT THE FLOOR (the idle read 44.0 ≥ 43.5) | AT THE TRIP: **not as predicted**; A1's R2w (44.54) predicted it |
 | predicted A1 FAIL ×2, A2 prior PASS ×2 and FAIL ×6, A3 PASS | as predicted |
@@ -174,7 +182,7 @@ Q136(w)'s checker at HEAD: GO, 37 send sites, 0 disallowed, with the two reviewe
 | program | command(s) | class | sent in this session |
 |---|---|---|---|
 | `ettelem sample --every-ms 100` (no `--reset-ms`), one sampler per run | `DM_CMD_GET_MODULE_POWER`, `GET_SP_STATS`, `GET_MODULE_CURRENT_TEMPERATURE`, `GET_ASIC_VOLTAGE` (2 PMIC voltage-register reads), `GET_MODULE_VOLTAGE` (9 PMIC voltage-register reads), `GET_ASIC_FREQUENCIES` | READ (the voltage reads are the owner's allowed ones, 2 Nov 2026) | 48,401 sample rows from 20 sampler processes, so about 48,401 rounds of the six GETs |
-| `ettelem config`: after every run and at each session's ends (`run_hpl.py`), at both ends of every step (the queue), at the session's start and end (`run_e133.sh config`) | `GET_MODULE_STATIC_TDP_LEVEL`, `GET_MODULE_TEMPERATURE_THRESHOLDS`, `GET_MODULE_POWER_STATE`, `GET_ASIC_FREQUENCIES`, `GET_ASIC_VOLTAGE` | READ | 30 + 10 + 1 = 41 (the session-end read is added below) |
+| `ettelem config`: after every run and at each session's ends (`run_hpl.py`), at both ends of every step (the queue), at the session's start and end (`run_e133.sh config`) | `GET_MODULE_STATIC_TDP_LEVEL`, `GET_MODULE_TEMPERATURE_THRESHOLDS`, `GET_MODULE_POWER_STATE`, `GET_ASIC_FREQUENCIES`, `GET_ASIC_VOLTAGE` | READ | 30 + 10 + 2 = 42 |
 | `ettelem sptrace` after every run | no SP command: the driver's trace ioctls and an MMIO read | READ | 30 |
 | `ettelem residency 2 3 4 5 6` (`run_hpl.py:622`) | — | **NOT SENT** (A1's guard on the chain; `run_e133.py`'s wrapper) | 0 sent; 30 answered unsent |
 | `dev_mngt_service -m DM_CMD_GET_MODULE_POWER` (run_hpl's drain) | `GET_MODULE_POWER` | READ | 0 |
@@ -191,8 +199,16 @@ Q136(w)'s checker at HEAD: GO, 37 send sites, 0 disallowed, with the two reviewe
   kinds table, the 8 tiles and every E133 file. All were equal, and A1's guard checks the chain again at every session.
 - **D2: a first collection, and a first look (11:40 PST).** Between END and W1B, while the card rested, `collect_e133.sh` ran once for a first look.
   The scorer refused to score without W1B: its "beside" reading needs every hold. So the first look called the scorer's own Part A and R2 functions
-  in scratch, and nothing of it is committed. The data here come from the collection at 12:41, after END2, re-run after W3 if W3 runs.
+  in scratch, and nothing of it is committed. The data here come from the collection at 12:41, after END2, and again at 14:06, after the queue
+  ended. Only the queue's records changed (W3's skip and the queue's end, `results.json` `queue`); every number and verdict is the same.
 - **D3: "the morning".** The holds ran from 10:35 to 12:24 PST, late morning and midday (A1 §3). R2 is keyed on the idle die, not the hour.
+- **D4: two small corrections to A1's text (Mon 2 Nov, ~13:00 PST, from the first lane's fix pass; A1 itself is not edited).** Neither changes a
+  number used anywhere.
+  - A1 §6 gives E111's W2 idle as 21.71 W. It is 21.70 W (E111 `results.json` `A.idles.W2.w`, 21.7048).
+  - A1 §6 says the morning range does not come from the minutes after E126's release. That holds for the range's ends, which come from 06:46–07:32,
+    but the first lane's own 08:16–08:26 bin (43.31 °C, 21.29 W) also lies inside the range.
+  - The first lane's blocked window had 26 attempts from 08:40:44 to 09:29:34: the first ssh, 14 probes by hand and the 11 in its `probes.log`.
+    A1 §1's "11 logged probes … plus unlogged attempts from 08:40:44" counts the same attempts.
 
 ## How it ran
 
@@ -208,6 +224,9 @@ bash tools/claims-v3/e133/run_e133.sh check                  # 10:13:20: idle-lo
 bash tools/claims-v3/e133/run_e133.sh config session-start   # 10:14:32: TDP 65 W, threshold 65 C, 600 MHz
 bash tools/claims-v3/e133/run_e133.sh go 10:14               # 10:14:32: the queue, detached (smoke latest 11:30 by A1)
 # 12:41:01 the card's clause dropped from the post (another lane's aifoundry3 clause kept)
+# 14:05:07 the W3 rule read on the box's own history: 10-minute idle die 44.925 C < 45.0, so W3 not claimed
+bash tools/claims-v3/e133/run_e133.sh skip-w3                # 14:05:29; the queue skipped W3 and ended at 14:05:40 ("done")
+bash tools/claims-v3/e133/run_e133.sh config session-end     # 14:05:44: TDP 65 W, threshold 65 C, 600 MHz; et-who: nothing held
 ```
 
 Then on the Intel, from the top of the repository:
@@ -245,7 +264,7 @@ python3 docs/reports/data/2026-11-02-e133-heat-holds/count_commands_e133.py docs
 | `a1_readings_e133.py`, `a1_readings.json` | amendment A1's R2w from the scorer's own R2 output, and the two sessions per kind side by side (E111's committed `results.json` against this one) |
 | `count_commands_e133.py`, `commands_sent.json` | every device command the session sent, counted from the records |
 | `SMOKE/`, `W2/`, `END/`, `W1B/`, `END2/` | raw `run_e133.py` sessions: `e133.json` (the chain's hashes), `session.json`, `kspeed.json`, `runs.jsonl`, `launches.jsonl.gz`, `queries.jsonl`, `marks.jsonl`, `e133-not-sent.jsonl`, `tel/*.jsonl.gz` (10 Hz), `sp/`, `logs/`, `manifest.txt`, `run.out`, `run.log`, the queue's `snapshot-*.json`, `sensors-*.json`, `config-*.txt` |
-| `config-session-start.txt` | the session-start `ettelem config` (10:14:32 PST) |
+| `config-session-start.txt`, `config-session-end.txt` | the session's first and last `ettelem config` (10:14:32 and 14:05:44 PST) |
 | `queue.jsonl`, `queue.out`, `status.json`, `schedule.json` | the queue's records and schedule (A1's smoke latest 11:30) |
 | `idle_logins.jsonl` | the idle-login rule's decisions at every check, counts only |
 | `phone.jsonl` | the camera phone's `/health`, once a minute (descriptive) |
