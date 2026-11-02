@@ -1,0 +1,55 @@
+E125 corrections-check (post hoc, deciding nothing). Paths are relative to the repository's top level.
+Data: docs/reports/data/2026-11-01-e125-a-side-replicate/ ; registration and frozen predictions: tools/claims-v3/e125/
+
+C1  the mirror's c is fitted against E70's aifoundry3 B rungs, so card 1's c carries the card scale
+  card 1, c refitted over 15 rungs (scored.json > D2_A.c_per_pass_mean_se): 0.6617 ± 0.0020 (n 7)
+  its B side, per rung (scored.json > items.*.B_same_mask_E70_W, E70's aifoundry3 rungs): 16 rungs, e.g. als_h8 7.108 W against card 1's own ls_h8 6.904 W
+  E82's fp32 card scale s, aifoundry3 over card 1 (predictions-e125.json > card_scale): 1.030017
+  card 1's c at its own scale, c x s: 0.6815
+  X-c as frozen (predictions-e125.json > x_rules X-c): E113 0.6809 / s = predicted 0.6611; card 1 read 0.6617
+  E113 on aifoundry3, registered (docs/reports/data/2026-11-01-e113-a-side-saturation/scored.json > D2_A.c_per_pass_mean_se): 0.6779 ± 0.0067
+  E113 on aifoundry3, dip-free frame (tools/claims-v3/e125/e113-nodips/scored.json > D2_A.c_per_pass_mean_se): 0.6809 ± 0.0052
+  within card 1's own passes, B run in the same passes, A/B of the same mask at k = 8:
+    low,    alq_h8 / lq_h8 (scored.json > e125.N1.r.8): 0.6391 ± 0.0094 (n 7)
+    self-check, low r8 recomputed here from runs.csv: 0.639113 ± 0.009424 (n 7); equals scored.json's: True
+    spread, als_h8 / ls_h8 per pass, paired as N1 pairs the low ones (runs.csv, passes 12502-12508): 0.6936 ± 0.0048 (n 7); per pass 0.683, 0.678, 0.705, 0.711, 0.691, 0.702, 0.684
+    spread, ratio of the means (scored.json > items.als_h8.dW / items.ls_h8.dW): 4.788 / 6.904 = 0.6935
+
+C2  blog wording: rho per designed bit depends on k; one fitted card scale, not the same 3% on every rung
+  rho_k, low layout, per designed bit (posthoc.json > rho_k; = 2 x scored.json > e125.N1.r, A's designed flips being half of B's):
+    k = 2: rho 1.921 ± 0.077; 2 x r_2 = 1.921
+    k = 4: rho 1.860 ± 0.041; 2 x r_4 = 1.860
+    k = 8: rho 1.278 ± 0.019; 2 x r_8 = 1.278
+  this ladder's card scale (scored.json > e125.ladder_scale; least squares through the origin, E113's 16 A rungs on card 1's): s 1.0314, rms 0.058 W over 16 rungs; E82's s 1.0300
+  per rung, E113 in the same frame (predictions-e125.json > x_rules.E113) over card 1 (scored.json > items.dW):
+    alq_h1   card 1  0.300 W  E113  0.349 W  ratio 1.166
+    alq_h3   card 1  0.911 W  E113  0.944 W  ratio 1.037
+    alq_h2   card 1  0.965 W  E113  0.945 W  ratio 0.979
+    als_h2   card 1  1.149 W  E113  1.167 W  ratio 1.016
+    alq_h4   card 1  1.601 W  E113  1.586 W  ratio 0.991
+    alq_h6   card 1  2.031 W  E113  2.041 W  ratio 1.005
+    alq_h8   card 1  2.048 W  E113  2.016 W  ratio 0.985
+    als_h3   card 1  2.675 W  E113  2.707 W  ratio 1.012
+    als_h4   card 1  2.738 W  E113  2.821 W  ratio 1.031
+    alq_h12  card 1  3.422 W  E113  3.508 W  ratio 1.025
+    als_h6   card 1  4.027 W  E113  4.175 W  ratio 1.037
+    als_h8   card 1  4.788 W  E113  4.854 W  ratio 1.014
+    alq_h16  card 1  5.556 W  E113  5.709 W  ratio 1.027
+    als_h12  card 1  5.898 W  E113  6.054 W  ratio 1.026
+    als_h16  card 1  6.190 W  E113  6.506 W  ratio 1.051
+    alq_h23  card 1  7.307 W  E113  7.609 W  ratio 1.041
+  ratio range over all 16 rungs: 0.979-1.166; over the 12 rungs above 1.5 W: 0.985-1.051
+
+C3  rho(8)'s layout difference is a reading beside P5, not a registered rule
+  card 1, spread minus low (scored.json > rho8.spread_minus_low): +0.109 ± 0.024 (4.5 SE)
+  P5 as registered (scored.json > rules.P5.asked): "rho(8) per designed bit, A over B, in both layouts inside [0.7, 2.5] and |spread - low| <= 0.30 (M: 1.29 both; WA spread 1.40; A spread 2.74; H spread 0.55)" -> PASS
+  the registered rules (predictions-e125.json): Z over E113's ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7']; 21 X rules (X-D1_A8, X-rho8-low, X-rho8-spread, X-nrd, X-c, and the 16 A rungs); N1
+  X rules on the difference between the layouts' rho(8): none (X-rho8-low and X-rho8-spread each test one layout against E113's value / s)
+  the desk finding, E113's passes dip-free (tools/claims-v3/e125/e113-nodips/scored.json > rho8.spread_minus_low): +0.124 ± 0.019 (6.4 SE), committed with the registration (105f4601)
+
+C4  fJ per designed A bit is E70's within-experiment currency (in the lane's result only)
+  scored.json > items.*.fJ_per_designed_bit: low alq 112-210 fJ (9 rungs), spread als 169-388 fJ (7 rungs)
+  README's caveat: "... and the spread rungs 169–388 fJ (E70's within-experiment currency, which must not be carried into the gate-level ledger..."
+
+C5  the README's header sentence (the text above its first '## ' heading)
+  'committed and **committed' present: False; '**committed as `105f4601`' present: True

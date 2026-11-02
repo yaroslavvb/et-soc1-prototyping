@@ -3,11 +3,12 @@
 *On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open):
 **item 15, "Smaller, and carried"**, its A-side part (the complaint this answers: Q133 answered the A side's form for the quiet
 partner on one card, with "another card" left open), and **item 6**'s clause on the A-side ladders. It replicates
-[E113](../2026-11-01-e113-a-side-saturation/README.md) (aifoundry3 card 0).*
+[E113](../2026-11-01-e113-a-side-saturation/README.md) (aifoundry3 card 0). Corrected after verification the same evening, at
+the desk, with no number or verdict changed: see [Corrections after verification](#corrections-after-verification-sun-1-nov-2026).*
 
 *Sun 1 Nov 2026 (week 44), Q134, lane a1c1-e125-a-side. Pre-registered in
 [`tools/claims-v3/e125/E125.md`](../../../../tools/claims-v3/e125/E125.md) with
-[`predictions-e125.json`](../../../../tools/claims-v3/e125/predictions-e125.json), the scorer and its self-test, committed and
+[`predictions-e125.json`](../../../../tools/claims-v3/e125/predictions-e125.json), the scorer and its self-test,
 **committed as `105f4601` at 20:12:35 PST and pushed by 20:12:38**, before the claim (the day's post rewritten 20:13:59–20:14:04
 PST) and before the first launch (the smoke's, 20:14:23). The session ran **20:14:18 → 20:42:32 PST on aifoundry1 card 1** (`V3_DEVICE=1`, its own lock):
 the smoke, pass 12500, then passes 12501–12508, **28.2 card-minutes** of the 35 allowed. 600 MHz, 499.0 mV. `ettelem config`, read
@@ -28,10 +29,14 @@ again on card 1, over the seven passes the gates keep. ([`scored.json`](scored.j
 3. **The mirror describes the A side better** (P3 PASS, P4 "which bits"). With c frozen at E70's 0.643, the mirror reads the seven
    spread rungs to **0.238 W rms** (registered ≤ 0.50; the frozen S_A curve reads 0.172 W there, so P3 alone does not separate the
    two laws, as in E113). Refitted on both layouts, **c = 0.6617 ± 0.0020** per pass reads the 15 rungs to **0.273 W**, against
-   0.682 W for a curve in S_A and 0.865 W for the best any "how many" law can do. (`scored.json` › `rules.P3`, `rules.P4`, `D2_A`)
+   0.682 W for a curve in S_A and 0.865 W for the best any "how many" law can do. That c is fitted against E70's B rungs, measured
+   on aifoundry3, so it carries the 3% card scale: at card 1's own scale it reads 0.68 (× 1.030), as E113's did on aifoundry3
+   ([C1](#corrections-after-verification-sun-1-nov-2026)). (`scored.json` › `rules.P3`, `rules.P4`, `D2_A`)
 4. **The A word's weight** (P5 PASS): per designed bit, A over B, **ρ(8) = 1.278 ± 0.019 (low) and 1.387 ± 0.010 (spread)**, both in
    the band, their difference **+0.109 ± 0.024** inside P5's 0.30. That difference is 4.5 SE from zero, so the two layouts do not
-   share one ρ(8). E113's passes, reduced the same way, read +0.124 ± 0.019 (§ Desk finding). (`scored.json` › `rho8`)
+   share one ρ(8). This is a reading beside P5, not a registered rule; the desk finding predicted it
+   ([C3](#corrections-after-verification-sun-1-nov-2026)). E113's passes, reduced the same way, read +0.124 ± 0.019 (§ Desk
+   finding). (`scored.json` › `rho8`)
 5. **E70 and the random pair** (P6 PASS, P7 PASS). E70's seven A rungs (aifoundry3) come back within −0.253 to +0.136 W (bands 0.6 W,
    1.0 W at the top), and `ls_h8` − `lq_h8` reads 3.698 ± 0.055 W against E70's 3.860. `nrd_a` / `nrd_b` reads **0.663 ± 0.002**
    (E113: 0.664). (`scored.json` › `replicate`, `nrd`)
@@ -121,17 +126,21 @@ aifoundry3, 13 inside a run's power window** (4 in pass 1137), against 45 and 10
   REPLICATES, registered), and its numbers carry over at the card scale the kinds matrix measured (21 of 21 X rules; this ladder's
   own scale 1.031 against E82's 1.030). In A's own single-bit sum the saturating form is rejected on two cards (0.71 and 0.68 W rms).
   Which positions flip sets A's cost on two cards (D1_A(8) +2.84 and +2.74 W). An A mask costs about two thirds of the same mask on B
-  on two cards (c 0.68 and 0.66). Still open: the busy partner, other A base words, fp16 and int8, the gated lane.
+  on both cards: the mirror's c reads 0.68 on aifoundry3, and on card 1 0.662 against E70's aifoundry3 B rungs, which is 0.68 at
+  card 1's own scale (× 1.030); within card 1's own passes, A/B of the same mask at k = 8 is 0.64 (low) and 0.69 (spread) (C1).
+  Still open: the busy partner, other A base words, fp16 and int8, the gated lane.
 - **Item 6's A-side clause (the power model): the constant fraction fails at small low masks.** Within one session an A mask of 2 or
   4 low bits costs 0.93–0.96 of the same mask on B, where 8 low bits cost 0.64 (N1, registered). E113's spread masks and its 8 or more
   low bits sit at 0.56–0.76. A power-model term that prices an A mask at about two thirds of the same mask on B (E113's suggestion)
   needs a small-k exception, and on two cards the refitted mirror still over-predicts the top rung by 0.6–0.7 W.
 - **E113's "ρ(8) is the same in both layouts" does not hold in the dip-free frame:** 1.23 low and 1.35 spread on aifoundry3 (post
-  hoc), 1.28 and 1.39 on card 1. Both are inside P5's band. The per-slot footing for E78's C2 (an ungated fp32 lane) stands: an A
-  bit costs 1.2–1.4 B bits at k = 8 on two cards, not the ~8× a per-word count would need.
+  hoc), 1.28 and 1.39 on card 1 (a reading beside P5, not a registered rule; C3). Both pairs are inside P5's band. The per-slot
+  footing for E78's C2 (an ungated fp32 lane) stands: an A bit costs 1.2–1.4 B bits at k = 8 on two cards, not the ~8× a per-word
+  count would need.
 - **For the blog:** flip the same bit positions on the broadcast operand A instead of B, and a second card pays the same fraction as
   the first, about two thirds, for spread masks and for 8 or more low bits. For a mask of 2–4 low bits it pays nearly the full B price.
-  The card itself scales every number by the same 3% the kinds matrix found.
+  On the second card the 16 A rungs fit one card scale of 3% (1.031, the kinds matrix's 1.030; rms 0.06 W), and all 21 numbers
+  tested at that scale pass (C2).
 
 ## What ran
 
@@ -166,6 +175,25 @@ cool to 58 °C (`runs.jsonl` › `heats`, `wait_s`).
   lane had rewritten the day's post after this lane read it at 20:13:07. The text was rebuilt from the live post and saved, as the
   one-post rule says.
 
+## Corrections after verification (Sun 1 Nov 2026)
+
+An independent verifier read the registration, the data and this page the same evening. It re-ran `score_e125.py` on the
+committed `runs.csv` and its six arm CSVs (`report.md` and `report-e113-format.md` byte-identical), re-derived every registered
+number from `runs.csv` with its own code, regenerated `predictions-e125.json` and the desk finding from committed sources, re-ran
+the self-test, and checked the harness hashes, the order of events, the posting protocol and the card etiquette. Every registered
+number and verdict holds (verdict: holds with fixes). Its five faults, all minor, are in wording, and all five hold against
+committed files ([`corrections-check.py`](corrections-check.py), [`corrections-check.txt`](corrections-check.txt), standard
+library). The corrections were made at the desk: no card was touched, and nothing was set or re-run. No frozen sentence, data
+file, number or verdict changes, and `E125.md` is untouched.
+
+| | what was wrong | what changed |
+|---|---|---|
+| C1 | **The mirror's c on card 1 was set beside E113's as if it were card 1's own A/B fraction** ("on two cards (c 0.68 and 0.66)", in "What it changes"). Card 1's c, 0.6617 ± 0.0020, is fitted against E70's B rungs, measured on aifoundry3, so it carries the 3% card scale: X-c predicted it at E113's 0.6809 / 1.030 = 0.661. The gap between 0.66 and 0.68 is that scale, not a difference between the cards | Result 3 and "What it changes" say: c = 0.662 against E70's aifoundry3 B rungs, 0.68 at card 1's own scale (× 1.030), as E113's 0.68 on aifoundry3. Within card 1's own passes, A/B of the same mask at k = 8 is 0.64 in the low layout (0.639 ± 0.009, N1's r8) and 0.69 in the spread layout (0.694 ± 0.005, paired per pass as N1 pairs the low ones). "About two thirds" stays |
+| C2 | **Blog wording went past the data.** "The card itself scales every number by the same 3%" overstates one fitted scale. The ladder's 1.0314 is a least-squares fit with rms 0.058 W, and E113's rungs over card 1's run 0.979–1.166 (0.985–1.051 above 1.5 W). In the lane's result, "an A bit costs 1.28 (low) to 1.39 (spread) times a B bit" holds at k = 8 only: at k = 2 and 4 the low layout reads 1.92 and 1.86 per designed bit (post hoc, `posthoc.json` › `rho_k`) | "For the blog" says the 16 A rungs fit one card scale of 3% (1.031, the kinds matrix's 1.030; rms 0.06 W), and all 21 numbers tested at that scale pass. The result's blog line names k = 8 |
+| C3 | **Result 4 gave "the two layouts do not share one ρ(8)" (+0.109 ± 0.024, 4.5 SE) as a result, without saying that no rule registers it.** P5 bounds only \|spread − low\| ≤ 0.30, and no Z, X or N1 rule tests the difference against zero | Result 4 and "What it changes" call it a reading beside P5, not a registered rule, which the desk finding predicted (+0.124 ± 0.019 on E113's dip-free passes, committed with the registration in `105f4601`) |
+| C4 | In the lane's result only, not a committed file: its numbers list gave fJ per designed A bit (112–210 low, 169–388 spread) without this page's caveat | The result's entries carry the caveat: E70's within-experiment currency, not to be carried into the gate-level ledger |
+| C5 | A doubled word in the header: "committed and **committed as `105f4601` …**" | "the scorer and its self-test, **committed as `105f4601` at 20:12:35 PST and pushed by 20:12:38**" |
+
 ## Files
 
 | file | what |
@@ -176,6 +204,7 @@ cool to 58 °C (`runs.jsonl` › `heats`, `wait_s`).
 | `hl-*.json`, `runs-*.csv`, `reduce-*.txt` | the arms: `e113frame` (dips kept, slope fitted), `dipskept` (0.2414), `leakauto`, `leak0.2/0.3/0.4` (dips removed) |
 | `dips/dips.json` | card 1's dips per pass, where they fall (E82 A2's test) |
 | `posthoc_e125.py`, `posthoc.json` | the numbers labelled post hoc |
+| `corrections-check.py`, `corrections-check.txt` | added with the corrections after verification: post hoc, deciding nothing, standard library (the same output on Python 3.9 and 3.13, from any directory); prints, from committed files, every number the corrections quote |
 | `predictions-e113.json`, `predictions-e125.json`, `manifest.json` | the frozen predictions as run; the operand set's items and designed flip counts |
 | `aifoundry1-c1/e125/p12501…p12508` | per pass: `block.json`, `configs.json`, `gen.sha256`, `manifest.txt` (`et-lab-manifest`), `marks.jsonl`, `run.log`, `runs.jsonl`, `code.sha256`, `telemetry.jsonl.gz`, `tiles/` |
 | `aifoundry1-c1/smoke-p12500` | the smoke pass |
