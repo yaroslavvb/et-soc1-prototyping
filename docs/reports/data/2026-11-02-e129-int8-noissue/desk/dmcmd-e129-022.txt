@@ -1,0 +1,126 @@
+E128 device-command audit at the running build. Public source: et-platform 836a4ab60 (project(EsperantoBootLoader VERSION 0.22.0 LANGUAGES C ASM)),
+compared function by function with da192816a (the BL2 0.18.0 line's last commit, which dmcmd-e128.py read).
+Command ids at 836a4ab60: GET_MODULE_STATIC_TDP_LEVEL 25, GET_MODULE_TEMPERATURE_THRESHOLDS 21, GET_MODULE_POWER_STATE 23, GET_ASIC_FREQUENCIES 53, GET_ASIC_VOLTAGE 32, GET_MODULE_POWER 33, GET_SP_STATS 60, GET_MODULE_CURRENT_TEMPERATURE 27, GET_MODULE_VOLTAGE 31, GET_MODULE_FIRMWARE_REVISIONS 14, SET_STATS_RUN_CONTROL 62, SET_DM_TRACE_CONFIG 67
+Routing: pc_vq_process_pending_command (rtos_task/command_dispatcher.c:102): same as at da192816a: False; lines added since: ['case DM_CMD_SET_VMIN_LUT:', 'case DM_CMD_GET_VMIN_LUT:', 'case DM_CMD_SET_FRU:', 'case DM_CMD_GET_FRU:']; lines gone: ['case DM_CMD_SET_FRU ... DM_CMD_GET_FRU:', '/* Process FRU cmds */', 'fru_process_request(tag_id, msg_id, (void *)buffer);']
+The services' own switches at 836a4ab60 (each command's case and the call under it):
+   services/thermal_power_monitor.c:950 case DM_CMD_GET_ASIC_VOLTAGE: pwr_svc_get_asic_voltage(tag_id, req_start_time);
+   services/thermal_power_monitor.c:954 case DM_CMD_GET_MODULE_POWER_STATE: pwr_svc_get_module_power_state(tag_id, req_start_time);
+   services/thermal_power_monitor.c:962 case DM_CMD_GET_MODULE_STATIC_TDP_LEVEL: pwr_svc_get_module_tdp_level(tag_id, req_start_time);
+   services/thermal_power_monitor.c:972 case DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS: pwr_svc_get_module_temp_thresholds(tag_id, req_start_time);
+   services/thermal_power_monitor.c:982 case DM_CMD_GET_MODULE_CURRENT_TEMPERATURE: pwr_svc_get_module_current_temperature(tag_id, req_start_time);
+   services/thermal_power_monitor.c:1000 case DM_CMD_GET_MODULE_POWER: pwr_svc_get_module_power(tag_id, req_start_time);
+   services/thermal_power_monitor.c:1004 case DM_CMD_GET_MODULE_VOLTAGE: pwr_svc_get_module_voltage(tag_id, req_start_time);
+   services/performance.c:643 case DM_CMD_GET_SP_STATS: dm_svc_perf_get_sp_stats(tag_id, req_start_time);
+   services/performance.c:652 case DM_CMD_GET_ASIC_FREQUENCIES: dm_svc_perf_get_asic_frequencies(tag_id, req_start_time);
+
+== DM_CMD_GET_MODULE_STATIC_TDP_LEVEL (25)
+   services/thermal_power_monitor.c:339 pwr_svc_get_module_tdp_level: found True; same as at da192816a: True; stores other than locals: 0
+   services/thermal_pwr_mgmt.c:613 get_module_tdp_level: found True; same as at da192816a: True; stores other than locals: 0
+
+== DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS (21)
+   services/thermal_power_monitor.c:438 pwr_svc_get_module_temp_thresholds: found True; same as at da192816a: True; stores other than locals: 0
+   services/thermal_pwr_mgmt.c:665 get_module_temperature_threshold: found True; same as at da192816a: True; stores other than locals: 0
+
+== DM_CMD_GET_MODULE_POWER_STATE (23)
+   services/thermal_power_monitor.c:48 pwr_svc_get_module_power_state: found True; same as at da192816a: True; stores other than locals: 0
+   services/thermal_pwr_mgmt.c:551 get_module_power_state: found True; same as at da192816a: True; stores other than locals: 0
+
+== DM_CMD_GET_ASIC_FREQUENCIES (53)
+   services/performance.c:41 dm_svc_perf_get_asic_frequencies: found True; same as at da192816a: True; stores other than locals: 0
+   services/perf_mgmt.c:276 get_module_asic_frequencies: found True; same as at da192816a: True; stores other than locals: 6
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] get_soc_perf_reg()->asic_frequency.minion_shire_mhz = freq;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] get_soc_perf_reg()->asic_frequency.noc_mhz = freq;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] get_soc_perf_reg()->asic_frequency.mem_shire_mhz = get_memshire_frequency();
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] get_soc_perf_reg()->asic_frequency.ddr_mhz = get_ddr_frequency();
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] get_soc_perf_reg()->asic_frequency.pcie_shire_mhz = freq;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] get_soc_perf_reg()->asic_frequency.io_shire_mhz = freq;
+   driver/io_pll.c:932 get_pll_frequency: found True; same as at da192816a: True; stores other than locals: 0
+   driver/io_pll.c:907 calculate_pll_freq: found True; same as at da192816a: True; stores other than locals: 0
+   driver/reset.c:121 get_hpdpll_strap_value: found True; same as at da192816a: True; stores other than locals: 0
+   driver/mem_controller.c:692 get_memshire_frequency: found True; same as at da192816a: True; stores other than locals: 0
+   driver/mem_controller.c:697 get_ddr_frequency: found True; same as at da192816a: True; stores other than locals: 0
+
+== DM_CMD_GET_ASIC_VOLTAGE (32)
+   services/thermal_power_monitor.c:192 pwr_svc_get_asic_voltage: found True; same as at da192816a: True; stores other than locals: 0
+   services/thermal_pwr_mgmt.c:1142 get_asic_voltage: found True; same as at da192816a: True; stores other than locals: 9
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_soc_power_reg.asic_voltage.l2_cache = minshire_voltage.vdd_sram.current;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_soc_power_reg.asic_voltage.minion = minshire_voltage.vdd_mnn.current;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_soc_power_reg.asic_voltage.noc = minshire_voltage.vdd_noc.current;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_soc_power_reg.asic_voltage.ddr = memshire_voltage.vdd_ms.current;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_soc_power_reg.asic_voltage.maxion = ioshire_voltage.vdd_mxn.current;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_soc_power_reg.asic_voltage.ioshire_0p75 = ioshire_voltage.vdd_0p75.current;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_soc_power_reg.asic_voltage.pshire_0p75 = pshr_voltage.vdd_pshr.current;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_soc_power_reg.asic_voltage.vddqlp = temp;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_soc_power_reg.asic_voltage.vddq = temp;
+   driver/pvt_controller.c:1342 pvt_get_minion_avg_low_high_voltage: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pvt_controller.c:732 pvt_get_min_shire_vm_sample: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pvt_controller.c:1362 pvt_get_memshire_avg_low_high_voltage: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pvt_controller.c:809 pvt_get_memshire_vm_sample: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pvt_controller.c:871 pvt_get_ioshire_vm_sample: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pvt_controller.c:938 pvt_get_pshire_vm_sample: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pmic_controller.c:1473 pmic_get_voltage: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pmic_controller.c:254 get_pmic_reg: found True; same as at da192816a: True; stores other than locals: 1
+      | [a call that writes (error path or not: see the line)] status = i2c_soft_reset(&g_pmic_i2c_dev_reg);
+   driver/pmic_controller.c:209 wait_pmic_ready: found True; same as at da192816a: True; stores other than locals: 0
+   driver/i2c_controller.c:250 i2c_read: found True; same as at da192816a: True; stores other than locals: 3
+      | [a device register (the SP's I2C controller's command register: an I2C transaction)] dev->regs->IC_DATA_CMD = (uint32_t)(
+      | [a device register (the SP's I2C controller's command register: an I2C transaction)] dev->regs->IC_DATA_CMD =
+      | [a device register (the SP's I2C controller's command register: an I2C transaction)] dev->regs->IC_DATA_CMD = (uint32_t)(
+
+== DM_CMD_GET_MODULE_POWER (33)
+   services/thermal_power_monitor.c:142 pwr_svc_get_module_power: found True; same as at da192816a: True; stores other than locals: 0
+   services/thermal_pwr_mgmt.c:984 get_module_soc_power: found True; same as at da192816a: True; stores other than locals: 0
+
+== DM_CMD_GET_SP_STATS (60)
+   services/performance.c:404 dm_svc_perf_get_sp_stats: found True; same as at da192816a: True; stores other than locals: 0
+   services/thermal_pwr_mgmt.c:2780 Thermal_Pwr_Mgmt_Get_System_Power_Temp_Stats: found True; same as at da192816a: True; stores other than locals: 0
+
+== DM_CMD_GET_MODULE_CURRENT_TEMPERATURE (27)
+   services/thermal_power_monitor.c:545 pwr_svc_get_module_current_temperature: found True; same as at da192816a: True; stores other than locals: 0
+   services/thermal_pwr_mgmt.c:732 get_module_current_temperature: found True; same as at da192816a: True; stores other than locals: 1
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_pmic_power_reg.soc_temperature = (uint8_t)pvt_temperature.current;
+   driver/pvt_controller.c:1274 pvt_get_minion_avg_temperature: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pvt_controller.c:1303 pvt_get_minion_avg_low_high_temperature: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pvt_controller.c:659 pvt_get_ioshire_ts_sample: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pvt_controller.c:645 pvt_get_min_shire_ts_sample: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pvt_controller.c:618 pvt_get_ts_data: found True; same as at da192816a: True; stores other than locals: 0
+
+== DM_CMD_GET_MODULE_VOLTAGE (31)
+   services/thermal_power_monitor.c:243 pwr_svc_get_module_voltage: found True; same as at da192816a: True; stores other than locals: 0
+   services/thermal_pwr_mgmt.c:1010 get_module_voltage: found True; same as at da192816a: True; stores other than locals: 9
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_pmic_power_reg.module_voltage.ddr = temp;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_pmic_power_reg.module_voltage.l2_cache = temp;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_pmic_power_reg.module_voltage.maxion = temp;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_pmic_power_reg.module_voltage.minion = temp;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_pmic_power_reg.module_voltage.pcie = temp;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_pmic_power_reg.module_voltage.noc = temp;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_pmic_power_reg.module_voltage.pcie_logic = temp;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_pmic_power_reg.module_voltage.vddqlp = temp;
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] g_pmic_power_reg.module_voltage.vddq = temp;
+   driver/pmic_controller.c:1473 pmic_get_voltage: found True; same as at da192816a: True; stores other than locals: 0
+   driver/pmic_controller.c:254 get_pmic_reg: found True; same as at da192816a: True; stores other than locals: 1
+      | [a call that writes (error path or not: see the line)] status = i2c_soft_reset(&g_pmic_i2c_dev_reg);
+   driver/pmic_controller.c:209 wait_pmic_ready: found True; same as at da192816a: True; stores other than locals: 0
+   driver/i2c_controller.c:250 i2c_read: found True; same as at da192816a: True; stores other than locals: 3
+      | [a device register (the SP's I2C controller's command register: an I2C transaction)] dev->regs->IC_DATA_CMD = (uint32_t)(
+      | [a device register (the SP's I2C controller's command register: an I2C transaction)] dev->regs->IC_DATA_CMD =
+      | [a device register (the SP's I2C controller's command register: an I2C transaction)] dev->regs->IC_DATA_CMD = (uint32_t)(
+
+== macro GET_MINION_VM (driver/pvt_controller.c:25): found True; same as at da192816a: True; stores other than locals: 1
+      | [SP RAM: a global (a copy of the value just read, or an error mark)] pvt_bad_min_shire_mask |= (1UL << min);
+== macro GET_MEMSHIRE_VM (driver/pvt_controller.c:93): found True; same as at da192816a: True; stores other than locals: 0
+
+Callers of pvt_hilo_reset (the PVT sensors' high/low reset) at 836a4ab60:
+   driver/pvt_controller.c:1071 (its definition)
+   services/thermal_pwr_mgmt.c:2828 called in Thermal_Pwr_Mgmt_Init_OP_Stats
+
+Per command, the stores other than locals on its whole path, by category:
+   DM_CMD_GET_MODULE_STATIC_TDP_LEVEL (25): none
+   DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS (21): none
+   DM_CMD_GET_MODULE_POWER_STATE (23): none
+   DM_CMD_GET_ASIC_FREQUENCIES (53): SP RAM: a global: 6
+   DM_CMD_GET_ASIC_VOLTAGE (32): SP RAM: a global: 9, a call that writes: 1, a device register: 3
+   DM_CMD_GET_MODULE_POWER (33): none
+   DM_CMD_GET_SP_STATS (60): none
+   DM_CMD_GET_MODULE_CURRENT_TEMPERATURE (27): SP RAM: a global: 1
+   DM_CMD_GET_MODULE_VOLTAGE (31): SP RAM: a global: 9, a call that writes: 1, a device register: 3
