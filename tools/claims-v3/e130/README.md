@@ -249,4 +249,76 @@ Data: `docs/reports/data/2026-11-02-e130-int8-netlists/`.
 
 ## Amendments
 
-*(none yet)*
+### A1 — Mon 2 Nov 2026 (week 45), 10:35 PST: § Device commands sent, the build the list cannot read, and the corrected checker's run (written before any E130 data)
+
+*Written on the Intel by the pass that corrects this registration after its verification (lane `fix-a3-e130-int8-netlists`),
+before any E130 claim, launch or data. No E130 session has run: every ssh of the first lane to aifoundry3 stopped at a Tailscale
+check (09:02–09:53 PST), so nothing reached the box and no device command was sent. Nothing above is changed, and A1–A3 change
+no tile, prediction, threshold, band, rule, stop value or budget. A later session's own amendment takes the next number.*
+
+1. **The build the nine reads are classified from is not the build aifoundry3 runs.** § Device commands sent reads them in
+   et-platform `836a4ab`, the public BL2 0.22.0. aifoundry3 runs the thermal firmware build first flashed there on 7 October
+   2026, which answers command 74 (`DM_CMD_GET_ASIC_PVT_SAMPLES`, absent from `836a4ab`), whose answer changed from whole
+   degrees (7 Oct) to raw sensor codes (31 Oct) while the card kept reporting release 1.4.0 / BL2 0.22.0, and whose source is
+   not held ([14-card-behaviour](../../../docs/findings/14-card-behaviour.md), "A finer reading exists on aifoundry3's firmware
+   build"; [E89](../../../docs/reports/data/2026-10-31-e89-heat-low-power/README.md), "Joins and traps";
+   [`dmcmd_table.json`](../dmcmd_table.json) › `source.caveat`, which names E130 among the aifoundry3 lanes this binds). So on
+   the running build the nine reads' class rests on `836a4ab`'s handlers, the nearest public source, which that build may not
+   share, and on their unchanged behaviour: they are the stock telemetry `ettelem config` and `ettelem sample` send, which this
+   card has answered normally since 7 October, E127's run on it this morning included ([E127's registration](../e127/README.md),
+   the note under its § Device commands sent; [its data README](../../../docs/reports/data/2026-11-02-e127-b-gate/README.md),
+   correction C4). **The verdict stays GO, on that condition:** if the session-start config read or the smoke's telemetry comes
+   back in another form than E127's run recorded (an error code, a missing field), the list may not describe what runs: NO-GO,
+   and the session stops there, as for a changed binary.
+2. **HEAD's checker, run.** The working-tree checker that § Device commands sent called another lane's work in progress was
+   Q136(w)'s corrected revision, committed in `32e9c109` (09:23 PST, after this registration; [`dmcmd_audit.py`](../dmcmd_audit.py)
+   sha256 `f29e91ca…`, `dmcmd_table.json` `50168632…`, both unchanged since; run here at `34ec50b8`). From the repository root on
+   the same eleven files it reads **NO-GO, 31 send sites, 1 disallowed**: the same nine READs, PMIC access on `GET_ASIC_VOLTAGE`
+   and `GET_MODULE_VOLTAGE` only (reads), and the conditional `STATS_RESET` at `lib.sh:154` (`start_sampler` forwards `"$@"`),
+   which it now calls NO-GO until a reviewed exception clears it; no `VARIANT_UNRESOLVED` or `UNKNOWN_SUBCOMMAND` line. With the
+   reviewed exception its docstring prescribes, `--except 'tools/claims-v3/lib.sh:154:STATS_RESET=block_e130.sh:106, the only
+   start_sampler call E130 makes, passes the output file and the duration and nothing else, so no --reset-ms is forwarded'`, it
+   reads **GO, 0 disallowed**; on the whole `e130/` directory with `lib.sh`, `run_e78.py`, `e78_common.py` and `reduce_e78.py`,
+   GO at the same 31 sites; with `--deny-pmic-read`, NO-GO on the eight voltage-read lines, as it should (the reads his rule
+   allows). The 36 sites above counted the dry-run message at `block_e130.sh:102` as a send; the config read is at `:103`. A
+   session runs the same command at its own commit and keeps both outputs with the data.
+
+### A2 — same time: § Stops, the second temperature stop is a die reading
+
+The registered "(or a PMIC reading ≥ 80 °C)" is not a PMIC reading. `run_e78.py` (lines 188–191) stops when `temp_c.pmic` ≥
+`--max-c` + 10, and at `836a4ab` `get_module_current_temperature` (`services/thermal_pwr_mgmt.c:732`) fills that field
+(`pmic_sys`) from `pvt_get_minion_avg_temperature`, the minion shires' PVT average, as E127's correction C5 found on this card
+with the same runner (it equals `minshire[0]` in 16,149 of E127's 16,155 samples). So both of E130's temperature stops are die
+readings (70 and 80 °C), E130 reads no PMIC temperature, and its margin to the PMIC's own over-power and over-temperature limits
+rests on the board stop (65 W) and the die stop (70 °C), with every run at most 5.1 W above its own zero and E127's passes here
+this morning at most 53.84 W and 62 °C. No stop value changes. On the running build the field's source carries A1's residual too.
+
+### A3 — same time: four wording corrections, and how R5 and R6 are read (no rule changes)
+
+1. **B's odd/even ratio** (§ The question, § What I expect). "About 2.8× … on two cards" is a post hoc rail reading with no
+   temperature term: 2.84× for E79's singles on this card and 2.85× [1.89, 6.09] for E102's on aifoundry1 card 1
+   ([E102's `corrections-check.txt`](../../../docs/reports/data/2026-11-01-e102-balanced-bit-prices/corrections-check.txt), [C7]).
+   E79's own scored B list here, the one this registration copies (`predictions-e130.json` › `card_precision_e79.b_list_board_fJ`),
+   reads **2.22×** (odd − even +40.2 board-fJ); E102's registered masks read 1.97× [1.69, 2.33] on the rail and 1.82× [1.48, 2.17]
+   on the board, and [its correction C6](../../../docs/reports/data/2026-11-01-e102-balanced-bit-prices/README.md) says "2–3×".
+   So: **about 2.2× on aifoundry3 (E79, board), 2–3× on aifoundry1 card 1 (E102, post hoc)**. The expectation's "+40 board-fJ,
+   0.7× the netlists' +60" was already E79's list, and no threshold or rule uses the ratio.
+2. **The zeros' place** (§ What runs, the blocks' why; [`e130_common.py`](e130_common.py)'s docstring, hash-frozen and left as
+   it is). "Its own zero immediately before and after it" overstates. Every item's own zero is **the nearest zero read on each
+   side**: the inserted sign items (two a block) and, in the A blocks, `a1_7` and one magnitude item stand alone between two
+   reads of their own zero; the other items run in pairs between zero reads (13010 opens `hb1 b1_2 b1_4 hb1`), so for each item
+   of a pair the zero on one side is two runs away. Over the 20 block numbers, 200 item places are in 100 pairs and 60 stand
+   alone. That is what `check_order` asserts, and the step interpolates the zero in time, as designed.
+3. **R5 and R6 can FAIL with every netlist right** (§ Why these lines, § Precision). The self-test checks R1–R4 only. In its own
+   model, in each netlist's world (whose sign ratios lie inside the shared bands), at σ = 0.015, 0.025 and 0.035 W a run, 200
+   sessions each, over two seed sets ([`selftest_r56_e130.py`](selftest_r56_e130.py), [`selftest-r56.txt`](selftest-r56.txt)):
+   **R6 reads FAILS in 177 of 4,200 sessions (4.2%; 1.5–8.5% by world and σ, ABOVE and BELOW alike)** and **R5 in 49 of 4,200
+   (1.2%; 0–5%, the most in `plain`'s world, all ABOVE: its A ratio, 1.0108, sits at the band's upper edge, 1.011)**. So a FAIL
+   says "every netlist is wrong about the sign bit in the same way" only beside those rates, and the data README states them
+   beside any R5 or R6 reading. The rules and bands are unchanged.
+4. **The post and the start** (§ How to run it). The clause is `using aifoundry3 for 1 h, until ~HH:MM PST [doc](<…>)`: the 30
+   card-minutes plus a margin for the reads, rounded up to the half hour (the brief's form), as the lane's tooling writes it;
+   "for 0.5 h" was wrong. A session starts only after A1–A3 are on origin/main, shares card 0 in turn with Q136's other
+   aifoundry3 lanes (§ Card budget), and probes aifoundry3 only through a script that kills the ssh at once on a login link and
+   at 15 s, never through a pipe that buffers its output (the first lane's first probe, at about 09:02, ran about 2 minutes
+   before it was stopped).

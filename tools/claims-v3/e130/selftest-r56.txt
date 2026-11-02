@@ -1,0 +1,37 @@
+E130 self-test of R5 and R6: FAILS with every shared prediction true (200 sessions a world and sigma; synthetic, nothing here is a measurement)
+shared bands: {"A_sign_w2_over_w1": {"hi": 1.0108330833783983, "lo": 0.9895239768724217, "what": "the hull of the four netlists' predictions over both merges"}, "B_sign_w2_over_w1": {"hi": 1.0255364088298173, "lo": 1.0083858215110146, "what": "the hull of the four netlists' predictions over both merges"}}
+
+seed set 'verify r56 <world> <sigma>'
+  world booth_tree: truth a2_7/a1_7 1.0002, b2_7/b1_7 1.0255
+    sigma 0.015: R5 FAILS   0/200 {'HOLDS': 200}; R6 FAILS  14/200 {'FAILS (ABOVE)': 11, 'FAILS (BELOW)': 3, 'HOLDS': 186}
+    sigma 0.025: R5 FAILS   0/200 {'HOLDS': 200}; R6 FAILS  10/200 {'FAILS (ABOVE)': 7, 'FAILS (BELOW)': 3, 'HOLDS': 190}
+    sigma 0.035: R5 FAILS   0/200 {'HOLDS': 200}; R6 FAILS   3/200 {'FAILS (ABOVE)': 2, 'FAILS (BELOW)': 1, 'HOLDS': 197}
+  world booth_swap: truth a2_7/a1_7 1.0088, b2_7/b1_7 1.0137
+    sigma 0.015: R5 FAILS   2/200 {'FAILS (ABOVE)': 2, 'HOLDS': 198}; R6 FAILS   5/200 {'FAILS (ABOVE)': 3, 'FAILS (BELOW)': 2, 'HOLDS': 195}
+    sigma 0.025: R5 FAILS   4/200 {'FAILS (ABOVE)': 4, 'HOLDS': 196}; R6 FAILS   6/200 {'FAILS (ABOVE)': 5, 'FAILS (BELOW)': 1, 'HOLDS': 194}
+    sigma 0.035: R5 FAILS   3/200 {'FAILS (ABOVE)': 3, 'HOLDS': 197}; R6 FAILS   7/200 {'FAILS (ABOVE)': 3, 'FAILS (BELOW)': 4, 'HOLDS': 193}
+  world plain: truth a2_7/a1_7 1.0108, b2_7/b1_7 1.0151
+    sigma 0.015: R5 FAILS   6/200 {'FAILS (ABOVE)': 6, 'HOLDS': 194}; R6 FAILS   9/200 {'FAILS (ABOVE)': 2, 'FAILS (BELOW)': 7, 'HOLDS': 191}
+    sigma 0.025: R5 FAILS   6/200 {'FAILS (ABOVE)': 6, 'HOLDS': 194}; R6 FAILS  10/200 {'FAILS (ABOVE)': 4, 'FAILS (BELOW)': 6, 'HOLDS': 190}
+    sigma 0.035: R5 FAILS   3/200 {'FAILS (ABOVE)': 3, 'HOLDS': 197}; R6 FAILS  10/200 {'FAILS (ABOVE)': 4, 'FAILS (BELOW)': 6, 'HOLDS': 190}
+
+seed set 'fix r56 <world> <sigma>'
+  world booth_tree: truth a2_7/a1_7 1.0002, b2_7/b1_7 1.0255
+    sigma 0.015: R5 FAILS   0/200 {'HOLDS': 200}; R6 FAILS   7/200 {'FAILS (ABOVE)': 3, 'FAILS (BELOW)': 4, 'HOLDS': 193}
+    sigma 0.025: R5 FAILS   0/200 {'HOLDS': 200}; R6 FAILS  17/200 {'FAILS (ABOVE)': 9, 'FAILS (BELOW)': 8, 'HOLDS': 183}
+    sigma 0.035: R5 FAILS   1/200 {'FAILS (BELOW)': 1, 'HOLDS': 199}; R6 FAILS   7/200 {'FAILS (ABOVE)': 3, 'FAILS (BELOW)': 4, 'HOLDS': 193}
+  world booth: truth a2_7/a1_7 1.0067, b2_7/b1_7 1.0222
+    sigma 0.015: R5 FAILS   0/200 {'HOLDS': 200}; R6 FAILS   5/200 {'FAILS (ABOVE)': 3, 'FAILS (BELOW)': 2, 'HOLDS': 195}
+    sigma 0.025: R5 FAILS   0/200 {'HOLDS': 200}; R6 FAILS   7/200 {'FAILS (ABOVE)': 4, 'FAILS (BELOW)': 3, 'HOLDS': 193}
+    sigma 0.035: R5 FAILS   1/200 {'FAILS (ABOVE)': 1, 'HOLDS': 199}; R6 FAILS  12/200 {'FAILS (ABOVE)': 6, 'FAILS (BELOW)': 6, 'HOLDS': 188}
+  world booth_swap: truth a2_7/a1_7 1.0088, b2_7/b1_7 1.0137
+    sigma 0.015: R5 FAILS   0/200 {'HOLDS': 200}; R6 FAILS  12/200 {'FAILS (ABOVE)': 3, 'FAILS (BELOW)': 9, 'HOLDS': 188}
+    sigma 0.025: R5 FAILS   1/200 {'FAILS (ABOVE)': 1, 'HOLDS': 199}; R6 FAILS   3/200 {'FAILS (ABOVE)': 1, 'FAILS (BELOW)': 2, 'HOLDS': 197}
+    sigma 0.035: R5 FAILS   1/200 {'FAILS (ABOVE)': 1, 'HOLDS': 199}; R6 FAILS  11/200 {'FAILS (ABOVE)': 5, 'FAILS (BELOW)': 6, 'HOLDS': 189}
+  world plain: truth a2_7/a1_7 1.0108, b2_7/b1_7 1.0151
+    sigma 0.015: R5 FAILS   7/200 {'FAILS (ABOVE)': 7, 'HOLDS': 193}; R6 FAILS   5/200 {'FAILS (ABOVE)': 1, 'FAILS (BELOW)': 4, 'HOLDS': 195}
+    sigma 0.025: R5 FAILS  10/200 {'FAILS (ABOVE)': 10, 'HOLDS': 190}; R6 FAILS   7/200 {'FAILS (ABOVE)': 3, 'FAILS (BELOW)': 4, 'HOLDS': 193}
+    sigma 0.035: R5 FAILS   4/200 {'FAILS (ABOVE)': 4, 'HOLDS': 196}; R6 FAILS  10/200 {'FAILS (ABOVE)': 6, 'FAILS (BELOW)': 4, 'HOLDS': 190}
+
+E130-R5: FAILS in 49 of 4200 sessions (1.2%); by world and sigma 0.0-5.0%
+E130-R6: FAILS in 177 of 4200 sessions (4.2%); by world and sigma 1.5-8.5%
