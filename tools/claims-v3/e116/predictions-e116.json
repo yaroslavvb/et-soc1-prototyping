@@ -1,0 +1,456 @@
+{
+ "experiment": "E116",
+ "registered": "Sun 1 Nov 2026, before the claim (the commit time is the registration time)",
+ "registration": "tools/claims-v3/e116/E116.md",
+ "card": {
+  "name": "aifoundry3",
+  "clock_mhz": 600,
+  "config_expected": {
+   "tdp_w": 0,
+   "temp_threshold_c": 65
+  },
+  "note": "E78's own aifoundry3 gate in reduce_e78.py; reduce_e88.py's card-1 substitution never fires here"
+ },
+ "sources": {
+  "docs/reports/data/2026-10-31-e88-result-path/scored.json": "6296cfe99830ac18880677f3766805b51d783906ec641b6e08d7e2854d406b07",
+  "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/scored.json": "498d5c70f01778248c7800d7d1d7e07b033db35f29b897d40f5a21787bef0b53",
+  "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json": "b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5",
+  "tools/claims-v3/kinds/e104/e104.json": "72b42f2a2f382cbf6b1bd622af23fc0f4e71254d4d7505053a6d4bf6b8dccd3b",
+  "tools/claims-v3/rpath/e88.json": "59a7b0efbc2cc0d936dbf725c386eda2fdb88f64d9523925a21f9f0ee9e3ca42"
+ },
+ "reference_e88_card1": {
+  "splits": {
+   "fp32": {
+    "total": {
+     "mean": 21.578647096554995,
+     "ci95": 0.15201167435299698
+    },
+    "D": {
+     "i_clocked_lane": {
+      "mean": 7.922293106296275,
+      "ci95": 0.1806111534510089
+     },
+     "iii_operand_multiplier": {
+      "mean": 8.614170818447889,
+      "ci95": 0.17537806823135138
+     },
+     "ii_result_path": {
+      "mean": 5.042183171810832,
+      "ci95": 0.1927859642139543
+     }
+    },
+    "shares": {
+     "i_clocked_lane": {
+      "mean": 0.3671430422573351,
+      "ci95": 0.008577231565612865
+     },
+     "iii_operand_multiplier": {
+      "mean": 0.3992132033085624,
+      "ci95": 0.008976688551135594
+     },
+     "ii_result_path": {
+      "mean": 0.23364375443410249,
+      "ci95": 0.007562794467309048
+     }
+    }
+   },
+   "fp16": {
+    "total": {
+     "mean": 20.434006193257154,
+     "ci95": 0.17533482629409902
+    },
+    "D": {
+     "i_clocked_lane": {
+      "mean": 7.955236408817808,
+      "ci95": 0.14296297875981986
+     },
+     "iii_operand_multiplier": {
+      "mean": 6.190231990712664,
+      "ci95": 0.16774588835963286
+     },
+     "ii_result_path": {
+      "mean": 6.288537793726684,
+      "ci95": 0.20790658892963113
+     }
+    },
+    "shares": {
+     "i_clocked_lane": {
+      "mean": 0.3893201765981011,
+      "ci95": 0.006926078417807991
+     },
+     "iii_operand_multiplier": {
+      "mean": 0.30295871342189795,
+      "ci95": 0.009190157878156403
+     },
+     "ii_result_path": {
+      "mean": 0.307721109980001,
+      "ci95": 0.007937169704453547
+     }
+    }
+   },
+   "int8": {
+    "total": {
+     "mean": 6.664513496158699,
+     "ci95": 0.1449953951391715
+    },
+    "D": {
+     "i_clocked_lane": {
+      "mean": 1.7103569629256925,
+      "ci95": 0.13454171004164725
+     },
+     "iii_operand_multiplier": {
+      "mean": 3.144832556329297,
+      "ci95": 0.21191006757274963
+     },
+     "ii_result_path": {
+      "mean": 1.8093239769037097,
+      "ci95": 0.2630531794926092
+     }
+    },
+    "shares": {
+     "i_clocked_lane": {
+      "mean": 0.2567085266851265,
+      "ci95": 0.02107892093603055
+     },
+     "iii_operand_multiplier": {
+      "mean": 0.4720487529449125,
+      "ci95": 0.03491034625762881
+     },
+     "ii_result_path": {
+      "mean": 0.271242720369961,
+      "ci95": 0.03576205224093652
+     }
+    }
+   }
+  },
+  "contrasts": {
+   "F32": {
+    "a": "fp32.c_abs",
+    "b": "fp32.zeros",
+    "D": 7.922293106296275,
+    "ci95": 0.1806111534510089
+   },
+   "W32": {
+    "a": "fp32.ones",
+    "b": "fp32.c_abs",
+    "D": 0.09957188072818042,
+    "ci95": 0.31109891449137006
+   },
+   "M32": {
+    "a": "fp32.r_abs",
+    "b": "fp32.c_abs",
+    "D": 8.614170818447889,
+    "ci95": 0.17537806823135138
+   },
+   "R32": {
+    "a": "fp32.r_walk",
+    "b": "fp32.r_abs",
+    "D": 5.042183171810832,
+    "ci95": 0.1927859642139543
+   },
+   "R32bus": {
+    "a": "fp32.r_het",
+    "b": "fp32.r_abs",
+    "D": 3.8011463512875947,
+    "ci95": 0.16769042041406557
+   },
+   "R32sum": {
+    "a": "fp32.r_walk",
+    "b": "fp32.r_het",
+    "D": 1.2410368205232374,
+    "ci95": 0.10551382145298455
+   },
+   "M32s": {
+    "a": "fp32.s_abs",
+    "b": "fp32.c_abs",
+    "D": 2.52400331086139,
+    "ci95": 0.1850943800339468
+   },
+   "R32s": {
+    "a": "fp32.s_walk",
+    "b": "fp32.s_abs",
+    "D": 2.2591501463550485,
+    "ci95": 0.15806138099913863
+   },
+   "X32": {
+    "a": "fp32.randn",
+    "b": "fp32.r_walk",
+    "D": 2.2405930057770256,
+    "ci95": 0.17288063656643424
+   },
+   "F16": {
+    "a": "fp16.c_cancel",
+    "b": "fp16.zeros",
+    "D": 7.955236408817808,
+    "ci95": 0.14296297875981986
+   },
+   "W16": {
+    "a": "fp16.ones",
+    "b": "fp16.c_cancel",
+    "D": 0.014010974364943252,
+    "ci95": 0.12705598113021996
+   },
+   "M16": {
+    "a": "fp16.r_cancel",
+    "b": "fp16.c_cancel",
+    "D": 6.190231990712664,
+    "ci95": 0.16774588835963286
+   },
+   "R16": {
+    "a": "fp16.r_walk",
+    "b": "fp16.r_cancel",
+    "D": 6.288537793726684,
+    "ci95": 0.20790658892963113
+   },
+   "A16": {
+    "a": "fp16.r_abs",
+    "b": "fp16.r_cancel",
+    "D": 0.3877388205227916,
+    "ci95": 0.11085991501272309
+   },
+   "R16abs": {
+    "a": "fp16.r_walk",
+    "b": "fp16.r_abs",
+    "D": 5.900798973203893,
+    "ci95": 0.14367355889465827
+   },
+   "F8": {
+    "a": "int8.c_cancel",
+    "b": "int8.zeros",
+    "D": 1.7103569629256925,
+    "ci95": 0.13454171004164725
+   },
+   "W8": {
+    "a": "int8.ones",
+    "b": "int8.c_cancel",
+    "D": -0.23076347630724428,
+    "ci95": 0.24878566298183688
+   },
+   "M8": {
+    "a": "int8.r_cancel",
+    "b": "int8.c_cancel",
+    "D": 3.144832556329297,
+    "ci95": 0.21191006757274963
+   },
+   "R8": {
+    "a": "int8.r_walk",
+    "b": "int8.r_cancel",
+    "D": 1.8093239769037097,
+    "ci95": 0.2630531794926092
+   }
+  },
+  "verdicts": {
+   "H1-fp32": "PASS",
+   "H1-fp16": "PASS",
+   "H1-int8": "PASS",
+   "H2-fp32": "PASS",
+   "H2-fp16": "PASS",
+   "H2-int8": "PASS",
+   "H3-fp32": "PASS",
+   "H3-fp16": "PASS",
+   "H3-int8": "PASS",
+   "H4-signs-mult": "FAIL",
+   "H4-signs-result": "PASS",
+   "H5-bus-share": "PASS",
+   "H6-two-freezes": "PASS",
+   "P-F32": "PASS",
+   "P-W32": "PASS",
+   "P-M32": "PASS",
+   "P-R32": "PASS",
+   "P-R32bus": "PASS",
+   "P-R32sum": "PASS",
+   "P-M32s": "FAIL",
+   "P-R32s": "FAIL",
+   "P-X32": "PASS",
+   "P-F16": "PASS",
+   "P-W16": "PASS",
+   "P-M16": "PASS",
+   "P-R16": "PASS",
+   "P-A16": "PASS",
+   "P-R16abs": "PASS",
+   "P-F8": "PASS",
+   "P-W8": "PASS",
+   "P-M8": "PASS",
+   "P-R8": "PASS"
+  }
+ },
+ "card_scale_e82": {
+  "value": {
+   "fp32": 1.03,
+   "fp16": 1.0332,
+   "int8": 1.0271
+  },
+  "what": "D(aifoundry3) / D(aifoundry1 card 1), median over kinds >= 5 W, per format"
+ },
+ "carried_W": {
+  "fp32": {
+   "i_clocked_lane": 8.16,
+   "iii_operand_multiplier": 8.8726,
+   "ii_result_path": 5.1934
+  },
+  "fp16": {
+   "i_clocked_lane": 8.2194,
+   "iii_operand_multiplier": 6.3957,
+   "ii_result_path": 6.4973
+  },
+  "int8": {
+   "i_clocked_lane": 1.7567,
+   "iii_operand_multiplier": 3.2301,
+   "ii_result_path": 1.8584
+  }
+ },
+ "tie_e78_aifoundry3": {
+  "fp32.randn": {
+   "D": 24.7249,
+   "ci95": 0.0823
+  },
+  "fp16.randn": {
+   "D": 22.1624,
+   "ci95": 0.0545
+  },
+  "int8.full": {
+   "D": 7.0565,
+   "ci95": 0.0595
+  },
+  "fp32.ones": {
+   "D": 8.2566,
+   "ci95": 0.2209
+  },
+  "fp16.ones": {
+   "D": 8.4483,
+   "ci95": 0.0819
+  },
+  "int8.ones": {
+   "D": 1.5612,
+   "ci95": 0.0694
+  },
+  "anchor_pi": {
+   "D": 8.3603,
+   "ci95": 0.0716
+  }
+ },
+ "rules": {
+  "E116-R0": {
+   "what": "every read equals accum.c's 256 words on all 1,024 minions (22 tiles, n = 199,874)",
+   "PASS": "22 of 22 reads equal",
+   "FAIL": "any read differs on any word of any minion",
+   "not scored": "fewer than 22 reads ran: the reads that ran are reported"
+  },
+  "E116-S": {
+   "what": "per format, the three parts' shares of the r_walk total, per pass, against E88's (card 1)",
+   "band": {
+    "fp32": 0.04,
+    "fp16": 0.04,
+    "int8": 0.08
+   },
+   "PASS": "all three |share - E88's share| <= band",
+   "FAIL": "any part's |difference| exceeds the band by more than its 95% half-width",
+   "INCONCLUSIVE": "otherwise"
+  },
+  "E116-W": {
+   "what": "per format, the three parts' watts against E88's x E82's card scale",
+   "band": "max(0.6 W, 12% of the carried value)",
+   "PASS": "all three inside",
+   "FAIL": "any part's 95% interval lies wholly outside its band",
+   "INCONCLUSIVE": "otherwise"
+  },
+  "E116-H": {
+   "what": "E88's 13 mechanism rules (H1-H6), scored by score_e88.py unchanged on E116's reduction",
+   "PASS": "13 of 13 give E88's card-1 verdict",
+   "FAIL": "2 or more differ",
+   "INCONCLUSIVE": "one differs"
+  },
+  "E116-P": {
+   "what": "E88's 19 frozen model bands, scored by score_e88.py unchanged (card 1's bands, no scale)",
+   "reported": "the tally and each verdict against E88's; no pass/fail of its own"
+  },
+  "E116-T": {
+   "what": "the session tie: fp32.randn, fp16.randn, int8.full against E78 on aifoundry3 (31 Oct)",
+   "PASS": "each within max(0.4 W, 3%)",
+   "FAIL": "any 95% interval wholly outside that band",
+   "INCONCLUSIVE": "otherwise"
+  },
+  "min_passes": 4,
+  "fewer_passes": "fewer than 4 kept passes: E116-S, -W, -H, -P and -T are not scored (reported as exploratory)"
+ },
+ "expected": {
+  "E116-R0": "PASS",
+  "E116-S": {
+   "fp32": "PASS",
+   "fp16": "PASS",
+   "int8": "PASS"
+  },
+  "E116-W": {
+   "fp32": "PASS",
+   "fp16": "PASS",
+   "int8": "PASS"
+  },
+  "E116-H": "PASS (13 of 13; H4-signs-mult FAILS again, as on card 1)",
+  "E116-P": "18 of 19 PASS: P-M32s FAILS as on card 1; P-R32s, which missed its band by 0.003 W on card 1, passes once the 3% scale lifts it",
+  "E116-T": "PASS"
+ },
+ "primary": {
+  "reduction": "reduce_e88.py unchanged (reduce_e78.py unchanged inside it), dips removed, leakage slope auto",
+  "arms": [
+   "dips kept",
+   "leak 0.545",
+   "leak 0.3803",
+   "leak 0"
+  ],
+  "min_passes": 4
+ },
+ "budget": {
+  "card_minutes_max": 40,
+  "queue_budget_min": 34,
+  "passes_planned": "11610.. (up to 6; the queue's budget rule stops it)",
+  "deadline_local": "18:55 PST"
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+   "tools/claims-v3/kinds/patch_host_e104.py": "d9db479776d05096ea5e0b189497abf4751553c0282e81649f1affa460c7e775",
+   "rtl-sim/fma_toggle_v2/accum.c": "dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf",
+   "tools/claims-v3/rpath/E88.md": "18a64412f0497c0cf77a70911b2ff8c880e159ca7bc24faaeec6f8a0798b0d90",
+   "tools/claims-v3/rpath/block_e88.sh": "9af800c075902d58357c912c6e30aad717e5764d553da1ccc60420d08362da8a",
+   "tools/claims-v3/rpath/collect_e88.sh": "f648698c5c31ec61454d141d6b4bf4e6c4dbc99f812de580694ae2495e88b675",
+   "tools/claims-v3/rpath/e88.json": "59a7b0efbc2cc0d936dbf725c386eda2fdb88f64d9523925a21f9f0ee9e3ca42",
+   "tools/claims-v3/rpath/e88_common.py": "550eee7eee828299abbd9c2eb7b7a250532c410875faa331160b02c5bc32f853",
+   "tools/claims-v3/rpath/make_e88.py": "3a15762fd92c9a8fef83c4f2c187f0433985ce8ee456dd90dacd8af0265dc151",
+   "tools/claims-v3/rpath/make_predictions_e88.py": "724a8b23e69c7a43addf060d7d445afc4a9edb8d9a73b277aa8bb77b2a26f1b4",
+   "tools/claims-v3/rpath/predictions-e88.json": "82dd71383ce97828712c842f7611a7fd635caefe30658de91ca99213dc08fc3f",
+   "tools/claims-v3/rpath/queue_e88.sh": "401a0324df2f3ab09818f48dae6b06c5d337e5b7e8a0178426fe35589de1682e",
+   "tools/claims-v3/rpath/reduce_e88.py": "72fccf9cedc4d324e2b5074cd1e6459349dc97cd6a23c3f213f4267339e5bf51",
+   "tools/claims-v3/rpath/run_e88.py": "3333c92697081404d49f8cbe47360db0ec80735bd2a76fe328b4b5f8afce1ac2",
+   "tools/claims-v3/rpath/run_e88_a1.sh": "dade5d01ebda82a975a1ba840f46ebf520baa00330cfed0a051e29f559031d0d",
+   "tools/claims-v3/rpath/score_e88.py": "64ac49760bcdb4dfa2b47b666a9fbf67a530d942c51bebf8154d99837218e55c",
+   "tools/claims-v3/rpath/selftest_e88.py": "e5d7075a57ce5230700ed5d277a1b7ad2c1766033c7dc2a2bc6556268952ef90",
+   "tools/claims-v3/rpath/selftest_e88.txt": "d201afc4d3f778cf3af33ecd1cf791d266ec224ed43060177156dab8e9890d85",
+   "tools/claims-v3/rpath/tiles/fp32/c_abs.bin": "3321477ba0c76532b4efd8d9ffc83a7b29928848cd04d0450a6c69f7c3d89672",
+   "tools/claims-v3/rpath/tiles/fp32/ones.bin": "fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1",
+   "tools/claims-v3/rpath/tiles/fp32/r_abs.bin": "c35268792c5200908cbeec7257058e28fc544943dfd7593600bf392e884b8cd7",
+   "tools/claims-v3/rpath/tiles/fp32/r_het.bin": "96209b3be5dd4498dd2275165da95d5af1ea8d962a797c84809fdc6af399adda",
+   "tools/claims-v3/rpath/tiles/fp32/r_walk.bin": "4b48dbafbe6fd0a9d5037f0fc33cb4279d133045690a58c48151c40b9629bd1e",
+   "tools/claims-v3/rpath/tiles/fp32/randn.bin": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa",
+   "tools/claims-v3/rpath/tiles/fp32/s_abs.bin": "79f5ac27db1f7f109e1ea6a3ba607f5a8024743d404aa2b4cb495c3320b57d4e",
+   "tools/claims-v3/rpath/tiles/fp32/s_walk.bin": "a4aa98612a755d9fd770fad5bf361ff5b54cc77925b98f77508ae89a470d3315",
+   "tools/claims-v3/rpath/tiles/fp32/zeros.bin": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "tools/claims-v3/rpath/tiles/int8/c_cancel.bin": "005d79c5496e5c5e4710298f0b7fc241be8d3aa0a5d5ecd22d431819e3ab58eb",
+   "tools/claims-v3/rpath/tiles/int8/full.bin": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9",
+   "tools/claims-v3/rpath/tiles/int8/ones.bin": "7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2",
+   "tools/claims-v3/rpath/tiles/int8/r_cancel.bin": "8fa23dfae80a61bf47b0df4975d65d900983b2edc3c04230de3909de5109dc82",
+   "tools/claims-v3/rpath/tiles/int8/r_walk.bin": "dc51b0492321075f0246526b8b3b1f682c0db2c023ebb1c6d40a6de0440fdb0d",
+   "tools/claims-v3/rpath/tiles/int8/zeros.bin": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "tools/claims-v3/rpath/tiles/fp16/c_cancel.bin": "8cfdabfe79423bcbd047390f4bbc2cb7544fe887f5120c979fc7f4ccebe1e23c",
+   "tools/claims-v3/rpath/tiles/fp16/ones.bin": "c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8",
+   "tools/claims-v3/rpath/tiles/fp16/r_abs.bin": "96919111c47158496e99cf0bb67a51ec8623fa0e08f56cde0b349401f0dede41",
+   "tools/claims-v3/rpath/tiles/fp16/r_cancel.bin": "495e8635d4918116dd653adb5c4cd9017d2e9757a65d8309c781c87c7be42258",
+   "tools/claims-v3/rpath/tiles/fp16/r_walk.bin": "d4979d1f3b7324be409791fda39956c3d78e210b55af476c97ddf35022303fdd",
+   "tools/claims-v3/rpath/tiles/fp16/randn.bin": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974",
+   "tools/claims-v3/rpath/tiles/fp16/zeros.bin": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad"
+  }
+ }
+}
