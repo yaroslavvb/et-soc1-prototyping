@@ -260,10 +260,11 @@ PVT memory-shire monitor (`thermal_pwr_mgmt.c:1169`, `:1172`: `asic_voltage.ddr 
    bits half the time, a memory shire's about 0.2 W (half of it on the network), and every core's own stream together about 0.2 W, beyond
    what the ones and the flips inside each line cost. In all, with the finer paths and those wider than 128 lines, that comes to about
    1.05 W [0.97, 1.13] at full read bandwidth, 0.96 W of it on the shared paths once each core's own stream is removed. The memory
-   interface's own encoding (read DBI) adds about 0.17 W for 392 more flips a line on its encoded side; that figure is on the registered
-   leakage footing, and at the highest leakage slope tried its interval reaches below zero. *(Corrected after verification,
+   interface's own encoding (read DBI) adds about 0.17 W for 392 more flips a line on its encoded side. That figure and the cores' own
+   streams' are on the registered leakage footing: at the highest leakage slope tried both intervals reach below zero, while the 1.05 W
+   stays above zero at every slope (§ The leakage footing). *(Corrected after verification,
    [C4 and C5](#corrections-after-verification-mon-2-nov-2026): this first said "a core's own stream", "together … about 1 W", and gave
-   the encoding's 0.17 W without its footing.)*
+   the encoding's 0.17 W and the streams' 0.2 W without their footing.)*
 
 ## Corrections after verification (Mon 2 Nov 2026)
 
@@ -281,7 +282,7 @@ re-run. **No registered rule, prediction, number or verdict changes**: R1, R2, R
 | C2 | **The DDR die rail's command.** Row 9 of § Device commands sent, and of the registration's § 5, said the rail is read from `DM_CMD_GET_MODULE_VOLTAGE` | Rows 5 and 9 are marked: the rail (`die_mv.ddr`) is `DM_CMD_GET_ASIC_VOLTAGE`'s PVT memory-shire reading (`thermal_pwr_mgmt.c:1172` at `836a4ab`), and `GET_MODULE_VOLTAGE`'s DDR field is the PMIC's set-point, `reg_mv.ddr`, 800 mV throughout. Both are READs, so no class changes. The same note sits under the registration's § 5 |
 | C3 | **No board-power stop, and the power figure.** The only stops were `runitems.py`'s die reading ≥ 78 °C and its `temp_c.pmic` ≥ 88 °C, which is the die mean again. The registration's "32–36 W on the board" is the DRAM loads', not the session's | A row in § What ran gives the session's peaks (board 53.60 W, in the preheat bursts; the die mean 61 °C) and the margins: 21.4 W under the 75 W PMIC alarm level, which has acted only on aifoundry1's card 0 and is unverified on aifoundry3, and 17 °C under the stop. Later aifoundry3 lanes on this harness register a board-power stop with margin below that level. The registration gains a note under its § 4 |
 | C4 | **What `R_all` is made of, and "a hart's stream".** What it changes 2 said a channel's, a memory shire's and the wide paths' costs, "with a hart's own stream", "sum to `R_all`". `R_all` is the nine rungs' sum without the hart stream, and the four named terms coming to 0.96 W is a coincidence; what a within-line model misses for these lines is `D_all`, +1.049 W [0.968, 1.130]. "A hart's" and "a core's own stream" read as one, but `H` is all 1,024 harts' streams together | What it changes 2 and 4, the Results paragraph, the Results table's caption and `H`'s row say so; the leakage table gains `R_all` and `D_all` |
-| C5 | **The encoded part's footing.** The Results paragraph and What it changes 1 and 4 gave `E448`'s +0.166 W [0.121, 0.210] as settled. At 0.3803 W/°C it is +0.164 [−0.053, +0.381], across zero; `E192` falls to about zero at both higher slopes; `E56` crosses zero in every arm. So item 10's "not separated on the board from the leakage footing" still holds | Each place names the footing, reading 5 gives every arm, and the leakage table gains `E192`. R4 is UNRESOLVED in every arm, as before |
+| C5 | **The encoded part's footing.** The Results paragraph and What it changes 1 and 4 gave `E448`'s +0.166 W [0.121, 0.210] as settled. At 0.3803 W/°C it is +0.164 [−0.053, +0.381], across zero; `E192` falls to about zero at both higher slopes; `E56` crosses zero in every arm. So item 10's "not separated on the board from the leakage footing" still holds | Each place names the footing, reading 5 gives every arm, and the leakage table gains `E192`. R4 is UNRESOLVED in every arm, as before. What it changes 4 also names the footing of the cores' streams (`H`, +0.146 [−0.051, +0.342] at 0.3803 W/°C, already in the leakage table) |
 
 Files added by the corrections: [`corrections_e132.py`](corrections_e132.py) (post hoc, standard library, committed files only) and its output
 [`corrections_e132.txt`](corrections_e132.txt); [`logs/ettelem-binary-check.txt`](logs/ettelem-binary-check.txt) (the verifier's box read).
