@@ -1,0 +1,10 @@
+Driver event counters (sysfs err_stats/ce_count), read-only host reads, 1 Nov 2026
+aifoundry2 0000:02:00.0 at 2026-11-01 19:14:57 PST (host up 536514 s): {'DramCeEvent': 0, 'MinionCeEvent': 0, 'PcieCeEvent': 0, 'PmicCeEvent': 0, 'SpCeEvent': 4234, 'SpExceptCeEvent': 0, 'SramCeEvent': 0, 'ThermOvershootCeEvent': 0, 'ThermThrottleCeEvent': 0, 'SpTraceBufferFullCeEvent': 0}
+aifoundry1 0000:01:00.0 (card 0) at 2026-11-01 19:15:19 PST: {'DramCeEvent': 0, 'MinionCeEvent': 0, 'PcieCeEvent': 0, 'PmicCeEvent': 177, 'SpCeEvent': 378, 'SpExceptCeEvent': 0, 'SramCeEvent': 0, 'ThermOvershootCeEvent': 0, 'ThermThrottleCeEvent': 146, 'SpTraceBufferFullCeEvent': 0}
+aifoundry1 0000:02:00.0 (card 1) at 2026-11-01 19:15:19 PST: {'DramCeEvent': 0, 'MinionCeEvent': 0, 'PcieCeEvent': 0, 'PmicCeEvent': 0, 'SpCeEvent': 0, 'SpExceptCeEvent': 0, 'SramCeEvent': 0, 'ThermOvershootCeEvent': 0, 'ThermThrottleCeEvent': 0, 'SpTraceBufferFullCeEvent': 0}
+Q132(g)'s snapshot at 00:13:31 PDT 1 Nov (q132-governor-desk/host/err-aifoundry*.txt): aifoundry2 PmicCeEvent 0, SpCeEvent 1692, ThermThrottleCeEvent 0; card 0 PmicCeEvent 177, SpCeEvent 252, ThermThrottleCeEvent 146
+SP Runtime Error events against committed residency reads of invalid states 4-6 (two events per invalid-state read, E77 F1):
+  card 0: 189 invalid-state reads x 2 = 378 vs SpCeEvent 378; before 00:13:31 PDT 126 x 2 = 252 vs 252
+  aifoundry2: 2114 invalid-state reads x 2 = 4228 vs SpCeEvent 4234; before 00:13:31 PDT 843 x 2 = 1686 vs 1692
+  aifoundry2's kernel log (it has wrapped; oldest line Sun 01 Nov 02:35 PST) holds 1557 ET events, kinds {'0000:02:00.0 | SP Runtime Error': 1557}, none a PMIC or throttling event; the last syndrome count is 4234 (= SpCeEvent)
+  aifoundry1's kernel log (unwrapped since its boot) holds 701 ET events, kinds {'0000:01:00.0 | Power Management IC Errors': 177, '0000:01:00.0 | SP Runtime Error': 378, '0000:01:00.0 | Thermal Throttling Error': 146}
