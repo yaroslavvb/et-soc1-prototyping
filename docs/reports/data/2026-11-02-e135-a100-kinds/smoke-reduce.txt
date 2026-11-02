@@ -1,0 +1,64 @@
+# E135 reduction of e135-20261102-smoke1: units S
+
+unit S: NVIDIA A100-SXM4-80GB, driver 610.57.04, VBIOS 92.00.9E.00.03, board caeba8fa1e90, limit default/enforced 400000/400000 mW, constraints [100000, 400000], max SM/MEM 1410/1593 MHz, app SM 1155, slowdown 89 C, gpu_max 85 C; torch 2.5.1+cu124, cuBLAS 12.4.5.8
+  idle0: 150 samples, 72.0 W, SM 1155 MHz, die 42->42 C, target 47.0 C
+
+## Cells
+
+| unit | cap | n | format | kind | pass | start C | burst T/s | burst MHz | burst W | sus T/s | sus MHz | sus W | limit W | SW cap share | thermal max | die C end | HBM C max | pJ/FLOP sus |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| S | default | 2048 | bf16 | randn | 1 | 41 | 153.9 | 1384 | 340.7 | 155.5 | 1410 | 347.5 | 400 | 0.00 | 0.00 | 62 | 59 | 2.235 |
+| S | default | 2048 | int8 | rand_full | 1 | 44 | 290.1 | 1326 | 360.2 | 299.8 | 1386 | 408.5 | 400 | 1.00 | 0.00 | 63 | 60 | 1.362 |
+| S | default | 2048 | tf32 | randn | 1 | 44 | 90.1 | 1245 | 324.9 | 93.0 | 1302 | 402.0 | 400 | 1.00 | 0.00 | 63 | 61 | 4.321 |
+
+## Gaps: zeros over random (randn; int8 rand_full), the kernel's rate and the sampled clock
+
+| unit | cap | n | format | pass | window | rate | clock | SW cap zeros / random | W zeros / random |
+|---|---|---|---|---|---|---|---|---|---|
+
+## Replicates (every unit and pass)
+
+
+## Horace's protocol (mm_weird.py's do_bench, median of 10 shuffled trials)
+
+S default smoke-gist6-2048: zeros/randn 1.0139; rand 123.3 (1155 MHz, 73 W) sparse_neg 131.8 (1155 MHz, 184 W) twos 149.7 (1410 MHz, 217 W) randn 148.9 (1410 MHz, 283 W) zeros 150.9 (1410 MHz, 234 W) onebit 149.6 (1410 MHz, 220 W)
+
+## The lower cap
+
+
+## Rules
+
+R1: N/A
+   {"detail": []}
+R2: N/A
+   {"detail": []}
+R3: N/A
+   {"detail": []}
+R4: N/A
+   {"detail": []}
+R5: N/A
+   {"why": "the lower-cap arm did not run", "detail": null}
+R6: N/A
+   {"detail": [], "at_330": {"verdict": "N/A", "detail": []}}
+R7: N/A
+   {"detail": []}
+R8: HOLDS
+   {"n": 3, "failing": [], "temp_max": 63}
+R9: N/A
+   {"why": "0 of 9 kinds"}
+R10: N/A
+   {"detail": []}
+
+## Checks
+
+ok   S: GPU name: NVIDIA A100-SXM4-80GB
+ok   S: steps with an error: []
+ok   S: steps skipped on the budget: 0
+ok   S: NVML calls not supported: {}
+ok   S: NVML call errors: {}
+ok   ('S', 'default', 2048, 'bf16', 'randn', 1): sustained samples / expected: 40/40
+ok   ('S', 'default', 2048, 'bf16', 'randn', 1): start 41 C, target 47.0: True
+ok   ('S', 'default', 2048, 'int8', 'rand_full', 1): sustained samples / expected: 10/10
+ok   ('S', 'default', 2048, 'int8', 'rand_full', 1): start 44 C, target 47.0: True
+ok   ('S', 'default', 2048, 'tf32', 'randn', 1): sustained samples / expected: 10/10
+ok   ('S', 'default', 2048, 'tf32', 'randn', 1): start 44 C, target 47.0: True

@@ -1,0 +1,323 @@
+# E135 reduction of e135-20261102-r1: units A, B
+
+unit A: NVIDIA A100-SXM4-40GB, driver 610.57.04, VBIOS 92.00.45.00.03, board 056fd0da90a7, limit default/enforced 400000/400000 mW, constraints [100000, 400000], max SM/MEM 1410/1215 MHz, app SM 1095, slowdown 89 C, gpu_max 85 C; torch 2.5.1+cu124, cuBLAS 12.4.5.8
+  idle0: 600 samples, 58.9 W, SM 1095 MHz, die 30->30 C, target 35.0 C
+unit B: NVIDIA A100-SXM4-40GB, driver 610.57.04, VBIOS 92.00.45.00.03, board 4877202b83cc, limit default/enforced 400000/400000 mW, constraints [100000, 400000], max SM/MEM 1410/1215 MHz, app SM 1095, slowdown 89 C, gpu_max 85 C; torch 2.5.1+cu124, cuBLAS 12.4.5.8
+  idle0: 600 samples, 55.9 W, SM 1095 MHz, die 26->28 C, target 32.0 C
+
+## Cells
+
+| unit | cap | n | format | kind | pass | start C | burst T/s | burst MHz | burst W | sus T/s | sus MHz | sus W | limit W | SW cap share | thermal max | die C end | HBM C max | pJ/FLOP sus |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| A | default | 8192 | bf16 | checker | 1 | 33 | 269.9 | 1297 | 393.2 | 270.2 | 1298 | 398.7 | 400 | 1.00 | 0.00 | 64 | 56 | 1.476 |
+| A | default | 8192 | bf16 | onebit | 1 | 33 | 287.1 | 1369 | 296.6 | 293.4 | 1410 | 320.3 | 400 | 0.00 | 0.00 | 56 | 51 | 1.092 |
+| A | default | 8192 | bf16 | pi | 1 | 35 | 290.5 | 1400 | 285.7 | 292.6 | 1410 | 301.4 | 400 | 0.00 | 0.00 | 57 | 52 | 1.030 |
+| A | default | 8192 | bf16 | rand | 1 | 35 | 272.8 | 1308 | 376.5 | 275.1 | 1321 | 398.6 | 400 | 1.00 | 0.00 | 66 | 59 | 1.449 |
+| A | default | 8192 | bf16 | randn | 1 | 34 | 264.7 | 1273 | 391.9 | 263.8 | 1267 | 398.4 | 400 | 1.00 | 0.00 | 66 | 59 | 1.510 |
+| A | default | 8192 | bf16 | randn | 2 | 32 | 265.9 | 1282 | 398.9 | 264.5 | 1271 | 397.8 | 400 | 1.00 | 0.00 | 66 | 59 | 1.504 |
+| A | default | 8192 | bf16 | randn | 3 | 34 | 263.9 | 1264 | 376.3 | 266.6 | 1281 | 401.6 | 400 | 1.00 | 0.00 | 59 | 51 | 1.507 |
+| A | default | 8192 | bf16 | sparse75 | 1 | 35 | 284.7 | 1366 | 385.6 | 285.5 | 1371 | 397.9 | 400 | 1.00 | 0.00 | 63 | 56 | 1.394 |
+| A | default | 8192 | bf16 | ternary | 1 | 35 | 288.8 | 1382 | 380.4 | 288.4 | 1385 | 396.3 | 400 | 1.00 | 0.00 | 65 | 57 | 1.374 |
+| A | default | 8192 | bf16 | twos | 1 | 35 | 289.8 | 1378 | 270.9 | 293.6 | 1410 | 286.5 | 400 | 0.00 | 0.00 | 57 | 52 | 0.976 |
+| A | default | 8192 | bf16 | zeros | 1 | 33 | 290.6 | 1389 | 242.2 | 293.5 | 1410 | 260.9 | 400 | 0.00 | 0.00 | 52 | 50 | 0.889 |
+| A | default | 8192 | bf16 | zeros | 2 | 35 | 288.9 | 1378 | 244.7 | 293.3 | 1410 | 258.6 | 400 | 0.00 | 0.00 | 51 | 50 | 0.882 |
+| A | default | 8192 | fp16 | rand | 1 | 33 | 268.3 | 1284 | 387.0 | 268.2 | 1288 | 398.6 | 400 | 1.00 | 0.00 | 63 | 56 | 1.486 |
+| A | default | 8192 | fp16 | randn | 1 | 33 | 260.4 | 1248 | 384.1 | 258.1 | 1240 | 399.3 | 400 | 1.00 | 0.00 | 64 | 57 | 1.547 |
+| A | default | 8192 | fp16 | twos | 1 | 35 | 289.3 | 1389 | 266.6 | 293.6 | 1410 | 283.0 | 400 | 0.00 | 0.00 | 53 | 50 | 0.964 |
+| A | default | 8192 | fp16 | zeros | 1 | 33 | 289.6 | 1389 | 246.2 | 293.5 | 1410 | 257.0 | 400 | 0.00 | 0.00 | 53 | 50 | 0.876 |
+| A | default | 8192 | int8 | rand_full | 1 | 33 | 407.4 | 1307 | 399.6 | 406.1 | 1305 | 398.2 | 400 | 1.00 | 0.00 | 63 | 56 | 0.981 |
+| A | default | 8192 | int8 | randn_q | 1 | 35 | 402.5 | 1294 | 381.7 | 405.6 | 1304 | 397.9 | 400 | 1.00 | 0.00 | 64 | 56 | 0.981 |
+| A | default | 8192 | int8 | twos | 1 | 35 | 433.4 | 1389 | 268.1 | 439.0 | 1410 | 285.4 | 400 | 0.00 | 0.00 | 56 | 52 | 0.650 |
+| A | default | 8192 | int8 | zeros | 1 | 35 | 431.4 | 1389 | 258.1 | 439.7 | 1410 | 270.8 | 400 | 0.00 | 0.00 | 51 | 49 | 0.616 |
+| A | default | 8192 | tf32 | rand | 1 | 35 | 133.8 | 1274 | 390.0 | 133.4 | 1272 | 398.8 | 400 | 1.00 | 0.00 | 63 | 57 | 2.989 |
+| A | default | 8192 | tf32 | randn | 1 | 35 | 130.1 | 1240 | 386.6 | 129.5 | 1235 | 399.3 | 400 | 1.00 | 0.00 | 63 | 57 | 3.082 |
+| A | default | 8192 | tf32 | twos | 1 | 35 | 145.7 | 1389 | 311.3 | 147.6 | 1410 | 334.6 | 400 | 0.00 | 0.00 | 60 | 53 | 2.267 |
+| A | default | 8192 | tf32 | zeros | 1 | 35 | 145.3 | 1389 | 292.1 | 147.5 | 1410 | 309.8 | 400 | 0.00 | 0.00 | 57 | 52 | 2.100 |
+| B | default | 8192 | bf16 | checker | 1 | 32 | 270.9 | 1299 | 383.4 | 270.9 | 1301 | 398.9 | 400 | 1.00 | 0.00 | 60 | 50 | 1.472 |
+| B | default | 8192 | bf16 | onebit | 1 | 31 | 288.5 | 1378 | 300.8 | 293.8 | 1410 | 316.4 | 400 | 0.00 | 0.00 | 57 | 50 | 1.077 |
+| B | default | 8192 | bf16 | pi | 1 | 31 | 290.1 | 1389 | 281.4 | 293.6 | 1410 | 294.0 | 400 | 0.00 | 0.00 | 56 | 49 | 1.002 |
+| B | default | 8192 | bf16 | rand | 1 | 32 | 273.2 | 1316 | 386.2 | 277.7 | 1333 | 398.9 | 400 | 1.00 | 0.00 | 60 | 51 | 1.436 |
+| B | default | 8192 | bf16 | randn | 1 | 32 | 263.9 | 1267 | 392.0 | 266.0 | 1277 | 397.1 | 400 | 1.00 | 0.00 | 60 | 51 | 1.493 |
+| B | default | 8192 | bf16 | randn | 2 | 34 | 263.0 | 1258 | 390.7 | 265.6 | 1277 | 396.3 | 400 | 1.00 | 0.00 | 60 | 51 | 1.492 |
+| B | default | 8192 | bf16 | sparse75 | 1 | 34 | 285.1 | 1360 | 380.1 | 287.3 | 1380 | 393.4 | 400 | 1.00 | 0.00 | 60 | 51 | 1.369 |
+| B | default | 8192 | bf16 | ternary | 1 | 29 | 286.1 | 1368 | 369.5 | 291.4 | 1401 | 398.0 | 400 | 0.58 | 0.00 | 62 | 52 | 1.366 |
+| B | default | 8192 | bf16 | twos | 1 | 31 | 287.7 | 1378 | 264.7 | 293.8 | 1410 | 277.4 | 400 | 0.00 | 0.00 | 53 | 47 | 0.944 |
+| B | default | 8192 | bf16 | zeros | 1 | 31 | 290.0 | 1378 | 242.6 | 293.6 | 1410 | 253.9 | 400 | 0.00 | 0.00 | 51 | 46 | 0.865 |
+| B | default | 8192 | bf16 | zeros | 2 | 30 | 290.5 | 1389 | 244.1 | 293.8 | 1410 | 255.4 | 400 | 0.00 | 0.00 | 55 | 49 | 0.869 |
+| B | default | 8192 | fp16 | rand | 1 | 34 | 268.9 | 1289 | 393.9 | 269.1 | 1294 | 398.2 | 400 | 1.00 | 0.00 | 61 | 52 | 1.479 |
+| B | default | 8192 | fp16 | randn | 1 | 36 | 257.1 | 1230 | 382.5 | 258.6 | 1242 | 398.4 | 400 | 1.00 | 0.00 | 59 | 52 | 1.541 |
+| B | default | 8192 | fp16 | twos | 1 | 32 | 289.2 | 1389 | 266.0 | 293.6 | 1410 | 277.5 | 400 | 0.00 | 0.00 | 56 | 49 | 0.945 |
+| B | default | 8192 | fp16 | zeros | 1 | 31 | 288.3 | 1378 | 233.1 | 293.1 | 1410 | 251.0 | 400 | 0.00 | 0.00 | 49 | 44 | 0.856 |
+| B | default | 8192 | int8 | rand_full | 1 | 38 | 402.3 | 1294 | 391.4 | 405.6 | 1302 | 398.7 | 400 | 1.00 | 0.00 | 65 | 56 | 0.983 |
+| B | default | 8192 | int8 | randn_q | 1 | 31 | 405.7 | 1306 | 390.5 | 408.9 | 1313 | 398.9 | 400 | 1.00 | 0.00 | 61 | 52 | 0.975 |
+| B | default | 8192 | int8 | twos | 1 | 32 | 431.0 | 1368 | 261.5 | 439.9 | 1410 | 281.2 | 400 | 0.00 | 0.00 | 58 | 51 | 0.639 |
+| B | default | 8192 | int8 | zeros | 1 | 32 | 435.1 | 1389 | 255.8 | 439.6 | 1410 | 272.9 | 400 | 0.00 | 0.00 | 64 | 56 | 0.621 |
+| B | default | 8192 | tf32 | rand | 1 | 41 | 133.2 | 1272 | 392.7 | 133.8 | 1275 | 397.8 | 400 | 1.00 | 0.00 | 59 | 56 | 2.974 |
+| B | default | 8192 | tf32 | randn | 1 | 32 | 129.8 | 1236 | 390.9 | 129.8 | 1238 | 397.5 | 400 | 1.00 | 0.00 | 59 | 52 | 3.064 |
+| B | default | 8192 | tf32 | twos | 1 | 31 | 145.3 | 1378 | 297.4 | 147.8 | 1410 | 319.2 | 400 | 0.00 | 0.00 | 56 | 48 | 2.160 |
+| B | default | 8192 | tf32 | zeros | 1 | 31 | 145.3 | 1378 | 286.8 | 147.7 | 1410 | 302.8 | 400 | 0.00 | 0.00 | 56 | 49 | 2.050 |
+| B | default | 4096 | bf16 | randn | 1 | 37 | 249.5 | 1300 | 385.1 | 249.4 | 1305 | 397.7 | 400 | 1.00 | 0.00 | 59 | 51 | 1.595 |
+| B | default | 4096 | bf16 | zeros | 1 | 32 | 265.7 | 1389 | 230.0 | 269.6 | 1410 | 244.8 | 400 | 0.00 | 0.00 | 53 | 48 | 0.908 |
+| B | default | 2048 | bf16 | randn | 1 | 28 | 155.1 | 1389 | 297.6 | 157.1 | 1410 | 310.0 | 400 | 0.00 | 0.00 | 55 | 42 | 1.973 |
+| B | default | 2048 | bf16 | zeros | 1 | 30 | 155.0 | 1389 | 163.5 | 157.4 | 1410 | 167.7 | 400 | 0.00 | 0.00 | 38 | 33 | 1.065 |
+
+## Gaps: zeros over random (randn; int8 rand_full), the kernel's rate and the sampled clock
+
+| unit | cap | n | format | pass | window | rate | clock | SW cap zeros / random | W zeros / random |
+|---|---|---|---|---|---|---|---|---|---|
+| A | default | 8192 | bf16 | 1 | early | 1.106 | 1.052 | 0.00 / 0.60 | 229.8 / 326.3 |
+| A | default | 8192 | bf16 | 1 | burst | 1.098 | 1.091 | 0.00 / 0.93 | 242.2 / 391.9 |
+| A | default | 8192 | bf16 | 1 | burst_b | 1.097 | 1.099 | 0.00 / 1.00 | 243.7 / 403.0 |
+| A | default | 8192 | bf16 | 1 | sus | 1.113 | 1.113 | 0.00 / 1.00 | 260.9 / 398.4 |
+| A | default | 8192 | bf16 | 1 | late | 1.117 | 1.116 | 0.00 / 1.00 | 263.1 / 398.4 |
+| A | default | 8192 | bf16 | 2 | early | 1.039 | 0.969 | 0.00 / 0.80 | 157.0 / 368.3 |
+| A | default | 8192 | bf16 | 2 | burst | 1.086 | 1.075 | 0.00 / 0.97 | 244.7 / 398.9 |
+| A | default | 8192 | bf16 | 2 | burst_b | 1.096 | 1.096 | 0.00 / 1.00 | 256.8 / 403.6 |
+| A | default | 8192 | bf16 | 2 | sus | 1.109 | 1.110 | 0.00 / 1.00 | 258.6 / 397.8 |
+| A | default | 8192 | bf16 | 2 | late | 1.116 | 1.116 | 0.00 / 1.00 | 258.7 / 398.3 |
+| A | default | 8192 | fp16 | 1 | early | 1.060 | 1.067 | 0.00 / 0.40 | 208.9 / 365.6 |
+| A | default | 8192 | fp16 | 1 | burst | 1.112 | 1.113 | 0.00 / 0.90 | 246.2 / 384.1 |
+| A | default | 8192 | fp16 | 1 | burst_b | 1.122 | 1.122 | 0.00 / 1.00 | 252.4 / 386.0 |
+| A | default | 8192 | fp16 | 1 | sus | 1.137 | 1.137 | 0.00 / 1.00 | 257.0 / 399.3 |
+| A | default | 8192 | fp16 | 1 | late | 1.142 | 1.142 | 0.00 / 1.00 | 259.4 / 399.1 |
+| A | default | 8192 | int8 | 1 | early | 0.991 | 0.994 | 0.00 / 0.20 | 172.1 / 318.8 |
+| A | default | 8192 | int8 | 1 | burst | 1.059 | 1.063 | 0.00 / 0.86 | 258.1 / 399.6 |
+| A | default | 8192 | int8 | 1 | burst_b | 1.072 | 1.071 | 0.00 / 1.00 | 269.6 / 413.1 |
+| A | default | 8192 | int8 | 1 | sus | 1.083 | 1.081 | 0.00 / 1.00 | 270.8 / 398.2 |
+| A | default | 8192 | int8 | 1 | late | 1.087 | 1.085 | 0.00 / 1.00 | 272.2 / 399.2 |
+| A | default | 8192 | tf32 | 1 | early | 1.057 | 1.070 | 0.00 / 0.80 | 242.2 / 382.3 |
+| A | default | 8192 | tf32 | 1 | burst | 1.116 | 1.120 | 0.00 / 0.97 | 292.1 / 386.6 |
+| A | default | 8192 | tf32 | 1 | burst_b | 1.128 | 1.129 | 0.00 / 1.00 | 302.2 / 386.4 |
+| A | default | 8192 | tf32 | 1 | sus | 1.139 | 1.142 | 0.00 / 1.00 | 309.8 / 399.3 |
+| A | default | 8192 | tf32 | 1 | late | 1.143 | 1.145 | 0.00 / 1.00 | 311.9 / 399.2 |
+| B | default | 2048 | bf16 | 1 | early | 0.991 | 1.000 | 0.00 / 0.00 | 136.0 / 249.8 |
+| B | default | 2048 | bf16 | 1 | burst | 0.999 | 1.000 | 0.00 / 0.00 | 163.5 / 297.6 |
+| B | default | 2048 | bf16 | 1 | burst_b | 1.000 | 1.000 | 0.00 / 0.00 | 168.0 / 305.4 |
+| B | default | 2048 | bf16 | 1 | sus | 1.002 | 1.000 | 0.00 / 0.00 | 167.7 / 310.0 |
+| B | default | 2048 | bf16 | 1 | late | 1.004 | 1.000 | 0.00 / 0.00 | 167.8 / 312.7 |
+| B | default | 4096 | bf16 | 1 | early | 1.015 | 1.044 | 0.00 / 0.60 | 216.3 / 283.9 |
+| B | default | 4096 | bf16 | 1 | burst | 1.065 | 1.068 | 0.00 / 0.93 | 230.0 / 385.1 |
+| B | default | 4096 | bf16 | 1 | burst_b | 1.075 | 1.073 | 0.00 / 1.00 | 234.9 / 403.7 |
+| B | default | 4096 | bf16 | 1 | sus | 1.081 | 1.080 | 0.00 / 1.00 | 244.8 / 397.7 |
+| B | default | 4096 | bf16 | 1 | late | 1.081 | 1.080 | 0.00 / 1.00 | 247.7 / 397.1 |
+| B | default | 8192 | bf16 | 1 | early | 1.104 | 1.036 | 0.00 / 0.40 | 189.5 / 318.8 |
+| B | default | 8192 | bf16 | 1 | burst | 1.099 | 1.088 | 0.00 / 0.90 | 242.6 / 392.0 |
+| B | default | 8192 | bf16 | 1 | burst_b | 1.098 | 1.098 | 0.00 / 1.00 | 251.2 / 402.4 |
+| B | default | 8192 | bf16 | 1 | sus | 1.104 | 1.104 | 0.00 / 1.00 | 253.9 / 397.1 |
+| B | default | 8192 | bf16 | 1 | late | 1.104 | 1.106 | 0.00 / 1.00 | 257.0 / 396.2 |
+| B | default | 8192 | bf16 | 2 | early | 1.131 | 1.129 | 0.00 / 0.40 | 201.5 / 286.3 |
+| B | default | 8192 | bf16 | 2 | burst | 1.104 | 1.104 | 0.00 / 0.90 | 244.1 / 390.7 |
+| B | default | 8192 | bf16 | 2 | burst_b | 1.100 | 1.099 | 0.00 / 1.00 | 243.1 / 403.0 |
+| B | default | 8192 | bf16 | 2 | sus | 1.106 | 1.104 | 0.00 / 1.00 | 255.4 / 396.3 |
+| B | default | 8192 | bf16 | 2 | late | 1.106 | 1.106 | 0.00 / 1.00 | 260.1 / 398.5 |
+| B | default | 8192 | fp16 | 1 | early | 1.095 | 1.082 | 0.00 / 0.20 | 190.3 / 245.3 |
+| B | default | 8192 | fp16 | 1 | burst | 1.121 | 1.121 | 0.00 / 0.87 | 233.1 / 382.5 |
+| B | default | 8192 | fp16 | 1 | burst_b | 1.126 | 1.128 | 0.00 / 1.00 | 239.4 / 404.8 |
+| B | default | 8192 | fp16 | 1 | sus | 1.134 | 1.136 | 0.00 / 1.00 | 251.0 / 398.4 |
+| B | default | 8192 | fp16 | 1 | late | 1.135 | 1.136 | 0.00 / 1.00 | 252.8 / 398.2 |
+| B | default | 8192 | int8 | 1 | early | 1.119 | 1.078 | 0.00 / 0.40 | 209.3 / 319.7 |
+| B | default | 8192 | int8 | 1 | burst | 1.081 | 1.074 | 0.00 / 0.90 | 255.8 / 391.4 |
+| B | default | 8192 | int8 | 1 | burst_b | 1.075 | 1.073 | 0.00 / 1.00 | 263.2 / 403.5 |
+| B | default | 8192 | int8 | 1 | sus | 1.084 | 1.083 | 0.00 / 1.00 | 272.9 / 398.7 |
+| B | default | 8192 | int8 | 1 | late | 1.086 | 1.085 | 0.00 / 1.00 | 280.0 / 399.3 |
+| B | default | 8192 | tf32 | 1 | early | 1.063 | 1.023 | 0.00 / 0.60 | 228.0 / 311.1 |
+| B | default | 8192 | tf32 | 1 | burst | 1.119 | 1.115 | 0.00 / 0.93 | 286.8 / 390.9 |
+| B | default | 8192 | tf32 | 1 | burst_b | 1.130 | 1.133 | 0.00 / 1.00 | 295.7 / 402.6 |
+| B | default | 8192 | tf32 | 1 | sus | 1.139 | 1.139 | 0.00 / 1.00 | 302.8 / 397.5 |
+| B | default | 8192 | tf32 | 1 | late | 1.139 | 1.140 | 0.00 / 1.00 | 306.4 / 395.9 |
+
+## Replicates (every unit and pass)
+
+('default', 2048, 'bf16', 'burst'): n 1, mean 0.9990, range 0.9990-0.9990
+('default', 2048, 'bf16', 'burst_b'): n 1, mean 1.0004, range 1.0004-1.0004
+('default', 2048, 'bf16', 'early'): n 1, mean 0.9914, range 0.9914-0.9914
+('default', 2048, 'bf16', 'late'): n 1, mean 1.0038, range 1.0038-1.0038
+('default', 2048, 'bf16', 'sus'): n 1, mean 1.0021, range 1.0021-1.0021
+('default', 4096, 'bf16', 'burst'): n 1, mean 1.0649, range 1.0649-1.0649
+('default', 4096, 'bf16', 'burst_b'): n 1, mean 1.0745, range 1.0745-1.0745
+('default', 4096, 'bf16', 'early'): n 1, mean 1.0152, range 1.0152-1.0152
+('default', 4096, 'bf16', 'late'): n 1, mean 1.0814, range 1.0814-1.0814
+('default', 4096, 'bf16', 'sus'): n 1, mean 1.0812, range 1.0812-1.0812
+('default', 8192, 'bf16', 'burst'): n 4, mean 1.0969, range 1.0864-1.1045, t95 ±0.0120
+('default', 8192, 'bf16', 'burst_b'): n 4, mean 1.0975, range 1.0956-1.0998, t95 ±0.0028
+('default', 8192, 'bf16', 'early'): n 4, mean 1.0948, range 1.0386-1.1309, t95 ±0.0628
+('default', 8192, 'bf16', 'late'): n 4, mean 1.1107, range 1.1040-1.1169, t95 ±0.0106
+('default', 8192, 'bf16', 'sus'): n 4, mean 1.1079, range 1.1036-1.1127, t95 ±0.0062
+('default', 8192, 'fp16', 'burst'): n 2, mean 1.1167, range 1.1120-1.1214, t95 ±0.0598
+('default', 8192, 'fp16', 'burst_b'): n 2, mean 1.1241, range 1.1221-1.1262, t95 ±0.0264
+('default', 8192, 'fp16', 'early'): n 2, mean 1.0775, range 1.0602-1.0949, t95 ±0.2204
+('default', 8192, 'fp16', 'late'): n 2, mean 1.1387, range 1.1352-1.1423, t95 ±0.0453
+('default', 8192, 'fp16', 'sus'): n 2, mean 1.1353, range 1.1336-1.1371, t95 ±0.0221
+('default', 8192, 'int8', 'burst'): n 2, mean 1.0702, range 1.0589-1.0814, t95 ±0.1427
+('default', 8192, 'int8', 'burst_b'): n 2, mean 1.0733, range 1.0722-1.0745, t95 ±0.0151
+('default', 8192, 'int8', 'early'): n 2, mean 1.0551, range 0.9908-1.1194, t95 ±0.8170
+('default', 8192, 'int8', 'late'): n 2, mean 1.0861, range 1.0856-1.0867, t95 ±0.0067
+('default', 8192, 'int8', 'sus'): n 2, mean 1.0834, range 1.0829-1.0839, t95 ±0.0061
+('default', 8192, 'tf32', 'burst'): n 2, mean 1.1178, range 1.1164-1.1191, t95 ±0.0177
+('default', 8192, 'tf32', 'burst_b'): n 2, mean 1.1291, range 1.1280-1.1301, t95 ±0.0130
+('default', 8192, 'tf32', 'early'): n 2, mean 1.0599, range 1.0569-1.0630, t95 ±0.0386
+('default', 8192, 'tf32', 'late'): n 2, mean 1.1412, range 1.1393-1.1431, t95 ±0.0237
+('default', 8192, 'tf32', 'sus'): n 2, mean 1.1387, range 1.1386-1.1388, t95 ±0.0015
+
+## Horace's protocol (mm_weird.py's do_bench, median of 10 shuffled trials)
+
+A default article9: zeros/randn 1.0803; twos 290.1 (1339 MHz, 325 W) onebit 291.8 (1346 MHz, 339 W) checker 275.1 (1358 MHz, 347 W) sparse75 290.5 (1403 MHz, 299 W) ternary 293.0 (1401 MHz, 323 W) rand 280.7 (1358 MHz, 385 W) randn 269.4 (1358 MHz, 353 W) zeros 291.0 (1370 MHz, 374 W) pi 293.1 (1381 MHz, 294 W)
+A default gist6: zeros/randn 1.0806; rand 281.9 (1326 MHz, 335 W) sparse_neg 285.5 (1374 MHz, 356 W) twos 292.3 (1398 MHz, 319 W) randn 271.4 (1323 MHz, 390 W) zeros 293.3 (1391 MHz, 304 W) onebit 292.1 (1395 MHz, 281 W)
+B default article9: zeros/randn 1.0817; twos 290.6 (1334 MHz, 327 W) onebit 291.8 (1354 MHz, 309 W) checker 275.2 (1366 MHz, 372 W) sparse75 290.6 (1404 MHz, 315 W) ternary 292.7 (1397 MHz, 343 W) rand 280.4 (1360 MHz, 391 W) randn 269.4 (1355 MHz, 374 W) zeros 291.4 (1372 MHz, 348 W) pi 293.3 (1389 MHz, 297 W)
+B default gist6: zeros/randn 1.087; rand 281.2 (1339 MHz, 330 W) sparse_neg 284.6 (1366 MHz, 355 W) twos 292.3 (1400 MHz, 331 W) randn 269.6 (1340 MHz, 338 W) zeros 293.1 (1389 MHz, 305 W) onebit 291.9 (1386 MHz, 319 W)
+
+## The lower cap
+
+A: target 330 W: rc 4, enforced 400 W, applied False; restored True (400.0 W)
+   set: {"cmd": "nvidia-smi -i 0 -pl 330", "rc": 4, "out": "Failed to set power management limit for GPU 00000000:20:1D.0: Insufficient Permissions\nTerminating early due to previous errors.\n", "err": ""}
+   restore: {"needed": false, "target_w": 400.0, "limit_after_w": 400.0, "enforced_after_w": 400.0, "restored": true}
+
+## Rules
+
+R1: HOLDS
+   {"detail": [{"unit": "A", "pass": 1, "clock_ratio": 0.8986, "a_clock_below": true, "sw_power_share": 1.0, "thermal_max": 0.0, "b_cap_not_thermal": true, "power_over_limit": 0.996, "c_on_cap": true, "ok": true}, {"unit": "A", "pass": 2, "clock_ratio": 0.9012, "a_clock_below": true, "sw_power_share": 1.0, "thermal_max": 0.0, "b_cap_not_thermal": true, "power_over_limit": 0.9945, "c_on_cap": true, "ok": true}, {"unit": "B", "pass": 1, "clock_ratio": 0.906, "a_clock_below": true, "sw_power_share": 1.0, "thermal_max": 0.0, "b_cap_not_thermal": true, "power_over_limit": 0.9928, "c_on_cap": true, "ok": true}, {"unit": "B", "pass": 2, "clock_ratio": 0.9054, "a_clock_below": true, "sw_power_share": 1.0, "thermal_max": 0.0, "b_cap_not_thermal": true, "power_over_limit": 0.9907, "c_on_cap": true, "ok": true}]}
+R2: HOLDS
+   {"detail": [{"unit": "A", "cap": "default", "dtype": "bf16", "window": "burst", "n": 12, "spread": 1.0135, "lo": ["randn", 2], "hi": ["twos", 1], "ok": true}, {"unit": "A", "cap": "default", "dtype": "bf16", "window": "sus", "n": 12, "spread": 1.0034, "lo": ["pi", 1], "hi": ["sparse75", 1], "ok": true}, {"unit": "A", "cap": "default", "dtype": "fp16", "window": "burst", "n": 4, "spread": 1.0035, "lo": ["twos", 1], "hi": ["rand", 1], "ok": true}, {"unit": "A", "cap": "default", "dtype": "fp16", "window": "sus", "n": 4, "spread": 1.0005, "lo": ["zeros", 1], "hi": ["rand", 1], "ok": true}, {"unit": "A", "cap": "default", "dtype": "int8", "window": "burst", "n": 4, "spread": 1.0047, "lo": ["zeros", 1], "hi": ["twos", 1], "ok": true}, {"unit": "A", "cap": "default", "dtype": "int8", "window": "sus", "n": 4, "spread": 1.0026, "lo": ["randn_q", 1], "hi": ["zeros", 1], "ok": true}, {"unit": "A", "cap": "default", "dtype": "tf32", "window": "burst", "n": 4, "spread": 1.0042, "lo": ["zeros", 1], "hi": ["rand", 1], "ok": true}, {"unit": "A", "cap": "default", "dtype": "tf32", "window": "sus", "n": 4, "spread": 1.0025, "lo": ["zeros", 1], "hi": ["rand", 1], "ok": true}, {"unit": "B", "cap": "default", "dtype": "bf16", "window": "burst", "n": 11, "spread": 1.0136, "lo": ["rand", 1], "hi": ["zeros", 1], "ok": true}, {"unit": "B", "cap": "default", "dtype": "bf16", "window": "sus", "n": 11, "spread": 1.0021, "lo": ["ternary", 1], "hi": ["zeros", 2], "ok": true}, {"unit": "B", "cap": "default", "dtype": "fp16", "window": "burst", "n": 4, "spread": 1.0046, "lo": ["twos", 1], "hi": ["zeros", 1], "ok": true}, {"unit": "B", "cap": "default", "dtype": "fp16", "window": "sus", "n": 4, "spread": 1.0017, "lo": ["zeros", 1], "hi": ["randn", 1], "ok": true}, {"unit": "B", "cap": "default", "dtype": "int8", "window": "burst", "n": 4, "spread": 1.0143, "lo": ["randn_q", 1], "hi": ["twos", 1], "ok": true}, {"unit": "B", "cap": "default", "dtype": "int8", "window": "sus", "n": 4, "spread": 1.0018, "lo": ["rand_full", 1], "hi": ["twos", 1], "ok": true}, {"unit": "B", "cap": "default", "dtype": "tf32", "window": "burst", "n": 4, "spread": 1.0064, "lo": ["rand", 1], "hi": ["twos", 1], "ok": true}, {"unit": "B", "cap": "default", "dtype": "tf32", "window": "sus", "n": 4, "spread": 1.0016, "lo": ["zeros", 1], "hi": ["rand", 1], "ok": true}]}
+R3: HOLDS
+   {"detail": [{"unit": "A", "dtype": "bf16", "kind": "checker", "pass": 1, "power_over_limit": 0.9968, "sw_power_share": 1.0, "sm_mean": 1297.7, "f_max": 1410, "clauses": [["capped", true]], "ok": true}, {"unit": "A", "dtype": "bf16", "kind": "onebit", "pass": 1, "power_over_limit": 0.8008, "sw_power_share": 0.0, "sm_mean": 1410.0, "f_max": 1410, "clauses": [["under", true]], "ok": true}, {"unit": "A", "dtype": "bf16", "kind": "pi", "pass": 1, "power_over_limit": 0.7536, "sw_power_share": 0.0, "sm_mean": 1410.0, "f_max": 1410, "clauses": [["under", true]], "ok": true}, {"unit": "A", "dtype": "bf16", "kind": "rand", "pass": 1, "power_over_limit": 0.9966, "sw_power_share": 1.0, "sm_mean": 1321.1, "f_max": 1410, "clauses": [["capped", true]], "ok": true}, {"unit": "A", "dtype": "bf16", "kind": "randn", "pass": 1, "power_over_limit": 0.996, "sw_power_share": 1.0, "sm_mean": 1267.1, "f_max": 1410, "clauses": [["capped", true]], "ok": true}, {"unit": "A", "dtype": "bf16", "kind": "randn", "pass": 2, "power_over_limit": 0.9945, "sw_power_share": 1.0, "sm_mean": 1270.7, "f_max": 1410, "clauses": [["capped", true]], "ok": true}, {"unit": "A", "dtype": "bf16", "kind": "randn", "pass": 3, "power_over_limit": 1.004, "sw_power_share": 1.0, "sm_mean": 1280.5, "f_max": 1410, "clauses": [["capped", true]], "ok": true}, {"unit": "A", "dtype": "bf16", "kind": "sparse75", "pass": 1, "power_over_limit": 0.9949, "sw_power_share": 1.0, "sm_mean": 1370.7, "f_max": 1410, "clauses": [["capped", true]], "ok": true}, {"unit": "A", "dtype": "bf16", "kind": "ternary", "pass": 1, "power_over_limit": 0.9908, "sw_power_share": 1.0, "sm_mean": 1384.9, "f_max": 1410, "clauses": [["capped", true]], "ok": true}, {"unit": "A", "dtype": "bf16", "kind": "twos", "pass": 1, "power_over_limit": 0.7162, "sw_power_share": 0.0, "sm_mean": 1410.0, "f_max": 1410, "clauses": [["under", true]], "ok": true}, {"unit": "A", "dtype": "bf16", "kind": "zeros", "pass": 1, "power_over_limit": 0.6521, "sw_power_share": 0.0, "sm_mean": 1410.0, "f_max": 1410, "clauses": [["under", true]], "ok": true}, {"unit": "A", "dtype": "bf16", "kind": "zeros", "pass": 2, "power_over_limit": 0.6466, "sw_power_share": 0.0, "sm_mean": 1410.0, "f_max": 1410, "clauses": [["under", true]], "ok": true}, {"unit": "A", "dtype": "fp16", "kind": "rand", "pass": 1, "power_over_limit": 0.9966, "sw_power_share": 1.0, "sm_mean": 1287.9, "f_max": 1410, "clauses": [["capped", true]], "ok": true}, {"unit": "A", "dtype": "fp16", "kind": "randn", "pass": 1, "power_over_limit": 0.9982, "sw_power_share": 1.0, "sm_mean": 1239.8, "f_max": 1410, "clauses": [["capped", true]], "ok": true}, {"unit": "A", "dtype": "fp16", "kind": "twos", "pass": 1, "power_over_limit": 0.7076, "sw_power_share": 0.0, "sm_mean": 1410.0, "f_max": 1410, "clauses": [["under", true]], "ok": true}, {"unit": "A", "dtype": "fp16", "kind": "zeros", "pass": 1, "power_over_limit": 0.6426, "sw_power_share": 0.0, "sm_mean": 1410.0, "f_max": 1410, "clauses": [["under", true]], "
+R4: HOLDS
+   {"detail": [{"unit": "A", "cap": "default", "size": 8192, "dtype": "bf16", "pass": 1, "window": "burst", "gap_rate": 1.0980374057145177, "gap_clock": 1.091123330714847, "sw_zeros": 0.0, "sw_random": 0.9333333333333333, "p_zeros": 242.23790203568123, "p_random": 391.9359180137376, "plim": 400.0, "case": "random capped", "ok": true}, {"unit": "A", "cap": "default", "size": 8192, "dtype": "bf16", "pass": 1, "window": "sus", "gap_rate": 1.1126936114737425, "gap_clock": 1.1127991634275791, "sw_zeros": 0.0, "sw_random": 1.0, "p_zeros": 260.8561972265675, "p_random": 398.4057152601762, "plim": 400.0, "case": "random capped", "ok": true}, {"unit": "A", "cap": "default", "size": 8192, "dtype": "bf16", "pass": 2, "window": "burst", "gap_rate": 1.0864310131447412, "gap_clock": 1.075273010920437, "sw_zeros": 0.0, "sw_random": 0.9666666666666667, "p_zeros": 244.69533773386996, "p_random": 398.9013045883231, "plim": 400.0, "case": "random capped", "ok": true}, {"unit": "A", "cap": "default", "size": 8192, "dtype": "bf16", "pass": 2, "window": "sus", "gap_rate": 1.1090553827312486, "gap_clock": 1.1096464477541466, "sw_zeros": 0.0, "sw_random": 1.0, "p_zeros": 258.62716596525735, "p_random": 397.80463525024646, "plim": 400.0, "case": "random capped", "ok": true}, {"unit": "A", "cap": "default", "size": 8192, "dtype": "fp16", "pass": 1, "window": "burst", "gap_rate": 1.111958716980533, "gap_clock": 1.1129807692307692, "sw_zeros": 0.0, "sw_random": 0.9, "p_zeros": 246.24482933416974, "p_random": 384.0877907524828, "plim": 400.0, "case": "random capped", "ok": true}, {"unit": "A", "cap": "default", "size": 8192, "dtype": "fp16", "pass": 1, "window": "sus", "gap_rate": 1.1370617102793101, "gap_clock": 1.1372572742120863, "sw_zeros": 0.0, "sw_random": 1.0, "p_zeros": 257.03009604776963, "p_random": 399.29820456579347, "plim": 400.0, "case": "random capped", "ok": true}, {"unit": "A", "cap": "default", "size": 8192, "dtype": "int8", "pass": 1, "window": "burst", "gap_rate": 1.058947453148999, "gap_clock": 1.0626830233478433, "sw_zeros": 0.0, "sw_random": 0.8620689655172413, "p_zeros": 258.1362389350429, "p_random": 399.6335544690555, "plim": 400.0, "case": "random capped", "ok": true}, {"unit": "A", "cap": "default", "size": 8192, "dtype": "int8", "pass": 1, "window": "sus", "gap_rate": 1.0829108492369741, "gap_clock": 1.0808732087167812, "sw_zeros": 0.0, "sw_random": 1.0, "p_zeros": 270.79947856398655, "p_random": 398.23393848187675, "plim": 400.0, "case": "random capped", "ok": true}, {"unit": "A", "cap": "default", "size": 8192, "dtype": "tf32", "pass": 1, "window": "burst", "gap_rate": 1.116366808901839, "gap_clock": 1.1197097944377268, "sw_zeros": 0.0, "sw_random": 0.9666666666666667, "p_zeros": 292.08249639570835, "p_random": 386.58103971380075, "plim": 400.0, "case": "random capped", "ok": true}, {"unit": "A", "cap": "default", "size": 8192, "dtype": "tf32", "pass": 1, "window": "sus", "gap_rate": 1.1388401780593103, "gap_clock": 1.141677293981903, "sw_zeros": 
+R5: N/A
+   {"why": "not applied: nvidia-smi -pl rc 4", "detail": {"target_w": 330.0, "set": {"cmd": "nvidia-smi -i 0 -pl 330", "rc": 4, "out": "Failed to set power management limit for GPU 00000000:20:1D.0: Insufficient Permissions\nTerminating early due to previous errors.\n", "err": ""}, "restore": {"needed": false, "target_w": 400.0, "limit_after_w": 400.0, "enforced_after_w": 400.0, "restored": true}}}
+R6: HOLDS
+   {"detail": [{"unit": "A", "limit_w": 400.0, "gap_mean": 1.1109, "gaps": [1.1127, 1.1091], "band": [1.0, 1.1218], "n2": 1.0753, "ok": true, "band_at_own_idle": {"P0_w": 58.9, "band": [1.0, 1.0884, 1.1309]}}, {"unit": "B", "limit_w": 400.0, "gap_mean": 1.1049, "gaps": [1.1036, 1.1062], "band": [1.0, 1.1218], "n2": 1.0753, "ok": true, "band_at_own_idle": {"P0_w": 55.9, "band": [1.0, 1.0897, 1.1318]}}], "at_330": {"verdict": "N/A", "detail": []}}
+R7: HOLDS
+   {"detail": [{"unit": "A", "pass": 1, "burst": 1.098, "sus": 1.1127, "sus_minus_burst": 0.0147, "ok": true}, {"unit": "A", "pass": 2, "burst": 1.0864, "sus": 1.1091, "sus_minus_burst": 0.0226, "ok": true}, {"unit": "B", "pass": 1, "burst": 1.0988, "sus": 1.1036, "sus_minus_burst": 0.0048, "ok": true}, {"unit": "B", "pass": 2, "burst": 1.1045, "sus": 1.1062, "sus_minus_burst": 0.0017, "ok": true}]}
+R8: HOLDS
+   {"n": 51, "failing": [], "temp_max": 66}
+R9: HOLDS
+   {"rho": 0.9, "spread": 1.1086, "ours": {"randn": 264.91, "checker": 270.54, "sparse75": 286.39, "rand": 276.41, "ternary": 289.9, "onebit": 293.58, "pi": 293.09, "twos": 293.69, "zeros": 293.55}}
+R10: FAILS
+   {"detail": [{"unit": "A", "protocol": 1.0806, "cells_sus": 1.1127, "diff": -0.0321, "ok": false}, {"unit": "B", "protocol": 1.087, "cells_sus": 1.1036, "diff": -0.0166, "ok": true}]}
+
+## Checks
+
+ok   A: GPU name: NVIDIA A100-SXM4-40GB
+ok   A: steps with an error: []
+ok   A: steps skipped on the budget: 0
+ok   A: NVML calls not supported: {}
+ok   A: NVML call errors: {}
+ok   B: GPU name: NVIDIA A100-SXM4-40GB
+ok   B: steps with an error: []
+ok   B: steps skipped on the budget: 0
+ok   B: NVML calls not supported: {}
+ok   B: NVML call errors: {}
+ok   ('A', 'default', 8192, 'bf16', 'checker', 1): sustained samples / expected: 597/600
+ok   ('A', 'default', 8192, 'bf16', 'checker', 1): start 33 C, target 35.0: True
+ok   ('A', 'default', 8192, 'bf16', 'onebit', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'bf16', 'onebit', 1): start 33 C, target 35.0: True
+ok   ('A', 'default', 8192, 'bf16', 'pi', 1): sustained samples / expected: 599/600
+ok   ('A', 'default', 8192, 'bf16', 'pi', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'bf16', 'rand', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'bf16', 'rand', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'bf16', 'randn', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'bf16', 'randn', 1): start 34 C, target 35.0: True
+ok   ('A', 'default', 8192, 'bf16', 'randn', 2): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'bf16', 'randn', 2): start 32 C, target 35.0: True
+ok   ('A', 'default', 8192, 'bf16', 'randn', 3): sustained samples / expected: 100/100
+ok   ('A', 'default', 8192, 'bf16', 'randn', 3): start 34 C, target 35.0: True
+ok   ('A', 'default', 8192, 'bf16', 'sparse75', 1): sustained samples / expected: 599/600
+ok   ('A', 'default', 8192, 'bf16', 'sparse75', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'bf16', 'ternary', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'bf16', 'ternary', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'bf16', 'twos', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'bf16', 'twos', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'bf16', 'zeros', 1): zeros give C = 0: 0.0
+ok   ('A', 'default', 8192, 'bf16', 'zeros', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'bf16', 'zeros', 1): start 33 C, target 35.0: True
+ok   ('A', 'default', 8192, 'bf16', 'zeros', 2): zeros give C = 0: 0.0
+ok   ('A', 'default', 8192, 'bf16', 'zeros', 2): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'bf16', 'zeros', 2): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'fp16', 'rand', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'fp16', 'rand', 1): start 33 C, target 35.0: True
+ok   ('A', 'default', 8192, 'fp16', 'randn', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'fp16', 'randn', 1): start 33 C, target 35.0: True
+ok   ('A', 'default', 8192, 'fp16', 'twos', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'fp16', 'twos', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'fp16', 'zeros', 1): zeros give C = 0: 0.0
+ok   ('A', 'default', 8192, 'fp16', 'zeros', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'fp16', 'zeros', 1): start 33 C, target 35.0: True
+ok   ('A', 'default', 8192, 'int8', 'rand_full', 1): sustained samples / expected: 601/600
+ok   ('A', 'default', 8192, 'int8', 'rand_full', 1): start 33 C, target 35.0: True
+ok   ('A', 'default', 8192, 'int8', 'randn_q', 1): sustained samples / expected: 599/600
+ok   ('A', 'default', 8192, 'int8', 'randn_q', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'int8', 'twos', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'int8', 'twos', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'int8', 'zeros', 1): zeros give C = 0: 0.0
+ok   ('A', 'default', 8192, 'int8', 'zeros', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'int8', 'zeros', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'tf32', 'rand', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'tf32', 'rand', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'tf32', 'randn', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'tf32', 'randn', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'tf32', 'twos', 1): sustained samples / expected: 600/600
+ok   ('A', 'default', 8192, 'tf32', 'twos', 1): start 35 C, target 35.0: True
+ok   ('A', 'default', 8192, 'tf32', 'zeros', 1): zeros give C = 0: 0.0
+ok   ('A', 'default', 8192, 'tf32', 'zeros', 1): sustained samples / expected: 599/600
+ok   ('A', 'default', 8192, 'tf32', 'zeros', 1): start 35 C, target 35.0: True
+ok   ('B', 'default', 2048, 'bf16', 'randn', 1): sustained samples / expected: 300/300
+ok   ('B', 'default', 2048, 'bf16', 'randn', 1): start 28 C, target 32.0: True
+ok   ('B', 'default', 2048, 'bf16', 'zeros', 1): zeros give C = 0: 0.0
+ok   ('B', 'default', 2048, 'bf16', 'zeros', 1): sustained samples / expected: 300/300
+ok   ('B', 'default', 2048, 'bf16', 'zeros', 1): start 30 C, target 32.0: True
+ok   ('B', 'default', 4096, 'bf16', 'randn', 1): sustained samples / expected: 300/300
+ok   ('B', 'default', 4096, 'bf16', 'randn', 1): start 37 C, target 32.0: False
+ok   ('B', 'default', 4096, 'bf16', 'zeros', 1): zeros give C = 0: 0.0
+ok   ('B', 'default', 4096, 'bf16', 'zeros', 1): sustained samples / expected: 300/300
+ok   ('B', 'default', 4096, 'bf16', 'zeros', 1): start 32 C, target 32.0: True
+ok   ('B', 'default', 8192, 'bf16', 'checker', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'bf16', 'checker', 1): start 32 C, target 32.0: True
+ok   ('B', 'default', 8192, 'bf16', 'onebit', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'bf16', 'onebit', 1): start 31 C, target 32.0: True
+ok   ('B', 'default', 8192, 'bf16', 'pi', 1): sustained samples / expected: 598/600
+ok   ('B', 'default', 8192, 'bf16', 'pi', 1): start 31 C, target 32.0: True
+ok   ('B', 'default', 8192, 'bf16', 'rand', 1): sustained samples / expected: 601/600
+ok   ('B', 'default', 8192, 'bf16', 'rand', 1): start 32 C, target 32.0: True
+ok   ('B', 'default', 8192, 'bf16', 'randn', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'bf16', 'randn', 1): start 32 C, target 32.0: True
+ok   ('B', 'default', 8192, 'bf16', 'randn', 2): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'bf16', 'randn', 2): start 34 C, target 32.0: False
+ok   ('B', 'default', 8192, 'bf16', 'sparse75', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'bf16', 'sparse75', 1): start 34 C, target 32.0: False
+ok   ('B', 'default', 8192, 'bf16', 'ternary', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'bf16', 'ternary', 1): start 29 C, target 32.0: True
+ok   ('B', 'default', 8192, 'bf16', 'twos', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'bf16', 'twos', 1): start 31 C, target 32.0: True
+ok   ('B', 'default', 8192, 'bf16', 'zeros', 1): zeros give C = 0: 0.0
+ok   ('B', 'default', 8192, 'bf16', 'zeros', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'bf16', 'zeros', 1): start 31 C, target 32.0: True
+ok   ('B', 'default', 8192, 'bf16', 'zeros', 2): zeros give C = 0: 0.0
+ok   ('B', 'default', 8192, 'bf16', 'zeros', 2): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'bf16', 'zeros', 2): start 30 C, target 32.0: True
+ok   ('B', 'default', 8192, 'fp16', 'rand', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'fp16', 'rand', 1): start 34 C, target 32.0: False
+ok   ('B', 'default', 8192, 'fp16', 'randn', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'fp16', 'randn', 1): start 36 C, target 32.0: False
+ok   ('B', 'default', 8192, 'fp16', 'twos', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'fp16', 'twos', 1): start 32 C, target 32.0: True
+ok   ('B', 'default', 8192, 'fp16', 'zeros', 1): zeros give C = 0: 0.0
+ok   ('B', 'default', 8192, 'fp16', 'zeros', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'fp16', 'zeros', 1): start 31 C, target 32.0: True
+ok   ('B', 'default', 8192, 'int8', 'rand_full', 1): sustained samples / expected: 597/600
+ok   ('B', 'default', 8192, 'int8', 'rand_full', 1): start 38 C, target 32.0: False
+ok   ('B', 'default', 8192, 'int8', 'randn_q', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'int8', 'randn_q', 1): start 31 C, target 32.0: True
+ok   ('B', 'default', 8192, 'int8', 'twos', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'int8', 'twos', 1): start 32 C, target 32.0: True
+ok   ('B', 'default', 8192, 'int8', 'zeros', 1): zeros give C = 0: 0.0
+ok   ('B', 'default', 8192, 'int8', 'zeros', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'int8', 'zeros', 1): start 32 C, target 32.0: True
+ok   ('B', 'default', 8192, 'tf32', 'rand', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'tf32', 'rand', 1): start 41 C, target 32.0: False
+ok   ('B', 'default', 8192, 'tf32', 'randn', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'tf32', 'randn', 1): start 32 C, target 32.0: True
+ok   ('B', 'default', 8192, 'tf32', 'twos', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'tf32', 'twos', 1): start 31 C, target 32.0: True
+ok   ('B', 'default', 8192, 'tf32', 'zeros', 1): zeros give C = 0: 0.0
+ok   ('B', 'default', 8192, 'tf32', 'zeros', 1): sustained samples / expected: 600/600
+ok   ('B', 'default', 8192, 'tf32', 'zeros', 1): start 31 C, target 32.0: True

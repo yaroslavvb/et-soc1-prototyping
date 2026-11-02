@@ -1,0 +1,71 @@
+{
+ "unit": "S",
+ "cfg": {
+  "target_above_idle_c": 5.0,
+  "min_wait_s": 3.0,
+  "max_wait_s": 20.0,
+  "group_ms": 4.0,
+  "depth": 4,
+  "sampler_period_s": 0.1
+ },
+ "steps": [
+  {
+   "op": "static"
+  },
+  {
+   "op": "idle",
+   "s": 15,
+   "label": "idle0",
+   "sets_target": true
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "randn",
+   "pass": 1,
+   "size": 2048,
+   "burst_s": 2.0,
+   "sus_s": 4.0,
+   "label": "smoke-bf16-randn-2048"
+  },
+  {
+   "op": "cell",
+   "dtype": "int8",
+   "kind": "rand_full",
+   "pass": 1,
+   "size": 2048,
+   "burst_s": 1.0,
+   "sus_s": 1.0,
+   "label": "smoke-int8-rand_full-2048"
+  },
+  {
+   "op": "cell",
+   "dtype": "tf32",
+   "kind": "randn",
+   "pass": 1,
+   "size": 2048,
+   "burst_s": 1.0,
+   "sus_s": 1.0,
+   "label": "smoke-tf32-randn-2048"
+  },
+  {
+   "op": "protocol",
+   "label": "smoke-gist6-2048",
+   "kinds": [
+    "randn",
+    "twos",
+    "sparse_neg",
+    "onebit",
+    "rand",
+    "zeros"
+   ],
+   "size": 2048,
+   "iters": 1
+  },
+  {
+   "op": "idle",
+   "s": 5,
+   "label": "idle_end"
+  }
+ ]
+}

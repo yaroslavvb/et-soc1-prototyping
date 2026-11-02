@@ -155,6 +155,98 @@ def main():
         epm.append({"unit": u, "dtype": dt, "kind": kind, "pj_mac_board": board, "pj_mac_over_idle": over})
         P(f"| {u} | {dt} | {kind} | {board:.3f} | {over if over is None else round(over, 3)} |")
     out["pj_per_mac"] = epm
+
+    # 6. the overshoot, from the pre-boost readings: every burst starts loaded at the idle application clock (1095 MHz
+    # on these boards) for 0.1-0.3 s before the boost, so each kind's power at that clock is read; the kinds that stay
+    # under the cap also read their power at 1410 MHz, which fits the exponent n of P - P_idle ~ f^n; with that n each
+    # capped kind's power at 1410 MHz (its demand) and the clock at which it would draw the limit follow.
+    P("\n## 6. The overshoot from the pre-boost readings (bf16, fp16, tf32, int8; default cap; pass 1)")
+    two = []
+    for (u, cap, size, dt, kind, p), c in sorted(cells.items()):
+        if cap != "default" or size != 8192 or p != 1:
+            continue
+        t0 = c["rec"]["run"]["t0"]
+        app = units[u]["static"].get("app_clock_sm") or 1095
+        S = [r for r in units[u]["samples"] if t0 - 0.05 <= R.tmid(r) < t0 + 0.8]
+        # a sample reads the clock first and the instantaneous field about 6 ms later, so a boost between the two reads
+        # puts a post-boost watt beside a pre-boost clock. Kept: the power-usage reading (read right after the clock) of
+        # a sample at the application clock, and its instantaneous field only if the next sample still reads that clock.
+        cand = []
+        for i, r in enumerate(S):
+            if r.get("sm") is None or r["sm"] > app + 30:
+                continue
+            if r.get("p_mw") is not None:
+                cand.append((r["p_mw"] / 1000.0, r["sm"]))
+            nxt = S[i + 1] if i + 1 < len(S) else None
+            if r.get("p_inst_mw") is not None and nxt and nxt.get("sm") is not None and nxt["sm"] <= app + 30:
+                cand.append((r["p_inst_mw"] / 1000.0, r["sm"]))
+        cand = [x for x in cand if x[0] > (idle.get(u) or 60) + 60]
+        s = c["w"].get("sus") or {}
+        e = R.wstats(units[u]["samples"], t0 + 0.6, t0 + 1.6)
+        if not cand or not s:
+            continue
+        p_app, f_app = max(cand)
+        two.append({"unit": u, "dtype": dt, "kind": kind, "f_app": f_app, "p_app": p_app, "n_pre": len(cand),
+                    "f_early": e.get("sm_mean"), "p_early": e.get("power_w"), "sw_early": (e.get("frac") or {}).get("sw_power"),
+                    "f_sus": s.get("sm_mean"), "p_sus": s.get("power_w"), "sw_sus": (s.get("frac") or {}).get("sw_power"),
+                    "limit": s.get("plim_w")})
+    # the exponent from kinds under the cap at 1410 MHz in the early window
+    ns = []
+    for d in two:
+        P0 = idle.get(d["unit"])
+        if P0 and d["sw_early"] is not None and d["sw_early"] <= 0.1 and d["f_early"] and d["f_early"] >= 1400 and d["p_app"] > P0:
+            n = math.log((d["p_early"] - P0) / (d["p_app"] - P0)) / math.log(d["f_early"] / d["f_app"])
+            d["n_fit"] = n
+            ns.append(n)
+    n_med = statistics.median(ns) if ns else None
+    out["exponent_from_uncapped"] = {"values": ns, "median": n_med}
+    P(f"exponent n from the kinds under the cap (P_early - P_idle)/(P_app - P_idle) = (f_early/f_app)^n: "
+      f"{[round(x, 2) for x in ns]}, median {n_med if n_med is None else round(n_med, 2)}")
+    P("| unit | format | kind | MHz, W before the boost | early MHz, W | sustained MHz, W, SW share | demand at 1410 MHz (n med) | "
+      "clock that draws the limit (n med) | measured early / sustained MHz |")
+    P("|---|---|---|---|---|---|---|---|---|")
+    for d in two:
+        P0 = idle.get(d["unit"])
+        dem = f_lim = None
+        if n_med and P0 and d["p_app"] > P0 and d["limit"]:
+            dem = P0 + (d["p_app"] - P0) * (1410.0 / d["f_app"]) ** n_med
+            f_lim = d["f_app"] * ((d["limit"] - P0) / (d["p_app"] - P0)) ** (1.0 / n_med)
+            f_lim = min(f_lim, 1410.0)
+        d["demand_1410_w"], d["clock_at_limit"] = dem, f_lim
+        P(f"| {d['unit']} | {d['dtype']} | {d['kind']} | {d['f_app']}, {d['p_app']:.1f} | {(d['f_early'] or 0):.0f}, "
+          f"{(d['p_early'] or 0):.1f} | {(d['f_sus'] or 0):.0f}, {(d['p_sus'] or 0):.1f}, {(d['sw_sus'] or 0):.2f} | "
+          f"{'—' if dem is None else f'{dem:.0f}'} | {'—' if f_lim is None else f'{f_lim:.0f}'} | "
+          f"{(d['f_early'] or 0):.0f} / {(d['f_sus'] or 0):.0f} |")
+    out["overshoot"] = two
+
+    # 7. what the same relation predicts at Horace's 330 W (the lower cap could not be set: nvidia-smi -pl rc 4), beside
+    # its own error at the 400 W the units ran: per format, the random kind's clock where P_idle + (P_app - P_idle)
+    # (f / f_app)^n reaches the limit, against zeros' (1410 MHz where its demand stays under), so the gap is the
+    # clock ratio, as R2 found the rate to follow the clock.
+    P("\n## 7. The relation of section 6 at a 330 W limit (Horace's), against its own error at 400 W")
+    pred = []
+    for d in two:
+        if d["kind"] != R.RANDOM_OF[d["dtype"]]:
+            continue
+        P0 = idle.get(d["unit"])
+        z = next((x for x in two if x["unit"] == d["unit"] and x["dtype"] == d["dtype"] and x["kind"] == "zeros"), None)
+        if not (n_med and P0 and z and z.get("demand_1410_w")):
+            continue
+        row = {"unit": d["unit"], "dtype": d["dtype"], "random": d["kind"]}
+        for L in (400.0, 330.0):
+            fr = min(1410.0, d["f_app"] * ((L - P0) / (d["p_app"] - P0)) ** (1.0 / n_med))
+            fz = 1410.0 if z["demand_1410_w"] <= L else min(1410.0, z["f_app"] * ((L - P0) / (z["p_app"] - P0)) ** (1.0 / n_med))
+            row[f"gap_{L:g}"] = fz / fr
+        g = [x for x in gaps if x["unit"] == d["unit"] and x["dtype"] == d["dtype"] and x["window"] == "sus"
+             and x["cap"] == "default" and x["size"] == 8192 and x["pass"] == 1]
+        row["measured_400"] = g[0]["gap_rate"] if g else None
+        row["model_error_400"] = (row["gap_400"] - row["measured_400"]) if row["measured_400"] else None
+        row["gap_330_less_error"] = (row["gap_330"] - row["model_error_400"]) if row["model_error_400"] is not None else None
+        pred.append(row)
+        P(f"{d['unit']} {d['dtype']} {d['kind']}: at 400 W predicted {row['gap_400']:.3f}, measured "
+          f"{(row['measured_400'] or 0):.3f} (error {(row['model_error_400'] or 0):+.3f}); at 330 W predicted {row['gap_330']:.3f}, "
+          f"less the 400 W error {(row['gap_330_less_error'] or 0):.3f}")
+    out["at_330"] = pred
     if a.json:
         with open(a.json, "w") as f:
             json.dump(out, f, indent=1, default=str)

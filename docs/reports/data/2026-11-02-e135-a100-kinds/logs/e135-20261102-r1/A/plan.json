@@ -1,0 +1,331 @@
+{
+ "unit": "A",
+ "cfg": {
+  "target_above_idle_c": 5.0,
+  "min_wait_s": 20.0,
+  "max_wait_s": 120.0,
+  "group_ms": 4.0,
+  "depth": 4,
+  "sampler_period_s": 0.1
+ },
+ "steps": [
+  {
+   "op": "static"
+  },
+  {
+   "op": "idle",
+   "s": 60,
+   "label": "idle0",
+   "sets_target": true
+  },
+  {
+   "op": "protocol",
+   "label": "gist6",
+   "kinds": [
+    "randn",
+    "twos",
+    "sparse_neg",
+    "onebit",
+    "rand",
+    "zeros"
+   ],
+   "size": 8192,
+   "iters": 10
+  },
+  {
+   "op": "protocol",
+   "label": "article9",
+   "kinds": [
+    "randn",
+    "checker",
+    "rand",
+    "sparse75",
+    "ternary",
+    "onebit",
+    "pi",
+    "twos",
+    "zeros"
+   ],
+   "size": 8192,
+   "iters": 10
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "zeros",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "randn",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "twos",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "rand",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "pi",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "sparse75",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "onebit",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "checker",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "ternary",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "lowcap",
+   "label": "lowcap",
+   "steps": [
+    {
+     "op": "cell",
+     "dtype": "bf16",
+     "kind": "zeros",
+     "pass": 1,
+     "size": 8192,
+     "burst_s": 3.0,
+     "sus_s": 60.0
+    },
+    {
+     "op": "cell",
+     "dtype": "bf16",
+     "kind": "randn",
+     "pass": 1,
+     "size": 8192,
+     "burst_s": 3.0,
+     "sus_s": 60.0
+    },
+    {
+     "op": "cell",
+     "dtype": "bf16",
+     "kind": "twos",
+     "pass": 1,
+     "size": 8192,
+     "burst_s": 3.0,
+     "sus_s": 60.0
+    },
+    {
+     "op": "cell",
+     "dtype": "bf16",
+     "kind": "rand",
+     "pass": 1,
+     "size": 8192,
+     "burst_s": 3.0,
+     "sus_s": 60.0
+    },
+    {
+     "op": "protocol",
+     "label": "gist6",
+     "kinds": [
+      "randn",
+      "twos",
+      "sparse_neg",
+      "onebit",
+      "rand",
+      "zeros"
+     ],
+     "size": 8192,
+     "iters": 10
+    }
+   ]
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "randn",
+   "pass": 3,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 10.0,
+   "label": "after-lowcap-bf16-randn"
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "randn",
+   "pass": 2,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "bf16",
+   "kind": "zeros",
+   "pass": 2,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "fp16",
+   "kind": "zeros",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "fp16",
+   "kind": "randn",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "fp16",
+   "kind": "twos",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "fp16",
+   "kind": "rand",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "tf32",
+   "kind": "zeros",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "tf32",
+   "kind": "randn",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "tf32",
+   "kind": "twos",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "tf32",
+   "kind": "rand",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "int8",
+   "kind": "zeros",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "int8",
+   "kind": "rand_full",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "int8",
+   "kind": "twos",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "cell",
+   "dtype": "int8",
+   "kind": "randn_q",
+   "pass": 1,
+   "size": 8192,
+   "burst_s": 3.0,
+   "sus_s": 60.0
+  },
+  {
+   "op": "idle",
+   "s": 30,
+   "label": "idle_end"
+  }
+ ]
+}
