@@ -1,0 +1,28 @@
+== 2026-11-01 16:00:03 PST host and card (read only) ==
+No process holds an ET-SoC-1 device node or card lock.
+logins: 12 (names not recorded)
+ 16:00:03 up 6 days,  1:41,  3 users,  load average: 0.72, 0.65, 0.71
+0.72 0.65 0.71 1/906 2069658
+3570816 Oct 20 20:19 build/enercat-hl/host/enercat_host
+4006896 Sep 25 07:25 build/ettelem/ettelem
+3569104 Sep 26 06:15 build/sparsity/host/sparsity_host
+== operand set /home/yaroslavvb/aifoundry/build/hl-gen6-e113 ==
+als_h12    mask   0x2ab555  A bits flipped per op (8 lanes)  24576 (mant 24576, exp 0, sign 0)  B 0
+als_h16    mask   0x5b76db  A bits flipped per op (8 lanes)  32768 (mant 32768, exp 0, sign 0)  B 0
+check: every count re-derived from the files (155 fma items)
+== byte-identity against build/hl-gen5 (E70's set: every file E60, E65, E67 and E70 ran) ==
+byte-identical: 167/167
+f1f5d11ece54eea2cc07ac7416c2d16045494dcfea39a02f8dc108aecd60e355  tiles/als_h12.bin
+ada00c90831c9381749334c12a117a16a6ccdac06dc8beafbd9f2a34f8c80014  tiles/als_h16.bin
+371f448d691aa3fe0635f1a99f440acc9dae1e6e34cca6fce526d7629b912390  tiles/als_h2.bin
+c1a4cd4dc452d43acbde5da69f541a5240e8d3090d826b2174c62fe0fd77b36d  tiles/als_h3.bin
+9b4c7c21963c69986dfcf4a6bcb8dad4ae5acbabe38555c4ec96a727723f1fe7  tiles/als_h4.bin
+2a1884c03b7facfa7f7a7da868aa4aa48246dbf77a03ddcba4a4101e1abb5604  tiles/als_h6.bin
+406fa8738ef67cd76f101d8eb1197bcc5e5a963b8793a6998411cc612927466d  tiles/als_h8.bin
+0b8b58884fdd77b38cd999d74c1b9ed50dcee54f9577688ebb78f710fce80d6c  tiles/alq_h3.bin
+1128abb3155f3dbfff3c105b43ceb15aaff817561b069c5961f2a2d006de8171  tiles/alq_h6.bin
+== dry run of the registered list ==
+DRY hold10: build/sparsity/host/sparsity_host --test fma --type fp32 --pattern none --values pi --shires 0xffffffff --per-shire 32 --seconds 4.0 --seed 1200 --stop-file /home/yaroslavvb/aifoundry/build/claims-v3-dry/aifoundry3/e113/p1199/STOP --dump-tiles /home/yaroslavvb/aifoundry/build/claims-v3-dry/aifoundry3/e113/p1199/tiles/anchor_pi.b1199.bin
+16:00:09 [aifoundry3] block 1199 #23 anchor_pi: 0 launches, start 58.0 C (hot 59.0) after 0 heats and 0.0 s
+16:00:09 [aifoundry3] done
+2026-11-01T16:00:14 [aifoundry3] e113 p1199 ends: ok anchor_pi,aq_h0,alq_h1,alq_h2,alq_h3,alq_h4,alq_h6,alq_h8,alq_h12,alq_h16,alq_h23,als_h2,als_h3,als_h4,als_h6,als_h8,als_h12,als_h16,lq_h0,lq_h8,ls_h8,nrd_a,nrd_b
