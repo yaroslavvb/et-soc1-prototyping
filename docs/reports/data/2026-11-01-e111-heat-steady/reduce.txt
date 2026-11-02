@@ -1,0 +1,79 @@
+E111: aifoundry2's steady coefficient, the drift's warm probes, the camera at 0.005 Hz; under its own governor, nothing set
+E98 regression (score98 on E98's probes == its committed results.json): {'keys_differing': [], 'ok': True}
+
+VERDICTS
+  E111-A1 H-I8                             FAIL
+  E111-A1 H-F32                            FAIL
+  E111-A2 H-I8 prior_aifoundry2            PASS
+  E111-A2 H-I8 lab_model_sept              FAIL
+  E111-A2 H-I8 e97_aifoundry3_plateau      FAIL
+  E111-A2 H-I8 line_76s                    FAIL
+  E111-A2 H-F32 prior_aifoundry2           PASS
+  E111-A2 H-F32 lab_model_sept             FAIL
+  E111-A2 H-F32 e97_aifoundry3_plateau     FAIL
+  E111-A2 H-F32 line_76s                   FAIL
+  E111-A3                                  PASS
+  E111-B0                                  OK
+  E111-B1                                  ABOVE_TARGET
+  E111-B2                                  INCONCLUSIVE
+  E111-BV                                  INCONCLUSIVE
+  E111-B3 hold                             UNDER-RESOLVED
+  E111-B3 line                             UNDER-RESOLVED
+  E111-B4 MHz                              INCONCLUSIVE
+  E111-B4 W                                INCONCLUSIVE
+  E111-C1                                  PASS
+  E111-C2                                  INCONCLUSIVE
+  E111-C3                                  INSIDE
+  E111-C4                                  PASS
+  tally {"FAIL": 8, "PASS": 5, "OK": 1, "ABOVE_TARGET": 1, "INCONCLUSIVE": 5, "UNDER-RESOLVED": 2, "INSIDE": 1}
+
+PART A, the holds
+  idles {"W1": {"die": 45.0, "w": 21.7537, "n": 600, "t0_ms": 1793572200242, "t1_ms": 1793572321532, "die_values": {"45": 600}}, "W2": {"die": 45.0, "w": 21.7048, "n": 600, "t0_ms": 1793573773367, "t1_ms": 1793573894662, "die_values": {"45": 600}}, "END": {"die": 46.0, "w": 21.8944, "n": 600, "t0_ms": 1793577603283, "t1_ms": 1793577724564, "die_values": {"46": 600}}, "W1B": {"die": 46.0, "w": 21.9347, "n": 600, "t0_ms": 1793578623277, "t1_ms": 1793578744557, "die_values": {"46": 600}}, "END2": {"die": 47.0, "w": 22.09, "n": 600, "t0_ms": 1793581243521, "t1_ms": 1793581364805, "die_values": {"47": 600}}}
+  H-I8: {"kind": "int8/neg_ones", "clock_mhz": 800, "processes_run": 190, "processes_planned": 190, "minutes": 26.5, "dips": 9, "complete": true, "clock_held": true}
+     plateau {"n": 2925, "die": 59.0041, "w": 40.6221, "io": 59.6591, "mhz": 795.6581, "share_clock": 0.9764, "fine_w": 40.8822, "fine_share": 0.9672, "t0_ms": 1793580036242, "t1_ms": 1793580336243}
+     previous {"n": 2923, "die": 58.7574, "w": 40.2589, "io": 58.9531, "mhz": 794.7999, "share_clock": 0.9716, "fine_w": 40.5804, "fine_share": 0.9425, "t0_ms": 1793579736242, "t1_ms": 1793580036242}
+     A1 {"fine_slope_c_per_min": 0.1205, "fine_slope_se": 0.0166, "fine_slope_w_per_min": 0.05326, "die_slope_c_per_min": 0.0499, "die_slope_se": 0.0155, "fine_range_w": 0.6384, "die_range_c": 0.983, "read_on": "fine W", "verdict": "FAIL"}
+     A2 {"rise_c": 12.504, "dW_w": 18.61, "c": 0.6719, "c_lo": 0.6471, "c_hi": 0.6962, "idle_mismatch_c": 1.0, "idle_mismatch_w": 0.155, "prior_aifoundry2": "PASS", "lab_model_sept": "FAIL", "e97_aifoundry3_plateau": "FAIL", "line_76s": "FAIL"}
+     asymptote {"tau_s": 60.0, "w_inf": 40.6568, "B": -10.3675, "rms": 0.1731, "n_bins": 49, "at_tau_edge": true, "die_inf": 58.494, "c_inf": 0.6524}
+     A4 {"windows_ms": {"before": [1793578444557, 1793578744557], "plateau": [1793580036242, 1793580336243], "after": [1793581064805, 1793581364805]}, "proxies": {"a1-nic": {"before": 51.642, "plateau": 51.775, "after": 51.715, "room_move_c": 0.105, "c_corrected": 0.6663}, "a1-nvme": {"before": 41.9, "plateau": 41.9, "after": 41.9, "room_move_c": 0.0, "c_corrected": 0.6719}, "a1c0-die": {"before": 46.0, "plateau": 46.0, "after": 46.0, "room_move_c": 0.0, "c_corrected": 0.6719}, "a1c1-die": {"before": 50.0, "plateau": 50.333, "after": 50.0, "room_move_c": 0.303, "c_corrected": 0.6556}, "a2-nic": {"before": 43.4, "plateau": null, "after": 43.673}, "a2-nvme": {"before": 36.9, "plateau": null, "after": 36.9}, "a3-nic": {"before": 43.472, "plateau": 42.968, "after": 43.41, "room_move_c": -0.523, "c_corrected": 0.7}, "a3-nvme": {"before": 36.9, "plateau": 36.9, "after": 36.9}, "a3c0-die": {"before": null, "plateau": 50.0, "after": null}}, "phone_battery_c": {"before": 30.4, "plateau": 30.4, "after": 30.4}}
+  H-F32: {"kind": "fp32/randn", "clock_mhz": 600, "processes_run": 190, "processes_planned": 190, "minutes": 27.05, "dips": 0, "complete": true, "clock_held": true}
+     plateau {"n": 2927, "die": 67.2631, "w": 54.2235, "io": 67.1572, "mhz": 600.0, "share_clock": 1.0, "fine_w": 54.2235, "fine_share": 1.0, "t0_ms": 1793576353367, "t1_ms": 1793576653368}
+     previous {"n": 2926, "die": 66.9815, "w": 54.1093, "io": 66.9877, "mhz": 600.0, "share_clock": 1.0, "fine_w": 54.1093, "fine_share": 1.0, "t0_ms": 1793576053367, "t1_ms": 1793576353367}
+     A1 {"fine_slope_c_per_min": 0.0756, "fine_slope_se": 0.0338, "fine_slope_w_per_min": 0.03344, "die_slope_c_per_min": 0.0714, "die_slope_se": 0.0209, "fine_range_w": 0.7591, "die_range_c": 1.024, "read_on": "fine W", "verdict": "FAIL"}
+     A2 {"rise_c": 21.763, "dW_w": 32.424, "c": 0.6712, "c_lo": 0.6513, "c_hi": 0.6846, "idle_mismatch_c": 1.0, "idle_mismatch_w": 0.19, "prior_aifoundry2": "PASS", "lab_model_sept": "FAIL", "e97_aifoundry3_plateau": "FAIL", "line_76s": "FAIL"}
+     asymptote {"tau_s": 88.6, "w_inf": 54.195, "B": -2.6785, "rms": 0.1692, "n_bins": 50, "at_tau_edge": false, "die_inf": 67.199, "c_inf": 0.6698}
+     A4 {"windows_ms": {"before": [1793573594662, 1793573894662], "plateau": [1793576353367, 1793576653368], "after": [1793577424564, 1793577724564]}, "proxies": {"a1-nic": {"before": 52.458, "plateau": 51.82, "after": 51.63, "room_move_c": -0.244, "c_corrected": 0.6787}, "a1-nvme": {"before": 42.9, "plateau": 42.183, "after": 41.9, "room_move_c": -0.238, "c_corrected": 0.6785}, "a1c0-die": {"before": null, "plateau": 46.0, "after": 46.0, "room_move_c": 0.0, "c_corrected": 0.6712}, "a1c1-die": {"before": null, "plateau": 50.35, "after": 50.0, "room_move_c": 0.318, "c_corrected": 0.6614}, "a2-nic": {"before": 43.22, "plateau": null, "after": 43.437}, "a2-nvme": {"before": 36.4, "plateau": null, "after": 36.9}, "a3-nic": {"before": 42.383, "plateau": 42.832, "after": 42.633, "room_move_c": 0.358, "c_corrected": 0.6602}, "a3-nvme": {"before": 35.9, "plateau": 36.9, "after": 35.9}, "a3c0-die": {"before": 49.0, "plateau": 50.0, "after": 50.0}}, "phone_battery_c": {"before": 30.4, "plateau": 30.4, "after": 30.4}}
+  A3 {"ratio": 0.999, "lo": 0.9355, "hi": 1.058, "band": [0.9, 1.11], "verdict": "PASS"}
+
+PART B, the drift
+  B0_gate: "OK"
+  R0: {"fall_w": 0.356, "fall_c_w_derived": 1.538, "range_c": 1.538, "expected_w": 0.437, "band_w": [0.1, 0.9], "against_expected": "INSIDE_BAND", "gate": "OK"}
+  B1: "ABOVE_TARGET"
+  B1_fit: {"slope": 0.472, "lo": 0.3707, "hi": 0.5733, "se": 0.0318, "icpt": -5.302, "rms": 0.0275, "n": 5, "df": 3, "x_range": 1.538}
+  B2: "INCONCLUSIVE"
+  B2_fit: {"slope": 1.4768, "lo": -0.0274, "hi": 2.981, "se": 0.4727, "icpt": -81.013, "rms": 0.4089, "n": 5, "df": 3, "x_range": 1.538}
+  BV: "INCONCLUSIVE"
+  B3: {"baseline": ["P3", "P6", "P7"], "per_probe": {"W1": {"dx_c": -0.661, "line_lead": null, "hold_lead": null, "warm": false}, "W2": {"dx_c": -0.661, "line_lead": -0.274, "hold_lead": -0.174, "warm": false}}, "min_lead_c": 0.5, "verdict_hold": "UNDER-RESOLVED", "verdict_line": "UNDER-RESOLVED"}
+  B4: {"fit_mhz": {"slope": -11.1411, "lo": -23.8475, "hi": 1.5654, "se": 3.9932, "icpt": 1838.659, "rms": 3.4543, "n": 5, "df": 3, "x_range": 1.538}, "verdict_mhz": "INCONCLUSIVE", "target_mhz": -12.0, "fit_w": {"slope": -1.0813, "lo": -2.2775, "hi": 0.115, "se": 0.376, "icpt": 155.94, "rms": 0.3252, "n": 5, "df": 3, "x_range": 1.538}, "verdict_w": "INCONCLUSIVE", "target_w": -1.0, "per_probe": {"P1": {"mhz": 771.4, "w": 52.37}, "P2": {"mhz": null, "w": null}, "P3": {"mhz": 789.9, "w": 54.18}, "P6": {"mhz": 783.8, "w": 53.62}, "P7": {"mhz": 787.1, "w": 53.72}, "W1": {"mhz": null, "w": null}, "W2": {"mhz": 787.2, "w": 53.96}}}
+  rest die (W-derived) {"P1": 95.51, "P2": 95.319, "P3": 94.588, "P6": 94.81, "P7": 94.502, "W1": 93.972, "W2": 93.972}
+  line per probe {"P1": 39.803, "P3": 39.331, "P6": 39.397, "P7": 39.31, "W2": 39.072} 
+  hold per probe {"P1": 60.415, "P3": 58.049, "P6": 58.795, "P7": 58.485, "W2": 58.268}
+  W1: rest W 21.7546 (history 20 min), rest20 {"rows": 173, "w": 21.7546, "die": 45.3699, "nic": 43.1653, "nvme": 36.2584, "cpu": 36.0578, "load": 1.0045, "window_end_ms": 1793572200008, "since_busy_min": 24.4, "busy_within_rest": false, "w_sd": 0.1}, rest60 {"w": 21.7537, "die": 45.0, "io": 46.02, "n": 600, "w_sd": 0.09}
+     0 fp32/zeros     W 32.71 die 50.40 line 35.44 MHz 794 fine 32.9612 gate {'held_s': 0.0, 'reached': True, 'die': 45.0}
+     1 fp16/zeros     W 33.30 die 51.99 line 36.76 MHz 795 fine 33.5256 gate {'held_s': 0.0, 'reached': True, 'die': 49.0}
+     2 int8/zeros     W 35.25 die 53.43 line 37.31 MHz 800 fine 35.2497 gate {'held_s': 0.0, 'reached': True, 'die': 50.0}
+     hold null
+  W2: rest W 21.7544 (history 20 min), rest20 {"rows": 122, "w": 21.7544, "die": 45.4426, "nic": 43.3197, "nvme": 36.8508, "cpu": 33.623, "load": 0.6373, "window_end_ms": 1793573773130, "since_busy_min": 20.1, "busy_within_rest": false, "w_sd": 0.083}, rest60 {"w": 21.7048, "die": 45.0, "io": 46.0, "n": 600, "w_sd": 0.092}
+     0 fp32/zeros     W 33.03 die 50.47 line 35.37 MHz 800 fine 33.0297 gate {'held_s': 0.0, 'reached': True, 'die': 45.0}
+     1 fp16/zeros     W 33.66 die 52.29 line 36.90 MHz 800 fine 33.6601 gate {'held_s': 0.0, 'reached': True, 'die': 49.0}
+     2 int8/zeros     W 35.35 die 53.76 line 37.60 MHz 800 fine 35.3473 gate {'held_s': 0.0, 'reached': True, 'die': 51.0}
+     3 int8/neg_ones  W 39.26 die 56.14 line 38.18 MHz 795 fine 39.5312 gate {'held_s': 0.0, 'reached': True, 'die': 52.0}
+     4 int8/sparse50  W 48.65 die 61.01 line 38.76 MHz 800 fine 48.6542 gate {'held_s': 0.0, 'reached': True, 'die': 54.0}
+     5 fp16/ones      W 54.43 die 64.95 line 40.06 MHz 792 fine 54.3185 gate {'held_s': 0.0, 'reached': True, 'die': 57.0}
+     6 int8/full      W 52.52 die 64.53 line 40.52 MHz 789 fine 53.575 gate {'held_s': 12.2, 'reached': True, 'die': 57.0}
+     7 fp32/randn     W 54.09 die 65.96 line 41.22 MHz 604 fine None gate {'held_s': 11.2, 'reached': True, 'die': 57.0}
+     8 fp16/ones      W 53.49 die 65.05 line 40.59 MHz 782 fine 53.7881 gate {'held_s': 15.2, 'reached': True, 'die': 57.0}
+     hold {"run": "HOLD-00-int8-neg_ones-hold-r1", "idx": 0, "kind": "int8/neg_ones", "rc_bad": 0, "t0_ms": 1793574697520, "processes": 39, "processes_planned": 39, "gate": {"held_s": 12.6, "reached": true, "die": 57.0}, "calibration": {"w_per_c": 0.389, "n": 2543, "die_span": [57, 60]}, "n": 1170, "w": 40.2878, "die": 58.2684, "io": 58.9556, "mhz": 796.5812, "share_800": 0.9812, "dips": [], "dips_in_work": 0, "fine_w": 40.5044, "fine_share": 0.9812, "w_nodip": 40.2878, "die_nodip": 58.2684, "die_values": {"57": 9, "58": 838, "59": 323}, "line": 39.8448, "line_nodip": 39.8448}
+
+PART C, the camera
+   {"laps_analysed": 5, "laps_total": 6, "stretches": 83, "roi_amp_mk": 1064.91, "roi_se_mk": 57.56, "roi_snr": 18.5, "roi_phase_deg": 50.89, "p_signflip": 0.09090909090909091, "p_floor": 0.0625, "board_amp_w": 4.5324, "board_snr": 130.51, "board_step_w": {"mean": 8.575999999999997, "sd": 0.07116178749862806, "se": 0.03182451884946541, "n": 5}, "C1": "PASS", "C2": "INCONCLUSIVE", "lag_0p005": {"deg": 45.94, "se": 14.85, "lo": 4.72, "hi": 87.17, "t": 2.776, "n_laps": 5, "H_mag": 234.96, "se_H_mag": 31.29, "f_hz": 0.004999915001444976}, "C3": "INSIDE", "lag_0p025": {"deg": 74.26, "se": 9.43, "e73": {"deg": 75.6, "se": 7.82}, "diff": -1.34, "sd": 12.25}, "h3_over_h1": 0.4549, "lag_0p015": {"deg": 79.6, "se": 25.67}, "harmonics": {"1": {"f_hz": 0.004999915001444976, "H_mag": 234.96, "se_H_mag": 31.29, "lag": 45.94, "se_lag": 14.85}, "3": {"f_hz": 0.014999745004334927, "H_mag": 106.88, "se_H_mag": 9.96, "lag": 79.6, "se_lag": 25.67}, "5": {"f_hz": 0.02499957500722488, "H_mag": 74.24, "se_H_mag": 7.72, "lag": 74.26, "se_lag": 9.43}, "7": {"f_hz": 0.03499940501011483, "H_mag": 91.69, "se_H_mag": 18.22, "lag": 68.46, "se_lag": 10.51}, "9": {"f_hz": 0.04499923501300478, "H_mag": 97.36, "se_H_mag": 15.75, "lag": 84.22, "se_lag": 8.88}}, "hold": {"launches": 100, "launches_held": 96, "share_held": 0.96, "samples_800_share": 0.9933244062672965, "die_mean_c": 54.25588940612216, "die_max_c": 57.333333333333336, "holds": true}, "C4": "PASS"}

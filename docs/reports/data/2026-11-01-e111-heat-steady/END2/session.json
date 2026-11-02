@@ -1,0 +1,77 @@
+{
+ "experiment": "E111",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793581243399,
+ "protocol": {
+  "experiment": "E111",
+  "request": "Q133",
+  "card": "aifoundry2",
+  "order_seed": 98,
+  "note": "E98's runner and blocks (run_e98.py's run_kspeed.py over E64's run_hpl.py, unchanged): REST holds no launch; SUS is E98's nine runs in E98's order behind E98's 57 C gate; nothing is set on the card",
+  "tools": {
+   "heater": "build/sparsity_t2/host/sparsity_host",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 85,
+   "board_cap_w": 97,
+   "cap_consecutive": 3,
+   "note": "E98's stops, unchanged: 85 C on the die mean or the hottest sensor (the lab's 85-90 C stop for long full-load runs, AGENT.md section 4), 97 W on three samples"
+  },
+  "caps": {
+   "max_card_min": 5
+  },
+  "step": "END2",
+  "blocks": [
+   {
+    "name": "REST",
+    "title": "the rest reading: no launch, the 10 Hz sampler on the idle card; the last 60 s are the reading",
+    "start": {
+     "mode": "cool",
+     "max_c": 99,
+     "max_wait_s": 5
+    },
+    "launch": {
+     "seconds": 2,
+     "budget": 3.5,
+     "processes": 0
+    },
+    "tail_s": 120,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "zeros",
+      "label": "rest"
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "REST-00-rest-r1"
+ ],
+ "sha256": {
+  "heater": "7adadf4f1ce331cc028c317561933d6d3209da0f0326b0ce9a124b39b15ac0d2",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e111/run_e111.py",
+  "--protocol",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e111/protocol-end2.json",
+  "--out",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/END2",
+  "--max-card-min",
+  "5"
+ ],
+ "git_head": "0c187e1262b0e0f7fb744da4c22211b5dcfa9958",
+ "git_dirty_hpl": ""
+}

@@ -1,0 +1,18 @@
+nice -n 10 /usr/bin/python3 /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/cam/reduce_hm.py /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM --out /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM-RED
+rc=0
+RED /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM-RED: 2521 bins x 96x128, 31501 packets, 25.00 fps, 187 FFC, scene 12 frames (38.5 s)
+
+nice -n 10 /usr/bin/python3 /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/cam/fpa_trace.py /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM --out /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM-RED/fpa.npz
+rc=0
+31501 frames -> /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM-RED/fpa.npz; vtemp 8319..8348, fpa_c 43.54..55.16 C
+
+nice -n 10 /usr/bin/python3 /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/cam/lockin_hlf.py /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM-RED --protocol /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/cam/protocol-cam.json --template /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/cam/prereg/e62_bloom_dt.npy --scene-ref /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/cam/prereg/e62_scene.npy --fpa /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM-RED/fpa.npz --out /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM-ANA --seed 111
+rc=0
+camera view vs E62: moved (-1, -1) full-res px, peak corr 0.97; template kept
+E111-F05: N=10 f=0.0050 Hz laps 5/6 bins 1322/2000 stretches 83; ROI 1064.9 +- 57.6 mK p=0.0909 ph 51 deg; board 4.532 W; step 8.576 W; H(f0) 235.0 +- 31.3 mK/W at 46 deg
+wrote /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM-ANA/lockin.json
+
+nice -n 10 /usr/bin/python3 /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/cam/dips_hlc.py /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM-RED --out /home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM-ANA/dips.json
+rc=0
+/home/yaroslavvb/claude/et-soc1-prototyping/build/e111/runs/CAM-RED: 4 of 120 launches dipped; onsets [3.78, 7.73, 3.7, 7.78]
+
