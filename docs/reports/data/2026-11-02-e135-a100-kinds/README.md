@@ -17,7 +17,7 @@ $8.66 ([`corrections-check.txt`](corrections-check.txt) §C13).*
 
 ## Corrections after verification
 
-*Mon 2 Nov 2026 (week 45), about 13:30 PST. An independent verifier re-derived every cell, gap, replicate and rule from
+*Mon 2 Nov 2026 (week 45), about 12:50 PST. An independent verifier re-derived every cell, gap, replicate and rule from
 the committed logs and found the data, the reduction, the registered verdicts, the timeline and the cost sound: all 150
 logs are byte-identical to the Modal Volume, and every derived file rebuilds byte-identical. It found the comparison
 with the ET-SoC-1 not like for like, the post-hoc 330 W figure quoted without its own calibration, and smaller slips. I
