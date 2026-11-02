@@ -1,0 +1,70 @@
+== C1: the ettelem source the box's binary matches
+box tree's tools/ettelem/ettelem.cpp sha256: ba9a0ac30a188f03762c77ade628cd16350d4f308ddf733d254db2a38068d214
+binary's usage line: usage: ettelem sample [--seconds T] [--every-ms M] [--reset-ms R] | config | loglevel debug|info | sptrace <out.bin>
+  efa3e8cd 2026-10-04 13:39  sha256 a6cf931b2a123e88…
+      usage: usage: ettelem sample [--seconds T] [--every-ms M] [--reset-ms R] | temp [--if-free] | config | loglevel debug|info | sptrace <out.bin>
+  1754701a 2026-10-02 10:22  sha256 e8d8d8a9e083be38…
+      usage: usage: ettelem sample [--seconds T] [--every-ms M] [--reset-ms R] | temp | config | loglevel debug|info | sptrace <out.bin>
+  eb7c762d 2026-09-25 23:18  sha256 39bfdc8a9a5304b2…
+      usage: usage: ettelem sample [--seconds T] [--every-ms M] [--reset-ms R] | config | loglevel debug|info | sptrace <out.bin>  <- the binary's usage line
+  de262730 2026-09-25 07:21  sha256 ba9a0ac30a188f03…  <- the box tree's source
+      usage: usage: ettelem sample [--seconds T] [--every-ms M] [--reset-ms R] | config | loglevel debug|info | sptrace <out.bin>  <- the binary's usage line
+  a7ecb2d4 2026-09-24 16:18  sha256 5264a76a68ae7491…
+      usage: usage: ettelem sample [--seconds T] [--every-ms M] | loglevel debug|info | sptrace <out.bin>
+  4845a60e 2026-09-23 11:30  sha256 73f61c9eadd2b1ce…
+      usage: usage: ettelem sample [--seconds T] [--every-ms M] | loglevel debug|info | sptrace <out.bin>
+  9df563ed 2026-09-22 13:00  sha256 86246a60f532f6d3…
+      usage: usage: ettelem sample [--seconds T] [--every-ms M] | loglevel debug|info | sptrace <out.bin>
+  df89c94f 2026-09-20 21:25  sha256 18317c19ed81365c…
+      usage: usage: ettelem sample [--seconds T] [--every-ms M] | loglevel debug|info | sptrace <out.bin>
+reviewed source (the table's build/ettelem/ entry) = HEAD's tools/ettelem/ettelem.cpp, sha256 a6cf931b2a123e88…
+  config()      byte-identical at de262730 and efa3e8cd: 1043 bytes
+  sample()      byte-identical at de262730 and efa3e8cd: 4445 bytes
+  resetStats()  byte-identical at de262730 and efa3e8cd: 351 bytes
+  get()         byte-identical at de262730 and efa3e8cd: 259 bytes
+  DM_CMD names in de262730: DM_CMD_GET_ASIC_FREQUENCIES, DM_CMD_GET_ASIC_VOLTAGE, DM_CMD_GET_MODULE_CURRENT_TEMPERATURE, DM_CMD_GET_MODULE_POWER, DM_CMD_GET_MODULE_POWER_STATE, DM_CMD_GET_MODULE_STATIC_TDP_LEVEL, DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS, DM_CMD_GET_MODULE_VOLTAGE, DM_CMD_GET_SP_STATS, DM_CMD_SET_DM_TRACE_CONFIG, DM_CMD_SET_STATS_RUN_CONTROL
+  DM_CMD names in efa3e8cd: DM_CMD_GET_ASIC_FREQUENCIES, DM_CMD_GET_ASIC_VOLTAGE, DM_CMD_GET_MODULE_CURRENT_TEMPERATURE, DM_CMD_GET_MODULE_POWER, DM_CMD_GET_MODULE_POWER_STATE, DM_CMD_GET_MODULE_STATIC_TDP_LEVEL, DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS, DM_CMD_GET_MODULE_VOLTAGE, DM_CMD_GET_SP_STATS, DM_CMD_SET_DM_TRACE_CONFIG, DM_CMD_SET_STATS_RUN_CONTROL
+  subcommands only in efa3e8cd: temp [--if-free]
+
+== C2 and C3: every telemetry sample of the smoke and the seven passes
+  p13201  board max by what ran: DRAM item 34.99 W, anchor_pi 36.58 W, between runs 26.75 W, burn-in 36.35 W, heater 53.04 W
+  p13210  board max by what ran: DRAM item 34.95 W, anchor_pi 36.77 W, between runs 27.09 W, burn-in 36.52 W, dp_zeros 32.40 W, heater 53.48 W
+  p13211  board max by what ran: DRAM item 34.97 W, anchor_pi 36.86 W, between runs 26.99 W, burn-in 36.52 W, dp_zeros 32.40 W, heater 53.32 W
+  p13212  board max by what ran: DRAM item 35.01 W, anchor_pi 36.69 W, between runs 27.16 W, burn-in 36.45 W, dp_zeros 32.41 W, heater 53.60 W
+  p13213  board max by what ran: DRAM item 34.96 W, anchor_pi 36.74 W, between runs 27.07 W, burn-in 36.55 W, dp_zeros 32.37 W, heater 53.42 W
+  p13214  board max by what ran: DRAM item 34.97 W, anchor_pi 36.72 W, between runs 26.90 W, burn-in 36.59 W, dp_zeros 32.44 W, heater 53.42 W
+  p13215  board max by what ran: DRAM item 35.01 W, anchor_pi 36.72 W, between runs 27.06 W, burn-in 36.55 W, dp_zeros 32.32 W, heater 53.41 W
+  p13216  board max by what ran: DRAM item 35.06 W, anchor_pi 36.64 W, between runs 26.93 W, burn-in 36.59 W, dp_zeros 32.43 W, heater 53.41 W
+samples: 18940
+C3 board power, instantaneous (board_w): max 53.60 W, pass p13212, during a heater
+C3 board max by what ran, all passes: DRAM item 35.06 W, anchor_pi 36.86 W, between runs 27.16 W, burn-in 36.59 W, dp_zeros 32.44 W, heater 53.60 W
+C3 die mean (temp_c.minshire[0], runitems.py's 78 C stop) max 61 C (first at p13201)
+C3 temp_c.pmic (runitems.py's 88 C stop) max 61 C; equal to temp_c.minshire[0] in 18925 of 18940 samples
+C3 margins: 75 W - 53.60 W = 21.40 W; 78 C - 61 C = 17 C; 88 C - 61 C = 27 C
+C3 sp.board_max_w values seen (the SP's since-reset maximum): [68.9]
+C3 PVT latches (temp_c.minshire low, high) seen: [(46, 87)]
+C3 since_reset_ms values seen: [-1]
+C3 minion clock (sp.minion_mhz) triples seen: [(600, 600, 600)]
+C2 die_mv.ddr (GET_ASIC_VOLTAGE, PVT memory-shire monitor; the reducer's DDR die rail): 762 to 768 mV
+C2 reg_mv.ddr (GET_MODULE_VOLTAGE, the PMIC's DDR voltage register): values seen [800] mV
+
+== C4: what R_all is made of (e132.json headline.contrasts.board, the registered primary arm)
+  R_all  +0.955 [+0.865, +1.045]  (the whole ladder: the not-periodic two-value image over constant lines (hart stream removed: -0.5114 x H))
+  D_all  +1.049 [+0.968, +1.130]  (the whole ladder: the not-periodic two-value image over constant lines (raw, no correction))
+  H      +0.184 [+0.120, +0.249]  (the hart stream: 504 more bits changed a line in a hart's own stream, every path's view equal)
+  rungs: R_0 +0.035, R_1 +0.138, R_2 +0.083, R_3 +0.220, R_4 +0.310, R_5 +0.013, R_6 +0.001, R_7 -0.094, R_hi +0.249
+  R_0 + ... + R_7 + R_hi = +0.9550 (R_all +0.9550)
+  the three named paths R_3 + R_4 + R_hi = +0.779 W; the other six rungs = +0.176 W
+  k_stream (gen/counts.json): {'dm_u4': 0.0, 'ab_7': 4.0, 'ab_x70': 508.0, 'ab_rnd': 257.75}; the hart stream's share of D_all = 257.75/504 x H = 0.5114 x 0.1844 = 0.0943 W
+  R_all + that share = +1.0493 W = D_all +1.0493
+  R_3 + R_4 + R_hi + H = +0.963 W (close to R_all by coincidence: H is not in R_all, and the other six rungs are)
+
+== C5: the encoded residuals and the hart stream in every arm (headline.contrasts.board)
+  e132.json              registered primary: dips removed, auto 0.0228 W/C
+      E448 +0.166 [+0.121, +0.210]; E56 +0.118 [-0.002, +0.237] (crosses 0); E192 +0.139 [+0.066, +0.213]; H +0.184 [+0.120, +0.249]; D_all +1.049 [+0.968, +1.130]; R_all +0.955 [+0.865, +1.045]
+  e132-leak0.2936.json   0.2936 W/C, dips removed
+      E448 +0.165 [+0.007, +0.322]; E56 +0.144 [-0.051, +0.339] (crosses 0); E192 +0.036 [-0.152, +0.224] (crosses 0); H +0.155 [+0.017, +0.293]; D_all +0.934 [+0.835, +1.034]; R_all +0.855 [+0.757, +0.953]
+  e132-leak0.3803.json   0.3803 W/C, dips removed
+      E448 +0.164 [-0.053, +0.381] (crosses 0); E56 +0.152 [-0.088, +0.392] (crosses 0); E192 +0.003 [-0.233, +0.239] (crosses 0); H +0.146 [-0.051, +0.342] (crosses 0); D_all +0.897 [+0.761, +1.034]; R_all +0.823 [+0.677, +0.969]
+  e132-unfiltered.json   unfiltered, its own auto
+      E448 +0.166 [+0.124, +0.208]; E56 +0.123 [-0.026, +0.272] (crosses 0); E192 +0.361 [+0.080, +0.641]; H +0.193 [+0.117, +0.270]; D_all +0.890 [+0.440, +1.340]; R_all +0.791 [+0.362, +1.220]

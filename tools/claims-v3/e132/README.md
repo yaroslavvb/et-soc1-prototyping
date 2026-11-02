@@ -139,6 +139,12 @@ before its next pass. No session starts after 15:00 PST; everything ends by 16:0
 The runs are E110's DRAM loads, 32–36 W on the board with the die at 58–59 °C (E110: every launch read 58.0 °C after a 59 °C preheat);
 `runitems.py` stops heating at 78 °C, far from any PMIC limit, and nothing here drives the card toward one.
 
+*Note added Mon 2 Nov 2026, after the run, from its verification (nothing above changed): no board-power stop was registered, and "32–36 W
+on the board" is the DRAM loads', not the session's. `runitems.py`'s fp32-randn preheat bursts read up to 53.60 W, the DRAM items at most
+35.06 W and the die mean at most 61 °C. Both of `runitems.py`'s stops were die readings: 78 °C on `temp_c.minshire[0]`, and 88 °C on
+`temp_c.pmic`, which is the minion shires' average again (equal in 18,925 of 18,940 samples). The data README's correction C3 gives the
+margins.*
+
 ## 5. Device commands sent
 
 *His rule of Mon 2 Nov 2026 (Q136): every device-management command a run's harness, sampler, host program and helpers send, classified
@@ -175,6 +181,13 @@ on `tools/claims-v3/e132/`, `lib.sh`, `mf/block.sh`, `runitems.py`, `text_hash.s
 `make_e110.py`: the nine reads above at 26 send sites, PMIC access on `GET_ASIC_VOLTAGE` and `GET_MODULE_VOLTAGE` only (reads), and one
 **conditional** write it cannot rule out from text, `STATS_RESET` at `lib.sh:154` (`start_sampler` forwards `"$@"`). Cleared by reading
 the call (above), recorded as a reviewed `--except`; with it and no allow-list the checker returns **GO** (`dmcmd-audit.txt`).
+
+*Note added Mon 2 Nov 2026, after the run, from its verification (nothing above changed): row 9's "(the DDR die rail is read from it)"
+belongs to row 5. The rail, `die_mv.ddr`, is `DM_CMD_GET_ASIC_VOLTAGE`'s PVT memory-shire reading (`thermal_pwr_mgmt.c:1172` at
+`836a4ab`); `GET_MODULE_VOLTAGE`'s DDR field is the PMIC's DDR set-point (`reg_mv.ddr`). And "the same `ettelem` binary" is the path
+`build/ettelem/`: the binary there on the box is built from lab commit `de262730`'s `tools/ettelem/ettelem.cpp` (`ba9a0ac3…`), not the
+`a6cf931b…` that Q136(w)'s table reviews for that path and the checker read. Its `config` and `sample` are byte-identical to the reviewed
+source's, so no class changes. The data README's corrections C1 and C2.*
 
 ## 6. How to run it (aifoundry3, in `~/aifoundry`)
 
@@ -232,3 +245,7 @@ Data on the box: `build/claims-v3/aifoundry3/e132/p<pass>/`, session log `build/
 ## Amendments
 
 *(none yet)*
+
+*Notes added after the run (not amendments: no procedure, prediction, rule or stop changed), Mon 2 Nov 2026, from the run's verification:
+one under § 4's budget and stops (the session's peaks; no board-power stop) and one under § 5 (the DDR die rail's command; the `ettelem`
+binary's source). The data README's § Corrections after verification lists every correction.*
