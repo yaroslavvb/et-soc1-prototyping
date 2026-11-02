@@ -4,7 +4,7 @@
     /usr/bin/python3 docs/reports/data/2026-11-02-q136b-rail-row/recut.py            # from the lab repo's root
         -> docs/reports/data/2026-11-02-q136b-rail-row/recut.json and recut.txt
 
-Needs numpy (a stock Mac's /usr/bin/python3 has it). Reads committed files only:
+Needs numpy (pip3 install --user numpy; a stock Mac's /usr/bin/python3 does not ship it). Reads committed files only:
   E77   docs/reports/data/2026-11-01-e77-rail-one-temperature/results.json   (per-launch rows, block drift, settling)
   E120  docs/reports/data/2026-11-01-e120-rail-redesign/results.json         (the same, and its registered V and B)
   the row  docs/reports/data/2026-10-27-q129-rail-ledger/rail-ledger.json    (footings, per-card drift, E38's idle)
