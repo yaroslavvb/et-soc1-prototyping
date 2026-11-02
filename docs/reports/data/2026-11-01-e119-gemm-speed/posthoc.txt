@@ -1,0 +1,62 @@
+POST HOC, labelled. Per arm and format: X by the registered launch means and by E105's fit; the [590, 610] launches' clocks; E(f) = T(f) - T_c1(f); spread
+arm.format     X means   X fit f600 mean n600    T600 E107 T600  a2/a3    T800    E600    E800 E800/E600  spr600  spr800
+c1.fp16          1.324   1.325     599.4    1  0.8977    0.8998 0.9977  0.6778  0.0000  0.0000         -   1.003   1.004
+c1.fp32          1.316   1.325     603.3    2  0.8920    0.8997 0.9914  0.6778  0.0000  0.0000         -   1.003   1.004
+c1.int8          1.319   1.320     599.5    1  0.4867    0.4879 0.9975  0.3688  0.0000  0.0000         -   1.006   1.009
+c16.fp16         1.064   1.064     599.3    2  2.5887    2.5954 0.9974  2.4340  1.6911  1.7562     1.039   1.000   1.000
+c16.fp32         1.065   1.065     599.5    4  2.5880    2.5958 0.9970  2.4307  1.6960  1.7529     1.034   1.000   1.000
+c16.int8         1.071   1.072     601.7    1  2.5763    2.5822 0.9977  2.4065  2.0896  2.0377     0.975   1.000   1.000
+c16r2.fp16       1.121   1.124     600.6    5  1.7341    1.7402 0.9965  1.5468  0.8364  0.8690     1.039   1.000   1.000
+c16r2.fp32       1.123   1.125     600.5    7  1.7344    1.7396 0.9970  1.5449  0.8425  0.8671     1.029   1.000   1.000
+c16r2.int8       1.103   1.104     599.4    3  1.5166    1.5207 0.9973  1.3747  1.0299  1.0059     0.977   1.000   1.000
+c16r32.fp16      1.300   1.302     599.2    1  0.9449    0.9469 0.9979  0.7266  0.0472  0.0488     1.034   1.000   1.000
+c16r32.fp32      1.301   1.301     599.2    2  0.9448    0.9469 0.9978  0.7262  0.0529  0.0485     0.917   1.000   1.000
+c16r32.int8      1.279   1.281     600.5    5  0.5399    0.5419 0.9963  0.4223  0.0532  0.0534     1.004   1.000   1.000
+c16r4.fp16       1.186   1.188     600.9   19  1.3136    1.3184 0.9964  1.1075  0.4159  0.4297     1.033   1.000   1.000
+c16r4.fp32       1.185   1.188     600.7   22  1.3133    1.3182 0.9963  1.1080  0.4213  0.4302     1.021   1.000   1.000
+c16r4.int8       1.148   1.150     601.1    5  0.9946    0.9985 0.9961  0.8667  0.5079  0.4979     0.980   1.000   1.000
+c16r8.fp16       1.239   1.239     599.5   72  1.1036    1.1065 0.9974  0.8906  0.2060  0.2128     1.033   1.000   1.000
+c16r8.fp32       1.239   1.240     599.6   81  1.1036    1.1066 0.9973  0.8907  0.2117  0.2129     1.006   1.000   1.000
+c16r8.int8       1.198   1.201     601.3    5  0.7344    0.7381 0.9950  0.6132  0.2477  0.2444     0.986   1.000   1.000
+c8s.fp16         1.125   1.127     600.3   16  1.4260    1.4303 0.9970  1.2679  0.5283  0.5902     1.117   1.143   1.156
+c8s.fp32         1.126   1.129     601.0   20  1.4253    1.4305 0.9964  1.2654  0.5333  0.5876     1.102   1.144   1.156
+c8s.int8         1.127   1.129     600.0   10  1.4351    1.4401 0.9965  1.2730  0.9484  0.9042     0.953   1.134   1.157
+
+POST HOC, labelled. The governed cells (results.json cells): burst clock, rate, board W, die max; sustained clock, rate, board W, die; limit
+  c1-fp16-zeros            burst  800.0 MHz   24.749  37.2 W  54 C | sus      - MHz        -     - W     - C None
+  c1-fp32-zeros            burst  800.0 MHz   12.376  36.1 W  51 C | sus      - MHz        -     - W     - C None
+  c1-int8-zeros            burst  800.0 MHz   90.968  39.9 W  55 C | sus      - MHz        -     - W     - C None
+  c16-fp16-randn           burst  800.0 MHz    6.888  51.5 W  59 C | sus      - MHz        -     - W     - C None
+  c16-fp16-zeros           burst  800.0 MHz    6.896  35.0 W  53 C | sus      - MHz        -     - W     - C None
+  c16-fp32-randn           burst  800.0 MHz    3.458  52.9 W  58 C | sus  790.7 MHz    3.442  55.7 W  64.6 C ['none']
+  c16-fp32-zeros           burst  800.0 MHz    3.458  34.0 W  50 C | sus      - MHz        -     - W     - C None
+  c16-int8-full            burst  800.0 MHz   13.944  41.2 W  56 C | sus      - MHz        -     - W     - C None
+  c16-int8-zeros           burst  800.0 MHz   13.941  35.0 W  54 C | sus      - MHz        -     - W     - C None
+  c16r2-fp16-randn         burst  800.0 MHz   10.846  59.4 W  60 C | sus  694.3 MHz   10.184  53.5 W  65.5 C ['thermal']
+  c16r2-fp16-zeros         burst  800.0 MHz   10.869  35.9 W  54 C | sus      - MHz        -     - W     - C None
+  c16r2-fp32-randn         burst  800.0 MHz    5.417  61.2 W  58 C | sus  695.4 MHz    5.095  55.3 W  65.5 C ['thermal']
+  c16r2-fp32-zeros         burst  800.0 MHz    5.417  34.2 W  50 C | sus  794.4 MHz    5.409  37.1 W  57.9 C ['none']
+  c16r2-int8-full          burst  800.0 MHz   24.341  44.9 W  56 C | sus  795.3 MHz   24.303  47.6 W  62.3 C ['none']
+  c16r2-int8-zeros         burst  800.0 MHz   24.431  36.1 W  55 C | sus      - MHz        -     - W     - C None
+  c16r32-fp16-zeros        burst  800.0 MHz   23.098  37.1 W  54 C | sus      - MHz        -     - W     - C None
+  c16r32-fp32-zeros        burst  800.0 MHz   11.549  35.7 W  51 C | sus      - MHz        -     - W     - C None
+  c16r32-int8-full         burst  800.0 MHz   79.465  63.9 W  60 C | sus  681.4 MHz   68.193  52.8 W  65.5 C ['thermal']
+  c16r32-int8-zeros        burst  800.0 MHz   79.409  39.4 W  55 C | sus      - MHz        -     - W     - C None
+  c16r4-fp16-randn         burst  780.4 MHz   14.798  65.1 W  60 C | sus  633.6 MHz   13.103  53.0 W  65.7 C ['thermal']
+  c16r4-fp16-zeros         burst  800.0 MHz   15.151  36.4 W  55 C | sus      - MHz        -     - W     - C None
+  c16r4-fp32-randn         burst  768.6 MHz    7.338  67.0 W  58 C | sus  636.7 MHz    6.576  55.7 W  65.7 C ['thermal']
+  c16r4-fp32-zeros         burst  800.0 MHz    7.566  35.9 W  57 C | sus  795.4 MHz    7.548  37.9 W  58.9 C ['none']
+  c16r4-int8-full          burst  800.0 MHz   38.647  49.6 W  57 C | sus  793.8 MHz   38.495  53.3 W  64.7 C ['none']
+  c16r4-int8-zeros         burst  800.0 MHz   38.696  37.2 W  56 C | sus      - MHz        -     - W     - C None
+  c16r8-fp16-randn         burst  731.5 MHz   17.315  66.4 W  61 C | sus  607.3 MHz   15.321  53.5 W  66.0 C ['thermal']
+  c16r8-fp16-zeros         burst  800.0 MHz   18.846  36.7 W  54 C | sus      - MHz        -     - W     - C None
+  c16r8-fp32-randn         burst  717.6 MHz    8.533  66.9 W  60 C | sus  603.6 MHz    7.626  55.3 W  65.9 C ['thermal']
+  c16r8-fp32-zeros         burst  800.0 MHz    9.418  35.2 W  50 C | sus  795.9 MHz    9.375  38.4 W  58.9 C ['none']
+  c16r8-int8-full          burst  800.0 MHz   54.669  55.0 W  58 C | sus  778.0 MHz   53.458  56.6 W  64.9 C ['thermal']
+  c16r8-int8-zeros         burst  800.0 MHz   54.779  37.9 W  55 C | sus      - MHz        -     - W     - C None
+  c8s-fp16-randn           burst  796.2 MHz   13.265  63.7 W  59 C | sus  653.6 MHz   12.119  53.0 W  65.6 C ['thermal']
+  c8s-fp16-zeros           burst  800.0 MHz   13.290  36.2 W  55 C | sus  794.4 MHz   13.173  37.1 W  58.1 C ['none']
+  c8s-fp32-randn           burst  788.5 MHz    6.593  63.0 W  57 C | sus  663.7 MHz    6.091  55.2 W  65.6 C ['thermal']
+  c8s-fp32-zeros           burst  800.0 MHz    6.641  35.5 W  57 C | sus  788.7 MHz    6.573  36.9 W  58.1 C ['none']
+  c8s-int8-full            burst  800.0 MHz   26.243  44.2 W  56 C | sus  790.2 MHz   26.234  47.2 W  62.9 C ['none']
+  c8s-int8-zeros           burst  800.0 MHz   26.421  35.6 W  56 C | sus  789.2 MHz   26.206  35.9 W  57.8 C ['none']

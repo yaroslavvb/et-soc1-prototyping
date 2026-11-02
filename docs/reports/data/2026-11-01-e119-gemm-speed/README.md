@@ -1,0 +1,87 @@
+# E119: what a clock gap buys in each of E107's arms, under aifoundry2's own governor
+
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): **item 1, "Where a large GEMM falls"**, as it reads at version `90e02fa93e9c`: "Still open: a large GEMM itself, which needs its own reuse per L2-sized block and its footprint, C included; what a clock gap buys in each of E107's arms, on a governed card; and the vendor's own binary, which nobody here has timed." E119 answers the middle part.*
+
+*Sun 1 Nov 2026 (week 44), Q134. Pre-registered in `695cad4c` ([`tools/claims-v3/e119/E119.md`](../../../../tools/claims-v3/e119/E119.md), frozen numbers in `predictions-e119.json`, rules R0-R6, scorer, self-test, a dry run of the runner and of the queue), before the claim and the first launch. It is the speed half that [E107](../2026-11-01-e107-gemm-placement/README.md) left (its arms, its binary `rgm107`, its T at 600 MHz on aifoundry3), framed by [E105](../2026-11-01-e105-gemm-layout/README.md) (the two ends on this card, its runner and power rule) and [E101](../2026-11-01-e101-real-matmul/README.md) (its registered 97 W stop fired on a hot start, so every start here is cool). **aifoundry2 card 0 under its own governor**: `ettelem config` read 65 W / 65 °C (low_power, 600 MHz, 519 mV) at the queue's start (19:30:25 PST) and end (20:11:16 PST) and after every run; nothing was set, no `--reset-ms`, no firmware-revisions query, no PMIC command. The card post was the day's single post in #community-lab, message `1566603178164617247`, rewritten at 19:29:59 PST to add "using aifoundry2 for 1 h, until ~20:29 PST" and at 20:12:15 PST to append " — released". **40.9 card-minutes**: the smoke (1.0 min) and one session (39.8 min), all 59 planned runs, none refused, none cut; the cap never bound.*
+
+## The answer
+
+**On aifoundry2, a third more clock (600 to 800 MHz) buys ×1.32 of speed in a block reused thousands of times, and less the less each block is reused: ×1.30, ×1.24, ×1.19 and ×1.12 at 32, 8, 4 and 2 passes per block, ×1.065 when each of 16 blocks is used once. In the walk whose 24 MB of operands sit in the L3 it buys ×1.13, the same in fp32, fp16 and int8: the L3-served path's wait does not follow the minion clock.** Every number is from this session's launches (fp32; `results.json` `rules.R2`, `rules.R3`):
+
+| arm | passes per block | X fp32 (frozen) | X fp16 (frozen) | X int8 (frozen) | T at 800 MHz, fp32 zeros, µs (frozen) | random fp32: burst, sustained MHz | zeros ÷ random, sustained rate (clock), fp32 |
+|---|---|---|---|---|---|---|---|
+| `c1` | thousands | 1.316 (1.324) | 1.325† (1.325) | 1.320† (1.320) | 0.6778 (0.6794) | not run (over 88 W) | E105: ×1.32 expected |
+| `c16r32` | 32 | 1.301 (1.297) | 1.302† (1.297) | 1.279 (1.274) | 0.7262 (0.7294) | not run (over 88 W) | |
+| `c16r8` | 8 | 1.239 (1.236) | 1.239 (1.236) | 1.198 (1.194) | 0.8906 (0.8948) | 717.6, 603.6 | ×1.229 (×1.319) |
+| `c16r4` | 4 | 1.185 (1.182) | 1.186 (1.182) | 1.148 (1.142) | 1.1080 (1.1154) | 768.6, 636.7 | ×1.148 (×1.249) |
+| `c16r2` | 2 | 1.123 (1.121) | 1.121 (1.121) | 1.103 (1.096) | 1.5449 (1.5565) | 800.0, 695.4 | ×1.062 (×1.142) |
+| `c16` | 1 | 1.065 (1.064) | 1.064 (1.064) | 1.072† (1.063) | 2.4259 (2.4388) | 800.0, 790.7 | ×1.005 (×1.012), post hoc‡ |
+| **`c8s`** | **1, from the L3** | **1.126** (M1 1.182, M2 1.328) | **1.125** (1.182, 1.328) | **1.127** (1.089, 1.329) | **1.2655** (1.2102) | 788.5, 663.7 | ×1.079 (×1.188) |
+
+X = T(600) ÷ T(800), what ×1.333 of clock buys; T = wall ÷ ops per minion, every kind pooled, from the launches whose kernel clock (cycles_max ÷ wall) read 590-610 MHz and at or above 790 MHz (`results.json` `per_arm`). The T800 column is zeros' launches at or above 790 MHz, bursts and sustained pooled (`results.json` `t800_us`). † too few 600 MHz launches, so X is from E105's fit T = C/f + M over 590-810 MHz, as registered. ‡ `c16` has no zeros sustained run here: its sustained gap is against zeros' burst rate (post hoc). The frozen numbers are M1 (`predictions-e119.json` `laws`): each arm's T at 600 MHz is E107's, each end's split into C/f + M is E105's aifoundry2 fit, and the rungs follow E107's reuse law at each clock.
+
+- **The reuse law holds at 800 MHz** (R1: REUSE IS THE VARIABLE AT 800 MHz, all three formats): T800(R) = Tinf + D ÷ R fits the five rungs to within 0.16% in fp32, 0.40% in fp16 and 0.68% in int8, with Tinf 1.1%, 1.4% and 3.6% under the repeated block's T (`rules.R1.per_format`). At 600 MHz on aifoundry3 E107 had 0.22%, 0.19% and 0.49%. In fp32 the cold excess D is 1.754 µs at 800 MHz against E107's 1.701 at 600: the walk's extra time per op grows 3% when the clock rises.
+- **So what the clock buys follows from the two ends and the law, rung by rung** (R2: all 18 cells PASS, within 0.03 of M1, 14 of them within 0.005; the order `c1` > `c16r32` > `c16r8` > `c16r4` > `c16r2` > `c16` holds in fp32). int8's rungs buy less than fp32's at each R (×1.198 against ×1.239 at 8 passes), because its 283-cycle FMA is a smaller part of the op than fp32's 528 cycles.
+- **The walk the L3 serves buys ×1.13, below even M1** (R3: OUTSIDE THE CLOCK in fp32, fp16 and int8; share of the way from M1 to M2 −0.38, −0.40 and +0.16). M1 kept the repeated block's 528 clock-following cycles and added the L3's extra time as a fixed wait; the walk does worse than that, because part of the FMA's time hides under the L3's wait. **The format does not matter there**: T at 600 MHz is 1.425, 1.426 and 1.435 µs, T at 800 MHz 1.265, 1.268 and 1.273 µs, in fp32, fp16 and int8.
+- **The governor turns X into the gap a sustained job sees.** Random fp32 settles at 604, 637, 695 and 664 MHz on `c16r8`, `c16r4`, `c16r2` and `c8s`, held at the 65 °C trip (55.2-55.7 W, die 65.5-65.9 °C; every one labelled `thermal`), while zeros hold 789-796 MHz at 37-38 W. So zeros beat random by ×1.229, ×1.148, ×1.062 and ×1.079 sustained, on clock gaps of ×1.319, ×1.249, ×1.142 and ×1.188 (R5: PASS on the three rungs and their order; **FAIL on `c8s`** in fp32 and fp16, ×1.079 and ×1.087 against ×1.168 and ×1.140 frozen, because M1's X for `c8s` was too high and the clock settled higher than the relation said). In a 6 s burst from a cool die the gaps are ×1.104, ×1.031, ×1.000 and ×1.007 (clock ×1.115, ×1.041, ×1.000, ×1.015).
+- **int8's random draws too little to be held back on these walks**: sustained 778, 794, 795 and 790 MHz on `c16r8`, `c16r4`, `c16r2` and `c8s` (`thermal` only on `c16r8`), so the sustained gap is ×1.00-1.03 (×0.999 measured on `c8s`, both runs sustained; the others against zeros' burst, post hoc). Only the 32-pass block reaches the trip in int8: 681 MHz at 52.8 W, ×1.16 against zeros' burst (post hoc).
+- **The kind never changes the count at a given clock** (R4 PASS: random's T at 800 MHz within 0.48% of zeros' on all 16 arms that have both, the worst `c8s` fp16).
+- **The power rule over-read every walk** (R6 PASS): random's burst power at 800 MHz came 3.3-14.6 W under its estimate (`c16r8` fp32 79.5 W against 84.1; `c8s` fp32 63.9 against 78.5), because a walk's rate gains less than the clock. The session's highest board reading was 85.71 W (`c16r8` fp32 random, the start of its sustained run), under the 93 W lock and the 97 W stop; the highest die reading 69 °C.
+- **The ties hold** (R0 PASS): T at 800 MHz of `c1` reads 0.6778 µs in fp32 and fp16 against E105's 0.6779, int8 0.3688 against 0.3775 (−2.3%, the build difference E107's R1 found: rgm107's int8 repeated block runs 283 clock-following cycles, rgm105's 289.5), and `c16` fp32 2.4259 against 2.435 (−0.37%). Every check of C read exact or approx.
+
+**What a third more clock buys in a GEMM-pattern kernel on this chip is set by how often each L2-sized block is reused, through one law at both clocks, and by where the misses are served: from DRAM or from the L3, the wait does not follow the minion clock, and in the L3-served walk the multiplier's format stops mattering.** E119 still runs E107's arms, not a large GEMM.
+
+## Registered against what happened
+
+59 runs in one session, none refused by the admission rule, none cut by the cap; 431 other-user checks, every one with no other user logged in, so the idle-login rule never had to leave anyone out (`aifoundry2/idle_logins.jsonl`, counts only).
+
+| rule | registered | measured | verdict |
+|---|---|---|---|
+| R0 the ties | `c1` T800 within 2% (fp32, fp16), 3% (int8) of E105's; `c16` fp32 within 3%; every check of C exact or approx | −0.01%, −0.01%, −2.3%; −0.37%; all exact or approx | **PASS** |
+| R1 reuse at 800 MHz | Tinf within 5% of T800(`c1`), every rung within 3% of the fit | 0.989 / 0.987 / 0.964; 0.16 / 0.40 / 0.68% | **REUSE IS THE VARIABLE AT 800 MHz**, all three |
+| R2 what the clock buys | each arm within 0.03 of M1; the fp32 order | 18 of 18 within 0.03 (largest +0.009, int8 `c16`); order holds | **PASS** |
+| R3 the walk the L3 serves | share ≤ 0.25 outside the clock, ≥ 0.75 follows it | −0.38 / −0.40 / +0.16 | **OUTSIDE THE CLOCK**, all three |
+| R4 the kind | random's T800 within 1% of zeros' | worst 0.48% over 16 | **PASS** |
+| R5 the governed gap, sustained | within 0.05 of frozen; fp32 order `c16r8` > `c16r4` > `c16r2` | `c16r8`, `c16r4`, `c16r2` fp32 and `c8s` int8 PASS; `c8s` fp32 −0.089, fp16 −0.053; order holds | **PASS ×4, FAIL ×2** |
+| R6 the estimate | measured burst power at 800 MHz ≤ estimate + 1 W | 16 of 16, 3.3-14.6 W under | **PASS** |
+
+**R5's failures are M1's, on the one arm it was least sure of.** M1 put `c8s`'s X at 1.182 and the relation put its random fp32 sustained clock at 611.5 MHz; it ran 663.7 MHz at X 1.126, so the gap came in at ×1.079 where ×1.168 was frozen. The frozen clocks, labelled and scored by no rule, ran 8.1 MHz rms in the bursts (37 cells) and 23.2 MHz rms sustained (20 cells), the sustained ones low, as in E105 (`results.json` `frozen_clocks_rms`).
+
+## Post hoc, labelled
+
+*Written after the session had started and after a look at its first launches; no rule reads any of it. [`posthoc_e119.py`](../../../../tools/claims-v3/e119/posthoc_e119.py) into [`posthoc.txt`](posthoc.txt) and `posthoc.json`.*
+
+- **Reuse divides the wait outside the clock as well as the time.** Per arm, E105's fit T = C/f + M (fp32): M is 1.957 µs in the cold walk and 0.965, 0.483, 0.250 and 0.070 µs at 2, 4, 8 and 32 passes, within 3% of 1.957 ÷ R, except at 32 passes (0.070 against 0.061); C rises from 378 to 464, 500, 512 and 524 cycles towards the repeated block's 527 (`results.json` `per_arm.<arm>.fit`). So reuse thins out both the hidden part of the FMA and the wait.
+- **The L3-served walk has the same split in every format**: C 392, 386 and 393 cycles and M 0.776, 0.785 and 0.782 µs in fp32, fp16 and int8. In int8, C (393) is more than the int8 FMA's own 283 cycles; in fp32 it is less than its 528. So the walk's clock-following part is about 390 cycles of the memory path, not of the multiplier, and about 61% of its op at 800 MHz is a wait outside the minion clock.
+- **The walk's extra time over the repeated block grows with the clock in fp32 and fp16** (×1.006 to ×1.039 along the ladder, ×1.10 and ×1.12 in `c8s`; fp32 `c16r32` reads ×0.92 only because `c1` fp32's T600 carries its fast 607 MHz launch) **and stays or shrinks a little in int8** (×0.95-1.00): E(f) = T(f) − T_c1(f) from the launch means (`posthoc.txt`). A clock-following FMA that overlaps the wait hides less of it at 800 MHz in the floats, where the FMA is long.
+- **The minions finish unevenly in the L3-served walk, on a second card**: slowest ÷ mean 1.134-1.144 at 600 MHz (E107 found 1.142 in fp32 on aifoundry3) and 1.156-1.157 at 800 MHz; every other arm 1.000-1.009.
+- **T at 600 MHz crosses cards**: this session's launch means read 0.2-0.5% under E107's pinned aifoundry3 T in every arm and format (0.995-0.998), except `c1` fp32 (0.991, its fast 607 MHz launch).
+- **The registered launch-mean X is up to 0.009 low where a 600 MHz launch ran fast**: the [590, 610] MHz window held one `c1` fp32 launch at 607 MHz, so its X reads 1.316 by the means and 1.325 by the fit (E105: ×1.324). The fit's X is within 0.009 of the means' in every cell.
+- **Sustained gaps where zeros had no sustained run**, against zeros' burst rate (zeros sustained read 0.15-1.0% under their bursts where both ran): fp16 `c16r8` ×1.230 (clock ×1.317), `c16r4` ×1.156 (×1.263), `c16r2` ×1.067 (×1.152); int8 `c16r32` ×1.165 (×1.174), `c16r8` ×1.025, `c16r4` ×1.005, `c16r2` ×1.005; fp32 `c16` ×1.005 (×1.012).
+
+## Departures and notes
+
+- **The build ran on aifoundry2's host** (Sun 1 Nov, 19:29:07-19:29:10 PST, `nice -n 10`, `-j2`, about 3 s), before the claim, with no card session running on that box; the brief keeps heavy compute off aifoundry2 and aifoundry3 because CPU load disturbs card measurements (E67). The binaries' sha256 are in `logs/e119-binaries.sha256`; they differ from E107's aifoundry3 build, as E105's two boxes' builds did, and R0 ties the behaviour.
+- **The box's tree** is an older checkout with other lanes' tool directories copied in; E119 copied its two (`tools/claims-v3/e107`, `tools/claims-v3/e119`, from `git archive` of `695cad4c`), and the 21 harness files it imports read the same sha256 on the box as in the committed tree.
+- **Not every burst's first launch ran at 600 MHz**: in the first back-to-back bursts the governor had not dropped the clock between runs, so those launches started at 628-726 MHz. Where an arm has fewer than two launches at 600 MHz, X is from the fit, as registered (†).
+- **The release came before the data commit**: the card was free at 20:11:16 PST and the clause was released at 20:12:15 PST, then the data were reduced and committed, so the card did not stay claimed while the README was written.
+- **The stock telemetry reads PMIC voltage registers** (two per `ettelem config`, eleven per sample, reads with no write, as in every run since September); whether "no PMIC command" covers such reads is an open question for the owner and Roman. The residency read after each run asked for raw states 1-3 only (E77's F1), so no SP error lines came from it.
+- The reduction ran on the Intel with the committed code; `reduce_e119.py` is the registered reducer.
+
+## What E119 says about the page
+
+- **Section 11 item 1 narrows again.** "What a clock gap buys in each of E107's arms, on a governed card" is measured: ×1.32 in a block reused thousands of times down to ×1.065 in a cold walk, rung by rung on E107's reuse law (which holds at 800 MHz too, to 0.7%), and ×1.13 in the walk the L3 serves, in every format, on aifoundry2 under its own governor, one session. Still open: a large GEMM itself and the vendor's binary. It must say R5 failed on `c8s` (M1's X too high there).
+- **The regimes section** may add, for E107's arms on aifoundry2: in every regime past the L2 the wait does not follow the minion clock, and reuse divides it (M = 1.96 µs ÷ R in fp32, post hoc). In the L3-served walk the format stops mattering: 1.27 µs an op at 800 MHz, ×1.13 for a third more clock.
+- **Section 3, speed**: zeros beat random fp32 sustained by ×1.23, ×1.15 and ×1.06 at 8, 4 and 2 passes per block, ×1.08 in the L3-served walk, and ×1.10 to ×1.00 in a burst; int8's random stays near 800 MHz on these walks (×1.00-1.03), except the 32-pass block (681 MHz). Each with "aifoundry2, its own governor, one run".
+- **The power rule**: estimating a walk from its own kind's S on a pinned card over-reads by 3-15 W at 800 MHz, a safe error; E105's corrected rule held.
+
+**For the post, in short sentences.** Each names its card and clock.
+- On aifoundry2 under its own governor, going from 600 to 800 MHz made a GEMM-pattern kernel 32% faster when each block was reused thousands of times, 24% faster at 8 passes per block, 19% at 4, 12% at 2, and 6.5% when each block was used once (`results.json` `rules.R2`).
+- E107's rule, that reusing a block R times divides the walk's extra time by R, holds at 800 MHz too, to 0.2% in fp32 (`rules.R1`).
+- When the walk's 24 MB fit in the chip's 32 MB L3, a third more clock bought only 13%, in fp32, fp16 and int8 alike: there the memory path sets the pace, not the multiplier (`rules.R3`).
+- In a sustained run the governor holds random fp32 at 604-695 MHz on these walks while zeros stay near 800, so zeros win by 23% at 8 passes per block, 15% at 4 and 6% at 2 (`rules.R5`).
+- int8 random draws too little to be held back on these walks: it stays near 800 MHz and the gap all but vanishes (`results.json` `cells`).
+
+## Files
+
+`results.json`, `reduce.txt` (`tools/claims-v3/e119/reduce_e119.py`, the registered reduction: per-run metrics, per arm X and the fit, the rules); `posthoc.json`, `posthoc.txt` (`posthoc_e119.py`, labelled); `aifoundry2/` (the queue's `queue.jsonl`, `status.json`, `admission.json`, `idle_logins.jsonl` (counts only), `snapshot-*.json`, `config-*.txt`, `sensors-*.json`, `history-before.jsonl`; `smoke/` and `s1/`: `runs.jsonl`, `marks.jsonl`, `launches.jsonl.gz`, `tel/*.jsonl.gz`, `sp/*.bin`, `session.json`, `kspeed.json`, `e119.json`, `manifest.txt`, `queries.jsonl`, `run.log`; `smoke.out`, `s1.out`); `logs/` (the build log, the binaries' and the code's sha256, the queue's output). The registration and code: [`tools/claims-v3/e119/`](../../../../tools/claims-v3/e119/README.md).
