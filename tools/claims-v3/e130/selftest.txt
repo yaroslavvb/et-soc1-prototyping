@@ -1,0 +1,37 @@
+E130 self-test: synthetic runs on the registered orders and sequence, sigma 0.025 W a run, 40 sessions a world (nothing here is a measurement)
+thresholds: T_B 30.68, T_A 27.58, T_S 18.07 fJ
+world booth_tree:
+     40/40  R1 RECODED, R2 FLAT, R3 RISES -> R4 BOOTH ON B
+    median 95% half-widths (fJ): B_odd_minus_even_fJ 9.4, A_odd_minus_even_fJ 2.2, A_sign_dense_minus_one_fJ 4.0
+    per netlist: booth_tree {'SURVIVES': 40}; booth {'SURVIVES': 40}; booth_swap {'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 40}; plain {'EXCLUDED by B_odd_minus_even_fJ': 17, 'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ': 23}
+  [pass] booth_tree: R4 reads BOOTH ON B in at least 80% of sessions (40/40)
+  [pass] booth_tree: R4 names a wrong group in at most 5% of sessions (0/40)
+world booth_swap:
+     40/40  R1 FLAT, R2 RECODED, R3 FLAT -> R4 BOOTH ON A
+    median 95% half-widths (fJ): B_odd_minus_even_fJ 9.0, A_odd_minus_even_fJ 2.3, A_sign_dense_minus_one_fJ 3.6
+    per netlist: booth_tree {'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 40}; booth {'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 40}; booth_swap {'SURVIVES': 34, 'EXCLUDED by B_odd_minus_even_fJ': 5, 'EXCLUDED by A_sign_dense_minus_one_fJ': 1}; plain {'EXCLUDED by A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 35, 'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 5}
+  [pass] booth_swap: R4 reads BOOTH ON A in at least 80% of sessions (40/40)
+  [pass] booth_swap: R4 names a wrong group in at most 5% of sessions (0/40)
+world plain:
+     40/40  R1 FLAT, R2 FLAT, R3 RISES -> R4 NO BOOTH
+    median 95% half-widths (fJ): B_odd_minus_even_fJ 10.3, A_odd_minus_even_fJ 2.2, A_sign_dense_minus_one_fJ 4.3
+    per netlist: booth_tree {'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ': 31, 'EXCLUDED by B_odd_minus_even_fJ': 8, 'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 1}; booth {'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ': 31, 'EXCLUDED by B_odd_minus_even_fJ': 7, 'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 2}; booth_swap {'EXCLUDED by A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 39, 'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 1}; plain {'SURVIVES': 39, 'EXCLUDED by B_odd_minus_even_fJ': 1}
+  [pass] plain: R4 reads NO BOOTH in at least 80% of sessions (40/40)
+  [pass] plain: R4 names a wrong group in at most 5% of sessions (0/40)
+world e79:
+     25/40  R1 RECODED, R2 FLAT, R3 RISES -> R4 BOOTH ON B
+     15/40  R1 INCONCLUSIVE, R2 FLAT, R3 RISES -> R4 INCONCLUSIVE between BOOTH ON B / NO BOOTH
+    median 95% half-widths (fJ): B_odd_minus_even_fJ 9.3, A_odd_minus_even_fJ 2.1, A_sign_dense_minus_one_fJ 3.6
+    per netlist: booth_tree {'EXCLUDED by B_odd_minus_even_fJ': 36, 'SURVIVES': 4}; booth {'EXCLUDED by B_odd_minus_even_fJ': 35, 'SURVIVES': 5}; booth_swap {'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 40}; plain {'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ': 20, 'EXCLUDED by B_odd_minus_even_fJ': 20}
+    power (reported, not checked): R4 reads BOOTH ON B in 25/40 sessions
+  [pass] e79: R4 names a wrong group in at most 5% of sessions (0/40)
+world both:
+     40/40  R1 RECODED, R2 RECODED, R3 FLAT -> R4 NONE OF THE FOUR
+    median 95% half-widths (fJ): B_odd_minus_even_fJ 8.7, A_odd_minus_even_fJ 2.2, A_sign_dense_minus_one_fJ 4.0
+    per netlist: booth_tree {'EXCLUDED by A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 40}; booth {'EXCLUDED by A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 40}; booth_swap {'EXCLUDED by B_odd_minus_even_fJ': 39, 'EXCLUDED by B_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 1}; plain {'EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ': 40}
+  [pass] both: R4 reads NONE OF THE FOUR in at least 80% of sessions (40/40)
+  [pass] both: R4 names a wrong group in at most 5% of sessions (0/40)
+  [pass] a +0.4 W glitch on an interior hb1 read sets block 13011 aside ([{'pass': 13011, 'why': ['train gate: int8.hb1 interior read +0.394 W off its line']}])
+  [pass] two B blocks: R1 NOT SCORED, R4 NOT SCORED (R1 NOT SCORED, R4 NOT SCORED)
+  [pass] every block order (13010-13029): each item has its own zero on both sides; registered counts (no problem)
+self-test: 12 of 12 checks pass
