@@ -1,0 +1,127 @@
+# E124: E109's int8-zeros test scores on a second card - the gap is per-time and the lanes oppose it (registered); per-op work is excluded at its reading's price but not below half the gap (Q134, aifoundry1 card 1, 600 MHz)
+
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): **item 11, "int8 zeros' extra 0.61 W"** (the complaint this answers: "Open: ... a replicate that scores, which needs 4–5 passes or a rule for a set-aside pass registered in advance"), with **item 15**'s live-zero part re-tested (E109 R7–R9). It replicates [E109](../2026-11-01-e109-int8-zeros/README.md) (aifoundry3, not scored).*
+
+*Sun 1 Nov 2026 (week 44), Q134, lane a1c1-e124-int8-zeros. Pre-registered in [`tools/claims-v3/e124/E124.md`](../../../../tools/claims-v3/e124/E124.md) with [`predictions-e124.json`](../../../../tools/claims-v3/e124/predictions-e124.json), committed and pushed as **`47995958`** (19:18:17 PST), before the claim (19:19:00 PST) and before any device opened. Amendment **A1** (`5ca4f13e`, 19:21:27 PST) was written after a failed launch that opened no device and before any data (§ Departures). **aifoundry1 card 1** (`V3_DEVICE=1`, its own lock) at **600 MHz, 498.8 mV**. `ettelem config` was read under card 1's lock with `timeout 10` at 19:21:38 and 19:46:21 PST: TDP 65 W, threshold 65 °C, 600 MHz, 499 mV both times (power state `low_power`, then `managed_power`). Nothing was set: no governor, TDP, threshold or clock set, no reset, no PMIC command, no `--reset-ms`. **Card session 19:21:38–19:46:21 PST, 24.7 card-minutes of the 30 allowed.** The card was claimed at 19:19:00 by rewriting the day's one card post in `#community-lab` (message `1566603178164617247`) and released at 19:47:16 by rewriting it again (§ How it ran).*
+
+## Results
+
+**The registered test scores: all four passes kept** (12410–12413; E78's gates unchanged, card 1's frame). The set-aside rule written for this replicate was not needed. The primary reduction kept every pass, so it carries every verdict below. ([`e124.json`](e124.json) › `passes`, `passes_set_aside` = []; [`extras.json`](extras.json) › `which_reduction_scores` = "primary")
+
+**E109's answer replicates in part (Z: PARTIAL).** R0 reads PER-TIME, R3 PASS and R2 LANES-OPPOSE, as E109's labelled reading did. R1 reads INCONCLUSIVE where E109's post-hoc three passes read FAIL. ([`scored.json`](scored.json) › `rules`; `extras.json` › `added_rules.Z`)
+
+1. **The gap is per-time** (R3 PASS, R0 PER-TIME). This session's gap is G = **0.548 ± 0.037 W** (int8 zeros 2.209 W over idle, fp32 zeros 1.662 W; E82 read 0.561 on this card). What neither the op rate nor the lanes move carries **G_rest = +1.54 ± 0.63 W**. Its 95% lower bound, 0.91 W, is above G/2 = 0.27 W. (`scored.json` › `gap`, `rules.R3_per_time`, `rules.R0_answer`)
+2. **The lanes oppose it** (R2 LANES-OPPOSE). Issuing the micro-ops on all-zero tiles costs **fp32 1.46 ± 0.14 W** and **int8 0.40 ± 0.20 W**, so the lanes favour int8 by **1.06 ± 0.24 W** (G_lane). That is the RTL bench's direction (its later revision's registers; E109 result 2). Per register-bit clock edge the bench's mask removes, that is **0.345 ± 0.034 fJ (fp32) and 0.47 ± 0.23 fJ (int8)**, int8's 1.35 ± 0.66 times fp32's paired by pass. That ratio is E109's 1.36 again, but here it does not exclude one price. (`scored.json` › `quantities.*.U`; `extras.json` › `reported`)
+3. **Per-op work is excluded at the price its reading needs, but not as a share of the gap** (Y2 PASS, R1 INCONCLUSIVE). With nothing issued, K = 8 nearly doubles the op rate. An op then costs **91 ± 101 pJ (fp32) and 84 ± 162 pJ (int8)**: at most **192 and 246 pJ** (95% upper bounds), against the **770 pJ** the ops reading needs (Y2 PASS). Its share of the gap, **G_op = +0.06 ± 0.37 W**, cannot be put below G/2 = 0.27 W, so R1 is INCONCLUSIVE, not FAIL. The width is the per-pass spread of e_op: G_op reads +0.22, +0.06, −0.27 and +0.23 W in the four passes. E109's FAIL came from a post-hoc three-pass reading, which this registered replicate does not confirm. (`scored.json` › `rules.R1_ops`, `gap.G_op.per_pass`; `extras.json` › `added_rules.Y2`)
+4. **With no micro-op issued, int8's loop costs 1.57 W more than fp32's** (Y1 PASS). Under mask 0x0000 (the same reads, cycles and op rate), int8's TensorFMA loop costs **1.765 ± 0.199 W** over idle and fp32's **0.199 ± 0.042 W**: N = **+1.567 ± 0.209 W**. The registered line was 0.84 W and the prediction 1.68 W (E109's labelled 1.735 ± 0.164 W × card 1's 0.970). Read prices do not carry it. If all of fp32's no-issue loop were reads, a read would cost at most **0.61 ± 0.13 pJ**, and at that price int8's extra reads buy **0.07 W**. int8's loop would need **4.1 pJ** a read. (`extras.json` › `added_rules.Y1`, `reported`)
+5. **The silicon keeps the RTL's schedule on a second card** (R6 PASS ×10). Every arm's cycles per op equal the predicted (the bench's plus E109's fitted 7.75) to 0.001 of a cycle: fp32 544.001 / 282.001 / 290.001 / 280.001, int8 318.001 / 166.0 / 190.0 / 166.0, and the two masked item-15 tiles 544.001. This kernel was built on aifoundry1, a different binary from E109's, and the smoke read the same cycles. (`scored.json` › `rules.R6_cycles`; [`logs/session.log`](logs/session.log), the smoke lines)
+6. **Item 15, the live zero: gated lanes do something with random B** (R8 FAIL, R7 PASS).
+   - With no micro-op issued, A = −0 and A = +0 cost the same: **+0.08 ± 0.13 W** (R7 PASS, registered here for the first time).
+   - In fully gated lanes, random B costs **0.64 ± 0.19 W** beyond its transport to the register files (R8 FAIL against ±0.25 W, registered). B's random bytes reaching the register files with no micro-op cost **T₊ = 0.21 ± 0.09 W** (A = +0) and **T₋ = 0.29 ± 0.04 W** (A = −0).
+   - From a constant live lane (π × π, 8.12 W) to a live −0 lane with random B, the step is **4.11 ± 0.13 W** (paired by pass; E109: 4.15 ± 0.15 W). Of that, 0.29 W goes with B's bytes reaching the register files, and **3.82 ± 0.16 W** is inside the live lanes (E109: 3.92 ± 0.38).
+   - The tile reads **12.23 ± 0.08 W** (E93 on this card: 12.11). (`scored.json` › `item15`, `rules.R7_sign_unseen`, `rules.R8_gated_transport`; `extras.json` › `reported.live_over_constant_w`)
+7. **The session ties to E82 and E93 on this card in all seven cells** (R10 PASS ×7): fp32 random 23.91 (E82 23.99), fp16 random 21.49 (21.44), int8 `full` 6.98 (6.87), π 8.12 (8.10), `a_zeros_b_randn` 0.85 (0.72), the gap 0.548 (0.561), `a_nz_b_randn` 12.23 W (E93 12.11). (`scored.json` › `rules.R10_tie`)
+8. **B-line reads are not resolved** (R4 NOT-RESOLVED; CONSISTENT). r_B = 2.7 ± 4.1 pJ a 256-bit read includes 0 and the reads reading's 4.44 pJ. The lane side is additive within its noise but not inside ±0.15 W (R5 INCONCLUSIVE ×2: −0.01 ± 0.32 and −0.02 ± 0.37 W). (`scored.json` › `rules.R4_b_reads`, `rules.R5_additive`)
+
+**Beside E109.** Of the twenty quantities set beside E109's labelled three-pass values, the two sessions' 95% intervals overlap on sixteen: G, G_lane, G_op, G_rest, U ×2, e_op ×2, r_B, R7, R8, T₋, N, U per edge ×2, and the live step. The ratios are 0.90–0.97 where the interval is tight, about card 1's 0.970 scale. The four that do not overlap are levels over idle in the no-issue loop: S(m0) fp32 0.199 against 0.376 W, S(m0) int8 1.765 against 2.111 W, and the two read ceilings derived from them. Their difference N overlaps. (`extras.json` › `beside_e109`)
+
+**What it changes.** Item 11 moves from *narrowed on labelled readings* to **narrowed by a registered test on a second card**. The extra cost of int8 zeros is a per-time excess (R0, R3), not the lanes, which favour int8 by about 1.06 W (R2). With nothing issued, int8's loop costs about 1.6 W more than fp32's (Y1, registered), and no single read price carries that. The per-op price is far below what the ops reading needs (Y2). As a share, per-op work is not bounded below half the gap (R1 INCONCLUSIVE), so "per-op work fails" stays E109's labelled reading, not a registered one. What item 11 still leaves open does not change: where the 1.7 W goes (the register arrays, the scratchpad's int8 reads, the core). For item 15, R8's "gated lanes cost something with random B" (0.64 W) is registered on this card, and R7's "A's sign is invisible with no micro-op" too.
+
+**Why it scored where E109 did not: the meter dips.** The dips-kept arm (E78's frame as E109 ran it) sets aside **two of the four passes**: 12410 (fp16 random spans 1.717 W) and 12412 (fp16 random spans 1.886 W, π drifts +1.082 W). That leaves two, and nothing scores, which is E109's failure again. The registered primary removes card 1's launch-gap dips first (E82 A2: 7, 6, 11 and 12 samples a pass) and keeps all four. Before the freeze the same filter was run on E109's own passes, and it keeps 10912, which E109 set aside (`tools/claims-v3/e124/selftest.txt` D). So E109's set-aside on aifoundry3 was also a meter dip. Post hoc, with the dips kept and the set-aside rule applied, three passes are kept (12412 stays out by its π drift), and every verdict reads as in the primary ([`posthoc/`](posthoc/)). (`e124-dipskept.json` › `passes_set_aside`; `e124.json` › `reducer.dip_samples_removed`)
+
+## The arms (primary reduction)
+
+D is over the format's zeros (interpolated between the pass's three zeros anchors) and S over the idle bracket, ± 95% over 4 passes. "Cycles" is the median over the kept runs; "predicted" is frozen (`predictions-e124.json` › `rules.R6_cycles.predicted`, E109's). Source: `e124.json` › `items`.
+
+| item | cycles | predicted | ops/s (10⁹) | D | S |
+|---|---|---|---|---|---|
+| `fp32.zeros` | 546.001 | 546.0 | 1.1207 | 0 | +1.662 ± 0.075 |
+| `m0.fp32.zeros` | 544.001 | 544.0 | 1.1251 | −1.457 ± 0.142 | +0.199 ± 0.042 |
+| `k8.fp32.zeros` | 282.001 | 282.0 | 2.1706 | +0.045 ± 0.226 | +1.622 ± 0.210 |
+| `r8.fp32.zeros` | 290.001 | 290.0 | 2.1107 | +0.128 ± 0.131 | +1.782 ± 0.143 |
+| `m0k8.fp32.zeros` | 280.001 | 280.0 | 2.1860 | −1.360 ± 0.064 | +0.269 ± 0.111 |
+| `int8.zeros` | 318.001 | 318.0 | 1.9248 | 0 | +2.209 ± 0.106 |
+| `m0.int8.zeros` | 318.001 | 318.0 | 1.9249 | −0.401 ± 0.199 | +1.765 ± 0.199 |
+| `k8.int8.zeros` | 166.000 | 166.0 | 3.6881 | +0.112 ± 0.170 | +2.283 ± 0.206 |
+| `r8.int8.zeros` | 190.000 | 190.0 | 3.2213 | +0.064 ± 0.089 | +2.216 ± 0.189 |
+| `m0k8.int8.zeros` | 166.000 | 166.0 | 3.6874 | −0.253 ± 0.100 | +1.866 ± 0.149 |
+| `fp32.a_zeros_b_randn` | 546.001 | — | 1.1209 | +0.849 ± 0.192 | +2.401 ± 0.220 |
+| `m0.fp32.a_zeros_b_randn` | 544.001 | 544.0 | 1.1251 | −1.250 ± 0.214 | +0.522 ± 0.118 |
+| `fp32.a_nz_b_randn` | 546.001 | — | 1.1206 | +12.229 ± 0.082 | +13.819 ± 0.122 |
+| `m0.fp32.a_nz_b_randn` | 544.001 | 544.0 | 1.1246 | −1.166 ± 0.121 | +0.429 ± 0.074 |
+| `anchor_pi` | 546.001 | — | 1.1207 | +8.121 ± 0.064 | +9.731 ± 0.147 |
+| `fp32.randn` | 546.001 | — | 1.1210 | +23.910 ± 0.073 | +25.582 ± 0.079 |
+| `fp16.randn` | 546.001 | — | 1.1208 | +21.486 ± 0.044 | +23.113 ± 0.064 |
+| `int8.full` | 318.001 | — | 1.9247 | +6.980 ± 0.201 | +9.180 ± 0.052 |
+
+`m0` = the row mask 0x0000 (no micro-op issued), `k8` = K of 8, `r8` = 8 A rows, `m0k8` = both. Idle 33.08 W; leakage slope frozen at 0.2414 W/°C (E82's on this card); idle consistency median 0.08 W over 48 cells; 128 of 128 runs kept; 600 MHz in every run; duty 0.9958–0.9964.
+
+## The registered rules against the data
+
+`scored.json` is `score_e109.py`'s output (E109's scorer, unchanged) with `predictions-e124.json`; `extras.json` is `extras_e124.py`'s. The two arms are registered and reported, and a verdict that moves between them is marked.
+
+| rule | registered line | **E124 (primary, 4 passes)** | dips kept (2 passes) | leakage `auto` (0.192) | E109 (3 passes, post hoc) |
+|---|---|---|---|---|---|
+| R0 the answer | a share with 95% lower bound ≥ G/2 | **PER-TIME** | MIXED | PER-TIME | PER-TIME |
+| R1 per-op work | G_op ≥ G/2 | **INCONCLUSIVE** (+0.06 ± 0.37) | INCONCLUSIVE | INCONCLUSIVE | FAIL |
+| R2 the lanes | OPPOSE if upper < 0 | **LANES-OPPOSE** (−1.06 ± 0.24) | LANES-OPPOSE | LANES-OPPOSE | LANES-OPPOSE |
+| R3 per-time | G_rest ≥ G/2 | **PASS** (+1.54 ± 0.63) | INCONCLUSIVE | PASS | PASS |
+| R4 B reads | r_B > 0; 4.44 pJ inside | **NOT-RESOLVED; CONSISTENT** (2.7 ± 4.1 pJ) | NOT-RESOLVED | NOT-RESOLVED | NOT-RESOLVED; CONSISTENT |
+| R5 additive lanes | inside ±0.15 W | **INCONCLUSIVE ×2** | INCONCLUSIVE ×2 | INCONCLUSIVE ×2 | fp32 INCONCLUSIVE, int8 PASS |
+| R6 the RTL's cycles | \|measured − predicted\| ≤ 2 | **PASS ×10** (every difference ≤ 0.001) | PASS ×10 | PASS ×10 | PASS ×10 |
+| R7 A's sign unseen | inside ±0.25 W | **PASS** (+0.08 ± 0.13) | INCONCLUSIVE | PASS | PASS |
+| R8 gated = transport | inside ±0.25 W | **FAIL** (+0.64 ± 0.19) | INCONCLUSIVE | FAIL | FAIL |
+| R10 the tie | seven cells (card 1) | **PASS ×7** | PASS ×7 | PASS ×7 | (E78 cells) PASS ×6 |
+| Y1 the no-issue gap | lower ≥ 0.84 W | **PASS** (+1.57 ± 0.21) | — | — | (labelled 1.73 ± 0.16) |
+| Y2 per-op ceiling | both upper < 769.7 pJ | **PASS** (192, 246 pJ) | — | — | (labelled 225, 103 pJ) |
+| Z E109's answer | R0–R3 as E109's | **PARTIAL** (R1) | — | — | — |
+
+**Arm-sensitive:** R0, R3, R7 and R8 move with the dips kept, where only two passes remain: at one degree of freedom (t 12.7) the same scatter between passes gives intervals about 5.6 times wider than at four passes. No verdict moves with the leakage slope. The frozen readings' rms over the eight item-11 arms at the measured rates (W): reads 0.63, ops 1.14, the RTL count 0.43. All three miss, as on aifoundry3 (0.67, 1.19, 0.46).
+
+## Registered against what happened
+
+| | registered | happened |
+|---|---|---|
+| freeze | committed and pushed before the claim and the first launch | `47995958`, 19:18:17 PST; claim 19:19:00; amendment A1 `5ca4f13e` 19:21:27 (before any device opened); first device process 19:21:38 (the opening config read) |
+| desk | self-test; the build on the box; `check_e124.py`; `V3_DRY` of the smoke and one pass | [`selftest.txt`](../../../../tools/claims-v3/e124/selftest.txt) PASS (A–D); [`logs/box-build.log`](logs/box-build.log) (sources' sha256 = aifoundry3's); [`logs/desk-check.log`](logs/desk-check.log) (19 files); [`logs/desk-dry-smoke.log`](logs/desk-dry-smoke.log), [`logs/desk-dry-12410.log`](logs/desk-dry-12410.log) |
+| smoke | 8 items; E109's gate (launch records, `ok`, `tensor_errors` 0) | 19:21:39–19:22:27; every item 6 launch records, all `ok`, `tensor_errors` 0: SMOKE-GATE PASS; cycles as R6 predicts |
+| passes | 12410–12414 inside 30 card-minutes, 4 expected | 12410 (360 s), 12411 (349 s), 12412 (338 s), 12413 (327 s); 12414 not started (projected end 1,844 s > 1,650 s from the anchor) |
+| kept | at least 3; the set-aside rule if the primary keeps fewer | **4 of 4** by E78's gates; the rule not needed (the relaxed reduction also keeps 4) |
+| runs | 32 a pass | 128 of 128 ran, none failed a run gate |
+| budget | at most 30 card-minutes (A1: from the session's first config read to its last) | 24.7 (19:21:38–19:46:21); claim to release 28.3 min (19:19:00–19:47:16) |
+| config | read at both ends, never set | TDP 65 W, 65 °C, 600 MHz, 499 mV at both ends of the session and of every pass |
+
+## Departures (dated)
+
+- **A1, Sun 1 Nov 2026, 19:2x PST, before any device opened and before any data** ([`E124.md`](../../../../tools/claims-v3/e124/E124.md) § Amendments, `5ca4f13e`). The first launch (19:19:18 PST) stopped at bash's parse of `session_e124.sh`. An apostrophe inside `${E124_T0:?…}` opened a single-quoted string, and `queue_e124.sh` had the same fault ([`logs/session-launch1-parse-error.out`](logs/session-launch1-parse-error.out)). Nothing ran past `export`. Both messages were reworded, both scripts parse-checked, and the queue was tested with a 1 s stub on the box ([`logs/desk-stub-queue.log`](logs/desk-stub-queue.log)). The 30 card-minute budget's anchor moved from the claim post to the relaunch (19:21:37), counted as E109 counted card-minutes, so that the failed launch did not cut four passes to three. The registered desk step's `V3_DRY` had exercised `block_e109.sh` but not the two new scripts. That gap is how the fault got through.
+- **19:47 PST, the release: a re-read** (no data touched). The first rewrite of the day's post refused with exit 7: the post named two more cards (aifoundry3 and aifoundry2, other lanes) than the plan's snapshot showed. The text was rebuilt from what the edit box held, and this card's clause was dropped while the other two were kept, per the one-post-a-day rule (§ How it ran).
+- **Post hoc, after the data: [`posthoc/`](posthoc/)**, `reduce_e124.py --keep-dips --relax-random` and `score_e109.py` on it, to see whether the set-aside rule alone would have rescued the dips-kept frame. It keeps three passes, and every verdict reads as in the primary (G_op +0.17 ± 0.23 W; G_rest +1.35 ± 0.27 W). Labelled post hoc; it decides nothing.
+
+## How it ran
+
+19:18:17 registration pushed. 19:19:00 the claim: the day's one card post (`1566603178164617247`), which read `<ai> **Claude says:** using aifoundry3 for 1 h, until ~17:05 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>) — released`, was rewritten to `<ai> **Claude says:** using aifoundry1 card 1 for 1 h, until ~20:20 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)` (`edit_replace.mjs` with `EXPECT_TEXT`, dry run, save, read back). 19:19:18 the first launch failed to parse (A1). 19:21:37 `session_e124.sh` started detached on the box (`setsid nohup`): `check_e124.py` (HARNESS OK); `et-who` (no holder); the opening config read under card 1's lock; the smoke and its gate; `queue_e124.sh`; the closing config read; `et-who` (no holder). The other lab user's idle logins (since 26 Oct) were present throughout; no other user's process, device node or card lock was seen (E78's departure D1 for `aifoundry1-c*`).
+
+Each pass ran E78's two burn-in runs of π, then 32 registered runs: π first and last, E78's six anchors in each of three segments, and E109's 12 items dealt round-robin with seed `E109|aifoundry1-c1|<pass>`. Each run launched at a 58 °C die reading after a 59 °C preheat, with 2 s quiet and 4 s FMA runs on all 1,024 minions. Pass 12410 began from a 51 °C die.
+
+19:47:16 the release: the post then read `…using aifoundry1 card 1 for 1 h, until ~20:20 PST [doc](…); using aifoundry3 for 1 h, until ~20:25 PST [doc](…); using aifoundry2 for 1 h, until ~20:29 PST [doc](…)`. It was rewritten to the two clauses still held, `<ai> **Claude says:** using aifoundry3 for 1 h, until ~20:25 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>); using aifoundry2 for 1 h, until ~20:29 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)`, and read back.
+
+19:48–19:50 the data were collected to the Intel ([`collect_e124.sh`](../../../../tools/claims-v3/e124/collect_e124.sh)), then reduced, scored and read with [`pipeline_e124.sh`](../../../../tools/claims-v3/e124/pipeline_e124.sh). `reduce_e124.py` checks the 19 reused files' sha256 against the freeze before it reads anything.
+
+The stock `ettelem` reads two PMIC voltage registers per `config` call and eleven per `sample` (reads, no write), as in every run since September. Whether "no PMIC command" covers such reads is the owner's open question of 1 Nov; it is disclosed here, not settled.
+
+## Files
+
+`e124.json`, `runs.csv`, `reduce.txt`, `reduce.log` (the primary reduction); `scored.json`, `results.md` (`score_e109.py` on it); `e124-relaxed.json`, `scored-relaxed.json`, `results-relaxed.md` and logs (the set-aside rule's reduction, always run, not needed); `e124-dipskept.json`, `e124-auto.json` with their `scored-*`, `results-*`, `runs-*`, `reduce-*` (the two registered arms); `extras.json`, `extras.txt` (Y1, Y2, Z, the reported readings, the table beside E109); `posthoc/` (dips kept with the set-aside rule; post hoc); `aifoundry1-c1/e124/p1241[0-3]/` (every pass's raw data: `runs.jsonl`, `marks.jsonl`, `telemetry.jsonl.gz`, `tiles/`, `config_start.json`, `config_end.json`, `manifest.txt`, `binaries.sha256`, `code.sha256`, `gen.sha256`, `configs.json`, `plan.json`, `run.log`, `block.json`); `aifoundry1-c1/e124-smoke/p12401/`; `logs/` (the session and its two config reads with their times, the queue, the failed first launch, the box build, the desk check, the two dry runs, the stub queue test, `binaries.sha256`, `anchor-t0.txt`). The registration and code are in [`tools/claims-v3/e124/`](../../../../tools/claims-v3/e124/README.md); E109's code, run unchanged, is in [`tools/claims-v3/e109/`](../../../../tools/claims-v3/e109/README.md).
+
+Rerun from the repo root: `bash tools/claims-v3/e124/pipeline_e124.sh <out dir> docs/reports/data/2026-11-01-e124-int8-zeros-replicate/aifoundry1-c1/e124/p1241[0-3]` (needs `uv` for numpy). Post hoc: `uv run tools/claims-v3/e124/reduce_e124.py <the same passes> --keep-dips --relax-random --leak 0.2414 --no-refit --out e124-dipskept-relaxed.json`, then `python3 tools/claims-v3/e109/score_e109.py e124-dipskept-relaxed.json --pred tools/claims-v3/e124/predictions-e124.json --out scored-dipskept-relaxed.json`.
+
+## Blog sentences, each with its baseline, its card and its source
+
+*Any line about the RTL is about its later revision (Erbium, core-et), not the ET-SoC-1's own.*
+
+- On a second ET-SoC-1 card, a pre-registered test now confirms where int8's extra cost on all-zero tiles sits. It is in what runs every cycle, not in the multiply lanes: the per-time part alone is 1.5 ± 0.6 W, the lanes favour int8 by about 1.06 W, and the net is the 0.55 W gap. [aifoundry1 card 1, 600 MHz; `scored.json` › `rules.R0_answer`, `R2_lanes`, `R3_per_time`]
+- With every micro-op suppressed, the same TensorFMA loop costs 1.57 ± 0.21 W more in int8 than in fp32 on this card, close to the 1.73 W read on another card. No single price per scratchpad read explains it. [aifoundry1 card 1; `extras.json` › `added_rules.Y1`, `reported`]
+- Doubling the op rate with no lanes working costs at most about 0.2 nJ an op (95% upper bounds 192 pJ in fp32, 246 pJ in int8), far below the 0.77 nJ that "int8 just runs more ops" would need. As a share of the gap, per-op work is not bounded below half (inconclusive). [aifoundry1 card 1; `extras.json` › `added_rules.Y2`; `scored.json` › `rules.R1_ops`]
+- A second card keeps the RTL's schedule (its later revision, Erbium) to a thousandth of a cycle: ten shortened or masked TensorFMA shapes take exactly the predicted cycles, on a kernel built separately on that box. [aifoundry1 card 1; `scored.json` › `rules.R6_cycles`]
+- Even when every lane is gated off by a zero, random numbers on B cost 0.64 ± 0.19 W more than moving them into the register files, so gated lanes are not idle. [aifoundry1 card 1; `scored.json` › `rules.R8_gated_transport`]
+- The board's power meter occasionally reads a launch gap as a 4 W dip. Removing those samples, a rule fixed before the run, is what let this replicate keep all four passes. Without it, two passes fall out, as one did in the first run on another card. [aifoundry1 card 1; `e124-dipskept.json` › `passes_set_aside`; `tools/claims-v3/e124/selftest.txt` D]

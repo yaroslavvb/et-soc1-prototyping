@@ -1,0 +1,38 @@
+E78 aifoundry1-c1: 600 MHz, 498.8 mV, leak 0.2414 W/C (-1 runs), runs kept 64/128, passes [12411, 12413], idle-invalid runs 0
+  passes set aside: [{'pass': 12410, 'why': ['fp16.randn spans 1.717 W']}, {'pass': 12412, 'why': ['fp16.randn spans 1.886 W', 'anchor_pi drifts +1.082 W']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.001, 'm0:fp32': 544.001, 'm0:int8': 318.001, 'k8:fp32': 282.001, 'k8:int8': 166.0, 'r8:fp32': 290.001, 'r8:int8': 190.0, 'm0k8:fp32': 280.001, 'm0k8:int8': 166.0}; idle level 33.0871315625
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 23.919  0.604    25.541      22782    5.562
+    fp32.a_nz_b_randn          12.103  1.422    13.716      12239    2.988
+    anchor_pi                   7.966  1.847     9.605       8571    2.092
+    fp32.a_zeros_b_randn        0.898  1.153     2.357       2103    0.514
+    fp32.zeros                  0.000  0.000     1.640       1464    0.357
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 21.466  0.230    23.098      20611    2.516
+    fp16.zeros                  0.000  0.000     1.692       1509    0.184
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.009  1.043     9.196       4778    0.292
+    int8.zeros                  0.000  0.000     2.174       1130    0.069
+  m0:fp32: kind  D(over m0:fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    m0.fp32.a_nz_b_randn       -1.107  0.016     0.447        398    0.097
+    m0.fp32.a_zeros_b_randn    -1.139  0.648     0.556        494    0.121
+    m0.fp32.zeros              -1.382  0.177     0.199        177    0.043
+  m0:fp16: kind  D(over m0:fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+  m0:int8: kind  D(over m0:int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    m0.int8.zeros              -0.422  0.054     1.740        904    0.055
+  k8:fp32: kind  D(over k8:fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    k8.fp32.zeros               0.140  1.225     1.670        769    0.376
+  k8:fp16: kind  D(over k8:fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+  k8:int8: kind  D(over k8:int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    k8.int8.zeros               0.057  1.118     2.179        591    0.072
+  r8:fp32: kind  D(over r8:fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    r8.fp32.zeros               0.172  1.002     1.781        844    0.412
+  r8:fp16: kind  D(over r8:fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+  r8:int8: kind  D(over r8:int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    r8.int8.zeros               0.062  0.423     2.295        713    0.087
+  m0k8:fp32: kind  D(over m0k8:fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    m0k8.fp32.zeros            -1.340  0.089     0.260        119    0.058
+  m0k8:fp16: kind  D(over m0k8:fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+  m0k8:int8: kind  D(over m0k8:int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    m0k8.int8.zeros            -0.248  0.626     1.861        505    0.062
+  idle consistency median |S - S0 - D| 0.06859966226734215 W; carry-over {'slope_w_per_w': 0.00288209850084913, 'se': 0.0012465026887652998, 'n': 62}; pi built-in - file None; rail tau re-fit median None

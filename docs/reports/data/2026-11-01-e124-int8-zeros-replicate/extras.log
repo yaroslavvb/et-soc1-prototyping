@@ -1,0 +1,34 @@
+E124 extras (extras_e124.py): the verdicts are carried by the primary reduction, passes 12410, 12411, 12412, 12413
+
+Y1 the no-issue loop gap N = S(m0.int8.zeros) - S(m0.fp32.zeros): +1.567 ± 0.209 W (line 0.84 W, predicted 1.683): PASS
+Y2 per-op price ceiling: e_op fp32 +91.5 ± 100.7 pJ, int8 +84.3 ± 161.7 pJ (line 769.7 pJ): PASS
+Z  E109's answer on this card: {'R0_answer': 'PER-TIME', 'R1_ops': 'INCONCLUSIVE', 'R2_lanes': 'LANES-OPPOSE', 'R3_per_time': 'PASS'} -> PARTIAL
+
+reported (posthoc_check_e109.reading on the scored reduction, no verdict):
+  S over idle: zeros fp32 +1.662 ± 0.075, int8 +2.209 ± 0.106; no-issue (m0) fp32 +0.199 ± 0.042, int8 +1.765 ± 0.199
+  per-read ceiling if all of m0's S were reads: fp32 +0.61 ± 0.13 pJ, int8 +4.09 ± 0.46 pJ; int8's extra reads at fp32's ceiling +0.066 ± 0.014 W
+  lanes U: fp32 +1.457 ± 0.142, int8 +0.401 ± 0.199; per clock edge fp32 +0.345 ± 0.034 fJ, int8 +0.466 ± 0.231 fJ, int8/fp32 paired +1.354 ± 0.656
+  per enabled bit: fp32 +2.98 ± 0.29 fJ, int8 +17.16 ± 8.52 fJ
+  item 15, a live -0 lane with random B over pi, transport out: +3.818 ± 0.160 W
+
+beside E109 (aifoundry3, three passes, post hoc; x0.970 card scale):
+  G: E124 +0.548 ± 0.037 | E109 +0.600 ± 0.115 | x scale 0.582 | ratio 0.913 | intervals overlap True
+  G_lane: E124 -1.055 ± 0.240 | E109 -1.088 ± 0.096 | x scale -1.055 | ratio 0.97 | intervals overlap True
+  G_op: E124 +0.060 ± 0.370 | E109 +0.055 ± 0.184 | x scale 0.054 | ratio 1.083 | intervals overlap True
+  G_rest: E124 +1.543 ± 0.634 | E109 +1.633 ± 0.148 | x scale 1.584 | ratio 0.945 | intervals overlap True
+  U_fp32: E124 +1.457 ± 0.142 | E109 +1.507 ± 0.175 | x scale 1.462 | ratio 0.966 | intervals overlap True
+  U_int8: E124 +0.401 ± 0.199 | E109 +0.419 ± 0.079 | x scale 0.407 | ratio 0.957 | intervals overlap True
+  e_op_fp32_pj: E124 +91.485 ± 100.691 | E109 +37.867 ± 187.337 | x scale 36.731 | ratio 2.416 | intervals overlap True
+  e_op_int8_pj: E124 +84.311 ± 161.663 | E109 +50.700 ± 52.671 | x scale 49.179 | ratio 1.663 | intervals overlap True
+  r_B_fp32_pj: E124 +2.718 ± 4.124 | E109 +6.517 ± 8.968 | x scale 6.321 | ratio 0.417 | intervals overlap True
+  R7: E124 +0.084 ± 0.127 | E109 +0.022 ± 0.037 | x scale 0.021 | ratio 3.845 | intervals overlap True
+  R8: E124 +0.643 ± 0.192 | E109 +0.593 ± 0.306 | x scale 0.576 | ratio 1.083 | intervals overlap True
+  T_minus: E124 +0.291 ± 0.040 | E109 +0.226 ± 0.284 | x scale 0.22 | ratio 1.284 | intervals overlap True
+  S_m0_gap: E124 +1.567 ± 0.209 | E109 +1.735 ± 0.164 | x scale 1.683 | ratio 0.903 | intervals overlap True
+  S_m0_fp32: E124 +0.199 ± 0.042 | E109 +0.376 ± 0.089 | x scale 0.364 | ratio 0.528 | intervals overlap False
+  S_m0_int8: E124 +1.765 ± 0.199 | E109 +2.111 ± 0.083 | x scale 2.047 | ratio 0.836 | intervals overlap False
+  U_per_edge_fp32_fj: E124 +0.345 ± 0.034 | E109 +0.357 ± 0.042 | x scale 0.346 | ratio 0.967 | intervals overlap True
+  U_per_edge_int8_fj: E124 +0.466 ± 0.231 | E109 +0.486 ± 0.092 | x scale 0.472 | ratio 0.958 | intervals overlap True
+  read_ceiling_fp32_pj: E124 +0.613 ± 0.128 | E109 +1.160 ± 0.274 | x scale 1.125 | ratio 0.528 | intervals overlap False
+  read_ceiling_int8_pj: E124 +4.094 ± 0.462 | E109 +4.894 ± 0.195 | x scale 4.748 | ratio 0.836 | intervals overlap False
+  live_over_constant_w: E124 +3.818 ± 0.160 | E109 +3.922 ± 0.378 | x scale 3.804 | ratio 0.973 | intervals overlap True
