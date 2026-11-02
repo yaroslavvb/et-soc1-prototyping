@@ -1,0 +1,38 @@
+1. The miss in two parts (excess = measured contrast - M5's frozen point; 95% over the five kept passes)
+  Q1 quiet: all-off/all-live flipping vs steady (the whole miss) +1.154 [+1.050, +1.257] W
+  Q2 quiet: per-lane flipping, 4 live a micro-op, vs steady  +0.810 [+0.716, +0.904] W
+  Q3 quiet: all-off/all-live vs 4 live a micro-op (equal flips) +0.344 [+0.292, +0.395] W
+  B1 random: the whole miss (E115's pair)                    +1.173 [+1.110, +1.237] W
+  B3 random: per-lane flipping, 4 live a micro-op, vs steady +0.879 [+0.741, +1.018] W
+  B2 random: 4 live a micro-op vs all-off/all-live (equal bus) -0.294 [-0.449, -0.138] W
+  F1 fp16 random: the whole miss                             +1.292 [+1.147, +1.438] W
+  F2 fp16 quiet: the whole miss                              +1.129 [+1.040, +1.219] W
+  F3 fp16 quiet: per-lane flipping vs steady                 +0.830 [+0.694, +0.966] W
+  identity checks: e(Q2) + e(Q3) - e(Q1) = +0.00e+00 W; e(B3) - e(B2) - e(B1) = +0.00e+00 W
+  per-lane share of the whole miss: quiet 0.702, random 0.750
+  all-off part: quiet e(Q3) +0.344 W, random -e(B2) +0.294 W
+  the all-off micro-ops' saving the card takes, measured / M5: quiet Q3 -0.588 / -0.932 = 0.63; random B2 (sign reversed) -0.639 / -0.932 = 0.68
+
+2. The per-lane part per gate flip (fJ beyond M5's price; 4,096 flips an op; op rate 1.1211e+09 /s)
+  Q2                                                         +176.455 [+155.964, +196.945] fJ per flip
+  B3                                                         +191.490 [+161.259, +221.721] fJ per flip
+  F3                                                         +180.777 [+151.145, +210.409] fJ per flip
+
+3. q_blk (128 flips an op, off and on in 32-cycle stretches)
+  e(Q4)                                                      +0.358 [+0.285, +0.431] W
+  the per-lane price at 128 flips an op: +0.025 W; e(Q4) - e(Q3) = +0.015 W (the two contrasts share no tile pair, so their difference's interval is about sqrt(h4^2 + h3^2) = 0.089 W)
+
+4. Where the per-tile miss sits (D - M5, W; M5's 95% half-width beside)
+  fp32.q_steady          D  4.718  M5  4.976  D-M5 -0.258  (M5 +-0.37; inside)
+  fp32.q_steady_hi       D  4.853  M5  4.972  D-M5 -0.118  (M5 +-0.37; inside)
+  fp32.q_blk             D  4.246  M5  4.147  D-M5 +0.100  (M5 +-0.37; inside)
+  fp32.q_chk             D  5.993  M5  5.441  D-M5 +0.552  (M5 +-0.37; OUTSIDE)
+  fp32.q_alt             D  5.405  M5  4.509  D-M5 +0.896  (M5 +-0.37; OUTSIDE)
+  fp16.q_steady          D  4.764  M5  4.975  D-M5 -0.211  (M5 +-0.33; inside)
+  fp16.q_chk             D  6.102  M5  5.483  D-M5 +0.619  (M5 +-0.34; OUTSIDE)
+  fp16.q_alt             D  5.469  M5  4.551  D-M5 +0.918  (M5 +-0.33; OUTSIDE)
+  fp32.g_blanes_steady   D 12.581  M5 13.216  D-M5 -0.635  (M5 +-0.39; OUTSIDE)
+  fp32.g_blanes_chk      D 15.175  M5 14.931  D-M5 +0.244  (M5 +-0.40; inside)
+  fp32.g_blanes_alt      D 14.537  M5 13.999  D-M5 +0.538  (M5 +-0.40; OUTSIDE)
+  fp16.g_blanes_steady   D 11.496  M5 11.952  D-M5 -0.456  (M5 +-0.35; OUTSIDE)
+  fp16.g_blanes_alt      D 13.279  M5 12.443  D-M5 +0.836  (M5 +-0.36; OUTSIDE)

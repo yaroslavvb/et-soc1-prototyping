@@ -1,0 +1,50 @@
+passes [12710, 12711, 12712, 12713, 12714] set aside [] leak {'mode': 'auto', 'k_w_per_c': 0.1913440860215034, 'n_runs': 77} arm dips removed (E82 A2)
+
+| rule | verdict | numbers | anchor footing | arms that move it |
+|---|---|---|---|---|
+| E127-R1 | PASS | measured_w +1.956; ci95_w +0.064; excess_w +1.173; minus_E115_w -0.047  | PASS | dips_kept |
+| E127-R2 | GATE | excess_w +1.154; excess_lo95 +1.050; excess_hi95 +1.257; line_w +0.587; reference_excess_w +1.173; ratio 0.98 [0.90, 1.06]  | GATE | dips_kept |
+| E127-R3 | GATE | excess_w +1.129; excess_lo95 +1.040; excess_hi95 +1.219; line_w +0.646; reference_excess_w +1.292; ratio 0.87 [0.76, 0.99]  | GATE | - |
+| E127-R4 | PER-LANE | excess_w +0.879; excess_lo95 +0.741; excess_hi95 +1.018; line_w +0.587; reference_excess_w +1.173; ratio 0.75 [0.62, 0.88]  | PER-LANE | dips_kept |
+| E127-R4q | PER-LANE | excess_w +0.810; excess_lo95 +0.716; excess_hi95 +0.904; line_w +0.577; reference_excess_w +1.154; ratio 0.70 [0.66, 0.74]  | PER-LANE | dips_kept |
+| E127-R5 | SHORT | excess_w +0.358; excess_lo95 +0.285; excess_hi95 +0.431; line_w +0.577; reference_excess_w +1.154; ratio 0.31 [0.23, 0.39]  | SHORT | dips_kept, leak0.3803 |
+| E127-R6 | PASS | measured_w +0.135; ci95_w +0.100  | PASS | dips_kept, leak0, leak0.3803 |
+| E127-S1 | PASS |   | PASS | leak0 |
+
+| contrast | measured | per pass | M5 [95%] | excess [95%] | verdict |
+|---|---:|---|---:|---:|---|
+| `B1: fp32.g_blanes_alt - fp32.g_blanes_steady` | +1.956 ± 0.064 | +1.93, +1.92, +1.91, +2.02, +2.01 | +0.78 [+0.23, +1.34] | +1.173 [+1.110, +1.237] | ABOVE |
+| `B2: fp32.g_blanes_chk - fp32.g_blanes_alt` | +0.639 ± 0.156 | +0.54, +0.79, +0.67, +0.48, +0.70 | +0.93 [+0.37, +1.50] | -0.294 [-0.449, -0.138] | INSIDE |
+| `B3: fp32.g_blanes_chk - fp32.g_blanes_steady` | +2.595 ± 0.139 | +2.47, +2.71, +2.59, +2.50, +2.71 | +1.72 [+1.16, +2.27] | +0.879 [+0.741, +1.018] | ABOVE |
+| `F1: fp16.g_blanes_alt - fp16.g_blanes_steady` | +1.783 ± 0.145 | +1.73, +1.99, +1.69, +1.73, +1.77 | +0.49 [-0.01, +0.99] | +1.292 [+1.147, +1.438] | ABOVE |
+| `F2: fp16.q_alt - fp16.q_steady` | +0.705 ± 0.089 | +0.61, +0.73, +0.80, +0.73, +0.66 | -0.42 [-0.90, +0.05] | +1.129 [+1.040, +1.219] | ABOVE |
+| `F3: fp16.q_chk - fp16.q_steady` | +1.338 ± 0.136 | +1.24, +1.30, +1.42, +1.24, +1.48 | +0.51 [+0.03, +0.98] | +0.830 [+0.694, +0.966] | ABOVE |
+| `Q1: fp32.q_alt - fp32.q_steady` | +0.687 ± 0.104 | +0.63, +0.57, +0.76, +0.77, +0.70 | -0.47 [-1.00, +0.06] | +1.154 [+1.050, +1.257] | ABOVE |
+| `Q2: fp32.q_chk - fp32.q_steady` | +1.275 ± 0.094 | +1.17, +1.22, +1.32, +1.36, +1.31 | +0.46 [-0.06, +0.99] | +0.810 [+0.716, +0.904] | ABOVE |
+| `Q3: fp32.q_alt - fp32.q_chk` | -0.588 ± 0.051 | -0.54, -0.65, -0.56, -0.59, -0.61 | -0.93 [-1.46, -0.40] | +0.344 [+0.292, +0.395] | INSIDE |
+| `Q4: fp32.q_blk - fp32.q_steady` | -0.472 ± 0.073 | -0.47, -0.47, -0.48, -0.55, -0.39 | -0.83 [-1.36, -0.30] | +0.358 [+0.285, +0.431] | INSIDE |
+| `Q5: fp32.q_steady_hi - fp32.q_steady` | +0.135 ± 0.100 | +0.09, +0.03, +0.21, +0.12, +0.22 | -0.00 [-0.53, +0.52] | +0.140 [+0.040, +0.240] | INSIDE |
+
+| tile | family | D [95%] | M5 [95%] | D − M5 | inside | M4 | D − M4 |
+|---|---|---:|---:|---:|---|---:|---:|
+| `fp16.g_blanes_alt` | bridge | 13.28 ± 0.09 | 12.44 [12.08, 12.80] | +0.84 | **no** | 12.46 | +0.82 |
+| `fp16.q_alt` | quiet | 5.47 ± 0.11 | 4.55 [4.22, 4.89] | +0.92 | **no** | 4.56 | +0.90 |
+| `fp16.q_chk` | quiet | 6.10 ± 0.09 | 5.48 [5.15, 5.82] | +0.62 | **no** | 5.50 | +0.60 |
+| `fp16.q_steady` | quiet | 4.76 ± 0.07 | 4.97 [4.64, 5.31] | -0.21 | yes | 5.03 | -0.26 |
+| `fp16.g_blanes_steady` | random | 11.50 ± 0.15 | 11.95 [11.60, 12.30] | -0.46 | **no** | 12.03 | -0.53 |
+| `fp32.g_blanes_alt` | bridge | 14.54 ± 0.07 | 14.00 [13.60, 14.40] | +0.54 | **no** | 13.94 | +0.60 |
+| `fp32.g_blanes_steady` | bridge | 12.58 ± 0.02 | 13.22 [12.83, 13.60] | -0.63 | **no** | 13.21 | -0.63 |
+| `fp32.q_alt` | quiet | 5.40 ± 0.11 | 4.51 [4.14, 4.88] | +0.90 | **no** | 4.53 | +0.88 |
+| `fp32.q_blk` | quiet | 4.25 ± 0.08 | 4.15 [3.77, 4.52] | +0.10 | yes | 4.19 | +0.06 |
+| `fp32.q_chk` | quiet | 5.99 ± 0.12 | 5.44 [5.07, 5.82] | +0.55 | **no** | 5.46 | +0.53 |
+| `fp32.q_steady` | quiet | 4.72 ± 0.04 | 4.98 [4.60, 5.35] | -0.26 | yes | 5.03 | -0.31 |
+| `fp32.q_steady_hi` | quiet | 4.85 ± 0.09 | 4.97 [4.60, 5.35] | -0.12 | yes | 5.02 | -0.17 |
+| `fp32.g_blanes_chk` | random | 15.18 ± 0.13 | 14.93 [14.53, 15.33] | +0.24 | yes | 14.87 | +0.30 |
+
+S1 {'anchor_pi': (8.487, 8.349, True), 'fp16.randn': (22.205, 22.063, True), 'fp32.randn': (24.772, 24.628, True), 'int8.full': (7.076, 7.105, True)}
+coverage {'coverage_M5': {'inside': 5, 'n': 13}, 'coverage_M4': {'inside': 5, 'n': 13}}
+arm dips_kept {'E127-R1': 'INCONCLUSIVE', 'E127-R2': 'NOT SCORED', 'E127-R3': 'GATE', 'E127-R4': 'NOT SCORED', 'E127-R4q': 'NOT SCORED', 'E127-R5': 'NOT SCORED', 'E127-R6': 'INCONCLUSIVE', 'E127-S1': 'PASS'} passes [12710, 12711, 12714]
+arm leak0.1994 {'E127-R1': 'PASS', 'E127-R2': 'GATE', 'E127-R3': 'GATE', 'E127-R4': 'PER-LANE', 'E127-R4q': 'PER-LANE', 'E127-R5': 'SHORT', 'E127-R6': 'PASS', 'E127-S1': 'PASS'} passes [12710, 12711, 12712, 12713, 12714]
+arm leak0.3803 {'E127-R1': 'PASS', 'E127-R2': 'GATE', 'E127-R3': 'GATE', 'E127-R4': 'PER-LANE', 'E127-R4q': 'PER-LANE', 'E127-R5': 'INCONCLUSIVE', 'E127-R6': 'INCONCLUSIVE', 'E127-S1': 'PASS'} passes [12710, 12711, 12712, 12713, 12714]
+arm leak0 {'E127-R1': 'PASS', 'E127-R2': 'GATE', 'E127-R3': 'GATE', 'E127-R4': 'PER-LANE', 'E127-R4q': 'PER-LANE', 'E127-R5': 'SHORT', 'E127-R6': 'INCONCLUSIVE', 'E127-S1': 'FAIL'} passes [12710, 12711, 12712, 12713, 12714]
+arm gates_off {'E127-R1': 'PASS', 'E127-R2': 'GATE', 'E127-R3': 'GATE', 'E127-R4': 'PER-LANE', 'E127-R4q': 'PER-LANE', 'E127-R5': 'SHORT', 'E127-R6': 'PASS', 'E127-S1': 'PASS'} passes [12710, 12711, 12712, 12713, 12714]

@@ -1,0 +1,28 @@
+E127: reduce_e78.py unchanged via reduce_e127.py (E127's items; primary)
+E78 aifoundry3: 600 MHz, 521.7 mV, leak 0.2191 W/C (77 runs), runs kept 99/164, passes [12710, 12711, 12714], idle-invalid runs 0
+  passes set aside: [{'pass': 12712, 'why': ['int8.full spans 1.066 W']}, {'pass': 12713, 'why': ['anchor_pi drifts +0.645 W']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.90606489133762
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 24.682  0.258    26.580      23718    5.791
+    fp32.g_blanes_chk          15.152  0.314    17.049      15208    3.713
+    fp32.g_blanes_alt          14.474  0.115    16.346      14583    3.560
+    fp32.g_blanes_steady       12.199  1.401    14.092      12572    3.069
+    anchor_pi                   8.478  0.237    10.388       9270    2.263
+    fp32.q_chk                  5.930  0.245     7.853       7005    1.710
+    fp32.q_alt                  5.322  0.139     7.180       6405    1.564
+    fp32.q_steady_hi            4.813  0.205     6.619       5907    1.442
+    fp32.q_steady               4.697  0.158     6.486       5786    1.412
+    fp32.q_blk                  4.256  0.199     6.168       5504    1.344
+    fp32.zeros                  0.000  0.000     1.857       1657    0.404
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 22.120  0.137    23.992      21406    2.613
+    fp16.g_blanes_alt          13.234  0.264    15.060      13442    1.641
+    fp16.g_blanes_steady       11.414  0.344    13.321      11884    1.451
+    fp16.q_chk                  6.074  0.232     7.879       7027    0.858
+    fp16.q_alt                  5.407  0.257     7.228       6447    0.787
+    fp16.q_steady               4.752  0.147     6.488       5788    0.707
+    fp16.zeros                  0.000  0.000     1.844       1645    0.201
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   6.997  0.112     9.500       4933    0.301
+    int8.zeros                  0.000  0.000     2.434       1264    0.077
+  idle consistency median |S - S0 - D| 0.08038967206416192 W; carry-over {'slope_w_per_w': 0.002172946629659475, 'se': 0.0013999187423470755, 'n': 96}; pi built-in - file None; rail tau re-fit median 1.0

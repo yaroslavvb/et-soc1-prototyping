@@ -1,0 +1,27 @@
+E127: reduce_e78.py unchanged via reduce_e127.py (E127's items; dips removed (E82 A2))
+E78 aifoundry3: 600 MHz, 521.7 mV, leak 0.0000 W/C (-1 runs), runs kept 164/164, passes [12710, 12711, 12712, 12713, 12714], idle-invalid runs 0
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 26.000531334175083
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 25.289  0.109    27.075      24160    5.899
+    fp32.g_blanes_chk          15.525  0.170    17.325      15452    3.773
+    fp32.g_blanes_alt          14.887  0.080    16.623      14830    3.621
+    fp32.g_blanes_steady       12.859  0.104    14.671      13088    3.195
+    anchor_pi                   8.622  0.131    10.459       9332    2.278
+    fp32.q_chk                  6.149  0.173     7.923       7067    1.725
+    fp32.q_alt                  5.601  0.107     7.271       6486    1.583
+    fp32.q_steady_hi            5.010  0.189     6.660       5943    1.451
+    fp32.q_steady               4.833  0.097     6.543       5837    1.425
+    fp32.q_blk                  4.361  0.120     6.170       5505    1.344
+    fp32.zeros                  0.000  0.000     1.755       1566    0.382
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 22.685  0.044    24.412      21780    2.659
+    fp16.g_blanes_alt          13.575  0.147    15.271      13628    1.664
+    fp16.g_blanes_steady       11.747  0.171    13.507      12048    1.471
+    fp16.q_chk                  6.297  0.084     7.909       7054    0.861
+    fp16.q_alt                  5.557  0.037     7.275       6489    0.792
+    fp16.q_steady               4.862  0.131     6.564       5856    0.715
+    fp16.zeros                  0.000  0.000     1.778       1586    0.194
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.244  0.072     9.619       4995    0.305
+    int8.zeros                  0.000  0.000     2.392       1242    0.076
+  idle consistency median |S - S0 - D| 0.0976353096489202 W; carry-over {'slope_w_per_w': 0.0037453136350894113, 'se': 0.0008494365826835703, 'n': 159}; pi built-in - file None; rail tau re-fit median None
