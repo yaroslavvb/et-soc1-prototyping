@@ -125,7 +125,9 @@ def wstats(samples, lo, hi):
 # ------------------------------------------------------------------------------------------------- cells
 def windows_of(st):
     b, s = st["burst_s"], st["sus_s"]
-    return {"early": (0.0, 0.5), "burst": (0.0, b), "sus": (b, b + s), "late": (max(b, b + s - 15.0), b + s)}
+    # burst_b, "the burst after the boost", added by amendment A1 (2 Nov 2026, before the measured run): reported only
+    return {"early": (0.0, 0.5), "burst": (0.0, b), "burst_b": (0.5, b), "sus": (b, b + s),
+            "late": (max(b, b + s - 15.0), b + s)}
 
 
 def reduce_cell(rec, samples):
@@ -259,7 +261,7 @@ def score(units, preds):
         if kind != "zeros":
             continue
         rk = RANDOM_OF[dt]
-        for w in ("early", "burst", "sus", "late"):
+        for w in ("early", "burst", "burst_b", "sus", "late"):
             z, r = W(u, cap, size, dt, "zeros", p, w), W(u, cap, size, dt, rk, p, w)
             if not z or not r:
                 continue
@@ -387,8 +389,14 @@ def score(units, preds):
             continue
         lo, mid, hi = (band(mb["gH"], mb["LH"], mb["P0"], L, n) for n in (1, 2, 3))
         m = mean(gs)
-        det.append({"unit": u, "limit_w": rnd(L, 1), "gap_mean": rnd(m), "gaps": [rnd(x) for x in gs],
-                    "band": [rnd(lo), rnd(hi)], "n2": rnd(mid), "ok": lo - 1e-9 <= m <= hi + 1e-9})
+        d = {"unit": u, "limit_w": rnd(L, 1), "gap_mean": rnd(m), "gaps": [rnd(x) for x in gs],
+             "band": [rnd(lo), rnd(hi)], "n2": rnd(mid), "ok": lo - 1e-9 <= m <= hi + 1e-9}
+        i0 = units[u]["idle0"]
+        if i0:  # amendment A1: the band with this unit's own idle as P0, printed beside it, not scored
+            p0 = wstats(units[u]["samples"], i0["t_a"], i0["t_b"]).get("power_w")
+            if p0 and L > p0:
+                d["band_at_own_idle"] = {"P0_w": rnd(p0, 1), "band": [rnd(band(mb["gH"], mb["LH"], p0, L, n)) for n in (1, 2, 3)]}
+        det.append(d)
     sub = []
     if lc and lc.get("applied") and abs(lc["target_w"] - 330.0) < 0.5:
         lo, hi = TH["gist_at_330"]
