@@ -1,0 +1,30 @@
+E78 aifoundry3: 600 MHz, 521.6 mV, leak 0.1802 W/C (130 runs), runs kept 70/177, passes [11611, 11613], idle-invalid runs 0
+  passes set aside: [{'pass': 11610, 'why': ['int8.zeros departs -0.301 W from its straight line']}, {'pass': 11612, 'why': ['fp32.randn spans 1.659 W']}, {'pass': 11614, 'why': ['fp16.randn spans 1.043 W']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.923911993295327
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 24.804  0.713    26.702      23820    5.815
+    fp32.r_walk                22.316  1.166    24.246      21629    5.280
+    fp32.r_het                 21.157  0.105    23.107      20612    5.032
+    fp32.r_abs                 17.288  0.744    19.193      17136    4.184
+    fp32.s_walk                13.174  2.033    15.086      13461    3.286
+    fp32.s_abs                 10.974  1.102    12.886      11499    2.807
+    anchor_pi                   8.486  0.873    10.470       9341    2.281
+    fp32.c_abs                  8.448  0.747    10.353       9235    2.255
+    fp32.ones                   8.360  2.286    10.263       9158    2.236
+    fp32.zeros                  0.000  0.000     1.938       1729    0.422
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 22.063  1.136    23.979      21397    2.612
+    fp16.r_walk                21.212  0.568    23.197      20692    2.526
+    fp16.r_abs                 15.182  0.278    17.129      15281    1.865
+    fp16.r_cancel              14.821  0.009    16.729      14930    1.823
+    fp16.ones                   8.411  0.064    10.417       9294    1.135
+    fp16.c_cancel               8.371  0.368    10.327       9215    1.125
+    fp16.zeros                  0.000  0.000     1.988       1773    0.216
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.160  0.288     9.750       5064    0.309
+    int8.r_walk                 7.089  0.766     9.607       4989    0.304
+    int8.r_cancel               5.057  0.083     7.608       3951    0.241
+    int8.c_cancel               1.654  1.626     4.289       2228    0.136
+    int8.ones                   1.506  1.744     4.015       2085    0.127
+    int8.zeros                  0.000  0.000     2.594       1347    0.082
+  idle consistency median |S - S0 - D| 0.05287243822133103 W; carry-over {'slope_w_per_w': -0.0005728487798401542, 'se': 0.001316606359487065, 'n': 68}; pi built-in - file None; rail tau re-fit median None

@@ -1,0 +1,31 @@
+E88: reduce_e78.py unchanged via reduce_e88.py (config gate at card 1's 65/65; dips removed)
+E78 aifoundry3: 600 MHz, 521.6 mV, leak 0.5450 W/C (-1 runs), runs kept 106/177, passes [11611, 11612, 11613], idle-invalid runs 0
+  passes set aside: [{'pass': 11610, 'why': ['int8.zeros departs -0.629 W from its straight line', 'int8.zeros spans 0.688 W']}, {'pass': 11614, 'why': ['int8.zeros departs -0.443 W from its straight line']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.652319989106754
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 23.721  0.213    25.832      23044    5.626
+    fp32.r_walk                21.352  0.396    23.513      20977    5.121
+    fp32.r_het                 20.228  0.324    22.335      19926    4.865
+    fp32.r_abs                 16.396  0.160    18.692      16684    4.073
+    fp32.s_walk                12.462  0.405    14.720      13134    3.207
+    fp32.s_abs                 10.379  0.399    12.584      11230    2.742
+    anchor_pi                   8.180  0.229    10.260       9155    2.235
+    fp32.c_abs                  8.073  0.258    10.278       9169    2.238
+    fp32.ones                   8.063  0.363    10.349       9234    2.254
+    fp32.zeros                  0.000  0.000     2.210       1971    0.481
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 21.184  0.128    23.346      20830    2.543
+    fp16.r_walk                20.329  0.304    22.454      20029    2.445
+    fp16.r_abs                 14.528  0.403    16.723      14917    1.821
+    fp16.r_cancel              14.084  0.050    16.285      14533    1.774
+    fp16.c_cancel               7.997  0.244    10.310       9201    1.123
+    fp16.ones                   7.963  0.207    10.239       9135    1.115
+    fp16.zeros                  0.000  0.000     2.258       2014    0.246
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   6.940  0.244     9.703       5038    0.308
+    int8.r_walk                 6.793  0.438     9.462       4914    0.300
+    int8.r_cancel               4.913  0.448     7.541       3916    0.239
+    int8.c_cancel               1.782  0.602     4.277       2221    0.136
+    int8.ones                   1.324  0.441     3.989       2072    0.126
+    int8.zeros                  0.000  0.000     2.721       1413    0.086
+  idle consistency median |S - S0 - D| 0.08410845286763635 W; carry-over {'slope_w_per_w': -0.0010701679004023526, 'se': 0.00117576239537642, 'n': 103}; pi built-in - file None; rail tau re-fit median None
