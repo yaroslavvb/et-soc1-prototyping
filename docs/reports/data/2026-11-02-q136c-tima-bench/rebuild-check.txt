@@ -1,0 +1,9 @@
+Q136(c), Mon 2 Nov 2026: the counts came from two builds, and they agree.
+
+Build 1 (binary sha256 66d79a50d906...) had acct_line.cpp's acct_get read past its tally array for which = 40-42, as
+rtl-sim/fma_toggle_v2/acct.cpp does: tb_vpu.sv's ACCTU line asks for a fourth unit that does not exist, and nothing reads
+those three numbers. Build 2 (88ae6e0bcf48..., the committed sources: acct_get returns 0 there) was built from a clean copy of
+the committed files with rtl-sim/tima_bench/build.sh.
+
+Both ran the same 62 streams (run_streams.py before its last three context streams were added): every field of every stream,
+per op, equal (62 of 62 records identical as JSON). counts.json here is build 2's, 65 streams.
