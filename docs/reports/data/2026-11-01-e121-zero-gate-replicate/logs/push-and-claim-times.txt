@@ -1,0 +1,18 @@
+E121 (Q134): the freeze, the claim and the release, as this lane's own command output recorded them (PST).
+freeze: commit b66434a8 (author time 19:21:23 -0800), pushed 19:21:26 PST by origin/main's reflog on the Intel
+setup (no device): 19:17:39, 19:19:56 and 19:20:31 PST on aifoundry3; the last ran the dry pass 12100 (42 launches, 17 on E93 tiles) with every card and E121 file identical to the freeze
+the day's #community-lab card post: message 1566603178164617247 (posted 16:01 PST for E113; one post a day, edited at every reservation and release)
+claim: first try 19:22:33 refused by EXPECT_TEXT (exit 7): delete_msg.mjs --plan read the post as E113's released text, but another session had rewritten it at 19:19 (a clause for aifoundry1 card 1); rebuilt from the edit box's own text
+claim edit saved: 2026-11-01 19:23:25 PST
+  before: <ai> **Claude says:** using aifoundry1 card 1 for 1 h, until ~20:20 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)
+  after:  <ai> **Claude says:** using aifoundry1 card 1 for 1 h, until ~20:20 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>); using aifoundry3 for 1 h, until ~20:25 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)
+  read back: <ai> Claude says: using aifoundry1 card 1 for 1 h, until ~20:20 PST doc; using aifoundry3 for 1 h, until ~20:25 PST doc (edited) | Sunday, November 1, 2026 at 7:23 PM
+smoke 12101: block 19:23:41-19:24:23 PST; session-start config read (the smoke block's config_start): {"tdp_w":0,"temp_threshold_c":65,"power_state":0,"power_state_name":"max_power","minion_mhz":600,"minion_mv":523}
+queue: 19:24:24-19:51:28 PST (T0+59 to T0+1683 s); passes 12110 19:24:24-19:31:08 (404 s), 12111 19:31:23-19:37:47 (384 s), 12112 19:38:02-19:44:40 (398 s), 12113 19:44:55-19:51:13 (378 s); 12114 not started by the budget rule
+session-end config read 19:51:28 PST: {"tdp_w":0,"temp_threshold_c":65,"power_state":0,"power_state_name":"max_power","minion_mhz":600,"minion_mv":523}
+release: first try 19:51:47 refused by EXPECT_TEXT (exit 7): meanwhile other sessions had dropped the aifoundry1 card 1 clause and added one for aifoundry2; rebuilt from the edit box's own text; aifoundry2 still held, so E121's clause was dropped
+release edit saved: 2026-11-01 19:51:59 PST
+  before: <ai> **Claude says:** using aifoundry3 for 1 h, until ~20:25 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>); using aifoundry2 for 1 h, until ~20:29 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)
+  after:  <ai> **Claude says:** using aifoundry2 for 1 h, until ~20:29 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)
+  read back: <ai> Claude says: using aifoundry2 for 1 h, until ~20:29 PST doc (edited) | Sunday, November 1, 2026 at 7:51 PM
+held: 19:23:25-19:51:59 PST = 28 min 34 s of the 35 registered; device access 19:23:41-19:51:28 = 27 min 47 s

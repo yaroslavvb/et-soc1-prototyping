@@ -1,0 +1,97 @@
+# E121 scored (kept passes [12110, 12111, 12112, 12113], set aside [], leak {'mode': '0.1994', 'k_w_per_c': 0.1994, 'n_runs': -1})
+
+Gate rules (22): **PASS**. Tally of E93's 24 rules: {'PASS': 23, 'FAIL': 1}; the same verdict as E93 on card 1: 24 of 24. Int8 pairing: **rtl: (l, l+8), the RTL's reading**. Cross-card: **PASS** {'PASS': 23, 'INCONCLUSIVE': 1}. Session tie to E78: **PASS**.
+
+| rule | contrast | W, 95% | threshold | verdict | E93 (card 1) | at the arms |
+|---|---|---|---|---|---|---|
+| R1-fp32-both | fp32.nz_both | 8.232 ± 0.190 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R1-fp32-a | fp32.a_nz_b_randn − fp32.a_zeros_b_randn | 11.717 ± 0.119 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R1-fp32-b | fp32.a_randn_b_nz − 0.616 (E78) | 12.216 ± 0.040 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R1-fp16-both | fp16.nz_both | 8.183 ± 0.188 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R1-fp16-a | fp16.a_nz_b_randn − 0.782 (E78) | 12.002 ± 0.059 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R1-fp16-b | fp16.a_randn_b_nz − 0.659 (E78) | 11.458 ± 0.067 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R2-fp32 | fp32.nz_both − anchor_pi | -0.190 ± 0.156 | inside ±1.0 | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R2-fp16 | fp16.nz_both − 8.382 (E78) | -0.198 ± 0.188 | inside ±1.0 | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R3-fp32-one | fp32.dn1_both | 8.389 ± 0.100 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R3-fp32-both | fp32.dnr_both | 9.739 ± 0.052 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R3-fp32-a | fp32.a_dnr_b_randn − fp32.a_zeros_b_randn | 12.501 ± 0.162 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R3-fp32-b | fp32.a_randn_b_dnr − 0.616 (E78) | 13.083 ± 0.117 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R3-fp16-both | fp16.dnr_both | 9.524 ± 0.058 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R3-fp16-a | fp16.a_dnr_b_randn − 0.782 (E78) | 12.486 ± 0.109 | low > 5.0, high < 2.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R4-fp32-both | fp32.dnr_both − fp32.dn1_both | 1.351 ± 0.080 | high < 4.98 | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R4-fp32-a | fp32.a_dnr_b_randn − fp32.a_nz_b_randn | 0.784 ± 0.104 | high < 3.94 | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R4-fp16-both | fp16.dnr_both − fp16.nz_both | 1.341 ± 0.143 | high < 3.58 | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R4-fp16-a | fp16.a_dnr_b_randn − fp16.a_nz_b_randn | 0.484 ± 0.144 | high < 2.48 | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R5-fp32 | fp32.a_randn_b_nz − fp32.a_nz_b_randn | 0.393 ± 0.089 | low > 1.0, high < 1.0 fails | **FAIL** | FAIL | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R6a | int8.b_unpaired − int8.b_pairs_rtl | 1.437 ± 0.118 | low > 0.3, high < 0.3 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R6b | int8.b_pairs_alt − int8.b_pairs_rtl | 1.419 ± 0.214 | low > 0.3, high < 0.3 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R6c | int8.b_unpaired − int8.b_pairs_alt | 0.018 ± 0.242 | inside ±0.6 | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| R7 | int8.a_3of4_b_full − int8.a_zeros_b_full | 5.682 ± 0.379 | low > 1.0, high < 1.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.3803 UNRESOLVED; leak0.545 NOT SCORED |
+| R8 | fp32.sparse50_mask − fp32.sparse50 | 5.815 ± 0.148 | low > 1.0, high < 1.0 fails | **PASS** | PASS | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+
+| cross-card rule | E121, W | E93 × scale, W | difference | ± h | w | verdict | ratio E121/E93 | at the arms |
+|---|---|---|---|---|---|---|---|---|
+| X-R1-fp32-both | 8.232 ± 0.190 | 7.936 × 1.0300 = 8.174 | +0.058 | 0.203 | 0.75 | **PASS** | 1.037 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R1-fp32-a | 11.717 ± 0.119 | 11.367 × 1.0300 = 11.708 | +0.009 | 0.181 | 0.75 | **PASS** | 1.031 | dips_kept NOT SCORED; leak0.3803 INCONCLUSIVE; leak0.545 NOT SCORED |
+| X-R1-fp32-b | 12.216 ± 0.040 | 11.791 × 1.0300 = 12.145 | +0.071 | 0.137 | 0.75 | **PASS** | 1.036 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R1-fp16-both | 8.183 ± 0.188 | 8.022 × 1.0332 = 8.288 | -0.105 | 0.324 | 0.75 | **PASS** | 1.020 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R1-fp16-a | 12.002 ± 0.059 | 11.719 × 1.0332 = 12.108 | -0.106 | 0.246 | 0.75 | **PASS** | 1.024 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R1-fp16-b | 11.458 ± 0.067 | 11.101 × 1.0332 = 11.470 | -0.012 | 0.195 | 0.75 | **PASS** | 1.032 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R2-fp32 | -0.190 ± 0.156 | -0.147 × 1.0300 = -0.151 | -0.039 | 0.211 | 0.75 | **PASS** | 1.299 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R2-fp16 | -0.198 ± 0.188 | -0.063 × 1.0332 = -0.065 | -0.133 | 0.324 | 0.75 | **PASS** | 3.141 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R3-fp32-one | 8.389 ± 0.100 | 8.014 × 1.0300 = 8.254 | +0.135 | 0.129 | 0.75 | **PASS** | 1.047 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R3-fp32-both | 9.739 ± 0.052 | 9.418 × 1.0300 = 9.701 | +0.038 | 0.092 | 0.75 | **PASS** | 1.034 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R3-fp32-a | 12.501 ± 0.162 | 12.041 × 1.0300 = 12.403 | +0.098 | 0.269 | 0.75 | **PASS** | 1.038 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R3-fp32-b | 13.083 ± 0.117 | 12.694 × 1.0300 = 13.075 | +0.008 | 0.175 | 0.75 | **PASS** | 1.031 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R3-fp16-both | 9.524 ± 0.058 | 9.249 × 1.0332 = 9.556 | -0.032 | 0.289 | 0.75 | **PASS** | 1.030 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R3-fp16-a | 12.486 ± 0.109 | 12.202 × 1.0332 = 12.607 | -0.121 | 0.158 | 0.75 | **PASS** | 1.023 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R4-fp32-both | 1.351 ± 0.080 | 1.405 × 1.0300 = 1.447 | -0.096 | 0.117 | 0.75 | **PASS** | 0.962 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R4-fp32-a | 0.784 ± 0.104 | 0.674 × 1.0300 = 0.695 | +0.089 | 0.223 | 0.75 | **PASS** | 1.162 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R4-fp16-both | 1.341 ± 0.143 | 1.227 × 1.0332 = 1.268 | +0.073 | 0.328 | 0.75 | **PASS** | 1.092 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R4-fp16-a | 0.484 ± 0.144 | 0.483 × 1.0332 = 0.499 | -0.015 | 0.265 | 0.75 | **PASS** | 1.001 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R5-fp32 | 0.393 ± 0.089 | 0.308 × 1.0300 = 0.317 | +0.076 | 0.186 | 0.75 | **PASS** | 1.277 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R6a | 1.437 ± 0.118 | 1.249 × 1.0271 = 1.283 | +0.155 | 0.331 | 0.5 | **PASS** | 1.151 | dips_kept NOT SCORED; leak0.3803 INCONCLUSIVE; leak0.545 NOT SCORED |
+| X-R6b | 1.419 ± 0.214 | 1.326 × 1.0271 = 1.362 | +0.057 | 0.294 | 0.5 | **PASS** | 1.070 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+| X-R6c | 0.018 ± 0.242 | -0.077 × 1.0271 = -0.080 | +0.098 | 0.302 | 0.5 | **PASS** | -0.235 | dips_kept NOT SCORED; leak0.3803 INCONCLUSIVE; leak0.545 NOT SCORED |
+| X-R7 | 5.682 ± 0.379 | 5.398 × 1.0271 = 5.544 | +0.138 | 0.440 | 0.5 | **INCONCLUSIVE** | 1.053 | dips_kept NOT SCORED; leak0.3803 UNRESOLVED; leak0.545 NOT SCORED |
+| X-R8 | 5.815 ± 0.148 | 5.821 × 1.0300 = 5.995 | -0.180 | 0.213 | 0.75 | **PASS** | 0.999 | dips_kept NOT SCORED; leak0.545 NOT SCORED |
+
+| tie cell | D | E78 (aifoundry3) | difference | band | verdict |
+|---|---|---|---|---|---|
+| anchor_pi | 8.423 | 8.3603 | 0.063 | ±0.5 | PASS |
+| fp16.randn | 22.139 | 22.1624 | -0.024 | ±0.5 | PASS |
+| fp32.a_zeros_b_randn | 0.722 | 0.8104 | -0.089 | ±0.25 | PASS |
+| fp32.randn | 24.741 | 24.7249 | 0.016 | ±0.5 | PASS |
+| fp32.sparse50 | 7.331 | 7.3019 | 0.029 | ±0.75 | PASS |
+| int8.a_zeros_b_full | 0.243 | 0.3055 | -0.063 | ±0.25 | PASS |
+| int8.full | 7.12 | 7.0565 | 0.064 | ±0.25 | PASS |
+
+| tile | D over the type's zeros, W | E93 on card 1, W | E93 × scale, W | difference | ratio |
+|---|---|---|---|---|---|
+| anchor_pi | 8.423 ± 0.093 | 8.083 | 8.325 | +0.098 | 1.0421 |
+| fp16.a_dnr_b_randn | 13.269 ± 0.109 | 12.963 | 13.394 | -0.125 | 1.0236 |
+| fp16.a_nz_b_randn | 12.785 ± 0.059 | 12.480 | 12.895 | -0.110 | 1.0244 |
+| fp16.a_randn_b_nz | 12.117 ± 0.067 | 11.725 | 12.115 | +0.002 | 1.0334 |
+| fp16.dnr_both | 9.524 ± 0.058 | 9.249 | 9.556 | -0.032 | 1.0297 |
+| fp16.nz_both | 8.183 ± 0.188 | 8.022 | 8.288 | -0.105 | 1.0202 |
+| fp16.randn | 22.139 ± 0.098 | 21.588 | 22.305 | -0.167 | 1.0255 |
+| fp16.zeros | 0.000 ± 0.000 | 0.000 | 0.000 | +0.000 | — |
+| fp32.a_dnr_b_randn | 13.223 ± 0.056 | 12.788 | 13.172 | +0.051 | 1.034 |
+| fp32.a_nz_b_randn | 12.439 ± 0.052 | 12.114 | 12.477 | -0.038 | 1.0268 |
+| fp32.a_randn_b_dnr | 13.699 ± 0.117 | 13.325 | 13.725 | -0.025 | 1.0281 |
+| fp32.a_randn_b_nz | 12.832 ± 0.040 | 12.422 | 12.795 | +0.038 | 1.033 |
+| fp32.a_zeros_b_randn | 0.722 ± 0.145 | 0.747 | 0.769 | -0.048 | 0.9665 |
+| fp32.dn1_both | 8.389 ± 0.100 | 8.014 | 8.254 | +0.135 | 1.0468 |
+| fp32.dnr_both | 9.739 ± 0.052 | 9.418 | 9.701 | +0.038 | 1.0341 |
+| fp32.nz_both | 8.232 ± 0.190 | 7.936 | 8.174 | +0.058 | 1.0373 |
+| fp32.randn | 24.741 ± 0.045 | 24.006 | 24.727 | +0.014 | 1.0306 |
+| fp32.sparse50 | 7.331 ± 0.047 | 6.933 | 7.141 | +0.190 | 1.0574 |
+| fp32.sparse50_mask | 13.146 ± 0.183 | 12.753 | 13.136 | +0.010 | 1.0308 |
+| fp32.zeros | 0.000 ± 0.000 | 0.000 | 0.000 | +0.000 | — |
+| int8.a_3of4_b_full | 5.877 ± 0.195 | 5.801 | 5.958 | -0.081 | 1.013 |
+| int8.a_zeros_b_full | 0.243 ± 0.150 | 0.404 | 0.414 | -0.172 | 0.6014 |
+| int8.b_pairs_alt | 5.691 ± 0.126 | 5.582 | 5.733 | -0.042 | 1.0196 |
+| int8.b_pairs_rtl | 4.272 ± 0.147 | 4.255 | 4.371 | -0.098 | 1.0039 |
+| int8.b_unpaired | 5.710 ± 0.122 | 5.504 | 5.653 | +0.056 | 1.0373 |
+| int8.full | 7.120 ± 0.055 | 6.963 | 7.152 | -0.032 | 1.0225 |
+| int8.zeros | 0.000 ± 0.000 | 0.000 | 0.000 | +0.000 | — |

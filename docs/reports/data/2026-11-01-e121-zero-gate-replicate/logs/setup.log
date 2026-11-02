@@ -1,0 +1,47 @@
+== host (no device access) ==
+aifoundry3
+ 19:20:23 up 6 days,  5:01,  3 users,  load average: 0.73, 0.69, 0.65
+No process holds an ET-SoC-1 device node or card lock.
+logins: 12 (names not recorded)
+== tree ==
+root /home/yaroslavvb/aifoundry; V3_DEVICE=unset
+card_code_unchanged_sha256: identical to E121's freeze: all
+e121_files_sha256: identical to E121's freeze: all
+the runner's own check (predictions-e93.json): all
+== tiles against their registered sha256 (each file and each half) ==
+{"e93_tiles": 17, "e78_tiles_checked": 9, "problems": []}
+== the binary takes fp16 and int8 with file: operands, --dump-tiles and --stop-file ==
+  fp16: present
+  int8: present
+  file:: present
+  --dump-tiles: present
+  --stop-file: present
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 4006896 Sep 25 07:25 build/ettelem/ettelem
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 3569104 Sep 26 06:15 build/sparsity/host/sparsity_host
+-rw-rw-rw- 1 root root 0 Oct 26 15:18 /run/lock/etsoc-shire0.lock
+== the plan of the first pass ==
+{"e93": ["fp16.a_dnr_b_randn", "fp16.a_nz_b_randn", "fp16.a_randn_b_nz", "fp16.dnr_both", "fp16.nz_both", "fp32.a_dnr_b_randn", "fp32.a_nz_b_randn", "fp32.a_randn_b_dnr", "fp32.a_randn_b_nz", "fp32.dn1_both", "fp32.dnr_both", "fp32.nz_both", "fp32.sparse50_mask", "int8.a_3of4_b_full", "int8.b_pairs_alt", "int8.b_pairs_rtl", "int8.b_unpaired"], "compare": ["fp32.a_zeros_b_randn", "int8.a_zeros_b_full", "fp32.sparse50"], "anchors": ["fp32.zeros", "fp32.randn", "fp16.zeros", "fp16.randn", "int8.zeros", "int8.full"], "tie": "anchor_pi", "runs_per_pass": 40}
+  0 s-1 anchor_pi
+  1 s+0 fp32.a_randn_b_dnr
+  2 s+0 fp32.zeros
+  3 s+0 int8.a_3of4_b_full
+  4 s+0 fp16.nz_both
+  5 s+0 int8.full
+== dry run of one whole pass (V3_DRY=1: lib.sh stubs every device call) ==
+dry rc=0
+device launches the pass would make: 42
+of them on E93 tiles: 17
+      1 ET_DEVICES=None
+DRY ettelem config
+2026-11-01T19:20:31 [aifoundry3] kinds p12100 ends: ok tiers 1,2
+== the queue's budget rule on stub blocks (no device: each stub only sleeps) ==
+  19:20:31 queue: 12110 12111 12112 12113 12114; budget 16 s from the claim (19:20:31), reserve 2 s, last end 19:20:45, deadline 23:15:00; first estimate 4 s
+  19:20:31 p12110 starts at T0+0 s (projected 4 s, end by T0+4 s)
+  19:20:34 p12110 rc=0 (3 s)
+  19:20:35 p12111 starts at T0+4 s (projected 3 s, end by T0+7 s)
+  19:20:38 p12111 rc=0 (3 s)
+  19:20:39 p12112 starts at T0+8 s (projected 3 s, end by T0+11 s)
+  19:20:42 p12112 rc=0 (3 s)
+  19:20:43 budget: stopping before p12113 (now T0+12 s, projected 3 s, ends T0+15 s > T0+14 s)
+  19:20:43 passes done: 3, stopped before 1, at T0+12 s
+  19:20:43 queue done at T0+12 s
