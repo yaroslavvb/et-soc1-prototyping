@@ -6,20 +6,29 @@ steady state for heat", and item 8, "The heat path drifts between sessions" (Q13
 *Pre-registered in [`tools/claims-v3/e133/E133.md`](../../../../tools/claims-v3/e133/E133.md) with
 [`predictions-e133.json`](../../../../tools/claims-v3/e133/predictions-e133.json), the scorer, its self-test and a dry queue. It was committed as
 **`9723d79b`** at 09:00:48 PST and was on origin at 09:00:52. The first lane was then blocked by the lab's Tailscale lapse (08:40–10:04 PST) and never
-reached the box. **Amendment A1** (`f842cc39`, 10:12:24 PST, on origin 10:12:27) was written for this second session before the claim and before
-any E133 data. It says the first session never ran (0 card-minutes, nothing to join), moves the smoke's latest start to 11:30, scores R2 as frozen
-beside R2w (keyed at the governor's whole degree), adds a hash guard on the audited chain and corrects two labels.*
+reached the card; it had only looked at the box, 08:21–08:26 PST, before the lapse (corrected after verification,
+[C4](#corrections-after-verification-mon-2-nov-2026)). **Amendment A1** (`f842cc39`, 10:12:24 PST, on origin 10:12:27) was written for this second
+session before the claim and before any E133 data: it was final at that commit, before the box access at 10:12:41 (C4). It says the first
+session never ran (0 card-minutes, nothing to join), moves the smoke's latest start to 11:30, scores R2 as frozen beside R2w (keyed at the
+governor's whole degree), adds a hash guard on the audited chain and corrects two labels.*
 
 *The session:*
 - *Claimed at 10:14:18 PST by rewriting the day's one `#community-lab` post (message `1566837317765963987`).*
 - *First device access at 10:14:32 PST: the session-start `ettelem config`.*
 - *Card runs 10:14:32–12:40:40 PST on aifoundry2 card 0 only: **80.81 card-minutes of 110**.*
-- *TDP 65 W and threshold 65 °C at all 42 config reads, from the session-start read (10:14:32) to the session-end read (14:05:44). Nothing was
-  set, and **no WRITE command of any kind** was sent, not even the statistics reset. The residency read was answered unsent 30 times and never
-  sent.*
-- *The card's clause was dropped from the post at 12:41:01 PST.*
+- *TDP 65 W and threshold 65 °C at all 42 config reads, from the session-start read (10:14:32) to the session-end read (14:05:44), which came
+  after the release (D5). Nothing was set, and **no WRITE command of any kind** was sent, not even the statistics reset. The residency read was
+  answered unsent 30 times and never sent.*
+- *The card's clause was dropped from the post at 12:41:01 PST. The session-end read (14:05:44) came after it, outside the claim: a READ on a free
+  card ([D5](#departures-dated), added after verification).*
 - ***W3, the optional afternoon probe, did not run, by its registered rule.** At 14:05:07 PST the free card's 10-minute idle die read 44.925 °C,
   under the rule's 45.0 (W2's REST idle, 44.0, plus 1.0). `SKIP-W3` was touched at 14:05:29, and the queue ended at 14:05:40.*
+
+*Corrected after an independent verification, Mon 2 Nov 2026 (§ [Corrections after verification](#corrections-after-verification-mon-2-nov-2026),
+C1–C6). The governor trips at a whole-degree reading of 66, which the plateau's own readings and the SP trace show directly. R2w's agreement is a
+weak test, because the idle's whole-degree reading cannot place the die on either side of its key. The session-end read came after the release
+(D5). The first lane never reached the card, though it looked at the box. A1 was final at its commit. Item 9 is given per kind. Desk only, no card
+touched. No registered rule, prediction, number or verdict changed.*
 
 ## Results first
 
@@ -30,12 +39,15 @@ those came out as predicted, all eight FAILs among them. Two did not:**
 - **E133-R2**: AT THE TRIP where AT THE FLOOR was predicted.
 
 Amendment A1's **E133-R2w**, keyed before any data at the governor's whole degree, predicted AT THE TRIP and came out as predicted
-([`a1_readings.json`](a1_readings.json) `R2w_amendment_A1`). Before scoring anything, the scorer reproduced E98's and E111's committed results key
-for key (`regression`).
+([`a1_readings.json`](a1_readings.json) `R2w_amendment_A1`). *(Added after verification, [C2](#corrections-after-verification-mon-2-nov-2026):
+that is a weak test. W2's REST idle read 44 in every sample, a whole degree, so it cannot place the die on either side of R2w's 44.54 °C key. The
+direct evidence that the trip comes at a reading of 66 is the plateau's own readings and the SP trace, in result 2.)* Before scoring anything, the
+scorer reproduced E98's and E111's committed results key for key (`regression`).
 
-**1. Item 9: a second session per kind.** The coefficient replicates for fp32 random (R1 PASS, ratio 0.966). It nearly replicates for int8 −1s
-(R1 INCONCLUSIVE, 1.042 [1.005, 1.111], the range's top 0.001 past the band). Four holds over two sessions put aifoundry2's steady coefficient at
-**0.65–0.70 °C per board W** ([`results.json`](results.json) `A`, `R1`; [`a1_readings.json`](a1_readings.json) `holds`):
+**1. Item 9: a second session per kind.** By R1 the coefficient replicates for fp32 random (PASS, ratio 0.966), though for that kind R1 compares
+Sunday's hold at the governor's floor with Monday's at its trip, two regimes *(added after verification,
+[C5](#corrections-after-verification-mon-2-nov-2026))*. It nearly replicates for int8 −1s (R1 INCONCLUSIVE, 1.042 [1.005, 1.111], the range's
+top 0.001 past the band). Four holds over two sessions put aifoundry2's steady coefficient at **0.65–0.70 °C per board W** ([`results.json`](results.json) `A`, `R1`; [`a1_readings.json`](a1_readings.json) `holds`):
 
 | hold | kind, clock (share at it) | start | idle before → after: die, W | plateau, last 300 s: die, W | rise | over idle | **c, per board W** [range] | E111's c (1 Nov) | R1: ratio [range] | slope, last 10 min: fine W (A1's reading), die beside | registered |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -61,7 +73,8 @@ for key (`regression`).
   - Against E111's, H-I8's plateau sits 2.64 °C lower, at 1.42 W less, from an idle 2.5 °C cooler (E111's idles around its hold: 46.0 and 47.0 °C).
 
 **2. E133-R2: fp32 random sat at the governor's trip, not at its floor. The frozen key missed by the governor's whole degree; A1's key did not**
-([`results.json`](results.json) `R2`, `beside.H-F32.minutes`; [`a1_readings.json`](a1_readings.json)).
+([`results.json`](results.json) `R2`, `beside.H-F32.minutes`; [`a1_readings.json`](a1_readings.json)). *(Added after verification: A1's key agreed
+on an idle reading too coarse to test it, [C2](#corrections-after-verification-mon-2-nov-2026).)*
 - **The die was pinned.** The minute bins read 65.88–66.01 °C from minute 1 to the end (from minute 8 the range is 0.097 °C). The clock left the
   600 MHz floor in 11.1% of the plateau's in-kernel samples, the ones the scorer reads. In the raw telemetry of the same 300 s (2,998 rows) it read
   700 MHz in 9.9% and 800 in 1.5% (desk count, not a registered reading). It left the floor in 5.7% of the 300 s before, and in 4–13% minute by
@@ -70,6 +83,20 @@ for key (`regression`).
   FLOOR, and below A1's 44.54 °C, so R2w predicted AT THE TRIP. At the floor the plateau would sit near idle + 21.5–21.8 °C = 65.5–65.8 °C. The
   governor's whole-degree mean reads that as 65, which is not above the threshold. So the governor lets the clock up, the die rises to read 66, the
   governor steps down, and it holds the die at the 65/66 boundary.
+- ***The trip, read directly*** *(dated note, [C1](#corrections-after-verification-mon-2-nov-2026) and C2, Mon 2 Nov 2026, after verification; post
+  hoc, from committed files: [`corrections_e133.txt`](corrections_e133.txt)).*
+  - **The rule.** The governor steps the clock down only when the whole-degree mean of the minion-shire sensors reads above its 65 °C threshold,
+    so at 66. That mean is an integer division (et-platform `836a4ab`: `pvt_controller.c`'s minion average, `thermal_pwr_mgmt.c:884`; A1 §4).
+  - **The plateau read 66.** Over the scorer's 300 s window, H-F32's 2,998 raw rows read **66 in 86.6%**, 65 in 12.0% and 67 in 1.4%. What reads 65
+    is the floor plateau that did not happen, near 65.5–65.8 °C.
+  - **The SP's own trace logged the trip at 66.** Its 30 dumps carry 89 thermal throttle-down lines. Each dump is 8 KiB and holds only the
+    buffer's last 44–45 entries, so later dumps repeat earlier entries. Told apart by their timestamps, the lines are **20 distinct events**: the
+    last ten of the probe's fp32 randn run and the last ten of H-F32. **Every one reads "current temperature: 66, threshold: 65".**
+  - **So R2w's agreement is a weak test.** W2's REST idle read 44 in all 1,212 raw rows (all 600 of the scorer's samples): a whole degree with no
+    dither. The reading places the die somewhere in the degree from 44 to 45 °C, and A1's 44.54 °C key lies inside it, so the reading cannot put the
+    die on either side of the key. A die near a whole-degree edge dithers: the smoke's rest at 10:14 read 43 in 189 of its 213 rows and 44 in 24.
+    W2's REST never did. R2w stays as scored, AT THE TRIP as predicted, but it does not confirm the key. The plateau's readings and the trace above
+    are the direct evidence for the whole-degree trip.
 - **Sunday was different.** E111's idle was 45.0 °C, which put the floor's plateau at 67.3 °C, above the trip, so its clock stayed at the floor.
   **A 1 °C cooler idle moved fp32 random from the governor's floor to its trip.**
 - **A1 on H-F32 reads the fine W, and FAILs (as predicted) while the die stood still.** The clock was held at 600 MHz in 89% of the window (≥ 70%),
@@ -144,17 +171,21 @@ mean peaked at 67 °C, and the hottest sensor's running maximum read 69 °C, car
 
 ## What it changes
 
-- **Kinds page, item 9.** The heat path's coefficient has a replicate: four holds over two sessions and two kinds read 0.648–0.700 °C per board W.
-  fp32 random replicated (R1 PASS, 0.966); int8 −1s was inconclusive by 0.001 (1.042 [1.005, 1.111]). Still open:
+- **Kinds page, item 9.** A second session per kind ran *(corrected after verification, [C5](#corrections-after-verification-mon-2-nov-2026):
+  this said "The heat path's coefficient has a replicate")*. R1 is PASS for fp32 random (0.966), with Sunday's hold at the governor's floor and
+  Monday's at its trip, and INCONCLUSIVE for int8 −1s, by 0.001 (1.042 [1.005, 1.111]). Four holds over two sessions and two kinds read 0.648–0.700
+  °C per board W. Still open:
   - no hold is steady by the registered test (A1 FAIL on all four holds of the two sessions);
   - int8's 1 °C wander repeated, cause unknown;
   - no inlet thermometer exists.
-- **Kinds page, item 8.** One cool probe, 2.8 °C below the night's, refutes both readings of the 76 s line's drift: the line moved 0.81 °C per °C of
+- **Kinds page, item 8.** One cool probe, 2.8 °C below the night's on E98's W-derived rest die *(the scale named after verification,
+  [C6](#corrections-after-verification-mon-2-nov-2026))*, refutes both readings of the 76 s line's drift: the line moved 0.81 °C per °C of
   rest die, against the room's 0.25 and E111's fit of 0.47. The hold followed the room's reading (0.73 per °C, SUPPORTS on E98-R2's partition). Still
   open: a warm probe (W3 did not run: the idle reached 44.9 °C, not 45.0) and an inlet thermometer.
-- **The governor (the speed half).** On this card fp32 random sits at the 600 MHz floor or at the 65 °C trip depending on a 1 °C change in the
-  idle. Under the trip the clock leaves the floor in about 11% of samples (mean 612.7 MHz). The die is pinned to within 0.1 °C at the 65/66 boundary
-  of the whole-degree mean the governor reads.
+- **The governor (the speed half).** On this card fp32 random sits at the 600 MHz floor or at the governor's trip, a whole-degree reading of 66
+  against its 65 °C threshold, depending on a 1 °C change in the idle. At the trip the clock leaves the floor in about 11% of samples (mean 612.7
+  MHz), and the die is pinned to within 0.1 °C at the 65/66 boundary of the whole-degree mean the governor reads *(corrected after verification,
+  [C1](#corrections-after-verification-mon-2-nov-2026): this said "the 65 °C trip" and "Under the trip")*.
 
 ## Registered against what happened
 
@@ -168,7 +199,7 @@ mean peaked at 67 °C, and the hottest sensor's running maximum read 69 °C, car
 | at most 110 card-minutes (less the first session's 0); no step after 15:00; hard stop 16:00 | 80.81 card-minutes; the last step ended 12:40:40; the queue ended 14:05:40 |
 | W3 only if the idle reaches W2's REST idle + 1.0 °C at about 14:05, and the post first | 44.925 °C < 45.0 at 14:05:07: not run, not claimed (`SKIP-W3`) |
 | predicted c 0.672 (H-I8), 0.671 (H-F32); R1 PASS ×2 | 0.700, 0.648; R1 INCONCLUSIVE (H-I8), PASS (H-F32) |
-| predicted R2 AT THE FLOOR (the idle read 44.0 ≥ 43.5) | AT THE TRIP: **not as predicted**; A1's R2w (44.54) predicted it |
+| predicted R2 AT THE FLOOR (the idle read 44.0 ≥ 43.5) | AT THE TRIP: **not as predicted**; A1's R2w (44.54) predicted it, a weak test: the idle's whole-degree reading cannot place the die on either side of 44.54 ([C2](#corrections-after-verification-mon-2-nov-2026)) |
 | predicted A1 FAIL ×2, A2 prior PASS ×2 and FAIL ×6, A3 PASS | as predicted |
 | predicted B0 OK, B1 ABOVE_TARGET, B3c line ABOVE_TARGET (about 0.47) | OK; ABOVE_TARGET (0.756); ABOVE_TARGET at 0.808 (it also excludes 0.47) |
 
@@ -193,6 +224,9 @@ Q136(w)'s checker at HEAD: GO, 37 send sites, 0 disallowed, with the two reviewe
 ## Departures (dated)
 
 - **A1** is the registration's amendment for this session (E133.md § Amendments). It was written before the claim and before any E133 data.
+  *Dated note ([C4](#corrections-after-verification-mon-2-nov-2026), Mon 2 Nov 2026, after verification): A1's date line reads "written
+  10:08–10:15 PST", a window that contains the claim (10:14:18) and the first device access (10:14:32). A1 was final at its commit, 10:12:24 PST,
+  and on origin at 10:12:27, before the box access (10:12:41), the claim and any data. A1 itself is not edited.*
 - **D1: the box's checkout was not pulled (Mon 2 Nov, 10:12 PST).** `git pull --ff-only` in aifoundry2's lab checkout (at `0c187e12`) refused,
   because other lanes' rsynced files, untracked there and since committed, would have been overwritten. Nothing of theirs was touched. E133's own
   directory was rsynced from the Intel's clone at origin/main `f842cc39`, and the sha256 of 38 files was compared on both sides: the chain, the
@@ -209,11 +243,21 @@ Q136(w)'s checker at HEAD: GO, 37 send sites, 0 disallowed, with the two reviewe
     but the first lane's own 08:16–08:26 bin (43.31 °C, 21.29 W) also lies inside the range.
   - The first lane's blocked window had 26 attempts from 08:40:44 to 09:29:34: the first ssh, 14 probes by hand and the 11 in its `probes.log`.
     A1 §1's "11 logged probes … plus unlogged attempts from 08:40:44" counts the same attempts.
+- **D5: the session-end config read came after the release (Mon 2 Nov, 14:05:44 PST; written after verification,
+  [C3](#corrections-after-verification-mon-2-nov-2026)).** The queue's END2 end snapshot read the config at 12:40:40, inside the claim, and this
+  session's clause left the post at 12:41:01. W3 did not run, so the card was never claimed again, and from 13:02:58 the post read fully released
+  (the aifoundry3 lane's " — released"). The session's last `ettelem config` (`run_e133.sh config session-end`, 14:05:44) then opened aifoundry2's
+  management node 85 minutes after the clause was dropped, when no clause named the card.
+  - It was a READ (A1's five GETs), under `flock -n` and `timeout 10`, on a free card: `et-who` read nothing held, and the 120 history rows the W3
+    rule read up to 14:05:07 show nothing held.
+  - It did no harm and changes no number.
+  - Later designs take the session-end read before the clause is dropped, or put the clause back for it.
 
 ## How it ran
 
-The first lane was blocked by the Tailscale lapse and never reached the box (A1 §1). This session ran from the Intel, each box step in a script
-file run by `ssh aifoundry2 'bash -s' < file`:
+The first lane was blocked by the Tailscale lapse and never reached the card; it had only looked at the box, 08:21–08:26 PST, before the lapse (A1
+§1; corrected after verification, [C4](#corrections-after-verification-mon-2-nov-2026): it said "never reached the box"). This session ran from
+the Intel, each box step in a script file run by `ssh aifoundry2 'bash -s' < file`:
 
 ```bash
 # 10:12:24 amendment A1 committed (f842cc39), on origin 10:12:27
@@ -226,7 +270,7 @@ bash tools/claims-v3/e133/run_e133.sh go 10:14               # 10:14:32: the que
 # 12:41:01 the card's clause dropped from the post (another lane's aifoundry3 clause kept)
 # 14:05:07 the W3 rule read on the box's own history: 10-minute idle die 44.925 C < 45.0, so W3 not claimed
 bash tools/claims-v3/e133/run_e133.sh skip-w3                # 14:05:29; the queue skipped W3 and ended at 14:05:40 ("done")
-bash tools/claims-v3/e133/run_e133.sh config session-end     # 14:05:44: TDP 65 W, threshold 65 C, 600 MHz; et-who: nothing held
+bash tools/claims-v3/e133/run_e133.sh config session-end     # 14:05:44: TDP 65 W, threshold 65 C, 600 MHz; et-who: nothing held (after the release: D5)
 ```
 
 Then on the Intel, from the top of the repository:
@@ -255,6 +299,29 @@ python3 docs/reports/data/2026-11-02-e133-heat-holds/count_commands_e133.py docs
 - **The proxies are coarse.** The NIC and NVMe sensors heat with their own hosts, a card is a proxy only while free, and the camera phone's battery
   did not move.
 
+## Corrections after verification (Mon 2 Nov 2026)
+
+An independent verifier read the registration and A1, this data, the source of the box's `ettelem` binary and the firmware handlers at `836a4ab`, the
+same afternoon.
+- **The write lens passes: no WRITE of any kind.** `since_reset_ms` is −1 in all 48,401 sample rows, and the SP's running board maximum never fell.
+  All 42 config reads read 65 W / 65 °C. The residency read was never sent, no drain ran, and the 30 SP trace dumps hold only the governor's events.
+- **It recomputed the registered rules** (R1, A3, R2, B1, B3c and the tally), reproduced the W3 rule's reading from the committed history, and checked
+  the amendment's timing against the Intel clone's reflog and the day's one post.
+
+What it found is wording, here and in the lane's own result: C1–C6, made above as marked edits and dated notes. The registration, the scorer's outputs
+([`results.json`](results.json), [`reduce.txt`](reduce.txt), [`a1_readings.json`](a1_readings.json)) and every registered number and verdict are
+unchanged. The new counts are post hoc: [`corrections_e133.py`](corrections_e133.py) → [`corrections_e133.txt`](corrections_e133.txt), from
+committed files only. They refine one of the verifier's counts: its 89 throttle-down lines are 20 distinct events.
+
+| | what was wrong | what changed |
+|---|---|---|
+| C1 | **Where the governor trips.** The lane's result said a plateau at 65.9 °C "reads 65, which is not above its 65 C threshold", and that the floor would have settled the die "just under the governor's 65 C trip". The plateau mostly read 66, above the threshold. What reads 65 is the floor plateau that did not happen, near 65.5–65.8 °C; result 2 had this right. What it changes said "the 65 °C trip" and "Under the trip" | A dated note under result 2 gives the direct evidence. The plateau's 2,998 raw rows read 66 in 86.6%, 65 in 12.0% and 67 in 1.4%. All 20 distinct thermal throttle-down events in the SP trace (89 lines in 30 dumps that repeat entries) read "current temperature: 66, threshold: 65". What it changes now says "the governor's trip, a whole-degree reading of 66 against its 65 °C threshold". The result's blog points 2 and 3 are rewritten from result 2 |
+| C2 | **R2w's agreement was read as a confirmation.** W2's REST idle read 44 in every sample, a whole degree with no dither. That places the die somewhere from 44 to 45 °C, and R2w's 44.54 °C key lies inside that degree | Dated notes in Results first, under result 2 and in the registered-against table. R2w stays as scored, AT THE TRIP as predicted, but it is a weak test; the trip's direct evidence is C1's readings and trace |
+| C3 | **One card access fell outside the claim**: the session-end `ettelem config` at 14:05:44, 85 minutes after the clause was dropped (12:41:01). The post had read fully released since 13:02:58 | Departure D5: a READ under the lock on a free card, with no harm done. Later designs take the read before the release, or claim again for it |
+| C4 | **Two timeline slips.** The header and How it ran said the first lane "never reached the box". It looked at the box from 08:21 to 08:26 (A1 §1), and the registration's "Before the freeze" numbers come from that look. A1's date line, "written 10:08–10:15 PST", contains the claim (10:14:18) and the first device access (10:14:32) | "Never reached the card" in both places, and a dated note on Departures' A1: final at its commit, 10:12:24 PST, on origin at 10:12:27, before the box access (10:12:41), the claim and any data. A1 itself is not edited |
+| C5 | **Item 9's "replicate" was given whole.** By R1 it holds for fp32 random only, and that PASS compares Sunday's floor with Monday's trip. For int8 −1s, R1 is INCONCLUSIVE | Result 1 and What it changes give item 9 per kind, with the two regimes named |
+| C6 | **Blog-point wording** in the lane's result. "A one-degree cooler room": no inlet thermometer exists, and the idle die also carries the card's recent heat. "700 MHz in about 10%", cited to `results.json` `R2`: it is result 2's desk count. "Steady to about 1 C, not 0.1 C": H-F32 was held within 0.1 °C at the trip. "2.8 C cooler": that is on E98's W-derived rest-die scale, not the die reading | Rewritten in the result. Here, What it changes' item 8 names the W-derived rest die |
+
 ## Files
 
 | file | what |
@@ -263,6 +330,7 @@ python3 docs/reports/data/2026-11-02-e133-heat-holds/count_commands_e133.py docs
 | `results.json`, `reduce.txt` | `reduce_e133.py`: Parts A and B, R1, R2, B3c, the verdicts, the regression (E98's and E111's results reproduced) |
 | `a1_readings_e133.py`, `a1_readings.json` | amendment A1's R2w from the scorer's own R2 output, and the two sessions per kind side by side (E111's committed `results.json` against this one) |
 | `count_commands_e133.py`, `commands_sent.json` | every device command the session sent, counted from the records |
+| `corrections_e133.py`, `corrections_e133.txt` | added after verification, post hoc, from committed files only: H-F32's plateau readings and clock, the REST blocks' readings, the SP trace's throttle-down events told apart by timestamp, the minute wander and the cool probe's W-derived lead |
 | `SMOKE/`, `W2/`, `END/`, `W1B/`, `END2/` | raw `run_e133.py` sessions: `e133.json` (the chain's hashes), `session.json`, `kspeed.json`, `runs.jsonl`, `launches.jsonl.gz`, `queries.jsonl`, `marks.jsonl`, `e133-not-sent.jsonl`, `tel/*.jsonl.gz` (10 Hz), `sp/`, `logs/`, `manifest.txt`, `run.out`, `run.log`, the queue's `snapshot-*.json`, `sensors-*.json`, `config-*.txt` |
 | `config-session-start.txt`, `config-session-end.txt` | the session's first and last `ettelem config` (10:14:32 and 14:05:44 PST) |
 | `queue.jsonl`, `queue.out`, `status.json`, `schedule.json` | the queue's records and schedule (A1's smoke latest 11:30) |

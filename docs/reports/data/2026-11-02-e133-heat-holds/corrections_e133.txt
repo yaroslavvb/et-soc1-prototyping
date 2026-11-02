@@ -1,0 +1,23 @@
+[A] H-F32's plateau, 1793647052253..1793647352254 ms (results.json A.H-F32.plateau), every raw row of W2/tel/HOLDF-00-fp32-randn-hold-r1.jsonl.gz
+  die readings (C): 65: 359 (12.0%), 66: 2597 (86.6%), 67: 42 (1.4%); 2998 rows
+  their mean: 65.894 C (the scorer's, on its 2927 in-kernel rows: 65.9142)
+  clock (MHz): 600: 2655 (88.6%), 700: 298 (9.9%), 800: 45 (1.5%); 2998 rows
+  share at 600 MHz: 0.8856 (the scorer's, in-kernel: 0.8886)
+
+[B] the REST blocks: die readings on every raw row, and in the scorer's idle, the block's last 60 s (results.json A.idles)
+  SMOKE/SMOKE-00-rest-r1: every row 43: 189 (88.7%), 44: 24 (11.3%); 213 rows; the last 60 s 43: 189 (88.7%), 44: 24 (11.3%); 213 rows
+  W2/REST-00-rest-r1: every row 44: 1212 (100.0%); 1212 rows; the last 60 s 44: 600 (100.0%); 600 rows (results.json A.idles.W2: die 44.0, 600 samples)
+  END/REST-00-rest-r1: every row 44: 1212 (100.0%); 1212 rows; the last 60 s 44: 600 (100.0%); 600 rows (results.json A.idles.END: die 44.0, 600 samples)
+  W1B/REST-00-rest-r1: every row 44: 1212 (100.0%); 1212 rows; the last 60 s 44: 600 (100.0%); 600 rows (results.json A.idles.W1B: die 44.0, 600 samples)
+  END2/REST-00-rest-r1: every row 44: 1212 (100.0%); 1212 rows; the last 60 s 44: 600 (100.0%); 600 rows (results.json A.idles.END2: die 44.0, 600 samples)
+
+[C] the SP trace dumps (*/sp/*.bin), in session order
+  30 dumps; timestamped entries per dump 44-45
+  thermal throttle-down lines: 89, in 9 dumps: W2/SUS-07-fp32-randn-r1 10; W2/SUS-08-fp16-ones-rep2-r1 9; W2/HOLDF-00-fp32-randn-hold-r1 10; W2/end 10; END/start 10; END/REST-00-rest-r1 10; END/end 10; W1B/start 10; W1B/REST-00-rest-r1 10
+  distinct throttle-down events (by timestamp): 20
+    20 x 'Thermal throttle down event, current temperature: 66, threshold: 65'
+  first carried by: {'W2/SUS-07-fp32-randn-r1': 10, 'W2/HOLDF-00-fp32-randn-hold-r1': 10}
+
+[D] H-F32's minute bins from minute 8: 65.908-66.005 C, range 0.097 C (results.json beside.H-F32.minutes.wander)
+[D] H-I8's minute bins from minute 8: 55.954-57.0 C, range 1.046 C (results.json beside.H-I8.minutes.wander)
+[D] the cool probe E133-W2: dx -2.8 C on E98's W-derived rest-die scale (results.json B.rest_die E133-W2 91.833 against the P3/P6/P7 mean 94.633); line 0.808 per C, hold 0.732 per C (results.json B.B3c.per_probe.E133-W2)
