@@ -251,6 +251,15 @@ and every one of them is post hoc.*
 - **C11, found while correcting (not a verifier fault):** the header's two links into `tools/claims-v3/e113/` were one directory short
   (`../../../` resolves under `docs/`). They now use `../../../../`.
 
+*Dated note, Sun 1 Nov 2026 (week 44), added by Q134's records without editing the text above:
+[E125](../2026-11-01-e125-a-side-replicate/README.md)'s desk finding, committed with its registration before any card-1 data
+and post hoc for this run. This run's seven passes hold 37 board-meter dips by E82's amendment A2 test, 13 of them inside a
+run's power window. With them removed and nothing else changed, all seven passes are kept (pass 1137's constant-operand
+spread reads 0.204 W, not 0.858 W, so its set-aside was a dip), every verdict here stands, `lq_h8` reads 3.281 ± 0.027 W, and
+ρ(8) reads 1.230 ± 0.019 in the low layout against 1.354 ± 0.011 in the spread layout: not the same in both layouts, though
+P5's 0.30 band still passes (`tools/claims-v3/e125/e113-nodips/`). E125 then replicated all seven verdicts on aifoundry1's
+card 1, with the same layout split (+0.109 ± 0.024).*
+
 ## Files
 
 | file | what |

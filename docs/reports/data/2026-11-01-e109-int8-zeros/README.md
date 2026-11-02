@@ -120,6 +120,15 @@ An independent verifier read the registration, the data and this page the same a
 | C8 | **The scope for the kinds page was incomplete.** Section 6's "one number cannot separate them" is superseded by these readings, section 7's "what is left on zeros" gains a measured split, and item 15 is a bundle of which E109 answers only the live-zero part | What it changes names section 6's sentence and section 7's split, and scopes item 15's change to "why a live zero on A costs 1.72 W more than priced" |
 | C9 | **The owed replicate was costed at about 19 card-minutes for 3 passes, with no spare.** E109's frame unchanged runs at most 3 passes inside its 23-minute queue deadline, and `min_kept_passes` is 3, so one set-aside by E78's gates voids it again | What it changes: budget 4–5 passes, about 25.3–31.2 card-minutes at this session's pace (26.1–32.8 if every added pass took the longest, 387 s), or register in advance how a set-aside pass is handled (C9) |
 
+*Dated note, Sun 1 Nov 2026 (week 44), added by Q134's records without editing the text above:
+[E124](../2026-11-01-e124-int8-zeros-replicate/README.md) replicated this test on aifoundry1's card 1, registered with four
+to five passes and a set-aside rule written in advance, and it scores: all four passes kept; R0 PER-TIME, R3 PASS, R2
+LANES-OPPOSE, Y1 and Y2 PASS, R1 INCONCLUSIVE (so Z, this run's answer replicating, reads PARTIAL), R8 FAIL. This run's
+labelled "per-op work fails" (R1 FAIL on three passes, post hoc) is therefore not confirmed as a registered result. Before
+E124's freeze its desk also ran card 1's dip filter over this run's committed passes: it keeps 10912
+(`tools/claims-v3/e124/selftest.txt`, D), so 10912's set-aside here is consistent with a board-meter dip; that applies card
+1's dip definition to aifoundry3's meter, so it is not shown directly (E124's C6).*
+
 ## Files
 
 `e109.json`, `runs.csv`, `reduce.txt`, `reduce.log` (the registered reduction); `scored.json`, `results.md` (`score_e109.py` on it); `e109-3pass.json`, `runs-3pass.csv`, `reduce-3pass.txt`, `reduce-3pass.log`, `scored-3pass.json`, `results-3pass.md` (post hoc, the gate lifted); `posthoc.json`, `posthoc.txt` (post hoc); `corrections-check.py`, `corrections-check.txt`, `corrections-check.json` (added with the corrections after verification: post hoc, deciding nothing, standard library); `aifoundry3/e109/p1091[0-2]/` (every pass's raw data: `runs.jsonl`, `marks.jsonl`, `telemetry.jsonl.gz`, `tiles/`, `config_start.json`, `config_end.json`, `manifest.txt`, `binaries.sha256`, `code.sha256`, `gen.sha256`, `configs.json`, `plan.json`, `run.log`, `block.json`); `aifoundry3/e109-smoke/p10901/`; `logs/` (the session, the queue, the session's two config reads, the queue's binaries' sha256, the box build, the sys_emu log, the two dry runs). The registration, binary, desk bench and code: [`tools/claims-v3/e109/`](../../../../tools/claims-v3/e109/README.md).

@@ -1024,7 +1024,9 @@ is the data, the last the corrections after verification. "Item N" is the kinds 
 E120's change record is committed with its data, as E118's and E77's are. Every claim was a clause in the day's one
 `#community-lab` post (`1566603178164617247`), added and released by rewriting it ([AGENT.md](../../AGENT.md) §4). Q134's
 records added dated notes, never editing frozen text, to the data READMEs of E69, E72, E79, E82 and E84: each sent the
-firmware-revisions query, a PMIC command by E85 C1's standard ([05-claims.md](05-claims.md), "Q134", the disclosures).
+firmware-revisions query, a PMIC command by E85 C1's standard ([05-claims.md](05-claims.md), "Q134", the disclosures); and to
+E109's and E113's, for E124's and E125's desk findings on their set-aside passes (a board-meter dip in E113's case,
+consistent with one in E109's).
 
 ## The camera and the details panel (30 September)
 
