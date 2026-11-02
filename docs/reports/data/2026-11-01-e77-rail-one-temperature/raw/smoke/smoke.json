@@ -1,0 +1,108 @@
+{
+ "experiment": "E77",
+ "stage": "smoke",
+ "t_start_iso": "2026-11-01T17:26:37.350-0800",
+ "dry": false,
+ "config_before": {
+  "t_ms": 1793582799376,
+  "tdp_w": 65,
+  "temp_threshold_c": 65,
+  "power_state": 3,
+  "power_state_name": "low_power",
+  "minion_mhz": 600,
+  "profile": "no-PMIC-read"
+ },
+ "launch_rc": 0,
+ "records": 7,
+ "samples": 118,
+ "complete_samples": 118,
+ "no_pmic_fields": true,
+ "profile_tag": true,
+ "max_board_w": 35.67,
+ "die_range": [
+  46.0,
+  48.0
+ ],
+ "high_water_max": 51.0,
+ "watcher_trip": null,
+ "clocks": [
+  600,
+  700,
+  800
+ ],
+ "cmd": [
+  "timeout",
+  "10",
+  "<tree>/build/sparsity_t2/host/sparsity_host",
+  "--test",
+  "fma",
+  "--type",
+  "fp32",
+  "--pattern",
+  "none",
+  "--values",
+  "randn",
+  "--shires",
+  "0xffffffff",
+  "--per-shire",
+  "5",
+  "--seconds",
+  "2",
+  "--budget",
+  "3",
+  "--seed",
+  "1",
+  "--kernel",
+  "<tree>/build/sparsity_t2/kernel/sparsity.elf",
+  "--stop-file",
+  "<tree>/build/e77/run/smoke/STOP"
+ ],
+ "stderr_tail": "            \nNumber of chiplet bits in chiplet DDR address:             255                 \nFirst chiplet bit in interleaved chiplet DDR address:      255                 \nNumber of chiplet bits in interleaved chiplet DDR address: 255                 \n\ndevice ready in 0.14 s\ndevice held for 2.45 s\n",
+ "queries": {
+  "tag": "smoke",
+  "t_ms": 1793582811235,
+  "t_iso": "2026-11-01T17:26:51.235-0800",
+  "sptrace_rc": 0,
+  "sptrace_sha256": "c8446bdf0dec5561e6d879ddd5802432c0959e555505d0a9fb6ae3a7e5b673df",
+  "throttle_up_lines": 17,
+  "throttle_down_lines": 0,
+  "pmic_alarm_lines": 0,
+  "residency_rc": 1,
+  "residency": [
+   {
+    "t_ms": 1793582811243,
+    "state": 2,
+    "rc": 0,
+    "cumulative_us": 4702163453,
+    "average_us": 46673091,
+    "maximum_us": 85119900,
+    "minimum_us": 32377
+   },
+   {
+    "t_ms": 1793582811245,
+    "state": 3,
+    "rc": 0,
+    "cumulative_us": 0,
+    "average_us": 0,
+    "maximum_us": 0,
+    "minimum_us": 0
+   },
+   {
+    "t_ms": 1793582811246,
+    "state": 4,
+    "rc": -5
+   }
+  ],
+  "config": {
+   "t_ms": 1793582811254,
+   "tdp_w": 65,
+   "temp_threshold_c": 65,
+   "power_state": 3,
+   "power_state_name": "low_power",
+   "minion_mhz": 600,
+   "profile": "no-PMIC-read"
+  }
+ },
+ "verdict": "PASS",
+ "t_end_iso": "2026-11-01T17:26:51.256-0800"
+}

@@ -179,11 +179,30 @@ governor move in E69's mapping — that the governor be shown to work afterwards
 - **GO / NO-GO:** desk **GO-READY**. ⟨RUN: GO only when every live item reads as required, recorded in a commit made
   before the set⟩
 
-## Live gates (filled at gate time)
+## Live gates (filled at gate time, Sun 1 Nov 2026)
 
-⟨RUN: G0 identity by continuity; the originals; the LUT floor; exclusivity (`et-who`, other users' device processes,
-the use count, the idle-login rule, the claim and its message id); the collector; the maintainer's newest posts; the
-telemetry profile; the GO⟩
+The gate reads ran 17:26:26.822–17:26:29.025 PST under the card lock (`raw/gates.json`), the smoke 17:26:37–17:26:51
+PST (`raw/smoke/smoke.json`), both with no write. Telemetry profile: **no-PMIC-read**, `ettelem-e77` built on the host
+at 16:04 PST, sha256 `21e7bf77e631eb7e…`; runner `run_e77.py` sha256 `fe316bdf53d7defa…` (= amendment A2's commit);
+heater `build/sparsity_t2` host `7adadf4f1ce331cc…`, kernel `990807f483cd57aa…`.
+
+| gate | read | verdict |
+|---|---|---|
+| G0 host and card | `aifoundry2`, kernel 7.0.0-38-generic, host up since 2026-10-26 15:13:03 PDT; card `0000:02:00.0`, PCIe 16.0 GT/s x8 (`et-lab-manifest`, `raw/manifest-gates.txt`); `et_soc1` 0.20.0, srcversion `47D26A305A0428B29FB7FC4`, module sha256 `3ae3759cf857874e…`; `dev_mngt_service` sha256 `a3d4c722d9505aa9…` | PASS |
+| G0 identity by continuity | module uptime **6 d 3 h 13 m = 8,833 min** at 17:26:28 PST, against **7,470 min** since E69's revisions read (27 Oct 13:56:26 PDT), and equal to the host's own uptime: no service-processor reset since, so that read (release 1.4.0, BL1/BL2 0.22.0, PMIC 1.5.0, minions 0.25.1) still names the running image. The revisions query was not sent | PASS |
+| originals, the two RAM GETs | **TDP 65 W, threshold 65 °C**, `low_power`, 600 MHz (idle) | PASS |
+| vmin-LUT floor, parsed in code | minion points **600 / 700 / 800 MHz**, 11 zero points; the file's sha256 `c9359513ce4d3769…` is the one E72 read on 27 Oct (`2026-10-27-e72-600mhz/vmin-lut.json`), so the LUT is unchanged; the file stays on the host | PASS |
+| exclusivity | `et-who`: "No process holds an ET-SoC-1 device node or card lock."; module use count 0; no other login (17:25:51 PST); Q133's E111 released aifoundry2 at 17:25 PST (its claim edited); this run's claim, message `1566624449086628034`, posted 17:26:15 PST: "using aifoundry2 for 1 h, until ~18:25 PST" | PASS |
+| collector | 3 `live-collector.py` processes, sha256 `58e7dc1b9f755be3…` (the desk's record); it opens nothing while the lock is held | PASS |
+| ring before | `sptrace` rc 0: 18 throttle-up lines (E111's runs), no throttle-down, no PMIC-alarm or POWER_SAFE line | recorded |
+| residencies before | POWER_UP cumulative 4,702 s; POWER_DOWN 0; the THERMAL_DOWN read returned rc −5 (an error code; no service-processor log line in the smoke's ring) | recorded |
+| host kernel log before | 666 "Error Event" lines in the buffer at 17:26 PST (`raw/logs/kernlog-before.txt`) | recorded |
+| smoke (no write) | PASS: launch rc 0, 7 kernel records, 118 complete samples, no PMIC fields in any line, clocks 600 / 700 / 800 MHz (the ring: idle at "Freq 600 MNN 520", then "Power throttle up" to 700 and 800 MHz, MNN 570 and 620), board at most 35.67 W, die 46–48 °C, high-water latch at most 51 °C | PASS |
+| the maintainer's newest posts | none since 14:00 PST in `#community-lab` (4 messages) or in the direct messages (none), read 16:04:26 PST, read-only, masked, stdout only | PASS |
+
+**GO**, recorded in this commit before the first write. The session started at 17:26:59 PST and runs arm B's first two
+passes at the card's own settings; by amendment A2 it writes nothing until the file `GO` exists in its run directory,
+created after this commit is pushed.
 
 ## Set log, activation, final handoff
 
