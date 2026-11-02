@@ -10,7 +10,7 @@ E126–E134 and Q136's desk lanes use the same list, item 16 included, as the pa
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E134**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E135**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
@@ -41,7 +41,8 @@ that morning on device commands (no power cycle, read-only PMIC voltage reads al
 the first launch): what a clock gap buys in E107's last three arms and a second session of E119's sustained pairs (E126)
 and E111's heat holds again (E133) on aifoundry2; the float B-lane gate (E127), which int8 multiplier (E130), the memory
 path's split (E132) and more single-bit prices (E134) on aifoundry3; and fp16's sign rest (E128), int8's no-issue excess
-with one A row (E129) and E95's real tiles (E131) on aifoundry1's card 1.
+with one A row (E129) and E95's real tiles (E131) on aifoundry1's card 1. E135, on 2 November at the owner's OK, is a
+GPU measured the same way: Horace He's kinds of numbers on two A100s rented on Modal, with no lab card.
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
 (aifoundry2, aifoundry3 or both; E35–E46, E48 and E50 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
@@ -6142,6 +6143,87 @@ W79 at bits 8–10, 12–15, 17–19, 21, 24–26 and 28–29, and every A posit
 word set; the sign on the rail; E102's bit-22 cell, on a second card.
 **Report:** no page of its own; the data README is the public record.
 
+## E135 — a GPU measured the same way: Horace He's kinds of numbers on two A100s (Q136, at the owner's OK of about 10:23 PST; GPU runs 2026-11-02, 11:05–11:58 PST, on Modal, two A100-SXM4-40GB boards) — pre-registered; no lab card
+
+**Asked:** item 2 of section 11, "A GPU measured the same way": *"Clocks, power and temperature logged per kind, in a
+burst and sustained, at the default cap and a lower one, and the layout question beside them"* (the kinds page as it
+stood on 1 Nov). The owner's OK, Mon 2 Nov 2026 about 10:23 PST by the session's record (E135.md says "about 10:1x"):
+*"btw you can do 'gpu measured the same way' by using modal, not exceeding $10 in experiments (use A100 or cheaper)"*.
+**Pre-registered** in [`tools/gpu/e135/E135.md`](../../tools/gpu/e135/E135.md) with `predictions-e135.json` (P1–P11),
+rules R1–R10, the reducer `reduce_e135.py` and a self-test that shows each rule holding and failing (`89378ba6`,
+committed 10:55:55 PST), pushed before any GPU call; amendment A1 (`73fc73a7`, 11:04:14 PST) after the declared 2048³ smoke
+and before the first measured call. Data:
+[`docs/reports/data/2026-11-02-e135-a100-kinds/`](../reports/data/2026-11-02-e135-a100-kinds/README.md) (`ffbcd3d8`;
+corrected after verification in `0e7cc89d`, C1–C13, and `57809cdc`; no frozen file, data file, derived file or verdict
+changed). The owner's Modal workspace, app `e135-a100-kinds`: two containers started together (units A and B), each on its
+own A100-SXM4-40GB at its default 400 W limit (1410 MHz maximum SM clock, 1095 MHz application clock; driver 610.57.04,
+torch 2.5.1, cuBLAS 12.4.5.8). Every 100 ms NVML read the SM and memory clocks, power, the energy counter, the GPU and HBM
+temperatures, the clock-event (throttle) reasons and the enforced limit; nothing on the GPU was set except the one lower-cap
+attempt, which was refused. **Metered cost $3.62** of the $10 ceiling: the run $3.575 (5,698 GPU-seconds at $2.10 an hour,
+plus CPU and memory) and the smoke with the image build $0.044 (66.6 GPU-seconds), against $6.41 projected, a budget guard
+at $7.94 (each unit stops itself at its budget, under the $8 stop) and the functions' timeouts at $8.66 (`billing.json`,
+`corrections-check.txt` C13). No lab card, no `#community-lab` post, no device command on any ET-SoC-1.
+
+**Results** (bf16 at 8192³ and the 400 W limit unless named; sustained = 3–63 s from the first call, burst = the first 3 s
+from a cool, idle GPU).
+- **R1 HOLDS, the ET-SoC-1's burst mechanism on the A100** (4 of 4 replicates): random normal sits **on the cap**, 396–398 W
+  with the SW power cap reason set in every 100 ms sample and every thermal reason in none, at **1267–1277 MHz and
+  264–266 TFLOPS**, while all zeros run **293.5–293.6 TFLOPS at the full 1410 MHz**, drawing 254–261 W with no reason
+  set. **Zeros ÷ random = ×1.108 sustained** (passes 1.104–1.113; board means ×1.111 and ×1.105; 95% ±0.006 over the four
+  passes, ±0.038 over the two boards) and **×1.097 in the burst** (1.086–1.105).
+- **R2 HOLDS, speed follows the clock:** TFLOPS per GHz agrees across kinds to within 0.34% in every sustained group (1.43%
+  in the bursts, whose sampled clock includes the boost ramp): 208.2 in bf16 and fp16, 104.8 in tf32, 311.4 TOPS in int8.
+  Each sustained gap is its clock ratio to within 0.003.
+- **R3 HOLDS, the cap's dichotomy** (47 cells): every kind under 95% of the limit held 1410 MHz with the SW cap bit clear
+  (zeros, twos, all π and one bit in bf16; zeros and twos in every format); every kind with the bit set half the time or more
+  sat at 98–100% of 400 W. The capped kinds run slower in the order of the power they would draw at the full clock (that
+  order is the post hoc demand): ternary ×1.013, 75% sparse ×1.025, uniform ×1.062, checkerboard ×1.085, random normal
+  ×1.108 (zeros ÷ the kind, sustained, mean over the two boards).
+- **R4 HOLDS:** all 20 format × window × pass pairs have random capped and zeros not, every gap above 1.02 (1.059–1.139).
+  fp16 ×1.135, tf32 ×1.139 and int8 (random −128…127) ×1.083 sustained, random on the cap each time; in the burst ×1.117,
+  ×1.118 and ×1.070.
+- **R5 N/A, the lower cap:** `nvidia-smi -i 0 -pl 330` exited 4, "Insufficient Permissions", inside Modal's container; the
+  limit read 400 W before and after, and nothing needed restoring. R6's 330 W half is N/A with it.
+- **R6 HOLDS** (his gap carried to 400 W through the overshoot): ×1.111 and ×1.105 inside the registered [1.000, 1.122].
+- **R7 HOLDS, no slow governor:** the sustained gap less the burst gap is +0.002 to +0.023. The controller takes the GPU from
+  its 1095 MHz application clock to a clock that fits 400 W within about 0.1–0.2 s of the boost, in 15 MHz steps.
+- **R8 HOLDS, no thermal limit** (51 cells): the die peaked at 66 °C and HBM at 59 °C, against the board's 85 °C GPU maximum
+  and 89 °C slowdown.
+- **R9 HOLDS:** Spearman ρ = 0.90 between the nine kinds' sustained TFLOPS and the post's chart.
+- **R10 FAILS, his loop against the cells:** `mm_weird.py`'s loop, reproduced as registered (its `do_bench` transcribed from triton 2.3), reads ×1.081 (A) and ×1.087 (B) against
+  the cells' ×1.113 and ×1.104, −0.032 against the 0.03 bar on unit A (−0.017 on B). His zeros come back (293.25 and 293.06
+  TFLOPS against his recorded 292.30); his random normal reads faster here (271.37 and 269.61 against his 239.41), which is
+  consistent with his 330 W limit against these boards' 400 W and not a test of it (his unit, its cooling and his April 2024
+  software differ, and the cap could not be set). Why his loop reads less is post hoc and untested, so "likely": its 0.145 s
+  trials last about as long as the controller takes to settle, and the interleaved, L2-flushed loop keeps the die 10–16 °C
+  cooler.
+- **The size half of the layout question** (unit B, exploratory, one run per size, square K-contiguous operands): ×1.002 at
+  2048³, where random bf16 draws 310.0 W at 1410 MHz, under the cap, against zeros' 167.7 W; ×1.081 at 4096³; ×1.104 at
+  8192³. What changes with size is whether random data's power reaches the cap.
+- **Post hoc, labelled, no verdicts** (`posthoc_e135.py`, written after the registration): the kinds under the cap give
+  P − P_idle ∝ f^n with n = 2.99 (median of 19 cells, 2.31–3.75; the four cells with two pre-boost readings that agree within
+  5% give 2.89–3.12; the range is partly the power sensor's 0.1–0.2 s lag); with it, random bf16 would draw about 550 W at
+  1410 MHz (unit B), 38% over the cap, and zeros keep about 40% of its switching at that clock; at Horace He's 330 W the same
+  relation gives zeros ÷ random ×1.19–1.22 in bf16 on one board (×1.217, ×1.193 after its own +0.025 error at 400 W) against
+  his ×1.213–1.221. Energy per multiply-add at each kind's own clock, with the GEMM's memory traffic: bf16 random normal
+  2.99–3.02 pJ on the board (2.57 over idle), zeros 1.73–1.78 (1.35–1.38); not like for like with the ET-SoC-1's
+  resident-loop prices.
+
+**Scored:** R1, R2, R3, R4, R6, R7, R8, R9 **HOLD**; R5 **N/A**; R10 **FAILS** (unit A). The checks in `reduce.txt` pass;
+7 of 51 cells (all on unit B) started 2–9 °C above their cooling target after the registered 120 s cap, recorded per cell.
+Departures (dated in the README): A1 (the smoke's container got an A100-SXM4-80GB billed as A100-40GB; both measured units
+got 40GB boards; the post-boost window `burst_b`; the band at each unit's own idle), the refused lower cap, and the post hoc
+sections written after the data.
+**What it changes.** Item 2 is **narrowed, not closed**: what it asked for at the default cap is measured on two boards, and
+the size ladder answers the size half of the layout question on one. The ET-SoC-1 comparison is kernel against kernel
+(E135's README, "Against the ET-SoC-1"): every ET-SoC-1 figure names its kernel, and no chip-level contrast is drawn from a
+gap's size or from zeros' share of random's switching; what differs by chip is the limit (the A100's power cap, burst and
+sustained, against the ET-SoC-1's 65 °C trip sustained) and the controller (15 MHz steps settling in 0.1–0.2 s, against
+100 MHz steps on a ~1.3 s average). Still open: a lower cap on the same board (a host with root on the GPU), his board and an
+H100, shapes other than square and K-contiguous, and a large streaming GEMM on the ET-SoC-1 to set beside it. The claims
+register's A100 rows that rested on the literature carry dated notes ([05-claims.md](05-claims.md), "E135").
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
 **Lane lessons from E78–E83, recorded for the next registration.** (1) A heat column read from a 2 s window over a
 whole-degree die reading resolves a kind only above about 12 W of switching on these cards: register a longer window,
 or a launch away from a step, before quoting heat for low-power kinds. (2) All six card lanes looked at
@@ -6275,3 +6357,12 @@ before calling it uncorrected: the off-rail row's coefficient was fitted on leak
 when another lane had edited the post meanwhile, and kept each from erasing another lane's clause; E130's plan read came back
 behind its own saved edits, though each of its dry runs opened on the expected text; rebuild from the edit box, or wait a minute
 after another lane's edit.
+
+**Lane lessons from E135, recorded for the next registration.** (60) A cloud GPU's container may refuse to set the
+board's power limit: on Modal `nvidia-smi -pl` answered "Insufficient Permissions" (exit 4), so E135's registered
+lower-cap arm could not run. Try the set in the declared smoke, before freezing an arm on it, or rent a host with root
+on the GPU. (61) A GPU's power reading is not instantaneous: NVML's updates every 0.1–0.2 s, and a boost can come within
+half a second of the first call, so a reading taken before the boost is one to three samples (E135 C10); a relation
+fitted on it is post hoc, and its own error at a measured point goes beside each figure it gives elsewhere (E135 C2).
+(62) A chip-against-chip figure needs the same kernel on both: E135's first README set the ET-SoC-1's resident loop
+against an A100's streaming GEMM and drew three contrasts its verifier withdrew (C1); name each figure's kernel.

@@ -64,7 +64,10 @@ Q136(p) deployed `a018f485d20b` at 14:07:15 PST (source `3006642`) and `2d0d2df1
 live version when this note was written, for Q136's card runs and desk lanes, its data pinned at lab `c317e1c6`, before Q136's
 records were committed; its section 11 names E128's, E130's and E133's results as to follow, since the three met the lapsed
 lab approvals, so a later page pass owes them. Public and unlisted still; the claims are in [05-claims.md](05-claims.md),
-"Q136".
+"Q136". **Dated note (E135's records, Mon 2 Nov 2026):** rebuilt in place as `9fdb534bbc77` at 15:06:17 PST (over
+`74e61efa531f`; source gyroscope `0fcf998`, data pinned at lab `b00d509e`) for E135, a GPU measured the same way:
+section 1's A100 half now measured, with a generated A100 table (the builder reads E135's `results.json`), the opening,
+section 10 and item 2, narrowed. Public and unlisted still; the claims are in [05-claims.md](05-claims.md), "E135".
 
 **A24 · From matmul speed to one transistor switch** (27 October 2026, Q128). The nine-step chain on one
 page: speed, the governor, board watts, picojoules per multiply-add, femtojoules per flipped operand bit,
@@ -1081,6 +1084,17 @@ raw copy during its pass 12910; to E120's, on its CV1 and the row it was read ag
 drift slope (both from Q136(b)); and to the data READMEs of E119, E121, E122, E123, E124 and E125, whose disclosures called
 the stock telemetry's PMIC voltage reads an open question: the owner's ruling of 2 November 2026 allows them. The frozen
 registrations that said the same (E119's, E124's and E125's) stay as written; [AGENT.md](../../AGENT.md) §3's stale spots cover them.
+
+## E135 published no new page: one data directory and the GPU harness (2 November 2026)
+
+E135, at the owner's OK of 2 November, ran on rented A100s on Modal, so it holds no lab card and no card post. What it made is in this repository; the kinds page (A25) took it first, rebuilt in place as `9fdb534bbc77` (A25's dated note), and the Horace hub in its own pass. The short name is the one [05-claims.md](05-claims.md), "E135", uses. "Item 2" is the kinds page's section 11, "A GPU measured the same way", and the data README's first lines name it.
+
+| What | Where | What is in it |
+|---|---|---|
+| **E135**, Horace He's kinds of numbers on two A100-SXM4-40GB boards at their 400 W limit, burst and sustained, NVML every 100 ms (item 2) | [`reports/data/2026-11-02-e135-a100-kinds/`](../reports/data/2026-11-02-e135-a100-kinds/README.md) (`ffbcd3d8`, `0e7cc89d`, `57809cdc`) | `results.json` and `reduce.txt` (the registered reduction: cells, gaps, replicates, his loop, the lower cap, R1–R10, checks), `posthoc.json` and `posthoc.txt` (no verdicts), `smoke-reduce.txt`, `billing.json` (the metered cost by app and resource, and the GPU-seconds), `rebuild.sh` (every derived file from `logs/`, Python 3 only), `corrections-check.py` and `.txt`, and `logs/` (the measured run's steps and 100 ms samples, compressed, byte-identical to the Modal Volume, and the declared smoke) |
+| The GPU harness | [`tools/gpu/e135/`](../../tools/gpu/e135/E135.md) (`89378ba6`, A1 `73fc73a7`) | `E135.md` (the registration, frozen), `predictions-e135.json` and `.txt` with `make_predictions_e135.py`, `e135_app.py` (the Modal app: pinned image, the two units' plans, the budget guard and timeouts), `reduce_e135.py`, `selftest_e135.py` and `selftest.txt`, `posthoc_e135.py` (written after the registration; its sections 6–7 after the data) |
+
+E135 sent nothing to any ET-SoC-1. On the GPU it read NVML getters only; its one set, the lower cap, was refused (exit 4), and nothing needed restoring. The board's identity is a 12-hex hash of its UUID; the `nvidia-smi -q` text kept in `logs/` also holds the GPU PDI, the Board ID and the PCI bus id, none a secret (C11). The Modal Volume `e135-a100-kinds` still holds the raw logs.
 
 ## The camera and the details panel (30 September)
 

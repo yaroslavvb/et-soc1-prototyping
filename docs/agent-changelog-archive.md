@@ -4,6 +4,24 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-10-31 (Sat, week 44, Q130 records)** — Section 3's index reads Q1–Q130, E1–E85 (E77 reserved and not
+  registered; E84 and E85 in progress when recorded) and A1–A24, where it read Q1–Q66, E1–E59 and A1–A21,
+  and its note on governor text now says the `353f20e` description is the cards' own BL2 0.22.0 and the loops and
+  the latch are 0.20.0's. Section 4's firmware column carries each card's fresh read — all four report release 1.4.0 /
+  BL2 0.22.0 (aifoundry2 on 27 Oct, E69; aifoundry3, aifoundry1's card 1 and card 0 on 31 Oct, E79, E82 A1, E84 A1),
+  where it read 1.3.1, 1.3.1, 1.2.0 and 1.4.1 — and aifoundry3's clock policy says its boot-time TDP of 0 is a
+  reversible pin, not a latch. Section 5's governor envelope says the same: at BL2 0.22.0 a TDP at or below a
+  pattern's own 600 MHz power pins the clock at the floor with no power-down loop to trap it, and writing the TDP back
+  releases it. *Why:* constraint — the BL2 0.22.0 source (the single-pass check at `thermal_pwr_mgmt.c:864-926`, its
+  guardband macros unused; 14-card-behaviour.md, "The governor's two knobs"; Q130(d)), E72's measured release of a
+  TDP-0 pin, and the firmware revisions read on all four cards between 27 and 31 Oct 2026; re-check: the read-only
+  `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` on each card under its lock, and that section of 14-card-behaviour.md.
+  *Dated note, Mon 2 Nov 2026 (week 45), Q134's records, the text above unedited: that query is not read-only. At
+  et-platform `836a4ab` it writes the PMIC's firmware-management command register twice (E114's C1), a PMIC command by E85
+  C1's standard, which section 5 forbids. Re-check the cards' firmware by each card's module uptime
+  (`DM_CMD_GET_MODULE_UPTIME`, service-processor RAM) against the time of section 4's committed read: an image takes
+  effect only through a reset, so an unbroken uptime carries the identity (E77, E118, E120). Send the query only with the
+  owner's and the firmware maintainer's authorization.*
 - **2026-10-31 (Sat, week 44)** — Section 4: a card reservation post says how long the card is held, as `for <N> h`
   in digits plus the clock time it ends (`using aifoundry3 for 1.5 h, until ~14:30 PDT`), is re-estimated in place if
   the run will overrun by more than 15 minutes, and carries the owner's "Claude says:" marking. *Why:* preference — the
