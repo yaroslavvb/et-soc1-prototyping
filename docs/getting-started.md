@@ -594,5 +594,15 @@ as [`findings/04-artifacts.md`](findings/04-artifacts.md), "Rebuilding the versi
 | `/opt/et` on aifoundry1 | a build of an et-platform fork (May 2026): its runtime and device layer differ, and the device layer honours `ET_DEVICES=<n>`; `libDM.so`, `dev_mngt_service`, `et-powertop` and GCC 15.1 as on the others | installed by the lab |
 | Card firmware | release 1.4.0 / BL2 0.22.0 on all four cards, as read 27–31 October 2026 (E69, E79, E82 A1, E84 A1; PMIC 1.5.0, 1.5.0, 1.3.0, 1.6.1 on aifoundry2, aifoundry3 and aifoundry1's cards 1 and 0). On 25 September they read 1.3.1 on aifoundry2 and aifoundry3 (a build of about mid-May 2024), 1.4.1 and 1.2.0 on aifoundry1's cards 0 and 1 | flashed by the lab; read with `dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` (`docs/reports/data/2026-09-25-claims-v3/firmware.md` for aifoundry2 and aifoundry3, `AMENDMENTS.md` A2 there for aifoundry1, on 25 September; [14-card-behaviour.md](findings/14-card-behaviour.md) for the reads since) |
 
+*Dated note, Mon 2 Nov 2026 (week 45), added by Q136(w), the write-command audit, without editing the table above: the
+last row's reads were all `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`, and that query is not a read. At et-platform `836a4ab`
+its handler writes the PMIC's firmware-management command register twice, ACTIVE_SLOT then VERSION, and reads the data
+register after each (`services/firmware_update.c:903` → `driver/pmic_controller.c:952-974`), the same at every BL2
+version from 0.18.0 to 0.22.0: a PMIC command by E85 C1's standard. The versions in the row stand. Re-check a card's
+firmware by its module uptime (`DM_CMD_GET_MODULE_UPTIME`, service-processor RAM) against the time of its last committed
+read, never by sending the query again: under the owner's rules of 2 November 2026 ([AGENT.md](../AGENT.md) section 5)
+every device command is classified before a run's first launch and a write outside the allowed statistics reset is
+NO-GO ([the audit](reports/data/2026-11-02-q136w-write-audit/README.md)).*
+
 `UPSTREAM_LATEST=1 scripts/clone-upstream.sh` and `TOOLCHAIN_REF=et scripts/provision-vm.sh` build the branch tips
 instead of the pins.

@@ -214,3 +214,17 @@ says which theories survived.
    so read it (`GET_VMIN_LUT`, §1) and compare it with `vmin-start/`.
 7. Then remove the ALERT files, the STOP file and a dirty `NV-STATE.json`. Record what happened in
    `docs/findings/14-card-behaviour.md`.
+
+---
+
+*Dated note, Mon 2 Nov 2026 (week 45), added by Q136(w), the write-command audit, without editing the text above:*
+the pre-flight of line 101 sends `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`, and the block's own set is
+`DM_CMD_SET_MODULE_VOLTAGE`; both write the PMIC. At et-platform `836a4ab` (BL2 0.22.0) the first writes the PMIC's
+firmware-management command register twice, ACTIVE_SLOT then VERSION, and reads the data register after each (`services/firmware_update.c:903` → `driver/pmic_controller.c:952-974`, with the two writes at `:2543` and `:2587` (paths under `device-bootloaders/src/ServiceProcessorBL2/`));
+the second sets a regulator through `pmic_set_voltage` (`services/thermal_pwr_mgmt.c:3008-3048`). NV never ran on a
+card (E54's first write was never started, [03-experiments.md](../../../docs/findings/03-experiments.md), E54). Both
+are PMIC commands, which [AGENT.md](../../../AGENT.md) section 5 forbids (the statistics reset is the one allowed), and
+under the owner's rules of 2 November 2026 a disallowed write is NO-GO before the first launch:
+`python3 tools/claims-v3/dmcmd_audit.py tools/claims-v3/nv/block.sh` lists both. Take a card's identity from its module
+uptime (`DM_CMD_GET_MODULE_UPTIME`, service-processor RAM) instead. The audit:
+[`2026-11-02-q136w-write-audit`](../../../docs/reports/data/2026-11-02-q136w-write-audit/README.md).

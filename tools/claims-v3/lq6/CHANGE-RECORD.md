@@ -443,3 +443,20 @@ rc and an ISO-millisecond timestamp) and `restore`. Filled from it after the ses
   PDT, returned holds-with-fixes, and its eleven faults are answered in the README's Corrections.
   The governor is at its defaults, the card is healthy and stepping normally, the firmware is untouched,
   and no flash, PMIC, reset, driver, PCIe, clock or voltage action was performed at any point.
+
+## Dated note, Mon 2 Nov 2026 (week 45): a PMIC command was sent
+
+*Added by Q136(w), the write-command audit, without editing the record above.* Two places above say that no PMIC command
+was sent: the PMIC row of the gates ("no PMIC command is sent", lines 152–155) and "PMIC runtime and next-boot state:
+unchanged; no PMIC command sent" (line 371). The live-query allowlist (lines 179–180) counts the same query among the
+safe reads. That was not so. The identity read of line 80, `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`, sent at 14:59:39 PDT
+(`gov.jsonl`, the `identity` event) and again at 15:24:48 (line 389), is a PMIC command: at et-platform `836a4ab`
+(BL2 0.22.0, the build this card reports) its handler writes the PMIC's firmware-management command register twice,
+ACTIVE_SLOT then VERSION, and reads the data register after each (`services/firmware_update.c:903` → `driver/pmic_controller.c:952-974`, with the two writes at `:2543` and `:2587` (paths under `device-bootloaders/src/ServiceProcessorBL2/`)), a PMIC command by E85 C1's standard. By the
+service processor's source the two writes select those two queries and nothing else (the PMIC firmware that answers
+them was not read), so "unchanged" at line 371 stands; "no PMIC command" does not. The card answered normally. E72's
+data README says the same in its dated note of 1 November
+([`README.md`](../../../docs/reports/data/2026-10-27-e72-600mhz/README.md)). Under the owner's rules of 2 November 2026
+([AGENT.md](../../../AGENT.md) section 5) a later run takes a card's identity from its module uptime instead, and
+`tools/claims-v3/dmcmd_audit.py` refuses the query before any launch. The audit:
+[`2026-11-02-q136w-write-audit`](../../../docs/reports/data/2026-11-02-q136w-write-audit/README.md).

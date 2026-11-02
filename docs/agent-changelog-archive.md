@@ -4,6 +4,12 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-10-28 (Wed, week 44)** — Section 4: the owner's agents post exactly twice per card in #community-lab, a
+  one-line reservation and a separate one-line release, each naming the box, with at most one small link to the public
+  spacesheep page that describes the run; no detail in the channel and no edit of the reservation. *Why:* preference —
+  the owner's words that day, *"I basically just want you to post when you reserve the card and when you release it, and
+  each post may have a small link to the spacesheep doc, which describes what you're doing"*, after he deleted four Q129
+  claims of 27 October *"because they were too wordy"*.
 - **2026-10-27 (Tue, week 44, correction)** — Section 5's governor exception gains what a reader could not find in it:
   the numeric envelope the owner set (TDP ≤ 75 W; a raised software threshold ≤ 70 °C; abort at a die ≥ 72 °C or board
   power ≥ 85 W; lowering safe thermally, but a TDP at or below a pattern's own 600 MHz power latches the governor, as

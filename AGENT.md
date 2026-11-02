@@ -213,6 +213,31 @@ reason:
 | Keep disk and memory small: sources only, `nice -j4` builds | the machines are shared, and aifoundry1's `/home` is one pool with the system that filled up once (99% until 30 September; 116 GB free since) |
 | An agent that only writes code never reaches a card: `V3_DRY=1`, then check `et-who` | on 25 September a code-only agent ran a real block because a `cd` in a backgrounded chain did not apply |
 
+### Device commands: the owner's three rules of 2 November 2026
+
+His words: *"continue the experiments but don't do any power cycles, read only PMIC voltage reads should be fine, take
+more care for writing commands"*. They bind every run, beside the table above:
+
+1. **No power cycles, and nothing that risks one.** No card reset (`et-reset`, `DM_CMD_RESET_ETSOC`, which at BL2 0.22.0
+   resets the card through its PMIC and may power-cycle it), no host reboot, no outlet cycle, and no run that drives a
+   card toward its PMIC's over-power or over-temperature shutdown: every run stays inside its registered die and board
+   stops, with margin.
+2. **Read-only PMIC voltage-register reads are allowed**: `DM_CMD_GET_ASIC_VOLTAGE` (two register reads, in
+   `ettelem config` and every stock `ettelem sample`) and `DM_CMD_GET_MODULE_VOLTAGE` (nine, every stock sample). A
+   command that writes a PMIC register is not a read, whatever its name: `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` writes
+   the PMIC's firmware-management command register twice, and `DM_CMD_GET_FRU` writes its FRU command registers.
+3. **Every device command is classified before the first launch.** A run lists every command its harness, sampler, host
+   program and helpers can send, each READ or WRITE from the firmware source of the build the card runs
+   ([`tools/claims-v3/dmcmd_table.json`](tools/claims-v3/dmcmd_table.json): et-platform `836a4ab`, BL2 0.22.0, the
+   build all four cards report), and puts the list in its README under "Device commands sent".
+   `python3 tools/claims-v3/dmcmd_audit.py --allow <the writes the run may send> <the run's files>` does it
+   (`--markdown` prints the section) and exits 3 on any write outside the allow-list, any unclassified or run-time-named
+   command, and any residency read of a raw state BL2 0.22.0 does not have (raw 4–6: each read logs two SP Runtime
+   Errors). An unclassified or disallowed write is NO-GO: stop and report, never launch. The one write a run may send
+   without its own ruling is the statistics reset (`ettelem sample --reset-ms`, the owner's ruling of 31 October 2026);
+   a governor move needs the owner's authorization for that run (the table above); nothing else is allowed
+   ([the audit](docs/reports/data/2026-11-02-q136w-write-audit/README.md)).
+
 ## 6. The traps, in brief
 
 Each links to the full entry in [14-card-behaviour.md](docs/findings/14-card-behaviour.md).
@@ -463,6 +488,19 @@ entries move verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelo
 10 October 2026 for agent instruction files). It starts on 14 October 2026; earlier changes are in
 `git log -- AGENT.md`.*
 
+- **2026-11-02 (Mon, week 45, Q136(w))** — Section 5 gains "Device commands: the owner's three rules of 2 November
+  2026": no power cycles and nothing that risks one; read-only PMIC voltage-register reads allowed (a GET that writes a
+  PMIC register, such as the firmware-revisions query, is not one); every command a run can send classified READ or
+  WRITE from the running build's source before the first launch and listed in its README, a disallowed or unclassified
+  write NO-GO, with the new [`tools/claims-v3/dmcmd_table.json`](tools/claims-v3/dmcmd_table.json) and
+  `tools/claims-v3/dmcmd_audit.py` to do it. The 28 October entry, the oldest of 16, moved verbatim to
+  [`docs/agent-changelog-archive.md`](docs/agent-changelog-archive.md). *Why:* preference — the owner's words that
+  morning, *"continue the experiments but don't do any power cycles, read only PMIC voltage reads should be fine, take
+  more care for writing commands"*. And constraint — at et-platform `836a4ab` two commands named GET write the PMIC (the
+  firmware-revisions query and `GET_FRU`), the lab's statistics reset also turns the SP stats trace off, and a raw-4
+  residency read logs SP errors; re-check: `python3 tools/claims-v3/dmcmd_audit.py --table-only` and the handler lines
+  it prints. And preference — the owner's rule of 10 October 2026 for agent instruction files, which keeps the newest
+  15 entries inline.
 - **2026-11-02 (Mon, week 45, Q134 records, corrections after verification)** — The 31 October (Q130 records) entry gains
   a dated note, its text unedited: the re-check it names, the "read-only" `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`, is a
   PMIC command, so the note re-checks each card's firmware by its module uptime against section 4's committed read
@@ -589,9 +627,3 @@ entries move verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelo
 - **2026-10-28 (Wed, week 44, correction)** — Section 4: the release is an edit of the reservation post appending
   " — released", not a second post. *Why:* preference — the owner's words minutes after the entry below: *"No, instead
   of posting a second time, it should edit the original post to know that it's been released."*
-- **2026-10-28 (Wed, week 44)** — Section 4: the owner's agents post exactly twice per card in #community-lab, a
-  one-line reservation and a separate one-line release, each naming the box, with at most one small link to the public
-  spacesheep page that describes the run; no detail in the channel and no edit of the reservation. *Why:* preference —
-  the owner's words that day, *"I basically just want you to post when you reserve the card and when you release it, and
-  each post may have a small link to the spacesheep doc, which describes what you're doing"*, after he deleted four Q129
-  claims of 27 October *"because they were too wordy"*.

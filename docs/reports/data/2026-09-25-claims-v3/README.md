@@ -38,3 +38,18 @@ again. V3-COOL was not scheduled and V3-LONG (E47) not run (D1). The experiments
 [`05-claims.md`](../../../findings/05-claims.md), "Version 3: the three-card check"; the pages carry the results since
 26 September. The gathers and scatters (E48) ran on each of the three cards once its campaign queue had ended, 26 September
 03:19–09:22.
+
+*Dated note, Mon 2 Nov 2026 (week 45), added by Q136(w), the write-command audit, without editing the text above:* the
+TEL arm's governor readouts ([`PLAN3.md`](PLAN3.md) line 849; [`tools/claims-v3/tel/block.sh`](../../../../tools/claims-v3/tel/block.sh)
+line 332; its [README](../../../../tools/claims-v3/tel/README.md) line 47) sent `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` once a
+pass, nine times in all on 25–26 September (`raw/{aifoundry1-c1,aifoundry2,aifoundry3}/tel/p{1,2,3}/gov/fw.txt`), as a
+check that `dev_mngt_service -n <n>` reached the right card. It is not a read. In the public et-platform source its handler
+writes the PMIC's firmware-management command register twice, ACTIVE_SLOT then VERSION, and reads the data register after
+each (`services/firmware_update.c:903` → `driver/pmic_controller.c:952-974`, with the two writes at `:2543` and `:2587` (paths under `device-bootloaders/src/ServiceProcessorBL2/`), at `836a4ab`); the same two writes are there at every BL2 version from 0.18.0 to 0.22.0 (the version-bump
+commits `169a17566`, `29950410d`, `11b0b6966`, `cafe03fc3`, `ce7297156`), so they cover the builds those cards ran then.
+That is a PMIC command by E85 C1's standard. The cards answered normally. The three files are left as they ran, because
+each pass's `code.sha256` holds their hashes; the tel note is beside them,
+[`tools/claims-v3/tel/block.sh.dated-note.md`](../../../../tools/claims-v3/tel/block.sh.dated-note.md). Under the owner's
+rules of 2 November 2026 ([AGENT.md](../../../../AGENT.md) section 5) every device command is classified before the first
+launch and a write outside the allowed statistics reset is NO-GO; [05-claims.md](../../../findings/05-claims.md), "Q134",
+lists every run that sent the query. The audit: [`2026-11-02-q136w-write-audit`](../2026-11-02-q136w-write-audit/README.md).

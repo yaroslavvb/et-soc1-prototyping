@@ -296,3 +296,17 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
+# --- Dated note, Mon 2 Nov 2026 (week 45), added by Q136(w), the write-command audit, without editing any line above ---
+# identity() (line 156) sends DM_CMD_GET_MODULE_FIRMWARE_REVISIONS as a read. It is not one. At et-platform 836a4ab
+# (BL2 0.22.0) its handler writes the PMIC's firmware-management command register twice, ACTIVE_SLOT then VERSION, and
+# reads the data register after each (device-bootloaders/src/ServiceProcessorBL2/services/firmware_update.c:903 -> driver/pmic_controller.c:952-974,
+# # the two writes at :2543 and :2587): a PMIC command by E85 C1's standard. E72 sent it on aifoundry2 at
+# 14:59:39 PDT on 27 Oct 2026 (docs/reports/data/2026-10-27-e72-600mhz/gov.jsonl, the identity event) and, by its change
+# record, again at 15:24:48; the card answered normally. The governor move this script exists for
+# (DM_CMD_SET_MODULE_STATIC_TDP_LEVEL, lines 175 and 203) is a write too, made under the owner's authorization for E72.
+# Under the owner's rules of 2 Nov 2026 (AGENT.md section 5) every device command a run can send is classified before its
+# first launch, and a write outside the allowed statistics reset is NO-GO: python3 tools/claims-v3/dmcmd_audit.py
+# tools/claims-v3/lq6/gov_e72.py lists all three lines as WRITE. Do not reuse it as it stands. Take a card's identity from
+# its module uptime (DM_CMD_GET_MODULE_UPTIME, service-processor RAM) against its last committed revisions read (E77,
+# E118, E120). The audit: docs/reports/data/2026-11-02-q136w-write-audit/README.md.

@@ -102,3 +102,16 @@ final)
   ;;
 *) echo "unknown stage $stage" >&2; exit 2 ;;
 esac
+
+# --- Dated note, Mon 2 Nov 2026 (week 45), added by Q136(w), the write-command audit, without editing any line above ---
+# Lines 62-67 send DM_CMD_GET_MODULE_FIRMWARE_REVISIONS, and the echo at line 62 calls it "read only". It is not a read.
+# At et-platform 836a4ab (BL2 0.22.0, the build all four lab cards report) its handler writes the PMIC's
+# firmware-management command register twice, ACTIVE_SLOT then VERSION, and reads the data register after each
+# (device-bootloaders/src/ServiceProcessorBL2/services/firmware_update.c:903 -> driver/pmic_controller.c:952-974,
+# # the two writes at :2543 and :2587): a PMIC command by E85 C1's standard. E84 sent it once, on aifoundry1 card 0 at 15:42:00 PDT on
+# 31 Oct 2026 (docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/ident/ident-154200.out); the card answered normally.
+# Under the owner's rules of 2 Nov 2026 (AGENT.md section 5) every device command a run can send is classified before its
+# first launch, and a write outside the allowed statistics reset is NO-GO. So do not reuse this script as it stands:
+# python3 tools/claims-v3/dmcmd_audit.py tools/claims-v3/kspeed/e84/run_e84.sh lists line 64 as a WRITE (NO-GO). Take a
+# card's identity from its module uptime (DM_CMD_GET_MODULE_UPTIME, service-processor RAM) against its last committed
+# revisions read instead (E77, E118, E120). The audit: docs/reports/data/2026-11-02-q136w-write-audit/README.md.

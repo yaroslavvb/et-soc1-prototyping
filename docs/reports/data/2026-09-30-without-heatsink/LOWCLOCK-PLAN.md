@@ -910,3 +910,16 @@ The low-clock work still delivers the floor: what the chip draws at its lowest s
   - `SET_FREQUENCY` and the governor's loop both reprogram PLL4 with no lock between them (§2.2), so a clock set while
     a loop runs can be undone. This is an upstream firmware report (et-platform), to be filed only with the owner's
     OK; it is from source reading, never seen on a card.
+
+---
+
+*Dated note, Mon 2 Nov 2026 (week 45), added by Q136(w), the write-command audit, without editing the text above:*
+the identity step (line 484) and the command table (line 624) give `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` as a read. It
+is not one. At et-platform `836a4ab` (BL2 0.22.0) its handler writes the PMIC's firmware-management command register
+twice, ACTIVE_SLOT then VERSION, and reads the data register after each (`services/firmware_update.c:903` → `driver/pmic_controller.c:952-974`, with the two writes at `:2543` and `:2587` (paths under `device-bootloaders/src/ServiceProcessorBL2/`)), a PMIC command by E85 C1's
+standard; the same two writes are in the public source at every BL2 version from 0.18.0 to 0.22.0. This plan never ran,
+so nothing was sent. If it is ever revived: under the owner's rules of 2 November 2026
+([AGENT.md](../../../../AGENT.md) section 5) every device command is classified before the first launch and a write
+outside the allowed statistics reset is NO-GO, so take the card's identity from its module uptime
+(`DM_CMD_GET_MODULE_UPTIME`, service-processor RAM) against its last committed revisions read instead, and run
+`tools/claims-v3/dmcmd_audit.py` on the runner first. The audit: [`2026-11-02-q136w-write-audit`](../2026-11-02-q136w-write-audit/README.md).

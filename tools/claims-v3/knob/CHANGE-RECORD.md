@@ -450,3 +450,19 @@ either way.
   in [`README.md` § A5](README.md#a5); the data README carries the reader-facing table. Two faults are **not**
   closed here because they would need a card: nothing in them is retried, and both stay recorded as open
   (the two unmeasured sustained `randn` cells, and the 62 °C cell that never reached equilibrium).
+
+## Dated note, Mon 2 Nov 2026 (week 45): a PMIC command was sent
+
+*Added by Q136(w), the write-command audit, without editing the record above.* Two places above say that no PMIC command
+was sent: the PMIC row of the gates ("no PMIC command is sent", lines 130–133) and "PMIC runtime and next-boot state:
+unchanged; no PMIC command sent" (line 357). The live-query allowlist (lines 140–141) counts the same query among the
+safe reads. That was not so. The identity read this run made at 13:56:26 PDT (line 67), and again after its last run
+(line 356), `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`, is a PMIC command: at et-platform `836a4ab` (BL2 0.22.0, the build
+this card reports) its handler writes the PMIC's firmware-management command register twice, ACTIVE_SLOT then VERSION,
+and reads the data register after each (`services/firmware_update.c:903` → `driver/pmic_controller.c:952-974`, with the two writes at `:2543` and `:2587` (paths under `device-bootloaders/src/ServiceProcessorBL2/`)), a PMIC command by E85 C1's standard. By the service processor's
+source the two writes select those two queries and nothing else (the PMIC firmware that answers them was not read), so
+"unchanged" at line 357 stands; "no PMIC command" does not. The card answered normally. E69's data README says the same
+in its dated note of 1 November ([`README.md`](../../../docs/reports/data/2026-10-27-e69-governor-knob/README.md),
+"Three corrections to the record"). Under the owner's rules of 2 November 2026 ([AGENT.md](../../../AGENT.md) section 5)
+a later run takes a card's identity from its module uptime instead, and `tools/claims-v3/dmcmd_audit.py` refuses the
+query before any launch. The audit: [`2026-11-02-q136w-write-audit`](../../../docs/reports/data/2026-11-02-q136w-write-audit/README.md).
