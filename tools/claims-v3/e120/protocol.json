@@ -1,0 +1,112 @@
+{
+ "experiment": "E120",
+ "question": "E77 redesigned: split the rail ledger's 0.875 pJ 'regulators' delivery loss plus logic in step with the rails' row into regulator conduction loss (carries 1/V^2 in the total current) and logic (does not), from matched minion-rail watts at two rail voltages, with the 800 MHz operating-point step fitted (E77's post hoc finding, now registered) and the ladder re-cut on E77's measured per-hart costs.",
+ "design_source": "docs/reports/data/2026-10-27-q129-rail-ledger/E77-PLAN.md, as E77 registered it (docs/reports/data/2026-11-01-e77-rail-one-temperature/README.md), with the re-run list of E77's corrections (F1-F6) and its open issues",
+ "card": "aifoundry2 card 0",
+ "type": "fp32",
+ "values": "randn",
+ "tools": {
+  "heater": "build/sparsity_t2/host/sparsity_host",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-e77/ettelem"
+ },
+ "binaries_sha256": {
+  "heater": "7adadf4f1ce331cc028c317561933d6d3209da0f0326b0ce9a124b39b15ac0d2",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem_e77": "21e7bf77e631eb7e24d6eecd1c684e80a09e83a7beedc581b3459ad7c310c78d",
+  "source": "E77's session.json sha256 (docs/reports/data/2026-11-01-e77-rail-one-temperature/raw/session.json): the same heater, kernel and no-PMIC-read telemetry build"
+ },
+ "sampler": {
+  "every_ms": 100,
+  "profile": "no-PMIC-read (ettelem-e77: no GET_ASIC_VOLTAGE, no GET_MODULE_VOLTAGE, no statistics reset)"
+ },
+ "residency_states": [1, 2, 3],
+ "arms": {
+  "A": {
+   "what": "600 MHz at about 518 mV: the static TDP level at 0 (the vmin-LUT floor pin, E72's and E77's write on this card)",
+   "tdp_w": 0,
+   "clock_mhz": 600,
+   "per_shire": [31, 23, 16, 8],
+   "predicted_minion_w": [20.54, 15.15, 10.43, 5.05],
+   "heater": {
+    "per_shire": 32,
+    "seconds": 2,
+    "note": "fp32 randn on 1,024 harts at 600 MHz, about 51 W on the board (E77's own heater); it plateaus near 58-59 C, so E77's 59 C preheat took 5.7 heats a launch and failed 5 gates"
+   }
+  },
+  "B": {
+   "what": "800 MHz at about 618 mV: the card's own governor at its own 65 W / 65 C",
+   "tdp_w": 65,
+   "clock_mhz": 800,
+   "per_shire": [13, 9, 5, 1],
+   "predicted_minion_w": [20.6, 15.41, 10.23, 5.05],
+   "heater": {
+    "per_shire": 24,
+    "seconds": 2,
+    "note": "fp32 randn on 768 harts at 800 MHz, as E77 (its highest board reading, 70.7 W, was this heater)"
+   }
+  }
+ },
+ "launch": {
+  "seconds": 4,
+  "budget": 5.5
+ },
+ "rounds_per_pass": 2,
+ "passes": {
+  "sequence": ["B1", "B2", "A1", "A2", "A3", "A4", "A5", "B3", "B4", "B5"],
+  "order": "B1 B2 | set TDP 0 | A1 A2 A3 A4 A5 SETTLE | restore TDP 65 | RETURN B3 B4 B5",
+  "pairing": "pass k of arm A with pass k of arm B, k = 1..5 (the unit of replication)"
+ },
+ "settling": {
+  "per_shire": 31,
+  "seconds": 8,
+  "budget": 9.5,
+  "note": "E77's 8 s rung of arm A's top rung (now 992 harts), after arm A's passes, at the new gate (E77's failed its 59 C preheat)"
+ },
+ "return_burst": {
+  "per_shire": 13,
+  "seconds": 4,
+  "budget": 5.5,
+  "note": "after the restore, one launch of arm B's top rung (416 harts): the clock must step up to 800 MHz and the ring dumped after it must hold at least one throttle-up entry NEWER than the dump before it (by service-processor timestamp)"
+ },
+ "gate": {
+  "preheat_c": 56,
+  "launch_c": 55,
+  "min_approach_s": 6.0,
+  "settle_w": 0.15,
+  "max_below_c": 3,
+  "max_heats": 8,
+  "max_reheats": 3,
+  "max_wait_s": 40,
+  "note": "E77's gate with E77's own temperatures read off its telemetry: arm A's heater plateaus near 58-59 C (preheat 59 took 5.7 heats a launch, 5 gates failed) and both arms fell to 53-55 C during the ~10 s the rails need to settle. Here: heat until the die mean reads >= 56 C, then idle until it reads <= 55 C, >= 6 s after the last device process, with the minion rail settled by S2's test computed live; a die that falls below 52 C first is heated again (at most 3 times), after which the launch goes ahead at its reading, flagged below_floor. Expected launch readings about 52-55 C in both arms"
+ },
+ "est_launch_s": 24,
+ "cuts_card_min": {
+  "before_move": 11,
+  "move_by": 12,
+  "restore_by": 33,
+  "b_after_by": 45,
+  "note": "card-minutes since the session took the lock; a pass is cut by whole rounds; the restore and the return burst are never cut; the runner's hard stop is 46 card-min (the 50 card-minute budget less the gate reads and the smoke) and 23:25 PST"
+ },
+ "watchdog": {
+  "deadline_min": 75
+ },
+ "time": {
+  "no_start_after": "22:30",
+  "hard_stop": "23:25"
+ },
+ "identity": {
+  "anchor": "E69's firmware revisions read, 27 Oct 2026 13:56:26 PDT (docs/reports/data/2026-10-27-e69-governor-knob/README.md:187), as E77",
+  "anchor_epoch": 1793134586,
+  "rule": "the module uptime (DM_CMD_GET_MODULE_UPTIME, RAM) must exceed the minutes since the anchor: no service-processor reset since, so the identity read then still names the running image"
+ },
+ "safety": {
+  "board_abort_w": 85.0,
+  "board_rule": "any single 10 Hz reading >= 85.0 W",
+  "die_abort_c": 72,
+  "die_rule": "the die mean (minshire[0]) on any reading",
+  "high_abort_c": 80,
+  "high_rule": "the die high-water latch (minshire[2], E69 A1: not a live reading)",
+  "pin_rule": "while the TDP is 0, any minion clock other than 600 MHz during a measurement launch"
+ }
+}
