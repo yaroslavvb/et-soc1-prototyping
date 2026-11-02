@@ -7,6 +7,15 @@ its time and evidence; **UNKNOWN is never PASS**. Desk gates were drafted by the
 re-checked each; the live gates are filled at gate time, timestamped, and committed as the GO **before** the first
 write. Local stamps are PST (UTC−8).
 
+> **Corrected after the run's verification** (Sun 1 Nov 2026, about 19:00 PST, at the desk; nothing run, set or read
+> on a card for it). See § "Corrections after the run's verification" at the end:
+> - F1: the residency reads' labels are another build's, and the run's own read of raw state 4 caused the window's 22
+>   `SP Runtime Error` events (two per read), which this record had put down to a known syndrome.
+> - F3: the return burst's ring holds two fresh throttle-ups, not "12 lines".
+> - F6: when the maintainer's posts were last checked, and who read the manual.
+>
+> The GO section ("Live gates") stands as committed before the write; a marked note follows it.
+
 **What this operation is** (the manual's runbook § 1): *authorized live observation* plus **one** *non-persistent
 management write*, `DM_CMD_SET_MODULE_STATIC_TDP_LEVEL` (26), 65 → **0** W and back to 65 W — the TDP-0 pin E72 used on
 this card on 27 Oct. **Lowering is the safe direction.** The threshold is not written. It is not an OTA, build, flash,
@@ -83,6 +92,10 @@ PMIC command, reset, driver or PCIe action, and **not a clock command** (`DM_CMD
 - **Also omitted:** the revisions query, `SET_STATS_RUN_CONTROL`, trace resets, `GET_DEVICE_ERROR_EVENTS` (it pops a
   queue), `GET_FIRMWARE_BOOT_STATUS`, every `MDI_*`, every `SET_*` but the one TDP write, resets, firmware-update
   commands, every PMIC command.
+
+*Corrected after the run's verification (F1 below): the residency read is a RAM read, but a raw state the build does
+not know (4 on 0.22.0) makes the service processor log two ERROR lines, and each pushes one `SP Runtime Error` event to
+the host. The run sent it 11 times. The list above is as committed.*
 
 ## Rule 8 — no incidental board-data change (desk: PASS at the version-matched source; build-identity residual named)
 
@@ -204,6 +217,11 @@ heater `build/sparsity_t2` host `7adadf4f1ce331cc…`, kernel `990807f483cd57aa�
 passes at the card's own settings; by amendment A2 it writes nothing until the file `GO` exists in its run directory,
 created after this commit is pushed.
 
+*Corrected after the run's verification (F1, F6 below); the table above is as committed in the GO.* The "residencies
+before" row uses the 0.20.0 build's names. On this card's 0.22.0 build it reads POWER_DOWN 4,702 s cumulative and
+POWER_SAFE 0, and raw 4 is no state. The rc −5 read logs two service-processor errors, and the smoke's ring holds them.
+The maintainer's posts were last checked at 16:04:26 PST, 82 minutes before the claim, not just before it.
+
 ## Set log, activation, final handoff (filled from `raw/gov.jsonl`, `raw/end.json`, `raw/watchdog.log`)
 
 | time (PST, Sun 1 Nov 2026) | event | read-back (the two RAM GETs) |
@@ -217,7 +235,7 @@ created after this commit is pushed.
 | 17:55:06 | the 8 s settling rung: its gate was not reached (the preheat to 59 °C, 8 heater launches), so it did not run | — |
 | 17:55:10.848 → .863 | **restore** `... -l 65 ...`, rc 0 | 17:55:10.871: TDP **65** W, threshold **65** °C (power-state label `max_power`, the known side effect of the pin) |
 | 17:55:15 | the watchdog read `release` and exited: "released by the session, nothing to do" | — |
-| 17:55:11–17:55:21 | **the return burst** (544 harts, 4 s): clock **600 → 700 → 800 MHz**; its ring holds 12 "Power throttle up" lines | after it: TDP 65 W, threshold 65 °C, `low_power`, 600 MHz |
+| 17:55:11–17:55:21 | **the return burst** (544 harts, 4 s): clock **600 → 700 → 800 MHz**; the ring dumped after it holds **two new** `Power throttle up` lines, at 17:55:14.92 and 17:55:15.10 PST (`tdp level: 65000`), each followed by its operating point (700, then 800 MHz), and 600 MHz again at 17:55:18.98. *Corrected after verification (F3): first written "12 lines", the count of every throttle-up in the dump, stale ones included* | after it: TDP 65 W, threshold 65 °C, `low_power`, 600 MHz |
 | 17:55:21–17:59:21 | arm B pass 3 (12 of 12 launches) | — |
 | 17:59:25.679 | **closing read**, then the lock released | TDP **65** W, threshold **65** °C, `low_power`, 600 MHz; module uptime 6 d 3 h 46 m (no service-processor reset) |
 
@@ -225,8 +243,10 @@ created after this commit is pushed.
   listed above. The pin lasted 19 min 36 s.
 - **Envelope:** the highest board reading of the session was 70.7 W (an arm-B heater launch on 768 harts); the highest
   in a kept measurement launch 58.05 W; no die mean reached 72 °C (launch readings 53–55 °C); no safety stop.
-- **Host kernel log:** 22 ET error events in the window, all the known `SP Runtime Error` / `Count 0` syndrome, two per
-  management burst between passes, none inside a pass (`raw/kernel-events.txt`).
+- **Host kernel log:** 22 ET error events in the window, all `SP Runtime Error` / `Count 0`, **caused by this run's own
+  residency reads**: two after each of the 11 reads of raw state 4 (no state on 0.22.0; each read logs two ERROR lines,
+  and each ERROR line pushes one event), 6–8 s later, none elsewhere (`raw/kernel-events.txt`). *Corrected after
+  verification (F1): first written "the known syndrome, two per management burst".*
 - **Card time:** 32.44 card-minutes in the session (exit 0, "done"), plus the gate reads and the smoke (under 1 min).
 - Activation and acceptance (reset, re-identification, new firmware): **N-A**, nothing was flashed or reset.
   **Outbound OTA: N-A. Automatic fallback: N-A.**
@@ -240,7 +260,8 @@ created after this commit is pushed.
 - **Logs and artefacts:** the run directory as `raw/` beside this file (telemetry gzipped; the box's tree path written
   `<tree>`); the vmin-LUT file stays on the host as per-card calibration data.
 - **Unresolved risks:** none from the operation. The run's own findings (the arms' operating-point step) are in the
-  README.
+  README. The residency read of raw state 4 raised 22 `SP Runtime Error` events and wrote nothing; a re-run drops it.
+  *(Added after verification, F1.)*
 - **Signoff:** the run agent, Sun 1 Nov 2026, 18:0x PST (02:0x UTC Mon 2 Nov); no independent reviewer.
 
 ## Template mapping
@@ -256,3 +277,18 @@ created after this commit is pushed.
 | Activation and acceptance | N-A (no reset, nothing flashed); the return burst stands in for "the governor works afterwards" |
 | Outbound OTA / fallback | N-A: **Outbound OTA: N-A. Automatic fallback: N-A** (nothing written to a bank) |
 | Final handoff | above |
+
+## Corrections after the run's verification (Sun 1 Nov 2026, about 19:00 PST; desk only)
+
+The workflow's independent verifier found the move safe and honestly recorded, with no critical fault. Its own
+read-only read at 18:30:53 PST found the card at its originals: TDP 65 W, threshold 65 °C, `low_power`, 600 MHz. It
+named the faults below; the README's § "Corrections after verification" has the two that touch only the science (F2,
+the conduction bound; F4, post hoc labels) and F5 (the launch readings). Nothing was run, set or read on a card to
+correct them. The GO section stands as committed before the write. Every number here is recomputed from the committed
+files by `corrections-check.py` beside this record.
+
+| # | What the record said | What it says now |
+|---|---|---|
+| F1 | Live gates, "residencies before": POWER_UP cumulative 4,702 s, POWER_DOWN 0, and a THERMAL_DOWN read returning rc −5 with no service-processor log line in the smoke's ring. Set log: 22 kernel events, "the known syndrome", two per management burst | Raw states 2 / 3 / 4 are **POWER_DOWN / POWER_SAFE / no state** on this card's BL2 0.22.0 (et-platform `836a4ab`, `device_mgmt_api_spec.h:280-285`: IDLE 0, UP 1, DOWN 2, SAFE 3, then the UNKNOWN sentinel). The record's names are the 0.20.0 and 0.18.0 builds' seven-state enum. So the gates read POWER_DOWN 4,702 s and POWER_SAFE 0. POWER_DOWN grew 7.03, 4.79 and 3.60 s over arm B's passes and stayed flat under the pin; POWER_SAFE stayed 0; POWER_UP (1) was never read. Each read of raw 4 logs "Unexpected power throtlling state: 4" and "thermal pwr mgmt error: get_throttle_time()" at ERROR (`thermal_pwr_mgmt.c:1477-1501`, `thermal_power_monitor.c:596-610`), and each ERROR line pushes one `SP_RUNTIME_ERROR` event to the host (`services/log.c:371-389, 410-428`). The smoke's ring holds those two lines (from the gate reads' read), as does every later dump the arm-B passes had not overwritten. **The 22 events are this run's own: two, 6–8 s after each of its 11 reads of raw 4, none elsewhere.** The read writes nothing. Amendment A1 kept state 4 although the E69 rings it cites show it erroring like 5 and 6. A re-run drops raw 4 from `run_e77.py`'s `queries()`. |
+| F3 | Set log: the return burst's ring "holds 12 Power throttle up lines" (and the README called the ring criterion PARTIAL) | The dump after the burst holds ten entries newer than the dump before it, read with `tools/claims-v3/hpl/sptrace_full.py`. They are the previous read's two error lines, then **two** `Power throttle up` lines at 17:55:14.92 and 17:55:15.10 PST (`current pwr 30310` and `32500`, `tdp level: 65000`), 4.1 s after the restore and inside the burst's launch. Each is followed by its operating point (700, then 800 MHz), and 600 MHz follows at 17:55:18.98. **The ring criterion is met.** The "12" counted every throttle-up in the dump, stale ones included, as the runner's live check does. A re-run counts only entries newer than the previous dump. |
+| F6 | Authorization: the maintainer's posts "re-checked ... just before the claim" | They were last checked at **16:04:26 PST**, 82 minutes before the claim (17:26:15) and 91 before the set (17:35:34.974). `#community-lab`, read again at 17:25 and 18:07 PST, shows no post of his after 14:00 PST; the direct messages were not read again after 16:04:26. The full read of his 258 posts (13:54–14:01 PST) and of the field manual's four files (12:30 PST) was the desk lane's. The run agent read that lane's paraphrase (14:24 PST), this template and the manual's `AGENTS.md` (its first 230 of 249 lines, 14:30 PST). On a re-run, the run agent reads all four files itself and re-checks both within minutes of the claim. |

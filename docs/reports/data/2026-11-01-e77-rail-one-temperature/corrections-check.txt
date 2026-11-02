@@ -1,0 +1,99 @@
+E77 corrections-check: every number below is recomputed from this directory's committed files.
+
+== A. The residency reads, the state-4 error lines and the kernel events (F1)
+  At et-platform 836a4ab (BL2 0.22.0) the throttle states are IDLE 0, UP 1, DOWN 2, SAFE 3, and 4 is the
+  enum's UNKNOWN sentinel (device-api/include/management-api/device_mgmt_api_spec.h:280-285). The run read raw
+  2, 3 and 4 and labelled them POWER_UP, POWER_DOWN, THERMAL_DOWN, the 0.20.0/0.18.0 seven-state names.
+
+  burst   phase                         state-4 read (PST)  raw 2 = POWER_DOWN cum. s   raw 3 = POWER_SAFE cum. s   raw 4 rc
+  gates   gate reads                    17:26:29.018            4702.163                     0.000                  -5
+  smoke   smoke                         17:26:51.246            4702.163 (+0.000)            0.000                  -5
+  start   session start                 17:27:01.314            4702.163 (+0.000)            0.000                  -5
+  B1      after arm B pass 1            17:31:22.971            4709.189 (+7.026)            0.000                  -5
+  B2      after arm B pass 2            17:35:34.955            4713.983 (+4.794)            0.000                  -5
+  A1      after arm A pass 1 (TDP 0)    17:41:56.535            4713.983 (+0.000)            0.000                  -5
+  A2      after arm A pass 2 (TDP 0)    17:48:24.220            4713.983 (+0.000)            0.000                  -5
+  A3      after arm A pass 3 (TDP 0)    17:54:36.714            4713.983 (+0.000)            0.000                  -5
+  SETTLE  before the restore (TDP 0)    17:55:10.830            4713.983 (+0.000)            0.000                  -5
+  RETURN  after the return burst        17:55:21.693            4713.983 (+0.000)            0.000                  -5
+  B3      after arm B pass 3            17:59:25.657            4717.587 (+3.604)            0.000                  -5
+
+  The rings (tools/claims-v3/hpl/sptrace_full.py): entries new in each dump since the one before, and its
+  state-4 error lines ('Unexpected power throtlling state: 4', 'thermal pwr mgmt error: get_throttle_time()').
+  A dump is taken before the burst's residency read (run_e77.py queries()), so its new error lines are the
+  previous burst's state-4 read.
+  gates    72 entries,  72 new; new error lines: 0 state-4 + 0 get_throttle_time; error lines in the whole dump 0
+  smoke    71 entries,  10 new; new error lines: 1 state-4 + 1 get_throttle_time at SP 530018.995 s <- the gates read; error lines in the whole dump 2
+  start    72 entries,   2 new; new error lines: 1 state-4 + 1 get_throttle_time at SP 530041.223 s <- the smoke read; error lines in the whole dump 4
+  B1       70 entries,  70 new; new error lines: 0 state-4 + 0 get_throttle_time (the ring overwritten by the pass's governor entries); error lines in the whole dump 0
+  B2       70 entries,  70 new; new error lines: 0 state-4 + 0 get_throttle_time (the ring overwritten by the pass's governor entries); error lines in the whole dump 0
+  A1       70 entries,   2 new; new error lines: 1 state-4 + 1 get_throttle_time at SP 530564.927 s <- the B2 read; error lines in the whole dump 2
+  A2       71 entries,   2 new; new error lines: 1 state-4 + 1 get_throttle_time at SP 530946.504 s <- the A1 read; error lines in the whole dump 4
+  A3       70 entries,   2 new; new error lines: 1 state-4 + 1 get_throttle_time at SP 531334.186 s <- the A2 read; error lines in the whole dump 6
+  SETTLE   70 entries,   2 new; new error lines: 1 state-4 + 1 get_throttle_time at SP 531706.677 s <- the A3 read; error lines in the whole dump 8
+  RETURN   70 entries,  10 new; new error lines: 1 state-4 + 1 get_throttle_time at SP 531740.793 s <- the SETTLE read; error lines in the whole dump 10
+  B3       71 entries,  71 new; new error lines: 0 state-4 + 0 get_throttle_time (the ring overwritten by the pass's governor entries); error lines in the whole dump 0
+
+  SP clock aligned on those 7 pairs: PST = SP + 1793052770.031 s; residuals (ms): gates -8.1, smoke -7.6, B2 -3.1, A1 +0.0, A2 +3.1, A3 +5.9, SETTLE +6.5
+
+  Host kernel log (raw/kernel-events.txt): 22 SP Runtime Error events in 11 seconds; 11 state-4 reads.
+    gates   read 17:26:29.018: 2 events stamped 17:26:35, 6.0-7.0 s later
+    smoke   read 17:26:51.246: 2 events stamped 17:26:58, 6.8-7.8 s later
+    start   read 17:27:01.314: 2 events stamped 17:27:08, 6.7-7.7 s later
+    B1      read 17:31:22.971: 2 events stamped 17:31:29, 6.0-7.0 s later
+    B2      read 17:35:34.955: 2 events stamped 17:35:41, 6.0-7.0 s later
+    A1      read 17:41:56.535: 2 events stamped 17:42:03, 6.5-7.5 s later
+    A2      read 17:48:24.220: 2 events stamped 17:48:31, 6.8-7.8 s later
+    A3      read 17:54:36.714: 2 events stamped 17:54:43, 6.3-7.3 s later
+    SETTLE  read 17:55:10.830: 2 events stamped 17:55:17, 6.2-7.2 s later
+    RETURN  read 17:55:21.693: 2 events stamped 17:55:28, 6.3-7.3 s later
+    B3      read 17:59:25.657: 2 events stamped 17:59:32, 6.3-7.3 s later
+  Events not matched to a read: 0
+  Source at 836a4ab: get_throttle_residency's default branch logs 'Unexpected power throtlling state: %d' at
+  LOG_LEVEL_ERROR (services/thermal_pwr_mgmt.c:1477-1501); the handler logs 'thermal pwr mgmt error:
+  get_throttle_time()' at LOG_LEVEL_ERROR (services/thermal_power_monitor.c:596-610); every ERROR line increments
+  RT_Error_Count and, past RT_ERROR_THRESHOLD, pushes one SP_RUNTIME_ERROR event to the host (services/log.c:371-389,
+  410-428). Two ERROR lines per state-4 read: two events per read.
+
+== B. The return burst in the ring (F3)
+  restore written 17:55:10.848; the return launch 17:55:14.132-17:55:18.582
+  RETURN.bin holds 10 entries newer than SETTLE.bin:
+    SP 531740.793 s = 17:55:10.823 PST  query_noise  Unexpected power throtlling state: 4
+    SP 531740.793 s = 17:55:10.823 PST  query_noise  thermal pwr mgmt error: get_throttle_time()
+    SP 531744.892 s = 17:55:14.923 PST  power_up     Power throttle up event, current pwr 30310  tdp level: 65000
+    SP 531744.936 s = 17:55:14.966 PST  pstat        power-status record: 700 MHz, throttle state 1, 30 W
+    SP 531744.936 s = 17:55:14.967 PST  new_op       New OP: Freq 700 MNN 570 (V) SRM 735 (V)
+    SP 531745.064 s = 17:55:15.095 PST  power_up     Power throttle up event, current pwr 32500  tdp level: 65000
+    SP 531745.145 s = 17:55:15.175 PST  pstat        power-status record: 800 MHz, throttle state 1, 32 W
+    SP 531745.145 s = 17:55:15.175 PST  new_op       New OP: Freq 800 MNN 620 (V) SRM 830 (V)
+    SP 531748.948 s = 17:55:18.978 PST  pstat        power-status record: 600 MHz, throttle state 0, 49 W
+    SP 531748.948 s = 17:55:18.978 PST  new_op       New OP: Freq 600 MNN 520 (V) SRM 705 (V)
+  Power throttle up lines after the restore: 2, 0.172 s apart, 0.79 s and 0.96 s into the launch
+  The runner's live count (every 'Throttle up' in the whole dump, stale ones included): 12
+  10 Hz telemetry (raw/tel/RETURN.jsonl.gz): 600 MHz 67, 700 MHz 2, 800 MHz 38; first 700 at 17:55:14.977, first 800 at 17:55:15.178
+
+== C. The conduction bound: the frozen conversion beside the model's total-current increment (F2, F4)
+  arm A, 32 kept launches: idle minion rail m0 = 7.114 W (range 7.011-7.150), idle 519.0 mV; window V_A = 518 mV (results.json moves.V_A); I0 = 13.7 A
+  per ohm at a 21 W rail delta: literal (21/V_A)^2 = 1643.5 A^2; total-current increment = 2757.1 A^2 (x1.678)
+  pJ of the row = W x 0.875 / (0.18789 x 21 W) = W x 0.22176; the whole row is 0.18789 x 21 = 3.946 W
+
+  fit                                   R mOhm [99%]              at the upper edge: literal W / pJ   total-current W / pJ   share of row
+  registered, drift_split (verdict)      0.622 [-0.487, +1.731]    2.84 W / 0.63 pJ           4.77 W / 1.06 pJ      121%
+  secondary, published small rails       0.354 [-0.251, +0.959]    1.58 W / 0.35 pJ           2.64 W / 0.59 pJ      67%
+  post hoc, arm-B offset                 0.210 [-0.076, +0.496]    0.82 W / 0.18 pJ           1.37 W / 0.30 pJ      35%
+  post hoc, offset + SRAM and NoC        0.643 [-0.690, +1.977]    3.25 W / 0.72 pJ           5.45 W / 1.21 pJ      138%
+  registered point estimate 0.622 mOhm: literal 1.02 W / 0.23 pJ; total-current 1.72 W / 0.38 pJ
+  verdict: the registered 99% interval contains 0 -> FAIL (the frozen rule); the pooled rms gain 22.6% is reported beside it
+
+== D. Post hoc, passes as the unit (99%: mean +- t(0.995, 2) x SD/sqrt(3)) (F4)
+  A_mW_per_hart  per pass 21.025, 21.176, 20.947; mean 21.050, 99% [20.383, 21.716]
+  B_mW_per_hart  per pass 40.296, 40.402, 40.771; mean 40.490, 99% [39.062, 41.917]
+  ratio          per pass 1.917, 1.908, 1.946; mean 1.924, 99% [1.808, 2.039]
+  step_minion_w  per pass 4.114, 4.198, 3.973; mean 4.095, 99% [3.444, 4.746]
+  step_sram_w    per pass 1.737, 1.741, 1.726; mean 1.735, 99% [1.692, 1.778]
+  pooled (posthoc.json): ratio 1.924 against f*V^2 = 1.899 at the measured 518/618 mV; step 4.09 W minion, 1.73 W SRAM
+
+== E. Launch readings against departure 3's registered 55-58 C (F5)
+  arm A: 32 kept launches, readings 54 C x3, 55 C x29; mean 54.91 C; in 55-58 C: 29; flagged below_floor: 0
+  arm B: 34 kept launches, readings 53 C x11, 54 C x23; mean 53.68 C; in 55-58 C: 0; flagged below_floor: 0
+  results.json launch_readings: {"A": {"mean": 54.90625, "min": 54.0, "max": 55.0, "n": 32}, "B": {"mean": 53.6764705882353, "min": 53.0, "max": 54.0, "n": 34}, "arm_mean_gap_c": 1.229779411764703}

@@ -4,36 +4,59 @@
 change after this commit goes under Amendments, dated, before the data it touches. Results go above the registration
 when the run is done; nothing below is edited.*
 
+*Corrected after an independent verification the same evening (Sun 1 Nov 2026, about 19:00 PST), at the desk: no
+card touched, nothing set, nothing re-run. Wrong sentences in the Results are replaced in place, each marked;
+[Corrections after verification](#corrections-after-verification-sun-1-nov-2026) lists F1–F6, and
+[`corrections-check.txt`](corrections-check.txt) prints every new number from the committed files. No registered
+number or verdict changed, and the registration below is untouched (one dated note is added after its Amendments). The
+two major ones: the 22 `SP Runtime Error` events were caused by this run's own residency read of raw state 4, which is
+no state on the card's 0.22.0 build (F1); and the registered conduction bound used the plan's literal square, which
+departure 10 rejects: in the registered model's own total-current form the 99% upper edge is more than the whole
+0.875 pJ row, so the regulators' share stays unresolved (F2).*
+
 ## Results (the run: Sun 1 Nov 2026, 17:26–17:59 PST; written 18:1x PST)
 
 **The registered verdict is FAIL, and by the registration's own rule it is provisional.** On the central footing
-R_eff = **0.62 mΩ, 99% interval [−0.49, +1.73] mΩ** over three passes, and the fit's rms falls by 22.6% (the bar was
-30%) (`results.json` `footings.drift_split.fit`). The other two footings fail too: uncorrected 0.33 [−3.86, +4.53] mΩ,
-board_only 0.67 [−0.13, +1.47] mΩ. Read as the plan says, the whole 0.875 pJ row is logic in step with the rails, with
-the conduction loss bounded by the interval's upper edge: at most **2.84 W at a 21 W minion rail** (518 mV), 72% of the
-published 0.188 × 21 W, **≤ 0.63 pJ of the 0.875 pJ row** (`moves`). But **all four rung pairs missed the 5% matching
-(P2)**, so by the registered rule the f·V² transfer is reported as refuted on this card and the verdict as provisional,
-pending a re-cut ladder. The secondaries agree: the published small-rail coefficients 0.35 [−0.25, +0.96] mΩ, the plan's
-literal square 0.71 [−0.82, +2.24] mΩ, both FAIL; leaving nothing out changes nothing (no launch was flagged
-`below_floor`).
+R_eff = **0.62 mΩ, 99% interval [−0.49, +1.73] mΩ** over three passes: the interval contains 0, which is the registered
+FAIL; the pooled fit's rms falls by 22.6%, short of the 30% a PASS would also have needed (`results.json`
+`footings.drift_split.fit`). *(Reworded after verification, F4: the first version set the rms beside its bar as if it
+decided the verdict.)* The other two footings fail too: uncorrected 0.33 [−3.86, +4.53] mΩ, board_only 0.67
+[−0.13, +1.47] mΩ. **What the FAIL bounds.** By the frozen conversion, R_eff·(21/V_A)², the interval's upper edge is
+2.84 W at a 21 W minion rail (518 mV), 72% of the published 0.188 × 21 W, 0.63 pJ of the 0.875 pJ row (`moves`; the
+registered figure). That conversion is the plan's literal square, which departure 10 rejects: the registered model
+charges the regulators R·I² in their whole current, so a 21 W step on arm A's 7.11 W idle rail adds
+R·[((7.11 + 21)/V_A)² − (7.11/V_A)²], 1.68 times the literal amount. In that form the upper edge is **4.77 W, 1.06 pJ,
+more than the whole 0.875 pJ row** ([`corrections-check.txt`](corrections-check.txt) C). **So this run does not bound
+the regulators' share below the row: the FAIL leaves the split unresolved**, and the frozen FAIL reading, "the whole
+0.875 pJ row is then logic in step with the rails", is not supported. *(Replaced after verification, F2: the first
+version read the FAIL as the whole row being logic in step, with the conduction loss at most 0.63 pJ.)* And **all four
+rung pairs missed the 5% matching (P2)**, so by the registered rule the f·V² transfer is reported as refuted on this card
+and the verdict as provisional, pending a re-cut ladder. The secondaries agree: the published small-rail coefficients
+0.35 [−0.25, +0.96] mΩ, the plan's literal square 0.71 [−0.82, +2.24] mΩ, both FAIL; leaving nothing out changes
+nothing (no launch was flagged `below_floor`).
 
 **P1 FAIL, P2 four of four mismatched — and what broke (post hoc).** At equal hart counts arm B's minion watts over
 arm A's are **2.33** (544 harts) and **2.68** (288), against the frozen 1.913 ± 5%; at the designed pairs arm B reads
-+22%, +30%, +39% and +79% more than arm A (`P1_ratio`, `P2_matching`). The per-hart transfer itself holds:
++22%, +30%, +39% and +79% more than arm A (`P1_ratio`, `P2_matching`). Post hoc, the per-hart transfer itself holds:
 fitting each arm's rung means against harts, arm A is **21.05 mW per hart** (−0.34 W, rms 0.05 W; the ledger's law
 was 22.31) and arm B **40.49 mW per hart** (+3.75 W, rms 0.08 W), a ratio of **1.924 against f·V² = 1.899** at the
-measured 518 / 618 mV, 1.3% apart (`posthoc.json`). What breaks the matching is an **offset in arm B: +4.09 W on the
-minion rail and +1.73 W on the SRAM rail at every rung**, the operating-point step. On this card the idle clock is
-600 MHz in both arms (the ring: "New OP: Freq 600 MNN 520 (V) SRM 705 (V)" at idle, "Freq 700 MNN 570 SRM 735" and
+measured 518 / 618 mV, 1.3% apart (`posthoc.json`); over the three passes the ratio's 99% interval is [1.81, 2.04],
+which holds 1.899. What breaks the matching is an **offset in arm B: +4.09 W on the minion rail and +1.73 W on the SRAM
+rail at every rung** (99% over passes [3.44, 4.75] W and [1.69, 1.78] W), the operating-point step
+([`corrections-check.txt`](corrections-check.txt) D). *(Label and intervals added after verification, F4.)* On this
+card the idle clock is 600 MHz in both arms (the ring: "New OP: Freq 600 MNN 520 (V) SRM 705 (V)" at idle, "Freq 700 MNN 570 SRM 735" and
 "Freq 800 MNN 620 SRM 830" under load), so arm B's pre-launch idle sits at 600 MHz and its window at 800 MHz: its
 deltas carry the static and clock power of the higher operating point with no work at all. E77-PLAN.md's matching
 assumed each arm idles at its own clock, and this registration did not catch it.
 
 **With that step fitted (post hoc, no verdict),** offrail = a_m·Δm + c_B·[arm B] + R_eff·Δ(I²) per pass gives
-R_eff = **0.21 mΩ, 99% [−0.08, +0.50] mΩ**, rms better by 3.5%: still no conduction term, now bounded at **0.82 W at a
-21 W rail, ≤ 0.18 pJ of the 0.875 pJ row**. With the SRAM and NoC rails as regressors too: 0.64 [−0.69, +1.98] mΩ.
-A pre-registered re-run would define arm B's reference at its own operating point (or fit the step) and re-cut arm B's
-harts on the measured 40.5 mW per hart.
+R_eff = **0.21 mΩ, 99% [−0.08, +0.50] mΩ**, rms better by 3.5%: still no conduction term. In the model's total-current
+form its upper edge is **1.37 W at a 21 W rail step, 0.30 pJ of the 0.875 pJ row** (the literal conversion gives
+0.82 W, 0.18 pJ). With the SRAM and NoC rails as regressors too, R_eff = 0.64 [−0.69, +1.98] mΩ, whose upper edge is
+5.45 W, 1.21 pJ, more than the row. So the post hoc bound depends on the fit: only the tighter one bounds the share, at
+about 0.3 pJ. *(Replaced after verification, F2 and F4: the first version gave only the tighter fit's literal
+≤ 0.18 pJ.)* A pre-registered re-run would define arm B's reference at its own operating point (or fit the step) and
+re-cut arm B's harts on the measured 40.5 mW per hart.
 
 **S-T, the rail at the launch temperature (secondary, no verdict).** Arm A's top rung is E38's own configuration
 (fp32 randn on 1,024 harts at 600 MHz), launched here at 54–55 °C with its drift measured in the same block. Its minion
@@ -49,25 +72,43 @@ did not run), seven launches (`secondary_rail_at_launch_temperature`).
 17:35:34.974, read back 0 / 65 at 17:35:34.999; the pin held every arm-A launch at 600 MHz (the abort never fired);
 **0 → 65** at 17:55:10.848, read back 65 / 65 at 17:55:10.871; the watchdog, armed at 17:35:34, read `release` and
 exited at 17:55:15; the return burst stepped **600 → 700 → 800 MHz** and arm B's third pass then ran all 12 launches at
-800 MHz; closing read 17:59:25: **65 W / 65 °C**, `low_power`, 600 MHz, module uptime 6 d 3 h 46 m (no reset). The
-ring criterion E72 left PARTIAL is partial here too: the dump right after the burst held no entry newer than the dump
-before it (the trace region lags), so its "Power throttle up" lines are older ones; the dump after arm B's third pass
-holds fresh throttle-up and throttle-down lines. Highest board reading 70.7 W (a 768-hart heater launch), 58.05 W in a
-kept launch; host kernel log: 22 events in the window, all the known `SP Runtime Error` syndrome, two per management
-burst, none inside a pass (`raw/kernel-events.txt`). 32.44 card-minutes. The change record has the full log.
+800 MHz; closing read 17:59:25: **65 W / 65 °C**, `low_power`, 600 MHz, module uptime 6 d 3 h 46 m (no reset).
+**The ring criterion E72 left PARTIAL is met here.** Read with the lab's full ring reader
+(`tools/claims-v3/hpl/sptrace_full.py`), the dump after the burst holds ten entries newer than the dump before it: the
+previous residency read's two error lines (F1), then **two `Power throttle up` lines at 17:55:14.92 and 17:55:15.10 PST**
+(`current pwr 30310`, then `32500`, against `tdp level: 65000`), 0.79 and 0.96 s into the burst's launch and 4.1 s after
+the restore, each followed by its operating point (700, then 800 MHz), and 600 MHz again at 17:55:18.98, after the
+launch ended. The SP clock is aligned to the residency reads' error lines, within 9 ms; the 10 Hz telemetry first reads
+700 MHz at 17:55:14.98 and 800 MHz at 17:55:15.18 ([`corrections-check.txt`](corrections-check.txt) B). *(Replaced
+after verification, F3: the first version called it partial, saying that dump held nothing newer than the one before;
+the runner's live check, which passed, had counted all 12 throttle-up lines in the dump, stale ones included.)* Highest
+board reading 70.7 W (a 768-hart heater launch), 58.05 W in a kept launch. **Host kernel log: 22 `SP Runtime Error`
+events in the window, all caused by this run's own residency reads.** Each read of raw state 4, which is no state on the
+card's 0.22.0 build, makes the service processor log two ERROR lines, and each ERROR line pushes one such event to the
+host: two events 6–8 s after each of the 11 reads (the gate reads, the smoke and the nine in the session), none elsewhere
+(`raw/kernel-events.txt`; F1). *(Replaced after verification, F1: the first version called them the known syndrome, two
+per management burst.)* 32.44 card-minutes. The change record has the full log.
 
 **What ran.** 67 of 72 launches (5 gates not reached: the preheat to 59 °C failed within 8 heater launches at the
 start of four passes and once mid-pass; arm A's heater, 1,024 harts at 600 MHz, heats slowly), 66 kept (one arm-B
 launch dropped by S1: its clock dipped after reaching 800 MHz); the 8 s settling rung's gate was not reached either.
 The gate held the rails to S2's settling test with approaches of 10.2–11.7 s; the launch readings were **54.9 °C in
-arm A (54–55) and 53.7 °C in arm B (53–54), a 1.2 °C gap** — above the 1 °C this registration said it would name. In
-arm B the clock reached 800 MHz 0.34–1.26 s after each launch began, before the window.
+arm A (54–55) and 53.7 °C in arm B (53–54), a 1.2 °C gap** — above the 1 °C this registration said it would name.
+Both arms also launched below the 55–58 °C that departure 3 registered: arm A at 54–55 °C (29 of 32 kept launches at
+55 °C), arm B at 53–54 °C (11 of 34 at the 53 °C re-heat floor, none flagged `below_floor`)
+([`corrections-check.txt`](corrections-check.txt) E). *(Added after verification, F5.)* In arm B the clock reached
+800 MHz 0.34–1.26 s after each launch began, before the window.
 
 **What it changes.** For the kinds page's § 11 item 13 and the Levels tab's stop 2: E77 ran. The regulators' half
-stays open — no conduction term resolved, bounded at ≤ 0.63 pJ (registered) or ≤ 0.18 pJ (post hoc, the operating-point
-step fitted) of the 0.875 pJ row. The minion rail's per-hart cost moves with f·V² from 600 to 800 MHz to within 1.3%,
-and the 800 MHz operating point costs about **4.1 W on the minion rail and 1.7 W on the SRAM rail before any work**.
-At a 54 °C launch the minion row does not depend on the leakage footing. The kinds page's [§ 11 list](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open),
+stays open: no conduction term resolved, and this run does not bound the conduction share below the row (in the
+registered model's total-current form the 99% upper edge is 1.06 pJ of the 0.875 pJ row; the frozen literal conversion
+gives 0.63 pJ). Post hoc, with the operating-point step fitted, one fit bounds it at about 0.30 pJ and a fit that also
+takes the SRAM and NoC rails does not bound it. Also post hoc, and the reason the registered P1 and P2 failed: the
+minion rail's per-hart cost moves with f·V² from 600 to 800 MHz (1.924, 99% [1.81, 2.04], against 1.899), and the
+800 MHz operating point costs **4.09 W (99% [3.44, 4.75]) on the minion rail and 1.73 W ([1.69, 1.78]) on the SRAM rail
+before any work**. *(Replaced after verification, F2 and F4: the first version bounded the regulators at ≤ 0.63 pJ or
+≤ 0.18 pJ and gave the post hoc numbers without their label or intervals.)* At a 54 °C launch the minion row does not
+depend on the leakage footing. The kinds page's [§ 11 list](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open),
 item 13 ("Not touched: E77 ... each a governor move, your OK for that exact operation"), and the Horace hub's Levels
 tab, stop 2 ("the card"), whose Missing column reads: *the rail measured AT the launch temperature, rather than at the
 launch window and corrected onto it (E77, reserved; the same run would split the 0.875 pJ regulator row, and it needs
@@ -76,7 +117,89 @@ a governor move under the field manual's gates)*. It was the hub's item 2 on 28 
 [rail ledger](../2026-10-27-q129-rail-ledger/README.md) on 27 Oct and reserved since. **The owner authorized this
 governor move on Sun 1 Nov 2026** (about 12:30 PST), for E77 among three named runs, on the condition that the firmware
 maintainer's posted guidelines be read first; they were read in full, and the change record
-([`CHANGE-RECORD.md`](CHANGE-RECORD.md)) says what they set.
+([`CHANGE-RECORD.md`](CHANGE-RECORD.md)) says what they set. The full read was the workflow's desk lane's: all 258 of
+the maintainer's posts at 13:54–14:01 PST, and the field manual's four files at 12:30 PST. The run agent read that
+lane's paraphrase, the manual's `AGENTS.md` and its change-record template, and last checked for newer posts at
+16:04:26 PST, 82 minutes before the claim. *(Added after verification, F6.)*
+
+## Corrections after verification (Sun 1 Nov 2026)
+
+The workflow's independent verifier returned "holds with fixes": the governor move safe and honestly recorded, no
+critical fault, and two major and four minor faults, all in the write-up. It reproduced `results.json` and
+`posthoc.json` from the committed raw data. One read-only read of its own at 18:30:53 PST found the card at its
+originals (TDP 65 W, threshold 65 °C, `low_power`, 600 MHz). Corrected at the desk the same evening: no card touched,
+nothing set, nothing re-run. **Not changed:** every registered number and verdict; `results.json`, `reduce.txt`,
+`posthoc.json`, `posthoc_e77.py` and `raw/`; the registration below and the tools under `tools/claims-v3/e77/`; the
+change record's GO section. [`corrections-check.py`](corrections-check.py) recomputes every new number from the
+committed files and prints it to [`corrections-check.txt`](corrections-check.txt) (sections A–E):
+`/usr/bin/python3 docs/reports/data/2026-11-01-e77-rail-one-temperature/corrections-check.py`.
+
+- **F1 (major): the residency reads were mislabelled, and they caused the 22 kernel events.**
+  - *The labels.* After each pass the run read raw throttle states 2, 3 and 4 and labelled them POWER_UP, POWER_DOWN
+    and THERMAL_DOWN. Those are the seven-state names of the 0.20.0 and 0.18.0 builds
+    (`tools/claims-v3/dv2/ettelem-dv2/ettelem.cpp`). This card runs BL2 0.22.0
+    ([Q130's governor finding](../2026-10-31-q130-governor-thermal-branch/README.md), item 7), whose enum is IDLE 0,
+    UP 1, DOWN 2, SAFE 3, with 4 its UNKNOWN sentinel (et-platform `836a4ab`,
+    `device-api/include/management-api/device_mgmt_api_spec.h:280-285`). So raw 2 is **POWER_DOWN**, raw 3 **POWER_SAFE**
+    and raw 4 **no state**; POWER_UP (1) was never read. Raw 2 grew 7.03, 4.79 and 3.60 s over arm B's three passes,
+    whose dumps hold throttle-down lines, and stayed flat under the pin; raw 3 read 0 at all 11 reads.
+  - *The events.* A read of raw 4 takes `get_throttle_residency`'s default branch, which logs "Unexpected power
+    throtlling state: 4" at ERROR (`services/thermal_pwr_mgmt.c:1477-1501`). The handler then logs "thermal pwr mgmt
+    error: get_throttle_time()" at ERROR (`services/thermal_power_monitor.c:596-610`). Past the runtime-error threshold,
+    every ERROR line pushes one `SP_RUNTIME_ERROR` event to the host (`services/log.c:371-389, 410-428`). The rings hold
+    those two lines after every read they still cover, the smoke's ring included; the change record had said it held
+    none. Aligned on them, the SP clock reproduces the read times within 9 ms. The kernel log's 22 events are two, 6–8 s
+    after each of the 11 reads, and none elsewhere (A). The read itself is a RAM read and writes nothing; the error
+    lines and the events are its only effect.
+  - *Amendment A1* dropped states 5 and 6 for exactly this error logging, but kept 4, although the E69 rings it cites
+    show state 4 erroring too (2 and 4 times, beside 5 and 6). Before any re-run, `run_e77.py`'s `queries()` drops raw 4
+    (and reads 1 if POWER_UP is wanted).
+  - *A lead, not a result.* At `836a4ab` POWER_SAFE is entered only from the PMIC interrupt callback, on an
+    over-temperature or over-power cause (`thermal_pwr_mgmt.c:2317-2323`). Its time is added when an episode ends
+    (`:2096-2114`), and nothing resets the counter. So raw 3's zero says, on the version-matched source, that no such
+    episode has completed on this card since its service processor started on 26 Oct. That span includes E83's runs of
+    31 Oct, whose board samples reached 88.9 W. This bears on [§ 11 item 14](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open)
+    (aifoundry2's over-power alarm). The running build's residual applies, and what the PMIC's threshold measures is
+    not established here.
+- **F2 (major): the conduction bound used the conversion departure 10 rejects.** The frozen report form,
+  R_eff·(21/V_A)² (`predictions.json` `V_fit.report`, `reduce_e77.py` `moves`), is the plan's literal square. The frozen
+  model charges the regulators R·I² in their whole current, so the loss a 21 W rail step adds is
+  R·[((m₀ + 21)/V_A)² − (m₀/V_A)²]. Arm A's idle minion rail is m₀ = 7.11 W (32 kept launches, 7.01–7.15 W) at 518 mV:
+  13.7 A, where departure 10 assumed 15–16 W and about 30 A. The increment is 1.68 times the literal form (C):
+
+  | fit | R_eff, mΩ [99%] | upper edge, frozen literal form | upper edge, total-current increment |
+  |---|---|---|---|
+  | registered (drift_split; the verdict) | 0.62 [−0.49, +1.73] | 2.84 W, 0.63 pJ | **4.77 W, 1.06 pJ (121% of the row)** |
+  | post hoc, arm-B offset | 0.21 [−0.08, +0.50] | 0.82 W, 0.18 pJ | **1.37 W, 0.30 pJ (35%)** |
+  | post hoc, offset + SRAM and NoC | 0.64 [−0.69, +1.98] | 3.25 W, 0.72 pJ | **5.45 W, 1.21 pJ (138%)** |
+
+  pJ = W × 0.875 / (0.188 × 21 W). The verdict, FAIL, is unchanged: it rests on the interval containing 0. The literal
+  figure stays the registered one, labelled as such. But the registered interval does not bound the regulators' share
+  below the 0.875 pJ row, so the FAIL leaves the split unresolved; the frozen reading that the whole row is logic in step
+  is not supported by this run.
+- **F3 (minor): the return burst's ring criterion is met.** The README called it PARTIAL, saying that the dump after
+  the burst held nothing newer than the one before. Read with the full ring reader, it holds ten newer entries, among
+  them two `Power throttle up` lines at 17:55:14.92 and 17:55:15.10 PST, 4.1 s after the restore and inside the burst
+  (B). The change record's "12 lines" counted every throttle-up in the dump, stale ones included; so did the runner's
+  live check (`run_e77.py` `queries()`). Before any re-run, the check counts only entries newer than the previous dump,
+  by SP timestamp (`sptrace_full.since`).
+- **F4 (minor): post hoc labels and intervals.** The statements that go outward now say "post hoc" and carry intervals
+  with passes as the unit (D):
+  - the per-hart ratio, 1.924 [1.81, 2.04], which holds f·V² = 1.899;
+  - the operating-point step, 4.09 W [3.44, 4.75] on the minion rail and 1.73 W [1.69, 1.78] on the SRAM rail;
+  - both post hoc fits are quoted (F2);
+  - the verdict is FAIL because the interval contains 0, and the rms gain is reported beside it.
+- **F5 (minor): the launch readings departed from departure 3.** It registered launch readings of 55–58 °C. Arm A
+  launched at 54–55 °C, arm B at 53–54 °C, 11 of 34 at the 53 °C re-heat floor (E). "What ran" now says so.
+- **F6 (minor): who read what, and when.**
+  - The full read of the maintainer's posts and of the field manual's four files was the desk lane's.
+  - The run agent read that lane's paraphrase (14:24 PST), the change-record template and the manual's `AGENTS.md`
+    (its first 230 of 249 lines, 14:30 PST).
+  - It last checked for newer posts at 16:04:26 PST: 82 minutes before the claim (17:26:15) and 91 before the set
+    (17:35:34.974), not "just before the claim" as the change record planned.
+  - `#community-lab`, read again at 17:25 and 18:07 PST, shows no post of his after 14:00 PST. The direct messages were
+    not read again after 16:04:26.
+  - On a re-run, the run agent reads all four manual files itself and re-checks both within minutes of the claim.
 
 ## The question
 
@@ -265,3 +388,9 @@ not run, the session closes with its reads, and nothing was written. This makes 
 the first write" a coded condition instead of an order of steps, and lets the session start straight after the smoke
 while the GO commit is made during arm B's first passes (Q133's E111 holds aifoundry2 until close to the 18:00 PST
 start limit). Dry-tested both ways (present: the full dry session; absent: no move, closing read 65 W / 65 °C).
+
+*Note after verification, Sun 1 Nov 2026, about 19:00 PST (not an amendment: written after the data, it changes
+nothing above):* A1's labels are the 0.20.0 build's. On the card's 0.22.0 build raw states 2–4 are POWER_DOWN,
+POWER_SAFE and no state, and the E69 rings A1 cites show state 4 logging the same two errors as states 5 and 6. The
+run's 11 reads of state 4 caused the window's 22 `SP Runtime Error` events. See
+[Corrections after verification](#corrections-after-verification-sun-1-nov-2026), F1.
