@@ -13,6 +13,9 @@ reads, the owner's open question of section 14, are what every kinds run makes).
 #community-lab, rewritten at 21:16:47 PST to add "using aifoundry3 for 1 h, until ~22:20 PST"; released by rewriting it at
 21:42:19 (25 min 32 s of card time, inside the 35 allowed).*
 
+*Dated note, Mon 2 Nov 2026 (Q136's records): the open question is answered. The owner's ruling of 2 November 2026 allows
+read-only PMIC voltage-register reads, so these reads are allowed ([AGENT.md](../../../../AGENT.md) §5, "Device commands").*
+
 *Corrected after verification, Sun 1 Nov 2026, at the desk, with no card touched and nothing re-run (§ [Corrections after
 verification](#corrections-after-verification-sun-1-nov-2026), C1–C7). fp16 50% zeros' NO CORRECTION is now labelled as registered,
 on class G's pooled SD: on the rule's own SD it reads UNRESOLVED, and the predicted +0.52 W is not excluded. The gate-share gaps'

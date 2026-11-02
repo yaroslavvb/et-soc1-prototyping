@@ -68,6 +68,12 @@ on board_only). The board is 5.69 pJ uncorrected, 5.16 with the registered 0.81 
 0.27 W/°C, is E66's idle 0.29). Caveats: a late window ([t1−1.5, t1]), the model's settling ratio (0.962; the 8 s rung
 did not run), seven launches (`secondary_rail_at_launch_temperature`).
 
+*Dated note, Mon 2 Nov 2026 (Q136's records, from [Q136(b)](../2026-11-02-q136b-rail-row/README.md), post hoc): the off-rail
+row's 0.56 pJ on drift_split takes the registered 0.81 W/°C, 3.0× this block's own board drift (0.267 ± 0.098 W/°C), and
+drift_split put 76% of it, 0.62 W/°C, on the off-rail, whose own drift is 0.204 ± 0.093 W/°C. On this block's own drift the
+in-step coefficient is 0.193 [0.157, 0.229] W per minion W (a row of 0.90 pJ), and the ledger's row re-cut on each run's own
+drift is 0.75–1.05 pJ as a straight line: it stands.*
+
 **The governor operation, as registered.** Originals 65 W / 65 °C by the two RAM GETs (17:27:01); TDP **65 → 0** at
 17:35:34.974, read back 0 / 65 at 17:35:34.999; the pin held every arm-A launch at 600 MHz (the abort never fired);
 **0 → 65** at 17:55:10.848, read back 65 / 65 at 17:55:10.871; the watchdog, armed at 17:35:34, read `release` and

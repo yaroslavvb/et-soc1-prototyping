@@ -6,10 +6,11 @@ what was posted; the times beside them are from the lanes' own logs. **And:** "i
 the kinds page carried until 31 October; its rebuild, now `5450fa1ebd61`, ranks that section afresh and prints each item's "old item N". In E107–E118 and Q133's READMEs, "item N" is that rebuilt list's, as at `1fe8377a18af`.
 E119–E125 and Q134(a) use the same numbering, as the page carried it at `fdcbcba2f34d`; Q134(d)'s rebuild of the page
 (`424503b97c24`) keeps it and adds item 16, the rail ledger's off-rail row (E77, E120).
+E126–E134 and Q136's desk lanes use the same list, item 16 included, as the page carried it at `fbb682f9393b`.
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E125**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E134**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
@@ -35,7 +36,12 @@ tile spread (E90), and the real tiles on aifoundry1's card 1 (E91, not scored).
 E92–E106 are Q132's and E107–E118 Q133's (1 November); E119–E125 are Q134's of the evening of 1 November: what a clock
 gap buys in seven of E107's arms (E119), E77 redesigned by a governor move (E120), and replicates on second cards,
 E93's zero gate (E121), E108's sign designs (E122) and E94's † rows (E123) on aifoundry3, E109's int8 zeros (E124) and
-E113's A side (E125) on aifoundry1's card 1.
+E113's A side (E125) on aifoundry1's card 1. E126–E134 are Q136's of 2 November 2026, under the owner's three rules of
+that morning on device commands (no power cycle, read-only PMIC voltage reads allowed, every command classified before
+the first launch): what a clock gap buys in E107's last three arms and a second session of E119's sustained pairs (E126)
+and E111's heat holds again (E133) on aifoundry2; the float B-lane gate (E127), which int8 multiplier (E130), the memory
+path's split (E132) and more single-bit prices (E134) on aifoundry3; and fp16's sign rest (E128), int8's no-issue excess
+with one A row (E129) and E95's real tiles (E131) on aifoundry1's card 1.
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
 (aifoundry2, aifoundry3 or both; E35–E46, E48 and E50 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
@@ -5527,6 +5533,15 @@ that is itself an uncorrected fit; E77's post hoc per-hart transfer and its 800 
 row should be re-cut on a drift-corrected footing is open. Three launches read 51 °C: the registered gate words say a die
 that falls below 52 °C is heated again, but the code kept from E77 launches when the rails settle and flags them
 `below_floor`; a registered sensitivity leaves them out (R_eff 0.44 mΩ, 99% [−0.06, 0.94]).
+*Dated note, Mon 2 Nov 2026 (Q136's records), on B's post hoc sentence and on "What it changes": the row's coefficient, 0.188 W
+per minion W, was not fitted on uncorrected deltas. `unmetered_fit.json` was fitted on the catalogue's `over_idle_w`, board
+deltas already corrected with the idle law's leakage slope times the burst's die rise, the rails raw; on the raw board the same
+fit gives 0.249 and 0.216. The "0.08–0.10 W per minion W (0.38–0.46 pJ)" is the registered drift slope at work: drift_split
+takes E38's 0.81 W/°C, 2.3× this block's own board drift (0.351 ± 0.119 W/°C, one s.e.), and put 92% of it, 0.75 W/°C, on the
+off-rail, whose own drift is 0.324 ± 0.086 W/°C; on the block's own drift the in-step slope is 0.161 (arm A) and 0.168 (arm
+B). The ledger's row is re-cut: 0.75–1.05 pJ as a straight line and 0.82–1.16 pJ with a conduction term, so it stands, and the
+re-cut is no longer open; the regulators' conduction is still not registered
+([Q136(b)](../reports/data/2026-11-02-q136b-rail-row/README.md)).*
 **Report:** no page of its own; the data README is the public record.
 
 ## E121 — E93's zero-gate tests on a second card: negative zero, denormals, int8's eight-byte rule, its column pairing and the A word (Q134; card runs 2026-11-01, 19:23–19:51 PST, aifoundry3) — pre-registered
@@ -5726,6 +5741,399 @@ and the refitted mirror over-predicts the top rung by 0.6–0.7 W on both cards.
 layouts".
 **Report:** no page of its own; the data README is the public record.
 
+## E126 — what a clock gap buys in E107's last three arms, and E119's four sustained pairs again, under aifoundry2's own governor (Q136; card runs 2026-11-02, 07:32–08:10 PST, aifoundry2) — pre-registered
+
+**Asked:** item 1 of section 11, "Where a large GEMM falls": the three arms E119 left (`c4s`, `c8`, `c16s`) and a replicate of a
+governed clock or gap, which E119 had not (Q134's final critic, item 1). **Pre-registered** in
+[`tools/claims-v3/e126/E126.md`](../../tools/claims-v3/e126/E126.md) (`69e4187a`, pushed 07:29:58 PST), before the claim and
+before any device opened: E119's harness unchanged, with tightened stops (80 °C; 93 W on three samples). Data:
+[`docs/reports/data/2026-11-02-e126-gemm-arms/`](../reports/data/2026-11-02-e126-gemm-arms/README.md) (`70c87605`; corrected
+after verification in `f86d0f2d`, C1–C6, wording and disclosure only, no number or verdict changed). Claim: the day's one
+card post, first posted at 07:32:06 PST, and this card's clause dropped at 08:11:08 (two other cards then held).
+aifoundry2's card 0 under its own governor, 65 W / 65 °C at the start, at the end and after every run; 07:32:50–08:09:56 PST,
+**37.1 card-minutes**, 42 of 42 runs. Nothing was set and no management write was sent: 22,174 sampler lines, 53 config
+reads and 244,020 PMIC voltage-register reads, which the owner's rule of 2 November 2026 allows; the tool refused all 51
+residency queries before it opened the device. Q136(w)'s checker, written after this registration and its first launch,
+reads the harness GO with one reviewed exception (`hpl/run_hpl.py:622`, which E119's `patch_residency` rewrites).
+
+**Results.**
+- **The L3-served walk with C shared:** `c4s` buys **×1.129 / 1.127 / 1.130** (fp32 / fp16 / int8) for ×1.333 of clock:
+  R1 LIKE THE L3 WALK (within 0.003 of E119's `c8s`) and OUTSIDE THE CLOCK. Its split is close to `c8s`'s but not the same
+  (C 401 ± 3 cycles, M 0.762 ± 0.004 µs: C 2.9% higher and M 2.1% lower than this session's `c8s`, offsetting).
+- **The two walks out to DRAM:** `c8` **×1.067 / 1.067 / 1.061** and `c16s` **×1.052 / 1.054 / 1.052**: R2(a) A DRAM WALK in
+  all six cells, within 0.002–0.020 of `c16`'s 1.065 / 1.064 / 1.072.
+- 🛑 **R2(b) FAILED:** the frozen share of `c16s`'s time between clock and wait missed; `c16s` scored h = 0.27 / 0.36 / 0.16
+  (BETWEEN / BETWEEN / THE COLD WALK'S WAIT), `c8` int8 0.26 (BETWEEN), and `c8` fp32 and fp16 are UNRESOLVED as registered.
+  Post hoc: `c16s` fits C = 279 cycles and M = 1.880 µs against the cold walk's 378 and 1.957 (E119's session), so sharing C
+  took away mostly minion cycles, about two thirds of the 0.24 µs saved at 600 MHz in fp32 (57% in fp16, 83% in int8), and
+  what is left is more wait-bound, so the clock buys less there than in the cold walk.
+- **Sustained fp32 on the new arms:** `c8` and `c16s` hold random at 790 MHz (gaps ×0.998 and ×1.004, R6 PASS); `c4s` held
+  random at 731.9 MHz (gap ×1.040), and R6 FAILED there, frozen against E119's `c8s` at 663.7 MHz where this session's `c8s`
+  ran 746.5. Bursts ×0.997–1.003; every random burst read 3.9–11.8 W under its estimate (R8 PASS).
+- **The replicate of E119's four sustained pairs:** what the clock buys repeats to within 0.002 (R5 PASS ×4); random's
+  governed clock does not (R3 NOT ×4): 603.6 → 640.1, 636.7 → 699.2, 695.4 → 759.8 and 663.7 → 746.5 MHz on `c16r8`, `c16r4`,
+  `c16r2` and `c8s`, so zeros' lead went ×1.229 → 1.189, 1.148 → 1.088, 1.062 → 1.025 and 1.079 → 1.023 (R4 PASS ×2, FAIL
+  ×2 on `c16r4` and `c8s`). The order holds, and `c8s` is again below 1.118, so E119's R5 failure repeats. R0 and R7 PASS.
+- **Why, post hoc and by proxies only (no inlet thermometer):** the card idled at 43 °C / 21.26 W before this session against
+  46 °C / 21.92 W before E119's, and the random runs drew 4.55–8.76 W more; block B began 1.2 minutes in, after 6 bursts,
+  against 2.4 minutes and 12, so `c8s` random started from a 48 °C die against 54 °C; every random run reached 65 °C 15–36 s
+  later, so the 40 s sustained window sat earlier in the warm-up (`c8s`'s began 21 s before its die reached the trip).
+- Peaks: board 85.62 W, die mean 66 °C, under the tightened stops; the hottest sensor's running maximum read 69 °C, carried
+  from E119's session (C5).
+
+**Scored:** R0, R5 ×4, R7, R8 PASS; R1 LIKE THE L3 WALK, OUTSIDE THE CLOCK; R2(a) A DRAM WALK ×6; R2(b) **FAILED**; R3 NOT ×4;
+R4 PASS ×2, **FAIL** ×2; R6 PASS ×2, **FAIL** (`c4s`).
+**What it changes.** Item 1's middle is measured: with E119, all ten of E107's arms. A large GEMM itself and the vendor's
+binary stay open. A sustained zeros/random gap on a governed card did not replicate between two sessions while what the clock
+buys did: quote E119's and E126's gaps together, each with its session, the idle reading before it and the run's start
+temperature. A sustained cell here is the last 40 s of a 78 s load, not a steady state.
+**Report:** no page of its own; the data README is the public record.
+
+## E127 — the float B-lane gate held steady against switching it every cycle, at equal operand activity (Q136; card runs 2026-11-02, 08:01–08:30 PST, aifoundry3) — pre-registered
+
+**Asked:** item 6 of section 11, "A power model across kinds", its float B-lane gate: on E115's random-data tiles a gate held
+steady read 0.74–0.76 W below M5 and one switching every cycle +0.48 W (fp32) and +0.69 W (fp16) above it (Q134's final
+critic, item 3). **Pre-registered** in [`tools/claims-v3/e127/README.md`](../../tools/claims-v3/e127/README.md) (`166fb897`,
+committed 07:59:39 PST and on origin by 07:59:54), before the claim, its tiles counted on Q133(b)'s bench first. Data:
+[`docs/reports/data/2026-11-02-e127-b-gate/`](../reports/data/2026-11-02-e127-b-gate/README.md) (`9b6311c7`; corrected after
+verification in `c519d540`, C1–C6: the reductions re-run on a repo-relative raw-data path with every other output
+byte-identical, and wording; no number or verdict changed). Claim: a clause in the day's post, added at 08:01:02 PST and
+dropped at 08:30:37. aifoundry3's card 0 at 600 MHz, 521.7 mV; TDP 0 W / 65 °C at both ends, nothing set; session
+08:01:16–08:29:38 PST, **28.4 card-minutes** of 35; five of five passes kept, 164 of 164 runs, on E78's reduction unchanged
+(dips removed, leakage `auto` 0.1913 W/°C). Nine management GETs, all READ (two of them PMIC voltage reads); no write, no
+`--reset-ms`, no firmware-revisions query. Highest readings 53.84 W board and 62 °C die. The design: eight quiet tiles, A =
+1.0 and the live B words the denormals 0x1 and 0x2, so every product is zero and the B bus moves exactly 4,096 bits an op in
+each, in five gate patterns (half the lanes held live two ways; flipping every cycle with all-off and all-live micro-ops, or
+with four lanes live every micro-op; flipping every 32 cycles), in fp32 and fp16; E115's random-data B-lane tiles byte for
+byte; and a random checkerboard with exactly E115's bus and products.
+
+**Results** (e is the measured contrast minus M5's).
+- **R1 PASS:** E115's random-data contrast replicates, B1 +1.956 ± 0.064 W against its +2.003 (M5 +0.78 [+0.23, +1.34]).
+- **R2 GATE: the miss is the gate's own.** With the data still, switching every lane every cycle against holding half off
+  reads e(Q1) = **+1.154 [+1.050, +1.257] W**, **0.98 [0.90, 1.06]** of the random-data miss.
+- **R3 GATE:** fp16's quiet miss is e(F2) = +1.129 [+1.040, +1.219] W, 0.87 [0.76, 0.99] of fp16's random-data miss; in
+  watts it is fp32's (e(Q1) − e(F2) = +0.024 [−0.079, +0.128] W).
+- **R4 PER-LANE** (e(B3) +0.879 W, 0.75 of the miss), **R4q PER-LANE** (e(Q2) +0.810 W, 0.70) and **R5 SHORT** (e(Q4)
+  +0.358 W, 0.31): the miss goes mostly with each lane's own gate flipping, and in 32-cycle stretches only the flips' small
+  part goes. 🛑 The frozen expectations for all three, ALL-OFF and LONG from the bench's clock terms, failed: failed
+  expectations, not failed rules.
+- **R6 PASS:** lane position, Q5 = +0.135 ± 0.100 W, is under 0.30 W, but its interval excludes zero (C2): never "lane
+  position does not matter". **S1 PASS.** Every verdict is the same on the anchor footing; the leakage-0.1994 and gates-off
+  arms move none; the dips-kept arm sets passes 12712 and 12713 aside.
+- Post hoc, labelled: the per-lane part prices at **176 fJ [156, 197] a lane-gate flip beyond M5** with the data still (191
+  random, 181 fp16; 161 [145, 178] with half of Q5 netted out, if lane position adds per live lane-cycle, which is untested);
+  M5 prices +0.465 W of Q2's measured +1.275 W and has no per-flip term. The all-off part is +0.344 W quiet and +0.294 W
+  random: the card takes 0.63–0.68 of the clocking saving the bench gives micro-ops with all eight lanes off.
+- Disclosures (C4–C6): aifoundry3 runs the thermal firmware build first flashed on 7 October, which answers command 74 and
+  whose source is not held, so each GET's class rests on `836a4ab` plus its unchanged replies (`since_reset_ms` −1 in all
+  16,155 samples); the registered "PMIC reading ≥ 80 °C" stop is a die reading (`temp_c.pmic` equals the shire mean in
+  16,149 of 16,155 samples), so the margin rested on board power and the die; a usage probe at about 07:04 PST ran `ettelem`
+  with no arguments outside the lock, which returns before it opens the device, so nothing was sent.
+
+**Scored:** R1 PASS; R2 GATE; R3 GATE; R4 PER-LANE; R4q PER-LANE; R5 SHORT; R6 PASS; S1 PASS.
+**What it changes.** Item 6's float B-lane gate is located, not closed: M5 lacks a per-flip term and over-prices the all-off
+clocking saving. Open: what spends a flip's price, whether it is linear in flips (one dose), how lane position enters, the
+A-side gate at equal activity, int8's gate, and an M5 refit scored on tiles it never saw.
+**Report:** no page of its own; the data README is the public record.
+
+## E128 — fp16's sign rest on E108's held design, and held and walking tiles matched in alternations (Q136; card runs 2026-11-02, 08:07–08:38 PST, and two config reads at 12:07 PST, aifoundry1's card 1) — pre-registered
+
+**Asked:** item 5 of section 11, "Where a random sign's ~5 W goes": fp16's rest, not located; the part that goes with the sums
+changing, which needs a held and a walking tile matched in alternations; and the fp16/fp32 moving-sum ratio (Q134's final
+critic, item 4). **Pre-registered** in [`tools/claims-v3/e128/E128.md`](../../tools/claims-v3/e128/E128.md) (`07b82303`, pushed
+08:06:11 PST), before the claim (08:07:15) and the first device access (08:07:23); amendment A1 (`97a934f8`, 08:22:21, before
+any power data was read): a third pass only if it ends inside 40 card-minutes of the claim; A2 (`f28628dd`, 10:21:00, before the
+second claim and before the lane read any power data): the second session. Data:
+[`docs/reports/data/2026-11-02-e128-fp16-signs/`](../reports/data/2026-11-02-e128-fp16-signs/README.md) (the status `f94978d7`,
+corrected after its first verification in `51af1569`, `e34078e3` and `71ed04b6`; the data `087639fb`; the second session
+`6810c18a`; corrected after its second verification in `a9d2844d`, C6–C11; no rule, prediction, number or verdict changed).
+aifoundry1's card 1 at 600 MHz, 65 W / 65 °C at both ends of every block, nothing set. **The first session**, 08:07:23–08:37:52
+PST (1,829 s of device access): the smoke p12801 (546.0 cycles an op), the read-back p12802 (R1 PASS, 76 of 76 reads in all
+three readings) and passes 12810 (721 s) and 12811 (958 s). A launch on the cool die needed about three heats, so neither the
+registered budget nor A1 left room for a third pass. From 08:41 PST the Tailscale lapse blocked ssh, so the session-end config
+read waited and the claim stayed open to 09:12:14 with the card idle from 08:38 (disclosed); the passes were collected after
+the lapse. **The second session** (12:07:04–12:08:14 PST, after E131 released the card) made only the registered session-end
+config reads: 65 W, 65 °C, 600 MHz, 499 mV, `low_power`. Device commands: corrected after the first verification (C1) to the
+build card 1 reports since 31 October, release 1.4.0 / BL2 0.22.0 / PMIC 1.3.0 (E82 A1), at et-platform `836a4ab`, where every
+function on the nine commands' paths is the same as at the end of the 0.18.0 line the registration named: all nine READ, two of
+them PMIC voltage reads; no WRITE was sent. No board-power stop was registered.
+
+**Results** (two kept passes, so every interval uses t(0.975, 1) = 12.71).
+- R1 PASS (76/76); R2 PASS (fp32's sign step 4.656 ± 0.404 W; fp16's 4.697 W on one pass, since pass 12811's fp16 signs run
+  was skipped by E78's launch rule at 57.0 °C after 15 heats).
+- **R6 MOST:** fp32's rest again goes with the accumulators differing, **0.954 ± 0.041** (X PASS against E108's 0.970 and
+  E122's 0.954).
+- **R7 MOST:** on E108's held design ported to fp16, fp16's rest goes with them too, **1.006 ± 0.119** (M4 1.045); the held
+  tile's 256 sums hold 8 distinct values in fp32 and 11 in fp16.
+- **R8 INCONCLUSIVE** (0.926 ± 0.307) on the matched design, so the frozen sentence "fp16's rest is located as fp32's is" (R7
+  and R8 MOST) is not met. R3, R4, R5, R9 and R12 INCONCLUSIVE: on tiles that alternate exactly as often, the walking tile
+  minus the held one is −0.056 ± 3.743 W in fp32 and +0.247 ± 1.079 W in fp16.
+- **The moving-sum ratio:** this session alone 1.727 ± 0.162 (R10 INCONCLUSIVE; HOLDS at three leakage arms); pooled over ten
+  passes in three sessions on two cards (E108 4, E122 4, E128 2) **1.587 ± 0.147, so E128-P's 1.55× HOLDS**; weighting the
+  sessions by their spread gives 1.710 ± 0.024, which leaves the test open, and the sessions read 1.49 (E122) to 1.73.
+- X: 5 PASS, 9 INCONCLUSIVE, 2 UNRESOLVED, 0 FAIL. R11 PASS (M4 0.225 W rms on 19 tiles; INCONCLUSIVE at 0.545 W/°C); S1
+  PASS (FAIL at three leakage arms). The dips-kept arm is NOT SCORED: E78's span gate sets both passes aside.
+- Maxima (C6): board 59.79 W, 15.2 W under the PMIC's 75 W over-power alarm; the shires' mean at most 61 °C and no shire above
+  65 °C (the PVT's running high, unmoved). No margin to the PMIC's 75 °C alarm is stated: that alarm reads the PMIC's own
+  temperature, which no telemetry field reads.
+
+**Scored:** R1, R2, R11, S1 PASS; R6, R7 MOST; R3, R4, R5, R8, R9, R10, R12 INCONCLUSIVE; E128-P 1.55× HOLDS; X INCONCLUSIVE.
+**What it changes.** Item 5: fp16's rest is located on E108's design ported, never just "located"; the part that goes with the
+sums changing is not established at two passes (more passes of the same tiles, in a new registered session); the ratio
+resolves as 1.55× pooled, with the inverse-variance arm and the sessions' spread beside it.
+**Report:** no page of its own; the data README is the public record.
+
+## E129 — int8's no-issue excess with one A row (Q136; card runs 2026-11-02, 10:08–10:39 PST, aifoundry1's card 1) — pre-registered
+
+**Asked:** item 11 of section 11, "int8 zeros' extra 0.61 W": an arm that changes int8's A path or TenC's addressing, and R1
+again with six or more passes and its set-aside rule written first (Q134's final critic, item 5). **Pre-registered** in
+[`tools/claims-v3/e129/E129.md`](../../tools/claims-v3/e129/E129.md) (`f4a4af74`, committed 10:07:21 PST and pushed by
+`commit_lab.sh` before the claim, 10:07:52, and the first device access, 10:08:00); amendment A1 (`7b0fa202`, 10:19:14, 94 s
+after pass 12910 ended and before any power data was read): R1p, the per-op rule pooled with E124's four passes, registered
+after those were known, and one more pass if it fit (it did not). Data:
+[`docs/reports/data/2026-11-02-e129-int8-noissue/`](../reports/data/2026-11-02-e129-int8-noissue/README.md) (`07496b2b`;
+corrected after verification in `167e24cc`, C1–C7, no rule, prediction, number or verdict changed). The arms: E109's m0 and
+m0k8 and the new one-A-row arm m0r1 (Q136(c)'s section 6), each on both formats' zeros, in E78's frame with the anchors cut to
+each format's zeros, in E124's card-1 frame (dips removed, 0.2414 W/°C). Session 10:08:00–10:38:33 PST, **30.5 card-minutes** of
+35; 600 MHz, 65 W / 65 °C at every config read, nothing set. Three passes (12910–12912, 536–663 s against 175–290 s planned),
+all kept: with no hot anchor a launch on the cool die needed 5–8 heats (median by pass), and two runs were skipped after 15.
+Device commands: corrected after verification (C1) to the build card 1 reports, release 1.4.0 / BL2 0.22.0 (it said firmware
+1.2.0 / BL2 0.18.0), at `836a4ab`, where every function on the nine paths is the same: all READ, no WRITE; Q136(w)'s checker
+read GO with no write allowed before the session. No board-power stop was registered (C6): board at most 59.38 W, die 47–60 °C.
+
+**Results** (three passes, t = 4.303).
+- **R6 PASS ×6, V0 EQUAL-RATE:** with one A row both formats run at **62.0 cycles an op**, the RTL's prediction to the cycle.
+- **V1 INCONCLUSIVE:** int8's no-issue excess, N = **1.566 ± 0.125 W** with 16 A rows (Y1 PASS; E124's 1.567), falls to N1 =
+  **0.865 ± 0.357 W** with one, against the N/2 line at 0.783; one A row removes N − N1 = 0.701 ± 0.421 W (95% 0.28–1.12).
+- **V2:** N1 lies above the bench's card-order reading (0.07–0.14 W) and below the all-per-cycle reading (1.40–1.57 W), and is
+  consistent with the bench from reset (0.40–0.79 W) and with the TIMA controls at the cards' issue price (0.49–1.46 W).
+- The premise: reading N − N1 as per-row work and N1 as per-cycle work assumes equal per-op work in the two formats at one row,
+  which this session checks only to −0.04 ± 0.62 W.
+- **R1 NOT SCORED** (three of the six passes it needs). **R1p FAIL:** pooled with E124 over seven passes in two sessions, the
+  per-op share G_op = **+0.059 ± 0.155 W**, below the 0.307 W line.
+- R0 PER-TIME; R2 LANES-OPPOSE (G_lane −0.985 ± 0.099 W); R3 PASS (G_rest +1.629 ± 0.233 W); Y2 PASS (81 ± 43 and 77 ± 92 pJ an
+  op); R10 PASS ×7 (G 0.702 against E124's 0.548, inside the ±0.2 W band). No verdict moves with the dips-kept, leakage-auto or
+  relaxed arms; two gates could not be evaluated (12912's π drift, 12911's fp32 zeros straight line), neither touching N or N1.
+- Post hoc, labelled: if all of N − N1 were TenC's read-address walk, 89 fJ [35, 142] a new-address read; if it were int8's
+  64-bit A reads, 5.7 pJ a read, above the 0.61 pJ ceiling fp32's own level sets.
+
+**Scored:** R0 PER-TIME; R2 LANES-OPPOSE; R3, Y1, Y2 PASS; R6 PASS ×6; V0 EQUAL-RATE; R10 PASS ×7; V1 INCONCLUSIVE; V2 ABOVE,
+CONSISTENT ×2, BELOW; R1 NOT SCORED; R1p **FAIL**.
+**What it changes.** Item 11: per-op work is below half the gap (R1p, pooled); one A row removes 0.70 ± 0.42 W of the no-issue
+excess, which is per-row work only if per-op work is equal at one row; which event carries which part stays open (per cycle,
+TenC's reads, the TIMA controls or the core; per row, the address walk or the A path), and E129's own R1 needs about 60
+card-minutes at this morning's heating rate, or a pass that keeps E78's hot anchors.
+**Report:** no page of its own; the data README is the public record. *Q136's records added a dated note to it: E128's raw
+copy (10:11:34–10:11:40 PST, about 1.8 MB) ran during pass 12910, in the heats before its first run, 11 s before any window its
+reduction reads.*
+
+## E130 — which int8 multiplier: Q136(a)'s single-bit set, each netlist's frozen prediction scored (Q136; the first session blocked; card runs 2026-11-02, 12:33–13:02 PST, aifoundry3) — pre-registered
+
+**Asked:** item 12 of section 11, "int8 at gate level", its first open point, which multiplier the chip has (the single bits
+favoured Booth on B and the kind-level watts Booth on A, neither registered; Q134's final critic, item 8). **Pre-registered** in
+[`tools/claims-v3/e130/README.md`](../../tools/claims-v3/e130/README.md) (`57506b0f`, 09:01:44 PST, pushed 09:01:48) on
+Q136(a)'s frozen predictions (`d64ea98c`; its corrections, `8ab2ed9d`, change no frozen number), copied number for number into
+`predictions-e130.json`. **The first session ran nothing:** every ssh of its lane to aifoundry3 stopped at Tailscale SSH's
+check (09:04–09:53 PST), 0 card-minutes. Amendments written before any E130 data: A1–A3 after that lane's verification
+(`5e770149`, 10:34:08, and `7dae3ed2`, 10:34:38): the nine READs classified from public `836a4ab` while aifoundry3 runs the
+non-public 7 October thermal build, GO kept on that condition; Q136(w)'s checker GO with the reviewed exception; the "PMIC
+reading ≥ 80 °C" stop named as a die reading; R5's and R6's false-FAIL rates in the self-test's model, 1.2% and 4.2%. A4
+(`d1218f6e`, 12:31:34) set up the second session as E130's only one, with the whole budget. Data:
+[`docs/reports/data/2026-11-02-e130-int8-netlists/`](../reports/data/2026-11-02-e130-int8-netlists/README.md) (`b259be11`,
+13:12:58 PST; corrected after verification in `a5faad3e`, C1–C5, dated notes and wording only, no rule, prediction, number or
+verdict changed). Claim: a clause in the day's post at 12:32:52 PST, " — released" appended at 13:02:59. aifoundry3's card 0 at
+600 MHz; TDP 0 W / 65 °C at all 23 config reads, never set; session 12:33:39–13:01:59 PST, **28.3 card-minutes** of 30; ten
+blocks of ten (B 13010–13015, A 13020–13023), 304 of 304 runs, none set aside; every command a READ.
+
+**Results.**
+- **R2 FLAT:** A's odd minus even bits −1.7 [−6.6, +3.2] fJ a flipped bit, against T_A = 27.58; **R3 RISES:** A's sign bit
+  +67.8 [+58.8, +76.8] fJ more with a dense B, against T_S = 18.07; both at every arm, so **Booth on A is excluded**.
+- **R1 INCONCLUSIVE:** B's odd minus even, +33.8 [+11.0, +56.7] fJ (2.4×, the ratio's interval [1.26, 38.2]), straddles T_B =
+  30.68. The rail arm's FLAT compares rail fJ (+26.9 [+23.9, +29.8]) with a board-fJ line; at E78's frozen 0.81 rail per board
+  it is +33.2 [+29.6, +36.7] board-equivalent fJ and straddles T_B too (C1).
+- **R4, the registered primary: INCONCLUSIVE between BOOTH ON B and NO BOOTH**; the rail arm's NO BOOTH is the same cross-unit
+  reading (C1). The frozen expectation, BOOTH ON B, was not confirmed.
+- R5 and R6 HOLD (the shared sign ratio; their false-FAIL rates are A3's). N, on the primary: every netlist is EXCLUDED on at
+  least one separator (booth and booth_tree by A's sign step, booth_swap by all three, plain by B's odd minus even); at the
+  dips-kept arm booth and booth_tree survive.
+- The registration's named weak case came about: B's alternation near E79's amplitude on this card (+40 fJ, 2.2×), and per-run
+  noise about 1.2× the plan's, like for like (C3); post hoc, most of B's width is one block, 13010.
+
+**Scored:** R1 INCONCLUSIVE; R2 FLAT; R3 RISES; R4 INCONCLUSIVE (BOOTH ON B / NO BOOTH); R5, R6 HOLDS; N, none survives on
+the primary.
+**What it changes.** Item 12's "which multiplier" is narrowed: not Booth on A; Booth on B against no recoder undecided on the
+board, where B's odd bits cost 2.4× its even, half the Booth-on-B netlists' contrast; none of Q133(a)'s four netlists fits the
+card's single bits as a whole on the registered primary. A follow-up that registers the rail as its primary needs a rail-footed
+threshold.
+**Report:** no page of its own; the data README is the public record.
+
+## E131 — E95's thirty real tiles on a second card, four passes and a set-aside rule written first (Q136; card runs 2026-11-02, 11:14–11:55 PST, aifoundry1's card 1) — pre-registered
+
+**Asked:** item 7 of section 11, "More real tensors": E95's thirty tiles, not scored on a second card since E112(b) kept two
+of three passes (Q134's final critic, item 9). **Pre-registered** in
+[`tools/claims-v3/e131/E131.md`](../../tools/claims-v3/e131/E131.md) (`959f635e`, committed 11:12:52 PST and pushed by
+11:12:55), before the claim (11:13:54) and the first device access (11:14:01): E95's 53-run pass and E78's card code unchanged
+(sha256), four passes and a fifth if it fit, card 1's frame (dips removed, the 65/65 config gate, leakage frozen at E82's
+0.2414 W/°C), claims C1–C12 on E112's card-1 view, the cross-card rules X1, X4 and X5 against E95's dips-removed arm, a
+set-aside rule written first (S1–S3), and stops at board ≥ 68 W or any shire reading ≥ 72 °C. Data:
+[`docs/reports/data/2026-11-02-e131-real-tiles-card1/`](../reports/data/2026-11-02-e131-real-tiles-card1/README.md)
+(`86c59594`; corrected after verification in `37b48967`, C1–C7, no rule, prediction, number or verdict changed). Session
+11:14:01–11:55:12 PST, **41.2 card-minutes** of 45 (claim to release 41.9); 600 MHz, 65 W / 65 °C at all 12 config reads,
+nothing set, no WRITE. Four passes (13110–13113, 547–652 s), all kept, so the set-aside rule restored nothing; the budget rule
+refused a fifth (169 s left).
+
+**Results.**
+- **The claims read verdict for verdict as E95's dips-removed arm on aifoundry3: 10 PASS, 1 FAIL, 2 INCONCLUSIVE.** 🛑 C1 FAILS
+  only on GPT-2's fp16 attention tile, **0.956 of random** over fp16's zeros on both cards (0.9563 ± 0.0094 here, 0.9562 ±
+  0.0060 there); C2 PASS (fp32 0.9883 ± 0.0076, fp16 0.9766 ± 0.0026); C3a, C3b, C4, C6 (+2.949 ± 0.193 W), C8 (+0.677 ± 0.123
+  W), C9, C10, C11 and C12 PASS; C5 and C7 INCONCLUSIVE, as on aifoundry3.
+- **X1 PASS** (ranks ρ 1.000 / 1.000 / 0.984), **X4 PASS** (card scale 1.0238, IQR 1.0224–1.0279, against E82's 1.031; 1.044
+  at the session's own fitted slope, and outside the band at 0.545 W/°C), **X5 PASS** (all 33 tiles' ratios to random within
+  0.0102 / 0.0091 / 0.0181 of aifoundry3's, fp32 / fp16 / int8).
+- The session ties to E82's card-1 cells (−0.024 to +0.059 W). Arms: C5 PASS at 0.545 W/°C, C8 and C11 INCONCLUSIVE with the
+  dips kept, X4 FAIL at 0.545; at the session's own slope, 0.4008 W/°C, no verdict moves; the leakage-0 arm keeps two passes
+  and scores nothing.
+- Maxima: board 60.58 W (stop 68 W); the shire mean peaked at 62 °C; the 65 °C "hottest shire" in all 24,157 samples is the PVT
+  high-water latch, set before the session (C3).
+
+**Scored:** C1 **FAIL**; C2, C3a, C3b, C4, C6, C8, C9, C10, C11, C12 PASS; C5, C7 INCONCLUSIVE; X1, X4, X5 PASS.
+**What it changes.** Item 7: the energy half is answered for fp32 and fp16 on two cards, tile by tile, and E95's tiles share
+E82's card scale. Still open: real int8 on a warmer heat path, where the ceiling lifts; real int8 beyond GPT-2's three tiles;
+whether an int8 calibration moves a clock; no-zero tiles sustained; E95's tiles' heat below 12 W.
+**Report:** no page of its own; the data README is the public record.
+
+## E132 — the memory path's split: address-bit images and an encoded-quiet twin (Q136; card runs 2026-11-02, 10:25–10:59 PST, aifoundry3) — pre-registered
+
+**Asked:** item 10 of section 11, "The memory path": images not periodic in the line index, and the encoded part at the DDR die
+rail (Q134's final critic, item 10). **Pre-registered** in [`tools/claims-v3/e132/`](../../tools/claims-v3/e132/) (`34ec50b8`,
+committed 10:22:35 PST and pushed 10:22:37; its header's "about 10:35" is a wording error, D1), before the claim (10:25:07) and
+the first launch: E110's command and E99's host, E75's `block.sh`, `runitems.py` and `lib.sh` unchanged; 22 memory items a pass,
+7 of them E110's bytes. Family A, address-bit images: each line is 0x0F × 64 or its complement, chosen by one bit b = 0..7 of
+the line index, so each rung changes one interleave's view and holds every other path's count; `ab_x70` isolates every hart's
+own stream and `ab_rnd` is a shuffle not periodic in the line index. Family E, the encoded part: `eh_64` (raw 56, encoded 448)
+against its encoded-quiet twin `el_64` (raw 56, encoded 56), and `c3` against W and V at 64 and 128 bits. Data:
+[`docs/reports/data/2026-11-02-e132-memory-split/`](../reports/data/2026-11-02-e132-memory-split/README.md) (`9f06ae88`;
+corrected after verification in `53548945` and `e769a92a`, C1–C5, no rule, prediction, number or verdict changed). aifoundry3's
+card 0, TDP 0 W / 65 °C at both config reads (10:25:18, 10:59:05), nothing set; seven passes, **33.8 card-minutes** of 40; nine
+READs, no WRITE (Q136(w)'s checker GO with no allow-list). The `ettelem` that ran (sha256 `16037641…`) is built from lab
+`de262730`'s source, not the reviewed one Q136(w)'s table binds to `build/ettelem/`; its sending functions are byte-identical,
+so every class stands (C1). Peaks: board 53.60 W in `runitems.py`'s fp32 preheat bursts (the DRAM items at most 35.06 W), die
+mean 61 °C; no board-power stop was registered (C3).
+
+**Results** (primary: dips removed, leakage `auto` 0.0228 W/°C, n = 6; every verdict is the same in all four arms).
+- **R1 PASS:** the session ties to E110.
+- **R2 PASS, EDGES:** a channel pays **R_4 = +0.310 W [0.212, 0.408]** for changes between the lines it carries (predicted
+  +0.204), off every metered rail (the three sum to −0.018 W), with the DDR die rail at −0.64 mV: 2.06 pJ a bit if it sits on a
+  256-bit path.
+- **R3 UNRESOLVED:** the encoded part moves the DDR die rail, RE64 = −0.77 mV [−1.02, −0.52], but the encoded-quiet twin reads
+  −0.09 [−0.31, +0.13], 0.01 mV past the still band.
+- **R4 UNRESOLVED:** the encoded part costs E448 = +0.166 W [0.121, 0.210] beyond the pins on the registered footing (0.36 pJ an
+  encoded toggle), but E56 falls 0.002 W short (+0.118 [−0.002, +0.237]); at 0.3803 W/°C E448 is +0.164 [−0.053, +0.381],
+  across zero.
+- **R5 PASS:** no rung that resolves in both runs disagrees with E99's mapped steps (NoC rail: the memory shire's R_3 +0.113 W;
+  SRAM: R_0–R_2 +0.04 to +0.07, R_5 +0.042, R_hi +0.097, H +0.070 W; off every rail: R_4 +0.328 W).
+- **R6 PASS:** 192 pins held high leave the DDR rail still; a pin held high costs 1.62 pJ [1.41, 1.83].
+- Reported: a memory shire, R_3 = +0.220 W [0.107, 0.334], half of it on the NoC rail; 256 ways and wider, R_hi = +0.249 W
+  [0.203, 0.294]; every hart's own stream, all 1,024 together, H = +0.184 W [0.120, 0.249] (0.31 pJ a bit; across zero at
+  0.3803 W/°C); bits 5–7 inside a channel resolve nothing on the board; what a within-line model misses for these lines, **D_all
+  = +1.049 W [0.968, 1.130]** (+0.897 at 0.3803 W/°C); the nine rungs without the hart stream, R_all = +0.955 W, of which the
+  three named paths are 0.779 W (C4).
+
+**Scored:** R1, R2, R5, R6 PASS; R3, R4 UNRESOLVED.
+**What it changes.** Item 10: the rails' period steps are registered by interleave (the NoC step is the memory shire's, the
+off-rail step the channel's, the SRAM steps the fine paths and 256 ways and wider); a channel's line-to-line path is measured,
+not placed; the encoded part's board cost is not separated from the leakage footing, while its DDR die rail reading stands.
+Open: the 1.0 pJ of a one between the memory shires' logic, the PHY's pads and the DRAM chips; where the 256-bit path sits; the
+encoded part's two verdicts (a replicate with more passes); E99's refit.
+**Report:** no page of its own; the data README is the public record.
+
+## E133 — E111's two heat holds again on aifoundry2, a second session per kind, and a cool probe (Q136, optional; the first session blocked; card runs 2026-11-02, 10:14–12:41 PST and a session-end read at 14:05 PST, aifoundry2) — pre-registered; verification under way when recorded
+
+**Asked:** items 9 and 8 of section 11, "A steady state for heat" and "The heat path drifts between sessions": E111's two
+holds again in the morning, with a second warm probe later if time allowed (Q134's final critic, item 6; there is no inlet
+thermometer, so the inlet stays unread). **Pre-registered** in
+[`tools/claims-v3/e133/E133.md`](../../tools/claims-v3/e133/E133.md) (`9723d79b`, committed 09:00:48 PST and on origin at
+09:00:52): E111's protocols block for block (W2, E98's probe and then H-F32, fp32 random under the governor; W1B, H-I8, int8
+−1s from rest; an optional afternoon probe W3, run only if the afternoon idle is at least 1.0 °C above W2's), E111's runner
+chain with its raw 2–6 residency read removed, E126's tightened stops (80 °C; 93 W on three samples) and at most 110
+card-minutes. **The first lane ran nothing:** from 08:40:44 PST every ssh to aifoundry2 met the Tailscale check (26 attempts
+through 09:29:34), 0 card-minutes. Amendment A1 (`f842cc39`, 10:12:24 PST, before the claim and any E133 data): the second
+session; the smoke's latest start 11:30; R2 scored as frozen beside R2w, keyed at the governor's whole degree (an idle of
+44.54 °C); a sha256 guard on the audited chain; and the first lane's six corrections. Data:
+[`docs/reports/data/2026-11-02-e133-heat-holds/`](../reports/data/2026-11-02-e133-heat-holds/README.md) (`3a277ae9`, 12:48:40
+PST; the session's end, `d55178ec`, 14:08:15). Claim: a clause in the day's post at 10:14:18 PST, dropped at 12:41:01.
+aifoundry2's card 0, TDP 65 W / 65 °C at all 42 config reads, nothing set; card runs 10:14:32–12:40:40 PST, **80.8
+card-minutes** of 110; no WRITE of any kind, not even the statistics reset, and the residency read never sent; nobody else
+logged in at any of 573 checks. **W3 did not run, by its registered rule:** at 14:05:07 PST the free card's 10-minute idle die
+read 44.925 °C, under the 45.0 °C it needed (W2's idle, 44.0, plus 1.0); the queue ended at 14:05:40 and the session-end
+config read 65 W / 65 °C at 14:05:44.
+
+**Results** (the data README's registered verdicts; **no verifier had read them when this entry was written**, and an addendum
+records the verification).
+- 22 registered verdicts. Of the 17 with a registered side, 15 came out as predicted, all eight FAILs among them; two did not:
+  R1 on H-I8 (INCONCLUSIVE, where PASS was predicted) and R2 (AT THE TRIP, where AT THE FLOOR was predicted). A1's R2w predicted
+  AT THE TRIP and came out so.
+- **Item 9:** the coefficient replicates for fp32 random (H-F32 c = **0.648 °C per board W**, R1 PASS, 0.966 of E111's) and
+  nearly for int8 −1s (H-I8 c = **0.700**, R1 INCONCLUSIVE, 1.042 [1.005, 1.111], the range's top 0.001 past the band); four
+  holds over two sessions read 0.648–0.700. Neither hold is steady by the registered test (A1 FAIL ×2, as predicted).
+- **R2:** fp32 random sat at the governor's trip, not its floor: from a 44.0 °C idle, 1 °C cooler than E111's, the governor held
+  the die at its 65/66 boundary (65.91 °C, 55.23 W).
+- **Item 8:** the cool probe's 76 s line moved 0.81 °C per °C of rest die (B3c ABOVE_TARGET, excluding E111's 0.47 and the
+  room's 0.25), and its hold 0.73 °C per °C (SUPPORTS).
+- Peaks: 88.65 W during H-F32 (372 samples over 85 W, none over 93 W), die mean 67 °C; the hottest sensor's running maximum read
+  69 °C, carried from before the session.
+
+**Scored (before verification):** 4 PASS, 8 FAIL, 1 INCONCLUSIVE, 1 AT THE TRIP, 1 OK, 2 ABOVE_TARGET, 2 SUPPORTS, 1 PARTLY, 1
+POSITIVE_BELOW_TARGET, 1 BELOW_TARGET (the README's tally).
+**What it changes.** Item 9: aifoundry2's coefficient has a replicate, 0.65–0.70 °C per board W over four holds in two
+sessions and two kinds, and no hold is steady by the registered test. Item 8: one cool probe puts the 76 s line at 0.81 °C per
+°C, steeper than either registered reading.
+**Report:** no page of its own; the data README is the public record.
+
+## E134 — single-bit prices on a second base word and at more positions, and A's low bits (Q136, optional; card runs 2026-11-02, 11:50–12:29 PST, aifoundry3) — pre-registered
+
+**Asked:** item 15 of section 11, "Smaller, and carried", its single-bit sentence: the other positions, other base words and
+A's low bits, E102's R2 (Q134's final critic, item 12). **Pre-registered** in
+[`tools/claims-v3/e134/`](../../tools/claims-v3/e134/) (`af56740a`, committed 11:48:32 PST and pushed 11:48:39), before the
+claim (11:49:28) and the first launch (11:50:46), with the fixed RTL bench's counts on all 57 tiles frozen (0 mismatches;
+equal to E102's on the 12 reused tiles) and priced at E92's `nets_map` coefficients, E67's list as the position-only null, and
+the real accumulator's counts for where B's swing starts. fp32 trains (no heater, a 0.2 s gap, 4.86 s a run), every item
+between reads of its own zero: A blocks with two base words in one train (W79 = 0x3fbd207c, E79's and E102's word; W67 =
+0x3fbbc9e4, E67's, with its own dumped tiles) at bits 0–7 in both layouts; B blocks at bits 6–16 on E79's B words. Data:
+[`docs/reports/data/2026-11-02-e134-bit-prices-more/`](../reports/data/2026-11-02-e134-bit-prices-more/README.md) (`6ae1019c`;
+corrected after verification in `c317e1c6`, C1–C6, no rule, prediction, number or verdict changed). aifoundry3's card 0, TDP 0
+W / 65 °C at both ends, nothing set; smoke 11:50:46–11:51:20 and the queue to 12:29:19, **38.6 card-minutes** of 40; nine
+blocks (A 13410–13413, B 13420–13424), 435 runs; the train gate set 13410 aside, so three A blocks and five B blocks were
+kept. Nine READs, no WRITE and no statistics reset (`since_reset_ms` −1 in all 22,560 samples); the `ettelem` that ran is
+built from `de262730`'s source, its sending functions byte-identical to the reviewed one's (C6). Highest readings 40.81 W
+board and 62 °C die.
+
+**Results** (primary: the board's `p_raw` over each item's own zero, dips removed).
+- **R5 AGREES: an A bit's price depends on its base word.** W67 minus W79 reads −0.327 W at bit 4, +0.482 W at bit 5 and
+  +0.351 [+0.172, +0.530] W at bit 6, the bench's signs at 0.65–0.71 of its size (−0.505, +0.678, +0.524); bits 1 and 3
+  resolve with its sign too (0.49× and 1.34×, outside R5's scope), and bit 2 is open. In fJ a flip, W79 against W67: 262
+  against 120 at bit 4, 105 against 315 at bit 5, 131 against 284 at bit 6; bits 0–3 and 7 agree within 0.13 W.
+- **R2 INCONCLUSIVE** at its registered WORD line (0.262 W). Post hoc (C1, no verdict): its width and 13410's set-aside come
+  from two board-meter dips of 3–4 W in one zero read, under E82 A2's 4 W line; at a 2 W line all four A blocks pass and it
+  reads +0.396 [+0.342, +0.451] W. A re-run that would decide it needs a dip rule, registered first, that catches 2–4 W dips.
+- **R1 POSITION** (A's low bits on W79, all-in over balanced per flip, 1.21 [0.78, 3.65] at bit 0 and 1.17 [0.41, 2.18] at bit
+  6) and **R3 FLIP** (W67 at bit 6, 1.01 [0.87, 1.14]): A's low bits are the flip alone.
+- **R4 AT 8:** B's accumulator swing is −0.000 [−0.044, +0.043] W at bit 7 and +0.149 [+0.106, +0.192] at bit 8 (bench
+  +0.139); balanced B stays flat at 83–113 fJ while all-in B runs 97–608 fJ, the swing reaching +2.327 W at bit 16 (bench
+  +1.951).
+- **S1 PASS:** E67's own tiles land inside E67's list's bands 8 of 8, but 0.18 W below it on average.
+- Arm-sensitive: on the rail R1 is INCONCLUSIVE, R5 DISAGREES on bit 2 and S1 FAILS; with the dips kept six of nine blocks are
+  set aside; with the gates off R3 is INCONCLUSIVE.
+
+**Scored:** R1 POSITION; R2 INCONCLUSIVE; R3 FLIP; R4 AT 8; R5 AGREES; S1 PASS.
+**What it changes.** Item 15's single-bit sentence: "other base words" is answered on A for bits 0–7 and two words (an A bit's
+price is its word's, as the bench's Booth recoder says); "A's low bits" is decided at bits 0 and 6, about 1×; "the other
+positions" is answered on B at bits 7–10 and 12–15, the onset at bit 8 on one card. Every A-side price on the kinds page needs
+its word attached (E67's list is W67's, E102's W79's). Still open, in both layouts: B bits 1–5, 17–19, 21, 24–26 and 28–29; A on
+W79 at bits 8–10, 12–15, 17–19, 21, 24–26 and 28–29, and every A position above 7 on a second word; more words and a second B
+word set; the sign on the rail; E102's bit-22 cell, on a second card.
+**Report:** no page of its own; the data README is the public record.
+
 **Lane lessons from E78–E83, recorded for the next registration.** (1) A heat column read from a 2 s window over a
 whole-degree die reading resolves a kind only above about 12 W of switching on these cards: register a longer window,
 or a launch away from a step, before quoting heat for low-power kinds. (2) All six card lanes looked at
@@ -5827,3 +6235,34 @@ fourth pass (its A1); dry-run every script a session calls, not only the block's
 sampling cannot: Q134(a) read aifoundry2's POWER_SAFE time from its service processor's own counter, with card 0's alarm
 episodes as an exact positive control, and found no over-power interrupt in six days; read the counters the firmware keeps
 before planning a run to provoke an event.
+
+*Dated note, Mon 2 Nov 2026 (Q136's records), on lesson (46): the row was not an uncorrected fit. Its coefficient was fitted on
+board deltas already corrected with the idle law's leakage slope (the rails raw), and E120's "about 0.4 pJ" was its registered
+0.81 W/°C drift slope at work; re-cut on each run's own drift the row is 0.75–1.05 pJ as a straight line and stands (Q136(b);
+lesson 58).*
+
+**Lane lessons from E126–E134 and Q136's desk lanes, recorded for the next registration.** (51) List and classify every device
+command before the first launch, from the source of the build the card reports, and run the checker at your own commit: a
+command named GET can write (the firmware-revisions query writes the PMIC's command register twice, `GET_FRU` its FRU
+registers), the ruled statistics reset is one form of a command whose other forms (`dev_mngt_service -t SPST:…` and `MMST:…`)
+are other writes, and a line another file patches reads as sent unless it is declared (E126's residency line, which E119's
+`patch_residency` rewrites) (Q136(w)). (52) Name the build from a fresh read, not a brief: E128 and E129 first classified card
+1's commands from BL2 0.18.0 while card 1 reports 1.4.0 / BL2 0.22.0 since 31 October (E82 A1); and name the binary that runs:
+aifoundry3's `build/ettelem/ettelem` is built from `de262730`'s source, not the reviewed one (E132 C1, E134 C6). (53) A stop
+field named PMIC may not read the PMIC: `temp_c.pmic` is the minion shires' mean (E127 C5), and the PMIC's 75 °C alarm reads its
+own temperature, which no telemetry field reads (E128 C6); register a board-power stop with margin under 75 W (E128, E129 and
+E132 registered none) and call the die stop a die reading. (54) On aifoundry1's card 1 a pass without a hot anchor runs 2–3×
+its estimate: a launch on the cool die needed about three heats in E128 and 5–8 in E129, so E128 kept two passes and E129
+three; size a session from the slowest pass seen with the same anchors, or keep E78's hot anchors. (55) A governed sustained
+cell is a window of a warm-up: in a second session E126's random clocks ran 37–83 MHz faster from a 3 °C cooler idle and an
+earlier place in the session (proxies; no inlet thermometer), while what the clock buys repeated to 0.002; give each sustained
+gap its session, its idle and its start temperature, or gate each run on the same start. (56) In a blocked window every probe
+goes through a 15 s hard-kill script, every 3 minutes, logged: E130's first probe sat two minutes behind `head -60`'s buffer
+before its link was seen, and E133's first lane made 14 probes by hand, 46–182 s apart and unlogged. (57) A dip under the
+registered line can still carry a verdict: E134's R2 width and its 13410 set-aside trace to 3–4 W board-meter dips under E82
+A2's 4 W line; register a dip rule that catches 2–4 W dips (6 of E134's 408 scored runs hold one). (58) Read a fit's inputs
+before calling it uncorrected: the off-rail row's coefficient was fitted on leakage-corrected board deltas, and E120's "about
+0.4 pJ" came from its registered 0.81 W/°C drift slope, 2.3× its own block's board drift, not from the window's heating
+(Q136(b)). (59) Lesson (48) held three more times: E126's, E128's and E130's plan reads came back a version behind the post,
+and `EXPECT_TEXT`'s exit 7 kept each from erasing another lane's clause; rebuild from the edit box, or wait a minute after
+another lane's edit.

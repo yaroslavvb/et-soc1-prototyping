@@ -4,6 +4,12 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-10-31 (Sat, week 44)** — Section 4: a card reservation post says how long the card is held, as `for <N> h`
+  in digits plus the clock time it ends (`using aifoundry3 for 1.5 h, until ~14:30 PDT`), is re-estimated in place if
+  the run will overrun by more than 15 minutes, and carries the owner's "Claude says:" marking. *Why:* preference — the
+  owner's words that day, *"when reserving cards, add an estimate of when it's reserved until"*; constraint — the
+  dashboard's reservation reader reads a stated duration only as `for/next/in <number> h|min`, and draws an unreleased
+  claim without one for 3 h; re-check: the reader's duration pattern.
 - **2026-10-28 (Wed, week 44, correction)** — Section 4: the release is an edit of the reservation post appending
   " — released", not a second post. *Why:* preference — the owner's words minutes after the entry below: *"No, instead
   of posting a second time, it should edit the original post to know that it's been released."*

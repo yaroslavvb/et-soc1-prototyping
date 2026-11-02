@@ -227,6 +227,9 @@ carry-over 0.0011 ± 0.0006 W/W, cycles per op 546.001 / 546.001 / 318.0, idle 2
 smoke and four passes, 10 Hz); each block's die readings are short `ettelem sample` calls too. Whether "no PMIC command" covers such reads is the owner's
 open question of 1 Nov; it is disclosed here, not settled.
 
+*Dated note, Mon 2 Nov 2026 (Q136's records): the open question is answered. The owner's ruling of 2 November 2026 allows
+read-only PMIC voltage-register reads, so these reads are allowed ([AGENT.md](../../../../AGENT.md) §5, "Device commands").*
+
 ## What it closes and what it leaves open
 
 - **The zero gate's closed entry (old item 4) now stands on two cards**: negative zero and denormal words against exact zeros (R1–R4), int8's eight-byte B

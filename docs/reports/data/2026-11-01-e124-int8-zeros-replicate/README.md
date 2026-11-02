@@ -116,6 +116,9 @@ Each pass ran E78's two burn-in runs of π, then 32 registered runs: π first an
 
 The stock `ettelem` reads two PMIC voltage registers per `config` call and eleven per `sample` (reads, no write), as in every run since September. Whether "no PMIC command" covers such reads is the owner's open question of 1 Nov; it is disclosed here, not settled.
 
+*Dated note, Mon 2 Nov 2026 (Q136's records): the open question is answered. The owner's ruling of 2 November 2026 allows
+read-only PMIC voltage-register reads, so these reads are allowed ([AGENT.md](../../../../AGENT.md) §5, "Device commands").*
+
 ## Corrections after verification (Sun 1 Nov 2026)
 
 An independent verifier read the registration, the data and this page the same evening. It re-ran the pipeline and the post-hoc reduction from the committed raw passes, and every output is byte-identical. It recomputed the registered quantities from `e124.json`'s per-pass values without the scorer, and checked each verdict against its frozen line. It also checked the 19 reused files' hashes, the pass order, the posting protocol and the card etiquette. Every registered number and verdict holds (verdict: holds with fixes). Its six faults, all minor, are in framing, arithmetic, one time and wording, and all six hold against committed files ([`corrections-check.py`](corrections-check.py), [`corrections-check.txt`](corrections-check.txt), standard library). The corrections were made at the desk: no card was touched, and nothing was set or re-run. No frozen sentence, data file, number or verdict changes. E124.md gains one dated note below its amendments, and the file as frozen, whose sha256 every pass records, stays at `5ca4f13e`.

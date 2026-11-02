@@ -21,6 +21,10 @@ did in the same form (0.05). In this form the linear "logic in step" coefficient
 +0.042 per W, mean −0.001) and the arm-B offset at +0.63 W (0.26–0.93): the fit trades a_m against R_eff, which is
 what widens the passes.
 
+*Dated note, Mon 2 Nov 2026 (Q136's records): "the row was fitted on uncorrected deltas" and "only about 0.4 pJ" above did not
+hold; the dated note under CV1 below says why, and the row stands, re-cut at the desk
+([Q136(b)](../2026-11-02-q136b-rail-row/README.md)).*
+
 **The rest of the registration passes.**
 - **T1, the per-hart transfer: PASS.** Arm B's cost per hart over arm A's, divided by (800/600)·(V_B/V_A)² from the
   measured voltages, is **0.979, 99% [0.906, 1.053]** over five passes (ratios 1.86, 1.92, 1.75, 1.90, 1.88 against
@@ -67,6 +71,19 @@ between the upper edge and the row is not a measured logic-in-step remainder: on
 is not there, and the difference between the footings is plausibly the window's own heating, which this design does not
 attribute. Every registered verdict stands ([`corrections-check.txt`](corrections-check.txt) CV1).
 
+*Dated note, Mon 2 Nov 2026 (Q136's records, from [Q136(b)](../2026-11-02-q136b-rail-row/README.md), a desk re-cut, post hoc;
+the text above unedited): (1) `unmetered_fit.json`'s coefficient was not fitted on uncorrected deltas. It was fitted on
+`catalogue.json`'s `over_idle_w`, board deltas corrected by the idle law's slope times the burst's die rise over its idle
+(`die_c_busy − die_c_idle`), the rails raw; on the raw board the same fit gives 0.249 (aifoundry2) and 0.216 (aifoundry3). (2)
+CV1's 0.08–0.10 W per minion W uses the registered 0.81 W/°C, 2.3× this block's own board drift (0.351 ± 0.119 W/°C, one
+s.e.); drift_split put 92% of it, 0.75 W/°C, on the off-rail, whose own drift is 0.324 ± 0.086 W/°C. On the block's own drift
+the in-step slope is 0.161 (arm A) and 0.168 (arm B), against CV1's 0.081 and 0.099 and the row's 0.188; attributed with that
+drift, the window's heating is 43% of the gap between the uncorrected and central footings' slopes, and the rest is the
+registered slope's excess over the block's own. (3) Q136(b) re-cuts the row at 0.75–1.05 pJ as a straight line and 0.82–1.16
+pJ with a conduction term: it stands. Every registered verdict here stands; the regulators' conduction is still not
+registered. `corrections-check.py` line 70 and `corrections-check.txt` line 4 say "uncorrected deltas" too: this note covers
+them, and they stay unedited.*
+
 **The governor operation, as registered** ([`CHANGE-RECORD.md`](CHANGE-RECORD.md) has the full log). Originals 65 W /
 65 °C by the two RAM GETs (20:49:33); TDP **65 → 0** at 20:55:16.593, read back 0 / 65 at .616, the watchdog armed first;
 arm A's 40 launches all read 600 MHz (the abort never fired); **0 → 65** at 21:11:41.131, read back 65 / 65 at .155; the
@@ -95,6 +112,10 @@ tab, stop 2 ("the card", its Missing column), its Next item 10 ("E77's regulator
 (Q130(q)); the kinds page's [§ 11 list](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open)
 has no entry of its own for it at `fdcbcba2f34d` (see "What this answers").
 
+*Dated note, Mon 2 Nov 2026 (Q136's records): the sentence above on the row's "uncorrected fit" and "about 0.4 pJ" did not
+hold (the dated note under CV1): the row stands at 0.75–1.05 pJ, re-cut on each run's own drift
+([Q136(b)](../2026-11-02-q136b-rail-row/README.md)), and the bound sits below it.*
+
 ## Corrections after verification (Sun 1 Nov 2026)
 
 An independent verifier read the registration, the data, this page and the change record the same evening. It re-ran
@@ -115,6 +136,10 @@ touched, and nothing was set or re-run. No data file, frozen sentence, number or
 | CV4 | **"With the upper edge unchanged at 0.68 pJ"** for the post hoc reading: the registered upper edge is 0.693 pJ and the post hoc one 0.682. (The lane's result also called the post hoc term "real but small" and credited the 800 MHz step to "the higher voltages" alone; neither phrase is in a committed file) | "Nearly unchanged (0.68 against 0.69 pJ)". In the result: "probably there (post hoc, not resolved at the registered 99%)" and "the price of the 800 MHz operating point (its clock and voltages)" |
 | CV5 | **The kernel-event window was overstated** as running to a minute after the session's end: `raw/kernel-events.txt` names its script's "+ 60 s" bound, but its `dmesg` was read at 21:20:21 PST, 33 s after the session ended (21:19:48.6) | K's line above and the change record say "from 20:48:55 to 21:20:21 PST, 33 s after the session's end". Recounted from `raw/logs/kernlog-after.txt`: 0 ET events in that window; the last in the buffer is E77's, at about 17:59:32 PST. K's registered window ends at the closing read (21:19:48.6), inside it, so K stays PASS. The raw file is not edited |
 | CV6 | **The change record kept eight ⟨RUN⟩ placeholders** in its plan sections, with the values only in its live-gates table, and left three template lines neither filled nor marked: the card's asset, serial, board revision, form factor and DRAM capacity; the PMIC's bootloader, protocol and watchdog assumptions; the qualified reset source. All were inherited from E77's record | Each placeholder holds its value or points to "Live gates"; the three lines are filled, UNKNOWN where nothing was read (asset, serial, board revision, the PMIC's assumptions, the reset source), with the form factor from the manifest and the DRAM capacity from the lab's records |
+
+*Dated note, Mon 2 Nov 2026 (Q136's records), on CV1's row: its premise, that the row's coefficient was fitted on uncorrected
+deltas, did not hold; the dated note under CV1 above gives the correction
+([Q136(b)](../2026-11-02-q136b-rail-row/README.md)).*
 
 ## What this answers
 

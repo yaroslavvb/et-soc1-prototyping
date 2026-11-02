@@ -661,6 +661,18 @@ not do what it was for", `aifoundry2/admission.json`, `aifoundry2/s1/skipped.jso
 - **A second card's die line moved too** (E114, aifoundry1's card 0): 1.67 °C cooler (about ±0.5) at the same board
   power between the afternoons of 31 October and 1 November (1 Nov 39.36 + 0.4941 °C per W; 31 Oct 41.78 + 0.4753),
   with its rest die lower; random fp16, at the trip, ran 3.3% faster for it. No inlet was read. Data: [`2026-11-01-e114-card0-replicates`](../reports/data/2026-11-01-e114-card0-replicates/README.md) §4.
+- **A governed sustained cell did not replicate between two sessions** (dated note, Mon 2 Nov 2026, Q136, E126; aifoundry2).
+  In a second session of E119's four sustained fp32 pairs what the clock buys repeated to within 0.002, but random's governed
+  clock ran 37–83 MHz faster (`c8s` 663.7 → 746.5 MHz), so zeros' lead fell from ×1.229 / 1.148 / 1.062 / 1.079 to ×1.189 /
+  1.088 / 1.025 / 1.023. By proxies only: the card idled at 43 °C / 21.26 W against 46 °C / 21.92 W before E119's, the random
+  runs drew 4.55–8.76 W more, and the block came earlier in the session, so every random run reached 65 °C 15–36 s later and
+  its 40 s window sat earlier in the warm-up. Give a governed sustained gap its session, the idle before it and its start
+  temperature. Data: [`2026-11-02-e126-gemm-arms`](../reports/data/2026-11-02-e126-gemm-arms/README.md) §5b.
+- **aifoundry2's coefficient has a replicate** (dated note, Mon 2 Nov 2026, Q136, E133; its data README's registered reading,
+  which no verifier had read when this was written). In a second session per kind the holds read 0.648 (fp32 random) and 0.700
+  °C per board W (int8 −1s), 0.65–0.70 over four holds in two sessions; neither steady by the registered test. A 1 °C cooler
+  idle (44.0 °C) put random fp32 at the governor's trip, not its floor, and one cool probe put the 76 s line at 0.81 °C per °C
+  of rest die. Data: [`2026-11-02-e133-heat-holds`](../reports/data/2026-11-02-e133-heat-holds/README.md).
 
 Data: [`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §c,
 [`2026-11-01-e98-heat-path-drift`](../reports/data/2026-11-01-e98-heat-path-drift/README.md),
@@ -748,6 +760,7 @@ it is the owner's call (the lab rules below).
 | `board_w` | board power, 10 mW steps | refreshed once per service-processor pass, and a poller lengthens the pass: under ettelem at 10 Hz a new value every 156 ms on aifoundry2, 158 on aifoundry1's card 1 and 263 on aifoundry3; with nothing polling the pass is 133, 135 and 224 ms (E41, 26 September); near-instantaneous otherwise. 🛑 **It can read a launch gap:** on aifoundry1's card 1 (E82) and on aifoundry3 (E78, E81, E86, E90) a reading sometimes lands in the 1–2 ms gap between two launches and is then held for one pass — one or two samples 4–20 W low, 12–151 ms after a launch boundary, with the minion rail unmoved (E82: 85 samples in 61 events over seven passes; E86: 13 in power windows over five passes, 1–7 a pass in E78's). One dip pair in a 20-sample window lowers a run's mean by 0.4–1.2 W, and the registered gates have set passes aside for them (E82, E86): remove them by E82 amendment A2's rule (`board_w[i] < min(board_w[i−2], board_w[i+2]) − 4.0 W`) or register a gate. On aifoundry3 they are routine (1 November 2026): E92 39 dips, 22 in power windows, which made seven of its ten rules INCONCLUSIVE, mostly on interval width, and moved every fp16 contrast over `c_abs` by 0.3–0.5 W; E95 60, 17 in windows; E99 112, 21 in windows. E78's random-anchor gate set E92's 9211 and E95's 9513 aside on them |
 | `sp.minion_w`, `sram_w`, `noc_w` | per-rail power | **the PMIC's running average, first-order, published one SP pass late** (E58, pre-registered): τ minion 1.06 s, SRAM 1.01, NoC 1.04 on aifoundry3; minion 1.08 and NoC 1.08 on aifoundry1's card 1, but **its SRAM rail 0.54 s**, so the cards' SRAM meters differ. (E27's single-parameter τ ≈ 1.15–1.22 s folded the SP's pass into τ; a step reaches 55–57% after 1 s and 83–84% after 2 s as read.) The published rail split (the last 0.6 s of a burst, divided by 0.94) assumes τ near 1.1 s: on the catalogue's 3.2 s bursts it errs by −1.8 to −4.3% on every rail but card 1's SRAM rail, where it errs by +5.5% (offline, `tools/claims-v3/tau/PREREG.md`). `tools/ettelem/deconv.py` undoes the filter with each card's τ (a burst's energy within 0.3% of the step on aifoundry3). The SP copies the reading each pass (so on aifoundry3 the copy changes only every 263 ms under ettelem); not a moving average. Skip 2–3 s after any change before averaging. `ettelem sample --reset-ms` resets the statistics on a schedule, and the reset also restarts the running average: with a reset every second, one second after a burst the rail has fallen 93% of the way on every card (E41). 🛑 **The reset is a PMIC command:** it is `DM_CMD_SET_STATS_RUN_CONTROL`, which the SP forwards to the PMIC as the PMIC's own statistics reset (0x47; `tools/ettelem/ettelem.cpp`, `resetStats`). E85 sent it 2,205 times in one session (its C1), as E52's, E62's, E63's and E73's samplers had sent it before, and its control word switches the SP's statistics trace off (`tools/claims-v3/tel/README.md`, deviation 1); whether E85's resets, or E100's arm R, left aifoundry2's trace off has not been read on the card. **Allowed by the owner's ruling of 31 October 2026** (AGENT.md §5); E64's, E78's and E80's runners sample without it |
 | `temp_c.minshire[0]` | die temperature | **whole degrees**, and it is the *integer mean of 34 shire sensors, each truncated to a whole degree*, so it reads about 1 °C below the mean of the same sensors' readings (E89). Hot spots are hotter. On aifoundry3's firmware build each sensor's raw 12-bit code can be read ("The sensor reads whole degrees", below) |
+| `temp_c.pmic` | **not the PMIC's temperature** (dated, Mon 2 Nov 2026, Q136's records) | at et-platform `836a4ab` the telemetry fills it from the minion shires' PVT average (`thermal_pwr_mgmt.c:732`), so it equals `minshire[0]` in 16,149 of E127's 16,155 samples (E127 C5); no telemetry field reads the PMIC's own temperature, which its 75 °C alarm compares (E128 C6). A stop on it is a die stop: register a board-power stop under 75 W beside it |
 | `die_mv.*` | on-die voltage per rail | the minion rail droops ~1 mV under 18 W more load: the regulator senses at the die |
 | `mhz.minion`, `mhz.noc`, `mhz.ddr` | clocks | the only reliable way to catch the governor |
 
@@ -781,6 +794,28 @@ it is the owner's call (the lab rules below).
   the version-3 check's nine passes (25–26 Sep, `tools/claims-v3/tel/block.sh`) and the aifoundry1 fix of 25 Sep; dated notes
   in E69's, E72's, E79's, E82's and E84's data READMEs say so. Take a card's identity by uptime continuity instead
   ([05-claims.md](05-claims.md), "Q134", the disclosures).
+- **Dated note, Mon 2 Nov 2026 (Q136's records): the open question above is answered.** The owner's ruling of 2 November
+  2026 allows read-only PMIC voltage-register reads ([AGENT.md](../../AGENT.md) §5, "Device commands"), so the stock
+  `ettelem`'s `GET_ASIC_VOLTAGE` and `GET_MODULE_VOLTAGE` reads are allowed; every Q136 card run used them (E126 alone sent
+  244,020). Q136(w)'s audit classified every command from the source of BL2 0.22.0 ([its
+  README](../reports/data/2026-11-02-q136w-write-audit/README.md)) and adds: `DM_CMD_GET_FRU` writes three PMIC FRU
+  registers before it reads (never sent); the statistics reset (`--reset-ms`, type 1 and control 2) is two PMIC writes,
+  `0x47` (the reset) then `0x43` (the snapshot the SP's own DM task sends every pass), and it also re-arms the PVT high/low
+  latches and switches the SP's statistics trace off; `dev_mngt_service -t SPST:enable` (type 1, control 1), which
+  `tools/claims-v3/tel/block.sh` sends, is another form of the same command, not the ruled reset;
+  `DM_CMD_GET_MODULE_CURRENT_TEMPERATURE` overwrites the governor's RAM temperature input with the same integer mean the
+  governor's own update writes (benign, E126's verifier); and the stock `ettelem` cannot set the SP's log level back to its
+  boot default, WARNING.
+- **The hottest shire on aifoundry1's card 1 is a latch** (dated, Mon 2 Nov 2026; E131 C3). `max(temp_c.minshire)` there is
+  the PVT's high-water latch, 65 °C in all 24,157 of E131's samples and since at least E112(b) (1 November), set before
+  those sessions, while the shire mean peaked at 62 °C. Give the shire mean beside any "hottest shire" maximum on that card.
+  The statistics reset is what re-arms the latch (Q136(w)).
+- **On aifoundry3 the `ettelem` that runs is not the reviewed build** (dated, Mon 2 Nov 2026; E132 C1, E134 C6). The
+  `build/ettelem/ettelem` in its binaries tree (sha256 `16037641…`, built 25 September) comes from lab `de262730`'s
+  `tools/ettelem/ettelem.cpp` (`ba9a0ac3…`), not the `a6cf931b…` Q136(w)'s table binds to that path; its `config()`,
+  `sample()`, `Dm::get()` and `Dm::resetStats()` are byte-identical, so every class stands, and the table should gain that
+  source as a reviewed variant. The card's own 0.22.0 is the non-public thermal build first flashed on 7 October, which
+  answers command 74.
 - **Throttle residency** (`DM_CMD_GET_MODULE_RESIDENCY_THROTTLE_STATES`) is a copy from the service processor's RAM and
   touches no PMIC; nothing clears it but a restart, the statistics reset included (Q134(a)). Its raw state numbers depend on
   the build: IDLE 0, UP 1, DOWN 2, SAFE 3 on BL2 0.22.0, and POWER_SAFE raw 5 on 0.18.0 and 0.20.0. A read of a state that is
@@ -1228,6 +1263,12 @@ Three host facts from the same afternoon, each read on all three hosts:
   10 October). aifoundry3 never did, and no host did at the cold reboots of 26 October. In such a boot the OS never sees a
   short press of the power button, so shut down from a shell, or hold the button for a forced off.
 
+**Dated note, Mon 2 Nov 2026 (Q136(w)):** both automatic reboot paths still stand on all three hosts, beside the owner's rule of
+2 November 2026 of no power cycles and nothing that risks one: `et-boot-check`'s cold reboot after a boot whose card link
+trained badly, and `kernel.panic = 10`, a reboot 10 s after any kernel panic, which a driver fault during a run could set off
+(`tools/lab/host-recovery/lab-panic.conf`). Neither was changed; they are named here for the owner's awareness
+([the audit](../reports/data/2026-11-02-q136w-write-audit/README.md)).
+
 ## aifoundry3's working temperature under the hl heater, and the gate that rules out its own protocol (26 October 2026, E65)
 
 E65 ran 123 approach launches and 48 no-approach launches on aifoundry3's card at the latched 600 MHz, 521.7 mV,
@@ -1336,6 +1377,9 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
   R5, and it does not move ratios to random. E112 registered `auto` without citing this bullet ((a) by re-running E91
   unchanged, (b) to pair with E95's dips-removed arm); read at E82's 0.2414, R5 would pass and (b) would stay NOT SCORED.
   The zeros-line gate set E112's third (b) pass aside by 0.003 W, as it had set E91's first pass aside by 0.038 W.
+  **Dated note, Mon 2 Nov 2026 (Q136, E131):** card 1's automatic slope read 0.4008 W/°C again (E112(b) 0.4172), its fourth
+  reading near 0.40–0.42 since 31 October. Frozen at 0.2414, E131's session tie to E82 passes, and its card scale moves with the
+  slope: 1.0238 frozen, 1.0442 at the session's own, outside the band at 0.545 W/°C.
 - **The launch-reading rule now skips runs** (1 November 2026). E78's runner skips an item whose die reading has not come
   back to its launch reading in the wait, which low-power tiles trigger: 5 of 265 in E95, one pass each of E103's largest and
   third-largest misses, `fp16.z_sub` in E104, which left it no interval. A retry needs its own registration. On aifoundry1's card
@@ -1346,12 +1390,20 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
   anchor), and the zeros-line gate set aside 11252 in E112 (so (b) NOT SCORED). On aifoundry3 the random-range gate had
   set aside one pass each in E86, E92 and E95. Register 4–5 passes, or how a set-aside pass is handled, and on aifoundry3
   a dips-aware gate.
+  **Dated note, Mon 2 Nov 2026 (Q136):** on card 1 a pass with no hot anchor runs 2–3× its estimate. A launch on the cool die
+  needed about three heats in E128 and 5–8 (median) in E129, whose anchors were cut to each format's zeros, so E128 kept two
+  passes and E129 three of the six its R1 needed; E131's four passes, from a 50 °C die, took 547–652 s. On aifoundry3, E134's
+  13410 was set aside on board-meter dips of 3–4 W, under E82 A2's 4 W line (its C1): register a dip rule that catches them.
 - **A residency read of a state the build does not have raises SP errors** (1 November 2026, E77 and Q134(a)). On BL2 0.22.0
   raw states 4–6 are no state: each read fails (rc −5), logs two SP ERROR lines and pushes two `SP Runtime Error` events to
   the host, where a session that counts kernel events will see them. Every lab session that read residency since 27 October
   but E77 asked for states 2–6 (701 of aifoundry2's 712 reads, all 63 of card 0's), and those reads account for all but six
   of aifoundry2's 4,234 such events and all 378 of card 0's. Ask for raw states 2 and 3 (POWER_DOWN, POWER_SAFE); the lab's
   `ettelem-dv2` builds refuse raw 1 outright, so a POWER_UP read needs a new build.
+  **Dated note, Mon 2 Nov 2026 (Q136(w)):** five lines in the lab's code still ask raw 4–6 (`dv2lib.sh:177`, `dv2/z2.sh:73`,
+  `hpl/run_hpl.py:622`, `knob/run_knob.py:658`, `e77/run_e77.py:686`), and Q136(w)'s checker refuses them before a run; a
+  runner that reuses one patches the call, as E119's `patch_residency` does, and declares it. No Q136 card run sent a residency
+  read: E126's tool refused all 51 queries before it opened the device, and E133's wrapper answered them unsent.
 - **A sampler killed mid-request poisons the management queue** (both cards, 2026-09-24). The reply to its
   last command stays queued. The next process to open `/dev/et0_mgmt` dies of `std::bad_function_call` on
   that reply and leaves its own behind, so retrying never recovers. Drain it once with

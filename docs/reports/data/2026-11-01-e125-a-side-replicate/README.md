@@ -218,3 +218,6 @@ question, Q133's records). No statistics reset was sent (`since_reset_ms` −1 i
 setup (20:11:49 PST, `logs/setup.log`), at the session's start (20:14:18, `logs/session.log`) and at its end (20:42:32). Other lab
 users' logins on the host did not block (E60's departure D1, as `hl/block.sh` implements it for aifoundry1), and none of their names
 is recorded here.
+
+*Dated note, Mon 2 Nov 2026 (Q136's records): the open question is answered. The owner's ruling of 2 November 2026 allows
+read-only PMIC voltage-register reads, so these reads are allowed ([AGENT.md](../../../../AGENT.md) §5, "Device commands").*
