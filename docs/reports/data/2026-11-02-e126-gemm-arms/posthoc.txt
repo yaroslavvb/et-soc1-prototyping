@@ -48,6 +48,25 @@ E126 post hoc, labelled: written after the session had started; no rule reads it
   E119: {"host_start": {"acpitz_0": 16.8, "acpitz_1": 27.8, "cpu_package": 33.0}, "host_end": {"acpitz_0": 16.8, "acpitz_1": 27.8, "cpu_package": 34.0}, "card_idle_10min_before": {"n": 121, "die_median_c": 46, "board_median_w": 21.92}, "rest_reading": {"n": 313, "die_median_c": 46, "board_median_w": 21.86}}
   E126: {"host_start": {"acpitz_0": 16.8, "acpitz_1": 27.8, "cpu_package": 30.0}, "host_end": {"acpitz_0": 16.8, "acpitz_1": 27.8, "cpu_package": 32.0}, "card_idle_10min_before": {"n": 121, "die_median_c": 43, "board_median_w": 21.26}, "rest_reading": {"n": 313, "die_median_c": 43, "board_median_w": 21.23}}
 
+(5b) DATED NOTE, Mon 2 Nov 2026, after verification (post hoc, labelled): the heat history, which (5) left out. The idle proxies in (5)
+  compare the two rooms; how long and how hard the card had worked before each replicate random run compares the runs.
+  E119: block B (the replicate pairs) began with B-00-c8s-fp32-randn-r1, after 12 runs, 2.4 min into the session
+  E126: block B (the replicate pairs) began with B-00-c8s-fp32-randn-r1, after 6 runs, 1.2 min into the session
+  fp32 random sustained runs: start = the gate's die reading / the reducer's die_start (C); t65 = s from the first work process to the first die
+  mean >= 65 C; window = where the reducer's sustained window (the last 40 s of work) began, in s after t65 (negative: before it)
+  c8s    E119: run 12, start 54/54 C, t65 22.3 s of 77.9, window +15.6 s, 55.21 W 663.7 MHz die 65.6 C thermal
+         E126: run  6, start 48/48 C, t65 58.0 s of 77.0, window -21.0 s, 63.97 W 746.5 MHz die 63.8 C unresolved
+  c16r4  E119: run 14, start 55/55 C, t65 17.3 s of 78.9, window +21.6 s, 55.72 W 636.7 MHz die 65.7 C thermal
+         E126: run  8, start 52/53 C, t65 39.4 s of 78.7, window -0.7 s, 62.04 W 699.2 MHz die 65.1 C thermal
+  c16r8  E119: run 16, start 56/56 C, t65 11.5 s of 78.1, window +26.6 s, 55.26 W 603.6 MHz die 65.9 C thermal
+         E126: run 10, start 53/54 C, t65 26.4 s of 77.6, window +11.2 s, 59.81 W 640.1 MHz die 65.7 C thermal
+  c16r2  E119: run 18, start 55/56 C, t65 19.0 s of 78.1, window +19.1 s, 55.3 W 695.4 MHz die 65.5 C thermal
+         E126: run 12, start 53/54 C, t65 37.9 s of 78.0, window +0.1 s, 61.02 W 759.8 MHz die 65.2 C thermal
+  c8s    E126 - E119: start -6 C (gate) / -6 C (die_start); t65 +35.7 s; sustained +8.76 W, +82.8 MHz
+  c16r4  E126 - E119: start -3 C (gate) / -2 C (die_start); t65 +22.1 s; sustained +6.32 W, +62.5 MHz
+  c16r8  E126 - E119: start -3 C (gate) / -2 C (die_start); t65 +14.9 s; sustained +4.55 W, +36.5 MHz
+  c16r2  E126 - E119: start -2 C (gate) / -2 C (die_start); t65 +18.9 s; sustained +5.72 W, +64.4 MHz
+
 (6) c4s against c8s in this session (fp32 random sustained; R6 compared c4s with E119's c8s):
   c4s  {'randn_sus_mhz': 731.9, 'randn_sus_w': 63.47, 'gap': 1.0397}
   c8s  {'randn_sus_mhz': 746.5, 'randn_sus_w': 63.97, 'gap': 1.0233}

@@ -1,0 +1,79 @@
+E126 corrections after verification, Mon 2 Nov 2026: the numbers the corrections quote, from committed files. Post hoc; it decides nothing.
+
+C1  The replicate's faster random clocks: the room by proxy, and the heat history (posthoc.json, results.json)
+  card idle, 10 min before each session (medians): E119 46 C / 21.92 W; E126 43 C / 21.26 W; difference -3 C, -0.66 W. No inlet thermometer was read: these are proxies for the room.
+  idle die to held die, C per W = (sus_die - idle die) / (sus_w - idle W), fp32 random sustained (results.json cells):
+    E119: c8s 0.589, c16r4 0.583, c16r8 0.597, c16r2 0.584
+    E126: c8s 0.487, c16r4 0.542, c16r8 0.589, c16r2 0.558
+  3 C at E119's 0.583-0.597 C/W is 5.0-5.1 W more at the same trip (the room proxy's share)
+  E119: block B began after 12 runs, 2.4 min into the session
+  E126: block B began after 6 runs, 1.2 min into the session
+  per arm, E126 - E119: start die (the reducer's die_start; the gate's reading), t65 (s to the first die mean >= 65 C), sustained W and MHz; and where each session's 40 s window began against t65:
+    c8s    start -6 C (-6 C gate); t65 +35.7 s; +8.76 W, +82.8 MHz; window +15.6 s (E119) and -21.0 s (E126) after t65; limit thermal -> unresolved, die 65.6 -> 63.8 C
+    c16r4  start -2 C (-3 C gate); t65 +22.1 s; +6.32 W, +62.5 MHz; window +21.6 s (E119) and -0.7 s (E126) after t65; limit thermal -> thermal, die 65.7 -> 65.1 C
+    c16r8  start -2 C (-3 C gate); t65 +14.9 s; +4.55 W, +36.5 MHz; window +26.6 s (E119) and +11.2 s (E126) after t65; limit thermal -> thermal, die 65.9 -> 65.7 C
+    c16r2  start -2 C (-2 C gate); t65 +18.9 s; +5.72 W, +64.4 MHz; window +19.1 s (E119) and +0.1 s (E126) after t65; limit thermal -> thermal, die 65.5 -> 65.2 C
+  the three c16 arms: +4.55 to +6.32 W; c8s +8.76 W
+  E126's three c16 arms' C per W: 0.542-0.589; c8s 0.487
+
+C2  What sharing C took away: c16s (this session) against the cold walk c16 (E119's session), fit T = C/f + M (results.json per_arm)
+  fp32 at 600 MHz: c16 C 378.28 +- 7.45, M 1.9572 +- 0.0095; c16s C 278.62 +- 5.26, M 1.8796 +- 0.0067; 99.66 cycles = 0.1661 us, wait 0.0776 us, saved 0.2437 us: cycles 68.2%, wait 31.8%
+  fp32 at 800 MHz: c16 C 378.28 +- 7.45, M 1.9572 +- 0.0095; c16s C 278.62 +- 5.26, M 1.8796 +- 0.0067; 99.66 cycles = 0.1246 us, wait 0.0776 us, saved 0.2022 us: cycles 61.6%, wait 38.4%
+  fp16 at 600 MHz: c16 C 370.9 +- 6.78, M 1.9698 +- 0.0088; c16s C 287.07 +- 5.92, M 1.8659 +- 0.0075; 83.83 cycles = 0.1397 us, wait 0.1039 us, saved 0.2436 us: cycles 57.4%, wait 42.6%
+  fp16 at 800 MHz: c16 C 370.9 +- 6.78, M 1.9698 +- 0.0088; c16s C 287.07 +- 5.92, M 1.8659 +- 0.0075; 83.83 cycles = 0.1048 us, wait 0.1039 us, saved 0.2087 us: cycles 50.2%, wait 49.8%
+  int8 at 600 MHz: c16 C 415.02 +- 21.88, M 1.8879 +- 0.0283; c16s C 279.6 +- 5.41, M 1.8406 +- 0.0069; 135.42 cycles = 0.2257 us, wait 0.0473 us, saved 0.2730 us: cycles 82.7%, wait 17.3%
+  int8 at 800 MHz: c16 C 415.02 +- 21.88, M 1.8879 +- 0.0283; c16s C 279.6 +- 5.41, M 1.8406 +- 0.0069; 135.42 cycles = 0.1693 us, wait 0.0473 us, saved 0.2166 us: cycles 78.2%, wait 21.8%
+  check, fp32 launch means at 600 MHz: c16 2.5880 - c16s 2.3443 = 0.2437 us
+  check, fp32 launch means at 800 MHz: c16 2.4307 - c16s 2.2283 = 0.2023 us
+  fp32 share of T at 800 MHz that is wait: c16s 84.4%, c16 80.5%
+  fp16 share of T at 800 MHz that is wait: c16s 83.9%, c16 80.9%
+  int8 share of T at 800 MHz that is wait: c16s 84.0%, c16 78.4%
+
+C3  c4s's split against c8s's (results.json per_arm; intervals: 95% regression over launches within one session)
+  fp32: c4s C 401.26 +- 3.34, M 0.7622 +- 0.0044; c8s (E126) C 389.92 +- 4.0, M 0.7784 +- 0.0052: C +2.9% (intervals apart), M -2.1% (intervals apart); X 1.1293 - 1.1261 = +0.0031
+  fp32: c4s C 401.26 +- 3.34, M 0.7622 +- 0.0044; c8s (E119) C 391.59 +- 2.08, M 0.7756 +- 0.0028: C +2.5% (intervals apart), M -1.7% (intervals apart); X 1.1293 - 1.1264 = +0.0029
+  fp16: c8s in E126: not run
+  fp16: c4s C 391.81 +- 2.04, M 0.7759 +- 0.0027; c8s (E119) C 385.53 +- 2.12, M 0.7852 +- 0.0029: C +1.6% (intervals apart), M -1.2% (intervals apart); X 1.1269 - 1.1247 = +0.0022
+  int8: c8s in E126: not run
+  int8: c4s C 401.05 +- 4.21, M 0.7679 +- 0.0054; c8s (E119) C 392.6 +- 5.69, M 0.7818 +- 0.0072: C +2.2% (intervals overlap), M -1.8% (intervals apart); X 1.1296 - 1.1273 = +0.0023
+
+C4  What reached the card besides management commands (the workload's host program; posthoc.json commands_sent)
+  tools/claims-v3/e107/rgm107/host/main.cpp:181: const auto load = rt_->loadCode(stream_, elf.data(), elf.size());
+  tools/claims-v3/e107/rgm107/host/main.cpp:211: rt_->memcpyHostToDevice(stream_, reinterpret_cast<const std::byte*>(src), ptr, bytes);
+  tools/claims-v3/e107/rgm107/host/main.cpp:218: rt_->memcpyDeviceToHost(stream_, buffers_.at(name).second, reinterpret_cast<std::byte*>(dst), bytes);
+  tools/claims-v3/e107/rgm107/host/main.cpp:240: rt_->kernelLaunch(stream_, kernel_, reinterpret_cast<const std::byte*>(&a), sizeof(a), opts);
+  management commands: 22174 sampler lines, 53 config reads, 244020 PMIC voltage-register reads, WRITE commands 0
+
+C5  The hottest sensor's running maximum (temp_c.minshire = [mean, low, high]; the high is a running maximum)
+  E126: 22174 sampler lines (smoke and s1). First (SMOKE-00-rest-r1, before any load): high 69 C, mean 43 C; SP running board max 85.71 W, min 20.86 W, minion temperature max 67 C
+  E126: the high over every line: min 69, max 69 C; the mean's highest 66 C
+  results.json peaks: {"board_max_w": 85.62, "board_run": "s1/B-04-c16r8-fp32-randn-r1", "die_mean_max_c": 66, "die_mean_run": "s1/B-00-c8s-fp32-randn-r1", "die_high_max_c": 69, "die_high_run": "s1/A-00-c4s-fp32-zeros-r1", "samples": 21580}
+  E119: the high read 64 C at its first line and 69 C first in B-00-c8s-fp32-randn-r1; at its last line 69 C
+
+C6  Which host build ran, and what the session shows
+  manifest.txt: et_soc1 version=0.20.0 srcversion=47D26A305A0428B29FB7FC4
+  manifest.txt: sha256 f5d1bfb14038b103 /opt/et/lib/libetrt.so
+  manifest.txt: sha256 786fc7650bf74375 /opt/et/lib/libdeviceLayer.a
+  manifest.txt: sha256 a3d4c722d9505aa9 /opt/et/bin/dev_mngt_service
+  libDM.so in the manifest: no
+  aifoundry2 manifests in the repository: 155 x 'et_soc1 version=0.20.0 srcversion=47D26A305A0428B29FB7FC4', 2026-09-27 to 2026-11-02
+  aifoundry2 manifests in the repository: 155 x 'sha256 f5d1bfb14038b103 /opt/et/lib/libetrt.so', 2026-09-27 to 2026-11-02
+  aifoundry2 manifests in the repository: 155 x 'sha256 786fc7650bf74375 /opt/et/lib/libdeviceLayer.a', 2026-09-27 to 2026-11-02
+  aifoundry2 manifests in the repository: 155 x 'sha256 a3d4c722d9505aa9 /opt/et/bin/dev_mngt_service', 2026-09-27 to 2026-11-02
+  (13 distinct dates)
+  docs/reports/data/2026-09-25-aifoundry1/facts.md: | `/usr/src/et-platform` HEAD | `353f20e982f4…` | same | same |
+  docs/reports/data/2026-09-25-aifoundry1/facts.md: | `/opt/et` runtime (cmake) | runtime 0.19.0, deviceLayer 4.1.0, deviceManagement 0.21.0, DMApp 1.22.0, linuxDriver 1.0.0 | same | same |
+  docs/reports/data/2026-09-25-aifoundry1/facts.md: | `libDM.so` | sha `28712bc70aa08685`, 2181888 B, 2026-01-03 | **identical** | **identical** |
+  docs/reports/data/2026-09-25-aifoundry1/facts.md: | `dev_mngt_service` | sha `a3d4c722d9505aa9`, 2026-01-03 | **identical** | **identical** |
+  et-platform (external/et-platform): 353f20e (2025-12-30 14:00:51 +0200) is an ancestor of 836a4ab (2026-07-17 16:17:40 +0200)
+  git diff --stat 353f20e 836a4ab -- devicelayer devicemanagement device-management-application et-driver common-sw device-api: (no change)
+  git diff --stat 353f20e 836a4ab -- esperanto-tools-libs/src: esperanto-tools-libs/src/EventManager.cpp | 25 ++++++++++++++++++++----- | esperanto-tools-libs/src/RuntimeImp.cpp   | 10 +++++++++- | 2 files changed, 29 insertions(+), 6 deletions(-)
+  its commits: 06dfe1302 runtime: allocate unique event IDs across wraparound
+  353f20e: runtime 0.19.0, deviceLayer 4.1.0, deviceManagement 0.21.0, deviceManagementApplication 1.22.0
+  836a4ab: runtime 0.19.0, deviceLayer 4.1.0, deviceManagement 0.21.0, deviceManagementApplication 1.22.0
+  SP running statistics over 22174 lines: board max 85.71-85.71 W, board min 20.86-20.86 W, minion temperature max 67-67 C; falls in a maximum or rises in a minimum: 0
+  since_reset_ms values: [-1]
+  ettelem config reads: 53; (TDP W, threshold C) read: [(65, 65)]
+  SP trace dumps: 51; occurrences of ERROR / error / invalid: 0
+  workload processes by exit code (smoke and s1): {'0': 222}
+
