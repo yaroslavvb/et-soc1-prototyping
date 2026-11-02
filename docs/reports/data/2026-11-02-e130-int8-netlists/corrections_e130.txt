@@ -1,0 +1,92 @@
+E130, corrections after verification: post hoc checks (Mon 2 Nov 2026). Nothing here is a registered rule; no verdict moves.
+Inputs: scored.json, predictions-e130.json, e130-items.json, aifoundry3/kinds/p130*/block.json and telemetry.jsonl.gz;
+the registered score_e130.py and selftest_e130.py imported unchanged.
+
+## [A] (C1) The rail arm in board units
+E78's frozen rail-per-board constant: reduce_e78.py --c-rb default 0.81 ("rail change per board change, frozen from E79").
+This session's own rail / board on A's bits 0-6 (a level; paired Fieller over 4 blocks): 0.811 [0.756, 0.872]  (rail 64.73, board 79.82)
+This session's own rail / board on B's bits 0-6 (a level; paired Fieller over 6 blocks): 1.128 [0.883, 1.603]  (rail 47.31, board 41.94)
+
+The rail's separators, in rail fJ as the registered code scored them, and in board-equivalent fJ at s:
+  B_odd_minus_even_fJ: rail +26.9 [+23.9, +29.8] rail-fJ (scored against T_B = 30.68 board-fJ)
+    at s = 0.810 (E78's 0.81): +33.2 [+29.6, +36.7]
+    at s = 0.811 (A's own): +33.1 [+29.5, +36.7]
+    at s = 1.128 (B's own): +23.8 [+21.2, +26.4]
+  A_odd_minus_even_fJ: rail -0.5 [-3.8, +2.9] rail-fJ (scored against T_A = 27.58 board-fJ)
+    at s = 0.810 (E78's 0.81): -0.6 [-4.7, +3.6]
+    at s = 0.811 (A's own): -0.6 [-4.7, +3.6]
+    at s = 1.128 (B's own): -0.4 [-3.4, +2.6]
+  A_sign_dense_minus_one_fJ: rail +50.4 [+49.6, +51.1] rail-fJ (scored against T_S = 18.07 board-fJ)
+    at s = 0.810 (E78's 0.81): +62.2 [+61.3, +63.1]
+    at s = 0.811 (A's own): +62.1 [+61.2, +63.0]
+    at s = 1.128 (B's own): +44.6 [+44.0, +45.3]
+
+R1 at the rail as s moves (closed form): RECODED for s <= 0.780, INCONCLUSIVE for 0.780 < s < 0.970, FLAT for s >= 0.970.
+  s = 1.000 (the registered code's implicit 1): R1 FLAT, R2 FLAT, R3 RISES -> R4 NO BOOTH
+  s = 0.810 (E78's frozen): R1 INCONCLUSIVE, R2 FLAT, R3 RISES -> R4 INCONCLUSIVE between BOOTH ON B / NO BOOTH
+  s = 0.811 (A's own): R1 INCONCLUSIVE, R2 FLAT, R3 RISES -> R4 INCONCLUSIVE between BOOTH ON B / NO BOOTH
+  s = 1.128 (B's own): R1 FLAT, R2 FLAT, R3 RISES -> R4 NO BOOTH
+R2 FLAT for s in 0.106-30.000; R3 RISES for s in 0.100-2.747 (grid 0.10-30).
+R4 reads exactly 'BOOTH ON B' (2 of 3 decided or 3 of 3) for s in 0.100-0.780
+R4 reads exactly 'NO BOOTH' (2 of 3 decided or 3 of 3) for s in 0.970-2.827
+R4 reads 'INCONCLUSIVE between BOOTH ON B / NO BOOTH' for s in 0.780-0.970
+
+E130-N at the rail as s moves: the s range where the rail's interval overlaps each netlist's band (board fJ):
+  booth_tree: B_odd_minus_even 0.362-0.542; A_odd_minus_even 0.100-6.712; A_sign_dense_minus_one 0.922-1.758  -> SURVIVES for s in none in 0.10-30
+  booth: B_odd_minus_even 0.363-0.543; A_odd_minus_even 0.100-30.000; A_sign_dense_minus_one 0.957-1.636  -> SURVIVES for s in none in 0.10-30
+  booth_swap: B_odd_minus_even 27.469-30.000; A_odd_minus_even none in 0.10-30; A_sign_dense_minus_one 11.260-30.000  -> SURVIVES for s in none in 0.10-30
+  plain: B_odd_minus_even 19.492-30.000; A_odd_minus_even 0.100-1.118; A_sign_dense_minus_one 0.840-1.681  -> SURVIVES for s in none in 0.10-30
+B's odd - even alone excludes every netlist's band for s in 0.100-0.362, 0.543-19.486.
+
+The unit-free ratios (no s needed), rail and board, against each netlist's frozen prediction (nets_map; nets_hier):
+  B_odd_over_even: rail 1.79 [1.68, 1.92], board 2.41 [1.26, 38.23]; booth_tree 4.39; 4.27; booth 4.30; 4.16; booth_swap 1.05; 1.07; plain 1.07; 1.09
+  A_odd_over_even: rail 0.99 [0.94, 1.05], board 0.98 [0.92, 1.04]; booth_tree 1.01; 1.04; booth 0.98; 1.03; booth_swap 2.52; 2.62; plain 1.10; 1.13
+  A_sign_dense_over_one: rail 1.42 [1.41, 1.42], board 1.43 [1.36, 1.51]; booth_tree 1.11; 1.32; booth 1.12; 1.32; booth_swap 0.96; 1.03; plain 1.22; 1.24
+
+## [B] (C3) The session's noise, like for like (the self-test's own model; nothing here is a measurement)
+Session: zeros' scatter about their neighbours' line, board 0.0397 W over 72 interior reads (rail 0.0355 W). The planning sigma is a per-run white noise (0.025 W a run).
+  sigma 0.0150 W a run: zeros' scatter median 0.0222 W (5-95% 0.0187-0.0262; 500 sessions, 72 interior reads each); B odd - even median half-width booth_tree 5.5, booth_swap 5.7, plain 6.0, e79 6.1, both 6.2 fJ
+  sigma 0.0200 W a run: zeros' scatter median 0.0275 W (5-95% 0.0227-0.0323; 500 sessions, 72 interior reads each); B odd - even median half-width booth_tree 7.6, booth_swap 8.0, plain 7.3, e79 7.4, both 8.0 fJ
+  sigma 0.0250 W a run: zeros' scatter median 0.0328 W (5-95% 0.0278-0.0394; 500 sessions, 72 interior reads each); B odd - even median half-width booth_tree 9.0, booth_swap 9.0, plain 9.3, e79 9.8, both 8.8 fJ
+  sigma 0.0300 W a run: zeros' scatter median 0.0393 W (5-95% 0.0325-0.0457; 500 sessions, 72 interior reads each); B odd - even median half-width booth_tree 11.1, booth_swap 11.6, plain 11.1, e79 10.5, both 10.4 fJ
+  sigma 0.0325 W a run: zeros' scatter median 0.0420 W (5-95% 0.0345-0.0499; 500 sessions, 72 interior reads each); B odd - even median half-width booth_tree 11.4, booth_swap 12.1, plain 11.1, e79 11.9, both 11.6 fJ
+  sigma 0.0350 W a run: zeros' scatter median 0.0447 W (5-95% 0.0371-0.0542; 500 sessions, 72 interior reads each); B odd - even median half-width booth_tree 13.2, booth_swap 13.0, plain 13.4, e79 13.2, both 12.7 fJ
+  sigma 0.0400 W a run: zeros' scatter median 0.0504 W (5-95% 0.0420-0.0596; 500 sessions, 72 interior reads each); B odd - even median half-width booth_tree 15.0, booth_swap 14.7, plain 14.5, e79 15.0, both 14.9 fJ
+At the planning sigma 0.025 W the model's scatter is 0.0328 W, so the session's 0.0397 W is 1.21x it (against 1.59x when set against sigma itself).
+The per-run sigma that gives the session's scatter (linear between grid points): 0.0303 W, 1.21x the plan's 0.025 W. At that sigma the model's median B odd - even half-width is booth_tree 11.1, booth_swap 11.6, plain 11.1, e79 10.7, both 10.6 fJ.
+Per-run sigma whose 5-95% scatter range holds the session's 0.0397 W: grid points 0.0300, 0.0325, 0.0350; edges (linear) 0.0252-0.0377 W. One session's scatter pins sigma only that well.
+The session: B odd - even half-width 22.8 fJ over 6 blocks (per-block sd 21.7 fJ).
+  per block: 13010 +75.9, 13011 +34.0, 13012 +26.4, 13013 +16.5, 13014 +31.8, 13015 +18.4
+  without 13010 (post hoc, no rule sets it aside): +25.4 [+15.8, +35.1], half-width 9.7 fJ over 5 blocks (per-block sd 7.8 fJ)
+
+## [C] (C5) The die by block, in session order (degrees C)
+  13010: block.json die_c start 51, end 52; telemetry minshire[0] 51-53 over 1748 samples
+  13020: block.json die_c start 52, end 53; telemetry minshire[0] 52-54 over 1315 samples
+  13011: block.json die_c start 53, end 53; telemetry minshire[0] 52-54 over 1752 samples
+  13021: block.json die_c start 52, end 53; telemetry minshire[0] 52-54 over 1314 samples
+  13012: block.json die_c start 53, end 53; telemetry minshire[0] 52-54 over 1750 samples
+  13022: block.json die_c start 52, end 53; telemetry minshire[0] 52-54 over 1314 samples
+  13013: block.json die_c start 53, end 53; telemetry minshire[0] 53-54 over 1748 samples
+  13023: block.json die_c start 53, end 53; telemetry minshire[0] 53-55 over 1312 samples
+  13014: block.json die_c start 53, end 53; telemetry minshire[0] 53-54 over 1747 samples
+  13015: block.json die_c start 53, end 53; telemetry minshire[0] 53-54 over 1750 samples
+After the first block (13020 onward): 52-55 C.
+
+## [D] (C2, C4) The sign bits at each base word and held operand (board p_raw, primary; rail beside)
+  a1_7: side A, base word A1, held B = 0x1: board +156.7 [+150.7, +162.6] fJ; rail +120.4 [+118.5, +122.3] rail-fJ
+  a2_7: side A, base word A2, held B = 0x1: board +160.2 [+157.7, +162.7] fJ; rail +123.8 [+121.5, +126.1] rail-fJ
+  a1d_7: side A, base word A1, held B = 0x55: board +224.5 [+219.8, +229.2] fJ; rail +170.8 [+168.5, +173.1] rail-fJ
+  b1_7: side B, base word B1, held A = 0x1: board +98.9 [+71.0, +126.9] fJ; rail +81.8 [+73.3, +90.3] rail-fJ
+  b2_7: side B, base word B2, held A = 0x1: board +56.5 [+5.2, +107.9] fJ; rail +49.6 [+43.0, +56.2] rail-fJ
+  b1d_7: side B, base word B1, held A = 0x55: board +117.0 [+79.7, +154.2] fJ; rail +82.3 [+77.2, +87.3] rail-fJ
+  A_sign_w2_over_w1: board 1.02 [0.98, 1.07], rail 1.03 [0.99, 1.06] (unit-free)
+  B_sign_w2_over_w1: board 0.57 [0.05, 1.30], rail 0.61 [0.49, 0.75] (unit-free)
+  A's bits 0-6 (held B = 0x1): +79.8 [+75.9, +83.8] fJ; A sign, B = 0x55 over B = 1: 1.433 [1.363, 1.508]
+  E79 at its own words (predictions-e130.json card_precision_e79; E79 scored.json prices.int8_a / int8_b_kg (aifoundry3, 600 MHz, 4 passes; base A 0xa5, B 93 c3 c6 ac 55 66 1e 8d)): A sign +152.1, B sign +16.8 board fJ
+
+## [E] (C4) E130-N, each netlist's verdict, primary and every arm (scored.json)
+  booth_tree: primary EXCLUDED by A_sign_dense_minus_one_fJ; rail EXCLUDED by B_odd_minus_even_fJ; board_p80 EXCLUDED by A_sign_dense_minus_one_fJ; dips_kept SURVIVES; gates_off EXCLUDED by A_sign_dense_minus_one_fJ
+  booth: primary EXCLUDED by A_sign_dense_minus_one_fJ; rail EXCLUDED by B_odd_minus_even_fJ; board_p80 EXCLUDED by A_sign_dense_minus_one_fJ; dips_kept SURVIVES; gates_off EXCLUDED by A_sign_dense_minus_one_fJ
+  booth_swap: primary EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ; rail EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ; board_p80 EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ; dips_kept EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ; gates_off EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ
+  plain: primary EXCLUDED by B_odd_minus_even_fJ; rail EXCLUDED by B_odd_minus_even_fJ; board_p80 EXCLUDED by B_odd_minus_even_fJ, A_sign_dense_minus_one_fJ; dips_kept EXCLUDED by B_odd_minus_even_fJ; gates_off EXCLUDED by B_odd_minus_even_fJ
+  blocks set aside: primary none; rail none; board_p80 none; dips_kept [13021]; gates_off none
