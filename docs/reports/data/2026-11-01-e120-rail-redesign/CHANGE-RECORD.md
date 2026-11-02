@@ -184,11 +184,51 @@ Read 2026-11-01T20:49:02.628-0800 to 2026-11-01T20:49:04.829-0800 under the card
 
 **GO**, recorded in this commit before the first write. The runner's gate verdict: ['GO-able: every live gate read as required']. The session runs arm B's first two passes at the card's own settings and writes nothing until the file `GO` exists in its run directory, created after this commit is pushed.
 
-## Set log, activation, final handoff
+## Set log, activation, final handoff (filled from `raw/gov.jsonl`, `raw/end.json`, `raw/watchdog.log`, `raw/queries.jsonl`)
 
-⟨RUN: as E77's record — originals, LUT floor, watchdog armed, both sets with argv/rc/ms timestamps, read-backs, restore,
-the return burst and its fresh ring entries, module uptime after, error-event counts before and after, the telemetry
-profile used, the post's edits read back. Outbound OTA: **N-A**. Signoff UTC and PST.⟩
+| time (PST, Sun 1 Nov 2026) | event | read-back (the two RAM GETs) |
+|---|---|---|
+| 20:48:49 | this run's clause written into the day's one `#community-lab` post (message `1566603178164617247`), after the pre-registration `9fbe7ba6` was pushed (20:47:53) | — |
+| 20:49:02–20:49:18 | the gate reads and the smoke, each its own hold of the card lock, no write | TDP 65 W, threshold 65 °C (gates) |
+| 20:49:33.418 | the session's original read, card lock held since 20:49:31 | TDP **65** W, threshold **65** °C, `low_power`, 600 MHz; module uptime 6 d 6 h 36 m |
+| 20:49:33–20:55:16 | arm B passes 1–2 at the card's own settings (15 of 16 launches; the first gate, from a 46 °C die, was not reached in 8 heater launches) | — |
+| 20:51:19 | `GO` created on the host, after the GO commit `c5a221cb` was pushed (20:51:11) | — |
+| 20:55:16.589 | deadline watchdog armed, pid 876477, deadline 22:10:16 | — |
+| 20:55:16.593 → .609 | **set** `DM_CMD_SET_MODULE_STATIC_TDP_LEVEL -n 0 -l 0 -u 5000`, rc 0 | 20:55:16.616: TDP **0** W, threshold **65** °C |
+| 20:55:16–21:10:54 | arm A passes 1–5 at the pin (40 of 40 launches); every measurement launch read 600 MHz (the abort never fired); the ring dumped after each arm-A pass holds no entry newer than the one before (no governor line, no operating-point change) | — |
+| 21:10:54–21:11:37 | the 8 s settling rung (992 harts), its gate reached after 6 heater launches | — |
+| 21:11:41.131 → .147 | **restore** `... -l 65 ...`, rc 0 | 21:11:41.155: TDP **65** W, threshold **65** °C (power-state label `max_power`, the pin's known side effect) |
+| 21:11:41 | the watchdog read `release` and exited: "released by the session, nothing to do" | — |
+| 21:11:44.41–21:11:48.83 | **the return burst** (416 harts, 4 s): the 10 Hz telemetry reads 700 MHz first at 21:11:45.06 and 800 MHz at 21:11:45.26; the ring dumped after it holds **8 entries newer than the settling rung's dump, 2 of them `Power throttle up`**, with operating points 700, 800, then 600 MHz | after it: TDP 65 W, threshold 65 °C, 600 MHz |
+| 21:11:51–21:19:48 | arm B passes 3–5 (24 of 24 launches) | — |
+| 21:19:48.615 | **closing read**, then the lock released | TDP **65** W, threshold **65** °C, `low_power`, 600 MHz; module uptime 6 d 7 h 6 m (no service-processor reset) |
+| 21:20:22 | an independent read after the session (`ettelem-e77 config`, the card lock, `timeout 10`) | TDP **65** W, threshold **65** °C, `low_power`, 600 MHz |
+
+- **One field written, twice:** the TDP to 0 and back to 65; the threshold never. Nothing else was sent but the reads
+  listed in "What each planned query asks of the card". The residency read sent nothing (README amendment A1). The pin
+  lasted 16 min 24.5 s.
+- **Envelope:** the highest board reading of the session was 69.59 W (an arm-B heater launch on 768 harts); the highest
+  in a kept measurement launch 50.6 W; the highest die mean 59 °C (the high-water latch read at most 69 °C, from earlier
+  sessions); no safety stop.
+- **Host kernel log:** **0** ET error events between the gate reads (20:48:55) and a minute after the session's end
+  (`raw/kernel-events.txt`); the buffer's 666 "Error Event" lines before and after are the same, older lines
+  (`raw/logs/`). E77's window held 22, all from its raw-4 residency reads (its F1).
+- **Card time:** 30.29 card-minutes in the session (exit 0, "done"), plus the gate reads, the smoke and the closing read
+  (about 17 s).
+- Activation and acceptance (reset, re-identification, new firmware): **N-A**, nothing was flashed or reset.
+  **Outbound OTA: N-A. Automatic fallback: N-A.**
+
+## Final handoff
+
+- **Retained state:** firmware, module and PMIC untouched; the governor at its original **65 W / 65 °C**, read back at
+  21:11:41, at the closing read 21:19:48 and independently at 21:20:22; the card idle at 600 MHz; no service-processor
+  reset (uptime continuous).
+- **Locks and monitors:** the card lock released at the session's end; `et-who` free afterwards; the owner's collector
+  resumes by itself (it was never stopped); the watchdog exited after `release`.
+- **Logs and artefacts:** the run directory as `raw/` beside this file (telemetry gzipped; the box's tree path written
+  `<tree>`); the vmin-LUT file stays on the host as per-card calibration data.
+- **Unresolved risks:** none from the operation.
+- **Signoff:** the run agent, Sun 1 Nov 2026, 21:3x PST (05:3x UTC Mon 2 Nov); no independent reviewer.
 
 ## Template mapping
 

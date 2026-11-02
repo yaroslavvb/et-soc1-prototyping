@@ -4,9 +4,75 @@
 change after this commit goes under Amendments, dated, before the data it touches. Results go above the registration
 when the run is done; nothing below is edited.*
 
-## Results
+## Results (the run: Sun 1 Nov 2026, 20:49–21:20 PST; written 21:3x PST)
 
-*Pending.*
+**The registered verdict is FAIL, narrowly, and the bound is new: the regulators' conduction share of the 0.875 pJ row
+is at most 0.69 pJ.** On the central footing R_eff = **0.55 mΩ, 99% [−0.06, +1.16] mΩ** over five passes (per pass 0.61,
+0.30, 0.30, 1.02, 0.51): the interval contains 0, by 0.06 mΩ, which is the registered FAIL; the pooled rms falls by 2.9%
+(`results.json` `footings.drift_split.fit`). **B: BOUNDED BELOW THE ROW.** At the interval's upper edge a 21 W
+minion-rail step on arm A's measured idle rail (6.75 W at 518 mV) adds **3.12 W** of conduction loss in the registered
+model's total-current form, **0.69 pJ of the 0.875 pJ row** (0.42 pJ by the literal conversion); at the mean, 1.48 W,
+0.33 pJ (`results.json` `B`). So at 99% at least 0.18 pJ of the row is not regulator conduction. E77's registered form
+gave an upper edge of 1.06 pJ, above the row. **C1 FAILS:** E77's post hoc bound, 0.496 mΩ (0.30 pJ), does not hold on
+fresh data; E120's upper edge is 1.16 mΩ, because its five passes spread six times wider (SD 0.30 mΩ) than E77's three
+did in the same form (0.05). In this form the linear "logic in step" coefficient comes out near zero (a_m −0.064 to
++0.042 per W, mean −0.001) and the arm-B offset at +0.63 W (0.26–0.93): the fit trades a_m against R_eff, which is
+what widens the passes.
+
+**The rest of the registration passes.**
+- **T1, the per-hart transfer: PASS.** Arm B's cost per hart over arm A's, divided by (800/600)·(V_B/V_A)² from the
+  measured voltages, is **0.979, 99% [0.906, 1.053]** over five passes (ratios 1.86, 1.92, 1.75, 1.90, 1.88 against
+  1.90; `T1`, `lines_per_pass`). E77's post hoc finding, now registered: the minion rail's per-hart cost moves with f·V².
+- **S1 and S2, the operating-point step: PASS.** With no work, the 800 MHz operating point costs **4.26 W on the minion
+  rail, 99% [3.82, 4.70]**, and **1.76 W on the SRAM rail, [1.70, 1.81]** (E77's post hoc 4.09 [3.44, 4.75] and 1.73
+  [1.69, 1.78]; `S1`, `S2`).
+- **P2, the matching: PASS.** The re-cut ladder matched every pair within 2.4% (−2.4, +1.7, −2.2, +0.2%), where E77's
+  missed by 22–79%.
+- **G, one temperature: PASS.** Arm A launched at 52.03 °C (52–53) and arm B at 51.95 °C (51–52), 0.08 °C apart (E77:
+  1.2 °C).
+- **RING: PASS.** The return burst stepped 600 → 700 → 800 MHz, and the ring dumped after it holds 2 throttle-ups newer
+  than the dump before it.
+- **K: PASS.** 0 kernel error events in the window (`raw/kernel-events.txt`; E77's held 22).
+
+**The secondaries (no verdict).** The uncorrected footing gives 0.89 mΩ [0.41, 1.37], an interval that excludes 0 with
+an rms gain of 8.5% ("resolved, not material"); board_only 0.53 [−0.14, 1.19]; the published small-rail coefficients
+held 0.55 [−0.05, 1.14]; SRAM and NoC free 0.53 [−0.19, 1.25]; E77's registered form (no offset) 0.37 [−0.32, 1.06];
+launches flagged `below_floor` left out 0.44 [−0.06, 0.94]; and the floor-referenced form, which spends one arm-B point a
+pass on the reference, −0.02 [−1.45, 1.41]. Every upper edge lies between 0.56 and 0.85 pJ, below the row.
+
+**Post hoc (labelled; no verdict; `posthoc_e120.py` → `posthoc.txt`).** All five per-pass values are positive (a
+one-sided sign test gives p = 0.031), and the same five passes at 95% give [0.18, 0.91] mΩ. The widest pass, 3, holds
+the one launch of either run that reached 800 MHz late: 1.84 s after it began (E77's latest was 1.26 s). The service
+processor's rails are the PMIC's running average (τ about 1.06 s) and the board reading is not, so that launch read its
+minion rail low in the window (17.2 W against its twin's 19.3 W) and its off-rail high. Leaving it out gives 0.60 mΩ
+[0.06, 1.14] at 99% (NEITHER), with the upper edge unchanged at 0.68 pJ. So a conduction term of about 0.5–0.6 mΩ,
+about 0.3 pJ of the row, is probably there; it is not resolved at the registered 99%, and by the plan's rms test it is
+not material in any form.
+
+**The governor operation, as registered** ([`CHANGE-RECORD.md`](CHANGE-RECORD.md) has the full log). Originals 65 W /
+65 °C by the two RAM GETs (20:49:33); TDP **65 → 0** at 20:55:16.593, read back 0 / 65 at .616, the watchdog armed first;
+arm A's 40 launches all read 600 MHz (the abort never fired); **0 → 65** at 21:11:41.131, read back 65 / 65 at .155; the
+watchdog read `release` and exited at 21:11:41; the return burst above; closing read 21:19:48: **65 W / 65 °C**,
+`low_power`, 600 MHz, module uptime 6 d 7 h 6 m (no reset); an independent read at 21:20:22 agreed. Highest board
+reading 69.59 W (an arm-B heater), 50.6 W in a kept launch, die mean at most 59 °C. 30.29 card-minutes in the session,
+about 31 with the gate reads, the smoke and the closing read.
+
+**What ran.** 79 of 80 launches (the first gate, from a 46 °C die at the session's start, was not reached in 8 heater
+launches), 78 kept (one arm-B launch dropped by S1: its clock moved after reaching 800 MHz), 3 flagged `below_floor`:
+the gate's code launches when the rails settle even if the die has just dipped under the floor, and those three read
+51 °C (the registration's wording, "heated again first", describes the case where it dips before the rails settle).
+The 8 s settling rung ran this time (settling ratios minion 0.959, SRAM 0.965, NoC 0.965). The block's drift: board
+0.351 W/°C, minion −0.020, SRAM 0.022, NoC 0.026, so 92% of the board's drift is off the three rails. Arm A's idle minion
+rail read 6.75 W at a 52 °C launch (E77: 7.11 W at 55 °C). By amendment A1, no residency was read.
+
+**What it changes.** The regulator split that E77 left open is now bounded by a registered run: the regulators'
+conduction share of the rail ledger's 0.875 pJ row is **at most 0.69 pJ at 99%** in the registered model's total-current
+form, about 0.33 pJ at the point estimate, and not resolved from zero at 99% (post hoc, probably there at about 0.3 pJ).
+E77's post hoc 0.30 pJ bound does not replicate as a bound. The operating-point step (4.26 W minion, 1.76 W SRAM before
+any work) and the f·V² per-hart transfer are now registered results on this card. This bears on the Horace hub's Levels
+tab, stop 2 ("the card", its Missing column), its Next item 10 ("E77's regulator split"), and the final critic's item 13
+(Q130(q)); the kinds page's [§ 11 list](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open)
+has no entry of its own for it at `fdcbcba2f34d` (see "What this answers").
 
 ## What this answers
 
