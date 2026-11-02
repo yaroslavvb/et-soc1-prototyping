@@ -1,0 +1,120 @@
+E123 corrections after verification: numbers from scored.json and predictions-e123.json (post hoc, labelled)
+
+[C1] the class pooling: each rule's own SD of the adjusted draws (rule_s_w) against its class's pooled s'
+     registered = score_e123's interval (recomputed here as a check of the formula); own SD = the same formula with the
+     rule's own s' and k - 1 df in place of the class's; t floored as the scorer's t975, and at the exact fractional df
+  fp32.nn_like    G  k 7  s' own 0.057 vs class 0.132 (13 df) | offset -0.133
+      registered: +- 0.143 (17.1 df) NO CORRECTION; formula check ok
+      own SD:     +- 0.111 (12.9 df, t floored) [-0.244, -0.022] NO CORRECTION; exact t: +- 0.110 [-0.243, -0.023] NO CORRECTION; kind's D 13.202 +- 0.113 (own SD) against +- 0.139 (registered)
+      |offset| + half-width - band (0.50): registered -0.2239; own SD -0.2564 (t floored), -0.2573 (exact t)
+  fp16.sparse50   G  k 5  s' own 0.220 vs class 0.132 (13 df) | offset +0.267
+      registered: +- 0.151 (15.9 df) NO CORRECTION; formula check ok
+      own SD:     +- 0.294 (4.4 df, t floored) [-0.027, +0.561] UNRESOLVED; exact t: +- 0.285 [-0.018, +0.551] UNRESOLVED; kind's D 13.230 +- 0.288 (own SD) against +- 0.146 (registered)
+      |offset| + half-width - band (0.50): registered -0.0824; own SD +0.0609 (t floored), +0.0514 (exact t)
+  fp16.wsparse50  G  k 4  s' own 0.066 vs class 0.132 (13 df) | offset -0.224
+      registered: +- 0.158 (15.3 df) NO CORRECTION; formula check ok
+      own SD:     +- 0.121 (5.3 df, t floored) [-0.345, -0.103] NO CORRECTION; exact t: +- 0.119 [-0.343, -0.105] NO CORRECTION; kind's D 7.263 +- 0.134 (own SD) against +- 0.153 (registered)
+      |offset| + half-width - band (0.50): registered -0.1178; own SD -0.1546 (t floored), -0.1568 (exact t)
+  fp32.smallint   LF k 3  s' own 0.151 vs class 0.089 (9 df) | offset +0.127
+      registered: +- 0.170 (9.5 df) NO CORRECTION; formula check ok
+      own SD:     +- 0.328 (3.2 df, t floored) [-0.201, +0.454] NO CORRECTION; exact t: +- 0.314 [-0.188, +0.441] NO CORRECTION; kind's D 13.949 +- 0.390 (own SD) against +- 0.130 (registered)
+      |offset| + half-width - band (0.50): registered -0.2030; own SD -0.0456 (t floored), -0.0590 (exact t)
+  fp32.sparse90   LF k 3  s' own 0.104 vs class 0.089 (9 df) | offset -0.135
+      registered: +- 0.161 (9.5 df) NO CORRECTION; formula check ok
+      own SD:     +- 0.215 (4.3 df, t floored) [-0.349, +0.080] NO CORRECTION; exact t: +- 0.209 [-0.344, +0.074] NO CORRECTION; kind's D 0.680 +- 0.258 (own SD) against +- 0.117 (registered)
+      |offset| + half-width - band (0.50): registered -0.2041; own SD -0.1505 (t floored), -0.1562 (exact t)
+  fp16.sparse90   LF k 3  s' own 0.037 vs class 0.089 (9 df) | offset +0.046
+      registered: +- 0.162 (9.5 df) NO CORRECTION; formula check ok
+      own SD:     +- 0.150 (4.0 df, t floored) [-0.104, +0.196] NO CORRECTION; exact t: +- 0.149 [-0.103, +0.195] NO CORRECTION; kind's D 1.345 +- 0.097 (own SD) against +- 0.118 (registered)
+      |offset| + half-width - band (0.50): registered -0.2921; own SD -0.3043 (t floored), -0.3046 (exact t)
+  fp16.wsparse90  LF k 3  s' own 0.032 vs class 0.089 (9 df) | offset +0.017
+      registered: +- 0.161 (9.5 df) NO CORRECTION; formula check ok
+      own SD:     +- 0.167 (3.8 df, t floored) [-0.149, +0.184] NO CORRECTION; exact t: +- 0.149 [-0.131, +0.166] NO CORRECTION; kind's D 0.672 +- 0.080 (own SD) against +- 0.117 (registered)
+      |offset| + half-width - band (0.50): registered -0.3216; own SD -0.3162 (t floored), -0.3340 (exact t)
+  fp16.smallint   LF k 2  s' own 0.015 vs class 0.089 (9 df) | offset +0.186
+      registered: +- 0.185 (8.8 df) NO CORRECTION; formula check ok
+      own SD:     +- 0.217 (2.2 df, t floored) [-0.031, +0.402] NO CORRECTION; exact t: +- 0.201 [-0.015, +0.387] NO CORRECTION; kind's D 16.853 +- 0.151 (own SD) against +- 0.144 (registered)
+      |offset| + half-width - band (0.50): registered -0.1295; own SD -0.0977 (t floored), -0.1134 (exact t)
+  int8.wsparse50  LI k 3  s' own 0.087 vs class 0.077 (6 df) | offset -0.051
+      registered: +- 0.162 (7.2 df) NO CORRECTION; formula check ok
+      own SD:     +- 0.200 (4.8 df, t floored) [-0.251, +0.150] UNRESOLVED; exact t: +- 0.188 [-0.238, +0.137] NO CORRECTION; kind's D 3.258 +- 0.220 (own SD) against +- 0.111 (registered)
+      |offset| + half-width - band (0.25): registered -0.0376; own SD +0.0011 (t floored), -0.0118 (exact t)
+  int8.sparse90   LI k 3  s' own 0.056 vs class 0.077 (6 df) | offset -0.125
+      registered: +- 0.161 (7.2 df) UNRESOLVED; formula check ok
+      own SD:     +- 0.170 (4.8 df, t floored) [-0.295, +0.045] UNRESOLVED; exact t: +- 0.160 [-0.284, +0.035] UNRESOLVED; kind's D 1.302 +- 0.145 (own SD) against +- 0.110 (registered)
+      |offset| + half-width - band (0.25): registered +0.0361; own SD +0.0446 (t floored), +0.0345 (exact t)
+  int8.wsparse90  LI k 2  s' own 0.118 vs class 0.077 (6 df) | offset +0.137
+      registered: +- 0.183 (6.4 df) UNRESOLVED; formula check ok
+      own SD:     +- 1.243 (1.8 df, t floored) [-1.106, +1.380] UNRESOLVED; exact t: +- 0.479 [-0.342, +0.616] UNRESOLVED; kind's D 0.445 +- 1.060 (own SD) against +- 0.133 (registered)
+      |offset| + half-width - band (0.25): registered +0.0693; own SD +1.1298 (t floored), +0.3660 (exact t)
+  int8.ternary    LI k 2  s' own 0.011 vs class 0.077 (6 df) | offset +0.033
+      registered: +- 0.183 (6.4 df) NO CORRECTION; formula check ok
+      own SD:     +- 0.223 (2.1 df, t floored) [-0.189, +0.256] UNRESOLVED; exact t: +- 0.213 [-0.180, +0.247] NO CORRECTION; kind's D 5.118 +- 0.105 (own SD) against +- 0.133 (registered)
+      |offset| + half-width - band (0.25): registered -0.0342; own SD +0.0059 (t floored), -0.0034 (exact t)
+  fp16.sparse50's frozen offsets (E94's desk table): gate law +0.517, Q130(n) +0.495 W
+  are the adjusted draws' SDs equal inside each class? (scored.json adjusted_w)
+    G : Bartlett 9.10 on 2 df, p 0.0106; Brown-Forsythe F(2, 13) = 5.567, p 0.0179
+    LF: Bartlett 6.99 on 4 df, p 0.1364; Brown-Forsythe F(4, 9) = 0.973, p 0.4682
+    LI: Bartlett 2.86 on 3 df, p 0.4130; Brown-Forsythe F(3, 6) = 0.598, p 0.6396
+
+[C2] the committed tiles' gate-share gaps at D(random) per unit: beta x (rule mean - committed gate share)
+  fp32.nn_like    gap -0.0069 x 24.72 = -0.170 W; measured offset -0.133 W
+  fp16.sparse50   gap +0.0229 x 22.16 = +0.509 W; measured offset +0.267 W
+  fp16.wsparse50  gap -0.0108 x 22.16 = -0.239 W; measured offset -0.224 W
+  fp32.smallint   gap +0.0033 x 24.72 = +0.081 W; measured offset +0.127 W
+  fp32.sparse90   gap -0.0017 x 24.72 = -0.043 W; measured offset -0.135 W
+  fp16.sparse90   gap +0.0029 x 22.16 = +0.064 W; measured offset +0.046 W
+  fp16.wsparse90  gap -0.0001 x 22.16 = -0.003 W; measured offset +0.017 W
+  fp16.smallint   gap +0.0037 x 22.16 = +0.082 W; measured offset +0.186 W
+  int8.wsparse50  gap -0.0193 x 7.06 = -0.136 W; measured offset -0.051 W
+  int8.sparse90   gap -0.0152 x 7.06 = -0.107 W; measured offset -0.125 W
+  int8.wsparse90  gap +0.0009 x 7.06 = +0.006 W; measured offset +0.137 W
+  int8.ternary    gap +0.0049 x 7.06 = +0.035 W; measured offset +0.033 W
+  |gap| range 0.0001 to 0.0229
+  largest |prediction| without fp16.sparse50: 0.239 W; without fp16.sparse50, fp16.wsparse50 and fp32.nn_like: 0.136 W
+
+[C3] fp16 50% zeros in the page's frame (E78's S, the page's cell, less the measured offset)
+  page's S 15.22 - offset +0.267 = 14.95 W, +- 0.15 (registered) or +- 0.29 (own SD); this session's frame: committed S 15.46, kind's S 15.19 +- 0.15 W
+  this session's committed D 13.497 against E78's 13.196: +0.301 W (S1 band 0.5)
+  the two frames on the other eleven rows differ by 0.131 W at most; fp16.sparse50's by 0.236 W
+
+[C4] the bridge: E94's draws of fp32 ReLU x small weights read on both cards (D(draw) - D(committed); E123-R8 draws)
+  5 draws: SD 0.612 W on aifoundry3; 0.565 W on card 1, 0.582 W at E82's fp32 scale (1.0300)
+  fp32.nn_like's draws on aifoundry3 (plain means, W): e123d1 14.14, e123d2 13.44, e94d1 11.96, e94d2 12.56, e94d3 12.10, e94d4 13.52, e94d5 12.64
+  plain SD over its 7 draws 0.807 W (tau 0.807); without e123d1 0.655 W; the five bridge draws alone 0.612 W
+  E94 on card 1 (posthoc_e123.txt [D]): fp32.sparse50 0.493, fp16.nn_like 0.565, fp32.nn_like 0.552 W; only fp32.nn_like is a rule of both
+
+[C5] what the gate share leaves: the SD of the adjusted draws (each with its tile's own noise in it)
+  G : pooled 0.132 W (13 df); per rule fp32.nn_like 0.057, fp16.sparse50 0.220, fp16.wsparse50 0.066
+  LF: pooled 0.089 W (9 df); per rule fp32.smallint 0.151, fp32.sparse90 0.104, fp16.sparse90 0.037, fp16.wsparse90 0.032, fp16.smallint 0.015
+  LI: pooled 0.077 W (6 df); per rule int8.wsparse50 0.087, int8.sparse90 0.056, int8.wsparse90 0.118, int8.ternary 0.011
+
+[C6] table cells (the registered primary; aifoundry3 card 0, 600 MHz, passes 12310 and 12311): value +- 95% half-width
+     D over the type's zeros (kind_mean_w +- kind_mean_halfwidth_w); S over idle (kind_S_w); nJ per op and pJ per MAC from S,
+     the half-widths scaled with S (score_e123: 1e9 S / rate, / MACs per op)
+  fp32.nn_like    D  13.202 +- 0.139 | S  15.194 +- 0.143 | nJ/op  13.550 +- 0.128 | pJ/MAC 3.3080 +- 0.0312 | R2 NO CORRECTION; linear in S: ok
+  fp16.sparse50   D  13.230 +- 0.146 | S  15.188 +- 0.151 | nJ/op  13.548 +- 0.134 | pJ/MAC 1.6538 +- 0.0164 | R2 NO CORRECTION; linear in S: ok
+  fp16.wsparse50  D   7.263 +- 0.153 | S   9.254 +- 0.158 | nJ/op   8.253 +- 0.141 | pJ/MAC 1.0075 +- 0.0172 | R2 NO CORRECTION; linear in S: ok
+  fp32.smallint   D  13.949 +- 0.130 | S  15.846 +- 0.170 | nJ/op  14.141 +- 0.152 | pJ/MAC 3.4523 +- 0.0371 | R2 NO CORRECTION; linear in S: ok
+  fp32.sparse90   D   0.680 +- 0.117 | S   2.608 +- 0.161 | nJ/op   2.326 +- 0.144 | pJ/MAC 0.5679 +- 0.0351 | R2 NO CORRECTION; linear in S: ok
+  fp16.sparse90   D   1.345 +- 0.118 | S   3.270 +- 0.162 | nJ/op   2.919 +- 0.145 | pJ/MAC 0.3563 +- 0.0176 | R2 NO CORRECTION; linear in S: ok
+  fp16.wsparse90  D   0.672 +- 0.117 | S   2.688 +- 0.161 | nJ/op   2.397 +- 0.144 | pJ/MAC 0.2927 +- 0.0175 | R2 NO CORRECTION; linear in S: ok
+  fp16.smallint   D  16.853 +- 0.144 | S  18.872 +- 0.185 | nJ/op  16.828 +- 0.165 | pJ/MAC 2.0542 +- 0.0201 | R2 NO CORRECTION; linear in S: ok
+  int8.wsparse50  D   3.258 +- 0.111 | S   5.852 +- 0.162 | nJ/op   3.039 +- 0.084 | pJ/MAC 0.1855 +- 0.0051 | R2 NO CORRECTION; linear in S: ok
+  int8.sparse90   D   1.302 +- 0.110 | S   3.834 +- 0.161 | nJ/op   1.992 +- 0.084 | pJ/MAC 0.1216 +- 0.0051 | R2 UNRESOLVED; linear in S: ok
+  int8.wsparse90  D   0.445 +- 0.133 | S   2.971 +- 0.183 | nJ/op   1.543 +- 0.095 | pJ/MAC 0.0942 +- 0.0058 | R2 UNRESOLVED; linear in S: ok
+  int8.ternary    D   5.118 +- 0.133 | S   7.654 +- 0.183 | nJ/op   3.976 +- 0.095 | pJ/MAC 0.2427 +- 0.0058 | R2 NO CORRECTION; linear in S: ok
+
+[C7] E94's form (plain mean over draws, the rule's own s; secondary): offset +- half-width, W
+  fp32.nn_like    UNRESOLVED     +0.1618 +- 0.7495  ->  (+0.16 +- 0.75)
+  fp16.sparse50   UNRESOLVED     +0.0180 +- 0.6838  ->  (+0.02 +- 0.68)
+  fp16.wsparse50  UNRESOLVED     -0.1479 +- 1.3730  ->  (-0.15 +- 1.37)
+  fp32.smallint   UNRESOLVED     -0.2124 +- 0.9845  ->  (-0.21 +- 0.98)
+  fp32.sparse90   NO CORRECTION  -0.1042 +- 0.3864  ->  (-0.10 +- 0.39)
+  fp16.sparse90   NO CORRECTION  -0.0146 +- 0.3729  ->  (-0.01 +- 0.37)
+  fp16.wsparse90  NO CORRECTION  +0.0097 +- 0.1623  ->  (+0.01 +- 0.16)
+  fp16.smallint   -  (two draws)
+  int8.wsparse50  NO CORRECTION  +0.0546 +- 0.1761  ->  (+0.05 +- 0.18)
+  int8.sparse90   UNRESOLVED     -0.1644 +- 0.2963  ->  (-0.16 +- 0.30)
+  int8.wsparse90  -  (two draws)
+  int8.ternary    -  (two draws)
