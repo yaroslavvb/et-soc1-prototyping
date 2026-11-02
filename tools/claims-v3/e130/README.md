@@ -249,7 +249,7 @@ Data: `docs/reports/data/2026-11-02-e130-int8-netlists/`.
 
 ## Amendments
 
-### A1 — Mon 2 Nov 2026 (week 45), 10:35 PST: § Device commands sent, the build the list cannot read, and the corrected checker's run (written before any E130 data)
+### A1 — Mon 2 Nov 2026 (week 45), 10:34 PST (committed 10:34:08): § Device commands sent, the build the list cannot read, and the corrected checker's run (written before any E130 data)
 
 *Written on the Intel by the pass that corrects this registration after its verification (lane `fix-a3-e130-int8-netlists`),
 before any E130 claim, launch or data. No E130 session has run: every ssh of the first lane to aifoundry3 stopped at a Tailscale
