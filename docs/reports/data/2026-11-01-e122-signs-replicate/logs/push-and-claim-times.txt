@@ -1,0 +1,20 @@
+E122 (Q134, lane a3-e122-signs): the order of events, PST, Sun 1 Nov 2026
+20:11:26  pre-registration a68de2d0 committed and pushed (tools/claims-v3/e122/), via the workflow's serialized commit helper
+20:11:34  tools/claims-v3/signloc/ and tools/claims-v3/e122/ copied to aifoundry3 (~/aifoundry/tools/claims-v3/)
+20:11:43  run_e122.sh setup on aifoundry3 (no device access): every hash as frozen, 23 E108 tiles + 8 E78 tiles verified, 96 dry reads, a 47-launch dry pass, the stub session
+20:13:15  et-who before the claim: "No process holds an ET-SoC-1 device node or card lock."
+20:13:20  the day's post 1566603178164617247 staged (edit_replace.mjs, EXPECT_TEXT): exit 7, the post had been rewritten since the plan read it (aifoundry2's clause now marked released); rebuilt from the edit box's text
+20:13:31  the claim saved: the day's post now reads "<ai> **Claude says:** using aifoundry3 for 1 h, until ~21:15 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)" (before: "... using aifoundry2 for 1 h, until ~20:29 PST [doc](<...>) — released"); T0 = 1793592811
+20:13:31  session_e122.sh started detached on aifoundry3 (E122_T0 = the save time)
+20:13:32  session-start config read under the card lock: TDP 0 W, threshold 65 C, max_power, 600 MHz, 523 mV
+20:13:32  smoke 12201 starts (block_e108.sh --smoke); 20:14:21 smoke rc=0, gate PASS (8 items, cycles/op 546.0, config 0/65/600 at both ends)
+20:14:21  read-back 12202 starts; 20:15:03 rc=0 (96 reads in 39.4 s)
+20:15:03  p12210 starts; 20:22:49 rc=0 (466 s)
+20:23:04  p12211 starts; 20:30:03 rc=0 (419 s)
+20:25:01  ssh to aifoundry3 met a Tailscale check; logged, probed every 3 min (the session ran on, detached); 20:38:23 ssh passes again
+20:30:18  p12212 starts; 20:37:12 rc=0 (414 s)
+20:37:27  p12213 starts; 20:44:45 rc=0 (438 s)
+20:45:00  passes done: 4; et-who "No process holds an ET-SoC-1 device node or card lock."; session-end config read under the card lock: TDP 0 W, threshold 65 C, max_power, 600 MHz, 523 mV; session done at T0+1889 s
+20:45:37  et-who before the release: "No process holds an ET-SoC-1 device node or card lock."
+20:45:55  the release saved: the day's post 1566603178164617247 now reads "<ai> **Claude says:** using aifoundry3 for 1 h, until ~21:15 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>) — released" (before: the same without " — released"; no other card was held, so the last card held got " — released" appended, every word kept); EXPECT_TEXT matched on the first staging
+          card time: claim edit 20:13:31 to release edit 20:45:55 = 32.4 min of the 40 registered; device access 20:13:32-20:45:00 = 31.5 min
