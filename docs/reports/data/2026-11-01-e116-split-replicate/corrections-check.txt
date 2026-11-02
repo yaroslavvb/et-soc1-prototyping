@@ -1,0 +1,112 @@
+E116 corrections-check: post hoc, labelled; no registered number and no verdict changes
+
+## 0. The frozen outputs this reads (sha256; the corrections change none of them)
+  a956c09f10841d6fcdcef6539c6d094a33b58e34e035733759e8b1d91e4756a4  e116.json
+  6e3c50624ec492d80b70efad6efec77cb4190520d59c4eeb9e5585f315f64bec  runs.csv
+  f3e42fb53e389661192a3c69619fc80193c9a5ae62944debba5794a228b6775e  scored.json
+  69f8ab6e955a6aa397c01487ba795d1a4a3a662978fe3d6c00c786004f6cf472  scored-e88rules.json
+  d4e8e5121e20f7d84ab1c23f71ab2540cfe4404a23d734f7ebd0122ae5e89f81  posthoc.json
+  c0ff14429f2d5f5d4af5cf04d6d3db6aa439c7ae560d499912a56412f3566bc7  results.md
+  a997c76b8f626eb6e8889482b97093374e67e0c4829e5044ff475b917f6d8e26  results-e88rules.md
+  c9ef1e5b9e7f5b22c3cd88e2757f9ec0a9867d2cfdd4a05ec6d19c39ee9bce93  reduce.txt
+  5f05c0c3839705cbf68483bde4c664f08d5e1d5a80d3c5bf9fec271a361ddac7  tools/claims-v3/e116/README.md (the registration, left as frozen)
+
+## C1. E88's own model (its frozen P bands) on aifoundry3, unscaled: band widths and what a card scale moves
+   scored-e88rules.json > primary.contrasts.*.predicted (mu, tol = the band's half-width) and .D;
+   predictions-e116.json > card_scale_e82 (E82's scale, aifoundry3 over card 1, per format)
+   E82's scale: {'fp32': 1.03, 'fp16': 1.0332, 'int8': 1.0271}
+   contrast fmt  measured    pred  +-tol              band P    meas-pred     pct scale moves  /tol
+   F32      fp32    8.386   7.564  1.086    6.478..  8.649 PASS    +0.822    +11%       0.227  0.21
+   W32      fp32    0.026   0.365  1.256   -0.890..  1.621 PASS    -0.339               0.011  0.01
+   M32      fp32    8.855   9.716  1.557    8.159.. 11.272 PASS    -0.861     -9%       0.291  0.19
+   R32      fp32    5.032   5.017  1.564    3.453..  6.581 PASS    +0.015     +0%       0.151  0.10
+   R32bus   fp32    3.889   4.753  1.490    3.262..  6.243 PASS    -0.864    -18%       0.143  0.10
+   R32sum   fp32    1.143   0.264  1.260   -0.996..  1.525 PASS    +0.879               0.008  0.01
+   M32s     fp32    2.627   0.242  1.254   -1.012..  1.496 FAIL    +2.385               0.007  0.01
+   R32s     fp32    2.134   3.693  1.431    2.262..  5.124 FAIL    -1.559    -42%       0.111  0.08
+   X32      fp32    2.471   1.483  1.257    0.225..  2.740 PASS    +0.988    +67%       0.044  0.04
+   F16      fp16    8.376   7.529  1.121    6.408..  8.649 PASS    +0.847    +11%       0.250  0.22
+   W16      fp16    0.018   0.505  1.200   -0.695..  1.705 PASS    -0.487               0.017  0.01
+   M16      fp16    6.361   5.636  1.664    3.972..  7.301 PASS    +0.725    +13%       0.187  0.11
+   R16      fp16    6.508   7.359  1.797    5.563..  9.156 PASS    -0.851    -12%       0.244  0.14
+   A16      fp16    0.410   0.127  1.197   -1.070..  1.324 PASS    +0.283               0.004  0.00
+   R16abs   fp16    6.097   7.232  1.800    5.432..  9.031 PASS    -1.135    -16%       0.240  0.13
+   F8       int8    1.678   1.359  0.751    0.608..  2.110 PASS    +0.319    +23%       0.037  0.05
+   W8       int8   -0.104   0.174  0.816   -0.642..  0.990 PASS    -0.278               0.005  0.01
+   M8       int8    3.402   2.123  1.565    0.558..  3.689 PASS    +1.279    +60%       0.058  0.04
+   R8       int8    1.964   3.066  1.609    1.456..  4.675 PASS    -1.102    -36%       0.083  0.05
+   P PASS 17 of 19; FAIL: M32s, R32s
+   band half-widths, all 19: 0.751 to 1.800 W; fp32 and fp16 only: 1.086 to 1.800 W
+   the most E82's scale moves any prediction: 0.291 W (M32); the largest share of a half-width: 0.22 (F16)
+   misses inside a PASS band of 0.85 W or more: M32 8.85 against 9.72 (-0.86 W); R32bus 3.89 against 4.75 (-0.86 W); R32sum 1.14 against 0.26 (+0.88 W); X32 2.47 against 1.48 (+0.99 W); R16 6.51 against 7.36 (-0.85 W); R16abs 6.10 against 7.23 (-1.13 W); M8 3.40 against 2.12 (+1.28 W); R8 1.96 against 3.07 (-1.10 W)
+
+## C2. The held fp32 sign (s_abs - c_abs, E88's M32s) and its walking half (s_walk - s_abs, R32s): every reading
+   held  E88, aifoundry1 card 1   2.524 +- 0.185 (n 5)   [2026-10-31-e88-result-path/scored.json > primary.contrasts.M32s.D]
+   held  E106, aifoundry1 card 1  2.668 +- 0.210 (n 3)   [2026-11-01-e106-held-signs/scored.json > primary.contrasts.fp32.held]
+   held  E108, aifoundry1 card 1  2.480 +- 0.320 (n 4)   [2026-11-01-e108-sign-located/scored.json > primary.quantities.fp32.held_abs]
+   held  E92, aifoundry3          2.377 +- 0.556 (n 3)   [2026-11-01-e92-sign-split/scored.json > contrasts.fp32.s_abs-c_abs.D_w]
+   held  E116, aifoundry3         2.627 +- 0.218 (n 4)   [scored-e88rules.json > primary.contrasts.M32s.D]
+   5 readings on two cards, 2.377 to 2.668 W (spread 0.291 W)
+   walk  E88, aifoundry1 card 1   2.259 +- 0.158 (n 5)   [2026-10-31-e88-result-path/scored.json > primary.contrasts.R32s.D]
+   walk  E108, aifoundry1 card 1  2.235 +- 0.169 (n 4)   [2026-11-01-e108-sign-located/scored.json > primary.quantities.fp32.rest]
+   walk  E116, aifoundry3         2.134 +- 0.153 (n 4)   [scored-e88rules.json > primary.contrasts.R32s.D]
+   E116's walking half over card 1's: 0.944 (E88), 0.955 (E108)
+
+## C4. Rail and board shares (posthoc.json; points = share x 100)
+   aifoundry3 (E116)  fp32: rail [0.3974, 0.3866, 0.216] board [0.3765, 0.3976, 0.2259]  rail - board [2.09, -1.1, -0.99]
+   aifoundry3 (E116)  fp16: rail [0.4143, 0.2986, 0.2871] board [0.3943, 0.2994, 0.3063]  rail - board [2.0, -0.08, -1.92]
+   aifoundry3 (E116)  int8: rail [0.2553, 0.4754, 0.2692] board [0.2391, 0.4823, 0.2787]  rail - board [1.62, -0.69, -0.95]
+   card 1 (E88)       fp32: rail [0.387, 0.3958, 0.2172] board [0.3671, 0.3992, 0.2336]  rail - board [1.99, -0.34, -1.64]
+   card 1 (E88)       fp16: rail [0.4004, 0.3069, 0.2928] board [0.3893, 0.303, 0.3077]  rail - board [1.11, 0.39, -1.49]
+   card 1 (E88)       int8: rail [0.2452, 0.4729, 0.2818] board [0.2567, 0.472, 0.2712]  rail - board [-1.15, 0.09, 1.06]
+   rail against board, aifoundry3 (E116): up to 2.09 points
+   rail against board, card 1 (E88): up to 1.99 points
+   rail, aifoundry3 - card 1, fp32: [1.04, -0.92, -0.12]
+   rail, aifoundry3 - card 1, fp16: [1.39, -0.83, -0.57]
+   rail, aifoundry3 - card 1, int8: [1.01, 0.25, -1.26]
+   aifoundry3's rail shares against card 1's rail shares: up to 1.39 points
+
+## C5. Board watts, E116 over E88 (posthoc.json > ratio_e116_over_e88_board), against E82's scale
+   fp32: parts (i) 1.0586  (iii) 1.0279  (ii) 0.9980;  r_walk total 1.0322;  random anchor 1.0388;  E82's scale 1.0300;  total over scale, less 1: 1.07x
+   fp16: parts (i) 1.0528  (iii) 1.0275  (ii) 1.0349;  r_walk total 1.0396;  random anchor 1.0395;  E82's scale 1.0332;  total over scale, less 1: 1.19x
+   int8: parts (i) 0.9849  (iii) 1.0801  (ii) 1.0856;  r_walk total 1.0572;  random anchor 1.0495;  E82's scale 1.0271;  total over scale, less 1: 2.11x
+   the nine parts run from 0.985 (int8 (i)) to 1.086 (int8 (ii))
+
+## C6. Passes behind each format's split (scored.json > power)
+   kept passes: 4 ['11611', '11612', '11613', '11614']; registered minimum 4 (the scorer counts kept passes)
+   fp32: shares n = [4, 4, 4]; S PASS, W PASS
+   fp16: shares n = [4, 4, 4]; S PASS, W PASS
+   int8: shares n = [3, 3, 3]; S PASS, W PASS
+   pass 11611: int8 items ['int8.c_cancel', 'int8.full', 'int8.ones', 'int8.r_cancel', 'int8.r_walk', 'int8.zeros']
+   pass 11612: int8 items ['int8.c_cancel', 'int8.full', 'int8.ones', 'int8.r_cancel', 'int8.r_walk', 'int8.zeros']
+   pass 11613: int8 items ['int8.c_cancel', 'int8.full', 'int8.ones', 'int8.r_cancel', 'int8.r_walk', 'int8.zeros']
+   pass 11614: int8 items ['int8.c_cancel', 'int8.full', 'int8.ones', 'int8.r_cancel', 'int8.zeros']; missing ['int8.r_walk']
+
+## C7. Pass 11613's int8 zero line (e116.json > anchors, gates; runs.csv; p11613/run.log)
+   gates: zero_mid_departure_w 0.25 (needs three runs), zero_range_w 0.6
+   11610 int8.zeros: n 3, mid departure -0.316 W -> set aside
+   11613 int8.zeros: n 2, p80 [28.4972, 28.499], range 0.002 W, mid departure not computed
+   run.log: pass 11613 #9 int8.zeros: launch reading not reached (hot 59.0 C, now 59.0 C after 0 heats, 1.7 s, quiet 1.71 s): skipped
+   11613 int8.zeros kept at positions [22, 30]; int8 items before the first of them (the line is held flat there): [(1, 'int8.c_cancel'), (3, 'int8.r_walk'), (5, 'int8.r_cancel'), (8, 'int8.full'), (18, 'int8.full'), (20, 'int8.ones')]
+   int8.c_cancel by pass: 11611 1.777, 11612 1.747, 11613 1.530, 11614 1.657
+   int8.ones by pass: 11611 1.636, 11612 1.651, 11613 1.358, 11614 1.648
+   int8 shares per pass (11611, 11612, 11613): i_clocked_lane [0.2488, 0.2503, 0.2181]; iii_operand_multiplier [0.4589, 0.488, 0.5]; ii_result_path [0.2924, 0.2617, 0.2819]
+   i_clocked_lane: with 11613 0.2391 (diff -0.0176); without it 0.2495 (diff -0.0072); band +-0.08: inside without it
+   iii_operand_multiplier: with 11613 0.4823 (diff +0.0102); without it 0.4734 (diff +0.0014); band +-0.08: inside without it
+   ii_result_path: with 11613 0.2787 (diff +0.0074); without it 0.2771 (diff +0.0058); band +-0.08: inside without it
+
+## C8. Wording checks
+   fp32.c_abs: C[0][0] 7a433080, distinct C 1; n x 2^100 as fp32 = 7a433080: equal
+   fp32.r_abs: C[0][0] 7a433080, distinct C 1; n x 2^100 as fp32 = 7a433080: equal
+   fp32.s_abs: C[0][0] 7a433080, distinct C 1; n x 2^100 as fp32 = 7a433080: equal
+   H1-fp32 (ones - c_abs): 0.026 +- 0.020 W, interval 0.006 to 0.046; rule: at most 1.0 W, PASS
+   E116-S fp32 share moves: +0.0094 +- 0.0043, -0.0017 +- 0.0060, -0.0077 +- 0.0059
+   E116-S fp16 share moves: +0.0049 +- 0.0030, -0.0035 +- 0.0086, -0.0014 +- 0.0092
+   E116-S int8 share moves: -0.0176 +- 0.0451, +0.0102 +- 0.0525, +0.0074 +- 0.0387
+   pass config reads (minion_mv): 11610 start 523; 11610 end 522; 11611 start 523; 11611 end 522; 11612 start 523; 11612 end 522; 11613 start 523; 11613 end 523; 11614 start 523; 11614 end 522
+   pass ends at 522 mV: 4 of 5; every read TDP/threshold/clock [(0, 65, 600)]
+   config-session-start: 523 mV, TDP 0 W, 65 C, 600 MHz
+   config-session-end: 523 mV, TDP 0 W, 65 C, 600 MHz
+   E116-T fp32.randn: 24.744 against E78 24.7249: +0.019 W (+0.1%), band 0.742, PASS
+   E116-T fp16.randn: 22.149 against E78 22.1624: -0.013 W (-0.1%), band 0.665, PASS
+   E116-T int8.full: 7.160 against E78 7.0565: +0.104 W (+1.5%), band 0.400, PASS
