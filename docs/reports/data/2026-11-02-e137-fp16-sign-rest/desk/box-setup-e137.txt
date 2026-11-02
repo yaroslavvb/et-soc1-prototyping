@@ -1,0 +1,35 @@
+2026-11-02 15:35:03 PST
+aifoundry1
+== check
+HARNESS OK: 19 files match predictions-e137.json
+check rc=0
+== tiles
+{"e137_tiles": 7, "e78_tiles_checked": 7, "problems": []}
+verify rc=0
+{"e137": ["fp16.b_B_w", "fp16.b_B_wm", "fp16.b_B_z", "fp16.b_B_zm", "fp16.c_abs", "fp16.signs", "fp16.z_s"], "compare": ["fp16.ones"], "anchors": ["fp32.zeros", "fp32.randn", "fp16.zeros", "fp16.randn", "int8.zeros", "int8.full"], "tie": "anchor_pi", "runs_per_pass": 28}
+== preflight
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+preflight rc=0
+== binaries
+  fp16 present
+  file: present
+  --dump-tiles present
+  --stop-file present
+-rw-rw-rw- 1 root root 0 Oct 26 15:02 /run/lock/etsoc-shire1.lock
+== dry pass
+dry rc=0
+device launches the pass would make: 30
+of them on E128 tiles: 7
+      1 ET_DEVICES=1
+15:35:06 [aifoundry1-c1] done
+DRY ettelem config
+2026-11-02T15:35:11 [aifoundry1-c1] e137 p13700 ends: ok tiers 1,2
+== dry smoke
+dry smoke rc=0
+smoke launches: 6
+== queue stub
+15:35:19 e137: passes 13710 13711 13712 13713 13714 13715 13716; budget 60 s from the anchor (15:35:19), reserve 60 s, last end 15:35:19, deadline 21:30:00; first estimate 1 s
+15:35:19 budget: stopping before p13710 (now T0+0 s, projected 1 s, would end T0+1 s > T0+0 s)
+15:35:19 e137: done, 0 passes, at T0+0 s
+No process holds an ET-SoC-1 device node or card lock.

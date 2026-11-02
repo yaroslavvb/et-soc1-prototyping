@@ -1,0 +1,957 @@
+{
+ "experiment": "E137",
+ "title": "fp16's sign rest on E128's matched design, at four or more kept passes (aifoundry1 card 1, 600 MHz)",
+ "request": "Q137 (the owner's words, Mon 2 Nov 2026 ~15:20 PST: 'The overall goal is to be able to predict the power requirement and heat generation of various kinds of numeric computations as accurately as possible'); the kinds page's section 11, item 5",
+ "date": "2026-11-02",
+ "registration": "tools/claims-v3/e137/E137.md",
+ "card": {
+  "name": "aifoundry1-c1",
+  "device": 1,
+  "clock_mhz": 600,
+  "config_gate": {
+   "expected": {
+    "tdp_w": 65,
+    "temp_threshold_c": 65
+   }
+  }
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337"
+  },
+  "card_code_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+   "tools/claims-v3/e128/e128/e128.json": "786eba597f531b664136533feb036081ea9937b95ac06a78527fcc078884ed7d",
+   "tools/claims-v3/e128/ettelem_guard.sh": "c2c4ab7602c2e4d2b3ed3454faa4f60b745d5985bb7f71713229979079dbd2fc",
+   "tools/claims-v3/dmcmd_audit.py": "f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e",
+   "tools/claims-v3/dmcmd_table.json": "50168632931fd8c1fab40794cbaaac6aca3d31f01d4367d8a21fcf69c0bdc638",
+   "workloads/sparsity/host/main.cpp": "0f53a7d505155156c933e2d9a64d38803ca4e0cea3e20242e0aaafbf35e82284"
+  },
+  "e137_card_files_sha256": {
+   "tools/claims-v3/e137/e137_common.py": "ce03a801fcd05546b75cf7f56c17f7cf733ebad5d17855445c1895e54ab84346",
+   "tools/claims-v3/e137/run_e137.py": "15edb54d0bd62edd50b63b2918719fede5a16315178e3b6a3bbaf3bab1af9d58",
+   "tools/claims-v3/e137/block_e137.sh": "ee10f75a6c921061342e02a15b1b01731ffd61b9fcdf4ccd34305362974ee351",
+   "tools/claims-v3/e137/queue_e137.sh": "0f592b31b8762c13e1a7dfcae61f71fe0275b3e668ad7fdf0f0d0e4d46c0386e",
+   "tools/claims-v3/e137/session_e137.sh": "931d28e5517d27fa5dfacf6c42f078fbcc3b9b45e7dade26af98fc11f046db59",
+   "tools/claims-v3/e137/preflight_e137.sh": "8b1cf0a77000b66fff4a2fe60191c8820227ac3f99200751a77b7cd5eeb0bdc9",
+   "tools/claims-v3/e137/smoke_gate_e137.py": "18f9198acec2688bc3b5ed41d15bda34389507bdd46e2008da11cc9a5db898ac"
+  },
+  "box_binaries_sha256": {
+   "build/sparsity/host/sparsity_host": "e0fbecce35f252c546e6e8390f6a4694519674dc4d6dea359b0db9c4d1a3fbbe",
+   "build/ettelem/ettelem": "8008f96f056ae1c224c33ccce38070a67882a664620d637b8833d378b2167325"
+  },
+  "e128_json_sha256": "786eba597f531b664136533feb036081ea9937b95ac06a78527fcc078884ed7d",
+  "predictions_e128_sha256": "c1793ad903b413be59e655dcecc213bdd2f142717979d7c9b9ad55605e52ccef"
+ },
+ "plan": {
+  "passes": [
+   13710,
+   13711,
+   13712,
+   13713,
+   13714,
+   13715,
+   13716
+  ],
+  "smoke": 13701,
+  "readback": null,
+  "runs_per_pass": 28,
+  "items_per_pass": "the tie twice, E78's six anchors three times, E128's seven fp16 sign tiles and E78's fp16.ones once",
+  "reduction_primary": "dips removed, leak 0.2414 (E82's), E78's gates (S1 of the set-aside rule)",
+  "min_kept_passes_scored": 4
+ },
+ "card_budget": {
+  "card_minutes_at_most": 60,
+  "counted": "the session's first device access (its start config read) to its last (its end config read)",
+  "queue_budget_s": 3420,
+  "reserve_s": 60,
+  "first_pass_estimate_s": 700,
+  "queue_deadline": "2026-11-02 21:30 PST",
+  "no_session_start_after": "2026-11-02 21:00 PST",
+  "every_run_ends_by": "2026-11-02 21:45 PST"
+ },
+ "stops": {
+  "board_w": 68.0,
+  "die_hottest_shire_c": 72.0,
+  "run_e78_max_c": 72.0,
+  "run_e78_pmic_stop_c": 82.0,
+  "what": "run_e137.py (E131's guard, copied): a telemetry line with board_w >= 68 W or any minion-shire reading >= 72 C writes the pass's STOP and ends it (run_e78's EXIT_HOT); run_e78.py's own --max-c 72 on the first shire reading (and its PMIC field >= 82 C, a die reading on this runner); either stop fails the block and ends the queue",
+  "margin_basis": "E128's two passes of the same tiles on this card: board at most 59.79 W, the shires' mean at most 61 C, no shire above 65 C (docs/reports/data/2026-11-02-e128-fp16-signs/desk/telemetry-max-e128.txt); E137 drops E128's fp32 tiles but keeps fp32.randn, the hottest kind, as an anchor; the PMIC's alarm is 75 W"
+ },
+ "set_aside_rule": {
+  "min_kept_passes": 4,
+  "written": "Mon 2 Nov 2026, in this registration, before the claim and before any E137 data",
+  "relaxed_reduction_gates": {
+   "zero_mid_departure_w": 99.0,
+   "zero_range_w": 99.0,
+   "random_range_w": 99.0,
+   "tie_drift_w": 99.0
+  },
+  "steps": [
+   "S1, the primary: E78's pass gates unchanged (each type's zeros line departs <= 0.25 W from its straight line and spans <= 0.60 W; each random anchor spans <= 1.0 W; the pi tie drifts <= 0.60 W; at most 2 failed runs; card 1's config read). It carries every verdict if it keeps >= 4 passes",
+   "S2, only if S1 keeps < 4: a pass set aside ONLY by the pi tie's drift is restored whole (pi enters no rule but the reported session tie)",
+   "S3, only if S1 and S2 keep < 4: a pass set aside only by the fp32 or int8 anchor gates (their zeros line's departure or span, their random anchor's span; the tie as in S2) is restored for fp16's items: every rule reads fp16 D, which is over fp16's own zeros line. A pass set aside by fp16's own anchors (fp16.zeros' departure or span, fp16.randn's span) is never restored",
+   "Never restored in any step: a pass with more than 2 failed runs, a pass whose config read is not card 1's 65/65, a pass whose block did not end ok, an .attempt-* directory",
+   "Per rule: a quantity is formed only in the kept passes in which every tile it reads has a kept run (a run skipped by E78's launch rule, as E128's 12811 fp16.signs, leaves that pass out of that quantity only); a rule is scored only if its quantity has >= 4 such passes, else NOT SCORED with its n",
+   "Where restored values come from: reduce_e137.py --relax-anchors at the same frozen slope (with a fixed slope each pass's reduction does not depend on the others', so its per-pass values equal the primary's for every pass both keep)",
+   "No pass is added after any reduction is read, and no pass is chosen after the fact. Every reading is reported and every verdict names the reading that carries it"
+  ]
+ },
+ "model": {
+  "name": "M4",
+  "coef_fJ": {
+   "a_clocked": 1.0660910178957255,
+   "k_bus": 7.533039550355875,
+   "k_core": 1.624383735237168,
+   "k_rest": 2.222188844199022
+  },
+  "card1_scale": 0.9722467829213307,
+  "card1_scale_se": 0.0018618294751800036,
+  "interval_pool": {
+   "n": 88,
+   "rms_w": 0.17561079622126327
+  }
+ },
+ "matched_alternations": {
+  "fp16": {
+   "fp16.z_s": [
+    2112.0,
+    1694.0
+   ],
+   "fp16.b_B_zm": [
+    2112.0,
+    1694.0
+   ],
+   "fp16.b_B_wm": [
+    2112.0,
+    1694.0
+   ]
+  }
+ },
+ "tiles": {
+  "fp16.b_B_w": {
+   "type": "fp16",
+   "kind": "b_B_w",
+   "group": "E108's design in fp16: B's signs walking",
+   "how": "new",
+   "counts_from": "docs/reports/data/2026-11-02-e128-fp16-signs/desk/counts-e128.json",
+   "alternations_per_op": [
+    1822.0,
+    2228.0
+   ],
+   "pred": {
+    "M": 13.62247937582829,
+    "lo95": 13.142834549729505,
+    "hi95": 14.102124201927074,
+    "half95": 0.4796448260987838,
+    "launch_points_w": [
+     13.564235287268652,
+     13.380739743657667,
+     13.922463096558557
+    ],
+    "terms_w": [
+     2.7427394066886364,
+     0.4126266015935612,
+     2.492106068131244,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.b_B_wm": {
+   "type": "fp16",
+   "kind": "b_B_wm",
+   "group": "matched: B's signs walking, alternations as z_s",
+   "how": "new",
+   "counts_from": "docs/reports/data/2026-11-02-e128-fp16-signs/desk/counts-e128.json",
+   "alternations_per_op": [
+    2112.0,
+    1694.0
+   ],
+   "pred": {
+    "M": 13.50537444585755,
+    "lo95": 13.124057602751533,
+    "hi95": 13.886691288963567,
+    "half95": 0.38131684310601754,
+    "launch_points_w": [
+     13.569345953551814,
+     13.378035854524377,
+     13.568741529496462
+    ],
+    "terms_w": [
+     2.8653622963119605,
+     0.4391466948484106,
+     2.22585815528233,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.b_B_z": {
+   "type": "fp16",
+   "kind": "b_B_z",
+   "group": "E108's design in fp16: held, zero products, at b_B_w's sums",
+   "how": "new",
+   "counts_from": "docs/reports/data/2026-11-02-e128-fp16-signs/desk/counts-e128.json",
+   "alternations_per_op": [
+    1824.0,
+    2166.0
+   ],
+   "pred": {
+    "M": 13.775504734378806,
+    "lo95": 13.327209615280788,
+    "hi95": 14.223799853476825,
+    "half95": 0.44829511909801895,
+    "launch_points_w": [
+     13.650619059299451,
+     13.635386044135455,
+     14.040509099701513
+    ],
+    "terms_w": [
+     2.6649535092147305,
+     0.4322786145688323,
+     2.703265311180394,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.b_B_zm": {
+   "type": "fp16",
+   "kind": "b_B_zm",
+   "group": "matched: held, zero products, at b_B_wm's sums",
+   "how": "new",
+   "counts_from": "docs/reports/data/2026-11-02-e128-fp16-signs/desk/counts-e128.json",
+   "alternations_per_op": [
+    2112.0,
+    1694.0
+   ],
+   "pred": {
+    "M": 13.641527605431627,
+    "lo95": 13.263967628155502,
+    "hi95": 14.019087582707751,
+    "half95": 0.37755997727612384,
+    "launch_points_w": [
+     13.684099549749392,
+     13.527026776852264,
+     13.713456489693224
+    ],
+    "terms_w": [
+     2.9153951636142645,
+     0.4615349947876573,
+     2.2895901476148555,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.c_abs": {
+   "type": "fp16",
+   "kind": "c_abs",
+   "group": "held baseline",
+   "how": "reused",
+   "counts_from": "docs/reports/data/2026-11-01-q132-rtl-bench/counts-e92.json",
+   "alternations_per_op": [
+    0.0,
+    0.0
+   ],
+   "pred": {
+    "M": 8.041986041710304,
+    "lo95": 7.6679524129153,
+    "hi95": 8.416019670505309,
+    "half95": 0.3740336287950044,
+    "launch_points_w": [
+     8.047185586397948,
+     8.033542882722204,
+     8.045229656010763
+    ],
+    "terms_w": [
+     0.0009110187640308173,
+     0.0026925063725517853,
+     0.0633752171588722,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.ones": {
+   "type": "fp16",
+   "kind": "ones",
+   "group": "the +1 side of the step",
+   "how": "reused",
+   "counts_from": "docs/reports/data/2026-11-01-q132-rtl-bench/counts-e88.json",
+   "alternations_per_op": [
+    0.0,
+    0.0
+   ],
+   "pred": {
+    "M": 8.068792166613445,
+    "lo95": 7.695085396327667,
+    "hi95": 8.442498936899224,
+    "half95": 0.373706770285778,
+    "launch_points_w": [
+     8.067485064264835,
+     8.06360337041213,
+     8.075288065163372
+    ],
+    "terms_w": [
+     0.009015781550771297,
+     0.002079578092621295,
+     0.08268950755520271,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.signs": {
+   "type": "fp16",
+   "kind": "signs",
+   "group": "the +-1 side of the step",
+   "how": "reused",
+   "counts_from": "docs/reports/data/2026-11-01-q132-rtl-bench/counts-e92.json",
+   "alternations_per_op": [
+    2070.0,
+    2026.0
+   ],
+   "pred": {
+    "M": 12.922942700907225,
+    "lo95": 12.501020752420613,
+    "hi95": 13.344864649393836,
+    "half95": 0.4219219484866105,
+    "launch_points_w": [
+     12.746147311638937,
+     12.897427630009213,
+     13.125253161073525
+    ],
+    "terms_w": [
+     2.466348468465714,
+     0.3039111842278549,
+     2.177675748798806,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  },
+  "fp16.z_s": {
+   "type": "fp16",
+   "kind": "z_s",
+   "group": "held, zero products, B's signs, equal accumulators",
+   "how": "reused",
+   "counts_from": "docs/reports/data/2026-11-01-e104-c-readback/desk/counts-e104b.json",
+   "alternations_per_op": [
+    2112.0,
+    1694.0
+   ],
+   "pred": {
+    "M": 10.243085498450274,
+    "lo95": 9.867842302003881,
+    "hi95": 10.618328694896666,
+    "half95": 0.3752431964463935,
+    "launch_points_w": [
+     10.225533795852856,
+     10.219427634656514,
+     10.284295064841452
+    ],
+    "terms_w": [
+     1.7104937830835216,
+     0.039780139882274246,
+     0.5178042760696273,
+     7.97500729941485
+    ]
+   },
+   "check_mismatch_words": 0.0,
+   "valid_slots": 4096.0,
+   "cycles": 545.0
+  }
+ },
+ "quantities": {
+  "fp16.step": {
+   "form": "contrast",
+   "plus": [
+    "fp16.signs"
+   ],
+   "minus": [
+    "fp16.ones"
+   ],
+   "what": "the sign step, fp16",
+   "M": 4.85415053429378,
+   "half95": 0.5479731079439659
+  },
+  "fp16.held_z": {
+   "form": "contrast",
+   "plus": [
+    "fp16.z_s"
+   ],
+   "minus": [
+    "fp16.c_abs"
+   ],
+   "what": "random B signs on zero products, the sum held (E104's z_s), fp16",
+   "M": 2.2010994567399687,
+   "half95": 0.4973299407233996
+  },
+  "fp16.rest_vs_z": {
+   "form": "contrast",
+   "plus": [
+    "fp16.signs",
+    "fp16.c_abs"
+   ],
+   "minus": [
+    "fp16.ones",
+    "fp16.z_s"
+   ],
+   "what": "the step less the zero-product held part (the step's rest), fp16",
+   "M": 2.6530510775538114,
+   "half95": 0.7400395457398732
+  },
+  "fp16.Bz_het": {
+   "form": "contrast",
+   "plus": [
+    "fp16.b_B_z"
+   ],
+   "minus": [
+    "fp16.z_s"
+   ],
+   "what": "E108's design, fp16: held at b_B_w's sums over held at z_s's equal ones",
+   "M": 3.5324192359285336,
+   "half95": 0.5771140510014452
+  },
+  "fp16.Bz_walk": {
+   "form": "contrast",
+   "plus": [
+    "fp16.b_B_w"
+   ],
+   "minus": [
+    "fp16.b_B_z"
+   ],
+   "what": "E108's design, fp16: walking over held at the same sums at every op's end (alternations differ)",
+   "M": -0.1530253585505152,
+   "half95": 0.6431192725868492
+  },
+  "fp16.Bz_rest": {
+   "form": "contrast",
+   "plus": [
+    "fp16.b_B_w"
+   ],
+   "minus": [
+    "fp16.z_s"
+   ],
+   "what": "E108's design, fp16: B's rest on zero products",
+   "M": 3.379393877378018,
+   "half95": 0.598924857652455
+  },
+  "fp16.Bm_het": {
+   "form": "contrast",
+   "plus": [
+    "fp16.b_B_zm"
+   ],
+   "minus": [
+    "fp16.z_s"
+   ],
+   "what": "matched, fp16: the accumulators differing (held at b_B_wm's sums over z_s's equal ones)",
+   "M": 3.3984421069813537,
+   "half95": 0.5165391217811632
+  },
+  "fp16.Bm_walk": {
+   "form": "contrast",
+   "plus": [
+    "fp16.b_B_wm"
+   ],
+   "minus": [
+    "fp16.b_B_zm"
+   ],
+   "what": "matched, fp16: the sums changing (walking over held at the same op-end sums, the same alternations)",
+   "M": -0.13615315957407623,
+   "half95": 0.5225024918984728
+  },
+  "fp16.Bm_rest": {
+   "form": "contrast",
+   "plus": [
+    "fp16.b_B_wm"
+   ],
+   "minus": [
+    "fp16.z_s"
+   ],
+   "what": "matched, fp16: B's rest on zero products",
+   "M": 3.262288947407278,
+   "half95": 0.5187651769819827
+  },
+  "fp16.held_alt": {
+   "form": "contrast",
+   "plus": [
+    "fp16.b_B_z"
+   ],
+   "minus": [
+    "fp16.b_B_zm"
+   ],
+   "what": "two held tiles with differing accumulators, fp16: E108's design over the matched one (other alternation counts and other C words)",
+   "M": 0.1339771289471793,
+   "half95": 0.5733139768052348
+  },
+  "fp16.walk_alt": {
+   "form": "contrast",
+   "plus": [
+    "fp16.b_B_w"
+   ],
+   "minus": [
+    "fp16.b_B_wm"
+   ],
+   "what": "two walking tiles, fp16: E108's design over the matched one (other alternation counts, A's sign, other sums)",
+   "M": 0.11710492997074032,
+   "half95": 0.6005354591966644
+  },
+  "fp16.share_z": {
+   "form": "ratio",
+   "a": "fp16.held_z",
+   "b": "fp16.step",
+   "what": "fp16's held share, zero products, one session",
+   "M": 0.45344688863469745,
+   "half95": null
+  },
+  "fp16.share_het_z": {
+   "form": "ratio",
+   "a": "fp16.Bz_het",
+   "b": "fp16.Bz_rest",
+   "what": "E108's design, fp16: how much of B's rest held accumulators at b_B_w's sums carry (E108-R12's form)",
+   "M": 1.0452818949501215,
+   "half95": null
+  },
+  "fp16.share_het_m": {
+   "form": "ratio",
+   "a": "fp16.Bm_het",
+   "b": "fp16.Bm_rest",
+   "what": "matched, fp16: how much of B's rest goes with the accumulators differing",
+   "M": 1.0417354691043796,
+   "half95": null
+  },
+  "fp16.share_walk_m": {
+   "form": "ratio",
+   "a": "fp16.Bm_walk",
+   "b": "fp16.Bm_rest",
+   "what": "matched, fp16: how much of B's rest goes with the sums changing",
+   "M": -0.04173546910437983,
+   "half95": null
+  },
+  "fp16.rest_ratio_m": {
+   "form": "ratio",
+   "a": "fp16.Bm_rest",
+   "b": "fp16.rest_vs_z",
+   "what": "fp16: B's rest on zero products (matched) over the step's rest",
+   "M": 1.2296366907550085,
+   "half95": null
+  },
+  "fp16.design_m": {
+   "form": "diff",
+   "a": "fp16.share_het_m",
+   "b": "fp16.share_het_z",
+   "k": 1.0,
+   "what": "fp16: the matched share less E108's design's share, one session",
+   "M": -0.0035464258457418296,
+   "half95": null
+  }
+ },
+ "e128_reference": {
+  "source": "docs/reports/data/2026-11-02-e128-fp16-signs/e128.json per_pass.<pass>.<tile>.D and scored.json primary.quantities",
+  "per_pass_D": {
+   "12810": {
+    "fp16.b_B_w": 13.750537526017375,
+    "fp16.b_B_wm": 13.590409999999999,
+    "fp16.b_B_z": 13.739148148998794,
+    "fp16.b_B_zm": 13.258022222222237,
+    "fp16.c_abs": 8.07175314361588,
+    "fp16.ones": 8.117875123806797,
+    "fp16.signs": 12.815021914878358,
+    "fp16.z_s": 10.21264966625997
+   },
+   "12811": {
+    "fp16.b_B_w": 13.593690723454614,
+    "fp16.b_B_wm": 13.465465645038641,
+    "fp16.b_B_z": 13.64605087481781,
+    "fp16.b_B_zm": 13.302910000000004,
+    "fp16.c_abs": 8.193986020503417,
+    "fp16.ones": 8.164237158917288,
+    "fp16.z_s": 10.220329725754475
+   }
+  },
+  "quantities": {
+   "fp16.step": {
+    "mean": 4.69714679107156,
+    "ci95": null,
+    "n": 1,
+    "per_pass": {
+     "12810": 4.69714679107156
+    },
+    "M": 4.85415053429378,
+    "half95": 0.5479731079439659,
+    "what": "the sign step, fp16",
+    "form": "contrast"
+   },
+   "fp16.held_z": {
+    "mean": 2.0836201139475747,
+    "ci95": 0.7277540488979387,
+    "n": 2,
+    "per_pass": {
+     "12810": 2.1408965226440912,
+     "12811": 2.0263437052510582
+    },
+    "M": 2.2010994567399687,
+    "half95": 0.4973299407233996,
+    "what": "random B signs on zero products, the sum held (E104's z_s), fp16",
+    "form": "contrast"
+   },
+   "fp16.rest_vs_z": {
+    "mean": 2.556250268427469,
+    "ci95": null,
+    "n": 1,
+    "per_pass": {
+     "12810": 2.556250268427469
+    },
+    "M": 2.6530510775538114,
+    "half95": 0.7400395457398732,
+    "what": "the step less the zero-product held part (the step's rest), fp16",
+    "form": "contrast"
+   },
+   "fp16.Bz_het": {
+    "mean": 3.4761098159010793,
+    "ci95": 0.6402384008403754,
+    "n": 2,
+    "per_pass": {
+     "12810": 3.5264984827388233,
+     "12811": 3.4257211490633352
+    },
+    "M": 3.5324192359285336,
+    "half95": 0.5771140510014452,
+    "what": "E108's design, fp16: held at b_B_w's sums over held at z_s's equal ones",
+    "form": "contrast"
+   },
+   "fp16.Bz_walk": {
+    "mean": -0.020485387172307412,
+    "ci95": 0.4050007538094295,
+    "n": 2,
+    "per_pass": {
+     "12810": 0.011389377018581115,
+     "12811": -0.05236015136319594
+    },
+    "M": -0.1530253585505152,
+    "half95": 0.6431192725868492,
+    "what": "E108's design, fp16: walking over held at the same sums at every op's end (alternations differ)",
+    "form": "contrast"
+   },
+   "fp16.Bz_rest": {
+    "mean": 3.455624428728772,
+    "ci95": 1.045239154649805,
+    "n": 2,
+    "per_pass": {
+     "12810": 3.5378878597574044,
+     "12811": 3.3733609977001393
+    },
+    "M": 3.379393877378018,
+    "half95": 0.598924857652455,
+    "what": "E108's design, fp16: B's rest on zero products",
+    "form": "contrast"
+   },
+   "fp16.Bm_het": {
+    "mean": 3.063976415103898,
+    "ci95": 0.23638063425356748,
+    "n": 2,
+    "per_pass": {
+     "12810": 3.045372555962267,
+     "12811": 3.0825802742455295
+    },
+    "M": 3.3984421069813537,
+    "half95": 0.5165391217811632,
+    "what": "matched, fp16: the accumulators differing (held at b_B_wm's sums over z_s's equal ones)",
+    "form": "contrast"
+   },
+   "fp16.Bm_walk": {
+    "mean": 0.247471711408199,
+    "ci95": 1.0789435392916553,
+    "n": 2,
+    "per_pass": {
+     "12810": 0.3323877777777611,
+     "12811": 0.16255564503863695
+    },
+    "M": -0.13615315957407623,
+    "half95": 0.5225024918984728,
+    "what": "matched, fp16: the sums changing (walking over held at the same op-end sums, the same alternations)",
+    "form": "contrast"
+   },
+   "fp16.Bm_rest": {
+    "mean": 3.311448126512097,
+    "ci95": 0.842562905038088,
+    "n": 2,
+    "per_pass": {
+     "12810": 3.377760333740028,
+     "12811": 3.2451359192841664
+    },
+    "M": 3.262288947407278,
+    "half95": 0.5187651769819827,
+    "what": "matched, fp16: B's rest on zero products",
+    "form": "contrast"
+   },
+   "fp16.held_alt": {
+    "mean": 0.4121334007971811,
+    "ci95": 0.8766190350939429,
+    "n": 2,
+    "per_pass": {
+     "12810": 0.4811259267765564,
+     "12811": 0.34314087481780575
+    },
+    "M": 0.1339771289471793,
+    "half95": 0.5733139768052348,
+    "what": "two held tiles with differing accumulators, fp16: E108's design over the matched one (other alternation counts and other C words)",
+    "form": "contrast"
+   },
+   "fp16.walk_alt": {
+    "mean": 0.14417630221667466,
+    "ci95": 0.202676249611717,
+    "n": 2,
+    "per_pass": {
+     "12810": 0.16012752601737645,
+     "12811": 0.12822507841597286
+    },
+    "M": 0.11710492997074032,
+    "half95": 0.6005354591966644,
+    "what": "two walking tiles, fp16: E108's design over the matched one (other alternation counts, A's sign, other sums)",
+    "form": "contrast"
+   },
+   "fp16.share_z": {
+    "mean": 0.45578659085416584,
+    "ci95": null,
+    "n": 1,
+    "per_pass": {
+     "12810": 0.45578659085416584
+    },
+    "M": 0.45344688863469745,
+    "half95": null,
+    "what": "fp16's held share, zero products, one session",
+    "form": "ratio"
+   },
+   "fp16.share_het_z": {
+    "mean": 1.006151198899211,
+    "ci95": 0.11906103693631959,
+    "n": 2,
+    "per_pass": {
+     "12810": 0.9967807410890174,
+     "12811": 1.0155216567094045
+    },
+    "M": 1.0452818949501215,
+    "half95": null,
+    "what": "E108's design, fp16: how much of B's rest held accumulators at b_B_w's sums carry (E108-R12's form)",
+    "form": "ratio"
+   },
+   "fp16.share_het_m": {
+    "mean": 0.9257515620490522,
+    "ci95": 0.30693053941560816,
+    "n": 2,
+    "per_pass": {
+     "12810": 0.9015952154871437,
+     "12811": 0.9499079086109605
+    },
+    "M": 1.0417354691043796,
+    "half95": null,
+    "what": "matched, fp16: how much of B's rest goes with the accumulators differing",
+    "form": "ratio"
+   },
+   "fp16.share_walk_m": {
+    "mean": 0.07424843795094788,
+    "ci95": 0.30693053941560855,
+    "n": 2,
+    "per_pass": {
+     "12810": 0.09840478451285631,
+     "12811": 0.05009209138903943
+    },
+    "M": -0.04173546910437983,
+    "half95": null,
+    "what": "matched, fp16: how much of B's rest goes with the sums changing",
+    "form": "ratio"
+   },
+   "fp16.rest_ratio_m": {
+    "mean": 1.3213730969377768,
+    "ci95": null,
+    "n": 1,
+    "per_pass": {
+     "12810": 1.3213730969377768
+    },
+    "M": 1.2296366907550085,
+    "half95": null,
+    "what": "fp16: B's rest on zero products (matched) over the step's rest",
+    "form": "ratio"
+   },
+   "fp16.design_m": {
+    "mean": -0.08039963685015883,
+    "ci95": 0.18786950247928855,
+    "n": 2,
+    "per_pass": {
+     "12810": -0.09518552560187366,
+     "12811": -0.065613748098444
+    },
+    "M": -0.0035464258457418296,
+    "half95": null,
+    "what": "fp16: the matched share less E108's design's share, one session",
+    "form": "diff"
+   }
+  }
+ },
+ "session_tie": {
+  "reference": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/posthoc/e82-nodips.json items.<cell>.D.mean (dips removed, as E128's primary)",
+  "cells": {
+   "fp32.randn": {
+    "ref_w": 24.0017,
+    "band_w": 0.5
+   },
+   "fp16.randn": {
+    "ref_w": 21.4901,
+    "band_w": 0.5
+   },
+   "anchor_pi": {
+    "ref_w": 8.1353,
+    "band_w": 0.5
+   },
+   "int8.full": {
+    "ref_w": 6.8392,
+    "band_w": 0.25
+   }
+  }
+ },
+ "rules": {
+  "E137-R1": {
+   "kind": "power",
+   "form": "bands",
+   "legs": [
+    "fp16.share_het_m"
+   ],
+   "lo": 0.35,
+   "hi": 0.65,
+   "names": {
+    "inside": "ABOUT HALF",
+    "above": "MOST",
+    "below": "LITTLE"
+   },
+   "what": "E128-R8 again: fp16, matched: (b_B_zm - z_s) / (b_B_wm - z_s), the share of B's rest the accumulators differing carry"
+  },
+  "E137-R2": {
+   "kind": "power",
+   "form": "band_then_sign",
+   "legs": [
+    "fp16.share_walk_m"
+   ],
+   "band": 0.1,
+   "names": {
+    "inside": "ALMOST NONE",
+    "above": "SOME",
+    "below": "NEGATIVE"
+   },
+   "what": "E128-R9 again: fp16, matched: (b_B_wm - b_B_zm) / (b_B_wm - z_s), the share that goes with the sums changing"
+  },
+  "E137-R3": {
+   "kind": "power",
+   "form": "bands",
+   "legs": [
+    "fp16.share_het_z"
+   ],
+   "lo": 0.35,
+   "hi": 0.65,
+   "names": {
+    "inside": "ABOUT HALF",
+    "above": "MOST",
+    "below": "LITTLE"
+   },
+   "what": "E128-R7 again: fp16, E108's design ported: (b_B_z - z_s) / (b_B_w - z_s)"
+  },
+  "E137-R4": {
+   "kind": "power",
+   "form": "sign_then_band",
+   "legs": [
+    "fp16.design_m"
+   ],
+   "band": 0.1,
+   "names": {
+    "above": "MATCHED HIGHER",
+    "below": "MATCHED LOWER",
+    "inside": "ALIKE"
+   },
+   "what": "fp16: the matched share less E108's design's share, per pass"
+  },
+  "E137-R5": {
+   "kind": "power",
+   "form": "step_band",
+   "what": "the fp16 step on this card: signs - ones against E108's",
+   "e108_w": 4.981194364848378,
+   "band_w": 1.0
+  },
+  "E137-R6": {
+   "kind": "power",
+   "form": "rms",
+   "what": "the bench's model M4 on E137's eight items: rms(D - M4)",
+   "pass_w": 0.6,
+   "fail_w": 1.0
+  },
+  "E137-R7": {
+   "kind": "power",
+   "form": "m4_contrasts",
+   "legs": [
+    "fp16.step",
+    "fp16.Bz_het",
+    "fp16.Bz_walk",
+    "fp16.Bz_rest",
+    "fp16.Bm_het",
+    "fp16.Bm_walk",
+    "fp16.Bm_rest"
+   ],
+   "what": "the sign term out of sample: each of M4's seven frozen fp16 sign contrasts against the measured one; PASS if every measured mean lies inside M4's frozen 95% half-width (quantities.<q>.half95) and rms(measured - M4) <= 0.30 W; FAIL if two or more lie outside or the rms exceeds 0.60 W; else INCONCLUSIVE",
+   "inside_all_rms_w": 0.3,
+   "fail_rms_w": 0.6,
+   "fail_outside_n": 2
+  },
+  "E137-R8": {
+   "kind": "power",
+   "form": "e128_replicate",
+   "legs": [
+    "fp16.share_het_m",
+    "fp16.share_walk_m",
+    "fp16.share_het_z"
+   ],
+   "what": "E137 against E128's two passes on the same card and tiles (E122's cross-session form): d = Q137 - Q128, h = sqrt(h137^2 + h128^2); PASS if |d| + h <= 0.15, FAIL if |d| - h > 0.15, else INCONCLUSIVE, per share",
+   "w": 0.15
+  },
+  "E137-S1": {
+   "kind": "power",
+   "form": "session_tie",
+   "what": "the session tie against E82, dips removed (E128-S1's bands)"
+  }
+ },
+ "expect": {
+  "E137-R1": "MOST",
+  "E137-R2": "ALMOST NONE or INCONCLUSIVE",
+  "E137-R3": "MOST",
+  "E137-R4": "ALIKE or INCONCLUSIVE",
+  "E137-R5": "PASS",
+  "E137-R6": "PASS",
+  "E137-R7": "PASS or INCONCLUSIVE",
+  "E137-R8": "PASS or INCONCLUSIVE",
+  "E137-S1": "PASS"
+ },
+ "not_scored_if": "a rule's quantity has fewer than 4 kept passes after the set-aside rule: that rule NOT SCORED, with its n"
+}

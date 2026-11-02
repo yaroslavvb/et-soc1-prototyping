@@ -1,0 +1,17 @@
+E137 board-power stop: board_w 68.0 W >= 68.0 W
+E137 die stop: hottest minion-shire reading 72.0 C >= 72.0 C
+PASS A1 E128's per-pass shares reproduced  [max diff 4.78e-06]
+PASS A2 two passes: R1-R7 NOT SCORED
+PASS B1 located world  [{'E137-R1': 'MOST', 'E137-R2': 'ALMOST NONE', 'E137-R3': 'MOST', 'E137-R4': 'ALIKE', 'E137-R5': 'PASS', 'E137-R6': 'PASS', 'E137-R7': 'PASS', 'E137-R8': 'INCONCLUSIVE'}]
+PASS B2 other world  [{'E137-R1': 'ABOUT HALF', 'E137-R2': 'SOME', 'E137-R3': 'LITTLE', 'E137-R4': 'MATCHED HIGHER', 'E137-R5': 'FAIL', 'E137-R6': 'FAIL', 'E137-R7': 'FAIL', 'E137-R8': 'FAIL'}]
+PASS C1 S1 with four kept
+PASS C2 S2 restores the tie-only pass, never the fp16-anchor pass  [{'S1_passes': ['13710', '13711', '13712'], 'set_aside': [{'pass': 13713, 'why': ['anchor_pi drifts +0.700 W']}, {'pass': 13714, 'why': ['fp16.zeros departs +0.300 W from its straight line']}], 'config_flags': [], 'S2_restored': ['13713']}]
+PASS C3 S3 restores an fp32-anchor pass for fp16 items only; failed runs never  [{'S1_passes': ['13710', '13711', '13712'], 'set_aside': [{'pass': 13713, 'why': ['fp32.randn spans 1.102 W']}, {'pass': 13714, 'why': ['3 runs failed a gate']}], 'config_flags': [], 'S2_restored': [], 'S3_restored_fp16_only': ['13713']}]
+PASS C4 a config-flagged pass is never restored  [{'S1_passes': ['13710', '13711', '13712'], 'set_aside': [{'pass': 13713, 'why': ['anchor_pi drifts +0.700 W']}], 'config_flags': [{'pass': 13713}], 'S2_restored': [], 'S3_restored_fp16_only': []}]
+PASS C5 a skipped tile leaves its pass out of that quantity only
+PASS C6 below four passes for a quantity: its rule NOT SCORED
+PASS D stop at {'board_w': 68.0, 'temp_c': {'minshire': [60, 61]}}  [exit 6, STOP True]
+PASS D stop at {'board_w': 60.0, 'temp_c': {'minshire': [60, 72.0]}}  [exit 6, STOP True]
+PASS D stop at {'board_w': 67.9, 'temp_c': {'minshire': [71.9, 70]}}  [exit None, STOP False]
+PASS E desk reduction check: max |diff| 0
+SELFTEST 14 of 14 checks pass
