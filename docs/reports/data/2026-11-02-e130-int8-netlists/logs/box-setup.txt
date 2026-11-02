@@ -1,0 +1,53 @@
+== setup aifoundry3 2026-11-02 12:31:57 PST
+== host (no device access) ==
+aifoundry3
+ 12:31:57 up 6 days, 22:13,  3 users,  load average: 0.73, 0.74, 0.78
+No process holds an ET-SoC-1 device node or card lock.
+== tree ==
+root /home/yaroslavvb/aifoundry
+reused_unchanged_sha256: identical to E130's freeze: all
+e130_files_sha256: identical to E130's freeze: all
+e130_tiles_sha256: identical to E130's freeze: all
+== tiles against their registered sha256 (each file and each half), and every block order's invariants ==
+{"e130_tiles": 26, "orders_checked": 10, "problems": []}
+== the binary takes int8 with file: operands, --dump-tiles and --stop-file ==
+  int8: present
+  file:: present
+  --dump-tiles: present
+  --stop-file: present
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 4006896 Sep 25 07:25 build/ettelem/ettelem
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 3569104 Sep 26 06:15 build/sparsity/host/sparsity_host
+20e760c20e9b99c789ef96f1e4e950d51f534410275bfb933c2aaf96d1090fd0  build/sparsity/host/sparsity_host
+16037641ab75bdbe1209f323641e269c9b897468091243173bfaaaf0b21686e2  build/ettelem/ettelem
+  build/ettelem/ettelem: the binary the device-command list was classified for
+  build/sparsity/host/sparsity_host: the binary the device-command list was classified for
+numpy 1.26.4
+-rw-rw-rw- 1 root root 0 Oct 26 15:18 /run/lock/etsoc-shire0.lock
+== the plan ==
+{"e130": ["int8.hb1", "int8.b1_0", "int8.b1_1", "int8.b1_2", "int8.b1_3", "int8.b1_4", "int8.b1_5", "int8.b1_6", "int8.b1_7", "int8.hb2", "int8.b2_7", "int8.hb1d", "int8.b1d_7", "int8.ha1", "int8.a1_0", "int8.a1_1", "int8.a1_2", "int8.a1_3", "int8.a1_4", "int8.a1_5", "int8.a1_6", "int8.a1_7", "int8.ha2", "int8.a2_7", "int8.ha1d", "int8.a1d_7"], "smoke": ["int8.hb1", "int8.b1_1", "int8.b1_7", "int8.ha1", "int8.a1_1", "int8.a1_7", "int8.ha1d", "int8.a1d_7"], "runs_per_block": {"B": 34, "A": 25}}
+-- dry run of block 13010 (V3_DRY=1: lib.sh stubs every device call)
+dry rc=0
+device launches the block would make: 34
+of them on E130 tiles: 34
+of them int8: 34
+train approaches (no heater, 0.2 s quiet): 34
+DRY ettelem config
+2026-11-02T12:32:05 [aifoundry3] kinds p13010 ends: ok block B
+-- dry run of block 13020 (V3_DRY=1: lib.sh stubs every device call)
+dry rc=0
+device launches the block would make: 25
+of them on E130 tiles: 25
+of them int8: 25
+train approaches (no heater, 0.2 s quiet): 25
+DRY ettelem config
+2026-11-02T12:32:14 [aifoundry3] kinds p13020 ends: ok block A
+== the queue's budget rule on stub blocks (no device: each stub only sleeps) ==
+  12:32:14 queue: blocks 13010 13020 13011 13021 13012 13022 13013 13023 13014 13015, budget 9 s from 12:32:14, deadline 2026-11-02 15:50 PST, first estimates B 3 s, A 3 s
+  12:32:14 p13010 (B) starts (elapsed 0 s)
+  12:32:16 p13010 rc=0 (2 s)
+  12:32:17 p13020 (A) starts (elapsed 3 s)
+  12:32:19 p13020 rc=0 (2 s)
+  12:32:20 p13011 (B) starts (elapsed 6 s)
+  12:32:22 p13011 rc=0 (2 s)
+  12:32:23 budget: stopping before p13021 (elapsed 9 s, longest A block 2 s, 3 blocks done)
+rs rc=0 12:32:23

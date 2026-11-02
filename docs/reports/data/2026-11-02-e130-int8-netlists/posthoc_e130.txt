@@ -1,0 +1,32 @@
+## 1. The separators block by block (primary: board p_raw over each item's own zero, dips removed; fJ per flipped bit)
+B_odd_minus_even_fJ: 13010 +75.9, 13011 +34.0, 13012 +26.4, 13013 +16.5, 13014 +31.8, 13015 +18.4; all: +33.8 [+11.0, +56.7]
+A_odd_minus_even_fJ: 13020 +1.9, 13021 -2.4, 13022 -0.8, 13023 -5.4; all: -1.7 [-6.6, +3.2]
+A_sign_dense_minus_one_fJ: 13020 +72.4, 13021 +66.7, 13022 +71.9, 13023 +60.3; all: +67.8 [+58.8, +76.8]
+B odd - even with one B block left out (T_B = 30.68 fJ):
+  without 13010: +25.4 [+15.8, +35.1] (straddles T_B)
+  without 13011: +33.8 [+3.6, +64.0] (straddles T_B)
+  without 13012: +35.3 [+5.6, +65.1] (straddles T_B)
+  without 13013: +37.3 [+9.5, +65.1] (straddles T_B)
+  without 13014: +34.2 [+4.1, +64.4] (straddles T_B)
+  without 13015: +36.9 [+8.6, +65.2] (straddles T_B)
+
+## 2. B's list against E79's on this card (board fJ per flipped bit; E79 at its own base words, 4 passes)
+bit:         0       1       2       3       4       5       6       7
+E130:     +3.3   +44.0   +22.1   +67.2   +46.8   +62.5   +47.7   +98.9
+E79:     +27.1   +61.6   +31.2   +72.3   +40.5   +85.6   +49.2   +16.8
+E130: odd (1, 3, 5) +57.9, even (0, 2, 4) +24.0, odd - even +33.8, odd/even 2.41
+E79: odd (1, 3, 5) +73.2, even (0, 2, 4) +32.9, odd - even +40.2, odd/even 2.22
+
+## 3. The minion rail (an arm) beside the board (the primary)
+B_odd_minus_even_fJ: board +33.8 [+11.0, +56.7]; rail +26.9 [+23.9, +29.8]
+A_odd_minus_even_fJ: board -1.7 [-6.6, +3.2]; rail -0.5 [-3.8, +2.9]
+A_sign_dense_minus_one_fJ: board +67.8 [+58.8, +76.8]; rail +50.4 [+49.6, +51.1]
+B_mean_bits0to6_fJ: board +41.9 [+28.3, +55.6]; rail +47.3 [+43.8, +50.8]
+A_mean_bits0to6_fJ: board +79.8 [+75.9, +83.8]; rail +64.7 [+63.3, +66.2]
+B_odd_over_even: board 2.41 [1.26, 38.23]; rail 1.79 [1.68, 1.92]
+A_odd_over_even: board 0.98 [0.92, 1.04]; rail 0.99 [0.94, 1.05]
+A_sign_dense_over_one: board 1.43 [1.36, 1.51]; rail 1.42 [1.41, 1.42]
+B_sign_w2_over_w1: board 0.57 [0.05, 1.30]; rail 0.61 [0.49, 0.75]
+A_sign_w2_over_w1: board 1.02 [0.98, 1.07]; rail 1.03 [0.99, 1.06]
+rail / board on A's bits 0-6 (a level, post hoc): 0.81
+zeros' scatter about their neighbours' line: board 0.0397 W, rail 0.0355 W (72 interior reads)
