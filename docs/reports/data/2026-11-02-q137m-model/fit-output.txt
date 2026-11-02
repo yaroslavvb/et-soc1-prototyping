@@ -1,0 +1,28 @@
+== float: 489 rows 235 kinds
+  M5_frozen_no_refit           all 0.226 fp32 0.239 fp16 0.207 | new-exp 0.270 (n 206)
+  M5_form_refit_plain_loko     all 0.230 fp32 0.243 fp16 0.211 | new-exp 0.265 (n 206)
+  nested_loko                  all 0.207 fp32 0.227 fp16 0.179 | new-exp 0.230 (n 206)
+    plain G0_M5                  0.230
+    plain G1_gtr                 0.211
+    plain G2_psgn                0.231
+    plain G3_fields              0.230
+    plain G4_gtr_psgn            0.213
+    plain G5_gtr_psgn_asmall     0.213
+    plain G6_gtr_psgn_fields     0.207
+    plain G7_all                 0.207
+  picks {'G6_gtr_psgn_fields': 129, 'G7_all': 106} chosen G6_gtr_psgn_fields {'mult': 1.544, 'add32': 1.661, 'add16': 1.592, 'bus': 3.219, 'rest': 2.462, 'clk': 1.054, 'gtr': 157.84, 'psgn': -36.825, 'a_sign': 46.978, 'a_exp': 3.216, 'a_mant': -3.873, 'b_sign': 27.594, 'b_exp': -1.27, 'b_mant': 8.67}
+== int8: 115 rows 50 kinds
+  M5_frozen_no_refit           all 0.222 int8 0.222 | new-exp 0.211 (n 37)
+  M5_form_refit_plain_loko     all 0.245 int8 0.245 | new-exp 0.237 (n 37)
+  nested_loko                  all 0.260 int8 0.260 | new-exp 0.243 (n 37)
+    plain J0_M5                  0.245
+    plain J1_gtr                 0.244
+    plain J2_psgn                0.247
+    plain J3_fields              0.250
+    plain J4_gtr_psgn            0.248
+    plain J5_all                 0.256
+  picks {'J1_gtr': 45, 'J3_fields': 2, 'J0_M5': 2, 'J2_psgn': 1} chosen J1_gtr {'nets_nobus': 3.326, 'bus': 13.658, 'clk': 1.892, 'gtr': -46.15}
+== heat 570 rows 258 kinds; before (S x 0.118) {'fp32': 0.277, 'fp16': 0.288, 'int8': 0.19} H0 {'fp32': 0.278, 'fp16': 0.286, 'int8': 0.184} nested {'fp32': 0.304, 'fp16': 0.283, 'int8': 0.175} {'H2_per_card_runlength': 257, 'H3_per_card_runlength_launch': 1} H2_per_card_runlength {'S|aifoundry1-c1': 0.11550955924762213, 'S|aifoundry3': 0.11837065075753907, 'ST|aifoundry1-c1': -0.15859655243686477, 'ST|aifoundry3': -0.06172567764094493}
+   end to end {'fp32': {'n': 241, 'rms_c': 0.30046540292477886, 'before_rms_c': 0.27288418937009845}, 'fp16': {'n': 176, 'rms_c': 0.2797716731209902, 'before_rms_c': 0.28834150257555535}, 'int8': {'n': 79, 'rms_c': 0.16273520509777326, 'before_rms_c': 0.18828295374350204}}
+   step {'rms_fraction': 0.00186132535237746, 'tau_s': [1.005, 15.98, 138.21229024038436, 1500.0], 'weights': [0.1475254229632836, 0.010046642157033103, 0.8323210084796046, 0.010103839662738784]}
+missing 0
