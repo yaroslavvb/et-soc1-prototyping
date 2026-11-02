@@ -1,0 +1,43 @@
+== host (no device access) ==
+aifoundry3
+ 21:14:18 up 6 days,  6:55,  3 users,  load average: 0.43, 0.62, 0.71
+No process holds an ET-SoC-1 device node or card lock.
+logins: 12 (names not recorded)
+== tree ==
+root /home/yaroslavvb/aifoundry; V3_DEVICE=unset
+reused_unchanged_sha256: identical to E123's freeze: all
+e123_card_files_sha256: identical to E123's freeze: all
+== tiles against their registered sha256 (each file and each half) ==
+{"e123_tiles": 42, "e78_tiles_checked": 18, "problems": []}
+== the binary takes fp16 and int8 with file: operands, --dump-tiles and --stop-file ==
+  fp16: present
+  int8: present
+  file:: present
+  --dump-tiles: present
+  --stop-file: present
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 4006896 Sep 25 07:25 build/ettelem/ettelem
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 3569104 Sep 26 06:15 build/sparsity/host/sparsity_host
+-rw-rw-rw- 1 root root 0 Oct 26 15:18 /run/lock/etsoc-shire0.lock
+== the plan of the first pass ==
+{"e123": ["fp16.smallint_e123d1", "fp16.smallint_e123d2", "fp16.sparse50_e123d1", "fp16.sparse50_e123d2", "fp16.sparse50_e123d3", "fp16.sparse50_e123d4", "fp16.sparse50_e123d5", "fp16.sparse90_e123d1", "fp16.sparse90_e123d2", "fp16.sparse90_e123d3", "fp16.wsparse50_e123d1", "fp16.wsparse50_e123d2", "fp16.wsparse50_e123d3", "fp16.wsparse50_e123d4", "fp16.wsparse50_e123d5", "fp16.wsparse90_e123d1", "fp16.wsparse90_e123d2", "fp16.wsparse90_e123d3", "fp32.nn_like_e123d1", "fp32.nn_like_e123d2", "fp32.nn_like_e94d1", "fp32.nn_like_e94d2", "fp32.nn_like_e94d3", "fp32.nn_like_e94d4", "fp32.nn_like_e94d5", "fp32.nn_like_e94d6", "fp32.smallint_e123d1", "fp32.smallint_e123d2", "fp32.smallint_e123d3", "fp32.sparse90_e123d1", "fp32.sparse90_e123d2", "fp32.sparse90_e123d3", "int8.sparse90_e123d1", "int8.sparse90_e123d2", "int8.sparse90_e123d3", "int8.ternary_e123d1", "int8.ternary_e123d2", "int8.wsparse50_e123d1", "int8.wsparse50_e123d2", "int8.wsparse50_e123d3", "int8.wsparse90_e123d1", "int8.wsparse90_e123d2"], "compare": ["fp32.nn_like", "fp16.sparse50", "fp16.wsparse50", "fp32.smallint", "fp32.sparse90", "fp16.sparse90", "fp16.wsparse90", "fp16.smallint", "int8.wsparse50", "int8.sparse90", "int8.wsparse90", "int8.ternary"], "anchors": ["fp32.zeros", "fp32.randn", "fp16.zeros", "fp16.randn", "int8.zeros", "int8.full"], "tie": "anchor_pi", "runs_per_pass": 74}
+  0 s-1 anchor_pi
+  1 s+0 int8.wsparse50_e123d2
+  2 s+0 int8.zeros
+  3 s+0 fp16.smallint_e123d2
+  4 s+0 fp16.wsparse90_e123d2
+  5 s+0 fp16.smallint_e123d1
+== dry run of one whole pass (V3_DRY=1: lib.sh stubs every device call) ==
+dry rc=0
+device launches the pass would make: 76
+of them on E123 tiles: 42
+      1 ET_DEVICES=None
+DRY ettelem config
+2026-11-01T21:14:26 [aifoundry3] kinds p12300 ends: ok tiers 1,2
+== the queue's budget rule on stub blocks (no device: each stub only sleeps) ==
+  21:14:26 queue: 12310 12311; budget 16 s from the claim (21:14:26), reserve 2 s, last end 21:14:40, deadline 23:15:00; first estimate 4 s
+  21:14:26 p12310 starts at T0+0 s (projected 4 s, end by T0+4 s)
+  21:14:29 p12310 rc=0 (3 s)
+  21:14:30 p12311 starts at T0+4 s (projected 3 s, end by T0+7 s)
+  21:14:33 p12311 rc=0 (3 s)
+  21:14:34 passes done: 2, stopped before 0, at T0+8 s
+  21:14:34 queue done at T0+8 s
