@@ -165,9 +165,24 @@ afterwards — is the return burst below, now checked on ring entries newer than
 - **GO / NO-GO:** desk **GO-READY** (as E77's). ⟨RUN: GO only when every live item reads as required, recorded in a
   commit made before the set⟩
 
-## Live gates (filled at gate time)
+## Live gates (filled at gate time, Sun 1 Nov 2026)
 
-⟨RUN⟩
+Read 2026-11-01T20:49:02.628-0800 to 2026-11-01T20:49:04.829-0800 under the card lock (`raw/gates.json`), the smoke 2026-11-01T20:49:04.883-0800 to 2026-11-01T20:49:18.538-0800 (`raw/smoke/smoke.json`), both with no write. Profile: **no-PMIC-read** (`ettelem-e77`, sha256 `21e7bf77e631eb7e…`, E77's build); heater `7adadf4f1ce331cc…`, kernel `990807f483cd57aa…` (E77's, checked by the runner's preflight); runner `run_e120.py` sha256 `7f95c3996e3ef5d6…`.
+
+| gate | read | verdict |
+|---|---|---|
+| G0 host and card | `aifoundry2`, kernel `7.0.0-38-generic`, host up since 2026-10-26 15:13:03; card `0000:02:00.0`, link 16.0 GT/s PCIe x8 (`et-lab-manifest`, `raw/manifest-gates.txt`; the runner's sysfs listing found no driver directory under that name, as in E77); `et_soc1` srcversion `47D26A305A0428B29FB7FC4`, module sha256 `3ae3759cf857874e…` | PASS |
+| G0 identity by continuity | module uptime **6 d 6 h 36 m = 9036 min**, against **7672.6 min** since E69's revisions read (27 Oct 13:56:26 PDT): no service-processor reset since, so that read (release 1.4.0, BL1/BL2 0.22.0, PMIC 1.5.0, minions 0.25.1) still names the running image. The revisions query was not sent | PASS |
+| originals, the two RAM GETs | **TDP 65 W, threshold 65 °C**, `low_power`, 600 MHz | PASS |
+| vmin-LUT floor, parsed in code | minion points **600 / 700 / 800 MHz**, 11 zero points; the file's sha256 `c9359513ce4d3769…` (E77 read `c9359513ce4d3769…`); the file stays on the host | PASS |
+| exclusivity | `et-who`: 'No process holds an ET-SoC-1 device node or card lock.'; module use count 0; no other login (`who` at 20:49:02 PST: 0 other users), so no idle-login departure; Q134's E119 released the card at 20:11:16 PST and the day's post read '— released' before this run's rewrite; this run's clause added to the day's one `#community-lab` post, message `1566603178164617247`, at 20:48:49 PST | PASS |
+| collector | 3 `live-collector.py` process(es), sha256 `58e7dc1b9f755be3…`; it opens nothing while the lock is held | PASS |
+| ring before | `sptrace` rc 0: 69 entries; whole-dump counts (stale included) throttle-up 14, throttle-down 5, PMIC-alarm or POWER_SAFE 0 | recorded |
+| residencies before | none read: `ettelem-e77` accepts raw states 2–6 only and refused the call for 1, 2, 3 (rc 2) before opening the management node, so nothing was sent; see the README's amendment A1 | recorded |
+| smoke (no write) | PASS: launch rc 0, 6 kernel records, 116 complete samples, no PMIC fields True, clocks [600, 700, 800] MHz, board at most 35.46 W, die [46.0, 47.0] °C, high-water latch at most 69.0 °C | PASS |
+| the maintainer's newest posts | none since 14:17 PST in `#community-lab` (1 message there, not his) or in the owner's direct messages with him (none), read 20:48:07–20:48:08 PST, 41 s before the claim, read-only, masked, stdout only (also read at 20:30:50 PST: none); the field manual's four files read in full by this run's agent at about 20:29 PST | PASS |
+
+**GO**, recorded in this commit before the first write. The runner's gate verdict: ['GO-able: every live gate read as required']. The session runs arm B's first two passes at the card's own settings and writes nothing until the file `GO` exists in its run directory, created after this commit is pushed.
 
 ## Set log, activation, final handoff
 

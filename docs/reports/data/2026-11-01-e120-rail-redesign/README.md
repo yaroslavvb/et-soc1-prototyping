@@ -205,4 +205,13 @@ two steps (4.09 W, 1.73 W): `crosscheck_e77.py` prints every comparison to `cros
 
 ## Amendments
 
-*None.*
+**A1, Sun 1 Nov 2026, 20:52 PST** (after the gate reads and the smoke, while arm B's first pass runs; before the first
+write and before any end-of-pass query): **E120 reads no throttle residency.** E77's `ettelem-e77`, which E120 must use
+by hash (change 9), accepts raw states 2–6 only and checks every argument before it opens the management node: given
+raw state 1 it refuses the whole call (rc 2), so states 2 and 3 are not read either, and nothing is sent to the card.
+The gate reads at 20:49:02 PST returned an empty residency with rc 2, which is how this was found. Change 3's "raw
+states 1–3" therefore reads none. No registered rule uses the residencies, the running session's protocol is not changed
+(it was loaded at 20:49:31 PST), and the post-pass queries keep their ring dumps and governor reads. What it costs: no
+new POWER_DOWN or POWER_SAFE reading (E77's lead for § 11 item 14 gets none from E120). What it gains: K now has no
+residency read of any state as a possible cause of a kernel event. A re-run that wants POWER_UP needs a tool that
+accepts raw 1 (E119's session read 1–3 on this card tonight with its own build).
