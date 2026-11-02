@@ -1,0 +1,57 @@
+block SMOKE:
+  rest                       burst zeros                                                          est 30.0 W  cum   0.0 min
+  c4s-fp32-zeros             burst gemmc4s:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin       est 39.0 W  cum   0.0 min
+  c8-int8-zeros              burst gemmc8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin        est 39.8 W  cum   0.0 min
+  c16s-fp16-zeros            burst gemmc16s:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin      est 39.2 W  cum   0.0 min
+  c8s-fp32-zeros             burst gemmc8s:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin       est 39.2 W  cum   0.0 min
+block A:
+  c4s-fp32-zeros             burst gemmc4s:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin       est 39.0 W  cum   0.4 min
+  c8-fp32-zeros              burst gemmc8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin        est 40.2 W  cum   0.7 min
+  c16s-fp32-zeros            burst gemmc16s:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      est 39.4 W  cum   1.1 min
+  c4s-fp32-randn             burst gemmc4s:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin       est 76.0 W  cum   1.5 min
+  c8-fp32-randn              burst gemmc8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin        est 62.0 W  cum   1.8 min
+  c16s-fp32-randn            burst gemmc16s:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin      est 61.7 W  cum   2.2 min
+block B:
+  c8s-fp32-randn             sus   gemmc8s:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin       est 78.5 W  cum   3.8 min
+  c8s-fp32-zeros             sus   gemmc8s:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin       est 39.2 W  cum   5.4 min
+  c16r4-fp32-randn           sus   gemmc16r4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin     est 78.1 W  cum   7.0 min
+  c16r4-fp32-zeros           sus   gemmc16r4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin     est 39.8 W  cum   8.5 min
+  c16r8-fp32-randn           sus   gemmc16r8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin     est 84.1 W  cum  10.1 min
+  c16r8-fp32-zeros           sus   gemmc16r8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin     est 39.7 W  cum  11.7 min
+  c16r2-fp32-randn           sus   gemmc16r2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin     est 69.7 W  cum  13.3 min
+  c16r2-fp32-zeros           sus   gemmc16r2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin     est 39.9 W  cum  14.9 min
+block C:
+  c4s-int8-zeros             burst gemmc4s:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin       est 38.5 W  cum  15.2 min
+  c8-int8-zeros              burst gemmc8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin        est 39.8 W  cum  15.6 min
+  c16s-int8-zeros            burst gemmc16s:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin      est 39.0 W  cum  16.0 min
+  c4s-int8-full              burst gemmc4s:randn:tools/claims-v3/kinds/tiles/int8/full.bin        est 49.4 W  cum  16.3 min
+  c8-int8-full               burst gemmc8:randn:tools/claims-v3/kinds/tiles/int8/full.bin         est 48.2 W  cum  16.7 min
+  c16s-int8-full             burst gemmc16s:randn:tools/claims-v3/kinds/tiles/int8/full.bin       est 47.6 W  cum  17.1 min
+block D:
+  c4s-fp16-zeros             burst gemmc4s:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin       est 39.3 W  cum  17.4 min
+  c8-fp16-zeros              burst gemmc8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin        est 40.2 W  cum  17.8 min
+  c16s-fp16-zeros            burst gemmc16s:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin      est 39.2 W  cum  18.2 min
+  c4s-fp16-randn             burst gemmc4s:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin       est 72.6 W  cum  18.5 min
+  c8-fp16-randn              burst gemmc8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin        est 60.1 W  cum  18.9 min
+  c16s-fp16-randn            burst gemmc16s:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin      est 59.8 W  cum  19.3 min
+block E:
+  c4s-fp32-randn             sus   gemmc4s:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin       est 76.0 W  cum  20.9 min
+  c4s-fp32-zeros             sus   gemmc4s:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin       est 39.0 W  cum  22.4 min
+  c16s-fp32-randn            sus   gemmc16s:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin      est 61.7 W  cum  24.0 min
+  c16s-fp32-zeros            sus   gemmc16s:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      est 39.4 W  cum  25.6 min
+  c8-fp32-randn              sus   gemmc8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin        est 62.0 W  cum  27.2 min
+  c8-fp32-zeros              sus   gemmc8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin        est 40.2 W  cum  28.8 min
+block F:
+  c4s-int8-full              sus   gemmc4s:randn:tools/claims-v3/kinds/tiles/int8/full.bin        est 49.4 W  cum  30.4 min
+  c4s-fp16-randn             sus   gemmc4s:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin       est 72.6 W  cum  31.9 min
+  c16s-int8-full             sus   gemmc16s:randn:tools/claims-v3/kinds/tiles/int8/full.bin       est 47.6 W  cum  33.5 min
+  c16s-fp16-randn            sus   gemmc16s:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin      est 59.8 W  cum  35.1 min
+  c8-int8-full               sus   gemmc8:randn:tools/claims-v3/kinds/tiles/int8/full.bin         est 48.2 W  cum  36.7 min
+  c8-fp16-randn              sus   gemmc8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin        est 60.1 W  cum  38.3 min
+block G:
+  c4s-int8-zeros             sus   gemmc4s:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin       est 38.5 W  cum  39.9 min
+  c4s-fp16-zeros             sus   gemmc4s:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin       est 39.3 W  cum  41.4 min
+  c4s-fp32-zeros-rep2        burst gemmc4s:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin       est 39.0 W  cum  41.8 min
+  c16s-fp32-zeros-rep2       burst gemmc16s:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin      est 39.4 W  cum  42.2 min
+{'burst': 20, 'sus': 22} about 42 card-minutes at 22 s a burst and 95 s a sustained run, gates included, plus the smoke; the 44-minute cap cuts the tail
+highest planned estimate 84.1 W; admission limit 88.0 W, lock 93.0 W; session stops {'abs_stop_c': 80, 'board_cap_w': 93, 'cap_consecutive': 3}

@@ -1,0 +1,218 @@
+# E126 dry run of run_e126.py on the toy card (--dry: no device), Mon 2 Nov 2026 07:22-07:25 PST on the Intel. The smoke passed (rc 0, 5 runs); the session (--max-card-min 8) ended at run 5 with error:telemetry_stale, because the Intel stopped the process (SIGSTOP) for about two minutes and the toy sampler went stale; the reducer below ran end to end on its 4 runs. The toy card's numbers mean nothing.
+E126: 4 runs; 0 refused by the rule; config after every run: ['{"tdp_w": 65, "temp_threshold_c": 65}']; checks of C []; peaks {'board_max_w': 72.97, 'board_run': 's1/A-03-c4s-fp32-randn-r1', 'die_mean_max_c': 62, 'die_mean_run': 's1/A-03-c4s-fp32-randn-r1', 'die_high_max_c': 65, 'die_high_run': 's1/A-03-c4s-fp32-randn-r1', 'samples': 260}
+per arm and format, every kind pooled: T at 600 and 800 MHz (launch means), X; the fit T = C/f + M
+  c16s.fp32      T600  0.0000 (n   0)  T800  0.6825 (n    6)  X  0.000 (None)  C     0.0 M  0.0000 span   0.0
+  c4s.fp32       T600  0.0000 (n   0)  T800  0.6825 (n    6)  X  1.333 (fit)  C   546.0 M  0.0000 span 100.0
+  c8.fp32        T600  0.0000 (n   0)  T800  0.6825 (n    6)  X  0.000 (None)  C     0.0 M  0.0000 span   0.0
+cell                      burst     rate    sus     rate     bW     sW   die   p800    est n
+c16s-fp32-zeros           800.0   12.291    0.0    0.000  36.53   0.00   0.0   36.3   39.4 1/0
+c4s-fp32-randn            700.0   10.755    0.0    0.000  61.09   0.00   0.0   73.0   76.0 1/0
+c4s-fp32-zeros            800.0   12.291    0.0    0.000  35.24   0.00   0.0   34.6   39.0 1/0
+c8-fp32-zeros             800.0   12.291    0.0    0.000  37.02   0.00   0.0   36.5   40.2 1/0
+{
+ "R0": {
+  "checks_ok": false,
+  "t600": {
+   "c4s.fp32": {
+    "T600": 0.91,
+    "how": "fit",
+    "e107": 1.4306,
+    "rel": -0.3639,
+    "ok": false
+   },
+   "c4s.fp16": {
+    "T600": null,
+    "how": null,
+    "e107": 1.4305,
+    "rel": null,
+    "ok": null
+   },
+   "c4s.int8": {
+    "T600": null,
+    "how": null,
+    "e107": 1.4399,
+    "rel": null,
+    "ok": null
+   },
+   "c8.fp32": {
+    "T600": null,
+    "how": null,
+    "e107": 2.5157,
+    "rel": null,
+    "ok": null
+   },
+   "c8.fp16": {
+    "T600": null,
+    "how": null,
+    "e107": 2.5165,
+    "rel": null,
+    "ok": null
+   },
+   "c8.int8": {
+    "T600": null,
+    "how": null,
+    "e107": 2.3931,
+    "rel": null,
+    "ok": null
+   },
+   "c16s.fp32": {
+    "T600": null,
+    "how": null,
+    "e107": 2.3522,
+    "rel": null,
+    "ok": null
+   },
+   "c16s.fp16": {
+    "T600": null,
+    "how": null,
+    "e107": 2.3517,
+    "rel": null,
+    "ok": null
+   },
+   "c16s.int8": {
+    "T600": null,
+    "how": null,
+    "e107": 2.3115,
+    "rel": null,
+    "ok": null
+   }
+  },
+  "t800": {
+   "c8s": {
+    "T800": null,
+    "e119": 1.2655,
+    "rel": null,
+    "ok": null
+   },
+   "c16r4": {
+    "T800": null,
+    "e119": 1.108,
+    "rel": null,
+    "ok": null
+   },
+   "c16r8": {
+    "T800": null,
+    "e119": 0.8906,
+    "rel": null,
+    "ok": null
+   },
+   "c16r2": {
+    "T800": null,
+    "e119": 1.5449,
+    "rel": null,
+    "ok": null
+   }
+  },
+  "verdict": "FAIL"
+ },
+ "R1": {
+  "per_format": {
+   "fp32": {
+    "X": 1.3333,
+    "X_c8s_e119": 1.1264,
+    "diff": 0.2069,
+    "verdict": "NOT LIKE IT",
+    "X_M1": 1.182,
+    "X_M2": 1.3276,
+    "share_following": 1.039,
+    "share_verdict": "FOLLOWS THE CLOCK"
+   },
+   "fp16": {
+    "verdict": null,
+    "share_verdict": null
+   },
+   "int8": {
+    "verdict": null,
+    "share_verdict": null
+   },
+   "this_session_fp32": {
+    "X_c8s": null,
+    "T800_c4s_over_c8s": null
+   }
+  },
+  "verdict": "NOT LIKE IT",
+  "share_verdict": "FOLLOWS THE CLOCK"
+ },
+ "R2": {
+  "cells": {
+   "c8.fp32": {
+    "verdict_a": null,
+    "verdict_b": null
+   },
+   "c8.fp16": {
+    "verdict_a": null,
+    "verdict_b": null
+   },
+   "c8.int8": {
+    "verdict_a": null,
+    "verdict_b": null
+   },
+   "c16s.fp32": {
+    "verdict_a": null,
+    "verdict_b": null
+   },
+   "c16s.fp16": {
+    "verdict_a": null,
+    "verdict_b": null
+   },
+   "c16s.int8": {
+    "verdict_a": null,
+    "verdict_b": null
+   }
+  }
+ },
+ "R3": {
+  "cells": {},
+  "verdict": null
+ },
+ "R4": {
+  "cells": {},
+  "order": null,
+  "order_values": [
+   null,
+   null,
+   null
+  ],
+  "c8s_below": null,
+  "c8s_max": 1.118
+ },
+ "R5": {
+  "cells": {}
+ },
+ "R6": {
+  "cells": {
+   "c4s": {
+    "verdict": null,
+    "randn_mhz": null,
+    "gap": null
+   },
+   "c8": {
+    "verdict": null,
+    "randn_mhz": null,
+    "gap": null
+   },
+   "c16s": {
+    "verdict": null,
+    "randn_mhz": null,
+    "gap": null
+   }
+  }
+ },
+ "R7": {
+  "compared": 0,
+  "worst": null,
+  "outside": [],
+  "verdict": null
+ },
+ "R8": {
+  "cells": {
+   "c4s-fp32-randn": {
+    "p800_w": 72.97,
+    "estimate_w": 76.0,
+    "excess_w": -3.03
+   }
+  },
+  "outside": [],
+  "verdict": "PASS"
+ }
+}

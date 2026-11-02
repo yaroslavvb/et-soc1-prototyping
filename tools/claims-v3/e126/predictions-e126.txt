@@ -1,0 +1,59 @@
+E126 frozen predictions (no E126 data exists). Inputs: E107 (T at 600 MHz, shares, S), E119 (this card's fits, X, sustained cells), E101's relation.
+X = T600 / T800, what x1.333 of clock buys
+  c4s.fp32  LIKE c8s 1.1264   M1 1.1820  M2 1.3276   (E107 T600 1.4306 us; c8s 1.4305)
+  c4s.fp16  LIKE c8s 1.1247   M1 1.1822  M2 1.3278   (E107 T600 1.4305 us; c8s 1.4303)
+  c4s.int8  LIKE c8s 1.1273   M1 1.0894  M2 1.3287   (E107 T600 1.4399 us; c8s 1.4401)
+  c8.fp32    phi 0.9528  T600 2.5079  S: T800 2.3473 X 1.0684   W: C  330.4 M 1.9572 T800 2.3702 X 1.0581   differ 0.0103 UNRESOLVED  (c16 X 1.0647)
+  c16s.fp32  phi 0.8564  T600 2.3448  S: T800 2.1783 X 1.0765   W: C  232.6 M 1.9572 T800 2.2479 X 1.0431   differ 0.0333 resolved  (c16 X 1.0647)
+  c8.fp16    phi 0.9535  T600 2.5093  S: T800 2.3517 X 1.0670   W: C  323.7 M 1.9698 T800 2.3744 X 1.0568   differ 0.0102 UNRESOLVED  (c16 X 1.0636)
+  c16s.fp16  phi 0.8563  T600 2.3449  S: T800 2.1810 X 1.0752   W: C  225.1 M 1.9698 T800 2.2511 X 1.0417   differ 0.0335 resolved  (c16 X 1.0636)
+  c8.int8    phi 0.9097  T600 2.3907  S: T800 2.2227 X 1.0756   W: C  301.7 M 1.8879 T800 2.2650 X 1.0555   differ 0.0201 resolved  (c16 X 1.0719)
+  c16s.int8  phi 0.8708  T600 2.3091  S: T800 2.1433 X 1.0774   W: C  252.7 M 1.8879 T800 2.2038 X 1.0478   differ 0.0296 resolved  (c16 X 1.0719)
+the replicate (E119's measured, fp32): random sus MHz, zeros sus MHz, gap, X
+  c8s      663.7  788.7  x1.0791  X 1.1264 (launch means)  T800 zeros 1.2655 us
+  c16r4    636.7  795.4  x1.1478  X 1.1853 (launch means)  T800 zeros 1.1080 us
+  c16r8    603.6  795.9  x1.2293  X 1.2391 (launch means)  T800 zeros 0.8906 us
+  c16r2    695.4  794.4  x1.0616  X 1.1227 (launch means)  T800 zeros 1.5449 us
+admission (88 W limit, 93 W lock; session stops {'abs_stop_c': 80, 'board_cap_w': 93, 'cap_consecutive': 3}):
+  c4s-fp32-zeros         S600   3.32 W  c600   2.84 W  estimate  39.0 W  admitted
+  c4s-fp32-randn         S600  23.09 W  c600  22.25 W  estimate  76.0 W  admitted
+  c8-fp32-zeros          S600   3.93 W  c600   3.44 W  estimate  40.2 W  admitted
+  c8-fp32-randn          S600  15.61 W  c600  14.90 W  estimate  62.0 W  admitted
+  c16s-fp32-zeros        S600   3.52 W  c600   3.04 W  estimate  39.4 W  admitted
+  c16s-fp32-randn        S600  15.46 W  c600  14.76 W  estimate  61.7 W  admitted
+  c8s-fp32-zeros         S600   3.43 W  c600   2.95 W  estimate  39.2 W  admitted
+  c8s-fp32-randn         S600  24.42 W  c600  23.56 W  estimate  78.5 W  admitted
+  c16r4-fp32-zeros       S600   3.75 W  c600   3.27 W  estimate  39.8 W  admitted
+  c16r4-fp32-randn       S600  24.20 W  c600  23.34 W  estimate  78.1 W  admitted
+  c16r8-fp32-zeros       S600   3.70 W  c600   3.22 W  estimate  39.7 W  admitted
+  c16r8-fp32-randn       S600  27.43 W  c600  26.51 W  estimate  84.1 W  admitted
+  c16r2-fp32-zeros       S600   3.77 W  c600   3.28 W  estimate  39.9 W  admitted
+  c16r2-fp32-randn       S600  19.71 W  c600  18.94 W  estimate  69.7 W  admitted
+  c4s-fp16-zeros         S600   3.56 W  c600   2.97 W  estimate  39.3 W  admitted
+  c4s-fp16-randn         S600  21.37 W  c600  20.45 W  estimate  72.6 W  admitted
+  c8-fp16-zeros          S600   4.04 W  c600   3.44 W  estimate  40.2 W  admitted
+  c8-fp16-randn          S600  14.67 W  c600  13.88 W  estimate  60.1 W  admitted
+  c16s-fp16-zeros        S600   3.53 W  c600   2.94 W  estimate  39.2 W  admitted
+  c16s-fp16-randn        S600  14.53 W  c600  13.74 W  estimate  59.8 W  admitted
+  c8s-fp16-zeros         S600   3.68 W  c600   3.08 W  estimate  39.5 W  admitted
+  c8s-fp16-randn         S600  21.72 W  c600  20.80 W  estimate  73.2 W  admitted
+  c16r4-fp16-zeros       S600   3.76 W  c600   3.17 W  estimate  39.6 W  admitted
+  c16r4-fp16-randn       S600  22.17 W  c600  21.24 W  estimate  74.1 W  admitted
+  c16r8-fp16-zeros       S600   3.71 W  c600   3.12 W  estimate  39.6 W  admitted
+  c16r8-fp16-randn       S600  25.58 W  c600  24.59 W  estimate  80.5 W  admitted
+  c16r2-fp16-zeros       S600   3.70 W  c600   3.11 W  estimate  39.5 W  admitted
+  c16r2-fp16-randn       S600  18.42 W  c600  17.56 W  estimate  67.1 W  admitted
+  c4s-int8-zeros         S600   3.02 W  c600   2.57 W  estimate  38.5 W  admitted
+  c4s-int8-full          S600   8.84 W  c600   8.28 W  estimate  49.4 W  admitted
+  c8-int8-zeros          S600   3.71 W  c600   3.25 W  estimate  39.8 W  admitted
+  c8-int8-full           S600   8.21 W  c600   7.67 W  estimate  48.2 W  admitted
+  c16s-int8-zeros        S600   3.30 W  c600   2.84 W  estimate  39.0 W  admitted
+  c16s-int8-full         S600   7.88 W  c600   7.35 W  estimate  47.6 W  admitted
+  c8s-int8-zeros         S600   2.85 W  c600   2.41 W  estimate  38.2 W  admitted
+  c8s-int8-full          S600   9.25 W  c600   8.69 W  estimate  50.2 W  admitted
+  c16r4-int8-zeros       S600   4.05 W  c600   3.58 W  estimate  40.4 W  admitted
+  c16r4-int8-full        S600  12.15 W  c600  11.54 W  estimate  55.6 W  admitted
+  c16r8-int8-zeros       S600   4.38 W  c600   3.91 W  estimate  41.1 W  admitted
+  c16r8-int8-full        S600  14.41 W  c600  13.75 W  estimate  59.8 W  admitted
+  c16r2-int8-zeros       S600   3.75 W  c600   3.29 W  estimate  39.9 W  admitted
+  c16r2-int8-full        S600  10.03 W  c600   9.46 W  estimate  51.6 W  admitted

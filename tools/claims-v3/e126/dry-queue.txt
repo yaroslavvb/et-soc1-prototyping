@@ -1,0 +1,12 @@
+# E126 dry run of queue_e126.py (--dry, toy card, 330 s slot), Mon 2 Nov 2026 07:17-07:21 PST on the Intel: queue start, snapshot, the smoke (rc 0) and its check (bad: null), session s1, then the slot's hard stop (STOP at slot end - 120 s; exit 4, slot_stopped true), snapshot-end, queue end. The session overran the short dry slot because the Intel stopped it (SIGSTOP) for about a minute; the hard stop is the path that caught it.
+07:17:27 PST {"t_ms": 1793632647528, "zone": "PST", "kind": "queue_start", "slot_start_ms": 1793632652000, "slot_end_ms": 1793632982000, "next_rest_ms": null, "python": "3.13.11", "sensors": false, "protocol": "<lab tree>/tools/claims-v3/e126/protocol-dry.json"}
+07:17:32 PST {"t_ms": 1793632652009, "zone": "PST", "kind": "card_free", "waits": {}, "late_s": 0.0}
+07:17:32 PST {"t_ms": 1793632652009, "zone": "PST", "kind": "before_first_launch", "snapshot": {"tag": "start", "t_ms": 1793632652009, "zone": "PST"}, "history_rows": 0}
+07:17:32 PST {"t_ms": 1793632652010, "zone": "PST", "kind": "session_start", "name": "smoke", "cap_min": 3.0}
+07:18:05 PST {"t_ms": 1793632685257, "zone": "PST", "kind": "session_end", "name": "smoke", "rc": 0, "end": {"t_end_ms": 1793632685115, "exit": 0, "reason": "done", "card_min": 0.5}, "slot_stopped": false}
+07:18:05 PST {"t_ms": 1793632685305, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+07:18:05 PST {"t_ms": 1793632685305, "zone": "PST", "kind": "session_start", "name": "s1", "cap_min": 3.944916666666667}
+07:21:02 PST {"t_ms": 1793632862775, "zone": "PST", "kind": "slot_stop", "session": "s1"}
+07:21:03 PST {"t_ms": 1793632863784, "zone": "PST", "kind": "session_end", "name": "s1", "rc": 4, "end": {"t_end_ms": 1793632863151, "exit": 4, "reason": "stop_file", "card_min": 2.9}, "slot_stopped": true}
+07:21:03 PST {"t_ms": 1793632863784, "zone": "PST", "kind": "s1_end", "rc": 4}
+07:21:03 PST {"t_ms": 1793632863784, "zone": "PST", "kind": "queue_end", "snapshot": {"tag": "end", "t_ms": 1793632863784, "zone": "PST"}, "card_free_ms": 1793632863784, "before_slot_end_s": 118.2}
