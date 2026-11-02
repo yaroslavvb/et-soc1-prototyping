@@ -1,0 +1,109 @@
+E128 posthoc_e128 (labelled post hoc; no rule depends on it)
+passes kept [12810, 12811], set aside [], leak {'mode': '0.2414', 'k_w_per_c': 0.2414, 'n_runs': -1}, rate 1.121e+09 op/s
+
+A. every registered quantity, board and rail, per pass
+  fp32.step              board 4.656 ± 0.404 (n 2)  rail 4.156 ± 0.371 (n 2)  M4 4.799  per pass [4.688, 4.624]
+  fp32.held_z            board 1.846 ± 1.819 (n 2)  rail 1.536 ± 0.669 (n 2)  M4 2.001  per pass [1.703, 1.989]
+  fp32.rest_vs_z         board 2.810 ± 2.223 (n 2)  rail 2.620 ± 0.298 (n 2)  M4 2.798  per pass [2.985, 2.635]
+  fp32.Bz_het            board 2.909 ± 1.506 (n 2)  rail 2.467 ± 0.158 (n 2)  M4 2.973  per pass [3.028, 2.791]
+  fp32.Bz_walk           board 0.140 ± 0.204 (n 2)  rail 0.241 ± 0.979 (n 2)  M4 0.111  per pass [0.156, 0.124]
+  fp32.Bz_rest           board 3.049 ± 1.710 (n 2)  rail 2.708 ± 0.821 (n 2)  M4 3.084  per pass [3.184, 2.915]
+  fp32.Bm_het            board 3.666 ± 1.004 (n 2)  rail 3.043 ± 0.888 (n 2)  M4 3.536  per pass [3.587, 3.745]
+  fp32.Bm_walk           board -0.056 ± 3.743 (n 2)  rail 0.016 ± 0.140 (n 2)  M4 -0.180  per pass [0.238, -0.351]
+  fp32.Bm_rest           board 3.610 ± 2.739 (n 2)  rail 3.059 ± 0.748 (n 2)  M4 3.356  per pass [3.825, 3.394]
+  fp32.held_alt          board -0.757 ± 2.511 (n 2)  rail -0.576 ± 1.046 (n 2)  M4 -0.563  per pass [-0.559, -0.955]
+  fp32.walk_alt          board -0.560 ± 1.029 (n 2)  rail -0.351 ± 0.073 (n 2)  M4 -0.271  per pass [-0.641, -0.479]
+  fp32.alt_walk          board 1.963 ± 0.835 (n 2)  rail 1.642 ± 0.784 (n 2)  M4 1.715  per pass [1.897, 2.029]
+  fp16.step              board 4.697 ± nan (n 1)  rail 4.244 ± nan (n 1)  M4 4.854  per pass [4.697]
+  fp16.held_z            board 2.084 ± 0.728 (n 2)  rail 1.764 ± 0.152 (n 2)  M4 2.201  per pass [2.141, 2.026]
+  fp16.rest_vs_z         board 2.556 ± nan (n 1)  rail 2.468 ± nan (n 1)  M4 2.653  per pass [2.556]
+  fp16.Bz_het            board 3.476 ± 0.640 (n 2)  rail 3.024 ± 0.159 (n 2)  M4 3.532  per pass [3.526, 3.426]
+  fp16.Bz_walk           board -0.020 ± 0.405 (n 2)  rail 0.054 ± 0.240 (n 2)  M4 -0.153  per pass [0.011, -0.052]
+  fp16.Bz_rest           board 3.456 ± 1.045 (n 2)  rail 3.078 ± 0.399 (n 2)  M4 3.379  per pass [3.538, 3.373]
+  fp16.Bm_het            board 3.064 ± 0.236 (n 2)  rail 2.541 ± 0.902 (n 2)  M4 3.398  per pass [3.045, 3.083]
+  fp16.Bm_walk           board 0.247 ± 1.079 (n 2)  rail 0.145 ± 0.594 (n 2)  M4 -0.136  per pass [0.332, 0.163]
+  fp16.Bm_rest           board 3.311 ± 0.843 (n 2)  rail 2.686 ± 1.496 (n 2)  M4 3.262  per pass [3.378, 3.245]
+  fp16.held_alt          board 0.412 ± 0.877 (n 2)  rail 0.483 ± 1.061 (n 2)  M4 0.134  per pass [0.481, 0.343]
+  fp16.walk_alt          board 0.144 ± 0.203 (n 2)  rail 0.392 ± 1.896 (n 2)  M4 0.117  per pass [0.160, 0.128]
+  fp16.alt_walk          board 3.389 ± 1.124 (n 2)  rail 2.716 ± 0.797 (n 2)  M4 2.646  per pass [3.301, 3.478]
+  fp32.share_z           board 0.397 ± 0.425 (n 2)  rail 0.369 ± 0.128 (n 2)  M4 0.417  per pass [0.363, 0.430]
+  fp32.share_het_z       board 0.954 ± 0.041 (n 2)  rail 0.912 ± 0.335 (n 2)  M4 0.964  per pass [0.951, 0.957]
+  fp32.share_het_m       board 1.021 ± 1.053 (n 2)  rail 0.995 ± 0.047 (n 2)  M4 1.054  per pass [0.938, 1.103]
+  fp32.share_walk_m      board -0.021 ± 1.053 (n 2)  rail 0.005 ± 0.047 (n 2)  M4 -0.054  per pass [0.062, -0.103]
+  fp32.rest_ratio_m      board 1.285 ± 0.042 (n 2)  rail 1.167 ± 0.153 (n 2)  M4 1.199  per pass [1.282, 1.288]
+  fp16.share_z           board 0.456 ± nan (n 1)  rail 0.419 ± nan (n 1)  M4 0.453  per pass [0.456]
+  fp16.share_het_z       board 1.006 ± 0.119 (n 2)  rail 0.983 ± 0.076 (n 2)  M4 1.045  per pass [0.997, 1.016]
+  fp16.share_het_m       board 0.926 ± 0.307 (n 2)  rail 0.947 ± 0.192 (n 2)  M4 1.042  per pass [0.902, 0.950]
+  fp16.share_walk_m      board 0.074 ± 0.307 (n 2)  rail 0.053 ± 0.192 (n 2)  M4 -0.042  per pass [0.098, 0.050]
+  fp16.rest_ratio_m      board 1.321 ± nan (n 1)  rail 1.041 ± nan (n 1)  M4 1.230  per pass [1.321]
+  fp32.design_m          board 0.066 ± 1.011 (n 2)  rail 0.083 ± 0.382 (n 2)  M4 0.090  per pass [-0.013, 0.146]
+  fp16.design_m          board -0.080 ± 0.188 (n 2)  rail -0.036 ± 0.267 (n 2)  M4 -0.004  per pass [-0.095, -0.066]
+  formats_m              board -0.095 ± 0.746 (n 2)  rail -0.048 ± 0.145 (n 2)  M4 -0.012  per pass [-0.036, -0.153]
+  formats_z              board 0.093 ± nan (n 1)  rail 0.059 ± nan (n 1)  M4 0.036  per pass [0.093]
+  alt_walk_ratio         board 1.727 ± 0.162 (n 2)  rail 1.655 ± 0.305 (n 2)  M4 1.543  per pass [1.740, 1.714]
+
+B. the arms (board), headline quantities
+  fp32.share_het_m     primary 1.021 ± 1.053 (n 2) | dipskept nan ± nan (n 0) | gatesoff 1.021 ± 1.053 (n 2) | auto 1.021 ± 1.052 (n 2) | leak0.1994 1.021 ± 1.052 (n 2) | leak0.3803 1.020 ± 1.054 (n 2) | leak0.545 1.020 ± 1.055 (n 2) | leak0 1.021 ± 1.051 (n 2)
+  fp32.share_walk_m    primary -0.021 ± 1.053 (n 2) | dipskept nan ± nan (n 0) | gatesoff -0.021 ± 1.053 (n 2) | auto -0.021 ± 1.052 (n 2) | leak0.1994 -0.021 ± 1.052 (n 2) | leak0.3803 -0.020 ± 1.054 (n 2) | leak0.545 -0.020 ± 1.055 (n 2) | leak0 -0.021 ± 1.051 (n 2)
+  fp32.Bm_walk         primary -0.056 ± 3.743 (n 2) | dipskept nan ± nan (n 0) | gatesoff -0.056 ± 3.743 (n 2) | auto -0.057 ± 3.781 (n 2) | leak0.1994 -0.057 ± 3.783 (n 2) | leak0.3803 -0.053 ± 3.611 (n 2) | leak0.545 -0.049 ± 3.454 (n 2) | leak0 -0.062 ± 3.973 (n 2)
+  fp32.design_m        primary 0.066 ± 1.011 (n 2) | dipskept nan ± nan (n 0) | gatesoff 0.066 ± 1.011 (n 2) | auto 0.065 ± 1.028 (n 2) | leak0.1994 0.065 ± 1.028 (n 2) | leak0.3803 0.070 ± 0.952 (n 2) | leak0.545 0.075 ± 0.876 (n 2) | leak0 0.061 ± 1.104 (n 2)
+  fp32.share_het_z     primary 0.954 ± 0.041 (n 2) | dipskept nan ± nan (n 0) | gatesoff 0.954 ± 0.041 (n 2) | auto 0.955 ± 0.025 (n 2) | leak0.1994 0.955 ± 0.024 (n 2) | leak0.3803 0.950 ± 0.101 (n 2) | leak0.545 0.945 ± 0.179 (n 2) | leak0 0.960 ± 0.053 (n 2)
+  fp16.share_het_z     primary 1.006 ± 0.119 (n 2) | dipskept nan ± nan (n 0) | gatesoff 1.006 ± 0.119 (n 2) | auto 1.007 ± 0.136 (n 2) | leak0.1994 1.007 ± 0.137 (n 2) | leak0.3803 1.003 ± 0.056 (n 2) | leak0.545 0.999 ± 0.024 (n 2) | leak0 1.011 ± 0.219 (n 2)
+  fp16.share_het_m     primary 0.926 ± 0.307 (n 2) | dipskept nan ± nan (n 0) | gatesoff 0.926 ± 0.307 (n 2) | auto 0.927 ± 0.298 (n 2) | leak0.1994 0.927 ± 0.298 (n 2) | leak0.3803 0.923 ± 0.339 (n 2) | leak0.545 0.920 ± 0.379 (n 2) | leak0 0.930 ± 0.257 (n 2)
+  fp16.share_walk_m    primary 0.074 ± 0.307 (n 2) | dipskept nan ± nan (n 0) | gatesoff 0.074 ± 0.307 (n 2) | auto 0.073 ± 0.298 (n 2) | leak0.1994 0.073 ± 0.298 (n 2) | leak0.3803 0.077 ± 0.339 (n 2) | leak0.545 0.080 ± 0.379 (n 2) | leak0 0.070 ± 0.257 (n 2)
+  fp16.Bm_walk         primary 0.247 ± 1.079 (n 2) | dipskept nan ± nan (n 0) | gatesoff 0.247 ± 1.079 (n 2) | auto 0.247 ± 1.059 (n 2) | leak0.1994 0.247 ± 1.058 (n 2) | leak0.3803 0.247 ± 1.148 (n 2) | leak0.545 0.247 ± 1.229 (n 2) | leak0 0.247 ± 0.960 (n 2)
+  formats_m            primary -0.095 ± 0.746 (n 2) | dipskept nan ± nan (n 0) | gatesoff -0.095 ± 0.746 (n 2) | auto -0.094 ± 0.754 (n 2) | leak0.1994 -0.094 ± 0.754 (n 2) | leak0.3803 -0.097 ± 0.715 (n 2) | leak0.545 -0.100 ± 0.676 (n 2) | leak0 -0.091 ± 0.794 (n 2)
+  alt_walk_ratio       primary 1.727 ± 0.162 (n 2) | dipskept nan ± nan (n 0) | gatesoff 1.727 ± 0.162 (n 2) | auto 1.720 ± 0.328 (n 2) | leak0.1994 1.720 ± 0.336 (n 2) | leak0.3803 1.753 ± 0.440 (n 2) | leak0.545 1.788 ± 1.213 (n 2) | leak0 1.688 ± 1.117 (n 2)
+  fp32.alt_walk        primary 1.963 ± 0.835 (n 2) | dipskept nan ± nan (n 0) | gatesoff 1.963 ± 0.835 (n 2) | auto 1.978 ± 0.949 (n 2) | leak0.1994 1.979 ± 0.955 (n 2) | leak0.3803 1.911 ± 0.438 (n 2) | leak0.545 1.849 ± 0.033 (n 2) | leak0 2.053 ± 1.525 (n 2)
+  fp16.alt_walk        primary 3.389 ± 1.124 (n 2) | dipskept nan ± nan (n 0) | gatesoff 3.389 ± 1.124 (n 2) | auto 3.400 ± 0.984 (n 2) | leak0.1994 3.401 ± 0.977 (n 2) | leak0.3803 3.351 ± 1.609 (n 2) | leak0.545 3.306 ± 2.185 (n 2) | leak0 3.456 ± 0.280 (n 2)
+
+C. lane bits behind each contrast (desk counts, per op per minion) and board watts per 1,000 differing lane C-read + result bits, post hoc
+  fp32.Bm_het      3.666 ± 1.004 (n 2) W | alternations +0 +0 | lane C-read +49182 result +49662 store +400 bits | 33.1 fJ per differing lane bit
+  fp32.Bm_walk     -0.056 ± 3.743 (n 2) W | alternations +0 +0 | lane C-read +482 result +473 store +7200 bits | -52.6 fJ per differing lane bit
+  fp32.Bm_rest     3.610 ± 2.739 (n 2) W | alternations +0 +0 | lane C-read +49664 result +50135 store +7600 bits | 32.3 fJ per differing lane bit
+  fp32.Bz_het      2.909 ± 1.506 (n 2) W | alternations -468 +0 | lane C-read +30456 result +30712 store +16 bits | 42.4 fJ per differing lane bit
+  fp32.Bz_walk     0.140 ± 0.204 (n 2) W | alternations +216 +0 | lane C-read +6441 result +6403 store +10528 bits | 9.8 fJ per differing lane bit
+  fp32.Bz_rest     3.049 ± 1.710 (n 2) W | alternations -252 +0 | lane C-read +36897 result +37115 store +10544 bits | 36.8 fJ per differing lane bit
+  fp32.held_alt    -0.757 ± 2.511 (n 2) W | alternations -468 +0 | lane C-read -18726 result -18950 store -384 bits | 17.9 fJ per differing lane bit
+  fp32.walk_alt    -0.560 ± 1.029 (n 2) W | alternations -252 +0 | lane C-read -12767 result -13020 store +2944 bits | 19.4 fJ per differing lane bit
+  fp16.Bm_het      3.064 ± 0.236 (n 2) W | alternations +0 +0 | lane C-read +45114 result +45562 store +320 bits | 30.1 fJ per differing lane bit
+  fp16.Bm_walk     0.247 ± 1.079 (n 2) W | alternations +0 +0 | lane C-read +354 result +342 store +3584 bits | 317.2 fJ per differing lane bit
+  fp16.Bm_rest     3.311 ± 0.843 (n 2) W | alternations +0 +0 | lane C-read +45468 result +45904 store +3904 bits | 32.3 fJ per differing lane bit
+  fp16.Bz_het      3.476 ± 0.640 (n 2) W | alternations -288 +472 | lane C-read +36758 result +37110 store +48 bits | 42.0 fJ per differing lane bit
+  fp16.Bz_walk     -0.020 ± 0.405 (n 2) W | alternations -2 +62 | lane C-read +1851 result +1831 store +4256 bits | -5.0 fJ per differing lane bit
+  fp16.Bz_rest     3.456 ± 1.045 (n 2) W | alternations -290 +534 | lane C-read +38609 result +38941 store +4304 bits | 39.8 fJ per differing lane bit
+  fp16.held_alt    0.412 ± 0.877 (n 2) W | alternations -288 +472 | lane C-read -8356 result -8452 store -272 bits | -21.9 fJ per differing lane bit
+  fp16.walk_alt    0.144 ± 0.203 (n 2) W | alternations -290 +534 | lane C-read -6859 result -6963 store +400 bits | -9.3 fJ per differing lane bit
+
+D. this session on card 1 against E108's, every tile both ran at 4 W or more: D(E128) / D(E108)
+  18 cells, median 0.9966, range 0.9833 (fp16.signs) .. 1.0114 (fp32.ones)
+
+E. alternations an op (desk, e128.json counts_real alt1 + alt2)
+  fp32 matched: fp32.z_s 2268+0, fp32.b_B_zm 2268+0, fp32.b_B_wm 2268+0
+  fp16 matched: fp16.z_s 2112+1694, fp16.b_B_zm 2112+1694, fp16.b_B_wm 2112+1694
+  fp32.b_B_z: 1800+0
+  fp32.b_B_w: 2016+0
+  fp16.b_B_z: 1824+2166
+  fp16.b_B_w: 1822+2228
+
+F. every tile: D, rail, M4, D - M4
+  fp16.b_B_w       D  13.672 ± 0.996  rail  12.018  M4  13.622  D-M4 +0.050
+  fp16.b_B_wm      D  13.528 ± 0.794  rail  11.626  M4  13.505  D-M4 +0.023
+  fp16.b_B_z       D  13.693 ± 0.591  rail  11.964  M4  13.776  D-M4 -0.083
+  fp16.b_B_zm      D  13.280 ± 0.285  rail  11.481  M4  13.642  D-M4 -0.361
+  fp16.c_abs       D   8.133 ± 0.777  rail   7.176  M4   8.042  D-M4 +0.091
+  fp16.m_h_sub     D  15.813 ± 0.949  rail  13.642  M4  15.720  D-M4 +0.093
+  fp16.ones        D   8.141 ± 0.295  rail   7.126  M4   8.069  D-M4 +0.072
+  fp16.signs       D  12.815 ± nan  rail  11.393  M4  12.923  D-M4 -0.108
+  fp16.w_h_add     D  12.423 ± 2.073  rail  10.927  M4  13.074  D-M4 -0.651
+  fp16.z_s         D  10.216 ± 0.049  rail   8.940  M4  10.243  D-M4 -0.027
+  fp32.b_B_w       D  12.943 ± 0.891  rail  11.396  M4  13.142  D-M4 -0.199
+  fp32.b_B_wm      D  13.503 ± 0.137  rail  11.747  M4  13.413  D-M4 +0.090
+  fp32.b_B_z       D  12.802 ± 1.095  rail  11.155  M4  13.030  D-M4 -0.228
+  fp32.b_B_zm      D  13.559 ± 3.606  rail  11.731  M4  13.593  D-M4 -0.034
+  fp32.c_abs       D   8.047 ± 0.783  rail   7.153  M4   8.056  D-M4 -0.009
+  fp32.m_h_sub     D  14.405 ± 2.671  rail  12.518  M4  14.604  D-M4 -0.198
+  fp32.ones        D   8.154 ± 0.025  rail   7.184  M4   8.078  D-M4 +0.076
+  fp32.signs       D  12.810 ± 0.430  rail  11.339  M4  12.877  D-M4 -0.067
+  fp32.w_h_add     D  12.442 ± 1.836  rail  10.876  M4  12.889  D-M4 -0.446
+  fp32.z_s         D   9.893 ± 2.602  rail   8.688  M4  10.057  D-M4 -0.164

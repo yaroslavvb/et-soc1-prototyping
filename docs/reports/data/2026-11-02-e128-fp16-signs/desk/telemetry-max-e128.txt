@@ -1,0 +1,119 @@
+E128 telemetry maxima (post hoc; for E128.md N3's stops disclosure; the PMIC alarm is 75 W or 75 C)
+  e128-smoke-p12801    samples    471 (bad 0) | board 55.43 W, SP running max 61.30 W | die: minion shires' mean 53.0 C, hottest shire 65.0 C, I/O shire 53.0 C, temp_c.pmic 53.0 C | minion MHz {600: 471}
+  p12810               samples   7185 (bad 0) | board 59.68 W, SP running max 61.30 W | die: minion shires' mean 61.0 C, hottest shire 65.0 C, I/O shire 60.0 C, temp_c.pmic 61.0 C | minion MHz {600: 7185}
+  p12811               samples   9540 (bad 0) | board 59.79 W, SP running max 61.30 W | die: minion shires' mean 61.0 C, hottest shire 65.0 C, I/O shire 60.0 C, temp_c.pmic 61.0 C | minion MHz {600: 9540}
+  all                  samples  17196 | board 59.79 W, SP running max 61.30 W | die: mean 61.0 C, hottest shire 65.0 C, I/O shire 60.0 C, temp_c.pmic 61.0 C | minion MHz {600: 17196}
+  sp_board_max_w: the same value in every sample from the first (idle) one, so a running maximum carried from before the session, not E128's own (e128-smoke-p12801 first 61.3, min 61.3, max 61.3; p12810 first 61.3, min 61.3, max 61.3; p12811 first 61.3, min 61.3, max 61.3)
+  minshire_high: the same value in every sample from the first (idle) one, so a running maximum carried from before the session, not E128's own (e128-smoke-p12801 first 65, min 65, max 65; p12810 first 65, min 65, max 65; p12811 first 65, min 65, max 65)
+  margin to the PMIC alarm: board 15.21 W (SP running max 13.70 W); hottest shire 10.0 C below 75 C
+{
+ "blocks": {
+  "e128-smoke-p12801": {
+   "samples": 471,
+   "bad": 0,
+   "max": {
+    "board_w": 55.43,
+    "sp_board_max_w": 61.3,
+    "minshire_mean": 53,
+    "minshire_high": 65,
+    "ioshire": 53,
+    "pmic_field": 53
+   },
+   "min": {
+    "board_w": 28.44,
+    "sp_board_max_w": 61.3,
+    "minshire_mean": 47,
+    "minshire_high": 65,
+    "ioshire": 48,
+    "pmic_field": 47
+   },
+   "first": {
+    "board_w": 28.57,
+    "sp_board_max_w": 61.3,
+    "minshire_mean": 48,
+    "minshire_high": 65,
+    "ioshire": 48,
+    "pmic_field": 48
+   },
+   "minion_mhz": {
+    "600": 471
+   }
+  },
+  "p12810": {
+   "samples": 7185,
+   "bad": 0,
+   "max": {
+    "board_w": 59.68,
+    "sp_board_max_w": 61.3,
+    "minshire_mean": 61,
+    "minshire_high": 65,
+    "ioshire": 60,
+    "pmic_field": 61
+   },
+   "min": {
+    "board_w": 28.7,
+    "sp_board_max_w": 61.3,
+    "minshire_mean": 49,
+    "minshire_high": 65,
+    "ioshire": 50,
+    "pmic_field": 49
+   },
+   "first": {
+    "board_w": 29.09,
+    "sp_board_max_w": 61.3,
+    "minshire_mean": 49,
+    "minshire_high": 65,
+    "ioshire": 50,
+    "pmic_field": 49
+   },
+   "minion_mhz": {
+    "600": 7185
+   }
+  },
+  "p12811": {
+   "samples": 9540,
+   "bad": 0,
+   "max": {
+    "board_w": 59.79,
+    "sp_board_max_w": 61.3,
+    "minshire_mean": 61,
+    "minshire_high": 65,
+    "ioshire": 60,
+    "pmic_field": 61
+   },
+   "min": {
+    "board_w": 29.98,
+    "sp_board_max_w": 61.3,
+    "minshire_mean": 52,
+    "minshire_high": 65,
+    "ioshire": 52,
+    "pmic_field": 52
+   },
+   "first": {
+    "board_w": 30.32,
+    "sp_board_max_w": 61.3,
+    "minshire_mean": 52,
+    "minshire_high": 65,
+    "ioshire": 53,
+    "pmic_field": 52
+   },
+   "minion_mhz": {
+    "600": 9540
+   }
+  }
+ },
+ "all": {
+  "samples": 17196,
+  "max": {
+   "board_w": 59.79,
+   "sp_board_max_w": 61.3,
+   "minshire_mean": 61,
+   "minshire_high": 65,
+   "ioshire": 60,
+   "pmic_field": 61
+  },
+  "minion_mhz": {
+   "600": 17196
+  }
+ }
+}
