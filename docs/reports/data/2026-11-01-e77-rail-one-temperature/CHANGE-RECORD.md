@@ -204,14 +204,44 @@ heater `build/sparsity_t2` host `7adadf4f1ce331cc…`, kernel `990807f483cd57aa�
 passes at the card's own settings; by amendment A2 it writes nothing until the file `GO` exists in its run directory,
 created after this commit is pushed.
 
-## Set log, activation, final handoff
+## Set log, activation, final handoff (filled from `raw/gov.jsonl`, `raw/end.json`, `raw/watchdog.log`)
 
-⟨RUN: as E72's record — originals, LUT floor, the watchdog armed, both sets with argv, rc and times, read-backs, the
-restore, the return burst and its ring, module uptime after, the residencies before and after, the host kernel log's ET
-error events before and after (read-only `dmesg`, E69's form; any event other than the known `SP Runtime Error` /
-`Count 0` syndrome is reported — recorded, not a live abort, since its raw format is not parsed during the run), the
-claim's release edit read back. Outbound OTA: **N-A**. Activation and acceptance (reset, re-identification, new firmware): **N-A**, nothing
-was flashed or reset. Signoff, UTC and PST.⟩
+| time (PST, Sun 1 Nov 2026) | event | read-back (the two RAM GETs) |
+|---|---|---|
+| 17:27:01.303 | the session's original read, card lock held since 17:26:59 | TDP **65** W, threshold **65** °C, `low_power`, 600 MHz; module uptime 6 d 3 h 14 m |
+| 17:27:01–17:35:30 | arm B passes 1–2 at the card's own settings (23 of 24 launches; one gate not reached) | — |
+| 17:28:42 | `GO` created on the host, after the GO commit `724a5473` was pushed (17:28:33) | — |
+| 17:35:34.965 | deadline watchdog armed, pid 399540, deadline 18:50:34 | — |
+| 17:35:34.974 → .991 | **set** `DM_CMD_SET_MODULE_STATIC_TDP_LEVEL -n 0 -l 0 -u 5000`, rc 0 | 17:35:34.999: TDP **0** W, threshold **65** °C |
+| 17:35:34–17:54:32 | arm A passes 1–3 at the pin (32 of 36 launches; four gates not reached); every measurement launch read 600 MHz (the abort never fired) | — |
+| 17:55:06 | the 8 s settling rung: its gate was not reached (the preheat to 59 °C, 8 heater launches), so it did not run | — |
+| 17:55:10.848 → .863 | **restore** `... -l 65 ...`, rc 0 | 17:55:10.871: TDP **65** W, threshold **65** °C (power-state label `max_power`, the known side effect of the pin) |
+| 17:55:15 | the watchdog read `release` and exited: "released by the session, nothing to do" | — |
+| 17:55:11–17:55:21 | **the return burst** (544 harts, 4 s): clock **600 → 700 → 800 MHz**; its ring holds 12 "Power throttle up" lines | after it: TDP 65 W, threshold 65 °C, `low_power`, 600 MHz |
+| 17:55:21–17:59:21 | arm B pass 3 (12 of 12 launches) | — |
+| 17:59:25.679 | **closing read**, then the lock released | TDP **65** W, threshold **65** °C, `low_power`, 600 MHz; module uptime 6 d 3 h 46 m (no service-processor reset) |
+
+- **One field written, twice:** the TDP to 0 and back to 65; the threshold never. Nothing else was sent but the reads
+  listed above. The pin lasted 19 min 36 s.
+- **Envelope:** the highest board reading of the session was 70.7 W (an arm-B heater launch on 768 harts); the highest
+  in a kept measurement launch 58.05 W; no die mean reached 72 °C (launch readings 53–55 °C); no safety stop.
+- **Host kernel log:** 22 ET error events in the window, all the known `SP Runtime Error` / `Count 0` syndrome, two per
+  management burst between passes, none inside a pass (`raw/kernel-events.txt`).
+- **Card time:** 32.44 card-minutes in the session (exit 0, "done"), plus the gate reads and the smoke (under 1 min).
+- Activation and acceptance (reset, re-identification, new firmware): **N-A**, nothing was flashed or reset.
+  **Outbound OTA: N-A. Automatic fallback: N-A.**
+
+## Final handoff
+
+- **Retained state:** firmware, module and PMIC untouched; the governor at its original **65 W / 65 °C**, read back at
+  17:55:10 and again at 17:59:25; the card idle at 600 MHz; no service-processor reset (uptime continuous).
+- **Locks and monitors:** the card lock released at the session's end; the owner's collector resumes by itself (it was
+  never stopped); the watchdog exited after `release`.
+- **Logs and artefacts:** the run directory as `raw/` beside this file (telemetry gzipped; the box's tree path written
+  `<tree>`); the vmin-LUT file stays on the host as per-card calibration data.
+- **Unresolved risks:** none from the operation. The run's own findings (the arms' operating-point step) are in the
+  README.
+- **Signoff:** the run agent, Sun 1 Nov 2026, 18:0x PST (02:0x UTC Mon 2 Nov); no independent reviewer.
 
 ## Template mapping
 
@@ -225,4 +255,4 @@ was flashed or reset. Signoff, UTC and PST.⟩
 | Update record — one attempt | N-A (no update) |
 | Activation and acceptance | N-A (no reset, nothing flashed); the return burst stands in for "the governor works afterwards" |
 | Outbound OTA / fallback | N-A: **Outbound OTA: N-A. Automatic fallback: N-A** (nothing written to a bank) |
-| Final handoff | below, at the end of the run |
+| Final handoff | above |

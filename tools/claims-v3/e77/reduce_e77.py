@@ -101,6 +101,8 @@ def launch_rows(rundir, drops):
         tag = "SETTLE" if L["role"] == "settle" else f"{L['arm']}{L['pass']}"
         if tag not in tels:
             p = os.path.join(rundir, "tel", f"{tag}.jsonl")
+            if not os.path.exists(p) and os.path.exists(p + ".gz"):
+                p = p + ".gz"          # the committed copy is gzipped; the reduction is the same
             tels[tag] = (tel_arrays(p) if os.path.exists(p) else None, p)
         A, tpath = tels[tag]
         recs = L.get("sparsity") or []
