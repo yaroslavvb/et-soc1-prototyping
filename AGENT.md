@@ -463,6 +463,16 @@ entries move verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelo
 10 October 2026 for agent instruction files). It starts on 14 October 2026; earlier changes are in
 `git log -- AGENT.md`.*
 
+- **2026-11-02 (Mon, week 45, Q134 records, corrections after verification)** — The 31 October (Q130 records) entry gains
+  a dated note, its text unedited: the re-check it names, the "read-only" `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`, is a
+  PMIC command, so the note re-checks each card's firmware by its module uptime against section 4's committed read
+  instead. The 27 October correction entry, the oldest of 16, moved verbatim to
+  [`docs/agent-changelog-archive.md`](docs/agent-changelog-archive.md). *Why:* constraint — at et-platform `836a4ab` that
+  query writes the PMIC's firmware-management command register twice (E114's C1), a PMIC command by E85 C1's standard,
+  which section 5 forbids; the verifier of Q134's records found two data READMEs still telling runs to send it, and this
+  changelog's re-check was a third such instruction; re-check: C1 of
+  `docs/reports/data/2026-11-01-e114-card0-replicates/README.md` and the handler chain it cites. And preference — the
+  owner's rule of 10 October 2026 for agent instruction files, which keeps the newest 15 entries inline.
 - **2026-11-01 (Sun, week 44, Q134 records)** — Section 3's index reads Q1–Q135 and E1–E125, where it read Q1–Q133 and
   E1–E118: E119–E125 are Q134's seven card experiments, E120 among them a governor move; E77's line says it is recorded
   beside E120, its redesign, where it said "recorded after its verification". The 27 October entry, the oldest of 16,
@@ -564,6 +574,12 @@ entries move verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelo
   guardband macros unused; 14-card-behaviour.md, "The governor's two knobs"; Q130(d)), E72's measured release of a
   TDP-0 pin, and the firmware revisions read on all four cards between 27 and 31 Oct 2026; re-check: the read-only
   `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` on each card under its lock, and that section of 14-card-behaviour.md.
+  *Dated note, Mon 2 Nov 2026 (week 45), Q134's records, the text above unedited: that query is not read-only. At
+  et-platform `836a4ab` it writes the PMIC's firmware-management command register twice (E114's C1), a PMIC command by E85
+  C1's standard, which section 5 forbids. Re-check the cards' firmware by each card's module uptime
+  (`DM_CMD_GET_MODULE_UPTIME`, service-processor RAM) against the time of section 4's committed read: an image takes
+  effect only through a reset, so an unbroken uptime carries the identity (E77, E118, E120). Send the query only with the
+  owner's and the firmware maintainer's authorization.*
 - **2026-10-31 (Sat, week 44)** — Section 4: a card reservation post says how long the card is held, as `for <N> h`
   in digits plus the clock time it ends (`using aifoundry3 for 1.5 h, until ~14:30 PDT`), is re-estimated in place if
   the run will overrun by more than 15 minutes, and carries the owner's "Claude says:" marking. *Why:* preference — the
@@ -579,11 +595,3 @@ entries move verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelo
   the owner's words that day, *"I basically just want you to post when you reserve the card and when you release it, and
   each post may have a small link to the spacesheep doc, which describes what you're doing"*, after he deleted four Q129
   claims of 27 October *"because they were too wordy"*.
-- **2026-10-27 (Tue, week 44, correction)** — Section 5's governor exception gains what a reader could not find in it:
-  the numeric envelope the owner set (TDP ≤ 75 W; a raised software threshold ≤ 70 °C; abort at a die ≥ 72 °C or board
-  power ≥ 85 W; lowering safe thermally, but a TDP at or below a pattern's own 600 MHz power latches the governor, as
-  on aifoundry3), the duty to read the exact running build's firmware source and show the two DM sets write no flash
-  before any set, that the manual's gates cover a governor move rather than sitting beside it, and that the change
-  record is committed with the run's data directory. *Why:* the Q129 verifier found the rule as first written carried
-  no ceiling, no abort condition and no commit step, on the card with an idle-runaway history; the envelope is the
-  owner's own, from his Q129 brief of the same afternoon, and the manual carries no numbers of its own.

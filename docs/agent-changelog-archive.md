@@ -4,6 +4,14 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-10-27 (Tue, week 44, correction)** — Section 5's governor exception gains what a reader could not find in it:
+  the numeric envelope the owner set (TDP ≤ 75 W; a raised software threshold ≤ 70 °C; abort at a die ≥ 72 °C or board
+  power ≥ 85 W; lowering safe thermally, but a TDP at or below a pattern's own 600 MHz power latches the governor, as
+  on aifoundry3), the duty to read the exact running build's firmware source and show the two DM sets write no flash
+  before any set, that the manual's gates cover a governor move rather than sitting beside it, and that the change
+  record is committed with the run's data directory. *Why:* the Q129 verifier found the rule as first written carried
+  no ceiling, no abort condition and no commit step, on the card with an idle-runaway history; the envelope is the
+  owner's own, from his Q129 brief of the same afternoon, and the manual carries no numbers of its own.
 - **2026-10-27 (Tue, week 44)** — Section 5's rule against changing a card's TDP, clocks, firmware or driver is amended:
   resets, PCIe retrains, firmware, OTA, flashing, PMIC commands, driver reloads and direct clock sets stay forbidden, but
   the owner may authorize a **governor move** (the static TDP level and the software temperature threshold) for one named

@@ -52,6 +52,13 @@ had gone past what its verifier allowed. Section 11's items now print their old 
 section 11" keep meaning that old list. **Old to new:** 1 → 3 and 14; 2 → 5; 3 → 7; 5 → 2; 6 → 6; 8 → 9, its extrapolation half
 closed; 9 → 8; 12 → 10, 11, 13 and 15; 7 → closed, what it leaves 12; 4, 10 and 11 → closed. New items: 1, 4, and, closed, the gap
 in a repeated GEMM-pattern block whose tiles fit. Public and unlisted still; the claims are in [05-claims.md](05-claims.md), "Q132".
+**Dated note (Q134's records, after their verification, Mon 2 Nov 2026):** rebuilt in place twice more on 1 November, each
+time keeping section 11's numbering. Q133(d) deployed `90e02fa93e9c` at 18:46:58 PST (over `5450fa1ebd61`; source
+`e68fea5`) and its verifier's fixes as `fdcbcba2f34d` at 19:31:56 PST (source `a9c84cb`), for Q133's E107–E118. Q134(d)
+deployed `424503b97c24` at 22:57:31 PST (source `de4db2b`), before Q134's records were committed, and its verifier's fixes
+as `fbb682f9393b` at 23:33:25 PST (source `ef8e30e`), the live version when this note was written, for Q134's E119–E125,
+E77 and Q134(a), with a new item 16, the rail ledger's off-rail row (E77, E120). Public and unlisted still; the claims are
+in [05-claims.md](05-claims.md), "Q133" and "Q134".
 
 **A24 · From matmul speed to one transistor switch** (27 October 2026, Q128). The nine-step chain on one
 page: speed, the governor, board watts, picojoules per multiply-add, femtojoules per flipped operand bit,
@@ -1003,10 +1010,13 @@ is cited by id and was released by an edit of the same post.
 
 ## Q134 published no new page: eight data directories, E77's corrections and the harness trees (1 November 2026)
 
-Q134's lanes built **no new space**. What they made is in this repository; the kinds page (A25) and the hubs take it in their
-own passes (Q134(d), Q134(e)). The short names are the ones [05-claims.md](05-claims.md), "Q134", uses. Each line's first sha
+Q134's lanes built **no new space**. What they made is in this repository. The kinds page (A25) took it first: Q134(d)
+rebuilt it in place as `424503b97c24` at 22:57:31 PST, before these records were committed, and after its verifier as
+`fbb682f9393b` at 23:33:25 PST (A25's dated note); the hubs take it in their own pass (Q134(e)). The short names are the
+ones [05-claims.md](05-claims.md), "Q134", uses. Each line's first sha
 is the data, the last the corrections after verification. "Item N" is the kinds page's section 11 as at `fdcbcba2f34d`
-(Q133's rebuild, which kept `1fe8377a18af`'s numbering), and each data README's first lines name the item it answers.
+(Q133's rebuild, which kept `1fe8377a18af`'s numbering; Q134(d)'s keeps it and adds item 16, the rail ledger's off-rail
+row, for E77 and E120), and each data README's first lines name the item it answers.
 
 | What | Where | What is in it |
 |---|---|---|
@@ -1026,7 +1036,12 @@ E120's change record is committed with its data, as E118's and E77's are. Every 
 records added dated notes, never editing frozen text, to the data READMEs of E69, E72, E79, E82 and E84: each sent the
 firmware-revisions query, a PMIC command by E85 C1's standard ([05-claims.md](05-claims.md), "Q134", the disclosures); and to
 E109's and E113's, for E124's and E125's desk findings on their set-aside passes (a board-meter dip in E113's case,
-consistent with one in E109's).
+consistent with one in E109's). After their verification they added dated notes to the Q129 throttle-wrap gate's and the
+Q130 governor thermal branch's READMEs, whose instructions to send the firmware-revisions query the notes qualify, and to
+the 31 October entry of [AGENT.md](../../AGENT.md)'s changelog, whose re-check called that query read-only; and to four
+records that said the owner had not been asked about E117's outage risk (the Q133 row of [02-requests.md](02-requests.md),
+E117's entry in [03-experiments.md](03-experiments.md), the Q133 section of [05-claims.md](05-claims.md) and
+[14-card-behaviour.md](14-card-behaviour.md)).
 
 ## The camera and the details panel (30 September)
 

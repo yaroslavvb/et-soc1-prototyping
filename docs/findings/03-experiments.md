@@ -4,7 +4,8 @@
 hand or tool not identified, so a claim id cited in E92–E106 or in their data READMEs may no longer open. The ids stay as the record of
 what was posted; the times beside them are from the lanes' own logs. **And:** "item N of section 11" in E92–E106 and their READMEs is the list
 the kinds page carried until 31 October; its rebuild, now `5450fa1ebd61`, ranks that section afresh and prints each item's "old item N". In E107–E118 and Q133's READMEs, "item N" is that rebuilt list's, as at `1fe8377a18af`.
-E119–E125 and Q134(a) use the same numbering, as the page carried it at `fdcbcba2f34d`.
+E119–E125 and Q134(a) use the same numbering, as the page carried it at `fdcbcba2f34d`; Q134(d)'s rebuild of the page
+(`424503b97c24`) keeps it and adds item 16, the rail ledger's off-rail row (E77, E120).
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
@@ -3539,8 +3540,8 @@ that sends no PMIC read, no revisions query and no statistics reset. Arm A ran a
   **1.06 pJ, more than the whole row** (`corrections-check.txt` C). So E77 does not bound the regulators' share below the
   row, and the frozen reading "the whole row is logic in step with the rails" is not supported.
 - **Post hoc, labelled.** The minion rail's cost per hart follows f·V²: arm B over arm A 1.924 (99% over passes
-  [1.81, 2.04]) against 1.899 from the measured 518 and 618 mV. The 800 MHz operating point costs 4.09 W [3.44, 4.75] on
-  the minion rail and 1.73 W [1.69, 1.78] on the SRAM rail before any work; because the card idles at 600 MHz in both
+  [1.81, 2.04]) against 1.899 from the measured 518 and 618 mV. The 800 MHz operating point costs 4.09 W (99% [3.44, 4.75]) on
+  the minion rail and 1.73 W (99% [1.69, 1.78]) on the SRAM rail before any work; because the card idles at 600 MHz in both
   arms, arm B's deltas carry that step, which is why P1 and P2 failed. With the step fitted one fit bounds the conduction
   at 0.30 pJ, and a fit with the SRAM and NoC rails too gives no bound (`posthoc.json`; `corrections-check.txt` C, D).
 - **At a known launch temperature** (secondary S-T): random fp32 launched at 54–55 °C puts **4.645 pJ** a multiply-add on
@@ -5389,6 +5390,13 @@ and stayed up, and aifoundry2 read up to 101.15 W and stayed up
 have shown only a slow-average alarm on aifoundry2's own scale, not card 0's mechanism or scale. Nothing was claimed, set,
 posted or committed, so the repository holds no E117 file; item 14 keeps its text.
 
+**Dated note, Mon 2 Nov 2026 (week 45), Q134's records, after their verification, added without editing the text above:**
+"an outage risk he has not yet been asked about" did not hold: the session had put E117's outage risk to the owner at
+16:04 PST on 1 November, before this entry was written, and put it again at 18:57 (the [Horace
+hub](https://spacesheep.dev/@yaroslavvb/horace-hub)'s record). E117 stays not run, awaiting his acceptance. Item 14 has
+since been narrowed at the desk by Q134(a), and the kinds page's item 14 now says only that the desk's NO-GO stands until
+the owner accepts that risk.
+
 ## E118 — a flipped bit's price at 600 MHz on a second card: aifoundry1's card 0 pinned by a TDP of 0, against its own 800 MHz (Q133; card runs 2026-11-01, 14:50–15:17 PST, aifoundry1's card 0) — pre-registered; a governor move
 
 **Asked:** item 15's last sentence, "E72 on a second card, which needs a governor move" (the rest of item 15 is other work),
@@ -5472,7 +5480,9 @@ check before opening the device, so all 68 queries returned nothing (C3).
 ## E120 — E77 redesigned: the rail launched and read at one temperature, with the 800 MHz operating-point step fitted (Q134; card runs 2026-11-01, 20:49–21:20 PST, aifoundry2) — pre-registered; a governor move
 
 **Asked:** E77's open issues (the re-run they asked for), the Horace hub's Levels stop 2 (its Missing column) and the final
-critic's item 13; the kinds page's section 11 has no item for the regulator split. The same TDP 65 → 0 → 65 move as E77,
+critic's item 13; the kinds page's section 11 had no item for the regulator split when E120 was registered (Q134(d)'s
+rebuild of the page, `424503b97c24`, added one, item 16, the rail ledger's off-rail row). The same TDP 65 → 0 → 65 move
+as E77,
 under the owner's governor OK of 1 November, with the maintainer's posted guidelines and the field manual's gates first (no
 post of his after 14:17 PST, read at 20:30:50 and again at 20:48:07, 41 s before the claim). **Pre-registered** in the data
 README's registration and [`tools/claims-v3/e120/`](../../tools/claims-v3/e120/) (`9fbe7ba6`, pushed 20:47:53 PST), before
@@ -5502,8 +5512,8 @@ highest board reading a heater's 69.59 W, 50.6 W in a kept launch; no safety sto
   off.
 - **T1 PASS:** arm B's per-hart cost over arm A's, divided by (800/600)·(V_B/V_A)², is **0.979, 99% [0.906, 1.053]**: the
   minion rail's per-hart cost follows f·V², now registered.
-- **S1, S2 PASS:** the 800 MHz operating point (its clock and voltages) costs **4.26 W [3.82, 4.70]** on the minion rail and
-  **1.76 W [1.70, 1.81]** on the SRAM rail with no work.
+- **S1, S2 PASS:** the 800 MHz operating point (its clock and voltages) costs **4.26 W, 99% [3.82, 4.70]** on the minion
+  rail and **1.76 W, 99% [1.70, 1.81]** on the SRAM rail with no work.
 - **P2 PASS** (the re-cut ladder matched every pair within 2.4%), **G PASS** (the arms launched at 52.03 and 51.95 °C),
   **RING PASS** (600 → 700 → 800 MHz after the restore, two fresh throttle-ups), **K PASS** (0 kernel error events,
   20:48:55–21:20:21 PST; E77's window held 22).
@@ -5516,7 +5526,7 @@ highest board reading a heater's 69.59 W, 50.6 W in a kept launch; no safety sto
 that is itself an uncorrected fit; E77's post hoc per-hart transfer and its 800 MHz step are registered. Whether the ledger's
 row should be re-cut on a drift-corrected footing is open. Three launches read 51 °C: the registered gate words say a die
 that falls below 52 °C is heated again, but the code kept from E77 launches when the rails settle and flags them
-`below_floor`; a registered sensitivity leaves them out (0.44 [−0.06, 0.94]).
+`below_floor`; a registered sensitivity leaves them out (R_eff 0.44 mΩ, 99% [−0.06, 0.94]).
 **Report:** no page of its own; the data README is the public record.
 
 ## E121 — E93's zero-gate tests on a second card: negative zero, denormals, int8's eight-byte rule, its column pairing and the A word (Q134; card runs 2026-11-01, 19:23–19:51 PST, aifoundry3) — pre-registered

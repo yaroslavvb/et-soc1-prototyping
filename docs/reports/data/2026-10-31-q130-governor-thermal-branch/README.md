@@ -344,6 +344,21 @@ under 0.20.0 a TDP of 0 latches the governor dead the first time the mean passes
 safe and permanent; under 0.22.0 the same TDP is a *reversible* pin whose only guard above the floor is the
 host harness ([`../../../findings/14-card-behaviour.md:333-347`](../../../findings/14-card-behaviour.md)).
 
+*Dated note, Mon 2 Nov 2026 (week 45), added by Q134's records after their verification, without editing the text above:
+the read this paragraph and the last bullet of "What this changes" ask for, `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`, is a
+PMIC command. At et-platform `836a4ab` its handler writes the PMIC's firmware-management command register twice,
+ACTIVE_SLOT then VERSION, and reads the data register after each (the chain is in [E114's
+README](../2026-11-01-e114-card0-replicates/README.md), C1); by the lab's standard since
+[E85](../2026-10-31-e85-camera-kinds/README.md)'s correction C1, a DM command the service processor passes to the PMIC is
+a PMIC command. The read was made: E79 sent it on aifoundry3 at 09:27:22 PDT on 31 October, three minutes before this
+README was first committed
+([`../2026-10-31-e79-fp16-int8-bit-prices/ident/firmware.txt`](../2026-10-31-e79-fp16-int8-bit-prices/ident/firmware.txt)),
+and E82 and E84 sent it on aifoundry1's two cards that afternoon, all under Q130's rule of no PMIC work. Take a card's
+identity from its last committed revisions read and its module uptime (`DM_CMD_GET_MODULE_UPTIME`, service-processor RAM):
+an image takes effect only through a reset, so an uptime longer than the time since that read carries the identity, as
+E77, E118 and E120 took it. Send the query again only with the owner's and the firmware maintainer's authorization.
+[05-claims.md](../../../findings/05-claims.md), "Q134", lists every run that sent it.*
+
 ## For the blog, in one paragraph
 
 The ET-SoC-1's clock is set by two firmware tests, and they fail in different ways, so the same chip gives the
@@ -486,3 +501,6 @@ python3 clamp_model.py --out clamp-band.json
 - **For the next card session:** read each card's own `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` and commit it.
   aifoundry3's committed firmware is 36 days old and was taken on the day aifoundry2's identical-looking read
   turned out to be about to change.
+  *Dated note, Mon 2 Nov 2026 (week 45), added by Q134's records after their verification, without editing the text above:
+  that query is a PMIC command, and E79, E82 and E84 sent it on 31 October; see the dated note under "What firmware the
+  two cards run".*

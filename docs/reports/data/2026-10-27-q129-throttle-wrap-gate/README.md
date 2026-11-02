@@ -61,6 +61,18 @@ Before any arm that **raises** the TDP level:
    processor RAM and nothing else), rather than at whatever revision is newest;
 4. keep a host-side power abort armed regardless, because guard (3) above is the only one under our control.
 
+*Dated note, Mon 2 Nov 2026 (week 45), added by Q134's records after their verification, without editing the text above:
+step 1's `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` is a PMIC command. At et-platform `836a4ab` its handler writes the PMIC's
+firmware-management command register twice, ACTIVE_SLOT then VERSION, and reads the data register after each (the chain is
+in [E114's README](../2026-11-01-e114-card0-replicates/README.md), C1); by the lab's standard since
+[E85](../2026-10-31-e85-camera-kinds/README.md)'s correction C1, a DM command the service processor passes to the PMIC is
+a PMIC command. E69 sent it at 13:56:26 PDT on 27 October, and the version this gate names for that card (below) is that
+read's. So take step 1's version from the card's last committed revisions read and its module uptime
+(`DM_CMD_GET_MODULE_UPTIME`, service-processor RAM): an image takes effect only through a reset, so an uptime longer than
+the time since that read carries the identity, as E77, E118 and E120 took it. Send the query again only with the owner's
+and the firmware maintainer's authorization. [05-claims.md](../../../findings/05-claims.md), "Q134", lists every run that
+sent it.*
+
 **For the card E69 used:** it reports BL2 0.22.0, the 0.22.0 tree carries the 32-bit conversion, and the rule-8
 read was done at 0.22.0 (`tools/claims-v3/knob/CHANGE-RECORD.md`). E69's raised-cap arm is therefore
 interpretable, subject to the build-identity residual that record already names — a reported "0.22.0" does not

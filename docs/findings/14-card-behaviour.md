@@ -503,6 +503,10 @@ operating-point changes is one candidate).
   of them in E114's session (the stock sampler), which E114, reading no kernel log, leaves open: the stock sampler's
   voltage-register reads or that session's heavier load would fit. Data: [`2026-11-01-e114-card0-replicates`](../reports/data/2026-11-01-e114-card0-replicates/README.md) C1, C8;
   [`2026-11-01-e118-two-clock-card0`](../reports/data/2026-11-01-e118-two-clock-card0/README.md).
+- **Dated note, Mon 2 Nov 2026 (week 45), Q134's records, after their verification, on the note above:** "an outage risk
+  he has not yet been asked about" did not hold: the session had put E117's outage risk to the owner at 16:04 PST on 1
+  November, before that note was written, and put it again at 18:57 (the [Horace
+  hub](https://spacesheep.dev/@yaroslavvb/horace-hub)'s record). E117 stays not run, awaiting his acceptance.
 - **Dated note, Sun 1 Nov 2026 (week 44), Q134(a): since it started on 26 Oct, aifoundry2's service processor has not entered
   POWER_SAFE.** Raw throttle-residency state 3 read 0 µs at all 712 committed reads, from 11 sessions (E69, 27 Oct 14:20:45
   PDT, to E77, 1 Nov 17:59:25 PST), while raw 2 rose monotonically from 1,095.9 to 4,717.6 s under one service-processor
