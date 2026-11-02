@@ -1,0 +1,23 @@
+E136 (Q137) desk: a large GEMM's own reuse, per L2-sized block, and where each missing line is served. No card. Standard library only.
+
+g2k: blocks MB 2 NB 2 KB 2; elements M x N x K fp32 (2048, 1024, 1024), fp16 (2048, 1024, 2048), int8 (2048, 1024, 4096); ops per minion a pass 512
+  footprint A 8 MB, B 4 MB, C 8 MB: 20 MB with C (the L3 is 32 MB)
+  per shire: A 256 KB a row pass, B 512 KB; B's reuse distance 768 KB against the L2's 512 KB
+  L2 (one shire, model): missing lines per op, first pass 176.0, steady 176.0 of 192.0
+  L3 at 32MB (model): share of missing A lines found in the L3 1.000, of B lines 1.000
+  L3 at 28MB (model): share of missing A lines found in the L3 1.000, of B lines 1.000
+  L3 at 24MB (model): share of missing A lines found in the L3 1.000, of B lines 1.000
+
+g4k: blocks MB 4 NB 8 KB 8; elements M x N x K fp32 (4096, 4096, 4096), fp16 (4096, 4096, 8192), int8 (4096, 4096, 16384); ops per minion a pass 16384
+  footprint A 64 MB, B 64 MB, C 64 MB: 192 MB with C (the L3 is 32 MB)
+  per shire: A 1024 KB a row pass, B 2048 KB; B's reuse distance 3072 KB against the L2's 512 KB
+  L2 (one shire, model): missing lines per op, first pass 192.0, steady 192.0 of 192.0
+  L3 at 32MB (model): share of missing A lines found in the L3 0.658, of B lines 0.500
+  L3 at 28MB (model): share of missing A lines found in the L3 0.221, of B lines 0.500
+  L3 at 24MB (model): share of missing A lines found in the L3 0.000, of B lines 0.500
+
+c1: L2 steady missing lines per op 0.0 (first pass 128.0); L3 class: none missing
+
+c8s: L2 steady missing lines per op 128.0 (first pass 128.0); L3 class: L3 (E107 R4, measured)
+
+c16: L2 steady missing lines per op 128.0 (first pass 128.0); L3 class: fresh (first touch, by construction)

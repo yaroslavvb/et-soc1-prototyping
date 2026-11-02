@@ -1,0 +1,47 @@
+block SMOKE:
+  rest                   burst zeros                                                                  est 30.0 W  cum   0.0 min
+  g4k-fp32-zeros         burst gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin            est 39.7 W  cum   0.0 min
+  g4k-int8-zeros         burst gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin            est 38.8 W  cum   0.0 min
+  g4k-fp16-zeros         burst gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin            est 39.8 W  cum   0.0 min
+  g2k-int8-zeros         burst gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin            est 37.8 W  cum   0.0 min
+block A:
+  g4k-fp32-zeros         burst gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin            est 39.7 W  cum   0.4 min
+  g4k-fp32-randn         burst gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin            est 63.8 W  cum   0.8 min
+  g4k-fp32-sparse50      burst gemmL4x8x8:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin      est 49.9 W  cum   1.2 min
+  g4k-fp32-real          burst gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_q est 63.7 W  cum   1.7 min
+  g2k-fp32-zeros         burst gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin            est 39.1 W  cum   2.1 min
+  g2k-fp32-randn         burst gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin            est 75.6 W  cum   2.5 min
+block B:
+  g4k-fp32-randn         sus   gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin            est 63.8 W  cum   4.2 min
+  g4k-fp32-zeros         sus   gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin            est 39.7 W  cum   5.8 min
+block C:
+  g4k-int8-zeros         burst gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin            est 38.8 W  cum   6.2 min
+  g4k-int8-full          burst gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/int8/full.bin             est 47.3 W  cum   6.7 min
+  g4k-int8-sparse50      burst gemmL4x8x8:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin      est 44.9 W  cum   7.1 min
+  g4k-int8-real          burst gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p est 45.5 W  cum   7.5 min
+  g2k-int8-zeros         burst gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin            est 37.8 W  cum   7.9 min
+  g2k-int8-full          burst gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin             est 48.4 W  cum   8.3 min
+block D:
+  g4k-fp16-zeros         burst gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin            est 39.8 W  cum   8.8 min
+  g4k-fp16-randn         burst gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin            est 60.7 W  cum   9.2 min
+  g4k-fp16-sparse50      burst gemmL4x8x8:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin      est 53.0 W  cum   9.6 min
+  g4k-fp16-real          burst gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_q est 60.3 W  cum  10.0 min
+  g2k-fp16-zeros         burst gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin            est 39.5 W  cum  10.4 min
+  g2k-fp16-randn         burst gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin            est 70.0 W  cum  10.8 min
+block E:
+  g4k-int8-full          sus   gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/int8/full.bin             est 47.3 W  cum  12.5 min
+  g4k-int8-zeros         sus   gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin            est 38.8 W  cum  14.2 min
+  g4k-fp16-randn         sus   gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin            est 60.7 W  cum  15.8 min
+  g4k-fp16-zeros         sus   gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin            est 39.8 W  cum  17.5 min
+block F:
+  g2k-fp32-randn         sus   gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin            est 75.6 W  cum  19.2 min
+  g2k-fp32-zeros         sus   gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin            est 39.1 W  cum  20.8 min
+  g4k-fp32-real          sus   gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_q est 63.7 W  cum  22.5 min
+  g4k-fp32-sparse50      sus   gemmL4x8x8:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin      est 49.9 W  cum  24.2 min
+block G:
+  g4k-int8-real          sus   gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p est 45.5 W  cum  25.8 min
+  g4k-fp16-real          sus   gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_q est 60.3 W  cum  27.5 min
+  g2k-fp32-sparse50      burst gemmL2x2x2:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin      est 53.1 W  cum  27.9 min
+  g2k-fp32-real          burst gemmL2x2x2:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_q est 75.4 W  cum  28.3 min
+{'burst': 20, 'sus': 12} about 28 card-minutes at 25 s a burst and 100 s a sustained run, gates included, plus the smoke; the 45-minute cap cuts the tail
+highest planned estimate 75.6 W; admission limit 88.0 W, lock 93.0 W; session stops {'die_c': 80, 'board_w': 93, 'board_samples': 3}; smoke cycles {'g4k-fp32-zeros': 1872.6, 'g4k-int8-zeros': 1988.5, 'g4k-fp16-zeros': 1875.8, 'g2k-int8-zeros': 1289.3}

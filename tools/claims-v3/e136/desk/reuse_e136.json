@@ -1,0 +1,153 @@
+{
+ "what": "E136 desk: the large GEMM's reuse per L2-sized block and where its missing lines are served (models, not measurements)",
+ "gemms": {
+  "g2k": {
+   "blocks": [
+    2,
+    2,
+    2
+   ],
+   "elements_MNK": {
+    "fp32": [
+     2048,
+     1024,
+     1024
+    ],
+    "fp16": [
+     2048,
+     1024,
+     2048
+    ],
+    "int8": [
+     2048,
+     1024,
+     4096
+    ]
+   },
+   "footprint_MB": {
+    "A_MB": 8.0,
+    "B_MB": 4.0,
+    "C_MB": 8.0,
+    "total_MB": 20.0
+   },
+   "ops_per_minion_per_pass": 512,
+   "per_shire": {
+    "A_KB_per_r": 256,
+    "B_KB": 512,
+    "reuse_distance_of_B_KB": 768,
+    "L2_KB": 512
+   },
+   "L2": {
+    "first_pass_missing_lines_per_op": 176.0,
+    "steady_missing_lines_per_op": 176.0,
+    "lines_per_op": 192.0
+   },
+   "L3": {
+    "32MB": {
+     "A_in_L3": 1.0,
+     "B_in_L3": 1.0
+    },
+    "28MB": {
+     "A_in_L3": 1.0,
+     "B_in_L3": 1.0
+    },
+    "24MB": {
+     "A_in_L3": 1.0,
+     "B_in_L3": 1.0
+    }
+   },
+   "reuse": {
+    "A_tile_uses_per_pass_per_shire": 2,
+    "B_tile_uses_per_pass_per_shire": 4,
+    "C_tile_stores_per_pass": 1
+   }
+  },
+  "g4k": {
+   "blocks": [
+    4,
+    8,
+    8
+   ],
+   "elements_MNK": {
+    "fp32": [
+     4096,
+     4096,
+     4096
+    ],
+    "fp16": [
+     4096,
+     4096,
+     8192
+    ],
+    "int8": [
+     4096,
+     4096,
+     16384
+    ]
+   },
+   "footprint_MB": {
+    "A_MB": 64.0,
+    "B_MB": 64.0,
+    "C_MB": 64.0,
+    "total_MB": 192.0
+   },
+   "ops_per_minion_per_pass": 16384,
+   "per_shire": {
+    "A_KB_per_r": 1024,
+    "B_KB": 2048,
+    "reuse_distance_of_B_KB": 3072,
+    "L2_KB": 512
+   },
+   "L2": {
+    "first_pass_missing_lines_per_op": 192.0,
+    "steady_missing_lines_per_op": 192.0,
+    "lines_per_op": 192.0
+   },
+   "L3": {
+    "32MB": {
+     "A_in_L3": 0.658,
+     "B_in_L3": 0.5
+    },
+    "28MB": {
+     "A_in_L3": 0.2205,
+     "B_in_L3": 0.5
+    },
+    "24MB": {
+     "A_in_L3": 0.0,
+     "B_in_L3": 0.5
+    }
+   },
+   "reuse": {
+    "A_tile_uses_per_pass_per_shire": 8,
+    "B_tile_uses_per_pass_per_shire": 8,
+    "C_tile_stores_per_pass": 1
+   }
+  }
+ },
+ "arms": {
+  "c1": {
+   "L2": {
+    "first_pass_missing_lines_per_op": 128.0,
+    "steady_missing_lines_per_op": 0.0,
+    "lines_per_op": 192.0
+   },
+   "L3_class": "none missing"
+  },
+  "c8s": {
+   "L2": {
+    "first_pass_missing_lines_per_op": 128.0,
+    "steady_missing_lines_per_op": 128.0,
+    "lines_per_op": 192.0
+   },
+   "L3_class": "L3 (E107 R4, measured)"
+  },
+  "c16": {
+   "L2": {
+    "first_pass_missing_lines_per_op": 128.0,
+    "steady_missing_lines_per_op": 128.0,
+    "lines_per_op": 192.0
+   },
+   "L3_class": "fresh (first touch, by construction)"
+  }
+ }
+}
