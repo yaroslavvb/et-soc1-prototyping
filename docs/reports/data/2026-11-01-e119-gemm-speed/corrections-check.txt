@@ -1,0 +1,87 @@
+E119 corrections after verification (Sun 1 Nov 2026): numbers from committed files, data docs/reports/data/2026-11-01-e119-gemm-speed
+
+C1  The power rule: R6's burst medians against single board readings
+  R6 (results.json rules.R6): 16 cells, burst p800_w minus the estimate -14.59 to -3.29 W, verdict PASS
+  registered guards (predictions-e119.json rules): limit_p800_w 88.0 W, peak_lock_w 93.0 W
+  sustained runs with a random kind (s1/runs.jsonl, processes >= 2): 14
+    run                          peak W  est W   over W  peak at s / load s  clocks of the 5 readings to the peak  die at load start, at peak  readings over est
+    B-00-c8s-fp32-randn-r1        78.11   78.5   -0.39   33.3 / 77.9         [700, 700, 800, 800, 700]            54, 66                    0 of 779
+    B-02-c16r4-fp32-randn-r1      77.71   78.1   -0.39   53.1 / 78.9         [700, 800, 800, 800, 700]            55, 66                    0 of 788
+    B-04-c16r8-fp32-randn-r1      85.71   84.1   +1.61   23.3 / 78.1         [700, 800, 800, 800, 700]            56, 66                    22 of 781
+    B-06-c16r2-fp32-randn-r1      67.81   69.7   -1.89   65.2 / 78.1         [700, 700, 800, 800, 700]            55, 66                    0 of 780
+    E-00-c16r8-int8-full-r1       60.15   59.8   +0.35   53.7 / 77.6         [800, 800, 800, 800, 800]            55, 65                    19 of 776
+    E-01-c16r32-int8-full-r1      68.15   65.7   +2.45   51.7 / 78.0         [700, 700, 800, 800, 700]            57, 66                    210 of 780
+    E-02-c16r4-int8-full-r1       54.85   55.6   -0.75   65.4 / 78.8         [800, 800, 800, 800, 800]            57, 65                    0 of 788
+    E-03-c8s-int8-full-r1         50.77   50.2   +0.57   68.6 / 78.3         [800, 800, 800, 800, 800]            57, 63                    242 of 783
+    F-00-c8s-fp16-randn-r1        74.85   73.2   +1.65   45.8 / 78.4         [700, 700, 800, 800, 700]            55, 66                    118 of 783
+    F-01-c16r4-fp16-randn-r1      74.43   74.1   +0.33   72.0 / 79.0         [700, 700, 800, 800, 700]            57, 66                    4 of 789
+    F-02-c16r8-fp16-randn-r1      81.79   80.5   +1.29   61.9 / 78.6         [800, 800, 800, 800, 700]            57, 66                    28 of 786
+    G-00-c16-fp32-randn-r1        57.51   61.2   -3.69   65.8 / 80.3         [800, 800, 800, 800, 800]            55, 65                    0 of 802
+    G-01-c16r2-fp16-randn-r1      65.91   67.1   -1.19   52.4 / 79.6         [700, 700, 800, 800, 700]            57, 66                    0 of 796
+    G-02-c16r2-int8-full-r1       48.77   51.6   -2.83   78.6 / 79.2         [800, 800, 800, 800, 800]            57, 63                    0 of 792
+  over the estimate: 7 of 14, by 0.33-2.45 W; peaks 23.3-72.0 s into loads of 77.6-79.0 s; die at the peak 63-66 C, at the load's start 55-57 C; an 800 MHz reading at or within the 4 readings before each peak: True
+  burst runs with a random kind (processes 1): 16; whose highest reading exceeded the estimate: 0; the closest -0.90 W; die over their loads 49-61 C
+  the session's highest board reading: 85.71 W (B-04-c16r8-fp32-randn-r1)
+  die (temp_c.minshire = current, min, max) over 23824 s1 samples: highest current reading 67 C; the max field (the SP's running maximum) 64 C at the first sample, 69 C at the last, never decreasing: True
+
+C2  int8 random, sustained (results.json cells.*-int8-full)
+  c16r2-int8-full    sus_mhz 795.3  sus_die 62.3 C  sus_w 47.62 W  sus_limit_runs ['none']
+  c16r32-int8-full   sus_mhz 681.4  sus_die 65.5 C  sus_w 52.79 W  sus_limit_runs ['thermal']
+  c16r4-int8-full    sus_mhz 793.8  sus_die 64.7 C  sus_w 53.27 W  sus_limit_runs ['none']
+  c16r8-int8-full    sus_mhz 778.0  sus_die 64.9 C  sus_w 56.63 W  sus_limit_runs ['thermal']
+  c8s-int8-full      sus_mhz 790.2  sus_die 62.9 C  sus_w 47.23 W  sus_limit_runs ['none']
+  the highest sustained board power of any cell: c16r8-int8-full 56.63 W
+
+C3  The residency read
+  tools/claims-v3/e119/run_e119.py: RESIDENCY_STATES = ["1", "2", "3"]
+  tools/claims-v3/e119/protocol.json tools.ettelem: build/ettelem-hpl/ettelem
+  tools/claims-v3/hpl/README.md line 54: throttle residencies (`ettelem residency 2 3 4 5 6`, from `ettelem-dv2`, built into `build/ettelem-hpl`); and
+  tools/claims-v3/dv2/ettelem-dv2/ettelem.cpp line 284: if (!e || *e || v < 2 || v > 6) {
+  tools/claims-v3/dv2/ettelem-dv2/ettelem.cpp line 285: std::fprintf(stderr, "residency: raw states 2-6 only (got '%s')\n", argv[i]);
+  tools/claims-v3/dv2/ettelem-dv2/ettelem.cpp line 286: return 2;
+  residency_rc over smoke and s1 runs.jsonl and queries.jsonl: 68 queries, rc counts {2: 68}, non-empty results 0
+
+C4  E107's arms against E119's
+  E107 README arms table: c1 c16r32 c16r8 c16r4 c16r2 c16 c4s c8s c8 c16s (10)
+  E119 predictions-e119.json arms: c1 c16r32 c16r8 c16r4 c16r2 c16 c8s (7)
+  not run in E119: c4s, c8, c16s
+  E107's T at 600 MHz, fp32: c4s 1.4306, c8s 1.4305, c8 2.5157, c16s 2.3522, c16 2.5958 us
+
+C5  The registration's time
+  git log 695cad4c: 695cad4cee622e7df2b8df99c7aabb3531b461b2 2026-11-01 19:28:53 -0800
+  tools/claims-v3/e119/E119.md line 3: Sun 1 Nov 2026 (week 44), about 19:45 PST. Registered before the claim and the first launch. It answers part of the kinds page's
+
+C6  R5's registered order
+  predictions-e119.json rules.R5_gap_sus: ...ORDER (fp32): c16r8 > c16r4 > c16r2 > 1.02 >= c16's burst gap
+  results.json rules.R5.order_values (c16r8, c16r4, c16r2): [1.2293, 1.1478, 1.0616]; order_fp32 True
+  results.json gaps.c16-fp32-randn.burst_rate: 1.0
+  the full registered order 1.2293 > 1.1478 > 1.0616 > 1.02 >= 1.0: True
+
+C7  The 600 MHz launches (the reducer's filter and window), by where they ran
+    arm.format     n600 (results.json)  burst first  burst later  sustained first  sustained later  T first launches  T sustained later  difference
+    c1.fp16          1 (  1)              1            0            0                0            0.8977            None             -
+    c1.fp32          2 (  2)              1            1            0                0            0.8977            None             -
+    c1.int8          1 (  1)              1            0            0                0            0.4867            None             -
+    c16.fp16         2 (  2)              2            0            0                0            2.5887            None             -
+    c16.fp32         4 (  4)              2            0            0                2            2.5893            2.5867           -0.10%
+    c16.int8         1 (  1)              1            0            0                0            2.5763            None             -
+    c16r2.fp16       5 (  5)              2            0            0                3            1.7314            1.7358           +0.25%
+    c16r2.fp32       7 (  7)              1            0            2                4            1.7365            1.7329           -0.20%
+    c16r2.int8       3 (  3)              1            0            1                1            1.5169            1.5159           -0.07%
+    c16r32.fp16      1 (  1)              1            0            0                0            0.9449            None             -
+    c16r32.fp32      2 (  2)              1            1            0                0            0.9447            None             -
+    c16r32.int8      5 (  5)              2            0            1                2            0.5407            0.5386           -0.38%
+    c16r4.fp16      19 ( 19)              1            0            0               18            1.316             1.3135           -0.19%
+    c16r4.fp32      22 ( 22)              2            1            0               19            1.3153            1.3134           -0.14%
+    c16r4.int8       5 (  5)              1            0            1                3            0.9964            0.9934           -0.30%
+    c16r8.fp16      72 ( 72)              1            0            1               70            1.1041            1.1036           -0.05%
+    c16r8.fp32      81 ( 81)              1            0            1               79            1.1041            1.1036           -0.04%
+    c16r8.int8       5 (  5)              1            0            1                3            0.7331            0.7353           +0.31%
+    c8s.fp16        16 ( 16)              2            0            2               12            1.4271            1.4257           -0.10%
+    c8s.fp32        20 ( 20)              1            0            2               17            1.4254            1.4253           -0.01%
+    c8s.int8        10 ( 10)              1            0            2                7            1.436             1.4347           -0.09%
+
+C9  Blog wording (the lane's result only)
+  burst gaps, fp32 (results.json gaps.<arm>-fp32-randn.burst_rate): c16r8 1.1037, c16r4 1.0311, c16r2 1.0, c8s 1.0073
+  M fp32 (results.json per_arm.<arm>.fit.M): c16 1.9572, c16r32 0.0699; c16's M / 32 = 0.0612; c16r32 reads +14% above it
+
