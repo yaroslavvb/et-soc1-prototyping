@@ -408,6 +408,22 @@ generate service-processor error events**: E69's count went 6 → 18 (before the
 the governor move, and the abort condition the registration set on them was never met — but a session that counts
 these events must expect its own commands to raise them.
 
+**A second card's governor moved (aifoundry1's card 0, 1 November 2026, E118; Q133, under the owner's governor OK of
+that day).** One TDP write each way, 65 → 0 at 14:52:00.933 PST and 0 → 65 at 15:12:37.217, both `rc 0` and read back,
+the threshold never written, the closing read equal to the originals and the module uptime unbroken: no reset, no other
+set, and a sampler that sends no PMIC read. The TDP-0 pin held 600 MHz in all 11,182 samples of the pinned passes, as on
+aifoundry2, and the service processor's ring logged nothing at all while it was set. The release took **two** "Power
+throttle up" events, one per step of the frequency table (600 → 700 → 800 MHz, 0.206 s apart), then 600 MHz at idle, as
+every complete ramp in the ring before the pin did. Rule 8, that the two sets write no flash, is PASS for the
+version-matched source (et-platform `836a4ab`) and UNKNOWN for the exact running build. Change record:
+[`CHANGE-RECORD.md`](../reports/data/2026-11-01-e118-two-clock-card0/CHANGE-RECORD.md). 🛑 **A ring-reading trap it
+found:** `tools/claims-v3/dv2/sptrace_events.py` stops at the first binary power-status record, so it saw one
+throttle-up where the ring holds two, and a desk screen finds fewer governor lines with it than with
+`tools/claims-v3/hpl/sptrace_full.py` (E64 A1) in at least 454 of 950 committed dumps, a lower bound. Count ring events
+after an operating-point change with `sptrace_full.py`, by the delta between dumps; the published counts of the work
+that used the old reader (dv2, dv2v, hp and its copies, `tools/ettelem/analyze_dvfs.py`) were not traced, and the shared
+decoder was not edited. E77 moved aifoundry2's TDP the same evening; its record follows its verification.
+
 ## aifoundry1 card 0's PMIC over-power alarm: a third speed limit (31 October 2026, E84)
 
 E84 ran E80's speed design on aifoundry1's card 0 under its own governor (release 1.4.0 / BL2 0.22.0 / PMIC 1.6.1, TDP
@@ -445,6 +461,19 @@ operating-point changes is one candidate).
   or more (post hoc, `rings-tonight.txt` in that directory). E84's "hotter per board watt" compares readings on these two
   scales. Data:
   [`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §a.
+- **Dated note, Sun 1 Nov 2026 (week 44), Q133: E117, the governor move that would have tested aifoundry2's slow
+  average at the PMIC's 75 W set point, was not run.** The desk's NO-GO stands until the owner accepts an outage risk he
+  has not yet been asked about: the public source lists an over-power power cycle among the PMIC's reset causes
+  (et-platform `836a4ab`, `device-bootloaders/src/ServiceProcessorBL2/include/pmic_hal.h:62`), though no lab card has
+  been seen to take that path (card 0 alarmed 177 times and stayed up; aifoundry2 read up to 101.15 W and stayed up).
+  On card 0 the same day, E114 found that **the firmware-revisions query is a PMIC command**: at `836a4ab` it writes the
+  PMIC's firmware-management command register twice (E114 C1). Take a card's identity by uptime continuity, as E118 and
+  E77 did. E114's 51 reads of throttle residency states 4–6 (rc −5) leave the service processor's "Unexpected power
+  throtlling state" lines in card 0's ring. Card 0's kernel log counted 575 error events at 00:13 PDT and 701 at
+  14:50:39 PST, and none was added through E118, whose sampler sends no PMIC read; by their timestamps E118 places 120
+  of them in E114's session (the stock sampler), which E114, reading no kernel log, leaves open: the stock sampler's
+  voltage-register reads or that session's heavier load would fit. Data: [`2026-11-01-e114-card0-replicates`](../reports/data/2026-11-01-e114-card0-replicates/README.md) C1, C8;
+  [`2026-11-01-e118-two-clock-card0`](../reports/data/2026-11-01-e118-two-clock-card0/README.md).
 - **For a run on card 0:** expect fp32 random data at 800 MHz to cycle through 300 MHz, and register a label and a stop
   or a count for the alarm (E84's labels had no PMIC category, so its limit rule scored the alarm runs as misses); Q130's
   evening round left card 0 out for this reason. 30 of E60's 33 300 MHz episodes on this card (20 October) match the
@@ -498,6 +527,14 @@ state is not idle (`:879-880`, `:910-919`). So a launch's *internal* kernel boun
   separate a long kernel from no added gap (Fisher p 0.25), so "a long kernel avoids them" rests on the lattice table.
   Data: [`2026-11-01-e100-idle-reset`](../reports/data/2026-11-01-e100-idle-reset/README.md),
   [`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §b.
+
+**On a second card (aifoundry1's card 0, 1 November 2026, E114, post hoc).** In 135 launch processes the same check
+dropped the clock to 600 MHz in a third of the 0.33 s gaps between processes: Q132(g)'s heartbeat lattice, fitted on
+the session's five falls inside processes (a period of 1000.0191 ms; E84's 1000.0186), predicts 95 of 95 gaps, 31 of
+which fell. 40 of 120 later starts climbed (13 of 40 in E84), every first start climbs, and the climb ends 0.39 ± 0.05 s
+after the first heartbeat inside a kernel. So **at the 800 MHz cap a 40 s window's count of falls decides about ±1% of a
+cell**: card 0's int8 zeros read 0.8% slower than random int8 in E114 and 0.8% faster in E84, a fall more or fewer per
+window, not a property of the data. Data: [`2026-11-01-e114-card0-replicates`](../reports/data/2026-11-01-e114-card0-replicates/README.md) §3, `posthoc/`.
 
 **E85's "possible trigger", which gives way to the above (31 October 2026, post hoc; dated note, 1 November).** E100 saw
 no rise in falls with the statistics reset (12 against 10, Fisher p 0.83, both inside one band), and its falls sit on the
@@ -561,6 +598,17 @@ not do what it was for", `aifoundry2/admission.json`, `aifoundry2/s1/skipped.jso
   has measured aifoundry2's steady coefficient since October's cooling change. A rest to within 0.1 °C takes about 9 minutes
   on this card after rises of 7–20 °C. Random fp32 at full duty reaches the lab's 78 °C stop 221 s from rest, with no
   measured plateau below it.
+- **aifoundry2's coefficient since October's cooling change is about 0.67 °C per board W, and random fp32 at full duty
+  plateaus there** (dated note, Sun 1 Nov 2026, Q133, E111). Two holds: 0.672 (range 0.647–0.696) on int8 `neg_ones` at
+  18.6 W over idle, from rest, and 0.671 (range 0.651–0.685) on random fp32 at the 600 MHz floor at 32.4 W over idle,
+  linear between them; random fp32 settles at **67.3 °C at 54.2 W**. Not a steady state by the registered test either:
+  the die wandered about 1 °C after reaching its level, cause not established. aifoundry3's random fp32 at the same
+  600 MHz drew about 40 W over idle and was still climbing at the 78 °C stop (E97): the two cards differ in power and
+  cooling, not in the governor. No warm probe was possible that afternoon (idle 21.7–21.95 W); W2, a cool probe, falls on
+  E98's line, post hoc. Data: [`2026-11-01-e111-heat-steady`](../reports/data/2026-11-01-e111-heat-steady/README.md).
+- **A second card's die line moved too** (E114, aifoundry1's card 0): 1.67 °C cooler (about ±0.5) at the same board
+  power between the afternoons of 31 October and 1 November (1 Nov 39.36 + 0.4941 °C per W; 31 Oct 41.78 + 0.4753),
+  with its rest die lower; random fp16, at the trip, ran 3.3% faster for it. No inlet was read. Data: [`2026-11-01-e114-card0-replicates`](../reports/data/2026-11-01-e114-card0-replicates/README.md) §4.
 
 Data: [`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §c,
 [`2026-11-01-e98-heat-path-drift`](../reports/data/2026-11-01-e98-heat-path-drift/README.md),
@@ -664,6 +712,10 @@ it is the owner's call (the lab rules below).
 - The management node is **single-opener**. A telemetry sampler excludes other management users for the whole
   session, so start it once and leave it running.
 - The three rails do not cover the memory shires or DRAM. Board minus rails is ~15 W idle and ~21 W under load.
+- **The memory shires' DDR die rail moves in whole-millivolt steps** (E110, 1 November 2026): a 0.14 W step read
+  −0.08 mV and a 0.36 W step −1.01 mV, so a registered bound must not assume a linear reading (E110's D2). It moves with
+  the DRAM read path's 64-bit toggles and not with its 256-bit path, so it can place a step on or off the memory shires'
+  logic. Data: [`2026-11-01-e110-memory-width`](../reports/data/2026-11-01-e110-memory-width/README.md).
 - Finer voltage exists: raising the SP log level to DEBUG and extracting the trace gives a **per-shire** on-die
   voltage map (E6). Restore the log level afterwards.
 
@@ -1196,7 +1248,9 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
   burst, a chance match is roughly 1 in 10, and the idle did not follow other lanes' card sessions, which carry more heat.
   It is all the evidence the record holds for the rule, which stands: no host compute on any box beside a card run, and read
   an inlet beside a settled reading. **A login stops a queue:** the runners' other-user check ended E98's P2 mid-run on
-  another lab user's login, so register a spare probe. Other users are part of the environment too
+  another lab user's login, so register a spare probe. (Dated note, 1 Nov 2026: by the owner's ruling of 1 November 2026 another lab user's **idle** login no longer
+  blocks a run on aifoundry2, as on aifoundry3; a fresh login or any activity still stops it, as one ended E111's W1
+  at 14:36:12.) Other users are part of the environment too
   (2026-09-25): CI runners on aifoundry1 and aifoundry2 can take a card at any time, and a demo service on aifoundry3
   can launch on its card without taking the card lock. Check `et-who` before and after a run. The hosts reach the
   network over Wi-Fi only and roam between access points: aifoundry2 lost its Tailscale connection for 12 minutes on
@@ -1207,10 +1261,22 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
 - **A session's automatic leakage slope wanders, so register one** (1 November 2026). E91's 0.422 W/°C on aifoundry1's
   card 1, against 0.20–0.24 elsewhere, is still unexplained; E93, E94, E103 and E104 froze E82's 0.2414 W/°C, and the
   automatic slope read 0.2959 on E95, 0.3298 on E101's first session and 0.0046 on E99 on aifoundry3.
+  **Dated note, Sun 1 Nov 2026 (Q133, E112):** card 1's automatic slope with the dips removed read 0.414 and 0.417 W/°C in
+  E112's two halves (E91 0.422), against E82's 0.241 with dips kept. It moves absolute D by about 0.5 W in fp32, makes
+  about half of the card scale's gap (1.054 at each session's own slope, 1.028 at one slope on both) and decides E91's
+  R5, and it does not move ratios to random. E112 registered `auto` without citing this bullet ((a) by re-running E91
+  unchanged, (b) to pair with E95's dips-removed arm); read at E82's 0.2414, R5 would pass and (b) would stay NOT SCORED.
+  The zeros-line gate set E112's third (b) pass aside by 0.003 W, as it had set E91's first pass aside by 0.038 W.
 - **The launch-reading rule now skips runs** (1 November 2026). E78's runner skips an item whose die reading has not come
   back to its launch reading in the wait, which low-power tiles trigger: 5 of 265 in E95, one pass each of E103's largest and
   third-largest misses, `fp16.z_sub` in E104, which left it no interval. A retry needs its own registration. On aifoundry1's card
   1 a run takes 8.9 s, not 10.2 s, with 2 s quiet at 58 °C (E93), so budget by that.
+- **A pass gate can void a registered minimum** (1 November 2026, Q133). E78's gates set aside 10912 in E109 (a random
+  fp32 anchor spanning 1.067 W against 1.0, so two of three passes and NOT SCORED), 11510 and 11511 in E115 (board-meter
+  dips; its primary kept one pass, and only the registered dips-removed fallback scored) and 11610 in E116 (the zero
+  anchor), and the zeros-line gate set aside 11252 in E112 (so (b) NOT SCORED). On aifoundry3 the random-range gate had
+  set aside one pass each in E86, E92 and E95. Register 4–5 passes, or how a set-aside pass is handled, and on aifoundry3
+  a dips-aware gate.
 - **A sampler killed mid-request poisons the management queue** (both cards, 2026-09-24). The reply to its
   last command stays queued. The next process to open `/dev/et0_mgmt` dies of `std::bad_function_call` on
   that reply and leaves its own behind, so retrying never recovers. Drain it once with
