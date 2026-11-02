@@ -1,0 +1,43 @@
+Q136(a), Mon 2 Nov 2026 (week 45), PST. Desk only; no card opened, no device command sent.
+
+Sources (as Q133(a), unchanged)
+  core-et                      b38a1a31 (openhwfoundation/core-et, Apache-2.0; the RTL's Erbium revision)
+  rtl-sim/tima_gate, rtl-sim/fma_toggle_v2   last changed in lab 5f48e866 (Q133(a)), used unchanged
+  netlists                     Q133(a)'s tima_<arm>_staged.v and asap7_cells.v, by sha256 (Q133(a) netlists/sha256.txt):
+    988cfc794c052f7133ff06136e77714bafd2b59abd0c3a98c5a77ff6c046fcef  tima_booth_tree_staged.v
+    c4c2dbff6e962aab3ffd64b453eefb3bde4f6f832d3d4d7b40a3f3db205b6b63  tima_booth_staged.v
+    86bb170d010398d6d9c3f2b0dc424646bbcb3c1ff6021d793360f9b6a29cb4f8  tima_booth_swap_staged.v
+    aa41d9bc39eaa5fe8020c5f4a443a36d719a99465a6b73f8fcb761b262d74173  tima_plain_staged.v
+    e03604cbe5577bfc14cd6aba571082a6866f113b9c34f2b7463ebd2a1024204d  asap7_cells.v (liberty_models.py output, not committed)
+  maps                         Q133(a)'s runs/<arm>/maps (booth_tree: train_maps.py's; booth, booth_swap, plain: one int8 stream), not committed:
+    e1ca3ce27526bb17e0bb6658096c05c27599fc284d21bd1a4ef380394165de2b  booth_tree/vpu.map
+    579113f015fba108d56236de00a855224a5e58ece68ce7fef1da6602739894ed  booth_tree/unit_int8.map
+    4d095389afedfc3f5857710aa359eb1de2c616d2774ad70c6e24ba44f4f74676  booth/vpu.map
+    51f4e3029de737ce66029f13b9abb971a377760e0d811d9888cef2031f60e307  booth/unit_int8.map
+    56239419de9acda81564b08cd29d01c38d7df58013abd31001ea6841791e2b8c  booth_swap/vpu.map
+    b651b5c3c54dbb382b90b3a0f232c3081057337e535b2adfa9e3b386d6819903  booth_swap/unit_int8.map
+    5ae76aa2d0fc3c282da8e6f7be1ad30b3717af9a771a4c09bea334b352f0cfc0  plain/vpu.map
+    d790657758ff6d7d939c51c7cf40ecfc01c96ea77eeacecfb9d727f7dee4089b  plain/unit_int8.map
+  lab checkout at the start    bc1e69aa (origin/main); predictions computed against 02cf82eb's records (E78 e78.json, E79 scored.json, Q133(a) analysis.json)
+
+Machines (README, Departures D1)
+  usual desk machine           macOS, x86_64, 16 CPUs; Q133(a)'s binaries (Verilator 5.052 conda-forge, clang++) ran the booth_tree control
+                               06:53:57-06:56:16 PST (16 of 16 numbers equal); its thermal guard went to its hot tier at 06:56:36 PST (1-min
+                               load 173 then 160 on 16 CPUs) and paused every later bench process within a tick
+  second desk machine          macOS 27.0.1, arm64 (Apple silicon), 10 cores, idle (1-min load about 1.5 before the builds);
+                               Verilator 5.052 (Homebrew build of 2026-09-05), Apple clang 21.0.0, python3 3.9.6 for
+                               run_kinds.py; builds 07:10:27-07:13:19 PST (make gate per arm, JOBS=6, nice 10); runs, one run_kinds.py call per
+                               tile, 6 at a time, nice 10: control + middle point 07:14:16-07:17:06, the dense-held tiles 07:24:23-07:24:48, the
+                               outer launch points 07:26:40-07:32:30; 256 calls, 0 failed
+  its binaries (sha256)        74161f35b32773117644ee84b4cb601ef62dcd52d4cb24b9b68ed277f7b53f7a  obj_booth_tree/Vtb
+                               e815e00c0322f8dd067fec4564652adb66bfe39fbbbf780fc9071d371aa36920  obj_booth/Vtb
+                               cd0021ba78a693a0cc623b70549d292e44ceefb5c02cef1e3b3f1728e7066bcc  obj_booth_swap/Vtb
+                               1abc280e676978311e465ed9c9c5ae31530a283cd579a9720a02218c9f024f7e  obj_plain/Vtb
+                               4c0449b1ab74c3c5d3c0e36dea5f38eb4a93509e4ef9865f5a39cfea5e5ad645  accum
+                               85b37581fae17702141803fb95b4e00b36d9b6b3a888c2ff083f4ab64d6644d9  settle_count
+  the control                  Q133(a)'s committed tiles e102_hq, e102_bk_5, e79_a8q, e79_a8_7 through all four: 400 of 400 numbers equal to
+                               Q133(a)'s committed counts_bits.json (runs/control.json)
+
+Analysis
+  predict.py                   uv run --script (numpy 2.5.4)
+  tiles                        python3 tools/claims-v3/kinds/make_e130.py (standard library only), seed 20261102
