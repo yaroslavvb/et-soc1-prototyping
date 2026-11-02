@@ -26,6 +26,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..', '..'))
 IMG = os.path.join(ROOT, 'docs', 'reports', 'ladder-img')
 LADDER = os.path.join(ROOT, 'docs', 'reports', 'data', '2026-10-01-ladder', 'ladder.json')
+GENJ = os.path.join(ROOT, 'docs', 'reports', 'data', '2026-10-01-ladder', 'images', 'prompts.json')
 # facts the ladder's corrections supersede (DESIGN §4.5): the fin inferred as 6-7 by 45-50 nm, the 20 nm gate, the
 # 270,000-atom channel, and the room "in San Francisco" (now Studio 45 on 29th Street, s45.1)
 SUPERSEDED = ['in.lib.fin.3', 'in.lib.gate.1', 'in.lib.channel.1', 'out.studio45.1']
@@ -244,6 +245,20 @@ def build(ALL, ml_keys_extra=(), ml_num_keys=()):
     for fn in sorted(os.listdir(IMG)):
         if fn.endswith('.webp'):
             img[fn] = {'bytes': os.path.getsize(os.path.join(IMG, fn)), 'sha256': sha(os.path.join(IMG, fn))}
+    # the generated pictures (31 Oct 2026, the owner's ask to replace the diagrams at the extremes of the scale with
+    # pictures made by Antigravity; the ladder's images/prompts.json): each scene's panel credits its picture, beside the
+    # photo the scene still shows (the WMAP sky map, the Blue Marble), each with its own licence
+    GENP = json.load(open(GENJ))
+    for it in GENP['images']:
+        if it['file'] not in img:
+            raise SystemExit('no image ' + it['file'])
+        for sid in it['scene'].split():
+            s, old = scales[sid], scales[sid].get('img')
+            if old and it.get('kept'):
+                s['img'] = {'file': old['file'], 'credit': f'{it["what"]}: {GENP["credit"]}; {it["kept"]}: {old["credit"]}',
+                            'licence': f'{it["what"]}: {GENP["licence"]}; {it["kept"]}: {old["licence"]}'}
+            else:
+                s['img'] = {'file': it['file'], 'credit': GENP['credit'], 'licence': GENP['licence']}
     for s in scales.values():
         if s.get('img') and s['img']['file'] not in img:
             raise SystemExit('no image ' + s['img']['file'])
@@ -264,6 +279,9 @@ def build(ALL, ml_keys_extra=(), ml_num_keys=()):
         onum[k] = {'t': t.replace(' x ', ' × '), 'f': fid}
     geo = {k: v for k, v in GEO.items() if k != 'meta'}
     geo['meta'] = {k: GEO['meta'][k] for k in ('units', 'sources', 'privacy', 'sf_nyc_great_circle_km') if k in GEO['meta']}
+    # (since 31 Oct 2026 the globe is a picture painted over the land outline, images/refs/earth-ref.png: the page needs
+    # only the globe's radius and its US box, not the 8 KB outline, which make_refs.py reads from outside-geo.json)
+    geo['earth'] = {k: v for k, v in geo['earth'].items() if k not in ('path', 'points', 'simplify_km')}
     for k, v in LD['num'].items():
         if k in onum and onum[k] != v:
             raise SystemExit(f'the ladder\'s number {k} collides with the chip\'s: {onum[k]} against {v}')

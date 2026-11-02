@@ -199,6 +199,15 @@ function inotes(L, lay, items) {
   });
   return y;
 }
+/* a generated picture in a particle scene (31 Oct 2026, the owner's ask: pictures made by Antigravity in place of the
+   diagrams below the atom; the ladder's images/prompts.json and README.md): the scene's picture box made night sky, the
+   square picture fitted in its middle, its black edges the sky's colour (make_webp.py), so the two meet unseen; returns the
+   picture's side, the box's smaller one. Labels on it are .i-on: light, in both themes */
+function pimg(L, f, p) {
+  S(E('rect', {x: p.x, y: p.y, width: p.w, height: p.h, rx: 10, 'pointer-events': 'none'}, L), {fill: '#070b17'});
+  oimg(L, f, p.x, p.y, p.w, p.h);
+  return Math.min(p.w, p.h);
+}
 /* a part of these scenes: the tree's (or the ladder's) name, lead and facts for its panel, its zoom and seat */
 function ipt(L, ap, key, label, o) {
   const g = KT.comp(L, key, {}, label);
@@ -538,32 +547,24 @@ bnode('p.atom', {pv: () => IVIEW(), draw: (L, ap) => {
   ]);
 }, def: () => ({id: 'p.nucleus'}), kids: () => [{id: 'p.nucleus'}, {id: 'p.electron'}]});
 
-/* ---- the silicon-28 nucleus: 14 protons and 14 neutrons, packed ---- */
-bnode('p.nucleus', {pv: () => IVIEW(), draw: (L, ap) => {
+/* ---- the silicon-28 nucleus: 14 protons and 14 neutrons, packed (an AI illustration since 31 Oct 2026: its cluster's
+   radius about 0.37 of its width; the proton at its front middle, (0.502, 0.502), radius 0.077 of it, is the one the
+   camera goes into; the legend's two colours sampled from it) ---- */
+bnode('p.nucleus', {pv: () => IVIEW(), imgs: () => [IMGDIR + 'nucleus.webp'], draw: (L, ap) => {
   const lay = ihead(L, {title: 'The silicon-28 nucleus', sub: `${on('nu_pn')}, ${on('nu_size')} across: ${on('nu_mass')} of the atom's mass`, subf: `${onf('nu_pn')} ${onf('nu_size')} ${onf('nu_mass')}`,
-    tags: [['documented', 'radius: measured (IAEA)'], ['generic', 'the packing: a picture']]});
-  const p = lay.pic, c = {x: p.x + p.w / 2, y: p.y + p.h / 2}, R = Math.min(p.w, p.h) * 0.4, r = R * 0.205;
-  // 28 places: the hexagonal grid's points nearest the middle
-  const pts = [];
-  for (let i = -6; i <= 6; i++) for (let j = -6; j <= 6; j++) { const x = (i + (j & 1) * 0.5) * 1.72 * r, y = j * 1.5 * r; pts.push({x, y, d: Math.hypot(x, y)}); }
-  pts.sort((a, b) => a.d - b.d || a.x - b.x);
-  const at = pts.slice(0, 28);
+    tags: [['documented', 'radius: measured (IAEA)'], ['generic', `the packing: ${GEN}`]]});
+  const p = lay.pic, c = {x: p.x + p.w / 2, y: p.y + p.h / 2}, s = pimg(L, 'nucleus.webp', p), R = s * 0.37, r = s * 0.077;
   const gn = ipt(L, ap, 'nucleons', 'Fourteen protons and fourteen neutrons', {title: 'Protons and neutrons', lead: sc('p.nucleus').blurb, facts: ['p.nucleus.1', 'p.nucleus.5', 'p.nucleus.7', 'p.nucleus.8'], box: {x: c.x - R, y: c.y - R, w: 2 * R, h: 2 * R}});
-  S(E('circle', {cx: c.x, cy: c.y, r: R * 1.04}, gn), {fill: 'var(--c5)', fillOpacity: 0.06, stroke: 'var(--ink-2)', strokeWidth: 1.25, strokeDasharray: '5 5'});
-  let pi = null;
-  at.forEach((q, i) => {
-    const prot = i % 2 === 0, x = c.x + q.x, y = c.y + q.y;
-    S(E('circle', {cx: x, cy: y, r: r * 1.02}, gn), {fill: prot ? 'color-mix(in srgb, var(--c2) 70%, var(--surface))' : 'color-mix(in srgb, var(--ink-2) 35%, var(--surface))', stroke: 'var(--ink)', strokeWidth: 1.25});
-    if (prot && pi == null && q.d > 0) pi = {x, y};
-  });
+  S(E('circle', {cx: c.x, cy: c.y, r: R * 1.04}, gn), {fill: 'transparent'});
+  const pi = {x: c.x + 0.002 * s, y: c.y + 0.002 * s};
   const pb = {x: pi.x - r, y: pi.y - r, w: 2 * r, h: 2 * r};
   const gp = ipt(L, ap, 'proton', 'One proton', {node: 'p.nucleon', kid: {id: 'p.nucleon'}, seat: pb, tr: 'jump', box: pb});
-  S(E('circle', {class: 'shape', cx: pi.x, cy: pi.y, r: r * 1.15}, gp), {fill: 'transparent', stroke: 'var(--c2)', strokeWidth: 3});
-  KTT(L, pi.x + r * 1.3, pi.y - r * 1.2, 'a proton', 'i-l halo');
-  const lx = PH ? p.x : c.x + R + 20;
-  [['color-mix(in srgb, var(--c2) 70%, var(--surface))', 'proton (+)'], ['color-mix(in srgb, var(--ink-2) 35%, var(--surface))', 'neutron']].forEach(([f, t], i) => {
-    S(E('circle', {cx: lx + 12, cy: p.y + 20 + i * 34, r: 11, 'pointer-events': 'none'}, L), {fill: f, stroke: 'var(--ink)', strokeWidth: 1.25});
-    KTT(L, lx + 30, p.y + 27 + i * 34, t, 'i-n');
+  S(E('circle', {class: 'shape', cx: pi.x, cy: pi.y, r: r * 1.15}, gp), {fill: 'transparent', stroke: '#ffd27a', strokeWidth: 3});
+  KTT(L, pi.x + r * 1.3, pi.y - r * 1.2, 'a proton', 'i-l i-on');
+  const lx = PH ? p.x + 16 : c.x + R + 20;
+  [['#d86454', 'proton (+)'], ['#b9b9c2', 'neutron']].forEach(([f, t], i) => {
+    S(E('circle', {cx: lx + 12, cy: p.y + 20 + i * 34, r: 11, 'pointer-events': 'none'}, L), {fill: f});
+    KTT(L, lx + 30, p.y + 27 + i * 34, t, 'i-n i-on');
   });
   inotes(L, lay, [
     {t: 'Almost all the mass, almost none of the room', h: 1},
@@ -572,23 +573,24 @@ bnode('p.nucleus', {pv: () => IVIEW(), draw: (L, ap) => {
   ]);
 }, def: () => ({id: 'p.nucleon'}), kids: () => [{id: 'p.nucleon'}]});
 
-/* ---- a proton: three quarks in a field of gluons (a picture: quarks are not little balls) ---- */
-bnode('p.nucleon', {pv: () => IVIEW(), draw: (L, ap) => {
+/* ---- a proton: three quarks in a field of gluons (an AI illustration since 31 Oct 2026: quarks are not little balls;
+   its sphere's radius 0.446 of its width; its quarks, red at (0.500, 0.296), green at (0.676, 0.602) and blue at (0.325,
+   0.607), labelled up, up and down; the blue one is the quark the camera goes into) ---- */
+bnode('p.nucleon', {pv: () => IVIEW(), imgs: () => [IMGDIR + 'proton.webp'], draw: (L, ap) => {
   const lay = ihead(L, {title: 'A proton: three quarks', sub: `${on('pr_uud')}, bound by gluons; radius ${on('pr_r')} fm, mass ${on('pr_m')}`, subf: `${onf('pr_uud')} ${onf('pr_r')} ${onf('pr_m')}`,
-    tags: [['documented', 'measured (CODATA, PDG)'], ['generic', 'a picture: quarks are not little balls']]});
-  const p = lay.pic, c = {x: p.x + p.w / 2, y: p.y + p.h / 2}, R = Math.min(p.w, p.h) * 0.42;
+    tags: [['documented', 'measured (CODATA, PDG)'], ['generic', `${GEN}: quarks are not little balls`]]});
+  const p = lay.pic, c = {x: p.x + p.w / 2, y: p.y + p.h / 2}, s = pimg(L, 'proton.webp', p), R = s * 0.446;
   const gf = ipt(L, ap, 'field', 'The gluon field: most of the proton\'s mass', {title: 'The gluon field', lead: 'The three quarks\' own masses add up to about 1% of the proton\'s. The rest is energy: the quarks\' motion and the field of gluons that binds them (E = mc²).', facts: ['p.quark.3', 'p.quark.4', 'p.quark.6', 'p.quark.8']});
-  S(E('circle', {cx: c.x, cy: c.y, r: R}, gf), {fill: 'var(--c7)', fillOpacity: 0.10, stroke: 'var(--c7)', strokeWidth: 1.5, strokeDasharray: '6 5'});
-  const q = [[-90, 'u', 'var(--c2)'], [30, 'u', 'var(--c3)'], [150, 'd', 'var(--c4)']].map(([a, t, col]) => ({x: c.x + Math.cos(a * Math.PI / 180) * R * 0.45, y: c.y + Math.sin(a * Math.PI / 180) * R * 0.45, t, col}));
-  for (let i = 0; i < 3; i++) { const a = q[i], b = q[(i + 1) % 3], n = 9; let d = `M${a.x},${a.y}`; for (let j = 1; j <= n; j++) { const f = j / n, x = a.x + (b.x - a.x) * f, y = a.y + (b.y - a.y) * f, s = (j % 2 ? 1 : -1) * 9, nx = -(b.y - a.y), ny = b.x - a.x, l = Math.hypot(nx, ny); d += ` Q${x - (b.x - a.x) / n / 2 + nx / l * s},${y - (b.y - a.y) / n / 2 + ny / l * s} ${x},${y}`; } S(E('path', {d}, gf), {fill: 'none', stroke: 'var(--c7)', strokeWidth: 2}); }
+  S(E('circle', {cx: c.x, cy: c.y, r: R}, gf), {fill: 'transparent'});
   gf._box = {x: c.x - R, y: c.y - R, w: 2 * R, h: 2 * R};
+  const q = [[0.500, 0.296, 'u'], [0.676, 0.602, 'u'], [0.325, 0.607, 'd']].map(([fx, fy, t]) => ({x: c.x + (fx - 0.5) * s, y: c.y + (fy - 0.5) * s, t}));
   const gq = ipt(L, ap, 'quarks', 'Two up quarks and a down quark', {title: 'The three quarks', lead: 'Up quarks carry +2/3 of the electron\'s charge (with the opposite sign), down quarks -1/3: two ups and a down make the proton\'s +1. Their colours stand for the strong force\'s "colour charge", not colours.', facts: ['p.nucleon.4', 'p.quark.3', 'p.quark.7']});
-  q.forEach(o => { S(E('circle', {cx: o.x, cy: o.y, r: 16}, gq), {fill: o.col, stroke: 'var(--ink)', strokeWidth: 1.5}); KTT(gq, o.x, o.y + 7, o.t, 'i-l', 'middle'); });
+  q.forEach(o => { S(E('circle', {cx: o.x, cy: o.y, r: 16}, gq), {fill: 'transparent'}); KTT(gq, o.x + 20, o.y - 16, o.t, 'i-l i-on'); });
   gq._box = {x: c.x - R * 0.6, y: c.y - R * 0.6, w: R * 1.2, h: R * 1.2};
   const qb = {x: q[2].x - 18, y: q[2].y - 18, w: 36, h: 36};
   const gk = ipt(L, ap, 'onequark', 'One quark', {node: 'p.quark', kid: {id: 'p.quark'}, seat: {x: qb.x + 13, y: qb.y + 13, w: 10, h: 10}, tr: 'jump', box: qb});
-  S(E('circle', {class: 'shape', cx: q[2].x, cy: q[2].y, r: 24}, gk), {fill: 'transparent', stroke: 'var(--c2)', strokeWidth: 2.5, strokeDasharray: '5 4'});
-  KTT(L, q[2].x - 30, q[2].y + 46, 'a down quark', 'i-l halo', 'middle');
+  S(E('circle', {class: 'shape', cx: q[2].x, cy: q[2].y, r: 24}, gk), {fill: 'transparent', stroke: '#ffd27a', strokeWidth: 2.5, strokeDasharray: '5 4'});
+  KTT(L, q[2].x - 30, q[2].y + 46, 'a down quark', 'i-l i-on', 'middle');
   inotes(L, lay, [
     {t: 'Mass from energy', h: 1},
     {t: `The quarks themselves weigh ${on('qk_u')} MeV/c² (up) and ${on('qk_d')} MeV/c² (down): together ${on('pr_1pc')}'s mass. The rest is the energy inside it.`, f: onf('qk_u')},
@@ -596,36 +598,38 @@ bnode('p.nucleon', {pv: () => IVIEW(), draw: (L, ap) => {
   ]);
 }, def: () => ({id: 'p.quark'}), kids: () => [{id: 'p.quark'}]});
 
-/* ---- a quark, and an electron: no size has ever been measured; the disc is only the limit ---- */
+/* ---- a quark, and an electron: no size has ever been measured; the disc is only the limit (since 31 Oct 2026 on an AI
+   illustration: the point at its middle, the haze of virtual particles around it fading out by 0.40 of its width, inside
+   the limit's circle, 0.42) ---- */
 function pointScene(L, ap, o) {
-  const lay = ihead(L, {title: o.title, sub: o.sub, subf: o.subf, tags: [['documented', 'the limit: measured'], ['generic', 'the point: as far as anyone can tell']]});
-  const p = lay.pic, c = {x: p.x + p.w / 2, y: p.y + p.h / 2}, R = Math.min(p.w, p.h) * 0.42;
+  const lay = ihead(L, {title: o.title, sub: o.sub, subf: o.subf, tags: [['documented', 'the limit: measured'], ['generic', `the point: ${GEN}`]]});
+  const p = lay.pic, c = {x: p.x + p.w / 2, y: p.y + p.h / 2}, R = pimg(L, o.img, p) * 0.42;
   const gb = ipt(L, ap, 'bound', 'The limit: if it has a size, it is smaller than this', {title: 'The limit, not the particle', lead: o.boundLead, facts: o.facts});
-  S(E('circle', {cx: c.x, cy: c.y, r: R}, gb), {fill: 'var(--c4)', fillOpacity: 0.05, stroke: 'var(--c4)', strokeWidth: 2, strokeDasharray: '9 7'});
-  KTT(gb, c.x, c.y - R - 12, o.boundLab, 'i-l halo', 'middle', o.boundF);
+  S(E('circle', {cx: c.x, cy: c.y, r: R}, gb), {fill: 'transparent', stroke: 'var(--c4)', strokeWidth: 2, strokeDasharray: '9 7'});
+  KTT(gb, c.x, c.y - R - 12, o.boundLab, 'i-l i-on', 'middle', o.boundF);
   gb._box = {x: c.x - R, y: c.y - R, w: 2 * R, h: 2 * R};
   const pb = {x: c.x - 14, y: c.y - 14, w: 28, h: 28};
   const gp = ipt(L, ap, 'point', o.pointLab, {node: 'p.planck', kid: {id: 'p.planck'}, seat: {x: pb.x + 9, y: pb.y + 9, w: 10, h: 10}, tr: 'jump', box: pb, info: {title: o.pointTitle, lead: o.pointLead, facts: o.facts}});
-  S(E('circle', {class: 'shape', cx: c.x, cy: c.y, r: 4}, gp), {fill: 'var(--ink)'});
-  S(E('circle', {cx: c.x, cy: c.y, r: 30, 'pointer-events': 'all'}, gp), {fill: 'transparent'});
-  KTT(L, c.x + 16, c.y + 34, o.pointLab, 'i-n halo');
+  S(E('circle', {class: 'shape', cx: c.x, cy: c.y, r: 30, 'pointer-events': 'all'}, gp), {fill: 'transparent'});
+  KTT(L, c.x + 16, c.y + 34, o.pointLab, 'i-n i-on');
   inotes(L, lay, o.notes);
 }
-bnode('p.quark', {pv: () => IVIEW(), draw: (L, ap) => pointScene(L, ap, {title: 'A quark: as far as we know, a point', sub: `no size measured: a radius under ${on('qk_b')}`, subf: onf('qk_b'),
+bnode('p.quark', {pv: () => IVIEW(), imgs: () => [IMGDIR + 'quark.webp'], draw: (L, ap) => pointScene(L, ap, {img: 'quark.webp', title: 'A quark: as far as we know, a point', sub: `no size measured: a radius under ${on('qk_b')}`, subf: onf('qk_b'),
   boundLab: `the limit: ${on('qk_b')}`, boundF: onf('qk_b'), boundLead: sc('p.quark').blurb, facts: sc('p.quark').facts,
   pointLab: 'the quark: a point', pointTitle: 'A quark', pointLead: sc('p.quark').blurb,
   notes: [{t: 'No size found', h: 1}, {t: `The proton is at least ${on('qk_1955')} wider than a quark could be.`, f: onf('qk_1955')},
     {t: `Below the electron's limit, ${on('el_b')}, lie ${on('pl_16')} that no experiment has reached, down to the Planck length.`, f: `${onf('el_b')} ${onf('pl_16')}`}]}),
   def: () => ({id: 'p.planck'}), kids: () => [{id: 'p.planck'}]});
-bnode('p.electron', {pv: () => IVIEW(), draw: (L, ap) => pointScene(L, ap, {title: 'An electron: as far as we know, a point', sub: `no size measured: a radius under ${on('el_b')}`, subf: onf('el_b'),
+bnode('p.electron', {pv: () => IVIEW(), imgs: () => [IMGDIR + 'electron.webp'], draw: (L, ap) => pointScene(L, ap, {img: 'electron.webp', title: 'An electron: as far as we know, a point', sub: `no size measured: a radius under ${on('el_b')}`, subf: onf('el_b'),
   boundLab: `the limit: ${on('el_b')}`, boundF: onf('el_b'), boundLead: sc('p.electron').blurb, facts: sc('p.electron').facts,
   pointLab: 'the electron: a point', pointTitle: 'An electron', pointLead: sc('p.electron').blurb,
   notes: [{t: 'What carries every current in the chip', h: 1}, {t: `Its charge is ${on('el_q')}, exactly: it defines the coulomb.`, f: onf('el_q')},
     {t: `It is round: the centre of its charge sits within ${on('el_edm')} of its centre of mass (the limit on its dipole moment). That limits its shape, not its size.`, f: onf('el_edm')}]}),
   def: () => ({id: 'p.planck'}), kids: () => [{id: 'p.planck'}]});
 
-/* ---- the Planck length: a ruler from the proton down to where known physics stops ---- */
-bnode('p.planck', {pv: () => IVIEW(), draw: (L, ap) => {
+/* ---- the Planck length: a ruler from the proton down to where known physics stops (since 31 Oct 2026 its unexplored
+   stretch holds an AI illustration of spacetime foam, a hypothesis, densest at the bottom, the Planck end) ---- */
+bnode('p.planck', {pv: () => IVIEW(), imgs: () => [IMGDIR + 'foam.webp'], draw: (L, ap) => {
   const lay = ihead(L, {title: 'The Planck length: where known physics stops', sub: `${on('pl_l')}: below the electron's limit lie ${on('pl_16')} nobody has explored`, subf: `${onf('pl_l')} ${onf('pl_16')}`,
     tags: [['documented', 'CODATA'], ['hypothesis', 'a smallest length? open']]});
   const p = lay.pic, top = -14, bot = -35, x = p.x + (PH ? 130 : 160), y0 = p.y + 10, y1 = p.y + p.h - 20, yl = e => y0 + (top - e) / (top - bot) * (y1 - y0);
@@ -642,10 +646,12 @@ bnode('p.planck', {pv: () => IVIEW(), draw: (L, ap) => {
   mark(Math.log10(4.3e-19), `a quark's limit: ${on('qk_b')}`, onf('qk_b'), null, -sep);
   mark(Math.log10(2e-20), `an electron's limit: ${on('el_b')}`, onf('el_b'), null, sep);
   const gu = ipt(L, ap, 'unexplored', 'Fifteen powers of ten that no experiment has reached', {title: 'Unexplored', lead: 'Between the electron\'s limit, the smallest on this ruler, and the Planck length lie some fifteen powers of ten: nobody knows what is there.', facts: ['p.planck.3', 'p.planck.4', 'p.electron.2']});
-  const ua = yl(Math.log10(2e-20)) + 18, ub = yl(Math.log10(1.6e-35)) - 18;
-  S(E('rect', {x: x + 18, y: ua, width: PH ? 300 : 420, height: ub - ua, rx: 8}, gu), {fill: 'var(--c4)', fillOpacity: 0.06, stroke: 'var(--c4)', strokeWidth: 1.25, strokeDasharray: '6 6'});
-  KTT(gu, x + 34, (ua + ub) / 2 + 6, `unexplored: ${on('pl_16')}`, 'i-l');
-  gu._box = {x: x + 18, y: ua, w: PH ? 300 : 420, h: ub - ua};
+  const ua = yl(Math.log10(2e-20)) + 18, ub = yl(Math.log10(1.6e-35)) - 18, uw = PH ? 300 : 420;
+  oimg(gu, 'foam.webp', x + 18, ua, uw, ub - ua, {par: 'xMidYMax slice'});
+  S(E('rect', {x: x + 18, y: ua, width: uw, height: ub - ua, rx: 8}, gu), {fill: 'none', stroke: 'var(--c4)', strokeWidth: 1.25, strokeDasharray: '6 6'});
+  KTT(gu, x + 34, ua + 32, `unexplored: ${on('pl_16')}`, 'i-l i-on');
+  KTT(gu, x + 34, ua + 58, PH ? GEN : `spacetime foam, a guess: ${GEN}`, 'i-n i-on');
+  gu._box = {x: x + 18, y: ua, w: uw, h: ub - ua};
   mark(Math.log10(1.616255e-35), `the Planck length, ${on('pl_l')}`, onf('pl_l'), 'var(--c7)');
   // (the loop, ladder-core.js: Up from the top of the ladder shrinks it into this mark)
   ap.loopAt = {x, y: yl(Math.log10(1.616255e-35))};

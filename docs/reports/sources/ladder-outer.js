@@ -62,7 +62,8 @@ function otitle(L, title, tag, sub, subf) {
   T(g, 140, -40, title, 'o-t');
   if (tag) {
     const fw = PH ? 14.2 : 9.6, w = Math.round(tag.length * fw + 26), x = 880 - w, y = PH ? 690 : -62;
-    S(E('rect', {x, y, width: w, height: PH ? 38 : 28, rx: 14}, g), {fill: 'none', stroke: 'currentColor', strokeWidth: 1.5});
+    // (on the night sky the pill is filled with it: since 31 Oct 2026 a picture can run under it, the universe's on a phone)
+    S(E('rect', {x, y, width: w, height: PH ? 38 : 28, rx: 14}, g), {fill: L._sky ? '#070b17' : 'none', stroke: 'currentColor', strokeWidth: 1.5});
     T(g, x + w / 2, y + (PH ? 27 : 20), tag, 'o-tag', 'middle');
   }
   if (sub) owrap(g, 140, PH ? -6 : -12, sub, 'o-s', 'start', subf);
@@ -104,6 +105,15 @@ function oimg(L, file, x, y, w, h, o) {
   im.addEventListener('error', () => { im.style.display = 'none'; T(L, x + w / 2, y + h / 2, 'photo not loaded', 'o-l', 'middle'); });
   return im;
 }
+/* the generated pictures (31 Oct 2026, the owner: "Improve the images at the higher end of the scale, milky way, observable
+   universe, etc, by generating appropriate prompts, generating images using AGy/antigravity and using them in place of
+   current diagrams ... above studio 45, and below individual atoms"). Antigravity drew each from a written prompt
+   (docs/reports/data/2026-10-01-ladder/images: prompts.json, and README.md for where each scene's seats fall on its
+   picture); make_webp.py put each on the night sky (#070b17), so a picture is opaque and its edges are the sky's. A picture
+   is drawn first in its scene, under every label and part; the parts keep their places and become clear hit areas on it.
+   gimg: a square picture of side s, the point (fx, fy) of it (fractions, default its middle) on (cx, cy) */
+const GEN = 'AI illustration';
+const gimg = (L, f, cx, cy, s, fx, fy) => oimg(L, f, cx - (fx == null ? 0.5 : fx) * s, cy - (fy == null ? 0.5 : fy) * s, s, s);
 /* a level's facts by number (out.<id>.<n>) */
 const ofx = (id, ...ns) => ns.map(n => `out.${id}.${n}`).filter(f => F[f]);
 /* the info for a part that stands for the level inside it: its name, its lead, the next level's facts */
@@ -154,36 +164,40 @@ function onode(id, o) {
 /* ---- beyond what we can see: our sphere among others that may or may not be there ---- */
 const U = {cx: 510, cy: 345, r: 330};   // the observable universe's circle in its own scene (on a phone, lower: cy 375)
 const UC = () => (PH ? Object.assign({}, U, {cy: 375}) : U);
-onode('beyond', {kid: 'universe', to: () => 'what lies beyond (speculative)', build: (L, ap) => {
+onode('beyond', {kid: 'universe', img: ['beyond.webp'], to: () => 'what lies beyond (speculative)', build: (L, ap) => {
   obd(L, true);
-  otitle(L, 'Beyond what we can see', 'speculative', 'how far space goes on is unknown: a hypothesis, not an observation', 'out.beyond.3');
   const B = {cx: 510, cy: 335, r: U.r / 2.7};
+  // the picture: our sphere is its middle bubble (radius 0.221 of its width), on B; the other bubbles around it
+  const bs = B.r / 0.2208;
+  gimg(L, 'beyond.webp', B.cx, B.cy, bs);
+  otitle(L, 'Beyond what we can see', 'speculative', 'how far space goes on is unknown: a hypothesis, not an observation', 'out.beyond.3');
   const go = opart(L, 'others', 'Other regions, perhaps other universes: details', {title: 'Other regions (speculative)', kick: 'Beyond · hypothesis',
     lead: 'Space is measured to be flat to within a fraction of a percent, which suggests it goes on well past what we can see. Whether there are other universes, a multiverse, is a hypothesis: nothing observed so far confirms or rules it out.', facts: ofx('beyond', 1, 2, 3)});
-  [[230, 210, 105], [800, 230, 120], [300, 520, 95], [760, 520, 110], [520, 80, 70], [150, 380, 60], [880, 390, 70]].forEach(([x, y, r], i) => {
-    S(E('circle', {class: 'shape ghost', cx: x, cy: y, r}, go), {opacity: 0.55 - i * 0.05});
-  });
+  S(E('rect', {class: 'shape hotr', x: 120, y: 60, width: 800, height: 580, rx: 20}, go), {});
   E('rect', {class: 'ring', x: 120, y: 60, width: 800, height: 580, rx: 20}, go);
-  T(go, 230, 340, 'other regions?', 'o-s', 'middle'); T(go, 780, 610, 'size unknown', 'o-s', 'middle');
+  // (the labels under two of the picture's other bubbles: its lower left one and its lower right one)
+  T(go, B.cx + (0.16 - 0.5) * bs, B.cy + (0.81 - 0.5) * bs, 'other regions?', 'o-s ohalo', 'middle'); T(go, B.cx + (0.79 - 0.5) * bs, B.cy + (0.975 - 0.5) * bs, 'size unknown', 'o-s ohalo', 'middle');
   const g = opart(L, 'obs', 'Our observable universe: zoom in', kidInfo('universe'), {id: 'universe'});
-  S(E('circle', {class: 'shape univ', cx: B.cx, cy: B.cy, r: B.r}, g), {});
+  S(E('circle', {class: 'shape hotr', cx: B.cx, cy: B.cy, r: B.r}, g), {});
   E('circle', {class: 'ring', cx: B.cx, cy: B.cy, r: B.r + 7}, g);
-  T(g, B.cx, B.cy - 6, 'our observable', 'o-l', 'middle'); T(g, B.cx, B.cy + 20, 'universe', 'o-l', 'middle');
+  T(g, B.cx, B.cy - 6, 'our observable', 'o-l ohalo', 'middle'); T(g, B.cx, B.cy + 20, 'universe', 'o-l ohalo', 'middle');
   ap.zs.universe = {r: seatMap(VB, cR(UC().cx, UC().cy, U.r), cR(B.cx, B.cy, B.r)), g};
-  owrap(L, 140, PH ? 630 : 690, 'No scale: the size of the whole is unknown, so this frame is only a picture.', 'o-s');
+  owrap(L, 140, PH ? 630 : 690, `No scale: the size of the whole is unknown, so this frame is only a picture (an ${GEN}).`, 'o-s');
 }});
 /* ---- the observable universe ---- */
-onode('universe', {kid: 'laniakea', img: ['cmb.webp'], build: (L, ap) => {
+onode('universe', {kid: 'laniakea', img: ['universe.webp', 'cmb.webp'], build: (L, ap) => {
   const U = UC();
   obd(L, true);
-  otitle(L, 'The observable universe', 'drawn to scale', `${on('u_age')} since the Big Bang; ${on('u_rad')} in radius`, `${onf('u_age')} ${onf('u_rad')}`);
+  // the picture: its sphere (centred at 0.506 of its height, radius 0.465 of its width) on the circle, to scale
+  gimg(L, 'universe.webp', U.cx, U.cy, U.r / 0.465, 0.5, 0.506);
+  otitle(L, 'The observable universe', PH ? GEN : `${GEN}, size to scale`, `${on('u_age')} since the Big Bang; ${on('u_rad')} in radius`, `${onf('u_age')} ${onf('u_rad')}`);
   const g = opart(L, 'sphere', 'The observable universe: details', {title: 'Everything we can see', kick: 'Universe · part', lead: (OSC.universe || {}).blurb, facts: ofx('universe', 1, 2, 4)});
-  S(E('circle', {class: 'shape univ2', cx: U.cx, cy: U.cy, r: U.r}, g), {});
+  S(E('circle', {class: 'shape hotr', cx: U.cx, cy: U.cy, r: U.r}, g), {});
   E('circle', {class: 'ring', cx: U.cx, cy: U.cy, r: U.r + 8}, g);
   const gc = opart(L, 'cmb', 'The cosmic microwave background: details', {title: 'The cosmic microwave background', kick: 'Universe · part',
     lead: 'The oldest light we can see. It left its source about 380,000 years after the Big Bang, and it reaches us from every direction: the edge of what we can see.', facts: ofx('universe', 3)});
-  S(E('circle', {class: 'shape cmbr', cx: U.cx, cy: U.cy, r: U.r - 6}, gc), {});
-  S(E('circle', {cx: U.cx, cy: U.cy, r: U.r - 6, 'pointer-events': 'stroke'}, gc), {fill: 'none', stroke: 'transparent', strokeWidth: 44});
+  // (the picture's orange shell is the background's; its ring, 44 units wide and clear, is the part)
+  S(E('circle', {class: 'shape', cx: U.cx, cy: U.cy, r: U.r - 6, 'pointer-events': 'stroke'}, gc), {fill: 'none', stroke: 'transparent', strokeWidth: 44});
   E('circle', {class: 'ring', cx: U.cx, cy: U.cy, r: U.r + 2}, gc);
   if (PH) T2(gc, U.cx - 90, U.cy + U.r - 104, ['the oldest light:', `${on('u_cmb')} after the Big Bang`], 'o-s ohalo', 'middle', onf('u_cmb'), 1.15);
   else T(gc, U.cx, U.cy + U.r - 64, `the oldest light: ${on('u_cmb')} after the Big Bang`, 'o-s ohalo', 'middle', onf('u_cmb'));
@@ -195,107 +209,102 @@ onode('universe', {kid: 'laniakea', img: ['cmb.webp'], build: (L, ap) => {
   oimg(gi, 'cmb.webp', ix, iy, iw, iw / 2);
   E('rect', {class: 'shape hotr', x: ix, y: iy, width: iw, height: iw / 2, rx: 6}, gi); E('rect', {class: 'ring', x: ix - 5, y: iy - 5, width: iw + 10, height: iw / 2 + 10, rx: 9}, gi);
   if (!PH) T(gi, ix, iy + iw / 2 + 24, 'the whole sky as we see it (WMAP)', 'o-s');
-  sbar(L, 140, 680, 10 * 330 / 46.2, '10 billion light-years', onf('u_rad'));
+  sbar(L, 140, PH ? 680 : 666, 10 * 330 / 46.2, '10 billion light-years', onf('u_rad'));
+  ocredit(L, `Sphere: ${GEN} (Google Antigravity), not a photograph. Sky map: NASA/WMAP Science Team, public domain`, 712);
 }});
 /* ---- Laniakea ---- */
-onode('laniakea', {kid: 'localgroup', build: (L, ap) => {
+onode('laniakea', {kid: 'localgroup', img: ['laniakea.webp'], build: (L, ap) => {
   obd(L, true);
-  otitle(L, 'Laniakea', 'schematic', `our supercluster: ${on('lan_n')}, ${on('lan_size')} across`, `${onf('lan_n')} ${onf('lan_size')}`);
-  const cx = 500, cy = 350, R = 290, pts = [];
-  for (let i = 0; i < 24; i++) { const a = i / 24 * 2 * Math.PI, r = R * (0.86 + 0.14 * Math.sin(3 * a + 0.7) + 0.06 * Math.cos(5 * a)); pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a) * 0.9]); }
-  const n = pts.length, f1 = v => v.toFixed(1);
-  let d = `M${f1(pts[0][0])},${f1(pts[0][1])}`;
-  for (let i = 0; i < n; i++) {
-    const p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
-    d += `C${f1(p1[0] + (p2[0] - p0[0]) / 6)},${f1(p1[1] + (p2[1] - p0[1]) / 6)} ${f1(p2[0] - (p3[0] - p1[0]) / 6)},${f1(p2[1] - (p3[1] - p1[1]) / 6)} ${f1(p2[0])},${f1(p2[1])}`;
-  }
-  d += 'Z';
+  // the picture: its cloud of galaxies (radius about 0.41 of its width) on R, 520 million light-years across; its flow
+  // lines meet at (0.395, 0.40) of it
+  const cx = 500, cy = 350, R = 290, ls = R / 0.41, at = (fx, fy) => ({x: cx + (fx - 0.5) * ls, y: cy + (fy - 0.5) * ls});
+  gimg(L, 'laniakea.webp', cx, cy, ls);
+  otitle(L, 'Laniakea', GEN, `our supercluster: ${on('lan_n')}, ${on('lan_size')} across`, `${onf('lan_n')} ${onf('lan_size')}`);
   const g = opart(L, 'flow', 'Laniakea: details', {title: 'Laniakea, "immeasurable heaven"', kick: 'Laniakea · part', lead: (OSC.laniakea || {}).blurb, facts: ofx('laniakea', 1, 2)});
-  S(E('path', {class: 'shape lani', d}, g), {});
-  const ga = {x: cx + 40, y: cy + 30};
-  for (let i = 0; i < 14; i++) {
-    const a = i / 14 * 2 * Math.PI + 0.2, r0 = R * 0.95, x0 = cx + r0 * Math.cos(a), y0 = cy + r0 * Math.sin(a) * 0.9;
-    E('path', {class: 'flowl', d: `M${x0.toFixed(1)},${y0.toFixed(1)} Q${((x0 + ga.x) / 2 + 40 * Math.sin(a)).toFixed(1)},${((y0 + ga.y) / 2 - 40 * Math.cos(a)).toFixed(1)} ${ga.x},${ga.y}`}, g);
-  }
-  E('path', {class: 'ring', d}, g);
-  S(E('circle', {cx: ga.x, cy: ga.y, r: 8}, g), {fill: '#ffd27a'});
-  if (PH) T2(g, ga.x + 14, ga.y + 30, ['where the galaxies’', 'motions converge'], 'o-s ohalo', 'start', null, 1.15); else T(g, ga.x + 14, ga.y + 30, 'where the galaxies’ motions converge', 'o-s');
-  owrap(L, 140, PH ? 636 : 680, 'shape simplified: no openly licensed map; the outline and flows are a sketch of Tully et al. 2014', 'o-s');
-  const lg = {x: cx - R * 0.72, y: cy - R * 0.52};
-  jumpMark(L, ap, 'localgroup', lg.x, lg.y, 18, 'the Local Group', {dot: 3, lx: 26, ly: -8});
-  sbar(L, PH ? 140 : 600, PH ? 600 : 650, 100 * 2 * R * 0.93 / 520, '100 million light-years', onf('lan_size'));
+  S(E('circle', {class: 'shape hotr', cx, cy, r: R}, g), {});
+  E('circle', {class: 'ring', cx, cy, r: R + 8}, g);
+  const ga = at(0.395, 0.40);
+  S(E('circle', {cx: ga.x, cy: ga.y, r: 8}, g), {fill: 'none', stroke: '#ffd27a', strokeWidth: 3});
+  if (PH) T2(g, ga.x + 14, ga.y + 30, ['where the galaxies’', 'motions converge'], 'o-s ohalo', 'start', null, 1.15); else T(g, ga.x + 14, ga.y + 30, 'where the galaxies’ motions converge', 'o-s ohalo');
+  owrap(L, 140, PH ? 636 : 680, `an ${GEN} after Tully et al. 2014, not a map; the scale bar is to scale`, 'o-s');
+  const lg = at(0.204, 0.286);
+  jumpMark(L, ap, 'localgroup', lg.x, lg.y, 18, 'the Local Group', {dot: 3, lx: 26, ly: -8, halo: true});
+  sbar(L, PH ? 140 : 600, PH ? 600 : 650, 100 * 2 * R / 520, '100 million light-years', onf('lan_size'));
 }});
 /* ---- the Local Group ---- */
 const LGK = 120;   // units per million light-years
-onode('localgroup', {kid: 'milkyway', img: ['andromeda.webp'], build: (L, ap) => {
+onode('localgroup', {kid: 'milkyway', img: ['localgroup.webp', 'milkyway.webp'], build: (L, ap) => {
   obd(L, true);
-  otitle(L, 'The Local Group', 'drawn to scale, positions schematic', `our galaxy's neighbourhood: more than 130 known galaxies, mostly faint dwarfs, over nearly ${on('lg_size')}`, `${onf('lg_size')} out.localgroup.5`);
   const mw = {x: 280, y: 400}, m31 = {x: mw.x + 2.5 * LGK, y: mw.y}, m33 = {x: mw.x + 2.92 * LGK, y: mw.y - 0.68 * LGK};
-  S(E('line', {x1: mw.x, y1: mw.y, x2: m31.x, y2: m31.y, 'pointer-events': 'none'}, L), {stroke: '#7a86a6', strokeWidth: 1.5, strokeDasharray: '6 6'});
-  T(L, (mw.x + m31.x) / 2, mw.y + 34, on('lg_m31'), 'o-s', 'middle', onf('lg_m31'));
+  // the pictures, the galaxies about 6 times their size and their distances to scale: Andromeda's (its core at (0.503,
+  // 0.504), Triangulum's at (0.576, 0.205)) turned 18.05 degrees and scaled so that both cores land on their places; and
+  // the Milky Way level's own picture at an eighth of its size where the jump into that level seats it (85 units, its
+  // middle 3 units under the mark), so that the jump shows the same galaxy growing
+  gimg(E('g', {transform: `rotate(18.05 ${m31.x} ${m31.y})`}, L), 'localgroup.webp', m31.x, m31.y, 311.8, 0.503, 0.504);
+  gimg(L, 'milkyway.webp', mw.x, mw.y + 3, 85);
+  otitle(L, 'The Local Group', `${GEN}, galaxies enlarged 6×`, `our galaxy's neighbourhood: more than 130 known galaxies, mostly faint dwarfs, over nearly ${on('lg_size')}`, `${onf('lg_size')} out.localgroup.5`);
+  S(E('line', {x1: mw.x + 46, y1: mw.y, x2: m31.x - 74, y2: m31.y, 'pointer-events': 'none'}, L), {stroke: '#7a86a6', strokeWidth: 1.5, strokeDasharray: '6 6'});
+  T(L, (mw.x + m31.x - 28) / 2, mw.y - 14, on('lg_m31'), 'o-s ohalo', 'middle', onf('lg_m31'));
   const ga = opart(L, 'm31', 'Andromeda (M31): details', {title: 'Andromeda (M31)', kick: 'Local Group · galaxy', lead: 'The nearest big galaxy, larger than ours. The light we see from it left 2.5 million years ago. It and the Milky Way may collide in some billions of years: about a coin flip within ten billion.', facts: ofx('localgroup', 2, 4)});
-  S(E('ellipse', {class: 'shape gal', cx: m31.x, cy: m31.y, rx: 0.13 * LGK, ry: 0.045 * LGK, transform: `rotate(-35 ${m31.x} ${m31.y})`}, ga), {});
-  S(E('circle', {cx: m31.x, cy: m31.y, r: 30}, ga), {fill: 'transparent'}); E('circle', {class: 'ring', cx: m31.x, cy: m31.y, r: 26}, ga);
-  T(ga, m31.x, m31.y - 30, 'Andromeda (M31)', 'o-l', 'middle');
+  S(E('circle', {class: 'shape hotr', cx: m31.x, cy: m31.y, r: 66}, ga), {}); E('circle', {class: 'ring', cx: m31.x, cy: m31.y, r: 70}, ga);
+  T(ga, m31.x + 20, m31.y + 74, 'Andromeda (M31)', 'o-l ohalo', 'middle');
   const gm = opart(L, 'm33', 'Triangulum (M33): details', {title: 'Triangulum (M33)', kick: 'Local Group · galaxy', lead: 'The third largest galaxy of the group, near Andromeda.', facts: ofx('localgroup', 3)});
-  S(E('ellipse', {class: 'shape gal', cx: m33.x, cy: m33.y, rx: 4, ry: 2.5}, gm), {});
-  S(E('circle', {cx: m33.x, cy: m33.y, r: 24}, gm), {fill: 'transparent'}); E('circle', {class: 'ring', cx: m33.x, cy: m33.y, r: 18}, gm);
-  T(gm, m33.x - 12, m33.y - 12, `M33, ${on('lg_m33')}`, 'o-s', 'end', onf('lg_m33'));
+  S(E('circle', {class: 'shape hotr', cx: m33.x, cy: m33.y, r: 26}, gm), {}); E('circle', {class: 'ring', cx: m33.x, cy: m33.y, r: 28}, gm);
+  T(gm, m33.x - 30, m33.y - 18, `M33, ${on('lg_m33')}`, 'o-s ohalo', 'end', onf('lg_m33'));
+  // (the Large Magellanic Cloud just outside the enlarged Milky Way's disc: at its true 160,000 light-years it would sit on it)
+  const lm = {x: mw.x - 34, y: mw.y + 42};
   const gl = opart(L, 'lmc', 'The Large Magellanic Cloud: details', {title: 'The Large Magellanic Cloud', kick: 'Local Group · galaxy', lead: 'A small galaxy orbiting our own, 160,000 light-years away: seen from the southern hemisphere as a faint cloud.', facts: ofx('localgroup', 3)});
-  S(E('circle', {cx: mw.x - 0.1 * LGK, cy: mw.y + 0.12 * LGK, r: 2.5, 'pointer-events': 'none'}, gl), {fill: '#c9d3ea'});
-  S(E('circle', {cx: mw.x - 0.1 * LGK, cy: mw.y + 0.12 * LGK, r: 22, 'pointer-events': 'all'}, gl), {fill: 'transparent'}); E('circle', {class: 'ring', cx: mw.x - 0.1 * LGK, cy: mw.y + 0.12 * LGK, r: 14}, gl);
-  T(gl, PH ? mw.x - 120 : mw.x - 30, mw.y + (PH ? 76 : 60), `LMC, ${on('lg_lmc')} ly`, 'o-s', PH ? 'start' : 'end', onf('lg_lmc'));
-  S(E('ellipse', {cx: mw.x, cy: mw.y, rx: 0.05 * LGK, ry: 0.018 * LGK, 'pointer-events': 'none'}, L), {fill: '#e7ecff'});
-  jumpMark(L, ap, 'milkyway', mw.x, mw.y, 16, 'the Milky Way', PH ? {lx: -10, ly: -26, la: 'middle'} : {lx: -8, ly: -26, la: 'end'});
-  // Andromeda, photographed (GALEX, ultraviolet)
-  const ix = PH ? 600 : 700, iy = PH ? 440 : 70, iw = PH ? 270 : 330, ih = iw * 357 / 480;
-  const gp = opart(L, 'm31photo', 'Andromeda, photographed: details', {title: 'Andromeda, photographed', kick: 'Local Group · image', lead: 'Andromeda in ultraviolet light from NASA’s GALEX telescope: bluer than to the eye. It spans 260,000 light-years.', facts: ofx('localgroup', 2)});
-  oimg(gp, 'andromeda.webp', ix, iy, iw, ih, {feather: true});
-  E('rect', {class: 'shape hotr', x: ix, y: iy, width: iw, height: ih, rx: 6}, gp); E('rect', {class: 'ring', x: ix - 5, y: iy - 5, width: iw + 10, height: ih + 10, rx: 9}, gp);
-  // (on a phone the credit is short, under the photo's right edge: the full one is in the panel)
-  if (PH) T(gp, ix + iw, iy + ih + 22, 'GALEX, ultraviolet', 'o-cr', 'end'); else T(gp, ix, iy + ih + 24, 'Andromeda (NASA/JPL-Caltech GALEX, ultraviolet)', 'o-cr');
-  if (!PH) S(E('line', {x1: m31.x, y1: m31.y - 12, x2: ix + iw * 0.3, y2: iy + ih, 'pointer-events': 'none'}, L), {stroke: '#7a86a6', strokeWidth: 1.2, strokeDasharray: '4 5'});
-  sbar(L, 140, 680, LGK, '1 million light-years');
+  S(E('circle', {cx: lm.x, cy: lm.y, r: 3, 'pointer-events': 'none'}, gl), {fill: '#c9d3ea'});
+  S(E('circle', {cx: lm.x, cy: lm.y, r: 22, 'pointer-events': 'all'}, gl), {fill: 'transparent'}); E('circle', {class: 'ring', cx: lm.x, cy: lm.y, r: 14}, gl);
+  T(gl, PH ? mw.x - 120 : lm.x - 12, lm.y + (PH ? 40 : 30), `LMC, ${on('lg_lmc')} ly`, 'o-s ohalo', PH ? 'start' : 'end', onf('lg_lmc'));
+  jumpMark(L, ap, 'milkyway', mw.x, mw.y, 44, 'the Milky Way', PH ? {lx: -10, ly: -56, la: 'middle', halo: true} : {lx: -8, ly: -54, la: 'end', halo: true});
+  sbar(L, 140, 666, LGK, '1 million light-years');
+  ocredit(L, `Galaxies: ${GEN}s (Google Antigravity), not photographs; the distances are to scale`, 712);
 }});
-/* ---- the Milky Way (an artist's concept) ---- */
-const MWI = {x: 170, y: -4, s: 680};
+/* ---- the Milky Way (an AI illustration since 31 Oct 2026; NASA/JPL-Caltech's artist's concept before). Its picture:
+   the bar's middle, the galaxy's centre, at (0.500, 0.495); the disc, 100,000 light-years, 0.84 of its width; the Sun
+   placed 26,000 light-years below the centre, at (0.500, 0.713) ---- */
+const MWI = {x: 170, y: -4, s: 680}, MWD = 0.84;
 onode('milkyway', {kid: 'stars', img: ['milkyway.webp'], build: (L, ap) => {
   obd(L, true);
+  gimg(L, 'milkyway.webp', 510, MWI.y + MWI.s / 2, MWI.s);
   const g = opart(L, 'disc', 'The Milky Way: details', {title: 'The Milky Way', kick: 'Milky Way · part', lead: (OSC.milkyway || {}).blurb, facts: ofx('milkyway', 1, 3)});
-  S(E('ellipse', {cx: 510, cy: MWI.y + 0.495 * MWI.s, rx: 300, ry: 300, 'pointer-events': 'none'}, g), {fill: '#1b2440'});
-  oimg(g, 'milkyway.webp', MWI.x, MWI.y, MWI.s, MWI.s, {feather: true});
   E('rect', {class: 'shape hotr', x: MWI.x, y: MWI.y, width: MWI.s, height: MWI.s, rx: 6}, g);
   E('rect', {class: 'ring', x: MWI.x - 5, y: MWI.y - 5, width: MWI.s + 10, height: MWI.s + 10, rx: 9}, g);
-  otitle(L, 'The Milky Way', 'an artist’s concept', `about ${on('mw_size')} across`, onf('mw_size'));
-  const sun = {x: MWI.x + 0.5 * MWI.s, y: MWI.y + 0.691 * MWI.s}, ctr = {x: MWI.x + 0.5 * MWI.s, y: MWI.y + 0.495 * MWI.s};
+  otitle(L, 'The Milky Way', GEN, `about ${on('mw_size')} across`, onf('mw_size'));
+  const sun = {x: MWI.x + 0.5 * MWI.s, y: MWI.y + (0.495 + 0.26 * MWD) * MWI.s}, ctr = {x: MWI.x + 0.5 * MWI.s, y: MWI.y + 0.495 * MWI.s};
   S(E('line', {x1: sun.x, y1: sun.y - 20, x2: ctr.x, y2: ctr.y, 'pointer-events': 'none'}, L), {stroke: '#ffd27a', strokeWidth: 2, strokeDasharray: '6 5'});
   T(L, ctr.x + 12, (sun.y + ctr.y) / 2, on('mw_sun'), 'o-l ohalo', 'start', onf('mw_sun'));
   const gc = opart(L, 'centre', 'The centre of the galaxy: details', {title: 'The centre of the Milky Way', kick: 'Milky Way · part', lead: 'The Sun is about 26,000 light-years from the centre, in a small arm called the Orion Spur.', facts: ofx('milkyway', 2)});
   S(E('circle', {cx: ctr.x, cy: ctr.y, r: 26}, gc), {fill: 'transparent'}); E('circle', {class: 'ring', cx: ctr.x, cy: ctr.y, r: 22}, gc);
   jumpMark(L, ap, 'stars', sun.x, sun.y, 20, 'you are here: the Sun', {lx: 28, ly: 8, halo: true, lcls: 'o-l'});
-  ocredit(L, 'Image: NASA/JPL-Caltech/R. Hurt (SSC/Caltech), PIA10748, an artist’s concept: nobody has seen the galaxy from outside', 712);
-  sbar(L, 140, 666, 20000 / (282.1 * 480 / MWI.s), '20,000 light-years');
+  ocredit(L, `Image: an ${GEN} (Google Antigravity), not a photograph: nobody has seen the galaxy from outside`, 712);
+  sbar(L, 140, 666, 0.2 * MWD * MWI.s, '20,000 light-years');
 }});
 /* ---- the nearest stars ---- */
-onode('stars', {kid: 'solar', build: (L, ap) => {
+onode('stars', {kid: 'solar', img: ['stars.webp'], build: (L, ap) => {
   obd(L, true);
-  otitle(L, 'The nearest stars', 'drawn to scale', 'a frame 20 light-years across, the Sun at its middle');
-  const k = 700 / 20, c = {x: 510, y: 345}, pr = 4.2 * k, a = 3.55;
+  // the picture: its Sun at (0.498, 0.498) of it on c, the middle of α Centauri's three stars at (0.346, 0.354), 0.209 of its
+  // width away, placed at 4.2 light-years: so the picture is 703 units wide; its starfield fades out at its edges
+  const k = 700 / 20, c = {x: 510, y: 345}, pr = 4.2 * k, ss = 703;
+  oimg(L, 'stars.webp', c.x - 0.498 * ss, c.y - 0.498 * ss, ss, ss, {feather: true});
+  otitle(L, 'The nearest stars', PH ? GEN : `${GEN}, distances to scale`, 'a frame 20 light-years across, the Sun at its middle');
   S(E('circle', {cx: c.x, cy: c.y, r: pr, 'pointer-events': 'none'}, L), {fill: 'none', stroke: '#5b6787', strokeWidth: 1.5, strokeDasharray: '6 6'});
-  const px = c.x + pr * Math.cos(a), py = c.y + pr * Math.sin(a);
+  const px = c.x - 0.152 * ss, py = c.y - 0.144 * ss;
   const gp = opart(L, 'proxima', 'Proxima Centauri: details', {title: 'Proxima Centauri', kick: 'Nearest stars · star', lead: 'The nearest star after the Sun: its light left it more than four years ago.', facts: ofx('stars', 1, 2)});
-  S(E('circle', {cx: px, cy: py, r: 4}, gp), {fill: '#ffb07a'}); S(E('circle', {cx: px, cy: py, r: 26}, gp), {fill: 'transparent'}); E('circle', {class: 'ring', cx: px, cy: py, r: 20}, gp);
-  T(gp, PH ? px + 40 : px - 10, PH ? py - 40 : py - 18, 'Proxima and α Centauri', 'o-l', PH ? 'middle' : 'end');
-  T(gp, px - 10, py + 34, on('st_prox'), 'o-s', 'end', onf('st_prox'));
-  S(E('circle', {cx: c.x, cy: c.y, r: 4, 'pointer-events': 'none'}, L), {fill: '#ffe08a'});
-  jumpMark(L, ap, 'solar', c.x, c.y, 16, 'the Sun', {lx: 24, ly: 6});
+  S(E('circle', {cx: px, cy: py, r: 30}, gp), {fill: 'transparent'}); E('circle', {class: 'ring', cx: px, cy: py, r: 30}, gp);
+  T(gp, PH ? px + 40 : px - 30, PH ? py - 44 : py - 22, 'Proxima and α Centauri', 'o-l ohalo', PH ? 'middle' : 'end');
+  T(gp, px - 30, py + 40, on('st_prox'), 'o-s ohalo', 'end', onf('st_prox'));
+  jumpMark(L, ap, 'solar', c.x, c.y, 24, 'the Sun', {lx: 32, ly: 6, halo: true});
   owrap(L, 140, PH ? 610 : 650, 'one light-year: 9.46 × 10¹⁵ m, about 1,050 times the width of Neptune’s orbit', 'o-s', 'start', 'out.stars.2');
   sbar(L, 140, 690, 5 * k, '5 light-years');
 }});
-/* ---- the Solar System ---- */
+/* ---- the Solar System (since 31 Oct 2026 on a generated starfield, shared with Earth and the Moon; the orbits drawn on
+   it to scale) ---- */
 const AU = 330 / 30.07;
-onode('solar', {kid: 'moon', build: (L, ap) => {
+onode('solar', {kid: 'moon', img: ['starfield.webp'], build: (L, ap) => {
   obd(L, true);
+  gimg(L, 'starfield.webp', 510, 345, 1500);
   otitle(L, 'The Solar System', 'orbits to scale, planets not', `the planets' orbits out to Neptune's, ${on('so_nep')}`, onf('so_nep'));
   const c = {x: 510, y: 350};
   const orb = [['Mercury', 0.387], ['Venus', 0.723], ['Earth', 1], ['Mars', 1.524], ['Jupiter', 5.2], ['Saturn', 9.57], ['Uranus', 19.17], ['Neptune', 30.07]];
@@ -318,8 +327,10 @@ onode('solar', {kid: 'moon', build: (L, ap) => {
   sbar(L, 140, PH ? 652 : 690, 5 * AU, '5 au (1 au: Earth to the Sun)');
 }});
 /* ---- Earth and the Moon ---- */
-onode('moon', {kid: 'earth', build: (L, ap) => {
+onode('moon', {kid: 'earth', img: ['starfield.webp', 'earth-globe.webp'], build: (L, ap) => {
   obd(L, true);
+  // (the Solar System's starfield, turned half round so that the two scenes' skies differ as one fades into the other)
+  gimg(E('g', {transform: 'rotate(180 510 345)'}, L), 'starfield.webp', 510, 345, 1500);
   otitle(L, 'Earth and the Moon', 'orbit to scale', `the Moon ${on('mo_dist')} away: ${on('mo_light')} for light`, `${onf('mo_dist')} ${onf('mo_light')}`);
   const c = {x: 510, y: 350}, R = 300, k = R / 384400;
   S(E('circle', {cx: c.x, cy: c.y, r: R, 'pointer-events': 'none'}, L), {fill: 'none', stroke: '#5b6787', strokeWidth: 1.5, strokeDasharray: '6 6'});
@@ -327,21 +338,24 @@ onode('moon', {kid: 'earth', build: (L, ap) => {
   const gm = opart(L, 'moonp', 'The Moon: details', {title: 'The Moon', kick: 'Earth and Moon · part', lead: 'Light takes 1.28 seconds to reach the Moon: in that time the chip’s clock ticks 770 million times.', facts: ofx('moon', 1, 2)});
   S(E('circle', {cx: mx, cy: my, r: Math.max(2.5, 1737.4 * k)}, gm), {fill: '#cfd3dc'}); S(E('circle', {cx: mx, cy: my, r: 26}, gm), {fill: 'transparent'}); E('circle', {class: 'ring', cx: mx, cy: my, r: 18}, gm);
   T(gm, PH ? mx - 16 : mx + 16, PH ? my - 26 : my - 12, 'the Moon', 'o-l', PH ? 'end' : 'start');
-  S(E('circle', {cx: c.x, cy: c.y, r: 6371 * k, 'pointer-events': 'none'}, L), {fill: '#5f8fe0'});
+  // (Earth to scale: the next level's globe picture, its disc 0.44 of it)
+  gimg(L, 'earth-globe.webp', c.x, c.y, 6371 * k / 0.44);
   jumpMark(L, ap, 'earth', c.x, c.y, 14, 'Earth', {lx: 20, ly: 24});
   sbar(L, 140, 690, 100000 * k, '100,000 km');
 }});
-/* ---- Earth: Natural Earth's land on an orthographic globe at 38 N 100 W, to scale with the US map ---- */
+/* ---- Earth: an orthographic globe at 38 N 100 W, to scale with the US map. Since 31 Oct 2026 the globe is an AI
+   illustration painted over the page's own drawn globe (Natural Earth's land; images/refs/earth-ref.png, made by
+   images/make_refs.py), so its coastlines lie on the drawn ones and the US box still frames the US map the camera zooms
+   into: its disc is 0.44 of its width, as the reference's ---- */
 const EG = {cx: 510, cy: 345, r: 310};
-onode('earth', {kid: 'us', img: ['earth.webp'], build: (L, ap) => {
+onode('earth', {kid: 'us', img: ['earth-globe.webp', 'earth.webp'], build: (L, ap) => {
   obd(L, true);
-  otitle(L, 'Earth', 'drawn to scale', `${on('ea_r')} km to the centre; light circles it in ${on('ea_eq')}`, `${onf('ea_r')} ${onf('ea_eq')}`);
+  gimg(L, 'earth-globe.webp', EG.cx, EG.cy, EG.r / 0.44);
+  otitle(L, 'Earth', `${GEN}, to scale`, `${on('ea_r')} km to the centre; light circles it in ${on('ea_eq')}`, `${onf('ea_r')} ${onf('ea_eq')}`);
   const ge = OGEO.earth, k = EG.r / ge.radius_km;
   const g = opart(L, 'globe', 'Earth: details', {title: 'Earth', kick: 'Earth · part', lead: (OSC.earth || {}).blurb, facts: ofx('earth', 1, 2)});
-  S(E('circle', {class: 'shape ocean', cx: EG.cx, cy: EG.cy, r: EG.r}, g), {});
+  S(E('circle', {class: 'shape hotr', cx: EG.cx, cy: EG.cy, r: EG.r}, g), {});
   E('circle', {class: 'ring', cx: EG.cx, cy: EG.cy, r: EG.r + 7}, g);
-  const m = mapG(g, k, 0, 0, EG.cx, EG.cy);
-  E('path', {class: 'land', d: ge.path}, m);
   const bb = ge.us_bbox_km, ur = kmR(bb, k, 0, 0, EG.cx, EG.cy);
   const gu = opart(L, 'tous', 'The United States: zoom in', kidInfo('us'), {id: 'us'});
   S(E('rect', {class: 'shape kidbox', x: ur.x, y: ur.y, width: ur.w, height: ur.h, rx: 4}, gu), {});
@@ -354,7 +368,7 @@ onode('earth', {kid: 'us', img: ['earth.webp'], build: (L, ap) => {
   oimg(gp, 'earth.webp', ix, iy, iw, iw, {clip: 'url(#ofdisc)'});
   E('rect', {class: 'shape hotr', x: ix, y: iy, width: iw, height: iw, rx: iw / 2}, gp); E('rect', {class: 'ring', x: ix - 5, y: iy - 5, width: iw + 10, height: iw + 10, rx: iw / 2 + 5}, gp);
   if (!PH) T(gp, ix + iw / 2, iy - 12, 'the Blue Marble (NASA, a composite)', 'o-cr', 'middle');
-  ocredit(L, 'Land: Natural Earth 1:110m, orthographic at 38 N 100 W. Image: NASA Goddard, The Blue Marble, a composite. Both public domain.', 712);
+  ocredit(L, `Globe: ${GEN} (Google Antigravity) over Natural Earth's land at 38 N 100 W. Inset: NASA's Blue Marble, public domain`, 712);
   sbar(L, 140, PH ? 680 : 664, 2000 * k, '2,000 km');
 }});
 /* ---- the maps: the US, California, the Bay Area, San Francisco (US Census outlines, public domain) ---- */

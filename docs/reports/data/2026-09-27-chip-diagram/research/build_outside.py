@@ -538,7 +538,7 @@ L.append({
 
 # ------------------------------------------------------------------ 14. the Milky Way
 mw = 100_000 * LY
-mw_frame = 135_400 * LY
+mw_frame = 119_000 * LY   # the picture's square (31 Oct 2026, the generated one): its disc, 100,000 ly, is 0.84 of it
 L.append({
     'id': 'milkyway', 'name': 'The Milky Way', 'parent': 'localgroup', 'optional': False,
     'size_m': mw, 'frame_m': mw_frame, 'size_kind': 'outside source',
@@ -553,28 +553,18 @@ L.append({
           'NASA/JPL-Caltech/R. Hurt (SSC/Caltech), ssc2008-10b caption; ESO eso1339e (annotated)', 'outside source'),
         F('More than 24 billion transistors on the chip against at least 100 billion stars: about one transistor for '
           'every four stars.', S['facts'] + ' (chip.process); NASA (above)', 'derived'),
-        F('The picture\'s square spans about 135,000 light-years: the page\'s builder measured it against ESO\'s '
-          'annotated copy of the same artwork (eso1339e), whose distance rings are 9.45 px per 1,000 light-years.',
-          'the builder\'s own measurement (outside.json, image geometry); ESO eso1339e', 'inferred'),
+        F('The picture is an AI illustration, not a photograph: its disc stands for the galaxy\'s 100,000 '
+          'light-years (0.84 of the picture\'s width), its bar\'s middle for the centre, and the page places the Sun '
+          '26,000 light-years below the centre.',
+          'the page\'s builder (docs/reports/data/2026-10-01-ladder/images/README.md, the Milky Way)', 'inferred'),
     ],
     'light': light(mw),
-    'image': {'file': 'milkyway.webp', 'px': [480, 480], 'bytes': os.path.getsize(
-        os.path.join(IMG, 'milkyway.webp')),
-        'credit': 'NASA/JPL-Caltech/R. Hurt (SSC/Caltech), "Our Milky Way Gets a Makeover" (artist\'s concept, '
-                  'PIA10748)',
-        'licence': 'JPL image use policy: "may be used for any purpose without prior permission"; credit '
-                   '"NASA/JPL-Caltech"',
-        'source_url': 'https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia10/pia10748/'
-                      'PIA10748.jpg',
-        'geometry': {'ly_per_px_at_480': 282.1, 'frame_ly': 135_400, 'sun_frac': [0.500, 0.691],
-                     'centre_frac': [0.500, 0.495],
-                     'how': 'same artwork and framing as ESO\'s annotated eso1339e (correlation 0.977 at scale 1.0, no '
-                            'shift); its distance rings, centred on the Sun, are 9.45 px per 1,000 ly on the 1280 px '
-                            'screen image; the Sun is marked at (640, 884) of 1280.'},
-        'note': 'An artist\'s concept, not a photograph: nobody has seen the galaxy from outside. Say so on the page.'},
-    'draw': 'The picture with an SVG overlay: a "You are here" ring at the Sun (sun_frac), a line to the centre '
-            'labelled "26,000 ly", and a 20,000 ly scale bar (70.9 px on the 480 px copy).',
-    'child': {'id': 'stars', 'at_frac': [0.500, 0.691]},
+    # (31 Oct 2026: NASA/JPL-Caltech's artist's concept, PIA10748, gave way to a picture Antigravity drew from a written
+    # prompt, at the owner's ask; its credit comes from the ladder's images/prompts.json, through research/deepzoom.py)
+    'image': None,
+    'draw': 'The generated picture with an SVG overlay: a "You are here" ring at the Sun (0.713 of its height), a line '
+            'to the centre (0.495) labelled "26,000 ly", and a 20,000 ly scale bar (0.168 of its width).',
+    'child': {'id': 'stars', 'at_frac': [0.500, 0.713]},
 })
 
 # ------------------------------------------------------------------ 15. the Local Group (Andromeda)
@@ -617,17 +607,12 @@ L.append({
           'outside source'),
     ],
     'light': light(m31),
-    'image': {'file': 'andromeda.webp', 'px': [480, 357], 'bytes': os.path.getsize(
-        os.path.join(IMG, 'andromeda.webp')),
-        'credit': 'NASA/JPL-Caltech, Galaxy Evolution Explorer (GALEX), "Andromeda" (PIA15416), ultraviolet',
-        'licence': 'JPL image use policy: "may be used for any purpose without prior permission"; credit '
-                   '"NASA/JPL-Caltech"',
-        'source_url': 'https://d2pn8kiwq2w21t.cloudfront.net/images/jpegPIA15416.width-1024.jpg',
-        'note': 'An ultraviolet mosaic, so bluer than to the eye; no scale bar on the photo (its framing in '
-                'light-years is not given).'},
-    'draw': 'Drawn SVG map (the zoom target): the Milky Way and Andromeda 2.5 Mly apart, M33 near Andromeda, the '
-            'Magellanic Clouds at the Milky Way, dwarf galaxies as unlabelled dots only if sourced; a 1 Mly scale '
-            'bar. The Andromeda photo as an inset at M31\'s position.',
+    # (31 Oct 2026: the GALEX photo inset, PIA15416, gave way to Andromeda and Triangulum drawn by Antigravity in the
+    # map itself, at the owner's ask; the credit comes from the ladder's images/prompts.json, through research/deepzoom.py)
+    'image': None,
+    'draw': 'The map (the zoom target): the Milky Way and Andromeda 2.5 Mly apart, M33 near Andromeda, the Large '
+            'Magellanic Cloud at the Milky Way; a 1 Mly scale bar. The galaxies are generated pictures, about 6 times '
+            'their size, their cores on their places (the ladder\'s images/README.md).',
     'child': {'id': 'milkyway', 'note': 'the Milky Way on the map'},
 })
 
@@ -764,8 +749,9 @@ meta = {
     'kinds': ['measured', 'spec', 'derived', 'inferred', 'estimate', 'assumed', 'outside source', 'owner',
               'hypothesis', 'note'],
     'files': {'geometry': 'outside-geo.json (map outlines in km: sf, bayarea, california, us, earth)',
-              'images': ['rack.webp', 'card.webp', 'earth.webp',
-                         'milkyway.webp', 'andromeda.webp', 'cmb.webp']},
+              # (the photos; since 31 Oct 2026 the levels in space also show pictures generated from the ladder's
+              # images/prompts.json, which replaced NASA's Milky Way concept and the GALEX Andromeda)
+              'images': ['rack.webp', 'card.webp', 'earth.webp', 'cmb.webp']},
     'privacy': 'Studio 45 by name and city only; no address, no coordinates, no map marker; the rack photo\'s '
                'host-name and address labels blurred.',
 }

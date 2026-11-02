@@ -7,7 +7,10 @@ lazily fetched data). Prints PASS or FAIL lines; the exit code is the number of 
       part reaches a transistor, add about 36 KB of drawing code; 840 before part 1b's nine scenes for the last dead ends,
       a PCIe lane, a differential pair, a crossbar, rounding, copper wiring, a copper atom, a buck converter, a power
       transistor and a boot pin, and the path-by-path walk the tests read, about 46 KB), its embedded data at most 600 KB, the lazy data (ladder-img/ladder-data.json) at most
-      400 KB and as the page's manifest says, the images at most 300 KB in all, each WebP at most 1000 px wide
+      400 KB and as the page's manifest says, the images at most 900 KB in all, each WebP at most 150 KB and 1000 px wide
+      (300 KB in all until 31 Oct 2026, when the generated pictures of the levels in space and below the atom, the
+      owner's ask, came in: about 490 KB of them; each is fetched only when the camera nears its level, prefetched at
+      most two levels ahead, so a reader pays only for the levels visited)
   T10 no IPv4-like string in the page or the image manifest; no street address, house number, ZIP code or listing link
       for Studio 45, in the page or its data; no latitude or longitude; the rack photo's sha256 equals the manifest's
       (from make_rack_photo.py, ten labels blurred); no EXIF, XMP or ICC in any image; the maps mark no point but the
@@ -55,13 +58,14 @@ if D.get('lazy'):
     ok(hashlib.sha256(lz.encode()).hexdigest() == D['lazy'].get('sha256'), 'T9 the lazy data is the build\'s (sha256 as the page says)')
 imgs = sorted(f for f in os.listdir(img_dir) if f.endswith('.webp'))
 tot = sum(os.path.getsize(os.path.join(img_dir, f)) for f in imgs)
-ok(tot <= 300e3, f'T9 {len(imgs)} images, {tot / 1e3:.0f} KB (at most 300)')
+ok(tot <= 900e3, f'T9 {len(imgs)} images, {tot / 1e3:.0f} KB (at most 900)')
 try:
     from PIL import Image
     for f in imgs:
         im = Image.open(os.path.join(img_dir, f))
         meta = [k for k in ('exif', 'icc_profile', 'xmp', 'XML:com.adobe.xmp') if k in im.info]
-        ok(im.width <= 1000 and not meta, f'T9/T10 {f}: {im.width} px wide, no metadata', ','.join(meta))
+        sz = os.path.getsize(os.path.join(img_dir, f))
+        ok(im.width <= 1000 and sz <= 150e3 and not meta, f'T9/T10 {f}: {im.width} px wide, {sz / 1e3:.0f} KB, no metadata', ','.join(meta))
 except ImportError:
     ok(False, 'T10 Pillow is needed to read the images\' metadata')
 # no IPv4-like strings (version strings like 1.2.3.4 would be listed: none are expected)
