@@ -993,7 +993,8 @@ to the spacesheep stream `aifoundry/reservations` on every run. The page already
 
 ```
 {"v": 1, "t": <ms>, "read_ms": <ms of the last good read>, "window_h": 48, "cap_h": 3, "source": "...",
- "reservations": [ {"id": "<the claim's message id>", "host": "aifoundry1", "n": 1 | null (the post named the machine only),
+ "reservations": [ {"id": "<the claim's message id; <id>.2, <id>.3 ... for the later holds of one day's post>",
+   "host": "aifoundry1", "n": 1 | null (the post named the machine only),
    "who": "<Discord display name>", "start_ms": <ms>, "end_ms": <ms> | null (no release yet),
    "end": "released" | "edited" | "next_claim" | "stated" | "cap" | "open", "limit_ms": <ms>, "stated_ms": <ms>?,
    "start_msg": {"at_ms": <ms>, "text": "..."}, "end_msg": {"at_ms": <ms>, "who": "...", "text": "..."}?,
@@ -1008,6 +1009,14 @@ theirs), or at the next claim of that card by someone else; failing all three it
 gave ("for the next few hours" is 3 h, "for 90 min"), else for 3 h, and says "no release posted". A release more than
 24 hours after its claim closes nothing. The newest 30 within 48 hours go on the stream, under spacesheep's 16 KB a
 value.
+
+Since 1 November 2026 the owner's agents make one card post a day and rewrite it at every reservation and release,
+one `; ` clause per card held (the owner's rule that day: *"only post at most once per day when I'm reserving things
+... just edit that message with reservation (erasing the previous one)"*). So the watcher keeps each text it reads of a
+message, with its edit time. In such a post a card's hold starts at the post, or at the edit that added its clause.
+It ends at the edit that marks the clause released or drops it, so a reservation erased from the text keeps its span.
+A clause whose "until ~HH:MM" minus "for N h" gives the same start as before is a re-estimate of the same hold. Every
+other post is read whole, as before.
 
 ---
 

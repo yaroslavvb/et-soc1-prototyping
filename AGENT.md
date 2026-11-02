@@ -176,20 +176,26 @@ approval); anything that needs a GitHub key, such as a push; any admin action on
 card resets, services), which is the lab admin's; any change to an existing page's visibility, which is the owner's (new report pages are published public by default,
 the owner's rule of 29 September; §8); and
 claiming a machine on the AI Foundry Discord (#community-lab: "using aifoundryN", then "released"), the lab's own norm
-(getting-started.md §2). **The owner's agents post once per card, `<ai>` plus one short line naming the box,** with
-at most one small link to the public spacesheep page that describes the run, **and how long they hold the card**:
-`<ai> **Claude says:** using aifoundry3 for 1.5 h, until ~14:30 PDT [doc](<https://spacesheep.dev/@yaroslavvb/…>)` when
-they reserve it — the duration in digits after `for` (`for 2 h`, `for 1.5 h`; the reservation reader parses that form
-and misses `~2 h` or `about 2 h`) and the clock time it ends, in the zone `date +%Z` prints (PST from 1 November
-2026) — and they edit that same post to append ` — released` when they release it, keeping its words (the lab
-dashboard's reservation reader closes a claim at the edit that adds "released" to it). A run that will overrun its
-estimate by more than 15 minutes replaces the post's text with the same line and a new estimate, its `for <N> h` still
-counted from the post's own time: the reader draws a hold as the post's time plus N, so a 13:00 post that will now end
-at 15:30 reads `for 2.5 h, until ~15:30`, never the time left. No plan, numbers or progress in the channel, and no
-second post: the page holds it (the owner's rules of 28 October 2026; the estimate since 31 October 2026). The owner's
-two newest card posts in the channel stay, and each older one is deleted once its card is released, except one that a
-record cites by id (this repo's data READMEs and findings, the owner's research log), which stays so the citation
-still opens (the owner's rule of 31 October 2026). Only the Intel deletes them, through the Discord client with its
+(getting-started.md §2). **The owner's agents make at most one card post a day, and every later reservation that day
+edits it** (the owner's rule of 1 November 2026: *"only post at most once per day when I'm reserving things. If
+multiple times I'm reserving, just edit that message with reservation (erasing the previous one)"*). It is `<ai>` plus
+one short clause per card held, naming the box, with at most one small link to the public spacesheep page that
+describes the run, **and how long they hold the card**: `<ai> **Claude says:** using aifoundry3 for 1.5 h, until
+~14:30 PST [doc](<https://spacesheep.dev/@yaroslavvb/…>)`, the duration in digits after `for` (`for 2 h`, `for 1.5 h`;
+the reservation reader parses that form and misses `~2 h` or `about 2 h`) and the clock time it ends, in the zone
+`date +%Z` prints (PST from 1 November 2026). The day's first reservation posts it. Every later change rewrites that
+post with the Intel's `edit_replace.mjs` under `EXPECT_TEXT`, which refuses (exit 7) if another session rewrote it first.
+A new reservation's text is the clauses of the cards still held plus its own, `; ` between them, so a released one is
+erased; a card released while another is held drops its clause; the last card held gets ` — released` appended,
+keeping its words. A clause's `for <N> h` counts from its hold's start (the post, or the edit that added it), in a
+re-estimate too: a run that will overrun by more than 15 minutes rewrites its clause, so a hold from 13:00 that will
+now end at 15:30 reads `for 2.5 h, until ~15:30`, never the time left. The lab dashboard's reservation reader keeps each
+version of the post: a hold starts where its clause appears and ends at the edit that releases or drops it, so a
+re-worded clause loses its span. No plan, numbers or progress in the channel, and no second post that day: the page
+holds it (the owner's rules of 28 October 2026; the estimate since 31 October; one post a day since 1 November). The
+owner's two newest card posts in the channel (today's and yesterday's) stay, and each older one is deleted once its
+card is released, except one that a record cites by id (this repo's data READMEs and findings, the owner's research
+log), which stays so the citation still opens (the owner's rule of 31 October 2026). Only the Intel deletes them, through the Discord client with its
 `delete_msg.mjs`; an agent here never deletes a post.
 
 ## 5. The lab's etiquette, and why
@@ -455,6 +461,16 @@ copy it here too.
 *Every edit to this file adds one line here, newest first, in the same commit (the owner's rule of 10 October 2026 for
 agent instruction files). It starts on 14 October 2026; earlier changes are in `git log -- AGENT.md`.*
 
+- **2026-11-01 (Sun, week 44)** — Section 4: the owner's agents make at most one card post a day in #community-lab.
+  The day's first reservation posts it, and every later change rewrites it with the Intel's `edit_replace.mjs` under
+  `EXPECT_TEXT`. It names every card held, one `; ` clause each: a new reservation erases the released ones, a card
+  released while another is held drops its clause, and the last one gets " — released" appended. A clause's `for <N> h`
+  counts from its hold's start, and today's and yesterday's posts are the two that stay. *Why:* preference — the owner's
+  words that evening, *"only post at most once per day when I'm reserving things. If multiple times I'm reserving, just
+  edit that message with reservation (erasing the previous one)"*, after his agents had made 27 card posts that day;
+  constraint — the reservation reader kept only a post's latest text and started every hold at the post's time, so it
+  now keeps each version, and two sessions sharing one post can overwrite each other; re-check: flush-util
+  `test_lab_reservations` (its section 7) and `EXPECT_TEXT` in `edit_replace.mjs`.
 - **2026-11-01 (Sun, week 44, Q132 records, E105 and E106)** — Section 3's index reads E1–E106, where it read E1–E104, with E105
   (the port's layout) and E106 (held signs on one card). Section 6's hot-start trap adds that random fp32 with tiles that fit the L2
   sits at the 97 W stop, and that a cell's power is estimated from its own kind's S on a pinned card, never a lower kind's rho.
