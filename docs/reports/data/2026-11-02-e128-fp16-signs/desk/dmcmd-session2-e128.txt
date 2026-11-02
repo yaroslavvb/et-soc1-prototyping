@@ -1,0 +1,27 @@
+# E128 amendment A2, the second session's device commands: tools/claims-v3/dmcmd_audit.py (Q136(w)'s preflight checker; its table is et-platform 836a4ab, BL2 0.22.0) over the second session's script, the guard it calls and et-lab-manifest, with an EMPTY allow-list (not even the statistics reset). Run on the Intel, Mon 2 Nov 2026 10:20 PST, before the second session's claim. The session calls only 'session2_e128.sh look' (host side) and 'session2_e128.sh config' (the guard's 'config': the five lines marked 'ettelem config' below); the guard's 'sample' lines are listed because the guard file can send them, and the second session never calls them.
+# call: python3 tools/claims-v3/dmcmd_audit.py tools/claims-v3/e128/session2_e128.sh tools/claims-v3/e128/ettelem_guard.sh tools/lab/et-lab-manifest
+# sha256: f1f3862707443700 session2_e128.sh, c2c4ab7602c2e4d2 ettelem_guard.sh, 6fbb4e103c3dffa4 et-lab-manifest, 50168632931fd8c1 dmcmd_table.json
+dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+note: tools/claims-v3/e128/session2_e128.sh:32: 'config' goes through tools/claims-v3/e128/ettelem_guard.sh, which is scanned: its own lines are what it sends
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      2 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      2 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+# exit 0
