@@ -1,0 +1,12 @@
+PASS A check_e124.py: HARNESS OK: 19 reused files match predictions-e124.json
+PASS B score_e109.py with predictions-e124.json on E109's e109-3pass.json: every rule but R10 identical to the committed scored-3pass.json
+     R10 against card 1's references: fp32.randn D FAIL, fp16.randn D FAIL, int8.full D PASS, anchor_pi D PASS, fp32.a_zeros_b_randn D PASS, gap G (S) PASS, fp32.a_nz_b_randn D PASS
+PASS B score_e109.py with predictions-e124.json on E109's e109.json: every rule but R10 identical to the committed scored.json
+     R10 against card 1's references: fp32.randn D FAIL, fp16.randn D FAIL, int8.full D PASS, anchor_pi D PASS, fp32.a_zeros_b_randn D PASS, gap G (S) PASS, fp32.a_nz_b_randn D PASS
+PASS C the set-aside rule picks the relaxed reduction (2 kept passes in the primary): relaxed (scored under the set-aside rule)
+PASS C N = 1.7349944270289133 +- 0.16416255049598846 equals posthoc.json's S_m0_gap 1.7349944270289133 +- 0.16416255049598846
+PASS C on E109's labelled reading: {'Y1': 'PASS', 'Y2': 'PASS', 'Z': 'REPLICATES'} (expected Y1 PASS, Y2 PASS, Z REPLICATES)
+     pipeline: passes read: 3 | primary rc=0 | relaxed rc=0 | dips-kept arm rc=0 | auto arm rc=0 | score rc=0: {"R1_ops": "FAIL", "R2_lanes": "LANES-OPPOSE", "R3_per_time": "PASS", "R0_answer": "PER-TIME", "R4_b_reads": "NOT-RESOLVED", "R5_additive": null, "R6_cycles": null, "R7_sign_unseen": "PASS", "R8_gated_transport": "INCONCLUSIVE", "R9_live_split": null, "R10_tie": null} | score-relaxed rc=0: {"R1_ops": "FAIL", "R2_lanes": "LANES-OPPOSE", "R3_per_time": "PASS", "R0_answer": "PER-TIME", "R4_b_reads": "NOT-RESOLVED", "R5_additive": null, "R6_cycles": null, "R7_sign_unseen": "PASS", "R8_gated_transport": "INCONCLUSIVE", "R9_live_split": null, "R10_tie": null} | score-dipskept rc=0: {"R1_ops": "FAIL", "R2_lanes": "LANES-OPPOSE", "R3_per_time": "PASS", "R0_answer": "PER-TIME", "R4_b_reads": "NOT-RESOLVED", "R5_additive": null, "R6_cycles": null, "R7_sign_unseen": "PASS", "R8_gated_transport": "INCONCL
+PASS D pipeline on E109's raw passes: primary keeps [10910, 10911, 10912], relaxed [10910, 10911, 10912], dips kept [10910, 10911] (set aside [{'pass': 10912, 'why': ['fp32.randn spans 1.050 W']}]); verdicts carried by: primary
+     D's verdicts (card-1 frame on aifoundry3's data, leak 0.2414, dips removed): {"Y1": "PASS", "Y2": "PASS", "Z": "REPLICATES"}; dip samples removed {"p10910": 6, "p10911": 7, "p10912": 6}
+SELFTEST PASS

@@ -1,0 +1,8 @@
+E124 frozen numbers (make_predictions_e124.py)
+
+R10's tie cells (card 1): fp32.randn D 23.9869 +- 0.6; fp16.randn D 21.4415 +- 0.6; int8.full D 6.8688 +- 0.3; anchor_pi D 8.0954 +- 0.5; fp32.a_zeros_b_randn D 0.7234 +- 0.25; gap G (S) 0.5605 +- 0.2; fp32.a_nz_b_randn D 12.1137 +- 0.5
+E82's gap per pass on this card: 0.613, 0.565, 0.424, 0.623, 0.578 (mean 0.5605 W)
+Y1 predicted N = 1.683 W (E109's 1.735 x 0.97); line 0.84 W
+Y2 line 769.7 pJ an op
+passes [12410, 12411, 12412, 12413, 12414], smoke 12401, min kept 3, budget 1800 s from the claim, reserve 150 s, first estimate 360 s
+expected if E109's labelled readings carry: {"R0_answer": "PER-TIME", "R1_ops": "FAIL", "R2_lanes": "LANES-OPPOSE", "R3_per_time": "PASS", "R4_b_reads": "NOT-RESOLVED; CONSISTENT", "R5_additive": {"fp32": "INCONCLUSIVE", "int8": "PASS"}, "R6_cycles": "PASS x10", "R7_sign_unseen": "PASS", "R8_gated_transport": "FAIL", "R10_tie": "PASS x7", "Y1": "PASS", "Y2": "PASS", "Z": "REPLICATES", "numbers": {"G": 0.561, "G_rest": 1.584, "G_lane": -1.055, "S_m0_gap": 1.683, "U_fp32": 1.462, "U_int8": 0.407}}

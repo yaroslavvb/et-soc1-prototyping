@@ -1,0 +1,886 @@
+{
+ "experiment": "E124",
+ "question": "Q134, kinds page section 11 item 11 (int8 zeros' extra 0.61 W) as it reads at 90e02fa93e9c: 'a replicate that scores, which needs 4-5 passes or a rule for a set-aside pass registered in advance' - E109's registered test on a second card, with item 15's live-zero arm",
+ "card": {
+  "name": "aifoundry1-c1",
+  "host": "aifoundry1",
+  "device": 1,
+  "lock": "/run/lock/etsoc-shire1.lock",
+  "clock_mhz": 600,
+  "config_gate": {
+   "expected": {
+    "tdp_w": 65,
+    "temp_threshold_c": 65
+   }
+  },
+  "what": "aifoundry1 card 1, 600 MHz in every sample since 25 Sep, TDP 65 W / threshold 65 C (read, never set); tree ~/nekko"
+ },
+ "sources": {
+  "q132b_section14": "docs/reports/data/2026-11-01-q132-rtl-bench/README.md section 14; zeros/zeros_check.py",
+  "e78": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json",
+  "m4": "tools/claims-v3/kinds/predictions-e103.json models.float.coef_fJ.a_clocked",
+  "bench": "tools/claims-v3/e109/desk/bench-arms.json (bench_e109.sh, bench_arms_e109.py)",
+  "e109_registration": "tools/claims-v3/e109/E109.md (predictions-e109.json, unchanged in every key the scorer reads)",
+  "e109_results": "docs/reports/data/2026-11-01-e109-int8-zeros/ (scored-3pass.json, posthoc.json: labelled, post hoc)",
+  "e82": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json (E78's design on this card; R10's references)",
+  "e93": "docs/reports/data/2026-11-01-e93-zero-gate-silicon/e93.json (fp32.a_nz_b_randn on this card; R10's added cell)",
+  "card_scale": "E82 README result 1: median D(aifoundry3)/D(card 1) 1.031 over 32 kinds, so card 1 = 0.970 x aifoundry3"
+ },
+ "readings": {
+  "H_reads": {
+   "what": "Q132(b)'s first: S = c x clocked + r x reads",
+   "r_pj_per_read": 5.933607738615601,
+   "c_fj_per_clocked_bit": 0.0603816649764257
+  },
+  "H_ops": {
+   "what": "Q132(b)'s second: S = c + e x ops",
+   "e_pj_per_op": 769.7229030697772,
+   "c_w": 1.12311570091182
+  },
+  "H_bench": {
+   "what": "the RTL count at M4's clocked-bit price, Q132(b)'s extrapolation (which says int8 - fp32 = -0.51 W at E78's cells)",
+   "a_fj": 1.0660910178957255
+  }
+ },
+ "e78_gap_w": 0.6194323128568877,
+ "duty": {
+  "fp32": 0.9960256806182067,
+  "int8": 0.9966223901439338
+ },
+ "delta_cycles": {
+  "fp32": 7.75,
+  "int8": 7.75
+ },
+ "arms": {
+  "base.fp32.zeros": {
+   "bench_cycles": 538.25,
+   "card_cycles_pred": 546.0,
+   "rate_pred": 1120802524.1242237,
+   "uops_per_op": 512.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 1033939.25,
+   "edges_per_op": 6023384.75,
+   "lane_edges_per_op": 3761120.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  },
+  "m0.fp32.zeros": {
+   "bench_cycles": 536.25,
+   "card_cycles_pred": 544.0,
+   "rate_pred": 1124923121.6393864,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 597104.5,
+   "edges_per_op": 2253858.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  },
+  "k8.fp32.zeros": {
+   "bench_cycles": 274.25,
+   "card_cycles_pred": 282.0,
+   "rate_pred": 2170064461.6022205,
+   "uops_per_op": 256.0,
+   "scp_reads_per_op": 144.0,
+   "clocked_bits_per_op": 522979.25,
+   "edges_per_op": 3055232.75,
+   "lane_edges_per_op": 1902560.0,
+   "b_half_lines_per_op": 16,
+   "a_reads_per_op": 128.0
+  },
+  "r8.fp32.zeros": {
+   "bench_cycles": 282.25,
+   "card_cycles_pred": 290.0,
+   "rate_pred": 2110200614.3856075,
+   "uops_per_op": 256.0,
+   "scp_reads_per_op": 160.0,
+   "clocked_bits_per_op": 533715.25,
+   "edges_per_op": 3145176.75,
+   "lane_edges_per_op": 1958880.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 128.0
+  },
+  "m0k8.fp32.zeros": {
+   "bench_cycles": 272.25,
+   "card_cycles_pred": 280.0,
+   "rate_pred": 2185564922.0422363,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 144.0,
+   "clocked_bits_per_op": 303104.5,
+   "edges_per_op": 1144266.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 16,
+   "a_reads_per_op": 128.0
+  },
+  "base.int8.zeros": {
+   "bench_cycles": 310.25,
+   "card_cycles_pred": 318.0,
+   "rate_pred": 1925549674.542242,
+   "uops_per_op": 256.0,
+   "scp_reads_per_op": 224.0,
+   "clocked_bits_per_op": 387805.0,
+   "edges_per_op": 1751836.75,
+   "lane_edges_per_op": 447856.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 192.0
+  },
+  "m0.int8.zeros": {
+   "bench_cycles": 310.25,
+   "card_cycles_pred": 318.0,
+   "rate_pred": 1925549674.542242,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 224.0,
+   "clocked_bits_per_op": 375651.0,
+   "edges_per_op": 1303980.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 192.0
+  },
+  "k8.int8.zeros": {
+   "bench_cycles": 158.25,
+   "card_cycles_pred": 166.0,
+   "rate_pred": 3688703593.4001985,
+   "uops_per_op": 128.0,
+   "scp_reads_per_op": 112.0,
+   "clocked_bits_per_op": 197565.0,
+   "edges_per_op": 889236.75,
+   "lane_edges_per_op": 224112.0,
+   "b_half_lines_per_op": 16,
+   "a_reads_per_op": 96.0
+  },
+  "r8.int8.zeros": {
+   "bench_cycles": 182.25,
+   "card_cycles_pred": 190.0,
+   "rate_pred": 3222762086.8654366,
+   "uops_per_op": 128.0,
+   "scp_reads_per_op": 128.0,
+   "clocked_bits_per_op": 227869.0,
+   "edges_per_op": 1025436.75,
+   "lane_edges_per_op": 259440.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 96.0
+  },
+  "m0k8.int8.zeros": {
+   "bench_cycles": 158.25,
+   "card_cycles_pred": 166.0,
+   "rate_pred": 3688703593.4001985,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 112.0,
+   "clocked_bits_per_op": 191491.0,
+   "edges_per_op": 665124.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 16,
+   "a_reads_per_op": 96.0
+  },
+  "base.fp32.a_zeros_b_randn": {
+   "bench_cycles": 538.25,
+   "card_cycles_pred": 546.0,
+   "rate_pred": 1120802524.1242237,
+   "uops_per_op": 512.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 1033939.25,
+   "edges_per_op": 6023384.75,
+   "lane_edges_per_op": 3761120.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  },
+  "m0.fp32.a_zeros_b_randn": {
+   "bench_cycles": 536.25,
+   "card_cycles_pred": 544.0,
+   "rate_pred": 1124923121.6393864,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 597104.5,
+   "edges_per_op": 2253858.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  },
+  "base.fp32.a_nz_b_randn": {
+   "bench_cycles": 538.25,
+   "card_cycles_pred": 546.0,
+   "rate_pred": 1120802524.1242237,
+   "uops_per_op": 512.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 7907449.75,
+   "edges_per_op": 10672620.75,
+   "lane_edges_per_op": 8410356.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  },
+  "m0.fp32.a_nz_b_randn": {
+   "bench_cycles": 536.25,
+   "card_cycles_pred": 544.0,
+   "rate_pred": 1124923121.6393864,
+   "uops_per_op": 0.0,
+   "scp_reads_per_op": 288.0,
+   "clocked_bits_per_op": 597104.5,
+   "edges_per_op": 2253858.75,
+   "lane_edges_per_op": 0.0,
+   "b_half_lines_per_op": 32,
+   "a_reads_per_op": 256.0
+  }
+ },
+ "predicted_D_w": {
+  "base.fp32.zeros": {
+   "H_reads": 0.0,
+   "H_ops": 0.0,
+   "H_bench": 0.0
+  },
+  "m0.fp32.zeros": {
+   "H_reads": -0.0223730273159346,
+   "H_ops": 0.003171718281753222,
+   "H_bench": -0.5193409761897467
+  },
+  "k8.fp32.zeros": {
+   "H_reads": -0.06257282452622515,
+   "H_ops": 0.8076409445961827,
+   "H_bench": -0.025525456271840996
+  },
+  "r8.fp32.zeros": {
+   "H_reads": 0.08609233355981605,
+   "H_ops": 0.7615623703276855,
+   "H_bench": -0.03474974070593029
+  },
+  "m0k8.fp32.zeros": {
+   "H_reads": -0.07785558131008385,
+   "H_ops": 0.8195720040049901,
+   "H_bench": -0.5291938908389124
+  },
+  "base.int8.zeros": {
+   "H_reads": 0.0,
+   "H_ops": 0.0,
+   "H_bench": 0.0
+  },
+  "m0.int8.zeros": {
+   "H_reads": -0.0014131200000071509,
+   "H_ops": 0.0,
+   "H_bench": -0.024949867477229604
+  },
+  "k8.int8.zeros": {
+   "H_reads": -0.10900798976260617,
+   "H_ops": 1.3571399529822004,
+   "H_bench": -0.019167320885487005
+  },
+  "r8.int8.zeros": {
+   "H_reads": -0.11235560365427233,
+   "H_ops": 0.998494103911558,
+   "H_bench": -0.013187777834304582
+  },
+  "m0k8.int8.zeros": {
+   "H_reads": -0.1103608521748285,
+   "H_ops": 1.3571399529822004,
+   "H_bench": -0.043053288035985515
+  },
+  "base.fp32.a_zeros_b_randn": {
+   "H_reads": 0.0,
+   "H_ops": 0.0,
+   "H_bench": 0.0
+  },
+  "m0.fp32.a_zeros_b_randn": {
+   "H_reads": -0.0223730273159346,
+   "H_ops": 0.003171718281753222,
+   "H_bench": -0.5193409761897467
+  },
+  "base.fp32.a_nz_b_randn": {
+   "H_reads": 0.46517116401366954,
+   "H_ops": 0.0,
+   "H_bench": 8.213003068608469
+  },
+  "m0.fp32.a_nz_b_randn": {
+   "H_reads": -0.0223730273159346,
+   "H_ops": 0.003171718281753222,
+   "H_bench": -0.5193409761897467
+  }
+ },
+ "predicted_quantities": {
+  "H_reads": {
+   "fp32": {
+    "U_w": 0.0223730273159346,
+    "P_w": -0.05548255399414925,
+    "e_op_pj": -52.31035960781107,
+    "Q_w": -0.06257282452622515,
+    "R_w": 0.1486651580860412,
+    "r_B_pj": 4.436273013810157,
+    "U8_w": 0.015282756783858709,
+    "U8_minus_U_scaled_w": -0.006376237745397129
+   },
+   "int8": {
+    "U_w": 0.0014131200000071509,
+    "P_w": -0.10894773217482134,
+    "e_op_pj": -61.79139042233465,
+    "Q_w": -0.10900798976260617,
+    "R_w": -0.003347613891666157,
+    "r_B_pj": -0.7286198561766632,
+    "U8_w": 0.001352862412222322,
+    "U8_minus_U_scaled_w": -6.681901941658647e-07
+   },
+   "gap": {
+    "G_w": 0.6191027945596934,
+    "G_lane_w": -0.02095990731592745,
+    "G_op_w": -0.06035280863095862,
+    "G_rest_w": 0.7004155105065795
+   },
+   "item15": {
+    "R7_w": 0.0,
+    "T_plus_w": 0.0,
+    "R8_w": 0.0
+   }
+  },
+  "H_ops": {
+   "fp32": {
+    "U_w": -0.003171718281753222,
+    "P_w": 0.8164002857232369,
+    "e_op_pj": 769.7229030697773,
+    "Q_w": 0.8076409445961827,
+    "R_w": -0.04607857426849726,
+    "r_B_pj": -7.826125156474305e-15,
+    "U8_w": -0.011931059408807343,
+    "U8_minus_U_scaled_w": -0.008860566178599436
+   },
+   "int8": {
+    "U_w": -0.0,
+    "P_w": 1.3571399529822004,
+    "e_op_pj": 769.7229030697771,
+    "Q_w": 1.3571399529822004,
+    "R_w": -0.35864584907064234,
+    "r_B_pj": 2.516991476853718e-15,
+    "U8_w": 0.0,
+    "U8_minus_U_scaled_w": 0.0
+   },
+   "gap": {
+    "G_w": 0.6194323128568877,
+    "G_lane_w": 0.003171718281753222,
+    "G_op_w": 0.6194323128568875,
+    "G_rest_w": -0.003171718281753
+   },
+   "item15": {
+    "R7_w": 0.0,
+    "T_plus_w": 0.0,
+    "R8_w": 0.0
+   }
+  },
+  "H_bench": {
+   "fp32": {
+    "U_w": 0.5193409761897467,
+    "P_w": -0.009852914649165712,
+    "e_op_pj": -9.289577919164985,
+    "Q_w": -0.025525456271840996,
+    "R_w": -0.009224284434089292,
+    "r_B_pj": -0.2981337768494155,
+    "U8_w": 0.5036684345670714,
+    "U8_minus_U_scaled_w": 0.0009021703833803629
+   },
+   "int8": {
+    "U_w": 0.024949867477229604,
+    "P_w": -0.01810342055875591,
+    "e_op_pj": -10.26763481346087,
+    "Q_w": -0.019167320885487005,
+    "R_w": 0.005979543051182423,
+    "r_B_pj": 0.027101551017202675,
+    "U8_w": 0.02388596715049851,
+    "U8_minus_U_scaled_w": -1.179748130574615e-05
+   },
+   "gap": {
+    "G_w": -0.43934029784499673,
+    "G_lane_w": -0.4943911087125171,
+    "G_op_w": -0.009359058493529401,
+    "G_rest_w": 0.0644098693610498
+   },
+   "item15": {
+    "R7_w": 0.0,
+    "T_plus_w": 0.0,
+    "R8_w": 0.0
+   }
+  }
+ },
+ "rules": {
+  "R0_answer": {
+   "what": "item 11's answer: which share of this session's gap G = S(int8.zeros) - S(fp32.zeros) carries at least half of it",
+   "shares": {
+    "per_op": "G_op = e_op(int8) x O(int8) - e_op(fp32) x O(fp32), O = each format's op rate on zeros, e_op from rule R1",
+    "lanes": "G_lane = U(int8) - U(fp32), U = S(zeros) - S(m0.zeros): what issuing the micro-ops costs on zeros",
+    "per_time": "G_rest = G - G_op - G_lane: what neither moves - the A-word stream and B's reads of the scratchpad, the FSM's busy clocks, the rest"
+   },
+   "line": "a share carries the gap if its 95% lower bound >= G/2 (G = this session's mean gap); if none does, MIXED; if two do (impossible unless one is negative), both are named",
+   "verdicts": [
+    "PER-OP",
+    "LANES",
+    "PER-TIME",
+    "MIXED"
+   ]
+  },
+  "R1_ops": {
+   "what": "Q132(b)'s second reading, S = c + e x ops: per-op work makes the gap",
+   "statistic": "e_op(f) = [D(m0k8.f.zeros) - D(m0.f.zeros)] / [rate(m0k8) - rate(m0)], per pass; G_op as in R0",
+   "line": "PASS if G_op's 95% lower bound >= G/2; FAIL if its upper bound < G/2; else INCONCLUSIVE",
+   "reading_e_op_pj": 769.7229030697772
+  },
+  "R2_lanes": {
+   "what": "the lanes (register clocking, the issued micro-op, int8's TenC read port): U(f) = -D(m0.f.zeros)",
+   "line": "LANES-CARRY if G_lane's 95% lower bound >= G/2; LANES-OPPOSE if its upper bound < 0 (the RTL count's direction: fp32's lanes clock more); else LANES-NEITHER",
+   "rtl_count_prediction": "H_bench: U(fp32) = 0.519 W, U(int8) = 0.025 W, G_lane = -0.494 W (M4's a on the bench's clocked bits, the extrapolation Q132(b) made)"
+  },
+  "R3_per_time": {
+   "what": "the per-time side, where the A-word stream and B's reads are (Q132(b)'s first reading puts the gap here)",
+   "line": "PASS if G_rest's 95% lower bound >= G/2; FAIL if its upper bound < G/2; else INCONCLUSIVE"
+  },
+  "R4_b_reads": {
+   "what": "B-line reuse: r8 against k8 in fp32, the same op rate within 3% and twice B's half-line reads per op",
+   "statistic": "r_B = {[D(r8) - D(k8)] + e_op x [rate(k8) - rate(r8)]} / [B/s(r8) - B/s(k8)], per pass, fp32",
+   "line": "PRICED if the 95% interval of r_B excludes 0 from above; NOT-RESOLVED if it includes 0; H_reads' value of this same statistic (its 5.93 pJ a read less the 3% of A reads a second r8 loses against k8, predicted_quantities.H_reads.fp32.r_B_pj) is named CONSISTENT if inside the interval, else INCONSISTENT",
+   "int8": "reported only: in int8 the RTL's count has r8 read A 13% less often a second than k8 (190 against 166 cycles at the same 96 A reads), so its contrast mixes A and B reads"
+  },
+  "R5_additive": {
+   "what": "the lane side at K = 8 against K = 16: U8(f) = D(k8) - D(m0k8) against U(f) x the issued micro-ops' rate ratio",
+   "line": "PASS per format if the 95% interval of U8 - U x ratio lies inside [-0.15, +0.15] W; FAIL if it lies outside; else INCONCLUSIVE"
+  },
+  "R6_cycles": {
+   "what": "the card's cycles per op for each arm against the RTL's: bench cycles (+period=1) + each format's DELTA (E78's card cycles minus the bench's base)",
+   "line": "PASS per arm if |median measured cycles per op - predicted| <= 2.0; else FAIL",
+   "delta_cycles": {
+    "fp32": 7.75,
+    "int8": 7.75
+   },
+   "predicted": {
+    "m0.fp32.zeros": 544.0,
+    "k8.fp32.zeros": 282.0,
+    "r8.fp32.zeros": 290.0,
+    "m0k8.fp32.zeros": 280.0,
+    "m0.int8.zeros": 318.0,
+    "k8.int8.zeros": 166.0,
+    "r8.int8.zeros": 190.0,
+    "m0k8.int8.zeros": 166.0,
+    "m0.fp32.a_zeros_b_randn": 544.0,
+    "m0.fp32.a_nz_b_randn": 544.0
+   },
+   "check_on_committed_data": "the September fma-rowmask runs (row mask 0x00FF, 16 x 16, fp32) read 544.001 cycles on this card (docs/reports/data/2026-09-18-sparsity-aifoundry3/energy-*/results.json); the bench gives 536.2 + 7.8 = 544.0 for that mask (desk/bench-arms.txt does not list it; bench_arms_e109.py's run() with mask 0xff reproduces it)"
+  },
+  "R7_sign_unseen": {
+   "what": "item 15: with no micro-op issued, A = -0 and A = +0 (both constant words; the B bytes identical) cost the same",
+   "statistic": "D(m0.fp32.a_nz_b_randn) - D(m0.fp32.a_zeros_b_randn)",
+   "line": "PASS if its 95% interval lies inside [-0.25, +0.25] W; FAIL if it lies outside; else INCONCLUSIVE"
+  },
+  "R8_gated_transport": {
+   "what": "item 15: a gated lane's moving B costs only its transport (the RTL: on a gated slot B's random bytes change no counted register; desk/bench-arms.txt: a_zeros_b_randn's counts equal zeros' to the bit, issued and masked)",
+   "statistic": "D(fp32.a_zeros_b_randn) - T_plus, T_plus = D(m0.fp32.a_zeros_b_randn) - D(m0.fp32.zeros)",
+   "line": "PASS if its 95% interval lies inside [-0.25, +0.25] W; FAIL if it lies outside; else INCONCLUSIVE"
+  },
+  "R9_live_split": {
+   "what": "item 15, reported (no verdict): where a live -0 lane with random B spends its watts on this card",
+   "statistics": {
+    "T_minus": "D(m0.fp32.a_nz_b_randn) - D(m0.fp32.zeros): B's random bytes moving to the register files, no micro-op",
+    "L_live": "D(fp32.a_nz_b_randn) - D(m0.fp32.a_nz_b_randn): the live lanes",
+    "X": "L_live - D(anchor_pi): what B's random bytes cost inside a live lane beyond a constant lane (pi x pi)"
+   },
+   "e93_context": "E93 priced a_nz_b_randn on aifoundry1 card 1 at 10.40 W (E88's constant lane 7.92 W + B's bus bits at E88's a + half E88's sign) and read 12.11 W: +1.72 W (E93 R5). E109 runs on another card, so it splits the tile, it does not re-price it"
+  },
+  "R10_tie": {
+   "what": "the session against E78's design on THIS card: E82 (aifoundry1 card 1, 31 Oct, e82.json: five kept passes, leak auto = 0.2414 W/C, dips kept) for E109's six cells, with E109's bands, and E93's fp32.a_nz_b_randn (the same tile, this card, 1 Nov, dips removed, 0.2414) as a seventh cell, +-0.5 W. score_e109.py names the reference field 'e78' (unchanged code); here it holds card 1's reference",
+   "cells": {
+    "fp32.randn D": [
+     23.986936105256,
+     0.6
+    ],
+    "fp16.randn D": [
+     21.441512616301118,
+     0.6
+    ],
+    "int8.full D": [
+     6.868848968010575,
+     0.3
+    ],
+    "anchor_pi D": [
+     8.095381203007511,
+     0.5
+    ],
+    "fp32.a_zeros_b_randn D": [
+     0.7234337597713634,
+     0.25
+    ],
+    "gap G (S)": [
+     0.5605303258145383,
+     0.2
+    ],
+    "fp32.a_nz_b_randn D": [
+     12.113749359697227,
+     0.5
+    ]
+   },
+   "line": "PASS per cell if |this session's mean - E78's| <= its band; a failed cell labels every verdict, it removes none",
+   "e82_gap_per_pass_w": [
+    0.6127380952380885,
+    0.5654523809523913,
+    0.4238809523809457,
+    0.6227619047619133,
+    0.5778182957393532
+   ]
+  }
+ },
+ "passes": [
+  12410,
+  12411,
+  12412,
+  12413,
+  12414
+ ],
+ "smoke_pass": 12401,
+ "min_kept_passes": 3,
+ "cap_card_minutes": 30,
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+   "tools/claims-v3/kinds/e93/e93.json": "73cb488715fcf0e328bb2a7d88e69f4df22366e7a420d82e22c9914ac2dea3e4",
+   "tools/claims-v3/kinds/e93/tiles/fp32/a_nz_b_randn.bin": "3a321590c5695cca3f84ffec75fbb3c7c9b2e533365f509e980446f15518c715",
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/e109/e109_common.py": "6d73db70a7f75546359c9cc2446d70bee56b8d1425b48a532dfb63a2eec90d18",
+   "tools/claims-v3/e109/run_e109.py": "7ab861da6b12758d6520e8c4df616412caf61096952f3e7378d4a91dee4534aa",
+   "tools/claims-v3/e109/block_e109.sh": "8d3013648890ad90df0061fd3ddea126b27f6f4c85c418f9f4dac110ac05c2e1",
+   "tools/claims-v3/e109/smoke_gate_e109.py": "e1e00cf1d242949a859475a044f31acd5613636db0f58b54a069364e5e44190d",
+   "tools/claims-v3/e109/score_e109.py": "8a41ef8a945f1d6bfde2fdd3766d42af67035e64b249446536071d491a8afb9c",
+   "tools/claims-v3/e109/posthoc_check_e109.py": "decb03bc51897f57354dbd553b17798bc82506fcbfc51347ac392d8e65dafdff",
+   "tools/claims-v3/e109/predictions-e109.json": "de6053d34a7beb3f616207e9ee596eedb2b6348734e1b550b6a9755f8e9b638b",
+   "tools/claims-v3/e109/desk/bench-arms.json": "6ea5518132ad5baf2af30f042c51731b945a021aee8cf4d47c893b66d6ea50c8",
+   "tools/claims-v3/e109/sp109/CMakeLists.txt": "123ef6e4ac1572d31914b6049fa700b30af1338c13cc96ec850cd047966dfcfd",
+   "tools/claims-v3/e109/sp109/sparsity_args.h": "dcc3aecd396d38a4b69508dcfbec0833873018e770717f1b830f7a9820825302",
+   "tools/claims-v3/e109/sp109/kernel/sparsity.c": "ff006016dcd7651b1bafbd4630314797799b4b0877db041538e5e8c0637a5677",
+   "tools/claims-v3/e109/sp109/host/main.cpp": "f2057ea3227667c5fe3ae0e3ee936ad9668feed70e56a0cb0b4fb4f564e6236a"
+  },
+  "what": "every file E124 runs or reads that it did not write, byte-identical to these hashes; check_e124.py refuses on any difference (session_e124.sh runs it before any device opens; reduce_e124.py checks the same list)"
+ },
+ "e78_gap_w_aifoundry3": 0.6194323128568877,
+ "card1_gap_w_e82": 0.5605303258145383,
+ "budget": {
+  "card_minutes": 30,
+  "anchor": "the claim post's time T0 (epoch seconds, E124_T0)",
+  "budget_s": 1800,
+  "reserve_s": 150,
+  "rule": "a pass starts only if now + projected <= T0 + budget_s - reserve_s and now + projected <= the deadline (2026-11-01 23:15 PST); projected = the first estimate until a pass ends, then the longest measured pass; a pass in flight is never cut",
+  "first_estimate_s": 360,
+  "deadline_pst": "2026-11-01 23:15",
+  "card1_pass_times": "E86's 34-run pass on this card (E112(a)): 320-334 s; E93's 42-run pass: 361-386 s; E109's 34-run pass on aifoundry3: 334-387 s",
+  "expected_passes": "4 (a fifth only if the passes run <= ~310 s)"
+ },
+ "primary_reduction": {
+  "code": "tools/claims-v3/e124/reduce_e124.py: reduce_e78.py unchanged, E109's items (e109_common.install_for_reduce, as reduce_e109.py), card 1's config gate (a 65/65 read handed to E78's gate as the 0/65 it accepts, E82's substitution), card 1's board-meter dips removed (E82 A2: board_w[i] < min(board_w[i-2], board_w[i+2]) - 4.0 W; E88's, E91's and E93's primary on this card), leakage slope frozen at E82's own",
+  "leak_w_per_c": 0.2414,
+  "dips": "removed",
+  "gates": "E78's, unchanged",
+  "arms_reported": {
+   "dips_kept": [
+    "--keep-dips",
+    "--leak",
+    "0.2414"
+   ],
+   "auto": [
+    "--leak",
+    "auto"
+   ]
+  },
+  "why_not_e109s_auto": "E109 on aifoundry3 used E78's 'auto'; on this card E91's per-session fit (0.422 W/C) moved fp32 random by -0.6 W and broke its tie, so E93 froze E82's 0.2414 for this card; E124 follows E93 and reports 'auto' as an arm"
+ },
+ "set_aside_rule": {
+  "why": "E109 kept 2 of 3 passes and scored nothing: E78's random-anchor span gate (random_range_w 1.0 W) set aside a pass whose E109 statistics were intact (its zeros anchors spanned 0.053 and 0.054 W). The random anchors enter no E109 statistic except R10's two random cells. Card 1's meter dips set aside 2 of 7 E82 passes by the same gate.",
+  "rule": "the primary reduction applies E78's pass gates unchanged and scores if it keeps >= 3 passes. If it keeps fewer, the rules are scored on reduce_e124.py --relax-random (GATES['random_range_w'] 1.0 -> 99 W, E109's posthoc_e109.py change, here registered in advance): a pass set aside ONLY by that gate is restored; a pass set aside by any other gate stays out. Verdicts so scored are registered and labelled 'scored under the set-aside rule'. Fewer than 3 passes after that: NOT SCORED. The relaxed reduction is always reported beside the primary. No pass is added after any reduction is read; no pass is chosen after the fact.",
+  "relaxed_gate": {
+   "random_range_w": 99.0
+  }
+ },
+ "e109_reference": {
+  "what": "E109's labelled three-pass values (aifoundry3, post hoc: E78's random-anchor gate lifted), for the replication table; scored-3pass.json, posthoc.json",
+  "card_scale": 0.97,
+  "quantities": {
+   "G": {
+    "mean": 0.60019170837229,
+    "half": 0.11456587322424087,
+    "lo": 0.4856258351480491,
+    "hi": 0.7147575815965308,
+    "n": 3,
+    "per_pass": [
+     0.5950663531870457,
+     0.6486555207244857,
+     0.5568532512053384
+    ]
+   },
+   "G_lane": {
+    "mean": -1.0879307605874853,
+    "half": 0.09625965010675665,
+    "lo": -1.184190410694242,
+    "hi": -0.9916711104807286,
+    "n": 3,
+    "per_pass": [
+     -1.1114898561037982,
+     -1.0432114875188603,
+     -1.109090938139797
+    ]
+   },
+   "G_op": {
+    "mean": 0.05516158807803917,
+    "half": 0.18366463486747348,
+    "lo": -0.1285030467894343,
+    "hi": 0.23882622294551265,
+    "n": 3,
+    "per_pass": [
+     0.14052565180290263,
+     0.012000766762894341,
+     0.012958345668320548
+    ]
+   },
+   "G_rest": {
+    "mean": 1.632960880881736,
+    "half": 0.14782104796928383,
+    "lo": 1.485139832912452,
+    "hi": 1.7807819288510198,
+    "n": 3,
+    "per_pass": [
+     1.5660305574879414,
+     1.6798662414804517,
+     1.6529858436768148
+    ]
+   },
+   "U_fp32": {
+    "mean": 1.507224091224283,
+    "half": 0.17498984975493054,
+    "lo": 1.3322342414693524,
+    "hi": 1.6822139409792134,
+    "n": 3,
+    "per_pass": [
+     1.546679207798146,
+     1.4259021277349042,
+     1.5490909381397984
+    ]
+   },
+   "U_int8": {
+    "mean": 0.41929333063679763,
+    "half": 0.07897708014127854,
+    "lo": 0.3403162504955191,
+    "hi": 0.49827041077807616,
+    "n": 3,
+    "per_pass": [
+     0.4351893516943477,
+     0.38269064021604393,
+     0.4400000000000013
+    ]
+   },
+   "e_op_fp32_pj": {
+    "mean": 37.867355732933824,
+    "half": 187.336943147595,
+    "lo": -149.4695874146612,
+    "hi": 225.20429888052882,
+    "n": 3,
+    "per_pass": [
+     -38.655204687522435,
+     40.1499423816847,
+     112.10732950463921
+    ]
+   },
+   "e_op_int8_pj": {
+    "mean": 50.70033467747735,
+    "half": 52.671214817579646,
+    "lo": -1.9708801401022953,
+    "hi": 103.371549495057,
+    "n": 3,
+    "per_pass": [
+     50.48162526489953,
+     29.609229362578205,
+     72.01014940495433
+    ]
+   },
+   "r_B_fp32_pj": {
+    "mean": 6.5165770049433,
+    "half": 8.968179836118289,
+    "lo": -2.4516028311749887,
+    "hi": 15.48475684106159,
+    "n": 3,
+    "per_pass": [
+     10.360378636369742,
+     3.1981895786047225,
+     5.991162799855435
+    ]
+   },
+   "R7": {
+    "mean": 0.021911013632606096,
+    "half": 0.03698062366238681,
+    "lo": -0.015069610029780713,
+    "hi": 0.0588916372949929,
+    "n": 3,
+    "per_pass": [
+     0.037187349925680735,
+     0.021095847711951166,
+     0.007449843260186384
+    ]
+   },
+   "R8": {
+    "mean": 0.5934672874388838,
+    "half": 0.30592066132673207,
+    "lo": 0.2875466261121517,
+    "hi": 0.8993879487656158,
+    "n": 3,
+    "per_pass": [
+     0.4883114414984995,
+     0.5631593145621885,
+     0.7289311062559634
+    ]
+   },
+   "T_minus": {
+    "mean": 0.22647977612397815,
+    "half": 0.28375941714828273,
+    "lo": -0.05727964102430458,
+    "hi": 0.5102391932722609,
+    "n": 3,
+    "per_pass": [
+     0.337866557723828,
+     0.23194839468176554,
+     0.10962437596634089
+    ]
+   },
+   "S_m0_gap": {
+    "mean": 1.7349944270289133,
+    "half": 0.16416255049598846,
+    "n": 3,
+    "per_pass": [
+     1.6615000000000038,
+     1.753983281086743,
+     1.7894999999999932
+    ]
+   },
+   "S_m0_fp32": {
+    "mean": 0.375634273772197,
+    "half": 0.0885896798496394,
+    "n": 3,
+    "per_pass": [
+     0.41680094043886484,
+     0.35430094043885774,
+     0.35580094043886845
+    ]
+   },
+   "S_m0_int8": {
+    "mean": 2.11062870080111,
+    "half": 0.08337804849399112,
+    "n": 3,
+    "per_pass": [
+     2.0783009404388686,
+     2.108284221525601,
+     2.1453009404388617
+    ]
+   },
+   "U_per_edge_fp32_fj": {
+    "mean": 0.35671015225554825,
+    "half": 0.04162335641657581,
+    "n": 3,
+    "per_pass": [
+     0.3661374695477228,
+     0.3373660133260784,
+     0.36662697389284354
+    ]
+   },
+   "U_per_edge_int8_fj": {
+    "mean": 0.4862444998017747,
+    "half": 0.09174776171526267,
+    "n": 3,
+    "per_pass": [
+     0.5046342346426652,
+     0.44372963269092225,
+     0.5103696320717366
+    ]
+   },
+   "read_ceiling_fp32_pj": {
+    "mean": 1.159565232772221,
+    "half": 0.2743658448342584,
+    "n": 3,
+    "per_pass": [
+     1.287067942347205,
+     1.0938413809444882,
+     1.0977863750249701
+    ]
+   },
+   "read_ceiling_int8_pj": {
+    "mean": 4.894342632297634,
+    "half": 0.19454809800308162,
+    "n": 3,
+    "per_pass": [
+     4.8189155803534875,
+     4.88886473491697,
+     4.975247581622446
+    ]
+   },
+   "live_over_constant_w": {
+    "mean": 3.9219509648430386,
+    "half": 0.37836203318217215,
+    "n": 3,
+    "per_pass": [
+     3.8142162531434725,
+     3.8554443790367383,
+     4.0961922623489055
+    ]
+   }
+  },
+  "verdicts": {
+   "R1_ops": "FAIL",
+   "R2_lanes": "LANES-OPPOSE",
+   "R3_per_time": "PASS",
+   "R0_answer": "PER-TIME",
+   "R4_b_reads": "NOT-RESOLVED",
+   "R5_additive": null,
+   "R6_cycles": null,
+   "R7_sign_unseen": "PASS",
+   "R8_gated_transport": "FAIL",
+   "R9_live_split": null,
+   "R10_tie": null
+  },
+  "r5": {
+   "fp32": "INCONCLUSIVE",
+   "int8": "PASS"
+  }
+ },
+ "expected_if_e109_carries": {
+  "R0_answer": "PER-TIME",
+  "R1_ops": "FAIL",
+  "R2_lanes": "LANES-OPPOSE",
+  "R3_per_time": "PASS",
+  "R4_b_reads": "NOT-RESOLVED; CONSISTENT",
+  "R5_additive": {
+   "fp32": "INCONCLUSIVE",
+   "int8": "PASS"
+  },
+  "R6_cycles": "PASS x10",
+  "R7_sign_unseen": "PASS",
+  "R8_gated_transport": "FAIL",
+  "R10_tie": "PASS x7",
+  "Y1": "PASS",
+  "Y2": "PASS",
+  "Z": "REPLICATES",
+  "numbers": {
+   "G": 0.561,
+   "G_rest": 1.584,
+   "G_lane": -1.055,
+   "S_m0_gap": 1.683,
+   "U_fp32": 1.462,
+   "U_int8": 0.407
+  },
+  "note": "E109's labelled three-pass readings x card 1's 0.970 scale (G is E82's own on this card); these are expectations, not lines: the rules' lines are E109's, relative to this session's own G"
+ },
+ "added_rules": {
+  "Y1": {
+   "what": "E109 result 3 as a registered test: with no micro-op issued (mask 0x0000), int8's TensorFMA loop costs more over idle than fp32's",
+   "statistic": "N = S(m0.int8.zeros) - S(m0.fp32.zeros), per kept pass (posthoc_check_e109.reading's S_m0_gap on E124's reduction)",
+   "predicted_w": 1.6829445942180459,
+   "line_w": 0.84,
+   "verdict": "PASS if N's 95% lower bound >= line_w; FAIL if its upper bound < line_w; else INCONCLUSIVE"
+  },
+  "Y2": {
+   "what": "E109 result 1 as a registered test: the ops reading's per-op price is excluded in both formats",
+   "statistic": "e_op(fp32), e_op(int8) from score_e109.py (rule R1's e_op_pj)",
+   "line_pj": 769.7229030697772,
+   "verdict": "PASS if both 95% upper bounds < line_pj; FAIL if either 95% lower bound >= line_pj; else INCONCLUSIVE"
+  },
+  "Z": {
+   "what": "E109's labelled answer on a second card: the gap is per-time, not per-op work and not the lanes",
+   "verdict": "REPLICATES if R0 PER-TIME and R1 FAIL and R2 LANES-OPPOSE and R3 PASS; CONTRADICTS if R0 names PER-OP or LANES, or R1 PASS, or R2 LANES-CARRY, or R3 FAIL; else PARTIAL"
+  },
+  "reported": "posthoc_check_e109.reading() on E124's scored reduction (no verdict): S over idle of the no-issue loops, the per-read ceilings, U per register-bit clock edge and per enabled bit with int8/fp32 paired by pass, item 15's live step over pi; each quantity beside e109_reference"
+ }
+}
