@@ -159,6 +159,12 @@ binary's sha256 changed, or the session-start config read or the smoke's telemet
 and E132's runs recorded (an error code, a missing field), the list does not describe what would run: that is NO-GO, and the
 session stops there.
 
+*Note added Mon 2 Nov 2026, after the run, from its verification (nothing above changed): "the same `ettelem` binary" is the path
+`build/ettelem/`, hashed at setup (`16037641…`). That binary is built from lab commit `de262730`'s `tools/ettelem/ettelem.cpp`
+(`ba9a0ac3…`), as E127 recorded, not from the `a6cf931b…` (`efa3e8cd`) that the table above and the checker read. Its `config()`,
+`sample()`, `Dm::get()` and `Dm::resetStats()` are byte-identical to the reviewed source's, and its `Dm` opens the management node
+only, so no class changes. The data README's correction C6.*
+
 ## Stops
 
 E134 runs no heater, no anchor and no random tile: every run is a constant-operand fp32 tile or one bit away from one, at most
@@ -338,3 +344,7 @@ counts: `docs/reports/data/2026-11-02-e134-bit-prices-more/bench/counts-e134.jso
 ## Amendments
 
 *None yet. A change after this commit goes here, dated, before the data it touches.*
+
+*A note added after the run (not an amendment: no procedure, prediction, rule or stop changed), Mon 2 Nov 2026, from the run's
+verification: one under § Device commands sent (the `ettelem` binary's source). The data README's § Corrections after verification
+lists every correction.*
