@@ -7,9 +7,11 @@
 [`predictions-e121.json`](../../../../tools/claims-v3/e121/predictions-e121.json) (sha256 `dd7bcb69…`), scorer `score_e121.py` (sha256 `b7accbef…`) committed
 with them. No amendment was written. aifoundry3 card 0 (no `V3_DEVICE`, `/run/lock/etsoc-shire0.lock`) at 600 MHz in every sample, 521.7 mV mean, TDP 0 /
 threshold 65 °C read at both ends of every block and at the session's start and end, never set; no governor move, no reset, no `--reset-ms`, no PMIC
-command. The claim was a clause added to the day's one `#community-lab` post (message 1566603178164617247) at 19:23:25 PST and erased from it at 19:51:59
-PST (aifoundry2 was still held, so the clause was dropped rather than marked released): held 28.6 min of the 35 registered; device access 27.8 min,
-19:23:41–19:51:28 ([`logs/push-and-claim-times.txt`](logs/push-and-claim-times.txt)).*
+command (the stock telemetry's PMIC register reads are disclosed under § Registered against what happened, C2). The claim was a clause added to the day's one `#community-lab` post (message 1566603178164617247) at 19:23:25 PST and erased from it at 19:51:59
+PST (aifoundry2 was still held, so the clause was dropped rather than marked released): held 28.6 min of the 35 registered; device access 27.9 min,
+19:23:35–19:51:28, the first launch at 19:23:41 ([`logs/push-and-claim-times.txt`](logs/push-and-claim-times.txt); C4).*
+
+*Corrected after verification, Sun 1 Nov 2026, at the desk, with no card touched and nothing re-run on a card (§ [Corrections after verification](#corrections-after-verification-sun-1-nov-2026), C1–C6). The reductions' raw-root paths are now repo-relative (re-reduced by the registered collector, every number byte-identical); the stock telemetry's PMIC reads are disclosed; item 15's first leftover is stated as what replicates (R5's failure), not as the 1.72 W A-side excess, which was not recomputed here; device access is dated from the die reading; two card-1 numbers are re-rounded; the blog text names the cards. No registered prediction, rule, number or verdict changed (24 of 24 as E93: 23 PASS, 1 FAIL).*
 
 > **What this is.** E93 tested the public RTL's zero gate where "the word is zero" and "the value is zero" disagree, on aifoundry1 card 1, and the page
 > closed the item at power resolution on one card. E121 runs **the same seventeen tiles, E93's card code and E78's runner unchanged, and E93's 24 rules
@@ -31,7 +33,7 @@ micro-op counters were still not read, so gated lanes are inferred from power, n
    11.37 ± 0.13 W). [R1 (six), R2 (two); `e121.json` › `items`]
 2. **Denormal words pass the gate; power agrees with the manual and the RTL that the fraction never reaches the multiplier.** `0x00000001 × 0x00000001` costs
    **8.39 ± 0.10 W**, random denormals on both sides **9.74 ± 0.05 W** (fp16 9.52 ± 0.06 W), on A alone 13.22 ± 0.06 W (fp16 13.27 ± 0.11), on B alone
-   13.70 ± 0.12 W. Random fractions over a constant denormal add **1.35 ± 0.08 W** (card 1: 1.41 ± 0.08), far below R4's 4.98 W midpoint toward the unflushed
+   13.70 ± 0.12 W. Random fractions over a constant denormal add **1.35 ± 0.08 W** (card 1: 1.40 ± 0.08), far below R4's 4.98 W midpoint toward the unflushed
    reading: **16.9 ± 1.0 fJ a raw bit** (card 1: 17.6 ± 1.0), about the operand-bus price. Cycles per op are 546.001 on every denormal tile: no stall. As in E93
    no run reads a result, so the flush itself is still the documents' statement (PRM §3.4, the VPU specification §2.2.3.9, `txfma_f0.v:375-377`). [R3 (six),
    R4 (four); [`readme-numbers.txt`](readme-numbers.txt)]
@@ -46,8 +48,10 @@ micro-op counters were still not read, so gated lanes are inferred from power, n
    `-0.0`, as `x * mask` leaves them, reads **13.15 ± 0.18 W**: **5.82 ± 0.15 W** more (card 1: 5.82 ± 0.15 W), 1.79× in D, 1.62× in S (9.34 → 15.11 W). The
    tile is synthetic. [R8]
 6. **R5 fails again: E93's Booth-recoder side prediction is wrong on two cards.** A live zero on B against one on A, fp32: **+0.39 ± 0.09 W** against a line of
-   +1 W (card 1: +0.31 ± 0.16); fp16's twin −0.67 ± 0.12 W (card 1: −0.76 ± 0.16; reported, no verdict). So item 15's "why a live zero on A costs more than
-   priced" is not a card-1 artifact. This run does not explain it. [R5-fp32; `reported.booth_asymmetry_w`]
+   +1 W (card 1: +0.31 ± 0.16); fp16's twin −0.67 ± 0.12 W (card 1: −0.75 ± 0.16; reported, no verdict). So R5's failure is not a card-1 artifact. Item 15's
+   "why a live zero on A costs 1.72 W more than priced" rests on E93's split of card 1's shortfall (C3 there: 2.793 W = 1.718 W of `a_nz_b_randn` above its
+   priced point + 1.075 W of `a_randn_b_nz` below its point). That split needs priced points on this card and was not recomputed here, so E121 shows R5's
+   failure again, not the A-side excess itself, and does not explain either (C3). [R5-fp32; `reported.e93_reported_block.booth_asymmetry_w`]
 7. **The watts carry across by the card scale.** 23 of the 24 cross-card rules PASS (|d| + h ≤ w); X-R7 is INCONCLUSIVE (d +0.14 W, h 0.44 W against w 0.50 W,
    R7's three-pass interval). Post hoc: over the 22 cells E93 read at 4 W or more, D here over D on card 1 has a **median of 1.030** (E82's 32-kind median:
    1.031), range 1.004 (`int8.b_pairs_rtl`) to 1.057 (fp32 `sparse50`, also E82's widest cell), 18 of 22 within 1.5%. The half-gated int8 tile's extra over
@@ -60,7 +64,7 @@ micro-op counters were still not read, so gated lanes are inferred from power, n
    zeros-line gate sets 12112 and 12113 aside at 0.545; two passes are left, so every rule is NOT SCORED there, as registered. The scorer therefore marks every
    rule arm-sensitive. The session tie fails at 0.3803, 0.545 and 0, where the slope moves the random cells against E78's frame, as E93's did against E82's.
 
-**What it means for the blog.** E93's statements about the zero gate now hold on two ET-SoC-1 cards, with the second card's watts about 3% above the first's,
+**What it means for the blog.** E93's statements about the zero gate now hold on two ET-SoC-1 cards, with aifoundry3's watts about 3% above aifoundry1 card 1's,
 the same scale E82 found across 32 kinds: a zero the gate can see is almost free; `-0.0` and denormal words keep the lane on and cost about what two constants
 cost (≈ 8 W over exact zeros on either card); int8's B side needs all eight bytes of an `(l, l+8)` column pair and its A side all four bytes of the word.
 Each blog sentence at the end carries its baseline, its cards and its source.
@@ -206,9 +210,9 @@ carry-over 0.0011 ± 0.0006 W/W, cycles per op 546.001 / 546.001 / 318.0, idle 2
 
 | | registered | happened |
 |---|---|---|
-| freeze | before the claim and the first launch | `b66434a8` pushed 19:21:26; claim edit 19:23:25; smoke block's t0 19:23:41 |
+| freeze | before the claim and the first launch | `b66434a8` pushed 19:21:26; claim edit 19:23:25; first device access 19:23:35 (the smoke block's die reading, its t0 19:23:34.8); first launch 19:23:41 |
 | setup | no device access; every card and E121 file identical to the freeze; a dry pass | 19:17:39, 19:19:56 and 19:20:31 on aifoundry3; the last ran dry pass 12100 (42 launches, 17 on E93 tiles, no `ET_DEVICES`) with every hash identical (`logs/setup.log`, `logs/e121-dry.log`) |
-| smoke and gate | 12101, eight 2 s runs; ok, 1,024 minions, cycles per op 546 / 318, all eight items, both reads 0 / 65 at 600 MHz | 19:23:41–19:24:23: 48 launches ok, 546.0 and 318.0, 0 / 65 / 600 MHz / 523 mV at both ends: **SMOKE GATE PASS** (`logs/smoke.log`) |
+| smoke and gate | 12101, eight 2 s runs; ok, 1,024 minions, cycles per op 546 / 318, all eight items, both reads 0 / 65 at 600 MHz | block 19:23:35–19:24:23, launches from 19:23:41: 48 launches ok, 546.0 and 318.0, 0 / 65 / 600 MHz / 523 mV at both ends: **SMOKE GATE PASS** (`logs/smoke.log`) |
 | passes | 12110–12114 planned, the budget rule decides, at least 3 kept | 12110–12113 ran (404, 384, 398, 378 s); 12114 was not started, its projected end past T0 + 1,980 s (`logs/e121-queue.log`) |
 | kept | at least 3 kept to score | **4 of 4**; none set aside by the registered gates at the primary |
 | skipped runs | a run whose launch reading is not reached is skipped, never launched off protocol | 2 of 160: 12110 `int8.a_zeros_b_full` (position 17) and `fp16.zeros` (19), the die still reading 59 °C after the quiet wait. The pass is kept by the registered code; R7 and that cell have three passes |
@@ -218,6 +222,11 @@ carry-over 0.0011 ± 0.0006 W/W, cycles per op 546.001 / 546.001 / 318.0, idle 2
 
 **Departures:** none from the registration.
 
+**PMIC reads (disclosed after verification, Sun 1 Nov 2026; C2).** The stock `ettelem` reads two PMIC voltage registers per `config` call and eleven per
+`sample` (reads, no write), as in every run since September. This session made eleven `config` reads; its committed telemetry holds 16,004 samples (the
+smoke and four passes, 10 Hz); each block's die readings are short `ettelem sample` calls too. Whether "no PMIC command" covers such reads is the owner's
+open question of 1 Nov; it is disclosed here, not settled.
+
 ## What it closes and what it leaves open
 
 - **The zero gate's closed entry (old item 4) now stands on two cards**: negative zero and denormal words against exact zeros (R1–R4), int8's eight-byte B
@@ -225,20 +234,22 @@ carry-over 0.0011 ± 0.0006 W/W, cycles per op 546.001 / 546.001 / 318.0, idle 2
   agreement with the RTL. The page's "on one card" can become "on two cards"; "the micro-op counters were not read" stays.
 - **The magnitudes carry across by the card scale** (23 of 24 cross-card rules; median per-cell ratio 1.030 against E82's 1.031): E93's watts for these tiles
   are not a card-1 quirk.
-- **Item 15's two E93 leftovers are confirmed, not explained**: R5 fails again (a live zero on B costs only +0.39 ± 0.09 W more than on A in fp32, not the
-  +3.1 W the Booth generator predicted), and the half-gated int8 tile again reads more than the gate law (+0.55 ± 0.15 W, post hoc). Two cards, one fixed set
-  of tiles; power is the only reading.
+- **Item 15's two E93 leftovers: what replicates, and neither is explained.** R5's failure replicates: a live zero on B costs only +0.39 ± 0.09 W more than
+  on A in fp32 here (card 1: +0.31 ± 0.16 W), not the +3.1 W the Booth generator predicted. The 1.72 W A-side excess behind item 15's "costs 1.72 W more than
+  priced" is E93 C3's split of card 1's shortfall and was not recomputed on this card; aifoundry3 prices such as
+  [E116](../2026-11-01-e116-split-replicate/README.md)'s (E88's split on this card) could supply it later. The half-gated int8 tile again reads more than the
+  gate law (+0.55 ± 0.15 W, three passes, post hoc; card 1: +0.65 W). Two cards, one fixed set of tiles; power is the only reading (C3).
 
 ## Blog sentences, each with its baseline, its cards and its source
 
-- The zero gate compares raw bits, on two ET-SoC-1 cards (1,024 minions, 600 MHz): `-0.0 × -0.0` costs 7.9–8.2 W of board power over `+0.0 × +0.0` in fp32
+- The zero gate compares raw bits, on two ET-SoC-1 cards (aifoundry1 card 1 and aifoundry3; 1,024 minions, 600 MHz): `-0.0 × -0.0` costs 7.9–8.2 W of board power over `+0.0 × +0.0` in fp32
   and 8.0–8.2 W in fp16, about what multiplying two constants costs. [E93 and E121 R1-fp32-both, R1-fp16-both, R2-fp32]
-- On both cards, `0x00000001 × 0x00000001` costs 8.0–8.4 W over exact zeros in fp32, and random denormal fractions add only 1.35–1.41 W, about what their raw
+- On both cards, `0x00000001 × 0x00000001` costs 8.0–8.4 W over exact zeros in fp32, and random denormal fractions add only 1.35–1.40 W, about what their raw
   bits cost on the operand bus (16.9–17.6 fJ a bit), consistent with the manual's flush to zero. [E93 and E121 R3-fp32-one, R4-fp32-both]
 - In int8, the same words with the same operand bus bits read 4.3 W over int8's zeros when the eight zero words a line fill columns `(l, l+8)`, and 5.5–5.7 W
   otherwise, on both cards; `(2l, 2l+1)` is rejected, in agreement with the RTL. [E93 and E121 R6a–c]
 - An int8 A word with one nonzero byte reads 5.8–5.9 W over int8's zeros, against 0.2–0.4 W when all four bytes are zero, on both cards. [E93 and E121 R7]
-- The second card's watts for these tiles are about 3% above the first card's (median 1.030 over 22 cells), the same card-to-card scale measured across 32
+- aifoundry3's watts for these tiles are about 3% above aifoundry1 card 1's (median 1.030 over 22 cells), the same card-to-card scale measured across 32
   kinds of numbers. [E121 `readme-numbers.txt`; E82]
 
 ## Files
@@ -248,4 +259,28 @@ carry-over 0.0011 ± 0.0006 W/W, cycles per op 546.001 / 546.001 / 318.0, idle 2
 `readme-numbers.txt` the derived and post hoc numbers this README quotes; `code.sha256`; `logs/` the setup, the dry pass, the smoke, the queue, the
 session-start and session-end config reads, the push and claim times; `aifoundry3/kinds/p121<nn>/` each pass's raw data (telemetry, marks, runs, tile dumps,
 config reads, manifest), `kinds-smoke-p12101` the smoke. Reproduce from the raw passes:
-`PY=/usr/bin/python3 bash tools/claims-v3/e121/collect_e121.sh 'p121[1-9][0-9]' <raw root>`.
+`PY=/usr/bin/python3 bash tools/claims-v3/e121/collect_e121.sh 'p121[1-9][0-9]' <raw root>`. The committed reductions were made from the repo root with
+the relative raw root `build/claims-v3/aifoundry3` (the passes' path under the box's tree, holding `kinds/`, `kinds-smoke/` and `logs/` copied from this
+directory), so `dirs` and the `dir` column read `build/claims-v3/aifoundry3/kinds/p121<nn>` (C1).
+
+## Corrections after verification (Sun 1 Nov 2026)
+
+An independent verifier (Q134's) checked E121 the same evening, after the data commit (`dd9e8466`). Its verdict: holds with fixes, one major fault (public
+text) and six minor ones in how the results were stated. It re-ran the registered collector over the committed raw passes (`scored.json`, `results.md`,
+`reduce*`, `score.log` and `code.sha256` byte-identical), matched 35 raw-file hashes on aifoundry3 (read only) against the committed copies, recomputed
+five rule intervals and X-R7's verdict by hand, and found the registration timing, the frozen rules, the tiles, the card's safety and the posting protocol
+sound. Each fault is corrected above, at the desk: no card was touched, and no registered prediction, rule, number or verdict changed (24 of 24 as E93,
+23 PASS, 1 FAIL; cross-card aggregate PASS). `scored.json`, `results.md`, `reduce*`, `score.log`, `code.sha256`, `readme-numbers.txt`, `logs/` and the raw
+passes are byte-identical to `dd9e8466`.
+
+| # | what was wrong | what changed |
+|---|---|---|
+| C1 | **Desk paths in public files.** The seven reductions (`e121*.json`, `dirs`) and their seven `runs*.csv` (`dir` column, 158 rows each) named the raw root as the lane's scratch folder on the desk machine, an absolute home path: 1,134 lines, the only such paths under `docs/reports/data` | The registered collector (code at `dd9e8466`) was re-run over the committed raw passes from a repo copy's root with the relative raw root `build/claims-v3/aifoundry3`, as E93's was. The 14 files now read `build/claims-v3/aifoundry3/kinds/p121<nn>`, and each equals its first version with only that prefix replaced (`git diff dd9e8466` on them shows only those lines); every other output of the collector is byte-identical to `dd9e8466`, and `readme-numbers.py` prints `readme-numbers.txt` unchanged. Git history keeps the old text |
+| C2 | **PMIC reads undisclosed.** The opening said "no PMIC command" and nothing of the stock telemetry's PMIC register reads | A paragraph under § Registered against what happened: two register reads per `config` call, eleven per `sample`, reads with no write; eleven `config` reads and 16,004 samples here; whether such reads count is the owner's open question of 1 Nov, disclosed, not settled, as E124's README says it. The opening points to it |
+| C3 | **Item 15's first leftover was over-claimed.** Result 6 said item 15's "why a live zero on A costs more than priced" is "not a card-1 artifact", and § What it closes called both leftovers "confirmed". What replicates is R5's failure (+0.39 ± 0.09 W here, +0.31 ± 0.16 W on card 1). The page's 1.72 W is E93 C3's split of card 1's shortfall (2.793 W = 1.718 W of `a_nz_b_randn` above its priced point + 1.075 W of `a_randn_b_nz` below it), and E121 did not recompute it | Result 6 and § What it closes say R5's failure replicates and the A-side split was not recomputed on this card, naming E116's prices as a way to supply it. The half-gated int8 tile's excess (+0.55 ± 0.15 W, post hoc) is the leftover that replicates as measured |
+| C4 | **Device access was dated from the first launch**: 19:23:41, 27.8 min, in the opening and the table. The smoke block began at 19:23:34.8 and read the die at 19:23:35 (`logs/smoke.log`), which is device access | Device access 19:23:35–19:51:28, 27.9 min; the first launch stays 19:23:41. The order holds: push 19:21:26, claim edit 19:23:25, device access 19:23:35. `logs/push-and-claim-times.txt` keeps the lane's command-output times as written |
+| C5 | **Small things, found in this pass, not by the verifier.** Two card-1 numbers were rounded twice: R4-fp32-both is 1.4047 W on card 1, printed 1.41 in result 2 and in the second blog sentence, and fp16's Booth twin is −0.7545 W, printed −0.76 in result 6. Result 6 cited `reported.booth_asymmetry_w`, which in this `scored.json` sits under `reported.e93_reported_block` | 1.40 and −0.75, as E93's README prints them; the citation names the full key |
+| C6 | **"The second card" and "the first card" in the blog text** reverse the kinds page's convention, where aifoundry3 is the main card and aifoundry1 card 1 the second card | The blog sentences and § What it means for the blog name the cards |
+
+Three more of the verifier's faults were in the lane's report to the integration lanes, not in this page (its blog points, one table cell's pass count,
+and the arms' wording, where what holds is that no verdict flips between PASS and FAIL at any arm that scores); they were corrected there.
