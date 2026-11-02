@@ -171,6 +171,16 @@ one of those leftover lines is older than the previous dump's newest entry.
 
 - **Firmware (A1).** Not 1.4.1 / 0.21.2 as on record but 1.4.0 / BL2 0.22.0 / PMIC 1.6.1, read after the claim and
   before any launch. No frozen item changed.
+
+  *Dated note, Sun 1 Nov 2026 (week 44), added by Q134's records without editing the text above:
+  `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` is a PMIC command. At et-platform `836a4ab` its handler writes the PMIC's
+  firmware-management command register twice, ACTIVE_SLOT then VERSION, and reads the data register after each (the
+  chain is in [E114's README](../2026-11-01-e114-card0-replicates/README.md), C1); by the lab's standard since
+  [E85](../2026-10-31-e85-camera-kinds/README.md)'s correction C1, a DM command the service processor passes to the
+  PMIC is a PMIC command. This run sent it once, at 15:42:00 PDT (`ident/ident-154200.out`;
+  `tools/claims-v3/kspeed/e84/run_e84.sh`, lines 62–67), under Q130's rule of no PMIC work. The card answered
+  normally. Later runs take a card's identity by its module uptime and its continuity instead (E77, E118, E120);
+  [05-claims.md](../../../findings/05-claims.md), "Q134", lists every run that sent the query.*
 - **Card time.** 23.1 card-minutes for the session against a 60-minute cap: the cooling gates passed at once, with
   0.1–1.9 s holds. With the identity reads (15:42:00), the smoke (15:42:50–15:43:12) and the closing reads (16:06:52),
   card 0 was in use 15:42–16:07 PDT.

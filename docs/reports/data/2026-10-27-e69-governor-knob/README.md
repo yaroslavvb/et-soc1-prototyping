@@ -215,6 +215,17 @@ directories (`smoke`, `smoke2`, `s1`, `s2`, `s3`).
   was attributed to the 0.20.0 source while the card was already running 0.22.0. **E64's measurements are
   unaffected** — they are measurements — but its source citations point at the wrong build, and today's
   rule-8 source read was done against 0.22.0 for that reason.
+
+  *Dated note, Sun 1 Nov 2026 (week 44), added by Q134's records without editing the text above:
+  `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` is a PMIC command. At et-platform `836a4ab` its handler writes the PMIC's
+  firmware-management command register twice, ACTIVE_SLOT then VERSION, and reads the data register after each (the
+  chain is in [E114's README](../2026-11-01-e114-card0-replicates/README.md), C1); by the lab's standard since
+  [E85](../2026-10-31-e85-camera-kinds/README.md)'s correction C1, a DM command the service processor passes to the
+  PMIC is a PMIC command. This run's records name one such read, at 13:56:26 PDT, and its change record says the
+  identity was re-read after the last run; no committed file keeps either output. So the change record's "no PMIC
+  command sent" (`tools/claims-v3/knob/CHANGE-RECORD.md`) did not hold for this query. The card answered normally.
+  Later runs take a card's identity by its module uptime and its continuity instead (E77, E118, E120);
+  [05-claims.md](../../../findings/05-claims.md), "Q134", lists every run that sent the query.*
 - **The power trigger is an average, which fits 0.22.0 and not 0.20.0.** 0.20.0's trigger compares the PMIC's
   *instantaneous* reading; 0.22.0 compares `avg_soc_pwr_mW`, the average. E64 measured the governor's logged
   input behaving as a ~1.3 s running average (65.0–67.9 W while the board read 80–83 W), and today's rings

@@ -408,6 +408,19 @@ generate service-processor error events**: E69's count went 6 → 18 (before the
 the governor move, and the abort condition the registration set on them was never met — but a session that counts
 these events must expect its own commands to raise them.
 
+**Dated note, Sun 1 Nov 2026 (week 44), Q134: the commands that raise them are residency reads of states the build does not
+have.** On BL2 0.22.0 the throttle-residency states are IDLE 0, UP 1, DOWN 2, SAFE 3 (et-platform `836a4ab`,
+`device-api/include/management-api/device_mgmt_api_spec.h:280-286`); a read of raw state 4, 5 or 6 fails (rc −5) and logs two
+SP ERROR lines, each pushing one `SP Runtime Error` event to the host (E77's F1: its 11 reads of raw 4 raised all 22 events
+in its window, each pair 6–8 s after its read). The counter E69 watched is the driver's: of the 1,692 it held on aifoundry2
+at 00:13 PDT on 1 Nov, 1,686 are two per committed read of states 4–6 (843 reads) and six, three reads, are in no committed
+file; by 19:14:57 PST it held 4,234, of which 4,228 are two per read (2,114 reads); every session that read residency on this
+card since its 26 Oct start asked for states 2–6 but E77 (2–4). On aifoundry1's card 0 all 378 are (189 reads). So these
+events come from the lab's own residency reads, not from management commands as such. Read states 2 and 3 only. Data:
+[`2026-11-01-q134a-alarm-residency`](../reports/data/2026-11-01-q134a-alarm-residency/README.md) (`counters.txt`,
+`results.json` › `invalid_state_reads`);
+[`2026-11-01-e77-rail-one-temperature`](../reports/data/2026-11-01-e77-rail-one-temperature/README.md) F1.
+
 **A second card's governor moved (aifoundry1's card 0, 1 November 2026, E118; Q133, under the owner's governor OK of
 that day).** One TDP write each way, 65 → 0 at 14:52:00.933 PST and 0 → 65 at 15:12:37.217, both `rc 0` and read back,
 the threshold never written, the closing read equal to the originals and the module uptime unbroken: no reset, no other
@@ -426,6 +439,19 @@ committed dumps the old reader under-reads is not counted in any committed file;
 used it (dv2, dv2v, hp and its copies, `tools/ettelem/analyze_dvfs.py`) were not traced, and the shared decoder was not
 edited. E77 moved aifoundry2's TDP the same evening; its corrections after verification were under way when this was
 written, and an addendum records it.
+
+**aifoundry2's governor moved twice more (1 November 2026: E77 under Q133, E120 under Q134, both under the owner's governor
+OK of that day).** Each wrote the TDP 65 → 0 → 65 and nothing else: E77 at 17:35:34.974 and 17:55:10.848 PST, E120 at
+20:55:16.593 and 21:11:41.131, every write read back, the threshold never written, the closing reads 65 W / 65 °C
+(`low_power`, 600 MHz idle), and the module uptime unbroken (6 d 3 h 46 m and 6 d 7 h 6 m), so no reset; their samplers sent
+no PMIC read, no revisions query and no statistics reset. The pin held 600 MHz again, and after each restore the ring holds
+two fresh "Power throttle up" events, 600 → 700 → 800 MHz, as card 0's did in E118. Two working rules they add: a live ring
+check must count only entries newer than the previous dump (E77's `run_e77.py` counted every match in the dump, twelve stale
+ones included; E120 counted fresh entries only); and a residency read of raw state 4 on this build logs SP errors (E77's F1;
+the dated note on E69's events, above). E120's kernel log held no error event in its window. Change records:
+[`E77`](../reports/data/2026-11-01-e77-rail-one-temperature/CHANGE-RECORD.md),
+[`E120`](../reports/data/2026-11-01-e120-rail-redesign/CHANGE-RECORD.md); results in [03-experiments.md](03-experiments.md),
+E77 and E120.
 
 ## aifoundry1 card 0's PMIC over-power alarm: a third speed limit (31 October 2026, E84)
 
@@ -477,6 +503,25 @@ operating-point changes is one candidate).
   of them in E114's session (the stock sampler), which E114, reading no kernel log, leaves open: the stock sampler's
   voltage-register reads or that session's heavier load would fit. Data: [`2026-11-01-e114-card0-replicates`](../reports/data/2026-11-01-e114-card0-replicates/README.md) C1, C8;
   [`2026-11-01-e118-two-clock-card0`](../reports/data/2026-11-01-e118-two-clock-card0/README.md).
+- **Dated note, Sun 1 Nov 2026 (week 44), Q134(a): since it started on 26 Oct, aifoundry2's service processor has not entered
+  POWER_SAFE.** Raw throttle-residency state 3 read 0 µs at all 712 committed reads, from 11 sessions (E69, 27 Oct 14:20:45
+  PDT, to E77, 1 Nov 17:59:25 PST), while raw 2 rose monotonically from 1,095.9 to 4,717.6 s under one service-processor
+  lifetime; the driver counts 0 PMIC events (Q132(g)'s zero, carried to 19:14:57 PST) and 0 throttle-time events. On card 0,
+  the positive control on the same reported release (BL2 0.22.0; PMIC 1.6.1), the counter is an exact record of the alarm:
+  the kernel log's 146 THROTTLE_TIME durations, replayed through the bookkeeping of a public tree that declares 0.22.0
+  (et-platform `836a4ab`), reproduce all 63 committed raw-3 reads on all four fields; 177 alarm interrupts made 146 episodes
+  of 0.284–0.462 s, 60.003 s in all, only in E84's four fp32 random-data runs, 36–37% of each sustained run. aifoundry2's
+  zeros cover readings up to 101.15 W (456,199 readings, each sample once, from 15 of its 16 card sessions since the start;
+  the PMIC's own average peaked at 71.85 W). So no PMIC over-power (or over-temperature) interrupt has reached aifoundry2's
+  service processor in that lifetime. Not settled: an alarm on the slow average or any filtered quantity (the 65 W governor
+  never let the average reach 75 W), whether its PMIC raises the line at all (firmware or board), the build hash and the set
+  point. Three side facts: the driver's "Thermal Throttling Duration … msec" is microseconds (the host-clock lag shows it);
+  the statistics reset leaves the residency counters alone (in source, and raw 2 unchanged across E85's 2,205 resets); and
+  raw-state numbers depend on the build (POWER_SAFE is raw 5 on 0.18.0 and 0.20.0). **And E114's open events are its own
+  residency reads:** card 0's 126 events between 00:13 PDT and 14:50:39 PST, the 120 that E118's timestamps place in E114's
+  session among them, are E114's 21 committed reads (17 in its session, 4 in its smoke) × 3 invalid states × 2; the "51 reads
+  of states 4–6" above counts the session's only, and neither the stock sampler's voltage-register reads nor the load is
+  needed. Data: [`2026-11-01-q134a-alarm-residency`](../reports/data/2026-11-01-q134a-alarm-residency/README.md).
 - **For a run on card 0:** expect fp32 random data at 800 MHz to cycle through 300 MHz, and register a label and a stop
   or a count for the alarm (E84's labels had no PMIC category, so its limit rule scored the alarm runs as misses); Q130's
   evening round left card 0 out for this reason. 30 of E60's 33 300 MHz episodes on this card (20 October) match the
@@ -721,6 +766,23 @@ it is the owner's call (the lab rules below).
   logic. Data: [`2026-11-01-e110-memory-width`](../reports/data/2026-11-01-e110-memory-width/README.md).
 - Finer voltage exists: raising the SP log level to DEBUG and extracting the trace gives a **per-shire** on-die
   voltage map (E6). Restore the log level afterwards.
+- 🛑 **The stock telemetry reads PMIC registers, and one identity query writes one** (dated, Sun 1 Nov 2026, Q134's records).
+  `ettelem config` sends `GET_ASIC_VOLTAGE` (two PMIC voltage-register reads a call), and each `ettelem sample` reading sends
+  it and `GET_MODULE_VOLTAGE` (eleven a reading): reads with no write, in every run since September (the handlers are in
+  E118's change record, "PMIC voltage-register reads, no write"). Whether "no PMIC command" covers such reads is **an open
+  question for the owner and Roman**, not a violation; the governor moves of 1 November (E77, E118, E120) used a build with
+  both reads off, and the Q134 READMEs that used the stock build disclose its reads. `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`
+  is different: it writes the PMIC's firmware-management command register twice (E114's C1), a PMIC command by E85 C1's
+  standard, and it was sent as a read-only identity read by E69 and E72 (27 Oct), E79, E82 and E84 (31 Oct), E114 (1 Nov),
+  the version-3 check's nine passes (25–26 Sep, `tools/claims-v3/tel/block.sh`) and the aifoundry1 fix of 25 Sep; dated notes
+  in E69's, E72's, E79's, E82's and E84's data READMEs say so. Take a card's identity by uptime continuity instead
+  ([05-claims.md](05-claims.md), "Q134", the disclosures).
+- **Throttle residency** (`DM_CMD_GET_MODULE_RESIDENCY_THROTTLE_STATES`) is a copy from the service processor's RAM and
+  touches no PMIC; nothing clears it but a restart, the statistics reset included (Q134(a)). Its raw state numbers depend on
+  the build: IDLE 0, UP 1, DOWN 2, SAFE 3 on BL2 0.22.0, and POWER_SAFE raw 5 on 0.18.0 and 0.20.0. A read of a state that is
+  no state (raw 4–6 on 0.22.0) fails and logs two SP errors (E77's F1), and the lab's `ettelem-dv2` builds (`ettelem-hpl`,
+  `ettelem-e77`) take raw states 2–6 only, refusing a call that names raw 1 before opening the device (E119's C3, E120's A1):
+  ask for 2 and 3.
 
 ## The sensor reads whole degrees — use the step times
 
@@ -1280,6 +1342,12 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
   anchor), and the zeros-line gate set aside 11252 in E112 (so (b) NOT SCORED). On aifoundry3 the random-range gate had
   set aside one pass each in E86, E92 and E95. Register 4–5 passes, or how a set-aside pass is handled, and on aifoundry3
   a dips-aware gate.
+- **A residency read of a state the build does not have raises SP errors** (1 November 2026, E77 and Q134(a)). On BL2 0.22.0
+  raw states 4–6 are no state: each read fails (rc −5), logs two SP ERROR lines and pushes two `SP Runtime Error` events to
+  the host, where a session that counts kernel events will see them. Every lab session that read residency since 27 October
+  but E77 asked for states 2–6 (701 of aifoundry2's 712 reads, all 63 of card 0's), and those reads account for all but six
+  of aifoundry2's 4,234 such events and all 378 of card 0's. Ask for raw states 2 and 3 (POWER_DOWN, POWER_SAFE); the lab's
+  `ettelem-dv2` builds refuse raw 1 outright, so a POWER_UP read needs a new build.
 - **A sampler killed mid-request poisons the management queue** (both cards, 2026-09-24). The reply to its
   last command stays queued. The next process to open `/dev/et0_mgmt` dies of `std::bad_function_call` on
   that reply and leaves its own behind, so retrying never recovers. Drain it once with
@@ -1326,6 +1394,11 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
   query (it also prints the firmware release). After a driver change, check `/sys/module/et_soc1/version`
   (`0.20.0`), not the device nodes' mode or `lspci`. "Cannot be opened" can mean that the library refused after
   `open()`, while `tools/etcfg` still works (aifoundry1 until 25 September).
+  **Dated note, Sun 1 Nov 2026 (week 44), Q134's records:** that first query is a PMIC command. At et-platform `836a4ab` it
+  writes the PMIC's firmware-management command register twice (E114's C1), a PMIC command by E85 C1's standard, and the
+  lab's rule allows no PMIC command but the samplers' statistics reset. Take a card's identity by its module uptime
+  (`DM_CMD_GET_MODULE_UPTIME`, a RAM read) and its unbroken continuity, as E77, E118 and E120 did; read the firmware release
+  only when the owner allows that command.
 - **The three hosts' toolchains generate identical code** (checked 2026-09-25). The same sources give kernel ELFs
   with different md5s on the three hosts, but only the `.comment` section (the compiler's version string)
   differs. Compare and record the `.text` hash, not the file's. One real difference: an LTO object compiled on

@@ -632,6 +632,16 @@ That is **the same reading aifoundry2 gave E69 and E72**. So Q129's throttle-wra
 covers this card too, and `docs/findings/14-card-behaviour.md`'s three "aifoundry3 was not re-read" notes can
 close. E79 does not edit that file: another lane owns it.
 
+*Dated note, Sun 1 Nov 2026 (week 44), added by Q134's records without editing the text above:
+`DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` is a PMIC command. At et-platform `836a4ab` its handler writes the PMIC's
+firmware-management command register twice, ACTIVE_SLOT then VERSION, and reads the data register after each (the
+chain is in [E114's README](../2026-11-01-e114-card0-replicates/README.md), C1); by the lab's standard since
+[E85](../2026-10-31-e85-camera-kinds/README.md)'s correction C1, a DM command the service processor passes to the PMIC
+is a PMIC command. This run sent it once, at 09:27:22 PDT (`ident/firmware.txt`), under Q130's rule of no PMIC work,
+as one of the read-only `DM_CMD_GET_*` queries above. The card answered normally. Later runs take a card's identity by
+its module uptime and its continuity instead (E77, E118, E120); [05-claims.md](../../../findings/05-claims.md),
+"Q134", lists every run that sent the query.*
+
 **The unit's own micro-op structure, measured rather than assumed.** The registered order is PRM 9.4's, as
 `hl/make_hl.py` states it for fp32, generalised: for each B line group, for each A row, two micro-ops (C columns
 0–7, then 8–15), with lane *l* taking column *l* and then column 8+*l*, and A broadcast to all eight lanes. That

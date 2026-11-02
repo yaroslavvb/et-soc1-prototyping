@@ -238,6 +238,18 @@ PDT, *before* E72 began. No AER, no link error, no all-ones read. No flash, PMIC
 clock or voltage action at any point. The deadline watchdog logged *"released by the session, nothing to
 do"*.
 
+*Dated note, Sun 1 Nov 2026 (week 44), added by Q134's records without editing the text above:
+`DM_CMD_GET_MODULE_FIRMWARE_REVISIONS` is a PMIC command. At et-platform `836a4ab` its handler writes the
+PMIC's firmware-management command register twice, ACTIVE_SLOT then VERSION, and reads the data register
+after each (the chain is in [E114's README](../2026-11-01-e114-card0-replicates/README.md), C1); by the
+lab's standard since [E85](../2026-10-31-e85-camera-kinds/README.md)'s correction C1, a DM command the
+service processor passes to the PMIC is a PMIC command. This run sent it at 14:59:39 PDT (`gov.jsonl`,
+the `identity` event) and, by its change record, again at 15:24:48 (not kept as a file). So "No flash,
+PMIC, reset, driver, PCIe, clock or voltage action at any point", above, and the change record's "no PMIC
+command sent" (`tools/claims-v3/lq6/CHANGE-RECORD.md`) did not hold for this query. The card answered
+normally. Later runs take a card's identity by its module uptime and its continuity instead (E77, E118,
+E120); [05-claims.md](../../../findings/05-claims.md), "Q134", lists every run that sent the query.*
+
 ## Departures and residuals, named
 
 - **D1 — G1's governor-log half is UNMEASURED.** The registered rule asked for 600 MHz in every sample
