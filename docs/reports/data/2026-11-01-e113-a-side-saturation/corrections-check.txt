@@ -1,0 +1,112 @@
+E113 corrections-check (post hoc; the registered reduction: kept passes [1131, 1132, 1133, 1134, 1135, 1136] )
+
+C1. The top rung out of sample under each law, and the A/B ratio rung by rung
+  alq_h23 measured 7.598 +- 0.032 W (scored.json items.alq_h23); E70's lq_h23 (the same mask on B) 12.145 +- 0.158 W
+  mirror, c refitted 0.6779 +- 0.0067 (per pass): predicts 8.233 W, residual -0.635 W = -20.1 SE on the A rung alone, -5.7 SE with E70's B-rung SE, -4.6 SE with E70's B-rung SE and c's SE (scored.json D2_A.out_of_sample_alq_h23.res_M_refit -0.6350)
+  mirror, c frozen 0.6433: predicts 7.813 W, residual -0.215 W = -6.8 SE on the A rung alone, -2.0 SE with E70's B-rung SE. The frozen c was fitted on E70's alq rungs at k = [1, 2, 4, 8, 12, 16, 23] (predictions-e113.json constants), so k = 23 was in its fit: for the frozen mirror the top rung is a replicate of a fitted rung, not out of sample
+  curve in S_A, W refitted 5.899 W: predicts 5.877 W, residual +1.721 W (54.5 SE); the rung sits 1.699 W (53.8 SE) above W
+  per rung, E113's A step over E70's B step of the same mask (SE from both rungs' SEs):
+    alq_h1   k  1 low    A  0.314 / B  0.606 (lq_h1) = 0.518 +- 0.097
+    alq_h2   k  2 low    A  0.951 / B  0.928 (lq_h2) = 1.025 +- 0.054
+    alq_h3   k  3 low    A  0.950 / B  1.294 (lq_h3) = 0.734 +- 0.022
+    alq_h4   k  4 low    A  1.594 / B  1.505 (lq_h4) = 1.059 +- 0.143
+    alq_h6   k  6 low    A  2.045 / B  2.357 (lq_h6) = 0.867 +- 0.032
+    alq_h8   k  8 low    A  2.026 / B  3.248 (lq_h8) = 0.624 +- 0.010
+    alq_h12  k 12 low    A  3.504 / B  5.502 (lq_h12) = 0.637 +- 0.009
+    alq_h16  k 16 low    A  5.743 / B  8.364 (lq_h16) = 0.687 +- 0.009
+    als_h2   k  2 spread A  1.177 / B  2.085 (ls_h2) = 0.564 +- 0.014
+    als_h3   k  3 spread A  2.641 / B  3.459 (ls_h3) = 0.764 +- 0.035
+    als_h4   k  4 spread A  2.827 / B  4.427 (ls_h4) = 0.639 +- 0.008
+    als_h6   k  6 spread A  3.941 / B  5.885 (ls_h6) = 0.670 +- 0.032
+    als_h8   k  8 spread A  4.844 / B  7.108 (ls_h8) = 0.681 +- 0.009
+    als_h12  k 12 spread A  6.061 / B  8.890 (ls_h12) = 0.682 +- 0.008
+    als_h16  k 16 spread A  6.504 / B  9.749 (ls_h16) = 0.667 +- 0.018
+    alq_h23  k 23 low    A  7.598 / B 12.145 (lq_h23) = 0.626 +- 0.009
+  low layout, k <= 6: 0.52, 1.02, 0.73, 1.06, 0.87 (k = 1, 2, 3, 4, 6); range 0.52-1.06
+  low layout k = 8-16 and every spread mask: range 0.56-0.76 (10 rungs); the top rung 0.626
+  with E113's own B rung at k = 8: alq_h8 / lq_h8 = 0.683 +- 0.053 (per pass; = rho(8) / 2)
+  with E113's own B rung at k = 8: als_h8 / ls_h8 = 0.675 +- 0.006 (per pass; = rho(8) / 2)
+
+C2. Curves in A's own summed prices S_A over the 15 fit rungs, and the pairs where a larger S_A costs less
+  registered, one parameter, W (1 - e^(-S/W)): W 5.899 W, rms 0.708 W (scored.json D2_A.R_SA_refit_W 0.708); P2's bands: ACCEPTED <= 0.40, REJECTED > 0.60, INCONCLUSIVE between
+  two parameters, W (1 - e^(-S/K)): W 7.83 W, K 11.90 W, rms 0.459 W
+  two parameters, W S / (S + K): W 11.76 W, K 16.77 W, rms 0.462 W
+  any non-decreasing function of S_A (isotonic least squares): rms 0.214 W, using 8 free levels for 15 rungs
+  pairs with the smaller S_A but the larger step: 10; at >= 3 SE (paired per pass): 7
+    als_h4   (S_A  3.923, dW 2.827) - alq_h6   (S_A  4.209, dW 2.045) = +0.783 +- 0.020 W (38.4 SE)
+    als_h4   (S_A  3.923, dW 2.827) - alq_h8   (S_A  5.784, dW 2.026) = +0.801 +- 0.024 W (34.0 SE)
+    als_h2   (S_A  1.429, dW 1.177) - alq_h2   (S_A  1.599, dW 0.951) = +0.226 +- 0.010 W (21.9 SE)
+    als_h2   (S_A  1.429, dW 1.177) - alq_h3   (S_A  2.072, dW 0.950) = +0.227 +- 0.018 W (12.3 SE)
+    als_h3   (S_A  3.279, dW 2.641) - alq_h8   (S_A  5.784, dW 2.026) = +0.615 +- 0.076 W (8.1 SE)
+    als_h3   (S_A  3.279, dW 2.641) - alq_h6   (S_A  4.209, dW 2.045) = +0.597 +- 0.086 W (6.9 SE)
+    als_h12  (S_A 15.715, dW 6.061) - alq_h16  (S_A 15.913, dW 5.743) = +0.318 +- 0.065 W (4.9 SE)
+  the clearest: als_h4 (S_A 3.92 W) 2.827 +- 0.029 W against alq_h8 (S_A 5.78 W) 2.026 +- 0.028 W: +0.801 +- 0.024 W paired (34.0 SE)
+  any non-decreasing f(S_A) has f(3.92) <= f(5.78), so it misses one of those two rungs by at least 0.401 W (14 SE of either rung)
+
+C3. What P3's spread rungs can and cannot separate
+  the 7 spread rungs, both laws frozen on E70's low layout: mirror 0.259 W, curve in S_A 0.226 W (scored.json rules.P3): the curve reads them as well
+  the 8 low rungs in the fit (the layout both frozen constants were fitted on, E70's): curve 0.980 W, mirror 0.345 W; alq_h8: curve +1.775 W over, mirror +0.063 W over
+  both layouts, each law refitted (P4): curve 0.708 W, mirror 0.248 W, ratio 2.85
+
+C4. rho, per designed bit A over B, in both sessions
+  E70 (low layout, 27 Oct): rho(8) = 1.205 +- 0.041 (E70 scored.json D4 h=8)
+  E70 (low layout, 27 Oct): rho(12) = 1.266 +- 0.011 (E70 scored.json D4 h=12)
+  E70 (low layout, 27 Oct): rho(16) = 1.365 +- 0.033 (E70 scored.json D4 h=16)
+  E70 (low layout, 27 Oct): rho(23) = 1.246 +- 0.020 (E70 scored.json D4 h=23)
+  E113 (low): rho(8) = 1.366 +- 0.106, per pass [1.208, 1.201, 1.425, 1.867, 1.195, 1.301]
+  E113 (spread): rho(8) = 1.350 +- 0.012, per pass [1.29, 1.36, 1.353, 1.368, 1.358, 1.369]
+  E113 lq_h8 per pass [3.324, 3.407, 2.742, 2.226, 3.26, 3.264] W, mean 3.037 +- 0.189; E70 lq_h8 3.248 +- 0.028
+  E113 alq_h8 per pass [2.008, 2.046, 1.954, 2.078, 1.948, 2.123] W, mean 2.026 +- 0.028; E70 alq_h8 1.957 +- 0.070
+  E113's alq_h8 over E70's lq_h8: 2 x 2.026 / 3.248 = 1.248; so the two sessions' low-layout rho(8) differ mostly through the B rung
+  range at k = 8-16 over both sessions: 1.205-1.366
+
+C5. What the stock sampler and ettelem config ask of the PMIC (reads only)
+  tools/ettelem/ettelem.cpp:96 in resetStats(): DM_CMD_SET_STATS_RUN_CONTROL
+  tools/ettelem/ettelem.cpp:121 in config(): DM_CMD_GET_ASIC_VOLTAGE
+  tools/ettelem/ettelem.cpp:166 in sample(): DM_CMD_GET_ASIC_VOLTAGE
+  tools/ettelem/ettelem.cpp:167 in sample(): DM_CMD_GET_MODULE_VOLTAGE
+  saved 10 Hz sampler readings, 7 passes and the smoke (telemetry.jsonl.gz): 14820; with die_mv (GET_ASIC_VOLTAGE) 14820, with reg_mv (GET_MODULE_VOLTAGE) 14820; since_reset_ms values seen: [-1] (-1: no statistics reset)
+  ettelem config reads in logs/session.log: 2
+  tools/claims-v3/lib.sh:103 (the definition): die_c() { timeout 20 "$ETTELEM" sample --seconds 1 --every-ms 500 2>/dev/null | grep '^{' | tail -1 
+  tools/claims-v3/lib.sh:114 (in heat_to()): t=$(die_c); echo "{\"t_ms\":$(now_ms),\"die_c\":${t:-0}}" >> "$out"
+  tools/claims-v3/lib.sh:188 (in block_begin()): BLOCK_C0=$(die_c)
+  tools/claims-v3/lib.sh:196 (in block_end()): c1=$(die_c || true)
+  (heat_to() returns at once on aifoundry3, where lib.sh:31 leaves GOV_FREE empty; block_begin and block_end call die_c once each per pass)
+
+C6. The op rate's unit
+  reduce_hl.py's rate is iters x minions per second over the run window ('fma: minion-ops/s'); pass means 1.1208-1.1210 G minion-ops/s over the card's 1,024 minions = 1.094-1.095 M ops/s per minion (600 MHz / 546 cycles = 1.099 M)
+
+C7. What the two sides share: the dumped tiles of pass 1133 (A tile then B tile, 256 fp32 words each)
+  alq_h8 : 2 distinct A word(s) ['3fbbc91b', '3fbbc9e4'], 1 distinct B word(s); A words differ by ['0000ff']; B = ['3f800000']
+  lq_h8  : 1 distinct A word(s) ['3f800000'], 16 distinct B word(s)
+           B rows: 8 per-lane base words, each lane l against lane 8+l differs by ['0000ff']
+  als_h8 : 2 distinct A word(s) ['3fa99bad', '3fbbc9e4'], 1 distinct B word(s); A words differ by ['125249']; B = ['3f800000']
+  ls_h8  : 1 distinct A word(s) ['3f800000'], 16 distinct B word(s)
+           B rows: 8 per-lane base words, each lane l against lane 8+l differs by ['125249']
+
+C8. The et-who reads in the committed logs
+  logs/setup.log: after the line stamped 2026-11-01 16:00:03: No process holds an ET-SoC-1 device node or card lock.
+  logs/session.log: after the line stamped 2026-11-01 16:01:54: No process holds an ET-SoC-1 device node or card lock.
+  logs/session.log: after the line stamped 2026-11-01 16:28:42: No process holds an ET-SoC-1 device node or card lock.
+  logs/smoke.log, the first launch: 16:02:04 [aifoundry3] block 1130 #0 anchor_pi: 10 launches, start 50.0 C (hot 50
+
+C9. The bench against the card, and E102's composites on A
+  k =  2: bench A/B net toggles 1.261, card A/B watts 1.025 (E113's alq over E70's lq, five days apart), bench over card 1.230 (posthoc.json bench_vs_card)
+  k =  4: bench A/B net toggles 1.382, card A/B watts 1.059 (E113's alq over E70's lq, five days apart), bench over card 1.305 (posthoc.json bench_vs_card)
+  k =  8: bench A/B net toggles 0.938, card A/B watts 0.624 (E113's alq over E70's lq, five days apart), bench over card 1.504 (posthoc.json bench_vs_card)
+  k = 12: bench A/B net toggles 0.878, card A/B watts 0.637 (E113's alq over E70's lq, five days apart), bench over card 1.378 (posthoc.json bench_vs_card)
+  k = 16: bench A/B net toggles 1.098, card A/B watts 0.687 (E113's alq over E70's lq, five days apart), bench over card 1.600 (posthoc.json bench_vs_card)
+  k = 23: bench A/B net toggles 1.085, card A/B watts 0.626 (E113's alq over E70's lq, five days apart), bench over card 1.735 (posthoc.json bench_vs_card)
+  k =  8 in one session (E113's own lq_h8): card A/B 0.667, bench over card 1.406
+  E102 README:25 bit 0: A all-in over balanced, board 1.29 [0.99, 2.45]; rail 1.12 [0.83, 2.41]; bench 1.00
+  E102 README:26 bit 6: A all-in over balanced, board 1.07 [0.74, 4.63]; rail 1.02 (unbounded); bench 1.00
+  E102 README:27 bit 11: A all-in over balanced, board 1.45 [1.20, 1.68]; rail 1.37 [1.02, 1.80]; bench 1.29
+  E102 README:28 bit 16: A all-in over balanced, board 7.10 [6.07, 8.41]; rail 7.96 [6.86, 9.13]; bench 4.27
+  E102 README:29 bit 20: A all-in over balanced, board 3.17 [2.59, 3.90]; rail 3.63 [2.48, 6.33]; bench 3.05
+  E102 README:30 bit 22: A all-in over balanced, board 2.15 [1.92, 2.42] (gate/gate); rail 2.20 [1.96, 2.53]; bench 1.97
+
+C10. Small facts the wording now uses
+  D1_A: k = 3 +1.692 +- 0.084, k = 4 +1.233 +- 0.018 W (the dip); E70's B side: [1.158, 2.165, 2.922, 3.528, 3.86, 3.388, 1.385] at k = [2, 3, 4, 6, 8, 12, 16] (no dip)
+
+F. Data and frozen files against the data commit 64e69cc3
+  280 files at 64e69cc3 under docs/reports/data/2026-11-01-e113-a-side-saturation and tools/claims-v3/e113; unchanged 279; changed: ['docs/reports/data/2026-11-01-e113-a-side-saturation/README.md']
