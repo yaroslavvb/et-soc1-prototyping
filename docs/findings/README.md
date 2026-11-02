@@ -277,8 +277,9 @@ Read [Terms](#terms) first.
    different values (E108). int8 zeros' extra 0.61 W is not per-op work and not the lanes: with nothing issued, int8's loop
    costs 1.7 W more than fp32's (E109, labelled, not scored). The DRAM read path pays for raw bit flips at 64 and 256 bits
    only (E110). aifoundry2's die settles at about 0.67 °C per board watt, though not steady by the registered test (E111).
-   E91's GPT-2 tiles, E88's split and card 0's fp16 and int8 sustained cells repeat on second cards (E112, E116, E114), and
-   the bit price follows the voltage on card 0 too (E118, a governor move). The A side's form (E113), int8 at gate level
+   E91's GPT-2 tiles and E88's split repeat on second cards (E112, E116); card 0's fp16 and int8 sustained cells were
+   re-run on the same card, three runs each (E114: fp16 ×1.23; int8's 1% is the clock); and the bit price follows the
+   voltage on card 0 too (E118, a governor move). The A side's form (E113), int8 at gate level
    (Q133(a)) and the power model's blind pool (Q133(b), E115: 0.29 W rms over 16 float tiles, a marginal fail) narrow the
    rest. → [03-experiments.md](03-experiments.md),
    E78–E118; [05-claims.md](05-claims.md), "Q130", "Q130 additions", "Q132" and "Q133";

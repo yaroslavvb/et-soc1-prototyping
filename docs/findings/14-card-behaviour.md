@@ -418,11 +418,14 @@ every complete ramp in the ring before the pin did. Rule 8, that the two sets wr
 version-matched source (et-platform `836a4ab`) and UNKNOWN for the exact running build. Change record:
 [`CHANGE-RECORD.md`](../reports/data/2026-11-01-e118-two-clock-card0/CHANGE-RECORD.md). 🛑 **A ring-reading trap it
 found:** `tools/claims-v3/dv2/sptrace_events.py` stops at the first binary power-status record, so it saw one
-throttle-up where the ring holds two, and a desk screen finds fewer governor lines with it than with
-`tools/claims-v3/hpl/sptrace_full.py` (E64 A1) in at least 454 of 950 committed dumps, a lower bound. Count ring events
-after an operating-point change with `sptrace_full.py`, by the delta between dumps; the published counts of the work
-that used the old reader (dv2, dv2v, hp and its copies, `tools/ettelem/analyze_dvfs.py`) were not traced, and the shared
-decoder was not edited. E77 moved aifoundry2's TDP the same evening; its record follows its verification.
+throttle-up where the ring holds two: in the dump after the return burst it stopped at the 16-byte record written 79 ms
+after the first throttle-up, and scored one new entry where `tools/claims-v3/hpl/sptrace_full.py` (E64 A1) reads eight,
+two of them throttle-ups ([`posthoc_g3_ring.txt`](../reports/data/2026-11-01-e118-two-clock-card0/posthoc_g3_ring.txt)). Count ring
+events after an operating-point change with `sptrace_full.py`, by the delta between dumps. How many of the lab's other
+committed dumps the old reader under-reads is not counted in any committed file; the published counts of the work that
+used it (dv2, dv2v, hp and its copies, `tools/ettelem/analyze_dvfs.py`) were not traced, and the shared decoder was not
+edited. E77 moved aifoundry2's TDP the same evening; its corrections after verification were under way when this was
+written, and an addendum records it.
 
 ## aifoundry1 card 0's PMIC over-power alarm: a third speed limit (31 October 2026, E84)
 

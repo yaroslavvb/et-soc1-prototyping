@@ -24,8 +24,8 @@ aifoundry1's card 1, frozen, then validated on aifoundry3, and E55–E57 also on
 E56 the mesh's routing order and stops, E57 the DRAM address map, the tensor reload, the shire's 128 B cap and
 stride-256 energy, E58 the rails' one-second filter. E59 is the sparse parity solver on aifoundry3's card (Q66,
 29 September): an engineering benchmark, not pre-registered. E60–E76 are the October campaign (Q119–Q129; E66,
-aifoundry2's idle slope, is recorded inside E68's entry); E77 is reserved for the rail at one temperature and was
-not registered; E78–E91 are Q130's of 31 October 2026 — the kinds energy matrix, the fp16 and int8 bit prices and
+aifoundry2's idle slope, is recorded inside E68's entry); E77, reserved for the rail at one temperature, was
+registered and run on 1 November under Q133's governor moves (its entry's dated note); E78–E91 are Q130's of 31 October 2026 — the kinds energy matrix, the fp16 and int8 bit prices and
 the DRAM pattern on aifoundry3, speed under aifoundry2's own governor (E80, E83), the matrix on aifoundry1's card 1
 (E82), a speed replicate on aifoundry1's card 0 (E84), the camera per kind (E85), and the evening round: the real
 GPT-2 tiles' energy and speed (E86, E87), the result path's share (E88), heat below 12 W (E89), sign patterns and
@@ -3503,8 +3503,8 @@ follows E76.
 **Dated note, Sun 1 Nov 2026 (week 44), Q133:** E77 was registered (`33b3be77`, amendments `c1beebb8` and `b8db7e92`) and
 run on aifoundry2, 17:26–17:59 PST, as one of Q133's governor moves under the owner's OK of that day (the GO `724a5473`;
 TDP 65 → 0 → 65, read back each time, no reset; data and README `be8ec992` and `cb3f1475`,
-[`2026-11-01-e77-rail-one-temperature/`](../reports/data/2026-11-01-e77-rail-one-temperature/README.md)). Its verification
-was still running when Q133's records were written, so its result is not recorded here; an addendum records it.
+[`2026-11-01-e77-rail-one-temperature/`](../reports/data/2026-11-01-e77-rail-one-temperature/README.md)). Its corrections
+after verification were under way when Q133's records were written, so its result is not recorded here; an addendum records it.
 
 ## E78 — kinds: the kinds-of-numbers energy matrix, 51 kinds in three formats at one clock (Q130; card runs 2026-10-31, 12:56–14:03 PDT, aifoundry3) — pre-registered
 
@@ -5205,7 +5205,8 @@ P1–P7 and the scorer (`b05e610d`, pushed 16:00:44 PST, 59 s before the claim).
 **Scored:** P1, P3, P5, P6, P7 **PASS**; P2 **REJECTED**; P4 **which bits**; every arm agrees. No departure; three notes in the
 README (the mirror formed post hoc on E70's numbers before the registration, c's 5% move partly the B side's session, the
 smoke gate counting launch records).
-**What it changes.** Item 15's A-side clause is answered in outline for the quiet partner on one card; its residuals (1–6 low
+**What it changes.** The A side's saturating form (the final critic's item 13; section 11 has no line for it, so E113
+files it under item 15) is answered in outline for the quiet partner on one card; its residuals (1–6 low
 bits, the top rung), the busy partner, other base words, fp16 and int8, and a gated lane stay open. For item 6's A-side
 clause, post hoc: if net toggles stood for watts, the fixed bench counts an A flip 1.2–1.7× too high against a B flip at the
 same positions.
@@ -5292,7 +5293,7 @@ item of section 11; on that list it bears on item 5 (E88's held fp32 sign on a s
 only through E88's own model; and section 5.3's "All of this is one card" and "int8's were not read". **Pre-registered** in
 [`tools/claims-v3/e116/README.md`](../../tools/claims-v3/e116/README.md) with `predictions-e116.json`, accum.c's words for every
 tile (`expect-e116.json`), the scorer and its self-test (`8bac6da5`, committed 16:49:57 PST), before the claim; amendment A1
-(`3f832bd6`, 17:00:58, before any power data: one more pass after the queue, which the queue's five passes left unused). Data:
+(`3f832bd6`, 17:00:58, before any power data were read: one more pass after the queue, which the queue's five passes left unused). Data:
 [`docs/reports/data/2026-11-01-e116-split-replicate/`](../reports/data/2026-11-01-e116-split-replicate/README.md)
 (`2d2f358a`; corrected after verification in `3b97f1c1`, C1–C8, no number or verdict changed). Claim `1566615650871541861`,
 16:51:17–17:24 PST, **32.4 card-minutes**: the read-back, then passes 11610–11614, 177 runs, 3 skipped by E78's launch rule,
@@ -5442,9 +5443,9 @@ post hoc: E107's prices per missing line rest on a desk L2 model's line counts, 
 bench's register count. Give the count's source beside the price, and the mean minion's figure beside the launch's pace.
 (34) A firmware-revisions query is a PMIC command (E114 C1): take a card's identity by uptime continuity, as E118 and E77 did.
 (35) The shared ring decoder `tools/claims-v3/dv2/sptrace_events.py` stops at the first binary power-status record: E118's G3
-read one throttle-up where the ring held two, and a desk screen finds fewer governor lines with it in at least 454 of 950
-committed dumps, a lower bound. Read ring events after an operating-point change with `tools/claims-v3/hpl/sptrace_full.py`
-(E64 A1), by the delta between dumps. (36) Simulations stay off the card hosts, even with the card idle (E107's C8): build
+read one throttle-up where the ring held two ([`posthoc_g3_ring.txt`](../reports/data/2026-11-01-e118-two-clock-card0/posthoc_g3_ring.txt)).
+Read ring events after an operating-point change with `tools/claims-v3/hpl/sptrace_full.py` (E64 A1), by the delta between
+dumps; counts published with the old reader were not re-read. (36) Simulations stay off the card hosts, even with the card idle (E107's C8): build
 the simulator on the Intel. (37) A same-session control needs about five passes to stand in for a reference row (E118's C1
 kept two of three). (38) Lesson (12) held again: E112 registered the automatic leakage slope by re-running E91 unchanged, and
 card 1's 0.414 W/°C decided its R5. (39) Every RTL-side count names its merge: at gate level `nets_map` and `nets_hier`
