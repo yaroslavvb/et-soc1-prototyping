@@ -169,6 +169,13 @@ never sent. The checker's output is kept with the data (`logs/dmcmd_audit_e127.t
 voltage-register reads his rule of Mon 2 Nov allows. If `run_e127.sh setup` finds either binary's sha256 changed, the list does not
 describe what would run: that is NO-GO, and the run stops there.
 
+*Note added Mon 2 Nov 2026, after the run, from its verification (nothing above changed): this list is classified from the public BL2
+0.22.0 at `836a4ab`, and "the build aifoundry3 reports" is a version, not a source. aifoundry3 runs the thermal firmware build flashed on
+7 October 2026, which answers command 74 (`DM_CMD_GET_ASIC_PVT_SAMPLES`), absent from `836a4ab`, and whose source is not held
+(`docs/findings/14-card-behaviour.md`, "A finer reading exists on aifoundry3's firmware build"; E89). So the class of the nine GETs on the
+running build rests on the public source plus their unchanged behaviour as the stock telemetry this card has answered since 7 October; the
+run's replies were normal (`since_reset_ms` −1 in every sample). The data README's correction C4 says the same.*
+
 ## Stops
 
 E115's three passes of these anchors on this card read at most **55.07 W** board power and **63 °C** on the die (its
@@ -178,6 +185,13 @@ reading ≥ 65 W** at any of E78's pre-launch reads writes the pass's STOP file 
 `guard_board_power`, a wrapper on `run_e78.last_sample` that changes nothing else; the self-test checks it fires at 65.0 W and
 not at 64.9 W). Either stop ends the queue. The PMIC over-power alarm that aifoundry1's card 0 showed sits at 75 W (E84; Q134(a)); this
 card's was never read. E127's highest expected reading is 20 W below that, and nothing in E127 risks a power cycle.
+
+*Note added Mon 2 Nov 2026, after the run, from its verification (nothing above changed): "a PMIC reading ≥ 80 °C" is not a PMIC reading.
+`run_e78.py` stops at `temp_c.pmic` ≥ `--max-c` + 10, and that field is `ettelem`'s `pmic_sys`, which `get_module_current_temperature`
+(`services/thermal_pwr_mgmt.c` at `836a4ab`) fills from `pvt_get_minion_avg_temperature`, the minion shires' PVT average; in E127's telemetry
+it equals `minshire[0]` in 16,149 of 16,155 samples (±1 °C in the other 6). So E127's two temperature stops were both die readings (70 °C and
+80 °C), it read no PMIC temperature, and its margin to a PMIC over-temperature rested on board power and die temperature alone (the run's
+highest readings: 53.84 W and 62 °C). Later lanes should not count this field as a PMIC guard.*
 
 ## The frozen predictions
 
@@ -326,3 +340,7 @@ side), `reduce_e127.py` (reduce_e78.py unchanged, labelled arms), `score_e127.py
 ## Amendments
 
 *(none yet)*
+
+*Notes added after the run (not amendments: no procedure, prediction or rule changed), Mon 2 Nov 2026, from the run's verification: one
+under § Device commands sent (the firmware build whose source the list could not read) and one under § Stops (what the "PMIC reading" is).
+The data README's § Corrections after verification lists every correction.*

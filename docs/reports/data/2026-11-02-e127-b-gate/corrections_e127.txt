@@ -1,0 +1,47 @@
+1. q_blk, R5's tile (data still; lanes off 32 cycles, live 32, all eight together)
+  Q4 = q_blk - q_steady, measured                                    -0.472 [-0.545, -0.399] W
+  M5's frozen point for Q4: -0.830 W
+  e(Q4), its excess over M5                                          +0.358 [+0.285, +0.431] W
+  e(Q3), the all-off part (q_alt - q_chk, equal flips)               +0.344 [+0.292, +0.395] W
+  e(Q4) - e(Q3), paired inside each pass                             +0.015 [-0.083, +0.112] W
+  D fp32.q_steady      4.718 +- 0.045 W
+  D fp32.q_steady_hi   4.853 +- 0.094 W
+  D fp32.q_blk         4.246 +- 0.080 W
+  the per-flip part at q_blk's 128 flips an op, at e(Q2)'s price: +0.025 W
+
+2. Lane position, R6's contrast (data still)
+  Q5 = q_steady_hi - q_steady, measured                              +0.135 [+0.035, +0.235] W
+  e(Q5)                                                              +0.140 [+0.040, +0.240] W
+  R6 PASS on the primary (|Q5| + h = 0.235 W <= 0.30); at the arms: dips_kept INCONCLUSIVE, leak0.1994 PASS, leak0.3803 INCONCLUSIVE, leak0 INCONCLUSIVE, gates_off PASS
+
+3. Lane position's share of the other contrasts, if it adds per live lane-cycle (assumed, not tested)
+  fp32.q_steady          live lane-cycles an op 2048; on lanes 0-3: 0.000
+  fp32.q_steady_hi       live lane-cycles an op 2048; on lanes 0-3: 1.000
+  fp32.q_chk             live lane-cycles an op 2048; on lanes 0-3: 0.500
+  fp32.q_alt             live lane-cycles an op 2048; on lanes 0-3: 0.500
+  fp32.q_blk             live lane-cycles an op 2048; on lanes 0-3: 0.500
+  fp32.g_blanes_chk      live lane-cycles an op 2048; on lanes 0-3: 0.500
+  fp32.g_blanes_steady   live lane-cycles an op 2048; on lanes 0-3: 0.000
+  fp32.g_blanes_alt      live lane-cycles an op 2048; on lanes 0-3: 0.500
+  Q1: carries +0.50 x e(Q5) = +0.070 W of lane position
+  Q2: carries +0.50 x e(Q5) = +0.070 W of lane position
+  Q3: carries +0.00 x e(Q5) = +0.000 W of lane position
+  Q4: carries +0.50 x e(Q5) = +0.070 W of lane position
+  B1: carries +0.50 x e(Q5) = +0.070 W of lane position (random data: only if lane position is the same there; no random q_steady_hi was run)
+  B2: carries +0.00 x e(Q5) = +0.000 W of lane position (random data: only if lane position is the same there; no random q_steady_hi was run)
+  B3: carries +0.50 x e(Q5) = +0.070 W of lane position (random data: only if lane position is the same there; no random q_steady_hi was run)
+  e(Q2) - 1/2 e(Q5): the per-lane part without lane position         +0.740 [+0.665, +0.816] W
+    the same per lane-gate flip                                      +161.233 [+144.750, +177.716] fJ per flip
+    e(Q2) per lane-gate flip, as posthoc_e127.txt section 2          +176.455 [+155.964, +196.945] fJ per flip
+  e(Q1) - 1/2 e(Q5): the whole quiet miss without lane position      +1.084 [+1.007, +1.160] W
+  per-lane share of the quiet miss without lane position: 0.683 (with it, posthoc_e127.txt: 0.702)
+  random data, if the same term applies there: per-lane share 0.734 (with it: 0.750); R2's ratio e(Q1)/e(B1) 0.982 (with it: 0.984)
+  e(Q4) - 1/2 e(Q5) - e(Q3), paired                                  -0.055 [-0.160, +0.049] W
+
+4. fp16 against fp32, data still
+  R3: e(F2) +1.129 [+1.040, +1.219] W against e(F1) +1.292; ratio 0.874 [0.756, 0.993]
+  R2: ratio 0.984 [0.905, 1.062]
+  e(Q1) - e(F2), paired: the quiet miss in watts, fp32 against fp16  +0.024 [-0.079, +0.128] W
+
+5. What the per-flip price is beyond (Q2 = q_chk - q_steady)
+  Q2 measured +1.275 W = 278 fJ a flip if all of it were the flips; M5 prices +0.465 W of it (its bus and rest terms; M5 has no per-flip term); the excess +0.810 W = 176 fJ a flip, the post hoc price beyond M5
