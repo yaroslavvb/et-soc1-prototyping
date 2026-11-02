@@ -52,7 +52,8 @@ case "$cmd" in
   go)
     nb=${2:?smoke not before HH:MM}
     if [ -e "$B/runs/queue.jsonl" ]; then echo "refusing: $B/runs already has a queue"; exit 2; fi
-    python3 "$T/e133/make_schedule_e133.py" --date "$(date +%F)" --smoke-not-before "$nb" --smoke-latest 11:00 --w3-not-before 14:15 \
+    # amendment A1 (Mon 2 Nov 2026): the smoke's latest start 11:30 (was 11:00); the budget 110 less the first session's 0 card-minutes
+    python3 "$T/e133/make_schedule_e133.py" --date "$(date +%F)" --smoke-not-before "$nb" --smoke-latest 11:30 --w3-not-before 14:15 \
       --w3-latest 14:45 --no-start-after 15:00 --cutoff 16:00 --out "$B/schedule.json"
     mkdir -p "$B/runs"
     setsid nohup python3 "$T/e133/queue_e133.py" --schedule "$B/schedule.json" --runs "$B/runs" > "$B/queue.out" 2>&1 < /dev/null &

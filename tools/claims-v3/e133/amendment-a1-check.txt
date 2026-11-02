@@ -1,0 +1,52 @@
+E133 amendment A1 check, 2026-11-02 10:10:09 PST, at f4a4af74 plus the uncommitted A1 files (run_e133.py, run_e133.sh, E133.md)
+
+== 1. the guard on the audited chain: every protocol's plan (run_e133.py --list, as run_e133.sh check runs it) ==
+  smoke  4 runs, about 2 min plus gates; 3 tiles verified against kinds.json (9586568f23a9)
+         rc=0
+  w2     12 runs, about 56 min plus gates; 8 tiles verified against kinds.json (9586568f23a9)
+         rc=0
+  end    1 runs, about 2 min plus gates; 0 tiles verified against kinds.json (9586568f23a9)
+         rc=0
+  w1b    2 runs, about 32 min plus gates; 1 tiles verified against kinds.json (9586568f23a9)
+         rc=0
+  end2   1 runs, about 2 min plus gates; 0 tiles verified against kinds.json (9586568f23a9)
+         rc=0
+  w3     11 runs, about 26 min plus gates; 8 tiles verified against kinds.json (9586568f23a9)
+         rc=0
+
+== 2. the guard on a copy whose run_hpl.py differs by one comment line (expect REFUSED, exit 2, before any import) ==
+  rc=2
+  E133 REFUSED (amendment A1): the chain is not the audited one: hpl/run_hpl.py: b51784a07dec7891 (audited 68493295504fba5d)
+  and with the audited run_hpl.py restored but run_kspeed.py changed:
+  rc=2
+  E133 REFUSED (amendment A1): the chain is not the audited one: kspeed/run_kspeed.py: 1f72233219fcc3e9 (audited d3d844c7912d873f)
+
+== 3. the dry queue, SMOKE then END2 (the toy card; no device), through the guarded runner ==
+  rc=0
+   start SMOKE rc None  
+   end SMOKE rc 0  0.72
+   start END2 rc None  
+   end END2 rc 0  0.37
+   queue_end  rc None done 
+    SMOKE e133.json: wrapper b0fa99934a6ab1c1 run_hpl 68493295504fba5d run_kspeed d3d844c7912d873f
+    END2 e133.json: wrapper b0fa99934a6ab1c1 run_hpl 68493295504fba5d run_kspeed d3d844c7912d873f
+
+== 4. Q136(w)'s checker at HEAD (32e9c109) over the chain, with E133's two reviewed exceptions ==
+  with the two exceptions: rc=0
+    dmcmd_audit: GO (37 send site(s), 0 disallowed; allow-list: none)
+    summary:
+    summary:
+      GET_ASIC_FREQUENCIES                       READ         pmic none      6 site(s)  ok
+      GET_ASIC_VOLTAGE                           READ         pmic read      6 site(s)  ok
+      GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+      GET_MODULE_POWER                           READ         pmic none      2 site(s)  ok
+      GET_MODULE_POWER_STATE                     READ         pmic none      5 site(s)  ok
+      GET_MODULE_RESIDENCY_THROTTLE_STATES       READ         pmic none      2 site(s)  EXCEPTED
+      GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      5 site(s)  ok
+      GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      5 site(s)  ok
+      GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+      GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+      TRACE_EXTRACT                              READ         pmic none      3 site(s)  ok
+  without them: rc=3
+    NO-GO tools/claims-v3/e133/selftest_e133.sh:66: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES: SP_ERROR_LOG
+    NO-GO tools/claims-v3/hpl/run_hpl.py:622: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES: SP_ERROR_LOG

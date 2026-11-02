@@ -27,12 +27,43 @@ import sys
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+# Amendment A1 (Mon 2 Nov 2026, before any E133 data): the chain must be the audited one. Before the runner is imported and before
+# any device access, the three files it runs are hashed; any other copy refuses with exit 2 (the queue halts). No command is sent.
+AUDITED = {os.path.join("hpl", "run_hpl.py"): "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227",
+           os.path.join("kspeed", "run_kspeed.py"): "d3d844c7912d873fb1fe80c92dd72124d2714e493bcf4f73a961cfa26d894c0c",
+           os.path.join("e111", "idle_logins_e111.py"): "91094be5f9af14c0897a817b7d95777fdaaa6ab12b49304883ccb3d066574ef4"}
+
+
+def chain_differs():
+    bad = []
+    for rel, want in AUDITED.items():
+        p = os.path.realpath(os.path.join(HERE, "..", rel))
+        try:
+            got = hashlib.sha256(open(p, "rb").read()).hexdigest()
+        except OSError as e:
+            got = f"unreadable: {e}"
+        if got != want:
+            bad.append(f"{rel}: {got[:16]} (audited {want[:16]})")
+    return bad
+
+
+_bad = chain_differs()
+if _bad:
+    print("E133 REFUSED (amendment A1): the chain is not the audited one: " + "; ".join(_bad), flush=True)
+    sys.exit(2)
+
 sys.path.insert(0, os.path.join(HERE, "..", "kspeed"))
 import run_kspeed as K  # noqa: E402
 sys.path.insert(0, os.path.join(HERE, "..", "e111"))
 import idle_logins_e111 as IL  # noqa: E402
 
 H = K.H
+for _m, _rel in ((H, os.path.join("hpl", "run_hpl.py")), (K, os.path.join("kspeed", "run_kspeed.py")),
+                 (IL, os.path.join("e111", "idle_logins_e111.py"))):
+    if os.path.realpath(_m.__file__) != os.path.realpath(os.path.join(HERE, "..", _rel)):   # A1: the imported module is the hashed file
+        print(f"E133 REFUSED (amendment A1): {_rel} was imported from {_m.__file__}", flush=True)
+        sys.exit(2)
 # The toy card's switching watts for these tiles, under --dry only (run_e111.py's DRY_C, unchanged).
 DRY_C = {"fp32/zeros": 1.6, "fp16/zeros": 1.4, "int8/zeros": 2.1, "int8/neg_ones": 2.7, "int8/sparse50": 8.1, "fp16/ones": 9.7,
          "int8/full": 9.1, "fp32/randn": 25.2}
