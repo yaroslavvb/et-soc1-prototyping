@@ -4,7 +4,7 @@
 change after this commit goes under Amendments, dated, before the data it touches. Results go above the registration
 when the run is done; nothing below is edited.*
 
-## Results (the run: Sun 1 Nov 2026, 20:49–21:20 PST; written 21:3x PST)
+## Results (the run: Sun 1 Nov 2026, 20:49–21:20 PST; written 21:2x PST)
 
 **The registered verdict is FAIL, narrowly, and the bound is new: the regulators' conduction share of the 0.875 pJ row
 is at most 0.69 pJ.** On the central footing R_eff = **0.55 mΩ, 99% [−0.06, +1.16] mΩ** over five passes (per pass 0.61,

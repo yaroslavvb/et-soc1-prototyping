@@ -228,7 +228,10 @@ Read 2026-11-01T20:49:02.628-0800 to 2026-11-01T20:49:04.829-0800 under the card
 - **Logs and artefacts:** the run directory as `raw/` beside this file (telemetry gzipped; the box's tree path written
   `<tree>`); the vmin-LUT file stays on the host as per-card calibration data.
 - **Unresolved risks:** none from the operation.
-- **Signoff:** the run agent, Sun 1 Nov 2026, 21:3x PST (05:3x UTC Mon 2 Nov); no independent reviewer.
+- **The post:** this run's clause dropped from the day's one `#community-lab` post at 21:25:05 PST, after the data
+  commit `9af99e8a` was pushed (21:24:28); another lane's aifoundry3 clause was then named, so it stays as the post's
+  whole text (section 15's rule), read back at 21:25:40 PST.
+- **Signoff:** the run agent, Sun 1 Nov 2026, 21:24 PST (05:24 UTC Mon 2 Nov); no independent reviewer.
 
 ## Template mapping
 
