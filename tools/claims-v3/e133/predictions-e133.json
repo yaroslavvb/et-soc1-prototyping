@@ -1,0 +1,354 @@
+{
+ "budget": {
+  "card_min": 110,
+  "cutoff": "16:00 PST",
+  "e111_actual_min": {
+   "END": 2.0,
+   "END2": 2.0,
+   "SMOKE": 0.7,
+   "W1B": 28.7,
+   "W2": 48.1
+  },
+  "hold_processes": 190,
+  "no_start_after": "15:00 PST",
+  "plan_min": {
+   "END": 2.5,
+   "END2": 2.5,
+   "SMOKE": 1.5,
+   "W1B": 30.0,
+   "W2": 50.0,
+   "W3": 24.0
+  }
+ },
+ "card": "aifoundry2",
+ "experiment": "E133",
+ "frozen_before_the_claim": true,
+ "morning_idle_before_freeze": {
+  "die_c": [
+   43.01,
+   43.48
+  ],
+  "w": [
+   21.235,
+   21.356
+  ],
+  "window_pst": "06:46-08:26 (card free), 2 Nov 2026"
+ },
+ "partA": {
+  "bands": {
+   "e97_aifoundry3_plateau": [
+    0.86,
+    0.95
+   ],
+   "lab_model_sept": [
+    1.25,
+    1.7
+   ],
+   "line_76s": [
+    0.4,
+    0.52
+   ],
+   "linearity_ratio": [
+    0.9,
+    1.11
+   ],
+   "prior_aifoundry2": [
+    0.62,
+    0.82
+   ]
+  },
+  "clock_share_min": 0.9,
+  "fine_min_share": 0.7,
+  "holds": {
+   "H-F32": {
+    "clock_mhz": 600,
+    "idle_after": "END",
+    "idle_before": "W2",
+    "kind": "fp32/randn",
+    "run": "HOLDF-00-fp32-randn-hold-r1",
+    "step": "W2"
+   },
+   "H-I8": {
+    "clock_mhz": 800,
+    "idle_after": "END2",
+    "idle_before": "W1B",
+    "kind": "int8/neg_ones",
+    "run": "HOLD-00-int8-neg_ones-hold-r1",
+    "step": "W1B"
+   }
+  },
+  "idle_window_s": 60,
+  "k_fine_w_per_c": 0.442,
+  "k_note": "E64's 0.442 W/C at a fixed clock (E98 constants l_800_w_per_c), used for both holds, frozen",
+  "plateau_s": 300,
+  "predicted": {
+   "H-F32": {
+    "c": 0.6712,
+    "die_at_the_floor_at_morning_idle": 65.01,
+    "verdicts": {
+     "A1": "FAIL",
+     "A2_e97": "FAIL",
+     "A2_lab": "FAIL",
+     "A2_line": "FAIL",
+     "A2_prior": "PASS",
+     "A3": "PASS",
+     "R1": "PASS",
+     "R2": "AT THE TRIP if W2's REST idle die < 43.5 C, else AT THE FLOOR"
+    }
+   },
+   "H-I8": {
+    "c": 0.6719,
+    "die_at_morning_idle": 55.75,
+    "verdicts": {
+     "A1": "FAIL",
+     "A2_e97": "FAIL",
+     "A2_lab": "FAIL",
+     "A2_line": "FAIL",
+     "A2_prior": "PASS",
+     "R1": "PASS"
+    },
+    "w_at_morning_idle": 39.91
+   }
+  },
+  "previous_s": 300,
+  "prior": {
+   "camera_sessions_near_steady": {
+    "E63-s1": {
+     "c": 0.6954,
+     "die": 55.528,
+     "harts": 256,
+     "rest_die": 46.11,
+     "rest_w": 21.952,
+     "w": 35.495
+    },
+    "E73": {
+     "c": 0.708,
+     "die": 56.09,
+     "harts": 192,
+     "rest_die": 47.09,
+     "rest_w": 22.17,
+     "w": 34.882
+    },
+    "E85": {
+     "c": 0.7179,
+     "die": 55.06,
+     "harts": 192,
+     "rest_die": 47.55,
+     "rest_w": 22.334,
+     "w": 32.796
+    }
+   },
+   "e98_holds_5p5min": {
+    "P1": {
+     "c": 0.7194,
+     "hold_die": 60.4154,
+     "hold_w": 40.9446,
+     "rest_die_raw": 46.8667,
+     "rest_w": 22.1105
+    },
+    "P3": {
+     "c": 0.6613,
+     "hold_die": 58.0486,
+     "hold_w": 39.9813,
+     "rest_die_raw": 46.0904,
+     "rest_w": 21.8971
+    },
+    "P6": {
+     "c": 0.6844,
+     "hold_die": 58.795,
+     "hold_w": 40.3586,
+     "rest_die_raw": 46.1958,
+     "rest_w": 21.9486
+    },
+    "P7": {
+     "c": 0.7096,
+     "hold_die": 58.485,
+     "hold_w": 39.9241,
+     "rest_die_raw": 45.6786,
+     "rest_w": 21.8771
+    }
+   },
+   "fan_swap_9oct_heavy_run": 0.68,
+   "range_of_the_near_steady_readings": [
+    0.68,
+    0.7179
+   ]
+  },
+  "proxy_c_per_c_of_rest_die": {
+   "a1-nic": 0.92,
+   "a1-nvme": 0.91,
+   "a1c0-die": 0.89,
+   "a1c1-die": 1.1,
+   "a3-nic": 0.903,
+   "note": "E98 section 5's nine-day relations (a3-nic: Q132(g)'s r against a2's idle W, used as a slope of 0.903 C per C as a stand-in); an arm, never a verdict"
+  },
+  "replicate": {
+   "band": [
+    0.9,
+    1.11
+   ],
+   "e111": {
+    "H-F32": {
+     "A1": "FAIL",
+     "c": 0.6712,
+     "c_hi": 0.6846,
+     "c_lo": 0.6513,
+     "dW_w": 32.424,
+     "idle_mean_die": 45.5,
+     "plateau_die": 67.2631,
+     "plateau_w": 54.2235,
+     "rise_c": 21.763,
+     "share_clock": 1.0
+    },
+    "H-I8": {
+     "A1": "FAIL",
+     "c": 0.6719,
+     "c_hi": 0.6962,
+     "c_lo": 0.6471,
+     "dW_w": 18.61,
+     "idle_mean_die": 46.5,
+     "plateau_die": 59.0041,
+     "plateau_w": 40.6221,
+     "rise_c": 12.504,
+     "share_clock": 0.9764
+    }
+   },
+   "e111_results_sha256": "5672433c52346d1c479c1a6e53645f90ce441812c299cd4c21fbae25fdc6523d",
+   "rule": "E133-R1: c(E133) / c(E111) per kind, its range from the two ranges' extremes, against the band; PASS (REPLICATES) inside, FAIL (DIFFERS) wholly outside, INCONCLUSIVE otherwise"
+  },
+  "room_clock": {
+   "e111_rise_c": 21.763,
+   "floor_die_at_morning_idle": 65.01,
+   "governor_threshold_c": 65,
+   "rule": "E133-R2: H-F32's share of plateau samples at 600 MHz: AT THE FLOOR if >= 0.90 (E111's clock_share_min), AT THE TRIP otherwise; predicted from W2's REST idle die (its last 60 s): the floor plateau would sit at idle + 21.76 C (E111's rise), so below 65 C (the governor's threshold) and the clock above the floor when the idle is under 43.5 C (the leakage's smaller climb in a cooler room taken as about 0.3 C)",
+   "threshold_idle_c": 43.5
+  },
+  "slope_bin_s": 30,
+  "slope_window_s": 600,
+  "steady_bar_c_per_min": 0.02
+ },
+ "partB": {
+  "b3_min_lead_c": 0.5,
+  "b3_noise_per_probe_c": {
+   "hold": 0.375,
+   "line": 0.089,
+   "note": "E98's measured hold scatter among its later probes (README section 2) and its positional line scatter (C4), frozen"
+  },
+  "b3c": {
+   "baseline": {
+    "hold_die": 58.443,
+    "line": 39.346,
+    "rest_die_w_derived": 94.633
+   },
+   "min_abs_lead_c": 0.5,
+   "morning_dx": -2.644,
+   "morning_rest_die_w_derived": 91.989,
+   "predicted": {
+    "hold_at_morning_e111_fit": 54.837,
+    "hold_at_morning_path": 52.943,
+    "hold_at_morning_room": 55.482,
+    "hold_per_c": null,
+    "hold_verdict": "no side predicted (the registered question: room 1.00-1.25, path 2.08)",
+    "line_at_morning_e111_fit": 38.117,
+    "line_at_morning_room": 38.685,
+    "line_per_c": 0.472,
+    "line_verdict": "ABOVE_TARGET"
+   },
+   "rule": "E133-B3c, a cool or warm probe against the night's baseline: E111-B3's reading (each probe's rest-die lead dx over the mean of P3, P6, P7, W-derived; its line lead and hold lead per C of dx; E98's frozen per-probe scatter, one probe against a mean of three; the line on E98-R1's partition, the hold on E98-R2's), counting every E133 probe with |dx| >= 0.5 C, cool or warm, and naming its side"
+  },
+  "baseline_probes": [
+   "P3",
+   "P6",
+   "P7"
+  ],
+  "e111_probes": [
+   "W1",
+   "W2"
+  ],
+  "e133_probes": [
+   "W2",
+   "W3"
+  ],
+  "e98_constants": {
+   "gain_hold": 1.253,
+   "gain_rest": 1.118,
+   "k_line_c_per_w": 0.4573,
+   "l_800_w_per_c": 0.442,
+   "line_slope_desk": 0.25,
+   "p_hold_w": 41.0,
+   "p_rest_w": 22.1,
+   "rest_w_per_c": 0.2315
+  },
+  "e98_gates": {
+   "min_gated_runs_per_probe": 6,
+   "min_probes": 4,
+   "min_rest_range_c": 0.75,
+   "rest_history_window_min": 20,
+   "rest_min": 15,
+   "rest_min_rows": 60,
+   "rest_skip_after_busy_min": 10
+  },
+  "e98_probes": [
+   "P1",
+   "P2",
+   "P3",
+   "P6",
+   "P7"
+  ],
+  "e98_targets": {
+   "fine_line_w_per_w_desk": 0.6,
+   "from_rest_line_slope": 0.89,
+   "from_rest_w_per_w_room": 2.14,
+   "hold_band": [
+    1.0,
+    1.25
+   ],
+   "hold_floor": 0.25,
+   "hold_slope_path": 2.08,
+   "hold_slope_room": 1.12,
+   "hold_w_band": [
+    1.91,
+    2.39
+   ],
+   "hold_w_per_w_if_line_slope": 0.6,
+   "hold_w_per_w_path": 3.97,
+   "hold_w_per_w_room": 2.14,
+   "line_slope": 0.25,
+   "trip_mhz_per_c": -12.0,
+   "trip_w_per_c": -1.0
+  },
+  "hold39_processes": 39,
+  "p1_lead_per_c": {
+   "hold": 2.2497,
+   "line": 0.5211,
+   "note": "E98's contrast, P1 minus the mean of P3, P6 and P7 (checks.txt K1): line +0.457 C, hold +1.973 C, rest die +0.877 C"
+  },
+  "predicted": {
+   "B0": "OK",
+   "B1": "ABOVE_TARGET",
+   "B2": "no side predicted",
+   "B4": "no side predicted (the morning's fp16 ones may run at 800 MHz, under the trip, which E98-S4 does not model)",
+   "BV": "no side predicted"
+  }
+ },
+ "request": "Q136",
+ "sources": {
+  "e111_predictions": "e7431e6e1a51077232fb31d8c3629a031fdef7db8135642ec2ac2bbd82006c97",
+  "e111_results": "5672433c52346d1c479c1a6e53645f90ce441812c299cd4c21fbae25fdc6523d",
+  "e98_predictions": "53c1142942c39bcabf37c7defde34fc0063afe9c6d380749e048a1de7607ff67"
+ },
+ "t975": {
+  "1": 12.706,
+  "2": 4.303,
+  "3": 3.182,
+  "4": 2.776,
+  "5": 2.571,
+  "6": 2.447,
+  "7": 2.365,
+  "8": 2.306
+ },
+ "w3": {
+  "min_rise_over_w2_idle_c": 1.0,
+  "rule": "W3 (optional) runs only if, read at about 14:05 PST on aifoundry2's own history, the free card's idle die (10-minute mean) is at least 1.0 C above W2's REST idle die, the budget holds it (used + 24 <= 110) and the card is free; then the #community-lab post names the card again and GO-W3 is touched; else SKIP-W3"
+ }
+}

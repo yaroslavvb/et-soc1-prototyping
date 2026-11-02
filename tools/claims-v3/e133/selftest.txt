@@ -1,0 +1,83 @@
+E133 self-test, 2026-11-02 08:57:43 PST, at 071e5afc plus the uncommitted E133 files
+
+== 1. regression ==
+E133: E111's two holds again on aifoundry2 in the morning's room, and the morning probe; its own governor, nothing set
+REGRESSION (before anything is scored): {"e98": {"keys_differing": [], "ok": true}, "e111_partB": {"keys_differing": [], "ok": true}, "e111_partA": {"keys_differing": [], "ok": true}, "ok": true}
+
+== 2. the scorer on E111's committed data posed as E133's (SMOKE, W2, END, W1B, END2, history, queue, phone linked) ==
+rc=0
+VERDICTS
+  E133-A1 H-I8                             FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-I8 prior_aifoundry2            PASS               predicted PASS                                                         as predicted
+  E133-A2 H-I8 lab_model_sept              FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-I8 e97_aifoundry3_plateau      FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-I8 line_76s                    FAIL               predicted FAIL                                                         as predicted
+  E133-A1 H-F32                            FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-F32 prior_aifoundry2           PASS               predicted PASS                                                         as predicted
+  E133-A2 H-F32 lab_model_sept             FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-F32 e97_aifoundry3_plateau     FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-F32 line_76s                   FAIL               predicted FAIL                                                         as predicted
+  E133-A3                                  PASS               predicted PASS                                                         as predicted
+  E133-R1 H-I8                             PASS               predicted PASS                                                         as predicted
+  E133-R1 H-F32                            PASS               predicted PASS                                                         as predicted
+  E133-R2                                  AT THE FLOOR       predicted AT THE FLOOR                                                 as predicted
+  E133-B0                                  OK                 predicted OK                                                           as predicted
+  E133-B1                                  ABOVE_TARGET       predicted ABOVE_TARGET                                                 as predicted
+  E133-B2                                  INCONCLUSIVE       predicted no side predicted                                            no side predicted
+  E133-BV                                  INCONCLUSIVE       predicted no side predicted                                            no side predicted
+  E133-B3c line                            SUPPORTS           predicted ABOVE_TARGET                                                 NOT as predicted
+  E133-B3c hold                            INCONCLUSIVE       predicted no side predicted (the registered question: room 1.00-1.25,  no side predicted
+  E133-B4 MHz                              SUPPORTS           predicted no side predicted (the morning's fp16 ones may run at 800 MH no side predicted
+  E133-B4 W                                SUPPORTS           predicted no side predicted (the morning's fp16 ones may run at 800 MH no side predicted
+  tally {"FAIL": 8, "PASS": 5, "AT THE FLOOR": 1, "OK": 1, "ABOVE_TARGET": 1, "INCONCLUSIVE": 3, "SUPPORTS": 3}
+  A3 {"ratio": 0.999, "lo": 0.9355, "hi": 1.058, "band": [0.9, 1.11], "verdict": "PASS"}
+  R1 {"H-I8": {"c_e133": 0.6719, "c_e111": 0.6719, "ratio": 1.0, "lo": 0.9295, "hi": 1.0759, "band": [0.9, 1.11], "verdict": "PASS"}, "H-F32": {"c_e133": 0.6712, "c_e111": 0.6712, "ratio": 1.0, "lo": 0.9514, "hi": 1.0511, "band": [0.9, 1.11], "verdict": "PASS"}}
+  R2 {"share_at_600": 1.0, "plateau_mhz": 600.0, "plateau_die": 67.2631, "plateau_w": 54.2235, "w2_rest_idle_die": 45.0, "predicted": "AT THE FLOOR", "verdict": "AT THE FLOOR", "as_predicted": true}
+  B3c: {"baseline": ["P3", "P6", "P7"], "per_probe": {"E133-W2": {"dx_c": -0.661, "line_lead": -0.274, "hold_lead": -0.174, "side": "cool", "line_per_c": 0.414, "hold_per_c": 0.263}}, "min_abs_lead_c": 0.5, "baseline_values": {"rest_die_w_derived": 94.633, "line": 39.346, "hold_die": 58.443}, "hold": {"slope": 0.2631, "lo": -1.0202, "hi": 1.5464, "se": 0.6548, "n": 1}, "verdict_hold": "INCONCLUSIVE", "line": {"slope": 0.4143, "lo": 0.1097, "hi": 0.7189, "se": 0.1554, "n": 1}, "verdict_line": "SUPPORTS"}
+
+== 3. the dry run on the Intel (dry-intel, the toy card; no device, no lock): the queue's steps ==
+  08:43:22 PST start SMOKE rc None cap 15  
+  08:44:06 PST end SMOKE rc 0 cap   0.72
+  08:44:11 PST start W2 rc None cap 15  
+  08:47:30 PST end W2 rc 0 cap   3.32
+  08:47:35 PST start END rc None cap 15  
+  08:47:57 PST end END rc 0 cap   0.37
+  08:48:02 PST start W1B rc None cap 15  
+  08:48:40 PST end W1B rc 0 cap   0.64
+  08:48:45 PST start END2 rc None cap 15  
+  08:49:08 PST end END2 rc 0 cap   0.37
+  08:49:13 PST start W3 rc None cap 15  
+  08:52:16 PST end W3 rc 0 cap   3.06
+  08:52:16 PST queue_end  rc None cap  done 
+  residency commands answered unsent in the dry run: 0 (a dry session sends no query at all)
+
+== 3b. the budget rule and the session cap, dry: budget 3 card-min, steps SMOKE,END2 (SMOKE's cap cut to 2.5; END2 refused) ==
+  rc=0
+    start SMOKE rc None cap 2.5 
+    end SMOKE rc 0 cap  
+    skip END2 rc None cap  card budget: 0.7 used + 2.5 planned > 3.0
+    queue_end  rc None cap  done
+
+== 4. the device-command audit (Q136(w)'s checker and table as committed at 96e24891) ==
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      6 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      6 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      2 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      5 site(s)  ok
+  GET_MODULE_RESIDENCY_THROTTLE_STATES       READ         pmic none      2 site(s)  EXCEPTED
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      5 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      5 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+  TRACE_EXTRACT                              READ         pmic none      2 site(s)  ok
+  tools/claims-v3/e133/selftest_e133.sh:66: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES [READ, pmic none] EXCEPTED: SP_ERROR_LOG: the unit check of section 5: a stand-in run_out records the argv; nothing is executed and no device is opened - varian
+  tools/claims-v3/hpl/run_hpl.py:622: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES [READ, pmic none] EXCEPTED: SP_ERROR_LOG: never sent in E133: run_e133.py wraps run_hpl.run_out so that any residency command returns at once, unsent (no process, no 
+    GET_MODULE_RESIDENCY_THROTTLE_STATES       READ         pmic none      2 site(s)  EXCEPTED
+  without the exceptions: NO-GO tools/claims-v3/e133/selftest_e133.sh:66: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES: SP_ERROR_LOG
+  without the exceptions: NO-GO tools/claims-v3/hpl/run_hpl.py:622: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES: SP_ERROR_LOG
+  without the exceptions: dmcmd_audit: NO-GO (36 send site(s), 2 disallowed; allow-list: none)
+
+== 5. the residency patch, unit-checked ==
+  residency -> (None, b'', b'E133: not sent') | passed through: [['timeout', '10', 'build/ettelem-hpl/ettelem', 'config'], ['timeout', '10', 'build/ettelem-hpl/ettelem', 'sptrace', '/x/residency.bin']]
+  OK: the residency command is answered unsent; config and sptrace (even with 'residency' inside a path) go through unchanged

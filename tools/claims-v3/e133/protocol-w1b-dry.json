@@ -1,0 +1,76 @@
+{
+ "experiment": "E133",
+ "request": "Q136",
+ "card": "aifoundry2",
+ "order_seed": 98,
+ "note": "E111's blocks, unchanged (E98's runner: run_kspeed.py over E64's run_hpl.py, run by run_e133.py): REST holds no launch; SUS is E98's nine runs in E98's order behind E98's 57 C gate; nothing is set on the card; the residency read run_hpl.py makes after every run is not sent (run_e133.py)",
+ "tools": {
+  "heater": "build/sparsity_t2/host/sparsity_host",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 80,
+  "board_cap_w": 93,
+  "cap_consecutive": 3,
+  "note": "E126's tightened stops (the owner's rules of 2 November 2026: nothing that risks a power cycle): 80 C on the die mean or the hottest sensor, 93 W on three samples. E111's own W2 peaked at 88.04 W (fp32 randn's first seconds at 800 MHz) and 68 C die mean; its hottest sensor's running maximum read 70 C"
+ },
+ "caps": {
+  "max_card_min": 15
+ },
+ "step": "W1B",
+ "from": {
+  "protocol": "tools/claims-v3/e111/protocol-w1b.json",
+  "blocks": "unchanged"
+ },
+ "blocks": [
+  {
+   "name": "REST",
+   "title": "the rest reading: no launch, the 10 Hz sampler on the idle card; the last 60 s are the reading",
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 20
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 0
+   },
+   "tail_s": 20,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest"
+    }
+   ]
+  },
+  {
+   "name": "HOLD",
+   "title": "amendment A2: the int8 hold H-I8 from rest, 190 back-to-back 8 s processes (~26.5 min) of int8 neg_ones behind E98's 57 C gate; the steady reading is the last 300 s",
+   "start": {
+    "mode": "cool",
+    "max_c": 57,
+    "max_wait_s": 20
+   },
+   "launch": {
+    "seconds": 8,
+    "budget": 9.5,
+    "processes": 1
+   },
+   "tail_s": 6,
+   "runs": [
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/neg_ones.bin",
+     "label": "int8-neg_ones-hold"
+    }
+   ]
+  }
+ ]
+}
