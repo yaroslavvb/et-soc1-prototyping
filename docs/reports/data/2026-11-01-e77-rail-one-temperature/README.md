@@ -4,7 +4,70 @@
 change after this commit goes under Amendments, dated, before the data it touches. Results go above the registration
 when the run is done; nothing below is edited.*
 
-**What it answers.** The kinds page's [§ 11 list](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open),
+## Results (the run: Sun 1 Nov 2026, 17:26–17:59 PST; written 18:1x PST)
+
+**The registered verdict is FAIL, and by the registration's own rule it is provisional.** On the central footing
+R_eff = **0.62 mΩ, 99% interval [−0.49, +1.73] mΩ** over three passes, and the fit's rms falls by 22.6% (the bar was
+30%) (`results.json` `footings.drift_split.fit`). The other two footings fail too: uncorrected 0.33 [−3.86, +4.53] mΩ,
+board_only 0.67 [−0.13, +1.47] mΩ. Read as the plan says, the whole 0.875 pJ row is logic in step with the rails, with
+the conduction loss bounded by the interval's upper edge: at most **2.84 W at a 21 W minion rail** (518 mV), 72% of the
+published 0.188 × 21 W, **≤ 0.63 pJ of the 0.875 pJ row** (`moves`). But **all four rung pairs missed the 5% matching
+(P2)**, so by the registered rule the f·V² transfer is reported as refuted on this card and the verdict as provisional,
+pending a re-cut ladder. The secondaries agree: the published small-rail coefficients 0.35 [−0.25, +0.96] mΩ, the plan's
+literal square 0.71 [−0.82, +2.24] mΩ, both FAIL; leaving nothing out changes nothing (no launch was flagged
+`below_floor`).
+
+**P1 FAIL, P2 four of four mismatched — and what broke (post hoc).** At equal hart counts arm B's minion watts over
+arm A's are **2.33** (544 harts) and **2.68** (288), against the frozen 1.913 ± 5%; at the designed pairs arm B reads
++22%, +30%, +39% and +79% more than arm A (`P1_ratio`, `P2_matching`). The per-hart transfer itself holds:
+fitting each arm's rung means against harts, arm A is **21.05 mW per hart** (−0.34 W, rms 0.05 W; the ledger's law
+was 22.31) and arm B **40.49 mW per hart** (+3.75 W, rms 0.08 W), a ratio of **1.924 against f·V² = 1.899** at the
+measured 518 / 618 mV, 1.3% apart (`posthoc.json`). What breaks the matching is an **offset in arm B: +4.09 W on the
+minion rail and +1.73 W on the SRAM rail at every rung**, the operating-point step. On this card the idle clock is
+600 MHz in both arms (the ring: "New OP: Freq 600 MNN 520 (V) SRM 705 (V)" at idle, "Freq 700 MNN 570 SRM 735" and
+"Freq 800 MNN 620 SRM 830" under load), so arm B's pre-launch idle sits at 600 MHz and its window at 800 MHz: its
+deltas carry the static and clock power of the higher operating point with no work at all. E77-PLAN.md's matching
+assumed each arm idles at its own clock, and this registration did not catch it.
+
+**With that step fitted (post hoc, no verdict),** offrail = a_m·Δm + c_B·[arm B] + R_eff·Δ(I²) per pass gives
+R_eff = **0.21 mΩ, 99% [−0.08, +0.50] mΩ**, rms better by 3.5%: still no conduction term, now bounded at **0.82 W at a
+21 W rail, ≤ 0.18 pJ of the 0.875 pJ row**. With the SRAM and NoC rails as regressors too: 0.64 [−0.69, +1.98] mΩ.
+A pre-registered re-run would define arm B's reference at its own operating point (or fit the step) and re-cut arm B's
+harts on the measured 40.5 mW per hart.
+
+**S-T, the rail at the launch temperature (secondary, no verdict).** Arm A's top rung is E38's own configuration
+(fp32 randn on 1,024 harts at 600 MHz), launched here at 54–55 °C with its drift measured in the same block. Its minion
+rail is **4.645 pJ per multiply-add on every footing** (4.648 on drift_split), because this block's minion drift is
+−0.001 ± 0.027 W/°C while the board's is 0.267 ± 0.098 W/°C, 76% of it off the three rails (`drift`, 43 body windows).
+The ledger's footings put the minion row at 4.55 / 4.77 / 4.95 pJ; at E77's launch temperature the footing choice moves
+it by 0.003 pJ, and the whole footing question sits in the off-rail row (0.97 pJ uncorrected, 0.56 on drift_split, 0.44
+on board_only). The board is 5.69 pJ uncorrected, 5.16 with the registered 0.81 W/°C (this block's own board slope,
+0.27 W/°C, is E66's idle 0.29). Caveats: a late window ([t1−1.5, t1]), the model's settling ratio (0.962; the 8 s rung
+did not run), seven launches (`secondary_rail_at_launch_temperature`).
+
+**The governor operation, as registered.** Originals 65 W / 65 °C by the two RAM GETs (17:27:01); TDP **65 → 0** at
+17:35:34.974, read back 0 / 65 at 17:35:34.999; the pin held every arm-A launch at 600 MHz (the abort never fired);
+**0 → 65** at 17:55:10.848, read back 65 / 65 at 17:55:10.871; the watchdog, armed at 17:35:34, read `release` and
+exited at 17:55:15; the return burst stepped **600 → 700 → 800 MHz** and arm B's third pass then ran all 12 launches at
+800 MHz; closing read 17:59:25: **65 W / 65 °C**, `low_power`, 600 MHz, module uptime 6 d 3 h 46 m (no reset). The
+ring criterion E72 left PARTIAL is partial here too: the dump right after the burst held no entry newer than the dump
+before it (the trace region lags), so its "Power throttle up" lines are older ones; the dump after arm B's third pass
+holds fresh throttle-up and throttle-down lines. Highest board reading 70.7 W (a 768-hart heater launch), 58.05 W in a
+kept launch; host kernel log: 22 events in the window, all the known `SP Runtime Error` syndrome, two per management
+burst, none inside a pass (`raw/kernel-events.txt`). 32.44 card-minutes. The change record has the full log.
+
+**What ran.** 67 of 72 launches (5 gates not reached: the preheat to 59 °C failed within 8 heater launches at the
+start of four passes and once mid-pass; arm A's heater, 1,024 harts at 600 MHz, heats slowly), 66 kept (one arm-B
+launch dropped by S1: its clock dipped after reaching 800 MHz); the 8 s settling rung's gate was not reached either.
+The gate held the rails to S2's settling test with approaches of 10.2–11.7 s; the launch readings were **54.9 °C in
+arm A (54–55) and 53.7 °C in arm B (53–54), a 1.2 °C gap** — above the 1 °C this registration said it would name. In
+arm B the clock reached 800 MHz 0.34–1.26 s after each launch began, before the window.
+
+**What it changes.** For the kinds page's § 11 item 13 and the Levels tab's stop 2: E77 ran. The regulators' half
+stays open — no conduction term resolved, bounded at ≤ 0.63 pJ (registered) or ≤ 0.18 pJ (post hoc, the operating-point
+step fitted) of the 0.875 pJ row. The minion rail's per-hart cost moves with f·V² from 600 to 800 MHz to within 1.3%,
+and the 800 MHz operating point costs about **4.1 W on the minion rail and 1.7 W on the SRAM rail before any work**.
+At a 54 °C launch the minion row does not depend on the leakage footing. The kinds page's [§ 11 list](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open),
 item 13 ("Not touched: E77 ... each a governor move, your OK for that exact operation"), and the Horace hub's Levels
 tab, stop 2 ("the card"), whose Missing column reads: *the rail measured AT the launch temperature, rather than at the
 launch window and corrected onto it (E77, reserved; the same run would split the 0.875 pJ regulator row, and it needs
@@ -177,10 +240,13 @@ the GO before the first write.
 | `tools/claims-v3/e77/ettelem-e77/` | the no-PMIC-read telemetry tool and its build file |
 | `tools/claims-v3/e77/e77.sh` | the stages on the box: build, look, kernlog (the host kernel log's ET error events, read-only, before and after; E69's record), gates, smoke, go, status, wait |
 | `CHANGE-RECORD.md` | the field manual's record for this governor move |
+| `raw/` | *(after the run)* the run directory: `gates.json`, `smoke/`, `session.json`, `launches.jsonl`, `gov.jsonl`, `passes.jsonl`, `queries.jsonl`, `marks.jsonl`, `end.json`, `tel/*.jsonl.gz` (10 Hz, no-PMIC-read), `sp/*.bin` (the rings), `watchdog.*`, `kernel-events.txt`; the box's tree path written `<tree>` |
+| `results.json`, `reduce.txt` | *(after the run)* the registered reduction: `/usr/bin/python3 tools/claims-v3/e77/reduce_e77.py docs/reports/data/2026-11-01-e77-rail-one-temperature/raw --out .../results.json --text .../reduce.txt` |
+| `posthoc_e77.py`, `posthoc.json` | *(after the run, post hoc)* each arm's minion-rail law against harts, the operating-point step, the fit with an arm-B offset |
 
 ## Results
 
-*Pending: the run follows Q133's E111 on aifoundry2.*
+*At the top (written after the run, Sun 1 Nov 2026, 18:1x PST); this line replaced "Pending".*
 
 ## Amendments
 
