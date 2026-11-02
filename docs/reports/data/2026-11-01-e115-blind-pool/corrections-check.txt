@@ -1,0 +1,68 @@
+E115 corrections-check (the registered fallback reading: dips removed, a3 footing; scored-nodips.json)
+
+C1. The gate tiles, by side and pattern (scored-nodips.json primary.table; pattern from blind3.json 'group',
+    lanes from the tile's bytes for the float B-gate tiles)
+  fp16.g_blanes_alt        D  13.134  M5  12.443 [12.08, 12.80]  D-M5 +0.690  OUTSIDE  | fp16: B gate, every lane on and off each cycle
+  fp32.g_arows_alt         D  13.481  M5  13.293 [12.90, 13.69]  D-M5 +0.188  inside  | A gate, 50% of micro-ops, alternating every two cycles
+      B columns zero in rows 1-15 [], A words zero 128: lanes {0: 'live', 1: 'live', 2: 'live', 3: 'live', 4: 'live', 5: 'live', 6: 'live', 7: 'live'}
+  fp32.g_blanes_alt        D  14.474  M5  13.999 [13.60, 14.40]  D-M5 +0.475  OUTSIDE  | B gate, 50% of lane-cycles, every lane on and off each cycle
+      B columns zero in rows 1-15 [0, 1, 2, 3, 4, 5, 6, 7], A words zero 0: lanes {0: 'switches', 1: 'switches', 2: 'switches', 3: 'switches', 4: 'switches', 5: 'switches', 6: 'switches', 7: 'switches'}
+  fp32.g_blanes_steady     D  12.471  M5  13.216 [12.83, 13.60]  D-M5 -0.744  OUTSIDE  | B gate, 50% of lane-cycles, steady (lanes 0-3 never live)
+      B columns zero in rows 1-15 [0, 1, 2, 3, 8, 9, 10, 11], A words zero 0: lanes {0: 'held off', 1: 'held off', 2: 'held off', 3: 'held off', 4: 'live', 5: 'live', 6: 'live', 7: 'live'}
+  fp32.x_logu_bsteady      D  13.117  M5  13.878 [13.49, 14.26]  D-M5 -0.761  OUTSIDE  | exponents spread, lanes 0-3 gated steadily
+      B columns zero in rows 1-15 [0, 1, 2, 3, 8, 9, 10, 11], A words zero 0: lanes {0: 'held off', 1: 'held off', 2: 'held off', 3: 'held off', 4: 'live', 5: 'live', 6: 'live', 7: 'live'}
+  int8.g_awords_alt        D   4.449  M5   4.705 [4.24, 5.17]  D-M5 -0.256  inside  | int8: A gate on every other micro-op
+  int8.g_bpairs_steady     D   3.554  M5   3.757 [3.30, 4.21]  D-M5 -0.203  inside  | int8: B column pairs gated steadily, 50%
+  registered contrast fp32.g_blanes_alt - fp32.g_blanes_steady: measured +2.003 +- 0.085 W, M5 +0.783 [+0.23, +1.34], ABOVE (both tiles fp32)
+  registered contrast fp32.x_logu_s50 - fp32.x_logu_bsteady: measured -5.012 +- 0.082 W, M5 -5.609 [-6.16, -5.06], ABOVE (both tiles fp32)
+  float B-lane gate tiles outside:  ['fp16.g_blanes_alt', 'fp32.g_blanes_alt', 'fp32.g_blanes_steady', 'fp32.x_logu_bsteady']
+  inside:  [('fp32.g_arows_alt', 0.188), ('int8.g_awords_alt', -0.256), ('int8.g_bpairs_steady', -0.203)]
+
+C2. E103's fp32.x_e_g (aifoundry1 card 1; E103 README lines 11, 28, 60, 115)
+  tile tools/claims-v3/kinds/e103/tiles/fp32/x_e_g.bin: B columns zero in rows 1-15 [1, 2, 3, 4, 5, 7, 14, 15], B row 0 zeros 0, A zeros 0, zero share of B words 0.4688
+  lanes (l reads column l, then l+8): {0: 'live', 1: 'switches', 2: 'switches', 3: 'switches', 4: 'switches', 5: 'switches', 6: 'switches', 7: 'held off'}: 6 of 8 switch each micro-op
+  E103 primary (leak 0.2414 W/C): D 14.787 +- 0.396, M4 14.169 [13.81, 14.53], D - M4 +0.618
+  E103-R9 (gated kinds) verdict: INCONCLUSIVE
+  D - M4 at E103's arms: {'dips_kept': 0.618, 'gates_off': 0.618, 'auto': 0.349, 'leak0.1994': 0.716, 'leak0.3803': 0.295, 'leak0.545': -0.088}
+  loko.json (M5's training rows include it): {'exp': 'E103', 'key': 'fp32.x_e_g', 'kind': 'fp32.e103:x_e_g', 'D': 14.787, 'nested_err_w': 0.558, 'm4_frozen_err_w': 0.616, 'm4_form_loko_err_w': 0.646, 'chosen_form_loko_err_w': 0.558}
+  loko.json (M5's training rows include it): {'exp': 'E103', 'key': 'fp32.x_e_g', 'kind': 'fp32.e103:x_e_g', 'D': 14.787, 'err_w': 0.558, 'm4_err_w': 0.616}
+
+C3. int8's bias (scored-nodips.json primary.rules.E115-R2, primary.table)
+  rms 0.3433 W, bias (predicted - measured) +0.2017 W, verdict PASS
+  D - M5 per tile: {'int8.a_colconst_b_full': -0.745, 'int8.a_low2_b_full': -0.128, 'int8.g_awords_alt': -0.256, 'int8.g_bpairs_steady': -0.203, 'int8.st_f32bytes': 0.163, 'int8.z_diag': -0.042}
+  tiles below the model: 5 of 6; mean D - M5 -0.2017 W
+
+C4. The registered sensitivity labels (scored-nodips-arms.json primary.rules; anchor footing from scored-nodips.json)
+  registration says 'arm-sensitive or footing-sensitive': True
+  E115-R1: verdict FAIL; footing_sensitive {'anchor': 'PASS'}; arm_sensitive None
+  E115-R2: verdict PASS; footing_sensitive None; arm_sensitive None
+  E115-R3: verdict INCONCLUSIVE; footing_sensitive None; arm_sensitive {'nodips_leak0': 'FAIL'}
+  E115-R4: verdict FAIL; footing_sensitive None; arm_sensitive {'nodips_leak0': 'INCONCLUSIVE'}
+  E115-R5: verdict UNRESOLVED; footing_sensitive {'anchor': 'M5 BETTER'}; arm_sensitive None
+  E115-S1: verdict PASS; footing_sensitive None; arm_sensitive {'nodips_leak0.3803': 'FAIL', 'nodips_leak0': 'FAIL'}
+  anchor footing: R1 rms 0.2829 W (PASS); R5 gap +0.0236 [+0.0049, +0.0494] (M5 BETTER)
+  the arms that move R3, R4 and S1 are nodips_leak*: run after the data on the dips-removed reduction (README Departures)
+
+C5. The sums, R1's line, the pool's independence
+  fp32.s_pair0     D 25.000  M5 24.643 [24.251, 25.035]  D-M5 +0.357  below the upper bound by 0.035 W  | signs alternate: the sum returns to exactly 0 every two k
+  fp32.s_bridge    D 25.674  M5 25.324 [24.928, 25.720]  D-M5 +0.350  below the upper bound by 0.046 W  | signs alternate: the sum climbs 8 k and walks back down
+  fp32.s_drift12   D 24.778  M5 24.704 [24.298, 25.110]  D-M5 +0.074  below the upper bound by 0.332 W  | signs alternate with a 2^-12 residual: the sum drifts slowly
+  E103 fp32.s_bhalf_alt: D - M4 +0.450 W
+  E103 fp32.c_near_rand: D - M4 +0.893 W
+  R1's frozen line (predictions-e115.json rules.E115-R1.planned_interval.hi95): 0.28763 W; measured 0.29050 W; over by 0.0029 W
+  registration: 'independence of the pool is half met' present: True; 'it says so wherever it reports' present: True
+
+F. Data and frozen files: sha256 now, and the same at the data commit ad06ad92
+  89f88fb061ff  same  docs/reports/data/2026-11-01-e115-blind-pool/scored.json
+  ad6bb3be6714  same  docs/reports/data/2026-11-01-e115-blind-pool/scored-nodips.json
+  830691c0a252  same  docs/reports/data/2026-11-01-e115-blind-pool/scored-nodips-arms.json
+  b16ec4c42a5a  same  docs/reports/data/2026-11-01-e115-blind-pool/e115.json
+  913658e282bd  same  docs/reports/data/2026-11-01-e115-blind-pool/e115-nodips.json
+  db48d859048c  same  docs/reports/data/2026-11-01-e115-blind-pool/results.md
+  c94dc8cf1627  same  docs/reports/data/2026-11-01-e115-blind-pool/results-nodips.md
+  a96f3d030379  same  docs/reports/data/2026-11-01-e115-blind-pool/results-nodips-arms.md
+  0e40c3d69d0e  same  tools/claims-v3/e115/predictions-e115.json
+  459c9d4e6acb  same  tools/claims-v3/e115/README.md
+  60dfbf12a10f  same  tools/claims-v3/kinds/blind3/blind3.json
+  5f28091a2878  same  tools/claims-v3/kinds/blind3/predictions-blind3.json
+  399128b9ff83  same  tools/claims-v3/kinds/blind3/contrasts-blind3.json
