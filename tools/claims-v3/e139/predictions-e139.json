@@ -1,0 +1,73 @@
+{
+ "exp": "E139",
+ "request": "Q137",
+ "answers": "kinds page section 11 item 10, the memory path (https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open)",
+ "repeats": "E132 (lab 34ec50b8 registration, 9f06ae88 data, 53548945 corrections)",
+ "card": "aifoundry3 card 0, 600 MHz, never set",
+ "smoke_pass": 13901,
+ "warmup_pass": 13910,
+ "passes_registered": [
+  13910,
+  13911,
+  13912,
+  13913,
+  13914,
+  13915,
+  13916,
+  13917,
+  13918
+ ],
+ "min_headline_passes": 3,
+ "expected_passes": "8 (13910-13917: warm-up + 7 headline); 13918 only if passes run short",
+ "budget": {
+  "card_minutes_max": 45,
+  "queue_deadline": "session start + 42 min, capped at 21:40 PST",
+  "first_pass_estimate_s": 270,
+  "no_session_start_after": "21:00 PST",
+  "everything_ends_by": "21:45 PST"
+ },
+ "stops": {
+  "die_c": 70,
+  "die_field": "temp_c.minshire[0] (and temp_c.pmic >= 80, the minion shires' average)",
+  "board_w": 65,
+  "board_field": "board_w, every telemetry sample, watch_e139.py"
+ },
+ "primary": "E139's own passes alone (p13911..), dips removed, leakage auto: reduce_e132.py and e132/predictions.json unchanged, --warmup 13910",
+ "registered_secondary": "pooled: E132's headline passes p13211-p13216 + E139's headline passes, dips removed, leakage auto",
+ "arms_reported": [
+  "leakage 0.2936 W/C",
+  "leakage 0.3803 W/C",
+  "unfiltered (dips kept)"
+ ],
+ "rules": {
+  "R3": "as E132: UNRESOLVED if wl_64z does not move; OTHER if el_64z moves; ENCODED if RE64 moves and el_64z is still; RAW if eh_64z, el_64z and RE64 all still; else UNRESOLVED. DDR die rail: moves at mean <= -0.30 mV with the 95% interval below 0, still inside +-0.30 mV. Predicted ENCODED (E132's frozen prediction).",
+  "R4": "as E132: PAYS if E56 and E448 both present (interval above 0); NONE if both absent (inside +-0.10 W); AT-HIGH-RAW-ONLY / AT-LOW-RAW-ONLY if one present one absent; else UNRESOLVED. Predicted PAYS (+0.185 W each).",
+  "R1_R2_R5_R6": "E132's rules unchanged, re-tests reported beside E132's verdicts",
+  "joint": "SETTLED if the primary decides the rule; SETTLED ONLY POOLED if the primary is UNRESOLVED and the pooled secondary decides it (stated with the optional-stopping caveat); OPEN otherwise; CONFLICT if primary and E132 read opposite decided classes"
+ },
+ "precision": "precision.txt (from E132's six headline passes): headline n=7 R3 ENCODED 54%, R4 PAYS 59%; n=8 65%, 68%; pooled n=13 91%, 92%",
+ "expectation_frozen": "R3 ENCODED and R4 PAYS, each SETTLED ONLY POOLED more likely than SETTLED (E139 alone at n=7 near a coin flip); E56 near +0.12 W, E448 near +0.17 W, el_64z near -0.1 mV, RE64 near -0.77 mV; R1, R2, R5, R6 PASS as in E132",
+ "reused_unchanged_sha256": {
+  "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+  "tools/claims-v3/runitems.py": "8293b5a0fbf72b68cb2d1ded35fa520711f0bd404246ac36874d8922cb137735",
+  "tools/claims-v3/text_hash.sh": "aa638f73d5253e9d2aef2dce504f5bf485ef15f56f2f02a8bff366888d4cdae5",
+  "tools/claims-v3/mf/block.sh": "b653f4a1e555dd0a8eb92e01dbce1f61db288e6809bf7b7567c5a859da890223",
+  "tools/claims-v3/mf/make_mf.py": "7512678064f727d1908452c4abfcfbfaa00fe3eaf8fffd0074b817576ed44c7a",
+  "tools/claims-v3/e110/smoke_gate_e110.py": "42a88db4d0e5f342dd08f9678ea7a8516078c4c767a0868d2ee2cbff06209563",
+  "tools/claims-v3/e132/reduce_e132.py": "46ed6c1115012deffeff0ff0e830752f64facf7cdacc92e71675a548477e0de4",
+  "tools/claims-v3/e132/predictions.json": "a4d46c0530a582a8b23d3683381e4fb0b31b3e9f0fd6ec53aa452c4f9040fd29",
+  "tools/claims-v3/e132/make_e132.py": "889c2f2dc143872f829dc712f955a1a3e82fe84dfe40423b8b3f9e07954f8f8e",
+  "tools/claims-v3/dp/posthoc_dips.py": "2c9224ea89b72f19d45015ff0aad4072e6bac1cb5f14c7fc3795f88b40f3ad71"
+ },
+ "own_sha256": {
+  "tools/claims-v3/e139/queue_e139.sh": "19a13b24131e9badcebc9cb614737a68a93850328387559399505659a97f5667",
+  "tools/claims-v3/e139/session_e139.sh": "2ec2b7d28b4e71235a3a021a8c80932e1206a81620b77e35c3d52a2b15e4c59a",
+  "tools/claims-v3/e139/run_e139.sh": "135ea6983876b4c40ba46a096b39951891b4acebe172ee283800b177a6989ebd",
+  "tools/claims-v3/e139/reduce_e139.sh": "61f64fa2f303e6769bd5979210aa3b43ac0b8cac10dd59bd2200ee12b6d94336",
+  "tools/claims-v3/e139/watch_e139.py": "b66374a953d3da97b4d28c6f827b0daef8feb12c2b9e5fb62671e9b4842129bf",
+  "tools/claims-v3/e139/selftest_e139.sh": "5e916c64b60517157e67cb0b5a37acdc12dcc8bec173c98a9e069d93ab9e7088",
+  "tools/claims-v3/e139/precision_e139.py": "adc945fee2c9fe71316dce411eb84b429f1f2060724646c07eed44359403a4fb",
+  "tools/claims-v3/e139/gen.sha256": "53add668faa701109fe7910fc9f10a3a960fd847f195df4260af040171591ea5"
+ },
+ "images": "docs/reports/data/2026-11-02-e132-memory-split/gen (E132's, byte for byte; e139/gen.sha256 = e132/gen.sha256), synced to aifoundry3:aifoundry/build/e139-gen/"
+}

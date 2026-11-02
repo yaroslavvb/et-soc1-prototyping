@@ -1,0 +1,47 @@
+# 2026-11-02 15:33:37 PST, lab HEAD 67fe20a9, checker sha256 f29e91ca97705454..., table 50168632931fd8c1...
+# files: tools/claims-v3/e139/ tools/claims-v3/lib.sh tools/claims-v3/mf/block.sh tools/claims-v3/runitems.py tools/claims-v3/text_hash.sh tools/claims-v3/e110/smoke_gate_e110.py tools/claims-v3/e110/reduce_e110.py tools/claims-v3/e110/make_e110.py tools/claims-v3/e132/reduce_e132.py tools/claims-v3/dp/posthoc_dips.py
+## 1. without an exception
+  GET_MODULE_VOLTAGE                         READ         pmic read      3 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      3 site(s)  ok
+  STATS_RESET                                WRITE        pmic write     1 site(s)  NO-GO
+exit 3 (NO-GO: only the conditional STATS_RESET at lib.sh:154; cleared by the reviewed exception below)
+## 2. with the reviewed exception (the run's verdict)
+dmcmd_audit: GO (26 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e139/session_e139.sh:17: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e139/session_e139.sh:17: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e139/session_e139.sh:17: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e139/session_e139.sh:17: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e139/session_e139.sh:17: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:139: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/lib.sh:143: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: STATS_RESET [WRITE, pmic write] (conditional) EXCEPTED: STATS_RESET: start_sampler forwards its extra arguments; E139s only caller, mf/block.sh:71, passes the output file and the duration and nothing else, so --reset-ms is never sent - variant ettelem; forwarded arguments may carry --reset-ms
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      4 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      4 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      3 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      5 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      3 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      3 site(s)  ok
+  STATS_RESET                                WRITE        pmic write     1 site(s)  EXCEPTED
+exit 0
