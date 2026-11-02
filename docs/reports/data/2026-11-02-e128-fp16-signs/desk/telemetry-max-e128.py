@@ -3,6 +3,10 @@
 and 75 C). Reads every ettelem sample line in the blocks' telemetry.jsonl.gz (the smoke and both passes; the read-back block runs no sampler).
 Standard library only. POST HOC: no rule depends on it. A port of the E128 verifier's tel_max.py.
 
+Corrected Mon 2 Nov 2026, after the second verification (README C6): the PMIC's 75 C alarm reads the PMIC's own temperature, which no field
+here reads (temp_c.pmic is the minion-shire mean again), so the last line no longer prints a die reading's distance below 75 C. It prints the
+board's margin to the 75 W over-power alarm and the die's maxima beside it. Every number and the JSON are unchanged.
+
     python3 desk/telemetry-max-e128.py aifoundry1-c1/e128/e128-smoke-p12801 aifoundry1-c1/e128/p12810 aifoundry1-c1/e128/p12811 \
         > desk/telemetry-max-e128.txt     # run in the data directory
 
@@ -64,7 +68,8 @@ for p in sys.argv[1:]:
     mhz.update(r["minion_mhz"])
     for k in KEYS:
         allmax[k] = max(allmax[k], r["max"][k])
-print("E128 telemetry maxima (post hoc; for E128.md N3's stops disclosure; the PMIC alarm is 75 W or 75 C)")
+print("E128 telemetry maxima (post hoc; for E128.md N3's stops disclosure; the PMIC alarm is 75 W of board power or 75 C of the PMIC's own "
+      "temperature)")
 for name, r in out.items():
     m = r["max"]
     print(f"  {name:20s} samples {r['samples']:6d} (bad {r['bad']}) | board {m['board_w']:.2f} W, SP running max {m['sp_board_max_w']:.2f} W | "
@@ -81,6 +86,10 @@ for k in ("sp_board_max_w", "minshire_high"):
     for nm, r in out.items():
         per.append("%s first %s, min %s, max %s" % (nm, r["first"][k], r["min"][k], r["max"][k]))
     print("  %s: %s (%s)" % (k, what, "; ".join(per)))
-print(f"  margin to the PMIC alarm: board {75 - allmax['board_w']:.2f} W (SP running max {75 - allmax['sp_board_max_w']:.2f} W); "
-      f"hottest shire {75 - allmax['minshire_high']:.1f} C below 75 C")
+high_carried = all(r["min"]["minshire_high"] == r["max"]["minshire_high"] == r["first"]["minshire_high"] for r in out.values())
+heat = (f"no shire above {allmax['minshire_high']:.1f} C (the PVT's running high, the same in every sample)" if high_carried
+        else f"the shires' running high at most {allmax['minshire_high']:.1f} C")
+print(f"  margin to the PMIC's 75 W over-power alarm: board {75 - allmax['board_w']:.2f} W (SP running max {75 - allmax['sp_board_max_w']:.2f} W); "
+      f"die, beside the alarm and not a margin to it: minion shires' mean at most {allmax['minshire_mean']:.1f} C, {heat}; the 75 C alarm "
+      f"reads the PMIC's own temperature, which no field here reads (temp_c.pmic is the shire mean again)")
 print(json.dumps({"blocks": out, "all": {"samples": tot, "max": allmax, "minion_mhz": dict(mhz)}}, indent=1))
