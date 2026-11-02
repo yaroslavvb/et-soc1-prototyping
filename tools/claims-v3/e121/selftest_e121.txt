@@ -1,0 +1,30 @@
+-- replicate: gate PASS, tally {'PASS': 23, 'FAIL': 1}, X PASS {'PASS': 23, 'INCONCLUSIVE': 1}, tie PASS, reading rtl:
+ok   replicate: the 22 gate rules PASS
+ok   replicate: R5 FAILs as on card 1, R8 PASSes
+ok   replicate: every verdict equals E93's
+ok   replicate: pairing reading rtl
+ok   replicate: cross-card aggregate PASS
+ok   replicate: no X rule FAILs
+ok   replicate: session tie to E78 PASS
+-- value_gate: gate FAIL, tally {'FAIL': 20, 'PASS': 4}, X FAIL {'FAIL': 21, 'INCONCLUSIVE': 2, 'PASS': 1}, tie PASS, reading alt:
+ok   value_gate: R1-fp32-both FAILs
+ok   value_gate: R1-fp32-a FAILs
+ok   value_gate: R1-fp16-both FAILs
+ok   value_gate: R3-fp32-one FAILs
+ok   value_gate: R3-fp32-both FAILs
+ok   value_gate: R6b FAILs
+ok   value_gate: R7 FAILs
+ok   value_gate: R8 FAILs
+ok   value_gate: the gate summary FAILs
+ok   value_gate: pairing reading alt
+ok   value_gate: cross-card aggregate FAILs
+-- scale_off: gate INCONCLUSIVE, tally {'PASS': 22, 'INCONCLUSIVE': 1, 'FAIL': 1}, X FAIL {'FAIL': 10, 'INCONCLUSIVE': 7, 'PASS': 7}, tie FAIL, reading rtl:
+ok   scale_off: every gate rule but R2-fp16 still PASSes (R2-fp16's fixed E78 constant does not move with the session, so it alone sees a 12% hotter card)
+ok   scale_off: the session tie to E78 FAILs (the session moved)
+ok   scale_off: cross-card aggregate FAILs
+-- three: gate PASS, tally {'PASS': 23, 'FAIL': 1}, X PASS {'PASS': 19, 'INCONCLUSIVE': 5}, tie PASS, reading rtl:
+ok   three passes: scored (gate PASS)
+-- two: gate NOT SCORED, tally {'NOT SCORED': 24}, X NOT SCORED {'NOT SCORED': 24}, tie PASS, reading NOT 
+ok   two passes: every rule NOT SCORED
+
+23 of 23 checks
