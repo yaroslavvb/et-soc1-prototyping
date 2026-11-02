@@ -94,9 +94,9 @@ start of four passes and once mid-pass; arm A's heater, 1,024 harts at 600 MHz, 
 launch dropped by S1: its clock dipped after reaching 800 MHz); the 8 s settling rung's gate was not reached either.
 The gate held the rails to S2's settling test with approaches of 10.2–11.7 s; the launch readings were **54.9 °C in
 arm A (54–55) and 53.7 °C in arm B (53–54), a 1.2 °C gap** — above the 1 °C this registration said it would name.
-Both arms also launched below the 55–58 °C that departure 3 registered: arm A at 54–55 °C (29 of 32 kept launches at
-55 °C), arm B at 53–54 °C (11 of 34 at the 53 °C re-heat floor, none flagged `below_floor`)
-([`corrections-check.txt`](corrections-check.txt) E). *(Added after verification, F5.)* In arm B the clock reached
+The launches also sat at or under the floor of the 55–58 °C that departure 3 registered: arm A at 54–55 °C (29 of 32
+kept launches at 55 °C, 3 at 54 °C), arm B at 53–54 °C, all 34 under it (11 at the 53 °C re-heat floor, none flagged
+`below_floor`) ([`corrections-check.txt`](corrections-check.txt) E). *(Added after verification, F5.)* In arm B the clock reached
 800 MHz 0.34–1.26 s after each launch began, before the window.
 
 **What it changes.** For the kinds page's § 11 item 13 and the Levels tab's stop 2: E77 ran. The regulators' half
@@ -190,7 +190,8 @@ committed files and prints it to [`corrections-check.txt`](corrections-check.txt
   - both post hoc fits are quoted (F2);
   - the verdict is FAIL because the interval contains 0, and the rms gain is reported beside it.
 - **F5 (minor): the launch readings departed from departure 3.** It registered launch readings of 55–58 °C. Arm A
-  launched at 54–55 °C, arm B at 53–54 °C, 11 of 34 at the 53 °C re-heat floor (E). "What ran" now says so.
+  launched at its floor or 1 °C under it (29 of 32 at 55 °C, 3 at 54 °C); arm B launched under it, at 53–54 °C, 11 of
+  34 at the 53 °C re-heat floor (E). "What ran" now says so.
 - **F6 (minor): who read what, and when.**
   - The full read of the maintainer's posts and of the field manual's four files was the desk lane's.
   - The run agent read that lane's paraphrase (14:24 PST), the change-record template and the manual's `AGENTS.md`
