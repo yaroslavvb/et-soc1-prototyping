@@ -1226,10 +1226,26 @@ env LD_LIBRARY_PATH={ET_LIB} timeout 20 {self.ettelem!r} config >> {log!r} 2>&1
             # arm B, passes 1-2, at the card's own settings
             for t in ("B1", "B2"):
                 self.run_pass(t, "B", by[t][1], float(C["before_move"]), est)
+            # A2: the GO interlock. The first write waits for the file GO in the run directory, which the operator
+            # creates only after the GO commit (the live gates filled) is pushed; bounded by move_by, else no move.
+            go = os.path.join(self.out, "GO")
+            if self.dry and not os.environ.get("E77_DRY_NO_GO"):
+                self.touch(go)
+            t_go = time.time()
+            while not os.path.exists(go) and self.card_min() <= float(C["move_by"]):
+                self.guard("waiting for GO")
+                if time.time() - t_go > 10:
+                    self.check_others("waiting for GO")
+                    t_go = time.time()
+                time.sleep(2.0)
+            go_ok = os.path.exists(go)
+            self.mark("go_file", "present" if go_ok else "absent at move_by")
             # the move
-            if self.card_min() > float(C["move_by"]):
-                self.mark("cut", f"no move: {self.card_min():.1f} card-min > {C['move_by']}")
-                self.say("    no move: too late in the session; arm A not run")
+            if not go_ok or self.card_min() > float(C["move_by"]):
+                why = "no GO file" if not go_ok else f"{self.card_min():.1f} card-min > {C['move_by']}"
+                self.mark("cut", f"no move: {why}")
+                self.say(f"    no move ({why}): arm A and arm B's third pass not run")
+                raise EndSession(f"done:no_move:{why}", EXIT_OK)
             else:
                 self.arm_watchdog()
                 self.set_tdp(TDP_PIN_W, "E77 arm A: the TDP-0 pin at the vmin-LUT floor")

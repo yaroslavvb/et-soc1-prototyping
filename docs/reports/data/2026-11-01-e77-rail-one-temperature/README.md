@@ -184,9 +184,18 @@ the GO before the first write.
 
 ## Amendments
 
-**A1, Sun 1 Nov 2026, 15:1x PST** (before the claim, the gate reads and any card access by E77): the throttle
+**A1, Sun 1 Nov 2026, 15:04 PST** (before the claim, the gate reads and any card access by E77): the throttle
 residencies read after each pass are raw states **2–4** (POWER_UP, POWER_DOWN, THERMAL_DOWN), not 2–6. E69's own rings
 on this card (`docs/reports/data/2026-10-27-e69-governor-knob/smoke2/sp/start.bin`, `end.bin`) show that every read
 of states 5 and 6 makes the service processor log "Unexpected power throtlling state" and "thermal pwr mgmt error:
 get_throttle_time()" — errors on the card for a read E77 does not need (POWER_SAFE and THERMAL_SAFE bear only on
 E117's alarm). One argument list in `run_e77.py`'s `queries()`; nothing else changes.
+
+**A2, Sun 1 Nov 2026, 16:09 PST** (before the claim, the gate reads and any card access by E77): **a GO interlock in
+code.** The session no longer writes the TDP as soon as arm B's first two passes end: it waits for a file `GO` in its
+run directory, which the operator creates only after the GO commit (the live gates filled in the change record) is
+pushed. If `GO` has not appeared by the move cut (17 card-minutes), there is no move: arm A and arm B's third pass are
+not run, the session closes with its reads, and nothing was written. This makes "the GO recorded in a commit before
+the first write" a coded condition instead of an order of steps, and lets the session start straight after the smoke
+while the GO commit is made during arm B's first passes (Q133's E111 holds aifoundry2 until close to the 18:00 PST
+start limit). Dry-tested both ways (present: the full dry session; absent: no move, closing read 65 W / 65 °C).
