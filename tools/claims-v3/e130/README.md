@@ -322,3 +322,34 @@ this morning at most 53.84 W and 62 °C. No stop value changes. On the running b
    aifoundry3 lanes (§ Card budget), and probes aifoundry3 only through a script that kills the ssh at once on a login link and
    at 15 s, never through a pipe that buffers its output (the first lane's first probe, at about 09:02, ran about 2 minutes
    before it was stopped).
+
+### A4 — Mon 2 Nov 2026 (week 45), 12:31 PST: the second session, and how it joins the first (written before any E130 data)
+
+*Written on the Intel by E130's second lane (`a3-e130-int8-netlists-rerun`), before its claim of aifoundry3 and before any of
+the 26 tiles has run on a card. Nothing above is changed, and A4 changes no tile, prediction, threshold, band, rule, stop, gate
+or budget.*
+
+1. **What the first session ran: nothing.** The lab hosts' Tailscale SSH approvals lapsed at about 08:40 PST and were renewed at
+   about 10:04 PST. Inside that window the first lane (`a3-e130-int8-netlists`) pushed this registration (09:01:48 PST) and then
+   found every ssh to aifoundry3 stopped at the check (09:02–09:53 PST; A1's preamble). No file reached the box and no block
+   directory or `build/e130-logs/` was made there (a read-only look at 10:16 PST found none), no device node was opened, no
+   `ettelem config` was read and the day's card post was not edited: **0 card-minutes, no E130 data.**
+2. **How the sessions join: E130 has one session, this one.** The rules read E130's kept blocks; the first session has none, so
+   this session's blocks are E130's data and nothing is pooled. It runs the registration with A1–A3 as they stand: smoke 13001,
+   then the queue B A B A B A B A B B (13010 13020 13011 13021 13012 13022 13013 13023 13014 13015), each block number used
+   once, none renumbered, reused or added. **Its budget is the whole registered one, 1,740 s from this session's start read (at
+   most 30 card-minutes)**, since the first session used none. If it ends with fewer than 3 kept blocks of a kind, the rules on
+   that kind read NOT SCORED, as registered; any further session would need its own amendment, written before its data, saying
+   how it joins this one.
+3. **When, and the card it finds.** aifoundry3 card 0 is shared in turn by Q136's aifoundry3 lanes (A3.4). This session starts
+   only after E134's lane has ended, with no aifoundry3 clause left in the day's card post and `et-who` clean on card 0, so it
+   starts in the afternoon, not the morning the first lane planned. The gates are unchanged: no session starts after 15:00 PST,
+   the queue starts no block projected to end after 15:50 PST, and every run ends by 16:00 PST. The die's level at the start is
+   whatever the session before it leaves. As registered, nothing gates on it: each item's step is over its own zero
+   interpolated in time, every block opens with settling runs that are never used, and the train gate sets aside a block whose
+   zero strays more than 0.25 W off its neighbours' line. The die readings at the session's start and at each block's two ends
+   are reported.
+4. **A1's two checks, made at this session.** The corrected checker is run with A1's reviewed exception at this amendment's
+   commit, and both outputs go with the data. A1's condition is checked after the smoke and before the queue starts: the
+   session-start `ettelem config` and the smoke's telemetry must come back in the form E127's run recorded (the same fields, the
+   same TDP 0 W / 65 °C / 600 MHz, `since_reset_ms` −1, no error), or it is NO-GO and the session stops there.
