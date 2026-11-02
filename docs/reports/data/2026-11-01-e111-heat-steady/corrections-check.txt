@@ -1,0 +1,124 @@
+check H-I8: the scorer's span and dips reproduce results.json: True
+check H-F32: the scorer's span and dips reproduce results.json: True
+A. RANDOM FP32 ON THE TWO CARDS: both ran at 600 MHz
+   docs/reports/data/2026-11-01-e97-heat-low-power-steady/README.md:
+     '600 MHz in every sample': line 5
+     'TDP 0 and threshold 65 °C at every read': line 5
+     "reaches the lab's stop in 221 s": line 65
+     'the board 63.1 W in total (40 W over idle)': line 65
+     'the die still climbing 4.1 °C a minute': line 65
+     'settle at about 0.9 °C per board W': line 85
+   E111 H-F32 (results.json A.H-F32.plateau): clock mean 600.0 MHz, share at 600 MHz 1.0, die 67.2631 C, board 54.2235 W
+   over its idle (A.H-F32.A2): 32.424 W, rise 21.763 C, c 0.6712 C per board W; c x W over idle = 21.76 C
+   at one clock the cards differ in watts over idle (32.4 here; about 40 at aifoundry3's stop) and in C per board W (0.67; about 0.9)
+
+B. THE HOLDS MINUTE BY MINUTE (in-kernel samples, the scorer's selection; die = the 34-sensor whole-degree mean)
+   H-I8 (W1B, int8/neg_ones at 800 MHz; idle mean die 46.500 C, W 22.0123; 26.50 min, 190 processes):
+     min  0-1   die  50.95  W  36.51  fine W  37.450  share at clock 0.908  n 584
+     min  1-2   die  54.35  W  38.61  fine W  38.806  share at clock 0.981  n 585
+     min  2-3   die  56.59  W  39.75  fine W  39.754  share at clock 1.000  n 587
+     min  3-4   die  57.88  W  39.84  fine W  40.285  share at clock 0.959  n 584
+     min  4-5   die  58.81  W  40.40  fine W  40.617  share at clock 0.980  n 587
+     min  5-6   die  59.00  W  40.77  fine W  40.766  share at clock 1.000  n 583
+     min  6-7   die  58.96  W  40.55  fine W  40.745  share at clock 0.983  n 586
+     min  7-8   die  58.97  W  40.54  fine W  40.769  share at clock 0.979  n 585
+     min  8-9   die  59.00  W  40.78  fine W  40.775  share at clock 1.000  n 585
+     min  9-10  die  58.96  W  40.48  fine W  40.701  share at clock 0.979  n 584
+     min 10-11  die  58.76  W  39.90  fine W  40.594  share at clock 0.934  n 587
+     min 11-12  die  58.28  W  39.91  fine W  40.512  share at clock 0.948  n 582
+     min 12-13  die  58.04  W  39.78  fine W  40.438  share at clock 0.937  n 585
+     min 13-14  die  57.97  W  39.96  fine W  40.421  share at clock 0.957  n 587
+     min 14-15  die  58.19  W  40.00  fine W  40.445  share at clock 0.959  n 585
+     min 15-16  die  57.98  W  39.92  fine W  40.392  share at clock 0.956  n 586
+     min 16-17  die  58.39  W  40.02  fine W  40.459  share at clock 0.959  n 584
+     min 17-18  die  58.97  W  40.65  fine W  40.669  share at clock 0.998  n 582
+     min 18-19  die  58.37  W  39.57  fine W  40.453  share at clock 0.916  n 586
+     min 19-20  die  58.88  W  40.34  fine W  40.619  share at clock 0.978  n 585
+     min 20-21  die  58.91  W  40.37  fine W  40.577  share at clock 0.981  n 585
+     min 21-22  die  58.98  W  40.66  fine W  40.663  share at clock 1.000  n 585
+     min 22-23  die  58.93  W  40.11  fine W  40.777  share at clock 0.938  n 585
+     min 23-24  die  58.97  W  40.48  fine W  40.872  share at clock 0.964  n 586
+     min 24-25  die  59.06  W  40.94  fine W  40.940  share at clock 1.000  n 583
+     min 25-26  die  59.08  W  41.02  fine W  41.019  share at clock 1.000  n 586
+     die over minutes 5-9 (bins 5-6 .. 9-10): 58.96 .. 59.00, mean 58.98
+     die over minutes 10-16 (bins 10-11 .. 16-17): 57.97 .. 58.76, mean 58.23
+     die over minutes 11-15 (bins 11-12 .. 15-16): 57.97 .. 58.28, mean 58.09
+     die over minutes 19-25 (bins 19-20 .. 25-26): 58.88 .. 59.08, mean 58.97
+     the dip: level at minutes 5-9 58.98, lowest bin in 10-16 57.97 (1.01 C down), minutes 19-25 58.97 (1.00 C back)
+     c in every 5-min window from minute 5 (start minute: c): 5: 0.671, 6: 0.674, 7: 0.672, 8: 0.667, 9: 0.662, 10: 0.656, 11: 0.648, 12: 0.648, 13: 0.652, 14: 0.659, 15: 0.664, 16: 0.671, 17: 0.673, 18: 0.677, 19: 0.677, 20: 0.674, 21: 0.671
+     c over those windows 0.648 .. 0.677; the registered plateau (last 300 s) 0.6719, results.json A.H-I8.A2.c 0.6719
+   H-F32 (W2, fp32/randn at 600 MHz; idle mean die 45.500 C, W 21.7996; 27.05 min, 190 processes):
+     min  0-1   die  64.64  W  61.76  fine W   None   share at clock 0.539  n 584
+     min  1-2   die  66.00  W  54.19  fine W  54.028  share at clock 0.973  n 587
+     min  2-3   die  66.00  W  53.59  fine W  53.635  share at clock 0.995  n 584
+     min  3-4   die  66.77  W  54.00  fine W  53.998  share at clock 1.000  n 586
+     min  4-5   die  66.92  W  53.97  fine W  53.973  share at clock 1.000  n 586
+     min  5-6   die  66.99  W  54.09  fine W  54.086  share at clock 1.000  n 587
+     min  6-7   die  67.34  W  54.33  fine W  54.333  share at clock 1.000  n 586
+     min  7-8   die  67.82  W  54.45  fine W  54.446  share at clock 1.000  n 584
+     min  8-9   die  67.05  W  54.28  fine W  54.276  share at clock 1.000  n 586
+     min  9-10  die  67.00  W  54.30  fine W  54.303  share at clock 1.000  n 586
+     min 10-11  die  67.00  W  54.07  fine W  54.069  share at clock 1.000  n 586
+     min 11-12  die  66.99  W  54.15  fine W  54.148  share at clock 1.000  n 586
+     min 12-13  die  67.00  W  54.21  fine W  54.210  share at clock 1.000  n 585
+     min 13-14  die  66.99  W  54.19  fine W  54.189  share at clock 1.000  n 586
+     min 14-15  die  67.00  W  54.25  fine W  54.247  share at clock 1.000  n 584
+     min 15-16  die  67.00  W  54.10  fine W  54.100  share at clock 1.000  n 586
+     min 16-17  die  66.99  W  54.20  fine W  54.203  share at clock 1.000  n 585
+     min 17-18  die  66.99  W  54.22  fine W  54.224  share at clock 1.000  n 587
+     min 18-19  die  66.98  W  54.08  fine W  54.079  share at clock 1.000  n 585
+     min 19-20  die  66.98  W  54.18  fine W  54.183  share at clock 1.000  n 586
+     min 20-21  die  66.97  W  54.00  fine W  54.002  share at clock 1.000  n 587
+     min 21-22  die  66.97  W  54.06  fine W  54.064  share at clock 1.000  n 582
+     min 22-23  die  66.98  W  53.99  fine W  53.986  share at clock 1.000  n 585
+     min 23-24  die  66.99  W  53.95  fine W  53.947  share at clock 1.000  n 585
+     min 24-25  die  66.99  W  54.22  fine W  54.216  share at clock 1.000  n 586
+     min 25-26  die  67.36  W  54.43  fine W  54.434  share at clock 1.000  n 586
+     min 26-27  die  67.95  W  54.51  fine W  54.506  share at clock 1.000  n 586
+     die over minutes 8-24 (bins 8-9 .. 24-25): 66.97 .. 67.05, mean 66.99
+     die over minutes 25-25 (bins 25-26 .. 25-26): 67.36 .. 67.36, mean 67.36
+     die over minutes 26-26 (bins 26-27 .. 26-27): 67.95 .. 67.95, mean 67.95
+     the step: minutes 8-24 mean 66.99; minute 25 +0.37 C, minute 26 +0.95 C
+     c in every 5-min window from minute 5 (start minute: c): 5: 0.669, 6: 0.669, 7: 0.668, 8: 0.664, 9: 0.664, 10: 0.664, 11: 0.664, 12: 0.664, 13: 0.664, 14: 0.664, 15: 0.664, 16: 0.664, 17: 0.665, 18: 0.666, 19: 0.666, 20: 0.666, 21: 0.667, 22: 0.671
+     c over those windows 0.664 .. 0.671; the registered plateau (last 300 s) 0.6712, results.json A.H-F32.A2.c 0.6712
+
+C. FROM REST: H-I8's rise at 76 s (the length of E98's sustained runs), and the 76 s line's slope against c
+   die over 75-77 s from the first process: 54.00 C (n 18); over the idle 7.50 C = 60.0% of the plateau's 12.504 C rise
+   die over 74-78 s from the first process: 54.00 C (n 38); over the idle 7.50 C = 60.0% of the plateau's 12.504 C rise
+   die over 71-81 s from the first process: 54.00 C (n 98); over the idle 7.50 C = 60.0% of the plateau's 12.504 C rise
+   the 76 s line's slope 0.4573 (predictions-e111.json partB.e98_constants.k_line_c_per_w) / c(H-I8) 0.6719 = 0.681: a ratio of slopes, not an arrival share
+   the 76 s line's slope 0.4573 (predictions-e111.json partB.e98_constants.k_line_c_per_w) / c(H-F32) 0.6712 = 0.681: a ratio of slopes, not an arrival share
+
+D. E111-A3: the point estimates and the registered range
+   c(H-F32) / c(H-I8) = 0.6712 / 0.6719 = 0.99896: the point estimates differ by 0.10%
+   registered range (results.json A.A3, from the two ranges' extremes; a range, not an interval): [0.9355, 1.058], band [0.9, 1.11], PASS
+   c(H-I8) 0.6719, range [0.6471, 0.6962] over {idle before, after, mean} x {plateau, previous} (E111.md, Part A)
+   c(H-F32) 0.6712, range [0.6513, 0.6846] over {idle before, after, mean} x {plateau, previous} (E111.md, Part A)
+
+E. E111-A1 AS REGISTERED, and the dips' scope
+   H-I8: read on 'fine W': fine W +0.05326 W/min / 0.442 W/C = +0.1205 C/min (se 0.0166) against |slope| <= 0.02: FAIL; beside, the die's own slope +0.0499 (se 0.0155)
+   H-F32: read on 'fine W': fine W +0.03344 W/min / 0.442 W/C = +0.0756 C/min (se 0.0338) against |slope| <= 0.02: FAIL; beside, the die's own slope +0.0714 (se 0.0209)
+   H-I8 idle-reset dips (the scorer's find_dips): 9 over the whole hold (results.json A.H-I8.dips 9), 1 touching the plateau's last 300 s
+   H-I8 share of in-kernel samples at 800 MHz: 0.9688 over the whole hold, 0.9764 in the plateau (results.json A.H-I8.plateau.share_clock)
+
+F. E111.md: edits above its '## Amendments' after the freeze (a8e2c969..f888c802)
+   620d80d1 (13:53:55 PST): 6 line(s) above Amendments, 22 at or below it
+     - line 100:   The queue waits for it; a step that cannot start in time is skipped and reported.*
+     + line 100:   The queue waits for it; a step that cannot start in time is skipped and reported.* (Amended by A1, below: a login idle for 120 minutes or more
+     + line 101:   does not block.)
+     - line 224: | `collect_e111.sh` | the collection to the lab clone, read-only on the boxes |
+     + line 225: | `collect_e111.sh`, `scrub_logins_e111.py` | the collection to the lab clone, read-only on the boxes; any login a runner's mark recorded replaced wit ...
+     + line 226: | `idle_logins_e111.py`, `run_hlc_e111.py` | amendment A1: the runners' `who`, answered so that a login idle for 120 minutes or more does not block; E ...
+   41219a10 (14:43:28 PST): 1 line(s) above Amendments, 18 at or below it
+     + line 226: | `amendment-2.json`, `protocol-w1b.json`, `protocol-end2.json` (and `-dry` copies) | amendment A2: H-I8 from W1B, the hold from rest, and its idle af ...
+   27f2c968 (15:07:20 PST): 3 line(s) above Amendments, 17 at or below it
+     - line 227: | `idle_logins_e111.py`, `run_hlc_e111.py` | amendment A1: the runners' `who`, answered so that a login idle for 120 minutes or more does not block; E ...
+     + line 227: | `watch_activity_e111.py`, `chain_go2_e111.sh`, `first_queue_min_e111.py` | amendment A3: the ruling's rule applied to the first queue's W2 and END;  ...
+     + line 228: | `idle_logins_e111.py`, `run_hlc_e111.py` | amendments A1 and A3: the runners' `who`, answered so that a login idle for 120 minutes or more does not  ...
+   f888c802 (17:32:17 PST): 0 line(s) above Amendments, 4 at or below it
+
+G. FILES: what is committed at f888c802 under docs/reports/data/2026-11-01-e111-heat-steady/ and tools/claims-v3/e111/, against the working tree
+   docs/reports/data/2026-11-01-e111-heat-steady/: 218 of 219 files unchanged since f888c802; changed: README.md
+   tools/claims-v3/e111/: 35 of 36 files unchanged since f888c802; changed: E111.md
+   added since f888c802: docs/reports/data/2026-11-01-e111-heat-steady/corrections-check.py, docs/reports/data/2026-11-01-e111-heat-steady/corrections-check.txt; removed: none
+   manifest.sha256 records the files as committed in ea74a2ef; its README.md line is that version's

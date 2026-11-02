@@ -11,7 +11,8 @@ W2: the int8 hold again, from rest, and the camera block last), **A3** `27f2c968
 idle logins, written on the coordinator's side). Claimed in `#community-lab` at 13:54:47 PST (message `1566571232378359819`); first device access
 14:05:00 PST (the smoke's `ettelem config`). Card runs **14:05:00–17:23:46 PST on aifoundry2 card 0 only, 108.8 card-minutes of 120**. TDP 65 W
 and threshold 65 °C at all 38 reads; nothing set; the statistics reset only in the camera step (the owner's ruling of 31 October 2026). Released at
-17:25–17:26 PST by an edit of the same post.*
+17:25–17:26 PST by an edit of the same post. Corrected the same evening after an independent verification
+([Corrections after verification](#corrections-after-verification)); no number or verdict changed.*
 
 ![The die and the board through each hold](holds.png)
 
@@ -22,40 +23,53 @@ and threshold 65 °C at all 38 reads; nothing set; the statistics reset only in 
 ([`results.json`](results.json) `tally`, [`reduce.txt`](reduce.txt)). E98's scoring, copied into the scorer, reproduces E98's committed
 `results.json` key for key before anything is scored (`e98_regression`).
 
-**1. Item 9: aifoundry2's steady coefficient is about 0.67 °C per board W, the same at 18.6 W and 32.4 W over idle; neither plateau is a steady
-state by E97's bar.** One hold per kind, one card, one afternoon ([`results.json`](results.json) `A`):
+**1. Item 9: aifoundry2's steady coefficient is about 0.67 °C per board W at both 18.6 W and 32.4 W over idle (A3 PASS); neither plateau is a
+steady state by E97's bar.** One hold per kind, one card, one afternoon ([`results.json`](results.json) `A`):
 
-| hold | kind, clock (share at it) | start | idle before → after: die, W | plateau, last 300 s: die, W | rise | over idle | **c, per board W** [range] | creep, last 10 min: fine W, die | registered |
+| hold | kind, clock (share at it) | start | idle before → after: die, W | plateau, last 300 s: die, W | rise | over idle | **c, per board W** [range] | slope, last 10 min: fine W (A1's reading), die beside | registered |
 |---|---|---|---|---|---|---|---|---|---|
 | **H-I8** (W1B) | int8 neg_ones, 800 MHz (0.976) | from rest, 26.5 min, 190 of 190 processes | 46.0, 21.935 → 47.0, 22.090 | **59.00 °C, 40.62 W** | 12.50 °C | 18.61 W | **0.672** [0.647, 0.696] | +0.053 W/min (+0.121 °C/min at 0.442 W/°C, se 0.017); die +0.050 °C/min (se 0.016) | A1 **FAIL**; A2 prior **PASS**, lab model FAIL, E97's aifoundry3 FAIL, 76 s line FAIL |
 | **H-F32** (W2) | fp32 randn, the 600 MHz floor (1.000) | after E98's probe series and hold, 27.0 min, 190 of 190 | 45.0, 21.705 → 46.0, 21.894 | **67.26 °C, 54.22 W** | 21.76 °C | 32.42 W | **0.671** [0.651, 0.685] | +0.033 W/min (+0.076 °C/min, se 0.034); die +0.071 °C/min (se 0.021) | A1 **FAIL**; A2 as H-I8 |
 
-- **E111-A3 PASS: linear in power.** c(H-F32) / c(H-I8) = **0.999** [0.936, 1.058], inside [0.90, 1.11]. Per board W the leakage's climb sits in
-  the denominator, as on aifoundry3 (E97-B3: 0.975).
+- **E111-A3 PASS: linear in power.** c(H-F32) / c(H-I8) = **0.999**: the point estimates agree within 0.1%, and the registered range, from the
+  two ranges' extremes, is [0.936, 1.058], inside [0.90, 1.11]. Per board W the leakage's climb sits in the denominator, as on aifoundry3 (E97-B3:
+  0.975).
 - **Where 0.67 sits.** Inside the registered band of aifoundry2's near-steady readings, [0.62, 0.82], predicted 0.73; at the low end of those readings
   (the 9 Oct heavy run's 0.68, the camera sessions' 0.695–0.718, E98's 5.5 min holds 0.661–0.719). Wholly below E97's aifoundry3 plateau [0.86, 0.95]
   and the lab model's September 1.47 (each FAIL, as predicted), and wholly above the 76 s line's 0.4573 (FAIL, as predicted): **the 76 s die line's
   slope is about 68% of the steady coefficient** (0.4573 / 0.672).
-- **Random fp32 at full duty has a plateau on this card.** The governor holds it at the 600 MHz floor once the die passes 65 °C, so its switching is
-  fixed and the die settles: **67.3 °C at 54.2 W, 21.8 °C over a 45.5 °C idle**. On aifoundry3, with no governor, it reached the lab's 78 °C stop in
-  221 s (E97). It was predicted at 72.9 °C and 57.1 W for a 47 °C rest die; it read 67.3 °C at 54.2 W over a 45.5 °C idle, the difference mostly
-  c (0.67 against 0.73) and the cooler idle.
-- **Not a steady state.** Both plateaus still crept over their last 10 minutes, the die by 0.050 and 0.071 °C a minute (0.5 and 0.7 °C, 4% and 3%
-  of the rise), so E111-A1 FAILs on both, as two of E97's three holds did. The room warmed late in the afternoon (the idle went 45 → 46 → 47 °C,
-  21.705 → 22.090 W, between 14:56 and 17:01). That is in the ranges, and at most about a quarter of the creep: 0.385 W is 1.7 °C of rest die over
-  125 minutes, 0.013 °C a minute. On H-I8 the fine W rose more than its die would give at 0.442 W/°C (about 1.07 W per °C of the whole-degree die's slope), so part of its
-  W creep is not the die; on H-F32 the two agree (0.47 W/°C). The asymptotes (registered as beside): H-F32 τ 89 s, die 67.20 °C, c 0.670; H-I8's τ sat
-  on the grid's lower edge (60 s), so no slow exponential describes its creep ([`results.json`](results.json) `A.*.asymptote`).
+- **Random fp32 at full duty has a plateau on this card: 67.3 °C at 54.2 W, 21.8 °C over a 45.5 °C idle.** The governor holds it at the 600 MHz
+  floor once the die passes 65 °C (every plateau sample at 600 MHz). The clock is not what sets it apart from aifoundry3: E97 ran the same kind
+  there at 600 MHz in every sample too (TDP 0), and it reached the lab's 78 °C stop in 221 s, the board 40 W over idle and the die still climbing
+  4.1 °C a minute. **The difference is the power and the cooling:** here the board draws 32.4 W over idle and the card holds 0.67 °C per board W,
+  so the die settles 21.8 °C up; aifoundry3 drew about 40 W over idle at about 0.9 °C per board W, and its die reached the stop still climbing
+  ([`corrections-check.txt`](corrections-check.txt) A). It was predicted at 72.9 °C and 57.1 W for a 47 °C rest die; it read 67.3 °C at 54.2 W
+  over a 45.5 °C idle, the difference mostly c (0.67 against 0.73) and the cooler idle.
+- **Not a steady state by the registered test, and not a creep either.** E111-A1 reads the fine W's slope over the last 10 minutes at E64's
+  0.442 W/°C: **+0.121 °C/min (H-I8, se 0.017) and +0.076 (H-F32, se 0.034) against a 0.02 bar, so A1 FAILs on both**, as two of E97's three holds
+  did; the die's own slopes, beside, are +0.050 and +0.071 °C/min. Minute by minute, on the scorer's in-kernel samples
+  ([`corrections-check.txt`](corrections-check.txt) B; minute m is the bin from m to m + 1 min after the first process), neither hold was drifting
+  steadily. **H-I8** reached 59.0 °C at minute 5 and held 58.96–59.00 °C to minute 9, dipped about 1 °C (57.97–58.28 °C at minutes 11–15, one bin
+  back at minute 17) and held 58.88–59.08 °C from minute 19 to 25: its last-10-min slope measures the recovery from the dip. **H-F32** held
+  66.97–67.05 °C from minute 8 to minute 24, then read 67.36 °C at minute 25 and 67.95 at minute 26: its slope is that last step. A like rise at
+  minutes 6–7 (67.34, 67.82 °C) fell back within a minute. What moved either, the room or the fans, is not established. **c does not depend on
+  the window:** over every 5-minute window from minute 5 it reads 0.648–0.677 (H-I8) and 0.664–0.671 (H-F32), because the board W follows the die.
+  The idle warmed by a degree over the afternoon (45 → 46 → 47 °C, 21.705 → 22.090 W, between 14:56 and 17:01), about 0.013 °C a minute on
+  average; that is in the ranges. On H-I8 the fine W rose more than its die would give at 0.442 W/°C (about 1.07 W per °C of the whole-degree die's
+  slope), so part of its W rise is not the die; on H-F32 the two agree (0.47 W/°C). The asymptotes (registered as beside): H-F32 τ 89 s, die
+  67.20 °C, c 0.670; H-I8's τ sat on the grid's lower edge (60 s), so no slow exponential describes its course
+  ([`results.json`](results.json) `A.*.asymptote`).
 - **The inlet proxies beside** (E111-A4, never a verdict). The room's move from each hold's idle mean to its plateau, by the other boxes' 5 s
   history in °C of aifoundry2 rest die: aifoundry1's NIC +0.11 and −0.24, its NVMe 0.0 and −0.24, its card 0 (never held) 0.0 and 0.0, its card 1
   +0.30 and +0.32, aifoundry3's NIC −0.52 and +0.36 (H-I8 and H-F32). **c corrected by each: 0.656–0.700 (H-I8), 0.660–0.679 (H-F32).** The camera
   phone's battery read 30.4–31.4 °C all afternoon, so it says nothing ([`phone.jsonl`](phone.jsonl)).
-- *Post hoc* ([`posthoc.txt`](posthoc.txt) §2): **from rest, aifoundry2's die arrives fast.** H-I8 reached 36% of its plateau's rise in its first
-  minute, 63% in the 1–2 min bin, 81% in the 2–3 min bin, 91% in the 3–4 min bin and 100% by the 5–6 min bin; aifoundry3's H1 had 45% by 60 s and
-  90% by 5 min (E97-B6).
+- *Post hoc* ([`posthoc.txt`](posthoc.txt) §2): **from rest, aifoundry2's die arrives fast.** H-I8, the hold that started from rest, reached 36%
+  of its plateau's rise in its first minute, 63% in the 1–2 min bin, 81% in the 2–3 min bin, 91% in the 3–4 min bin and 100% by the 5–6 min bin;
+  at 76 s, the length of E98's runs, it had 60% (54.00 °C; [`corrections-check.txt`](corrections-check.txt) C). aifoundry3's H1 had 45% by 60 s
+  and 90% by 5 min (E97-B6). H-F32 started at about 64.6 °C, after E98's probe series, so it has no arrival from rest.
 
-**2. Item 8: the afternoon stayed cool, so no probe was warm; one new probe, on the cool side, fell on E98's line, and its hold did not follow
-E98's steep slope (post hoc).** W1 was ended at 14:36:12 by another lab user's fresh login (A1, as written), after its REST and three sustained
+**2. Item 8: the afternoon stayed cool, so no probe was warm; one new probe, on the cool side, fell on E98's line and its hold did not follow
+E98's steep slope (both post hoc, on one probe).** W1 was ended at 14:36:12 by another lab user's fresh login (A1, as written), after its REST and three sustained
 runs; W2 ran complete. Probes counted: P1, P3, P6, P7 (E98) and W2 for the line and the hold, with P2 and W1 in the rest die's range
 ([`results.json`](results.json) `B`):
 
@@ -111,21 +125,26 @@ fp32 randn against fp32 zeros on E85's 192 minions, 200 s laps, five analysed ([
 ## What it changes
 
 - **Item 9, a steady state for heat: narrowed further, not closed.** aifoundry2's coefficient since October's fan work is measured: about **0.67 °C
-  per board W** at two operating points, the same within 0.1% (A3 PASS), with inlet proxies beside that move it 0.656–0.700. Random fp32 at full duty
-  plateaus on this card (67.3 °C at 54.2 W, at the governor's floor). What stays open: a steady state by the registered bar (both plateaus crept
-  0.05–0.07 °C a minute after 26–27 minutes); a replicate of each hold; an inlet thermometer (the proxies are coarse and self-heated).
+  per board W** at two operating points (point estimates within 0.1%; A3's registered range 0.94–1.06, PASS), with inlet proxies beside that move it
+  0.656–0.700. Random fp32 at full duty plateaus on this card (67.3 °C at 54.2 W) at the same 600 MHz at which aifoundry3 reached the stop: the cards
+  differ in power and cooling, not clock. What stays open: a steady state by the registered bar (A1 FAIL on both: H-I8 dipped about 1 °C and
+  recovered, H-F32 rose about 1 °C in its last 2 minutes, causes not established); a replicate of each hold; an inlet thermometer (the proxies are
+  coarse and self-heated).
 - **Item 8, the drift: not closed; narrowed in one direction.** No warm probe could be taken (the afternoon stayed below the nine-day means), so
-  "more than one warm probe" and "a probe at 23 Oct's idle die" stay open. One cool probe on another day agrees with E98's line, which makes the line's
-  dependence on the rest die (about 0.5 °C per °C, registered ABOVE_TARGET on five probes) less likely to be the night's alone; its hold sits where a
-  weak dependence puts it, against E98's steep 2.19 (post hoc, one probe).
+  "more than one warm probe" and "a probe at 23 Oct's idle die" stay open. Registered: the 76 s line's dependence on the rest die reads 0.472
+  [0.371, 0.573] on five probes (B1 ABOVE_TARGET). Post hoc, on one probe: the cool probe from another day falls within +0.055 °C of E98's frozen
+  line, which makes that dependence less likely to be the night's alone, and its hold sits where a weak dependence puts it, against E98's steep 2.19.
 - **The camera below 0.01 Hz: measured, not resolved.** Detected strongly at 0.005 Hz; the registered lag test is INCONCLUSIVE at five laps. Post hoc the
   combined data lean to a slow or distributed part of the heat path. A longer block (at least ten laps, as E73's 0.01 Hz had) would decide it.
 - **The kinds page's section 4 and the hub.** Replace "nobody has measured aifoundry2's steady coefficient since October's cooling change" with this
-  measurement; the lab model's 1.47 °C/W and its loop gains are aifoundry2's September fit; on aifoundry2 now the plateau is about 0.67 °C per board W
-  and about 68% of it arrives in a 76 s run. aifoundry3's E97 plateau (about 0.9) is another card.
+  measurement; the lab model's 1.47 °C/W and its loop gains are aifoundry2's September fit; on aifoundry2 now the plateau is about 0.67 °C per board W.
+  The 76 s line's slope (0.4573) is about 68% of that coefficient, a ratio of slopes; from rest, the int8 hold had about 60% of its rise at 76 s.
+  aifoundry3's E97 plateau (about 0.9) is another card.
 
 **For the blog.** Once settled, aifoundry2's die sits about 0.67 °C above its idle for every extra watt the board draws, whether the watts come from
-int8 constants or random fp32; it gets two thirds of the way in the first minute or two, and it was still creeping slowly after half an hour.
+int8 constants or random fp32. From rest (the int8 hold) it got 60% of the way in 76 s and all of it within six minutes; after that it wandered by
+about a degree, a dip and recovery on the int8 hold and a late rise on the fp32 one, so neither passed the registered steadiness test. Random fp32
+settles at 67 °C here but reached the 78 °C stop on aifoundry3 at the same 600 MHz: what differs is the power and the cooling, not the clock.
 
 ## Registered against what happened
 
@@ -189,16 +208,51 @@ python3 tools/claims-v3/e111/reduce_e111.py docs/reports/data/2026-11-01-e111-he
   per W of switching. The die is the firmware's whole-degree 34-sensor mean; over 300 s its readings dither enough to read to about 0.1 °C.
 - **The two holds started differently.** H-I8 started from rest (W1B); H-F32 straight after E98's probe series and hold of 39, from about 60 °C. So only
   H-I8 has an arrival from rest, and it is post hoc.
-- **A1's creep test reads the fine W at 0.442 W/°C**, E64's slope, frozen. On H-I8 the fine W moved about twice as much as the die's own slope implies,
-  so its A1 number overstates the die's creep; the die's own slope (0.050 °C/min) still fails the 0.02 bar.
+- **A1's steadiness test reads the fine W at 0.442 W/°C**, E64's slope, frozen. On H-I8 the fine W moved about twice as much as the die's own slope
+  implies, so its A1 number overstates the die's slope; the die's own slope (0.050 °C/min) still fails the 0.02 bar. Over the last 10 minutes either
+  slope measures a wander (H-I8's recovery from a dip, H-F32's last step), not a steady creep (result 1).
 - **The idles moved by a whole degree across the afternoon**, so each c uses the mean of its idle before and after; its range carries both.
 - **W2 is the only new probe in Part B**, and it is cool. B1's five-probe interval rests on 3 df.
 - **The camera's lag at 0.005 Hz rests on five laps.** Its jackknife SE, 14.9°, is about five times what the planning assumed; the ROI's amplitude is
   large (1.06 K). A transient from the idle start, which the drift spline absorbs only in part over 1,000 s, is the likeliest reason; not tested.
 - **The proxies are coarse.** NIC and NVMe sensors heat with their own hosts; a card is a proxy only while free; aifoundry3's card was free only in
   part of the windows. The camera phone's battery reading did not move.
-- **Another user's login decided W1.** The registered rule and A1 stopped it as written; the owner's ruling (A3) confirms an idle login does not block
-  and a fresh one does.
+- **Another user's login decided W1, and A1 decided who could block.** A1 was this run's own decision (13:53:55 PST), taken while the question was
+  with the coordinator and the owner (the coordinator told at 13:05, no answer by 13:50); the smoke, W1 and W2 started under it, about an hour before
+  the owner's ruling of 1 November 2026 (about 15:00 PST, applied in A3), which matched it. The registered rule and A1 stopped W1 as written, at
+  14:36:12, when the other user opened a second session. The ruling confirms that an idle login does not block and a fresh one does; records cite it
+  beside A1's timing.
+
+## Corrections after verification
+
+*Sun 1 Nov 2026, against `f888c802`, from an independent verifier's read (holds with fixes: two major faults, five minor). Desk only: no card
+touched, nothing re-run, nothing set. **No data file, frozen file or registered verdict changed**: every file under this directory and
+`tools/claims-v3/e111/` has the content it had at `f888c802` except this README and `E111.md`, whose one change is a dated note under its
+Amendments ([`corrections-check.txt`](corrections-check.txt) G). Wrong sentences are replaced above. Every new number is recomputed by
+[`corrections-check.py`](corrections-check.py) from committed files.*
+
+- **C1, major: the random-fp32 plateau was credited to the governor.** Result 1 and the blog material set it against an aifoundry3 "with no
+  governor", but E97 ran the same kind there at 600 MHz in every sample (TDP 0), the clock aifoundry2's governor holds here. At one clock the cards
+  differ in watts over idle (32.4 here; 40 at aifoundry3's stop, its die still climbing 4.1 °C a minute) and in cooling (0.67 against about 0.9 °C
+  per board W). Result 1, item 9 and For the blog now say so (A).
+- **C2, major: the holds' last minutes were called a creep.** Result 1, item 9 and For the blog said the die crept 0.05–0.07 °C a minute, "still
+  creeping slowly after half an hour". Minute by minute (B), H-I8 held 59.0 °C at minutes 5–9, dipped about 1 °C at minutes 11–15 and held
+  58.88–59.08 °C from minute 19; H-F32 held 66.97–67.05 °C from minute 8 to 24 and rose 0.37 and 0.95 °C at minutes 25 and 26. So the last-10-min
+  slopes measure a recovery and a last step. The A1 FAILs stand as registered and scored, and c over every 5-minute window from minute 5 is
+  0.648–0.677 and 0.664–0.671. The arrival from rest is H-I8's alone (H-F32 started after E98's probe series).
+- **C3: precision.** "The same within 0.1%" is now "point estimates within 0.1%; A3's registered range 0.94–1.06" (D). The brackets after c and A3
+  are ranges over the idle and window choices (E111.md, Part A: "a range, not an interval"), and are labelled so.
+- **C4: "about 68% of it arrives in a 76 s run"** read a ratio of slopes as an arrival share. The 76 s line's slope, 0.4573, is 0.681 of c. From
+  rest, H-I8 had 60.0% of its rise at 76 s (54.00 °C against a 46.5 °C idle and a 12.50 °C rise) (C).
+- **C5: registered and post hoc kept apart.** A1 is quoted as registered, on the fine W at 0.442 W/°C (+0.121 and +0.076 °C/min), with the die's
+  slopes beside (E). "Fell on E98's line" (posthoc.txt §5) is marked post hoc beside the registered B1. The int8 hold's 97.6% at 800 MHz is the
+  plateau's (last 300 s); its 9 idle-reset dips are the whole hold's (1 touches the plateau; the whole hold's share at 800 MHz is 96.9%) (E).
+- **C6: E111.md's body was edited after the freeze, outside its Amendments.** With A1, A2 and A3 the registration gained a pointer in *The queue*
+  (line 100), and its Files table gained three rows and had two changed; `f888c802` appended the Results line after the Amendments (F). Nothing
+  rule-bearing changed. A dated note at the end of E111.md's Amendments now lists them; no history is rewritten.
+- **C7: etiquette, stated.** A1 relaxed aifoundry2's any-login block on the run's own decision while the question was pending, and the smoke, W1
+  and W2 started under it, about an hour before the owner's matching ruling. Nothing in the data changes; Joins and traps now gives A1's timing
+  beside the ruling.
 
 ## Files
 
@@ -207,6 +261,8 @@ python3 tools/claims-v3/e111/reduce_e111.py docs/reports/data/2026-11-01-e111-he
 | `README.md` | this file |
 | `results.json`, `reduce.txt` | `reduce_e111.py`: Parts A, B, C, the verdicts, E98's regression |
 | `posthoc_e111.py`, `posthoc.txt`, `holds.png` | **post hoc and descriptive**: the room, the holds by the minute, the die at 0.005 Hz, the refit with the camera's new points, W2 against E98's fits; the figure |
+| `corrections-check.py`, `corrections-check.txt` | the corrections after verification: every number they added, recomputed from committed files (the holds minute by minute, c by window, the rise at 76 s, A1 as registered, the dips' scope), E111.md's edits above its Amendments, and the files changed since `f888c802` |
+| `manifest.sha256` | sha256 of every file as committed in `ea74a2ef`; this README has changed since (Corrections after verification) |
 | `SMOKE/`, `W1/`, `W2/`, `END/`, `W1B/`, `END2/` | raw `run_e111.py` sessions: `e111.json`, `session.json`, `kspeed.json`, `runs.jsonl`, `launches.jsonl.gz`, `queries.jsonl`, `marks.jsonl`, `tel/*.jsonl.gz` (10 Hz), `sp/`, `logs/`, `manifest.txt`, `run.out`, the queue's `snapshot-*.json`, `sensors-*.json`, `config-*.txt` |
 | `CAM/`, `CAM-RED/`, `CAM-ANA/` | the camera session (`run_hlc_e111.py`): its records and telemetry; `reduce_hm.py`'s reduced records without the frame cube; `lockin_hlf.py`'s `lockin.json`, the maps, `dips.json`, `reduce.log` |
 | `left-on-aifoundry2.sha256` | the camera's raw stream (`CAM/cam/cam.p3rec`), the frame cube (`CAM-RED/frames.npz`) and the per-launch logs, left on the box under `build/e111/runs/` |
