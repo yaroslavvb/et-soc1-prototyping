@@ -68,7 +68,10 @@ fp16 0.956–0.970; `results.md`, Every tile). The other findings carry across:
 - the same zeros cost more in fp16 than in fp32, by +0.06 to +0.15 of random (C4);
 - an int8 calibration is a lever: on GPT-2's layer 11, clipping at p99.9 instead of max-abs costs +2.95 ± 0.19 W, against +3.13 ± 0.14 W there
   (C6);
-- ViT's layer-11 tile, 64% of whose words are −0.0, reads 19.73 ± 0.22 W, as if the gate never saw a zero (C9);
+- ViT's layer-11 tile, 64% of whose words are −0.0, reads D = 19.73 ± 0.22 W over fp32's zeros level (r 0.823 ± 0.012), far above the
+  11.56 W line that a gated −0.0 would stay under: the gate does not take −0.0 (C9). The tile still costs less than ViT's zero-free layer-5 tile
+  (r 0.997 ± 0.014; `results.md`), so C9 says what the gate does, not that the tile costs what a tile with no zeros costs (corrected after
+  verification, C6);
 - T5's bf16-grid weights cost 0.890 ± 0.012 of random in fp32 (C10).
 
 C5 stays INCONCLUSIVE on both cards: the int8 ResNet tile sits nearer the bits predictor (a) and the VGG tile nearer the gate law (c), on both
@@ -80,7 +83,7 @@ outside that run from 0.884 (fp32's T5 down-projection, 1.8 W) to 1.066 (int8's 
 1.031 over 32 synthetic kinds, measured, like this pairing, with each card at its own slope. At card 1's own fitted slope (the `auto` arm, 0.40
 W/°C) the median is 1.0442, E112(b)'s post-hoc 1.0432 again; at 0.545 W/°C it is 1.0641, past the band's top (1.0608): X4 is the one cross-card
 verdict that moves at an arm (`readme-numbers.txt` § C, E; the arms' medians from `e131-auto.json` and `e131-leak0.545.json` against
-`dips-arm/e95-nodips.json`).
+`dips-arm/e95-nodips.json`, printed for every arm in [`x4-arms-e131.txt`](x4-arms-e131.txt), added after verification).
 
 **4. The leakage slope, again.** Fitted per session (`auto`), card 1's slope came out **0.4008 W/°C** (E112(b) 0.417, E91 0.422), against E82's
 0.2414 that the primary uses. The fitted slope would lower fp32 random's D by 0.51 W, fp16 random's by 0.42 W and int8 `full`'s by 0.19 W
@@ -96,12 +99,15 @@ zeros-line departures (−0.253 and −0.403 W), so that arm keeps two and score
 **6. Arms and checks (reported).** Three claims move at one arm each, none at the registered primary: C5 reads PASS at 0.545 W/°C; C8 and C11 read
 INCONCLUSIVE with the meter dips kept (`scored.json` › `claims.<C>.at_arms`). E78-R5's checks hold: idle consistency 0.082 W (≤ 0.15), rail lag
 re-fit 1.00 s (in [0.80, 1.15]), duty 0.9957–0.9964, carry-over 0.0046 W/W, standard error 0.0007 (n 208; ≤ 0.01). The smoke (13101): 7 of 7 runs
-ok, cycles per op 546 / 546 / 318, 0.5992–0.5995 GHz, its gate PASS. Cycles per op 546 / 546 / 318 in every pass; 30–34 dip samples removed per
+ok, cycles per op 546 / 546 / 318, 0.5992–0.5996 GHz (corrected after verification, C7), its gate PASS. Cycles per op 546 / 546 / 318 in every pass; 30–34 dip samples removed per
 pass.
 
-**7. The stops were never approached.** The session's highest board reading was **60.58 W** and its hottest minion-shire reading **65 °C** (PMIC
-field 62 °C), against the registered stops of 68 W and 72 °C and the firmware's PMIC alarm at 75 W / 75 °C
-([`telemetry-max-e131.txt`](telemetry-max-e131.txt)).
+**7. The stops were never approached.** The session's highest board reading was **60.58 W**. The minion shires' high-water mark read **65 °C**
+in every one of the 24,157 samples, the smoke's included, whose shire mean read 48–53 °C: it was set before the session, so no shire exceeded
+65 °C during it. The shire mean peaked at **62 °C**, and so did the PMIC field (a die reading). All of these sit below the registered stops of
+68 W and 72 °C and the firmware's PMIC alarm at 75 W / 75 °C; the 72 °C stop reads the largest of the three shire fields, so it would have fired
+on any shire's reaching 72 °C ([`telemetry-max-e131.txt`](telemetry-max-e131.txt); the fields apart in
+[`telemetry-fields-e131.txt`](telemetry-fields-e131.txt); corrected after verification, C3).
 
 ## Device commands sent
 
@@ -113,7 +119,7 @@ every file the session ran read **GO with no WRITE allowed**, on the Intel befor
 
 | # | sent by | command (id) | class (BL2 0.22.0 source, `device-bootloaders/src/ServiceProcessorBL2/`) |
 |---|---|---|---|
-| 1 | `ettelem config`: the session's 2 reads, each block's 2 (10 in all) | `DM_CMD_GET_MODULE_STATIC_TDP_LEVEL` (25) | READ: `thermal_power_monitor.c:339` → `thermal_pwr_mgmt.c:613`, a copy from SP RAM |
+| 1 | `ettelem config`: 12 reads in all, the session's 2 and the start and end of the smoke and of each of the four passes (corrected after verification, C4) | `DM_CMD_GET_MODULE_STATIC_TDP_LEVEL` (25) | READ: `thermal_power_monitor.c:339` → `thermal_pwr_mgmt.c:613`, a copy from SP RAM |
 | 2 | `ettelem config` | `DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS` (21) | READ: `:438` → `:665`, a copy from SP RAM |
 | 3 | `ettelem config` | `DM_CMD_GET_MODULE_POWER_STATE` (23) | READ: `:48` → `:551`, a copy from SP RAM |
 | 4 | `ettelem config`, `ettelem sample` | `DM_CMD_GET_ASIC_FREQUENCIES` (53) | READ: `performance.c:41` → `perf_mgmt.c:276`, PLL registers and a strap read, an SP RAM copy |
@@ -128,7 +134,9 @@ every file the session ran read **GO with no WRITE allowed**, on the Intel befor
 READ: the handler writes only its response, its log line and the SP's RAM copy of the value it read (an I2C read puts the register's address on
 the bus through the SP's own I2C controller; only a failed read soft-resets that controller). **No WRITE was sent.** Every telemetry call went
 through `tools/claims-v3/e128/ettelem_guard.sh` (`config`, `sample --seconds --every-ms`; anything else refused before the device opens), and
-`lib.sh`'s drain (the vendor tool) was replaced by a refusal; the logs show neither a refusal nor a drain. **Not sent:** the statistics reset
+`lib.sh`'s drain (the vendor tool) was replaced by a refusal. No guard refusal occurred: every config read, die read and sampler produced data
+(the guard's stderr is not logged, so a refusal would leave no line). No drain was attempted: the replacement logs `E131: drain refused`, and no
+log holds that line (corrected after verification, C7). **Not sent:** the statistics reset
 (`DM_CMD_SET_STATS_RUN_CONTROL`, 62; no `--reset-ms`), the SP log level (67), `sptrace`, `dev_mngt_service`, the firmware-revisions query (14),
 any residency read, any governor, TDP, threshold, clock or voltage set, any reset. The checker's one finding, `lib.sh:154`'s forwarded sampler
 arguments, is waived on its line: `block_e131.sh`'s one `start_sampler` call passes the file and the duration only.
@@ -145,7 +153,7 @@ arguments, is waived on its line: `block_e131.sh`'s one `start_sampler` call pas
 | passes | 13110–13113, then 13114 if it fits (T0 + 2,640 s, projected by the longest pass) | 652, 620, 547 and 567 s, every one rc 0; 13114 refused at T0 + 2,471 s (projected 652 s, end T0 + 3,123 s) ([`logs/queue.out`](logs/queue.out)) |
 | kept passes, the set-aside rule | S1 carries with ≥ 3 | S1 kept **4 of 4**; S2 and S3 restored nothing |
 | verdicts | C1–C12, X1, X4, X5 | 10 PASS, 1 FAIL, 2 INCONCLUSIVE; X1, X4, X5 PASS |
-| stops | board ≥ 68 W, a shire ≥ 72 °C | maxima 60.58 W, 65 °C; no stop fired |
+| stops | board ≥ 68 W, a shire ≥ 72 °C | board at most 60.58 W; the shires' high-water mark 65 °C in every sample, set before the session; the shire mean at most 62 °C; no stop fired (C3) |
 | budget | ≤ 45 card-minutes, first device access to last | 41.2 (2,471 s); claim to release 41.9 |
 
 ## Departures
@@ -160,19 +168,25 @@ arguments, is waived on its line: `block_e131.sh`'s one `start_sampler` call pas
   from the freeze, because the file list had been narrowed after the first freeze (the checker had read the freeze script's list of unsent
   commands as sends); the freeze was re-made and the second run (11:11) read HARNESS OK. Its dry blocks were skipped as already done, so they were
   re-run with `V3_FORCE=1` (`logs/box-dry-2.txt`). All of this came before the commit and the claim.
-- **Beyond the registration, labelled:** before E131's data existed, the collector was run once on E112(b)'s published passes as stand-ins, in the
-  lane's scratch, to test it (it reproduced self-test D; nothing committed). After the session, the collector was run twice on the same raw copy:
-  first from the lane's scratch, then from a repo-relative root (`build/e131-raw`), so that the reductions name their input directories without a
-  home path; the committed files are the second run's, with the same verdicts. `readme-numbers.py` and `telemetry-max-e131.txt` are derived after
-  the scoring and decide nothing.
+- **Beyond the registration, labelled:** during the session, at 11:36 PST, after passes 13110 and 13111 had ended on the box, the collector was
+  tested once in the lane's scratch on E112(b)'s published passes only, as stand-ins (its inputs were links to E112(b)'s committed passes, so it
+  read none of E131's data; it reproduced self-test D; nothing committed; corrected after verification, C7). After the session, the collector was
+  run twice on the same raw copy: first from the lane's scratch, then from a repo-relative root (`build/e131-raw`), so that the reductions name
+  their input directories without a home path; the committed files are the second run's, with the same verdicts. `readme-numbers.py` and
+  `telemetry-max-e131.txt` are derived after the scoring and decide nothing.
 - The raw passes and the box's logs keep the box's own paths, as every raw directory here does.
 
 ## What it changes for the blog material and the hub
 
-- **Item 7, "another card":** answered for E95's thirty tiles. On a second card, under a rule written before the data, every tile's cost relative
-  to random data agrees with aifoundry3's to within 0.010 (fp32), 0.009 (fp16) and 0.018 (int8); the ranks agree; the card scale is E82's 1.024;
-  and the claims read verdict for verdict as E95's dips-removed arm did. Item 7's remaining open parts are the other ones it lists: real int8 beyond
-  GPT-2's tiles, an int8 calibration's effect on the clock, no-zero tiles sustained, and these tiles' heat below 12 W.
+- **Item 7, "another card":** answered for E95's thirty tiles (and three of E86's). On a second card, with a set-aside rule written before the
+  data that was not needed (all four passes were kept), every tile's cost relative to random data over its format's zeros level agrees with
+  aifoundry3's, differing by at most 0.0102 (fp32), 0.0091 (fp16) and 0.0181 (int8); the ranks agree (ρ 1.000, 1.000, 0.984); the tiles share
+  E82's card scale, a median of 1.024 against E82's 1.031 (band 1.001–1.061) at the frozen slope, 1.044 at the session's own fitted slope and
+  outside the band (1.064) at 0.545 W/°C ([`x4-arms-e131.txt`](x4-arms-e131.txt)); and the claims read verdict for verdict as E95's dips-removed
+  arm did. So item 7's energy half is answered for fp32 and fp16 on two cards. E131 touches none of item 7's other open parts, which stay as the
+  kinds page lists them: real int8 on a warmer heat path, where the ceiling lifts; real int8 beyond GPT-2's three tiles; whether an int8
+  calibration moves a clock; no-zero tiles sustained, beyond "both at the floor"; E95's tiles' heat below 12 W (corrected after verification, C1
+  and C5).
 - **The blog's real-tensors sentence** can now cite two cards: real fp32 and fp16 operands with full mantissas and no exact or negative zero cost
   95.6–99.7% of random data over the format's zeros level, within 2% of random except in GPT-2's attention tiles (layer 9's fp16 tile 0.956 on both
   cards), and that one failure is a property of the tile, not of a card.
@@ -193,5 +207,28 @@ arguments, is waived on its line: `block_e131.sh`'s one `start_sampler` call pas
   tiles) and `aifoundry1-c1/e131-smoke-p13101/`; `logs/` (the session log, the queue's log, the session's two config reads with their times, the
   box's preflight, the binaries' sha256, the dry runs, the box setup, the launch).
 - Derived, after the scoring: [`readme-numbers.py`](readme-numbers.py) / [`.txt`](readme-numbers.txt), [`telemetry-max-e131.txt`](telemetry-max-e131.txt).
+  After verification: [`x4-arms-e131.py`](x4-arms-e131.py) / [`.txt`](x4-arms-e131.txt) (X4's median at every arm) and
+  [`telemetry-fields-e131.py`](telemetry-fields-e131.py) / [`.txt`](telemetry-fields-e131.txt) (the telemetry's temperature fields apart, for
+  E131's smoke and passes and for E112(b)'s three). Each decides nothing.
 - Desk, before the registration: `desk/history-card1.py` / `.txt` (how often E78's gates fire on card 1), `desk/telemetry-max-e112b.py` / `.txt`
   (the stops' margin), `desk/dmcmd-e131.txt` (the commands at `836a4ab`), `desk/dmcmd-audit-e131.txt` (the checker).
+
+## Corrections after verification (Mon 2 Nov 2026)
+
+An independent verifier read the registration, the data, the logs, the scripts and the firmware handlers the run's commands reach at `836a4ab`,
+the same day. It re-ran the registered reduction and scorer on the committed raw passes (every `e131*.json`, `runs.csv`, `reduce.txt`,
+`scored.json` and `results.md` byte-identical), recomputed the headline numbers with its own script, and read the box's logs and hashes
+(read-only). It found that no WRITE was sent and that every verdict stands. The corrections below change wording, a count and the evidence named:
+no rule, prediction, number or verdict changed. They were made at the desk: no card was touched, no device command sent, nothing re-run.
+
+| | what was wrong | what changed |
+|---|---|---|
+| C1 | **Item 7's open parts.** What it changes, bullet 1, kept four of the five parts of item 7 that E131 leaves open and dropped "real int8 on a warmer heat path, where the ceiling lifts" (the speed half's, E96), saying "Item 7's remaining open parts are the other ones it lists". The lane's suggested wording for the kinds page did the same | The bullet gives the five verbatim, as the kinds page lists them, and says the energy half is answered for fp32 and fp16 on two cards |
+| C2 | **What made the replicate score.** A blog sentence in the lane's result (not in this README) said the set-aside rule and the frozen leakage slope "made the replicate score". The rule restored nothing (`scored.json` › `set_aside`: S2 and S3 empty, no pass set aside), and at the session's own fitted slope (`auto`, 0.4008 W/°C, E112(b)'s registered primary method) all four passes are kept as well and no claim or cross-card verdict moves (`claims.<C>.at_arms.auto`, `cross_card.at_arms.auto`, `x4-arms-e131.txt`). What made it score was four passes with no gate failure | The sentence is rewritten in the lane's result; What it changes, bullet 1, says the rule was not needed |
+| C3 | **"Its hottest minion-shire reading 65 °C"** (result 7, the stops row of § Registered against what happened, and `telemetry-max-e131.txt`'s "die max"). That figure is the largest of `temp_c.minshire`'s three fields, `[mean, low, high]`, and the largest is always the third: the PVT high-water latch over the shires (`thermal_pwr_mgmt.c:756` at `836a4ab`), which only the SP's start or a statistics reset clears (`pvt_hilo_reset`, called only from `Thermal_Pwr_Mgmt_Init_OP_Stats`, `:2828`); E131 sent no reset. It read 65 °C in all 24,157 samples, the smoke's included at a shire mean of 48–53 °C, and in all 14,853 of E112(b)'s on 1 Nov: a peak set before the session, not a reading the session made | Result 7 and the stops row give the latch as an upper bound set before the session (no shire exceeded 65 °C) and the shire mean's peak, 62 °C (the PMIC field, a die reading, also 62 °C). The margins stand: the 72 °C stop reads the largest of the three fields. `telemetry-max-e131.txt` and `desk/telemetry-max-e112b.txt` carry a note at their top; [`telemetry-fields-e131.py`](telemetry-fields-e131.py) / [`.txt`](telemetry-fields-e131.txt) give the fields apart; [E131.md](../../../../tools/claims-v3/e131/E131.md) N1 says the same of its margin basis |
+| C4 | **The config reads' count** (§ Device commands sent, row 1): "10 in all" | 12: the session's 2 (`logs/config-session-*.json`) and the start and end of the smoke and of each of the four passes (`aifoundry1-c1/*/*/config_{start,end}.json`, `readme-numbers.txt` § A). Every one is a READ, so no class changes |
+| C5 | **"The card scale is E82's 1.024"** (What it changes, bullet 1, and the lane's suggested wording): 1.024 is E131's own X4 median; E82's is 1.031, as result 3 says | The bullet says the tiles share E82's card scale: 1.024 against E82's 1.031 (band 1.001–1.061) at the frozen slope, 1.044 at the session's own fitted slope, and outside the band (1.064) at 0.545 W/°C. [`x4-arms-e131.py`](x4-arms-e131.py) / [`.txt`](x4-arms-e131.txt) print the median at every arm (1.0238 primary, 1.0442 `auto`, 1.0184 at 0.1994, 1.0416 at 0.3803, 1.0641 at 0.545, 1.0282 with the dips kept) |
+| C6 | **Result 2's −0.0 line** said ViT's layer-11 tile "reads 19.73 ± 0.22 W, as if the gate never saw a zero". 19.73 W is D over fp32's zeros level, and the tile's r is 0.823, well below ViT's zero-free layer-5 tile at 0.997: C9 shows that the gate does not take −0.0, not that the tile costs what a tile with no zeros costs. The lane's blog sentences had the same looseness: r given as a share of "random data's power" rather than of its D over the format's zeros level, and "16x16 slices", true only in 32-bit words (the fp16 and int8 windows are 16 × 32 and 16 × 64 values) | Result 2 gives D, r, C9's line and the zero-free tile beside it; the blog sentences are rewritten in the lane's result |
+| C7 | **Evidence and timing slips.** (1) § Device commands sent said "the logs show neither a refusal nor a drain"; a guard refusal leaves no line, since every guarded call discards stderr. (2) § Departures dated the collector's test on E112(b)'s passes "before E131's data existed"; it ran at 11:36 PST, during the session, after passes 13110 and 13111 had ended on the box, and read only E112(b)'s data. (3) Result 6 gave the smoke's clocks as 0.5992–0.5995 GHz; the smoke's lines in `logs/session.log` read up to 0.5996 | (1) now says that no refusal occurred, because every guarded call produced data, and that no drain was attempted, because the drain's replacement logs a line and no log holds it; (2) and (3) are corrected where they stood |
+
+Files added by the corrections: `x4-arms-e131.py` / `.txt` and `telemetry-fields-e131.py` / `.txt`.
