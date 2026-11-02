@@ -1,0 +1,8 @@
+E129 self-test (selftest_e129.py --full), committed data only
+A  formulas on E124's committed reduction: 44 per-pass values compared, 0 differ; verdicts {'R0_answer': 'PER-TIME', 'R2_lanes': 'LANES-OPPOSE', 'R3_per_time': 'PASS', 'Y1_no_issue': 'PASS', 'Y2_per_op_ceiling': 'PASS'} against E124's {'R0_answer': 'PER-TIME', 'R2_lanes': 'LANES-OPPOSE', 'R3_per_time': 'PASS', 'Y1_no_issue': 'PASS', 'Y2_per_op_ceiling': 'PASS'}; R1 at 4 passes reads 'NOT-SCORED (fewer than 6 kept passes)' (E124's own R1: INCONCLUSIVE, half 0.3704 W, here 0.3704): PASS
+B  pass order: 10 passes x 14 runs, every arm once, each format's zeros once a segment, pi first and last, deterministic, 10 distinct orders; smoke items 7 known; --values strings as E109's grammar: PASS [] [] []
+C  reducer port on E124's raw passes cut to E129's known items: 144 values of 4 passes compared, 0 differ (reduce_e124 vs reduce_e129); cut to E129's own pass (no random or fp16 anchors): 84 values, 0 differ; passes kept [4, 4, 4]: PASS
+D  set-aside rule and minimums: 6 kept -> primary; 5 kept, relaxed 6 -> relaxed; 5 and 5 -> primary; R1 at 5 passes 'NOT-SCORED (fewer than 6 kept passes)', at 6 'FAIL'; nothing scored at 2: PASS []
+E  V0-V2 on synthetic passes: N1 near 0.1 W -> PER-ROW, near N -> PER-CYCLE, near N/2 -> INCONCLUSIVE; V2 (N1 near 0.1) ['CONSISTENT', 'N1 BELOW', 'N1 BELOW', 'N1 BELOW'], (N1 near N) ['N1 ABOVE', 'N1 ABOVE', 'CONSISTENT', 'CONSISTENT']; cycles 62.0/66.5 -> V0 RATES-DIFFER, R6 FAIL: PASS []
+F  HARNESS OK: 20 files match predictions-e129.json (desk: binaries not checked) | dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none) (rc 0): PASS
+SELFTEST PASS {"A": true, "B": true, "C": true, "D": true, "E": true, "F": true}

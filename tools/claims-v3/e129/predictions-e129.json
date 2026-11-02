@@ -1,0 +1,431 @@
+{
+ "experiment": "E129",
+ "question": "Q136, lane a1c1-e129-int8-noissue; the kinds page's section 11, item 11 ('int8 zeros' extra 0.61 W'); Q134's final critic, item 5",
+ "card": {
+  "name": "aifoundry1-c1",
+  "host": "aifoundry1",
+  "device": 1,
+  "lock": "/run/lock/etsoc-shire1.lock",
+  "clock_mhz": 600,
+  "config_gate": {
+   "expected": {
+    "tdp_w": 65,
+    "temp_threshold_c": 65
+   }
+  },
+  "what": "aifoundry1 card 1, firmware 1.2.0 (BL2 0.18.0), 600 MHz in every sample since 25 Sep, TDP 65 W / threshold 65 C (read, never set)"
+ },
+ "sources": {
+  "e109_frozen": "tools/claims-v3/e109/predictions-e109.json",
+  "e124_reduction": "docs/reports/data/2026-11-01-e124-int8-zeros-replicate/e124.json",
+  "e124_scored": "docs/reports/data/2026-11-01-e124-int8-zeros-replicate/scored.json",
+  "e124_extras": "docs/reports/data/2026-11-01-e124-int8-zeros-replicate/extras.json",
+  "e124_frozen": "tools/claims-v3/e124/predictions-e124.json",
+  "q136c_priced": "docs/reports/data/2026-11-02-q136c-tima-bench/priced.json",
+  "q136c_counts": "docs/reports/data/2026-11-02-q136c-tima-bench/counts.json",
+  "q136c_corrections": "docs/reports/data/2026-11-02-q136c-tima-bench/corrections-check.json"
+ },
+ "items": [
+  "m0.fp32.zeros",
+  "m0k8.fp32.zeros",
+  "m0r1.fp32.zeros",
+  "m0.int8.zeros",
+  "m0k8.int8.zeros",
+  "m0r1.int8.zeros"
+ ],
+ "anchors": [
+  "fp32.zeros",
+  "int8.zeros"
+ ],
+ "runs_per_pass": 14,
+ "burnin_runs_per_pass": 2,
+ "arms_bench_per_op": {
+  "m0.fp32.zeros": {
+   "bench_cycles": 544.25,
+   "scp_reads": 288.0,
+   "scp_rd32": 256.0,
+   "scp_rd64": 0.0,
+   "scp_rd256": 32.0,
+   "tenc_reads": 0.0,
+   "tenc_reads_newaddr": 0.0,
+   "tena_writes": 256.0,
+   "tentmp_writes": 0.0,
+   "tenb_writes": 256.0,
+   "ff_clocked_bits": 605295.0
+  },
+  "m0.int8.zeros": {
+   "bench_cycles": 318.25,
+   "scp_reads": 224.0,
+   "scp_rd32": 128.0,
+   "scp_rd64": 64.0,
+   "scp_rd256": 32.0,
+   "tenc_reads": 5092.0,
+   "tenc_reads_newaddr": 4096.0,
+   "tena_writes": 192.0,
+   "tentmp_writes": 64.0,
+   "tenb_writes": 256.0,
+   "ff_clocked_bits": 383331.0
+  },
+  "m0r1.fp32.zeros": {
+   "bench_cycles": 54.25,
+   "scp_reads": 48.0,
+   "scp_rd32": 16.0,
+   "scp_rd64": 0.0,
+   "scp_rd256": 32.0,
+   "tenc_reads": 0.0,
+   "tenc_reads_newaddr": 0.0,
+   "tena_writes": 16.0,
+   "tentmp_writes": 0.0,
+   "tenb_writes": 256.0,
+   "ff_clocked_bits": 62100.5
+  },
+  "m0r1.int8.zeros": {
+   "bench_cycles": 54.25,
+   "scp_reads": 40.0,
+   "scp_rd32": 0.0,
+   "scp_rd64": 8.0,
+   "scp_rd256": 32.0,
+   "tenc_reads": 868.0,
+   "tenc_reads_newaddr": 0.0,
+   "tena_writes": 8.0,
+   "tentmp_writes": 8.0,
+   "tenb_writes": 256.0,
+   "ff_clocked_bits": 66707.0
+  }
+ },
+ "one_row_rates_pred_ops_per_s": {
+  "fp32": 9909677419.35484,
+  "int8": 9909677419.35484
+ },
+ "passes": [
+  12910,
+  12911,
+  12912,
+  12913,
+  12914,
+  12915,
+  12916,
+  12917,
+  12918,
+  12919
+ ],
+ "smoke_pass": 12901,
+ "min_kept_passes": {
+  "every_rule": 3,
+  "R1": 6
+ },
+ "budget": {
+  "card_minutes": 35,
+  "budget_s": 2100,
+  "reserve_s": 150,
+  "first_estimate_s": 300,
+  "deadline": "2026-11-02 15:50 PST",
+  "anchor": "E129_T0 = the session's launch (date +%s in the launch command); card time counted from the session's first config read to its last",
+  "no_new_session_after": "2026-11-02 15:00 PST"
+ },
+ "primary_reduction": {
+  "code": "tools/claims-v3/e129/reduce_e129.py (reduce_e78.py unchanged)",
+  "leak_w_per_c": 0.2414,
+  "dips": "removed (E82 A2)",
+  "gates": "E78's, unchanged; the four anchors E129 does not run (fp32/fp16 random, fp16 zeros, int8 full) have no runs to gate"
+ },
+ "set_aside_rule": {
+  "why": "E129's statistics use only each format's zeros anchors and the six arms; pi enters none but its own R10 cell. On this card a pass whose statistics are intact has been set aside by a gate on an anchor no statistic uses (E124's dips-kept arm: 12410 and 12412 by fp16 random's span, 12412 also by pi's drift, +1.082 W). R1 needs six kept passes.",
+  "rule": "The primary reduction (E78's pass gates as they apply to E129's pass: the zeros anchors' span <= 0.60 W and straight-line departure <= 0.25 W, pi's drift <= 0.60 W, at most 2 failed runs, card 1's config gate) carries every verdict if it keeps at least 6 passes. If it keeps fewer, the relaxed reduction (reduce_e129.py --relax-tie: GATES['tie_drift_w'] 0.60 -> 99 W) carries them if it keeps more passes than the primary: a pass set aside ONLY by pi's drift is restored, a pass set aside by any other gate stays out, and the verdicts are labelled 'scored under the set-aside rule'. R1 needs at least 6 kept passes in the reduction that carries the verdicts, else it reads NOT-SCORED and G_op is reported with no verdict; every other rule needs at least 3. The relaxed reduction is always reported. No pass is added after any reduction is read, and no pass is chosen after the fact.",
+  "relaxed_gate": {
+   "tie_drift_w": 99.0
+  }
+ },
+ "rules": {
+  "R0_R3": "E109's (predictions-e109.json \u203a rules R0-R3), statistics and lines unchanged: shares of G with 95% lower bound >= G/2 carry it",
+  "R1_ops": {
+   "statistic": "G_op = e_op(int8) O(int8) - e_op(fp32) O(fp32)",
+   "line": "G/2 (this session's G)",
+   "verdict": "PASS if lower >= G/2; FAIL if upper < G/2; else INCONCLUSIVE; NOT-SCORED with fewer than 6 kept passes"
+  },
+  "Y1": {
+   "statistic": "N = S(m0.int8.zeros) - S(m0.fp32.zeros)",
+   "line_w": 0.84,
+   "predicted_w": 1.5665500000000012,
+   "verdict": "PASS if lower >= line_w; FAIL if upper < line_w; else INCONCLUSIVE"
+  },
+  "Y2": {
+   "statistic": "e_op(fp32), e_op(int8)",
+   "line_pj": 769.7229030697772,
+   "verdict": "PASS if both upper < line_pj; FAIL if either lower >= line_pj; else INCONCLUSIVE"
+  },
+  "R6_cycles": {
+   "predicted": {
+    "m0.fp32.zeros": 544.0,
+    "m0.int8.zeros": 318.0,
+    "m0k8.fp32.zeros": 280.0,
+    "m0k8.int8.zeros": 166.0,
+    "m0r1.fp32.zeros": 62.0,
+    "m0r1.int8.zeros": 62.0
+   },
+   "tolerance": 2.0,
+   "what": "the card's median cycles per op of each arm against the RTL's: the bench's own cycles + E109's 7.75 (E109's rule); m0 and m0k8 are E109's frozen values, m0r1 is Q136(c)'s bench (counts.json, set arms_pace) + 7.75"
+  },
+  "V0_equal_rate": {
+   "statistic": "|cycles(m0r1.int8.zeros) - cycles(m0r1.fp32.zeros)| (medians)",
+   "tolerance_cycles": 2.0,
+   "verdict": "EQUAL-RATE if <= 2 cycles, else RATES-DIFFER (V1 then carries that label)"
+  },
+  "V1_one_row": {
+   "statistic": "N1 = S(m0r1.int8.zeros) - S(m0r1.fp32.zeros), per kept pass",
+   "line_fraction_of_N": 0.5,
+   "verdict": "PER-ROW if N1's 95% upper bound < N/2 (N = this session's Y1 mean); PER-CYCLE if N1's 95% lower bound >= N/2; else INCONCLUSIVE"
+  },
+  "V2_readings": {
+   "what": "which frozen reading N1's 95% interval agrees with: CONSISTENT if it overlaps the reading's range, else N1 BELOW / ABOVE",
+   "readings": {
+    "bench at its constants, the card's order (TenC read at one frozen address in fp32 too)": {
+     "range_w": [
+      0.07043672644496139,
+      0.13992703362604592
+     ],
+     "by_constant_set": {
+      "M2 floats": 0.07138557390527885,
+      "M2 int8": 0.13992703362604592,
+      "M4 floats": 0.07043672644496139,
+      "I3 int8": 0.11764525389333569
+     }
+    },
+    "bench at its constants, from reset (TenC's reads int8's alone)": {
+     "range_w": [
+      0.3961682523580256,
+      0.7934000095727048
+     ],
+     "by_constant_set": {
+      "M2 floats": 0.40514457656213465,
+      "M2 int8": 0.7934000095727048,
+      "M4 floats": 0.3961682523580256,
+      "I3 int8": 0.6675155990951179
+     }
+    },
+    "the TIMA controls alone at the cards' issue price (17.2 fJ a clocked bit, Q136(c) result 5b), 95%": {
+     "range_w": [
+      0.4922961043131007,
+      1.4642113913290822
+     ],
+     "mean_w": 0.9782537478210914
+    },
+    "all of N goes with work done every cycle (the r1/m0 ratio of the TIMA controls' or TenC's reads a second)": {
+     "range_fraction_of_N": [
+      0.8928040954178399,
+      1.0030980834619492
+     ]
+    }
+   }
+  },
+  "R10_tie": {
+   "what": "the tie to E124 on this card (same frame for these cells); a failed cell labels every verdict and removes none",
+   "cells": {
+    "m0.fp32.zeros": {
+     "what": "D",
+     "ref": -1.4566617816089789,
+     "band": 0.3
+    },
+    "m0.int8.zeros": {
+     "what": "D",
+     "ref": -0.40143939858918287,
+     "band": 0.3
+    },
+    "m0k8.fp32.zeros": {
+     "what": "D",
+     "ref": -1.3596035258436814,
+     "band": 0.3
+    },
+    "m0k8.int8.zeros": {
+     "what": "D",
+     "ref": -0.2528385147140835,
+     "band": 0.3
+    },
+    "anchor_pi": {
+     "what": "D",
+     "ref": 8.120581437908497,
+     "band": 0.5
+    },
+    "gap G (S)": {
+     "what": "G",
+     "ref": 0.5477633333333316,
+     "band": 0.2
+    },
+    "no-issue gap N (S)": {
+     "what": "N",
+     "ref": 1.5665500000000012,
+     "band": 0.5
+    }
+   }
+  }
+ },
+ "predictions": {
+  "if_e124_carries": {
+   "R0": "PER-TIME",
+   "R1": "INCONCLUSIVE at 6 kept passes, FAIL at 8 or more (E124's mean and per-pass spread)",
+   "R2": "LANES-OPPOSE",
+   "R3": "PASS",
+   "Y1": "PASS",
+   "Y2": "PASS",
+   "R6": "PASS x6",
+   "V0": "EQUAL-RATE",
+   "numbers_w": {
+    "G": 0.5477633333333316,
+    "G_lane": -1.055222383019796,
+    "G_op": 0.0597515828134058,
+    "G_rest": 1.543234133539722,
+    "N": 1.5665500000000012
+   }
+  },
+  "resolution_from_e124_spread": {
+   "6": {
+    "G_op_half_w": 0.2443624587691733,
+    "N1_half_w_if_N_spread": 0.1376999969099877,
+    "R1_if_E124_mean": "INCONCLUSIVE"
+   },
+   "8": {
+    "G_op_half_w": 0.19466782943014746,
+    "N1_half_w_if_N_spread": 0.10969671710631396,
+    "R1_if_E124_mean": "FAIL"
+   },
+   "10": {
+    "G_op_half_w": 0.1665331264577558,
+    "N1_half_w_if_N_spread": 0.09384261033444972,
+    "R1_if_E124_mean": "FAIL"
+   }
+  },
+  "V1": "No single expectation: at the bench's constants every reading puts N1 below N/2 (PER-ROW), 0.07-0.14 W in the card's order and 0.40-0.79 W from reset; at the cards' issue price the TIMA controls alone would put it near N/2 or above (0.98 +- 0.49 W), and work done every cycle would keep 0.89-1.00 of N (PER-CYCLE).",
+  "bench_N_16_rows_w": {
+   "card_order": {
+    "M2 floats": 0.14495888967321258,
+    "M2 int8": 0.2853155772803032,
+    "M4 floats": 0.14866811987033995,
+    "I3 int8": 0.23916752779816342
+   },
+   "from_reset": {
+    "M2 floats": 0.47753216089217676,
+    "M2 int8": 0.9364669875306827,
+    "M4 floats": 0.473242433221307,
+    "I3 int8": 0.7870843719711198
+   }
+  },
+  "tima_issue_price_16_rows_w": {
+   "mean": 1.095700269838596,
+   "half": 0.5442736082676959,
+   "lo": 0.5514266615709001,
+   "hi": 1.639973878106292,
+   "n": 4,
+   "per_pass": [
+    1.4521178077372117,
+    1.1385480798184513,
+    0.6291296259578821,
+    1.1630055658408394
+   ]
+  }
+ },
+ "e124_reference": {
+  "G": {
+   "mean": 0.5477633333333316,
+   "half": 0.03706915585836454,
+   "lo": 0.510694177474967,
+   "hi": 0.5848324891916962,
+   "n": 4,
+   "per_pass": [
+    0.5454266666666616,
+    0.5452266666666621,
+    0.5785266666666735,
+    0.5218733333333294
+   ]
+  },
+  "G_op": {
+   "mean": 0.0597515828134058,
+   "half": 0.3704061719236485,
+   "lo": -0.3106545891102427,
+   "hi": 0.4301577547370543,
+   "n": 4,
+   "per_pass": [
+    0.22016063080668194,
+    0.06432429147811466,
+    -0.2709779119879709,
+    0.22549932095679748
+   ]
+  },
+  "N": {
+   "mean": 1.5665500000000012,
+   "half": 0.2087265326524907,
+   "n": 4,
+   "per_pass": [
+    1.4360300000000024,
+    1.543859999999981,
+    1.7488600000000147,
+    1.5374500000000069
+   ]
+  },
+  "e_op_pj": {
+   "fp32": {
+    "mean": 91.4850869801585,
+    "half": 100.69069341467427,
+    "lo": -9.205606434515772,
+    "hi": 192.17578039483277,
+    "n": 4,
+    "per_pass": [
+     128.84087805578272,
+     59.224795120221266,
+     158.0995611690819,
+     19.77511357554809
+    ]
+   },
+   "int8": {
+    "mean": 84.31082399468083,
+    "half": 161.6631755645305,
+    "lo": -77.35235156984966,
+    "hi": 245.97399955921134,
+    "n": 4,
+    "per_pass": [
+     189.3811013580498,
+     67.90582174533182,
+     -48.720071003927515,
+     128.67644387926924
+    ]
+   }
+  }
+ },
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/kinds/run_e78.py": "f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73",
+   "tools/claims-v3/kinds/e78_common.py": "c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e",
+   "tools/claims-v3/kinds/reduce_e78.py": "6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39",
+   "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+   "tools/claims-v3/kinds/tiles/fp32/zeros.bin": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "tools/claims-v3/kinds/tiles/int8/zeros.bin": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "tools/claims-v3/e128/ettelem_guard.sh": "c2c4ab7602c2e4d2b3ed3454faa4f60b745d5985bb7f71713229979079dbd2fc",
+   "tools/claims-v3/dmcmd_audit.py": "f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e",
+   "tools/claims-v3/dmcmd_table.json": "50168632931fd8c1fab40794cbaaac6aca3d31f01d4367d8a21fcf69c0bdc638",
+   "tools/claims-v3/e109/sp109/CMakeLists.txt": "123ef6e4ac1572d31914b6049fa700b30af1338c13cc96ec850cd047966dfcfd",
+   "tools/claims-v3/e109/sp109/sparsity_args.h": "dcc3aecd396d38a4b69508dcfbec0833873018e770717f1b830f7a9820825302",
+   "tools/claims-v3/e109/sp109/host/CMakeLists.txt": "6b6c1c80139ec0eadc8940bb93c264806412ab93ae90779d9ec6ad13d88a0477",
+   "tools/claims-v3/e109/sp109/host/Constants.h.in": "c464f57f54f0efd6d5659483c9121a0299bf86d82eacacc66938c8226f7ceebb",
+   "tools/claims-v3/e109/sp109/host/main.cpp": "f2057ea3227667c5fe3ae0e3ee936ad9668feed70e56a0cb0b4fb4f564e6236a",
+   "tools/claims-v3/e109/sp109/kernel/CMakeLists.txt": "061b87dfa8850f7f6714121f0313dee587fb85509db684693b5f38091ab10948",
+   "tools/claims-v3/e109/sp109/kernel/crt.S": "dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4",
+   "tools/claims-v3/e109/sp109/kernel/sections.ld": "b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09",
+   "tools/claims-v3/e109/sp109/kernel/sparsity.c": "ff006016dcd7651b1bafbd4630314797799b4b0877db041538e5e8c0637a5677",
+   "workloads/sparsity/host/main.cpp": "0f53a7d505155156c933e2d9a64d38803ca4e0cea3e20242e0aaafbf35e82284"
+  },
+  "box_binaries_sha256": {
+   "build/e109/host/sparsity_host": "bbc76e880ec0add02277806204d2b13b7799c8eb78b7d8f0ee2d3a996a88d09b",
+   "build/e109/kernel/sparsity.elf": "3149010f036e8ab3dfbb0ea5d9e2f6f631c2226d6757926676127d3548260cbb",
+   "build/sparsity/host/sparsity_host": "e0fbecce35f252c546e6e8390f6a4694519674dc4d6dea359b0db9c4d1a3fbbe",
+   "build/sparsity/kernel/sparsity.elf": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+   "build/ettelem/ettelem": "8008f96f056ae1c224c33ccce38070a67882a664620d637b8833d378b2167325"
+  },
+  "box_binaries_sources": {
+   "build/e109/host/sparsity_host": "docs/reports/data/2026-11-01-e124-int8-zeros-replicate/aifoundry1-c1/e124/p12413/binaries.sha256",
+   "build/e109/kernel/sparsity.elf": "docs/reports/data/2026-11-01-e124-int8-zeros-replicate/aifoundry1-c1/e124/p12413/binaries.sha256",
+   "build/sparsity/host/sparsity_host": "docs/reports/data/2026-11-01-e124-int8-zeros-replicate/aifoundry1-c1/e124/p12413/binaries.sha256",
+   "build/sparsity/kernel/sparsity.elf": "docs/reports/data/2026-11-02-e128-fp16-signs/aifoundry1-c1/e128/readback-p12802/binaries.sha256",
+   "build/ettelem/ettelem": "docs/reports/data/2026-11-02-e128-fp16-signs/desk/box-binaries.txt"
+  }
+ }
+}
