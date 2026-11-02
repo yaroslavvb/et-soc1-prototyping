@@ -1,0 +1,54 @@
+E131 freeze (predictions-e131.json), printed by make_predictions_e131.py
+
+passes [13110, 13111, 13112, 13113, 13114], smoke 13101; budget 2700 s from T0, reserve 60 s
+stops: board >= 68.0 W, hottest shire >= 72.0 C, run_e78 --max-c 72.0
+reduction: dips removed, leakage 0.2414 W/C frozen; arms ['auto', 'dips_kept', 'leak0.1994', 'leak0.3803', 'leak0', 'leak0.545']
+set-aside rule: min 3 kept; relaxed gates {'zero_mid_departure_w': 99.0, 'zero_range_w': 99.0, 'random_range_w': 99.0, 'tie_drift_w': 99.0}
+claims' formats: {'C1': ['fp16', 'fp32'], 'C2': ['fp16', 'fp32'], 'C3a': ['fp16', 'fp32'], 'C3b': ['fp16', 'fp32'], 'C4': ['fp16', 'fp32'], 'C5': ['int8'], 'C6': ['int8'], 'C7': ['int8'], 'C8': ['int8'], 'C9': ['fp32'], 'C10': ['fp32'], 'C11': ['fp16'], 'C12': ['fp32', 'fp16', 'int8']}
+card scale (E82): {'fp16': 1.033232, 'fp32': 1.030017, 'int8': 1.027062}
+X4 eligible: 24 tiles, band [1.0008, 1.0608]; X5 bands {'fp32': 0.03, 'fp16': 0.03, 'int8': 0.06}
+
+cross-card power, P(PASS):
+  4 passes, shared: X1 1.0 (by type {'fp32': 1.0, 'fp16': 1.0, 'int8': 1.0}), X4 1.0, X5 1.0
+  4 passes, unshared_x1.03: X1 0.637 (by type {'fp32': 1.0, 'fp16': 0.637, 'int8': 1.0}), X4 0.602, X5 0.896
+  4 passes, scale_1.00: X1 1.0 (by type {'fp32': 1.0, 'fp16': 1.0, 'int8': 1.0}), X4 0.044, X5 1.0
+  4 passes, tile_ratios_shift_0.02: X1 1.0 (by type {'fp32': 1.0, 'fp16': 1.0, 'int8': 1.0}), X4 1.0, X5 1.0
+  4 passes, tile_ratios_shift_0.04: X1 1.0 (by type {'fp32': 1.0, 'fp16': 1.0, 'int8': 1.0}), X4 1.0, X5 0.0
+  5 passes, shared: X1 1.0 (by type {'fp32': 1.0, 'fp16': 1.0, 'int8': 1.0}), X4 1.0, X5 1.0
+  5 passes, unshared_x1.03: X1 0.689 (by type {'fp32': 1.0, 'fp16': 0.689, 'int8': 1.0}), X4 0.578, X5 0.912
+  5 passes, scale_1.00: X1 1.0 (by type {'fp32': 1.0, 'fp16': 1.0, 'int8': 1.0}), X4 0.029, X5 1.0
+  5 passes, tile_ratios_shift_0.02: X1 1.0 (by type {'fp32': 1.0, 'fp16': 1.0, 'int8': 1.0}), X4 1.0, X5 1.0
+  5 passes, tile_ratios_shift_0.04: X1 1.0 (by type {'fp32': 1.0, 'fp16': 1.0, 'int8': 1.0}), X4 1.0, X5 0.0
+
+harness (sha256):
+  card_code_unchanged: tools/claims-v3/lib.sh 033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa
+  card_code_unchanged: tools/claims-v3/kinds/e78_common.py c58923a522849ea033a2d14b7981b0589bcd8a1d5c3129e608d3a418578a552e
+  card_code_unchanged: tools/claims-v3/kinds/run_e78.py f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73
+  card_code_unchanged: tools/claims-v3/kinds/reduce_e78.py 6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39
+  card_code_unchanged: tools/claims-v3/kinds/kinds.json 9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337
+  card_code_unchanged: tools/claims-v3/kinds/e95_common.py 53e6182b00e4df828024b2317d5a8339989caf358569b1422853b2ec07a88263
+  card_code_unchanged: tools/claims-v3/kinds/predictions-e95.json 0f7da535659de3cf3a437e68bc76b99a1b65d970d25e93bb3d90f3282da61dd5
+  card_code_unchanged: tools/claims-v3/kinds/real/real.json eb36f4cd0d88d928d2c0c92165f4a48e23727221d5ac047bff3de3c8e0ad83c0
+  card_code_unchanged: tools/claims-v3/kinds/real2/real2.json 6e259fd2e9edaa3d4fdeb663461ec39389ec8c24436c114719536a51d26c8715
+  card_code_unchanged: tools/claims-v3/kinds/real2/predictions-real2.json 0957e0c295990ac95cded56430697fb0683c9cf451d90f6943c8ff8d6a0b021a
+  card_code_unchanged: tools/claims-v3/e128/ettelem_guard.sh c2c4ab7602c2e4d2b3ed3454faa4f60b745d5985bb7f71713229979079dbd2fc
+  card_code_unchanged: tools/claims-v3/dmcmd_audit.py f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e
+  card_code_unchanged: tools/claims-v3/dmcmd_table.json 50168632931fd8c1fab40794cbaaac6aca3d31f01d4367d8a21fcf69c0bdc638
+  card_code_unchanged: workloads/sparsity/host/main.cpp 0f53a7d505155156c933e2d9a64d38803ca4e0cea3e20242e0aaafbf35e82284
+  desk_code_unchanged: tools/claims-v3/kinds/score_e95.py d18c9f3dc8741ff680df609d7078f1d76d6133bfcca16af8f214a88d685168c5
+  desk_code_unchanged: tools/claims-v3/e112/score_e112b.py 88ed293c1a3a742960c75302c13da785b51e5236b16a0a71aa4ecc8abf14f371
+  desk_code_unchanged: tools/claims-v3/e112/make_predictions_e112.py 69132cb274d0ce6cf9909c29b0c5512c38e5410947c9bb38a58e29ba00153051
+  desk_code_unchanged: tools/claims-v3/kinds/selftest_e78.py b3728af2f9854fe2ac8e1866e6f334d9b10cbe29bc83f16913f719b211cce20d
+  e131_card_files: tools/claims-v3/e131/run_e131.py fa48c7623d016691bf3a80665bb1f857a51e33dc3f7dbde108ba4f77f53fba21
+  e131_card_files: tools/claims-v3/e131/block_e131.sh fed8a217108a95946ee5472b04c0f55f73866c9702928ae8779d11a1e52f9504
+  e131_card_files: tools/claims-v3/e131/queue_e131.sh 6b01292fceee99aec274d6ad0b8c10d86ea20f12fc5ecbac30e8f6150addeb0e
+  e131_card_files: tools/claims-v3/e131/session_e131.sh 9c7d75f607ad6f8f5b3166db366e46bc400939f96f3a9555bebf1c8e159d94e2
+  e131_card_files: tools/claims-v3/e131/check_e131.py 83ac4732de6ee38ad685dd64fe4d2ca2b0b93a97f2016ed86b0d69b5f24f673e
+  e131_card_files: tools/claims-v3/e131/preflight_e131.sh 88cc64b7e8f5a2a2a96006c1312beac64a8cd533545bfb2fc778b1917701f988
+  e131_card_files: tools/claims-v3/e131/smoke_gate_e131.py ee2dd3abf4535d620e8e663a502c0a02ab489b9c508a9f749e834b1ea9eddf11
+  e131_desk_files: tools/claims-v3/e131/reduce_e131.py 82b4e78bbdb971dae2a492ab8b3305eb91627a7a002e58cbbec4b2ac19969b45
+  e131_desk_files: tools/claims-v3/e131/score_e131.py 926869c8ec8bc82aceaa772a6e029ba3a1c2dda223c05a593279615935585a33
+  e131_desk_files: tools/claims-v3/e131/collect_e131.sh ad78f3b2a7a13bfcd2ba91f825d8524857277bba41214cc8b1802887b6d4712b
+  e131_desk_files: tools/claims-v3/e131/selftest_e131.py 82f323c587eae7812e604b1b5d818c717c22433d15b87202859e508eb5202655
+  box_binaries: build/sparsity/host/sparsity_host e0fbecce35f252c546e6e8390f6a4694519674dc4d6dea359b0db9c4d1a3fbbe
+  box_binaries: build/ettelem/ettelem 8008f96f056ae1c224c33ccce38070a67882a664620d637b8833d378b2167325

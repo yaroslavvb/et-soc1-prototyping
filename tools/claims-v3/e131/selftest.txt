@@ -1,0 +1,30 @@
+E131 board-power stop: board_w 68.0 W >= 68.0 W
+E131 die stop: hottest minion-shire reading 72.0 C >= 72.0 C
+PASS A stops: 67.9 W and 71.9 C pass
+PASS A stops: board line writes STOP and exits 6: E131 board-power stop: board_w 68.0 W >= 68.0 W
+PASS A stops: die line writes STOP and exits 6: E131 die stop: hottest minion-shire reading 72.0 C >= 72.0 C
+PASS B classify tie
+PASS B classify zeros line
+PASS B classify spans
+PASS B classify failed runs
+PASS B S2 restores the tie-only pass whole
+PASS B S3 restores the one-format pass for the other two
+PASS B never: failed runs (5), three formats (6), a config flag (7), no relaxed values (8)
+PASS B carrying reading
+PASS B passes by format in S3: {'fp32': 3, 'fp16': 4, 'int8': 4}
+PASS B the per-format rule
+PASS C reduce_e131 with E112b's options runs
+PASS C the same kept passes and set-asides as E112b: [11250, 11251] [{'pass': 11252, 'why': ['fp32.zeros departs -0.253 W from its straight line']}]
+PASS C every per-pass D, S, p80 equals E112b's committed reduction: 240 values, max |diff| 0.00e+00; leak 0.417214 vs 0.417214
+D primary at 0.2414 W/C: passes [11250, 11251], set aside [{'pass': 11252, 'why': ['fp32.zeros departs -0.253 W from its straight line']}]; relaxed: passes [11250, 11251, 11252], set aside []; relaxed gates {'mv_band': 3.0, 'launch_band_c': 0.5, 'cpo_rel': 0.005, 'min_win_samples': 15, 'max_gap_ms': 500, 'min_window_duty': 0.97, 'idle_min_samples': 8, 'idle_after_prev_ms': 800, 'idle_temp_band_c': 1.5, 'pass_max_failed_runs': 2, 'zero_mid_departure_w': 99.0, 'zero_range_w': 99.0, 'tie_drift_w': 99.0, 'random_range_w': 99.0}
+PASS D the relaxed reduction's per-pass values equal the primary's on the passes both keep: 1120 values, max |diff| 0.00e+00
+PASS D score_e131 runs: lly": {"NOT SCORED": 8, "INCONCLUSIVE": 3, "PASS": 2}, "cross": {"E131-X1": "NOT SCORED", "E131-X4": "NOT SCORED", "E131-X5": "NOT SCORED"}, "C1": "NOT SCORED", "C2": "NOT SCORED", "C3a": "NOT SCORED", "C3b": "NOT SCORED", "C4": "NOT SCORED", "C5": "INCONCLUSIVE", "C6": "PASS", "C7": "INCONCLUSIVE", "C8": "PASS", "C9": "NOT SCORED", "C10": "NOT SCORED", "C11": "INCONCLUSIVE", "C12": "NOT SCORED"}
+
+D (E112b's data, labelled, not E131's): carrying reading S3; restored S2 [], S3 [{'pass': 11252, 'why': ['fp32.zeros departs -0.253 W from its straight line'], 'formats_restored': ['fp16', 'int8'], 'formats_left_out': ['fp32']}]
+D   reading S1: passes [11250, 11251], by format {'fp32': 2, 'fp16': 2, 'int8': 2}, claims {'C1': 'NOT SCORED', 'C2': 'NOT SCORED', 'C3a': 'NOT SCORED', 'C3b': 'NOT SCORED', 'C4': 'NOT SCORED', 'C5': 'NOT SCORED', 'C6': 'NOT SCORED', 'C7': 'NOT SCORED', 'C8': 'NOT SCORED', 'C9': 'NOT SCORED', 'C10': 'NOT SCORED', 'C11': 'NOT SCORED', 'C12': 'NOT SCORED'}, cross {'E131-X1': 'NOT SCORED', 'E131-X4': 'NOT SCORED', 'E131-X5': 'NOT SCORED'}
+D   reading S2: passes [11250, 11251], by format {'fp32': 2, 'fp16': 2, 'int8': 2}, claims {'C1': 'NOT SCORED', 'C2': 'NOT SCORED', 'C3a': 'NOT SCORED', 'C3b': 'NOT SCORED', 'C4': 'NOT SCORED', 'C5': 'NOT SCORED', 'C6': 'NOT SCORED', 'C7': 'NOT SCORED', 'C8': 'NOT SCORED', 'C9': 'NOT SCORED', 'C10': 'NOT SCORED', 'C11': 'NOT SCORED', 'C12': 'NOT SCORED'}, cross {'E131-X1': 'NOT SCORED', 'E131-X4': 'NOT SCORED', 'E131-X5': 'NOT SCORED'}
+D   reading S3: passes [11250, 11251, 11252], by format {'fp32': 2, 'fp16': 3, 'int8': 3}, claims {'C1': 'NOT SCORED', 'C2': 'NOT SCORED', 'C3a': 'NOT SCORED', 'C3b': 'NOT SCORED', 'C4': 'NOT SCORED', 'C5': 'INCONCLUSIVE', 'C6': 'PASS', 'C7': 'INCONCLUSIVE', 'C8': 'PASS', 'C9': 'NOT SCORED', 'C10': 'NOT SCORED', 'C11': 'INCONCLUSIVE', 'C12': 'NOT SCORED'}, cross {'E131-X1': 'NOT SCORED', 'E131-X4': 'NOT SCORED', 'E131-X5': 'NOT SCORED'}
+D   arm auto (E112b's own primary options, two passes): {'C1': 'NOT SCORED', 'C2': 'NOT SCORED', 'C3a': 'NOT SCORED', 'C3b': 'NOT SCORED', 'C4': 'NOT SCORED', 'C5': 'NOT SCORED', 'C6': 'NOT SCORED', 'C7': 'NOT SCORED', 'C8': 'NOT SCORED', 'C9': 'NOT SCORED', 'C10': 'NOT SCORED', 'C11': 'NOT SCORED', 'C12': 'NOT SCORED'}
+PASS E check_e131.py --desk: HARNESS OK: 21 files match predictions-e131.json (desk: binaries not checked)
+PASS E preflight_e131.sh reads GO: dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+SELFTEST PASS
