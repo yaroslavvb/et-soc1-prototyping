@@ -4,6 +4,8 @@
 
 *Mon 2 Nov 2026 (week 45), Q136, desk work, 06:47 to about 08:00 PST (the bench runs 06:54–06:56 and 07:14–07:33). **No card was opened and no device command was sent**; every watt below is a prediction or a committed experiment's (E78, E79, E102), named where it is used. The tiles are written by the kinds machinery, [`tools/claims-v3/kinds/make_e130.py`](../../../../tools/claims-v3/kinds/make_e130.py), into [`tools/claims-v3/kinds/e130/`](../../../../tools/claims-v3/kinds/e130/) (`e130.json`, `sha256.txt`, `tiles/int8/`). The counts are Q133(a)'s bench, rebuilt unchanged ([`rtl-sim/tima_gate`](../../../../rtl-sim/tima_gate/README.md), zero delay), and every number is in [`predictions.json`](predictions.json), written by [`predict.py`](predict.py) from the committed counts in [`runs/`](runs/); [`tables.md`](tables.md) is generated from it. E130, the card run that scores these predictions on aifoundry3, is another lane's; nothing here registers its rules.*
 
+*Corrected after an independent verification the same morning (Mon 2 Nov 2026, about 08:10 PST), at the desk: no card touched, no device command sent, nothing re-run. The verification re-derived every frozen number from the committed counts and found none wrong; what it corrected is wording, the footing of result 3's margins, and housekeeping. **The frozen text is unchanged.** Each correction is a dated note inserted beside what it corrects, and `predictions.json`, `predict.py`, `tables.md`, `runs/` and the tiles are untouched. [`corrections-check.txt`](corrections-check.txt) prints every new number in the notes from committed files ([`corrections-check.py`](corrections-check.py); the notes cite its sections as [1]–[6]). `sha256.txt` keeps this README's hash as frozen at `d64ea98c` (the note under Files).*
+
 ## Results
 
 **1. The set: 26 int8 tiles in E79's two layouts, on fresh base words.** On the B side A is held at 1 and B's chosen bit flips on the line-group parity (E79's `kg` layout, E102's B list: 1,024 flips an op); on the A side B is held at 1 and A's chosen bit alternates down the rows (E79's A list: 8,192 flips an op). Each item has its own zero, the same base held constant, so an item minus its zero differs in the chosen bit alone. The bases are new: drawn from `random.Random(20261102)`, each byte of popcount 4 (so no flip zeroes a byte and no operand word is gated), none of them E79's (`e130.json` `bases`).
@@ -16,6 +18,8 @@
 | `ha1`, `a1_0` … `a1_7` | A's every bit | A1: 0xc6 (b6 + b5 = 1) | B = 1 |
 | `ha2`, `a2_7` | A's sign bit at a second base word | A2: 0xf0 (b6 = b5 = 1) | B = 1 |
 | `ha1d`, `a1d_7` | A's sign bit, A1, with the held operand dense | A1 | B = 0x55 |
+
+*Dated note, Mon 2 Nov 2026, about 08:30 PST (after verification; the text above is unchanged): "none of them E79's" holds for the words, not for every byte. B1's eight bytes are drawn from the 40 popcount-4 bytes with b6 + b5 = 1, four of which are in E79's and E102's B word (93 c3 c6 ac 55 66 1e 8d), and two of those, 0xac and 0xc6, are in B1, in other lanes (B1's lanes 1 and 3, E79's 3 and 2). A1 = 0xc6 is one of those bytes too; E79's A base was 0xa5. B2 and A2 share no byte with E79's words [5]. So: new base words, two of B1's bytes appearing in E79's B word in other lanes.*
 
 **Why these.** Both operands are signed on the card and in the bench (the kernel's `fma_word` leaves `u_a` and `u_b` clear), so the unit multiplies 9-bit sign-extended values. A radix-4 Booth recoder reads overlapping three-bit windows of ONE operand, so an odd bit of the recoded operand enters two digits and an even bit one. Yosys recodes the second operand of `x * y`, which is B as the RTL is written (Q133(a) METHOD §1). So `booth` and `booth_tree` should alternate on B and not on A, `booth_swap` on A and not on B, and `plain` on neither: odd and even positions on both lists tell the three groups apart. The two sign-bit base words differ in bits 6 and 5, which set the recoded operand's top digit, d3 = −2·b7 + b6 + b5: a sign flip moves it between +1 and −1 at word 1 and between +2 and 0 at word 2. The dense held operand (0x55, four nonzero radix-4 digits) multiplies the partial-product rows that carry the flipped operand's sign, but only in netlists that do not recode it (result 4).
 
@@ -46,6 +50,8 @@
 
 The largest predicted step is 5.1 W (`a1d_7`), the smallest 0.015 W (`b1_1` in `booth_swap`). `nets_hier` is frozen beside it (`fJ_hier`, `dW_hier`; `tables.md`). On the B list the two merges agree within 2.2 fJ a flip; on the A list `nets_hier` reads about half (`booth_tree`'s A list 24–33 fJ a magnitude bit and 153 at the sign, against 47–63 and 294), as Q133(a) found on E79's tiles (its Departures).
 
+*Dated note, Mon 2 Nov 2026, about 08:30 PST (after verification), on k's footing: k is Q133(a)'s M2 fit on `nets_hier` counts (`predictions.json` `inputs.k_source`), applied here to the `nets_map` counts too. Q133(a) quotes a `nets_map` fit only for `booth_tree`, 1.003 against 1.006, under 1% (its README, under the table of k); the other three netlists' maps were learned on one stream. No number here moves, and shapes do not carry k.*
+
 **3. What separates them: odd against even on both lists, and the A sign bit's held operand.** In fJ (the three-point means; `predictions.json` `arms.<netlist>.stats`), with the gap between netlists in units of the 95% half-width the card would give that statistic at E79's own 4-pass precision on aifoundry3 (E79 `scored.json`: median item half-width 6.0 board-fJ on the A list, 17.9 on the B list; a difference of two three-bit means carries √(2/3) of it, a difference of two items √2; `separation`):
 
 | statistic | `booth_tree` | `booth` | `booth_swap` | `plain` | card half-width | separates, by (half-widths) |
@@ -62,11 +68,26 @@ The largest predicted step is 5.1 W (`a1d_7`), the smallest 0.015 W (`b1_1` in `
 
 So the set tells **three groups** apart. Booth on B (`booth`, `booth_tree`) alternates on B (odd bits 4.2–4.4× the even in either merge, against 1.05–1.09× in the others) and not on A. Booth on A (`booth_swap`) alternates on A (2.5× in `nets_map`, 2.6× in `nets_hier`, against 0.98–1.13×) and not on B. Its A sign bit moves −4% to +3% with a dense held B, where every other netlist's rises 11–22% (24–32% in `nets_hier`). `plain` does neither. Each separation holds in both merges. **`booth` and `booth_tree` are not separated**: no statistic puts them more than 0.3 card half-widths apart, so at zero delay the sums' structure does not show in a single bit. Between Booth on B and `plain` the A sign's held-operand step changes order with the merge (`nets_map` puts `plain` higher, `nets_hier` lower), so only B's odd − even, 4.1 half-widths, separates those two robustly.
 
+*Dated note, Mon 2 Nov 2026, about 08:30 PST (after verification; the table and text above are unchanged): **the margins above stand on E79's median item half-width; on the half-widths of the items each statistic uses, most are smaller.** E79's 95% half-widths at 4 passes on aifoundry3 (`scored.json` `prices.int8_b_kg` and `prices.int8_a`, `fJ_ci95`) are 12.5, 44.2, 13.8, 8.7, 8.6, 30.0, 21.9 and 162.8 board-fJ on B's bits 0–7, and 7.1, 27.1, 20.5, 2.6, 2.7, 4.5, 13.2 and 4.9 on A's. Among the bits the statistics use, B's bits 1 and 5 and A's bits 0, 1 and 2 are wider than the medians, 17.9 and 6.0, and A's sign bit is narrower [1]. With the items taken as independent [2]:*
+
+| statistic | card half-width, board fJ: from its items (the table's) | separates, by (half-widths): `nets_map`; `nets_hier` | the table's |
+|---|---|---|---|
+| B: odd − even | 19.3 (14.6) | Booth on B from the rest: 3.1; 3.1 | 4.1; 4.1 |
+| A: odd − even | 11.75 (4.9) | Booth on A from the rest: 6.9–7.4; 4.1–4.2 | 16.6–17.7; 9.7–10.2 |
+| A sign: B = 0x55 − B = 1 | 7.0 (8.5) | Booth on A from the rest: 5.7–8.8; 4.3–6.5 | 4.7–7.2; 3.5–5.3 |
+| B list mean, bits 0–6 | 8.8 (6.7) | Booth on B from the rest: 3.6–3.7; 3.7 | 4.8 (`nets_map`) |
+| B sign: A = 0x55 − A = 1 | 230 (25.2) | nothing (at most 0.1), and not measurable at 4 passes | at most 1.0 |
+| `booth` against `booth_tree`, on any of these | — | at most 0.34 | at most 0.3 |
+
+*Each separator stays above 3 half-widths on either footing, so result 3's three groups stand. Quote B's margin as about 3–4 half-widths, not 4.1. Between Booth on B and `plain`, B's odd − even (3.1) is still the one robust separator. **The B list's sign items cannot be scored at E79's 4-pass precision**: E79's `kg` sign bit read 16.8 ± 162.8 board-fJ, an interval that contains 0, and its P3b_kg passed vacuously. So `b1_7`, `b2_7` and `b1d_7`, and the two statistics built on them (B's sign step with A = 0x55, and B's word-2 ratio), need more than 4 passes or a precision of E130's own. A's sign bit read 152.1 ± 4.9, so a ratio of two A sign items carries about ± 4.6% at 4 passes [2]. **The sign row's range** over the four netlists, both lists and both merges is 0.99–1.03, not 1.00–1.03: `booth_swap`'s A ratio in `nets_hier` is 0.990, and its cell shows the `nets_map` value, 1.01. Result 4's "within 3%" holds [3]. E130 sets its pass count from E79's per-item precision, not from the median.*
+
 **4. The sign bit at two base words is a prediction all four netlists share, not a separator.** At word 2 every netlist prices the sign bit within 3% of word 1, on both lists and in both merges. With the held operand at 1, the held operand has one nonzero digit (one nonzero partial-product row), and in every netlist a sign flip costs the same whatever bits 6 and 5 are. A reading, not shown: the recoder's negate signal follows the window's top bit, so the digit's value does not matter. If the card's sign-bit price differs between the two words, every netlist is wrong about the sign in the same way. That is the open "the sign bit is priced about twice the card's" of item 12. On the levels, `nets_map` puts A's sign at 228–294 fJ, about 1.5–1.9× E79's 152 board-fJ at its own base word; `nets_hier` puts it at 133–153 fJ.
 
 **5. The bench is Q133(a)'s, number for number.** The four netlists' benches were rebuilt from the same sources (core-et `b38a1a31`, `rtl-sim/tima_gate` and `rtl-sim/fma_toggle_v2` unchanged since Q133(a), the same `*_staged.v` netlists and cell models by sha256), the same Makefile and flags (`-fno-dfg`), Verilator 5.052 and Q133(a)'s own maps, on a second desk machine (Departures D1). The control put Q133(a)'s committed single-bit tiles (`e102_hq`, `e102_bk_5`, `e79_a8q`, `e79_a8_7`) through all four: **400 of 400 numbers equal** to Q133(a)'s committed `counts_bits.json` (unit and VPU `nets_hier`, `nets_map`, `nets_hier2`, net counts, stages, the check, cycles, clocked bits; [`runs/control.json`](runs/control.json)). Q133(a)'s own binary for `booth_tree`, run on the usual desk machine before its thermal guard paused it, also gave the same four tiles exactly (16 of 16). Every one of the 26 × 4 × 3 tile-points has 0 of 256 accumulator words wrong. The rest of the VPU (VPU − unit) adds the same per flip in every netlist (−0.7 to +2.1 nets), so the netlists differ by their units alone.
 
 **6. What the card already said at E79's base words** (post hoc; context only, nothing registered): E79's `kg` B list on aifoundry3 put odd − even at +40 board-fJ (61.6, 72.3, 85.6 against 27.1, 31.2, 40.5) and its A list at −0.9 fJ (E79 `scored.json` `prices.int8_b_kg`, `int8_a`), the Booth-on-B pattern at a smaller amplitude than the netlists'. E78's kind-level watts fit `booth_swap` best (Q133(a) result 6). E130 tests the question on base words neither line of evidence has seen, against predictions frozen first.
+
+*Dated note, Mon 2 Nov 2026, about 08:30 PST (after verification): "base words neither line of evidence has seen" holds word for word; two of B1's bytes are bytes of E79's B word, in other lanes (the note under result 1).*
 
 ## For E130's registration (suggestions, not rules)
 
@@ -74,6 +95,8 @@ So the set tells **three groups** apart. Booth on B (`booth`, `booth_tree`) alte
 - **Expected steps** for launch gates and budgets: 0.015–0.27 W on the B list, 0.6–5.1 W on the A list (table above). The three A sign items are 3.5–5.1 W in every netlist, and `a1_1` reaches 3.2 W in `booth_swap`.
 - **The statistics that separate in both merges**: B's odd − even (Booth on B from the rest: about +60 against +1 fJ, a midpoint near +30); A's odd − even (Booth on A from the rest: +51 to +86 against −1 to +5, a midpoint near +25); A's sign step with the dense held B (Booth on A −8 to +4 against +32 to +53). The word-2 sign ratio is a shared prediction (1.00–1.03). Shapes (ratios and differences inside a list) do not carry k; levels do, and on the A list a level depends on the merge by about 2×.
 - **The noise**: at E79's 4-pass precision the B list's contrast is 4.1 half-widths, so the B side wants more passes than the A side; E102's rail read B singles at a median half-width of 15 rail-fJ on aifoundry1 card 1.
+
+*Dated note, Mon 2 Nov 2026, about 08:30 PST (after verification), for E130's registration. **The noise**: on E79's per-item precision B's odd − even contrast is 3.1 half-widths at 4 passes, not 4.1, and the B list's sign items cannot be scored at 4 passes (the note under result 3); set the pass count from E79's per-item half-widths [1], not their median. **The word-2 sign ratio** is a shared prediction of 0.99–1.03, within 3% of 1 [3]. **Device commands**: E79's harness, `tools/claims-v3/hlp/run_e79.sh`, sends the firmware-revisions query in its identity stage, a PMIC write that the owner's rules of 2 November 2026 make NO-GO ([its dated note](../../../../tools/claims-v3/hlp/run_e79.sh.dated-note.md)). E102's block, `tools/claims-v3/kinds/block_e102.sh` with `lib.sh`, passes `python3 tools/claims-v3/dmcmd_audit.py --allow SET_STATS_RUN_CONTROL`: every command it can send is a READ except the statistics reset, the one allowed write. So E130 is better ported from E102's block than from E79's harness.*
 
 ## What was asked and what was done
 
@@ -103,6 +126,8 @@ Asked (Q136's brief, lane Q136(a), from Q134's critic item 8): choose a single-b
 - **Item 12's first open point ("which multiplier") now has frozen predictions**, which E130 will score on aifoundry3. The glitch count, the sign bit's price and int8's clock term stay open. The sign bit gets a shared prediction (result 4); the other two are not addressed here.
 - For the blog, each from a committed file: "Before the card ran it, each of four gate-level versions of the int8 multiplier predicted a different pattern for the same 26 single-bit flips. A multiplier that Booth-recodes B makes B's odd bits cost about four times its even bits, one that recodes A does that to A instead, and one with no recoder does neither (`predictions.json` `separation`)." And: "None of the four predicts that the sign bit's cost depends on the value's next two bits (`stats.*.B_sign_w2_over_w1`, `A_sign_w2_over_w1`)."
 
+  *Dated note, Mon 2 Nov 2026, about 08:30 PST (after verification): the first quotation overstates the A side. `booth_swap`'s A odd bits cost 2.5× its even bits in `nets_map` and 2.6× in `nets_hier`, where the Booth-on-B netlists' B odd bits cost 4.2–4.4× [4]. The records and the blog use: "Before the card ran it, each of four gate-level versions of the int8 multiplier predicted a different pattern for the same 26 single-bit flips. A multiplier that Booth-recodes B makes B's odd bits cost about four times its even bits, one that recodes A makes A's odd bits cost about two and a half times its even bits, and one with no recoder does neither (`predictions.json` `separation`)."*
+
 ## Files
 
 | file | what |
@@ -120,4 +145,14 @@ python3 tools/claims-v3/kinds/make_e130.py --check          # the 26 tiles, byte
 # the bench: rtl-sim/tima_gate/README.md (make gate per netlist, Q133(a)'s netlists and maps); one run_kinds.py call per tile:
 #   run_kinds.py --bin obj_<arm>/Vtb ... --only __none__ --extra-tiles int8:e130_<tile>:<tile.bin> --points launch
 uv run --script predict.py                                   # in this directory: predictions.json, tables.md
+```
+
+*Dated note, Mon 2 Nov 2026, about 08:30 PST (after verification), on `sha256.txt`: its 15 lines are relative to two directories. The 12 plain names are relative to this one and the three `tools/claims-v3/kinds/…` lines to the repository's top directory, so `shasum -a 256 -c sha256.txt` run here reports those three as unreadable; check each line from its own directory. Its `README.md` line hashes the README as frozen at `d64ea98c`: this README inserts dated notes after that and removes no frozen line [6]. `corrections-check.py` and `corrections-check.txt` are new beside it and not hashed there.*
+
+```
+cd docs/reports/data/2026-11-02-q136a-int8-netlist-predictions
+grep -v -e '^#' -e ' tools/' -e ' README.md$' sha256.txt | shasum -a 256 -c    # the 11 data files here
+git show d64ea98c:./README.md | shasum -a 256                                    # 17bcb97b..., the README as frozen
+cd ../../../.. && grep ' tools/' docs/reports/data/2026-11-02-q136a-int8-netlist-predictions/sha256.txt | shasum -a 256 -c
+python3 -I docs/reports/data/2026-11-02-q136a-int8-netlist-predictions/corrections-check.py . # corrections-check.txt
 ```
