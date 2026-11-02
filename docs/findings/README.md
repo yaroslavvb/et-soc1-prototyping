@@ -295,15 +295,16 @@ Read [Terms](#terms) first.
    ×1.052 in `c16s`, so all ten arms are measured, and a governed sustained gap did not replicate between two sessions while
    what the clock buys did (E126). The float B-lane gate's miss is the gate's own, mostly each lane's gate flipping (E127).
    fp16's sign rest goes with the accumulators differing on E108's design, and the moving-sum ratio holds 1.55× pooled over
-   ten passes (E128). One A row cuts int8 zeros' no-issue excess from 1.57 to 0.87 W, and per-op work is below half the gap
-   (E129; the bench leaves TenC's read port and the TIMA controls, Q136(c)). The int8 multiplier does not Booth-recode A,
-   against frozen netlist predictions (E130, Q136(a)). E95's real tiles carry to a second card verdict for verdict (E131). A
-   memory channel pays +0.31 W for changes between its lines, off every metered rail (E132). aifoundry2's heat coefficient
-   replicates at 0.65–0.70 °C per board W (E133, before verification). An A bit's price depends on its base word (E134). At
-   the desk the off-rail row stands at 0.75–1.05 pJ (Q136(b)), and the write audit classifies all 92 management commands
-   from source, with a checker every runner calls (Q136(w)). →
-   [03-experiments.md](03-experiments.md), E78–E134; [05-claims.md](05-claims.md), "Q130", "Q130 additions", "Q132", "Q133",
-   "Q134" and "Q136";
+   ten passes (E128; the inverse-variance arm, 1.710 ± 0.024, leaves it open). One A row cuts int8 zeros' no-issue excess
+   from 1.57 to 0.87 W, and per-op work is below half the gap (R1p, registered after E124's passes were known; E129; the
+   bench leaves TenC's read port and the TIMA controls, Q136(c)). The int8 multiplier does not Booth-recode A, against
+   frozen netlist predictions (E130, Q136(a)). E95's real tiles carry to a second card verdict for verdict (E131). A memory
+   channel pays +0.31 W for changes between its lines, off every metered rail (E132). aifoundry2's heat coefficient
+   replicates at 0.65–0.70 °C per board W (E133: by R1 for fp32 random, inconclusive for int8 −1s). An A bit's price
+   depends on its base word (E134). At the desk the off-rail row stands at 0.75–1.05 pJ (Q136(b)), and the write audit
+   classifies all 92 management commands from source, with a checker every runner calls (Q136(w)). →
+   [03-experiments.md](03-experiments.md), E78–E134; [05-claims.md](05-claims.md), "Q130", "Q130 additions", "Q132",
+   "Q133", "Q134" and "Q136";
    [`reports/data/2026-10-31-e78-kinds-energy-matrix/`](../reports/data/2026-10-31-e78-kinds-energy-matrix/README.md),
    [`2026-10-31-e80-kinds-speed/`](../reports/data/2026-10-31-e80-kinds-speed/README.md)
 

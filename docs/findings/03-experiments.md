@@ -6047,7 +6047,7 @@ Open: the 1.0 pJ of a one between the memory shires' logic, the PHY's pads and t
 encoded part's two verdicts (a replicate with more passes); E99's refit.
 **Report:** no page of its own; the data README is the public record.
 
-## E133 — E111's two heat holds again on aifoundry2, a second session per kind, and a cool probe (Q136, optional; the first session blocked; card runs 2026-11-02, 10:14–12:41 PST and a session-end read at 14:05 PST, aifoundry2) — pre-registered; verification under way when recorded
+## E133 — E111's two heat holds again on aifoundry2, a second session per kind, and a cool probe (Q136, optional; the first session blocked; card runs 2026-11-02, 10:14–12:41 PST and a session-end read at 14:05 PST, aifoundry2) — pre-registered; verified, holds with fixes (`f50c77fd`)
 
 **Asked:** items 9 and 8 of section 11, "A steady state for heat" and "The heat path drifts between sessions": E111's two
 holds again in the morning, with a second warm probe later if time allowed (Q134's final critic, item 6; there is no inlet
@@ -6065,17 +6065,23 @@ PST; the session's end, `d55178ec`, 14:08:15). Claim: a clause in the day's post
 aifoundry2's card 0, TDP 65 W / 65 °C at all 42 config reads, nothing set; card runs 10:14:32–12:40:40 PST, **80.8
 card-minutes** of 110; no WRITE of any kind, not even the statistics reset, and the residency read never sent; nobody else
 logged in at any of 573 checks. **W3 did not run, by its registered rule:** at 14:05:07 PST the free card's 10-minute idle die
-read 44.925 °C, under the 45.0 °C it needed (W2's idle, 44.0, plus 1.0); the queue ended at 14:05:40 and the session-end
-config read 65 W / 65 °C at 14:05:44.
+read 44.925 °C, under the 45.0 °C it needed (W2's idle, 44.0, plus 1.0); the queue ended at 14:05:40 and the session-end config
+read 65 W / 65 °C at 14:05:44, **after its clause was dropped** (12:41:01) and the post read released (13:02:58): a READ under
+the lock on a free card, outside any claim (the README's departure D5; later designs take the session-end read before the
+release, or claim again for it).
 
-**Results** (the data README's registered verdicts; **no verifier had read them when this entry was written**, and an addendum
-records the verification).
+**Results** (the data README's registered verdicts; verified Mon 2 Nov 2026, holds with fixes: the corrections, `f50c77fd` at
+14:45 PST, are wording, dated notes, departure D5 and a post-hoc check script, with no rule, prediction, number or verdict
+changed).
 - 22 registered verdicts. Of the 17 with a registered side, 15 came out as predicted, all eight FAILs among them; two did not:
   R1 on H-I8 (INCONCLUSIVE, where PASS was predicted) and R2 (AT THE TRIP, where AT THE FLOOR was predicted). A1's R2w predicted
-  AT THE TRIP and came out so.
-- **Item 9:** the coefficient replicates for fp32 random (H-F32 c = **0.648 °C per board W**, R1 PASS, 0.966 of E111's) and
-  nearly for int8 −1s (H-I8 c = **0.700**, R1 INCONCLUSIVE, 1.042 [1.005, 1.111], the range's top 0.001 past the band); four
-  holds over two sessions read 0.648–0.700. Neither hold is steady by the registered test (A1 FAIL ×2, as predicted).
+  AT THE TRIP and came out so, a weak test: the idle read 44 in every sample, a whole degree that holds the 44.54 °C key, so it
+  cannot place the die on either side of it. The direct evidence for the whole-degree trip is the plateau's readings (66 in
+  86.6% of its raw rows) and the SP trace (all 20 distinct throttle-down events read 66 against 65).
+- **Item 9:** by R1 the coefficient replicates for fp32 random (H-F32 c = **0.648 °C per board W**, R1 PASS, 0.966 of E111's;
+  Sunday's hold at the governor's floor, Monday's at its trip, two regimes) and nearly for int8 −1s (H-I8 c = **0.700**, R1
+  INCONCLUSIVE, 1.042 [1.005, 1.111], the range's top 0.001 past the band); four holds over two sessions read 0.648–0.700.
+  Neither hold is steady by the registered test (A1 FAIL ×2, as predicted).
 - **R2:** fp32 random sat at the governor's trip, not its floor: from a 44.0 °C idle, 1 °C cooler than E111's, the governor held
   the die at its 65/66 boundary (65.91 °C, 55.23 W).
 - **Item 8:** the cool probe's 76 s line moved 0.81 °C per °C of rest die (B3c ABOVE_TARGET, excluding E111's 0.47 and the
@@ -6083,11 +6089,13 @@ records the verification).
 - Peaks: 88.65 W during H-F32 (372 samples over 85 W, none over 93 W), die mean 67 °C; the hottest sensor's running maximum read
   69 °C, carried from before the session.
 
-**Scored (before verification):** 4 PASS, 8 FAIL, 1 INCONCLUSIVE, 1 AT THE TRIP, 1 OK, 2 ABOVE_TARGET, 2 SUPPORTS, 1 PARTLY, 1
+**Scored (verified):** 4 PASS, 8 FAIL, 1 INCONCLUSIVE, 1 AT THE TRIP, 1 OK, 2 ABOVE_TARGET, 2 SUPPORTS, 1 PARTLY, 1
 POSITIVE_BELOW_TARGET, 1 BELOW_TARGET (the README's tally).
-**What it changes.** Item 9: aifoundry2's coefficient has a replicate, 0.65–0.70 °C per board W over four holds in two
-sessions and two kinds, and no hold is steady by the registered test. Item 8: one cool probe puts the 76 s line at 0.81 °C per
-°C, steeper than either registered reading.
+**What it changes.** Item 9, per kind: by R1 fp32 random's coefficient replicates (PASS, across the governor's floor and its
+trip) and int8 −1s's is INCONCLUSIVE by 0.001; four holds in two sessions read 0.65–0.70 °C per board W, and no hold is steady
+by the registered test. aifoundry2's governor steps the clock down at a whole-degree reading of 66 against its 65 °C threshold,
+so a floor plateau that reads 65 releases the clock. Item 8: one cool probe, on E98's W-derived rest die, puts the 76 s line at
+0.81 °C per °C, refuting both registered line readings; a warm probe is still missing (W3 not run, by its rule).
 **Report:** no page of its own; the data README is the public record.
 
 ## E134 — single-bit prices on a second base word and at more positions, and A's low bits (Q136, optional; card runs 2026-11-02, 11:50–12:29 PST, aifoundry3) — pre-registered
@@ -6258,11 +6266,12 @@ cell is a window of a warm-up: in a second session E126's random clocks ran 37�
 earlier place in the session (proxies; no inlet thermometer), while what the clock buys repeated to 0.002; give each sustained
 gap its session, its idle and its start temperature, or gate each run on the same start. (56) In a blocked window every probe
 goes through a 15 s hard-kill script, every 3 minutes, logged: E130's first probe sat two minutes behind `head -60`'s buffer
-before its link was seen, and E133's first lane made 14 probes by hand, 46–182 s apart and unlogged. (57) A dip under the
+before its link was seen, and E133's first lane made 14 probes by hand, unlogged (its README's D4). (57) A dip under the
 registered line can still carry a verdict: E134's R2 width and its 13410 set-aside trace to 3–4 W board-meter dips under E82
 A2's 4 W line; register a dip rule that catches 2–4 W dips (6 of E134's 408 scored runs hold one). (58) Read a fit's inputs
 before calling it uncorrected: the off-rail row's coefficient was fitted on leakage-corrected board deltas, and E120's "about
 0.4 pJ" came from its registered 0.81 W/°C drift slope, 2.3× its own block's board drift, not from the window's heating
-(Q136(b)). (59) Lesson (48) held three more times: E126's, E128's and E130's plan reads came back a version behind the post,
-and `EXPECT_TEXT`'s exit 7 kept each from erasing another lane's clause; rebuild from the edit box, or wait a minute after
-another lane's edit.
+(Q136(b)). (59) Lesson (48) held again: `EXPECT_TEXT`'s exit 7 refused E126's, E128's (its second session's) and E133's rewrites
+when another lane had edited the post meanwhile, and kept each from erasing another lane's clause; E130's plan read came back
+behind its own saved edits, though each of its dry runs opened on the expected text; rebuild from the edit box, or wait a minute
+after another lane's edit.

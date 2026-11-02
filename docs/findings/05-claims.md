@@ -36,7 +36,7 @@ energies are **assumed**. Terms are defined in [README.md](README.md#terms). Sin
 text as the record. The section "Q133", after it, carries E107–E118 the same way (E117 was not run, and E77 follows its
 verification), with Q133(a) and Q133(b) at the desk. The section "Q134", after that, carries E119–E125, Q134(a) at the
 desk and E77's corrected result the same way. The section "Q136", after that, carries E126–E134 and Q136's four desk
-lanes the same way, with E133's rows marked before verification.
+lanes the same way, E133's among them, verified after the section was first written (holds with fixes, `f50c77fd`).
 
 Paths are relative to the repository root. `DATA` means `docs/reports/data/2026-09-21-horace-aifoundry2/`,
 `DATA2` means `docs/reports/data/2026-09-22-dvfs-aifoundry2/`, `DATA3` means
@@ -2246,22 +2246,23 @@ as "Device commands: the owner's three rules of 2 November 2026". The round took
 rebuilt it in place as `a018f485d20b` (14:07:15 PST) and `2d0d2df10c44` (14:10:15), keeping that numbering. Every card run was
 pre-registered and pushed before its claim, every lane was re-derived by a separate verifier (each returned holds with fixes)
 and corrected in its own commit, and the rows carry the corrected figures; a sentence a verifier struck does not come back.
-The exception is E133's second session, whose verification was under way when this section was written: its rows say **before
-verification**, and an addendum records the verified result. E135, the GPU measured the same way under the owner's OK of the
-same morning, is recorded on its own. Short names, all under `docs/reports/data/`: `E126` `2026-11-02-e126-gemm-arms/`, `E127`
-`2026-11-02-e127-b-gate/`, `E128` `2026-11-02-e128-fp16-signs/`, `E129` `2026-11-02-e129-int8-noissue/`, `E130`
-`2026-11-02-e130-int8-netlists/`, `E131` `2026-11-02-e131-real-tiles-card1/`, `E132` `2026-11-02-e132-memory-split/`, `E133`
-`2026-11-02-e133-heat-holds/`, `E134` `2026-11-02-e134-bit-prices-more/`, `QW` `2026-11-02-q136w-write-audit/` (Q136(w)), `QA`
-`2026-11-02-q136a-int8-netlist-predictions/` (Q136(a)), `QB` `2026-11-02-q136b-rail-row/` (Q136(b)), `QC`
-`2026-11-02-q136c-tima-bench/` (Q136(c)), and the earlier sections' names. "Item N" is section 11's. **How to read ±:** a ± or
-a bracketed range is a 95% interval over independent passes (over blocks in E130 and E134) unless the row says otherwise; E128
-has two passes (t = 12.71) and E129 three (t = 4.303). The exceptions: E126's fit intervals are within its session; Q136(b)'s
+E133's second session was verified after this section was first written (holds with fixes; corrections `f50c77fd`, wording and
+dated notes only), and its rows below carry the verified reading (dated, Mon 2 Nov 2026). E135, the GPU measured the same way
+under the owner's OK of the same morning, is recorded on its own. Short names, all under `docs/reports/data/`: `E126`
+`2026-11-02-e126-gemm-arms/`, `E127` `2026-11-02-e127-b-gate/`, `E128` `2026-11-02-e128-fp16-signs/`, `E129`
+`2026-11-02-e129-int8-noissue/`, `E130` `2026-11-02-e130-int8-netlists/`, `E131` `2026-11-02-e131-real-tiles-card1/`, `E132`
+`2026-11-02-e132-memory-split/`, `E133` `2026-11-02-e133-heat-holds/`, `E134` `2026-11-02-e134-bit-prices-more/`, `QW`
+`2026-11-02-q136w-write-audit/` (Q136(w)), `QA` `2026-11-02-q136a-int8-netlist-predictions/` (Q136(a)), `QB`
+`2026-11-02-q136b-rail-row/` (Q136(b)), `QC` `2026-11-02-q136c-tima-bench/` (Q136(c)), and the earlier sections' names. "Item N"
+is section 11's. **How to read ±:** a ± or a bracketed range is a 95% interval over independent passes (over blocks in E130 and
+E134) unless the row says otherwise; E128 has two passes (t = 12.71) and E129 three (t = 4.303). The exceptions: E126's fit
+intervals are within its session; E133's c and R1 brackets are ranges, one hold per kind (its README's [range]); Q136(b)'s
 re-cut intervals are approximate 95% (1.96 on a pass s.e. from three or five passes) and its conduction intervals 99% over R;
 Q136(c)'s ranges run across the bench's constant sets and are not intervals, and its ± is a 95% t interval over the cards'
 passes; Q136(a)'s margins are in card 95% half-widths. 🛑 **The things to carry from the earlier sections hold here, and four
 more.** (19) **A GET can write, and a stop field named PMIC may not read the PMIC:** classify every command from the source of
-the build the card reports (Q136(w)), and read `temp_c.pmic` as the shire mean (E127 C5). (20) **A governed sustained cell is
-a window of a warm-up:** quote it with its session, the idle before it and the run's start temperature (E126). (21) **A frozen
+the build the card reports (Q136(w)), and read `temp_c.pmic` as the shire mean (E127 C5). (20) **A governed sustained cell is a
+window of a warm-up:** quote it with its session, the idle before it and the run's start temperature (E126). (21) **A frozen
 expectation is not a rule:** E127's ALL-OFF and LONG and E130's BOOTH ON B failed as expectations and are reported so. (22)
 **The off-rail row's coefficient is a leakage-corrected fit,** never an uncorrected one (Q136(b)).
 
@@ -2276,10 +2277,10 @@ expectation is not a rule:** E127's ALL-OFF and LONG and E130's BOOTH ON B faile
 | 5. Where a random sign's ~5 W goes | **fp16's rest located on E108's design ported** (R7 MOST 1.006 ± 0.119; fp32's again 0.954 ± 0.041); on the matched design INCONCLUSIVE at two passes, so not "located as fp32's is", and the sums' share not established; the moving-sum ratio **1.55× HOLDS** pooled over ten passes (1.587 ± 0.147), the inverse-variance arm leaving it open | [E128](../reports/data/2026-11-02-e128-fp16-signs/README.md) |
 | 6. A power model across kinds | **the float B-lane gate located, not closed:** the miss is the gate's own (0.98 of the random-data miss with the data still), 0.70–0.75 of it with each lane's gate flipping (post hoc about 0.18 pJ a flip beyond M5), the rest with all-off micro-ops; M5 lacks a per-flip term | [E127](../reports/data/2026-11-02-e127-b-gate/README.md) |
 | 7. More real tensors | **E95's thirty tiles score on a second card**, verdict for verdict as on aifoundry3 (10 PASS, 1 FAIL, 2 INCONCLUSIVE), the ranks, the card scale and all 33 ratios carrying across; the energy half answered for fp32 and fp16 on two cards | [E131](../reports/data/2026-11-02-e131-real-tiles-card1/README.md) |
-| 8. The heat path drifts between sessions | **one cool probe, before verification:** the 76 s line moved 0.81 °C per °C of rest die, steeper than either registered reading | [E133](../reports/data/2026-11-02-e133-heat-holds/README.md) |
-| 9. A steady state for heat | **a replicate, before verification:** 0.648 and 0.700 °C per board W in a second session per kind, 0.65–0.70 over four holds in two sessions; no hold steady by the registered test | [E133](../reports/data/2026-11-02-e133-heat-holds/README.md) |
+| 8. The heat path drifts between sessions | **one cool probe:** 2.8 °C below the night's on E98's W-derived rest die, its 76 s line moved 0.81 [0.74, 0.88] °C per °C, refuting both registered line readings; its hold followed the room's (0.73, SUPPORTS); a warm probe still missing (W3 not run, by its rule) | [E133](../reports/data/2026-11-02-e133-heat-holds/README.md) |
+| 9. A steady state for heat | **a second session per kind:** R1 PASS for fp32 random (0.648, 0.966 [0.947, 1.019] of E111's; Sunday's floor against Monday's trip, two regimes), INCONCLUSIVE for int8 −1s (0.700, 1.042 [1.005, 1.111]); 0.65–0.70 °C per board W over four holds in two sessions; no hold steady by the registered test, and no inlet thermometer | [E133](../reports/data/2026-11-02-e133-heat-holds/README.md) |
 | 10. The memory path | **split by interleave:** a channel +0.310 W off every metered rail, a memory shire +0.220 W (half on the NoC rail), 256 ways and wider +0.249 W, every hart's stream +0.184 W, and +1.049 W in all that a within-line model misses; the encoded part's board cost not separated from the leakage footing (R4 UNRESOLVED), its DDR die rail reading −0.77 mV (R3 UNRESOLVED by 0.01 mV) | [E132](../reports/data/2026-11-02-e132-memory-split/README.md) |
-| 11. int8 zeros' extra 0.61 W | **narrowed:** per-op work below half the gap, pooled over seven passes (R1p); one A row equalizes the op rate (62.0 cycles) and cuts the no-issue excess from 1.57 to 0.87 W (V1 INCONCLUSIVE); the bench bounds TenB, TenA and the scratchpad's reads by fp32's own level, leaving TenC's read port, the TIMA controls and the core | [E129](../reports/data/2026-11-02-e129-int8-noissue/README.md), [Q136(c)](../reports/data/2026-11-02-q136c-tima-bench/README.md) |
+| 11. int8 zeros' extra 0.61 W | **narrowed:** per-op work below half the gap, pooled over seven passes (R1p, registered by amendment after E124's passes were known, its seven passes over two sessions); one A row equalizes the op rate (62.0 cycles) and cuts the no-issue excess from 1.57 to 0.87 W (V1 INCONCLUSIVE); the bench bounds TenB, TenA and the scratchpad's reads by fp32's own level, leaving TenC's read port, the TIMA controls and the core | [E129](../reports/data/2026-11-02-e129-int8-noissue/README.md), [Q136(c)](../reports/data/2026-11-02-q136c-tima-bench/README.md) |
 | 12. int8 at gate level | **predictions frozen, then measured:** Booth on A excluded; Booth on B against no recoder INCONCLUSIVE on the board (the rail arm's reading is cross-unit and straddles the line too); on the registered primary none of the four netlists fits the single bits as a whole | [Q136(a)](../reports/data/2026-11-02-q136a-int8-netlist-predictions/README.md), [E130](../reports/data/2026-11-02-e130-int8-netlists/README.md) |
 | 13. Zeros' transport | not itself touched; E129 measures again on aifoundry1's card 1 what issuing the micro-ops on all-zero tiles costs, fp32 1.431 ± 0.106 W and int8 0.446 ± 0.160 W | [E129](../reports/data/2026-11-02-e129-int8-noissue/README.md) |
 | 14. aifoundry2's alarm | not touched: it needs a governor move or a PMIC read beyond the allowed voltage reads, and Q136 had no governor move | — |
@@ -2383,14 +2384,14 @@ expectation is not a rule:** E127's ALL-OFF and LONG and E130's BOOTH ON B faile
 | The encoded part | E448 = +0.166 W [0.121, 0.210] beyond the pins on the registered footing (0.36 pJ an encoded toggle), across zero at 0.3803 W/°C (+0.164 [−0.053, +0.381]); E56 0.002 W short (R4 UNRESOLVED); on the DDR die rail RE64 −0.77 mV [−1.02, −0.52] while the encoded-quiet twin reads −0.09 [−0.31, +0.13], 0.01 mV past still (R3 UNRESOLVED) | M, P→M | Q136, E132 (C5) | `E132/e132.json`, `verdicts.R3_encoded_ddr`, `verdicts.R4_encoded_board`; `E132/corrections_e132.txt` C5 |
 | R1, R5, R6 | the session ties to E110 (R1 PASS); no rung that resolves in both runs disagrees with E99's mapped steps (R5 PASS); 192 pins held high leave the DDR rail still, 1.62 pJ [1.41, 1.83] a pin (R6 PASS). The DDR die rail is `GET_ASIC_VOLTAGE`'s PVT memory-shire reading, not the PMIC's set-point | M, P→M | Q136, E132 (C2) | `E132/e132.json`, `verdicts` |
 
-### Heat holds again (E133, aifoundry2; before verification)
+### Heat holds again (E133, aifoundry2; verified, holds with fixes, `f50c77fd`)
 
 | Claim | Value | Kind | Source | Verify at |
 |---|---|---|---|---|
-| **aifoundry2's steady coefficient replicates** (before verification) | H-F32 c = **0.648 °C per board W** [0.648, 0.664] (R1 PASS, 0.966 of E111's), H-I8 **0.700** [0.699, 0.719] (R1 INCONCLUSIVE, 1.042 [1.005, 1.111], 0.001 past the band); four holds over two sessions read 0.648–0.700; neither hold steady by the registered test (A1 FAIL ×2, as predicted) | M, P→M | Q136, E133 | `E133/results.json`, `A`, `R1`; `E133/a1_readings.json`, `holds` |
-| A 1 °C cooler idle moved fp32 random from the floor to the trip (before verification) | W2's idle read 44.0 °C (E111's 45.0); the governor held the die at 65.88–66.01 °C, 55.23 W, off the 600 MHz floor in 11.1% of the plateau's samples: R2 AT THE TRIP, where AT THE FLOOR was predicted; A1's R2w, keyed at 44.54 °C, AT THE TRIP as predicted | M, P→M | Q136, E133 | `E133/results.json`, `R2`; `E133/a1_readings.json`, `R2w_amendment_A1` |
-| The cool probe (before verification) | 2.8 °C below the night's baseline on the rest die: the 76 s line 0.808 [0.736, 0.880] per °C (B3c ABOVE_TARGET, excluding E111's 0.47 and the room's 0.25), the hold 0.732 [0.429, 1.035] per °C (SUPPORTS); one probe, its interval from E98's per-probe scatter | M, P→M | Q136, E133 | `E133/results.json`, `B` |
-| The session | 80.8 card-minutes of 110, 42 config reads at 65 W / 65 °C, no WRITE of any kind; W3, the afternoon probe, not run by its rule (the idle die 44.925 °C against the 45.0 °C it needed); peak 88.65 W during H-F32 (372 samples over 85 W, none over 93 W), die mean 67 °C | M | Q136, E133 | `E133/results.json`, `peaks`; `E133/queue.jsonl`; `E133/README.md`, the session |
+| **aifoundry2's steady coefficient, a second session per kind** (R1 PASS for fp32 random, INCONCLUSIVE for int8 −1s) | H-F32 c = **0.648 °C per board W** [0.648, 0.664] (R1 PASS, 0.966 of E111's), H-I8 **0.700** [0.699, 0.719] (R1 INCONCLUSIVE, 1.042 [1.005, 1.111], 0.001 past the band); four holds over two sessions read 0.648–0.700; neither hold steady by the registered test (A1 FAIL ×2, as predicted); for fp32 random R1 compares two regimes, Sunday's hold at the governor's floor and Monday's at its trip | M, P→M | Q136, E133 | `E133/results.json`, `A`, `R1`; `E133/a1_readings.json`, `holds` |
+| A 1 °C cooler idle moved fp32 random from the floor to the trip | W2's idle read 44.0 °C (E111's 45.0); the governor held the die at 65.88–66.01 °C, 55.23 W, off the 600 MHz floor in 11.1% of the plateau's samples: R2 AT THE TRIP, where AT THE FLOOR was predicted; A1's R2w, keyed at 44.54 °C, AT THE TRIP as predicted, a weak test (the idle read 44 in every sample, a whole degree that holds the key); the direct evidence: the governor steps down at a whole-degree reading of 66 against its 65 °C threshold, the plateau's raw rows reading 66 in 86.6% and all 20 distinct SP throttle-down events 66 against 65 | M, P→M | Q136, E133 | `E133/results.json`, `R2`; `E133/a1_readings.json`, `R2w_amendment_A1`; `E133/corrections_e133.txt`, `[A]`, `[C]` |
+| The cool probe | 2.8 °C below the night's baseline on E98's W-derived rest die: the 76 s line 0.808 [0.736, 0.880] per °C (B3c ABOVE_TARGET, excluding E111's 0.47 and the room's 0.25), the hold 0.732 [0.429, 1.035] per °C (SUPPORTS); one probe, its interval from E98's per-probe scatter | M, P→M | Q136, E133 | `E133/results.json`, `B` |
+| The session | 80.8 card-minutes of 110, 42 config reads at 65 W / 65 °C, the last (14:05:44 PST) after the clause was dropped and the post read released, a READ on a free card outside any claim (the README's D5); no WRITE of any kind; W3, the afternoon probe, not run by its rule (the idle die 44.925 °C against the 45.0 °C it needed); peak 88.65 W during H-F32 (372 samples over 85 W, none over 93 W), die mean 67 °C | M | Q136, E133 | `E133/results.json`, `peaks`; `E133/queue.jsonl`; `E133/README.md`, the session |
 
 ### Single-bit prices at more positions and a second base word (E134, aifoundry3)
 

@@ -672,7 +672,12 @@ not do what it was for", `aifoundry2/admission.json`, `aifoundry2/s1/skipped.jso
   which no verifier had read when this was written). In a second session per kind the holds read 0.648 (fp32 random) and 0.700
   °C per board W (int8 −1s), 0.65–0.70 over four holds in two sessions; neither steady by the registered test. A 1 °C cooler
   idle (44.0 °C) put random fp32 at the governor's trip, not its floor, and one cool probe put the 76 s line at 0.81 °C per °C
-  of rest die. Data: [`2026-11-02-e133-heat-holds`](../reports/data/2026-11-02-e133-heat-holds/README.md).
+  of rest die. Data: [`2026-11-02-e133-heat-holds`](../reports/data/2026-11-02-e133-heat-holds/README.md). **Verified** (dated
+  note, Mon 2 Nov 2026, E133's addendum): holds with fixes (`f50c77fd`). Per kind: by R1 fp32 random's coefficient replicates
+  (PASS 0.966, Sunday's hold at the floor against Monday's at the trip) and int8 −1s's is INCONCLUSIVE (1.042 [1.005, 1.111]).
+  The card fact: **aifoundry2's governor steps the clock down at a whole-degree reading of 66 against its 65 °C threshold** (the
+  integer mean of the minion sensors; all 20 distinct SP throttle-down events in E133 read 66 against 65), so a floor plateau
+  that reads 65 releases the clock and the die pins at the 65/66 boundary.
 
 Data: [`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §c,
 [`2026-11-01-e98-heat-path-drift`](../reports/data/2026-11-01-e98-heat-path-drift/README.md),
