@@ -16,6 +16,7 @@ six-pass R1 and the device-command care need.
 | `reduce_e129.py` | `reduce_e78.py` unchanged with E129's items, card 1's config gate, its meter dips removed; `--relax-tie` is the registered set-aside rule |
 | `score_e129.py` | R0-R3 (E109's formulas), Y1, Y2, V0-V2 (one A row), R6, R10, and the set-aside rule's choice of reduction |
 | `pipeline_e129.sh` | on the Intel: the primary, the relaxed reduction, two arms, the scorer on each |
+| `pool_r1_e129.py` | amendment A1: R1p, R1 pooled with E124's four passes on this card |
 | `selftest_e129.py` | committed data through the code (`selftest.txt`): E124's numbers reproduced, the order, the reducer port, the rules |
 | `collect_e129.sh` | the raw passes and the session's logs from aifoundry1 to the Intel's clone (rsync, read only on the box) |
 
