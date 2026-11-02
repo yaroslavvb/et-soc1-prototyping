@@ -1,0 +1,104 @@
+{
+ "experiment": "E133",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793649300279,
+ "protocol": {
+  "experiment": "E133",
+  "request": "Q136",
+  "card": "aifoundry2",
+  "order_seed": 98,
+  "note": "E111's blocks, unchanged (E98's runner: run_kspeed.py over E64's run_hpl.py, run by run_e133.py): REST holds no launch; SUS is E98's nine runs in E98's order behind E98's 57 C gate; nothing is set on the card; the residency read run_hpl.py makes after every run is not sent (run_e133.py)",
+  "tools": {
+   "heater": "build/sparsity_t2/host/sparsity_host",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 80,
+   "board_cap_w": 93,
+   "cap_consecutive": 3,
+   "note": "E126's tightened stops (the owner's rules of 2 November 2026: nothing that risks a power cycle): 80 C on the die mean or the hottest sensor, 93 W on three samples. E111's own W2 peaked at 88.04 W (fp32 randn's first seconds at 800 MHz) and 68 C die mean; its hottest sensor's running maximum read 70 C"
+  },
+  "caps": {
+   "max_card_min": 34
+  },
+  "step": "W1B",
+  "from": {
+   "protocol": "tools/claims-v3/e111/protocol-w1b.json",
+   "blocks": "unchanged"
+  },
+  "blocks": [
+   {
+    "name": "REST",
+    "title": "the rest reading: no launch, the 10 Hz sampler on the idle card; the last 60 s are the reading",
+    "start": {
+     "mode": "cool",
+     "max_c": 99,
+     "max_wait_s": 5
+    },
+    "launch": {
+     "seconds": 2,
+     "budget": 3.5,
+     "processes": 0
+    },
+    "tail_s": 120,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "zeros",
+      "label": "rest"
+     }
+    ]
+   },
+   {
+    "name": "HOLD",
+    "title": "amendment A2: the int8 hold H-I8 from rest, 190 back-to-back 8 s processes (~26.5 min) of int8 neg_ones behind E98's 57 C gate; the steady reading is the last 300 s",
+    "start": {
+     "mode": "cool",
+     "max_c": 57,
+     "max_wait_s": 300
+    },
+    "launch": {
+     "seconds": 8,
+     "budget": 9.5,
+     "processes": 190
+    },
+    "tail_s": 6,
+    "runs": [
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/neg_ones.bin",
+      "label": "int8-neg_ones-hold"
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "REST-00-rest-r1",
+  "HOLD-00-int8-neg_ones-hold-r1"
+ ],
+ "sha256": {
+  "heater": "7adadf4f1ce331cc028c317561933d6d3209da0f0326b0ce9a124b39b15ac0d2",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e133/run_e133.py",
+  "--protocol",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e133/protocol-w1b.json",
+  "--out",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e133/runs/W1B",
+  "--max-card-min",
+  "34"
+ ],
+ "git_head": "0c187e1262b0e0f7fb744da4c22211b5dcfa9958",
+ "git_dirty_hpl": ""
+}

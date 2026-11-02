@@ -1,0 +1,131 @@
+E133: E111's two holds again on aifoundry2 in the morning's room, and the morning probe; its own governor, nothing set
+REGRESSION (before anything is scored): {"e98": {"keys_differing": [], "ok": true}, "e111_partB": {"keys_differing": [], "ok": true}, "e111_partA": {"keys_differing": [], "ok": true}, "ok": true}
+
+VERDICTS
+  E133-A1 H-I8                             FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-I8 prior_aifoundry2            PASS               predicted PASS                                                         as predicted
+  E133-A2 H-I8 lab_model_sept              FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-I8 e97_aifoundry3_plateau      FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-I8 line_76s                    FAIL               predicted FAIL                                                         as predicted
+  E133-A1 H-F32                            FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-F32 prior_aifoundry2           PASS               predicted PASS                                                         as predicted
+  E133-A2 H-F32 lab_model_sept             FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-F32 e97_aifoundry3_plateau     FAIL               predicted FAIL                                                         as predicted
+  E133-A2 H-F32 line_76s                   FAIL               predicted FAIL                                                         as predicted
+  E133-A3                                  PASS               predicted PASS                                                         as predicted
+  E133-R1 H-I8                             INCONCLUSIVE       predicted PASS                                                         NOT as predicted
+  E133-R1 H-F32                            PASS               predicted PASS                                                         as predicted
+  E133-R2                                  AT THE TRIP        predicted AT THE FLOOR                                                 NOT as predicted
+  E133-B0                                  OK                 predicted OK                                                           as predicted
+  E133-B1                                  ABOVE_TARGET       predicted ABOVE_TARGET                                                 as predicted
+  E133-B2                                  SUPPORTS           predicted no side predicted                                            no side predicted
+  E133-BV                                  PARTLY             predicted no side predicted                                            no side predicted
+  E133-B3c line                            ABOVE_TARGET       predicted ABOVE_TARGET                                                 as predicted
+  E133-B3c hold                            SUPPORTS           predicted no side predicted (the registered question: room 1.00-1.25,  no side predicted
+  E133-B4 MHz                              POSITIVE_BELOW_TARGET predicted no side predicted (the morning's fp16 ones may run at 800 MH no side predicted
+  E133-B4 W                                BELOW_TARGET       predicted no side predicted (the morning's fp16 ones may run at 800 MH no side predicted
+  tally {"FAIL": 8, "PASS": 4, "INCONCLUSIVE": 1, "AT THE TRIP": 1, "OK": 1, "ABOVE_TARGET": 2, "SUPPORTS": 2, "PARTLY": 1, "POSITIVE_BELOW_TARGET": 1, "BELOW_TARGET": 1}
+
+PART A, the holds
+  idles {"W1": null, "W2": {"die": 44.0, "w": 21.4126, "n": 600, "t0_ms": 1793644514949, "t1_ms": 1793644636223, "die_values": {"44": 600}}, "END": {"die": 44.0, "w": 21.4473, "n": 600, "t0_ms": 1793648278283, "t1_ms": 1793648399575, "die_values": {"44": 600}}, "W1B": {"die": 44.0, "w": 21.5267, "n": 600, "t0_ms": 1793649300389, "t1_ms": 1793649421681, "die_values": {"44": 600}}, "END2": {"die": 44.0, "w": 21.5522, "n": 600, "t0_ms": 1793651918622, "t1_ms": 1793652039922, "die_values": {"44": 600}}}
+  H-I8: {"kind": "int8/neg_ones", "clock_mhz": 800, "processes_run": 190, "processes_planned": 190, "minutes": 26.48, "dips": 4, "complete": true, "clock_held": true}
+     plateau {"n": 2928, "die": 56.3624, "w": 39.2048, "io": 56.93, "mhz": 792.6913, "share_clock": 0.9604, "fine_w": 39.6218, "fine_share": 0.9604, "t0_ms": 1793650712192, "t1_ms": 1793651012193}
+     previous {"n": 2926, "die": 56.92, "w": 39.5251, "io": 57.2697, "mhz": 794.2925, "share_clock": 0.9689, "fine_w": 39.8598, "fine_share": 0.959, "t0_ms": 1793650412192, "t1_ms": 1793650712192}
+     A1 {"fine_slope_c_per_min": -0.1006, "fine_slope_se": 0.0153, "fine_slope_w_per_min": -0.04446, "die_slope_c_per_min": -0.0959, "die_slope_se": 0.0158, "fine_range_w": 0.5763, "die_range_c": 0.949, "read_on": "fine W", "verdict": "FAIL"}
+     A2 {"rise_c": 12.362, "dW_w": 17.665, "c": 0.6998, "c_lo": 0.6993, "c_hi": 0.7189, "idle_mismatch_c": 0.0, "idle_mismatch_w": 0.025, "e97_aifoundry3_plateau": "FAIL", "lab_model_sept": "FAIL", "line_76s": "FAIL", "prior_aifoundry2": "PASS"}
+     asymptote {"tau_s": 203.2, "w_inf": 39.7477, "B": -1.9744, "rms": 0.1298, "n_bins": 48, "at_tau_edge": false, "die_inf": 56.647, "c_inf": 0.7109}
+     A4 {"windows_ms": {"before": [1793649121681, 1793649421681], "plateau": [1793650712192, 1793651012193], "after": [1793651739922, 1793652039922]}, "proxies": {"a1-nic": {"before": 51.58, "plateau": 50.775, "after": 50.805, "room_move_c": -0.454, "c_corrected": 0.7255}, "a1-nvme": {"before": 41.9, "plateau": 41.9, "after": 40.983, "room_move_c": 0.504, "c_corrected": 0.6713}, "a1c0-die": {"before": 45.0, "plateau": 45.0, "after": 45.0, "room_move_c": 0.0, "c_corrected": 0.6998}, "a1c1-die": {"before": 50.542, "plateau": 49.0, "after": 49.0, "room_move_c": -0.701, "c_corrected": 0.7395}, "a2-nic": {"before": 41.737, "plateau": null, "after": 42.246}, "a2-nvme": {"before": 34.9, "plateau": null, "after": 35.9}, "a3-nic": {"before": 41.632, "plateau": 42.83, "after": 42.483, "room_move_c": 0.855, "c_corrected": 0.6514}, "a3-nvme": {"before": 35.483, "plateau": 36.9, "after": 35.9}}, "phone_battery_c": {"before": 29.4, "plateau": 29.4, "after": 29.4}}
+     wander (minute bins from minute 8) {"from_min": 8, "lo": 55.954, "hi": 57.0, "range_c": 1.046}
+       min  0  die 48.981  W 36.443  fine 36.982  share 0.952  n 584
+       min  1  die 52.338  W 37.407  fine 38.056  share 0.942  n 586
+       min  2  die 54.138  W 38.336  fine 38.734  share 0.961  n 586
+       min  3  die 54.993  W 38.895  fine 39.125  share 0.978  n 585
+       min  4  die 55.497  W 38.828  fine 39.247  share 0.961  n 587
+       min  5  die 55.99  W 39.437  fine 39.437  share 1.0  n 583
+       min  6  die 55.969  W 39.212  fine 39.423  share 0.981  n 585
+       min  7  die 56.0  W 39.591  fine 39.591  share 1.0  n 585
+       min  8  die 55.954  W 39.056  fine 39.481  share 0.961  n 585
+       min  9  die 56.0  W 39.557  fine 39.557  share 1.0  n 586
+       min 10  die 55.968  W 39.073  fine 39.486  share 0.961  n 586
+       min 11  die 55.978  W 39.361  fine 39.586  share 0.979  n 583
+       min 12  die 55.991  W 39.413  fine 39.627  share 0.981  n 582
+       min 13  die 56.509  W 39.724  fine 39.724  share 1.0  n 585
+       min 14  die 56.995  W 39.826  fine 39.826  share 1.0  n 587
+       min 15  die 56.93  W 39.401  fine 39.872  share 0.956  n 585
+       min 16  die 56.974  W 39.738  fine 39.959  share 0.98  n 586
+       min 17  die 56.983  W 39.793  fine 39.997  share 0.981  n 582
+       min 18  die 56.949  W 39.457  fine 39.855  share 0.963  n 587
+       min 19  die 57.0  W 39.872  fine 39.872  share 1.0  n 584
+       min 20  die 56.857  W 38.997  fine 39.751  share 0.927  n 586
+       min 21  die 56.638  W 39.182  fine 39.659  share 0.957  n 586
+       min 22  die 56.291  W 39.203  fine 39.615  share 0.959  n 588
+       min 23  die 56.146  W 39.125  fine 39.563  share 0.959  n 583
+       min 24  die 56.683  W 39.186  fine 39.666  share 0.956  n 586
+       min 25  die 56.26  W 39.21  fine 39.603  share 0.962  n 585
+       min 26  die 56.184  W 39.258  fine 39.634  share 0.965  n 283
+     c by 5-min window: 5: 0.672, 6: 0.6745, 7: 0.6735, 8: 0.6747, 9: 0.6759, 10: 0.685, 11: 0.6932, 12: 0.7013, 13: 0.7093, 14: 0.7162, 15: 0.7159, 16: 0.7183, 17: 0.719, 18: 0.716, 19: 0.7096, 20: 0.7116, 21: 0.7031
+  H-F32: {"kind": "fp32/randn", "clock_mhz": 600, "processes_run": 190, "processes_planned": 190, "minutes": 26.95, "dips": 0, "complete": true, "clock_held": false}
+     plateau {"n": 2927, "die": 65.9142, "w": 55.229, "io": 65.2292, "mhz": 612.6751, "share_clock": 0.8886, "fine_w": 54.9315, "fine_share": 0.8886, "t0_ms": 1793647052253, "t1_ms": 1793647352254}
+     previous {"n": 2928, "die": 65.9699, "w": 54.5456, "io": 65.5748, "mhz": 607.138, "share_clock": 0.943, "fine_w": 54.1418, "fine_share": 0.943, "t0_ms": 1793646752253, "t1_ms": 1793647052253}
+     A1 {"fine_slope_c_per_min": 0.3031, "fine_slope_se": 0.048, "fine_slope_w_per_min": 0.13397, "die_slope_c_per_min": -0.008, "die_slope_se": 0.0025, "fine_range_w": 1.5013, "die_range_c": 0.144, "read_on": "fine W", "verdict": "FAIL"}
+     A2 {"rise_c": 21.914, "dW_w": 33.799, "c": 0.6484, "c_lo": 0.648, "c_hi": 0.6638, "idle_mismatch_c": 0.0, "idle_mismatch_w": 0.035, "e97_aifoundry3_plateau": "FAIL", "lab_model_sept": "FAIL", "line_76s": "FAIL", "prior_aifoundry2": "PASS"}
+     asymptote {"tau_s": 566.1, "w_inf": 54.5604, "B": 0.7711, "rms": 0.387, "n_bins": 49, "at_tau_edge": false, "die_inf": 65.075, "c_inf": 0.6304}
+     A4 {"windows_ms": {"before": [1793644336223, 1793644636223], "plateau": [1793647052253, 1793647352254], "after": [1793648099575, 1793648399575]}, "proxies": {"a1-nic": {"before": 50.745, "plateau": 50.648, "after": 51.433, "room_move_c": -0.479, "c_corrected": 0.6625}, "a1-nvme": {"before": 40.9, "plateau": 40.9, "after": 41.9, "room_move_c": -0.549, "c_corrected": 0.6646}, "a2-nic": {"before": 41.065, "plateau": null, "after": 41.69}, "a2-nvme": {"before": 34.5, "plateau": null, "after": 34.9}, "a3-nic": {"before": 41.66, "plateau": 41.298, "after": 41.345, "room_move_c": -0.226, "c_corrected": 0.6551}, "a3-nvme": {"before": 35.417, "plateau": 34.9, "after": 34.9}, "a3c0-die": {"before": null, "plateau": 49.0, "after": 49.0}}, "phone_battery_c": {"before": 29.4, "plateau": 29.4, "after": 29.4}}
+     wander (minute bins from minute 8) {"from_min": 8, "lo": 65.908, "hi": 66.005, "range_c": 0.097}
+       min  0  die 63.565  W 64.506  fine 62.415  share 0.378  n 584
+       min  1  die 65.889  W 56.805  fine 56.602  share 0.801  n 583
+       min  2  die 65.884  W 55.235  fine 55.128  share 0.881  n 586
+       min  3  die 65.942  W 55.565  fine 55.054  share 0.884  n 585
+       min  4  die 65.918  W 55.525  fine 55.026  share 0.882  n 586
+       min  5  die 65.932  W 55.339  fine 54.705  share 0.897  n 585
+       min  6  die 65.894  W 55.325  fine 55.242  share 0.873  n 584
+       min  7  die 65.957  W 55.4  fine 54.924  share 0.884  n 586
+       min  8  die 65.928  W 55.561  fine 55.088  share 0.872  n 586
+       min  9  die 65.949  W 55.424  fine 54.663  share 0.887  n 586
+       min 10  die 65.918  W 55.148  fine 54.822  share 0.889  n 583
+       min 11  die 65.91  W 55.139  fine 54.892  share 0.894  n 587
+       min 12  die 65.915  W 55.472  fine 55.085  share 0.885  n 585
+       min 13  die 65.908  W 55.488  fine 55.121  share 0.872  n 584
+       min 14  die 65.942  W 55.407  fine 54.944  share 0.889  n 584
+       min 15  die 65.978  W 55.651  fine 54.882  share 0.894  n 585
+       min 16  die 65.956  W 55.097  fine 54.661  share 0.909  n 585
+       min 17  die 65.951  W 54.319  fine 53.92  share 0.949  n 587
+       min 18  die 66.005  W 54.655  fine 54.108  share 0.956  n 585
+       min 19  die 65.974  W 54.213  fine 53.928  share 0.961  n 587
+       min 20  die 65.973  W 54.569  fine 54.196  share 0.935  n 584
+       min 21  die 65.925  W 54.758  fine 54.473  share 0.918  n 585
+       min 22  die 65.914  W 55.438  fine 55.047  share 0.885  n 583
+       min 23  die 65.91  W 54.844  fine 54.852  share 0.889  n 586
+       min 24  die 65.916  W 55.265  fine 55.043  share 0.886  n 586
+       min 25  die 65.925  W 55.335  fine 54.88  share 0.889  n 587
+       min 26  die 65.922  W 55.393  fine 54.948  share 0.894  n 554
+     c by 5-min window: 5: 0.6454, 6: 0.6461, 7: 0.6469, 8: 0.6464, 9: 0.6465, 10: 0.6465, 11: 0.645, 12: 0.6454, 13: 0.65, 14: 0.6538, 15: 0.6587, 16: 0.663, 17: 0.6642, 18: 0.6595, 19: 0.6582, 20: 0.6537, 21: 0.6504
+  A3 {"ratio": 0.9266, "lo": 0.9014, "hi": 0.9492, "band": [0.9, 1.11], "verdict": "PASS"}
+  R1 {"H-I8": {"c_e133": 0.6998, "c_e111": 0.6719, "ratio": 1.0415, "lo": 1.0045, "hi": 1.111, "band": [0.9, 1.11], "verdict": "INCONCLUSIVE"}, "H-F32": {"c_e133": 0.6484, "c_e111": 0.6712, "ratio": 0.966, "lo": 0.9465, "hi": 1.0192, "band": [0.9, 1.11], "verdict": "PASS"}}
+  R2 {"share_at_600": 0.8886, "plateau_mhz": 612.6751, "plateau_die": 65.9142, "plateau_w": 55.229, "w2_rest_idle_die": 44.0, "predicted": "AT THE FLOOR", "verdict": "AT THE TRIP", "as_predicted": false}
+  peaks {"SMOKE": {"board_w_max": 47.6, "die_mean_max": 47, "hottest_max": 69, "samples_over_85w": 0, "samples_over_80w": 0}, "W2": {"board_w_max": 88.65, "die_mean_max": 67, "hottest_max": 69, "samples_over_85w": 372, "samples_over_80w": 416}, "END": {"board_w_max": 21.72, "die_mean_max": 44, "hottest_max": 69, "samples_over_85w": 0, "samples_over_80w": 0}, "W1B": {"board_w_max": 40.31, "die_mean_max": 57, "hottest_max": 69, "samples_over_85w": 0, "samples_over_80w": 0}, "END2": {"board_w_max": 21.8, "die_mean_max": 44, "hottest_max": 69, "samples_over_85w": 0, "samples_over_80w": 0}}
+
+PART B, the drift
+  B0_gate: "OK"
+  R0: {"fall_w": 0.851, "fall_c_w_derived": 3.677, "range_c": 3.677, "expected_w": 0.437, "band_w": [0.1, 0.9], "against_expected": "INSIDE_BAND", "gate": "OK"}
+  B1: "ABOVE_TARGET"
+  B1_fit: {"slope": 0.7562, "lo": 0.5838, "hi": 0.9287, "se": 0.0621, "icpt": -32.241, "rms": 0.1433, "n": 6, "df": 4, "x_range": 3.677}
+  B2: "SUPPORTS"
+  B2_fit: {"slope": 0.9458, "lo": 0.3961, "hi": 1.4956, "se": 0.198, "icpt": -30.7, "rms": 0.4569, "n": 6, "df": 4, "x_range": 3.677}
+  BV: "PARTLY"
+  B3c: {"baseline": ["P3", "P6", "P7"], "per_probe": {"E133-W2": {"dx_c": -2.8, "line_lead": -2.263, "hold_lead": -2.05, "side": "cool", "line_per_c": 0.808, "hold_per_c": 0.732}}, "min_abs_lead_c": 0.5, "baseline_values": {"rest_die_w_derived": 94.633, "line": 39.346, "hold_die": 58.443}, "hold": {"slope": 0.7321, "lo": 0.429, "hi": 1.0351, "se": 0.1546, "n": 1}, "verdict_hold": "SUPPORTS", "line": {"slope": 0.8081, "lo": 0.7362, "hi": 0.88, "se": 0.0367, "n": 1}, "verdict_line": "ABOVE_TARGET"}
+  B4: {"fit_mhz": {"slope": -6.5293, "lo": -11.2176, "hi": -1.8411, "se": 1.6889, "icpt": 1401.629, "rms": 3.8965, "n": 6, "df": 4, "x_range": 3.677}, "verdict_mhz": "POSITIVE_BELOW_TARGET", "target_mhz": -12.0, "fit_w": {"slope": -0.3562, "lo": -0.9175, "hi": 0.205, "se": 0.2022, "icpt": 87.235, "rms": 0.4665, "n": 6, "df": 4, "x_range": 3.677}, "verdict_w": "BELOW_TARGET", "target_w": -1.0, "per_probe": {"P1": {"mhz": 771.4, "w": 52.37}, "P2": {"mhz": null, "w": null}, "P3": {"mhz": 789.9, "w": 54.18}, "P6": {"mhz": 783.8, "w": 53.62}, "P7": {"mhz": 787.1, "w": 53.72}, "E111-W1": {"mhz": null, "w": null}, "E111-W2": {"mhz": 787.2, "w": 53.96}, "E133-W2": {"mhz": 800.0, "w": 54.2}}}
+  rest die (W-derived) {"P1": 95.51, "P2": 95.319, "P3": 94.588, "P6": 94.81, "P7": 94.502, "E111-W1": 93.972, "E111-W2": 93.972, "E133-W2": 91.833}
+  line per probe {"P1": 39.803, "P3": 39.331, "P6": 39.397, "P7": 39.31, "E111-W2": 39.072, "E133-W2": 37.083} 
+  hold per probe {"P1": 60.415, "P3": 58.049, "P6": 58.795, "P7": 58.485, "E111-W2": 58.268, "E133-W2": 56.392}
+  E133-W2: rest W 21.2593 (history 20 min), rest20 {"rows": 121, "w": 21.2593, "die": 43.0661, "nic": 40.9727, "nvme": 34.0818, "cpu": 31.4545, "load": 0.6126, "window_end_ms": 1793644514713, "since_busy_min": 20.0, "busy_within_rest": false, "w_sd": 0.08}, rest60 {"w": 21.4126, "die": 44.0, "io": 45.0, "n": 600, "w_sd": 0.077}
+     0 fp32/zeros     W 31.94 die 48.51 line 33.90 MHz 789 fine 32.3867 gate {'held_s': 0.0, 'reached': True, 'die': 44.0}
+     1 fp16/zeros     W 32.97 die 50.12 line 35.04 MHz 800 fine 32.9668 gate {'held_s': 0.0, 'reached': True, 'die': 47.0}
+     2 int8/zeros     W 34.53 die 51.28 line 35.49 MHz 800 fine 34.5269 gate {'held_s': 0.0, 'reached': True, 'die': 48.0}
+     3 int8/neg_ones  W 38.42 die 53.51 line 35.94 MHz 800 fine 38.4163 gate {'held_s': 0.0, 'reached': True, 'die': 49.0}
+     4 int8/sparse50  W 46.74 die 57.84 line 36.47 MHz 795 fine 47.1156 gate {'held_s': 0.0, 'reached': True, 'die': 51.0}
+     5 fp16/ones      W 53.58 die 61.78 line 37.28 MHz 800 fine 53.5833 gate {'held_s': 0.0, 'reached': True, 'die': 54.0}
+     6 int8/full      W 52.05 die 62.64 line 38.84 MHz 795 fine 52.4788 gate {'held_s': 0.0, 'reached': True, 'die': 57.0}
+     7 fp32/randn     W 57.70 die 65.84 line 39.45 MHz 628 fine None gate {'held_s': 0.2, 'reached': True, 'die': 57.0}
+     8 fp16/ones      W 54.82 die 64.48 line 39.41 MHz 800 fine 54.8207 gate {'held_s': 9.0, 'reached': True, 'die': 57.0}
+     hold {"run": "HOLD-00-int8-neg_ones-hold-r1", "idx": 0, "kind": "int8/neg_ones", "rc_bad": 0, "t0_ms": 1793645401644, "processes": 39, "processes_planned": 39, "gate": {"held_s": 5.8, "reached": true, "die": 57.0}, "calibration": {"w_per_c": 0.361, "n": 2516, "die_span": [55, 58]}, "n": 1172, "w": 39.348, "die": 56.3925, "io": 56.9497, "mhz": 794.5392, "share_800": 0.971, "dips": [], "dips_in_work": 1, "fine_w": 39.6692, "fine_share": 0.971, "w_nodip": 39.348, "die_nodip": 56.3925, "die_values": {"55": 19, "56": 674, "57": 479}, "line": 38.3987, "line_nodip": 38.3987}
