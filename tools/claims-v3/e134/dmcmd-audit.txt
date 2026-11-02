@@ -1,0 +1,139 @@
+E134 device-command preflight, Mon 2 Nov 2026 11:47 PST, on the Intel, from the top of the lab repository at 167e24cc plus E134's files as registered
+checker: tools/claims-v3/dmcmd_audit.py sha256 f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e, table 50168632931fd8c1fab40794cbaaac6aca3d31f01d4367d8a21fcf69c0bdc638 (both as committed in 32e9c109)
+files: tools/claims-v3/e134/ tools/claims-v3/lib.sh tools/claims-v3/kinds/run_e78.py tools/claims-v3/kinds/e78_common.py tools/claims-v3/kinds/reduce_e78.py
+
+=== 1. no allow-list, no exception
+NO-GO tools/claims-v3/lib.sh:154: ettelem sample: STATS_RESET: WRITE not in the allow-list
+dmcmd_audit: NO-GO (36 send site(s), 1 disallowed; allow-list: none)
+tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:139: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/lib.sh:143: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: STATS_RESET [WRITE, pmic write] (conditional) NO-GO: WRITE not in the allow-list - variant ettelem; forwarded arguments may carry --reset-ms
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      6 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      6 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      3 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      5 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      3 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      3 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      3 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      3 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      3 site(s)  ok
+  STATS_RESET                                WRITE        pmic write     1 site(s)  NO-GO
+exit 3
+
+=== 2. with the reviewed exception: --except 'tools/claims-v3/lib.sh:154:STATS_RESET=block_e134.sh:105, the only start_sampler call E134 makes, passes the output file and the duration and nothing else, so no --reset-ms is forwarded'
+dmcmd_audit: GO (36 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:139: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/lib.sh:143: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: STATS_RESET [WRITE, pmic write] (conditional) EXCEPTED: STATS_RESET: block_e134.sh:105, the only start_sampler call E134 makes, passes the output file and the duration and nothing else, so no --reset-ms is forwarded - variant ettelem; forwarded arguments may carry --reset-ms
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      6 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      6 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      3 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      5 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      3 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      3 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      3 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      3 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      3 site(s)  ok
+  STATS_RESET                                WRITE        pmic write     1 site(s)  EXCEPTED
+exit 0
+
+=== 3. as 2, with --deny-pmic-read (the voltage reads his rule of 2 Nov allows are then refused, as they should be); the NO-GO lines and the summary
+tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] NO-GO: PMIC read denied (--deny-pmic-read) - variant ettelem
+tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] NO-GO: PMIC read denied (--deny-pmic-read) - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] NO-GO: PMIC read denied (--deny-pmic-read) - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] NO-GO: PMIC read denied (--deny-pmic-read) - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] NO-GO: PMIC read denied (--deny-pmic-read) - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] NO-GO: PMIC read denied (--deny-pmic-read) - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] NO-GO: PMIC read denied (--deny-pmic-read) - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] NO-GO: PMIC read denied (--deny-pmic-read) - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] NO-GO: PMIC read denied (--deny-pmic-read) - variant ettelem
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      6 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      6 site(s)  NO-GO
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      3 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      5 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      3 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      3 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      3 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      3 site(s)  NO-GO
+  GET_SP_STATS                               READ         pmic none      3 site(s)  ok
+  STATS_RESET                                WRITE        pmic write     1 site(s)  EXCEPTED
+NO-GO tools/claims-v3/e134/block_e134.sh:102: ettelem config: GET_ASIC_VOLTAGE: PMIC read denied (--deny-pmic-read)
+NO-GO tools/claims-v3/e134/make_predictions_e134.py:137: ettelem config: GET_ASIC_VOLTAGE: PMIC read denied (--deny-pmic-read)
+NO-GO tools/claims-v3/e134/queue_e134.sh:35: ettelem config: GET_ASIC_VOLTAGE: PMIC read denied (--deny-pmic-read)
+NO-GO tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_VOLTAGE: PMIC read denied (--deny-pmic-read)
+NO-GO tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_VOLTAGE: PMIC read denied (--deny-pmic-read)
+NO-GO tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_VOLTAGE: PMIC read denied (--deny-pmic-read)
+NO-GO tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_VOLTAGE: PMIC read denied (--deny-pmic-read)
+NO-GO tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_VOLTAGE: PMIC read denied (--deny-pmic-read)
+NO-GO tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_VOLTAGE: PMIC read denied (--deny-pmic-read)
+dmcmd_audit: NO-GO (36 send site(s), 9 disallowed; allow-list: none)
+exit 3
