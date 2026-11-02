@@ -1,0 +1,88 @@
+E124 corrections-check (post hoc, deciding nothing). Paths are relative to the repository's top level.
+
+C1  S over idle across sessions on aifoundry1 card 1 (levels over idle carry a session offset; differences cancel it)
+  E124 primary (dips removed, 0.2414): docs/reports/data/2026-11-01-e124-int8-zeros-replicate/e124.json
+      passes [12410, 12411, 12412, 12413]; idle 33.084 W; leak 0.2414 W/C (0.2414)
+      S: fp32.zeros +1.662 ± 0.075; fp16.zeros +1.644 ± 0.129; int8.zeros +2.209 ± 0.106; anchor_pi +9.731 ± 0.147
+      D(anchor_pi) +8.121 ± 0.064; G = S(int8.zeros) - S(fp32.zeros) +0.548
+  E124 dips-kept arm (2 passes): docs/reports/data/2026-11-01-e124-int8-zeros-replicate/e124-dipskept.json
+      passes [12411, 12413]; idle 33.087 W; leak 0.2414 W/C (0.2414)
+      S: fp32.zeros +1.640 ± 0.625; fp16.zeros +1.692 ± 0.310; int8.zeros +2.174 ± 0.773; anchor_pi +9.605 ± 0.694
+      D(anchor_pi) +7.966 ± 1.847; G = S(int8.zeros) - S(fp32.zeros) +0.534
+  E82 (dips kept, auto 0.2414): docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json
+      passes [8211, 8212, 8213, 8214, 8215]; idle 33.105 W; leak 0.2414 W/C (auto)
+      S: fp32.zeros +1.841 ± 0.113; fp16.zeros +1.873 ± 0.067; int8.zeros +2.402 ± 0.060; anchor_pi +9.917 ± 0.206
+      D(anchor_pi) +8.095 ± 0.293; G = S(int8.zeros) - S(fp32.zeros) +0.561
+  E93 (dips removed, 0.2414): docs/reports/data/2026-11-01-e93-zero-gate-silicon/e93.json
+      passes [9310, 9311, 9312, 9313, 9314]; idle 33.084 W; leak 0.2414 W/C (0.2414)
+      S: fp32.zeros +1.876 ± 0.129; fp16.zeros +1.812 ± 0.133; int8.zeros +2.368 ± 0.196; anchor_pi +9.995 ± 0.096
+      D(anchor_pi) +8.083 ± 0.075; G = S(int8.zeros) - S(fp32.zeros) +0.492
+  E124 primary minus E82: fp32.zeros -0.180 (95% intervals overlap: True); fp16.zeros -0.229 (95% intervals overlap: False); int8.zeros -0.192 (95% intervals overlap: False); anchor_pi -0.186 (95% intervals overlap: True)
+  E124 primary minus E93: fp32.zeros -0.215 (95% intervals overlap: False); fp16.zeros -0.168 (95% intervals overlap: True); int8.zeros -0.159 (95% intervals overlap: True); anchor_pi -0.264 (95% intervals overlap: False)
+  E124's S runs 0.159 to 0.264 W below E82's and E93's over these four items
+      E124 minus E82, anchor_pi: S -0.186, D +0.025
+      E124 minus E82, fp16.randn: S -0.190, D +0.045
+      E124 minus E82, fp16.zeros: S -0.229, D +0.000
+      E124 minus E82, fp32.a_zeros_b_randn: S -0.283, D +0.126
+      E124 minus E82, fp32.randn: S -0.238, D -0.077
+      E124 minus E82, fp32.zeros: S -0.180, D +0.000
+      E124 minus E82, int8.full: S -0.110, D +0.111
+      E124 minus E82, int8.zeros: S -0.192, D +0.000
+      E124 minus E93, anchor_pi: S -0.264, D +0.038
+      E124 minus E93, fp16.randn: S -0.231, D -0.102
+      E124 minus E93, fp16.zeros: S -0.168, D +0.000
+      E124 minus E93, fp32.a_nz_b_randn: S -0.104, D +0.116
+      E124 minus E93, fp32.a_zeros_b_randn: S -0.195, D +0.103
+      E124 minus E93, fp32.randn: S -0.257, D -0.096
+      E124 minus E93, fp32.zeros: S -0.215, D +0.000
+      E124 minus E93, int8.full: S -0.167, D +0.016
+      E124 minus E93, int8.zeros: S -0.159, D +0.000
+  over all 17 shared cells: S -0.283 to -0.104 W (every one below: True); D -0.102 to +0.126 W
+  D(anchor_pi), E124 minus E82: +0.025 W (the tie R10 reads on D: scored.json › rules.R10_tie)
+  D(anchor_pi), E124 minus E93: +0.038 W (the tie R10 reads on D: scored.json › rules.R10_tie)
+  S(m0.fp32.zeros): E124 primary +0.199 ± 0.042; leakage-auto arm (0.192 W/C, e124-auto.json) +0.145 ± 0.045; E109 three passes (leak 0.130, e109-3pass.json) +0.376 ± 0.089
+  S(m0.int8.zeros): E124 primary +1.765 ± 0.199; leakage-auto arm +1.736 ± 0.174; E109 three passes +2.111 ± 0.083
+  S(fp32.zeros): E124 +1.662 ± 0.075; E109 three passes +1.857 ± 0.148; overlap True (not among extras.json › beside_e109's twenty)
+  S(int8.zeros): E124 +2.209 ± 0.106; E109 three passes +2.458 ± 0.034; overlap False (not among extras.json › beside_e109's twenty)
+  read ceilings (from S(m0) levels): fp32 E124 +0.61 ± 0.13 pJ, E109 +1.16 ± 0.27 pJ; int8 E124 +4.09 ± 0.46 pJ, E109 +4.89 ± 0.19 pJ
+  int8's extra reads at fp32's ceiling: E124 +0.066 ± 0.014 W against N +1.567 ± 0.209; E109 (posthoc.json) +0.124 ± 0.030 W against N +1.735 ± 0.164
+
+C2  A1's arithmetic (logs/anchor-t0.txt, logs/claim-save-time.txt, logs/release-save-time.txt, logs/queue.out)
+  claim saved 19:19:00 PST (1793589540); relaunch anchor T0 19:21:37 PST (1793589697): the failed launch cost 157 s = 2 min 37 s
+  limit for a pass's projected end: A1 (T0) 19:49:07 PST; the frozen claim anchor 19:46:30 PST
+  p12410 starts 19:22:27, projected end 19:28:27: under the claim anchor it would start
+  p12411 starts 19:28:42, projected end 19:34:42: under the claim anchor it would start
+  p12412 starts 19:34:46, projected end 19:40:46: under the claim anchor it would start
+  p12413 starts 19:40:39, projected end 19:46:39: under the claim anchor it would be REFUSED by 9 s
+  p12410 ended 19:28:27 PST after 360 s (rc 0)
+  p12411 ended 19:34:31 PST after 349 s (rc 0)
+  p12412 ended 19:40:24 PST after 338 s (rc 0)
+  p12413 ended 19:46:06 PST after 327 s (rc 0)
+  session config reads 2026-11-01T19:21:38-08:00 and 2026-11-01T19:46:21-08:00
+  release saved 19:47:16 PST (1793591236); claim to release 1696 s = 28.27 min (inside the frozen 30 card-minutes from the claim to the release)
+
+C3  the desk finding's time (tools/claims-v3/e124/selftest.txt D; the freeze commit)
+  PASS D pipeline on E109's raw passes: primary keeps [10910, 10911, 10912], relaxed [10910, 10911, 10912], dips kept [10910, 10911] (set aside [{'pass': 10912, 'why': ['fp32.randn spans 1.050 W']}]); verdicts carried by: primary
+  D's verdicts (card-1 frame on aifoundry3's data, leak 0.2414, dips removed): {"Y1": "PASS", "Y2": "PASS", "Z": "REPLICATES"}; dip samples removed {"p10910": 6, "p10911": 7, "p10912": 6}
+  freeze commit 47995958 2026-11-01 19:18:17 -0800; selftest.txt there has PASS D: True
+  E124.md at 5ca4f13e (A1): sha256 8ae6a8c0c10e999efe6f0ea2ad089d5b2ddf7153bb1bd0bdd56d10b34285f9f9 (each pass's code.sha256 and docs/reports/data/2026-11-01-e124-int8-zeros-replicate/code.sha256 record this one)
+  The self-test's run times (19:15:46 PST, its output read at 19:16:04; the re-run that wrote selftest.txt 19:16:20-19:16:24) are from the lane's session record, which is not committed.
+
+C4  dips removed per pass, the dips-kept arm, the per-pass outlier (e124.json, e124-dipskept.json, scored.json)
+  dip samples removed: p12410 7, p12411 6, p12412 11, p12413 12
+  dips-kept arm keeps [12411, 12413]; sets aside 12410 (fp16.randn spans 1.717 W); 12412 (fp16.randn spans 1.886 W, anchor_pi drifts +1.082 W)
+  G_op per pass ['12410', '12411', '12412', '12413']: +0.220, +0.064, -0.271, +0.225
+  G_rest per pass ['12410', '12411', '12412', '12413']: +1.349, +1.460, +2.125, +1.239
+
+C5  item 15's live step over pi: reported (R9), no verdict (e124.json › per_pass, scored.json, extras.json)
+  D(fp32.a_nz_b_randn) - D(anchor_pi) per pass: +4.202, +4.104, +4.002, +4.127; paired +4.109 ± 0.131 W
+  T- +0.291 ± 0.040 W; inside the live lanes (extras.json › reported.live_over_constant_w) +3.818 ± 0.160 W
+  scored.json › rules.R9_live_split keys ['D_a_nz_b_randn', 'D_pi', 'L_gated', 'L_live', 'T_minus', 'X']; a verdict key: False
+  E109.md: | **R9** a live −0 lane | T₋, L_live, L_live − D(anchor_pi) | reported, no verdict | — |
+  E124.md: Reported with no verdict: `posthoc_check_e109.reading()` on the scored reduction (the no-issue loops' S over idle, the per-read ceilings, U per register-bit clock edge and per enabled bit, int8 over fp32 paired by pass, item 15's live step over π), and each E1
+
+C6  wording (scored.json › rules.R6_cycles, extras.json › added_rules.Y2, tools/claims-v3/e124/reduce_e124.py)
+  R6 entries 10: ['k8.fp32.zeros', 'k8.int8.zeros', 'm0.fp32.a_nz_b_randn', 'm0.fp32.a_zeros_b_randn', 'm0.fp32.zeros', 'm0.int8.zeros', 'm0k8.fp32.zeros', 'm0k8.int8.zeros', 'r8.fp32.zeros', 'r8.int8.zeros']
+  distinct arm x format shapes 8: ['k8.fp32', 'k8.int8', 'm0.fp32', 'm0.int8', 'm0k8.fp32', 'm0k8.int8', 'r8.fp32', 'r8.int8'] (the two item-15 tiles run m0.fp32's shape, 544 and 544 cycles predicted)
+  Y2 95% upper bounds: fp32 192.2 pJ, int8 246.0 pJ (line 769.7 pJ)
+  reduce_e124.py DIP_W = 4.0: sample i dropped when board_w[i] < min(board_w[i-2], board_w[i+2]) - DIP_W
