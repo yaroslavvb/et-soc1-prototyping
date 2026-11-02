@@ -1,0 +1,338 @@
+Q136(c) CORRECTIONS AFTER VERIFICATION (corrections-check.py): post hoc, desk only, deciding nothing; per pass, then mean ± 95% t over passes
+The RTL is core-et's (Erbium), a later revision of the ET-SoC-1's lineage. Every count is the bench's (counts.json, price.py's selection).
+
+## Checks
+
+- E124, aifoundry1 card 1 (registered, four passes): price A recomputed from counts.json's check streams: max difference 0.00e+00
+- E124, aifoundry1 card 1 (registered, four passes): price B recomputed from counts.json's check streams: max difference 0.00e+00
+- E124, aifoundry1 card 1 (registered, four passes): max |this script's bench-constant prices - priced.json| over 4 contrasts x 4 sets x 4 candidates, W: max difference 0.00e+00
+- E109, aifoundry3 card 0 (three passes, post hoc): price A recomputed from counts.json's check streams: max difference 0.00e+00
+- E109, aifoundry3 card 0 (three passes, post hoc): price B recomputed from counts.json's check streams: max difference 0.00e+00
+- E109, aifoundry3 card 0 (three passes, post hoc): max |this script's bench-constant prices - priced.json| over 4 contrasts x 4 sets x 4 candidates, W: max difference 0.00e+00
+- E109, aifoundry3 card 0 (two kept passes): price A recomputed from counts.json's check streams: max difference 0.00e+00
+- E109, aifoundry3 card 0 (two kept passes): price B recomputed from counts.json's check streams: max difference 0.00e+00
+- E109, aifoundry3 card 0 (two kept passes): max |this script's bench-constant prices - priced.json| over 4 contrasts x 4 sets x 4 candidates, W: max difference 0.00e+00
+
+## F1: the TIMA controls and TenB at three prices of a register bit, each from a card's own watts
+
+### E124, aifoundry1 card 1 (registered, four passes)
+
+N = 1.567 ± 0.209 W. Price A (the card's, int8's enabled bits on zeros): 17.16 ± 8.52 fJ (fp32's the same way: 2.98 ± 0.29 fJ); price B (per clock edge): 0.466 ± 0.231 fJ; price C (fp32's no-issue floor, a ceiling): 0.292 ± 0.061 fJ. Issuing adds 7,296 TIMA-control bits an op of the 12,144 enabled bits it adds.
+
+Price A as one price for every bit: int8's no-issue loop's enabled bits alone would cost 12.66 ± 6.29 W against its measured S of 1.765 ± 0.199 W; it can hold for at most 0.157 ± 0.119 of them. At A, fp32's own TenB bits would cost 0.474 ± 0.236 W, and its TenB and TenA bits 0.791 ± 0.393 W, against fp32's whole no-issue S of 0.199 ± 0.042 W.
+
+fp32's own no-issue level as a bound at one price per event, on the events fp32 does too (the most one could cost; what int8's extra events a second would then buy):
+
+- a TenA bit|at most, fJ each: 10.769 ± 2.253
+- a TenA bit|int8's extra at most, W: 0.056 ± 0.012
+- a TenA write|at most, fJ each: 689.238 ± 144.177
+- a TenA write|int8's extra at most, W: 0.056 ± 0.012
+- a TenB latch or data-latch bit|at most, fJ each: 7.180 ± 1.502
+- a TenB latch or data-latch bit|int8's extra at most, W: 0.141 ± 0.029
+- a TenB write|at most, fJ each: 689.238 ± 144.177
+- a TenB write|int8's extra at most, W: 0.141 ± 0.029
+- a TenC read at one address (the card's order)|at most, fJ each: 20.262 ± 4.239
+- a scratchpad bit requested|at most, fJ each: 10.769 ± 2.253
+- a scratchpad bit requested|int8's extra at most, W: 0.141 ± 0.029
+- a scratchpad read|at most, fJ each: 612.656 ± 128.158
+- a scratchpad read|int8's extra at most, W: 0.066 ± 0.014
+- every event fp32 does too, together|int8's extra at most, W: 0.141 ± 0.029
+
+**N, from reset** (`m0.int8.zeros` − `m0.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.337 ± 0.168 | 5.382 ± 2.674 | 1.096 ± 0.544 | 0.360 ± 0.179 | 7.176 ± 3.564 |
+| A, share of N | 0.22 ± 0.13 | 3.52 ± 2.10 | 0.72 ± 0.43 | 0.24 ± 0.14 | 4.69 ± 2.80 |
+| B (per edge) | | | 0.0000 ± 0.0001 | | |
+| C (fp32's floor, at most) | 0.0057 ± 0.0012 | 0.0914 ± 0.0191 | 0.0186 ± 0.0039 | 0.0061 ± 0.0013 | |
+
+Beside it, the nets and buses at the bench's constants: 0.034–0.068 W, of which TenC's 0.027–0.054 W. The TIMA controls' clocked bits a second 6.385e+13; their clock edges a second +4.65e+10. Every candidate without TenC at A: 1.793 ± 0.891 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.271 ± 0.135 W; TenTMP's zero mask 0.135 ± 0.067 W; with the TIMA controls 1.502 ± 0.746 W, 0.98 ± 0.59 of N. Of TenTMP's, its latch bits 0.135 ± 0.067 W and its control 0.136 ± 0.067 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.367 ± 0.679 W, 0.89 ± 0.53 of N.
+
+**N, fp32 after an int8 run (the card's order)** (`m0.int8.zeros` − `pre.m0.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.337 ± 0.168 | 0.002 ± 0.006 | 1.096 ± 0.544 | 0.360 ± 0.179 | 1.796 ± 0.892 |
+| A, share of N | 0.22 ± 0.13 | 0.00 ± 0.00 | 0.72 ± 0.43 | 0.24 ± 0.14 | 1.17 ± 0.70 |
+| B (per edge) | | | 0.0000 ± 0.0001 | | |
+| C (fp32's floor, at most) | 0.0057 ± 0.0012 | 0.0000 ± 0.0001 | 0.0186 ± 0.0039 | 0.0061 ± 0.0013 | |
+
+Beside it, the nets and buses at the bench's constants: 0.034–0.068 W, of which TenC's 0.027–0.054 W. The TIMA controls' clocked bits a second 6.385e+13; their clock edges a second +4.65e+10. Every candidate without TenC at A: 1.793 ± 0.891 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.271 ± 0.135 W; TenTMP's zero mask 0.135 ± 0.067 W; with the TIMA controls 1.502 ± 0.746 W, 0.98 ± 0.59 of N. Of TenTMP's, its latch bits 0.135 ± 0.067 W and its control 0.136 ± 0.067 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.367 ± 0.679 W, 0.89 ± 0.53 of N.
+
+**desk-only arm: one A row, fp32 after an int8 run** (`m0r1.int8.zeros` − `pre.m0r1.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.978 ± 0.486 | 0.118 ± 0.059 | 1.096 ± 0.545 |
+| A, share of N | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.64 ± 0.38 | 0.08 ± 0.05 | 0.72 ± 0.43 |
+| B (per edge) | | | 0.0000 ± 0.0000 | | |
+| C (fp32's floor, at most) | 0.0000 ± 0.0000 | 0.0000 ± 0.0000 | 0.0166 ± 0.0035 | 0.0020 ± 0.0004 | |
+
+Beside it, the nets and buses at the bench's constants: 0.004–0.007 W, of which TenC's 0.000–0.000 W. The TIMA controls' clocked bits a second 5.701e+13; their clock edges a second +0. Every candidate without TenC at A: 1.096 ± 0.545 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.205 ± 0.102 W; TenTMP's zero mask 0.087 ± 0.043 W; with the TIMA controls 1.270 ± 0.631 W, 0.83 ± 0.49 of N. Of TenTMP's, its latch bits 0.087 ± 0.043 W and its control 0.118 ± 0.059 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.183 ± 0.588 W, 0.77 ± 0.46 of N.
+
+**desk-only arm: one A row, from reset** (`m0r1.int8.zeros` − `m0r1.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.000 ± 0.000 | 5.399 ± 2.682 | 0.978 ± 0.486 | 0.118 ± 0.059 | 6.495 ± 3.227 |
+| A, share of N | 0.00 ± 0.00 | 3.53 ± 2.10 | 0.64 ± 0.38 | 0.08 ± 0.05 | 4.25 ± 2.53 |
+| B (per edge) | | | 0.0000 ± 0.0000 | | |
+| C (fp32's floor, at most) | 0.0000 ± 0.0000 | 0.0917 ± 0.0192 | 0.0166 ± 0.0035 | 0.0020 ± 0.0004 | |
+
+Beside it, the nets and buses at the bench's constants: 0.004–0.007 W, of which TenC's 0.000–0.000 W. The TIMA controls' clocked bits a second 5.701e+13; their clock edges a second +0. Every candidate without TenC at A: 1.096 ± 0.545 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.205 ± 0.102 W; TenTMP's zero mask 0.087 ± 0.043 W; with the TIMA controls 1.270 ± 0.631 W, 0.83 ± 0.49 of N. Of TenTMP's, its latch bits 0.087 ± 0.043 W and its control 0.118 ± 0.059 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.183 ± 0.588 W, 0.77 ± 0.46 of N.
+
+### E109, aifoundry3 card 0 (three passes, post hoc)
+
+N = 1.735 ± 0.164 W. Price A (the card's, int8's enabled bits on zeros): 17.92 ± 3.38 fJ (fp32's the same way: 3.08 ± 0.36 fJ); price B (per clock edge): 0.486 ± 0.092 fJ; price C (fp32's no-issue floor, a ceiling): 0.552 ± 0.131 fJ. Issuing adds 7,296 TIMA-control bits an op of the 12,144 enabled bits it adds.
+
+Price A as one price for every bit: int8's no-issue loop's enabled bits alone would cost 13.22 ± 2.49 W against its measured S of 2.111 ± 0.083 W; it can hold for at most 0.160 ± 0.031 of them. At A, fp32's own TenB bits would cost 0.495 ± 0.094 W, and its TenB and TenA bits 0.826 ± 0.156 W, against fp32's whole no-issue S of 0.376 ± 0.089 W.
+
+fp32's own no-issue level as a bound at one price per event, on the events fp32 does too (the most one could cost; what int8's extra events a second would then buy):
+
+- a TenA bit|at most, fJ each: 20.383 ± 4.823
+- a TenA bit|int8's extra at most, W: 0.107 ± 0.026
+- a TenA write|at most, fJ each: 1304.511 ± 308.662
+- a TenA write|int8's extra at most, W: 0.107 ± 0.026
+- a TenB latch or data-latch bit|at most, fJ each: 13.589 ± 3.215
+- a TenB latch or data-latch bit|int8's extra at most, W: 0.267 ± 0.064
+- a TenB write|at most, fJ each: 1304.511 ± 308.662
+- a TenB write|int8's extra at most, W: 0.267 ± 0.064
+- a TenC read at one address (the card's order)|at most, fJ each: 38.350 ± 9.074
+- a scratchpad bit requested|at most, fJ each: 20.383 ± 4.823
+- a scratchpad bit requested|int8's extra at most, W: 0.267 ± 0.064
+- a scratchpad read|at most, fJ each: 1159.565 ± 274.366
+- a scratchpad read|int8's extra at most, W: 0.124 ± 0.030
+- every event fp32 does too, together|int8's extra at most, W: 0.267 ± 0.064
+
+**N, from reset** (`m0.int8.zeros` − `m0.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.352 ± 0.066 | 5.621 ± 1.060 | 1.144 ± 0.216 | 0.377 ± 0.071 | 7.494 ± 1.413 |
+| A, share of N | 0.20 ± 0.05 | 3.24 ± 0.74 | 0.66 ± 0.15 | 0.22 ± 0.05 | 4.33 ± 0.98 |
+| B (per edge) | | | 0.0000 ± 0.0001 | | |
+| C (fp32's floor, at most) | 0.0109 ± 0.0026 | 0.1731 ± 0.0410 | 0.0352 ± 0.0084 | 0.0116 ± 0.0028 | |
+
+Beside it, the nets and buses at the bench's constants: 0.035–0.070 W, of which TenC's 0.028–0.055 W. The TIMA controls' clocked bits a second 6.387e+13; their clock edges a second +8.14e+10. Every candidate without TenC at A: 1.873 ± 0.353 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.283 ± 0.053 W; TenTMP's zero mask 0.141 ± 0.027 W; with the TIMA controls 1.568 ± 0.296 W, 0.91 ± 0.21 of N. Of TenTMP's, its latch bits 0.141 ± 0.027 W and its control 0.142 ± 0.027 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.427 ± 0.269 W, 0.82 ± 0.19 of N.
+
+**N, fp32 after an int8 run (the card's order)** (`m0.int8.zeros` − `pre.m0.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.352 ± 0.066 | 0.005 ± 0.007 | 1.144 ± 0.216 | 0.377 ± 0.071 | 1.878 ± 0.352 |
+| A, share of N | 0.20 ± 0.05 | 0.00 ± 0.00 | 0.66 ± 0.15 | 0.22 ± 0.05 | 1.08 ± 0.25 |
+| B (per edge) | | | 0.0000 ± 0.0001 | | |
+| C (fp32's floor, at most) | 0.0109 ± 0.0026 | 0.0001 ± 0.0003 | 0.0352 ± 0.0084 | 0.0116 ± 0.0028 | |
+
+Beside it, the nets and buses at the bench's constants: 0.035–0.070 W, of which TenC's 0.028–0.055 W. The TIMA controls' clocked bits a second 6.387e+13; their clock edges a second +8.14e+10. Every candidate without TenC at A: 1.873 ± 0.353 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.283 ± 0.053 W; TenTMP's zero mask 0.141 ± 0.027 W; with the TIMA controls 1.568 ± 0.296 W, 0.91 ± 0.21 of N. Of TenTMP's, its latch bits 0.141 ± 0.027 W and its control 0.142 ± 0.027 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.427 ± 0.269 W, 0.82 ± 0.19 of N.
+
+**desk-only arm: one A row, fp32 after an int8 run** (`m0r1.int8.zeros` − `pre.m0r1.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.000 ± 0.000 | 0.000 ± 0.000 | 1.022 ± 0.192 | 0.123 ± 0.023 | 1.145 ± 0.216 |
+| A, share of N | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.59 ± 0.13 | 0.07 ± 0.02 | 0.66 ± 0.15 |
+| B (per edge) | | | 0.0000 ± 0.0000 | | |
+| C (fp32's floor, at most) | 0.0000 ± 0.0000 | 0.0000 ± 0.0000 | 0.0315 ± 0.0074 | 0.0038 ± 0.0009 | |
+
+Beside it, the nets and buses at the bench's constants: 0.004–0.007 W, of which TenC's 0.000–0.000 W. The TIMA controls' clocked bits a second 5.702e+13; their clock edges a second +0. Every candidate without TenC at A: 1.145 ± 0.216 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.214 ± 0.040 W; TenTMP's zero mask 0.091 ± 0.017 W; with the TIMA controls 1.326 ± 0.250 W, 0.77 ± 0.17 of N. Of TenTMP's, its latch bits 0.091 ± 0.017 W and its control 0.123 ± 0.023 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.235 ± 0.233 W, 0.71 ± 0.16 of N.
+
+**desk-only arm: one A row, from reset** (`m0r1.int8.zeros` − `m0r1.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.000 ± 0.000 | 5.639 ± 1.062 | 1.022 ± 0.192 | 0.123 ± 0.023 | 6.783 ± 1.278 |
+| A, share of N | 0.00 ± 0.00 | 3.25 ± 0.74 | 0.59 ± 0.13 | 0.07 ± 0.02 | 3.91 ± 0.89 |
+| B (per edge) | | | 0.0000 ± 0.0000 | | |
+| C (fp32's floor, at most) | 0.0000 ± 0.0000 | 0.1736 ± 0.0411 | 0.0315 ± 0.0074 | 0.0038 ± 0.0009 | |
+
+Beside it, the nets and buses at the bench's constants: 0.004–0.007 W, of which TenC's 0.000–0.000 W. The TIMA controls' clocked bits a second 5.702e+13; their clock edges a second +0. Every candidate without TenC at A: 1.145 ± 0.216 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.214 ± 0.040 W; TenTMP's zero mask 0.091 ± 0.017 W; with the TIMA controls 1.326 ± 0.250 W, 0.77 ± 0.17 of N. Of TenTMP's, its latch bits 0.091 ± 0.017 W and its control 0.123 ± 0.023 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.235 ± 0.233 W, 0.71 ± 0.16 of N.
+
+### E109, aifoundry3 card 0 (two kept passes)
+
+N = 1.708 ± 0.588 W. Price A (the card's, int8's enabled bits on zeros): 17.47 ± 14.26 fJ (fp32's the same way: 3.04 ± 1.58 fJ); price B (per clock edge): 0.474 ± 0.387 fJ; price C (fp32's no-issue floor, a ceiling): 0.566 ± 0.584 fJ. Issuing adds 7,296 TIMA-control bits an op of the 12,144 enabled bits it adds.
+
+Price A as one price for every bit: int8's no-issue loop's enabled bits alone would cost 12.90 ± 10.53 W against its measured S of 2.093 ± 0.190 W; it can hold for at most 0.163 ± 0.148 of them. At A, fp32's own TenB bits would cost 0.483 ± 0.393 W, and its TenB and TenA bits 0.805 ± 0.656 W, against fp32's whole no-issue S of 0.386 ± 0.397 W.
+
+fp32's own no-issue level as a bound at one price per event, on the events fp32 does too (the most one could cost; what int8's extra events a second would then buy):
+
+- a TenA bit|at most, fJ each: 20.926 ± 21.578
+- a TenA bit|int8's extra at most, W: 0.110 ± 0.114
+- a TenA write|at most, fJ each: 1339.261 ± 1381.014
+- a TenA write|int8's extra at most, W: 0.110 ± 0.114
+- a TenB latch or data-latch bit|at most, fJ each: 13.951 ± 14.386
+- a TenB latch or data-latch bit|int8's extra at most, W: 0.275 ± 0.284
+- a TenB write|at most, fJ each: 1339.261 ± 1381.014
+- a TenB write|int8's extra at most, W: 0.275 ± 0.284
+- a TenC read at one address (the card's order)|at most, fJ each: 39.372 ± 40.599
+- a scratchpad bit requested|at most, fJ each: 20.926 ± 21.578
+- a scratchpad bit requested|int8's extra at most, W: 0.275 ± 0.284
+- a scratchpad read|at most, fJ each: 1190.455 ± 1227.568
+- a scratchpad read|int8's extra at most, W: 0.128 ± 0.133
+- every event fp32 does too, together|int8's extra at most, W: 0.275 ± 0.284
+
+**N, from reset** (`m0.int8.zeros` − `m0.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.344 ± 0.282 | 5.481 ± 4.476 | 1.116 ± 0.912 | 0.367 ± 0.301 | 7.309 ± 5.970 |
+| A, share of N | 0.20 ± 0.23 | 3.22 ± 3.73 | 0.66 ± 0.76 | 0.22 ± 0.25 | 4.29 ± 4.97 |
+| B (per edge) | | | 0.0001 ± 0.0001 | | |
+| C (fp32's floor, at most) | 0.0111 ± 0.0115 | 0.1777 ± 0.1833 | 0.0362 ± 0.0374 | 0.0119 ± 0.0123 | |
+
+Beside it, the nets and buses at the bench's constants: 0.035–0.070 W, of which TenC's 0.028–0.055 W. The TIMA controls' clocked bits a second 6.388e+13; their clock edges a second +1.11e+11. Every candidate without TenC at A: 1.827 ± 1.494 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.276 ± 0.225 W; TenTMP's zero mask 0.138 ± 0.113 W; with the TIMA controls 1.530 ± 1.250 W, 0.90 ± 1.04 of N. Of TenTMP's, its latch bits 0.138 ± 0.113 W and its control 0.138 ± 0.113 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.392 ± 1.137 W, 0.82 ± 0.95 of N.
+
+**N, fp32 after an int8 run (the card's order)** (`m0.int8.zeros` − `pre.m0.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.344 ± 0.282 | 0.006 ± 0.015 | 1.116 ± 0.912 | 0.367 ± 0.301 | 1.833 ± 1.509 |
+| A, share of N | 0.20 ± 0.23 | 0.00 ± 0.01 | 0.66 ± 0.76 | 0.22 ± 0.25 | 1.08 ± 1.25 |
+| B (per edge) | | | 0.0001 ± 0.0001 | | |
+| C (fp32's floor, at most) | 0.0111 ± 0.0115 | 0.0002 ± 0.0005 | 0.0362 ± 0.0374 | 0.0119 ± 0.0123 | |
+
+Beside it, the nets and buses at the bench's constants: 0.035–0.070 W, of which TenC's 0.028–0.055 W. The TIMA controls' clocked bits a second 6.388e+13; their clock edges a second +1.11e+11. Every candidate without TenC at A: 1.827 ± 1.494 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.276 ± 0.225 W; TenTMP's zero mask 0.138 ± 0.113 W; with the TIMA controls 1.530 ± 1.250 W, 0.90 ± 1.04 of N. Of TenTMP's, its latch bits 0.138 ± 0.113 W and its control 0.138 ± 0.113 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.392 ± 1.137 W, 0.82 ± 0.95 of N.
+
+**desk-only arm: one A row, fp32 after an int8 run** (`m0r1.int8.zeros` − `pre.m0r1.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.996 ± 0.812 | 0.120 ± 0.098 | 1.116 ± 0.910 |
+| A, share of N | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.58 ± 0.68 | 0.07 ± 0.08 | 0.66 ± 0.76 |
+| B (per edge) | | | 0.0000 ± 0.0000 | | |
+| C (fp32's floor, at most) | 0.0000 ± 0.0000 | 0.0000 ± 0.0000 | 0.0323 ± 0.0333 | 0.0039 ± 0.0040 | |
+
+Beside it, the nets and buses at the bench's constants: 0.004–0.007 W, of which TenC's 0.000–0.000 W. The TIMA controls' clocked bits a second 5.702e+13; their clock edges a second +0. Every candidate without TenC at A: 1.116 ± 0.910 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.208 ± 0.170 W; TenTMP's zero mask 0.088 ± 0.072 W; with the TIMA controls 1.293 ± 1.054 W, 0.76 ± 0.88 of N. Of TenTMP's, its latch bits 0.088 ± 0.072 W and its control 0.120 ± 0.098 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.205 ± 0.982 W, 0.71 ± 0.82 of N.
+
+**desk-only arm: one A row, from reset** (`m0r1.int8.zeros` − `m0r1.fp32.zeros`), W, clocked terms only:
+
+| price | TenB arrays | TenC read port | TIMA controls | scratchpad, TenA, TenTMP | sum |
+|---|---:|---:|---:|---:|---:|
+| A (the card's) | 0.000 ± 0.000 | 5.499 ± 4.481 | 0.996 ± 0.812 | 0.120 ± 0.098 | 6.615 ± 5.391 |
+| A, share of N | 0.00 ± 0.00 | 3.23 ± 3.73 | 0.58 ± 0.68 | 0.07 ± 0.08 | 3.88 ± 4.49 |
+| B (per edge) | | | 0.0000 ± 0.0000 | | |
+| C (fp32's floor, at most) | 0.0000 ± 0.0000 | 0.1783 ± 0.1836 | 0.0323 ± 0.0333 | 0.0039 ± 0.0040 | |
+
+Beside it, the nets and buses at the bench's constants: 0.004–0.007 W, of which TenC's 0.000–0.000 W. The TIMA controls' clocked bits a second 5.702e+13; their clock edges a second +0. Every candidate without TenC at A: 1.116 ± 0.910 W.
+
+What int8 alone clocks, at A: TenTMP's bits and control 0.208 ± 0.170 W; TenTMP's zero mask 0.088 ± 0.072 W; with the TIMA controls 1.293 ± 1.054 W, 0.76 ± 0.88 of N. Of TenTMP's, its latch bits 0.088 ± 0.072 W and its control 0.120 ± 0.098 W. The int8-only registers alone (the TIMA controls, TenTMP's control, its zero mask): 1.205 ± 0.982 W, 0.71 ± 0.82 of N.
+
+## F8: break-even prices with N's spread (per pass N over that pass's events)
+
+| event | E124, aifoundry1 card 1 (registered, four passes) | E109, aifoundry3 card 0 (three passes, post hoc) | E109, aifoundry3 card 0 (two kept passes) |
+|---|---:|---:|---:|
+| a TenC read, from reset | 159.8 ± 21.3 fJ | 177.0 ± 16.8 fJ | 174.2 ± 60.0 fJ |
+| a TenC read at a new address (the card's order) | 198.7 ± 26.4 fJ | 220.0 ± 20.9 fJ | 216.6 ± 74.6 fJ |
+| a TIMA control bit clocked | 24.5 ± 3.3 fJ | 27.2 ± 2.6 fJ | 26.7 ± 9.2 fJ |
+| a TenB write (one 32-bit entry) | 7650.5 ± 1017.8 fJ | 8468.1 ± 817.0 fJ | 8331.2 ± 2893.0 fJ |
+| a scratchpad read (any size) | 14618.3 ± 1943.8 fJ | 16171.9 ± 1590.6 fJ | 15902.5 ± 5570.3 fJ |
+| a scratchpad bit requested | 119.5 ± 15.9 fJ | 132.3 ± 12.8 fJ | 130.2 ± 45.2 fJ |
+| a 64-bit A read into TenTMP (int8 only) | 12715.8 ± 1692.5 fJ | 14081.5 ± 1335.6 fJ | 13859.6 ± 4776.1 fJ |
+| a working cycle of one minion's FSM in int8 | 2625.2 ± 349.4 fJ | 2907.2 ± 275.7 fJ | 2861.3 ± 986.0 fJ |
+
+- E124, aifoundry1 card 1 (registered, four passes): the bench's price for TenC's 32 output-register bits 33.1–66.5 fJ (card 1's scale)
+- E109, aifoundry3 card 0 (three passes, post hoc): the bench's price for TenC's 32 output-register bits 34.1–68.3 fJ
+- E109, aifoundry3 card 0 (two kept passes): the bench's price for TenC's 32 output-register bits 34.1–68.3 fJ
+
+- E124, aifoundry1 card 1 (registered, four passes), a TenC read, from reset: 2.40–4.82 times the bench's price at N's mean; 2.08–5.47 with N's 95% interval
+- E124, aifoundry1 card 1 (registered, four passes), a TenC read at a new address (the card's order): 2.99–6.00 times the bench's price at N's mean; 2.59–6.80 with N's 95% interval
+- E109, aifoundry3 card 0 (three passes, post hoc), a TenC read, from reset: 2.59–5.19 times the bench's price at N's mean; 2.35–5.68 with N's 95% interval
+- E109, aifoundry3 card 0 (three passes, post hoc), a TenC read at a new address (the card's order): 3.22–6.45 times the bench's price at N's mean; 2.92–7.06 with N's 95% interval
+- E109, aifoundry3 card 0 (two kept passes), a TenC read, from reset: 2.55–5.11 times the bench's price at N's mean; 1.67–6.87 with N's 95% interval
+- E109, aifoundry3 card 0 (two kept passes), a TenC read at a new address (the card's order): 3.17–6.35 times the bench's price at N's mean; 2.08–8.54 with N's 95% interval
+- across card 1 and aifoundry3 (three passes): 2.4–6.4 times at N's means, 2.1–7.1 with N's spread
+
+## F6: int8's register bits clocked a second, beyond fp32's, by kind of register (m0.int8.zeros − m0.fp32.zeros, mean rates)
+
+### E124, aifoundry1 card 1 (registered, four passes)
+
+- TIMA group (TIMA_CTRL and TIMA_PIPE): +6.385e+13
+- int8 only, in TENTMP_CTRL (priced in the scratchpad row): +7.9e+12
+- int8 only, outside every candidate group: +7.885e+12
+- fp32 only: -2.49e+13
+- clocked in both formats, outside the TIMA group: +2.113e+12
+- registers outside the macros' lines (not by line): +3.166e+10
+- total: every register bit clocked: +5.688e+13
+- check: the parts sum to the total: +0.04688
+- int8 only, outside every candidate group, priced at the bench's constants: 0.008–0.016 W
+- largest lines, int8 only, outside every candidate group: `shire/minion/vpu/vpu_ctrl.v:738` (64 bits) +7.88e+12
+- largest lines, fp32 only: `shire/minion/vpu/vpu_tensorfma.v:628` (32 bits) -1.94e+13; `shire/minion/vpu/vpu_tensorfma.v:132` (7 bits) -4.24e+12; `shire/minion/vpu/vpu_tensorfma.v:622` (1 bits) -6.08e+11; `shire/minion/vpu/vpu_tensorfma.v:624` (1 bits) -6.08e+11
+
+### E109, aifoundry3 card 0 (three passes, post hoc)
+
+- TIMA group (TIMA_CTRL and TIMA_PIPE): +6.387e+13
+- int8 only, in TENTMP_CTRL (priced in the scratchpad row): +7.901e+12
+- int8 only, outside every candidate group: +7.886e+12
+- fp32 only: -2.49e+13
+- clocked in both formats, outside the TIMA group: +2.312e+12
+- registers outside the macros' lines (not by line): +5.544e+10
+- total: every register bit clocked: +5.713e+13
+- check: the parts sum to the total: +0.007812
+- int8 only, outside every candidate group, priced at the bench's constants: 0.008–0.017 W
+- largest lines, int8 only, outside every candidate group: `shire/minion/vpu/vpu_ctrl.v:738` (64 bits) +7.89e+12
+- largest lines, fp32 only: `shire/minion/vpu/vpu_tensorfma.v:628` (32 bits) -1.94e+13; `shire/minion/vpu/vpu_tensorfma.v:132` (7 bits) -4.24e+12; `shire/minion/vpu/vpu_tensorfma.v:622` (1 bits) -6.07e+11; `shire/minion/vpu/vpu_tensorfma.v:624` (1 bits) -6.07e+11
+
+### E109, aifoundry3 card 0 (two kept passes)
+
+- TIMA group (TIMA_CTRL and TIMA_PIPE): +6.388e+13
+- int8 only, in TENTMP_CTRL (priced in the scratchpad row): +7.901e+12
+- int8 only, outside every candidate group: +7.886e+12
+- fp32 only: -2.489e+13
+- clocked in both formats, outside the TIMA group: +2.48e+12
+- registers outside the macros' lines (not by line): +7.544e+10
+- total: every register bit clocked: +5.733e+13
+- check: the parts sum to the total: +0.01562
+- int8 only, outside every candidate group, priced at the bench's constants: 0.008–0.017 W
+- largest lines, int8 only, outside every candidate group: `shire/minion/vpu/vpu_ctrl.v:738` (64 bits) +7.89e+12
+- largest lines, fp32 only: `shire/minion/vpu/vpu_tensorfma.v:628` (32 bits) -1.94e+13; `shire/minion/vpu/vpu_tensorfma.v:132` (7 bits) -4.24e+12; `shire/minion/vpu/vpu_tensorfma.v:622` (1 bits) -6.07e+11; `shire/minion/vpu/vpu_tensorfma.v:624` (1 bits) -6.07e+11
+
+## F4: the per-row work one A row removes (per op on one minion)
+
+| | `m0.int8.zeros` | `m0r1.int8.zeros` | `m0.fp32.zeros` | `m0r1.fp32.zeros` | `pre.m0r1.fp32.zeros` |
+|---|---:|---:|---:|---:|---:|
+| period | 318.00 | 62.00 | 544.00 | 62.00 | 62.00 |
+| cycles | 318.25 | 62.25 | 544.25 | 62.25 | 62.25 |
+| rd32 | 128.00 | 0.00 | 256.00 | 16.00 | 16.00 |
+| rd64 | 64.00 | 8.00 | 0.00 | 0.00 | 0.00 |
+| rd256 | 32.00 | 32.00 | 32.00 | 32.00 | 32.00 |
+| A reads (32- and 64-bit) | 192.00 | 8.00 | 256.00 | 16.00 | 16.00 |
+| TenA writes | 192.00 | 8.00 | 256.00 | 16.00 | 16.00 |
+| TenTMP writes | 64.00 | 8.00 | 0.00 | 0.00 | 0.00 |
+| TenTMP zero mask bits clocked (vpu_ctrl.v:738) | 4,096.00 | 512.00 | 0.00 | 0.00 | 0.00 |
+| TenC reads | 5,092.00 | 996.00 | 0.00 | 0.00 | 996.00 |
+| TenC reads at a new address | 4,096.00 | 0.00 | 0.00 | 0.00 | 0.00 |
+| TIMA control bits clocked | 33,167.00 | 5,775.00 | 0.00 | 0.00 | 0.00 |
+
+## F7: TenC's read enable in an op with first_pass set (per op on one minion)
+
+| | `f1.m0k1.int8.zeros` | `m0k1.int8.zeros` | `f1.m0.int8.zeros` | `m0.int8.zeros` | `pre.m0.fp32.zeros` |
+|---|---:|---:|---:|---:|---:|
+| cycles | 34.25 | 34.25 | 318.25 | 318.25 | 544.25 |
+| f2_tima_ren3 high (cycles) | 14.25 | 34.25 | 298.25 | 318.25 | 544.25 |
+| tima_clk_en high (cycles) | 26.00 | 26.00 | 310.00 | 310.00 | 0.00 |
+| micro-ops | 16.00 | 0.00 | 16.00 | 0.00 | 0.00 |
+| TenC reads | 228.00 | 548.00 | 4,772.00 | 5,092.00 | 8,708.00 |
+

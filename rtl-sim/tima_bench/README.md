@@ -23,6 +23,12 @@ registers are the TIMA controls. This one counts all three. Results and reasonin
 | `run_streams.py` | every stream of E109's and E124's design at the card's cycles per op; E109's desk streams at the FSM's own pace, compared field by field with E109's committed counts; the fp32 streams after an int8 run; and desk-only arms |
 | `price.py` | makes the counts per second at each card's measured op rates, and prices the candidates at the bench's constants (M2, M4, I3) |
 
+*Added after verification, Mon 2 Nov 2026:* the bench's constants are not the only price of a register bit. The data directory's
+[`corrections-check.py`](../../docs/reports/data/2026-11-02-q136c-tima-bench/corrections-check.py) imports `price.py`'s functions and
+also prices the candidates at three prices read from the cards' own watts: int8's issue price on zeros, the same per clock edge, and
+fp32's no-issue floor. It finds the TIMA controls unbounded: about two thirds of the excess at the first, about none per edge (the data
+README's result 5b).
+
 ## Build and run
 
 ```
