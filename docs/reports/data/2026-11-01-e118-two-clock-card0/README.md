@@ -6,7 +6,16 @@ record, its live gates filled and committed as the GO (`f37fa285`, **14:51:51 PS
 at 14:52:00.933, is [`CHANGE-RECORD.md`](CHANGE-RECORD.md) (also in the tools directory). Card claimed in
 `#community-lab` at **14:50:28 PST** (message `1566585247326535741`). Request Q133; it answers
 [the kinds page's section 11](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open),
-**item 15**, "E72 on a second card, which needs a governor move", under the owner's governor OK of 1 Nov.
+**item 15**'s last sentence, "E72 on a second card, which needs a governor move" (the rest of item 15 is other work,
+F3), under the owner's governor OK of 1 Nov.
+
+*Corrected after verification the same afternoon (Sun 1 Nov 2026, about 16:15 PST), at the desk: no card touched,
+nothing set, nothing re-run. Wrong sentences are replaced in place below, each marked;
+[Corrections after verification](#corrections-after-verification-sun-1-nov-2026) lists F1–F5, and
+[`posthoc_g3_ring.txt`](posthoc_g3_ring.txt) prints F1's numbers from the committed ring dumps. No price, interval or
+verdict changed. The major ones: G3's log half counted one `Power throttle up` after the restore where the ring holds
+two (G3 still passes: ≥ 1 was registered), and rule 8 is PASS only for the version-matched source, UNKNOWN for the
+exact running build.*
 
 ## Results first
 
@@ -14,8 +23,11 @@ at 14:52:00.933, is [`CHANGE-RECORD.md`](CHANGE-RECORD.md) (also in the tools di
 pinned passes and the probe sat at **600 MHz**; the 105 measured runs averaged **0.5183 V**; every one was kept. After TDP 65 was
 written back, the return burst stepped **600 → 700 → 800 MHz** in one launch (117 / 2 / 97 samples) with no reset,
 and the closing read at 15:17:33.8 equals the originals in every field (TDP 65 W, threshold 65 °C, `low_power`).
-The SP trace ring adds the evidence E72 could not: **no governor event at all** while TDP 0 was set, and exactly one
-`Power throttle up event, current pwr 23370  tdp level: 65000` after the restore.
+The SP trace ring adds the evidence E72 could not: **no governor event at all** while TDP 0 was set, and after the
+restore **two** `Power throttle up` events, 0.21 s apart (`current pwr 23370`, then `25130` mW, against `tdp level:
+65000`), each followed by its operating point, 700 then 800 MHz, and 600 MHz again at idle 10.16 s after the first:
+the two-step ramp that all six complete ramps in the ring from before the pin show. *(Replaced after verification, F1:
+the first version said exactly one.)*
 
 **The price of a flipped mantissa bit follows the voltage on this card too** (`lq` h2 → h8 secant, board, per designed
 flipped B mantissa bit, E60's estimator; [`verdicts.json`](verdicts.json)):
@@ -60,7 +72,7 @@ reads low (per-pass secants 74.97, 77.33, 80.47, **52.53**, 71.99 fJ).
 | **C1** | the same-session 800 MHz control against E60's rows: `lq_h2`, `lq_h8` | 1.912 / 5.672 W, ±10 % | **0.810 ± 0.892 / 5.175 ± 0.547 W** | **FAIL**: `lq_h2` out (below), `lq_h8` in band (−8.8 %) |
 | **G1** | the pin: every pinned sample at 600 MHz, and no `Power throttle up` while TDP 0 was set | 100 % and zero | **11,182 + 221 of 11,182 + 221; zero governor entries in the ring (dumps overlap)** | **PASS**, both halves |
 | **G2** | pinned voltage | 0.519 [0.516, 0.522] V | **0.5183 V** | **PASS** |
-| **G3** | restore read back; burst ≥ 700 MHz; ≥ 1 `Power throttle up` | all three | **65 W / 65 °C; 600 → 700 → 800 MHz; one event** | **PASS**, all three halves |
+| **G3** | restore read back; burst ≥ 700 MHz; ≥ 1 `Power throttle up` | all three | **65 W / 65 °C; 600 → 700 → 800 MHz; two events** (F1: first counted as one) | **PASS**, all three halves |
 
 **Nine of the eleven registered rules pass; V3 and C1 fail as registered.** V1s (V1 against today's control instead
 of E60's rows) was registered as reported only: 0.601, from a control secant of 118.9 ± 39.2 fJ on two passes, so it
@@ -136,7 +148,10 @@ read 15:17:33.8. **26.9 card-minutes** of the 45 allowed; the card was claimed 1
   800 MHz in every kept window after the restore.
 - **R3 — rule 8's build-identity residual**, as in E69 and E72: the card exposes no BL2 hash, so the source read
   establishes the behaviour of the version-matched source (et-platform `836a4ab`, BL2 0.22.0), on the footing E72
-  accepted (CHANGE-RECORD, Rule 8).
+  accepted (CHANGE-RECORD, Rule 8). **So rule 8 reads PASS for the version-matched source and UNKNOWN for the exact
+  running build:** the raw-temperature patch's second version, the boot-counter fix beneath it and the card's binary
+  are unread, and neither commit is in the lab's copy of et-platform. *(Corrected after verification, F2: the change
+  record labelled rule 8 PASS.)*
 - **R4 — no independent reviewer saw the run, and no independent hardware recovery path exists for this fleet.** Both
   are why E118 wrote one volatile field, only downwards, armed a watchdog first and sent no clock, PMIC, reset or
   driver command.
@@ -148,15 +163,25 @@ read 15:17:33.8. **26.9 card-minutes** of the 45 allowed; the card was claimed 1
 
 - **The V² reading of a flipped bit's price is now a two-card, same-card-at-two-clocks result.** E72 alone excluded
   the clock-scaling alternative; E118 repeats it on a card with a different PMIC family and a 15 % lower 800 MHz
-  price, with the matched form of the test passing at both registered slopes. For the blog: on two cards, a flipped
+  price, with the matched form of the test passing at both registered slopes. On this card the two clocks are twelve
+  days apart: the 800 MHz side is E60's session of 20 Oct (card 0's firmware that day is not on record), and today's
+  same-session control was too noisy to confirm it (C1 FAIL, R2). *(Added after verification, F4.)* For the blog: on two cards, a flipped
   operand bit costs 0.65–0.70 of its 800 MHz energy at 600 MHz (the registered rows), where V² predicts 0.70–0.74 and "energy scales with
   the clock" predicts 0.53–0.55.
 - **A third card at 600 MHz** for the full ladders: a flipped mantissa bit costs **107 fJ at the board on this card**,
   against 113 and 117 fJ on the other two; the busy partner's ladder 120 fJ against 125 and 130.
 - **The governor method is proven on a third card and a second PMIC family**, with G1's and G3's log halves measured
-  for the first time: TDP 0 produced no governor event at all, and the restore produced exactly one throttle-up.
-- **For the kinds page's section 11 item 15 and the Horace hub's older item 5:** answered (E118); what stays open is
-  the board exponent's exact value (2 is inside on both cards; the rail disagrees between them).
+  for the first time: TDP 0 produced no governor event at all, and the restore released the pin in two throttle-ups,
+  one per step of the frequency table (600 → 700 → 800 MHz). *(Replaced after verification, F1: the first version said
+  exactly one.)*
+- **For the kinds page's section 11 item 15:** E118 answers its last sentence, "E72 on a second card, which needs a
+  governor move" (the Horace hub's older item 5, "a second card at 600 MHz", asked the same). The rest of item 15 (the
+  single-bit prices' other positions and base words, A's low bits, the sign on the rail, and why a live zero on A and a
+  half-gated int8 tile cost more than priced) is other work and stays open. What stays open from E118 itself is the
+  exponent's exact value: n = 2 is inside every E118 board row but 3.2 SE below this card's rail reading (2.50 ± 0.16),
+  while on E72's card 2 is inside only the registered board row (outside every matched one) and the rail reads
+  1.60–1.72. *(Replaced after verification, F3: the first version called item 15 answered and said 2 is inside on both
+  cards.)*
 
 ## The claim
 
@@ -164,9 +189,59 @@ One post in `#community-lab`, message `1566585247326535741`, sent 14:50:28.709 P
 aifoundry1 card 0 for 1 h, until ~15:50 PST [doc](…)". Edited at **15:21:22 PST** to append " — released"; read back
 as "… until ~15:50 PST doc — released (edited)".
 
+## Corrections after verification (Sun 1 Nov 2026)
+
+The workflow's independent verifier returned "holds with fixes". It found the governor move safe and honestly recorded,
+and named two major and three minor faults, all in the write-up. It reproduced `verdicts.json` from the committed data,
+and one read-only read of its own at 15:48:23 PST found card 0 at its originals (TDP 65 W, 65 °C, `low_power`,
+600 MHz; [`session/verify-read-154823.out`](session/verify-read-154823.out)). Corrected at the desk the same
+afternoon: no card touched, nothing set, nothing re-run. **Not changed:** every price, interval and verdict;
+`results600.json`, `resultsC.json`, the runs CSVs, the matched reductions and `posthoc_exponents.json`; the frozen
+registration (`tools/claims-v3/e118/README.md`, `predictions.json`, the scripts).
+
+- **F1 (major): two throttle-ups after the restore, not one.** Between the dump after the pinned passes and the dump
+  after the return burst the ring holds **eight** new entries (covered): two `Power throttle up` lines, 0.206 s apart
+  (`current pwr 23370` and `25130`, `tdp level: 65000`); after each a binary power-status record and its operating
+  point (700, then 800 MHz); and, 10.16 s after the first, a record and the operating point 600 MHz at idle. That is
+  what 600 → 700 → 800 MHz needs at `836a4ab`, one throttle-up per step of the frequency table, and all six complete
+  ramps in the dump from before the pin have the same two-step form. The return burst's 10 Hz telemetry agrees: 700 MHz
+  first 0.88 s into the burst, 800 MHz 0.20 s later (SP: 0.19 s), 600 MHz again 9.71 s after that (SP: 9.89 s). The
+  first count came from `score_e118.py`'s reader, `tools/claims-v3/dv2/sptrace_events.py`. Its walk from the header
+  stops at the first entry that is not a printable string: here the 16-byte record written 79 ms after the first
+  throttle-up. The lab already has the fix, `tools/claims-v3/hpl/sptrace_full.py` (E64 amendment A1, whose docstring
+  names this defect), and [`posthoc_g3_ring.py`](posthoc_g3_ring.py) re-reads the three dumps with it. With `--apply`
+  it writes the re-read ring blocks into `verdicts.json` and keeps the scorer's reading under `as_scored`, with a dated
+  `corrections` entry. **G3 stays PASS** (≥ 1 was registered). **G1 is unaffected**: the dumps before the pin and after
+  the pinned passes are byte-identical (`4df35ccf…`), so no reader finds an entry between them. The shared decoder is
+  not edited here: the dv2, dv2v, hp and hpl tools import it (`hp/` and `hp/a2/` keep their own copies), and their
+  committed outputs were made with it. Any count of ring events after an operating-point change made with it should be
+  re-read with `sptrace_full.py`.
+- **F2 (major): rule 8 is PASS only for the version-matched source.** At `836a4ab` the set is one assignment to a
+  `volatile` `.data` field, with no flash or PMIC write on its path: PASS. For the exact build card 0 runs it is
+  UNKNOWN: the raw-temperature patch's second version, the boot-counter fix beneath it and the binary are unread.
+  Missing evidence is UNKNOWN, never PASS, by the change record's own rule. The GO was taken with that part unknown, on
+  the footing the verified governor-preparation plan and E72 accepted; the card ended where it began (65 → 0 → 65 W).
+  R3 above and the change record's dated correction now say so.
+- **F3 (minor): item 15 is a bundle.** E118 answers only its last sentence, "E72 on a second card". The board exponent
+  stays open, and the two cards' rails disagree. "2 is inside on both cards" is replaced too: on E72's card, 2 is
+  outside every matched board row (E72's README).
+- **F4 (minor): the 800 MHz side is twelve days older.** The 0.70 ratio sets today's 600 MHz price against E60's
+  800 MHz price of 20 Oct. Today's control could not confirm that price (C1 FAIL, R2). "What it changes" now says so.
+- **F5 (minor): the change record's missing fields.** The template asks for several fields the record left out:
+  - the GO's exact time;
+  - the handoff's signoff, in UTC and local time;
+  - the card's asset, serial and board revision, now marked UNKNOWN;
+  - the other lab user's idle login;
+  - who read the maintainer's posts in full.
+
+  They are added as a dated addendum in [`CHANGE-RECORD.md`](CHANGE-RECORD.md), in both copies.
+
 ## Files
 
-[`verdicts.json`](verdicts.json) (every registered rule, scored by `score_e118.py`), `results600.json` /
+[`verdicts.json`](verdicts.json) (every registered rule, scored by `score_e118.py`; after verification its two ring
+blocks were re-read by `posthoc_g3_ring.py --apply`, with the scorer's reading kept under `as_scored`, F1),
+[`posthoc_g3_ring.py`](posthoc_g3_ring.py) / `posthoc_g3_ring.json` / [`posthoc_g3_ring.txt`](posthoc_g3_ring.txt)
+(F1's re-read), `results600.json` /
 `runs600.csv` (the 600 MHz passes through `reduce_e118.py --pinned`, registered leak auto), `resultsC.json` /
 `runsC.csv` (the control, `--free`), `m600-k*.json`, `matched600-k*.json` and their CSVs (V1m's matched reductions),
 [`posthoc_exponents.py`](posthoc_exponents.py) / `posthoc_exponents.json`, [`CHANGE-RECORD.md`](CHANGE-RECORD.md),
@@ -174,7 +249,7 @@ as "… until ~15:50 PST doc — released (edited)".
 hashes, the host manifest), `e118c/p1`–`p3` (the control), `e118-smoke/p900` (the pinned smoke), `e118probe/p1007`
 and `p1005` (the launch-reading probe), `e118back-smoke/p901` (the return burst), and `session/` (`gov.jsonl`,
 `steps.jsonl`, `session.log`, `guard.jsonl`, the three ring dumps, the watchdog's script and log, `code.sha256`, the
-gate and final reads). Reproduce: `python3 tools/claims-v3/e118/score_e118.py --data
+gate and final reads, and the verifier's read after the release, `verify-read-154823.out`). Reproduce: `python3 tools/claims-v3/e118/score_e118.py --data
 docs/reports/data/2026-11-01-e118-two-clock-card0 --gen <a dir holding E60's manifest.json> --e60pred
 docs/reports/data/2026-10-20-bitflip-ladder/predictions.json --pred tools/claims-v3/e118/predictions.json --out
-<verdicts.json>`. The vmin-LUT binary is not committed (per-card calibration); its digest is in `gov.jsonl`.
+<verdicts.json>`, then `python3 docs/reports/data/2026-11-01-e118-two-clock-card0/posthoc_g3_ring.py --apply` (F1). The vmin-LUT binary is not committed (per-card calibration); its digest is in `gov.jsonl`.

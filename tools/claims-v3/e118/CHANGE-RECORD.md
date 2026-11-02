@@ -9,6 +9,14 @@
 > differs from the draft (the order, the telemetry profile, the ring dumps, the guard, the launch reading), the
 > pre-registration README's departures D1–D10 govern, and this record says so where it matters. This is the **first
 > governor move on this card**, and its host has two cards on one driver: read § "Two cards, one CLI" first.
+>
+> **Corrected after the run's verification** (Sun 1 Nov 2026, about 16:15 PST, at the desk; nothing run, set or read
+> on a card for it). See § "Corrections after the run's verification" at the end:
+> - F1: the ring after the restore holds two throttle-ups, not one.
+> - F2: rule 8 is PASS for the version-matched source and UNKNOWN for the exact running build.
+> - F5: the template's fields this record had left out.
+>
+> The GO section stands as committed before the write.
 
 Filled from `templates/change-record.md` of the ET-SoC-1 firmware rebuild / OTA field manual (private). Every gate
 carries **PASS / FAIL / UNKNOWN / N-A** with a timestamp and its evidence.
@@ -151,6 +159,9 @@ lists E72's second card as the owner's call; the call was made on 1 Nov.
 
 ## Rule 8 (desk: PASS, build-identity residual named)
 
+*Corrected after the run's verification (F2 below): **PASS for the version-matched source (`836a4ab`); UNKNOWN for the
+exact running build.***
+
 At et-platform `836a4ab600e93c3059bb58c898edbc37744cd8d0` (2026-07-17; `device-bootloaders/CMakeLists.txt:4`
 declares `project(EsperantoBootLoader VERSION 0.22.0)`), read from the git objects at 12:44 PST: the TDP set is
 dispatched at `services/thermal_power_monitor.c:966-971`, handled at `:392-415`, and set at
@@ -268,7 +279,7 @@ Filled from them after the session (all times PST, UTC−8):
 | Restore | 15:12:37.241, **`ok: true`**; `release` written; the watchdog logged *"released by the session, nothing to do"* at 15:12:41 and exited |
 | Read-back after the restore | 15:12:37.279: TDP 65 W, 65 °C, 600 MHz, power state `max_power`. *The power state is not a knob: the firmware re-derives it each service-processor pass from the SoC power against the TDP (`thermal_pwr_mgmt.c` `get_power_state`, called at `:859`), and this read came within 62 ms of the write, before the next pass, so it still showed the pinned era's state; the closing read below shows it re-derived* |
 | Return burst (normal stepping) | 15:12:38–15:13:01, `anchor_pi`, `xin_h16`, `lq_h8`, `anchor_pi` (block.sh's smoke): clocks **600 → 700 → 800 MHz** (117 / 2 / 97 samples) |
-| SP ring after the pinned passes / after the burst | 15:12:37.182 and 15:13:01.483; between the dump before the pin and the dump after the pinned passes **zero** new entries (covered); between that dump and the one after the burst exactly **one**, `Power throttle up event, current pwr 23370  tdp level: 65000` |
+| SP ring after the pinned passes / after the burst | 15:12:37.182 and 15:13:01.483; between the dump before the pin and the dump after the pinned passes **zero** new entries (covered; the two files are byte-identical); between that dump and the one after the burst **eight** (covered): **two** `Power throttle up` lines, 0.21 s apart (`current pwr 23370` and `25130`, `tdp level: 65000`), each followed by a power-status record and its operating point (700, then 800 MHz), and, 10.16 s after the first, a record and the operating point 600 MHz at idle. *Corrected after verification (F1): first written "exactly one", the count of a reader that stops at the first binary record* |
 | The 800 MHz control | 15:13:02–15:17:23, three passes at the card's own 65 W / 65 °C, the `pi` heater, launch at 57 °C after 58 °C |
 | Closing read-back | **15:17:33.805**: TDP **65 W**, threshold **65 °C**, `low_power`, 600 MHz — **equal to the originals** in every field read |
 | Module uptime | 8,689 min at the gates, 8,711 min after the restore, 8,716 min at the close: no service-processor reset at any point |
@@ -292,3 +303,47 @@ watchdog gone, card 1 untouched. The claim's release edit is recorded in the dat
 | 4 | Residual: the thermal build's additions are in no source the lab holds | Narrowed by the patch's first version, read 1 Nov |
 | 5 | Rule 8 "exactly E117's record" | Stated here in full, since E117 may never run |
 | 6 | Timestamps "13:xx PST" | The real times of each desk read |
+
+## Corrections after the run's verification (Sun 1 Nov 2026, about 16:15 PST; desk only)
+
+The workflow's independent verifier found the move safe and honestly recorded, and named the faults below. Nothing was
+run, set or read on a card to correct them. The GO section above stands as committed before the write.
+
+| # | What the record said | What it says now |
+|---|---|---|
+| F1 | Set log: exactly **one** `Power throttle up` between the dump after the pinned passes and the dump after the return burst | **Two**, 0.21 s apart (`current pwr 23370`, then `25130`, against `tdp level: 65000`), among eight new entries. Each throttle-up is followed by a binary power-status record and its operating point (700, then 800 MHz); 10.16 s after the first come a record and 600 MHz at idle. All six complete ramps in the dump from before the pin have the same two-step form. Re-read with the lab's full ring reader (`tools/claims-v3/hpl/sptrace_full.py`, E64 amendment A1) by the data directory's `posthoc_g3_ring.py`. The registered scorer's reader (`tools/claims-v3/dv2/sptrace_events.py`) stops at the first entry that is not a string: here the record written 79 ms after the first throttle-up. **G3 stays PASS** (≥ 1 registered). G1 is unaffected: its two dumps are byte-identical. |
+| F2 | Rule 8 "desk: PASS, build-identity residual named", and the GO's "rule 8 PASS at the version-matched source with its named residual" | **PASS for the version-matched source** (et-platform `836a4ab`, BL2 0.22.0): the set is one assignment to a `volatile` `.data` field, with no flash or PMIC write on its path. **UNKNOWN for the exact running build**: the raw-temperature patch's second version, the boot-counter fix beneath it and the card's binary are unread, and neither commit is in the lab's copy of et-platform. Missing evidence is UNKNOWN, never PASS (this record's own rule). The GO was taken with that part unknown, on the footing the verified governor-preparation plan and E72 accepted. The card ended where it began (65 → 0 → 65 W). Cite rule 8 for this card only with this residual. |
+| F5 | Fields the template asks for that this record left out | The addendum below. |
+
+### Addendum: the template's missing fields (filled at the desk from the committed logs)
+
+- **The GO's time:** commit `f37fa285`, made **14:51:48 PST (22:51:48 UTC)** and pushed at 14:51:51 PST, 12.9 s before
+  the one write. The GO line's "14:5x" is that time.
+- **Final handoff, signed off:**
+  - Operator: E118's run agent, an AI Foundry agent of the Q133 governor workflow.
+  - Reviewer: none during the run; the workflow's verifier checked it afterwards.
+  - Card 0 was handed back at the closing read, **15:17:33.805 PST (23:17:33.805 UTC)**: TDP 65 W, 65 °C, `low_power`,
+    600 MHz.
+  - Host-side close at 15:17:51 PST (23:17:51 UTC), with nothing of ours left on the host. The claim was released at
+    15:21:22 PST (23:21:22 UTC).
+  - The verifier made one read-only read at **15:48:23 PST (23:48:23 UTC)**: card 0 free, its lock held, `timeout 10`,
+    the no-PMIC-read build. It read the same TDP 65 W, threshold 65 °C, `low_power` and 600 MHz
+    (`session/verify-read-154823.out`).
+
+  *The run agent did not sign at the time. The fix pass wrote this signoff from `session/gov.jsonl`,
+  `session/final-151751.out` and the data README.*
+- **Card asset, serial, board revision, DRAM capacity:** **UNKNOWN.** Neither this run nor E84's committed reads read
+  them, and no query for them was planned or sent. Form factor: PCIe (the device layer's configuration banner, in E84's
+  `ident/ident-154200.out`).
+- **Affected users and services:**
+  - The host showed `2 users` at the gates (`session/gates-145039.out`): another lab user's login. It held no device
+    node, lock or process (`et-who` and the process check were empty before and after), so it did not block under
+    `tools/claims-v3/lib.sh` amendment A3: on aifoundry1, a user who is only logged in does not block. It is not named.
+  - Services: the host's dashboard collector (reads only, and none on a card whose lock is held); card 1, idle and
+    untouched; no CI job.
+- **Who read the maintainer's posts:** the full read in § Identity / authorization (258 posts, 13:54–14:01 PST) was
+  made by the workflow's governor-preparation lane. E118's run agent:
+  - read that lane's paraphrase at 14:21:13 PST;
+  - read the field manual's `AGENTS.md`, hosts-and-recovery guide, runbook and change-record template itself at
+    14:23 PST;
+  - checked for posts made since at 14:48:54–14:48:55 PST, and found none that day.

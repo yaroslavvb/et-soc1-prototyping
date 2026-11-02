@@ -1,0 +1,18 @@
+E118 post hoc: the SP ring halves of G1 and G3 re-read with tools/claims-v3/hpl/sptrace_full.py scan() (E64 amendment A1)
+  ring-before-pin.bin  sha256 4df35ccf1b0f3612...  write offset 488  70 entries
+  ring-after-pinned.bin  sha256 4df35ccf1b0f3612...  write offset 488  70 entries
+  ring-after-back.bin  sha256 c80fe689d9f9a86b...  write offset 936  70 entries
+G1 before-pin -> after-pinned: 0 new entries (covered True; byte-identical files True) -> log half PASS
+G3 after-pinned -> after-back: 8 new entries (covered True): new_op 3, power_up 2, pstat 3 -> event half PASS (registered: >= 1)
+  +  0.000 s  Power throttle up, current pwr 23370 mW, tdp level 65000 mW
+  +  0.079 s  power-status record: 23 W, throttle state 1 (POWER_UP), power state 3, 50 C, target 700 MHz
+  +  0.079 s  New OP: 700 MHz
+  +  0.206 s  Power throttle up, current pwr 25130 mW, tdp level 65000 mW
+  +  0.272 s  power-status record: 25 W, throttle state 1 (POWER_UP), power state 1, 50 C, target 800 MHz
+  +  0.272 s  New OP: 800 MHz
+  + 10.159 s  power-status record: 35 W, throttle state 0 (POWER_IDLE), power state 3, 55 C, target 600 MHz
+  + 10.159 s  New OP: 600 MHz
+the registered reader on ring-after-back.bin: walks 8 entries from the header and stops at offset 568 of 936 (a 16-byte record of type 14, not a string)
+before the pin: 13 raises to 700 or 800 MHz, 12 of them right after a Power throttle up and 1 at the ring's oldest end (what preceded it was overwritten); 6 complete 600 -> 700 -> 800 ramps, throttle-ups per ramp [2, 2, 2, 2, 2, 2]
+the return burst (10 Hz telemetry, from its first run's start): 700 MHz first at 0.878 s, 800 MHz at 1.078 s, 600 MHz again at 10.787 s; 700 -> 800 in 0.2 s and 800 -> 600 in 9.709 s, against the SP's 0.193562 s and 9.886395 s (so SP ticks are microseconds)
+as scored by score_e118.py: G1 0 new entries; G3 1 new entry, power_up 1

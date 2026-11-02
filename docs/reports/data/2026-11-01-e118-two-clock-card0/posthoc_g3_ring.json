@@ -1,0 +1,191 @@
+{
+ "experiment": "E118",
+ "post_hoc": "after verification, Sun 1 Nov 2026; nothing re-run",
+ "reader": "tools/claims-v3/hpl/sptrace_full.py scan() (E64 amendment A1)",
+ "registered_reader": "tools/claims-v3/dv2/sptrace_events.py (score_e118.py, frozen)",
+ "dumps": {
+  "before-pin": {
+   "sha256": "4df35ccf1b0f3612647e435cfa63d43283722908c1a040227d9c20e1255ec630",
+   "bytes": 8192,
+   "write_offset": 488,
+   "entries": 70
+  },
+  "after-pinned": {
+   "sha256": "4df35ccf1b0f3612647e435cfa63d43283722908c1a040227d9c20e1255ec630",
+   "bytes": 8192,
+   "write_offset": 488,
+   "entries": 70
+  },
+  "after-back": {
+   "sha256": "c80fe689d9f9a86b1482567d368f96457f1ba6fc11a17ad6d4180e05bc51205a",
+   "bytes": 8192,
+   "write_offset": 936,
+   "entries": 70
+  }
+ },
+ "G1_before_pin_to_after_pinned": {
+  "measured": true,
+  "covered": true,
+  "new_entries": 0,
+  "kinds": {},
+  "power_up": [],
+  "governor_lines": [],
+  "identical_bytes": true,
+  "log_half": "PASS"
+ },
+ "G3_after_pinned_to_after_back": {
+  "measured": true,
+  "covered": true,
+  "new_entries": 8,
+  "kinds": {
+   "power_up": 2,
+   "pstat": 3,
+   "new_op": 3
+  },
+  "power_up": [
+   "Power throttle up event, current pwr 23370  tdp level: 65000",
+   "Power throttle up event, current pwr 25130  tdp level: 65000"
+  ],
+  "governor_lines": [
+   "Power throttle up event, current pwr 23370  tdp level: 65000",
+   "Power throttle up event, current pwr 25130  tdp level: 65000"
+  ],
+  "new_op_mhz": [
+   700,
+   800,
+   600
+  ],
+  "entries": [
+   {
+    "kind": "power_up",
+    "sp_ts": 522673905628,
+    "t_rel_s": 0.0,
+    "text": "Power throttle up event, current pwr 23370  tdp level: 65000",
+    "pwr_mw": 23370,
+    "tdp_mw": 65000
+   },
+   {
+    "kind": "pstat",
+    "sp_ts": 522673984308,
+    "t_rel_s": 0.07868,
+    "power_w": 23,
+    "throttle_state": 1,
+    "power_state": 3,
+    "temp_c": 50,
+    "mhz": 700,
+    "throttle_state_name": "POWER_UP"
+   },
+   {
+    "kind": "new_op",
+    "sp_ts": 522673984332,
+    "t_rel_s": 0.078704,
+    "mhz": 700
+   },
+   {
+    "kind": "power_up",
+    "sp_ts": 522674111629,
+    "t_rel_s": 0.206001,
+    "text": "Power throttle up event, current pwr 25130  tdp level: 65000",
+    "pwr_mw": 25130,
+    "tdp_mw": 65000
+   },
+   {
+    "kind": "pstat",
+    "sp_ts": 522674177871,
+    "t_rel_s": 0.272243,
+    "power_w": 25,
+    "throttle_state": 1,
+    "power_state": 1,
+    "temp_c": 50,
+    "mhz": 800,
+    "throttle_state_name": "POWER_UP"
+   },
+   {
+    "kind": "new_op",
+    "sp_ts": 522674177894,
+    "t_rel_s": 0.272266,
+    "mhz": 800
+   },
+   {
+    "kind": "pstat",
+    "sp_ts": 522684064265,
+    "t_rel_s": 10.158637,
+    "power_w": 35,
+    "throttle_state": 0,
+    "power_state": 3,
+    "temp_c": 55,
+    "mhz": 600,
+    "throttle_state_name": "POWER_IDLE"
+   },
+   {
+    "kind": "new_op",
+    "sp_ts": 522684064289,
+    "t_rel_s": 10.158661,
+    "mhz": 600
+   }
+  ],
+  "power_up_spacing_s": 0.206001,
+  "new_op_700_to_800_s": 0.193562,
+  "new_op_800_to_600_s": 9.886395,
+  "first_power_up_to_600_s": 10.158661,
+  "event_half": "PASS",
+  "registered_reader_walk": {
+   "walked_entries": 8,
+   "stopped_at_offset": 568,
+   "write_offset": 936,
+   "stopped_on": {
+    "sp_ts": 522673984308,
+    "length": 16,
+    "record_type": 14,
+    "printable_string": false
+   }
+  }
+ },
+ "before_pin_pattern": {
+  "raises_to_700_or_800": 13,
+  "raises_right_after_a_power_up": 12,
+  "raises_at_the_ring_start": 1,
+  "complete_ramps_600_700_800": 6,
+  "power_ups_per_complete_ramp": [
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ]
+ },
+ "burst_telemetry": {
+  "source": "aifoundry1-c0/e118back-smoke/p901 (10 Hz)",
+  "first_run_start_ms": 1793574762076,
+  "first_700_s": 0.878,
+  "first_800_s": 1.078,
+  "back_to_600_s": 10.787,
+  "700_to_800_s": 0.2,
+  "first_800_to_600_s": 9.709
+ },
+ "as_scored_by_score_e118": {
+  "G1": {
+   "measured": true,
+   "covered": true,
+   "new_entries": 0,
+   "kinds": {},
+   "power_up": [],
+   "governor_lines": []
+  },
+  "G3": {
+   "measured": true,
+   "covered": true,
+   "new_entries": 1,
+   "kinds": {
+    "power_up": 1
+   },
+   "power_up": [
+    "Power throttle up event, current pwr 23370  tdp level: 65000"
+   ],
+   "governor_lines": [
+    "Power throttle up event, current pwr 23370  tdp level: 65000"
+   ]
+  }
+ }
+}

@@ -197,7 +197,18 @@
     "new_entries": 0,
     "kinds": {},
     "power_up": [],
-    "governor_lines": []
+    "governor_lines": [],
+    "identical_bytes": true,
+    "reader": "tools/claims-v3/hpl/sptrace_full.py scan() (E64 amendment A1)",
+    "note": "re-read after verification (Sun 1 Nov 2026) with tools/claims-v3/hpl/sptrace_full.py by posthoc_g3_ring.py --apply; the registered reader stops at the first binary power-status record",
+    "as_scored": {
+     "measured": true,
+     "covered": true,
+     "new_entries": 0,
+     "kinds": {},
+     "power_up": [],
+     "governor_lines": []
+    }
    },
    "log_half": "PASS",
    "verdict": "PASS"
@@ -284,16 +295,42 @@
    "ring_after_pinned_to_after_back": {
     "measured": true,
     "covered": true,
-    "new_entries": 1,
+    "new_entries": 8,
     "kinds": {
-     "power_up": 1
+     "power_up": 2,
+     "pstat": 3,
+     "new_op": 3
     },
     "power_up": [
-     "Power throttle up event, current pwr 23370  tdp level: 65000"
+     "Power throttle up event, current pwr 23370  tdp level: 65000",
+     "Power throttle up event, current pwr 25130  tdp level: 65000"
     ],
     "governor_lines": [
-     "Power throttle up event, current pwr 23370  tdp level: 65000"
-    ]
+     "Power throttle up event, current pwr 23370  tdp level: 65000",
+     "Power throttle up event, current pwr 25130  tdp level: 65000"
+    ],
+    "new_op_mhz": [
+     700,
+     800,
+     600
+    ],
+    "power_up_spacing_s": 0.206001,
+    "reader": "tools/claims-v3/hpl/sptrace_full.py scan() (E64 amendment A1)",
+    "note": "re-read after verification (Sun 1 Nov 2026) with tools/claims-v3/hpl/sptrace_full.py by posthoc_g3_ring.py --apply; the registered reader stops at the first binary power-status record",
+    "as_scored": {
+     "measured": true,
+     "covered": true,
+     "new_entries": 1,
+     "kinds": {
+      "power_up": 1
+     },
+     "power_up": [
+      "Power throttle up event, current pwr 23370  tdp level: 65000"
+     ],
+     "governor_lines": [
+      "Power throttle up event, current pwr 23370  tdp level: 65000"
+     ]
+    }
    },
    "event_half": "PASS",
    "verdict": "PASS"
@@ -375,5 +412,19 @@
   "G1": "PASS",
   "G2": "PASS",
   "G3": "PASS"
- }
+ },
+ "corrections": [
+  {
+   "date": "2026-11-01",
+   "after": "the Q133 verifier's report (holds with fixes)",
+   "by": "posthoc_g3_ring.py --apply",
+   "rules": [
+    "G3",
+    "G1"
+   ],
+   "what": "G3's ring half held 1 new entry and 1 Power throttle up; the dump holds 8 new entries, 2 of them Power throttle up (23370, 25130 mW against a 65000 mW TDP level, 0.206001 s apart), 3 operating points (700, 800, 600 MHz) and 3 binary power-status records. G1's ring half is unchanged (0 new entries; its two dumps are byte-identical).",
+   "why": "score_e118.py reads the dumps with tools/claims-v3/dv2/sptrace_events.py, whose walk from the header to the write offset stops at the first entry that is not a printable string: here the 16-byte power-status record the governor writes right after the first throttle-up.",
+   "verdicts_changed": "none"
+  }
+ ]
 }
