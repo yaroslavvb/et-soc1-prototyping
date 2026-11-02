@@ -31,7 +31,7 @@ is not an OTA, build, flash, PMIC command, reset, driver or PCIe action, and **n
   **This run's agent** read that paraphrase, then the manual's four files itself in full (`AGENTS.md`,
   `docs/hosts-and-recovery.md`, `docs/runbook.md`, `templates/change-record.md`; about 20:29 PST), and checked for newer
   posts of the maintainer since 14:17 PST in `#community-lab` and in the owner's direct messages at 20:30:50 PST: none.
-  ⟨RUN: re-checked within minutes of the claim: see "Live gates"⟩
+  Re-checked at 20:48:07–20:48:08 PST, 41 s before the claim: none (see "Live gates").
 - **Allowed:** offline build [ ] · live observation [x] · **one volatile write of the static TDP level to 0 W and its
   restore to 65 W [x]** · OTA [ ] · SoC reset [ ] · PMIC reset [ ] · driver/PCI changes [ ] · AC cycle [ ] · external
   SPI [ ] · PMIC write [ ] · PMIC firmware-management or slot query [ ] · clock command [ ] · threshold write [ ] ·
@@ -43,34 +43,49 @@ is not an OTA, build, flash, PMIC command, reset, driver or PCIe action, and **n
   included) by 23:30 PST; at most 50 card-minutes. Affected users: anyone wanting aifoundry2 in the window, told by the
   day's one `#community-lab` post.
 - **Host / card / node:** `aifoundry2`, one card, `0000:02:00.0` ↔ device 0 ↔ `/dev/et0_mgmt`, `/dev/et0_ops`.
-  ⟨RUN: re-read from sysfs, `uptime`, `et-who`⟩. Other cards sharing the driver or root port: none (one card).
+  Re-read at gate time, 20:49:02 PST, from the manifest, the device nodes, `uptime` and `et-who` (see "Live gates", G0
+  and exclusivity). Other cards sharing the driver or root port: none (one card).
+- **Card asset, serial, board revision, form factor, DRAM capacity** (the template's line): asset, serial and board
+  revision **UNKNOWN**, not read: this run sends no identity query but the uptime, and the revisions query is a PMIC
+  command. Form factor: a PCIe add-in card, link 16.0 GT/s x8 (`raw/manifest.txt`). DRAM capacity: 32 GB LPDDR4X by the
+  lab's records ([01-resources.md](../../../findings/01-resources.md) R5), not read by this run.
 - **Firmware identities: by continuity, not re-queried.** Expected release 1.4.0, BL1/BL2 0.22.0, PMIC 1.5.0, minions
   0.25.1: E69's revisions read, 13:56:26 PDT on 27 Oct, with the service processor up since the host's 26 Oct boot. The
   revisions query is **not** sent: at et-platform `836a4ab` it writes the PMIC's firmware-management command register
   twice (`services/firmware_update.c:903` → `driver/pmic_controller.c:952-974, 2531-2557, 2581-2600`), a PMIC command.
-  ⟨RUN: `DM_CMD_GET_MODULE_UPTIME` (service-processor RAM) must exceed the minutes since 13:56:26 PDT on 27 Oct; an image
-  takes effect only through a reset, so an unbroken uptime carries the identity. Shorter is **NO-GO**⟩. Host uptime at
-  20:40:53 PST: 6 d 6 h 27 m (the 26 Oct boot).
+  The rule: `DM_CMD_GET_MODULE_UPTIME` (service-processor RAM) must exceed the minutes since 13:56:26 PDT on 27 Oct; an
+  image takes effect only through a reset, so an unbroken uptime carries the identity; shorter is **NO-GO**. Read at gate
+  time: 9,036 min against 7,672.6, **PASS** (see "Live gates", G0 identity). Host uptime at 20:40:53 PST: 6 d 6 h 27 m
+  (the 26 Oct boot).
 - **Ordering on the card:** after E119 (released 20:11:16 PST). E117 did not run. Never two sessions on the card.
 - **Locks / monitors / races:** the owner's dashboard collector (`live-collector.py`, 3 processes at 20:40:53 PST)
   reads temperatures with `ettelem temp --if-free` (two GETs, neither reaching the PMIC) and opens nothing while
   `/run/lock/etsoc-shire0.lock` is held. **One runner holds the lock for the whole session**; the gate reads and the
   smoke take it for their own short holds before. The management node allows one opener, so the sampler is stopped for
-  every set and every query, and the governor is never polled during a pass. ⟨RUN: the collector's hash at gate time⟩
+  every set and every query, and the governor is never polled during a pass. The collector's hash at gate time: sha256
+  `58e7dc1b9f755be3…` (see "Live gates", collector).
 
 ## Current state
 
-- ⟨RUN⟩ kernel, module srcversion and hash, tool hashes (`gates.json`, `session.json`). **The tools are E77's own
+- Kernel `7.0.0-38-generic`, `et_soc1` srcversion `47D26A305A0428B29FB7FC4`, module sha256 `3ae3759cf857874e…`, and the
+  tool hashes, read at gate time (`raw/gates.json`, `raw/session.json`; see "Live gates", G0). **The tools are E77's own
   binaries, checked by SHA-256 before anything opens the card** (20:40:53 PST: heater `7adadf4f1ce331cc…`, kernel
   `990807f483cd57aa…`, `ettelem-e77` `21e7bf77e631eb7e…`, all equal to E77's `session.json`; `ettelem-e77 profile`
   reads `no-PMIC-read`). The runner refuses to start otherwise.
 - **The originals by the two RAM GETs** (`DM_CMD_GET_MODULE_STATIC_TDP_LEVEL`, `DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS`,
   through `ettelem-e77 config`): **must read 65 and 65** (the boot defaults, `thermal_pwr_mgmt.c:1672-1676`), else NO-GO.
-  E119 read 65 W / 65 °C at 20:11:16 PST. ⟨RUN⟩
+  E119 read 65 W / 65 °C at 20:11:16 PST. Read at gate time (20:49:02 PST) and by the session (20:49:33.418 PST): 65 W /
+  65 °C, **PASS** (see "Live gates" and the set log).
 - **vmin-LUT floor:** `DM_CMD_GET_VMIN_LUT` (a copy from the service processor's RAM, `driver/flashfs.c:2073`), parsed
   in code from the file the vendor tool writes; the floor must be **600 MHz**, else NO-GO (E72 and E77 read
-  600 / 700 / 800 on this card). ⟨RUN⟩
+  600 / 700 / 800 on this card). Read at gate time (20:49:04.815 PST): 600 / 700 / 800 MHz, floor 600 MHz, **PASS** (see
+  "Live gates").
 - Bank / boot counters: UNKNOWN, deliberately (they need flash access) / N-A. PMIC slots: not read (a PMIC command).
+- **PMIC bootloader, protocol and watchdog assumptions** (the template's line): **UNKNOWN**, not read, and none is
+  relied on: nothing is sent to the PMIC, no PMIC image or slot is touched, and the operation lowers power. The
+  limitation: the PMIC's own protections (its over-power alarm, whose level on this card is an open question that E117,
+  not run, was for, and any PMIC watchdog) are not known; the board stayed at or under 69.59 W (E77, the same operation
+  on this card today: 70.7 W), with no safety stop.
 
 ### What each planned query asks of the card (et-platform `836a4ab`)
 
@@ -126,6 +141,9 @@ restore, two fresh throttle-ups in the ring.
   back and logs. One value; it never resets and never raises.
 - SPI / PMIC backups, rollback artefact, bank selection, automatic fallback, power-loss plan: **N-A** (nothing is
   written to flash, the PMIC or any bank; a power loss leaves the boot default, 65 W).
+- **Exact qualified reset source, ROM, straps, threshold and tie handling** (the template's line): **UNKNOWN**. No reset
+  is part of this operation, and none is qualified by or for this run; the only recovery path named (a host soft reboot,
+  then an AC-outlet cycle) is the owner's and the maintainer's (above).
 - **Outage escalation (G1's last item):** none is approved or planned; the run stops instead.
 
 ## Candidate and build provenance (G2)
@@ -162,8 +180,8 @@ afterwards — is the return burst below, now checked on ring entries newer than
   in the session's `finally`.
 - **Card time:** 80 launches plus gates: about 38 card-minutes estimated, at most 50 (the session cuts at 46); the post's
   clause `for 1 h`.
-- **GO / NO-GO:** desk **GO-READY** (as E77's). ⟨RUN: GO only when every live item reads as required, recorded in a
-  commit made before the set⟩
+- **GO / NO-GO:** desk **GO-READY** (as E77's); **GO** once every live item read as required, recorded in the GO commit
+  `c5a221cb` (20:51:07 PST) before the set at 20:55:16.593 PST (see "Live gates").
 
 ## Live gates (filled at gate time, Sun 1 Nov 2026)
 
@@ -210,9 +228,11 @@ Read 2026-11-01T20:49:02.628-0800 to 2026-11-01T20:49:04.829-0800 under the card
 - **Envelope:** the highest board reading of the session was 69.59 W (an arm-B heater launch on 768 harts); the highest
   in a kept measurement launch 50.6 W; the highest die mean 59 °C (the high-water latch read at most 69 °C, from earlier
   sessions); no safety stop.
-- **Host kernel log:** **0** ET error events between the gate reads (20:48:55) and a minute after the session's end
-  (`raw/kernel-events.txt`); the buffer's 666 "Error Event" lines before and after are the same, older lines
-  (`raw/logs/`). E77's window held 22, all from its raw-4 residency reads (its F1).
+- **Host kernel log:** **0** ET error events from the gate reads (20:48:55) to 21:20:21 PST, when the log was read, 33 s
+  after the session's end (`raw/kernel-events.txt`, whose header names its script's "+ 60 s" bound, though its `dmesg`
+  ran at 21:20:21; corrected after verification, the README's CV5); the buffer's 666 "Error Event" lines before and after
+  are the same, older lines, the last E77's at about 17:59:32 PST (`raw/logs/`). E77's window held 22, all from its raw-4
+  residency reads (its F1).
 - **Card time:** 30.29 card-minutes in the session (exit 0, "done"), plus the gate reads, the smoke and the closing read
   (about 17 s).
 - Activation and acceptance (reset, re-identification, new firmware): **N-A**, nothing was flashed or reset.
@@ -246,3 +266,13 @@ Read 2026-11-01T20:49:02.628-0800 to 2026-11-01T20:49:04.829-0800 under the card
 | Activation and acceptance | N-A (no reset, nothing flashed); the return burst stands in for "the governor works afterwards" |
 | Outbound OTA / fallback | N-A: **Outbound OTA: N-A. Automatic fallback: N-A** (nothing written to a bank) |
 | Final handoff | after the run |
+
+## Corrections after verification (Sun 1 Nov 2026)
+
+An independent verifier read this record with the data the same evening (verdict: holds with fixes; every gate verdict
+stands). Corrected at the desk, with no card touched: the eight placeholders left from the plan now hold their values
+or point to "Live gates" (they were inherited from E77's record); the template's lines for the card's asset, serial,
+board revision, form factor and DRAM capacity, for the PMIC's bootloader, protocol and watchdog assumptions, and for the
+qualified reset source are filled, UNKNOWN where nothing was read; and the kernel-log window ends at the log's read,
+21:20:21 PST, not a minute after the session's end. No gate verdict, operation time or read-back changed. The README's
+"Corrections after verification" has the rest ([`corrections-check.txt`](corrections-check.txt) CV5, CV6).

@@ -1,0 +1,60 @@
+E120 corrections after verification (Sun 1 Nov 2026): numbers from committed files, data docs/reports/data/2026-11-01-e120-rail-redesign
+
+CV1 The bound against the row: the off-rail that grows with the minion rail, as this design measured it
+  the row's coefficient (docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json aifoundry2): minion 0.18789 W/W (s.e. 0.0027), n 392, fitted on each configuration's mean unmetered watts over idle (uncorrected deltas; tools/ettelem/fit_unmetered.py)
+  results.json B: coef 0.18789 x 21 W = 3.946 W = 0.875 pJ (the row); m0_A 6.7517 W, V_A 0.518 V
+  registered upper edge: R 1.1568 mOhm -> 3.124 W = 0.6927 pJ; at the mean R 0.5465 mOhm -> 1.476 W = 0.3272 pJ; verdict BOUNDED BELOW THE ROW
+  footing drift_split (central):
+    arm A: g4 minion 5.12 W, off-rail 0.058 W (-0.02 to 0.33 per pass); g3 minion 10.44 W, off-rail 0.476 W (0.24 to 0.67 per pass); g2 minion 15.20 W, off-rail 0.823 W (0.63 to 0.96 per pass); g1 minion 20.66 W, off-rail 1.314 W (1.10 to 1.50 per pass)
+    arm A: slope top rung over bottom rung 0.0808 W per minion W -> x 21 W = 1.70 W = 0.376 pJ; per-pass least-squares slope mean 0.0801 (0.0734 to 0.0865)
+    arm B: g4 minion 5.13 W, off-rail 0.596 W (0.33 to 1.03 per pass); g3 minion 10.21 W, off-rail 0.862 W (0.64 to 1.31 per pass); g2 minion 15.47 W, off-rail 0.914 W (0.48 to 1.23 per pass); g1 minion 20.17 W, off-rail 2.087 W (1.61 to 3.33 per pass)
+    arm B: slope top rung over bottom rung 0.0991 W per minion W -> x 21 W = 2.08 W = 0.462 pJ; per-pass least-squares slope mean 0.0893 (0.0328 to 0.1884)
+  footing uncorrected:
+    arm A: g4 minion 5.08 W, off-rail 0.729 W (0.71 to 0.75 per pass); g3 minion 10.36 W, off-rail 1.724 W (1.66 to 1.79 per pass); g2 minion 15.08 W, off-rail 2.748 W (2.70 to 2.80 per pass); g1 minion 20.48 W, off-rail 4.184 W (4.08 to 4.28 per pass)
+    arm A: slope top rung over bottom rung 0.2242 W per minion W -> x 21 W = 4.71 W = 1.044 pJ; per-pass least-squares slope mean 0.2237 (0.2147 to 0.2336)
+    arm B: g4 minion 5.10 W, off-rail 1.133 W (1.04 to 1.25 per pass); g3 minion 10.14 W, off-rail 1.957 W (1.69 to 2.17 per pass); g2 minion 15.34 W, off-rail 2.909 W (2.72 to 3.02 per pass); g1 minion 20.01 W, off-rail 4.623 W (4.14 to 5.72 per pass)
+    arm B: slope top rung over bottom rung 0.2341 W per minion W -> x 21 W = 4.92 W = 1.090 pJ; per-pass least-squares slope mean 0.2279 (0.1910 to 0.3080)
+  footing board_only:
+    arm A: g4 minion 5.08 W, off-rail 0.000 W (-0.08 to 0.30 per pass); g3 minion 10.36 W, off-rail 0.369 W (0.11 to 0.57 per pass); g2 minion 15.08 W, off-rail 0.658 W (0.45 to 0.81 per pass); g1 minion 20.48 W, off-rail 1.068 W (0.84 to 1.26 per pass)
+    arm A: slope top rung over bottom rung 0.0693 W per minion W -> x 21 W = 1.46 W = 0.323 pJ; per-pass least-squares slope mean 0.0686 (0.0620 to 0.0757)
+    arm B: g4 minion 5.10 W, off-rail 0.550 W (0.26 to 1.01 per pass); g3 minion 10.14 W, off-rail 0.769 W (0.52 to 1.25 per pass); g2 minion 15.34 W, off-rail 0.743 W (0.29 to 1.07 per pass); g1 minion 20.01 W, off-rail 1.869 W (1.36 to 3.13 per pass)
+    arm B: slope top rung over bottom rung 0.0885 W per minion W -> x 21 W = 1.86 W = 0.412 pJ; per-pass least-squares slope mean 0.0783 (0.0189 to 0.1796)
+  central footing: 0.081 to 0.099 W per minion W = 0.38 to 0.46 pJ, 43% to 53% of the row's 0.188; uncorrected footing 0.224 / 0.234 W per minion W
+  the conduction point estimate (0.327 pJ) over the central in-step off-rail: 71% to 87%
+  if ALL of arm A's top-rung off-rail (central footing) were conduction (total-current form, each launch's own m0, V0 and window V):
+    pass 1: off-rail 1.096 W at minion 20.79 W, regressor 2671 A^2 -> R 0.410 mOhm -> at B's 21 W step 1.11 W = 0.246 pJ
+    pass 2: off-rail 1.314 W at minion 20.58 W, regressor 2630 A^2 -> R 0.500 mOhm -> at B's 21 W step 1.35 W = 0.299 pJ
+    pass 3: off-rail 1.466 W at minion 20.61 W, regressor 2631 A^2 -> R 0.557 mOhm -> at B's 21 W step 1.50 W = 0.334 pJ
+    pass 4: off-rail 1.200 W at minion 20.72 W, regressor 2656 A^2 -> R 0.452 mOhm -> at B's 21 W step 1.22 W = 0.271 pJ
+    pass 5: off-rail 1.495 W at minion 20.61 W, regressor 2631 A^2 -> R 0.568 mOhm -> at B's 21 W step 1.53 W = 0.340 pJ
+    range R 0.41 to 0.57 mOhm = 0.25 to 0.34 pJ, against the registered upper edge 1.16 mOhm = 0.69 pJ
+  the registered offset fit per pass: R 0.610 / 0.299 / 0.297 / 1.018 / 0.508 mOhm; a_m -0.018 / +0.027 / +0.042 / -0.064 / +0.009 (mean -0.001); c_B 0.82 / 0.56 / 0.60 / 0.93 / 0.26 W
+
+CV2 E119's residency read
+  docs/reports/data/2026-11-01-e119-gemm-speed/README.md contains '**No residency was read.**': True
+  docs/reports/data/2026-11-01-e119-gemm-speed/README.md contains 'All 68 residency queries returned rc 2': True
+  docs/reports/data/2026-11-01-e119-gemm-speed/README.md contains 'takes raw states 2-6 only': True
+  docs/reports/data/2026-11-01-e77-rail-one-temperature/README.md (its F1) contains 'raw 3 read 0 at all 11 reads': True
+  E120 raw/gates.json residency: []
+  E120 raw/queries.jsonl: 13 queries with residency_rc 2 and residency [] (start, B1, B2, A1, A2, A3, A4, A5, SETTLE, RETURN, B3, B4, B5)
+
+CV3 Amendment A1's time
+  git: the GO commit holding A1: c5a221cb 2026-11-01 20:51:07 -0800
+  raw/gov.jsonl first set: TDP 0 W sent at 2026-11-01T20:55:16.593-0800 (rc 0), read back at 2026-11-01T20:55:16.616-0800
+  raw/queries.jsonl first end-of-pass query: B1 at 2026-11-01T20:52:44.804-0800
+
+CV4 The post hoc upper edge against the registered one
+  registered (all kept)                                        upper edge 3.12 W = 0.693 pJ
+  arm B launches stepping later than 1.5 s left out            upper edge 3.08 W = 0.682 pJ
+  arm B launches stepping later than 1.26 s left out           upper edge 3.02 W = 0.671 pJ
+
+CV5 The kernel-event window
+  raw/logs/kernlog-after.txt read at 2026-11-01 21:20:21 PST (uptime 544038.59 s); the session ended 2026-11-01T21:19:48.615-0800 (raw/end.json), 33 s before the read
+  ET 'Error Event Detected' lines in the buffer: 666; from 20:48:55 to 21:20:21 PST: 0; the last at 2026-11-01 17:59:31.9 PST, plus up to 1 s (the read's header clock is to the second)
+  raw/kernel-events.txt header: window 20:48:55 to 21:19:48 + 60 s PST (dmesg's clock from /proc/uptime); ET error events in it: 0
+
+CV6 The change record
+  CHANGE-RECORD.md placeholders left ('⟨RUN'): 0
+  CHANGE-RECORD.md addresses the template field 'Card asset, serial, board revision, form factor, DRAM capacity': True
+  CHANGE-RECORD.md addresses the template field 'PMIC bootloader, protocol and watchdog assumptions': True
+  CHANGE-RECORD.md addresses the template field 'Exact qualified reset source': True

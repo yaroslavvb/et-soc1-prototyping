@@ -12,7 +12,9 @@ is at most 0.69 pJ.** On the central footing R_eff = **0.55 mΩ, 99% [−0.06, +
 (`results.json` `footings.drift_split.fit`). **B: BOUNDED BELOW THE ROW.** At the interval's upper edge a 21 W
 minion-rail step on arm A's measured idle rail (6.75 W at 518 mV) adds **3.12 W** of conduction loss in the registered
 model's total-current form, **0.69 pJ of the 0.875 pJ row** (0.42 pJ by the literal conversion); at the mean, 1.48 W,
-0.33 pJ (`results.json` `B`). So at 99% at least 0.18 pJ of the row is not regulator conduction. E77's registered form
+0.33 pJ (`results.json` `B`). So at 99% at least 0.18 pJ of the row is not regulator conduction, though that remainder
+is not a measured logic-in-step energy: the row was fitted on uncorrected deltas, and on this run's central footing the
+off-rail that grows with the minion rail is itself only about 0.4 pJ (post hoc, CV1 below). E77's registered form
 gave an upper edge of 1.06 pJ, above the row. **C1 FAILS:** E77's post hoc bound, 0.496 mΩ (0.30 pJ), does not hold on
 fresh data; E120's upper edge is 1.16 mΩ, because its five passes spread six times wider (SD 0.30 mΩ) than E77's three
 did in the same form (0.05). In this form the linear "logic in step" coefficient comes out near zero (a_m −0.064 to
@@ -32,7 +34,8 @@ what widens the passes.
   1.2 °C).
 - **RING: PASS.** The return burst stepped 600 → 700 → 800 MHz, and the ring dumped after it holds 2 throttle-ups newer
   than the dump before it.
-- **K: PASS.** 0 kernel error events in the window (`raw/kernel-events.txt`; E77's held 22).
+- **K: PASS.** 0 kernel error events from the gate reads (20:48:55) to the log's read at 21:20:21 PST, 33 s after the
+  session's end (`raw/kernel-events.txt`; E77's held 22).
 
 **The secondaries (no verdict).** The uncorrected footing gives 0.89 mΩ [0.41, 1.37], an interval that excludes 0 with
 an rms gain of 8.5% ("resolved, not material"); board_only 0.53 [−0.14, 1.19]; the published small-rail coefficients
@@ -45,9 +48,24 @@ one-sided sign test gives p = 0.031), and the same five passes at 95% give [0.18
 the one launch of either run that reached 800 MHz late: 1.84 s after it began (E77's latest was 1.26 s). The service
 processor's rails are the PMIC's running average (τ about 1.06 s) and the board reading is not, so that launch read its
 minion rail low in the window (17.2 W against its twin's 19.3 W) and its off-rail high. Leaving it out gives 0.60 mΩ
-[0.06, 1.14] at 99% (NEITHER), with the upper edge unchanged at 0.68 pJ. So a conduction term of about 0.5–0.6 mΩ,
-about 0.3 pJ of the row, is probably there; it is not resolved at the registered 99%, and by the plan's rms test it is
-not material in any form.
+[0.06, 1.14] at 99% (NEITHER), with the upper edge nearly unchanged (0.68 against 0.69 pJ). So a conduction term of
+about 0.5–0.6 mΩ, about 0.3 pJ of the row, is probably there; it is not resolved at the registered 99%, and by the
+plan's rms test it is not material in any form.
+
+**Post hoc, added after verification (CV1; labelled, no verdict): what the bound is set against.** B states the upper
+edge as a share of the rail ledger's row, 0.188 × minion W (3.95 W at a 21 W step, 0.875 pJ). That coefficient was
+fitted on uncorrected over-idle deltas ([`unmetered_fit.json`](../2026-09-23-energy-manual/unmetered_fit.json),
+aifoundry2, n 392), and the rail ledger applied it unchanged ([its README](../2026-10-27-q129-rail-ledger/README.md)).
+On this run's central footing, which takes the window's heating out, the off-rail that grows with the minion rail is
+much smaller: arm A's top rung reads 1.31 W of off-rail at 20.66 W on the minion rail (1.10–1.50 W per pass) and its
+bottom rung 0.06 W at 5.12 W, a slope of 0.081 W per minion W (arm B's 0.099), which B's conversion makes 0.38–0.46 pJ,
+43–53% of the row. On the uncorrected footing the same slopes are 0.224 and 0.234, close to the row's 0.188. Three
+things follow. (1) The registered upper edge, 3.12 W at a 21 W step at arm A's voltage, is more than twice the whole
+off-rail arm A measured at its top rung: counting all of it as conduction gives R = 0.41–0.57 mΩ per pass, 0.25–0.34
+pJ. (2) The conduction point estimate, 0.33 pJ, is most (71–87%) of the in-step off-rail measured here. (3) The 0.18 pJ
+between the upper edge and the row is not a measured logic-in-step remainder: on the central footing most of the row
+is not there, and the difference between the footings is plausibly the window's own heating, which this design does not
+attribute. Every registered verdict stands ([`corrections-check.txt`](corrections-check.txt) CV1).
 
 **The governor operation, as registered** ([`CHANGE-RECORD.md`](CHANGE-RECORD.md) has the full log). Originals 65 W /
 65 °C by the two RAM GETs (20:49:33); TDP **65 → 0** at 20:55:16.593, read back 0 / 65 at .616, the watchdog armed first;
@@ -68,11 +86,35 @@ rail read 6.75 W at a 52 °C launch (E77: 7.11 W at 55 °C). By amendment A1, no
 **What it changes.** The regulator split that E77 left open is now bounded by a registered run: the regulators'
 conduction share of the rail ledger's 0.875 pJ row is **at most 0.69 pJ at 99%** in the registered model's total-current
 form, about 0.33 pJ at the point estimate, and not resolved from zero at 99% (post hoc, probably there at about 0.3 pJ).
-E77's post hoc 0.30 pJ bound does not replicate as a bound. The operating-point step (4.26 W minion, 1.76 W SRAM before
+Post hoc (CV1), the bound is loose against this run's own data: on the central footing the off-rail that grows with the
+minion rail is about 0.4 pJ, less than half the row, so the bound sits above everything arm A measured at that step,
+and the rest of the row is not shown to be logic in step (plausibly the window's heating, which the row's uncorrected
+fit includes). E77's post hoc 0.30 pJ bound does not replicate as a bound. The operating-point step (4.26 W minion, 1.76 W SRAM before
 any work) and the f·V² per-hart transfer are now registered results on this card. This bears on the Horace hub's Levels
 tab, stop 2 ("the card", its Missing column), its Next item 10 ("E77's regulator split"), and the final critic's item 13
 (Q130(q)); the kinds page's [§ 11 list](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open)
 has no entry of its own for it at `fdcbcba2f34d` (see "What this answers").
+
+## Corrections after verification (Sun 1 Nov 2026)
+
+An independent verifier read the registration, the data, this page and the change record the same evening. It re-ran
+`reduce_e120.py` and `posthoc_e120.py` on the committed raw data, and `results.json`, `reduce.txt` and `posthoc.txt`
+came out byte-identical. It refitted every registered number from the per-launch rows with its own code, spot-checked
+the raw telemetry, the governor log, the ring dumps and the kernel log, and checked the order of the commits, the claim
+and the first write. Every registered number and verdict holds (verdict: holds with fixes). It found six faults, one
+major and five minor: in a written conclusion, a reference to E119, a time stamp, wording, the kernel-log window and
+the change record. All six hold against committed files ([`corrections-check.py`](corrections-check.py),
+[`corrections-check.txt`](corrections-check.txt), standard library). The corrections were made at the desk: no card was
+touched, and nothing was set or re-run. No data file, frozen sentence, number or verdict changed.
+
+| | what was wrong | what changed |
+|---|---|---|
+| CV1 (major) | **B was read against a row this design did not measure.** The results set the bound against the ledger's 0.875 pJ row and said that at least 0.18 pJ of the row is not regulator conduction, without saying that on this run's central footing the off-rail that grows with the minion rail is 0.08–0.10 W per minion W (0.38–0.46 pJ), less than half the row, whose 0.188 coefficient was fitted on uncorrected deltas. So the upper edge (3.12 W) is more than twice all the off-rail arm A measured at its top rung, and the remainder cannot be read as logic in step | A labelled post hoc paragraph in the results gives these numbers; the 0.18 pJ sentence and "What it changes" say the remainder is not shown to be logic in step (plausibly the window's heating). B's verdict, BOUNDED BELOW THE ROW, stands as registered |
+| CV2 | **E119 was said to have read residency raw states 1–3 on this card tonight** (change 3, and A1's last parenthesis). E119's own correction C3 (`36abea05`, 20:58:29 PST) says it read none: its `ettelem-hpl` takes raw states 2–6 and returned rc 2 before opening the device in all 68 queries | A dated note under Amendments; the frozen sentences are not edited |
+| CV3 | **A1's stamp, "20:52 PST",** is later than the GO commit that holds it, `c5a221cb`, made at 20:51:07 PST | A dated note under Amendments: written by 20:51:07 PST. The order A1 states holds: before the first write (20:55:16.593) and before arm B's first end-of-pass query (20:52:44.8) |
+| CV4 | **"With the upper edge unchanged at 0.68 pJ"** for the post hoc reading: the registered upper edge is 0.693 pJ and the post hoc one 0.682. (The lane's result also called the post hoc term "real but small" and credited the 800 MHz step to "the higher voltages" alone; neither phrase is in a committed file) | "Nearly unchanged (0.68 against 0.69 pJ)". In the result: "probably there (post hoc, not resolved at the registered 99%)" and "the price of the 800 MHz operating point (its clock and voltages)" |
+| CV5 | **The kernel-event window was overstated** as running to a minute after the session's end: `raw/kernel-events.txt` names its script's "+ 60 s" bound, but its `dmesg` was read at 21:20:21 PST, 33 s after the session ended (21:19:48.6) | K's line above and the change record say "from 20:48:55 to 21:20:21 PST, 33 s after the session's end". Recounted from `raw/logs/kernlog-after.txt`: 0 ET events in that window; the last in the buffer is E77's, at about 17:59:32 PST. K's registered window ends at the closing read (21:19:48.6), inside it, so K stays PASS. The raw file is not edited |
+| CV6 | **The change record kept eight ⟨RUN⟩ placeholders** in its plan sections, with the values only in its live-gates table, and left three template lines neither filled nor marked: the card's asset, serial, board revision, form factor and DRAM capacity; the PMIC's bootloader, protocol and watchdog assumptions; the qualified reset source. All were inherited from E77's record | Each placeholder holds its value or points to "Live gates"; the three lines are filled, UNKNOWN where nothing was read (asset, serial, board revision, the PMIC's assumptions, the reset source), with the form factor from the manifest and the DRAM capacity from the lab's records |
 
 ## What this answers
 
@@ -281,3 +323,17 @@ states 1–3" therefore reads none. No registered rule uses the residencies, the
 new POWER_DOWN or POWER_SAFE reading (E77's lead for § 11 item 14 gets none from E120). What it gains: K now has no
 residency read of any state as a possible cause of a kernel event. A re-run that wants POWER_UP needs a tool that
 accepts raw 1 (E119's session read 1–3 on this card tonight with its own build).
+
+*Dated note to A1 (CV3), Sun 1 Nov 2026, after verification:* A1's stamp, "20:52 PST", is a minute late. A1 was written
+by 20:51:07 PST, the time of the GO commit `c5a221cb` that holds it. The order it states holds: before the first write
+(20:55:16.593 PST) and before arm B's first end-of-pass query (20:52:44.8 PST, `raw/queries.jsonl`).
+
+*Dated note to change 3 and A1 (CV2), Sun 1 Nov 2026, after verification:* change 3's last sentence ("E119's session read
+states 1–3 only on this card tonight") and A1's last parenthesis ("E119's session read 1–3 on this card tonight with its
+own build") are wrong: E119 read no residency either. Its correction C3 ([E119's README](../2026-11-01-e119-gemm-speed/README.md),
+`36abea05`, 20:58:29 PST, after A1 was written) says its `ettelem-hpl` takes raw states 2–6 only and returned rc 2 at its
+argument check, before opening the device, in all 68 queries. So neither E119 nor E120 read a residency, and no tool used
+on this card today accepts raw state 1 (E77's and E120's `ettelem-e77` and E119's `ettelem-hpl` all take raw 2–6): a
+POWER_UP read needs a new no-PMIC-read build. POWER_DOWN and POWER_SAFE (raw 2 and 3) are within `ettelem-e77`'s range
+when they are asked without raw 1, as E77 asked them (its F1: raw 3 read 0 at all 11 reads); raw 4 is never to be asked.
+The frozen sentences are not edited.
