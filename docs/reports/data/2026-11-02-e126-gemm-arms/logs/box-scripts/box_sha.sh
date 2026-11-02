@@ -1,0 +1,34 @@
+#!/bin/bash
+cd ~/claude/et-soc1-prototyping || exit 9
+while read f; do if [ -f "$f" ]; then sha256sum "$f"; else echo "MISSING-BOX $f"; fi; done <<"EOL"
+tools/claims-v3/hpl/run_hpl.py
+tools/claims-v3/hpl/reduce_hpl.py
+tools/claims-v3/kspeed/run_kspeed.py
+tools/claims-v3/kspeed/reduce_kspeed.py
+tools/claims-v3/kspeed/predictions.json
+tools/claims-v3/kspeed/e83/predict_e83.py
+tools/claims-v3/kspeed/e83/reduce_e83.py
+tools/claims-v3/kspeed/e101/run_e101s.py
+tools/claims-v3/kspeed/e105/run_e105.py
+tools/claims-v3/kspeed/e105/reduce_e105.py
+tools/claims-v3/kinds/e101_common.py
+tools/claims-v3/kinds/e78_common.py
+tools/claims-v3/kinds/kinds.json
+tools/claims-v3/kinds/real2/real2.json
+tools/claims-v3/kinds/tiles/fp32/zeros.bin
+tools/claims-v3/kinds/tiles/fp32/randn.bin
+tools/claims-v3/kinds/tiles/fp16/zeros.bin
+tools/claims-v3/kinds/tiles/fp16/randn.bin
+tools/claims-v3/kinds/tiles/int8/zeros.bin
+tools/claims-v3/kinds/tiles/int8/full.bin
+tools/claims-v3/e111/idle_logins_e111.py
+tools/claims-v3/hpl/surface_hpl.py
+tools/claims-v3/e119/run_e119.py
+tools/claims-v3/e119/queue_e119.py
+tools/claims-v3/e119/predictions-e119.json
+tools/claims-v3/e126/run_e126.py
+tools/claims-v3/e126/queue_e126.py
+tools/claims-v3/e126/protocol.json
+tools/claims-v3/e126/protocol-dry.json
+tools/claims-v3/e126/predictions-e126.json
+EOL

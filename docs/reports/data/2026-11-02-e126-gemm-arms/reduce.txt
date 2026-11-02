@@ -1,0 +1,435 @@
+E126: 42 runs; 0 refused by the rule; config after every run: ['{"tdp_w": 65, "temp_threshold_c": 65}']; checks of C ['approx', 'exact']; peaks {'board_max_w': 85.62, 'board_run': 's1/B-04-c16r8-fp32-randn-r1', 'die_mean_max_c': 66, 'die_mean_run': 's1/B-00-c8s-fp32-randn-r1', 'die_high_max_c': 69, 'die_high_run': 's1/A-00-c4s-fp32-zeros-r1', 'samples': 21580}
+per arm and format, every kind pooled: T at 600 and 800 MHz (launch means), X; the fit T = C/f + M
+  c16r2.fp32     T600  1.7334 (n   5)  T800  1.5434 (n  241)  X  1.123 (launch means)  C   471.8 M  0.9532 span 200.2
+  c16r4.fp32     T600  1.3150 (n  11)  T800  1.1079 (n  163)  X  1.187 (launch means)  C   502.1 M  0.4799 span 200.1
+  c16r8.fp32     T600  1.1031 (n  21)  T800  0.8904 (n  160)  X  1.239 (launch means)  C   514.3 M  0.2468 span 200.2
+  c16s.fp16      T600  2.3456 (n   1)  T800  2.2251 (n  173)  X  1.054 (fit)  C   287.1 M  1.8659 span 200.1
+  c16s.fp32      T600  2.3443 (n   9)  T800  2.2283 (n  324)  X  1.052 (launch means)  C   278.6 M  1.8796 span 200.1
+  c16s.int8      T600  2.3052 (n   4)  T800  2.1904 (n  170)  X  1.052 (launch means)  C   279.6 M  1.8406 span 200.7
+  c4s.fp16       T600  1.4267 (n   7)  T800  1.2661 (n  195)  X  1.127 (launch means)  C   391.8 M  0.7759 span 200.3
+  c4s.fp32       T600  1.4271 (n   9)  T800  1.2637 (n  198)  X  1.129 (launch means)  C   401.3 M  0.7622 span 200.5
+  c4s.int8       T600  1.4343 (n   9)  T800  1.2697 (n  320)  X  1.130 (launch means)  C   401.1 M  0.7679 span 200.2
+  c8.fp16        T600  2.5082 (n   2)  T800  2.3506 (n  168)  X  1.067 (launch means)  C   383.5 M  1.8708 span 200.0
+  c8.fp32        T600  2.5096 (n  11)  T800  2.3530 (n  300)  X  1.067 (launch means)  C   378.0 M  1.8799 span 200.2
+  c8.int8        T600  2.3834 (n   2)  T800  2.2469 (n  168)  X  1.061 (launch means)  C   336.4 M  1.8261 span 200.1
+  c8s.fp32       T600  1.4258 (n  12)  T800  1.2661 (n  170)  X  1.126 (launch means)  C   389.9 M  0.7784 span 200.1
+cell                      burst     rate    sus     rate     bW     sW   die   p800    est n
+c16r2-fp32-randn            0.0    0.000  759.8    5.289   0.00  61.02  65.2    0.0   69.7 0/1
+c16r2-fp32-zeros            0.0    0.000  794.9    5.419   0.00  36.36  56.0    0.0   39.9 0/1
+c16r4-fp32-randn            0.0    0.000  699.2    6.921   0.00  62.04  65.1    0.0   78.1 0/1
+c16r4-fp32-zeros            0.0    0.000  794.4    7.531   0.00  37.03  56.6    0.0   39.8 0/1
+c16r8-fp32-randn            0.0    0.000  640.1    7.918   0.00  59.81  65.7    0.0   84.1 0/1
+c16r8-fp32-zeros            0.0    0.000  800.0    9.416   0.00  37.80  56.9    0.0   39.7 0/1
+c16s-fp16-randn           800.0    7.518  800.0    7.541  50.17  54.60  62.8   49.7   59.8 1/1
+c16s-fp16-zeros           800.0    7.541    0.0    0.000  33.87   0.00   0.0   33.6   39.2 1/0
+c16s-fp32-randn           800.0    3.764  789.9    3.749  51.07  54.33  61.6   50.4   61.7 1/1
+c16s-fp32-zeros           800.0    3.768  794.9    3.764  33.31  35.19  55.0   34.0   39.4 2/1
+c16s-int8-full            800.0   15.334  789.7   15.275  39.92  42.29  59.0   40.0   47.6 1/1
+c16s-int8-zeros           800.0   15.296    0.0    0.000  34.02   0.00   0.0   33.9   39.0 1/0
+c4s-fp16-randn            796.2   13.279  704.5   12.492  62.40  58.86  65.5   67.0   72.6 1/1
+c4s-fp16-zeros            796.1   13.278  793.4   13.197  34.98  35.10  53.1   35.6   39.3 1/1
+c4s-fp32-randn            798.0    6.630  731.9    6.342  64.60  63.47  64.9   68.8   76.0 1/1
+c4s-fp32-zeros            798.0    6.636  788.8    6.594  34.05  36.00  56.1   35.6   39.0 2/1
+c4s-int8-full             800.0   26.452  795.1   26.361  43.86  45.11  57.7   45.5   49.4 1/1
+c4s-int8-zeros            800.0   26.468  789.3   26.174  34.76  34.85  55.3   35.3   38.5 1/1
+c8-fp16-randn             800.0    7.127  793.8    7.125  50.61  53.77  62.1   49.9   60.1 1/1
+c8-fp16-zeros             800.0    7.144    0.0    0.000  34.50   0.00   0.0   34.2   40.2 1/0
+c8-fp32-randn             800.0    3.570  790.2    3.554  50.73  54.19  61.1   50.2   62.0 1/1
+c8-fp32-zeros             800.0    3.572  783.6    3.547  32.79  35.11  54.7   32.7   40.2 1/1
+c8-int8-full              800.0   14.958  794.4   14.898  40.95  42.89  58.6   40.7   48.2 1/1
+c8-int8-zeros             800.0   14.919    0.0    0.000  34.51   0.00   0.0   34.7   39.8 1/0
+c8s-fp32-randn              0.0    0.000  746.5    6.398   0.00  63.97  63.8    0.0   78.5 0/1
+c8s-fp32-zeros              0.0    0.000  782.4    6.547   0.00  35.75  55.9    0.0   39.2 0/1
+{
+ "R0": {
+  "checks_ok": true,
+  "t600": {
+   "c4s.fp32": {
+    "T600": 1.4271,
+    "how": "launch means",
+    "e107": 1.4306,
+    "rel": -0.0025,
+    "ok": true
+   },
+   "c4s.fp16": {
+    "T600": 1.4267,
+    "how": "launch means",
+    "e107": 1.4305,
+    "rel": -0.0026,
+    "ok": true
+   },
+   "c4s.int8": {
+    "T600": 1.4343,
+    "how": "launch means",
+    "e107": 1.4399,
+    "rel": -0.0039,
+    "ok": true
+   },
+   "c8.fp32": {
+    "T600": 2.5096,
+    "how": "launch means",
+    "e107": 2.5157,
+    "rel": -0.0024,
+    "ok": true
+   },
+   "c8.fp16": {
+    "T600": 2.5082,
+    "how": "launch means",
+    "e107": 2.5165,
+    "rel": -0.0033,
+    "ok": true
+   },
+   "c8.int8": {
+    "T600": 2.3834,
+    "how": "launch means",
+    "e107": 2.3931,
+    "rel": -0.004,
+    "ok": true
+   },
+   "c16s.fp32": {
+    "T600": 2.3443,
+    "how": "launch means",
+    "e107": 2.3522,
+    "rel": -0.0034,
+    "ok": true
+   },
+   "c16s.fp16": {
+    "T600": 2.3443,
+    "how": "fit",
+    "e107": 2.3517,
+    "rel": -0.0031,
+    "ok": true
+   },
+   "c16s.int8": {
+    "T600": 2.3052,
+    "how": "launch means",
+    "e107": 2.3115,
+    "rel": -0.0027,
+    "ok": true
+   }
+  },
+  "t800": {
+   "c8s": {
+    "T800": 1.2665,
+    "e119": 1.2655,
+    "rel": 0.0008,
+    "ok": true
+   },
+   "c16r4": {
+    "T800": 1.1078,
+    "e119": 1.108,
+    "rel": -0.0002,
+    "ok": true
+   },
+   "c16r8": {
+    "T800": 0.8904,
+    "e119": 0.8906,
+    "rel": -0.0002,
+    "ok": true
+   },
+   "c16r2": {
+    "T800": 1.5424,
+    "e119": 1.5449,
+    "rel": -0.0016,
+    "ok": true
+   }
+  },
+  "verdict": "PASS"
+ },
+ "R1": {
+  "per_format": {
+   "fp32": {
+    "X": 1.1293,
+    "X_c8s_e119": 1.1264,
+    "diff": 0.0029,
+    "verdict": "LIKE THE L3 WALK",
+    "X_M1": 1.182,
+    "X_M2": 1.3276,
+    "share_following": -0.362,
+    "share_verdict": "OUTSIDE THE CLOCK"
+   },
+   "fp16": {
+    "X": 1.1269,
+    "X_c8s_e119": 1.1247,
+    "diff": 0.0022,
+    "verdict": "LIKE THE L3 WALK",
+    "X_M1": 1.1822,
+    "X_M2": 1.3278,
+    "share_following": -0.38,
+    "share_verdict": "OUTSIDE THE CLOCK"
+   },
+   "int8": {
+    "X": 1.1296,
+    "X_c8s_e119": 1.1273,
+    "diff": 0.0023,
+    "verdict": "LIKE THE L3 WALK",
+    "X_M1": 1.0894,
+    "X_M2": 1.3287,
+    "share_following": 0.168,
+    "share_verdict": "OUTSIDE THE CLOCK"
+   },
+   "this_session_fp32": {
+    "X_c8s": 1.1261,
+    "T800_c4s_over_c8s": 0.9978
+   }
+  },
+  "verdict": "LIKE THE L3 WALK",
+  "share_verdict": "OUTSIDE THE CLOCK"
+ },
+ "R2": {
+  "cells": {
+   "c8.fp32": {
+    "X": 1.0665,
+    "X_c16_e119": 1.0647,
+    "verdict_a": "A DRAM WALK",
+    "X_S": 1.0684,
+    "X_W": 1.0581,
+    "h": 0.819,
+    "verdict_b": "UNRESOLVED"
+   },
+   "c8.fp16": {
+    "X": 1.067,
+    "X_c16_e119": 1.0636,
+    "verdict_a": "A DRAM WALK",
+    "X_S": 1.067,
+    "X_W": 1.0568,
+    "h": 1.004,
+    "verdict_b": "UNRESOLVED"
+   },
+   "c8.int8": {
+    "X": 1.0608,
+    "X_c16_e119": 1.0719,
+    "verdict_a": "A DRAM WALK",
+    "X_S": 1.0756,
+    "X_W": 1.0555,
+    "h": 0.262,
+    "verdict_b": "BETWEEN"
+   },
+   "c16s.fp32": {
+    "X": 1.052,
+    "X_c16_e119": 1.0647,
+    "verdict_a": "A DRAM WALK",
+    "X_S": 1.0765,
+    "X_W": 1.0431,
+    "h": 0.268,
+    "verdict_b": "BETWEEN"
+   },
+   "c16s.fp16": {
+    "X": 1.0538,
+    "X_c16_e119": 1.0636,
+    "verdict_a": "A DRAM WALK",
+    "X_S": 1.0752,
+    "X_W": 1.0417,
+    "h": 0.36,
+    "verdict_b": "BETWEEN"
+   },
+   "c16s.int8": {
+    "X": 1.0524,
+    "X_c16_e119": 1.0719,
+    "verdict_a": "A DRAM WALK",
+    "X_S": 1.0774,
+    "X_W": 1.0478,
+    "h": 0.156,
+    "verdict_b": "THE COLD WALK'S WAIT"
+   }
+  }
+ },
+ "R3": {
+  "cells": {
+   "c8s": {
+    "randn_mhz": 746.5,
+    "e119_randn_mhz": 663.7,
+    "d_randn": 82.8,
+    "zeros_mhz": 782.4,
+    "e119_zeros_mhz": 788.7,
+    "d_zeros": -6.3,
+    "verdict": "NOT"
+   },
+   "c16r4": {
+    "randn_mhz": 699.2,
+    "e119_randn_mhz": 636.7,
+    "d_randn": 62.5,
+    "zeros_mhz": 794.4,
+    "e119_zeros_mhz": 795.4,
+    "d_zeros": -1.0,
+    "verdict": "NOT"
+   },
+   "c16r8": {
+    "randn_mhz": 640.1,
+    "e119_randn_mhz": 603.6,
+    "d_randn": 36.5,
+    "zeros_mhz": 800.0,
+    "e119_zeros_mhz": 795.9,
+    "d_zeros": 4.1,
+    "verdict": "NOT"
+   },
+   "c16r2": {
+    "randn_mhz": 759.8,
+    "e119_randn_mhz": 695.4,
+    "d_randn": 64.4,
+    "zeros_mhz": 794.9,
+    "e119_zeros_mhz": 794.4,
+    "d_zeros": 0.5,
+    "verdict": "NOT"
+   }
+  },
+  "verdict": "NOT ALL"
+ },
+ "R4": {
+  "cells": {
+   "c8s": {
+    "gap": 1.0233,
+    "e119_gap": 1.0791,
+    "d": -0.0558,
+    "clock_gap": 1.0481,
+    "verdict": "FAIL"
+   },
+   "c16r4": {
+    "gap": 1.0881,
+    "e119_gap": 1.1478,
+    "d": -0.0597,
+    "clock_gap": 1.1362,
+    "verdict": "FAIL"
+   },
+   "c16r8": {
+    "gap": 1.1892,
+    "e119_gap": 1.2293,
+    "d": -0.0401,
+    "clock_gap": 1.2498,
+    "verdict": "PASS"
+   },
+   "c16r2": {
+    "gap": 1.0246,
+    "e119_gap": 1.0616,
+    "d": -0.037,
+    "clock_gap": 1.0462,
+    "verdict": "PASS"
+   }
+  },
+  "order": true,
+  "order_values": [
+   1.1892,
+   1.0881,
+   1.0246
+  ],
+  "c8s_below": true,
+  "c8s_max": 1.118
+ },
+ "R5": {
+  "cells": {
+   "c8s": {
+    "X": 1.1261,
+    "how": "launch means",
+    "e119_X": 1.1264,
+    "d": -0.0003,
+    "verdict": "PASS"
+   },
+   "c16r4": {
+    "X": 1.187,
+    "how": "launch means",
+    "e119_X": 1.1853,
+    "d": 0.0017,
+    "verdict": "PASS"
+   },
+   "c16r8": {
+    "X": 1.2389,
+    "how": "launch means",
+    "e119_X": 1.2391,
+    "d": -0.0002,
+    "verdict": "PASS"
+   },
+   "c16r2": {
+    "X": 1.1231,
+    "how": "launch means",
+    "e119_X": 1.1227,
+    "d": 0.0004,
+    "verdict": "PASS"
+   }
+  }
+ },
+ "R6": {
+  "cells": {
+   "c4s": {
+    "randn_mhz": 731.9,
+    "zeros_mhz": 788.8,
+    "gap": 1.0397,
+    "clock_gap": 1.0777,
+    "verdict": "FAIL"
+   },
+   "c8": {
+    "randn_mhz": 790.2,
+    "zeros_mhz": 783.6,
+    "gap": 0.998,
+    "clock_gap": 0.9916,
+    "verdict": "PASS"
+   },
+   "c16s": {
+    "randn_mhz": 789.9,
+    "zeros_mhz": 794.9,
+    "gap": 1.004,
+    "clock_gap": 1.0063,
+    "verdict": "PASS"
+   }
+  }
+ },
+ "R7": {
+  "compared": 13,
+  "worst": [
+   "c16s-fp32-randn",
+   0.00292
+  ],
+  "outside": [],
+  "verdict": "PASS"
+ },
+ "R8": {
+  "cells": {
+   "c16s-fp16-randn": {
+    "p800_w": 49.73,
+    "estimate_w": 59.8,
+    "excess_w": -10.07
+   },
+   "c16s-fp32-randn": {
+    "p800_w": 50.36,
+    "estimate_w": 61.7,
+    "excess_w": -11.34
+   },
+   "c16s-int8-full": {
+    "p800_w": 39.97,
+    "estimate_w": 47.6,
+    "excess_w": -7.63
+   },
+   "c4s-fp16-randn": {
+    "p800_w": 66.95,
+    "estimate_w": 72.6,
+    "excess_w": -5.65
+   },
+   "c4s-fp32-randn": {
+    "p800_w": 68.81,
+    "estimate_w": 76.0,
+    "excess_w": -7.19
+   },
+   "c4s-int8-full": {
+    "p800_w": 45.54,
+    "estimate_w": 49.4,
+    "excess_w": -3.86
+   },
+   "c8-fp16-randn": {
+    "p800_w": 49.88,
+    "estimate_w": 60.1,
+    "excess_w": -10.22
+   },
+   "c8-fp32-randn": {
+    "p800_w": 50.22,
+    "estimate_w": 62.0,
+    "excess_w": -11.78
+   },
+   "c8-int8-full": {
+    "p800_w": 40.72,
+    "estimate_w": 48.2,
+    "excess_w": -7.48
+   }
+  },
+  "outside": [],
+  "verdict": "PASS"
+ }
+}
