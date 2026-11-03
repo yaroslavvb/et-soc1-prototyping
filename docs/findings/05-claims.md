@@ -2533,7 +2533,7 @@ run a cell in one session, so its errors are rms over cells and its T intervals 
 one jackknife s.e. by kind. 🛑 **To carry from here, beside the earlier sections' items:** (23) **a nested leave-one-kind-out score
 is not an out-of-sample bound:** quote M6's power error from E140 (0.41 W rms on new kinds, biased high, 19 of 25 inside its 95%), not
 from its nested score; (24) **for power on new kinds M5 is the better predictor** (E140 C1); (25) **heat over a short run follows the
-board watts** at about 0.118 °C per W on aifoundry3, to about 0.2 °C on new kinds; long holds are not scored out of sample.
+board watts** at about 0.118 °C per W on aifoundry3, to about 0.2 °C on new kinds; long holds are not scored out of sample. *Corrected after verification (Mon 2 Nov 2026, the integration's own verifier; no number changed): the heat row's "before" is the unfitted prior rule on the 22 experiments' rows, not a nested score; M5 against M6 is compared on one set of tiles; a key's path.*
 
 ### Section 11, item by item, after Q137
 
@@ -2550,9 +2550,9 @@ board watts** at about 0.118 °C per W on aifoundry3, to about 0.2 °C on new ki
 
 | What is predicted | Before (the prior rule or model) | After (Q137) | Kind | Source | Verify at |
 |---|---|---|---|---|---|
-| **Power on new kinds** (W over the format's zeros, aifoundry3, 600 MHz, the resident kinds loop) | M5 on blind pool 3 (E115): 0.29 W rms over 16 float tiles, 0.34 W int8, 18 of 25 inside its intervals | M6 on blind pool 4: **0.406 W rms floats, 0.384 W int8, 19 of 25 inside (P3 FAIL), bias −0.28 W**; M5 on the same pool **0.358 W** over all 25 | M, P→M | E115, E140 | `E140/scored.json`, `primary.reported_m5`; `E140/README.md` §2, §4 |
+| **Power on new kinds** (W over the format's zeros, aifoundry3, 600 MHz, the resident kinds loop) | M5 on blind pool 3 (E115): 0.29 W rms over 16 float tiles, 0.34 W int8, 18 of 25 inside its intervals | M6 on blind pool 4: **0.406 W rms floats, 0.384 W int8, 19 of 25 inside (P3 FAIL), bias −0.28 W**; M5 on the same pool **0.358 W** over all 25 (M6 0.406), 0.337 on the 14 float tiles | M, P→M | E115, E140 | `E140/scored.json`, `primary.reported_m5`; `E140/README.md` §2, §4 |
 | Power, nested leave-one-kind-out (in sample for M5's rows) | M5 as frozen: fp32 0.239, fp16 0.207, int8 0.222 W | M6: **fp32 0.227, fp16 0.179, int8 0.260 W** (489 float rows from 22 experiments; int8 worse, resolved) | F | Q137(m) | `QM/loko-m6.json`; `QM/bootstrap-m6.json` |
-| **Heat on new kinds** (die rise over a 4.5 s run) | the prior rule S × 0.118 °C per board W, nested: 0.277 / 0.288 / 0.190 °C (fp32 / fp16 / int8) | M6 on blind pool 4: **0.204 °C rms floats, 0.164 int8, 24 of 25 inside**; nested 0.304 / 0.283 / 0.175 °C | M, P→M | Q137(m), E140 | `E140/scored.json`, `verdicts`; `QM/m6.json` heat |
+| **Heat on new kinds** (die rise over a 4.5 s run) | the prior rule S × 0.118 °C per board W (unfitted), on the 22 experiments' rows: 0.277 / 0.288 / 0.190 °C (fp32 / fp16 / int8) | M6 on blind pool 4: **0.204 °C rms floats, 0.164 int8, 24 of 25 inside**; nested 0.304 / 0.283 / 0.175 °C | M, P→M | Q137(m), E140 | `E140/scored.json`, `verdicts`; `QM/m6.json` heat |
 | Heat per board W (the coefficient itself) | 0.118 °C per W (E97's rule) | 0.1184 (aifoundry3) and 0.1155 (aifoundry1's card 1) fitted; 0.119 measured on E140's kept runs | F, M | Q137(m), E140 | `QM/m6.json`; `E140/README.md` §3 |
 | A large GEMM's burst power, sustained clock and die (aifoundry2, governed) | — (no large GEMM had run) | burst power **3.37 W rms** (20 cells), sustained clock 25.9 MHz rms on G2, die **0.82 °C** (bursts) and **1.60 °C** (sustained, on G2); time per op 7–13% slow (R1, R2 FAIL) | P→M | E136 | `E136/results.json`, `errors` |
 | fp16 sign contrasts (3–5 W) | M4 on E128's two passes, 0.211 W rms (post hoc) | M4 frozen on E137's six passes, **0.125 W rms**, 0 of 7 outside (R7 PASS) | P→M | E137 | `E137/scored.json`, `primary.rules` |
@@ -2586,7 +2586,7 @@ board watts** at about 0.118 °C per W on aifoundry3, to about 0.2 °C on new ki
 | Claim | Value | Kind | Source | Verify at |
 |---|---|---|---|---|
 | **B odd − even on the rail** | **+35.9 [+30.5, +41.4]** board-equivalent fJ (+29.1 [+24.7, +33.6] rail fJ); odd ÷ even **1.91 [1.71, 2.16]**; on the board +32.5 [+17.0, +48.0] and 1.88 [1.40, 2.62]; nine blocks | M, P→M | Q137, E138 | `E138/scored.json`, `primary` |
-| **Neither netlist group fits** | Booth on B's frozen band [54.8, 66.2] fJ and [4.16, 4.39]; no recoder's [0.5, 1.2] and [1.05, 1.09]: R1n and R1q NEITHER (BETWEEN) at every arm; R1 INCONCLUSIVE, 0.2 fJ short of T_B 30.68; R4 INCONCLUSIVE between BOOTH ON B / NO BOOTH; pooled with E130 (reported) +34.8 [+31.6, +38.1], RECODED, not a verdict | M, P→M | E138 (C5) | `E138/scored.json`, `verdicts`, `pool_with_e130` |
+| **Neither netlist group fits** | Booth on B's frozen band [54.8, 66.2] fJ and [4.16, 4.39]; no recoder's [0.5, 1.2] and [1.05, 1.09]: R1n and R1q NEITHER (BETWEEN) at every arm; R1 INCONCLUSIVE, 0.2 fJ short of T_B 30.68; R4 INCONCLUSIVE between BOOTH ON B / NO BOOTH; pooled with E130 (reported) +34.8 [+31.6, +38.1], RECODED, not a verdict | M, P→M | E138 (C5) | `E138/scored.json`, `primary.verdicts`, `pool_with_e130` |
 | Why 1.9 | the odd bits match Booth on B (75.4 against 78.1–78.5 board-equivalent fJ); the even bits cost about 2.2× its prediction (39.4 against 17.8–18.3) | D | E138 (C1) | `E138/README.md` §3 |
 | **Per-position prices predict a second session** | E130's B bits 0–6 from E138's: 3.2 rail fJ rms (7%) per position, 7.2 (15%) parity, 13.6 (29%) flat | D | E138 | `E138/scored.json`, `out_of_sample_e130` |
 
@@ -2618,7 +2618,7 @@ board watts** at about 0.118 °C per W on aifoundry3, to about 0.2 °C on new ki
 | (the Q136 section; E128) fp16's rest not located on the matched design, the sums' share not established (R8, R9 INCONCLUSIVE at two passes) | located: 1.001 ± 0.055 with the accumulators differing, −0.001 ± 0.055 with the sums changing, six passes | E137 |
 | (the Q136 section; E132) the encoded part's two verdicts UNRESOLVED, its board cost not separated from the leakage footing | settled on the primary: PAYS (+0.213 W on both images, about 0.46 pJ an encoded toggle) and ENCODED at the DDR die rail; no verdict moves at an arm | E139 |
 | (the Q136 section; E130) B's side read only as straddling the line between Booth on B and no recoder | on the rail neither group's band holds (1.91 against 4.16–4.39 and 1.05–1.09); the structural verdict still INCONCLUSIVE, by 0.2 fJ | E138 |
-| (Q137(m)) M6's nested 0.207 W for the floats against M5's 0.226 as a gain in prediction | not out of sample: on blind pool 4 M6 reads 0.406 W rms and M5 0.358, M6 biased high and its intervals under-covering (19 of 25) | E140 |
+| (Q137(m)) M6's nested 0.207 W for the floats against M5's 0.226 as a gain in prediction | not out of sample: on blind pool 4, over all 25 tiles, M6 reads 0.406 W rms and M5 0.358 (on the 14 float tiles 0.406 against 0.337), M6 biased high and its intervals under-covering (19 of 25) | E140 |
 | (the kinds page; Q134, Q136) "a large GEMM itself" not run on this chip | 4,096³ fp32 measured on aifoundry2: 2.173 µs an op at 800 MHz, no zeros-against-random speed gap where it streams to DRAM | E136 |
 | (E136's frozen speed law, from E119's arms) a large GEMM's time per op | 7–13% slow; with C's store frequency priced at `c16s`, `g4k` within 1.5% in fp32 and fp16 (post hoc) | E136 |
 

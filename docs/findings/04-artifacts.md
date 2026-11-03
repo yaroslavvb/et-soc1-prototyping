@@ -67,7 +67,7 @@ lab approvals, so a later page pass owes them. Public and unlisted still; the cl
 "Q136". **Dated note (E135's records, Mon 2 Nov 2026):** rebuilt in place as `9fdb534bbc77` at 15:06:17 PST (over
 `74e61efa531f`; source gyroscope `0fcf998`, data pinned at lab `b00d509e`) for E135, a GPU measured the same way:
 section 1's A100 half now measured, with a generated A100 table (the builder reads E135's `results.json`), the opening,
-section 10 and item 2, narrowed. Public and unlisted still; the claims are in [05-claims.md](05-claims.md), "E135".
+section 10 and item 2, narrowed. Public and unlisted still; the claims are in [05-claims.md](05-claims.md), "E135". **Dated note (Q137's integration, Mon 2 Nov 2026):** rebuilt in place as `3afa3a5facf1` at 17:43:13 PST (over `9fdb534bbc77`; source gyroscope `e7f1a80`, generated parts still pinned at lab `b00d509e`) for Q137: section 11 items 1, 5, 6, 10 and 12 answered, and a new subsection, "How well power and heat can be predicted now", with a before/after table of out-of-sample errors; then corrected after the integration's verifier (wording only). Public and unlisted still; the claims are in [05-claims.md](05-claims.md), "Q137".
 
 **A24 · From matmul speed to one transistor switch** (27 October 2026, Q128). The nine-step chain on one
 page: speed, the governor, board watts, picojoules per multiply-add, femtojoules per flipped operand bit,
