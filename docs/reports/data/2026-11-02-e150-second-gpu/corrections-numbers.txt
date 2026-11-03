@@ -1,0 +1,97 @@
+E150 corrections after verification: the numbers C1-C8 quote (corrections-numbers.py)
+
+== C1 heat: what the power path and the heat model each contribute to the blind 30 s rise error (score-e150.json heat)
+kinds 17; committed rms blind 1.209 C, corrected 1.190, measured power 0.871; bias blind +0.029, corrected +0.225, measured power +0.645
+recomputed: rms blind 1.209, corrected 1.190, measured power 0.871
+the power path's share d = predicted rise from measured power - blind predicted rise (blind error = heat model's error + d): rms 1.475 C, mean -0.616 C
+bias: blind +0.029 = heat model +0.645 + power path -0.616
+the power path's mean, in parts: G1's bias -3.51 W x the fit's 30 s rise per W 0.108 C/W = -0.380 C; the double count (corrected arm's bias minus the blind arm's) -0.196 C; the rest -0.040 C
+heat model's error against the power path's share: mean product -0.736 C^2, correlation -0.57 (raw moments; they partly cancel)
+checkerboard: measured 7.00 C; blind 10.29 (error -3.29), corrected 9.89 (error -2.89), from measured power 5.79 (error +1.21); d -4.50
+checkerboard's share of the blind arm's sum of squares 43%; of d's 55%
+without the checkerboard (16 kinds): rms blind 0.937, corrected 0.992, measured power 0.845, d 1.022; bias blind +0.236, measured power +0.609
+G1's power error on the checkerboard -37.7 W x the fit's 30 s rise per W 0.108 C/W = -4.07 C
+largest blind errors (C): bf16.checker -3.29 (measured power +1.21, d -4.50); bf16.rand +2.04 (measured power +1.33, d +0.71); bf16.sortrand +1.87 (measured power +0.84, d +1.04); int8.q_gelu_w +1.41 (measured power +0.36, d +1.04); bf16.twos -1.28 (measured power -0.04, d -1.24)
+
+== C2 cost by board: billing.json's rows per app, tied to the units by apps-e150.json's times
+ap-MTBCQWkgWu8qDiRno8Ta7Y: created 21:53:37, stopped 21:53:38; units none (STARTED -); metered $0.0000 (no row); GPU-seconds at the read rates -; the units' function-seconds 0.0
+ap-2D097VePZT0r2FJq6FzIPq: created 22:00:25, stopped 22:11:07; units ['S-A10G', 'S-L4'] (STARTED 22:00:30.76, 22:06:27.23); metered $0.2104 (Memory 0.0119, L4 0.0618, CPU 0.0176, A10G 0.1192); GPU-seconds at the read rates L4 278, A10G 390; the units' function-seconds 543.6
+ap-Wblo59AJBSv4RsK7adO8an: created 22:12:07, stopped 22:58:38; units ['A', 'B'] (STARTED 22:12:11.32, 22:12:11.86); metered $1.0300 (Memory 0.0524, CPU 0.0774, A10G 0.9002); GPU-seconds at the read rates A10G 2946; the units' function-seconds 2854.5
+ap-E0N7ZHFbYh150XuuPoIDKD: created 22:14:22, stopped 22:14:29; units ['B2'] (STARTED 22:14:26.32); metered $0.0007 (Memory 0.0000, CPU 0.0001, A10G 0.0006); GPU-seconds at the read rates A10G 2; the units' function-seconds 0.0
+ap-yjb1QlzCwEvCpeu37vmnly: created 22:15:26, stopped 22:17:36; units ['B3'] (STARTED 22:15:30.23); metered $0.0427 (Memory 0.0022, CPU 0.0032, A10G 0.0373); GPU-seconds at the read rates A10G 122; the units' function-seconds 0.0
+ap-KG1EulydKFGWB6alymcqTg: created 22:15:45, stopped 23:03:37; units ['B4'] (STARTED 22:15:49.35); metered $1.0020 (Memory 0.0510, CPU 0.0753, A10G 0.8757); GPU-seconds at the read rates A10G 2866; the units' function-seconds 2781.2
+total metered $2.2857
+GPU resources billed per app: ap-2D097VePZT0r2FJq6FzIPq: ['A10G', 'L4']; ap-E0N7ZHFbYh150XuuPoIDKD: ['A10G']; ap-KG1EulydKFGWB6alymcqTg: ['A10G']; ap-Wblo59AJBSv4RsK7adO8an: ['A10G']; ap-yjb1QlzCwEvCpeu37vmnly: ['A10G']
+
+== C3 the ledger's priced function-seconds (ledger.json)
+fn_seconds_total 6179.3 s; est_usd_fn_total $2.1126; priced 6108.3 s over ['A', 'B4', 'S-A10G', 'S-L4']; unpriced [('B', 71.01027464866638, None)]
+board B's NVML name: 'NVIDIA A10' (ledger_e150.py's gpu_of() matches 'L4' and 'A10G' only)
+the unpriced seconds at the A10G unit rate $1.2586/h: $0.0248; all 6179.3 s: $2.1375
+
+== C4 the freeze's timing against phase H (logs/e150-20261102-r1, git)
+board A 007_pass3: 59 windows 22:38:09.07 -> 22:42:08.69
+board A 008_pass4: 59 windows 22:42:09.44 -> 22:46:09.06
+board B4 007_pass3: 59 windows 22:41:45.73 -> 22:45:45.39
+board B4 008_pass4: 59 windows 22:45:46.11 -> 22:49:45.74
+commit bacc1a94 (the freeze): committed 22:46:18 PST
+commit fbd1df58 (A5): committed 22:47:16 PST
+commit bc14113b (the note on A5): committed 22:47:46 PST
+commit 451812e5 (phase H scored): committed 23:09:05 PST
+board A: the freeze's heat series (analyze_e150.py do_freeze: the last phase-L row's start + 10 s) ends 22:38:09.89; pass 2's last window ends 22:38:08.07; pass 3's first window bf16.REF (ref) 22:38:09.07 -> 22:38:12.15: the series runs 0.83 s into it
+board B4: the freeze's heat series (analyze_e150.py do_freeze: the last phase-L row's start + 10 s) ends 22:41:46.85; pass 2's last window ends 22:41:44.95; pass 3's first window bf16.REF (ref) 22:41:45.73 -> 22:41:48.82: the series runs 1.13 s into it
+the freeze's fetch, board A: 16 files written 22:45:54.53-22:45:55.78; steps 000_static .. 007_pass3; last sample 22:42:08.60; every file byte-identical to the committed log: True
+the freeze's fetch, board B4: 16 files written 22:45:57.57-22:45:57.92; steps 000_static .. 007_pass3; last sample 22:45:45.36; every file byte-identical to the committed log: True
+cut copy, board A: steps 000-006, samples to pass 2's last window end 22:38:08.07 (15555 kept, 12280 dropped)
+cut copy, board B4: steps 000-006, samples to pass 2's last window end 22:41:44.95 (15544 kept, 12270 dropped)
+analyze_e150.py reduce on the cut copy: exit 0
+analyze_e150.py freeze on the cut copy: exit 0
+the freeze from the cut copy against the committed predictions-e150.json, 1860 numbers: largest relative difference by block: heat 0.023; fit_L 3.8e-16; kinds 3.8e-16; band_w 2.1e-16; scales 1.7e-16; native_G1 0; rate_ratio 0; rules_L 0; span_w 0; tflops_e149 0; tflops_e150 0; units 0; zeros_offset_w 0
+  heat pooled R_ss: committed 0.14397, cut 0.14396 (-0.01%)
+  heat pooled r1: committed 0.05186, cut 0.05195 (+0.17%)
+  heat pooled r2: committed 0.09211, cut 0.09201 (-0.11%)
+  heat pooled tau1: committed 0.20000, cut 0.20000 (+0.00%)
+  heat pooled tau2: committed 31.81083, cut 31.81083 (+0.00%)
+  heat pooled rise30_per_W: committed 0.10810, cut 0.10813 (+0.02%)
+  heat pooled F30: committed 0.75084, cut 0.75110 (+0.03%)
+  heat pooled rms: committed 0.86184, cut 0.85414 (-0.89%)
+  heat pooled sse: committed 22824.76606, cut 22391.73398 (-1.90%)
+  heat pooled n: committed 30729.00000, cut 30692.00000 (-0.12%)
+  heat pooled session-start terms (init, one per board): committed -1.7491, -1.0756, cut -1.7599, -1.0849; intercepts committed 21.663, 20.980, cut 21.667, 20.983
+  heat per board A: init -2.2877 -> -2.3002; R_ss 0.14205 -> 0.14203, r1 0.05509 -> 0.05519, n 15366 -> 15348, sse 14965.4 -> 14705.3
+  heat per board B4: init -0.5627 -> -0.5699; R_ss 0.14578 -> 0.14577, r1 0.04854 -> 0.04861, n 15363 -> 15344, sse 7492.4 -> 7317.6
+  lambda_r1: committed 0.03362, cut 0.03367; sigma_cross committed 0.9501, cut 0.9501
+
+== C5 A2's timing: the L4's smoke container against A1 (logs/e150-20261102-smoke, apps-e150.json, git)
+the smoke's app created 22:00:25; S-A10G STARTED 22:00:30.76; S-L4 STARTED 22:06:27.23, its function's first line (t_fn) 22:06:28.69, its first NVML sample 22:06:28.76, its DONE 22:11:03.37
+A1 (de658109) committed 22:06:44 PST: the L4's function had started 15.3 s before it; A2 (aa706ef6) committed 22:11:53 PST
+
+== C6 the scale and the leakage share (predictions-e150.json scales, heat; E149's posthoc.txt)
+G1 scale per board 1.4634 (A), 1.4071 (B4); per format A bf16 1.421, fp16 1.461, int8 2.067; B4 bf16 1.371, fp16 1.404, int8 1.968
+leakage slope at the held reference: A 0.154, B4 1.142 W/C (ratio 7.4); mean 0.648; pooled r1 0.0519 C/W
+lambda r1: committed 0.0336 (mean slope x pooled r1); by board, each slope x pooled r1: A 0.0080, B4 0.0592; each slope x its own board's r1: A 0.0085, B4 0.0554
+E149 (the A100): lambda r1 A 0.156, B 0.106, pooled 0.131 (posthoc.txt); the A10G's by board is 0.06-0.45 of the A100's pooled
+post hoc switching-energy ratio, 1.4 x (1 - lambda r1) / (1 - 0.131): at the pooled 0.0336 1.557; by board A 1.598, B4 1.516
+the same with each board's own G1 scale: at the pooled lambda r1 A 1.627, B4 1.565; with each board's own lambda r1 A 1.671, B4 1.523
+
+== C7 the 75% sparse held-out kind and phase L's 75% scattered-zeros rung (tools/gpu/e149/e149_app.py; reduce files)
+  e149_app.py:76: src = S(g="randn", seed="zl-src")
+  e149_app.py:78: for f in (25, 50, 75, 90):
+  e149_app.py:79: k.append(("bf16", f"zs{f}", *both(S(g="zmask", src=src, frac=f / 100, block=1))))
+  e149_app.py:354: def _zmask(torch, X, spec, g2):
+  e149_app.py:358: z = torch.rand(X.shape, generator=g2, device="cuda") < f
+  e149_app.py:361: return torch.where(z, torch.zeros((), dtype=X.dtype, device="cuda"), X)
+  e149_app.py:314: if t == "sparse75":                      # Horace He's post: a random 75% masked (mask drawn in fp32)
+  e149_app.py:315: x = torch.randn(shape, generator=g, dtype=dt, device=dev)
+  e149_app.py:316: keep = torch.rand(shape, generator=g2, device=dev) >= 0.75
+  e149_app.py:317: return torch.where(keep, x, torch.zeros((), dtype=dt, device=dev))
+y: held-out bf16.sparse75 43.62 +/- 1.00 W; phase L's bf16.zs75 44.33 +/- 0.47 W
+G1: rms over 17 kinds 11.223 W (bias -3.513); without the 75% sparse, over 16: 11.557 W (bias -3.602)
+G4: rms over 17 kinds 5.225 W (bias -1.904); without the 75% sparse, over 16: 5.358 W (bias -1.886)
+G0: rms over 17 kinds 34.875 W (bias +22.763); without the 75% sparse, over 16: 34.436 W (bias +21.607)
+T0_a100_measured: rms over 17 kinds 2.982 W (bias +1.513); without the 75% sparse, over 16: 3.073 W (bias +1.603)
+
+== C8 two number slips (score-e150.json; reduce-L.json, reduce-H.json)
+G0 rms 34.8746 W -> 34.87; F4's g0_rms_w 34.8746
+board watts by cell (every valid pass row, both phases, both boards; 440 cells): 104.4 W (int8.zeros, board B4 pass 1) to 246.0 W (fp16.gelu_w, board A pass 4)
+board watts by kind mean (p_abs, 92 kinds): 108.0 W (int8.zeros) to 242.3 W (fp16.gelu_w)
+the zeros anchors' cells: 104.4 (int8.zeros) to 147.9 W (fp16.zeros)
