@@ -1,0 +1,104 @@
+{
+ "experiment": "E144b",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793688649986,
+ "protocol": {
+  "experiment": "E144b",
+  "request": "Q138",
+  "card": "aifoundry2",
+  "order_seed": 98,
+  "note": "E133's blocks (E111's), run by run_e144b.py over E133's chain (run_kspeed.py over E64's run_hpl.py, E111's idle-login rule): REST holds no launch; nothing is set on the card; the residency read run_hpl.py makes after every run is not sent; the holds are Q138(t)'s frozen 15 minutes",
+  "tools": {
+   "heater": "build/sparsity_t2/host/sparsity_host",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 72,
+   "board_cap_w": 93,
+   "cap_consecutive": 3,
+   "note": "Q138(t)'s frozen aifoundry2 stops (predictions-e144.json rules.stops.aifoundry2, c2f9920d): the hold ends at a die reading >= 72 C or a board reading > 93 W on 3 samples (E133's 80 C / 93 W with the die tightened). run_hpl.py's watcher reads every live sampler line and applies 72 C to the die mean and to the hottest sensor. E111's and E133's H-F32 peaked at 88.04 and 88.65 W (none over 90 W) and a 67-68 C die mean; the hottest sensor's carried running maximum read 69-70 C"
+  },
+  "caps": {
+   "max_card_min": 19
+  },
+  "step": "G2",
+  "from": {
+   "protocol": "tools/claims-v3/e133/protocol-w2.json",
+   "blocks": "W2's REST and HOLDF, unchanged but for HOLDF's 106 processes (was 190) and its title; W2's SUS and HOLD dropped"
+  },
+  "blocks": [
+   {
+    "name": "REST",
+    "title": "the rest reading: no launch, the 10 Hz sampler on the idle card; the last 60 s are the reading",
+    "start": {
+     "mode": "cool",
+     "max_c": 99,
+     "max_wait_s": 5
+    },
+    "launch": {
+     "seconds": 2,
+     "budget": 3.5,
+     "processes": 0
+    },
+    "tail_s": 120,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "zeros",
+      "label": "rest"
+     }
+    ]
+   },
+   {
+    "name": "HOLDF",
+    "title": "E144b G2 (Q138(t)'s frozen H-F32): fp32 randn, 106 back-to-back 8 s processes (~15.1 min) from at once after the REST, under the card's own governor; the steady reading is the last 300 s",
+    "start": {
+     "mode": "cool",
+     "max_c": 99,
+     "max_wait_s": 5
+    },
+    "launch": {
+     "seconds": 8,
+     "budget": 9.5,
+     "processes": 106
+    },
+    "tail_s": 6,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "fp32-randn-hold"
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "REST-00-rest-r1",
+  "HOLDF-00-fp32-randn-hold-r1"
+ ],
+ "sha256": {
+  "heater": "7adadf4f1ce331cc028c317561933d6d3209da0f0326b0ce9a124b39b15ac0d2",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e144b/run_e144b.py",
+  "--protocol",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e144b/protocol-g2.json",
+  "--out",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e144b/runs/G2",
+  "--max-card-min",
+  "19"
+ ],
+ "git_head": "0c187e1262b0e0f7fb744da4c22211b5dcfa9958",
+ "git_dirty_hpl": ""
+}

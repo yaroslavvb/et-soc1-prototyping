@@ -1,0 +1,184 @@
+{
+ "experiment": "E144b",
+ "frozen_inputs": {
+  "commit": "c2f9920d",
+  "sha256": {
+   "predictions-e144.json": "ae840f84bd36e80f822981913b3d44f314248669f56ff96dc2c2b61ced0a92d0",
+   "amendment-a1.json": "a147f40c5225e6d213f6f907dae652961f2b7ae784fe56747dbf6d22b5726240",
+   "model-q138t.json": "268b47fd580b330738eb3e1c83ea392f3784aae348a658e7335b734a1168e8fa",
+   "score_e144.py": "0569c49474da4058de4ad14c13d1081fa50ba2e7dd705d4a564835d94c2e1494",
+   "heat_q138t.py": "9dbb288f896b7e588fbc155d67f32b1cb7089ffe4ede465c1380d2724d1fb49b",
+   "fit_q138t.py": "0f21f77cb916bb65c85708b89a89a36e7add3146e098da38dd64b4077e9eb29a",
+   "predict_e144.py": "313c6840337615b2c474c39f74f095737bf7a35ecc6f9d8ac2356478f6442512"
+  }
+ },
+ "steps_scored": [
+  "G1",
+  "G2"
+ ],
+ "score": {
+  "card": "aifoundry2 card 0",
+  "holds": [
+   {
+    "step": "G1",
+    "hold": "HOLD-00-int8-neg_ones-hold",
+    "G": "G1",
+    "dur_s": 902.8289999961853,
+    "rest_die_C": 46.0,
+    "a": {
+     "rms_C": 0.7621346856440495,
+     "plateau_err_C": 0.723639692382852,
+     "max_abs_C": 1.6884089195296355,
+     "verdict": "PASS"
+    },
+    "a_M6": {
+     "rms_C": 1.5925953103692096,
+     "plateau_err_C": 0.625607404606102
+    },
+    "b": {
+     "plateau_rise_C": 12.923241415315175,
+     "predicted_C": 11.833,
+     "err_C": 1.090241415315175,
+     "verdict": "PASS"
+    },
+    "b_M6": {
+     "predicted_C": 11.933,
+     "err_C": 0.9902414153151753
+    },
+    "c_per_board_W": {
+     "per_board_W": 0.71107572153949,
+     "verdict": "PASS"
+    },
+    "c_t63": {
+     "t63_s": 79.1050477027893,
+     "ratio": 1.5948598327175263,
+     "reference_s": 49.6,
+     "reference": "the open loop's t63 (as frozen)",
+     "verdict": "NOT PASS (no FAIL band was registered)"
+    },
+    "c_t63_A1": {
+     "t63_s": 79.1050477027893,
+     "ratio": 1.0408558908261751,
+     "reference_s": 76.0,
+     "reference": "A1.8: the frozen chain on the planned board trace, read as the scorer reads a hold",
+     "verdict": "PASS"
+    },
+    "per_board_W_last300s": 0.71107572153949
+   },
+   {
+    "step": "G2",
+    "hold": "HOLDF-00-fp32-randn-hold",
+    "G": "G2",
+    "dur_s": 912.6180000305176,
+    "rest_die_C": 46.0,
+    "a": {
+     "rms_C": 0.3691156776520867,
+     "plateau_err_C": 0.12266657193400533,
+     "max_abs_C": 1.905056630853906,
+     "verdict": "PASS"
+    },
+    "a_M6": {
+     "rms_C": 2.1981628769759736,
+     "plateau_err_C": -0.053448504761838
+    },
+    "b": {
+     "plateau_C": 67.28832436256309,
+     "predicted_C": 67.493,
+     "err_C": -0.20467563743690675,
+     "regime": "floor",
+     "regime_predicted": "floor",
+     "share_600MHz_last300s": 1.0,
+     "verdict": "PASS",
+     "tests": "the chain (floor regime)"
+    },
+    "b_M6": {
+     "predicted_C": 67.884,
+     "err_C": -0.5956756374369121,
+     "note": "M6 has no governor term: the floor's rise only"
+    },
+    "per_board_W_last300s": 0.6745231582312783
+   }
+  ],
+  "verdicts": {
+   "G1/HOLD-00-int8-neg_ones-hold a": "PASS",
+   "G1/HOLD-00-int8-neg_ones-hold b": "PASS",
+   "G1/HOLD-00-int8-neg_ones-hold c_per_board_W": "PASS",
+   "G1/HOLD-00-int8-neg_ones-hold c_t63": "NOT PASS (no FAIL band was registered)",
+   "G1/HOLD-00-int8-neg_ones-hold c_t63_A1": "PASS",
+   "G2/HOLDF-00-fp32-randn-hold a": "PASS",
+   "G2/HOLDF-00-fp32-randn-hold b": "PASS"
+  }
+ },
+ "scorer_cmd": [
+  "score_e144.py",
+  "a2",
+  "G1",
+  "G2"
+ ],
+ "clock": {
+  "G1": {
+   "hold_file": "HOLD-00-int8-neg_ones-hold-r1.jsonl.gz",
+   "dur_s": 902.8,
+   "samples": 9022,
+   "last300": {
+    "n": 2998,
+    "mean_mhz": 792.6951300867245,
+    "share_ge_790": 0.961974649766511,
+    "share_le_610": 0.03502334889926618
+   },
+   "whole": {
+    "mean_mhz": 794.4358235424518,
+    "share_ge_790": 0.970405675016626,
+    "share_le_610": 0.02604743959210818
+   },
+   "safety": {
+    "board_peak_W": 41.27,
+    "samples_over_85W": 0,
+    "samples_over_90W": 0,
+    "die_max_C": 60,
+    "hottest_max_C": 69
+   },
+   "first_step_down": {
+    "after_first_launch_s": 24.7,
+    "die_C": 51,
+    "board_W": 37.76,
+    "mhz": 600
+   }
+  },
+  "G2": {
+   "hold_file": "HOLDF-00-fp32-randn-hold-r1.jsonl.gz",
+   "dur_s": 912.6,
+   "samples": 9120,
+   "last300": {
+    "n": 2998,
+    "mean_mhz": 600.0,
+    "share_ge_790": 0.0,
+    "share_le_610": 1.0
+   },
+   "whole": {
+    "mean_mhz": 608.2675438596491,
+    "share_ge_790": 0.02149122807017544,
+    "share_le_610": 0.9388157894736842
+   },
+   "safety": {
+    "board_peak_W": 87.98,
+    "samples_over_85W": 79,
+    "samples_over_90W": 0,
+    "die_max_C": 68,
+    "hottest_max_C": 70
+   },
+   "first_step_down": {
+    "after_first_launch_s": 0.0,
+    "die_C": 47,
+    "board_W": 46.6,
+    "mhz": 600
+   }
+  }
+ },
+ "K1": {
+  "rule": "E144b-K1: G1's share of samples over its last 300 s at >= 790 MHz: PASS >= 0.90, FAIL < 0.80",
+  "share": 0.961974649766511,
+  "verdict": "PASS",
+  "die_max_C": 60
+ }
+}

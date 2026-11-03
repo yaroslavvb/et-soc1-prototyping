@@ -1,0 +1,18 @@
+E144b reduce: frozen inputs at c2f9920d verified (7 files); steps scored ['G1', 'G2']
+
+== G1 HOLD-00-int8-neg_ones-hold (G1), 903 s, rest die 46.00 C
+  (a) chain on the measured board: rms 0.762 C, plateau err +0.724 C, max |err| 1.688 -> PASS   [M6 as frozen: rms 1.593, plateau +0.626]
+  (b) plateau rise 12.923 vs 11.833 C: err +1.090 -> PASS   [M6: +0.990]
+  (c) per board W 0.71107572153949 -> PASS; t63 79.1050477027893 s, x1.5948598327175263 of the open loop's -> NOT PASS (no FAIL band was registered); A1.8 closed reference x1.0408558908261751 -> PASS
+
+== G2 HOLDF-00-fp32-randn-hold (G2), 913 s, rest die 46.00 C
+  (a) chain on the measured board: rms 0.369 C, plateau err +0.123 C, max |err| 1.905 -> PASS   [M6 as frozen: rms 2.198, plateau -0.053]
+  (b) plateau 67.288 vs 67.493 C: err -0.205; regime floor (predicted floor, 600 MHz share 1.000) -> PASS; tests the chain (floor regime)   [M6 floor only: -0.596]
+
+== G1 clock and safety: {"hold_file": "HOLD-00-int8-neg_ones-hold-r1.jsonl.gz", "dur_s": 902.8, "samples": 9022, "last300": {"n": 2998, "mean_mhz": 792.6951300867245, "share_ge_790": 0.961974649766511, "share_le_610": 0.03502334889926618}, "whole": {"mean_mhz": 794.4358235424518, "share_ge_790": 0.970405675016626, "share_le_610": 0.02604743959210818}, "safety": {"board_peak_W": 41.27, "samples_over_85W": 0, "samples_over_90W": 0, "die_max_C": 60, "hottest_max_C": 69}, "first_step_down": {"after_first_launch_s": 24.7, "die_C": 51, "board_W": 37.76, "mhz": 600}}
+
+== G2 clock and safety: {"hold_file": "HOLDF-00-fp32-randn-hold-r1.jsonl.gz", "dur_s": 912.6, "samples": 9120, "last300": {"n": 2998, "mean_mhz": 600.0, "share_ge_790": 0.0, "share_le_610": 1.0}, "whole": {"mean_mhz": 608.2675438596491, "share_ge_790": 0.02149122807017544, "share_le_610": 0.9388157894736842}, "safety": {"board_peak_W": 87.98, "samples_over_85W": 79, "samples_over_90W": 0, "die_max_C": 68, "hottest_max_C": 70}, "first_step_down": {"after_first_launch_s": 0.0, "die_C": 47, "board_W": 46.6, "mhz": 600}}
+
+E144b-K1: {"rule": "E144b-K1: G1's share of samples over its last 300 s at >= 790 MHz: PASS >= 0.90, FAIL < 0.80", "share": 0.961974649766511, "verdict": "PASS", "die_max_C": 60}
+
+verdicts: {"G1/HOLD-00-int8-neg_ones-hold a": "PASS", "G1/HOLD-00-int8-neg_ones-hold b": "PASS", "G1/HOLD-00-int8-neg_ones-hold c_per_board_W": "PASS", "G1/HOLD-00-int8-neg_ones-hold c_t63": "NOT PASS (no FAIL band was registered)", "G1/HOLD-00-int8-neg_ones-hold c_t63_A1": "PASS", "G2/HOLDF-00-fp32-randn-hold a": "PASS", "G2/HOLDF-00-fp32-randn-hold b": "PASS"}
