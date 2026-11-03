@@ -1,0 +1,31 @@
+== float: rows 515 (old 515); card term C0_M5_E78E82_family
+   M7 form LOKO old 0.2090 -> footing 0.1842 W  fp16 0.177->0.169  fp32 0.231->0.195  card a3 0.216->0.182  card c1 0.203->0.186
+   M6 form LOKO old 0.2187 -> footing 0.1896 W  fp16 0.187->0.180  fp32 0.241->0.197  card a3 0.235->0.195  card c1 0.203->0.185
+   M5 form LOKO old 0.2338 -> footing 0.2094 W  fp16 0.211->0.203  fp32 0.251->0.215  card a3 0.258->0.226  card c1 0.209->0.193
+   M7u card-1 scale {np.str_('fp16'): 0.9615998850616304, np.str_('fp32'): 0.9615998850616304} (M7 {'fp16': 0.9711174157693975, 'fp32': 0.9711174157693975})
+   M7u coef fJ {"mult": 1.62, "add32": 1.64, "add16": 1.57, "bus": 6.58, "rest": 2.35, "clk": 0.62, "gtr": 136.11, "glive": 2965213.02}
+   M7  coef fJ {"mult": 1.59, "add32": 1.64, "add16": 1.58, "bus": 6.78, "rest": 2.31, "clk": 0.63, "gtr": 145.53, "glive": 2926666.78}
+   pool 4 (fp32, n 11), M7u without E140: rms 0.240 bias(meas-pred) +0.026 inside 11/11
+   pool 4 (fp16, n 7), M7u without E140: rms 0.116 bias(meas-pred) -0.022 inside 7/7
+== int8: rows 122 (old 122); card term C0_M5_E78E82_family
+   M7 form LOKO old 0.2399 -> footing 0.2435 W  int8 0.240->0.244  card a3 0.226->0.235  card c1 0.255->0.253
+   M6 form LOKO old 0.2519 -> footing 0.2505 W  int8 0.252->0.251  card a3 0.256->0.256  card c1 0.248->0.245
+   M5 form LOKO old 0.2524 -> footing 0.2532 W  int8 0.252->0.253  card a3 0.256->0.260  card c1 0.248->0.246
+   M7u card-1 scale {np.str_('int8'): 0.9615854710541774} (M7 {'int8': 0.9734515623123359})
+   M7u coef fJ {"nets_nobus": 3.39, "bus": 16.17, "clk": 1.89, "b138": -21.31}
+   M7  coef fJ {"nets_nobus": 3.37, "bus": 16.32, "clk": 1.88, "b138": -23.38}
+   pool 4 (int8, n 7), M7u without E140: rms 0.233 bias(meas-pred) -0.048 inside 7/7
+E141_committed_frozen: leak 0.26343653250774357, passes [14111, 14112, 14113]; B1 FAIL HIGH -0.23028430058389648 [-0.11654671573758858, 0.08501801822061678]; B2 PASS -0.11001299536167128; C1 {'verdict': 'PASS', 'inside': 28, 'n': 30}; X1 None; X2 None
+   M7 rms by format {'fp32': 0.3251476194285146, 'fp16': 0.3168574546716508, 'int8': 0.35558433357096314} all {'rms': 0.3650239964993548, 'bias': -0.232804153212681} cov {'verdict': 'PASS', 'inside': 28, 'n': 30}
+E141_footing_frozen: leak 0.20563713796102187, passes [14110, 14111, 14112, 14113]; B1 PASS 0.01193243606709881 [-0.11654671573758858, 0.08501801822061678]; B2 PASS -0.08324134530277284; C1 {'verdict': 'PASS', 'inside': 30, 'n': 30}; X1 None; X2 None
+   M7 rms by format {'fp32': 0.1459651121810754, 'fp16': 0.1493818796123353, 'int8': 0.3361837434375055} all {'rms': 0.23072963091296372, 'bias': -0.039516945546807035} cov {'verdict': 'PASS', 'inside': 30, 'n': 30}
+E141_footing_m7u: leak 0.20563713796102187, passes [14110, 14111, 14112, 14113]; B1 PASS -0.07176756393290121 [-0.11654671573758858, 0.08501801822061678]; B2 PASS -0.11895563101705882; C1 {'verdict': 'PASS', 'inside': 29, 'n': 30}; X1 None; X2 None
+   M7 rms by format {'fp32': 0.1612759627321718, 'fp16': 0.14756247150444834, 'int8': 0.3417174191550069} all {'rms': 0.24121594351586567, 'bias': -0.10803027888014062} cov {'verdict': 'PASS', 'inside': 29, 'n': 30}
+E142_committed_frozen: leak 0.2414, passes [14210, 14211, 14212, 14213, 14214]; B1 PASS 0.04988168683566151 [-0.08973211942555741, 0.10504513075201416]; B2 PASS -0.037519230455307105; C1 {'verdict': 'PASS', 'inside': 30, 'n': 30}; X1 {'verdict': 'FAIL', 'median_ratio': 0.9821245717499325, 'lo95': 0.979648347359601, 'hi95': 0.9954867632622687, 'card_term': 0.9711174157693975, 'n': 21}; X2 {'verdict': 'PASS', 'median_ratio': 0.9809406080380357, 'lo95': 0.9688191192176724, 'hi95': 1.0049933169010374, 'card_term': 0.9734515623123359, 'n': 9}
+   M7 rms by format {'fp32': 0.16857644316153927, 'fp16': 0.1492137958076993, 'int8': 0.2509425414162514} all {'rms': 0.21078807127125773, 'bias': 0.0005092907107894451} cov {'verdict': 'PASS', 'inside': 30, 'n': 30}
+E142_footing_frozen: leak 0.3134106532552718, passes [14210, 14211, 14212, 14213, 14214]; B1 FAIL HIGH -0.12489088578269121 [-0.08973211942555741, 0.10504513075201416]; B2 PASS -0.09877556789894289; C1 {'verdict': 'PASS', 'inside': 30, 'n': 30}; X1 {'verdict': 'FAIL', 'median_ratio': 0.963528675235089, 'lo95': 0.9625529149421788, 'hi95': 0.9667360866018134, 'card_term': 0.9711174157693975, 'n': 21}; X2 {'verdict': 'PASS', 'median_ratio': 0.9645713253591975, 'lo95': 0.9509803867167199, 'hi95': 0.9912810479028233, 'card_term': 0.9734515623123359, 'n': 9}
+   M7 rms by format {'fp32': 0.16513921332860274, 'fp16': 0.19723617515561576, 'int8': 0.2614037575201981} all {'rms': 0.2344188610941574, 'bias': -0.1385449270370307} cov {'verdict': 'PASS', 'inside': 30, 'n': 30}
+E142_footing_m7u: leak 0.3134106532552718, passes [14210, 14211, 14212, 14213, 14214]; B1 PASS -0.027432062253278995 [-0.08973211942555741, 0.10504513075201416]; B2 PASS -0.07118985361322842; C1 {'verdict': 'PASS', 'inside': 30, 'n': 30}; X1 {'verdict': 'FAIL', 'median_ratio': 0.963528675235089, 'lo95': 0.9625529149421788, 'hi95': 0.9667360866018134, 'card_term': 0.9615998850616304, 'n': 21}; X2 {'verdict': 'PASS', 'median_ratio': 0.9645713253591975, 'lo95': 0.9509803867167199, 'hi95': 0.9912810479028233, 'card_term': 0.9615854710541774, 'n': 9}
+   M7 rms by format {'fp32': 0.12970840179783605, 'fp16': 0.14688435672584757, 'int8': 0.2564938218328825} all {'rms': 0.20523894761468262, 'bias': -0.06292492703703041} cov {'verdict': 'PASS', 'inside': 30, 'n': 30}
+nested procedure on footing rows, float: picks G8_gtr_glive / C1_allpairs_family, nested 0.1848 W (M7's own at freeze: see loko-m7.json)
+nested procedure on footing rows, int8: picks J8_b138 / C0_M5_E78E82_family, nested 0.2435 W (M7's own at freeze: see loko-m7.json)
