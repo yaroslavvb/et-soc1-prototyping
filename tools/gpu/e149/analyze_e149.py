@@ -108,7 +108,8 @@ def reduce_run(run_dir):
                     ok = w["st"]["valid"] and r0["st"]["valid"] and r1["st"]["valid"]
                     pr = 0.5 * (r0["st"]["p_w"] + r1["st"]["p_w"])
                     tr = 0.5 * (r0["st"]["t_c"] + r1["st"]["t_c"])
-                    fl = 2.0 * 2048 ** 3 * w["calls"] / (w["gpu_ms"] / 1000.0) / 1e12 if w["gpu_ms"] > 0 else None
+                    fl = (2.0 * w.get("n", 2048) ** 3 * w["calls"] / (w["gpu_ms"] / 1000.0) / 1e12
+                          if w["gpu_ms"] > 0 else None)
                     rows.append({"kind": w["kind"], "d": w["st"]["p_w"] - pr, "dT": w["st"]["t_c"] - tr,
                                  "p": w["st"]["p_w"], "p_e": w["st"]["p_e_w"], "p_ref": pr, "T": w["st"]["t_c"],
                                  "valid": ok, "cell_valid": w["st"]["valid"], "sm_min": w["st"]["sm_min"],

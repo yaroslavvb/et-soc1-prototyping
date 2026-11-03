@@ -32,9 +32,10 @@ PINS = {"python": "3.11", "torch": "2.5.1", "nvidia-ml-py": "12.560.30", "numpy"
 RATE = {"gpu_h": 2.10, "cpu_core_h": 0.0473, "mem_gib_h": 0.008}
 CPU_CORES = 2.0
 MEM_MIB = 8192
-N = 2048                       # M = N = K
-TIMEOUT_S = {"S": 900, "1": 3300, "2": 2700}
-BUDGET_S = {"S": 720.0, "1": 3000.0, "2": 2400.0}
+N = 2048                       # M = N = K for bf16 (E149.md); fp16 and int8 run at SIZE[fmt] (amendment A1)
+SIZE = {"bf16": 2048, "fp16": 2048, "int8": 2048}
+TIMEOUT_S = {"S": 900, "S2": 900, "1": 3300, "2": 2700}
+BUDGET_S = {"S": 720.0, "S2": 600.0, "1": 3000.0, "2": 2400.0}
 WIN = {"cell_s": 5.0, "ref_s": 3.0, "cell_settle_s": 1.5, "ref_settle_s": 1.0, "group_ms": 20.0, "depth": 4,
        "sampler_period_s": 0.1}
 HOLD = {"pre_s": 15.0, "hold_s": 30.0}
@@ -360,8 +361,14 @@ def _zmask(torch, X, spec, g2):
     return torch.where(z, torch.zeros((), dtype=X.dtype, device="cuda"), X)
 
 
-def make_pair(torch, k, n=N):
+def size_of(k):
+    """A kind's M = N = K: SIZE[fmt], or the '@n' suffix of its name (the size smoke S2 only)."""
+    return int(k[1].split('@')[1]) if '@' in k[1] else SIZE[k[0]]
+
+
+def make_pair(torch, k, n=None):
     fmt, name, sa, sb = k
+    n = size_of(k) if n is None else n
     A = build(torch, sa, fmt, (n, n), f"e149/{fmt}/{name}/A")
     Bs = build(torch, sb, fmt, (n, n), f"e149/{fmt}/{name}/B")
     return A.contiguous(), Bs.contiguous()
@@ -572,7 +579,21 @@ def pass_order(kinds, stage, unit, p):
     return seq if fwd else list(reversed(seq))
 
 
+SIZES_S2 = (1024, 1536, 1792)
+STAGE_S2 = ([("fp16", f"randn@{n}", S(g="randn"), S(g="randn")) for n in SIZES_S2] +
+            [("fp16", f"zeros@{n}", S(g="zeros"), S(g="zeros")) for n in SIZES_S2] +
+            [("int8", f"rand@{n}", S(g="randint8"), S(g="randint8")) for n in SIZES_S2] +
+            [("int8", f"zeros@{n}", S(g="zeros"), S(g="zeros")) for n in SIZES_S2] +
+            [("bf16", "randn", S(g="randn"), S(g="randn")), ("bf16", "zeros", S(g="zeros"), S(g="zeros"))])
+
+
 def plan(stage, unit):
+    if stage == "S2":
+        seq = [kid(k) for k in STAGE_S2]
+        return {"stage": "S2", "unit": unit,
+                "steps": [{"op": "static"}, {"op": "gen", "set": "S2"}, {"op": "idle", "s": 10.0},
+                          {"op": "hold", "kind": "bf16.REF", "s": 60.0, "label": "warm_ref"},
+                          {"op": "pass", "p": 1, "seq": seq}, {"op": "idle", "s": 5.0}]}
     if stage == "S":
         kinds = [k for k in STAGE1 if kid(k) in ("bf16.randn", "bf16.zeros", "bf16.mk3", "bf16.sq1", "fp16.mk5",
                                                      "int8.rand", "int8.zeros", "bf16.dsortK")]
@@ -610,7 +631,7 @@ def step_seconds(st):
     if op == "static":
         return 40.0
     if op == "gen":
-        return {"S": 30.0, "1": 150.0, "2": 60.0}[st["set"]]
+        return {"S": 30.0, "1": 150.0, "2": 60.0, "S2": 30.0}[st["set"]]
     if op == "idle":
         return st["s"] + 2.0
     if op == "hold":
@@ -701,7 +722,8 @@ class Unit:
         torch.cuda.synchronize()
         t_b = time.time()
         gpu_ms = e0.elapsed_time(evs[-1])
-        return {"kind": kname, "t_a": t_a, "t_b": t_b, "calls": n, "group": grp, "gpu_ms": round(gpu_ms, 3)}
+        return {"kind": kname, "t_a": t_a, "t_b": t_b, "calls": n, "group": grp, "gpu_ms": round(gpu_ms, 3),
+                "n": self.ops[kname + "#n"]}
 
     def run_step(self, st):
         need = step_seconds(st)
@@ -781,7 +803,9 @@ class Unit:
                 feats[name] = {"sha_A": sha(torch, A), "sha_B": sha(torch, Bs)}
             fmt = k[0]
             Bt = Bs.t()
-            C = torch.empty((N, N), dtype=torch.int32 if fmt == "int8" else A.dtype, device="cuda")
+            nn = A.shape[0]
+            C = torch.empty((nn, nn), dtype=torch.int32 if fmt == "int8" else A.dtype, device="cuda")
+            self.ops[name + "#n"] = nn
             self.ops[name] = (A, Bt, C, fmt)
             fn = self.mm_for(name)
             for _ in range(3):
@@ -803,7 +827,7 @@ class Unit:
         return feats
 
     def step_gen(self, st):
-        sets = {"S": [k for k in STAGE1 if kid(k) in self.plan_ids()], "1": STAGE1, "2": STAGE2}
+        sets = {"S": [k for k in STAGE1 if kid(k) in self.plan_ids()], "1": STAGE1, "2": STAGE2, "S2": STAGE_S2}
         kinds = list(sets[st["set"]]) + [REF]
         feats = self._prepare(kinds, with_feats=(st["set"] in ("S", "1")))
         _wjson_gz(f"{self.root}/features-{st['set']}.json.gz", feats)
@@ -944,8 +968,9 @@ def main(mode: str = "dry", run_id: str = ""):
         print(f"projected total ${tot:.2f}")
         return
     assert run_id, "--run-id is required"
-    if mode == "smoke":
-        res = run_smoke.remote(run_id, json.dumps(plan("S", "S")), BUDGET_S["S"])
+    if mode in ("smoke", "smoke2"):
+        st_ = "S" if mode == "smoke" else "S2"
+        res = run_smoke.remote(run_id, json.dumps(plan(st_, st_)), BUDGET_S[st_])
         print(res[:4000])
         return
     if mode in ("stage1", "stage2"):
