@@ -1,0 +1,51 @@
+E141: reduce_e78.py unchanged via reduce_e141.py (blind pool 5's items; primary)
+E78 aifoundry3: 600 MHz, 521.5 mV, leak 0.1994 W/C (-1 runs), runs kept 166/222, passes [14111, 14112, 14113], idle-invalid runs 0
+  passes set aside: [{'pass': 14110, 'why': ['fp32.randn spans 1.701 W']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.90573063708514
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.wideexp48_dense       26.019  0.096    27.969      24952    6.092
+    fp32.anchor_randn          24.787  0.176    26.742      23851    5.823
+    fp32.randn                 24.713  0.041    26.713      23832    5.818
+    fp32.lowrank2_w            23.931  2.991    25.986      23182    5.660
+    fp32.sorted_k              22.690  1.390    24.657      21997    5.370
+    fp32.real_pythia_gelu_down   22.313  0.097    24.269      21650    5.286
+    fp32.real_pythia_ln1_q     22.134  0.149    24.092      21496    5.248
+    fp32.e4m3grid_gelu_w       16.786  0.142    18.700      16684    4.073
+    fp32.gray_stream           16.712  0.099    18.773      16746    4.089
+    fp32.b_exp_busy_a_const    15.524  0.075    17.469      15589    3.806
+    fp32.exp_only_both         15.310  2.012    17.332      15466    3.776
+    fp32.wideexp48_bgate_alt   14.886  0.563    16.787      14969    3.655
+    fp32.wideexp48_bgate_kblk   13.071  0.174    15.051      13422    3.277
+    fp32.block_sparse_k4       12.300  1.048    14.304      12762    3.116
+    anchor_pi                   8.376  0.009    10.449       9321    2.276
+    fp32.anchor_zeros           0.029  0.155     2.002       1786    0.436
+    fp32.zeros                  0.000  0.000     1.992       1777    0.434
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 22.080  0.318    24.029      21436    2.617
+    fp16.anchor_randn          22.008  0.190    24.013      21420    2.615
+    fp16.real_pythia_ln2_up    21.997  1.021    23.958      21374    2.609
+    fp16.pair_nearcancel       21.943  0.087    23.897      21314    2.602
+    fp16.sparse24_straddled    21.917  0.119    23.927      21341    2.605
+    fp16.real_pythia_qk        20.746  2.020    22.696      20253    2.472
+    fp16.real_pythia_softmax_v   16.905  0.649    18.857      16823    2.054
+    fp16.pair_cancel_asign     16.666  0.066    18.657      16645    2.032
+    fp16.exp_only              16.369  0.220    18.353      16377    1.999
+    fp16.wideexp_bgate_alt     13.490  0.245    15.429      13765    1.680
+    fp16.sparse24_aligned      12.834  0.121    14.866      13261    1.619
+    fp16.zeros                  0.000  0.000     1.956       1745    0.213
+    fp16.anchor_zeros          -0.010  0.037     1.996       1781    0.217
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.170  0.123     9.741       5059    0.309
+    int8.anchor_full            7.037  0.496     9.662       5017    0.306
+    int8.real_pythia_w8a8_down    6.701  0.208     9.190       4772    0.291
+    int8.real_pythia_w8a8_up    6.366  0.250     8.978       4662    0.285
+    int8.b_line_flipflop_nogate    6.205  0.203     8.837       4589    0.280
+    int8.sorted_k               6.018  0.505     8.592       4462    0.272
+    int8.powerlaw_w             5.800  0.288     8.349       4335    0.265
+    int8.block_sparse_a         4.363  0.238     6.921       3596    0.219
+    int8.gray_a                 4.096  0.092     6.728       3494    0.213
+    int8.b_line_zero_one        3.378  0.113     5.996       3114    0.190
+    int8.a_word_flipflop        3.246  0.187     5.774       2998    0.183
+    int8.zeros                  0.000  0.000     2.556       1328    0.081
+    int8.anchor_zeros          -0.010  0.293     2.561       1330    0.081
+  idle consistency median |S - S0 - D| 0.06280827352512652 W; carry-over {'slope_w_per_w': 0.002760231914166417, 'se': 0.0019182061605638222, 'n': 163}; pi built-in - file None; rail tau re-fit median None
