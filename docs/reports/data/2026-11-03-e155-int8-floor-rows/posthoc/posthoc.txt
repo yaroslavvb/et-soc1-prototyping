@@ -1,0 +1,14 @@
+E155 post hoc (deciding nothing), primary reduction, 9 passes; per pass, then mean ± 95% t
+1. fp32's three arms: e +90.5 ± 19.4 pJ an op, pB +0.146 ± 0.077 pJ a TenB write; shared term at three rows (e + 256 pB) x dr +0.100 ± 0.008 W (frozen: +0.085 W from E148's E_op; session E_op: +0.100 ± 0.008 W)
+2. Q31k = S(m0r3k8.int8) - S(m0r1.int8): raw +0.036 ± 0.065 W; with B's halving added back at each pass's pB +0.220 ± 0.118 W; walk parts frozen: Wn +0.359 [+0.319, +0.399], Wt +0.255 [+0.227, +0.284]; C and T 0
+3. D31 less the frozen shared: +0.226 ± 0.102 W -> +52.8 ± 23.9 fJ a new-address read (E148 94.8), +39.6 ± 17.9 fJ an address-bit toggle (E148 50.5)
+3. D31 less the fp32 three-arm shared: +0.210 ± 0.097 W -> +49.3 ± 22.7 fJ a new-address read (E148 94.8), +36.9 ± 17.0 fJ an address-bit toggle (E148 50.5)
+3. D31 less the session E_op shared: +0.210 ± 0.097 W -> +49.3 ± 22.7 fJ a new-address read (E148 94.8), +36.9 ± 17.0 fJ an address-bit toggle (E148 50.5)
+4. Wn          : D31 predicted +0.490, error -0.179 W; N3 from E148's N1 +1.373, error -0.129 W
+4. Wt          : D31 predicted +0.373, error -0.062 W; N3 from E148's N1 +1.256, error -0.012 W
+4. C           : D31 predicted +0.142, error +0.168 W; N3 from E148's N1 +1.026, error +0.218 W
+4. T           : D31 predicted +0.255, error +0.056 W; N3 from E148's N1 +1.138, error +0.106 W
+4. two_term    : D31 predicted +0.442, error -0.131 W; N3 from E148's N1 +1.326, error -0.081 W
+4. null        : D31 predicted +0.000, error +0.311 W; N3 from E148's N1 +0.884, error +0.361 W
+4. null_shared : D31 predicted +0.085, error +0.226 W; N3 from E148's N1 +0.969, error +0.276 W
+5. E148 D21 (two rows) +0.159 ± 0.096 W; E155 D31 (three rows) +0.311 ± 0.102 W; ratio of means 1.95 (Wn's count terms predict 1.28 x, Wt's 1.71 x, before the shared terms)
