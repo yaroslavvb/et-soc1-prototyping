@@ -1,0 +1,17 @@
+G1 nested rms by format: {'bf16': 0.14, 'fp16': 0.16, 'int8': 0.07}
+stage-1 rules, made to hold: {'V0': 'HOLDS', 'R1a_bf16': 'HOLDS', 'R1a_int8': 'HOLDS', 'R1b': 'HOLDS', 'R2_bf16.mant': 'HOLDS', 'R2_bf16.exp': 'HOLDS', 'R2_fp16.mant': 'HOLDS', 'R2_int8.bits': 'HOLDS', 'R3a': 'HOLDS', 'R3b': 'HOLDS', 'R4a': 'HOLDS', 'R4b': 'HOLDS', 'B1': 'HOLDS'}
+stage-1 rules, made to fail: {'V0': 'FAILS', 'R1a_bf16': 'FAILS', 'R1a_int8': 'FAILS', 'R1b': 'FAILS', 'R2_bf16.mant': 'FAILS', 'R2_bf16.exp': 'FAILS', 'R2_fp16.mant': 'FAILS', 'R2_int8.bits': 'FAILS', 'R3a': 'FAILS', 'R3b': 'FAILS', 'R4a': 'FAILS', 'R4b': 'FAILS', 'B1': 'FAILS'}
+PASS G1 bf16 coefficients recovered within 15% (flip_mant, nzprod)
+PASS G1 nested error small on synthetic data (< 1 W every format)
+PASS the capped window was excluded (bf16.zs25 has one invalid replicate)
+PASS heat: tau2 recovered within 35%, R_ss within 15%
+PASS leakage slope recovered within 30%
+PASS blind power: G1 beats G0 and holds P1-P4 on data made by G1's form
+PASS blind heat: H1 and H2 hold on data made by the two-pole path
+PASS P5 compares G1 with S1 (G1 better here)
+PASS every stage-1 rule HOLDS on a reduction made to hold
+PASS every stage-1 rule FAILS on a reduction made to fail
+G1 bf16 fitted: {'nzprod': 20.24, 'gtr': 15.32, 'flip_sign': 6.04, 'flip_exp': 4.02, 'flip_mant': 9.12, 'pos_exp': 1.88, 'pos_mant': 3.21, 'asym': 1.01, 'psgn': 4.73}
+heat fitted: {'tau1': 2.0, 'tau2': 63.4333, 'r1': 0.031, 'r2': 0.0726, 'R_ss': 0.1036, 'F30': 0.5634}
+scores: {'G0': 21.84, 'S1': 8.3, 'G1': 0.18, 'G1s': 0.18, 'G2': 0.2, 'G3': 0.18} {'P1': 'HOLDS', 'P2': 'HOLDS', 'P3': 'HOLDS', 'P4': 'HOLDS', 'P5': 'HOLDS', 'H1': 'HOLDS', 'H2': 'HOLDS', 'H3': 'HOLDS', 'H4': 'HOLDS'}
+SELFTEST OK
