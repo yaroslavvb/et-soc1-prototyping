@@ -1,0 +1,1399 @@
+{
+ "schema": "dmcmd-table/1",
+ "title": "Every device-management command at et-platform 836a4ab (BL2 0.22.0), classified READ or WRITE from the firmware source - E144's copy: command 74 group 0 classified READ from the held patch source",
+ "written": "2026-11-02 (Mon, week 45), Q136(w), desk only; docs/reports/data/2026-11-02-q136w-write-audit/README.md explains it",
+ "source": {
+  "repo": "et-platform (open source)",
+  "commit": "836a4ab600e93c3059bb58c898edbc37744cd8d0",
+  "bl2_version": "0.22.0 (device-bootloaders/CMakeLists.txt:4), the version all four lab cards report since 27-31 Oct 2026; aifoundry3's 0.22.0 is a non-public build (see caveat)",
+  "paths": "handler paths are relative to device-bootloaders/src/ServiceProcessorBL2/ unless they start with a top-level directory of the repo",
+  "enum": "device-api/include/management-api/device_mgmt_api_spec.h:41-129",
+  "dispatch": "rtos_task/command_dispatcher.c:134-193",
+  "host_library": "devicemanagement/src/DeviceManagement.cc:430-560: every command goes to the service processor (SP); no command is answered on the host",
+  "caveat": "PASS at the version-matched public source; the running binaries are not hashed (gov-prep's rule-8 residual), and no card exposes a BL2 hash, so each card runs *a* 0.22.0. One is known to differ: aifoundry3 runs a non-public build, the thermal firmware build first flashed there on 7 Oct 2026, which answers command 74 (DM_CMD_GET_ASIC_PVT_SAMPLES, absent from 836a4ab) and whose answer changed from whole degrees (7 Oct) to raw sensor codes (31 Oct) while the card reported release 1.4.0 / BL2 0.22.0 (docs/findings/14-card-behaviour.md, 'A finer reading exists on aifoundry3's firmware build'; docs/reports/data/2026-10-31-e89-heat-low-power/README.md, 'Joins and traps'). For aifoundry3 this table classifies from the nearest public source with a known divergence: a command present in both is read from 836a4ab's handler, which that build may not share. The residual binds every aifoundry3 lane (Q136: E127, E130, E132, E134). A card running another build needs its own audit.",
+  "corrected": "2026-11-02 (Mon, week 45), after verification: the statistics reset's second PMIC write (the 0x43 snapshot), GET_FRU's three register writes (once, not per byte), the forms of SET_STATS_RUN_CONTROL, build/ettelem-hpl/ under ettelem-dv2, aifoundry3's caveat, and the three ettelem pseudo entries; the README's 'Corrections after verification' lists them"
+ },
+ "classes": {
+  "READ": "No write anywhere on the card except the reply itself: RAM getters, PVT/PLL/OTP register reads, PMIC register reads. A READ may refresh the SP's own RAM copy of the value it just read; that is noted, not counted as a write.",
+  "WRITE": "Writes something on the card: a register, flash, persistent or RAM configuration, a counter or log setting, the PMIC (any set_pmic_reg), a reset or a power action.",
+  "UNSUPPORTED": "No handler at 836a4ab: the SP logs an ERROR (which raises an SP_RUNTIME_ERROR event to the host) and may never reply. Treated as NO-GO.",
+  "UNCLASSIFIED": "Not in the 836a4ab source. NO-GO until classified from the source of the build that runs it."
+ },
+ "common_side_effects": [
+  "Every command makes the SP log one INFO line on arrival (rtos_task/command_dispatcher.c:130). It reaches the SP trace buffer only when the SP log level is INFO or DEBUG; the boot default is WARNING (services/trace.c Trace_Init_SP default filter TRACE_EVENT_STRING_WARNING).",
+  "Every ERROR-level log line increments the SP's runtime-error counter and sends one SP_RUNTIME_ERROR event to the host (services/log.c:240-249 and :414-436; RT_ERROR_THRESHOLD is 0 at include/config/mgmt_build_config.h:379). The driver counts them (SpCeEvent). So any command that fails, or asks for an invalid state, leaves a counter behind.",
+  "A PMIC register read that fails is retried up to 3 times, and each failure soft-resets the SP's own I2C master (driver/pmic_controller.c:254-300, i2c_soft_reset at :273; driver/i2c_controller.c:406-431). The PMIC itself is not written."
+ ],
+ "commands": {
+  "GET_MODULE_MANUFACTURE_NAME": {
+   "id": 0,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/asset_track.c:18 -> services/asset_track_mgmt.c:27 -> driver/flashfs.c:1508 (RAM copy of the flash config)",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "GET_MODULE_PART_NUMBER": {
+   "id": 1,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/asset_track.c:23 -> driver/flashfs.c:1536-1541 (RAM copy of the persistent config)",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "GET_MODULE_SERIAL_NUMBER": {
+   "id": 2,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/asset_track.c:34 -> services/asset_track_mgmt.c:42-48 -> driver/bl2_otp.c:252-263 (memory-mapped eFuse read of the ECID)",
+   "depth": "traced",
+   "lab_sends": false,
+   "note": "A per-die identifier read with no write: a read-only way to tell two cards' nodes apart. Compare it inside a run; never commit the value."
+  },
+  "GET_ASIC_CHIP_REVISION": {
+   "id": 3,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/asset_track.c:39 -> services/asset_track_mgmt.c:52 -> driver/bl2_otp.c:141 -> shared/common/src/sp_otp.c:1394 (OTP read)",
+   "depth": "traced",
+   "lab_sends": true
+  },
+  "GET_MODULE_DRIVER_REVISION": {
+   "id": 4,
+   "class": "UNSUPPORTED",
+   "pmic": "none",
+   "handler": "dispatched to asset tracking (rtos_task/command_dispatcher.c:136), which has no case for it: ERROR 'Unsupported Message ID' (services/asset_track.c:214), so one SP_RUNTIME_ERROR event",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_PCIE_ADDR": {
+   "id": 5,
+   "class": "UNSUPPORTED",
+   "pmic": "none",
+   "handler": "as GET_MODULE_DRIVER_REVISION: no case in services/asset_track.c, ERROR at :214",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_PCIE_NUM_PORTS_MAX_SPEED": {
+   "id": 6,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/asset_track.c:44 -> services/asset_track_mgmt.c:57 (pcie_get_speed)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_MEMORY_SIZE_MB": {
+   "id": 7,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/asset_track.c:64 -> services/asset_track_mgmt.c:83",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_REVISION": {
+   "id": 8,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/asset_track.c:49 -> driver/flashfs.c:1682 (RAM copy)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_FORM_FACTOR": {
+   "id": 9,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/asset_track.c:54 -> driver/flashfs.c:1709 (RAM copy)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_MEMORY_VENDOR_PART_NUMBER": {
+   "id": 10,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/asset_track.c:59 -> services/asset_track_mgmt.c:72",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_MEMORY_TYPE": {
+   "id": 11,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/asset_track.c:69 -> services/asset_track_mgmt.c:97",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_MODULE_PART_NUMBER": {
+   "id": 12,
+   "class": "WRITE",
+   "reaches": [
+    "flash"
+   ],
+   "pmic": "none",
+   "handler": "services/asset_track.c:28 -> driver/flashfs.c:1563 (writes the persistent config to SPI flash)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_FUSED_PUBLIC_KEYS": {
+   "id": 13,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/firmware_update.c:108 (OTP read)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_FIRMWARE_REVISIONS": {
+   "id": 14,
+   "class": "WRITE",
+   "reaches": [
+    "pmic"
+   ],
+   "pmic": "write",
+   "handler": "services/firmware_update.c:862-915; :903 pmic_get_fw_version -> driver/pmic_controller.c:952-974 -> pmic_get_active_boot_slot :2531-2557 (set_pmic_reg(PMIC_I2C_FW_MGMTCMD_ADDRESS 0x16, ACTIVE_SLOT 7) at :2543, data read at :2549) and pmic_fw_update_subcommand :2581-2600 (set_pmic_reg(0x16, VERSION 5 | slot) at :2587, data read at :2591)",
+   "depth": "traced",
+   "lab_sends": true,
+   "what": "Despite its name, it writes the PMIC's firmware-management command register twice (two subcommands, ACTIVE_SLOT then VERSION) and reads the answers. Nothing reaches the PMIC's configuration or its slots, but it is a PMIC command by E85 C1's standard. Card identity comes from module-uptime continuity instead (gov-prep, Q133)."
+  },
+  "SET_FIRMWARE_UPDATE": {
+   "id": 15,
+   "class": "WRITE",
+   "reaches": [
+    "flash",
+    "pmic"
+   ],
+   "pmic": "write",
+   "handler": "services/firmware_update.c:1077-1089 -> dm_svc_firmware_update :661 (an OTA: writes the image to flash; may update the PMIC firmware)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_FIRMWARE_BOOT_STATUS": {
+   "id": 16,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/firmware_update.c:153 (flash_fs_get_boot_counters)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_SP_BOOT_ROOT_CERT": {
+   "id": 17,
+   "class": "WRITE",
+   "reaches": [
+    "otp_or_flash"
+   ],
+   "pmic": "none",
+   "handler": "services/firmware_update.c:356",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_SW_BOOT_ROOT_CERT": {
+   "id": 18,
+   "class": "WRITE",
+   "reaches": [
+    "otp_or_flash"
+   ],
+   "pmic": "none",
+   "handler": "services/firmware_update.c:268",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_FIRMWARE_VERSION_COUNTER": {
+   "id": 19,
+   "class": "WRITE",
+   "reaches": [
+    "persistent"
+   ],
+   "pmic": "none",
+   "handler": "services/firmware_update.c:1100-1105 (the BL2 monotonic counter)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_FIRMWARE_VALID": {
+   "id": 20,
+   "class": "UNSUPPORTED",
+   "pmic": "none",
+   "handler": "dispatched to firmware_service_process_request (command_dispatcher.c:145), which has no case for it: ERROR at services/firmware_update.c:1128-1129, no reply",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_TEMPERATURE_THRESHOLDS": {
+   "id": 21,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:438 -> services/thermal_pwr_mgmt.c:665-669 (RAM: g_soc_power_reg.temperature_threshold)",
+   "depth": "traced",
+   "lab_sends": true
+  },
+  "SET_MODULE_TEMPERATURE_THRESHOLDS": {
+   "id": 22,
+   "class": "WRITE",
+   "reaches": [
+    "ram_config"
+   ],
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:493-521 -> services/thermal_pwr_mgmt.c:638-643 (RAM, no range check in the SP; libDM refuses outside 20-125 C)",
+   "depth": "traced",
+   "lab_sends": true,
+   "what": "A governor move (the software temperature threshold). RAM only at this build: no flash write (gov-prep rule 8)."
+  },
+  "GET_MODULE_POWER_STATE": {
+   "id": 23,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:48 -> services/thermal_pwr_mgmt.c:551-555 (RAM)",
+   "depth": "traced",
+   "lab_sends": true
+  },
+  "SET_MODULE_ACTIVE_POWER_MANAGEMENT": {
+   "id": 24,
+   "class": "WRITE",
+   "reaches": [
+    "ram_config"
+   ],
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:747 -> :94 -> services/thermal_pwr_mgmt.c:525-529 (RAM flag)",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "GET_MODULE_STATIC_TDP_LEVEL": {
+   "id": 25,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:339 -> services/thermal_pwr_mgmt.c:613-617 (RAM: g_pmic_power_reg.module_tdp_level)",
+   "depth": "traced",
+   "lab_sends": true
+  },
+  "SET_MODULE_STATIC_TDP_LEVEL": {
+   "id": 26,
+   "class": "WRITE",
+   "reaches": [
+    "ram_config"
+   ],
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:392-415 -> services/thermal_pwr_mgmt.c:576-591 (refuses > 75 W, else one INFO log and the RAM assignment)",
+   "depth": "traced",
+   "lab_sends": true,
+   "what": "A governor move (the static TDP). RAM only at this build: no flash or PMIC write (gov-prep rule 8)."
+  },
+  "GET_MODULE_CURRENT_TEMPERATURE": {
+   "id": 27,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:545 -> services/thermal_pwr_mgmt.c:732-773 (PVT register reads, driver/pvt_controller.c:618-643, 659-664, 1274-1340)",
+   "depth": "traced",
+   "lab_sends": true,
+   "side_effects": [
+    "refreshes the SP's own RAM copy of the die temperature (g_pmic_power_reg.soc_temperature, thermal_pwr_mgmt.c:754) with the value just read, as its own task does every pass"
+   ],
+   "note": "The field the reply calls pmic_sys is the PVT minion average (:739-746): no PMIC access."
+  },
+  "GET_MODULE_TEMPERATURE_THROTTLE_STATUS": {
+   "id": 28,
+   "class": "UNSUPPORTED",
+   "pmic": "none",
+   "handler": "dispatched to thermal_power_monitoring_process (command_dispatcher.c:152), which has no case for it: ERROR 'Unsupported message id!' (services/thermal_power_monitor.c:1025), no reply",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "GET_MODULE_RESIDENCY_THROTTLE_STATES": {
+   "id": 29,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:596-618 -> services/thermal_pwr_mgmt.c:1477-1502 (RAM copies)",
+   "depth": "traced",
+   "lab_sends": true,
+   "valid_args": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "arg_names": {
+    "0": "POWER_IDLE",
+    "1": "POWER_UP",
+    "2": "POWER_DOWN",
+    "3": "POWER_SAFE"
+   },
+   "invalid_arg_effect": "SP_ERROR_LOG",
+   "side_effects": [
+    "a raw state outside 0-3 (the enum at device-api/include/management-api/device_mgmt_api_spec.h:278-286) takes the default branch: two ERROR log lines (thermal_pwr_mgmt.c:1499 and thermal_power_monitor.c:607), so two SP_RUNTIME_ERROR events and two counts on the SP's error counter per state read (E77's F1; Q134(a): 4,228 events = 2 x 2,114 invalid-state reads on aifoundry2)"
+   ],
+   "note": "The ettelem variants accept raw 2-6 (BL2 0.18.0/0.20.0 numbering): at 0.22.0 raw 4, 5 and 6 are no state. Read 2 and 3 only; raw 1 needs a binary that accepts it."
+  },
+  "GET_MODULE_UPTIME": {
+   "id": 30,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:698 -> services/thermal_pwr_mgmt.c:1451-1455 (RAM, updated by the SP's task, :1406-1426)",
+   "depth": "traced",
+   "lab_sends": true
+  },
+  "GET_MODULE_VOLTAGE": {
+   "id": 31,
+   "class": "READ",
+   "pmic": "read",
+   "pmic_reads": 9,
+   "handler": "services/thermal_power_monitor.c:243 -> services/thermal_pwr_mgmt.c:1010-1140: nine pmic_get_voltage calls (DDR, L2 cache, Maxion, Minion, PCIe, NoC, PCIe logic, VDDQLP, VDDQ) -> driver/pmic_controller.c:1473-1500 -> get_pmic_reg (:254-300, an I2C register read)",
+   "depth": "traced",
+   "lab_sends": true,
+   "side_effects": [
+    "refreshes the SP's RAM copy g_pmic_power_reg.module_voltage with the values read"
+   ],
+   "what": "Nine PMIC voltage-register reads, no PMIC write: allowed by the owner's rule of 2 Nov 2026 (read-only PMIC voltage reads)."
+  },
+  "GET_ASIC_VOLTAGE": {
+   "id": 32,
+   "class": "READ",
+   "pmic": "read",
+   "pmic_reads": 2,
+   "handler": "services/thermal_power_monitor.c:192 -> services/thermal_pwr_mgmt.c:1142-1222: PVT voltage-monitor reads, then pmic_get_voltage(VDDQLP) and (VDDQ) at :1213 and :1215",
+   "depth": "traced",
+   "lab_sends": true,
+   "side_effects": [
+    "refreshes the SP's RAM copy g_soc_power_reg.asic_voltage"
+   ],
+   "what": "Two PMIC voltage-register reads, no PMIC write: allowed by the owner's rule of 2 Nov 2026."
+  },
+  "GET_MODULE_POWER": {
+   "id": 33,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:142 -> services/thermal_pwr_mgmt.c:984-988 (RAM copy the SP's task keeps from the PMIC)",
+   "depth": "traced",
+   "lab_sends": true
+  },
+  "GET_MODULE_RESIDENCY_POWER_STATES": {
+   "id": 34,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:648 -> services/thermal_pwr_mgmt.c:1527-1555 (RAM)",
+   "depth": "traced",
+   "lab_sends": false,
+   "invalid_arg_effect": "SP_ERROR_LOG",
+   "side_effects": [
+    "a power state outside 0-3 logs two ERROR lines (thermal_pwr_mgmt.c:1550, thermal_power_monitor.c:659)"
+   ]
+  },
+  "SET_MODULE_VOLTAGE": {
+   "id": 35,
+   "class": "WRITE",
+   "reaches": [
+    "pmic"
+   ],
+   "pmic": "write",
+   "handler": "services/thermal_power_monitor.c:294-316 -> services/thermal_pwr_mgmt.c:3008-3048 -> pmic_set_voltage (:3021; driver/pmic_controller.c:1586)",
+   "depth": "traced",
+   "lab_sends": true,
+   "what": "Sets a regulator's output voltage through the PMIC."
+  },
+  "SET_THROTTLE_POWER_STATE_TEST": {
+   "id": 36,
+   "class": "WRITE",
+   "reaches": [
+    "trace"
+   ],
+   "pmic": "read",
+   "handler": "services/thermal_power_monitor.c:1016 -> services/thermal_pwr_mgmt.c:2034-2058 (reads the PMIC's average power, writes a power-status record into the SP trace)",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "SET_FREQUENCY": {
+   "id": 37,
+   "class": "WRITE",
+   "reaches": [
+    "clock"
+   ],
+   "pmic": "none",
+   "handler": "services/thermal_power_monitor.c:870-935 (reprograms the NoC or minion PLL)",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "GET_MODULE_MAX_TEMPERATURE": {
+   "id": 38,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/historical_extreme.c:199 -> services/thermal_pwr_mgmt.c:1380",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_MAX_DDR_BW": {
+   "id": 39,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/historical_extreme.c:196",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MAX_MEMORY_ERROR": {
+   "id": 40,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/historical_extreme.c:193 (ddr_get_ce_count)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_DDR_ECC_COUNT": {
+   "id": 41,
+   "class": "WRITE",
+   "reaches": [
+    "ram_config"
+   ],
+   "pmic": "none",
+   "handler": "services/error_control.c:197",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_PCIE_ECC_COUNT": {
+   "id": 42,
+   "class": "WRITE",
+   "reaches": [
+    "ram_config"
+   ],
+   "pmic": "none",
+   "handler": "services/error_control.c:200",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_SRAM_ECC_COUNT": {
+   "id": 43,
+   "class": "WRITE",
+   "reaches": [
+    "ram_config"
+   ],
+   "pmic": "none",
+   "handler": "services/error_control.c:203",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_PCIE_RESET": {
+   "id": 44,
+   "class": "WRITE",
+   "reaches": [
+    "reset",
+    "pcie"
+   ],
+   "pmic": "none",
+   "handler": "services/link_mgmt.c:456 -> :38",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_PCIE_ECC_UECC": {
+   "id": 45,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/link_mgmt.c:232 (pcie_get_ce_count, pcie_get_uce_count)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_DDR_BW_COUNTER": {
+   "id": 46,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/link_mgmt.c:400",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_DDR_ECC_UECC": {
+   "id": 47,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/link_mgmt.c:288",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_MODULE_SRAM_ECC_UECC": {
+   "id": 48,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/link_mgmt.c:344",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_PCIE_MAX_LINK_SPEED": {
+   "id": 49,
+   "class": "WRITE",
+   "reaches": [
+    "pcie"
+   ],
+   "pmic": "none",
+   "handler": "services/link_mgmt.c:462 -> :92",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_PCIE_LANE_WIDTH": {
+   "id": 50,
+   "class": "WRITE",
+   "reaches": [
+    "pcie"
+   ],
+   "pmic": "none",
+   "handler": "services/link_mgmt.c:468 -> :142",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "SET_PCIE_RETRAIN_PHY": {
+   "id": 51,
+   "class": "WRITE",
+   "reaches": [
+    "pcie"
+   ],
+   "pmic": "none",
+   "handler": "services/link_mgmt.c:474 -> :191 (a link retrain hung aifoundry1's host on 30 Sep 2026)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "RESET_ETSOC": {
+   "id": 52,
+   "class": "WRITE",
+   "reaches": [
+    "reset",
+    "pmic",
+    "power_cycle_risk"
+   ],
+   "pmic": "write",
+   "handler": "services/firmware_update.c:1125 -> :45-105: if the PMIC firmware was updated, pmic_force_power_off_on() (a power cycle, driver/pmic_controller.c:2272); else the PMIC watchdog is armed (pmic_enable_wdog_timeout_reset, pmic_set_wdog_timeout_time) and pmic_force_reset() (:2298)",
+   "depth": "traced",
+   "lab_sends": true,
+   "what": "A card reset through the PMIC; the lab's tools/lab/et-reset sends it. Never in a run (the owner's rules of 2 Nov 2026: no power cycles, no resets)."
+  },
+  "GET_ASIC_FREQUENCIES": {
+   "id": 53,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/performance.c:41 -> services/perf_mgmt.c:276- -> driver/io_pll.c:907-960 (PLL register reads)",
+   "depth": "traced",
+   "lab_sends": true,
+   "side_effects": [
+    "refreshes the SP's RAM copy of the clocks (get_soc_perf_reg()->asic_frequency)"
+   ]
+  },
+  "GET_DRAM_BANDWIDTH": {
+   "id": 54,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/performance.c:93 -> services/perf_mgmt.c:127-131 (RAM)",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "GET_DRAM_CAPACITY_UTILIZATION": {
+   "id": 55,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/performance.c:144 -> services/perf_mgmt.c:377-381 (RAM)",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "GET_ASIC_PER_CORE_DATAPATH_UTILIZATION": {
+   "id": 56,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/performance.c:196 -> services/perf_mgmt.c:402 (a stub: returns 0)",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "GET_ASIC_UTILIZATION": {
+   "id": 57,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/performance.c:248 -> services/perf_mgmt.c:430",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_ASIC_STALLS": {
+   "id": 58,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/performance.c:300 -> services/perf_mgmt.c:458",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_ASIC_LATENCY": {
+   "id": 59,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/performance.c:352 -> services/perf_mgmt.c:486",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_SP_STATS": {
+   "id": 60,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/performance.c:404-466 -> services/thermal_pwr_mgmt.c:2780-2784 (a copy of the RAM op_stats the SP's task keeps)",
+   "depth": "traced",
+   "lab_sends": true
+  },
+  "GET_MM_STATS": {
+   "id": 61,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/performance.c:497 -> services/perf_mgmt.c:574 (RAM)",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "SET_STATS_RUN_CONTROL": {
+   "id": 62,
+   "class": "WRITE",
+   "reaches": [
+    "pmic",
+    "ram",
+    "pvt_registers",
+    "trace_config"
+   ],
+   "pmic": "write",
+   "handler": "services/performance.c:546-636. With type SP and control RESET_COUNTER: Thermal_Pwr_Mgmt_Init_OP_Stats (:575 -> services/thermal_pwr_mgmt.c:2805-2880): the RAM op_stats re-initialised, pvt_hilo_reset() (:2828, writes the PVT controllers' high/low latches, driver/pvt_controller.c:1071-1081), PMIC reads (temperature :2838, average power :2874) and update_pmb_stats(true) (:2846 -> :1334-1350), which makes two PMIC writes: pmic_reset_pmb_stats (driver/pmic_controller.c:1801-1805: set_pmic_reg(PMB_RW 0x15, 0x47, 1 byte), the PMIC's stats reset), then pmic_get_pmb_stats (:1827-1832: set_pmic_reg(PMB_RW 0x15, 0x43 = PMIC_I2C_PMB_STATS_SNAPSHOT_VALUE, 4 bytes, include/pmic_hal.h:737), the snapshot command, before it reads the PMB stats back; the SP's own DM task sends that snapshot write every pass anyway, rtos_task/dm_task.c:215, update_pmb_stats(false)). And any control word WITHOUT bit 0 (TRACE_ENABLE) switches the SP's device-statistics trace OFF (performance.c:556-564 -> services/trace.c:654-661); Trace_Init at boot leaves it on. With type MM (2) the control goes to the Master Minion instead (performance.c:579-599 -> interface/mm_iface.c:413-450).",
+   "depth": "traced",
+   "lab_sends": true,
+   "what": "Its forms write different things, so the checker names each (see 'forms'): STATS_RESET is the statistics reset (type 1, control 2: what ettelem --reset-ms / --reset-once-file sends), allowed by the owner's ruling of 31 Oct 2026. Besides the PMIC's stats reset and snapshot it re-arms the PVT latches and, because control 2 lacks TRACE_ENABLE, leaves the SP stats trace (dev_mngt_service -t SPST) off until something re-enables it (tools/claims-v3/tel/README.md, 'Deviations' 1). dev_mngt_service -t SPST:enable sends control 1 (the trace on, nothing reset), -t SPST:reset control 7 (the counters and the trace buffer reset, the trace on), -t MMST:... type 2: none of them is the ruled reset. A send whose form the checker cannot see keeps this name and is never allowed."
+  },
+  "GET_MM_ERROR_COUNT": {
+   "id": 63,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "driver/minion_configuration.c:1571",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MM_RESET": {
+   "id": 64,
+   "class": "WRITE",
+   "reaches": [
+    "reset"
+   ],
+   "pmic": "none",
+   "handler": "driver/minion_configuration.c:1564 (resets the master minion)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_DEVICE_ERROR_EVENTS": {
+   "id": 65,
+   "class": "UNSUPPORTED",
+   "pmic": "none",
+   "handler": "rtos_task/command_dispatcher.c:174-178: only under TEST_EVENT_GEN, where it generates test events; otherwise nothing and no reply",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "SET_DM_TRACE_RUN_CONTROL": {
+   "id": 66,
+   "class": "WRITE",
+   "reaches": [
+    "trace_config"
+   ],
+   "pmic": "none",
+   "handler": "services/trace.c:465-470 -> :126-165 (enables or disables the SP trace, can reset its buffer, and redirects the SP log to the UART or the trace buffer)",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "SET_DM_TRACE_CONFIG": {
+   "id": 67,
+   "class": "WRITE",
+   "reaches": [
+    "trace_config"
+   ],
+   "pmic": "none",
+   "handler": "services/trace.c:474-479 -> :183-207 (sets the SP trace's event and filter masks and the SP log level, RAM; it stays until the next boot or set)",
+   "depth": "traced",
+   "lab_sends": true,
+   "what": "ettelem loglevel. The boot default is event mask TRACE_EVENT_STRING, filter WARNING (Trace_Init_SP's default); 'loglevel warning' with a five-word variant restores it, but the stock ettelem maps every word but 'debug' to INFO, so it cannot."
+  },
+  "SET_SHIRE_CACHE_CONFIG": {
+   "id": 68,
+   "class": "WRITE",
+   "reaches": [
+    "flash"
+   ],
+   "pmic": "none",
+   "handler": "driver/bl2_cache_control.c:884 -> flash_fs_update_shire_cache_config (flash)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_SHIRE_CACHE_CONFIG": {
+   "id": 69,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "driver/bl2_cache_control.c:880 -> driver/flashfs.c:1937-1945 (RAM copy)",
+   "depth": "traced",
+   "lab_sends": true
+  },
+  "SET_FRU": {
+   "id": 70,
+   "class": "WRITE",
+   "reaches": [
+    "pmic",
+    "pmic_nvm"
+   ],
+   "pmic": "write",
+   "handler": "services/asset_track.c:102-106 -> driver/pmic_controller.c:2468 (writes the PMIC's NVM)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_FRU": {
+   "id": 71,
+   "class": "WRITE",
+   "reaches": [
+    "pmic"
+   ],
+   "pmic": "write",
+   "handler": "services/asset_track.c:96-100 -> driver/pmic_controller.c:2412-2445 (pmic_read_fru): three PMIC register writes, once (FRU_OPS_CMD := SET_OFFSET :2419, FRU_DATA := offset 0 :2424, FRU_OPS_CMD := READ_FRU_DATA_BYTE :2431), then the FRU bytes read one at a time (get_pmic_reg :2438)",
+   "depth": "traced",
+   "lab_sends": false,
+   "what": "A GET that writes PMIC command registers, like GET_MODULE_FIRMWARE_REVISIONS."
+  },
+  "SET_VMIN_LUT": {
+   "id": 72,
+   "class": "WRITE",
+   "reaches": [
+    "flash"
+   ],
+   "pmic": "none",
+   "handler": "services/asset_track.c:79-94 -> driver/flashfs.c:2082 (flash)",
+   "depth": "traced",
+   "lab_sends": false
+  },
+  "GET_VMIN_LUT": {
+   "id": 73,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/asset_track.c:74 -> driver/flashfs.c:2073-2080 (RAM copy of the persistent config)",
+   "depth": "traced",
+   "lab_sends": true,
+   "note": "dev_mngt_service writes the LUT to dev<N>_vmin_lut.bin in its working directory (a host file)."
+  },
+  "MDI_SELECT_HART": {
+   "id": 128,
+   "class": "WRITE",
+   "reaches": [
+    "debug"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:735",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_UNSELECT_HART": {
+   "id": 129,
+   "class": "WRITE",
+   "reaches": [
+    "debug"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:739",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_RESET_HART": {
+   "id": 130,
+   "class": "WRITE",
+   "reaches": [
+    "debug",
+    "reset"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:751",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_HALT_HART": {
+   "id": 131,
+   "class": "WRITE",
+   "reaches": [
+    "debug"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:743",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_RESUME_HART": {
+   "id": 132,
+   "class": "WRITE",
+   "reaches": [
+    "debug"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:747",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_GET_HART_STATUS": {
+   "id": 133,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/minion_debug.c:755",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_SET_BREAKPOINT": {
+   "id": 134,
+   "class": "WRITE",
+   "reaches": [
+    "debug"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:759",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_UNSET_BREAKPOINT": {
+   "id": 135,
+   "class": "WRITE",
+   "reaches": [
+    "debug"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:763",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_ENABLE_SINGLE_STEP": {
+   "id": 136,
+   "class": "WRITE",
+   "reaches": [
+    "debug"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:767",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_DISABLE_SINGLE_STEP": {
+   "id": 137,
+   "class": "WRITE",
+   "reaches": [
+    "debug"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:771",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_READ_GPR": {
+   "id": 138,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/minion_debug.c:775 (needs a selected, halted hart)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_DUMP_GPR": {
+   "id": 139,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/minion_debug.c:779 (needs a selected, halted hart)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_WRITE_GPR": {
+   "id": 140,
+   "class": "WRITE",
+   "reaches": [
+    "debug"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:783",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_READ_CSR": {
+   "id": 141,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/minion_debug.c:787 (needs a selected, halted hart)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_WRITE_CSR": {
+   "id": 142,
+   "class": "WRITE",
+   "reaches": [
+    "debug"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:791",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_READ_MEM": {
+   "id": 143,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "services/minion_debug.c:795 (needs a selected, halted hart)",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "MDI_WRITE_MEM": {
+   "id": 144,
+   "class": "WRITE",
+   "reaches": [
+    "debug"
+   ],
+   "pmic": "none",
+   "handler": "services/minion_debug.c:799",
+   "depth": "handler",
+   "lab_sends": false
+  },
+  "GET_ASIC_PVT_SAMPLES": {
+   "id": 74,
+   "class": "READ",
+   "pmic": "none",
+   "handler": "the maintainer's command-74 patch of 7 Oct 2026 (held by the lab, not public): command_dispatcher.c routes 74 to thermal_power_monitoring_process -> pwr_svc_get_asic_pvt_samples; group 0 (PVT_SAMPLE_GROUP_MINSHIRE_TS) fills each entry with pvt_get_min_shire_ts_sample(idx), the public driver/pvt_controller.c:651-665 at 836a4ab -> pvt_get_ts_data :618-643: two PVT register reads per sensor (ts_individual[].sdif_data and .smpl_hilo), no write; the reply is built in a static RAM buffer and pushed to the host queue. That is the same register path GET_MODULE_CURRENT_TEMPERATURE (27, READ) reads (pvt_controller.c:618-643, 659-664)",
+   "depth": "traced (held patch source)",
+   "lab_sends": true,
+   "what": "Per-sensor PVT temperature readings. Group 0 is a READ (above); group 6 is a WRITE and is refused by the sampler.",
+   "forms_sent": "group 0 only (tools/claims-v3/e89/pvt_sample.py refuses every group but 0 and 4; E144 sends 0)",
+   "residual": "aifoundry3's running build is not hashed and differs from the held patch in at least one respect: since 31 Oct its group 0 returns raw 12-bit codes where the held patch converts them to whole degrees, so its group-0 path is read from the nearest held source with a known divergence, the standard this table applies to every aifoundry3 command. Both held forms of that path (the converted read and a raw-code variant of the same function) read the same two registers and write none. The held patch's group 6 (pvt_hilo_reset, the latch reset) is a WRITE: never sent.",
+   "classified_by": "E144 (Q138), Mon 2 Nov 2026, before its first launch"
+  }
+ },
+ "forms": {
+  "STATS_RESET": {
+   "of": "SET_STATS_RUN_CONTROL",
+   "id": 62,
+   "type": 1,
+   "control": 2,
+   "class": "WRITE",
+   "reaches": [
+    "pmic",
+    "ram",
+    "pvt_registers",
+    "trace_config"
+   ],
+   "pmic": "write",
+   "sent_by": "ettelem sample --reset-ms N (N > 0) and --reset-once-file in the reviewed variants that take them (tools/ettelem/ettelem.cpp:91-97, tools/claims-v3/hp/ettelem-hp/ettelem.cpp:69-76, tools/claims-v3/dv2/ettelem-dv2/ettelem.cpp:88-95: in[2] = {1 SP stats, 2 RESET_COUNTER}), and a reset option passed on to a sampler wrapper",
+   "what": "The statistics reset, the one form the owner's ruling of 31 Oct 2026 allows: the SP's RAM statistics re-initialised, the PVT controllers' high/low latches re-armed (thermal_pwr_mgmt.c:2828), two PMIC writes (PMB_RW 0x15 := 0x47, the PMIC's stats reset, pmic_controller.c:1801-1805; then 0x15 := 0x43, the snapshot command, :1827-1832), and the SP stats trace switched off (control 2 lacks TRACE_ENABLE, performance.c:556-564)."
+  },
+  "SPST_TRACE_CONTROL": {
+   "of": "SET_STATS_RUN_CONTROL",
+   "id": 62,
+   "type": 1,
+   "control": "1 (enable, to_uart, to_memory) or 0 (disable)",
+   "class": "WRITE",
+   "reaches": [
+    "trace_config"
+   ],
+   "pmic": "none",
+   "sent_by": "dev_mngt_service -t SPST:enable|disable|to_uart|to_memory (device-management-application/src/dev_mngt_service.cc doTraceOperation: enable is on unless the last of enable/disable is disable)",
+   "what": "Switches the SP's device-statistics trace on (control 1) or off (control 0) through Trace_Run_Control_SP_Dev_Stats (performance.c:556-564); resets no counter and touches no PMIC. Not the ruled statistics reset: NO-GO in Q136."
+  },
+  "SPST_RESET": {
+   "of": "SET_STATS_RUN_CONTROL",
+   "id": 62,
+   "type": 1,
+   "control": "7 (6 with disable)",
+   "class": "WRITE",
+   "reaches": [
+    "pmic",
+    "ram",
+    "pvt_registers",
+    "trace_config",
+    "trace_buffer"
+   ],
+   "pmic": "write",
+   "sent_by": "dev_mngt_service -t SPST:reset (with or without enable or disable): RESET_TRACEBUF | RESET_COUNTER, plus TRACE_ENABLE unless disabled",
+   "what": "The counters reset (the same Thermal_Pwr_Mgmt_Init_OP_Stats as STATS_RESET: the PVT latches, the PMIC's stats reset and snapshot) plus the SP stats trace buffer reset (Trace_Reset_SP_Dev_Stats_Buffer) and the trace switched on (off with disable). Not the form the owner ruled on: NO-GO in Q136."
+  },
+  "MMST_CONTROL": {
+   "of": "SET_STATS_RUN_CONTROL",
+   "id": 62,
+   "type": 2,
+   "control": "per the operations",
+   "class": "WRITE",
+   "reaches": [
+    "mm_stats"
+   ],
+   "pmic": "none",
+   "sent_by": "dev_mngt_service -t MMST:enable|disable|reset|to_uart|to_memory",
+   "what": "Forwarded to the Master Minion's firmware as SP2MM_CMD_MM_STATS_RUN_CONTROL (performance.c:579-599 -> interface/mm_iface.c:413-450): its statistics trace and counters; the Master Minion's handler is not in the service processor's source and was not read. NO-GO in Q136."
+  }
+ },
+ "pseudo": {
+  "UNREVIEWED_VARIANT": {
+   "class": "UNCLASSIFIED",
+   "pmic": "unknown",
+   "what": "an ettelem binary outside every reviewed build directory (tools.variants.*.build_dirs): what its subcommands send is not in this table. NO-GO until its source is reviewed into the table, or the runner names a reviewed source with --variant-source BUILD_DIR=SOURCE and that file's sha256 equals a reviewed variant's. Never allowed by --allow."
+  },
+  "VARIANT_UNRESOLVED": {
+   "class": "UNCLASSIFIED",
+   "pmic": "unknown",
+   "what": "an ettelem call whose binary the checker cannot resolve to a reviewed build directory (a variable set outside the scanned files, or a program that is not among them): its sends are listed as the reviewed variants', but which build runs is not visible. NO-GO until the runner names the source with --variant-source (KEY 'unresolved', a build directory or a program name; the source's sha256 must equal a reviewed variant's) or a person reads the line and records a reviewed --except. Never allowed by --allow."
+  },
+  "UNKNOWN_SUBCOMMAND": {
+   "class": "UNCLASSIFIED",
+   "pmic": "unknown",
+   "what": "an ettelem subcommand the matched reviewed variant does not have (or, for a forwarding wrapper's call, no reviewed subcommand among its words): what that binary does with it is not in this table. NO-GO. Never allowed by --allow."
+  },
+  "TRACE_EXTRACT": {
+   "class": "READ",
+   "pmic": "none",
+   "what": "dev_mngt_service -t <type>:extract and ettelem sptrace: no DM command; two driver ioctls (ETSOC1_IOCTL_GET_TRACE_BUFFER_SIZE, ETSOC1_IOCTL_EXTRACT_TRACE_BUFFER) copy a trace region over PCIe (devicelayer/src/DevicePcie.cpp:822-835; et-driver/et-soc1-pcie.c:1021-1077, et_ioread)"
+  },
+  "ETCFG": {
+   "class": "READ",
+   "pmic": "none",
+   "what": "tools/etcfg: ETSOC1_IOCTL_GET_DEVICE_CONFIGURATION, a read-only driver ioctl (tools/etcfg/etcfg.c:28)"
+  },
+  "SYSFS_WRITE": {
+   "class": "WRITE",
+   "pmic": "none",
+   "what": "a write into /sys (driver or PCI attributes: reset, remove, rescan, power, link). Never in a run."
+  },
+  "SETPCI_WRITE": {
+   "class": "WRITE",
+   "pmic": "none",
+   "what": "setpci with REG=VALUE: a PCI configuration-space write (a link retrain hung a host on 30 Sep 2026). setpci without '=' only reads."
+  },
+  "MODULE_LOAD": {
+   "class": "WRITE",
+   "pmic": "none",
+   "what": "modprobe, rmmod or insmod: loads or unloads a driver for every user of the host."
+  },
+  "HOST_REBOOT": {
+   "class": "WRITE",
+   "pmic": "none",
+   "what": "reboot, shutdown, poweroff, systemctl reboot|poweroff|kexec, or an outlet cycle: takes every card on the host. Never (the owner's rules of 2 Nov 2026)."
+  },
+  "DYNAMIC": {
+   "class": "UNCLASSIFIED",
+   "pmic": "unknown",
+   "what": "a command named at run time (a variable, a format string, a numeric code from a variable): the checker cannot tell what is sent. NO-GO until the line is rewritten with literal commands."
+  }
+ },
+ "tools": {
+  "dev_mngt_service": {
+   "what": "/opt/et/bin/dev_mngt_service, the vendor CLI (device-management-application/src/dev_mngt_service.cc at 836a4ab). -m <name> or -o <enum id> sends one command; on aifoundry1 it opens BOTH cards' nodes even with -n.",
+   "code_option": "-o N / --code=N takes the enum value of device_mgmt_api_spec.h (dev_mngt_service.cc:1513-1530); its README's numbering is stale",
+   "trace_option": "-t TYPE:op[,op...] (dev_mngt_service.cc:2224-2365): extract -> TRACE_EXTRACT (a read); disable, enable, reset, to_uart, to_memory -> SET_DM_TRACE_RUN_CONTROL for SP; for SPST and MMST a DM_CMD_SET_STATS_RUN_CONTROL whose form the checker names: SPST_TRACE_CONTROL (enable, disable, to_uart, to_memory: type 1, control 1 or 0), SPST_RESET (reset: control 7, or 6 with disable), MMST_CONTROL (type 2); MM and CM take no control (refused before anything is sent)"
+  },
+  "variants": {
+   "ettelem": {
+    "source": "tools/ettelem/ettelem.cpp",
+    "sha256": "a6cf931b2a123e88699c046eb45f438b06d1648cabb86fc114577a32ec153377",
+    "build_dirs": [
+     "build/ettelem/",
+     "live/ettelem-build/"
+    ],
+    "subcommands": {
+     "sample": {
+      "sends": [
+       "GET_MODULE_POWER",
+       "GET_SP_STATS",
+       "GET_MODULE_CURRENT_TEMPERATURE",
+       "GET_ASIC_VOLTAGE",
+       "GET_MODULE_VOLTAGE",
+       "GET_ASIC_FREQUENCIES"
+      ],
+      "lines": "165-167",
+      "reset_options": [
+       "--reset-ms"
+      ],
+      "reset_sends": [
+       "STATS_RESET"
+      ],
+      "reset_lines": "91-97"
+     },
+     "temp": {
+      "sends": [
+       "GET_MODULE_CURRENT_TEMPERATURE",
+       "GET_MODULE_POWER"
+      ],
+      "lines": "214"
+     },
+     "config": {
+      "sends": [
+       "GET_MODULE_STATIC_TDP_LEVEL",
+       "GET_MODULE_TEMPERATURE_THRESHOLDS",
+       "GET_MODULE_POWER_STATE",
+       "GET_ASIC_FREQUENCIES",
+       "GET_ASIC_VOLTAGE"
+      ],
+      "lines": "118-121"
+     },
+     "loglevel": {
+      "sends": [
+       "SET_DM_TRACE_CONFIG"
+      ],
+      "lines": "250-259",
+      "note": "every word but 'debug' sets INFO (3)"
+     },
+     "sptrace": {
+      "sends": [
+       "TRACE_EXTRACT"
+      ],
+      "lines": "261-266"
+     }
+    }
+   },
+   "ettelem-hp": {
+    "source": "tools/claims-v3/hp/ettelem-hp/ettelem.cpp",
+    "sha256": "9452b09dee761e68fb1d74e6d1369ae994e7fa6c2d30f0a053c86b8c5679308a",
+    "build_dirs": [
+     "build/ettelem-hp/"
+    ],
+    "subcommands": {
+     "sample": {
+      "sends": [
+       "GET_MODULE_POWER",
+       "GET_SP_STATS",
+       "GET_MODULE_CURRENT_TEMPERATURE",
+       "GET_ASIC_VOLTAGE",
+       "GET_MODULE_VOLTAGE",
+       "GET_ASIC_FREQUENCIES"
+      ],
+      "lines": "143-145",
+      "reset_options": [
+       "--reset-ms"
+      ],
+      "reset_sends": [
+       "STATS_RESET"
+      ],
+      "reset_lines": "69-76"
+     },
+     "config": {
+      "sends": [
+       "GET_MODULE_STATIC_TDP_LEVEL",
+       "GET_MODULE_TEMPERATURE_THRESHOLDS",
+       "GET_MODULE_POWER_STATE",
+       "GET_ASIC_FREQUENCIES",
+       "GET_ASIC_VOLTAGE"
+      ],
+      "lines": "96-99"
+     },
+     "loglevel": {
+      "sends": [
+       "SET_DM_TRACE_CONFIG"
+      ],
+      "lines": "220-230"
+     },
+     "sptrace": {
+      "sends": [
+       "TRACE_EXTRACT"
+      ],
+      "lines": "232-237"
+     }
+    }
+   },
+   "ettelem-dv2": {
+    "source": "tools/claims-v3/dv2/ettelem-dv2/ettelem.cpp",
+    "sha256": "10855b72cd63b39d75883c79dfd5a78bfae3b66e45548ecdc444a130dd9b68c5",
+    "build_dirs": [
+     "build/ettelem-dv2/",
+     "build/ettelem-e84/",
+     "build/ettelem-hpl/"
+    ],
+    "build_dirs_note": "build/ettelem-hpl/ holds this source, built for E64 (23 Oct 2026) and reused by later runs (E69, E80, E87, E98, E111, E119 and E126 among them; tools/claims-v3/hpl/README.md:54; tools/claims-v3/e126/E126.md:72, binary sha256 77a46171...); the source has not changed since 28 Sep 2026 (commit 8eb0e384)",
+    "subcommands": {
+     "sample": {
+      "sends": [
+       "GET_MODULE_POWER",
+       "GET_SP_STATS",
+       "GET_MODULE_CURRENT_TEMPERATURE",
+       "GET_ASIC_VOLTAGE",
+       "GET_MODULE_VOLTAGE",
+       "GET_ASIC_FREQUENCIES"
+      ],
+      "lines": "205-207",
+      "reset_options": [
+       "--reset-ms",
+       "--reset-once-file"
+      ],
+      "reset_sends": [
+       "STATS_RESET"
+      ],
+      "reset_lines": "88-95, 213, 218"
+     },
+     "config": {
+      "sends": [
+       "GET_MODULE_STATIC_TDP_LEVEL",
+       "GET_MODULE_TEMPERATURE_THRESHOLDS",
+       "GET_MODULE_POWER_STATE",
+       "GET_ASIC_FREQUENCIES",
+       "GET_ASIC_VOLTAGE"
+      ],
+      "lines": "157-160"
+     },
+     "residency": {
+      "sends": [
+       "GET_MODULE_RESIDENCY_THROTTLE_STATES"
+      ],
+      "lines": "114-128",
+      "accepts": [
+       2,
+       3,
+       4,
+       5,
+       6
+      ]
+     },
+     "uptime": {
+      "sends": [
+       "GET_MODULE_UPTIME"
+      ],
+      "lines": "130-137"
+     },
+     "threshold": {
+      "sends": [
+       "GET_MODULE_TEMPERATURE_THRESHOLDS"
+      ],
+      "lines": "139-144",
+      "note": "'threshold set' is refused before the node opens (:267-279)"
+     },
+     "loglevel": {
+      "sends": [
+       "SET_DM_TRACE_CONFIG"
+      ],
+      "lines": "345-356"
+     },
+     "sptrace": {
+      "sends": [
+       "TRACE_EXTRACT"
+      ],
+      "lines": "357-363"
+     }
+    }
+   },
+   "ettelem-e77": {
+    "source": "tools/claims-v3/e77/ettelem-e77/ettelem.cpp",
+    "sha256": "298688032d9b9c978d47c215a9f9e6c4b6a998ff9dbeff916983d9de75786d54",
+    "build_dirs": [
+     "build/ettelem-e77/"
+    ],
+    "subcommands": {
+     "sample": {
+      "sends": [
+       "GET_MODULE_POWER",
+       "GET_SP_STATS",
+       "GET_MODULE_CURRENT_TEMPERATURE",
+       "GET_ASIC_FREQUENCIES"
+      ],
+      "lines": "169-170"
+     },
+     "config": {
+      "sends": [
+       "GET_MODULE_STATIC_TDP_LEVEL",
+       "GET_MODULE_TEMPERATURE_THRESHOLDS",
+       "GET_MODULE_POWER_STATE",
+       "GET_ASIC_FREQUENCIES"
+      ],
+      "lines": "137-139"
+     },
+     "residency": {
+      "sends": [
+       "GET_MODULE_RESIDENCY_THROTTLE_STATES"
+      ],
+      "lines": "86-94",
+      "accepts": [
+       2,
+       3,
+       4,
+       5,
+       6
+      ]
+     },
+     "uptime": {
+      "sends": [
+       "GET_MODULE_UPTIME"
+      ],
+      "lines": "126"
+     },
+     "sptrace": {
+      "sends": [
+       "TRACE_EXTRACT"
+      ],
+      "lines": "260-266"
+     },
+     "profile": {
+      "sends": [],
+      "lines": "207",
+      "note": "prints its list; opens nothing"
+     }
+    },
+    "note": "No set and no PMIC read; Dm::get refuses any other command (:73-76)."
+   },
+   "ettelem-e118": {
+    "source": "tools/claims-v3/e118/ettelem-e118/ettelem.cpp",
+    "sha256": "a3a4f0b94ff55d41b3ed9aa420970a6d924d54aae23fa61524ef943bdda0f806",
+    "build_dirs": [
+     "build/ettelem-e118/"
+    ],
+    "subcommands": {
+     "sample": {
+      "sends": [
+       "GET_MODULE_POWER",
+       "GET_SP_STATS",
+       "GET_MODULE_CURRENT_TEMPERATURE",
+       "GET_ASIC_FREQUENCIES"
+      ],
+      "lines": "217-221",
+      "note": "--reset-ms and --reset-once-file are refused at parse time (:325-329)"
+     },
+     "config": {
+      "sends": [
+       "GET_MODULE_STATIC_TDP_LEVEL",
+       "GET_MODULE_TEMPERATURE_THRESHOLDS",
+       "GET_MODULE_POWER_STATE",
+       "GET_ASIC_FREQUENCIES"
+      ],
+      "lines": "168-170"
+     },
+     "residency": {
+      "sends": [
+       "GET_MODULE_RESIDENCY_THROTTLE_STATES"
+      ],
+      "lines": "125-139",
+      "accepts": [
+       2,
+       3,
+       4,
+       5,
+       6
+      ]
+     },
+     "uptime": {
+      "sends": [
+       "GET_MODULE_UPTIME"
+      ],
+      "lines": "141-148"
+     },
+     "threshold": {
+      "sends": [
+       "GET_MODULE_TEMPERATURE_THRESHOLDS"
+      ],
+      "lines": "150-155"
+     },
+     "sptrace": {
+      "sends": [
+       "TRACE_EXTRACT"
+      ],
+      "lines": "378-384"
+     },
+     "loglevel": {
+      "sends": [],
+      "lines": "345-348",
+      "note": "refused before the node opens; the SET_DM_TRACE_CONFIG at :373 is unreachable"
+     }
+    }
+   }
+  },
+  "raw_clients": {
+   "tools/claims-v3/e89/pvt_sample.py": {
+    "sha256": "c4e4aed59fbdc08ca6155c5a8a877105692d87c80b29b00f5bfd09a9b27c2134",
+    "sends": [
+     "GET_MODULE_POWER",
+     "GET_SP_STATS",
+     "GET_MODULE_CURRENT_TEMPERATURE",
+     "GET_ASIC_PVT_SAMPLES",
+     "GET_ASIC_VOLTAGE",
+     "GET_ASIC_FREQUENCIES"
+    ],
+    "lines": "72"
+   },
+   "docs/reports/2026-10-08-how-energy-is-measured/etpower.py": {
+    "sha256": "dab5bf8a614d584fb7dc545963427781d608e0d90732bb23f4b9f0e2ae29b036",
+    "sends": [
+     "GET_MODULE_CURRENT_TEMPERATURE",
+     "GET_MODULE_POWER",
+     "GET_SP_STATS"
+    ],
+    "lines": "57-59"
+   }
+  }
+ }
+}
