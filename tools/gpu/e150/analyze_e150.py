@@ -412,6 +412,21 @@ def do_score(pred_path, redH_path, run_dir, out_path):
                 byf[f] = {"rms": _rms(ef), "bias": float(np.mean(ef)), "n": len(ef)}
         sc["models"][m] = {"rms_w": _rms(e), "bias_w": float(np.mean(e)), "max_abs_w": float(np.max(np.abs(e))),
                            "n": len(e), "by_fmt": byf, "rms_over_span": _rms(e) / span}
+    # A5: a model-free comparison (no verdict): each held-out kind's y measured on the A100 (E149's stage 2) times the
+    # board's ratio of its format's anchor (bf16 and fp16 randn, int8 rand) on phase L over the same kind on E149's stage 1
+    d149 = os.path.join(os.path.dirname(os.path.abspath(pred_path)), "..", "2026-11-02-e149-gpu-model-check")
+    if os.path.exists(os.path.join(d149, "reduce-stage2.json")):
+        r2 = json.load(open(os.path.join(d149, "reduce-stage2.json")))["kinds"]
+        r1 = json.load(open(os.path.join(d149, "reduce-stage1.json")))["kinds"]
+        anchor = {"bf16": "bf16.randn", "fp16": "fp16.randn", "int8": "int8.rand"}
+        ratio = {un: {f: pz["fit_L"][a]["by_unit"][un] / r1[a]["y"] for f, a in anchor.items()
+                      if a in pz["fit_L"] and un in pz["fit_L"][a]["by_unit"]} for un in names}
+        sc["t0_ratio"] = ratio
+        for k in blind:
+            f = k.split(".")[0]
+            if r2.get(k, {}).get("y") is not None:
+                pb = {un: ratio[un][f] * r2[k]["y"] for un in names if f in ratio[un]}
+                sc["per_kind"][k]["err_arms"]["T0_a100_measured"] = err_of(k, pb)
     arm_names = sorted({a for k in blind for a in sc["per_kind"][k]["err_arms"]})
     for a in arm_names:
         e = [sc["per_kind"][k]["err_arms"][a] for k in blind if sc["per_kind"][k]["err_arms"].get(a) is not None]
