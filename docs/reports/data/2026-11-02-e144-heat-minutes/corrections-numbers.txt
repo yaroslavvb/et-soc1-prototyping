@@ -1,0 +1,89 @@
+E144 corrections after verification: the numbers C1-C6 quote, from committed files
+
+[C1] lib.sh's die_c: the `ettelem sample` calls the first device-command list left out
+  tools/claims-v3/lib.sh:103: die_c() { timeout 20 "$ETTELEM" sample --seconds 1 --every-ms 500 2>/dev/null | grep '^{' | tail -1 |
+  tools/claims-v3/lib.sh:188: BLOCK_C0=$(die_c)
+  tools/claims-v3/lib.sh:196: c1=$(die_c || true)
+  tools/claims-v3/e144/block_e144.sh:15: . "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
+  tools/claims-v3/e144/block_e144.sh:16: ETTELEM=tools/claims-v3/e128/ettelem_guard.sh                                                   # E144 change 3
+  tools/claims-v3/e128/ettelem_guard.sh:19: sample)
+  tools/claims-v3/e128/ettelem_guard.sh:31: exec "$REAL" sample ${args[@]+"${args[@]}"} ;;
+  sends per sample, tools/ettelem/ettelem.cpp at HEAD:
+  tools/ettelem/ettelem.cpp:149: if (resetMs > 0) d.resetStats();
+  tools/ettelem/ettelem.cpp:165: const bool okP = d.get(DM_CMD_GET_MODULE_POWER, p), okS = d.get(DM_CMD_GET_SP_STATS, s),
+  tools/ettelem/ettelem.cpp:166: okT = d.get(DM_CMD_GET_MODULE_CURRENT_TEMPERATURE, t), okA = d.get(DM_CMD_GET_ASIC_VOLTAGE, av),
+  tools/ettelem/ettelem.cpp:167: okM = d.get(DM_CMD_GET_MODULE_VOLTAGE, mv), okF = d.get(DM_CMD_GET_ASIC_FREQUENCIES, f);
+  tools/ettelem/ettelem.cpp:172: d.resetStats();
+  sample() at de262730 (the source of aifoundry3's binary) identical to HEAD's: True
+  the box's ettelem binary (logs/sha256-setup.txt): 16037641ab75bdbe...
+  smoke 14401 block.json: block 22:37:01-22:38:18 PST, die_c_start 50, die_c_end 51 (non-null: the sample ran)
+  pass 14420 block.json: block 22:38:30-23:23:39 PST, die_c_start 51, die_c_end 52 (non-null: the sample ran)
+  tools/claims-v3/e144/dmcmd-audit.txt lines 8-13: lib.sh:103's sends, 6: GET_ASIC_FREQUENCIES [READ, pmic none]; GET_ASIC_VOLTAGE [READ, pmic read]; GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none]; GET_MODULE_POWER [READ, pmic none]; GET_MODULE_VOLTAGE [READ, pmic read]; GET_SP_STATS [READ, pmic none]
+   dmcmd_audit: GO (38 send site(s), 0 disallowed; allow-list: none)
+  dmcmd_table.json GET_MODULE_VOLTAGE: id 31, class READ, pmic read, pmic_reads 9; handler services/thermal_power_monitor.c:243 -> services/thermal_pwr_mgmt.c:1010-1140: nine pmic_get_voltage calls (DDR, L2 cache, Maxion, Minion, PCIe, NoC, PCIe logic, VDDQLP, VDDQ) -> driver/pmic_controller.c:1473-1500 -> get_pmic_reg (:254-300, an I2C register read)
+  dmcmd_table.json GET_ASIC_VOLTAGE: id 32, class READ, pmic read, pmic_reads 2
+  kinds sent (the sites that ran: the sampler, die_c's sample and config through the guard): 10
+    GET_ASIC_FREQUENCIES: READ, pmic none
+    GET_ASIC_PVT_SAMPLES: READ, pmic none
+    GET_ASIC_VOLTAGE: READ, pmic read
+    GET_MODULE_CURRENT_TEMPERATURE: READ, pmic none
+    GET_MODULE_POWER: READ, pmic none
+    GET_MODULE_POWER_STATE: READ, pmic none
+    GET_MODULE_STATIC_TDP_LEVEL: READ, pmic none
+    GET_MODULE_TEMPERATURE_THRESHOLDS: READ, pmic none
+    GET_MODULE_VOLTAGE: READ, pmic read
+    GET_SP_STATS: READ, pmic none
+  of them with PMIC reads: ['GET_ASIC_VOLTAGE', 'GET_MODULE_VOLTAGE']
+
+[C2] Q138(t)'s corrections C1 and C2, which withdrew the registration's two 'before' framings
+  docs/reports/data/2026-11-02-q138t-heat-model/README.md:20: - **C1 (major): the "before" misstated M6.** M6 froze a four-pole step response (Q137(m) `m6.json` `heat.step_response`: τ 1.005, 15.98,
+  docs/reports/data/2026-11-02-q138t-heat-model/README.md:23: labelled a plateau coefficient misused as a trajectory, and "M6 had only a plateau coefficient" is withdrawn. Against M6 as frozen
+  docs/reports/data/2026-11-02-q138t-heat-model/README.md:30: - **C2 (major): "out of sample, 0.47–0.66 °C" was within one session.** It is leave-one-hold-out inside E97's session, and H1's fit keeps
+  docs/reports/data/2026-11-02-q138t-heat-model/README.md:35: "A session-out error on aifoundry3 is unmeasured" is withdrawn.
+  docs/reports/data/2026-11-02-q138t-heat-model/README.md:103: | **aifoundry3: the die through a 15–30 min hold, given its board trace** (arm a) | **M6 as frozen** (0.9 × its four-pole F(t)), in sample, since E97 set F: rms **0.64 / 0.31 / 0.91 °C** on E97's H1/H2/H3, plateau +0.04 / +0.44 / 
+  docs/reports/data/2026-11-02-q138t-heat-model/README.md:108: and 1.9–5.1 °C on aifoundry2 (`fit.txt`). No model made that rule, M6 included.
+  docs/reports/data/2026-11-02-q138t-heat-model/README.md:124: intercept. Training data: E89's two passes and E97's whole session, Part A then Part B (4.2 h, 10 Hz, the 34 raw codes). NNLS kept
+
+[C3] one blind session: the errors as scored (no interval on (a) or (b)), the rest dies, E97's within-session moves
+  H_H (fp32.randn): share 0.4563, period 7.56 s, rest die 51.220 C; (a) rms 0.182, plateau +0.015, at 60/120/300/600 s -0.004/-0.069/+0.105/+0.104; (b) plateau -0.150, worst checkpoint 0.317; interval keys in (a): [], in (b): []
+  H_L (int8.neg_ones): share 0.9655, period 7.50 s, rest die 51.646 C; (a) rms 0.037, plateau -0.032, at 60/120/300/600 s -0.029/+0.032/-0.035/-0.012; (b) plateau +0.012, worst checkpoint 0.054; interval keys in (a): [], in (b): []
+  docs/reports/data/2026-11-02-e144-heat-minutes/aifoundry3/e144/p14420/run.log:5: 22:46:34 [aifoundry3] hold H_H: fp32.randn for 780 s, 3.20 s every 7.56 s
+  docs/reports/data/2026-11-02-q138t-heat-model/README.md:245: - **The plateau moved 0.3–0.8 °C** in E97 and about 1 °C in E111/E133 with nothing changed. The model has no term for that, so it
+
+[C4] item 8's like for like: E97's H3 (fp32 randn, duty-cycled) against E144's H_H
+  E97 H3: R_ol 0.8767 [0.868, 0.885] C per board W, compute share 0.5604, die 70.37 C, rise 19.72 C, idle before 50.629 C (R1)
+  E144 H_H: 0.8675 [0.854, 0.881] C per board W, share 0.4563, rest die 51.220 C, plateau die 66.22 C
+  ratio E144 H_H / E97 H3: 0.9896 (-1.04%; against E97's table value 0.877: -1.08%); rest dies differ by +0.59 C
+
+[C5] command 74 group 0: raw codes on group 0, and the latches across 31 Oct - 2 Nov
+  logs/probe.out: 3 ticks, status [0, 0, 0], codes 1914-1956 at a firmware minshire reading of 50 C
+  E89 ident/probe2.out: one hi/lo tick at Sat 31 Oct 19:02:49 PDT, 34 high latches, max 2543 codes
+  smoke 14401: 751 samples, 16 with hi/lo, high latches equal to E89's in 16: True (16), latch rises between ticks: high 0, low 0
+  pass 14420: 27065 samples, 542 with hi/lo, high latches equal to E89's in 542: True (542), latch rises between ticks: high 0, low 0
+  docs/reports/data/2026-11-01-e97-heat-low-power-steady/README.md:79: ...All 150,295 samples carry 34 sensors (100%), and the firmware's integer mean rebuilt from the codes equals its `minshire_avg` in 98.3% (E97-R0 PASS). Command 74 group 0 still returns raw codes (probe, 1,960–2,004). No fault bit in any sample; the sensors' high latch never moved backwards and stayed at 2543 codes (87.5 °C), as in E89
+  docs/reports/data/2026-10-31-e89-heat-low-power/README.md:202: ...command 74 answered in every one of the 22,976 samples)
+  e144.json pass.telemetry: {'lines': 27065, 'lines_with_34_sensors': 27065, 'span_s': 2706.4, 'gaps_over_0.5s': 0, 'largest_gap_s': 0.0, 'firmware_die_max_C': 67.0, 'mean34_max_C': 68.136, 'board_max_W': 56.69}
+  et-platform 836a4ab driver/pvt_controller.c: pvt_get_ts_data at lines 618-643
+  et-platform 836a4ab driver/pvt_controller.c: pvt_get_min_shire_ts_sample at lines 645-657
+  et-platform 836a4ab driver/pvt_controller.c: pvt_get_ioshire_ts_sample at lines 659-665
+  et-platform 836a4ab driver/pvt_controller.c: pvt_hilo_reset at lines 1071-1081
+
+[C6] times and text
+  commit 13799873 Mon 02 Nov 22:35:10 E144: pre-registration - Q138(t)'s frozen heat-over-minutes holds on aifoundry3 card 0, the
+  commit 8d396e2c Mon 02 Nov 22:44:43 E144: note N1 before any hold's data - in the registered subset H_L sits on H_H's tail, so 
+  commit ca979517 Mon 02 Nov 23:26:36 E144: data and README - Q138(t)'s frozen step response, run blind on aifoundry3 card 0 on a
+  commit 5718a11e Mon 02 Nov 23:27:19 E144: README - the card post's release (23:27:07 PST, ' — released' appended: aifoundry3 wa
+  docs/reports/data/2026-11-02-e144-heat-minutes/aifoundry3/e144/p14420/run.log:1: 22:38:34 [aifoundry3] E144 pass 14420: design subset; deadline 2026-11-02 23:49:00 PST, 70.4 min left; lines: gate 70 C, hold 72 C / 65 W, session 74 C
+  logs/smoke.log: 2026-11-02T22:37:02 [aifoundry3] e144-smoke p14401 begins (die 50 C) | 22:37:20 [aifoundry3] rest R0 ends after 15 s: 34-sensor mean None C
+  logs/queue.log:1: 22:38:30 p14420 starts: design subset, deadline 1793692140
+  predictions-e144.json: full design 75.9 card-minutes, subset 44.9
+  docs/reports/data/2026-11-02-q138t-heat-model/README.md:179: - **The registered subset** (if the gates leave under 80 card-minutes; at most 45): R0 for 8 min, then H_H for 13, R1 fo
+  from the claim (22:36:26) to the 23:50 end gate: 73.6 min
+  N1's figures, predictions-e144.json aifoundry3.subset: H_L plateau_per_board_W 0.7858, carried_in_C 0.409
+  N1's linearity: 0.8608 / 0.7858 = 1.0954
+  tools/claims-v3/e144/README.md at 8d396e2c, line 3: *Written Mon 2 Nov 2026, about 22:40 PST, before E144's claim and before any E144 device access. Nothing below changes after the
+  tools/claims-v3/e144/README.md at 8d396e2c, line 39: every run ended by 23:50 PST. That leaves under 60 card-minutes, so **Q138(t)'s full 75.9-minute design cannot run**. E144 runs
+  tools/claims-v3/e144/README.md at 8d396e2c, line 73: **Note N1, a reading of the frozen numbers.** Written Mon 2 Nov 2026 about 22:46 PST, during R0, before any hold's data. It changes no
+  tools/claims-v3/e144/README.md at 8d396e2c, line 143: EXPECT_TEXT, adding the clause `using aifoundry3 for 1 h, until ~23:50 PST`.
+  pass 14420 code.sha256 pins tools/claims-v3/e144/README.md at fcd51917cd392885...; the registration commit's text hashes fcd51917cd392885... (equal: True)
+  'others present' / 'another user' lines in run.log, smoke.log, queue.log: 0

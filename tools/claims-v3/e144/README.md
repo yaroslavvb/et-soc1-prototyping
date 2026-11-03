@@ -3,6 +3,14 @@
 *Written Mon 2 Nov 2026, about 22:40 PST, before E144's claim and before any E144 device access. Nothing below changes after the
 first launch. A departure is a dated amendment written before the data it touches.*
 
+*Dated note, Tue 3 Nov 2026, about 00:20 PST, after verification (desk only: no card, no device command, nothing re-run). The notes
+marked "Dated note, 3 Nov" below were added then, and the text as registered is unedited. Pass 14420's `code.sha256` pins this file at
+its registration text (`fcd51917…`, commit `13799873`). Note N1 (`8d396e2c`) and these notes came after it, and
+`git show 13799873:tools/claims-v3/e144/README.md` gives the pinned text. Four slips here are corrected in the data README,
+[§ Registered against what happened](../../../docs/reports/data/2026-11-02-e144-heat-minutes/README.md#registered-against-what-happened)
+(C6): this header's "about 22:40" (the commit is 22:35:10), N1's "about 22:46" (22:44:43), § Design's "under 60 card-minutes" (73.6
+from the claim to the 23:50 gate) and the order of work's "~23:50" (the claim said "~23:40").*
+
 **What it answers.** The kinds page's section 11, items **9** (heat over minutes: the die's step response, one long-hold session per
 card) and **8** (a plateau's second session on a card), [§ 11](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open),
 and step (2) of "After Q137, the next steps in order".
@@ -15,6 +23,17 @@ the die (aifoundry3: R 0.8695 °C/W, t63 79 s), on a session the chain never saw
 
 Before E144 the out-of-sample error was measured only within one session (E97, leave one hold out): 0.47–0.66 °C rms. M6's
 plateau-only rule used as a trajectory read 1.5–11.6 °C. E144 gives the first session-out score on long holds on this card.
+
+*Dated note, 3 Nov (C2 of the data README): the two sentences above repeat framings that Q138(t)'s corrections C1 and C2 withdrew
+before E144's claim ([Q138(t)'s README](../../../docs/reports/data/2026-11-02-q138t-heat-model/README.md), § Corrections after
+verification).*
+- ***C1:** the 1.5–11.6 °C arm was an instantaneous 0.9 × ΔP rule that no model made, M6 included. M6 as frozen is a four-pole step
+  response. Given the board trace it read E97's holds to 0.31–0.91 °C rms, and from the planned power it read their plateaus 29–33%
+  low, both in sample.*
+- ***C2:** the 0.47–0.66 °C is leave one hold out inside E97's session. A session-out score did exist: the chain's form, fitted on
+  E89's square waves alone (31 Oct), read E97 (1 Nov) at 0.46–1.50 °C rms. The frozen chain was fitted on E89's and E97's sessions,
+  and E144 is its first score on a session it never saw.*
+- *No rule, band or prediction changes.*
 
 ## Frozen inputs (not changed by E144)
 
@@ -136,6 +155,50 @@ the converted read and a raw-code variant of the same function, read the same tw
 agrees but does not replace the source: E89 sent group 0 in 22,976 samples and E97 in 150,295, with no fault.
 
 **No statistics reset** and **no PMIC write**. The compute launches (`sparsity_host`) use the ops queue, not management commands.
+
+**Dated note, 3 Nov (C1 of the data README): one sender is missing above, lib.sh's `die_c`.**
+- lib.sh's `block_begin` (lib.sh:188) and `block_end` (:196) call `die_c` (:103). It runs `$ETTELEM sample --seconds 1 --every-ms 500`
+  under `timeout 20`.
+- `block_e144.sh` sources lib.sh (:15) and then sets `ETTELEM` to E128's guard (:16). So these calls took the guard's sample path
+  (`ettelem_guard.sh:19-31`) to the box's `ettelem`.
+- They ran under the card lock at both ends of smoke 14401 and of pass 14420: four calls of about two samples each (`block.json` ›
+  `die_c_start`/`die_c_end`: 50/51 and 51/52).
+- Each sample sends six GETs (`tools/ettelem/ettelem.cpp:165-167`). It resets nothing without `--reset-ms` (:149, :172), which the guard
+  refuses.
+
+One of the six is a kind the table above lacks:
+
+| command | sent by | class | source (et-platform 836a4ab) |
+|---|---|---|---|
+| `DM_CMD_GET_MODULE_VOLTAGE` (31) | lib.sh's `die_c`: `ettelem sample` through E128's guard, at each block's start and end | READ (nine PMIC voltage-register reads per sample, I2C reads with no write; allowed by the owner's rule of 2 Nov 2026) | thermal_power_monitor.c:243 → thermal_pwr_mgmt.c:1010-1140 (nine `pmic_get_voltage` calls) → pmic_controller.c:1473-1500 → `get_pmic_reg` :254-300 (Q136(w)'s table) |
+
+The other five (`GET_MODULE_POWER`, `GET_SP_STATS`, `GET_MODULE_CURRENT_TEMPERATURE`, `GET_ASIC_VOLTAGE`, `GET_ASIC_FREQUENCIES`) are in
+the table already, from the sampler and `ettelem config`. The committed audit lists all six at lib.sh:103 (`dmcmd-audit.txt` lines
+8-13) and reads GO.
+- **So E144 sent ten kinds of command, every one a READ.** Two of them, `GET_ASIC_VOLTAGE` and `GET_MODULE_VOLTAGE`, make PMIC
+  voltage-register reads.
+- E128's guard carried the config reads and these samples, not "config only".
+- No class changes, and no write was sent.
+
+**Dated note, 3 Nov (C5 of the data README): command 74's residual, exactly.** The held source has two forms, both of 7 Oct 2026:
+- **The first:** group 0 goes to `pvt_get_min_shire_ts_sample`, which converts the codes to whole degrees, and group 6 goes to
+  `pvt_hilo_reset`, a write.
+- **The same day's amendment:** raw codes are served on a new group 7 (`PVT_SAMPLE_GROUP_TS_RAW`, through `pvt_get_ts_raw_data`). It makes
+  the same `sdif_data` and `smpl_hilo` reads, unconverted, and writes nothing. Group 6 is no longer served.
+
+The running build returns raw codes on group 0, so its group-0 path matches neither held form. It differs in more than "the
+conversion" (above).
+
+The committed data check the only write either form has, the latch reset:
+- The 34 high latches read the same at E89's probe of 31 Oct (19:02:49 PDT) as in every hi/lo tick of smoke 14401 (16) and pass 14420
+  (542).
+- No low latch rose between ticks.
+- A reset sets each latch to the current code: the high latches would drop and the low ones rise.
+
+So no latch reset ran on this card through more than 200,000 group-0 reads (E89's 22,976, E97's 150,295 and E144's 27,816). That rules
+out both paths: command 74's group 6, and the statistics reset, whose handler resets the latches too (performance.c:575 →
+thermal_pwr_mgmt.c:2828). At 836a4ab, `pvt_get_min_shire_ts_sample` is pvt_controller.c:645-657, not 651-665. The class stays READ, with
+this residual.
 
 ## Order of work
 
