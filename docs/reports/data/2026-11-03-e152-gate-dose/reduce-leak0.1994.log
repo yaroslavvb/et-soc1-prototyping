@@ -1,0 +1,24 @@
+E78 aifoundry3: 600 MHz, 521.8 mV, leak 0.1994 W/C (-1 runs), runs kept 185/185, passes [15210, 15211, 15212, 15213, 15214, 15215], idle-invalid runs 0
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.897256917562725
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 24.734  0.057    26.671      23793    5.809
+    anchor_pi                   8.432  0.109    10.359       9242    2.256
+    fp32.q_chk                  5.993  0.100     7.855       7009    1.711
+    fp32.gd8                    5.937  0.114     7.828       6984    1.705
+    fp32.gd4a                   5.403  0.093     7.219       6440    1.572
+    fp32.gd4b                   5.333  0.081     7.182       6409    1.565
+    fp32.gd2a                   5.091  0.114     6.974       6223    1.519
+    fp32.gd2b                   5.019  0.091     6.958       6206    1.515
+    fp32.gd1a                   4.934  0.099     6.827       6090    1.487
+    fp32.gd1h                   4.929  0.087     6.886       6143    1.500
+    fp32.gd1b                   4.888  0.065     6.751       6023    1.470
+    fp32.q_steady               4.769  0.131     6.551       5845    1.427
+    fp32.gd0                    4.750  0.025     6.676       5955    1.454
+    fp32.zeros                  0.000  0.000     1.878       1676    0.409
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 22.187  0.036    23.998      21412    2.614
+    fp16.zeros                  0.000  0.000     1.892       1688    0.206
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.034  0.049     9.617       4995    0.305
+    int8.zeros                  0.000  0.000     2.513       1305    0.080
+  idle consistency median |S - S0 - D| 0.06774653966009492 W; carry-over {'slope_w_per_w': 0.000909482167497066, 'se': 0.0006192384726706382, 'n': 179}; pi built-in - file None; rail tau re-fit median None

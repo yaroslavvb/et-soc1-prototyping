@@ -1,0 +1,18 @@
+E152 registration and claim times (Tue 3 Nov 2026, PST)
+registration commit 2a744f4d: committed 05:44:49, on origin/main by 05:44:54 (commit_lab.sh "pushed")
+box setup (no device access): 05:45:29-05:45:45, every hash identical, preflight GO, V3_DRY pass of 33 launches (11 on E152 tiles), 0 --reset-ms lines
+et-who before the claim, 05:46:46: "No process holds an ET-SoC-1 device node or card lock."; no device process of any user
+the day's post 1567153765390487573 rewritten 05:46:47-05:47:03 (EXPECT_TEXT, dry run, save, read back)
+  before: <ai> **Claude says:** using aifoundry2 for 1 h, until ~06:33 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)
+  after:  <ai> **Claude says:** using aifoundry2 for 1 h, until ~06:33 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>); using aifoundry3 for 1 h, until ~06:46 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)
+session start (T0, the smoke's config read): 05:47:28 (epoch 1793713648)
+smoke p15201: 05:47:28-05:48:13; stop tests p15202 (board) 05:48:27-05:48:33, p15203 (die) 05:48:34-05:48:43, both ok
+queue started 05:48:54 (elapsed 86 s)
+passes 15210-15215: 05:48:54-06:20:04 (341, 294, 279, 295, 292, 294 s); queue done 1,956 s after the session start
+session-end read 06:20:04: TDP 0 / 65 C / max_power / 600 MHz / 523 mV; et-who 06:20:04: no process holds an ET-SoC-1 device node or card lock
+card session 05:47:28-06:20:04 = 32.6 card-minutes of the 40 allowed
+the day's post 1567153765390487573 rewritten 06:20:15-06:20:31 to drop this card's clause (EXPECT_TEXT, dry run, save, read back)
+  before: <ai> **Claude says:** using aifoundry3 for 1 h, until ~06:46 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>); using aifoundry1 card 1 for 1 h, until ~06:47 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)
+  after:  <ai> **Claude says:** using aifoundry1 card 1 for 1 h, until ~06:47 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)
+  (between the claim and the release the aifoundry2 lane dropped its clause and an aifoundry1 card 1 lane added its own; the read-back's
+   text field still showed the 05:55 source while its rendered field and the save's own read showed the 06:20 text, as E151 found)

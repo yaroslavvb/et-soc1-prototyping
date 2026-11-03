@@ -305,3 +305,7 @@ labelled arms), `score_e152.py` (every rule), `collect_e152.sh`, `selftest_e152.
 ## Amendments
 
 *(none yet)*
+
+*Note added after the run (not an amendment: no procedure, prediction or rule changed), Tue 3 Nov 2026, 06:2x PST: § Decision rules
+gives R2's band as [236.6, 289.2] fJ; the frozen value the scorer uses is 0.9 × 262.9449 = 236.650 fJ (236.7 at one decimal) in
+`predictions-e152.json` › `price`. The result: [`docs/reports/data/2026-11-03-e152-gate-dose/`](../../../docs/reports/data/2026-11-03-e152-gate-dose/README.md).*

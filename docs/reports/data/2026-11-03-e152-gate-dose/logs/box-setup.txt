@@ -1,0 +1,51 @@
+== host (no device access) ==
+aifoundry3
+ 05:45:29 up 7 days, 15:27,  3 users,  load average: 0.94, 0.75, 0.67
+No process holds an ET-SoC-1 device node or card lock.
+== tree ==
+root /home/yaroslavvb/aifoundry
+reused_unchanged_sha256: identical to E152's freeze: all
+e152_files_sha256: identical to E152's freeze: all
+e152_tiles_sha256: identical to E152's freeze: all
+== the device-command preflight (Q136(w)'s checker; GO required before any device opens) ==
+preflight rc=0 (0 = GO)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+== tiles against their registered sha256 (each file and each half) ==
+{"e152_tiles": 11, "families": {"bridge": 2, "ladder": 9}, "e78_tiles_checked": 6, "problems": []}
+== the binary takes fp32 file: operands, --dump-tiles and --stop-file ==
+  fp32: present
+  file:: present
+  --dump-tiles: present
+  --stop-file: present
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 4006896 Sep 25 07:25 build/ettelem/ettelem
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 3569104 Sep 26 06:15 build/sparsity/host/sparsity_host
+20e760c20e9b99c789ef96f1e4e950d51f534410275bfb933c2aaf96d1090fd0  build/sparsity/host/sparsity_host
+16037641ab75bdbe1209f323641e269c9b897468091243173bfaaaf0b21686e2  build/ettelem/ettelem
+  build/ettelem/ettelem: the binary the device-command list was classified for
+  build/sparsity/host/sparsity_host: the binary the device-command list was classified for
+-rw-rw-rw- 1 root root 0 Oct 26 15:18 /run/lock/etsoc-shire0.lock
+== the plan of the first pass ==
+{"e152": ["fp32.gd0", "fp32.gd1a", "fp32.gd1b", "fp32.gd1h", "fp32.gd2a", "fp32.gd2b", "fp32.gd4a", "fp32.gd4b", "fp32.gd8", "fp32.q_chk", "fp32.q_steady"], "compare": [], "anchors": ["fp32.zeros", "fp32.randn", "fp16.zeros", "fp16.randn", "int8.zeros", "int8.full"], "tie": "anchor_pi", "runs_per_pass": 31}
+  0 s-1 anchor_pi
+  1 s+0 fp16.zeros
+  2 s+0 fp16.randn
+  3 s+0 fp32.gd4b
+  4 s+0 fp32.gd0
+  5 s+0 int8.full
+  6 s+0 int8.zeros
+  7 s+0 fp32.zeros
+== dry run of one whole pass (V3_DRY=1: lib.sh stubs every device call) ==
+dry rc=0
+device launches the pass would make: 33
+of them on E152 tiles: 11
+lines naming --reset-ms in the dry run (must be 0): 0
+DRY hold10: build/sparsity/host/sparsity_host --test fma --type fp32 --pattern none --values pi --shires 0xffffffff --per-shire 32 --seconds 4.0 --seed 15201 --stop-file /home/yaroslavvb/aifoundry/build/claims-v3-dry/aifoundry3/kinds/p15200/STOP
+DRY ettelem config
+2026-11-03T05:45:37 [aifoundry3] kinds p15200 ends: ok tiers 1,2
+== the queue's budget rule on stub blocks (no device: each stub only sleeps) ==
+  05:45:37 queue: passes 15290..15293, budget 10 s from 05:45:37, deadline 2026-11-03 11:20 PST, first-pass estimate 4 s
+  05:45:37 p15290 starts (elapsed 0 s)
+  05:45:40 p15290 rc=0 (3 s)
+  05:45:41 p15291 starts (elapsed 4 s)
+  05:45:44 p15291 rc=0 (3 s)
+  05:45:45 budget: stopping before p15292 (elapsed 8 s, longest pass 3 s, 2 passes done)

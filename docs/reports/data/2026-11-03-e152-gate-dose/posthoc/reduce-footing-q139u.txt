@@ -1,0 +1,25 @@
+E152: reduce_e78.py unchanged via reduce_e152.py (E152's items; dips removed (E82 A2))
+E78 aifoundry3: 600 MHz, 521.8 mV, leak 0.2056 W/C (-1 runs), runs kept 185/185, passes [15210, 15211, 15212, 15213, 15214, 15215], idle-invalid runs 0
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.894394317147277
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 24.716  0.057    26.657      23780    5.806
+    anchor_pi                   8.428  0.110    10.356       9240    2.256
+    fp32.q_chk                  5.987  0.101     7.854       7008    1.711
+    fp32.gd8                    5.930  0.114     7.825       6982    1.705
+    fp32.gd4a                   5.396  0.093     7.217       6438    1.572
+    fp32.gd4b                   5.329  0.082     7.180       6407    1.564
+    fp32.gd2a                   5.086  0.115     6.973       6221    1.519
+    fp32.gd2b                   5.015  0.091     6.956       6205    1.515
+    fp32.gd1a                   4.930  0.100     6.826       6089    1.487
+    fp32.gd1h                   4.925  0.088     6.885       6142    1.499
+    fp32.gd1b                   4.885  0.065     6.750       6022    1.470
+    fp32.q_steady               4.767  0.134     6.550       5845    1.427
+    fp32.gd0                    4.745  0.026     6.675       5954    1.454
+    fp32.zeros                  0.000  0.000     1.881       1678    0.410
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 22.171  0.036    23.986      21401    2.612
+    fp16.zeros                  0.000  0.000     1.894       1690    0.206
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.029  0.049     9.615       4993    0.305
+    int8.zeros                  0.000  0.000     2.517       1307    0.080
+  idle consistency median |S - S0 - D| 0.0705530021356493 W; carry-over {'slope_w_per_w': 0.0008800329026272917, 'se': 0.000621783103925935, 'n': 179}; pi built-in - file None; rail tau re-fit median None
