@@ -85,12 +85,13 @@ def main(d):
         for a, v in sc["arms"].items():
             print(f"| arm {a} | {f(v['rms_w'])} | {f(v['bias_w'])} | — | {f(v['rms_over_span'], 3)} | — |")
         print()
-        print("| kind | measured y (W) | se | G1 pred | err | band ± | G4 err | native err | E149 G1 pred (A100 W) |"
-              "\n|---|---|---|---|---|---|---|---|---|")
+        print("| kind | measured y (W) | se | G1 pred | err | band ± | G4 err | native err | G1 in A100 W, E150 bytes |"
+              " E149's G1 pred (A100 W) |\n|---|---|---|---|---|---|---|---|---|---|")
         for k, v in sorted(sc["per_kind"].items()):
             p9 = (p149 or {}).get("kinds", {}).get(k, {}).get("pred", {}).get("G1")
+            p0 = pz["kinds"][k]["pred0"]["G1"] if pz else None
             print(f"| {k} | {f(v['meas'])} | {f(v['se'])} | {f(v['pred']['G1'])} | {f(v['err']['G1'])} | "
-                  f"{f(v['band90_w'])} | {f(v['err']['G4'])} | {f(v['err_arms'].get('G1_native'))} | {f(p9)} |")
+                  f"{f(v['band90_w'])} | {f(v['err']['G4'])} | {f(v['err_arms'].get('G1_native'))} | {f(p0)} | {f(p9)} |")
         print()
         print("| rule | verdict | numbers |\n|---|---|---|")
         for k, v in sc["rules"].items():
