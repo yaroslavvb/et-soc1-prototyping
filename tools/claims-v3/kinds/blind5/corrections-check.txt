@@ -1,0 +1,33 @@
+0. make_blind5.c_check, unchanged, rerun on the 36 frozen tiles: 36 identical to blind5.json
+
+1. fp16 C under E36's rule (the plain sum) against the frozen PRM-literal c_check
+   tile                           half-zero words A/B  dropped/op  differ/op  C flips start -> end (literal)  C flips start -> end (card)  C changed
+   fp16.anchor_zeros                      0 / 0              4096          0               0 -> 0                       0 -> 0             no
+   fp16.anchor_randn                      0 / 0                 0          0          50,179 -> 11,487             50,179 -> 11,487        no
+   fp16.pair_cancel_asign                 0 / 0                 0          0               0 -> 0                       0 -> 0             no
+   fp16.pair_nearcancel                   0 / 0                 0          0          35,516 -> 10,740             35,516 -> 10,740        no
+   fp16.wideexp_bgate_alt                 0 / 0              2048          0          11,688 -> 1,119              11,688 -> 1,119         no
+   fp16.exp_only                          0 / 0                 0          0          11,163 -> 1,532              11,163 -> 1,532         no
+   fp16.real_pythia_qk                    0 / 0                 0          0          46,661 -> 8,143              46,661 -> 8,143         no
+   fp16.real_pythia_softmax_v             8 / 0              1024        128          35,340 -> 7,099              36,847 -> 7,280         YES
+   fp16.real_pythia_ln2_up                0 / 0                 0          0          47,891 -> 10,517             47,891 -> 10,517        no
+   fp16.sparse24_aligned                  0 / 0              2048          0          25,965 -> 6,136              25,965 -> 6,136         no
+   fp16.sparse24_straddled                0 / 256            4096       4096               0 -> 0                  48,600 -> 10,350        YES
+   C descriptors change: fp16.real_pythia_softmax_v, fp16.sparse24_straddled
+   only the dropped count changes (every dropped update there adds zero): fp16.anchor_zeros, fp16.wideexp_bgate_alt, fp16.sparse24_aligned
+   every fp16 tile passes the C check under the card's rule: True
+
+2. blind pool 4: E140's M6 power residuals (measured - predicted) against C-register flips per op (post hoc)
+   C non-finite after the first op: fp32.wideexp_bgate_alt 109 of 256 (NaN 0); fp32.wideexp_agate_rows 133 of 256 (NaN 0)
+   fp16 flips identical under both rules on all blind-4 fp16 tiles: True
+   rule    arm          descriptor                r [95%] Spearman     r fp32/fp16/int8  wf r2  r without the 2 Inf tiles [95%]
+   literal primary      end           0.528 [ 0.168, 0.764]    0.493  0.609/0.456/0.656  0.337        0.503 [ 0.114, 0.758] (n 23)
+   literal primary      start         0.455 [ 0.073, 0.720]    0.578  0.584/0.413/0.715  0.260        0.407 [-0.007, 0.701] (n 23)
+   literal dips_removed end           0.632 [ 0.315, 0.822]    0.525  0.797/0.522/0.644  0.412        0.608 [ 0.261, 0.816] (n 23)
+   literal dips_removed start         0.565 [ 0.219, 0.785]    0.648  0.820/0.479/0.719  0.360        0.503 [ 0.114, 0.758] (n 23)
+   math    primary      end           0.528 [ 0.168, 0.764]    0.493  0.609/0.456/0.656  0.337        0.503 [ 0.114, 0.758] (n 23)
+   math    primary      start         0.455 [ 0.073, 0.720]    0.578  0.584/0.413/0.715  0.260        0.407 [-0.007, 0.701] (n 23)
+   math    dips_removed end           0.632 [ 0.315, 0.822]    0.525  0.797/0.522/0.644  0.412        0.608 [ 0.261, 0.816] (n 23)
+   math    dips_removed start         0.565 [ 0.219, 0.785]    0.648  0.820/0.479/0.719  0.360        0.503 [ 0.114, 0.758] (n 23)
+
+3. decodes_back: 32 tiles built from elements are decoded and compared at build time; n/a (defined on words) for 4: fp32.gray_stream, fp16.wideexp_bgate_alt, fp16.exp_only, int8.gray_a

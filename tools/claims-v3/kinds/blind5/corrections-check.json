@@ -1,0 +1,1130 @@
+{
+ "what": "Q138(b) blind pool 5: checks behind CORRECTIONS.md (2026-11-02)",
+ "numpy": "2.5.4",
+ "reproduces_frozen_c_check": {
+  "tiles": 36,
+  "identical": 36,
+  "differ": []
+ },
+ "fp16_rule": {
+  "rule_frozen": "PRM 9.4 pseudo-code: the two-term update applies only when a1, a2, b1, b2 are all nonzero",
+  "rule_card": "E36 LAT-S1: the plain sum a1*b1 + a2*b2 for every k pair (\"math\", PASS on aifoundry1 card 1, aifoundry2 and aifoundry3, 3 passes each; A-side half zeros tested directly)",
+  "tiles": {
+   "fp16.anchor_zeros": {
+    "half_zero_words": {
+     "a": 0,
+     "b": 0
+    },
+    "updates_that_differ_per_op": 0,
+    "literal_as_frozen": {
+     "c_start_flips": 0,
+     "c_end_flips": 0,
+     "start_update_change_frac": 0.0,
+     "start_moving_frac": 0.0,
+     "end_update_change_frac": 0.0,
+     "end_moving_frac": 0.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 4096
+    },
+    "math_the_card": {
+     "c_start_flips": 0,
+     "c_end_flips": 0,
+     "start_update_change_frac": 0.0,
+     "start_moving_frac": 0.0,
+     "end_update_change_frac": 0.0,
+     "end_moving_frac": 0.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_c_check": {
+     "operands_finite": true,
+     "nan_inf_encodings": 0,
+     "neg_zero_elements": {
+      "a": 0,
+      "b": 0
+     },
+     "updates_dropped_per_op": 0,
+     "c_bound_abs_over_2^21_ops": 0.0,
+     "c_bound_ok": true,
+     "c_op1_max_abs": 0.0,
+     "c_finite_64_ops_exact": true,
+     "c_start": {
+      "what": "the second op, from the first op's C",
+      "update_change_frac": 0.0,
+      "c_reg_flips_per_op": 0,
+      "moving_frac": 0.0
+     },
+     "c_launch_end_est": {
+      "what": "one op from C = 524288 x the op's exact increment, rounded (an estimate of the state at the end of a 0.5 s launch at 600 MHz)",
+      "ops": 524288,
+      "update_change_frac": 0.0,
+      "c_reg_flips_per_op": 0,
+      "moving_frac": 0.0,
+      "finite": true
+     },
+     "pass": true
+    },
+    "fields_changed": [
+     "updates_dropped_per_op"
+    ],
+    "c_descriptors_changed": false,
+    "other_fields_unchanged": true
+   },
+   "fp16.anchor_randn": {
+    "half_zero_words": {
+     "a": 0,
+     "b": 0
+    },
+    "updates_that_differ_per_op": 0,
+    "literal_as_frozen": {
+     "c_start_flips": 50179,
+     "c_end_flips": 11487,
+     "start_update_change_frac": 1.0,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.919189,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_the_card": {
+     "c_start_flips": 50179,
+     "c_end_flips": 11487,
+     "start_update_change_frac": 1.0,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.919189,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_c_check": {
+     "operands_finite": true,
+     "nan_inf_encodings": 0,
+     "neg_zero_elements": {
+      "a": 0,
+      "b": 0
+     },
+     "updates_dropped_per_op": 0,
+     "c_bound_abs_over_2^21_ops": 420851731.125,
+     "c_bound_ok": true,
+     "c_op1_max_abs": 17.71267318725586,
+     "c_finite_64_ops_exact": true,
+     "c_start": {
+      "what": "the second op, from the first op's C",
+      "update_change_frac": 1.0,
+      "c_reg_flips_per_op": 50179,
+      "moving_frac": 1.0
+     },
+     "c_launch_end_est": {
+      "what": "one op from C = 524288 x the op's exact increment, rounded (an estimate of the state at the end of a 0.5 s launch at 600 MHz)",
+      "ops": 524288,
+      "update_change_frac": 0.919189,
+      "c_reg_flips_per_op": 11487,
+      "moving_frac": 1.0,
+      "finite": true
+     },
+     "pass": true
+    },
+    "fields_changed": [],
+    "c_descriptors_changed": false,
+    "other_fields_unchanged": true
+   },
+   "fp16.pair_cancel_asign": {
+    "half_zero_words": {
+     "a": 0,
+     "b": 0
+    },
+    "updates_that_differ_per_op": 0,
+    "literal_as_frozen": {
+     "c_start_flips": 0,
+     "c_end_flips": 0,
+     "start_update_change_frac": 0.0,
+     "start_moving_frac": 0.0,
+     "end_update_change_frac": 0.0,
+     "end_moving_frac": 0.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_the_card": {
+     "c_start_flips": 0,
+     "c_end_flips": 0,
+     "start_update_change_frac": 0.0,
+     "start_moving_frac": 0.0,
+     "end_update_change_frac": 0.0,
+     "end_moving_frac": 0.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_c_check": {
+     "operands_finite": true,
+     "nan_inf_encodings": 0,
+     "neg_zero_elements": {
+      "a": 0,
+      "b": 0
+     },
+     "updates_dropped_per_op": 0,
+     "c_bound_abs_over_2^21_ops": 0.0,
+     "c_bound_ok": true,
+     "c_op1_max_abs": 0.0,
+     "c_finite_64_ops_exact": true,
+     "c_start": {
+      "what": "the second op, from the first op's C",
+      "update_change_frac": 0.0,
+      "c_reg_flips_per_op": 0,
+      "moving_frac": 0.0
+     },
+     "c_launch_end_est": {
+      "what": "one op from C = 524288 x the op's exact increment, rounded (an estimate of the state at the end of a 0.5 s launch at 600 MHz)",
+      "ops": 524288,
+      "update_change_frac": 0.0,
+      "c_reg_flips_per_op": 0,
+      "moving_frac": 0.0,
+      "finite": true
+     },
+     "pass": true
+    },
+    "fields_changed": [],
+    "c_descriptors_changed": false,
+    "other_fields_unchanged": true
+   },
+   "fp16.pair_nearcancel": {
+    "half_zero_words": {
+     "a": 0,
+     "b": 0
+    },
+    "updates_that_differ_per_op": 0,
+    "literal_as_frozen": {
+     "c_start_flips": 35516,
+     "c_end_flips": 10740,
+     "start_update_change_frac": 1.0,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.873291,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_the_card": {
+     "c_start_flips": 35516,
+     "c_end_flips": 10740,
+     "start_update_change_frac": 1.0,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.873291,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_c_check": {
+     "operands_finite": true,
+     "nan_inf_encodings": 0,
+     "neg_zero_elements": {
+      "a": 0,
+      "b": 0
+     },
+     "updates_dropped_per_op": 0,
+     "c_bound_abs_over_2^21_ops": 1736170.5,
+     "c_bound_ok": true,
+     "c_op1_max_abs": 0.042724400758743286,
+     "c_finite_64_ops_exact": true,
+     "c_start": {
+      "what": "the second op, from the first op's C",
+      "update_change_frac": 1.0,
+      "c_reg_flips_per_op": 35516,
+      "moving_frac": 1.0
+     },
+     "c_launch_end_est": {
+      "what": "one op from C = 524288 x the op's exact increment, rounded (an estimate of the state at the end of a 0.5 s launch at 600 MHz)",
+      "ops": 524288,
+      "update_change_frac": 0.873291,
+      "c_reg_flips_per_op": 10740,
+      "moving_frac": 1.0,
+      "finite": true
+     },
+     "pass": true
+    },
+    "fields_changed": [],
+    "c_descriptors_changed": false,
+    "other_fields_unchanged": true
+   },
+   "fp16.wideexp_bgate_alt": {
+    "half_zero_words": {
+     "a": 0,
+     "b": 0
+    },
+    "updates_that_differ_per_op": 0,
+    "literal_as_frozen": {
+     "c_start_flips": 11688,
+     "c_end_flips": 1119,
+     "start_update_change_frac": 0.390625,
+     "start_moving_frac": 0.5,
+     "end_update_change_frac": 0.087158,
+     "end_moving_frac": 0.5,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 2048
+    },
+    "math_the_card": {
+     "c_start_flips": 11688,
+     "c_end_flips": 1119,
+     "start_update_change_frac": 0.390625,
+     "start_moving_frac": 0.5,
+     "end_update_change_frac": 0.087158,
+     "end_moving_frac": 0.5,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_c_check": {
+     "operands_finite": true,
+     "nan_inf_encodings": 0,
+     "neg_zero_elements": {
+      "a": 0,
+      "b": 0
+     },
+     "updates_dropped_per_op": 0,
+     "c_bound_abs_over_2^21_ops": 4.447907984709791e+16,
+     "c_bound_ok": true,
+     "c_op1_max_abs": 2197755392.0,
+     "c_finite_64_ops_exact": true,
+     "c_start": {
+      "what": "the second op, from the first op's C",
+      "update_change_frac": 0.390625,
+      "c_reg_flips_per_op": 11688,
+      "moving_frac": 0.5
+     },
+     "c_launch_end_est": {
+      "what": "one op from C = 524288 x the op's exact increment, rounded (an estimate of the state at the end of a 0.5 s launch at 600 MHz)",
+      "ops": 524288,
+      "update_change_frac": 0.087158,
+      "c_reg_flips_per_op": 1119,
+      "moving_frac": 0.5,
+      "finite": true
+     },
+     "pass": true
+    },
+    "fields_changed": [
+     "updates_dropped_per_op"
+    ],
+    "c_descriptors_changed": false,
+    "other_fields_unchanged": true
+   },
+   "fp16.exp_only": {
+    "half_zero_words": {
+     "a": 0,
+     "b": 0
+    },
+    "updates_that_differ_per_op": 0,
+    "literal_as_frozen": {
+     "c_start_flips": 11163,
+     "c_end_flips": 1532,
+     "start_update_change_frac": 0.753662,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.179688,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_the_card": {
+     "c_start_flips": 11163,
+     "c_end_flips": 1532,
+     "start_update_change_frac": 0.753662,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.179688,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_c_check": {
+     "operands_finite": true,
+     "nan_inf_encodings": 0,
+     "neg_zero_elements": {
+      "a": 0,
+      "b": 0
+     },
+     "updates_dropped_per_op": 0,
+     "c_bound_abs_over_2^21_ops": 2.75846428860872e+16,
+     "c_bound_ok": true,
+     "c_op1_max_abs": 1644166656.0,
+     "c_finite_64_ops_exact": true,
+     "c_start": {
+      "what": "the second op, from the first op's C",
+      "update_change_frac": 0.753662,
+      "c_reg_flips_per_op": 11163,
+      "moving_frac": 1.0
+     },
+     "c_launch_end_est": {
+      "what": "one op from C = 524288 x the op's exact increment, rounded (an estimate of the state at the end of a 0.5 s launch at 600 MHz)",
+      "ops": 524288,
+      "update_change_frac": 0.179688,
+      "c_reg_flips_per_op": 1532,
+      "moving_frac": 1.0,
+      "finite": true
+     },
+     "pass": true
+    },
+    "fields_changed": [],
+    "c_descriptors_changed": false,
+    "other_fields_unchanged": true
+   },
+   "fp16.real_pythia_qk": {
+    "half_zero_words": {
+     "a": 0,
+     "b": 0
+    },
+    "updates_that_differ_per_op": 0,
+    "literal_as_frozen": {
+     "c_start_flips": 46661,
+     "c_end_flips": 8143,
+     "start_update_change_frac": 1.0,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.728271,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_the_card": {
+     "c_start_flips": 46661,
+     "c_end_flips": 8143,
+     "start_update_change_frac": 1.0,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.728271,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_c_check": {
+     "operands_finite": true,
+     "nan_inf_encodings": 0,
+     "neg_zero_elements": {
+      "a": 0,
+      "b": 0
+     },
+     "updates_dropped_per_op": 0,
+     "c_bound_abs_over_2^21_ops": 1089036463.75,
+     "c_bound_ok": true,
+     "c_op1_max_abs": 40.35932922363281,
+     "c_finite_64_ops_exact": true,
+     "c_start": {
+      "what": "the second op, from the first op's C",
+      "update_change_frac": 1.0,
+      "c_reg_flips_per_op": 46661,
+      "moving_frac": 1.0
+     },
+     "c_launch_end_est": {
+      "what": "one op from C = 524288 x the op's exact increment, rounded (an estimate of the state at the end of a 0.5 s launch at 600 MHz)",
+      "ops": 524288,
+      "update_change_frac": 0.728271,
+      "c_reg_flips_per_op": 8143,
+      "moving_frac": 1.0,
+      "finite": true
+     },
+     "pass": true
+    },
+    "fields_changed": [],
+    "c_descriptors_changed": false,
+    "other_fields_unchanged": true
+   },
+   "fp16.real_pythia_softmax_v": {
+    "half_zero_words": {
+     "a": 8,
+     "b": 0
+    },
+    "updates_that_differ_per_op": 128,
+    "literal_as_frozen": {
+     "c_start_flips": 35340,
+     "c_end_flips": 7099,
+     "start_update_change_frac": 0.75,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.647705,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 1024
+    },
+    "math_the_card": {
+     "c_start_flips": 36847,
+     "c_end_flips": 7280,
+     "start_update_change_frac": 0.78125,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.66748,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_c_check": {
+     "operands_finite": true,
+     "nan_inf_encodings": 0,
+     "neg_zero_elements": {
+      "a": 0,
+      "b": 0
+     },
+     "updates_dropped_per_op": 0,
+     "c_bound_abs_over_2^21_ops": 15776921.3046875,
+     "c_bound_ok": true,
+     "c_op1_max_abs": 0.9403777718544006,
+     "c_finite_64_ops_exact": true,
+     "c_start": {
+      "what": "the second op, from the first op's C",
+      "update_change_frac": 0.78125,
+      "c_reg_flips_per_op": 36847,
+      "moving_frac": 1.0
+     },
+     "c_launch_end_est": {
+      "what": "one op from C = 524288 x the op's exact increment, rounded (an estimate of the state at the end of a 0.5 s launch at 600 MHz)",
+      "ops": 524288,
+      "update_change_frac": 0.66748,
+      "c_reg_flips_per_op": 7280,
+      "moving_frac": 1.0,
+      "finite": true
+     },
+     "pass": true
+    },
+    "fields_changed": [
+     "updates_dropped_per_op",
+     "c_start",
+     "c_launch_end_est"
+    ],
+    "c_descriptors_changed": true,
+    "other_fields_unchanged": false
+   },
+   "fp16.real_pythia_ln2_up": {
+    "half_zero_words": {
+     "a": 0,
+     "b": 0
+    },
+    "updates_that_differ_per_op": 0,
+    "literal_as_frozen": {
+     "c_start_flips": 47891,
+     "c_end_flips": 10517,
+     "start_update_change_frac": 1.0,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.865234,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_the_card": {
+     "c_start_flips": 47891,
+     "c_end_flips": 10517,
+     "start_update_change_frac": 1.0,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.865234,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_c_check": {
+     "operands_finite": true,
+     "nan_inf_encodings": 0,
+     "neg_zero_elements": {
+      "a": 0,
+      "b": 0
+     },
+     "updates_dropped_per_op": 0,
+     "c_bound_abs_over_2^21_ops": 6327228.09375,
+     "c_bound_ok": true,
+     "c_op1_max_abs": 0.2523152828216553,
+     "c_finite_64_ops_exact": true,
+     "c_start": {
+      "what": "the second op, from the first op's C",
+      "update_change_frac": 1.0,
+      "c_reg_flips_per_op": 47891,
+      "moving_frac": 1.0
+     },
+     "c_launch_end_est": {
+      "what": "one op from C = 524288 x the op's exact increment, rounded (an estimate of the state at the end of a 0.5 s launch at 600 MHz)",
+      "ops": 524288,
+      "update_change_frac": 0.865234,
+      "c_reg_flips_per_op": 10517,
+      "moving_frac": 1.0,
+      "finite": true
+     },
+     "pass": true
+    },
+    "fields_changed": [],
+    "c_descriptors_changed": false,
+    "other_fields_unchanged": true
+   },
+   "fp16.sparse24_aligned": {
+    "half_zero_words": {
+     "a": 0,
+     "b": 0
+    },
+    "updates_that_differ_per_op": 0,
+    "literal_as_frozen": {
+     "c_start_flips": 25965,
+     "c_end_flips": 6136,
+     "start_update_change_frac": 0.5,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.467773,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 2048
+    },
+    "math_the_card": {
+     "c_start_flips": 25965,
+     "c_end_flips": 6136,
+     "start_update_change_frac": 0.5,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.467773,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_c_check": {
+     "operands_finite": true,
+     "nan_inf_encodings": 0,
+     "neg_zero_elements": {
+      "a": 0,
+      "b": 0
+     },
+     "updates_dropped_per_op": 0,
+     "c_bound_abs_over_2^21_ops": 360200278.0,
+     "c_bound_ok": true,
+     "c_op1_max_abs": 15.260687828063965,
+     "c_finite_64_ops_exact": true,
+     "c_start": {
+      "what": "the second op, from the first op's C",
+      "update_change_frac": 0.5,
+      "c_reg_flips_per_op": 25965,
+      "moving_frac": 1.0
+     },
+     "c_launch_end_est": {
+      "what": "one op from C = 524288 x the op's exact increment, rounded (an estimate of the state at the end of a 0.5 s launch at 600 MHz)",
+      "ops": 524288,
+      "update_change_frac": 0.467773,
+      "c_reg_flips_per_op": 6136,
+      "moving_frac": 1.0,
+      "finite": true
+     },
+     "pass": true
+    },
+    "fields_changed": [
+     "updates_dropped_per_op"
+    ],
+    "c_descriptors_changed": false,
+    "other_fields_unchanged": true
+   },
+   "fp16.sparse24_straddled": {
+    "half_zero_words": {
+     "a": 0,
+     "b": 256
+    },
+    "updates_that_differ_per_op": 4096,
+    "literal_as_frozen": {
+     "c_start_flips": 0,
+     "c_end_flips": 0,
+     "start_update_change_frac": 0.0,
+     "start_moving_frac": 0.0,
+     "end_update_change_frac": 0.0,
+     "end_moving_frac": 0.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 4096
+    },
+    "math_the_card": {
+     "c_start_flips": 48600,
+     "c_end_flips": 10350,
+     "start_update_change_frac": 1.0,
+     "start_moving_frac": 1.0,
+     "end_update_change_frac": 0.85376,
+     "end_moving_frac": 1.0,
+     "c_finite_64_ops_exact": true,
+     "launch_end_finite": true,
+     "pass": true,
+     "updates_dropped_per_op": 0
+    },
+    "math_c_check": {
+     "operands_finite": true,
+     "nan_inf_encodings": 0,
+     "neg_zero_elements": {
+      "a": 0,
+      "b": 0
+     },
+     "updates_dropped_per_op": 0,
+     "c_bound_abs_over_2^21_ops": 383560184.0,
+     "c_bound_ok": true,
+     "c_op1_max_abs": 10.416223526000977,
+     "c_finite_64_ops_exact": true,
+     "c_start": {
+      "what": "the second op, from the first op's C",
+      "update_change_frac": 1.0,
+      "c_reg_flips_per_op": 48600,
+      "moving_frac": 1.0
+     },
+     "c_launch_end_est": {
+      "what": "one op from C = 524288 x the op's exact increment, rounded (an estimate of the state at the end of a 0.5 s launch at 600 MHz)",
+      "ops": 524288,
+      "update_change_frac": 0.85376,
+      "c_reg_flips_per_op": 10350,
+      "moving_frac": 1.0,
+      "finite": true
+     },
+     "pass": true
+    },
+    "fields_changed": [
+     "updates_dropped_per_op",
+     "c_start",
+     "c_launch_end_est"
+    ],
+    "c_descriptors_changed": true,
+    "other_fields_unchanged": false
+   }
+  },
+  "c_descriptors_changed": [
+   "fp16.real_pythia_softmax_v",
+   "fp16.sparse24_straddled"
+  ],
+  "dropped_count_only": [
+   "fp16.anchor_zeros",
+   "fp16.wideexp_bgate_alt",
+   "fp16.sparse24_aligned"
+  ],
+  "all_pass_under_card_rule": true
+ },
+ "blind4": {
+  "tiles": 25,
+  "fp16_flips_same_under_both_rules": true,
+  "c_op1_nonfinite_of_256": {
+   "fp32.wideexp_bgate_alt": {
+    "nonfinite": 109,
+    "nan": 0
+   },
+   "fp32.wideexp_agate_rows": {
+    "nonfinite": 133,
+    "nan": 0
+   }
+  },
+  "flips": {
+   "literal": {
+    "fp32.cancel_pairs": {
+     "start": 62522,
+     "end": 63280
+    },
+    "fp32.sign_drift": {
+     "start": 43146,
+     "end": 5875
+    },
+    "fp32.wideexp_bgate_alt": {
+     "start": 214,
+     "end": 42
+    },
+    "fp32.wideexp_agate_rows": {
+     "start": 499,
+     "end": 80
+    },
+    "fp32.denormals_only": {
+     "start": 2042,
+     "end": 2015
+    },
+    "fp32.a_const_b_busy": {
+     "start": 53536,
+     "end": 12656
+    },
+    "fp32.a_exp_busy_b_const": {
+     "start": 5792,
+     "end": 1232
+    },
+    "fp32.b_3of8_k": {
+     "start": 19133,
+     "end": 4318
+    },
+    "fp32.rowcol_sparse": {
+     "start": 27153,
+     "end": 5555
+    },
+    "fp32.real_pythia_embed_qkv": {
+     "start": 46464,
+     "end": 10692
+    },
+    "fp32.real_qwen_q_down": {
+     "start": 38405,
+     "end": 10732
+    },
+    "fp16.pair_cancel": {
+     "start": 0,
+     "end": 0
+    },
+    "fp16.wideexp_gate30": {
+     "start": 12585,
+     "end": 1801
+    },
+    "fp16.a_hi_busy_lo_const": {
+     "start": 50424,
+     "end": 12045
+    },
+    "fp16.block_sparse_37": {
+     "start": 25391,
+     "end": 6220
+    },
+    "fp16.band_local": {
+     "start": 3507,
+     "end": 971
+    },
+    "fp16.real_pythia_embed_qkv": {
+     "start": 48637,
+     "end": 11550
+    },
+    "fp16.real_qwen_ln_down": {
+     "start": 42548,
+     "end": 11313
+    },
+    "int8.sign_runs_i": {
+     "start": 29196,
+     "end": 30396
+    },
+    "int8.a_full_b_const": {
+     "start": 32912,
+     "end": 33680
+    },
+    "int8.pair_gate_37": {
+     "start": 19814,
+     "end": 19707
+    },
+    "int8.band_a": {
+     "start": 9556,
+     "end": 10453
+    },
+    "int8.b_line_flipflop": {
+     "start": 14704,
+     "end": 13120
+    },
+    "int8.real_pythia_embed_mlpout": {
+     "start": 23793,
+     "end": 27066
+    },
+    "int8.real_qwen_q_down": {
+     "start": 22046,
+     "end": 25768
+    }
+   },
+   "math": {
+    "fp32.cancel_pairs": {
+     "start": 62522,
+     "end": 63280
+    },
+    "fp32.sign_drift": {
+     "start": 43146,
+     "end": 5875
+    },
+    "fp32.wideexp_bgate_alt": {
+     "start": 214,
+     "end": 42
+    },
+    "fp32.wideexp_agate_rows": {
+     "start": 499,
+     "end": 80
+    },
+    "fp32.denormals_only": {
+     "start": 2042,
+     "end": 2015
+    },
+    "fp32.a_const_b_busy": {
+     "start": 53536,
+     "end": 12656
+    },
+    "fp32.a_exp_busy_b_const": {
+     "start": 5792,
+     "end": 1232
+    },
+    "fp32.b_3of8_k": {
+     "start": 19133,
+     "end": 4318
+    },
+    "fp32.rowcol_sparse": {
+     "start": 27153,
+     "end": 5555
+    },
+    "fp32.real_pythia_embed_qkv": {
+     "start": 46464,
+     "end": 10692
+    },
+    "fp32.real_qwen_q_down": {
+     "start": 38405,
+     "end": 10732
+    },
+    "fp16.pair_cancel": {
+     "start": 0,
+     "end": 0
+    },
+    "fp16.wideexp_gate30": {
+     "start": 12585,
+     "end": 1801
+    },
+    "fp16.a_hi_busy_lo_const": {
+     "start": 50424,
+     "end": 12045
+    },
+    "fp16.block_sparse_37": {
+     "start": 25391,
+     "end": 6220
+    },
+    "fp16.band_local": {
+     "start": 3507,
+     "end": 971
+    },
+    "fp16.real_pythia_embed_qkv": {
+     "start": 48637,
+     "end": 11550
+    },
+    "fp16.real_qwen_ln_down": {
+     "start": 42548,
+     "end": 11313
+    },
+    "int8.sign_runs_i": {
+     "start": 29196,
+     "end": 30396
+    },
+    "int8.a_full_b_const": {
+     "start": 32912,
+     "end": 33680
+    },
+    "int8.pair_gate_37": {
+     "start": 19814,
+     "end": 19707
+    },
+    "int8.band_a": {
+     "start": 9556,
+     "end": 10453
+    },
+    "int8.b_line_flipflop": {
+     "start": 14704,
+     "end": 13120
+    },
+    "int8.real_pythia_embed_mlpout": {
+     "start": 23793,
+     "end": 27066
+    },
+    "int8.real_qwen_q_down": {
+     "start": 22046,
+     "end": 25768
+    }
+   }
+  }
+ },
+ "corr": {
+  "literal/primary/end": {
+   "n": 25,
+   "r": 0.528,
+   "r_95ci": [
+    0.168,
+    0.764
+   ],
+   "spearman": 0.493,
+   "r_by_format": {
+    "fp32": 0.609,
+    "fp16": 0.456,
+    "int8": 0.656
+   },
+   "within_format_slope_W_per_1000_flips": 0.0132,
+   "within_format_r2": 0.337,
+   "n_without_inf_tiles": 23,
+   "r_without_inf_tiles": 0.503,
+   "r_without_inf_tiles_95ci": [
+    0.114,
+    0.758
+   ]
+  },
+  "literal/primary/start": {
+   "n": 25,
+   "r": 0.455,
+   "r_95ci": [
+    0.073,
+    0.72
+   ],
+   "spearman": 0.578,
+   "r_by_format": {
+    "fp32": 0.584,
+    "fp16": 0.413,
+    "int8": 0.715
+   },
+   "within_format_slope_W_per_1000_flips": 0.0079,
+   "within_format_r2": 0.26,
+   "n_without_inf_tiles": 23,
+   "r_without_inf_tiles": 0.407,
+   "r_without_inf_tiles_95ci": [
+    -0.007,
+    0.701
+   ]
+  },
+  "literal/dips_removed/end": {
+   "n": 25,
+   "r": 0.632,
+   "r_95ci": [
+    0.315,
+    0.822
+   ],
+   "spearman": 0.525,
+   "r_by_format": {
+    "fp32": 0.797,
+    "fp16": 0.522,
+    "int8": 0.644
+   },
+   "within_format_slope_W_per_1000_flips": 0.0119,
+   "within_format_r2": 0.412,
+   "n_without_inf_tiles": 23,
+   "r_without_inf_tiles": 0.608,
+   "r_without_inf_tiles_95ci": [
+    0.261,
+    0.816
+   ]
+  },
+  "literal/dips_removed/start": {
+   "n": 25,
+   "r": 0.565,
+   "r_95ci": [
+    0.219,
+    0.785
+   ],
+   "spearman": 0.648,
+   "r_by_format": {
+    "fp32": 0.82,
+    "fp16": 0.479,
+    "int8": 0.719
+   },
+   "within_format_slope_W_per_1000_flips": 0.0076,
+   "within_format_r2": 0.36,
+   "n_without_inf_tiles": 23,
+   "r_without_inf_tiles": 0.503,
+   "r_without_inf_tiles_95ci": [
+    0.114,
+    0.758
+   ]
+  },
+  "math/primary/end": {
+   "n": 25,
+   "r": 0.528,
+   "r_95ci": [
+    0.168,
+    0.764
+   ],
+   "spearman": 0.493,
+   "r_by_format": {
+    "fp32": 0.609,
+    "fp16": 0.456,
+    "int8": 0.656
+   },
+   "within_format_slope_W_per_1000_flips": 0.0132,
+   "within_format_r2": 0.337,
+   "n_without_inf_tiles": 23,
+   "r_without_inf_tiles": 0.503,
+   "r_without_inf_tiles_95ci": [
+    0.114,
+    0.758
+   ]
+  },
+  "math/primary/start": {
+   "n": 25,
+   "r": 0.455,
+   "r_95ci": [
+    0.073,
+    0.72
+   ],
+   "spearman": 0.578,
+   "r_by_format": {
+    "fp32": 0.584,
+    "fp16": 0.413,
+    "int8": 0.715
+   },
+   "within_format_slope_W_per_1000_flips": 0.0079,
+   "within_format_r2": 0.26,
+   "n_without_inf_tiles": 23,
+   "r_without_inf_tiles": 0.407,
+   "r_without_inf_tiles_95ci": [
+    -0.007,
+    0.701
+   ]
+  },
+  "math/dips_removed/end": {
+   "n": 25,
+   "r": 0.632,
+   "r_95ci": [
+    0.315,
+    0.822
+   ],
+   "spearman": 0.525,
+   "r_by_format": {
+    "fp32": 0.797,
+    "fp16": 0.522,
+    "int8": 0.644
+   },
+   "within_format_slope_W_per_1000_flips": 0.0119,
+   "within_format_r2": 0.412,
+   "n_without_inf_tiles": 23,
+   "r_without_inf_tiles": 0.608,
+   "r_without_inf_tiles_95ci": [
+    0.261,
+    0.816
+   ]
+  },
+  "math/dips_removed/start": {
+   "n": 25,
+   "r": 0.565,
+   "r_95ci": [
+    0.219,
+    0.785
+   ],
+   "spearman": 0.648,
+   "r_by_format": {
+    "fp32": 0.82,
+    "fp16": 0.479,
+    "int8": 0.719
+   },
+   "within_format_slope_W_per_1000_flips": 0.0076,
+   "within_format_r2": 0.36,
+   "n_without_inf_tiles": 23,
+   "r_without_inf_tiles": 0.503,
+   "r_without_inf_tiles_95ci": [
+    0.114,
+    0.758
+   ]
+  }
+ },
+ "corr_note": "post hoc: computed after the pool's design, on one session's 25 tiles, with a derived descriptor; the frozen README shows the 'end' rows only, chosen after both descriptors were computed",
+ "decodes_back": {
+  "built_from_words_na": [
+   "fp32.gray_stream",
+   "fp16.wideexp_bgate_alt",
+   "fp16.exp_only",
+   "int8.gray_a"
+  ],
+  "built_from_elements_checked": 32,
+  "note": "make_blind5.py writes decodes_back true for every tile; build_one decodes and compares only the tiles built from elements (make_kinds.encode); for the tiles built from words (make_kinds.from_words) the check is not defined: read it as n/a (defined on words)"
+ }
+}
