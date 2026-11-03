@@ -1,0 +1,39 @@
+E140: reduce_e78.py unchanged via reduce_e140.py (E140's items; dips removed (E82 A2))
+E78 aifoundry3: 600 MHz, 521.6 mV, leak 0.2774 W/C (123 runs), runs kept 180/180, passes [14010, 14011, 14012, 14013], idle-invalid runs 0
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.858611299594756
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.cancel_pairs          24.620  0.117    26.693      23818    5.815
+    fp32.randn                 24.505  0.084    26.468      23613    5.765
+    fp32.sign_drift            22.959  0.104    24.856      22170    5.413
+    fp32.real_pythia_embed_qkv   19.605  0.124    21.607      19272    4.705
+    fp32.a_const_b_busy        19.278  0.096    21.294      18997    4.638
+    fp32.real_qwen_q_down      17.974  0.031    20.007      17851    4.358
+    fp32.rowcol_sparse         15.322  0.172    17.373      15499    3.784
+    fp32.wideexp_agate_rows    13.903  0.158    15.961      14237    3.476
+    fp32.wideexp_bgate_alt     13.315  0.297    15.345      13691    3.343
+    fp32.a_exp_busy_b_const    12.050  0.103    14.081      12563    3.067
+    fp32.denormals_only        11.197  0.105    13.230      11801    2.881
+    fp32.b_3of8_k              10.908  0.177    12.860      11473    2.801
+    anchor_pi                   8.360  0.156    10.367       9246    2.257
+    fp32.zeros                  0.000  0.000     1.976       1763    0.430
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.real_pythia_embed_qkv   22.076  0.095    24.052      21462    2.620
+    fp16.randn                 21.969  0.020    23.937      21354    2.607
+    fp16.a_hi_busy_lo_const    20.439  0.085    22.408      19990    2.440
+    fp16.real_qwen_ln_down     20.181  0.041    22.204      19809    2.418
+    fp16.pair_cancel           16.396  0.114    18.429      16441    2.007
+    fp16.wideexp_gate30        12.996  0.034    14.967      13349    1.630
+    fp16.block_sparse_37       11.999  0.146    13.993      12483    1.524
+    fp16.band_local             2.935  0.119     4.912       4382    0.535
+    fp16.zeros                  0.000  0.000     1.974       1761    0.215
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.077  0.124     9.641       5007    0.306
+    int8.a_full_b_const         6.995  0.171     9.548       4957    0.303
+    int8.real_qwen_q_down       6.116  0.162     8.706       4521    0.276
+    int8.real_pythia_embed_mlpout    5.947  0.159     8.531       4430    0.270
+    int8.sign_runs_i            5.601  0.178     8.194       4255    0.260
+    int8.pair_gate_37           4.258  0.269     6.826       3544    0.216
+    int8.b_line_flipflop        3.625  0.311     6.193       3217    0.196
+    int8.band_a                 2.594  0.149     5.118       2658    0.162
+    int8.zeros                  0.000  0.000     2.592       1346    0.082
+  idle consistency median |S - S0 - D| 0.05142159903842547 W; carry-over {'slope_w_per_w': 0.0011217350318915313, 'se': 0.0006543046191487975, 'n': 176}; pi built-in - file None; rail tau re-fit median 0.975

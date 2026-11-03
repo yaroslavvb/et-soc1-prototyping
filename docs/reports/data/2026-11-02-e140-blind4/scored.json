@@ -1,0 +1,4812 @@
+{
+ "experiment": "E140",
+ "primary": {
+  "passes": [
+   14012,
+   14013
+  ],
+  "set_aside": [
+   {
+    "pass": 14010,
+    "why": [
+     "fp32.randn spans 2.489 W"
+    ]
+   },
+   {
+    "pass": 14011,
+    "why": [
+     "anchor_pi drifts +0.715 W"
+    ]
+   }
+  ],
+  "leak": {
+   "mode": "auto",
+   "k_w_per_c": 0.28609907120743255,
+   "n_runs": 123
+  },
+  "reducer_arm": "primary (nothing changed)",
+  "power": {
+   "quantity": "power",
+   "footing": "frozen",
+   "anchor_scale": null,
+   "short_tiles": [],
+   "rules": {
+    "E140-P1": {
+     "verdict": "PASS",
+     "rms": 0.40559937868219503,
+     "interval": {
+      "lo95": 0.11351391150483078,
+      "median": 0.18532583968716762,
+      "hi95": 0.4741456035155995,
+      "n": 14,
+      "mix": {
+       "fp16": 6,
+       "fp32": 8
+      },
+      "draws": 100000,
+      "seed": 14007
+     },
+     "tiles": [
+      "fp16.a_hi_busy_lo_const",
+      "fp16.block_sparse_37",
+      "fp16.pair_cancel",
+      "fp16.real_pythia_embed_qkv",
+      "fp16.real_qwen_ln_down",
+      "fp16.wideexp_gate30",
+      "fp32.a_const_b_busy",
+      "fp32.b_3of8_k",
+      "fp32.cancel_pairs",
+      "fp32.denormals_only",
+      "fp32.real_pythia_embed_qkv",
+      "fp32.real_qwen_q_down",
+      "fp32.sign_drift",
+      "fp32.wideexp_bgate_alt"
+     ],
+     "below_interval": false,
+     "unit": "W"
+    },
+    "E140-P2": {
+     "verdict": "PASS",
+     "rms": 0.38353437808605434,
+     "interval": {
+      "lo95": 0.10068949065907881,
+      "median": 0.23958406534920004,
+      "hi95": 0.43386927918165086,
+      "n": 6,
+      "mix": {
+       "int8": 6
+      },
+      "draws": 100000,
+      "seed": 14007
+     },
+     "tiles": [
+      "int8.a_full_b_const",
+      "int8.b_line_flipflop",
+      "int8.pair_gate_37",
+      "int8.real_pythia_embed_mlpout",
+      "int8.real_qwen_q_down",
+      "int8.sign_runs_i"
+     ],
+     "below_interval": false,
+     "unit": "W"
+    },
+    "E140-P3": {
+     "verdict": "FAIL",
+     "inside": 19,
+     "n": 25,
+     "share": 0.76,
+     "binomial_low_2p5": 21,
+     "outside": [
+      "fp16.pair_cancel",
+      "fp16.wideexp_gate30",
+      "fp32.a_exp_busy_b_const",
+      "fp32.real_qwen_q_down",
+      "fp32.wideexp_bgate_alt",
+      "int8.b_line_flipflop"
+     ]
+    }
+   },
+   "rows": {
+    "fp16.a_hi_busy_lo_const": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "3 A with a busy partner",
+     "pred": 20.4809,
+     "lo95": 20.1372,
+     "hi95": 20.8245,
+     "measured": 20.4019113526913,
+     "n_passes": 2,
+     "error": -0.07898864730869803,
+     "inside": true
+    },
+    "fp16.band_local": {
+     "type": "fp16",
+     "priority": 2,
+     "case": "4 partial sparsity",
+     "pred": 2.9226,
+     "lo95": 2.5509,
+     "hi95": 3.2944,
+     "measured": 2.9580558449740764,
+     "n_passes": 2,
+     "error": 0.03545584497407628,
+     "inside": true
+    },
+    "fp16.block_sparse_37": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "4 partial sparsity",
+     "pred": 12.1374,
+     "lo95": 11.8029,
+     "hi95": 12.4719,
+     "measured": 11.957102008314683,
+     "n_passes": 2,
+     "error": -0.18029799168531646,
+     "inside": true
+    },
+    "fp16.pair_cancel": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "1 signs on moving sums",
+     "pred": 16.8184,
+     "lo95": 16.4603,
+     "hi95": 17.1764,
+     "measured": 16.34196983281878,
+     "n_passes": 2,
+     "error": -0.47643016718122055,
+     "inside": false
+    },
+    "fp16.real_pythia_embed_qkv": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 22.2296,
+     "lo95": 21.8954,
+     "hi95": 22.5639,
+     "measured": 22.045887796381304,
+     "n_passes": 2,
+     "error": -0.1837122036186969,
+     "inside": true
+    },
+    "fp16.real_qwen_ln_down": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 20.2552,
+     "lo95": 19.9052,
+     "hi95": 20.6051,
+     "measured": 20.175578112813866,
+     "n_passes": 2,
+     "error": -0.07962188718613206,
+     "inside": true
+    },
+    "fp16.wideexp_gate30": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "2 spread exponents under a gate",
+     "pred": 13.3407,
+     "lo95": 13.0012,
+     "hi95": 13.6801,
+     "measured": 12.97841505848992,
+     "n_passes": 2,
+     "error": -0.3622849415100795,
+     "inside": false
+    },
+    "fp32.a_const_b_busy": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "3 A with a busy partner",
+     "pred": 19.2303,
+     "lo95": 18.708,
+     "hi95": 19.7526,
+     "measured": 19.208403305270178,
+     "n_passes": 2,
+     "error": -0.02189669472982203,
+     "inside": true
+    },
+    "fp32.a_exp_busy_b_const": {
+     "type": "fp32",
+     "priority": 2,
+     "case": "3 A with a busy partner",
+     "pred": 12.1854,
+     "lo95": 11.6794,
+     "hi95": 12.6914,
+     "measured": 11.395627427747316,
+     "n_passes": 2,
+     "error": -0.7897725722526836,
+     "inside": false
+    },
+    "fp32.b_3of8_k": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "4 partial sparsity",
+     "pred": 11.1842,
+     "lo95": 10.6886,
+     "hi95": 11.6797,
+     "measured": 10.800471543116123,
+     "n_passes": 2,
+     "error": -0.3837284568838779,
+     "inside": true
+    },
+    "fp32.cancel_pairs": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "1 signs on moving sums",
+     "pred": 24.3438,
+     "lo95": 23.8475,
+     "hi95": 24.8401,
+     "measured": 24.53777554179566,
+     "n_passes": 2,
+     "error": 0.193975541795659,
+     "inside": true
+    },
+    "fp32.denormals_only": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "own choice (surprise)",
+     "pred": 11.556,
+     "lo95": 11.0214,
+     "hi95": 12.0906,
+     "measured": 11.18611072111236,
+     "n_passes": 2,
+     "error": -0.3698892788876389,
+     "inside": true
+    },
+    "fp32.real_pythia_embed_qkv": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 19.6969,
+     "lo95": 19.211,
+     "hi95": 20.1827,
+     "measured": 19.5341875930199,
+     "n_passes": 2,
+     "error": -0.16271240698009848,
+     "inside": true
+    },
+    "fp32.real_qwen_q_down": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 18.1218,
+     "lo95": 17.6354,
+     "hi95": 18.6083,
+     "measured": 17.150527089783274,
+     "n_passes": 2,
+     "error": -0.9712729102167259,
+     "inside": false
+    },
+    "fp32.rowcol_sparse": {
+     "type": "fp32",
+     "priority": 2,
+     "case": "4 partial sparsity",
+     "pred": 15.5756,
+     "lo95": 15.0782,
+     "hi95": 16.0731,
+     "measured": 15.231678709269726,
+     "n_passes": 2,
+     "error": -0.34392129073027355,
+     "inside": true
+    },
+    "fp32.sign_drift": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "1 signs on moving sums",
+     "pred": 23.1549,
+     "lo95": 22.661,
+     "hi95": 23.6487,
+     "measured": 22.880170871066944,
+     "n_passes": 2,
+     "error": -0.2747291289330569,
+     "inside": true
+    },
+    "fp32.wideexp_agate_rows": {
+     "type": "fp32",
+     "priority": 2,
+     "case": "2 spread exponents under a gate",
+     "pred": 14.1847,
+     "lo95": 13.6829,
+     "hi95": 14.6865,
+     "measured": 13.838428143949674,
+     "n_passes": 2,
+     "error": -0.3462718560503255,
+     "inside": true
+    },
+    "fp32.wideexp_bgate_alt": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "2 spread exponents under a gate",
+     "pred": 13.9088,
+     "lo95": 13.4025,
+     "hi95": 14.4151,
+     "measured": 13.202694173096424,
+     "n_passes": 2,
+     "error": -0.7061058269035758,
+     "inside": false
+    },
+    "int8.a_full_b_const": {
+     "type": "int8",
+     "priority": 1,
+     "case": "3 A with a busy partner",
+     "pred": 6.4681,
+     "lo95": 5.9478,
+     "hi95": 6.9885,
+     "measured": 6.925560751055745,
+     "n_passes": 2,
+     "error": 0.4574607510557449,
+     "inside": true
+    },
+    "int8.b_line_flipflop": {
+     "type": "int8",
+     "priority": 1,
+     "case": "own choice (surprise)",
+     "pred": 4.0474,
+     "lo95": 3.5323,
+     "hi95": 4.5624,
+     "measured": 3.485695485629714,
+     "n_passes": 2,
+     "error": -0.5617045143702857,
+     "inside": false
+    },
+    "int8.band_a": {
+     "type": "int8",
+     "priority": 2,
+     "case": "4 partial sparsity",
+     "pred": 2.7778,
+     "lo95": 2.2877,
+     "hi95": 3.2679,
+     "measured": 2.507202314093705,
+     "n_passes": 2,
+     "error": -0.27059768590629485,
+     "inside": true
+    },
+    "int8.pair_gate_37": {
+     "type": "int8",
+     "priority": 1,
+     "case": "4 partial sparsity",
+     "pred": 4.3514,
+     "lo95": 3.8556,
+     "hi95": 4.8472,
+     "measured": 4.118895552569169,
+     "n_passes": 2,
+     "error": -0.23250444743083065,
+     "inside": true
+    },
+    "int8.real_pythia_embed_mlpout": {
+     "type": "int8",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 6.3468,
+     "lo95": 5.8347,
+     "hi95": 6.859,
+     "measured": 5.878881434772088,
+     "n_passes": 2,
+     "error": -0.46791856522791164,
+     "inside": true
+    },
+    "int8.real_qwen_q_down": {
+     "type": "int8",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 6.3339,
+     "lo95": 5.8157,
+     "hi95": 6.8522,
+     "measured": 6.043093399683286,
+     "n_passes": 2,
+     "error": -0.29080660031671357,
+     "inside": true
+    },
+    "int8.sign_runs_i": {
+     "type": "int8",
+     "priority": 1,
+     "case": "1 signs on moving sums",
+     "pred": 5.429,
+     "lo95": 4.9286,
+     "hi95": 5.9295,
+     "measured": 5.413675696594428,
+     "n_passes": 2,
+     "error": -0.015324303405572337,
+     "inside": true
+    }
+   }
+  },
+  "reported_m5": {
+   "E140-P1": {
+    "rms_m5": 0.33739919713976846,
+    "rms_m6": 0.40559937868219503,
+    "n": 14
+   },
+   "E140-P2": {
+    "rms_m5": 0.37856405156128314,
+    "rms_m6": 0.38353437808605434,
+    "n": 6
+   }
+  },
+  "heat": {
+   "quantity": "heat",
+   "footing": "frozen",
+   "anchor_scale": null,
+   "short_tiles": [],
+   "rules": {
+    "E140-H1": {
+     "verdict": "PASS",
+     "rms": 0.2042299124586238,
+     "interval": {
+      "lo95": 0.18763554441766958,
+      "median": 0.28810011408988934,
+      "hi95": 0.4027848971640914,
+      "n": 14,
+      "mix": {
+       "fp16": 6,
+       "fp32": 8
+      },
+      "draws": 100000,
+      "seed": 14007
+     },
+     "tiles": [
+      "fp16.a_hi_busy_lo_const",
+      "fp16.block_sparse_37",
+      "fp16.pair_cancel",
+      "fp16.real_pythia_embed_qkv",
+      "fp16.real_qwen_ln_down",
+      "fp16.wideexp_gate30",
+      "fp32.a_const_b_busy",
+      "fp32.b_3of8_k",
+      "fp32.cancel_pairs",
+      "fp32.denormals_only",
+      "fp32.real_pythia_embed_qkv",
+      "fp32.real_qwen_q_down",
+      "fp32.sign_drift",
+      "fp32.wideexp_bgate_alt"
+     ],
+     "below_interval": false,
+     "unit": "C"
+    },
+    "E140-H2": {
+     "verdict": "PASS",
+     "rms": 0.16405537682949212,
+     "interval": {
+      "lo95": 0.07964652943660817,
+      "median": 0.16526891437053273,
+      "hi95": 0.2713103737136563,
+      "n": 6,
+      "mix": {
+       "int8": 6
+      },
+      "draws": 100000,
+      "seed": 14007
+     },
+     "tiles": [
+      "int8.a_full_b_const",
+      "int8.b_line_flipflop",
+      "int8.pair_gate_37",
+      "int8.real_pythia_embed_mlpout",
+      "int8.real_qwen_q_down",
+      "int8.sign_runs_i"
+     ],
+     "below_interval": false,
+     "unit": "C"
+    },
+    "E140-H3": {
+     "verdict": "PASS",
+     "inside": 24,
+     "n": 25,
+     "share": 0.96,
+     "binomial_low_2p5": 21,
+     "outside": [
+      "int8.band_a"
+     ]
+    }
+   },
+   "rows": {
+    "fp16.a_hi_busy_lo_const": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "3 A with a busy partner",
+     "pred": 2.657,
+     "lo95": 2.102,
+     "hi95": 3.212,
+     "measured": 2.775000000000002,
+     "n_passes": 2,
+     "error": 0.1180000000000021,
+     "inside": true
+    },
+    "fp16.band_local": {
+     "type": "fp16",
+     "priority": 2,
+     "case": "4 partial sparsity",
+     "pred": 0.579,
+     "lo95": 0.024,
+     "hi95": 1.134,
+     "measured": 1.0,
+     "n_passes": 2,
+     "error": 0.42100000000000004,
+     "inside": true
+    },
+    "fp16.block_sparse_37": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "4 partial sparsity",
+     "pred": 1.669,
+     "lo95": 1.114,
+     "hi95": 2.225,
+     "measured": 1.4250000000000007,
+     "n_passes": 2,
+     "error": -0.24399999999999933,
+     "inside": true
+    },
+    "fp16.pair_cancel": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "1 signs on moving sums",
+     "pred": 2.224,
+     "lo95": 1.668,
+     "hi95": 2.779,
+     "measured": 1.9499999999999993,
+     "n_passes": 2,
+     "error": -0.2740000000000009,
+     "inside": true
+    },
+    "fp16.real_pythia_embed_qkv": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 2.864,
+     "lo95": 2.309,
+     "hi95": 3.419,
+     "measured": 2.5500000000000007,
+     "n_passes": 2,
+     "error": -0.31399999999999917,
+     "inside": true
+    },
+    "fp16.real_qwen_ln_down": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 2.63,
+     "lo95": 2.075,
+     "hi95": 3.186,
+     "measured": 2.8000000000000007,
+     "n_passes": 2,
+     "error": 0.17000000000000082,
+     "inside": true
+    },
+    "fp16.wideexp_gate30": {
+     "type": "fp16",
+     "priority": 1,
+     "case": "2 spread exponents under a gate",
+     "pred": 1.812,
+     "lo95": 1.257,
+     "hi95": 2.367,
+     "measured": 1.6000000000000014,
+     "n_passes": 2,
+     "error": -0.21199999999999863,
+     "inside": true
+    },
+    "fp32.a_const_b_busy": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "3 A with a busy partner",
+     "pred": 2.511,
+     "lo95": 1.915,
+     "hi95": 3.107,
+     "measured": 2.525000000000002,
+     "n_passes": 2,
+     "error": 0.01400000000000201,
+     "inside": true
+    },
+    "fp32.a_exp_busy_b_const": {
+     "type": "fp32",
+     "priority": 2,
+     "case": "3 A with a busy partner",
+     "pred": 1.677,
+     "lo95": 1.081,
+     "hi95": 2.273,
+     "measured": 1.9499999999999993,
+     "n_passes": 2,
+     "error": 0.27299999999999924,
+     "inside": true
+    },
+    "fp32.b_3of8_k": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "4 partial sparsity",
+     "pred": 1.558,
+     "lo95": 0.962,
+     "hi95": 2.154,
+     "measured": 1.8999999999999986,
+     "n_passes": 2,
+     "error": 0.3419999999999985,
+     "inside": true
+    },
+    "fp32.cancel_pairs": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "1 signs on moving sums",
+     "pred": 3.116,
+     "lo95": 2.52,
+     "hi95": 3.712,
+     "measured": 3.2749999999999986,
+     "n_passes": 2,
+     "error": 0.15899999999999848,
+     "inside": true
+    },
+    "fp32.denormals_only": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "own choice (surprise)",
+     "pred": 1.602,
+     "lo95": 1.006,
+     "hi95": 2.198,
+     "measured": 1.8500000000000014,
+     "n_passes": 2,
+     "error": 0.24800000000000133,
+     "inside": true
+    },
+    "fp32.real_pythia_embed_qkv": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 2.566,
+     "lo95": 1.97,
+     "hi95": 3.162,
+     "measured": 2.700000000000003,
+     "n_passes": 2,
+     "error": 0.134000000000003,
+     "inside": true
+    },
+    "fp32.real_qwen_q_down": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 2.38,
+     "lo95": 1.783,
+     "hi95": 2.976,
+     "measured": 2.25,
+     "n_passes": 2,
+     "error": -0.1299999999999999,
+     "inside": true
+    },
+    "fp32.rowcol_sparse": {
+     "type": "fp32",
+     "priority": 2,
+     "case": "4 partial sparsity",
+     "pred": 2.078,
+     "lo95": 1.482,
+     "hi95": 2.674,
+     "measured": 2.0500000000000007,
+     "n_passes": 2,
+     "error": -0.027999999999999137,
+     "inside": true
+    },
+    "fp32.sign_drift": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "1 signs on moving sums",
+     "pred": 2.975,
+     "lo95": 2.379,
+     "hi95": 3.571,
+     "measured": 2.875,
+     "n_passes": 2,
+     "error": -0.10000000000000009,
+     "inside": true
+    },
+    "fp32.wideexp_agate_rows": {
+     "type": "fp32",
+     "priority": 2,
+     "case": "2 spread exponents under a gate",
+     "pred": 1.913,
+     "lo95": 1.317,
+     "hi95": 2.51,
+     "measured": 1.7368421052631575,
+     "n_passes": 2,
+     "error": -0.1761578947368425,
+     "inside": true
+    },
+    "fp32.wideexp_bgate_alt": {
+     "type": "fp32",
+     "priority": 1,
+     "case": "2 spread exponents under a gate",
+     "pred": 1.881,
+     "lo95": 1.285,
+     "hi95": 2.477,
+     "measured": 2.0,
+     "n_passes": 2,
+     "error": 0.119,
+     "inside": true
+    },
+    "int8.a_full_b_const": {
+     "type": "int8",
+     "priority": 1,
+     "case": "3 A with a busy partner",
+     "pred": 1.067,
+     "lo95": 0.724,
+     "hi95": 1.411,
+     "measured": 1.0,
+     "n_passes": 2,
+     "error": -0.06699999999999995,
+     "inside": true
+    },
+    "int8.b_line_flipflop": {
+     "type": "int8",
+     "priority": 1,
+     "case": "own choice (surprise)",
+     "pred": 0.781,
+     "lo95": 0.437,
+     "hi95": 1.124,
+     "measured": 1.0,
+     "n_passes": 2,
+     "error": 0.21899999999999997,
+     "inside": true
+    },
+    "int8.band_a": {
+     "type": "int8",
+     "priority": 2,
+     "case": "4 partial sparsity",
+     "pred": 0.63,
+     "lo95": 0.287,
+     "hi95": 0.974,
+     "measured": 1.0,
+     "n_passes": 2,
+     "error": 0.37,
+     "inside": false
+    },
+    "int8.pair_gate_37": {
+     "type": "int8",
+     "priority": 1,
+     "case": "4 partial sparsity",
+     "pred": 0.817,
+     "lo95": 0.473,
+     "hi95": 1.16,
+     "measured": 0.5,
+     "n_passes": 2,
+     "error": -0.31699999999999995,
+     "inside": true
+    },
+    "int8.real_pythia_embed_mlpout": {
+     "type": "int8",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 1.053,
+     "lo95": 0.709,
+     "hi95": 1.396,
+     "measured": 1.0,
+     "n_passes": 2,
+     "error": -0.052999999999999936,
+     "inside": true
+    },
+    "int8.real_qwen_q_down": {
+     "type": "int8",
+     "priority": 1,
+     "case": "5 real model",
+     "pred": 1.051,
+     "lo95": 0.708,
+     "hi95": 1.395,
+     "measured": 1.0,
+     "n_passes": 2,
+     "error": -0.050999999999999934,
+     "inside": true
+    },
+    "int8.sign_runs_i": {
+     "type": "int8",
+     "priority": 1,
+     "case": "1 signs on moving sums",
+     "pred": 0.944,
+     "lo95": 0.601,
+     "hi95": 1.288,
+     "measured": 1.0,
+     "n_passes": 2,
+     "error": 0.05600000000000005,
+     "inside": true
+    }
+   }
+  }
+ },
+ "arms": {
+  "leak0.1994": {
+   "passes": [
+    14012,
+    14013
+   ],
+   "set_aside": [
+    {
+     "pass": 14010,
+     "why": [
+      "fp32.randn spans 2.469 W"
+     ]
+    },
+    {
+     "pass": 14011,
+     "why": [
+      "anchor_pi drifts +0.802 W"
+     ]
+    }
+   ],
+   "leak": {
+    "mode": "0.1994",
+    "k_w_per_c": 0.1994,
+    "n_runs": -1
+   },
+   "reducer_arm": "primary (nothing changed)",
+   "power": {
+    "quantity": "power",
+    "footing": "frozen",
+    "anchor_scale": null,
+    "short_tiles": [],
+    "rules": {
+     "E140-P1": {
+      "verdict": "PASS",
+      "rms": 0.32298861946076524,
+      "interval": {
+       "lo95": 0.11351391150483078,
+       "median": 0.18532583968716762,
+       "hi95": 0.4741456035155995,
+       "n": 14,
+       "mix": {
+        "fp16": 6,
+        "fp32": 8
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "fp16.a_hi_busy_lo_const",
+       "fp16.block_sparse_37",
+       "fp16.pair_cancel",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.real_qwen_ln_down",
+       "fp16.wideexp_gate30",
+       "fp32.a_const_b_busy",
+       "fp32.b_3of8_k",
+       "fp32.cancel_pairs",
+       "fp32.denormals_only",
+       "fp32.real_pythia_embed_qkv",
+       "fp32.real_qwen_q_down",
+       "fp32.sign_drift",
+       "fp32.wideexp_bgate_alt"
+      ],
+      "below_interval": false,
+      "unit": "W"
+     },
+     "E140-P2": {
+      "verdict": "PASS",
+      "rms": 0.3522355724016511,
+      "interval": {
+       "lo95": 0.10068949065907881,
+       "median": 0.23958406534920004,
+       "hi95": 0.43386927918165086,
+       "n": 6,
+       "mix": {
+        "int8": 6
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "int8.a_full_b_const",
+       "int8.b_line_flipflop",
+       "int8.pair_gate_37",
+       "int8.real_pythia_embed_mlpout",
+       "int8.real_qwen_q_down",
+       "int8.sign_runs_i"
+      ],
+      "below_interval": false,
+      "unit": "W"
+     },
+     "E140-P3": {
+      "verdict": "PASS",
+      "inside": 21,
+      "n": 25,
+      "share": 0.84,
+      "binomial_low_2p5": 21,
+      "outside": [
+       "fp32.a_exp_busy_b_const",
+       "fp32.real_qwen_q_down",
+       "fp32.wideexp_bgate_alt",
+       "int8.a_full_b_const"
+      ]
+     }
+    },
+    "rows": {
+     "fp16.a_hi_busy_lo_const": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 20.4809,
+      "lo95": 20.1372,
+      "hi95": 20.8245,
+      "measured": 20.61863711432117,
+      "n_passes": 2,
+      "error": 0.13773711432117253,
+      "inside": true
+     },
+     "fp16.band_local": {
+      "type": "fp16",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.9226,
+      "lo95": 2.5509,
+      "hi95": 3.2944,
+      "measured": 3.022271020185938,
+      "n_passes": 2,
+      "error": 0.0996710201859381,
+      "inside": true
+     },
+     "fp16.block_sparse_37": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 12.1374,
+      "lo95": 11.8029,
+      "hi95": 12.4719,
+      "measured": 12.079812783219976,
+      "n_passes": 2,
+      "error": -0.0575872167800231,
+      "inside": true
+     },
+     "fp16.pair_cancel": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 16.8184,
+      "lo95": 16.4603,
+      "hi95": 17.1764,
+      "measured": 16.492567233069337,
+      "n_passes": 2,
+      "error": -0.3258327669306631,
+      "inside": true
+     },
+     "fp16.real_pythia_embed_qkv": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 22.2296,
+      "lo95": 21.8954,
+      "hi95": 22.5639,
+      "measured": 22.247331680193405,
+      "n_passes": 2,
+      "error": 0.01773168019340332,
+      "inside": true
+     },
+     "fp16.real_qwen_ln_down": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 20.2552,
+      "lo95": 19.9052,
+      "hi95": 20.6051,
+      "measured": 20.404403254959654,
+      "n_passes": 2,
+      "error": 0.14920325495965514,
+      "inside": true
+     },
+     "fp16.wideexp_gate30": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 13.3407,
+      "lo95": 13.0012,
+      "hi95": 13.6801,
+      "measured": 13.099046188913828,
+      "n_passes": 2,
+      "error": -0.2416538110861719,
+      "inside": true
+     },
+     "fp32.a_const_b_busy": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 19.2303,
+      "lo95": 18.708,
+      "hi95": 19.7526,
+      "measured": 19.427318460068946,
+      "n_passes": 2,
+      "error": 0.1970184600689464,
+      "inside": true
+     },
+     "fp32.a_exp_busy_b_const": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "3 A with a busy partner",
+      "pred": 12.1854,
+      "lo95": 11.6794,
+      "hi95": 12.6914,
+      "measured": 11.564690616601807,
+      "n_passes": 2,
+      "error": -0.6207093833981929,
+      "inside": false
+     },
+     "fp32.b_3of8_k": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 11.1842,
+      "lo95": 10.6886,
+      "hi95": 11.6797,
+      "measured": 10.965199778410243,
+      "n_passes": 2,
+      "error": -0.21900022158975752,
+      "inside": true
+     },
+     "fp32.cancel_pairs": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 24.3438,
+      "lo95": 23.8475,
+      "hi95": 24.8401,
+      "measured": 24.821714999999998,
+      "n_passes": 2,
+      "error": 0.47791499999999587,
+      "inside": true
+     },
+     "fp32.denormals_only": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 11.556,
+      "lo95": 11.0214,
+      "hi95": 12.0906,
+      "measured": 11.34650400284611,
+      "n_passes": 2,
+      "error": -0.20949599715388878,
+      "inside": true
+     },
+     "fp32.real_pythia_embed_qkv": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 19.6969,
+      "lo95": 19.211,
+      "hi95": 20.1827,
+      "measured": 19.768275085279967,
+      "n_passes": 2,
+      "error": 0.07137508527996772,
+      "inside": true
+     },
+     "fp32.real_qwen_q_down": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 18.1218,
+      "lo95": 17.6354,
+      "hi95": 18.6083,
+      "measured": 17.34559999999999,
+      "n_passes": 2,
+      "error": -0.77620000000001,
+      "inside": false
+     },
+     "fp32.rowcol_sparse": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 15.5756,
+      "lo95": 15.0782,
+      "hi95": 16.0731,
+      "measured": 15.409411805244964,
+      "n_passes": 2,
+      "error": -0.1661881947550352,
+      "inside": true
+     },
+     "fp32.sign_drift": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 23.1549,
+      "lo95": 22.661,
+      "hi95": 23.6487,
+      "measured": 23.129430700788316,
+      "n_passes": 2,
+      "error": -0.025469299211685836,
+      "inside": true
+     },
+     "fp32.wideexp_agate_rows": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "2 spread exponents under a gate",
+      "pred": 14.1847,
+      "lo95": 13.6829,
+      "hi95": 14.6865,
+      "measured": 13.989010741309947,
+      "n_passes": 2,
+      "error": -0.19568925869005227,
+      "inside": true
+     },
+     "fp32.wideexp_bgate_alt": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 13.9088,
+      "lo95": 13.4025,
+      "hi95": 14.4151,
+      "measured": 13.376092315511285,
+      "n_passes": 2,
+      "error": -0.5327076844887149,
+      "inside": false
+     },
+     "int8.a_full_b_const": {
+      "type": "int8",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 6.4681,
+      "lo95": 5.9478,
+      "hi95": 6.9885,
+      "measured": 6.996168511777304,
+      "n_passes": 2,
+      "error": 0.5280685117773043,
+      "inside": false
+     },
+     "int8.b_line_flipflop": {
+      "type": "int8",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 4.0474,
+      "lo95": 3.5323,
+      "hi95": 4.5624,
+      "measured": 3.566017707389534,
+      "n_passes": 2,
+      "error": -0.4813822926104656,
+      "inside": true
+     },
+     "int8.band_a": {
+      "type": "int8",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.7778,
+      "lo95": 2.2877,
+      "hi95": 3.2679,
+      "measured": 2.591035464854672,
+      "n_passes": 2,
+      "error": -0.1867645351453282,
+      "inside": true
+     },
+     "int8.pair_gate_37": {
+      "type": "int8",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 4.3514,
+      "lo95": 3.8556,
+      "hi95": 4.8472,
+      "measured": 4.146878390905263,
+      "n_passes": 2,
+      "error": -0.20452160909473704,
+      "inside": true
+     },
+     "int8.real_pythia_embed_mlpout": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 6.3468,
+      "lo95": 5.8347,
+      "hi95": 6.859,
+      "measured": 5.963413029199337,
+      "n_passes": 2,
+      "error": -0.38338697080066275,
+      "inside": true
+     },
+     "int8.real_qwen_q_down": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 6.3339,
+      "lo95": 5.8157,
+      "hi95": 6.8522,
+      "measured": 6.127624994110535,
+      "n_passes": 2,
+      "error": -0.20627500588946468,
+      "inside": true
+     },
+     "int8.sign_runs_i": {
+      "type": "int8",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 5.429,
+      "lo95": 4.9286,
+      "hi95": 5.9295,
+      "measured": 5.478700000000005,
+      "n_passes": 2,
+      "error": 0.04970000000000496,
+      "inside": true
+     }
+    }
+   },
+   "reported_m5": {
+    "E140-P1": {
+     "rms_m5": 0.28431681746979875,
+     "rms_m6": 0.32298861946076524,
+     "n": 14
+    },
+    "E140-P2": {
+     "rms_m5": 0.3487468494927189,
+     "rms_m6": 0.3522355724016511,
+     "n": 6
+    }
+   },
+   "heat": {
+    "quantity": "heat",
+    "footing": "frozen",
+    "anchor_scale": null,
+    "short_tiles": [],
+    "rules": {
+     "E140-H1": {
+      "verdict": "PASS",
+      "rms": 0.2042299124586238,
+      "interval": {
+       "lo95": 0.18763554441766958,
+       "median": 0.28810011408988934,
+       "hi95": 0.4027848971640914,
+       "n": 14,
+       "mix": {
+        "fp16": 6,
+        "fp32": 8
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "fp16.a_hi_busy_lo_const",
+       "fp16.block_sparse_37",
+       "fp16.pair_cancel",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.real_qwen_ln_down",
+       "fp16.wideexp_gate30",
+       "fp32.a_const_b_busy",
+       "fp32.b_3of8_k",
+       "fp32.cancel_pairs",
+       "fp32.denormals_only",
+       "fp32.real_pythia_embed_qkv",
+       "fp32.real_qwen_q_down",
+       "fp32.sign_drift",
+       "fp32.wideexp_bgate_alt"
+      ],
+      "below_interval": false,
+      "unit": "C"
+     },
+     "E140-H2": {
+      "verdict": "PASS",
+      "rms": 0.16405537682949212,
+      "interval": {
+       "lo95": 0.07964652943660817,
+       "median": 0.16526891437053273,
+       "hi95": 0.2713103737136563,
+       "n": 6,
+       "mix": {
+        "int8": 6
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "int8.a_full_b_const",
+       "int8.b_line_flipflop",
+       "int8.pair_gate_37",
+       "int8.real_pythia_embed_mlpout",
+       "int8.real_qwen_q_down",
+       "int8.sign_runs_i"
+      ],
+      "below_interval": false,
+      "unit": "C"
+     },
+     "E140-H3": {
+      "verdict": "PASS",
+      "inside": 24,
+      "n": 25,
+      "share": 0.96,
+      "binomial_low_2p5": 21,
+      "outside": [
+       "int8.band_a"
+      ]
+     }
+    },
+    "rows": {
+     "fp16.a_hi_busy_lo_const": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 2.657,
+      "lo95": 2.102,
+      "hi95": 3.212,
+      "measured": 2.775000000000002,
+      "n_passes": 2,
+      "error": 0.1180000000000021,
+      "inside": true
+     },
+     "fp16.band_local": {
+      "type": "fp16",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 0.579,
+      "lo95": 0.024,
+      "hi95": 1.134,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.42100000000000004,
+      "inside": true
+     },
+     "fp16.block_sparse_37": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 1.669,
+      "lo95": 1.114,
+      "hi95": 2.225,
+      "measured": 1.4250000000000007,
+      "n_passes": 2,
+      "error": -0.24399999999999933,
+      "inside": true
+     },
+     "fp16.pair_cancel": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 2.224,
+      "lo95": 1.668,
+      "hi95": 2.779,
+      "measured": 1.9499999999999993,
+      "n_passes": 2,
+      "error": -0.2740000000000009,
+      "inside": true
+     },
+     "fp16.real_pythia_embed_qkv": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.864,
+      "lo95": 2.309,
+      "hi95": 3.419,
+      "measured": 2.5500000000000007,
+      "n_passes": 2,
+      "error": -0.31399999999999917,
+      "inside": true
+     },
+     "fp16.real_qwen_ln_down": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.63,
+      "lo95": 2.075,
+      "hi95": 3.186,
+      "measured": 2.8000000000000007,
+      "n_passes": 2,
+      "error": 0.17000000000000082,
+      "inside": true
+     },
+     "fp16.wideexp_gate30": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.812,
+      "lo95": 1.257,
+      "hi95": 2.367,
+      "measured": 1.6000000000000014,
+      "n_passes": 2,
+      "error": -0.21199999999999863,
+      "inside": true
+     },
+     "fp32.a_const_b_busy": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 2.511,
+      "lo95": 1.915,
+      "hi95": 3.107,
+      "measured": 2.525000000000002,
+      "n_passes": 2,
+      "error": 0.01400000000000201,
+      "inside": true
+     },
+     "fp32.a_exp_busy_b_const": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "3 A with a busy partner",
+      "pred": 1.677,
+      "lo95": 1.081,
+      "hi95": 2.273,
+      "measured": 1.9499999999999993,
+      "n_passes": 2,
+      "error": 0.27299999999999924,
+      "inside": true
+     },
+     "fp32.b_3of8_k": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 1.558,
+      "lo95": 0.962,
+      "hi95": 2.154,
+      "measured": 1.8999999999999986,
+      "n_passes": 2,
+      "error": 0.3419999999999985,
+      "inside": true
+     },
+     "fp32.cancel_pairs": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 3.116,
+      "lo95": 2.52,
+      "hi95": 3.712,
+      "measured": 3.2749999999999986,
+      "n_passes": 2,
+      "error": 0.15899999999999848,
+      "inside": true
+     },
+     "fp32.denormals_only": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 1.602,
+      "lo95": 1.006,
+      "hi95": 2.198,
+      "measured": 1.8500000000000014,
+      "n_passes": 2,
+      "error": 0.24800000000000133,
+      "inside": true
+     },
+     "fp32.real_pythia_embed_qkv": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.566,
+      "lo95": 1.97,
+      "hi95": 3.162,
+      "measured": 2.700000000000003,
+      "n_passes": 2,
+      "error": 0.134000000000003,
+      "inside": true
+     },
+     "fp32.real_qwen_q_down": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.38,
+      "lo95": 1.783,
+      "hi95": 2.976,
+      "measured": 2.25,
+      "n_passes": 2,
+      "error": -0.1299999999999999,
+      "inside": true
+     },
+     "fp32.rowcol_sparse": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.078,
+      "lo95": 1.482,
+      "hi95": 2.674,
+      "measured": 2.0500000000000007,
+      "n_passes": 2,
+      "error": -0.027999999999999137,
+      "inside": true
+     },
+     "fp32.sign_drift": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 2.975,
+      "lo95": 2.379,
+      "hi95": 3.571,
+      "measured": 2.875,
+      "n_passes": 2,
+      "error": -0.10000000000000009,
+      "inside": true
+     },
+     "fp32.wideexp_agate_rows": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.913,
+      "lo95": 1.317,
+      "hi95": 2.51,
+      "measured": 1.7368421052631575,
+      "n_passes": 2,
+      "error": -0.1761578947368425,
+      "inside": true
+     },
+     "fp32.wideexp_bgate_alt": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.881,
+      "lo95": 1.285,
+      "hi95": 2.477,
+      "measured": 2.0,
+      "n_passes": 2,
+      "error": 0.119,
+      "inside": true
+     },
+     "int8.a_full_b_const": {
+      "type": "int8",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 1.067,
+      "lo95": 0.724,
+      "hi95": 1.411,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": -0.06699999999999995,
+      "inside": true
+     },
+     "int8.b_line_flipflop": {
+      "type": "int8",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 0.781,
+      "lo95": 0.437,
+      "hi95": 1.124,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.21899999999999997,
+      "inside": true
+     },
+     "int8.band_a": {
+      "type": "int8",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 0.63,
+      "lo95": 0.287,
+      "hi95": 0.974,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.37,
+      "inside": false
+     },
+     "int8.pair_gate_37": {
+      "type": "int8",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 0.817,
+      "lo95": 0.473,
+      "hi95": 1.16,
+      "measured": 0.5,
+      "n_passes": 2,
+      "error": -0.31699999999999995,
+      "inside": true
+     },
+     "int8.real_pythia_embed_mlpout": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 1.053,
+      "lo95": 0.709,
+      "hi95": 1.396,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": -0.052999999999999936,
+      "inside": true
+     },
+     "int8.real_qwen_q_down": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 1.051,
+      "lo95": 0.708,
+      "hi95": 1.395,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": -0.050999999999999934,
+      "inside": true
+     },
+     "int8.sign_runs_i": {
+      "type": "int8",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 0.944,
+      "lo95": 0.601,
+      "hi95": 1.288,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.05600000000000005,
+      "inside": true
+     }
+    }
+   }
+  },
+  "leak0.3803": {
+   "passes": [
+    14012,
+    14013
+   ],
+   "set_aside": [
+    {
+     "pass": 14010,
+     "why": [
+      "fp32.randn spans 2.527 W"
+     ]
+    },
+    {
+     "pass": 14011,
+     "why": [
+      "anchor_pi drifts +0.621 W"
+     ]
+    }
+   ],
+   "leak": {
+    "mode": "0.3803",
+    "k_w_per_c": 0.3803,
+    "n_runs": -1
+   },
+   "reducer_arm": "primary (nothing changed)",
+   "power": {
+    "quantity": "power",
+    "footing": "frozen",
+    "anchor_scale": null,
+    "short_tiles": [],
+    "rules": {
+     "E140-P1": {
+      "verdict": "FAIL",
+      "rms": 0.5660150320265137,
+      "interval": {
+       "lo95": 0.11351391150483078,
+       "median": 0.18532583968716762,
+       "hi95": 0.4741456035155995,
+       "n": 14,
+       "mix": {
+        "fp16": 6,
+        "fp32": 8
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "fp16.a_hi_busy_lo_const",
+       "fp16.block_sparse_37",
+       "fp16.pair_cancel",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.real_qwen_ln_down",
+       "fp16.wideexp_gate30",
+       "fp32.a_const_b_busy",
+       "fp32.b_3of8_k",
+       "fp32.cancel_pairs",
+       "fp32.denormals_only",
+       "fp32.real_pythia_embed_qkv",
+       "fp32.real_qwen_q_down",
+       "fp32.sign_drift",
+       "fp32.wideexp_bgate_alt"
+      ],
+      "below_interval": false,
+      "unit": "W"
+     },
+     "E140-P2": {
+      "verdict": "PASS",
+      "rms": 0.4286428831785371,
+      "interval": {
+       "lo95": 0.10068949065907881,
+       "median": 0.23958406534920004,
+       "hi95": 0.43386927918165086,
+       "n": 6,
+       "mix": {
+        "int8": 6
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "int8.a_full_b_const",
+       "int8.b_line_flipflop",
+       "int8.pair_gate_37",
+       "int8.real_pythia_embed_mlpout",
+       "int8.real_qwen_q_down",
+       "int8.sign_runs_i"
+      ],
+      "below_interval": false,
+      "unit": "W"
+     },
+     "E140-P3": {
+      "verdict": "FAIL",
+      "inside": 12,
+      "n": 25,
+      "share": 0.48,
+      "binomial_low_2p5": 21,
+      "outside": [
+       "fp16.pair_cancel",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.wideexp_gate30",
+       "fp32.a_exp_busy_b_const",
+       "fp32.b_3of8_k",
+       "fp32.denormals_only",
+       "fp32.real_qwen_q_down",
+       "fp32.rowcol_sparse",
+       "fp32.sign_drift",
+       "fp32.wideexp_agate_rows",
+       "fp32.wideexp_bgate_alt",
+       "int8.b_line_flipflop",
+       "int8.real_pythia_embed_mlpout"
+      ]
+     }
+    },
+    "rows": {
+     "fp16.a_hi_busy_lo_const": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 20.4809,
+      "lo95": 20.1372,
+      "hi95": 20.8245,
+      "measured": 20.16643284346985,
+      "n_passes": 2,
+      "error": -0.31446715653014934,
+      "inside": true
+     },
+     "fp16.band_local": {
+      "type": "fp16",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.9226,
+      "lo95": 2.5509,
+      "hi95": 3.2944,
+      "measured": 2.888284288447684,
+      "n_passes": 2,
+      "error": -0.03431571155231605,
+      "inside": true
+     },
+     "fp16.block_sparse_37": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 12.1374,
+      "lo95": 11.8029,
+      "hi95": 12.4719,
+      "measured": 11.823773371595182,
+      "n_passes": 2,
+      "error": -0.31362662840481725,
+      "inside": true
+     },
+     "fp16.pair_cancel": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 16.8184,
+      "lo95": 16.4603,
+      "hi95": 17.1764,
+      "measured": 16.178341609588948,
+      "n_passes": 2,
+      "error": -0.6400583904110526,
+      "inside": false
+     },
+     "fp16.real_pythia_embed_qkv": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 22.2296,
+      "lo95": 21.8954,
+      "hi95": 22.5639,
+      "measured": 21.8270134683129,
+      "n_passes": 2,
+      "error": -0.4025865316871027,
+      "inside": false
+     },
+     "fp16.real_qwen_ln_down": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 20.2552,
+      "lo95": 19.9052,
+      "hi95": 20.6051,
+      "measured": 19.92695329341238,
+      "n_passes": 2,
+      "error": -0.3282467065876169,
+      "inside": true
+     },
+     "fp16.wideexp_gate30": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 13.3407,
+      "lo95": 13.0012,
+      "hi95": 13.6801,
+      "measured": 12.847346012778447,
+      "n_passes": 2,
+      "error": -0.4933539872215533,
+      "inside": false
+     },
+     "fp32.a_const_b_busy": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 19.2303,
+      "lo95": 18.708,
+      "hi95": 19.7526,
+      "measured": 18.970545960068943,
+      "n_passes": 2,
+      "error": -0.2597540399310567,
+      "inside": true
+     },
+     "fp32.a_exp_busy_b_const": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "3 A with a busy partner",
+      "pred": 12.1854,
+      "lo95": 11.6794,
+      "hi95": 12.6914,
+      "measured": 11.211935616601812,
+      "n_passes": 2,
+      "error": -0.9734643833981877,
+      "inside": false
+     },
+     "fp32.b_3of8_k": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 11.1842,
+      "lo95": 10.6886,
+      "hi95": 11.6797,
+      "measured": 10.621489778410249,
+      "n_passes": 2,
+      "error": -0.5627102215897519,
+      "inside": false
+     },
+     "fp32.cancel_pairs": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 24.3438,
+      "lo95": 23.8475,
+      "hi95": 24.8401,
+      "measured": 24.2292675,
+      "n_passes": 2,
+      "error": -0.11453250000000281,
+      "inside": true
+     },
+     "fp32.denormals_only": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 11.556,
+      "lo95": 11.0214,
+      "hi95": 12.0906,
+      "measured": 11.01183900284611,
+      "n_passes": 2,
+      "error": -0.5441609971538899,
+      "inside": false
+     },
+     "fp32.real_pythia_embed_qkv": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 19.6969,
+      "lo95": 19.211,
+      "hi95": 20.1827,
+      "measured": 19.27984508527997,
+      "n_passes": 2,
+      "error": -0.41705491472002976,
+      "inside": true
+     },
+     "fp32.real_qwen_q_down": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 18.1218,
+      "lo95": 17.6354,
+      "hi95": 18.6083,
+      "measured": 16.938574999999993,
+      "n_passes": 2,
+      "error": -1.1832250000000073,
+      "inside": false
+     },
+     "fp32.rowcol_sparse": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 15.5756,
+      "lo95": 15.0782,
+      "hi95": 16.0731,
+      "measured": 15.038566805244965,
+      "n_passes": 2,
+      "error": -0.5370331947550344,
+      "inside": false
+     },
+     "fp32.sign_drift": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 23.1549,
+      "lo95": 22.661,
+      "hi95": 23.6487,
+      "measured": 22.609343200788313,
+      "n_passes": 2,
+      "error": -0.5455567992116883,
+      "inside": false
+     },
+     "fp32.wideexp_agate_rows": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "2 spread exponents under a gate",
+      "pred": 14.1847,
+      "lo95": 13.6829,
+      "hi95": 14.6865,
+      "measured": 13.674816004467846,
+      "n_passes": 2,
+      "error": -0.509883995532153,
+      "inside": false
+     },
+     "fp32.wideexp_bgate_alt": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 13.9088,
+      "lo95": 13.4025,
+      "hi95": 14.4151,
+      "measured": 13.01429231551129,
+      "n_passes": 2,
+      "error": -0.8945076844887101,
+      "inside": false
+     },
+     "int8.a_full_b_const": {
+      "type": "int8",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 6.4681,
+      "lo95": 5.9478,
+      "hi95": 6.9885,
+      "measured": 6.8488434743040685,
+      "n_passes": 2,
+      "error": 0.38074347430406874,
+      "inside": true
+     },
+     "int8.b_line_flipflop": {
+      "type": "int8",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 4.0474,
+      "lo95": 3.5323,
+      "hi95": 4.5624,
+      "measured": 3.3984231793975717,
+      "n_passes": 2,
+      "error": -0.648976820602428,
+      "inside": false
+     },
+     "int8.band_a": {
+      "type": "int8",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.7778,
+      "lo95": 2.2877,
+      "hi95": 3.2679,
+      "measured": 2.4161152868013804,
+      "n_passes": 2,
+      "error": -0.3616847131986196,
+      "inside": true
+     },
+     "int8.pair_gate_37": {
+      "type": "int8",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 4.3514,
+      "lo95": 3.8556,
+      "hi95": 4.8472,
+      "measured": 4.088491427994349,
+      "n_passes": 2,
+      "error": -0.2629085720056512,
+      "inside": true
+     },
+     "int8.real_pythia_embed_mlpout": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 6.3468,
+      "lo95": 5.8347,
+      "hi95": 6.859,
+      "measured": 5.787035529199336,
+      "n_passes": 2,
+      "error": -0.5597644708006637,
+      "inside": false
+     },
+     "int8.real_qwen_q_down": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 6.3339,
+      "lo95": 5.8157,
+      "hi95": 6.8522,
+      "measured": 5.951247494110534,
+      "n_passes": 2,
+      "error": -0.38265250588946564,
+      "inside": true
+     },
+     "int8.sign_runs_i": {
+      "type": "int8",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 5.429,
+      "lo95": 4.9286,
+      "hi95": 5.9295,
+      "measured": 5.343025000000003,
+      "n_passes": 2,
+      "error": -0.08597499999999769,
+      "inside": true
+     }
+    }
+   },
+   "reported_m5": {
+    "E140-P1": {
+     "rms_m5": 0.49006214771284445,
+     "rms_m6": 0.5660150320265137,
+     "n": 14
+    },
+    "E140-P2": {
+     "rms_m5": 0.4224788147052599,
+     "rms_m6": 0.4286428831785371,
+     "n": 6
+    }
+   },
+   "heat": {
+    "quantity": "heat",
+    "footing": "frozen",
+    "anchor_scale": null,
+    "short_tiles": [],
+    "rules": {
+     "E140-H1": {
+      "verdict": "PASS",
+      "rms": 0.2042299124586238,
+      "interval": {
+       "lo95": 0.18763554441766958,
+       "median": 0.28810011408988934,
+       "hi95": 0.4027848971640914,
+       "n": 14,
+       "mix": {
+        "fp16": 6,
+        "fp32": 8
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "fp16.a_hi_busy_lo_const",
+       "fp16.block_sparse_37",
+       "fp16.pair_cancel",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.real_qwen_ln_down",
+       "fp16.wideexp_gate30",
+       "fp32.a_const_b_busy",
+       "fp32.b_3of8_k",
+       "fp32.cancel_pairs",
+       "fp32.denormals_only",
+       "fp32.real_pythia_embed_qkv",
+       "fp32.real_qwen_q_down",
+       "fp32.sign_drift",
+       "fp32.wideexp_bgate_alt"
+      ],
+      "below_interval": false,
+      "unit": "C"
+     },
+     "E140-H2": {
+      "verdict": "PASS",
+      "rms": 0.16405537682949212,
+      "interval": {
+       "lo95": 0.07964652943660817,
+       "median": 0.16526891437053273,
+       "hi95": 0.2713103737136563,
+       "n": 6,
+       "mix": {
+        "int8": 6
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "int8.a_full_b_const",
+       "int8.b_line_flipflop",
+       "int8.pair_gate_37",
+       "int8.real_pythia_embed_mlpout",
+       "int8.real_qwen_q_down",
+       "int8.sign_runs_i"
+      ],
+      "below_interval": false,
+      "unit": "C"
+     },
+     "E140-H3": {
+      "verdict": "PASS",
+      "inside": 24,
+      "n": 25,
+      "share": 0.96,
+      "binomial_low_2p5": 21,
+      "outside": [
+       "int8.band_a"
+      ]
+     }
+    },
+    "rows": {
+     "fp16.a_hi_busy_lo_const": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 2.657,
+      "lo95": 2.102,
+      "hi95": 3.212,
+      "measured": 2.775000000000002,
+      "n_passes": 2,
+      "error": 0.1180000000000021,
+      "inside": true
+     },
+     "fp16.band_local": {
+      "type": "fp16",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 0.579,
+      "lo95": 0.024,
+      "hi95": 1.134,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.42100000000000004,
+      "inside": true
+     },
+     "fp16.block_sparse_37": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 1.669,
+      "lo95": 1.114,
+      "hi95": 2.225,
+      "measured": 1.4250000000000007,
+      "n_passes": 2,
+      "error": -0.24399999999999933,
+      "inside": true
+     },
+     "fp16.pair_cancel": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 2.224,
+      "lo95": 1.668,
+      "hi95": 2.779,
+      "measured": 1.9499999999999993,
+      "n_passes": 2,
+      "error": -0.2740000000000009,
+      "inside": true
+     },
+     "fp16.real_pythia_embed_qkv": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.864,
+      "lo95": 2.309,
+      "hi95": 3.419,
+      "measured": 2.5500000000000007,
+      "n_passes": 2,
+      "error": -0.31399999999999917,
+      "inside": true
+     },
+     "fp16.real_qwen_ln_down": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.63,
+      "lo95": 2.075,
+      "hi95": 3.186,
+      "measured": 2.8000000000000007,
+      "n_passes": 2,
+      "error": 0.17000000000000082,
+      "inside": true
+     },
+     "fp16.wideexp_gate30": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.812,
+      "lo95": 1.257,
+      "hi95": 2.367,
+      "measured": 1.6000000000000014,
+      "n_passes": 2,
+      "error": -0.21199999999999863,
+      "inside": true
+     },
+     "fp32.a_const_b_busy": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 2.511,
+      "lo95": 1.915,
+      "hi95": 3.107,
+      "measured": 2.525000000000002,
+      "n_passes": 2,
+      "error": 0.01400000000000201,
+      "inside": true
+     },
+     "fp32.a_exp_busy_b_const": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "3 A with a busy partner",
+      "pred": 1.677,
+      "lo95": 1.081,
+      "hi95": 2.273,
+      "measured": 1.9499999999999993,
+      "n_passes": 2,
+      "error": 0.27299999999999924,
+      "inside": true
+     },
+     "fp32.b_3of8_k": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 1.558,
+      "lo95": 0.962,
+      "hi95": 2.154,
+      "measured": 1.8999999999999986,
+      "n_passes": 2,
+      "error": 0.3419999999999985,
+      "inside": true
+     },
+     "fp32.cancel_pairs": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 3.116,
+      "lo95": 2.52,
+      "hi95": 3.712,
+      "measured": 3.2749999999999986,
+      "n_passes": 2,
+      "error": 0.15899999999999848,
+      "inside": true
+     },
+     "fp32.denormals_only": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 1.602,
+      "lo95": 1.006,
+      "hi95": 2.198,
+      "measured": 1.8500000000000014,
+      "n_passes": 2,
+      "error": 0.24800000000000133,
+      "inside": true
+     },
+     "fp32.real_pythia_embed_qkv": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.566,
+      "lo95": 1.97,
+      "hi95": 3.162,
+      "measured": 2.700000000000003,
+      "n_passes": 2,
+      "error": 0.134000000000003,
+      "inside": true
+     },
+     "fp32.real_qwen_q_down": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.38,
+      "lo95": 1.783,
+      "hi95": 2.976,
+      "measured": 2.25,
+      "n_passes": 2,
+      "error": -0.1299999999999999,
+      "inside": true
+     },
+     "fp32.rowcol_sparse": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.078,
+      "lo95": 1.482,
+      "hi95": 2.674,
+      "measured": 2.0500000000000007,
+      "n_passes": 2,
+      "error": -0.027999999999999137,
+      "inside": true
+     },
+     "fp32.sign_drift": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 2.975,
+      "lo95": 2.379,
+      "hi95": 3.571,
+      "measured": 2.875,
+      "n_passes": 2,
+      "error": -0.10000000000000009,
+      "inside": true
+     },
+     "fp32.wideexp_agate_rows": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.913,
+      "lo95": 1.317,
+      "hi95": 2.51,
+      "measured": 1.7368421052631575,
+      "n_passes": 2,
+      "error": -0.1761578947368425,
+      "inside": true
+     },
+     "fp32.wideexp_bgate_alt": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.881,
+      "lo95": 1.285,
+      "hi95": 2.477,
+      "measured": 2.0,
+      "n_passes": 2,
+      "error": 0.119,
+      "inside": true
+     },
+     "int8.a_full_b_const": {
+      "type": "int8",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 1.067,
+      "lo95": 0.724,
+      "hi95": 1.411,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": -0.06699999999999995,
+      "inside": true
+     },
+     "int8.b_line_flipflop": {
+      "type": "int8",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 0.781,
+      "lo95": 0.437,
+      "hi95": 1.124,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.21899999999999997,
+      "inside": true
+     },
+     "int8.band_a": {
+      "type": "int8",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 0.63,
+      "lo95": 0.287,
+      "hi95": 0.974,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.37,
+      "inside": false
+     },
+     "int8.pair_gate_37": {
+      "type": "int8",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 0.817,
+      "lo95": 0.473,
+      "hi95": 1.16,
+      "measured": 0.5,
+      "n_passes": 2,
+      "error": -0.31699999999999995,
+      "inside": true
+     },
+     "int8.real_pythia_embed_mlpout": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 1.053,
+      "lo95": 0.709,
+      "hi95": 1.396,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": -0.052999999999999936,
+      "inside": true
+     },
+     "int8.real_qwen_q_down": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 1.051,
+      "lo95": 0.708,
+      "hi95": 1.395,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": -0.050999999999999934,
+      "inside": true
+     },
+     "int8.sign_runs_i": {
+      "type": "int8",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 0.944,
+      "lo95": 0.601,
+      "hi95": 1.288,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.05600000000000005,
+      "inside": true
+     }
+    }
+   }
+  },
+  "leak0": {
+   "passes": [
+    14012,
+    14013
+   ],
+   "set_aside": [
+    {
+     "pass": 14010,
+     "why": [
+      "fp32.randn spans 2.459 W"
+     ]
+    },
+    {
+     "pass": 14011,
+     "why": [
+      "anchor_pi drifts +1.001 W"
+     ]
+    }
+   ],
+   "leak": {
+    "mode": "0",
+    "k_w_per_c": 0.0,
+    "n_runs": -1
+   },
+   "reducer_arm": "primary (nothing changed)",
+   "power": {
+    "quantity": "power",
+    "footing": "frozen",
+    "anchor_scale": null,
+    "short_tiles": [],
+    "rules": {
+     "E140-P1": {
+      "verdict": "FAIL",
+      "rms": 0.5184035978803105,
+      "interval": {
+       "lo95": 0.11351391150483078,
+       "median": 0.18532583968716762,
+       "hi95": 0.4741456035155995,
+       "n": 14,
+       "mix": {
+        "fp16": 6,
+        "fp32": 8
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "fp16.a_hi_busy_lo_const",
+       "fp16.block_sparse_37",
+       "fp16.pair_cancel",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.real_qwen_ln_down",
+       "fp16.wideexp_gate30",
+       "fp32.a_const_b_busy",
+       "fp32.b_3of8_k",
+       "fp32.cancel_pairs",
+       "fp32.denormals_only",
+       "fp32.real_pythia_embed_qkv",
+       "fp32.real_qwen_q_down",
+       "fp32.sign_drift",
+       "fp32.wideexp_bgate_alt"
+      ],
+      "below_interval": false,
+      "unit": "W"
+     },
+     "E140-P2": {
+      "verdict": "PASS",
+      "rms": 0.33164557740662354,
+      "interval": {
+       "lo95": 0.10068949065907881,
+       "median": 0.23958406534920004,
+       "hi95": 0.43386927918165086,
+       "n": 6,
+       "mix": {
+        "int8": 6
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "int8.a_full_b_const",
+       "int8.b_line_flipflop",
+       "int8.pair_gate_37",
+       "int8.real_pythia_embed_mlpout",
+       "int8.real_qwen_q_down",
+       "int8.sign_runs_i"
+      ],
+      "below_interval": false,
+      "unit": "W"
+     },
+     "E140-P3": {
+      "verdict": "FAIL",
+      "inside": 17,
+      "n": 25,
+      "share": 0.68,
+      "binomial_low_2p5": 21,
+      "outside": [
+       "fp16.a_hi_busy_lo_const",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.real_qwen_ln_down",
+       "fp32.a_const_b_busy",
+       "fp32.cancel_pairs",
+       "fp32.real_pythia_embed_qkv",
+       "fp32.sign_drift",
+       "int8.a_full_b_const"
+      ]
+     }
+    },
+    "rows": {
+     "fp16.a_hi_busy_lo_const": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 20.4809,
+      "lo95": 20.1372,
+      "hi95": 20.8245,
+      "measured": 21.117086708615,
+      "n_passes": 2,
+      "error": 0.6361867086149999,
+      "inside": false
+     },
+     "fp16.band_local": {
+      "type": "fp16",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.9226,
+      "lo95": 2.5509,
+      "hi95": 3.2944,
+      "measured": 3.1699600987299323,
+      "n_passes": 2,
+      "error": 0.24736009872993225,
+      "inside": true
+     },
+     "fp16.block_sparse_37": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 12.1374,
+      "lo95": 11.8029,
+      "hi95": 12.4719,
+      "measured": 12.362036435392357,
+      "n_passes": 2,
+      "error": 0.22463643539235711,
+      "inside": true
+     },
+     "fp16.pair_cancel": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 16.8184,
+      "lo95": 16.4603,
+      "hi95": 17.1764,
+      "measured": 16.83892759416381,
+      "n_passes": 2,
+      "error": 0.020527594163809226,
+      "inside": true
+     },
+     "fp16.real_pythia_embed_qkv": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 22.2296,
+      "lo95": 21.8954,
+      "hi95": 22.5639,
+      "measured": 22.71063434160287,
+      "n_passes": 2,
+      "error": 0.48103434160286795,
+      "inside": false
+     },
+     "fp16.real_qwen_ln_down": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 20.2552,
+      "lo95": 19.9052,
+      "hi95": 20.6051,
+      "measured": 20.930680327002364,
+      "n_passes": 2,
+      "error": 0.675480327002365,
+      "inside": false
+     },
+     "fp16.wideexp_gate30": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 13.3407,
+      "lo95": 13.0012,
+      "hi95": 13.6801,
+      "measured": 13.376486847406893,
+      "n_passes": 2,
+      "error": 0.035786847406892974,
+      "inside": true
+     },
+     "fp32.a_const_b_busy": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 19.2303,
+      "lo95": 18.708,
+      "hi95": 19.7526,
+      "measured": 19.930803460068944,
+      "n_passes": 2,
+      "error": 0.7005034600689442,
+      "inside": false
+     },
+     "fp32.a_exp_busy_b_const": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "3 A with a busy partner",
+      "pred": 12.1854,
+      "lo95": 11.6794,
+      "hi95": 12.6914,
+      "measured": 11.953520616601809,
+      "n_passes": 2,
+      "error": -0.2318793833981907,
+      "inside": true
+     },
+     "fp32.b_3of8_k": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 11.1842,
+      "lo95": 10.6886,
+      "hi95": 11.6797,
+      "measured": 11.344059778410246,
+      "n_passes": 2,
+      "error": 0.15985977841024557,
+      "inside": true
+     },
+     "fp32.cancel_pairs": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 24.3438,
+      "lo95": 23.8475,
+      "hi95": 24.8401,
+      "measured": 25.47475,
+      "n_passes": 2,
+      "error": 1.1309499999999986,
+      "inside": false
+     },
+     "fp32.denormals_only": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 11.556,
+      "lo95": 11.0214,
+      "hi95": 12.0906,
+      "measured": 11.71539400284611,
+      "n_passes": 2,
+      "error": 0.1593940028461116,
+      "inside": true
+     },
+     "fp32.real_pythia_embed_qkv": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 19.6969,
+      "lo95": 19.211,
+      "hi95": 20.1827,
+      "measured": 20.30665508527997,
+      "n_passes": 2,
+      "error": 0.6097550852799714,
+      "inside": false
+     },
+     "fp32.real_qwen_q_down": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 18.1218,
+      "lo95": 17.6354,
+      "hi95": 18.6083,
+      "measured": 17.79424999999999,
+      "n_passes": 2,
+      "error": -0.32755000000000933,
+      "inside": true
+     },
+     "fp32.rowcol_sparse": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 15.5756,
+      "lo95": 15.0782,
+      "hi95": 16.0731,
+      "measured": 15.818181805244965,
+      "n_passes": 2,
+      "error": 0.2425818052449653,
+      "inside": true
+     },
+     "fp32.sign_drift": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 23.1549,
+      "lo95": 22.661,
+      "hi95": 23.6487,
+      "measured": 23.702705700788314,
+      "n_passes": 2,
+      "error": 0.547805700788313,
+      "inside": false
+     },
+     "fp32.wideexp_agate_rows": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "2 spread exponents under a gate",
+      "pred": 14.1847,
+      "lo95": 13.6829,
+      "hi95": 14.6865,
+      "measured": 14.335337057099423,
+      "n_passes": 2,
+      "error": 0.15063705709942354,
+      "inside": true
+     },
+     "fp32.wideexp_bgate_alt": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 13.9088,
+      "lo95": 13.4025,
+      "hi95": 14.4151,
+      "measured": 13.774892315511286,
+      "n_passes": 2,
+      "error": -0.13390768448871349,
+      "inside": true
+     },
+     "int8.a_full_b_const": {
+      "type": "int8",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 6.4681,
+      "lo95": 5.9478,
+      "hi95": 6.9885,
+      "measured": 7.158559957173445,
+      "n_passes": 2,
+      "error": 0.6904599571734451,
+      "inside": false
+     },
+     "int8.b_line_flipflop": {
+      "type": "int8",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 4.0474,
+      "lo95": 3.5323,
+      "hi95": 4.5624,
+      "measured": 3.7507515320528686,
+      "n_passes": 2,
+      "error": -0.29664846794713107,
+      "inside": true
+     },
+     "int8.band_a": {
+      "type": "int8",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.7778,
+      "lo95": 2.2877,
+      "hi95": 3.2679,
+      "measured": 2.7838441077724525,
+      "n_passes": 2,
+      "error": 0.006044107772452456,
+      "inside": true
+     },
+     "int8.pair_gate_37": {
+      "type": "int8",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 4.3514,
+      "lo95": 3.8556,
+      "hi95": 4.8472,
+      "measured": 4.211236380979534,
+      "n_passes": 2,
+      "error": -0.14016361902046626,
+      "inside": true
+     },
+     "int8.real_pythia_embed_mlpout": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 6.3468,
+      "lo95": 5.8347,
+      "hi95": 6.859,
+      "measured": 6.157828029199335,
+      "n_passes": 2,
+      "error": -0.1889719708006652,
+      "inside": true
+     },
+     "int8.real_qwen_q_down": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 6.3339,
+      "lo95": 5.8157,
+      "hi95": 6.8522,
+      "measured": 6.322039994110533,
+      "n_passes": 2,
+      "error": -0.011860005889467118,
+      "inside": true
+     },
+     "int8.sign_runs_i": {
+      "type": "int8",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 5.429,
+      "lo95": 4.9286,
+      "hi95": 5.9295,
+      "measured": 5.628250000000001,
+      "n_passes": 2,
+      "error": 0.19925000000000104,
+      "inside": true
+     }
+    }
+   },
+   "reported_m5": {
+    "E140-P1": {
+     "rms_m5": 0.5547832240803058,
+     "rms_m6": 0.5184035978803105,
+     "n": 14
+    },
+    "E140-P2": {
+     "rms_m5": 0.33261167510826606,
+     "rms_m6": 0.33164557740662354,
+     "n": 6
+    }
+   },
+   "heat": {
+    "quantity": "heat",
+    "footing": "frozen",
+    "anchor_scale": null,
+    "short_tiles": [],
+    "rules": {
+     "E140-H1": {
+      "verdict": "PASS",
+      "rms": 0.2042299124586238,
+      "interval": {
+       "lo95": 0.18763554441766958,
+       "median": 0.28810011408988934,
+       "hi95": 0.4027848971640914,
+       "n": 14,
+       "mix": {
+        "fp16": 6,
+        "fp32": 8
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "fp16.a_hi_busy_lo_const",
+       "fp16.block_sparse_37",
+       "fp16.pair_cancel",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.real_qwen_ln_down",
+       "fp16.wideexp_gate30",
+       "fp32.a_const_b_busy",
+       "fp32.b_3of8_k",
+       "fp32.cancel_pairs",
+       "fp32.denormals_only",
+       "fp32.real_pythia_embed_qkv",
+       "fp32.real_qwen_q_down",
+       "fp32.sign_drift",
+       "fp32.wideexp_bgate_alt"
+      ],
+      "below_interval": false,
+      "unit": "C"
+     },
+     "E140-H2": {
+      "verdict": "PASS",
+      "rms": 0.16405537682949212,
+      "interval": {
+       "lo95": 0.07964652943660817,
+       "median": 0.16526891437053273,
+       "hi95": 0.2713103737136563,
+       "n": 6,
+       "mix": {
+        "int8": 6
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "int8.a_full_b_const",
+       "int8.b_line_flipflop",
+       "int8.pair_gate_37",
+       "int8.real_pythia_embed_mlpout",
+       "int8.real_qwen_q_down",
+       "int8.sign_runs_i"
+      ],
+      "below_interval": false,
+      "unit": "C"
+     },
+     "E140-H3": {
+      "verdict": "PASS",
+      "inside": 24,
+      "n": 25,
+      "share": 0.96,
+      "binomial_low_2p5": 21,
+      "outside": [
+       "int8.band_a"
+      ]
+     }
+    },
+    "rows": {
+     "fp16.a_hi_busy_lo_const": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 2.657,
+      "lo95": 2.102,
+      "hi95": 3.212,
+      "measured": 2.775000000000002,
+      "n_passes": 2,
+      "error": 0.1180000000000021,
+      "inside": true
+     },
+     "fp16.band_local": {
+      "type": "fp16",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 0.579,
+      "lo95": 0.024,
+      "hi95": 1.134,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.42100000000000004,
+      "inside": true
+     },
+     "fp16.block_sparse_37": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 1.669,
+      "lo95": 1.114,
+      "hi95": 2.225,
+      "measured": 1.4250000000000007,
+      "n_passes": 2,
+      "error": -0.24399999999999933,
+      "inside": true
+     },
+     "fp16.pair_cancel": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 2.224,
+      "lo95": 1.668,
+      "hi95": 2.779,
+      "measured": 1.9499999999999993,
+      "n_passes": 2,
+      "error": -0.2740000000000009,
+      "inside": true
+     },
+     "fp16.real_pythia_embed_qkv": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.864,
+      "lo95": 2.309,
+      "hi95": 3.419,
+      "measured": 2.5500000000000007,
+      "n_passes": 2,
+      "error": -0.31399999999999917,
+      "inside": true
+     },
+     "fp16.real_qwen_ln_down": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.63,
+      "lo95": 2.075,
+      "hi95": 3.186,
+      "measured": 2.8000000000000007,
+      "n_passes": 2,
+      "error": 0.17000000000000082,
+      "inside": true
+     },
+     "fp16.wideexp_gate30": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.812,
+      "lo95": 1.257,
+      "hi95": 2.367,
+      "measured": 1.6000000000000014,
+      "n_passes": 2,
+      "error": -0.21199999999999863,
+      "inside": true
+     },
+     "fp32.a_const_b_busy": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 2.511,
+      "lo95": 1.915,
+      "hi95": 3.107,
+      "measured": 2.525000000000002,
+      "n_passes": 2,
+      "error": 0.01400000000000201,
+      "inside": true
+     },
+     "fp32.a_exp_busy_b_const": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "3 A with a busy partner",
+      "pred": 1.677,
+      "lo95": 1.081,
+      "hi95": 2.273,
+      "measured": 1.9499999999999993,
+      "n_passes": 2,
+      "error": 0.27299999999999924,
+      "inside": true
+     },
+     "fp32.b_3of8_k": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 1.558,
+      "lo95": 0.962,
+      "hi95": 2.154,
+      "measured": 1.8999999999999986,
+      "n_passes": 2,
+      "error": 0.3419999999999985,
+      "inside": true
+     },
+     "fp32.cancel_pairs": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 3.116,
+      "lo95": 2.52,
+      "hi95": 3.712,
+      "measured": 3.2749999999999986,
+      "n_passes": 2,
+      "error": 0.15899999999999848,
+      "inside": true
+     },
+     "fp32.denormals_only": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 1.602,
+      "lo95": 1.006,
+      "hi95": 2.198,
+      "measured": 1.8500000000000014,
+      "n_passes": 2,
+      "error": 0.24800000000000133,
+      "inside": true
+     },
+     "fp32.real_pythia_embed_qkv": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.566,
+      "lo95": 1.97,
+      "hi95": 3.162,
+      "measured": 2.700000000000003,
+      "n_passes": 2,
+      "error": 0.134000000000003,
+      "inside": true
+     },
+     "fp32.real_qwen_q_down": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.38,
+      "lo95": 1.783,
+      "hi95": 2.976,
+      "measured": 2.25,
+      "n_passes": 2,
+      "error": -0.1299999999999999,
+      "inside": true
+     },
+     "fp32.rowcol_sparse": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.078,
+      "lo95": 1.482,
+      "hi95": 2.674,
+      "measured": 2.0500000000000007,
+      "n_passes": 2,
+      "error": -0.027999999999999137,
+      "inside": true
+     },
+     "fp32.sign_drift": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 2.975,
+      "lo95": 2.379,
+      "hi95": 3.571,
+      "measured": 2.875,
+      "n_passes": 2,
+      "error": -0.10000000000000009,
+      "inside": true
+     },
+     "fp32.wideexp_agate_rows": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.913,
+      "lo95": 1.317,
+      "hi95": 2.51,
+      "measured": 1.7368421052631575,
+      "n_passes": 2,
+      "error": -0.1761578947368425,
+      "inside": true
+     },
+     "fp32.wideexp_bgate_alt": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.881,
+      "lo95": 1.285,
+      "hi95": 2.477,
+      "measured": 2.0,
+      "n_passes": 2,
+      "error": 0.119,
+      "inside": true
+     },
+     "int8.a_full_b_const": {
+      "type": "int8",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 1.067,
+      "lo95": 0.724,
+      "hi95": 1.411,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": -0.06699999999999995,
+      "inside": true
+     },
+     "int8.b_line_flipflop": {
+      "type": "int8",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 0.781,
+      "lo95": 0.437,
+      "hi95": 1.124,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.21899999999999997,
+      "inside": true
+     },
+     "int8.band_a": {
+      "type": "int8",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 0.63,
+      "lo95": 0.287,
+      "hi95": 0.974,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.37,
+      "inside": false
+     },
+     "int8.pair_gate_37": {
+      "type": "int8",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 0.817,
+      "lo95": 0.473,
+      "hi95": 1.16,
+      "measured": 0.5,
+      "n_passes": 2,
+      "error": -0.31699999999999995,
+      "inside": true
+     },
+     "int8.real_pythia_embed_mlpout": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 1.053,
+      "lo95": 0.709,
+      "hi95": 1.396,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": -0.052999999999999936,
+      "inside": true
+     },
+     "int8.real_qwen_q_down": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 1.051,
+      "lo95": 0.708,
+      "hi95": 1.395,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": -0.050999999999999934,
+      "inside": true
+     },
+     "int8.sign_runs_i": {
+      "type": "int8",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 0.944,
+      "lo95": 0.601,
+      "hi95": 1.288,
+      "measured": 1.0,
+      "n_passes": 2,
+      "error": 0.05600000000000005,
+      "inside": true
+     }
+    }
+   }
+  },
+  "dips_removed": {
+   "passes": [
+    14010,
+    14011,
+    14012,
+    14013
+   ],
+   "set_aside": [],
+   "leak": {
+    "mode": "auto",
+    "k_w_per_c": 0.277404580152679,
+    "n_runs": 123
+   },
+   "reducer_arm": "dips removed (E82 A2)",
+   "power": {
+    "quantity": "power",
+    "footing": "frozen",
+    "anchor_scale": null,
+    "short_tiles": [],
+    "rules": {
+     "E140-P1": {
+      "verdict": "PASS",
+      "rms": 0.2741127977160735,
+      "interval": {
+       "lo95": 0.11351391150483078,
+       "median": 0.18532583968716762,
+       "hi95": 0.4741456035155995,
+       "n": 14,
+       "mix": {
+        "fp16": 6,
+        "fp32": 8
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "fp16.a_hi_busy_lo_const",
+       "fp16.block_sparse_37",
+       "fp16.pair_cancel",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.real_qwen_ln_down",
+       "fp16.wideexp_gate30",
+       "fp32.a_const_b_busy",
+       "fp32.b_3of8_k",
+       "fp32.cancel_pairs",
+       "fp32.denormals_only",
+       "fp32.real_pythia_embed_qkv",
+       "fp32.real_qwen_q_down",
+       "fp32.sign_drift",
+       "fp32.wideexp_bgate_alt"
+      ],
+      "below_interval": false,
+      "unit": "W"
+     },
+     "E140-P2": {
+      "verdict": "PASS",
+      "rms": 0.34198834103944326,
+      "interval": {
+       "lo95": 0.10068949065907881,
+       "median": 0.23958406534920004,
+       "hi95": 0.43386927918165086,
+       "n": 6,
+       "mix": {
+        "int8": 6
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "int8.a_full_b_const",
+       "int8.b_line_flipflop",
+       "int8.pair_gate_37",
+       "int8.real_pythia_embed_mlpout",
+       "int8.real_qwen_q_down",
+       "int8.sign_runs_i"
+      ],
+      "below_interval": false,
+      "unit": "W"
+     },
+     "E140-P3": {
+      "verdict": "PASS",
+      "inside": 21,
+      "n": 25,
+      "share": 0.84,
+      "binomial_low_2p5": 21,
+      "outside": [
+       "fp16.pair_cancel",
+       "fp16.wideexp_gate30",
+       "fp32.wideexp_bgate_alt",
+       "int8.a_full_b_const"
+      ]
+     }
+    },
+    "rows": {
+     "fp16.a_hi_busy_lo_const": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 20.4809,
+      "lo95": 20.1372,
+      "hi95": 20.8245,
+      "measured": 20.43851475929541,
+      "n_passes": 4,
+      "error": -0.04238524070458993,
+      "inside": true
+     },
+     "fp16.band_local": {
+      "type": "fp16",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.9226,
+      "lo95": 2.5509,
+      "hi95": 3.2944,
+      "measured": 2.9349739372128454,
+      "n_passes": 4,
+      "error": 0.012373937212845298,
+      "inside": true
+     },
+     "fp16.block_sparse_37": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 12.1374,
+      "lo95": 11.8029,
+      "hi95": 12.4719,
+      "measured": 11.998814521515383,
+      "n_passes": 4,
+      "error": -0.13858547848461633,
+      "inside": true
+     },
+     "fp16.pair_cancel": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 16.8184,
+      "lo95": 16.4603,
+      "hi95": 17.1764,
+      "measured": 16.396429483570596,
+      "n_passes": 4,
+      "error": -0.4219705164294041,
+      "inside": false
+     },
+     "fp16.real_pythia_embed_qkv": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 22.2296,
+      "lo95": 21.8954,
+      "hi95": 22.5639,
+      "measured": 22.07609325282722,
+      "n_passes": 4,
+      "error": -0.15350674717278068,
+      "inside": true
+     },
+     "fp16.real_qwen_ln_down": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 20.2552,
+      "lo95": 19.9052,
+      "hi95": 20.6051,
+      "measured": 20.181385374619826,
+      "n_passes": 4,
+      "error": -0.07381462538017303,
+      "inside": true
+     },
+     "fp16.wideexp_gate30": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 13.3407,
+      "lo95": 13.0012,
+      "hi95": 13.6801,
+      "measured": 12.995901560450562,
+      "n_passes": 4,
+      "error": -0.3447984395494377,
+      "inside": false
+     },
+     "fp32.a_const_b_busy": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 19.2303,
+      "lo95": 18.708,
+      "hi95": 19.7526,
+      "measured": 19.277854406248487,
+      "n_passes": 4,
+      "error": 0.04755440624848717,
+      "inside": true
+     },
+     "fp32.a_exp_busy_b_const": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "3 A with a busy partner",
+      "pred": 12.1854,
+      "lo95": 11.6794,
+      "hi95": 12.6914,
+      "measured": 12.050482937615527,
+      "n_passes": 4,
+      "error": -0.13491706238447243,
+      "inside": true
+     },
+     "fp32.b_3of8_k": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 11.1842,
+      "lo95": 10.6886,
+      "hi95": 11.6797,
+      "measured": 10.90828613974865,
+      "n_passes": 4,
+      "error": -0.27591386025135023,
+      "inside": true
+     },
+     "fp32.cancel_pairs": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 24.3438,
+      "lo95": 23.8475,
+      "hi95": 24.8401,
+      "measured": 24.61967664020432,
+      "n_passes": 4,
+      "error": 0.27587664020432,
+      "inside": true
+     },
+     "fp32.denormals_only": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 11.556,
+      "lo95": 11.0214,
+      "hi95": 12.0906,
+      "measured": 11.196601325431152,
+      "n_passes": 4,
+      "error": -0.35939867456884755,
+      "inside": true
+     },
+     "fp32.real_pythia_embed_qkv": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 19.6969,
+      "lo95": 19.211,
+      "hi95": 20.1827,
+      "measured": 19.604970935877834,
+      "n_passes": 4,
+      "error": -0.09192906412216573,
+      "inside": true
+     },
+     "fp32.real_qwen_q_down": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 18.1218,
+      "lo95": 17.6354,
+      "hi95": 18.6083,
+      "measured": 17.974014459122824,
+      "n_passes": 4,
+      "error": -0.14778554087717666,
+      "inside": true
+     },
+     "fp32.rowcol_sparse": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 15.5756,
+      "lo95": 15.0782,
+      "hi95": 16.0731,
+      "measured": 15.322273998958082,
+      "n_passes": 4,
+      "error": -0.25332600104191805,
+      "inside": true
+     },
+     "fp32.sign_drift": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 23.1549,
+      "lo95": 22.661,
+      "hi95": 23.6487,
+      "measured": 22.959281639589413,
+      "n_passes": 4,
+      "error": -0.1956183604105881,
+      "inside": true
+     },
+     "fp32.wideexp_agate_rows": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "2 spread exponents under a gate",
+      "pred": 14.1847,
+      "lo95": 13.6829,
+      "hi95": 14.6865,
+      "measured": 13.902653567436147,
+      "n_passes": 4,
+      "error": -0.28204643256385253,
+      "inside": true
+     },
+     "fp32.wideexp_bgate_alt": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 13.9088,
+      "lo95": 13.4025,
+      "hi95": 14.4151,
+      "measured": 13.31487589024213,
+      "n_passes": 4,
+      "error": -0.5939241097578698,
+      "inside": false
+     },
+     "int8.a_full_b_const": {
+      "type": "int8",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 6.4681,
+      "lo95": 5.9478,
+      "hi95": 6.9885,
+      "measured": 6.9951556214417545,
+      "n_passes": 4,
+      "error": 0.5270556214417548,
+      "inside": false
+     },
+     "int8.b_line_flipflop": {
+      "type": "int8",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 4.0474,
+      "lo95": 3.5323,
+      "hi95": 4.5624,
+      "measured": 3.6254884364531117,
+      "n_passes": 4,
+      "error": -0.42191156354688797,
+      "inside": true
+     },
+     "int8.band_a": {
+      "type": "int8",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.7778,
+      "lo95": 2.2877,
+      "hi95": 3.2679,
+      "measured": 2.594212489712569,
+      "n_passes": 4,
+      "error": -0.18358751028743114,
+      "inside": true
+     },
+     "int8.pair_gate_37": {
+      "type": "int8",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 4.3514,
+      "lo95": 3.8556,
+      "hi95": 4.8472,
+      "measured": 4.258198244137496,
+      "n_passes": 4,
+      "error": -0.09320175586250379,
+      "inside": true
+     },
+     "int8.real_pythia_embed_mlpout": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 6.3468,
+      "lo95": 5.8347,
+      "hi95": 6.859,
+      "measured": 5.946689655725171,
+      "n_passes": 4,
+      "error": -0.40011034427482883,
+      "inside": true
+     },
+     "int8.real_qwen_q_down": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 6.3339,
+      "lo95": 5.8157,
+      "hi95": 6.8522,
+      "measured": 6.115995306906927,
+      "n_passes": 4,
+      "error": -0.2179046930930726,
+      "inside": true
+     },
+     "int8.sign_runs_i": {
+      "type": "int8",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 5.429,
+      "lo95": 4.9286,
+      "hi95": 5.9295,
+      "measured": 5.601284203367481,
+      "n_passes": 4,
+      "error": 0.17228420336748052,
+      "inside": true
+     }
+    }
+   },
+   "reported_m5": {
+    "E140-P1": {
+     "rms_m5": 0.1659203413010798,
+     "rms_m6": 0.2741127977160735,
+     "n": 14
+    },
+    "E140-P2": {
+     "rms_m5": 0.33841710604251063,
+     "rms_m6": 0.34198834103944326,
+     "n": 6
+    }
+   },
+   "heat": {
+    "quantity": "heat",
+    "footing": "frozen",
+    "anchor_scale": null,
+    "short_tiles": [],
+    "rules": {
+     "E140-H1": {
+      "verdict": "PASS",
+      "rms": 0.13422296380405865,
+      "interval": {
+       "lo95": 0.18763554441766958,
+       "median": 0.28810011408988934,
+       "hi95": 0.4027848971640914,
+       "n": 14,
+       "mix": {
+        "fp16": 6,
+        "fp32": 8
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "fp16.a_hi_busy_lo_const",
+       "fp16.block_sparse_37",
+       "fp16.pair_cancel",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.real_qwen_ln_down",
+       "fp16.wideexp_gate30",
+       "fp32.a_const_b_busy",
+       "fp32.b_3of8_k",
+       "fp32.cancel_pairs",
+       "fp32.denormals_only",
+       "fp32.real_pythia_embed_qkv",
+       "fp32.real_qwen_q_down",
+       "fp32.sign_drift",
+       "fp32.wideexp_bgate_alt"
+      ],
+      "below_interval": true,
+      "unit": "C"
+     },
+     "E140-H2": {
+      "verdict": "PASS",
+      "rms": 0.06094396333244708,
+      "interval": {
+       "lo95": 0.07964652943660817,
+       "median": 0.16526891437053273,
+       "hi95": 0.2713103737136563,
+       "n": 6,
+       "mix": {
+        "int8": 6
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "int8.a_full_b_const",
+       "int8.b_line_flipflop",
+       "int8.pair_gate_37",
+       "int8.real_pythia_embed_mlpout",
+       "int8.real_qwen_q_down",
+       "int8.sign_runs_i"
+      ],
+      "below_interval": true,
+      "unit": "C"
+     },
+     "E140-H3": {
+      "verdict": "PASS",
+      "inside": 25,
+      "n": 25,
+      "share": 1.0,
+      "binomial_low_2p5": 21,
+      "outside": []
+     }
+    },
+    "rows": {
+     "fp16.a_hi_busy_lo_const": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 2.657,
+      "lo95": 2.102,
+      "hi95": 3.212,
+      "measured": 2.762500000000001,
+      "n_passes": 4,
+      "error": 0.10550000000000104,
+      "inside": true
+     },
+     "fp16.band_local": {
+      "type": "fp16",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 0.579,
+      "lo95": 0.024,
+      "hi95": 1.134,
+      "measured": 1.0,
+      "n_passes": 4,
+      "error": 0.42100000000000004,
+      "inside": true
+     },
+     "fp16.block_sparse_37": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 1.669,
+      "lo95": 1.114,
+      "hi95": 2.225,
+      "measured": 1.4347222222222218,
+      "n_passes": 4,
+      "error": -0.23427777777777825,
+      "inside": true
+     },
+     "fp16.pair_cancel": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 2.224,
+      "lo95": 1.668,
+      "hi95": 2.779,
+      "measured": 2.125,
+      "n_passes": 4,
+      "error": -0.0990000000000002,
+      "inside": true
+     },
+     "fp16.real_pythia_embed_qkv": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.864,
+      "lo95": 2.309,
+      "hi95": 3.419,
+      "measured": 2.7375000000000007,
+      "n_passes": 4,
+      "error": -0.12649999999999917,
+      "inside": true
+     },
+     "fp16.real_qwen_ln_down": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.63,
+      "lo95": 2.075,
+      "hi95": 3.186,
+      "measured": 2.6750000000000007,
+      "n_passes": 4,
+      "error": 0.04500000000000082,
+      "inside": true
+     },
+     "fp16.wideexp_gate30": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.812,
+      "lo95": 1.257,
+      "hi95": 2.367,
+      "measured": 1.7875000000000014,
+      "n_passes": 4,
+      "error": -0.024499999999998634,
+      "inside": true
+     },
+     "fp32.a_const_b_busy": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 2.511,
+      "lo95": 1.915,
+      "hi95": 3.107,
+      "measured": 2.4375000000000018,
+      "n_passes": 4,
+      "error": -0.07349999999999834,
+      "inside": true
+     },
+     "fp32.a_exp_busy_b_const": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "3 A with a busy partner",
+      "pred": 1.677,
+      "lo95": 1.081,
+      "hi95": 2.273,
+      "measured": 1.7249999999999996,
+      "n_passes": 4,
+      "error": 0.0479999999999996,
+      "inside": true
+     },
+     "fp32.b_3of8_k": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 1.558,
+      "lo95": 0.962,
+      "hi95": 2.154,
+      "measured": 1.5749999999999993,
+      "n_passes": 4,
+      "error": 0.016999999999999238,
+      "inside": true
+     },
+     "fp32.cancel_pairs": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 3.116,
+      "lo95": 2.52,
+      "hi95": 3.712,
+      "measured": 3.2749999999999986,
+      "n_passes": 4,
+      "error": 0.15899999999999848,
+      "inside": true
+     },
+     "fp32.denormals_only": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 1.602,
+      "lo95": 1.006,
+      "hi95": 2.198,
+      "measured": 1.875,
+      "n_passes": 4,
+      "error": 0.2729999999999999,
+      "inside": true
+     },
+     "fp32.real_pythia_embed_qkv": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.566,
+      "lo95": 1.97,
+      "hi95": 3.162,
+      "measured": 2.625,
+      "n_passes": 4,
+      "error": 0.05900000000000016,
+      "inside": true
+     },
+     "fp32.real_qwen_q_down": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.38,
+      "lo95": 1.783,
+      "hi95": 2.976,
+      "measured": 2.426388888888889,
+      "n_passes": 4,
+      "error": 0.046388888888889035,
+      "inside": true
+     },
+     "fp32.rowcol_sparse": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.078,
+      "lo95": 1.482,
+      "hi95": 2.674,
+      "measured": 2.075000000000001,
+      "n_passes": 4,
+      "error": -0.0029999999999987814,
+      "inside": true
+     },
+     "fp32.sign_drift": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 2.975,
+      "lo95": 2.379,
+      "hi95": 3.571,
+      "measured": 2.7750000000000004,
+      "n_passes": 4,
+      "error": -0.19999999999999973,
+      "inside": true
+     },
+     "fp32.wideexp_agate_rows": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.913,
+      "lo95": 1.317,
+      "hi95": 2.51,
+      "measured": 1.8684210526315788,
+      "n_passes": 4,
+      "error": -0.04457894736842127,
+      "inside": true
+     },
+     "fp32.wideexp_bgate_alt": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.881,
+      "lo95": 1.285,
+      "hi95": 2.477,
+      "measured": 1.9625000000000004,
+      "n_passes": 4,
+      "error": 0.08150000000000035,
+      "inside": true
+     },
+     "int8.a_full_b_const": {
+      "type": "int8",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 1.067,
+      "lo95": 0.724,
+      "hi95": 1.411,
+      "measured": 1.0,
+      "n_passes": 4,
+      "error": -0.06699999999999995,
+      "inside": true
+     },
+     "int8.b_line_flipflop": {
+      "type": "int8",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 0.781,
+      "lo95": 0.437,
+      "hi95": 1.124,
+      "measured": 0.8499999999999996,
+      "n_passes": 4,
+      "error": 0.06899999999999962,
+      "inside": true
+     },
+     "int8.band_a": {
+      "type": "int8",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 0.63,
+      "lo95": 0.287,
+      "hi95": 0.974,
+      "measured": 0.75,
+      "n_passes": 4,
+      "error": 0.12,
+      "inside": true
+     },
+     "int8.pair_gate_37": {
+      "type": "int8",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 0.817,
+      "lo95": 0.473,
+      "hi95": 1.16,
+      "measured": 0.75,
+      "n_passes": 4,
+      "error": -0.06699999999999995,
+      "inside": true
+     },
+     "int8.real_pythia_embed_mlpout": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 1.053,
+      "lo95": 0.709,
+      "hi95": 1.396,
+      "measured": 1.0,
+      "n_passes": 4,
+      "error": -0.052999999999999936,
+      "inside": true
+     },
+     "int8.real_qwen_q_down": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 1.051,
+      "lo95": 0.708,
+      "hi95": 1.395,
+      "measured": 1.0,
+      "n_passes": 4,
+      "error": -0.050999999999999934,
+      "inside": true
+     },
+     "int8.sign_runs_i": {
+      "type": "int8",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 0.944,
+      "lo95": 0.601,
+      "hi95": 1.288,
+      "measured": 1.0,
+      "n_passes": 4,
+      "error": 0.05600000000000005,
+      "inside": true
+     }
+    }
+   }
+  },
+  "gates_off": {
+   "passes": [
+    14010,
+    14011,
+    14012,
+    14013
+   ],
+   "set_aside": [],
+   "leak": {
+    "mode": "auto",
+    "k_w_per_c": 0.28609907120743255,
+    "n_runs": 123
+   },
+   "reducer_arm": "pass gates opened",
+   "power": {
+    "quantity": "power",
+    "footing": "frozen",
+    "anchor_scale": null,
+    "short_tiles": [],
+    "rules": {
+     "E140-P1": {
+      "verdict": "PASS",
+      "rms": 0.3392875511602008,
+      "interval": {
+       "lo95": 0.11351391150483078,
+       "median": 0.18532583968716762,
+       "hi95": 0.4741456035155995,
+       "n": 14,
+       "mix": {
+        "fp16": 6,
+        "fp32": 8
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "fp16.a_hi_busy_lo_const",
+       "fp16.block_sparse_37",
+       "fp16.pair_cancel",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.real_qwen_ln_down",
+       "fp16.wideexp_gate30",
+       "fp32.a_const_b_busy",
+       "fp32.b_3of8_k",
+       "fp32.cancel_pairs",
+       "fp32.denormals_only",
+       "fp32.real_pythia_embed_qkv",
+       "fp32.real_qwen_q_down",
+       "fp32.sign_drift",
+       "fp32.wideexp_bgate_alt"
+      ],
+      "below_interval": false,
+      "unit": "W"
+     },
+     "E140-P2": {
+      "verdict": "PASS",
+      "rms": 0.33983026871464184,
+      "interval": {
+       "lo95": 0.10068949065907881,
+       "median": 0.23958406534920004,
+       "hi95": 0.43386927918165086,
+       "n": 6,
+       "mix": {
+        "int8": 6
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "int8.a_full_b_const",
+       "int8.b_line_flipflop",
+       "int8.pair_gate_37",
+       "int8.real_pythia_embed_mlpout",
+       "int8.real_qwen_q_down",
+       "int8.sign_runs_i"
+      ],
+      "below_interval": false,
+      "unit": "W"
+     },
+     "E140-P3": {
+      "verdict": "FAIL",
+      "inside": 19,
+      "n": 25,
+      "share": 0.76,
+      "binomial_low_2p5": 21,
+      "outside": [
+       "fp16.block_sparse_37",
+       "fp16.pair_cancel",
+       "fp16.wideexp_gate30",
+       "fp32.real_qwen_q_down",
+       "fp32.wideexp_bgate_alt",
+       "int8.a_full_b_const"
+      ]
+     }
+    },
+    "rows": {
+     "fp16.a_hi_busy_lo_const": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 20.4809,
+      "lo95": 20.1372,
+      "hi95": 20.8245,
+      "measured": 20.41580150034155,
+      "n_passes": 4,
+      "error": -0.06509849965844694,
+      "inside": true
+     },
+     "fp16.band_local": {
+      "type": "fp16",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.9226,
+      "lo95": 2.5509,
+      "hi95": 3.2944,
+      "measured": 2.9274068286656982,
+      "n_passes": 4,
+      "error": 0.0048068286656981485,
+      "inside": true
+     },
+     "fp16.block_sparse_37": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 12.1374,
+      "lo95": 11.8029,
+      "hi95": 12.4719,
+      "measured": 11.68637917753195,
+      "n_passes": 4,
+      "error": -0.451020822468049,
+      "inside": false
+     },
+     "fp16.pair_cancel": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 16.8184,
+      "lo95": 16.4603,
+      "hi95": 17.1764,
+      "measured": 16.378978516283375,
+      "n_passes": 4,
+      "error": -0.43942148371662526,
+      "inside": false
+     },
+     "fp16.real_pythia_embed_qkv": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 22.2296,
+      "lo95": 21.8954,
+      "hi95": 22.5639,
+      "measured": 22.053352518786717,
+      "n_passes": 4,
+      "error": -0.17624748121328437,
+      "inside": true
+     },
+     "fp16.real_qwen_ln_down": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 20.2552,
+      "lo95": 19.9052,
+      "hi95": 20.6051,
+      "measured": 20.15882619918901,
+      "n_passes": 4,
+      "error": -0.09637380081098712,
+      "inside": true
+     },
+     "fp16.wideexp_gate30": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 13.3407,
+      "lo95": 13.0012,
+      "hi95": 13.6801,
+      "measured": 12.981375772385586,
+      "n_passes": 4,
+      "error": -0.3593242276144135,
+      "inside": false
+     },
+     "fp32.a_const_b_busy": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 19.2303,
+      "lo95": 18.708,
+      "hi95": 19.7526,
+      "measured": 19.25670652247927,
+      "n_passes": 4,
+      "error": 0.026406522479270222,
+      "inside": true
+     },
+     "fp32.a_exp_busy_b_const": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "3 A with a busy partner",
+      "pred": 12.1854,
+      "lo95": 11.6794,
+      "hi95": 12.6914,
+      "measured": 11.743415496101633,
+      "n_passes": 4,
+      "error": -0.4419845038983663,
+      "inside": true
+     },
+     "fp32.b_3of8_k": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 11.1842,
+      "lo95": 10.6886,
+      "hi95": 11.6797,
+      "measured": 10.894677580710436,
+      "n_passes": 4,
+      "error": -0.2895224192895647,
+      "inside": true
+     },
+     "fp32.cancel_pairs": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 24.3438,
+      "lo95": 23.8475,
+      "hi95": 24.8401,
+      "measured": 24.591482267502215,
+      "n_passes": 4,
+      "error": 0.24768226750221345,
+      "inside": true
+     },
+     "fp32.denormals_only": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 11.556,
+      "lo95": 11.0214,
+      "hi95": 12.0906,
+      "measured": 11.180527754468777,
+      "n_passes": 4,
+      "error": -0.37547224553122227,
+      "inside": true
+     },
+     "fp32.real_pythia_embed_qkv": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 19.6969,
+      "lo95": 19.211,
+      "hi95": 20.1827,
+      "measured": 19.58247062692309,
+      "n_passes": 4,
+      "error": -0.11442937307690926,
+      "inside": true
+     },
+     "fp32.real_qwen_q_down": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 18.1218,
+      "lo95": 17.6354,
+      "hi95": 18.6083,
+      "measured": 17.555893294355236,
+      "n_passes": 4,
+      "error": -0.565906705644764,
+      "inside": false
+     },
+     "fp32.rowcol_sparse": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 15.5756,
+      "lo95": 15.0782,
+      "hi95": 16.0731,
+      "measured": 15.304553687534538,
+      "n_passes": 4,
+      "error": -0.2710463124654616,
+      "inside": true
+     },
+     "fp32.sign_drift": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 23.1549,
+      "lo95": 22.661,
+      "hi95": 23.6487,
+      "measured": 22.93528630553025,
+      "n_passes": 4,
+      "error": -0.21961369446975,
+      "inside": true
+     },
+     "fp32.wideexp_agate_rows": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "2 spread exponents under a gate",
+      "pred": 14.1847,
+      "lo95": 13.6829,
+      "hi95": 14.6865,
+      "measured": 13.886575919159656,
+      "n_passes": 4,
+      "error": -0.2981240808403438,
+      "inside": true
+     },
+     "fp32.wideexp_bgate_alt": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 13.9088,
+      "lo95": 13.4025,
+      "hi95": 14.4151,
+      "measured": 13.298071200105886,
+      "n_passes": 4,
+      "error": -0.6107287998941135,
+      "inside": false
+     },
+     "int8.a_full_b_const": {
+      "type": "int8",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 6.4681,
+      "lo95": 5.9478,
+      "hi95": 6.9885,
+      "measured": 6.989733427798696,
+      "n_passes": 4,
+      "error": 0.5216334277986965,
+      "inside": false
+     },
+     "int8.b_line_flipflop": {
+      "type": "int8",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 4.0474,
+      "lo95": 3.5323,
+      "hi95": 4.5624,
+      "measured": 3.6194054311535906,
+      "n_passes": 4,
+      "error": -0.4279945688464091,
+      "inside": true
+     },
+     "int8.band_a": {
+      "type": "int8",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.7778,
+      "lo95": 2.2877,
+      "hi95": 3.2679,
+      "measured": 2.589970973967656,
+      "n_passes": 4,
+      "error": -0.18782902603234408,
+      "inside": true
+     },
+     "int8.pair_gate_37": {
+      "type": "int8",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 4.3514,
+      "lo95": 3.8556,
+      "hi95": 4.8472,
+      "measured": 4.256655132307024,
+      "n_passes": 4,
+      "error": -0.09474486769297563,
+      "inside": true
+     },
+     "int8.real_pythia_embed_mlpout": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 6.3468,
+      "lo95": 5.8347,
+      "hi95": 6.859,
+      "measured": 5.939639684255328,
+      "n_passes": 4,
+      "error": -0.4071603157446724,
+      "inside": true
+     },
+     "int8.real_qwen_q_down": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 6.3339,
+      "lo95": 5.8157,
+      "hi95": 6.8522,
+      "measured": 6.109307859349268,
+      "n_passes": 4,
+      "error": -0.2245921406507323,
+      "inside": true
+     },
+     "int8.sign_runs_i": {
+      "type": "int8",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 5.429,
+      "lo95": 4.9286,
+      "hi95": 5.9295,
+      "measured": 5.540486066104305,
+      "n_passes": 4,
+      "error": 0.11148606610430445,
+      "inside": true
+     }
+    }
+   },
+   "reported_m5": {
+    "E140-P1": {
+     "rms_m5": 0.24842518177788617,
+     "rms_m6": 0.3392875511602008,
+     "n": 14
+    },
+    "E140-P2": {
+     "rms_m5": 0.336402286287044,
+     "rms_m6": 0.33983026871464184,
+     "n": 6
+    }
+   },
+   "heat": {
+    "quantity": "heat",
+    "footing": "frozen",
+    "anchor_scale": null,
+    "short_tiles": [],
+    "rules": {
+     "E140-H1": {
+      "verdict": "PASS",
+      "rms": 0.13358564668406536,
+      "interval": {
+       "lo95": 0.18763554441766958,
+       "median": 0.28810011408988934,
+       "hi95": 0.4027848971640914,
+       "n": 14,
+       "mix": {
+        "fp16": 6,
+        "fp32": 8
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "fp16.a_hi_busy_lo_const",
+       "fp16.block_sparse_37",
+       "fp16.pair_cancel",
+       "fp16.real_pythia_embed_qkv",
+       "fp16.real_qwen_ln_down",
+       "fp16.wideexp_gate30",
+       "fp32.a_const_b_busy",
+       "fp32.b_3of8_k",
+       "fp32.cancel_pairs",
+       "fp32.denormals_only",
+       "fp32.real_pythia_embed_qkv",
+       "fp32.real_qwen_q_down",
+       "fp32.sign_drift",
+       "fp32.wideexp_bgate_alt"
+      ],
+      "below_interval": true,
+      "unit": "C"
+     },
+     "E140-H2": {
+      "verdict": "PASS",
+      "rms": 0.06094396333244708,
+      "interval": {
+       "lo95": 0.07964652943660817,
+       "median": 0.16526891437053273,
+       "hi95": 0.2713103737136563,
+       "n": 6,
+       "mix": {
+        "int8": 6
+       },
+       "draws": 100000,
+       "seed": 14007
+      },
+      "tiles": [
+       "int8.a_full_b_const",
+       "int8.b_line_flipflop",
+       "int8.pair_gate_37",
+       "int8.real_pythia_embed_mlpout",
+       "int8.real_qwen_q_down",
+       "int8.sign_runs_i"
+      ],
+      "below_interval": true,
+      "unit": "C"
+     },
+     "E140-H3": {
+      "verdict": "PASS",
+      "inside": 25,
+      "n": 25,
+      "share": 1.0,
+      "binomial_low_2p5": 21,
+      "outside": []
+     }
+    },
+    "rows": {
+     "fp16.a_hi_busy_lo_const": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 2.657,
+      "lo95": 2.102,
+      "hi95": 3.212,
+      "measured": 2.762500000000001,
+      "n_passes": 4,
+      "error": 0.10550000000000104,
+      "inside": true
+     },
+     "fp16.band_local": {
+      "type": "fp16",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 0.579,
+      "lo95": 0.024,
+      "hi95": 1.134,
+      "measured": 1.0,
+      "n_passes": 4,
+      "error": 0.42100000000000004,
+      "inside": true
+     },
+     "fp16.block_sparse_37": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 1.669,
+      "lo95": 1.114,
+      "hi95": 2.225,
+      "measured": 1.4375,
+      "n_passes": 4,
+      "error": -0.23150000000000004,
+      "inside": true
+     },
+     "fp16.pair_cancel": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 2.224,
+      "lo95": 1.668,
+      "hi95": 2.779,
+      "measured": 2.125,
+      "n_passes": 4,
+      "error": -0.0990000000000002,
+      "inside": true
+     },
+     "fp16.real_pythia_embed_qkv": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.864,
+      "lo95": 2.309,
+      "hi95": 3.419,
+      "measured": 2.7375000000000007,
+      "n_passes": 4,
+      "error": -0.12649999999999917,
+      "inside": true
+     },
+     "fp16.real_qwen_ln_down": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.63,
+      "lo95": 2.075,
+      "hi95": 3.186,
+      "measured": 2.6750000000000007,
+      "n_passes": 4,
+      "error": 0.04500000000000082,
+      "inside": true
+     },
+     "fp16.wideexp_gate30": {
+      "type": "fp16",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.812,
+      "lo95": 1.257,
+      "hi95": 2.367,
+      "measured": 1.7875000000000014,
+      "n_passes": 4,
+      "error": -0.024499999999998634,
+      "inside": true
+     },
+     "fp32.a_const_b_busy": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 2.511,
+      "lo95": 1.915,
+      "hi95": 3.107,
+      "measured": 2.4375000000000018,
+      "n_passes": 4,
+      "error": -0.07349999999999834,
+      "inside": true
+     },
+     "fp32.a_exp_busy_b_const": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "3 A with a busy partner",
+      "pred": 1.677,
+      "lo95": 1.081,
+      "hi95": 2.273,
+      "measured": 1.7249999999999996,
+      "n_passes": 4,
+      "error": 0.0479999999999996,
+      "inside": true
+     },
+     "fp32.b_3of8_k": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 1.558,
+      "lo95": 0.962,
+      "hi95": 2.154,
+      "measured": 1.5749999999999993,
+      "n_passes": 4,
+      "error": 0.016999999999999238,
+      "inside": true
+     },
+     "fp32.cancel_pairs": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 3.116,
+      "lo95": 2.52,
+      "hi95": 3.712,
+      "measured": 3.2749999999999986,
+      "n_passes": 4,
+      "error": 0.15899999999999848,
+      "inside": true
+     },
+     "fp32.denormals_only": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 1.602,
+      "lo95": 1.006,
+      "hi95": 2.198,
+      "measured": 1.875,
+      "n_passes": 4,
+      "error": 0.2729999999999999,
+      "inside": true
+     },
+     "fp32.real_pythia_embed_qkv": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.566,
+      "lo95": 1.97,
+      "hi95": 3.162,
+      "measured": 2.625,
+      "n_passes": 4,
+      "error": 0.05900000000000016,
+      "inside": true
+     },
+     "fp32.real_qwen_q_down": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 2.38,
+      "lo95": 1.783,
+      "hi95": 2.976,
+      "measured": 2.4124999999999996,
+      "n_passes": 4,
+      "error": 0.03249999999999975,
+      "inside": true
+     },
+     "fp32.rowcol_sparse": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 2.078,
+      "lo95": 1.482,
+      "hi95": 2.674,
+      "measured": 2.075000000000001,
+      "n_passes": 4,
+      "error": -0.0029999999999987814,
+      "inside": true
+     },
+     "fp32.sign_drift": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 2.975,
+      "lo95": 2.379,
+      "hi95": 3.571,
+      "measured": 2.7750000000000004,
+      "n_passes": 4,
+      "error": -0.19999999999999973,
+      "inside": true
+     },
+     "fp32.wideexp_agate_rows": {
+      "type": "fp32",
+      "priority": 2,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.913,
+      "lo95": 1.317,
+      "hi95": 2.51,
+      "measured": 1.8684210526315788,
+      "n_passes": 4,
+      "error": -0.04457894736842127,
+      "inside": true
+     },
+     "fp32.wideexp_bgate_alt": {
+      "type": "fp32",
+      "priority": 1,
+      "case": "2 spread exponents under a gate",
+      "pred": 1.881,
+      "lo95": 1.285,
+      "hi95": 2.477,
+      "measured": 1.9625000000000004,
+      "n_passes": 4,
+      "error": 0.08150000000000035,
+      "inside": true
+     },
+     "int8.a_full_b_const": {
+      "type": "int8",
+      "priority": 1,
+      "case": "3 A with a busy partner",
+      "pred": 1.067,
+      "lo95": 0.724,
+      "hi95": 1.411,
+      "measured": 1.0,
+      "n_passes": 4,
+      "error": -0.06699999999999995,
+      "inside": true
+     },
+     "int8.b_line_flipflop": {
+      "type": "int8",
+      "priority": 1,
+      "case": "own choice (surprise)",
+      "pred": 0.781,
+      "lo95": 0.437,
+      "hi95": 1.124,
+      "measured": 0.8499999999999996,
+      "n_passes": 4,
+      "error": 0.06899999999999962,
+      "inside": true
+     },
+     "int8.band_a": {
+      "type": "int8",
+      "priority": 2,
+      "case": "4 partial sparsity",
+      "pred": 0.63,
+      "lo95": 0.287,
+      "hi95": 0.974,
+      "measured": 0.75,
+      "n_passes": 4,
+      "error": 0.12,
+      "inside": true
+     },
+     "int8.pair_gate_37": {
+      "type": "int8",
+      "priority": 1,
+      "case": "4 partial sparsity",
+      "pred": 0.817,
+      "lo95": 0.473,
+      "hi95": 1.16,
+      "measured": 0.75,
+      "n_passes": 4,
+      "error": -0.06699999999999995,
+      "inside": true
+     },
+     "int8.real_pythia_embed_mlpout": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 1.053,
+      "lo95": 0.709,
+      "hi95": 1.396,
+      "measured": 1.0,
+      "n_passes": 4,
+      "error": -0.052999999999999936,
+      "inside": true
+     },
+     "int8.real_qwen_q_down": {
+      "type": "int8",
+      "priority": 1,
+      "case": "5 real model",
+      "pred": 1.051,
+      "lo95": 0.708,
+      "hi95": 1.395,
+      "measured": 1.0,
+      "n_passes": 4,
+      "error": -0.050999999999999934,
+      "inside": true
+     },
+     "int8.sign_runs_i": {
+      "type": "int8",
+      "priority": 1,
+      "case": "1 signs on moving sums",
+      "pred": 0.944,
+      "lo95": 0.601,
+      "hi95": 1.288,
+      "measured": 1.0,
+      "n_passes": 4,
+      "error": 0.05600000000000005,
+      "inside": true
+     }
+    }
+   }
+  }
+ },
+ "verdicts": {
+  "E140-P1": "PASS",
+  "E140-P2": "PASS",
+  "E140-P3": "FAIL",
+  "E140-H1": "PASS",
+  "E140-H2": "PASS",
+  "E140-H3": "PASS"
+ },
+ "arm_sensitive": {
+  "E140-P1": [
+   "leak0.3803",
+   "leak0"
+  ],
+  "E140-P2": [],
+  "E140-P3": [
+   "leak0.1994",
+   "dips_removed"
+  ],
+  "E140-H1": [],
+  "E140-H2": [],
+  "E140-H3": []
+ }
+}
