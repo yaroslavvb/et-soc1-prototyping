@@ -228,6 +228,16 @@ are as first committed.*
 | C2 | **"A property of the multiplier and not of these tiles"** (§ 5; the lane's result said the price "belongs to the multiplier, not to these tiles"). E130, E138, E145 and E151 pin the same 26 tiles ([A] in `corrections_e151.txt`), so the day-to-day and card-to-card transfers test sessions and cards, not tiles. The per-position list, bits 0-6, is measured at one B base word: B1, eight nonzero bytes (0x3A, 0x53, 0x5C, 0xA3, 0xA6, 0xAA, 0xAC, 0xC6, each on 128 of B's 1,024), with A held at 0x01 ([B]). R1 RECODED puts B's contrast on the Booth side of the midpoint, but its size matches neither netlist group (R1n, R1q NEITHER). The registration framed R1 the same way: it "decides whether the per-position B term is a property of the multiplier's design (so it can be carried to any kernel and card) or an accident of these tiles" ([`tools/claims-v3/e151/README.md`](../../../../tools/claims-v3/e151/README.md)). It is frozen and stays as written, and this note governs how its result is read | § 5 and What it changes now read "consistent with a property of the multiplier (R1 RECODED); measured at one B base word, so transfer to other base words and kernels is untested". M8 should carry the prices as measured at B1 with A = 0x01. No byte of B in the 13 B tiles is zero: bit 0 flips each B1 byte to its neighbour, 0x53 → 0x52, 0x3A → 0x3B and so on ([B]). So no B flip in these tiles goes to or from zero |
 | C3 | **A's "one price to 6%"** (§ 5, What it changes, and the lane's blog point 4). Today's A prices come from one A block, and E151-R2, R3, C1, R4s, R5 and N are NOT SCORED ([C]) | The claim that A is flat rests on E130-R2 FLAT (A odd − even −1.7 [−6.6, +3.2] fJ, the board, 4 A blocks, this card). It also rests on E145's control on card 1: R2 FLAT (−2.1 [−9.4, +5.1] board-equivalent fJ, 3 A blocks), C1 REPRODUCES card 0, and card 0's one A price predicted card 1's A bits to 5%, per position to 2%. Today's single A block agrees: one price to 6%, per position to 2% ([D]) |
 
+**What the corrections do to predicting power and heat.**
+- **No number moves.** The term tested, int8's per-flip price by B bit position, keeps its out-of-sample errors, one price → per position:
+  - day to day on card 0: 17.2 → 4.3 rail fJ rms (36% → 9%);
+  - card 1 → card 0: 17.4 → 4.7 (37% → 10%).
+- **These stay rail-price transfer errors,** not a board-power error for int8 kinds.
+- **C2 narrows their scope** to the tiles they were measured on: one B base word, B1, with A = 0x01. For other base words and kernels the
+  before and after are unmeasured.
+- **C3 moves no number.** A's one price (6%) rests on E130's and E145's registered A FLAT.
+- **Heat:** no heat term was measured. Heat follows this power term through Q138(t)'s 0.87 °C per board W on this card.
+
 ## Files
 
 `results.md`, `scored.json` (the scorer's output: every rule at every arm, the pools, the scales, the two out-of-sample tables),
