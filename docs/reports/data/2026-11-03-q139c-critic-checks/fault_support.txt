@@ -1,0 +1,39 @@
+Q139(c): the committed numbers behind the corrections (read, not computed anew)
+
+fault 2: E141 corrections-numbers.txt C1 (B1 is the floats' bias, measured - predicted; its line -0.117 W):
+  dips kept, leak 0.2104 (post hoc)     0.2104     0.266 PASS     0.243 PASS     0.344 PASS          -0.107 PASS        -0.082 PASS    30/30
+  dips kept, leak 0.2163 (post hoc)     0.2163     0.271 PASS     0.249 FAIL     0.345 PASS     -0.121 FAIL HIGH        -0.085 PASS    30/30
+  dips kept, leak 0.2217 (post hoc)     0.2217     0.275 PASS     0.255 FAIL     0.346 PASS     -0.133 FAIL HIGH        -0.088 PASS    30/30
+  dips removed, leak 0.2104 (post hoc)  0.2104     0.145 PASS     0.147 PASS     0.337 PASS          +0.001 PASS        -0.086 PASS    30/30
+  dips removed, leak 0.2163 (post hoc)  0.2163     0.144 PASS     0.145 PASS     0.338 PASS          -0.013 PASS        -0.090 PASS    30/30
+  dips removed, leak 0.2217 (post hoc)  0.2217     0.145 PASS     0.145 PASS     0.339 PASS          -0.026 PASS        -0.093 PASS    30/30
+
+fault 4: the measured 4.5 s rise per format against M7's heat rms (priority-1 tiles; spread = rms about the mean, the error of a constant per format):
+  aifoundry3 (E141)  fp32: n 9  rises 1.533-3.350 C (9 distinct)  constant 0.546 C  M7 0.128 C
+  aifoundry3 (E141)  fp16: n 8  rises 1.983-2.883 C (7 distinct)  constant 0.365 C  M7 0.129 C
+  aifoundry3 (E141)  int8: n 7  rises 0.667-1.000 C (2 distinct)  constant 0.117 C  M7 0.135 C
+  card 1 (E142)      fp32: n 9  rises 1.900-3.324 C (9 distinct)  constant 0.498 C  M7 0.167 C
+  card 1 (E142)      fp16: n 8  rises 1.922-2.750 C (8 distinct)  constant 0.331 C  M7 0.162 C
+  card 1 (E142)      int8: n 7  rises 0.370-1.000 C (7 distinct)  constant 0.220 C  M7 0.139 C
+
+fault 6: E146 results.json rules.R5 on the fresh shape F6:
+  time per op fp32: T800 1.9121 us, MS 2.0986 (-8.89%), point FAIL
+  time per op fp16: T800 1.9064 us, MS 2.0986 (-9.16%), point FAIL
+  time per op int8: T800 1.924 us, MS 2.1194 (-9.22%), point FAIL
+  burst power F6-fp16-randn: measured 53.66 W, PS 53.79 W, P0 55.38 W, err on PS -0.13 W PASS
+  burst power F6-fp16-zeros: measured 36.17 W, PS 35.85 W, P0 38.51 W, err on PS +0.32 W PASS
+  burst power F6-fp32-randn: measured 58.11 W, PS 52.5 W, P0 57.98 W, err on PS +5.61 W FAIL
+  burst power F6-fp32-zeros: measured 36.48 W, PS 34.24 W, P0 38.41 W, err on PS +2.24 W PASS
+  burst power F6-int8-full: measured 43.28 W, PS 42.72 W, P0 44.71 W, err on PS +0.56 W PASS
+  burst power F6-int8-zeros: measured 35.8 W, PS 35.08 W, P0 37.74 W, err on PS +0.72 W PASS
+  sustained F6-fp32-randn: 745.1 MHz (G2 800.0, FAIL), 56.15 W (G2 52.5, PASS), die 65.3 (law on G2's W 60.68, FAIL)
+  sustained F6-int8-full: 794.1 MHz (G2 800.0, PASS), 45.48 W (G2 42.72, PASS), die 61.7 (law on G2's W 58.13, FAIL)
+
+fault 7: Q138(m) posthoc-m7.json aifoundry2_split.frozen_cap (M7 end to end from the tile's bytes, its C1):
+  all: n 56  clock 8.50 MHz rms  board 1.863 W rms
+  governed: n 21  clock 13.86 MHz rms  board 2.351 W rms
+
+fault 9: the result field of every fma launch in pool 5's sessions (sparsity_host --values file:):
+  E141 aifoundry3: {'unchecked': 2274}
+  E142 card 1: {'unchecked': 2854}
+  E143 aifoundry2: {'unchecked': 2004}

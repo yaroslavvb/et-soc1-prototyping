@@ -1,0 +1,52 @@
+Q139(c) check (a), post hoc: Q138(t)'s frozen aifoundry2 chain (model-q138t.json a2: tau [1.0, 3.0, 10.0, 60.0, 120.0] s, R [0.07364, 0.06598, 0.03889, 0.34285, 0.14159] C/W, sum 0.6629) on the large-GEMM sessions' sustained runs
+error = measured window die - predicted (C); the window is the last 40 s of work inside dispatch windows; numerics: grid
+
+E119 (2026-11-01-e119-gemm-speed): 20 sustained runs; rest window 120 s before the first launch: board 21.886 W, die 46.000 C (anchor 45.993); first gate [47.0, 64.0, 22.07]
+  reader against results.json cells: window die max |diff| 0.04999999999999716, window W max |diff| 0.005000000000002558, die_start equal 20/20
+  rest      rms 0.721  mean +0.620  range +0.027 .. +1.407  (n 20)
+  gate      rms 0.446  mean -0.264  range -0.824 .. +0.556  (n 20)
+  start     rms 0.494  mean +0.034  range -0.785 .. +1.252  (n 20)
+  e136_law  rms 2.945  mean +2.886  range +2.153 .. +4.321  (n 20)
+
+E126 (2026-11-02-e126-gemm-arms): 22 sustained runs; rest window 120 s before the first launch: board 21.221 W, die 43.000 C (anchor 43.001); first gate [44.0, 69.0, 21.33]
+  reader against results.json cells: window die max |diff| 0.045000000000001705, window W max |diff| 0.005000000000002558, die_start equal 22/22
+  rest      rms 0.611  mean +0.534  range +0.048 .. +1.037  (n 22)
+  gate      rms 0.504  mean -0.391  range -0.875 .. +0.161  (n 22)
+  start     rms 0.514  mean +0.037  range -0.921 .. +0.948  (n 22)
+  e136_law  rms 0.967  mean +0.857  range +0.380 .. +2.182  (n 22)
+
+E136 (2026-11-02-e136-large-gemm): 12 sustained runs; rest window 120 s before the first launch: board 21.970 W, die 46.000 C (anchor 46.027); first gate [47.0, 69.0, 22.16]
+  reader against results.json cells: window die max |diff| 0.046999999999997044, window W max |diff| 0.005000000000002558, die_start equal 12/12
+  rest      rms 0.460  mean +0.407  range -0.003 .. +0.731  (n 12)
+  gate      rms 0.485  mean -0.434  range -0.833 .. -0.077  (n 12)
+  start     rms 0.455  mean +0.024  range -0.788 .. +0.884  (n 12)
+  e136_law  rms 2.155  mean +2.054  range +1.269 .. +3.896  (n 12)
+
+E146 (2026-11-02-e146-gemm-stores): 2 sustained runs; rest window 120 s before the first launch: board 22.089 W, die 46.504 C (anchor 46.496); first gate [47.0, 69.0, 22.3]
+  reader against results.json cells: window die max |diff| 0.04899999999999238, window W max |diff| 0.0040000000000048885, die_start equal 2/2
+  rest      rms 0.619  mean +0.616  range +0.546 .. +0.685  (n 2)
+  gate      rms 0.228  mean +0.210  range +0.122 .. +0.298  (n 2)
+  start     rms 0.397  mean +0.272  range -0.018 .. +0.561  (n 2)
+  e136_law  rms 2.757  mean +2.740  range +2.432 .. +3.047  (n 2)
+  D-06-F6-fp32-randn-r1: measured 65.25 C at 56.15 W, start 54.0; err rest +0.55 gate +0.12 start +0.56 law +3.05
+     fed G2_in_dispatch          52.50 W: err rest +2.70 gate +2.32 start +2.89 law +4.57
+     fed G2_whole_span           52.50 W: err rest +2.42 gate +2.04 start +3.22 law +4.57
+     fed P0_800_in_dispatch      57.98 W: err rest +0.35 gate -0.04 start +0.63 law +2.29
+     fed P0_800_whole_span       57.98 W: err rest -0.03 gate -0.40 start +0.99 law +2.29
+  D-07-F6-int8-full-r1: measured 61.71 C at 45.48 W, start 58.0; err rest +0.69 gate +0.30 start -0.02 law +2.43
+     fed G2_in_dispatch          42.72 W: err rest +1.73 gate +1.36 start +1.19 law +3.58
+     fed G2_whole_span           42.72 W: err rest +1.57 gate +1.19 start +1.36 law +3.58
+     fed P0_800_in_dispatch      44.71 W: err rest +0.87 gate +0.50 start +0.37 law +2.75
+     fed P0_800_whole_span       44.71 W: err rest +0.68 gate +0.30 start +0.54 law +2.75
+
+all four sessions, 56 sustained runs:
+  rest      rms 0.625  mean +0.541
+  gate      rms 0.472  mean -0.333
+  start     rms 0.491  mean +0.041
+  e136_law  rms 2.175  mean +1.906
+
+frozen-code check (Q138(t)'s own load_tel/grid/states on s1's telemetry, first-gate anchor) against this script's gate arm:
+  E119: max |this - frozen code| over 20 windows = 0.0004 C
+  E126: max |this - frozen code| over 22 windows = 0.0005 C
+  E136: max |this - frozen code| over 12 windows = 0.0004 C
+  E146: max |this - frozen code| over 2 windows = 0.0004 C

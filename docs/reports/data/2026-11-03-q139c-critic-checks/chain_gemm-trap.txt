@@ -1,0 +1,46 @@
+Q139(c) check (a), post hoc: Q138(t)'s frozen aifoundry2 chain (model-q138t.json a2: tau [1.0, 3.0, 10.0, 60.0, 120.0] s, R [0.07364, 0.06598, 0.03889, 0.34285, 0.14159] C/W, sum 0.6629) on the large-GEMM sessions' sustained runs
+error = measured window die - predicted (C); the window is the last 40 s of work inside dispatch windows; numerics: trap
+
+E119 (2026-11-01-e119-gemm-speed): 20 sustained runs; rest window 120 s before the first launch: board 21.886 W, die 46.000 C (anchor 45.993); first gate [47.0, 64.0, 22.07]
+  reader against results.json cells: window die max |diff| 0.04999999999999716, window W max |diff| 0.005000000000002558, die_start equal 20/20
+  rest      rms 0.729  mean +0.626  range +0.054 .. +1.511  (n 20)
+  gate      rms 0.454  mean -0.257  range -0.831 .. +0.626  (n 20)
+  start     rms 0.535  mean -0.053  range -0.979 .. +1.237  (n 20)
+  e136_law  rms 2.945  mean +2.886  range +2.153 .. +4.321  (n 20)
+
+E126 (2026-11-02-e126-gemm-arms): 22 sustained runs; rest window 120 s before the first launch: board 21.221 W, die 43.000 C (anchor 43.001); first gate [44.0, 69.0, 21.33]
+  reader against results.json cells: window die max |diff| 0.045000000000001705, window W max |diff| 0.005000000000002558, die_start equal 22/22
+  rest      rms 0.615  mean +0.535  range +0.045 .. +1.065  (n 22)
+  gate      rms 0.493  mean -0.386  range -0.874 .. +0.139  (n 22)
+  start     rms 0.540  mean -0.023  range -1.047 .. +0.967  (n 22)
+  e136_law  rms 0.967  mean +0.857  range +0.380 .. +2.182  (n 22)
+
+E136 (2026-11-02-e136-large-gemm): 12 sustained runs; rest window 120 s before the first launch: board 21.970 W, die 46.000 C (anchor 46.027); first gate [47.0, 69.0, 22.16]
+  reader against results.json cells: window die max |diff| 0.046999999999997044, window W max |diff| 0.005000000000002558, die_start equal 12/12
+  rest      rms 0.463  mean +0.410  range +0.009 .. +0.760  (n 12)
+  gate      rms 0.481  mean -0.429  range -0.836 .. -0.087  (n 12)
+  start     rms 0.451  mean -0.022  range -0.819 .. +0.810  (n 12)
+  e136_law  rms 2.155  mean +2.054  range +1.269 .. +3.896  (n 12)
+
+E146 (2026-11-02-e146-gemm-stores): 2 sustained runs; rest window 120 s before the first launch: board 22.089 W, die 46.504 C (anchor 46.496); first gate [47.0, 69.0, 22.3]
+  reader against results.json cells: window die max |diff| 0.04899999999999238, window W max |diff| 0.0040000000000048885, die_start equal 2/2
+  rest      rms 0.606  mean +0.602  range +0.525 .. +0.678  (n 2)
+  gate      rms 0.249  mean +0.237  range +0.161 .. +0.313  (n 2)
+  start     rms 0.268  mean +0.117  range -0.124 .. +0.358  (n 2)
+  e136_law  rms 2.757  mean +2.740  range +2.432 .. +3.047  (n 2)
+  D-06-F6-fp32-randn-r1: measured 65.25 C at 56.15 W, start 54.0; err rest +0.53 gate +0.16 start +0.36 law +3.05
+     fed G2_in_dispatch          52.50 W: err rest +2.69 gate +2.33 start +2.58 law +4.57
+     fed G2_whole_span           52.50 W: err rest +2.41 gate +2.05 start +3.08 law +4.57
+     fed P0_800_in_dispatch      57.98 W: err rest +0.34 gate -0.03 start +0.25 law +2.29
+     fed P0_800_whole_span       57.98 W: err rest -0.03 gate -0.39 start +0.82 law +2.29
+  D-07-F6-int8-full-r1: measured 61.71 C at 45.48 W, start 58.0; err rest +0.68 gate +0.31 start -0.12 law +2.43
+     fed G2_in_dispatch          42.72 W: err rest +1.71 gate +1.35 start +0.96 law +3.58
+     fed G2_whole_span           42.72 W: err rest +1.56 gate +1.20 start +1.29 law +3.58
+     fed P0_800_in_dispatch      44.71 W: err rest +0.85 gate +0.49 start +0.11 law +2.75
+     fed P0_800_whole_span       44.71 W: err rest +0.67 gate +0.31 start +0.47 law +2.75
+
+all four sessions, 56 sustained runs:
+  rest      rms 0.630  mean +0.543
+  gate      rms 0.470  mean -0.327
+  start     rms 0.513  mean -0.029
+  e136_law  rms 2.175  mean +1.906

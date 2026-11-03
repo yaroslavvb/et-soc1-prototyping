@@ -6430,8 +6430,10 @@ kept; measured − M7).
 - **The float bias is the reduction's footing, not a measured term of M7** (C1, post hoc): M7's 247 aifoundry3 float training rows
   were reduced at slopes averaging 0.210–0.222 W/°C (by rows, by D, by D²), 80 of them at a fixed 0.1994 and 93 with the meter's
   dips removed. Reduced again at those slopes by the frozen code, B1 reads −0.107 to −0.133 W with the dips kept and +0.001 to
-  −0.026 W with them removed, P2 0.243–0.255 and 0.145–0.147 W, C1 30 of 30 at all six. So E141 measures no float offset in M7,
-  and cannot exclude one of up to about −0.13 W; int8 and heat do not move with the footing.
+  −0.026 W with them removed, P2 0.243–0.255 and 0.145–0.147 W, C1 30 of 30 at all six. So about half (the slope) to
+  all (the slope and the dip rule) of the bias is the footing; on the dips-kept footing most training rows used, −0.11 to −0.13 W
+  remains at B1's line, so an offset of about −0.1 W is neither shown nor excluded (corrected by Q139(c), Tue 3 Nov 2026,
+  post hoc; it read "E141 measures no float offset in M7"); int8 and heat do not move with the footing.
 - **M7's power bands are calibration, not accuracy** (C3): over the 30 tiles M7 and M6 err alike (rms 0.365 against 0.367 W, bias
   −0.233 against −0.237), and M7's float bands are 1.6 times M6's (mean 95% half-width 0.81 against 0.50 W on fp32); its float
   heat bands are narrower than M6's (0.34 against 0.58 °C) and still hold 30 of 30.
@@ -6477,7 +6479,10 @@ experiments in M7's rows, the meter's dips removed).
   high on fp32).
 
 **Scored:** P1–P3, B1, B2, C1, H1–H4 PASS; M1, M2 NOT RESOLVED; X1 and X2, the card term, NOT SCORED (E141's reduction did not
-exist when E142 reduced; it does now, in `0531494f`). The frozen expectation was met.
+exist when E142 reduced; it does now, in `0531494f`). *Scored post hoc by Q139(c) (Tue 3 Nov 2026) with the registered scorer on E141's committed
+reduction: X1 FAIL (floats 0.982 [0.980, 0.996] against 0.9711), X2 PASS (int8 0.981 [0.969, 1.005] against 0.9735); the
+float ratio moves 0.931–1.015 over the two cards' committed reduction arms and reads 0.973–0.974 at M7's training
+footing with the dips removed on both ([`2026-11-03-q139c-critic-checks/`](../reports/data/2026-11-03-q139c-critic-checks/README.md)).* The frozen expectation was met.
 **What it changes.** Item 6: M7 holds blind on new kinds on card 1, a card whose earlier rows it was fitted on (new kinds, not new
 hardware; C2), at the registered leakage slope, and its stated bands can be quoted there, perhaps conservative (30 of 30 where
 28.5 are expected); E142 shows no gain of M7 over M6 in rms, bias or coverage. Open: X1/X2; card 1's leakage slope (the frozen
