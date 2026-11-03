@@ -1,0 +1,34 @@
+E151 corrections after verification: the facts behind C2 and C3 (post hoc; committed files only)
+
+[A] Tiles. E130, E138, E145 and E151 each pin the tiles in their own tools/claims-v3/<e>/e130-items.json.
+    the four lists (tile name and sha256, in order) are identical: YES; 26 tiles
+    every tile file in tools/claims-v3/kinds/e130 matches its registered sha256: True
+    so the day-to-day (E130 + E138 -> E151) and card-to-card (E145 -> E151) transfers repeat the same tiles: they test
+    sessions and cards, not other tiles, base words or kernels.
+
+[B] What the tiles hold (each file is A then B, 1,024 bytes each).
+    hb1   (base word B1): A = {0x01}; B = 8 distinct bytes {0x3A, 0x53, 0x5C, 0xA3, 0xA6, 0xAA, 0xAC, 0xC6}, each on 128 of 1,024
+    hb2   (base word B2): A = {0x01}; B = 8 distinct bytes {0x63, 0x6C, 0x71, 0x72, 0xE1, 0xE4, 0xE8, 0xF0}, each on 128 of 1,024
+    hb1d  (base word B1): A = {0x55}; B = 8 distinct bytes {0x3A, 0x53, 0x5C, 0xA3, 0xA6, 0xAA, 0xAC, 0xC6}, each on 128 of 1,024
+    b1_0: A as hb1 (True); B bit 0 flipped on 512 of 1,024 bytes, the rest as hb1; pairs 0x3A->0x3B, 0x53->0x52, 0x5C->0x5D, 0xA3->0xA2, 0xA6->0xA7, 0xAA->0xAB, 0xAC->0xAD, 0xC6->0xC7
+    b1_6: A as hb1 (True); B bit 6 flipped on 512 of 1,024 bytes, the rest as hb1; pairs 0x3A->0x7A, 0x53->0x13, 0x5C->0x1C, 0xA3->0xE3, 0xA6->0xE6, 0xAA->0xEA, 0xAC->0xEC, 0xC6->0x86
+    b1_0 ... b1_7 each differ from hb1 only in their own B bit, on half the bytes, with A unchanged: True
+    B-side tiles (13): zero bytes in B: 0 in all (none)
+    so no B flip in these tiles goes to or from zero; the per-position B list (bits 0-6) is measured at one B base word,
+    B1, with A held at 0x01.
+    ha1   (base word A1): A = {0xC6}; B = {0x01}
+    ha2   (base word A2): A = {0xF0}; B = {0x01}
+    ha1d  (base word A1): A = {0xC6}; B = {0x55}
+
+[C] The A side (C3).
+    E130 (aifoundry3 card 0, registered primary = the board): R2 FLAT, A odd - even -1.7 [-6.6, +3.2] (n 4) fJ; A blocks 4
+    E145 (aifoundry1 card 1, registered primary = the rail): R2 FLAT, C1 REPRODUCES card 0, A odd - even -2.1 [-9.4, +5.1] (n 3) board-equivalent fJ
+    E145 cross_card.A (card 0 predicting card 1, bits 0-6): flat 3.3 rail fJ (5%), per position 1.6 (2%)
+    E151 A blocks kept: [15130]; R2 NOT SCORED, R3 NOT SCORED, C1 NOT SCORED, R4s NOT SCORED, R5 NOT SCORED; A odd - even -2.7 (n 1, no interval) board-equivalent fJ
+
+[D] Out of sample, bits 0-6, rms in rail fJ (share of the predicted session's mean), as scored in E151's scored.json.
+    card 0's earlier sessions (E130, E138) -> E151 B: flat 17.2 (36%), parity 10.6 (22%), per position 4.3 (9%)
+    card 0's E130 (E138 ran no A block) -> E151    A: flat 3.9 (6%), parity 3.9 (6%), per position 1.2 (2%)  [E151's A: one block]
+    card 1 (E145, E151's filter) -> E151           B: flat 17.4 (37%), parity 11.0 (23%), per position 4.7 (10%)
+    card 1 (E145, E151's filter) -> E151           A: flat 3.9 (6%), parity 3.9 (6%), per position 1.6 (2%)  [E151's A: one block]
+    Scope: the same tiles as [A] (B base word B1, A = 0x01 for bits 0-6); other base words and kernels untested.

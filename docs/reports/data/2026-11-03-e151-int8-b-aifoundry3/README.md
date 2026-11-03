@@ -20,6 +20,15 @@ allowed**; the stop-path test, the smoke and **11 blocks (10 B, 1 A)** ran, ever
 aside, so **8 B blocks are kept**. Collected and scored on the Intel at about 05:06 PST by the registered `collect_e151.sh`, unchanged, on
 the raw copy in this directory.*
 
+*Corrected after an independent verification (a dated note, Tue 3 Nov 2026, about 05:55 PST; desk only, no card touched): three wording
+faults, none of which changes a number, rule or verdict, are corrected as marked notes where they stand and listed in
+[§ Corrections after verification](#corrections-after-verification-tue-3-nov-2026), C1–C3. **C1**, § Card and post: another lane's
+aifoundry1 card 1 clause was added at 04:30, not 05:00, and the post had moved on before this README was committed. **C2**, § 5 and What it
+changes: all four sessions ran the same tiles, so the transfers test days and cards, not tiles. The per-position B prices are measured at
+one B base word (E130's B1, A held at 0x01), so "a property of the multiplier and not of these tiles" is too strong; R1 RECODED is
+consistent with it. **C3**: today's A prices come from one A block, so "A's one price holds to 6%" rests on E130's and E145's registered
+A rules. The registration, `results.md`, `scored.json` and `posthoc/` are as first committed.*
+
 ## Results
 
 **In plain words.** Two of the four gate-level versions of the chip's int8 multiplier recode the B operand in Booth digits (they predict
@@ -102,10 +111,17 @@ Frozen per-bit prices of bits 0-6 predicting today's, rms in rail fJ and as a sh
 
 **The term tested: the int8 per-flip price by B bit position, out of sample on a new day and from another card.** One price per B bit
 misses today's per-bit prices by 36-37%; a price per position by 9-10%, from either predictor; on A one price is already good to 6% and per
-position to 2%. Out of sample, before → after: **B 36% → 9% (day to day on card 0) and 37% → 10% (card 1 → card 0)**. Card 0's scale held
+position to 2%. *(Corrected after verification, [C3](#corrections-after-verification-tue-3-nov-2026): today's A prices come from one A
+block, and E151's A rules are NOT SCORED. That A is flat rests on E130-R2 FLAT, A odd − even −1.7 [−6.6, +3.2] fJ on this card, and on
+E145's control on card 1, R2 FLAT and C1 REPRODUCES, where card 0's one A price predicted card 1's to 5%. Today's single A block agrees,
+one price to 6%.)* Out of sample, before → after: **B 36% → 9% (day to day on card 0) and 37% → 10% (card 1 → card 0)**. Card 0's scale held
 to 0.4% across days; card 1's prices run 7% below card 0's. **R1 RECODED says why the term is structural**: B is recoded (Booth on B,
 with E130's A side), so the per-position price is a property of the multiplier and not of these tiles, which is why it carries between
-cards and sessions. No frozen model (M5, M6, M7) carries per-position B prices yet; M8 (Q139(m)) is where the term goes. It matters for
+cards and sessions. *(Corrected after verification, [C2](#corrections-after-verification-tue-3-nov-2026): too strong. E130, E138, E145
+and E151 ran the same 26 tiles, so the day-to-day and card-to-card transfers test sessions and cards, not tiles. Read instead:
+consistent with a property of the multiplier (R1 RECODED); measured at one B base word, E130's B1, with A held at 0x01, so transfer to
+other base words and kernels is untested. R1 puts B's contrast on the Booth side of the midpoint, while its size matches neither netlist
+group (R1n, R1q NEITHER).)* No frozen model (M5, M6, M7) carries per-position B prices yet; M8 (Q139(m)) is where the term goes. It matters for
 kinds whose flips sit on a few B bit positions (small integers, few-level quantised weights, sign patterns); for uniform random int8 every
 bit flips alike and the models agree on the mean. **Heat**: E151 measures no heat term; the die read 49-55 °C (`minshire[0]`, the shires'
 mean) at 22.7-32.8 W on the board, and the prediction of heat moves only through this power term and the die rise per board watt (0.87 °C
@@ -161,6 +177,23 @@ Another lane added its aifoundry1 card 1 clause at 05:00. At 05:04:03, the sessi
 dry run, then save), every other word kept: the post now reads "<ai> **Claude says:** using aifoundry1 card 1 for 1 h, until ~05:30 PST
 [doc](<…>)" ([`logs/push-and-claim-times.txt`](logs/push-and-claim-times.txt)).
 
+*Correction (a dated note, Tue 3 Nov 2026, about 05:55 PST, after verification;
+[C1](#corrections-after-verification-tue-3-nov-2026)): the paragraph above misdates the other lanes' edits, and its "now reads" was out of
+date before this README was committed (05:11). Rebuilt from the three lanes' read-backs of the post (E155's README gives its claim at 04:30
+and release at 05:07, E158's its claim at 04:38), the post's history to the last release was:*
+
+| PST | lane | edit | the clauses the post held after it |
+|---|---|---|---|
+| 04:29:33 | E151 | created the day's post with `post.mjs` | aifoundry3, until ~05:29 |
+| 04:30 | E155 | added its clause | aifoundry3; aifoundry1 card 1, until ~05:30 |
+| 04:38 | E158 | added its clause | aifoundry3; aifoundry1 card 1; aifoundry2, until ~05:38 |
+| 05:00 | E158 | dropped its clause (the 05:00 edit) | aifoundry3; aifoundry1 card 1 |
+| 05:04:03 | E151 | dropped the aifoundry3 clause (EXPECT_TEXT, dry run, save) | aifoundry1 card 1 |
+| 05:07 | E155 | appended " — released"; its first rebuild, made from the plan's stale text, would have restored the aifoundry3 clause and was refused by EXPECT_TEXT (exit 7), so it rebuilt from the edit box's text | aifoundry1 card 1, " — released" |
+
+*So the line quoted above held from 05:04 to 05:07 only, and no aifoundry3 clause was left after E151's release. Later lanes' reservations
+rewrite the same post again. E151's own two edits are as stated.*
+
 ## What it changes
 
 - **Item 12 (critic rank 11)**: **the structural verdict is registered: B is recoded** (E151-R1 RECODED, R4 BOOTH ON B with E130's A
@@ -170,9 +203,30 @@ dry run, then save), every other word kept: the post now reads "<ai> **Claude sa
   Booth on B's zero-delay count. Why is the private half of rank 11 (the archive's glitch-aware count, Q139(v)), not this run.
 - **The power model**: int8's per-flip term should carry B's per-position prices; out of sample they predict a new day on card 0 to 9%
   and card 0 from card 1 to 10%, against 36-37% for one price and 22-23% for an odd/even pair (M7's J8 shape); A's one price holds to 6%.
-  M8 (Q139(m)) can take the per-position B prices as measured in four sessions on two cards.
+  M8 (Q139(m)) can take the per-position B prices as measured in four sessions on two cards. *(Corrected after verification,
+  [C2 and C3](#corrections-after-verification-tue-3-nov-2026): the four sessions ran the same tiles, so the prices are measured at one B
+  base word, E130's B1 with A held at 0x01; at other base words and in other kernels they are untested, and M8 should carry them as
+  measured there. That A's one price holds rests on E130's and E145's registered A FLAT; today's single A block agrees, at 6%.)*
 - **The meter**: aifoundry3's rail stays clean (0 glitches in 19,259 more samples); the filter is now registered code
   (`tools/claims-v3/e151/railfilter_e151.py`) any later rail reading on card 1 can import.
+
+## Corrections after verification (Tue 3 Nov 2026)
+
+*A dated note, written at about 05:55 PST on the Intel, at the desk (no card, no device command, no re-run). An independent verifier
+read the registration, this data, the logs and the code that ran, and passed the write lens. It found nine READs and no write, with
+`since_reset_ms` −1 in all 19,259 samples, and the checker GO with the reviewed `lib.sh:154` exception and NO-GO without it. With its own
+code it re-derived R1 and every arm from [`runs.csv`](runs.csv), which it checked against the raw telemetry: +39.2 [+33.2, +45.2]
+board-equivalent fJ, RECODED, with the flip points, the pools and both out-of-sample tables. It re-ran the rail filter and the census with
+its own implementation. Every number, label and verdict stands. It found three wording faults, C1–C3, corrected above as marked notes. The
+facts behind C2 and C3 are checked from committed files only by [`corrections_e151.py`](corrections_e151.py) →
+[`corrections_e151.txt`](corrections_e151.txt). The registration, [`results.md`](results.md), [`scored.json`](scored.json) and `posthoc/`
+are as first committed.*
+
+| | what was wrong | what changed |
+|---|---|---|
+| C1 | **The post's history** (§ Card and post; [`logs/push-and-claim-times.txt`](logs/push-and-claim-times.txt)'s release line; the lane's result). It said another lane added its aifoundry1 card 1 clause "at 05:00", and that the post "now reads" the aifoundry1 card 1 line. In fact E155 added that clause at 04:30. The 05:00 edit was E158 dropping the aifoundry2 clause it had added at 04:38. From 05:07 the post ended " — released", before this README was committed at 05:11 | A dated note and the sequence under § Card and post, and a dated correction appended to the log, whose first lines stay as written. E151's own create (04:29:33) and drop (05:04:03) were right, and no aifoundry3 clause was left after the release |
+| C2 | **"A property of the multiplier and not of these tiles"** (§ 5; the lane's result said the price "belongs to the multiplier, not to these tiles"). E130, E138, E145 and E151 pin the same 26 tiles ([A] in `corrections_e151.txt`), so the day-to-day and card-to-card transfers test sessions and cards, not tiles. The per-position list, bits 0-6, is measured at one B base word: B1, eight nonzero bytes (0x3A, 0x53, 0x5C, 0xA3, 0xA6, 0xAA, 0xAC, 0xC6, each on 128 of B's 1,024), with A held at 0x01 ([B]). R1 RECODED puts B's contrast on the Booth side of the midpoint, but its size matches neither netlist group (R1n, R1q NEITHER). The registration framed R1 the same way: it "decides whether the per-position B term is a property of the multiplier's design (so it can be carried to any kernel and card) or an accident of these tiles" ([`tools/claims-v3/e151/README.md`](../../../../tools/claims-v3/e151/README.md)). It is frozen and stays as written, and this note governs how its result is read | § 5 and What it changes now read "consistent with a property of the multiplier (R1 RECODED); measured at one B base word, so transfer to other base words and kernels is untested". M8 should carry the prices as measured at B1 with A = 0x01. No byte of B in the 13 B tiles is zero: bit 0 flips each B1 byte to its neighbour, 0x53 → 0x52, 0x3A → 0x3B and so on ([B]). So no B flip in these tiles goes to or from zero |
+| C3 | **A's "one price to 6%"** (§ 5, What it changes, and the lane's blog point 4). Today's A prices come from one A block, and E151-R2, R3, C1, R4s, R5 and N are NOT SCORED ([C]) | The claim that A is flat rests on E130-R2 FLAT (A odd − even −1.7 [−6.6, +3.2] fJ, the board, 4 A blocks, this card). It also rests on E145's control on card 1: R2 FLAT (−2.1 [−9.4, +5.1] board-equivalent fJ, 3 A blocks), C1 REPRODUCES card 0, and card 0's one A price predicted card 1's A bits to 5%, per position to 2%. Today's single A block agrees: one price to 6%, per position to 2% ([D]) |
 
 ## Files
 
@@ -183,4 +237,5 @@ block), `telemetry.json` (each block's extremes), `code.sha256`; `posthoc/` (lab
 `logs/` (the session log with the stop-path test, the smoke gate and every block's lines, the queue, the session's config reads, the box's
 preflight, the binaries' sha256, `push-and-claim-times.txt`, `dry/` the no-device dry runs); `aifoundry3/e151/p151*`,
 `aifoundry3/e151-smoke/p15101`, `aifoundry3/e151-stoptest/p15102` (raw: per-run records, telemetry, tile dumps, manifests, the stop
-test's STOP lines).
+test's STOP lines). Added after verification (post hoc, Tue 3 Nov 2026): `corrections_e151.py` → `corrections_e151.txt`, the facts behind
+C2 and C3 from committed files only.
