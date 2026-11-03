@@ -1,0 +1,22 @@
+ok   frozen inputs, Q139(k)'s three files and 50 tiles as committed (50 tiles, 0 bad; [])
+ok   a changed byte and a short file are refused (fp16.anchor6_randn: sha256 whole 0608f35cc60fe6075233fe394d7...; fp16.anchor6_randn: 2047 bytes, not 2048)
+ok   predictions-e160.json = Q139(x)'s numbers for 50 tiles x 3 models; 19 governed, 31 pinned; dropped ['fp32.anchor6_randn', 'fp32.real_qwen_softmax_v'] (flagged ['fp32.anchor6_randn', 'fp32.real_qwen_softmax_v']); run 17 + 31
+ok   preflight refuses other stop keys: protocol safety lacks abs_stop_c; protocol safety lacks board_cap_w; protocol safety lacks cap_consecutive; to
+ok   preflight refuses a 93 W board stop and E80's own heater: protocol board stop 93 W is above 85 W; protocol tools.heater is 'build/sparsity_t2/host/sparsity_host', not 'tools/claims-v3/ccheck/sparsity_ccheck.s
+ok   preflight refuses missing binaries: tools/claims-v3/ccheck/sparsity_ccheck.sh: sha256 None, registered d00158d454596a8325ff3a7ffa3dff6e80a2e1798516b022009450f63443b9b7; tools/claims-v3/c
+ok   the protocol's stops {'abs_stop_c': 76, 'board_cap_w': 85, 'cap_consecutive': 3}, admission limit 82.0 W and lock 82.0 W
+ok   every label in the admission table, highest planned estimate 81.12 W <= 82 W, no dropped label in a run
+ok   admission refuses the dropped tiles ({'fp32.anchor6_randn': 'estimate 86.36 W > 82.0 W', 'fp32.real_qwen_softmax_v': 'estimate 85.48 W > 82.0 W'}), admits fp16.anchor6_randn at 81.12 W, and after a lock at 80.17 W refuses it but not 78.06 W
+ok   heater tools/claims-v3/ccheck/sparsity_ccheck.sh (host build/ccheck/b/host/sparsity_host eae32a152b8f...), kernel build/sparsity_t2/kernel/sparsity.elf
+ok   the override keeps other refusals (no card lock /run/lock/etsoc-shire0.lock) and drops only the compiled-heater two (None)
+ok   bootstrap reproducible (4.218, 9.077); coverage lines 25 -> 21, 48 -> 42
+ok   at M8's numbers (48 tiles): {'E160-F1': 'PASS (better than the reference says)', 'E160-F2': 'PASS (better than the reference says)', 'E160-F3': 'PASS', 'E160-W1': 'PASS (better than the reference says)', 'E160-W2': 'PASS (better than the reference says)', 'E160-W3': 'PASS', 'E160-H1': 'PASS (better than the reference says)', 'E160-H3': 'PASS', 'E160-PK': 'PASS'}
+ok   governed clocks 30 MHz low: F1 FAIL, F2 PASS (better than the reference says), F3 FAIL
+ok   boards 5 W high: W1 FAIL, W2 FAIL, W3 FAIL
+ok   rises 2 C high: H1 FAIL, H3 FAIL
+ok   peaks 3 W over the 95% value: PK FAIL (0 inside)
+ok   a replicate 30 MHz off: R0 FAIL; at the reference: PASS
+ok   smoke C log: sound None; missing record: smoke: SMOKE-01 launch 2 has no C record; nonzero C: smoke: SMOKE-01 launch 1: a zeros tile's C is not +0 (first ; other kernel: smoke: the C log's host record names eae32a152b8f0; poison off: smoke: SMOKE-01 launch 0: C record ok True poison False mask; 40 ms gaps: smoke: the C log adds 39.0 ms a launch; E143's longest run would hold the device 7.23 s, o
+ok   the C join on E143's s1: 117 bursts, all PASS -> 117 counted of 117 complete (C PASS); one FAIL and one missing record -> 115 counted (C FAIL, {'FAIL': 1, 'PASS': 1981, 'NO_RECORD': 1})
+
+ALL PASS

@@ -1,0 +1,57 @@
+predictions-e160.json sha256 0f655c0e15dbb18a5c87e436db5571a6dc044984b6c64ed288204da69c808475
+50 tiles; dropped (M8 95% peak > 82.0 W): ['fp32.anchor6_randn', 'fp32.real_qwen_softmax_v']; run 48: 17 governed (M8 < 795 MHz), 31 pinned
+replicates ['k-fp16-randn', 'k-int8-full']; dropped replicates ['k-fp32-randn'] (["its estimate 85.35 W (E143's highest board sample 84.97 W) exceeds 82 W: dropped"])
+reference: governed 36 rows, 6.6776 MHz, 2.102 W; pinned 56 rows, 7.4454 MHz, 1.6916 W; heat 112 runs, 0.6845 C; peak excess median 1.940 W, q95 2.952 W
+bars at full n (2.5%, 97.5% of the bootstrap rms): {"F1_governed_clock_rms_mhz": [4.218, 9.077], "F2_pinned_clock_rms_mhz": [0.746, 12.189], "W1_governed_board_rms_w": [1.51, 2.634], "W2_pinned_board_rms_w": [1.293, 2.135], "H1_die_rise_rms_c": [0.547, 0.818], "coverage_line_all": 42, "coverage_line_governed": 14, "coverage_line_pinned": 27}
+admission (run tiles): highest estimates [(81.12, 'b6-fp16.anchor6_randn'), (80.75, 'b6-fp16.real_qwen_dequant_v'), (80.52, 'k-fp16-randn'), (80.17, 'b6-fp16.real_smol_qk'), (78.06, 'b6-fp32.real_qwen_dequant_q'), (77.46, 'b6-fp32.c_absorbed')]; limit 82.0 W, lock 82.0 W; stops {'abs_stop_c': 76, 'board_cap_w': 85, 'cap_consecutive': 3}
+dma (E143's launches): {"smoke": {"processes": 3, "launch_gap_ms_median": 1.0, "launch_gap_ms_max": 2, "n_gaps": 16, "launches_per_process_median": 5, "launches_per_process_max": 6, "device_held_s_median": 2.26, "device_held_s_max": 2.41, "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/aifoundry2/smoke/launches.jsonl.gz"}, "s1": {"processes": 117, "launch_gap_ms_median": 1.0, "launch_gap_ms_max": 2, "n_gaps": 1866, "launches_per_process_median": 16, "launches_per_process_max": 17, "device_held_s_median": 6.38, "device_held_s_max": 6.57, "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/aifoundry2/s1/launches.jsonl.gz"}}
+  governed p2 0 fp16.anchor6_randn               M8  726.5 MHz  65.18 W D  28.91 rise  6.12 C peak  79.49/ 81.12 W  M7  729.7/ 65.57  M6  729.1/ 65.57
+  governed p2 C fp16.c_absorbed                  M8  747.8 MHz  65.20 W D  28.93 rise  6.12 C peak  75.36/ 76.99 W  M7  750.5/ 65.58  M6  749.8/ 65.58
+  governed p1 E fp16.e5m2grid_wide               M8  768.7 MHz  65.15 W D  28.89 rise  6.11 C peak  71.73/ 73.37 W  M7  771.0/ 65.51  M6  770.6/ 65.51
+  governed p1 E fp16.exp_b_alt_shift             M8  791.6 MHz  64.16 W D  27.90 rise  5.97 C peak  67.25/ 68.88 W  M7  792.9/ 64.35  M6  793.7/ 64.21
+  governed p1 E fp16.exp_only_narrow2            M8  788.8 MHz  64.47 W D  28.21 rise  6.02 C peak  67.96/ 69.60 W  M7  790.7/ 64.66  M6  790.8/ 64.65
+  governed p2 R fp16.real_qwen_dequant_v         M8  728.3 MHz  65.18 W D  28.92 rise  6.12 C peak  79.12/ 80.75 W  M7  731.4/ 65.57  M6  730.9/ 65.57
+  governed p1 R fp16.real_qwen_qk                M8  756.8 MHz  65.20 W D  28.93 rise  6.12 C peak  73.76/ 75.39 W  M7  759.9/ 65.57  M6  760.3/ 65.57
+  governed p1 R fp16.real_smol_qk                M8  731.2 MHz  65.19 W D  28.92 rise  6.12 C peak  78.54/ 80.17 W  M7  734.4/ 65.57  M6  734.3/ 65.57
+  governed p1 R fp16.real_smol_softmax_v         M8  772.8 MHz  65.11 W D  28.84 rise  6.11 C peak  71.03/ 72.66 W  M7  775.9/ 65.44  M6  776.8/ 65.42
+  governed p1 E fp32.bf16_wideexp                M8  752.0 MHz  65.20 W D  28.85 rise  6.12 C peak  74.61/ 76.46 W  M7  754.0/ 65.58  M6  753.4/ 65.58
+  governed p2 C fp32.c_absorbed                  M8  746.3 MHz  65.20 W D  28.85 rise  6.12 C peak  75.63/ 77.46 W  M7  749.5/ 65.58  M6  748.2/ 65.58
+  governed p2 E fp32.exp_a_pow2wide_b_randn      M8  754.7 MHz  65.20 W D  28.84 rise  6.12 C peak  74.14/ 75.97 W  M7  756.8/ 65.58  M6  753.6/ 65.58
+  governed p1 E fp32.exp_b_alt_shift             M8  787.3 MHz  64.60 W D  28.24 rise  6.04 C peak  68.31/ 70.14 W  M7  788.7/ 64.87  M6  789.2/ 64.83
+  governed p1 E fp32.exp_only_narrow2            M8  794.5 MHz  63.66 W D  27.31 rise  5.90 C peak  66.33/ 68.16 W  M7  795.6/ 63.77  M6  795.7/ 63.76
+  governed p1 Z fp32.negzero_a_b_complement      M8  781.5 MHz  64.90 W D  28.55 rise  6.08 C peak  69.47/ 71.33 W  M7  783.0/ 65.23  M6  777.7/ 65.40
+  governed p1 R fp32.real_qwen_dequant_q         M8  743.0 MHz  65.20 W D  28.85 rise  6.12 C peak  76.24/ 78.06 W  M7  746.2/ 65.58  M6  747.4/ 65.58
+  governed p1 E fp32.signexp_invert_b            M8  777.4 MHz  65.03 W D  28.67 rise  6.10 C peak  70.23/ 72.09 W  M7  778.9/ 65.37  M6  780.9/ 65.31
+  pinned   p2 Z fp16.a_zeros_b_complement        M8  800.0 MHz  39.11 W D   2.84 rise  2.47 C peak  41.05/ 42.72 W  M7  800.0/ 39.11  M6  800.0/ 39.26
+  pinned   p2 0 fp16.anchor6_zeros               M8  800.0 MHz  36.27 W D   0.00 rise  2.07 C peak  38.21/ 39.82 W  M7  800.0/ 36.27  M6  800.0/ 36.27
+  pinned   p2 S fp16.b_onebit_b6_third           M8  799.8 MHz  60.04 W D  23.77 rise  5.40 C peak  62.01/ 63.64 W  M7  799.9/ 59.99  M6  799.9/ 59.79
+  pinned   p2 E fp16.exp_a_walk_fixedmant        M8  799.8 MHz  59.63 W D  23.37 rise  5.34 C peak  61.59/ 63.22 W  M7  799.9/ 59.64  M6  799.9/ 59.68
+  pinned   p2 S fp32.a_onebit_b16_half           M8  800.0 MHz  54.46 W D  18.10 rise  4.62 C peak  56.40/ 58.21 W  M7  800.0/ 54.40  M6  800.0/ 54.36
+  pinned   p1 S fp32.a_onebit_b5_third           M8  800.0 MHz  54.02 W D  17.67 rise  4.55 C peak  55.96/ 57.77 W  M7  800.0/ 53.92  M6  800.0/ 53.81
+  pinned   p1 Z fp32.a_zeros_b_complement        M8  800.0 MHz  39.23 W D   2.87 rise  2.48 C peak  41.17/ 43.01 W  M7  800.0/ 39.22  M6  800.0/ 39.68
+  pinned   p2 0 fp32.anchor6_zeros               M8  800.0 MHz  36.35 W D   0.00 rise  2.08 C peak  38.29/ 40.10 W  M7  800.0/ 36.35  M6  800.0/ 36.35
+  pinned   p1 S fp32.b_onebit_b12_third          M8  800.0 MHz  54.78 W D  18.43 rise  4.66 C peak  56.72/ 58.53 W  M7  800.0/ 54.73  M6  800.0/ 54.67
+  pinned   p1 S fp32.b_onebit_b20_third          M8  798.7 MHz  61.90 W D  25.54 rise  5.66 C peak  64.01/ 65.82 W  M7  799.0/ 61.92  M6  799.2/ 61.77
+  pinned   p1 E fp32.exp_a_walk_fixedmant        M8  799.8 MHz  59.94 W D  23.58 rise  5.38 C peak  61.90/ 63.72 W  M7  799.9/ 59.99  M6  799.8/ 60.02
+  pinned   p1 R fp32.real_smol_softmax_v_causal  M8  798.8 MHz  61.81 W D  25.45 rise  5.64 C peak  63.90/ 65.72 W  M7  799.2/ 61.73  M6  799.3/ 61.60
+  pinned   p1 L int8.a_word_zero_one             M8  800.0 MHz  43.00 W D   5.34 rise  3.01 C peak  44.94/ 47.30 W  M7  800.0/ 42.85  M6  800.0/ 42.68
+  pinned   p1 Z int8.a_zeros_b_lineflip          M8  800.0 MHz  37.02 W D  -0.63 rise  2.17 C peak  38.96/ 42.57 W  M7  800.0/ 37.75  M6  800.0/ 38.60
+  pinned   p2 0 int8.anchor6_full                M8  800.0 MHz  50.80 W D  13.14 rise  4.10 C peak  52.74/ 55.09 W  M7  800.0/ 50.77  M6  800.0/ 50.70
+  pinned   p2 0 int8.anchor6_zeros               M8  800.0 MHz  37.65 W D   0.00 rise  2.26 C peak  39.59/ 41.90 W  M7  800.0/ 37.65  M6  800.0/ 37.65
+  pinned   p2 L int8.b_line_55_aa                M8  800.0 MHz  49.06 W D  11.41 rise  3.86 C peak  51.00/ 54.37 W  M7  800.0/ 49.97  M6  800.0/ 50.46
+  pinned   p1 L int8.b_line_zero_ff              M8  800.0 MHz  43.99 W D   6.34 rise  3.15 C peak  45.93/ 49.23 W  M7  800.0/ 44.58  M6  800.0/ 45.33
+  pinned   p1 L int8.b_line_zero_full            M8  800.0 MHz  45.58 W D   7.92 rise  3.37 C peak  47.52/ 49.88 W  M7  800.0/ 45.28  M6  800.0/ 45.47
+  pinned   p2 B int8.bflip_bit2_w                M8  800.0 MHz  41.70 W D   4.04 rise  2.83 C peak  43.64/ 46.07 W  M7  800.0/ 41.79  M6  800.0/ 41.64
+  pinned   p2 B int8.bflip_bit5_w                M8  800.0 MHz  41.70 W D   4.05 rise  2.83 C peak  43.64/ 46.07 W  M7  800.0/ 41.70  M6  800.0/ 41.63
+  pinned   p1 B int8.bheld_bit1                  M8  800.0 MHz  49.22 W D  11.57 rise  3.88 C peak  51.16/ 53.68 W  M7  800.0/ 49.27  M6  800.0/ 48.98
+  pinned   p1 B int8.bheld_bit4                  M8  800.0 MHz  48.61 W D  10.95 rise  3.80 C peak  50.55/ 53.04 W  M7  800.0/ 48.65  M6  800.0/ 48.37
+  pinned   p1 B int8.bheld_bit7                  M8  800.0 MHz  47.97 W D  10.31 rise  3.71 C peak  49.91/ 52.37 W  M7  800.0/ 48.02  M6  800.0/ 47.75
+  pinned   p2 W int8.powerlaw_df15_pt            M8  800.0 MHz  42.65 W D   4.99 rise  2.96 C peak  44.59/ 46.95 W  M7  800.0/ 42.61  M6  800.0/ 42.57
+  pinned   p1 W int8.powerlaw_df4_pc             M8  800.0 MHz  50.30 W D  12.64 rise  4.03 C peak  52.24/ 54.58 W  M7  800.0/ 50.27  M6  800.0/ 50.28
+  pinned   p2 R int8.real_qwen_w8a8_down         M8  800.0 MHz  49.15 W D  11.50 rise  3.87 C peak  51.09/ 53.44 W  M7  800.0/ 48.93  M6  800.0/ 49.00
+  pinned   p1 R int8.real_qwen_w8a8_gate         M8  800.0 MHz  50.24 W D  12.58 rise  4.02 C peak  52.18/ 54.52 W  M7  800.0/ 50.16  M6  800.0/ 50.17
+  pinned   p1 R int8.real_qwen_w8a8_v            M8  800.0 MHz  50.17 W D  12.52 rise  4.02 C peak  52.11/ 54.46 W  M7  800.0/ 50.17  M6  800.0/ 50.19
+  pinned   p1 R int8.real_smol_w8a8_down         M8  800.0 MHz  47.82 W D  10.17 rise  3.69 C peak  49.76/ 52.10 W  M7  800.0/ 47.63  M6  800.0/ 47.58
+  pinned   p1 R int8.real_smol_w8a8_q            M8  800.0 MHz  49.90 W D  12.24 rise  3.98 C peak  51.84/ 54.18 W  M7  800.0/ 49.75  M6  800.0/ 49.80
+  DROPPED governed p2 0 fp32.anchor6_randn               M8  702.6 MHz  64.92 W D  28.57 rise  6.08 C peak  84.54/ 86.36 W  M7  706.1/ 65.38  M6  705.8/ 65.37
+  DROPPED governed p2 R fp32.real_qwen_softmax_v         M8  706.7 MHz  65.00 W D  28.65 rise  6.09 C peak  83.66/ 85.48 W  M7  710.2/ 65.44  M6  710.6/ 65.45

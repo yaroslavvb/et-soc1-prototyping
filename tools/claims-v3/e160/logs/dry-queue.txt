@@ -1,0 +1,28 @@
+# E160 dry run of the whole queue on the Intel with run_hpl.py's toy card (no device): queue_e160.py --dry with protocol-dry.json (2 passes of 1.5 s bursts over the 50 runs of a pass) and the two dry stop-path protocols, Tue 3 Nov 2026 06:26-06:37 PST. The queue's records (queue.jsonl), the scratch path replaced by <scratch>. The toy card's governor and powers are a toy: its numbers test the code paths only. Under --dry the toy card runs no host, so no C log exists: the smoke's C-log and DMA checks are recorded as skipped (their code is tested on made-up records in selftest.txt, step 8), and the reduction counts complete runs (dry).
+{"t_ms": 1793715964219, "zone": "PST", "kind": "queue_start", "slot_start_ms": 1793715955000, "slot_end_ms": 1793718355000, "next_rest_ms": null, "python": "3.13.11", "sensors": false, "protocol": "<lab repo>/tools/claims-v3/e160/protocol-dry.json"}
+{"t_ms": 1793715964219, "zone": "PST", "kind": "card_free", "waits": {}, "late_s": 9.2}
+{"t_ms": 1793715964220, "zone": "PST", "kind": "before_first_launch", "snapshot": {"tag": "start", "t_ms": 1793715964220, "zone": "PST"}, "history_rows": 0}
+{"t_ms": 1793715964220, "zone": "PST", "kind": "session_start", "name": "smoke", "cap_min": 3.0}
+{"t_ms": 1793715990426, "zone": "PST", "kind": "session_end", "name": "smoke", "rc": 0, "end": {"t_end_ms": 1793715990083, "exit": 0, "reason": "done", "card_min": 0.4}, "slot_stopped": false}
+{"t_ms": 1793715990428, "zone": "PST", "kind": "smoke_ccheck", "skipped": "dry: the toy card runs no host and writes no C log"}
+{"t_ms": 1793715990429, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null, "ccheck": null}
+{"t_ms": 1793715990429, "zone": "PST", "kind": "session_start", "name": "stoptest-board", "cap_min": 2.0}
+{"t_ms": 1793715993459, "zone": "PST", "kind": "session_end", "name": "stoptest-board", "rc": 4, "end": {"t_end_ms": 1793715992632, "exit": 4, "reason": "safety:board 31.9 W > 30 W on 3 samples", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793715993460, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793715992456, "t_third_line_ms": 1793715992415, "launch": [1793715992115, 1793715992623], "trip_after_line_ms": 41, "launch_end_after_trip_ms": 167, "lines": 17}
+{"t_ms": 1793715993460, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+{"t_ms": 1793715993460, "zone": "PST", "kind": "session_start", "name": "stoptest-die", "cap_min": 2.0}
+{"t_ms": 1793715995480, "zone": "PST", "kind": "session_end", "name": "stoptest-die", "rc": 4, "end": {"t_end_ms": 1793715995141, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793715995481, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793715993801, "t_first_line_ms": 1793715993770, "trip_after_line_ms": 31, "lines": 13}
+{"t_ms": 1793715995481, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+{"t_ms": 1793715995481, "zone": "PST", "kind": "session_start", "name": "s1", "cap_min": 30.0}
+{"t_ms": 1793716622944, "zone": "PST", "kind": "session_end", "name": "s1", "rc": 0, "end": {"t_end_ms": 1793716622539, "exit": 0, "reason": "done", "card_min": 10.4}, "slot_stopped": false}
+{"t_ms": 1793716622944, "zone": "PST", "kind": "s1_end", "rc": 0}
+{"t_ms": 1793716622945, "zone": "PST", "kind": "queue_end", "snapshot": {"tag": "end", "t_ms": 1793716622945, "zone": "PST"}, "card_free_ms": 1793716622945, "before_slot_end_s": 1732.1}
+## smoke/end.json
+{"t_end_ms": 1793715990083, "exit": 0, "reason": "done", "card_min": 0.4}
+## stoptest-board/end.json
+{"t_end_ms": 1793715992632, "exit": 4, "reason": "safety:board 31.9 W > 30 W on 3 samples", "card_min": 0.0}
+## stoptest-die/end.json
+{"t_end_ms": 1793715995141, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}
+## s1/end.json
+{"t_end_ms": 1793716622539, "exit": 0, "reason": "done", "card_min": 10.4}

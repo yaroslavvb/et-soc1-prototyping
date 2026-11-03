@@ -1,0 +1,35 @@
+# E160: Q139(k)'s C-logging host built on aifoundry2 (no device opened, no lock taken), Tue 3 Nov 2026, from ~/claude/et-soc1-prototyping with tools/claims-v3/ccheck/ synced in at 4946a992's bytes; the output of a read-only script run over ssh (bash -s), the box path written as ~
+== who/et-who before
+0
+No process holds an ET-SoC-1 device node or card lock.
+== main.cpp
+0f53a7d505155156c933e2d9a64d38803ca4e0cea3e20242e0aaafbf35e82284  workloads/sparsity/host/main.cpp
+92b174a8cd0fc06986a2184e833f3ba650d0fababa6f70c32fa7cf5debb64547  workloads/sparsity/kernel/sparsity.c
+2108470d021967b2dba8cd39c08c10c42e143b9d387c75e7ab5785a32777ef8d  workloads/sparsity/sparsity_args.h
+== ccheck files
+d00158d454596a8325ff3a7ffa3dff6e80a2e1798516b022009450f63443b9b7  tools/claims-v3/ccheck/sparsity_ccheck.sh
+05a8c867f9c408c59437c30333d02f9252ee54d3d5bd2743e49a5b99a358c3ee  tools/claims-v3/ccheck/patch_host_ccheck.py
+35537915689bfa02c351b895db8ebd79d066e5a80bd432b38a273ac11d39502f  tools/claims-v3/ccheck/build_host_ccheck.sh
+06:18:27 PST build start
+patched ~/claude/et-soc1-prototyping/build/ccheck/src/host/main.cpp sha256 5bd029ca1bc0a3f63573015d400b9e7b2d8c2e84de12a722f58bc84057edf79f
+0a87377d08b15935f9984f3ed14a31cd503888a2bc2c188e7218f33e04fa31ac  build/sparsity/host/sparsity_host
+990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24  build/sparsity/kernel/sparsity.elf
+5bd029ca1bc0a3f63573015d400b9e7b2d8c2e84de12a722f58bc84057edf79f  ~/claude/et-soc1-prototyping/build/ccheck/src/host/main.cpp
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 3652232 Nov  3 06:18 ~/claude/et-soc1-prototyping/build/ccheck/b/host/sparsity_host
+eae32a152b8f0861bd2922c500eac217c931c9b464d3274a6bcf346cc986bfd2  ~/claude/et-soc1-prototyping/build/ccheck/b/host/sparsity_host
+1
+06:18:30 PST build end
+== result
+eae32a152b8f0861bd2922c500eac217c931c9b464d3274a6bcf346cc986bfd2  build/ccheck/b/host/sparsity_host
+990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24  build/sparsity_t2/kernel/sparsity.elf
+7adadf4f1ce331cc028c317561933d6d3209da0f0326b0ce9a124b39b15ac0d2  build/sparsity_t2/host/sparsity_host
+--c-log 1
+--c-poison 1
+--stop-file 1
+--kernel 1
+--budget 1
+file: 4
+VERBOSE_HIGH 1
+	libetrt.so => /opt/et/lib/libetrt.so (0x00007d849f800000)
+	libetrt.so => /opt/et/lib/libetrt.so (0x00007c8d34400000)
+-rwxr-xr-x 1 yaroslavvb yaroslavvb 3652232 2026-11-03 06:18:30.579144702 -0800 build/ccheck/b/host/sparsity_host

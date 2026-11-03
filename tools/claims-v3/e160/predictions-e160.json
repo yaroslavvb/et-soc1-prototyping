@@ -1,0 +1,5917 @@
+{
+ "experiment": "E160",
+ "request": "Q139",
+ "card": "aifoundry2 card 0, under its own governor (65 W static TDP, 65 C threshold: read, never set)",
+ "_note": "frozen before the claim and the first launch; nothing fitted or refitted: every prediction is Q139(x)'s, copied by key after its sha256 check",
+ "inputs_sha256": {
+  "tools/claims-v3/kinds/blind6/predictions-blind6-aifoundry2.json": "6b9a5e6ee5f3c4761855d8cedc486c546fecc2d855d0e706919c2a21302e3125",
+  "tools/claims-v3/kinds/blind6/blind6.json": "4c4cee7b96cd128e525601793030ec386bc773dd88d9ef34b7a3fde9a2d4cb03",
+  "tools/claims-v3/kinds/blind6/MANIFEST": "a0e91556dee34d393a791e86fd25987b733500da49a1813ece91bdb838c7c5c0",
+  "docs/reports/data/2026-11-03-q139m-model/m8.json": "8c23aba2307fd18c15a3a8fc40c8d937ca0df0cf0373a7bc2e9e0c3847d46abd",
+  "docs/reports/data/2026-11-03-q139m-model/nested-m8.json": "f284b5407a98641ec33a57410be925a4c64199e0033b6c94ef893702de0f4905",
+  "tools/claims-v3/kinds/blind6/card-scale-blind6.json": "6b04079139e05d168517779fbc97c6c9a720c69226585ee6c5e67d6857ff9312",
+  "tools/claims-v3/e143/predictions-e143.json": "d45c1ece62c2940d691a359809a26b226e4b8e4c18b371e543024a4a2829623f",
+  "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json": "6f4b4c84819d79f6472e798b6be80534536673798656e2011e77ce9438bd4479",
+  "tools/claims-v3/kinds/kinds.json": "9586568f23a97757e34b3cdacdffe5bee0122d236e28a9f76f06e8598b7b1337",
+  "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/aifoundry2/smoke/launches.jsonl.gz": "9c0f1a769f58f6774c81920ddbc4bac6e84eb5008dac5a266506d368338ac79a",
+  "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/aifoundry2/s1/launches.jsonl.gz": "f585496eeab0283abd33da210e1e3be3a45f9147ccf3711e4b8d4e8f6563d88b",
+  "tools/claims-v3/e160/e160_common.py": "24ecb6f87eb8e253f1c63e7ccb284e379de8cf4477e356b37792ce0def162d43",
+  "tools/claims-v3/e160/make_predictions_e160.py": "92f12790a08fa39fa9a3df4e4978a3324ad4805d7af02402fedd4f12898cabd9"
+ },
+ "q139x_commit": "d98d2e34e1de004bb49a8e728c19b8f7b5f5bb70",
+ "m8_commit": "122da8b6",
+ "q139k_commit": "4946a99272472c72e8e5a54b96f402fd7bd73eff",
+ "relation": {
+  "B800": 33.60956684526229,
+  "s800": 1.90517380064275,
+  "W0_w": 65.20000000000014,
+  "g": {
+   "fp16": 0.9816867666703736,
+   "fp32": 0.9816867666703736,
+   "int8": 0.9816867666703736
+  },
+  "c_zeros_w": {
+   "fp16": 1.394,
+   "fp32": 1.44,
+   "int8": 2.123
+  },
+  "heat_k_c_per_w": 0.14004345109940583,
+  "P_idle_w": 21.5,
+  "source": "docs/reports/data/2026-11-03-q139m-model/m8.json aifoundry2"
+ },
+ "frozen_bands": {
+  "M8": {
+   "mhz": 16.95,
+   "board_w": 3.5,
+   "die_c": 1.41
+  },
+  "M7_M6": {
+   "mhz": 21.3,
+   "board_w": 3.37,
+   "die_c": 1.41
+  },
+  "source": "m8.json aifoundry2.bands and burst_heat.q95_abs_c; m7.json for M7 and M6; as each tile's _95 in the predictions file"
+ },
+ "tiles": {
+  "fp16.a_zeros_b_complement": {
+   "type": "fp16",
+   "priority": 2,
+   "anchor": false,
+   "class": "Z",
+   "case": "Z zeros' transport: B traffic under gated and live zero A operands (item 13)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp16.a_zeros_b_complement",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.a_zeros_b_complement.bin",
+   "sha256": {
+    "whole": "07c6f08cc915a182b37e60cccd958cc67476ec8f14e879d01dc508ca03de7211",
+    "a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+    "b": "d1443507b49d1167b6f351ea09ccf6f8ff76c41e88e8f6e7db44cdf2d2a3c156"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 39.11,
+     "burst_board_95": [
+      35.61,
+      42.61
+     ],
+     "burst_D_w": 2.84,
+     "burst_D_95": [
+      -0.66,
+      6.35
+     ],
+     "burst_die_rise_c": 2.47,
+     "burst_die_rise_95": [
+      1.06,
+      3.87
+     ],
+     "D600_a3_footing_w": 1.52,
+     "P800_w": 39.11,
+     "peak_board_w": 41.05,
+     "peak_board_hi95_w": 42.72,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 39.11,
+     "burst_board_95": [
+      35.74,
+      42.48
+     ],
+     "burst_D_w": 2.84,
+     "burst_D_95": [
+      -0.53,
+      6.21
+     ],
+     "burst_die_rise_c": 2.47,
+     "burst_die_rise_95": [
+      1.06,
+      3.87
+     ],
+     "D600_a3_footing_w": 1.5193
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 39.26,
+     "burst_board_95": [
+      35.89,
+      42.63
+     ],
+     "burst_D_w": 2.99,
+     "burst_D_95": [
+      -0.38,
+      6.36
+     ],
+     "burst_die_rise_c": 2.49,
+     "burst_die_rise_95": [
+      1.08,
+      3.89
+     ],
+     "D600_a3_footing_w": 1.5988
+    }
+   }
+  },
+  "fp16.anchor6_randn": {
+   "type": "fp16",
+   "priority": 2,
+   "anchor": true,
+   "class": "0",
+   "case": "0 anchor (footing)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp16.anchor6_randn",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.anchor6_randn.bin",
+   "sha256": {
+    "whole": "05ae2dc691e126c91e0bc3e3db47179977e581d54b3213e928b18108cda18ecc",
+    "a": "ebc667bb671f6e9e9de952e4e64c3dd8124038b6eae7e533731361b8ad81fa60",
+    "b": "0da5d2bc0b40cba7cb546783ae6b94fa1bbb5a1576189bceb1226d351ca474a7"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 726.5,
+     "burst_mhz_95": [
+      709.5,
+      743.4
+     ],
+     "burst_board_w": 65.18,
+     "burst_board_95": [
+      61.68,
+      68.68
+     ],
+     "burst_D_w": 28.91,
+     "burst_D_95": [
+      25.41,
+      32.42
+     ],
+     "burst_die_rise_c": 6.12,
+     "burst_die_rise_95": [
+      4.71,
+      7.52
+     ],
+     "D600_a3_footing_w": 22.0749,
+     "P800_w": 77.55,
+     "peak_board_w": 79.49,
+     "peak_board_hi95_w": 81.12,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 729.7,
+     "burst_mhz_95": [
+      708.4,
+      751.0
+     ],
+     "burst_board_w": 65.57,
+     "burst_board_95": [
+      62.2,
+      68.94
+     ],
+     "burst_D_w": 29.3,
+     "burst_D_95": [
+      25.93,
+      32.67
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 21.9749
+    },
+    "M6": {
+     "burst_mhz": 729.1,
+     "burst_mhz_95": [
+      707.8,
+      750.4
+     ],
+     "burst_board_w": 65.57,
+     "burst_board_95": [
+      62.2,
+      68.94
+     ],
+     "burst_D_w": 29.3,
+     "burst_D_95": [
+      25.93,
+      32.67
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 22.0376
+    }
+   }
+  },
+  "fp16.anchor6_zeros": {
+   "type": "fp16",
+   "priority": 2,
+   "anchor": true,
+   "class": "0",
+   "case": "0 anchor (footing)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp16.anchor6_zeros",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.anchor6_zeros.bin",
+   "sha256": {
+    "whole": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+    "a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+    "b": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 36.27,
+     "burst_board_95": [
+      32.76,
+      39.77
+     ],
+     "burst_D_w": 0.0,
+     "burst_D_95": [
+      -3.5,
+      3.5
+     ],
+     "burst_die_rise_c": 2.07,
+     "burst_die_rise_95": [
+      0.66,
+      3.47
+     ],
+     "D600_a3_footing_w": 0.0,
+     "P800_w": 36.27,
+     "peak_board_w": 38.21,
+     "peak_board_hi95_w": 39.82,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 36.27,
+     "burst_board_95": [
+      32.9,
+      39.64
+     ],
+     "burst_D_w": 0.0,
+     "burst_D_95": [
+      -3.37,
+      3.37
+     ],
+     "burst_die_rise_c": 2.07,
+     "burst_die_rise_95": [
+      0.66,
+      3.47
+     ],
+     "D600_a3_footing_w": 0.0
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 36.27,
+     "burst_board_95": [
+      32.9,
+      39.64
+     ],
+     "burst_D_w": 0.0,
+     "burst_D_95": [
+      -3.37,
+      3.37
+     ],
+     "burst_die_rise_c": 2.07,
+     "burst_die_rise_95": [
+      0.66,
+      3.47
+     ],
+     "D600_a3_footing_w": 0.0
+    }
+   }
+  },
+  "fp16.b_onebit_b6_third": {
+   "type": "fp16",
+   "priority": 2,
+   "anchor": false,
+   "class": "S",
+   "case": "S single bits on other base words (item 15)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp16.b_onebit_b6_third",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.b_onebit_b6_third.bin",
+   "sha256": {
+    "whole": "89453d7ee5e96be9d76f1bcc5c64f4d9a978ccac677c8ef1555d8b035f3c352e",
+    "a": "aacc3a5507f223eaa76dcf389a19fbdd997ba700a8e6750973380d82a6cfe84c",
+    "b": "781db883f57b4e9cfeac69cf15a1e844269da11978eb9c6e24c937f7f8f8fef9"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 799.8,
+     "burst_mhz_95": [
+      782.8,
+      800.0
+     ],
+     "burst_board_w": 60.04,
+     "burst_board_95": [
+      56.54,
+      63.54
+     ],
+     "burst_D_w": 23.77,
+     "burst_D_95": [
+      20.27,
+      27.28
+     ],
+     "burst_die_rise_c": 5.4,
+     "burst_die_rise_95": [
+      3.99,
+      6.8
+     ],
+     "D600_a3_footing_w": 12.7265,
+     "P800_w": 60.07,
+     "peak_board_w": 62.01,
+     "peak_board_hi95_w": 63.64,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 799.9,
+     "burst_mhz_95": [
+      778.6,
+      800.0
+     ],
+     "burst_board_w": 59.99,
+     "burst_board_95": [
+      56.62,
+      63.36
+     ],
+     "burst_D_w": 23.72,
+     "burst_D_95": [
+      20.35,
+      27.09
+     ],
+     "burst_die_rise_c": 5.39,
+     "burst_die_rise_95": [
+      3.98,
+      6.8
+     ],
+     "D600_a3_footing_w": 12.6934
+    },
+    "M6": {
+     "burst_mhz": 799.9,
+     "burst_mhz_95": [
+      778.6,
+      800.0
+     ],
+     "burst_board_w": 59.79,
+     "burst_board_95": [
+      56.42,
+      63.16
+     ],
+     "burst_D_w": 23.53,
+     "burst_D_95": [
+      20.16,
+      26.9
+     ],
+     "burst_die_rise_c": 5.36,
+     "burst_die_rise_95": [
+      3.96,
+      6.77
+     ],
+     "D600_a3_footing_w": 12.5865
+    }
+   }
+  },
+  "fp16.c_absorbed": {
+   "type": "fp16",
+   "priority": 2,
+   "anchor": false,
+   "class": "C",
+   "case": "C the C-register candidate: operands as busy as random data, an accumulator that barely moves",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp16.c_absorbed",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.c_absorbed.bin",
+   "sha256": {
+    "whole": "f4b41ed786ca61d238ca1a6f519bbc3b34805bf4cb7caeae154a7c38c88f6fcb",
+    "a": "b2c6cff704343b96bfd56b57d9856faccaed313396c5400b7df635e3d1b2807d",
+    "b": "3b16361384540db16095707e99ccca7481c6495d1db6867d0275b3e196f572bb"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 747.8,
+     "burst_mhz_95": [
+      730.9,
+      764.8
+     ],
+     "burst_board_w": 65.2,
+     "burst_board_95": [
+      61.7,
+      68.7
+     ],
+     "burst_D_w": 28.93,
+     "burst_D_95": [
+      25.43,
+      32.44
+     ],
+     "burst_die_rise_c": 6.12,
+     "burst_die_rise_95": [
+      4.71,
+      7.53
+     ],
+     "D600_a3_footing_w": 19.8632,
+     "P800_w": 73.42,
+     "peak_board_w": 75.36,
+     "peak_board_hi95_w": 76.99,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 750.5,
+     "burst_mhz_95": [
+      729.2,
+      771.8
+     ],
+     "burst_board_w": 65.58,
+     "burst_board_95": [
+      62.21,
+      68.95
+     ],
+     "burst_D_w": 29.31,
+     "burst_D_95": [
+      25.94,
+      32.68
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 19.8358
+    },
+    "M6": {
+     "burst_mhz": 749.8,
+     "burst_mhz_95": [
+      728.5,
+      771.1
+     ],
+     "burst_board_w": 65.58,
+     "burst_board_95": [
+      62.21,
+      68.95
+     ],
+     "burst_D_w": 29.31,
+     "burst_D_95": [
+      25.94,
+      32.68
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 19.9053
+    }
+   }
+  },
+  "fp16.e5m2grid_wide": {
+   "type": "fp16",
+   "priority": 1,
+   "anchor": false,
+   "class": "E",
+   "case": "E exponent-heavy: operand flips concentrated in the exponent field (E147: the card pays 0.82-0.84 of the models' watts on exponent flips)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp16.e5m2grid_wide",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.e5m2grid_wide.bin",
+   "sha256": {
+    "whole": "c0568909bd655c0024302f8e3f84b5c73586e5e711f1a03c893b797e5d8d6290",
+    "a": "6c4e6ec1c0cf52ff235948b08214a3a2e925a5d94e9ff41ce8857a7ad3df8d4a",
+    "b": "9af398a060e567e05c11066d97ea9f323fd2bb4673a159b930be152b31133963"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 768.7,
+     "burst_mhz_95": [
+      751.7,
+      785.6
+     ],
+     "burst_board_w": 65.15,
+     "burst_board_95": [
+      61.65,
+      68.65
+     ],
+     "burst_D_w": 28.89,
+     "burst_D_95": [
+      25.38,
+      32.39
+     ],
+     "burst_die_rise_c": 6.11,
+     "burst_die_rise_95": [
+      4.71,
+      7.52
+     ],
+     "D600_a3_footing_w": 17.9231,
+     "P800_w": 69.79,
+     "peak_board_w": 71.73,
+     "peak_board_hi95_w": 73.37,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 771.0,
+     "burst_mhz_95": [
+      749.7,
+      792.3
+     ],
+     "burst_board_w": 65.51,
+     "burst_board_95": [
+      62.14,
+      68.88
+     ],
+     "burst_D_w": 29.25,
+     "burst_D_95": [
+      25.88,
+      32.62
+     ],
+     "burst_die_rise_c": 6.16,
+     "burst_die_rise_95": [
+      4.76,
+      7.57
+     ],
+     "D600_a3_footing_w": 17.9373
+    },
+    "M6": {
+     "burst_mhz": 770.6,
+     "burst_mhz_95": [
+      749.3,
+      791.9
+     ],
+     "burst_board_w": 65.51,
+     "burst_board_95": [
+      62.14,
+      68.88
+     ],
+     "burst_D_w": 29.25,
+     "burst_D_95": [
+      25.88,
+      32.62
+     ],
+     "burst_die_rise_c": 6.16,
+     "burst_die_rise_95": [
+      4.76,
+      7.57
+     ],
+     "D600_a3_footing_w": 17.9689
+    }
+   }
+  },
+  "fp16.exp_a_walk_fixedmant": {
+   "type": "fp16",
+   "priority": 2,
+   "anchor": false,
+   "class": "E",
+   "case": "E exponent-heavy: operand flips concentrated in the exponent field (E147: the card pays 0.82-0.84 of the models' watts on exponent flips)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp16.exp_a_walk_fixedmant",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_a_walk_fixedmant.bin",
+   "sha256": {
+    "whole": "b91bcf1c5f0321ac3878e1b3b55793b5f9e97d7387ef331874d2471d6f8d69b8",
+    "a": "0b9bd30cd3cbaeb30d344c14e52b5e70bced03617d8a4c918f03ac4578dd1608",
+    "b": "578861ea9a31cb814ddb0f2ce7010dbb8fdfb9558329c4388e33c493162041ce"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 799.8,
+     "burst_mhz_95": [
+      782.9,
+      800.0
+     ],
+     "burst_board_w": 59.63,
+     "burst_board_95": [
+      56.13,
+      63.14
+     ],
+     "burst_D_w": 23.37,
+     "burst_D_95": [
+      19.86,
+      26.87
+     ],
+     "burst_die_rise_c": 5.34,
+     "burst_die_rise_95": [
+      3.93,
+      6.75
+     ],
+     "D600_a3_footing_w": 12.5041,
+     "P800_w": 59.65,
+     "peak_board_w": 61.59,
+     "peak_board_hi95_w": 63.22,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 799.9,
+     "burst_mhz_95": [
+      778.6,
+      800.0
+     ],
+     "burst_board_w": 59.64,
+     "burst_board_95": [
+      56.27,
+      63.01
+     ],
+     "burst_D_w": 23.37,
+     "burst_D_95": [
+      20.0,
+      26.74
+     ],
+     "burst_die_rise_c": 5.34,
+     "burst_die_rise_95": [
+      3.94,
+      6.75
+     ],
+     "D600_a3_footing_w": 12.5036
+    },
+    "M6": {
+     "burst_mhz": 799.9,
+     "burst_mhz_95": [
+      778.6,
+      800.0
+     ],
+     "burst_board_w": 59.68,
+     "burst_board_95": [
+      56.31,
+      63.05
+     ],
+     "burst_D_w": 23.41,
+     "burst_D_95": [
+      20.04,
+      26.78
+     ],
+     "burst_die_rise_c": 5.35,
+     "burst_die_rise_95": [
+      3.94,
+      6.75
+     ],
+     "D600_a3_footing_w": 12.5237
+    }
+   }
+  },
+  "fp16.exp_b_alt_shift": {
+   "type": "fp16",
+   "priority": 1,
+   "anchor": false,
+   "class": "E",
+   "case": "E exponent-heavy: operand flips concentrated in the exponent field (E147: the card pays 0.82-0.84 of the models' watts on exponent flips)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp16.exp_b_alt_shift",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_b_alt_shift.bin",
+   "sha256": {
+    "whole": "8e326bf126a975492a404a8de5bd701391ff00970d61a2e0eb73a20ed4eb42c0",
+    "a": "aa31a86fcc9368e2db0bd259c12a14093832e7737d17816c32fe0f2afc3ab592",
+    "b": "45361c0a824b91eb176b5e3f840c995c079855b3e1b87b0711b404a8d1e2feec"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 791.6,
+     "burst_mhz_95": [
+      774.7,
+      800.0
+     ],
+     "burst_board_w": 64.16,
+     "burst_board_95": [
+      60.66,
+      67.67
+     ],
+     "burst_D_w": 27.9,
+     "burst_D_95": [
+      24.39,
+      31.4
+     ],
+     "burst_die_rise_c": 5.97,
+     "burst_die_rise_95": [
+      4.57,
+      7.38
+     ],
+     "D600_a3_footing_w": 15.5279,
+     "P800_w": 65.31,
+     "peak_board_w": 67.25,
+     "peak_board_hi95_w": 68.88,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 792.9,
+     "burst_mhz_95": [
+      771.6,
+      800.0
+     ],
+     "burst_board_w": 64.35,
+     "burst_board_95": [
+      60.98,
+      67.72
+     ],
+     "burst_D_w": 28.09,
+     "burst_D_95": [
+      24.72,
+      31.46
+     ],
+     "burst_die_rise_c": 6.0,
+     "burst_die_rise_95": [
+      4.6,
+      7.41
+     ],
+     "D600_a3_footing_w": 15.5343
+    },
+    "M6": {
+     "burst_mhz": 793.7,
+     "burst_mhz_95": [
+      772.4,
+      800.0
+     ],
+     "burst_board_w": 64.21,
+     "burst_board_95": [
+      60.84,
+      67.58
+     ],
+     "burst_D_w": 27.95,
+     "burst_D_95": [
+      24.58,
+      31.32
+     ],
+     "burst_die_rise_c": 5.98,
+     "burst_die_rise_95": [
+      4.58,
+      7.39
+     ],
+     "D600_a3_footing_w": 15.3988
+    }
+   }
+  },
+  "fp16.exp_only_narrow2": {
+   "type": "fp16",
+   "priority": 1,
+   "anchor": false,
+   "class": "E",
+   "case": "E exponent-heavy: operand flips concentrated in the exponent field (E147: the card pays 0.82-0.84 of the models' watts on exponent flips)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp16.exp_only_narrow2",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_only_narrow2.bin",
+   "sha256": {
+    "whole": "6bfb16e16a7495d76be9e3e7f765bdc2cca786e5b7ececa9bdacf0af69781a97",
+    "a": "0075592a5e86e891cb2abd4095793e5e370286e1e356ebbc735dda20261521f7",
+    "b": "4364bf704c6d5673f26552e1582295f4ea94103cfceea30ba34fc9ba652d951e"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 788.8,
+     "burst_mhz_95": [
+      771.9,
+      800.0
+     ],
+     "burst_board_w": 64.47,
+     "burst_board_95": [
+      60.97,
+      67.98
+     ],
+     "burst_D_w": 28.21,
+     "burst_D_95": [
+      24.71,
+      31.71
+     ],
+     "burst_die_rise_c": 6.02,
+     "burst_die_rise_95": [
+      4.61,
+      7.42
+     ],
+     "D600_a3_footing_w": 15.9096,
+     "P800_w": 66.02,
+     "peak_board_w": 67.96,
+     "peak_board_hi95_w": 69.6,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 790.7,
+     "burst_mhz_95": [
+      769.4,
+      800.0
+     ],
+     "burst_board_w": 64.66,
+     "burst_board_95": [
+      61.29,
+      68.03
+     ],
+     "burst_D_w": 28.4,
+     "burst_D_95": [
+      25.03,
+      31.77
+     ],
+     "burst_die_rise_c": 6.04,
+     "burst_die_rise_95": [
+      4.64,
+      7.45
+     ],
+     "D600_a3_footing_w": 15.8676
+    },
+    "M6": {
+     "burst_mhz": 790.8,
+     "burst_mhz_95": [
+      769.5,
+      800.0
+     ],
+     "burst_board_w": 64.65,
+     "burst_board_95": [
+      61.28,
+      68.02
+     ],
+     "burst_D_w": 28.38,
+     "burst_D_95": [
+      25.01,
+      31.75
+     ],
+     "burst_die_rise_c": 6.04,
+     "burst_die_rise_95": [
+      4.64,
+      7.45
+     ],
+     "D600_a3_footing_w": 15.8535
+    }
+   }
+  },
+  "fp16.real_qwen_dequant_v": {
+   "type": "fp16",
+   "priority": 2,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": false,
+   "label": "b6-fp16.real_qwen_dequant_v",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_qwen_dequant_v.bin",
+   "sha256": {
+    "whole": "c1ac6a45560f90493b84ef8b654075073289b0d69a16568065cf8951f8f9cd7a",
+    "a": "324f19d9b87b32e94aef4fe772c0f4697554bf7b0746a2a7b7293ece3579efca",
+    "b": "e788312ebde190d34b7c42de82719ade6b0bf44d97d457fe200310a25a25898f"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 728.3,
+     "burst_mhz_95": [
+      711.4,
+      745.2
+     ],
+     "burst_board_w": 65.18,
+     "burst_board_95": [
+      61.68,
+      68.69
+     ],
+     "burst_D_w": 28.92,
+     "burst_D_95": [
+      25.42,
+      32.42
+     ],
+     "burst_die_rise_c": 6.12,
+     "burst_die_rise_95": [
+      4.71,
+      7.52
+     ],
+     "D600_a3_footing_w": 21.8767,
+     "P800_w": 77.18,
+     "peak_board_w": 79.12,
+     "peak_board_hi95_w": 80.75,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 731.4,
+     "burst_mhz_95": [
+      710.1,
+      752.7
+     ],
+     "burst_board_w": 65.57,
+     "burst_board_95": [
+      62.2,
+      68.94
+     ],
+     "burst_D_w": 29.31,
+     "burst_D_95": [
+      25.94,
+      32.68
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 21.7864
+    },
+    "M6": {
+     "burst_mhz": 730.9,
+     "burst_mhz_95": [
+      709.6,
+      752.2
+     ],
+     "burst_board_w": 65.57,
+     "burst_board_95": [
+      62.2,
+      68.94
+     ],
+     "burst_D_w": 29.3,
+     "burst_D_95": [
+      25.93,
+      32.67
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 21.8476
+    }
+   }
+  },
+  "fp16.real_qwen_qk": {
+   "type": "fp16",
+   "priority": 1,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": false,
+   "label": "b6-fp16.real_qwen_qk",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_qwen_qk.bin",
+   "sha256": {
+    "whole": "da9a13426327ef5de8fe8530dfdf7b7263a9e3189b319dbed12d49252974b0a9",
+    "a": "44760b29443546dc00a3e0c12d4ec4aa00c3c1cb138999ce545aa18e3bdce78e",
+    "b": "6782d87d3b48598fad09f9ecaae625dc10b3a5deb5564803a2872b586c7ad7f4"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 756.8,
+     "burst_mhz_95": [
+      739.8,
+      773.7
+     ],
+     "burst_board_w": 65.2,
+     "burst_board_95": [
+      61.69,
+      68.7
+     ],
+     "burst_D_w": 28.93,
+     "burst_D_95": [
+      25.43,
+      32.43
+     ],
+     "burst_die_rise_c": 6.12,
+     "burst_die_rise_95": [
+      4.71,
+      7.53
+     ],
+     "D600_a3_footing_w": 19.0112,
+     "P800_w": 71.82,
+     "peak_board_w": 73.76,
+     "peak_board_hi95_w": 75.39,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 759.9,
+     "burst_mhz_95": [
+      738.6,
+      781.2
+     ],
+     "burst_board_w": 65.57,
+     "burst_board_95": [
+      62.2,
+      68.94
+     ],
+     "burst_D_w": 29.31,
+     "burst_D_95": [
+      25.94,
+      32.68
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 18.9466
+    },
+    "M6": {
+     "burst_mhz": 760.3,
+     "burst_mhz_95": [
+      739.0,
+      781.6
+     ],
+     "burst_board_w": 65.57,
+     "burst_board_95": [
+      62.2,
+      68.94
+     ],
+     "burst_D_w": 29.3,
+     "burst_D_95": [
+      25.93,
+      32.67
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 18.9107
+    }
+   }
+  },
+  "fp16.real_smol_qk": {
+   "type": "fp16",
+   "priority": 1,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": false,
+   "label": "b6-fp16.real_smol_qk",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_smol_qk.bin",
+   "sha256": {
+    "whole": "a144008e568f3319ec1fc0ca77cddfc2ede6569736de7b0f04b8c63af34f0dba",
+    "a": "5e820de8e5645400e8510654d25760aa9834643e79cad2296f8726a8a866a730",
+    "b": "f9a98583edb976b2469c786072351a11bf84c44af70d37a6cdcd8e4a68c27498"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 731.2,
+     "burst_mhz_95": [
+      714.3,
+      748.1
+     ],
+     "burst_board_w": 65.19,
+     "burst_board_95": [
+      61.69,
+      68.69
+     ],
+     "burst_D_w": 28.92,
+     "burst_D_95": [
+      25.42,
+      32.43
+     ],
+     "burst_die_rise_c": 6.12,
+     "burst_die_rise_95": [
+      4.71,
+      7.52
+     ],
+     "D600_a3_footing_w": 21.5641,
+     "P800_w": 76.6,
+     "peak_board_w": 78.54,
+     "peak_board_hi95_w": 80.17,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 734.4,
+     "burst_mhz_95": [
+      713.1,
+      755.7
+     ],
+     "burst_board_w": 65.57,
+     "burst_board_95": [
+      62.2,
+      68.94
+     ],
+     "burst_D_w": 29.31,
+     "burst_D_95": [
+      25.94,
+      32.68
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 21.4737
+    },
+    "M6": {
+     "burst_mhz": 734.3,
+     "burst_mhz_95": [
+      713.0,
+      755.6
+     ],
+     "burst_board_w": 65.57,
+     "burst_board_95": [
+      62.2,
+      68.94
+     ],
+     "burst_D_w": 29.31,
+     "burst_D_95": [
+      25.94,
+      32.68
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 21.48
+    }
+   }
+  },
+  "fp16.real_smol_softmax_v": {
+   "type": "fp16",
+   "priority": 1,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": false,
+   "label": "b6-fp16.real_smol_softmax_v",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_smol_softmax_v.bin",
+   "sha256": {
+    "whole": "b07a344a904756c54ed7966964defb7eeef6410d6a607baf2f99d2d6e41e1c7c",
+    "a": "dc25422c327ec6eb3484dabeda573f47ac4be8bc004657fc5d851084a30d3bf8",
+    "b": "5dc0d7ed87448f1d281abdffd581ad493c32f16de74b8f19cc05853e93d82ed2"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 772.8,
+     "burst_mhz_95": [
+      755.8,
+      789.7
+     ],
+     "burst_board_w": 65.11,
+     "burst_board_95": [
+      61.6,
+      68.61
+     ],
+     "burst_D_w": 28.84,
+     "burst_D_95": [
+      25.34,
+      32.34
+     ],
+     "burst_die_rise_c": 6.11,
+     "burst_die_rise_95": [
+      4.7,
+      7.51
+     ],
+     "D600_a3_footing_w": 17.551,
+     "P800_w": 69.09,
+     "peak_board_w": 71.03,
+     "peak_board_hi95_w": 72.66,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 775.9,
+     "burst_mhz_95": [
+      754.6,
+      797.2
+     ],
+     "burst_board_w": 65.44,
+     "burst_board_95": [
+      62.07,
+      68.81
+     ],
+     "burst_D_w": 29.18,
+     "burst_D_95": [
+      25.81,
+      32.55
+     ],
+     "burst_die_rise_c": 6.15,
+     "burst_die_rise_95": [
+      4.75,
+      7.56
+     ],
+     "D600_a3_footing_w": 17.48
+    },
+    "M6": {
+     "burst_mhz": 776.8,
+     "burst_mhz_95": [
+      755.5,
+      798.1
+     ],
+     "burst_board_w": 65.42,
+     "burst_board_95": [
+      62.05,
+      68.79
+     ],
+     "burst_D_w": 29.16,
+     "burst_D_95": [
+      25.79,
+      32.53
+     ],
+     "burst_die_rise_c": 6.15,
+     "burst_die_rise_95": [
+      4.74,
+      7.56
+     ],
+     "D600_a3_footing_w": 17.3912
+    }
+   }
+  },
+  "fp32.a_onebit_b16_half": {
+   "type": "fp32",
+   "priority": 2,
+   "anchor": false,
+   "class": "S",
+   "case": "S single bits on other base words (item 15)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.a_onebit_b16_half",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_onebit_b16_half.bin",
+   "sha256": {
+    "whole": "872b9ba11af3417a086896d7ff76d3d90922fd4950acb7c1ee279f69da03d09b",
+    "a": "c85de349520598dca41a7ef7e659852ee901f77ca0ae2f8f1e25977da13fd6a3",
+    "b": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 54.46,
+     "burst_board_95": [
+      50.95,
+      57.96
+     ],
+     "burst_D_w": 18.1,
+     "burst_D_95": [
+      14.6,
+      21.61
+     ],
+     "burst_die_rise_c": 4.62,
+     "burst_die_rise_95": [
+      3.21,
+      6.02
+     ],
+     "D600_a3_footing_w": 9.6798,
+     "P800_w": 54.46,
+     "peak_board_w": 56.4,
+     "peak_board_hi95_w": 58.21,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 54.4,
+     "burst_board_95": [
+      51.03,
+      57.77
+     ],
+     "burst_D_w": 18.05,
+     "burst_D_95": [
+      14.68,
+      21.42
+     ],
+     "burst_die_rise_c": 4.61,
+     "burst_die_rise_95": [
+      3.2,
+      6.01
+     ],
+     "D600_a3_footing_w": 9.6503
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 54.36,
+     "burst_board_95": [
+      50.99,
+      57.73
+     ],
+     "burst_D_w": 18.0,
+     "burst_D_95": [
+      14.63,
+      21.37
+     ],
+     "burst_die_rise_c": 4.6,
+     "burst_die_rise_95": [
+      3.2,
+      6.01
+     ],
+     "D600_a3_footing_w": 9.6256
+    }
+   }
+  },
+  "fp32.a_onebit_b5_third": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "S",
+   "case": "S single bits on other base words (item 15)",
+   "real": false,
+   "hold_candidate": true,
+   "label": "b6-fp32.a_onebit_b5_third",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_onebit_b5_third.bin",
+   "sha256": {
+    "whole": "6d07fe951904d0232dc9b05b3aceea171b2b642e1f615b9de01f7dabc375bca1",
+    "a": "91dad245806d2a2d5556985312bcca6202b3a01a42ecaf1c049fb734c4272115",
+    "b": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 54.02,
+     "burst_board_95": [
+      50.52,
+      57.52
+     ],
+     "burst_D_w": 17.67,
+     "burst_D_95": [
+      14.16,
+      21.17
+     ],
+     "burst_die_rise_c": 4.55,
+     "burst_die_rise_95": [
+      3.15,
+      5.96
+     ],
+     "D600_a3_footing_w": 9.4465,
+     "P800_w": 54.02,
+     "peak_board_w": 55.96,
+     "peak_board_hi95_w": 57.77,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 53.92,
+     "burst_board_95": [
+      50.55,
+      57.29
+     ],
+     "burst_D_w": 17.57,
+     "burst_D_95": [
+      14.2,
+      20.94
+     ],
+     "burst_die_rise_c": 4.54,
+     "burst_die_rise_95": [
+      3.13,
+      5.95
+     ],
+     "D600_a3_footing_w": 9.3925
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 53.81,
+     "burst_board_95": [
+      50.44,
+      57.18
+     ],
+     "burst_D_w": 17.46,
+     "burst_D_95": [
+      14.09,
+      20.83
+     ],
+     "burst_die_rise_c": 4.53,
+     "burst_die_rise_95": [
+      3.12,
+      5.93
+     ],
+     "D600_a3_footing_w": 9.3362
+    }
+   }
+  },
+  "fp32.a_zeros_b_complement": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "Z",
+   "case": "Z zeros' transport: B traffic under gated and live zero A operands (item 13)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.a_zeros_b_complement",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_zeros_b_complement.bin",
+   "sha256": {
+    "whole": "6f3b15348b1f9e0f4fd7a60862c4e76328a32c5e66f1526d0aee1a2780f22435",
+    "a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+    "b": "b69a0b6a3f775ce5657f4b7ddae6fb535e687207c35efa36317342bb99937f28"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 39.23,
+     "burst_board_95": [
+      35.72,
+      42.73
+     ],
+     "burst_D_w": 2.87,
+     "burst_D_95": [
+      -0.63,
+      6.38
+     ],
+     "burst_die_rise_c": 2.48,
+     "burst_die_rise_95": [
+      1.08,
+      3.89
+     ],
+     "D600_a3_footing_w": 1.536,
+     "P800_w": 39.23,
+     "peak_board_w": 41.17,
+     "peak_board_hi95_w": 43.01,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 39.22,
+     "burst_board_95": [
+      35.85,
+      42.59
+     ],
+     "burst_D_w": 2.87,
+     "burst_D_95": [
+      -0.5,
+      6.24
+     ],
+     "burst_die_rise_c": 2.48,
+     "burst_die_rise_95": [
+      1.08,
+      3.89
+     ],
+     "D600_a3_footing_w": 1.5353
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 39.68,
+     "burst_board_95": [
+      36.31,
+      43.05
+     ],
+     "burst_D_w": 3.33,
+     "burst_D_95": [
+      -0.04,
+      6.7
+     ],
+     "burst_die_rise_c": 2.55,
+     "burst_die_rise_95": [
+      1.14,
+      3.95
+     ],
+     "D600_a3_footing_w": 1.7793
+    }
+   }
+  },
+  "fp32.anchor6_randn": {
+   "type": "fp32",
+   "priority": 2,
+   "anchor": true,
+   "class": "0",
+   "case": "0 anchor (footing)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.anchor6_randn",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.anchor6_randn.bin",
+   "sha256": {
+    "whole": "36d9320b43deb5ab3bc0f77a073f908e36d070ac69c33d5898d6d7a65b2d8b24",
+    "a": "ced87a660242ab954d5ac71b1bcb5805aa39e6ad62ad96bf1c4d4f1b11c49c03",
+    "b": "05e4377f462b6d10ed62fa3d29986659bd2e0c30420a42cf4361abb6b1e83176"
+   },
+   "group": "governed",
+   "dropped": true,
+   "models": {
+    "M8": {
+     "burst_mhz": 702.6,
+     "burst_mhz_95": [
+      685.6,
+      719.5
+     ],
+     "burst_board_w": 64.92,
+     "burst_board_95": [
+      61.42,
+      68.43
+     ],
+     "burst_D_w": 28.57,
+     "burst_D_95": [
+      25.07,
+      32.07
+     ],
+     "burst_die_rise_c": 6.08,
+     "burst_die_rise_95": [
+      4.68,
+      7.49
+     ],
+     "D600_a3_footing_w": 24.7277,
+     "P800_w": 82.6,
+     "peak_board_w": 84.54,
+     "peak_board_hi95_w": 86.36,
+     "peak_over_82w": true
+    },
+    "M7": {
+     "burst_mhz": 706.1,
+     "burst_mhz_95": [
+      684.8,
+      727.4
+     ],
+     "burst_board_w": 65.38,
+     "burst_board_95": [
+      62.01,
+      68.75
+     ],
+     "burst_D_w": 29.02,
+     "burst_D_95": [
+      25.65,
+      32.39
+     ],
+     "burst_die_rise_c": 6.14,
+     "burst_die_rise_95": [
+      4.74,
+      7.55
+     ],
+     "D600_a3_footing_w": 24.5973
+    },
+    "M6": {
+     "burst_mhz": 705.8,
+     "burst_mhz_95": [
+      684.5,
+      727.1
+     ],
+     "burst_board_w": 65.37,
+     "burst_board_95": [
+      62.0,
+      68.74
+     ],
+     "burst_D_w": 29.02,
+     "burst_D_95": [
+      25.65,
+      32.39
+     ],
+     "burst_die_rise_c": 6.14,
+     "burst_die_rise_95": [
+      4.74,
+      7.55
+     ],
+     "D600_a3_footing_w": 24.6361
+    }
+   },
+   "dropped_why": "M8's 95% upper peak 86.36 W (expected 84.54 W) exceeds the 82 W line of section 22: dropped, not duty-cycled (M8's frozen predictions are for a continuous 6 s burst; a duty-cycled burst has none)"
+  },
+  "fp32.anchor6_zeros": {
+   "type": "fp32",
+   "priority": 2,
+   "anchor": true,
+   "class": "0",
+   "case": "0 anchor (footing)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.anchor6_zeros",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.anchor6_zeros.bin",
+   "sha256": {
+    "whole": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+    "a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+    "b": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 36.35,
+     "burst_board_95": [
+      32.85,
+      39.86
+     ],
+     "burst_D_w": 0.0,
+     "burst_D_95": [
+      -3.5,
+      3.5
+     ],
+     "burst_die_rise_c": 2.08,
+     "burst_die_rise_95": [
+      0.67,
+      3.49
+     ],
+     "D600_a3_footing_w": 0.0,
+     "P800_w": 36.35,
+     "peak_board_w": 38.29,
+     "peak_board_hi95_w": 40.1,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 36.35,
+     "burst_board_95": [
+      32.98,
+      39.72
+     ],
+     "burst_D_w": 0.0,
+     "burst_D_95": [
+      -3.37,
+      3.37
+     ],
+     "burst_die_rise_c": 2.08,
+     "burst_die_rise_95": [
+      0.67,
+      3.49
+     ],
+     "D600_a3_footing_w": 0.0
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 36.35,
+     "burst_board_95": [
+      32.98,
+      39.72
+     ],
+     "burst_D_w": 0.0,
+     "burst_D_95": [
+      -3.37,
+      3.37
+     ],
+     "burst_die_rise_c": 2.08,
+     "burst_die_rise_95": [
+      0.67,
+      3.49
+     ],
+     "D600_a3_footing_w": 0.0
+    }
+   }
+  },
+  "fp32.b_onebit_b12_third": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "S",
+   "case": "S single bits on other base words (item 15)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.b_onebit_b12_third",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.b_onebit_b12_third.bin",
+   "sha256": {
+    "whole": "29489c0fbc823cba0542b31672937a025c0d1496273eb802c6518bc7a416af02",
+    "a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+    "b": "fdcb382dbc1322038eaea5c0ddde51394f8630df776629e6cfd1b13e0f2c78a8"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 54.78,
+     "burst_board_95": [
+      51.28,
+      58.28
+     ],
+     "burst_D_w": 18.43,
+     "burst_D_95": [
+      14.93,
+      21.93
+     ],
+     "burst_die_rise_c": 4.66,
+     "burst_die_rise_95": [
+      3.25,
+      6.07
+     ],
+     "D600_a3_footing_w": 9.853,
+     "P800_w": 54.78,
+     "peak_board_w": 56.72,
+     "peak_board_hi95_w": 58.53,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 54.73,
+     "burst_board_95": [
+      51.36,
+      58.1
+     ],
+     "burst_D_w": 18.37,
+     "burst_D_95": [
+      15.0,
+      21.74
+     ],
+     "burst_die_rise_c": 4.65,
+     "burst_die_rise_95": [
+      3.25,
+      6.06
+     ],
+     "D600_a3_footing_w": 9.8231
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 54.67,
+     "burst_board_95": [
+      51.3,
+      58.04
+     ],
+     "burst_D_w": 18.32,
+     "burst_D_95": [
+      14.95,
+      21.69
+     ],
+     "burst_die_rise_c": 4.65,
+     "burst_die_rise_95": [
+      3.24,
+      6.05
+     ],
+     "D600_a3_footing_w": 9.7963
+    }
+   }
+  },
+  "fp32.b_onebit_b20_third": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "S",
+   "case": "S single bits on other base words (item 15)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.b_onebit_b20_third",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.b_onebit_b20_third.bin",
+   "sha256": {
+    "whole": "85505a89777d5d2588a3791795342a36b6b17e47912a1540bb594f4e087d7eca",
+    "a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+    "b": "826f164adfbe79584a3764497bf8922e1f5df300d91472b6b55870eb19c54ada"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 798.7,
+     "burst_mhz_95": [
+      781.7,
+      800.0
+     ],
+     "burst_board_w": 61.9,
+     "burst_board_95": [
+      58.4,
+      65.4
+     ],
+     "burst_D_w": 25.54,
+     "burst_D_95": [
+      22.04,
+      29.05
+     ],
+     "burst_die_rise_c": 5.66,
+     "burst_die_rise_95": [
+      4.25,
+      7.06
+     ],
+     "D600_a3_footing_w": 13.7487,
+     "P800_w": 62.07,
+     "peak_board_w": 64.01,
+     "peak_board_hi95_w": 65.82,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 799.0,
+     "burst_mhz_95": [
+      777.7,
+      800.0
+     ],
+     "burst_board_w": 61.92,
+     "burst_board_95": [
+      58.55,
+      65.29
+     ],
+     "burst_D_w": 25.57,
+     "burst_D_95": [
+      22.2,
+      28.94
+     ],
+     "burst_die_rise_c": 5.66,
+     "burst_die_rise_95": [
+      4.25,
+      7.07
+     ],
+     "D600_a3_footing_w": 13.7368
+    },
+    "M6": {
+     "burst_mhz": 799.2,
+     "burst_mhz_95": [
+      777.9,
+      800.0
+     ],
+     "burst_board_w": 61.77,
+     "burst_board_95": [
+      58.4,
+      65.14
+     ],
+     "burst_D_w": 25.41,
+     "burst_D_95": [
+      22.04,
+      28.78
+     ],
+     "burst_die_rise_c": 5.64,
+     "burst_die_rise_95": [
+      4.23,
+      7.05
+     ],
+     "D600_a3_footing_w": 13.6447
+    }
+   }
+  },
+  "fp32.bf16_wideexp": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "E",
+   "case": "E exponent-heavy: operand flips concentrated in the exponent field (E147: the card pays 0.82-0.84 of the models' watts on exponent flips)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.bf16_wideexp",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.bf16_wideexp.bin",
+   "sha256": {
+    "whole": "0535bb7277cf74b9ea2e52f1c747632ed34fe78cf038b5c5dd3049129c90355a",
+    "a": "5b00388928328402443507ad07cc8fd23ae7a17cc7b44b90cb68f34efb00a5df",
+    "b": "56c8569d17b049e1e951f7d0b94219d8463eb08976e5343f660acafcd5e82f98"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 752.0,
+     "burst_mhz_95": [
+      735.0,
+      768.9
+     ],
+     "burst_board_w": 65.2,
+     "burst_board_95": [
+      61.7,
+      68.7
+     ],
+     "burst_D_w": 28.85,
+     "burst_D_95": [
+      25.34,
+      32.35
+     ],
+     "burst_die_rise_c": 6.12,
+     "burst_die_rise_95": [
+      4.71,
+      7.53
+     ],
+     "D600_a3_footing_w": 19.4196,
+     "P800_w": 72.67,
+     "peak_board_w": 74.61,
+     "peak_board_hi95_w": 76.46,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 754.0,
+     "burst_mhz_95": [
+      732.7,
+      775.3
+     ],
+     "burst_board_w": 65.58,
+     "burst_board_95": [
+      62.21,
+      68.95
+     ],
+     "burst_D_w": 29.23,
+     "burst_D_95": [
+      25.86,
+      32.6
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 19.457
+    },
+    "M6": {
+     "burst_mhz": 753.4,
+     "burst_mhz_95": [
+      732.1,
+      774.7
+     ],
+     "burst_board_w": 65.58,
+     "burst_board_95": [
+      62.21,
+      68.95
+     ],
+     "burst_D_w": 29.23,
+     "burst_D_95": [
+      25.86,
+      32.6
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 19.512
+    }
+   }
+  },
+  "fp32.c_absorbed": {
+   "type": "fp32",
+   "priority": 2,
+   "anchor": false,
+   "class": "C",
+   "case": "C the C-register candidate: operands as busy as random data, an accumulator that barely moves",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.c_absorbed",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.c_absorbed.bin",
+   "sha256": {
+    "whole": "c6792446c044ee7c425c585f409e6c5495464f33fc26ee1650fbaf11c651c06f",
+    "a": "8dd739c639942a0a25e4a0e71dba723cd249951fbe12a18018da686e00d3d269",
+    "b": "1f9a76bf5d2193b82d582be18857efa1be0d36aef4230b9629c907bebb033801"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 746.3,
+     "burst_mhz_95": [
+      729.4,
+      763.3
+     ],
+     "burst_board_w": 65.2,
+     "burst_board_95": [
+      61.7,
+      68.7
+     ],
+     "burst_D_w": 28.85,
+     "burst_D_95": [
+      25.34,
+      32.35
+     ],
+     "burst_die_rise_c": 6.12,
+     "burst_die_rise_95": [
+      4.71,
+      7.53
+     ],
+     "D600_a3_footing_w": 19.963,
+     "P800_w": 73.69,
+     "peak_board_w": 75.63,
+     "peak_board_hi95_w": 77.46,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 749.5,
+     "burst_mhz_95": [
+      728.2,
+      770.8
+     ],
+     "burst_board_w": 65.58,
+     "burst_board_95": [
+      62.21,
+      68.95
+     ],
+     "burst_D_w": 29.23,
+     "burst_D_95": [
+      25.86,
+      32.6
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 19.893
+    },
+    "M6": {
+     "burst_mhz": 748.2,
+     "burst_mhz_95": [
+      726.9,
+      769.5
+     ],
+     "burst_board_w": 65.58,
+     "burst_board_95": [
+      62.21,
+      68.95
+     ],
+     "burst_D_w": 29.23,
+     "burst_D_95": [
+      25.86,
+      32.6
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 20.0116
+    }
+   }
+  },
+  "fp32.exp_a_pow2wide_b_randn": {
+   "type": "fp32",
+   "priority": 2,
+   "anchor": false,
+   "class": "E",
+   "case": "E exponent-heavy: operand flips concentrated in the exponent field (E147: the card pays 0.82-0.84 of the models' watts on exponent flips)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.exp_a_pow2wide_b_randn",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_a_pow2wide_b_randn.bin",
+   "sha256": {
+    "whole": "a88bc2c40e6113e588c99d5fd395dba76233a4dbc25f67ab19c606520c10c77b",
+    "a": "fb6f7a2c5c89bb1c2a8b841f9c0f1a3f13804f805b7a6e9d7186e5f6eebb5dde",
+    "b": "d7305f5a6a25b7fff93e10f75b34541df44c4ad15d9b3140571e2b4020575a64"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 754.7,
+     "burst_mhz_95": [
+      737.7,
+      771.6
+     ],
+     "burst_board_w": 65.2,
+     "burst_board_95": [
+      61.69,
+      68.7
+     ],
+     "burst_D_w": 28.84,
+     "burst_D_95": [
+      25.34,
+      32.35
+     ],
+     "burst_die_rise_c": 6.12,
+     "burst_die_rise_95": [
+      4.71,
+      7.53
+     ],
+     "D600_a3_footing_w": 19.1638,
+     "P800_w": 72.19,
+     "peak_board_w": 74.14,
+     "peak_board_hi95_w": 75.97,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 756.8,
+     "burst_mhz_95": [
+      735.5,
+      778.1
+     ],
+     "burst_board_w": 65.58,
+     "burst_board_95": [
+      62.21,
+      68.95
+     ],
+     "burst_D_w": 29.22,
+     "burst_D_95": [
+      25.85,
+      32.59
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 19.1938
+    },
+    "M6": {
+     "burst_mhz": 753.6,
+     "burst_mhz_95": [
+      732.3,
+      774.9
+     ],
+     "burst_board_w": 65.58,
+     "burst_board_95": [
+      62.21,
+      68.95
+     ],
+     "burst_D_w": 29.23,
+     "burst_D_95": [
+      25.86,
+      32.6
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 19.4936
+    }
+   }
+  },
+  "fp32.exp_a_walk_fixedmant": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "E",
+   "case": "E exponent-heavy: operand flips concentrated in the exponent field (E147: the card pays 0.82-0.84 of the models' watts on exponent flips)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.exp_a_walk_fixedmant",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_a_walk_fixedmant.bin",
+   "sha256": {
+    "whole": "8ddb845a688d8ae860b562ddc32032e2080a2eebe57133a5f5fdf3fbc46e6801",
+    "a": "264fabe50c1cf1d7b83bbd7bf8f8aa7e5238c63ac59fdea87a99fb89c3ce3108",
+    "b": "7b19cdc5dae799d4e1acf6107b586d85e94b8878ed5d6cf3163e17fb5026a47c"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 799.8,
+     "burst_mhz_95": [
+      782.8,
+      800.0
+     ],
+     "burst_board_w": 59.94,
+     "burst_board_95": [
+      56.43,
+      63.44
+     ],
+     "burst_D_w": 23.58,
+     "burst_D_95": [
+      20.08,
+      27.09
+     ],
+     "burst_die_rise_c": 5.38,
+     "burst_die_rise_95": [
+      3.98,
+      6.79
+     ],
+     "D600_a3_footing_w": 12.6231,
+     "P800_w": 59.96,
+     "peak_board_w": 61.9,
+     "peak_board_hi95_w": 63.72,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 799.9,
+     "burst_mhz_95": [
+      778.6,
+      800.0
+     ],
+     "burst_board_w": 59.99,
+     "burst_board_95": [
+      56.62,
+      63.36
+     ],
+     "burst_D_w": 23.64,
+     "burst_D_95": [
+      20.27,
+      27.01
+     ],
+     "burst_die_rise_c": 5.39,
+     "burst_die_rise_95": [
+      3.98,
+      6.8
+     ],
+     "D600_a3_footing_w": 12.6489
+    },
+    "M6": {
+     "burst_mhz": 799.8,
+     "burst_mhz_95": [
+      778.5,
+      800.0
+     ],
+     "burst_board_w": 60.02,
+     "burst_board_95": [
+      56.65,
+      63.39
+     ],
+     "burst_D_w": 23.67,
+     "burst_D_95": [
+      20.3,
+      27.04
+     ],
+     "burst_die_rise_c": 5.39,
+     "burst_die_rise_95": [
+      3.99,
+      6.8
+     ],
+     "D600_a3_footing_w": 12.6656
+    }
+   }
+  },
+  "fp32.exp_b_alt_shift": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "E",
+   "case": "E exponent-heavy: operand flips concentrated in the exponent field (E147: the card pays 0.82-0.84 of the models' watts on exponent flips)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.exp_b_alt_shift",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_b_alt_shift.bin",
+   "sha256": {
+    "whole": "f6c08d00938be71d095ccca1703412086f4fa8955658ff2e1bb2977b7c9c1664",
+    "a": "ef0d521fe6f704734c2e89b32d63dd9d46d1a68cb3bc494edaf0e252cbb0f561",
+    "b": "4abbdc3700921720606dbdc5bf500fb53391a7f653ea1721835fc37b8b276020"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 787.3,
+     "burst_mhz_95": [
+      770.3,
+      800.0
+     ],
+     "burst_board_w": 64.6,
+     "burst_board_95": [
+      61.09,
+      68.1
+     ],
+     "burst_D_w": 28.24,
+     "burst_D_95": [
+      24.74,
+      31.75
+     ],
+     "burst_die_rise_c": 6.04,
+     "burst_die_rise_95": [
+      4.63,
+      7.44
+     ],
+     "D600_a3_footing_w": 16.0472,
+     "P800_w": 66.37,
+     "peak_board_w": 68.31,
+     "peak_board_hi95_w": 70.14,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 788.7,
+     "burst_mhz_95": [
+      767.4,
+      800.0
+     ],
+     "burst_board_w": 64.87,
+     "burst_board_95": [
+      61.5,
+      68.24
+     ],
+     "burst_D_w": 28.52,
+     "burst_D_95": [
+      25.15,
+      31.89
+     ],
+     "burst_die_rise_c": 6.07,
+     "burst_die_rise_95": [
+      4.67,
+      7.48
+     ],
+     "D600_a3_footing_w": 16.0922
+    },
+    "M6": {
+     "burst_mhz": 789.2,
+     "burst_mhz_95": [
+      767.9,
+      800.0
+     ],
+     "burst_board_w": 64.83,
+     "burst_board_95": [
+      61.46,
+      68.2
+     ],
+     "burst_D_w": 28.47,
+     "burst_D_95": [
+      25.1,
+      31.84
+     ],
+     "burst_die_rise_c": 6.07,
+     "burst_die_rise_95": [
+      4.66,
+      7.47
+     ],
+     "D600_a3_footing_w": 16.0285
+    }
+   }
+  },
+  "fp32.exp_only_narrow2": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "E",
+   "case": "E exponent-heavy: operand flips concentrated in the exponent field (E147: the card pays 0.82-0.84 of the models' watts on exponent flips)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.exp_only_narrow2",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_only_narrow2.bin",
+   "sha256": {
+    "whole": "14ce8cc730ee59b442b76a79056a75c07f795d6889b69d264df5b5e2d1389135",
+    "a": "1cacbc5fbbd04781f5c1cb86500cacd1e43a342130c8e4d89f47bb5f77b5f437",
+    "b": "46dee4ad15db3bd92e1d53462f2ddba717f2d6dd9f94bd0e91794182851ed948"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 794.5,
+     "burst_mhz_95": [
+      777.6,
+      800.0
+     ],
+     "burst_board_w": 63.66,
+     "burst_board_95": [
+      60.16,
+      67.16
+     ],
+     "burst_D_w": 27.31,
+     "burst_D_95": [
+      23.8,
+      30.81
+     ],
+     "burst_die_rise_c": 5.9,
+     "burst_die_rise_95": [
+      4.5,
+      7.31
+     ],
+     "D600_a3_footing_w": 14.9913,
+     "P800_w": 64.39,
+     "peak_board_w": 66.33,
+     "peak_board_hi95_w": 68.16,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 795.6,
+     "burst_mhz_95": [
+      774.3,
+      800.0
+     ],
+     "burst_board_w": 63.77,
+     "burst_board_95": [
+      60.4,
+      67.14
+     ],
+     "burst_D_w": 27.42,
+     "burst_D_95": [
+      24.05,
+      30.79
+     ],
+     "burst_die_rise_c": 5.92,
+     "burst_die_rise_95": [
+      4.51,
+      7.33
+     ],
+     "D600_a3_footing_w": 14.9738
+    },
+    "M6": {
+     "burst_mhz": 795.7,
+     "burst_mhz_95": [
+      774.4,
+      800.0
+     ],
+     "burst_board_w": 63.76,
+     "burst_board_95": [
+      60.39,
+      67.13
+     ],
+     "burst_D_w": 27.41,
+     "burst_D_95": [
+      24.04,
+      30.78
+     ],
+     "burst_die_rise_c": 5.92,
+     "burst_die_rise_95": [
+      4.51,
+      7.32
+     ],
+     "D600_a3_footing_w": 14.9614
+    }
+   }
+  },
+  "fp32.negzero_a_b_complement": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "Z",
+   "case": "Z zeros' transport: B traffic under gated and live zero A operands (item 13)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.negzero_a_b_complement",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.negzero_a_b_complement.bin",
+   "sha256": {
+    "whole": "9166093f3fa7edd5e272eeab86cbb92575342157b3508efe23a55c092ea39d68",
+    "a": "d8cc0513f8841dd76fc138a155aa5623d275007dd58ed73fb44006e9d0991747",
+    "b": "a5f8a4c015a71a17eeb8bbd924c79ce5e986b96d975c747032495a0c5421ad57"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 781.5,
+     "burst_mhz_95": [
+      764.6,
+      798.5
+     ],
+     "burst_board_w": 64.9,
+     "burst_board_95": [
+      61.4,
+      68.4
+     ],
+     "burst_D_w": 28.55,
+     "burst_D_95": [
+      25.05,
+      32.05
+     ],
+     "burst_die_rise_c": 6.08,
+     "burst_die_rise_95": [
+      4.67,
+      7.48
+     ],
+     "D600_a3_footing_w": 16.6697,
+     "P800_w": 67.53,
+     "peak_board_w": 69.47,
+     "peak_board_hi95_w": 71.33,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 783.0,
+     "burst_mhz_95": [
+      761.7,
+      800.0
+     ],
+     "burst_board_w": 65.23,
+     "burst_board_95": [
+      61.86,
+      68.6
+     ],
+     "burst_D_w": 28.88,
+     "burst_D_95": [
+      25.51,
+      32.25
+     ],
+     "burst_die_rise_c": 6.12,
+     "burst_die_rise_95": [
+      4.72,
+      7.53
+     ],
+     "D600_a3_footing_w": 16.7377
+    },
+    "M6": {
+     "burst_mhz": 777.7,
+     "burst_mhz_95": [
+      756.4,
+      799.0
+     ],
+     "burst_board_w": 65.4,
+     "burst_board_95": [
+      62.03,
+      68.77
+     ],
+     "burst_D_w": 29.05,
+     "burst_D_95": [
+      25.68,
+      32.42
+     ],
+     "burst_die_rise_c": 6.15,
+     "burst_die_rise_95": [
+      4.74,
+      7.55
+     ],
+     "D600_a3_footing_w": 17.2615
+    }
+   }
+  },
+  "fp32.real_qwen_dequant_q": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": false,
+   "label": "b6-fp32.real_qwen_dequant_q",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_qwen_dequant_q.bin",
+   "sha256": {
+    "whole": "f33904e5a45900b15f6ce0abfbd330682e5eeee8b4105e4b9d888513f30dd675",
+    "a": "322f2e3c3009d7cb5258041f12ab90ab821e3d0edc7b190ef012bfe20516df85",
+    "b": "38feb2812036ad1b31a3d3be1f9a4fb9c613294a7ed15ef10943e78da43ae0d1"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 743.0,
+     "burst_mhz_95": [
+      726.1,
+      760.0
+     ],
+     "burst_board_w": 65.2,
+     "burst_board_95": [
+      61.7,
+      68.7
+     ],
+     "burst_D_w": 28.85,
+     "burst_D_95": [
+      25.34,
+      32.35
+     ],
+     "burst_die_rise_c": 6.12,
+     "burst_die_rise_95": [
+      4.71,
+      7.53
+     ],
+     "D600_a3_footing_w": 20.2918,
+     "P800_w": 74.3,
+     "peak_board_w": 76.24,
+     "peak_board_hi95_w": 78.06,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 746.2,
+     "burst_mhz_95": [
+      724.9,
+      767.5
+     ],
+     "burst_board_w": 65.58,
+     "burst_board_95": [
+      62.21,
+      68.95
+     ],
+     "burst_D_w": 29.23,
+     "burst_D_95": [
+      25.86,
+      32.6
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 20.2118
+    },
+    "M6": {
+     "burst_mhz": 747.4,
+     "burst_mhz_95": [
+      726.1,
+      768.7
+     ],
+     "burst_board_w": 65.58,
+     "burst_board_95": [
+      62.21,
+      68.95
+     ],
+     "burst_D_w": 29.23,
+     "burst_D_95": [
+      25.86,
+      32.6
+     ],
+     "burst_die_rise_c": 6.17,
+     "burst_die_rise_95": [
+      4.77,
+      7.58
+     ],
+     "D600_a3_footing_w": 20.0972
+    }
+   }
+  },
+  "fp32.real_qwen_softmax_v": {
+   "type": "fp32",
+   "priority": 2,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": false,
+   "label": "b6-fp32.real_qwen_softmax_v",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_qwen_softmax_v.bin",
+   "sha256": {
+    "whole": "0a2e98ab65f13b50f597a41d3a4919762ba814ddd128ae5573fe5ed2c1e91052",
+    "a": "9a0b7d3456239fc7b7200617eff3d46962cd5590cab6c39f2fcb5e50e8af4be6",
+    "b": "f32386ee992a7ed330899972ba683b351c9ee86d9b47ad14ac143e6fa7880228"
+   },
+   "group": "governed",
+   "dropped": true,
+   "models": {
+    "M8": {
+     "burst_mhz": 706.7,
+     "burst_mhz_95": [
+      689.8,
+      723.7
+     ],
+     "burst_board_w": 65.0,
+     "burst_board_95": [
+      61.5,
+      68.51
+     ],
+     "burst_D_w": 28.65,
+     "burst_D_95": [
+      25.15,
+      32.15
+     ],
+     "burst_die_rise_c": 6.09,
+     "burst_die_rise_95": [
+      4.69,
+      7.5
+     ],
+     "D600_a3_footing_w": 24.2559,
+     "P800_w": 81.72,
+     "peak_board_w": 83.66,
+     "peak_board_hi95_w": 85.48,
+     "peak_over_82w": true
+    },
+    "M7": {
+     "burst_mhz": 710.2,
+     "burst_mhz_95": [
+      688.9,
+      731.5
+     ],
+     "burst_board_w": 65.44,
+     "burst_board_95": [
+      62.07,
+      68.81
+     ],
+     "burst_D_w": 29.09,
+     "burst_D_95": [
+      25.72,
+      32.46
+     ],
+     "burst_die_rise_c": 6.15,
+     "burst_die_rise_95": [
+      4.75,
+      7.56
+     ],
+     "D600_a3_footing_w": 24.122
+    },
+    "M6": {
+     "burst_mhz": 710.6,
+     "burst_mhz_95": [
+      689.3,
+      731.9
+     ],
+     "burst_board_w": 65.45,
+     "burst_board_95": [
+      62.08,
+      68.82
+     ],
+     "burst_D_w": 29.09,
+     "burst_D_95": [
+      25.72,
+      32.46
+     ],
+     "burst_die_rise_c": 6.15,
+     "burst_die_rise_95": [
+      4.75,
+      7.56
+     ],
+     "D600_a3_footing_w": 24.0803
+    }
+   },
+   "dropped_why": "M8's 95% upper peak 85.48 W (expected 83.66 W) exceeds the 82 W line of section 22: dropped, not duty-cycled (M8's frozen predictions are for a continuous 6 s burst; a duty-cycled burst has none)"
+  },
+  "fp32.real_smol_softmax_v_causal": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": true,
+   "label": "b6-fp32.real_smol_softmax_v_causal",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_smol_softmax_v_causal.bin",
+   "sha256": {
+    "whole": "21337776084c35ce58e2b6402bf5b67d0892a26b01e6f96046f6c1a3bb78e4fd",
+    "a": "a62fccbcab989b38c8556a88b332e009a879a1f889629e33148fe0a85877a102",
+    "b": "76bc0457acca7d9119b4cd5095c2275df294da132a36cb4ce9197a962dceafe1"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 798.8,
+     "burst_mhz_95": [
+      781.8,
+      800.0
+     ],
+     "burst_board_w": 61.81,
+     "burst_board_95": [
+      58.3,
+      65.31
+     ],
+     "burst_D_w": 25.45,
+     "burst_D_95": [
+      21.95,
+      28.96
+     ],
+     "burst_die_rise_c": 5.64,
+     "burst_die_rise_95": [
+      4.24,
+      7.05
+     ],
+     "D600_a3_footing_w": 13.6932,
+     "P800_w": 61.96,
+     "peak_board_w": 63.9,
+     "peak_board_hi95_w": 65.72,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 799.2,
+     "burst_mhz_95": [
+      777.9,
+      800.0
+     ],
+     "burst_board_w": 61.73,
+     "burst_board_95": [
+      58.36,
+      65.1
+     ],
+     "burst_D_w": 25.38,
+     "burst_D_95": [
+      22.01,
+      28.75
+     ],
+     "burst_die_rise_c": 5.63,
+     "burst_die_rise_95": [
+      4.23,
+      7.04
+     ],
+     "D600_a3_footing_w": 13.6251
+    },
+    "M6": {
+     "burst_mhz": 799.3,
+     "burst_mhz_95": [
+      778.0,
+      800.0
+     ],
+     "burst_board_w": 61.6,
+     "burst_board_95": [
+      58.23,
+      64.97
+     ],
+     "burst_D_w": 25.25,
+     "burst_D_95": [
+      21.88,
+      28.62
+     ],
+     "burst_die_rise_c": 5.62,
+     "burst_die_rise_95": [
+      4.21,
+      7.02
+     ],
+     "D600_a3_footing_w": 13.5477
+    }
+   }
+  },
+  "fp32.signexp_invert_b": {
+   "type": "fp32",
+   "priority": 1,
+   "anchor": false,
+   "class": "E",
+   "case": "E exponent-heavy: operand flips concentrated in the exponent field (E147: the card pays 0.82-0.84 of the models' watts on exponent flips)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-fp32.signexp_invert_b",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.signexp_invert_b.bin",
+   "sha256": {
+    "whole": "503400abe6dab2bd8eb53c0d5b00d22f6777d3eb527dfb820f4f6f0459b5b5c1",
+    "a": "ab372bdc4fc88aeb0625a53fd8b5e22ddbe404a8b768a618468ce843bd88e9d4",
+    "b": "9a1955eb027d9e71135f08c5c9fd7043e19ba932c2766cdcba4a3ac141130a08"
+   },
+   "group": "governed",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 777.4,
+     "burst_mhz_95": [
+      760.4,
+      794.3
+     ],
+     "burst_board_w": 65.03,
+     "burst_board_95": [
+      61.52,
+      68.53
+     ],
+     "burst_D_w": 28.67,
+     "burst_D_95": [
+      25.17,
+      32.18
+     ],
+     "burst_die_rise_c": 6.1,
+     "burst_die_rise_95": [
+      4.69,
+      7.5
+     ],
+     "D600_a3_footing_w": 17.0755,
+     "P800_w": 68.29,
+     "peak_board_w": 70.23,
+     "peak_board_hi95_w": 72.09,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 778.9,
+     "burst_mhz_95": [
+      757.6,
+      800.0
+     ],
+     "burst_board_w": 65.37,
+     "burst_board_95": [
+      62.0,
+      68.74
+     ],
+     "burst_D_w": 29.02,
+     "burst_D_95": [
+      25.65,
+      32.39
+     ],
+     "burst_die_rise_c": 6.14,
+     "burst_die_rise_95": [
+      4.74,
+      7.55
+     ],
+     "D600_a3_footing_w": 17.1412
+    },
+    "M6": {
+     "burst_mhz": 780.9,
+     "burst_mhz_95": [
+      759.6,
+      800.0
+     ],
+     "burst_board_w": 65.31,
+     "burst_board_95": [
+      61.94,
+      68.68
+     ],
+     "burst_D_w": 28.96,
+     "burst_D_95": [
+      25.59,
+      32.33
+     ],
+     "burst_die_rise_c": 6.14,
+     "burst_die_rise_95": [
+      4.73,
+      7.54
+     ],
+     "D600_a3_footing_w": 16.9481
+    }
+   }
+  },
+  "int8.a_word_zero_one": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "L",
+   "case": "L int8 whole-line or whole-word flip-flops (E141's steady int8 misses)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.a_word_zero_one",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.a_word_zero_one.bin",
+   "sha256": {
+    "whole": "a332b69b890f67e9dc5b961ceb055d8ee7ef06a8cebe802c8bd8f03d36053fcc",
+    "a": "45f92c8bc8c2700c671cc9700ad39e174d250d56fafb9e402c25730b5a3699b5",
+    "b": "93e0ff776952faa298ca6cfd140f9698a146614c38cdd5548f2b8045d94cf544"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 43.0,
+     "burst_board_95": [
+      39.49,
+      46.5
+     ],
+     "burst_D_w": 5.34,
+     "burst_D_95": [
+      1.84,
+      8.85
+     ],
+     "burst_die_rise_c": 3.01,
+     "burst_die_rise_95": [
+      1.6,
+      4.42
+     ],
+     "D600_a3_footing_w": 2.8569,
+     "P800_w": 43.0,
+     "peak_board_w": 44.94,
+     "peak_board_hi95_w": 47.3,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 42.85,
+     "burst_board_95": [
+      39.48,
+      46.22
+     ],
+     "burst_D_w": 5.19,
+     "burst_D_95": [
+      1.82,
+      8.56
+     ],
+     "burst_die_rise_c": 2.99,
+     "burst_die_rise_95": [
+      1.58,
+      4.4
+     ],
+     "D600_a3_footing_w": 2.7771
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 42.68,
+     "burst_board_95": [
+      39.31,
+      46.05
+     ],
+     "burst_D_w": 5.03,
+     "burst_D_95": [
+      1.66,
+      8.4
+     ],
+     "burst_die_rise_c": 2.97,
+     "burst_die_rise_95": [
+      1.56,
+      4.37
+     ],
+     "D600_a3_footing_w": 2.6888
+    }
+   }
+  },
+  "int8.a_zeros_b_lineflip": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "Z",
+   "case": "Z zeros' transport: B traffic under gated and live zero A operands (item 13)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.a_zeros_b_lineflip",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.a_zeros_b_lineflip.bin",
+   "sha256": {
+    "whole": "e3ae621ac9f9ec65eb9d59d6ff57063cb425870d38fda3729dab11d7dc3e9840",
+    "a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+    "b": "3a329b37859ac6e9d8a9ce34b7e562aa8dbc63b9a889f511613eaeba5d295f82"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 37.02,
+     "burst_board_95": [
+      33.52,
+      40.52
+     ],
+     "burst_D_w": -0.63,
+     "burst_D_95": [
+      -4.14,
+      2.87
+     ],
+     "burst_die_rise_c": 2.17,
+     "burst_die_rise_95": [
+      0.77,
+      3.58
+     ],
+     "D600_a3_footing_w": -0.3387,
+     "P800_w": 37.02,
+     "peak_board_w": 38.96,
+     "peak_board_hi95_w": 42.57,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 37.75,
+     "burst_board_95": [
+      34.38,
+      41.12
+     ],
+     "burst_D_w": 0.09,
+     "burst_D_95": [
+      -3.28,
+      3.46
+     ],
+     "burst_die_rise_c": 2.28,
+     "burst_die_rise_95": [
+      0.87,
+      3.68
+     ],
+     "D600_a3_footing_w": 0.049
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 38.6,
+     "burst_board_95": [
+      35.23,
+      41.97
+     ],
+     "burst_D_w": 0.95,
+     "burst_D_95": [
+      -2.42,
+      4.32
+     ],
+     "burst_die_rise_c": 2.39,
+     "burst_die_rise_95": [
+      0.99,
+      3.8
+     ],
+     "D600_a3_footing_w": 0.5054
+    }
+   }
+  },
+  "int8.anchor6_full": {
+   "type": "int8",
+   "priority": 2,
+   "anchor": true,
+   "class": "0",
+   "case": "0 anchor (footing)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.anchor6_full",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.anchor6_full.bin",
+   "sha256": {
+    "whole": "df06eb01a286a25b4847dcd2f866c8adc7f7421eb996f00141b4d18f7eb3d87c",
+    "a": "ab9eaa813ffcd6cc12b0e6714cc07eeebb2d86cc5f2ea661a4f9544c4c43d546",
+    "b": "0f455966db227973af3b2453621e25ca31bc1aaf5735b73293a79a4f739b7a26"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 50.8,
+     "burst_board_95": [
+      47.29,
+      54.3
+     ],
+     "burst_D_w": 13.14,
+     "burst_D_95": [
+      9.64,
+      16.64
+     ],
+     "burst_die_rise_c": 4.1,
+     "burst_die_rise_95": [
+      2.7,
+      5.51
+     ],
+     "D600_a3_footing_w": 7.0263,
+     "P800_w": 50.8,
+     "peak_board_w": 52.74,
+     "peak_board_hi95_w": 55.09,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 50.77,
+     "burst_board_95": [
+      47.4,
+      54.14
+     ],
+     "burst_D_w": 13.12,
+     "burst_D_95": [
+      9.75,
+      16.49
+     ],
+     "burst_die_rise_c": 4.1,
+     "burst_die_rise_95": [
+      2.69,
+      5.51
+     ],
+     "D600_a3_footing_w": 7.0139
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 50.7,
+     "burst_board_95": [
+      47.33,
+      54.07
+     ],
+     "burst_D_w": 13.04,
+     "burst_D_95": [
+      9.67,
+      16.41
+     ],
+     "burst_die_rise_c": 4.09,
+     "burst_die_rise_95": [
+      2.68,
+      5.5
+     ],
+     "D600_a3_footing_w": 6.9748
+    }
+   }
+  },
+  "int8.anchor6_zeros": {
+   "type": "int8",
+   "priority": 2,
+   "anchor": true,
+   "class": "0",
+   "case": "0 anchor (footing)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.anchor6_zeros",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.anchor6_zeros.bin",
+   "sha256": {
+    "whole": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+    "a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+    "b": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 37.65,
+     "burst_board_95": [
+      34.15,
+      41.16
+     ],
+     "burst_D_w": 0.0,
+     "burst_D_95": [
+      -3.5,
+      3.5
+     ],
+     "burst_die_rise_c": 2.26,
+     "burst_die_rise_95": [
+      0.86,
+      3.67
+     ],
+     "D600_a3_footing_w": 0.0,
+     "P800_w": 37.65,
+     "peak_board_w": 39.59,
+     "peak_board_hi95_w": 41.9,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 37.65,
+     "burst_board_95": [
+      34.28,
+      41.02
+     ],
+     "burst_D_w": 0.0,
+     "burst_D_95": [
+      -3.37,
+      3.37
+     ],
+     "burst_die_rise_c": 2.26,
+     "burst_die_rise_95": [
+      0.86,
+      3.67
+     ],
+     "D600_a3_footing_w": 0.0
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 37.65,
+     "burst_board_95": [
+      34.28,
+      41.02
+     ],
+     "burst_D_w": 0.0,
+     "burst_D_95": [
+      -3.37,
+      3.37
+     ],
+     "burst_die_rise_c": 2.26,
+     "burst_die_rise_95": [
+      0.86,
+      3.67
+     ],
+     "D600_a3_footing_w": 0.0
+    }
+   }
+  },
+  "int8.b_line_55_aa": {
+   "type": "int8",
+   "priority": 2,
+   "anchor": false,
+   "class": "L",
+   "case": "L int8 whole-line or whole-word flip-flops (E141's steady int8 misses)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.b_line_55_aa",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_55_aa.bin",
+   "sha256": {
+    "whole": "19d2d9fd0be5bdbe545365ac87b03d16e009b9d95b817ae7ddf202e8829d9a06",
+    "a": "728b5e96316b31bf6ae74a86b8cee6d8add134b896593018d7c4ebc68b255965",
+    "b": "d0a20dbd8d6d82ab4ff5e8f9e3458e6310791bb24a2b04a1da9a816bd73ebc84"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 49.06,
+     "burst_board_95": [
+      45.56,
+      52.57
+     ],
+     "burst_D_w": 11.41,
+     "burst_D_95": [
+      7.91,
+      14.91
+     ],
+     "burst_die_rise_c": 3.86,
+     "burst_die_rise_95": [
+      2.45,
+      5.27
+     ],
+     "D600_a3_footing_w": 6.1002,
+     "P800_w": 49.06,
+     "peak_board_w": 51.0,
+     "peak_board_hi95_w": 54.37,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 49.97,
+     "burst_board_95": [
+      46.6,
+      53.34
+     ],
+     "burst_D_w": 12.32,
+     "burst_D_95": [
+      8.95,
+      15.69
+     ],
+     "burst_die_rise_c": 3.99,
+     "burst_die_rise_95": [
+      2.58,
+      5.39
+     ],
+     "D600_a3_footing_w": 6.5859
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 50.46,
+     "burst_board_95": [
+      47.09,
+      53.83
+     ],
+     "burst_D_w": 12.8,
+     "burst_D_95": [
+      9.43,
+      16.17
+     ],
+     "burst_die_rise_c": 4.06,
+     "burst_die_rise_95": [
+      2.65,
+      5.46
+     ],
+     "D600_a3_footing_w": 6.8458
+    }
+   }
+  },
+  "int8.b_line_zero_ff": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "L",
+   "case": "L int8 whole-line or whole-word flip-flops (E141's steady int8 misses)",
+   "real": false,
+   "hold_candidate": true,
+   "label": "b6-int8.b_line_zero_ff",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_zero_ff.bin",
+   "sha256": {
+    "whole": "6a50d22072dfca72d1da830063c9b88bdf75f8716955e9b330c1321867040607",
+    "a": "a877d4a8c70a4f3076dd63e01ffe1dda9db1e8eb0b4e0d90ab317199303d813d",
+    "b": "259b1863e358a09f418220fda2fed6597d0e29741ebf689d186edb4927c2d11c"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 43.99,
+     "burst_board_95": [
+      40.49,
+      47.49
+     ],
+     "burst_D_w": 6.34,
+     "burst_D_95": [
+      2.83,
+      9.84
+     ],
+     "burst_die_rise_c": 3.15,
+     "burst_die_rise_95": [
+      1.74,
+      4.56
+     ],
+     "D600_a3_footing_w": 3.3882,
+     "P800_w": 43.99,
+     "peak_board_w": 45.93,
+     "peak_board_hi95_w": 49.23,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 44.58,
+     "burst_board_95": [
+      41.21,
+      47.95
+     ],
+     "burst_D_w": 6.93,
+     "burst_D_95": [
+      3.56,
+      10.3
+     ],
+     "burst_die_rise_c": 3.23,
+     "burst_die_rise_95": [
+      1.83,
+      4.64
+     ],
+     "D600_a3_footing_w": 3.7032
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 45.33,
+     "burst_board_95": [
+      41.96,
+      48.7
+     ],
+     "burst_D_w": 7.67,
+     "burst_D_95": [
+      4.3,
+      11.04
+     ],
+     "burst_die_rise_c": 3.34,
+     "burst_die_rise_95": [
+      1.93,
+      4.74
+     ],
+     "D600_a3_footing_w": 4.1015
+    }
+   }
+  },
+  "int8.b_line_zero_full": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "L",
+   "case": "L int8 whole-line or whole-word flip-flops (E141's steady int8 misses)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.b_line_zero_full",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_zero_full.bin",
+   "sha256": {
+    "whole": "ee46e3c1cefcb4b0a91ce9c9f77065cba47166f4cdc56d3649d77f3934783852",
+    "a": "a8afb526c496a12a2b5d8c547968baa72357a463810db001c16d31ac533b7f9f",
+    "b": "3d7597339419d78e3fe7668141bffbde173fd99db409065edc98239dd53e1ce5"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 45.58,
+     "burst_board_95": [
+      42.08,
+      49.08
+     ],
+     "burst_D_w": 7.92,
+     "burst_D_95": [
+      4.42,
+      11.43
+     ],
+     "burst_die_rise_c": 3.37,
+     "burst_die_rise_95": [
+      1.97,
+      4.78
+     ],
+     "D600_a3_footing_w": 4.2372,
+     "P800_w": 45.58,
+     "peak_board_w": 47.52,
+     "peak_board_hi95_w": 49.88,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 45.28,
+     "burst_board_95": [
+      41.91,
+      48.65
+     ],
+     "burst_D_w": 7.62,
+     "burst_D_95": [
+      4.25,
+      10.99
+     ],
+     "burst_die_rise_c": 3.33,
+     "burst_die_rise_95": [
+      1.92,
+      4.74
+     ],
+     "D600_a3_footing_w": 4.0747
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 45.47,
+     "burst_board_95": [
+      42.1,
+      48.84
+     ],
+     "burst_D_w": 7.81,
+     "burst_D_95": [
+      4.44,
+      11.18
+     ],
+     "burst_die_rise_c": 3.36,
+     "burst_die_rise_95": [
+      1.95,
+      4.76
+     ],
+     "D600_a3_footing_w": 4.1782
+    }
+   }
+  },
+  "int8.bflip_bit2_w": {
+   "type": "int8",
+   "priority": 2,
+   "anchor": false,
+   "class": "B",
+   "case": "B int8 B-position: B's bits held or flipped at one position (E138, E145)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.bflip_bit2_w",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bflip_bit2_w.bin",
+   "sha256": {
+    "whole": "00429415886e46b73208f2185b79c05170bcabfa6a36050270ba8a9b8637087a",
+    "a": "5a648d8015900d89664e00e125df179636301a2d8fa191c1aa2bd9358ea53a69",
+    "b": "f577fe42758f40372bbf74df612ef757cb6b1d2af1903eb3800264a550639a08"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 41.7,
+     "burst_board_95": [
+      38.19,
+      45.2
+     ],
+     "burst_D_w": 4.04,
+     "burst_D_95": [
+      0.54,
+      7.55
+     ],
+     "burst_die_rise_c": 2.83,
+     "burst_die_rise_95": [
+      1.42,
+      4.23
+     ],
+     "D600_a3_footing_w": 2.1617,
+     "P800_w": 41.7,
+     "peak_board_w": 43.64,
+     "peak_board_hi95_w": 46.07,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 41.79,
+     "burst_board_95": [
+      38.42,
+      45.16
+     ],
+     "burst_D_w": 4.14,
+     "burst_D_95": [
+      0.77,
+      7.51
+     ],
+     "burst_die_rise_c": 2.84,
+     "burst_die_rise_95": [
+      1.44,
+      4.25
+     ],
+     "D600_a3_footing_w": 2.2122
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 41.64,
+     "burst_board_95": [
+      38.27,
+      45.01
+     ],
+     "burst_D_w": 3.99,
+     "burst_D_95": [
+      0.62,
+      7.36
+     ],
+     "burst_die_rise_c": 2.82,
+     "burst_die_rise_95": [
+      1.41,
+      4.23
+     ],
+     "D600_a3_footing_w": 2.1323
+    }
+   }
+  },
+  "int8.bflip_bit5_w": {
+   "type": "int8",
+   "priority": 2,
+   "anchor": false,
+   "class": "B",
+   "case": "B int8 B-position: B's bits held or flipped at one position (E138, E145)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.bflip_bit5_w",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bflip_bit5_w.bin",
+   "sha256": {
+    "whole": "fe60fd2993206b52400a883359cd1c53fe014adcb86f0c1680112327219f6403",
+    "a": "5a648d8015900d89664e00e125df179636301a2d8fa191c1aa2bd9358ea53a69",
+    "b": "51b326c3f87cfb7dd9b82a360332777fd66ecaee6138969a06cd4758f210fdda"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 41.7,
+     "burst_board_95": [
+      38.2,
+      45.2
+     ],
+     "burst_D_w": 4.05,
+     "burst_D_95": [
+      0.54,
+      7.55
+     ],
+     "burst_die_rise_c": 2.83,
+     "burst_die_rise_95": [
+      1.42,
+      4.23
+     ],
+     "D600_a3_footing_w": 2.1628,
+     "P800_w": 41.7,
+     "peak_board_w": 43.64,
+     "peak_board_hi95_w": 46.07,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 41.7,
+     "burst_board_95": [
+      38.33,
+      45.07
+     ],
+     "burst_D_w": 4.05,
+     "burst_D_95": [
+      0.68,
+      7.42
+     ],
+     "burst_die_rise_c": 2.83,
+     "burst_die_rise_95": [
+      1.42,
+      4.24
+     ],
+     "D600_a3_footing_w": 2.1656
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 41.63,
+     "burst_board_95": [
+      38.26,
+      45.0
+     ],
+     "burst_D_w": 3.98,
+     "burst_D_95": [
+      0.61,
+      7.35
+     ],
+     "burst_die_rise_c": 2.82,
+     "burst_die_rise_95": [
+      1.41,
+      4.23
+     ],
+     "D600_a3_footing_w": 2.126
+    }
+   }
+  },
+  "int8.bheld_bit1": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "B",
+   "case": "B int8 B-position: B's bits held or flipped at one position (E138, E145)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.bheld_bit1",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit1.bin",
+   "sha256": {
+    "whole": "c93ea4422c6cbc1dc01cc3603717e45e779e3d6eb81cddb0422685b66c7fbbad",
+    "a": "afa6cf432da6f8ff08a72de67307c85a869c90fd83017d8e4492db864fadc817",
+    "b": "14d6fc848712815bc1b5fe1ced1b8980eea1e0db781a946dac5aded9769d1984"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 49.22,
+     "burst_board_95": [
+      45.72,
+      52.72
+     ],
+     "burst_D_w": 11.57,
+     "burst_D_95": [
+      8.06,
+      15.07
+     ],
+     "burst_die_rise_c": 3.88,
+     "burst_die_rise_95": [
+      2.48,
+      5.29
+     ],
+     "D600_a3_footing_w": 6.1846,
+     "P800_w": 49.22,
+     "peak_board_w": 51.16,
+     "peak_board_hi95_w": 53.68,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 49.27,
+     "burst_board_95": [
+      45.9,
+      52.64
+     ],
+     "burst_D_w": 11.62,
+     "burst_D_95": [
+      8.25,
+      14.99
+     ],
+     "burst_die_rise_c": 3.89,
+     "burst_die_rise_95": [
+      2.48,
+      5.3
+     ],
+     "D600_a3_footing_w": 6.2118
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 48.98,
+     "burst_board_95": [
+      45.61,
+      52.35
+     ],
+     "burst_D_w": 11.32,
+     "burst_D_95": [
+      7.95,
+      14.69
+     ],
+     "burst_die_rise_c": 3.85,
+     "burst_die_rise_95": [
+      2.44,
+      5.25
+     ],
+     "D600_a3_footing_w": 6.0548
+    }
+   }
+  },
+  "int8.bheld_bit4": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "B",
+   "case": "B int8 B-position: B's bits held or flipped at one position (E138, E145)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.bheld_bit4",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit4.bin",
+   "sha256": {
+    "whole": "5449f302af2e0d4658292f1f21c843954524e04fc36cb8496edf94351fb96067",
+    "a": "17cb9f64c8f1c9a9e6106c02c8ad6a5fba6a8c86e102ccfa5ed70911eb283219",
+    "b": "57ba70f7ac3b68d5bc59bb537aac0d4346c90a6daba6b46ac28f62b4fc9f48b4"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 48.61,
+     "burst_board_95": [
+      45.1,
+      52.11
+     ],
+     "burst_D_w": 10.95,
+     "burst_D_95": [
+      7.45,
+      14.45
+     ],
+     "burst_die_rise_c": 3.8,
+     "burst_die_rise_95": [
+      2.39,
+      5.2
+     ],
+     "D600_a3_footing_w": 5.8554,
+     "P800_w": 48.61,
+     "peak_board_w": 50.55,
+     "peak_board_hi95_w": 53.04,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 48.65,
+     "burst_board_95": [
+      45.28,
+      52.02
+     ],
+     "burst_D_w": 11.0,
+     "burst_D_95": [
+      7.63,
+      14.37
+     ],
+     "burst_die_rise_c": 3.8,
+     "burst_die_rise_95": [
+      2.4,
+      5.21
+     ],
+     "D600_a3_footing_w": 5.8797
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 48.37,
+     "burst_board_95": [
+      45.0,
+      51.74
+     ],
+     "burst_D_w": 10.72,
+     "burst_D_95": [
+      7.35,
+      14.09
+     ],
+     "burst_die_rise_c": 3.76,
+     "burst_die_rise_95": [
+      2.36,
+      5.17
+     ],
+     "D600_a3_footing_w": 5.7299
+    }
+   }
+  },
+  "int8.bheld_bit7": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "B",
+   "case": "B int8 B-position: B's bits held or flipped at one position (E138, E145)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.bheld_bit7",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit7.bin",
+   "sha256": {
+    "whole": "18151e6e7d6c439316a87e38d208014e7ef769fe878a809b2a70ea701c23c3c8",
+    "a": "228057b9fe30c71ecf9b4ba417ed2c8bf50c58b81dc87bc911d03d7bbc7a9d51",
+    "b": "f991acb1e5897fe61be2decbf1d1b41b165ec8c2317284f8e3d8322c4d052e21"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 47.97,
+     "burst_board_95": [
+      44.46,
+      51.47
+     ],
+     "burst_D_w": 10.31,
+     "burst_D_95": [
+      6.81,
+      13.82
+     ],
+     "burst_die_rise_c": 3.71,
+     "burst_die_rise_95": [
+      2.3,
+      5.11
+     ],
+     "D600_a3_footing_w": 5.5141,
+     "P800_w": 47.97,
+     "peak_board_w": 49.91,
+     "peak_board_hi95_w": 52.37,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 48.02,
+     "burst_board_95": [
+      44.65,
+      51.39
+     ],
+     "burst_D_w": 10.37,
+     "burst_D_95": [
+      7.0,
+      13.74
+     ],
+     "burst_die_rise_c": 3.71,
+     "burst_die_rise_95": [
+      2.31,
+      5.12
+     ],
+     "D600_a3_footing_w": 5.5446
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 47.75,
+     "burst_board_95": [
+      44.38,
+      51.12
+     ],
+     "burst_D_w": 10.1,
+     "burst_D_95": [
+      6.73,
+      13.47
+     ],
+     "burst_die_rise_c": 3.68,
+     "burst_die_rise_95": [
+      2.27,
+      5.08
+     ],
+     "D600_a3_footing_w": 5.3977
+    }
+   }
+  },
+  "int8.powerlaw_df15_pt": {
+   "type": "int8",
+   "priority": 2,
+   "anchor": false,
+   "class": "W",
+   "case": "W seeded power-law weights, int8 (E141's steady int8 misses)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.powerlaw_df15_pt",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.powerlaw_df15_pt.bin",
+   "sha256": {
+    "whole": "f234359946f4e83bd30f27c4600cf1a9f7cde87b2d307ae2fd16589c4c517403",
+    "a": "3baa1df69fe39ba17563f3d3a1e3b58f65a3135ac7dd3487518fe19c24d417e0",
+    "b": "9cdf34b4ff8129d64120936c834d776e5f879cf2796195ab2242e240cd5e7a50"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 42.65,
+     "burst_board_95": [
+      39.14,
+      46.15
+     ],
+     "burst_D_w": 4.99,
+     "burst_D_95": [
+      1.49,
+      8.49
+     ],
+     "burst_die_rise_c": 2.96,
+     "burst_die_rise_95": [
+      1.56,
+      4.37
+     ],
+     "D600_a3_footing_w": 2.6685,
+     "P800_w": 42.65,
+     "peak_board_w": 44.59,
+     "peak_board_hi95_w": 46.95,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 42.61,
+     "burst_board_95": [
+      39.24,
+      45.98
+     ],
+     "burst_D_w": 4.95,
+     "burst_D_95": [
+      1.58,
+      8.32
+     ],
+     "burst_die_rise_c": 2.96,
+     "burst_die_rise_95": [
+      1.55,
+      4.36
+     ],
+     "D600_a3_footing_w": 2.6475
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 42.57,
+     "burst_board_95": [
+      39.2,
+      45.94
+     ],
+     "burst_D_w": 4.91,
+     "burst_D_95": [
+      1.54,
+      8.28
+     ],
+     "burst_die_rise_c": 2.95,
+     "burst_die_rise_95": [
+      1.54,
+      4.36
+     ],
+     "D600_a3_footing_w": 2.6264
+    }
+   }
+  },
+  "int8.powerlaw_df4_pc": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "W",
+   "case": "W seeded power-law weights, int8 (E141's steady int8 misses)",
+   "real": false,
+   "hold_candidate": false,
+   "label": "b6-int8.powerlaw_df4_pc",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.powerlaw_df4_pc.bin",
+   "sha256": {
+    "whole": "6567a038effab405cdf5727f60f28b738931c8eb7deaa490f578f200f183d53a",
+    "a": "3795d96e28f16738af4add6c4aaf3d97a4d9a57d9817b149774a963911fa4c94",
+    "b": "d194c5fba78900c122dd12162526436844f218273580c87d741d060e7323ae51"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 50.3,
+     "burst_board_95": [
+      46.79,
+      53.8
+     ],
+     "burst_D_w": 12.64,
+     "burst_D_95": [
+      9.14,
+      16.14
+     ],
+     "burst_die_rise_c": 4.03,
+     "burst_die_rise_95": [
+      2.63,
+      5.44
+     ],
+     "D600_a3_footing_w": 6.7591,
+     "P800_w": 50.3,
+     "peak_board_w": 52.24,
+     "peak_board_hi95_w": 54.58,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 50.27,
+     "burst_board_95": [
+      46.9,
+      53.64
+     ],
+     "burst_D_w": 12.62,
+     "burst_D_95": [
+      9.25,
+      15.99
+     ],
+     "burst_die_rise_c": 4.03,
+     "burst_die_rise_95": [
+      2.62,
+      5.43
+     ],
+     "D600_a3_footing_w": 6.745
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 50.28,
+     "burst_board_95": [
+      46.91,
+      53.65
+     ],
+     "burst_D_w": 12.62,
+     "burst_D_95": [
+      9.25,
+      15.99
+     ],
+     "burst_die_rise_c": 4.03,
+     "burst_die_rise_95": [
+      2.62,
+      5.44
+     ],
+     "D600_a3_footing_w": 6.7501
+    }
+   }
+  },
+  "int8.real_qwen_w8a8_down": {
+   "type": "int8",
+   "priority": 2,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": false,
+   "label": "b6-int8.real_qwen_w8a8_down",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_down.bin",
+   "sha256": {
+    "whole": "de54c13f933cf48e42f79c23ddca765f8b58000a353e2898f5c68716d402c188",
+    "a": "62947f88e7dec299c43806766733c8139be267185bd983ab6e16c6b82a250e0e",
+    "b": "da9cce1503c53896d66d90c579cba837af5d944d1d7136e750068b37504a61c9"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 49.15,
+     "burst_board_95": [
+      45.65,
+      52.65
+     ],
+     "burst_D_w": 11.5,
+     "burst_D_95": [
+      7.99,
+      15.0
+     ],
+     "burst_die_rise_c": 3.87,
+     "burst_die_rise_95": [
+      2.47,
+      5.28
+     ],
+     "D600_a3_footing_w": 6.1463,
+     "P800_w": 49.15,
+     "peak_board_w": 51.09,
+     "peak_board_hi95_w": 53.44,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 48.93,
+     "burst_board_95": [
+      45.56,
+      52.3
+     ],
+     "burst_D_w": 11.28,
+     "burst_D_95": [
+      7.91,
+      14.65
+     ],
+     "burst_die_rise_c": 3.84,
+     "burst_die_rise_95": [
+      2.44,
+      5.25
+     ],
+     "D600_a3_footing_w": 6.0289
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 49.0,
+     "burst_board_95": [
+      45.63,
+      52.37
+     ],
+     "burst_D_w": 11.35,
+     "burst_D_95": [
+      7.98,
+      14.72
+     ],
+     "burst_die_rise_c": 3.85,
+     "burst_die_rise_95": [
+      2.45,
+      5.26
+     ],
+     "D600_a3_footing_w": 6.0686
+    }
+   }
+  },
+  "int8.real_qwen_w8a8_gate": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": false,
+   "label": "b6-int8.real_qwen_w8a8_gate",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_gate.bin",
+   "sha256": {
+    "whole": "3a31a0b62d83dfab441c5513e1218174a6a56226638d7f6fddf7e97a2b095136",
+    "a": "be53a4c15dd13991733a132bc34d8c918cfe7c69de5cdb28df8a92643961f6eb",
+    "b": "cad1ad401950311d3b2fb6d529e9c89188580a11fcb7527284a19b8f4c4924e2"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 50.24,
+     "burst_board_95": [
+      46.73,
+      53.74
+     ],
+     "burst_D_w": 12.58,
+     "burst_D_95": [
+      9.08,
+      16.09
+     ],
+     "burst_die_rise_c": 4.02,
+     "burst_die_rise_95": [
+      2.62,
+      5.43
+     ],
+     "D600_a3_footing_w": 6.7275,
+     "P800_w": 50.24,
+     "peak_board_w": 52.18,
+     "peak_board_hi95_w": 54.52,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 50.16,
+     "burst_board_95": [
+      46.79,
+      53.53
+     ],
+     "burst_D_w": 12.51,
+     "burst_D_95": [
+      9.14,
+      15.88
+     ],
+     "burst_die_rise_c": 4.01,
+     "burst_die_rise_95": [
+      2.61,
+      5.42
+     ],
+     "D600_a3_footing_w": 6.6874
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 50.17,
+     "burst_board_95": [
+      46.8,
+      53.54
+     ],
+     "burst_D_w": 12.51,
+     "burst_D_95": [
+      9.14,
+      15.88
+     ],
+     "burst_die_rise_c": 4.01,
+     "burst_die_rise_95": [
+      2.61,
+      5.42
+     ],
+     "D600_a3_footing_w": 6.6913
+    }
+   }
+  },
+  "int8.real_qwen_w8a8_v": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": true,
+   "label": "b6-int8.real_qwen_w8a8_v",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_v.bin",
+   "sha256": {
+    "whole": "b253206379b267bd90d7eb76a0ddfcb2dff4b83c184bd304dddc79e30107668a",
+    "a": "f7a3aad6d46ff274ee4d45821968890db5aca5a55f4a9e4cb9b3e31767e8b80f",
+    "b": "c82fc61f004507581cb43c58688d4efc1c3f7d40c2de0ea3472e30d37c2dffcf"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 50.17,
+     "burst_board_95": [
+      46.67,
+      53.68
+     ],
+     "burst_D_w": 12.52,
+     "burst_D_95": [
+      9.02,
+      16.02
+     ],
+     "burst_die_rise_c": 4.02,
+     "burst_die_rise_95": [
+      2.61,
+      5.42
+     ],
+     "D600_a3_footing_w": 6.6943,
+     "P800_w": 50.17,
+     "peak_board_w": 52.11,
+     "peak_board_hi95_w": 54.46,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 50.17,
+     "burst_board_95": [
+      46.8,
+      53.54
+     ],
+     "burst_D_w": 12.52,
+     "burst_D_95": [
+      9.15,
+      15.89
+     ],
+     "burst_die_rise_c": 4.02,
+     "burst_die_rise_95": [
+      2.61,
+      5.42
+     ],
+     "D600_a3_footing_w": 6.692
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 50.19,
+     "burst_board_95": [
+      46.82,
+      53.56
+     ],
+     "burst_D_w": 12.54,
+     "burst_D_95": [
+      9.17,
+      15.91
+     ],
+     "burst_die_rise_c": 4.02,
+     "burst_die_rise_95": [
+      2.61,
+      5.42
+     ],
+     "D600_a3_footing_w": 6.7033
+    }
+   }
+  },
+  "int8.real_smol_w8a8_down": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": false,
+   "label": "b6-int8.real_smol_w8a8_down",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_down.bin",
+   "sha256": {
+    "whole": "24fe46efcb1b3a93deea9e781e8caf17495ded5703366bec820bda9603111b2f",
+    "a": "04341238eba81dc1daa1079e67ae7a83925aee1433e411237d52d7983f99e50b",
+    "b": "2e87d815b10713b40a47651183a509084ba5c244996c4c75c6f3cb2efc128da8"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 47.82,
+     "burst_board_95": [
+      44.32,
+      51.33
+     ],
+     "burst_D_w": 10.17,
+     "burst_D_95": [
+      6.67,
+      13.67
+     ],
+     "burst_die_rise_c": 3.69,
+     "burst_die_rise_95": [
+      2.28,
+      5.09
+     ],
+     "D600_a3_footing_w": 5.4369,
+     "P800_w": 47.82,
+     "peak_board_w": 49.76,
+     "peak_board_hi95_w": 52.1,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 47.63,
+     "burst_board_95": [
+      44.26,
+      51.0
+     ],
+     "burst_D_w": 9.98,
+     "burst_D_95": [
+      6.61,
+      13.35
+     ],
+     "burst_die_rise_c": 3.66,
+     "burst_die_rise_95": [
+      2.25,
+      5.07
+     ],
+     "D600_a3_footing_w": 5.3357
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 47.58,
+     "burst_board_95": [
+      44.21,
+      50.95
+     ],
+     "burst_D_w": 9.93,
+     "burst_D_95": [
+      6.56,
+      13.3
+     ],
+     "burst_die_rise_c": 3.65,
+     "burst_die_rise_95": [
+      2.25,
+      5.06
+     ],
+     "D600_a3_footing_w": 5.3079
+    }
+   }
+  },
+  "int8.real_smol_w8a8_q": {
+   "type": "int8",
+   "priority": 1,
+   "anchor": false,
+   "class": "R",
+   "case": "R real model tiles: W8A8 projections and attention matmuls from two public W8A8 checkpoints (item 7; critic rank 8)",
+   "real": true,
+   "hold_candidate": false,
+   "label": "b6-int8.real_smol_w8a8_q",
+   "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_q.bin",
+   "sha256": {
+    "whole": "fbea3ed0b0336fd3ec297717f7ba76c8d2941fc37bd5e439cf1e960711835020",
+    "a": "51d9c65d857366b841b76e2cfec9dc416e754f4059dddf4718d8cbdcae23af90",
+    "b": "4da9e3e445d8e192655c5dde6a47ed8b1af6522eb99da632d34f8888a145a63d"
+   },
+   "group": "pinned",
+   "dropped": false,
+   "models": {
+    "M8": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      783.1,
+      800.0
+     ],
+     "burst_board_w": 49.9,
+     "burst_board_95": [
+      46.39,
+      53.4
+     ],
+     "burst_D_w": 12.24,
+     "burst_D_95": [
+      8.74,
+      15.74
+     ],
+     "burst_die_rise_c": 3.98,
+     "burst_die_rise_95": [
+      2.57,
+      5.38
+     ],
+     "D600_a3_footing_w": 6.5455,
+     "P800_w": 49.9,
+     "peak_board_w": 51.84,
+     "peak_board_hi95_w": 54.18,
+     "peak_over_82w": false
+    },
+    "M7": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 49.75,
+     "burst_board_95": [
+      46.38,
+      53.12
+     ],
+     "burst_D_w": 12.1,
+     "burst_D_95": [
+      8.73,
+      15.47
+     ],
+     "burst_die_rise_c": 3.96,
+     "burst_die_rise_95": [
+      2.55,
+      5.36
+     ],
+     "D600_a3_footing_w": 6.4686
+    },
+    "M6": {
+     "burst_mhz": 800.0,
+     "burst_mhz_95": [
+      778.7,
+      800.0
+     ],
+     "burst_board_w": 49.8,
+     "burst_board_95": [
+      46.43,
+      53.17
+     ],
+     "burst_D_w": 12.14,
+     "burst_D_95": [
+      8.77,
+      15.51
+     ],
+     "burst_die_rise_c": 3.96,
+     "burst_die_rise_95": [
+      2.56,
+      5.37
+     ],
+     "D600_a3_footing_w": 6.4918
+    }
+   }
+  }
+ },
+ "dropped": [
+  "fp32.anchor6_randn",
+  "fp32.real_qwen_softmax_v"
+ ],
+ "n_run": 48,
+ "n_governed": 17,
+ "n_pinned": 31,
+ "replicate": {
+  "k-fp16-randn": {
+   "type": "fp16",
+   "kind": "randn",
+   "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+   "sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974",
+   "ref_burst_mhz": 727.7,
+   "ref_burst_w": 66.585,
+   "ref_source": "tools/claims-v3/e143/predictions-e143.json replicate.k-fp16-randn (E80's and E83's mean cell)",
+   "e143_burst_mhz": 720.13,
+   "e143_burst_w": 67.327,
+   "e143_rise_c": 6.333,
+   "e143_source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json replicate.tiles.k-fp16-randn",
+   "e143_peak_w_runs": [
+    80.26,
+    80.19,
+    79.79
+   ],
+   "e143_p800_from_c_w": 77.57,
+   "estimate_w": 80.52
+  },
+  "k-int8-full": {
+   "type": "int8",
+   "kind": "full",
+   "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+   "sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9",
+   "ref_burst_mhz": 800.0,
+   "ref_burst_w": 49.8,
+   "ref_source": "tools/claims-v3/e143/predictions-e143.json replicate.k-int8-full (E80's and E83's mean cell)",
+   "e143_burst_mhz": 794.67,
+   "e143_burst_w": 49.467,
+   "e143_rise_c": 3.667,
+   "e143_source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json replicate.tiles.k-int8-full",
+   "e143_peak_w_runs": [
+    49.9,
+    50.96,
+    51.01
+   ],
+   "e143_p800_from_c_w": 50.661,
+   "estimate_w": 53.61
+  }
+ },
+ "replicate_dropped": {
+  "k-fp32-randn": {
+   "type": "fp32",
+   "kind": "randn",
+   "values": "file:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+   "sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa",
+   "ref_burst_mhz": 713.3,
+   "ref_burst_w": 68.985,
+   "ref_source": "tools/claims-v3/e143/predictions-e143.json replicate.k-fp32-randn (E80's and E83's mean cell)",
+   "e143_burst_mhz": 705.33,
+   "e143_burst_w": 67.93,
+   "e143_rise_c": 6.667,
+   "e143_source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json replicate.tiles.k-fp32-randn",
+   "e143_peak_w_runs": [
+    84.3,
+    84.97,
+    84.88
+   ],
+   "e143_p800_from_c_w": 82.402,
+   "estimate_w": 85.35,
+   "dropped_why": "its estimate 85.35 W (E143's highest board sample 84.97 W) exceeds 82 W: dropped"
+  }
+ },
+ "reference": {
+  "source": "docs/reports/data/2026-11-03-q139m-model/nested-m8.json aifoundry2.end_to_end_from_M8_nested_D.rows (M8's end to end from its nested D, its frozen relation and cap 65.20 W), split by M8's predicted clock (below 795 MHz: governed), as E160's groups are",
+  "split_by_measured_clock_for_information": {
+   "governed": {
+    "bias_board_meas_minus_pred_w": 1.1563601530781433,
+    "n": 41,
+    "rms_board_w": 2.2801590070742495,
+    "rms_mhz": 10.678375768888298
+   },
+   "pinned": {
+    "n": 51,
+    "rms_board_w": 1.4430793067092176,
+    "rms_mhz": 0.827844479060556
+   },
+   "source": "docs/reports/data/2026-11-03-q139m-model/m8.json aifoundry2.end_to_end_from_M8_nested_D"
+  },
+  "governed": {
+   "n": 36,
+   "mhz_err": [
+    4.5,
+    3.3,
+    7.0,
+    7.4,
+    7.5,
+    8.2,
+    10.3,
+    3.7,
+    -1.4,
+    3.7,
+    8.3,
+    -0.8,
+    -1.3,
+    -16.1,
+    18.0,
+    -9.1,
+    -3.8,
+    1.87,
+    -1.17,
+    0.93,
+    -11.77,
+    -3.8,
+    4.33,
+    3.93,
+    -9.27,
+    -7.8,
+    0.53,
+    -0.03,
+    -5.97,
+    -0.43,
+    -5.37,
+    -3.27,
+    -4.7,
+    -1.5,
+    -3.5,
+    -2.8
+   ],
+   "w_err": [
+    1.53,
+    0.87,
+    0.81,
+    0.72,
+    3.73,
+    0.92,
+    4.32,
+    3.81,
+    2.59,
+    2.23,
+    1.71,
+    2.96,
+    1.28,
+    0.11,
+    2.27,
+    2.14,
+    1.49,
+    0.283,
+    1.477,
+    2.97,
+    -1.2,
+    1.927,
+    0.967,
+    0.913,
+    0.753,
+    1.653,
+    1.053,
+    0.857,
+    2.147,
+    4.173,
+    3.32,
+    2.347,
+    1.75,
+    1.263,
+    1.75,
+    0.68
+   ],
+   "cells": [
+    "E80:fp16.randn",
+    "E80:fp16.smallint",
+    "E80:fp16.fp8grid",
+    "E80:fp16.nn_like",
+    "E80:fp32.randn",
+    "E80:fp32.bf16trunc",
+    "E83:fp32.randn",
+    "E83:fp32.randn_small",
+    "E83:fp32.randn_large",
+    "E83:fp32.uniform01",
+    "E83:fp32.fp16grid",
+    "E83:fp32.randn_sorted",
+    "E83:fp16.randn",
+    "E83:fp16.randn_small",
+    "E83:fp16.uniform01",
+    "E83:fp16.pair_half_zero",
+    "E83:fp16.randn_sorted",
+    "E143:fp32.exp_only_both",
+    "E143:fp32.real_pythia_ln1_q",
+    "E143:fp32.randn",
+    "E143:fp32.wideexp48_bgate_alt",
+    "E143:fp16.real_pythia_qk",
+    "E143:fp16.real_pythia_softmax_v",
+    "E143:fp32.gray_stream",
+    "E143:fp32.sorted_k",
+    "E143:fp32.real_pythia_gelu_down",
+    "E143:fp16.pair_cancel_asign",
+    "E143:fp32.b_exp_busy_a_const",
+    "E143:fp16.randn",
+    "E143:fp32.wideexp48_dense",
+    "E143:fp32.lowrank2_w",
+    "E143:fp16.pair_nearcancel",
+    "E143:fp16.real_pythia_ln2_up",
+    "E143:fp32.e4m3grid_gelu_w",
+    "E143:fp16.sparse24_straddled",
+    "E143:fp16.exp_only"
+   ],
+   "rms_mhz": 6.6776,
+   "rms_w": 2.102
+  },
+  "pinned": {
+   "n": 56,
+   "mhz_err": [
+    0.0,
+    0.0,
+    0.9,
+    0.0,
+    -22.5,
+    0.0,
+    -2.0,
+    0.0,
+    0.0,
+    0.0,
+    2.1,
+    -38.7,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.9,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -2.0,
+    -20.9,
+    0.0,
+    0.0,
+    0.0,
+    -24.5,
+    0.0,
+    0.0,
+    0.8,
+    -5.33,
+    -4.07,
+    0.0,
+    0.0,
+    0.8,
+    0.0,
+    0.0,
+    0.3,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.3,
+    0.0
+   ],
+   "w_err": [
+    -1.54,
+    -0.35,
+    -0.54,
+    -2.71,
+    -2.64,
+    -1.18,
+    -3.01,
+    -1.96,
+    -0.63,
+    -1.83,
+    -0.39,
+    -5.21,
+    -2.14,
+    0.02,
+    -0.09,
+    -0.14,
+    -0.72,
+    0.64,
+    -0.59,
+    -2.14,
+    -2.17,
+    0.1,
+    -2.38,
+    -0.89,
+    -2.01,
+    -0.92,
+    -2.0,
+    -2.2,
+    -1.41,
+    -0.78,
+    -0.53,
+    -1.06,
+    -1.28,
+    -1.33,
+    -2.71,
+    -1.77,
+    -1.32,
+    -2.44,
+    -3.3,
+    -1.2,
+    -1.807,
+    0.187,
+    -1.313,
+    -2.227,
+    -1.983,
+    -1.317,
+    -0.01,
+    -1.183,
+    -1.23,
+    0.857,
+    -0.247,
+    0.68,
+    -1.827,
+    0.177,
+    -0.333,
+    -1.11
+   ],
+   "cells": [
+    "E80:fp16.zeros",
+    "E80:fp16.ones",
+    "E80:fp16.sparse50",
+    "E80:int8.zeros",
+    "E80:int8.neg_ones",
+    "E80:int8.full",
+    "E80:int8.smallint",
+    "E80:int8.gauss_q",
+    "E80:int8.sparse50",
+    "E80:fp32.sparse90",
+    "E80:fp32.smallint",
+    "E80:fp32.nn_like",
+    "E83:fp32.zeros",
+    "E83:fp32.ones",
+    "E83:fp32.neg_ones",
+    "E83:fp32.pi",
+    "E83:fp32.sparse50",
+    "E83:fp32.pow2",
+    "E83:fp32.a_randn_b_zeros",
+    "E83:fp32.a_zeros_b_randn",
+    "E83:fp16.zeros",
+    "E83:fp16.neg_ones",
+    "E83:fp16.sparse90",
+    "E83:fp16.wsparse50",
+    "E83:fp16.wsparse90",
+    "E83:fp16.a_randn_b_zeros",
+    "E83:fp16.a_zeros_b_randn",
+    "E83:int8.zeros",
+    "E83:int8.ones",
+    "E83:int8.full",
+    "E83:int8.pos",
+    "E83:int8.ternary",
+    "E83:int8.sparse90",
+    "E83:int8.wsparse50",
+    "E83:int8.wsparse90",
+    "E83:int8.highbit",
+    "E83:int8.a_full_b_zeros",
+    "E83:int8.a_zeros_b_full",
+    "E83:int8.sorted",
+    "E143:int8.sorted_k",
+    "E143:int8.gray_a",
+    "E143:fp16.wideexp_bgate_alt",
+    "E143:int8.full",
+    "E143:int8.a_word_flipflop",
+    "E143:int8.powerlaw_w",
+    "E143:int8.anchor_zeros",
+    "E143:fp32.wideexp48_bgate_kblk",
+    "E143:fp32.anchor_zeros",
+    "E143:int8.block_sparse_a",
+    "E143:fp16.sparse24_aligned",
+    "E143:int8.real_pythia_w8a8_up",
+    "E143:int8.b_line_flipflop_nogate",
+    "E143:int8.b_line_zero_one",
+    "E143:int8.real_pythia_w8a8_down",
+    "E143:fp32.block_sparse_k4",
+    "E143:fp16.anchor_zeros"
+   ],
+   "rms_mhz": 7.4454,
+   "rms_w": 1.6916
+  },
+  "heat": {
+   "n": 112,
+   "rise_err_c": [
+    -1.031156,
+    -0.031156,
+    -0.979064,
+    0.020936,
+    -0.237242,
+    -0.237242,
+    -0.252941,
+    -0.252941,
+    0.819703,
+    0.819703,
+    -0.187389,
+    -0.187389,
+    -0.416563,
+    0.583437,
+    0.701616,
+    -0.298384,
+    1.736445,
+    -0.263555,
+    0.880089,
+    -0.119911,
+    -0.322294,
+    0.677706,
+    -0.199314,
+    0.800686,
+    0.487557,
+    -0.512443,
+    -0.103857,
+    -0.103857,
+    0.56456,
+    -0.43544,
+    -0.78476,
+    0.21524,
+    0.04655,
+    0.04655,
+    -1.859104,
+    -0.859104,
+    -0.770575,
+    -0.770575,
+    -0.091724,
+    -1.091724,
+    -0.972332,
+    -0.972332,
+    -0.23545,
+    0.76455,
+    0.645822,
+    -0.354178,
+    -0.24011,
+    -0.24011,
+    -0.776585,
+    1.223415,
+    -0.262452,
+    -1.262452,
+    0.770761,
+    -0.229239,
+    0.207869,
+    1.207869,
+    0.42072,
+    0.42072,
+    0.338462,
+    0.338462,
+    -0.447061,
+    0.552939,
+    0.40121,
+    0.40121,
+    0.498237,
+    0.498237,
+    0.324884,
+    0.324884,
+    0.098308,
+    0.098308,
+    0.019529,
+    -0.980471,
+    0.597942,
+    0.597942,
+    -0.782135,
+    -0.782135,
+    -0.237541,
+    -0.237541,
+    -1.080453,
+    -0.080453,
+    0.065912,
+    -0.934088,
+    0.009911,
+    1.009911,
+    -0.771972,
+    0.228028,
+    -0.845341,
+    0.154659,
+    -1.397873,
+    -0.397873,
+    -0.535017,
+    -1.535017,
+    -0.799692,
+    -0.799692,
+    -0.535083,
+    0.464917,
+    0.501733,
+    -0.498267,
+    -1.626071,
+    -0.626071,
+    -1.415984,
+    -1.415984,
+    -0.536385,
+    -0.536385,
+    -0.95137,
+    0.04863,
+    -0.032147,
+    -0.032147,
+    0.118337,
+    0.118337,
+    0.046935,
+    0.046935
+   ],
+   "rms_c": 0.6845,
+   "source": "tools/claims-v3/e143/predictions-e143.json reference.heat (E143's frozen copy of the burst heat law's 112 leave-one-kind-out residuals on E80's and E83's kinds bursts; M8 carries M7's law: m8.json aifoundry2.burst_heat)"
+  },
+  "peak": {
+   "excess_w": [
+    -1.665,
+    2.651,
+    2.949,
+    -1.089,
+    -0.853,
+    -1.084,
+    1.957,
+    1.86,
+    2.264,
+    2.161,
+    2.283,
+    2.302,
+    2.53,
+    2.402,
+    2.55,
+    2.926,
+    2.749,
+    2.722,
+    2.178,
+    2.635,
+    2.592,
+    1.93,
+    2.209,
+    2.323,
+    1.656,
+    5.315,
+    1.697,
+    2.464,
+    2.549,
+    2.605,
+    -0.438,
+    1.796,
+    1.804,
+    3.493,
+    3.145,
+    2.814,
+    -1.272,
+    -1.066,
+    -1.024,
+    2.653,
+    2.327,
+    2.409,
+    1.367,
+    1.574,
+    1.791,
+    2.262,
+    -3.918,
+    2.263,
+    -0.723,
+    2.367,
+    2.952,
+    1.94,
+    2.424,
+    2.366,
+    2.952,
+    3.893,
+    2.831,
+    2.318,
+    2.584,
+    2.557,
+    0.82,
+    2.555,
+    2.594,
+    2.544,
+    2.753,
+    2.411,
+    1.097,
+    2.213,
+    2.116,
+    1.582,
+    1.762,
+    1.408,
+    2.938,
+    2.769,
+    3.028,
+    -0.401,
+    -0.699,
+    -0.438,
+    0.458,
+    0.323,
+    0.546,
+    -1.355,
+    -1.298,
+    -0.825,
+    0.391,
+    0.252,
+    0.485,
+    -0.208,
+    1.817,
+    -0.252,
+    -0.559,
+    -0.616,
+    -0.14,
+    -2.555,
+    0.116,
+    -0.058,
+    0.041,
+    -0.348,
+    0.484,
+    0.458,
+    2.878,
+    0.407,
+    0.27,
+    2.828,
+    0.18,
+    -2.107,
+    0.397,
+    0.572,
+    1.981,
+    2.489,
+    2.475,
+    2.696,
+    2.571,
+    2.262,
+    -0.835,
+    0.368,
+    0.355
+   ],
+   "median_w": 1.9402533269109057,
+   "q95_w": 2.9518500869720983,
+   "source": "docs/reports/data/2026-11-03-q139m-model/nested-m8.json aifoundry2.peaks (E143's 117 traces); docs/reports/data/2026-11-03-q139m-model/m8.json aifoundry2.peak"
+  }
+ },
+ "plan_bars_at_full_n": {
+  "F1_governed_clock_rms_mhz": [
+   4.218,
+   9.077
+  ],
+  "F2_pinned_clock_rms_mhz": [
+   0.746,
+   12.189
+  ],
+  "W1_governed_board_rms_w": [
+   1.51,
+   2.634
+  ],
+  "W2_pinned_board_rms_w": [
+   1.293,
+   2.135
+  ],
+  "H1_die_rise_rms_c": [
+   0.547,
+   0.818
+  ],
+  "coverage_line_all": 42,
+  "coverage_line_governed": 14,
+  "coverage_line_pinned": 27
+ },
+ "admission": {
+  "b6-fp16.a_zeros_b_complement": {
+   "c_ref_w": 2.887,
+   "fixed_p800_w": 42.72,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.anchor6_randn": {
+   "c_ref_w": 23.064,
+   "fixed_p800_w": 81.12,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.anchor6_zeros": {
+   "c_ref_w": 1.396,
+   "fixed_p800_w": 39.82,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.b_onebit_b6_third": {
+   "c_ref_w": 13.889,
+   "fixed_p800_w": 63.64,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.c_absorbed": {
+   "c_ref_w": 20.896,
+   "fixed_p800_w": 76.99,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.e5m2grid_wide": {
+   "c_ref_w": 18.991,
+   "fixed_p800_w": 73.37,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.exp_a_walk_fixedmant": {
+   "c_ref_w": 13.668,
+   "fixed_p800_w": 63.22,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.exp_b_alt_shift": {
+   "c_ref_w": 16.639,
+   "fixed_p800_w": 68.88,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.exp_only_narrow2": {
+   "c_ref_w": 17.012,
+   "fixed_p800_w": 69.6,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.real_qwen_dequant_v": {
+   "c_ref_w": 22.87,
+   "fixed_p800_w": 80.75,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.real_qwen_qk": {
+   "c_ref_w": 20.056,
+   "fixed_p800_w": 75.39,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.real_smol_qk": {
+   "c_ref_w": 22.565,
+   "fixed_p800_w": 80.17,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp16.real_smol_softmax_v": {
+   "c_ref_w": 18.623,
+   "fixed_p800_w": 72.66,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.a_onebit_b16_half": {
+   "c_ref_w": 10.944,
+   "fixed_p800_w": 58.21,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.a_onebit_b5_third": {
+   "c_ref_w": 10.713,
+   "fixed_p800_w": 57.77,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.a_zeros_b_complement": {
+   "c_ref_w": 2.95,
+   "fixed_p800_w": 43.01,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.anchor6_randn": {
+   "c_ref_w": 25.714,
+   "fixed_p800_w": 86.36,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.anchor6_zeros": {
+   "c_ref_w": 1.438,
+   "fixed_p800_w": 40.1,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.b_onebit_b12_third": {
+   "c_ref_w": 11.112,
+   "fixed_p800_w": 58.53,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.b_onebit_b20_third": {
+   "c_ref_w": 14.938,
+   "fixed_p800_w": 65.82,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.bf16_wideexp": {
+   "c_ref_w": 20.502,
+   "fixed_p800_w": 76.46,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.c_absorbed": {
+   "c_ref_w": 21.038,
+   "fixed_p800_w": 77.46,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.exp_a_pow2wide_b_randn": {
+   "c_ref_w": 20.25,
+   "fixed_p800_w": 75.97,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.exp_a_walk_fixedmant": {
+   "c_ref_w": 13.831,
+   "fixed_p800_w": 63.72,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.exp_b_alt_shift": {
+   "c_ref_w": 17.196,
+   "fixed_p800_w": 70.14,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.exp_only_narrow2": {
+   "c_ref_w": 16.156,
+   "fixed_p800_w": 68.16,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.negzero_a_b_complement": {
+   "c_ref_w": 17.804,
+   "fixed_p800_w": 71.33,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.real_qwen_dequant_q": {
+   "c_ref_w": 21.358,
+   "fixed_p800_w": 78.06,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.real_qwen_softmax_v": {
+   "c_ref_w": 25.253,
+   "fixed_p800_w": 85.48,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.real_smol_softmax_v_causal": {
+   "c_ref_w": 14.881,
+   "fixed_p800_w": 65.72,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-fp32.signexp_invert_b": {
+   "c_ref_w": 18.203,
+   "fixed_p800_w": 72.09,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.a_word_zero_one": {
+   "c_ref_w": 4.929,
+   "fixed_p800_w": 47.3,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.a_zeros_b_lineflip": {
+   "c_ref_w": 1.79,
+   "fixed_p800_w": 42.57,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.anchor6_full": {
+   "c_ref_w": 9.023,
+   "fixed_p800_w": 55.09,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.anchor6_zeros": {
+   "c_ref_w": 2.121,
+   "fixed_p800_w": 41.9,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.b_line_55_aa": {
+   "c_ref_w": 8.11,
+   "fixed_p800_w": 54.37,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.b_line_zero_ff": {
+   "c_ref_w": 5.449,
+   "fixed_p800_w": 49.23,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.b_line_zero_full": {
+   "c_ref_w": 6.283,
+   "fixed_p800_w": 49.88,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.bflip_bit2_w": {
+   "c_ref_w": 4.247,
+   "fixed_p800_w": 46.07,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.bflip_bit5_w": {
+   "c_ref_w": 4.247,
+   "fixed_p800_w": 46.07,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.bheld_bit1": {
+   "c_ref_w": 8.194,
+   "fixed_p800_w": 53.68,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.bheld_bit4": {
+   "c_ref_w": 7.874,
+   "fixed_p800_w": 53.04,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.bheld_bit7": {
+   "c_ref_w": 7.538,
+   "fixed_p800_w": 52.37,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.powerlaw_df15_pt": {
+   "c_ref_w": 4.745,
+   "fixed_p800_w": 46.95,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.powerlaw_df4_pc": {
+   "c_ref_w": 8.761,
+   "fixed_p800_w": 54.58,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.real_qwen_w8a8_down": {
+   "c_ref_w": 8.157,
+   "fixed_p800_w": 53.44,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.real_qwen_w8a8_gate": {
+   "c_ref_w": 8.729,
+   "fixed_p800_w": 54.52,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.real_qwen_w8a8_v": {
+   "c_ref_w": 8.692,
+   "fixed_p800_w": 54.46,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.real_smol_w8a8_down": {
+   "c_ref_w": 7.459,
+   "fixed_p800_w": 52.1,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "b6-int8.real_smol_w8a8_q": {
+   "c_ref_w": 8.551,
+   "fixed_p800_w": 54.18,
+   "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+  },
+  "k-fp16-randn": {
+   "c_ref_w": 23.074,
+   "fixed_p800_w": 80.52,
+   "what": "the larger of E143's highest board sample on this tile and P800 from E143's c plus M8's q95 peak excess"
+  },
+  "k-int8-full": {
+   "c_ref_w": 8.95,
+   "fixed_p800_w": 53.61,
+   "what": "the larger of E143's highest board sample on this tile and P800 from E143's c plus M8's q95 peak excess"
+  },
+  "rest": {
+   "c_ref_w": 0.0,
+   "fixed_p800_w": 33.61,
+   "what": "the idle card (no launch)"
+  }
+ },
+ "dry_c_w": {
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.a_zeros_b_complement.bin": 2.887,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.anchor6_randn.bin": 23.064,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.anchor6_zeros.bin": 1.396,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.b_onebit_b6_third.bin": 13.889,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.c_absorbed.bin": 20.896,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.e5m2grid_wide.bin": 18.991,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_a_walk_fixedmant.bin": 13.668,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_b_alt_shift.bin": 16.639,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_only_narrow2.bin": 17.012,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_qwen_dequant_v.bin": 22.87,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_qwen_qk.bin": 20.056,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_smol_qk.bin": 22.565,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_smol_softmax_v.bin": 18.623,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_onebit_b16_half.bin": 10.944,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_onebit_b5_third.bin": 10.713,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_zeros_b_complement.bin": 2.95,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.anchor6_randn.bin": 25.714,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.anchor6_zeros.bin": 1.438,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.b_onebit_b12_third.bin": 11.112,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.b_onebit_b20_third.bin": 14.938,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.bf16_wideexp.bin": 20.502,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.c_absorbed.bin": 21.038,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_a_pow2wide_b_randn.bin": 20.25,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_a_walk_fixedmant.bin": 13.831,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_b_alt_shift.bin": 17.196,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_only_narrow2.bin": 16.156,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.negzero_a_b_complement.bin": 17.804,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_qwen_dequant_q.bin": 21.358,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_qwen_softmax_v.bin": 25.253,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_smol_softmax_v_causal.bin": 14.881,
+  "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.signexp_invert_b.bin": 18.203,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.a_word_zero_one.bin": 4.929,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.a_zeros_b_lineflip.bin": 1.79,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.anchor6_full.bin": 9.023,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.anchor6_zeros.bin": 2.121,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_55_aa.bin": 8.11,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_zero_ff.bin": 5.449,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_zero_full.bin": 6.283,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bflip_bit2_w.bin": 4.247,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bflip_bit5_w.bin": 4.247,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit1.bin": 8.194,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit4.bin": 7.874,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit7.bin": 7.538,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.powerlaw_df15_pt.bin": 4.745,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.powerlaw_df4_pc.bin": 8.761,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_down.bin": 8.157,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_gate.bin": 8.729,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_v.bin": 8.692,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_down.bin": 7.459,
+  "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_q.bin": 8.551,
+  "file:tools/claims-v3/kinds/tiles/fp16/randn.bin": 23.074,
+  "file:tools/claims-v3/kinds/tiles/int8/full.bin": 8.95
+ },
+ "dma": {
+  "e143": {
+   "smoke": {
+    "processes": 3,
+    "launch_gap_ms_median": 1.0,
+    "launch_gap_ms_max": 2,
+    "n_gaps": 16,
+    "launches_per_process_median": 5,
+    "launches_per_process_max": 6,
+    "device_held_s_median": 2.26,
+    "device_held_s_max": 2.41,
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/aifoundry2/smoke/launches.jsonl.gz"
+   },
+   "s1": {
+    "processes": 117,
+    "launch_gap_ms_median": 1.0,
+    "launch_gap_ms_max": 2,
+    "n_gaps": 1866,
+    "launches_per_process_median": 16,
+    "launches_per_process_max": 17,
+    "device_held_s_median": 6.38,
+    "device_held_s_max": 6.57,
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/aifoundry2/s1/launches.jsonl.gz"
+   }
+  }
+ },
+ "scale": {
+  "predicted": {
+   "floats": {
+    "cheap_read_predicted_scale": {
+     "V600_v|fitted_on_other_two": {
+      "beta": 0.8978395585650392,
+      "pred_scale": 0.9931802955095326,
+      "train_meas_scale": 0.9784104720141874,
+      "train_rel_err": 0.015095733250830357,
+      "train_within_1pct": false
+     },
+     "V600_v|physical": {
+      "beta": 2.0,
+      "pred_scale": 1.00983232056039,
+      "train_meas_scale": 0.9784104720141874,
+      "train_rel_err": 0.03211520056762751,
+      "train_within_1pct": false
+     },
+     "idle_w|fitted_on_other_two": {
+      "beta": -0.1672836210750425,
+      "pred_scale": 1.0029304172546405,
+      "train_meas_scale": 0.9784104720141874,
+      "train_rel_err": 0.025061000410160794,
+      "train_within_1pct": false
+     },
+     "idle_w|physical": {
+      "beta": 1.0,
+      "pred_scale": 0.8523509148921037,
+      "train_meas_scale": 0.9784104720141874,
+      "train_rel_err": -0.12884117732568157,
+      "train_within_1pct": false
+     },
+     "leak_w_per_c|fitted_on_other_two": {
+      "beta": -0.09676295474584574,
+      "pred_scale": 0.9661291227499877,
+      "train_meas_scale": 0.9784104720141874,
+      "train_rel_err": -0.012552348544386471,
+      "train_within_1pct": false
+     },
+     "leak_w_per_c|physical": {
+      "beta": 1.0,
+      "pred_scale": 1.1331672066361211,
+      "train_meas_scale": 0.9784104720141874,
+      "train_rel_err": 0.15817158447144042,
+      "train_within_1pct": false
+     },
+     "zeros_level_fp32_w|fitted_on_other_two": {
+      "beta": 0.22578609011843043,
+      "pred_scale": 0.9295667998520961,
+      "train_meas_scale": 0.9784104720141874,
+      "train_rel_err": -0.04992145276362392,
+      "train_within_1pct": false
+     },
+     "zeros_level_fp32_w|physical": {
+      "beta": 1.0,
+      "pred_scale": 0.7760276650582935,
+      "train_meas_scale": 0.9784104720141874,
+      "train_rel_err": -0.206848569945559,
+      "train_within_1pct": false
+     }
+    },
+    "reads_this_card": {
+     "V600_v": 0.5179582814731484,
+     "idle_w": 25.455614671708208,
+     "leak_w_per_c": 0.2936,
+     "zeros_level_fp32_w": 1.44
+    },
+    "scale_applied_by_model": {
+     "M6": 0.9816867666703736,
+     "M7": 0.9816867666703736,
+     "M8": 0.9816867666703736
+    },
+    "train_measured_scale": 0.9784104720141874
+   },
+   "int8": {
+    "cheap_read_predicted_scale": {
+     "V600_v|fitted_on_other_two": {
+      "beta": 0.8498657582291614,
+      "pred_scale": 0.9935435103156021,
+      "train_meas_scale": 0.9589183294217791,
+      "train_rel_err": 0.03610858175450837,
+      "train_within_1pct": false
+     },
+     "V600_v|physical": {
+      "beta": 2.0,
+      "pred_scale": 1.0109330132871213,
+      "train_meas_scale": 0.9589183294217791,
+      "train_rel_err": 0.05424308021800628,
+      "train_within_1pct": false
+     },
+     "idle_w|fitted_on_other_two": {
+      "beta": -0.15834524120487622,
+      "pred_scale": 1.0027736208335325,
+      "train_meas_scale": 0.9589183294217791,
+      "train_rel_err": 0.04573412569785562,
+      "train_within_1pct": false
+     },
+     "idle_w|physical": {
+      "beta": 1.0,
+      "pred_scale": 0.8532799567078021,
+      "train_meas_scale": 0.9589183294217791,
+      "train_rel_err": -0.11016409789317116,
+      "train_within_1pct": false
+     },
+     "leak_w_per_c|fitted_on_other_two": {
+      "beta": -0.09159266944642552,
+      "pred_scale": 0.9679095646185386,
+      "train_meas_scale": 0.9589183294217791,
+      "train_rel_err": 0.009376434802514488,
+      "train_within_1pct": true
+     },
+     "leak_w_per_c|physical": {
+      "beta": 1.0,
+      "pred_scale": 1.134402331396064,
+      "train_meas_scale": 0.9589183294217791,
+      "train_rel_err": 0.18300203113241187,
+      "train_within_1pct": false
+     },
+     "zeros_level_fp32_w|fitted_on_other_two": {
+      "beta": 0.21372177784500837,
+      "pred_scale": 0.9332015476731756,
+      "train_meas_scale": 0.9589183294217791,
+      "train_rel_err": -0.026818531839004955,
+      "train_within_1pct": false
+     },
+     "zeros_level_fp32_w|physical": {
+      "beta": 1.0,
+      "pred_scale": 0.7768735163835885,
+      "train_meas_scale": 0.9589183294217791,
+      "train_rel_err": -0.18984391835325787,
+      "train_within_1pct": false
+     }
+    },
+    "reads_this_card": {
+     "V600_v": 0.5179582814731484,
+     "idle_w": 25.455614671708208,
+     "leak_w_per_c": 0.2936,
+     "zeros_level_fp32_w": 1.44
+    },
+    "scale_applied_by_model": {
+     "M6": 0.9816867666703736,
+     "M7": 0.9816867666703736,
+     "M8": 0.9816867666703736
+    },
+    "train_measured_scale": 0.9589183294217791
+   }
+  },
+  "M8_applies_g": {
+   "fp16": 0.9816867666703736,
+   "fp32": 0.9816867666703736,
+   "int8": 0.9816867666703736
+  },
+  "measured_in_training": {
+   "floats": {
+    "iqr": [
+     0.9755321315643287,
+     0.9802365473028634
+    ],
+    "median": 0.9784104720141874,
+    "n": 53
+   },
+   "int8": {
+    "iqr": [
+     0.9299830865733085,
+     0.9697704169477541
+    ],
+    "median": 0.9589183294217791,
+    "n": 24
+   }
+  },
+  "source": "tools/claims-v3/kinds/blind6/card-scale-blind6.json; docs/reports/data/2026-11-03-q139m-model/m8.json aifoundry2"
+ },
+ "rules": {
+  "safety": {
+   "abs_stop_c": 76,
+   "board_cap_w": 85,
+   "cap_consecutive": 3
+  },
+  "limit_w": 82.0,
+  "peak_lock_w": 82.0,
+  "min_passes": 2,
+  "min_tiles": {
+   "F1": 8,
+   "F2": 8,
+   "W1": 8,
+   "W2": 8,
+   "H1": 10,
+   "coverage": 10,
+   "PK": 10
+  },
+  "replicate_mhz": 25.0,
+  "replicate_w": 3.37,
+  "boot": {
+   "draws": 20000,
+   "seed": 160,
+   "form": "e160_common.boot_rms_range"
+  },
+  "c_check": "a burst counts for the registered scores only if every launch of it (the calibration launch included) has a C record and reads PASS in ccheck.py check (bit-exact against Q139(k)'s reference); ROUNDING, UNMODELLED, FAIL and a missing record are not checked",
+  "dma": {
+   "projected_held_max_s": 7.2,
+   "budget_s": 7.5,
+   "launches": 17,
+   "rule": "the smoke's median launch gap less E143's smoke median is the C log's extra time per launch (delta); the session runs only if E143's longest device-held time (s1) + 17 x delta <= 7.2 s, else QUEUE-HALT"
+  },
+  "scale_1pct": 0.01
+ }
+}
