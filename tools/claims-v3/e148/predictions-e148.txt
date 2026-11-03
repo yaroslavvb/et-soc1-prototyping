@@ -1,0 +1,11 @@
+E148 frozen readings of D21 = N2 - N1 (W), aifoundry1 card 1, from the bench's counts and E129's reduction
+E129: N +1.566 [+1.442, +1.691]; N1 +0.865 [+0.508, +1.223]; N - N1 +0.701 [+0.280, +1.122]
+predicted card cycles: {"m0.fp32": 544, "m0.int8": 318, "m0r1.fp32": 62, "m0r1.int8": 62, "m0r2.fp32": 96, "m0r2.int8": 94}
+predicted rates (1e9/s): m0.fp32 1.1251, m0.int8 1.9248, m0r1.fp32 9.8645, m0r1.int8 9.8645, m0r2.fp32 6.3709, m0r2.int8 6.5064
+reading W: factor +0.4225 of E129's N - N1: D21 +0.296 W [+0.118, +0.474]  (all of E129's N - N1 is TenC's read-address walk (a price per TenC read at a new address))
+reading T: factor -0.6069 of E129's N - N1: D21 -0.425 W [-0.681, -0.170]  (all of E129's N - N1 is int8's TenTMP staging, its 64-bit A reads (a price per 64-bit A read into TenTMP))
+reading C: factor +0.0506 of E129's N1: D21 +0.044 W [+0.026, +0.062]  (none of N is per-row: N1 is work int8 does every working cycle, scaled by the TIMA controls' clocked bits a second)
+reading A: factor +0.1945 of E129's N - N1: D21 +0.136 W [+0.054, +0.218]  (all of E129's N - N1 is TenA's writes (int8 - fp32); excluded beforehand by Q136(c)'s fp32-level bound (at most 0.14 W on card 1))
+bench constants, card_order: D21 +0.0114 to +0.0225 W; M2 floats: N2 +0.083 N1 +0.071; M2 int8: N2 +0.162 N1 +0.140; M4 floats: N2 +0.082 N1 +0.070; I3 int8: N2 +0.136 N1 +0.118
+bench constants, from_reset: D21 +0.0109 to +0.0216 W; M2 floats: N2 +0.416 N1 +0.405; M2 int8: N2 +0.814 N1 +0.793; M4 floats: N2 +0.407 N1 +0.396; I3 int8: N2 +0.685 N1 +0.667
+per second, int8 - fp32 in the card's order (1e10): m0: walk 788.39, TenTMP 12.319, TIMA ctrl bits 6383.9, TenC reads 0.32, TenA 8.152; m0r1: walk 0.00, TenTMP 7.892, TIMA ctrl bits 5696.8, TenC reads 0.00, TenA -7.892; m0r2: walk 333.13, TenTMP 5.205, TIMA ctrl bits 5985.2, TenC reads 0.05, TenA -4.771
