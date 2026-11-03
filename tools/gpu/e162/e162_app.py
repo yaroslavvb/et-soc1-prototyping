@@ -49,8 +49,8 @@ MEM_MIB = 8192
 SIZE_A100 = {"bf16": 2048, "fp16": 1024, "int8": 1024}   # E149's sizes (its A1)
 SMOKE_SIZES = (1024, 1536, 2048, 3072, 4096)
 # function timeouts and each unit's own step budget (s); the timeouts are the spend's hard ceiling (E162.md, Budget)
-TIMEOUT_S = {"LS": 600, "A1": 1680, "L1": 1440, "A2": 720, "L2": 600}
-BUDGET_S = {"LS": 480.0, "A1": 1560.0, "L1": 1320.0, "A2": 600.0, "L2": 480.0}
+TIMEOUT_S = {"LS": 600, "A1": 1680, "L1": 1440, "A2": 1020, "L2": 600}       # A2: amendment A2 (two passes)
+BUDGET_S = {"LS": 480.0, "A1": 1560.0, "L1": 1320.0, "A2": 900.0, "L2": 480.0}
 WIN = {"cell_s": 5.0, "ref_s": 3.0, "cell_settle_s": 1.5, "ref_settle_s": 1.0, "group_ms": 20.0, "depth": 4,
        "sampler_period_s": 0.1}
 LAGS = [1, 2, 4, 8, 16, 32]
@@ -820,10 +820,12 @@ def plan(stage, unit, first=True, l40s_size=None, refuse=()):
         if gpu == "A100":
             steps.append({"op": "feat", "set": "E149", "stop": True})
         return dict(base, steps=steps)
-    if stage in ("A2", "L2"):
-        steps = [{"op": "static"}, {"op": "gen", "set": stage}, {"op": "idle", "s": 20.0},
-                 {"op": "pass", "p": 1, "seq": pass_order(SETS[stage], stage, first, anchors)},
-                 {"op": "idle", "s": 10.0}]
+    if stage in ("A2", "L2"):          # amendment A2: two passes per board, ordered as stage 1's
+        steps = [{"op": "static"}, {"op": "gen", "set": stage}, {"op": "idle", "s": 20.0}]
+        for p in (1, 2):
+            fwd = (p == 1) == first
+            steps.append({"op": "pass", "p": p, "seq": pass_order(SETS[stage], stage, fwd, anchors)})
+        steps.append({"op": "idle", "s": 10.0})
         return dict(base, steps=steps)
     raise ValueError(stage)
 

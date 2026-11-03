@@ -159,23 +159,27 @@ def do_choose(run_dir, out_path):
     zst = A9.wstats(u, z0["t_a"], z0["t_b"], SETTLE["cell"], smax) if z0 else {"n": 0}
     if zst.get("n") and zst["sm_min"] >= smax and zst["cap_frac"] == 0:
         H, hrule = smax, "the NVML maximum, held by bf16 zeros at 1024^3"
-    elif zst.get("n") and zst["rsn_or"] & CAP_BITS == 0:
+    elif zst.get("n") and (zst["rsn_or"] & CAP_BITS) == 0:      # (A1: the brackets were missing; see E162.md)
         H, hrule = zst["sm_min"], "the lowest clock of bf16 zeros at 1024^3 (no reason bit), below the NVML maximum"
     else:
-        H, hrule = None, "none: bf16 zeros at 1024^3 carried a reason bit"
+        H, hrule = None, "none: bf16 zeros at 1024^3 did not hold the NVML maximum and carried a reason bit"
     table = []
     for n in (1024, 1536, 2048, 3072, 4096):
         row = {"n": n}
         for nm in ("randn", "zeros"):
             w = wins.get(f"bf16.{nm}@{n}")
-            if not w or H is None:
+            if not w:
                 row[nm] = None
                 continue
-            x = A9.wstats(u, w["t_a"], w["t_b"], SETTLE["cell"], H)
+            # every size's readings are recorded; validity is tested against H (against the NVML maximum if no H)
+            x = A9.wstats(u, w["t_a"], w["t_b"], SETTLE["cell"], H if H is not None else smax)
+            lo, hi = np.searchsorted(u["ts"], w["t_a"] + SETTLE["cell"]), np.searchsorted(u["ts"], w["t_b"] - 0.05)
+            sm = [r["sm"] for r in u["samples"][lo:hi] if r.get("sm") is not None]
             fl = 2.0 * n ** 3 * w["calls"] / (w["gpu_ms"] / 1000.0) / 1e12 if w["gpu_ms"] > 0 else None
-            row[nm] = {"p_w": x.get("p_w"), "sm_min": x.get("sm_min"), "sm_mean": x.get("sm_mean"),
-                       "cap_frac": x.get("cap_frac"), "rsn_or": x.get("rsn_or"), "valid": x.get("valid"),
-                       "t_c": x.get("t_c"), "tflops": fl, "n_samples": x.get("n")}
+            row[nm] = {"p_w": x.get("p_w"), "sm_min": x.get("sm_min"), "sm_max": max(sm) if sm else None,
+                       "sm_mean": x.get("sm_mean"), "cap_frac": x.get("cap_frac"), "rsn_or": x.get("rsn_or"),
+                       "valid": bool(x.get("valid")) and H is not None, "t_c": x.get("t_c"), "tflops": fl,
+                       "n_samples": x.get("n")}
         r, z = row["randn"], row["zeros"]
         row["qualifies"] = bool(r and z and r["valid"] and z["valid"] and r["p_w"] <= 0.9 * lim_w and
                                 r["p_w"] - z["p_w"] >= 25.0)

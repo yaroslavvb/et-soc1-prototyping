@@ -1,0 +1,55 @@
+{
+ "stage": "LS",
+ "unit": "LS",
+ "gpu": "L40S",
+ "sizes": {
+  "bf16": 1024,
+  "fp16": 1024,
+  "int8": 1024
+ },
+ "expect_name": "L40S",
+ "refuse_uuid": [],
+ "first_fwd": true,
+ "steps": [
+  {
+   "op": "static"
+  },
+  {
+   "op": "gen",
+   "set": "LS"
+  },
+  {
+   "op": "plumb"
+  },
+  {
+   "op": "idle",
+   "s": 10.0
+  },
+  {
+   "op": "hold",
+   "kind": "bf16.REF",
+   "s": 45.0,
+   "label": "warm_ref"
+  },
+  {
+   "op": "pass",
+   "p": 1,
+   "seq": [
+    "bf16.randn@1024",
+    "bf16.randn@1536",
+    "bf16.randn@2048",
+    "bf16.randn@3072",
+    "bf16.randn@4096",
+    "bf16.zeros@1024",
+    "bf16.zeros@1536",
+    "bf16.zeros@2048",
+    "bf16.zeros@3072",
+    "bf16.zeros@4096"
+   ]
+  },
+  {
+   "op": "idle",
+   "s": 5.0
+  }
+ ]
+}
