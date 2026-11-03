@@ -22,7 +22,7 @@ FIELDS = {"bf16": {"sign": [15], "exp": list(range(7, 15)), "mant": list(range(0
           "fp16": {"sign": [15], "exp": list(range(10, 15)), "mant": list(range(0, 10))},
           "int8": {"sign": [7], "high": [4, 5, 6], "low": [0, 1, 2, 3]}}
 LAGS = [1, 2, 4, 8, 16, 32]
-MODELS = ["G0", "S1", "G1", "G1s", "G2", "G3"]
+MODELS = ["G0", "S1", "G1", "G1s", "G2", "G3", "G4"]
 PRIMARY = "G1"
 
 
@@ -193,7 +193,7 @@ def features(fe, model, lag=1):
         add("negprod", c["negprod"])
         add("asym_ones", _asym(fe, "ones"))
         return names, x
-    s = lag if model == "G1s" else 1
+    s = lag if model in ("G1s", "G4") else 1
     key = f"lag{s}"
     add("nzprod", c["nzprod"])
     add("gtr", c[f"gtr{s}"])
@@ -207,7 +207,7 @@ def features(fe, model, lag=1):
     add("psgn", c[f"psgn{s}"])
     if model == "G2":
         add("acc", fe["acc"]["acc"])
-    if model == "G3":
+    if model in ("G3", "G4"):
         for f, pos in fl.items():
             add(f"row_{f}", _fsum(fe, "row", pos))
     return names, x
@@ -439,17 +439,19 @@ def do_fit(red_path, run1_dir, out_path):
         rows[fmt].append((k, fe1[k], v["y"]))
     out = {"models": {}, "lag_scan": {}}
     for m in MODELS:
-        if m == "G1s":
+        if m in ("G1s", "G4"):
             continue
         out["models"][m] = {f: dict(fit_format(rows[f], m), model=m) for f in FIELDS}
-    for s in LAGS:
-        fits = {f: fit_format(rows[f], "G1s", s) for f in FIELDS}
-        allres = [r["y"] - r["loko"] for f in FIELDS for r in fits[f]["rows"]]
-        out["lag_scan"][str(s)] = {"rms_loko_pooled": float(np.sqrt(np.mean(np.square(allres)))),
-                                   "by_fmt": {f: fits[f]["rms_loko"] for f in FIELDS}}
-    best = min(LAGS, key=lambda s: out["lag_scan"][str(s)]["rms_loko_pooled"])
-    out["models"]["G1s"] = {f: dict(fit_format(rows[f], "G1s", best), model="G1s") for f in FIELDS}
-    out["G1s_lag"] = best
+    out["lag_scan_G4"] = {}
+    for mm, scan in (("G1s", out["lag_scan"]), ("G4", out["lag_scan_G4"])):
+        for s in LAGS:
+            fits = {f: fit_format(rows[f], mm, s) for f in FIELDS}
+            allres = [r["y"] - r["loko"] for f in FIELDS for r in fits[f]["rows"]]
+            scan[str(s)] = {"rms_loko_pooled": float(np.sqrt(np.mean(np.square(allres)))),
+                            "by_fmt": {f: fits[f]["rms_loko"] for f in FIELDS}}
+        best = min(LAGS, key=lambda s: scan[str(s)]["rms_loko_pooled"])
+        out["models"][mm] = {f: dict(fit_format(rows[f], mm, best), model=mm) for f in FIELDS}
+        out[f"{mm}_lag"] = best
     out["span_w"] = K["bf16.randn"]["y"]
     out["zeros_offset_w"] = {}
     for f in FIELDS:                                   # P(zeros of f) - P(zeros bf16), reference-differenced
@@ -604,7 +606,7 @@ def do_score(model_path, pred_path, red2_path, run2_dir, out_path):
     # heat
     hh = {}
     for un, u in units.items():
-        hh[un] = heat_holds(mz, u, red["units"][un], pred)
+        hh[un] = [dict(r, unit=un) for r in heat_holds(mz, u, red["units"][un], pred)]
     sc["heat_holds"] = hh
     byk = {}
     for un, lst in hh.items():
@@ -635,6 +637,41 @@ def do_score(model_path, pred_path, red2_path, run2_dir, out_path):
         needh = math.ceil(0.75 * len(eb))
         sc["rules"]["H3"] = {"verdict": "HOLDS" if ins >= needh else "FAILS", "inside": ins, "of": len(eb),
                              "need": needh}
+    # A2: the registered secondary arm with a board scale (no verdict): each stage-2 board's predictions times its
+    # measured y(bf16 randn) / stage 1's, and its heat predictions times its randn hold's measured / predicted rise
+    sec = {"power": {}, "heat": {}}
+    rn = red["kinds"].get("bf16.randn", {})
+    scale = {b: rn["by_unit"][b] / span for b in rn.get("by_unit", {})}
+    sec["power"]["scale"] = scale
+    for m in MODELS:
+        ek, ins_s = [], 0
+        for k in blind:
+            v = red["kinds"][k]
+            eb_ = [v["by_unit"][b] - scale[b] * pred["kinds"][k]["pred"][m] for b in v["by_unit"] if b in scale]
+            if eb_:
+                e_ = float(np.mean(eb_))
+                ek.append(e_)
+                ins_s += abs(e_) <= pred["kinds"][k]["band90_w"]
+        if ek:
+            sec["power"][m] = {"rms_w": float(np.sqrt(np.mean(np.square(ek)))), "bias_w": float(np.mean(ek)),
+                               "inside": ins_s, "of": len(ek)}
+    hsc = {}
+    for un, lst in hh.items():
+        r0 = next((r for r in lst if r["kind"] == "bf16.randn" and r.get("pred_rise_blind_c")), None)
+        if r0 and r0["pred_rise_blind_c"]:
+            hsc[un] = r0["meas_rise_c"] / r0["pred_rise_blind_c"]
+    sec["heat"]["scale"] = hsc
+    ehs, ins_h = [], 0
+    for k, rs in byk.items():
+        es = [r["meas_rise_c"] - hsc[r["unit"]] * r["pred_rise_blind_c"] for r in rs if r.get("unit") in hsc]
+        if es:
+            e_ = float(np.mean(es))
+            ehs.append(e_)
+            ins_h += abs(e_) <= rows[k]["band90_c"]
+    if ehs:
+        sec["heat"].update({"rms_c": float(np.sqrt(np.mean(np.square(ehs)))), "bias_c": float(np.mean(ehs)),
+                            "inside": ins_h, "of": len(ehs)})
+    sc["secondary_board_scale"] = sec
     pu = mz["heat"]["per_unit"]
     if len(pu) == 2:
         a, b = [v["R_ss"] for v in pu.values()]
