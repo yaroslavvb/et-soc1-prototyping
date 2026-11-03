@@ -152,3 +152,14 @@ day's post rewritten to add `using aifoundry3 for 1 h, until ~HH:MM PST [doc](<�
 ## Amendments
 
 *(none)*
+
+### A1 — Mon 2 Nov 2026 (week 45), about 16:25 PST, after E138's data (wording only; no tile, threshold, band, rule or budget changes)
+
+*Written after E138's session and data commit (`a3195392`), on its independent verification. It corrects text only.*
+
+1. § No warm-up block: E130's block 13010 read +23.1 rail fJ, **below** the other five's +24.2..+30.5 (not "inside"), about 1.9 sd
+   below their mean: not an outlier, so the decision to add no set-aside rule stands.
+2. § Precision and `predictions-e138.json` › `expected.why`: the Booth band lies **18.0 fJ** above E130's rail interval (54.79 − 36.75),
+   not "20 fJ and more"; on the ratio, Booth's band is a factor 2.17 above E130's upper end, not "a ratio of 2.3". The frozen JSON is
+   left as committed.
+3. § Files: `selftest-e130.txt` (committed in `07f59099`) is the self-test's output.
