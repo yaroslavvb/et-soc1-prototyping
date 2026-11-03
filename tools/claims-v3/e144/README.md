@@ -70,6 +70,14 @@ Scored with `python3 docs/reports/data/2026-11-02-q138t-heat-model/score_e144.py
   t63 PASS, outside 0.5–2× FAIL.
 - **M6 as frozen** (A1.6) is reported beside each arm, with no verdict of its own.
 
+**Note N1, a reading of the frozen numbers.** Written Mon 2 Nov 2026 about 22:46 PST, during R0, before any hold's data. It changes no
+rule or band. In the subset, H_L starts 9 minutes after H_H, on H_H's tail (carried in: 0.409 °C, `aifoundry3.subset.holds[H_L]`). So
+the frozen model itself reads H_L's rise per board W as 0.786. That is under (c)'s PASS edge of 0.80 and inside its FAIL interval
+[0.74, 1.00]. It reads the linearity H_H/H_L as 0.8608 / 0.7858 = 1.095, outside PASS [0.92, 1.08] and inside [0.85, 1.15].
+- In the subset, an INCONCLUSIVE on those two (c) readings is what a correct model gives.
+- E144 reports them as the scorer reads them, beside the model's own values.
+- Arms (a) and (b) carry the tail in the prediction, so they are the subset's tests.
+
 ## Stops (Q138(t)'s `rules.stops`), on live samples, tested in the smoke
 
 - No launch starts at a firmware die reading (minshire[0]) ≥ **70 °C**.
