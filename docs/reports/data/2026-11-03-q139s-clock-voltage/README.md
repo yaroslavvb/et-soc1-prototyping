@@ -8,7 +8,7 @@ model across kinds: M7's clock-and-voltage term for aifoundry2's governed bursts
 is no prediction at other operating points"). Item 16 (the rail ledger's off-rail row: the regulator's conduction and
 efficiency) waits on the owner's word and is not touched.*
 
-*Corrected after verification (a dated note, Tue 3 Nov 2026, about 05:10-05:35 PST; desk only: no card, no device command).
+*Corrected after verification (a dated note, Tue 3 Nov 2026, about 05:10-05:25 PST, committed `c944ff99`; desk only: no card, no device command).
 An independent verifier re-derived the survey, the voltage table, s(f), xfer, E118's predictions and every E143 arm from the
 committed files, with this lane's code and with its own, and found the voltage half sound. It found one major fault and six
 minor ones. None changes a measured, frozen or registered number or verdict (nothing here was registered), and none is a
