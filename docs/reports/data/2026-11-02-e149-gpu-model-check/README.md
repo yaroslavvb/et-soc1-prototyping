@@ -15,50 +15,132 @@ and before the first stage-1 call; A2 and A3 (a board-scaled secondary arm for s
 stage 1 ran and pushed in `dd226347` before any of its data was fetched; the freeze, `e929b00f`, before stage 2's first
 call. Modal workspace `yaroslavvb`, app `e149-gpu-model-check`.*
 
+## Corrections after verification
+
+*Mon 2 Nov 2026 (week 45), about 21:40 PST, at the desk: no GPU call, no Modal app, no card. An independent verifier
+re-derived E149 from the committed logs (the spend to the cent; the order of registration, amendments, freeze and calls;
+the cap test over every sample; all five derived JSON files rebuilt with zero differences; every registered number and
+verdict) and found three major faults and eleven minor ones. I checked each against the committed files, and all hold;
+one more slip turned up in this pass (C14). The wrong sentences are replaced in place below, the larger ones marked
+"corrected after verification", so this README reads as corrected. **No frozen file, data file, registered number,
+rule or verdict changed**: `model-e149.json`, `predictions-e149.json`, `reduce-stage1.json`, `reduce-stage2.json`,
+`score-e149.json` and the registration's text are as committed, and a dated note was appended to
+[`E149.md`](../../../../tools/gpu/e149/E149.md). The new numbers come from [`posthoc_e149.py`](posthoc_e149.py) (post
+hoc, no verdicts) into [`posthoc.txt`](posthoc.txt) and [`posthoc.json`](posthoc.json), by the section (§) named.*
+
+- **C1, major: board B's 0.143 °C/W is a fit bent by its slot's drift, not the board's gain.** Inside one 180 s randn
+  hold at 319–329 W, B's die read 53.0 °C at 90 s, 57.9 °C at 150 s and 56.0 °C at 180 s; the fit absorbs that with a
+  +7.5 °C initial-transient term and a 40 s pole. Model-free steps on the same holds read **0.098–0.112 °C/W on B** and
+  0.092–0.098 on A, beside A's fit of 0.094 (§2); their ratio A/B, 0.87–0.94, sits inside H4's 0.8–1.25. **H4 stays
+  FAILS as registered** (the fits' ratio, 0.66). So "the boards differ (an 80GB and a 40GB part)" and the A100's
+  "0.094–0.143 °C/W" go: the die rises about 0.1 °C per board W on both boards. E135's two boards fit too poorly to quote
+  as gains (1.7 and 3.3 °C rms; on its board B the slow pole all but vanishes, r₂ 0.001; §12), so "0.067–0.143 °C/W over
+  four boards" goes too.
+- **C2, major: y carries each window's own leakage, and the blind heat path counts it twice.** The fast pole (τ₁ ≤ 0.2 s,
+  r₁ 0.060 °C/W) settles inside a window's 1.5 s settle, so a zeros cell's die runs 9.3 °C below its bracketing
+  references (the slope of that difference on the watts, 0.062 °C/W, is r₁; §4). y is watts over zeros with each window
+  at its own fast-pole temperature, not "at the reference's thermal state" as E149.md puts it: random bf16's 154.7 W
+  carries 17–25 W of leakage (11–16%; λr₁ 0.106 on board B, 0.156 on A, 0.131 pooled). **So the per-flip prices are upper
+  bounds on switching energy by that share**: bf16's mantissa 115 fJ is about 97–103 fJ without it, fp16's 148 fJ
+  125–132 fJ, int8's 136–149 fJ 115–133 fJ (§10). The registered blind heat path adds λ × the whole simulated rise on top
+  of G1's y, which already holds the fast pole's part: over the 34 blind holds its power ran 34.0 W above the measured,
+  12.9 W of it G1's own error and 21.1 W (sd 11.5) the path's construction (§5). Post hoc, with no verdict, the
+  registered 3.77 °C rms becomes **2.53–2.68 °C** without the double count (three ways of removing it), 1.43 °C with each
+  kind's measured y in place of G1's, and **1.06–1.16 °C** with both; the measured power (H2) gives 1.39 °C. **So most of
+  the blind 3.8 °C is the power path (G1's error, and the double count that compounds it); the heat model and the slot
+  set a floor of about 1.1–1.4 °C** (about 1.1 °C on board A, 2.0–2.3 °C on board B, whose slot drifted). This README
+  had named the slot's cooling the largest remaining term. E150, which would reuse this frozen path, should state the
+  double count in its registration and score a corrected arm beside the registered one.
+- **C3, major: only "not lag 1" is confirmed; which pairing the A100 pays for is open.** R4b fails, so neighbours along K
+  are not the A100's pairing. Stage 1's lag scan prefers a K-lag of 32, but blind the lag-32 form does no better than lag
+  1: 24.0 against 24.7 W rms, closer on 10 of 17 kinds, and 17.5 against 16.1 W without the checkerboard (§7). Adding
+  the row direction helped (G3 13.5 W without the checkerboard; G4 12.8 W, unstable on stage 1). Nothing here reads which
+  operands meet on a wire, so "a GPU's operands meet on a wire a tensor-core K-step (16–32 elements) or a row apart" and
+  "the lag scan and the checkerboard put it at K-steps of 16–32 elements" go.
+- **C4.** P3's 16 of 17 sit inside bands of ±47 W (bf16), ±93 W (fp16) and ±22 W (int8), 30%, 60% and 14% of the span,
+  wide because G1's own nested errors were (§8).
+- **C5.** R1b's 50% arm clears its 2-SE bar by 0.008 W (7.888 against 7.880 W; the 75% arm +16.1 ± 3.4 W against 6.9), and
+  B1 holds narrowly (slope 0.918 against a floor of 0.9; 7.33 against 7.74 W) (§8). This README said "just" for both; the
+  margins are now given.
+- **C6.** A kind's watts in the stage-2 table and bullets are y, over the same GEMM on zeros: the checkerboard cost
+  135.9 W over zeros while the board drew 320.2 W (§9).
+- **C7.** The hottest stage-1 kind averaged 341 W; the hottest single windows drew 355.7 W (a cell) and 355.9 W (a
+  reference), 44 W under the 400 W limit, so V0 is unaffected (§1).
+- **C8.** G4's 12.8 W and 10.9 W are the best of seven registered forms, picked after scoring, from a fit whose stage-1
+  nested error ran to 94–321 W; G1's 24.7 W is the registered result.
+- **C9.** Item 2 is **narrowed**, not answered: E149 adds power by kind under the cap, at a fixed 1410 MHz, for one GPU
+  model. None of item 2's open parts (a lower cap, his board and an H100, other shapes, an ET-SoC-1 GEMM limited the same
+  way) is touched.
+- **C10.** The functions' timeouts cap the spend at **$8.66** with A1's smoke S2 (900 s + 900 s + 2 × 3,300 s + 2 × 2,700 s
+  at $2.2586 an hour); the registration's $8.08 was written before S2 existed, and by the same arithmetic is $8.09 (§11).
+- **C11.** The heat model's per-board errors with measured power over the 17 blind kinds are 1.07 and 2.32 °C; the 1.04 and
+  2.29 °C quoted first included the randn hold, which is not blind (§6).
+- **C12.** The post hoc heat checks the first README cited from the lane's scratch (`heat_resid.py`, `e135_heat.py`) are
+  committed as `posthoc_e149.py` §3 and §12, unchanged in method; their numbers reproduce.
+- **C13.** `summary.md` converts each field's centre coefficient to fJ. For bf16's exponent its 176 fJ lies outside the
+  five bits the ladders flipped (bits 7–11), where G1s's per-position values run −1 to 201 fJ, mean 100 fJ (§10); no
+  exponent price is quoted here.
+- **C14 (found in this pass).** The blind holds' measured rises run −0.2 to 13.0 °C (`score-e149.json` `heat.rows`); the
+  Results said 0–15 °C.
+
 ## Results
 
 **Under its 400 W cap an A100's power follows the operand bits the way the ET-SoC-1's model says, in kind: changes of
 bits, not ones; zeros by what they stop switching; a random sign costs and a fixed one does not. But the operands whose
 bits are counted as "consecutive" are not the ET-SoC-1's.** The ET-SoC-1 model's pairing, neighbours along K, fails on
-the GPU (R4b): a GPU's operands meet on a wire a tensor-core K-step (16–32 elements) or a row apart.
+the GPU (R4b). Which pairing the A100 pays for is open: stage 1's lag scan prefers a K-lag of 32, but blind the lag-32
+form does no better than lag 1 (24.0 against 24.7 W rms; 17.5 against 16.1 W without the checkerboard), and only the
+forms that add the row direction did better. *(Corrected after verification, C3: this said a GPU's operands meet on a
+wire a tensor-core K-step, 16–32 elements, or a row apart.)*
 
 **Blind, on 17 kinds measured on two boards the fit never saw, the toggle model in the ET-SoC-1's form (G1) predicts
 power to 24.7 W rms, 16% of the 154.7 W from zeros to random bf16, biased high by 13.0 W.** So its registered accuracy
 rules **fail** (P1: rms ≤ 15.5 W; P2: |bias| ≤ 7.7 W), while its coverage and its two comparisons **hold**: 16 of 17
-kinds inside its frozen 90% band (P3, the checkerboard outside), 2.6 times better than power as density alone (G0, 63.7
-W; P4), and better than static bits (S1, 33.8 W; P5). **The best registered form, G4, a K-lag of 16 plus the row
-direction, predicts the same 17 kinds to 12.8 W rms (8.2% of the span)**, and 10.9 W with A2's board anchor; G1 plus the
-result path (G2) reads 17.7 W with the smallest bias (−2.4 W). G4 is a registered comparison, not yet a stable model: on
-stage 1 its leave-one-kind-out error ran to 94–321 W, because its row and K-lag counts nearly coincide on kinds random
-along rows (below, "The models").
+kinds inside its frozen 90% band (P3, the checkerboard outside; the bands are ±47 W in bf16, ±93 W in fp16 and ±22 W in
+int8, wide because G1's own nested errors were), 2.6 times better than power as density alone (G0, 63.7 W; P4), and
+better than static bits (S1, 33.8 W; P5). **The best of the seven registered forms, picked after scoring, is G4, a K-lag
+of 16 plus the row direction: it predicts the same 17 kinds to 12.8 W rms (8.2% of the span)**, and 10.9 W with A2's
+board anchor; G1 plus the result path (G2) reads 17.7 W with the smallest bias (−2.4 W). G4 is a registered comparison,
+not yet a stable model: on stage 1 its leave-one-kind-out error ran to 94–321 W, because its row and K-lag counts nearly
+coincide on kinds random along rows (below, "The models"). *(Corrected after verification, C8: G4 was called "the best
+registered form" without saying it was picked after scoring.)*
 
-**Heat: the A100's die rises 0.094 and 0.143 °C per board W at steady state on the two stage-1 boards** (0.116 pooled),
-about half of it at once (within 0.2 s, the fit's grid edge) and the rest with a 13–40 s time constant (32 s
-pooled), so 81% of it within 30 s. **A 30 s hold's rise on a new board is predicted to 1.4 °C rms from its measured
-power and to 3.8 °C rms end to end from the bits**, against rises of 0–15 °C: both heat accuracy rules **fail** (H1, H2),
-the band's coverage **holds** (H3, 14 of 17), and the two stage-1 boards' coefficients differ by more than the registered
-ratio (H4 **fails**, 0.66). Cloud boards differ in cooling, and one board's die wandered ±2–3 °C at constant power
-over minutes (post hoc), so heat on a rented GPU is a property of its slot as much as of the data.
+**Heat: the A100's die rises about 0.1 °C per board W at steady state**: 0.094 °C/W on stage 1's board A by its fit
+(0.092–0.098 by model-free steps), and 0.098–0.112 °C/W on board B by model-free steps, where B's own fit reads 0.143
+because it absorbs a drift of that slot's cooling (the frozen pooled model reads 0.116). About half of it comes at once
+(within 0.2 s, the fit's grid edge) and the rest with a 13 s time constant on board A (32 s pooled). *(Corrected after
+verification, C1: this gave 0.094 and 0.143 °C/W as the two boards' gains, and a 13–40 s time constant.)* **A 30 s
+hold's rise on a new board is predicted to 1.4 °C rms from its measured power and to 3.8 °C rms end to end from the
+bits**, against rises of −0.2 to 13 °C: both heat accuracy rules **fail** (H1, H2), the band's coverage **holds** (H3, 14
+of 17), and H4 **fails** as registered (the two fits' ratio 0.66; the model-free steps' ratio is 0.87–0.94). **Most of
+the end-to-end error is the power path, not the slot**: G1's power error, and the frozen path's second count of the
+leakage y already carries. Post hoc, without the double count the same G1 reads 2.5–2.7 °C rms, and with each kind's
+measured y as well 1.06–1.16 °C, against 1.39 °C from the measured power (H2). One board's die did wander ±2–3 °C at
+nearly constant power over minutes, so the slot sets the floor: about 1.1 °C on board A and 2.0–2.3 °C on board B.
+*(Corrected after verification, C2: this said heat on a rented GPU is a property of its slot as much as of the data.)*
 
 | what is predicted, held-out kinds, new boards | before E149 | after E149 | source |
 |---|---|---|---|
-| **power of a new kind, A100, under the cap** | no GPU model; density alone (G0) **63.7 W** rms, bias +37.0 | ET-SoC-1 form (G1) **24.7 W**, bias −13.0; best registered form (G4) **12.8 W**; G4 with a board anchor **10.9 W** | `score-e149.json` `models`, `secondary_board_scale` |
-| **heat of a new kind**, die rise over a 30 s hold | none for the A100 (post hoc on E135's boards, 0.067–0.097 °C/W at 1.7–3.3 °C fits) | **3.8 °C** rms end to end, **1.4 °C** from measured power (1.0 and 2.3 °C on the two boards) | `score-e149.json` `heat`, `heat_holds` |
-| die rise per board W, steady | — | **0.094 / 0.143 °C/W** (two boards), τ ≤ 0.2 s and 13–40 s, leakage 1.8–2.6 W/°C | `model-e149.json` `heat` |
+| **power of a new kind, A100, under the cap** | no GPU model; density alone (G0) **63.7 W** rms, bias +37.0 | the registered primary, the ET-SoC-1 form (G1): **24.7 W**, bias −13.0, 16 of 17 inside bands of ±22–93 W; the best of seven registered comparisons, picked after scoring (G4, stage-1 nested error 94–321 W): 12.8 W, and 10.9 W with a board anchor | `score-e149.json` `models`, `secondary_board_scale`; `posthoc.txt` §7, §8 |
+| **heat of a new kind**, die rise over a 30 s hold | none for the A100 (E135's logs fit poorly, 1.7 and 3.3 °C rms) | **3.8 °C** rms end to end (post hoc 2.5–2.7 °C without the path's double count); **1.4 °C** from measured power (1.07 and 2.32 °C on the two boards) | `score-e149.json` `heat`, `heat_holds`; `posthoc.txt` §5, §6 |
+| die rise per board W, steady | — | **0.094 °C/W** on board A (its fit; 0.092–0.098 by model-free steps), **0.098–0.112 °C/W** on board B (model-free steps; its fit's 0.143 absorbs the slot's drift); τ ≤ 0.2 s and 13 s (board A); leakage 1.8–2.6 W/°C | `model-e149.json` `heat`; `posthoc.txt` §2 |
 
 Every number in this section comes from `score-e149.json` (the blind scores and rules), `model-e149.json` (the frozen
-fit) and `reduce-stage1.json` / `reduce-stage2.json` (the measured watts); `summarize_e149.py` prints the tables below
-from them.
+fit) and `reduce-stage1.json` / `reduce-stage2.json` (the measured watts), except those named post hoc or model-free,
+which come from `posthoc.txt`; `summarize_e149.py` prints the tables below from the first four.
 
 ## Stage 1: what an A100's power follows, under its cap
 
 **Every one of stage 1's 404 cell windows ran at 1410 MHz in every 100 ms sample with no clock-event reason bit** (the
-hottest drew 341 W), so the watts below read the data, not the cap (V0 **HOLDS**: 92 of 92 kinds valid on both boards;
+hottest kind averaged 341 W; the hottest single windows drew 355.7 W, a cell, and 355.9 W, a reference, 44 W under the
+limit; `posthoc.txt` §1), so the watts below read the data, not the cap (V0 **HOLDS**: 92 of 92 kinds valid on both boards;
 `model-e149.json` `rules_stage1.V0`). **At that clock the data never changed the speed**: bf16 ran 157.1 TFLOPS over
 all 52 kinds (0.7% spread), fp16 108.7 TFLOPS and int8 148.2 TOPS at 1024³ (`reduce-stage1.json` `kinds.*.tflops`).
 In bf16 at 2048³, zeros drew 181.5 W, a constant 1.0 matrix 203.9 W and random normal 338.5 W
 (`kinds["bf16.<kind>"].p_abs`). Below, y is watts over the same GEMM on zeros, ± SE over the valid replicates (2 passes ×
-2 boards), from `reduce-stage1.json` `kinds.*.y`, `se`.
+2 boards), from `reduce-stage1.json` `kinds.*.y`, `se`. Each window's die sits at its own fast-pole temperature (a zeros
+cell runs 9.3 °C below its references), so about 11–16% of y is the leakage of the die's own warming within the window
+(`posthoc.txt` §4; C2).
 
 | bf16 zeros | 0% | 25% | 50% | 75% | 90% | 100% |
 |---|---:|---:|---:|---:|---:|---:|
@@ -104,7 +186,8 @@ What these say, in the ET-SoC-1 model's terms (the rules are `model-e149.json` `
   on the ET-SoC-1 (E70's shared wires) and in Gregersen et al.'s A100 ladder (the lab's reduction, Q130(e) §2).
 - **Zeros save what they stop switching** (R1a **HOLDS** in bf16 and int8): 25% scattered zeros save 1.5 W, 50% 27 W,
   75% 59 W, 90% 87 W in bf16. **Zeros in blocks save more than scattered zeros** (R1b **HOLDS**: 7.9 W more at 50%,
-  just at its 2-SE bar, and 16.1 W at 75%; 39 W at 90%): a scattered zero still flips its neighbours' bits.
+  just at its 2-SE bar, which it clears by 0.008 W, and 16.1 ± 3.4 W at 75%; 39 W at 90%): a scattered zero still flips
+  its neighbours' bits.
   Zeros in B save more than zeros in A (50% on B alone −17.8 W, on A alone −5.3 W).
 - **A random sign costs, a fixed one does not** (R3a, R3b **HOLD**): at constant magnitude 1.5, random signs on both
   operands cost 43.1 W more than all positive; A negative and B positive costs +0.8 W ± 1.9.
@@ -116,9 +199,11 @@ What these say, in the ET-SoC-1 model's terms (the rules are `model-e149.json` `
   less. So most of what sorting saves comes from neighbouring rows holding similar values at the same k.
 - **The ET-SoC-1 model's pairing, consecutive operands along K, is not the A100's** (R4b **FAILS**). The period-2 square
   wave (b = 1, all seven bits flip between every pair of neighbours along K) costs 72 W, *less* than the period-128 one
-  (86 W); the six waves rise from b = 1 to b = 16 (72, 80, 83, 88, 91 W) and dip at 64. On a GPU the operands that meet
-  one after another on a wire are a tensor-core K-step or a row apart, and the lag scan picks **K-lag 32** (`lag_scan`):
-  G1's form at lag 32 reads a pooled nested error of 19.4 W against 34.9 W at lag 1.
+  (86 W); the six waves rise from b = 1 to b = 16 (72, 80, 83, 88, 91 W) and dip at 64. On stage 1 the lag scan picks
+  **K-lag 32** (`lag_scan`): G1's form at lag 32 reads a pooled nested error of 19.4 W against 34.9 W at lag 1. Stage 2
+  did not confirm it: blind, lag 32 predicted no better than lag 1 (below). Which operand pairs the A100's circuits see
+  in turn is not read here. *(Corrected after verification, C3: this said the operands that meet one after another on
+  a wire are a tensor-core K-step or a row apart.)*
 - **The two boards agree** (B1 **HOLDS**, just): board B's y on board A's has a slope of 0.918 (limit 0.9–1.1) and an
   rms difference of 7.33 W against a 7.74 W limit; random bf16 read 160.7 W over zeros on board A (an 80GB part) and
   148.8 W on board B (a 40GB part).
@@ -151,15 +236,21 @@ Lag scan (G1's form at K-lag s; pooled nested rms over the three formats, W): s 
   square waves) cannot pin both. That is a finding about this design, reported as found (post hoc, no verdict).
 - The coefficients are predictors, not a price list (several are negative). Read physically, G1s's flips of a mantissa
   bit cost about 115 fJ (bf16), 148 fJ (fp16), and an int8 magnitude bit 136–149 fJ at the measured multiply-add rate,
-  per flip of one operand's bit at one multiply-add: the same order as the ET-SoC-1's 118–136 fJ per flipped bit.
+  per flip of one operand's bit at one multiply-add: the same order as the ET-SoC-1's 118–136 fJ per flipped bit. They
+  are upper bounds on switching energy: y carries the die's own fast-pole leakage (λr₁ 0.11–0.16), and without it they
+  read about 97–103, 125–132 and 115–133 fJ (`posthoc.txt` §10; C2). `summary.md` converts each field's centre
+  coefficient; bf16's exponent figure there (176 fJ) lies outside the five bits the ladders flipped, where the
+  per-position values run −1 to 201 fJ (C13).
 
 ## Stage 2, blind: 17 held-out kinds on two new boards
 
 Measured after the freeze (`e929b00f`, 20:14:46 PST) in run `e149-20261102-r2` (20:15–20:40 PST): unit A an
 A100-SXM4-80GB, unit B an A100-SXM4-40GB, neither one of stage 1's boards (`reduce-stage2.json` `units.*.static`). Every
 operand's sha256 matched the predictions' (`do_score` asserts it), and every window held 1410 MHz with no reason bit
-(the hottest, the power law, drew 345 W). y is watts over each format's zeros, measured ± SE over 2 passes × 2 boards
-(`reduce-stage2.json` `kinds`); the predictions are `predictions-e149.json` `kinds.*.pred`.
+(the hottest kind, the power law, averaged 345 W; the hottest single window drew 353.6 W). y is watts over each
+format's zeros, measured ± SE over 2 passes × 2 boards (`reduce-stage2.json` `kinds`), not the board's watts (the
+checkerboard's 135.9 W is over zeros; the board drew 320.2 W; `posthoc.txt` §9); the predictions are
+`predictions-e149.json` `kinds.*.pred`.
 
 | kind | measured y ± SE | G1 | G1s | G0 | S1 | G2 | G3 | G4 | G1 band | inside |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
@@ -192,9 +283,13 @@ operand's sha256 matched the predictions' (`do_score` asserts it), and every win
 | G4 | 12.76 | -9.36 | 28.94 | 17 |
 | S1 | 33.82 | 22.19 | 68.00 | 17 |
 
-- **The checkerboard decides the pairing.** Its zeros alternate along K and along the rows. Counting flips between
-  neighbours along K (G1) predicts 214.6 W, between elements 32 apart (G1s) 65.9 W; it drew **135.9 W**, and the form
-  with a K-lag of 16 plus the rows (G4) came within 13 W (149.3 W). It is G1's one kind outside its band.
+- **The checkerboard is what neither pairing along K gets.** Its zeros alternate along K and along the rows. Counting
+  flips between neighbours along K (G1) predicts 214.6 W, between elements 32 apart (G1s) 65.9 W; it cost **135.9 W**
+  over zeros (the board drew 320.2 W), so each misses by 70–79 W, in opposite directions. The form with a K-lag of 16
+  plus the rows (G4) came within 13 W (149.3 W) and G1 plus the result path (G2) within 14 W (122.4 W). It is G1's one
+  kind outside its band. Without it, lag 1 predicts the other 16 kinds better than lag 32 (G1 16.1 W rms, G1s 17.5 W),
+  and the forms with the row direction better still (G3 13.5 W, G4 12.7 W; `posthoc.txt` §7). *(Corrected after
+  verification, C3 and C6: this was headed "the checkerboard decides the pairing", and said it "drew" 135.9 W.)*
 - **Constants and the result path.** All-π drew 17.0 W and all-twos 10.2 W over zeros. G1 and G1s give every constant
   the same 35–40 W (no flips, all products nonzero). Static bits (S1) and the accumulator term (G2) know twos are cheap
   (4.0, 10.3 W) but overshoot π (44.8, 63.3 W): what separates constants is not settled by stage 1's few constants.
@@ -211,10 +306,15 @@ operand's sha256 matched the predictions' (`do_score` asserts it), and every win
 
 **The A100's die, fitted on both stage-1 sessions** (`model-e149.json` `heat`): a fast part that follows power within
 the 0.2 s grid edge and a slow pole; pooled **0.116 °C per board W** at steady state (r₁ 0.060 + r₂ 0.056), τ₂ 31.8 s,
-81% reached in 30 s, 1.77 °C rms over 39,024 samples. Board by board: unit A (80GB) **0.094 °C/W**, τ₂ 12.7 s, 0.71 °C
-rms; unit B (40GB) **0.143 °C/W**, τ₂ 40.0 s, 2.25 °C rms. A model fitted on one board predicts the other's 30 s rises
-to 1.0–1.2 °C rms (`heat.cross`). **Leakage at the held reference load: 2.6 and 1.8 W per °C** (`heat.leakage`), so a
-10 °C warmer die costs about 20 W at the same data and clock.
+81% reached in 30 s, 1.77 °C rms over 39,024 samples. Board by board, the fits read: unit A (80GB) **0.094 °C/W**, τ₂
+12.7 s, 0.71 °C rms; unit B (40GB) 0.143 °C/W, τ₂ 40.0 s, 2.25 °C rms. **B's fit is not B's gain** *(corrected after
+verification, C1)*: inside one 180 s randn hold at 319–329 W its die read 53.0 °C at 90 s, 57.9 °C at 150 s and 56.0 °C
+at 180 s, a drift of the slot's cooling that the fit absorbs with a +7.5 °C initial-transient term and a long pole.
+Model-free steps on the same holds read **0.098–0.112 °C/W on B** and 0.092–0.098 on A, beside A's fit; and between 45 s
+and 90 s after the step down to zeros B's die fell 0.66 °C, where its own 40 s fit has it fall 3.0 °C (`posthoc.txt` §2). The pooled model, which carries B's drift too, is
+the frozen one and is scored as registered. A model fitted on one board predicts the other's 30 s rises to 1.0–1.2 °C
+rms (`heat.cross`). **Leakage at the held reference load: 2.6 and 1.8 W per °C** (`heat.leakage`), so a 10 °C warmer
+die costs about 20 W at the same data and clock.
 
 | hold (30 s after 15 s of zeros) | measured rise °C | blind | with measured power | band |
 |---|---:|---:|---:|---:|
@@ -239,42 +339,63 @@ to 1.0–1.2 °C rms (`heat.cross`). **Leakage at the held reference load: 2.6 a
 **The blind rise** (G1's frozen power through the frozen heat model, from the pre-hold's measured zeros) reads **3.78
 °C rms**, bias −2.16 °C (H1 **FAILS**, ≤ 0.8 °C registered): the checkerboard alone, predicted at 214.6 W, is predicted
 to rise 23.1 °C against 12.95 °C. **With each hold's measured power the heat model reads 1.39 °C rms**, bias +1.06 °C
-(H2 **FAILS**, ≤ 0.6 °C): 1.04 °C on board A and 2.29 °C on board B, whose die ran hotter than the pooled model
-(`score-e149.json` `heat_holds`). 14 of 17 rises fall inside the frozen heat band (H3 **HOLDS**), which was wide (±4.8
-°C in bf16) because it carries G1's power band. A2's anchor (each board's randn hold) scales the blind rises by 0.72 and
-0.93 and reads 2.35 °C rms.
+(H2 **FAILS**, ≤ 0.6 °C): 1.07 °C on board A and 2.32 °C on board B over the 17 blind kinds, B's die running hotter than
+the pooled model (`score-e149.json` `heat_holds`; `posthoc.txt` §6; C11). 14 of 17 rises fall inside the frozen heat
+band (H3 **HOLDS**), which was wide (±4.8 °C in bf16) because it carries G1's power band. A2's anchor (each board's randn
+hold) scales the blind rises by 0.72 and 0.93 and reads 2.35 °C rms.
+
+**Most of the blind error is the power path** *(added after verification, C2; post hoc, no verdict)*. y already carries
+each window's own fast-pole leakage (λr₁ = 0.131 of it, pooled), and the blind path adds λ × the whole simulated rise on
+top, so the fast pole's part is counted twice. Over the 34 blind holds the path's power ran 34.0 W above the measured:
+12.9 W of it G1's own error and 21.1 W (sd 11.5) the path's construction. Removing the double count (y × (1 − λr₁),
+y ÷ (1 + λr₁), or λ times the slow pole's rise only) gives **2.53–2.68 °C rms** from the same frozen G1; each kind's
+measured y in place of G1's gives 1.43 °C, and both together **1.06–1.16 °C**, against 1.39 °C from the measured power
+(`posthoc.txt` §5). So the heat model and the slot set a floor of about 1.1–1.4 °C (about 1.1 °C on board A, 2.0–2.3 °C
+on board B), and G1's power error and the double count, which compounds it, make up the rest.
 
 ## What this does to predicting power and heat
 
 **Section 11 item 6 ("a power model across kinds"), on a GPU: narrowed.** The terms of the ET-SoC-1's model, operand
 bit changes by field and side, a gate term for zeros and a sign term, **measured** on an A100 under its cap: every
-ladder rule of the model's structure holds there (R1a, R1b, R2, R3a, R3b, R4a), and the per-flip prices come out at the
-ET-SoC-1's order (about 115–150 fJ per mantissa or magnitude flip of one operand at one multiply-add, at the measured
-rate). **Tested**: the model's pairing of operands, neighbours along K, is **corrected** for the GPU (R4b fails; the lag
-scan and the checkerboard put it at K-steps of 16–32 elements plus the row direction). **Out-of-sample error, power**
-(17 held-out kinds, two new boards): **before**, no model, and density alone 63.7 W rms (41% of the zeros-to-random
-span); **after**, 24.7 W (16%) for the ET-SoC-1 form and 12.8 W (8.2%) for the best registered GPU form, 10.9 W (7%)
-with a board anchor. **Heat**: the A100's die rise per board W (0.094–0.143 °C/W) and its time constants (≤ 0.2 s and
-13–40 s) **measured** for the first time; a new kind's 30 s rise **before**: no A100 model; **after**: 3.8 °C rms end to
-end, 1.4 °C rms from measured power, with the board's own slot the largest remaining term.
+ladder rule of the model's structure holds there (R1a, R1b, R2, R3a, R3b, R4a; R1b and B1 just), and the per-flip
+prices come out at the ET-SoC-1's order (about 115–150 fJ per mantissa or magnitude flip of one operand at one
+multiply-add, at the measured rate; upper bounds on switching energy, since 11–16% of y is the die's own leakage:
+about 97–133 fJ without it). **Tested**: the model's pairing of operands, neighbours along K, **fails** on the GPU
+(R4b); what replaces it is not settled, since the lag-32 form chosen on stage 1 predicted the blind kinds no better than
+lag 1 and only the forms with the row direction did better. **Out-of-sample error, power** (17 held-out kinds, two new
+boards): **before**, no model, and density alone 63.7 W rms (41% of the zeros-to-random span); **after**, 24.7 W (16%)
+for the ET-SoC-1 form, the registered primary; the best of seven registered comparisons, picked after scoring (G4,
+stage-1 nested error 94–321 W), 12.8 W (8.2%) and 10.9 W (7%) with a board anchor. **Heat**: the A100's die rise per
+board W, about 0.1 °C/W (0.094 on board A; 0.098–0.112 on board B by model-free steps), and its time constants (≤ 0.2 s
+and 13 s on board A) **measured** for the first time; a new kind's 30 s rise **before**: no A100 model; **after**: 3.8 °C
+rms end to end, 1.4 °C rms from measured power. **Corrected** (post hoc): the frozen path counts the fast pole's leakage
+twice; without that it reads 2.5–2.7 °C end to end and 1.06–1.16 °C from measured y, so the end-to-end heat error is
+mostly the power path, and the heat model and the slot set a floor of about 1.1–1.4 °C. *(Corrected after
+verification, C1–C3, C8: this called the pairing corrected to K-steps of 16–32 elements, gave 0.094–0.143 °C/W, set G4
+beside G1 unlabelled, and named the slot the largest remaining term.)*
 
-**Section 11 item 2 ("a GPU measured the same way"), its under-the-cap part: answered for one GPU model.** E135
-measured power at the cap; E149 holds 1410 MHz in every window and reads the data's watts at 2048³ (bf16) and 1024³
-(fp16, int8). Still open: a lower cap (needs root on the GPU), another GPU model (E150, the optional lane), other GEMM
-shapes.
+**For E150**, which would reuse the frozen model and heat path on a cheaper GPU: re-choose the sizes by A1's rule, state
+the double count in its registration, and score a corrected heat arm (y × (1 − λr₁), or λ times the slow pole's rise
+only) beside the registered one.
+
+**Section 11 item 2 ("a GPU measured the same way"): narrowed, not answered.** E135 measured power at the cap; E149 holds
+1410 MHz in every window and adds power and die temperature by kind under the cap, at 2048³ (bf16) and 1024³ (fp16,
+int8), for one GPU model. Item 2's open parts are untouched: a lower cap (it needs a host that allows `nvidia-smi -pl`;
+Modal's container refused it), his board and an H100, other GEMM shapes, and an ET-SoC-1 GEMM limited the same way. *(Corrected after verification, C9: this said "its
+under-the-cap part: answered for one GPU model".)*
 
 ## Against the ET-SoC-1
 
 | | ET-SoC-1 (its resident loop, the kinds harness) | A100 (cuBLAS GEMM under its cap, E149) |
 |---|---|---|
-| what costs | operand bits changing between consecutive micro-ops; flips share wires (E70) | the same: changes, not ones (R2); flips share wires (k = 1 → 3: twice the changes, 1.6× the watts) |
-| which operands are consecutive | the micro-op stream along K (PRM 9.4 order) | K-steps 16–32 apart and neighbouring rows (R4b fails at lag 1; G4 best blind) |
+| what costs | operand bits changing between consecutive micro-ops; flips share wires (E70) | the same: changes, not ones (R2); flips do not add (k = 1 → 3: twice the changes, 1.6× the watts; which wires, not read, C3) |
+| which operands are consecutive | the micro-op stream along K (PRM 9.4 order) | not neighbours along K (R4b fails); a K-lag of 32 did no better blind, forms with the row direction did; open (C3) |
 | zeros | gated lanes, a gate's state change ~158 fJ (M6's `gtr`) | blocks save more than scattered zeros (R1b); zeros in B save more than in A |
 | signs | a random sign's ~5 W (fp32), held signs free | a random sign +43 W at constant magnitude, a fixed negative +0.8 ± 1.9 W (R3a, R3b) |
 | A against B | A pays about two thirds of B's price per flip (E113, E125) | bf16: A's flips cost about twice B's; int8: B's random costs more than A's |
-| per flip | 118–136 fJ per flipped bit (whole board) | about 115–150 fJ per operand-bit flip at one multiply-add (G1s, whole board over zeros) — same order, not like for like |
+| per flip | 118–136 fJ per flipped bit (whole board) | about 115–150 fJ per operand-bit flip at one multiply-add (G1s, whole board over zeros) — same order, not like for like; upper bounds, 11–16% of it the die's own leakage (C2) |
 | speed at a fixed clock | data-independent | data-independent (0.6–2.6% spread over every kind) |
-| blind power error | M5 0.36 W, M6 0.41 W rms (E140, 600 MHz) | G1 24.7 W, G4 12.8 W rms (16% and 8% of the span) |
+| blind power error | M5 0.36 W, M6 0.41 W rms (E140, 600 MHz) | G1, the registered primary, 24.7 W rms (16% of the span); G4, the best of seven comparisons picked after scoring, 12.8 W (C8) |
 
 The two kernels differ (a resident loop on one tile against a streaming GEMM), so the table sets kernel against kernel
 (E135's correction C1), and no chip-level contrast is drawn from the size of an error.
@@ -285,7 +406,7 @@ The two kernels differ (a resident loop on one tile against a streaming GEMM), s
 |---|---|---|---|
 | V0 | ≥ 90% of stage-1 kinds valid on each board | 92 of 92 on both | **HOLDS** |
 | R1a | no resolved rise along the scattered zero ladder (bf16, int8) | none | **HOLDS** (both) |
-| R1b | blocks < scattered at 50% and 75%, resolved | +7.9 W (bar 7.9) and +16.1 W (bar 6.9) | **HOLDS** |
+| R1b | blocks < scattered at 50% and 75%, resolved | +7.888 W (bar 7.880) and +16.1 W (bar 6.9) | **HOLDS** (just, at 50%) |
 | R2 | middle rung up, all-flipped constant back below half (four ladders) | bf16 mant +81.4 / +7.0, exp +51.9 / −4.0, fp16 mant +81.7 / +6.8, int8 +73.3 / +5.8 W | **HOLDS** (all four) |
 | R3a | random sign > fixed, resolved | +43.1 ± 1.9 W | **HOLDS** |
 | R3b | fixed negative ≈ fixed positive | +0.8 ± 1.9 W (limit 4.3) | **HOLDS** |
@@ -294,13 +415,13 @@ The two kernels differ (a resident loop on one tile against a streaming GEMM), s
 | B1 | boards agree: slope 0.9–1.1, rms ≤ 5% of S | slope 0.918, 7.33 W (limit 7.74) | **HOLDS** |
 | P1 | G1 blind rms ≤ 0.10 S (15.5 W) | 24.7 W | **FAILS** |
 | P2 | G1's absolute bias ≤ 0.05 S (7.7 W) | −13.0 W | **FAILS** |
-| P3 | ≥ 13 of 17 inside G1's 90% band | 16 of 17 | **HOLDS** |
+| P3 | ≥ 13 of 17 inside G1's 90% band | 16 of 17 (bands ±47 / ±93 / ±22 W in bf16 / fp16 / int8) | **HOLDS** |
 | P4 | G1 rms ≤ 0.7 × G0's | 24.7 against 63.7 W | **HOLDS** |
 | P5 | G1 rms < S1's | 24.7 against 33.8 W | **HOLDS** |
 | H1 | blind hold rise rms ≤ 0.8 °C | 3.78 °C | **FAILS** |
 | H2 | with measured power, rms ≤ 0.6 °C | 1.39 °C | **FAILS** |
 | H3 | ≥ 13 of 17 rises inside the heat band | 14 of 17 | **HOLDS** |
-| H4 | the two stage-1 boards' die rise per W within 0.8–1.25 | 0.66 | **FAILS** |
+| H4 | the two stage-1 boards' die rise per W within 0.8–1.25 | 0.66 (the fits; model-free steps 0.87–0.94, post hoc, C1) | **FAILS** |
 
 Sources: `model-e149.json` `rules_stage1`, `score-e149.json` `rules`. 12 of the 18 rules hold (R1a counted once for its two
 formats, R2 once for its four ladders); R4b, P1, P2, H1, H2 and H4 fail.
@@ -316,8 +437,10 @@ formats, R2 once for its four ladders); R4b, P1, P2, H1, H2 and H4 fail.
   TFLOPS and 303 TOPS and they reach the cap).
 - **A window**: back-to-back GEMMs of one kind, 5 s for a cell and 3 s for the bracketing reference (bf16 randn); the
   power is the mean of the 100 ms NVML readings after 1.5 s (cell) or 1.0 s (reference). y = cell − mean of its two
-  references − the same for its format's zeros in that pass: watts over zeros at 1410 MHz, at the reference's thermal
-  state. A window counts only if the SM clock read 1410 MHz in every sample and no clock-event reason bit was set (V0).
+  references − the same for its format's zeros in that pass: watts over zeros at 1410 MHz, each window at its own
+  fast-pole temperature and the pass's slow thermal state, so y carries about 11–16% leakage (C2; the registration says
+  "at the reference's thermal state"). A window counts only if the SM clock read 1410 MHz in every sample and no
+  clock-event reason bit was set (V0).
 - **Reads only.** Every command sent to the GPU is an NVML getter or `nvidia-smi -q`; nothing was set.
 
 ## Departures, dated
@@ -341,11 +464,13 @@ formats, R2 once for its four ladders); R4b, P1, P2, H1, H2 and H4 fail.
   per operand at any b, from the random phase per row) and a few K-steps predict; they rise with b to 16 and dip at 64.
 - **One board's die wandered**: on stage 1's unit B the heat model's residual moved between −3.5 and +2.1 °C in
   two-minute bins at nearly constant power (48.5 °C at 263 W, then 55.7 °C at 279 W); unit A's stayed within ±0.4 °C
-  (`heat_resid.py` in the lane's scratch; the samples are `logs/e149-20261102-r1/B/samples/`). A shared multi-GPU
-  server's inlet or fans are the likely cause; nothing here measured them.
-- **E135's boards, the same heat fit** (post hoc, its committed logs): 0.097 and 0.067 °C per board W with τ₂ 20 and
-  80 s, at 1.7 and 3.3 °C rms, its long idle cooling waits making the poor fits: the A100 coefficient spans 0.067–0.143
-  °C/W over four boards.
+  (`posthoc_e149.py` §3, the lane's `heat_resid.py` committed after verification; the samples are
+  `logs/e149-20261102-r1/B/samples/`). A shared multi-GPU server's inlet or fans are the likely cause; nothing here
+  measured them. It is also why B's own fit reads 0.143 °C/W (C1).
+- **E135's boards, the same heat fit** (`posthoc_e149.py` §12, its committed logs): 0.097 and 0.067 °C per board W with
+  τ₂ 20 and 80 s, at 1.7 and 3.3 °C rms (on its board B the slow pole all but vanishes, r₂ 0.001), its long idle cooling
+  waits making the poor fits: too poor to quote as gains. *(Corrected after verification, C1: this said the A100
+  coefficient spans 0.067–0.143 °C/W over four boards.)*
 - **Single positions**: bf16's mantissa bits 0, 3 and 6 each flipped at p = 0.5 cost 44.7, 40.7 and 38.5 W (low bits a
   little dearer), exponent bits 0 and 4 37.1 and 45.0 W, fp16's mantissa bits 0, 5, 9 23.6, 28.0, 23.0 W.
 
@@ -359,13 +484,16 @@ formats, R2 once for its four ladders); R4b, P1, P2, H1, H2 and H4 fail.
   so their watts are not bf16's kernel's.
 - Board power is NVML's reading (every 100 ms, updating every 0.1–0.2 s, E135 C10); the die temperature is whole degrees.
 - The heat model is linear and two-pole; the cloud slots' cooling is neither measured nor controlled.
+- y is watts over zeros with each window at its own fast-pole temperature, so it carries 11–16% leakage, and the
+  registered blind heat path counts that part again (C2).
 
 ## Cost
 
 **Metered $4.48** (`billing.json`: `modal billing report --for today --show-resources --json`, read 20:42 PST, app
 `e149-gpu-model-check` only): stage 1 $2.52, stage 2 $1.73, smoke S0 $0.11, smoke S2 $0.13; the GPU line $4.17 = 7,144
 GPU-seconds at $2.10/h. The ledger of function-seconds from the Volume's `STARTED`/`DONE` (`ledger.json`): 7,101 s, $4.45
-at the registered rate. Projected $5.19, ceiling from the timeouts $8.08, E149's cap $11 (stop at $10). Against the
+at the registered rate. Projected $5.19, ceiling from the timeouts $8.66 with A1's smoke S2 (`posthoc.txt` §11; the
+registration's $8.08 was written before S2 existed: C10), E149's cap $11 (stop at $10). Against the
 owner's $20 for GPU checks: E135's $3.62 plus E149's $4.48 = $8.10 (E150, if it runs, adds its own). No container is
 left running; the Volume `e149-gpu-model-check` (about 2 MB, every log committed here) remains.
 
@@ -383,3 +511,4 @@ left running; the Volume `e149-gpu-model-check` (about 2 MB, every log committed
 | `ledger.json`, `billing.json` | GPU-seconds per call (`ledger_e149.py`) and the metered bill by app |
 | `summary.md` | the tables above, printed by `summarize_e149.py` from the JSON files |
 | `fit-stage1.txt`, `predictions-e149.txt` | the fit's and the predictions' printed summaries |
+| `posthoc_e149.py`, `posthoc.txt`, `posthoc.json` | added after verification, post hoc and labelled (no verdicts): the hottest windows, board B's fit against model-free steps, the heat residual by two-minute bins, the leakage inside y, the blind heat path's double count and its variants, the heat errors by board, the blind errors by model, the bands and narrow rules, y beside the board's watts, the per-flip coefficients by bit position, the timeouts' ceiling, E135's boards' heat fit. Run: `python posthoc_e149.py` (numpy) |
