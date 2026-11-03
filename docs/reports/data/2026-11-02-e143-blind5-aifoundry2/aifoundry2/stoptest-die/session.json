@@ -1,0 +1,296 @@
+{
+ "experiment": "E143",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793681791186,
+ "protocol": {
+  "experiment": "E143",
+  "request": "Q138",
+  "card": "aifoundry2",
+  "order_seed": 143,
+  "note": "E143's stop-path test (die): the registered watcher with one stop lowered, so that it must trip on live samples; the session must end with exit 4",
+  "tools": {
+   "heater": "build/sparsity_t2/host/sparsity_host",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "pool": "tools/claims-v3/kinds/blind5/blind5.json",
+  "predictions": "tools/claims-v3/e143/predictions-e143.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 30,
+   "board_cap_w": 93,
+   "cap_consecutive": 3
+  },
+  "caps": {
+   "max_card_min": 2
+  },
+  "smoke_cycles": {
+   "b5-fp32.anchor_zeros": 546,
+   "b5-fp16.anchor_zeros": 546,
+   "b5-int8.anchor_zeros": 318
+  },
+  "dry_c_w": {
+   "file:tools/claims-v3/kinds/blind5/tiles/fp16/fp16.anchor_randn.bin": 22.865,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp16/fp16.anchor_zeros.bin": 1.394,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp16/fp16.exp_only.bin": 17.502,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp16/fp16.pair_cancel_asign.bin": 17.911,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp16/fp16.pair_nearcancel.bin": 22.792,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp16/fp16.real_pythia_ln2_up.bin": 23.077,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp16/fp16.real_pythia_qk.bin": 22.108,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp16/fp16.real_pythia_softmax_v.bin": 18.428,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp16/fp16.sparse24_aligned.bin": 13.946,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp16/fp16.sparse24_straddled.bin": 22.689,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp16/fp16.wideexp_bgate_alt.bin": 14.606,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.anchor_randn.bin": 25.478,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.anchor_zeros.bin": 1.44,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.b_exp_busy_a_const.bin": 16.741,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.block_sparse_k4.bin": 13.992,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.e4m3grid_gelu_w.bin": 17.866,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.exp_only_both.bin": 16.945,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.gray_stream.bin": 17.81,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.lowrank2_w.bin": 25.496,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.real_pythia_gelu_down.bin": 23.322,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.real_pythia_ln1_q.bin": 23.115,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.sorted_k.bin": 24.042,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.wideexp48_bgate_alt.bin": 16.288,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.wideexp48_bgate_kblk.bin": 14.528,
+   "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.wideexp48_dense.bin": 26.627,
+   "file:tools/claims-v3/kinds/blind5/tiles/int8/int8.a_word_flipflop.bin": 5.581,
+   "file:tools/claims-v3/kinds/blind5/tiles/int8/int8.anchor_full.bin": 8.992,
+   "file:tools/claims-v3/kinds/blind5/tiles/int8/int8.anchor_zeros.bin": 2.123,
+   "file:tools/claims-v3/kinds/blind5/tiles/int8/int8.b_line_flipflop_nogate.bin": 8.352,
+   "file:tools/claims-v3/kinds/blind5/tiles/int8/int8.b_line_zero_one.bin": 6.01,
+   "file:tools/claims-v3/kinds/blind5/tiles/int8/int8.block_sparse_a.bin": 6.36,
+   "file:tools/claims-v3/kinds/blind5/tiles/int8/int8.gray_a.bin": 6.41,
+   "file:tools/claims-v3/kinds/blind5/tiles/int8/int8.powerlaw_w.bin": 8.382,
+   "file:tools/claims-v3/kinds/blind5/tiles/int8/int8.real_pythia_w8a8_down.bin": 8.199,
+   "file:tools/claims-v3/kinds/blind5/tiles/int8/int8.real_pythia_w8a8_up.bin": 8.154,
+   "file:tools/claims-v3/kinds/blind5/tiles/int8/int8.sorted_k.bin": 8.027,
+   "file:tools/claims-v3/kinds/tiles/fp32/randn.bin": 25.57,
+   "file:tools/claims-v3/kinds/tiles/fp16/randn.bin": 23.062,
+   "file:tools/claims-v3/kinds/tiles/int8/full.bin": 8.983
+  },
+  "limit_p800_w": 86.0,
+  "peak_lock_w": 93.0,
+  "relation": {
+   "B800": 33.60956684526229,
+   "s800": 1.90517380064275
+  },
+  "admission": {
+   "b5-fp16.anchor_randn": {
+    "c_ref_w": 22.865,
+    "fixed_p800_w": 77.17
+   },
+   "b5-fp16.anchor_zeros": {
+    "c_ref_w": 1.394,
+    "fixed_p800_w": 36.27
+   },
+   "b5-fp16.exp_only": {
+    "c_ref_w": 17.502,
+    "fixed_p800_w": 66.95
+   },
+   "b5-fp16.pair_cancel_asign": {
+    "c_ref_w": 17.911,
+    "fixed_p800_w": 67.73
+   },
+   "b5-fp16.pair_nearcancel": {
+    "c_ref_w": 22.792,
+    "fixed_p800_w": 77.03
+   },
+   "b5-fp16.real_pythia_ln2_up": {
+    "c_ref_w": 23.077,
+    "fixed_p800_w": 77.58
+   },
+   "b5-fp16.real_pythia_qk": {
+    "c_ref_w": 22.108,
+    "fixed_p800_w": 75.73
+   },
+   "b5-fp16.real_pythia_softmax_v": {
+    "c_ref_w": 18.428,
+    "fixed_p800_w": 68.72
+   },
+   "b5-fp16.sparse24_aligned": {
+    "c_ref_w": 13.946,
+    "fixed_p800_w": 60.18
+   },
+   "b5-fp16.sparse24_straddled": {
+    "c_ref_w": 22.689,
+    "fixed_p800_w": 76.84
+   },
+   "b5-fp16.wideexp_bgate_alt": {
+    "c_ref_w": 14.606,
+    "fixed_p800_w": 61.44
+   },
+   "b5-fp32.anchor_randn": {
+    "c_ref_w": 25.478,
+    "fixed_p800_w": 82.15
+   },
+   "b5-fp32.anchor_zeros": {
+    "c_ref_w": 1.44,
+    "fixed_p800_w": 36.35
+   },
+   "b5-fp32.b_exp_busy_a_const": {
+    "c_ref_w": 16.741,
+    "fixed_p800_w": 65.5
+   },
+   "b5-fp32.block_sparse_k4": {
+    "c_ref_w": 13.992,
+    "fixed_p800_w": 60.27
+   },
+   "b5-fp32.e4m3grid_gelu_w": {
+    "c_ref_w": 17.866,
+    "fixed_p800_w": 67.65
+   },
+   "b5-fp32.exp_only_both": {
+    "c_ref_w": 16.945,
+    "fixed_p800_w": 65.89
+   },
+   "b5-fp32.gray_stream": {
+    "c_ref_w": 17.81,
+    "fixed_p800_w": 67.54
+   },
+   "b5-fp32.lowrank2_w": {
+    "c_ref_w": 25.496,
+    "fixed_p800_w": 82.18
+   },
+   "b5-fp32.real_pythia_gelu_down": {
+    "c_ref_w": 23.322,
+    "fixed_p800_w": 78.04
+   },
+   "b5-fp32.real_pythia_ln1_q": {
+    "c_ref_w": 23.115,
+    "fixed_p800_w": 77.65
+   },
+   "b5-fp32.sorted_k": {
+    "c_ref_w": 24.042,
+    "fixed_p800_w": 79.41
+   },
+   "b5-fp32.wideexp48_bgate_alt": {
+    "c_ref_w": 16.288,
+    "fixed_p800_w": 64.64
+   },
+   "b5-fp32.wideexp48_bgate_kblk": {
+    "c_ref_w": 14.528,
+    "fixed_p800_w": 61.29
+   },
+   "b5-fp32.wideexp48_dense": {
+    "c_ref_w": 26.627,
+    "fixed_p800_w": 84.34
+   },
+   "b5-int8.a_word_flipflop": {
+    "c_ref_w": 5.581,
+    "fixed_p800_w": 44.24
+   },
+   "b5-int8.anchor_full": {
+    "c_ref_w": 8.992,
+    "fixed_p800_w": 50.74
+   },
+   "b5-int8.anchor_zeros": {
+    "c_ref_w": 2.123,
+    "fixed_p800_w": 37.65
+   },
+   "b5-int8.b_line_flipflop_nogate": {
+    "c_ref_w": 8.352,
+    "fixed_p800_w": 49.52
+   },
+   "b5-int8.b_line_zero_one": {
+    "c_ref_w": 6.01,
+    "fixed_p800_w": 45.06
+   },
+   "b5-int8.block_sparse_a": {
+    "c_ref_w": 6.36,
+    "fixed_p800_w": 45.73
+   },
+   "b5-int8.gray_a": {
+    "c_ref_w": 6.41,
+    "fixed_p800_w": 45.82
+   },
+   "b5-int8.powerlaw_w": {
+    "c_ref_w": 8.382,
+    "fixed_p800_w": 49.58
+   },
+   "b5-int8.real_pythia_w8a8_down": {
+    "c_ref_w": 8.199,
+    "fixed_p800_w": 49.23
+   },
+   "b5-int8.real_pythia_w8a8_up": {
+    "c_ref_w": 8.154,
+    "fixed_p800_w": 49.14
+   },
+   "b5-int8.sorted_k": {
+    "c_ref_w": 8.027,
+    "fixed_p800_w": 48.9
+   },
+   "k-fp32-randn": {
+    "c_ref_w": 25.977,
+    "fixed_p800_w": 83.1
+   },
+   "k-fp16-randn": {
+    "c_ref_w": 23.211,
+    "fixed_p800_w": 77.83
+   },
+   "k-int8-full": {
+    "c_ref_w": 8.519,
+    "fixed_p800_w": 49.84
+   },
+   "rest": {
+    "c_ref_w": 0.0,
+    "fixed_p800_w": 33.61
+   }
+  },
+  "blocks": [
+   {
+    "name": "STOPTEST",
+    "title": "the die stop's path on live samples",
+    "default": false,
+    "passes": 1,
+    "shuffle": false,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind5/tiles/fp32/fp32.anchor_randn.bin",
+      "label": "b5-fp32.anchor_randn",
+      "start": {
+       "mode": "cool",
+       "max_c": 99,
+       "max_wait_s": 5
+      },
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "STOPTEST-00-b5-fp32.anchor_randn-r1"
+ ],
+ "sha256": {
+  "heater": "7adadf4f1ce331cc028c317561933d6d3209da0f0326b0ce9a124b39b15ac0d2",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e143/run_e143.py",
+  "--protocol",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e143/protocol-stoptest-die.json",
+  "--out",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e143/runs/stoptest-die",
+  "--only",
+  "STOPTEST",
+  "--max-card-min",
+  "2.00"
+ ],
+ "git_head": "0c187e1262b0e0f7fb744da4c22211b5dcfa9958",
+ "git_dirty_hpl": ""
+}

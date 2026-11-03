@@ -1,0 +1,62 @@
+E143 reduction: 117 burst runs, 117 counted, passes [1, 2, 3]; dry False
+tiles scored 36; left out []
+  E143-F1  {"n": 19, "rms": 6.629, "range_2.5_97.5": [4.664, 10.231], "verdict": "PASS", "mean_err": -4.964, "ref_rms": 7.587}
+  E143-F2  {"n": 17, "rms": 1.007, "range_2.5_97.5": [0.364, 15.467], "verdict": "PASS", "mean_err": -0.151, "ref_rms": 8.872}
+  E143-F3  {"n": 36, "inside": 36, "line": 31, "verdict": "PASS"}
+  E143-W1  {"n": 19, "rms": 1.601, "range_2.5_97.5": [1.405, 2.429], "verdict": "PASS", "mean_err": 1.174, "ref_rms": 1.945}
+  E143-W2  {"n": 17, "rms": 1.184, "range_2.5_97.5": [1.254, 2.44], "verdict": "PASS (better than the reference says)", "mean_err": -0.804, "ref_rms": 1.827}
+  E143-W3  {"n": 36, "inside": 35, "line": 31, "verdict": "PASS"}
+  E143-H1  {"n": 36, "rms": 0.585, "range_2.5_97.5": [0.523, 0.839], "verdict": "PASS", "mean_err": -0.101, "ref_rms": 0.685}
+  E143-H3  {"n": 36, "inside": 36, "line": 31, "verdict": "PASS"}
+  R0       {"verdict": "PASS", "tiles": {"k-fp32-randn": {"n": 3, "burst_mhz": 705.33, "ref_mhz": 713.3, "d_mhz": -7.97, "burst_w": 67.93, "ref_w": 68.985, "d_w": -1.055, "rise_c": 6.667, "within": true}, "k-fp16-randn": {"n": 3, "burst_mhz": 720.13, "ref_mhz": 727.7, "d_mhz": -7.57, "burst_w": 67.327, "ref_w": 66.585, "d_w": 0.742, "rise_c": 6.333, "within": true}, "k-int8-full": {"n": 3, "burst_mhz": 794.67, "ref_mhz": 800.0, "d_mhz": -5.33, "burst_w": 49.467, "ref_w": 49.8, "d_w": -0.333, "rise_c": 3.667, "within": true}}}
+  [governed         ] n 19  clock rms M7/M6/M5 6.629/6.567/6.599 MHz  board 1.601/1.605/1.571 W  rise 0.461 C  D 2.567/2.571/2.559 W
+  [pinned           ] n 17  clock rms M7/M6/M5 1.007/1.005/1.001 MHz  board 1.184/1.17/1.256 W  rise 0.699 C  D 1.042/1.014/1.15 W
+  [all              ] n 36  clock rms M7/M6/M5 4.865/4.821/4.843 MHz  board 1.42/1.416/1.431 W  rise 0.585 C  D 2.063/2.06/2.081 W
+  [priority1        ] n 24  clock rms M7/M6/M5 5.38/5.364/5.471 MHz  board 1.371/1.359/1.386 W  rise 0.543 C  D 1.997/1.978/2.026 W
+  [fp32             ] n 14  clock rms M7/M6/M5 6.683/6.758/6.686 MHz  board 1.612/1.618/1.573 W  rise 0.39 C  D 2.522/2.551/2.505 W
+  [fp16             ] n 11  clock rms M7/M6/M5 4.372/4.052/4.287 MHz  board 1.201/1.175/1.251 W  rise 0.488 C  D 2.249/2.207/2.326 W
+  [int8             ] n 11  clock rms M7/M6/M5 1.227/1.227/1.227 MHz  board 1.359/1.359/1.411 W  rise 0.83 C  D 0.849/0.82/0.853 W
+  [measured_governed] n 19  clock rms M7/M6/M5 6.629/6.567/6.599 MHz  board 1.601/1.605/1.571 W  rise 0.461 C  D 2.567/2.571/2.559 W
+  [measured_pinned  ] n 17  clock rms M7/M6/M5 1.007/1.005/1.001 MHz  board 1.184/1.17/1.256 W  rise 0.699 C  D 1.042/1.014/1.15 W
+  heat law on the measured W: {"n": 36, "rms_c": 0.453, "mean_c": -0.135, "k": 0.14004345109940583, "P_idle_w": 21.5}
+  pass 1: E143-F1 12.763 FAIL; E143-F2 0.201 PASS (better than the reference says); E143-F3 35 PASS; E143-W1 2.03 PASS; E143-W2 1.559 PASS; E143-W3 34 PASS; E143-H1 0.792 PASS; E143-H3 35 PASS
+  pass 2: E143-F1 6.193 PASS; E143-F2 2.966 PASS; E143-F3 36 PASS; E143-W1 1.627 PASS; E143-W2 1.265 PASS; E143-W3 36 PASS; E143-H1 0.629 PASS; E143-H3 36 PASS
+  pass 3: E143-F1 6.971 PASS; E143-F2 0.201 PASS (better than the reference says); E143-F3 36 PASS; E143-W1 1.814 PASS; E143-W2 1.013 PASS (better than the reference says); E143-W3 35 PASS; E143-H1 0.656 PASS; E143-H3 36 PASS
+tile                                group    p  passes  MHz (M7)        W (M7)          rise C (M7)    D W (M7)
+  fp16.anchor_randn                  governed 2  3   731.4 ( 730.6)   67.22 ( 65.57)   7.33 ( 6.17)  32.057 (29.3)
+  fp16.exp_only                      governed 2  3   782.2 ( 786.4)   65.43 ( 65.04)   6.67 ( 6.10)  30.27 (28.78)
+  fp16.pair_cancel_asign             governed 1  3   780.5 ( 782.6)   66.00 ( 65.25)   6.00 ( 6.13)  30.843 (28.98)
+  fp16.pair_nearcancel               governed 1  3   724.8 ( 731.3)   67.53 ( 65.57)   6.33 ( 6.17)  32.367 (29.3)
+  fp16.real_pythia_ln2_up            governed 1  3   720.8 ( 728.7)   66.93 ( 65.57)   6.67 ( 6.17)  31.77 (29.3)
+  fp16.real_pythia_qk                governed 1  3   731.0 ( 737.9)   67.12 ( 65.58)   6.33 ( 6.17)  31.957 (29.31)
+  fp16.real_pythia_softmax_v         governed 1  3   778.5 ( 777.2)   66.06 ( 65.41)   6.33 ( 6.15)  30.897 (29.15)
+  fp16.sparse24_straddled            governed 1  3   726.5 ( 732.3)   66.94 ( 65.57)   6.67 ( 6.17)  31.78 (29.31)
+  fp32.anchor_randn                  governed 2  3   699.3 ( 707.0)   67.74 ( 65.39)   7.00 ( 6.15)  32.57 (29.04)
+  fp32.b_exp_busy_a_const            governed 2  3   791.3 ( 792.3)   65.06 ( 64.45)   6.00 ( 6.02)  29.89 (28.1)
+  fp32.e4m3grid_gelu_w               governed 1  3   779.2 ( 783.0)   66.19 ( 65.23)   6.00 ( 6.12)  31.027 (28.88)
+  fp32.exp_only_both                 governed 1  3   791.8 ( 790.9)   64.64 ( 64.64)   6.33 ( 6.04)  29.477 (28.29)
+  fp32.gray_stream                   governed 1  3   784.6 ( 783.6)   65.84 ( 65.20)   6.00 ( 6.12)  30.677 (28.85)
+  fp32.lowrank2_w                    governed 2  3   698.0 ( 706.9)   68.26 ( 65.39)   6.67 ( 6.15)  33.093 (29.04)
+  fp32.real_pythia_gelu_down         governed 1  3   715.5 ( 726.4)   66.82 ( 65.56)   6.33 ( 6.17)  31.657 (29.21)
+  fp32.real_pythia_ln1_q             governed 1  3   724.1 ( 728.3)   66.66 ( 65.56)   6.33 ( 6.17)  31.49 (29.21)
+  fp32.sorted_k                      governed 1  3   707.3 ( 719.8)   65.88 ( 65.53)   6.67 ( 6.17)  30.717 (29.18)
+  fp32.wideexp48_bgate_alt           governed 1  3   781.9 ( 794.9)   62.62 ( 63.96)   5.67 ( 5.95)  27.453 (27.6)
+  fp32.wideexp48_dense               governed 1  3   693.8 ( 696.9)   69.15 ( 65.31)   6.67 ( 6.14)  33.987 (28.96)
+  fp16.anchor_zeros                  pinned   2  3   800.0 ( 800.0)   35.16 ( 36.27)   1.67 ( 2.07)  0.0 (0.0)
+  fp16.sparse24_aligned              pinned   1  3   800.0 ( 799.8)   61.08 ( 60.16)   5.33 ( 5.41)  25.917 (23.89)
+  fp16.wideexp_bgate_alt             pinned   1  3   800.0 ( 799.4)   61.49 ( 61.36)   6.00 ( 5.58)  26.327 (25.1)
+  fp32.anchor_zeros                  pinned   2  3   800.0 ( 800.0)   35.17 ( 36.35)   1.67 ( 2.08)  0.0 (0.0)
+  fp32.block_sparse_k4               pinned   2  3   800.0 ( 799.8)   60.02 ( 60.24)   5.00 ( 5.43)  24.85 (23.89)
+  fp32.wideexp48_bgate_kblk          pinned   1  3   800.0 ( 799.5)   61.24 ( 61.22)   5.67 ( 5.56)  26.073 (24.87)
+  int8.a_word_flipflop               pinned   1  3   795.9 ( 800.0)   42.23 ( 44.24)   2.00 ( 3.18)  5.9 (6.59)
+  int8.anchor_full                   pinned   2  3   800.0 ( 800.0)   50.48 ( 50.74)   3.67 ( 4.10)  14.15 (13.09)
+  int8.anchor_zeros                  pinned   2  3   800.0 ( 800.0)   36.33 ( 37.65)   1.33 ( 2.26)  0.0 (0.0)
+  int8.b_line_flipflop_nogate        pinned   1  3   800.0 ( 800.0)   48.69 ( 49.52)   3.00 ( 3.92)  12.357 (11.87)
+  int8.b_line_zero_one               pinned   1  3   800.0 ( 800.0)   43.41 ( 45.06)   2.00 ( 3.30)  7.08 (7.4)
+  int8.block_sparse_a                pinned   2  3   800.0 ( 800.0)   44.64 ( 45.73)   3.00 ( 3.39)  8.307 (8.07)
+  int8.gray_a                        pinned   1  3   800.0 ( 800.0)   44.00 ( 45.82)   2.67 ( 3.41)  7.67 (8.17)
+  int8.powerlaw_w                    pinned   2  3   800.0 ( 800.0)   47.39 ( 49.58)   3.00 ( 3.93)  11.053 (11.92)
+  int8.real_pythia_w8a8_down         pinned   1  3   800.0 ( 800.0)   49.56 ( 49.23)   3.67 ( 3.88)  13.223 (11.58)
+  int8.real_pythia_w8a8_up           pinned   1  3   800.0 ( 800.0)   49.05 ( 49.14)   3.33 ( 3.87)  12.72 (11.49)
+  int8.sorted_k                      pinned   1  3   800.0 ( 800.0)   47.61 ( 48.90)   3.00 ( 3.84)  11.277 (11.25)
+peaks: {"board_max_w": 87.95, "board_run": "s1/BURST-24-b5-fp32.wideexp48_dense-r3.jsonl.gz", "die_mean_max_c": 63, "die_high_max_c": 69, "samples": 16134}

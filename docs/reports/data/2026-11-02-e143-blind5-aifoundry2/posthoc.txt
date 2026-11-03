@@ -1,0 +1,65 @@
+(1) the rest reading, card time, commands
+  the smoke's rest reading (last 30 s): {'board_w': 21.87, 'die_c': 46.0, 'n': 300}
+  card time, first session start to last session end: 28.05 min; sampler lines 16679; runs with an after-run config read 121; session start/end query records 6; queue snapshots 2
+
+(2) the stop-path tests (the queue's records)
+   {"t_ms": 1793681788135, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+   {"t_ms": 1793681791136, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793681790063, "t_third_line_ms": 1793681790001, "launch": [1793681789577, 1793681790272], "trip_after_line_ms": 62, "launch_end_after_trip_ms": 209, "lines": 20}
+   {"t_ms": 1793681791136, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+   {"t_ms": 1793681793137, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793681791359, "t_first_line_ms": 1793681791294, "trip_after_line_ms": 65, "lines": 13}
+   {"t_ms": 1793681793137, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+
+(3) the sampled clock against the kernel's own clock (MHz), per tile, mean over passes
+  b5-fp16.anchor_randn                 sampled  731.43  kernel   714.2  diff  -17.2
+  b5-fp16.anchor_zeros                 sampled  800.00  kernel   799.0  diff   -1.0
+  b5-fp16.exp_only                     sampled  782.20  kernel   775.6  diff   -6.6
+  b5-fp16.pair_cancel_asign            sampled  780.53  kernel   772.5  diff   -8.0
+  b5-fp16.pair_nearcancel              sampled  724.83  kernel   708.8  diff  -16.0
+  b5-fp16.real_pythia_ln2_up           sampled  720.80  kernel   702.9  diff  -17.9
+  b5-fp16.real_pythia_qk               sampled  731.00  kernel   719.0  diff  -12.0
+  b5-fp16.real_pythia_softmax_v        sampled  778.53  kernel   769.0  diff   -9.5
+  b5-fp16.sparse24_aligned             sampled  800.00  kernel   798.9  diff   -1.1
+  b5-fp16.sparse24_straddled           sampled  726.50  kernel   711.2  diff  -15.3
+  b5-fp16.wideexp_bgate_alt            sampled  800.00  kernel   799.0  diff   -1.0
+  b5-fp32.anchor_randn                 sampled  699.30  kernel   683.8  diff  -15.5
+  b5-fp32.anchor_zeros                 sampled  800.00  kernel   799.0  diff   -1.0
+  b5-fp32.b_exp_busy_a_const           sampled  791.27  kernel   786.9  diff   -4.4
+  b5-fp32.block_sparse_k4              sampled  800.00  kernel   799.0  diff   -1.0
+  b5-fp32.e4m3grid_gelu_w              sampled  779.20  kernel   770.6  diff   -8.6
+  b5-fp32.exp_only_both                sampled  791.77  kernel   786.6  diff   -5.2
+  b5-fp32.gray_stream                  sampled  784.63  kernel   775.4  diff   -9.2
+  b5-fp32.lowrank2_w                   sampled  698.03  kernel   684.0  diff  -14.0
+  b5-fp32.real_pythia_gelu_down        sampled  715.50  kernel   703.1  diff  -12.4
+  b5-fp32.real_pythia_ln1_q            sampled  724.13  kernel   706.6  diff  -17.5
+  b5-fp32.sorted_k                     sampled  707.33  kernel   689.9  diff  -17.4
+  b5-fp32.wideexp48_bgate_alt          sampled  781.93  kernel   776.0  diff   -5.9
+  b5-fp32.wideexp48_bgate_kblk         sampled  800.00  kernel   799.0  diff   -1.0
+  b5-fp32.wideexp48_dense              sampled  693.77  kernel   679.3  diff  -14.5
+  b5-int8.a_word_flipflop              sampled  795.93  kernel   796.1  diff   +0.2
+  b5-int8.anchor_full                  sampled  800.00  kernel   799.0  diff   -1.0
+  b5-int8.anchor_zeros                 sampled  800.00  kernel   798.9  diff   -1.1
+  b5-int8.b_line_flipflop_nogate       sampled  800.00  kernel   799.0  diff   -1.0
+  b5-int8.b_line_zero_one              sampled  800.00  kernel   798.9  diff   -1.1
+  b5-int8.block_sparse_a               sampled  800.00  kernel   799.0  diff   -1.0
+  b5-int8.gray_a                       sampled  800.00  kernel   799.0  diff   -1.0
+  b5-int8.powerlaw_w                   sampled  800.00  kernel   799.0  diff   -1.0
+  b5-int8.real_pythia_w8a8_down        sampled  800.00  kernel   799.0  diff   -1.0
+  b5-int8.real_pythia_w8a8_up          sampled  800.00  kernel   798.9  diff   -1.1
+  b5-int8.sorted_k                     sampled  800.00  kernel   799.0  diff   -1.0
+  k-fp16-randn                         sampled  720.13  kernel   705.0  diff  -15.1
+  k-fp32-randn                         sampled  705.33  kernel   690.1  diff  -15.2
+  k-int8-full                          sampled  794.67  kernel   794.8  diff   +0.1
+  kernel - sampled over 39 cells: mean -7.02 MHz, rms 9.58
+
+(4) the passes: the spread of a tile's clock and board W between its passes (max - min)
+  39 cells: clock spread median 2.2 MHz, max 41.6; board spread median 0.84 W, max 6.71
+    b5-fp32.wideexp48_bgate_alt            41.6 MHz  [754.2, 795.8, 795.8]
+    b5-fp16.anchor_randn                   30.6 MHz  [751.0, 720.4, 722.9]
+    k-int8-full                            16.0 MHz  [800, 784, 800]
+    b5-fp32.anchor_randn                   13.9 MHz  [700, 705.9, 692]
+    b5-fp32.exp_only_both                  12.5 MHz  [800, 787.5, 787.8]
+    b5-int8.a_word_flipflop                12.2 MHz  [800, 787.8, 800]
+
+(5) the config at the queue's start and end
+  start: {"tdp_w":65,"temp_threshold_c":65,"power_state":3,"power_state_name":"low_power","minion_mhz":600,"minion_mv":519}
+  end: {"tdp_w":65,"temp_threshold_c":65,"power_state":3,"power_state_name":"low_power","minion_mhz":600,"minion_mv":519}
