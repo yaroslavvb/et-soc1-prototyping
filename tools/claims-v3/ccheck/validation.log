@@ -1,0 +1,251 @@
+# Q139(k) ccheck validation log, Tue 3 Nov 2026 (PST), on the Intel (x86_64 desk Mac, no card, no ET runtime)
+# engine: rtl-sim/fma_toggle_v2/accum.c sha256 dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf, built with cc -O2
+# host source: workloads/sparsity/host/main.cpp sha256 0f53a7d505155156c933e2d9a64d38803ca4e0cea3e20242e0aaafbf35e82284; patched (patch_host_ccheck.py) sha256 116b1efb146c16576dc28c134ea6b3f97add71711793e3dc74d5376adcccb4ab
+# ccheck.py sha256 86f437b15c8604051ac08a6fddfe979754035516b34204dc6954d2b2c42b23c9 (every run below is this version); validate_ccheck.py 12842fadaef02e84
+# engine timing on this machine (one tile, ascending n 20000 and 541999 in one run): fp32 anchor_randn 9.64 s, fp16 anchor_randn 74.36 s, int8 anchor_full 0.00 s
+# bugs found while validating, both fixed before these runs: (1) the first full E104 run (571 s from a cold cache) raised at its end, two worker threads having built the engine under one temporary name (a lock, a unique name, and the engine built before the workers now); (2) validate_ccheck.py's V2 fp32 identity closed form wrote +0 where op 0's first multiply +0 x B[0][j] gives -0 for a negative B[0][j], kept by a gated zero B word: the engine was right and the exact-rational oracle agrees; the closed form now follows IEEE's zero sign and is checked against that oracle
+
+## A. E104's 110 card reads (aifoundry1 card 1, 1 Nov 2026; 44 file tiles; every word of all 1,024 minions), through ccheck.py e104
+# python3 tools/claims-v3/ccheck/ccheck.py e104 docs/reports/data/2026-11-01-e104-c-readback/aifoundry1-c1/kinds/readback-p10402/readback.jsonl --jobs 6 --cache <scratch>/cache --out <scratch>/v-e104.json   (references cached by the earlier runs)
+PASS     fp32 n=1000 fp32.z_add launch=- groups=1
+PASS     fp32 n=199874 fp32.z_add launch=- groups=1
+PASS     fp32 n=541999 fp32.z_add launch=- groups=1
+PASS     fp32 n=1000 fp32.z_sub launch=- groups=1
+PASS     fp32 n=199874 fp32.z_sub launch=- groups=1
+PASS     fp32 n=541999 fp32.z_sub launch=- groups=1
+PASS     fp32 n=1000 fp32.u_sub launch=- groups=1
+PASS     fp32 n=199874 fp32.u_sub launch=- groups=1
+PASS     fp32 n=541999 fp32.u_sub launch=- groups=1
+PASS     fp32 n=199874 fp32.z_s launch=- groups=1
+PASS     fp32 n=1000 fp32.m_h_sub launch=- groups=1
+PASS     fp32 n=199874 fp32.m_h_sub launch=- groups=1
+PASS     fp32 n=500000 fp32.m_h_sub launch=- groups=1
+PASS     fp16 n=1000 fp16.z_add launch=- groups=1
+PASS     fp16 n=199874 fp16.z_add launch=- groups=1
+PASS     fp16 n=541999 fp16.z_add launch=- groups=1
+PASS     fp16 n=1000 fp16.z_sub launch=- groups=1
+PASS     fp16 n=199874 fp16.z_sub launch=- groups=1
+PASS     fp16 n=541999 fp16.z_sub launch=- groups=1
+PASS     fp16 n=199874 fp16.z_allsub launch=- groups=1
+PASS     fp16 n=199874 fp16.z_hh launch=- groups=1
+PASS     fp16 n=199874 fp16.z_hl launch=- groups=1
+PASS     fp16 n=1000 fp16.u_sub launch=- groups=1
+PASS     fp16 n=199874 fp16.u_sub launch=- groups=1
+PASS     fp16 n=541999 fp16.u_sub launch=- groups=1
+PASS     fp16 n=199874 fp16.z_s launch=- groups=1
+PASS     fp16 n=199874 fp16.x_add launch=- groups=1
+PASS     fp16 n=199874 fp16.x_sub launch=- groups=1
+PASS     fp16 n=199874 fp16.w_c launch=- groups=1
+PASS     fp16 n=1000 fp16.w_h_add launch=- groups=1
+PASS     fp16 n=199874 fp16.w_h_add launch=- groups=1
+PASS     fp16 n=500000 fp16.w_h_add launch=- groups=1
+PASS     fp16 n=199874 fp16.w_h_sub launch=- groups=1
+PASS     fp16 n=1000 fp16.m_h_sub launch=- groups=1
+PASS     fp16 n=199874 fp16.m_h_sub launch=- groups=1
+PASS     fp16 n=500000 fp16.m_h_sub launch=- groups=1
+PASS     fp16 n=2 fp16.c_abs launch=- groups=1
+PASS     fp16 n=16 fp16.c_abs launch=- groups=1
+PASS     fp16 n=1000 fp16.c_abs launch=- groups=1
+PASS     fp16 n=199874 fp16.c_abs launch=- groups=1
+PASS     fp16 n=541999 fp16.c_abs launch=- groups=1
+PASS     fp16 n=2 fp16.h_add launch=- groups=1
+PASS     fp16 n=16 fp16.h_add launch=- groups=1
+PASS     fp16 n=1000 fp16.h_add launch=- groups=1
+PASS     fp16 n=199874 fp16.h_add launch=- groups=1
+PASS     fp16 n=541999 fp16.h_add launch=- groups=1
+PASS     fp16 n=2 fp16.h_sub launch=- groups=1
+PASS     fp16 n=16 fp16.h_sub launch=- groups=1
+PASS     fp16 n=1000 fp16.h_sub launch=- groups=1
+PASS     fp16 n=199874 fp16.h_sub launch=- groups=1
+PASS     fp16 n=541999 fp16.h_sub launch=- groups=1
+PASS     fp16 n=2 fp16.c_alt launch=- groups=1
+PASS     fp16 n=16 fp16.c_alt launch=- groups=1
+PASS     fp16 n=1000 fp16.c_alt launch=- groups=1
+PASS     fp16 n=199874 fp16.c_alt launch=- groups=1
+PASS     fp16 n=541999 fp16.c_alt launch=- groups=1
+PASS     fp16 n=2 fp16.s_abs launch=- groups=1
+PASS     fp16 n=16 fp16.s_abs launch=- groups=1
+PASS     fp16 n=1000 fp16.s_abs launch=- groups=1
+PASS     fp16 n=199874 fp16.s_abs launch=- groups=1
+PASS     fp16 n=541999 fp16.s_abs launch=- groups=1
+PASS     fp16 n=2 fp16.h_allsub launch=- groups=1
+PASS     fp16 n=16 fp16.h_allsub launch=- groups=1
+PASS     fp16 n=1000 fp16.h_allsub launch=- groups=1
+PASS     fp16 n=199874 fp16.h_allsub launch=- groups=1
+PASS     fp16 n=541999 fp16.h_allsub launch=- groups=1
+PASS     fp16 n=2 fp16.hh_sub launch=- groups=1
+PASS     fp16 n=16 fp16.hh_sub launch=- groups=1
+PASS     fp16 n=1000 fp16.hh_sub launch=- groups=1
+PASS     fp16 n=199874 fp16.hh_sub launch=- groups=1
+PASS     fp16 n=541999 fp16.hh_sub launch=- groups=1
+PASS     fp16 n=2 fp16.hl_sub launch=- groups=1
+PASS     fp16 n=16 fp16.hl_sub launch=- groups=1
+PASS     fp16 n=1000 fp16.hl_sub launch=- groups=1
+PASS     fp16 n=199874 fp16.hl_sub launch=- groups=1
+PASS     fp16 n=541999 fp16.hl_sub launch=- groups=1
+PASS     fp16 n=199874 fp16.signs launch=- groups=1
+PASS     fp32 n=1000 fp32.c_abs launch=- groups=1
+PASS     fp32 n=199874 fp32.c_abs launch=- groups=1
+PASS     fp32 n=541999 fp32.c_abs launch=- groups=1
+PASS     fp32 n=1000 fp32.h_add launch=- groups=1
+PASS     fp32 n=199874 fp32.h_add launch=- groups=1
+PASS     fp32 n=541999 fp32.h_add launch=- groups=1
+PASS     fp32 n=1000 fp32.h_sub launch=- groups=1
+PASS     fp32 n=199874 fp32.h_sub launch=- groups=1
+PASS     fp32 n=541999 fp32.h_sub launch=- groups=1
+PASS     fp32 n=199874 fp32.c_alt launch=- groups=1
+PASS     fp32 n=1000 fp32.s_abs launch=- groups=1
+PASS     fp32 n=199874 fp32.s_abs launch=- groups=1
+PASS     fp32 n=541999 fp32.s_abs launch=- groups=1
+PASS     fp32 n=199874 fp32.h_allsub launch=- groups=1
+PASS     fp32 n=199874 fp32.w_c launch=- groups=1
+PASS     fp32 n=1000 fp32.w_h_add launch=- groups=1
+PASS     fp32 n=199874 fp32.w_h_add launch=- groups=1
+PASS     fp32 n=500000 fp32.w_h_add launch=- groups=1
+PASS     fp32 n=199874 fp32.w_h_sub launch=- groups=1
+PASS     fp32 n=1000 fp32.r_abs launch=- groups=1
+PASS     fp32 n=199874 fp32.r_abs launch=- groups=1
+PASS     fp32 n=541999 fp32.r_abs launch=- groups=1
+PASS     fp32 n=199874 fp32.signs launch=- groups=1
+PASS     fp16 n=2 fp16.r_abs launch=- groups=1
+PASS     fp16 n=16 fp16.r_abs launch=- groups=1
+PASS     fp16 n=1000 fp16.r_abs launch=- groups=1
+PASS     fp16 n=199874 fp16.r_abs launch=- groups=1
+PASS     fp16 n=541999 fp16.r_abs launch=- groups=1
+PASS     fp16 n=199874 fp16.r_cancel launch=- groups=1
+PASS     fp16 n=199874 fp16.c_cancel launch=- groups=1
+PASS     fp16 n=199874 fp16.r_walk launch=- groups=1
+PASS     fp32 n=199874 fp32.pm_pi launch=- groups=1
+PASS     fp32 n=199874 fp32.bj_6 launch=- groups=1
+{"launches": 110, "PASS": 110, "ROUNDING": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 38, "ROUNDING": 0, "FAIL": 0}, "fp16": {"PASS": 72, "ROUNDING": 0, "FAIL": 0}}, "all_pass": true}
+real 2.94
+user 0.16
+sys 0.11
+exit 0
+
+## B. Known-C tiles, independent oracles, the ROUNDING category, corruptions of card reads: python3 tools/claims-v3/ccheck/validate_ccheck.py --cache <scratch>/cache
+engine: rtl-sim/fma_toggle_v2/accum.c sha256 dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf built at <scratch>/cache/accum-dc47efbc32e3
+ok   V1 fp32 zeros: C = +0 in all 256 words at n = 1, 2, 20000, 541999
+ok   V1 fp16 zeros: C = +0 in all 256 words at n = 1, 2, 20000, 541999
+ok   V1 int8 zeros: C = +0 in all 256 words at n = 1, 2, 20000, 541999
+ok   V2 fp32 identity A x integer B in [-8, 8]: C = n B exactly at n = 1, 3, 1000, 541999 (a zero B word keeps the sign op 0's first multiply gave it)
+ok   V2 fp32 identity: the closed form's signed zeros agree with the exact-rational oracle at n = 1, 3
+ok   V2 fp16 selection A[i][2i] = 1 x integer B in [-8, 8] (fp16 layout): C = n B[2i][j] exactly at n = 1, 3, 1000, 541999
+ok   V2 int8 selection A[i][4i] = 1 x B in [-128, 127] (int8 layout): C = n B[4i][j] mod 2^32 at n up to 1,600,000
+ok   V2 int8 all 127 x all -128 at n = 541,999: C = n (-1,040,384) mod 2^32 = b5b5e000 (wraps)
+ok   V3 fp32 seeded random (randn, 10% zeros of both signs): engine = exact-rational oracle, all 256 words, n = 1, 2, 3
+ok   V3 fp32 seeded random (exponents 2^-40..2^40, 10% zeros): engine = exact-rational oracle, all 256 words, n = 1, 2, 3
+ok   V3 fp16 seeded random (normal halves in +-4, 10% zeros): engine = fp16_model.py driven here, all 256 words, n = 1, 2, 3
+ok   V3 fp16 seeded random (exponents 2^-12..2^12): engine = fp16_model.py driven here, all 256 words, n = 1, 2, 3
+ok   V3 int8 seeded random: engine = integer oracle mod 2^32 at n = 1, 7, 20000, 943000
+ok   V4 fp32 n = 1: the reference itself PASSes
+ok   V4 fp32 n = 1: word 37 one ulp off in every minion is ROUNDING, not PASS (got ROUNDING)
+ok   V4 fp32 n = 1: word 37's sign flipped in every minion is FAIL (got FAIL)
+ok   V5 found 4 E104 reads to corrupt: [('fp16.h_sub', 541999), ('fp16.s_abs', 199874), ('fp32.h_sub', 541999), ('fp32.pm_pi', 199874)]
+ok   V5 fp16.h_sub n=541999: the card's C as read (1,024 minions, one value) PASSes
+ok   V5 fp16.h_sub n=541999: one minion with word 37's low bit flipped: FAIL (minions disagree: 2 distinct C among 1024)
+ok   V5 fp16.h_sub n=541999: every minion with word 37's low bit flipped: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp16.h_sub n=541999: word 37's sign flipped in every minion: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp16.h_sub n=541999: the C of n+1 ops: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['ref(n=542000)']
+ok   V5 fp16.h_sub n=541999: zeros (no store, unpoisoned buffer zeroed): ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['zeros']
+ok   V5 fp16.h_sub n=541999: the poison (no store): FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['poison (no C stored)']
+ok   V5 fp16.h_sub n=541999: another tile's C at the same n: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ["another tile's C"]
+ok   V5 fp16.h_sub n=541999: A and B swapped: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['A and B swapped']
+ok   V5 fp16.h_sub n=541999: only 1,000 of 1,024 minions read: FAIL (read 1000 minions of 1024)
+ok   V5 fp16.s_abs n=199874: the card's C as read (1,024 minions, one value) PASSes
+ok   V5 fp16.s_abs n=199874: one minion with word 37's low bit flipped: FAIL (minions disagree: 2 distinct C among 1024)
+ok   V5 fp16.s_abs n=199874: every minion with word 37's low bit flipped: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp16.s_abs n=199874: word 37's sign flipped in every minion: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp16.s_abs n=199874: the C of n+1 ops: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['ref(n=199875)']
+ok   V5 fp16.s_abs n=199874: zeros (no store, unpoisoned buffer zeroed): ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['zeros']
+ok   V5 fp16.s_abs n=199874: the poison (no store): FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['poison (no C stored)']
+ok   V5 fp16.s_abs n=199874: another tile's C at the same n: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ["another tile's C"]
+ok   V5 fp16.s_abs n=199874: A and B swapped: FAIL (1 word(s) outside the rounding envelope, 0 undecided); equals ['A and B swapped']
+ok   V5 fp16.s_abs n=199874: only 1,000 of 1,024 minions read: FAIL (read 1000 minions of 1024)
+ok   V5 fp32.h_sub n=541999: the card's C as read (1,024 minions, one value) PASSes
+ok   V5 fp32.h_sub n=541999: one minion with word 37's low bit flipped: FAIL (minions disagree: 2 distinct C among 1024)
+ok   V5 fp32.h_sub n=541999: every minion with word 37's low bit flipped: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp32.h_sub n=541999: word 37's sign flipped in every minion: FAIL (1 word(s) outside the rounding envelope, 0 undecided)
+ok   V5 fp32.h_sub n=541999: the C of n+1 ops: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['ref(n=542000)']
+ok   V5 fp32.h_sub n=541999: zeros (no store, unpoisoned buffer zeroed): FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['zeros']
+ok   V5 fp32.h_sub n=541999: the poison (no store): FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['poison (no C stored)']
+ok   V5 fp32.h_sub n=541999: another tile's C at the same n: FAIL (128 word(s) outside the rounding envelope, 0 undecided); equals ["another tile's C"]
+ok   V5 fp32.h_sub n=541999: A and B swapped: FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['A and B swapped']
+ok   V5 fp32.h_sub n=541999: only 1,000 of 1,024 minions read: FAIL (read 1000 minions of 1024)
+ok   V5 fp32.pm_pi n=199874: the card's C as read (1,024 minions, one value) PASSes
+ok   V5 fp32.pm_pi n=199874: one minion with word 37's low bit flipped: FAIL (minions disagree: 2 distinct C among 1024)
+ok   V5 fp32.pm_pi n=199874: every minion with word 37's low bit flipped: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp32.pm_pi n=199874: word 37's sign flipped in every minion: FAIL (1 word(s) outside the rounding envelope, 0 undecided)
+ok   V5 fp32.pm_pi n=199874: the C of n+1 ops: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['ref(n=199875)']
+ok   V5 fp32.pm_pi n=199874: zeros (no store, unpoisoned buffer zeroed): FAIL (208 word(s) outside the rounding envelope, 0 undecided); equals ['zeros']
+ok   V5 fp32.pm_pi n=199874: the poison (no store): FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['poison (no C stored)']
+ok   V5 fp32.pm_pi n=199874: another tile's C at the same n: FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ["another tile's C"]
+ok   V5 fp32.pm_pi n=199874: A and B swapped: FAIL (222 word(s) outside the rounding envelope, 0 undecided); equals ['A and B swapped']
+ok   V5 fp32.pm_pi n=199874: only 1,000 of 1,024 minions read: FAIL (read 1000 minions of 1024)
+ok   V5 int8 n=943000: as computed: PASS (expected PASS)
+ok   V5 int8 n=943000: saturating instead of wrapping (256 of 256 words wrap): FAIL (expected FAIL)
+ok   V5 int8 n=943000: word 0 one unit off: FAIL (expected FAIL)
+ok   V5 int8 n=943000: the C of n+1 ops: FAIL (expected FAIL)
+{"cases_bad": 0, "bad": []}
+real 9.37
+user 6.24
+sys 0.12
+exit 0
+
+## C. End to end on the mock runtime: bash tools/claims-v3/ccheck/mockrt/run_e2e.sh <scratch>/e2e
+as-expected: ok_fp16 (fault none, --c-poison) host rc=0, ccheck PASS (expected PASS): {"launches": 7, "PASS": 7, "ROUNDING": 0, "FAIL": 0, "by_type": {"fp16": {"PASS": 7, "ROUNDING": 0, "FAIL": 0}}, "all_pass": true}
+    mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+as-expected: ok_fp32 (fault none, --c-poison) host rc=0, ccheck PASS (expected PASS): {"launches": 8, "PASS": 8, "ROUNDING": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 8, "ROUNDING": 0, "FAIL": 0}}, "all_pass": true}
+    mock: 8 launches; host-to-device 18 calls 9439232 bytes; device-to-host 16 calls 9437184 bytes
+as-expected: ok_int8 (fault none, --c-poison) host rc=0, ccheck PASS (expected PASS): {"launches": 8, "PASS": 8, "ROUNDING": 0, "FAIL": 0, "by_type": {"int8": {"PASS": 8, "ROUNDING": 0, "FAIL": 0}}, "all_pass": true}
+    mock: 8 launches; host-to-device 18 calls 9439232 bytes; device-to-host 16 calls 9437184 bytes
+as-expected: ok_anchor (fault none, --c-poison) host rc=0, ccheck PASS (expected PASS): {"launches": 8, "PASS": 8, "ROUNDING": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 8, "ROUNDING": 0, "FAIL": 0}}, "all_pass": true}
+    mock: 8 launches; host-to-device 18 calls 9439232 bytes; device-to-host 16 calls 9437184 bytes
+as-expected: ok_nopois (fault none, ) host rc=0, ccheck PASS (expected PASS): {"launches": 7, "PASS": 7, "ROUNDING": 0, "FAIL": 0, "by_type": {"fp16": {"PASS": 7, "ROUNDING": 0, "FAIL": 0}}, "all_pass": true}
+    mock: 7 launches; host-to-device 9 calls 919552 bytes; device-to-host 14 calls 8257536 bytes
+as-expected: bitflip (fault bitflip, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 7, "PASS": 0, "ROUNDING": 0, "FAIL": 7, "by_type": {"fp16": {"PASS": 0, "ROUNDING": 0, "FAIL": 7}}, "all_pass": false}
+    mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+    first non-PASS: FAIL     fp16 n=40 /kinds/blind5/tiles/fp16/fp16.real_pythia_qk.bin launch=-1 groups=2 | minions disagree: 2 distinct C among 16 | [{"count": 15, "first_minion": 0, "words_off": 0}, {"count": 1, "first_minion": 5, "words_off": 1, "first": {"i": 1, "j": 1, "got": "446a4de1", "want": "446a4de0"}, "max
+as-expected: nostore_p (fault nostore, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 7, "PASS": 0, "ROUNDING": 0, "FAIL": 7, "by_type": {"fp32": {"PASS": 0, "ROUNDING": 0, "FAIL": 7}}, "all_pass": false}
+    mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+    first non-PASS: FAIL     fp32 n=40 kinds/blind5/tiles/fp32/fp32.wideexp48_dense.bin launch=-1 groups=2 | minions disagree: 2 distinct C among 16 | [{"count": 15, "first_minion": 0, "words_off": 0}, {"count": 1, "first_minion": 7, "words_off": 256, "first": {"i": 0, "j": 0, "got": "7fbadbad", "want": "e54faa9e"}, "m
+as-expected: nostore_np (fault nostore, ) host rc=0, ccheck FAIL (expected FAIL): {"launches": 7, "PASS": 0, "ROUNDING": 0, "FAIL": 7, "by_type": {"fp32": {"PASS": 0, "ROUNDING": 0, "FAIL": 7}}, "all_pass": false}
+    mock: 7 launches; host-to-device 9 calls 919552 bytes; device-to-host 14 calls 8257536 bytes
+    first non-PASS: FAIL     fp32 n=40 kinds/blind5/tiles/fp32/fp32.wideexp48_dense.bin launch=-1 groups=2 | minions disagree: 2 distinct C among 16 | [{"count": 1, "first_minion": 7, "words_off": 256, "first": {"i": 0, "j": 0, "got": "5a5a5a5a", "want": "e54faa9e"}, "max_ulp": 3406125683, "zero_sign_only": false}, {"c
+as-expected: stale_p (fault stale, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 8, "PASS": 1, "ROUNDING": 0, "FAIL": 7, "by_type": {"int8": {"PASS": 1, "ROUNDING": 0, "FAIL": 7}}, "all_pass": false}
+    mock: 8 launches; host-to-device 18 calls 9439232 bytes; device-to-host 16 calls 9437184 bytes
+    first non-PASS: FAIL     int8 n=236 s/blind5/tiles/int8/int8.real_pythia_w8a8_up.bin launch=0 groups=1 | int8 C is not the exact sum mod 2^32 | [{"count": 16, "first_minion": 0, "words_off": 256, "first": {"i": 0, "j": 0, "got": "7fbadbad", "want": "ffffeacc"}, "max_abs_off": 2147476013, "equals": ["poison (no C st
+as-expected: stale2_p (fault stale2, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 8, "PASS": 2, "ROUNDING": 0, "FAIL": 6, "by_type": {"int8": {"PASS": 2, "ROUNDING": 0, "FAIL": 6}}, "all_pass": false}
+    mock: 8 launches; host-to-device 18 calls 9439232 bytes; device-to-host 16 calls 9437184 bytes
+    first non-PASS: FAIL     int8 n=344 s/blind5/tiles/int8/int8.real_pythia_w8a8_up.bin launch=1 groups=1 | int8 C is not the exact sum mod 2^32 | [{"count": 16, "first_minion": 0, "words_off": 256, "first": {"i": 0, "j": 0, "got": "7fbadbad", "want": "ffffe118"}, "max_abs_off": 2146932445, "equals": ["poison (no C st
+as-expected: stale2_np (fault stale2, ) host rc=0, ccheck PASS (expected PASS): {"launches": 8, "PASS": 8, "ROUNDING": 0, "FAIL": 0, "by_type": {"int8": {"PASS": 8, "ROUNDING": 0, "FAIL": 0}}, "all_pass": true}
+    mock: 8 launches; host-to-device 10 calls 1050624 bytes; device-to-host 16 calls 9437184 bytes
+as-expected: wrongn (fault wrongn, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 7, "PASS": 0, "ROUNDING": 0, "FAIL": 7, "by_type": {"fp16": {"PASS": 0, "ROUNDING": 0, "FAIL": 7}}, "all_pass": false}
+    mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+    first non-PASS: FAIL     fp16 n=40 /kinds/blind5/tiles/fp16/fp16.real_pythia_qk.bin launch=-1 groups=1 | 256 word(s) outside the rounding envelope, 0 undecided | [{"count": 16, "first_minion": 0, "words_off": 256, "first": {"i": 0, "j": 0, "got": "4499278b", "want": "44956b49"}, "max_ulp": 409084, "zero_sign_only":
+as-expected: swapab (fault swapab, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 8, "PASS": 0, "ROUNDING": 0, "FAIL": 8, "by_type": {"int8": {"PASS": 0, "ROUNDING": 0, "FAIL": 8}}, "all_pass": false}
+    mock: 8 launches; host-to-device 18 calls 9439232 bytes; device-to-host 16 calls 9437184 bytes
+    first non-PASS: FAIL     int8 n=40 s/blind5/tiles/int8/int8.real_pythia_w8a8_up.bin launch=-1 groups=1 | int8 C is not the exact sum mod 2^32 | [{"count": 16, "first_minion": 0, "words_off": 256, "first": {"i": 0, "j": 0, "got": "00018a60", "want": "fffffc68"}, "max_abs_off": 1225040}]
+wrapper: rc=0 7 launches; mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+wrapper: ccheck rc=0 {"launches": 7, "PASS": 7, "ROUNDING": 0, "FAIL": 0, "by_type": {"fp16": {"PASS": 7, "ROUNDING": 0, "FAIL": 0}}, "all_pass": true}
+host orig without --c-log: rc=0 7 launches; mock: 7 launches; host-to-device 9 calls 919552 bytes; device-to-host 7 calls 917504 bytes
+host ccheck without --c-log: rc=0 7 launches; mock: 7 launches; host-to-device 9 calls 919552 bytes; device-to-host 7 calls 917504 bytes
+SPARSITY lines: the same keys in the same order on every launch (orig, patched without flags, patched with --c-log --c-poison): True; the calibration launch (iters 40) equal on every field but its timing: True
+exit 0
+
+## D. The 6 pool-5 tiles for E153/E157: python3 tools/claims-v3/ccheck/pick6.py; ccheck.py domain <the 6> --n 750000
+fp32.b_exp_busy_a_const      fp32  E141 D 15.393 +-0.080 (n=3)  E142 D 15.114 +-0.169 (n=5)  combined +-0.187  tools/claims-v3/kinds/blind5/tiles/fp32/fp32.b_exp_busy_a_const.bin
+fp32.real_pythia_ln1_q       fp32  E141 D 21.964 +-0.153 (n=3)  E142 D 21.500 +-0.135 (n=5)  combined +-0.204  tools/claims-v3/kinds/blind5/tiles/fp32/fp32.real_pythia_ln1_q.bin
+fp16.sparse24_aligned        fp16  E141 D 12.716 +-0.120 (n=3)  E142 D 12.459 +-0.087 (n=5)  combined +-0.148  tools/claims-v3/kinds/blind5/tiles/fp16/fp16.sparse24_aligned.bin
+fp16.exp_only                fp16  E141 D 16.247 +-0.172 (n=2)  E142 D 15.822 +-0.095 (n=5)  combined +-0.196  tools/claims-v3/kinds/blind5/tiles/fp16/fp16.exp_only.bin
+int8.gray_a                  int8  E141 D 4.034 +-0.094 (n=3)  E142 D 4.261 +-0.168 (n=5)  combined +-0.193  tools/claims-v3/kinds/blind5/tiles/int8/int8.gray_a.bin
+int8.b_line_zero_one         int8  E141 D 3.351 +-0.137 (n=3)  E142 D 3.287 +-0.227 (n=5)  combined +-0.265  tools/claims-v3/kinds/blind5/tiles/int8/int8.b_line_zero_one.bin
+narrowest committed pool-5 D interval on either card: +-0.041 W (the critic's flat +-0.05 W is narrower than every other)
+inside  tools/claims-v3/kinds/blind5/tiles/fp16/fp16.exp_only.bin 
+inside  tools/claims-v3/kinds/blind5/tiles/fp16/fp16.sparse24_aligned.bin 
+inside  tools/claims-v3/kinds/blind5/tiles/fp32/fp32.b_exp_busy_a_const.bin 
+inside  tools/claims-v3/kinds/blind5/tiles/fp32/fp32.real_pythia_ln1_q.bin 
+inside  tools/claims-v3/kinds/blind5/tiles/int8/int8.b_line_zero_one.bin 
+inside  tools/claims-v3/kinds/blind5/tiles/int8/int8.gray_a.bin 
+{"tiles": 6, "inside": 6}
+exit 0
