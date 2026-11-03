@@ -4,8 +4,10 @@
     run_tile.py --model models/<arm>.pkl --stim stim/<arm>__<tile>__<n0>.pkl.gz --out <json> [--t-in 66] [--period 833.5]
                 [--skew-ps 0 --skew-seed 1] [--no-check]
 
-Validation in every run: the simulator's settled value of every net just before every rising clock edge is compared with
-the bench's own zero-delay VCD value at that moment (Verilator, the same netlist); mismatches are counted and reported.
+Validation in every run without --no-check: the simulator's settled value of every net just before every rising clock edge is
+compared with the bench's own zero-delay VCD value at that moment (Verilator, the same netlist); mismatches are counted and
+reported. A run with --no-check still writes mismatch 0, so the record's "checked" says whether the comparison ran (added
+after verification, 2 Nov 2026; the runs committed before it got the flag from their launch commands, README C2).
 """
 import argparse, gzip, json, os, pickle, random, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -48,7 +50,7 @@ def main():
     in_ids = set(m["inputs"])
     stg = [stage(n) for n in nets]
     res = {"model": os.path.basename(a.model), "stim": os.path.basename(a.stim), "t_in_ps": t_in, "period_ps": a.period,
-           "skew_ps": a.skew_ps, "verilog_style": a.verilog_style, "params": m["params"], "instances": {}}
+           "skew_ps": a.skew_ps, "verilog_style": a.verilog_style, "checked": not a.no_check, "params": m["params"], "instances": {}}
     t0 = time.time()
     tot = {"timed": 0, "zero": 0, "mismatch": 0, "late": 0}
     for p in sorted(st["insts"]):

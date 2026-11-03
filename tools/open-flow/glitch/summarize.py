@@ -6,7 +6,7 @@ Reads glitch_<arm-of-run>.json files named in RUNS below and refit_k.json, if pr
 """
 import argparse, json, math, os
 ARMS = ["booth_tree", "booth", "booth_swap", "plain"]
-RUNS = [("glitch_mid.json", "primary: liberty delays, VHDL inertial rule, the middle launch point"),
+RUNS = [("glitch_mid.json", "primary: liberty delays, a VHDL-like inertial rule, the middle launch point"),
         ("glitch_3pt.json", "the three launch points' mean"),
         ("glitch_vstyle.json", "Verilog's inertial rule (middle point)"),
         ("glitch_skew150.json", "input ports skewed 0-150 ps at random, bit by bit (middle point)"),

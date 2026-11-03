@@ -10,10 +10,10 @@ The card's intervals (95%): B odd ÷ even E138 rail **1.91 [1.71, 2.16]** (E130 
 | zero delay (Q136(a), middle point) | `booth` | 4.28 | 1.00 | 1.11 | 1.00 |
 | zero delay (Q136(a), middle point) | `booth_swap` | 1.05 | 2.48 | 0.96 | 0.99 |
 | zero delay (Q136(a), middle point) | `plain` | 1.07 | 1.11 | 1.21 | 1.01 |
-| primary: liberty delays, VHDL inertial rule, the middle launch point | `booth_tree` | 9.32 | 1.07 | 1.74 | 0.97 |
-| primary: liberty delays, VHDL inertial rule, the middle launch point | `booth` | 9.51 | 1.01 | 1.66 | 0.98 |
-| primary: liberty delays, VHDL inertial rule, the middle launch point | `booth_swap` | 0.99 | 5.50 | 1.03 | 1.01 |
-| primary: liberty delays, VHDL inertial rule, the middle launch point | `plain` | 1.12 | 1.17 | 1.49 | 1.04 |
+| primary: liberty delays, a VHDL-like inertial rule, the middle launch point | `booth_tree` | 9.32 | 1.07 | 1.74 | 0.97 |
+| primary: liberty delays, a VHDL-like inertial rule, the middle launch point | `booth` | 9.51 | 1.01 | 1.66 | 0.98 |
+| primary: liberty delays, a VHDL-like inertial rule, the middle launch point | `booth_swap` | 0.99 | 5.50 | 1.03 | 1.01 |
+| primary: liberty delays, a VHDL-like inertial rule, the middle launch point | `plain` | 1.12 | 1.17 | 1.49 | 1.04 |
 | the three launch points' mean | `booth_tree` | 9.33 | 1.04 | 1.76 | 0.99 |
 | Verilog's inertial rule (middle point) | `booth_tree` | 9.45 | 1.09 | 1.62 | 0.98 |
 | Verilog's inertial rule (middle point) | `booth` | 9.75 | 1.00 | 1.63 | 0.98 |
@@ -30,7 +30,7 @@ The card's intervals (95%): B odd ÷ even E138 rail **1.91 [1.71, 2.16]** (E130 
 
 The card: 1.91 [1.71, 2.16] (E138 rail), 0.98 [0.92, 1.04], 1.43 [1.36, 1.51] (E130 board); A sign word 2 ÷ 1 1.02 [0.98, 1.07].
 
-## primary: liberty delays, VHDL inertial rule, the middle launch point (`glitch_mid.json`)
+## primary: liberty delays, a VHDL-like inertial rule, the middle launch point (`glitch_mid.json`)
 
 | netlist | count | B odd ÷ even | A odd ÷ even | A sign dense ÷ one | A sign word 2 ÷ 1 | B odd − even, fJ | A odd − even, fJ | A sign step, fJ | B mean 0–6, fJ | A mean 0–6, fJ | mismatches, late |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|

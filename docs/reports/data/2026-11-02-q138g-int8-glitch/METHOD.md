@@ -39,7 +39,9 @@ transaction is pending. When an input pin moves at time t, the cell is evaluated
   rejection window equal to the arc's own delay;
 - otherwise: v is scheduled at t + the delay of that pin, in that state, for that edge.
 
-This is VHDL's inertial rule (the first cause of a transition keeps its time). The arm `vstyle` uses Verilog's continuous-assignment
+This is a VHDL-like inertial rule: the first cause of a transition keeps its time. VHDL's own preemption keeps the earlier of the
+pending time and the new one, so the two differ only when a re-evaluation, through a faster arc, would mature before the pending
+transaction; VHDL's own rule is not an arm here. *(Corrected after verification, C5: this called the rule VHDL's.)* The arm `vstyle` uses Verilog's continuous-assignment
 rule instead (a re-evaluation that gives the pending value replaces it by one at t + d). Flip-flops sample D at the unit clock's
 rising edge and move Q at edge + CLK->Q. Input ports move at edge + t_in, t_in = the smallest CLK->Q (66.0 ps; transport); the arm
 `skew150` adds a random 0–150 ps to each input bit. The bench timestamps are mapped to a 600 MHz clock (833.3 ps a half period).
@@ -48,12 +50,16 @@ rising edge and move Q at edge + CLK->Q. Input ports move at edge + t_in, t_in =
 sample 1 (`settle_count --skip 1`) and ends when the last activity settles. The zero-delay count of the same window is computed the
 bench's way, from the bench VCD's own settled samples: per net, bit changes between consecutive even-timestamp samples. Summed over
 the unit's internal and output nets it equals `settle_count`'s `ids` count for the unit (`hb1`, `booth_tree`, middle point: 26,548
-with the ports, the bench's committed 26,548), and per flip it reproduces Q136(a)'s unit `nets_map` within about 1 net on the B
-list and 3 on the A list. Ports move once per change in both counts, so the **excess** (timed minus zero delay) is the glitches.
+with the ports, the bench's committed 26,548), and per flip it reproduces Q136(a)'s unit `nets_map` within 1.2 nets on the B list
+and 5.3 on the A list *(corrected after verification, C3: it said about 1 and 3)*. Ports move once per change in both counts, so the
+**excess** (timed minus zero delay) is the glitches.
 
-**Checks in every run.** Before each rising edge the simulator's settled value of every net of every instance is compared with the
-bench VCD's: 0 mismatches in all runs that carried the check (the primary and the kinds; the arms ran without it). A flip-flop whose
-D still had a transaction pending at an edge is counted as late: 0 in every checked run.
+**Checks.** Before each rising edge the simulator's settled value of every net of every instance is compared with the
+bench VCD's: 0 mismatches in all 220 runs that carried the check, which are every run of `sims/primary.json` (104 single-bit runs at
+the middle point, 52 at the other two launch points, 64 kinds); the arms ran without it (`--no-check`). A run without it still
+records mismatch 0, so each record carries `checked` *(corrected after verification, C2: this did not count the runs, and the
+records did not say which carried the check)*. A flip-flop whose D still had a transaction pending at an edge is counted as late,
+whether or not the comparison runs: 0 in every run, the arms' included.
 
 ## 4. From counts to prices
 

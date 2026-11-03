@@ -13,8 +13,8 @@ method: its [METHOD.md](../../../docs/reports/data/2026-11-02-q138g-int8-glitch/
 | `vcdread.py` | the 16 `tima_top` instances out of a bench VCD: every port and net, as the zero-delay bench settled them |
 | `batch_vcd.py` | `mkvcd.py` + `vcdread.py` over tiles, netlists and launch points; each VCD is read, saved as a gzipped pickle and deleted |
 | `annotate.py` | a netlist plus its liberty files -> a model: truth tables, loads, slews, and per-arc, per-state rise and fall delays |
-| `esim.py` | the event-driven simulator, inertial delays (VHDL's rule; `verilog_style=True` for Verilog's) |
-| `run_tile.py` | one tile's 16 instances through `esim.py`, with the bench's own zero-delay count and a settled-value check against the VCD at every edge |
+| `esim.py` | the event-driven simulator, inertial delays (a VHDL-like rule: a re-evaluation that gives the pending value keeps the first-scheduled time; `verilog_style=True` for Verilog's) |
+| `run_tile.py` | one tile's 16 instances through `esim.py`, with the bench's own zero-delay count and a settled-value check against the VCD at every edge (off with `--no-check`; the record's `checked` says which) |
 | `batch_sim.py` | `run_tile.py` over tiles, netlists and points, and the arms (`--extra`, `--model-suffix`) |
 | `analyze_glitch.py` | per item (minus its own zero, per flip): zero-delay, timed and excess counts; prices in Q136(a)'s frozen frame; the card's intervals; the glitch-weight scan |
 | `refit_k.py` | Q133(a)'s M2 on E78's int8 kinds with zero-delay and glitch-aware counts |

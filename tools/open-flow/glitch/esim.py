@@ -8,7 +8,9 @@ Semantics, per cell output (one pending transaction at most):
   inertial delay, the rejection window being the arc's own delay);  else: a transaction v is scheduled at t + delay(pin k,
   state after the change, edge of v), from the liberty table annotate.py read for that instance.
 verilog_style=True instead replaces a pending transaction by a new one at t + d also when v equals it (a Verilog
-continuous assignment's rule, which Icarus Verilog follows); the default keeps the first (VHDL's inertial rule).
+continuous assignment's rule, which Icarus Verilog follows); the default keeps the first-scheduled time (a VHDL-like inertial
+rule: VHDL's own preemption keeps the earlier of the two times, which differs when the re-evaluation, through a faster arc, would
+mature first; that rule is not implemented here. Wording corrected after verification, 2 Nov 2026; the code is unchanged).
 A flip-flop samples D at its clock's rising edge (ideal clock at every CLK pin) and its Q moves at edge + CLK->Q(rise|fall).
 Input ports move at their bench time + t_in (transport), bit by bit, optionally with a per-bit skew.
 Every matured transaction is one toggle of its net. The zero-delay count of the same run is the number of nets whose settled
