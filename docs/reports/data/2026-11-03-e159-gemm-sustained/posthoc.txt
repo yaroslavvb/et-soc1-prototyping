@@ -1,0 +1,132 @@
+1. INTERVALS (post hoc): 95% bootstrap over the holds (10,000 resamples, seed 159) on each arm's rms; measured - predicted
+  all9:
+    G3.mhz                                8.678  [5.175, 11.521]
+    G3.w                                  1.940  [1.088, 2.595]
+    G3.die                                0.986  [0.644, 1.259]
+    G3_q138t_constants.mhz               14.524  [5.843, 21.042]
+    G3_q138t_constants.w                  3.076  [1.609, 4.387]
+    G3_q138t_constants.die                1.613  [0.821, 2.3]
+    E136_law.mhz                         41.179  [5.329, 63.997]
+    E136_law.w                            3.994  [1.591, 5.872]
+    E136_law.die                          1.354  [0.508, 1.878]
+    chain_on_measured.die                 0.407  [0.208, 0.578]
+    G3_given_p800.mhz                    10.938  [5.331, 14.794]
+    G3_given_p800.w                       1.451  [0.408, 2.348]
+    G3_given_p800.die                     0.860  [0.159, 1.422]
+    gain_E136_law_minus_G3.mhz           32.502  [-0.069, 53.533]
+    gain_E136_law_minus_G3.w              2.054  [-0.652, 4.324]
+    gain_E136_law_minus_G3.die            0.368  [-0.436, 0.946]
+  subset6:
+    G3.mhz                                9.943  [5.505, 13.183]
+    G3.w                                  1.625  [0.458, 2.655]
+    G3.die                                0.738  [0.352, 1.07]
+    G3_q138t_constants.mhz               17.388  [6.915, 24.644]
+    G3_q138t_constants.w                  2.902  [0.648, 4.757]
+    G3_q138t_constants.die                1.537  [0.234, 2.529]
+    E136_law.mhz                         50.294  [7.201, 71.796]
+    E136_law.w                            4.624  [1.047, 6.546]
+    E136_law.die                          1.641  [0.821, 2.199]
+    chain_on_measured.die                 0.434  [0.129, 0.66]
+    G3_given_p800.mhz                    12.859  [7.018, 17.684]
+    G3_given_p800.w                       1.722  [0.277, 2.825]
+    G3_given_p800.die                     0.994  [0.101, 1.705]
+    gain_E136_law_minus_G3.mhz           40.352  [-0.092, 60.614]
+    gain_E136_law_minus_G3.w              2.999  [-0.982, 5.972]
+    gain_E136_law_minus_G3.die            0.903  [0.427, 1.294]
+
+2. BY KIND (post hoc): mean and rms of measured - predicted, per arm
+  fp32 random (['H1-fp32-randn', 'H2-fp32-randn', 'H3-fp32-randn']):
+    G3.mhz                       mean  -13.231  rms  13.407  per hold [-15.526, -10.322, -13.843]
+    G3.w                         mean   -1.033  rms   2.155  per hold [-3.68, 0.624, -0.043]
+    G3.die                       mean   -0.384  rms   0.798  per hold [-1.372, 0.059, 0.16]
+    E136_law.mhz                 mean  -62.611  rms  71.000  per hold [-15.356, -83.674, -88.803]
+    E136_law.w                   mean   -5.826  rms   6.481  per hold [-1.818, -7.601, -8.058]
+    E136_law.die                 mean   +0.943  rms   1.471  per hold [2.539, 0.134, 0.156]
+    chain_on_measured.die        mean   +0.345  rms   0.512  per hold [0.875, 0.023, 0.138]
+    G3_given_p800.mhz            mean   -7.197  rms  17.684  per hold [-15.544, -21.44, 15.392]
+    G3_given_p800.w              mean   +1.475  rms   2.275  per hold [3.901, 0.561, -0.038]
+    G3_given_p800.die            mean   +0.875  rms   1.391  per hold [2.404, 0.06, 0.159]
+  int8 full (['H1-int8-full', 'H2-int8-full', 'H3-int8-full']):
+    G3.mhz                       mean   -3.442  rms   4.239  per hold [0.0, -5.699, -4.627]
+    G3.w                         mean   -0.007  rms   0.797  per hold [-1.095, 0.286, 0.789]
+    G3.die                       mean   +0.152  rms   0.672  per hold [-0.737, 0.375, 0.818]
+    E136_law.mhz                 mean   -3.442  rms   4.239  per hold [0.0, -5.699, -4.627]
+    E136_law.w                   mean   +0.298  rms   0.869  per hold [-0.814, 0.586, 1.123]
+    E136_law.die                 mean   +1.680  rms   1.795  per hold [0.853, 1.799, 2.389]
+    chain_on_measured.die        mean   +0.138  rms   0.339  per hold [-0.229, 0.116, 0.527]
+    G3_given_p800.mhz            mean   -3.442  rms   4.239  per hold [0.0, -5.699, -4.627]
+    G3_given_p800.w              mean   -0.487  rms   0.866  per hold [0.22, -0.214, -1.468]
+    G3_given_p800.die            mean   -0.086  rms   0.196  per hold [-0.078, 0.126, -0.306]
+  zeros (['H1-fp32-zeros', 'H2-fp32-zeros', 'H3-fp32-zeros']):
+    G3.mhz                       mean   -5.304  rms   5.310  per hold [-5.141, -5.656, -5.115]
+    G3.w                         mean   -2.453  rms   2.453  per hold [-2.447, -2.486, -2.425]
+    G3.die                       mean   -1.324  rms   1.351  per hold [-1.622, -1.379, -0.971]
+    E136_law.mhz                 mean   -5.304  rms   5.310  per hold [-5.141, -5.656, -5.115]
+    E136_law.w                   mean   -2.251  rms   2.257  per hold [-2.471, -2.194, -2.088]
+    E136_law.die                 mean   -0.258  rms   0.334  per hold [-0.443, -0.371, 0.039]
+    chain_on_measured.die        mean   -0.118  rms   0.346  per hold [-0.497, -0.154, 0.298]
+    G3_given_p800.mhz            mean   -5.304  rms   5.310  per hold [-5.141, -5.656, -5.115]
+    G3_given_p800.w              mean   -0.581  rms   0.622  per hold [-0.82, -0.286, -0.636]
+    G3_given_p800.die            mean   -0.390  rms   0.497  per hold [-0.809, -0.281, -0.079]
+
+3. THE CLOCK INSIDE EACH HOLD'S WINDOW (post hoc): in-kernel samples of the last 40 s (the scorer's window)
+  H1-fp32-randn     386 samples:  91.5% at 800 MHz; mean  784.5; below 800: mean 618.2, lowest 600; clock levels seen [600, 700, 800]
+  H1-int8-full      387 samples: 100.0% at 800 MHz; mean  800.0; below 800: mean None, lowest 800; clock levels seen [800]
+  H2-fp32-randn     387 samples:  25.8% at 800 MHz; mean  697.7; below 800: mean 662.0, lowest 600; clock levels seen [600, 700, 800]
+  H2-int8-full      386 samples:  96.9% at 800 MHz; mean  794.3; below 800: mean 616.7, lowest 600; clock levels seen [600, 700, 800]
+  H3-fp32-randn     390 samples:   6.2% at 800 MHz; mean  649.7; below 800: mean 639.9, lowest 600; clock levels seen [600, 700, 800]
+  H3-int8-full      389 samples:  97.4% at 800 MHz; mean  795.4; below 800: mean 620.0, lowest 600; clock levels seen [600, 700, 800]
+  H1-fp32-zeros     389 samples:  97.2% at 800 MHz; mean  794.9; below 800: mean 618.2, lowest 600; clock levels seen [600, 700, 800]
+  H2-fp32-zeros     389 samples:  96.9% at 800 MHz; mean  794.3; below 800: mean 616.7, lowest 600; clock levels seen [600, 700, 800]
+  H3-fp32-zeros     391 samples:  97.2% at 800 MHz; mean  794.9; below 800: mean 618.2, lowest 600; clock levels seen [600, 700, 800]
+
+3b. WHERE THE SAMPLES UNDER 800 MHz FALL (post hoc): in-kernel samples of the whole hold; runs of consecutive samples under 800 MHz, their start since the hold's first process and since their own process's start
+  H1-fp32-randn      7 runs of low samples (76 of 1022); since the hold's start [0.3, 9.1, 17.9, 20.8, 71.2, 80.0, 92.9]; since their own process's start [0.32, 0.34, 0.32, 3.22, 0.3, 0.33, 4.43]
+  H1-int8-full       1 runs of low samples (12 of 1037); since the hold's start [0.3]; since their own process's start [0.33]
+  H2-fp32-randn     96 runs of low samples (484 of 1011); since the hold's start [0.3, 26.0, 28.4, 29.1, 29.9, 30.5, 31.0, 31.6, 32.1, 32.6, 33.2, 33.6, 34.1, 34.7] ...; since their own process's start [0.33, 8.56, 2.06, 2.77, 3.56, 4.17, 4.67, 5.27, 5.77, 6.27, 6.77, 7.17, 7.67, 8.27] ...
+  H2-int8-full       2 runs of low samples (21 of 1028); since the hold's start [0.3, 101.0]; since their own process's start [0.32, 2.88]
+  H3-fp32-randn     69 runs of low samples (773 of 1005); since the hold's start [0.2, 3.4, 4.1, 4.7, 5.4, 6.0, 6.8, 8.2, 9.6, 10.1, 10.6, 11.1, 11.7, 12.1] ...; since their own process's start [0.23, 3.43, 4.13, 4.73, 5.43, 6.03, 6.83, 8.23, 1.14, 1.64, 2.14, 2.64, 3.24, 3.64] ...
+  H3-int8-full       5 runs of low samples (54 of 1023); since the hold's start [0.2, 17.8, 44.0, 52.8, 97.0]; since their own process's start [0.22, 0.17, 0.2, 0.18, 0.28]
+  H1-fp32-zeros      4 runs of low samples (48 of 1026); since the hold's start [0.2, 3.2, 44.4, 97.4]; since their own process's start [0.23, 3.23, 0.23, 0.27]
+  H2-fp32-zeros      3 runs of low samples (32 of 1019); since the hold's start [0.2, 44.1, 79.0]; since their own process's start [0.23, 0.26, 0.22]
+  H3-fp32-zeros      5 runs of low samples (50 of 1022); since the hold's start [0.2, 17.6, 27.5, 43.7, 87.6]; since their own process's start [0.22, 0.16, 1.33, 0.23, 0.22]
+
+4. P0'S LEVEL (post hoc): the first second at 800 MHz (p800, the scorer's) against P0(800); the registered attribution band is 4 W
+  H1-fp32-randn    p800  49.89 W  P0(800)  57.09 W  difference  -7.20 W
+  H1-int8-full     p800  43.37 W  P0(800)  44.62 W  difference  -1.25 W
+  H2-fp32-randn    p800  61.33 W  P0(800)  62.62 W  difference  -1.29 W
+  H2-int8-full     p800  45.63 W  P0(800)  45.16 W  difference  +0.48 W
+  H3-fp32-randn    p800  71.60 W  P0(800)  68.12 W  difference  +3.48 W
+  H3-int8-full     p800  48.12 W  P0(800)  45.98 W  difference  +2.15 W
+  H1-fp32-zeros    p800  36.91 W  P0(800)  38.45 W  difference  -1.55 W
+  H2-fp32-zeros    p800  36.14 W  P0(800)  38.23 W  difference  -2.09 W
+  H3-fp32-zeros    p800  36.42 W  P0(800)  38.12 W  difference  -1.70 W
+  zeros: p800 - P0(800) [-1.55, -2.09, -1.7] (E158's zeros bursts on other shapes: P0 high by 2.7-4.4 W, docs/reports/data/2026-11-03-e158-l3-retention/results.json rules.R7)
+
+5. THE NOMINAL FROZEN NUMBERS (gate57, predictions-e159.txt) beside the measured and the registered primary (from each hold's own start)
+  H1-fp32-randn    measured  784.5  55.25  62.09 | primary  800.0  58.93  63.46 | nominal gate57  748.8  53.09  65.49 | die start 46 C (nominal 57.0)
+  H1-int8-full     measured  800.0  43.81  59.78 | primary  800.0  44.90  60.52 | nominal gate57  800.0  44.99  60.69 | die start 58 C (nominal 57.0)
+  H2-fp32-randn    measured  697.7  54.46  65.55 | primary  708.0  53.83  65.49 | nominal gate57  697.4  52.79  65.49 | die start 56 C (nominal 57.0)
+  H2-int8-full     measured  794.3  45.75  60.95 | primary  800.0  45.46  60.57 | nominal gate57  800.0  45.56  61.03 | die start 58 C (nominal 57.0)
+  H3-fp32-randn    measured  649.7  54.00  65.66 | primary  663.6  54.04  65.50 | nominal gate57  649.4  52.74  65.50 | die start 57 C (nominal 57.0)
+  H3-int8-full     measured  795.4  47.10  61.88 | primary  800.0  46.31  61.06 | nominal gate57  800.0  46.43  61.47 | die start 58 C (nominal 57.0)
+  H1-fp32-zeros    measured  794.9  35.98  55.54 | primary  800.0  38.43  57.16 | nominal gate57  800.0  38.50  57.50 | die start 57 C (nominal 57.0)
+  H2-fp32-zeros    measured  794.3  36.04  54.00 | primary  800.0  38.52  55.38 | nominal gate57  800.0  38.27  57.44 | die start 53 C (nominal 57.0)
+  H3-fp32-zeros    measured  794.9  36.03  53.98 | primary  800.0  38.46  54.96 | nominal gate57  800.0  38.16  57.39 | die start 52 C (nominal 57.0)
+
+6. THE SESSION (post hoc)
+  stop test stoptest-board: trip 63 ms after the third live line over 30 W; the launch ended 281 ms after the trip
+  stop test stoptest-die: trip 56 ms after the first live line at or above 30 C; before any launch
+  the session's rest reading (R, 30 s, no launch): 21.74 W, die 45.17 C (313 samples)
+  gate H1-fp32-randn    held 0.0 s, reading [45.0, 70.0, 21.59, 600.0]
+  gate H1-int8-full     held 0.8 s, reading [57.0, 70.0, 25.17, 600.0]
+  gate H2-fp32-randn    held 0.0 s, reading [56.0, 70.0, 24.54, 600.0]
+  gate H2-int8-full     held 11.0 s, reading [57.0, 70.0, 25.07, 600.0]
+  gate H3-fp32-randn    held 0.0 s, reading [56.0, 70.0, 24.81, 600.0]
+  gate H3-int8-full     held 10.4 s, reading [57.0, 70.0, 25.14, 600.0]
+  gate H1-fp32-zeros    held 0.0 s, reading [57.0, 70.0, 24.98, 600.0]
+  gate H2-fp32-zeros    held 0.0 s, reading [52.0, 70.0, 23.59, 600.0]
+  gate H3-fp32-zeros    held 0.0 s, reading [52.0, 70.0, 23.29, 600.0]
+  device commands counted: 11317 sampler samples (each GET_MODULE_POWER, GET_SP_STATS, GET_MODULE_CURRENT_TEMPERATURE, GET_ASIC_VOLTAGE, GET_MODULE_VOLTAGE, GET_ASIC_FREQUENCIES: all READ); ettelem config after 15 runs, plus 6 session start/end query records and the queue's two snapshots; ettelem sptrace after 15 runs (MMIO copy); the residency rewrite answered rc 2 (not sent) 15 times; no statistics reset, no firmware-revisions query, no set
+  card time: 18.95 min from the first card touch (snapshot-start, 1793712838057) to the queue's end (1793713975305); the session s1 17.8 card-minutes
+  peaks: {'board_max_w': 76.1, 'die_mean_max_c': 66, 'hottest_field_max_c': 70}; config read (TDP W, threshold C): [[65, 65]]
