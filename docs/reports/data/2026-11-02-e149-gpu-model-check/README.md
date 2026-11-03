@@ -6,8 +6,8 @@
 cap; here it runs under the cap, where power reads the data.*
 
 *Mon 2 Nov 2026 (week 45), Q138. The owner's words that evening: "all cards are available, feel free to settle any
-unanswered questions regarding horace's power model using mordast, runs on aifoundry and modal for sanity checks on GPUs
-(don't exceed $20 on modal)", with Q137's goal, "to be able to predict the power requirement and heat generation of
+unanswered questions regarding horace's power model using [removed: the private archive's host], runs on aifoundry and modal for sanity checks on GPUs
+(don't exceed $20 on modal)" (the private archive's host withheld here, as the requests register withholds it: a dated note of Tue 3 Nov 2026, Q138's records), with Q137's goal, "to be able to predict the power requirement and heat generation of
 various kinds of numeric computations as accurately as possible". Pre-registered in `afc11eac`
 ([`tools/gpu/e149/E149.md`](../../../../tools/gpu/e149/E149.md): both stages' kinds, the model form, the rules, a
 selftest), pushed at 19:23:52 PST before any GPU call; amendment A1 (`670c1e50`, `125d9133`) after two declared smokes

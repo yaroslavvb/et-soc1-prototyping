@@ -143,3 +143,5 @@ own code, and reproduced all six verdicts on every arm. Its faults are corrected
 - **C4** (wording): the bias is −0.28 W (−0.2753; the commit subject's −0.27 stands as written); `dT_win` is fractional; the
   registration's push time; the three 522 mV reads; `fp32.a_exp_busy_b_const` was named in advance; the heat column's improvement
   comes from four passes, not from removing dips.
+
+*Dated note, Tue 3 Nov 2026 (Q138's records; Q138(b)'s finding): two of the fp32 tiles scored here, `fp32.wideexp_bgate_alt` (−0.71 W, one of the misses above) and `fp32.wideexp_agate_rows`, hold the accumulator C at ±Inf from the first op in 109 and 133 of their 256 elements, with no NaN, by the desk's emulation of the pool's C ([`tools/claims-v3/kinds/blind5/CORRECTIONS.md`](../../../../tools/claims-v3/kinds/blind5/CORRECTIONS.md) § C2; `corrections-check.json` › `blind4.c_op1_nonfinite_of_256`). So part of the wide-exponent miss may come from a result path held at infinity rather than from the exponents themselves. It is an emulation, not a measurement; no number, rule or verdict here changes, and the frozen text above is as committed.*

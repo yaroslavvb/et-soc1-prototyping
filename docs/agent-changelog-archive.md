@@ -4,6 +4,13 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-10-31 (Sat, week 44)** — Section 4: the owner's two newest card posts in #community-lab stay, and each
+  older one is deleted once its card is released, except one a record cites by id (this repo's data READMEs and
+  findings, the owner's research log); only the Intel deletes them, through the Discord client. *Why:* preference —
+  the owner's words at 16:42 that day, *"delete the older ones because it's just spamming the chat"*, correcting the
+  reservation rule written earlier that day; constraint — this repo's data READMEs cite card posts by id as claim
+  times, and a deleted post's link no longer opens; re-check: `git grep -n -F <post id> -- docs` names a post's
+  citations, and the Intel's `delete_msg.mjs --plan` gives each kept post's reason.
 - **2026-10-31 (Sat, week 44)** — Section 4: the reservation post's clock time is written in the zone `date +%Z`
   prints (PST from 1 November 2026), and a re-estimate's `for <N> h` is still counted from the post's own time, never
   the time left. *Why:* preference — the owner's words that morning, *"estimate when I'm, holding the card until, and

@@ -5,8 +5,8 @@
 [E149](../2026-11-02-e149-gpu-model-check/README.md) narrowed on one GPU model (the A100).*
 
 *Mon 2 Nov 2026 (week 45), Q138. The owner's words that evening: "all cards are available, feel free to settle any
-unanswered questions regarding horace's power model using mordast, runs on aifoundry and modal for sanity checks on GPUs
-(don't exceed $20 on modal)", with Q137's goal, "to be able to predict the power requirement and heat generation of
+unanswered questions regarding horace's power model using [removed: the private archive's host], runs on aifoundry and modal for sanity checks on GPUs
+(don't exceed $20 on modal)" (the private archive's host withheld here, as the requests register withholds it: a dated note of Tue 3 Nov 2026, Q138's records), with Q137's goal, "to be able to predict the power requirement and heat generation of
 various kinds of numeric computations as accurately as possible". Pre-registered in `0ddbad8d`
 ([`tools/gpu/e150/E150.md`](../../../../tools/gpu/e150/E150.md): the smoke and its rule for the GPU type and sizes, the
 two phases, one scale per board, the rules, a selftest), pushed at 22:00:11 PST before any GPU call; amendments A1–A5
