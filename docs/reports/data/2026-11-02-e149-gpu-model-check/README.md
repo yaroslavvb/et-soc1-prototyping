@@ -17,7 +17,7 @@ call. Modal workspace `yaroslavvb`, app `e149-gpu-model-check`.*
 
 ## Corrections after verification
 
-*Mon 2 Nov 2026 (week 45), about 21:40 PST, at the desk: no GPU call, no Modal app, no card. An independent verifier
+*Mon 2 Nov 2026 (week 45), pushed 21:34 PST in `52e7a690`, at the desk: no GPU call, no Modal app, no card. An independent verifier
 re-derived E149 from the committed logs (the spend to the cent; the order of registration, amendments, freeze and calls;
 the cap test over every sample; all five derived JSON files rebuilt with zero differences; every registered number and
 verdict) and found three major faults and eleven minor ones. I checked each against the committed files, and all hold;
