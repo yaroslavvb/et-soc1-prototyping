@@ -1,0 +1,48 @@
+E155 corrections after verification (post hoc, deciding nothing; Tue 3 Nov 2026). Inputs: predictions-e155.json (frozen at 82b5af8d), scored*.json, posthoc/posthoc.json, E148's e148.json (primary, 10 passes).
+
+C2. F1 as registered (bands frozen in predictions-e155.json > readings; the rule is overlap of D31's 95% interval with a band)
+  primary     : D31 +0.3106 [+0.2084, +0.4128] (n 9); Wn [0.4304, 0.5493] EXCLUDED by 0.0176 = 0.018 W; Wt [0.3265, 0.4193] CONSISTENT; T [0.2216, 0.2879] CONSISTENT; C [0.1232, 0.1615] EXCLUDED by 0.0469 = 0.047 W -> F1a WALK; F1b TOGGLES; D31's point lies +0.0159 W below Wt's band
+  dips kept   : D31 +0.3089 [+0.1901, +0.4276] (n 8); Wn [0.4304, 0.5493] EXCLUDED by 0.0028 = 0.003 W; Wt [0.3265, 0.4193] CONSISTENT; T [0.2216, 0.2879] CONSISTENT; C [0.1232, 0.1615] EXCLUDED by 0.0286 = 0.029 W -> F1a WALK; F1b TOGGLES; D31's point lies +0.0177 W below Wt's band
+  leakage auto: D31 +0.3110 [+0.2150, +0.4071] (n 9); Wn [0.4304, 0.5493] EXCLUDED by 0.0233 = 0.023 W; Wt [0.3265, 0.4193] CONSISTENT; T [0.2216, 0.2879] CONSISTENT; C [0.1232, 0.1615] EXCLUDED by 0.0534 = 0.053 W -> F1a WALK; F1b TOGGLES; D31's point lies +0.0155 W below Wt's band
+  relaxed     : D31 +0.3106 [+0.2084, +0.4128] (n 9); Wn [0.4304, 0.5493] EXCLUDED by 0.0176 = 0.018 W; Wt [0.3265, 0.4193] CONSISTENT; T [0.2216, 0.2879] CONSISTENT; C [0.1232, 0.1615] EXCLUDED by 0.0469 = 0.047 W -> F1a WALK; F1b TOGGLES; D31's point lies +0.0159 W below Wt's band
+
+C1. The bands on the premise's own footing (post hoc)
+  E148 reproduced from e148.json: N - N1 +0.7472 [+0.6636, +0.8308] W, E_op 108.70 pJ, N1 +0.8835 W (largest difference from the frozen e148_reference: 0.0e+00)
+  op-rate gap int8 - fp32: sixteen rows measured 0.7996e9/s (frozen prediction 0.7996e9), one row +0.00058e9/s, three rows (frozen) 0.7821e9/s
+  the shared per-op term inside E148's N - N1 (E_op x the sixteen-row gap, per pass): +0.0869 ± 0.0145 W [+0.0724, +0.1014]; at the frozen gap +0.0869 W; three rows' frozen term +0.0850 W
+  E148's N - N1 less it: +0.6603 ± 0.0863 W [+0.5740, +0.7465]
+  Wn: factor 0.5418; point 0.4428 (registered 0.4899, -0.0471); band by the registration's interval rule [0.3818, 0.5037] (registered [0.4304, 0.5493]); paired per E148 pass [0.3977, 0.4879]
+  Wt: factor 0.3853; point 0.3394 (registered 0.3729, -0.0335); band by the registration's interval rule [0.2920, 0.3868] (registered [0.3265, 0.4193]); paired per E148 pass [0.3069, 0.3719]
+  T: factor 0.2271; point 0.2350 (registered 0.2547, -0.0197); band by the registration's interval rule [0.2012, 0.2687] (registered [0.2216, 0.2879]); paired per E148 pass [0.2141, 0.2559]
+  C: unchanged, built on N1 (no rate gap at one row): [0.1232, 0.1615]
+  primary     : D31 [0.2084, 0.4128] -> interval rule: Wn CONSISTENT, Wt CONSISTENT, T CONSISTENT, C EXCLUDED: F1a WALK; F1b INCONCLUSIVE (both counts consistent) | paired: Wn CONSISTENT, Wt CONSISTENT: F1b INCONCLUSIVE (both counts consistent)
+  dips kept   : D31 [0.1901, 0.4276] -> interval rule: Wn CONSISTENT, Wt CONSISTENT, T CONSISTENT, C EXCLUDED: F1a WALK; F1b INCONCLUSIVE (both counts consistent) | paired: Wn CONSISTENT, Wt CONSISTENT: F1b INCONCLUSIVE (both counts consistent)
+  leakage auto: D31 [0.2150, 0.4071] -> interval rule: Wn CONSISTENT, Wt CONSISTENT, T CONSISTENT, C EXCLUDED: F1a WALK; F1b INCONCLUSIVE (both counts consistent) | paired: Wn CONSISTENT, Wt CONSISTENT: F1b INCONCLUSIVE (both counts consistent)
+  relaxed     : D31 [0.2084, 0.4128] -> interval rule: Wn CONSISTENT, Wt CONSISTENT, T CONSISTENT, C EXCLUDED: F1a WALK; F1b INCONCLUSIVE (both counts consistent) | paired: Wn CONSISTENT, Wt CONSISTENT: F1b INCONCLUSIVE (both counts consistent)
+  errors (measured - predicted), Wn: registered D31 -0.1792, N3 -0.1291 W; on the premise's footing D31 -0.1321, N3 -0.0820 W
+  errors (measured - predicted), Wt: registered D31 -0.0623, N3 -0.0121 W; on the premise's footing D31 -0.0288, N3 +0.0213 W
+  errors (measured - predicted), T: registered D31 +0.0559, N3 +0.1060 W; on the premise's footing D31 +0.0756, N3 +0.1258 W
+  errors (measured - predicted), C: registered D31 +0.1683, N3 +0.2184 W; on the premise's footing D31 +0.1683, N3 +0.2184 W
+  registered Wn margin 0.0176 W against the construction's shift of Wn's point 0.0471 W
+  E148's two rows (post hoc there), new-address (factor 0.4225): D21 - prediction as E148 computed it -0.1565 ± 0.0766 [-0.2331, -0.0799]; on the premise's footing (E148's shared term out at sixteen rows, its own at two rows in) -0.1345 ± 0.0787 [-0.2132, -0.0558] W -> excluded
+  E148's two rows (post hoc there), toggles (factor 0.2254): D21 - prediction as E148 computed it -0.0091 ± 0.0846 [-0.0937, +0.0755]; on the premise's footing (E148's shared term out at sixteen rows, its own at two rows in) -0.0043 ± 0.0848 [-0.0891, +0.0805] W -> consistent
+  F3's allowance with Wn's and Wt's prices taken from N - N1 less the term (C and the two-term solve as frozen): Wn -9.38, Wt -6.67 pJ (frozen -10.61, -7.55); mid -11.57 ± 4.90 (frozen -12.01 ± 4.46); de3c +7.72, interval [-19.29, +34.72] pJ -> INCONCLUSIVE
+
+C1. One-term prices (post hoc), fJ; E155's at three rows (counts 5.695e+12 toggles and 4.271e+12 new-address reads a second), E148's at sixteen (1.478e+13 and 7.883e+12); this session's E_op 127.9 pJ
+  E148 as committed (N - N1): toggle 50.5 ± 5.7 [44.9, 56.2]; new-address 94.8 ± 10.6 [84.2, 105.4]
+  E148 less its shared term at E148's E_op: toggle 44.7 ± 5.8 [38.8, 50.5]; new-address 83.8 ± 10.9 [72.8, 94.7]
+  E148 less its shared term at this session's E_op: toggle 43.6 ± 5.7 [38.0, 49.3]; new-address 81.8 ± 10.6 [71.2, 92.4]
+  E155 less the session's shared term (session E_op): toggle 36.9 ± 17.0 [19.9, 54.0]; new-address 49.3 ± 22.7 [26.6, 71.9]
+  E155 less the frozen shared term (E148's E_op): toggle 39.6 ± 17.9 [21.7, 57.6]; new-address 52.8 ± 23.9 [28.9, 76.7]
+  as committed (each session's own construction): toggle overlap; new-address miss by 12.24 fJ
+  mixed: E148 at its E_op, E155 at the session's: toggle overlap; new-address miss by 0.87 fJ
+  matched: E148's E_op at both: toggle overlap; new-address overlap fJ
+  matched: the session's E_op at both: toggle overlap; new-address overlap fJ
+
+C3. Q31k = S(m0r3k8.int8) - S(m0r1.int8) (post hoc): raw +0.0357 ± 0.0650 W; with B's halving added back at fp32's three-arm price per TenB write +0.2201 ± 0.1175 [+0.1026, +0.3377] W, of which the add-back is +0.1845 W (84%)
+  Wn's walk part, frozen 0.3591 [0.3190, 0.3993]: overlaps Q31k's interval, residual -0.1390 W; on the premise's footing 0.3174 [0.2759, 0.3588], residual -0.0972 W
+  Wt's walk part, frozen 0.2554 [0.2268, 0.2839]: overlaps Q31k's interval, residual -0.0352 W; on the premise's footing 0.2257 [0.1962, 0.2552], residual -0.0055 W
+
+C4. The toggle count's out-of-sample errors (measured - frozen prediction): N3 -0.0121 ± 0.0830 W; D31 -0.0623 ± 0.1022 W; this session's N1 sits +0.0501 W above E148's, which offsets the rise's error in N3
+
+C5. R6: the frozen cycles are the bench's plus one constant (E109's, fitted on the ordinary op): m0r1.fp32 54.25 + 7.75 = 62 (measured 62.0); m0r1.int8 54.25 + 7.75 = 62 (measured 62.0); m0r3.fp32 120.25 + 7.75 = 128 (measured 128.0); m0r3.int8 102.25 + 7.75 = 110 (measured 110.0); m0r3k8.fp32 64.25 + 7.75 = 72 (measured 72.0); m0r3k8.int8 54.25 + 7.75 = 62 (measured 62.0)
