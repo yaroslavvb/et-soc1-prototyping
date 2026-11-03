@@ -1,0 +1,180 @@
+E158 frozen predictions (no E158 data exists): aifoundry2 under its own governor, zeros in every cell; time per op by MAB's frozen prices (E146)
+with the lines a retention curve leaves: STRICT-C (E146's MAB), STRICT-NOC (C takes no L3), PRIOR (a logistic fitted on E146's KB >= 2 ladder, not F6).
+PRIOR: x50 31.25 MB, s 1.016 MB, w 0.494; rms 1.12% over its 18 cells
+check: STRICT-C reproduces E146's MAB T800 on E146's nine shapes within 0.00213 us
+shape.fmt  arm            far  x(w1)  x(w0) | STRICT-C    sh |      NOC    sh |    PRIOR    sh | X(C)   cyc800(C)
+K2n4.fp32  gemmL1x4x2    64.0  19.00  11.98 |   1.3260  1.00 |   1.3260  1.00 |   1.3260  1.00 | 1.1390  1060.8
+K2n4.fp16  gemmL1x4x2    64.0  19.00  11.98 |   1.3223  1.00 |   1.3223  1.00 |   1.3223  1.00 | 1.1441  1057.9
+K2n4.int8  gemmL1x4x2    64.0  19.00  11.98 |   1.4046  1.00 |   1.4046  1.00 |   1.4046  1.00 | 1.1459  1123.7
+K2n5.fp32  gemmL1x5x2    64.0  23.00  13.98 |   1.3260  1.00 |   1.3260  1.00 |   1.3260  1.00 | 1.1390  1060.8
+K2n5.fp16  gemmL1x5x2    64.0  23.00  13.98 |   1.3223  1.00 |   1.3223  1.00 |   1.3223  1.00 | 1.1441  1057.9
+K2n5.int8  gemmL1x5x2    64.0  23.00  13.98 |   1.4046  1.00 |   1.4046  1.00 |   1.4046  1.00 | 1.1459  1123.7
+K2n6.fp32  gemmL1x6x2    64.0  27.00  15.98 |   1.3260  1.00 |   1.3260  1.00 |   1.3261  1.00 | 1.1390  1060.8
+K2n6.fp16  gemmL1x6x2    64.0  27.00  15.98 |   1.3223  1.00 |   1.3223  1.00 |   1.3224  1.00 | 1.1441  1057.9
+K2n6.int8  gemmL1x6x2    64.0  27.00  15.98 |   1.4046  1.00 |   1.4046  1.00 |   1.4046  1.00 | 1.1459  1123.7
+K2n7.fp32  gemmL1x7x2    64.0  31.00  17.98 |   1.3260  1.00 |   1.3260  1.00 |   1.3268  1.00 | 1.1390  1060.8
+K2n7.fp16  gemmL1x7x2    64.0  31.00  17.98 |   1.3223  1.00 |   1.3223  1.00 |   1.3231  1.00 | 1.1441  1057.9
+K2n7.int8  gemmL1x7x2    64.0  31.00  17.98 |   1.4046  1.00 |   1.4046  1.00 |   1.4052  1.00 | 1.1459  1123.7
+K2n8.fp32  gemmL1x8x2    64.0  35.00  19.98 |   1.9755  0.00 |   1.3260  1.00 |   1.3404  0.98 | 1.0982  1580.4
+K2n8.fp16  gemmL1x8x2    64.0  35.00  19.98 |   1.9827  0.00 |   1.3223  1.00 |   1.3370  0.98 | 1.0913  1586.2
+K2n8.int8  gemmL1x8x2    64.0  35.00  19.98 |   1.9173  0.00 |   1.4046  1.00 |   1.4159  0.98 | 1.0835  1533.9
+K2n9.fp32  gemmL1x9x2    64.0  39.00  21.98 |   1.9755  0.00 |   1.3260  1.00 |   1.5210  0.70 | 1.0982  1580.4
+K2n9.fp16  gemmL1x9x2    64.0  39.00  21.98 |   1.9827  0.00 |   1.3223  1.00 |   1.5206  0.70 | 1.0913  1586.2
+K2n9.int8  gemmL1x9x2    64.0  39.00  21.98 |   1.9173  0.00 |   1.4046  1.00 |   1.5585  0.70 | 1.0835  1533.9
+K2n10.fp32 gemmL1x10x2   64.0  43.00  23.98 |   1.9755  0.00 |   1.3260  1.00 |   1.9043  0.11 | 1.0982  1580.4
+K2n10.fp16 gemmL1x10x2   64.0  43.00  23.98 |   1.9827  0.00 |   1.3223  1.00 |   1.9103  0.11 | 1.0913  1586.2
+K2n10.int8 gemmL1x10x2   64.0  43.00  23.98 |   1.9173  0.00 |   1.4046  1.00 |   1.8611  0.11 | 1.0835  1533.9
+K2n11.fp32 gemmL1x11x2   64.0  47.00  25.98 |   1.9755  0.00 |   1.3260  1.00 |   1.9713  0.01 | 1.0982  1580.4
+K2n11.fp16 gemmL1x11x2   64.0  47.00  25.98 |   1.9827  0.00 |   1.3223  1.00 |   1.9785  0.01 | 1.0913  1586.2
+K2n11.int8 gemmL1x11x2   64.0  47.00  25.98 |   1.9173  0.00 |   1.4046  1.00 |   1.9140  0.01 | 1.0835  1533.9
+K2n12.fp32 gemmL1x12x2   64.0  51.00  27.98 |   1.9755  0.00 |   1.3260  1.00 |   1.9753  0.00 | 1.0982  1580.4
+K2n12.fp16 gemmL1x12x2   64.0  51.00  27.98 |   1.9827  0.00 |   1.3223  1.00 |   1.9825  0.00 | 1.0913  1586.2
+K2n12.int8 gemmL1x12x2   64.0  51.00  27.98 |   1.9173  0.00 |   1.4046  1.00 |   1.9172  0.00 | 1.0835  1533.9
+K2n13.fp32 gemmL1x13x2   64.0  55.00  29.98 |   1.9755  0.00 |   1.3260  1.00 |   1.9755  0.00 | 1.0982  1580.4
+K2n13.fp16 gemmL1x13x2   64.0  55.00  29.98 |   1.9827  0.00 |   1.3223  1.00 |   1.9827  0.00 | 1.0913  1586.2
+K2n13.int8 gemmL1x13x2   64.0  55.00  29.98 |   1.9173  0.00 |   1.4046  1.00 |   1.9173  0.00 | 1.0835  1533.9
+K4n2.fp32  gemmL1x2x4    64.0  19.00  15.98 |   1.3463  1.00 |   1.3463  1.00 |   1.3463  1.00 | 1.1421  1077.1
+K4n2.fp16  gemmL1x2x4    64.0  19.00  15.98 |   1.3407  1.00 |   1.3407  1.00 |   1.3407  1.00 | 1.1496  1072.6
+K4n2.int8  gemmL1x2x4    64.0  19.00  15.98 |   1.4486  1.00 |   1.4486  1.00 |   1.4486  1.00 | 1.1510  1158.9
+K4n3.fp32  gemmL1x3x4    64.0  25.00  19.98 |   1.3463  1.00 |   1.3463  1.00 |   1.3464  1.00 | 1.1421  1077.1
+K4n3.fp16  gemmL1x3x4    64.0  25.00  19.98 |   1.3407  1.00 |   1.3407  1.00 |   1.3408  1.00 | 1.1496  1072.6
+K4n3.int8  gemmL1x3x4    64.0  25.00  19.98 |   1.4486  1.00 |   1.4486  1.00 |   1.4487  1.00 | 1.1510  1158.9
+K4n4.fp32  gemmL1x4x4    64.0  31.00  23.98 |   1.3463  1.00 |   1.3463  1.00 |   1.3614  0.98 | 1.1421  1077.1
+K4n4.fp16  gemmL1x4x4    64.0  31.00  23.98 |   1.3407  1.00 |   1.3407  1.00 |   1.3560  0.98 | 1.1496  1072.6
+K4n4.int8  gemmL1x4x4    64.0  31.00  23.98 |   1.4486  1.00 |   1.4486  1.00 |   1.4605  0.98 | 1.1510  1158.9
+K4n5.fp32  gemmL1x5x4    64.0  37.00  27.98 |   1.9958  0.00 |   1.3463  1.00 |   1.8419  0.24 | 1.1008  1596.6
+K4n5.fp16  gemmL1x5x4    64.0  37.00  27.98 |   2.0011  0.00 |   1.3407  1.00 |   1.8446  0.24 | 1.0955  1600.9
+K4n5.int8  gemmL1x5x4    64.0  37.00  27.98 |   1.9613  0.00 |   1.4486  1.00 |   1.8398  0.24 | 1.0886  1569.1
+K4n6.fp32  gemmL1x6x4    64.0  43.00  31.98 |   1.9958  0.00 |   1.3463  1.00 |   1.9943  0.00 | 1.1008  1596.6
+K4n6.fp16  gemmL1x6x4    64.0  43.00  31.98 |   2.0011  0.00 |   1.3407  1.00 |   1.9996  0.00 | 1.0955  1600.9
+K4n6.int8  gemmL1x6x4    64.0  43.00  31.98 |   1.9613  0.00 |   1.4486  1.00 |   1.9602  0.00 | 1.0886  1569.1
+K4n7.fp32  gemmL1x7x4    64.0  49.00  35.98 |   1.9958  0.00 |   1.9958  0.00 |   1.9958  0.00 | 1.1008  1596.6
+K4n7.fp16  gemmL1x7x4    64.0  49.00  35.98 |   2.0011  0.00 |   2.0011  0.00 |   2.0011  0.00 | 1.0955  1600.9
+K4n7.int8  gemmL1x7x4    64.0  49.00  35.98 |   1.9613  0.00 |   1.9613  0.00 |   1.9613  0.00 | 1.0886  1569.1
+K4n8.fp32  gemmL1x8x4    64.0  55.00  39.98 |   1.9958  0.00 |   1.9958  0.00 |   1.9958 -0.00 | 1.1008  1596.6
+K4n8.fp16  gemmL1x8x4    64.0  55.00  39.98 |   2.0011  0.00 |   2.0011  0.00 |   2.0011 -0.00 | 1.0955  1600.9
+K4n8.int8  gemmL1x8x4    64.0  55.00  39.98 |   1.9613  0.00 |   1.9613  0.00 |   1.9613 -0.00 | 1.0886  1569.1
+K6n1.fp32  gemmL1x1x6     0.0   0.00   0.00 |   1.3463       |   1.3463       |   1.3463       | 1.1421  1077.1
+K6n1.fp16  gemmL1x1x6     0.0   0.00   0.00 |   1.3407       |   1.3407       |   1.3407       | 1.1496  1072.6
+K6n1.int8  gemmL1x1x6     0.0   0.00   0.00 |   1.4486       |   1.4486       |   1.4486       | 1.1510  1158.9
+K6n2.fp32  gemmL1x2x6    64.0  27.00  23.98 |   1.3463  1.00 |   1.3463  1.00 |   1.3487  1.00 | 1.1421  1077.1
+K6n2.fp16  gemmL1x2x6    64.0  27.00  23.98 |   1.3407  1.00 |   1.3407  1.00 |   1.3431  1.00 | 1.1496  1072.6
+K6n2.int8  gemmL1x2x6    64.0  27.00  23.98 |   1.4486  1.00 |   1.4486  1.00 |   1.4505  1.00 | 1.1510  1158.9
+K6n3.fp32  gemmL1x3x6    64.0  35.00  29.98 |   1.9958  0.00 |   1.3463  1.00 |   1.8448  0.23 | 1.1008  1596.6
+K6n3.fp16  gemmL1x3x6    64.0  35.00  29.98 |   2.0011  0.00 |   1.3407  1.00 |   1.8476  0.23 | 1.0955  1600.9
+K6n3.int8  gemmL1x3x6    64.0  35.00  29.98 |   1.9613  0.00 |   1.4486  1.00 |   1.8422  0.23 | 1.0886  1569.1
+K6n4.fp32  gemmL1x4x6    64.0  43.00  35.98 |   1.9958  0.00 |   1.9958  0.00 |   1.9958  0.00 | 1.1008  1596.6
+K6n4.fp16  gemmL1x4x6    64.0  43.00  35.98 |   2.0011  0.00 |   2.0011  0.00 |   2.0011  0.00 | 1.0955  1600.9
+K6n4.int8  gemmL1x4x6    64.0  43.00  35.98 |   1.9613  0.00 |   1.9613  0.00 |   1.9614 -0.00 | 1.0886  1569.1
+K6n5.fp32  gemmL1x5x6    64.0  51.00  41.98 |   1.9958  0.00 |   1.9958  0.00 |   1.9960 -0.00 | 1.1008  1596.6
+K6n5.fp16  gemmL1x5x6    64.0  51.00  41.98 |   2.0011  0.00 |   2.0011  0.00 |   2.0013 -0.00 | 1.0955  1600.9
+K6n5.int8  gemmL1x5x6    64.0  51.00  41.98 |   1.9613  0.00 |   1.9613  0.00 |   1.9616 -0.00 | 1.0886  1569.1
+K6n6.fp32  gemmL1x6x6    64.0  59.00  47.98 |   1.9958  0.00 |   1.9958  0.00 |   1.9960 -0.00 | 1.1008  1596.6
+K6n6.fp16  gemmL1x6x6    64.0  59.00  47.98 |   2.0011  0.00 |   2.0011  0.00 |   2.0013 -0.00 | 1.0955  1600.9
+K6n6.int8  gemmL1x6x6    64.0  59.00  47.98 |   1.9613  0.00 |   1.9613  0.00 |   1.9616 -0.00 | 1.0886  1569.1
+L1.fp32    gemmL2x2x1     0.0   0.00   0.00 |   1.1384       |   1.1384       |   1.1384       | 1.1619   910.7   E146 measured 1.2707
+L1.fp16    gemmL2x2x1     0.0   0.00   0.00 |   1.1380       |   1.1380       |   1.1380       | 1.1629   910.4   E146 measured 1.2750
+L1.int8    gemmL2x2x1     0.0   0.00   0.00 |   1.0905       |   1.0905       |   1.0905       | 1.1522   872.4   E146 measured 1.3282
+L2.fp32    gemmL2x2x2     0.0   0.00   0.00 |   1.3260       |   1.3260       |   1.3260       | 1.1390  1060.8   E146 measured 1.3243
+L2.fp16    gemmL2x2x2     0.0   0.00   0.00 |   1.3223       |   1.3223       |   1.3223       | 1.1441  1057.9   E146 measured 1.3270
+L2.int8    gemmL2x2x2     0.0   0.00   0.00 |   1.4046       |   1.4046       |   1.4046       | 1.1459  1123.7   E146 measured 1.4106
+L4.fp32    gemmL1x2x4    64.0  19.00  15.98 |   1.3463  1.00 |   1.3463  1.00 |   1.3463  1.00 | 1.1421  1077.1   E146 measured 1.3416
+L4.fp16    gemmL1x2x4    64.0  19.00  15.98 |   1.3407  1.00 |   1.3407  1.00 |   1.3407  1.00 | 1.1496  1072.6   E146 measured 1.3404
+L4.int8    gemmL1x2x4    64.0  19.00  15.98 |   1.4486  1.00 |   1.4486  1.00 |   1.4486  1.00 | 1.1510  1158.9   E146 measured 1.4306
+L8.fp32    gemmL1x1x8   128.0  17.00  15.98 |   1.3463  1.00 |   1.3463  1.00 |   1.3474  1.00 | 1.1421  1077.1   E146 measured 1.3375
+L8.fp16    gemmL1x1x8   128.0  17.00  15.98 |   1.3407  1.00 |   1.3407  1.00 |   1.3418  1.00 | 1.1496  1072.6   E146 measured 1.3382
+L8.int8    gemmL1x1x8   128.0  17.00  15.98 |   1.4486  1.00 |   1.4486  1.00 |   1.4499  1.00 | 1.1510  1158.9   E146 measured 1.4288
+D1.fp32    gemmL4x8x1    64.0  26.62  11.61 |   1.1078  1.00 |   1.0433  1.10 |   1.1078  1.00 | 1.1790   886.2   E146 measured 1.2673
+D1.fp16    gemmL4x8x1    64.0  26.62  11.61 |   1.1043  1.00 |   1.0411  1.10 |   1.1043  1.00 | 1.1851   883.5   E146 measured 1.2650
+D1.int8    gemmL4x8x1    64.0  26.62  11.61 |   1.0317  1.00 |   0.9540  1.15 |   1.0317  1.00 | 1.1692   825.3   E146 measured 1.3096
+D2.fp32    gemmL4x8x2    64.0  38.25  23.23 |   2.0399  0.00 |   1.3260  1.10 |   1.6627  0.58 | 1.0942  1631.9   E146 measured 1.6674
+D2.fp16    gemmL4x8x2    64.0  38.25  23.23 |   2.0460  0.00 |   1.3223  1.10 |   1.6624  0.58 | 1.0887  1636.8   E146 measured 1.6641
+D2.int8    gemmL4x8x2    64.0  38.25  23.23 |   1.9950  0.00 |   1.4046  1.15 |   1.6972  0.58 | 1.0836  1596.0   E146 measured 1.6910
+D4.fp32    gemmL4x8x4    64.0  61.50  46.48 |   2.0602  0.00 |   2.0602  0.00 |   2.0602 -0.00 | 1.0967  1648.2   E146 measured 2.1040
+D4.fp16    gemmL4x8x4    64.0  61.50  46.48 |   2.0644  0.00 |   2.0644  0.00 |   2.0644 -0.00 | 1.0928  1651.5   E146 measured 2.1043
+D4.int8    gemmL4x8x4    64.0  61.50  46.48 |   2.0390  0.00 |   2.0390  0.00 |   2.0390 -0.00 | 1.0886  1631.2   E146 measured 2.1033
+D8.fp32    gemmL4x8x8   128.0  62.50  54.48 |   2.1739  0.50 |   2.0602  0.59 |   2.1672  0.51 | 1.0901  1739.1   E146 measured 2.1762
+D8.fp16    gemmL4x8x8   128.0  62.50  54.48 |   2.1759  0.50 |   2.0644  0.58 |   2.1694  0.50 | 1.0884  1740.7   E146 measured 2.1769
+D8.int8    gemmL4x8x8   128.0  62.50  54.48 |   2.1760  0.50 |   2.0390  0.63 |   2.1680  0.51 | 1.0885  1740.8   E146 measured 2.1754
+F6.fp32    gemmL3x4x6    64.0  50.50  43.48 |   2.1247  0.00 |   2.1247  0.00 |   2.1248 -0.00 | 1.0928  1699.7   E146 measured 1.9121
+F6.fp16    gemmL3x4x6    64.0  50.50  43.48 |   2.1276  0.00 |   2.1276  0.00 |   2.1277 -0.00 | 1.0902  1702.1   E146 measured 1.9064
+F6.int8    gemmL3x4x6    64.0  50.50  43.48 |   2.1167  0.00 |   2.1167  0.00 |   2.1169 -0.00 | 1.0885  1693.4   E146 measured 1.9240
+cells (zeros): admission estimate = predicted peak board W, limit 82.0 W; highest 39.8 W
+  K2n4-fp32-zeros  est  39.1 W  P0(800)  38.12 W  admitted True
+  K2n4-fp16-zeros  est  39.5 W  P0(800)  38.42 W  admitted True
+  K2n4-int8-zeros  est  37.8 W  P0(800)  37.13 W  admitted True
+  K2n5-fp32-zeros  est  39.1 W  P0(800)  38.12 W  admitted True
+  K2n5-fp16-zeros  est  39.5 W  P0(800)  38.42 W  admitted True
+  K2n5-int8-zeros  est  37.8 W  P0(800)  37.13 W  admitted True
+  K2n6-fp32-zeros  est  39.1 W  P0(800)  38.12 W  admitted True
+  K2n6-fp16-zeros  est  39.5 W  P0(800)  38.42 W  admitted True
+  K2n6-int8-zeros  est  37.8 W  P0(800)  37.13 W  admitted True
+  K2n7-fp32-zeros  est  39.1 W  P0(800)  38.12 W  admitted True
+  K2n7-fp16-zeros  est  39.5 W  P0(800)  38.42 W  admitted True
+  K2n7-int8-zeros  est  37.8 W  P0(800)  37.13 W  admitted True
+  K2n8-fp32-zeros  est  39.6 W  P0(800)  38.42 W  admitted True
+  K2n8-fp16-zeros  est  39.8 W  P0(800)  38.53 W  admitted True
+  K2n8-int8-zeros  est  38.7 W  P0(800)  37.73 W  admitted True
+  K2n9-fp32-zeros  est  39.6 W  P0(800)  38.42 W  admitted True
+  K2n9-fp16-zeros  est  39.8 W  P0(800)  38.53 W  admitted True
+  K2n9-int8-zeros  est  38.7 W  P0(800)  37.73 W  admitted True
+  K2n10-fp32-zeros est  39.6 W  P0(800)  38.42 W  admitted True
+  K2n10-fp16-zeros est  39.8 W  P0(800)  38.53 W  admitted True
+  K2n10-int8-zeros est  38.7 W  P0(800)  37.73 W  admitted True
+  K2n11-fp32-zeros est  39.6 W  P0(800)  38.42 W  admitted True
+  K2n11-fp16-zeros est  39.8 W  P0(800)  38.53 W  admitted True
+  K2n11-int8-zeros est  38.7 W  P0(800)  37.73 W  admitted True
+  K2n12-fp32-zeros est  39.6 W  P0(800)  38.42 W  admitted True
+  K2n12-fp16-zeros est  39.8 W  P0(800)  38.53 W  admitted True
+  K2n12-int8-zeros est  38.7 W  P0(800)  37.73 W  admitted True
+  K2n13-fp32-zeros est  39.6 W  P0(800)  38.42 W  admitted True
+  K2n13-fp16-zeros est  39.8 W  P0(800)  38.53 W  admitted True
+  K2n13-int8-zeros est  38.7 W  P0(800)  37.73 W  admitted True
+  K4n2-fp32-zeros  est  39.1 W  P0(800)  38.05 W  admitted True
+  K4n2-fp16-zeros  est  39.5 W  P0(800)  38.38 W  admitted True
+  K4n2-int8-zeros  est  37.7 W  P0(800)  37.04 W  admitted True
+  K4n3-fp32-zeros  est  39.1 W  P0(800)  38.05 W  admitted True
+  K4n3-fp16-zeros  est  39.5 W  P0(800)  38.38 W  admitted True
+  K4n3-int8-zeros  est  37.7 W  P0(800)  37.04 W  admitted True
+  K4n4-fp32-zeros  est  39.1 W  P0(800)  38.05 W  admitted True
+  K4n4-fp16-zeros  est  39.5 W  P0(800)  38.38 W  admitted True
+  K4n4-int8-zeros  est  37.7 W  P0(800)  37.04 W  admitted True
+  K4n5-fp32-zeros  est  39.6 W  P0(800)  38.36 W  admitted True
+  K4n5-fp16-zeros  est  39.8 W  P0(800)  38.49 W  admitted True
+  K4n5-int8-zeros  est  38.6 W  P0(800)  37.64 W  admitted True
+  K4n6-fp32-zeros  est  39.6 W  P0(800)  38.36 W  admitted True
+  K4n6-fp16-zeros  est  39.8 W  P0(800)  38.49 W  admitted True
+  K4n6-int8-zeros  est  38.6 W  P0(800)  37.64 W  admitted True
+  K4n7-fp32-zeros  est  39.6 W  P0(800)  38.36 W  admitted True
+  K4n7-fp16-zeros  est  39.8 W  P0(800)  38.49 W  admitted True
+  K4n7-int8-zeros  est  38.6 W  P0(800)  37.64 W  admitted True
+  K4n8-fp32-zeros  est  39.6 W  P0(800)  38.36 W  admitted True
+  K4n8-fp16-zeros  est  39.8 W  P0(800)  38.49 W  admitted True
+  K4n8-int8-zeros  est  38.6 W  P0(800)  37.64 W  admitted True
+  K6n1-fp32-zeros  est  39.1 W  P0(800)  38.05 W  admitted True
+  K6n1-fp16-zeros  est  39.5 W  P0(800)  38.38 W  admitted True
+  K6n1-int8-zeros  est  37.7 W  P0(800)  37.04 W  admitted True
+  K6n2-fp32-zeros  est  39.1 W  P0(800)  38.05 W  admitted True
+  K6n2-fp16-zeros  est  39.5 W  P0(800)  38.38 W  admitted True
+  K6n2-int8-zeros  est  37.7 W  P0(800)  37.04 W  admitted True
+  K6n3-fp32-zeros  est  39.6 W  P0(800)  38.36 W  admitted True
+  K6n3-fp16-zeros  est  39.8 W  P0(800)  38.49 W  admitted True
+  K6n3-int8-zeros  est  38.6 W  P0(800)  37.64 W  admitted True
+  K6n4-fp32-zeros  est  39.6 W  P0(800)  38.36 W  admitted True
+  K6n4-fp16-zeros  est  39.8 W  P0(800)  38.49 W  admitted True
+  K6n4-int8-zeros  est  38.6 W  P0(800)  37.64 W  admitted True
+  K6n5-fp32-zeros  est  39.6 W  P0(800)  38.36 W  admitted True
+  K6n5-fp16-zeros  est  39.8 W  P0(800)  38.49 W  admitted True
+  K6n5-int8-zeros  est  38.6 W  P0(800)  37.64 W  admitted True
+  K6n6-fp32-zeros  est  39.6 W  P0(800)  38.36 W  admitted True
+  K6n6-fp16-zeros  est  39.8 W  P0(800)  38.49 W  admitted True
+  K6n6-int8-zeros  est  38.6 W  P0(800)  37.64 W  admitted True
+  D2-fp32-zeros    est  39.7 W  P0(800)  38.45 W  admitted True
+  D2-fp16-zeros    est  39.8 W  P0(800)  38.54 W  admitted True
+  D2-int8-zeros    est  38.8 W  P0(800)  37.79 W  admitted True
+  D4-fp32-zeros    est  39.6 W  P0(800)  38.39 W  admitted True
+  D4-fp16-zeros    est  39.8 W  P0(800)  38.50 W  admitted True
+  D4-int8-zeros    est  38.6 W  P0(800)  37.69 W  admitted True
+  F6-fp32-zeros    est  39.7 W  P0(800)  38.41 W  admitted True
+  F6-fp16-zeros    est  39.8 W  P0(800)  38.51 W  admitted True
+  F6-int8-zeros    est  38.7 W  P0(800)  37.74 W  admitted True

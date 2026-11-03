@@ -1,0 +1,428 @@
+{
+ "experiment": "E158",
+ "request": "Q139",
+ "card": "aifoundry2",
+ "order_seed": 158,
+ "note": "E158's stop-path test (die): the registered watcher with one stop lowered, so that it must trip on live samples; the session must end with exit 4",
+ "tools": {
+  "heater": "build/e136/host/sparsity_host",
+  "kernel": "build/e136/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "predictions": "tools/claims-v3/e158/predictions-e158.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 30,
+  "board_cap_w": 60,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 2
+ },
+ "smoke_cycles": {
+  "K4n2-fp32-zeros": 1077.1,
+  "K2n13-fp16-zeros": 1586.2,
+  "K6n6-int8-zeros": 1569.1,
+  "F6-fp32-zeros": 1699.7
+ },
+ "dry_c_w": {
+  "zeros": 3.0,
+  "gemmL1x2x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.86,
+  "gemmL1x13x2:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.23,
+  "gemmL1x6x6:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.601,
+  "gemmL3x4x6:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.18,
+  "gemmL1x4x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.88,
+  "gemmL1x5x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.88,
+  "gemmL1x6x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.88,
+  "gemmL1x7x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.88,
+  "gemmL1x8x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.155,
+  "gemmL1x9x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.155,
+  "gemmL1x10x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.155,
+  "gemmL1x11x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.155,
+  "gemmL1x12x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.155,
+  "gemmL1x13x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.155,
+  "gemmL1x3x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.86,
+  "gemmL1x4x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.86,
+  "gemmL1x5x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.132,
+  "gemmL1x6x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.132,
+  "gemmL1x7x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.132,
+  "gemmL1x8x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.132,
+  "gemmL1x1x6:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.86,
+  "gemmL1x2x6:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.86,
+  "gemmL1x3x6:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.132,
+  "gemmL1x4x6:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.132,
+  "gemmL1x5x6:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.132,
+  "gemmL1x6x6:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.132,
+  "gemmL3x4x6:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.25,
+  "gemmL3x4x6:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.68,
+  "gemmL4x8x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.18,
+  "gemmL4x8x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.157,
+  "gemmL1x2x4:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.077,
+  "gemmL1x3x4:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.077,
+  "gemmL1x4x4:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.077,
+  "gemmL1x5x4:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.224,
+  "gemmL1x6x4:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.224,
+  "gemmL1x7x4:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.224,
+  "gemmL1x8x4:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.224,
+  "gemmL1x2x4:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.164,
+  "gemmL1x3x4:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.164,
+  "gemmL1x4x4:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.164,
+  "gemmL1x5x4:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.601,
+  "gemmL1x6x4:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.601,
+  "gemmL1x7x4:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.601,
+  "gemmL1x8x4:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.601
+ },
+ "limit_p800_w": 82.0,
+ "peak_lock_w": 60.0,
+ "relation": {
+  "B800": 33.60956684526229,
+  "s800": 1.90517380064275
+ },
+ "admission": {
+  "K2n4-fp32-zeros": {
+   "c_ref_w": 2.88,
+   "fixed_p800_w": 39.1
+  },
+  "K2n4-fp16-zeros": {
+   "c_ref_w": 3.079,
+   "fixed_p800_w": 39.5
+  },
+  "K2n4-int8-zeros": {
+   "c_ref_w": 2.213,
+   "fixed_p800_w": 37.8
+  },
+  "K2n5-fp32-zeros": {
+   "c_ref_w": 2.88,
+   "fixed_p800_w": 39.1
+  },
+  "K2n5-fp16-zeros": {
+   "c_ref_w": 3.079,
+   "fixed_p800_w": 39.5
+  },
+  "K2n5-int8-zeros": {
+   "c_ref_w": 2.213,
+   "fixed_p800_w": 37.8
+  },
+  "K2n6-fp32-zeros": {
+   "c_ref_w": 2.88,
+   "fixed_p800_w": 39.1
+  },
+  "K2n6-fp16-zeros": {
+   "c_ref_w": 3.079,
+   "fixed_p800_w": 39.5
+  },
+  "K2n6-int8-zeros": {
+   "c_ref_w": 2.213,
+   "fixed_p800_w": 37.8
+  },
+  "K2n7-fp32-zeros": {
+   "c_ref_w": 2.88,
+   "fixed_p800_w": 39.1
+  },
+  "K2n7-fp16-zeros": {
+   "c_ref_w": 3.079,
+   "fixed_p800_w": 39.5
+  },
+  "K2n7-int8-zeros": {
+   "c_ref_w": 2.213,
+   "fixed_p800_w": 37.8
+  },
+  "K2n8-fp32-zeros": {
+   "c_ref_w": 3.155,
+   "fixed_p800_w": 39.6
+  },
+  "K2n8-fp16-zeros": {
+   "c_ref_w": 3.23,
+   "fixed_p800_w": 39.8
+  },
+  "K2n8-int8-zeros": {
+   "c_ref_w": 2.66,
+   "fixed_p800_w": 38.7
+  },
+  "K2n9-fp32-zeros": {
+   "c_ref_w": 3.155,
+   "fixed_p800_w": 39.6
+  },
+  "K2n9-fp16-zeros": {
+   "c_ref_w": 3.23,
+   "fixed_p800_w": 39.8
+  },
+  "K2n9-int8-zeros": {
+   "c_ref_w": 2.66,
+   "fixed_p800_w": 38.7
+  },
+  "K2n10-fp32-zeros": {
+   "c_ref_w": 3.155,
+   "fixed_p800_w": 39.6
+  },
+  "K2n10-fp16-zeros": {
+   "c_ref_w": 3.23,
+   "fixed_p800_w": 39.8
+  },
+  "K2n10-int8-zeros": {
+   "c_ref_w": 2.66,
+   "fixed_p800_w": 38.7
+  },
+  "K2n11-fp32-zeros": {
+   "c_ref_w": 3.155,
+   "fixed_p800_w": 39.6
+  },
+  "K2n11-fp16-zeros": {
+   "c_ref_w": 3.23,
+   "fixed_p800_w": 39.8
+  },
+  "K2n11-int8-zeros": {
+   "c_ref_w": 2.66,
+   "fixed_p800_w": 38.7
+  },
+  "K2n12-fp32-zeros": {
+   "c_ref_w": 3.155,
+   "fixed_p800_w": 39.6
+  },
+  "K2n12-fp16-zeros": {
+   "c_ref_w": 3.23,
+   "fixed_p800_w": 39.8
+  },
+  "K2n12-int8-zeros": {
+   "c_ref_w": 2.66,
+   "fixed_p800_w": 38.7
+  },
+  "K2n13-fp32-zeros": {
+   "c_ref_w": 3.155,
+   "fixed_p800_w": 39.6
+  },
+  "K2n13-fp16-zeros": {
+   "c_ref_w": 3.23,
+   "fixed_p800_w": 39.8
+  },
+  "K2n13-int8-zeros": {
+   "c_ref_w": 2.66,
+   "fixed_p800_w": 38.7
+  },
+  "K4n2-fp32-zeros": {
+   "c_ref_w": 2.86,
+   "fixed_p800_w": 39.1
+  },
+  "K4n2-fp16-zeros": {
+   "c_ref_w": 3.077,
+   "fixed_p800_w": 39.5
+  },
+  "K4n2-int8-zeros": {
+   "c_ref_w": 2.164,
+   "fixed_p800_w": 37.7
+  },
+  "K4n3-fp32-zeros": {
+   "c_ref_w": 2.86,
+   "fixed_p800_w": 39.1
+  },
+  "K4n3-fp16-zeros": {
+   "c_ref_w": 3.077,
+   "fixed_p800_w": 39.5
+  },
+  "K4n3-int8-zeros": {
+   "c_ref_w": 2.164,
+   "fixed_p800_w": 37.7
+  },
+  "K4n4-fp32-zeros": {
+   "c_ref_w": 2.86,
+   "fixed_p800_w": 39.1
+  },
+  "K4n4-fp16-zeros": {
+   "c_ref_w": 3.077,
+   "fixed_p800_w": 39.5
+  },
+  "K4n4-int8-zeros": {
+   "c_ref_w": 2.164,
+   "fixed_p800_w": 37.7
+  },
+  "K4n5-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  },
+  "K4n5-fp16-zeros": {
+   "c_ref_w": 3.224,
+   "fixed_p800_w": 39.8
+  },
+  "K4n5-int8-zeros": {
+   "c_ref_w": 2.601,
+   "fixed_p800_w": 38.6
+  },
+  "K4n6-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  },
+  "K4n6-fp16-zeros": {
+   "c_ref_w": 3.224,
+   "fixed_p800_w": 39.8
+  },
+  "K4n6-int8-zeros": {
+   "c_ref_w": 2.601,
+   "fixed_p800_w": 38.6
+  },
+  "K4n7-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  },
+  "K4n7-fp16-zeros": {
+   "c_ref_w": 3.224,
+   "fixed_p800_w": 39.8
+  },
+  "K4n7-int8-zeros": {
+   "c_ref_w": 2.601,
+   "fixed_p800_w": 38.6
+  },
+  "K4n8-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  },
+  "K4n8-fp16-zeros": {
+   "c_ref_w": 3.224,
+   "fixed_p800_w": 39.8
+  },
+  "K4n8-int8-zeros": {
+   "c_ref_w": 2.601,
+   "fixed_p800_w": 38.6
+  },
+  "K6n1-fp32-zeros": {
+   "c_ref_w": 2.86,
+   "fixed_p800_w": 39.1
+  },
+  "K6n1-fp16-zeros": {
+   "c_ref_w": 3.077,
+   "fixed_p800_w": 39.5
+  },
+  "K6n1-int8-zeros": {
+   "c_ref_w": 2.164,
+   "fixed_p800_w": 37.7
+  },
+  "K6n2-fp32-zeros": {
+   "c_ref_w": 2.86,
+   "fixed_p800_w": 39.1
+  },
+  "K6n2-fp16-zeros": {
+   "c_ref_w": 3.077,
+   "fixed_p800_w": 39.5
+  },
+  "K6n2-int8-zeros": {
+   "c_ref_w": 2.164,
+   "fixed_p800_w": 37.7
+  },
+  "K6n3-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  },
+  "K6n3-fp16-zeros": {
+   "c_ref_w": 3.224,
+   "fixed_p800_w": 39.8
+  },
+  "K6n3-int8-zeros": {
+   "c_ref_w": 2.601,
+   "fixed_p800_w": 38.6
+  },
+  "K6n4-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  },
+  "K6n4-fp16-zeros": {
+   "c_ref_w": 3.224,
+   "fixed_p800_w": 39.8
+  },
+  "K6n4-int8-zeros": {
+   "c_ref_w": 2.601,
+   "fixed_p800_w": 38.6
+  },
+  "K6n5-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  },
+  "K6n5-fp16-zeros": {
+   "c_ref_w": 3.224,
+   "fixed_p800_w": 39.8
+  },
+  "K6n5-int8-zeros": {
+   "c_ref_w": 2.601,
+   "fixed_p800_w": 38.6
+  },
+  "K6n6-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  },
+  "K6n6-fp16-zeros": {
+   "c_ref_w": 3.224,
+   "fixed_p800_w": 39.8
+  },
+  "K6n6-int8-zeros": {
+   "c_ref_w": 2.601,
+   "fixed_p800_w": 38.6
+  },
+  "D2-fp32-zeros": {
+   "c_ref_w": 3.18,
+   "fixed_p800_w": 39.7
+  },
+  "D2-fp16-zeros": {
+   "c_ref_w": 3.244,
+   "fixed_p800_w": 39.8
+  },
+  "D2-int8-zeros": {
+   "c_ref_w": 2.701,
+   "fixed_p800_w": 38.8
+  },
+  "D4-fp32-zeros": {
+   "c_ref_w": 3.157,
+   "fixed_p800_w": 39.6
+  },
+  "D4-fp16-zeros": {
+   "c_ref_w": 3.238,
+   "fixed_p800_w": 39.8
+  },
+  "D4-int8-zeros": {
+   "c_ref_w": 2.642,
+   "fixed_p800_w": 38.6
+  },
+  "F6-fp32-zeros": {
+   "c_ref_w": 3.18,
+   "fixed_p800_w": 39.7
+  },
+  "F6-fp16-zeros": {
+   "c_ref_w": 3.25,
+   "fixed_p800_w": 39.8
+  },
+  "F6-int8-zeros": {
+   "c_ref_w": 2.68,
+   "fixed_p800_w": 38.7
+  },
+  "rest": {
+   "fixed_p800_w": 30.0
+  }
+ },
+ "blocks": [
+  {
+   "name": "STOPTEST",
+   "title": "the die stop's path on live samples",
+   "default": false,
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "gemmL1x8x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "K4n8-fp32-zeros",
+     "start": {
+      "mode": "cool",
+      "max_c": 99,
+      "max_wait_s": 5
+     },
+     "launch": {
+      "seconds": 6,
+      "budget": 7.5,
+      "processes": 1
+     },
+     "tail_s": 4
+    }
+   ]
+  }
+ ]
+}

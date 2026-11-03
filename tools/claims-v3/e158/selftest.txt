@@ -1,0 +1,30 @@
+PASS R1 consistent on a soft truth ([])
+PASS R1 reads a soft curve as SOFT
+PASS R2 on a w = 1 truth: C OCCUPIES THE L3 (w 0.95, rms 0.0000, at w=0 0.21998)
+PASS R3 PASS when F6 follows the same curve (ISO {'T800': 2.0701, 'rel': -0.0018, 'rel_e146': -0.0763, 'verdict': 'PASS', 'verdict_e146': 'FAIL'})
+PASS R5: the formats follow the fp32 curve (14 of 14)
+PASS LOGI recovers x50 41 and w 1 ({'x50_mb': 40.953, 's_mb': 3, 'w': 0.998, 'rms_share': 0.0009632207212885184})
+PASS R2 on a w = 0 strict truth: C TAKES NONE OF IT (w 0.15, near-best [0.0, 0.3], rms 0.0000, at w=1 0.26112)
+PASS R1: the w = 0 strict truth is STRICT against STRICT-NOC, SOFT against STRICT-C
+PASS R1: E146's strict model read as STRICT
+PASS R2 on E146's strict model: C OCCUPIES THE L3 (near-best w [0.55, 1.0])
+PASS R2 on a w = 0.5 soft truth: PARTIAL (w 0.5, near-best [0.35, 0.6])
+PASS R3 PASS when F6 follows E146's strict model too
+PASS R2 on family-dependent retention: NO SINGLE CURVE (rms 0.1881)
+PASS R3 FAIL when F6 runs 10% faster than its curve ({'T800': 2.0701, 'rel': -0.1016, 'rel_e146': -0.0763, 'verdict': 'FAIL', 'verdict_e146': 'FAIL'})
+PASS R1 INCONSISTENT names the rung MAB cannot carry (['K4n8'])
+PASS R0 FAIL when a check of C failed
+PASS the registered protocol's stops and limit pass the runner's check
+PASS the runner refuses a 93 W board stop: board_cap_w 93 W is above 85 W
+PASS the runner refuses an 88 W admission limit: limit_p800_w 88.0 is missing or above 82 W
+PASS the runner refuses a protocol whose stops lack a key the watcher reads
+PASS the board stop test's protocol passes the runner's check
+PASS the die stop test's protocol passes the runner's check
+PASS every cell's predicted peak board power is at most 82 W (highest 39.8 W)
+PASS stop check: a board trip on live samples (a zeros burst over 30 W) passes
+PASS stop check: a trip read at the pass's end fails (b-end: the trip at 1007000 is 5300 ms from the third live line over 30 W)
+PASS stop check: a stop that never fired fails
+PASS stop check: a die trip on the first live sample passes
+PASS stop check: a die trip after a launch, seconds after its sample, fails
+
+ALL PASS

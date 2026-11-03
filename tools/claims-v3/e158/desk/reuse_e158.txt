@@ -1,0 +1,204 @@
+E158 (Q139) desk: for every line a shire's L2 misses in E158's large GEMMs, its LRU stack distance in the L3, split into the operand tiles (A and
+B) and the C tiles touched since the line's tile was last touched. No card. Standard library only. It imports E136's desk model
+(tools/claims-v3/e136/desk/reuse_e136.py: shire_ops, l2_pass, the cache constants) and E146's (tools/claims-v3/e146/desk/reuse_e146.py: l3_steps,
+to_l3_addr, split) and changes none of them.
+
+K2n4 gemmL1x4x2: a C store every 64 ops; A 4 MB, B 8 MB, C 8 MB = 20 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 112.00 F   0.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3 112.00 F   0.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 11.98 MB + d_C 7.02 MB = 19.00 MB
+  distance profile (MB, C counted; lines an op): A@7: 0.50; A@8: 32.00; A@9: 31.50; B@4: 48.00; B@18: 64.00
+
+K2n5 gemmL1x5x2: a C store every 64 ops; A 4 MB, B 10 MB, C 10 MB = 24 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 112.00 F   0.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3 112.00 F   0.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 13.98 MB + d_C 9.02 MB = 23.00 MB
+  distance profile (MB, C counted; lines an op): A@7: 0.50; A@8: 32.00; A@9: 31.50; B@4: 48.00; B@22: 64.00
+
+K2n6 gemmL1x6x2: a C store every 64 ops; A 4 MB, B 12 MB, C 12 MB = 28 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 112.00 F   0.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 15.98 MB + d_C 11.02 MB = 27.00 MB
+  distance profile (MB, C counted; lines an op): A@7: 0.50; A@8: 32.00; A@9: 31.50; B@4: 48.00; B@26: 64.00
+
+K2n7 gemmL1x7x2: a C store every 64 ops; A 4 MB, B 14 MB, C 14 MB = 32 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 112.00 F   0.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 17.98 MB + d_C 13.02 MB = 31.00 MB
+  distance profile (MB, C counted; lines an op): A@7: 0.50; A@8: 32.00; A@9: 31.50; B@4: 48.00; B@30: 64.00
+
+K2n8 gemmL1x8x2: a C store every 64 ops; A 4 MB, B 16 MB, C 16 MB = 36 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 19.98 MB + d_C 15.02 MB = 35.00 MB
+  distance profile (MB, C counted; lines an op): A@7: 0.50; A@8: 32.00; A@9: 31.50; B@4: 48.00; B@34: 64.00
+
+K2n9 gemmL1x9x2: a C store every 64 ops; A 4 MB, B 18 MB, C 18 MB = 40 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 21.98 MB + d_C 17.02 MB = 39.00 MB
+  distance profile (MB, C counted; lines an op): A@7: 0.50; A@8: 32.00; A@9: 31.50; B@4: 48.00; B@38: 64.00
+
+K2n10 gemmL1x10x2: a C store every 64 ops; A 4 MB, B 20 MB, C 20 MB = 44 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 23.98 MB + d_C 19.02 MB = 43.00 MB
+  distance profile (MB, C counted; lines an op): A@7: 0.50; A@8: 32.00; A@9: 31.50; B@4: 48.00; B@42: 64.00
+
+K2n11 gemmL1x11x2: a C store every 64 ops; A 4 MB, B 22 MB, C 22 MB = 48 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 25.98 MB + d_C 21.02 MB = 47.00 MB
+  distance profile (MB, C counted; lines an op): A@7: 0.50; A@8: 32.00; A@9: 31.50; B@4: 48.00; B@46: 64.00
+
+K2n12 gemmL1x12x2: a C store every 64 ops; A 4 MB, B 24 MB, C 24 MB = 52 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 27.98 MB + d_C 23.02 MB = 51.00 MB
+  distance profile (MB, C counted; lines an op): A@7: 0.50; A@8: 32.00; A@9: 31.50; B@4: 48.00; B@50: 64.00
+
+K2n13 gemmL1x13x2: a C store every 64 ops; A 4 MB, B 26 MB, C 26 MB = 56 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  48.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 29.98 MB + d_C 25.02 MB = 55.00 MB
+  distance profile (MB, C counted; lines an op): A@7: 0.50; A@8: 32.00; A@9: 31.50; B@4: 48.00; B@54: 64.00
+
+K4n2 gemmL1x2x4: a C store every 128 ops; A 8 MB, B 8 MB, C 4 MB = 20 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 128.00 F   0.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3 128.00 F   0.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 15.98 MB + d_C 3.02 MB = 19.00 MB
+  distance profile (MB, C counted; lines an op): A@13: 0.25; A@14: 16.00; A@15: 16.00; A@16: 16.00; A@17: 15.75; B@8: 64.00; B@18: 64.00
+
+K4n3 gemmL1x3x4: a C store every 128 ops; A 8 MB, B 12 MB, C 6 MB = 26 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 128.00 F   0.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 19.98 MB + d_C 5.02 MB = 25.00 MB
+  distance profile (MB, C counted; lines an op): A@13: 0.25; A@14: 16.00; A@15: 16.00; A@16: 16.00; A@17: 15.75; B@8: 64.00; B@24: 64.00
+
+K4n4 gemmL1x4x4: a C store every 128 ops; A 8 MB, B 16 MB, C 8 MB = 32 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 128.00 F   0.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 23.98 MB + d_C 7.02 MB = 31.00 MB
+  distance profile (MB, C counted; lines an op): A@13: 0.25; A@14: 16.00; A@15: 16.00; A@16: 16.00; A@17: 15.75; B@8: 64.00; B@30: 64.00
+
+K4n5 gemmL1x5x4: a C store every 128 ops; A 8 MB, B 20 MB, C 10 MB = 38 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 27.98 MB + d_C 9.02 MB = 37.00 MB
+  distance profile (MB, C counted; lines an op): A@13: 0.25; A@14: 16.00; A@15: 16.00; A@16: 16.00; A@17: 15.75; B@8: 64.00; B@36: 64.00
+
+K4n6 gemmL1x6x4: a C store every 128 ops; A 8 MB, B 24 MB, C 12 MB = 44 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 31.98 MB + d_C 11.02 MB = 43.00 MB
+  distance profile (MB, C counted; lines an op): A@13: 0.25; A@14: 16.00; A@15: 16.00; A@16: 16.00; A@17: 15.75; B@8: 64.00; B@42: 64.00
+
+K4n7 gemmL1x7x4: a C store every 128 ops; A 8 MB, B 28 MB, C 14 MB = 50 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 35.98 MB + d_C 13.02 MB = 49.00 MB
+  distance profile (MB, C counted; lines an op): A@13: 0.25; A@14: 16.00; A@15: 16.00; A@16: 16.00; A@17: 15.75; B@8: 64.00; B@48: 64.00
+
+K4n8 gemmL1x8x4: a C store every 128 ops; A 8 MB, B 32 MB, C 16 MB = 56 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 39.98 MB + d_C 15.02 MB = 55.00 MB
+  distance profile (MB, C counted; lines an op): A@13: 0.25; A@14: 16.00; A@15: 16.00; A@16: 16.00; A@17: 15.75; B@8: 64.00; B@54: 64.00
+
+K6n1 gemmL1x1x6: a C store every 192 ops; A 12 MB, B 6 MB, C 2 MB = 20 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 128.00 F   0.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3 128.00 F   0.00
+  distance profile (MB, C counted; lines an op): A@19: 64.00; B@12: 128.00
+
+K6n2 gemmL1x2x6: a C store every 192 ops; A 12 MB, B 12 MB, C 4 MB = 28 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 128.00 F   0.00
+  strict LRU 24MB: A L3  42.83 F  21.17 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 23.98 MB + d_C 3.02 MB = 27.00 MB
+  distance profile (MB, C counted; lines an op): A@19: 0.17; A@20: 10.67; A@21: 10.67; A@22: 10.67; A@23: 10.67; A@24: 10.67; A@25: 10.50; B@12: 64.00; B@26: 64.00
+
+K6n3 gemmL1x3x6: a C store every 192 ops; A 12 MB, B 18 MB, C 6 MB = 36 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  strict LRU 24MB: A L3  42.83 F  21.17 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 29.98 MB + d_C 5.02 MB = 35.00 MB
+  distance profile (MB, C counted; lines an op): A@19: 0.17; A@20: 10.67; A@21: 10.67; A@22: 10.67; A@23: 10.67; A@24: 10.67; A@25: 10.50; B@12: 64.00; B@34: 64.00
+
+K6n4 gemmL1x4x6: a C store every 192 ops; A 12 MB, B 24 MB, C 8 MB = 44 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  strict LRU 24MB: A L3  42.83 F  21.17 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 35.98 MB + d_C 7.02 MB = 43.00 MB
+  distance profile (MB, C counted; lines an op): A@19: 0.17; A@20: 10.67; A@21: 10.67; A@22: 10.67; A@23: 10.67; A@24: 10.67; A@25: 10.50; B@12: 64.00; B@42: 64.00
+
+K6n5 gemmL1x5x6: a C store every 192 ops; A 12 MB, B 30 MB, C 10 MB = 52 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  strict LRU 24MB: A L3  42.83 F  21.17 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 41.98 MB + d_C 9.02 MB = 51.00 MB
+  distance profile (MB, C counted; lines an op): A@19: 0.17; A@20: 10.67; A@21: 10.67; A@22: 10.67; A@23: 10.67; A@24: 10.67; A@25: 10.50; B@12: 64.00; B@50: 64.00
+
+K6n6 gemmL1x6x6: a C store every 192 ops; A 12 MB, B 36 MB, C 12 MB = 60 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3  64.00 F  64.00
+  strict LRU 24MB: A L3  42.83 F  21.17 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 47.98 MB + d_C 11.02 MB = 59.00 MB
+  distance profile (MB, C counted; lines an op): A@19: 0.17; A@20: 10.67; A@21: 10.67; A@22: 10.67; A@23: 10.67; A@24: 10.67; A@25: 10.50; B@12: 64.00; B@58: 64.00
+
+L1 gemmL2x2x1: a C store every 32 ops; A 4 MB, B 2 MB, C 8 MB = 14 MB; L2 hits A 16.00 B 64.00 an op
+  strict LRU 32MB: A L3  48.00 F   0.00 | B L3  64.00 F   0.00
+  strict LRU 24MB: A L3  48.00 F   0.00 | B L3  64.00 F   0.00
+  distance profile (MB, C counted; lines an op): A@5: 16.00; A@11: 32.00; B@6: 1.00; B@7: 63.00
+  check against E146's desk split: reproduced
+
+L2 gemmL2x2x2: a C store every 64 ops; A 8 MB, B 4 MB, C 8 MB = 20 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 112.00 F   0.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3 112.00 F   0.00
+  distance profile (MB, C counted; lines an op): A@7: 0.25; A@8: 16.00; A@9: 15.75; A@17: 32.00; B@4: 48.00; B@10: 0.50; B@11: 32.00; B@12: 31.50
+  check against E146's desk split: reproduced
+
+L4 gemmL1x2x4: a C store every 128 ops; A 8 MB, B 8 MB, C 4 MB = 20 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 128.00 F   0.00
+  strict LRU 24MB: A L3  64.00 F   0.00 | B L3 128.00 F   0.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 15.98 MB + d_C 3.02 MB = 19.00 MB
+  distance profile (MB, C counted; lines an op): A@13: 0.25; A@14: 16.00; A@15: 16.00; A@16: 16.00; A@17: 15.75; B@8: 64.00; B@18: 64.00
+  check against E146's desk split: reproduced
+
+L8 gemmL1x1x8: a C store every 256 ops; A 16 MB, B 8 MB, C 2 MB = 26 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  64.00 F   0.00 | B L3 128.00 F   0.00
+  strict LRU 24MB: A L3   0.00 F  64.00 | B L3 128.00 F   0.00
+  B lines at 16 MB or more (C counted): 128.00 an op, mean d_AB 15.98 MB + d_C 1.02 MB = 17.00 MB
+  distance profile (MB, C counted; lines an op): A@25: 64.00; B@16: 128.00
+  check against E146's desk split: reproduced
+
+D1 gemmL4x8x1: a C store every 32 ops; A 8 MB, B 8 MB, C 64 MB = 80 MB; L2 hits A 28.00 B 64.00 an op
+  strict LRU 32MB: A L3  28.00 F   8.00 | B L3  64.00 F   0.00
+  strict LRU 24MB: A L3  28.00 F   8.00 | B L3   0.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 11.61 MB + d_C 15.02 MB = 26.62 MB
+  distance profile (MB, C counted; lines an op): A@5: 28.00; A@65: 8.00; B@24: 0.25; B@25: 15.75; B@26: 48.00
+  check against E146's desk split: reproduced
+
+D2 gemmL4x8x2: a C store every 64 ops; A 16 MB, B 16 MB, C 64 MB = 96 MB; L2 hits A 0.00 B 16.00 an op
+  strict LRU 32MB: A L3  56.00 F   8.00 | B L3  48.00 F  64.00
+  strict LRU 24MB: A L3  56.00 F   8.00 | B L3  48.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 23.23 MB + d_C 15.02 MB = 38.25 MB
+  distance profile (MB, C counted; lines an op): A@7: 0.44; A@8: 28.00; A@9: 27.56; A@81: 8.00; B@4: 48.00; B@34: 0.12; B@35: 8.00; B@36: 7.88; B@38: 48.00
+  check against E146's desk split: reproduced
+
+D4 gemmL4x8x4: a C store every 128 ops; A 32 MB, B 32 MB, C 64 MB = 128 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  56.00 F   8.00 | B L3  64.00 F  64.00
+  strict LRU 24MB: A L3  56.00 F   8.00 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 46.48 MB + d_C 15.02 MB = 61.50 MB
+  distance profile (MB, C counted; lines an op): A@13: 0.22; A@14: 14.00; A@15: 14.00; A@16: 14.00; A@17: 13.78; A@113: 8.00; B@8: 64.00; B@54: 0.06; B@55: 4.00; B@56: 4.00; B@57: 4.00; B@58: 3.94; B@62: 48.00
+  check against E146's desk split: reproduced
+
+D8 gemmL4x8x8: a C store every 256 ops; A 64 MB, B 64 MB, C 64 MB = 192 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  42.11 F  21.89 | B L3  64.00 F  64.00
+  strict LRU 24MB: A L3   0.00 F  64.00 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 128.00 an op, mean d_AB 54.48 MB + d_C 8.02 MB = 62.50 MB
+  distance profile (MB, C counted; lines an op): A@25: 0.11; A@26: 7.00; A@27: 7.00; A@28: 7.00; A@29: 7.00; A@30: 7.00; A@31: 7.00; A@32: 7.00; A@33: 6.89; A@177: 8.00; B@16: 64.00; B@94: 0.03; B@95: 2.00; B@96: 2.00; B@97: 2.00; B@98: 2.00; B@99: 2.00; B@100: 2.00; B@101: 2.00; B@102: 1.97; B@110: 48.00
+  check against E146's desk split: reproduced
+
+F6 gemmL3x4x6: a C store every 192 ops; A 36 MB, B 24 MB, C 24 MB = 84 MB; L2 hits A 0.00 B 0.00 an op
+  strict LRU 32MB: A L3  48.00 F  16.00 | B L3  64.00 F  64.00
+  strict LRU 24MB: A L3  32.12 F  31.88 | B L3  64.00 F  64.00
+  B lines at 16 MB or more (C counted): 64.00 an op, mean d_AB 43.48 MB + d_C 7.02 MB = 50.50 MB
+  distance profile (MB, C counted; lines an op): A@19: 0.12; A@20: 8.00; A@21: 8.00; A@22: 8.00; A@23: 8.00; A@24: 8.00; A@25: 7.88; A@77: 16.00; B@12: 64.00; B@42: 0.08; B@43: 5.33; B@44: 5.33; B@45: 5.33; B@46: 5.33; B@47: 5.33; B@48: 5.25; B@54: 32.00
+  check against E146's desk split: reproduced
+
+every E146 shape reproduced at 32 and 24 MB, L2 hits included; reuse_e158.json written

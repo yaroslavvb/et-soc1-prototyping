@@ -1,0 +1,32 @@
+# E158's dry run on the Intel (Tue 3 Nov 2026), before the registration's commit: tools/claims-v3/e158/queue_e158.py --dry with protocol-dry.json and the two dry stop-test protocols, on run_hpl.py's toy card (no device, no ssh); then reduce_e158.py on the session. The toy card's time per op is its own constant, so the verdicts are not readings: what this shows is that the smoke check, both stop-path checks, the 98 runs and the reducer run.
+queue rc 0
+{"t_ms": 1793708897203, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+{"t_ms": 1793708900244, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793708899336, "t_third_line_ms": 1793708899316, "launch": [1793708899039, 1793708899549], "trip_after_line_ms": 20, "launch_end_after_trip_ms": 213, "lines": 18}
+{"t_ms": 1793708900244, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+{"t_ms": 1793708902272, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793708900736, "t_first_line_ms": 1793708900684, "trip_after_line_ms": 52, "lines": 13}
+{"t_ms": 1793708902273, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+{"t_ms": 1793709400708, "zone": "PST", "kind": "s1_end", "rc": 0}
+{"t_ms": 1793709400709, "zone": "PST", "kind": "queue_end", "snapshot": {"tag": "end", "t_ms": 1793709400708, "zone": "PST"}, "card_free_ms": 1793709400709, "before_slot_end_s": 3063.3}
+reduce rc 0
+E158: 98 runs; 0 refused by the rule; config after every run: ['{"tdp_w": 65, "temp_threshold_c": 65}']; checks of C []; peaks {'board_max_w': 37.72, 'board_run': 's1/E-03-K4n5-fp16-zeros-r1', 'die_mean_max_c': 57, 'die_mean_run': 's1/A-05-K2n9-fp32-zeros-r1', 'die_high_max_c': 60, 'die_high_run': 's1/A-05-K2n9-fp32-zeros-r1', 'samples': 4614}
+per shape and format, every pass pooled: T at 600 and 800 MHz (launch means), X; the fit T = C/f + M (C cycles at the kernel's own clock)
+  D2.fp32     T600  0.0000 (n   0)  T800  0.6825 (n   18)  X  0.000 (None)  C     0.0 M  0.0000 span   0.0  cycles/op at >=790 MHz by pass {'pass1': 546.0, 'pass2': 546.0, 'pass3': 546.0}
+  D4.fp32     T600  0.0000 (n   0)  T800  0.6825 (n   18)  X  0.000 (None)  C     0.0 M  0.0000 span   0.0  cycles/op at >=790 MHz by pass {'pass1': 546.0, 'pass2': 546.0, 'pass3': 546.0}
+  F6.fp16     T600  0.0000 (n   0)  T800  0.6825 (n   18)  X  0.000 (None)  C     0.0 M  0.0000 span   0.0  cycles/op at >=790 MHz by pass {'pass1': 546.0, 'pass2': 546.0, 'pass3': 546.0}
+
+# queue.out, first and last lines
+04:27:42 PST {"t_ms": 1793708862179, "zone": "PST", "kind": "queue_start", "slot_start_ms": 1793708864000, "slot_end_ms": 1793712464000, "next_rest_ms": null, "python": "3.13.11", "sensors": false, "protocol": "<the Intel's clone>/tools/claims-v3/e158/protocol-dry.json"}
+04:27:44 PST {"t_ms": 1793708864007, "zone": "PST", "kind": "card_free", "waits": {}, "late_s": 0.0}
+04:27:44 PST {"t_ms": 1793708864008, "zone": "PST", "kind": "before_first_launch", "snapshot": {"tag": "start", "t_ms": 1793708864007, "zone": "PST"}, "history_rows": 0}
+04:27:44 PST {"t_ms": 1793708864008, "zone": "PST", "kind": "session_start", "name": "smoke", "cap_min": 3.0}
+04:28:17 PST {"t_ms": 1793708897197, "zone": "PST", "kind": "session_end", "name": "smoke", "rc": 0, "end": {"t_end_ms": 1793708896976, "exit": 0, "reason": "done", "card_min": 0.5}, "slot_stopped": false}
+04:28:17 PST {"t_ms": 1793708897203, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+04:28:17 PST {"t_ms": 1793708897203, "zone": "PST", "kind": "session_start", "name": "stoptest-board", "cap_min": 2.0}
+04:28:20 PST {"t_ms": 1793708900233, "zone": "PST", "kind": "session_end", "name": "stoptest-board", "rc": 4, "end": {"t_end_ms": 1793708899632, "exit": 4, "reason": "safety:board 35.1 W > 30 W on 3 samples", "card_min": 0.0}, "slot_stopped": false}
+...
+04:28:22 PST {"t_ms": 1793708902272, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793708900736, "t_first_line_ms": 1793708900684, "trip_after_line_ms": 52, "lines": 13}
+04:28:22 PST {"t_ms": 1793708902273, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+04:28:22 PST {"t_ms": 1793708902273, "zone": "PST", "kind": "session_start", "name": "s1", "cap_min": 40.0}
+04:36:40 PST {"t_ms": 1793709400708, "zone": "PST", "kind": "session_end", "name": "s1", "rc": 0, "end": {"t_end_ms": 1793709399837, "exit": 0, "reason": "done", "card_min": 8.3}, "slot_stopped": false}
+04:36:40 PST {"t_ms": 1793709400708, "zone": "PST", "kind": "s1_end", "rc": 0}
+04:36:40 PST {"t_ms": 1793709400709, "zone": "PST", "kind": "queue_end", "snapshot": {"tag": "end", "t_ms": 1793709400708, "zone": "PST"}, "card_free_ms": 1793709400709, "before_slot_end_s": 3063.3}
