@@ -39,8 +39,8 @@ checkerboard is again G1's worst kind (−37.7 W; 6.7 W rms without it).
 **The kinds' watts carry from one die to the other better than any model does.** The A100's own measured watts for each
 held-out kind, times one ratio per format and board (the A10G's random kind over the A100's, read on phase L), predict
 the A10G's held-out kinds to **3.0 W rms (4% of the span)**, the checkerboard to −0.09 W (T0, registered in A5 after
-the freeze and before phase H was read; no verdict). So most of G1's 11.2 W is the model's own error (its lag-1 pairing
-above all), not the change of die.
+the freeze and before phase H was read; no verdict). So most of G1's 11.2 W is the model's own error (the checkerboard,
+which its lag-1 pairing over-reads, above all), not the change of die.
 
 **Heat: the A10G's die rises 0.142–0.146 °C per board W at steady state** (each board's fit; 0.144 pooled), with poles
 at ≤ 0.2 s (the grid's edge) and 32 s; its leakage share of y is small (λr₁ = 0.034, against the A100's 0.131), so
@@ -224,8 +224,9 @@ A10G's price per operand-bit flip at one multiply-add, **about 1.4 times the A10
 0.131). **Tested again, and confirmed on a second die:** the structure (C1, 11 of 11 verdicts as on the A100, R4b's
 failure of the lag-1 pairing included). **What limits prediction now is the model's form, not the die:** the A100's
 own measured watts per kind, carried by one ratio per format, predict the A10G to 3.0 W rms (4%), where the best frozen
-model reads 5.2 W and the refitted G1 8.3 W (F5 fails: refitting G1 on the new die beats freezing it). For a new GPU of
-a measured generation, the cheapest good predictor is a few anchor kinds on it times the measured GPU's watts per kind.
+model reads 5.2 W and the refitted G1 8.3 W (F5 fails: refitting G1 on the new die beats freezing it). On this pair of dies,
+a few anchor kinds measured on the new board, times the measured GPU's watts per kind, predict better than any frozen
+model (one pair of one generation: whether it holds across generations is open).
 
 **Heat, measured for the first time on an A10G:** die rise **0.142–0.146 °C per board W** (fits; 0.125–0.151 by
 model-free 60 s steps), poles ≤ 0.2 s and 32 s. A new kind's 30 s rise: **before**, no A10G model; **after**, 1.21 °C
