@@ -1,0 +1,99 @@
+E144b corrections after verification: numbers (post hoc, desk only; no verdict comes from this file)
+frozen inputs at c2f9920d verified (7 files); Q138(t)'s score_e144, fit_q138t and heat_q138t imported as committed
+
+C1. Die rise per board W, by kind and session (aifoundry2 card 0; score_e144.per_board_w's formula; the rest anchor is the
+    whole-degree die over the REST's last 120 s; '+-' is that anchor's +-0.5 C over the window's board rise)
+  E111  W1B int8 -1s     1597 s  rest die 46.00 (readings {46: 600}); from rest
+        last 300 s : 0.7096 +-0.0274 C/W (12.97 C over 18.27 W), 791.9 MHz, 600 MHz share 0.039; the frozen chain's plateau error +0.729 C
+        600-900 s  : 0.6854 +-0.0280 C/W (12.25 C over 17.87 W), 790.0 MHz; the frozen chain's plateau error over 600-900 s +0.336 C  (in sample: the chain was fitted on E111 and E133)
+  E111  W2  fp32 randn   1630 s  rest die 45.00 (readings {45: 600}); warm: it starts 1134 s after the REST, after the step's other runs
+        last 300 s : 0.7016 +-0.0158 C/W (22.20 C over 31.64 W), 600.0 MHz, 600 MHz share 1.000; the frozen chain's plateau error +0.994 C
+        600-900 s  : 0.6839 +-0.0156 C/W (21.99 C over 32.15 W), 600.0 MHz; the frozen chain's plateau error over 600-900 s +0.673 C  (in sample: the chain was fitted on E111 and E133)
+  E133  W1B int8 -1s     1596 s  rest die 44.00 (readings {44: 600}); from rest
+        last 300 s : 0.7134 +-0.0290 C/W (12.31 C over 17.25 W), 788.7 MHz, 600 MHz share 0.053; the frozen chain's plateau error +0.711 C
+        600-900 s  : 0.6889 +-0.0281 C/W (12.28 C over 17.83 W), 796.9 MHz; the frozen chain's plateau error over 600-900 s +0.509 C  (in sample: the chain was fitted on E111 and E133)
+  E133  W2  fp32 randn   1624 s  rest die 44.00 (readings {44: 600}); warm: it starts 1098 s after the REST, after the step's other runs
+        last 300 s : 0.6625 +-0.0152 C/W (21.82 C over 32.93 W), 612.8 MHz, 600 MHz share 0.887; the frozen chain's plateau error -0.238 C
+        600-900 s  : 0.6530 +-0.0149 C/W (21.90 C over 33.54 W), 613.3 MHz; the frozen chain's plateau error over 600-900 s -0.341 C  (in sample: the chain was fitted on E111 and E133)
+  E144b G1  int8 -1s      903 s  rest die 46.00 (readings {46: 600}); from rest
+        last 300 s : 0.7111 +-0.0275 C/W (12.92 C over 18.17 W), 792.8 MHz, 600 MHz share 0.035; the frozen chain's plateau error +0.724 C
+        600-900 s  : 0.7067 +-0.0273 C/W (12.95 C over 18.33 W), 794.6 MHz; the frozen chain's plateau error over 600-900 s +0.728 C  (blind)
+  E144b G2  fp32 randn    913 s  rest die 46.00 (readings {46: 600}); from rest
+        last 300 s : 0.6745 +-0.0158 C/W (21.29 C over 31.56 W), 600.0 MHz, 600 MHz share 1.000; the frozen chain's plateau error +0.123 C
+        600-900 s  : 0.6656 +-0.0156 C/W (21.35 C over 32.08 W), 600.0 MHz; the frozen chain's plateau error over 600-900 s +0.122 C  (blind)
+
+  int8 -1s minus fp32 randn, per session (each with the two anchors' quantization added: +-(0.5/dP_int8 + 0.5/dP_fp32))
+  E111  last 300 s +0.0079 +-0.0432 (range -0.035 to +0.051); 600-900 s +0.0015 +-0.0435 (range -0.042 to +0.045); fp32's regime over its last 300 s: floor
+  E133  last 300 s +0.0509 +-0.0442 (range +0.007 to +0.095); 600-900 s +0.0359 +-0.0430 (range -0.007 to +0.079); fp32's regime over its last 300 s: trip
+  E144b last 300 s +0.0366 +-0.0434 (range -0.007 to +0.080); 600-900 s +0.0412 +-0.0429 (range -0.002 to +0.084); fp32's regime over its last 300 s: floor
+
+  the frozen chain's single R (model-q138t.json a2): 0.6630 C per board W
+  int8 -1s plateau error, the frozen chain (last 300 s): E111 +0.729, E133 +0.711, E144b +0.724; over 600-900 s: E111 +0.336, E133 +0.509, E144b +0.728
+  fp32 randn plateau error, the frozen chain (last 300 s): E111 +0.994, E133 -0.238, E144b +0.123; over 600-900 s: E111 +0.673, E133 -0.341, E144b +0.122
+  int8 -1s per board W, last 300 s: E111 0.7096, E133 0.7134, E144b 0.7111; 600-900 s: E111 0.6854, E133 0.6889, E144b 0.7067
+  int8 -1s per board W over its chain's 0.663: last 300 s E111 x1.070, E133 x1.076, E144b x1.073
+
+C2. The rest anchor's quantization: E144b scored by the frozen score_a2, the anchor window's die moved by delta
+    (the rest die read as 46.00 + delta C; every REST sample read one whole degree; the holds' own samples are left as read)
+  G1: raw die readings over the anchor window {46: 1199} (n 1199); over the last 300 s {56: 30, 57: 19, 58: 106, 59: 2843} (mean 58.922)
+  G2: raw die readings over the anchor window {46: 1199} (n 1199); over the last 300 s {62: 5, 63: 23, 64: 15, 65: 10, 66: 11, 67: 1873, 68: 1061} (mean 67.290)
+
+  delta  | G1 (a) rms, plateau, verdict | G1 (b) err, verdict | G1 (c) per W, verdict | G1 t63 x open, x A1.8 | G2 (a) rms, plateau, verdict | G2 (b) predicted, err, regime predicted, verdict
+  -0.50  | 1.235 +1.224 INCONCLUSIVE | +1.590 INCONCLUSIVE | 0.7386 PASS | x1.301 x0.849 (PASS) | 0.633 +0.623 PASS         | 66.993 +0.295 floor PASS (G2 per W 0.6904)
+  -0.25  | 0.995 +0.974 PASS         | +1.340 INCONCLUSIVE | 0.7248 PASS | x1.587 x1.036 (PASS) | 0.454 +0.373 PASS         | 67.243 +0.045 floor PASS (G2 per W 0.6824)
+  +0.00  | 0.762 +0.724 PASS         | +1.090 PASS         | 0.7111 PASS | x1.595 x1.041 (PASS) | 0.369 +0.123 PASS         | 67.493 -0.205 floor PASS (G2 per W 0.6745)
+  +0.25  | 0.544 +0.474 PASS         | +0.840 PASS         | 0.6973 PASS | x1.607 x1.049 (PASS) | 0.438 -0.127 PASS         | 67.743 -0.455 floor PASS (G2 per W 0.6666)
+  +0.50  | 0.370 +0.224 PASS         | +0.590 PASS         | 0.6836 PASS | x1.615 x1.054 (PASS) | 0.610 -0.377 PASS         | 67.993 -0.705 floor INCONCLUSIVE (G2 per W 0.6587)
+
+  the delta at which a PASS edge is reached inside [-0.5, +0.5] C (None: not inside the range)
+    G1 (a) rms reaches its PASS edge 1.20: -0.464 C
+    G1 (a) plateau error reaches +1.30: None
+    G1 (b) error reaches +1.30: -0.210 C
+    G1 (c) per W reaches 0.74: None
+    G1 t63 against the open loop's 49.6 s reaches x1.33 (its PASS edge): -0.455 C
+    G2 (a) rms reaches 1.20: None
+    G2 (b) error reaches -0.60: +0.395 C
+    G2 (b) error reaches +0.60: None
+  G2's regime edge: the rest die where max(rest + 21.49, 65.9) changes regime is 44.41 C, 1.59 C under the 46.00 reading
+
+  Before and after at one hold length. Before = Q138(t)'s two session-out chains (fit_q138t's folds: fit on one day, score the
+  other); after = the frozen chain on E144b, blind. The four long holds whole (as cv-q138t.json has them), then cut post hoc at
+  E144b's lengths (int8 -1s at 902.8 s, fp32 randn at 912.6 s): rms over the hold, plateau error over its last 300 s
+    fit E111, predict E133: R_total 0.6700 (cv-q138t.json 0.6700)
+      E133-W2   int8 -1s      339 s whole: rms 0.437 (cv-q138t.json 0.437), plateau +0.215 | shorter than E144b's holds: not cut
+      E133-W2   fp32 randn   1624 s whole: rms 0.567 (cv-q138t.json 0.567), plateau -0.478 | cut at 913 s: rms 0.630, plateau -0.584
+      E133-W1B  int8 -1s     1596 s whole: rms 0.643 (cv-q138t.json 0.643), plateau +0.591 | cut at 903 s: rms 0.417, plateau +0.386
+    fit E133, predict E111: R_total 0.6577 (cv-q138t.json 0.6577)
+      E111-W2   int8 -1s      345 s whole: rms 1.164 (cv-q138t.json 1.164), plateau +1.096 | shorter than E144b's holds: not cut
+      E111-W2   fp32 randn   1630 s whole: rms 1.058 (cv-q138t.json 1.058), plateau +1.162 | cut at 913 s: rms 1.066, plateau +0.859
+      E111-W1B  int8 -1s     1597 s whole: rms 0.868 (cv-q138t.json 0.868), plateau +0.833 | cut at 903 s: rms 0.898, plateau +0.458
+    the four long holds, session-out: whole rms 0.567-1.058 (mean 0.784, holds 1596-1630 s); cut to E144b's lengths 0.417-1.066 (mean 0.753)
+      int8 -1s: cut rms E133-W1B 0.417 (plateau +0.386), E111-W1B 0.898 (plateau +0.458)
+      fp32 randn: cut rms E133-W2 0.630 (plateau -0.584), E111-W2 1.066 (plateau +0.859)
+    all six holds as committed (two of them the 339-345 s warm probes): mean 0.789 (A1 A1_7 means_over_six_holds 0.789)
+    after (E144b, blind, the frozen chain): G1 int8 -1s 902.8 s rms 0.762, G2 fp32 randn 912.6 s rms 0.369
+
+C3. The time bases of the clock readings (G1, G2), and G2's clock (raw 10 Hz rows of the hold file; sp.board_avg_w is the SP's running board average)
+  G1: the hold file's first sampler line comes 1.277 s before the first sparsity_host process starts (its first kernel launch 0.137 s after that); posthoc.txt's times count from that first line
+    results.json's first_step_down counts from the first sample over 30 W, 0.526 s after the first process started; its 24.7 s sample (25.24 s after the first process, 600 MHz, die 51) is inside process 3, 0.038 s after it started and before its first kernel launch (0.138 s after its start): a process boundary
+  G2: the hold file's first sampler line comes 1.278 s before the first sparsity_host process starts (its first kernel launch 0.140 s after that); posthoc.txt's times count from that first line
+    results.json's first_step_down counts from the first sample over 30 W, 0.324 s after the first process started; its 0.0 s sample (0.32 s after the first process, 600 MHz, die 47) is inside process 0, 0.324 s after it started and inside a kernel launch
+    (every time below counts from the first sparsity_host process's start)
+    first sample >= 790 MHz 1.12 s after the first process (posthoc.txt: 2.4 s from the first line)
+    first sample under 790 MHz after it: 2.33 s, 700 MHz, die 52 C, board 80.15 W, the SP's running average 65.54 W (its highest from the first 800 MHz sample to here 65.54 W; the TDP is 65 W, the die threshold 65 C)
+    first sample at or under 610 MHz after it: 2.53 s (posthoc.txt: 3.8 s from the first line)
+    the die's first reading of 66: 58.27 s; the last sample above 610 MHz: 128.63 s (700 MHz), 70.4 s after the die's first 66
+    from the first step down to the last sample above 610 MHz: 800 MHz 0.146, 700 MHz 0.285, 600 MHz 0.569 of samples
+    samples >= 790 MHz in the whole hold: 196 (19.6 s at 10 Hz)
+    board peak 87.98 W at 61.57 s, 700 MHz, 3.3 s after the die's first 66
+
+C5. Commands, counted from the records (each run_hpl query set = one ettelem sptrace, one residency read answered unsent, one ettelem config)
+  SMOKE           query sets  6 (config 6, sptrace 6), residency answered unsent 6, queue config reads 2, et-lab-manifest 1
+  STOPTEST-DIE    query sets  1 (config 1, sptrace 1), residency answered unsent 1, queue config reads 2, et-lab-manifest 1
+  STOPTEST-BOARD  query sets  1 (config 1, sptrace 1), residency answered unsent 1, queue config reads 2, et-lab-manifest 1
+  G1              query sets  4 (config 4, sptrace 4), residency answered unsent 4, queue config reads 2, et-lab-manifest 1
+  END             query sets  3 (config 3, sptrace 3), residency answered unsent 3, queue config reads 2, et-lab-manifest 1
+  G2              query sets  4 (config 4, sptrace 4), residency answered unsent 4, queue config reads 2, et-lab-manifest 1
+  END2            query sets  3 (config 3, sptrace 3), residency answered unsent 3, queue config reads 2, et-lab-manifest 1
+  total: {"query_sets": 22, "config_in_query_sets": 22, "sptrace": 22, "residency_not_sent": 22, "queue_config": 14, "manifest": 7, "session_end_config": 1, "ettelem_config_all": 37}
+  et-lab-manifest outputs: 7 (one per run_hpl session, run_hpl.py:824); tools/lab/et-lab-manifest sha256 6fbb4e103c3dffa4
