@@ -1,0 +1,15 @@
+Q139(q) frozen G3 predictions for E159 (aifoundry2, its own governor). Nominal starts: 'rest' (46.0 C) and 'gate57' (after a governed fp32 hold, idle to 57 C).
+The registered primary is the mechanical G3 from each hold's own measured start (score); these are the same model at nominal starts.
+  H1 gemmL2x4x8: M x N x K fp32 [2048, 2048, 4096], 80 MB with C, a C store every 256 ops; lines an op that miss the L2: L3 100.094, fresh 91.906
+  H2 gemmL4x2x4: M x N x K fp32 [4096, 1024, 2048], 56 MB with C, a C store every 128 ops; lines an op that miss the L2: L3 160.0, fresh 32.0
+  H3 gemmL1x2x2: M x N x K fp32 [1024, 1024, 1024], 12 MB with C, a C store every 64 ops; lines an op that miss the L2: L3 176.0, fresh 0.0
+cell                 P0 600/700/800 W   peak | G3 rest: MHz      W   die | G3 gate57: MHz      W   die | Q138t-const gate57 |  E136 law gate57
+H1-fp32-randn       41.0/ 47.6/ 57.1   65.6 |        799.2  58.83 64.18 |          748.8  53.09 65.49 |  722.3  53.7  65.9 | 799.8  57.1  63.7
+H1-int8-full        32.6/ 37.2/ 44.6   53.1 |        800.0  45.79 57.73 |          800.0  44.99 60.69 |  800.0  46.6  61.5 | 800.0  44.6  58.5
+H1-fp32-zeros       28.7/ 32.2/ 38.5   47.0 |        800.0  39.30 54.53 |          800.0  38.50 57.50 |  800.0  38.8  57.7 | 800.0  38.5  56.0
+H2-fp32-randn       44.4/ 52.0/ 62.6   71.1 |        741.0  58.31 65.45 |          697.4  52.79 65.49 |  666.0  53.5  65.9 | 781.3  62.1  65.5
+H2-int8-full        32.8/ 37.6/ 45.2   53.7 |        800.0  46.36 58.00 |          800.0  45.56 61.03 |  800.0  47.3  61.9 | 800.0  45.2  58.8
+H2-fp32-zeros       28.5/ 32.0/ 38.2   46.7 |        800.0  39.07 54.41 |          800.0  38.27 57.44 |  800.0  38.5  57.6 | 800.0  38.2  55.9
+H3-fp32-randn       47.5/ 56.2/ 68.1   76.6 |        683.9  56.99 65.49 |          649.4  52.74 65.50 |  622.2  53.4  65.9 | 738.6  62.1  65.5
+H3-int8-full        33.2/ 38.2/ 46.0   54.5 |        800.0  47.22 58.43 |          800.0  46.43 61.47 |  800.0  48.4  62.4 | 800.0  46.0  59.1
+H3-fp32-zeros       28.3/ 31.9/ 38.1   46.6 |        800.0  38.95 54.35 |          800.0  38.16 57.39 |  800.0  38.4  57.6 | 800.0  38.1  55.8
