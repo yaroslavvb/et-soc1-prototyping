@@ -1,0 +1,490 @@
+{
+ "answers": "https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open item 6, its tail (the gate's price per flip, its linearity); Q138's final critic, open rank 12",
+ "date": "2026-11-03",
+ "experiment": "E152 (Q139)",
+ "generator": "tools/claims-v3/e152/make_e152.py",
+ "smoke": [
+  "anchor_pi",
+  "fp32.gd0",
+  "fp32.gd1a",
+  "fp32.gd8",
+  "fp32.q_chk",
+  "fp32.zeros",
+  "fp32.randn"
+ ],
+ "stoptest": [
+  "fp32.gd0"
+ ],
+ "tiles": {
+  "fp32.gd0": {
+   "bytes": 2048,
+   "family": "ladder",
+   "file": "tools/claims-v3/e152/tiles/fp32/gd0.bin",
+   "kind": "gd0",
+   "lanes_switching": 0,
+   "rule": "no lane switches inside a line: L on lanes 0,1,4,5 in B lines 0-7 and on 2,3,6,7 in lines 8-15 (each lane live in half the micro-ops, flipping twice an op at the half boundaries); four live in every micro-op",
+   "sha256": "3d7d91ca6903101e96b3c2103cf9225bc989ab1003a3c10455e35bc4b218b1c7",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "b3a287157a6aa8ab57cbb66c23c9d774e4c04a05248f3069edaba29f2251acc7",
+   "stats": {
+    "a_bus_bits_per_op_x8": 0,
+    "b_bus_bits_per_op": 4096,
+    "boundaries_with_a_flip": 2,
+    "flips_above_gd0": 0,
+    "gate_flips_per_op": 16,
+    "gated_lane_frac": 0.5,
+    "kinds_bus_bits_per_op": 4096,
+    "live_frac_by_lane": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ],
+    "live_lanes_0_3_per_microop": [
+     2
+    ],
+    "live_lanes_mean": 4.0,
+    "live_lanes_per_microop": [
+     4
+    ],
+    "microops_all_off": 0,
+    "microops_per_op": 512,
+    "zero_words_a": 0,
+    "zero_words_b": 128
+   },
+   "type": "fp32"
+  },
+  "fp32.gd1a": {
+   "bytes": 2048,
+   "family": "ladder",
+   "file": "tools/claims-v3/e152/tiles/fp32/gd1a.bin",
+   "kind": "gd1a",
+   "lanes_switching": 1,
+   "rule": "one lane switching: lane 0 live on h=0 only (B 0x1 / 0); L on lanes 1,4,5,6 in lines 0-7 and on 2,3,7 in lines 8-15; live count 5/4 in lines 0-7 and 4/3 in lines 8-15 (average 4)",
+   "sha256": "6133b7f990d54880ae8d4c01d31f9a31dbd68ee109fa74616d3455c9290a6434",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "70084266005ccbe15a5241f40b3463c072ec7d846295cc8f0715ce4e513ffccb",
+   "stats": {
+    "a_bus_bits_per_op_x8": 0,
+    "b_bus_bits_per_op": 4096,
+    "boundaries_with_a_flip": 512,
+    "flips_above_gd0": 510,
+    "gate_flips_per_op": 526,
+    "gated_lane_frac": 0.5,
+    "kinds_bus_bits_per_op": 4096,
+    "live_frac_by_lane": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ],
+    "live_lanes_0_3_per_microop": [
+     1,
+     2,
+     3
+    ],
+    "live_lanes_mean": 4.0,
+    "live_lanes_per_microop": [
+     3,
+     4,
+     5
+    ],
+    "microops_all_off": 0,
+    "microops_per_op": 512,
+    "zero_words_a": 0,
+    "zero_words_b": 128
+   },
+   "type": "fp32"
+  },
+  "fp32.gd1b": {
+   "bytes": 2048,
+   "family": "ladder",
+   "file": "tools/claims-v3/e152/tiles/fp32/gd1b.bin",
+   "kind": "gd1b",
+   "lanes_switching": 1,
+   "rule": "gd1a mirrored (lane l -> 7 - l): lane 7 switching",
+   "sha256": "56cafcd25f521af259ad38e52aba00cd67eb1e387ed55fd2ad0d908aee5d221a",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "9b9798375790c57b02a211aeaa94dfdba4ffa0ac367a4895db5cbf009bd1c5ca",
+   "stats": {
+    "a_bus_bits_per_op_x8": 0,
+    "b_bus_bits_per_op": 4096,
+    "boundaries_with_a_flip": 512,
+    "flips_above_gd0": 510,
+    "gate_flips_per_op": 526,
+    "gated_lane_frac": 0.5,
+    "kinds_bus_bits_per_op": 4096,
+    "live_frac_by_lane": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ],
+    "live_lanes_0_3_per_microop": [
+     1,
+     3
+    ],
+    "live_lanes_mean": 4.0,
+    "live_lanes_per_microop": [
+     3,
+     4,
+     5
+    ],
+    "microops_all_off": 0,
+    "microops_per_op": 512,
+    "zero_words_a": 0,
+    "zero_words_b": 128
+   },
+   "type": "fp32"
+  },
+  "fp32.gd1h": {
+   "bytes": 2048,
+   "family": "ladder",
+   "file": "tools/claims-v3/e152/tiles/fp32/gd1h.bin",
+   "kind": "gd1h",
+   "lanes_switching": 1,
+   "rule": "two lanes switching in half the lines: lanes 0 (h=0) and 1 (h=1) in lines 0-7, L on 2,4,5; in lines 8-11 lane 0 and in 12-15 lane 1 steady live, with L on 3,6,7: the single-lane dose at four live in every micro-op",
+   "sha256": "f3807f7e72fea0d5690ab68f77a2ad97cfceceb1914dfacb6835b3df0d3c41e6",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "0e0d0040b51fad62add1627ba15ffc3d056e37fd0ab35c2b7df5b471cc14438f",
+   "stats": {
+    "a_bus_bits_per_op_x8": 0,
+    "b_bus_bits_per_op": 4096,
+    "boundaries_with_a_flip": 258,
+    "flips_above_gd0": 512,
+    "gate_flips_per_op": 528,
+    "gated_lane_frac": 0.5,
+    "kinds_bus_bits_per_op": 4096,
+    "live_frac_by_lane": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ],
+    "live_lanes_0_3_per_microop": [
+     2
+    ],
+    "live_lanes_mean": 4.0,
+    "live_lanes_per_microop": [
+     4
+    ],
+    "microops_all_off": 0,
+    "microops_per_op": 512,
+    "zero_words_a": 0,
+    "zero_words_b": 128
+   },
+   "type": "fp32"
+  },
+  "fp32.gd2a": {
+   "bytes": 2048,
+   "family": "ladder",
+   "file": "tools/claims-v3/e152/tiles/fp32/gd2a.bin",
+   "kind": "gd2a",
+   "lanes_switching": 2,
+   "rule": "two lanes switching: lane 0 live on h=0, lane 1 on h=1; L on 2,4,5 in lines 0-7 and on 3,6,7 in 8-15",
+   "sha256": "7802275df2ed01544bfe335bca26a81d4f6c985c133c86925280dc84bd7da87a",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "6f456ddfd80b2549036de5be2fba5a4ea7ca93f4923455051c58fab509b5b41e",
+   "stats": {
+    "a_bus_bits_per_op_x8": 0,
+    "b_bus_bits_per_op": 4096,
+    "boundaries_with_a_flip": 512,
+    "flips_above_gd0": 1020,
+    "gate_flips_per_op": 1036,
+    "gated_lane_frac": 0.5,
+    "kinds_bus_bits_per_op": 4096,
+    "live_frac_by_lane": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ],
+    "live_lanes_0_3_per_microop": [
+     2
+    ],
+    "live_lanes_mean": 4.0,
+    "live_lanes_per_microop": [
+     4
+    ],
+    "microops_all_off": 0,
+    "microops_per_op": 512,
+    "zero_words_a": 0,
+    "zero_words_b": 128
+   },
+   "type": "fp32"
+  },
+  "fp32.gd2b": {
+   "bytes": 2048,
+   "family": "ladder",
+   "file": "tools/claims-v3/e152/tiles/fp32/gd2b.bin",
+   "kind": "gd2b",
+   "lanes_switching": 2,
+   "rule": "gd2a mirrored: lanes 7 (h=0) and 6 (h=1) switching",
+   "sha256": "3d16553474ee1a5c4d01f1f5a15014c315ff5b37ad96403a802ff0c09dd6e5fe",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "800693ab6ad868ed154635f856c82aaef3dda3b670144cfa3244d8231f4b1fd7",
+   "stats": {
+    "a_bus_bits_per_op_x8": 0,
+    "b_bus_bits_per_op": 4096,
+    "boundaries_with_a_flip": 512,
+    "flips_above_gd0": 1020,
+    "gate_flips_per_op": 1036,
+    "gated_lane_frac": 0.5,
+    "kinds_bus_bits_per_op": 4096,
+    "live_frac_by_lane": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ],
+    "live_lanes_0_3_per_microop": [
+     2
+    ],
+    "live_lanes_mean": 4.0,
+    "live_lanes_per_microop": [
+     4
+    ],
+    "microops_all_off": 0,
+    "microops_per_op": 512,
+    "zero_words_a": 0,
+    "zero_words_b": 128
+   },
+   "type": "fp32"
+  },
+  "fp32.gd4a": {
+   "bytes": 2048,
+   "family": "ladder",
+   "file": "tools/claims-v3/e152/tiles/fp32/gd4a.bin",
+   "kind": "gd4a",
+   "lanes_switching": 4,
+   "rule": "four lanes switching: lanes 0,4 live on h=0, 1,5 on h=1; L on 2,6 in lines 0-7 and on 3,7 in 8-15",
+   "sha256": "414cad6f3e4afef5345ca47c70965a7b3aabb919a4f8a44bff25139f667fafe8",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "588d33e68c97782743653bab8e5bd6411e6f4f906ed740e2053c69bbdf00197f",
+   "stats": {
+    "a_bus_bits_per_op_x8": 0,
+    "b_bus_bits_per_op": 4096,
+    "boundaries_with_a_flip": 512,
+    "flips_above_gd0": 2040,
+    "gate_flips_per_op": 2056,
+    "gated_lane_frac": 0.5,
+    "kinds_bus_bits_per_op": 4096,
+    "live_frac_by_lane": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ],
+    "live_lanes_0_3_per_microop": [
+     2
+    ],
+    "live_lanes_mean": 4.0,
+    "live_lanes_per_microop": [
+     4
+    ],
+    "microops_all_off": 0,
+    "microops_per_op": 512,
+    "zero_words_a": 0,
+    "zero_words_b": 128
+   },
+   "type": "fp32"
+  },
+  "fp32.gd4b": {
+   "bytes": 2048,
+   "family": "ladder",
+   "file": "tools/claims-v3/e152/tiles/fp32/gd4b.bin",
+   "kind": "gd4b",
+   "lanes_switching": 4,
+   "rule": "gd4a mirrored: lanes 7,3 (h=0) and 6,2 (h=1) switching",
+   "sha256": "e4bfb5e09ab16af2f70b82b9ceb78e890cd00241f6794a4dfb03d8814f116999",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "1b207f51ecfbaae8aeb3c4de7e5da3895aa6e7a34e24b7ca91955e25df18026e",
+   "stats": {
+    "a_bus_bits_per_op_x8": 0,
+    "b_bus_bits_per_op": 4096,
+    "boundaries_with_a_flip": 512,
+    "flips_above_gd0": 2040,
+    "gate_flips_per_op": 2056,
+    "gated_lane_frac": 0.5,
+    "kinds_bus_bits_per_op": 4096,
+    "live_frac_by_lane": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ],
+    "live_lanes_0_3_per_microop": [
+     2
+    ],
+    "live_lanes_mean": 4.0,
+    "live_lanes_per_microop": [
+     4
+    ],
+    "microops_all_off": 0,
+    "microops_per_op": 512,
+    "zero_words_a": 0,
+    "zero_words_b": 128
+   },
+   "type": "fp32"
+  },
+  "fp32.gd8": {
+   "bytes": 2048,
+   "family": "ladder",
+   "file": "tools/claims-v3/e152/tiles/fp32/gd8.bin",
+   "kind": "gd8",
+   "lanes_switching": 8,
+   "rule": "every lane switching every cycle: lanes 0,1,4,5 live on h=0 and 2,3,6,7 on h=1; four live in every micro-op, two of them lanes 0-3",
+   "sha256": "75d4e61294587d675945555dbb9e80a64306ca9dee64c8ef1b2e3ea0044eff6a",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "43401f63e86a33c1138d66143871430996d1f9a4ab4413bf13bfd043b71ec8c1",
+   "stats": {
+    "a_bus_bits_per_op_x8": 0,
+    "b_bus_bits_per_op": 4096,
+    "boundaries_with_a_flip": 512,
+    "flips_above_gd0": 4080,
+    "gate_flips_per_op": 4096,
+    "gated_lane_frac": 0.5,
+    "kinds_bus_bits_per_op": 4096,
+    "live_frac_by_lane": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ],
+    "live_lanes_0_3_per_microop": [
+     2
+    ],
+    "live_lanes_mean": 4.0,
+    "live_lanes_per_microop": [
+     4
+    ],
+    "microops_all_off": 0,
+    "microops_per_op": 512,
+    "zero_words_a": 0,
+    "zero_words_b": 128
+   },
+   "type": "fp32"
+  },
+  "fp32.q_chk": {
+   "bytes": 2048,
+   "family": "bridge",
+   "file": "tools/claims-v3/e127/tiles/fp32/q_chk.bin",
+   "kind": "q_chk",
+   "lanes_switching": 8,
+   "rule": "E127's tile, byte for byte (tools/claims-v3/e127/tiles/fp32/q_chk.bin)",
+   "sha256": "b038cd64953cdc86c5d08f85d061d9d7dbc547136197c7c873739c58110809c4",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "aabfe66e7a870bcb642c8c795e394d0b99a24e3c9681d51120fc16a16f4b01c0",
+   "stats": {
+    "a_bus_bits_per_op_x8": 0,
+    "b_bus_bits_per_op": 4096,
+    "boundaries_with_a_flip": 512,
+    "flips_above_gd0": 4080,
+    "gate_flips_per_op": 4096,
+    "gated_lane_frac": 0.5,
+    "kinds_bus_bits_per_op": 4096,
+    "live_frac_by_lane": [
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5,
+     0.5
+    ],
+    "live_lanes_0_3_per_microop": [
+     0,
+     4
+    ],
+    "live_lanes_mean": 4.0,
+    "live_lanes_per_microop": [
+     4
+    ],
+    "microops_all_off": 0,
+    "microops_per_op": 512,
+    "zero_words_a": 0,
+    "zero_words_b": 128
+   },
+   "type": "fp32"
+  },
+  "fp32.q_steady": {
+   "bytes": 2048,
+   "family": "bridge",
+   "file": "tools/claims-v3/e127/tiles/fp32/q_steady.bin",
+   "kind": "q_steady",
+   "lanes_switching": 0,
+   "rule": "E127's tile, byte for byte (tools/claims-v3/e127/tiles/fp32/q_steady.bin)",
+   "sha256": "6c5ccd2ffe968fd8ab51b39f5b0ebe487024409e6b3eb41f71963fd18f86475f",
+   "sha256_a": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "sha256_b": "744174fcf70b111d320a3f3c56326b95619fcb555db923e32d27d4ab69769c04",
+   "stats": {
+    "a_bus_bits_per_op_x8": 0,
+    "b_bus_bits_per_op": 4096,
+    "boundaries_with_a_flip": 0,
+    "flips_above_gd0": -16,
+    "gate_flips_per_op": 0,
+    "gated_lane_frac": 0.5,
+    "kinds_bus_bits_per_op": 4096,
+    "live_frac_by_lane": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "live_lanes_0_3_per_microop": [
+     0
+    ],
+    "live_lanes_mean": 4.0,
+    "live_lanes_per_microop": [
+     4
+    ],
+    "microops_all_off": 0,
+    "microops_per_op": 512,
+    "zero_words_a": 0,
+    "zero_words_b": 128
+   },
+   "type": "fp32"
+  }
+ }
+}
