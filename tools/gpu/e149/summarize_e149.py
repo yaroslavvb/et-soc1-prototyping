@@ -59,7 +59,7 @@ def main(D):
       + ", ".join(cell(f"fp16.mb{b}") for b in (0, 5, 9)) + ". One-sided bf16 mantissa k = 3 A / B: "
       + f"{cell('bf16.mk3A')} / {cell('bf16.mk3B')}; exponent k = 2 A / B: {cell('bf16.ek2A')} / {cell('bf16.ek2B')}; "
       + f"fp16 mantissa k = 5 on A: {cell('fp16.mk5A')}; int8 random on A / B: {cell('int8.randA')} / {cell('int8.randB')}.\n")
-    w("| bf16 signs, magnitude 1.5 | fixed + | A −, B + | random both | random A | random B | |randn| fixed + | same, random signs |")
+    w("| bf16 signs, magnitude 1.5 | fixed + | A −, B + | random both | random A | random B | abs(randn), fixed + | same, random signs |")
     w("|---|---:|---:|---:|---:|---:|---:|---:|")
     w("| y | " + " | ".join(cell(k) for k in ("bf16.sfix", "bf16.sfixAneg", "bf16.srand", "bf16.srandA", "bf16.srandB",
                                                "bf16.smagfix", "bf16.smagrand")) + " |")
