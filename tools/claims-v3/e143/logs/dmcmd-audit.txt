@@ -1,0 +1,40 @@
+# tools/claims-v3/dmcmd_audit.py (sha256 f29e91ca97705454..., table 50168632931fd8c1...) on E143's run chain (the paths below), run at 20:53 PST on Mon 2 Nov 2026, before the registration's commit, the claim and the first launch.
+# files: tools/claims-v3/e143/run_e143.py tools/claims-v3/e143/queue_e143.py tools/claims-v3/e143/e143_common.py tools/claims-v3/e143/reduce_e143.py tools/claims-v3/e143/make_protocol_e143.py tools/claims-v3/e143/make_predictions_e143.py workloads/sparsity/host/main.cpp workloads/sparsity/kernel/sparsity.c tools/claims-v3/e119/run_e119.py tools/claims-v3/kspeed/e105/run_e105.py tools/claims-v3/kspeed/e101/run_e101s.py tools/claims-v3/kspeed/run_kspeed.py tools/claims-v3/hpl/run_hpl.py tools/claims-v3/e111/idle_logins_e111.py tools/claims-v3/kinds/e101_common.py
+# the one reviewed exception, as E136's and E146's: run_hpl.py:622's residency read (run_e119.py rewrites it to raw states 1 2 3, which this ettelem refuses at its argument check before it opens the device)
+# the kinds host was built from workloads/sparsity/host/main.cpp of 21 Sep 2026 (07f7d049 or f2b87769); its later change (27dce7f0, 25 Sep, the runtime's log level) adds no device-management call: git grep of DM_CMD|dev_mngt|ioctl in that file at 07f7d049, f2b87769 and HEAD finds none (below)
+dmcmd_audit: GO (19 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e143/queue_e143.py:175: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e143/queue_e143.py:175: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e143/queue_e143.py:175: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e143/queue_e143.py:175: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e143/queue_e143.py:175: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:597: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/hpl/run_hpl.py:618: ettelem sptrace: TRACE_EXTRACT [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:622: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES [READ, pmic none] EXCEPTED: SP_ERROR_LOG: run_e119.py patch_residency rewrites this command to residency 1 2 3, which build/ettelem-hpl/ettelem (ettelem-dv2) refuses at its argument check before it opens the device (E126: 51 queries, E136: 37, E146: 109, every one rc 2, no record) - variant ettelem-dv2; raw states 2 3 4 5 6 (raw 4 5 6 is no state at BL2 0.22.0: 2 SP Runtime Errors each)
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      3 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      3 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      2 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      2 site(s)  ok
+  GET_MODULE_RESIDENCY_THROTTLE_STATES       READ         pmic none      1 site(s)  EXCEPTED
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      2 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      2 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+  TRACE_EXTRACT                              READ         pmic none      1 site(s)  ok
+# exit 0
+# workloads/sparsity/host/main.cpp at 07f7d049: 0 lines naming DM_CMD|dev_mngt|ioctl|serviceRequest
+# workloads/sparsity/host/main.cpp at f2b87769: 0 lines naming DM_CMD|dev_mngt|ioctl|serviceRequest
+# workloads/sparsity/host/main.cpp at HEAD: 0 lines naming DM_CMD|dev_mngt|ioctl|serviceRequest

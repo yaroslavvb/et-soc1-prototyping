@@ -1,0 +1,27 @@
+# E143 dry run of the whole queue on the Intel with run_hpl.py's toy card (no device): queue_e143.py --dry with protocol-dry.json (2 passes of 2.5 s bursts) and the two dry stop-path protocols, Mon 2 Nov 2026 20:40-20:52 PST. The queue's records (queue.jsonl), the scratch path replaced by <scratch>. The toy card's governor and powers are a toy: its numbers test the code paths only.
+{"t_ms": 1793680810275, "zone": "PST", "kind": "queue_start", "slot_start_ms": 1793680810000, "slot_end_ms": 1793683208000, "next_rest_ms": null, "python": "3.13.11", "sensors": false, "protocol": "<lab repo>/tools/claims-v3/e143/protocol-dry.json"}
+{"t_ms": 1793680810276, "zone": "PST", "kind": "card_free", "waits": {}, "late_s": 0.3}
+{"t_ms": 1793680810276, "zone": "PST", "kind": "before_first_launch", "snapshot": {"tag": "start", "t_ms": 1793680810276, "zone": "PST"}, "history_rows": 0}
+{"t_ms": 1793680810277, "zone": "PST", "kind": "session_start", "name": "smoke", "cap_min": 3.0}
+{"t_ms": 1793680836474, "zone": "PST", "kind": "session_end", "name": "smoke", "rc": 0, "end": {"t_end_ms": 1793680836191, "exit": 0, "reason": "done", "card_min": 0.4}, "slot_stopped": false}
+{"t_ms": 1793680836477, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+{"t_ms": 1793680836478, "zone": "PST", "kind": "session_start", "name": "stoptest-board", "cap_min": 2.0}
+{"t_ms": 1793680839507, "zone": "PST", "kind": "session_end", "name": "stoptest-board", "rc": 4, "end": {"t_end_ms": 1793680838792, "exit": 4, "reason": "safety:board 62.5 W > 30 W on 3 samples", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793680839509, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793680838489, "t_third_line_ms": 1793680838477, "launch": [1793680838228, 1793680838729], "trip_after_line_ms": 12, "launch_end_after_trip_ms": 240, "lines": 18}
+{"t_ms": 1793680839509, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+{"t_ms": 1793680839510, "zone": "PST", "kind": "session_start", "name": "stoptest-die", "cap_min": 2.0}
+{"t_ms": 1793680841534, "zone": "PST", "kind": "session_end", "name": "stoptest-die", "rc": 4, "end": {"t_end_ms": 1793680841398, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793680841536, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793680840075, "t_first_line_ms": 1793680840026, "trip_after_line_ms": 49, "lines": 13}
+{"t_ms": 1793680841536, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+{"t_ms": 1793680841537, "zone": "PST", "kind": "session_start", "name": "s1", "cap_min": 30.0}
+{"t_ms": 1793681562012, "zone": "PST", "kind": "session_end", "name": "s1", "rc": 0, "end": {"t_end_ms": 1793681561763, "exit": 0, "reason": "done", "card_min": 12.0}, "slot_stopped": false}
+{"t_ms": 1793681562013, "zone": "PST", "kind": "s1_end", "rc": 0}
+{"t_ms": 1793681562014, "zone": "PST", "kind": "queue_end", "snapshot": {"tag": "end", "t_ms": 1793681562013, "zone": "PST"}, "card_free_ms": 1793681562014, "before_slot_end_s": 1646.0}
+## smoke/end.json
+{"t_end_ms": 1793680836191, "exit": 0, "reason": "done", "card_min": 0.4}
+## stoptest-board/end.json
+{"t_end_ms": 1793680838792, "exit": 4, "reason": "safety:board 62.5 W > 30 W on 3 samples", "card_min": 0.0}
+## stoptest-die/end.json
+{"t_end_ms": 1793680841398, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}
+## s1/end.json
+{"t_end_ms": 1793681561763, "exit": 0, "reason": "done", "card_min": 12.0}

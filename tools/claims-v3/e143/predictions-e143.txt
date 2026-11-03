@@ -1,0 +1,41 @@
+predictions-e143.json sha256 d45c1ece62c2940d691a359809a26b226e4b8e4c18b371e543024a4a2829623f
+36 tiles: 19 governed (M7 < 795 MHz), 17 pinned; replicates ['k-fp32-randn', 'k-fp16-randn', 'k-int8-full']
+reference: governed 17 rows, 7.587 MHz, 1.9447 W; pinned 39 rows, 8.8719 MHz, 1.8265 W; heat 112 runs (112), 0.6845 C
+bars at full n (2.5%, 97.5% of the bootstrap rms): {"F1_governed_clock_rms_mhz": [4.664, 10.231], "F2_pinned_clock_rms_mhz": [0.364, 15.467], "W1_governed_board_rms_w": [1.405, 2.429], "W2_pinned_board_rms_w": [1.254, 2.44], "H1_die_rise_rms_c": [0.523, 0.839], "coverage_line_36": 31, "coverage_line_governed": 16, "coverage_line_pinned": 14}
+admission: highest estimates [(84.34, 'b5-fp32.wideexp48_dense'), (83.1, 'k-fp32-randn'), (82.18, 'b5-fp32.lowrank2_w'), (82.15, 'b5-fp32.anchor_randn'), (79.41, 'b5-fp32.sorted_k')]; limit 86.0 W, lock 93.0 W; stops {'abs_stop_c': 80, 'board_cap_w': 93, 'cap_consecutive': 3}
+  governed p2 fp16.anchor_randn                  M7  730.6 MHz  65.57 W D  29.30 rise  6.17 C  M6  730.0/ 65.57  M5  730.7/ 65.57  est800 77.17 W
+  governed p2 fp16.exp_only                      M7  786.4 MHz  65.04 W D  28.78 rise  6.10 C  M6  786.3/ 65.05  M5  785.6/ 65.09  est800 66.95 W
+  governed p1 fp16.pair_cancel_asign             M7  782.6 MHz  65.25 W D  28.98 rise  6.13 C  M6  781.4/ 65.29  M5  783.1/ 65.22  est800 67.73 W
+  governed p1 fp16.pair_nearcancel               M7  731.3 MHz  65.57 W D  29.30 rise  6.17 C  M6  730.6/ 65.57  M5  731.4/ 65.57  est800 77.03 W
+  governed p1 fp16.real_pythia_ln2_up            M7  728.7 MHz  65.57 W D  29.30 rise  6.17 C  M6  728.0/ 65.56  M5  728.6/ 65.57  est800 77.58 W
+  governed p1 fp16.real_pythia_qk                M7  737.9 MHz  65.58 W D  29.31 rise  6.17 C  M6  737.7/ 65.58  M5  737.9/ 65.58  est800 75.73 W
+  governed p1 fp16.real_pythia_softmax_v         M7  777.2 MHz  65.41 W D  29.15 rise  6.15 C  M6  778.0/ 65.39  M5  777.3/ 65.41  est800 68.72 W
+  governed p1 fp16.sparse24_straddled            M7  732.3 MHz  65.57 W D  29.31 rise  6.17 C  M6  732.0/ 65.57  M5  732.0/ 65.57  est800 76.84 W
+  governed p2 fp32.anchor_randn                  M7  707.0 MHz  65.39 W D  29.04 rise  6.15 C  M6  706.6/ 65.38  M5  706.3/ 65.38  est800 82.15 W
+  governed p2 fp32.b_exp_busy_a_const            M7  792.3 MHz  64.45 W D  28.10 rise  6.02 C  M6  792.8/ 64.37  M5  791.2/ 64.60  est800 65.5 W
+  governed p1 fp32.e4m3grid_gelu_w               M7  783.0 MHz  65.23 W D  28.88 rise  6.12 C  M6  783.1/ 65.23  M5  781.5/ 65.29  est800 67.65 W
+  governed p1 fp32.exp_only_both                 M7  790.9 MHz  64.64 W D  28.29 rise  6.04 C  M6  790.5/ 64.69  M5  789.6/ 64.78  est800 65.89 W
+  governed p1 fp32.gray_stream                   M7  783.6 MHz  65.20 W D  28.85 rise  6.12 C  M6  784.8/ 65.14  M5  783.4/ 65.21  est800 67.54 W
+  governed p2 fp32.lowrank2_w                    M7  706.9 MHz  65.39 W D  29.04 rise  6.15 C  M6  706.5/ 65.38  M5  706.1/ 65.38  est800 82.18 W
+  governed p1 fp32.real_pythia_gelu_down         M7  726.4 MHz  65.56 W D  29.21 rise  6.17 C  M6  727.3/ 65.56  M5  725.7/ 65.56  est800 78.04 W
+  governed p1 fp32.real_pythia_ln1_q             M7  728.3 MHz  65.56 W D  29.21 rise  6.17 C  M6  729.0/ 65.57  M5  727.6/ 65.56  est800 77.65 W
+  governed p1 fp32.sorted_k                      M7  719.8 MHz  65.53 W D  29.18 rise  6.17 C  M6  719.9/ 65.53  M5  719.6/ 65.53  est800 79.41 W
+  governed p1 fp32.wideexp48_bgate_alt           M7  794.9 MHz  63.96 W D  27.60 rise  5.95 C  M6  794.9/ 63.97  M5  797.1/ 63.24  est800 64.64 W
+  governed p1 fp32.wideexp48_dense               M7  696.9 MHz  65.31 W D  28.96 rise  6.14 C  M6  696.2/ 65.32  M5  695.5/ 65.34  est800 84.34 W
+  pinned   p2 fp16.anchor_zeros                  M7  800.0 MHz  36.27 W D   0.00 rise  2.07 C  M6  800.0/ 36.27  M5  800.0/ 36.27  est800 36.27 W
+  pinned   p1 fp16.sparse24_aligned              M7  799.8 MHz  60.16 W D  23.89 rise  5.41 C  M6  799.7/ 60.63  M5  799.8/ 60.19  est800 60.18 W
+  pinned   p1 fp16.wideexp_bgate_alt             M7  799.4 MHz  61.36 W D  25.10 rise  5.58 C  M6  799.4/ 61.39  M5  799.8/ 60.30  est800 61.44 W
+  pinned   p2 fp32.anchor_zeros                  M7  800.0 MHz  36.35 W D   0.00 rise  2.08 C  M6  800.0/ 36.35  M5  800.0/ 36.35  est800 36.35 W
+  pinned   p2 fp32.block_sparse_k4               M7  799.8 MHz  60.24 W D  23.89 rise  5.43 C  M6  799.9/ 59.93  M5  799.8/ 60.29  est800 60.27 W
+  pinned   p1 fp32.wideexp48_bgate_kblk          M7  799.5 MHz  61.22 W D  24.87 rise  5.56 C  M6  799.6/ 60.96  M5  799.4/ 61.33  est800 61.29 W
+  pinned   p1 int8.a_word_flipflop               M7  800.0 MHz  44.24 W D   6.59 rise  3.18 C  M6  800.0/ 44.07  M5  800.0/ 44.41  est800 44.24 W
+  pinned   p2 int8.anchor_full                   M7  800.0 MHz  50.74 W D  13.09 rise  4.10 C  M6  800.0/ 50.67  M5  800.0/ 50.65  est800 50.74 W
+  pinned   p2 int8.anchor_zeros                  M7  800.0 MHz  37.65 W D   0.00 rise  2.26 C  M6  800.0/ 37.65  M5  800.0/ 37.65  est800 37.65 W
+  pinned   p1 int8.b_line_flipflop_nogate        M7  800.0 MHz  49.52 W D  11.87 rise  3.92 C  M6  800.0/ 50.03  M5  800.0/ 50.01  est800 49.52 W
+  pinned   p1 int8.b_line_zero_one               M7  800.0 MHz  45.06 W D   7.40 rise  3.30 C  M6  800.0/ 44.95  M5  800.0/ 44.92  est800 45.06 W
+  pinned   p2 int8.block_sparse_a                M7  800.0 MHz  45.73 W D   8.07 rise  3.39 C  M6  800.0/ 45.76  M5  800.0/ 45.82  est800 45.73 W
+  pinned   p1 int8.gray_a                        M7  800.0 MHz  45.82 W D   8.17 rise  3.41 C  M6  800.0/ 45.81  M5  800.0/ 45.89  est800 45.82 W
+  pinned   p2 int8.powerlaw_w                    M7  800.0 MHz  49.58 W D  11.92 rise  3.93 C  M6  800.0/ 49.63  M5  800.0/ 49.60  est800 49.58 W
+  pinned   p1 int8.real_pythia_w8a8_down         M7  800.0 MHz  49.23 W D  11.58 rise  3.88 C  M6  800.0/ 49.29  M5  800.0/ 49.28  est800 49.23 W
+  pinned   p1 int8.real_pythia_w8a8_up           M7  800.0 MHz  49.14 W D  11.49 rise  3.87 C  M6  800.0/ 49.15  M5  800.0/ 49.18  est800 49.14 W
+  pinned   p1 int8.sorted_k                      M7  800.0 MHz  48.90 W D  11.25 rise  3.84 C  M6  800.0/ 48.79  M5  800.0/ 48.81  est800 48.9 W
