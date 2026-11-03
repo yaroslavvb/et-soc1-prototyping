@@ -1,0 +1,838 @@
+{
+ "experiment": "E136",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793663483222,
+ "protocol": {
+  "experiment": "E136",
+  "request": "Q137",
+  "card": "aifoundry2",
+  "order_seed": 136,
+  "note": "a large GEMM in the vendor's pattern (rgm136 SP_GEMM_LARGE: g4k 192 MB with C, g2k 20 MB), four kinds in fp32, fp16 and int8, under aifoundry2's own governor; every start is cool; nothing is set on the card",
+  "tools": {
+   "heater": "build/e136/host/sparsity_host",
+   "kernel": "build/e136/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "predictions": "tools/claims-v3/e136/predictions-e136.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "die_c": 80,
+   "board_w": 93,
+   "board_samples": 3
+  },
+  "caps": {
+   "max_card_min": 45
+  },
+  "smoke_cycles": {
+   "g4k-fp32-zeros": 1872.6,
+   "g4k-int8-zeros": 1988.5,
+   "g4k-fp16-zeros": 1875.8,
+   "g2k-int8-zeros": 1289.3
+  },
+  "dry_c_w": {
+   "zeros": 3.0,
+   "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.196,
+   "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.708,
+   "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.259,
+   "gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.213,
+   "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 15.851,
+   "gemmL4x8x8:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin": 8.534,
+   "gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin,tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin": 15.784,
+   "gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.88,
+   "gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 22.043,
+   "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.181,
+   "gemmL4x8x8:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin": 5.906,
+   "gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin": 6.251,
+   "gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.786,
+   "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 14.219,
+   "gemmL4x8x8:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin": 10.198,
+   "gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin,tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin": 14.029,
+   "gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.079,
+   "gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 19.125,
+   "gemmL2x2x2:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin": 10.248,
+   "gemmL2x2x2:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin,tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin": 21.941
+  },
+  "limit_p800_w": 88.0,
+  "peak_lock_w": 93.0,
+  "relation": {
+   "B800": 33.60956684526229,
+   "s800": 1.90517380064275
+  },
+  "admission": {
+   "g4k-fp32-zeros": {
+    "c_ref_w": 3.196,
+    "fixed_p800_w": 39.7
+   },
+   "g4k-fp32-randn": {
+    "c_ref_w": 15.851,
+    "fixed_p800_w": 63.8
+   },
+   "g4k-fp32-sparse50": {
+    "c_ref_w": 8.534,
+    "fixed_p800_w": 49.9
+   },
+   "g4k-fp32-real": {
+    "c_ref_w": 15.784,
+    "fixed_p800_w": 63.7
+   },
+   "g4k-fp16-zeros": {
+    "c_ref_w": 3.259,
+    "fixed_p800_w": 39.8
+   },
+   "g4k-fp16-randn": {
+    "c_ref_w": 14.219,
+    "fixed_p800_w": 60.7
+   },
+   "g4k-fp16-sparse50": {
+    "c_ref_w": 10.198,
+    "fixed_p800_w": 53.0
+   },
+   "g4k-fp16-real": {
+    "c_ref_w": 14.029,
+    "fixed_p800_w": 60.3
+   },
+   "g4k-int8-zeros": {
+    "c_ref_w": 2.708,
+    "fixed_p800_w": 38.8
+   },
+   "g4k-int8-full": {
+    "c_ref_w": 7.181,
+    "fixed_p800_w": 47.3
+   },
+   "g4k-int8-sparse50": {
+    "c_ref_w": 5.906,
+    "fixed_p800_w": 44.9
+   },
+   "g4k-int8-real": {
+    "c_ref_w": 6.251,
+    "fixed_p800_w": 45.5
+   },
+   "g2k-fp32-zeros": {
+    "c_ref_w": 2.88,
+    "fixed_p800_w": 39.1
+   },
+   "g2k-fp32-randn": {
+    "c_ref_w": 22.043,
+    "fixed_p800_w": 75.6
+   },
+   "g2k-fp32-sparse50": {
+    "c_ref_w": 10.248,
+    "fixed_p800_w": 53.1
+   },
+   "g2k-fp32-real": {
+    "c_ref_w": 21.941,
+    "fixed_p800_w": 75.4
+   },
+   "g2k-fp16-zeros": {
+    "c_ref_w": 3.079,
+    "fixed_p800_w": 39.5
+   },
+   "g2k-fp16-randn": {
+    "c_ref_w": 19.125,
+    "fixed_p800_w": 70.0
+   },
+   "g2k-fp16-sparse50": {
+    "c_ref_w": 12.628,
+    "fixed_p800_w": 57.7
+   },
+   "g2k-fp16-real": {
+    "c_ref_w": 18.847,
+    "fixed_p800_w": 69.5
+   },
+   "g2k-int8-zeros": {
+    "c_ref_w": 2.213,
+    "fixed_p800_w": 37.8
+   },
+   "g2k-int8-full": {
+    "c_ref_w": 7.786,
+    "fixed_p800_w": 48.4
+   },
+   "g2k-int8-sparse50": {
+    "c_ref_w": 6.073,
+    "fixed_p800_w": 45.2
+   },
+   "g2k-int8-real": {
+    "c_ref_w": 6.627,
+    "fixed_p800_w": 46.2
+   },
+   "rest": {
+    "fixed_p800_w": 30.0
+   }
+  },
+  "blocks": [
+   {
+    "name": "SMOKE",
+    "title": "the idle card with no launch (its last 30 s are the session's rest reading), then a 2 s launch of four cells' zeros",
+    "default": false,
+    "start": {
+     "mode": "cool",
+     "max_c": 99,
+     "max_wait_s": 5
+    },
+    "launch": {
+     "seconds": 2,
+     "budget": 3.5,
+     "processes": 1
+    },
+    "tail_s": 3,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "zeros",
+      "label": "rest",
+      "launch": {
+       "seconds": 2,
+       "budget": 3.5,
+       "processes": 0
+      },
+      "tail_s": 30
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "g4k-fp32-zeros"
+     },
+     {
+      "type": "int8",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "g4k-int8-zeros"
+     },
+     {
+      "type": "fp16",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+      "label": "g4k-fp16-zeros"
+     },
+     {
+      "type": "int8",
+      "values": "gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "g2k-int8-zeros"
+     }
+    ]
+   },
+   {
+    "name": "A",
+    "title": "block A",
+    "passes": 1,
+    "shuffle": false,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "g4k-fp32-zeros",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "g4k-fp32-randn",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL4x8x8:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+      "label": "g4k-fp32-sparse50",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin,tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin",
+      "label": "g4k-fp32-real",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "g2k-fp32-zeros",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "g2k-fp32-randn",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     }
+    ]
+   },
+   {
+    "name": "B",
+    "title": "block B",
+    "passes": 1,
+    "shuffle": false,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "g4k-fp32-randn",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "g4k-fp32-zeros",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     }
+    ]
+   },
+   {
+    "name": "C",
+    "title": "block C",
+    "passes": 1,
+    "shuffle": false,
+    "runs": [
+     {
+      "type": "int8",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "g4k-int8-zeros",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "int8",
+      "values": "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "g4k-int8-full",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "int8",
+      "values": "gemmL4x8x8:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+      "label": "g4k-int8-sparse50",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "int8",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin",
+      "label": "g4k-int8-real",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "int8",
+      "values": "gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "g2k-int8-zeros",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "int8",
+      "values": "gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "g2k-int8-full",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     }
+    ]
+   },
+   {
+    "name": "D",
+    "title": "block D",
+    "passes": 1,
+    "shuffle": false,
+    "runs": [
+     {
+      "type": "fp16",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+      "label": "g4k-fp16-zeros",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp16",
+      "values": "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "g4k-fp16-randn",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp16",
+      "values": "gemmL4x8x8:sparse50:tools/claims-v3/kinds/tiles/fp16/sparse50.bin",
+      "label": "g4k-fp16-sparse50",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp16",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin,tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin",
+      "label": "g4k-fp16-real",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp16",
+      "values": "gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+      "label": "g2k-fp16-zeros",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp16",
+      "values": "gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "g2k-fp16-randn",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     }
+    ]
+   },
+   {
+    "name": "E",
+    "title": "block E",
+    "passes": 1,
+    "shuffle": false,
+    "runs": [
+     {
+      "type": "int8",
+      "values": "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "g4k-int8-full",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "int8",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+      "label": "g4k-int8-zeros",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp16",
+      "values": "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "g4k-fp16-randn",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp16",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+      "label": "g4k-fp16-zeros",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     }
+    ]
+   },
+   {
+    "name": "F",
+    "title": "block F",
+    "passes": 1,
+    "shuffle": false,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+      "label": "g2k-fp32-randn",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "g2k-fp32-zeros",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin,tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin",
+      "label": "g4k-fp32-real",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL4x8x8:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+      "label": "g4k-fp32-sparse50",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     }
+    ]
+   },
+   {
+    "name": "G",
+    "title": "block G",
+    "passes": 1,
+    "shuffle": false,
+    "runs": [
+     {
+      "type": "int8",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin,tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin",
+      "label": "g4k-int8-real",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp16",
+      "values": "gemmL4x8x8:tiles:tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin,tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin",
+      "label": "g4k-fp16-real",
+      "launch": {
+       "seconds": 8,
+       "budget": 9.5,
+       "processes": 9
+      },
+      "tail_s": 6,
+      "start": {
+       "mode": "cool",
+       "max_c": 57,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL2x2x2:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin",
+      "label": "g2k-fp32-sparse50",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     },
+     {
+      "type": "fp32",
+      "values": "gemmL2x2x2:tiles:tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin,tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin,tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin,tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin",
+      "label": "g2k-fp32-real",
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4,
+      "start": {
+       "mode": "cool",
+       "max_c": 55,
+       "max_wait_s": 300
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "A-00-g4k-fp32-zeros-r1",
+  "A-01-g4k-fp32-randn-r1",
+  "A-02-g4k-fp32-sparse50-r1",
+  "A-03-g4k-fp32-real-r1",
+  "A-04-g2k-fp32-zeros-r1",
+  "A-05-g2k-fp32-randn-r1",
+  "B-00-g4k-fp32-randn-r1",
+  "B-01-g4k-fp32-zeros-r1",
+  "C-00-g4k-int8-zeros-r1",
+  "C-01-g4k-int8-full-r1",
+  "C-02-g4k-int8-sparse50-r1",
+  "C-03-g4k-int8-real-r1",
+  "C-04-g2k-int8-zeros-r1",
+  "C-05-g2k-int8-full-r1",
+  "D-00-g4k-fp16-zeros-r1",
+  "D-01-g4k-fp16-randn-r1",
+  "D-02-g4k-fp16-sparse50-r1",
+  "D-03-g4k-fp16-real-r1",
+  "D-04-g2k-fp16-zeros-r1",
+  "D-05-g2k-fp16-randn-r1",
+  "E-00-g4k-int8-full-r1",
+  "E-01-g4k-int8-zeros-r1",
+  "E-02-g4k-fp16-randn-r1",
+  "E-03-g4k-fp16-zeros-r1",
+  "F-00-g2k-fp32-randn-r1",
+  "F-01-g2k-fp32-zeros-r1",
+  "F-02-g4k-fp32-real-r1",
+  "F-03-g4k-fp32-sparse50-r1",
+  "G-00-g4k-int8-real-r1",
+  "G-01-g4k-fp16-real-r1",
+  "G-02-g2k-fp32-sparse50-r1",
+  "G-03-g2k-fp32-real-r1"
+ ],
+ "sha256": {
+  "heater": "76475508f8e88983edfe16bcc8757dd23094877a31c78c302f6003993ee5fe74",
+  "kernel": "aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e136/run_e136.py",
+  "--protocol",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e136/protocol.json",
+  "--out",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e136/runs/s1",
+  "--max-card-min",
+  "45.00"
+ ],
+ "git_head": "0c187e1262b0e0f7fb744da4c22211b5dcfa9958",
+ "git_dirty_hpl": ""
+}

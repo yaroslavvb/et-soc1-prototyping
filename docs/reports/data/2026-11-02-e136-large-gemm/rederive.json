@@ -1,0 +1,419 @@
+{
+ "per_gemm": {
+  "g2k.fp16": {
+   "T800": 1.3229,
+   "n800": 23,
+   "T600": null,
+   "n600": 0,
+   "T800_sd": 0.0014,
+   "T800_P1": 1.4884,
+   "err_P1": -0.1112
+  },
+  "g2k.fp32": {
+   "T800": 1.3264,
+   "n800": 197,
+   "T600": 1.5075,
+   "n600": 19,
+   "T800_sd": 0.0031,
+   "T800_P1": 1.4856,
+   "err_P1": -0.1072,
+   "X": 1.1365
+  },
+  "g2k.int8": {
+   "T800": 1.4053,
+   "n800": 24,
+   "T600": null,
+   "n600": 0,
+   "T800_sd": 0.0009,
+   "T800_P1": 1.6116,
+   "err_P1": -0.128
+  },
+  "g4k.fp16": {
+   "T800": 2.1746,
+   "n800": 478,
+   "T600": 2.364,
+   "n600": 17,
+   "T800_sd": 0.0051,
+   "T800_P1": 2.3448,
+   "err_P1": -0.0726,
+   "h": 1.444,
+   "X": 1.0871
+  },
+  "g4k.fp32": {
+   "T800": 2.1726,
+   "n800": 641,
+   "T600": 2.3661,
+   "n600": 24,
+   "T800_sd": 0.0036,
+   "T800_P1": 2.3408,
+   "err_P1": -0.0719,
+   "h": 1.439,
+   "X": 1.0891
+  },
+  "g4k.int8": {
+   "T800": 2.1745,
+   "n800": 520,
+   "T600": 2.3641,
+   "n600": 11,
+   "T800_sd": 0.0048,
+   "T800_P1": 2.4856,
+   "err_P1": -0.1252,
+   "h": 1.834,
+   "X": 1.0872
+  }
+ },
+ "runs": {
+  "A-00-g4k-fp32-zeros-r1": {
+   "label": "g4k-fp32-zeros",
+   "mode": "burst",
+   "mhz": 778.3,
+   "board_w": 32.73,
+   "die_mean_c": 48.32,
+   "die_max_c": 49,
+   "die_start_c": 47,
+   "rate": 3.827,
+   "n_tel": 60
+  },
+  "A-01-g4k-fp32-randn-r1": {
+   "label": "g4k-fp32-randn",
+   "mode": "burst",
+   "mhz": 780.0,
+   "board_w": 50.75,
+   "die_mean_c": 51.25,
+   "die_max_c": 53,
+   "die_start_c": 48,
+   "rate": 3.829,
+   "n_tel": 60
+  },
+  "A-02-g4k-fp32-sparse50-r1": {
+   "label": "g4k-fp32-sparse50",
+   "mode": "burst",
+   "mhz": 781.7,
+   "board_w": 40.88,
+   "die_mean_c": 51.08,
+   "die_max_c": 52,
+   "die_start_c": 49,
+   "rate": 3.833,
+   "n_tel": 60
+  },
+  "A-03-g4k-fp32-real-r1": {
+   "label": "g4k-fp32-real",
+   "mode": "burst",
+   "mhz": 780.3,
+   "board_w": 50.54,
+   "die_mean_c": 52.75,
+   "die_max_c": 55,
+   "die_start_c": 50,
+   "rate": 3.821,
+   "n_tel": 61
+  },
+  "A-04-g2k-fp32-zeros-r1": {
+   "label": "g2k-fp32-zeros",
+   "mode": "burst",
+   "mhz": 777.4,
+   "board_w": 34.18,
+   "die_mean_c": 51.48,
+   "die_max_c": 52,
+   "die_start_c": 50,
+   "rate": 6.216,
+   "n_tel": 62
+  },
+  "A-05-g2k-fp32-randn-r1": {
+   "label": "g2k-fp32-randn",
+   "mode": "burst",
+   "mhz": 769.8,
+   "board_w": 60.1,
+   "die_mean_c": 55.13,
+   "die_max_c": 58,
+   "die_start_c": 50,
+   "rate": 6.208,
+   "n_tel": 63
+  },
+  "B-00-g4k-fp32-randn-r1": {
+   "label": "g4k-fp32-randn",
+   "mode": "sus",
+   "mhz": 800.0,
+   "board_w": 56.69,
+   "die_mean_c": 63.23,
+   "die_max_c": 65,
+   "die_start_c": 52,
+   "rate": 3.865,
+   "n_tel": 399
+  },
+  "B-01-g4k-fp32-zeros-r1": {
+   "label": "g4k-fp32-zeros",
+   "mode": "sus",
+   "mhz": 788.0,
+   "board_w": 36.25,
+   "die_mean_c": 57.29,
+   "die_max_c": 58,
+   "die_start_c": 57,
+   "rate": 3.846,
+   "n_tel": 400
+  },
+  "C-00-g4k-int8-zeros-r1": {
+   "label": "g4k-int8-zeros",
+   "mode": "burst",
+   "mhz": 770.5,
+   "board_w": 34.25,
+   "die_mean_c": 54.85,
+   "die_max_c": 56,
+   "die_start_c": 54,
+   "rate": 15.265,
+   "n_tel": 61
+  },
+  "C-01-g4k-int8-full-r1": {
+   "label": "g4k-int8-full",
+   "mode": "burst",
+   "mhz": 776.7,
+   "board_w": 40.92,
+   "die_mean_c": 55.4,
+   "die_max_c": 56,
+   "die_start_c": 54,
+   "rate": 15.312,
+   "n_tel": 60
+  },
+  "C-02-g4k-int8-sparse50-r1": {
+   "label": "g4k-int8-sparse50",
+   "mode": "burst",
+   "mhz": 783.6,
+   "board_w": 39.42,
+   "die_mean_c": 55.11,
+   "die_max_c": 56,
+   "die_start_c": 54,
+   "rate": 15.353,
+   "n_tel": 61
+  },
+  "C-03-g4k-int8-real-r1": {
+   "label": "g4k-int8-real",
+   "mode": "burst",
+   "mhz": 788.3,
+   "board_w": 40.16,
+   "die_mean_c": 54.83,
+   "die_max_c": 56,
+   "die_start_c": 53,
+   "rate": 15.362,
+   "n_tel": 60
+  },
+  "C-04-g2k-int8-zeros-r1": {
+   "label": "g2k-int8-zeros",
+   "mode": "burst",
+   "mhz": 787.1,
+   "board_w": 34.39,
+   "die_mean_c": 53.87,
+   "die_max_c": 54,
+   "die_start_c": 53,
+   "rate": 23.643,
+   "n_tel": 62
+  },
+  "C-05-g2k-int8-full-r1": {
+   "label": "g2k-int8-full",
+   "mode": "burst",
+   "mhz": 787.1,
+   "board_w": 43.2,
+   "die_mean_c": 54.87,
+   "die_max_c": 56,
+   "die_start_c": 52,
+   "rate": 23.671,
+   "n_tel": 62
+  },
+  "D-00-g4k-fp16-zeros-r1": {
+   "label": "g4k-fp16-zeros",
+   "mode": "burst",
+   "mhz": 786.7,
+   "board_w": 34.8,
+   "die_mean_c": 53.68,
+   "die_max_c": 54,
+   "die_start_c": 53,
+   "rate": 7.679,
+   "n_tel": 60
+  },
+  "D-01-g4k-fp16-randn-r1": {
+   "label": "g4k-fp16-randn",
+   "mode": "burst",
+   "mhz": 793.8,
+   "board_w": 51.61,
+   "die_mean_c": 55.62,
+   "die_max_c": 57,
+   "die_start_c": 52,
+   "rate": 7.708,
+   "n_tel": 65
+  },
+  "D-02-g4k-fp16-sparse50-r1": {
+   "label": "g4k-fp16-sparse50",
+   "mode": "burst",
+   "mhz": 780.3,
+   "board_w": 45.08,
+   "die_mean_c": 55.16,
+   "die_max_c": 56,
+   "die_start_c": 53,
+   "rate": 7.635,
+   "n_tel": 61
+  },
+  "D-03-g4k-fp16-real-r1": {
+   "label": "g4k-fp16-real",
+   "mode": "burst",
+   "mhz": 786.7,
+   "board_w": 50.55,
+   "die_mean_c": 55.98,
+   "die_max_c": 57,
+   "die_start_c": 53,
+   "rate": 7.655,
+   "n_tel": 60
+  },
+  "D-04-g2k-fp16-zeros-r1": {
+   "label": "g2k-fp16-zeros",
+   "mode": "burst",
+   "mhz": 788.5,
+   "board_w": 35.42,
+   "die_mean_c": 54.34,
+   "die_max_c": 55,
+   "die_start_c": 53,
+   "rate": 12.569,
+   "n_tel": 61
+  },
+  "D-05-g2k-fp16-randn-r1": {
+   "label": "g2k-fp16-randn",
+   "mode": "burst",
+   "mhz": 787.1,
+   "board_w": 61.46,
+   "die_mean_c": 57.61,
+   "die_max_c": 60,
+   "die_start_c": 53,
+   "rate": 12.556,
+   "n_tel": 62
+  },
+  "E-00-g4k-int8-full-r1": {
+   "label": "g4k-int8-full",
+   "mode": "sus",
+   "mhz": 789.5,
+   "board_w": 42.5,
+   "die_mean_c": 58.04,
+   "die_max_c": 59,
+   "die_start_c": 54,
+   "rate": 15.35,
+   "n_tel": 399
+  },
+  "E-01-g4k-int8-zeros-r1": {
+   "label": "g4k-int8-zeros",
+   "mode": "sus",
+   "mhz": 800.0,
+   "board_w": 35.63,
+   "die_mean_c": 55.93,
+   "die_max_c": 56,
+   "die_start_c": 55,
+   "rate": 15.438,
+   "n_tel": 400
+  },
+  "E-02-g4k-fp16-randn-r1": {
+   "label": "g4k-fp16-randn",
+   "mode": "sus",
+   "mhz": 788.7,
+   "board_w": 54.24,
+   "die_mean_c": 63.25,
+   "die_max_c": 65,
+   "die_start_c": 53,
+   "rate": 7.676,
+   "n_tel": 399
+  },
+  "E-03-g4k-fp16-zeros-r1": {
+   "label": "g4k-fp16-zeros",
+   "mode": "sus",
+   "mhz": 800.0,
+   "board_w": 36.82,
+   "die_mean_c": 57.32,
+   "die_max_c": 58,
+   "die_start_c": 58,
+   "rate": 7.733,
+   "n_tel": 400
+  },
+  "F-00-g2k-fp32-randn-r1": {
+   "label": "g2k-fp32-randn",
+   "mode": "sus",
+   "mhz": 656.9,
+   "board_w": 54.59,
+   "die_mean_c": 65.68,
+   "die_max_c": 66,
+   "die_start_c": 54,
+   "rate": 5.752,
+   "n_tel": 399
+  },
+  "F-01-g2k-fp32-zeros-r1": {
+   "label": "g2k-fp32-zeros",
+   "mode": "sus",
+   "mhz": 788.0,
+   "board_w": 37.21,
+   "die_mean_c": 58.11,
+   "die_max_c": 59,
+   "die_start_c": 58,
+   "rate": 6.277,
+   "n_tel": 400
+  },
+  "F-02-g4k-fp32-real-r1": {
+   "label": "g4k-fp32-real",
+   "mode": "sus",
+   "mhz": 777.2,
+   "board_w": 55.88,
+   "die_mean_c": 64.81,
+   "die_max_c": 66,
+   "die_start_c": 55,
+   "rate": 3.825,
+   "n_tel": 400
+  },
+  "F-03-g4k-fp32-sparse50-r1": {
+   "label": "g4k-fp32-sparse50",
+   "mode": "sus",
+   "mhz": 800.0,
+   "board_w": 46.23,
+   "die_mean_c": 62.06,
+   "die_max_c": 63,
+   "die_start_c": 58,
+   "rate": 3.854,
+   "n_tel": 400
+  },
+  "G-00-g4k-int8-real-r1": {
+   "label": "g4k-int8-real",
+   "mode": "sus",
+   "mhz": 800.0,
+   "board_w": 42.9,
+   "die_mean_c": 60.0,
+   "die_max_c": 60,
+   "die_start_c": 58,
+   "rate": 15.471,
+   "n_tel": 400
+  },
+  "G-01-g4k-fp16-real-r1": {
+   "label": "g4k-fp16-real",
+   "mode": "sus",
+   "mhz": 780.8,
+   "board_w": 53.99,
+   "die_mean_c": 65.01,
+   "die_max_c": 66,
+   "die_start_c": 57,
+   "rate": 7.648,
+   "n_tel": 400
+  },
+  "G-02-g2k-fp32-sparse50-r1": {
+   "label": "g2k-fp32-sparse50",
+   "mode": "burst",
+   "mhz": 777.4,
+   "board_w": 48.05,
+   "die_mean_c": 58.6,
+   "die_max_c": 60,
+   "die_start_c": 56,
+   "rate": 6.253,
+   "n_tel": 62
+  },
+  "G-03-g2k-fp32-real-r1": {
+   "label": "g2k-fp32-real",
+   "mode": "burst",
+   "mhz": 763.5,
+   "board_w": 61.28,
+   "die_mean_c": 60.43,
+   "die_max_c": 63,
+   "die_start_c": 56,
+   "rate": 6.156,
+   "n_tel": 63
+  }
+ }
+}
