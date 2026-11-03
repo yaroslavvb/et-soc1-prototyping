@@ -1,0 +1,71 @@
+Q138(t) desk fit: board W -> die, open loop, NNLS on the tau grid [1.0, 3.0, 10.0, 30.0, 60.0, 120.0, 250.0, 500.0, 1000.0]
+
+== aifoundry3 card 0, 600 MHz: sessions [('E89', 2300, 24.41), ('E97', 15035, 23.22)]
+
+  before: plateau only, 0.90 C per board W, no dynamics (M6's quote)
+    H1    1800s rms  1.90 mean -0.35 max  8.77 plateau err +0.01 (rise 11.84) @60s -4.32 @300s -0.85 cool-down rms   nan
+    H2     900s rms  1.53 mean +0.02 max  9.20 plateau err +0.32 (rise 13.22) @60s -0.36 @300s -0.16 cool-down rms  2.96
+    H3    1800s rms 11.61 mean -1.60 max 22.30 plateau err -0.58 (rise 19.74) @60s -12.98 @300s +0.58 cool-down rms  4.23
+
+  before: E89's frozen chain (E97's registration, lab grid)
+    H1    1800s rms  0.78 mean +0.75 max  1.37 plateau err +0.50 (rise 11.84) @60s +0.37 @300s +0.85 cool-down rms   nan
+    H2     900s rms  0.73 mean +0.70 max  1.13 plateau err +0.92 (rise 13.22) @60s +0.39 @300s +0.60 cool-down rms  0.38
+    H3    1800s rms  0.72 mean +0.58 max  1.98 plateau err +0.51 (rise 19.74) @60s -0.06 @300s +1.33 cool-down rms  0.30
+
+  E89 only, this grid
+    H1    1800s rms  0.46 mean -0.33 max  1.03 plateau err -0.76 (rise 11.84) @60s +0.33 @300s -0.06 cool-down rms   nan
+    H2     900s rms  0.65 mean -0.63 max  1.15 plateau err -0.45 (rise 13.22) @60s -0.86 @300s -0.72 cool-down rms  0.45
+    H3    1800s rms  1.50 mean -1.43 max  2.43 plateau err -1.59 (rise 19.74) @60s -0.15 @300s -1.27 cool-down rms  0.89
+
+  E89 + E97 Part A (every hold left out)
+    H1    1800s rms  0.36 mean -0.24 max  0.87 plateau err -0.61 (rise 11.84) @60s +0.20 @300s -0.05 cool-down rms   nan
+    H2     900s rms  0.50 mean -0.47 max  1.00 plateau err -0.28 (rise 13.22) @60s -0.71 @300s -0.56 cool-down rms  0.26
+    H3    1800s rms  1.33 mean -1.28 max  2.26 plateau err -1.36 (rise 19.74) @60s -0.50 @300s -1.13 cool-down rms  0.62
+
+  leave one hold out (E89 + E97, the hold and its cool-down left out)
+    H1    1800s rms  0.66 mean +0.63 max  1.28 plateau err +0.40 (rise 11.84) @60s +0.37 @300s +0.65 cool-down rms   nan
+    H2     900s rms  0.64 mean +0.60 max  1.07 plateau err +0.82 (rise 13.22) @60s +0.30 @300s +0.49 cool-down rms  0.33
+    H3    1800s rms  0.47 mean -0.38 max  1.28 plateau err -0.40 (rise 19.74) @60s -0.43 @300s -0.13 cool-down rms  0.12
+
+  frozen aifoundry3 chain: {"tau_s": [1.0, 3.0, 10.0, 60.0, 120.0], "R_C_per_W": [0.0866, 0.03217, 0.05201, 0.16341, 0.53529], "R_total": 0.8695, "t63_s": 79.3, "t90_s": 223.7, "share_by_s": {"2": 0.131, "10": 0.251, "30": 0.404, "60": 0.557, "120": 0.748, "300": 0.948, "600": 0.996, "900": 1.0}}
+  in sample: [('H1', 0.63, 0.366), ('H2', 0.594, 0.771), ('H3', 0.38, 0.242)]
+
+== aifoundry2 card 0, governed: sessions [('E111-W2', 2886, 21.7), ('E111-W1B', 1719, 21.93), ('E133-W2', 2843, 21.41), ('E133-W1B', 1718, 21.55)]
+
+  fit E111, predict E133  (R_total 0.670)
+    E133-W2   HOLD-00-int8-neg_ones-hold          339s rms  0.44 mean +0.17 max  1.02 plateau err +0.22 (rise 12.87) @60s -0.09
+    E133-W2   HOLDF-00-fp32-randn-hold           1624s rms  0.57 mean -0.45 max  1.63 plateau err -0.48 (rise 21.82) @60s -0.52
+    E133-W1B  HOLD-00-int8-neg_ones-hold         1596s rms  0.64 mean +0.50 max  1.66 plateau err +0.59 (rise 12.31) @60s +0.04
+
+  fit E133, predict E111  (R_total 0.658)
+    E111-W2   HOLD-00-int8-neg_ones-hold          345s rms  1.16 mean +1.11 max  1.82 plateau err +1.10 (rise 13.72) @60s +1.54
+    E111-W2   HOLDF-00-fp32-randn-hold           1630s rms  1.06 mean +1.01 max  2.20 plateau err +1.16 (rise 22.20) @60s +1.05
+    E111-W1B  HOLD-00-int8-neg_ones-hold         1597s rms  0.87 mean +0.77 max  1.93 plateau err +0.83 (rise 12.97) @60s +0.41
+
+  before: plateau only, 0.673 C per board W, no dynamics (M6's quote)
+    E111-W2   HOLD-00-int8-neg_ones-hold          345s rms  3.15 mean +1.84 max 12.32 plateau err +1.36 (rise 13.72) @60s +1.98
+    E111-W2   HOLDF-00-fp32-randn-hold           1630s rms  3.38 mean +0.18 max 27.35 plateau err +0.91 (rise 22.20) @60s -1.42
+    E111-W1B  HOLD-00-int8-neg_ones-hold         1597s rms  1.91 mean +0.03 max  9.83 plateau err +0.67 (rise 12.97) @60s -3.29
+    E133-W2   HOLD-00-int8-neg_ones-hold          339s rms  2.80 mean +1.36 max 12.36 plateau err +0.95 (rise 12.87) @60s +1.31
+    E133-W2   HOLDF-00-fp32-randn-hold           1624s rms  5.07 mean -0.86 max 27.58 plateau err -0.34 (rise 21.82) @60s -3.32
+    E133-W1B  HOLD-00-int8-neg_ones-hold         1596s rms  1.88 mean +0.08 max  9.97 plateau err +0.70 (rise 12.31) @60s -2.90
+
+  before: one pole, tau 89 s, 0.673 C per board W (E111's asymptote beside)
+    E111-W2   HOLD-00-int8-neg_ones-hold          345s rms  0.91 mean +0.27 max  3.69 plateau err +0.50 (rise 13.72) @60s +0.46
+    E111-W2   HOLDF-00-fp32-randn-hold           1630s rms  0.96 mean +0.66 max  5.32 plateau err +0.64 (rise 22.20) @60s +2.21
+    E111-W1B  HOLD-00-int8-neg_ones-hold         1597s rms  0.96 mean +0.69 max  3.14 plateau err +0.54 (rise 12.97) @60s +2.02
+    E133-W2   HOLD-00-int8-neg_ones-hold          339s rms  1.21 mean -0.74 max  4.95 plateau err -0.51 (rise 12.87) @60s -1.47
+    E133-W2   HOLDF-00-fp32-randn-hold           1624s rms  0.95 mean -0.32 max  5.37 plateau err -0.59 (rise 21.82) @60s +2.01
+    E133-W1B  HOLD-00-int8-neg_ones-hold         1596s rms  0.94 mean +0.71 max  3.12 plateau err +0.49 (rise 12.31) @60s +2.11
+
+  frozen aifoundry2 chain: {"tau_s": [1.0, 3.0, 10.0, 60.0, 120.0], "R_C_per_W": [0.07364, 0.06598, 0.03889, 0.34285, 0.14159], "R_total": 0.663, "t63_s": 49.6, "t90_s": 153.1, "share_by_s": {"2": 0.176, "10": 0.341, "30": 0.517, "60": 0.68, "120": 0.851, "300": 0.979, "600": 0.999, "900": 1.0}}
+  fit E111, predict E133 chain: {"tau_s": [1.0, 3.0, 10.0, 60.0, 120.0], "R_C_per_W": [0.06887, 0.08314, 0.01267, 0.42913, 0.07621], "R_total": 0.67, "t63_s": 47.3}
+  fit E133, predict E111 chain: {"tau_s": [1.0, 3.0, 10.0, 60.0, 120.0, 250.0], "R_C_per_W": [0.07265, 0.06697, 0.03756, 0.33986, 0.10201, 0.03867], "R_total": 0.6577, "t63_s": 51.5}
+
+  aifoundry2 switching power over the hold, board - P_ref - leakage at 0.442 W/C:
+    HOLD-00-int8-neg_ones-hold       E111-W2   S_eff  12.32 W  share at 800 MHz 0.960, at 600 0.034, rest die 45.00
+    HOLD-00-int8-neg_ones-hold       E111-W1B  S_eff  12.62 W  share at 800 MHz 0.963, at 600 0.028, rest die 46.00
+    HOLD-00-int8-neg_ones-hold       E133-W2   S_eff  12.01 W  share at 800 MHz 0.942, at 600 0.045, rest die 44.00
+    HOLD-00-int8-neg_ones-hold       E133-W1B  S_eff  12.20 W  share at 800 MHz 0.964, at 600 0.026, rest die 44.00
+    HOLDF-00-fp32-randn-hold         E111-W2   S_eff  22.36 W  share at 800 MHz 0.001, at 600 0.991, rest die 45.00
+    HOLDF-00-fp32-randn-hold         E133-W2   S_eff  23.83 W  share at 800 MHz 0.011, at 600 0.846, rest die 44.00
