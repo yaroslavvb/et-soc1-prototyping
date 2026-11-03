@@ -10,3 +10,24 @@ E148 post hoc (deciding nothing); primary reduction, 10 passes; residuals paired
     R 5: new-address reads 0.700, address-bit toggles 0.597; cycles int8 142, fp32 192
     R 6: new-address reads 0.755, address-bit toggles 0.671; cycles int8 158, fp32 224
     R 8: new-address reads 0.837, address-bit toggles 0.781; cycles int8 190, fp32 288
+after verification (Mon 2 Nov 2026; deciding nothing):
+  4. premise: E129's per-op difference int8 - fp32 -3.9 +- 63.3 pJ an op (3 passes, t 4.303); int8's op rate two rows against one -3.3581e+09 a second; so a per-op difference puts +0.013 +- 0.213 W into D21; D21 net of it (half-widths in quadrature) +0.146 +- 0.234 W = [-0.087, +0.380]: against W2's line 0 -> not resolved from zero; against T's frozen range (top -0.170) -> T still excluded
+  5. two-term solve (registered, reported): p_t 3.43 +- 1.68 pJ a 64-bit A read (95% 1.75 to 5.11); of N - N1 at sixteen rows the walk 0.595 +- 0.132 W and the A path 0.152 +- 0.074 W; one row's A staging inside N1 0.271 +- 0.133 W; in D21 the walk +0.251 and the A path -0.092 W
+  6a. D21 measured +0.159 +- 0.096 W; error = measured - predicted (each carries the measurement's +-0.096; the post hoc rows' paired residuals are in section 1):
+      null: a second row changes nothing: predicted +0.000, error +0.159
+      the bench at its constants, card order (frozen): predicted +0.011 to +0.023, error +0.137 to +0.148
+      C, per cycle (frozen): predicted +0.044, error +0.115
+      W, the walk at E129's N - N1 (frozen): predicted +0.296, error -0.137
+      T, the A path (frozen): predicted -0.425, error +0.585
+      post hoc: W's count at this session's N - N1: predicted +0.316, error -0.156
+      post hoc: address-bit toggles at this session's N - N1: predicted +0.168, error -0.009
+  6b. N2 measured +1.043 +- 0.087 W, from what was frozen before the run (E129's N1 0.8655):
+      E129's N1 alone (no change from one row): predicted 0.865, error +0.177
+      E129's N1 + the bench's frozen D21: predicted 0.877 to 0.888, error +0.155 to +0.166
+      E129's N1 + C's frozen D21: predicted 0.909, error +0.133
+      E129's N1 + W's frozen D21: predicted 1.162, error -0.119
+      E129's N1 + T's frozen D21: predicted 0.440, error +0.603
+      the bench at its own constants, all of N2: predicted 0.082 to 0.162, error +0.880 to +0.960
+      the bench's own N1 at its constants 0.070 to 0.140 W against N1 measured 0.884: its N2 miss is its N1 miss
+  6c. the registered N2 errors (this session's N1 + a frozen D21; scored.json > reported.N2_out_of_sample) equal the D21 errors: True
+  6d. post hoc: W's count priced at this session's N - N1 (94.8 fJ a new-address read) predicts N2 1.199 W, error -0.156, against the null's (N2 = N1) +0.159
