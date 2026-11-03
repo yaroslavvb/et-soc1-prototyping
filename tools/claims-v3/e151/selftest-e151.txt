@@ -1,0 +1,24 @@
+E151 self-test, 2026-11-03 04:21 PST
+PASS  1a lone glitch at the running maximum: F1 and F2  ({"F1": [5], "F2": [5], "union": [5]})
+PASS  1b a pair of glitches: both marked  ([5, 6])
+PASS  1c a load step: nothing marked  ([])
+PASS  1d a glitch at a high load under 4 W above its neighbours: F2 only
+PASS  1e an aifoundry3-like stream (max field 38.375 W): nothing marked
+PASS  2a E145's 16 blocks: the filter marks E145's post-hoc 15, all at the running maximum  ({"files": 16, "samples": 26469, "F1": 15, "F2": 15, "union": 15})
+PASS  2b E138's aifoundry3 blocks: nothing marked  ({"files": 9, "samples": 15741, "F1": 0, "F2": 0, "union": 0})
+PASS  2b E130's aifoundry3 blocks: nothing marked  ({"files": 11, "samples": 16091, "F1": 0, "F2": 0, "union": 0})
+PASS  3 E145's reducer with E151's filter reproduces E145's post-hoc reduction byte for byte  (runs.csv True, reduce json True)
+PASS  4 the scorer on E138: B odd - even +35.95 [+30.47, +41.42] (n 9), R1 INCONCLUSIVE  (want +35.95 [+30.47, +41.42], R1 INCONCLUSIVE)
+PASS  4 the scorer on E130: B odd - even +33.15 [+29.56, +36.75] (n 6), R1 INCONCLUSIVE  (want +33.15 [+29.56, +36.75], R1 INCONCLUSIVE)
+PASS  4 the scorer on E145 filtered: B odd - even +36.12 [+31.75, +40.49] (n 13), R1 RECODED  (want +36.12 [+31.75, +40.49], R1 RECODED)
+PASS  5a a normal live line passes at the registered 45 W / 68 C (minshire[2] = 87 C is the latch)
+PASS  5b the board stop at 1.0 W fires and names the sample's age  (E151 board-power stop: board_w 23.4 W >= 1.0 W (sample t_ms 1793708492494.2278, read 0.0 s after it was taken, from tele)
+PASS  5c the die stop at 1.0 C fires on minshire[0]  (E151 die stop: minion-shire reading minshire[0] 52.0 C >= 1.0 C (sample t_ms 1793708492494.2278, read 0.0 s after it was)
+PASS  5d a 46 W line trips the 45 W stop
+PASS  5e a 68 C minshire[0] trips the 68 C die stop
+PASS  6 the smoke gate's stop test, correct: passes
+PASS  6 the smoke gate's stop test, stale: fails  (stop test die: sample read 3.5 s after it was taken, from telemetry.jsonl.raw (want <= 2.0 s, telemetry.jsonl.raw); stop test board: sample read 3.5 s after it )
+PASS  6 the smoke gate's stop test, launched: fails  (stop test: 1 launch records and 0 launch marks (want none: no launch))
+PASS  7a check_e151.py --desk  (HARNESS OK: 46 files match predictions-e151.json (desk: binaries not checked))
+PASS  7b e151_common.py --verify  ({"e130_tiles": 26, "orders_checked": 14, "problems": []})
+SELFTEST PASS []
