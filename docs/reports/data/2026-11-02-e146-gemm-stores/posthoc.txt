@@ -1,0 +1,110 @@
+(1) the session's fit T = C/f + M per shape and format (C cycles, M us), against each model's
+  L1.fp32: C  443.9 +-  3.1, M 0.7157 +- 0.0041 (span 200 MHz) | M0 C  408.6 M 0.6809  MS C  408.6 M 0.6809  MAB C  442.4 M 0.5853
+  L1.fp16: C  441.0 +- 16.9, M 0.7230 +- 0.0215 (span 158 MHz) | M0 C  403.3 M 0.6892  MS C  403.3 M 0.6892  MAB C  445.0 M 0.5817
+  L1.int8: C  459.8 +-  9.9, M 0.7527 +- 0.0129 (span 200 MHz) | M0 C  378.9 M 0.6859  MS C  378.9 M 0.6859  MAB C  398.3 M 0.5927
+  L2.fp32: C  449.1 +-  9.6, M 0.7634 +- 0.0125 (span 200 MHz) | M0 C  340.6 M 1.0598  MS C  426.4 M 0.8489  MAB C  442.2 M 0.7732
+  L2.fp16: C  442.0 +- 12.1, M 0.7735 +- 0.0155 (span 184 MHz) | M0 C  332.2 M 1.0732  MS C  423.6 M 0.8530  MAB C  457.4 M 0.7505
+  L2.int8: C  471.0 +- 10.6, M 0.8213 +- 0.0137 (span 200 MHz) | M0 C  433.7 M 1.0695  MS C  445.9 M 0.8816  MAB C  491.8 M 0.7899
+  L4.fp32: C  427.1 +- 10.7, M 0.8068 +- 0.0138 (span 200 MHz) | M0 C  323.6 M 1.1546  MS C  463.9 M 0.8095  MAB C  459.1 M 0.7724
+  L4.fp16: C  429.8 +- 11.5, M 0.8026 +- 0.0149 (span 200 MHz) | M0 C  314.4 M 1.1692  MS C  464.0 M 0.8089  MAB C  481.4 M 0.7389
+  L4.int8: C  454.1 +- 13.6, M 0.8624 +- 0.0176 (span 200 MHz) | M0 C  447.4 M 1.1654  MS C  467.3 M 0.8579  MAB C  524.8 M 0.7926
+  L8.fp32: C  437.1 +-  5.5, M 0.7908 +- 0.0071 (span 200 MHz) | M0 C  323.6 M 1.1546  MS C  487.3 M 0.7519  MAB C  459.1 M 0.7724
+  L8.fp16: C  438.0 +- 10.1, M 0.7905 +- 0.0132 (span 200 MHz) | M0 C  314.4 M 1.1692  MS C  488.9 M 0.7488  MAB C  481.4 M 0.7389
+  L8.int8: C  457.6 +- 12.0, M 0.8564 +- 0.0155 (span 200 MHz) | M0 C  447.4 M 1.1654  MS C  470.6 M 0.8067  MAB C  524.8 M 0.7926
+  D1.fp32: C  440.9 +-  7.5, M 0.7163 +- 0.0100 (span 200 MHz) | M0 C  420.5 M 0.6836  MS C  420.5 M 0.6836  MAB C  476.0 M 0.5128
+  D1.fp16: C  447.9 +-  6.0, M 0.7054 +- 0.0078 (span 200 MHz) | M0 C  415.7 M 0.6913  MS C  415.7 M 0.6913  MAB C  490.7 M 0.4910
+  D1.int8: C  437.5 +-  8.0, M 0.7622 +- 0.0103 (span 200 MHz) | M0 C  370.0 M 0.6831  MS C  370.0 M 0.6831  MAB C  418.8 M 0.5082
+  D2.fp32: C  378.6 +- 10.5, M 1.1938 +- 0.0135 (span 200 MHz) | M0 C  333.1 M 1.7245  MS C  418.9 M 1.5136  MAB C  461.2 M 1.4634
+  D2.fp16: C  391.6 +-  6.8, M 1.1743 +- 0.0088 (span 200 MHz) | M0 C  324.0 M 1.7395  MS C  415.4 M 1.5193  MAB C  435.7 M 1.5014
+  D2.int8: C  390.5 +-  6.8, M 1.2024 +- 0.0087 (span 200 MHz) | M0 C  446.3 M 1.6917  MS C  458.5 M 1.5038  MAB C  400.3 M 1.4946
+  D4.fp32: C  461.8 +- 16.2, M 1.5260 +- 0.0206 (span 194 MHz) | M0 C  316.2 M 1.8193  MS C  456.5 M 1.4741  MAB C  478.1 M 1.4626
+  D4.fp16: C  435.9 +- 18.4, M 1.5592 +- 0.0236 (span 192 MHz) | M0 C  306.2 M 1.8355  MS C  455.8 M 1.4752  MAB C  459.6 M 1.4898
+  D4.int8: C  395.1 +-  7.8, M 1.6086 +- 0.0102 (span 200 MHz) | M0 C  460.0 M 1.7876  MS C  479.9 M 1.4801  MAB C  433.4 M 1.4973
+  D8.fp32: C  456.6 +- 11.6, M 1.6048 +- 0.0148 (span 200 MHz) | M0 C  314.7 M 1.9475  MS C  478.4 M 1.5448  MAB C  470.1 M 1.5845
+  D8.fp16: C  459.4 +- 13.7, M 1.6022 +- 0.0176 (span 200 MHz) | M0 C  304.6 M 1.9640  MS C  479.1 M 1.5437  MAB C  461.4 M 1.5974
+  D8.int8: C  481.6 +- 19.2, M 1.5726 +- 0.0243 (span 159 MHz) | M0 C  462.4 M 1.9076  MS C  485.6 M 1.5489  MAB C  461.6 M 1.5969
+  F6.fp32: C  399.1 +-  5.3, M 1.4131 +- 0.0070 (span 200 MHz) | M0 C  315.3 M 1.8931  MS C  471.2 M 1.5096  MAB C  473.5 M 1.5328
+  F6.fp16: C  407.1 +-  6.0, M 1.3973 +- 0.0078 (span 200 MHz) | M0 C  305.3 M 1.9095  MS C  471.5 M 1.5092  MAB C  460.7 M 1.5518
+  F6.int8: C  403.0 +-  5.8, M 1.4198 +- 0.0074 (span 200 MHz) | M0 C  461.4 M 1.8567  MS C  483.5 M 1.5151  MAB C  449.6 M 1.5547
+
+(2) the store's cost from the pair that differs only in cadence, L4 (every 128 ops) and L8 (every 256)
+  fp32: T800 L4 1.3416122098235208, L8 1.3374500596363676; sigma at 800 MHz 0.71 us a store (frozen 4.829), at 600 -0.117 (frozen 3.166)
+  fp16: T800 L4 1.3403593201522017, L8 1.3381864365650828; sigma at 800 MHz 0.371 us a store (frozen 4.93), at 600 -0.273 (frozen 3.158)
+  int8: T800 L4 1.4305503036411114, L8 1.4288075090190757; sigma at 800 MHz 0.297 us a store (frozen 8.039), at 600 0.02 (frozen 7.803)
+
+(3) a refit on E146's ladder (operand split + store term, least squares at 800 MHz, per format), scored on F6, which it never sees
+  fp32 split+store             : in-sample rms 6.63%; F6 predicted 2.0562 us, measured 1.9121331532956838, error -0.0701; coefficients [0.004501, 0.00405, 0.025766, 0.00952, 3.009209]
+  fp32 split only              : in-sample rms 6.60%; F6 predicted 2.0632 us, measured 1.9121331532956838, error -0.0732; coefficients [0.008604, 0.001137, 0.03076, 0.00638]
+  fp32 lines+store (MS's form) : in-sample rms 7.92%; F6 predicted 2.0209 us, measured 1.9121331532956838, error -0.0538; coefficients [0.004324, 0.012458, 3.505008]
+  fp16 split+store             : in-sample rms 6.70%; F6 predicted 2.0557 us, measured 1.9064016955403726, error -0.0726; coefficients [0.005037, 0.003704, 0.026395, 0.009129, 2.730354]
+  fp16 split only              : in-sample rms 6.67%; F6 predicted 2.0621 us, measured 1.9064016955403726, error -0.0755; coefficients [0.00876, 0.001061, 0.030926, 0.006281]
+  fp16 lines+store (MS's form) : in-sample rms 8.00%; F6 predicted 2.0201 us, measured 1.9064016955403726, error -0.0563; coefficients [0.004331, 0.012443, 3.517518]
+  int8 split+store             : in-sample rms 6.89%; F6 predicted 2.0543 us, measured 1.9240403620118518, error -0.0634; coefficients [0.00754, 0.00726, 0.031951, 0.010746, 8.69458]
+  int8 split only              : in-sample rms 7.23%; F6 predicted 2.0747 us, measured 1.9240403620118518, error -0.0726; coefficients [0.019396, -0.001156, 0.046379, 0.001675]
+  int8 lines+store (MS's form) : in-sample rms 8.87%; F6 predicted 2.0076 us, measured 1.9240403620118518, error -0.0416; coefficients [0.007496, 0.014512, 9.247614]
+
+(4) energy per op over the base, e = (p800 - B(800)) T800, card uJ an op step, and the store's energy slope on the pairs
+  L4/L8 fp32 zeros : e   4.602 ->   4.662; slope (eps)    -15.4 uJ a store step (fitted 371.28)
+  L4/L8 fp32 randn : e  46.944 ->  39.529; slope (eps)   1898.2 uJ a store step (fitted 617.74)
+  L4/L8 fp16 zeros : e   4.920 ->   1.787; slope (eps)    802.0 uJ a store step (fitted 250.51)
+  L4/L8 fp16 randn : e  41.572 ->  45.010; slope (eps)   -880.1 uJ a store step (fitted 288.47)
+  L4/L8 int8 zeros : e   3.627 ->   1.108; slope (eps)    644.9 uJ a store step (fitted 266.82)
+  L4/L8 int8 full  : e  17.875 ->  14.539; slope (eps)    854.0 uJ a store step (fitted 295.47)
+  D4/D8 fp32 zeros : e   4.882 ->   5.420; slope (eps)   -137.7 uJ a store step (fitted 371.28)
+  D4/D8 fp32 randn : e  45.057 ->  43.611; slope (eps)    370.2 uJ a store step (fitted 617.74)
+  D4/D8 fp16 zeros : e   6.009 ->   5.574; slope (eps)    111.4 uJ a store step (fitted 250.51)
+  D4/D8 fp16 randn : e  42.170 ->  42.537; slope (eps)    -94.0 uJ a store step (fitted 288.47)
+  D4/D8 int8 zeros : e   3.314 ->   3.580; slope (eps)    -68.1 uJ a store step (fitted 266.82)
+  D4/D8 int8 full  : e  17.785 ->  16.599; slope (eps)    303.6 uJ a store step (fitted 295.47)
+  L2/L4 fp32 zeros : e   3.205 ->   4.602; slope (eps)   -178.8 uJ a store step (fitted 371.28)
+  L2/L4 fp32 randn : e  47.656 ->  46.944; slope (eps)     91.1 uJ a store step (fitted 617.74)
+  L2/L4 fp16 zeros : e   4.897 ->   4.920; slope (eps)     -2.9 uJ a store step (fitted 250.51)
+  L2/L4 fp16 randn : e  45.092 ->  41.572; slope (eps)    450.6 uJ a store step (fitted 288.47)
+  L2/L4 int8 zeros : e   1.559 ->   3.627; slope (eps)   -264.7 uJ a store step (fitted 266.82)
+  L2/L4 int8 full  : e  17.471 ->  17.875; slope (eps)    -51.7 uJ a store step (fitted 295.47)
+  D2/D4 fp32 zeros : e   4.461 ->   4.882; slope (eps)    -53.9 uJ a store step (fitted 371.28)
+  D2/D4 fp32 randn : e  44.046 ->  45.057; slope (eps)   -129.4 uJ a store step (fitted 617.74)
+  D2/D4 fp16 zeros : e   5.833 ->   6.009; slope (eps)    -22.5 uJ a store step (fitted 250.51)
+  D2/D4 fp16 randn : e  41.378 ->  42.170; slope (eps)   -101.4 uJ a store step (fitted 288.47)
+  D2/D4 int8 zeros : e   3.239 ->   3.314; slope (eps)     -9.6 uJ a store step (fitted 266.82)
+  D2/D4 int8 full  : e  17.096 ->  17.785; slope (eps)    -88.2 uJ a store step (fitted 295.47)
+
+(5) the rest reading, card time, commands
+  the smoke's rest reading (last 30 s): {'board_w': 22.06, 'die_c': 46.0, 'n': 300}
+  card time, first session start to last session end: 25.12 min; sampler lines 14932; runs with an after-run config read 109; session start/end query records 6; queue snapshots 2
+
+(6) the stop-path tests (the queue's records)
+   {"t_ms": 1793677264135, "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793677263365, "t_third_line_ms": 1793677263302, "launch": [1793677262582, 1793677263652], "trip_after_line_ms": 63, "launch_end_after_trip_ms": 287, "lines": 24}
+   {"t_ms": 1793677264135, "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+   {"t_ms": 1793677266137, "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793677264361, "t_first_line_ms": 1793677264301, "trip_after_line_ms": 60, "lines": 13}
+   {"t_ms": 1793677266137, "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+
+(7) how many of the lines the desk's strict-LRU L3 calls fresh the L3 must have served, for MAB's frozen prices to give the measured T800 (B's fresh
+    lines turned into L3 lines; the reuse distance of a B panel from one row of C blocks to the next, C included)
+  D2.fp32: B panel reuse distance 36 MB; T800 1.6674 against MAB 2.0399: share of the 'fresh' B lines the L3 served 0.57
+  D2.fp16: B panel reuse distance 36 MB; T800 1.6641 against MAB 2.0460: share of the 'fresh' B lines the L3 served 0.58
+  D2.int8: B panel reuse distance 36 MB; T800 1.6910 against MAB 1.9950: share of the 'fresh' B lines the L3 served 0.59
+  F6.fp32: B panel reuse distance 44 MB; T800 1.9121 against MAB 2.1247: share of the 'fresh' B lines the L3 served 0.33
+  F6.fp16: B panel reuse distance 44 MB; T800 1.9064 against MAB 2.1276: share of the 'fresh' B lines the L3 served 0.33
+  F6.int8: B panel reuse distance 44 MB; T800 1.9240 against MAB 2.1167: share of the 'fresh' B lines the L3 served 0.38
+  D4.fp32: B panel reuse distance 56 MB; T800 2.1040 against MAB 2.0602: share of the 'fresh' B lines the L3 served -0.07
+  D4.fp16: B panel reuse distance 56 MB; T800 2.1043 against MAB 2.0644: share of the 'fresh' B lines the L3 served -0.06
+  D4.int8: B panel reuse distance 56 MB; T800 2.1033 against MAB 2.0390: share of the 'fresh' B lines the L3 served -0.13
+  D8.fp32: B panel reuse distance 96 MB; T800 2.1762 against MAB 2.1721: share of the 'fresh' B lines the L3 served -0.01
+  D8.fp16: B panel reuse distance 96 MB; T800 2.1769 against MAB 2.1742: share of the 'fresh' B lines the L3 served -0.00
+  D8.int8: B panel reuse distance 96 MB; T800 2.1754 against MAB 2.1739: share of the 'fresh' B lines the L3 served -0.00
+
+(8) the store's energy from each burst's whole-window mean power (burst_w, at the burst's own mean clock; L4 and L8 ran at the same clock and rate),
+    per pass: eps = (P(L8) - P(L4)) T / (1/256 - 1/128), T the pair's mean T800; the registered R4 reads the first second at 800 MHz instead
+  L4/L8 fp32 zeros : eps per pass [-3.4, -17.1] uJ a store step (mean -10.2; fitted 371.28); burst W [36.44, 36.66] -> [36.45, 36.71]
+  L4/L8 fp32 randn : eps per pass [-288.1, 555.5] uJ a store step (mean 133.7; fitted 617.74); burst W [65.15, 67.08] -> [65.99, 65.46]
+  L4/L8 fp16 zeros : eps per pass [92.6, -181.7] uJ a store step (mean -44.5; fitted 250.51); burst W [37.09, 36.58] -> [36.82, 37.11]
+  L4/L8 fp16 randn : eps per pass [325.7, 92.6] uJ a store step (mean 209.1; fitted 288.47); burst W [64.74, 63.56] -> [63.79, 63.29]
+  L4/L8 int8 zeros : eps per pass [139.1, 281.8] uJ a store step (mean 210.4; fitted 266.82); burst W [35.41, 36.2] -> [35.03, 35.43]
+  L4/L8 int8 full  : eps per pass [322.1, -219.6] uJ a store step (mean 51.3; fitted 295.47); burst W [45.05, 44.84] -> [44.17, 45.44]
+  D4/D8 fp32 zeros : eps per pass [-98.6, -87.7] uJ a store step (mean -93.2; fitted 371.28); burst W [35.98, 36.04] -> [36.16, 36.2]
+  D4/D8 fp32 randn : eps per pass [580.7, 356.1] uJ a store step (mean 468.4; fitted 617.74); burst W [55.26, 56.09] -> [54.2, 55.44]
+  D4/D8 fp16 zeros : eps per pass [65.8, 328.8] uJ a store step (mean 197.3; fitted 250.51); burst W [36.59, 36.59] -> [36.47, 35.99]
+  D4/D8 fp16 randn : eps per pass [838.4, 43.8] uJ a store step (mean 441.1; fitted 288.47); burst W [54.07, 53.28] -> [52.54, 53.2]
+  D4/D8 int8 zeros : eps per pass [32.9, -76.7] uJ a store step (mean -21.9; fitted 266.82); burst W [35.14, 35.5] -> [35.08, 35.64]
+  D4/D8 int8 full  : eps per pass [60.2, 186.2] uJ a store step (mean 123.2; fitted 295.47); burst W [41.76, 42.55] -> [41.65, 42.21]
