@@ -1,0 +1,124 @@
+E141 corrections after verification: the numbers C1-C6 quote, from committed files
+====================================================================================================
+
+C1  The footing of M7's aifoundry3 float training rows, and B1/P2 at it
+  source: docs/reports/data/2026-11-02-q138m-model/loko-m7.json > families.float|int8.row_errors (card a3)
+  exp   leak.mode    k W/C the meter dips (reducer.dips)                float rows int8 rows  file
+  E78        auto   0.1994 kept (no record; reduce_e78.py removes no di         33        15  docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json > leak, reducer.dips
+  E86        auto   0.2290 kept (no record; reduce_e78.py removes no di          8         4  docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json > leak, reducer.dips
+  E90        auto   0.2203 kept (no record; reduce_e78.py removes no di         21         1  docs/reports/data/2026-10-31-e90-signs-spread/e90.json > leak, reducer.dips
+  E92        auto   0.1396 kept (no record; reduce_e78.py removes no di         34         0  docs/reports/data/2026-11-01-e92-sign-split/e92.json > leak, reducer.dips
+  E95        auto   0.2959 kept (no record; reduce_e78.py removes no di         21        12  docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json > leak, reducer.dips
+  E115       auto   0.2300 kept (E78's primary on aifoundry3)                   19         6  docs/reports/data/2026-11-01-e115-blind-pool/e115.json > leak, reducer.dips
+  E121     0.1994   0.1994 removed (E82 A2's definition; E93's register         15         5  docs/reports/data/2026-11-01-e121-zero-gate-replicate/e121.json > leak, reducer.dips
+  E122     0.1994   0.1994 removed (E82 A2's definition; E108's registe         25         0  docs/reports/data/2026-11-01-e122-signs-replicate/e122.json > leak, reducer.dips
+  E123     0.1994   0.1994 removed (E82 A2's definition; E123's registe         40        14  docs/reports/data/2026-11-01-e123-tile-spread-rest/e123.json > leak, reducer.dips
+  E127       auto   0.1913 removed (E82 A2's definition; the labelled d         13         0  docs/reports/data/2026-11-02-e127-b-gate/e127.json > leak, reducer.dips
+  E140       auto   0.2861 kept (E78's primary on aifoundry3)                   18         7  docs/reports/data/2026-11-02-e140-blind4/e140.json > leak, reducer.dips
+  float rows: 247; at a FIXED 0.1994 (E121, E122, E123; leak.mode '0.1994'): 80; at 0.1994 with E78's own fit: 113; with the meter's dips removed (E121, E122, E123, E127): 93; with them kept: 154
+  the training rows' footing (their sessions' slopes averaged): by rows 0.21035; weighted by D 0.21631; weighted by D^2 0.22173 W/C
+    fp32: 143 rows, by rows 0.2081, by D^2 0.2186
+    fp16: 104 rows, by rows 0.2134, by D^2 0.2263
+  the training sessions' own fits (auto) span 0.1396-0.2959 W/C
+  E141's session fit (the registered primary): 0.2634 W/C over 165 runs  (e141.json > leak)
+  the post hoc arms use 0.2104 (the verifier's row count, from the slopes rounded to four places), 0.2163 and 0.2217
+  B1 interval [-0.117, +0.085] W; P2 upper line 0.247 W   (scored.json > primary.rules.E141-B1|P2.interval)
+  sources: scored.json > primary and arms.*; posthoc-after-verification/scored-[nodips-]leak<k>.json > primary
+  arm                                        k             P1             P2             P3          B1 (floats)          B2 (int8)       C1
+  dips kept, leak 0 (none)              0.0000     0.487 PASS     0.463 FAIL     0.324 PASS      +0.381 FAIL LOW        +0.031 PASS    27/30
+  dips kept, leak 0.1994                0.1994     0.260 PASS     0.233 PASS     0.342 PASS          -0.082 PASS        -0.076 PASS    30/30
+  dips kept, leak 0.2104 (post hoc)     0.2104     0.266 PASS     0.243 PASS     0.344 PASS          -0.107 PASS        -0.082 PASS    30/30
+  dips kept, leak 0.2163 (post hoc)     0.2163     0.271 PASS     0.249 FAIL     0.345 PASS     -0.121 FAIL HIGH        -0.085 PASS    30/30
+  dips kept, leak 0.2217 (post hoc)     0.2217     0.275 PASS     0.255 FAIL     0.346 PASS     -0.133 FAIL HIGH        -0.088 PASS    30/30
+  dips kept, auto (REGISTERED)          0.2634     0.325 PASS     0.317 FAIL     0.356 PASS     -0.230 FAIL HIGH        -0.110 PASS    28/30
+  dips kept, leak 0.3803                0.3803  NOT SCORED (passes set aside: [14110, 14112, 14113])
+  dips removed, leak 0.2104 (post hoc)  0.2104     0.145 PASS     0.147 PASS     0.337 PASS          +0.001 PASS        -0.086 PASS    30/30
+  dips removed, leak 0.2163 (post hoc)  0.2163     0.144 PASS     0.145 PASS     0.338 PASS          -0.013 PASS        -0.090 PASS    30/30
+  dips removed, leak 0.2217 (post hoc)  0.2217     0.145 PASS     0.145 PASS     0.339 PASS          -0.026 PASS        -0.093 PASS    30/30
+  dips removed, auto (reported)         0.2747     0.201 PASS     0.195 PASS     0.352 PASS     -0.151 FAIL HIGH        -0.126 PASS    28/30
+  B1 moves -2.319 W per W/C between 0.1994 and 0.2634; it reaches its lower line (-0.117) at k = 0.2144 W/C
+  at 0.2104: B1 -0.107 W with the dips kept, so the slope gap from 0.2634 accounts for +0.123 of the registered -0.230 W (53%); with the dips removed too +0.001 W (100% accounted for)
+  at 0.2163: B1 -0.121 W with the dips kept, so the slope gap from 0.2634 accounts for +0.109 of the registered -0.230 W (47%); with the dips removed too -0.013 W (94% accounted for)
+  at 0.2217: B1 -0.133 W with the dips kept, so the slope gap from 0.2634 accounts for +0.097 of the registered -0.230 W (42%); with the dips removed too -0.026 W (89% accounted for)
+  post hoc leak0.2104, scored alone (posthoc-after-verification/scored-leak0.2104.json): passes [14111, 14112, 14113] set aside [14110]; M1 -0.006 [-0.043, +0.025] NOT RESOLVED; M2 -0.047 [-0.110, +0.006] NOT RESOLVED; H1-H3 0.128/0.129/0.135 C; H4 30/30; all 30: rms 0.311 bias -0.140 W
+  post hoc leak0.2163, scored alone (posthoc-after-verification/scored-leak0.2163.json): passes [14111, 14112, 14113] set aside [14110]; M1 -0.006 [-0.044, +0.025] NOT RESOLVED; M2 -0.046 [-0.109, +0.005] NOT RESOLVED; H1-H3 0.128/0.129/0.135 C; H4 30/30; all 30: rms 0.316 bias -0.150 W
+  post hoc leak0.2217, scored alone (posthoc-after-verification/scored-leak0.2217.json): passes [14111, 14112, 14113] set aside [14110]; M1 -0.006 [-0.044, +0.025] NOT RESOLVED; M2 -0.045 [-0.106, +0.005] NOT RESOLVED; H1-H3 0.128/0.129/0.135 C; H4 30/30; all 30: rms 0.321 bias -0.160 W
+  post hoc nodips-leak0.2104, scored alone (posthoc-after-verification/scored-nodips-leak0.2104.json): passes [14110, 14111, 14112, 14113] set aside []; M1 -0.001 [-0.048, +0.033] NOT RESOLVED; M2 -0.056 [-0.138, +0.006] NOT RESOLVED; H1-H3 0.087/0.126/0.129 C; H4 30/30; all 30: rms 0.231 bias -0.048 W
+  post hoc nodips-leak0.2163, scored alone (posthoc-after-verification/scored-nodips-leak0.2163.json): passes [14110, 14111, 14112, 14113] set aside []; M1 -0.002 [-0.049, +0.033] NOT RESOLVED; M2 -0.056 [-0.136, +0.004] NOT RESOLVED; H1-H3 0.087/0.126/0.129 C; H4 30/30; all 30: rms 0.231 bias -0.059 W
+  post hoc nodips-leak0.2217, scored alone (posthoc-after-verification/scored-nodips-leak0.2217.json): passes [14110, 14111, 14112, 14113] set aside []; M1 -0.002 [-0.050, +0.033] NOT RESOLVED; M2 -0.056 [-0.134, +0.002] NOT RESOLVED; H1-H3 0.087/0.126/0.129 C; H4 30/30; all 30: rms 0.232 bias -0.068 W
+  E142 (card 1, docs/reports/data/2026-11-02-e142-blind5-card1/scored.json): primary leak 0.2414 B1 +0.050 PASS; arms.auto leak 0.4077 B1 -0.354 FAIL HIGH
+  E140 (pool 4, M6; docs/reports/data/2026-11-02-e140-blind4/scored.json > primary.power.rows): leak 0.2861: mean error over 25 rows -0.275 W; priority-1 floats (14) -0.290 W
+  E140 (pool 4, M6; docs/reports/data/2026-11-02-e140-blind4/scored.json > leak0.1994.power.rows): leak 0.1994: mean error over 25 rows -0.124 W; priority-1 floats (14) -0.095 W
+
+C2  36 tiles = 30 new kinds + 6 anchors; three anchors are E78's own zeros tiles
+  anchors (6): fp16.anchor_randn, fp16.anchor_zeros, fp32.anchor_randn, fp32.anchor_zeros, int8.anchor_full, int8.anchor_zeros; non-anchor tiles: 30 (predictions-e141.json > sets.coverage_tiles)
+  tools/claims-v3/kinds/blind5/tiles/fp32/fp32.anchor_zeros.bin e5a00aa9991ac8a5  tools/claims-v3/kinds/tiles/fp32/zeros.bin e5a00aa9991ac8a5  identical: True
+  tools/claims-v3/kinds/blind5/tiles/fp16/fp16.anchor_zeros.bin e5a00aa9991ac8a5  tools/claims-v3/kinds/tiles/fp16/zeros.bin e5a00aa9991ac8a5  identical: True
+  tools/claims-v3/kinds/blind5/tiles/int8/int8.anchor_zeros.bin e5a00aa9991ac8a5  tools/claims-v3/kinds/tiles/int8/zeros.bin e5a00aa9991ac8a5  identical: True
+  M7 heat rms (dT_win - M7): priority-1 per format (the rules) 0.128 / 0.129 / 0.135 C; the 24 priority-1 0.130; the 30 non-anchor 0.132; all 36 0.132 C
+
+C3  Band widths: M7's power bands are wider than M6's, with the same errors
+  fp32 (12 non-anchor tiles): mean power half-width M7 0.807 / M6 0.498 / M5 0.385 W (M7/M6 1.62); heat half-width M7 0.353 / M6 0.596 C
+  fp16 (9 non-anchor tiles): mean power half-width M7 0.536 / M6 0.344 / M5 0.340 W (M7/M6 1.56); heat half-width M7 0.310 / M6 0.555 C
+  int8 (9 non-anchor tiles): mean power half-width M7 0.595 / M6 0.517 / M5 0.467 W (M7/M6 1.15); heat half-width M7 0.399 / M6 0.344 C
+  floats (21): power half-width M7 0.691 / M6 0.432 W (x1.60); heat M7 0.335 / M6 0.579 C
+  M7: 30 non-anchor rms 0.365 bias -0.233 W, inside 28 of 30, largest |error|/half-width 1.14 (scored.json > primary.reported.M7)
+  M6: 30 non-anchor rms 0.367 bias -0.237 W, inside 22 of 30, largest |error|/half-width 1.61 (scored.json > primary.reported.M6)
+  M5: 30 non-anchor rms 0.408 bias -0.244 W, inside 19 of 30, largest |error|/half-width 2.20 (scored.json > primary.reported.M5)
+
+C4  Kinds-table cells (e141.json > items.<tile>.D and .dT_win: mean, 95% half-width, kept passes)
+  tile                               prio      D W  +-95%  n  dT_win C  +-95%  n
+  fp32.b_exp_busy_a_const               2   15.393  0.080  3     2.050  0.215  3
+  fp32.block_sparse_k4                  2   12.180  1.058  3     1.950  0.124  3
+  fp32.e4m3grid_gelu_w                  1   16.657  0.180  3     2.217  0.502  3
+  fp32.exp_only_both                    1   15.195  2.008  3     2.033  0.379  3
+  fp32.gray_stream                      1   16.575  0.116  3     2.400  0.124  3
+  fp32.lowrank2_w                       2   23.753  3.056  3     2.983  1.257  3
+  fp32.real_pythia_gelu_down            1   22.140  0.118  3     2.950  0.248  3
+  fp32.real_pythia_ln1_q                1   21.964  0.153  3     2.767  0.259  3
+  fp32.sorted_k                         1   22.507  1.393  3     3.033  0.399  3
+  fp32.wideexp48_bgate_alt              1   14.767  0.508  3     2.100  0.248  3
+  fp32.wideexp48_bgate_kblk             1   12.985  0.168  3     1.533  1.250  3
+  fp32.wideexp48_dense                  1   25.819  0.122  3     3.350  0.124  3
+  fp32.anchor_randn                     2   24.598  0.206  3     3.217  0.470  3  (anchor)
+  fp32.anchor_zeros                     2    0.024  0.157  3     0.083  0.259  3  (anchor)
+  fp16.exp_only                         2   16.247  0.172  2     2.300  0.635  2
+  fp16.pair_cancel_asign                1   16.524  0.041  3     2.383  0.287  3
+  fp16.pair_nearcancel                  1   21.765  0.069  3     2.883  0.072  3
+  fp16.real_pythia_ln2_up               1   21.831  1.009  3     2.850  0.124  3
+  fp16.real_pythia_qk                   1   20.576  2.042  3     2.833  0.143  3
+  fp16.real_pythia_softmax_v            1   16.754  0.645  3     2.400  0.215  3
+  fp16.sparse24_aligned                 1   12.716  0.120  3     1.983  0.072  3
+  fp16.sparse24_straddled               1   21.734  0.112  3     2.867  0.072  3
+  fp16.wideexp_bgate_alt                1   13.383  0.266  3     1.983  0.072  3
+  fp16.anchor_randn                     2   21.829  0.179  3     2.850  0.215  3  (anchor)
+  fp16.anchor_zeros                     2    0.000  0.061  3     0.000  0.000  3  (anchor)
+  int8.a_word_flipflop                  1    3.220  0.270  3     1.000  0.000  3
+  int8.b_line_flipflop_nogate           1    6.164  0.254  3     1.000  0.000  3
+  int8.b_line_zero_one                  1    3.351  0.137  3     0.667  1.434  3
+  int8.block_sparse_a                   2    4.330  0.311  3     1.000  0.000  3
+  int8.gray_a                           1    4.034  0.094  3     1.000  0.000  3
+  int8.powerlaw_w                       2    5.774  0.371  3     1.000  0.000  3
+  int8.real_pythia_w8a8_down            1    6.685  0.272  3     1.000  0.000  3
+  int8.real_pythia_w8a8_up              1    6.327  0.336  3     1.000  0.000  3
+  int8.sorted_k                         1    5.991  0.586  3     1.000  0.000  3
+  int8.anchor_full                      2    6.994  0.561  3     1.033  0.143  3  (anchor)
+  int8.anchor_zeros                     2   -0.002  0.403  3     0.233  0.706  3  (anchor)
+
+C5  The ettelem binary on aifoundry3 predates the source its sends were classified from
+  binary that ran: build/ettelem/ettelem 16037641ab75bdbe... (logs/binaries.sha256)
+  tools/ettelem/ettelem.cpp at de262730 (2026-09-25): sha256 ba9a0ac30a188f03...
+  tools/ettelem/ettelem.cpp at efa3e8cd (2026-10-04): sha256 a6cf931b2a123e88...
+  config(): byte-identical at the two revisions: True
+  sample(): byte-identical at the two revisions: True
+  get(): byte-identical at the two revisions: True
+  resetStats(): byte-identical at the two revisions: True
+  'temp' subcommand (the later source only; E128's guard refuses it): de262730 False, efa3e8cd True
+  docs/findings/14-card-behaviour.md records it at line 820 (E132 C1, E134 C6)
+
+C6  E141-M2 (M7 against M5) by arm
+  primary: -0.040 W [-0.091, +0.004] NOT RESOLVED   (scored.json)
+  dips_removed: -0.049 W [-0.106, -0.007] BETTER   (scored.json)
+  gates_off: -0.044 W [-0.095, -0.002] BETTER   (scored.json)
+  leak0.1994: -0.048 W [-0.115, +0.007] NOT RESOLVED   (scored.json)
+  leak0: -0.034 W [-0.131, +0.039] NOT RESOLVED   (scored.json)

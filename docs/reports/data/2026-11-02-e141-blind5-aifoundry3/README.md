@@ -13,6 +13,21 @@ reads, which the owner's rule of 2 November 2026 allows; `since_reset_ms` −1 i
 **41.0 of the 50 card-minutes allowed**: the stop-path test 14102, the smoke 14101 and four passes, 14110–14113 (574–623 s each); the budget
 rule stopped before 14114.*
 
+*Corrected after verification (a dated note, Mon 2 Nov 2026, about 23:10 PST; desk only: no card opened, no device command, no pass
+re-run). An independent verifier re-derived every registered number and verdict from the committed raw passes, and confirmed that every
+command sent was a read and that the blind order held. It found six faults. None changes a measured number, a rule, a prediction or a
+registered verdict, and none is an unsafe or disallowed command. Each is corrected by a dated note beside the text it concerns, the frozen
+text left as it was, and set out in full in [§ Corrections after verification](#corrections-after-verification-mon-2-nov-2026) at the end.
+The numbers they quote are printed by [`corrections-numbers.py`](corrections-numbers.py) → [`corrections-numbers.txt`](corrections-numbers.txt);
+the post hoc reductions are in [`posthoc-after-verification/`](posthoc-after-verification/README.md). **The main one, C1:** the floats'
+−0.23 W bias (B1 FAIL HIGH) and fp16's excess (P2 FAIL) are read on this session's own leakage fit, 0.263 W/°C, while M7's aifoundry3
+training rows were reduced on a mixed footing: their sessions' slopes average 0.210–0.222 W/°C, 80 of the 247 float rows sit at a fixed
+0.1994, and 93 had the meter's dips removed. Read post hoc on that footing, the floats' bias is between +0.001 W (dips removed) and
+−0.133 W (dips kept), so the registered FAILs follow the reduction's footing; E141 does not measure a float offset in M7, and cannot
+exclude one of up to about −0.13 W. The "0.23 W too high" of the title and of "In plain words" is the registered reading on this session's
+footing, not a model offset. The registration ([`tools/claims-v3/e141/`](../../../../tools/claims-v3/e141/README.md), `87a64409`) is frozen
+and unchanged.*
+
 **In plain words.** M7 is the lab's power-and-heat model: from the bytes a matmul multiplies it predicts the watts the chip draws over the
 same kernel on zeros, and how far the die warms in a 4.5 s run. E141 ran 36 new kinds of numbers, written by someone who never saw the
 model, on the card M7's power numbers are written for. **Heat holds again**: the die's rise is predicted to 0.13 °C rms in every format and
@@ -21,6 +36,12 @@ older models' bands held 22 (M6) and 19 (M5) of the same 30. **But M7 still pred
 same direction as M6's −0.28 W on pool 4), and on fp16 its error, 0.32 W rms, is about twice what its nested score claims (P2 FAIL). With the
 board meter's dips removed, a reported arm, fp16 passes (0.20 W) and the float bias shrinks to −0.15 W but still fails. M7 is not told apart
 from M6 or M5 on these tiles (M1, M2 NOT RESOLVED).
+
+*Note after verification (C1, C2, C3; Mon 2 Nov 2026). Of the 36 tiles, 30 are new kinds and 6 are the pool's anchors: three of those are
+byte-identical to E78's own zeros tiles, which M7 was fitted on, and the other three are fresh draws of the random and full kinds it was
+fitted on. "M7 still predicts the floats about 0.23 W too high" is the registered reading on this session's leakage fit; on the footing M7's
+training rows were reduced on, the floats read between +0.00 and −0.13 W (C1), so E141 does not show that M7 itself runs high. "Power's
+bands now hold" is calibration, not accuracy: M7's float bands are 1.6 times M6's, with the same errors (C3).*
 
 ## Results
 
@@ -67,6 +88,13 @@ The three models' power errors are close (their predictions differ by at most 0.
 rule B's half-width (k 3.179 floats, 2.483 int8, times the pool rms with the constants' covariance) covers 28 of 30 on the primary and on the
 dips-removed arm, where M6's 1.96σ bands cover 22 and 26 and M5's 19 and 23.
 
+*Note after verification (C3, Mon 2 Nov 2026): the coverage gain is the bands' width, not smaller errors. Over the 30 non-anchor tiles,
+M7's mean 95% half-width is 0.81 W on fp32, 0.54 on fp16 and 0.60 on int8, against M6's 0.50, 0.34 and 0.52 and M5's 0.39, 0.34 and 0.47
+(1.6 times M6's on the floats, 1.15 times on int8), while M7's and M6's errors are the same (rms 0.365 against 0.367 W, bias −0.233 against
+−0.237). The largest error is 1.14 of M7's half-width, 1.61 of M6's and 2.20 of M5's. So M7's power bands are better calibrated, not more
+accurate. Heat is the other way round: M7's float heat bands are narrower than M6's (0.34 against 0.58 °C mean half-width) and still hold
+all 30 tiles, a sharper heat prediction (`corrections-numbers.txt` § C3, from `predictions-e141.json` › `tiles.*.D_95`, `dT_win_95`).*
+
 **3. Where power misses** (measured − M7, W; per-pass D in `e141.json` › `per_pass`). The primary's largest misses, −0.52 to −0.75 W on
 `fp32.lowrank2_w`, `fp32.block_sparse_k4`, `fp32.exp_only_both`, `fp16.real_pythia_qk` and `fp32.sorted_k`, are each one low pass of three:
 `fp32.lowrank2_w` read 22.33 W in 14111 against 24.43 and 24.50, and 24.41–24.56 W in all four passes with dips removed (−0.04 W there). The
@@ -97,6 +125,31 @@ E115 0.230, E140 0.286), a spread that moves this pool's float bias by about 0.3
 the registered footing, in E140's direction, and of the size the session-to-session leakage fit makes; E141 alone cannot tell a model term
 from that footing.
 
+*Corrected after verification (C1, Mon 2 Nov 2026; post hoc, never a verdict). "The footing every M7 training session used with its own
+fit" is wrong, and so is the registration's "That is the frame of M7's aifoundry3 training rows". Of M7's 247 aifoundry3 float training
+rows, 80 (E121, E122, E123) were reduced at a fixed 0.1994 W/°C with the board meter's dips removed, 13 (E127) at their own fit with the
+dips removed, and 154 at their sessions' own fits (0.140–0.296) with the dips kept. Their sessions' slopes average 0.210 W/°C counted by
+rows, 0.216 weighted by each row's D and 0.222 weighted by D² (the weighting a common scale error carries), against this session's 0.263.
+E141's four passes reduced again at those slopes by the frozen code
+([`posthoc-after-verification/`](posthoc-after-verification/README.md)):*
+
+| footing (post hoc except the first row) | B1 floats bias, W (line −0.117) | P2 fp16 rms, W (line 0.247) | P1 fp32 rms, W | C1 |
+|---|---|---|---|---|
+| registered primary: auto 0.263, dips kept | **−0.230 FAIL HIGH** | **0.317 FAIL** | 0.325 PASS | 28/30 |
+| 0.210 / 0.216 / 0.222, dips kept | −0.107 PASS / −0.121 FAIL HIGH / −0.133 FAIL HIGH | 0.243 PASS / 0.249 FAIL / 0.255 FAIL | 0.266 / 0.271 / 0.275, PASS | 30/30 |
+| 0.210 / 0.216 / 0.222, dips removed | +0.001 / −0.013 / −0.026, all PASS | 0.147 / 0.145 / 0.145, all PASS | 0.145 / 0.144 / 0.145, PASS | 30/30 |
+
+*The slope gap alone accounts for 42–53% of the registered −0.230 W, and 89–100% once the dips are removed as 93 of the training rows had
+them. A footing matched to the training rows lies between the table's last two rows: B1 between +0.00 and −0.13 W, at or inside its line,
+and P2 between 0.145 and 0.255 W. So the registered B1 FAIL HIGH and P2 FAIL follow this session's own leakage fit against M7's training
+footing: E141 does not measure a float offset in M7, and it cannot exclude one of up to about −0.13 W. The other blind tests read the same
+way. E142 on card 1 reads +0.050 W (PASS) at its training-matched fixed 0.2414 W/°C and −0.354 W (FAIL HIGH) at its own fit, 0.408
+([`../2026-11-02-e142-blind5-card1/scored.json`](../2026-11-02-e142-blind5-card1/scored.json) › `primary`, `arms.auto`). E140's −0.28 W on
+pool 4 was read at its session's 0.286 W/°C: over its 25 rows the mean error is −0.275 W there and −0.124 W at 0.1994
+([`../2026-11-02-e140-blind4/scored.json`](../2026-11-02-e140-blind4/scored.json) › `primary`, `arms.leak0.1994`). int8 does not move
+with the footing (P3 0.337–0.356 W, B2 −0.08 to −0.13 W, PASS at every footing), and neither does heat. These readings were chosen after the
+data: they correct the interpretation, never a verdict (`corrections-numbers.txt` § C1).*
+
 **5. Heat** (measured − M7, °C): bias +0.004 (fp32), +0.110 (fp16), +0.032 (int8), rms 0.13 in each format, all 30 tiles inside M7's bands
 and all six pool anchors inside too. **The rise against M7's 0.1186 °C per board W** (reported): a line through the origin of each tile's
 mean `dT_win` on its mean S gives 0.1220 °C/W over the 30 tiles (+2.9%). At the measured run length (median T_run 4.49 s fp32 and fp16, 4.42
@@ -120,6 +173,12 @@ card**, with two blind pools and two models behind it. **M7's power bands can be
 of 30 here). **M7's power point estimate cannot yet, as stated**: on new kinds it runs 1.3× (fp32), 2.0× (fp16) and 1.6× (int8) its nested rms
 on the registered primary and reads the floats 0.23 W high; the meter's dips carry most of the fp32 and fp16 excess (0.201 and 0.195 W with
 them removed: inside the rules' intervals, fp32 below its nested 0.247 W, fp16 still above its 0.162 W), not int8's, whose misses are steady.
+
+*Note after verification (C1, C3; Mon 2 Nov 2026; post hoc). On M7's training footing with the dips removed, the floats read 0.144–0.145 W
+rms on fp32 and 0.145–0.147 W on fp16, below their nested 0.247 and 0.162 W, with a bias of +0.00 to −0.03 W; with the dips kept, 0.266–0.275
+and 0.243–0.255 W. So on the floats the excess over the nested score and the 0.23 W are the reduction's footing and the meter's dips, not
+shown to be M7's. int8's 1.5–1.6 times its nested 0.226 W is steady at every footing (0.337–0.356 W; its three steady misses, result 3).
+M7's 28 of 30 against M6's 22 is calibration: its float bands are 1.6 times M6's, with the same errors (C3).*
 
 **The anchors** (reported, D in W): E78's anchors on the kept passes, `fp32.randn` 24.52, `fp16.randn` 21.91, `int8.full` 7.15, against
 E140's 24.44, 21.85 and 7.01 on this card this afternoon; the pool's own random anchors inside M7's bands (fp32 +0.11, fp16 −0.04, int8
@@ -155,6 +214,13 @@ uses); NO-GO without it ([`logs/dmcmd-preflight.txt`](logs/dmcmd-preflight.txt);
 registered: aifoundry3's thermal firmware build is not public, so the classes rest on `836a4ab`'s handlers; the config reads and the telemetry
 came back in the form E147 read on this card tonight (the smoke gate checks it).
 
+*Added after verification (C5, Mon 2 Nov 2026): the host-binary residual. The `ettelem` that ran, aifoundry3's `build/ettelem/ettelem`
+(`16037641…`, [`logs/binaries.sha256`](logs/binaries.sha256)), was built on 25 September from lab `de262730`'s `tools/ettelem/ettelem.cpp`
+(`ba9a0ac3…`), which predates the reviewed source Q136(w)'s table and `dmcmd_audit.py` bind to that path (`a6cf931b…`, `efa3e8cd`). Its
+`config()`, `sample()`, `Dm::get()` and `Dm::resetStats()` are byte-identical to the reviewed source's, and the reviewed source's extra
+sends sit in a `temp` subcommand that the binary's source lacks and E128's guard refuses, so every class above stands
+([`docs/findings/14-card-behaviour.md`](../../../findings/14-card-behaviour.md), E132 C1 and E134 C6; `corrections-numbers.txt` § C5).*
+
 ## Card and post
 
 `et-who` at the session's start (21:23:33) and at its end (22:04:32): no process held a device node or card lock; other users' idle logins
@@ -176,6 +242,15 @@ rewritten the post meanwhile), dropped it and kept the aifoundry2 clause word fo
 - **The model**: a next fit should carry a float offset or a leakage footing shared across sessions, and int8's line flip-flop; the bands
   (rule B) stand as they are. **For E142**: `e141.json` is the aifoundry3 footing its card-term rules X1 and X2 read.
 
+*Corrected after verification (C1, C3; Mon 2 Nov 2026). For item 6, read "M7's power is biased high on the floats (−0.23 W, registered B1
+FAIL HIGH ...)" as the registered reading on this session's leakage fit; on M7's training footing it is +0.00 to −0.13 W, and fp16's
+P2 FAIL is the same footing (on that footing fp16 reads 0.243–0.255 W with the dips kept, 0.145–0.147 W with them removed, against the
+0.247 W line). For the model, read instead of "a next fit
+should carry a float offset or a leakage footing shared across sessions": **a next fit should first put its training rows and its tests on
+one footing, a leakage slope shared across sessions (or the slope as a model term) and one rule for the meter's dips, which the evidence
+favours over a float offset**; only then can a residual float offset of up to about −0.13 W be tested. The bands' gain over M6 is
+calibration, not accuracy (C3). int8's three steady misses and the line flip-flop stand.*
+
 ## Files
 
 `scored.json` and `results.md` (primary, with every arm's verdicts), `scored-nodips.json` and `results-nodips.md` (dips removed, scored alone),
@@ -183,3 +258,66 @@ rewritten the post meanwhile), dropped it and kept the aifoundry2 clause word fo
 `code.sha256`, `logs/` (the session log, the queue, the session's two config reads, the device-command preflight, the binaries' hashes, the
 pre-commit dry runs, the order of events), `aifoundry3/e141/p1411*`, `aifoundry3/e141-smoke/p14101`, `aifoundry3/e141-stoptest/p14102` (raw,
 as copied from the box; the reduction's `dir` fields point here), `aifoundry3/logs/` (the box's copy of the logs).
+
+*Added after verification (Mon 2 Nov 2026):* `corrections-numbers.py` → `corrections-numbers.txt` (every number the corrections quote, from
+committed files); `posthoc-after-verification/` (six post hoc reductions of the four passes at the training rows' footing, each scored
+alone; its README). Nothing listed above changed.
+
+## Corrections after verification (Mon 2 Nov 2026)
+
+An independent verifier (Q138's, about 22:20–22:48 PST) re-ran E141's reducer on the committed passes (0 differences from `e141.json`),
+scored it again with its own scorer (every rule and every arm reproduced), re-ran the frozen predictor (0 differences from the predictions
+file), checked the commits' order and the blind protocol, audited every device-command site again down to the firmware handlers, and read
+the box (read-only) and the day's post. Its verdict: the result holds, with six faults to fix. None is a measured number, a rule, a
+prediction or a registered verdict, and none is a disallowed command. They are corrected here, desk only, at about 23:10 PST, by the dated
+notes above and this section; the frozen text is unedited.
+
+- **C1 (major): the footing behind B1 and P2.** The registration says leakage `auto` with the dips kept "is the frame of M7's aifoundry3
+  training rows", and result 4 calls it "the footing every M7 training session used with its own fit". Neither is true. Of the 247
+  aifoundry3 float rows M7 was fitted on (`docs/reports/data/2026-11-02-q138m-model/loko-m7.json` › `families.float.row_errors`, card `a3`),
+  80 (E121 15, E122 25, E123 40) were reduced at a fixed 0.1994 W/°C with the meter's dips removed (each one's `e1xx.json` › `leak.mode`
+  `0.1994`, `reducer.dips` "removed"), 13 (E127) at their own fit, 0.1913, with the dips removed, and 154 (E78 33, E86 8, E90 21, E92 34,
+  E95 21, E115 19, E140 18) at their sessions' own fits, 0.1396–0.2959, with the dips kept. Their sessions' slopes average 0.2104 W/°C over
+  rows, 0.2163 weighted by D and 0.2217 weighted by D², against this session's fitted 0.2634. Reduced post hoc at those slopes, E141's floats
+  read a bias of −0.107 / −0.121 / −0.133 W with the dips kept and +0.001 / −0.013 / −0.026 W with them removed (B1's line −0.117), and
+  fp16 0.243 / 0.249 / 0.255 W and 0.147 / 0.145 / 0.145 W (P2's line 0.247); C1 30 of 30 at all six. So between about half and all of
+  the registered −0.230 W is the reduction's footing, and the registered B1 FAIL HIGH and P2 FAIL follow the session's own leakage fit
+  against M7's training footing, as E142's auto arm shows on card 1 (−0.354 W FAIL HIGH at 0.408, against +0.050 PASS at its
+  training-matched 0.2414) and E140's 0.1994 arm on pool 4 (−0.124 W over 25 rows, against −0.275 at its fit, 0.286). **Corrected
+  reading:** E141 does not measure a float offset in M7; it cannot exclude one of up to about −0.13 W. **Corrected correction for the next
+  fit:** not "a float offset of about −0.2 W" but one footing for training rows and tests, a leakage slope shared across sessions (or the
+  slope as a model term) and one rule for the meter's dips, which the evidence favours; a residual float offset is then testable. The
+  verifier's own post hoc arm, 0.2104 with the dips kept ("every power rule passes"), is reproduced byte for byte; the D-weighted
+  slopes and the dips-removed readings are this fix's, added because B1 crosses its line at 0.2144 W/°C, between the row-weighted and
+  the D-weighted footing. All post hoc, never a verdict: [`posthoc-after-verification/`](posthoc-after-verification/README.md),
+  `corrections-numbers.txt` § C1.
+- **C2 (minor): 30 new kinds, not 36.** The 36 tiles are 30 new kinds and 6 anchors; the three zeros anchors are byte-identical to E78's
+  own zeros tiles (sha256 `e5a00aa9…`, `tools/claims-v3/kinds/blind5/tiles/*/*.anchor_zeros.bin` and `tools/claims-v3/kinds/tiles/*/zeros.bin`),
+  on which M7 was fitted, and the random and full anchors are fresh draws of kinds it was fitted on. Heat rms is 0.130 °C over the 24
+  priority-1 tiles (0.128 / 0.129 / 0.135 per format, the rules), 0.132 over the 30 new kinds and 0.132 over all 36, so "about an eighth of
+  a degree" stands (§ C2).
+- **C3 (minor): the bands' width.** M7's mean 95% half-width over the 30 non-anchor tiles is 0.807 / 0.536 / 0.595 W (fp32 / fp16 / int8)
+  against M6's 0.498 / 0.344 / 0.517 and M5's 0.385 / 0.340 / 0.467, while M7's and M6's errors are the same (rms 0.365 against 0.367 W,
+  bias −0.233 against −0.237); the largest |error| is 1.14 of M7's half-width, 1.61 of M6's, 2.20 of M5's. M7's 28 of 30 against M6's 22
+  is calibration, not accuracy. M7's float heat bands are narrower than M6's (0.335 against 0.579 °C) and hold 30 of 30 (§ C3).
+- **C4 (minor): the kinds-table cells.** The lane's result named no kinds-table cells. It now carries one per tile and quantity, from
+  `e141.json` › `items.<tile>.D` (switching W over the type's zeros, 600 MHz) and `.dT_win` (the die's rise over the 4.5 s run), each with its
+  95% half-width and kept passes (three; two for `fp16.exp_only`): the 30 new kinds and the 6 anchors, marked (§ C4). The int8 rises sit on
+  the readout's whole-degree steps (exactly 1.0 °C with no spread on eight tiles): there the zero interval is the 1 °C step, not a precision.
+- **C5 (minor): the `ettelem` binary predates its reviewed source.** As the note in § Device commands sent says: built from `de262730`'s
+  source (`ba9a0ac3…`), not the reviewed `a6cf931b…`; its four sending functions are byte-identical and the extra sends of the reviewed
+  source are in a `temp` subcommand the guard refuses, so every class stands (§ C5).
+- **C6 (minor): M2 by arm.** The lane's result said M7 beats M5 "only with the dips removed". It reads BETTER with the pass gates opened too
+  (−0.044 W [−0.095, −0.002], `scored.json` › `arms.gates_off`), as result 1's table shows; the verdict is NOT RESOLVED (−0.040 W
+  [−0.091, +0.004]) (§ C6).
+
+**Unchanged:** the registration (`tools/claims-v3/e141/`, `87a64409`), `scored.json`, `results.md`, `scored-nodips.json`,
+`results-nodips.md`, every reduction and arm in this directory, the raw passes and the logs, and every registered verdict: P1 PASS, **P2
+FAIL**, P3 PASS, **B1 FAIL HIGH**, B2 PASS, C1 PASS, M1 and M2 NOT RESOLVED, H1–H4 PASS.
+
+**What the corrections do to predicting power and heat.** Heat: nothing; the term H2 (0.1186 °C per board W over a 4.5 s run) holds at
+every footing, 0.13 °C rms against a nested 0.16–0.21 °C, with bands narrower than M6's. Power on the floats: the blind error over the nested
+score and the 0.23 W bias are not shown to be M7's; read on M7's training footing the floats come to 0.144–0.275 W rms (fp32) and
+0.145–0.255 W (fp16), against nested 0.247 and 0.162, and the next step is a fit and its tests on one footing, not an offset. Power on int8:
+unchanged, 0.34–0.36 W against a nested 0.226 W at every footing, with three steady misses. The bands: they cover new kinds because they are
+wider, and can be quoted as calibrated bands, not as a sharper model.

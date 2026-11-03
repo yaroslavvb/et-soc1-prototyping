@@ -1,0 +1,50 @@
+E78 aifoundry3: 600 MHz, 521.5 mV, leak 0.2104 W/C (-1 runs), runs kept 166/222, passes [14111, 14112, 14113], idle-invalid runs 0
+  passes set aside: [{'pass': 14110, 'why': ['fp32.randn spans 1.702 W']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.89724303126503
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.wideexp48_dense       25.985  0.101    27.942      24927    6.086
+    fp32.anchor_randn          24.754  0.181    26.714      23827    5.817
+    fp32.randn                 24.679  0.045    26.687      23808    5.813
+    fp32.lowrank2_w            23.901  3.002    25.959      23158    5.654
+    fp32.sorted_k              22.659  1.391    24.634      21976    5.365
+    fp32.real_pythia_gelu_down   22.283  0.100    24.246      21630    5.281
+    fp32.real_pythia_ln1_q     22.105  0.149    24.069      21475    5.243
+    fp32.e4m3grid_gelu_w       16.764  0.148    18.682      16669    4.069
+    fp32.gray_stream           16.688  0.102    18.756      16732    4.085
+    fp32.b_exp_busy_a_const    15.501  0.075    17.456      15578    3.803
+    fp32.exp_only_both         15.291  2.011    17.316      15452    3.773
+    fp32.wideexp48_bgate_alt   14.866  0.554    16.770      14954    3.651
+    fp32.wideexp48_bgate_kblk   13.056  0.172    15.037      13410    3.274
+    fp32.block_sparse_k4       12.280  1.050    14.292      12752    3.113
+    anchor_pi                   8.366  0.008    10.441       9314    2.274
+    fp32.anchor_zeros           0.028  0.155     2.011       1794    0.438
+    fp32.zeros                  0.000  0.000     1.999       1784    0.435
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 22.050  0.318    24.005      21415    2.614
+    fp16.anchor_randn          21.978  0.188    23.991      21400    2.612
+    fp16.real_pythia_ln2_up    21.968  1.019    23.936      21354    2.607
+    fp16.pair_nearcancel       21.912  0.084    23.875      21294    2.599
+    fp16.sparse24_straddled    21.885  0.118    23.905      21321    2.603
+    fp16.real_pythia_qk        20.716  2.024    22.675      20234    2.470
+    fp16.real_pythia_softmax_v   16.879  0.648    18.840      16808    2.052
+    fp16.pair_cancel_asign     16.641  0.062    18.640      16631    2.030
+    fp16.exp_only              16.348  0.212    18.337      16363    1.997
+    fp16.wideexp_bgate_alt     13.472  0.248    15.416      13754    1.679
+    fp16.sparse24_aligned      12.813  0.121    14.854      13251    1.618
+    fp16.zeros                  0.000  0.000     1.963       1752    0.214
+    fp16.anchor_zeros          -0.009  0.040     2.005       1789    0.218
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.166  0.129     9.740       5058    0.309
+    int8.anchor_full            7.030  0.507     9.657       5015    0.306
+    int8.real_pythia_w8a8_down    6.699  0.219     9.188       4771    0.291
+    int8.real_pythia_w8a8_up    6.360  0.265     8.977       4661    0.285
+    int8.b_line_flipflop_nogate    6.198  0.210     8.832       4586    0.280
+    int8.sorted_k               6.013  0.519     8.587       4459    0.272
+    int8.powerlaw_w             5.795  0.302     8.348       4335    0.265
+    int8.block_sparse_a         4.357  0.250     6.920       3595    0.219
+    int8.gray_a                 4.085  0.093     6.727       3493    0.213
+    int8.b_line_zero_one        3.374  0.113     5.995       3114    0.190
+    int8.a_word_flipflop        3.242  0.201     5.772       2997    0.183
+    int8.zeros                  0.000  0.000     2.560       1329    0.081
+    int8.anchor_zeros          -0.009  0.312     2.565       1332    0.081
+  idle consistency median |S - S0 - D| 0.06402754072220418 W; carry-over {'slope_w_per_w': 0.002721298554978054, 'se': 0.0019271740985901248, 'n': 163}; pi built-in - file None; rail tau re-fit median None
