@@ -1,0 +1,115 @@
+== 1. aifoundry2 end to end (governed = a burst measured below 795 MHz (no burst is predicted below 795 MHz and measured above it); pinned = measured at 795-800 MHz. Frozen bands: +-21.3 MHz, +-3.37 W (m7.json aifoundry2.end_to_end_band)); my refit of the cap 65.58009 W (frozen 65.58009); rows reproduced to 0
+  frozen_cap                           all       n 56  rms  8.50 MHz (q95  21.3, inside 53/56)  board rms 1.86 W (q95 3.37, inside 53/56, bias pred-meas +0.53)
+  frozen_cap                           governed  n 21  rms 13.86 MHz (q95  24.5, inside 18/21)  board rms 2.35 W (q95 3.87, inside 18/21, bias pred-meas -0.62)
+  frozen_cap                           pinned    n 35  rms  0.61 MHz (q95   1.7, inside 35/35)  board rms 1.50 W (q95 2.48, inside 35/35, bias pred-meas +1.21)
+  cap_refitted_leaving_each_kind_out   all       n 56  rms  8.64 MHz (q95  21.3, inside 53/56)  board rms 1.88 W (q95 3.41, inside 51/56, bias pred-meas +0.52)
+  cap_refitted_leaving_each_kind_out   governed  n 21  rms 14.08 MHz (q95  24.5, inside 18/21)  board rms 2.38 W (q95 4.04, inside 16/21, bias pred-meas -0.63)
+  cap_refitted_leaving_each_kind_out   pinned    n 35  rms  0.61 MHz (q95   1.7, inside 35/35)  board rms 1.50 W (q95 2.48, inside 35/35, bias pred-meas +1.21)
+  LOKO caps 65.43-65.77 W over 51 kinds
+  governed bursts (meas, pred MHz; meas - pred W):
+    E83:fp32.randn_large          703.0  708.0 (  -5.0)   67.55  65.41 (+2.14)
+    E83:fp32.randn_small          706.0  705.8 (  +0.2)   68.73  65.37 (+3.36)
+    E83:fp16.randn_small          709.2  728.5 ( -19.3)   65.29  65.57 (-0.28)
+    E80:fp32.randn                711.9  708.0 (  +3.9)   68.69  65.41 (+3.28)
+    E83:fp32.randn_sorted         712.9  717.1 (  -4.2)   68.06  65.51 (+2.55)
+    E83:fp32.randn                714.7  708.0 (  +6.7)   69.28  65.41 (+3.87)
+    E83:fp32.uniform01            722.1  721.7 (  +0.4)   67.37  65.54 (+1.83)
+    E83:fp16.randn                724.8  729.5 (  -4.7)   66.46  65.57 (+0.89)
+    E80:fp16.randn                730.6  729.5 (  +1.1)   66.71  65.57 (+1.14)
+    E83:fp16.randn_sorted         734.0  741.1 (  -7.1)   66.69  65.58 (+1.11)
+    E83:fp16.pair_half_zero       737.7  748.9 ( -11.2)   67.34  65.58 (+1.76)
+    E83:fp32.fp16grid             757.5  752.2 (  +5.3)   66.91  65.58 (+1.33)
+    E80:fp32.nn_like              760.8  799.7 ( -38.9)   55.64  60.73 (-5.09)
+    E83:fp16.uniform01            769.2  754.7 ( +14.5)   67.47  65.58 (+1.89)
+    E80:fp16.fp8grid              773.2  769.3 (  +3.9)   65.98  65.53 (+0.45)
+    E80:fp32.bf16trunc            774.0  768.7 (  +5.3)   66.09  65.53 (+0.56)
+    E83:int8.sorted               775.5  800.0 ( -24.5)   46.48  49.88 (-3.40)
+    E80:int8.neg_ones             777.5  800.0 ( -22.5)   38.59  41.28 (-2.69)
+    E83:int8.wsparse90            779.1  800.0 ( -20.9)   36.01  38.67 (-2.66)
+    E80:fp16.nn_like              780.0  775.3 (  +4.7)   65.83  65.45 (+0.38)
+    E80:fp16.smallint             782.7  782.2 (  +0.5)   65.84  65.26 (+0.58)
+  predicted at 800 MHz but governed: ['E80:int8.neg_ones', 'E80:fp32.nn_like', 'E83:int8.wsparse90', 'E83:int8.sorted']
+== 2. random-like kinds' bursts (measured / predicted MHz; board meas - pred W)
+  fp32 randn                           meas [703.0, 714.7]  pred [705.8, 717.1]  board err [2.14, 3.87]  ['E80:fp32.randn', 'E83:fp32.randn', 'E83:fp32.randn_small', 'E83:fp32.randn_large', 'E83:fp32.randn_sorted']
+  fp32 uniform01                       meas [722.1, 722.1]  pred [721.7, 721.7]  board err [1.83, 1.83]  ['E83:fp32.uniform01']
+  fp16 randn                           meas [709.2, 734.0]  pred [728.5, 741.1]  board err [-0.28, 1.14]  ['E80:fp16.randn', 'E83:fp16.randn', 'E83:fp16.randn_small', 'E83:fp16.randn_sorted']
+  fp16 uniform01                       meas [769.2, 769.2]  pred [754.7, 754.7]  board err [1.89, 1.89]  ['E83:fp16.uniform01']
+  int8 full (uniform over the range)   meas [800.0, 800.0]  pred [800.0, 800.0]  board err [-1.17, -0.77]  ['E80:int8.full', 'E83:int8.full']
+  int8 gauss_q                         meas [800.0, 800.0]  pred [800.0, 800.0]  board err [-1.86, -1.86]  ['E80:int8.gauss_q']
+== 3. glive vs clk (floats, 515 rows): R^2 glive on clk 0.9962 centered, 0.9995 through the origin; on the other G8 terms 0.9964 / 0.9995
+  clk/glive median 6872933.0 (rows with glive > 0); glive = clk = 0 on 10 rows (4 kinds), glive = 0 with clk > 0 on 0; rows departing > 10%: 69 (29 kinds) {'E103': 4, 'E115': 5, 'E121': 1, 'E123': 18, 'E127': 8, 'E131': 2, 'E140': 4, 'E78': 5, 'E82': 5, 'E90': 4, 'E93': 1, 'E94': 10, 'E95': 2}
+  int8 clk/glive {'min': 372736.0, 'max': 372736.0, 'n': 116}; J9_glive vs J0_M5 plain LOKO [0.25236951810850056, 0.25236951798054735]
+  prices fJ (all rows): {"G0_M5": {"clk": 1.057}, "G1_gtr": {"clk": 1.056, "gtr": 125.754}, "G8_gtr_glive": {"clk": 0.632, "gtr": 145.532, "glive": 2926666.779}, "G6_M6": {"clk": 1.055, "gtr": 145.266}, "M6_frozen": {"clk": 1.054, "gtr": 157.84}} G8 vs m7.json 0.00e+00
+== 4. where the gains sit (rms M7 nested - rms other; 95% over kinds)
+  float M7_nested_minus_M6_form_loko       pool_rows_E115_E140  n  37 ( 37 kinds): 0.413 vs 0.454 = -0.0409 [-0.0751, -0.0003]
+  float M7_nested_minus_M6_form_loko       other_rows           n 478 (216 kinds): 0.184 vs 0.189 = -0.0047 [-0.0162, +0.0071]
+  float M7_nested_minus_M6_form_loko       all_rows             n 515 (253 kinds): 0.209 vs 0.219 = -0.0097 [-0.0207, +0.0012]
+  float M7_nested_minus_M5_form_loko       pool_rows_E115_E140  n  37 ( 37 kinds): 0.413 vs 0.446 = -0.0336 [-0.0860, +0.0207]
+  float M7_nested_minus_M5_form_loko       other_rows           n 478 (216 kinds): 0.184 vs 0.208 = -0.0244 [-0.0409, -0.0104]
+  float M7_nested_minus_M5_form_loko       all_rows             n 515 (253 kinds): 0.209 vs 0.234 = -0.0248 [-0.0391, -0.0111]
+  float E140 rows: {"M5_frozen_err_w": 0.354, "M6_frozen_err_w": 0.418, "M7_nested_err_w": 0.37}
+  int8  M7_nested_minus_M5_form_loko       pool_rows_E115_E140  n  13 ( 13 kinds): 0.298 vs 0.359 = -0.0611 [-0.1405, -0.0028]
+  int8  M7_nested_minus_M5_form_loko       other_rows           n 109 ( 44 kinds): 0.232 vs 0.236 = -0.0045 [-0.0258, +0.0218]
+  int8  M7_nested_minus_M5_form_loko       all_rows             n 122 ( 57 kinds): 0.240 vs 0.252 = -0.0125 [-0.0348, +0.0123]
+  int8  M7_nested_minus_M6_form_loko       pool_rows_E115_E140  n  13 ( 13 kinds): 0.298 vs 0.361 = -0.0632 [-0.1384, -0.0089]
+  int8  M7_nested_minus_M6_form_loko       other_rows           n 109 ( 44 kinds): 0.232 vs 0.235 = -0.0035 [-0.0253, +0.0238]
+  int8  M7_nested_minus_M6_form_loko       all_rows             n 122 ( 57 kinds): 0.240 vs 0.252 = -0.0120 [-0.0336, +0.0115]
+  int8  E140 rows: {"M5_frozen_err_w": 0.367, "M6_frozen_err_w": 0.37, "M7_nested_err_w": 0.265}
+== 5. band k
+  float: {"n_pool_rows": 37, "pool_z_top5": [6.146463514336643, 3.835580356831029, 3.0145294437098524, 2.9455000047057447, 2.6994860599528163], "k_recomputed": 3.1787396263340844, "k_frozen": 3.1787396263340844, "quantile_position_ascending_0based": 34.199999999999996, "between_ascending": [3.0145294437098524, 3.835580356831029], "between_rank_from_top": [3, 2], "pool_rows_outside_k": 2, "leave_one_pool_row_out_inside": [35, 37]}
+  int8: {"n_pool_rows": 13, "pool_z_top5": [3.2541822422302364, 1.9686851374097367, 1.3854806445894277, 1.167728293846148, 1.1402047936747979], "k_recomputed": 2.482883979337935, "k_frozen": 2.482883979337935, "quantile_position_ascending_0based": 11.399999999999999, "between_ascending": [1.9686851374097367, 3.2541822422302364], "between_rank_from_top": [2, 1], "pool_rows_outside_k": 1, "leave_one_pool_row_out_inside": [12, 13]}
+== 6. heat at the measured run length
+  aifoundry1-c1: T_run median 4.463 s (4.351-4.492, range 0.141); ST -0.1548; offset +0.00573 C/W
+    fp32: S median 14.25 W (max 26.14): offset +0.082 C (+0.150 at max) against a band of +-0.686 C (12%)
+    fp16: S median 17.68 W (max 25.33): offset +0.101 C (+0.145 at max) against a band of +-0.692 C (15%)
+    int8: S median 8.05 W (max 9.36): offset +0.046 C (+0.054 at max) against a band of +-0.275 C (17%)
+  aifoundry3: T_run median 4.490 s (4.384-4.521, range 0.137); ST -0.0490; offset +0.00048 C/W
+    fp32: S median 15.27 W (max 27.73): offset +0.007 C (+0.013 at max) against a band of +-0.353 C (2%)
+    fp16: S median 18.01 W (max 24.24): offset +0.009 C (+0.012 at max) against a band of +-0.310 C (3%)
+    int8: S median 8.09 W (max 9.77): offset +0.004 C (+0.005 at max) against a band of +-0.399 C (1%)
+== 7. zeros_S, frozen list ['E102', 'E103', 'E104', 'E106', 'E108', 'E115', 'E121', 'E122', 'E123', 'E127', 'E128', 'E131', 'E78', 'E82', 'E86', 'E88', 'E90', 'E91', 'E92', 'E93', 'E94', 'E95']
+  a3: fp32 1.9804 (n 10) -> 1.9860 (n 11), dT +0.0007 C, predictor match True; fp16 1.9664 (n 10) -> 1.9679 (n 11), dT +0.0002 C, predictor match True; int8 2.5470 (n 10) -> 2.5588 (n 11), dT +0.0014 C, predictor match True
+  c1: fp32 1.7969 (n 12) -> 1.7893 (n 13), dT -0.0009 C, predictor match True; fp16 1.7821 (n 12) -> 1.7745 (n 13), dT -0.0009 C, predictor match True; int8 2.3320 (n 12) -> 2.3268 (n 13), dT -0.0006 C, predictor match True
+== 8. provenance (sha256)
+  modules:
+    e02116913042291bac41a4431bf880f00a4249bddf50c649c66feb267d77decb  docs/reports/data/2026-11-01-q133b-power-model/fit_m5.py
+    010f2cf1b05e84906c697e5b9945adc903a45acd6f3b7348cc42d82de59092c7  docs/reports/data/2026-11-02-q137m-model/fit_m6.py
+    6a0e0458948683b07974b153917631b2e38d4b579985f9db5bae9f5e2ca6756a  docs/reports/data/2026-11-02-q137m-model/m6_rows.py
+    cb01d82684be3aa49e4e00b5a9a453c27603cd0612a2993af7775835f5bc55c0  docs/reports/data/2026-11-02-q138m-model/fit_m7.py
+    0d114d5bc01e317de2b5d1adef3cb71f01d0ecfc3ebad0ff7abe342f06bac369  docs/reports/data/2026-11-02-q138m-model/predict_blind5.py
+    8f9b7fe440a632bddbab411a2b054aa87880b64c12b685efd612e211ca8e96e0  tools/claims-v3/e119/make_predictions_e119.py
+    cf2b63e2b9bf9b53b2aa0a6b415578d4464f5cf3c4ca689985f75b7006e23550  tools/claims-v3/hpl/surface_hpl.py
+    772da3bc732eb8443bd41d1d8c222c16bdd8aeecb44c2eaae51128e013602248  tools/claims-v3/hpl/surface_hpl_t.py
+    339a192d62a34c355717c3e602d3c8f83f7265b7a1c05606db3d845b0a09c2dc  tools/claims-v3/kinds/make_kinds.py
+    f82efac5c0107a30808ede5bbd6f2f479c77fac5a6ea8f22e820ec2749783cd4  tools/claims-v3/kspeed/e83/predict_e83.py
+  files_read_by_imports_and_pool_independent_reads:
+    b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5  docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json
+    4794f5ac4ccfde95f45535aa855fa06c8d85b7d7716c9b63bd508ded1ade8601  docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json
+    e5cc743acdc6bd47ec0b32603ed433ef09daf3f9d08c3163d66c1854eaedca40  docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json
+    007eb9cbeb39b8f75da0eb0eb97fd89bd1b23a63a242d079bdee582b4938e21d  docs/reports/data/2026-10-31-e88-result-path/e88.json
+    7a8b03cd3b8b5c1bbe1cf427732172a883a355cdc1660011d92826a515c847df  docs/reports/data/2026-10-31-e90-signs-spread/e90.json
+    0dd4ef9e4e1e19d0ef7e380814a63f73413f66cab3dd115ef41125e7e3f80e5b  docs/reports/data/2026-10-31-e91-real-tensors-aifoundry1/e91.json
+    d90336fcedd4c22d9a2625dc55086f0511f75a116c84dc182a65458927809f3f  docs/reports/data/2026-11-01-e102-balanced-bit-prices/e102.json
+    965a437f6745eac38087a9101d97258fcfe4fc291f1d583c2f774503f7165eda  docs/reports/data/2026-11-01-e103-model-blind-test/e103.json
+    dee52bffa32e2b8dbfd20e5b4fcdc82386c4caea473a5dc6af0944967a394c8b  docs/reports/data/2026-11-01-e104-c-readback/e104.json
+    e817d98062ce7fc8cdd27befa3bbe904bc44ce1d0cd635eaba8a6b3cc61188d2  docs/reports/data/2026-11-01-e105-gemm-layout/results-speed.json
+    5edf9ad60f20c384156e0e41ed57c295d9c3da8403694c6608493c646983097f  docs/reports/data/2026-11-01-e106-held-signs/e106.json
+    87b190f364ceb2eee796d00b78e6fda49775be59c1b40cc87da0b6f6c79f6a86  docs/reports/data/2026-11-01-e107-gemm-placement/e107.json
+    fd9d43e2764da8a604dc7fd4ed919897d81ac0fc57af4693b0f8edb31b4f7811  docs/reports/data/2026-11-01-e107-gemm-placement/scored.json
+    9fe5ae20b1a582e453302ccb49370e74feb0ab5a8243bf728ab3d286b3709d1a  docs/reports/data/2026-11-01-e108-sign-located/e108.json
+    b16ec4c42a5a4f9a250edc8345d733914d54f239404133c9a27e79750cb38f87  docs/reports/data/2026-11-01-e115-blind-pool/e115.json
+    c4b96d3cb2f075831cf7ae8b9d0b6e7de62aa87ac225895b55cbba015c4f6782  docs/reports/data/2026-11-01-e121-zero-gate-replicate/e121.json
+    03d7383fcd8adf3bda0cc5c424eb1ccbf2c0fbf3ccce5e2c756e1d0e60452ddc  docs/reports/data/2026-11-01-e122-signs-replicate/e122.json
+    35f03eac6cd65373a6f3b464ed4de9d9038cabb339fc78ae04624b2bae8c0398  docs/reports/data/2026-11-01-e123-tile-spread-rest/e123.json
+    e18ce85a6994419981ed8593a35da63a8c845b1423b652b566a56f28c6336b91  docs/reports/data/2026-11-01-e92-sign-split/e92.json
+    04ec3a93b6a382985a50c217bfa3cd6b082b6d183315c7b2e177e90573461c1a  docs/reports/data/2026-11-01-e93-zero-gate-silicon/e93.json
+    de3e8c30c67eec442011bab0515322d46621ea89a6c6ef2bdee949dab6243338  docs/reports/data/2026-11-01-e94-tile-spread/e94.json
+    47ad02e5dfa0edef31af7c43e64be952a4fc51b7c33372e4b5d37964ee0e5e6a  docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json
+    422bdeac130a12d352f77e2e635eae2592188e7548d8196c9e033f5228986f45  docs/reports/data/2026-11-01-q132-rtl-bench/counts-v2.json
+    c19f2c7bc098b5a8969694b6563784d57bf88e7336fe97ac2afe769b0c63e2da  docs/reports/data/2026-11-01-q133b-power-model/m5.json
+    a65283b627e47f8805e362674dcbfe4a761bb8c63888d529b3d96253c2cbb9d8  docs/reports/data/2026-11-02-e127-b-gate/e127.json
+    91e5f6ae45abc5106d5025ce1c69f546b51db1ceb6bbfb2084a11e8091e3e8bb  docs/reports/data/2026-11-02-e128-fp16-signs/e128.json
+    8800c15442964d8521639564a22cea2f92590b960c3a2cf845b01c12541fa861  docs/reports/data/2026-11-02-e131-real-tiles-card1/e131.json
+    87c17e086ee36699d7bb96609c02c471b5ba6b7bcdc20ead576d26f89e136e82  docs/reports/data/2026-11-02-q137m-model/m6.json
+    bfeea822b87e0a1f8c315809192faf0a437b72bcadd1459c027cd857c8b3d8b2  docs/reports/data/2026-11-02-q138m-model/m7.json
+    bf2646e9889a0a3dc7883abb2f31c456f40c5c0a93a5d6db5d868710fa9c5652  tools/claims-v3/kinds/predictions-e101.json
