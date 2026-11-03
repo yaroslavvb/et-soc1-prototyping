@@ -1,115 +1,700 @@
 {
- "note": "in sample for the chain (E97 and E133 trained it): this checks the scorer, not the model",
- "a3_E97": [
-  {
-   "hold": "H1",
-   "dur_s": 1800.0009999275208,
-   "rms_C": 0.6302544862737308,
-   "mean_C": 0.594237735711093,
-   "max_abs_C": 1.2627683364929396,
-   "plateau_err_C": 0.36744070291554354,
-   "rise_meas_C": 11.839386723649568,
-   "anchor_C": 50.54772307060592,
-   "err_at_60s": 0.35132138395379514,
-   "err_at_120s": 0.38563007008841327,
-   "err_at_300s": 0.6074149825499744,
-   "err_at_600s": 0.49514357948919996,
-   "a_verdict": "PASS",
-   "board_rise_W": 13.143911273475297,
-   "per_board_W": 0.9007506576479797,
-   "t63_s": 119.49520468711853
+ "note": "(1) in sample for the chain (E97, E111 and E133 trained it): it checks the scorer, not the model. (2) synthetic sessions made by the frozen model: every arm must read PASS, and (b) at the plan's pattern must give back predictions-e144.json's numbers",
+ "1_a3_E97_partB": {
+  "card": "aifoundry3 card 0",
+  "holds": [
+   {
+    "hold": "H1",
+    "item": "int8.full",
+    "t0": 1793538247.917,
+    "dur_s": 1800.0009999275208,
+    "share_recorded": 0.9657455753833794,
+    "launch_period_s": 7.496999979019165,
+    "from_rest": true,
+    "rest_die_C": 50.558488953957784,
+    "a": {
+     "rms_C": 0.6302544862737308,
+     "plateau_err_C": 0.36744070291554354,
+     "max_abs_C": 1.2627683364929396,
+     "verdict": "PASS",
+     "cooldown_rms_C": null,
+     "cooldown_verdict": null,
+     "err_at_s": {
+      "60": 0.35132138395379514,
+      "120": 0.38563007008841327,
+      "300": 0.6074149825499744,
+      "600": 0.49514357948919996
+     }
+    },
+    "a_M6": {
+     "rms_C": 0.6380078150029659,
+     "plateau_err_C": 0.03869432349561676,
+     "cooldown_rms_C": null
+    },
+    "b": {
+     "window_s": 5.0,
+     "measured": {
+      "base_C": 50.558488953957784,
+      "rise_C_by_s": {
+       "10": 2.4427384214820123,
+       "30": 3.8229899358369863,
+       "60": 5.338253831340943,
+       "120": 7.501653881949679,
+       "180": 8.967026534988321,
+       "300": 10.659926262510048,
+       "450": 11.493517135206375,
+       "600": 11.770827348139036,
+       "end": 11.694933068027197
+      },
+      "plateau_rise_C": 11.839386723649568,
+      "at_600s_rise_C": 11.764771067138255
+     },
+     "predicted": {
+      "base_C": 50.5584889539578,
+      "rise_C_by_s": {
+       "10": 2.1588655467518194,
+       "30": 3.5462977376202858,
+       "60": 5.066567345194009,
+       "120": 7.171366867820375,
+       "180": 8.544459093636277,
+       "300": 10.02590992346623,
+       "450": 10.803695035391733,
+       "600": 11.147016762517964,
+       "end": 11.331970943744317
+      },
+      "plateau_rise_C": 11.334742154387662,
+      "at_600s_rise_C": 11.129372782088538
+     },
+     "verdict": "PASS",
+     "checkpoint_err_C": {
+      "60": 0.272,
+      "120": 0.33,
+      "180": 0.423,
+      "300": 0.634,
+      "450": 0.69,
+      "600": 0.624,
+      "end": 0.363
+     },
+     "plateau_err_C": 0.505,
+     "max_abs_checkpoint_err_C": 0.69
+    },
+    "b_M6": {
+     "predicted": {
+      "base_C": 50.5584889539578,
+      "rise_C_by_s": {
+       "10": 1.782946627286833,
+       "30": 2.66271692884893,
+       "60": 3.769369477483295,
+       "120": 5.3653353112701865,
+       "180": 6.428668477070673,
+       "300": 7.515599550334876,
+       "450": 8.03581466952835,
+       "600": 8.261753825243439,
+       "end": 8.354032609586604
+      },
+      "plateau_rise_C": 8.3597685579279,
+      "at_600s_rise_C": 8.238501691263458
+     },
+     "plateau_err_C": 3.479618165721668
+    },
+    "c_per_board_W": {
+     "rise_C": 11.839386723649568,
+     "board_rise_W": 13.143911273475297,
+     "per_board_W": 0.9007506576479797,
+     "interval": [
+      0.8969451826740119,
+      0.9045561326219475
+     ],
+     "idle_before_after_C": [
+      50.558488953957784,
+      50.558488953957784
+     ],
+     "eT": 0.039940452748623484,
+     "eP": 0.03342824677752878,
+     "verdict": "PASS"
+    },
+    "c_t63": {
+     "t63_s": 119.49520468711853,
+     "closed_loop_t63_s": 119.2,
+     "ratio": 1.0024765493885783,
+     "verdict": "PASS",
+     "reference": "the closed loop at the recorded share and rest die"
+    },
+    "c_replicate": {
+     "rise_600s_C": 11.764771067138255,
+     "board_rise_600s_W": 13.184088613237542,
+     "per_board_W_600s": 0.8923461766879954,
+     "ratio_to_E97_H1": 0.9937039829487699,
+     "verdict": "PASS"
+    }
+   },
+   {
+    "hold": "H2",
+    "item": "fp32.ones",
+    "t0": 1793540047.918,
+    "dur_s": 900.0,
+    "share_recorded": 0.9642066674762302,
+    "launch_period_s": 7.138000011444092,
+    "from_rest": false,
+    "rest_die_C": 50.558488953957784,
+    "a": {
+     "rms_C": 0.5910865500800718,
+     "plateau_err_C": 0.7667501163215656,
+     "max_abs_C": 0.998715911386256,
+     "verdict": "PASS",
+     "cooldown_rms_C": 0.3100737036899532,
+     "cooldown_verdict": "PASS",
+     "err_at_s": {
+      "60": 0.2545887092700424,
+      "120": 0.23170176813755233,
+      "300": 0.4383217466466651,
+      "600": 0.7345065320811419
+     }
+    },
+    "a_M6": {
+     "rms_C": 0.30911289748340837,
+     "plateau_err_C": 0.4311877509608629,
+     "cooldown_rms_C": 0.6354114640867983
+    },
+    "b": {
+     "window_s": 5.0,
+     "measured": {
+      "base_C": 50.558488953957784,
+      "rise_C_by_s": {
+       "10": 11.817578550136076,
+       "30": 11.914882850450866,
+       "60": 11.992448457274868,
+       "120": 12.085526694808962,
+       "180": 12.189725457380753,
+       "300": 12.566743429586602,
+       "450": 12.749348182364692,
+       "600": 13.157718034199519,
+       "end": 13.219479753704348
+      },
+      "plateau_rise_C": 13.22421744131698,
+      "at_600s_rise_C": 13.167234508195314
+     },
+     "predicted": {
+      "base_C": 50.5584889539578,
+      "rise_C_by_s": {
+       "10": 11.441090755407075,
+       "30": 11.530273040288797,
+       "60": 11.665239841342242,
+       "120": 11.82388841591797,
+       "180": 11.91017900055084,
+       "300": 12.03062445993936,
+       "450": 12.09005046511951,
+       "600": 12.116580180645826,
+       "end": 12.158491218363721
+      },
+      "plateau_rise_C": 12.138529172770603,
+      "at_600s_rise_C": 12.12827651832226
+     },
+     "verdict": "PASS",
+     "checkpoint_err_C": {
+      "60": 0.327,
+      "120": 0.262,
+      "180": 0.28,
+      "300": 0.536,
+      "450": 0.659,
+      "600": 1.041,
+      "end": 1.061
+     },
+     "plateau_err_C": 1.086,
+     "max_abs_checkpoint_err_C": 1.061
+    },
+    "b_M6": {
+     "predicted": {
+      "base_C": 50.5584889539578,
+      "rise_C_by_s": {
+       "10": 8.46436074162468,
+       "30": 8.499725246788117,
+       "60": 8.604104261370345,
+       "120": 8.704816105734459,
+       "180": 8.760322639368148,
+       "300": 8.839031909090835,
+       "450": 8.874417867410791,
+       "600": 8.890518771902933,
+       "end": 8.93054465651467
+      },
+      "plateau_rise_C": 8.912030357383138,
+      "at_600s_rise_C": 8.904814813416934
+     },
+     "plateau_err_C": 4.312187083933843
+    },
+    "c_per_board_W": {
+     "rise_C": 13.22421744131698,
+     "board_rise_W": 14.342696571493896,
+     "per_board_W": 0.9220175143076029,
+     "interval": [
+      0.9183751897115532,
+      0.9256598389036527
+     ],
+     "idle_before_after_C": [
+      50.558488953957784,
+      50.629221254779075
+     ],
+     "eT": 0.03600739808191454,
+     "eP": 0.041050441662567154,
+     "verdict": "PASS"
+    }
+   },
+   {
+    "hold": "H3",
+    "item": "fp32.randn",
+    "t0": 1793541548.175,
+    "dur_s": 1800.0,
+    "share_recorded": 0.6126927717526753,
+    "launch_period_s": 7.0,
+    "from_rest": true,
+    "rest_die_C": 50.629221254779075,
+    "a": {
+     "rms_C": 0.3918207856651499,
+     "plateau_err_C": 0.21581590772986306,
+     "max_abs_C": 1.2328364517283177,
+     "verdict": "PASS",
+     "cooldown_rms_C": 0.1774602611624053,
+     "cooldown_verdict": "PASS",
+     "err_at_s": {
+      "60": -0.10109689626563564,
+      "120": -0.06562142860513888,
+      "300": 0.6515857520375167,
+      "600": 0.542228306830107
+     }
+    },
+    "a_M6": {
+     "rms_C": 0.9164772111306413,
+     "plateau_err_C": -0.1688376516786648,
+     "cooldown_rms_C": 1.074801343013586
+    },
+    "b": {
+     "window_s": 7.0,
+     "measured": {
+      "base_C": 50.629221254779075,
+      "rise_C_by_s": {
+       "10": 5.881598771127813,
+       "30": 9.593380128526462,
+       "60": 13.737633414390096,
+       "120": 20.253081932449923,
+       "180": 25.253382780831082,
+       "300": 24.20598385519032,
+       "450": 22.007491429745933,
+       "600": 20.855979934746124,
+       "end": 19.601035006229033
+      },
+      "plateau_rise_C": 19.736639113259876,
+      "at_600s_rise_C": 20.79715757077333
+     },
+     "predicted": {
+      "base_C": 50.77100594672081,
+      "rise_C_by_s": {
+       "10": 5.875180380274479,
+       "30": 9.836493477471485,
+       "60": 14.220230244036195,
+       "120": 20.605574818384504,
+       "180": 25.07253545659581,
+       "300": 22.922277447140296,
+       "450": 20.790959635811554,
+       "600": 19.953870600867795,
+       "end": 19.273963918269253
+      },
+      "plateau_rise_C": 19.285722622909752,
+      "at_600s_rise_C": 19.89313973071375
+     },
+     "verdict": "PASS",
+     "checkpoint_err_C": {
+      "60": -0.483,
+      "120": -0.352,
+      "180": 0.181,
+      "300": 1.284,
+      "450": 1.217,
+      "600": 0.902,
+      "end": 0.327
+     },
+     "plateau_err_C": 0.451,
+     "max_abs_checkpoint_err_C": 1.284
+    },
+    "b_M6": {
+     "predicted": {
+      "base_C": 50.762653460932114,
+      "rise_C_by_s": {
+       "10": 4.830872050065246,
+       "30": 7.322526623131083,
+       "60": 10.3704486041093,
+       "120": 14.760476266606119,
+       "180": 17.6024313978902,
+       "300": 15.614282232333608,
+       "450": 14.077620627641437,
+       "600": 13.574472000951516,
+       "end": 13.297009354075684
+      },
+      "plateau_rise_C": 13.305245924237312,
+      "at_600s_rise_C": 13.501232618807052
+     },
+     "plateau_err_C": 6.431393189022565
+    },
+    "c_per_board_W": {
+     "rise_C": 19.736639113259876,
+     "board_rise_W": 22.60847179908321,
+     "per_board_W": 0.872975373508448,
+     "interval": [
+      0.8644000821761925,
+      0.8815506648407035
+     ],
+     "idle_before_after_C": [
+      50.629221254779075,
+      50.662758593334146
+     ],
+     "eT": 0.03207614793201879,
+     "eP": 0.21902376155828546,
+     "verdict": "PASS"
+    }
+   }
+  ],
+  "session": {
+   "rest_die_R0_C": 50.558488953957784,
+   "P_ref_W": 23.2135818806683
   },
-  {
-   "hold": "H2",
-   "dur_s": 900.0,
-   "rms_C": 0.5910865500800718,
-   "mean_C": 0.5510544686183855,
-   "max_abs_C": 0.998715911386256,
-   "plateau_err_C": 0.7667501163215656,
-   "rise_meas_C": 13.22421744131698,
-   "anchor_C": 50.54772307060592,
-   "err_at_60s": 0.2545887092700424,
-   "err_at_120s": 0.23170176813755233,
-   "err_at_300s": 0.4383217466466651,
-   "err_at_600s": 0.7345065320811419,
-   "cooldown_rms_C": 0.3100737036899532,
-   "a_verdict": "PASS",
-   "board_rise_W": 14.342696571493896,
-   "per_board_W": 0.9220175143076029,
-   "t63_s": 1.2946057319641113
+  "c_linear": {}
+ },
+ "1_a2_E133": {
+  "card": "aifoundry2 card 0",
+  "holds": [
+   {
+    "step": "W1B",
+    "hold": "HOLD-00-int8-neg_ones-hold",
+    "G": "G1",
+    "dur_s": 1596.2489998340607,
+    "rest_die_C": 44.0,
+    "a": {
+     "rms_C": 0.7612701643936944,
+     "plateau_err_C": 0.7105379705537734,
+     "max_abs_C": 1.774577826140245,
+     "verdict": "PASS"
+    },
+    "a_M6": {
+     "rms_C": 1.1900730026430402,
+     "plateau_err_C": 0.5014880500569456
+    },
+    "b": {
+     "plateau_rise_C": 12.305385905121845,
+     "predicted_C": 11.833,
+     "err_C": 0.4723859051218451,
+     "verdict": "PASS"
+    },
+    "b_M6": {
+     "predicted_C": 11.933,
+     "err_C": 0.37238590512184544
+    },
+    "c_per_board_W": {
+     "per_board_W": 0.71344819667933,
+     "verdict": "PASS"
+    },
+    "c_t63": {
+     "t63_s": 74.30204653739929,
+     "ratio": 1.498025131802405,
+     "reference_s": 49.6,
+     "reference": "the open loop's t63 (as frozen)",
+     "verdict": "NOT PASS (no FAIL band was registered)"
+    },
+    "c_t63_A1": {
+     "t63_s": 74.30204653739929,
+     "ratio": 0.9776585070710433,
+     "reference_s": 76.0,
+     "reference": "A1.8: the frozen chain on the planned board trace, read as the scorer reads a hold",
+     "verdict": "PASS"
+    },
+    "per_board_W_last300s": 0.71344819667933
+   },
+   {
+    "step": "W2",
+    "hold": "HOLD-00-int8-neg_ones-hold",
+    "G": null,
+    "dur_s": 339.47500014305115,
+    "rest_die_C": 44.0,
+    "a": {
+     "rms_C": 0.4537547351013931,
+     "plateau_err_C": 0.2507983639093312,
+     "max_abs_C": 1.103681877746041,
+     "verdict": "PASS"
+    },
+    "a_M6": {
+     "rms_C": 1.1575375296396382,
+     "plateau_err_C": -0.9140737274211601
+    },
+    "per_board_W_last300s": 0.7265000221147223
+   },
+   {
+    "step": "W2",
+    "hold": "HOLDF-00-fp32-randn-hold",
+    "G": "G2",
+    "dur_s": 1623.9749999046326,
+    "rest_die_C": 44.0,
+    "a": {
+     "rms_C": 0.3889195541058982,
+     "plateau_err_C": -0.2381628825200764,
+     "max_abs_C": 1.8237456520113966,
+     "verdict": "PASS"
+    },
+    "a_M6": {
+     "rms_C": 0.8761313367699474,
+     "plateau_err_C": -0.540800731167486
+    },
+    "b": {
+     "plateau_C": 65.81702855875638,
+     "predicted_C": 65.9,
+     "err_C": -0.08297144124362887,
+     "regime": "trip",
+     "regime_predicted": "trip",
+     "share_600MHz_last300s": 0.8872581721147431,
+     "verdict": "PASS",
+     "tests": "the governor's trip, not the chain (trip regime)"
+    },
+    "b_M6": {
+     "predicted_C": 65.884,
+     "err_C": -0.06697144124362353,
+     "note": "M6 has no governor term: the floor's rise only"
+    },
+    "per_board_W_last300s": 0.6625373932251976
+   }
+  ]
+ },
+ "1_a2_E111": {
+  "card": "aifoundry2 card 0",
+  "holds": [
+   {
+    "step": "W1B",
+    "hold": "HOLD-00-int8-neg_ones-hold",
+    "G": "G1",
+    "dur_s": 1597.430999994278,
+    "rest_die_C": 46.0,
+    "a": {
+     "rms_C": 0.7276339296029068,
+     "plateau_err_C": 0.7293913485579862,
+     "max_abs_C": 1.6659901682250577,
+     "verdict": "PASS"
+    },
+    "a_M6": {
+     "rms_C": 1.2779619721020206,
+     "plateau_err_C": 0.5976825690706469
+    },
+    "b": {
+     "plateau_rise_C": 12.9653275210175,
+     "predicted_C": 11.833,
+     "err_C": 1.1323275210174994,
+     "verdict": "PASS"
+    },
+    "b_M6": {
+     "predicted_C": 11.933,
+     "err_C": 1.0323275210174998
+    },
+    "c_per_board_W": {
+     "per_board_W": 0.709565807102062,
+     "verdict": "PASS"
+    },
+    "c_t63": {
+     "t63_s": 88.89904999732971,
+     "ratio": 1.7923195563977763,
+     "reference_s": 49.6,
+     "reference": "the open loop's t63 (as frozen)",
+     "verdict": "NOT PASS (no FAIL band was registered)"
+    },
+    "c_t63_A1": {
+     "t63_s": 88.89904999732971,
+     "ratio": 1.1697243420701278,
+     "reference_s": 76.0,
+     "reference": "A1.8: the frozen chain on the planned board trace, read as the scorer reads a hold",
+     "verdict": "PASS"
+    },
+    "per_board_W_last300s": 0.709565807102062
+   },
+   {
+    "step": "W2",
+    "hold": "HOLD-00-int8-neg_ones-hold",
+    "G": null,
+    "dur_s": 345.202999830246,
+    "rest_die_C": 45.0,
+    "a": {
+     "rms_C": 1.0804911865204585,
+     "plateau_err_C": 1.020476524395042,
+     "max_abs_C": 1.6997847352968662,
+     "verdict": "PASS"
+    },
+    "a_M6": {
+     "rms_C": 0.471589076745003,
+     "plateau_err_C": 0.19453673871736782
+    },
+    "per_board_W_last300s": 0.7472785428125495
+   },
+   {
+    "step": "W2",
+    "hold": "HOLDF-00-fp32-randn-hold",
+    "G": "G2",
+    "dur_s": 1630.3599998950958,
+    "rest_die_C": 45.0,
+    "a": {
+     "rms_C": 0.8668230359538203,
+     "plateau_err_C": 0.9938895278296347,
+     "max_abs_C": 2.1115207801711833,
+     "verdict": "PASS"
+    },
+    "a_M6": {
+     "rms_C": 1.0609969208461414,
+     "plateau_err_C": 0.6637270901647383
+    },
+    "b": {
+     "plateau_C": 67.19919933433951,
+     "predicted_C": 66.493,
+     "err_C": 0.7061993343395159,
+     "regime": "floor",
+     "regime_predicted": "floor",
+     "share_600MHz_last300s": 1.0,
+     "verdict": "INCONCLUSIVE",
+     "tests": "the chain (floor regime)"
+    },
+    "b_M6": {
+     "predicted_C": 66.884,
+     "err_C": 0.31519933433951053,
+     "note": "M6 has no governor term: the floor's rise only"
+    },
+    "per_board_W_last300s": 0.7016399548908602
+   }
+  ]
+ },
+ "2_a3_synthetic_plan": {
+  "verdicts": {
+   "H_L a": "PASS",
+   "H_L b": "PASS",
+   "H_L b_plan_f5473428": "PASS",
+   "H_L c_per_board_W": "PASS",
+   "H_L c_t63": "PASS",
+   "H_M a": "PASS",
+   "H_M b": "PASS",
+   "H_M b_plan_f5473428": "PASS",
+   "H_M c_per_board_W": "PASS",
+   "H_M c_t63": "PASS",
+   "H_M c_replicate": "PASS",
+   "H_H a": "PASS",
+   "H_H b": "PASS",
+   "H_H b_plan_f5473428": "PASS",
+   "H_H c_per_board_W": "PASS",
+   "linear H_M/H_L": "PASS",
+   "linear H_H/H_L": "PASS"
   },
-  {
-   "hold": "H3",
-   "dur_s": 1800.0,
-   "rms_C": 0.3918207856651499,
-   "mean_C": 0.26622207006828474,
-   "max_abs_C": 1.2328364517283177,
-   "plateau_err_C": 0.21581590772986306,
-   "rise_meas_C": 19.73663911325987,
-   "anchor_C": 50.39634300134029,
-   "err_at_60s": -0.10109689626563564,
-   "err_at_120s": -0.06562142860513888,
-   "err_at_300s": 0.6515857520375167,
-   "err_at_600s": 0.542228306830107,
-   "cooldown_rms_C": 0.1774602611624053,
-   "a_verdict": "PASS",
-   "board_rise_W": 22.60847179908321,
-   "per_board_W": 0.8729753735084477,
-   "t63_s": 50.637975215911865
+  "b_at_realized_pattern_vs_frozen": {
+   "H_L": {
+    "max_abs_diff_checkpoints_C": 0.0004396234587886738,
+    "plateau_diff_C": -0.00024541720519355437
+   },
+   "H_M": {
+    "max_abs_diff_checkpoints_C": 0.0004758203832819774,
+    "plateau_diff_C": -9.794114418326672e-05
+   },
+   "H_H": {
+    "max_abs_diff_checkpoints_C": 0.0004314228574333612,
+    "plateau_diff_C": -0.00023053488759927632
+   }
+  },
+  "a_rms_C": {
+   "H_L": 1.425603747446849e-14,
+   "H_M": 1.623082728012611e-14,
+   "H_H": 1.5093350251810376e-14
   }
- ],
- "a2_E133": [
-  {
-   "hold": "HOLD-00-int8-neg_ones-hold",
-   "dur_s": 1596.2489998340607,
-   "rms_C": 0.7612701643936944,
-   "mean_C": 0.6524379504918512,
-   "max_abs_C": 1.774577826140245,
-   "plateau_err_C": 0.7105379705537734,
-   "rise_meas_C": 12.305385905121845,
-   "anchor_C": 43.99780730390995,
-   "err_at_60s": 0.25467513262723784,
-   "err_at_120s": 0.5667217116912734,
-   "err_at_300s": 0.736883511459887,
-   "err_at_600s": 0.21409058705611117,
-   "a_verdict": "PASS",
-   "board_rise_W": 17.247763695242302,
-   "per_board_W": 0.7134481966793305,
-   "t63_s": 74.30204653739929
+ },
+ "2_a3_synthetic_A1": {
+  "verdicts": {
+   "H_L a": "PASS",
+   "H_L b": "PASS",
+   "H_L b_plan_f5473428": "PASS",
+   "H_L c_per_board_W": "PASS",
+   "H_L c_t63": "PASS",
+   "H_M a": "PASS",
+   "H_M b": "PASS",
+   "H_M b_plan_f5473428": "PASS",
+   "H_M c_per_board_W": "PASS",
+   "H_M c_t63": "PASS",
+   "H_M c_replicate": "PASS",
+   "H_H a": "PASS",
+   "H_H b": "PASS",
+   "H_H b_plan_f5473428": "PASS",
+   "H_H c_per_board_W": "PASS",
+   "linear H_M/H_L": "PASS",
+   "linear H_H/H_L": "PASS"
   },
-  {
-   "hold": "HOLD-00-int8-neg_ones-hold",
-   "dur_s": 339.47500014305115,
-   "rms_C": 0.4537547351013931,
-   "mean_C": 0.22447641216479491,
-   "max_abs_C": 1.103681877746041,
-   "plateau_err_C": 0.2507983639093312,
-   "rise_meas_C": 12.870249497948564,
-   "anchor_C": 44.00090328499295,
-   "err_at_60s": -0.06572728942382909,
-   "err_at_120s": 0.10007031279068855,
-   "err_at_300s": 0.852260462851775,
-   "a_verdict": "PASS",
-   "board_rise_W": 17.71541514958992,
-   "per_board_W": 0.7265000221147223
+  "H_H_b_predicted_plateau_rise_C": 14.708589970783734,
+  "H_H_share_recorded": 0.4571428691014903
+ },
+ "2_a2_synthetic": {
+  "verdicts": {
+   "synthetic-G1-rest44.0/HOLD-00-int8-neg_ones-hold a": "PASS",
+   "synthetic-G1-rest44.0/HOLD-00-int8-neg_ones-hold b": "PASS",
+   "synthetic-G1-rest44.0/HOLD-00-int8-neg_ones-hold c_per_board_W": "PASS",
+   "synthetic-G1-rest44.0/HOLD-00-int8-neg_ones-hold c_t63": "NOT PASS (no FAIL band was registered)",
+   "synthetic-G1-rest44.0/HOLD-00-int8-neg_ones-hold c_t63_A1": "PASS",
+   "synthetic-G2-rest44.0/HOLDF-00-fp32-randn-hold a": "PASS",
+   "synthetic-G2-rest44.0/HOLDF-00-fp32-randn-hold b": "PASS",
+   "synthetic-G2-rest45.0/HOLDF-00-fp32-randn-hold a": "PASS",
+   "synthetic-G2-rest45.0/HOLDF-00-fp32-randn-hold b": "PASS"
   },
-  {
-   "hold": "HOLDF-00-fp32-randn-hold",
-   "dur_s": 1623.9749999046326,
-   "rms_C": 0.3889195541058982,
-   "mean_C": -0.18705287087655012,
-   "max_abs_C": 1.8237456520113966,
-   "plateau_err_C": -0.2381628825200764,
-   "rise_meas_C": 21.817028558756377,
-   "anchor_C": 44.00090328499295,
-   "err_at_60s": -0.07353720102390256,
-   "err_at_120s": -0.008259004845038475,
-   "err_at_300s": -0.27882306358613546,
-   "err_at_600s": -0.3889387905330953,
-   "a_verdict": "PASS",
-   "board_rise_W": 32.929505235247504,
-   "per_board_W": 0.6625373932251976,
-   "t63_s": 4.077291488647461
-  }
- ]
+  "rows": [
+   {
+    "step": "synthetic-G1-rest44.0",
+    "G": "G1",
+    "a": {
+     "rms_C": 1.9038532442219088e-15,
+     "plateau_err_C": 9.473903143468003e-17,
+     "max_abs_C": 7.105427357601002e-15,
+     "verdict": "PASS"
+    },
+    "b": {
+     "plateau_rise_C": 11.833191067853555,
+     "predicted_C": 11.833,
+     "err_C": 0.00019106785355482714,
+     "verdict": "PASS"
+    }
+   },
+   {
+    "step": "synthetic-G2-rest44.0",
+    "G": "G2",
+    "a": {
+     "rms_C": 1.0917060082494203,
+     "plateau_err_C": 0.12953353482996277,
+     "max_abs_C": 2.8564177205091283,
+     "verdict": "PASS"
+    },
+    "b": {
+     "plateau_C": 65.89999999999998,
+     "predicted_C": 65.9,
+     "err_C": -2.842170943040401e-14,
+     "regime": "trip",
+     "regime_predicted": "trip",
+     "share_600MHz_last300s": 0.9000666222518321,
+     "verdict": "PASS",
+     "tests": "the governor's trip, not the chain (trip regime)"
+    }
+   },
+   {
+    "step": "synthetic-G2-rest45.0",
+    "G": "G2",
+    "a": {
+     "rms_C": 0.24119945727761566,
+     "plateau_err_C": -0.28011817015704027,
+     "max_abs_C": 0.8950660141770896,
+     "verdict": "PASS"
+    },
+    "b": {
+     "plateau_C": 66.49034829501299,
+     "predicted_C": 66.493,
+     "err_C": -0.00265170498700229,
+     "regime": "floor",
+     "regime_predicted": "floor",
+     "share_600MHz_last300s": 1.0,
+     "verdict": "PASS",
+     "tests": "the chain (floor regime)"
+    }
+   }
+  ]
+ },
+ "self_test_ok": true,
+ "self_test_problems": []
 }

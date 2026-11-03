@@ -1,0 +1,958 @@
+{
+ "amendment": "A1 to Q138(t)'s frozen E144 design (predictions-e144.json, model-q138t.json at f5473428): written Mon 2 Nov 2026 after the verifier's report and before E144's claim; it changes no frozen number, band or stop",
+ "A1_1_launch_pattern": {
+  "dispatch": {
+   "source": "E97 Part B p9720 runs.jsonl and marks.jsonl, H3's reduced phase (fp32.randn, --seconds 3.50, one launch per 7.0 s)",
+   "dispatch_s_median": 0.491,
+   "dispatch_s_p5_p95": [
+    0.488,
+    0.493
+   ],
+   "n_dispatches": 1803,
+   "calibration_s_median": 0.019,
+   "recorded_compute_per_launch_s": 3.9460000000000006,
+   "launch_wall_s": 4.187,
+   "launch_period_s": 7.0,
+   "rule": "dispatches run while the time spent is under --seconds, so n = ceil(--seconds / dispatch) and the recorded compute is n x dispatch + the calibration dispatch"
+  },
+  "H_H": {
+   "runner": "start the hold duty-cycled from its first launch (no natural phase): --seconds 3.20 per launch, one launch every 7.56 s, start to start (run_e97b.py's --reduced-launch-s 3.2 --reduced-period-s 7.56, entered at the hold's start)",
+   "seconds_arg": 3.2,
+   "dispatches": 7,
+   "recorded_compute_s": 3.456,
+   "period_s": 7.56,
+   "share": 0.4571,
+   "share_frozen": 0.4571,
+   "b_at_50.6C": {
+    "hold": "H_H",
+    "share": 0.4571,
+    "period_s": 7.56,
+    "window_s": 7.56,
+    "rise_C_by_s": {
+     "10": 2.966,
+     "30": 4.666,
+     "60": 6.597,
+     "120": 9.321,
+     "180": 11.098,
+     "300": 13.119,
+     "450": 14.26,
+     "600": 14.729,
+     "end": 14.938
+    },
+    "plateau_rise_C": 14.708,
+    "plateau_board_rise_W": 17.357,
+    "peak_C_abs": 67.59,
+    "plateau_C_abs": 65.61,
+    "carried_in_C": 0.302,
+    "plateau_per_board_W": 0.8474,
+    "M6": {
+     "rise_C_by_s": {
+      "10": 2.394,
+      "30": 3.485,
+      "60": 4.873,
+      "120": 6.899,
+      "180": 8.214,
+      "300": 9.629,
+      "450": 10.342,
+      "600": 10.596,
+      "end": 10.687
+     },
+     "plateau_rise_C": 10.558
+    },
+    "fixed_point_C": 15.311
+   },
+   "by_rest_die": {
+    "49.5": {
+     "plateau_rise_C": 14.462,
+     "peak_C_abs": 66.21,
+     "plateau_C_abs": 64.25
+    },
+    "50.6": {
+     "plateau_rise_C": 14.708,
+     "peak_C_abs": 67.59,
+     "plateau_C_abs": 65.61
+    },
+    "51.5": {
+     "plateau_rise_C": 14.915,
+     "peak_C_abs": 68.73,
+     "plateau_C_abs": 66.73
+    }
+   },
+   "check_dt_0.02s": {
+    "plateau_rise_C": 14.711,
+    "peak_C_abs": 67.6
+   }
+  },
+  "H_H_warm": {
+   "runner": "if the rest die before H_H (34-sensor mean, last 120 s) is 51.5-53.0 C: --seconds 2.60 per launch (6 dispatches, 2.965 s recorded), one launch every 7.98 s; not run above 53.0 C",
+   "seconds_arg": 2.6,
+   "dispatches": 6,
+   "recorded_compute_s": 2.965,
+   "period_s": 7.98,
+   "share": 0.3716,
+   "share_frozen": 0.3714,
+   "by_rest_die": {
+    "51.5": {
+     "plateau_rise_C": 11.782,
+     "peak_C_abs": 65.7,
+     "plateau_C_abs": 63.6,
+     "fixed_point_C": 12.332
+    },
+    "52.5": {
+     "plateau_rise_C": 11.958,
+     "peak_C_abs": 66.9,
+     "plateau_C_abs": 64.79,
+     "fixed_point_C": 12.545
+    },
+    "53.0": {
+     "plateau_rise_C": 12.048,
+     "peak_C_abs": 67.51,
+     "plateau_C_abs": 65.39,
+     "fixed_point_C": 12.655
+    }
+   }
+  },
+  "subset": [
+   {
+    "hold": "H_H",
+    "share": 0.4571,
+    "period_s": 7.56,
+    "window_s": 7.56,
+    "rise_C_by_s": {
+     "10": 3.088,
+     "30": 4.81,
+     "60": 6.768,
+     "120": 9.533,
+     "180": 11.337,
+     "300": 13.39,
+     "450": 14.549,
+     "600": 15.025,
+     "end": 15.238
+    },
+    "plateau_rise_C": 15.005,
+    "plateau_board_rise_W": 17.355,
+    "peak_C_abs": 67.59,
+    "plateau_C_abs": 65.6,
+    "carried_in_C": 0.0,
+    "plateau_per_board_W": 0.8646,
+    "M6": {
+     "rise_C_by_s": {
+      "10": 2.489,
+      "30": 3.597,
+      "60": 5.008,
+      "120": 7.067,
+      "180": 8.404,
+      "300": 9.842,
+      "450": 10.568,
+      "600": 10.828,
+      "end": 10.922
+     },
+     "plateau_rise_C": 10.79
+    }
+   },
+   {
+    "hold": "H_L",
+    "share": 0.9655,
+    "period_s": 5.8,
+    "window_s": 5.0,
+    "rise_C_by_s": {
+     "10": 0.768,
+     "30": 1.338,
+     "60": 1.947,
+     "120": 2.779,
+     "180": 3.291,
+     "300": 3.84,
+     "450": 4.115,
+     "600": 4.21,
+     "end": 4.251
+    },
+    "plateau_rise_C": 4.209,
+    "plateau_board_rise_W": 5.354,
+    "peak_C_abs": 55.28,
+    "plateau_C_abs": 55.22,
+    "carried_in_C": 0.408,
+    "plateau_per_board_W": 0.7861,
+    "M6": {
+     "rise_C_by_s": {
+      "10": 0.648,
+      "30": 1.013,
+      "60": 1.463,
+      "120": 2.116,
+      "180": 2.531,
+      "300": 2.983,
+      "450": 3.202,
+      "600": 3.272,
+      "end": 3.302
+     },
+     "plateau_rise_C": 3.269
+    }
+   }
+  ],
+  "options_at_50.6C": {
+   "f5473428 plan: 3.2 s of compute per 7.0 s (not producible: whole dispatches)": {
+    "hold": "H_H",
+    "share": 0.4571,
+    "period_s": 7.0,
+    "window_s": 7.0,
+    "rise_C_by_s": {
+     "10": 2.921,
+     "30": 4.679,
+     "60": 6.625,
+     "120": 9.35,
+     "180": 11.125,
+     "300": 13.134,
+     "450": 14.244,
+     "600": 14.698,
+     "end": 14.903
+    },
+    "plateau_rise_C": 14.708,
+    "plateau_board_rise_W": 17.417,
+    "peak_C_abs": 67.54,
+    "plateau_C_abs": 65.61,
+    "carried_in_C": 0.302,
+    "plateau_per_board_W": 0.8445,
+    "M6": {
+     "rise_C_by_s": {
+      "10": 2.352,
+      "30": 3.501,
+      "60": 4.907,
+      "120": 6.936,
+      "180": 8.249,
+      "300": 9.654,
+      "450": 10.33,
+      "600": 10.562,
+      "end": 10.651
+     },
+     "plateau_rise_C": 10.563
+    },
+    "fixed_point_C": 15.311
+   },
+   "A1: --seconds 3.20 (7 dispatches, 3.456 s recorded), one launch per 7.56 s": {
+    "hold": "H_H",
+    "share": 0.4571,
+    "period_s": 7.56,
+    "window_s": 7.56,
+    "rise_C_by_s": {
+     "10": 2.966,
+     "30": 4.666,
+     "60": 6.597,
+     "120": 9.321,
+     "180": 11.098,
+     "300": 13.119,
+     "450": 14.26,
+     "600": 14.729,
+     "end": 14.938
+    },
+    "plateau_rise_C": 14.708,
+    "plateau_board_rise_W": 17.357,
+    "peak_C_abs": 67.59,
+    "plateau_C_abs": 65.61,
+    "carried_in_C": 0.302,
+    "plateau_per_board_W": 0.8474,
+    "M6": {
+     "rise_C_by_s": {
+      "10": 2.394,
+      "30": 3.485,
+      "60": 4.873,
+      "120": 6.899,
+      "180": 8.214,
+      "300": 9.629,
+      "450": 10.342,
+      "600": 10.596,
+      "end": 10.687
+     },
+     "plateau_rise_C": 10.558
+    },
+    "fixed_point_C": 15.311
+   },
+   "--seconds 3.20 at the 7.0 s period (3.456 s recorded)": {
+    "hold": "H_H",
+    "share": 0.4937,
+    "period_s": 7.0,
+    "window_s": 7.0,
+    "rise_C_by_s": {
+     "10": 3.15,
+     "30": 5.058,
+     "60": 7.17,
+     "120": 10.137,
+     "180": 12.078,
+     "300": 14.294,
+     "450": 15.534,
+     "600": 16.051,
+     "end": 16.288
+    },
+    "plateau_rise_C": 16.064,
+    "plateau_board_rise_W": 19.009,
+    "peak_C_abs": 68.84,
+    "plateau_C_abs": 66.97,
+    "carried_in_C": 0.302,
+    "plateau_per_board_W": 0.8451,
+    "M6": {
+     "rise_C_by_s": {
+      "10": 2.538,
+      "30": 3.782,
+      "60": 5.305,
+      "120": 7.5,
+      "180": 8.922,
+      "300": 10.442,
+      "450": 11.174,
+      "600": 11.425,
+      "end": 11.521
+     },
+     "plateau_rise_C": 11.427
+    },
+    "fixed_point_C": 16.718
+   },
+   "--seconds 3.50, E97's reduced default (8 dispatches, 3.947 s)": {
+    "hold": "H_H",
+    "share": 0.5639,
+    "period_s": 7.0,
+    "window_s": 7.0,
+    "rise_C_by_s": {
+     "10": 3.583,
+     "30": 5.781,
+     "60": 8.215,
+     "120": 11.654,
+     "180": 13.926,
+     "300": 16.56,
+     "450": 18.075,
+     "600": 18.727,
+     "end": 19.037
+    },
+    "plateau_rise_C": 18.746,
+    "plateau_board_rise_W": 22.168,
+    "peak_C_abs": 71.42,
+    "plateau_C_abs": 69.65,
+    "carried_in_C": 0.302,
+    "plateau_per_board_W": 0.8456,
+    "M6": {
+     "rise_C_by_s": {
+      "10": 2.893,
+      "30": 4.319,
+      "60": 6.065,
+      "120": 8.581,
+      "180": 10.211,
+      "300": 11.953,
+      "450": 12.793,
+      "600": 13.081,
+      "end": 13.192
+     },
+     "plateau_rise_C": 13.084
+    },
+    "fixed_point_C": 19.522
+   },
+   "--seconds 2.90 at 7.0 s (6 dispatches)": {
+    "hold": "H_H",
+    "share": 0.4236,
+    "period_s": 7.0,
+    "window_s": 7.0,
+    "rise_C_by_s": {
+     "10": 2.709,
+     "30": 4.331,
+     "60": 6.125,
+     "120": 8.631,
+     "180": 10.256,
+     "300": 12.082,
+     "450": 13.078,
+     "600": 13.48,
+     "end": 13.658
+    },
+    "plateau_rise_C": 13.488,
+    "plateau_board_rise_W": 15.985,
+    "peak_C_abs": 66.27,
+    "plateau_C_abs": 64.39,
+    "carried_in_C": 0.302,
+    "plateau_per_board_W": 0.8438,
+    "M6": {
+     "rise_C_by_s": {
+      "10": 2.179,
+      "30": 3.241,
+      "60": 4.542,
+      "120": 6.417,
+      "180": 7.631,
+      "300": 8.93,
+      "450": 9.555,
+      "600": 9.77,
+      "end": 9.851
+     },
+     "plateau_rise_C": 9.77
+    },
+    "fixed_point_C": 14.049
+   }
+  }
+ },
+ "A1_2_b_scoring": {
+  "rule": "arm (b) is scored against the frozen chain closed through E97's idle law (heat_q138t's update, model-q138t.json, E78's S), run on the REALIZED launch pattern: every dispatch record in the pass's runs.jsonl is on at its item's E78 S, and the loop starts at R0's start from the measured rest die (the 34-sensor mean over R0's last 120 s). The checkpoints and the plateau are read as predict_e144.describe reads them, over one launch period on a duty-cycled hold and 5 s otherwise, as rises over the last 120 s of the rest before each hold, with the frozen bands (+-1.30 C PASS at every checkpoint from 60 s and the plateau, +-2.60 C plateau FAIL). The f5473428 plan numbers are reported beside (b_plan_f5473428); when the run matches the plan they agree (self-test 2: within 0.02 C). The same reading scores H_H' and the subset.",
+  "why": "the plan's 3.2 s of compute per 7.0 s cannot be produced (A1.1), and the frozen numbers assume a 50.6 C rest; scored at the realized pattern, (b) tests the model and not the harness's rounding or the room"
+ },
+ "A1_3_definitions": {
+  "rest_die": "aifoundry3: the 34-sensor mean of the raw codes over the last 120 s of the rest before the hold (the anchor of arm (a)). aifoundry2: the firmware's whole-degree minshire[0] reading, mean over the last 120 s of the REST before the hold (the anchor of arm (a); score_e144.py reads it so)",
+  "G2_regime": "floor when at least 98% of the samples over the hold's last 300 s read 600 MHz, else trip (E111, floor: 1.000; E133, trip: 0.887)",
+  "G2_tests": "in the floor regime G2 tests the chain (rest die + 0.663 x 32.42 W); in the trip regime it tests the governor's hold at the 65/66 boundary, not the chain",
+  "G2_backcheck": {
+   "E111": {
+    "rest_die_C": 45.0,
+    "predicted_C": 66.493,
+    "plateau_last300s_C": 67.199,
+    "err_C": 0.706,
+    "regime": "floor",
+    "regime_predicted": "floor",
+    "share_600MHz_last300s": 1.0,
+    "verdict_by_G2_band": "INCONCLUSIVE"
+   },
+   "E133": {
+    "rest_die_C": 44.0,
+    "predicted_C": 65.9,
+    "plateau_last300s_C": 65.817,
+    "err_C": -0.083,
+    "regime": "trip",
+    "regime_predicted": "trip",
+    "share_600MHz_last300s": 0.887,
+    "verdict_by_G2_band": "PASS"
+   }
+  }
+ },
+ "A1_4_corrected_strings": {
+  "rules.b_full_chain.aifoundry3.why": "was 'E97's three holds back-checked to -0.3 to +0.6 C'; the frozen back-check reads the chain 0.33-1.04 C under E97's plateaus (measured - predicted +0.47, +1.04, +0.33 C; in sample for the chain)",
+  "rules.c_plateaus_and_time_constants.aifoundry2.per_board_W": "was '(0.648-0.700 in four holds; the chain 0.663)': those are E133's registered coefficients. By the scorer's metric (rise over the last 300 s per board W, both over the REST anchor) the four earlier int8 holds read as below; the band [0.62, 0.74] is unchanged and its top sits inside their spread",
+  "G1_per_board_W_by_the_scorers_metric": {
+   "E111 W1B HOLD-00-int8-neg_ones-hold (1597 s)": {
+    "last300s": 0.7096,
+    "600_900s": 0.6854
+   },
+   "E111 W2 HOLD-00-int8-neg_ones-hold (345 s)": {
+    "last300s": 0.7473
+   },
+   "E133 W1B HOLD-00-int8-neg_ones-hold (1596 s)": {
+    "last300s": 0.7134,
+    "600_900s": 0.6889
+   },
+   "E133 W2 HOLD-00-int8-neg_ones-hold (339 s)": {
+    "last300s": 0.7265
+   }
+  },
+  "README_G2_backcheck": "was 'E111 rested at 45.5 C': 45.5 is E111's before/after mean idle; the rest die before the hold reads 45.0 (A1.3)"
+ },
+ "A1_5_aifoundry2_stops_rationale": {
+  "was": "the PMIC alarm's 75 W is the SP's slow average, which the 65 W governor holds",
+  "now": "the empirical record only: G2 repeats exactly the hold E111 and E133 ran (fp32 randn, the same harness, the governor's own 65 W / 65 C, nothing set); those holds peaked at 88.04 W and 88.65 W with no alarm, and none passed 90 W. aifoundry2's PMIC over-power alarm configuration is unknown (E117 did not run). The stops are unchanged",
+  "peaks": {
+   "E111 W2 HOLDF-00-fp32-randn-hold": {
+    "board_peak_W": 88.04,
+    "samples_over_85W_grid": 23,
+    "die_max_C": 68.0
+   },
+   "E133 W2 HOLDF-00-fp32-randn-hold": {
+    "board_peak_W": 88.65,
+    "samples_over_85W_grid": 101,
+    "die_max_C": 67.0
+   },
+   "E111 H-F32 raw samples": {
+    "board_peak_W": 88.04,
+    "samples_over_85W": 65,
+    "samples_over_90W": 0,
+    "die_max_C": 68.0
+   },
+   "E133 H-F32 raw samples": {
+    "board_peak_W": 88.65,
+    "samples_over_85W": 322,
+    "samples_over_90W": 0,
+    "die_max_C": 67.0
+   }
+  }
+ },
+ "m6_comparison_arm": {
+  "form": "M6 as frozen (Q137(m) m6.json heat): the long-hold rule c x S x F(t), F(t) = 1 - sum w_i exp(-t/tau_i), tau [1.005, 15.98, 138.212, 1500.0] s, w [0.1475, 0.01, 0.8323, 0.0101]; c = 0.9 on aifoundry3 and 0.675 on aifoundry2 (steady_c_per_board_w). Arm (b): S = E78's S x the planned launch pattern (no leakage loop: M6 has none). Arm (a): the same F(t) x c as a chain on the measured board trace",
+  "aifoundry3": {
+   "H_L": {
+    "rise_C_by_s": {
+     "10": 0.77,
+     "30": 1.159,
+     "60": 1.637,
+     "120": 2.332,
+     "180": 2.774,
+     "300": 3.256,
+     "450": 3.491,
+     "600": 3.569,
+     "end": 3.603
+    },
+    "plateau_rise_C": 3.566,
+    "Q138t_plateau_rise_C": 4.613
+   },
+   "H_M": {
+    "rise_C_by_s": {
+     "10": 1.739,
+     "30": 2.628,
+     "60": 3.724,
+     "120": 5.315,
+     "180": 6.328,
+     "300": 7.43,
+     "450": 7.968,
+     "600": 8.147,
+     "end": 8.224
+    },
+    "plateau_rise_C": 8.139,
+    "Q138t_plateau_rise_C": 11.021
+   },
+   "H_H": {
+    "rise_C_by_s": {
+     "10": 2.394,
+     "30": 3.485,
+     "60": 4.873,
+     "120": 6.899,
+     "180": 8.214,
+     "300": 9.629,
+     "450": 10.342,
+     "600": 10.596,
+     "end": 10.687
+    },
+    "plateau_rise_C": 10.558,
+    "Q138t_plateau_rise_C": 14.708
+   }
+  },
+  "aifoundry3_at_the_plans_3.2_per_7.0": {
+   "H_L": 3.566,
+   "H_M": 8.139,
+   "H_H": 10.563
+  },
+  "aifoundry2": {
+   "G1_plateau_rise_C": 11.933,
+   "G1_board_rise_W": 17.836,
+   "G2_floor_only_rise_C": 21.884,
+   "G2_note": "M6 has no governor term: rest die + 0.675 x E111's 32.42 W at the floor"
+  }
+ },
+ "A1_7_before_after": {
+  "aifoundry3": {
+   "a_M6_as_frozen_in_sample": [
+    {
+     "hold": "H1",
+     "rms_C": 0.639,
+     "plateau_err_C": 0.039,
+     "err_at_60s": 1.189
+    },
+    {
+     "hold": "H2",
+     "rms_C": 0.312,
+     "plateau_err_C": 0.437,
+     "cooldown_rms_C": 0.634,
+     "err_at_60s": -0.003
+    },
+    {
+     "hold": "H3",
+     "rms_C": 0.912,
+     "plateau_err_C": -0.144,
+     "cooldown_rms_C": 1.071,
+     "err_at_60s": 2.284
+    }
+   ],
+   "a: before: plateau only, 0.90 C per board W, no dynamics (M6's quote)": [
+    {
+     "hold": "H1",
+     "rms_C": 1.903,
+     "plateau_err_C": 0.008,
+     "err_at_60s": -4.322
+    },
+    {
+     "hold": "H2",
+     "rms_C": 1.525,
+     "plateau_err_C": 0.319,
+     "cooldown_rms_C": 2.962,
+     "err_at_60s": -0.36
+    },
+    {
+     "hold": "H3",
+     "rms_C": 11.615,
+     "plateau_err_C": -0.584,
+     "cooldown_rms_C": 4.228,
+     "err_at_60s": -12.98
+    }
+   ],
+   "a: before: E89's frozen chain (E97's registration, lab grid)": [
+    {
+     "hold": "H1",
+     "rms_C": 0.779,
+     "plateau_err_C": 0.499,
+     "err_at_60s": 0.37
+    },
+    {
+     "hold": "H2",
+     "rms_C": 0.732,
+     "plateau_err_C": 0.919,
+     "cooldown_rms_C": 0.375,
+     "err_at_60s": 0.39
+    },
+    {
+     "hold": "H3",
+     "rms_C": 0.72,
+     "plateau_err_C": 0.512,
+     "cooldown_rms_C": 0.303,
+     "err_at_60s": -0.057
+    }
+   ],
+   "a: E89 only, this grid": [
+    {
+     "hold": "H1",
+     "rms_C": 0.461,
+     "plateau_err_C": -0.764,
+     "err_at_60s": 0.329
+    },
+    {
+     "hold": "H2",
+     "rms_C": 0.654,
+     "plateau_err_C": -0.446,
+     "cooldown_rms_C": 0.45,
+     "err_at_60s": -0.865
+    },
+    {
+     "hold": "H3",
+     "rms_C": 1.501,
+     "plateau_err_C": -1.593,
+     "cooldown_rms_C": 0.889,
+     "err_at_60s": -0.145
+    }
+   ],
+   "a: E89 + E97 Part A (every hold left out)": [
+    {
+     "hold": "H1",
+     "rms_C": 0.355,
+     "plateau_err_C": -0.607,
+     "err_at_60s": 0.203
+    },
+    {
+     "hold": "H2",
+     "rms_C": 0.502,
+     "plateau_err_C": -0.275,
+     "cooldown_rms_C": 0.26,
+     "err_at_60s": -0.715
+    },
+    {
+     "hold": "H3",
+     "rms_C": 1.329,
+     "plateau_err_C": -1.364,
+     "cooldown_rms_C": 0.621,
+     "err_at_60s": -0.5
+    }
+   ],
+   "a: leave one hold out (E89 + E97, the hold and its cool-down left out)": [
+    {
+     "hold": "H1",
+     "rms_C": 0.664,
+     "plateau_err_C": 0.405,
+     "err_at_60s": 0.372,
+     "R_total_fit": 0.867
+    },
+    {
+     "hold": "H2",
+     "rms_C": 0.636,
+     "plateau_err_C": 0.816,
+     "cooldown_rms_C": 0.326,
+     "err_at_60s": 0.303,
+     "R_total_fit": 0.866
+    },
+    {
+     "hold": "H3",
+     "rms_C": 0.475,
+     "plateau_err_C": -0.395,
+     "cooldown_rms_C": 0.12,
+     "err_at_60s": -0.432,
+     "R_total_fit": 0.898
+    }
+   ],
+   "R_total_by_design": {
+    "full fit (frozen)": 0.8695,
+    "leave one hold out": [
+     0.8666,
+     0.8663,
+     0.8981
+    ],
+    "every Part B hold out (E89 + E97 Part A)": 0.9439,
+    "E89 only (session-out)": 0.9584,
+    "E89's own frozen chain (lab grid)": 0.8607
+   },
+   "dense_19_point_grid": {
+    "tau_s": [
+     1.0,
+     5.0,
+     7.0,
+     90.0,
+     120.0
+    ],
+    "R_C_per_W": [
+     0.08871,
+     0.02259,
+     0.06051,
+     0.38522,
+     0.31023
+    ],
+    "R_total": 0.8673,
+    "t63_s": 79.5,
+    "t90_s": 215.4,
+    "fit_rms_C": 0.2919
+   },
+   "b_on_E97_at_its_realized_pattern_in_sample": [
+    {
+     "hold": "H1",
+     "share_recorded": 0.9657,
+     "measured_plateau_rise_C": 11.839,
+     "Q138t_closed_chain_C": 11.335,
+     "Q138t_err_C": 0.505,
+     "M6_C": 8.36,
+     "M6_err_C": 3.48,
+     "M6_err_share_of_rise": 0.294
+    },
+    {
+     "hold": "H2",
+     "share_recorded": 0.9642,
+     "measured_plateau_rise_C": 13.224,
+     "Q138t_closed_chain_C": 12.139,
+     "Q138t_err_C": 1.086,
+     "M6_C": 8.912,
+     "M6_err_C": 4.312,
+     "M6_err_share_of_rise": 0.326
+    },
+    {
+     "hold": "H3",
+     "share_recorded": 0.6127,
+     "measured_plateau_rise_C": 19.737,
+     "Q138t_closed_chain_C": 19.286,
+     "Q138t_err_C": 0.451,
+     "M6_C": 13.305,
+     "M6_err_C": 6.431,
+     "M6_err_share_of_rise": 0.326
+    }
+   ],
+   "b_on_E97_fixed_points_frozen": [
+    {
+     "hold": "E97 H1",
+     "S_eff_W": 9.314,
+     "predicted_rise_C": 11.33,
+     "measured_rise_C": 11.8,
+     "err_C": 0.47
+    },
+    {
+     "hold": "E97 H2 (chained: from H1)",
+     "S_eff_W": 9.911,
+     "predicted_rise_C": 12.13,
+     "measured_rise_C": 13.17,
+     "err_C": 1.04
+    },
+    {
+     "hold": "E97 H3 (reduced phase)",
+     "S_eff_W": 14.963,
+     "predicted_rise_C": 19.39,
+     "measured_rise_C": 19.72,
+     "err_C": 0.33
+    }
+   ]
+  },
+  "aifoundry2": {
+   "a: fit E111, predict E133": [
+    {
+     "session": "E133-W2",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 0.437,
+     "plateau_err_C": 0.215
+    },
+    {
+     "session": "E133-W2",
+     "hold": "HOLDF-00-fp32-randn-hold",
+     "rms_C": 0.567,
+     "plateau_err_C": -0.478
+    },
+    {
+     "session": "E133-W1B",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 0.643,
+     "plateau_err_C": 0.591
+    }
+   ],
+   "a: fit E133, predict E111": [
+    {
+     "session": "E111-W2",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 1.164,
+     "plateau_err_C": 1.096
+    },
+    {
+     "session": "E111-W2",
+     "hold": "HOLDF-00-fp32-randn-hold",
+     "rms_C": 1.058,
+     "plateau_err_C": 1.162
+    },
+    {
+     "session": "E111-W1B",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 0.868,
+     "plateau_err_C": 0.833
+    }
+   ],
+   "a: before: plateau only, 0.673 C per board W, no dynamics (M6's quote)": [
+    {
+     "session": "E111-W2",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 3.148,
+     "plateau_err_C": 1.364
+    },
+    {
+     "session": "E111-W2",
+     "hold": "HOLDF-00-fp32-randn-hold",
+     "rms_C": 3.383,
+     "plateau_err_C": 0.906
+    },
+    {
+     "session": "E111-W1B",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 1.908,
+     "plateau_err_C": 0.668
+    },
+    {
+     "session": "E133-W2",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 2.802,
+     "plateau_err_C": 0.948
+    },
+    {
+     "session": "E133-W2",
+     "hold": "HOLDF-00-fp32-randn-hold",
+     "rms_C": 5.072,
+     "plateau_err_C": -0.345
+    },
+    {
+     "session": "E133-W1B",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 1.879,
+     "plateau_err_C": 0.698
+    }
+   ],
+   "a: before: one pole, tau 89 s, 0.673 C per board W (E111's asymptote beside)": [
+    {
+     "session": "E111-W2",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 0.913,
+     "plateau_err_C": 0.496
+    },
+    {
+     "session": "E111-W2",
+     "hold": "HOLDF-00-fp32-randn-hold",
+     "rms_C": 0.959,
+     "plateau_err_C": 0.639
+    },
+    {
+     "session": "E111-W1B",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 0.958,
+     "plateau_err_C": 0.538
+    },
+    {
+     "session": "E133-W2",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 1.214,
+     "plateau_err_C": -0.508
+    },
+    {
+     "session": "E133-W2",
+     "hold": "HOLDF-00-fp32-randn-hold",
+     "rms_C": 0.954,
+     "plateau_err_C": -0.59
+    },
+    {
+     "session": "E133-W1B",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 0.941,
+     "plateau_err_C": 0.494
+    }
+   ],
+   "a: M6's F(t) x 0.675 as a chain (aifoundry3's F carried over)": [
+    {
+     "session": "E111-W2",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 0.472,
+     "plateau_err_C": 0.195
+    },
+    {
+     "session": "E111-W2",
+     "hold": "HOLDF-00-fp32-randn-hold",
+     "rms_C": 1.061,
+     "plateau_err_C": 0.664
+    },
+    {
+     "session": "E111-W1B",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 1.278,
+     "plateau_err_C": 0.598
+    },
+    {
+     "session": "E133-W2",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 1.158,
+     "plateau_err_C": -0.914
+    },
+    {
+     "session": "E133-W2",
+     "hold": "HOLDF-00-fp32-randn-hold",
+     "rms_C": 0.876,
+     "plateau_err_C": -0.541
+    },
+    {
+     "session": "E133-W1B",
+     "hold": "HOLD-00-int8-neg_ones-hold",
+     "rms_C": 1.19,
+     "plateau_err_C": 0.501
+    }
+   ],
+   "means_over_six_holds": {
+    "Q138(t) session-out": 0.789,
+    "one pole 89 s": 0.99,
+    "M6 F(t) x 0.675": 1.006
+   },
+   "R_total_by_design": {
+    "full fit (frozen)": 0.663,
+    "fit E111": 0.67,
+    "fit E133": 0.6577
+   },
+   "dense_19_point_grid": {
+    "tau_s": [
+     1.0,
+     5.0,
+     7.0,
+     60.0,
+     90.0
+    ],
+    "R_total": 0.6626,
+    "t63_s": 50.5
+   }
+  }
+ },
+ "A1_8_G1_t63": {
+  "closed_reference_s": 76.0,
+  "open_loop_t63_s_frozen": 49.6,
+  "frozen_model_over_open": 1.532,
+  "earlier_holds_in_sample": {
+   "E111 W1B": {
+    "t63_s": 88.9,
+    "over_open_49.6s": 1.792,
+    "over_closed_reference": 1.17
+   },
+   "E133 W1B": {
+    "t63_s": 74.3,
+    "over_open_49.6s": 1.498,
+    "over_closed_reference": 0.978
+   }
+  },
+  "rule": "the frozen G1 t63 reading (PASS within 0.75-1.33x of the open loop's 49.6 s) is kept and reported; it is expected to read NOT PASS even when the model is right, because the frozen model's own die from rest reads the ratio above. A1 adds beside it the same band against this closed reference (PASS within 0.75-1.33x; no FAIL band, as registered)"
+ },
+ "A1_9_short_run": {
+  "chain_C_per_board_W": {
+   "at_2s": 0.1142,
+   "at_4.5s_end": 0.161,
+   "mean_over_0_4.5s": 0.1091
+  },
+  "M6": {
+   "window_coefficient": 0.118,
+   "its_own_0.9xF_at_4.5s": 0.1575,
+   "its_own_0.9xF_mean_over_0_4.5s": 0.1167
+  },
+  "reading": "M6's 0.118 is a reading over the kinds harness's run (a window), and the chain's 0.161 is the value at 4.5 s, the end of that run. Read like for like the gap mostly closes: the chain's mean over a 4.5 s run is close to 0.118, and M6's own 0.9 x F(4.5 s) is close to the chain's end value"
+ }
+}
