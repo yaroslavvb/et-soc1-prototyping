@@ -1,0 +1,72 @@
+E141 self-test (nothing here is a measurement)
+
+A. planned intervals (registered draws):
+  E141-P1 power fp32 rms over 9: [0.087, 0.545] W (median 0.194)
+  E141-P2 power fp16 rms over 8: [0.071, 0.247] W (median 0.156)
+  E141-P3 power int8 rms over 7: [0.093, 0.361] W (median 0.210)
+  E141-B1 bias {'fp32': 9, 'fp16': 8}: [-0.117, +0.085] W
+  E141-B2 bias {'int8': 7}: [-0.225, +0.103] W
+  E141-H1 heat fp32 rms over 9: [0.102, 0.261] C
+  E141-H2 heat fp16 rms over 8: [0.083, 0.235] C
+  E141-H3 heat int8 rms over 7: [0.095, 0.309] C
+  E141-C1 / E141-H4: at least 26 of 30 inside
+
+B. simulated sessions, 60 a world (bootstrap draws 2,000): count of each verdict
+  as good as the nested score:
+    E141-B1: FAIL HIGH 3, FAIL LOW 3, PASS 54
+    E141-B2: PASS 60
+    E141-C1: PASS 60
+    E141-H1: FAIL 1, PASS 59
+    E141-H2: FAIL 1, PASS 59
+    E141-H3: FAIL 1, PASS 59
+    E141-H4: FAIL 1, PASS 59
+    E141-M1: BETTER 10, NOT RESOLVED 50
+    E141-M2: BETTER 45, NOT RESOLVED 15
+    E141-P1: FAIL 2, PASS 58
+    E141-P2: FAIL 2, PASS 58
+    E141-P3: FAIL 2, PASS 58
+  twice as bad:
+    E141-B1: FAIL HIGH 13, FAIL LOW 8, PASS 39
+    E141-B2: FAIL HIGH 12, FAIL LOW 5, PASS 43
+    E141-C1: FAIL 23, PASS 37
+    E141-H1: FAIL 53, PASS 7
+    E141-H2: FAIL 50, PASS 10
+    E141-H3: FAIL 50, PASS 10
+    E141-H4: FAIL 59, PASS 1
+    E141-M1: BETTER 6, NOT RESOLVED 53, WORSE 1
+    E141-M2: BETTER 16, NOT RESOLVED 44
+    E141-P1: FAIL 13, PASS 47
+    E141-P2: FAIL 46, PASS 14
+    E141-P3: FAIL 40, PASS 20
+  three times as bad:
+    E141-B1: FAIL HIGH 19, FAIL LOW 14, PASS 27
+    E141-B2: FAIL HIGH 22, FAIL LOW 5, PASS 33
+    E141-C1: FAIL 57, PASS 3
+    E141-H1: FAIL 59, PASS 1
+    E141-H2: FAIL 58, PASS 2
+    E141-H3: FAIL 59, PASS 1
+    E141-H4: FAIL 60
+    E141-M1: BETTER 3, NOT RESOLVED 56, WORSE 1
+    E141-M2: BETTER 19, NOT RESOLVED 41
+    E141-P1: FAIL 35, PASS 25
+    E141-P2: FAIL 58, PASS 2
+    E141-P3: FAIL 53, PASS 7
+  floats biased -0.3 W (M7 too high), 1x:
+    E141-B1: FAIL HIGH 60
+    E141-B2: FAIL HIGH 3, FAIL LOW 1, PASS 56
+    E141-C1: FAIL 1, PASS 59
+    E141-H1: FAIL 1, PASS 59
+    E141-H2: FAIL 2, PASS 58
+    E141-H3: PASS 60
+    E141-H4: FAIL 2, PASS 58
+    E141-M1: BETTER 5, NOT RESOLVED 55
+    E141-M2: BETTER 36, NOT RESOLVED 24
+    E141-P1: FAIL 4, PASS 56
+    E141-P2: FAIL 55, PASS 5
+    E141-P3: FAIL 2, PASS 58
+
+C. edge cases:
+  one kept pass: 1 kept passes, fewer than 2
+  fp32.sorted_k missing: short tiles {'power': ['fp32.sorted_k'], 'heat': ['fp32.sorted_k']} ; P1 tiles 8
+
+SELFTEST DONE
