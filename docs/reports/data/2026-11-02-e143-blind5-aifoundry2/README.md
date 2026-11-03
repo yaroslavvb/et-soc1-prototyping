@@ -4,6 +4,15 @@
 
 *Mon 2 Nov 2026 (week 45), Q138, aifoundry2 card 0 under its own governor. Pre-registered in `38cd9099` ([`tools/claims-v3/e143/E143.md`](../../../../tools/claims-v3/e143/E143.md): the frozen numbers, the rules, the stops, a self-test, a toy-card dry run of the whole queue and the device-command audit), committed at 20:54:09 PST and pushed before the claim (20:55:03) and the first launch (20:56). Every number it scores is Q138(x)'s, committed in `dac39d97` at 20:24 PST (`git merge-base --is-ancestor dac39d97 38cd9099` holds), from M7 (`3a210f2b`, 19:21 PST, before pool 5 entered the tree); nothing was fitted or refitted. `ettelem config` read 65 W / 65 °C, low_power, 600 MHz, 519 mV at the queue's start (20:55:36) and end (21:23:39). Nothing was set on the card. 28.1 card-minutes (20:55:36-21:23:39), every command a read.*
 
+*Corrected after verification (a dated note, Mon 2 Nov 2026, about 22:30 PST). An independent verifier re-derived every registered number
+and verdict from the raw telemetry, and all of them stand. It found seven faults in the text, and none of them changes a number, rule or
+verdict. They are corrected in [§ Corrections after verification](#corrections-after-verification-mon-2-nov-2026) at the end. The text
+between is as first committed; where it disagrees with those notes, the notes hold. The main one is C1: what M7 leaves on this card is
+not an offset. The board error rises with the power M7 predicts, and the zeros level is −1.20 W (−0.80 W is the mean of all 17 pinned
+tiles). So the next terms are a zeros level, a cap term and a D scale that depends on the format, all found post hoc and all to be scored
+blind. Where the governor acts, and for the heat, the blind scores are consistent with the reference, not better than it (C3). And the
+pool is 30 new kinds and 6 anchors (C5).*
+
 ## The answer
 
 **M7's clock-and-voltage term holds on 36 kinds it never saw.** On the 19 tiles M7 put below 795 MHz, where aifoundry2's governor acts, the measured burst clock (three passes each) came within **6.63 MHz rms** of the frozen prediction, against 7.59 MHz on the reference rows the rules drew from; all 36 tiles fell inside the frozen ±21.3 MHz band, and the 17 tiles predicted at 800 MHz stayed there (1.01 MHz rms). **The board power at that clock** came within **1.60 W rms** on the governed tiles and **1.18 W** on the pinned ones (35 of 36 inside ±3.37 W), and **the die's rise** over a burst within **0.58 °C** (36 of 36 inside ±1.41 °C). Every registered rule passes, and the drift check against E80's and E83's own tiles passes (−5 to −8 MHz, −1.1 to +0.7 W). M7, M6 and M5 cannot be told apart on this card: they share M7's clock term and heat law and differ only through their D, by at most 0.3 MHz and 0.09 W of rms here.
@@ -150,3 +159,100 @@ The session's highest board reading was **87.95 W**, in `fp32.wideexp48_dense`'s
 | `logs/` | the queue's stdout and the script that started it |
 
 To reproduce from the tree's root: `python3 tools/claims-v3/e143/reduce_e143.py docs/reports/data/2026-11-02-e143-blind5-aifoundry2/aifoundry2/s1 --out results.json > reduce.txt`, then `python3 docs/reports/data/2026-11-02-e143-blind5-aifoundry2/tables_e143.py > tables.md` and `posthoc_e143.py > posthoc.txt`.
+
+## Corrections after verification (Mon 2 Nov 2026)
+
+*A dated note, written at about 22:30 PST on the Intel. Desk only: no card, no device command, nothing re-run. An independent verifier
+re-derived F1–F3, W1–W3, H1, H3 and R0 from the raw telemetry with its own code (per-run differences from `results.json` at most
+0.049 MHz, 0.005 W and 0 °C). It also reran Q138(x)'s predictor, which reproduced the frozen predictions byte for byte, and it confirmed
+that every command sent was a read. The numbers below come from [`posthoc_corrections_e143.py`](posthoc_corrections_e143.py), which
+writes [`posthoc-corrections.json`](posthoc-corrections.json) and prints [`posthoc-corrections.txt`](posthoc-corrections.txt). They are
+post hoc and never a verdict, and every interval is a percentile bootstrap over tiles (20,000 draws). The text above is as first committed
+in `f8783f05`. `results.json`, `reduce.txt`, `posthoc.txt` and the registration (`tools/claims-v3/e143/`, `38cd9099`) are unchanged.
+`tables_e143.py` now prints two reference values correctly, so two cells of `tables.md` change (C3).*
+
+- **C1 (major; "What this does to predicting power and heat" and What E143 says): what M7 leaves on this card is not an offset.** The
+  text says the governed tiles read 1.17 W high and the pinned 0.80 W low, and that a cap and a zeros level refitted per card "would remove
+  most of it". Its last bullet calls the next term "the cap's and the zeros' levels (+1.2 W and −0.8 W)". Both are corrected
+  (`posthoc-corrections.json` › `3_board_error_offset_or_scale`):
+  - **The board error rises with the power M7 predicts**: 0.107 W per predicted W [0.081, 0.141] over the 36 tiles; 0.110 [0.066, 0.166]
+    over the 14 pinned tiles that are not zeros, where no cap acts; 0.214 [0.022, 0.367] inside int8's 10.
+  - **The zeros level is −1.20 W**: the three zeros anchors read −1.11 (fp16), −1.18 (fp32) and −1.32 W (int8). −0.80 W is the mean of
+    all 17 pinned tiles. The four pinned floats that are not zeros (gated or sparse, 60.0–61.5 W) read +0.21 W, the ten pinned int8
+    tiles −1.09 W and the 19 governed tiles +1.17 W.
+  - **Inside the governed tiles the error rises too.** The 11 random-like ones (M7 below 760 MHz) read +1.79 W [1.29, 2.34] and the 8
+    lightly governed +0.33 W [−0.20, 0.71]. Against each tile's frozen unthrottled estimate (`predictions-e143.json` › `admission` ›
+    `fixed_p800_w`, 64.6–84.3 W) the slope is 0.138 W per W [0.075, 0.188], so the cap term is not one level either. One candidate, not
+    tested here: the burst window opens 1.5 s after the first launch, and the hottest tile, `fp32.wideexp48_dense`, held 85–88 W for
+    1.6–1.8 s in each pass before the governor stepped down (§ Safety).
+  - **Where no cap acts, the burst D reads high by a share.** It reads +1.35 W on the four gated or sparse pinned floats (measured D
+    over M7's, through zero: 1.055) and +0.23 W on the ten int8 tiles (1.031). The governed tiles' +2.33 W is where the cap's error and
+    the zeros' add, as the text says.
+  - **In sample, on these same tiles**, a cap level and a zeros level take the board's rms from 1.42 to 1.03 W, but the pinned tiles
+    that are not zeros only from 1.18 to 1.05 W. A D gain per kind of format as well (floats 1.058, int8 1.020) takes the pinned tiles
+    to 0.65 W and all 36 to 0.91 W.
+  - **So the next aifoundry2 terms** are a zeros level (about −1.2 W), a cap term (about +1.2 W on average, rising with the tile's
+    overshoot of the cap) and a D scale that depends on the format (floats 1.055–1.058, int8 1.020–1.031 by the two estimates above). All three were found post hoc
+    on E143's own tiles, and each must be scored blind on a new pool or session before it is quoted.
+- **C2 (the same paragraph): where the governor acts, the clock reads about 5 MHz low.** "What it does not fix" leaves out the governed
+  clock's bias: −4.96 MHz [−6.97, −3.01], with 15 of the 19 tiles below their prediction. It is −6.68 MHz [−8.71, −4.52] on the 11
+  random-like tiles and −2.61 MHz on the 8 lightly governed (`4_clock_bias_and_drift`). That is about the size of the card's drift
+  since E80 and E83 on identical tiles, which R0 measured tonight. E80's fp32 randn tile ran at 705.3 MHz against E80's and E83's mean
+  of 713.3 (−8.0), and its fp16 randn tile at 720.1 against 727.7 (−7.6); all six of their passes read low. The pool's fresh fp32 randn
+  anchor read 7.7 MHz below M7. (R0's int8 −5.3 MHz is one pass at 784 MHz, not a drift.) R0 passed its 25 MHz bar, and as registered
+  it "qualifies the verdicts above": F1 passes with a bias the size of the drift inside it. So a burst clock quoted for this card needs
+  an anchor in the same session, or a drift allowance of about −5 to −8 MHz (kinds page section 11 item 8, the drift).
+- **C3 (The answer, the rules table, Before and after, and What this does): the blind scores carry intervals. Where the governor acts,
+  and for the heat, they are consistent with the reference, not better than it; the pinned scores reflect what the pool holds.** With
+  95% intervals over tiles (`1_blind_rms_intervals`):
+
+  | rule | blind rms [95%] | in-sample reference | reading |
+  |---|---|---|---|
+  | F1, governed clock | 6.63 [4.77, 8.27] MHz | 7.59 | inside: consistent |
+  | F2, pinned clock | 1.01 [0.08, 1.73] MHz | 8.87; 0.61 without its 4 large-error cells | the pool's composition |
+  | W1, governed board | 1.60 [1.11, 2.08] W | 1.94 | inside: consistent |
+  | W2, pinned board | 1.18 [0.87, 1.46] W | 1.83; 1.50 without those cells | below the reference, as W2's verdict says |
+  | H1, die rise | 0.585 [0.46, 0.70] °C | 0.68 | inside: consistent |
+
+  The pinned clock's drop from 8.87 to 1.01 MHz does not come from a better model. Four of the reference's 39 pinned cells, which M7 put
+  at 800 MHz, read 21–39 MHz lower: E80's int8 neg_ones and fp32 nn_like, and E83's int8 wsparse90 and int8 sorted. Without them the
+  reference reads 0.61 MHz, and pool 5's pinned tiles held none like them (the largest pinned error is −4.1 MHz, `int8.a_word_flipflop`'s
+  one pass at 788 MHz). So the line "pinned 8.87 → 1.01 MHz" reflects what the pool holds. W2 is the one score below its reference
+  (1.18 W against 1.83, or 1.50 without the four cells), as its registered verdict says. Read Before and after, and the "before" and
+  "after" of What this does, as the text's own conclusion puts it: the quoted error "can stand at the reference's size". On the 30 new
+  kinds alone (`2_new_kinds_only`; C5) the scores are much the same: governed 6.75 MHz [4.76, 8.52] and 1.54 W [0.98, 2.09], pinned
+  1.15 MHz and 1.22 W, die rise 0.544 °C [0.40, 0.68]. **The rules table prints W1's reference rms as 1.95 and H1's as 0.69.** They are
+  1.94 (1.9447) and 0.68 (0.6845), as Before and after has them. `results.json` stores them rounded to three places (1.945, 0.685), and
+  `tables_e143.py` rounded those again. It now prints the frozen reference's own values, and in `tables.md` those two cells change and
+  nothing else.
+- **C4 (Registered against what happened, and Departures): no launch's C was checked.** "All 117 counted (every launch passed its check
+  of C)" is not so, and E143.md's smoke and counting rule (lines 81 and 105) and `queue_e143.py`'s step 5 say the same. For a file tile
+  the host checks no arithmetic: `rawValues` is true for any `--values` but `small` (`workloads/sparsity/host/main.cpp:589`), so the
+  result is `unchecked` (`:614`). All 1,983 kernel launches of the session and all 19 of the smoke read `unchecked`, with `ok` true and
+  no tensor error (`5_check_of_C`), as in E80 (4,148 and 21). So "counted" means that every launch completed, every hart wrote its result
+  record and no tensor error was raised (`ok`, `:615`, with `summarize`'s `bad`), which is what `reduce_e143.py`'s `launch_ok ==
+  launch_n` tests. **This is a departure**, recorded after the data: the registered smoke's "check of C" could not run, so "No departure
+  from the registration" is corrected to this one. No rule or score depends on C.
+- **C5 (the title, The answer and What E143 says): 30 new kinds and 6 anchors.** "36 kinds it never saw" overstates it. Six of the 36
+  tiles are anchors (`6_anchors`). The three zeros tiles are byte-identical to the zeros tiles of E80, E83 and M7's reference rows
+  (sha256 `e5a00aa9…`, as `tools/claims-v3/kinds/tiles/<format>/zeros.bin`). The fp32 and fp16 randn anchors and the int8 full anchor
+  are fresh tiles of kinds M7 was fitted on. So the pool is 30 new kinds and 6 anchors. And "the other floats (gated, sparse, …)
+  778–800 MHz" is wrong for one sparse float. `fp16.sparse24_straddled` is a 2:4 tile whose zeros straddle the fp16 pairs, so no update
+  is gated (pool 5's [CORRECTIONS](../../../../tools/claims-v3/kinds/blind5/CORRECTIONS.md) C1). It ran at 726.5 MHz (725, 724, 730),
+  with the random-like ones. Read: the gated and block-sparse floats, and the 2:4 tile aligned to the pairs, stayed at 778–800 MHz.
+- **C6 (E143.md's first line): the registration did not precede every card's run of the pool.** E143.md says it was registered "before
+  any card has run a tile of the pool". E142 had begun the pool on aifoundry1 card 1 at 20:52:47 PST (`fp32.gray_stream`), 82 s before
+  `38cd9099` was committed at 20:54:09, and 57 of E142's records, of 6 pool tiles, started before the commit (`7_registration_vs_e142`).
+  Nothing flowed. E143's numbers are Q138(x)'s, frozen in `dac39d97` at 20:24 PST, before any card ran the pool. And the E143 lane read
+  no E141 or E142 file: its 163 tool calls name them only in its own prose (checked from the lane's record on 2 Nov). The registration
+  did precede E143's own claim and every launch of E143, as it says.
+- **C7 (the kinds table): the cells.** The 36 tiles' burst clock, burst board W, burst D and die rise on aifoundry2 under its own
+  governor are cells of the kinds table. All 141 of them (D is 0 by definition for the 3 zeros tiles) are in `posthoc-corrections.json` ›
+  `8_table_cells`, each with its passes' spread and its source key in `results.json`.
+
+**What the corrections do to predicting power and heat.** Nothing is refitted, and every registered verdict stands. Where the governor
+acts, the blind clock (6.63 [4.77, 8.27] MHz) and board (1.60 [1.11, 2.08] W) scores, and the heat (0.585 [0.46, 0.70] °C), are
+consistent with the in-sample reference (7.59 MHz, 1.94 W, 0.68 °C). So M7's clock-and-voltage term holds blind at the size it was
+quoted, and no better. What changes is the model's next term on this card. It is not two levels: it is a zeros level (−1.20 W), a cap
+term that rises with the tile's overshoot (+1.17 W on average) and a D scale that depends on the format (floats 1.055–1.058), plus a drift
+allowance for the clock (about −5 to −8 MHz) or an anchor in the same session. All of these are post hoc, to be scored blind.

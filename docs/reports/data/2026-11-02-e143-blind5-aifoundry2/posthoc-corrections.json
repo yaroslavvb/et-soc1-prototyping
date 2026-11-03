@@ -1,0 +1,2384 @@
+{
+ "note": "post hoc, written after verification on Mon 2 Nov 2026; never a verdict; every interval a percentile bootstrap over tiles (20000 draws, seed 143)",
+ "1_blind_rms_intervals": {
+  "E143-F1": {
+   "n": 19,
+   "rms": 6.629,
+   "rms_95": [
+    4.769,
+    8.27
+   ],
+   "ref_rms": 7.587,
+   "ref_inside_interval": true,
+   "registered_rms": 6.629,
+   "registered_verdict": "PASS"
+  },
+  "E143-F2": {
+   "n": 17,
+   "rms": 1.007,
+   "rms_95": [
+    0.084,
+    1.726
+   ],
+   "ref_rms": 8.8719,
+   "ref_inside_interval": false,
+   "registered_rms": 1.007,
+   "registered_verdict": "PASS"
+  },
+  "E143-W1": {
+   "n": 19,
+   "rms": 1.601,
+   "rms_95": [
+    1.109,
+    2.079
+   ],
+   "ref_rms": 1.9447,
+   "ref_inside_interval": true,
+   "registered_rms": 1.601,
+   "registered_verdict": "PASS"
+  },
+  "E143-W2": {
+   "n": 17,
+   "rms": 1.184,
+   "rms_95": [
+    0.869,
+    1.461
+   ],
+   "ref_rms": 1.8265,
+   "ref_inside_interval": false,
+   "registered_rms": 1.184,
+   "registered_verdict": "PASS (better than the reference says)"
+  },
+  "E143-H1": {
+   "n": 36,
+   "rms": 0.585,
+   "rms_95": [
+    0.459,
+    0.702
+   ],
+   "ref_rms": 0.6845,
+   "ref_inside_interval": true,
+   "registered_rms": 0.585,
+   "registered_verdict": "PASS"
+  },
+  "all 36 clock": {
+   "n": 36,
+   "rms": 4.865,
+   "rms_95": [
+    3.294,
+    6.251
+   ],
+   "ref_rms": null,
+   "ref_inside_interval": null
+  },
+  "all 36 board": {
+   "n": 36,
+   "rms": 1.42,
+   "rms_95": [
+    1.101,
+    1.739
+   ],
+   "ref_rms": null,
+   "ref_inside_interval": null
+  },
+  "reference_pinned_without_its_large_clock_errors": {
+   "cells_left_out": [
+    "E80:int8.neg_ones",
+    "E80:fp32.nn_like",
+    "E83:int8.wsparse90",
+    "E83:int8.sorted"
+   ],
+   "their_mhz_err": [
+    -22.5,
+    -38.9,
+    -20.9,
+    -24.5
+   ],
+   "their_w_err": [
+    -2.69,
+    -5.09,
+    -2.66,
+    -3.4
+   ],
+   "n_kept": 35,
+   "rms_mhz": 0.613,
+   "rms_w": 1.496,
+   "source": "tools/claims-v3/e143/predictions-e143.json reference.pinned (cells, mhz_err, w_err): the cells with |clock error| > 5 MHz"
+  }
+ },
+ "2_new_kinds_only": {
+  "anchors_left_out": [
+   "fp16.anchor_randn",
+   "fp16.anchor_zeros",
+   "fp32.anchor_randn",
+   "fp32.anchor_zeros",
+   "int8.anchor_full",
+   "int8.anchor_zeros"
+  ],
+  "governed clock": {
+   "n": 17,
+   "rms": 6.752,
+   "rms_95": [
+    4.761,
+    8.516
+   ],
+   "mean": -5.144
+  },
+  "pinned clock": {
+   "n": 13,
+   "rms": 1.152,
+   "rms_95": [
+    0.111,
+    1.972
+   ],
+   "mean": -0.198
+  },
+  "governed board": {
+   "n": 17,
+   "rms": 1.543,
+   "rms_95": [
+    0.978,
+    2.088
+   ],
+   "mean": 1.077
+  },
+  "pinned board": {
+   "n": 13,
+   "rms": 1.222,
+   "rms_95": [
+    0.815,
+    1.552
+   ],
+   "mean": -0.753
+  },
+  "all clock": {
+   "n": 30,
+   "rms": 5.139,
+   "rms_95": [
+    3.447,
+    6.663
+   ],
+   "mean": -3.001
+  },
+  "all board": {
+   "n": 30,
+   "rms": 1.413,
+   "rms_95": [
+    1.043,
+    1.79
+   ],
+   "mean": 0.284
+  },
+  "all rise": {
+   "n": 30,
+   "rms": 0.544,
+   "rms_95": [
+    0.404,
+    0.676
+   ],
+   "mean": -0.116
+  }
+ },
+ "3_board_error_offset_or_scale": {
+  "slope all 36": {
+   "n": 36,
+   "slope_w_per_w": 0.107,
+   "slope_95": [
+    0.0812,
+    0.1411
+   ],
+   "intercept_w": -5.915,
+   "M7_w_range": [
+    36.27,
+    65.58
+   ]
+  },
+  "slope pinned 17": {
+   "n": 17,
+   "slope_w_per_w": 0.0709,
+   "slope_95": [
+    0.0421,
+    0.1135
+   ],
+   "intercept_w": -4.269,
+   "M7_w_range": [
+    36.27,
+    61.36
+   ]
+  },
+  "slope pinned non-zeros 14": {
+   "n": 14,
+   "slope_w_per_w": 0.1098,
+   "slope_95": [
+    0.0663,
+    0.1657
+   ],
+   "intercept_w": -6.374,
+   "M7_w_range": [
+    44.24,
+    61.36
+   ]
+  },
+  "slope int8 non-zeros 10": {
+   "n": 10,
+   "slope_w_per_w": 0.2139,
+   "slope_95": [
+    0.0218,
+    0.3672
+   ],
+   "intercept_w": -11.315,
+   "M7_w_range": [
+    44.24,
+    50.74
+   ]
+  },
+  "slope governed 19": {
+   "n": 19,
+   "slope_w_per_w": 1.5365,
+   "slope_95": [
+    0.5386,
+    2.0194
+   ],
+   "intercept_w": -99.084,
+   "M7_w_range": [
+    63.96,
+    65.58
+   ]
+  },
+  "levels_w": {
+   "zeros anchors, each": {
+    "fp16.anchor_zeros": -1.11,
+    "fp32.anchor_zeros": -1.183,
+    "int8.anchor_zeros": -1.317
+   },
+   "zeros anchors, mean (the zeros level)": -1.203,
+   "float zeros anchors, mean": -1.147,
+   "pinned floats, non-zeros (gated and block-sparse), mean": 0.21,
+   "pinned int8, non-zeros, mean": -1.089,
+   "governed, mean (the cap level)": 1.174,
+   "pinned, mean": -0.804
+  },
+  "burst_D_error_w": {
+   "governed": {
+    "n": 19,
+    "mean": 2.326,
+    "rms": 2.567
+   },
+   "pinned floats non-zeros": {
+    "n": 4,
+    "mean": 1.354,
+    "rms": 1.413
+   },
+   "pinned int8 non-zeros": {
+    "n": 10,
+    "mean": 0.231,
+    "rms": 0.849
+   }
+  },
+  "D_gain_measured_on_M7": {
+   "pinned floats": 1.0553,
+   "pinned int8": 1.0313,
+   "pinned all": 1.0478
+  },
+  "in_sample_fits": {
+   "A": {
+    "what": "as frozen",
+    "all36": 1.42,
+    "governed": 1.601,
+    "pinned": 1.184,
+    "pinned_nonzeros": 1.18
+   },
+   "B": {
+    "what": "+ a cap level and a zeros level",
+    "all36": 1.029,
+    "governed": 1.089,
+    "pinned": 0.958,
+    "pinned_nonzeros": 1.054
+   },
+   "C": {
+    "what": "+ one D gain on the pinned (1.0461)",
+    "all36": 0.924,
+    "governed": 1.089,
+    "pinned": 0.696,
+    "pinned_nonzeros": 0.765
+   },
+   "C2": {
+    "what": "+ a D gain per format kind (floats 1.0577, int8 1.0203)",
+    "all36": 0.908,
+    "governed": 1.089,
+    "pinned": 0.65,
+    "pinned_nonzeros": 0.715
+   }
+  },
+  "in_sample_parameters": {
+   "cap_level_w": 1.174,
+   "zeros_level_w": -1.203,
+   "one_D_gain_pinned": 1.0461,
+   "D_gain_floats": 1.0577,
+   "D_gain_int8": 1.0203,
+   "note": "fitted on E143's own 36 tiles: in-sample; a term found here must be scored blind on a new pool or session"
+  },
+  "governed_vs_overshoot": {
+   "x": "tools/claims-v3/e143/predictions-e143.json admission.<label>.fixed_p800_w (the frozen estimate of the tile's board W at 800 MHz)",
+   "W_star_w": 65.58,
+   "slope_w_per_w": 0.1383,
+   "slope_95": [
+    0.0746,
+    0.1877
+   ],
+   "x_range_w": [
+    64.64,
+    84.34
+   ],
+   "split": {
+    "M7 below 760 MHz (random-like)": {
+     "n": 11,
+     "mean_w": 1.786,
+     "mean_95": [
+      1.287,
+      2.343
+     ]
+    },
+    "M7 760-795 MHz": {
+     "n": 8,
+     "mean_w": 0.333,
+     "mean_95": [
+      -0.198,
+      0.71
+     ]
+    }
+   }
+  }
+ },
+ "4_clock_bias_and_drift": {
+  "governed": {
+   "n": 19,
+   "mean_mhz": -4.964,
+   "mean_95": [
+    -6.969,
+    -3.005
+   ],
+   "n_below_prediction": 15
+  },
+  "governed, M7 below 760 MHz (random-like)": {
+   "n": 11,
+   "mean_mhz": -6.68,
+   "mean_95": [
+    -8.708,
+    -4.516
+   ],
+   "tiles": [
+    "fp16.anchor_randn",
+    "fp16.pair_nearcancel",
+    "fp16.real_pythia_ln2_up",
+    "fp16.real_pythia_qk",
+    "fp16.sparse24_straddled",
+    "fp32.anchor_randn",
+    "fp32.lowrank2_w",
+    "fp32.real_pythia_gelu_down",
+    "fp32.real_pythia_ln1_q",
+    "fp32.sorted_k",
+    "fp32.wideexp48_dense"
+   ]
+  },
+  "governed, M7 760-795 MHz": {
+   "n": 8,
+   "mean_mhz": -2.605,
+   "mean_95": [
+    -5.962,
+    -0.04
+   ],
+   "tiles": [
+    "fp16.exp_only",
+    "fp16.pair_cancel_asign",
+    "fp16.real_pythia_softmax_v",
+    "fp32.b_exp_busy_a_const",
+    "fp32.e4m3grid_gelu_w",
+    "fp32.exp_only_both",
+    "fp32.gray_stream",
+    "fp32.wideexp48_bgate_alt"
+   ]
+  },
+  "R0_replicates": {
+   "k-fp32-randn": {
+    "tonight_mhz": 705.33,
+    "vs_E80_plus_E83_mean": -7.97,
+    "vs_E80": -6.57,
+    "vs_E83": -9.37,
+    "same_bytes_sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa"
+   },
+   "k-fp16-randn": {
+    "tonight_mhz": 720.13,
+    "vs_E80_plus_E83_mean": -7.57,
+    "vs_E80": -10.47,
+    "vs_E83": -4.67,
+    "same_bytes_sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974"
+   },
+   "k-int8-full": {
+    "tonight_mhz": 794.67,
+    "vs_E80_plus_E83_mean": -5.33,
+    "vs_E80": -5.33,
+    "vs_E83": -5.33,
+    "same_bytes_sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9"
+   }
+  },
+  "fp32.anchor_randn per pass error": [
+   -7.0,
+   -1.1,
+   -15.0
+  ],
+  "fp16.anchor_randn per pass error": [
+   20.4,
+   -10.2,
+   -7.7
+  ]
+ },
+ "5_check_of_C": {
+  "E143 s1": {
+   "kernel_launches": 1983,
+   "result_ok": {
+    "result=unchecked ok=True": 1983
+   },
+   "tensor_errors": 0,
+   "values_prefix": [
+    "file:"
+   ]
+  },
+  "E143 smoke": {
+   "kernel_launches": 19,
+   "result_ok": {
+    "result=unchecked ok=True": 19
+   },
+   "tensor_errors": 0,
+   "values_prefix": [
+    "file:"
+   ]
+  },
+  "E80 s1": {
+   "kernel_launches": 4148,
+   "result_ok": {
+    "result=unchecked ok=True": 4148
+   },
+   "tensor_errors": 0,
+   "values_prefix": [
+    "file:"
+   ]
+  },
+  "E80 smoke": {
+   "kernel_launches": 21,
+   "result_ok": {
+    "result=unchecked ok=True": 21
+   },
+   "tensor_errors": 0,
+   "values_prefix": [
+    "file:"
+   ]
+  },
+  "host_rule": "workloads/sparsity/host/main.cpp:589 rawValues = values != 'small'; :614 a raw-values launch's check is 'unchecked'; :615 ok = the launch completed, every hart reported (summarize's bad == 0) and no tensor error"
+ },
+ "6_anchors": {
+  "fp16.anchor_randn": {
+   "sha256": "1d5e328c68a8e57815740fc942c963620702e613771c589c8f3484ec29a3b0ff",
+   "kinds_tile": "tools/claims-v3/kinds/tiles/fp16/randn.bin",
+   "kinds_tile_sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974",
+   "same_bytes": false
+  },
+  "fp16.anchor_zeros": {
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "kinds_tile": "tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+   "kinds_tile_sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "same_bytes": true
+  },
+  "fp32.anchor_randn": {
+   "sha256": "195494806e1cf74636026ac2941ff6e9b234963a1bba4d90e4a53c3b969cc52a",
+   "kinds_tile": "tools/claims-v3/kinds/tiles/fp32/randn.bin",
+   "kinds_tile_sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa",
+   "same_bytes": false
+  },
+  "fp32.anchor_zeros": {
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "kinds_tile": "tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "kinds_tile_sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "same_bytes": true
+  },
+  "int8.anchor_full": {
+   "sha256": "c88be4f2f8585fcfe61dd8ac2dabb19dad13a0df193b8aa534d85a332384d0b2",
+   "kinds_tile": "tools/claims-v3/kinds/tiles/int8/full.bin",
+   "kinds_tile_sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9",
+   "same_bytes": false
+  },
+  "int8.anchor_zeros": {
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "kinds_tile": "tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "kinds_tile_sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "same_bytes": true
+  },
+  "zeros_sha256_named_in": [
+   "docs/reports/data/2026-10-31-e80-kinds-speed/s1/kspeed.json",
+   "docs/reports/data/2026-10-31-e83-kinds-speed-rest/s1/kspeed.json"
+  ]
+ },
+ "7_registration_vs_e142": {
+  "commit_38cd9099_pst": "20:54:09",
+  "commit_time_source": "git show -s --format=%ct 38cd9099",
+  "e142_first_pool_record": {
+   "item": "fp32.gray_stream",
+   "start_pst": "20:52:47.219",
+   "seconds_before_commit": 81.8
+  },
+  "e142_pool_records_before_commit": 57,
+  "e142_pool_tiles_before_commit": [
+   "fp16.pair_cancel_asign",
+   "fp16.pair_nearcancel",
+   "fp32.exp_only_both",
+   "fp32.gray_stream",
+   "fp32.sorted_k",
+   "fp32.wideexp48_bgate_alt"
+  ],
+  "source": "docs/reports/data/2026-11-02-e142-blind5-card1/aifoundry1-c1/e142/p14210/runs.jsonl"
+ },
+ "8_table_cells": {
+  "interval": "the spread of the 3 passes (min, max)",
+  "quantities": {
+   "burst_MHz": "the sampled clock (100 ms telemetry) from 1.5 s after the first launch to the work's end",
+   "burst_W": "the board W over the same samples",
+   "D_W": "the burst W less the same type's zeros tile's burst W in the same pass (0 by definition for the zeros tiles, so left out)",
+   "die_C": "the die's rise over the burst: die_max - die_start (E64's reduction)"
+  },
+  "cells": [
+   {
+    "format": "fp16",
+    "kind": "anchor_randn",
+    "quantity": "burst_MHz",
+    "value": 731.43,
+    "interval": [
+     720.4,
+     751.0
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.anchor_randn.burst_mhz"
+   },
+   {
+    "format": "fp16",
+    "kind": "anchor_randn",
+    "quantity": "burst_W",
+    "value": 67.217,
+    "interval": [
+     66.71,
+     68.17
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.anchor_randn.burst_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "anchor_randn",
+    "quantity": "D_W",
+    "value": 32.057,
+    "interval": [
+     31.44,
+     32.99
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.anchor_randn.D_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "anchor_randn",
+    "quantity": "die_C",
+    "value": 7.333,
+    "interval": [
+     7,
+     8
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.anchor_randn.rise_c"
+   },
+   {
+    "format": "fp16",
+    "kind": "anchor_zeros",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.anchor_zeros.burst_mhz"
+   },
+   {
+    "format": "fp16",
+    "kind": "anchor_zeros",
+    "quantity": "burst_W",
+    "value": 35.16,
+    "interval": [
+     35.03,
+     35.27
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.anchor_zeros.burst_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "anchor_zeros",
+    "quantity": "die_C",
+    "value": 1.667,
+    "interval": [
+     1,
+     2
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.anchor_zeros.rise_c"
+   },
+   {
+    "format": "fp16",
+    "kind": "exp_only",
+    "quantity": "burst_MHz",
+    "value": 782.2,
+    "interval": [
+     780,
+     783.3
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.exp_only.burst_mhz"
+   },
+   {
+    "format": "fp16",
+    "kind": "exp_only",
+    "quantity": "burst_W",
+    "value": 65.43,
+    "interval": [
+     64.58,
+     66.13
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.exp_only.burst_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "exp_only",
+    "quantity": "D_W",
+    "value": 30.27,
+    "interval": [
+     29.4,
+     30.86
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.exp_only.D_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "exp_only",
+    "quantity": "die_C",
+    "value": 6.667,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.exp_only.rise_c"
+   },
+   {
+    "format": "fp16",
+    "kind": "pair_cancel_asign",
+    "quantity": "burst_MHz",
+    "value": 780.53,
+    "interval": [
+     779.6,
+     782
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.pair_cancel_asign.burst_mhz"
+   },
+   {
+    "format": "fp16",
+    "kind": "pair_cancel_asign",
+    "quantity": "burst_W",
+    "value": 66.003,
+    "interval": [
+     65.46,
+     66.28
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.pair_cancel_asign.burst_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "pair_cancel_asign",
+    "quantity": "D_W",
+    "value": 30.843,
+    "interval": [
+     30.28,
+     31.25
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.pair_cancel_asign.D_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "pair_cancel_asign",
+    "quantity": "die_C",
+    "value": 6,
+    "interval": [
+     6,
+     6
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.pair_cancel_asign.rise_c"
+   },
+   {
+    "format": "fp16",
+    "kind": "pair_nearcancel",
+    "quantity": "burst_MHz",
+    "value": 724.83,
+    "interval": [
+     722,
+     728
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.pair_nearcancel.burst_mhz"
+   },
+   {
+    "format": "fp16",
+    "kind": "pair_nearcancel",
+    "quantity": "burst_W",
+    "value": 67.527,
+    "interval": [
+     67.4,
+     67.63
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.pair_nearcancel.burst_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "pair_nearcancel",
+    "quantity": "D_W",
+    "value": 32.367,
+    "interval": [
+     32.36,
+     32.37
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.pair_nearcancel.D_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "pair_nearcancel",
+    "quantity": "die_C",
+    "value": 6.333,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.pair_nearcancel.rise_c"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_ln2_up",
+    "quantity": "burst_MHz",
+    "value": 720.8,
+    "interval": [
+     720,
+     722
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_ln2_up.burst_mhz"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_ln2_up",
+    "quantity": "burst_W",
+    "value": 66.93,
+    "interval": [
+     65.89,
+     67.66
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_ln2_up.burst_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_ln2_up",
+    "quantity": "D_W",
+    "value": 31.77,
+    "interval": [
+     30.86,
+     32.48
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_ln2_up.D_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_ln2_up",
+    "quantity": "die_C",
+    "value": 6.667,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_ln2_up.rise_c"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_qk",
+    "quantity": "burst_MHz",
+    "value": 731,
+    "interval": [
+     725,
+     736
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_qk.burst_mhz"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_qk",
+    "quantity": "burst_W",
+    "value": 67.117,
+    "interval": [
+     66.24,
+     67.77
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_qk.burst_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_qk",
+    "quantity": "D_W",
+    "value": 31.957,
+    "interval": [
+     31.06,
+     32.5
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_qk.D_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_qk",
+    "quantity": "die_C",
+    "value": 6.333,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_qk.rise_c"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_softmax_v",
+    "quantity": "burst_MHz",
+    "value": 778.53,
+    "interval": [
+     777.6,
+     780
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_softmax_v.burst_mhz"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_softmax_v",
+    "quantity": "burst_W",
+    "value": 66.057,
+    "interval": [
+     65.28,
+     66.77
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_softmax_v.burst_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_softmax_v",
+    "quantity": "D_W",
+    "value": 30.897,
+    "interval": [
+     30.1,
+     31.74
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_softmax_v.D_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "real_pythia_softmax_v",
+    "quantity": "die_C",
+    "value": 6.333,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.real_pythia_softmax_v.rise_c"
+   },
+   {
+    "format": "fp16",
+    "kind": "sparse24_aligned",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.sparse24_aligned.burst_mhz"
+   },
+   {
+    "format": "fp16",
+    "kind": "sparse24_aligned",
+    "quantity": "burst_W",
+    "value": 61.077,
+    "interval": [
+     61.0,
+     61.22
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.sparse24_aligned.burst_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "sparse24_aligned",
+    "quantity": "D_W",
+    "value": 25.917,
+    "interval": [
+     25.82,
+     25.98
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.sparse24_aligned.D_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "sparse24_aligned",
+    "quantity": "die_C",
+    "value": 5.333,
+    "interval": [
+     5,
+     6
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.sparse24_aligned.rise_c"
+   },
+   {
+    "format": "fp16",
+    "kind": "sparse24_straddled",
+    "quantity": "burst_MHz",
+    "value": 726.5,
+    "interval": [
+     724.5,
+     730
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.sparse24_straddled.burst_mhz"
+   },
+   {
+    "format": "fp16",
+    "kind": "sparse24_straddled",
+    "quantity": "burst_W",
+    "value": 66.94,
+    "interval": [
+     66.21,
+     68.13
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.sparse24_straddled.burst_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "sparse24_straddled",
+    "quantity": "D_W",
+    "value": 31.78,
+    "interval": [
+     31.03,
+     33.1
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.sparse24_straddled.D_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "sparse24_straddled",
+    "quantity": "die_C",
+    "value": 6.667,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.sparse24_straddled.rise_c"
+   },
+   {
+    "format": "fp16",
+    "kind": "wideexp_bgate_alt",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.wideexp_bgate_alt.burst_mhz"
+   },
+   {
+    "format": "fp16",
+    "kind": "wideexp_bgate_alt",
+    "quantity": "burst_W",
+    "value": 61.487,
+    "interval": [
+     60.37,
+     62.12
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.wideexp_bgate_alt.burst_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "wideexp_bgate_alt",
+    "quantity": "D_W",
+    "value": 26.327,
+    "interval": [
+     25.19,
+     27.09
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.wideexp_bgate_alt.D_w"
+   },
+   {
+    "format": "fp16",
+    "kind": "wideexp_bgate_alt",
+    "quantity": "die_C",
+    "value": 6,
+    "interval": [
+     6,
+     6
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp16.wideexp_bgate_alt.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "anchor_randn",
+    "quantity": "burst_MHz",
+    "value": 699.3,
+    "interval": [
+     692,
+     705.9
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.anchor_randn.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "anchor_randn",
+    "quantity": "burst_W",
+    "value": 67.737,
+    "interval": [
+     66.64,
+     68.59
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.anchor_randn.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "anchor_randn",
+    "quantity": "D_W",
+    "value": 32.57,
+    "interval": [
+     31.6,
+     33.36
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.anchor_randn.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "anchor_randn",
+    "quantity": "die_C",
+    "value": 7,
+    "interval": [
+     7,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.anchor_randn.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "anchor_zeros",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.anchor_zeros.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "anchor_zeros",
+    "quantity": "burst_W",
+    "value": 35.167,
+    "interval": [
+     35.04,
+     35.23
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.anchor_zeros.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "anchor_zeros",
+    "quantity": "die_C",
+    "value": 1.667,
+    "interval": [
+     1,
+     2
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.anchor_zeros.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "b_exp_busy_a_const",
+    "quantity": "burst_MHz",
+    "value": 791.27,
+    "interval": [
+     789.8,
+     792
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.b_exp_busy_a_const.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "b_exp_busy_a_const",
+    "quantity": "burst_W",
+    "value": 65.057,
+    "interval": [
+     65.03,
+     65.11
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.b_exp_busy_a_const.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "b_exp_busy_a_const",
+    "quantity": "D_W",
+    "value": 29.89,
+    "interval": [
+     29.8,
+     30.07
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.b_exp_busy_a_const.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "b_exp_busy_a_const",
+    "quantity": "die_C",
+    "value": 6,
+    "interval": [
+     6,
+     6
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.b_exp_busy_a_const.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "block_sparse_k4",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.block_sparse_k4.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "block_sparse_k4",
+    "quantity": "burst_W",
+    "value": 60.017,
+    "interval": [
+     59.56,
+     60.51
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.block_sparse_k4.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "block_sparse_k4",
+    "quantity": "D_W",
+    "value": 24.85,
+    "interval": [
+     24.52,
+     25.28
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.block_sparse_k4.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "block_sparse_k4",
+    "quantity": "die_C",
+    "value": 5,
+    "interval": [
+     5,
+     5
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.block_sparse_k4.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "e4m3grid_gelu_w",
+    "quantity": "burst_MHz",
+    "value": 779.2,
+    "interval": [
+     778,
+     780
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.e4m3grid_gelu_w.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "e4m3grid_gelu_w",
+    "quantity": "burst_W",
+    "value": 66.193,
+    "interval": [
+     65.88,
+     66.44
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.e4m3grid_gelu_w.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "e4m3grid_gelu_w",
+    "quantity": "D_W",
+    "value": 31.027,
+    "interval": [
+     30.65,
+     31.4
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.e4m3grid_gelu_w.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "e4m3grid_gelu_w",
+    "quantity": "die_C",
+    "value": 6,
+    "interval": [
+     6,
+     6
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.e4m3grid_gelu_w.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "exp_only_both",
+    "quantity": "burst_MHz",
+    "value": 791.77,
+    "interval": [
+     787.5,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.exp_only_both.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "exp_only_both",
+    "quantity": "burst_W",
+    "value": 64.643,
+    "interval": [
+     64.11,
+     65.4
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.exp_only_both.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "exp_only_both",
+    "quantity": "D_W",
+    "value": 29.477,
+    "interval": [
+     29.07,
+     30.17
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.exp_only_both.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "exp_only_both",
+    "quantity": "die_C",
+    "value": 6.333,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.exp_only_both.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "gray_stream",
+    "quantity": "burst_MHz",
+    "value": 784.63,
+    "interval": [
+     782.4,
+     787.8
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.gray_stream.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "gray_stream",
+    "quantity": "burst_W",
+    "value": 65.843,
+    "interval": [
+     65.54,
+     66.27
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.gray_stream.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "gray_stream",
+    "quantity": "D_W",
+    "value": 30.677,
+    "interval": [
+     30.31,
+     31.23
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.gray_stream.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "gray_stream",
+    "quantity": "die_C",
+    "value": 6,
+    "interval": [
+     6,
+     6
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.gray_stream.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "lowrank2_w",
+    "quantity": "burst_MHz",
+    "value": 698.03,
+    "interval": [
+     694.1,
+     700
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.lowrank2_w.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "lowrank2_w",
+    "quantity": "burst_W",
+    "value": 68.26,
+    "interval": [
+     67.85,
+     68.63
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.lowrank2_w.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "lowrank2_w",
+    "quantity": "D_W",
+    "value": 33.093,
+    "interval": [
+     32.62,
+     33.4
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.lowrank2_w.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "lowrank2_w",
+    "quantity": "die_C",
+    "value": 6.667,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.lowrank2_w.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "real_pythia_gelu_down",
+    "quantity": "burst_MHz",
+    "value": 715.5,
+    "interval": [
+     712.2,
+     720
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.real_pythia_gelu_down.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "real_pythia_gelu_down",
+    "quantity": "burst_W",
+    "value": 66.823,
+    "interval": [
+     66.37,
+     67.21
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.real_pythia_gelu_down.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "real_pythia_gelu_down",
+    "quantity": "D_W",
+    "value": 31.657,
+    "interval": [
+     31.14,
+     31.98
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.real_pythia_gelu_down.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "real_pythia_gelu_down",
+    "quantity": "die_C",
+    "value": 6.333,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.real_pythia_gelu_down.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "real_pythia_ln1_q",
+    "quantity": "burst_MHz",
+    "value": 724.13,
+    "interval": [
+     720,
+     732
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.real_pythia_ln1_q.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "real_pythia_ln1_q",
+    "quantity": "burst_W",
+    "value": 66.657,
+    "interval": [
+     66.17,
+     67.0
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.real_pythia_ln1_q.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "real_pythia_ln1_q",
+    "quantity": "D_W",
+    "value": 31.49,
+    "interval": [
+     30.94,
+     31.96
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.real_pythia_ln1_q.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "real_pythia_ln1_q",
+    "quantity": "die_C",
+    "value": 6.333,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.real_pythia_ln1_q.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "sorted_k",
+    "quantity": "burst_MHz",
+    "value": 707.33,
+    "interval": [
+     706,
+     708
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.sorted_k.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "sorted_k",
+    "quantity": "burst_W",
+    "value": 65.883,
+    "interval": [
+     65.39,
+     66.15
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.sorted_k.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "sorted_k",
+    "quantity": "D_W",
+    "value": 30.717,
+    "interval": [
+     30.16,
+     31.11
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.sorted_k.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "sorted_k",
+    "quantity": "die_C",
+    "value": 6.667,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.sorted_k.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_bgate_alt",
+    "quantity": "burst_MHz",
+    "value": 781.93,
+    "interval": [
+     754.2,
+     795.8
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_bgate_alt.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_bgate_alt",
+    "quantity": "burst_W",
+    "value": 62.62,
+    "interval": [
+     58.21,
+     64.92
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_bgate_alt.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_bgate_alt",
+    "quantity": "D_W",
+    "value": 27.453,
+    "interval": [
+     23.17,
+     29.69
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_bgate_alt.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_bgate_alt",
+    "quantity": "die_C",
+    "value": 5.667,
+    "interval": [
+     5,
+     6
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_bgate_alt.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_bgate_kblk",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_bgate_kblk.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_bgate_kblk",
+    "quantity": "burst_W",
+    "value": 61.24,
+    "interval": [
+     60.66,
+     61.71
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_bgate_kblk.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_bgate_kblk",
+    "quantity": "D_W",
+    "value": 26.073,
+    "interval": [
+     25.43,
+     26.48
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_bgate_kblk.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_bgate_kblk",
+    "quantity": "die_C",
+    "value": 5.667,
+    "interval": [
+     5,
+     6
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_bgate_kblk.rise_c"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_dense",
+    "quantity": "burst_MHz",
+    "value": 693.77,
+    "interval": [
+     691.7,
+     697.9
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_dense.burst_mhz"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_dense",
+    "quantity": "burst_W",
+    "value": 69.153,
+    "interval": [
+     68.53,
+     70.23
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_dense.burst_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_dense",
+    "quantity": "D_W",
+    "value": 33.987,
+    "interval": [
+     33.3,
+     35.0
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_dense.D_w"
+   },
+   {
+    "format": "fp32",
+    "kind": "wideexp48_dense",
+    "quantity": "die_C",
+    "value": 6.667,
+    "interval": [
+     6,
+     7
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 governed",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.fp32.wideexp48_dense.rise_c"
+   },
+   {
+    "format": "int8",
+    "kind": "a_word_flipflop",
+    "quantity": "burst_MHz",
+    "value": 795.93,
+    "interval": [
+     787.8,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.a_word_flipflop.burst_mhz"
+   },
+   {
+    "format": "int8",
+    "kind": "a_word_flipflop",
+    "quantity": "burst_W",
+    "value": 42.233,
+    "interval": [
+     40.91,
+     42.9
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.a_word_flipflop.burst_w"
+   },
+   {
+    "format": "int8",
+    "kind": "a_word_flipflop",
+    "quantity": "D_W",
+    "value": 5.9,
+    "interval": [
+     4.68,
+     6.65
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.a_word_flipflop.D_w"
+   },
+   {
+    "format": "int8",
+    "kind": "a_word_flipflop",
+    "quantity": "die_C",
+    "value": 2,
+    "interval": [
+     2,
+     2
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.a_word_flipflop.rise_c"
+   },
+   {
+    "format": "int8",
+    "kind": "anchor_full",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.anchor_full.burst_mhz"
+   },
+   {
+    "format": "int8",
+    "kind": "anchor_full",
+    "quantity": "burst_W",
+    "value": 50.483,
+    "interval": [
+     50.18,
+     50.71
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.anchor_full.burst_w"
+   },
+   {
+    "format": "int8",
+    "kind": "anchor_full",
+    "quantity": "D_W",
+    "value": 14.15,
+    "interval": [
+     13.95,
+     14.32
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.anchor_full.D_w"
+   },
+   {
+    "format": "int8",
+    "kind": "anchor_full",
+    "quantity": "die_C",
+    "value": 3.667,
+    "interval": [
+     3,
+     4
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.anchor_full.rise_c"
+   },
+   {
+    "format": "int8",
+    "kind": "anchor_zeros",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.anchor_zeros.burst_mhz"
+   },
+   {
+    "format": "int8",
+    "kind": "anchor_zeros",
+    "quantity": "burst_W",
+    "value": 36.333,
+    "interval": [
+     36.23,
+     36.53
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.anchor_zeros.burst_w"
+   },
+   {
+    "format": "int8",
+    "kind": "anchor_zeros",
+    "quantity": "die_C",
+    "value": 1.333,
+    "interval": [
+     1,
+     2
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.anchor_zeros.rise_c"
+   },
+   {
+    "format": "int8",
+    "kind": "b_line_flipflop_nogate",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.b_line_flipflop_nogate.burst_mhz"
+   },
+   {
+    "format": "int8",
+    "kind": "b_line_flipflop_nogate",
+    "quantity": "burst_W",
+    "value": 48.69,
+    "interval": [
+     48.36,
+     49.08
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.b_line_flipflop_nogate.burst_w"
+   },
+   {
+    "format": "int8",
+    "kind": "b_line_flipflop_nogate",
+    "quantity": "D_W",
+    "value": 12.357,
+    "interval": [
+     11.83,
+     12.85
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.b_line_flipflop_nogate.D_w"
+   },
+   {
+    "format": "int8",
+    "kind": "b_line_flipflop_nogate",
+    "quantity": "die_C",
+    "value": 3,
+    "interval": [
+     3,
+     3
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.b_line_flipflop_nogate.rise_c"
+   },
+   {
+    "format": "int8",
+    "kind": "b_line_zero_one",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.b_line_zero_one.burst_mhz"
+   },
+   {
+    "format": "int8",
+    "kind": "b_line_zero_one",
+    "quantity": "burst_W",
+    "value": 43.413,
+    "interval": [
+     43.38,
+     43.44
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.b_line_zero_one.burst_w"
+   },
+   {
+    "format": "int8",
+    "kind": "b_line_zero_one",
+    "quantity": "D_W",
+    "value": 7.08,
+    "interval": [
+     6.85,
+     7.2
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.b_line_zero_one.D_w"
+   },
+   {
+    "format": "int8",
+    "kind": "b_line_zero_one",
+    "quantity": "die_C",
+    "value": 2,
+    "interval": [
+     2,
+     2
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.b_line_zero_one.rise_c"
+   },
+   {
+    "format": "int8",
+    "kind": "block_sparse_a",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.block_sparse_a.burst_mhz"
+   },
+   {
+    "format": "int8",
+    "kind": "block_sparse_a",
+    "quantity": "burst_W",
+    "value": 44.64,
+    "interval": [
+     44.41,
+     45.07
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.block_sparse_a.burst_w"
+   },
+   {
+    "format": "int8",
+    "kind": "block_sparse_a",
+    "quantity": "D_W",
+    "value": 8.307,
+    "interval": [
+     8.18,
+     8.54
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.block_sparse_a.D_w"
+   },
+   {
+    "format": "int8",
+    "kind": "block_sparse_a",
+    "quantity": "die_C",
+    "value": 3,
+    "interval": [
+     3,
+     3
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.block_sparse_a.rise_c"
+   },
+   {
+    "format": "int8",
+    "kind": "gray_a",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.gray_a.burst_mhz"
+   },
+   {
+    "format": "int8",
+    "kind": "gray_a",
+    "quantity": "burst_W",
+    "value": 44.003,
+    "interval": [
+     42.92,
+     44.91
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.gray_a.burst_w"
+   },
+   {
+    "format": "int8",
+    "kind": "gray_a",
+    "quantity": "D_W",
+    "value": 7.67,
+    "interval": [
+     6.68,
+     8.68
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.gray_a.D_w"
+   },
+   {
+    "format": "int8",
+    "kind": "gray_a",
+    "quantity": "die_C",
+    "value": 2.667,
+    "interval": [
+     2,
+     3
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.gray_a.rise_c"
+   },
+   {
+    "format": "int8",
+    "kind": "powerlaw_w",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.powerlaw_w.burst_mhz"
+   },
+   {
+    "format": "int8",
+    "kind": "powerlaw_w",
+    "quantity": "burst_W",
+    "value": 47.387,
+    "interval": [
+     46.52,
+     48.03
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.powerlaw_w.burst_w"
+   },
+   {
+    "format": "int8",
+    "kind": "powerlaw_w",
+    "quantity": "D_W",
+    "value": 11.053,
+    "interval": [
+     10.28,
+     11.5
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.powerlaw_w.D_w"
+   },
+   {
+    "format": "int8",
+    "kind": "powerlaw_w",
+    "quantity": "die_C",
+    "value": 3,
+    "interval": [
+     3,
+     3
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.powerlaw_w.rise_c"
+   },
+   {
+    "format": "int8",
+    "kind": "real_pythia_w8a8_down",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.real_pythia_w8a8_down.burst_mhz"
+   },
+   {
+    "format": "int8",
+    "kind": "real_pythia_w8a8_down",
+    "quantity": "burst_W",
+    "value": 49.557,
+    "interval": [
+     49.45,
+     49.64
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.real_pythia_w8a8_down.burst_w"
+   },
+   {
+    "format": "int8",
+    "kind": "real_pythia_w8a8_down",
+    "quantity": "D_W",
+    "value": 13.223,
+    "interval": [
+     12.92,
+     13.41
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.real_pythia_w8a8_down.D_w"
+   },
+   {
+    "format": "int8",
+    "kind": "real_pythia_w8a8_down",
+    "quantity": "die_C",
+    "value": 3.667,
+    "interval": [
+     3,
+     4
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.real_pythia_w8a8_down.rise_c"
+   },
+   {
+    "format": "int8",
+    "kind": "real_pythia_w8a8_up",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.real_pythia_w8a8_up.burst_mhz"
+   },
+   {
+    "format": "int8",
+    "kind": "real_pythia_w8a8_up",
+    "quantity": "burst_W",
+    "value": 49.053,
+    "interval": [
+     48.87,
+     49.18
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.real_pythia_w8a8_up.burst_w"
+   },
+   {
+    "format": "int8",
+    "kind": "real_pythia_w8a8_up",
+    "quantity": "D_W",
+    "value": 12.72,
+    "interval": [
+     12.58,
+     12.94
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.real_pythia_w8a8_up.D_w"
+   },
+   {
+    "format": "int8",
+    "kind": "real_pythia_w8a8_up",
+    "quantity": "die_C",
+    "value": 3.333,
+    "interval": [
+     3,
+     4
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.real_pythia_w8a8_up.rise_c"
+   },
+   {
+    "format": "int8",
+    "kind": "sorted_k",
+    "quantity": "burst_MHz",
+    "value": 800,
+    "interval": [
+     800,
+     800
+    ],
+    "unit": "MHz",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.sorted_k.burst_mhz"
+   },
+   {
+    "format": "int8",
+    "kind": "sorted_k",
+    "quantity": "burst_W",
+    "value": 47.61,
+    "interval": [
+     45.83,
+     48.5
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.sorted_k.burst_w"
+   },
+   {
+    "format": "int8",
+    "kind": "sorted_k",
+    "quantity": "D_W",
+    "value": 11.277,
+    "interval": [
+     9.59,
+     12.27
+    ],
+    "unit": "W",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.sorted_k.D_w"
+   },
+   {
+    "format": "int8",
+    "kind": "sorted_k",
+    "quantity": "die_C",
+    "value": 3,
+    "interval": [
+     3,
+     3
+    ],
+    "unit": "C",
+    "conditions": "aifoundry2 card 0, own governor (65 W / 65 C, nothing set), E80's 6 s burst, 3 passes, mean of passes; M7 pinned",
+    "source": "docs/reports/data/2026-11-02-e143-blind5-aifoundry2/results.json score.reported.tiles.int8.sorted_k.rise_c"
+   }
+  ]
+ }
+}

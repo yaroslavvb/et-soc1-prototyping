@@ -1,0 +1,73 @@
+E143 post hoc checks for the corrections after verification (Mon 2 Nov 2026). Never a verdict. Intervals: percentile bootstrap over
+tiles, 20000 draws, seed 143.
+
+(1) The blind rms values with 95% intervals over tiles, against the in-sample reference the rules drew from
+  E143-F1       n 19: rms  6.629 MHz [4.769, 8.270]; reference 7.587 inside the interval
+  E143-F2       n 17: rms  1.007 MHz [0.084, 1.726]; reference 8.8719 OUTSIDE the interval
+  E143-W1       n 19: rms  1.601 W [1.109, 2.079]; reference 1.9447 inside the interval
+  E143-W2       n 17: rms  1.184 W [0.869, 1.461]; reference 1.8265 OUTSIDE the interval
+  E143-H1       n 36: rms  0.585 C [0.459, 0.702]; reference 0.6845 inside the interval
+  all 36 clock  n 36: rms  4.865 MHz [3.294, 6.251]
+  all 36 board  n 36: rms  1.420 W [1.101, 1.739]
+  The reference's pinned rows: 4 of 39 cells M7 put at 800 MHz read -38.9 to -20.9 MHz (E80:int8.neg_ones, E80:fp32.nn_like, E83:int8.wsparse90, E83:int8.sorted).
+  Without them the reference's pinned rms is 0.613 MHz and 1.496 W over 35 cells; pool 5's pinned tiles
+  held none like them (largest pinned clock error -4.07 MHz, int8.a_word_flipflop's one pass at 788 MHz).
+
+(2) The 30 new kinds alone (the 6 anchors left out), M7, rms with 95% intervals
+  governed clock  n 17: rms  6.752 MHz [4.761, 8.516], mean -5.144
+  pinned clock    n 13: rms  1.152 MHz [0.111, 1.972], mean -0.198
+  governed board  n 17: rms  1.543 W [0.978, 2.088], mean +1.077
+  pinned board    n 13: rms  1.222 W [0.815, 1.552], mean -0.753
+  all clock       n 30: rms  5.139 MHz [3.447, 6.663], mean -3.001
+  all board       n 30: rms  1.413 W [1.043, 1.79], mean +0.284
+  all rise        n 30: rms  0.544 C [0.404, 0.676], mean -0.116
+
+(3) The board error (measured - M7): an offset or a scale?
+  slope on M7's W, all 36              : +0.1070 W/W [+0.0812, +0.1411] over M7 36.27-65.58 W
+  slope on M7's W, pinned 17           : +0.0709 W/W [+0.0421, +0.1135] over M7 36.27-61.36 W
+  slope on M7's W, pinned non-zeros 14 : +0.1098 W/W [+0.0663, +0.1657] over M7 44.24-61.36 W
+  slope on M7's W, int8 non-zeros 10   : +0.2139 W/W [+0.0218, +0.3672] over M7 44.24-50.74 W
+  slope on M7's W, governed 19         : +1.5365 W/W [+0.5386, +2.0194] over M7 63.96-65.58 W
+  levels (mean board error, W): zeros anchors, mean (the zeros level) -1.203; float zeros anchors, mean -1.147; pinned floats, non-zeros (gated and block-sparse), mean 0.21; pinned int8, non-zeros, mean -1.089; governed, mean (the cap level) 1.174; pinned, mean -0.804
+  the zeros anchors one by one: fp16.anchor_zeros -1.110, fp32.anchor_zeros -1.183, int8.anchor_zeros -1.317
+  burst D error (measured D - M7 D, W): governed mean +2.326, rms 2.567 (n 19); pinned floats non-zeros mean +1.354, rms 1.413 (n 4); pinned int8 non-zeros mean +0.231, rms 0.849 (n 10)
+  D's gain (measured D on M7's D through 0, pass-matched D, non-zeros pinned): pinned floats 1.0553; pinned int8 1.0313; pinned all 1.0478
+  in-sample A  as frozen                                           : rms all 1.420, governed 1.601, pinned 1.184, pinned non-zeros 1.180 W
+  in-sample B  + a cap level and a zeros level                     : rms all 1.029, governed 1.089, pinned 0.958, pinned non-zeros 1.054 W
+  in-sample C  + one D gain on the pinned (1.0461)                 : rms all 0.924, governed 1.089, pinned 0.696, pinned non-zeros 0.765 W
+  in-sample C2 + a D gain per format kind (floats 1.0577, int8 1.0203): rms all 0.908, governed 1.089, pinned 0.650, pinned non-zeros 0.715 W
+  inside the governed 19: board error on the frozen unthrottled estimate fixed_p800_w (64.6-84.3 W, cap 65.58): +0.1383 W/W [+0.0746, +0.1877]
+  governed board error by depth: M7 below 760 MHz (random-like) n 11, mean +1.786 W [1.287, 2.343]; M7 760-795 MHz n 8, mean +0.333 W [-0.198, 0.71]
+
+(4) The clock's bias where the governor acts, against the drift check R0
+  governed mean clock error -4.964 MHz [-6.969, -3.005]; 15 of 19 below their prediction
+  governed, M7 below 760 MHz (random-like): n 11, mean -6.680 MHz [-8.708, -4.516]
+  governed, M7 760-795 MHz: n 8, mean -2.605 MHz [-5.962, -0.04]
+  R0 k-fp32-randn: 705.33 MHz tonight; -7.97 against E80 and E83's mean, -6.57 against E80, -9.37 against E83
+  R0 k-fp16-randn: 720.13 MHz tonight; -7.57 against E80 and E83's mean, -10.47 against E80, -4.67 against E83
+  R0 k-int8-full: 794.67 MHz tonight; -5.33 against E80 and E83's mean, -5.33 against E80, -5.33 against E83
+  fp32.anchor_randn: per-pass clock error [-7.0, -1.1, -15.0] MHz (mean -7.70)
+  fp16.anchor_randn: per-pass clock error [20.4, -10.2, -7.7] MHz (mean +0.83)
+
+(5) The check of C: what 'counted' means for file tiles
+  E143 s1: 1983 kernel launches, {'result=unchecked ok=True': 1983}, tensor errors 0, values ['file:']
+  E143 smoke: 19 kernel launches, {'result=unchecked ok=True': 19}, tensor errors 0, values ['file:']
+  E80 s1: 4148 kernel launches, {'result=unchecked ok=True': 4148}, tensor errors 0, values ['file:']
+  E80 smoke: 21 kernel launches, {'result=unchecked ok=True': 21}, tensor errors 0, values ['file:']
+  workloads/sparsity/host/main.cpp:589 rawValues = values != 'small'; :614 a raw-values launch's check is 'unchecked'; :615 ok = the launch completed, every hart reported (summarize's bad == 0) and no tensor error
+
+(6) The 6 anchors
+  fp16.anchor_randn: 1d5e328c68a8... not the bytes of tools/claims-v3/kinds/tiles/fp16/randn.bin
+  fp16.anchor_zeros: e5a00aa9991a... the same bytes as tools/claims-v3/kinds/tiles/fp16/zeros.bin
+  fp32.anchor_randn: 195494806e1c... not the bytes of tools/claims-v3/kinds/tiles/fp32/randn.bin
+  fp32.anchor_zeros: e5a00aa9991a... the same bytes as tools/claims-v3/kinds/tiles/fp32/zeros.bin
+  int8.anchor_full: c88be4f2f858... not the bytes of tools/claims-v3/kinds/tiles/int8/full.bin
+  int8.anchor_zeros: e5a00aa9991a... the same bytes as tools/claims-v3/kinds/tiles/int8/zeros.bin
+  the zeros tiles' sha256 e5a00aa9991a... is named in: docs/reports/data/2026-10-31-e80-kinds-speed/s1/kspeed.json, docs/reports/data/2026-10-31-e83-kinds-speed-rest/s1/kspeed.json
+
+(7) E143's registration commit against E142's first runs of the pool
+  38cd9099 committed 20:54:09 PST (git show -s --format=%ct 38cd9099); E142's first record of a pool tile, fp32.gray_stream, started 20:52:47.219 PST, 81.8 s before;
+  57 of E142's records of 6 pool tiles started before the commit: fp16.pair_cancel_asign, fp16.pair_nearcancel, fp32.exp_only_both, fp32.gray_stream, fp32.sorted_k, fp32.wideexp48_bgate_alt
+
+(8) The kinds table's cells (aifoundry2 card 0, its own governor, E80's 6 s burst, 3 passes; interval = the passes' spread)
+  141 cells: 36 tiles x burst_MHz, burst_W and die_C, and D_W for the 33 that are not zeros (D is 0 by definition there)

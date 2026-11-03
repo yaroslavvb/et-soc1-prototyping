@@ -19,6 +19,13 @@ def f(x, n=1):
     return "-" if x is None else f"{x:.{n}f}"
 
 
+# Corrected Mon 2 Nov 2026, after verification: results.json stores each rule's ref_rms rounded to three places (W1 1.945, H1 0.685), and
+# printing those to two places rounded twice (1.95, 0.69). The verdicts table now prints the frozen reference's own values
+# (predictions-e143.json reference: W1 1.9447 -> 1.94, H1 0.6845 -> 0.68); F1, F2 and W2 print as before. No number or verdict changes.
+REF_RMS = {"E143-F1": P["reference"]["governed"]["rms_mhz"], "E143-F2": P["reference"]["pinned"]["rms_mhz"],
+           "E143-W1": P["reference"]["governed"]["rms_w"], "E143-W2": P["reference"]["pinned"]["rms_w"], "E143-H1": P["reference"]["heat"]["rms_c"]}
+
+
 print("## Verdicts\n")
 print("| rule | set | n | measured | reference line (2.5% – 97.5%) or coverage line | verdict |")
 print("|---|---|---:|---|---|---|")
@@ -28,7 +35,7 @@ lab = {"E143-F1": ("burst clock, governed", "MHz"), "E143-F2": ("burst clock, pi
 for k, (s, u) in lab.items():
     v = ru[k]
     if "rms" in v:
-        print(f"| **{k}** | {s} | {v['n']} | rms {f(v['rms'], 2)} {u} (mean error {f(v['mean_err'], 2)}) | {f(v['range_2.5_97.5'][0], 2)} – {f(v['range_2.5_97.5'][1], 2)} {u} (reference rms {f(v['ref_rms'], 2)}) | **{v['verdict']}** |")
+        print(f"| **{k}** | {s} | {v['n']} | rms {f(v['rms'], 2)} {u} (mean error {f(v['mean_err'], 2)}) | {f(v['range_2.5_97.5'][0], 2)} – {f(v['range_2.5_97.5'][1], 2)} {u} (reference rms {f(REF_RMS.get(k, v['ref_rms']), 2)}) | **{v['verdict']}** |")
     else:
         print(f"| **{k}** | {s} | {v['n']} | {v['inside']} of {v['n']} inside | at least {v['line']} | **{v['verdict']}** |")
 rp = R["replicate"]

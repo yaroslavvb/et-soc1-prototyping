@@ -5,10 +5,10 @@
 | **E143-F1** | burst clock, governed | 19 | rms 6.63 MHz (mean error -4.96) | 4.66 – 10.23 MHz (reference rms 7.59) | **PASS** |
 | **E143-F2** | burst clock, pinned | 17 | rms 1.01 MHz (mean error -0.15) | 0.36 – 15.47 MHz (reference rms 8.87) | **PASS** |
 | **E143-F3** | burst clock, all: inside ±21.3 MHz | 36 | 36 of 36 inside | at least 31 | **PASS** |
-| **E143-W1** | board W, governed | 19 | rms 1.60 W (mean error 1.17) | 1.41 – 2.43 W (reference rms 1.95) | **PASS** |
+| **E143-W1** | board W, governed | 19 | rms 1.60 W (mean error 1.17) | 1.41 – 2.43 W (reference rms 1.94) | **PASS** |
 | **E143-W2** | board W, pinned | 17 | rms 1.18 W (mean error -0.80) | 1.25 – 2.44 W (reference rms 1.83) | **PASS (better than the reference says)** |
 | **E143-W3** | board W, all: inside ±3.37 W | 36 | 35 of 36 inside | at least 31 | **PASS** |
-| **E143-H1** | die rise, all | 36 | rms 0.58 °C (mean error -0.10) | 0.52 – 0.84 °C (reference rms 0.69) | **PASS** |
+| **E143-H1** | die rise, all | 36 | rms 0.58 °C (mean error -0.10) | 0.52 – 0.84 °C (reference rms 0.68) | **PASS** |
 | **E143-H3** | die rise, all: inside ±1.41 °C | 36 | 36 of 36 inside | at least 31 | **PASS** |
 | **E143-R0** | E80's replicate tiles | 3 | fp32-randn 705.3 MHz (-8.0), 67.93 W (-1.05); fp16-randn 720.1 MHz (-7.6), 67.33 W (+0.74); int8-full 794.7 MHz (-5.3), 49.47 W (-0.33) | within 25 MHz and 3.37 W of E80's and E83's cells | **PASS** |
 
