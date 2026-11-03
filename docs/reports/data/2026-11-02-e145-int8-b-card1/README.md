@@ -17,6 +17,12 @@ two of them PMIC voltage-register reads, which the owner's rule of 2 November 20
 test, the smoke and **16 blocks (13 B, 3 A)** ran, every one `ok` (the budget rule stopped before 14523, as projected). Collected and scored
 on the Intel at about 20:13 PST by the registered `collect_e145.sh`, unchanged.*
 
+*Corrected after verification (a dated note, Mon 2 Nov 2026, about 21:00 PST): six faults, none of which changes a number, rule or verdict,
+are corrected in [§ Corrections after verification](#corrections-after-verification-mon-2-nov-2026) at the end; the text between is as
+first committed. The main ones: E145 tests whether card 0's per-position B prices carry over to a second card, a term no frozen model
+carries, and it does not test M7's J8 (C1). 20% is the registered cross-card figure and 7% the post-hoc one (C2). Four spike samples fell
+in three runs (C3). And card 1 gives no live hottest-shire reading, so the die is read as the shires' mean, at most 56 °C (C4).*
+
 ## Results
 
 **In plain words.** Two of the four gate-level versions of the chip's int8 multiplier recode the B operand (Booth on B) and predict B's
@@ -189,3 +195,67 @@ after the data: `rail-spikes.json`, `e145-posthoc.json`, `runs-posthoc.csv`, `re
 from `posthoc_e145.py`); `logs/` (the session log with the stop-path test, the smoke gate and every block's lines, the queue, the session's
 config reads, the box's preflight, the dry runs, the binaries' sha256, `push-and-claim-times.txt`); `aifoundry1-c1/kinds/p145*`,
 `kinds-smoke/p14501`, `kinds-stoptest/p14502` (raw: per-run records, telemetry, tile dumps, manifests, the stop test's STOP lines).
+
+## Corrections after verification (Mon 2 Nov 2026)
+
+*A dated note, written at about 21:00 PST on the Intel. An independent verifier re-derived the results from the committed files:
+`reduce_e145.py` and `score_e145.py` reproduce `scored.json` to 1e-9, and `posthoc_e145.py` reproduces `posthoc/` exactly. It also confirmed
+that every command sent was a read. The text above is left as first committed; where it disagrees with these notes, the notes hold. No
+frozen file, number, rule, prediction or verdict changed.*
+
+- **C1 (§ 6 and What it changes): E145 does not test M7's J8.** § 6 says M7 "adds E138-priced B flips to its int8 form (J8, `3a210f2b`):
+  this is the first test of such prices on another card, and they hold". What it changes says "(M7's J8 form adds E138's)" of B's
+  per-position prices. Neither is so. M7's int8 form `J8_b138` adds one feature, b_even + 1.91 b_odd: a two-level shape built on E138's
+  odd/even ratio, priced at −23.4 ± 9.8 fJ in the fit to board power. M7's README says the negative sign "corrects the bench's own B
+  count ... it is not E138's price" ([Q138(m)](../2026-11-02-q138m-model/README.md) § 2). What E145 tests is whether card 0's int8 price
+  list by B bit position carries over to a second card. No frozen model (M5, M6 or M7) carries that term:
+  - The before is the one-price row, the shape of M5's and M6's int8 forms, which have no term for B's bit position.
+  - The row nearest J8's two-level shape is parity. J8 itself is not scored here.
+  - E138's 1.91 ratio does lie inside card 1's 1.81 [1.17, 3.30] (2.00 [1.81, 2.23] post hoc).
+
+  | card 0's B prices predicting card 1's bits 0–6 (rms rail fJ, share of card 1's mean) | registered | post hoc, card 1's 15 spike samples removed |
+  |---|---:|---:|
+  | one price (the before: M5's and M6's shape) | 19.3 (39%) | 15.4 (35%) |
+  | parity: an odd and an even price (nearest J8's shape) | 13.9 (28%) | 8.9 (20%) |
+  | per position (the after: no frozen model carries it) | 9.9 (20%) | 3.1 (7%) |
+
+  (`scored.json` › `cross_card.B`, `posthoc/scored-posthoc.json` › `cross_card.B`.)
+- **C2 (§ 6 and What it changes): the registered figures come first.** § 6's "one price per B bit misses card 1's per-bit prices by 35–39%"
+  mixes the registered 39% with the post-hoc 35%, and What it changes leads with the post-hoc 7%. As registered, the per-position prices
+  miss by 20% against 39% for one price. Post hoc, an analysis chosen after the data, the figures are 7% against 35%. § 5's per-bit list in
+  words ("odd 1, 3, 5 at 56–60; even 0, 2, 4, 6 rising 17, 30, 41, 45") is the spikes-removed row, as it says. As registered, bit 1 reads
+  76.1 rail fJ and bit 4 reads 61.5.
+- **C3 (Results and Registered against what happened): four spike samples in three runs, about 1.0 W each.** The Results paragraph says
+  "three such samples fell inside the rail windows of three B runs, each raising that run's rail reading by 0.5–2 W", and the precision
+  row says "three rail spikes". § 3 has it right: four samples fell in three B runs' rail windows, two in `b1d_7`'s run of 14515 and one
+  each in `b1_4`'s run of 14518 and `b1_1`'s run of 14522. They raised those runs' `rail_raw` by 2.09 W (the pair), 1.05 W and 1.03 W
+  (`runs.csv` against `posthoc/runs-posthoc.csv`): about 1.0 W a sample.
+- **C4 (the status, § 6 and Registered against what happened): there is no live hottest-shire reading on this card.** "Hottest shire
+  65 °C" is not a reading of E145's die:
+  - In `temp_c.minshire` only the mean moved (51–56 °C). The low and high entries read 46 and 65 °C in all 26,916 samples.
+  - At `836a4ab` the firmware fills them from the temperature sensors' latched sample low and high (`smpl_hilo`). It reads them in
+    `pvt_controller.c`'s `pvt_get_ts_data`, takes them over the shires in `pvt_get_minion_avg_low_high_temperature`, and never clears
+    them. On aifoundry3 the high entry reads 87 °C in every sample of E138.
+  - So the die read at most 56 °C as the shires' mean, and the hottest shire is not known. The latch bounds it at 65 °C only if the
+    hardware updates the latch on every conversion, which the source does not show.
+  - The registered die stop (any minion-shire reading ≥ 72 °C) took the largest entry, which was the latched 65 °C throughout. It was at
+    least a stop on the mean, and a stop on the hottest shire only if the latch updates. The stop-path test's die stop fired on that
+    constant 65 °C at its test threshold of 1 °C: it proved the path on live sample lines, not a live shire reading.
+  - The margins hold: the mean at most 56 °C against 72 °C, the board 39.45 W against the 60 W stop. `telemetry.json` ›
+    `hottest_shire_c_max` is the same latch.
+- **C5 (Device commands sent): one sender was left out.** `lib.sh`'s `die_c` (`lib.sh:102–103`) runs `ettelem sample --seconds 1
+  --every-ms 500` through the guard (`block_e145.sh` sets `ETTELEM` to `ettelem_guard.sh`). `block_begin` and `block_end` call it
+  (`lib.sh:188`, `:196`), twice a block, 36 calls in all (the 18 `block.json` files' `die_c_start` and `die_c_end`). It sends the
+  sampler's six READ commands: GET_MODULE_POWER 33, GET_SP_STATS 60, GET_MODULE_CURRENT_TEMPERATURE 27, GET_MODULE_VOLTAGE 31,
+  GET_ASIC_VOLTAGE 32 and GET_ASIC_FREQUENCIES 53. The box's preflight lists `lib.sh:103` with all six as READ
+  ([`logs/dmcmd-preflight.txt`](logs/dmcmd-preflight.txt)). Their samples are parsed for the die reading and not written to
+  `telemetry.jsonl`, so the 26,916 samples are the 10 Hz sampler's alone. No class changes.
+- **C6 (§ 6 and What it changes): the scale is three figures, not a range.** "The card-to-card scale (0.94–1.06)" mixes B as registered
+  (1.06), B post hoc (0.94) and A (0.99) (`cross_card` › `card1_over_card0_mean`). Registered against what happened is right that the
+  frozen cross-card sizes were missed: per position about 10% was expected and 20% came out; one price about 29% was expected and 39% came
+  out. Only the order per position < parity < flat held.
+
+**What the corrections do to predicting power and heat.** Nothing is refitted, and every out-of-sample error above stands. What changes is
+the term E145 bears on: the int8 price list by B bit position. It carries over to a second card (one price 39% → per position 20% as
+registered; 35% → 7% post hoc), and no frozen model carries it yet. E145 is not a test of M7's J8. Heat: no heat term was measured, and
+the die is read here only as the shires' mean.
