@@ -1,0 +1,21 @@
+1. before (no encoded term) and after (reading A, 0.4630 pJ x count x 1.17259e+09 lines/s), W
+   E56   measured +0.199 [+0.153, +0.246]  error before -0.199  after -0.013  (prediction +0.2128)
+   E448  measured +0.169 [+0.080, +0.257]  error before -0.169  after -0.044  (prediction +0.2128)
+   E192  measured +0.120 [+0.029, +0.211]  error before -0.120  after +0.029  (prediction +0.0912)
+   E7    measured +0.117 [+0.036, +0.199]  error before -0.117  after -0.035  (prediction +0.1520)
+   E32   measured -0.030 [-0.101, +0.041]  error before +0.030  after -0.030  (prediction +0.0000)
+   rms over the two new pairs (E7, E32): before 0.0856 W, after 0.0325 W
+   rms over the four scored (E56, E448, E7, E32): before 0.1440 W, after 0.0325 W
+   rms over all five (E192 too): before 0.1396 W, after 0.0318 W
+   reading B instead (frozen at E139's price): errors E56..E32 -0.013 -0.044 +0.029 -0.035 -0.486, rms over all five 0.2193 W
+   reading C instead (frozen at E139's price): errors E56..E32 -0.013 -0.044 -0.153 -0.035 -0.030, rms over all five 0.0745 W
+   reading E instead (frozen at E139's price): errors E56..E32 -0.013 -0.044 +0.029 -0.035 -0.486, rms over all five 0.2193 W
+   reading F instead (frozen at E139's price): errors E56..E32 -0.013 -0.044 -0.093 -0.035 -0.243, rms over all five 0.1190 W
+
+2. one price per encoded 64-bit toggle, fitted per pass on E56 + E448 + E7 (1,064 toggles a line in all), pJ
+   E156 (card 1)                        0.3892 [0.2858, 0.4926] pJ, n = 9 passes
+   E139 (aifoundry3), E56 + E448 only   0.4630 [0.3228, 0.6032] pJ, n = 8 passes
+   card 1 over aifoundry3: 0.841
+
+3. the session's peaks (raw telemetry, every pass, the smoke and the stop test)
+   19655 samples; board max 59.55 W (stop 66); hottest minion-shire field max 65 C (stop 72); minion-shire mean max 61 C (runitems cap 70); largest gap between samples 101 ms; samples with since_reset_ms other than -1: 0
