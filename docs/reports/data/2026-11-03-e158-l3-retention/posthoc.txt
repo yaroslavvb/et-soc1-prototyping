@@ -1,0 +1,120 @@
+§1 POST HOC: every rung's far-B share (fp32 unless named), through MAB's frozen prices, with its structure
+  rung   arm          NB KB  x(w=1)   d_AB   d_C   C%    T800   share   pass1   pass2   pass3   fp16   int8
+  K2n4   gemmL1x4x2    4  2   19.00  11.98  7.02   37  1.3230  +1.005  +1.000  +1.007  +1.007              
+  K2n5   gemmL1x5x2    5  2   23.00  13.98  9.02   39  1.3279  +0.997  +1.005  +0.994  +0.991              
+  K2n6   gemmL1x6x2    6  2   27.00  15.98 11.02   41  1.3264  +0.999  +0.992  +1.005  +1.002              
+  K2n7   gemmL1x7x2    7  2   31.00  17.98 13.02   42  1.3265  +0.999  +0.991  +1.008  +0.999              
+  K2n8   gemmL1x8x2    8  2   35.00  19.98 15.02   43  1.3638  +0.942  +0.941  +0.947  +0.937              
+  K2n9   gemmL1x9x2    9  2   39.00  21.98 17.02   44  1.6418  +0.514  +0.512  +0.513  +0.515              
+  K2n10  gemmL1x10x2  10  2   43.00  23.98 19.02   44  1.6631  +0.481  +0.474  +0.489  +0.479              
+  K2n11  gemmL1x11x2  11  2   47.00  25.98 21.02   45  1.6784  +0.457  +0.459  +0.461  +0.451              
+  K2n12  gemmL1x12x2  12  2   51.00  27.98 23.02   45  1.6773  +0.459  +0.457  +0.462  +0.458              
+  K2n13  gemmL1x13x2  13  2   55.00  29.98 25.02   45  1.6681  +0.473  +0.478  +0.477  +0.465              
+  K4n2   gemmL1x2x4    2  4   19.00  15.98  3.02   16  1.3440  +1.004  +1.004  +1.004  +1.003 +0.995 +1.038
+  K4n3   gemmL1x3x4    3  4   25.00  19.98  5.02   20  1.3428  +1.005  +1.002  +1.004  +1.010 +1.004 +1.053
+  K4n4   gemmL1x4x4    4  4   31.00  23.98  7.02   23  1.3385  +1.012  +1.005  +1.016  +1.014 +1.005 +1.052
+  K4n5   gemmL1x5x4    5  4   37.00  27.98  9.02   24  1.5300  +0.717  +0.726  +0.712  +0.713 +0.723 +0.803
+  K4n6   gemmL1x6x4    6  4   43.00  31.98 11.02   26  1.6330  +0.559  +0.559  +0.558  +0.559 +0.557 +0.587
+  K4n7   gemmL1x7x4    7  4   49.00  35.98 13.02   27  1.6487  +0.534  +0.527  +0.541  +0.535 +0.541 +0.573
+  K4n8   gemmL1x8x4    8  4   55.00  39.98 15.02   27  2.1251  -0.199  -0.199  -0.197  -0.202 -0.185 -0.315
+  K6n1   gemmL1x1x6   (no far B lines: A at 19 MB, B at 12; T800 1.3406, STRICT-C 1.3463)
+  K6n2   gemmL1x2x6    2  6   27.00  23.98  3.02   11  1.3387  +1.012  +1.016  +1.004  +1.015              
+  K6n3   gemmL1x3x6    3  6   35.00  29.98  5.02   14  1.4091  +0.903  +0.903  +0.904  +0.903              
+  K6n4   gemmL1x4x6    4  6   43.00  35.98  7.02   16  1.8783  +0.181  +0.186  +0.183  +0.174              
+  K6n5   gemmL1x5x6    5  6   51.00  41.98  9.02   18  1.6353  +0.555  +0.554  +0.555  +0.556              
+  K6n6   gemmL1x6x6    6  6   59.00  47.98 11.02   19  1.6448  +0.540  +0.531  +0.546  +0.543              
+  D2     gemmL4x8x2    8  2   38.25  23.23 15.02   39  1.6644  +0.578  +0.576  +0.582  +0.576                 E146's session: +0.574
+  D4     gemmL4x8x4    8  4   61.50  46.48 15.02   24  2.1062  -0.071  -0.074  -0.068  -0.070                 E146's session: -0.067
+  F6     gemmL3x4x6    4  6   50.50  43.48  7.02   14  1.9111  +0.329  +0.332  +0.327  +0.328 +0.332 +0.387   E146's session: +0.327
+  the largest spread of a rung's share between its passes: 0.017
+
+§2 POST HOC: the structure of the shares (fp32)
+  held, below 32 MB (C counted): 8 rungs, shares 0.997 to 1.012
+  the step, 32-38 MB: K2n8 35 MB 0.942; K4n5 37 MB 0.717; K6n3 35 MB 0.903
+  beyond 38 MB, 9 rungs (every family): shares 0.457 to 0.559, mean 0.508 +- 0.041 (sd), from 39 to 59 MB: no fall with distance
+  beyond 38 MB, the collapses: K4n8 (gemmL1x8x4, NB 8 KB 4) 55 MB -0.199; K6n4 (gemmL1x4x6, NB 4 KB 6) 43 MB +0.181
+  E146's shapes with the same (NB, KB): D4 = gemmL4x8x4 (NB 8, KB 4) at 61.5 MB: here -0.071, E146 -0.067; F6 = gemmL3x4x6 (NB 4, KB 6) at 50.5 MB: here +0.329, E146 +0.327
+  so: the L3 holds every far line below 32 MB; at 35-37 MB it holds 72-94%; from 39 to 59 MB it holds about half in every family, with no fall
+  with distance, except in two block structures, NB 8 with KB 4 and NB 4 with KB 6 (a B panel of 4-6 blocks at a power-of-two stride of 4 or 8
+  MB), where it holds 18% or less. On the plateau the C-heavy rungs (C 44-45% of the distance) hold 0.477 on average and the others (C 16-27%)
+  0.547: C's share moves the plateau by 0.070. Retention is not a function of reuse distance at any w (R2), and the collapse is a structural reading of four shapes
+  (K4n8 and K6n4 here; E146's D4, NB 8 with KB 4, and D8, NB 8 with KB 8, on which MAB's prices were solved with its far B lines fresh), not a
+  tested law: no rung puts NB 4 or 8 with KB >= 4 at the plateau's distances other than these.
+
+§3 POST HOC: F6 under the registered ISO and under readings no rule registered (T800, measured - predicted, relative)
+  ISO (registered)                                                                           fp32 +0.0041  fp16 +0.0026  int8 -0.0076
+  ISO, r = 0 past the last rung (F6's first-touch A lines at 77 MB fresh)                    fp32 -0.0074  fp16 -0.0087  int8 -0.0210
+  a plateau, r = 0.50 past 38 MB, 1 below 32 MB: 0.508                                       fp32 +0.1051  fp16 +0.1044  int8 +0.0792
+  F6's (NB, KB) twin K6n4's share: 0.181                                                     fp32 -0.0367  fp16 -0.0388  int8 -0.0389
+  the rung nearest in distance, K6n5 (51 MB): 0.555                                          fp32 +0.1290  fp16 +0.1285  int8 +0.0987
+  ISO's lines for F6 (an op): A from the L3 50.73, fresh 13.27; B from the L3 83.65, fresh 44.35; ISO's r at F6's far B distances: 0.443 (42-48 MB), 0.171 (54 MB), and at its first-touch A lines (77 MB): 0.171 (flat past 58 MB)
+  F6's measured share, through MAB: 0.329; ISO's pooled values at its distances average 0.307: the 3% PASS rests on ISO pooling the plateau with the two collapse rungs in F6's distance bins
+
+§4 POST HOC: E146's committed ladder (its own session, 2 Nov), cell by cell, T800 measured - predicted (relative)
+  L1: fp32 STRICT-C +0.116 PRIOR +0.116 ISO +0.116 LOGI +0.106; fp16 STRICT-C +0.120 PRIOR +0.120 ISO +0.120 LOGI +0.111; int8 STRICT-C +0.218 PRIOR +0.218 ISO +0.218 LOGI +0.207
+  L2: fp32 STRICT-C -0.001 PRIOR -0.001 ISO -0.001 LOGI -0.019; fp16 STRICT-C +0.004 PRIOR +0.004 ISO +0.004 LOGI -0.014; int8 STRICT-C +0.004 PRIOR +0.004 ISO +0.004 LOGI -0.012
+  L4: fp32 STRICT-C -0.004 PRIOR -0.004 ISO -0.004 LOGI -0.034; fp16 STRICT-C -0.000 PRIOR -0.000 ISO -0.000 LOGI -0.031; int8 STRICT-C -0.012 PRIOR -0.012 ISO -0.012 LOGI -0.038
+  L8: fp32 STRICT-C -0.007 PRIOR -0.007 ISO -0.007 LOGI -0.061; fp16 STRICT-C -0.002 PRIOR -0.003 ISO -0.002 LOGI -0.057; int8 STRICT-C -0.014 PRIOR -0.015 ISO -0.014 LOGI -0.065
+  D1: fp32 STRICT-C +0.144 PRIOR +0.144 ISO +0.155 LOGI +0.100; fp16 STRICT-C +0.145 PRIOR +0.145 ISO +0.157 LOGI +0.100; int8 STRICT-C +0.269 PRIOR +0.269 ISO +0.286 LOGI +0.230
+  D2: fp32 STRICT-C -0.183 PRIOR +0.003 ISO +0.021 LOGI +0.062; fp16 STRICT-C -0.187 PRIOR +0.001 ISO +0.019 LOGI +0.061; int8 STRICT-C -0.152 PRIOR -0.004 ISO +0.013 LOGI +0.040
+  D4: fp32 STRICT-C +0.021 PRIOR +0.021 ISO +0.085 LOGI +0.057; fp16 STRICT-C +0.019 PRIOR +0.019 ISO +0.084 LOGI +0.056; int8 STRICT-C +0.032 PRIOR +0.032 ISO +0.085 LOGI +0.058
+  D8: fp32 STRICT-C +0.001 PRIOR +0.004 ISO +0.119 LOGI +0.018; fp16 STRICT-C +0.000 PRIOR +0.003 ISO +0.118 LOGI +0.017; int8 STRICT-C -0.000 PRIOR +0.003 ISO +0.118 LOGI +0.024
+
+§5 POST HOC: the zeros' power and energy per op against time per op (fp32 cells; burst p800, the first second's median at 800 MHz)
+  26 fp32 cells: p800 34.13-35.35 W; least squares p800 = 34.77 + (-1.08 +- 0.19) (T800 - 1.573 us) W per us
+  energy per op over E119's base B(800) = 33.61 W, e = (p800 - B) T800: 1.11-2.33 uJ an op step (every minion one op); the held rungs (T800 < 1.40 us, 10) 1.84, the slowest (T800 > 2.05 us: D4, K4n8) 1.13
+  the whole energy per op, p800 x T800 (the base included, which zeros' power barely clears): held 46.8 uJ, slowest 72.2 uJ (+54%): a zeros GEMM's energy per op follows its time per op
+
+§6 POST HOC: cycles per op at the measured clock (cycles_max / ops at the launches at or above 790 MHz), by pass; and the fit's C (cycles) and M (us)
+  D2.fp32     {"pass1": 1331.3, "pass2": 1327.8, "pass3": 1331.0}        fit C  388.2 M 1.1787  X 1.096
+  D4.fp32     {"pass1": 1684.6, "pass2": 1681.7, "pass3": 1682.9}        fit C  450.9 M 1.5421  X 1.091
+  F6.fp16     {"pass1": 1523.4, "pass2": 1523.6, "pass3": 1527.4}        fit C  427.0 M 1.3740  X 1.093
+  F6.fp32     {"pass1": 1525.5, "pass2": 1528.1, "pass3": 1527.7}        fit C  401.7 M 1.4086  X 1.085
+  F6.int8     {"pass1": 1530.0, "pass2": 1530.7, "pass3": 1536.6}        fit C  421.9 M 1.3901  X 1.090
+  K2n10.fp32  {"pass1": 1332.4, "pass2": 1324.9, "pass3": 1329.8}        fit C  418.7 M 1.1392  X 1.105
+  K2n11.fp32  {"pass1": 1340.1, "pass2": 1339.2, "pass3": 1344.3}        fit C  423.8 M 1.1481  X 1.105
+  K2n12.fp32  {"pass1": 1341.4, "pass2": 1338.7, "pass3": 1340.9}        fit C  426.6 M 1.1435  X 1.106
+  K2n13.fp32  {"pass1": 1330.6, "pass2": 1330.9, "pass3": 1337.6}        fit C  424.0 M 1.1377  X 1.105
+  K2n4.fp32   {"pass1": 1059.9, "pass2": 1055.8, "pass3": 1055.9}        fit C  448.6 M 0.7618  X 1.138
+  K2n5.fp32   {"pass1": 1056.9, "pass2": 1062.7, "pass3": 1064.2}        fit C  437.0 M 0.7812  X 1.137
+  K2n6.fp32   {"pass1": 1063.2, "pass2": 1057.3, "pass3": 1058.5}        fit C  443.5 M 0.7712  X 1.139
+  K2n7.fp32   {"pass1": 1064.1, "pass2": 1055.5, "pass3": 1060.3}        fit C  442.8 M 0.7724  X 1.139
+  K2n8.fp32   {"pass1": 1090.0, "pass2": 1087.2, "pass3": 1092.4}        fit C  413.5 M 0.8463  X 1.123
+  K2n9.fp32   {"pass1": 1312.6, "pass2": 1312.2, "pass3": 1311.3}        fit C  441.2 M 1.0899  X 1.111
+  K4n2.fp16   {"pass1": 1074.2}                                          fit C  420.5 M 0.8181  X 1.130
+  K4n2.fp32   {"pass1": 1073.8, "pass2": 1074.1, "pass3": 1074.2}        fit C  419.2 M 0.8195  X 1.130
+  K4n2.int8   {"pass1": 1142.0}                                          fit C  457.1 M 0.8572  X 1.133
+  K4n3.fp16   {"pass1": 1069.3}                                          fit C  437.2 M 0.7910  X 1.136
+  K4n3.fp32   {"pass1": 1075.0, "pass2": 1073.6, "pass3": 1070.8}        fit C  423.2 M 0.8133  X 1.131
+  K4n3.int8   {"pass1": 1136.1}                                          fit C  477.4 M 0.8244  X 1.140
+  K4n4.fp16   {"pass1": 1068.5}                                          fit C  445.3 M 0.7799  X 1.139
+  K4n4.fp32   {"pass1": 1073.0, "pass2": 1067.5, "pass3": 1068.5}        fit C  434.1 M 0.7954  X 1.134
+  K4n4.int8   {"pass1": 1136.1}                                          fit C  477.1 M 0.8252  X 1.140
+  K4n5.fp16   {"pass1": 1217.4}                                          fit C  442.1 M 0.9703  X 1.121
+  K4n5.fp32   {"pass1": 1217.9, "pass2": 1225.4, "pass3": 1224.8}        fit C  423.9 M 0.9997  X 1.115
+  K4n5.int8   {"pass1": 1238.1}                                          fit C  440.4 M 0.9984  X 1.118
+  K4n6.fp16   {"pass1": 1305.5}                                          fit C  445.1 M 1.0766  X 1.114
+  K4n6.fp32   {"pass1": 1304.9, "pass2": 1305.2, "pass3": 1304.6}        fit C  436.7 M 1.0867  X 1.111
+  K4n6.int8   {"pass1": 1326.7}                                          fit C  420.3 M 1.1343  X 1.106
+  K4n7.fp16   {"pass1": 1313.7}                                          fit C  466.1 M 1.0607  X 1.118
+  K4n7.fp32   {"pass1": 1321.4, "pass2": 1314.1, "pass3": 1316.9}        fit C  430.4 M 1.1103  X 1.109
+  K4n7.int8   {"pass1": 1332.2}                                          fit C  434.3 M 1.1238  X 1.109
+  K4n8.fp16   {"pass1": 1696.9}                                          fit C  465.8 M 1.5405  X 1.091
+  K4n8.fp32   {"pass1": 1697.7, "pass2": 1697.0, "pass3": 1700.0}        fit C  434.6 M 1.5812  X 1.085
+  K4n8.int8   {"pass1": 1696.5}                                          fit C  446.9 M 1.5637  X 1.088
+  K6n1.fp32   {"pass1": 1067.0, "pass2": 1075.0, "pass3": 1072.0}        fit C  432.4 M 0.7996  X 1.134
+  K6n2.fp32   {"pass1": 1067.6, "pass2": 1073.9, "pass3": 1068.1}        fit C  433.9 M 0.7958  X 1.132
+  K6n3.fp32   {"pass1": 1126.1, "pass2": 1126.0, "pass3": 1126.0}        fit C  423.4 M 0.8793  X 1.122
+  K6n4.fp32   {"pass1": 1498.2, "pass2": 1498.7, "pass3": 1504.8}        fit C  443.7 M 1.3230  X 1.098
+  K6n5.fp32   {"pass1": 1307.3, "pass2": 1306.9, "pass3": 1306.4}        fit C  441.4 M 1.0831  X 1.112
+  K6n6.fp32   {"pass1": 1319.5, "pass2": 1311.2, "pass3": 1312.7}        fit C  436.0 M 1.0994  X 1.109
+
+§7 POST HOC: card time, the commands' counts, the stop tests, the rest reading
+  card time, the start snapshot's config read to the queue's end: 20.84 min; session s1 19.7 min
+  sampler lines (each GET_MODULE_POWER, GET_SP_STATS, GET_MODULE_CURRENT_TEMPERATURE, GET_ASIC_VOLTAGE, GET_MODULE_VOLTAGE, GET_ASIC_FREQUENCIES): 12368; runs (each followed by an ettelem config and an sptrace): {'smoke': 5, 'stoptest-board': 0, 'stoptest-die': 0, 's1': 98}
+   {"t_ms": 1793709608149, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+   {"t_ms": 1793709611150, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793709610682, "t_third_line_ms": 1793709610620, "launch": [1793709609593, 1793709610932], "trip_after_line_ms": 62, "launch_end_after_trip_ms": 250, "lines": 27}
+   {"t_ms": 1793709611150, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+   {"t_ms": 1793709613151, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793709611377, "t_first_line_ms": 1793709611317, "trip_after_line_ms": 60, "lines": 13}
+   {"t_ms": 1793709613152, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+  the smoke's rest reading (its last 30 s, the idle card): board 21.70 W, die 45.0 C, n 300

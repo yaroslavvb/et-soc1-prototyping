@@ -1,0 +1,92 @@
+# E158: a large GEMM's time per op as the L3's retention by reuse distance, under aifoundry2's own governor
+
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): **item 1, "Where a large GEMM falls"**, its rest after [E146](../2026-11-02-e146-gemm-stores/README.md), and **rank 7 of Q138's final critic**: *"A large GEMM's time per op: the L3's retention by reuse distance ... Register a ladder of B-panel reuse distances from 20 to 56 MB, with and without C's traffic, with MAB's frozen prices predicting the L3-served share. Rule: the fitted retention curve predicts F6's time per op within 3%."* Q139 continues the owner's ask of 2 November 2026: *"feel free to settle any unanswered questions regarding horace's power model"*, with Q137's goal, *"to be able to predict the power requirement and heat generation of various kinds of numeric computations as accurately as possible"*.*
+
+*Tue 3 Nov 2026 (week 45), Q139. Pre-registered in `2cfc4525` ([`tools/claims-v3/e158/E158.md`](../../../../tools/claims-v3/e158/E158.md): the desk's exact stack distance of every line, three frozen time models through E146's MAB prices, the scorer, rules R0-R8, a self-test, a toy-card dry run of the whole queue and the device-command audit), committed at 04:37:54 PST and pushed before the claim (04:38 PST) and the first card touch (04:39:07 PST). **aifoundry2 card 0 under its own governor**: `ettelem config` read 65 W / 65 °C (low_power, 600 MHz, 519 mV) at the queue's start and end and after every run; nothing was set, no statistics reset, no firmware-revisions query, no residency read, **no WRITE command of any kind** ([Device commands sent](#device-commands-sent)). E136's binary, unchanged (its sha256 checked before every session): every shape is an argument. Zeros in every cell. The card post was the day's single post in #community-lab, message `1567153765390487573` (posted at 04:29 PST by another lane of this round), rewritten at 04:38 PST to add "using aifoundry2 for 1 h, until ~05:38 PST" and at 05:00 PST to drop that clause, the two other cards' clauses kept word for word. **20.8 card-minutes** (04:39:07 to 04:59:57 PST): the smoke, the two stop-path tests and one session of 98 runs (19.7 min), none refused, none cut. No other user was logged in at any check (`aifoundry2/idle_logins.jsonl`: `other_users` 0 throughout).*
+
+## The answer
+
+**The L3 serves every far B line whose reuse distance (C's lines counted) is under 32 MB, 72-94% of them at 35-37 MB, and about half from 39 to 59 MB, in all three families (nine rungs, 0.46-0.56, mean 0.51 ± 0.04 sd, with no fall from 39 to 59 MB; the C-heavy rungs, C 44-45% of the distance, a little lower, 0.48 on average, than the others, 0.55, with C at 16-27%), except in two block structures, where it serves 18% or less: NB 8 with KB 4 (`K4n8`, −0.20, slower than all-fresh; E146's `D4` the same, −0.07) and NB 4 with KB 6 (`K6n4`, 0.18), a B panel of four to six blocks at a power-of-two stride.** So **retention is not a function of reuse distance at any weight of C** (R2: NO SINGLE CURVE, the best rms 0.129 in share against the 0.06 bar, near-best w 0.3-1.0), C's share of the distance moves it by about 0.07 at most, and E146's two readings were each one shape's case: `D2`'s 58% is the step region (38 MB), `F6`'s 33% lies between the plateau and its (NB, KB) twin's collapse. Every share replicated across the three passes within 0.017. **The critic's rule passes as registered: ISO, the isotonic retention curve fitted on the 22 rungs, predicts `F6`'s time per op within 3% in every format, +0.41% (fp32), +0.26% (fp16), −0.76% (int8), where E146's MAB (strict LRU, "before") was −10.0%, −10.3% and −9.4%, and in each pass alone (0.05-0.94%)** (R3, R6). *But the pass rests on ISO pooling the plateau with the two collapse rungs in `F6`'s distance bins (r 0.44 at 42-48 MB, 0.17 at 54 MB; `F6` measured 0.33): read rung by rung, `F6` misses by +10.5% (the plateau's 0.51), −3.7% (its (NB, KB) twin `K6n4`) and +12.9% (the rung nearest in distance), so the next term is the L3's set mapping, not a curve (post hoc, [`posthoc.txt`](posthoc.txt) §2-§3).* Numbers from `results.json` (`rules`, `errors`) and `posthoc.txt`.
+
+| rung (arm) | far B distance, MB: C counted (operand + C) | C's share | T800 fp32, µs | far-B share served by the L3 (passes 1 / 2 / 3) |
+|---|---|---|---|---|
+| `K2n4`-`K2n7` (`gemmL1x{4-7}x2`) | 19-31 (12-18 + 7-13) | 37-42% | 1.323-1.328 | 0.997-1.005 |
+| `K4n2`-`K4n4` (`gemmL1x{2-4}x4`), `K6n2` (`gemmL1x2x6`) | 19-31 (16-24 + 3-7) | 11-23% | 1.339-1.344 | 1.004-1.012 |
+| `K2n8` (`gemmL1x8x2`) / `K6n3` (`gemmL1x3x6`) / `K4n5` (`gemmL1x5x4`) | 35 / 35 / 37 | 43% / 14% / 24% | 1.364 / 1.409 / 1.530 | **0.942** / **0.903** / **0.717** |
+| `K2n9`-`K2n13` (`gemmL1x{9-13}x2`) | 39-55 (22-30 + 17-25) | 44-45% | 1.642-1.678 | **0.457-0.514** (each within 0.015 across passes) |
+| `K4n6`, `K4n7` | 43, 49 | 26%, 27% | 1.633, 1.649 | **0.559, 0.534** |
+| `K6n5`, `K6n6` | 51, 59 | 18%, 19% | 1.635, 1.645 | **0.555, 0.540** |
+| **`K6n4`** (`gemmL1x4x6`: NB 4, KB 6) | 43 (36 + 7) | 16% | 1.878 | **0.181** (0.186 / 0.183 / 0.174) |
+| **`K4n8`** (`gemmL1x8x4`: NB 8, KB 4) | 55 (40 + 15) | 27% | 2.125 | **−0.199** (−0.199 / −0.197 / −0.202): slower than MAB's all-fresh 1.996 |
+| E146's `D2` (`gemmL4x8x2`) / `D4` (`gemmL4x8x4`) / **`F6`** (`gemmL3x4x6`) | 38.3 / 61.5 / 50.5 | 39% / 24% / 14% | 1.664 / 2.106 / **1.911** | 0.578 / −0.071 / **0.329** (E146: 0.574 / −0.067 / 0.327) |
+
+The share is read through MAB's frozen prices from the measured T800 (`model_e158.share_of`: the far B lines all fresh against all from the L3, every other line as strict LRU says); in fp32 its axis spans 0.65 µs, so 0.01 of share is 0.0065 µs. The fp16 and int8 K4 rungs read the same shares within 0.014 (fp16) and 0.03-0.12 higher (int8, through MAB's int8 prices) (`posthoc.txt` §1). Every check of C against the host's own reference over the whole K read **exact**, in the smoke and in all 98 runs (R0).
+
+**So for the blog's kinds table, on aifoundry2 under its own governor:** what a large GEMM's time per op depends on, past the 32 MB L3, is not how far a block of B travels before it comes back but how its blocks fall on the L3: about half of a returning B panel is still in the L3 at 39-59 MB, unless the panel's blocks sit at a power-of-two stride, when almost none is (18% or less). The kind of number does not enter (every cell zeros; E146's R7). For zeros, the energy per op follows the time per op: 46.8 µJ an op step on the L3-held rungs against 72.2 µJ on the slowest (+54%), the board drawing 34.1-35.4 W throughout (`posthoc.txt` §5).
+
+## Registered against what happened
+
+98 runs in one session, none refused by the admission rule, none cut by the cap.
+
+| rule | registered | measured | verdict |
+|---|---|---|---|
+| R0 the ties | every check of C exact or approx; smoke cycles 50-250% of STRICT-C's; `K4n2` (= E146's `L4`), `D2`, `D4`, `F6` T800 within 2% of E146's | all exact; the smoke passed the queue's check; −0.31% to +0.29% (8 cells) | **PASS**; replicate **PASS** (8 of 8) |
+| R1 the shape | every share in [−0.10, 1.10]; STRICT if every rung within 0.15 of STRICT-C's share | `K4n8` −0.199 (outside); 14 of 22 rungs more than 0.15 off STRICT-C, 12 off STRICT-NOC | **INCONSISTENT** (`K4n8`: MAB cannot carry it); **SOFT** against both |
+| R2 C's weight | ISO's near-best interval of w; NO SINGLE CURVE if its least rms > 0.06 | least rms 0.129 (w 0.8-1.0 tied); 0.192 at w = 0; near-best 0.3-1.0. LOGI: x50 45.2 MB, s 8.0 MB, w 0.92, rms 0.188 | **NO SINGLE CURVE** |
+| **R3 `F6` (the critic's rule)** | ISO at its w predicts `F6`'s T800 here within 3%, per format; fp32 primary | ISO +0.41% / +0.26% / −0.76% (fp32 / fp16 / int8); against E146's `F6` +0.47% / +0.17% / −0.45%; LOGI −0.40% / −0.49% / −2.26% | **PASS** ×3 (LOGI PASS ×3) |
+| R4 out of sample | ISO's rms on E146's 18 KB ≥ 2 cells at least 2 points under STRICT-C's | ISO 6.0%, STRICT-C 7.2% (all 24: 10.6% against 10.9%); `D2`, `D4` here: ISO 6.3%, STRICT-C 13.1% | **NOT BETTER** |
+| R5 the formats | ISO (fitted on fp32) predicts the K4 rungs in fp16 and int8 within 3% | 10 of 14; misses `K4n7` −3.8% (both), `K4n8` +12.4% / +13.3% (ISO misses those rungs in fp32 too) | 10 PASS / 4 FAIL |
+| R6 the passes | shares per pass; ISO refitted per pass | every rung within 0.017 across passes; ISO's w 0.9 in each; `F6` +0.05% to +0.64% (fp32, fp16), −0.55% to −0.94% (int8) | reported; R3 holds in every pass |
+| R7 power (reported) | zeros' p800 against P0, strict and ISO's lines | P0 3.57 W rms (reads 2.7-4.4 W high in every cell; 34 of 42 within 4 W); with ISO's lines 3.48 W | reported |
+| R8 cycles (printed) | per rung, cycles per op at the measured clock | 1,056-1,075 cycles an op held; 1,305-1,344 on the plateau; 1,498-1,700 on the collapses; `F6` 1,523-1,537 (`posthoc.txt` §6) | printed |
+
+**The failed rules have one cause: retention past 32 MB is set by the shape's block structure, not by its distance.** R1 fails because one such structure (`K4n8`) runs slower than MAB's all-fresh time (its DRAM lines cost more than `c16`'s, or its B panel conflicts with A's lines, which MAB holds in the L3); R2 because no weight of C lines the families up; R4 and R5 because ISO, a curve, cannot carry the collapses (it reads `D4` and `D8` 8.5% and 11.9% fast, `K4n8` 12-13% fast).
+
+## What E158 does to predicting power and heat
+
+| quantity | before | after | |
+|---|---|---|---|
+| time per op of the fresh shape `F6`, fp32 / fp16 / int8 (never fitted) | E146's MAB (STRICT-C) −10.0% / −10.3% / −9.4%; PRIOR (a curve fitted on E146's ladder) the same | **ISO +0.41% / +0.26% / −0.76%** (0.52% rms); LOGI 1.36% rms | registered (R3); the pass is the pooled curve's (above) |
+| time per op of the 22 ladder rungs (fp32) | STRICT-C 15.0% rms; PRIOR 11.9% | ISO 4.6% rms (in sample) | — |
+| time per op of E146's committed ladder (another session), the 18 KB ≥ 2 cells / all 24 | STRICT-C 7.2% / 10.9% rms | ISO 6.0% / 10.6%; LOGI 4.5% / 8.5% | registered (R4: not better by 2 points) |
+| zeros' burst board power, 42 cells | P0 (E136's law, strict lines) 3.57 W rms, reading high in every cell | P0 with ISO's lines 3.48 W | reported (R7) |
+| zeros' energy per op | — | follows time per op: +54% from the L3-held rungs to the slowest, at 34-35 W | post hoc §5 |
+
+The term this measures is **where a large GEMM's missing lines are served** (strict LRU's line classes, E146's MAB input). Its time error on a never-run shape falls from 9-10% to under 1%. The result does not carry to other shapes as a law. A distance curve misses the block structures that collapse (8.5-13% on `D4`, `D8` and `K4n8`), so the next term is the L3's set mapping of a panel's block stride, which these records cannot model without the pools' device addresses (not logged). For heat, nothing changes directly. The die read 48-51 °C in every zeros burst (the heat law is E146's), and a GEMM's power and heat follow its time per op through E = P·T and the governor's clock, so the gain is in the time.
+
+## The stops, and their test on live samples
+
+The session's stops: `abs_stop_c` 80 °C on one sample, `board_cap_w` **60 W** on three in a row (Q139's rule for aifoundry2: at most 85 W), the admission limit 82 W at the estimate (no cell's estimate above 39.8 W: nothing duty-cycled or dropped). Before the session the queue ran **both stops on live samples**: **stoptest-board** (`board_cap_w` 30 W; one 6 s burst of `K4n8` fp32 zeros over a 22 W rest) tripped **62 ms after the third live sampler line over 30 W, while the work launch ran, and the launch ended 250 ms after the trip**; **stoptest-die** (`abs_stop_c` 30 °C) tripped **60 ms after the first live line, before any launch**. Both ended with exit 4 and passed the queue's registered check (`aifoundry2/queue.jsonl` `stoptest_detail`, `stoptest_check`; `posthoc.txt` §7).
+
+## Device commands sent
+
+*Q136's rule ("take more care for writing commands"), kept in Q137-Q139: the classified list is [`E158.md`](../../../../tools/claims-v3/e158/E158.md) "Device commands sent", frozen in `2cfc4525`, from et-platform `836a4ab` (aifoundry2's BL2 0.22.0), checked by Q136(w)'s `dmcmd_audit.py` before the claim ([`logs/dmcmd-audit.txt`](../../../../tools/claims-v3/e158/logs/dmcmd-audit.txt): 19 send sites, every one READ, GO; one reviewed exception, the residency read run_e119.py rewrites to raw states 1-3, which this `ettelem` refuses before it opens the device). **E158 sent no WRITE.** Counted from the session's records (`posthoc.txt` §7): 12,368 sampler samples (each `GET_MODULE_POWER`, `GET_SP_STATS`, `GET_MODULE_CURRENT_TEMPERATURE`, `GET_ASIC_VOLTAGE`, `GET_MODULE_VOLTAGE`, `GET_ASIC_FREQUENCIES`: all READ; 11 PMIC voltage-register reads each, the owner's allowed read-only PMIC voltage reads of 2 November 2026); an `ettelem config` (three RAM getters, the ASIC voltage and PLL reads) after each of the 103 recorded runs, at each session's start and end and in the queue's two snapshots; `ettelem sptrace` (an MMIO copy, nothing sent to the SP) after each run; no statistics reset, no firmware-revisions query, no residency read, no set. `sparsity_host` (rgm136) opens the ops node only: the kernel load, the DMA of the tiles and C and the launches, no management command.*
+
+## Safety
+
+The session's highest board reading was 36.1 W (`K2n8` fp32, pass 3), 23.9 W under the 60 W stop; the die mean's highest was 51 °C, 29 °C under the 80 °C stop. The hottest-sensor field read 70 °C at every sample from the smoke's idle rest on: the SP's running maximum carried from before the session, as E146 saw (69 °C), not a live reading. Neither stop fired in the session. The smoke's rest reading (30 s, idle card): 21.70 W, die 45.0 °C.
+
+## Departures and notes
+
+- **"Without C's traffic" is the C-light family**, as registered: the large-GEMM kernel stores every C block to its own place, so no rung has none; the families put C at 37-45%, 16-27% and 11-19% of the distance.
+- **Zeros only**, as registered (the kind does not move time per op: E146 R7). The power readings are zeros'.
+- **ISO's flat extrapolation.** ISO is flat past its last rung (58 MB), so it gave `F6`'s 16 first-touch A lines an op at 77 MB an r of 0.17. With r = 0 past the ladder, `F6` reads −0.74% / −0.87% / −2.10%: still inside 3% (post hoc, `posthoc.txt` §3).
+- **R3's pass and R2's verdict together.** R3 passes as registered; the reading that it is a pooled curve's, not a law's, is post hoc (§2, §3) and changes no verdict.
+- **MAB's prices stay frozen.** `K4n8`'s share below zero says those prices (solved from `c16` and E136's `g4k`) do not carry every DRAM-bound structure. That is a limit of the inference, recorded as R1's INCONSISTENT.
+- **One session, three passes.** The unit of replication is the pass, and every share repeated within 0.017. No interval is between sessions; `F6`, `D2`, `D4` and `L4` repeat E146's session of 2 November within 0.31%.
+- **The registration's stated time** is "about 05:00 PST"; `2cfc4525` was committed at 04:37:54 and pushed by 04:38, before the claim (04:38) and the queue's first card touch (04:39:07).
+
+## What E158 says about the page and the model
+
+- **Section 11 item 1 narrows again:** a large GEMM's time per op past the L3 depends on the L3's retention, which is about half of a returning B panel from 39 to 59 MB but collapses for B panels of 4-6 blocks at a power-of-two stride, and moves little with C's share of the distance (0.48 against 0.55). A curve by reuse distance predicts the never-run `F6` to under 1% (R3 PASS), but as a pooled average: the open part is the L3's set mapping (the pools' device addresses and the L3's hash), the KB = 1 shapes' A lines, the vendor's binary and a second card.
+- **For the power model (Q139):** the time term's error on the fresh shape, 9-10% → 0.3-0.8% (registered); on E146's ladder out of sample 7.2% → 6.0% (KB ≥ 2); and, post hoc, a zeros GEMM's energy per op follows its time per op (+54% held to slowest).
+
+**For the post, in short sentences.** Each names its card and clock.
+- On aifoundry2 at 800 MHz, a large matrix multiply whose blocks of B come back before 32 MB of other data have gone by finds every one of them still in the chip's 32 MB L3 (`results.json` `rules.shares`).
+- Past 39 MB, about half of each returning block is still there, out to 59 MB, a little less (48% against 55%) when the traffic in between is mostly the result than when it is mostly the inputs (`posthoc.txt` §2).
+- But when a block of B is laid out as four to six pieces at a power-of-two stride, 18% or less of it survives, and the multiply runs 15-29% slower per step than its neighbour in the ladder with one column block more or fewer, though that neighbour's B travels further or less far (`K6n4` against `K6n5`, `K4n8` against `K4n7`; `posthoc.txt` §1).
+- A curve of retention against distance, fitted on 22 shapes, predicted a never-run 3,072 × 2,048 × 3,072 multiply to within 0.8% in every number format, where the model with a sharp 32 MB cutoff was 9-10% slow (`rules.R3`). That works because the curve averages over the layouts, not because retention follows distance (`rules.R2`, `posthoc.txt` §3).
+
+## Files
+
+`results.json`, `reduce.txt` (`tools/claims-v3/e158/reduce_e158.py`, the registered reduction: per-run metrics, T and X per shape and format, the shares, ISO and LOGI, the rules, the errors per model, the safety record); `posthoc_e158.py`, `posthoc.txt`, `posthoc.json` (labelled, post hoc: the shares with their structure, the plateau and the collapses, `F6` under other readings, E146's ladder cell by cell, the zeros' power and energy per op, cycles per op at the measured clock, card time and commands, the stop tests, the rest reading); `aifoundry2/` (the queue's `queue.jsonl`, `status.json`, `admission.json`, `idle_logins.jsonl` (counts only), `snapshot-*.json`, `config-*.txt`, `sensors-*.json`, `history-before.jsonl`; `smoke/`, `stoptest-board/`, `stoptest-die/` and `s1/`: `runs.jsonl`, `marks.jsonl`, `launches.jsonl.gz`, `tel/*.jsonl.gz`, `sp/`, `session.json`, `e158.json`, `manifest.txt`, `queries.jsonl`, `run.log`, `end.json`; `smoke.out`, `stoptest-*.out`, `s1.out`); `logs/` (the queue's output and start script). The registration, the desk model and the code: [`tools/claims-v3/e158/`](../../../../tools/claims-v3/e158/README.md).
