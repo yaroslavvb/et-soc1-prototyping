@@ -33,7 +33,9 @@ B1's band on both 600 MHz cards with M7u (aifoundry3 −0.072 W, card 1 −0.027
 measured float ratio is 0.9635 [0.9626, 0.9667] and M7u's card term is 0.9616, 0.0010 below the interval's low end. The
 card term's miss shrinks from 1.1% (0.9711 against 0.982) to 0.2%, but at 1-in-500 precision the C0 term (fitted on E78's
 and E82's pairs only) is still off. The nested procedure on the new rows re-chooses the all-pairs term C1 for floats, and its
-scale, 0.9596, is further out (`scores-m7u.json` › `nested_procedure_footing_rows`).
+scale, 0.9596, is further out (`scores-m7u.json` › `nested_procedure_footing_rows`). *(Added 04:31 PST, § Sensitivity to the
+slope: B1 holds on both cards at every slope pair scored. X1 fails at all eight per-card pairs and passes only with one
+slope, 0.2056, on both cards.)*
 
 **In plain words.** Most of aifoundry3's blind float error was the reduction's footing, not the model. When
 every row and every test is reduced the same way (one leakage slope per card, the meter's dips removed), the frozen M7 reads
@@ -106,7 +108,8 @@ M7u's). B1's band is the registered interval drawn from M7's reference errors, u
   die reading's noise in a 1 s mean can attenuate a slope fitted on that spread. E71's dedicated idle cycles read
   aifoundry3 at 0.3200 W/°C (52-58 °C) and 0.3803 (58-62 °C), above F1's 0.2056. One footing removes the inconsistency
   between rows. A common error in k is absorbed into the prices on a card. But the card term depends on both cards' slopes,
-  so X1's 0.001 miss is inside what a slope error could move. The sensitivity of X1 to k_a3 and k_c1 was not run here.
+  so X1's verdict is a slope question as well as a model one. *(Added after the first commit: § Sensitivity to the slope
+  runs it. X1 fails at every per-card combination scored and passes only with one slope on both cards.)*
 - **X1's interval is narrow** (±0.002: 21 tiles whose ratios agree closely on one footing), and the rule tests a point card
   term with no interval of its own.
 - **int8 is not explained by the footing.** Its 0.24-0.34 W blind error stays, and is M8's job (E141's whole-line,
@@ -116,6 +119,36 @@ M7u's). B1's band is the registered interval drawn from M7's reference errors, u
   frozen M7 prediction. Heat rules were not re-scored. Rates and features are M7's rows' own; only D, its se and dT_win
   were replaced.
 - No launch's C is checked on file tiles (rank 14), here as in every earlier pool.
+
+## Sensitivity to the slope (added 04:31 PST, after the first commit `f47669d1`; post hoc, not the rule)
+
+[`sens_footing.py`](sens_footing.py) re-reduced each card's experiments at other slopes (A2 once, as F3) and ran
+`fit_m7u.py` unchanged on each combination. It covers F1's bootstrap ends per card, aifoundry3 at E71's dedicated idle-cycle
+slopes, and one slope on both cards. M7u refitted every time ([`sens-footing.json`](sens-footing.json) › `grid`):
+
+| arm | k aifoundry3 / card 1 (W/°C) | B1 aifoundry3 (M7u) | B1 card 1 (M7u) | X1: measured ratio [95%] vs M7u's term | X2 | LOKO floats / int8 (W) | passes kept E141 / E142 |
+|---|---|---|---|---|---|---|---|
+| **F1 (the footing)** | 0.2056 / 0.3134 | PASS −0.072 | PASS −0.027 | 0.9635 [0.9626, 0.9667] vs 0.9616 **FAIL** | PASS | 0.184 / 0.244 | 4 / 5 |
+| aifoundry3 low | 0.1916 / 0.3134 | PASS −0.072 | PASS −0.027 | 0.9619 [0.9608, 0.9651] vs 0.9599 FAIL | PASS | 0.184 / 0.243 | 4 / 5 |
+| aifoundry3 high | 0.2204 / 0.3134 | PASS −0.071 | PASS −0.028 | 0.9652 [0.9644, 0.9685] vs 0.9634 FAIL | PASS | 0.184 / 0.244 | 4 / 5 |
+| card 1 low | 0.2056 / 0.2955 | PASS −0.071 | PASS −0.030 | 0.9656 [0.9648, 0.9690] vs 0.9641 FAIL | PASS | 0.184 / 0.244 | 4 / 5 |
+| card 1 high | 0.2056 / 0.3320 | PASS −0.073 | PASS −0.025 | 0.9613 [0.9602, 0.9644] vs 0.9590 FAIL | PASS | 0.184 / 0.244 | 4 / 5 |
+| aifoundry3 low, card 1 high | 0.1916 / 0.3320 | PASS −0.073 | PASS −0.024 | 0.9597 [0.9585, 0.9627] vs 0.9573 FAIL | PASS | 0.184 / 0.243 | 4 / 5 |
+| aifoundry3 high, card 1 low | 0.2204 / 0.2955 | PASS −0.070 | PASS −0.030 | 0.9674 [0.9666, 0.9708] vs 0.9659 FAIL | PASS | 0.184 / 0.244 | 4 / 5 |
+| aifoundry3 at E71's 52-58 °C slope | 0.3200 / 0.3134 | PASS −0.062 | PASS −0.031 | 0.9775 [0.9763, 0.9799] vs 0.9761 FAIL | PASS | 0.185 / 0.248 | 3 / 5 |
+| aifoundry3 at E71's 58-62 °C slope | 0.3803 / 0.3134 | NOT SCORED (E141 keeps 1 pass) | PASS −0.030 | NOT SCORED | NOT SCORED | 0.187 / 0.255 | 1 / 5 |
+| one slope on both, 0.2056 | 0.2056 / 0.2056 | PASS −0.067 | PASS −0.030 | 0.9798 [0.9752, 0.9811] vs 0.9766 **PASS** | PASS | 0.185 / 0.245 | 4 / 4 |
+| one slope on both, 0.3134 | 0.3134 / 0.3134 | PASS −0.062 | PASS −0.031 | 0.9766 [0.9755, 0.9791] vs 0.9752 FAIL | PASS | 0.185 / 0.248 | 3 / 5 |
+
+**What it shows.** (1) **B1 is robust.** With M7u refitted, the blind float bias lies inside B1's band on both cards in
+every scored arm, at −0.06 to −0.07 W on aifoundry3 and −0.02 to −0.03 W on card 1. That half of the decisive reading does
+not hang on the slope. (2) **X1 is not robust, and it fails at the footing.** The measured ratio and M7u's card term move
+together with the slopes, from 0.960 to 0.980. M7u's C0 term sits 0.0010-0.0025 below the low end of the ratio's interval
+in every per-card arm. It passes only where one slope is used on both cards and E142 loses a pass, which widens the
+interval. The card term (fitted on E78's and E82's pairs) reads pool 5's float ratio about 0.2% low on every footing
+tried: a small systematic for M8's card-scale predictor (rank 5). (3) **The fit does not care which slope is used**: M7's
+form out of kind stays at 0.184-0.187 W for floats. Higher aifoundry3 slopes (E71's) cost int8 accuracy (0.244 → 0.255 W)
+and passes: at 0.38 W/°C the gates keep one of E141's four. F1's in-session slope keeps every pass.
 
 ## Files
 
@@ -130,6 +163,7 @@ M7u's). B1's band is the registered interval drawn from M7's reference errors, u
 | [`score/`](score/) | the registered scorers' outputs for every arm, and the two registration copies carrying M7u's predictions |
 | [`checks_footing.py`](checks_footing.py), [`checks-footing.json`](checks-footing.json) | E140's registered scorer on both footings, A2's dips on aifoundry2 (E143, E80, E83), the passes kept per experiment |
 | [`e143_dips.py`](e143_dips.py), [`e143-nodips.json`](e143-nodips.json) | F4: E143's registered reduction on its traces with A2's dips removed, beside the committed results |
+| [`sens_footing.py`](sens_footing.py), [`sens-footing.json`](sens-footing.json) | *(added 04:31 PST)* the slope sensitivity: eleven slope pairs, M7u refitted on each, B1/X1/X2 and the passes kept |
 
 Rerun from the tree's root, with a python that has numpy (each step takes seconds):
 
