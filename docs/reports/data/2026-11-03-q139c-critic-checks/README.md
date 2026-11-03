@@ -159,3 +159,12 @@ history) is the owner's call and is left as it stands.
   corrected page, the verification bullet), Levels stop 3 and the Library line. The AI Foundry hub (private) carried one faulty
   sentence, E144's row, and has its own Fix entry. Read back signed out: `<main>` identical to the deploy copy, public-text counts unchanged.
 - Not changed: the carried privacy item (the owner's call), and the projects tracker, whose Horace row carries no fault from the list.
+- **Corrected after verification** (Tue 3 Nov 2026, 05:1x–05:2x PST): this file's C1–C7 and the records' pointers in lab `33548517`
+  (05:18:51 PST). The kinds page `c09062203aa2` (05:21:45 PST) over `2ed9794277c1`, public and unlisted: C1, C2, C7 and two wordings
+  (the 4.5 s constant 0.33–0.55 °C on the two cards; the governed clock's blind error about half M7's end-to-end clock error and two
+  thirds its board error); read back signed out, `<main>` identical to the deploy copy, 11 of 11 phrase checks. The Horace Hub
+  `f89fc11b7ebf` (05:26:44 PST) over `2abafc9e57ca`, public and unlisted: a new Fix entry at the top of week 45 (no older Log entry
+  touched), Status (the page's version, Q138's paragraph, section 11 re-quoted from the corrected page, the verification bullet), Levels
+  stop 3 and the Library line; read back signed out, `<main>` identical to the deploy copy, public-text counts unchanged. Its render
+  picks up a change to the report renderer made that morning: two plain-text public URLs in quoted words became links. The AI Foundry
+  hub carried none of these faults and was not changed.
