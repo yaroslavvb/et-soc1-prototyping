@@ -1,0 +1,10 @@
+# Q138(g) tools, sources and host, Mon 2 Nov 2026
+netlists: Q133(a)'s four rewritten netlists, docs/reports/data/2026-11-01-q133a-int8-gate-level/netlists/tima_{booth_tree,booth,booth_swap,plain}_staged.v.gz (sha256 in that directory's sha256.txt), unchanged
+liberty: the same five files the netlists were mapped to (the open flow's 7 nm library, RVT, TT corner, NLDM), from the open flow's setup (tools/open-flow/tima/setup_darwin.sh; names and pins in Q133(a)'s versions.txt)
+stimulus: Q133(a)'s bench binaries (rtl-sim/tima_gate, obj_<netlist>/Vtb, built Sun 1 Nov 2026 by Q133(a) with Verilator 5.052 -fno-dfg, unchanged) and its accum (rtl-sim/fma_toggle_v2/accum.c)
+tiles: tools/claims-v3/kinds/e130/tiles/int8/*.bin (Q136(a); sha256 in tools/claims-v3/kinds/e130/sha256.txt), tools/claims-v3/kinds/tiles/int8/*.bin (E78's int8 kinds)
+frozen predictions: docs/reports/data/2026-11-02-q136a-int8-netlist-predictions/predictions.json (k, fJ_map_by_point)
+card: docs/reports/data/2026-11-02-e138-int8-b-rail/scored.json (primary), docs/reports/data/2026-11-02-e130-int8-netlists/scored.json (primary), docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json, docs/reports/data/2026-11-01-q132-rtl-bench/counts-v2.json (clocked bits)
+simulator: tools/open-flow/glitch/ (this lane's; Python 3.13.11, no packages beyond the standard library; refit_k.py uses numpy)
+cross-check: Icarus Verilog 14.0 (devel) (s20260301-713-gf9111a949), from the open flow's oss-cad-suite 2026-10-26 darwin-x64
+host: the Intel, Darwin 25.6.0 x86_64 (macOS 26.6.2), Intel Core i9-9880H, 16 logical cpus, shared with other lanes' work (load average about 25 at 19:01 and about 50 at 19:25 PST, others' processes); every process of this lane under nice -n 10, at most six at once
