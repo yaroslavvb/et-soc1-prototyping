@@ -10,7 +10,7 @@
 
 **How well the frozen model predicted, out of sample** (measured − predicted; `results.json` `errors`):
 
-| quantity | cells | rms error | mean error | verdict |
+| quantity | cells | error (rms, or per format for T) | mean error | verdict |
 |---|---|---|---|---|
 | time per op at 800 MHz, `g4k` (fp32, fp16; int8) | 3 | −7.2%, −7.3%; −12.5% | faster than frozen | R1 point FAIL ×3; placement A HELD (h 1.44, 1.44), int8 OUTSIDE (h 1.83) |
 | time per op at 800 MHz, `g2k` | 3 | −10.7% to −12.8% | faster | R2 FAIL ×3 |
@@ -71,10 +71,10 @@ The session's highest board reading was 76.09 W (`g2k` fp32 random, sustained), 
 
 ## Departures and notes
 
-- **The build.** rgm136 was built on aifoundry2 (`cmake`, `nice -n 10`, `-j2`, card idle, about a minute) at 15:37 PST, before the registration; its sources on the box were byte-identical to the committed ones when the queue started (27 files' sha256, checked at 15:48 PST), and the runner's preflight checked the three binaries' sha256 before the session. A short build on a lab host is a departure from the "no heavy compute on aifoundry2/3" rule only in kind: nobody held the card.
+- **The build.** rgm136 was built on aifoundry2 (`cmake`, `nice -n 10`, `-j2`, card idle, about a minute) at 15:37 PST, before the registration; its sources and the harness on the box were byte-identical to the committed ones (27 files' sha256, checked at 15:48 PST, two minutes before the queue started; D1), and the runner's preflight checked the three binaries' sha256 before the session. A short build on a lab host is a departure from the "no heavy compute on aifoundry2/3" rule only in kind: nobody held the card.
 - **No sys_emu run of the new kernel.** Its correctness rests on the host's check of C over the whole K on silicon, in the smoke and in every run (exact or approx in all 36 work runs).
 - **Two frozen inputs were the same session's predecessors.** G2 and the heat law's two shape constants were fitted on E119's and E126's committed cells before this run: they are out of sample for these GEMMs, not for this card.
-- **The window definitions.** The registered reducer's burst clock and power start at its first 800 MHz second; `rederive_e136.py` averages the whole work window, first 600 MHz launch included, so its burst clocks read 770-794 MHz where the reducer reads 782-800. The two agree on every T and X to the fourth decimal, and on the sustained clocks within 2.6 MHz and power within 0.93 W (the sustained window's edges differ by a sample or two).
+- **The window definitions.** The registered reducer's burst clock and power start at its first 800 MHz second; `rederive_e136.py` averages the whole work window, first 600 MHz launch included, so its burst clocks read 763-794 MHz where the reducer reads 782-800 (D1). The two agree on every T and X to the fourth decimal, and on the sustained clocks within 2.6 MHz and power within 0.93 W (the sustained window's edges differ by a sample or two).
 - **One run per cell, one session.** No interval here is between sessions; the T intervals are over launches inside one session.
 
 ## What E136 says about the page and the model
@@ -93,7 +93,13 @@ The session's highest board reading was 76.09 W (`g2k` fp32 random, sustained), 
 
 ## Corrections after verification
 
-*None yet.* A re-derivation of the headline by independent code is in [`rederive.txt`](rederive.txt).
+*Mon 2 Nov 2026, about 16:35 PST, at the desk: no card touched, nothing re-run.* The headline was re-derived from the raw records by code that imports none of the lab's reducers ([`rederive_e136.py`](rederive_e136.py) into [`rederive.txt`](rederive.txt)): every T at 800 and 600 MHz and every X agrees with `results.json` to the fourth decimal, every sustained clock within 2.6 MHz and board power within 0.93 W, so the answer stands. Reading the README against it and the data found three slips of wording, corrected in place; no number in `results.json`, `reduce.txt`, `posthoc.*` or `rederive.*` changed, and no frozen file, rule or verdict changed.
+
+| | what was wrong | what changed |
+|---|---|---|
+| D1 | The re-derivation's burst clocks were given as 770-794 MHz; they read 763.5-793.8 (`G-03-g2k-fp32-real` 763.5, `A-05-g2k-fp32-randn` 769.8). The source check was said to be "when the queue started"; it ran at 15:48, two minutes before | Both sentences say what the files say |
+| D2 | The error table's third column was headed "rms error", but its first two rows give the per-format errors of T, not an rms | Headed "error (rms, or per format for T)" |
+| D3 | First version of the sustained agreement: "within 0.8 MHz and 0.8 W"; the largest differences are 2.6 MHz and 0.93 W | Corrected before the data commit `2303f4c6`; recorded here |
 
 ## Files
 
