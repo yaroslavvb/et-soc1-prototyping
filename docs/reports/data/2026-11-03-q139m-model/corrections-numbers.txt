@@ -1,0 +1,77 @@
+== Q139(m) corrections after verification: the numbers (post hoc)
+K4 floats: rms M8 0.1818, M7's form 0.1872, M7 frozen 0.1980, M6 frozen 0.1954 W
+   M8_minus_M7_form: -0.0054 [-0.0122, +0.0017] resolved False
+   M7_form_minus_M7_frozen: -0.0108 [-0.0178, -0.0040] resolved True
+   M7_form_minus_M6_frozen: -0.0082 [-0.0190, +0.0036] resolved False
+   M8_minus_M7_frozen: -0.0162 [-0.0251, -0.0069] resolved True
+   M8_minus_M6_frozen: -0.0135 [-0.0256, -0.0010] resolved True
+   the C term on the 627 float rows: mean 0.0385 W, mean |.| 0.0390, at most 0.505 W (mean D 12.09 W)
+K4 int8 M8_minus_M7_form: -0.0145 [-0.0500, +0.0246] resolved False
+K4 int8 M7_form_minus_M7_frozen: +0.0190 [+0.0091, +0.0289] resolved True
+K4 int8 M8_minus_M7_frozen: +0.0045 [-0.0310, +0.0437] resolved False
+K1 aifoundry2, all 92 bursts end to end: M8 cap on all bursts 7.155 MHz / 1.863 W (q95 16.95 / 3.50); cap held out per kind 7.215 / 1.871 (q95 17.57 / 3.54); M7 frozen 7.272 / 1.731
+   cap all: governed (<795 MHz, 41) 10.68 MHz / 2.28 W, bias +1.16; pinned (51) 0.83 / 1.44; E80+E83 (56) 8.66 / 2.00; E143 (36) 3.76 / 1.63
+   cap per kind: governed (<795 MHz, 41) 10.77 MHz / 2.30 W, bias +1.16; pinned (51) 0.83 / 1.44; E80+E83 (56) 8.73 / 2.01; E143 (36) 3.81 / 1.64
+   M7 frozen: governed (<795 MHz, 41) 10.86 MHz / 2.03 W, bias +0.84; pinned (51) 0.77 / 1.44; E80+E83 (56) 8.52 / 1.89; E143 (36) 4.71 / 1.45
+   W0 per kind fold 65.1-65.3 W (all bursts 65.20)
+K3 aifoundry2's float scale by the board exponent n (approximate): n 2.0: 0.9784 (+0.0%; at 800 MHz x1.0000); n 2.28: 0.9403 (-3.9%; at 800 MHz x0.9513); n 2.3: 0.9375 (-4.2%; at 800 MHz x0.9479); n 2.45: 0.9136 (-6.6%; at 800 MHz x0.9228)
+K2(b) aifoundry2's float scale: all bursts 0.9784 (n 53); pinned 795-800 MHz 0.9761 (n 14); int8 0.9589 (n 24) / 0.9588 (n 21)
+   V^2 LOCO with aifoundry2 at 0.9784 [committed (all bursts, V^2)]: physical a3 +2.2% / c1 -5.2% / a2 +3.2%; fitted -1.8 / -8.5 / +1.5%; card 1 from aifoundry3 alone -4.9%; FAIL True
+   V^2 LOCO with aifoundry2 at 0.9761 [pinned 795-800 MHz only (as registered)]: physical a3 +2.1% / c1 -5.3% / a2 +3.5%; fitted -2.1 / -9.8 / +1.7%; card 1 from aifoundry3 alone -4.9%; FAIL True
+   V^2 LOCO with aifoundry2 at 0.9403 [n = 2.28 (approx.)]: physical a3 +0.2% / c1 -7.1% / a2 +7.4%; fitted -6.4 / -27.8 / +5.6%; card 1 from aifoundry3 alone -4.9%; FAIL True
+   V^2 LOCO with aifoundry2 at 0.9136 [n = 2.45 (approx.)]: physical a3 -1.2% / c1 -8.4% / a2 +10.5%; fitted -9.5 / -39.2 / +8.7%; card 1 from aifoundry3 alone -4.9%; FAIL True
+K5 peak on pool 5 (in sample, 36 tiles): frozen 95% value covers 35, over: [['fp32.lowrank2_w', 86.65, 86.19]]; flags 4: [['fp32.anchor_randn', 86.16, 85.82], ['fp32.lowrank2_w', 86.19, 86.65], ['fp32.sorted_k', 83.37, 81.98], ['fp32.wideexp48_dense', 88.22, 87.95]]
+   registered P800(c) + q95: covers 32, flags 4: [['fp32.anchor_randn', 85.35, 85.82], ['fp32.lowrank2_w', 85.38, 86.65], ['fp32.sorted_k', 82.56, 81.98], ['fp32.wideexp48_dense', 87.39, 87.95]]; frozen minus registered median 0.81 W (0.60-2.34); expected vs highest 1.60 W rms; measured over 82 W: [['fp32.anchor_randn', 85.82], ['fp32.lowrank2_w', 86.65], ['fp32.wideexp48_dense', 87.95]]
+K9 predict_blind6.py read 47 code/model files under the tree (plus 38 of pool 5's); every one unchanged since 122da8b6: True
+   docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json b7463b6c2c15 unchanged
+   docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json 4794f5ac4ccf unchanged
+   docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json e5cc743acdc6 unchanged
+   docs/reports/data/2026-10-31-e88-result-path/e88.json 007eb9cbeb39 unchanged
+   docs/reports/data/2026-10-31-e90-signs-spread/e90.json 7a8b03cd3b8b unchanged
+   docs/reports/data/2026-10-31-e91-real-tensors-aifoundry1/e91.json 0dd4ef9e4e1e unchanged
+   docs/reports/data/2026-11-01-e102-balanced-bit-prices/e102.json d90336fcedd4 unchanged
+   docs/reports/data/2026-11-01-e103-model-blind-test/e103.json 965a437f6745 unchanged
+   docs/reports/data/2026-11-01-e104-c-readback/e104.json dee52bffa32e unchanged
+   docs/reports/data/2026-11-01-e105-gemm-layout/results-speed.json e817d98062ce unchanged
+   docs/reports/data/2026-11-01-e106-held-signs/e106.json 5edf9ad60f20 unchanged
+   docs/reports/data/2026-11-01-e107-gemm-placement/e107.json 87b190f364ce unchanged
+   docs/reports/data/2026-11-01-e107-gemm-placement/scored.json fd9d43e2764d unchanged
+   docs/reports/data/2026-11-01-e108-sign-located/e108.json 9fe5ae20b1a5 unchanged
+   docs/reports/data/2026-11-01-e115-blind-pool/e115.json b16ec4c42a5a unchanged
+   docs/reports/data/2026-11-01-e121-zero-gate-replicate/e121.json c4b96d3cb2f0 unchanged
+   docs/reports/data/2026-11-01-e122-signs-replicate/e122.json 03d7383fcd8a unchanged
+   docs/reports/data/2026-11-01-e123-tile-spread-rest/e123.json 35f03eac6cd6 unchanged
+   docs/reports/data/2026-11-01-e92-sign-split/e92.json e18ce85a6994 unchanged
+   docs/reports/data/2026-11-01-e93-zero-gate-silicon/e93.json 04ec3a93b6a3 unchanged
+   docs/reports/data/2026-11-01-e94-tile-spread/e94.json de3e8c30c67e unchanged
+   docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json 47ad02e5dfa0 unchanged
+   docs/reports/data/2026-11-01-q132-rtl-bench/counts-v2.json 422bdeac130a unchanged
+   docs/reports/data/2026-11-01-q133b-power-model/fit_m5.py e02116913042 unchanged
+   docs/reports/data/2026-11-02-e127-b-gate/e127.json a65283b627e4 unchanged
+   docs/reports/data/2026-11-02-e128-fp16-signs/e128.json 91e5f6ae45ab unchanged
+   docs/reports/data/2026-11-02-e131-real-tiles-card1/e131.json 8800c1544296 unchanged
+   docs/reports/data/2026-11-02-e147-bit-prices-rest/posthoc_m7_e147.py 40c5e867ea25 unchanged
+   docs/reports/data/2026-11-02-q137m-model/fit_m6.py 010f2cf1b05e unchanged
+   docs/reports/data/2026-11-02-q137m-model/m6.json 87c17e086ee3 unchanged
+   docs/reports/data/2026-11-02-q137m-model/m6_rows.py 6a0e04589486 unchanged
+   docs/reports/data/2026-11-02-q138m-model/fit_m7.py cb01d82684be unchanged
+   docs/reports/data/2026-11-02-q138m-model/m7.json bfeea822b87e unchanged
+   docs/reports/data/2026-11-02-q138m-model/predict_blind5.py 0d114d5bc01e unchanged
+   docs/reports/data/2026-11-03-q139m-model/fit_m8.py 3764bc4c3454 unchanged
+   docs/reports/data/2026-11-03-q139m-model/m8.json 8c23aba2307f unchanged
+   docs/reports/data/2026-11-03-q139m-model/predict_blind6.py 6bc447eb5c5d unchanged
+   docs/reports/data/2026-11-03-q139u-footing/footing.json f589efaad1fc unchanged
+   docs/reports/data/2026-11-03-q139u-footing/reduce_footing.py 8b2ef4ec2a9f unchanged
+   tools/claims-v3/e119/make_predictions_e119.py 8f9b7fe440a6 unchanged
+   tools/claims-v3/e145/predictions-e145.json 4f336235e23b unchanged
+   tools/claims-v3/hpl/surface_hpl.py cf2b63e2b9bf unchanged
+   tools/claims-v3/hpl/surface_hpl_t.py 772da3bc732e unchanged
+   tools/claims-v3/kinds/blind5/make_blind5.py ba3e42de552c unchanged
+   tools/claims-v3/kinds/make_kinds.py 339a192d62a3 unchanged
+   tools/claims-v3/kinds/predictions-e101.json bf2646e9889a unchanged
+   tools/claims-v3/kspeed/e83/predict_e83.py f82efac5c010 unchanged
+K6 int8 pool-5 misses (measured - predicted, W), M8 against M7's form: E141 b_line_flipflop_nogate +0.658 vs -0.208; E141 b_line_zero_one -0.678 vs -0.605; E141 a_word_flipflop -0.406 vs -0.321; E141 real_pythia_w8a8_up +0.141 vs +0.217; E141 real_pythia_w8a8_down +0.397 vs +0.471; E141 powerlaw_w -0.458 vs -0.603; E142 b_line_flipflop_nogate +0.776 vs -0.055; E142 b_line_zero_one -0.673 vs -0.602; E142 a_word_flipflop -0.292 vs -0.211; E142 real_pythia_w8a8_up +0.072 vs +0.145; E142 real_pythia_w8a8_down +0.136 vs +0.207; E142 powerlaw_w -0.466 vs -0.606
+K7 card terms, LOKO rms on the paired kinds (W): float: C0_M5_E78E82_family 0.7735, C1_allpairs_family 0.7738, C2_allpairs_format 0.7736 -> C0_M5_E78E82_family; int8: C0_M5_E78E82_family 0.0975, C1_allpairs_family 0.1000, C2_allpairs_format 0.1000 -> C0_M5_E78E82_family
+K8 E143: 480 A2 dips; at >= 55 W 449, a minion clock change within +-2 samples at 98% of them against 52% of the other 3518 samples at >= 55 W
+K10 git times (PST): f640fb7a author 2026-11-03 04:43:16, committer 2026-11-03 04:43:16; 122da8b6 author 2026-11-03 04:57:59, committer 2026-11-03 04:57:59
+SELF-CHECKS against the committed nested-m8.json / m8.json: 35 of 35 equal
