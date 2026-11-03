@@ -1,0 +1,559 @@
+{
+ "experiment": "E144",
+ "scorer": "docs/reports/data/2026-11-02-q138t-heat-model/score_e144.py a3 (A1, c2f9920d)",
+ "pass": {
+  "holds": [
+   {
+    "name": "H_H",
+    "item": "fp32.randn",
+    "planned_s": 780.0,
+    "why_end": "time",
+    "launches": 103,
+    "last_phase": "reduced",
+    "gated": 0,
+    "hold_stop": null,
+    "dur_s": 780.0,
+    "dispatch_records": 824,
+    "share_recorded": 0.4563,
+    "cycles_per_op": [
+     546.0
+    ],
+    "all_ok": true
+   },
+   {
+    "name": "H_L",
+    "item": "int8.neg_ones",
+    "planned_s": 780.0,
+    "why_end": "time",
+    "launches": 105,
+    "last_phase": "natural",
+    "gated": 0,
+    "hold_stop": null,
+    "dur_s": 780.0,
+    "dispatch_records": 1659,
+    "share_recorded": 0.9655,
+    "cycles_per_op": [
+     318.0
+    ],
+    "all_ok": true
+   }
+  ],
+  "rest_die": [
+   {
+    "kind": "rest_die",
+    "hold": "H_H",
+    "t_ms": 1793688394867,
+    "window_s": 120.0,
+    "mean34_c": 51.21997291953891,
+    "firmware_c": 50.0
+   },
+   {
+    "kind": "rest_die",
+    "hold": "H_L",
+    "t_ms": 1793689714926,
+    "window_s": 120.0,
+    "mean34_c": 51.64597573673024,
+    "firmware_c": 50.92
+   }
+  ],
+  "rests": [
+   {
+    "name": "R0",
+    "why_end": "time",
+    "idle_c": 51.21997291953891,
+    "dur_s": 480.0
+   },
+   {
+    "name": "R1",
+    "why_end": "time",
+    "idle_c": 51.64597573673024,
+    "dur_s": 540.0
+   },
+   {
+    "name": "R2",
+    "why_end": "time",
+    "idle_c": 53.69685096531288,
+    "dur_s": 120.0
+   }
+  ],
+  "decisions": [],
+  "gates": [],
+  "watch": [],
+  "stoptest": [],
+  "launch_rc_nonzero": 0,
+  "block": {
+   "exp": "e144",
+   "pass": 14420,
+   "card": "aifoundry3",
+   "t0_ms": 1793687910348,
+   "t1_ms": 1793690619326,
+   "die_c_start": 51,
+   "die_c_end": 52,
+   "status": "ok",
+   "note": "sampler pvt"
+  },
+  "config_start": [
+   {
+    "tdp_w": 0,
+    "temp_threshold_c": 65,
+    "power_state": 0,
+    "power_state_name": "max_power",
+    "minion_mhz": 600,
+    "minion_mv": 523
+   }
+  ],
+  "config_end": [
+   {
+    "tdp_w": 0,
+    "temp_threshold_c": 65,
+    "power_state": 0,
+    "power_state_name": "max_power",
+    "minion_mhz": 600,
+    "minion_mv": 523
+   }
+  ],
+  "telemetry": {
+   "lines": 27065,
+   "lines_with_34_sensors": 27065,
+   "span_s": 2706.4,
+   "gaps_over_0.5s": 0,
+   "largest_gap_s": 0.0,
+   "firmware_die_max_C": 67.0,
+   "mean34_max_C": 68.136,
+   "board_max_W": 56.69,
+   "minion_mhz_samples": {
+    "600": 27065
+   }
+  }
+ },
+ "smoke": {
+  "holds": [
+   {
+    "name": "H_H",
+    "item": "fp32.randn",
+    "planned_s": 16.0,
+    "why_end": "time",
+    "launches": 2,
+    "last_phase": "reduced",
+    "gated": 0,
+    "hold_stop": null,
+    "dur_s": 16.0,
+    "dispatch_records": 16,
+    "share_recorded": 0.4327,
+    "cycles_per_op": [
+     546.0
+    ],
+    "all_ok": true
+   },
+   {
+    "name": "H_L",
+    "item": "int8.neg_ones",
+    "planned_s": 8.0,
+    "why_end": "time",
+    "launches": 1,
+    "last_phase": "natural",
+    "gated": 0,
+    "hold_stop": null,
+    "dur_s": 8.0,
+    "dispatch_records": 16,
+    "share_recorded": 0.9085,
+    "cycles_per_op": [
+     318.0
+    ],
+    "all_ok": true
+   },
+   {
+    "name": "T_gate",
+    "item": "fp32.randn",
+    "planned_s": 3.0,
+    "why_end": "time",
+    "launches": 0,
+    "last_phase": "reduced",
+    "gated": 3,
+    "hold_stop": null,
+    "dur_s": 3.0,
+    "dispatch_records": 0,
+    "share_recorded": 0.0,
+    "cycles_per_op": [],
+    "all_ok": true
+   },
+   {
+    "name": "T_die",
+    "item": "fp32.randn",
+    "planned_s": 3.0,
+    "why_end": "stop",
+    "launches": 0,
+    "last_phase": "reduced",
+    "gated": 0,
+    "hold_stop": {
+     "rule": "die",
+     "line": 1.0,
+     "hold": "T_die",
+     "t_sample_ms": 1793687887688,
+     "t_seen_ms": 1793687887700,
+     "die_c": 51.0,
+     "mean34_c": 52.11522144990809,
+     "board_w": 23.91,
+     "where": "loop"
+    },
+    "dur_s": 0.0,
+    "dispatch_records": 0,
+    "share_recorded": 0.0,
+    "cycles_per_op": [],
+    "all_ok": true
+   },
+   {
+    "name": "T_board",
+    "item": "fp32.randn",
+    "planned_s": 3.0,
+    "why_end": "stop",
+    "launches": 0,
+    "last_phase": "reduced",
+    "gated": 0,
+    "hold_stop": {
+     "rule": "board",
+     "line": 1.0,
+     "hold": "T_board",
+     "t_sample_ms": 1793687887688,
+     "t_seen_ms": 1793687887700,
+     "die_c": 51.0,
+     "mean34_c": 52.11522144990809,
+     "board_w": 23.91,
+     "where": "loop"
+    },
+    "dur_s": 0.0,
+    "dispatch_records": 0,
+    "share_recorded": 0.0,
+    "cycles_per_op": [],
+    "all_ok": true
+   },
+   {
+    "name": "T_inlaunch",
+    "item": "fp32.randn",
+    "planned_s": 12.0,
+    "why_end": "stop",
+    "launches": 1,
+    "last_phase": "reduced",
+    "gated": 0,
+    "hold_stop": {
+     "rule": "board",
+     "line": 27.77,
+     "hold": "T_inlaunch",
+     "t_sample_ms": 1793687890988,
+     "t_seen_ms": 1793687891018,
+     "die_c": 52.0,
+     "mean34_c": 52.62203010110294,
+     "board_w": 49.44,
+     "where": "watcher"
+    },
+    "dur_s": 0.8,
+    "dispatch_records": 2,
+    "share_recorded": 0.64,
+    "cycles_per_op": [
+     546.0
+    ],
+    "all_ok": true
+   }
+  ],
+  "rest_die": [
+   {
+    "kind": "rest_die",
+    "hold": "H_H",
+    "t_ms": 1793687840664,
+    "window_s": 120.0,
+    "mean34_c": null,
+    "firmware_c": null
+   },
+   {
+    "kind": "rest_die",
+    "hold": "H_L",
+    "t_ms": 1793687866681,
+    "window_s": 120.0,
+    "mean34_c": 52.20124256588393,
+    "firmware_c": 51.25507900677201
+   }
+  ],
+  "rests": [
+   {
+    "name": "R0",
+    "why_end": "time",
+    "idle_c": null,
+    "dur_s": 15.0
+   },
+   {
+    "name": "R1",
+    "why_end": "time",
+    "idle_c": 52.20124256588393,
+    "dur_s": 10.0
+   },
+   {
+    "name": "R2",
+    "why_end": "time",
+    "idle_c": 52.30171605720986,
+    "dur_s": 5.0
+   },
+   {
+    "name": "T0",
+    "why_end": "time",
+    "idle_c": 52.29654505170221,
+    "dur_s": 5.0
+   },
+   {
+    "name": "T1",
+    "why_end": "time",
+    "idle_c": 52.28065452615051,
+    "dur_s": 3.0
+   },
+   {
+    "name": "T2",
+    "why_end": "time",
+    "idle_c": 52.295865625812674,
+    "dur_s": 3.0
+   }
+  ],
+  "decisions": [],
+  "gates": [
+   {
+    "kind": "gate",
+    "hold": "T_gate",
+    "t_ms": 1793687884699,
+    "die_c": 51.0,
+    "line_c": 1.0
+   }
+  ],
+  "watch": [
+   {
+    "kind": "watch",
+    "rule": "die",
+    "line": 1.0,
+    "hold": "T_die",
+    "t_sample_ms": 1793687887688,
+    "t_seen_ms": 1793687887700,
+    "die_c": 51.0,
+    "mean34_c": 52.11522144990809,
+    "board_w": 23.91,
+    "where": "loop"
+   },
+   {
+    "kind": "watch",
+    "rule": "board",
+    "line": 1.0,
+    "hold": "T_board",
+    "t_sample_ms": 1793687887688,
+    "t_seen_ms": 1793687887700,
+    "die_c": 51.0,
+    "mean34_c": 52.11522144990809,
+    "board_w": 23.91,
+    "where": "loop"
+   },
+   {
+    "kind": "watch",
+    "rule": "board",
+    "line": 27.77,
+    "hold": "T_inlaunch",
+    "t_sample_ms": 1793687890988,
+    "t_seen_ms": 1793687891018,
+    "die_c": 52.0,
+    "mean34_c": 52.62203010110294,
+    "board_w": 49.44,
+    "where": "watcher"
+   },
+   {
+    "kind": "watch",
+    "rule": "session",
+    "line_c": 1.0,
+    "t_sample_ms": 1793687894388,
+    "t_seen_ms": 1793687894472,
+    "die_c": 51.0,
+    "mean34_c": 52.28356071920956,
+    "board_w": 23.81,
+    "where": "loop"
+   }
+  ],
+  "stoptest": [
+   {
+    "kind": "stoptest",
+    "t_ms": 1793687894472,
+    "results": {
+     "gate": {
+      "launches": 0,
+      "pass": true
+     },
+     "hold_die": {
+      "why": "stop",
+      "launches": 0,
+      "pass": true
+     },
+     "hold_board": {
+      "why": "stop",
+      "launches": 0,
+      "pass": true
+     },
+     "in_launch": {
+      "line_w": 27.77,
+      "why": "stop",
+      "launches": 1,
+      "pass": true
+     },
+     "session": {
+      "pass": true,
+      "exit": 6
+     }
+    },
+    "all_pass": true
+   }
+  ],
+  "launch_rc_nonzero": 0,
+  "block": {
+   "exp": "e144-smoke",
+   "pass": 14401,
+   "card": "aifoundry3",
+   "t0_ms": 1793687821204,
+   "t1_ms": 1793687898607,
+   "die_c_start": 50,
+   "die_c_end": 51,
+   "status": "ok",
+   "note": "sampler pvt smoke and stop tests"
+  },
+  "config_start": [
+   {
+    "tdp_w": 0,
+    "temp_threshold_c": 65,
+    "power_state": 0,
+    "power_state_name": "max_power",
+    "minion_mhz": 600,
+    "minion_mv": 523
+   }
+  ],
+  "config_end": [
+   {
+    "tdp_w": 0,
+    "temp_threshold_c": 65,
+    "power_state": 0,
+    "power_state_name": "max_power",
+    "minion_mhz": 600,
+    "minion_mv": 523
+   }
+  ],
+  "telemetry": {
+   "lines": 751,
+   "lines_with_34_sensors": 751,
+   "span_s": 75.0,
+   "gaps_over_0.5s": 0,
+   "largest_gap_s": 0.0,
+   "firmware_die_max_C": 55.0,
+   "mean34_max_C": 55.812,
+   "board_max_W": 50.73,
+   "minion_mhz_samples": {
+    "600": 751
+   }
+  }
+ },
+ "session_config": {
+  "start": [
+   {
+    "tdp_w": 0,
+    "temp_threshold_c": 65,
+    "power_state": 0,
+    "power_state_name": "max_power",
+    "minion_mhz": 600,
+    "minion_mv": 523
+   }
+  ],
+  "end": [
+   {
+    "tdp_w": 0,
+    "temp_threshold_c": 65,
+    "power_state": 0,
+    "power_state_name": "max_power",
+    "minion_mhz": 600,
+    "minion_mv": 523
+   }
+  ]
+ },
+ "verdicts": {
+  "H_H a": "PASS",
+  "H_H b": "PASS",
+  "H_H b_plan_f5473428": "PASS",
+  "H_H c_per_board_W": "PASS",
+  "H_L a": "PASS",
+  "H_L b": "PASS",
+  "H_L b_plan_f5473428": "PASS",
+  "H_L c_per_board_W": "INCONCLUSIVE",
+  "H_L c_t63": "PASS",
+  "linear H_H/H_L": "INCONCLUSIVE"
+ },
+ "reported_model_reading": {
+  "H_H": {
+   "model_per_board_W": 0.8762238466467904,
+   "subset_f5473428": {
+    "plateau_rise_C": 15.006,
+    "measured_plateau_rise_C": 14.997,
+    "plateau_err_C": -0.009,
+    "checkpoint_err_C": {
+     "10": 0.026,
+     "30": -0.07,
+     "60": -0.219,
+     "120": -0.237,
+     "180": -0.255,
+     "300": -0.143,
+     "450": -0.071,
+     "600": 0.027,
+     "end": -0.122
+    }
+   },
+   "subset_A1": {
+    "plateau_rise_C": 15.005,
+    "measured_plateau_rise_C": 14.997,
+    "plateau_err_C": -0.008,
+    "checkpoint_err_C": {
+     "10": -0.019,
+     "30": -0.057,
+     "60": -0.191,
+     "120": -0.208,
+     "180": -0.228,
+     "300": -0.128,
+     "450": -0.087,
+     "600": -0.003,
+     "end": -0.157
+    }
+   }
+  },
+  "H_L": {
+   "model_per_board_W": 0.7928745221087624,
+   "model_t63_s": 111.41045641899109,
+   "subset_f5473428": {
+    "plateau_rise_C": 4.209,
+    "measured_plateau_rise_C": 4.254,
+    "plateau_err_C": 0.045,
+    "checkpoint_err_C": {
+     "10": -0.002,
+     "30": -0.03,
+     "60": -0.013,
+     "120": 0.044,
+     "180": 0.06,
+     "300": 0.041,
+     "450": 0.053,
+     "600": 0.031,
+     "end": 0.057
+    }
+   },
+   "subset_A1": {
+    "plateau_rise_C": 4.209,
+    "measured_plateau_rise_C": 4.254,
+    "plateau_err_C": 0.045,
+    "checkpoint_err_C": {
+     "10": 0.0,
+     "30": -0.029,
+     "60": -0.012,
+     "120": 0.044,
+     "180": 0.06,
+     "300": 0.04,
+     "450": 0.052,
+     "600": 0.031,
+     "end": 0.058
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,139 @@
+{
+ "card": "aifoundry3",
+ "args": {
+  "out": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e144/p14420",
+  "root": "/home/yaroslavvb/aifoundry",
+  "tel_live": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e144/p14420/telemetry.jsonl.raw",
+  "sparsity": "build/sparsity/host/sparsity_host",
+  "pass_no": 14420,
+  "card": "aifoundry3",
+  "design": "subset",
+  "deadline_epoch": 1793692140.0,
+  "launch_s": 6.8,
+  "overhead_s": 0.75,
+  "min_launch_s": 1.0,
+  "gate_c": 70.0,
+  "hold_c": 72.0,
+  "hold_w": 65.0,
+  "session_c": 74.0,
+  "inlaunch_dw": 4.0,
+  "watch_every_s": 0.05,
+  "stale_s": 3.0,
+  "check_every_s": 60.0,
+  "min_rate_hz": 5.0,
+  "smoke": false,
+  "stoptest": false,
+  "dry": false,
+  "list": false
+ },
+ "holds": {
+  "H_L": "int8.neg_ones",
+  "H_M": "int8.full",
+  "H_H": "fp32.randn",
+  "H_H'": "fp32.randn"
+ },
+ "duty": {
+  "H_H": [
+   3.2,
+   7.56
+  ],
+  "H_H'": [
+   2.6,
+   7.98
+  ]
+ },
+ "steps": [
+  [
+   "rest",
+   "R0",
+   480.0
+  ],
+  [
+   "hold",
+   "H_H",
+   780.0
+  ],
+  [
+   "rest",
+   "R1",
+   540.0
+  ],
+  [
+   "hold",
+   "H_L",
+   780.0
+  ],
+  [
+   "rest",
+   "R2",
+   120.0
+  ]
+ ],
+ "items": [
+  {
+   "name": "fp32.randn",
+   "type": "fp32",
+   "kind": "randn",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/tiles/fp32/randn.bin",
+   "bytes": 2048,
+   "sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa",
+   "sha256_a": "11ce14be9310c675be0eaf1b5e4235d7a9e99423ce855b6c7bca055cf7355abc",
+   "sha256_b": "9851fe6cf28fbe4491269f6d25eee093d531c26442b6e536892dd015a4f90994",
+   "values": null,
+   "zero": "fp32.zeros",
+   "random": "fp32.randn",
+   "anchor": true,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 82214,
+   "provisional": false,
+   "cpo": 546.0,
+   "macs_per_op": 4096,
+   "rule": "standard normal, sigma 1"
+  },
+  {
+   "name": "int8.full",
+   "type": "int8",
+   "kind": "full",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/tiles/int8/full.bin",
+   "bytes": 2048,
+   "sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9",
+   "sha256_a": "ca9b3a28e84eb1147f024b26a30c71bbbf5afc262b8377ac0338eedf1c5d208b",
+   "sha256_b": "2cfbe5b8714ea56cf09294f9a56961bb5bbaac4459344eaf14459130f13c5e87",
+   "values": null,
+   "zero": "int8.zeros",
+   "random": "int8.full",
+   "anchor": true,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 69312,
+   "provisional": true,
+   "cpo": 318.0,
+   "macs_per_op": 16384,
+   "rule": "uniform over -128..127, the whole two's-complement range (E64's int8 `randn`)"
+  },
+  {
+   "name": "int8.neg_ones",
+   "type": "int8",
+   "kind": "neg_ones",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/tiles/int8/neg_ones.bin",
+   "bytes": 2048,
+   "sha256": "d0ff1b294b5288d1ae1421eadf5b2d38a8752b76d472ff30bed9028e25b1c5b8",
+   "sha256_a": "5f4ecdb7b71c3e403983fe405cddcdc2f2576b655fdb3e80d94a6f7c32e58bc2",
+   "sha256_b": "5f4ecdb7b71c3e403983fe405cddcdc2f2576b655fdb3e80d94a6f7c32e58bc2",
+   "values": null,
+   "zero": "int8.zeros",
+   "random": "int8.full",
+   "anchor": false,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 0,
+   "provisional": true,
+   "cpo": 318.0,
+   "macs_per_op": 16384,
+   "rule": "every byte -1 (0xFF), word 0xFFFFFFFF: every bit set"
+  }
+ ],
+ "et_devices": null,
+ "experiment": "E144"
+}
