@@ -28,7 +28,9 @@ rules **fail** (P1: rms ≤ 15.5 W; P2: |bias| ≤ 7.7 W), while its coverage an
 kinds inside its frozen 90% band (P3, the checkerboard outside), 2.6 times better than power as density alone (G0, 63.7
 W; P4), and better than static bits (S1, 33.8 W; P5). **The best registered form, G4, a K-lag of 16 plus the row
 direction, predicts the same 17 kinds to 12.8 W rms (8.2% of the span)**, and 10.9 W with A2's board anchor; G1 plus the
-result path (G2) reads 17.7 W with the smallest bias (−2.4 W).
+result path (G2) reads 17.7 W with the smallest bias (−2.4 W). G4 is a registered comparison, not yet a stable model: on
+stage 1 its leave-one-kind-out error ran to 94–321 W, because its row and K-lag counts nearly coincide on kinds random
+along rows (below, "The models").
 
 **Heat: the A100's die rises 0.094 and 0.143 °C per board W at steady state on the two stage-1 boards** (0.116 pooled),
 about half of it at once (within 0.2 s, the fit's grid edge) and the rest with a 13–40 s time constant (32 s
