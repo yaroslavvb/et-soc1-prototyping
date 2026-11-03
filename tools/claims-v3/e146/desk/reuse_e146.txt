@@ -1,0 +1,44 @@
+E146 (Q138) desk: where every line of E146's large GEMMs is served, split by operand (A, B) and by place (the shire's L2, the L3, fresh from DRAM),
+and where C's stores land. No card. Standard library only. It imports E136's desk model (tools/claims-v3/e136/desk/reuse_e136.py) and changes none of it.
+
+L1 gemmL2x2x1: a C store every 32 ops; M x N x K fp32 (2048, 1024, 512); A 4 MB, B 2 MB, C 8 MB = 14 MB; 256 ops a minion a pass
+  L3 32MB: A L2  16.00 L3  48.00 F   0.00 | B L2  64.00 L3  64.00 F   0.00 | missing 112.00 (L3 112.00, fresh   0.00); C stores in the L3 1.000
+  L3 24MB: A L2  16.00 L3  48.00 F   0.00 | B L2  64.00 L3  64.00 F   0.00 | missing 112.00 (L3 112.00, fresh   0.00); C stores in the L3 1.000
+
+L2 gemmL2x2x2: a C store every 64 ops; M x N x K fp32 (2048, 1024, 1024); A 8 MB, B 4 MB, C 8 MB = 20 MB; 512 ops a minion a pass
+  L3 32MB: A L2   0.00 L3  64.00 F   0.00 | B L2  16.00 L3 112.00 F   0.00 | missing 176.00 (L3 176.00, fresh   0.00); C stores in the L3 1.000
+  L3 24MB: A L2   0.00 L3  64.00 F   0.00 | B L2  16.00 L3 112.00 F   0.00 | missing 176.00 (L3 176.00, fresh   0.00); C stores in the L3 1.000
+
+L4 gemmL1x2x4: a C store every 128 ops; M x N x K fp32 (1024, 1024, 2048); A 8 MB, B 8 MB, C 4 MB = 20 MB; 512 ops a minion a pass
+  L3 32MB: A L2   0.00 L3  64.00 F   0.00 | B L2   0.00 L3 128.00 F   0.00 | missing 192.00 (L3 192.00, fresh   0.00); C stores in the L3 1.000
+  L3 24MB: A L2   0.00 L3  64.00 F   0.00 | B L2   0.00 L3 128.00 F   0.00 | missing 192.00 (L3 192.00, fresh   0.00); C stores in the L3 1.000
+
+L8 gemmL1x1x8: a C store every 256 ops; M x N x K fp32 (1024, 512, 4096); A 16 MB, B 8 MB, C 2 MB = 26 MB; 512 ops a minion a pass
+  L3 32MB: A L2   0.00 L3  64.00 F   0.00 | B L2   0.00 L3 128.00 F   0.00 | missing 192.00 (L3 192.00, fresh   0.00); C stores in the L3 1.000
+  L3 24MB: A L2   0.00 L3   0.00 F  64.00 | B L2   0.00 L3 128.00 F   0.00 | missing 192.00 (L3 128.00, fresh  64.00); C stores in the L3 0.000
+
+D1 gemmL4x8x1: a C store every 32 ops; M x N x K fp32 (4096, 4096, 512); A 8 MB, B 8 MB, C 64 MB = 80 MB; 2048 ops a minion a pass
+  L3 32MB: A L2  28.00 L3  28.00 F   8.00 | B L2  64.00 L3  64.00 F   0.00 | missing 100.00 (L3  92.00, fresh   8.00); C stores in the L3 0.000
+  L3 24MB: A L2  28.00 L3  28.00 F   8.00 | B L2  64.00 L3   0.00 F  64.00 | missing 100.00 (L3  28.00, fresh  72.00); C stores in the L3 0.000
+
+D2 gemmL4x8x2: a C store every 64 ops; M x N x K fp32 (4096, 4096, 1024); A 16 MB, B 16 MB, C 64 MB = 96 MB; 4096 ops a minion a pass
+  L3 32MB: A L2   0.00 L3  56.00 F   8.00 | B L2  16.00 L3  48.00 F  64.00 | missing 176.00 (L3 104.00, fresh  72.00); C stores in the L3 0.000
+  L3 24MB: A L2   0.00 L3  56.00 F   8.00 | B L2  16.00 L3  48.00 F  64.00 | missing 176.00 (L3 104.00, fresh  72.00); C stores in the L3 0.000
+
+D4 gemmL4x8x4: a C store every 128 ops; M x N x K fp32 (4096, 4096, 2048); A 32 MB, B 32 MB, C 64 MB = 128 MB; 8192 ops a minion a pass
+  L3 32MB: A L2   0.00 L3  56.00 F   8.00 | B L2   0.00 L3  64.00 F  64.00 | missing 192.00 (L3 120.00, fresh  72.00); C stores in the L3 0.000
+  L3 24MB: A L2   0.00 L3  56.00 F   8.00 | B L2   0.00 L3  64.00 F  64.00 | missing 192.00 (L3 120.00, fresh  72.00); C stores in the L3 0.000
+
+D8 gemmL4x8x8: a C store every 256 ops; M x N x K fp32 (4096, 4096, 4096); A 64 MB, B 64 MB, C 64 MB = 192 MB; 16384 ops a minion a pass
+  L3 32MB: A L2   0.00 L3  42.11 F  21.89 | B L2   0.00 L3  64.00 F  64.00 | missing 192.00 (L3 106.11, fresh  85.89); C stores in the L3 0.000
+  L3 24MB: A L2   0.00 L3   0.00 F  64.00 | B L2   0.00 L3  64.00 F  64.00 | missing 192.00 (L3  64.00, fresh 128.00); C stores in the L3 0.000
+
+F6 gemmL3x4x6: a C store every 192 ops; M x N x K fp32 (3072, 2048, 3072); A 36 MB, B 24 MB, C 24 MB = 84 MB; 4608 ops a minion a pass
+  L3 32MB: A L2   0.00 L3  48.00 F  16.00 | B L2   0.00 L3  64.00 F  64.00 | missing 192.00 (L3 112.00, fresh  80.00); C stores in the L3 0.000
+  L3 24MB: A L2   0.00 L3  32.12 F  31.88 | B L2   0.00 L3  64.00 F  64.00 | missing 192.00 (L3  96.12, fresh  95.88); C stores in the L3 0.000
+
+c1: L2 steady missing lines per shire-op: A 0.00, B 0.00; L3 class: none missing; a C store every 32 ops
+
+c8s: L2 steady missing lines per shire-op: A 64.00, B 64.00; L3 class: L3 (E107 R4, measured); a C store every 32 ops
+
+c16: L2 steady missing lines per shire-op: A 64.00, B 64.00; L3 class: fresh (first touch, by construction); a C store every 32 ops

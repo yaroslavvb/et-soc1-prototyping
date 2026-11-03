@@ -1,0 +1,36 @@
+# E146 dry run of the whole queue on the Intel with run_hpl.py's toy card (no device): queue_e146.py --dry with protocol-dry.json and the two dry stop-path protocols, Mon 2 Nov 2026 19:23-19:37 PST. The queue's records (queue.jsonl), the scratch path replaced by <scratch>. The toy card gives every kernel 546 cycles an op, so no number here is a prediction or a measurement; it shows the path: the smoke, both stop tests firing on live samples and passing the queue's check, the session's 104 runs, the reducer.
+{"t_ms": 1793676217429, "zone": "PST", "kind": "queue_start", "slot_start_ms": 1793676219000, "slot_end_ms": 1793679819000, "next_rest_ms": null, "python": "3.13.11", "sensors": false, "protocol": "<lab repo>/tools/claims-v3/e146/protocol-dry.json"}
+{"t_ms": 1793676219010, "zone": "PST", "kind": "card_free", "waits": {}, "late_s": 0.0}
+{"t_ms": 1793676219011, "zone": "PST", "kind": "before_first_launch", "snapshot": {"tag": "start", "t_ms": 1793676219010, "zone": "PST"}, "history_rows": 0}
+{"t_ms": 1793676219011, "zone": "PST", "kind": "session_start", "name": "smoke", "cap_min": 3.0}
+{"t_ms": 1793676252244, "zone": "PST", "kind": "session_end", "name": "smoke", "rc": 0, "end": {"t_end_ms": 1793676252003, "exit": 0, "reason": "done", "card_min": 0.5}, "slot_stopped": false}
+{"t_ms": 1793676252251, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+{"t_ms": 1793676252251, "zone": "PST", "kind": "session_start", "name": "stoptest-board", "cap_min": 2.0}
+{"t_ms": 1793676255281, "zone": "PST", "kind": "session_end", "name": "stoptest-board", "rc": 4, "end": {"t_end_ms": 1793676254707, "exit": 4, "reason": "safety:board 59.7 W > 30 W on 3 samples", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793676255304, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793676254506, "t_third_line_ms": 1793676254489, "launch": [1793676254193, 1793676254701], "trip_after_line_ms": 17, "launch_end_after_trip_ms": 195, "lines": 17}
+{"t_ms": 1793676255305, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+{"t_ms": 1793676255305, "zone": "PST", "kind": "session_start", "name": "stoptest-die", "cap_min": 2.0}
+{"t_ms": 1793676257327, "zone": "PST", "kind": "session_end", "name": "stoptest-die", "rc": 4, "end": {"t_end_ms": 1793676257277, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793676257329, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793676255952, "t_first_line_ms": 1793676255904, "trip_after_line_ms": 48, "lines": 13}
+{"t_ms": 1793676257329, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+{"t_ms": 1793676257329, "zone": "PST", "kind": "session_start", "name": "s1", "cap_min": 40.0}
+{"t_ms": 1793677029524, "zone": "PST", "kind": "session_end", "name": "s1", "rc": 0, "end": {"t_end_ms": 1793677028995, "exit": 0, "reason": "done", "card_min": 12.9}, "slot_stopped": false}
+{"t_ms": 1793677029525, "zone": "PST", "kind": "s1_end", "rc": 0}
+{"t_ms": 1793677029526, "zone": "PST", "kind": "queue_end", "snapshot": {"tag": "end", "t_ms": 1793677029525, "zone": "PST"}, "card_free_ms": 1793677029526, "before_slot_end_s": 2789.5}
+
+# the stop-path sessions' own logs
+## stoptest-board/run.log
+19:24:12     e105: admitted, estimate 63.8 W (fixed)
+19:24:12 [1/1] STOPTEST-00-D8-fp32-randn-r1: 1 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 99, 'max_wait_s': 5}
+19:24:14     gate: {'mode': 'cool', 'max_c': 99, 'reached': True, 'held_s': 0.0, 'reading': (51.0, 54.0, 23.84, 600.0)}
+19:24:14 session ends: safety:board 59.7 W > 30 W on 3 samples
+19:24:14 exit 4 (safety:board 59.7 W > 30 W on 3 samples)
+## stoptest-board/end.json
+{"t_end_ms": 1793676254707, "exit": 4, "reason": "safety:board 59.7 W > 30 W on 3 samples", "card_min": 0.0}
+## stoptest-die/run.log
+19:24:15     e105: admitted, estimate 63.8 W (fixed)
+19:24:15 [1/1] STOPTEST-00-D8-fp32-randn-r1: 1 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 99, 'max_wait_s': 5}
+19:24:17 session ends: safety:die 54 C >= 30 C
+19:24:17 exit 4 (safety:die 54 C >= 30 C)
+## stoptest-die/end.json
+{"t_end_ms": 1793676257277, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}

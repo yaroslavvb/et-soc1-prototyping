@@ -1,0 +1,342 @@
+{
+ "experiment": "E146",
+ "request": "Q138",
+ "card": "aifoundry2",
+ "order_seed": 146,
+ "note": "E146's stop-path test (board): the registered watcher with one stop lowered, so that it must trip on live samples; the session must end with exit 4",
+ "tools": {
+  "heater": "build/e136/host/sparsity_host",
+  "kernel": "build/e136/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "predictions": "tools/claims-v3/e146/predictions-e146.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 80,
+  "board_cap_w": 30,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 2
+ },
+ "smoke_cycles": {
+  "L1-fp32-zeros": 953.3,
+  "L8-fp16-zeros": 1088.0,
+  "D1-int8-zeros": 916.5,
+  "F6-fp32-zeros": 1678.9
+ },
+ "dry_c_w": {
+  "zeros": 3.0,
+  "gemmL2x2x1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.98,
+  "gemmL1x1x8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.077,
+  "gemmL4x8x1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.656,
+  "gemmL3x4x6:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.18,
+  "gemmL2x2x1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 24.164,
+  "gemmL4x8x1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.051,
+  "gemmL4x8x1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 23.538,
+  "gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.88,
+  "gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 22.043,
+  "gemmL4x8x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.18,
+  "gemmL4x8x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 16.68,
+  "gemmL1x2x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.86,
+  "gemmL1x2x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 21.617,
+  "gemmL4x8x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.157,
+  "gemmL4x8x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 16.524,
+  "gemmL1x1x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.86,
+  "gemmL1x1x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 21.617,
+  "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.196,
+  "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 15.851,
+  "gemmL2x2x1:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.496,
+  "gemmL2x2x1:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 9.102,
+  "gemmL4x8x1:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 9.285,
+  "gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.213,
+  "gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.786,
+  "gemmL4x8x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.701,
+  "gemmL4x8x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.378,
+  "gemmL1x2x4:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.164,
+  "gemmL1x2x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.559,
+  "gemmL4x8x4:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.642,
+  "gemmL4x8x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.227,
+  "gemmL1x1x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.164,
+  "gemmL1x1x8:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.559,
+  "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.708,
+  "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.181,
+  "gemmL2x2x1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.087,
+  "gemmL2x2x1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 21.467,
+  "gemmL4x8x1:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.119,
+  "gemmL4x8x1:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 21.097,
+  "gemmL2x2x2:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.079,
+  "gemmL2x2x2:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 19.125,
+  "gemmL4x8x2:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.244,
+  "gemmL4x8x2:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 14.958,
+  "gemmL1x2x4:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.077,
+  "gemmL1x2x4:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 18.654,
+  "gemmL4x8x4:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.238,
+  "gemmL4x8x4:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 14.736,
+  "gemmL1x1x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 18.654,
+  "gemmL4x8x8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.259,
+  "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 14.219,
+  "gemmL3x4x6:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 16.128,
+  "gemmL3x4x6:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.68,
+  "gemmL3x4x6:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.2,
+  "gemmL3x4x6:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin": 3.25,
+  "gemmL3x4x6:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin": 14.432
+ },
+ "limit_p800_w": 88.0,
+ "peak_lock_w": 93.0,
+ "relation": {
+  "B800": 33.60956684526229,
+  "s800": 1.90517380064275
+ },
+ "admission": {
+  "L1-fp32-zeros": {
+   "c_ref_w": 2.98,
+   "fixed_p800_w": 39.3
+  },
+  "L1-fp32-randn": {
+   "c_ref_w": 24.164,
+   "fixed_p800_w": 79.6
+  },
+  "L1-fp16-zeros": {
+   "c_ref_w": 3.087,
+   "fixed_p800_w": 39.5
+  },
+  "L1-fp16-randn": {
+   "c_ref_w": 21.467,
+   "fixed_p800_w": 74.5
+  },
+  "L1-int8-zeros": {
+   "c_ref_w": 2.496,
+   "fixed_p800_w": 38.4
+  },
+  "L1-int8-full": {
+   "c_ref_w": 9.102,
+   "fixed_p800_w": 50.9
+  },
+  "L2-fp32-zeros": {
+   "c_ref_w": 2.88,
+   "fixed_p800_w": 39.1
+  },
+  "L2-fp32-randn": {
+   "c_ref_w": 22.043,
+   "fixed_p800_w": 75.6
+  },
+  "L2-fp16-zeros": {
+   "c_ref_w": 3.079,
+   "fixed_p800_w": 39.5
+  },
+  "L2-fp16-randn": {
+   "c_ref_w": 19.125,
+   "fixed_p800_w": 70.0
+  },
+  "L2-int8-zeros": {
+   "c_ref_w": 2.213,
+   "fixed_p800_w": 37.8
+  },
+  "L2-int8-full": {
+   "c_ref_w": 7.786,
+   "fixed_p800_w": 48.4
+  },
+  "L4-fp32-zeros": {
+   "c_ref_w": 2.86,
+   "fixed_p800_w": 39.1
+  },
+  "L4-fp32-randn": {
+   "c_ref_w": 21.617,
+   "fixed_p800_w": 74.8
+  },
+  "L4-fp16-zeros": {
+   "c_ref_w": 3.077,
+   "fixed_p800_w": 39.5
+  },
+  "L4-fp16-randn": {
+   "c_ref_w": 18.654,
+   "fixed_p800_w": 69.1
+  },
+  "L4-int8-zeros": {
+   "c_ref_w": 2.164,
+   "fixed_p800_w": 37.7
+  },
+  "L4-int8-full": {
+   "c_ref_w": 7.559,
+   "fixed_p800_w": 48.0
+  },
+  "L8-fp32-zeros": {
+   "c_ref_w": 2.86,
+   "fixed_p800_w": 39.1
+  },
+  "L8-fp32-randn": {
+   "c_ref_w": 21.617,
+   "fixed_p800_w": 74.8
+  },
+  "L8-fp16-zeros": {
+   "c_ref_w": 3.077,
+   "fixed_p800_w": 39.5
+  },
+  "L8-fp16-randn": {
+   "c_ref_w": 18.654,
+   "fixed_p800_w": 69.1
+  },
+  "L8-int8-zeros": {
+   "c_ref_w": 2.164,
+   "fixed_p800_w": 37.7
+  },
+  "L8-int8-full": {
+   "c_ref_w": 7.559,
+   "fixed_p800_w": 48.0
+  },
+  "D1-fp32-zeros": {
+   "c_ref_w": 3.051,
+   "fixed_p800_w": 39.4
+  },
+  "D1-fp32-randn": {
+   "c_ref_w": 23.538,
+   "fixed_p800_w": 78.5
+  },
+  "D1-fp16-zeros": {
+   "c_ref_w": 3.119,
+   "fixed_p800_w": 39.6
+  },
+  "D1-fp16-randn": {
+   "c_ref_w": 21.097,
+   "fixed_p800_w": 73.8
+  },
+  "D1-int8-zeros": {
+   "c_ref_w": 2.656,
+   "fixed_p800_w": 38.7
+  },
+  "D1-int8-full": {
+   "c_ref_w": 9.285,
+   "fixed_p800_w": 51.3
+  },
+  "D2-fp32-zeros": {
+   "c_ref_w": 3.18,
+   "fixed_p800_w": 39.7
+  },
+  "D2-fp32-randn": {
+   "c_ref_w": 16.68,
+   "fixed_p800_w": 65.4
+  },
+  "D2-fp16-zeros": {
+   "c_ref_w": 3.244,
+   "fixed_p800_w": 39.8
+  },
+  "D2-fp16-randn": {
+   "c_ref_w": 14.958,
+   "fixed_p800_w": 62.1
+  },
+  "D2-int8-zeros": {
+   "c_ref_w": 2.701,
+   "fixed_p800_w": 38.8
+  },
+  "D2-int8-full": {
+   "c_ref_w": 7.378,
+   "fixed_p800_w": 47.7
+  },
+  "D4-fp32-zeros": {
+   "c_ref_w": 3.157,
+   "fixed_p800_w": 39.6
+  },
+  "D4-fp32-randn": {
+   "c_ref_w": 16.524,
+   "fixed_p800_w": 65.1
+  },
+  "D4-fp16-zeros": {
+   "c_ref_w": 3.238,
+   "fixed_p800_w": 39.8
+  },
+  "D4-fp16-randn": {
+   "c_ref_w": 14.736,
+   "fixed_p800_w": 61.7
+  },
+  "D4-int8-zeros": {
+   "c_ref_w": 2.642,
+   "fixed_p800_w": 38.6
+  },
+  "D4-int8-full": {
+   "c_ref_w": 7.227,
+   "fixed_p800_w": 47.4
+  },
+  "D8-fp32-zeros": {
+   "c_ref_w": 3.196,
+   "fixed_p800_w": 39.7
+  },
+  "D8-fp32-randn": {
+   "c_ref_w": 15.851,
+   "fixed_p800_w": 63.8
+  },
+  "D8-fp16-zeros": {
+   "c_ref_w": 3.259,
+   "fixed_p800_w": 39.8
+  },
+  "D8-fp16-randn": {
+   "c_ref_w": 14.219,
+   "fixed_p800_w": 60.7
+  },
+  "D8-int8-zeros": {
+   "c_ref_w": 2.708,
+   "fixed_p800_w": 38.8
+  },
+  "D8-int8-full": {
+   "c_ref_w": 7.181,
+   "fixed_p800_w": 47.3
+  },
+  "F6-fp32-zeros": {
+   "c_ref_w": 3.18,
+   "fixed_p800_w": 39.7
+  },
+  "F6-fp32-randn": {
+   "c_ref_w": 16.128,
+   "fixed_p800_w": 64.3
+  },
+  "F6-fp16-zeros": {
+   "c_ref_w": 3.25,
+   "fixed_p800_w": 39.8
+  },
+  "F6-fp16-randn": {
+   "c_ref_w": 14.432,
+   "fixed_p800_w": 61.1
+  },
+  "F6-int8-zeros": {
+   "c_ref_w": 2.68,
+   "fixed_p800_w": 38.7
+  },
+  "F6-int8-full": {
+   "c_ref_w": 7.2,
+   "fixed_p800_w": 47.3
+  },
+  "rest": {
+   "fixed_p800_w": 30.0
+  }
+ },
+ "blocks": [
+  {
+   "name": "STOPTEST",
+   "title": "the board stop's path on live samples",
+   "default": false,
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "gemmL4x8x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "D8-fp32-randn",
+     "start": {
+      "mode": "cool",
+      "max_c": 99,
+      "max_wait_s": 5
+     },
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5
+    }
+   ]
+  }
+ ]
+}
