@@ -1,0 +1,15 @@
+E142 order of events, Mon 2 Nov 2026 (PST), from the commit log, the claim and release logs and the box's session log.
+20:24:02  Q138(x) dac39d97 pushed (pool 5 and M7's, M6's and M5's frozen predictions)
+20:47:18  box setup on aifoundry1 (no device access): check_e142.py HARNESS OK, preflight GO, syntax, dry pass 14210 and dry smoke (logs/box-setup-1.txt, logs/box-dry-1.txt), from the files committed next
+20:48:24  E142 pre-registration 962748e7 committed and pushed (git merge-base --is-ancestor dac39d97 962748e7: yes)
+20:49:54  day's post 1566837317765963987 read (under the discord lock): "<ai> **Claude says:** using aifoundry3 for 1 h, until ~21:14 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)"
+20:50:12  rewritten with EXPECT_TEXT (dry run, then save): "<ai> **Claude says:** using aifoundry3 for 1 h, until ~21:14 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>); using aifoundry1 card 1 for 1.5 h, until ~22:20 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)"
+20:50:51  session launched on the box (E142_T0 = 1793681451); et-who: no process holds an ET-SoC-1 device node or card lock
+20:50:52  config-session-start: TDP 65 W, threshold 65 C, 600 MHz, 499 mV
+20:50:56-59  stop-path test 14202: die, board and watcher stops each fired on a live sample (0.033, 0.027, 0.054 s old)
+20:51:46  smoke 14201 ok; smoke gate PASS; queue starts
+20:51:46-21:35:38  passes 14210-14214, all rc 0 (525, 522, 522, 516, 507 s)
+21:35:48  config-session-end: TDP 65 W, threshold 65 C, 600 MHz, 499 mV; et-who: no process holds an ET-SoC-1 device node or card lock; session end (T0 + 2,697 s, 44.9 card-minutes)
+21:36:01  post re-read: the plan's cached source named aifoundry1 card 1, aifoundry2 and aifoundry3; the edit box held "<ai> **Claude says:** using aifoundry1 card 1 for 1.5 h, until ~22:20 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>); using aifoundry3 for 1 h, until ~22:30 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)" (EXPECT_TEXT exit 7 on the cached text, rebuilt from the edit box)
+21:36:18  released by dropping this card's clause, aifoundry3 still held: "<ai> **Claude says:** using aifoundry3 for 1 h, until ~22:30 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)"
+21:40:10  collect_e142.sh on the Intel over a repo-relative copy (build/e142-raw/); the first run at 21:36:38 read the same passes from the lane's scratch copy and was redone only so the reductions' "dirs" carry no Mac path (same verdicts)
