@@ -1,0 +1,16 @@
+# E137 results
+
+Reading: **S1** (set-aside rule); passes ['13711', '13712', '13713', '13714', '13715', '13716']; S1 kept ['13711', '13712', '13713', '13714', '13715', '13716']; set aside [{'pass': 13710, 'why': ['int8.zeros departs +0.279 W from its straight line']}]; leak {'mode': '0.2414', 'k_w_per_c': 0.2414, 'n_runs': -1}
+
+| rule | verdict | quantity | measured | n | M4 | arm-sensitive at |
+|---|---|---|---:|---:|---:|---|
+| E137-R1 | **MOST** | `fp16.share_het_m` | 1.001 ± 0.055 | 6 | 1.042 | — |
+| E137-R2 | **ALMOST NONE** | `fp16.share_walk_m` | -0.001 ± 0.055 | 6 | -0.042 | dips_kept, leak0 |
+| E137-R3 | **MOST** | `fp16.share_het_z` | 1.026 ± 0.053 | 6 | 1.045 | — |
+| E137-R4 | **INCONCLUSIVE** | `fp16.design_m` | -0.026 ± 0.103 | 6 | -0.004 | leak0.3803 |
+| E137-R5 | **PASS** | `fp16.step` | 4.802 ± 0.173 W | 6 | E108 4.981 | — |
+| E137-R6 | **PASS** | rms(D − M4), 8 items | 0.130 W, bias +0.089 W | | | — |
+| E137-R7 | **PASS** | M4's seven sign contrasts | rms 0.125 W, 0 outside | | | — |
+| E137-R8 | **INCONCLUSIVE** | against E128's two passes | share_het_m INCONCLUSIVE (d +0.075, h 0.312); share_walk_m INCONCLUSIVE (d -0.075, h 0.312); share_het_z INCONCLUSIVE (d +0.020, h 0.130) | | | — |
+| E137-S1 | **PASS** | session tie | fp32.randn 23.97 (24.00 ± 0.5); fp16.randn 21.57 (21.49 ± 0.5); anchor_pi 8.17 (8.14 ± 0.5); int8.full 6.94 (6.84 ± 0.25) | | | leak0, leak0.545 |
+

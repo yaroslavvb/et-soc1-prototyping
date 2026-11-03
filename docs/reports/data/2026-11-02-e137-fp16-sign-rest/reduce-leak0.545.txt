@@ -1,0 +1,23 @@
+E137: reduce_e78.py unchanged via reduce_e137.py (E137's items; config gate at card 1's 65/65; dips removed; anchor and tie gates E78s)
+E78 aifoundry1-c1: 600 MHz, 498.8 mV, leak 0.5450 W/C (-1 runs), runs kept 168/196, passes [13710, 13711, 13712, 13713, 13715, 13716], idle-invalid runs 0
+  passes set aside: [{'pass': 13714, 'why': ['fp16.zeros departs +0.357 W from its straight line']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 32.93442460317461
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 23.114  0.086    24.960      22269    5.437
+    anchor_pi                   7.880  0.118     9.751       8698    2.124
+    fp32.zeros                  0.000  0.000     1.857       1657    0.404
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 20.728  0.062    22.576      20141    2.459
+    fp16.b_B_z                 13.324  0.118    15.226      13583    1.658
+    fp16.b_B_w                 13.227  0.120    15.188      13548    1.654
+    fp16.b_B_zm                13.045  0.108    14.826      13227    1.615
+    fp16.b_B_wm                13.035  0.084    14.815      13216    1.613
+    fp16.signs                 12.473  0.106    14.381      12831    1.566
+    fp16.z_s                    9.805  0.155    11.710      10447    1.275
+    fp16.ones                   7.905  0.145     9.814       8756    1.069
+    fp16.c_abs                  7.864  0.226     9.770       8716    1.064
+    fp16.zeros                  0.000  0.000     1.847       1648    0.201
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   6.618  0.058     9.139       4748    0.290
+    int8.zeros                  0.000  0.000     2.443       1269    0.077
+  idle consistency median |S - S0 - D| 0.0957589418288407 W; carry-over {'slope_w_per_w': 0.0021192146502152513, 'se': 0.0009428998119830785, 'n': 162}; pi built-in - file None; rail tau re-fit median None
