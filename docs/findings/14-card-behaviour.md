@@ -852,6 +852,11 @@ it is the owner's call (the lab rules below).
   `sample()`, `Dm::get()` and `Dm::resetStats()` are byte-identical, so every class stands, and the table should gain that
   source as a reviewed variant. The card's own 0.22.0 is the non-public thermal build first flashed on 7 October, which
   answers command 74.
+  **Dated note, Tue 3 Nov 2026 (Q138's records; E144 C5):** E144 classified command 74's group 0, the per-sensor reading its
+  sampler sends at 10 Hz, READ from the held patch source, with a residual: the running build answers raw codes on group 0, which
+  neither held form does, and is unhashed, while the card's 34 high latches read unchanged from 31 October through all of E144's
+  ticks, so no latch reset ran. The shared `tools/claims-v3/dmcmd_table.json` still lists command 74 UNCLASSIFIED; E144's own
+  table, `tools/claims-v3/e144/dmcmd_table_e144.json`, carries the class and the residual.
 - **Throttle residency** (`DM_CMD_GET_MODULE_RESIDENCY_THROTTLE_STATES`) is a copy from the service processor's RAM and
   touches no PMIC; nothing clears it but a restart, the statistics reset included (Q134(a)). Its raw state numbers depend on
   the build: IDLE 0, UP 1, DOWN 2, SAFE 3 on BL2 0.22.0, and POWER_SAFE raw 5 on 0.18.0 and 0.20.0. A read of a state that is
@@ -1436,7 +1441,7 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
   24.50); E147 registered a 2 W dip line, under which none of its blocks was set aside, where E134's 4 W line would have set two A
   blocks aside. On card 1 a warm die makes passes short: E148's 14-run passes took 172–206 s with a median of one heat a launch,
   against 536–663 s for E129's on its cool morning; card 1's session-fitted leakage slope read 0.408 W/°C in E142's arm and 0.141
-  W/°C on E148's low-power runs.
+  W/°C on E148's low-power runs. Two A rows run on card 1 at the bench's 96 / 94 cycles an op (E148 R6).
 - **A watcher can watch the wrong file** (2 November 2026, E139). During a pass the sampler writes `telemetry.jsonl.raw`; `telemetry.jsonl` appears only when the pass ends and is gzipped at once (`mf/block.sh`). E139's board-power watcher followed `telemetry.jsonl`, read no sample all session, and its test passed on a file of that name, so its registered 65 W stop was never armed (the die stop was; the board peaked at 53.52 W). Watch the `.raw` file, and test the watcher on a live pass (E139 C1).
 - **A protocol's stops are armed only under its watcher's keys** (2 November 2026, E146). `run_hpl.py`'s watcher reads
   `safety.abs_stop_c`, `board_cap_w` and `cap_consecutive` (defaults 85 °C, 97 W and 3 samples); E136's `protocol.json` wrote its
@@ -1450,6 +1455,14 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
 - **A file tile's C is not checked** (E80, E143). `sparsity_host --values file:` reports every launch "unchecked" (`main.cpp:589`,
   `:614`), so a file-tile run counts launches by completion, every hart reporting and no tensor error; say so in the registration
   (E143's departure).
+- **aifoundry2's admission estimate reads random-like fp32 low** (2 November 2026, E143, as in E105). The estimate built from M7's
+  D on aifoundry3's footing put `fp32.wideexp48_dense` at 84.34 W; it drew 1.7–3.6 W more, peaking at 87.95 W, 5 W under E143's 93
+  W stop. Size an aifoundry2 table with a margin over the estimate, or with a measured probe.
+- **`fit_m6.heat_rows`' run length can span a heater launch** (2 November 2026, E142, post hoc). It takes a run's length from the
+  next run's record (its `prev_end_ms` less this run's `t0_ms`), and on a cool int8 tile the next device process is often a heater
+  launch, so three of E142's int8 tiles read 7.1–7.2 s and that arm's int8 heat rms read 1.29 °C, an artefact; with M7's own 5 s
+  row rule the term reads 0.131 / 0.110 / 0.176 °C, and read from each run's own marks it moves the other way, so its run-length
+  slopes are no run-length law. Cap the length as M7's rows do (5 s).
 - **A residency read of a state the build does not have raises SP errors** (1 November 2026, E77 and Q134(a)). On BL2 0.22.0
   raw states 4–6 are no state: each read fails (rc −5), logs two SP ERROR lines and pushes two `SP Runtime Error` events to
   the host, where a session that counts kernel events will see them. Every lab session that read residency since 27 October
