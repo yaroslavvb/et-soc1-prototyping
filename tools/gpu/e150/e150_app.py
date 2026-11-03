@@ -900,6 +900,13 @@ def _run(run_id, plan_json, budget_s):
     _wjson(root + "/plan.json", pl)
     vol.commit()
     u = Unit(run_id, pl, budget_s)
+    want = pl.get("expect_gpu")                # amendment A3: a board that is not the chosen part measures nothing
+    got = _s(u.N.nvmlDeviceGetName(u.h))
+    if want and got != want:
+        res = {"unit": unit, "run_id": run_id, "status": f"refused: the GPU is {got}, not {want}", "t": time.time()}
+        _wjson(root + "/DONE", res)
+        vol.commit()
+        return json.dumps(res)
     with open("/tmp/e150_sampler.py", "w") as f:
         f.write(SAMPLER_SRC)
     sp = subprocess.Popen([sys.executable, "/tmp/e150_sampler.py", u.samp_path, u.stop_path,
@@ -967,7 +974,7 @@ def _collect(calls):
 
 
 @app.local_entrypoint()
-def main(mode: str = "dry", run_id: str = "", gpu: str = "", sizes: str = ""):
+def main(mode: str = "dry", run_id: str = "", gpu: str = "", sizes: str = "", unit: str = "", order: str = ""):
     if mode == "dry":
         tot_s = 0.0
         for g in GPU_TYPES:
@@ -1000,6 +1007,13 @@ def main(mode: str = "dry", run_id: str = "", gpu: str = "", sizes: str = ""):
         calls = {f"S-{g}": SMOKE_FN[g].spawn(run_id, json.dumps(plan("S", f"S-{g}")), BUDGET_S["S"])
                  for g in GPU_TYPES}
         _collect(calls)
+        return
+    if mode == "unit":                          # amendment A3: one board, named `unit`, in board `order`'s order
+        assert gpu in MAIN_FN and unit and order in ("A", "B"), (gpu, unit, order)
+        pl = plan("M", order, json.loads(sizes))
+        pl["unit"] = unit
+        pl["expect_gpu"] = {"A10G": "NVIDIA A10G", "L4": "NVIDIA L4"}[gpu]
+        _collect({unit: MAIN_FN[gpu].spawn(run_id, json.dumps(pl), BUDGET_S["M"])})
         return
     if mode == "main":
         assert gpu in MAIN_FN, gpu
