@@ -14,14 +14,26 @@ two of them the PMIC voltage-register reads the owner's rule of 2 November 2026 
 session 20:50:51–21:35:48 PST, **44.9 of the 50 card-minutes allowed**: the stop-path test 14202, the smoke 14201 and five passes,
 14210–14214 (507–525 s each), all kept.*
 
+*Corrected after verification (a dated note, Mon 2 Nov 2026, about 22:30 PST; desk only: no card opened, no device command, nothing
+re-run). An independent verifier re-derived every registered number and verdict from the committed raw passes and confirmed that every
+command sent was a read. It found five faults, none of which changes a measured number, a rule, a prediction or a verdict. Each is corrected
+in place, marked "corrected after verification, C<n>", and listed in
+[§ Corrections after verification](#corrections-after-verification-mon-2-nov-2026) at the end; the numbers they quote are printed by
+[`corrections-numbers.py`](corrections-numbers.py) → [`corrections-numbers.txt`](corrections-numbers.txt). The main one, C1: on these 30
+tiles M6 is as unbiased as M7 and covers 29 of 30 inside narrower bands, so E142 does not show that M7's wider bands or its bias correction
+gain anything over M6 on card 1. The 30-of-30 against 19-of-25 contrast this README drew compared two pools, two cards and two reduction
+rules. The registration ([`tools/claims-v3/e142/`](../../../../tools/claims-v3/e142/README.md), `962748e7`) is frozen and unchanged.*
+
 **In plain words.** M7 is the lab's model that predicts how much power a matmul draws (watts over the same kernel on zeros) and how far the
 die warms (in a 4.5 s run) from the numbers it multiplies. On this card it also carries a card term: card 1 draws 0.971 times what aifoundry3
-does for the same floats. E142 ran 36 kinds of numbers that nobody fitted, written by an independent designer, on the second card. **M7
+does for the same floats. E142 ran 36 kinds of numbers that nobody fitted, written by an independent designer, on the second card, one
+whose earlier runs M7 was fitted on: new kinds, not new hardware *(added after verification, C2)*. **M7
 predicted their power to 0.17 W rms on fp32, 0.15 W on fp16 and 0.25 W on int8, with no resolved bias, and all 30 scored tiles fell inside
 its 95% bands; it predicted the die's rise to 0.17, 0.16 and 0.14 °C, 29 of 30 inside.** Every registered rule that could be scored passed.
-But M7 is not resolved better than M6, the model it replaced (the same rms over the 30 tiles, 0.211 W), or than M5 (0.254 W; the
-difference has an interval that includes zero); the one visible gain over M5 is the clock-gate tiles, which M5 under-predicts by 0.54–0.60 W
-and M7 gets within 0.02 W. The power figures hold at the registered leakage slope (the frame of M7's card-1 training rows); at the session's own
+But M7 is not resolved better than M6, the model it replaced (the same rms over the 30 tiles, 0.211 W, the same near-zero bias, and 29 of 30
+inside M6's narrower bands; corrected after verification, C1), or than M5 (0.254 W; the difference has an interval that includes zero). The
+clearest gain over M5 is on the clock-gate tiles, which M5 under-predicts by 0.54–0.60 W, outside its bands, and M7 gets within 0.02 W
+*(corrected after verification, C5: this said "the one visible gain")*. The power figures hold at the registered leakage slope (the frame of M7's card-1 training rows); at the session's own
 fitted slope every D reads about 0.35 W lower and M7 would be too high.
 
 ## Results
@@ -68,7 +80,8 @@ no heat rule moves.
 (`fp32.wideexp48_bgate_alt`) and **+0.596 W** (`fp16.wideexp_bgate_alt`), outside its bands; M7 reads +0.012 and +0.018, M6 +0.004 and +0.003.
 That is the gate's switching (M7's `gtr`, M6's per-flip gate terms), which M5 lacks, and the largest model disagreement Q138(x) had flagged
 (0.55 and 0.59 W). On int8's whole-line flip-flop without the gate (`b_line_flipflop_nogate`), M7 reads −0.001 W where M6 and M5 read −0.27
-and −0.26 W (M7's `b138`, E138's B-bit ratio). M7's largest errors: `int8.powerlaw_w` −0.582 W (a priority-2 test; M6 −0.608 and M5 −0.593,
+and −0.26 W (M7's `b138`, E138's B-bit ratio): a 0.25–0.27 W gain on one tile, inside both older models' bands *(added after verification,
+C5)*. M7's largest errors: `int8.powerlaw_w` −0.582 W (a priority-2 test; M6 −0.608 and M5 −0.593,
 outside both their bands), `int8.b_line_zero_one` −0.567, `fp32.wideexp48_dense` +0.437, `fp32.anchor_randn` +0.386 (the pool's own random
 anchor), `fp32.lowrank2_w` +0.273. By case (M7, non-anchor): the whole-line / whole-word flip-flops −0.254 W mean (rms 0.346, 3 tiles), the
 seeded realistic weights −0.155 (rms 0.455, 2), every other case within ±0.09 W mean.
@@ -123,20 +136,29 @@ times 0.115 °C/W: a constant the readout cannot see over 4.5 s; anchors are not
 
 **5. What it does to predicting power and heat** (the before/after the owner's goal asks for):
 
-| | before: M7's nested leave-one-kind-out on card-1 rows (`loko-m7.json`) | after: blind pool 5, card 1, primary | blind record before M7 (E140, pool 4, aifoundry3) |
-|---|---:|---:|---:|
-| power, fp32 | 0.214 W rms | **0.169 W** (bias +0.067) | M6 0.50 W (bias −0.38), M5 0.44 |
-| power, fp16 | 0.188 W | **0.149 W** (+0.030) | M6 0.25, M5 0.15 |
-| power, int8 | 0.255 W | **0.251 W** (−0.038) | M6 0.37, M5 0.37 |
-| power, 95% bands | 47 of 50 pool rows (a calibration, not a test) | **30 of 30** (100%) | M6 19 of 25 (76%) |
-| heat, fp32 / fp16 / int8 | 0.352 / 0.355 / 0.141 °C | **0.167 / 0.162 / 0.139 °C** | M6 0.18 / 0.27 / 0.21 °C |
-| heat, 95% bands | — | **29 of 30** | M6 24 of 25 |
-| the card term (0.9711 floats, 0.9735 int8) | 0.175 W rms on 92 paired float kinds | not separable without E141 (X1/X2 handed on) | — |
+| | before: M7's nested leave-one-kind-out on card-1 rows (`loko-m7.json`) | after: blind pool 5, card 1, primary | M6 on the same tiles (frozen, beside; column added after verification, C1) | blind record before M7 (E140, pool 4, aifoundry3: another pool, card and reduction rule) |
+|---|---:|---:|---:|---:|
+| power, fp32 | 0.214 W rms | **0.169 W** (bias +0.067) | 0.162 W (+0.106) | M6 0.50 W (bias −0.38), M5 0.44 |
+| power, fp16 | 0.188 W | **0.149 W** (+0.030) | 0.170 (−0.034) | M6 0.25, M5 0.15 |
+| power, int8 | 0.255 W | **0.251 W** (−0.038) | 0.248 (−0.051) | M6 0.37, M5 0.37 |
+| power, the 30 non-anchor tiles | — | 0.211 W (+0.001) | 0.211 W (−0.003) | — |
+| power, 95% bands | 47 of 50 pool rows (a calibration, not a test) | **30 of 30** (100%); mean half-width 0.70 / 0.62 / 0.66 W | 29 of 30 (97%); 0.43 / 0.39 / 0.56 W | M6 19 of 25 (76%; the meter's dips kept, two of four passes; 21 of 25 with the dips removed) |
+| heat, fp32 / fp16 / int8 | 0.352 / 0.355 / 0.141 °C | **0.167 / 0.162 / 0.139 °C** | 0.163 / 0.147 / 0.138 °C | M6 0.18 / 0.27 / 0.21 °C |
+| heat, 95% bands | — | **29 of 30** | 30 of 30 | M6 24 of 25 |
+| the card term (0.9711 floats, 0.9735 int8) | 0.175 W rms on 92 paired float kinds | not separable without E141 (X1/X2 handed on) | — | — |
 
 So: **on the second card, M7's stated error bars can be quoted for new kinds** (power within its nested rms per format, no resolved bias,
 bands that covered every tile; heat about half its card-1 nested rms on the floats), with two qualifications. (i) M7 is not shown better than
-M6 on these tiles, nor than M5 beyond the gate tiles; its gain is the bands (30 of 30 against M6's 19 of 25 on pool 4) and the absence of
-E140's one-sided bias, not a smaller rms. (ii) Card 1's D depends on the leakage slope at the 0.3–0.4 W level (§ 6). The bands may be
+M6 on these tiles, nor than M5 beyond the gate tiles. On pool 5 and card 1 M7 and M6 cannot be told apart in rms (0.211 against 0.211 W over
+the 30 tiles; M1 −0.003 W [−0.042, +0.025]), in bias (+0.001 against −0.003 W) or in coverage (M7 30 of 30 inside bands 1.6 times wider on
+the floats and 1.2 times on int8; M6 29 of 30, its one miss `int8.powerlaw_w` at 1.09 of its half-width). Heat reads the same (M6 0.163 /
+0.147 / 0.138 °C, 30 of 30). M6's pool-4 miscalibration did not recur here, so E142 does not show that M7's wider bands or its bias
+correction were needed on card 1. The pool-4 figures differ from this primary in pool, card and reduction rule: E140's primary kept the
+meter's dips, fitted its leakage (0.286 W/°C) and kept two of four passes (21 of 25 inside and a −0.15 W bias with the dips removed), where
+E142's removes the dips, freezes the leakage at 0.2414 W/°C and kept five of five. E141, the same pool on aifoundry3, is the test that
+can separate them. It was committed at 22:18 PST (`0531494f`), while this correction was written, and had not been verified; its README
+reports M6's bands covering 22 of 30 there, against M7's 28 *(corrected after verification, C1: this said "its gain is the bands (30 of 30
+against M6's 19 of 25 on pool 4) and the absence of E140's one-sided bias, not a smaller rms")*. (ii) Card 1's D depends on the leakage slope at the 0.3–0.4 W level (§ 6). The bands may be
 conservative here (30 of 30 where 28.5 is expected): rule B sized k on the pools' adversarial rows (3.18 floats, 2.48 int8).
 
 **6. The footing and the leakage slope** (reported). The pool's own anchors: `fp32.anchor_randn` 24.166 W against M7's 23.779 (+0.386,
@@ -164,7 +186,7 @@ aifoundry3 footing and the card term together.
 | card time | ≤ 50 min, first device access to the closing read | **44.9 min** (20:50:51–21:35:48 PST) |
 | stop-path test | the guard's die and board stops and the in-run watcher each fire on a live sample (≤ 2.0 s old), no launch | **PASS**: 0.033, 0.027 and 0.054 s old (`logs/session.log`, `aifoundry1-c1/e142-stoptest-p14202/`) |
 | smoke gate | records ok, cycles per op within 0.5%, 600 MHz, config 65 W / 65 °C / 600 MHz, dumped pool tiles equal their sha256, `since_reset_ms` −1, board below the stop | **PASS** (every item; board 29.71–58.49 W, shire mean 51–57 °C) |
-| stops | board ≥ 66 W or a minion-shire field ≥ 72 °C (main path and in-run watcher); `--max-c 72` | **no stop**: board at most 62.09 W (p99.9 61.67–61.89 per pass), shire mean at most 63 °C, the shire field's high-water latch 65 °C throughout, PMIC 63 °C (`telemetry-max.json`) |
+| stops | board ≥ 66 W or a minion-shire field ≥ 72 °C (main path and in-run watcher); `--max-c 72` | **no stop**: board at most 62.09 W (p99.9 61.67–61.89 per pass), shire mean at most 63 °C (the field named `pmic` holds the same shire average, 63 °C: it is not the PMIC's temperature), the shire field's high-water latch 65 °C throughout (`telemetry-max.json`). No telemetry field reads the PMIC's own temperature, which its 75 °C over-temperature alarm compares, so that margin is not measured; the guard against over-temperature was the 72 °C die stop *(corrected after verification, C3: this said "PMIC 63 °C")* |
 | config reads | 65 W / 65 °C / 600 MHz | **all 16 reads** 65 W, 65 °C, 600 MHz, 499 mV; `power_state` read 1 (managed) in 13 and 3 (low power) in 3 (read only; nothing set) |
 | expectation | P1–P3, B2, C1, H1–H4 PASS; B1 PASS or FAIL HIGH; M1, M2 NOT RESOLVED | **met** |
 | X1, X2 | scored if E141's reduction exists | NOT SCORED (E141 not yet run) |
@@ -206,6 +228,17 @@ residency read, `dev_mngt_service` (the drain was replaced by a refusal and no r
 NO-GO without it (the registration's `dmcmd-audit-noexcept.txt`). `check_e142.py` on the box: HARNESS OK, 59 files (E78's card code, E128's
 guard, Q136(w)'s checker and table, the host source, E142's card files, the pool and its 36 tiles, the two binaries).
 
+**The `ettelem` binary predates the source its sends were classified from** *(added after verification, C4)*. The table classifies
+`ettelem` from `tools/ettelem/ettelem.cpp` at `efa3e8cd` (4 Oct, sha256 `a6cf931b…`). The binary that ran, `8008f96f…`
+([`logs/binaries.sha256`](logs/binaries.sha256)), was already on aifoundry1 on 28 Sep
+([`2026-09-28-heat-placement/…/p5501/binaries.json`](../2026-09-28-heat-placement/raw/aifoundry1-c1/hp/p5501/binaries.json)), so it was
+built from an earlier revision. It writes `since_reset_ms`, which first appears at `4845a60e` (23 Sep). Every revision from `4845a60e` to
+`efa3e8cd` requests the same six reads in `sample` and the same five in `config`, sends the statistics reset only when `resetMs > 0`
+(both calls in `sample` guarded), and defaults `resetMs` to 0. `git diff 4845a60e efa3e8cd -- tools/ettelem/ettelem.cpp` changes only comments and usage
+text, signal handling, and the `temp` subcommand with its `--if-free` lock probe, which E128's guard refuses. So the classification
+holds. The residual stays: no running binary is hashed against its source (Q136(w)'s
+[What it does not settle](../2026-11-02-q136w-write-audit/README.md): "The running binaries are unhashed").
+
 ## Card and post
 
 `et-who` at the session's start (20:50:51) and end (21:35:48): no process held an ET-SoC-1 device node or card lock. Never two of our sessions on aifoundry1 (card 0 unused). The day's one post (message 1566837317765963987) read at 20:49:54
@@ -221,14 +254,20 @@ an aifoundry2 clause the edit box no longer held, so `EXPECT_TEXT` refused once 
   tiles on aifoundry1 card 1 (power 0.17 / 0.15 / 0.25 W rms, no resolved bias, 30 of 30 inside its bands; heat 0.17 / 0.16 / 0.14 °C,
   29 of 30). Still open there: the same pool on aifoundry3 (E141) and on aifoundry2 under its governor (E143), and the card term itself (X1,
   X2, once E141 exists).
-- **The model**: no gain of M7 over M6 is resolved on these tiles (−0.003 W), nor over M5 (−0.054 W, interval through zero); the clock-gate
-  term is the one term the card shows doing work (M5's +0.54 / +0.60 W misses). `int8.b_line_zero_one` and `int8.powerlaw_w` (−0.57, −0.58 W,
+- **The model**: no gain of M7 over M6 is resolved on these tiles, in rms (−0.003 W), bias (+0.001 against −0.003 W) or coverage (30 and 29
+  of 30, M6's bands the narrower) *(corrected after verification, C1)*, nor over M5 (−0.054 W, interval through zero). The clearest term the
+  card shows at work is the clock gate's switching (M5's +0.54 / +0.60 W misses, outside its bands); M7's `b138` shows a 0.25–0.27 W gain on
+  one int8 tile, inside M6's and M5's bands *(corrected after verification, C5: this said "the one term the card shows doing work")*.
+  `int8.b_line_zero_one` and `int8.powerlaw_w` (−0.57, −0.58 W,
   every model too high) are the next int8 cases to look at.
 - **The method**: on card 1 the leakage slope is a ±0.35 W systematic on D (frozen 0.2414 against the session's 0.408 W/°C); a model scored on
   card 1 must name its slope, as here. The in-run watcher and the stop-path test (live samples, 0.03–0.05 s old) are the stops a kinds pass
   should carry on this card.
 - **Records to add** (integration lanes): 03-experiments (E142), 05-claims (item 6 on the second card), 14-card-behaviour (the session's
-  fitted leakage slope 0.408 W/°C on card 1 again; the post-hoc run-length artefact of the heater in `fit_m6.heat_rows`' formula).
+  fitted leakage slope 0.408 W/°C on card 1 again; the post-hoc run-length artefact of the heater in `fit_m6.heat_rows`' formula). Added
+  after verification: 05-claims, that E142 shows no M7 gain over M6 in rms, bias or coverage (C1); 14-card-behaviour, that the board's
+  62.09 W is above the highest card-1 reading that file gives (61.30 W), still 13 W under the firmware's 75 W over-power set point, so card
+  1's alarm stays untested, and that the PMIC's own temperature was again unread (C3).
 
 ## Files
 
@@ -237,7 +276,62 @@ an aifoundry2 clause the edit box no longer held, so `EXPECT_TEXT` refused once 
 - Here: `e142.json`, `runs.csv`, `reduce.txt`, `reduce.log` (the primary); `e142-auto.json`, `e142-dipskept.json`, `e142-leak0.1994.json`,
   `e142-leak0.3803.json`, `e142-leak0.json`, `e142-relaxed.json` and their `runs-*.csv`, `reduce-*.{txt,log}` (the arms); `scored.json`,
   `results.md`, `score.log` (the rules); `telemetry-max.json`; `readme-numbers.py`, `readme-numbers.txt`; `posthoc/runlength-posthoc.json`;
-  `code.sha256`.
+  `code.sha256`; added after verification, `corrections-numbers.py` and `corrections-numbers.txt` (the numbers C1–C5 quote).
 - Raw: `aifoundry1-c1/e142/p14210` … `p14214` (each pass's runs, marks, plan, telemetry, configs, manifest, run log, code and binaries'
   sha256), `aifoundry1-c1/e142-smoke-p14201/`, `aifoundry1-c1/e142-stoptest-p14202/`; `logs/` (the box's session log, queue log,
   preflight, binaries, the session's config reads, the box setup and dry runs, the order of events).
+
+## Corrections after verification (Mon 2 Nov 2026)
+
+An independent verifier re-derived E142 from the committed files. The reductions (the primary and six arms) and the scoring, rerun from the
+raw passes, are identical on every numeric leaf (numpy 2.5.3; with numpy 1.26.4 the largest difference is 1e-14). The blind protocol's order,
+isolation and byte identity hold, the box ran the registered code, no registered file changed after `962748e7`, and every device command
+sent was a read. Its five faults are corrected above, in place. None changes a measured number, a rule, a prediction or a verdict. The
+numbers below are printed by [`corrections-numbers.py`](corrections-numbers.py) → [`corrections-numbers.txt`](corrections-numbers.txt),
+from this directory's `scored.json` and `telemetry-max.json`, the registration's `predictions-e142.json`, E140's `scored.json` and
+`scored-nodips.json`, `m7.json`, 14-card-behaviour.md and git.
+
+- **C1 (major): M7 against M6.** § 5 (i) said M7's gain over M6 "is the bands (30 of 30 against M6's 19 of 25 on pool 4) and the absence of
+  E140's one-sided bias, not a smaller rms". E142's own same-tile comparison does not show that. On the 30 non-anchor tiles, M7 and M6 read:
+  - the same rms: 0.211 and 0.211 W (M1 −0.003 W [−0.042, +0.025]);
+  - the same near-zero bias: +0.001 and −0.003 W (`scored.json` › `primary.reported.<model>.power_all_nonanchor`);
+  - coverage that passes for both: M7 30 of 30, M6 29 of 30 (the rule needs 26). M6's one miss is `int8.powerlaw_w`, at 1.09 of its
+    half-width; M7's largest error is 0.89 of its own.
+
+  M7's bands are the wider ones: 1.64, 1.58 and 1.19 times M6's on fp32, fp16 and int8 (mean 95% half-widths 0.70 / 0.62 / 0.66 W against
+  0.43 / 0.39 / 0.56; `predictions-e142.json` › `tiles.*.<model>.D_95`). Heat reads the same: M6 0.163 / 0.147 / 0.138 °C with 30 of 30
+  inside, against M7's 0.167 / 0.162 / 0.139 with 29 of 30. M6's pool-4 miscalibration did not recur here.
+
+  The 19 of 25 is E140's primary: pool 4 on aifoundry3, with the meter's dips kept, its leakage fitted (`auto`, 0.286 W/°C) and two of four
+  passes kept. With the dips removed it reads 21 of 25 and a −0.152 W bias (E140 `scored-nodips.json`). E142's primary removes the dips,
+  freezes the leakage at 0.2414 W/°C and kept five of five passes. So that contrast mixed pool, card and reduction rule, and the test that
+  can separate them is E141, the same pool on aifoundry3. E141's result was committed at 22:18 PST (`0531494f`), while this was written, and
+  had not been verified. Its README reports M6's bands covering 22 of 30 on that card, against M7's 28 (its § 2). Comparing the two cards is
+  left to the integration lanes, once E141 is verified.
+
+  Corrected in place: the plain words, § 5's table (a column for M6 on the same tiles; the E140 column labelled with its rules), § 5 (i)
+  and § What it changes. In the lane's result, the prediction effect and the third blog point are corrected the same way.
+- **C2 (minor): "a second chip", "about 1% of a 20 W load".** The lane's first blog point read as a test on unseen hardware. M7 was fitted
+  on this card's rows: from 13 card-1 experiments (§ 6), with its card-1 scale 0.9711 for the floats and 0.9735 for int8 (`m7.json` ›
+  `families.*.card1_scale_by_format`). So E142 tests new kinds, not new hardware. And 1% holds for the floats only:
+  - fp32 0.169 W rms on 12.8–25.4 W, 0.9% of the mean D;
+  - fp16 0.149 W on 12.5–21.6 W, 0.8%;
+  - int8 0.251 W on 3.2–6.2 W, 5.0% of the mean D (4.0–7.8% of the largest and smallest).
+
+  The plain words now say "new kinds, not new hardware". The blog point is corrected in the lane's result.
+- **C3 (minor): "PMIC 63 °C".** The stops row reported the telemetry field named `pmic` as the PMIC's temperature. That field is the minion
+  shires' PVT average (14-card-behaviour.md, the `temp_c.pmic` row; E127 C5, E128 C6). Here it equals the shire mean's maximum, 63 °C, in
+  every block (`telemetry-max.json` › `blocks.*.pmic_c_max`, `shire_mean_c_max`). No telemetry field reads the PMIC's own temperature, which
+  its 75 °C over-temperature alarm compares, so the margin to that alarm is not measured. The guard against over-temperature was the
+  registered 72 °C die stop (the hottest-shire latch read 65 °C throughout). Corrected in the stops row.
+
+  For the records, too: the board's 62.09 W is above the highest card-1 reading 14-card-behaviour.md gives (61.30 W), still 13 W under
+  the firmware's 75 W over-power set point, so card 1's alarm stays untested.
+- **C4 (minor): the `ettelem` binary.** § Device commands sent did not say that the binary that ran (`8008f96f…`, on the box by 28 Sep)
+  predates the source its sends were classified from (`efa3e8cd`, 4 Oct, sha256 `a6cf931b…`). The classification holds for every source
+  revision the binary can come from (`4845a60e` onward: the same reads, the reset only when `resetMs > 0`, `resetMs` 0 by default).
+  The residual, that no running binary is hashed against its source, is Q136(w)'s. Added to § Device commands sent.
+- **C5 (minor): "the one term".** The plain words called the gate tiles "the one visible gain over M5", and § What it changes and the lane's
+  result called gate switching "the one term the card shows doing work". But § 2 also shows M7's `b138` moving `int8.b_line_flipflop_nogate`
+  from −0.266 and −0.255 W (M6, M5) to −0.001 W, inside both older models' bands. Corrected: the clearest term at work is gate switching
+  (outside M5's bands), and M7's `b138` shows a 0.25–0.27 W gain on one int8 tile, inside M6's and M5's bands.

@@ -1,0 +1,50 @@
+== C1: M7 against M6 (and M5) on the same 30 non-anchor tiles (scored.json > primary.reported, primary.power_rows)
+  M7: power rms 0.211 W, bias +0.0005 W, inside its 95% band 30 of 30, outside []
+  M6: power rms 0.211 W, bias -0.0035 W, inside its 95% band 29 of 30, outside ['int8.powerlaw_w']
+  M5: power rms 0.254 W, bias -0.0100 W, inside its 95% band 27 of 30, outside ['fp16.wideexp_bgate_alt', 'fp32.wideexp48_bgate_alt', 'int8.powerlaw_w']
+  mean 95% half-width per format, W (power_rows lo95/hi95; equal to predictions-e142.json tiles.*.<model>.D_95):
+    M7: fp32 0.702  fp16 0.615  int8 0.661  all 30 0.664;  largest |error| / half-width 0.888 (int8.powerlaw_w)
+    M6: fp32 0.429  fp16 0.388  int8 0.558  all 30 0.455;  largest |error| / half-width 1.087 (int8.powerlaw_w)
+    M5: fp32 0.469  fp16 0.400  int8 0.592  all 30 0.485;  largest |error| / half-width 1.476 (fp16.wideexp_bgate_alt)
+  M7's half-width over M6's: fp32 1.64x (M6 39% narrower), fp16 1.58x (M6 37% narrower), int8 1.19x (M6 16% narrower), all 1.46x (M6 31% narrower)
+  heat, priority-1 tiles (the H1-H3 sets) and coverage over 30 (primary.reported.<model>.heat, coverage_heat):
+    M7: rms 0.167 / 0.162 / 0.139 C, bias +0.094 / +0.134 / -0.053 C; inside 29 of 30, outside ['int8.a_word_flipflop']
+    M6: rms 0.163 / 0.147 / 0.138 C, bias +0.090 / +0.119 / -0.058 C; inside 30 of 30, outside []
+  E140 (pool 4, aifoundry3 card 0), M6, as committed (scored.json and scored-nodips.json > primary.power):
+    primary (dips kept): passes [14012, 14013], set aside [14010, 14011], leakage auto (0.2861 W/C), P3 FAIL, inside 19 of 25, mean(measured - M6) -0.275 W
+    dips removed: passes [14010, 14011, 14012, 14013], set aside [], leakage auto (0.2774 W/C), P3 PASS, inside 21 of 25, mean(measured - M6) -0.152 W
+  E142's primary: passes [14210, 14211, 14212, 14213, 14214], set aside [], leakage 0.2414 (0.2414 W/C), reducer {'dips': "removed (E82 A2's definition; E142's primary)", 'relaxed_anchor_gates': False}
+
+== C2: the error against the load, M7, priority-1 tiles (the P1-P3 sets; primary.power_rows.M7)
+  fp32: 9 tiles, measured D 12.82-25.35 W (mean 18.49), rms 0.169 W = 0.9% of the mean D (0.7-1.3% of the largest and smallest); per-tile relative rms 0.8%
+  fp16: 8 tiles, measured D 12.46-21.59 W (mean 17.89), rms 0.149 W = 0.8% of the mean D (0.7-1.2% of the largest and smallest); per-tile relative rms 0.8%
+  int8: 7 tiles, measured D 3.24-6.22 W (mean 5.04), rms 0.251 W = 5.0% of the mean D (4.0-7.8% of the largest and smallest); per-tile relative rms 7.1%
+  M7's card-1 scale (m7.json > families.*.card1_scale_by_format): float fp16 0.9711, float fp32 0.9711, int8 int8 0.9735
+
+== C3: the field named pmic (telemetry-max.json per block; docs/findings/14-card-behaviour.md)
+  e142/p14210: pmic_c_max 63, shire_mean_c_max 63, equal True, hottest_shire_c_max 65, board_w_max 61.89
+  e142/p14211: pmic_c_max 63, shire_mean_c_max 63, equal True, hottest_shire_c_max 65, board_w_max 62.09
+  e142/p14212: pmic_c_max 63, shire_mean_c_max 63, equal True, hottest_shire_c_max 65, board_w_max 61.89
+  e142/p14213: pmic_c_max 63, shire_mean_c_max 63, equal True, hottest_shire_c_max 65, board_w_max 61.95
+  e142/p14214: pmic_c_max 63, shire_mean_c_max 63, equal True, hottest_shire_c_max 65, board_w_max 61.61
+  14-card-behaviour.md:485: ...alarms; PMIC 1.5.0 did not at those readings; **firmware or board, unknown**. aifoundry3 and card 1 never read above
+  14-card-behaviour.md:770: | `temp_c.pmic` | **not the PMIC's temperature** (dated, Mon 2 Nov 2026, Q136's records) | at et-platform `836a4ab` the telemetry fills it from the mi...
+
+== C4: the ettelem binary that ran against its reviewed source
+  E142 logs/binaries.sha256: 8008f96f056ae1c224c33ccce38070a67882a664620d637b8833d378b2167325  build/ettelem/ettelem
+  28 Sep, aifoundry1 card 1 (2026-09-28-heat-placement/raw/aifoundry1-c1/hp/p5501/binaries.json > ettelem): 8008f96f056ae1c224c33ccce38070a67882a664620d637b8833d378b2167325
+  tools/ettelem/ettelem.cpp at HEAD: sha256 a6cf931b2a123e88699c046eb45f438b06d1648cabb86fc114577a32ec153377; last changed in efa3e8cd 2026-10-04
+  per revision of tools/ettelem/ettelem.cpp (DM commands requested in sample() and config(); the reset's guard; the default resetMs; the subcommands main() dispatches):
+    df89c94f 2026-09-20: since_reset_ms emitted False; sample ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_CURRENT_TEMPERATURE', 'DM_CMD_GET_MODULE_POWER', 'DM_CMD_GET_MODULE_VOLTAGE', 'DM_CMD_GET_SP_STATS']; config []; statistics-reset calls in sample 0, guarded by 'resetMs > 0' 0; resetMs = 0 default False; subcommands ['loglevel', 'sample', 'sptrace']
+    9df563ed 2026-09-22: since_reset_ms emitted False; sample ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_CURRENT_TEMPERATURE', 'DM_CMD_GET_MODULE_POWER', 'DM_CMD_GET_MODULE_VOLTAGE', 'DM_CMD_GET_SP_STATS']; config ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_POWER_STATE', 'DM_CMD_GET_MODULE_STATIC_TDP_LEVEL', 'DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS']; statistics-reset calls in sample 0, guarded by 'resetMs > 0' 0; resetMs = 0 default False; subcommands ['config', 'loglevel', 'sample', 'sptrace']
+    4845a60e 2026-09-23: since_reset_ms emitted True; sample ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_CURRENT_TEMPERATURE', 'DM_CMD_GET_MODULE_POWER', 'DM_CMD_GET_MODULE_VOLTAGE', 'DM_CMD_GET_SP_STATS']; config ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_POWER_STATE', 'DM_CMD_GET_MODULE_STATIC_TDP_LEVEL', 'DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS']; statistics-reset calls in sample 2, guarded by 'resetMs > 0' 2; resetMs = 0 default True; subcommands ['config', 'loglevel', 'sample', 'sptrace']
+    a7ecb2d4 2026-09-24: since_reset_ms emitted True; sample ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_CURRENT_TEMPERATURE', 'DM_CMD_GET_MODULE_POWER', 'DM_CMD_GET_MODULE_VOLTAGE', 'DM_CMD_GET_SP_STATS']; config ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_POWER_STATE', 'DM_CMD_GET_MODULE_STATIC_TDP_LEVEL', 'DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS']; statistics-reset calls in sample 2, guarded by 'resetMs > 0' 2; resetMs = 0 default True; subcommands ['config', 'loglevel', 'sample', 'sptrace']
+    de262730 2026-09-25: since_reset_ms emitted True; sample ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_CURRENT_TEMPERATURE', 'DM_CMD_GET_MODULE_POWER', 'DM_CMD_GET_MODULE_VOLTAGE', 'DM_CMD_GET_SP_STATS']; config ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_POWER_STATE', 'DM_CMD_GET_MODULE_STATIC_TDP_LEVEL', 'DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS']; statistics-reset calls in sample 2, guarded by 'resetMs > 0' 2; resetMs = 0 default True; subcommands ['config', 'loglevel', 'sample', 'sptrace']
+    eb7c762d 2026-09-25: since_reset_ms emitted True; sample ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_CURRENT_TEMPERATURE', 'DM_CMD_GET_MODULE_POWER', 'DM_CMD_GET_MODULE_VOLTAGE', 'DM_CMD_GET_SP_STATS']; config ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_POWER_STATE', 'DM_CMD_GET_MODULE_STATIC_TDP_LEVEL', 'DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS']; statistics-reset calls in sample 2, guarded by 'resetMs > 0' 2; resetMs = 0 default True; subcommands ['config', 'loglevel', 'sample', 'sptrace']
+    1754701a 2026-10-02: since_reset_ms emitted True; sample ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_CURRENT_TEMPERATURE', 'DM_CMD_GET_MODULE_POWER', 'DM_CMD_GET_MODULE_VOLTAGE', 'DM_CMD_GET_SP_STATS']; config ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_POWER_STATE', 'DM_CMD_GET_MODULE_STATIC_TDP_LEVEL', 'DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS']; statistics-reset calls in sample 2, guarded by 'resetMs > 0' 2; resetMs = 0 default True; subcommands ['config', 'loglevel', 'sample', 'sptrace', 'temp']
+    efa3e8cd 2026-10-04: since_reset_ms emitted True; sample ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_CURRENT_TEMPERATURE', 'DM_CMD_GET_MODULE_POWER', 'DM_CMD_GET_MODULE_VOLTAGE', 'DM_CMD_GET_SP_STATS']; config ['DM_CMD_GET_ASIC_FREQUENCIES', 'DM_CMD_GET_ASIC_VOLTAGE', 'DM_CMD_GET_MODULE_POWER_STATE', 'DM_CMD_GET_MODULE_STATIC_TDP_LEVEL', 'DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS']; statistics-reset calls in sample 2, guarded by 'resetMs > 0' 2; resetMs = 0 default True; subcommands ['config', 'loglevel', 'sample', 'sptrace', 'temp']
+
+== C5: the tiles where M7's terms differ from M6's and M5's (primary.power_rows; error = measured - model, W)
+  fp32.wideexp48_bgate_alt: M7 +0.012 (inside True, half-width 0.720); M6 +0.004 (inside True, half-width 0.429); M5 +0.542 (inside False, half-width 0.468)
+  fp16.wideexp_bgate_alt: M7 +0.018 (inside True, half-width 0.643); M6 +0.003 (inside True, half-width 0.396); M5 +0.596 (inside False, half-width 0.403)
+  int8.b_line_flipflop_nogate: M7 -0.001 (inside True, half-width 0.691); M6 -0.266 (inside True, half-width 0.548); M5 -0.255 (inside True, half-width 0.580)
