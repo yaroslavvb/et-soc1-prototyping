@@ -159,8 +159,9 @@ standard Q136(w)'s table applies to every aifoundry3 command. Both held forms of
   dry run first, then saved and read back:
   - **The claim** was saved 22:36:26 PST. It appended `; using aifoundry3 for 1 h, until ~23:40 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)`
     to the clauses then held (aifoundry2 until ~23:30, aifoundry1 card 1 until ~23:11).
-  - **The release** follows this commit, as section 15 of the brief says: the clause is dropped if another card is still named, or
-    ` — released` is appended if aifoundry3 is the last one held.
+  - **The release** was saved 23:27:07 PST, after the data commit `ca979517` (23:26:39). By then the post named aifoundry3 alone,
+    because the other two clauses had been dropped at their releases. So ` — released` was appended with every word kept:
+    `<ai> **Claude says:** using aifoundry3 for 1 h, until ~23:40 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>) — released`.
 
 ## Departures
 
