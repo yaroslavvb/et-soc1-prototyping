@@ -47,13 +47,16 @@ At every arm (leakage 0.2936 and 0.3803 W/°C; dips kept) R3 reads ENCODED and R
 | R5 the rail steps | **PASS** (board, NoC, SRAM, off PASS; minion UNRESOLVED) | **FAIL** (the NoC rail's class pattern) |
 | R6 the high pins and the DDR rail | **PASS**: `Hp` +0.308 W [0.233, 0.384], 1.37 pJ a high pin a beat-line, RH64 and RH128 still | PASS |
 
-The pool's R5 FAIL is reported only (the registered reading of R5 is E139's own); E132 alone and E139 alone each PASS it, so it is a
-pooling of two sessions whose NoC-rail rung classes differ, not a new failure of the rule on either.
+The pool's R5 FAIL is reported only (the registered reading of R5 is E139's own); E132 alone and E139 alone each PASS it. *(Corrected
+after verification, C2: this called it two sessions whose NoC-rail classes differ. They do not.)* The NoC rail's `R_2` rung is
+unresolved in each session (E132 +0.0018 W [−0.027, +0.030], E139 −0.0004 [−0.030, +0.029]); pooled it narrows to +0.0005
+[−0.016, +0.017], which reads *absent* against E99's frozen *present*: a secondary finding the pool has power for and neither session
+alone does, on that one rung.
 
 **3. What it does to predicting power and heat.** The power model prices memory traffic by toggled raw bits (E110's 64-bit path 0.71
-pJ, 256-bit path 2.38 pJ or 1.15 with line edges; E132's line-edge placement). E139 adds **one term, settled: an encoded-toggle price on
-the DRAM bus, 0.46 pJ an encoded toggle** (E56 0.463, E448 0.463 pJ on E139's passes; the pool 0.37 and 0.42), against E132's
-provisional 0.26–0.36. On the two E-family images the residual the model leaves without the term, and with E132's frozen +0.185 W:
+pJ, 256-bit path 2.38 pJ or 1.15 with line edges; E132's line-edge placement). E139 adds **one term, settled in sign and presence: an encoded-toggle price on the DRAM bus, about 0.46 pJ an encoded toggle** on the
+primary (E56 0.463, E448 0.463 pJ; the pool 0.37 and 0.42), against E132's provisional 0.26–0.36. *(Corrected after verification,
+C4: the size depends on the arm: E448 reads 0.55–0.58 pJ at the leakage arms and dips kept; the verdict does not move.)* On the two E-family images the residual the model leaves without the term, and with E132's frozen +0.185 W:
 
 | | E132's passes: rms of `E56`, `E448` | E139's passes |
 |---|---:|---:|
@@ -64,7 +67,7 @@ So the term removes most of the error on DRAM-bound images whose bus re-encodes 
 measured it on passes the term was not fitted on: the frozen +0.185 W predicted E139's +0.213 W to 0.028 W. And because RE64 moves the
 DDR die rail while the raw control does not (R3), the term can be tied to the memory shire's supply, a reading every run already
 records. **Heat**: the term enters only through board power, 0.2 W times the card's die rise per board watt (M6's heat term), a few
-tenths of a degree at most; E139 measures no heat term (the die stayed at 57–58 °C through every pass).
+tenths of a degree at most; E139 measures no heat term (the die ran 56–61 °C in every headline pass, launching at 58 °C).
 
 ## Registered against what happened
 
@@ -72,10 +75,10 @@ tenths of a degree at most; E139 measures no heat term (the die stayed at 57–5
 |---|---|---|
 | passes | warm-up 13910 + headline 13911 onward, queue deadline start + 42 min | 13910 + **13911–13918** (eight headline); passes 201–230 s |
 | card time | ≤ 45 min | 36.9 min |
-| stops | die 70 °C; board 65 W (`watch_e139.py`) | highest die 61 °C, board 53.52 W; no stop (`logs/watch.log` records only the watcher's start) |
+| stops | die 70 °C; board 65 W (`watch_e139.py`) | highest die 61 °C, board 53.52 W; the die stop was live; **the board stop never read a sample** (D5, corrected after verification) |
 | A1-style form check | config 0 W / 65 °C / 600 MHz at both ends; `since_reset_ms` −1 | PASS (both reads; −1 in all 20,469 samples) |
 | expectation | R3 ENCODED, R4 PAYS, more likely SETTLED ONLY POOLED; R1, R2, R5, R6 PASS | R3, R4 SETTLED on the primary; R1, R2, R5, R6 PASS |
-| departures | — | **D1**: eight headline passes, one more than the README's projected seven; the queue's registered rule (start + 42 min, longest pass so far) decided it, as the README allows ("13918 runs only if the passes run short"). **D2**: the reducer labels its output `"exp": "E132"` (its code is E132's, unchanged), as the registration said. **D3**: the collector's Python was numpy through `uv` on the Intel. **D4**: the session ran no separate form-check script; the check above was made on the collected files after the session |
+| departures | — | **D1**: eight headline passes, one more than the README's projected seven; the queue's registered rule decided it (start + 42 min; the 270 s first-pass estimate stayed in force, no pass being longer: 16:37:36 + 270 s = 16:42:06, before the 16:46:40 deadline), as the README allows ("13918 runs only if the passes run short"). **D2**: the reducer labels its output `"exp": "E132"` (its code is E132's, unchanged); the registration did not mention the label. **D3**: the collector's Python was numpy through `uv` on the Intel. **D4**: the session ran no separate form-check script; the check above was made on the collected files after the session |
 
 ## Device commands sent
 
@@ -89,7 +92,7 @@ firmware-revisions query, a residency read. The checker's output is the registra
 
 `et-who` at the session's start and end: no process held a device node or card lock; other users' idle logins present, no device
 process of theirs. The card was held from E138's session; the day's post (message 1566837317765963987) had its aifoundry3 clause
-rewritten at 16:04:40 PST from "until ~16:39 PST" to "using aifoundry3 for 1 h, until ~17:10 PST" (EXPECT_TEXT, dry run, then save)
+rewritten (saved 16:04:35–16:04:40 PST, before `run_e139.sh go` was called) from "until ~16:39 PST" to "using aifoundry3 for 1 h, until ~17:10 PST" (EXPECT_TEXT, dry run, then save)
 before this session started, and at 16:43:09 to "until ~17:40 PST" for E140, which followed on the same card.
 
 ## What it changes
@@ -104,3 +107,23 @@ before this session started, and at 16:43:09 to "until ~17:40 PST" for E140, whi
 `e139.json` (primary), `runs.csv`, `e139-leak0.2936.json`, `e139-leak0.3803.json`, `e139-unfiltered.json` (dips kept),
 `e139-pooled.json` (the secondary), `dips.json`, `dips-e132-pooled.json`, `passes/p139*` (raw: per-run records, telemetry, block.json),
 `logs/` (session log, queue, smoke, watcher, the session's two config reads).
+
+## Corrections after verification (Mon 2 Nov 2026)
+
+*An independent verifier re-derived every headline number from the raw passes with its own code and reproduced every number and
+verdict. Its faults are corrected here and in place; no rule, prediction, number or verdict changed.*
+
+- **C1, D5 (substantive): the registered 65 W board stop never ran.** `watch_e139.py` watches `p139*/telemetry.jsonl`, but during a
+  pass the sampler writes `telemetry.jsonl.raw`; `telemetry.jsonl` appears only at the pass's end and is gzipped at once
+  (`mf/block.sh`), so the watcher read no sample all session (`logs/watch.log`: its start line and `watch: end` only). Its test
+  (`watchtest.txt`) used a file named `telemetry.jsonl`, which is why it passed. The die stop (70 °C, `runitems.py`) was live; the board
+  peaked at 53.52 W, 11.5 W under the stop. A later use of `watch_e139.py` must watch the `.raw` file.
+- **C2**: the pooled R5 FAIL explained correctly (in place).
+- **C3**: the pooled intervals use z = 1.96 (the reducer's t table stops at 10 degrees of freedom); with t(13) = 2.160: `E56`
+  [0.114, 0.230] W, `el_64z` [−0.127, +0.034] mV, `RE64` [−0.902, −0.614] mV. No pooled class changes.
+- **C4**: the encoded-toggle price is arm-dependent in size (in place).
+- **C5** (wording): the die's range; why 13918 ran; the reducer label; the post's save time (all in place).
+- **C6** (completeness of § Device commands sent): `sparsity_host` also runs on the card (the heater and the fp32 anchor) and opens the
+  ops node only; `et-holders` (through `sudo -n`, `runitems.py:57`) reads device holders and opens no device node. Neither sends a
+  management command; the classification stands. The registration's `dmcmd-audit.txt` lists three command kinds in its first section,
+  which is truncated; its second section and summary are complete.
