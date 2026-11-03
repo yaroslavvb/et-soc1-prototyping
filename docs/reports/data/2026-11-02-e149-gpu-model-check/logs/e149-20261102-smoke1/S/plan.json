@@ -1,0 +1,51 @@
+{
+ "stage": "S",
+ "unit": "S",
+ "kinds": "S",
+ "steps": [
+  {
+   "op": "static"
+  },
+  {
+   "op": "gen",
+   "set": "S"
+  },
+  {
+   "op": "idle",
+   "s": 15.0
+  },
+  {
+   "op": "hold",
+   "kind": "bf16.REF",
+   "s": 30.0,
+   "label": "heat_ref_smoke"
+  },
+  {
+   "op": "pass",
+   "p": 1,
+   "seq": [
+    "bf16.randn",
+    "bf16.zeros",
+    "bf16.mk3",
+    "bf16.dsortK",
+    "bf16.sq1",
+    "fp16.mk5",
+    "int8.rand",
+    "int8.zeros"
+   ]
+  },
+  {
+   "op": "holds",
+   "seq": [
+    "bf16.mk3",
+    "int8.rand"
+   ],
+   "pre_s": 5.0,
+   "hold_s": 8.0
+  },
+  {
+   "op": "idle",
+   "s": 5.0
+  }
+ ]
+}

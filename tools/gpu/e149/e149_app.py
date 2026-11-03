@@ -33,7 +33,7 @@ RATE = {"gpu_h": 2.10, "cpu_core_h": 0.0473, "mem_gib_h": 0.008}
 CPU_CORES = 2.0
 MEM_MIB = 8192
 N = 2048                       # M = N = K for bf16 (E149.md); fp16 and int8 run at SIZE[fmt] (amendment A1)
-SIZE = {"bf16": 2048, "fp16": 2048, "int8": 2048}
+SIZE = {"bf16": 2048, "fp16": 1024, "int8": 1024}   # A1, chosen on smoke S2 by its registered rule
 TIMEOUT_S = {"S": 900, "S2": 900, "1": 3300, "2": 2700}
 BUDGET_S = {"S": 720.0, "S2": 600.0, "1": 3000.0, "2": 2400.0}
 WIN = {"cell_s": 5.0, "ref_s": 3.0, "cell_settle_s": 1.5, "ref_settle_s": 1.0, "group_ms": 20.0, "depth": 4,

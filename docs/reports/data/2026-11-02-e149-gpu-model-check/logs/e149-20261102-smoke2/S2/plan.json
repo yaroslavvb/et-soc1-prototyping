@@ -1,0 +1,47 @@
+{
+ "stage": "S2",
+ "unit": "S2",
+ "steps": [
+  {
+   "op": "static"
+  },
+  {
+   "op": "gen",
+   "set": "S2"
+  },
+  {
+   "op": "idle",
+   "s": 10.0
+  },
+  {
+   "op": "hold",
+   "kind": "bf16.REF",
+   "s": 60.0,
+   "label": "warm_ref"
+  },
+  {
+   "op": "pass",
+   "p": 1,
+   "seq": [
+    "fp16.randn@1024",
+    "fp16.randn@1536",
+    "fp16.randn@1792",
+    "fp16.zeros@1024",
+    "fp16.zeros@1536",
+    "fp16.zeros@1792",
+    "int8.rand@1024",
+    "int8.rand@1536",
+    "int8.rand@1792",
+    "int8.zeros@1024",
+    "int8.zeros@1536",
+    "int8.zeros@1792",
+    "bf16.randn",
+    "bf16.zeros"
+   ]
+  },
+  {
+   "op": "idle",
+   "s": 5.0
+  }
+ ]
+}
