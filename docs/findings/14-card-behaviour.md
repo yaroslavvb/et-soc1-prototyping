@@ -627,6 +627,8 @@ reads the governor's hunt high, so a rate gap can print above its clock gap, whi
 cycles_max ÷ wall. Data: [`2026-11-01-e105-gemm-layout`](../reports/data/2026-11-01-e105-gemm-layout/README.md), "The power rule did
 not do what it was for", `aifoundry2/admission.json`, `aifoundry2/s1/skipped.jsonl`.
 
+**A large GEMM that streams to DRAM never meets the governor (E136, 2 November 2026).** On aifoundry2 under its own 65 W / 65 °C governor, a 4,096³ fp32 GEMM in the vendor's pattern (192 MB with C) ran random data at 800.0 MHz sustained, 57.5 W on the board and a 63.3 °C die, so zeros and random ran at one speed (×0.995 sustained): the memory path holds it to 3.86 TFLOPS, too slow for random's power to reach the limit. The 20 MB GEMM the L3 holds is the one the governor caught: random fp32 at 656.3 MHz sustained, 55.2 W and 65.7 °C, its burst 62–70 W, and the session's highest board reading 76.09 W. Data: [`2026-11-02-e136-large-gemm`](../reports/data/2026-11-02-e136-large-gemm/README.md), `results.json` `cells`.
+
 ## The heat path moves with the hour and the day, and a hold settles slowly (1 November 2026; Q132(g), E98 on aifoundry2, E97 on aifoundry3)
 
 - **The rest die cycles by about 3.5 °C a day.** Nine days of the boxes' own 5 s history: aifoundry2 at rest reads 46.1 °C at
@@ -1399,6 +1401,8 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
   needed about three heats in E128 and 5–8 (median) in E129, whose anchors were cut to each format's zeros, so E128 kept two
   passes and E129 three of the six its R1 needed; E131's four passes, from a 50 °C die, took 547–652 s. On aifoundry3, E134's
   13410 was set aside on board-meter dips of 3–4 W, under E82 A2's 4 W line (its C1): register a dip rule that catches them.
+  **Dated note, Mon 2 Nov 2026 (Q137):** on aifoundry3 E78's own pass gates set two of E140's four passes aside on readings the size of board-meter dips (a 2.489 W span of `fp32.randn`, a +0.715 W drift of `anchor_pi`), and two of its six power misses were dips on the kept passes (E140 D1, C2).
+- **A watcher can watch the wrong file** (2 November 2026, E139). During a pass the sampler writes `telemetry.jsonl.raw`; `telemetry.jsonl` appears only when the pass ends and is gzipped at once (`mf/block.sh`). E139's board-power watcher followed `telemetry.jsonl`, read no sample all session, and its test passed on a file of that name, so its registered 65 W stop was never armed (the die stop was; the board peaked at 53.52 W). Watch the `.raw` file, and test the watcher on a live pass (E139 C1).
 - **A residency read of a state the build does not have raises SP errors** (1 November 2026, E77 and Q134(a)). On BL2 0.22.0
   raw states 4–6 are no state: each read fails (rc −5), logs two SP ERROR lines and pushes two `SP Runtime Error` events to
   the host, where a session that counts kernel events will see them. Every lab session that read residency since 27 October

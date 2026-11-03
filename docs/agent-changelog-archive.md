@@ -4,6 +4,13 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-10-31 (Sat, week 44)** — Section 4: the reservation post's clock time is written in the zone `date +%Z`
+  prints (PST from 1 November 2026), and a re-estimate's `for <N> h` is still counted from the post's own time, never
+  the time left. *Why:* preference — the owner's words that morning, *"estimate when I'm, holding the card until, and
+  then update it"*; constraint — Pacific time leaves daylight saving at 02:00 on Sun 1 Nov 2026, and the reservation
+  reader draws a hold as the post's time plus its stated hours, so a re-estimate written as the time left shows the
+  card free while it is still held; re-check: `TZ=America/Los_Angeles date -d '2026-11-01 12:00' +%Z` prints PST, and
+  the reader's `parse()` sets a claim's limit to its post time plus the stated duration.
 - **2026-10-31 (Sat, week 44, Q130 records)** — Section 3's index reads Q1–Q130, E1–E85 (E77 reserved and not
   registered; E84 and E85 in progress when recorded) and A1–A24, where it read Q1–Q66, E1–E59 and A1–A21,
   and its note on governor text now says the `353f20e` description is the cards' own BL2 0.22.0 and the loops and

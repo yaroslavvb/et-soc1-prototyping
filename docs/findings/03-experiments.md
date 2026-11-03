@@ -7,10 +7,11 @@ the kinds page carried until 31 October; its rebuild, now `5450fa1ebd61`, ranks 
 E119–E125 and Q134(a) use the same numbering, as the page carried it at `fdcbcba2f34d`; Q134(d)'s rebuild of the page
 (`424503b97c24`) keeps it and adds item 16, the rail ledger's off-rail row (E77, E120).
 E126–E134 and Q136's desk lanes use the same list, item 16 included, as the page carried it at `fbb682f9393b`.
+E136–E140 and Q137(m) use the same list as the page carried it at `9fdb534bbc77`.
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E135**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E140**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
@@ -42,7 +43,7 @@ the first launch): what a clock gap buys in E107's last three arms and a second 
 and E111's heat holds again (E133) on aifoundry2; the float B-lane gate (E127), which int8 multiplier (E130), the memory
 path's split (E132) and more single-bit prices (E134) on aifoundry3; and fp16's sign rest (E128), int8's no-issue excess
 with one A row (E129) and E95's real tiles (E131) on aifoundry1's card 1. E135, on 2 November at the owner's OK, is a
-GPU measured the same way: Horace He's kinds of numbers on two A100s rented on Modal, with no lab card.
+GPU measured the same way: Horace He's kinds of numbers on two A100s rented on Modal, with no lab card. E136–E140 are Q137's of the afternoon of 2 November, run so that power and heat can be predicted: a large GEMM predicted first under aifoundry2's own governor (E136); fp16's sign rest on the matched design on aifoundry1's card 1 (E137); int8's B side on the minion rail (E138), the memory path's split with more passes (E139) and the blind test of the power-and-heat model M6 (E140) on aifoundry3.
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
 (aifoundry2, aifoundry3 or both; E35–E46, E48 and E50 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
@@ -6224,6 +6225,177 @@ H100, shapes other than square and K-contiguous, and a large streaming GEMM on t
 register's A100 rows that rested on the literature carry dated notes ([05-claims.md](05-claims.md), "E135").
 **Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
 
+## E136 — a large GEMM on the ET-SoC-1, its power, clock, rate and die frozen first, under aifoundry2's own governor (Q137; card runs 2026-11-02, 15:50–16:14 PST, aifoundry2) — pre-registered
+
+**Asked:** item 1 of section 11, "Where a large GEMM falls": *"Still open: a large GEMM itself, which needs its own reuse per
+L2-sized block and its footprint, C included"* (the kinds page at `9fdb534bbc77`), with Q137's goal, to predict power and heat.
+**Pre-registered** in [`tools/claims-v3/e136/E136.md`](../../tools/claims-v3/e136/E136.md) (`61e5232f`), pushed before the claim
+(15:49:47 PST) and the first card touch (15:50:22): the binary `rgm136`, the vendor's pattern built from public sources
+(`SP_GEMM_LARGE`: `g4k`, 4,096³ in fp32, 192 MB with C, and `g2k`, an L3-held 2,048 × 1,024 × 1,024, 20 MB), the desk reuse
+model, numbers frozen in `predictions-e136.json` from E107, E119, E126, E95, E101, E111 and E133, rules R0–R8, a scorer, a
+self-test and a toy-card dry run. Data: [`docs/reports/data/2026-11-02-e136-large-gemm/`](../reports/data/2026-11-02-e136-large-gemm/README.md)
+(`2303f4c6`; corrected after a re-derivation from the raw records by code that imports none of the lab's reducers, `06df8b01`,
+D1–D3, wording only: no number, rule or verdict changed). aifoundry2's card 0 under its own governor: `ettelem config` read 65 W /
+65 °C at the queue's start and end and after every run, nothing set; one session, all 32 planned runs, none refused, none cut;
+**23.7 card-minutes**. READs only (the classified list in `E136.md`, `dmcmd_audit.py` GO at 19 send sites with one reviewed
+exception); no statistics reset, no firmware-revisions query, no residency read. Board peak 76.09 W, die mean peak 66 °C, under
+the session's 93 W and 80 °C stops.
+
+**Results** (`results.json`: `per_gemm`, `cells`, `rules`, `errors`; `rederive.txt`).
+- **`g4k`, a GEMM that streams to DRAM:** 2.173 µs an op at 800 MHz in fp32 (2.175 in fp16 and int8), **7.2% faster than frozen**
+  (fp16 7.3%, int8 12.5%): R1's point FAIL ×3, the placement A HELD in fp32 and fp16 (h 1.44) and OUTSIDE in int8 (h 1.83);
+  ×1.089 from the clock's ×1.333 (frozen ×1.056). Bursts: **3.86 TFLOPS** fp32, 7.73 fp16, 15.47 TOPS int8.
+- **The governor never held `g4k` back:** random fp32 sustained 800.0 MHz at 57.5 W, die 63.3 °C, so zeros ÷ random **×0.995
+  sustained** and ×1.000 in a burst; the kind moves T by at most 0.42% (R7 PASS), and every gap was as frozen (R5 PASS ×14, ×9).
+  The kind still sets the power: fp32 bursts, zeros 33.58 W, sparse50 42.07, real (E101's tiles) 52.36, random 52.52; sustained
+  die zeros 57.3 °C against random 63.3.
+- **`g2k`, the L3-held GEMM:** 10.7–12.8% faster than frozen (R2 FAIL ×3); 62–70 W in bursts with random-like data; random fp32
+  held to **656.3 MHz** sustained at 55.2 W and 65.7 °C, so there zeros led **×1.090** sustained (G1 frozen ×1.079).
+- **The prediction, out of sample:** burst board power **3.37 W rms** over 20 cells (mean −2.27 W; R3 15 PASS / 5 FAIL at its 4
+  W band, all 20 under the admission estimate); sustained power 4.12 W (G1, E101's cap) and **2.28 W** (G2, the cap refitted on
+  E126); sustained clock 35.7 and **25.9 MHz** rms (R4: G2 11 of 12 within 30 MHz); die **0.82 °C** rms in bursts (R6 PASS ×20) and
+  3.35 / **1.60 °C** sustained (G1 7 of 12 inside 3 °C; on G2 all 12); rates 10–12% low (R8 FAIL), from the time error.
+- Post hoc (`posthoc.txt` §1): with the fresh lines priced at E126's `c16s` (C shared), the time error falls to −1.5% (fp32),
+  −1.4% (fp16) and −7.1% (int8) on `g4k`; `g2k` stays 11–13% faster than any arm says.
+
+**Scored:** R0, R5, R7 PASS; R1 point FAIL ×3 (A HELD ×2, int8 OUTSIDE); R2 FAIL ×3; R3 15 of 20; R4 G2 better; R6 bursts PASS,
+sustained (G1) 7 of 12; R8 FAIL.
+**What it changes.** Item 1: a real large GEMM is measured on this chip, with its footprint (192 MB and 20 MB, C included) and its
+reuse (no line of `g4k` hits the L2, by E105's model); the DRAM-streaming GEMM shows no zeros-against-random speed gap on this card,
+the L3-held one ×1.090. For prediction: power within 3.4 W rms in bursts, the die within 0.8 °C (bursts) and 1.6 °C (sustained, on
+G2's power); the time term needs C's store frequency as a variable, and the sustained clock is better predicted from the latest
+session's cap. Open: the vendor's own binary, a second card or session (one run a cell), `g2k`'s 11–13%.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E137 — fp16's sign rest on E128's matched design, six kept passes (Q137; card runs 2026-11-02, 15:38–16:12 PST, aifoundry1's card 1) — pre-registered
+
+**Asked:** item 5 of section 11, "Where a random sign's ~5 W goes", as [E128](../reports/data/2026-11-02-e128-fp16-signs/README.md) left it:
+fp16's rest on the matched design, and the part that goes with the sums changing, not established (E128-R8 and R9 INCONCLUSIVE at
+two passes). **Pre-registered** in [`tools/claims-v3/e137/E137.md`](../../tools/claims-v3/e137/E137.md) (`a3e9d32d`, committed
+15:36:38 PST and pushed before 15:36:49), before the claim (15:37:58) and the first device access (15:38:09), with
+`predictions-e137.json` and the set-aside rule written first; no amendment. Data:
+[`docs/reports/data/2026-11-02-e137-fp16-sign-rest/`](../reports/data/2026-11-02-e137-fp16-sign-rest/README.md) (`df05d9f3`; corrected after a
+re-derivation from `runs.csv` without the reducer or scorer, `cca0aaad`, C1–C3, wording only). aifoundry1's card 1 at 600 MHz in all
+19,335 samples, 65 W / 65 °C at every config read, nothing set; **33.75 card-minutes** of 60; seven passes (13710–13716, 196
+runs); E78's gates set 13710 aside (`int8.zeros` departs +0.279 W against 0.25), so S1 keeps six. Nine READs only, through E128's
+guard (`dmcmd_audit.py` GO, 32 sites, all READ); the board at most 60.68 W.
+
+**Results** (`scored.json` › `primary`; ± is t(0.975, 5) over the six passes).
+- **R1 MOST:** on the matched tiles the accumulators differing carry **1.001 ± 0.055** of B's rest on zero products (E128 0.926 ±
+  0.307). **R2 ALMOST NONE:** the sums changing, same alternations, carry **−0.001 ± 0.055** (INCONCLUSIVE at two of seven arms,
+  dips kept and no leakage correction). **R3 MOST** on E108's design ported, 1.026 ± 0.053. **R4 INCONCLUSIVE**, −0.026 ± 0.103.
+- In watts over fp16's zeros (board): B's rest on zero products 3.323 ± 0.166 W, the sums changing 0.002 ± 0.193 W; the step
+  `signs` − `ones` 4.802 ± 0.173 W (R5 PASS against E108's 4.98). Post hoc, about 32.7 ± 1.3 fJ per differing lane C-read and
+  result bit on the matched held tile (44.6 ± 1.4 on E108's design).
+- **The prediction:** M4's frozen fp16 sign term predicts the seven sign contrasts to **0.125 W rms**, all inside their 95% bands
+  (R7 PASS; E128's two passes of the same contrasts, post hoc, 0.211 W); the eight items to 0.130 W rms (R6 PASS). R8 INCONCLUSIVE
+  (no share FAILs against E128); S1 PASS (FAIL at leakage 0.545 and 0).
+
+**Scored:** R1 MOST, R2 ALMOST NONE, R3 MOST, R4 INCONCLUSIVE, R5–R7 PASS, R8 INCONCLUSIVE, S1 PASS; every frozen expectation met.
+**What it changes.** Item 5: fp16's rest is located as fp32's is, on the matched design too, so E128's frozen sentence is met, and
+for fp16 no model term is missing for the sums changing; a sign contrast of 3–5 W is predicted to about ±0.13 W out of sample by M4's
+lane-bit terms. Open: R4; one card, one clock; heat not measured (the launch rule held the die at 58–59 °C).
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E138 — int8's B side on the minion rail: E130's B list again, the rail as the registered primary (Q137; card runs 2026-11-02, 15:35–16:03 PST, aifoundry3) — pre-registered
+
+**Asked:** item 12 of section 11, "int8 at gate level", the part [E130](../reports/data/2026-11-02-e130-int8-netlists/README.md) left open:
+does the int8 multiplier recode B? **Pre-registered** in [`tools/claims-v3/e138/README.md`](../../tools/claims-v3/e138/README.md)
+(`07f59099`, committed 15:32:57, on origin/main 15:33:00 PST), before the claim and before any E138 run. Data:
+[`docs/reports/data/2026-11-02-e138-int8-b-rail/`](../reports/data/2026-11-02-e138-int8-b-rail/README.md) (`a3195392`; corrected after
+verification, `748d185b`, C1–C7: wording, and a disclosure; no rule, prediction, number or verdict changed). aifoundry3's card 0 at
+600 MHz, TDP 0 W / 65 °C at all 21 config reads, never set; **28.2 card-minutes** of 30; the smoke and nine of the ten registered B
+blocks (13810–13818, 306 of 306 runs; the budget rule stopped before 13819, as projected). Nine command kinds, all READs, two of
+them PMIC voltage-register reads (allowed); no `--reset-ms`. **Disclosed (C7):** at about 15:41 PST, during blocks 13811 and 13812,
+another lane of the run made a no-device setup on aifoundry3's host; post hoc without those blocks the verdicts are unchanged.
+
+**Results** (`scored.json`; 95% over blocks).
+- On the rail: **B odd − even +35.9 [+30.5, +41.4] board-equivalent fJ** a flipped bit (+29.1 [+24.7, +33.6] rail fJ); **odd ÷ even
+  1.91 [1.71, 2.16]**. On the board +32.5 [+17.0, +48.0] fJ and 1.88 [1.40, 2.62]. The frozen bands: Booth on B [54.8, 66.2] fJ and
+  [4.16, 4.39]; no recoder [0.5, 1.2] fJ and [1.05, 1.09].
+- **R1n and R1q NEITHER (BETWEEN):** neither netlist group's B list fits the card, at every arm and for any rail-to-board scale from
+  0.61 to 20. **R1 INCONCLUSIVE:** the interval's low end is 0.2 fJ short of the line T_B = 30.68, so **R4 stays INCONCLUSIVE between
+  BOOTH ON B / NO BOOTH**. Pooled with E130's six rail blocks (reported, not a verdict): +34.8 [+31.6, +38.1], RECODED.
+- Per bit (rail fJ, bits 0–7): 17.9, 56.2, 31.2, 65.4, 46.8, 61.6, 47.4, 82.7 (E130: 23.4, 57.5, 35.1, 62.8, 42.9, 61.7, 47.7, 81.8).
+  The ratio is 1.9, not 4.3, because the even bits cost about 2.2× what Booth on B predicts (39.4 against 17.8–18.3 board-equivalent
+  fJ) while the odd bits match it (75.4 against 78.1–78.5; C1).
+- **The prediction:** E130's rail prices of B bits 0–6 are predicted from E138's to **3.2 rail fJ rms (7%) with a price per position**,
+  7.2 (15%) with an odd and an even price, and 13.6 (29%) with one flat price. The session's rail block sd was 5.77 rail fJ, 2.1×
+  E130's, so the half-width came out 5.5 fJ against the planned 2.6.
+
+**Scored:** R1 INCONCLUSIVE; R1n, R1q NEITHER (BETWEEN); R4 INCONCLUSIVE; no verdict arm-sensitive; every frozen expectation met.
+**What it changes.** Item 12: answered for prediction (B's bits need a price per position, or at least a parity weight of about
+1.9, not one price; neither netlist group's B list fits), and open as a registered structural verdict. The A side stands as E130 left
+it. Q137(m)'s M6 does not carry per-position B prices.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E139 — the memory path's split again, eight headline passes (Q137; card runs 2026-11-02, 16:04–16:41 PST, aifoundry3) — pre-registered
+
+**Asked:** item 10 of section 11, "The memory path", the two verdicts [E132](../reports/data/2026-11-02-e132-memory-split/README.md) left
+UNRESOLVED: R3 (the encoded part at the DDR die rail) and R4 (the encoded part on the board). **Pre-registered** in
+[`tools/claims-v3/e139/README.md`](../../tools/claims-v3/e139/README.md) (`96b141f8`, committed 15:35:59 PST), before the claim and
+before any E139 pass: E132's images, rules and constants unchanged, the primary E139's passes alone. Data:
+[`docs/reports/data/2026-11-02-e139-memory-split-more-passes/`](../reports/data/2026-11-02-e139-memory-split-more-passes/README.md) (`c091be99`;
+corrected after verification, `3d179a42`, C1–C6; no rule, prediction, number or verdict changed). aifoundry3's card 0 at 600 MHz in
+all 20,469 samples, TDP 0 W / 65 °C at both config reads, never set; **36.9 card-minutes** of 45: the smoke 13901, the warm-up 13910
+and eight headline passes 13911–13918 (one more than projected, by the queue's registered rule, D1). E132's nine command kinds, all
+READs. 🛑 **Disclosed after verification (C1, D5): the registered 65 W board stop never read a sample.** `watch_e139.py` followed
+`telemetry.jsonl`, which the sampler writes only at a pass's end (the live file is `telemetry.jsonl.raw`), and its test passed on a
+file of that name; the die stop (70 °C) was live, and the board peaked at 53.52 W.
+
+**Results** (`e139.json`, primary: dips removed, leakage `auto`).
+- **R4 PAYS (SETTLED):** the encoded part costs **E56 +0.213 W [0.150, 0.275]** and **E448 +0.213 W [0.128, 0.298]**, about **0.46
+  pJ an encoded toggle** on the primary (E132 alone +0.118 [−0.002, +0.237] and +0.166 [0.121, 0.210]; the size is arm-dependent,
+  E448 0.55–0.58 pJ at the leakage arms and with dips kept, C4).
+- **R3 ENCODED (SETTLED):** on the DDR die rail RE64 **−0.751 mV [−0.979, −0.524]** while the raw control `el_64z` stays still,
+  −0.013 [−0.050, +0.025]. Both settle on E139's passes alone; the pool with E132 agrees (`E56` +0.172, `E448` +0.193 W).
+- The re-tests: R1 PASS (the tie to E110); R2 PASS, EDGES (`R_4` +0.290 W [0.244, 0.336], off every metered rail, the rails summing
+  −0.021 W); R5 PASS (pooled with E132 it FAILS, reported only: the NoC rail's `R_2` narrows to absent against E99's present, C2);
+  R6 PASS (`Hp` +0.308 W [0.233, 0.384], 1.37 pJ a high pin a beat-line).
+- **The prediction:** a model with no encoded term leaves 0.213 W rms on `E56` and `E448`; with E132's frozen +0.185 W per image,
+  **0.028 W**, on passes the term was not fitted on.
+
+**Scored:** R1–R6 PASS (R3 ENCODED, R4 PAYS, both SETTLED on the primary); every verdict the same at every arm.
+**What it changes.** Item 10: the encoded part of the memory path is settled on this card: it pays, about 0.46 pJ an encoded toggle
+(or E132's +0.185 W per image), and moves the DDR die rail, so the power model gains a term it can tie to a reading every run
+records; heat moves only through that ~0.2 W. Open: one card, two images; the 1.0 pJ of a one between the memory shires' logic, the
+PHY and the DRAM; where the 256-bit path sits; E99's refit.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E140 — the blind test of Q137(m)'s M6: power and die rise on blind pool 4 (Q137; card runs 2026-11-02, 16:43–17:15 PST, aifoundry3) — pre-registered
+
+**Asked:** item 6 of section 11, "A power model across kinds", out of sample: Q137(m)'s M6, a refit with per-flip terms and a heat
+term (frozen in `6a713a9f`, 15:56 PST; its predictions for the pool in `03fcd720`, 16:06), against blind pool 4, 25 tiles (11 fp32, 7
+fp16, 7 int8) written by a designer who never saw the model (`67fe20a9`, 15:33). **Pre-registered** in
+[`tools/claims-v3/e140/README.md`](../../tools/claims-v3/e140/README.md) (`aa6c0a54`, committed 16:10:25, pushed 16:10:27 PST), before
+the claim and before any card ran a tile of the pool; M5's frozen predictions for the same tiles are carried beside M6's. Data:
+[`docs/reports/data/2026-11-02-e140-blind4/`](../reports/data/2026-11-02-e140-blind4/README.md) (`1b43bc80`; corrected after verification,
+`88964136`, C1–C4; no rule, prediction, number or verdict changed). aifoundry3's card 0 at 600 MHz, TDP 0 W / 65 °C, never set;
+**31.9 card-minutes** of 35: the smoke 14001 and the four registered passes 14010–14013. **E78's registered pass gates set 14010 and
+14011 aside** (`fp32.randn` spans 2.489 W against the 1.0 W gate; `anchor_pi` drifts +0.715 W against 0.60), readings the size of
+the board meter's dips, so the primary keeps two (D1). Nine command kinds, all READs; highest die 62 °C, board 54.17 W.
+
+**Results** (`scored.json`, `results.md`; measured − M6).
+- **Heat holds:** the die rise over the kinds harness's 4.5 s run, **H1 0.204 °C rms** over the 14 priority-1 float tiles (the nested
+  score's interval 0.188–0.403), **H2 0.164 °C** over the 6 int8 (0.080–0.271), **H3 24 of 25** inside M6's 95% intervals: PASS ×3;
+  bias +0.03 °C; a line through the origin of the kept runs' rise on their board watts, 0.119 °C per W (0.118 with dips removed).
+- **Power passes its rms rules:** **P1 0.406 W** (0.114–0.474) and **P2 0.384 W** (0.101–0.434), PASS. **Coverage fails: P3 19 of 25**
+  inside, against the 21 needed. M6 is **biased high by 0.28 W** (fp32 −0.38, fp16 −0.19, int8 −0.20; rms 0.50, 0.25, 0.37 W); all
+  six misses are over-predictions, two of them the board meter's dips on the kept passes (C2). On the dips-removed arm (four passes)
+  every rule passes: power 0.27 W floats and 0.34 W int8, 21 of 25 inside.
+- **M5 does better on this pool** (C1): P1's tiles 0.337 W rms against M6's 0.406, P2's 0.379 against 0.384, all 25 tiles 0.358
+  against 0.406, M5 better in every format (0.44, 0.15, 0.37 against 0.50, 0.25, 0.37 W).
+- The anchors: `fp32.randn` 24.44, `fp16.randn` 21.85, `int8.full` 7.01 W, against E115's 24.64, 22.07 and 7.15 on this card.
+
+**Scored:** H1, H2, H3, P1, P2 PASS; **P3 FAIL** (arm-sensitive: it passes with dips removed and at leakage 0.1994; P1 fails at
+leakage 0.3803 and 0); heat is not arm-sensitive. The frozen expectation was all six PASS.
+**What it changes.** Item 6: answered for heat over a short run (the die rise ≈ 0.118 °C per board W, about ±0.2 °C on new kinds on
+this card), and **not yet for power**: on new kinds M6 is biased high, its intervals under-cover, and it does no better than M5, so
+its per-flip terms did not improve the out-of-sample power prediction here. The next fit should start from the over-predicted
+tiles' cases (wide exponents beside gated zeros, exponent-only activity, mantissas with many zero low bits) and carry E138's
+per-position int8 B prices and E139's encoded-toggle term.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
 **Lane lessons from E78–E83, recorded for the next registration.** (1) A heat column read from a 2 s window over a
 whole-degree die reading resolves a kind only above about 12 W of switching on these cards: register a longer window,
 or a launch away from a step, before quoting heat for low-power kinds. (2) All six card lanes looked at
@@ -6366,3 +6538,17 @@ half a second of the first call, so a reading taken before the boost is one to t
 fitted on it is post hoc, and its own error at a measured point goes beside each figure it gives elsewhere (E135 C2).
 (62) A chip-against-chip figure needs the same kernel on both: E135's first README set the ET-SoC-1's resident loop
 against an A100's streaming GEMM and drew three contrasts its verifier withdrew (C1); name each figure's kernel.
+
+**Lane lessons from E136–E140 and Q137(m), recorded for the next registration.** (63) A stop is armed only if its watcher reads
+the file the sampler writes live: E139's 65 W watcher followed `telemetry.jsonl`, which exists only after a pass ends, so it read
+no sample all session, and its test passed on a file of that name (E139 C1); test a watcher on a live pass's `.raw` file. (64)
+Score the old model's frozen predictions beside the new one's: E140's registration carried M5's, its first README did not report
+them, and on the pool they beat M6 (0.358 against 0.406 W rms over 25 tiles; E140 C1). (65) A nested leave-one-kind-out score is
+not an out-of-sample bound: M6's nested 0.227 W in fp32 read 0.50 W on blind pool 4, one-sided, and its 95% intervals held 19 of 25
+tiles; register coverage and bias as rules beside the rms. (66) Lessons (31) and (43) held again on aifoundry3: E78's pass gates set
+two of E140's four passes aside on readings the size of board-meter dips, and two of its six power misses were dips on the kept
+passes; register the dips-removed arm as the primary there. (67) A speed law priced from benchmark arms carries their C-store
+frequency: E119's arms store a C tile every 32 ops, E136's GEMMs every 256 (`g4k`) or 64 (`g2k`), and its frozen time per op was
+7–13% slow; give C's stores as a variable before predicting a new kernel (E136 post hoc). (68) Preparing one lane on the host of
+another lane's running card disturbs it: E140's no-device setup ran on aifoundry3's host during E138's blocks 13811–13812 (E138
+C7); prepare on the Intel, or between sessions.

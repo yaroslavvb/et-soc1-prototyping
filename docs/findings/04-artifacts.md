@@ -1096,6 +1096,27 @@ E135, at the owner's OK of 2 November, ran on rented A100s on Modal, so it holds
 
 E135 sent nothing to any ET-SoC-1. On the GPU it read NVML getters only; its one set, the lower cap, was refused (exit 4), and nothing needed restoring. The board's identity is a 12-hex hash of its UUID; the `nvidia-smi -q` text kept in `logs/` also holds the GPU PDI, the Board ID and the PCI bus id, none a secret (C11). The Modal Volume `e135-a100-kinds` still holds the raw logs.
 
+## Q137 published no new page: six data directories, blind pool 4 and the harness trees (2 November 2026)
+
+Q137's lanes built **no new space**. What they made is in this repository; the kinds page (A25) and the hubs take it after these
+records, in Q137's integration. The short names are the ones [05-claims.md](05-claims.md), "Q137", uses. Each line's first sha is
+the data, the last the corrections. "Item N" is the kinds page's section 11 as at `9fdb534bbc77`, and each data README's first lines
+name the item it answers and say what it does to the prediction of power and heat.
+
+| What | Where | What is in it |
+|---|---|---|
+| **Q137(m)**, M6: M5 refitted with per-flip terms and a heat term per card, nested leave-one-kind-out, frozen (item 6) | [`reports/data/2026-11-02-q137m-model/`](../reports/data/2026-11-02-q137m-model/README.md) (`6a713a9f`, `03fcd720`) | `fit_m6.py` and `m6_rows.py` (the fit), `m6.json` (the freeze, sha256 `87c17e08…`), `loko-m6.json` and `fit-output.txt`, `rows-m6.json`, `heat-rows.json`, `counts-e123.json` and `counts-blind4.json` (the bench's counts), `bootstrap_m6.py` and its outputs (post hoc), `predict_blind4.py`. Desk only; no verifier of its own (E140's regenerated the freeze byte for byte) |
+| **Blind pool 4**, 25 tiles by an independent designer, frozen before M6 was fitted (item 6) | [`tools/claims-v3/kinds/blind4/`](../../tools/claims-v3/kinds/blind4/README.md) (`67fe20a9`; predictions `03fcd720`) | `make_blind4.py`, `blind4.json`, `SHA256SUMS`, `tiles/`, `real/` (the pythia-70m and Qwen2.5-0.5B cuts), `predictions-blind4.json` and `.md` (M6 and M5, power and die rise) |
+| **E136**, a large GEMM predicted first (item 1), aifoundry2 | [`reports/data/2026-11-02-e136-large-gemm/`](../reports/data/2026-11-02-e136-large-gemm/README.md) (`2303f4c6`, `06df8b01`) | `results.json`, `reduce.txt`, `rederive_e136.py` and `rederive.*` (independent code), `posthoc_e136.py` and `posthoc.*`, raw `aifoundry2/` (queue, admission, config reads, `smoke/`, `s1/`), `logs/` |
+| **E137**, fp16's sign rest on the matched design (item 5), aifoundry1's card 1 | [`reports/data/2026-11-02-e137-fp16-sign-rest/`](../reports/data/2026-11-02-e137-fp16-sign-rest/README.md) (`df05d9f3`, `cca0aaad`) | `e137.json` and its arms, `scored.json`, `results.md`, `posthoc_e137.txt`, `runs*.csv`, `reduce*`, `code.sha256`, `desk/` (the re-derivation, the telemetry maxima), raw `aifoundry1-c1/`, `logs/` |
+| **E138**, int8's B side on the minion rail (item 12), aifoundry3 | [`reports/data/2026-11-02-e138-int8-b-rail/`](../reports/data/2026-11-02-e138-int8-b-rail/README.md) (`a3195392`, `748d185b`) | `e138.json` and its two arms, `scored.json`, `results.md`, `runs*.csv`, `reduce*`, `score.log`, `code.sha256`, raw `aifoundry3/`, `logs/` |
+| **E139**, the memory path's split again (item 10), aifoundry3 | [`reports/data/2026-11-02-e139-memory-split-more-passes/`](../reports/data/2026-11-02-e139-memory-split-more-passes/README.md) (`c091be99`, `3d179a42`) | `e139.json` (primary) and its arms, `e139-pooled.json`, `dips*.json`, `runs.csv`, `passes/` (raw), `logs/` (the watcher's log among them) |
+| **E140**, M6 against blind pool 4 (item 6), aifoundry3 | [`reports/data/2026-11-02-e140-blind4/`](../reports/data/2026-11-02-e140-blind4/README.md) (`1b43bc80`, `88964136`) | `scored.json`, `results.md`, `scored-nodips.json`, `results-nodips.md`, `e140*.json`, `runs*.csv`, `reduce*`, `score*.log`, `code.sha256`, raw `aifoundry3/kinds/`, `logs/` |
+| The harness trees | [`tools/claims-v3/e136/`](../../tools/claims-v3/e136/E136.md) (with `rgm136`, the GEMM's source), [`e137/`](../../tools/claims-v3/e137/E137.md), [`e138/`](../../tools/claims-v3/e138/README.md), [`e139/`](../../tools/claims-v3/e139/README.md), [`e140/`](../../tools/claims-v3/e140/README.md) | each registered and pushed before its claim, with its classified device commands and the checker's output; no frozen rule, prediction or scorer changed since |
+
+Every claim was a clause in the day's one `#community-lab` post (`1566837317765963987`), added and released by rewriting it
+([AGENT.md](../../AGENT.md) §4); the last card held, aifoundry3, got " — released" at 17:15:42 PST.
+
 ## The camera and the details panel (30 September)
 
 For Q74–Q76: the memory levels and the chip diagram (the pages of 28 and 27 September) jumped in the middle of their

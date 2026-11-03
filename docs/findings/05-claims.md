@@ -2517,6 +2517,119 @@ H100, other shapes** (only square, K-contiguous operands ran), and a replicate o
 board). **A like-for-like ET-SoC-1 counterpart:** no large streaming GEMM has run on the ET-SoC-1. **Horace He's pair**
 (item 3), still a question for him.
 
+## Q137: prediction is the goal — a large GEMM predicted first, fp16's sign rest on the matched design, int8's B side on the rail, the memory path's encoded part settled, and the power-and-heat model M6 frozen and tested blind (Mon 2 Nov 2026, week 45; five card experiments on three cards, no WRITE command sent)
+
+The owner's words, Mon 2 Nov 2026 about 15:20 PST: *"yes, run them. The overall goal is to be able to predict the power requirement
+and heat generation of various kinds of numeric computations as accurately as possible."* (Q137; "them" are section 11's items 1, 5,
+12, 10 and 6 of the [kinds page](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open) at `9fdb534bbc77`). Every card run was pre-registered and pushed before its claim and
+sent reads only, under Q136's three rules (no power cycle, read-only PMIC voltage reads, every command classified before the first
+launch). E138, E139 and E140 were re-derived by separate verifiers (holds with fixes); E136 and E137 by their own lanes' independent
+code at the desk; Q137(m) has no verifier of its own, and E140's verifier regenerated its freeze byte for byte. The rows carry the
+corrected figures. Short names, under `docs/reports/data/`: `E136` `2026-11-02-e136-large-gemm/`, `E137`
+`2026-11-02-e137-fp16-sign-rest/`, `E138` `2026-11-02-e138-int8-b-rail/`, `E139` `2026-11-02-e139-memory-split-more-passes/`,
+`E140` `2026-11-02-e140-blind4/`, `QM` `2026-11-02-q137m-model/` (Q137(m)); the pool is `tools/claims-v3/kinds/blind4/`. **How to
+read ±:** a ± or bracket is a 95% interval over independent passes (over blocks in E138) unless the row says otherwise; E136 ran one
+run a cell in one session, so its errors are rms over cells and its T intervals are over launches; Q137(m)'s ± on a coefficient is
+one jackknife s.e. by kind. 🛑 **To carry from here, beside the earlier sections' items:** (23) **a nested leave-one-kind-out score
+is not an out-of-sample bound:** quote M6's power error from E140 (0.41 W rms on new kinds, biased high, 19 of 25 inside its 95%), not
+from its nested score; (24) **for power on new kinds M5 is the better predictor** (E140 C1); (25) **heat over a short run follows the
+board watts** at about 0.118 °C per W on aifoundry3, to about 0.2 °C on new kinds; long holds are not scored out of sample.
+
+### Section 11, item by item, after Q137
+
+| Item | After Q137 | Where |
+|---|---|---|
+| 1. Where a large GEMM falls | **a real large GEMM measured, predicted first:** 4,096³ fp32 (192 MB with C) at 2.173 µs an op at 800 MHz, 3.86 TFLOPS, 7.2% faster than frozen; under aifoundry2's governor random fp32 sustained 800 MHz, so no zeros-against-random speed gap (×0.995) where the GEMM streams to DRAM, and ×1.090 in the L3-held 20 MB GEMM, where random sat at 656 MHz; open: the vendor's own binary, a second session or card | [E136](../reports/data/2026-11-02-e136-large-gemm/README.md) |
+| 5. Where a random sign's ~5 W goes | **fp16's rest located on the matched design too:** the accumulators differing carry 1.001 ± 0.055 of it (R1 MOST), the sums changing −0.001 ± 0.055 (R2 ALMOST NONE), so E128's frozen sentence is met; R4 (the two designs alike) open | [E137](../reports/data/2026-11-02-e137-fp16-sign-rest/README.md) |
+| 6. A power model across kinds | **M6 frozen and tested blind:** heat holds (H1–H3 PASS); power passes its rms rules (0.406, 0.384 W) and fails coverage (19 of 25, P3), biased high by 0.28 W, and M5 does better on the pool (0.358 against 0.406 W) | [Q137(m)](../reports/data/2026-11-02-q137m-model/README.md), [E140](../reports/data/2026-11-02-e140-blind4/README.md) |
+| 10. The memory path | **the encoded part settled:** it pays +0.213 W on both images, about 0.46 pJ an encoded toggle (R4 PAYS), and moves the DDR die rail, −0.751 mV, while the raw control stays still (R3 ENCODED) | [E139](../reports/data/2026-11-02-e139-memory-split-more-passes/README.md) |
+| 12. int8 at gate level | **B's side: neither netlist group fits** on the rail (odd ÷ even 1.91 [1.71, 2.16] against 4.16–4.39 and 1.05–1.09; R1n, R1q NEITHER); Booth on B against none INCONCLUSIVE by 0.2 fJ (R1, R4); per-position B prices predict a second session to 7% | [E138](../reports/data/2026-11-02-e138-int8-b-rail/README.md) |
+| 2, 3, 4, 7, 8, 9, 11, 13, 14, 15, 16 | not in this round | — |
+
+### How well power and heat can be predicted, before and after Q137
+
+| What is predicted | Before (the prior rule or model) | After (Q137) | Kind | Source | Verify at |
+|---|---|---|---|---|---|
+| **Power on new kinds** (W over the format's zeros, aifoundry3, 600 MHz, the resident kinds loop) | M5 on blind pool 3 (E115): 0.29 W rms over 16 float tiles, 0.34 W int8, 18 of 25 inside its intervals | M6 on blind pool 4: **0.406 W rms floats, 0.384 W int8, 19 of 25 inside (P3 FAIL), bias −0.28 W**; M5 on the same pool **0.358 W** over all 25 | M, P→M | E115, E140 | `E140/scored.json`, `primary.reported_m5`; `E140/README.md` §2, §4 |
+| Power, nested leave-one-kind-out (in sample for M5's rows) | M5 as frozen: fp32 0.239, fp16 0.207, int8 0.222 W | M6: **fp32 0.227, fp16 0.179, int8 0.260 W** (489 float rows from 22 experiments; int8 worse, resolved) | F | Q137(m) | `QM/loko-m6.json`; `QM/bootstrap-m6.json` |
+| **Heat on new kinds** (die rise over a 4.5 s run) | the prior rule S × 0.118 °C per board W, nested: 0.277 / 0.288 / 0.190 °C (fp32 / fp16 / int8) | M6 on blind pool 4: **0.204 °C rms floats, 0.164 int8, 24 of 25 inside**; nested 0.304 / 0.283 / 0.175 °C | M, P→M | Q137(m), E140 | `E140/scored.json`, `verdicts`; `QM/m6.json` heat |
+| Heat per board W (the coefficient itself) | 0.118 °C per W (E97's rule) | 0.1184 (aifoundry3) and 0.1155 (aifoundry1's card 1) fitted; 0.119 measured on E140's kept runs | F, M | Q137(m), E140 | `QM/m6.json`; `E140/README.md` §3 |
+| A large GEMM's burst power, sustained clock and die (aifoundry2, governed) | — (no large GEMM had run) | burst power **3.37 W rms** (20 cells), sustained clock 25.9 MHz rms on G2, die **0.82 °C** (bursts) and **1.60 °C** (sustained, on G2); time per op 7–13% slow (R1, R2 FAIL) | P→M | E136 | `E136/results.json`, `errors` |
+| fp16 sign contrasts (3–5 W) | M4 on E128's two passes, 0.211 W rms (post hoc) | M4 frozen on E137's six passes, **0.125 W rms**, 0 of 7 outside (R7 PASS) | P→M | E137 | `E137/scored.json`, `primary.rules` |
+| int8 B single-bit prices | one flat price: 29% rms (13.6 rail fJ) | a price per position: **7%** (3.2 rail fJ); parity 15% | M, D | E138 | `E138/scored.json`, `out_of_sample_e130` |
+| The memory path's encoded part (DRAM-bound images) | no encoded term: 0.213 W rms | E132's frozen +0.185 W per image: **0.028 W rms** | P→M | E139 | `E139/README.md` §3 |
+
+### A large GEMM predicted first (E136, aifoundry2 under its own governor)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **The large GEMM's time per op** | `g4k` (4,096³, 192 MB with C): **2.173 µs** an op at 800 MHz in fp32, 2.175 fp16 and int8; 7.2% / 7.3% / 12.5% faster than frozen (R1 point FAIL ×3; placement A HELD fp32, fp16, OUTSIDE int8); ×1.089 for the clock's ×1.333; `g2k` (20 MB) 1.326 µs fp32, 10.7–12.8% faster than frozen (R2 FAIL ×3) | M, P→M | Q137, E136 | `E136/results.json`, `per_gemm`, `rules.R1`, `rules.R2` |
+| **Its rate** | bursts at 800 MHz: `g4k` 3.86 TFLOPS fp32, 7.73 fp16, 15.47 TOPS int8; `g2k` 6.30, 12.64, 23.89 | M | E136 | `E136/results.json`, `per_gemm`, `cells` |
+| **Zeros against random** | `g4k`: random fp32 sustained 800.0 MHz at 57.5 W, die 63.3 °C; zeros ÷ random ×0.995 sustained, ×1.000 burst; the kind moves T by at most 0.42% (R7 PASS); `g2k`: random fp32 held to 656.3 MHz at 55.2 W, 65.7 °C, zeros ÷ random **×1.090** sustained (G1 frozen ×1.079; R5 PASS ×14, ×9) | M, P→M | E136 | `E136/results.json`, `cells`, `gaps`, `rules.R5`, `rules.R7` |
+| The kind's power on `g4k` | fp32 bursts at 800 MHz: zeros 33.58 W, sparse50 42.07, real (E101's tiles) 52.36, random 52.52; sustained die zeros 57.3 °C, random 63.3 | M | E136 | `E136/results.json`, `cells.g4k-fp32-*` |
+| **The prediction's errors** | burst board power 3.37 W rms (mean −2.27; R3 15 of 20 in 4 W); sustained power 4.12 (G1) / 2.28 W (G2); sustained clock 35.7 / 25.9 MHz (R4: G2 better); die 0.82 °C bursts (R6 PASS ×20), 3.35 / 1.60 °C sustained; rates 10–12% low (R8 FAIL) | P→M | E136 | `E136/results.json`, `errors`, `rules` |
+| Why the time failed (post hoc) | the frozen law priced a missing line from E119's arms (a C store every 32 ops; the GEMM every 256 or 64); priced at E126's `c16s` the `g4k` error falls to −1.5% / −1.4% / −7.1%; `g2k` unexplained | D | E136 | `E136/posthoc.txt` §1 |
+| Safety | board peak 76.09 W, die mean 66 °C, under the session's 93 W and 80 °C stops; READs only, 23.7 card-minutes | M | E136 | `E136/README.md` "Safety", "Device commands sent" |
+
+### fp16's sign rest on the matched design (E137, aifoundry1's card 1)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **fp16's rest goes with the accumulators differing** | matched tiles: (`b_B_zm` − `z_s`) / (`b_B_wm` − `z_s`) = **1.001 ± 0.055** (R1 MOST); E108's design ported 1.026 ± 0.053 (R3 MOST); six kept passes | M, P→M | Q137, E137 | `E137/scored.json`, `primary.rules` |
+| **Almost none with the sums changing** | (`b_B_wm` − `b_B_zm`) / (`b_B_wm` − `z_s`) = **−0.001 ± 0.055** (R2 ALMOST NONE; INCONCLUSIVE at dips kept and leak 0); 0.002 ± 0.193 W of a 3.323 ± 0.166 W rest | M, P→M | E137 | `E137/scored.json`, `primary.quantities` |
+| The step, and the session | `signs` − `ones` 4.802 ± 0.173 W (R5 PASS, E108 4.98); R4 INCONCLUSIVE −0.026 ± 0.103; R8 INCONCLUSIVE; S1 PASS | M | E137 | `E137/scored.json` |
+| **M4's sign term, out of sample** | seven fp16 sign contrasts 0.125 W rms, 0 of 7 outside (R7 PASS); eight items 0.130 W rms (R6 PASS) | P→M | E137 | `E137/scored.json`, `primary.rules.E137-R6`, `E137-R7` |
+| Per bit (post hoc) | 32.7 ± 1.3 fJ per differing lane C-read and result bit (matched held tile); 44.6 ± 1.4 on E108's design | D | E137 | `E137/posthoc_e137.txt` B |
+
+### int8's B side on the minion rail (E138, aifoundry3)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **B odd − even on the rail** | **+35.9 [+30.5, +41.4]** board-equivalent fJ (+29.1 [+24.7, +33.6] rail fJ); odd ÷ even **1.91 [1.71, 2.16]**; on the board +32.5 [+17.0, +48.0] and 1.88 [1.40, 2.62]; nine blocks | M, P→M | Q137, E138 | `E138/scored.json`, `primary` |
+| **Neither netlist group fits** | Booth on B's frozen band [54.8, 66.2] fJ and [4.16, 4.39]; no recoder's [0.5, 1.2] and [1.05, 1.09]: R1n and R1q NEITHER (BETWEEN) at every arm; R1 INCONCLUSIVE, 0.2 fJ short of T_B 30.68; R4 INCONCLUSIVE between BOOTH ON B / NO BOOTH; pooled with E130 (reported) +34.8 [+31.6, +38.1], RECODED, not a verdict | M, P→M | E138 (C5) | `E138/scored.json`, `verdicts`, `pool_with_e130` |
+| Why 1.9 | the odd bits match Booth on B (75.4 against 78.1–78.5 board-equivalent fJ); the even bits cost about 2.2× its prediction (39.4 against 17.8–18.3) | D | E138 (C1) | `E138/README.md` §3 |
+| **Per-position prices predict a second session** | E130's B bits 0–6 from E138's: 3.2 rail fJ rms (7%) per position, 7.2 (15%) parity, 13.6 (29%) flat | D | E138 | `E138/scored.json`, `out_of_sample_e130` |
+
+### The memory path's encoded part, settled (E139, aifoundry3)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **The encoded part pays on the board** | `E56` **+0.213 W [0.150, 0.275]**, `E448` **+0.213 W [0.128, 0.298]**, about **0.46 pJ an encoded toggle** (R4 PAYS, SETTLED; E448 0.55–0.58 pJ at the leakage arms and with dips kept); eight passes | M, P→M | Q137, E139 (C4) | `E139/e139.json`; `E139/e139-leak*.json`, `e139-unfiltered.json` |
+| **It moves the DDR die rail** | RE64 **−0.751 mV [−0.979, −0.524]**; the raw control `el_64z` −0.013 [−0.050, +0.025] (R3 ENCODED, SETTLED) | M, P→M | E139 | `E139/e139.json` |
+| The re-tests | R1 PASS; R2 PASS, EDGES (`R_4` +0.290 W [0.244, 0.336], off every rail); R5 PASS (pooled FAIL, reported only: the NoC rail's `R_2` absent against E99's present); R6 PASS (`Hp` +0.308 W [0.233, 0.384], 1.37 pJ a high pin a beat-line) | M, P→M | E139 (C2) | `E139/e139.json`, `E139/e139-pooled.json` |
+| The term, out of sample | no encoded term 0.213 W rms on `E56`, `E448`; with E132's frozen +0.185 W per image 0.028 W | P→M | E139 | `E139/README.md` §3 |
+| 🛑 The board stop | the registered 65 W stop never read a sample (its watcher followed `telemetry.jsonl`, not the live `.raw`); the die stop was live; board peak 53.52 W | M | E139 (C1, D5) | `E139/logs/` (the watcher's log) |
+
+### The power-and-heat model M6, frozen (Q137(m), at the desk) and tested blind (E140, aifoundry3)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **M6, frozen** | floats `G6_gtr_psgn_fields` (a gate state change about 157.8 ± 18.4 fJ; bench terms mult 1.544, add32 1.661, add16 1.592, rest 2.462, clk 1.054 fJ; the field terms share variance with the bus count and are a predictor, not a price list); int8 `J1_gtr` (its gate term −46.2 ± 28.2 fJ, not physical); heat `H2_per_card_runlength`, 0.1184 °C per board W on aifoundry3 and 0.1155 on card 1 over a 4.5 s run; `m6.json` sha256 `87c17e08…`, pushed `6a713a9f` 15:56 PST, after the pool (`67fe20a9`, 15:33) | F | Q137(m) | `QM/m6.json`; `QM/README.md` §2 |
+| Nested leave-one-kind-out | power: M5 as frozen 0.239 / 0.207 / 0.222 W → M6 0.227 / 0.179 / 0.260 (fp32 / fp16 / int8); on the nine experiments M5 never saw, fp16 0.250 → 0.178 (resolved), int8 0.211 → 0.243 (worse); heat: S × 0.118 0.277 / 0.288 / 0.190 °C → M6 0.304 / 0.283 / 0.175 | F | Q137(m) | `QM/loko-m6.json`, `QM/bootstrap-m6.json` |
+| **Heat holds on new kinds** | H1 0.204 °C rms (14 float tiles), H2 0.164 (6 int8), H3 24 of 25 inside: PASS ×3; bias +0.03 °C; 0.119 °C per board W through the origin on the kept runs | M, P→M | E140 | `E140/scored.json`, `verdicts`; `E140/README.md` §3 |
+| **Power on new kinds** | P1 0.406 W, P2 0.384 W rms (PASS); **P3 19 of 25 inside, FAIL**; bias −0.28 W (fp32 −0.38, fp16 −0.19, int8 −0.20), every miss an over-prediction, two of six meter dips; dips removed: all six PASS (0.27 W floats, 0.34 int8, 21 of 25) | M, P→M | E140 (C2) | `E140/scored.json`; `E140/scored-nodips.json` |
+| **M5 beats M6 on the pool** | P1's tiles 0.337 against 0.406 W; P2's 0.379 against 0.384; all 25 0.358 against 0.406; M5 better in every format | M, P→M | E140 (C1) | `E140/scored.json`, `primary.reported_m5`; `predictions-e140.json`, `tiles.*.power_m5` |
+| The pass gates | two of four passes kept (14012, 14013): 14010's `fp32.randn` span 2.489 W, 14011's `anchor_pi` drift +0.715 W, each the size of a board-meter dip (D1) | M | E140 | `E140/README.md` "Results" |
+
+### What Q137 refuted, superseded or withdrew
+
+| Was | Now | Where |
+|---|---|---|
+| (the Q136 section; E128) fp16's rest not located on the matched design, the sums' share not established (R8, R9 INCONCLUSIVE at two passes) | located: 1.001 ± 0.055 with the accumulators differing, −0.001 ± 0.055 with the sums changing, six passes | E137 |
+| (the Q136 section; E132) the encoded part's two verdicts UNRESOLVED, its board cost not separated from the leakage footing | settled on the primary: PAYS (+0.213 W on both images, about 0.46 pJ an encoded toggle) and ENCODED at the DDR die rail; no verdict moves at an arm | E139 |
+| (the Q136 section; E130) B's side read only as straddling the line between Booth on B and no recoder | on the rail neither group's band holds (1.91 against 4.16–4.39 and 1.05–1.09); the structural verdict still INCONCLUSIVE, by 0.2 fJ | E138 |
+| (Q137(m)) M6's nested 0.207 W for the floats against M5's 0.226 as a gain in prediction | not out of sample: on blind pool 4 M6 reads 0.406 W rms and M5 0.358, M6 biased high and its intervals under-covering (19 of 25) | E140 |
+| (the kinds page; Q134, Q136) "a large GEMM itself" not run on this chip | 4,096³ fp32 measured on aifoundry2: 2.173 µs an op at 800 MHz, no zeros-against-random speed gap where it streams to DRAM | E136 |
+| (E136's frozen speed law, from E119's arms) a large GEMM's time per op | 7–13% slow; with C's store frequency priced at `c16s`, `g4k` within 1.5% in fp32 and fp16 (post hoc) | E136 |
+
+**Not established by Q137.** **A large GEMM:** the vendor's own binary, a second session or card, and why `g2k` runs 11–13% faster
+than any arm says (E136). **Signs:** whether the two designs give the same share (R4), another card or clock, and heat (E137). **Which
+multiplier:** Booth on B against none as a registered verdict, and glitches (E138). **The memory path:** another card or other
+images, the 1.0 pJ split, the 256-bit path's place, E99's refit (E139). **The model:** a power model whose stated intervals cover on
+new kinds; M6 with E138's per-position B prices and E139's encoded term; the cases of its six over-predicted tiles; long-hold heat out
+of sample (M6's step response and plateaus are quoted from E97, E111 and E133, not scored); any card but aifoundry3 for the blind pool
+(Q137(m), E140). **Not in this round:** items 2, 3, 4, 7, 8, 9, 11 and 13–16, and every governor move.
+
 ## Ridge points (derived; no card time)
 
 Peak compute divided by each level's measured bandwidth, at 600 MHz on 1,024 minions. Kind `D`: arithmetic on
