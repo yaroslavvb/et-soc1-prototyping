@@ -1,0 +1,42 @@
+2026-11-02 22:11:58 PST session start (budget anchor T0 22:11:58 PST)
+HARNESS OK: 25 files match predictions-e148.json
+2026-11-02 22:11:58 PST dmcmd_audit preflight rc=0 (dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none))
+No process holds an ET-SoC-1 device node or card lock.
+2026-11-02 22:11:58 PST config config-session-start.json: {"tdp_w":65,"temp_threshold_c":65,"power_state":3,"power_state_name":"low_power","minion_mhz":600,"minion_mv":499}
+2026-11-02T22:11:59 [aifoundry1-c1] e148-stoptest p14802 begins (die 51 C) -> /home/yaroslavvb/nekko/build/claims-v3/aifoundry1-c1/e148-stoptest/p14802
+22:12:03 [aifoundry1-c1] E78 pass 14802: 7 runs of 7 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 2 s quiet; cap 72 C; ET_DEVICES=1; tiles verified against kinds.json
+E148 die stop: hottest minion-shire reading 65.0 C >= 1.0 C (sample t_ms 1793686323352, read 0.102 s after it was taken, from telemetry.jsonl.raw)
+2026-11-02T22:12:03 [aifoundry1-c1] E148 stop-path test (die): run_e148 exit 6
+22:12:04 [aifoundry1-c1] E78 pass 14802: 7 runs of 7 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 2 s quiet; cap 72 C; ET_DEVICES=1; tiles verified against kinds.json
+E148 board-power stop: board_w 29.57 W >= 1.0 W (sample t_ms 1793686324653, read 0.084 s after it was taken, from telemetry.jsonl.raw)
+2026-11-02T22:12:04 [aifoundry1-c1] E148 stop-path test (board): run_e148 exit 6
+E148 watcher board-power stop: board_w 29.77 W >= 1.0 W (sample t_ms 1793686325754, read 0.031 s after it was taken, from telemetry.jsonl.raw)
+E148 stop-path test (watch): the watcher wrote STOP: E148 watcher board-power stop: board_w 29.77 W >= 1.0 W (sample t_ms 1793686325754, read 0.031 s after it was taken, from telemetry.jsonl.raw)
+2026-11-02T22:12:05 [aifoundry1-c1] E148 stop-path test (watch): run_e148 exit 6
+2026-11-02T22:12:12 [aifoundry1-c1] e148-stoptest p14802 ends: ok tiers 1,2 stoptest
+2026-11-02 22:12:12 PST stop-path test rc=0: die:rc=6 board:rc=6 watch:rc=6  STOP lines: 3
+2026-11-02T22:12:14 [aifoundry1-c1] e148-smoke p14801 begins (die 51 C) -> /home/yaroslavvb/nekko/build/claims-v3/aifoundry1-c1/e148-smoke/p14801
+22:12:17 [aifoundry1-c1] E78 pass 14801: 7 runs of 7 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 2 s quiet; cap 72 C; ET_DEVICES=1; tiles verified against kinds.json
+22:12:20 [aifoundry1-c1] pass 14801 #0 anchor_pi: 6 launches, start 51.0 C (hot 51.0) after 0 heats, 0.0 s, quiet 3600.18 s
+22:12:25 [aifoundry1-c1] pass 14801 #1 fp32.zeros: 6 launches, start 51.0 C (hot 52.0) after 0 heats, 1.9 s, quiet 2.09 s
+22:12:30 [aifoundry1-c1] pass 14801 #2 int8.zeros: 6 launches, start 51.0 C (hot 51.0) after 0 heats, 1.9 s, quiet 2.09 s
+22:12:34 [aifoundry1-c1] pass 14801 #3 m0.int8.zeros: 6 launches, start 51.0 C (hot 51.0) after 0 heats, 1.9 s, quiet 2.09 s
+22:12:39 [aifoundry1-c1] pass 14801 #4 m0r1.fp32.zeros: 6 launches, start 51.0 C (hot 51.0) after 0 heats, 1.9 s, quiet 2.09 s
+22:12:43 [aifoundry1-c1] pass 14801 #5 m0r2.fp32.zeros: 6 launches, start 51.0 C (hot 51.0) after 0 heats, 1.9 s, quiet 2.09 s
+22:12:48 [aifoundry1-c1] pass 14801 #6 m0r2.int8.zeros: 6 launches, start 51.0 C (hot 51.0) after 0 heats, 1.9 s, quiet 2.09 s
+22:12:51 [aifoundry1-c1] done
+2026-11-02T22:12:57 [aifoundry1-c1] e148-smoke p14801 ends: ok tiers 1,2 smoke
+2026-11-02 22:12:57 PST smoke rc=0
+smoke anchor_pi: 6 launch records, cycles per op 546.001, arows 16, acols 16, row_mask 0xffff
+smoke fp32.zeros: 6 launch records, cycles per op 546.001, arows 16, acols 16, row_mask 0xffff
+smoke int8.zeros: 6 launch records, cycles per op 318.001, arows 16, acols 16, row_mask 0xffff
+smoke m0.int8.zeros: 6 launch records, cycles per op 318.001, arows 16, acols 16, row_mask 0x0000
+smoke m0r1.fp32.zeros: 6 launch records, cycles per op 62.0, arows 1, acols 16, row_mask 0x0000
+smoke m0r2.fp32.zeros: 6 launch records, cycles per op 96.0, arows 2, acols 16, row_mask 0x0000
+smoke m0r2.int8.zeros: 6 launch records, cycles per op 94.0, arows 2, acols 16, row_mask 0x0000
+SMOKE-GATE PASS {'bad': [], 'missing': []}
+2026-11-02 22:12:57 PST smoke gate passed: queue starts
+2026-11-02 22:45:56 PST queue: 22:45:56 e148: done, 10 passes, at T0+2038 s
+2026-11-02 22:45:56 PST config config-session-end.json: {"tdp_w":65,"temp_threshold_c":65,"power_state":1,"power_state_name":"managed_power","minion_mhz":600,"minion_mv":499}
+No process holds an ET-SoC-1 device node or card lock.
+2026-11-02 22:45:56 PST session end

@@ -1,0 +1,12 @@
+E148 post hoc (deciding nothing); primary reduction, 10 passes; residuals paired inside each pass, mean +- 95% t (9 df)
+  W, new-address reads (registered count): factor +0.4225; predicts D21 +0.316 +- 0.035 W from this session; D21 - prediction -0.156 +- 0.077 W -> EXCLUDED
+  T, 64-bit A reads into TenTMP (registered count): factor -0.6069; predicts D21 -0.453 +- 0.051 W from this session; D21 - prediction +0.613 +- 0.136 W -> EXCLUDED
+  walk in address-bit toggles (count chosen after the data): factor +0.2254; predicts D21 +0.168 +- 0.019 W from this session; D21 - prediction -0.009 +- 0.085 W -> consistent
+  C, per cycle (registered count): factor +0.0506; predicts D21 +0.045 +- 0.004 W from this session; D21 - prediction +0.115 +- 0.098 W -> EXCLUDED
+  one-term prices from N - N1 at sixteen rows: 94.8 +- 10.6 fJ a TenC read at a new address (7.88e12 a second), or 50.5 +- 5.7 fJ an address-bit toggle (1.48e13 a second)
+  design note, the bench's counts a second relative to sixteen rows' (int8 at the card's cycles; fp32 reads TenC at one address):
+    R 2: new-address reads 0.423, address-bit toggles 0.226; cycles int8 94, fp32 96
+    R 3: new-address reads 0.542, address-bit toggles 0.385; cycles int8 110, fp32 128
+    R 5: new-address reads 0.700, address-bit toggles 0.597; cycles int8 142, fp32 192
+    R 6: new-address reads 0.755, address-bit toggles 0.671; cycles int8 158, fp32 224
+    R 8: new-address reads 0.837, address-bit toggles 0.781; cycles int8 190, fp32 288
