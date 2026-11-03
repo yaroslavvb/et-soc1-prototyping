@@ -1,0 +1,75 @@
+C1. THE BOARD EXPONENT FROM THE START-RAMP SLOPES, BY THE 58 C REFERRAL'S LEAKAGE SLOPE PER CLOCK (E64 + E80 + E83, never E143)
+  check: surface_hpl.LEAK_W_PER_C 0.442; 210 runs; this re-implementation at 0.442 vs powers() max |d| 0.000 W, vs the committed p_ref / p_ref58_w 0.000 W
+  V (reads, aifoundry2 busy means without E143): 0.5180 / 0.5679 / 0.6183 V; V^2 gives s(700) 1.4025, s(800) 1.8999
+  E60_0.442_every_clock (the lane's)  (k600 0.4420, k700 0.4420, k800 0.4420 W/C)
+    s(800) per-experiment intercepts: all_runs s 2.0577 +- 0.0119 n 2.45 +- 0.03 (210) | post_ramp_P600 s 2.0484 +- 0.0052 n 2.42 +- 0.01 (89) | ramp_only_runs s 2.0048 +- 0.0292 n 2.30 +- 0.08 (107)   [common intercept, all runs: s 2.0559 +- 0.0117 n 2.45]
+    s(700) per-experiment intercepts: all_runs s 1.4771 +- 0.0090 n 2.56 +- 0.07 (201) | post_ramp_P600 s 1.4804 +- 0.0131 n 2.59 +- 0.10 (89) | ramp_only_runs s 1.4425 +- 0.0089 n 2.30 +- 0.07 (98)   [common intercept, all runs: s 1.4756 +- 0.0089 n 2.55]
+    C1b late - ramp P600 over 89 runs: mean -0.058 W (median -0.160); slope against the load -0.0124 +- 0.0076 W/W; die late - ramp +4.7 C (medians 58 / 62 C); lags {2: 56, 0: 3, 1: 30}
+  E66_0.2936_at_600, 0.3678_at_700, E60_0.442_at_800  (k600 0.2936, k700 0.3678, k800 0.4420 W/C)
+    s(800) per-experiment intercepts: all_runs s 1.9958 +- 0.0092 n 2.28 +- 0.03 (210) | post_ramp_P600 s 1.9907 +- 0.0063 n 2.26 +- 0.02 (89) | ramp_only_runs s 2.0063 +- 0.0241 n 2.31 +- 0.07 (107)   [common intercept, all runs: s 1.9946 +- 0.0091 n 2.27]
+    s(700) per-experiment intercepts: all_runs s 1.4543 +- 0.0086 n 2.39 +- 0.06 (201) | post_ramp_P600 s 1.4524 +- 0.0133 n 2.38 +- 0.10 (89) | ramp_only_runs s 1.4573 +- 0.0081 n 2.42 +- 0.06 (98)   [common intercept, all runs: s 1.4534 +- 0.0085 n 2.39]
+    C1b late - ramp P600 over 89 runs: mean +0.627 W (median +0.492); slope against the load +0.0196 +- 0.0080 W/W; die late - ramp +4.7 C (medians 58 / 62 C); lags {2: 57, 0: 3, 1: 29}
+  no_referral  (k600 0.0000, k700 0.0000, k800 0.0000 W/C)
+    s(800) per-experiment intercepts: all_runs s 1.9449 +- 0.0158 n 2.13 +- 0.05 (210) | post_ramp_P600 s 1.9126 +- 0.0120 n 2.04 +- 0.04 (89) | ramp_only_runs s 2.0942 +- 0.0248 n 2.55 +- 0.07 (107)   [common intercept, all runs: s 1.9468 +- 0.0155 n 2.14]
+    s(700) per-experiment intercepts: all_runs s 1.4622 +- 0.0114 n 2.45 +- 0.08 (201) | post_ramp_P600 s 1.4294 +- 0.0133 n 2.21 +- 0.10 (89) | ramp_only_runs s 1.5339 +- 0.0137 n 2.97 +- 0.10 (98)   [common intercept, all runs: s 1.4625 +- 0.0113 n 2.45]
+    C1b late - ramp P600 over 89 runs: mean +2.009 W (median +1.860); slope against the load +0.0867 +- 0.0115 W/W; die late - ramp +4.7 C (medians 58 / 62 C); lags {2: 55, 0: 2, 1: 32}
+  sweep of the 600 MHz slope (700 interpolated, 800 at 0.442; per-experiment intercepts; s(800) and n):
+    k600 0.0000: s(800) 1.8371 +- 0.0220, n all runs 1.81 +- 0.07, post-ramp P600 1.89 +- 0.07, ramp-only runs 2.19
+    k600 0.1000: s(800) 1.8963 +- 0.0172, n all runs 1.99 +- 0.05, post-ramp P600 2.02 +- 0.05, ramp-only runs 2.25
+    k600 0.2000: s(800) 1.9504 +- 0.0125, n all runs 2.15 +- 0.04, post-ramp P600 2.15 +- 0.03, ramp-only runs 2.29
+    k600 0.2500: s(800) 1.9751 +- 0.0105, n all runs 2.22 +- 0.03, post-ramp P600 2.21 +- 0.03, ramp-only runs 2.30
+    k600 0.2936: s(800) 1.9958 +- 0.0092, n all runs 2.28 +- 0.03, post-ramp P600 2.26 +- 0.02, ramp-only runs 2.31
+    k600 0.3500: s(800) 2.0218 +- 0.0090, n all runs 2.35 +- 0.03, post-ramp P600 2.33 +- 0.01, ramp-only runs 2.31
+    k600 0.4000: s(800) 2.0425 +- 0.0101, n all runs 2.41 +- 0.03, post-ramp P600 2.38 +- 0.01, ramp-only runs 2.31
+    k600 0.4420: s(800) 2.0577 +- 0.0119, n all runs 2.45 +- 0.03, post-ramp P600 2.42 +- 0.01, ramp-only runs 2.30
+
+C1c. E143 THROUGH THE LANE'S CHAIN AT THE CORRECTED EXPONENT (36 tiles, registered groups, measured - predicted; post hoc, E143 in no fit)
+  check: A0, A2 and A3 recomputed here equal clock-voltage.json's arms to 1.7e-07; A5c re-refers 35 E64 runs and 175 E80/E83 runs
+  A2_recomputed_n2                           s800 1.8999 W* 65.570 | governed clk 6.57 (-4.87) W 1.609 (+1.181) | pinned clk 1.01 (-0.15) W 1.188 (-0.811) | rise 0.586 C | D gov 2.577 (+2.334) pin 1.038 (+0.546) | zeros fp16 -1.11, fp32 -1.19, int8 -1.32
+  A3_recomputed_n2.43                        s800 2.0503 W* 65.567 | governed clk 6.93 (+5.01) W 1.646 (+1.020) | pinned clk 1.18 (+0.04) W 1.372 (-1.204) | rise 0.599 C | D gov 2.092 (+1.646) pin 0.857 (-0.550) | zeros fp16 -0.58, fp32 -0.66, int8 -0.82
+  A5_n2.28_chain_on_committed_0.442_powers   s800 1.9965 W* 65.570 | governed clk 4.82 (+1.46) W 1.639 (+1.068) | pinned clk 1.08 (-0.05) W 1.257 (-1.057) | rise 0.594 C | D gov 2.248 (+1.874) pin 0.725 (-0.162) | zeros fp16 -0.76, fp32 -0.84, int8 -0.99
+  A5c_n2.28_chain_on_E66_rereferred_powers   s800 1.9965 W* 65.587 | governed clk 4.83 (+1.44) W 1.619 (+1.059) | pinned clk 1.07 (-0.06) W 1.184 (-0.979) | rise 0.587 C | D gov 2.170 (+1.789) pin 0.725 (-0.164) | zeros fp16 -0.77, fp32 -0.70, int8 -0.90
+  A4c_ramp_slopes_at_E66_referral_chain_on_E66_rereferred_powers s800 1.9946 W* 65.625 | governed clk 4.93 (+1.90) W 1.587 (+1.016) | pinned clk 1.07 (-0.06) W 1.242 (-1.047) | rise 0.590 C | D gov 2.200 (+1.830) pin 0.725 (-0.149) | zeros fp16 -0.85, fp32 -0.79, int8 -0.98
+  A0_M7_frozen_rescored                      s800 1.9052 W* 65.580 | governed clk 6.64 (-4.97) W 1.601 (+1.174) | pinned clk 1.01 (-0.15) W 1.185 (-0.804) | rise 0.586 C | D gov 2.568 (+2.327) pin 1.043 (+0.552) | zeros fp16 -1.11, fp32 -1.19, int8 -1.32
+  E118's 600/800 ratio on card 0's own reads (0.5195 / 0.6038 V): measured 0.697 +- 0.057 [registered: each side at]; 0.697 +- 0.061 [matched at 0.0 W/C (E118]; 0.675 +- 0.063 [matched at 0.327346 W/C ]; 0.683 +- 0.016 [minion rail, uncorrected]
+    V^2                                                            n 2.000 -> 0.7401   registered row -0.0429 (-0.8 SE), rail -0.0571 (-3.5 SE)
+    n at E66's slope, all runs                                     n 2.278 -> 0.7098   registered row -0.0125 (-0.2 SE), rail -0.0268 (-1.6 SE)
+    n at E66's slope, post-ramp P600                               n 2.263 -> 0.7113   registered row -0.0141 (-0.2 SE), rail -0.0284 (-1.7 SE)
+    n at E66's slope, ramp-only runs                               n 2.308 -> 0.7066   registered row -0.0094 (-0.2 SE), rail -0.0237 (-1.4 SE)
+    n with no referral, all runs                                   n 2.132 -> 0.7255   registered row -0.0283 (-0.5 SE), rail -0.0426 (-2.6 SE)
+    n at 0.442 everywhere, all runs (common intercept, the lane's) n 2.445 -> 0.6921   registered row +0.0051 (+0.1 SE), rail -0.0092 (-0.6 SE)
+
+C2. THE DROOP FITS (clock-voltage.json voltage_table *.droop_fit; PVT on the rail current sp.minion_w / V, at the set point's mode)
+  aifoundry1c0@300     +0.0142 mV/A (-0.0142 mOhm), current p05-p95 52.8-91.2 A
+  aifoundry1c0@600     +0.0204 mV/A (-0.0204 mOhm), current p05-p95 11.8-59.0 A
+  aifoundry1c0@700     +0.0288 mV/A (-0.0288 mOhm), current p05-p95 17.1-70.9 A
+  aifoundry1c0@800     -0.0085 mV/A (+0.0085 mOhm), current p05-p95 20.8-47.2 A
+  aifoundry1c1@300     -0.0072 mV/A (+0.0072 mOhm), current p05-p95 9.8-10.5 A
+  aifoundry1c1@600     -0.0187 mV/A (+0.0187 mOhm), current p05-p95 20.6-72.3 A
+  aifoundry2@600       -0.0380 mV/A (+0.0380 mOhm), current p05-p95 12.8-58.7 A
+  aifoundry2@700       -0.0203 mV/A (+0.0203 mOhm), current p05-p95 12.8-69.6 A
+  aifoundry2@800       -0.0382 mV/A (+0.0382 mOhm), current p05-p95 16.1-48.7 A
+  aifoundry3@600       -0.0299 mV/A (+0.0299 mOhm), current p05-p95 14.1-51.9 A
+  range -0.0382 to +0.0288 mV/A, so -0.0288 to +0.0382 mOhm
+
+C3. PER RUN: EACH FILE'S STEADY PVT MEDIAN AGAINST ITS CARD'S MEDIAN (voltage-reads.json.gz; files with >= 20 steady PVT samples at the point)
+  aifoundry1c0@300     card median 398 mV, 3 files, file median - card median (mV): {0: 3}
+  aifoundry1c0@600     card median 519 mV, 80 files, file median - card median (mV): {-1: 7, 0: 73}
+  aifoundry1c0@700     card median 563 mV, 30 files, file median - card median (mV): {0: 24, 1: 6}
+  aifoundry1c0@800     card median 604 mV, 73 files, file median - card median (mV): {-1: 11, 0: 62}
+  aifoundry1c1@300     card median 399 mV, 19 files, file median - card median (mV): {-1: 3, 0: 16}
+  aifoundry1c1@600     card median 499 mV, 443 files, file median - card median (mV): {-1: 38, 0: 402, 1: 3}
+  aifoundry2@600       card median 518 mV, 1449 files, file median - card median (mV): {-2: 3, -1: 85, 0: 184, 1: 1177}; 3 files >= 2 mV low, mean die 80.8 C against 58.5 C for the rest; dirs {'2026-09-25-claims-v3': 3}
+  aifoundry2@700       card median 567 mV, 176 files, file median - card median (mV): {-1: 3, 0: 85, 1: 78, 2: 10}
+  aifoundry2@800       card median 618 mV, 1127 files, file median - card median (mV): {-2: 108, -1: 207, 0: 499, 1: 309, 2: 4}; 108 files >= 2 mV low, mean die 61.7 C against 57.8 C for the rest; dirs {'2026-11-02-e143-blind5-aifoundry2': 24, '2026-10-31-e87-real-tensors-speed': 20, '2026-11-01-e96-real-tensors-speed': 19, '2026-10-31-e83-kinds-speed-rest': 15, '2026-10-23-e64-horace-power-limit': 6, '2026-10-31-e80-kinds-speed': 4}
+  aifoundry3@600       card median 522 mV, 639 files, file median - card median (mV): {-2: 6, -1: 26, 0: 444, 1: 160, 2: 3}; 6 files >= 2 mV low, mean die 74.9 C against 58.9 C for the rest; dirs {'2026-09-28-overheating': 5, '2026-09-28-heat-placement': 1}
+  aifoundry2 re-read from the raw telemetry (1882 files): lane = same clock as the previous record within 1 s; strict = lane AND the next record at the same clock; busy = rail >= 8 W
+    600 MHz: lane 1099667 samples, median 518; strict 1086404, median 518, mean 518.05; strict busy without E143 986751, mean 517.96 (lane busy without E143: mean 517.95)
+    700 MHz: lane 18732 samples, median 567; strict 1712, median 569, mean 572.40; strict busy without E143 1488, mean 572.77 (lane busy without E143: mean 567.90)
+    800 MHz: lane 434133 samples, median 618; strict 423263, median 618, mean 618.32; strict busy without E143 401593, mean 618.31 (lane busy without E143: mean 618.29)
+    700 MHz lane_busy without E143: p05/p25/p50/p75/p95 [566, 567, 567, 568, 569] mV; below 566 mV 0.1%, above 571 mV 3.3% (set point 570)
+    700 MHz strict_busy without E143: p05/p25/p50/p75/p95 [567, 568, 569, 578, 590] mV; below 566 mV 0.6%, above 571 mV 35.6% (set point 570)
+  s(700): the lane's 1.4025; with the strict busy median at 700 (569 mV) over the lane's V600 1.4080 (+0.39%); strict medians at both 1.4077; strict means 1.4267 (+1.72%, carried by the samples still falling from 800 MHz)
+
+C4. card 0's E118 voltages come from 3 data dirs: 2026-10-21-dtf, 2026-10-31-e84-speed-aifoundry1-card0, 2026-11-01-e114-card0-replicates
+C5. E143 registered (results.json score.rules): F1 governed clock 6.629 MHz, F2 pinned 1.007 MHz, W1 governed board 1.601 W, W2 pinned 1.184 W, H1 rise 0.585 C; A0 re-scored on unrounded predictions: 6.635 / 1.007 MHz, 1.601 / 1.185 W, 0.586 C
