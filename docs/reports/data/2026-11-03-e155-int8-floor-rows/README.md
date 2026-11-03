@@ -21,7 +21,7 @@ card-minutes of the 40 allowed**: the stop-path test 15502, the smoke 15501 and 
 claimed at 04:30 by rewriting the day's one card post in `#community-lab` (message `1567153765390487573`) and released at 05:07 by rewriting it again
 (§ How it ran).*
 
-*Corrected after verification (a dated note, Tue 3 Nov 2026, about 06:00 PST; desk only: no card opened, no device command, nothing re-run, no
+*Corrected after verification (a dated note, Tue 3 Nov 2026, about 05:40–05:56 PST, pushed as `93637c7f` at 05:56; desk only: no card opened, no device command, nothing re-run, no
 Modal). An independent verifier re-ran the pipeline on the nine committed passes (every scored file byte-identical), re-derived the frozen bands by
 hand, recomputed every statistic with its own scorer and traced every command sent to a read at `836a4ab`. It found six faults in how the result
 was read, two major and four minor; none changes a measured number, a rule, a frozen prediction or a registered verdict. Each is corrected in
@@ -127,7 +127,7 @@ shared per-op term out of E148's sixteen-row base it is not (post hoc), and Q31k
 either *(corrected after verification, C1–C3: this said "The per-row part follows the walk counted in address-bit toggles on two shapes now: …
 (registered: F1b TOGGLES, the new-address count excluded by 0.017 W, under the per-op premise; post hoc by Q31k without it)")*. The A path's band
 also holds D31 at three rows, but E148's W2 excluded it as the sole carrier at two rows, and no single count other than the toggle count fits both
-shapes: at two rows the new-address count stays excluded on the premise's footing too (E148's post hoc residual −0.135 ± 0.079 W, the toggle
+shapes: at two rows the new-address count stays excluded on the premise's footing too (E148's post hoc residual −0.134 ± 0.079 W, the toggle
 count's −0.004 ± 0.085 W; [`corrections-numbers.txt`](corrections-numbers.txt) C1) *(added after verification, C1)*. **The premise** is measured
 at three rows (−19 to +35 pJ), 2.4 times tighter than E129's ±63 pJ, but not inside the ±30 pJ the critic asked for. **What stays at one row** (0.93 W) is replicated a third time; what it is (per-cycle work or one row's A
 staging) no arm here separates.
@@ -353,7 +353,7 @@ An independent verifier (lane `verify-a1c1-e155-int8-floor`, about 05:20–05:50
 `git archive` copy of `eb0d142b` (every scored file, reduction and table byte-identical), re-ran `posthoc_e155.py` (identical), re-derived the four
 frozen bands by hand, recomputed every statistic with its own scorer, traced all nine commands sent to their handlers at et-platform `836a4ab`,
 scanned all 20,534 samples (`since_reset_ms` −1 in each), and checked the registration's order, the stops, the card's release and the day's post.
-Its verdict: the run holds, with fixes to how it is read. The corrections below (desk only, about 06:00 PST; no card opened, no device command,
+Its verdict: the run holds, with fixes to how it is read. The corrections below (desk only, about 05:40–05:56 PST, pushed as `93637c7f`; no card opened, no device command,
 nothing re-run, no Modal) change no measured number, rule, frozen prediction or registered verdict. Their numbers are printed by
 [`corrections-numbers.py`](corrections-numbers.py) into [`corrections-numbers.txt`](corrections-numbers.txt), written independently of the
 verifier's scorer; they reproduce its numbers, two of its roundings sharpened (the toggle count's D31 error on the premise's footing is −0.0288 W,
@@ -371,7 +371,7 @@ int8's no-issue floor rises 0.31 ± 0.10 W, inside the frozen band of the walk c
   pass, Wn 0.398–0.488. D31's interval (0.208–0.413) reaches Wn's band, so on that footing F1b would read INCONCLUSIVE, in every arm. Unaffected:
   F1a WALK (C is built on N1, which has no rate gap; excluded by 0.047 W) and the toggle count's small errors (D31 −0.062 registered / −0.029 on the
   footing; N3 −0.012 / +0.021 W), against the new-address count's −0.179 / −0.132 and −0.129 / −0.082 W. At two rows (E148's post hoc check) the
-  new-address count stays excluded on that footing too (residual −0.135 ± 0.079 W; the toggle count −0.004 ± 0.085 W). F3's frozen allowance,
+  new-address count stays excluded on that footing too (residual −0.134 ± 0.079 W; the toggle count −0.004 ± 0.085 W). F3's frozen allowance,
   priced from the same N − N1, moves by under 0.5 pJ on that footing and F3 stays INCONCLUSIVE (−19.3 to +34.7 pJ). The one-term prices had the
   same mismatch: E155's take the session's shared term out, E148's 50.5 and 94.8 fJ keep it in; matched, E148's are 44.7 ± 5.8 fJ a toggle and
   83.8 ± 10.9 fJ a new-address read (at its own E_op) or 43.6 and 81.8 fJ (at this session's), so the toggle prices agree on every footing and the
