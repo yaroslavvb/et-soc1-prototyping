@@ -1,0 +1,122 @@
+{
+ "experiment": "E159",
+ "request": "Q139",
+ "card": "aifoundry2",
+ "order_seed": 159,
+ "note": "E159's stop-path test (die): the registered watcher with one stop lowered, so that it must trip on live samples; the session must end with exit 4",
+ "tools": {
+  "heater": "build/e136/host/sparsity_host",
+  "kernel": "build/e136/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "predictions": "docs/reports/data/2026-11-03-q139q-gemm-g3/predictions-e159.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 30,
+  "board_cap_w": 85,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 2
+ },
+ "smoke_cycles": {
+  "H1-fp32-zeros": 1916.5,
+  "H2-fp32-zeros": 1480.3,
+  "H3-fp32-zeros": 1188.5,
+  "H1-int8-zeros": 2031.2
+ },
+ "dry_c_w": {
+  "zeros": 0.0,
+  "gemmL2x4x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 15.584,
+  "gemmL2x4x8:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.164,
+  "gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.214,
+  "gemmL4x2x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 18.934,
+  "gemmL4x2x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.384,
+  "gemmL4x2x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.014,
+  "gemmL1x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 22.044,
+  "gemmL1x2x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.784,
+  "gemmL1x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.884,
+  "gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 3.214
+ },
+ "limit_p800_w": 82.0,
+ "peak_lock_w": 82.0,
+ "relation": {
+  "B800": 33.60956684526229,
+  "s800": 1.90517380064275
+ },
+ "admission": {
+  "rest": {
+   "fixed_p800_w": 30.0
+  },
+  "H1-fp32-randn": {
+   "c_ref_w": 15.584,
+   "fixed_p800_w": 65.6
+  },
+  "H1-int8-full": {
+   "c_ref_w": 7.164,
+   "fixed_p800_w": 53.13
+  },
+  "H1-fp32-zeros": {
+   "c_ref_w": 3.214,
+   "fixed_p800_w": 46.96
+  },
+  "H2-fp32-randn": {
+   "c_ref_w": 18.934,
+   "fixed_p800_w": 71.13
+  },
+  "H2-int8-full": {
+   "c_ref_w": 7.384,
+   "fixed_p800_w": 53.67
+  },
+  "H2-fp32-zeros": {
+   "c_ref_w": 3.014,
+   "fixed_p800_w": 46.74
+  },
+  "H3-fp32-randn": {
+   "c_ref_w": 22.044,
+   "fixed_p800_w": 76.63
+  },
+  "H3-int8-full": {
+   "c_ref_w": 7.784,
+   "fixed_p800_w": 54.49
+  },
+  "H3-fp32-zeros": {
+   "c_ref_w": 2.884,
+   "fixed_p800_w": 46.63
+  },
+  "H1-int8-zeros": {
+   "c_ref_w": 3.214,
+   "fixed_p800_w": 46.96
+  }
+ },
+ "blocks": [
+  {
+   "name": "STOPTEST",
+   "title": "the die stop's path on live samples",
+   "default": false,
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "H1-fp32-zeros",
+     "start": {
+      "mode": "cool",
+      "max_c": 99,
+      "max_wait_s": 5
+     },
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5
+    }
+   ]
+  }
+ ]
+}

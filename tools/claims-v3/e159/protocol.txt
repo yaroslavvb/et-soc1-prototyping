@@ -1,0 +1,24 @@
+E159 protocol from docs/reports/data/2026-11-03-q139q-gemm-g3/predictions-e159.json (Q139(q), frozen at 91def7c4); session stops {'abs_stop_c': 76, 'board_cap_w': 85, 'cap_consecutive': 3}; admission limit 82.0 W, lock 82.0 W; session cap 30 card-minutes
+block SMOKE: the idle card with no launch (its last 30 s are the session's rest reading), then a 2 s launch of four cells' zeros
+  rest              0 x 2 s  zeros                                                          estimate 30.0 W  plan   55.0 s  cum   0.0 min
+  H1-fp32-zeros     1 x 2 s  gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin    estimate 46.96 W  plan   31.2 s  cum   0.0 min
+  H2-fp32-zeros     1 x 2 s  gemmL4x2x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin    estimate 46.74 W  plan   31.2 s  cum   0.0 min
+  H3-fp32-zeros     1 x 2 s  gemmL1x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin    estimate 46.63 W  plan   31.2 s  cum   0.0 min
+  H1-int8-zeros     1 x 2 s  gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin    estimate 46.96 W  plan   31.2 s  cum   0.0 min
+block R: the session's rest reading: 30 s of the idle card, no launch (the chain's start and the first hold's anchor)
+  rest              0 x 2 s  zeros                                                          estimate 30.0 W  plan   55.0 s  cum   0.9 min
+block H: the registered subset: the first six holds of Q139(q)'s frozen order
+  H1-fp32-randn    12 x 8 s  gemmL2x4x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin    estimate 65.6 W  plan  141.4 s  cum   3.3 min
+  H1-int8-full     12 x 8 s  gemmL2x4x8:randn:tools/claims-v3/kinds/tiles/int8/full.bin     estimate 53.13 W  plan  141.4 s  cum   5.6 min
+  H2-fp32-randn    12 x 8 s  gemmL4x2x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin    estimate 71.13 W  plan  141.4 s  cum   8.0 min
+  H2-int8-full     12 x 8 s  gemmL4x2x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin     estimate 53.67 W  plan  141.4 s  cum  10.3 min
+  H3-fp32-randn    12 x 8 s  gemmL1x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin    estimate 76.63 W  plan  141.4 s  cum  12.7 min
+  H3-int8-full     12 x 8 s  gemmL1x2x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin     estimate 54.49 W  plan  141.4 s  cum  15.1 min
+block Z: the rest of the frozen order: the three zeros holds
+  H1-fp32-zeros    12 x 8 s  gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin    estimate 46.96 W  plan  141.4 s  cum  17.4 min
+  H2-fp32-zeros    12 x 8 s  gemmL4x2x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin    estimate 46.74 W  plan  141.4 s  cum  19.8 min
+  H3-fp32-zeros    12 x 8 s  gemmL1x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin    estimate 46.63 W  plan  141.4 s  cum  22.1 min
+the session's planned time (run_hpl plan_s, gates included as its 25 s) 22.1 min; the registered subset with the rest reading 15.1 min; highest estimate 76.63 W (limit 82.0 W)
+smoke cycles per op at 800 MHz (T0 x 800, the 50-250% check): {'H1-fp32-zeros': 1916.5, 'H2-fp32-zeros': 1480.3, 'H3-fp32-zeros': 1188.5, 'H1-int8-zeros': 2031.2}
+stop-path test board: safety {'abs_stop_c': 76, 'board_cap_w': 30, 'cap_consecutive': 3}; run H1-fp32-zeros gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin
+stop-path test die: safety {'abs_stop_c': 30, 'board_cap_w': 85, 'cap_consecutive': 3}; run H1-fp32-zeros gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin

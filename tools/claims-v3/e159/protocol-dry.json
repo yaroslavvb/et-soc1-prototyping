@@ -1,0 +1,335 @@
+{
+ "experiment": "E159",
+ "request": "Q139",
+ "card": "aifoundry2",
+ "order_seed": 159,
+ "note": "three large-GEMM shapes nobody has run (H1 gemmL2x4x8, H2 gemmL4x2x4, H3 gemmL1x2x2), each held about 106 s (12 processes of 8 s) in fp32 random and int8 full, then in zeros, from a cool start at or below 57 C, under aifoundry2's own governor; Q139(q)'s G3 design and predictions frozen at 91def7c4; nothing is set on the card",
+ "tools": {
+  "heater": "build/e136/host/sparsity_host",
+  "kernel": "build/e136/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "predictions": "docs/reports/data/2026-11-03-q139q-gemm-g3/predictions-e159.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 76,
+  "board_cap_w": 85,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 30
+ },
+ "smoke_cycles": {
+  "H1-fp32-zeros": 1916.5,
+  "H2-fp32-zeros": 1480.3,
+  "H3-fp32-zeros": 1188.5,
+  "H1-int8-zeros": 2031.2
+ },
+ "dry_c_w": {
+  "zeros": 0.0,
+  "gemmL2x4x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 15.584,
+  "gemmL2x4x8:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.164,
+  "gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.214,
+  "gemmL4x2x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 18.934,
+  "gemmL4x2x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.384,
+  "gemmL4x2x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.014,
+  "gemmL1x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 22.044,
+  "gemmL1x2x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin": 7.784,
+  "gemmL1x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.884,
+  "gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 3.214
+ },
+ "limit_p800_w": 82.0,
+ "peak_lock_w": 82.0,
+ "relation": {
+  "B800": 33.60956684526229,
+  "s800": 1.90517380064275
+ },
+ "admission": {
+  "rest": {
+   "fixed_p800_w": 30.0
+  },
+  "H1-fp32-randn": {
+   "c_ref_w": 15.584,
+   "fixed_p800_w": 65.6
+  },
+  "H1-int8-full": {
+   "c_ref_w": 7.164,
+   "fixed_p800_w": 53.13
+  },
+  "H1-fp32-zeros": {
+   "c_ref_w": 3.214,
+   "fixed_p800_w": 46.96
+  },
+  "H2-fp32-randn": {
+   "c_ref_w": 18.934,
+   "fixed_p800_w": 71.13
+  },
+  "H2-int8-full": {
+   "c_ref_w": 7.384,
+   "fixed_p800_w": 53.67
+  },
+  "H2-fp32-zeros": {
+   "c_ref_w": 3.014,
+   "fixed_p800_w": 46.74
+  },
+  "H3-fp32-randn": {
+   "c_ref_w": 22.044,
+   "fixed_p800_w": 76.63
+  },
+  "H3-int8-full": {
+   "c_ref_w": 7.784,
+   "fixed_p800_w": 54.49
+  },
+  "H3-fp32-zeros": {
+   "c_ref_w": 2.884,
+   "fixed_p800_w": 46.63
+  },
+  "H1-int8-zeros": {
+   "c_ref_w": 3.214,
+   "fixed_p800_w": 46.96
+  }
+ },
+ "blocks": [
+  {
+   "name": "SMOKE",
+   "title": "the idle card with no launch (its last 30 s are the session's rest reading), then a 2 s launch of four cells' zeros",
+   "default": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 5
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 1
+   },
+   "tail_s": 3,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest",
+     "launch": {
+      "seconds": 2,
+      "budget": 3.5,
+      "processes": 0
+     },
+     "tail_s": 3,
+     "start": {
+      "mode": "cool",
+      "max_c": 99,
+      "max_wait_s": 5
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "H1-fp32-zeros"
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL4x2x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "H2-fp32-zeros"
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL1x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "H3-fp32-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "H1-int8-zeros"
+    }
+   ]
+  },
+  {
+   "name": "R",
+   "title": "the session's rest reading: 30 s of the idle card, no launch (the chain's start and the first hold's anchor)",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest",
+     "launch": {
+      "seconds": 2,
+      "budget": 3.5,
+      "processes": 0
+     },
+     "tail_s": 3,
+     "start": {
+      "mode": "cool",
+      "max_c": 99,
+      "max_wait_s": 5
+     }
+    }
+   ]
+  },
+  {
+   "name": "H",
+   "title": "the registered subset: the first six holds of Q139(q)'s frozen order",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "gemmL2x4x8:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "H1-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmL2x4x8:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "H1-int8-full",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL4x2x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "H2-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmL4x2x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "H2-int8-full",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL1x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "H3-fp32-randn",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmL1x2x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "label": "H3-int8-full",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    }
+   ]
+  },
+  {
+   "name": "Z",
+   "title": "the rest of the frozen order: the three zeros holds",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "gemmL2x4x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "H1-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL4x2x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "H2-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL1x2x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "H3-fp32-zeros",
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 2
+     },
+     "tail_s": 0.5,
+     "start": {
+      "mode": "cool",
+      "max_c": 57,
+      "max_wait_s": 300
+     }
+    }
+   ]
+  }
+ ]
+}

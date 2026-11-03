@@ -1,0 +1,137 @@
+CHECK OK: all 28 files the E159 scorer reads equal their bytes at 91def7c4
+== the frozen scorer on s1 (9 complete holds; 0 cut)
+H1-fp32-randn      meas  800.0 MHz  61.89 W 59.04 C | G3  800.0  57.52 55.65 | inside {'mhz': True, 'w': False, 'die': False}
+H1-int8-full       meas  800.0 MHz  46.12 W 59.77 C | G3  800.0  44.83 59.07 | inside {'mhz': True, 'w': True, 'die': True}
+H2-fp32-randn      meas  691.4 MHz  56.43 W 62.33 C | G3  793.9  62.40 63.85 | inside {'mhz': False, 'w': False, 'die': False}
+H2-int8-full       meas  800.0 MHz  46.56 W 59.84 C | G3  800.0  45.37 61.84 | inside {'mhz': True, 'w': True, 'die': False}
+H3-fp32-randn      meas  670.7 MHz  58.64 W 63.12 C | G3  759.5  63.76 64.21 | inside {'mhz': False, 'w': False, 'die': False}
+H3-int8-full       meas  800.0 MHz  47.42 W 60.02 C | G3  800.0  46.19 61.92 | inside {'mhz': True, 'w': True, 'die': False}
+H1-fp32-zeros      meas  800.0 MHz  37.93 W 58.12 C | G3  800.0  38.56 60.64 | inside {'mhz': True, 'w': True, 'die': False}
+H2-fp32-zeros      meas  800.0 MHz  37.38 W 57.67 C | G3  800.0  38.33 59.02 | inside {'mhz': True, 'w': True, 'die': False}
+H3-fp32-zeros      meas  800.0 MHz  36.98 W 57.47 C | G3  800.0  38.22 58.36 | inside {'mhz': True, 'w': True, 'die': True}
+{
+ "verdict_G3": {
+  "mhz": "FAIL (7 of 9)",
+  "w": "FAIL (6 of 9)",
+  "die": "FAIL (2 of 9)"
+ },
+ "G3_rms_below_E136_law": {
+  "mhz": false,
+  "w": false,
+  "die": true
+ },
+ "summary": {
+  "G3.mhz": {
+   "n": 9,
+   "rms": 45.198,
+   "mean": -21.252,
+   "inside": 7
+  },
+  "G3.w": {
+   "n": 9,
+   "rms": 3.133,
+   "mean": -0.648,
+   "inside": 6
+  },
+  "G3.die": {
+   "n": 9,
+   "rms": 1.887,
+   "mean": -0.798,
+   "inside": 2
+  },
+  "G3_q138t_constants.mhz": {
+   "n": 9,
+   "rms": 44.486,
+   "mean": -20.896,
+   "inside": 7
+  },
+  "G3_q138t_constants.w": {
+   "n": 9,
+   "rms": 3.499,
+   "mean": -1.501,
+   "inside": 6
+  },
+  "G3_q138t_constants.die": {
+   "n": 9,
+   "rms": 1.904,
+   "mean": -0.892,
+   "inside": 2
+  },
+  "E136_law.mhz": {
+   "n": 9,
+   "rms": 37.563,
+   "mean": -17.515,
+   "inside": 7
+  },
+  "E136_law.w": {
+   "n": 9,
+   "rms": 2.89,
+   "mean": -0.267,
+   "inside": 6
+  },
+  "E136_law.die": {
+   "n": 9,
+   "rms": 1.984,
+   "mean": 0.088,
+   "inside": 1
+  },
+  "chain_on_measured.die": {
+   "n": 9,
+   "rms": 1.709,
+   "mean": -0.687,
+   "inside": 4
+  },
+  "G3_given_p800.mhz": {
+   "n": 9,
+   "rms": 28.813,
+   "mean": -13.246,
+   "inside": 7
+  },
+  "G3_given_p800.w": {
+   "n": 9,
+   "rms": 3.103,
+   "mean": -0.897,
+   "inside": 7
+  },
+  "G3_given_p800.die": {
+   "n": 9,
+   "rms": 1.833,
+   "mean": -0.842,
+   "inside": 2
+  }
+ }
+}
+
+E159 reduction (registered): Q139(q)'s frozen scorer behind its hash check, cut holds left out, the attribution, R0, the safety record
+complete holds scored: ['H1-fp32-randn', 'H1-int8-full', 'H2-fp32-randn', 'H2-int8-full', 'H3-fp32-randn', 'H3-int8-full', 'H1-fp32-zeros', 'H2-fp32-zeros', 'H3-fp32-zeros']; cut: []
+hold                   measured MHz/W/C |                   G3 |             G3 err | in |             E136 law | chain die | p800-P0
+H1-fp32-randn     800.0  61.89  59.04 |  800.0  57.52  55.65 |   +0.0 +4.37 +3.39 | ynn |  799.8  57.07  61.45 |     56.09 |   +2.35
+H1-int8-full      800.0  46.12  59.77 |  800.0  44.83  59.07 |   +0.0 +1.29 +0.70 | yyy |  800.0  44.62  58.55 |     59.22 |   +0.59
+H2-fp32-randn     691.4  56.43  62.33 |  793.9  62.40  63.85 | -102.5 -5.96 -1.52 | nnn |  781.3  62.06  65.50 |     63.00 |   +4.77
+H2-int8-full      800.0  46.56  59.84 |  800.0  45.37  61.84 |   +0.0 +1.19 -2.00 | yyn |  800.0  45.16  58.77 |     61.98 |   +0.58
+H3-fp32-randn     670.7  58.64  63.12 |  759.5  63.76  64.21 |  -88.8 -5.13 -1.09 | nnn |  738.5  62.06  65.50 |     63.59 |   +5.68
+H3-int8-full      800.0  47.42  60.02 |  800.0  46.19  61.92 |   +0.0 +1.22 -1.90 | yyn |  800.0  45.98  59.11 |     62.06 |   +0.61
+H1-fp32-zeros     800.0  37.93  58.12 |  800.0  38.56  60.64 |   +0.0 -0.63 -2.52 | yyn |  800.0  38.45  55.98 |     60.55 |   -0.85
+H2-fp32-zeros     800.0  37.38  57.67 |  800.0  38.33  59.02 |   +0.0 -0.95 -1.35 | yyn |  800.0  38.23  55.89 |     58.88 |   -1.08
+H3-fp32-zeros     800.0  36.98  57.47 |  800.0  38.22  58.36 |   +0.0 -1.24 -0.89 | yyy |  800.0  38.12  55.84 |     58.19 |   -1.46
+  attribution H1-fp32-randn: clock inside; board not P0's level by the rule (p800 - P0(800) = +2.35 W); die the heat path (chain on the measured trace +2.95 C)
+  attribution H2-fp32-randn: clock P0's level (p800 - P0(800) = +4.77 W, outside 4 W); board P0's level (p800 - P0(800) = +4.77 W, outside 4 W); die the power path, not heat (chain on the measured trace -0.67 C)
+  attribution H2-int8-full: clock inside; board inside; die the heat path (chain on the measured trace -2.14 C)
+  attribution H3-fp32-randn: clock P0's level (p800 - P0(800) = +5.68 W, outside 4 W); board P0's level (p800 - P0(800) = +5.68 W, outside 4 W); die the power path, not heat (chain on the measured trace -0.47 C)
+  attribution H3-int8-full: clock inside; board inside; die the heat path (chain on the measured trace -2.04 C)
+  attribution H1-fp32-zeros: clock inside; board inside; die the heat path (chain on the measured trace -2.43 C)
+  attribution H2-fp32-zeros: clock inside; board inside; die the heat path (chain on the measured trace -1.22 C)
+ALL SCORED HOLDS (the primary): G3 {"mhz": "FAIL (7 of 9)", "w": "FAIL (6 of 9)", "die": "FAIL (2 of 9)"}; G3 rms below E136's law {"mhz": false, "w": false, "die": true}
+   G3                   mhz 45.198 rms (-21.252 mean, 7 of 9 inside); w 3.133 rms (-0.648 mean, 6 of 9 inside); die 1.887 rms (-0.798 mean, 2 of 9 inside)
+   G3_q138t_constants   mhz 44.486 rms (-20.896 mean, 7 of 9 inside); w 3.499 rms (-1.501 mean, 6 of 9 inside); die 1.904 rms (-0.892 mean, 2 of 9 inside)
+   E136_law             mhz 37.563 rms (-17.515 mean, 7 of 9 inside); w 2.89 rms (-0.267 mean, 6 of 9 inside); die 1.984 rms (+0.088 mean, 1 of 9 inside)
+   chain_on_measured    die 1.709 rms (-0.687 mean, 4 of 9 inside)
+   G3_given_p800        mhz 28.813 rms (-13.246 mean, 7 of 9 inside); w 3.103 rms (-0.897 mean, 7 of 9 inside); die 1.833 rms (-0.842 mean, 2 of 9 inside)
+THE REGISTERED SUBSET (the first six): G3 {"mhz": "FAIL (4 of 6)", "w": "FAIL (3 of 6)", "die": "FAIL (1 of 6)"}; G3 rms below E136's law {"mhz": false, "w": false, "die": true}
+   G3                   mhz 55.355 rms (-31.878 mean, 4 of 6 inside); w 3.775 rms (-0.503 mean, 3 of 6 inside); die 1.962 rms (-0.404 mean, 1 of 6 inside)
+   G3_q138t_constants   mhz 54.484 rms (-31.344 mean, 4 of 6 inside); w 4.182 rms (-1.599 mean, 3 of 6 inside); die 1.968 rms (-0.523 mean, 1 of 6 inside)
+   E136_law             mhz 46.006 rms (-26.273 mean, 4 of 6 inside); w 3.485 rms (+0.018 mean, 3 of 6 inside); die 2.042 rms (-0.794 mean, 1 of 6 inside)
+   chain_on_measured    die 1.75 rms (-0.303 mean, 3 of 6 inside)
+   G3_given_p800        mhz 35.288 rms (-19.87 mean, 4 of 6 inside); w 3.797 rms (-1.448 mean, 4 of 6 inside); die 1.938 rms (-0.546 mean, 1 of 6 inside)
+R0 (checks of C): PASS (129 kernel records, 0 not ok)
+safety: peaks {'board_max_w': 73.8, 'die_mean_max_c': 66, 'hottest_field_max_c': 69}; trips [('stoptest-board', 'board 35.1 W > 30 W on 3 samples'), ('stoptest-die', 'die 54 C >= 30 C')]; not admitted []; peak locks 0; config read (TDP W, threshold C) [(65, 65)]; card time {'first_touch_ms': 1793712257004, 'card_free_ms': 1793712394833, 'minutes': 2.3}

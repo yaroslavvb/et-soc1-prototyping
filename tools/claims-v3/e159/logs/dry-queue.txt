@@ -1,0 +1,42 @@
+# E159 toy-card dry run of the whole queue on the Intel (no device), Tue 3 Nov 2026 05:30 PST: queue_e159.py --dry with protocol-dry.json and the two dry stop-test protocols, then reduce_e159.py (dry-reduce.txt).
+# queue.jsonl, every record:
+{"t_ms": 1793712255132, "zone": "PST", "kind": "queue_start", "slot_start_ms": 1793712257000, "slot_end_ms": 1793715857000, "next_rest_ms": null, "python": "3.13.11", "sensors": false, "protocol": "<lab>/tools/claims-v3/e159/protocol-dry.json"}
+{"t_ms": 1793712257004, "zone": "PST", "kind": "card_free", "waits": {}, "late_s": 0.0}
+{"t_ms": 1793712257005, "zone": "PST", "kind": "before_first_launch", "snapshot": {"tag": "start", "t_ms": 1793712257004, "zone": "PST"}, "history_rows": 0}
+{"t_ms": 1793712257005, "zone": "PST", "kind": "session_start", "name": "smoke", "cap_min": 3.0}
+{"t_ms": 1793712290215, "zone": "PST", "kind": "session_end", "name": "smoke", "rc": 0, "end": {"t_end_ms": 1793712289712, "exit": 0, "reason": "done", "card_min": 0.5}, "slot_stopped": false}
+{"t_ms": 1793712290218, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+{"t_ms": 1793712290218, "zone": "PST", "kind": "session_start", "name": "stoptest-board", "cap_min": 2.0}
+{"t_ms": 1793712293243, "zone": "PST", "kind": "session_end", "name": "stoptest-board", "rc": 4, "end": {"t_end_ms": 1793712292577, "exit": 4, "reason": "safety:board 35.1 W > 30 W on 3 samples", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793712293245, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793712292287, "t_third_line_ms": 1793712292268, "launch": [1793712292008, 1793712292508], "trip_after_line_ms": 19, "launch_end_after_trip_ms": 221, "lines": 18}
+{"t_ms": 1793712293245, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+{"t_ms": 1793712293245, "zone": "PST", "kind": "session_start", "name": "stoptest-die", "cap_min": 2.0}
+{"t_ms": 1793712295260, "zone": "PST", "kind": "session_end", "name": "stoptest-die", "rc": 4, "end": {"t_end_ms": 1793712295048, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793712295261, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793712293743, "t_first_line_ms": 1793712293678, "trip_after_line_ms": 65, "lines": 13}
+{"t_ms": 1793712295262, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+{"t_ms": 1793712295262, "zone": "PST", "kind": "session_start", "name": "s1", "cap_min": 40.0}
+{"t_ms": 1793712394821, "zone": "PST", "kind": "session_end", "name": "s1", "rc": 0, "end": {"t_end_ms": 1793712394117, "exit": 0, "reason": "done", "card_min": 1.6}, "slot_stopped": false}
+{"t_ms": 1793712394832, "zone": "PST", "kind": "s1_end", "rc": 0}
+{"t_ms": 1793712394833, "zone": "PST", "kind": "queue_end", "snapshot": {"tag": "end", "t_ms": 1793712394832, "zone": "PST"}, "card_free_ms": 1793712394833, "before_slot_end_s": 3462.2}
+# s1.out, the session's lines:
+05:24:55     e105: admitted, estimate 30.0 W (fixed)
+05:24:55 [1/10] R-00-rest-r1: 0 x 2 s, 1024 minions, start {'mode': 'cool', 'max_c': 99, 'max_wait_s': 5}
+05:25:00     e105: admitted, estimate 65.6 W (fixed)
+05:25:00 [2/10] H-00-H1-fp32-randn-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 57, 'max_wait_s': 300}
+05:25:08     e105: admitted, estimate 53.13 W (fixed)
+05:25:08 [3/10] H-01-H1-int8-full-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 57, 'max_wait_s': 300}
+05:25:20     e105: admitted, estimate 71.13 W (fixed)
+05:25:20 [4/10] H-02-H2-fp32-randn-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 57, 'max_wait_s': 300}
+05:25:31     e105: admitted, estimate 53.67 W (fixed)
+05:25:31 [5/10] H-03-H2-int8-full-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 57, 'max_wait_s': 300}
+05:25:43     e105: admitted, estimate 76.63 W (fixed)
+05:25:43 [6/10] H-04-H3-fp32-randn-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 57, 'max_wait_s': 300}
+05:25:54     e105: admitted, estimate 54.49 W (fixed)
+05:25:54 [7/10] H-05-H3-int8-full-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 57, 'max_wait_s': 300}
+05:26:07     e105: admitted, estimate 46.96 W (fixed)
+05:26:07 [8/10] Z-00-H1-fp32-zeros-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 57, 'max_wait_s': 300}
+05:26:17     e105: admitted, estimate 46.74 W (fixed)
+05:26:17 [9/10] Z-01-H2-fp32-zeros-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 57, 'max_wait_s': 300}
+05:26:26     e105: admitted, estimate 46.63 W (fixed)
+05:26:26 [10/10] Z-02-H3-fp32-zeros-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 57, 'max_wait_s': 300}
+05:26:34 exit 0 (done)
