@@ -1,0 +1,121 @@
+{
+ "stage": "A2",
+ "unit": "B",
+ "gpu": "A100",
+ "sizes": {
+  "bf16": 2048,
+  "fp16": 1024,
+  "int8": 1024
+ },
+ "expect_name": "A100",
+ "refuse_uuid": [
+  "dbf92f75735f",
+  "660a9fe7d69f",
+  "ac97f0c6a6ae",
+  "83190b6e35b9"
+ ],
+ "first_fwd": false,
+ "steps": [
+  {
+   "op": "static"
+  },
+  {
+   "op": "gen",
+   "set": "A2"
+  },
+  {
+   "op": "idle",
+   "s": 20.0
+  },
+  {
+   "op": "pass",
+   "p": 1,
+   "seq": [
+    "int8.zeros",
+    "fp16.zeros",
+    "bf16.zeros",
+    "fp16.rdup8",
+    "int8.cdup8",
+    "bf16.checkv",
+    "fp16.zeros",
+    "int8.rdup8",
+    "int8.t16x16",
+    "bf16.t32x4",
+    "bf16.kB8_4",
+    "int8.zeros",
+    "bf16.walkR",
+    "bf16.walkK",
+    "fp16.walkK",
+    "fp16.cdup8",
+    "bf16.stripeK0",
+    "int8.zeros",
+    "fp16.zeros",
+    "bf16.zeros",
+    "fp16.t16x16",
+    "bf16.walk2",
+    "int8.rand",
+    "bf16.t16x16",
+    "bf16.randn",
+    "bf16.t4x32",
+    "bf16.rollM_A",
+    "bf16.rdup8",
+    "bf16.cdup8",
+    "fp16.randn",
+    "bf16.stripeR0",
+    "bf16.zeros",
+    "bf16.sinpos",
+    "int8.walkK",
+    "int8.zeros",
+    "fp16.zeros",
+    "bf16.zeros"
+   ]
+  },
+  {
+   "op": "pass",
+   "p": 2,
+   "seq": [
+    "bf16.zeros",
+    "fp16.zeros",
+    "int8.zeros",
+    "int8.walkK",
+    "bf16.sinpos",
+    "bf16.zeros",
+    "bf16.stripeR0",
+    "fp16.randn",
+    "bf16.cdup8",
+    "bf16.rdup8",
+    "bf16.rollM_A",
+    "bf16.t4x32",
+    "bf16.randn",
+    "bf16.t16x16",
+    "int8.rand",
+    "bf16.walk2",
+    "fp16.t16x16",
+    "bf16.zeros",
+    "fp16.zeros",
+    "int8.zeros",
+    "bf16.stripeK0",
+    "fp16.cdup8",
+    "fp16.walkK",
+    "bf16.walkK",
+    "bf16.walkR",
+    "int8.zeros",
+    "bf16.kB8_4",
+    "bf16.t32x4",
+    "int8.t16x16",
+    "int8.rdup8",
+    "fp16.zeros",
+    "bf16.checkv",
+    "int8.cdup8",
+    "fp16.rdup8",
+    "bf16.zeros",
+    "fp16.zeros",
+    "int8.zeros"
+   ]
+  },
+  {
+   "op": "idle",
+   "s": 10.0
+  }
+ ]
+}
