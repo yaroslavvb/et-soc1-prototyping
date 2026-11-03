@@ -1,0 +1,19 @@
+# reduce_e144b.py on the dry queue's output (the toy card's numbers: the code path only, no verdict means anything)
+E144b reduce: frozen inputs at c2f9920d verified (7 files); steps scored ['G1', 'G2']
+
+== G1 HOLD-00-int8-neg_ones-hold (G1), 16 s, rest die 51.00 C
+  (a) chain on the measured board: rms 1.868 C, plateau err +0.671 C, max |err| 3.210 -> INCONCLUSIVE   [M6 as frozen: rms 2.471, plateau +0.899]
+  (b) plateau rise 1.298 vs 11.833 C: err -10.535 -> FAIL   [M6: -10.635]
+  (c) per board W 0.4523424644158872 -> NOT PASS (no FAIL band was registered); t63 3.660005807876587 s, x0.07379043967493118 of the open loop's -> NOT PASS (no FAIL band was registered); A1.8 closed reference x0.04815797115627088 -> NOT PASS (no FAIL band was registered)
+
+== G2 HOLDF-00-fp32-randn-hold (G2), 16 s, rest die 51.00 C
+  (a) chain on the measured board: rms 6.187 C, plateau err +2.276 C, max |err| 9.482 -> FAIL   [M6 as frozen: rms 8.179, plateau +3.032]
+  (b) plateau 55.344 vs 72.493 C: err -17.149; regime trip (predicted floor, 600 MHz share 0.860) -> FAIL; tests the chain (floor regime)   [M6 floor only: -17.540]
+
+== G1 clock and safety: {"hold_file": "HOLD-00-int8-neg_ones-hold-r1.jsonl", "dur_s": 15.7, "samples": 158, "last300": {"n": 158, "mean_mhz": 707.5949367088608, "share_ge_790": 0.5379746835443038, "share_le_610": 0.4620253164556962}, "whole": {"mean_mhz": 707.5949367088608, "share_ge_790": 0.5379746835443038, "share_le_610": 0.4620253164556962}, "safety": {"board_peak_W": 36.27, "samples_over_85W": 0, "samples_over_90W": 0, "die_max_C": 56, "hottest_max_C": 59}, "first_step_down": null}
+
+== G2 clock and safety: {"hold_file": "HOLDF-00-fp32-randn-hold-r1.jsonl", "dur_s": 15.7, "samples": 158, "last300": {"n": 158, "mean_mhz": 633.5443037974684, "share_ge_790": 0.006329113924050633, "share_le_610": 0.6708860759493671}, "whole": {"mean_mhz": 633.5443037974684, "share_ge_790": 0.006329113924050633, "share_le_610": 0.6708860759493671}, "safety": {"board_peak_W": 77.13, "samples_over_85W": 0, "samples_over_90W": 0, "die_max_C": 67, "hottest_max_C": 70}, "first_step_down": {"after_first_launch_s": 5.2, "die_C": 66, "board_W": 54.89, "mhz": 600}}
+
+E144b-K1: {"rule": "E144b-K1: G1's share of samples over its last 300 s at >= 790 MHz: PASS >= 0.90, FAIL < 0.80", "share": 0.5379746835443038, "verdict": "FAIL", "die_max_C": 56}
+
+verdicts: {"G1/HOLD-00-int8-neg_ones-hold a": "INCONCLUSIVE", "G1/HOLD-00-int8-neg_ones-hold b": "FAIL", "G1/HOLD-00-int8-neg_ones-hold c_per_board_W": "NOT PASS (no FAIL band was registered)", "G1/HOLD-00-int8-neg_ones-hold c_t63": "NOT PASS (no FAIL band was registered)", "G1/HOLD-00-int8-neg_ones-hold c_t63_A1": "NOT PASS (no FAIL band was registered)", "G2/HOLDF-00-fp32-randn-hold a": "FAIL", "G2/HOLDF-00-fp32-randn-hold b": "FAIL"}

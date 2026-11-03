@@ -1,0 +1,54 @@
+{
+ "experiment": "E144b",
+ "request": "Q138",
+ "card": "aifoundry2",
+ "order_seed": 98,
+ "note": "E133's blocks (E111's), run by run_e144b.py over E133's chain (run_kspeed.py over E64's run_hpl.py, E111's idle-login rule): REST holds no launch; nothing is set on the card; the residency read run_hpl.py makes after every run is not sent; the holds are Q138(t)'s frozen 15 minutes",
+ "tools": {
+  "heater": "build/sparsity_t2/host/sparsity_host",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 72,
+  "board_cap_w": 93,
+  "cap_consecutive": 3,
+  "note": "Q138(t)'s frozen aifoundry2 stops (predictions-e144.json rules.stops.aifoundry2, c2f9920d): the hold ends at a die reading >= 72 C or a board reading > 93 W on 3 samples (E133's 80 C / 93 W with the die tightened). run_hpl.py's watcher reads every live sampler line and applies 72 C to the die mean and to the hottest sensor. E111's and E133's H-F32 peaked at 88.04 and 88.65 W (none over 90 W) and a 67-68 C die mean; the hottest sensor's carried running maximum read 69-70 C"
+ },
+ "caps": {
+  "max_card_min": 5
+ },
+ "step": "END",
+ "from": {
+  "protocol": "tools/claims-v3/e133/protocol-end.json",
+  "blocks": "unchanged"
+ },
+ "blocks": [
+  {
+   "name": "REST",
+   "title": "the rest reading: no launch, the 10 Hz sampler on the idle card; the last 60 s are the reading",
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 20
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 0
+   },
+   "tail_s": 20,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest"
+    }
+   ]
+  }
+ ]
+}

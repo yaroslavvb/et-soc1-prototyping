@@ -1,0 +1,66 @@
+# tools/claims-v3/dmcmd_audit.py (sha256 f29e91ca97705454..., table 50168632931fd8c1...) on E144b's run chain, run at 21:57 PST on Mon 02 Nov 2026, before the registration's commit, the claim and the first launch.
+# files: tools/claims-v3/e144b/ tools/claims-v3/kspeed/run_kspeed.py tools/claims-v3/hpl/run_hpl.py tools/claims-v3/e111/idle_logins_e111.py workloads/sparsity/host/main.cpp workloads/sparsity/kernel/sparsity.c
+# two reviewed exceptions, as E133's: run_hpl.py:622's residency read (raw states 2-6), which run_e144b.py answers unsent, and the unit check that hands that line to a stand-in
+## 1. with the reviewed exception
+dmcmd_audit: GO (35 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e144b/queue_e144b.py:205: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/queue_e144b.py:205: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e144b/queue_e144b.py:205: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/queue_e144b.py:205: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/queue_e144b.py:205: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/run_e144b.sh:22: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/run_e144b.sh:22: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e144b/run_e144b.sh:22: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/run_e144b.sh:22: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/run_e144b.sh:22: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/unitcheck_e144b.py:22: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES [READ, pmic none] EXCEPTED: SP_ERROR_LOG: the unit check hands run_hpl.py:622's command line to a stand-in run_out that records it; nothing is executed and no device is opened (E133's second reviewed exception, its selftest_e133.sh) - variant ettelem-dv2; raw states 2 3 4 5 6 (raw 4 5 6 is no state at BL2 0.22.0: 2 SP Runtime Errors each)
+tools/claims-v3/e144b/unitcheck_e144b.py:24: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/unitcheck_e144b.py:24: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e144b/unitcheck_e144b.py:24: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/unitcheck_e144b.py:24: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/unitcheck_e144b.py:24: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/unitcheck_e144b.py:25: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/unitcheck_e144b.py:25: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e144b/unitcheck_e144b.py:25: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/unitcheck_e144b.py:25: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e144b/unitcheck_e144b.py:25: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:597: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/hpl/run_hpl.py:618: ettelem sptrace: TRACE_EXTRACT [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:622: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES [READ, pmic none] EXCEPTED: SP_ERROR_LOG: run_e144b.py patch_no_residency answers this command unsent (no process started, no device opened), as run_e133.py did in E133 (30 times, never sent); the unit check below - variant ettelem-dv2; raw states 2 3 4 5 6 (raw 4 5 6 is no state at BL2 0.22.0: 2 SP Runtime Errors each)
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      6 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      6 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      2 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      5 site(s)  ok
+  GET_MODULE_RESIDENCY_THROTTLE_STATES       READ         pmic none      2 site(s)  EXCEPTED
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      5 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      5 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+  TRACE_EXTRACT                              READ         pmic none      1 site(s)  ok
+# exit 0
+## 2. without it (expect NO-GO on exactly run_hpl.py:622 and the unit check)
+NO-GO tools/claims-v3/e144b/unitcheck_e144b.py:22: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES: SP_ERROR_LOG
+NO-GO tools/claims-v3/hpl/run_hpl.py:622: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES: SP_ERROR_LOG
+dmcmd_audit: NO-GO (35 send site(s), 2 disallowed; allow-list: none)
+# exit 3
+## 3. the unit check: run_e144b.py's wrapped run_out, handed run_hpl.py:622's command line and one other, with a stand-in run_out (nothing executed)
+residency line answered unsent, stand-in not called: True
+config line passed through to the stand-in: True
+run_hpl.py:622 is that run_out call: True
+# exit 0
+# workloads/sparsity/host/main.cpp at 07f7d049: 0 lines naming DM_CMD|dev_mngt|ioctl|serviceRequest
+# workloads/sparsity/host/main.cpp at f2b87769: 0 lines naming DM_CMD|dev_mngt|ioctl|serviceRequest
+# workloads/sparsity/host/main.cpp at HEAD: 0 lines naming DM_CMD|dev_mngt|ioctl|serviceRequest
