@@ -144,3 +144,15 @@ history) is the owner's call and is left as it stands.
 - `blind_rms_ci.py` → `blind_rms_ci.json`, `blind_rms_ci.txt` (check (c)).
 - `fault_support.py` → `fault_support.txt`: the committed numbers behind corrections 2, 4, 6, 7 and 9.
 - Reproduce from the repository root: `python3 docs/reports/data/2026-11-03-q139c-critic-checks/<script>.py --json … --txt …`.
+
+## Published (Tue 3 Nov 2026, 04:2x–04:3x PST)
+
+- This folder and the records' corrections: lab `22f8d1f9` (04:20:57 PST).
+- The kinds page, [Multiplying different numbers](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers): `2ed9794277c1`
+  (04:24:30 PST) over `8ec9ead107aa`, public and unlisted. Read back signed out: `<main>` identical to the deploy copy, 32 of 32 phrase
+  checks, Chrome at 390 and 1280 px in light and dark with no sideways scroll and no errors (the before/after table now 18 rows).
+- The [Horace Hub](https://spacesheep.dev/@yaroslavvb/horace-hub): `2abafc9e57ca` (04:31:15 PST) over `cb5b58d682b7`, public and
+  unlisted: a new Fix entry at the top of week 45 (no older Log entry touched), Status (Q138's paragraph, section 11 re-quoted from the
+  corrected page, the verification bullet), Levels stop 3 and the Library line. The AI Foundry hub (private) carried one faulty
+  sentence, E144's row, and has its own Fix entry. Read back signed out: `<main>` identical to the deploy copy, public-text counts unchanged.
+- Not changed: the carried privacy item (the owner's call), and the projects tracker, whose Horace row carries no fault from the list.
