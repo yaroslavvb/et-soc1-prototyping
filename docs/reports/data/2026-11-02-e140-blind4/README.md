@@ -1,13 +1,13 @@
 # E140: the power-and-heat model M6 against blind pool 4 - heat holds, power is biased high and its intervals under-cover (aifoundry3 card 0, 600 MHz)
 
 *On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open):
-item 6, "a power model across kinds", tested out of sample. Mon 2 Nov 2026 (week 45), Q137. Pre-registered in `aa6c0a54` (pushed about
-16:15 PST), before the claim and before any card ran a tile of the pool: [`tools/claims-v3/e140/README.md`](../../../../tools/claims-v3/e140/README.md).
+item 6, "a power model across kinds", tested out of sample. Mon 2 Nov 2026 (week 45), Q137. Pre-registered in `aa6c0a54` (committed 16:10:25, pushed
+16:10:27 PST), before the claim and before any card ran a tile of the pool: [`tools/claims-v3/e140/README.md`](../../../../tools/claims-v3/e140/README.md).
 The model is Q137(m)'s M6, frozen in `6a713a9f` (15:56 PST), its predictions for the pool in `03fcd720` (16:06 PST); the pool,
 [blind pool 4](../../../../tools/claims-v3/kinds/blind4/README.md), 25 tiles written by a designer who never saw the model, in `67fe20a9`
 (15:33 PST). aifoundry3 card 0 at 600 MHz in every sample; `ettelem config` read at the session's start (16:43:09, the smoke's), at both
 ends of the smoke and of every pass, and at the queue's end (17:15:03): TDP 0 W, threshold 65 °C, max_power, 600 MHz, 523 mV (522 mV at
-the last read), never set. **Every device-management command sent was a read** (nine kinds, two of them PMIC voltage-register reads,
+three reads: the ends of 14011 and 14012 and the session's end), never set. **Every device-management command sent was a read** (nine kinds, two of them PMIC voltage-register reads,
 which the owner's rule of 2 November 2026 allows); no write (`since_reset_ms` −1 in all 18,552 samples). Card session 16:43:09–17:15:03
 PST, **31.9 of the 35 card-minutes allowed**: the smoke 14001 and all four registered passes, 14010–14013 (438–469 s each).*
 
@@ -15,7 +15,7 @@ PST, **31.9 of the 35 card-minutes allowed**: the smoke 14001 and all four regis
 run) from the numbers it multiplies. Its makers scored it on the 22 experiments it was fitted on, leaving one kind out at a time. E140
 ran 25 kinds nobody fitted on this card. **Heat holds**: the die's rise is predicted to 0.20 °C rms on the floats and 0.16 °C on int8,
 inside what the nested score says, and 24 of 25 tiles fall inside M6's own 95% intervals (H1, H2, H3 PASS). **Power passes its rms tests
-but is biased**: M6 predicts 0.27 W too high on average (0.38 W on fp32), its rms is 0.41 W on the floats and 0.38 W on int8, near the top
+but is biased**: M6 predicts 0.28 W too high on average (0.38 W on fp32), its rms is 0.41 W on the floats and 0.38 W on int8, near the top
 of what its nested score allows (P1, P2 PASS), and **only 19 of 25 tiles fall inside its 95% intervals, against the 21 the rule needs:
 P3 FAILS** on the registered primary. On the reported arm with the board meter's dips removed, which keeps the two passes the primary
 set aside, every rule PASSES (power rms 0.27 W floats, 0.34 W int8; 21 of 25 inside), so P3's FAIL is arm-sensitive.
@@ -48,16 +48,20 @@ arm-sensitive. The frozen expectation was all six PASS: P3 did not.
 | fp32 | 11 | **−0.38** | 0.50 | `a_exp_busy_b_const` −0.79, `real_qwen_q_down` −0.97, `wideexp_bgate_alt` −0.71 |
 | fp16 | 7 | −0.19 | 0.25 | `pair_cancel` −0.48, `wideexp_gate30` −0.36 |
 | int8 | 7 | −0.20 | 0.37 | `b_line_flipflop` −0.56 |
-| all | 25 | **−0.27** | 0.41 | 6 tiles, all over-predicted |
+| all | 25 | **−0.28** | 0.41 | 6 tiles, all over-predicted |
 
-Every miss is M6 predicting too much power. The cases: the two wide-exponent gate tiles (named in advance as M6's steady-gate
-overprediction), an A busy only in sign and exponent against a constant B, the real Qwen bf16 weights (low 16 mantissa bits zero), the
-fp16 pair that cancels every two-term update, and int8's whole-line flip-flop (named in advance). `fp32.denormals_only`, named as a
-likely miss, read −0.37 W, inside. With dips removed the bias shrinks to −0.15 W (fp32 −0.18) and the rms to 0.28 W.
+Every miss on the primary is M6 predicting too much power. *(Corrected after verification, C2.)* **Two of the six are the board
+meter's dips, not the model**: `fp32.a_exp_busy_b_const` read 11.975 and 10.816 W in its two kept passes and `fp32.real_qwen_q_down`
+17.521 and 16.780; with dips removed the same passes read 11.992 / 12.002 and 17.971 / 17.959 W and both tiles fall inside M6's
+intervals. The four left are the two wide-exponent gate tiles (named in advance as M6's steady-gate overprediction), the fp16 pair that
+cancels every two-term update, and int8's whole-line flip-flop (named in advance); `fp32.a_exp_busy_b_const` (case 3) was named in
+advance too. `fp32.denormals_only`, also named, read −0.37 W, inside. On the dips-removed arm the bias shrinks to −0.15 W (fp32
+−0.18), the rms to 0.28 W, and the misses are not all one-sided: `int8.a_full_b_const` falls outside there, under-predicted by +0.53 W.
 
 **3. Heat** (measured − M6, °C): bias +0.03 °C over all 25 (fp32 +0.08, fp16 −0.05, int8 +0.02), rms 0.22 °C; the one tile outside
-its interval is `int8.band_a` (+0.37 °C, a 1.0 °C reading against 0.63 predicted). The die reads in whole degrees, so a two-pass mean
-moves in 0.5 °C steps on a tile (the int8 rows read 0.5 or 1.0 °C); that floor is inside M6's reference.
+its interval is `int8.band_a` (+0.37 °C, a 1.0 °C reading against 0.63 predicted). The die reads in whole degrees; `dT_win` is a window mean, so it is fractional (2.775, 1.737), but the small int8 rises land on 0.5 or
+1.0 °C; that floor is inside M6's reference. **The rise against the quoted 0.118 °C per board W** (reported): a line through the origin
+of each run's `dT_win` on its S gives 0.119 °C per W on the primary's 86 tile runs and 0.118 on the dips-removed arm's 172.
 
 **4. What it does to predicting power and heat** (the before/after the owner's goal asks for):
 
@@ -67,15 +71,22 @@ moves in 0.5 °C steps on a tile (the int8 rows read 0.5 or 1.0 °C); that floor
 | power, fp16 | 0.179 W | 0.25 W (bias −0.19) | 0.22 W |
 | power, int8 | 0.260 W | 0.37 W (bias −0.20) | 0.32 W |
 | power, 95% intervals | 95% | 76% (19 of 25) | 84% (21 of 25) |
-| heat, fp32 / fp16 / int8 | 0.304 / 0.283 / 0.175 °C | 0.18 / 0.27 / 0.21 °C | 0.12 / 0.20 / 0.07 °C |
+| heat, fp32 / fp16 / int8 | 0.304 / 0.283 / 0.175 °C | 0.18 / 0.27 / 0.21 °C | 0.12 / 0.20 / 0.07 °C (four passes, not dips: gates-off gives the same) |
 | heat, 95% intervals | 95% | 96% (24 of 25) | 100% |
 
 So: **the heat prediction's stated error can be quoted for new kinds** (die rise ≈ 0.118 °C per board W, within about 0.2 °C over a
 4.5 s run on this card). **The power prediction's cannot yet, as stated**: on new kinds M6's power error is up to about twice its
 nested score on fp32 and one-sided (too high), so its 95% intervals cover about three in four. The bias points at what to change: the
 over-predicted tiles are those where M6 counts bits that switch in its bench but cost less on the card (wide exponents beside gated
-zeros, exponent-only activity, mantissas with many zero low bits). M5's frozen predictions for this pool were not provided by Q137(m),
-so no M5-against-M6 comparison is reported (`scored.json` › `reported_m5` null).
+zeros, exponent-only activity, mantissas with many zero low bits). *(Corrected after verification, C1: this said M5's predictions for the pool were not provided; they were, frozen into
+`predictions-e140.json` › `tiles.*.power_m5`, and `scored.json` › `primary.reported_m5` reports them.)* **M5, the model M6 replaced,
+does better on this pool**: P1's tiles M5 0.337 W rms against M6's 0.406, P2's 0.379 against 0.384; all 25 tiles 0.358 against 0.406, M5
+better in every format (0.44 / 0.15 / 0.37 W against 0.50 / 0.25 / 0.37); dips removed, P1 0.166 against 0.274. So M6's added per-flip
+terms did not improve the out-of-sample power prediction here; heat is new in M6 and has no M5 counterpart. **The anchors** (reported,
+D in W): this session's kept passes `fp32.randn` 24.44, `fp16.randn` 21.85, `int8.full` 7.01 (dips removed 24.51, 21.97, 7.08), against
+E115's 24.64, 22.07, 7.15 on this card (its `runs.csv`): about 0.1-0.2 W lower, the size of the session-to-session spread M6's
+reference carries. **Better than the nested score:** on the dips-removed and gates-off arms H1 (0.134 °C) and H2 (0.061 °C) fall below
+their intervals' 2.5% points (0.188, 0.080): heat there reads better than the nested score says.
 
 ## Registered against what happened
 
@@ -109,7 +120,7 @@ logins were present, no device process of theirs. The day's post (message 156683
 ## What it changes
 
 - **Item 6**: answered for heat (M6's heat term holds out of sample, with intervals that cover), and **not yet for power**: on new kinds
-  M6 over-predicts (−0.27 W bias) and its intervals under-cover (19 of 25, registered FAIL; 21 of 25 with dips removed).
+  M6 over-predicts (−0.28 W bias; two of its six misses are meter dips) and does no better than M5 and its intervals under-cover (19 of 25, registered FAIL; 21 of 25 with dips removed).
 - **The model**: a next fit should look at the six over-predicted tiles' cases before widening any interval; E138's per-position int8
   B prices and E139's encoded-toggle term are two terms measured today that M6 does not carry.
 
@@ -118,3 +129,17 @@ logins were present, no device process of theirs. The day's post (message 156683
 `scored.json` and `results.md` (primary), `scored-nodips.json` and `results-nodips.md` (dips removed), `e140*.json`, `runs*.csv`,
 `reduce*.txt|log` (the reduction and each arm), `score*.log`, `code.sha256`, `logs/` (queue, session reads, form check, dry run),
 `aifoundry3/kinds/p1401*`, `aifoundry3/kinds-smoke/p14001` (raw), `aifoundry3/logs/` (the box's copy of the logs).
+
+## Corrections after verification (Mon 2 Nov 2026)
+
+*An independent verifier regenerated the freeze byte for byte, re-derived every tile, rms, coverage count and bootstrap interval with its
+own code, and reproduced all six verdicts on every arm. Its faults are corrected in place; no rule, prediction, number or verdict changed.*
+
+- **C1 (substantive)**: M5's frozen predictions were in the registration and are reported: M5 beats M6 on this pool (in place, § 4).
+- **C2 (substantive)**: two of the six power misses are meter dips on the kept passes, and on the dips-removed arm one miss is
+  under-predicted (in place, § 2).
+- **C3**: the registered reported items added: M5's rms, the anchors against E115's, the rise per board W, and "better than the nested
+  score" for H1 and H2 on two arms.
+- **C4** (wording): the bias is −0.28 W (−0.2753; the commit subject's −0.27 stands as written); `dT_win` is fractional; the
+  registration's push time; the three 522 mV reads; `fp32.a_exp_busy_b_const` was named in advance; the heat column's improvement
+  comes from four passes, not from removing dips.
