@@ -1,0 +1,710 @@
+{
+ "_note": "Q139(e): heat over minutes from the bits, frozen before E154/E161; desk only, nothing refitted",
+ "frozen_inputs_sha256": {
+  "docs/reports/data/2026-11-02-q138t-heat-model/model-q138t.json": "268b47fd580b330738eb3e1c83ea392f3784aae348a658e7335b734a1168e8fa",
+  "docs/reports/data/2026-11-02-q138t-heat-model/heat_q138t.py": "9dbb288f896b7e588fbc155d67f32b1cb7089ffe4ede465c1380d2724d1fb49b",
+  "docs/reports/data/2026-11-02-q138t-heat-model/score_e144.py": "0569c49474da4058de4ad14c13d1081fa50ba2e7dd705d4a564835d94c2e1494",
+  "tools/claims-v3/kinds/blind6/predictions-blind6-aifoundry3.json": "972476423c2bd70b00066037060ec8cc45b000ce90017b1ef8c6b58cf961e21f",
+  "tools/claims-v3/kinds/blind6/predictions-blind6-aifoundry2.json": "6b9a5e6ee5f3c4761855d8cedc486c546fecc2d855d0e706919c2a21302e3125",
+  "docs/reports/data/2026-11-03-q139m-model/m8.json": "8c23aba2307fd18c15a3a8fc40c8d937ca0df0cf0373a7bc2e9e0c3847d46abd",
+  "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json": "b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5"
+ },
+ "gate_commit_pool6_predictions": "d98d2e34",
+ "chain_terms_1sigma_C": {
+  "aifoundry3": 0.18,
+  "aifoundry2": 0.76
+ },
+ "zeros_level_spread_aifoundry3": {
+  "fp32": {
+   "n": 85,
+   "mean": 1.9831,
+   "sd": 0.1062
+  },
+  "fp16": {
+   "n": 85,
+   "mean": 1.9719,
+   "sd": 0.1185
+  },
+  "int8": {
+   "n": 85,
+   "mean": 2.5587,
+   "sd": 0.0707
+  }
+ },
+ "aifoundry3": {
+  "design": [
+   {
+    "step": "R0",
+    "kind": "rest",
+    "item": null,
+    "minutes": 5.0,
+    "pattern": null
+   },
+   {
+    "step": "H_M",
+    "kind": "hold",
+    "item": "int8.full",
+    "minutes": 11.0,
+    "pattern": "natural"
+   },
+   {
+    "step": "R1",
+    "kind": "rest",
+    "item": null,
+    "minutes": 3.5,
+    "pattern": null
+   },
+   {
+    "step": "K_S",
+    "kind": "hold",
+    "item": "fp32.real_smol_softmax_v_causal",
+    "minutes": 10.0,
+    "pattern": "duty"
+   },
+   {
+    "step": "R2",
+    "kind": "rest",
+    "item": null,
+    "minutes": 3.5,
+    "pattern": null
+   },
+   {
+    "step": "K_Q",
+    "kind": "hold",
+    "item": "int8.real_qwen_w8a8_v",
+    "minutes": 10.0,
+    "pattern": "natural"
+   },
+   {
+    "step": "R3",
+    "kind": "rest",
+    "item": null,
+    "minutes": 3.5,
+    "pattern": null
+   },
+   {
+    "step": "K_L",
+    "kind": "hold",
+    "item": "int8.b_line_zero_ff",
+    "minutes": 10.0,
+    "pattern": "natural"
+   },
+   {
+    "step": "R4",
+    "kind": "rest",
+    "item": null,
+    "minutes": 3.5,
+    "pattern": null
+   },
+   {
+    "step": "K_O",
+    "kind": "hold",
+    "item": "fp32.a_onebit_b5_third",
+    "minutes": 10.0,
+    "pattern": "natural"
+   },
+   {
+    "step": "R5",
+    "kind": "rest",
+    "item": null,
+    "minutes": 2.5,
+    "pattern": null
+   }
+  ],
+  "K_S_duty": {
+   "plan (room <= 51.5 C)": {
+    "seconds": 3.2,
+    "dispatches": 7,
+    "recorded_s": 3.456,
+    "period_s": 4.37,
+    "share": 0.7908,
+    "peak_C": 66.987
+   },
+   "warm room (51.5-53.0 C)": {
+    "seconds": 3.2,
+    "dispatches": 7,
+    "recorded_s": 3.456,
+    "period_s": 4.97,
+    "share": 0.6954,
+    "peak_C": 66.988
+   },
+   "rule": "the room is R0's rest die (34-sensor mean, last 120 s of R0). At or under 51.5 C K_S runs the plan period; 51.5-53.0 C the warm-room period; above 53.0 C K_S's 10 minutes are a rest. The prediction scored is the one for the pattern that ran (A1.2: the realized dispatch records)."
+  },
+  "power_arms": {
+   "fp32.a_onebit_b5_third": {
+    "M8_S_W": 11.4269,
+    "M8_D_W": 9.4465,
+    "M8_D_95": [
+     9.0186,
+     9.8743
+    ],
+    "sigma_D_W": 0.2183,
+    "sigma_zeros_W": 0.1062,
+    "sigma_S_W": 0.2428,
+    "M7_S_W": 11.3729,
+    "M6_S_W": 11.3166
+   },
+   "fp32.real_smol_softmax_v_causal": {
+    "M8_S_W": 15.6736,
+    "M8_D_W": 13.6932,
+    "M8_D_95": [
+     13.265,
+     14.1214
+    ],
+    "sigma_D_W": 0.2185,
+    "sigma_zeros_W": 0.1062,
+    "sigma_S_W": 0.2429,
+    "M7_S_W": 15.6055,
+    "M6_S_W": 15.5281
+   },
+   "int8.b_line_zero_ff": {
+    "M8_S_W": 5.9352,
+    "M8_D_W": 3.3882,
+    "M8_D_95": [
+     2.1679,
+     4.6084
+    ],
+    "sigma_D_W": 0.6226,
+    "sigma_zeros_W": 0.0707,
+    "sigma_S_W": 0.6266,
+    "M7_S_W": 6.2502,
+    "M6_S_W": 6.6485
+   },
+   "int8.real_qwen_w8a8_v": {
+    "M8_S_W": 9.2413,
+    "M8_D_W": 6.6943,
+    "M8_D_95": [
+     5.9818,
+     7.4067
+    ],
+    "sigma_D_W": 0.3635,
+    "sigma_zeros_W": 0.0707,
+    "sigma_S_W": 0.3703,
+    "M7_S_W": 9.239,
+    "M6_S_W": 9.2503
+   }
+  },
+  "session": {
+   "rest_die_C": 51.2,
+   "total_min": 72.34,
+   "holds": [
+    {
+     "hold": "H_M",
+     "item": "int8.full",
+     "share": 0.9655,
+     "S_W": 9.6483,
+     "S_eff_W": 9.316,
+     "start_s": 300.0,
+     "end_s": 955.4,
+     "carried_in_C": 0.0,
+     "rise_C_by_s": {
+      "10": 2.168,
+      "30": 3.568,
+      "60": 5.095,
+      "120": 7.227,
+      "180": 8.584,
+      "300": 10.108,
+      "450": 10.928,
+      "600": 11.244,
+      "end": 11.308
+     },
+     "plateau_rise_C": 11.015,
+     "plateau_board_rise_W": 12.991,
+     "plateau_C_abs": 62.21,
+     "peak_C_abs": 62.55,
+     "plateau_per_board_W": 0.8479,
+     "at_600s_rise_C": 11.237,
+     "at_600s_board_rise_W": 13.093,
+     "at_600s_per_board_W": 0.8582,
+     "dplateau_dS_C_per_W": 1.23,
+     "sigma_S_W": 0.0317,
+     "band_1sigma_C": 0.184,
+     "band_95_C": 0.361,
+     "fail_beyond_C": 1.3,
+     "critic_scale_C": 0.182,
+     "end_to_end": false,
+     "M7_S_through_the_chain": {
+      "plateau_rise_C": 11.015,
+      "plateau_C_abs": 62.21
+     },
+     "M6_S_through_the_chain": {
+      "plateau_rise_C": 11.015,
+      "plateau_C_abs": 62.21
+     },
+     "replicate_ratio_vs_E97_H1_0.898": 0.9557
+    },
+    {
+     "hold": "K_S",
+     "item": "fp32.real_smol_softmax_v_causal",
+     "share": 0.7908,
+     "S_W": 15.6736,
+     "S_eff_W": 12.395,
+     "start_s": 1165.4,
+     "end_s": 1768.2,
+     "carried_in_C": 3.211,
+     "rise_C_by_s": {
+      "10": 1.537,
+      "30": 3.126,
+      "60": 4.844,
+      "120": 7.198,
+      "180": 8.73,
+      "300": 10.462,
+      "450": 11.44,
+      "600": 11.861,
+      "end": 11.844
+     },
+     "plateau_rise_C": 11.365,
+     "plateau_board_rise_W": 17.267,
+     "plateau_C_abs": 65.78,
+     "peak_C_abs": 66.68,
+     "plateau_per_board_W": 0.6582,
+     "dplateau_dS_C_per_W": 1.018,
+     "sigma_S_W": 0.2429,
+     "band_1sigma_C": 0.306,
+     "band_95_C": 0.599,
+     "fail_beyond_C": 1.3,
+     "critic_scale_C": 0.278,
+     "end_to_end": true,
+     "M7_S_through_the_chain": {
+      "plateau_rise_C": 11.296,
+      "plateau_C_abs": 65.71
+     },
+     "M6_S_through_the_chain": {
+      "plateau_rise_C": 11.218,
+      "plateau_C_abs": 65.63
+     }
+    },
+    {
+     "hold": "K_Q",
+     "item": "int8.real_qwen_w8a8_v",
+     "share": 0.9655,
+     "S_W": 9.2413,
+     "S_eff_W": 8.923,
+     "start_s": 1978.2,
+     "end_s": 2575.6,
+     "carried_in_C": 4.318,
+     "rise_C_by_s": {
+      "10": 0.3,
+      "30": 1.323,
+      "60": 2.385,
+      "120": 3.837,
+      "180": 4.739,
+      "300": 5.742,
+      "450": 6.275,
+      "end": 6.477
+     },
+     "plateau_rise_C": 6.207,
+     "plateau_board_rise_W": 12.402,
+     "plateau_C_abs": 61.73,
+     "peak_C_abs": 62.03,
+     "plateau_per_board_W": 0.5005,
+     "dplateau_dS_C_per_W": 1.202,
+     "sigma_S_W": 0.3703,
+     "band_1sigma_C": 0.48,
+     "band_95_C": 0.941,
+     "fail_beyond_C": 1.882,
+     "critic_scale_C": 0.369,
+     "end_to_end": true,
+     "M7_S_through_the_chain": {
+      "plateau_rise_C": 6.225,
+      "plateau_C_abs": 61.72
+     },
+     "M6_S_through_the_chain": {
+      "plateau_rise_C": 6.263,
+      "plateau_C_abs": 61.73
+     }
+    },
+    {
+     "hold": "K_L",
+     "item": "int8.b_line_zero_ff",
+     "share": 0.9655,
+     "S_W": 5.9352,
+     "S_eff_W": 5.731,
+     "start_s": 2785.6,
+     "end_s": 3383.0,
+     "carried_in_C": 3.06,
+     "rise_C_by_s": {
+      "10": 0.064,
+      "30": 0.693,
+      "60": 1.335,
+      "120": 2.2,
+      "180": 2.725,
+      "300": 3.291,
+      "450": 3.58,
+      "end": 3.685
+     },
+     "plateau_rise_C": 3.542,
+     "plateau_board_rise_W": 7.749,
+     "plateau_C_abs": 57.8,
+     "peak_C_abs": 57.97,
+     "plateau_per_board_W": 0.4571,
+     "dplateau_dS_C_per_W": 1.142,
+     "sigma_S_W": 0.6266,
+     "band_1sigma_C": 0.738,
+     "band_95_C": 1.446,
+     "fail_beyond_C": 2.892,
+     "critic_scale_C": 0.574,
+     "end_to_end": true,
+     "M7_S_through_the_chain": {
+      "plateau_rise_C": 3.903,
+      "plateau_C_abs": 58.16
+     },
+     "M6_S_through_the_chain": {
+      "plateau_rise_C": 4.358,
+      "plateau_C_abs": 58.62
+     }
+    },
+    {
+     "hold": "K_O",
+     "item": "fp32.a_onebit_b5_third",
+     "share": 0.9655,
+     "S_W": 11.4269,
+     "S_eff_W": 11.033,
+     "start_s": 3593.0,
+     "end_s": 4190.4,
+     "carried_in_C": 1.881,
+     "rise_C_by_s": {
+      "10": 1.791,
+      "30": 3.317,
+      "60": 4.962,
+      "120": 7.26,
+      "180": 8.728,
+      "300": 10.398,
+      "450": 11.315,
+      "end": 11.677
+     },
+     "plateau_rise_C": 11.205,
+     "plateau_board_rise_W": 15.567,
+     "plateau_C_abs": 64.29,
+     "peak_C_abs": 64.8,
+     "plateau_per_board_W": 0.7198,
+     "dplateau_dS_C_per_W": 1.242,
+     "sigma_S_W": 0.2428,
+     "band_1sigma_C": 0.351,
+     "band_95_C": 0.688,
+     "fail_beyond_C": 1.376,
+     "critic_scale_C": 0.277,
+     "end_to_end": true,
+     "M7_S_through_the_chain": {
+      "plateau_rise_C": 11.036,
+      "plateau_C_abs": 64.22
+     },
+     "M6_S_through_the_chain": {
+      "plateau_rise_C": 10.836,
+      "plateau_C_abs": 64.16
+     }
+    }
+   ]
+  },
+  "plateau_rise_fixed_point_C_by_room": {
+   "49.5": {
+    "int8.full": 11.135,
+    "fp32.real_smol_softmax_v_causal": 15.284,
+    "int8.real_qwen_w8a8_v": 10.626,
+    "int8.b_line_zero_ff": 6.629,
+    "fp32.a_onebit_b5_third": 13.414
+   },
+   "50.6": {
+    "int8.full": 11.336,
+    "fp32.real_smol_softmax_v_causal": 15.58,
+    "int8.real_qwen_w8a8_v": 10.816,
+    "int8.b_line_zero_ff": 6.741,
+    "fp32.a_onebit_b5_third": 13.665
+   },
+   "51.2": {
+    "int8.full": 11.449,
+    "fp32.real_smol_softmax_v_causal": 15.747,
+    "int8.real_qwen_w8a8_v": 10.923,
+    "int8.b_line_zero_ff": 6.803,
+    "fp32.a_onebit_b5_third": 13.807
+   },
+   "51.5": {
+    "int8.full": 11.507,
+    "fp32.real_smol_softmax_v_causal": 15.832,
+    "int8.real_qwen_w8a8_v": 10.977,
+    "int8.b_line_zero_ff": 6.835,
+    "fp32.a_onebit_b5_third": 13.879
+   },
+   "52.5": {
+    "int8.full": 11.703,
+    "fp32.real_smol_softmax_v_causal": 16.124,
+    "int8.real_qwen_w8a8_v": 11.162,
+    "int8.b_line_zero_ff": 6.943,
+    "fp32.a_onebit_b5_third": 14.126
+   },
+   "53.0": {
+    "int8.full": 11.804,
+    "fp32.real_smol_softmax_v_causal": 16.274,
+    "int8.real_qwen_w8a8_v": 11.258,
+    "int8.b_line_zero_ff": 6.998,
+    "fp32.a_onebit_b5_third": 14.253
+   }
+  },
+  "fixed_point_by_model_at_nominal_room": {
+   "fp32.a_onebit_b5_third": {
+    "M8": 13.807,
+    "M7_S_through_the_chain": 13.734,
+    "M6_S_through_the_chain": 13.658
+   },
+   "fp32.real_smol_softmax_v_causal": {
+    "M8": 15.747,
+    "M7_S_through_the_chain": 15.669,
+    "M6_S_through_the_chain": 15.581
+   },
+   "int8.b_line_zero_ff": {
+    "M8": 6.803,
+    "M7_S_through_the_chain": 7.184,
+    "M6_S_through_the_chain": 7.67
+   },
+   "int8.real_qwen_w8a8_v": {
+    "M8": 10.923,
+    "M7_S_through_the_chain": 10.92,
+    "M6_S_through_the_chain": 10.934
+   }
+  },
+  "S_table_W": {
+   "fp32.a_onebit_b5_third": 11.4269,
+   "fp32.real_smol_softmax_v_causal": 15.6736,
+   "int8.b_line_zero_ff": 5.9352,
+   "int8.real_qwen_w8a8_v": 9.2413,
+   "int8.full": 9.6483
+  },
+  "subset": {
+   "steps": [
+    "R0",
+    "H_M",
+    "R1",
+    "K_S",
+    "R2",
+    "K_Q"
+   ],
+   "minutes": 43.0,
+   "holds": [
+    "H_M",
+    "K_S",
+    "K_Q"
+   ]
+  }
+ },
+ "aifoundry2": {
+  "T_REF_A2_C": 56.0,
+  "T_REF_check": {
+   "g1_line": {
+    "b0_W": 16.45,
+    "slope_W_per_C": 0.41,
+    "n": 8723
+   },
+   "e80_int8_neg_ones_P800_W": 39.4,
+   "T_at_e80_board_C": 55.97
+  },
+  "K_A2_W_per_C": 0.442,
+  "W0_W": 65.20000000000014,
+  "trip_C": 65.9,
+  "backcheck_E144b_G1_posthoc": {
+   "kind": "int8.neg_ones (E144b G1)",
+   "D600_E78_W": 1.629,
+   "rest_die_C": 46.0,
+   "P_ref_W": 21.934,
+   "predicted_plateau_C": 59.431,
+   "measured_plateau_C": 58.923,
+   "predicted_board_plateau_W": 42.22,
+   "measured_board_300_900s_W": "40.42 / 40.26 (300-600 / 600-900 s)",
+   "predicted_P800_at_56C_W": 40.7,
+   "e80_measured_P800_W": 39.4
+  },
+  "design": [
+   {
+    "step": "REST",
+    "minutes": 2.0
+   },
+   {
+    "step": "G1q",
+    "item": "int8.b_line_zero_ff",
+    "minutes": 13.0
+   },
+   {
+    "step": "END",
+    "minutes": 2.0
+   },
+   {
+    "step": "REST",
+    "minutes": 2.0
+   },
+   {
+    "step": "G2q",
+    "item": "fp32.real_smol_softmax_v_causal",
+    "minutes": 13.0
+   },
+   {
+    "step": "END2",
+    "minutes": 2.0
+   }
+  ],
+  "holds": [
+   {
+    "step": "G1q",
+    "item": "int8.b_line_zero_ff",
+    "minutes": 13.0,
+    "c_W": 5.4492,
+    "M8_P800_burst_W": 43.99,
+    "board_800MHz_at_rest_die_W": 39.57,
+    "T800_fixed_point_C": 62.545,
+    "regime": "800 MHz",
+    "plateau_C_rule": 62.545,
+    "plateau_rise_C_rule": 16.545,
+    "plateau_C_simulated": 62.474,
+    "clock_MHz_last300_simulated": 800.0,
+    "clock_MHz_at_plateau_rule": 800.0,
+    "board_W_at_plateau_rule": null,
+    "board_W_last300_simulated": 46.85,
+    "first_step_down_s": null,
+    "rise_C_by_s": {
+     "10": 4.369,
+     "30": 6.944,
+     "60": 9.548,
+     "120": 12.695,
+     "180": 14.351,
+     "300": 15.773,
+     "450": 16.315,
+     "600": 16.473,
+     "750": 16.522
+    },
+    "peak_board_W_expected": 48.82,
+    "peak_board_W_hi95": 53.33,
+    "dplateau_dP_C_per_W": 0.9377,
+    "sigma_P_W": 1.509,
+    "band_1sigma_C": 1.606,
+    "band_95_C": 3.149,
+    "fail_beyond_C": 6.297,
+    "critic_scale_C": 1.305,
+    "M7_P800_W_for_comparison": 44.58
+   },
+   {
+    "step": "G2q",
+    "item": "fp32.real_smol_softmax_v_causal",
+    "minutes": 13.0,
+    "c_W": 14.8824,
+    "M8_P800_burst_W": 61.96,
+    "board_800MHz_at_rest_die_W": 57.54,
+    "T800_fixed_point_C": 79.398,
+    "regime": "trip",
+    "plateau_C_rule": 65.9,
+    "plateau_rise_C_rule": 19.9,
+    "plateau_C_simulated": 65.662,
+    "clock_MHz_last300_simulated": 678.3,
+    "clock_MHz_at_plateau_rule": 681.6,
+    "board_W_at_plateau_rule": 51.94,
+    "board_W_last300_simulated": 51.55,
+    "first_step_down_s": 48.0,
+    "rise_C_by_s": {
+     "10": 8.82,
+     "30": 14.017,
+     "60": 17.53,
+     "120": 18.589,
+     "180": 19.719,
+     "300": 19.593,
+     "450": 19.633,
+     "600": 19.547,
+     "750": 19.882
+    },
+    "peak_board_W_expected": 66.96,
+    "peak_board_W_hi95": 68.15,
+    "dplateau_dP_C_per_W": 0.9377,
+    "sigma_P_W": 1.509,
+    "band_1sigma_C": 1.606,
+    "band_95_C": 0.6,
+    "fail_beyond_C": 1.2,
+    "critic_scale_C": 1.305,
+    "M7_P800_W_for_comparison": 61.84,
+    "band_note": "trip regime: Q138(t)'s G2 bands (+-0.60 PASS, +-1.20 FAIL) on the plateau; the die is the governor's, not the bits'"
+   }
+  ],
+  "by_rest_die": {
+   "44.0": {
+    "int8.b_line_zero_ff": {
+     "T800_fixed_point_C": 60.135,
+     "plateau_C": 60.135,
+     "regime": "800 MHz",
+     "clock_MHz_at_plateau": 800.0
+    },
+    "fp32.real_smol_softmax_v_causal": {
+     "T800_fixed_point_C": 76.988,
+     "plateau_C": 65.9,
+     "regime": "trip",
+     "clock_MHz_at_plateau": 707.4
+    }
+   },
+   "45.0": {
+    "int8.b_line_zero_ff": {
+     "T800_fixed_point_C": 61.34,
+     "plateau_C": 61.34,
+     "regime": "800 MHz",
+     "clock_MHz_at_plateau": 800.0
+    },
+    "fp32.real_smol_softmax_v_causal": {
+     "T800_fixed_point_C": 78.193,
+     "plateau_C": 65.9,
+     "regime": "trip",
+     "clock_MHz_at_plateau": 696.1
+    }
+   },
+   "46.0": {
+    "int8.b_line_zero_ff": {
+     "T800_fixed_point_C": 62.545,
+     "plateau_C": 62.545,
+     "regime": "800 MHz",
+     "clock_MHz_at_plateau": 800.0
+    },
+    "fp32.real_smol_softmax_v_causal": {
+     "T800_fixed_point_C": 79.398,
+     "plateau_C": 65.9,
+     "regime": "trip",
+     "clock_MHz_at_plateau": 681.6
+    }
+   },
+   "47.0": {
+    "int8.b_line_zero_ff": {
+     "T800_fixed_point_C": 63.751,
+     "plateau_C": 63.751,
+     "regime": "800 MHz",
+     "clock_MHz_at_plateau": 800.0
+    },
+    "fp32.real_smol_softmax_v_causal": {
+     "T800_fixed_point_C": 80.604,
+     "plateau_C": 65.9,
+     "regime": "trip",
+     "clock_MHz_at_plateau": 667.1
+    }
+   }
+  },
+  "nominal": {
+   "rest_die_C": 46.0,
+   "P_ref_W": 21.927,
+   "P_ref_line": {
+    "b0": 11.6707,
+    "slope": 0.223
+   }
+  },
+  "total_min": 34.0
+ },
+ "rules": {
+  "E154 (aifoundry3 card 0, 600 MHz, nothing set)": {
+   "harness": "E144's runner (tools/claims-v3/e144/run_e144.py, E97's harness, --values file: tiles), with this design: rests fixed lengths, H_M / K_Q / K_L / K_O E97's natural chain, K_S 7 dispatches (--seconds 3.20) once every K_S_duty period, start to start, from its first launch. Pool-6 tiles from tools/claims-v3/kinds/blind6/ (sha256 as MANIFEST); H_M runs E78's int8.full tile (E97's H1).",
+   "subset": "the design's first 43.0 minutes (R0, H_M, R1, K_S, R2, K_Q), registered on its own; the full design adds R3, K_L, R4, K_O, R5 (72.9 minutes of plan). Probe, smoke and stop tests come on top and stay inside 76 (full) and 45 (subset).",
+   "E_end_to_end (primary, per pool-6 hold)": "Q138(t)'s frozen chain closed through E97's idle law, from R0's measured rest die (34-sensor mean, last 120 s of R0), on the session's realized dispatch records, each on at the item's frozen S (S_table_W: M8's S_w for pool-6 items, E78's for int8.full) - score_e144.py's arm (b) machinery (A1.2) with its S78 table extended by S_table_W, nothing else changed. Plateau = the mean rise over the hold's last 300 s over the chain's carried-in base; the trajectory = checkpoints from 60 s to the end (5 s means; one cycle on K_S). PASS: |plateau error| <= band_95_C and the checkpoints' rms <= band_95_C. FAIL: |plateau error| > fail_beyond_C. Otherwise INCONCLUSIVE.",
+   "band": "band_95_C = 1.96 sqrt(0.18^2 + (G sigma_S)^2): 0.18 C the chain's blind error given the power (E144); G = d(plateau)/dS x share on the closed loop (about 1.0-1.25 C per W); sigma_S = M8's 95% D band / 1.96 with the zeros level's spread between sessions in quadrature. fail_beyond_C = max(2 band_95_C, 1.30 C). critic_scale_C is the critic's form sqrt(0.18^2 + (0.87 sigma_S)^2), reported.",
+   "A_given_watts (beside, per hold)": "score_e144.py arm (a) unchanged (the chain on the measured board trace): PASS rms <= 0.80 and |plateau| <= 1.00 C; FAIL > 1.60 or > 2.00. E minus A on the plateau is the power path's share of the error.",
+   "H_M (E97 H1 replicate, not end to end)": "Q138(t)'s (b) from E78's S (PASS +-1.30 C) and (c) replicate: rise per board W at 600 s over E97's H1 0.898, PASS [0.94, 1.06], FAIL outside [0.88, 1.12]; band_95_C reported as the tight reading.",
+   "session": "the rms of the pool-6 holds' plateau errors (2 in the subset, 4 in the full design) is the out-of-sample error of heat over minutes from the bits on this card; reported with each model's S through the same chain (M7, M6 arms).",
+   "K_S warm room": "R0's rest die <= 51.5 C: the plan period; 51.5-53.0 C: the warm-room period; above 53.0 C K_S is a rest.",
+   "stops": "Q138(t)'s, unchanged: no launch at a firmware die reading >= 70 C; a hold ends at any sample >= 72 C or board >= 65 W; the session ends at >= 74 C. Every planned in-launch peak is at or under 67.5 C (34-sensor mean) at its room."
+  },
+  "E161 (aifoundry2 card 0, its own governor, 65 W / 65 C, nothing set)": {
+   "harness": "E144b's (tools/claims-v3/e144b/run_e144b.py, E133's kspeed holds) with --values file: tiles: REST 2, G1q 13, END 2, REST 2, G2q 13, END2 2 = 34 minutes, inside 40 with the smoke and stop tests.",
+   "G1q int8.b_line_zero_ff (800 MHz regime predicted)": "plateau (firmware whole-degree die, mean over the last 300 s) from the REST's measured die and board: the 800 MHz fixed point T = T_rest + 0.663 (board(800, c, T) - P_ref), board = M8's burst board moved by 0.442 W/C from 56.0 C. PASS |plateau error| <= band_95_C (3.15 C at a 46 C rest) and the checkpoints' rms from 60 s <= band_95_C; FAIL beyond fail_beyond_C. Clock: share at >= 790 MHz over the last 300 s >= 0.90 PASS (E144b-K1's rule), < 0.75 FAIL.",
+   "G2q fp32.real_smol_softmax_v_causal (trip regime predicted)": "plateau 65.9 C (Q138(t)'s trip rule): PASS within +-0.60 C and the regime as predicted (the clock below 790 MHz for >= 50% of the last 300 s); FAIL outside +-1.20 C or in the other regime. The clock over the last 300 s from the bits: the level whose board holds the die at 65.9 C, PASS within +-35 MHz of clock_MHz_at_plateau_rule, FAIL outside +-70 MHz. The first step-down time is reported (predicted 48 s, the cap).",
+   "band": "band_95_C = 1.96 sqrt(0.76^2 + (G sigma_P)^2): 0.76 C the chain's blind rms given the watts (E144b G1); G = 0.938 C per board W (the closed loop's gain at 800 MHz); sigma_P = sqrt(1.443^2 + (0.442 x 1.0)^2) W (M8's pinned end-to-end rms and the reference die's 1 C).",
+   "stops (section 22)": "no tile whose predicted peak passes 82 W: G1q 53.3 W and G2q 68.2 W at 95%. A hold ends at a die reading >= 72 C or board >= 80 W on 3 consecutive live samples (at most 85 W, tested in the smoke)."
+  }
+ }
+}
