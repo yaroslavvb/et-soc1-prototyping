@@ -1,0 +1,93 @@
+E162 corrections after verification: numbers from committed files (post hoc, no verdict)
+fit rows {'bf16': 75, 'fp16': 26, 'int8': 24} = 125; E162's new rows 36, E149's rows 89; held-out kinds 22
+check: the frozen RK is (s, r) = (8, 1), lambda [0.03, 0.1, 0.3]; refitted here, its coefficients and its 22 held-out predictions equal the frozen ones to better than 1e-9
+check: the vectorized exact LOO equals a brute-force refit loop (9 cases) to better than 1e-8 W
+
+C1  THE K-LAG
+  stage-1 scan, pooled LOKO rms (W) at its best lambda per format: closed form (as frozen) | exact (C2);
+  then rms(pair) - rms(8,1) with a paired bootstrap over the 125 rows (approximate: LOO residuals share rows)
+  (8,1)   closed  12.40 (bf16/fp16/int8 12.36/13.09/11.71)  exact  12.90   minus (8,1): closed +0.00 [+0.00, +0.00]  exact +0.00 [+0.00, +0.00]
+  (4,1)   closed  13.15 (bf16/fp16/int8 13.99/11.87/11.68)  exact  13.73   minus (8,1): closed +0.76 [-0.73, +2.62]  exact +0.83 [-0.87, +2.78]
+  (32,1)  closed  13.34 (bf16/fp16/int8 13.93/12.38/12.43)  exact  13.67   minus (8,1): closed +0.95 [-0.17, +2.36]  exact +0.76 [-0.52, +2.43]
+  (2,1)   closed  13.47 (bf16/fp16/int8 14.36/12.09/11.94)  exact  13.99   minus (8,1): closed +1.07 [-0.16, +2.50]  exact +1.08 [-0.15, +2.53]
+  (16,1)  closed  13.74 (bf16/fp16/int8 12.83/16.67/12.94)  exact  14.77   minus (8,1): closed +1.34 [+0.45, +2.30]  exact +1.86 [+0.47, +3.40]
+  (1,1)   closed  15.66 (bf16/fp16/int8 15.12/18.42/13.98)  exact  16.84   minus (8,1): closed +3.26 [+1.93, +4.73]  exact +3.93 [+2.10, +6.02]
+  (8,4)   closed  16.06 (bf16/fp16/int8 16.83/16.37/12.91)  exact  16.45   minus (8,1): closed +3.66 [+0.22, +7.13]  exact +3.54 [+0.38, +6.66]
+  (8,2)   closed  16.15 (bf16/fp16/int8 16.95/16.46/12.96)  exact  16.46   minus (8,1): closed +3.76 [+0.20, +7.28]  exact +3.55 [+0.26, +6.85]
+  (8,8)   closed  17.38 (bf16/fp16/int8 18.44/17.35/13.58)  exact  17.69   minus (8,1): closed +4.98 [+1.48, +8.49]  exact +4.79 [+1.51, +8.06]
+  (8,32)  closed  17.81 (bf16/fp16/int8 19.24/17.09/13.43)  exact  18.19   minus (8,1): closed +5.42 [+1.88, +8.95]  exact +5.29 [+1.95, +8.67]
+  (8,16)  closed  19.04 (bf16/fp16/int8 19.35/20.76/15.85)  exact  20.05   minus (8,1): closed +6.65 [+3.66, +9.63]  exact +7.15 [+4.11, +10.07]
+  row-lag 1, worst of the six: closed 15.66, exact 16.84; row-lag != 1, best: closed 16.06 (8,4), exact 16.45 (8,4); 'every row-lag != 1 worse than every row-lag 1': closed True, exact False
+  stage-1 waves, bf16 y +- SE (W over zeros, reduce-a1.json):
+    kS: b1 28.9 +- 0.85; b2 28.1 +- 0.87; b4 24.3 +- 1.94; b8 51.1 +- 0.85; b16 52.4 +- 1.10; b32 36.5 +- 1.25; b64 35.6 +- 2.66
+    sq: b1 72.9 +- 1.48; b16 90.9 +- 1.96; b64 83.6 +- 2.98
+    rS: b1 97.5 +- 2.55; b2 61.3 +- 1.59; b4 67.7 +- 1.24; b8 48.5 +- 0.89; b16 47.1 +- 0.56; b32 38.4 +- 1.93; b64 37.1 +- 0.60
+  post hoc, blind (22 held-out kinds, new boards): the same form refitted at each pairing, rms (bias) W;
+  rms(pair) - rms(8,1) with the registered paired bootstrap over the 22 kinds (10,000, seed 162)
+  (1,1)   blind  24.90 (+11.65)  [lambda by exact LOO  24.90]  without the stripes  23.51   minus (8,1)  +9.25 [ +4.21, +14.96]
+  (2,1)   blind  20.27 ( +9.97)  [lambda by exact LOO  20.80]  without the stripes  17.25   minus (8,1)  +4.62 [ +1.94,  +8.13]
+  (4,1)   blind  17.79 ( +5.74)  [lambda by exact LOO  18.49]  without the stripes  14.07   minus (8,1)  +2.14 [ +0.96,  +3.81]
+  (8,1)   blind  15.65 ( +2.68)  [lambda by exact LOO  15.65]  without the stripes  11.15   minus (8,1)  +0.00 [ +0.00,  +0.00]
+  (16,1)  blind  15.83 ( +1.30)  [lambda by exact LOO  15.83]  without the stripes  12.45   minus (8,1)  +0.18 [ -2.23,  +3.78]
+  (32,1)  blind  16.20 ( -1.96)  [lambda by exact LOO  15.36]  without the stripes  14.04   minus (8,1)  +0.55 [ -3.98,  +6.27]
+  (8,2)   blind  19.24 ( +7.67)  [lambda by exact LOO  19.24]  without the stripes  17.41   minus (8,1)  +3.60 [ -3.66, +13.02]
+  (8,4)   blind  22.68 ( +1.62)  [lambda by exact LOO  22.69]  without the stripes  21.43   minus (8,1)  +7.03 [ -2.62, +16.59]
+  (8,8)   blind  29.70 ( -5.32)  [lambda by exact LOO  29.70]  without the stripes  29.27   minus (8,1) +14.05 [ +3.14, +24.54]
+  (8,16)  blind  33.57 ( -7.82)  [lambda by exact LOO  34.45]  without the stripes  33.44   minus (8,1) +17.93 [ +6.48, +29.17]
+  (8,32)  blind  37.94 (-13.66)  [lambda by exact LOO  37.94]  without the stripes  38.24   minus (8,1) +22.29 [ +9.94, +34.41]
+  the six best pairings blind, of 36: (8,1) 15.65, (16,1) 15.83, (32,1) 16.20, (4,1) 17.79, (8,2) 19.24, (1,2) 20.24
+
+C2  THE LOKO, EXACT (the column scale recomputed on each fold's training rows)
+  choice: closed form (8,1) lambda [0.03, 0.1, 0.3]; exact (8,1) lambda [0.03, 0.1, 0.3]
+  the scan's best six, exact: (8,1) 12.90, (32,1) 13.67, (4,1) 13.73, (2,1) 13.99, (16,1) 14.77, (8,4) 16.45
+  LOO at the choice, bf16/fp16/int8: closed 12.36 / 13.09 / 11.71; exact 12.42 / 14.92 / 12.00
+  fully nested rms, bf16/fp16/int8 (pooled): as frozen 13.943 / 15.404 / 12.659 (14.027); exact 14.893 / 15.524 / 13.136 (14.709)
+  the nested folds' choices: exact {'bf16': {'(4,1)': 1, '(8,1)': 73, '(32,1)': 1}, 'fp16': {'(8,1)': 24, '(32,1)': 1, '(32,4)': 1}, 'int8': {'(8,1)': 24}}; as frozen (closed form) {'bf16': {'(4,1)': 1, '(8,1)': 74}, 'fp16': {'(8,1)': 26}, 'int8': {'(8,1)': 24}}
+  STABLE (i) nested / in-sample (<= 3): as frozen 1.38 / 1.77 / 1.31; exact 1.47 / 1.78 / 1.36; (ii) pooled nested <= G1's form's OLS LOKO 67.29: exact 14.71 -> HOLDS
+  the band (1.645 x nested rms) under exact refits, bf16/fp16/int8: 24.5 / 25.5 / 21.6 W (frozen 22.9 / 25.3 / 20.8); held-out kinds inside: frozen 20, exact-band 20 of 22
+
+C3  THE BOARDS
+  E149 stage 1 (fit rows): A NVIDIA A100-SXM4-80GB dbf92f75735f 81920 MiB; B NVIDIA A100-SXM4-40GB 660a9fe7d69f 40960 MiB
+  E149 stage 2 (seen-kinds arm): A NVIDIA A100-SXM4-80GB 8a5db1cd3afd 81920 MiB; B NVIDIA A100-SXM4-40GB 5d6c11c9a424 40960 MiB
+  E162 stage 1: A NVIDIA A100-SXM4-40GB ac97f0c6a6ae 40960 MiB; B NVIDIA A100-SXM4-40GB 83190b6e35b9 40960 MiB
+  E162 stage 2: A NVIDIA A100-SXM4-40GB d31f897269bd 40960 MiB; B NVIDIA A100-SXM4-40GB 80d5c1565177 40960 MiB
+
+C4  THE L40S SMOKE (choice-ls.json; one 5 s window per cell, one board)
+  1024^3: random  345.8 W ( 99% of 350),   2237 MHz,  150.9 TFLOPS, 0x4 in 100%; zeros  227.2 W ( 65%),   2478 MHz,  154.1 TFLOPS, 0x4 in 100%; random - zeros +118.5 W, clock -9.7%, TFLOPS -2.1%
+  1536^3: random  340.1 W ( 97% of 350),   2157 MHz,  146.1 TFLOPS, 0x4 in 100%; zeros  223.7 W ( 64%),   2386 MHz,  143.3 TFLOPS, 0x4 in 100%; random - zeros +116.4 W, clock -9.6%, TFLOPS +2.0%
+  2048^3: random  349.6 W (100% of 350),   1890 MHz,  222.7 TFLOPS, 0x4 in 100%; zeros  226.5 W ( 65%),   2235 MHz,  261.0 TFLOPS, 0x4 in 100%; random - zeros +123.1 W, clock -15.4%, TFLOPS -14.7%
+  3072^3: random  321.4 W ( 92% of 350),   2235 MHz,  191.8 TFLOPS, 0x4 in 100%; zeros  209.7 W ( 60%),   2445 MHz,  185.1 TFLOPS, 0x4 in 100%; random - zeros +111.7 W, clock -8.6%, TFLOPS +3.6%
+  4096^3: random  349.5 W (100% of 350),   1745 MHz,  220.0 TFLOPS, 0x4 in 100%; zeros  240.3 W ( 69%),   2176 MHz,  272.2 TFLOPS, 0x4 in 100%; random - zeros +109.2 W, clock -19.8%, TFLOPS -19.2%
+  zeros at 60%-69% of the limit; random draws 109.2-123.1 W more than zeros; its mean SM clock 8.6%-19.8% lower; TFLOPS -19.2% to +3.6%
+
+C5  THE BEST FORM FROZEN BEFORE E162, on the 22 held-out kinds (score-e162-a100.json models)
+  RK           15.65 W rms, bias    +2.68   E162's own (frozen at 54e8f87d)
+  e149_S1      36.07 W rms, bias   -12.08   E149's, frozen at e929b00f
+  e149_G0      45.72 W rms, bias   +30.74   E149's, frozen at e929b00f
+  G1p          47.98 W rms, bias   +11.72   E162's own (frozen at 54e8f87d)
+  e149_G1s     49.98 W rms, bias   -21.56   E149's, frozen at e929b00f
+  G1           52.35 W rms, bias    +3.24   E149's, frozen at e929b00f
+  G4p         177.59 W rms, bias   +43.49   E162's own (frozen at 54e8f87d)
+  e149_G4     550.04 W rms, bias   +82.49   E149's, frozen at e929b00f
+  e149_G3    2035.36 W rms, bias  -523.53   E149's, frozen at e929b00f
+  rms(S1) - rms(RK) +20.42 W, paired bootstrap 95% [+9.40, +32.09] (no verdict; BEAT is registered against G1); ratio 0.434; as shares of E149's span 154.73 W: S1 23.3%, G1 33.8%, RK 10.1%
+
+C6  HEAT: HT1 THROUGH E149'S FROZEN LINEAR HEAT MODEL (score-e162-a100.json heat_cells, per_kind)
+  dT(model) - dT(measured P) = g x (model y - measured y): g 0.0612 C/W through the origin (with an intercept 0.0612 C/W, -0.009 C), residual rms 0.016 C, R^2 0.99995, over 44 points (22 kinds x RK, G1)
+  RK: heat rms 1.276 C; it is the heat model's own error (from measured power) 0.694 C, bias +0.624, minus the power path's 0.959 C (= g x its power rms 15.65 W = 0.958 C): 0.482 + 0.921 + cross +0.225 = 1.627 C^2
+  G1: heat rms 3.334 C; it is the heat model's own error (from measured power) 0.694 C, bias +0.624, minus the power path's 3.204 C (= g x its power rms 52.35 W = 3.204 C): 0.482 + 10.265 + cross +0.367 = 11.113 C^2
+  E149's frozen pooled heat model: tau1 0.2 s, tau2 31.8 s, steady 0.116 C/W; over a 5 s cell read after its 1.5 s settle against references on either side, a watt of power error reads 0.061 C
+
+C7  COSMETIC
+  bf16.kS1: y 28.891 +- 0.8463 (reduce-a1.txt prints se 0.85; one decimal 0.8)
+  bf16.kS8: y 51.086 +- 0.8486 (reduce-a1.txt prints se 0.85; one decimal 0.8)
+  bf16.rS1: y 97.498 +- 2.5466 (reduce-a1.txt prints se 2.55; one decimal 2.5)
+  bf16.rowcA_colcB: y 134.828 +- 4.3467 (reduce-a1.txt prints se 4.35; one decimal 4.3)
+  int8.rand: y 83.776 +- 2.7492 (reduce-a1.txt prints se 2.75; one decimal 2.7)
+  score-e162-a100.txt: ['inside_band_RK None']; score-e162-a100.json rules.inside_band_RK: {'inside': 20, 'of': 22}
+
+C8  TIMES (pushes-e162.json: git's commit time against GitHub's ref update for main)
+  038db597 committed 04:32:27, pushed 04:32:29 PST  registration (tools/gpu/e162/E162.md)
+  0e8479c9 committed 04:48:57, pushed 04:49:00 PST  amendments A1 and A2
+  54e8f87d committed 04:54:02, pushed 04:54:05 PST  the freeze (model and held-out predictions)
+  c30af4f6 committed 05:11:04, pushed 05:11:19 PST  results
