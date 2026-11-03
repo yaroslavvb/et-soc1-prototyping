@@ -1,10 +1,12 @@
-# E147: every open single-bit position priced in both layouts; the swing plateaus at 6× on B, the exponent reverses on both sides, and M6 predicts the new positions to 0.21 W (aifoundry3 card 0, 600 MHz)
+# E147: every open single-bit position priced in both layouts; on B the all-in/balanced ratio levels off at about 6× while the swing in watts keeps rising, the exponent reverses on both sides, and M6 predicts the 68 new items to 0.21 W (aifoundry3 card 0, 600 MHz)
 
 *On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open), item 15, "Smaller, and carried": its single-bit sentence's open list, "B bits 1–5, 17–19, 21, 24–26 and 28–29; A bits 8–10, 12–15, 17–19, 21, 24–26 and 28–29 on E102's word, and above bit 7 on any other" ([E134](../2026-11-02-e134-bit-prices-more/README.md), the run that left them, correction C2). E147 runs every listed position in both layouts, and four A positions above bit 7 on a second word. The sign on the rail and E102-R2's bit-22 cell were not run.*
 
-*Mon 2 Nov 2026 (week 45), Q138, lane `a3-e147-bit-prices`, on the owner's words of that evening: "feel free to settle any unanswered questions regarding horace's power model", with that day's goal, to predict the power and heat of numeric computations as accurately as possible. Pre-registered in lab `c41c3905` (committed 20:12:58 PST, pushed by 20:13:02, before the reservation and the first launch): [`tools/claims-v3/e147/README.md`](../../../../tools/claims-v3/e147/README.md), with the frozen numbers in `predictions-e147.json`, the 73 tiles in `e147/`, the scorer and its self-test, and the fixed RTL bench's counts and M6's frozen predictions in [`bench/`](bench/). No amendment. aifoundry3 card 0 at 600 MHz, 521.9 mV mean. The card was read at 20:15:26 (TDP 0 W, 65 °C, max_power, 600 MHz, 523 mV) and at 20:56:59 (the same, 522 mV), under the card lock and `timeout 10`, at both ends of every block, the smoke and both stop tests too: 23 reads, all alike; nothing was ever set. **Every device command sent was a read** (§ Device commands sent): no write of any kind, no `--reset-ms`, no firmware-revisions query, no residency read.*
+*Mon 2 Nov 2026 (week 45), Q138, lane `a3-e147-bit-prices`, on the owner's words of that evening: "feel free to settle any unanswered questions regarding horace's power model", with that day's goal, to predict the power and heat of numeric computations as accurately as possible. Pre-registered in lab `c41c3905` (committed 20:12:58 PST, pushed by 20:13:02, before the reservation and the first launch): [`tools/claims-v3/e147/README.md`](../../../../tools/claims-v3/e147/README.md), with the frozen numbers in `predictions-e147.json`, the 73 tiles in `e147/`, the scorer and its self-test, and the fixed RTL bench's counts and M6's frozen predictions in [`bench/`](bench/). No amendment. aifoundry3 card 0 at 600 MHz, 521.9 mV mean. The card was read at 20:15:26 (TDP 0 W, 65 °C, max_power, 600 MHz, 523 mV) and at 20:56:59 (the same, 522 mV), under the card lock and `timeout 10`, at both ends of every block, the smoke and both stop tests too: 23 reads, all alike; nothing was ever set. **Every device command sent was a read** (§ Device commands sent): no register, flash, configuration, counter or PMIC write, no `--reset-ms`, no firmware-revisions query, no residency read (corrected after verification, C6: this said "no write of any kind", which leaves out an error path: a failed PMIC voltage read soft-resets the SP's own I2C master, not the PMIC).*
 
 *The day's card post in `#community-lab` (message `1566837317765963987`) was rewritten at 20:14:50 PST from "using aifoundry1 card 1 for 1.5 h, until ~20:53 PST [doc] — released" to "using aifoundry3 for 1 h, until ~21:14 PST [doc]" (a first attempt at 20:14 was refused with exit 7: another lane had appended " — released" at 20:11; the post was re-read and the text rebuilt), and at 20:57:44 to drop that clause, keeping aifoundry1 card 1's and aifoundry2's clauses word for word (both still held, so no " — released"). Smoke 14701, 20:15:25–20:15:59; stop test 14702 and 14703, 20:16:08–20:16:29; queue 20:16:50–20:56:59, ending with the session-end read: **41.6 card-minutes** of the registered 45. Eight blocks (A 14710–14713, B 14720–14723), 468 runs, none failed a run gate, none set aside.*
+
+*Corrected after verification (a dated note, Mon 2 Nov 2026, about 21:50 PST; desk only: no card opened, no device command, nothing re-run). An independent verifier re-derived every registered number and verdict from the raw telemetry and confirmed that every command sent was a read. It found six faults, none of which changes a measured number, a rule, a prediction or a verdict. Each is corrected in place, marked "corrected after verification, C<n>", and in [§ Corrections after verification](#corrections-after-verification-mon-2-nov-2026) at the end. The main one, C1: M6's fit was not free of single bits. It held E102's 23 single-bit tiles from aifoundry1 card 1, none at E147's positions and none on aifoundry3, so M1 tests M6 at new positions on a new card, not on a kind it never saw. The registration's statements to the contrary ([`tools/claims-v3/e147/README.md`](../../../../tools/claims-v3/e147/README.md) lines 39 and 288, `make_predictions_e147.py` line 13) are frozen and stay as written; this note and C1 correct them. C2: M7, the lab's current model, frozen before E147's registration but not named in it, is scored here after the data, unregistered: 0.202 W rms over the 68 new items, with the exponent over-priced as M6 has it (0.278 W).*
 
 **What ran.** fp32 trains (no heater, a 0.2 s gap, 4.83 s a run), every item between reads of its own zero, each bit's two layouts paired (E147 change 2):
 - **A blocks:** W79 = `0x3fbd207c` (E79's, E102's, E134's word) at bits 8–10, 12–15, 17–19, 21, 24–26 and 28–29, and W67 = `0x3fbbc9e4` (E67's) at 9, 17, 18 and 19, both layouts.
@@ -16,13 +18,13 @@ A price is a step over the item's own zero (board `p_raw`, no temperature term, 
 
 **In plain words.** One flipped bit costs what its place in the number says, and the lab's model mostly knows it:
 - **On B, a low mantissa bit is the flip alone:** 90–102 fJ in both layouts at bits 1–5.
-- **High on B, the two accumulators part:** at bits 17–21 the all-in layout costs 693–989 fJ a flip, the balanced one 110–164. The ratio sits at 6.05–6.66×, level with bit 16 (6.84 here, 6.03 in E134): a plateau.
+- **High on B, the two accumulators part:** at bits 17–21 the all-in layout costs 693–989 fJ a flip, the balanced one 110–164. The ratio sits at 6.05–6.66×, level with bit 16 (6.84 here, 6.03 in E134): a plateau in the ratio, while the swing in watts keeps rising, from +2.35 W at bit 16 to +3.79 W at 21 (corrected after verification, C4).
 - **The exponent turns it around on both sides:** at bits 24–29 the balanced layout costs 1.8–3.7× the all-in one (all-in / balanced 0.30–0.57 on B, 0.27–0.54 on A).
 - **On A the word still matters above bit 7, in the Booth recoder's direction:** W79 is dearer at 9 and 17 by 0.21 and 0.28 W, and W67 at 18 by 0.80 W. Where both words make the same digit changes (bit 19) the difference is −0.16 [−0.36, +0.04] W, unresolved.
 
-**M6, the lab's power model, frozen before the run and never fitted on a single bit, predicts the 68 new items to 0.210 W rms** (bias −0.089 W), inside its own claimed 0.245 W (M1 HOLDS). It does well on the mantissa (0.153 W rms over 48 items, bias −0.018). It over-prices the exponent: 0.307 W rms over 20 items, bias −0.259 W; the card pays 0.82 of M6's watts there. On E134's single bits, post hoc, it had read 0.098 W.
+**M6, the power model E147 registered against, frozen before the run, predicts the 68 new items to 0.210 W rms** (bias −0.089 W), inside its own claimed 0.245 W (M1 HOLDS). M6's fit held E102's 23 single-bit tiles from aifoundry1 card 1, but none at these positions and none on aifoundry3, so this tests it at new positions on a new card *(corrected after verification, C1: this said "the lab's power model, frozen before the run and never fitted on a single bit")*. It does well on the mantissa (0.153 W rms over 48 items, bias −0.018). It over-prices the exponent: 0.307 W rms over 20 items, bias −0.259 W; the card pays 0.82 of M6's watts there. On E134's single bits, post hoc, it had read 0.098 W. **M7, the lab's current model** (Q138(m), frozen at `3a210f2b` at 19:21 PST, before E147's registration, which named only M6 and M5), scored after the data with its own frozen predictor and nothing refitted (post hoc, no verdict), reads the 68 items to 0.202 W rms (bias −0.092): the mantissa to 0.160 W, the exponent to 0.278 W (bias −0.228), where the card pays 0.84 of M7's watts *(added after verification, C2; [`posthoc/m7-e147.txt`](posthoc/m7-e147.txt))*.
 
-**1. B: the flip alone below bit 8, a 6× plateau at the top of the mantissa, and the exponent reversed** (E79's B words; the swing is all-in − balanced × 4096/3968, board W; in brackets each item's frozen M6 step):
+**1. B: the flip alone below bit 8, the ratio per flip level at about 6× at the top of the mantissa while the swing in watts keeps rising, and the exponent reversed** (E79's B words; the swing is all-in − balanced × 4096/3968, board W; in brackets each item's frozen M6 step; corrected after verification, C4: this heading said "a 6× plateau"):
 
 | bit | all-in, fJ | balanced, fJ | ratio per flip | **swing, W** | M6 swing | bench swing | all-in W (M6) | balanced W (M6) |
 |---:|---|---|---|---|---:|---:|---|---|
@@ -46,7 +48,7 @@ A price is a step over the item's own zero (board `p_raw`, no temperature term, 
 - **E147-R1, B's low bits: FLAT** (registered). The mean swing over bits 1–5 is +0.005 [−0.017, +0.027] W, inside ±0.10 W, and no bit's lower bound reaches 0.10 W (the widest, bit 3, +0.028 [−0.046, +0.102]). With E134-R4 (none at 6 and 7, +0.149 W at 8) the swing is absent at every B bit below 8, as the frozen real-sum counts say (0 result-path bits an op over the zero at bits 1–5).
 - **E147-R2, B's exponent: INVERTED** (registered): all-in / balanced 0.34, 0.30, 0.41, 0.52, 0.57 at bits 24, 25, 26, 28, 29, every upper bound below 1 (the highest 0.60). E102 read 0.42, 0.30 and 0.46 at 23, 27 and 30 on aifoundry1 card 1.
 - **At the top of the mantissa the ratio stops climbing:** 6.06, 6.66, 6.30, 6.05 at bits 17, 18, 19, 21, and 6.84 at 16 here (E134 6.03; E102 5.31 at 20, 6.17 at 22, card 1). The balanced price stays flat: 90–101 fJ at 1–5 and 110–164 fJ at 17–21 (E134: 83–113 at 6–16).
-- **The card's swing at the top is 9–19% above the bench's and 5–14% above M6's:** measured over bench 1.18, 1.13, 1.19, 1.09 at 17, 18, 19, 21 (E134 read 1.07–1.26 at 8–16); over M6 1.13, 1.09, 1.14, 1.05.
+- **The card's swing at the top is 9–19% above the bench's and 5–14% above M6's:** measured over bench 1.18, 1.13, 1.19, 1.09 at 17, 18, 19, 21 (E134 read 1.07–1.26 at 8–16); over M6 1.13, 1.09, 1.14, 1.05. Over M7, post hoc, 1.10, 1.05, 1.11, 1.02 (added after verification, C2; `posthoc/m7-e147.json` › `contrasts`).
 - **E147-S1, the session link: PASS** (registered). E134's `bj_16` reads 2.752 W against E134's 2.789, and `bp_16` 0.390 against 0.448 (bands ±0.697 and ±0.150 W). E65's B all-in list, from another protocol with a fresh word at each bit, predicts the 14 new all-in items to 0.154 W rms, the best of the four frozen models there (`models.B_allin`).
 
 **2. A on W79: no swing at bits 8 and 9, a rising and uneven one from bit 10, and the exponent reversed** (all-in − balanced × 2048/1920, board W):
@@ -83,7 +85,7 @@ A price is a step over the item's own zero (board `p_raw`, no temperature term, 
 | 18 | cross / same | **+0.801 [+0.717, +0.885]** | +1.145 | +0.824 | W67 dearer | +1.005 [+0.852, +1.157] | +1.600 | 1146 [1123, 1169] | 797 [775, 820] | 1.88 [1.77, 2.00] |
 | 19 | cross / cross | **-0.163 [-0.364, +0.038]** | -0.178 | -0.192 | the same | -0.055 [-0.217, +0.107] | +0.072 | 1026 [971, 1081] | 1097 [1050, 1144] | 3.25 [2.63, 4.29] |
 
-- **E147-R4, the bench's word differences above bit 7: AGREES** (registered). At bits 9, 17 and 18 the difference resolves with the bench's sign, at 0.48, 0.76 and 0.70 of its size (E134: 0.65–0.71 at bits 4–6); bit 19 does not resolve. M6 put them at 0.68, 1.19 and 0.97 of what the card read.
+- **E147-R4, the bench's word differences above bit 7: AGREES** (registered). At bits 9, 17 and 18 the difference resolves with the bench's sign, at 0.48, 0.76 and 0.70 of its size (E134: 0.65–0.71 at bits 4–6); bit 19 does not resolve. The card read 0.68, 1.19 and 0.97 of M6's values; put the other way, M6 predicted 1.47, 0.84 and 1.03 of what the card read *(corrected after verification, C3: this said "M6 put them at 0.68, 1.19 and 0.97 of what the card read", the ratios turned over)*.
 - **E147-R5, E134's digit-class reading: INCONCLUSIVE** (registered, and expected). The three signed bits have the reading's signs and all resolve; but at bit 19, where both words make the same two digit changes, the difference is −0.163 [−0.364, +0.038] W: neither inside the ±0.10 W band nor wholly outside it. The bench said −0.178 W there and M6 −0.192. On the rail arm R5 reads HOLDS, so it is arm-sensitive.
 - E67's four tiles above bit 7, reported: 0.599, 1.524, 2.631 and 2.356 W at 9, 17, 18, 19 against E67's 0.754, 1.504, 2.481 and 2.669 W on this card, all inside E134-S1's bands.
 
@@ -105,6 +107,7 @@ A price is a step over the item's own zero (board `p_raw`, no temperature term, 
 - **Per flip:** M6's price is off by 72 fJ rms (bias −30 fJ), a median 11% of the measured price. By list: B all-in 46 fJ rms, B balanced 61, A all-in on W79 85, A balanced on W79 74, W67 90.
 - **Mantissa against exponent:** on the 48 mantissa items M6 reads 0.153 W rms (bias −0.018), level with E134's single bits post hoc (0.098 W over 54). On the 20 exponent items it reads 0.307 W (bias −0.259): the card's exponent steps are 0.82 of M6's. M5 is the same there (0.307), and the bench is closer (0.258, bias −0.150).
 - **Against the other frozen models**, over all 68: M5 0.214 W, the bench at E92's coefficients 0.226 W, the position-only lists 0.993 W. M6, M5 and the bench are within 0.016 W of each other; what they share is the exponent's over-pricing.
+- **M7, post hoc** *(added after verification, C2: unregistered, no verdict)*. M7 was frozen at `3a210f2b` (19:21:05 PST) before E147's registration (`c41c3905`, 20:12:58), which named M6 and M5 only. Scored after the data by Q138(m)'s frozen `predict_blind5.py`, nothing refitted, it reads the 68 new items to **0.202 W rms** (bias −0.092): mantissa 0.160 (−0.035), exponent **0.278** (−0.228; the card pays 0.84 of M7's watts), B all-in 0.181, B balanced 0.252, A on W79 0.200 all-in and 0.149 balanced, W67 0.233. Per flip it is off by 72 fJ rms (bias −33 fJ), a median 11% of the price. Its largest misses are over-predictions, seven of its eight at M6's eight items (`aj_19` −0.542, `bp_28` −0.538, `a67j_19` −0.506, `bp_29` −0.488 W). Its band without the coefficient term (3.179 × 0.2475 = ±0.787 W) holds all 68. The same run reproduces M6's and M5's registered steps to 0.0001 W ([`posthoc/m7-e147.txt`](posthoc/m7-e147.txt), [`posthoc/m7-e147.json`](posthoc/m7-e147.json), [`posthoc_m7_e147.py`](posthoc_m7_e147.py)). So the current model does about as well on single bits as M6 (0.202 against 0.210 W, no interval computed), and it over-prices the exponent the same way.
 
 ## Registered against happened
 
@@ -126,15 +129,15 @@ A price is a step over the item's own zero (board `p_raw`, no temperature term, 
 ## What it does to predicting power and heat
 
 - **The term measured:** the price of one flipped bit at every fp32 position item 15 left open, by side, layout and word. With E134's and E102's positions, every fp32 position now has both layouts on at least one card. This is the per-position table a next model reads: [`scored.json`](scored.json) › `primary.prices` (W and fJ per flip, with intervals) and `statistics` (ratios and swings).
-- **The term tested, blind:** M6's per-flip prediction at the new positions. Out of sample, M6 claimed 0.245 W rms for fp32 tiles on this card (nested leave-one-kind-out), and post hoc it read E134's single bits to 0.098 W. At E147's 68 new positions it reads **0.210 W** (M1 HOLDS). The error is not spread evenly: 0.153 W on the mantissa and **0.307 W on the exponent**, where every model frozen here over-prices the steps (M6 by 0.26 W, 18%).
-- **The correction it points to (a reading, not refitted here):** M6's exponent-field terms (`a_exp` 3.2 ± 8.8 fJ, `b_exp` −1.3 ± 4.5 fJ per flip, both unresolved) and its bench counts give the exponent flips about 1.2× their measured cost. A refit that weighs E147's 20 exponent items would take that bias out; how much of the 0.307 W it removes out of sample is for the next model's nested score, not this one. The B swing at the top of the mantissa runs 5–14% above M6's.
-- **Heat:** nothing measured here. The steps are at most 4.5 W in 4.8 s trains, and the die read 51–64 °C over the session; E147 makes no heat claim. The power term these prices feed is the one M6's heat term multiplies (0.118 °C per board W over a 4.5 s run, Q137(m)).
+- **The term tested, blind:** M6's per-flip prediction at the new positions. Out of sample, M6 claimed 0.245 W rms for fp32 tiles on this card (nested leave-one-kind-out), and post hoc it read E134's single bits to 0.098 W. At E147's 68 new items it reads **0.210 W** (M1 HOLDS). The error is not spread evenly: 0.153 W on the mantissa and **0.307 W on the exponent**, where every model frozen here over-prices the steps (M6 by 0.26 W, 18% of its own watts). M6's fit held E102's 23 single-bit tiles from aifoundry1 card 1, none at these positions, so this is out of sample at new positions on a new card, not on a kind M6 never saw *(corrected after verification, C1)*. M7, the current model, scored after the data: 0.202 W, the exponent 0.278 W *(C2)*.
+- **The correction it points to (a reading, not refitted here):** M6's exponent-field terms (`a_exp` 3.2 ± 8.8 fJ, `b_exp` −1.3 ± 4.5 fJ per flip, both unresolved) and its bench counts give the exponent flips about 1.2× their measured cost. But M7, which the next refit starts from, has no exponent-field term: its float form `G8_gtr_glive` prices mult, add32, add16, bus, rest, clk, gtr and glive, and M6's per-field flip terms and an exponent-flip form (`G9`) did not lower its nested error when it was fitted ([Q138(m)](../2026-11-02-q138m-model/README.md) § 2). M7 still over-prices the exponent (the card pays 0.84 of its watts), although its fit holds E102's six exponent rows from card 1. So the correction is a new exponent term in M7's form, for instance the aligner's flips that the bench counts on the balanced exponent items (§ Interpretation's reading), fitted with E147's 20 exponent items and E102's exponent rows, and scored nested. How much of the 0.28–0.31 W it removes out of sample is for that model's nested score, not this one *(corrected after verification, C2: this paragraph named only M6's `a_exp` and `b_exp`, terms M7 no longer has)*. The B swing at the top of the mantissa runs 5–14% above M6's (2–11% above M7's).
+- **Heat:** nothing measured here. The steps are at most 4.5 W in 4.8 s trains, and the die read 50–64 °C over the session (the 50 in the smoke; corrected after verification, C5d: this said 51–64 °C); E147 makes no heat claim. The power term these prices feed is the one M6's heat term multiplies (0.118 °C per board W over a 4.5 s run, Q137(m)); M7's is 0.1186 °C per board W on aifoundry3 (Q138(m), `m7.json` › `heat`).
 
 ## What it changes
 
-- **Item 15's single-bit sentence.** Its open list is answered at every listed position on aifoundry3, in both layouts, and above bit 7 on a second word at four positions. Proposed replacement, a reading for the integration lane: *"Single-bit prices, every fp32 position in both layouts on at least one card (E102, E134, E147): on B a low mantissa bit costs the flip alone (90–152 fJ in both layouts at bits 0–7); from bit 8, where the two accumulators first part, the all-in price grows to a plateau of about 6× the balanced one at bits 16–22. At the exponent the order reverses on both sides: the balanced layout costs 1.8–3.7× the all-in one. On A the flip alone is the price at bits 0–9; above, the all-in layout is 1.5–7× dearer, unevenly (E102, E147), and the price depends on the base word, in the Booth recoder's direction, below bit 8 and at 9, 17 and 18 (E134, E147; one card, two words). M6, frozen, predicts single bits at positions never fitted to 0.21 W rms, the exponent's 0.31 W the largest part (E147). Open: other words, the sign on the rail, and E102-R2's bit-22 cell on a second card."*
+- **Item 15's single-bit sentence.** Its open list is answered at every listed position on aifoundry3, in both layouts, and above bit 7 on a second word at four positions. Proposed replacement, a reading for the integration lane: *"Single-bit prices, every fp32 position in both layouts on at least one card (E102, E134, E147): on B a low mantissa bit costs the flip alone (90–152 fJ in both layouts at bits 0–7); from bit 8, where the two accumulators first part, the all-in price grows to a plateau of about 6× the balanced one at bits 16–22. At the exponent the order reverses on both sides: the balanced layout costs 1.8–3.7× the all-in one. On A the flip alone is the price at bits 0–9; above, the all-in layout is 1.8–7× dearer, unevenly (E102, E147), and the price depends on the base word, in the Booth recoder's direction, below bit 8 and at 9, 17 and 18 (E134, E147; one card, two words). M6 and M7, frozen, predict single bits at positions neither was fitted on to 0.21 and 0.20 W rms (M7's scored after the data), the exponent's 0.31 and 0.28 W the largest part (E147). Open: other words, the sign on the rail, and E102-R2's bit-22 cell on a second card."* *(Corrected after verification, C5a and C2: the sentence said "1.5–7×", where the data give 1.76–7.10×, and named M6 alone.)*
 - **The kinds page's single-bit price lists** gain both layouts at the 30 positions (B and A on W79) and four on W67. The B-side all-in list carries over between protocols (E65's list predicts the new all-in items to 0.154 W). The A-side numbers need their word attached, above bit 7 as below.
-- **Item 6 (a model for every kind):** M6's error on single bits doubles from E134's positions (bits 0–16, post hoc) to E147's (0.098 → 0.210 W), and the exponent is where. The bench, frozen, also falls short of the B swing at the top by about 15% (1.09–1.19 here, 1.07–1.26 in E134) and over-states the A word effect (the card reads 0.48–0.76 of it).
+- **Item 6 (a model for every kind):** M6's error on single bits doubles from E134's positions (bits 0–16, post hoc) to E147's (0.098 → 0.210 W), and the exponent is where. M7, the model item 6 now carries, reads E147's items to 0.202 W after the data, the exponent to 0.278 W: the next refit's case is an exponent term in M7's form *(added after verification, C2)*. The bench, frozen, also falls short of the B swing at the top by about 15% (1.09–1.19 here, 1.07–1.26 in E134) and over-states the A word effect (the card reads 0.48–0.76 of it).
 
 ## Interpretation (labelled: a reading, not measured)
 
@@ -156,12 +159,23 @@ listed them before the first launch. Every one sent was a READ.*
 | 1 | `DM_CMD_GET_MODULE_STATIC_TDP_LEVEL` | `ettelem config`: 23 reads (two for each block, the smoke and each stop test, and the session-end read) | `services/thermal_pwr_mgmt.c:613` (copies SP RAM) | READ |
 | 2 | `DM_CMD_GET_MODULE_TEMPERATURE_THRESHOLDS` | the same reads | `thermal_pwr_mgmt.c:665` (copies SP RAM) | READ |
 | 3 | `DM_CMD_GET_MODULE_POWER_STATE` | the same reads | `thermal_pwr_mgmt.c:551` (copies SP RAM) | READ |
-| 4 | `DM_CMD_GET_ASIC_FREQUENCIES` | `ettelem config`; `ettelem sample` (10 Hz, eleven sampler runs: one per block, the smoke and each stop test) | `services/perf_mgmt.c:276` → `driver/io_pll.c:932` (PLL register reads) | READ |
-| 5 | `DM_CMD_GET_ASIC_VOLTAGE` | `ettelem config`; `ettelem sample` | `thermal_pwr_mgmt.c:1142` → `driver/pmic_controller.c:1473`, `:254` `i2c_read` (two PMIC voltage-register reads) | READ, a PMIC voltage read, allowed by his rule of 2 Nov |
-| 6 | `DM_CMD_GET_MODULE_POWER` | `ettelem sample` (lib.sh's `drain_mgmt` , which sends it after a sampler fails to start twice, was not needed: every sampler started) | `thermal_pwr_mgmt.c:984` (copies SP RAM) | READ |
-| 7 | `DM_CMD_GET_SP_STATS` | `ettelem sample` | `services/performance.c:404` → `thermal_pwr_mgmt.c:2780` (copies SP RAM, resets nothing) | READ |
+| 4 | `DM_CMD_GET_ASIC_FREQUENCIES` | `ettelem config`; `ettelem sample` (10 Hz, eleven sampler runs: one per block, the smoke and each stop test); lib.sh `die_c` (22 calls, C6) | `services/perf_mgmt.c:276` → `driver/io_pll.c:932` (PLL register reads) | READ |
+| 5 | `DM_CMD_GET_ASIC_VOLTAGE` | `ettelem config`; `ettelem sample`; lib.sh `die_c` (C6) | `thermal_pwr_mgmt.c:1142` → `driver/pmic_controller.c:1473`, `:254` `i2c_read` (two PMIC voltage-register reads) | READ, a PMIC voltage read, allowed by his rule of 2 Nov |
+| 6 | `DM_CMD_GET_MODULE_POWER` | `ettelem sample`; lib.sh `die_c` (C6). lib.sh's `drain_mgmt`, which sends it after a sampler fails to start twice, was not needed: every sampler started | `thermal_pwr_mgmt.c:984` (copies SP RAM) | READ |
+| 7 | `DM_CMD_GET_SP_STATS` | `ettelem sample`; lib.sh `die_c` (C6) | `services/performance.c:404` → `thermal_pwr_mgmt.c:2780` (copies SP RAM, resets nothing) | READ |
 | 8 | `DM_CMD_GET_MODULE_CURRENT_TEMPERATURE` | `ettelem sample`; lib.sh `die_c` at each block's start and end | `thermal_pwr_mgmt.c:732` (PVT reads, cached in SP RAM) | READ |
-| 9 | `DM_CMD_GET_MODULE_VOLTAGE` | `ettelem sample` | `thermal_pwr_mgmt.c:1010` → `pmic_controller.c:1473` (nine PMIC voltage-register reads) | READ, PMIC voltage reads, allowed by his rule of 2 Nov |
+| 9 | `DM_CMD_GET_MODULE_VOLTAGE` | `ettelem sample`; lib.sh `die_c` (C6) | `thermal_pwr_mgmt.c:1010` → `pmic_controller.c:1473` (nine PMIC voltage-register reads) | READ, PMIC voltage reads, allowed by his rule of 2 Nov |
+
+*Added after verification, C6.* lib.sh's `die_c` (`lib.sh:103`, sha256 `033d0776…` as hashed in every block) is a full `ettelem sample --seconds 1 --every-ms 500`: two
+samples a call, each sending rows 4–9's six getters (`tools/ettelem/ettelem.cpp` at `de262730`, `sample()`). `block_begin` and
+`block_end` call it (`lib.sh:188`, `:196`) at the start and end of each of the eight blocks, the smoke and both stop tests: 22
+calls (the 11 `block.json` files' `die_c_start` and `die_c_end`). Its samples are parsed for the die reading and not written to
+`telemetry.jsonl`, so the 24,217 samples are the 10 Hz sampler's alone. The preflight audit already listed `lib.sh:103` with all
+six getters as READ (`dmcmd-audit.txt` lines 23–28). The voltage reads (rows 5 and 9) have an error path: a failed PMIC read
+soft-resets the SP's own I2C master and retries (`driver/pmic_controller.c:273`, `i2c_soft_reset` in `get_pmic_reg`). That
+writes the SP's I2C controller, not the PMIC (Q136(w)'s item 5; E128 and E129 say the same). Whether it ever ran here is not
+recorded, since the SP's log was not read; every one of the 24,217 samples carries all its voltage fields. No command's class
+changes.
 
 **Not sent:**
 - `DM_CMD_SET_STATS_RUN_CONTROL`, the statistics reset: there is no `--reset-ms` anywhere, and `block_e147.sh:120`, the one
@@ -191,7 +205,7 @@ recorded (the same fields; TDP 0 W, 65 °C, 600 MHz).
 | reservation | the day's post `1566837317765963987`, rewritten under `EXPECT_TEXT` and the Discord lock: a first dry run refused with exit 7 (the post had changed at 20:11), re-read, rebuilt, dry run, `--save` at 20:14:50 PST, read back (aifoundry1 card 1's released clause erased, aifoundry3's added) |
 | session | the smoke's config read 20:15:26 to the session-end read 20:56:59: 41.6 card-minutes. A blocks 345–346 s, B blocks 253 s, as estimated (the budget's projection, A 360 and B 265 s, held throughout) |
 | stops | the board stop's first line in every block and the smoke was 0.08 s old (`runner.err`); the stop test fired both stops on live samples before any launch: board 23.77 W ≥ 1.0 W and die 51.0 °C ≥ 20 °C, exit 6, no run, no record (`aifoundry3/kinds/kinds-stoptest-p1470[23]/stoptest.json`) |
-| readings | board at most 43.67 W (stop 65 W), die 51–64 °C (stop 70 °C); 600 MHz in every sample; cycles per op 546.001; 179 meter-dip samples removed at the 2 W line over eight blocks |
+| readings | board at most 43.67 W (stop 65 W), die 50–64 °C, the 50 in the smoke (stop 70 °C; corrected after verification, C5d: this said 51–64 °C); 600 MHz in every sample; cycles per op 546.001; 179 meter-dip samples removed at the 2 W line over eight blocks |
 | end | the session-end read: TDP 0 W, 65 °C, max_power, 600 MHz, 522 mV; `et-who` clean at 20:56:59; nothing left running |
 | release | the post rewritten at 20:57:44 to drop this card's clause, aifoundry1 card 1's and aifoundry2's kept word for word (both still held, so no " — released"); read back at 20:57 |
 
@@ -207,7 +221,9 @@ recorded (the same fields; TDP 0 W, 65 °C, 600 MHz).
    - M6's split into mantissa and exponent items, and its per-flip errors;
    - the digit reading of the balanced A price, and § Interpretation;
    - E147's own carry-over, 2.3 ± 0.2% per W of the preceding step (`carry_e134.py` run on this table; its printed label says E134), against E134's 2.8 ± 0.8%;
-   - the proposed sentence for item 15.
+   - the proposed sentence for item 15;
+   - M7's score at E147's items, its contrasts and its per-flip error (added after verification, C2: `posthoc_m7_e147.py`,
+     `posthoc/`).
 
 ## Caveats
 
@@ -224,3 +240,104 @@ One card, one clock (600 MHz, 522 mV), one session, four kept blocks of each kin
 - `aifoundry3/kinds/p147*`: the eight raw blocks (telemetry, marks, records, tile dumps, config reads, manifests, code hashes, `runner.err`), plus the smoke as `kinds-smoke-p14701` and the stop tests as `kinds-stoptest-p14702` and `-p14703`.
 - `bench/`: `counts-e147.json` and `bench-e147.log`, the fixed RTL bench's counts of the 70 tiles it ran (0 mismatches), and `m6-e147.json`, M6's and M5's frozen steps, all frozen with the registration; `m6-e134-posthoc.json` and `.txt`, M6 on E134's items (post hoc, the "before").
 - The tiles, registration and code: [`tools/claims-v3/e147/`](../../../../tools/claims-v3/e147/README.md).
+- Added after verification (post hoc, labelled, unregistered): `posthoc_m7_e147.py`, which runs Q138(m)'s frozen
+  `predict_blind5.py` on E147's 73 tiles (`posthoc/predict_blind5/predictions-aifoundry3.json` and `.md`: M7's, M6's and M5's
+  D, with the hashes of every model file it read) and scores M7 at E147's lists (`posthoc/m7-e147.json`, `posthoc/m7-e147.txt`).
+
+## Corrections after verification (Mon 2 Nov 2026)
+
+*A dated note, written at about 21:50 PST on the Intel, desk only: no card opened, no device command sent, nothing re-run. An
+independent verifier re-derived E147 from the committed files: `p_raw` for all 468 runs from the raw telemetry (exact at the 2 W
+and the 4 W line), every price, ratio, swing and contrast, all seven registered verdicts, M6's and M5's frozen steps, the block
+orders and the 299 tile dumps. It confirmed that every command sent was a read. Its six faults are corrected above, in place and
+marked, and here. No frozen file changed: the registration ([`tools/claims-v3/e147/`](../../../../tools/claims-v3/e147/README.md),
+`c41c3905`), `scored.json`, `results.md`, the reductions and `bench/` are as first committed (`b2348e11`). No measured number, rule,
+prediction or verdict changed.*
+
+- **C1 (major): M6 was fitted on single bits, though none at E147's positions and none on aifoundry3.** Four places said otherwise:
+  - the registration README, line 39: "M6's fit left out every single-bit ladder (E134's included)";
+  - M1's frozen page statement, line 288: "M6, never fitted on single bits, predicts their steps at new positions to X W rms";
+  - `make_predictions_e147.py`, line 13 (its docstring), as line 39;
+  - this README's Results ("never fitted on a single bit", corrected in place), and the lane's blog point and integration text.
+
+  M6's committed fit ([`rows-m6.json`](../2026-11-02-q137m-model/rows-m6.json): 604 rows, all fitted) holds 28 rows of
+  [E102](../2026-11-01-e102-balanced-bit-prices/README.md), from aifoundry1 card 1 (`m6_rows.py` loads E102's `e102.json`;
+  `loko-m6.json` › `families.float.by_experiment` has E102 at n 28, nested 0.224 W). They are 23 single-bit tiles in E102's
+  layouts, which E147's follow (the registration's § Tiles), and their five zero references (fp32 `aq`, `hq`, `hq_e64`; fp16 `aq`,
+  `hq`):
+  - fp32 A: all-in at bits 16, 20 and 22, balanced at 22;
+  - fp32 B: all-in at 16, 20, 22, 23, 27, 30 and 31, balanced at 22, 23, 27, 30 and 31 (the exponent bits 23, 27 and 30 and the
+    sign bit 31 in both layouts);
+  - fp16: A at bit 9 in both layouts; B all-in at 0, 9 and 15, balanced at 9 and 15.
+
+  M7's fit ([`rows-m7.json`](../2026-11-02-q138m-model/rows-m7.json)) holds the same 28. None is at an E147 position, none is on
+  aifoundry3, and E134's single bits are rows in neither fit (M7 tried E134's case only as a candidate form, `G10`, which it did
+  not carry). So M1 HOLDS stands as registered: M6 predicts 68 items at positions it
+  was never fitted on, on a card where it was fitted on no single-bit tile. It is not a test of a model that never saw a single-bit
+  tile. **The integration lanes must not copy the registered statement's "never fitted on single bits".** Corrected, M1's
+  statement reads: "M6, never fitted at these positions or on this card's single bits, predicts their steps at new positions to
+  0.210 W rms".
+- **C2: M7 was not named.** M7 ([Q138(m)](../2026-11-02-q138m-model/README.md)) was frozen at `3a210f2b`, 19:21:05 PST, before
+  E147's registration (`c41c3905`, 20:12:58), and is the lab's current power model. E147 registered against M6 and M5 and called M6
+  "the lab's power model". Here M7 is scored after the data with Q138(m)'s frozen `predict_blind5.py`, unchanged since `3a210f2b`,
+  with nothing refitted: unregistered, no verdict. The script, [`posthoc_m7_e147.py`](posthoc_m7_e147.py), first checks that the
+  same run reproduces M6's and M5's registered steps (to 0.0001 W):
+
+  | list (measured − model, board W) | n | M7 rms (bias) | M6 rms (bias) | M5 rms (bias) |
+  |---|---:|---|---|---|
+  | new_items | 68 | **0.202** (−0.092) | 0.210 (−0.089) | 0.214 (−0.106) |
+  | mantissa_new | 48 | 0.160 (−0.035) | 0.153 (−0.018) | 0.161 (−0.042) |
+  | exponent_new | 20 | **0.278** (−0.228) | 0.307 (−0.259) | 0.307 (−0.259) |
+  | B all-in / B balanced | 14 / 14 | 0.181 / 0.252 | 0.213 / 0.270 | 0.200 / 0.268 |
+  | A on W79, all-in / balanced | 16 / 16 | 0.200 / 0.149 | 0.194 / 0.160 | 0.216 / 0.151 |
+  | A on W67 | 8 | 0.233 | 0.203 | 0.235 |
+
+  (`posthoc/m7-e147.json` › `lists`; M6's and M5's columns are from this run's D's, which match `scored.json` › `primary.models`
+  to rounding.)
+  - **The exponent:** the card pays 0.838 of M7's watts on the 20 exponent items (M6 0.820), so the over-pricing carries over to
+    the current model.
+  - **Per flip and the contrasts:** M7 is off by 72 fJ rms (bias −33), a median 11% of the price. At the top of B's mantissa the
+    card's swing is 1.10, 1.05, 1.11 and 1.02 of M7's at bits 17, 18, 19 and 21. The card's word differences at 9, 17 and 18 are
+    0.65, 1.16 and 0.94 of M7's.
+  - **M7's form:** its float form `G8_gtr_glive` has no exponent-field term (its terms: mult, add32, add16, bus, rest, clk, gtr,
+    glive). M6's `a_exp` and `b_exp` are among the per-field terms it dropped, and an exponent-flip form (`G9`) did not lower its
+    nested error when it was fitted (Q138(m) § 2).
+  - **So the correction this result points to** is a new exponent term in M7's form (for instance the aligner's flips the bench
+    counts on the balanced exponent items, § Interpretation's reading), fitted with E147's 20 exponent items and E102's exponent
+    rows, and scored nested. § What it does to predicting power and heat is corrected that way.
+- **C3: one ratio was turned over.** R4's bullet said "M6 put them at 0.68, 1.19 and 0.97 of what the card read"; those are the
+  card's values over M6's. The card read −0.210, −0.278 and +0.801 W at bits 9, 17 and 18 (`scored.json` ›
+  `primary.statistics.contrasts_W` › `A_word_allin_*`) against M6's −0.310, −0.234 and +0.824 W (`predictions-e147.json` ›
+  `contrasts_pred_W`), so M6 predicted 1.47, 0.84 and 1.03 of what the card read. Corrected in place.
+- **C4: "swing" where the ratio was meant.** The title and § 1's heading said the swing plateaus at 6×. The swing in watts keeps
+  rising: +2.349 W at bit 16, then +2.658, +2.854, +3.118 and +3.792 W at 17, 18, 19 and 21. What levels off is the
+  all-in/balanced ratio per flip: 6.84, 6.06, 6.66, 6.30 and 6.05 (`scored.json` › `primary.statistics`). Corrected in the title,
+  in § 1's heading and in the Results' plain words.
+- **C5: four wording errors.**
+  - (a) The proposed item-15 sentence gave A's all-in layout above bit 9 as "1.5–7× dearer". The data give 1.76–5.55× at bits
+    10–21 here and 7.1, 3.2 and 2.2 at bits 16, 20 and 22 in E102, so 1.8–7×.
+  - (b) The lane's blog point on the exponent stated the aligner as the cause ("because the aligner then shifts on every step").
+    That is § Interpretation's reading of the bench's counts, not a measurement.
+  - (c) The lane's blog point on M6 said "all 68 new positions". The 68 are items: 34 position-and-word cells in two layouts each
+    (B at 14 positions, A at 16 on W79 and at 4 on W67).
+  - (d) The die read 50–64 °C over the session, not 51–64. The smoke's minshire mean read 50 °C (its telemetry and its
+    `block.json`); the eight blocks read 51–64.
+
+  (a) and (d) are corrected in place; (b) and (c) are in the lane's result, not in this README.
+- **C6: one sender was left out of § Device commands sent.** lib.sh's `die_c` is a full `ettelem sample` (22 calls, two samples
+  each), so it sends all six sample getters, not only the temperature read that row 8 credited it with. Rows 4–7 and 9 now name it,
+  with the paragraph under the table. The status line's "no write of any kind" also left out the voltage reads' error path, a soft
+  reset of the SP's own I2C master after a failed PMIC read; it now says what is meant (no register, flash, configuration, counter
+  or PMIC write). No command's class changes.
+
+**What the corrections do to predicting power and heat.** Nothing was measured, re-run or refitted, and every registered number
+and verdict stands. The term measured is unchanged: the price of one flipped bit at item 15's 30 open fp32 positions in both
+layouts, and at four A positions on a second word. What changes is what the test means:
+- M1 scores M6 at 68 items at positions it was never fitted on, on a card where its fit held no single-bit tile.
+  - Before: M6's own nested 0.245 W (fp32 on aifoundry3), and 0.098 W on E134's single bits post hoc.
+  - After: 0.210 W (mantissa 0.153, exponent 0.307 W).
+- It is not a test of a model that never saw a single bit: M6's fit held E102's 23 on card 1.
+- The current model, M7, scored after the data and unregistered, reads the same items to 0.202 W (mantissa 0.160, exponent
+  0.278 W, the card paying 0.84 of its watts there). So its next refit needs an exponent term, scored nested.
+
+Heat: nothing measured; the die read 50–64 °C.
