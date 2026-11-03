@@ -1,0 +1,5 @@
+(a) reduce on E149's stage-1 logs: 92 kinds, max |dy|, |dse| = 0.000e+00 W (REPRODUCES)
+(b) row+K truth at (16, 8): RK chose (s, r) = (16, 8); in-sample {'bf16': 1.58, 'fp16': 0.99, 'int8': 1.46}; nested {'bf16': 1.99, 'fp16': 2.03, 'int8': 2.4}; G1-form LOKO {'bf16': 46.62, 'fp16': 31.84, 'int8': 11.69}; STABLE HOLDS (pooled nested 2.09 vs G1 form 38.83); held-out rms RK 2.26 vs G1 form 40.11 W, ratio 0.056, 95% [24.93, 49.24] -> BEAT HOLDS (expected BEAT and STABLE HOLDS)
+(c) G1-form truth (lag 1, no rows): RK chose (s, r) = (1, 1); in-sample {'bf16': 1.59, 'fp16': 1.45, 'int8': 1.21}; nested {'bf16': 1.99, 'fp16': 3.38, 'int8': 2.48}; G1-form LOKO {'bf16': 1.89, 'fp16': 2.45, 'int8': 2.01}; STABLE FAILS (pooled nested 2.44 vs G1 form 2.04); held-out rms RK 2.26 vs G1 form 1.93 W, ratio 1.175, 95% [-0.86, 0.21] -> BEAT FAILS (expected BEAT and STABLE FAILS)
+(d) bootstrap: errors 0.4x G1's -> HOLDS (ratio 0.39, 95% [4.32, 10.24]); errors equal to G1's -> FAILS (ratio 1.00)
+SELFTEST PASSES [True, True, True]
