@@ -1,0 +1,17 @@
+E155 frozen readings of D31 = N3 - N1, aifoundry1 card 1, from the bench's counts and E148's reduction (10 passes)
+E148: N +1.631 [+1.582, +1.680]; N1 +0.884 [+0.807, +0.960]; N - N1 +0.747 [+0.664, +0.831]; fp32's E_op 108.7 pJ [90.6, 126.8]
+duty {"m0": 0.99617, "short": 0.99577}; predicted card cycles: {"m0r1.fp32": 62.0, "m0r1.int8": 62.0, "m0r3.fp32": 128.0, "m0r3.int8": 110.0, "m0r3k8.fp32": 72.0, "m0r3k8.int8": 62.0}
+predicted rates (1e9/s): m0.fp32 1.1251, m0.int8 1.9247, m0r1.fp32 9.8677, m0r1.int8 9.8677, m0r3.fp32 4.7797, m0r3.int8 5.5618, m0r3k8.fp32 8.4972, m0r3k8.int8 9.8677
+shared per-op term: E_op x 0.7821e9 = +0.0850 W [+0.0708, +0.0992]
+reading Wn: factor +0.5418 of E148's N - N1: count term +0.405 [+0.360, +0.450]; D31 +0.490 W, band [+0.430, +0.549]  (the walk counted in TenC reads at a new address (E148's registered count): all of E148's N - N1 is the walk)
+reading Wt: factor +0.3853 of E148's N - N1: count term +0.288 [+0.256, +0.320]; D31 +0.373 W, band [+0.327, +0.419]  (the walk counted in TenC read-address bits that change (E148's post hoc count, registered here): all of E148's N - N1 is the walk)
+reading C: factor +0.0649 of E148's N1: count term +0.057 [+0.052, +0.062]; D31 +0.142 W, band [+0.123, +0.162]  (per cycle: none of the rise is per-row; N1 is work int8 does every working cycle, scaled by the TIMA controls' clocked bits a second)
+reading T: factor +0.2271 of E148's N - N1: count term +0.170 [+0.151, +0.189]; D31 +0.255 W, band [+0.222, +0.288]  (the A path: all of E148's N - N1 is int8's TenTMP staging, its 64-bit A reads (excluded as the sole per-row carrier by E148's W2))
+reported two_term: D31 +0.442 W  (E148's registered two-term solve (reported there): pw a TenC read at a new address, pt a 64-bit A read)
+reported null: D31 +0.000 W  (a third row changes nothing (D31 = 0))
+reported null_shared: D31 +0.085 W  (a third row changes nothing but the shared per-op term)
+F3 allowance (pJ, int8's counts partner - arm over int8's rate change 4.306e9): Wn -10.6, Wt -7.5, C -13.3, two_term -16.5; mid -12.0, half 4.5; reported {"T (excluded as sole carrier by E148)": -39.4, "B traffic, both formats (int8's TenB writes a second change by -1.61e+11, fp32's by -1.36e+11; at 0.10-0.16 pJ a write)": [-0.08, -0.12]}
+int8's counts a second, partner against arm (fractions): {"newaddr": -0.1129, "tog": -0.1129, "A": -0.1129, "bits": -0.061}
+reported Q31k walk parts: Wn +0.359 [+0.319, +0.399], Wt +0.255 [+0.227, +0.284]; int8 TenB writes a second change -1.263e+12
+expected D31 95% half-width from E148's D21 spread (W): 3_passes 0.335, 4_passes 0.214, 6_passes 0.141, 8_passes 0.113, 10_passes 0.096
+per second, int8 - fp32 in the card's order (1e10): m0: walk 788.347, toggles 1478.151, TenTMP 12.318, TIMA bits 6383.57, TenB 20.47; m0r1: walk 0.000, toggles 0.000, TenTMP 7.894, TIMA bits 5698.62, TenB 0.00; m0r3: walk 427.148, toggles 569.531, TenTMP 8.899, TIMA bits 6068.50, TenB 20.02; m0r3k8: walk 378.922, toggles 505.229, TenTMP 7.894, TIMA bits 5698.62, TenB 17.54
