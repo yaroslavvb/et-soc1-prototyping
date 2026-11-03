@@ -5,8 +5,8 @@
 *Mon 2 Nov 2026 (week 45), Q138, aifoundry2 card 0 under its own governor. Pre-registered in `38cd9099` ([`tools/claims-v3/e143/E143.md`](../../../../tools/claims-v3/e143/E143.md): the frozen numbers, the rules, the stops, a self-test, a toy-card dry run of the whole queue and the device-command audit), committed at 20:54:09 PST and pushed before the claim (20:55:03) and the first launch (20:56). Every number it scores is Q138(x)'s, committed in `dac39d97` at 20:24 PST (`git merge-base --is-ancestor dac39d97 38cd9099` holds), from M7 (`3a210f2b`, 19:21 PST, before pool 5 entered the tree); nothing was fitted or refitted. `ettelem config` read 65 W / 65 °C, low_power, 600 MHz, 519 mV at the queue's start (20:55:36) and end (21:23:39). Nothing was set on the card. 28.1 card-minutes (20:55:36-21:23:39), every command a read.*
 
 *Corrected after verification (a dated note, Mon 2 Nov 2026, about 22:30 PST). An independent verifier re-derived every registered number
-and verdict from the raw telemetry, and all of them stand. It found seven faults in the text, and none of them changes a number, rule or
-verdict. They are corrected in [§ Corrections after verification](#corrections-after-verification-mon-2-nov-2026) at the end. The text
+and verdict from the raw telemetry, and all of them stand. It found seven faults, six in the text and one in the result's table cells,
+and none of them changes a number, rule or verdict; the fix pass found one more of C3's kind (H1's printed reference). They are corrected in [§ Corrections after verification](#corrections-after-verification-mon-2-nov-2026) at the end. The text
 between is as first committed; where it disagrees with those notes, the notes hold. The main one is C1: what M7 leaves on this card is
 not an offset. The board error rises with the power M7 predicts, and the zeros level is −1.20 W (−0.80 W is the mean of all 17 pinned
 tiles). So the next terms are a zeros level, a cap term and a D scale that depends on the format, all found post hoc and all to be scored
@@ -201,7 +201,7 @@ in `f8783f05`. `results.json`, `reduce.txt`, `posthoc.txt` and the registration 
   of 713.3 (−8.0), and its fp16 randn tile at 720.1 against 727.7 (−7.6); all six of their passes read low. The pool's fresh fp32 randn
   anchor read 7.7 MHz below M7. (R0's int8 −5.3 MHz is one pass at 784 MHz, not a drift.) R0 passed its 25 MHz bar, and as registered
   it "qualifies the verdicts above": F1 passes with a bias the size of the drift inside it. So a burst clock quoted for this card needs
-  an anchor in the same session, or a drift allowance of about −5 to −8 MHz (kinds page section 11 item 8, the drift).
+  an anchor in the same session, or a drift allowance of about −5 to −8 MHz (kinds page section 11 item 8, the drift between sessions).
 - **C3 (The answer, the rules table, Before and after, and What this does): the blind scores carry intervals. Where the governor acts,
   and for the heat, they are consistent with the reference, not better than it; the pinned scores reflect what the pool holds.** With
   95% intervals over tiles (`1_blind_rms_intervals`):
