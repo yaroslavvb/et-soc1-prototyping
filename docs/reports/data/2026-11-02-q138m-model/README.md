@@ -1,0 +1,113 @@
+# Q138(m): M7, the power model refitted on every public kinds row with bands sized on held-out residuals, a card term, aifoundry2's governed burst clock and power, and heat per card, frozen before blind pool 5
+
+*On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open): **item 6**, "a power model across kinds", and the first of its "After Q137, the next steps in order": "(1) Item 6's power half: a refit that carries E138's and E139's terms and the six misses' cases, with bands sized on a blind score, tested on a fifth pool written by someone else, on a second card". Q138's goal, in the owner's words of 2 November 2026: to predict the power requirement and heat generation of numeric computations as accurately as possible.*
+
+*Mon 2 Nov 2026 (week 45), Q138(m), desk only, on the Intel: no card was opened and nothing was measured here. Every watt, MHz and degree comes from a committed experiment, named where it is used. It builds on Q137(m)'s M6 ([`../2026-11-02-q137m-model/`](../2026-11-02-q137m-model/README.md)), Q133(b)'s M5 ([`../2026-11-01-q133b-power-model/`](../2026-11-01-q133b-power-model/README.md)), E140's scoring of M6 on blind pool 4 ([`../2026-11-02-e140-blind4/`](../2026-11-02-e140-blind4/README.md)) and E115's of M5 on blind pool 3 ([`../2026-11-01-e115-blind-pool/`](../2026-11-01-e115-blind-pool/README.md)). This lane never read blind pool 5 or its designer's files: pool 5 does not exist in the tree when M7 is committed. E141 (aifoundry3), E142 (aifoundry1 card 1) and E143 (aifoundry2) score it.*
+
+## Results
+
+**What this does to prediction** (out-of-sample error before and after; every "after" is a nested leave-one-kind-out score, so it is out of kind, not blind):
+
+| term | before | after (M7) | resolved? | source |
+|---|---|---|---|---|
+| power, floats (515 rows, 253 kinds) | M5's form refitted on the same folds **0.234 W**; M6's form **0.219 W** | **0.209 W** | against M5's form yes (−0.025 W, 95% over kinds −0.040 to −0.011); against M6's form no (−0.010, −0.021 to +0.001) | `loko-m7.json` › `families.float.side_by_side_same_folds`; `summary-m7.txt` |
+| power, int8 (122 rows, 57 kinds) | M5's / M6's form **0.252 W** | **0.240 W** | no (−0.012, −0.034 to +0.011) | `families.int8` |
+| power on the blind pools' rows (held out kind by kind) | M5 frozen on pool 3 0.53 W, M6 frozen on pool 4 0.42 W (floats) | 0.45 W (pool 3), **0.37 W** (pool 4) floats; int8 pool 4 0.37 → **0.27 W** | — | `row_errors`, `summary-m7.txt` |
+| 95% bands on held-out kinds | 1.96 × nested rms: E140 19 of 25 inside (registered FAIL); on M7's held-out pool rows **41 of 50** | rule B (k 3.18 floats, 2.48 int8): **47 of 50** pool rows, **630 of 637** rows | sized on held-out residuals | `band_calibration` |
+| card 1 (aifoundry1 card 1, 600 MHz) | M6: one scale per family, 0.9711 floats, 0.9735 int8 | the same term kept: **0.175 W** rms on 92 paired float kinds (0.076 W on 30 int8), against 0.176 and 0.179 W for the all-pairs alternatives | the alternatives are no better | `card_terms` |
+| aifoundry2's burst clock under its own governor | E101's cap 66.15 W: 8.64 MHz rms over 56 kinds bursts | cap refitted **65.58 W**: 8.57 MHz; end to end from the tile's bytes, **8.5 MHz** and **1.86 W** board rms | no (the cap moves 0.6 W) | `aifoundry2.burst_cap`, `end_to_end_from_M7_nested_D` |
+| heat, aifoundry3 and card 1, die rise over a 4.5 s run | the prior S × 0.118 °C/W: 0.274 / 0.283 / 0.192 °C (fp32 / fp16 / int8) | **0.275 / 0.280 / 0.180 °C** at 0.1186 (aifoundry3) and 0.1151 °C/W (card 1) | no: heat over 4.5 s is S × 0.118 on both cards | `heat` |
+| heat, aifoundry2, die max over a 6 s burst | E136's frozen 0.1445 °C/W: 0.69 °C on 112 kinds bursts | **0.140 °C/W**, 0.68 °C leave-one-kind-out | no | `aifoundry2.burst_heat` |
+
+**In plain words.** M7 predicts the same things M6 did, from the tile's bytes: a matmul's power over the same kernel on zeros, and how far the die warms. It now also says what aifoundry2's own governor will do with a kind in a 6 s burst: the clock it settles at, the board power at that clock, and the die's rise. On kinds it never saw, M7 is about 0.21 W rms on the floats and 0.24 W on int8, a small, partly resolved gain over the older forms. The bigger change is honesty about its errors: on the 50 rows of the two blind pools, which nested scoring holds out kind by kind, 1.96 times the nested rms covered only 41. M7's bands are 1.6 times wider on the floats (k 3.18) and 1.3 times on int8 (k 2.48), sized so that 47 of those 50 fall inside.
+
+**1. Power, the same folds for M5, M6 and M7** (rms of measured − predicted D, W; [`loko-m7.json`](loko-m7.json) › `families.<family>.side_by_side_same_folds`; [`summary-m7.txt`](summary-m7.txt)):
+
+| | rows | M5 frozen | M6 frozen | M5's form, refitted per fold | M6's form, refitted per fold | **M7, nested** |
+|---|---:|---:|---:|---:|---:|---:|
+| fp32 | 286 | 0.250 | 0.229 | 0.251 | 0.241 | **0.231** |
+| fp16 | 229 | 0.206 | 0.171 | 0.211 | 0.187 | **0.177** |
+| int8 | 122 | 0.233 | 0.230 | 0.252 | 0.252 | **0.240** |
+| floats, aifoundry3 / card 1 | 247 / 268 | 0.259 / 0.203 | 0.224 / 0.187 | 0.258 / 0.209 | 0.235 / 0.203 | **0.216 / 0.203** |
+| floats, E115 rows (pool 3) | 19 | 0.532 | 0.480 | 0.528 | 0.503 | **0.450** |
+| floats, E140 rows (pool 4) | 18 | 0.354 | 0.418 | **0.340** | 0.395 | 0.370 |
+| int8, E140 rows (pool 4) | 7 | 0.367 | 0.370 | 0.367 | 0.369 | **0.265** |
+| fp16, E137 rows (card 1) | 8 | 0.217 | 0.243 | 0.209 | 0.227 | **0.199** |
+
+M5 and M6 as frozen are in sample on their own training rows (thirteen and 22 experiments), so those two columns flatter them; the three refitted columns are all out of kind on the same folds. M7 is not best everywhere: on pool 4's float tiles M5's form, refitted, does better (0.340 against 0.370 W), and M7 still over-predicts pool 4's floats by 0.22 W on average (M6 0.30), so the six misses' bias is reduced, not removed.
+
+**2. M7, frozen.** [`m7.json`](m7.json), written by [`fit_m7.py`](fit_m7.py) (imports Q137(m)'s `fit_m6.py`, `m6_rows.py` and Q133(b)'s `fit_m5.py`, unchanged). sha256s are in § Files and in the commit.
+- **Floats, form `G8_gtr_glive`** = M5's bench terms + the gate's switching `gtr` + `glive`, the live (ungated) share of the gate slots, a constant per op for every slot left on (fJ per count, ± 1 s.e., jackknife by kind): mult 1.594 ± 0.021, add32 1.639 ± 0.033, add16 1.581 ± 0.046, bus 6.78 ± 0.38, rest 2.307 ± 0.069, clk 0.632 ± 0.069, gtr 145.5 ± 20.2, glive 2.93 ± 0.48 nJ an op at every slot live (about 3.3 W at the kinds harness's 1.12 × 10⁹ ops/s). The nested procedure picked it in all 253 folds. Dropping `gtr` raises plain leave-one-kind-out from 0.209 to 0.230 W, dropping `glive` to 0.219 W. M6's product-sign and per-field flip terms (`G6_M6`, 0.219 W), exponent flips (`G9`, 0.221) and A's low bits (`G10`, E134's case, 0.220) did not lower the error and are not carried.
+- **int8, form `J8_b138`** = M5's I3 + `b138`, B's bit flips priced with E138's measured odd/even ratio (b_even + 1.91 b_odd): nets_nobus 3.365 ± 0.157, bus 16.3 ± 3.1, clk 1.883 ± 0.186, b138 −23.4 ± 9.8 fJ. Picked in all 57 folds; without it 0.252 W. **The negative sign means it corrects the bench's own B count (int8's multiply is behavioural in the public RTL); it is not E138's price**, which is positive.
+- **Card term (a)**: M5's, one model-free scale per family from E78's and E82's same tiles, 0.9711 floats and 0.9735 int8, recomputed inside every fold. Scored on all 92 float kinds (30 int8) measured on both cards (E78/E82, E86/E91, E95/E131, E137's ones and the rest), it predicts card 1's D at 0.175 W rms (int8 0.076), level with one scale from all pairs (0.176) or one per format (0.179). Paired kinds read card 1 at 0.972 ± 0.021 (sd) of aifoundry3.
+- **Interval pools** (M7's nested rms, W): fp32 aifoundry3 0.247, card 1 0.214; fp16 0.162, 0.188; int8 0.226, 0.255.
+- **Terms carried beside the kinds model.** E139's encoded memory-path term, +0.185 W per encoded image (0.46 pJ an encoded toggle), which predicted E139 to 0.028 W rms, applies to DRAM-streamed images: a kinds tile is a resident loop and moves none, so it is zero for every pool tile. E134 and E138 have no per-tile board D (their items' D is null: bit ladders reduced on a rail), so they entered as candidate terms (`a_lo`, `b138`, `b_odd`/`b_even`), not rows.
+
+**3. The band rule** (`m7.json` › `band_rule`; `families.<family>.band_calibration`). Power: half-width = k × √(pool² + s² xᵀCx), pool = M7's nested rms for the tile's format and card, C the jackknife covariance, s the card scale; **k = 3.179 floats, 2.483 int8**, the larger of (i) the 95th percentile of |nested residual| / pool over all of M7's rows (2.08, 1.87) and (ii) the same over the rows of blind pools 3 and 4 (E115, E140), which the nested procedure holds out kind by kind (3.18 on 37 float rows, 2.48 on 13 int8). Heat: k_h × pool_h, **k_h = 1.95**. aifoundry2: ± the 95th percentile of |measured − predicted| end to end over E80's and E83's 56 kinds bursts (21.3 MHz, 3.37 W board) and of the burst heat law's leave-one-kind-out residuals (1.41 °C).
+
+| coverage on M7's nested residuals | all rows | pool 3 rows | pool 4 rows |
+|---|---|---|---|
+| 1.96 × pool (M6's rule) | floats 482 / 515, int8 116 / 122 | 16 / 19, 5 / 6 | 14 / 18, 6 / 7 |
+| **rule B, frozen** (k 3.18 / 2.48) | **511 / 515, 119 / 122** | **18 / 19, 5 / 6** | **17 / 18, 7 / 7** |
+| rule A, written before the first fit (k 4.31 / 2.54) | 513 / 515, 119 / 122 | 18 / 19, 5 / 6 | 18 / 18, 7 / 7 |
+
+Rule A took (ii) from M5's and M6's frozen residuals on their blind pools, each against that model's own pool (95th percentiles 4.79, 4.47 and 3.34 on the floats). It double-counts: those pools came from rows with no adversarial pool in them, and M7's pools include both. It was replaced by rule B after the first fit was read (§ Order).
+
+**4. aifoundry2 under its own governor, in bursts (b).** E136's frozen relation (E101's, through E119): board power at f MHz P(f) = B(f) + c × s(f), B = 25.46 / 28.24 / 33.61 W at 600 / 700 / 800 MHz, s(f) = (V_f / 0.517 V)² × f / 600 with aifoundry2's telemetry voltages 0.517 / 0.568 / 0.618 V (s(800) = 1.905); c = c_zeros + D / 1.01865, D the tile's D at 600 MHz on aifoundry3 (M7's); E83's dither at an effective cap W* ± 2.75 W gives the mean burst clock. The cap was refitted four ways and scored leave-one-kind-out on E80's and E83's 56 kinds bursts (6 s each, `burst_mhz` against the dither on each cell's measured `c_w`): E101's 66.15 W 8.64 MHz rms; refitted on E126's 18 bursts alone 70.46 W, 17.4 MHz (they ran at 796–800 MHz and bound the cap only from below); **refitted on the kinds bursts 65.58 W, 8.57 MHz (frozen)**; on both 65.83 W, 8.59 MHz. End to end, from the tile bytes through M7's nested D: **8.5 MHz rms and 1.86 W board rms** over the 56 bursts, over-reading the board by 0.53 W on average. E136's G2, the sustained cap refitted on E126's held runs (60.83 W), is carried for sustained runs, which pool 5 does not run. The V² law's check is E118's (two clocks on a second card: 73.27 ± 5.00 fJ against V²'s 77.40 at 0 W/°C, −5.3%); this lane did not re-read the telemetry voltages of E80, E83, E119, E126 or E136 (open, § What this cannot say).
+
+**5. Heat per card (c).** Over the kinds harness's 4.5 s run, form `H2_per_card_runlength` (M6's form, chosen again in all 287 folds): **0.1186 °C per board W on aifoundry3 and 0.1151 on card 1**, with run-length slopes fitted on runs of 4.4–5.0 s only. 610 rows from 24 experiments (E140's 29 and E137's 11 added; items whose runs are over 5.0 s left out, M6's rule unchanged). Nested 0.275 / 0.280 / 0.180 °C (fp32 / fp16 / int8), against the prior rule's 0.274 / 0.283 / 0.192: heat over 4.5 s is S × 0.118 on both cards, and what M7 changes is the band, by card: pools aifoundry3 0.181 / 0.159 / 0.205 °C, card 1 0.352 / 0.355 / 0.141. On E140's rows, nested 0.213 °C against M6's frozen 0.211. **aifoundry2's own heat**: die max − die start = k × (burst board W − 21.5 W) over a 6 s burst, **k = 0.140 °C per W** on E80's and E83's 112 kinds burst runs (0.68 °C leave-one-kind-out), against E136's frozen 0.1445 (fitted on GEMM bursts; 0.69 °C on the kinds bursts). The long-hold step response and steady coefficients are M6's, carried unchanged (Q138(t) freezes the heat-over-minutes model for E144).
+
+**6. The six misses of E140, as M7 reads them out of kind** (measured − predicted, W; M6 frozen → M7 nested): `fp32.real_qwen_q_down` −0.97 → −0.95 and `fp32.a_exp_busy_b_const` −0.79 → −0.73 (both meter dips, E140 C2), `fp32.wideexp_bgate_alt` −0.70 → −0.67, `fp16.pair_cancel` −0.47 → −0.33, `fp16.wideexp_gate30` −0.36 → −0.07, `int8.b_line_flipflop` −0.56 → −0.20. The fp16 gate tile and the int8 flip-flop move most (which of M7's terms moves each was not separated); the fp32 wide-exponent gate tile and the pair that cancels stay over-predicted. M7's worst out-of-kind misses are still E115's A held down a column (`fp32.a_colconst_b_randn` −1.52 W) and E103's `c_near_rand` (+0.93).
+
+**7. The predictor for pool 5.** [`predict_blind5.py`](predict_blind5.py) `<pool_dir> <card>` (card `aifoundry3`, `aifoundry1c1` or `aifoundry2`) reads a pool in blind pool 4's layout (tiles plus a manifest with a `tiles` list; `blind5.json` preferred) and the bench's counts for its tiles (`--counts`, or the one `counts-*.json` in the pool; without counts it prints the bench command and exits), and writes `predictions-<card>.json` and `.md`: per tile, M7's, M6's and M5's D with 95% bands and the die rise over 4.5 s (M5 has no heat term) on aifoundry3 or card 1; on aifoundry2, the burst clock, board W, D in the burst and the die rise, each with a band (M5 and M6 go through M7's clock term, having none of their own). It hashes every input it reads. Self-test on pool 4 ([`selftest_predict_blind5.py`](selftest_predict_blind5.py) → [`selftest-predict-blind5.txt`](selftest-predict-blind5.txt)): all three cards run, and M6 and M5 through it reproduce Q137(m)'s frozen `predictions-blind4.json` (D, its interval, M6's die rise and its interval) to the file's rounding. Pool 4 is in M7's fit, so M7's numbers there are in sample and test nothing.
+
+## How it was done
+
+**Rows.** M6's 604 power rows (`rows-m6.json`, byte for byte M6's assembly: 22 experiments, two cards) plus **E140**'s 25 blind-pool-4 tiles (aifoundry3; counts from Q137(m)'s `counts-blind4.json`, 0 mismatches) and **E137**'s 8 fp16 rows (card 1; E128's tiles, counted in E128's desk counts; joined to E128's kinds by tile sha256): 637 rows, 24 experiments ([`rows-m7.json`](rows-m7.json)). Anchors and later sessions' `randn`/`full` are left out as in M5. Pool 3 (E115) was already in M6's rows. E134, E138 and E139 give no kinds rows (§ 2).
+
+**Candidate forms**, written in `fit_m7.py` before its first run (19:05 PST) and not changed after: floats `G0_M5`, `G1_gtr`, `G6_M6`, `G8_gtr_glive`, `G9_gtr_exp`, `G10_gtr_alo`, `G11_gtr_glive_exp`; int8 `J0_M5`, `J1_M6`, `J6_bpos` (B's odd and even bit flips), `J7_gtr_bpos`, `J8_b138`, `J9_glive`. New features from the tile bytes through make_kinds' issue stream: `b_odd`, `b_even`, `b138`, `a_lo` (A's flips in the low 8 mantissa bits), `glive` (1 − the gated share of make_kinds' gate decisions).
+
+**Nested leave-one-kind-out**, as M5 and M6 (a kind is every row of one tile rule on both cards): for each held-out kind every form is scored by leave-one-kind-out on the rest, the best is refitted on the rest and predicts the held-out kind. M5's and M6's forms are refitted on the same folds and scored beside it. **Keep only terms that lower the error**: the frozen form is the plain leave-one-kind-out best, kept only if the procedure's nested error is below M5's form's on the same folds (else M5's form is frozen); each added term is dropped in turn and reported. The fits are per-kind normal equations, batched (the least-squares solution of M5's `Family`, with a 10⁻⁹ relative ridge on column-scaled features), with card 1's rows divided by the card term inside every fold.
+
+**Heat** as M6 (rows with `dT_win` and S, runs of 5.0 s or less, run length and launch offset from each `runs.csv`), forms `H1_per_card`, `H2_per_card_runlength`, `H4_per_card_int8`, nested the same way. **aifoundry2**: § 4, and the burst heat law fitted through the origin on E80's and E83's kinds bursts, leave-one-kind-out.
+
+## Order (PST, Mon 2 Nov 2026)
+
+1. 18:56 brief read; 18:58–19:04 M6's, M5's, E140's, E136's and E119's code and READMEs read. Pool 5 and its designer's scratch were never read or listed.
+2. ~19:05 `fit_m7.py` written: rows, forms, band rule A, card terms, heat forms, aifoundry2's cap options (E101's against a kinds refit).
+3. 19:06:44–19:09 **fit run 1**, read at once. Three changes followed (19:10–19:12), **before any freeze and with no pool 5 in existence**: (i) the card terms had been scored on different pair sets (33 against 92 float pairs); they are now scored on the same 92 (the choice did not change); (ii) the docstring said E126 ran no bursts; it ran 18, so caps refitted on E126 alone and on E126 plus the kinds bursts were added (the choice did not change); (iii) the band rule A → B (§ 3), after reading rule A's k of 4.31. No power form, row rule or heat form changed. Run 1's code and scores: [`run1/`](run1/).
+4. 19:12:10–19:15 fit run 2 (its JSON written; a print after it failed); 19:16:21–19:19:28 **fit run 3, the freeze**, [`fit-output.txt`](fit-output.txt), the same numbers. Then `summarize_m7.py` (post hoc tables and the bootstrap over kinds; nothing frozen changes) and the self-test (PASS). Committed and pushed with this README, before pool 5 is copied into the tree.
+
+## What this cannot say
+
+- **The bands are calibrated on 50 pool rows.** k for the floats is the second-largest of 37 standardized residuals; a pool 5 harder than pools 3 and 4 can still under-cover. The bias on pool 4's floats (M7 0.22 W high, out of kind) is inside the band, not removed.
+- **The int8 gain is not resolved**, and its new term enters with the opposite sign to E138's price: it is a correction to the RTL bench's B count. The float gain is resolved against M5's form only.
+- **aifoundry2's terms are tested on kinds bursts only, and not blind.** The cap was refitted on the same 56 bursts it is scored on (leave one kind out). The telemetry voltages behind s(f) were not re-read for E80, E83, E119, E126 or E136 here; the V² law rests on E64's three voltages and E118's −5.3% check. Nothing here predicts aifoundry2's sustained clock for a kinds tile (G2 is carried as E136 froze it).
+- **The aifoundry2 heat figure is a different window**: die maximum over a 6 s burst, per board W over a 21.5 W idle; aifoundry3's and card 1's are the window mean over a 4.5 s run over the launch reading. Pool 5's aifoundry2 lane needs the burst form.
+- E112 has no top-level item file, so its card-1 rows are not in the card term (E131 supersedes its part (b), and E91's rows carry part (a)'s tiles).
+- One lane wrote the model and its scoring code; pool 5's designer is independent, and E141–E143 are the test.
+
+## Files
+
+| file | what |
+|---|---|
+| [`fit_m7.py`](fit_m7.py) | the fit: rows, features, forms, card terms, nested leave-one-kind-out with M5/M6/M7 on the same folds, the band rule, heat, aifoundry2's governor and burst heat, the freeze |
+| [`m7.json`](m7.json) | **the freeze**: per family the form, constants (J), jackknife covariance, card term and scales, interval pools, band k; heat form, coefficients, pools, k_h, M6's step response; aifoundry2's relation, cap, sigma, bands and burst heat law; E139's term and its scope; the band rule in words |
+| [`loko-m7.json`](loko-m7.json), [`fit-output.txt`](fit-output.txt), [`summary-m7.txt`](summary-m7.txt) | every form's plain and nested errors by format, card and experiment, row by row; card terms; band calibration; heat; aifoundry2 (per burst) |
+| [`rows-m7.json`](rows-m7.json), [`heat-rows-m7.json`](heat-rows-m7.json) | the assembled power and heat rows |
+| [`predict_blind5.py`](predict_blind5.py) | the frozen predictor for pool 5 (M7, M6, M5; three cards) |
+| [`selftest_predict_blind5.py`](selftest_predict_blind5.py), [`selftest-predict-blind5.txt`](selftest-predict-blind5.txt) | the predictor run on pool 4, against Q137(m)'s frozen predictions |
+| [`summarize_m7.py`](summarize_m7.py) | the README's tables and the bootstrap over kinds (post hoc) |
+| [`run1/`](run1/) | fit run 1's code and scores, before the three changes of § Order 3 |
+
+sha256 at the freeze: `m7.json` **`bfeea822b87e0a1f8c315809192faf0a437b72bcadd1459c027cd857c8b3d8b2`**; `fit_m7.py` `cb01d82684be3aa49e4e00b5a9a453c27603cd0612a2993af7775835f5bc55c0`; `predict_blind5.py` `0d114d5bc01e317de2b5d1adef3cb71f01d0ecfc3ebad0ff7abe342f06bac369`; `loko-m7.json` `c30320b7a8f290e6f5640db4897b68a5876c63627c90315accec578661fd9322`; `rows-m7.json` `c6ac75c275ba985616f0f251f98f403399853dd711c1f81b56b75cd6b4a6b368`; `heat-rows-m7.json` `9c35620281a9ea5800cc9834eeb821d56460268cf5a01b291b568b8cacf8e341`. Imported unchanged: Q137(m)'s `fit_m6.py` `010f2cf1…92c7`, `m6_rows.py` `6a0e0458…756a`, `m6.json` `87c17e08…6e82`; Q133(b)'s `fit_m5.py` `e0211691…decb`.
+
+Rerun from the tree's root, with a python that has numpy:
+
+```
+python3 -u docs/reports/data/2026-11-02-q138m-model/fit_m7.py > docs/reports/data/2026-11-02-q138m-model/fit-output.txt   # ~3 min
+python3 docs/reports/data/2026-11-02-q138m-model/summarize_m7.py > docs/reports/data/2026-11-02-q138m-model/summary-m7.txt
+python3 docs/reports/data/2026-11-02-q138m-model/selftest_predict_blind5.py <scratch dir> > docs/reports/data/2026-11-02-q138m-model/selftest-predict-blind5.txt
+# pool 5: count its tiles with the bench (Q133(b)'s README, run_kinds.py --only __none__ --extra-tiles ...), then for each card
+python3 docs/reports/data/2026-11-02-q138m-model/predict_blind5.py tools/claims-v3/kinds/blind5 aifoundry3 --counts <counts.json>
+```

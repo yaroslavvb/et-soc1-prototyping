@@ -1,0 +1,406 @@
+{
+ "_model": "M7 (Q138(m)): power = the bench terms of M5 plus the terms nested leave-one-kind-out kept; card term; aifoundry2's governed burst clock and power; heat per card",
+ "aifoundry2": {
+  "burst_cap": {
+   "E101_W_star_w": 66.15,
+   "W_star_by_option_w": {
+    "E101_cap": 66.15,
+    "E126_refit_cap": 70.45999999999809,
+    "kinds_and_E126_refit_cap": 65.82971918287888,
+    "kinds_refit_cap": 65.58008573814928
+   },
+   "W_star_used_w": 65.58008573814928,
+   "chosen": "kinds_refit_cap",
+   "e126_bursts": {
+    "n": 18,
+    "rms_mhz_at_cap_used": 5.614509763016785,
+    "rms_mhz_at_own_refit": 1.2671440822423745
+   },
+   "e126_cells_with_bursts": 18,
+   "loko_rms_mhz_on_kinds_bursts": {
+    "E101_cap": 8.644901847123851,
+    "E126_refit_cap": 17.392069307674213,
+    "kinds_and_E126_refit_cap": 8.594414125924976,
+    "kinds_refit_cap": 8.566321512669369
+   },
+   "n_cells": 56,
+   "n_kinds": 51,
+   "refit_W_star_w": 65.58008573814928,
+   "sigma_w": 2.75
+  },
+  "burst_heat": {
+   "P_idle_w": 21.5,
+   "chosen": "kinds_refit",
+   "k_E136_frozen_c_per_w": 0.1445,
+   "k_kinds_c_per_w": 0.14004345109940583,
+   "k_used_c_per_w": 0.14004345109940583,
+   "law": "die_max - die_start = k (P_burst - P_idle) over a kinds burst",
+   "loko_rms_c_kinds_refit": 0.6845045387241696,
+   "n_runs_gemm": 59,
+   "n_runs_kinds": 112,
+   "q95_abs_c": 1.4060232415642677,
+   "rms_c_E136_frozen_on_kinds": 0.6936546510734312
+  },
+  "end_to_end_band": {
+   "n": 56,
+   "q95_abs_board_w": 3.369997618984012,
+   "q95_abs_mhz": 21.299999999999756,
+   "rms_board_w": 1.864014453242803,
+   "rms_mhz": 8.501226423464333
+  },
+  "relation": {
+   "B_w": {
+    "600": 25.455614671708208,
+    "700": 28.243261128820862,
+    "800": 33.60956684526229
+   },
+   "V_v": {
+    "600": 0.517,
+    "700": 0.568,
+    "800": 0.618
+   },
+   "c_zeros_w": {
+    "fp16": 1.394,
+    "fp32": 1.44,
+    "int8": 2.123
+   },
+   "s_f": {
+    "600": 1.0,
+    "700": 1.408193628120374,
+    "800": 1.90517380064275
+   },
+   "source": "tools/claims-v3/e136/predictions-e136.json relation (E101's, through E119); V from E64's aifoundry2 telemetry (surface_hpl.py)",
+   "xfer": 1.0186548642106485
+  },
+  "sustained_cap_G2": {
+   "fit_check": [
+    [
+     709.4,
+     731.9
+    ],
+    [
+     709.4,
+     746.5
+    ],
+    [
+     672.6,
+     640.1
+    ],
+    [
+     711.7,
+     699.2
+    ],
+    [
+     772.2,
+     759.8
+    ]
+   ],
+   "fit_rms_mhz": 25.5,
+   "held_board_w": 62.06,
+   "sigma_w": 1.95,
+   "sustained_W_star_w": 60.827
+  }
+ },
+ "band_rule": "power: half-width = k x sqrt(pool^2 + x C x), pool = M7's nested rms for the tile's format and card, k = max(the 95th percentile of |nested residual| / pool over M7's rows, the 95th percentile of |blind residual| / that model's own pool over blind pools 3 (M5) and 4 (M5, M6)); heat: k_h x pool_h with k_h the 95th percentile of |nested heat residual| / pool_h; aifoundry2: the 95th percentiles of |measured - predicted| end to end over E80's and E83's kinds bursts (clock, board W) and of the burst heat law's leave-one-kind-out residuals",
+ "e138_int8_b_ratio": 1.91,
+ "families": {
+  "float": {
+   "band_k": 3.1787396263340844,
+   "card1_scale_by_format": {
+    "fp16": 0.9711174157693975,
+    "fp32": 0.9711174157693975
+   },
+   "card_term": "C0_M5_E78E82_family",
+   "coef_J": [
+    1.5935305807088286e-15,
+    1.6391490097855774e-15,
+    1.58106661329934e-15,
+    6.778040160427266e-15,
+    2.3067683593770205e-15,
+    6.321163901978914e-16,
+    1.455317013572915e-13,
+    2.9266667791581542e-09
+   ],
+   "coef_fJ": [
+    1.5935305807088285,
+    1.6391490097855774,
+    1.58106661329934,
+    6.778040160427266,
+    2.3067683593770205,
+    0.6321163901978915,
+    145.5317013572915,
+    2926666.779158154
+   ],
+   "cov_J2": [
+    [
+     4.436541638528224e-34,
+     2.175288805190434e-34,
+     3.6942592778931e-34,
+     -1.822907713150975e-33,
+     -7.976036037351514e-34,
+     -1.5886551612609772e-35,
+     1.3026731753255609e-31,
+     1.0685457896916262e-28
+    ],
+    [
+     2.175288805190434e-34,
+     1.0767999762129917e-33,
+     1.3227946074853783e-33,
+     1.7614484596817527e-33,
+     -1.6428685987288607e-33,
+     2.185624336126821e-34,
+     1.140453797313364e-31,
+     -1.807564375785454e-27
+    ],
+    [
+     3.6942592778931e-34,
+     1.3227946074853783e-33,
+     2.146898776765216e-33,
+     2.6617659234151185e-33,
+     -2.677756190945573e-33,
+     1.6469857136825273e-34,
+     2.7229751127981357e-31,
+     -1.3940773038416358e-27
+    ],
+    [
+     -1.822907713150975e-33,
+     1.7614484596817527e-33,
+     2.6617659234151185e-33,
+     1.469446188632225e-31,
+     -1.1518110868995266e-32,
+     3.0168959169564785e-33,
+     -4.316570343539137e-30,
+     -1.9372836637652048e-26
+    ],
+    [
+     -7.976036037351514e-34,
+     -1.6428685987288607e-33,
+     -2.677756190945573e-33,
+     -1.1518110868995266e-32,
+     4.773793462686109e-33,
+     -2.7009050160372935e-34,
+     -2.3428222825479932e-31,
+     1.7992825404770363e-27
+    ],
+    [
+     -1.5886551612609772e-35,
+     2.185624336126821e-34,
+     1.6469857136825273e-34,
+     3.0168959169564785e-33,
+     -2.7009050160372935e-34,
+     4.768576894993227e-33,
+     -4.3967989910219435e-31,
+     -3.302472181730684e-26
+    ],
+    [
+     1.3026731753255609e-31,
+     1.140453797313364e-31,
+     2.7229751127981357e-31,
+     -4.316570343539137e-30,
+     -2.3428222825479932e-31,
+     -4.3967989910219435e-31,
+     4.07171755068973e-28,
+     3.0206779108035473e-24
+    ],
+    [
+     1.0685457896916262e-28,
+     -1.807564375785454e-27,
+     -1.3940773038416358e-27,
+     -1.9372836637652048e-26,
+     1.7992825404770363e-27,
+     -3.302472181730684e-26,
+     3.0206779108035473e-24,
+     2.2923727493762507e-19
+    ]
+   ],
+   "form": "G8_gtr_glive",
+   "interval_pool_by_format_card": {
+    "fp16|a3": {
+     "n": 104,
+     "q95_abs_w": 0.336221400503099,
+     "rms_w": 0.16248182079755005
+    },
+    "fp16|c1": {
+     "n": 125,
+     "q95_abs_w": 0.3969546600649181,
+     "rms_w": 0.1883915408581653
+    },
+    "fp32|a3": {
+     "n": 143,
+     "q95_abs_w": 0.47330157301775366,
+     "rms_w": 0.24748829708177583
+    },
+    "fp32|c1": {
+     "n": 143,
+     "q95_abs_w": 0.4615557475677707,
+     "rms_w": 0.21407434292338107
+    }
+   },
+   "n_kinds": 253,
+   "n_rows": 515,
+   "terms": [
+    "mult",
+    "add32",
+    "add16",
+    "bus",
+    "rest",
+    "clk",
+    "gtr",
+    "glive"
+   ]
+  },
+  "int8": {
+   "band_k": 2.482883979337935,
+   "card1_scale_by_format": {
+    "int8": 0.9734515623123359
+   },
+   "card_term": "C0_M5_E78E82_family",
+   "coef_J": [
+    3.3653167707232137e-15,
+    1.6323132926210542e-14,
+    1.8830414258077968e-15,
+    -2.3381342672512762e-14
+   ],
+   "coef_fJ": [
+    3.3653167707232137,
+    16.32313292621054,
+    1.8830414258077968,
+    -23.381342672512762
+   ],
+   "cov_J2": [
+    [
+     2.4707271155768114e-32,
+     -2.5470952782523087e-31,
+     -3.5576450528796766e-33,
+     -1.8872761173263565e-31
+    ],
+    [
+     -2.5470952782523087e-31,
+     9.619683368926731e-30,
+     -3.7761162479917184e-31,
+     -2.1070587199599627e-29
+    ],
+    [
+     -3.5576450528796766e-33,
+     -3.7761162479917184e-31,
+     3.4756037258638093e-32,
+     1.059433213892312e-30
+    ],
+    [
+     -1.8872761173263565e-31,
+     -2.1070587199599627e-29,
+     1.059433213892312e-30,
+     9.684871364129014e-29
+    ]
+   ],
+   "form": "J8_b138",
+   "interval_pool_by_format_card": {
+    "int8|a3": {
+     "n": 64,
+     "q95_abs_w": 0.4012060688554824,
+     "rms_w": 0.225726964677305
+    },
+    "int8|c1": {
+     "n": 58,
+     "q95_abs_w": 0.4952209256341801,
+     "rms_w": 0.254605017172549
+    }
+   },
+   "n_kinds": 57,
+   "n_rows": 122,
+   "terms": [
+    "nets_nobus",
+    "bus",
+    "clk",
+    "b138"
+   ]
+  }
+ },
+ "heat": {
+  "band_k": 1.9496925528240727,
+  "coef": {
+   "ST|aifoundry1-c1": -0.15484974391670606,
+   "ST|aifoundry3": -0.04902433151669239,
+   "S|aifoundry1-c1": 0.1151065674167393,
+   "S|aifoundry3": 0.1185549025545979
+  },
+  "form": "H2_per_card_runlength",
+  "interval_pool_by_format_card_c": {
+   "fp16|aifoundry1-c1": {
+    "n": 113,
+    "q95_abs_c": 0.6531819801670409,
+    "rms_c": 0.35474313504546195
+   },
+   "fp16|aifoundry3": {
+    "n": 100,
+    "q95_abs_c": 0.29481414475005496,
+    "rms_c": 0.15893881916152225
+   },
+   "fp32|aifoundry1-c1": {
+    "n": 138,
+    "q95_abs_c": 0.6970087717170056,
+    "rms_c": 0.3519224172840442
+   },
+   "fp32|aifoundry3": {
+    "n": 154,
+    "q95_abs_c": 0.35545686996824044,
+    "rms_c": 0.181280374870395
+   },
+   "int8|aifoundry1-c1": {
+    "n": 45,
+    "q95_abs_c": 0.28931561332742756,
+    "rms_c": 0.14081113100625603
+   },
+   "int8|aifoundry3": {
+    "n": 60,
+    "q95_abs_c": 0.3964450630602409,
+    "rms_c": 0.20455838002643895
+   }
+  },
+  "steady_c_per_board_w_M6": {
+   "aifoundry1-c1": {
+    "source": "no hold on this card",
+    "value": null
+   },
+   "aifoundry2": {
+    "range": [
+     0.65,
+     0.7
+    ],
+    "source": "E111 + E133, four holds, two sessions",
+    "value": 0.675
+   },
+   "aifoundry3": {
+    "source": "E97 holds (settled plateau, not a steady state by E97's test)",
+    "value": 0.9
+   }
+  },
+  "step_response_M6": {
+   "rms_fraction": 0.00186132535237746,
+   "tau_s": [
+    1.005,
+    15.98,
+    138.21229024038436,
+    1500.0
+   ],
+   "weights": [
+    0.1475254229632836,
+    0.010046642157033103,
+    0.8323210084796046,
+    0.010103839662738784
+   ]
+  },
+  "terms": [
+   "S|card",
+   "ST|card"
+  ],
+  "window": "the kinds harness: a run of T_run s (4.5 s typical) from launch; ST = S x (T_run - 4.5)"
+ },
+ "memory_path_E139": {
+  "out_of_sample": "E132's frozen +0.185 W per image predicted E139 to 0.028 W rms (E139 README)",
+  "pj_per_encoded_toggle": 0.46,
+  "scope": "DRAM-streamed images (E132/E139's memory-path harness); zero for a kinds tile, which is a resident loop and moves no image",
+  "w_per_encoded_image": 0.185
+ },
+ "units": "power: W over the type's own zeros at 600 MHz on aifoundry3 card 0's footing (card 1: x card1_scale_by_format); heat: C over the run's launch reading, S = board W over idle"
+}
