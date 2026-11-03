@@ -321,7 +321,8 @@ Read [Terms](#terms) first.
    on aifoundry1's card 1, and power to 0.15–0.36 W rms by card and format, its error bars holding by being wider rather than its
    errors smaller, with no gain over M6 shown on card 1 (E141, E142); under aifoundry2's governor it predicts a burst's clock to
    about 7 MHz where the governor acts (E143). Heat over minutes was predicted blind to 0.04–0.18 °C rms on aifoundry3 and
-   0.37–0.76 °C under aifoundry2's governor (Q138(t), E144). A large GEMM's C stores cost no time where C stays in the L3 (E146);
+   0.37–0.76 °C under aifoundry2's governor (Q138(t), E144, E144b). A large GEMM's C stores cost no time where C stays in the L3,
+   and its die held to about 1 °C rms in bursts but ran 3.6–4.6 °C over the frozen law, sustained, on a shape never run (E146);
    int8's B side on a second card matches the first, its structural verdict still open (E145); every open single-bit position is
    priced (E147); and on an A100 and an A10G under their caps power follows the operand bits as on the ET-SoC-1, in kind, the
    model's pairing excepted (E149, E150). →

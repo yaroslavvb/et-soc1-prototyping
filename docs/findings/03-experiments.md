@@ -6674,7 +6674,7 @@ E136's binary unchanged; **25.1 card-minutes**: the smoke, two stop tests on liv
   after 56 MB.
 - **The store's energy:** R4 FAIL ×4; the store-energy term made burst power worse, P0's **2.73 W** rms against PS's **3.09 W** on
   the 36 cells outside the fit shapes; post hoc, with each shape at its own time per op, a store step costs **92 ± 86 µJ** for
-  random C and 18 ± 45 µJ for zeros, both consistent with zero (C1).
+  random C and 18 ± 45 µJ for zeros, ± 1 s.e. over 12 per-pass contrasts (labelled Tue 3 Nov 2026, after the integration's verifier), both consistent with zero (C1).
 - **Heat:** E136's burst die law held out of sample, **0.98 °C rms**, 102 of 102 within 3 °C (R6); `F6`'s sustained die ran
   3.6–4.6 °C over it, and the governor held its fp32 random at 745 MHz at the 65 °C trip where G2 said 800.
 - **Found while building it:** E136's `protocol.json` named its stops `die_c`, `board_w` and `board_samples`, keys `run_hpl.py`'s
