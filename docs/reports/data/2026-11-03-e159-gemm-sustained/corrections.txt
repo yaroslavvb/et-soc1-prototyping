@@ -1,0 +1,61 @@
+E159 CORRECTIONS AFTER VERIFICATION (post hoc, labelled). Errors are measured - predicted. No registered number or verdict changes.
+
+C1. H1 FP32 RANDOM'S CLOCK MISS (post hoc): G3, and G3 given the hold's first second, both say 800 MHz (the hold is unheld)
+  measured 784.46 MHz, 55.25 W, 62.09 C
+  G3 (registered)           799.98 MHz  58.93 W  63.46 C  error  -15.53 MHz  -3.68 W  -1.37 C
+  G3 given the first second 800.00 MHz  51.35 W  59.69 C  error  -15.54 MHz  +3.90 W  +2.40 C
+  the window: 386 in-kernel samples, 91.5% at 800 MHz, the rest at 618.2 MHz on average (800 x 0.915 + 618.2 x 0.085 = 784.5 MHz, the measured mean 784.5)
+  the hold: 7 runs of samples under 800 MHz (76 of 1022); 5 start 0.30-0.34 s into a process, 2 mid-process at 3.22, 4.43 s
+  every hold G3 calls unheld (800 MHz): its clock error is the window's samples under 800 MHz
+    H1-fp32-randn   G3  799.98 MHz  error  -15.53 MHz   91.5% at 800 MHz
+    H1-int8-full    G3  800.00 MHz  error   +0.00 MHz  100.0% at 800 MHz
+    H2-int8-full    G3  800.00 MHz  error   -5.70 MHz   96.9% at 800 MHz
+    H3-int8-full    G3  800.00 MHz  error   -4.63 MHz   97.4% at 800 MHz
+    H1-fp32-zeros   G3  800.00 MHz  error   -5.14 MHz   97.2% at 800 MHz
+    H2-fp32-zeros   G3  800.00 MHz  error   -5.66 MHz   96.9% at 800 MHz
+    H3-fp32-zeros   G3  800.00 MHz  error   -5.12 MHz   97.2% at 800 MHz
+  attribution as registered: P0's level (p800 - P0(800) = -7.20 W, outside 4 W)  (the label stays)
+
+C2. H1'S FIRST-SECOND DEFICIT AND ITS COLD START (post hoc)
+  H1 fp32 random: the session's first hold, after the 30 s rest; start die 46.0 C; p800 49.885 W against P0(800) 57.09 W: -7.205 W
+  the other eight holds started at 52-58 C
+  E136 (P0's fit set): 20 bursts, start die 47-56 C, median 53.0
+  E146 (P0 scored): 102 bursts, start die 47-56 C, median 54.0
+  E146's 102 bursts: the 2 that started below 50 C read -4.38 W (L1-fp32-randn, 48 C), -3.88 W (L1-fp32-zeros, 47 C), mean -4.13 W; but its largest deficits started warm: -15.52 W (L1-fp32-randn, 53 C), -10.68 W (L8-fp32-randn, 53 C), -5.18 W (D8-fp32-randn, 53 C), -5.13 W (L8-int8-full, 52 C)
+  inside H1 at 800 MHz, rule A (Q139(q) C1's rule: from 2 s after the hold's first process): n 937, die 48-64 C, board 51.10 -> 57.46 W (first 20 / last 40 samples), slope 0.493 W/C; the line meets P0(800) at 63.3 C
+  inside H1 at 800 MHz, rule B (the verifier's: each process's first 0.6 s left out): n 924, die 47-64 C, board 49.68 -> 57.46 W (first 20 / last 40 samples), slope 0.500 W/C; the line meets P0(800) at 62.9 C
+  beside it: Q139(q) C1's slope inside the four unheld GEMM-pattern runs at 800 MHz, median 0.502 (0.414-0.556); Q138(t)'s idle law 0.442 W/C
+  the part of the 7.21 W deficit a start-die term carries, P0's reference die taken as the median start of its bursts (53 C E136, 54 C E146):
+    way 1, H1's first second carried to that die at k = 0.442, 0.493, 0.500 W/C: 3.09-4.00 W
+    way 2, H1's in-hold line read at that die, the rest to P0(800) is the level: 2.13-2.74 W
+  so a start-die term carries about 2.1-4.0 W of it, and the line law and the L3 about 3.2-5.1 W
+  for context, the frozen nominal G3 for H1 fp32 random: from a 57 C gate 748.8 MHz (held), from a 46 C rest start 799.2 MHz; the registered primary from the measured start: 799.98 MHz
+
+C3. E159 BLIND BESIDE Q139(q)'S NESTED FIGURES (Q139(q)'s posthoc-fix-g3.json subsets)
+  56 GEMM-pattern runs: G3 nested 10.754 MHz, 1.855 W, 0.716 C (E136's law 37.681, 3.706, 1.387); E159 blind / nested: clock 0.807, board 1.046, die 1.377
+  14 large GEMMs (E136, E146): G3 nested 12.818 MHz, 1.208 W, 0.685 C (E136's law 28.027, 2.169, 1.768); E159 blind / nested: clock 0.677, board 1.606, die 1.439
+  E159 blind: 8.678 MHz, 1.94 W, 0.986 C
+
+C4. THE POST'S FIRST SENTENCE: what was on record before the run, and what the registered primary computed after it
+  H2-fp32-randn: measured 697.7 MHz; frozen nominal G3 697.4 MHz from a 57 C gate (741.0 from a 46 C start); the registered primary, from the hold's measured start (56.0 C) and anchor, 708.0 MHz
+  H3-fp32-randn: measured 649.7 MHz; frozen nominal G3 649.4 MHz from a 57 C gate (683.9 from a 46 C start); the registered primary, from the hold's measured start (57.0 C) and anchor, 663.6 MHz
+  as registered: clock FAIL (8 of 9), board FAIL (5 of 9), die FAIL (6 of 9) (bands 15 MHz, 2 W, 1 C)
+
+C5. ZEROS (measured - predicted; a negative error means G3 reads high)
+  H1-fp32-zeros: G3 board error -2.447 W (G3 high); p800 - P0(800) -1.545 W -> 'not P0's level by the rule (p800 - P0(800) = -1.55 W)'; given the first second -0.820 W; die error -1.622 C, the chain on the measured trace -0.497 C
+  H2-fp32-zeros: G3 board error -2.486 W (G3 high); p800 - P0(800) -2.090 W -> 'not P0's level by the rule (p800 - P0(800) = -2.09 W)'; given the first second -0.286 W; die error -1.379 C, the chain on the measured trace -0.154 C
+  H3-fp32-zeros: G3 board error -2.425 W (G3 high); p800 - P0(800) -1.700 W -> 'not P0's level by the rule (p800 - P0(800) = -1.70 W)'; given the first second -0.636 W; die error -0.971 C, the chain on the measured trace +0.298 C
+
+C6. THE SESSION'S SPTRACE COPIES AND RESIDENCY ATTEMPTS (all READ or NOT SENT; no WRITE)
+  records: 15 per run (smoke and s1) + 6 at session start and end ({'smoke': 2, 'stoptest-board': 1, 'stoptest-die': 1, 's1': 2}) = 21
+  sptrace rc 0: 21; residency rc 2 with no output (refused before the device opens, nothing sent): 21; config rc 0: 21
+
+C7. THE RECORDS: the predictions file's hash on the box, and the board stop test's docstring
+  smoke           predictions_sha256_here None; registered 497497cb1d2b...; protocol.json 45e94140daff... = d8badb73's: True
+  stoptest-board  predictions_sha256_here None; registered 497497cb1d2b...; protocol-stoptest-board.json f064e8e81ec7... = d8badb73's: True
+  stoptest-die    predictions_sha256_here None; registered 497497cb1d2b...; protocol-stoptest-die.json 57640704dee6... = d8badb73's: True
+  s1              predictions_sha256_here None; registered 497497cb1d2b...; protocol.json 45e94140daff... = d8badb73's: True
+  predictions-e159.json on the Intel, where the scorer ran: 497497cb1d2b...; results.json's predictions_sha256 497497cb1d2b...; equal: True
+  queue_e159.py line 22: Session stoptest-board runs protocol-stoptest-board.json (the same runner, watcher and sampler; board_cap_w 30 W on 3 samples; one 6 s burst of D8
+  protocol-stoptest-board.json runs ['H1-fp32-zeros']; stoptest-board/tel: ['STOPTEST-00-H1-fp32-zeros-r1.jsonl.gz']
+

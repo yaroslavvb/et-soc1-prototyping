@@ -1,0 +1,408 @@
+{
+ "what": "E159 corrections after verification, post hoc and labelled; no registered number or verdict changes",
+ "date": "2026-11-03",
+ "C1": {
+  "measured": {
+   "mhz": 784.4559585492228,
+   "w": 55.25383419689119,
+   "die": 62.090673575129536
+  },
+  "G3": {
+   "mhz": 799.9824501718167,
+   "w": 58.93347777837159,
+   "die": 63.46284086339188
+  },
+  "G3_err": {
+   "mhz": -15.52649162259388,
+   "w": -3.6796435814803985,
+   "die": -1.3721672882623466
+  },
+  "G3_given_p800": {
+   "mhz": 799.9999999999997,
+   "w": 51.353131953108345,
+   "die": 59.68679287779586
+  },
+  "G3_given_p800_err": {
+   "mhz": -15.544041450776831,
+   "w": 3.9007022437828454,
+   "die": 2.403880697333676
+  },
+  "window": {
+   "samples": 386,
+   "share_at_800": 0.915,
+   "mean_below_800": 618.2,
+   "lowest": 600,
+   "mean": 784.5,
+   "levels": [
+    600,
+    700,
+    800
+   ]
+  },
+  "dips": {
+   "n_runs": 7,
+   "since_own_process_s": [
+    0.32,
+    0.34,
+    0.32,
+    3.22,
+    0.3,
+    0.33,
+    4.43
+   ],
+   "at_process_start": 5,
+   "mid_process_s": [
+    3.22,
+    4.43
+   ]
+  },
+  "window_mean_from_shares": 784.547,
+  "unheld_holds": [
+   {
+    "hold": "H1-fp32-randn",
+    "G3_mhz": 799.982,
+    "err_mhz": -15.526,
+    "share_at_800": 0.915,
+    "mean_below_800": 618.2
+   },
+   {
+    "hold": "H1-int8-full",
+    "G3_mhz": 800.0,
+    "err_mhz": 0.0,
+    "share_at_800": 1.0,
+    "mean_below_800": null
+   },
+   {
+    "hold": "H2-int8-full",
+    "G3_mhz": 800.0,
+    "err_mhz": -5.699,
+    "share_at_800": 0.969,
+    "mean_below_800": 616.7
+   },
+   {
+    "hold": "H3-int8-full",
+    "G3_mhz": 800.0,
+    "err_mhz": -4.627,
+    "share_at_800": 0.974,
+    "mean_below_800": 620.0
+   },
+   {
+    "hold": "H1-fp32-zeros",
+    "G3_mhz": 800.0,
+    "err_mhz": -5.141,
+    "share_at_800": 0.972,
+    "mean_below_800": 618.2
+   },
+   {
+    "hold": "H2-fp32-zeros",
+    "G3_mhz": 800.0,
+    "err_mhz": -5.656,
+    "share_at_800": 0.969,
+    "mean_below_800": 616.7
+   },
+   {
+    "hold": "H3-fp32-zeros",
+    "G3_mhz": 800.0,
+    "err_mhz": -5.115,
+    "share_at_800": 0.972,
+    "mean_below_800": 618.2
+   }
+  ],
+  "registered_attribution_mhz": "P0's level (p800 - P0(800) = -7.20 W, outside 4 W)"
+ },
+ "C2": {
+  "H1_die_start": 46.0,
+  "H1_p800": 49.885,
+  "P0_800": 57.09,
+  "p800_minus_P0_800": -7.205,
+  "other_holds_start_c": [
+   52.0,
+   58.0
+  ],
+  "E136_burst_starts": {
+   "n": 20,
+   "min": 47,
+   "max": 56,
+   "median": 53.0
+  },
+  "E146_burst_starts": {
+   "n": 102,
+   "min": 47,
+   "max": 56,
+   "median": 54.0
+  },
+  "E146_cold_bursts": [
+   {
+    "cell": "L1-fp32-randn",
+    "start_c": 48,
+    "p800_minus_P0": -4.38
+   },
+   {
+    "cell": "L1-fp32-zeros",
+    "start_c": 47,
+    "p800_minus_P0": -3.88
+   }
+  ],
+  "E146_largest_deficits": [
+   {
+    "cell": "L1-fp32-randn",
+    "start_c": 53,
+    "p800_minus_P0": -15.52
+   },
+   {
+    "cell": "L8-fp32-randn",
+    "start_c": 53,
+    "p800_minus_P0": -10.68
+   },
+   {
+    "cell": "D8-fp32-randn",
+    "start_c": 53,
+    "p800_minus_P0": -5.18
+   },
+   {
+    "cell": "L8-int8-full",
+    "start_c": 52,
+    "p800_minus_P0": -5.13
+   }
+  ],
+  "H1_slope_at_800MHz": {
+   "A (Q139(q) C1's rule: from 2 s after the hold's first process)": {
+    "n": 937,
+    "die_min": 48,
+    "die_max": 64,
+    "slope_W_per_C": 0.493,
+    "intercept": 25.887,
+    "board_first20_w": 51.103,
+    "board_last40_w": 57.46,
+    "die_where_line_meets_P0_800_c": 63.292
+   },
+   "B (the verifier's: each process's first 0.6 s left out)": {
+    "n": 924,
+    "die_min": 47,
+    "die_max": 64,
+    "slope_W_per_C": 0.5,
+    "intercept": 25.628,
+    "board_first20_w": 49.678,
+    "board_last40_w": 57.46,
+    "die_where_line_meets_P0_800_c": 62.924
+   }
+  },
+  "Q139q_C1_unheld_slopes": {
+   "n": 4,
+   "median": 0.502,
+   "min": 0.414,
+   "max": 0.556,
+   "runs": [
+    {
+     "session": "E126",
+     "cell": "c16r8-fp32-zeros",
+     "slope_W_per_C": 0.414,
+     "n": 711,
+     "die_span_C": 3.0,
+     "window_mhz": 800.0,
+     "unheld": true
+    },
+    {
+     "session": "E126",
+     "cell": "c16s-fp16-randn",
+     "slope_W_per_C": 0.524,
+     "n": 756,
+     "die_span_C": 7.0,
+     "window_mhz": 800.0,
+     "unheld": true
+    },
+    {
+     "session": "E136",
+     "cell": "g4k-fp32-randn",
+     "slope_W_per_C": 0.556,
+     "n": 728,
+     "die_span_C": 11.0,
+     "window_mhz": 800.0,
+     "unheld": true
+    },
+    {
+     "session": "E136",
+     "cell": "g4k-fp32-sparse50",
+     "slope_W_per_C": 0.48,
+     "n": 728,
+     "die_span_C": 4.0,
+     "window_mhz": 800.0,
+     "unheld": true
+    }
+   ]
+  },
+  "Q138t_idle_slope": 0.442,
+  "start_die_share_w": {
+   "way1_first_second": [
+    3.094,
+    4.0
+   ],
+   "way2_in_hold_line": [
+    2.131,
+    2.743
+   ],
+   "range": [
+    2.131,
+    4.0
+   ],
+   "rest_line_law_and_L3": [
+    3.205,
+    5.074
+   ]
+  },
+  "nominal_G3_mhz": {
+   "gate57": 748.8,
+   "rest_46C": 799.2
+  }
+ },
+ "C3": {
+  "E159_G3_blind": {
+   "mhz": 8.678,
+   "w": 1.94,
+   "die": 0.986
+  },
+  "all": {
+   "G3_nested": {
+    "mhz": 10.754,
+    "w": 1.855,
+    "die": 0.716
+   },
+   "E136_law": {
+    "mhz": 37.681,
+    "w": 3.706,
+    "die": 1.387
+   },
+   "E159_over_nested": {
+    "mhz": 0.807,
+    "w": 1.046,
+    "die": 1.377
+   }
+  },
+  "large_gemms_E136_E146": {
+   "G3_nested": {
+    "mhz": 12.818,
+    "w": 1.208,
+    "die": 0.685
+   },
+   "E136_law": {
+    "mhz": 28.027,
+    "w": 2.169,
+    "die": 1.768
+   },
+   "E159_over_nested": {
+    "mhz": 0.677,
+    "w": 1.606,
+    "die": 1.439
+   }
+  }
+ },
+ "C4": {
+  "H2-fp32-randn": {
+   "measured_mhz": 697.674,
+   "primary_mhz": 707.997,
+   "nominal_gate57_mhz": 697.4,
+   "nominal_rest46_mhz": 741.0,
+   "die_start": 56.0
+  },
+  "H3-fp32-randn": {
+   "measured_mhz": 649.744,
+   "primary_mhz": 663.586,
+   "nominal_gate57_mhz": 649.4,
+   "nominal_rest46_mhz": 683.9,
+   "die_start": 57.0
+  },
+  "verdict_G3": {
+   "mhz": "FAIL (8 of 9)",
+   "w": "FAIL (5 of 9)",
+   "die": "FAIL (6 of 9)"
+  }
+ },
+ "C5": {
+  "H1-fp32-zeros": {
+   "G3_w_err": -2.447,
+   "p800_minus_P0_800": -1.545,
+   "attribution_w": "not P0's level by the rule (p800 - P0(800) = -1.55 W)",
+   "G3_given_p800_w_err": -0.82,
+   "G3_die_err": -1.622,
+   "chain_die_err": -0.497
+  },
+  "H2-fp32-zeros": {
+   "G3_w_err": -2.486,
+   "p800_minus_P0_800": -2.09,
+   "attribution_w": "not P0's level by the rule (p800 - P0(800) = -2.09 W)",
+   "G3_given_p800_w_err": -0.286,
+   "G3_die_err": -1.379,
+   "chain_die_err": -0.154
+  },
+  "H3-fp32-zeros": {
+   "G3_w_err": -2.425,
+   "p800_minus_P0_800": -1.7,
+   "attribution_w": "not P0's level by the rule (p800 - P0(800) = -1.70 W)",
+   "G3_given_p800_w_err": -0.636,
+   "G3_die_err": -0.971,
+   "chain_die_err": 0.298
+  }
+ },
+ "C6": {
+  "per_run": 15,
+  "session_start_end": 6,
+  "by_session": {
+   "smoke": 2,
+   "stoptest-board": 1,
+   "stoptest-die": 1,
+   "s1": 2
+  },
+  "total": 21,
+  "sptrace_rc0": 21,
+  "residency_rc2_empty": 21,
+  "config_rc0": 21
+ },
+ "C7": {
+  "sessions": {
+   "smoke": {
+    "predictions_sha256_here": null,
+    "predictions_sha256_registered": "497497cb1d2b1eb669a6c551895981ac4e997327fdd428017d3becb633b81255",
+    "protocol": "protocol.json",
+    "protocol_sha256": "45e94140daffed99a773669e32b094fbb0ad9f05d9097b2523befa4394bee980",
+    "protocol_sha256_at_d8badb73": "45e94140daffed99a773669e32b094fbb0ad9f05d9097b2523befa4394bee980"
+   },
+   "stoptest-board": {
+    "predictions_sha256_here": null,
+    "predictions_sha256_registered": "497497cb1d2b1eb669a6c551895981ac4e997327fdd428017d3becb633b81255",
+    "protocol": "protocol-stoptest-board.json",
+    "protocol_sha256": "f064e8e81ec7d9f87699fa6bdd71cd949c3b7dbf9afe7933b05168ff953de812",
+    "protocol_sha256_at_d8badb73": "f064e8e81ec7d9f87699fa6bdd71cd949c3b7dbf9afe7933b05168ff953de812"
+   },
+   "stoptest-die": {
+    "predictions_sha256_here": null,
+    "predictions_sha256_registered": "497497cb1d2b1eb669a6c551895981ac4e997327fdd428017d3becb633b81255",
+    "protocol": "protocol-stoptest-die.json",
+    "protocol_sha256": "57640704dee6e4e578c5290608e5968ffbfe3c7baaa8e54b2224bc121b769ba8",
+    "protocol_sha256_at_d8badb73": "57640704dee6e4e578c5290608e5968ffbfe3c7baaa8e54b2224bc121b769ba8"
+   },
+   "s1": {
+    "predictions_sha256_here": null,
+    "predictions_sha256_registered": "497497cb1d2b1eb669a6c551895981ac4e997327fdd428017d3becb633b81255",
+    "protocol": "protocol.json",
+    "protocol_sha256": "45e94140daffed99a773669e32b094fbb0ad9f05d9097b2523befa4394bee980",
+    "protocol_sha256_at_d8badb73": "45e94140daffed99a773669e32b094fbb0ad9f05d9097b2523befa4394bee980"
+   }
+  },
+  "predictions_sha256_on_the_intel": "497497cb1d2b1eb669a6c551895981ac4e997327fdd428017d3becb633b81255",
+  "predictions_sha256_in_results": "497497cb1d2b1eb669a6c551895981ac4e997327fdd428017d3becb633b81255",
+  "docstring": {
+   "lines": [
+    [
+     22,
+     "Session stoptest-board runs protocol-stoptest-board.json (the same runner, watcher and sampler; board_cap_w 30 W on 3 samples; one 6 s burst of D8"
+    ]
+   ],
+   "protocol_runs": [
+    "H1-fp32-zeros"
+   ],
+   "tel_files": [
+    "STOPTEST-00-H1-fp32-zeros-r1.jsonl.gz"
+   ]
+  }
+ }
+}

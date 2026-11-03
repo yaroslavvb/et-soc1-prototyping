@@ -19,6 +19,19 @@ post in #community-lab, message `1567153765390487573`, rewritten at 05:33 PST to
 and at 05:55 PST to drop that clause, the two other cards' clauses kept word for word. **18.95 card-minutes** (05:33:58 to 05:52:55 PST): the smoke, the two
 stop-path tests and one session of ten runs (17.8 min), none refused, none cut, no stop fired.*
 
+*Corrected after verification (a dated note, Tue 3 Nov 2026, about 06:35-06:50 PST; desk only: no card, no device command,
+nothing re-run). An independent verifier re-derived the reduction (0 differences), the post hoc file (byte-identical), the
+nine window means from the raw telemetry and every command's class (no WRITE), and found the registered verdicts sound. It
+found seven minor faults in what this README draws from them. None changes a measured, frozen or registered number or
+verdict. Each is corrected by a dated note beside the text it concerns, the text itself left as it was, and set out in full in
+[§ Corrections after verification](#corrections-after-verification-tue-3-nov-2026) at the end. The numbers are printed by
+[`corrections_e159.py`](corrections_e159.py) → [`corrections.txt`](corrections.txt) ([`corrections.json`](corrections.json)),
+labelled post hoc. **C1:** `H1` fp32 random's clock FAIL, the only clock FAIL, is the governor's dips to 600-700 MHz (the
+clock-mapping term), not P0's level. G3 calls the hold unheld at 800 MHz and, given the hold's own first second, still does
+(−15.5 MHz), while the board over-corrects to +3.9 W. **C2:** `H1`'s 7.2 W first-second deficit is confounded by its cold
+start. It was the session's first hold, at 46 °C, and every burst behind P0 started at 47-56 °C. About 3 W of it (2.1-4.0 W)
+is a start-die term P0 lacks; only the rest (3.2-5.1 W) is the line law and the L3. C3-C7 are in the section.*
+
 ## The answer
 
 **Blind, on nine sustained holds of three GEMM shapes nobody had run, G3 reads the governed clock to 8.7 MHz, the board to 1.94 W and the window die to
@@ -40,6 +53,20 @@ subset (the six fp32 random and int8 full holds) it is 5 of 6 on each, and one h
 - **Heat given the watts is right on every hold.** Q138(t)'s frozen chain, run on the measured board trace, reads all nine window dies within 1 °C, 0.41 °C
   rms [0.21, 0.58] (post hoc interval). Every die miss of G3 is the power path, not heat.
 - **int8 full is inside every band on every shape** (clock 0 to −5.7 MHz, board −1.10 to +0.79 W, die −0.74 to +0.82 °C).
+
+*(Dated note, Tue 3 Nov 2026, after verification, C1 and C2.)* Read the `H1` bullet with two corrections, both post hoc.
+**(a) Its clock miss is not P0's level.** G3 calls `H1` unheld at 800 MHz, and given the hold's own first second it still says
+800 MHz. The clock error stays at −15.5 MHz, while the board error flips from −3.68 to **+3.90 W** and the die error from −1.37
+to +2.40 °C. A lower P0 cannot lower G3's clock. The 784.5 MHz comes from the window's samples under 800 MHz: 8.5% of them,
+at 618 MHz on average, in seven runs. Five start 0.30-0.34 s into a process and two mid-process (3.22 and 4.43 s). That is
+the clock-mapping term (the governor's dips), as on every other hold G3 calls unheld (0 to −5.7 MHz). The registered label
+"P0's level" stays. **(b) The 7.2 W is confounded by `H1`'s cold start.** It was the session's first hold, at **46 °C** after
+the rest reading; the other eight started at 52-58 °C. Every burst P0 was fitted or scored on started at 47-56 °C (E136's 20,
+median 53 °C; E146's 102, median 54 °C). P0 is a first-second law with no die term: G3 applies it at each run's own start die.
+Inside `H1` at 800 MHz the board rose **0.49-0.50 W per °C** (47 → 64 °C, 49.7 → 57.5 W), as Q139(q) C1 found inside unheld
+GEMM runs (median 0.50) and near Q138(t)'s idle 0.442; its line met P0(800) at about 63 °C. So **about 3 W of the 7.2 W
+(2.1-4.0 W, by the two ways in `corrections.txt` C2) is a start-die term P0 lacks**. Only the rest, about 4 W (3.2-5.1 W), is
+the line law and the L3. [§ Corrections, C1, C2](#corrections-after-verification-tue-3-nov-2026).
 
 | hold | measured: MHz, board W, window die °C | **G3** (frozen, from the hold's own start) | G3 error | inside 15 MHz / 2 W / 1 °C | E136's law | E136's law error | chain on the measured trace: die (error) | p800 − P0(800) |
 |---|---|---|---|---|---|---|---|---|
@@ -90,6 +117,13 @@ So the critic's rank-3 test, as registered, is **a FAIL of G3 on every quantity*
 board (2.4-2.5 W, every shape alike). It is also **a clear gain over E136's law**: the law's misses on the fp32 random holds are five times G3's in clock
 and three times in board power.
 
+*(Dated note, Tue 3 Nov 2026, after verification, C1, C2 and C5.)* "The misses on one fp32 random shape (`H1`, P0's level)"
+holds as the registered label. Post hoc, though, `H1`'s clock miss is the governor's dips (C1), and about 3 W of its
+first-second deficit is its 46 °C start (C2). "Zeros' board (2.4-2.5 W, every shape alike)" is G3 reading high: measured −
+predicted −2.43 to −2.49 W. By the registered rule it is not P0's level (the first second 1.55-2.09 W under P0(800), inside the
+4 W band). Post hoc, given the first second the error falls to 0.29-0.82 W, so most of it is the level (C5).
+[§ Corrections](#corrections-after-verification-tue-3-nov-2026).
+
 ## What E159 does to predicting power and heat
 
 - **The term tested** is a governed large GEMM's sustained power and clock path: G3 (Q139(q)) takes the burst law P0 as the power at each clock, an
@@ -114,6 +148,27 @@ and three times in board power.
 
   The next model term is P0's level per shape (zeros included) and the governor's clock in and between processes.
 
+*(Dated note, Tue 3 Nov 2026, after verification, C1-C3 and C5.)* Three readings here go further than the data.
+- **(a) Q139(q)'s nested figures.** Its 10.8 MHz, 1.86 W and 0.72 °C are over 56 GEMM-pattern runs, 42 of them E119's and
+  E126's arms, not large GEMMs (Q139(q) C2). Like for like, on its 14 large GEMMs it read **12.8 MHz, 1.21 W and 0.69 °C**.
+  Against those, E159's blind board (1.94 W) is about 1.6 times as large and its die (0.99 °C) about 1.4 times, while its clock
+  (8.7 MHz) is better. Against the 56 runs, the clock and board are at that level and the die is worse.
+- **(b) "What remains is P0's per-shape level"** needs two corrections. About 3 W (2.1-4.0 W) of `H1`'s 7.2 W first-second
+  deficit is its cold start (C2), and its clock FAIL is not the level at all (C1). Given the first second, board and die improve
+  (1.45 W, 0.86 °C) but the clock gets worse (10.9 MHz), as Q139(q)'s C1 said it would: the clock's misses are the dips and the
+  held-state mapping, not the level. Zeros' board miss is G3 reading high, not P0's level by the registered rule; most of it
+  is the level post hoc (C5).
+- **(c) The next terms, in order (post hoc):**
+  1. a reference die for P0, at the leakage measured inside runs (0.44-0.50 W/°C). It may also let G3 drop its effective
+     k = 0.1 W/°C, which Q139(q) C1 found offsets P0's over-read of first seconds (a hypothesis, not tested here);
+  2. the governor's clock in and between processes (the dips: −15.5 MHz on `H1`, 0 to −5.7 MHz on every other hold G3 calls unheld;
+     10-14 MHz under G3 on the held fp32 random holds);
+  3. P0's per-shape level (rank 7: the L3's retention and set mapping) and a zeros level (0.3-0.8 W left given the first second).
+
+  Heat needs no new term.
+
+[§ Corrections, C1-C3, C5](#corrections-after-verification-tue-3-nov-2026).
+
 ## The stops, and their test on live samples
 
 The session's stops were Q139(q)'s:
@@ -128,6 +183,12 @@ Before the session the queue ran **both stops on live samples**:
 - **stoptest-die** (`abs_stop_c` 30 °C) tripped **56 ms after the first live line, before any launch**.
 
 Both ended with exit 4 and passed the queue's registered check (`aifoundry2/queue.jsonl` `stoptest_detail`, `stoptest_check`; `posthoc.txt` §6).
+
+*(Dated note, Tue 3 Nov 2026, after verification, C7.)* The board stop test ran as registered and as this section says: one
+6 s burst of `H1` fp32 zeros (`protocol-stoptest-board.json`; `stoptest-board/tel/STOPTEST-00-H1-fp32-zeros-r1`). The
+docstring of `queue_e159.py` (step 5b) still says "one 6 s burst of D8 fp32 random", E146's wording. Only the comment is
+wrong: the script runs whatever the protocol file holds, and its bytes stay as registered. A dated note sits beside it:
+[`queue_e159.py.dated-note.md`](../../../../tools/claims-v3/e159/queue_e159.py.dated-note.md).
 
 ## Device commands sent
 
@@ -147,6 +208,20 @@ What the session's records count (`posthoc.txt` §6):
 | the residency read | 15 times answered rc 2 | NOT SENT |
 | statistics reset, firmware-revisions query, any set | none | — |
 | `sparsity_host` (rgm136) | opens the ops node only: the kernel load, the DMA of the tiles and C, the launches | not device management |
+
+*(Dated note, Tue 3 Nov 2026, after verification, C6 and C7.)*
+- **The sptrace and residency counts are short.** Each ran after the 15 recorded runs and also at the 6 session start and end
+  records: smoke 2, stoptest-board 1, stoptest-die 1, s1 2 (`*/queries.jsonl`).
+  - **21 `ettelem sptrace` copies**, every one rc 0.
+  - **21 residency attempts**, every one rc 2 with no output: refused before the device opens, so nothing was sent.
+  - `posthoc.txt` §6's "15" counts the per-run records only. The class is unchanged: **no WRITE**.
+- **The predictions file was not on the box.** Every session's `e159.json` records `predictions_sha256_here` null. `run_e159.py`
+  records null when the file is absent, and the box held E159's runner chain, not Q139(q)'s files. Two things carry the freeze:
+  - the protocol sha256 each session recorded, equal to `d8badb73`'s (`protocol.json` `45e94140…`, and each stop test's own);
+  - `score_e159.py check`, run on the Intel before any scoring (`reduce_e159.py` step 1). `predictions-e159.json` there reads
+    `497497cb…`, as registered.
+
+[§ Corrections, C6, C7](#corrections-after-verification-tue-3-nov-2026).
 
 ## Safety
 
@@ -184,6 +259,17 @@ What the session's records count (`posthoc.txt` §6):
 - **For the "How well" table:** a governed large GEMM's sustained clock, blind: 41 MHz (E136's law) → 8.7 MHz (G3). Its board: 4.0 → 1.9 W. Its window die:
   1.35 → 0.99 °C. Heat given the watts: 0.41 °C.
 
+*(Dated note, Tue 3 Nov 2026, after verification, C1-C3 and C5.)* Read these two bullets with the corrections.
+- **"The rules fail on one shape's power level (`H1`, P0 7.2 W high)"** is the registered label. Post hoc, `H1`'s clock miss is
+  the governor's dips (C1), and about 3 W (2.1-4.0) of the 7.2 W is its 46 °C start, a start-die term P0 lacks (C2).
+- **"On zeros' level (2.4-2.5 W high on every shape)":** G3 reads zeros' board 2.4-2.5 W high. By the registered rule that is
+  not P0's level; post hoc, given the first second, the error falls to 0.3-0.8 W, so most of it is the level (C5).
+- **"The open part is P0's per-shape level":** the next terms are, in order, a reference die for P0, then the clock dips in and
+  between processes, then the per-shape level (rank 7) and zeros' level.
+- **For the "How well" table:** beside the blind 41 → 8.7 MHz, 4.0 → 1.9 W and 1.35 → 0.99 °C, add a like-for-like line.
+  Against Q139(q)'s 14 large GEMMs nested (12.8 MHz, 1.21 W, 0.69 °C), the blind board and die are worse and the clock better
+  (C3). As registered, G3 FAILS every per-hold rule: clock 8 of 9, board 5 of 9, die 6 of 9.
+
 **For the post, in short sentences.** Each names its card and clock.
 - On aifoundry2, under its own governor, a large matrix multiply of random fp32 numbers is held at a die temperature of about 65.5 °C, and its clock falls
   to whatever power keeps it there. For two new shapes that was 698 and 650 MHz. A model built from each shape's short-burst power and the chip's heat path
@@ -194,6 +280,21 @@ What the session's records count (`posthoc.txt` §6):
 - What the model gets wrong is the power level of some shapes. One 80 MB shape drew 7 W less in its first second than the burst law said, and multiplying
   zeros drew about 2.4 W less on every shape (`posthoc.txt` §4).
 - int8 multiplies stayed at 800 MHz and were predicted within 1.1 W and 0.8 °C (`posthoc.txt` §2).
+
+*(Dated note, Tue 3 Nov 2026, after verification, C1, C2, C4 and C5: the post's sentences as corrected. Use the first and third
+below in place of the first and fourth above, and add the second and fourth.)*
+- On aifoundry2, under its own governor, a large matrix multiply of random fp32 numbers is held at a die temperature of about
+  65.5 °C, and its clock falls to whatever power keeps it there. For two new shapes that was 698 and 650 MHz. A model frozen
+  before the run, started from each run's measured state, put them at 708 and 664 MHz (`results.json` `rows`;
+  `corrections.txt` C4).
+- As registered, the model missed its per-run bands: clock within 15 MHz on 8 of 9 runs, board within 2 W on 5 of 9, die
+  within 1 °C on 6 of 9 (`results.json` `all_scored.verdict_G3`).
+- What the model gets wrong is the power level of some runs. The session's first run, started on a cool 46 °C chip, drew 7 W
+  less in its first second than the burst law said. About 3 W of that is the cooler start, which the law has no term for
+  (post hoc). Multiplying zeros drew about 2.4 W less than the model predicted on every shape (`results.json` `rows`;
+  `corrections.txt` C2, C5).
+- That first run's clock missed by 15.5 MHz because of short dips to 600-700 MHz, most a third of a second into a process,
+  which the model does not have (post hoc, `corrections.txt` C1).
 
 ## Files
 
@@ -208,8 +309,103 @@ What the session's records count (`posthoc.txt` §6):
 The registration, the protocol and the code are in [`tools/claims-v3/e159/`](../../../../tools/claims-v3/e159/README.md). The design and the frozen
 predictions are in [`../2026-11-03-q139q-gemm-g3/`](../2026-11-03-q139q-gemm-g3/README.md).
 
+*(Dated note, Tue 3 Nov 2026, after verification.)* [`corrections_e159.py`](corrections_e159.py), [`corrections.txt`](corrections.txt)
+and [`corrections.json`](corrections.json) hold the numbers of the corrections below, post hoc. They are computed from the committed
+files: this session's records, `results.json`, `posthoc.json`, and Q139(q)'s, E136's and E146's committed results. Run it with
+`/usr/bin/python3 corrections_e159.py > corrections.txt` from this directory. The dated note on the registered queue's docstring is
+[`tools/claims-v3/e159/queue_e159.py.dated-note.md`](../../../../tools/claims-v3/e159/queue_e159.py.dated-note.md).
+
 ```bash
 /usr/bin/python3 tools/claims-v3/e159/reduce_e159.py docs/reports/data/2026-11-03-e159-gemm-sustained/aifoundry2 \
     --out docs/reports/data/2026-11-03-e159-gemm-sustained/results.json > docs/reports/data/2026-11-03-e159-gemm-sustained/reduce.txt
 cd docs/reports/data/2026-11-03-e159-gemm-sustained && /usr/bin/python3 posthoc_e159.py > posthoc.txt
 ```
+
+## Corrections after verification (Tue 3 Nov 2026)
+
+*Desk only, about 06:35-06:50 PST: no card, no device command, nothing re-run.* An independent verifier did the following:
+- re-ran `reduce_e159.py` on the committed data (0 differences in `results.json`; `reduce.txt` equal but for epoch ms) and
+  `posthoc_e159.py` (byte-identical);
+- recomputed the nine window means from the raw telemetry;
+- re-ran `dmcmd_audit.py` (GO with the reviewed exception, 19 READ sites) and re-classified every command from et-platform
+  `836a4ab` (no WRITE; no statistics reset in any of 11,317 samples);
+- checked the freeze (28 of 28 files at `91def7c4`), the order of events (`d8badb73` pushed at 05:31:51 PST, before the claim and
+  the first card touch) and the stops on live samples.
+
+It found the registered verdicts sound: G3 clock FAIL (8 of 9), board FAIL (5 of 9), die FAIL (6 of 9), the subset 5 of 6 on
+each, G3's rms below E136's law's on all three, the chain on the measured trace 0.41 °C (9 of 9 inside 1 °C), R0 PASS. Its seven
+faults, all minor, are in what the text draws from those verdicts. Every number below is printed by
+[`corrections_e159.py`](corrections_e159.py) ([`corrections.txt`](corrections.txt), [`corrections.json`](corrections.json)), and all
+of it is post hoc. No frozen file, measured number, prediction, rule or verdict changes. The registration (`tools/claims-v3/e159/`,
+`d8badb73`) is untouched; a dated note was added beside `queue_e159.py`.
+
+- **C1: `H1` fp32 random's clock FAIL, the only clock FAIL, is the governor's dips, not P0's level** (`corrections.txt` C1).
+  - **G3 calls `H1` unheld.** It predicts 799.98 MHz from the hold's measured 46 °C start, and 800.00 MHz given the hold's own
+    first second. So the clock error is −15.53 and −15.54 MHz either way, while the board error flips from −3.68 to +3.90 W and
+    the die error from −1.37 to +2.40 °C. A lower P0 makes an unheld hold more unheld, so it cannot lower G3's clock.
+  - **The 784.5 MHz is the window's dips.** 91.5% of the window's 386 in-kernel samples read 800 MHz, and the rest read 618.2 MHz
+    on average: 800 × 0.915 + 618.2 × 0.085 = 784.5. In the whole hold there are seven runs of low samples. Five start 0.30-0.34 s
+    into a process and two mid-process, at 3.22 and 4.43 s.
+  - **Every other hold G3 calls unheld** misses the same way, by 0 to −5.7 MHz with 96.9-100% of its samples at 800 MHz.
+  - **The registered attribution stays** ("P0's level", because p800 is 7.2 W from P0(800)). Post hoc, the clock part of it is
+    the clock-mapping term.
+- **C2: `H1`'s 7.2 W first-second deficit is confounded by its cold start** (`corrections.txt` C2).
+  - **The start dies.** `H1` fp32 random was the session's first hold, after the 30 s rest. Its start die was 46.0 °C and its
+    p800 49.885 W, against P0(800) 57.09 W (−7.205 W). The other eight holds started at 52-58 °C. The bursts behind P0 all started
+    warmer: E136's 20 (P0's fit set) at 47-56 °C, median 53 °C; E146's 102 (P0 scored) at 47-56 °C, median 54 °C.
+  - **Why it matters.** P0 is a first-second law with no die term, and G3 applies it at each run's own start die
+    (`g3_model.py`'s docstring).
+  - **The slope inside `H1`.** At 800 MHz the board rose 0.493 W/°C under Q139(q) C1's sample rule (48-64 °C) and 0.500 W/°C
+    under the verifier's (47-64 °C). The board went 49.7 → 57.5 W, and the line met P0(800) at 62.9-63.3 °C. Beside it, Q139(q)
+    C1's four unheld GEMM-pattern runs gave a median of 0.502 (0.414-0.556), and Q138(t)'s idle law is 0.442 W/°C.
+  - **The share.** Take P0's reference die as its bursts' median start, 53-54 °C. Carrying `H1`'s first second to that die at
+    0.442-0.500 W/°C gives 3.09-4.00 W. Reading `H1`'s in-hold line at that die, and calling the rest to P0(800) the level,
+    gives 2.13-2.74 W. So **a start-die term carries about 3 W (2.1-4.0 W) of the 7.2 W**, and the line law and the L3 carry
+    about 4 W (3.2-5.1 W).
+  - **E146 agrees in part.** Its two bursts that started below 50 °C read −4.38 W (`L1` fp32 random, 48 °C) and −3.88 W (`L1`
+    fp32 zeros, 47 °C). But its largest deficits started warm (−15.52 W, `L1` fp32 random at 53 °C; −10.68 W, `L8` fp32 random at
+    53 °C), so the start die is part of P0's level misses, not all of them.
+  - **Context.** Q139(q)'s frozen table already had G3 for `H1` fp32 random from a 46 °C start, 799.2 MHz (748.8 MHz from the
+    57 °C gate).
+- **C3: Q139(q)'s nested figures, like for like** (`corrections.txt` C3; Q139(q)'s `posthoc-fix-g3.json` `subsets`).
+  - **Over 56 GEMM-pattern runs** G3 read 10.754 MHz, 1.855 W and 0.716 °C nested. E159's blind rms is 0.81, 1.05 and 1.38 times
+    that: it matches on clock and board, and the die is worse.
+  - **Over the 14 large GEMMs (E136, E146)** G3 read 12.818 MHz, 1.208 W and 0.685 °C nested. Against that, E159's blind board
+    (1.94 W) is 1.61 times as large and its die (0.986 °C) 1.44 times, while its clock (8.68 MHz) is 0.68 times: better.
+- **C4: the post** (`corrections.txt` C4).
+  - **The FAIL goes beside the gains.** The post's sentences gave the rms gains with no registered FAIL beside them, the pattern of
+    Q138's critic fault 6. The sentence added above gives it: clock 8 of 9, board 5 of 9, die 6 of 9.
+  - **The 708 and 664 MHz were not numbers before the run.** They are `e159_g3.score`'s output, started from each hold's measured
+    state (56 and 57 °C) and anchor. What was on record before the run were the frozen nominal clocks: 697.4 and 649.4 MHz from a
+    57 °C gate (741.0 and 683.9 MHz from a 46 °C start). The sentence now says "a model frozen before the run, started from each
+    run's measured state".
+- **C5: zeros, the direction and the attribution** (`corrections.txt` C5).
+  - **G3 reads zeros' board high.** Measured − predicted is −2.447, −2.486 and −2.425 W.
+  - **By the registered rule the miss is not P0's level.** p800 − P0(800) is −1.545, −2.090 and −1.700 W, inside the 4 W band;
+    `results.json`'s attribution prints the first as −1.55 W, and the README's table −1.54 W.
+  - **Post hoc, most of it is the level.** Given the first second, the error falls to −0.820, −0.286 and −0.636 W.
+  - **The die misses** (−1.62, −1.38 °C) are the power path: the chain on the measured trace reads −0.50 and −0.15 °C.
+- **C6: the command counts** (`corrections.txt` C6).
+  - **The records.** 15 per run (smoke 5, s1 10) and 6 at session start and end (smoke 2, stoptest-board 1, stoptest-die 1, s1 2):
+    21 in all.
+  - **What they hold.** 21 `ettelem sptrace` copies, every one rc 0. 21 residency attempts, every one rc 2 with no output, so
+    nothing was sent. 21 `ettelem config` reads, every one rc 0, plus the queue's two snapshots.
+  - **The class is unchanged:** every command READ or NOT SENT, no WRITE. The README's table and `posthoc.txt` §6 said 15 for
+    sptrace and residency.
+- **C7: two record gaps, both harmless** (`corrections.txt` C7).
+  - **The predictions hash on the box.** All four sessions' `e159.json` record `predictions_sha256_here` null:
+    `predictions-e159.json` was not on the box. Each session's protocol sha256 equals `d8badb73`'s. The scorer ran on the Intel
+    behind `score_e159.py check`, where `predictions-e159.json` reads `497497cb…`, as registered and as `results.json` records.
+  - **The docstring.** `queue_e159.py`'s docstring (step 5b, line 22) names "one 6 s burst of D8 fp32 random" for the board stop
+    test. What ran is `protocol-stoptest-board.json`'s one run, `H1-fp32-zeros`, as `E159.md` says. The dated note is
+    [`queue_e159.py.dated-note.md`](../../../../tools/claims-v3/e159/queue_e159.py.dated-note.md).
+
+**What the corrections do to predicting power and heat.**
+- **No registered number moves.** Blind, the clock goes 41.2 → 8.7 MHz rms, the board 3.99 → 1.94 W and the window die
+  1.35 → 0.99 °C, and G3 FAILS all three per-hold rules.
+- **Like for like** against Q139(q)'s 14 large GEMMs nested, the blind board and die are worse and the clock better.
+- **The next power terms, in order (post hoc):**
+  1. a reference die for P0, at the leakage measured inside runs (0.44-0.50 W/°C), which may also retire G3's effective k = 0.1;
+  2. the governor's clock in and between processes;
+  3. P0's per-shape level (rank 7) and zeros' level.
+- **Heat needs no new term:** given the watts, the chain reads every hold to 0.41 °C rms.
