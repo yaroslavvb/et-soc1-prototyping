@@ -4,6 +4,7 @@
 # ccheck.py sha256 86f437b15c8604051ac08a6fddfe979754035516b34204dc6954d2b2c42b23c9 (every run below is this version); validate_ccheck.py 12842fadaef02e84
 # engine timing on this machine (one tile, ascending n 20000 and 541999 in one run): fp32 anchor_randn 9.64 s, fp16 anchor_randn 74.36 s, int8 anchor_full 0.00 s
 # bugs found while validating, both fixed before these runs: (1) the first full E104 run (571 s from a cold cache) raised at its end, two worker threads having built the engine under one temporary name (a lock, a unique name, and the engine built before the workers now); (2) validate_ccheck.py's V2 fp32 identity closed form wrote +0 where op 0's first multiply +0 x B[0][j] gives -0 for a negative B[0][j], kept by a gated zero B word: the engine was right and the exact-rational oracle agrees; the closed form now follows IEEE's zero sign and is checked against that oracle
+# sections A-D ran the files of 60b91395 (ccheck.py 86f437b1...). Section E, at the end, is the fix pass of the same morning, after verification, on the corrected files
 
 ## A. E104's 110 card reads (aifoundry1 card 1, 1 Nov 2026; 44 file tiles; every word of all 1,024 minions), through ccheck.py e104
 # python3 tools/claims-v3/ccheck/ccheck.py e104 docs/reports/data/2026-11-01-e104-c-readback/aifoundry1-c1/kinds/readback-p10402/readback.jsonl --jobs 6 --cache <scratch>/cache --out <scratch>/v-e104.json   (references cached by the earlier runs)
@@ -249,3 +250,196 @@ inside  tools/claims-v3/kinds/blind5/tiles/int8/int8.b_line_zero_one.bin
 inside  tools/claims-v3/kinds/blind5/tiles/int8/int8.gray_a.bin 
 {"tiles": 6, "inside": 6}
 exit 0
+
+## E. The fix pass after verification (Tue 3 Nov 2026, about 05:20-06:00 PST, on the Intel; no card, no ET runtime)
+# corrected files: ccheck.py sha256 2f806fe6080baeea33558ddd49fded16f2ebcb8c02f494217dfd32cc033c0a22; validate_ccheck.py b82860949b6d8f14; pick6.py b4b92dc14001609f; patch_host_ccheck.py 05a8c867f9c408c5 (it writes a patched main.cpp of sha256 5bd029ca1bc0a3f63573015d400b9e7b2d8c2e84de12a722f58bc84057edf79f); sparsity_ccheck.sh d00158d454596a83; mockrt/run_e2e.sh a1843dd0bcd0a2b4
+# engine unchanged: rtl-sim/fma_toggle_v2/accum.c sha256 dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf; references from a copy of the lane's cache plus the new tiles' runs; the Intel's load average 15-52 during these runs
+
+### E1. E104's 110 card reads again, through the corrected ccheck.py: python3 tools/claims-v3/ccheck/ccheck.py e104 docs/reports/data/2026-11-01-e104-c-readback/aifoundry1-c1/kinds/readback-p10402/readback.jsonl --jobs 4 --cache <scratch>/cache
+# the 110 per-launch lines are byte-identical to section A's (all PASS); flags_unlogged 110: E104's records carry no use_mask field (its own host patch), so each is judged as the table says and marked
+{"launches": 110, "PASS": 110, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 38, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "fp16": {"PASS": 72, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 110, "all_pass": true}
+real 2.35
+user 0.13
+sys 0.09
+exit 0
+
+### E2. python3 tools/claims-v3/ccheck/validate_ccheck.py --cache <scratch>/cache  (V1-V5 as in section B; V6-V10 new)
+# 86 ok lines, 0 BAD: 85 cases and V5's set-up check (V1-V5 60 cases on 61 lines, as in section B; V6-V10 25 cases)
+engine: rtl-sim/fma_toggle_v2/accum.c sha256 dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf built at <scratch>/cache/accum-dc47efbc32e3
+ok   V1 fp32 zeros: C = +0 in all 256 words at n = 1, 2, 20000, 541999
+ok   V1 fp16 zeros: C = +0 in all 256 words at n = 1, 2, 20000, 541999
+ok   V1 int8 zeros: C = +0 in all 256 words at n = 1, 2, 20000, 541999
+ok   V2 fp32 identity A x integer B in [-8, 8]: C = n B exactly at n = 1, 3, 1000, 541999 (a zero B word keeps the sign op 0's first multiply gave it)
+ok   V2 fp32 identity: the closed form's signed zeros agree with the exact-rational oracle at n = 1, 3
+ok   V2 fp16 selection A[i][2i] = 1 x integer B in [-8, 8] (fp16 layout): C = n B[2i][j] exactly at n = 1, 3, 1000, 541999
+ok   V2 int8 selection A[i][4i] = 1 x B in [-128, 127] (int8 layout): C = n B[4i][j] mod 2^32 at n up to 1,600,000
+ok   V2 int8 all 127 x all -128 at n = 541,999: C = n (-1,040,384) mod 2^32 = b5b5e000 (wraps)
+ok   V3 fp32 seeded random (randn, 10% zeros of both signs): engine = exact-rational oracle, all 256 words, n = 1, 2, 3
+ok   V3 fp32 seeded random (exponents 2^-40..2^40, 10% zeros): engine = exact-rational oracle, all 256 words, n = 1, 2, 3
+ok   V3 fp16 seeded random (normal halves in +-4, 10% zeros): engine = fp16_model.py driven here, all 256 words, n = 1, 2, 3
+ok   V3 fp16 seeded random (exponents 2^-12..2^12): engine = fp16_model.py driven here, all 256 words, n = 1, 2, 3
+ok   V3 int8 seeded random: engine = integer oracle mod 2^32 at n = 1, 7, 20000, 943000
+ok   V4 fp32 n = 1: the reference itself PASSes
+ok   V4 fp32 n = 1: word 37 one ulp off in every minion is ROUNDING, not PASS (got ROUNDING)
+ok   V4 fp32 n = 1: word 37's sign flipped in every minion is FAIL (got FAIL)
+ok   V5 found 4 E104 reads to corrupt: [('fp16.h_sub', 541999), ('fp16.s_abs', 199874), ('fp32.h_sub', 541999), ('fp32.pm_pi', 199874)]
+ok   V5 fp16.h_sub n=541999: the card's C as read (1,024 minions, one value) PASSes
+ok   V5 fp16.h_sub n=541999: one minion with word 37's low bit flipped: FAIL (minions disagree: 2 distinct C among 1024)
+ok   V5 fp16.h_sub n=541999: every minion with word 37's low bit flipped: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp16.h_sub n=541999: word 37's sign flipped in every minion: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp16.h_sub n=541999: the C of n+1 ops: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['ref(n=542000)']
+ok   V5 fp16.h_sub n=541999: zeros (no store, unpoisoned buffer zeroed): ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['zeros']
+ok   V5 fp16.h_sub n=541999: the poison (no store): FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['poison (no C stored)']
+ok   V5 fp16.h_sub n=541999: another tile's C at the same n: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ["another tile's C"]
+ok   V5 fp16.h_sub n=541999: A and B swapped: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['A and B swapped']
+ok   V5 fp16.h_sub n=541999: only 1,000 of 1,024 minions read: FAIL (read 1000 minions of 1024)
+ok   V5 fp16.s_abs n=199874: the card's C as read (1,024 minions, one value) PASSes
+ok   V5 fp16.s_abs n=199874: one minion with word 37's low bit flipped: FAIL (minions disagree: 2 distinct C among 1024)
+ok   V5 fp16.s_abs n=199874: every minion with word 37's low bit flipped: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp16.s_abs n=199874: word 37's sign flipped in every minion: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp16.s_abs n=199874: the C of n+1 ops: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['ref(n=199875)']
+ok   V5 fp16.s_abs n=199874: zeros (no store, unpoisoned buffer zeroed): ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['zeros']
+ok   V5 fp16.s_abs n=199874: the poison (no store): FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['poison (no C stored)']
+ok   V5 fp16.s_abs n=199874: another tile's C at the same n: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ["another tile's C"]
+ok   V5 fp16.s_abs n=199874: A and B swapped: FAIL (1 word(s) outside the rounding envelope, 0 undecided); equals ['A and B swapped']
+ok   V5 fp16.s_abs n=199874: only 1,000 of 1,024 minions read: FAIL (read 1000 minions of 1024)
+ok   V5 fp32.h_sub n=541999: the card's C as read (1,024 minions, one value) PASSes
+ok   V5 fp32.h_sub n=541999: one minion with word 37's low bit flipped: FAIL (minions disagree: 2 distinct C among 1024)
+ok   V5 fp32.h_sub n=541999: every minion with word 37's low bit flipped: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp32.h_sub n=541999: word 37's sign flipped in every minion: FAIL (1 word(s) outside the rounding envelope, 0 undecided)
+ok   V5 fp32.h_sub n=541999: the C of n+1 ops: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['ref(n=542000)']
+ok   V5 fp32.h_sub n=541999: zeros (no store, unpoisoned buffer zeroed): FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['zeros']
+ok   V5 fp32.h_sub n=541999: the poison (no store): FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['poison (no C stored)']
+ok   V5 fp32.h_sub n=541999: another tile's C at the same n: FAIL (128 word(s) outside the rounding envelope, 0 undecided); equals ["another tile's C"]
+ok   V5 fp32.h_sub n=541999: A and B swapped: FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['A and B swapped']
+ok   V5 fp32.h_sub n=541999: only 1,000 of 1,024 minions read: FAIL (read 1000 minions of 1024)
+ok   V5 fp32.pm_pi n=199874: the card's C as read (1,024 minions, one value) PASSes
+ok   V5 fp32.pm_pi n=199874: one minion with word 37's low bit flipped: FAIL (minions disagree: 2 distinct C among 1024)
+ok   V5 fp32.pm_pi n=199874: every minion with word 37's low bit flipped: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum)
+ok   V5 fp32.pm_pi n=199874: word 37's sign flipped in every minion: FAIL (1 word(s) outside the rounding envelope, 0 undecided)
+ok   V5 fp32.pm_pi n=199874: the C of n+1 ops: ROUNDING (unanimous, not bit-exact, inside the rounding envelope of the exact sum); equals ['ref(n=199875)']
+ok   V5 fp32.pm_pi n=199874: zeros (no store, unpoisoned buffer zeroed): FAIL (208 word(s) outside the rounding envelope, 0 undecided); equals ['zeros']
+ok   V5 fp32.pm_pi n=199874: the poison (no store): FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ['poison (no C stored)']
+ok   V5 fp32.pm_pi n=199874: another tile's C at the same n: FAIL (256 word(s) outside the rounding envelope, 0 undecided); equals ["another tile's C"]
+ok   V5 fp32.pm_pi n=199874: A and B swapped: FAIL (222 word(s) outside the rounding envelope, 0 undecided); equals ['A and B swapped']
+ok   V5 fp32.pm_pi n=199874: only 1,000 of 1,024 minions read: FAIL (read 1000 minions of 1024)
+ok   V5 int8 n=943000: as computed: PASS (expected PASS)
+ok   V5 int8 n=943000: saturating instead of wrapping (256 of 256 words wrap): FAIL (expected FAIL)
+ok   V5 int8 n=943000: word 0 one unit off: FAIL (expected FAIL)
+ok   V5 int8 n=943000: the C of n+1 ops: FAIL (expected FAIL)
+ok   V6 a C record cut short mid-hex, then the next process's host, tiles and C records (its host record on the cut line): 4 launches, 3 PASS, the cut one FAIL ('no result: its C record was cut short (the run stopped mid-write)'), nothing aborted
+ok   V6 each launch carries the host record before it (the cut one included); the summary lists 2 (host, kernel) pairs
+ok   V6 a C record before any tiles record FAILs, a C record whose tiles' bytes do not match their fnv FAILs, the next good launch PASSes: ['FAIL', 'FAIL', 'PASS']
+ok   V6 a log whose last line lacks only its final brace: that launch FAIL, the check runs to its end
+ok   V7 the tensor mask on (use_mask 1), C equal to the unmasked reference: UNMODELLED (expected UNMODELLED); equals_unmasked_reference true; the log's all_pass false
+ok   V7 B streamed through TenB (b_stream 1), C equal to the unmasked reference: UNMODELLED (expected UNMODELLED); equals_unmasked_reference true; the log's all_pass false
+ok   V7 the flags logged as zero, C equal to the unmasked reference: PASS (expected PASS)
+ok   V7 a C record without the flags (the patch of 60b91395): judged as before (PASS), marked flags_logged false
+ok   V7 the mask on and C not the unmasked reference: UNMODELLED, equals_unmasked_reference false
+ok   V8 fp32: E104's 18 tiles' widest exponent spread 61 and most distinct magnitudes 481, recomputed, equal ccheck's E104_SPREAD 61 and E104_DISTINCT 481
+ok   V8 fp16: E104's 26 tiles' widest exponent spread 25 and most distinct magnitudes 662, recomputed, equal ccheck's E104_SPREAD 25 and E104_DISTINCT 662
+ok   V8 each of E104's 44 tiles at its largest read n: inside, no first-read note
+ok   V8 pick fp32.b_exp_busy_a_const at n = 750,000: inside; first-read notes: exponent spread 80, wider than any tile E104 read (61)
+ok   V8 pick fp32.real_pythia_ln1_q at n = 750,000: inside; first-read notes: none
+ok   V8 pick fp16.sparse24_aligned at n = 750,000: inside; first-read notes: 711 distinct operand magnitudes, more than any tile E104 read (662)
+ok   V8 pick fp16.exp_only at n = 750,000: inside; first-read notes: exponent spread 29, wider than any tile E104 read (25)
+ok   V8 pick int8.gray_a at n = 750,000: inside; first-read notes: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 256 of 256 words wrap by n=750000 (the 32-bit wrap, never read on silicon)
+ok   V8 pick int8.b_line_zero_one at n = 750,000: inside; first-read notes: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3])
+ok   V8 an fp32 tile of words near 2^-70 (products near 2^-140): OUTSIDE, a sum may fall below 2^-126 (the flush)
+ok   V8 an fp32 tile of 2^100 words: OUTSIDE, the bound reaches 2^127 and the final C is Inf
+ok   V8 fp16, every half the largest finite (65504), n = 1,600,000: every partial sum below 2.68e+23, far under 2^127: fp16's clamp is out of reach of finite fp16 operands
+ok   V8 the bound on every partial sum holds over a run: max |C| at n = 50, 100 .. 1000 is 7.615e+07, the bound at n = 1000 7.626e+07
+ok   V9 the 25 Sep 2026 int8 read-backs: 90 launches on 3 cards (['aifoundry1-c1', 'aifoundry2', 'aifoundry3']), 90 with result 'both', ok and 0 tensor errors; --values small, n = 20,000, one minion, row_mask 0xffff, b_stream 0
+ok   V9 ccheck's int8 reference equals the host's expectC (first + (n-1) rest, mod 2^32) on 30 of 30 tiles packed as makeTiles packs them (values in [-3, 3], A sparsity 0-1, n = 1 and 20,000)
+ok   V10 fp16 at n = 541,999, the reference against the exact sum n S on ordinary pool-5 tiles: fp16.anchor_randn: 256 words, |C - nS| / |nS| median 0.202, 90th 0.228, max 0.261, share above 10% 1.00; fp16.real_pythia_qk: 256 words, |C - nS| / |nS| median 0.206, 90th 0.228, max 0.253, share above 10% 1.00; fp16.sparse24_aligned: 256 words, |C - nS| / |nS| median 0.109, 90th 0.126, max 0.144, share above 10% 0.75
+{"cases_bad": 0, "bad": []}
+real 19.42
+user 15.98
+sys 0.21
+exit 0
+
+### E3. End to end on the mock runtime, the corrected patch and wrapper: bash tools/claims-v3/ccheck/mockrt/run_e2e.sh <scratch>/e2e
+# new: masked, bstream (UNMODELLED), the cut record over two processes, the wrapper with a runner's own --kernel, and its refusal of a different CCHECK_KERNEL. Launch counts vary with the mock's timing under load; per launch the DMA is the committed host's (no flags: one 128 KiB write and one 128 KiB read; tiles 2 KiB once) and, with --c-log --c-poison, one more 1 MiB of each
+as-expected: ok_fp16 (fault none, --c-poison) host rc=0, ccheck PASS (expected PASS): {"launches": 7, "PASS": 7, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp16": {"PASS": 7, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+    mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+as-expected: ok_fp32 (fault none, --c-poison) host rc=0, ccheck PASS (expected PASS): {"launches": 8, "PASS": 8, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 8, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+    mock: 8 launches; host-to-device 18 calls 9439232 bytes; device-to-host 16 calls 9437184 bytes
+as-expected: ok_int8 (fault none, --c-poison) host rc=0, ccheck PASS (expected PASS): {"launches": 7, "PASS": 7, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"int8": {"PASS": 7, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+    mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+as-expected: ok_anchor (fault none, --c-poison) host rc=0, ccheck PASS (expected PASS): {"launches": 8, "PASS": 8, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 8, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+    mock: 8 launches; host-to-device 18 calls 9439232 bytes; device-to-host 16 calls 9437184 bytes
+as-expected: ok_nopois (fault none, ) host rc=0, ccheck PASS (expected PASS): {"launches": 6, "PASS": 6, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp16": {"PASS": 6, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+    mock: 6 launches; host-to-device 8 calls 788480 bytes; device-to-host 12 calls 7077888 bytes
+as-expected: bitflip (fault bitflip, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 5, "PASS": 0, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 5, "by_type": {"fp16": {"PASS": 0, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 5}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": false}
+    mock: 5 launches; host-to-device 12 calls 5900288 bytes; device-to-host 10 calls 5898240 bytes
+    first non-PASS: FAIL     fp16 n=40 /kinds/blind5/tiles/fp16/fp16.real_pythia_qk.bin launch=-1 groups=2 | minions disagree: 2 distinct C among 16 | [{"count": 15, "first_minion": 0, "words_off": 0}, {"count": 1, "first_minion": 5, "words_off": 1, "first": {"i": 1, "j": 1, "got": "446a4de1", "want": "446a4de0"}, "max
+as-expected: nostore_p (fault nostore, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 7, "PASS": 0, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 7, "by_type": {"fp32": {"PASS": 0, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 7}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": false}
+    mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+    first non-PASS: FAIL     fp32 n=40 kinds/blind5/tiles/fp32/fp32.wideexp48_dense.bin launch=-1 groups=2 | minions disagree: 2 distinct C among 16 | [{"count": 15, "first_minion": 0, "words_off": 0}, {"count": 1, "first_minion": 7, "words_off": 256, "first": {"i": 0, "j": 0, "got": "7fbadbad", "want": "e54faa9e"}, "m
+as-expected: nostore_np (fault nostore, ) host rc=0, ccheck FAIL (expected FAIL): {"launches": 7, "PASS": 0, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 7, "by_type": {"fp32": {"PASS": 0, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 7}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": false}
+    mock: 7 launches; host-to-device 9 calls 919552 bytes; device-to-host 14 calls 8257536 bytes
+    first non-PASS: FAIL     fp32 n=40 kinds/blind5/tiles/fp32/fp32.wideexp48_dense.bin launch=-1 groups=2 | minions disagree: 2 distinct C among 16 | [{"count": 1, "first_minion": 7, "words_off": 256, "first": {"i": 0, "j": 0, "got": "5a5a5a5a", "want": "e54faa9e"}, "max_ulp": 3406125683, "zero_sign_only": false}, {"c
+as-expected: stale_p (fault stale, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 8, "PASS": 1, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 7, "by_type": {"int8": {"PASS": 1, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 7}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": false}
+    mock: 8 launches; host-to-device 18 calls 9439232 bytes; device-to-host 16 calls 9437184 bytes
+    first non-PASS: FAIL     int8 n=315 s/blind5/tiles/int8/int8.real_pythia_w8a8_up.bin launch=0 groups=1 | int8 C is not the exact sum mod 2^32 | [{"count": 16, "first_minion": 0, "words_off": 256, "first": {"i": 0, "j": 0, "got": "7fbadbad", "want": "ffffe3b3"}, "max_abs_off": 2147208346, "equals": ["poison (no C st
+as-expected: stale2_p (fault stale2, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 8, "PASS": 2, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 6, "by_type": {"int8": {"PASS": 2, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 6}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": false}
+    mock: 8 launches; host-to-device 18 calls 9439232 bytes; device-to-host 16 calls 9437184 bytes
+    first non-PASS: FAIL     int8 n=347 s/blind5/tiles/int8/int8.real_pythia_w8a8_up.bin launch=1 groups=1 | int8 C is not the exact sum mod 2^32 | [{"count": 16, "first_minion": 0, "words_off": 256, "first": {"i": 0, "j": 0, "got": "7fbadbad", "want": "ffffe0d3"}, "max_abs_off": 2146967155, "equals": ["poison (no C st
+as-expected: stale2_np (fault stale2, ) host rc=0, ccheck PASS (expected PASS): {"launches": 8, "PASS": 8, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"int8": {"PASS": 8, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+    mock: 8 launches; host-to-device 10 calls 1050624 bytes; device-to-host 16 calls 9437184 bytes
+as-expected: wrongn (fault wrongn, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 7, "PASS": 0, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 7, "by_type": {"fp16": {"PASS": 0, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 7}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": false}
+    mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+    first non-PASS: FAIL     fp16 n=40 /kinds/blind5/tiles/fp16/fp16.real_pythia_qk.bin launch=-1 groups=1 | 256 word(s) outside the rounding envelope, 0 undecided | [{"count": 16, "first_minion": 0, "words_off": 256, "first": {"i": 0, "j": 0, "got": "4499278b", "want": "44956b49"}, "max_ulp": 409084, "zero_sign_only":
+as-expected: swapab (fault swapab, --c-poison) host rc=0, ccheck FAIL (expected FAIL): {"launches": 8, "PASS": 0, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 8, "by_type": {"int8": {"PASS": 0, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 8}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": false}
+    mock: 8 launches; host-to-device 18 calls 9439232 bytes; device-to-host 16 calls 9437184 bytes
+    first non-PASS: FAIL     int8 n=40 s/blind5/tiles/int8/int8.real_pythia_w8a8_up.bin launch=-1 groups=1 | int8 C is not the exact sum mod 2^32 | [{"count": 16, "first_minion": 0, "words_off": 256, "first": {"i": 0, "j": 0, "got": "00018a60", "want": "fffffc68"}, "max_abs_off": 1225040}]
+as-expected: masked (fault none, --c-poison --row-mask 0xfff0) host rc=0, ccheck UNMODELLED (expected UNMODELLED): {"launches": 7, "PASS": 0, "ROUNDING": 0, "UNMODELLED": 7, "FAIL": 0, "by_type": {"fp32": {"PASS": 0, "ROUNDING": 0, "UNMODELLED": 7, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": false}
+    mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+    first non-PASS: UNMODELLED fp32 n=40 kinds/blind5/tiles/fp32/fp32.wideexp48_dense.bin launch=-1 groups=1 | the tensor mask is on (row_mask 0xfff0): the reference models neither, so not checked | [{"count": 16, "first_minion": 0, "words_off": 0}]
+as-expected: bstream (fault none, --c-poison --b-stream) host rc=0, ccheck UNMODELLED (expected UNMODELLED): {"launches": 7, "PASS": 0, "ROUNDING": 0, "UNMODELLED": 7, "FAIL": 0, "by_type": {"fp16": {"PASS": 0, "ROUNDING": 0, "UNMODELLED": 7, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": false}
+    mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+    first non-PASS: UNMODELLED fp16 n=40 /kinds/blind5/tiles/fp16/fp16.real_pythia_qk.bin launch=-1 groups=1 | B streams through TenB: the reference models neither, so not checked | [{"count": 16, "first_minion": 0, "words_off": 0}]
+cut record: rc=1 (expected 1), 15 launches in two processes: {"launches": 15, "PASS": 14, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 1, "by_type": {"fp32": {"PASS": 6, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 1}, "int8": {"PASS": 8, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 1, "flags_unlogged": 0, "all_pass": false}
+    FAIL     fp32 n=333  launch=5 groups=0 | no result: its C record was cut short (the run stopped mid-write) | null
+wrapper: rc=0 7 launches; mock: 7 launches; host-to-device 16 calls 8259584 bytes; device-to-host 14 calls 8257536 bytes
+wrapper: ccheck rc=0 {"launches": 7, "PASS": 7, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp16": {"PASS": 7, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "binaries": [{"host_sha256": "ef02a1465089631399912553e8284acd323ab85b265f8d596c606e77a5e32ea9", "kernel_sha256": "d18ff93b88664459a4adbd5e6a6a75e39e74332a9baf80750d971f0569237d45"}], "all_pass": true}
+wrapper: host record: {"ccheck":1,"kind":"host","host":"<scratch>... kernel_from "kernel_from":"CCHECK_KERNEL"
+wrapper, runner's own --kernel: rc=0 7 launches; "kernel_from":"runner"; tiles record kernel accum"
+wrapper, runner's own --kernel: ccheck rc=0 {"launches": 7, "PASS": 7, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp16": {"PASS": 7, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "binaries": [{"host_sha256": "ef02a1465089631399912553e8284acd323ab85b265f8d596c606e77a5e32ea9", "kernel_sha256": "d18ff93b88664459a4adbd5e6a6a75e39e74332a9baf80750d971f0569237d45"}], "all_pass": true}
+wrapper, runner's --kernel against another CCHECK_KERNEL: rc=2 (expected 2), 0 launches, log absent; sparsity_ccheck: the runner's --kernel <scratch>/e2e/mock/accum is not CCHECK_KERNEL <scratch>/e2e/mock/sparsity_host_orig (sha256 differ): refused
+host orig without --c-log: rc=0 6 launches; mock: 6 launches; host-to-device 8 calls 788480 bytes; device-to-host 6 calls 786432 bytes
+host ccheck without --c-log: rc=0 7 launches; mock: 7 launches; host-to-device 9 calls 919552 bytes; device-to-host 7 calls 917504 bytes
+SPARSITY lines: the same keys in the same order on every launch (orig, patched without flags, patched with --c-log --c-poison): True; the calibration launch (iters 40) equal on every field but its timing: True
+real 26.78
+user 15.19
+sys 3.48
+exit 0
+
+### E4. python3 tools/claims-v3/ccheck/pick6.py (byte-identical to section D's output) and --json's new fields
+fp32.b_exp_busy_a_const      fp32  E141 D 15.393 +-0.080 (n=3)  E142 D 15.114 +-0.169 (n=5)  combined +-0.187  tools/claims-v3/kinds/blind5/tiles/fp32/fp32.b_exp_busy_a_const.bin
+fp32.real_pythia_ln1_q       fp32  E141 D 21.964 +-0.153 (n=3)  E142 D 21.500 +-0.135 (n=5)  combined +-0.204  tools/claims-v3/kinds/blind5/tiles/fp32/fp32.real_pythia_ln1_q.bin
+fp16.sparse24_aligned        fp16  E141 D 12.716 +-0.120 (n=3)  E142 D 12.459 +-0.087 (n=5)  combined +-0.148  tools/claims-v3/kinds/blind5/tiles/fp16/fp16.sparse24_aligned.bin
+fp16.exp_only                fp16  E141 D 16.247 +-0.172 (n=2)  E142 D 15.822 +-0.095 (n=5)  combined +-0.196  tools/claims-v3/kinds/blind5/tiles/fp16/fp16.exp_only.bin
+int8.gray_a                  int8  E141 D 4.034 +-0.094 (n=3)  E142 D 4.261 +-0.168 (n=5)  combined +-0.193  tools/claims-v3/kinds/blind5/tiles/int8/int8.gray_a.bin
+int8.b_line_zero_one         int8  E141 D 3.351 +-0.137 (n=3)  E142 D 3.287 +-0.227 (n=5)  combined +-0.265  tools/claims-v3/kinds/blind5/tiles/int8/int8.b_line_zero_one.bin
+narrowest committed pool-5 D interval on either card: +-0.041 W (the critic's flat +-0.05 W is narrower than every other)
+exit 0
+json exit 0
+card_difference_W over pool 5's 30 kinds: min 0.004, median 0.233, max 0.466
+fp32.b_exp_busy_a_const    se E141 0.01850 (n=3), E142 0.06082 (n=5); repeat_band_W (a same-card repeat at the old se and passes, Welch) E141 +-0.073, E142 +-0.198
+fp32.real_pythia_ln1_q     se E141 0.03546 (n=3), E142 0.04865 (n=5); repeat_band_W (a same-card repeat at the old se and passes, Welch) E141 +-0.139, E142 +-0.159
+fp16.sparse24_aligned      se E141 0.02788 (n=3), E142 0.03124 (n=5); repeat_band_W (a same-card repeat at the old se and passes, Welch) E141 +-0.110, E142 +-0.102
+fp16.exp_only              se E141 0.01351 (n=2), E142 0.03434 (n=5); repeat_band_W (a same-card repeat at the old se and passes, Welch) E141 +-0.082, E142 +-0.112
+int8.gray_a                se E141 0.02191 (n=3), E142 0.06057 (n=5); repeat_band_W (a same-card repeat at the old se and passes, Welch) E141 +-0.086, E142 +-0.198
+int8.b_line_zero_one       se E141 0.03186 (n=3), E142 0.08164 (n=5); repeat_band_W (a same-card repeat at the old se and passes, Welch) E141 +-0.125, E142 +-0.266
+
+### E5. The corrected domain check on the 6 picks: ccheck.py domain <the 6> --n 750000 --jobs 3 --cache <scratch>/cache
+inside  tools/claims-v3/kinds/blind5/tiles/fp16/fp16.exp_only.bin  | first silicon read: exponent spread 29, wider than any tile E104 read (25)
+inside  tools/claims-v3/kinds/blind5/tiles/fp16/fp16.sparse24_aligned.bin  | first silicon read: 711 distinct operand magnitudes, more than any tile E104 read (662)
+inside  tools/claims-v3/kinds/blind5/tiles/fp32/fp32.b_exp_busy_a_const.bin  | first silicon read: exponent spread 80, wider than any tile E104 read (61)
+inside  tools/claims-v3/kinds/blind5/tiles/fp32/fp32.real_pythia_ln1_q.bin  
+inside  tools/claims-v3/kinds/blind5/tiles/int8/int8.b_line_zero_one.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3])
+inside  tools/claims-v3/kinds/blind5/tiles/int8/int8.gray_a.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 256 of 256 words wrap by n=750000 (the 32-bit wrap, never read on silicon)
+{"tiles": 6, "inside": 6, "first_silicon_read": 5}
+exit 0
+

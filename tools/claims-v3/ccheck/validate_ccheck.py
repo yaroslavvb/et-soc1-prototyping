@@ -3,14 +3,32 @@
 
     python3 tools/claims-v3/ccheck/validate_ccheck.py [--cache DIR] [--e104 readback.jsonl]
 
-V1 zeros, V2 identity-like, V3 seeded random: the engine's C against oracles written here, independently of accum.c
-  (int8: Python integers mod 2^32; fp32: exact rational FMA rounded to nearest even, denormals read as zero and flushed,
-  the raw-word gate, op 0's first k a multiply; fp16: rtl-sim/fma_toggle_v2/fp16_model.py, the bench's Python model,
-  driven by a loop written here). Identity-like tiles have C known in closed form (n x a B entry), no rounding at all.
+V1 zeros, V2 identity-like, V3 seeded random: the engine's C against oracles written here (int8: Python integers mod
+  2^32; fp32: exact rational FMA rounded to nearest even, denormals read as zero and flushed, the raw-word gate, op 0's
+  first k a multiply: both independent of accum.c; fp16: rtl-sim/fma_toggle_v2/fp16_model.py, the bench's Python
+  model, driven by a loop written here. accum.c's fp16 path is a port of that model, so for fp16 the driver loop is
+  independent and the arithmetic is not: fp16's arithmetic rests on E104's 72 silicon reads). Identity-like tiles have
+  C known in closed form (n x a B entry), no rounding at all.
 V4 the ROUNDING category: a unanimous C one ulp off is ROUNDING, not PASS; a sign flip is FAIL.
 V5 corruptions of real card reads (E104's raw read-back, aifoundry1 card 1): each read as committed PASSes; a bit flipped
   in one minion, a bit flipped in all, a sign flipped, the C of n+1 ops, zeros, the poison, another tile's C, A and B
-  swapped: none PASSes. int8 (never read back on silicon) the same on engine C: a saturating sum, one unit off.
+  swapped: none PASSes. int8 the same on engine C on a tile that wraps (no int8 file tile, and no wrap, has been read
+  back on silicon): a saturating sum, one unit off. Its first "ok" line is a set-up check (the 4 reads were found), not
+  a case: V1-V5 are 60 cases on 61 lines.
+Added Tue 3 Nov 2026 in the fix pass after verification (V1-V5 unchanged):
+V6 the C log read robustly: a record cut short mid-write, with the next process's records on its line, fails that one
+  launch and every other launch is judged; a C record with no tiles record, or tiles whose bytes do not match their
+  fnv, fails; the wrapper's host record reaches every launch after it.
+V7 amendment A1's UNMODELLED: the tensor mask on, or B streamed, is not checked even when C equals the unmasked
+  reference; flags logged as zero PASS; a record without flags (the patch of 60b91395) is judged and marked.
+V8 the domain check: E104_SPREAD and E104_DISTINCT recomputed from E104's committed tiles; each E104 tile at its largest
+  read n is inside with no first-read note; the 6 picks' first-read notes; a tiny-exponent fp32 tile flagged for the
+  flush, a huge one for overflow; fp16's clamp out of reach of the largest finite halves at n = 1,600,000; the bound on
+  every partial sum holds over a run.
+V9 int8's link to silicon: the host's own checkC read back 90 small-integer int8 launches on 25 Sep 2026 (all "both");
+  this reference equals that check's expected C (expectC, mod 2^32) on tiles packed as makeTiles packs them.
+V10 finding 1 beyond the designed tile: on three ordinary pool-5 fp16 tiles at n = 541,999 the reference sits a median
+  of more than 5% from the exact sum (three fp16 engine runs, about 4 minutes from a cold cache).
 Exit 0 when every case comes out as expected.
 """
 import argparse
@@ -244,7 +262,7 @@ def main():
     want = (541999 * 64 * 127 * -128) % (1 << 32)
     say(r[541999] == pack([want] * 256), f"V2 int8 all 127 x all -128 at n = 541,999: C = n (-1,040,384) mod 2^32 = {want:08x} (wraps)")
 
-    # V3 seeded random against the independent oracles
+    # V3 seeded random against the oracles (fp32 and int8 independent of accum.c; fp16 the bench's model, which it ports)
     def rnd32(scale_lo, scale_hi, zfrac):
         out = []
         for _ in range(256):
@@ -334,7 +352,8 @@ def main():
             eq = [e for d in v.get("by_group", []) for e in d.get("equals", [])]
             say(v["verdict"] != "PASS", f"V5 {tile_name} n={n}: {what}: {v['verdict']}"
                 + (f" ({v.get('why', '')})" if v["verdict"] != "PASS" else "") + (f"; equals {eq}" if eq else ""))
-    # int8 (never read back on a card): corruptions of the engine's C on a tile that wraps
+    # int8 (no file tile and no wrap read back on a card; small integers were, V9): corruptions of the engine's C on a
+    # tile that wraps
     t = tile_int8([rng.randint(-128, 127) for _ in range(1024)], [rng.randint(100, 127) for _ in range(1024)])
     n = 943000
     refs = cc.ref_many("int8", t, [n, n + 1], a.cache)
@@ -350,8 +369,210 @@ def main():
         want = "PASS" if what == "as computed" else "FAIL"
         say(v["verdict"] == want, f"V5 int8 n={n}: {what}: {v['verdict']} (expected {want})")
 
+    v6_v7(a.cache, rng)
+    v8(a.cache, launches)
+    v9(a.cache)
+    v10(a.cache)
+
     print(json.dumps({"cases_bad": len(FAILS), "bad": FAILS}))
     return 1 if FAILS else 0
+
+
+# ------------------------------------------------------------------ V6-V9, the fix pass of Tue 3 Nov 2026
+
+def rec_tiles(t, values="file:synthetic", kernel="build/sparsity/kernel/sparsity.elf"):
+    return json.dumps({"ccheck": 1, "kind": "tiles", "type": "fp32", "values": values, "kernel": kernel, "sweep": 0,
+                       "fnv": cc.fnv64(t), "a": t[:1024].hex(), "b": t[1024:].hex()}, separators=(",", ":"))
+
+
+def rec_c(t, n, c, launch, flags=True, use_mask=0, b_stream=0, fnv=None):
+    r = {"ccheck": 1, "kind": "c", "type": "fp32", "sweep": 0, "launch": launch, "iters": n, "t_start_ms": 1000 + launch,
+         "t_end_ms": 1500 + launch, "ok": True, "participants": 16, "poison": True}
+    if flags:
+        r.update(use_mask=use_mask, row_mask="0x%04x" % (0xFFF0 if use_mask else 0xFFFF), b_stream=b_stream)
+    r.update(fnv=fnv or cc.fnv64(t), groups=[{"count": 16, "first_minion": 0, "minions": list(range(16)), "hex": c.hex()}])
+    return json.dumps(r, separators=(",", ":"))
+
+
+def rec_host(tag):
+    return json.dumps({"ccheck": 1, "kind": "host", "host": "build/ccheck/b/host/sparsity_host", "host_sha256": tag * 64,
+                       "kernel": "build/sparsity/kernel/sparsity.elf", "kernel_sha256": "e" * 64, "kernel_from": "default"},
+                      separators=(",", ":"))
+
+
+def judge_log(cache, text):
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        p = os.path.join(d, "c-log.jsonl")
+        open(p, "w").write(text)
+        vs = cc.check_launches(cc.load_clog([p]), cache, 2)
+    return vs, cc.summarize(vs)
+
+
+def v6_v7(cache, rng):
+    t = pack([f32w(rng.gauss(0, 1)) for _ in range(256)]) + pack([f32w(rng.gauss(0, 1)) for _ in range(256)])
+    t2 = pack([f32w(rng.gauss(0, 2)) for _ in range(256)]) + pack([f32w(rng.gauss(0, 2)) for _ in range(256)])
+    r = cc.ref_many("fp32", t, [5, 7], cache)
+    r2 = cc.ref_many("fp32", t2, [5], cache)
+    cut = rec_c(t, 5, r[5], 2)
+    cut = cut[:len(cut) // 2]                         # the writer killed mid-record: no closing brace, no newline
+    log = "\n".join([rec_host("a"), rec_tiles(t), rec_c(t, 5, r[5], 0), rec_c(t, 7, r[7], 1)]) + "\n" + cut
+    log += rec_host("b") + "\n" + rec_tiles(t2) + "\n" + rec_c(t2, 5, r2[5], 0) + "\n"   # the next process, same line first
+    vs, s = judge_log(cache, log)
+    ok = (s["launches"] == 4 and s["PASS"] == 3 and s["FAIL"] == 1 and s["broken_records"] == 1
+          and [v["verdict"] for v in vs] == ["PASS", "PASS", "FAIL", "PASS"] and "cut short" in vs[2]["why"]
+          and vs[2]["launch"] == 2 and vs[2]["n"] == 5)
+    say(ok, "V6 a C record cut short mid-hex, then the next process's host, tiles and C records (its host record on the cut "
+            "line): 4 launches, 3 PASS, the cut one FAIL ('%s'), nothing aborted" % (vs[2].get("why") if len(vs) > 2 else "?"))
+    say([v.get("host_sha256", "")[:1] for v in vs] == ["a", "a", "a", "b"] and len(s.get("binaries", [])) == 2,
+        "V6 each launch carries the host record before it (the cut one included); the summary lists 2 (host, kernel) pairs")
+    bad = bytearray.fromhex(rec_tiles(t2).split('"a":"')[1][:8])
+    wrong_tiles = rec_tiles(t2).replace('"a":"' + bad.hex(), '"a":"' + bytes(x ^ 1 for x in bad).hex(), 1)
+    log = "\n".join([rec_c(t, 5, r[5], 0), wrong_tiles, rec_c(t2, 5, r2[5], 1), rec_tiles(t), rec_c(t, 5, r[5], 2)]) + "\n"
+    vs, s = judge_log(cache, log)
+    ok = ([v["verdict"] for v in vs] == ["FAIL", "FAIL", "PASS"] and "no tiles record" in vs[0]["why"]
+          and "do not match" in vs[1]["why"])
+    say(ok, "V6 a C record before any tiles record FAILs, a C record whose tiles' bytes do not match their fnv FAILs, the "
+            "next good launch PASSes: %s" % [v["verdict"] for v in vs])
+    vs, s = judge_log(cache, rec_tiles(t) + "\n" + rec_c(t, 5, r[5], 0)[:-1] + "\n")       # the final brace missing
+    say(s["launches"] == 1 and s["FAIL"] == 1 and s["broken_records"] == 1,
+        "V6 a log whose last line lacks only its final brace: that launch FAIL, the check runs to its end")
+    # V7
+    for what, kw, want in (("the tensor mask on (use_mask 1)", {"use_mask": 1}, "UNMODELLED"),
+                           ("B streamed through TenB (b_stream 1)", {"b_stream": 1}, "UNMODELLED"),
+                           ("the flags logged as zero", {}, "PASS")):
+        vs, s = judge_log(cache, rec_tiles(t) + "\n" + rec_c(t, 5, r[5], 0, **kw) + "\n")
+        v = vs[0]
+        ok = v["verdict"] == want and (want == "PASS" or v.get("equals_unmasked_reference") is True)
+        say(ok and not s["all_pass"] if want != "PASS" else ok and s["all_pass"],
+            f"V7 {what}, C equal to the unmasked reference: {v['verdict']} (expected {want})"
+            + ("; equals_unmasked_reference true; the log's all_pass false" if want != "PASS" else ""))
+    vs, s = judge_log(cache, rec_tiles(t) + "\n" + rec_c(t, 5, r[5], 0, flags=False) + "\n")
+    say(vs[0]["verdict"] == "PASS" and vs[0].get("flags_logged") is False and s["flags_unlogged"] == 1,
+        "V7 a C record without the flags (the patch of 60b91395): judged as before (PASS), marked flags_logged false")
+    vs, s = judge_log(cache, rec_tiles(t) + "\n" + rec_c(t, 5, r[7], 0, use_mask=1) + "\n")
+    say(vs[0]["verdict"] == "UNMODELLED" and vs[0].get("equals_unmasked_reference") is False,
+        "V7 the mask on and C not the unmasked reference: UNMODELLED, equals_unmasked_reference false")
+
+
+def v8(cache, launches):
+    seen = {}
+    for typ, t, n, groups, parts, meta in launches:
+        seen.setdefault((typ, meta["tile"], t), set()).add(n)
+    for typ in ("fp32", "fp16"):
+        st = [cc.operand_stats(ty, t) for (ty, nm, t) in seen if ty == typ]
+        sp, di = max(x[1] for x in st), max(x[0] for x in st)
+        say(sp == cc.E104_SPREAD[typ] and di == cc.E104_DISTINCT[typ],
+            f"V8 {typ}: E104's {len(st)} tiles' widest exponent spread {sp} and most distinct magnitudes {di}, recomputed, "
+            f"equal ccheck's E104_SPREAD {cc.E104_SPREAD[typ]} and E104_DISTINCT {cc.E104_DISTINCT[typ]}")
+    rows = [(nm, cc.domain(ty, t, max(ns), cache)) for (ty, nm, t), ns in sorted(seen.items(), key=lambda x: x[0][1])]
+    bad = [(nm, d["notes"], d["first_read"]) for nm, d in rows if not d["inside"] or d["first_read"]]
+    say(not bad, f"V8 each of E104's {len(rows)} tiles at its largest read n: inside, no first-read note" + (f": {bad}" if bad else ""))
+    T = os.path.join(ROOT, "tools/claims-v3/kinds/blind5/tiles")
+    want = {"fp32/fp32.b_exp_busy_a_const": ["exponent spread 80"], "fp32/fp32.real_pythia_ln1_q": [],
+            "fp16/fp16.sparse24_aligned": ["711 distinct"], "fp16/fp16.exp_only": ["exponent spread 29"],
+            "int8/int8.gray_a": ["operands up to |128|", "wrap"], "int8/int8.b_line_zero_one": ["operands up to |128|"]}
+    for p, keys in want.items():
+        d = cc.domain(p.split("/")[0], open(os.path.join(T, p + ".bin"), "rb").read(), 750000, cache)
+        fr = "; ".join(d["first_read"])
+        say(d["inside"] and all(k in fr for k in keys) and (keys or not fr),
+            f"V8 pick {p.split('/')[1]} at n = 750,000: inside; first-read notes: {fr or 'none'}")
+    tiny = pack([f32w(2.0 ** -70 * (1 + k / 64)) for k in range(256)]) * 2          # A and B words near 2^-70
+    d = cc.domain("fp32", tiny, 10, cache)
+    say(not d["inside"] and any("2^-126" in x for x in d["notes"]),
+        "V8 an fp32 tile of words near 2^-70 (products near 2^-140): OUTSIDE, a sum may fall below 2^-126 (the flush)")
+    huge = pack([f32w(2.0 ** 100)] * 256) * 2
+    d = cc.domain("fp32", huge, 10, cache)
+    say(not d["inside"] and any("2^127" in x for x in d["notes"]) and any("Inf" in x for x in d["notes"]),
+        "V8 an fp32 tile of 2^100 words: OUTSIDE, the bound reaches 2^127 and the final C is Inf")
+    big16 = struct.pack("<512I", *([0x7BFF7BFF] * 512))                                 # every half 65504
+    b16 = cc.partial_bound("fp16", big16, 1600000)
+    say(b16 < 2.0 ** 127, f"V8 fp16, every half the largest finite (65504), n = 1,600,000: every partial sum below {b16:.3g}, "
+                          "far under 2^127: fp16's clamp is out of reach of finite fp16 operands")
+    rt = pack([f32w(rng_v8.gauss(0, 1) * 2.0 ** rng_v8.randint(-8, 8)) for _ in range(256)]) * 2
+    ns = list(range(50, 1001, 50))
+    refs = cc.ref_many("fp32", rt, ns, cache)
+    top = max(abs(struct.unpack("<f", refs[n][4 * x:4 * x + 4])[0]) for n in ns for x in range(256))
+    b = cc.partial_bound("fp32", rt, 1000)
+    say(top <= b, f"V8 the bound on every partial sum holds over a run: max |C| at n = 50, 100 .. 1000 is {top:.4g}, "
+                  f"the bound at n = 1000 {b:.4g}")
+
+
+rng_v8 = random.Random(20261103 + 8)
+
+
+def v9(cache):
+    import glob
+    n_launch, both = 0, 0
+    files = sorted(glob.glob(os.path.join(ROOT, "docs/reports/data/2026-09-25-claims-v3/raw/*/lat/p*/sp/fma-int8-elem.jsonl")))
+    cards, vals, mins = set(), set(), set()
+    for f in files:
+        for line in open(f):
+            if not line.startswith("SPARSITY {"):        # the host's stdout lines ("Opening device 1" among them)
+                continue
+            r = json.loads(line[len("SPARSITY "):])
+            if r.get("test") != "fma" or r.get("type") != "int8":
+                continue
+            n_launch += 1
+            both += r.get("result") == "both" and r.get("ok") is True and r.get("tensor_errors") == 0
+            cards.add(f.split("/raw/")[1].split("/")[0])
+            vals.add((r.get("values"), r.get("iters"), r.get("b_stream"), r.get("row_mask")))
+            mins.add(r.get("minions"))
+    say(n_launch == 90 and both == 90 and len(cards) == 3 and vals == {("small", 20000, 0, "0xffff")} and mins == {1},
+        f"V9 the 25 Sep 2026 int8 read-backs: {n_launch} launches on {len(cards)} cards ({sorted(cards)}), {both} with result "
+        f"'both', ok and 0 tensor errors; --values small, n = 20,000, one minion, row_mask 0xffff, b_stream 0")
+    rng = random.Random(925)
+    small = [-3, -2, -1, 1, 2, 3]                       # smallNonzero (workloads/sparsity/host/main.cpp)
+    good = 0
+    trials = 30
+    for trial in range(trials):
+        s = [0.0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 0.9375, 1.0][trial % 10]
+        A = [[0 if rng.random() < s else rng.choice(small) for k in range(64)] for i in range(16)]
+        B = [[rng.choice(small) for j in range(16)] for k in range(64)]
+        ta, tb = bytearray(1024), bytearray(1024)
+        for i in range(16):
+            for k in range(64):
+                ta[i * 64 + k] = A[i][k] & 0xFF                          # A: row i = line i, byte k
+        for k in range(64):
+            for j in range(16):
+                tb[(k // 4) * 64 + j * 4 + (k % 4)] = B[k][j] & 0xFF     # B: line p = k / E, bytes (j E + e)
+        n = 20000 if trial % 3 else 1
+        got = cc.ref_many("int8", bytes(ta) + bytes(tb), [n], cache)[n]
+        expect = pack([((sum(A[i][k] * B[k][j] for k in range(64)) * n) % (1 << 32)) for i in range(16) for j in range(16)])
+        good += got == expect
+    say(good == trials, f"V9 ccheck's int8 reference equals the host's expectC (first + (n-1) rest, mod 2^32) on {good} of "
+                        f"{trials} tiles packed as makeTiles packs them (values in [-3, 3], A sparsity 0-1, n = 1 and 20,000)")
+
+
+def v10(cache):
+    """Finding 1 beyond the designed tile: at a launch's length the reference's fp16 C sits far from the exact sum n S on
+    ordinary pool-5 tiles too, so no 'within the format's rounding' rule can tell right from wrong. The RTL's arithmetic,
+    as E104 read it on 44 designed tiles; on silicon the gap is read only on those (fp16.h_sub: 29%)."""
+    import statistics
+    import concurrent.futures as cf
+    n = 541999
+    T = os.path.join(ROOT, "tools/claims-v3/kinds/blind5/tiles/fp16")
+    names = ["fp16.anchor_randn", "fp16.real_pythia_qk", "fp16.sparse24_aligned"]
+    tiles = {nm: open(os.path.join(T, nm + ".bin"), "rb").read() for nm in names}
+    with cf.ThreadPoolExecutor(max_workers=3) as ex:
+        refs = dict(zip(names, ex.map(lambda nm: cc.ref_many("fp16", tiles[nm], [n], cache)[n], names)))
+    out = []
+    for nm in names:
+        terms = cc.exact_terms("fp16", tiles[nm])
+        cw = cc.words(refs[nm])
+        rel = []
+        for i in range(16):
+            for j in range(16):
+                S = terms[(i, j)][0]
+                if S:
+                    got = cc.word_value("fp16", cw[i * 16 + j])
+                    rel.append(abs(got - float(n * S)) / abs(float(n * S)))
+        rel.sort()
+        out.append((nm, len(rel), statistics.median(rel), rel[int(0.9 * (len(rel) - 1))], rel[-1],
+                    sum(x > 0.1 for x in rel) / len(rel)))
+    say(all(x[2] > 0.05 for x in out),
+        "V10 fp16 at n = 541,999, the reference against the exact sum n S on ordinary pool-5 tiles: "
+        + "; ".join("%s: %d words, |C - nS| / |nS| median %.3f, 90th %.3f, max %.3f, share above 10%% %.2f" % x for x in out))
 
 
 if __name__ == "__main__":

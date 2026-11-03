@@ -9,9 +9,13 @@ Two flags, both for --test fma, both off unless given:
   --c-log <file>  after each launch, one more read of the buffer the kernel stores C into on a launch's last op (run_fma,
                   a->out + minion * SP_TILE_BYTES; `dev.get("out", ...)`, the runtime's device-to-host DMA, the read
                   checkC already makes on --values small launches), and one JSON line appended to <file>: the launch's own
-                  iters, its window, and each distinct 1,024-byte C among the participating minions with how many hold it.
-                  Each sweep point's A and B tiles (the bytes the launch used, file: or built-in) are logged once before
-                  its launches. The read comes after the launch's end time stamp and after its SPARSITY line.
+                  iters, its window, its kernel flags (use_mask, row_mask, b_stream: ccheck.py refuses a launch with the
+                  mask on or B streamed, which its reference does not model), and each distinct 1,024-byte C among the
+                  participating minions with how many hold it. Each sweep point's A and B tiles (the bytes the launch
+                  used, file: or built-in) are logged once before its launches, with the kernel's path. The read comes
+                  after the launch's end time stamp and after its SPARSITY line.
+                  (Fix pass of Tue 3 Nov 2026: the flags and the kernel's path are new; the patch of 60b91395 logged
+                  neither, and no card ran it.)
   --c-poison      with --c-log, write 0x7FBADBAD to the whole C buffer before each launch (`dev.put("out", ...)`, the
                   host-to-device DMA the harness already makes every launch for the results buffer), so a minion that
                   never stored C reads as the poison, not as the previous launch's C. The write comes before the launch's
@@ -63,12 +67,12 @@ void ccLogTiles(const Options& o, const Tiles& t, double s) {
   char fnv[24];
   std::snprintf(fnv, sizeof fnv, "%016llx", (unsigned long long)ccFnv(t));
   f << "{\"ccheck\":1,\"kind\":\"tiles\",\"type\":\"" << o.type << "\",\"values\":\"" << ccJson(o.values)
-    << "\",\"sweep\":" << s << ",\"fnv\":\"" << fnv << "\",\"a\":\"" << ccHex(t.a.data(), t.a.size()) << "\",\"b\":\""
-    << ccHex(t.b.data(), t.b.size()) << "\"}\n";
+    << "\",\"kernel\":\"" << ccJson(o.kernel) << "\",\"sweep\":" << s << ",\"fnv\":\"" << fnv << "\",\"a\":\""
+    << ccHex(t.a.data(), t.a.size()) << "\",\"b\":\"" << ccHex(t.b.data(), t.b.size()) << "\"}\n";
 }
 
-void ccLogLaunch(const Options& o, Session& dev, const Tiles& t, uint64_t iters, int launchNo, const Session::Launch& L,
-                 const std::vector<uint64_t>& harts, double s) {
+void ccLogLaunch(const Options& o, Session& dev, const Tiles& t, const SpArgs& a, uint64_t iters, int launchNo,
+                 const Session::Launch& L, const std::vector<uint64_t>& harts, double s) {
   std::map<std::string, std::vector<uint64_t>> groups;
   if (L.ok) {
     std::vector<uint8_t> c(size_t(SP_MINIONS) * SP_TILE_BYTES);
@@ -81,9 +85,11 @@ void ccLogLaunch(const Options& o, Session& dev, const Tiles& t, uint64_t iters,
   char head[640];
   std::snprintf(head, sizeof head,
                 "{\"ccheck\":1,\"kind\":\"c\",\"type\":\"%s\",\"sweep\":%.4f,\"launch\":%d,\"iters\":%llu,\"t_start_ms\":%lld,"
-                "\"t_end_ms\":%lld,\"ok\":%s,\"participants\":%zu,\"poison\":%s,\"fnv\":\"%016llx\",\"groups\":[",
+                "\"t_end_ms\":%lld,\"ok\":%s,\"participants\":%zu,\"poison\":%s,\"use_mask\":%llu,\"row_mask\":\"0x%04llx\","
+                "\"b_stream\":%llu,\"fnv\":\"%016llx\",\"groups\":[",
                 o.type.c_str(), s, launchNo, (unsigned long long)iters, L.t0Ms, L.t1Ms, L.ok ? "true" : "false",
-                harts.size(), o.cPoison ? "true" : "false", (unsigned long long)ccFnv(t));
+                harts.size(), o.cPoison ? "true" : "false", (unsigned long long)a.use_mask,
+                (unsigned long long)(a.mask & 0xFFFF), (unsigned long long)a.b_stream, (unsigned long long)ccFnv(t));
   std::ofstream f(o.cLog, std::ios::app);
   f << head;
   bool first = true;
@@ -120,7 +126,7 @@ PATCHES = (
      '      const auto L = dev.launch(a);\n      const Summary sm = summarize(L, harts);\n      const std::string check =\n'),
     # 5. the read and the log line, after the launch's SPARSITY line
     ('      std::fflush(stdout);\n      return L.wallS;\n    };\n    repeatFor(o, dev, o.iters ? o.iters : (o.sysemu ? 4 : 20000), one);\n',
-     '      std::fflush(stdout);\n      if (!o.cLog.empty()) {\n        ccLogLaunch(o, dev, t, iters, launchNo, L, harts, s);\n      }\n'
+     '      std::fflush(stdout);\n      if (!o.cLog.empty()) {\n        ccLogLaunch(o, dev, t, a, iters, launchNo, L, harts, s);\n      }\n'
      '      return L.wallS;\n    };\n    repeatFor(o, dev, o.iters ? o.iters : (o.sysemu ? 4 : 20000), one);\n'),
     # 6. the flags
     ('    else if (a == "--dump-tiles") o.dumpTiles = next();\n',

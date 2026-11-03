@@ -5,7 +5,8 @@ Q139(k), Tue 3 Nov 2026 (the Q138 critic's rank 14). Standard library only; no d
     ccheck.py check <c-log.jsonl>... [--out verdicts.json] [--jobs 6] [--cache DIR]   # the patched host's --c-log
     ccheck.py e104 <readback.jsonl> [--out verdicts.json] [--jobs 6] [--cache DIR]    # E104's raw read-back lines
     ccheck.py ref <fp32|fp16|int8> <tile.bin> <n> [<n> ...]                            # C for each n, hex, host order
-    ccheck.py domain <tile.bin | dir>... [--n 1600000] [--jobs 6]                       # is the tile in the checked domain
+    ccheck.py domain <tile.bin | dir>... [--n 1600000] [--jobs 6] [--out rows.json]     # operand/result classes, every
+                                                                                         # op up to n; first-read notes
 
 The reference. C after n TensorFMA ops on one tile is computed by rtl-sim/fma_toggle_v2/accum.c, unchanged and pinned
 by sha256 (ENGINE_SHA below), built here with the host's cc: the order and the zero gate are the RTL's (for k, for row
@@ -13,9 +14,13 @@ i, for column j; a word pair whose raw A or B word is zero is skipped; op 0's fi
 kernel's MUL bit on its first op); fp32 is FMADD rounded to nearest even, denormal operands read as zero and denormal
 results flushed; fp16 is the RTL's fixed-point window (each aligned product truncated, a negated term that lost bits
 one unit low); int8 is signed x signed in 32-bit wraparound, closed form n x sum (mod 2^32). E104 read 110 launches' C
-back on aifoundry1 card 1 (44 file tiles, n = 2 .. 541,999, fp32 and fp16) and every word of all 1,024 minions equals
-this arithmetic; int8's rule is the RTL's (vpu_tensorfma.v:918-919 sign from u_a/u_b, which the kernel never sets;
-tima_adder.v keeps sum[31:0]). The tile layout is the host's (workloads/sparsity/sparsity_args.h): 2,048 bytes, A
+back on aifoundry1 card 1 (44 designed file tiles, n = 2 .. 541,999, fp32 and fp16) and every word of all 1,024 minions
+equals this arithmetic; int8's rule is the RTL's (vpu_tensorfma.v:918-919 sign from u_a/u_b, which the kernel never
+sets; tima_adder.v keeps sum[31:0]), and the host's own checkC read int8's signed product sum and byte pairing back on 90
+small-integer launches of 25 Sep 2026 (all three cards, n = 20,000, one minion, values in [-3, 3]; docs/reports/data/
+2026-09-25-claims-v3/raw/*/lat/p*/sp/fma-int8-elem.jsonl, result "both"), whose expected C this reference equals (V9).
+Not read on silicon: int8's 32-bit wrap, full-range int8 operands, float tiles spread wider than E104's (`domain`).
+The tile layout is the host's (workloads/sparsity/sparsity_args.h): 2,048 bytes, A
 (16 lines of 64 B, row i = line i) then B (line p holds column j's E consecutive k-elements at bytes (j*E+e)*size);
 accum.c reads 32-bit words, so fp16's word pairs low halves with low halves and int8's byte e with byte e. C is 256
 little-endian 32-bit words, C[i][j] at word i*16+j, minion m's tile at byte m*1024 of the out buffer, as checkC reads
@@ -32,12 +37,20 @@ The verdict of one launch (registered in README.md before any card use of this t
   FAIL      anything else: minions disagree, a word outside the envelope, an int8 word off, no result read.
 Diagnostics name what a failing C does equal (the reference at n-1 or n+1, the run's other n, the poison word, zeros,
 another tile's C in the same log, A and B swapped), the words and ulps off, and the first mismatch.
+Amendment A1 (Tue 3 Nov 2026, before any card use; README.md):
+  UNMODELLED  the C record says the launch ran with the tensor mask on (use_mask 1, from --row-mask) or with B streamed
+            through TenB (b_stream 1, from --b-stream). The reference models neither: not checked. The diagnostics
+            still say whether its C equals the unmasked, L1 reference (equals_unmasked_reference).
+  A record cut short (its writer killed mid-write), a C record with no tiles record before it, or tiles whose bytes do
+  not match their fnv: that launch is FAIL (no result), and every other launch in the log is judged. A C record from
+  the patch of 60b91395, which did not log the mask and the stream, is judged as above and marked flags_logged false.
 """
 import argparse
 import concurrent.futures as cf
 import hashlib
 import json
 import os
+import re
 import shutil
 import struct
 import subprocess
@@ -54,6 +67,14 @@ POISON_WORD = 0x7FBADBAD     # what the patched host's --c-poison writes before 
 TYPES = ("fp32", "fp16", "int8")
 MINIONS = 1024
 U32 = 2.0 ** -24
+REC = '{"ccheck":1,'         # every record of the C log starts with these bytes (patch_host_ccheck.py, sparsity_ccheck.sh)
+# What silicon has read, for `domain`'s first-read notes. E104's 44 tiles (1 Nov 2026): the widest exponent spread (max
+# minus min biased exponent over a tile's nonzero normal operands, A and B together) and the most distinct nonzero
+# operand magnitudes in one tile; validate_ccheck.py V8 recomputes both from E104's committed tiles. int8: the host's
+# own --values small tiles, read back by checkC on 25 Sep 2026, hold values in [-3, 3] and never wrap (n = 20,000).
+E104_SPREAD = {"fp32": 61, "fp16": 25}
+E104_DISTINCT = {"fp32": 481, "fp16": 662}
+SMALL_INT8 = 3
 
 
 def sha256(b):
@@ -219,9 +240,10 @@ def ulp_key(w):
 
 # ------------------------------------------------------------------------------------------------ one launch
 
-def judge(typ, tile, n, groups, participants, refs, others=None):
+def judge(typ, tile, n, groups, participants, refs, others=None, flags=None):
     """groups: [{"count", "first_minion", "minions", "hex"}]; refs: {n: bytes} holding at least n (and n-1, n+1 when
-    computed). Returns the verdict dict."""
+    computed); flags: the C record's {"use_mask", "row_mask", "b_stream"}, or None for a record that does not log them
+    (the patch of 60b91395). Returns the verdict dict."""
     v = {"type": typ, "n": n, "participants": participants, "groups": len(groups),
          "counts": sorted((g["count"] for g in groups), reverse=True)}
     ref = refs[n]
@@ -229,6 +251,15 @@ def judge(typ, tile, n, groups, participants, refs, others=None):
     if not groups or total != participants:
         v.update(verdict="FAIL", why=f"read {total} minions of {participants}")
         return v
+    unmodelled = []
+    if flags is None:
+        v["flags_logged"] = False
+    else:
+        v["flags"] = flags
+        if int(flags.get("use_mask", 0)):
+            unmodelled.append("the tensor mask is on (row_mask %s)" % flags.get("row_mask"))
+        if int(flags.get("b_stream", 0)):
+            unmodelled.append("B streams through TenB")
     rw = words(ref)
     out = []
     unanimous = len(groups) == 1
@@ -259,6 +290,10 @@ def judge(typ, tile, n, groups, participants, refs, others=None):
         out.append(d)
     v["by_group"] = out
     exact = unanimous and out[0]["words_off"] == 0
+    if unmodelled:                       # amendment A1: neither the mask nor the stream is modelled
+        v.update(verdict="UNMODELLED", why="; ".join(unmodelled) + ": the reference models neither, so not checked",
+                 equals_unmasked_reference=exact)
+        return v
     if exact:
         v["verdict"] = "PASS"
         return v
@@ -320,30 +355,102 @@ def tile_path_from_values(values, roots):
     return None
 
 
+def _records(line):
+    """One line of a C log -> [(record or None, text)]. A record cut short (its writer killed mid-write) ends with no
+    newline, so the next process's first record can share its line: such a line is split where each record starts,
+    and a piece that does not parse comes back as None."""
+    try:
+        return [(json.loads(line), line)]
+    except ValueError:
+        pass
+    cuts = [m.start() for m in re.finditer(re.escape(REC), line)]
+    if not cuts or cuts[0] != 0:
+        cuts = [0] + cuts
+    out = []
+    for a, b in zip(cuts, cuts[1:] + [len(line)]):
+        piece = line[a:b]
+        try:
+            out.append((json.loads(piece), piece))
+        except ValueError:
+            out.append((None, piece))
+    return out
+
+
+def _field(text, key, pat):
+    m = re.search('"%s":%s' % (key, pat), text)
+    return m.group(1) if m else None
+
+
+FLAG_KEYS = ("use_mask", "row_mask", "b_stream")
+HOST_KEYS = ("host", "host_sha256", "kernel", "kernel_sha256", "kernel_from")
+
+
 def load_clog(paths):
-    """The patched host's --c-log lines -> launches [(typ, tile bytes, n, groups, participants, meta)]."""
+    """The C log's lines (the patched host's --c-log, the wrapper's host records) -> launches
+    [(typ, tile bytes or None, n, groups, participants, meta)]. A launch whose C record was cut short, whose tiles
+    record is missing or was cut short, or whose tiles' bytes do not match their fnv comes back with tile None and
+    meta["broken"] saying why: check_launches judges it FAIL (no result) and judges every other launch (amendment A1)."""
     tiles, launches = {}, []
     for path in paths:
-        for ln, line in enumerate(open(path), 1):
+        host = None
+        for ln, line in enumerate(open(path, errors="replace"), 1):
             line = line.strip()
             if not line:
                 continue
-            r = json.loads(line)
-            if r.get("ccheck") != 1:
-                continue
-            if r["kind"] == "tiles":
-                t = bytes.fromhex(r["a"]) + bytes.fromhex(r["b"])
-                if fnv64(t) != r["fnv"]:
-                    raise SystemExit(f"{path}:{ln}: tile record's fnv does not match its bytes")
-                tiles[r["fnv"]] = (t, r.get("values"))
-            elif r["kind"] == "c":
-                if r["fnv"] not in tiles:
-                    raise SystemExit(f"{path}:{ln}: a C record before its tiles record")
-                t, values = tiles[r["fnv"]]
-                meta = {"log": os.path.basename(path), "line": ln, "launch": r["launch"], "values": values,
-                        "ok": r["ok"], "poison": r.get("poison"), "t_end_ms": r.get("t_end_ms")}
-                groups = r["groups"] if r["ok"] else []
-                launches.append((r["type"], t, int(r["iters"]), groups, int(r["participants"]), meta))
+            for r, text in _records(line):
+                base = {"log": os.path.basename(path), "line": ln}
+                if host:
+                    base.update(host)
+                if r is None:                      # a record cut short
+                    kind = _field(text, "kind", r'"(\w+)"')
+                    if kind == "host":
+                        continue
+                    if kind == "tiles":
+                        fnv = _field(text, "fnv", r'"([0-9a-f]{16})"')
+                        if fnv:
+                            tiles[fnv] = (None, "its tiles record was cut short")
+                        continue
+                    it = _field(text, "iters", r"(\d+)")
+                    lno = _field(text, "launch", r"(-?\d+)")
+                    base.update(broken="its C record was cut short (the run stopped mid-write)",
+                                launch=int(lno) if lno is not None else None)
+                    launches.append((_field(text, "type", r'"(\w+)"') or "?", None, int(it) if it else None, [], 0, base))
+                    continue
+                if r.get("ccheck") != 1:
+                    continue
+                kind = r.get("kind")
+                if kind == "host":
+                    host = {k: r.get(k) for k in HOST_KEYS}
+                    continue
+                if kind == "tiles":
+                    try:
+                        t = bytes.fromhex(r["a"]) + bytes.fromhex(r["b"])
+                    except (KeyError, ValueError):
+                        t = b""
+                    if len(t) != 2048 or fnv64(t) != r.get("fnv"):
+                        tiles[r.get("fnv")] = (None, "its tiles record's bytes do not match their fnv")
+                    else:
+                        tiles[r["fnv"]] = (t, r.get("values"))
+                    continue
+                if kind != "c":
+                    continue
+                meta = dict(base, launch=r.get("launch"), ok=r.get("ok"), poison=r.get("poison"),
+                            t_start_ms=r.get("t_start_ms"), t_end_ms=r.get("t_end_ms"))
+                flags = {k: r[k] for k in FLAG_KEYS if k in r} or None
+                entry = tiles.get(r.get("fnv"))
+                groups = r.get("groups") if r.get("ok") else []
+                if entry is None or entry[0] is None:
+                    meta["broken"] = "no tiles record before this C record" if entry is None else entry[1]
+                    launches.append((r.get("type", "?"), None, int(r.get("iters", 0)), [], int(r.get("participants", 0)), meta))
+                    continue
+                if any(len(g.get("hex", "")) != 2048 for g in groups or []):
+                    meta["broken"] = "a group's C is not 1,024 bytes"
+                    launches.append((r["type"], None, int(r["iters"]), [], int(r["participants"]), meta))
+                    continue
+                t, values = entry
+                meta["values"] = values
+                meta["flags"] = flags
+                launches.append((r["type"], t, int(r["iters"]), groups or [], int(r["participants"]), meta))
     return launches
 
 
@@ -373,6 +480,8 @@ def check_launches(launches, cache, jobs, neighbours=True):
     """Every launch judged; refs computed once per (type, tile) for every n needed (n, and n-1, n+1 for diagnostics)."""
     need = {}
     for typ, t, n, *_ in launches:
+        if t is None:                   # a broken record: judged FAIL below, no reference needed
+            continue
         s = need.setdefault((typ, t), set())
         s.add(n)
         if neighbours:
@@ -386,6 +495,12 @@ def check_launches(launches, cache, jobs, neighbours=True):
     # other tiles' C at the same n, for "equals another tile's C" diagnostics (cheap: only refs already computed)
     out = []
     for typ, t, n, groups, parts, meta in launches:
+        if t is None:
+            v = {"type": typ, "n": n, "participants": parts, "groups": 0, "counts": [], "verdict": "FAIL",
+                 "why": "no result: " + meta["broken"]}
+            v.update(meta)
+            out.append(v)
+            continue
         others = {}
         for (typ2, t2), r2 in refs.items():
             if t2 != t and typ2 == typ and n in r2:
@@ -393,30 +508,109 @@ def check_launches(launches, cache, jobs, neighbours=True):
         swapped = t[1024:] + t[:1024]
         if (typ, swapped) in refs and n in refs[(typ, swapped)]:
             others["A and B swapped"] = refs[(typ, swapped)][n]
-        v = judge(typ, t, n, groups, parts, refs[(typ, t)], others)
+        v = judge(typ, t, n, groups, parts, refs[(typ, t)], others,
+                  flags=meta.get("flags") if "flags" in meta else None)
         v["tile_sha256"] = sha256(t)
         v.update(meta)
         out.append(v)
     return out
 
 
+VERDICTS = ("PASS", "ROUNDING", "UNMODELLED", "FAIL")
+
+
 def summarize(verdicts):
     s = {"launches": len(verdicts)}
-    for k in ("PASS", "ROUNDING", "FAIL"):
+    for k in VERDICTS:
         s[k] = sum(v["verdict"] == k for v in verdicts)
-    s["by_type"] = {t: {k: sum(v["verdict"] == k and v["type"] == t for v in verdicts) for k in ("PASS", "ROUNDING", "FAIL")}
+    s["by_type"] = {t: {k: sum(v["verdict"] == k and v["type"] == t for v in verdicts) for k in VERDICTS}
                     for t in TYPES if any(v["type"] == t for v in verdicts)}
+    s["broken_records"] = sum("broken" in v for v in verdicts)
+    s["flags_unlogged"] = sum(v.get("flags_logged") is False for v in verdicts)
+    bins = sorted({(v.get("host_sha256"), v.get("kernel_sha256")) for v in verdicts if v.get("host_sha256")})
+    if bins:
+        s["binaries"] = [{"host_sha256": h, "kernel_sha256": k} for h, k in bins]
     s["all_pass"] = s["PASS"] == s["launches"] and s["launches"] > 0
     return s
 
 
 # ------------------------------------------------------------------------------------------------ domain
 
-def domain(typ, tile, n, cache):
-    """Is this tile's arithmetic inside what E104 checked on silicon (finite normal or zero operands, finite C that never
-    clamps or flushes to Inf)? Lists what is outside."""
+def operand_stats(typ, tile):
+    """(distinct nonzero normal operand magnitudes, exponent spread, lowest biased exponent of A's and of B's nonzero
+    normal operands) for a float tile; for int8 (distinct nonzero values, 0, (largest |A|, largest |B|))."""
     w = words(tile)
-    why = []
+    mags, exps, lo = set(), [], [None, None]
+    for side, ws in ((0, w[:256]), (1, w[256:])):
+        for x in ws:
+            if typ == "int8":
+                for e in range(4):
+                    b = (x >> (8 * e)) & 0xFF
+                    v = b - 256 if b > 127 else b
+                    if v:
+                        mags.add(abs(v))
+                        lo[side] = max(lo[side] or 0, abs(v))
+                continue
+            hs = [x] if typ == "fp32" else [x & 0xFFFF, x >> 16]
+            for h in hs:
+                m, e = (h & 0x7FFFFFFF, (h >> 23) & 0xFF) if typ == "fp32" else (h & 0x7FFF, (h >> 10) & 0x1F)
+                emax = 0xFF if typ == "fp32" else 0x1F
+                if m and 0 < e < emax:
+                    mags.add(m)
+                    exps.append(e)
+                    lo[side] = e if lo[side] is None else min(lo[side], e)
+    spread = (max(exps) - min(exps)) if exps else 0
+    return len(mags), spread, tuple(lo)
+
+
+def partial_bound(typ, tile, n):
+    """A rigorous bound on |C| at every op up to n, every word (floats): an exact partial sum after m ops, mid-op
+    included, is at most m|S| + P, and the computed one is within envelope(n) of it (envelope is monotone in n)."""
+    worst = 0.0
+    for (i, j), (S, P, steps, bad) in exact_terms(typ, tile).items():
+        if bad:
+            continue
+        try:
+            b = n * abs(float(S)) + float(P) + envelope(typ, n, S, P, steps)
+        except OverflowError:
+            b = float("inf")
+        worst = max(worst, b)
+    return worst
+
+
+def domain(typ, tile, n, cache):
+    """Is this tile's arithmetic, at every op up to n, inside the operand and result classes silicon reads have covered
+    (finite normal or zero operands; no Inf, no overflow and no fp16 clamp at ANY op up to n, by a rigorous bound on
+    every partial sum; for fp32 no sum in the range the unit flushes to zero)? "inside" is that test. The first-read
+    notes say what of the tile's values no silicon read has covered, though its classes are inside: float tiles spread
+    wider, or with more distinct magnitudes, than any of E104's 44 tiles; int8 operands beyond the [-3, 3] the host read
+    back on 25 Sep 2026, or a 32-bit wrap. A launch on such a tile is that range's first silicon read, so a FAIL there
+    can be the model's. Also lists the final n's C: Inf/NaN words, and words at the largest finite."""
+    w = words(tile)
+    why, first = [], []
+    distinct, spread, lo = operand_stats(typ, tile)
+    if typ == "int8":
+        big = max(x or 0 for x in lo)
+        if big > SMALL_INT8:
+            first.append(f"operands up to |{big}| (the host's small-integer read-backs of 25 Sep held [-3, 3])")
+        terms = exact_terms("int8", tile)
+        wraps = sum(abs(n * int(terms[(i, j)][0])) >= (1 << 31) for i in range(16) for j in range(16))
+        if wraps:
+            first.append(f"{wraps} of 256 words wrap by n={n} (the 32-bit wrap, never read on silicon)")
+    else:
+        if spread > E104_SPREAD[typ]:
+            first.append(f"exponent spread {spread}, wider than any tile E104 read ({E104_SPREAD[typ]})")
+        if distinct > E104_DISTINCT[typ]:
+            first.append(f"{distinct} distinct operand magnitudes, more than any tile E104 read ({E104_DISTINCT[typ]})")
+        bound = partial_bound(typ, tile, n)
+        if bound >= 2.0 ** 127:
+            why.append(f"a partial sum may reach 2^127 by n={n} (bound {bound:.3g}): an overflow (fp32: Inf, which stays) "
+                       "or fp16's clamp at the largest finite cannot be ruled out: never read on silicon")
+        if typ == "fp32" and lo[0] is not None and lo[1] is not None and lo[0] + lo[1] - 300 < -126:
+            # every product and every computed sum is a multiple of 2^(min E_A + min E_B - 300); at or above 2^-126 a
+            # nonzero sum is never denormal, so the flush never fires (proof in README.md, "The domain check")
+            why.append("a sum may fall below 2^-126, where the unit flushes it to zero (products' grain 2^%d): never "
+                       "read on silicon" % (lo[0] + lo[1] - 300))
     for side, ws in (("A", w[:256]), ("B", w[256:])):
         nan = den = negz = 0
         for x in ws:
@@ -446,8 +640,12 @@ def domain(typ, tile, n, cache):
             why.append(f"C at n={n}: {inf} words Inf/NaN (overflow: never read back on silicon)")
         if clamp:
             why.append(f"C at n={n}: {clamp} words at the largest finite (fp16's clamp, or fp32 at the edge: unread)")
-    return {"type": typ, "n": n, "sha256": sha256(tile),
-            "inside": not [x for x in why if "inside" not in x], "notes": why}
+    d = {"type": typ, "n": n, "sha256": sha256(tile),
+         "inside": not [x for x in why if "inside" not in x], "notes": why, "first_read": first,
+         "distinct": distinct, "spread": spread}
+    if typ != "int8":
+        d["partial_bound"] = float("%.4g" % partial_bound(typ, tile, n))
+    return d
 
 
 # ------------------------------------------------------------------------------------------------ main
@@ -473,6 +671,7 @@ def main():
     p.add_argument("--n", type=int, default=1600000)
     p.add_argument("--jobs", type=int, default=6)
     p.add_argument("--cache", default=default_cache())
+    p.add_argument("--out", help="write every tile's row (notes, first-read notes, spread, bound) as JSON")
     a = ap.parse_args()
 
     if a.cmd == "ref":
@@ -506,8 +705,14 @@ def main():
                 rows.append(d)
         rows.sort(key=lambda r: r["file"])
         for r in rows:
-            print(("inside " if r["inside"] else "OUTSIDE"), r["file"], "; ".join(r["notes"]))
-        print(json.dumps({"tiles": len(rows), "inside": sum(r["inside"] for r in rows)}))
+            fr = r.get("first_read") or []
+            print(("inside " if r["inside"] else "OUTSIDE"), r["file"], "; ".join(r["notes"]),
+                  ("| first silicon read: " + "; ".join(fr)) if fr else "")
+        s = {"tiles": len(rows), "inside": sum(r["inside"] for r in rows),
+             "first_silicon_read": sum(bool(r.get("first_read")) for r in rows)}
+        print(json.dumps(s))
+        if a.out:
+            json.dump({"summary": s, "n": a.n, "tiles": rows}, open(a.out, "w"), indent=1)
         return 0 if all(r["inside"] for r in rows) else 1
 
     roots = a.root + [ROOT]

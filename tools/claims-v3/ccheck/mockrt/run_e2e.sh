@@ -25,6 +25,8 @@ run() { # name type tile fault expect extra...
   python3 "$R/tools/claims-v3/ccheck/ccheck.py" check "$name.jsonl" --jobs 2 --cache "$OUT/cache" > "$name.check" 2>&1
   local crc=$?
   local got=PASS; [ $crc -eq 0 ] || got=FAIL
+  # UNMODELLED (amendment A1): every launch refused, none failed
+  tail -1 "$name.check" | grep -q '"PASS": 0, "ROUNDING": 0, "UNMODELLED": [1-9][0-9]*, "FAIL": 0' && got=UNMODELLED
   local ok=as-expected; [ "$got" = "$want" ] || ok=UNEXPECTED
   echo "$ok: $name (fault $f, $*) host rc=$hrc, ccheck $got (expected $want): $(tail -1 "$name.check")"
   echo "    $(tail -1 "$name.err")"
@@ -43,6 +45,23 @@ run stale2_p   int8 "$T/int8/int8.real_pythia_w8a8_up.bin" stale2  FAIL --c-pois
 run stale2_np  int8 "$T/int8/int8.real_pythia_w8a8_up.bin" stale2  PASS
 run wrongn     fp16 "$T/fp16/fp16.real_pythia_qk.bin"      wrongn  FAIL --c-poison
 run swapab     int8 "$T/int8/int8.real_pythia_w8a8_up.bin" swapab  FAIL --c-poison
+# added in the fix pass of Tue 3 Nov 2026: the mask and the stream are logged and refused (the mock kernel ignores both,
+# so C is the unmasked reference: ccheck still says UNMODELLED), and a record cut short fails only its own launch
+run masked     fp32 "$T/fp32/fp32.wideexp48_dense.bin"     none    UNMODELLED --c-poison --row-mask 0xfff0
+run bstream    fp16 "$T/fp16/fp16.real_pythia_qk.bin"      none    UNMODELLED --c-poison --b-stream
+MOCK_FAULT=none "$M/sparsity_host_ccheck" --test fma --type fp32 --values "file:$T/fp32/fp32.wideexp48_dense.bin" "${COMMON[@]}" \
+  --c-log cut.jsonl --c-poison > cut1.out 2> cut1.err
+python3 - cut.jsonl <<'EOF'
+import sys
+p = sys.argv[1]
+L = open(p).read().splitlines()
+open(p, "w").write("\n".join(L[:-1]) + "\n" + L[-1][:len(L[-1]) // 2])   # the last C record cut mid-hex, no newline
+EOF
+MOCK_FAULT=none "$M/sparsity_host_ccheck" --test fma --type int8 --values "file:$T/int8/int8.real_pythia_w8a8_up.bin" "${COMMON[@]}" \
+  --c-log cut.jsonl --c-poison > cut2.out 2> cut2.err
+python3 "$R/tools/claims-v3/ccheck/ccheck.py" check cut.jsonl --jobs 2 --cache "$OUT/cache" > cut.check 2>&1
+echo "cut record: rc=$? (expected 1), $(($(grep -c SPARSITY cut1.out) + $(grep -c SPARSITY cut2.out))) launches in two processes: $(tail -1 cut.check)"
+grep '^FAIL' cut.check | cut -c1-200 | sed 's/^/    /'
 # through the runner wrapper, as a run_e78-style runner calls it (--sparsity sparsity_ccheck.sh, no ccheck flags of its own)
 CCHECK_HOST=$M/sparsity_host_ccheck CCHECK_KERNEL=$M/accum CCHECK_LOG=$OUT/wrapper.jsonl MOCK_FAULT=none \
   "$R/tools/claims-v3/ccheck/sparsity_ccheck.sh" --test fma --type fp16 --pattern none --values "file:$T/fp16/fp16.exp_only.bin" \
@@ -50,6 +69,19 @@ CCHECK_HOST=$M/sparsity_host_ccheck CCHECK_KERNEL=$M/accum CCHECK_LOG=$OUT/wrapp
 echo "wrapper: rc=$? $(grep -c SPARSITY wrapper.out) launches; $(tail -1 wrapper.err)"
 python3 "$R/tools/claims-v3/ccheck/ccheck.py" check wrapper.jsonl --jobs 2 --cache "$OUT/cache" > wrapper.check 2>&1
 echo "wrapper: ccheck rc=$? $(tail -1 wrapper.check)"
+echo "wrapper: host record: $(grep -m1 '"kind":"host"' wrapper.jsonl | cut -c1-60)... kernel_from $(grep -m1 -o '"kernel_from":"[a-zA-Z_]*"' wrapper.jsonl)"
+# a runner that passes its own --kernel (E143's runner on aifoundry2 does): the wrapper must not append a second one
+CCHECK_HOST=$M/sparsity_host_ccheck CCHECK_LOG=$OUT/wrapper_rk.jsonl MOCK_FAULT=none \
+  "$R/tools/claims-v3/ccheck/sparsity_ccheck.sh" --test fma --type fp16 --pattern none --values "file:$T/fp16/fp16.exp_only.bin" \
+  --shires 0x3 --per-shire 8 --iters 40 --seconds 0.3 --seed 1 --kernel "$M/accum" > wrapper_rk.out 2> wrapper_rk.err
+echo "wrapper, runner's own --kernel: rc=$? $(grep -c SPARSITY wrapper_rk.out) launches; $(grep -m1 -o '"kernel_from":"[a-zA-Z_]*"' wrapper_rk.jsonl); tiles record kernel $(grep -m1 -o '"kernel":"[^"]*"' wrapper_rk.jsonl | sed 's#.*/##')"
+python3 "$R/tools/claims-v3/ccheck/ccheck.py" check wrapper_rk.jsonl --jobs 2 --cache "$OUT/cache" > wrapper_rk.check 2>&1
+echo "wrapper, runner's own --kernel: ccheck rc=$? $(tail -1 wrapper_rk.check)"
+# the runner's --kernel and a different CCHECK_KERNEL: refused before the host starts
+CCHECK_HOST=$M/sparsity_host_ccheck CCHECK_KERNEL=$M/sparsity_host_orig CCHECK_LOG=$OUT/wrapper_x.jsonl MOCK_FAULT=none \
+  "$R/tools/claims-v3/ccheck/sparsity_ccheck.sh" --test fma --type fp16 --values "file:$T/fp16/fp16.exp_only.bin" \
+  --kernel "$M/accum" > wrapper_x.out 2> wrapper_x.err
+echo "wrapper, runner's --kernel against another CCHECK_KERNEL: rc=$? (expected 2), $(grep -c SPARSITY wrapper_x.out) launches, log $( [ -e wrapper_x.jsonl ] && echo written || echo absent); $(tail -1 wrapper_x.err)"
 # the host as committed, and the patched host without its flags, on the same tile: the DMA each makes
 for v in orig ccheck; do
   MOCK_FAULT=none "$M/sparsity_host_$v" --test fma --type fp16 --values "file:$T/fp16/fp16.real_pythia_qk.bin" "${COMMON[@]}" \
