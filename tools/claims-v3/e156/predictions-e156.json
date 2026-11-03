@@ -1,0 +1,401 @@
+{
+ "exp": "E156",
+ "card": "aifoundry1-c1",
+ "written": "Tue 3 Nov 2026, before any E156 pass, from committed files only",
+ "E139_source": {
+  "file": "docs/reports/data/2026-11-02-e139-memory-split-more-passes/e139.json",
+  "sha256": "0cd188463013d635a9b11a8d46e6d34bd01328981b7b56031a96082fb9cd4c7a",
+  "line_rate_lines_per_s": 1172937670.4545455,
+  "passes_headline": [
+   13911,
+   13912,
+   13913,
+   13914,
+   13915,
+   13916,
+   13917,
+   13918
+  ],
+  "arm": "primary: E139's passes alone, the board meter's dips removed, leakage auto"
+ },
+ "prices": {
+  "A": {
+   "count": "e64",
+   "what": "E139's reading: per encoded toggle between consecutive 64-bit pieces of a line (the count E139's 0.46 pJ is per)",
+   "pJ": 0.4629939097961423,
+   "from_E56_E448_pJ": [
+    0.46277600261123286,
+    0.4632118169810517
+   ]
+  },
+  "B": {
+   "count": "e32",
+   "what": "per encoded toggle between consecutive 32-bit pieces",
+   "pJ": 0.9259878195922846,
+   "from_E56_E448_pJ": [
+    0.9255520052224657,
+    0.9264236339621034
+   ]
+  },
+  "C": {
+   "count": "e64_plus_e128",
+   "what": "per encoded toggle between consecutive 64-bit pieces plus between consecutive 128-bit pieces",
+   "pJ": 0.4629939097961423,
+   "from_E56_E448_pJ": [
+    0.46277600261123286,
+    0.4632118169810517
+   ]
+  },
+  "E": {
+   "count": "t_enc",
+   "what": "per encoded pin toggle between beats beyond V16's price (the pins mispriced, the residual on the pins)",
+   "pJ": 1.8519756391845692,
+   "from_E56_E448_pJ": [
+    1.8511040104449314,
+    1.8528472679242067
+   ]
+  },
+  "F": {
+   "count": "tx_enc",
+   "what": "per encoded pin toggle from a line's last beat to the next line's first on a channel (the line edge)",
+   "pJ": 12.963829474291984,
+   "from_E56_E448_pJ": [
+    12.95772807311452,
+    12.969930875469448
+   ]
+  }
+ },
+ "registered_reading": "A",
+ "formula": "predicted encoded residual (W) = price_pJ x 1e-12 x count x lines_per_s, lines_per_s = this session's headline mean line rate (reduce_e132's lines_per_s: the mean over passes of each pass's mean ops_per_s over its DRAM runs)",
+ "pairs": {
+  "E56": {
+   "image": "eh_64",
+   "twin": "el_64",
+   "counts": {
+    "hi": 32.0,
+    "t_enc": 98.0,
+    "e32": 196.0,
+    "e64": 392.0,
+    "e128": 0.0,
+    "tx_enc": 14.0,
+    "w": 0.0,
+    "t_raw": 0.0,
+    "r32": 0.0,
+    "r64": 0.0,
+    "r128": 0.0,
+    "half": 0.0,
+    "tx_raw": 0.0,
+    "e64_plus_e128": 392.0
+   },
+   "residual": "(eh_64 - el_64) - (98/496) V16 - (32/192) Hp",
+   "predicted_W_at_E139_line_rate": {
+    "A": 0.21288069521244424,
+    "B": 0.21288069521244424,
+    "C": 0.21288069521244424,
+    "E": 0.21288069521244424,
+    "F": 0.21288069521244424
+   },
+   "k_vs_E56": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 1.0,
+    "E": 1.0,
+    "F": 1.0
+   },
+   "E139_measured_W": {
+    "mean": 0.21278050332647375,
+    "lo": 0.15013524488270397,
+    "hi": 0.2754257617702435
+   }
+  },
+  "E448": {
+   "image": "vl_64",
+   "twin": "c3_64",
+   "counts": {
+    "hi": 32.0,
+    "t_enc": 98.0,
+    "e32": 196.0,
+    "e64": 392.0,
+    "e128": 0.0,
+    "tx_enc": 14.0,
+    "w": 0.0,
+    "t_raw": 0.0,
+    "r32": 0.0,
+    "r64": 0.0,
+    "r128": 0.0,
+    "half": 0.0,
+    "tx_raw": 0.0,
+    "e64_plus_e128": 392.0
+   },
+   "residual": "(vl_64 - c3_64) - (98/496) V16 - (32/192) Hp",
+   "predicted_W_at_E139_line_rate": {
+    "A": 0.21288069521244424,
+    "B": 0.21288069521244424,
+    "C": 0.21288069521244424,
+    "E": 0.21288069521244424,
+    "F": 0.21288069521244424
+   },
+   "k_vs_E56": {
+    "A": 1.0,
+    "B": 1.0,
+    "C": 1.0,
+    "E": 1.0,
+    "F": 1.0
+   },
+   "E139_measured_W": {
+    "mean": 0.21298088709841462,
+    "lo": 0.12834632423362358,
+    "hi": 0.29761544996320566
+   }
+  },
+  "E192": {
+   "image": "vl_128",
+   "twin": "c3_128",
+   "counts": {
+    "hi": 32.0,
+    "t_enc": 42.0,
+    "e32": 84.0,
+    "e64": 168.0,
+    "e128": 336.0,
+    "tx_enc": 14.0,
+    "w": 0.0,
+    "t_raw": 0.0,
+    "r32": 0.0,
+    "r64": 0.0,
+    "r128": 0.0,
+    "half": 0.0,
+    "tx_raw": 0.0,
+    "e64_plus_e128": 504.0
+   },
+   "residual": "(vl_128 - c3_128) - (42/496) V16 - (32/192) Hp",
+   "predicted_W_at_E139_line_rate": {
+    "A": 0.09123458366247611,
+    "B": 0.09123458366247611,
+    "C": 0.2737037509874283,
+    "E": 0.09123458366247611,
+    "F": 0.21288069521244424
+   },
+   "k_vs_E56": {
+    "A": 0.42857142857142855,
+    "B": 0.42857142857142855,
+    "C": 1.2857142857142858,
+    "E": 0.42857142857142855,
+    "F": 1.0
+   },
+   "E139_measured_W": {
+    "mean": 0.179739309742724,
+    "lo": 0.030569793645744553,
+    "hi": 0.3289088258397035
+   }
+  },
+  "E7": {
+   "image": "e7_64",
+   "twin": "e2_64",
+   "counts": {
+    "hi": -32.0,
+    "t_enc": 70.0,
+    "e32": 140.0,
+    "e64": 280.0,
+    "e128": 0.0,
+    "tx_enc": 10.0,
+    "w": 0.0,
+    "t_raw": 0.0,
+    "r32": 0.0,
+    "r64": 0.0,
+    "r128": 0.0,
+    "half": 0.0,
+    "tx_raw": 0.0,
+    "e64_plus_e128": 280.0
+   },
+   "residual": "(e7_64 - e2_64) - (70/496) V16 - (-32/192) Hp",
+   "predicted_W_at_E139_line_rate": {
+    "A": 0.15205763943746015,
+    "B": 0.15205763943746015,
+    "C": 0.15205763943746015,
+    "E": 0.15205763943746015,
+    "F": 0.15205763943746015
+   },
+   "k_vs_E56": {
+    "A": 0.7142857142857143,
+    "B": 0.7142857142857143,
+    "C": 0.7142857142857143,
+    "E": 0.7142857142857143,
+    "F": 0.7142857142857143
+   },
+   "E139_measured_W": null
+  },
+  "E32": {
+   "image": "eh_32",
+   "twin": "el_32",
+   "counts": {
+    "hi": 32.0,
+    "t_enc": 210.0,
+    "e32": 420.0,
+    "e64": 0.0,
+    "e128": 0.0,
+    "tx_enc": 14.0,
+    "w": 0.0,
+    "t_raw": 0.0,
+    "r32": 0.0,
+    "r64": 0.0,
+    "r128": 0.0,
+    "half": 0.0,
+    "tx_raw": 0.0,
+    "e64_plus_e128": 0.0
+   },
+   "residual": "(eh_32 - el_32) - (210/496) V16 - (32/192) Hp",
+   "predicted_W_at_E139_line_rate": {
+    "A": 0.0,
+    "B": 0.4561729183123805,
+    "C": 0.0,
+    "E": 0.4561729183123805,
+    "F": 0.21288069521244424
+   },
+   "k_vs_E56": {
+    "A": 0.0,
+    "B": 2.142857142857143,
+    "C": 0.0,
+    "E": 2.142857142857143,
+    "F": 1.0
+   },
+   "E139_measured_W": null
+  }
+ },
+ "E132_frozen_W": 0.185,
+ "E139_ties_W": {
+  "S64": 0.36576504629629625,
+  "S128": 0.14535243055555647,
+  "V16": 0.4579898574561412,
+  "V64": 0.6627343750000012,
+  "V128": 0.3041000548245636,
+  "U4z": 1.5775156249999975,
+  "Hp": 0.30828857517056507,
+  "RH64": 0.33492437256335084,
+  "RH128": 0.2816527777777793
+ },
+ "rules": {
+  "N1": {
+   "pairs": [
+    "E7",
+    "E32"
+   ],
+   "what": "the critic's rule on the two new images: |mean - prediction(A)| <= 0.05 W for each; PASS if both, FAIL if either; NOT-SCORED below 3 headline passes. The 95% interval is reported against prediction +- 0.05 W (decided inside, decided outside, or straddling)"
+  },
+  "C1": {
+   "pairs": [
+    "E56",
+    "E448"
+   ],
+   "what": "E139's own images on this card, the same price and the same rule; E132's R4 class reading beside it, and each against E132's frozen +0.185 W"
+  },
+  "N2": {
+   "pairs": [
+    "E32",
+    "E192"
+   ],
+   "what": "the width reading inside the session: for each reading X, per pass d_X = E_pair - k_X (E56 + E448)/2 with k_X the pair's count over E56's under X; X is consistent on a pair when the 95% interval of d_X contains 0; the verdict is the set of readings consistent on both E32 and E192 ('A ONLY', ..., 'SEVERAL: ...', 'NONE'). E7 is reported (every reading gives it k = 5/7)"
+  },
+  "D": {
+   "what": "read DBI evident on this card: Hp present on the board at E132's class (mean >= 0.10 W, interval above 0) -> EVIDENT; absent -> NOT EVIDENT (every encoded prediction assumes read DBI on, as on aifoundry3); else UNRESOLVED"
+  }
+ },
+ "decision": {
+  "within_W": 0.05,
+  "min_headline_passes": 3,
+  "warmup_pass": 15610,
+  "board_absent_half_W": 0.1,
+  "board_present_W": 0.1,
+  "ddr_moves_mV": 0.3,
+  "ddr_still_half_mV": 0.3
+ },
+ "plan": {
+  "passes": {
+   "stoptest": 15602,
+   "smoke": 15601,
+   "warmup": 15610,
+   "headline": "15611 onward, up to 15619, as the budget allows"
+  },
+  "items_per_pass": "anchor_pi first and last, the 16 memory items once each in runitems.py's shuffled order (seed '<card>|<pass>|<pass>'), two burn-in launches of anchor_pi",
+  "smoke_items": "anchor_pi,e7_64,eh_32,eh_64,c3_128",
+  "budget_card_minutes": 40,
+  "budget_s": 2400,
+  "reserve_s": 150,
+  "first_pass_estimate_s": 330,
+  "no_session_after": "2026-11-03 10:30 PST",
+  "last_pass_end": "2026-11-03 11:20 PST",
+  "stops": {
+   "board_w": 66.0,
+   "die_hottest_shire_c": 72.0,
+   "stale_line_s": 1.5,
+   "runitems_max_c_minshire0": 70.0,
+   "stoptest_board_w": 1.0,
+   "stoptest_die_c": 1.0,
+   "stoptest_stale_s": 0.0
+  },
+  "launch": "58 C after a 59 C preheat (E139's, runitems.py's defaults), 4 s runs"
+ },
+ "expectation": "not a line: E7 near +0.15 W and E32 near 0 if reading A holds and card 1 prices encoded toggles as aifoundry3 does; E56 and E448 near +0.21 W; Hp present.",
+ "harness": {
+  "reused_unchanged_sha256": {
+   "tools/claims-v3/lib.sh": "033d07762548c4abad0bb1721d338bb2333e58d6f07bc0d9a93bdcac0301eaaa",
+   "tools/claims-v3/runitems.py": "8293b5a0fbf72b68cb2d1ded35fa520711f0bd404246ac36874d8922cb137735",
+   "tools/claims-v3/text_hash.sh": "aa638f73d5253e9d2aef2dce504f5bf485ef15f56f2f02a8bff366888d4cdae5",
+   "tools/claims-v3/e128/ettelem_guard.sh": "c2c4ab7602c2e4d2b3ed3454faa4f60b745d5985bb7f71713229979079dbd2fc",
+   "tools/claims-v3/dmcmd_audit.py": "f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e",
+   "tools/claims-v3/dmcmd_table.json": "50168632931fd8c1fab40794cbaaac6aca3d31f01d4367d8a21fcf69c0bdc638",
+   "tools/claims-v3/e110/smoke_gate_e110.py": "42a88db4d0e5f342dd08f9678ea7a8516078c4c767a0868d2ee2cbff06209563",
+   "tools/claims-v3/dm/build_host.sh": "0029ff8cdb53df0f9cee9037f16291900e437e32c888da77f54ec7886d242a69",
+   "tools/claims-v3/dm/make_host_src.py": "64ae602348827de36eadb5f8837fd6b493c30aadfdd50272fdb49bf4b9da8133",
+   "workloads/enercat/host/main.cpp": "3cad4adc16534b845cc142f78a28907192b62fe21081e282d6df67342200359c",
+   "workloads/sparsity/host/main.cpp": "0f53a7d505155156c933e2d9a64d38803ca4e0cea3e20242e0aaafbf35e82284",
+   "tools/claims-v3/e156/block_e156.sh": "985b0e85dde22f566c75e4a0bf5727ac222fc9f160695154f7b89ce8ce393a88",
+   "tools/claims-v3/e156/run_e156.py": "0e7e43a3d9520962d7d0c6b9eba1cab4e40f16a414d147210d147091b02f596b",
+   "tools/claims-v3/e156/session_e156.sh": "522ed82cf859e067e95244670d8f20cf733bf35262ac079d2df46ea210074ce9",
+   "tools/claims-v3/e156/queue_e156.sh": "496ef6d5f8a0ca62068c0a0d9d9bef27872fb7e0d5ae3c11f1e3a89ad110f10f",
+   "tools/claims-v3/e156/check_e156.py": "3c929b9a2b4e471d407211f7a0d9cc0f54260f4e44a9e9e60533a6e9ca45fd93",
+   "tools/claims-v3/e156/preflight_e156.sh": "24f7a97ea99f106df335c22c536b92c7e373a954eb595601785cbb1f0ab60ef5",
+   "tools/claims-v3/e156/collect_e156.sh": "ae1b8d8cccd2938aaa316c089e070d0a6705f4da9235f7970c2025620b8f2545",
+   "tools/claims-v3/e156/box-binaries.txt": "9064881bf11261ead8cb7172d3130d55b8195818013364b5d0a5e7e4ba9365ba"
+  },
+  "box_binaries_sha256": {
+   "build/enercat-e99/host/enercat_host": "e246327417574ee1da4bc6374cfbefe64ad0f30a2e00fa0e06d1b1541f0a112a",
+   "build/enercat-hl/kernel/enercat.elf": "7e7ce13f2753c246d2aed1e806ec692044f6c2763f6ffcdc843348e36c081af4",
+   "build/sparsity/host/sparsity_host": "e0fbecce35f252c546e6e8390f6a4694519674dc4d6dea359b0db9c4d1a3fbbe",
+   "build/ettelem/ettelem": "8008f96f056ae1c224c33ccce38070a67882a664620d637b8833d378b2167325",
+   "build/e156-gen/manifest.json": "65a287267455e98ed7691bfb15d9da6a9e8fefde5575b3bde9eddcd43b583872",
+   "build/e156-gen/srcs/c3_128.bin": "84281ce8938f1c17db890b8867673d8fd140025329af6cac1a972da2a867d407",
+   "build/e156-gen/srcs/c3_64.bin": "ce9f44229ae85e673974bcf38783e0f9ec088fd6a6d394259bafcda63050dd57",
+   "build/e156-gen/srcs/dm_a44.bin": "b08136594ebaf1ce547d31af5d394cb0a2ce8a02cf7a0ae933d15ef66c442f60",
+   "build/e156-gen/srcs/dm_l08.bin": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+   "build/e156-gen/srcs/dm_u4.bin": "605d3ca65a8561d008d6e45cf0b66cbbc1cd19c9587cb3a5e0409012687cf2ea",
+   "build/e156-gen/srcs/e2_64.bin": "96ad626a338955cf5f3ec738fa59220ff5c14d84f1f671d104a57624aa3a91cb",
+   "build/e156-gen/srcs/e7_64.bin": "cd55c4a417cafd97f2ec4861dd237c22456c09d893feb960b5ff47027e4d670d",
+   "build/e156-gen/srcs/eh_32.bin": "05714b91f9b818e54ad21d10e1f0a56a4da653d00d4b3925b08d0a7106115e0c",
+   "build/e156-gen/srcs/eh_64.bin": "6690a48eba708ee64a60a8744016f7bae048aac324c07368b62c9ec6b0d3f44e",
+   "build/e156-gen/srcs/el_32.bin": "a941bea6ff605eb7c2ca09e631b64ea9f4a53c85886cf8c9d9cdb6f30400ce5f",
+   "build/e156-gen/srcs/el_64.bin": "4df278ec54c06e69d7cf395a7483af4adcc5ce9fff9bdce836dc9968db06e04a",
+   "build/e156-gen/srcs/vl_128.bin": "a5213bef9d64d1ae00b79b59b0baea7509448767866fab2d27d20c50def35a45",
+   "build/e156-gen/srcs/vl_64.bin": "545b48fad4ad77ddd53093eb598a93348f43837b039a0c7997ebd63174b2ecb6",
+   "build/e156-gen/srcs/wl_128.bin": "7cf40f0ec1e2dd920efa9c59077c3e8a67ff7ee3034a3a3c448abd8de70229d8",
+   "build/e156-gen/srcs/wl_64.bin": "bf0dfa6c5444db33b2dec4b0b80b9f72e2dc68c3b83d642bbd770500c14fb050"
+  },
+  "reduction_sha256": {
+   "tools/claims-v3/e156/reduce_e156.py": "2e8f6484dbf87a259d42b83e57217a3ffc858d39444d835bca0797df1da4666d",
+   "tools/claims-v3/e156/reduce_e156.sh": "f5a0da22821cd8af2c1f4d6154a0edc4af8f587ea6f1d96d897969842d0107cb",
+   "tools/claims-v3/dp/posthoc_dips.py": "2c9224ea89b72f19d45015ff0aad4072e6bac1cb5f14c7fc3795f88b40f3ad71",
+   "tools/claims-v3/hl/reduce_hl.py": "5cc653cb86b791b4d21110fde759a9cf12e79633ac9b7028a2c19e8c965ac86e",
+   "tools/claims-v3/mf/reduce_mf.py": "d2955aaf270dcc8697a96764ba5a2a55e3369e649ac00909061d8767719506b8",
+   "tools/claims-v3/e110/reduce_e110.py": "213c78fd0614812d0587baa2fd563003c9c9f05879a7114a3c2f846056f3e42b",
+   "tools/claims-v3/e132/reduce_e132.py": "46ed6c1115012deffeff0ff0e830752f64facf7cdacc92e71675a548477e0de4",
+   "tools/claims-v3/e156/make_e156.py": "4eae183b61f80adc7f9e2371b048cd68e6dfaca587b87f46328b07fc7f749b1d",
+   "tools/claims-v3/dm/dm_enc.py": "8b851a5de8968d893df5fb1a297ee8a548e12ee595488a578ecd70737ea638ee",
+   "tools/claims-v3/mf/make_mf.py": "7512678064f727d1908452c4abfcfbfaa00fe3eaf8fffd0074b817576ed44c7a",
+   "tools/claims-v3/e110/make_e110.py": "56161fd91d3159ee2b4db36afd0c61bcb47ca395bea3526c9367b7f9cc448756"
+  },
+  "gen_sha256_file": {
+   "path": "docs/reports/data/2026-11-03-e156-memory-images-card1/gen/gen.sha256",
+   "sha256": "865cba35d4f2f2fa4aeb398ed0376d94e083995686ac92428f879e13d653b755"
+  },
+  "counts_json_sha256": "35e614e0b5ef87a9c59f1ab71936d76b88ba0e78ef6c408b76bac1cce75cf084"
+ }
+}

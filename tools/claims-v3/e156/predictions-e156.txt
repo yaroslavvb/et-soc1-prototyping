@@ -1,0 +1,17 @@
+E156 frozen predictions (written from docs/reports/data/2026-11-02-e139-memory-split-more-passes/e139.json, sha256 0cd188463013...; line rate 1.17294e+09 lines/s)
+prices per reading (each from E139's E56 and E448):
+  A e64            0.4630 pJ  (E56 0.4628, E448 0.4632)  E139's reading: per encoded toggle between consecutive 64-bit pieces of a line (the count E139's 0.46 pJ is per)
+  B e32            0.9260 pJ  (E56 0.9256, E448 0.9264)  per encoded toggle between consecutive 32-bit pieces
+  C e64_plus_e128  0.4630 pJ  (E56 0.4628, E448 0.4632)  per encoded toggle between consecutive 64-bit pieces plus between consecutive 128-bit pieces
+  E t_enc          1.8520 pJ  (E56 1.8511, E448 1.8528)  per encoded pin toggle between beats beyond V16's price (the pins mispriced, the residual on the pins)
+  F tx_enc         12.9638 pJ  (E56 12.9577, E448 12.9699)  per encoded pin toggle from a line's last beat to the next line's first on a channel (the line edge)
+pairs: counts (image - twin) and each reading's prediction at E139's line rate, W:
+  E56   eh_64 - el_64: d_e64 +392 d_e32 +196 d_e128 +0 d_t_enc +98 d_tx_enc +14 d_hi +32 | A 0.2129 B 0.2129 C 0.2129 E 0.2129 F 0.2129
+  E448  vl_64 - c3_64: d_e64 +392 d_e32 +196 d_e128 +0 d_t_enc +98 d_tx_enc +14 d_hi +32 | A 0.2129 B 0.2129 C 0.2129 E 0.2129 F 0.2129
+  E192  vl_128 - c3_128: d_e64 +168 d_e32 +84 d_e128 +336 d_t_enc +42 d_tx_enc +14 d_hi +32 | A 0.0912 B 0.0912 C 0.2737 E 0.0912 F 0.2129
+  E7    e7_64 - e2_64: d_e64 +280 d_e32 +140 d_e128 +0 d_t_enc +70 d_tx_enc +10 d_hi -32 | A 0.1521 B 0.1521 C 0.1521 E 0.1521 F 0.1521
+  E32   eh_32 - el_32: d_e64 +0 d_e32 +420 d_e128 +0 d_t_enc +210 d_tx_enc +14 d_hi +32 | A 0.0000 B 0.4562 C 0.0000 E 0.4562 F 0.2129
+rule N1: the critic's rule on the two new images: |mean - prediction(A)| <= 0.05 W for each; PASS if both, FAIL if either; NOT-SCORED below 3 headline passes. The 95% interval is reported against prediction +- 0.05 W (decided inside, decided outside, or straddling)
+rule C1: E139's own images on this card, the same price and the same rule; E132's R4 class reading beside it, and each against E132's frozen +0.185 W
+rule N2: the width reading inside the session: for each reading X, per pass d_X = E_pair - k_X (E56 + E448)/2 with k_X the pair's count over E56's under X; X is consistent on a pair when the 95% interval of d_X contains 0; the verdict is the set of readings consistent on both E32 and E192 ('A ONLY', ..., 'SEVERAL: ...', 'NONE'). E7 is reported (every reading gives it k = 5/7)
+rule D: read DBI evident on this card: Hp present on the board at E132's class (mean >= 0.10 W, interval above 0) -> EVIDENT; absent -> NOT EVIDENT (every encoded prediction assumes read DBI on, as on aifoundry3); else UNRESOLVED
