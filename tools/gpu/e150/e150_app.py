@@ -583,9 +583,9 @@ def _scrub(text):
 # ---------------------------------------------------------------------------------------------------------------
 # The plans. A pass = REF, then (cell, REF) for every kind in the pass's order; each format's zeros also runs at the
 # start, middle and end of a pass (the anchors). Unit A runs the passes forward then reversed, unit B the reverse.
-def pass_order(kinds, stage, unit, p):
-    ids = [kid(k) for k in kinds]
-    anchors = [f"{f}.{n}" for f, n in ANCHOR_EXTRA[stage]]
+def pass_order(kinds, stage, unit, p, fmts=("bf16", "fp16", "int8")):
+    ids = [kid(k) for k in kinds if k[0] in fmts]
+    anchors = [f"{f}.{n}" for f, n in ANCHOR_EXTRA[stage] if f in fmts]
     import random as _r
     rnd = _r.Random(_seed(f"e150/order/{stage}"))
     body = list(ids)
@@ -608,11 +608,12 @@ def plan(stage, unit, sizes=None):
         steps = [{"op": "static"}, {"op": "gen", "set": "M"}, {"op": "idle", "s": HEAT["idle_s"]},
                  {"op": "hold", "kind": "bf16.REF", "s": HEAT["ref_hold_s"], "label": "heat_ref"},
                  {"op": "hold", "kind": "bf16.zeros", "s": HEAT["zeros_hold_s"], "label": "heat_zeros"}]
+        fm = tuple(f for f in ("bf16", "fp16", "int8") if f in (sizes or SIZE))   # a dropped format runs nothing
         for p in (1, 2):
-            steps.append({"op": "pass", "p": p, "seq": pass_order(PHASE_L, "L", unit, p)})
+            steps.append({"op": "pass", "p": p, "seq": pass_order(PHASE_L, "L", unit, p, fm)})
         for p in (3, 4):
-            steps.append({"op": "pass", "p": p, "seq": pass_order(PHASE_H, "H", unit, p)})
-        hold_ids = [kid(k) for k in STAGE2 if k[1] != "zeros"]
+            steps.append({"op": "pass", "p": p, "seq": pass_order(PHASE_H, "H", unit, p, fm)})
+        hold_ids = [kid(k) for k in STAGE2 if k[1] != "zeros" and k[0] in fm]
         if unit == "B":
             hold_ids = list(reversed(hold_ids))
         steps.append({"op": "holds", "seq": hold_ids, "pre_s": HOLD["pre_s"], "hold_s": HOLD["hold_s"]})
@@ -822,7 +823,8 @@ class Unit:
         return feats
 
     def step_gen(self, st):
-        sets = {"S": STAGE_S, "M": PHASE_L + PHASE_H}
+        fm = set(self.plan["sizes"])
+        sets = {"S": STAGE_S, "M": [k for k in PHASE_L + PHASE_H if k[0] in fm]}
         kinds = list(sets[st["set"]]) + [REF]
         feats = self._prepare(kinds, with_feats=(st["set"] == "M"))
         _wjson_gz(f"{self.root}/features-{st['set']}.json.gz", feats)

@@ -1,0 +1,62 @@
+{
+ "stage": "S",
+ "unit": "S-A10G",
+ "sizes": {
+  "bf16": 512,
+  "fp16": 512,
+  "int8": 512
+ },
+ "steps": [
+  {
+   "op": "static"
+  },
+  {
+   "op": "gen",
+   "set": "S"
+  },
+  {
+   "op": "idle",
+   "s": 10.0
+  },
+  {
+   "op": "hold",
+   "kind": "bf16.rand@1024",
+   "s": 45.0,
+   "label": "warm"
+  },
+  {
+   "op": "pass",
+   "p": 1,
+   "seq": [
+    "bf16.rand@512",
+    "fp16.rand@512",
+    "int8.rand@512",
+    "bf16.zeros@512",
+    "fp16.zeros@512",
+    "int8.zeros@512",
+    "bf16.rand@1024",
+    "fp16.rand@1024",
+    "int8.rand@1024",
+    "bf16.zeros@1024",
+    "fp16.zeros@1024",
+    "int8.zeros@1024",
+    "bf16.rand@1536",
+    "fp16.rand@1536",
+    "int8.rand@1536",
+    "bf16.zeros@1536",
+    "fp16.zeros@1536",
+    "int8.zeros@1536",
+    "bf16.rand@2048",
+    "fp16.rand@2048",
+    "int8.rand@2048",
+    "bf16.zeros@2048",
+    "fp16.zeros@2048",
+    "int8.zeros@2048"
+   ]
+  },
+  {
+   "op": "idle",
+   "s": 5.0
+  }
+ ]
+}
