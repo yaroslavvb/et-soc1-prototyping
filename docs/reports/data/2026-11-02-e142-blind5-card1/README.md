@@ -24,6 +24,8 @@ tiles M6 is as unbiased as M7 and covers 29 of 30 inside narrower bands, so E142
 gain anything over M6 on card 1. The 30-of-30 against 19-of-25 contrast this README drew compared two pools, two cards and two reduction
 rules. The registration ([`tools/claims-v3/e142/`](../../../../tools/claims-v3/e142/README.md), `962748e7`) is frozen and unchanged.*
 
+*Scored since (a dated note, Tue 3 Nov 2026, about 05:20 PST; desk only; the text below, written before E141's reduction existed, is unchanged): X1 and X2 were scored post hoc by Q139(c) in lab `22f8d1f9`, with the registered `score_e142.py --e141` on E141's committed reduction (`0531494f`). **X1 FAILS**: the median of card 1's float D over aifoundry3's, 21 tiles, 0.982 [0.980, 0.996] against M7's 0.9711. **X2 PASSES**: int8, 9 tiles, 0.981 [0.969, 1.005] against 0.9735. The float ratio moves about 0.95–0.99 over the two cards' leakage-corrected reduction arms (0.93–1.02 only with one card's leakage left uncorrected), so the card term cannot be tested to 1% until the footing is one ([Q139(c)](../2026-11-03-q139c-critic-checks/README.md), check (b)). Where this README says X1 and X2 are not scored (the results table, the before/after table, § 7, the registered-against-happened table and What it changes), it describes the record as this lane reduced it.*
+
 **In plain words.** M7 is the lab's model that predicts how much power a matmul draws (watts over the same kernel on zeros) and how far the
 die warms (in a 4.5 s run) from the numbers it multiplies. On this card it also carries a card term: card 1 draws 0.971 times what aifoundry3
 does for the same floats. E142 ran 36 kinds of numbers that nobody fitted, written by an independent designer, on the second card, one
@@ -60,7 +62,7 @@ drifted +0.13, +0.23, −0.16, +0.38 and +0.26 W across the five passes (gate 0.
 | **E142-H2** | die rise, fp16 | 8 | rms **0.162 °C** | 0.181–0.524 | **PASS** (below) | none |
 | **E142-H3** | die rise, int8 | 7 | rms **0.139 °C** | 0.067–0.211 | **PASS** | none |
 | **E142-H4** | heat coverage | 30 | **29 of 30** inside (`int8.a_word_flipflop` outside, 0.37 against 0.66 °C) | ≥ 26 | **PASS** | none |
-| **E142-X1**, **X2** | the card term | — | — | — | **NOT SCORED**: E141 (pool 5 on aifoundry3) has not run; handed on with the code (`score_e142.py --e141`) | — |
+| **E142-X1**, **X2** | the card term | — | — | — | **NOT SCORED**: E141 (pool 5 on aifoundry3) has not run; handed on with the code (`score_e142.py --e141`) *(scored post hoc since: X1 FAIL, X2 PASS; the dated note at the top)* | — |
 
 The frozen expectation was P1–P3 PASS, B1 PASS or FAIL HIGH, B2 PASS, C1 PASS, M1 and M2 NOT RESOLVED, H1–H4 PASS: it was met. The
 likeliest misses named in advance mostly were not misses: the wide-exponent gate tiles read +0.012, −0.131 and +0.018 W from M7, the fp16
@@ -145,7 +147,7 @@ times 0.115 °C/W: a constant the readout cannot see over 4.5 s; anchors are not
 | power, 95% bands | 47 of 50 pool rows (a calibration, not a test) | **30 of 30** (100%); mean half-width 0.70 / 0.62 / 0.66 W | 29 of 30 (97%); 0.43 / 0.39 / 0.56 W | M6 19 of 25 (76%; the meter's dips kept, two of four passes; 21 of 25 with the dips removed) |
 | heat, fp32 / fp16 / int8 | 0.352 / 0.355 / 0.141 °C | **0.167 / 0.162 / 0.139 °C** | 0.163 / 0.147 / 0.138 °C | M6 0.18 / 0.27 / 0.21 °C |
 | heat, 95% bands | — | **29 of 30** | 30 of 30 | M6 24 of 25 |
-| the card term (0.9711 floats, 0.9735 int8) | 0.175 W rms on 92 paired float kinds | not separable without E141 (X1/X2 handed on) | — | — |
+| the card term (0.9711 floats, 0.9735 int8) | 0.175 W rms on 92 paired float kinds | not separable without E141 (X1/X2 handed on) *(scored post hoc since: X1 FAIL, X2 PASS; the dated note at the top)* | — | — |
 
 So: **on the second card, M7's stated error bars can be quoted for new kinds** (power within its nested rms per format, no resolved bias,
 bands that covered every tile; heat about half its card-1 nested rms on the floats), with two qualifications. (i) M7 is not shown better than
@@ -172,7 +174,7 @@ E137; E88 and E91 used their own `auto` slopes, 0.315 and 0.422). The session's 
 pass gates set aside three of five passes (the tie drifting −0.705 and +1.034 W, `fp32.randn` spanning 1.638 W: the meter dips E82 A2 removes)
 and the two kept passes give fp16 0.315 W (P2 FAIL). With the anchor and tie gates relaxed, nothing changes (no pass was set aside).
 
-**7. The card term** (X1, X2): NOT SCORED. E141, the same pool on aifoundry3 card 0, had not run when this lane reduced. When E141's committed
+**7. The card term** (X1, X2): NOT SCORED *(scored post hoc since, Tue 3 Nov 2026: X1 FAIL, X2 PASS; the dated note at the top)*. E141, the same pool on aifoundry3 card 0, had not run when this lane reduced. When E141's committed
 reduction exists, `PY=<python with numpy> bash tools/claims-v3/e142/collect_e142.sh <raw root> <E141's reduction json>` (or
 `score_e142.py --e142 e142.json --e141 <its reduction>`) scores them as registered: the median D(card 1) / D(aifoundry3) over the float tiles
 with D ≥ 5 W (int8 ≥ 1 W) against 0.9711 (0.9735), with a bootstrap interval over tiles. Without it, card 1's blind error above is M7's
@@ -189,7 +191,7 @@ aifoundry3 footing and the card term together.
 | stops | board ≥ 66 W or a minion-shire field ≥ 72 °C (main path and in-run watcher); `--max-c 72` | **no stop**: board at most 62.09 W (p99.9 61.67–61.89 per pass), shire mean at most 63 °C (the field named `pmic` holds the same shire average, 63 °C: it is not the PMIC's temperature), the shire field's high-water latch 65 °C throughout (`telemetry-max.json`). No telemetry field reads the PMIC's own temperature, which its 75 °C over-temperature alarm compares, so that margin is not measured; the guard against over-temperature was the 72 °C die stop *(corrected after verification, C3: this said "PMIC 63 °C")* |
 | config reads | 65 W / 65 °C / 600 MHz | **all 16 reads** 65 W, 65 °C, 600 MHz, 499 mV; `power_state` read 1 (managed) in 13 and 3 (low power) in 3 (read only; nothing set) |
 | expectation | P1–P3, B2, C1, H1–H4 PASS; B1 PASS or FAIL HIGH; M1, M2 NOT RESOLVED | **met** |
-| X1, X2 | scored if E141's reduction exists | NOT SCORED (E141 not yet run) |
+| X1, X2 | scored if E141's reduction exists | NOT SCORED (E141 not yet run) *(scored post hoc since: X1 FAIL, X2 PASS; the dated note at the top)* |
 
 ## Departures and post hoc
 
@@ -253,7 +255,7 @@ an aifoundry2 clause the edit box no longer held, so `EXPECT_TEXT` refused once 
 - **Item 6 on the kinds page**: answered for the second card. M7's power and heat predictions, frozen before the run, held on 36 blind
   tiles on aifoundry1 card 1 (power 0.17 / 0.15 / 0.25 W rms, no resolved bias, 30 of 30 inside its bands; heat 0.17 / 0.16 / 0.14 °C,
   29 of 30). Still open there: the same pool on aifoundry3 (E141) and on aifoundry2 under its governor (E143), and the card term itself (X1,
-  X2, once E141 exists).
+  X2, once E141 exists; scored post hoc since: X1 FAIL, X2 PASS, the dated note at the top).
 - **The model**: no gain of M7 over M6 is resolved on these tiles, in rms (−0.003 W), bias (+0.001 against −0.003 W) or coverage (30 and 29
   of 30, M6's bands the narrower) *(corrected after verification, C1)*, nor over M5 (−0.054 W, interval through zero). The clearest term the
   card shows at work is the clock gate's switching (M5's +0.54 / +0.60 W misses, outside its bands); M7's `b138` shows a 0.25–0.27 W gain on

@@ -6481,11 +6481,11 @@ experiments in M7's rows, the meter's dips removed).
 **Scored:** P1–P3, B1, B2, C1, H1–H4 PASS; M1, M2 NOT RESOLVED; X1 and X2, the card term, NOT SCORED (E141's reduction did not
 exist when E142 reduced; it does now, in `0531494f`). *Scored post hoc by Q139(c) (Tue 3 Nov 2026) with the registered scorer on E141's committed
 reduction: X1 FAIL (floats 0.982 [0.980, 0.996] against 0.9711), X2 PASS (int8 0.981 [0.969, 1.005] against 0.9735); the
-float ratio moves 0.931–1.015 over the two cards' committed reduction arms and reads 0.973–0.974 at M7's training
-footing with the dips removed on both ([`2026-11-03-q139c-critic-checks/`](../reports/data/2026-11-03-q139c-critic-checks/README.md)).* The frozen expectation was met.
+float ratio moves 0.953–0.990 over the two cards' leakage-corrected reduction arms (0.931–1.015 only with one card's leakage left uncorrected) and reads 0.973–0.977 at M7's training
+footing (0.973–0.974 with the dips removed on both, 0.976–0.977 with them kept on aifoundry3); corrected after verification, Tue 3 Nov 2026, about 05:20 PST: it said "moves 0.931–1.015 over the two cards' committed reduction arms and reads 0.973–0.974 at M7's training footing with the dips removed on both" ([`2026-11-03-q139c-critic-checks/`](../reports/data/2026-11-03-q139c-critic-checks/README.md)).* The frozen expectation was met.
 **What it changes.** Item 6: M7 holds blind on new kinds on card 1, a card whose earlier rows it was fitted on (new kinds, not new
 hardware; C2), at the registered leakage slope, and its stated bands can be quoted there, perhaps conservative (30 of 30 where
-28.5 are expected); E142 shows no gain of M7 over M6 in rms, bias or coverage. Open: X1/X2; card 1's leakage slope (the frozen
+28.5 are expected); E142 shows no gain of M7 over M6 in rms, bias or coverage. Open: X1/X2 *(scored post hoc since by Q139(c), above)*; card 1's leakage slope (the frozen
 0.2414 against the session's 0.408 moves D about 0.35 W); `int8.b_line_zero_one` (−0.567 W) and `int8.powerlaw_w` (−0.582 W),
 over-predicted by all three models.
 **Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.

@@ -3,10 +3,12 @@
 *Tue 3 Nov 2026 (week 45), about 04:00–05:00 PST, on the Intel. Desk only: no card, no ssh to a lab host, no Modal, nothing set.
 **Everything here is post hoc**: every number it reads was committed before this lane began, and none of its arms was registered.
 It answers the kinds page's [section 11](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open), item 1
-(a large GEMM; ranks 3 and 7 of Q138's final critic) and items 9 and 8 (heat over minutes, the critic's rank 4) for check (a), and
+(a large GEMM; rank 3 of Q138's final critic; corrected after verification, C5: it said "ranks 3 and 7", but check (a) does not touch rank 7, the time per op) and items 9 and 8 (heat over minutes, the critic's rank 4) for check (a), and
 item 6 (the power model: the card term, rank 5, and the blind scores, ranks 1–2) for checks (b) and (c). Q138's final critic ran
 these three checks in its own scratch, unverified; this lane wrote its own code from the committed data and compared with the
 critic's outputs only at the end. The corrections they support are in the lab records, on the kinds page and on the hubs (below).*
+
+*Corrected after verification (a dated note, Tue 3 Nov 2026, about 05:20 PST; desk only, nothing re-run on a card). An independent verifier re-derived checks (a)–(c) with its own code and the registered scorer: every number in this file reproduces. It found seven minor faults, none of which changes a measured, frozen or registered number, a rule or a verdict; each is corrected in place, marked "corrected after verification, C<n>" (or "added after verification"). **C1**, the card ratio's spread: both ends of 0.931–1.015 pair an arm with no leakage correction (`leak0`) on one card with a corrected arm on the other (E141 `leak0` × E142 `auto` 0.9312, E141 `nodips` × E142 `leak0` 1.0153); over the 60 pairs with the leakage corrected on both cards it runs 0.953–0.990, and pairs with the same slope rule on both cards read 0.960–0.982 (`xterm_check.txt`), so the spread to quote is about 0.95–0.99. **C2**, `F6` given the watts: −0.02 to +0.69 °C on the three anchors, and the rest anchor is a whole-degree die that read 47 °C, then 46 °C, inside its 120 s window, so averaged by sample rather than by time it gives +1.00 / +1.14 °C (the critic's 46.0 °C, +0.95 / +1.13): the bound to quote is about 1 °C, not 0.7. **C3**, the card term was still "not scored" in E142's claim row in `05-claims.md`, the Q138 row of `02-requests.md`, the open list of E142's entry in `03-experiments.md` and E142's README; each now carries a dated pointer to (b). **C4**, how much of R5's miss is the law's: on the measured watts the law alone misses `F6` by +3.05 / +2.43 °C, about two thirds of R5's +4.62 / +3.57; the low power it was fed adds 1.1–1.5 °C. **C5**, cites and labels: E78's README line 613, not 231, says a `file:` run's math is unchecked; M7 against M6, −0.009 and −0.003 W, is the registered M1 over the 24 priority-1 tiles (over the 30, −0.002 and −0.0004 W); check (a) answers rank 3, not rank 7. **C6**, M7's training footing reads 0.973–0.974 with the meter's dips removed on both cards, and 0.976–0.977 with them kept on aifoundry3, as 154 of M7's 247 aifoundry3 float training rows were: within 0.2–0.6% of 0.9711, still an X1 FAIL. **C7**, the heat "before": E136's law's 2.18 °C over the 56 includes the 25 runs (E119 and E126 below 64 °C) its sustained weight was fitted on, where it reads 1.60 °C; on the 14 runs of E136 and E146, which it never saw, it reads 2.25 °C, against the chain's 0.45–0.49 °C (`chain_gemm.json`). The kinds page and the Horace Hub carried C1, C2 and two wordings (the 4.5 s constant's range on two cards, 0.33–0.55 °C; the governed clock's blind error about half M7's end-to-end clock error and two thirds its board error) and are corrected too (§ Published).*
 
 ## Results first
 
@@ -23,14 +25,15 @@ runs: the registered reducers' last 40 s of work inside dispatch windows. Errors
 | E146 | 2 | 0.62 (+0.62) | 0.23 (+0.21) | 0.40 (+0.27) | 2.76 (+2.74) |
 | **All 56** | 56 | **0.63** (+0.54) | **0.47** (−0.33) | **0.49** (+0.04) | **2.18** (+1.91) |
 
+- **E136's law was fitted on 25 of these 56 runs** (E119 and E126 below 64 °C: its sustained weight), where it reads 1.60 °C rms; on the 14 runs of E136 and E146, which it never saw, it reads 2.25 °C, against the chain's 0.45–0.49 °C by anchor *(added after verification, C7)*.
 - **F6, the shape never run, given the watts.** fp32 random measured 65.25 °C at 56.15 W, and the chain reads +0.55 / +0.12 / +0.56 °C
-  by the three anchors. int8 full measured 61.71 °C at 45.48 W: +0.69 / +0.30 / −0.02 °C. E136's law on the same watts reads
+  by the three anchors. int8 full measured 61.71 °C at 45.48 W: +0.69 / +0.30 / −0.02 °C. The rest anchor is a whole-degree die that read 47 °C, then 46 °C, inside its 120 s window; averaged by sample rather than by time it gives +1.00 / +1.14 °C, so the bound to quote is about 1 °C *(added after verification, C2)*. E136's law on the same watts reads
   +3.05 / +2.43 °C (+3.10 with the registered die rounded to 65.3).
 - **F6 end to end, through the prediction's power.** Fed G2's frozen sustained power (52.5 / 42.72 W) instead of the trace, the chain
   reads fp32 random **+2.0 to +3.2 °C** low and int8 full **+1.2 to +1.7 °C** low (by anchor, and by whether only in-dispatch samples or the
   whole run span carry the frozen watts). E136's law on G2's power gives +4.57 / +3.58 °C (registered: +4.62 / +3.57, R5 die FAIL ×2).
   Fed P0's 800 MHz power (57.98 / 44.71 W), the chain reads −0.40 to +0.99 °C.
-- **So R5's die FAIL is E136's two-parameter law and the power it was fed, not the heat path.** G2 read F6's sustained board 3.65 / 2.76 W
+- **So R5's die FAIL is E136's two-parameter law and the power it was fed, not the heat path.** On the measured watts the law alone misses F6 by +3.05 / +2.43 °C, about two thirds of R5's +4.62 / +3.57; the low power it was fed adds 1.1–1.5 °C *(added after verification, C4)*. G2 read F6's sustained board 3.65 / 2.76 W
   low and its clock 800 MHz where the governor held fp32 random at 745.1. For a sustained large GEMM the next gain is its sustained power
   and governed clock (the critic's rank 3, Q139(q)), not heat.
 - **Checks on this file's own reader.** Its window die and watts equal every session's registered `results.json` cells to 0.05 °C and
@@ -49,10 +52,10 @@ runs: the registered reducers' last 40 s of work inside dispatch windows. Errors
 - **The ratio moves with the reduction footing.** Over every scorable pair of the two cards' committed reduction arms (E141's 12,
   including the six post hoc training-footing arms of its corrections C1, by E142's 7; 77 pairs, 7 not scorable), the float median runs
   **0.931–1.015** (X1 PASS in 10) and int8's 0.928–1.038 (X2 PASS in 60). Over the 31 pairs with the same rule for the meter's dips on
-  both cards, the float median runs 0.953–1.015.
+  both cards, the float median runs 0.953–1.015. Both ends of the span pair an arm with no leakage correction (`leak0`) on one card with a corrected arm on the other: over the 60 pairs with the leakage corrected on both cards the float median runs **0.953–0.990**, and pairs with the same slope rule on both cards read 0.960–0.982 *(corrected after verification, C1: the spread to quote is about 0.95–0.99, not 0.93–1.02)*.
 - **At M7's own training footing**, with the dips removed on both cards (E141 at 0.2104 / 0.2163 / 0.2217 W/°C against card 1's frozen
   0.2414), the float ratio is **0.9730–0.9744**, 0.20–0.34% over M7's 0.9711. That still FAILS X1, because the intervals are narrow
-  ([0.9722, 0.9765] at 0.2104). With each card's slope fitted on its own session (E141 `nodips` × E142 `auto`) it is 0.9604, 1.1% under.
+  ([0.9722, 0.9765] at 0.2104). With the meter's dips kept on aifoundry3, as 154 of M7's 247 aifoundry3 float training rows were, it is 0.9758–0.9772 (+0.5–0.6%), also an X1 FAIL *(added after verification, C6)*. With each card's slope fitted on its own session (E141 `nodips` × E142 `auto`) it is 0.9604, 1.1% under.
   The registered verdict is at mismatched footings: aifoundry3's session slope with the dips kept, against card 1's frozen slope with
   the dips removed. So M7's card term is about right on its own footing, and its error at 1% is set by the footing, not measured.
 - No frozen number, band, prediction or verdict is changed. X1 / X2 stay as registered; this is their first scoring, post hoc and labelled.
@@ -73,7 +76,7 @@ the percentile bootstrap over tiles assumes neither but runs short at n ≤ 9:
 
 - The per-format readings rest on 7–9 tiles, so their χ² intervals run from 0.66–0.69 to 1.83–2.04 times the reading. Every format's
   set of all its non-anchor tiles (12 / 9 / 9) is in `blind_rms_ci.txt`. M6 over all 30 reads 0.367 [0.293, 0.491] on aifoundry3 and
-  0.211 [0.169, 0.282] on card 1, so M7 against M6 (−0.009 and −0.003 W over the 30, registered as NOT RESOLVED) sits deep inside both.
+  0.211 [0.169, 0.282] on card 1, so M7 against M6 (−0.009 and −0.003 W over the 24 priority-1 tiles, registered as NOT RESOLVED; −0.002 and −0.0004 W over the 30) sits deep inside both *(corrected after verification, C5: it said "over the 30")*.
 - The recomputed errors equal the committed `scored.json` `power_rows` to 1e-14 W.
 
 ## Where this differs from Q138's final critic (the data rule)
@@ -82,12 +85,12 @@ the percentile bootstrap over tiles assumes neither but runs short at n ≤ 9:
   die over the last 120 s of rest before the first launch, here 46.50 °C on E146, with the smoke's heat simulated). The critic used a
   46.0 °C rest reading, and for E119 and E126 a generic 22.0 W / 46.0 °C anchor. E126 rested at 43.0 °C and 21.22 W, so the critic's rest
   arm there read 2.04 °C rms over the whole session; on its own rest it reads 0.61 °C over the sustained windows. The critic's
-  first-gate figures reproduce: 0.45 / 0.50 / 0.49 / 0.23 °C against its 0.45 / 0.51 / 0.49 / 0.22, and F6 +0.12 / +0.30 against +0.11 / +0.29.
+  first-gate figures reproduce: 0.45 / 0.50 / 0.49 / 0.23 °C against its 0.45 / 0.51 / 0.49 / 0.22, and F6 +0.12 / +0.30 against +0.11 / +0.29. Both rest readings are defensible: the rest die read 47 °C, then 46 °C, inside A1.3's window, so its time-weighted mean is 46.50 °C and its sample mean 46.03 °C (+1.00 / +1.14 °C), and the critic's 46.0 °C sits with the second *(corrected after verification, C2: the difference is how a whole-degree reading is averaged, not an error of the critic's)*.
 - **Through G2's power the chain reads F6 +1.2 to +3.2 °C low, not "+1.5 to +2.9"**: the range depends on the anchor and on which samples
   carry the frozen watts.
 - **The card ratio's spread is wider, and its sign flips.** It is 0.931–1.015 over the 77 committed pairs, against the critic's
   0.953–0.989 over 24. "M7 about 1.1% low on card 1" holds at the registered inputs only. At M7's training footing M7 is within 0.2–0.34%,
-  and on the session-fitted slopes it is 1.1% high.
+  and on the session-fitted slopes it is 1.1% high. Over the 60 leakage-corrected pairs the span is 0.953–0.990, close to the critic's; the wider one needs one card's leakage left uncorrected, and with the dips kept on aifoundry3 M7's training footing reads +0.5–0.6% *(corrected after verification, C1 and C6)*.
 - **The governed clock's second "before"**, 13.9 MHz and 2.35 W, is M7's end-to-end score from the tile's bytes on the 21 training bursts the
   governor acts on, with the cap fitted on those bursts (Q138(m) C1, `posthoc-m7.json` `aifoundry2_split`). It is not a leave-one-kind-out
   score, so the records quote it under that name.
@@ -97,13 +100,13 @@ the percentile bootstrap over tiles assumes neither but runs short at n ≤ 9:
 
 - **Heat, the term tested: Q138(t)'s frozen board-watts-to-die chain, carried from the kinds loop to a large GEMM** (out of sample for the
   chain's fit; post hoc for this scoring). Before, E136's frozen sustained law on the measured watts: 2.18 °C rms over 56 sustained runs
-  (0.97–2.95 by session), and F6 +3.05 / +2.43 °C. After, the frozen chain on the same watts: **0.47–0.63 °C rms** (by anchor; 0.49 °C
-  anchored like the law on each run's start), and **F6 within +0.7 °C**. End to end through the frozen power, F6 still reads 1.2–3.2 °C low,
+  (0.97–2.95 by session; 25 of the 56 inside the law's own fit, and 2.25 °C on the 14 it never saw), and F6 +3.05 / +2.43 °C. After, the frozen chain on the same watts: **0.47–0.63 °C rms** (by anchor; 0.49 °C
+  anchored like the law on each run's start; 0.45–0.49 °C on the 14), and **F6 within about 1 °C** (−0.02 to +0.69 °C on the three anchors) *(corrected after verification, C2 and C7: it said "F6 within +0.7 °C" and did not name the law's fit set)*. End to end through the frozen power, F6 still reads 1.2–3.2 °C low,
   so the term to correct is a large GEMM's sustained power and governed clock (Q139(q), the critic's rank 3).
 - **Power, the term tested: M7's card-1 scale.** Registered X1 FAILS at 0.982 against 0.9711, M7 about 1.1% low on card 1 at the
-  registered inputs (about 0.2 W on a 20 W float kind). The ratio moves 0.931–1.015 with the reduction footing, and on M7's own footing it
-  is within 0.3%. So the card term's out-of-sample error cannot be put below the footing's few percent until one footing exists (Q139(u),
-  rank 1). int8's scale passes.
+  registered inputs (about 0.2 W on a 20 W float kind). The ratio moves about 0.95–0.99 over the leakage-corrected reduction footings (0.931–1.015 only with one card's leakage left uncorrected), and on M7's training footing it
+  is within 0.2–0.6%. So the card term's out-of-sample error cannot be put below the footing's 2–4% until one footing exists (Q139(u),
+  rank 1) *(corrected after verification, C1 and C6: it said "moves 0.931–1.015", "within 0.3%" and "few percent")*. int8's scale passes.
 - **The blind scores' own uncertainty.** aifoundry3 0.365 W [0.29, 0.49], card 1 0.211 W [0.17, 0.28]; per format about 0.7 to 2 times
   the reading. A refit must beat M6 or M7 by more than about 0.05–0.1 W over 30 tiles, per card, to resolve, which is why pool 6 pairs the
   models tile by tile (Q139(b)).
@@ -116,8 +119,8 @@ Q138's final critic listed one major fault, one moderate, eight minor and one ca
 corrected in the lab records (`docs/findings/05-claims.md`, `02-requests.md`), on the kinds page and on the Horace hub, each as a dated
 correction that keeps what was written. The carried item (the private archive's host named in four public lab files, and in git
 history) is the owner's call and is left as it stands.
-1. **Major, the sustained-die miss.** R5's die FAIL stays E136's law's. Given the watts, the frozen chain reads that die to within 0.7 °C
-   (post hoc), and the open part moves to the sustained power and governed clock.
+1. **Major, the sustained-die miss.** R5's die FAIL stays E136's law's. Given the watts, the frozen chain reads that die to within about 1 °C
+   (post hoc; corrected after verification, C2: it said 0.7 °C), and the open part moves to the sustained power and governed clock.
 2. **Moderate.** "E141 measures no float offset in M7" now reads: about half (the slope) to all (the slope and the dip rule) of the −0.23 W
    is the reduction's footing. On the dips-kept footing that 154 of M7's 247 aifoundry3 float training rows used, −0.11 to −0.13 W remains at B1's line
    (`fault_support.txt`), so an offset of about −0.1 W is neither shown nor excluded.
@@ -131,7 +134,7 @@ history) is the owner's call and is left as it stands.
 7. **The governed clock** gives both befores: in sample 7.59 MHz / 1.94 W, and M7's end-to-end 13.9 MHz / 2.35 W where the governor acts.
 8. **The GPU tile** reads "a toggle model of the ET-SoC-1's form, fitted on A100 ladders and frozen".
 9. **No launch's C was checked on pool 5.** Every fma launch reads `unchecked`: 2,274 on aifoundry3, 2,854 on card 1, 2,004 on aifoundry2
-   (`fault_support.txt`; E78's README line 231).
+   (`fault_support.txt`; E78's README line 613; corrected after verification, C5: it said line 231).
 10. **"E448's reads"** becomes "the 448-toggle image reads".
 
 ## Files
