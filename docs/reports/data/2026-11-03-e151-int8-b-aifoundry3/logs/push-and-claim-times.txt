@@ -1,0 +1,38 @@
+E151 order of events, Tue 3 Nov 2026 (PST), as read from git, the Discord tool's read-backs and the box's logs
+no-device setup on the box (files byte-identical to the freeze: check_e151 HARNESS OK 48 files, preflight GO, dry B/A/smoke/session, stub queue): 04:23:21-04:24:20, before the commit
+E151 registration a81541a3: committed 04:27:20, pushed by 04:27:23 (COMMIT_LAB: pushed a81541a3)
+box re-synced to the commit and re-checked (HARNESS OK 48 files, preflight GO), dry-run logs moved aside to build/e151-dry-042739: 04:27:39
+et-who before the claim: 04:29:14 (No process holds an ET-SoC-1 device node or card lock)
+claim: no card post dated Tue 3 Nov in the plan of 04:29:21 (Mon 2 Nov's 1566837317765963987 never edited), so the day's one post was created with post.mjs (staged, checked, sent): message 1567153765390487573 at 04:29:33
+  text:  <ai> **Claude says:** using aifoundry3 for 1 h, until ~05:29 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)
+session T0 (session start; first device access, the session-start config read 04:29:52): 2026-11-03 04:29:51 PST
+queue: 04:30:42 e151: blocks 15110 15111 15112 15113 15114 15115 15116 15117 15118 15119 15130 15120 15131 15132; budget 2100 s from the anchor (04:29:51), reserve 45 s, last end 05:04:06, deadline 11:25:00; first estimates B 185 s, A 140 s
+queue: 04:30:42 p15110 (B) starts at T0+51 s (projected 185 s)
+queue: 04:33:40 p15110 rc=0 (178 s)
+queue: 04:33:45 p15111 (B) starts at T0+234 s (projected 178 s)
+queue: 04:36:42 p15111 rc=0 (177 s)
+queue: 04:36:47 p15112 (B) starts at T0+416 s (projected 178 s)
+queue: 04:39:45 p15112 rc=0 (178 s)
+queue: 04:39:50 p15113 (B) starts at T0+599 s (projected 178 s)
+queue: 04:42:47 p15113 rc=0 (177 s)
+queue: 04:42:52 p15114 (B) starts at T0+781 s (projected 178 s)
+queue: 04:45:49 p15114 rc=0 (177 s)
+queue: 04:45:54 p15115 (B) starts at T0+963 s (projected 178 s)
+queue: 04:48:51 p15115 rc=0 (177 s)
+queue: 04:48:56 p15116 (B) starts at T0+1145 s (projected 178 s)
+queue: 04:51:54 p15116 rc=0 (178 s)
+queue: 04:51:59 p15117 (B) starts at T0+1328 s (projected 178 s)
+queue: 04:54:56 p15117 rc=0 (177 s)
+queue: 04:55:01 p15118 (B) starts at T0+1510 s (projected 178 s)
+queue: 04:57:59 p15118 rc=0 (178 s)
+queue: 04:58:04 p15119 (B) starts at T0+1693 s (projected 178 s)
+queue: 05:01:01 p15119 rc=0 (177 s)
+queue: 05:01:06 p15130 (A) starts at T0+1875 s (projected 140 s)
+queue: 05:03:20 p15130 rc=0 (134 s)
+queue: 05:03:25 budget: stopping before p15120 (B; now T0+2014 s, projected 178 s, would end T0+2192 s > T0+2055 s or the deadline)
+queue: 05:03:25 e151: done, 11 blocks (B 10, A 1), at T0+2014 s
+session end (closing config read, et-who free): 05:03:25
+release saved: 05:04:03 (save started 05:03:58, after a dry run at 05:03:54 with EXPECT_TEXT). Another lane had added its clause at 05:00, so the aifoundry3 clause was dropped, every other word kept
+  before: <ai> **Claude says:** using aifoundry3 for 1 h, until ~05:29 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>); using aifoundry1 card 1 for 1 h, until ~05:30 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)
+  after:  <ai> **Claude says:** using aifoundry1 card 1 for 1 h, until ~05:30 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)
+  read back 05:04:51: rendered '<ai> Claude says: using aifoundry1 card 1 for 1 h, until ~05:30 PST doc (edited)', edit time 5:04 AM; the plan's source field (React props) still showed the 05:00 text
