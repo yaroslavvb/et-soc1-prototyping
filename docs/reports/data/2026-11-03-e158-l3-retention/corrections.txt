@@ -1,0 +1,45 @@
+C1 POST HOC: F6 ran in E146; R3's pass and what carries it; the out-of-sample errors
+  F6 = gemmL3x4x6 (MB, NB, KB = [3, 4, 6]): E146's session (2 Nov) measured T800 1.9121 / 1.9064 / 1.9240 us (fp32 / fp16 / int8; E146 results.json per_shape), its far-B share through MAB +0.327 (posthoc.json shares); here 1.9111 / 1.9082 / 1.9181
+  so F6 was never fitted (no curve saw it), but it was run before E158, and its 0.33 share was known when E158's ladder was set (E158.md, 'Why')
+  R3 as registered: ISO on 22 rungs, w 0.9, near-best [0.3, 1.0], rms 0.1293; F6 +0.41% / +0.26% / -0.76% -> PASS
+  ISO at each w of the near-best interval 0.3-1.0: the worst |F6 error| 1.64% (R3 holds at every such w)
+  ISO refitted without K4n8: w 0.9 (near [0.7, 1.0]), rms 0.0698; F6 +8.04% / +7.94% / +5.90% -> FAIL of the 3% rule
+  ISO refitted without K6n4: w 0.9 (near [0.35, 1.0]), rms 0.1164; F6 +1.47% / +1.33% / +0.06% -> PASS of the 3% rule
+  ISO refitted without K6n4 and K4n8 (20 rungs): w 0.9 (near [0.8, 1.0]), rms 0.0257; F6 +10.33% / +10.26% / +7.78% -> FAIL of the 3% rule
+  F6's far B lines an op: 64, of them 32 at 54 MB (w 0.9), where ISO's r is 0.171: the pool of K4n8 (-0.199) and K6n6 (+0.540); at 42-48 MB ISO's r is 0.443, which pools K6n4 (+0.181) with plateau rungs
+  out of sample (results.json errors), STRICT-C -> ISO (LOGI): E146's committed ladder, the 18 KB >= 2 cells 7.2% -> 6.0% (4.5%) rms; all 24 10.9% -> 10.6% (8.5%); D2 and D4 here 13.1% -> 6.3% (5.9%); R4 NOT BETTER
+  ISO's single-shape errors (measured / predicted - 1; positive = ISO reads it fast): D4 here fp32 +8.66%; D4 E146 fp32 +8.54% / fp16 +8.42% / int8 +8.52%; D8 E146 fp32 +11.92% / fp16 +11.82% / int8 +11.82%; K4n8 here fp32 +12.74% / fp16 +12.44% / int8 +13.29%; K6n4 here fp32 +9.98%; D2 here fp32 +1.91%
+
+C2 POST HOC: the two block structures that collapse, against the other shapes with the same (NB, KB), their all-fresh price and their neighbours (fp32)
+  K6n4  gemmL1x4x6  MB 1 row block(s), NB 4, KB 6; far B at 43.0 MB; share +0.181; T800 1.8783 us against MAB's all-fresh 1.9958 and all-L3 1.3463 (-5.89% over all-fresh)
+  F6    gemmL3x4x6  MB 3 row block(s), NB 4, KB 6; far B at 50.5 MB; share +0.329; T800 1.9111 us against MAB's all-fresh 2.1247 and all-L3 1.4752 (-10.05% over all-fresh)
+  K4n8  gemmL1x8x4  MB 1 row block(s), NB 8, KB 4; far B at 55.0 MB; share -0.199; T800 2.1251 us against MAB's all-fresh 1.9958 and all-L3 1.3463 (+6.48% over all-fresh)
+  D4    gemmL4x8x4  MB 4 row block(s), NB 8, KB 4; far B at 61.5 MB; share -0.071; T800 2.1062 us against MAB's all-fresh 2.0602 and all-L3 1.4108 (+2.23% over all-fresh)
+  against the neighbour with one column block fewer or more: K6n4/K6n3 +33.29%; K6n4/K6n5 +14.86%; K4n8/K4n7 +28.89%
+  every MB = 1 rung past 38 MB with KB >= 4: K4n6 (NB 6, KB 4, 43 MB), K4n7 (NB 7, KB 4, 49 MB), K4n8 (NB 8, KB 4, 55 MB), K6n4 (NB 4, KB 6, 43 MB), K6n5 (NB 5, KB 6, 51 MB), K6n6 (NB 6, KB 6, 59 MB): NB 4 and NB 8 appear only in K6n4 and K4n8, so the stride reading rests on these two single-row-block rungs, and of the multi-row-block
+  shapes with the same (NB, KB), D4 (four row blocks, K4n8's layout) also runs slower than all-fresh while F6 (three row blocks, K6n4's layout) keeps 0.33
+
+C3 POST HOC: the zeros' energy per op step, three ways (fp32 cells; burst p800 x T800, the cells and the split posthoc.txt §5 uses)
+  whole board (base included): held (10 cells, T800 < 1.40 us) 46.781 uJ, slowest (D4, K4n8, T800 > 2.05 us) 72.239 uJ: +54.4%
+  over the idle rest (21.70 W, the smoke's last 30 s): held (10 cells, T800 < 1.40 us) 17.770 uJ, slowest (D4, K4n8, T800 > 2.05 us) 26.339 uJ: +48.2%
+  over E119's 800 MHz base B(800) = 33.61 W: held (10 cells, T800 < 1.40 us) 1.838 uJ, slowest (D4, K4n8, T800 > 2.05 us) 1.133 uJ: -38.4%
+  the board's p800: held 34.46-35.35 W, slowest 34.13-34.16 W: the slower shapes draw a little less, so the energy over the base falls while the whole board's rises
+
+C4 POST HOC: C's occupancy off the two collapses, by R2's registered logic, and the plateau's KB confound
+  ISO (the registered scorer) on the 20 rungs off K6n4 and K4n8: w 0.9, tied [0.8, 1.0], near-best [0.8, 1.0], rms 0.0257 (R2's bar 0.06); rms at w = 0 0.147, at w = 1 0.026 -> by R2's words: C OCCUPIES THE L3
+  LOGI on the same 20: x50 50.844 MB, s 10.398 MB, w 1.0, rms 0.121
+  the registered R2 on all 22: NO SINGLE CURVE (rms 0.129, near-best [0.3, 1.0]); by R2's words on the 22: NO SINGLE CURVE
+    plateau K2n9   KB 2 NB  9  39.0 MB, C 44% of the distance, share +0.514
+    plateau K2n10  KB 2 NB 10  43.0 MB, C 44% of the distance, share +0.481
+    plateau K2n11  KB 2 NB 11  47.0 MB, C 45% of the distance, share +0.457
+    plateau K2n12  KB 2 NB 12  51.0 MB, C 45% of the distance, share +0.459
+    plateau K2n13  KB 2 NB 13  55.0 MB, C 45% of the distance, share +0.473
+    plateau K4n6   KB 4 NB  6  43.0 MB, C 26% of the distance, share +0.559
+    plateau K4n7   KB 4 NB  7  49.0 MB, C 27% of the distance, share +0.534
+    plateau K6n5   KB 6 NB  5  51.0 MB, C 18% of the distance, share +0.555
+    plateau K6n6   KB 6 NB  6  59.0 MB, C 19% of the distance, share +0.540
+  the plateau by KB: KB 2 (5 rungs, C 44-45%) mean 0.477; KB 4-6 (4 rungs, C 18-27%) mean 0.547: every C-heavy rung is KB 2 and no other is, so C's share and KB are confounded by design (the family sets both)
+
+C5 POST HOC: the counts
+  ladder rungs run: 23 (22 with far B lines and a share; K6n1 has none)
+  the 98 bursts (session.json runs_planned; RES runs 98): ladder fp32 69, E146's F6, D2, D4 15, the K4 rungs' fp16 and int8 14, other 0
