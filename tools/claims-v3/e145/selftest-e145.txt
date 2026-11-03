@@ -1,0 +1,20 @@
+E145 board-power stop: board_w 40.0 W >= 1.0 W (sample t_ms 1793676061166, read 0.101 s after it was taken, from telemetry.jsonl.raw)
+E145 die stop: hottest minion-shire reading 61.0 C >= 1.0 C (sample t_ms 1793676061167, read 0.101 s after it was taken, from telemetry.jsonl.raw)
+PASS S1 E138 rail B odd-even 35.95 [30.47, 41.42] n 9
+PASS S1 E138 ratio 1.911 [1.706, 2.165]
+PASS S1 E138 verdicts {"E145-R1": "INCONCLUSIVE", "E145-R1n": "NEITHER (BETWEEN)", "E145-R1q": "NEITHER (BETWEEN)", "E145-R2": "NOT SCORED", "E145-C1": "NOT SCORED"}
+PASS S1 E130 rail B odd-even 33.15 [29.56, 36.75]
+PASS S1 E130 A control {"E145-R2": "FLAT", "E145-R3": "RISES", "E145-C1": "REPRODUCES card 0", "E145-R4": "INCONCLUSIVE between BOOTH ON B / NO BOOTH", "E145-R5": "HOLDS", "E145-R6": "FAILS (BELOW)"}
+PASS S1 E130 A-based rail/board scale {"ratio": 0.8110450675089419, "lo": 0.7555583552955436, "hi": 0.8723302410672408, "n": 4}
+S1 E130 netlists (rail, board-equivalent): {"booth_tree": "EXCLUDED by B_odd_minus_even_fJ, A_sign_dense_minus_one_fJ", "booth": "EXCLUDED by B_odd_minus_even_fJ, A_sign_dense_minus_one_fJ", "booth_swap": "EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ", "plain": "EXCLUDED by B_odd_minus_even_fJ, A_sign_dense_minus_one_fJ"}
+S1 E130 board arm: {"E145-R1": "INCONCLUSIVE", "E145-R1n": "IN BOOTH ON B's BAND", "E145-R1q": "IN BOOTH ON B's BAND", "E145-R2": "FLAT", "E145-R3": "RISES", "E145-R4": "INCONCLUSIVE between BOOTH ON B / NO BOOTH", "E145-R5": "HOLDS", "E145-R6": "HOLDS", "E145-C1": "REPRODUCES card 0", "E145-N": {"booth_tree": "EXCLUDED by A_sign_dense_minus_one_fJ", "booth": "EXCLUDED by A_sign_dense_minus_one_fJ", "booth_swap": "EXCLUDED by B_odd_minus_even_fJ, A_odd_minus_even_fJ, A_sign_dense_minus_one_fJ", "plain": "EXCLUDED by B_odd_minus_even_fJ"}} {"mean": 33.844975387971914, "lo": 11.024186539868012, "hi": 56.665764236075816, "n": 6}
+PASS S2 board stop fires E145 board-power stop: board_w 40.0 W >= 1.0 W (sample t_ms 1793676061166, read 0.101 s after it was taken, from telemetry.jsonl.raw)
+PASS S2 die stop fires E145 die stop: hottest minion-shire reading 61.0 C >= 1.0 C (sample t_ms 1793676061167, read 0.101 s after it was taken, from telemetry.jsonl.raw)
+PASS S2 registered stops pass a 40 W / 61 C line 
+stop test die: rc=6; E145 die stop: hottest minion-shire reading 61.0 C >= 1.0 C (sample t_ms 1, read 0.12 s after it was taken, from telemetry.jsonl.raw)
+stop test board: rc=6; E145 board-power stop: board_w 33.1 W >= 1.0 W (sample t_ms 1, read 0.2 s after it was taken, from telemetry.jsonl.raw)
+PASS S3 gate passes a correct stop test []
+stop test die: rc=6; E145 die stop: hottest minion-shire reading 61.0 C >= 1.0 C (sample t_ms 1, read 0.12 s after it was taken, from telemetry.jsonl.raw)
+stop test board: rc=6; E145 board-power stop: board_w 33.1 W >= 1.0 W (sample t_ms 1, read 9.5 s after it was taken, from telemetry.jsonl)
+PASS S3 gate fails a stale sample, the wrong file and a launch ["stop test board: sample read 9.5 s after it was taken, from telemetry.jsonl (want <= 2.0 s, telemetry.jsonl.raw)", "stop test: 0 launch records and 1 run marks (want none: no launch)"]
+SELFTEST PASS
