@@ -1,0 +1,31 @@
+E165 scorer self-test: score_e165.py sha256 03bfd40b728bad2a40a8e3559f16ac4b7e817929729c2090d9f029b4b41fd74c, predictions-e165.json 7235109379f9a8f6af5057a205ea5b41c18049045706801ee46b8325380555a2
+  parent: E160 results.json 7dbddc797e2f0607e5142735e048caeaa95e0c23971e65e7dde83cd937571887, predictions-e160.json 0f655c0e15dbb18a5c87e436db5571a6dc044984b6c64ed288204da69c808475
+ok   E160's ccheck-s1.json decompressed is the file its results name (946fabaa6b981774...)
+ok   E160's s1 reduced again: 150 runs, 150 complete, 150 counted (results.json: 150, 150, 150)
+ok   E160's registered rules reproduced field for field (9 rules, 53 fields, 0 differ): E160-F1 PASS; E160-F2 PASS; E160-F3 PASS; E160-W1 PASS (better than the reference says); E160-W2 PASS; E160-W3 PASS; E160-H1 PASS; E160-H3 PASS; E160-PK PASS
+ok   E160-C reproduced: PASS, 2596 launches {'PASS': 2596} (0 differ)
+ok   E160-R0 reproduced: PASS (0 differ)
+ok   E160's every pass alone reproduced (3 passes, 0 differ): pass 1 F1 FAIL, W2 FAIL; pass 2 F1 PASS, W2 PASS; pass 3 F1 PASS, W2 PASS
+ok   E160's rules over the complete runs (C not required) reproduced (0 differ)
+ok   the scorer's own E160 cells equal Q140(l)'s rows: 45 tiles' means and die starts, and the three zeros anchors' reads (9 bursts)
+ok   Q140(l)'s end-to-end E160 figures from the scorer's own cells, unrounded: governed clock 3.6833 MHz (+1.545), governed board 0.6633 W (-0.348), pinned board 0.7956 W (-0.034); n (17, 28); loso.json's to 7.5e-14 (3.68 / 0.66 / 0.80); anchors the session's own zeros anchors
+ok   the same through burst()'s rounded outputs (E165's primary path): 3.6844 MHz, 0.6632 W, 0.7955 W (differences 0.0011 MHz, 0.0001 W, 0.0001 W)
+ok   they read 3.68 MHz / 0.66 W / 0.80 W at two decimals, as Q140(l)'s README and the critic quote them
+ok   measured = M9's part (no anchor read, die starts at T_ref, so the primary is the frozen block): 52 tiles, {'R2': 'PASS', 'G': 'PASS', 'Bg': 'PASS', 'Bp': 'PASS', 'E165-F1': 'PASS (better than the reference says)', 'E165-F2': 'PASS (better than the reference says)', 'E165-W1': 'PASS (better than the reference says)', 'E165-W2': 'PASS (better than the reference says)', 'E165-F3': 'PASS', 'E165-W3': 'PASS', 'E165-H1': 'PASS (better than the reference says)', 'E165-H3': 'PASS'}
+ok   governed clocks 5 MHz high: G FAIL, Bg PASS, Bp PASS, R2 FAIL
+ok   governed clocks 3 MHz high: G FAIL (rms 3.0 within 4 MHz, mean 3.0 not within 2)
+ok   pinned boards 0.8 W high: Bp FAIL, G PASS, Bg PASS
+ok   pinned boards +-1.2 W: Bp FAIL (mean 0.0 within, rms 1.2 over 1.0 W)
+ok   measured = M7 as frozen: resolved better than M7 G False, Bg False, Bp False; R2 FAIL
+ok   boards 3 W high: W3 FAIL, W1 FAIL, W2 FAIL
+ok   rises 2 C high: H1 FAIL, H3 FAIL
+ok   7 governed tiles: G NOT SCORED (n 7 < 8), Bg NOT SCORED (n 7 < 8), Bp PASS, R2 NOT SCORED
+ok   at burst()'s own steps (anchors 0.1 W over the fallback level, die starts 0.5 C over T_ref) every scored tile moves as its frozen sensitivities say, to the frozen code's rounding (0.02 MHz, 0.002 W): 0 off []
+ok   larger steps, group means: anchors 1 W under the fallback level move the pinned boards -0.654 W (linear -0.655; beta 0.648) and the governed clocks +3.76 MHz (linear +3.82); die starts 2 C over T_ref move the governed clocks -4.72 MHz (linear -4.68) and the pinned boards +0.799 W (linear +0.798); within 10% (the dither curves near the cap's edge, so single tiles there differ more)
+ok   an anchor burst at 752 MHz is not counted (delta {'fp32': -2.534, 'fp16': -2.5068, 'int8': -2.5352})
+ok   with no session read the primary is the frozen block on all 61 tiles, field for field
+ok   the order: idx 60 is pass 2; a run whose label is not the order's at its idx is refused; each pass opens with the three zeros anchors
+ok   a run of a left-out tile is refused (runs of tiles left out by name: ['b7-fp32.uniform_pm1']); 6 tiles left out by name
+ok   bootstrap reproducible (2.45, 6.408); coverage lines 25 -> 21, 52 -> 46
+
+ALL PASS
