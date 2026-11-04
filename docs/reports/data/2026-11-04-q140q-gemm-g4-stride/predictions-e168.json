@@ -1,0 +1,872 @@
+{
+ "what": "Q140(q): G4's frozen predictions for E168 (aifoundry2, its own governor); nothing of E168 exists",
+ "date": "2026-11-04",
+ "registration": "49575094",
+ "g4": {
+  "_model": "G4 (Q140(q)): G3 plus the terms the registered forward rule kept, constants chosen on all five sessions",
+  "registration": "49575094",
+  "kept_terms": [
+   "T_Z",
+   "T_G",
+   "T_S (structural)"
+  ],
+  "constants": {
+   "k_W_per_C": 0.2,
+   "k_is": "G3's k_eff from the run's start die",
+   "T_ref_C": null,
+   "trip_C": 65.5,
+   "zeros_level": true,
+   "beta": 0.648275414762018,
+   "delta_fallback_w": {
+    "fp16": -1.5067753028963726,
+    "fp32": -1.533979965482577,
+    "int8": -1.5351694510250744
+   },
+   "dip": {
+    "d_G": 0.12,
+    "P_G_w": 56.0,
+    "f_dip_mhz": 618.0
+   }
+  },
+  "g3_frozen_base": {
+   "commit": "91def7c4",
+   "chain": "Q138(t) model-q138t.json a2",
+   "burst_cap": [
+    66.15,
+    2.75
+   ],
+   "off_share": 0.5,
+   "anchor_s": 20.0,
+   "window_s": 40.0
+  },
+  "final_in_sample": {
+   "mhz": {
+    "rms": 10.4184,
+    "mean": -4.9519,
+    "inside": 53,
+    "n": 65
+   },
+   "w": {
+    "rms": 1.2289,
+    "mean": -0.4007,
+    "inside": 59,
+    "n": 65
+   },
+   "die": {
+    "rms": 0.5289,
+    "mean": -0.0911,
+    "inside": 60,
+    "n": 65
+   }
+  },
+  "nested_pooled": {
+   "mhz": {
+    "rms": 10.3421,
+    "mean": -4.173,
+    "inside": 53,
+    "n": 65
+   },
+   "w": {
+    "rms": 1.3344,
+    "mean": -0.3234,
+    "inside": 57,
+    "n": 65
+   },
+   "die": {
+    "rms": 0.5774,
+    "mean": -0.0587,
+    "inside": 58,
+    "n": 65
+   }
+  }
+ },
+ "g4_sha256": "fe5bb0a62861c95611570938f643cde1fae9ff03b2c66380fa25d650f42ffebc",
+ "span_fractions": {
+  "real_smol_w8a8_down": {
+   "phi": 0.7725518776101364,
+   "D_M8_w": 5.4369,
+   "D_M8_top_w": 7.037585639968761,
+   "source": "predictions-blind6-aifoundry3.json (blind for M8) over E78 a3 int8.full (rows-m8.json)"
+  },
+  "sparse50": {
+   "phi": 0.782830561128837,
+   "D_M8_w": 5.5092371155289905,
+   "D_M8_top_w": 7.037585639968761,
+   "D_meas_w": 5.4586133118313365,
+   "source": "rows-m8.json E78 a3 (in sample for M8)"
+  },
+  "fp32_sparse50_for_reference": {
+   "phi": 0.2982578220024052
+  }
+ },
+ "levels_phi_selfcheck_max_abs_w": 0.0,
+ "rules": {
+  "per_hold": {
+   "mhz": 15.0,
+   "w": 2.0,
+   "die": 1.0
+  },
+  "pass": "each quantity inside on at least 8 of the 9 holds (measured - G4)",
+  "increment": "int8 W8A8 real and int8 sparse50 at S2: (window board minus int8 zeros' at S2), measured vs G4, within 15% of the span (G4's frozen 800 MHz level int8 full - int8 zeros at S2)",
+  "beside": "E136's law and G3 as frozen, scored the same way; the chain on the measured trace (heat alone)",
+  "primary": "G4 run from each hold's own measured start (score_e168.py); T_Z on the fallback; if the session ran kinds zeros anchors, an arm with its own delta"
+ },
+ "design": {
+  "card": "aifoundry2 card 0, its own governor (65 W / 65 C read, never set)",
+  "binary": "E136's rgm136 SP_GEMM_LARGE, unchanged",
+  "shapes": {
+   "S1": {
+    "arm": "gemmL1x3x3",
+    "MNK_fp32": [
+     1024,
+     1536,
+     1536
+    ],
+    "footprint_MB": {
+     "A": 6,
+     "B": 9,
+     "C": 6,
+     "total": 21
+    },
+    "store_every_ops": 96,
+    "lines_32MB": {
+     "A_L2": 0.0,
+     "A_L3": 64.0,
+     "A_F": 0.0,
+     "B_L2": 0.0,
+     "B_L3": 128.0,
+     "B_F": 0.0,
+     "n_L3": 192.0,
+     "n_F": 0.0,
+     "n_miss": 192.0,
+     "h_C": 1.0
+    }
+   },
+   "S2": {
+    "arm": "gemmL3x3x2",
+    "MNK_fp32": [
+     3072,
+     1536,
+     1024
+    ],
+    "footprint_MB": {
+     "A": 12,
+     "B": 6,
+     "C": 18,
+     "total": 36
+    },
+    "store_every_ops": 64,
+    "lines_32MB": {
+     "A_L2": 0.0,
+     "A_L3": 64.0,
+     "A_F": 0.0,
+     "B_L2": 16.0,
+     "B_L3": 112.0,
+     "B_F": 0.0,
+     "n_L3": 176.0,
+     "n_F": 0.0,
+     "n_miss": 176.0,
+     "h_C": 0.0
+    }
+   },
+   "S3": {
+    "arm": "gemmL3x5x3",
+    "MNK_fp32": [
+     3072,
+     2560,
+     1536
+    ],
+    "footprint_MB": {
+     "A": 18,
+     "B": 15,
+     "C": 30,
+     "total": 63
+    },
+    "store_every_ops": 96,
+    "lines_32MB": {
+     "A_L2": 0.0,
+     "A_L3": 51.2,
+     "A_F": 12.8,
+     "B_L2": 0.0,
+     "B_L3": 81.2,
+     "B_F": 46.8,
+     "n_L3": 132.4,
+     "n_F": 59.6,
+     "n_miss": 192.0,
+     "h_C": 0.0
+    }
+   }
+  },
+  "order": [
+   "S1-fp32-randn-cold",
+   "S1-fp32-randn-warm55",
+   "S2-fp32-randn-cold",
+   "S2-fp32-randn-warm55",
+   "S3-fp32-randn-cold",
+   "S3-fp32-randn-warm55",
+   "S2-int8-zeros-warm55",
+   "S2-int8-real_smol_w8a8_down-warm55",
+   "S2-int8-sparse50-warm55"
+  ],
+  "hold": {
+   "processes": 12,
+   "seconds": 8.0,
+   "budget": 9.5,
+   "tail_s": 6,
+   "window": "in-kernel samples of the last 40 s of work (reduce_hpl SUS_LAST_S)",
+   "starts": {
+    "cold": "the card at rest, die about 46 C (wait for it, bounded)",
+    "warm55": "after the preceding hold, idle until the die reads 55 C"
+   }
+  },
+  "stops": {
+   "abs_stop_c": 76,
+   "board_cap_w": 85,
+   "cap_consecutive": 3
+  },
+  "power_rule": "predicted peak = P0(800) + 8.51 W (G3's frozen rule, no level term) <= 82.0 W; a hold above it is duty-cycled or dropped",
+  "budget": "about 45 card-minutes planned (nine holds of about 106 s, three rests to about 46 C, idles to 55 C, smoke and stop tests); cap 55; registered subset the six fp32 random holds",
+  "device_commands": "E159's chain unchanged (ettelem sample without --reset-ms, ettelem config, ettelem sptrace, sparsity_host); every command READ; the lane re-runs tools/claims-v3/dmcmd_audit.py before its claim"
+ },
+ "cells": {
+  "S1-fp32-randn-cold": {
+   "shape": "S1",
+   "arm": "gemmL1x3x3",
+   "type": "fp32",
+   "kind": "randn",
+   "start": "cold",
+   "values": "gemmL1x3x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+   "P0_w": {
+    "600": 47.072,
+    "700": 55.579,
+    "800": 67.169
+   },
+   "predicted_peak_w": 75.68,
+   "runs_as_designed": true,
+   "G4": {
+    "mhz": 689.23,
+    "w": 57.952,
+    "die": 65.39,
+    "die_start": 46.0,
+    "peak_w_traj": 66.06
+   },
+   "G3_as_frozen": {
+    "mhz": 691.21,
+    "w": 57.051,
+    "die": 65.489,
+    "die_start": 46.0,
+    "peak_w_traj": 65.96
+   },
+   "E136_law": {
+    "mhz": 745.279,
+    "w": 62.06,
+    "die": 61.626
+   },
+   "both_nominal_starts": {
+    "cold": {
+     "G4": {
+      "mhz": 689.23,
+      "w": 57.952,
+      "die": 65.39,
+      "die_start": 46.0,
+      "peak_w_traj": 66.06
+     },
+     "G3_as_frozen": {
+      "mhz": 691.21,
+      "w": 57.051,
+      "die": 65.489,
+      "die_start": 46.0,
+      "peak_w_traj": 65.96
+     }
+    },
+    "warm55": {
+     "G4": {
+      "mhz": 656.95,
+      "w": 53.097,
+      "die": 65.44,
+      "die_start": 54.98,
+      "peak_w_traj": 65.81
+     },
+     "G3_as_frozen": {
+      "mhz": 656.8,
+      "w": 53.037,
+      "die": 65.495,
+      "die_start": 54.99,
+      "peak_w_traj": 65.8
+     }
+    }
+   }
+  },
+  "S1-fp32-randn-warm55": {
+   "shape": "S1",
+   "arm": "gemmL1x3x3",
+   "type": "fp32",
+   "kind": "randn",
+   "start": "warm55",
+   "values": "gemmL1x3x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+   "P0_w": {
+    "600": 47.072,
+    "700": 55.579,
+    "800": 67.169
+   },
+   "predicted_peak_w": 75.68,
+   "runs_as_designed": true,
+   "G4": {
+    "mhz": 656.95,
+    "w": 53.097,
+    "die": 65.44,
+    "die_start": 54.98,
+    "peak_w_traj": 65.81
+   },
+   "G3_as_frozen": {
+    "mhz": 656.8,
+    "w": 53.037,
+    "die": 65.495,
+    "die_start": 54.99,
+    "peak_w_traj": 65.8
+   },
+   "E136_law": {
+    "mhz": 745.279,
+    "w": 62.06,
+    "die": 65.032
+   },
+   "both_nominal_starts": {
+    "cold": {
+     "G4": {
+      "mhz": 689.23,
+      "w": 57.952,
+      "die": 65.39,
+      "die_start": 46.0,
+      "peak_w_traj": 66.06
+     },
+     "G3_as_frozen": {
+      "mhz": 691.21,
+      "w": 57.051,
+      "die": 65.489,
+      "die_start": 46.0,
+      "peak_w_traj": 65.96
+     }
+    },
+    "warm55": {
+     "G4": {
+      "mhz": 656.95,
+      "w": 53.097,
+      "die": 65.44,
+      "die_start": 54.98,
+      "peak_w_traj": 65.81
+     },
+     "G3_as_frozen": {
+      "mhz": 656.8,
+      "w": 53.037,
+      "die": 65.495,
+      "die_start": 54.99,
+      "peak_w_traj": 65.8
+     }
+    }
+   }
+  },
+  "S2-fp32-randn-cold": {
+   "shape": "S2",
+   "arm": "gemmL3x3x2",
+   "type": "fp32",
+   "kind": "randn",
+   "start": "cold",
+   "values": "gemmL3x3x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+   "P0_w": {
+    "600": 47.499,
+    "700": 56.245,
+    "800": 68.116
+   },
+   "predicted_peak_w": 76.63,
+   "runs_as_designed": true,
+   "G4": {
+    "mhz": 681.88,
+    "w": 57.866,
+    "die": 65.398,
+    "die_start": 46.0,
+    "peak_w_traj": 66.11
+   },
+   "G3_as_frozen": {
+    "mhz": 683.92,
+    "w": 56.994,
+    "die": 65.489,
+    "die_start": 46.0,
+    "peak_w_traj": 66.06
+   },
+   "E136_law": {
+    "mhz": 738.583,
+    "w": 62.06,
+    "die": 61.626
+   },
+   "both_nominal_starts": {
+    "cold": {
+     "G4": {
+      "mhz": 681.88,
+      "w": 57.866,
+      "die": 65.398,
+      "die_start": 46.0,
+      "peak_w_traj": 66.11
+     },
+     "G3_as_frozen": {
+      "mhz": 683.92,
+      "w": 56.994,
+      "die": 65.489,
+      "die_start": 46.0,
+      "peak_w_traj": 66.06
+     }
+    },
+    "warm55": {
+     "G4": {
+      "mhz": 650.6,
+      "w": 53.088,
+      "die": 65.443,
+      "die_start": 54.98,
+      "peak_w_traj": 65.97
+     },
+     "G3_as_frozen": {
+      "mhz": 650.39,
+      "w": 53.031,
+      "die": 65.495,
+      "die_start": 54.99,
+      "peak_w_traj": 65.97
+     }
+    }
+   }
+  },
+  "S2-fp32-randn-warm55": {
+   "shape": "S2",
+   "arm": "gemmL3x3x2",
+   "type": "fp32",
+   "kind": "randn",
+   "start": "warm55",
+   "values": "gemmL3x3x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+   "P0_w": {
+    "600": 47.499,
+    "700": 56.245,
+    "800": 68.116
+   },
+   "predicted_peak_w": 76.63,
+   "runs_as_designed": true,
+   "G4": {
+    "mhz": 650.6,
+    "w": 53.088,
+    "die": 65.443,
+    "die_start": 54.98,
+    "peak_w_traj": 65.97
+   },
+   "G3_as_frozen": {
+    "mhz": 650.39,
+    "w": 53.031,
+    "die": 65.495,
+    "die_start": 54.99,
+    "peak_w_traj": 65.97
+   },
+   "E136_law": {
+    "mhz": 738.583,
+    "w": 62.06,
+    "die": 65.032
+   },
+   "both_nominal_starts": {
+    "cold": {
+     "G4": {
+      "mhz": 681.88,
+      "w": 57.866,
+      "die": 65.398,
+      "die_start": 46.0,
+      "peak_w_traj": 66.11
+     },
+     "G3_as_frozen": {
+      "mhz": 683.92,
+      "w": 56.994,
+      "die": 65.489,
+      "die_start": 46.0,
+      "peak_w_traj": 66.06
+     }
+    },
+    "warm55": {
+     "G4": {
+      "mhz": 650.6,
+      "w": 53.088,
+      "die": 65.443,
+      "die_start": 54.98,
+      "peak_w_traj": 65.97
+     },
+     "G3_as_frozen": {
+      "mhz": 650.39,
+      "w": 53.031,
+      "die": 65.495,
+      "die_start": 54.99,
+      "peak_w_traj": 65.97
+     }
+    }
+   }
+  },
+  "S3-fp32-randn-cold": {
+   "shape": "S3",
+   "arm": "gemmL3x5x3",
+   "type": "fp32",
+   "kind": "randn",
+   "start": "cold",
+   "values": "gemmL3x5x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+   "P0_w": {
+    "600": 42.644,
+    "700": 49.716,
+    "800": 59.715
+   },
+   "predicted_peak_w": 68.23,
+   "runs_as_designed": true,
+   "G4": {
+    "mhz": 767.34,
+    "w": 59.43,
+    "die": 64.654,
+    "die_start": 46.0,
+    "peak_w_traj": 62.49
+   },
+   "G3_as_frozen": {
+    "mhz": 777.1,
+    "w": 59.332,
+    "die": 65.09,
+    "die_start": 46.0,
+    "peak_w_traj": 61.61
+   },
+   "E136_law": {
+    "mhz": 796.598,
+    "w": 59.375,
+    "die": 60.51
+   },
+   "both_nominal_starts": {
+    "cold": {
+     "G4": {
+      "mhz": 767.34,
+      "w": 59.43,
+      "die": 64.654,
+      "die_start": 46.0,
+      "peak_w_traj": 62.49
+     },
+     "G3_as_frozen": {
+      "mhz": 777.1,
+      "w": 59.332,
+      "die": 65.09,
+      "die_start": 46.0,
+      "peak_w_traj": 61.61
+     }
+    },
+    "warm55": {
+     "G4": {
+      "mhz": 725.02,
+      "w": 53.546,
+      "die": 65.383,
+      "die_start": 55.0,
+      "peak_w_traj": 60.79
+     },
+     "G3_as_frozen": {
+      "mhz": 725.69,
+      "w": 53.335,
+      "die": 65.49,
+      "die_start": 54.98,
+      "peak_w_traj": 60.74
+     }
+    }
+   }
+  },
+  "S3-fp32-randn-warm55": {
+   "shape": "S3",
+   "arm": "gemmL3x5x3",
+   "type": "fp32",
+   "kind": "randn",
+   "start": "warm55",
+   "values": "gemmL3x5x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+   "P0_w": {
+    "600": 42.644,
+    "700": 49.716,
+    "800": 59.715
+   },
+   "predicted_peak_w": 68.23,
+   "runs_as_designed": true,
+   "G4": {
+    "mhz": 725.02,
+    "w": 53.546,
+    "die": 65.383,
+    "die_start": 55.0,
+    "peak_w_traj": 60.79
+   },
+   "G3_as_frozen": {
+    "mhz": 725.69,
+    "w": 53.335,
+    "die": 65.49,
+    "die_start": 54.98,
+    "peak_w_traj": 60.74
+   },
+   "E136_law": {
+    "mhz": 796.598,
+    "w": 59.375,
+    "die": 63.923
+   },
+   "both_nominal_starts": {
+    "cold": {
+     "G4": {
+      "mhz": 767.34,
+      "w": 59.43,
+      "die": 64.654,
+      "die_start": 46.0,
+      "peak_w_traj": 62.49
+     },
+     "G3_as_frozen": {
+      "mhz": 777.1,
+      "w": 59.332,
+      "die": 65.09,
+      "die_start": 46.0,
+      "peak_w_traj": 61.61
+     }
+    },
+    "warm55": {
+     "G4": {
+      "mhz": 725.02,
+      "w": 53.546,
+      "die": 65.383,
+      "die_start": 55.0,
+      "peak_w_traj": 60.79
+     },
+     "G3_as_frozen": {
+      "mhz": 725.69,
+      "w": 53.335,
+      "die": 65.49,
+      "die_start": 54.98,
+      "peak_w_traj": 60.74
+     }
+    }
+   }
+  },
+  "S2-int8-zeros-warm55": {
+   "shape": "S2",
+   "arm": "gemmL3x3x2",
+   "type": "int8",
+   "kind": "zeros",
+   "start": "warm55",
+   "values": "gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "P0_w": {
+    "600": 27.668,
+    "700": 31.077,
+    "800": 37.126
+   },
+   "predicted_peak_w": 45.64,
+   "runs_as_designed": true,
+   "G4": {
+    "mhz": 800.0,
+    "w": 36.326,
+    "die": 55.96,
+    "die_start": 54.98,
+    "peak_w_traj": 36.53
+   },
+   "G3_as_frozen": {
+    "mhz": 800.0,
+    "w": 37.268,
+    "die": 56.421,
+    "die_start": 54.99,
+    "peak_w_traj": 37.34
+   },
+   "E136_law": {
+    "mhz": 800.0,
+    "w": 37.126,
+    "die": 54.663
+   },
+   "both_nominal_starts": {
+    "cold": {
+     "G4": {
+      "mhz": 800.0,
+      "w": 37.66,
+      "die": 53.662,
+      "die_start": 46.0,
+      "peak_w_traj": 37.79
+     },
+     "G3_as_frozen": {
+      "mhz": 800.0,
+      "w": 37.909,
+      "die": 53.84,
+      "die_start": 46.0,
+      "peak_w_traj": 37.97
+     }
+    },
+    "warm55": {
+     "G4": {
+      "mhz": 800.0,
+      "w": 36.326,
+      "die": 55.96,
+      "die_start": 54.98,
+      "peak_w_traj": 36.53
+     },
+     "G3_as_frozen": {
+      "mhz": 800.0,
+      "w": 37.268,
+      "die": 56.421,
+      "die_start": 54.99,
+      "peak_w_traj": 37.34
+     }
+    }
+   },
+   "int8_full_P0_w": {
+    "600": 33.241,
+    "700": 38.215,
+    "800": 45.982
+   }
+  },
+  "S2-int8-real_smol_w8a8_down-warm55": {
+   "shape": "S2",
+   "arm": "gemmL3x3x2",
+   "type": "int8",
+   "kind": "real_smol_w8a8_down",
+   "start": "warm55",
+   "values": "gemmL3x3x2:tiles:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_down.bin",
+   "P0_w": {
+    "600": 31.974,
+    "700": 36.592,
+    "800": 43.967
+   },
+   "predicted_peak_w": 52.48,
+   "runs_as_designed": true,
+   "G4": {
+    "mhz": 800.0,
+    "w": 43.908,
+    "die": 59.67,
+    "die_start": 54.98,
+    "peak_w_traj": 43.95
+   },
+   "G3_as_frozen": {
+    "mhz": 800.0,
+    "w": 44.464,
+    "die": 59.967,
+    "die_start": 54.99,
+    "peak_w_traj": 44.49
+   },
+   "E136_law": {
+    "mhz": 800.0,
+    "w": 43.967,
+    "die": 57.508
+   },
+   "both_nominal_starts": {
+    "cold": {
+     "G4": {
+      "mhz": 800.0,
+      "w": 45.243,
+      "die": 57.372,
+      "die_start": 46.0,
+      "peak_w_traj": 45.44
+     },
+     "G3_as_frozen": {
+      "mhz": 800.0,
+      "w": 45.104,
+      "die": 57.387,
+      "die_start": 46.0,
+      "peak_w_traj": 45.2
+     }
+    },
+    "warm55": {
+     "G4": {
+      "mhz": 800.0,
+      "w": 43.908,
+      "die": 59.67,
+      "die_start": 54.98,
+      "peak_w_traj": 43.95
+     },
+     "G3_as_frozen": {
+      "mhz": 800.0,
+      "w": 44.464,
+      "die": 59.967,
+      "die_start": 54.99,
+      "peak_w_traj": 44.49
+     }
+    }
+   },
+   "int8_full_P0_w": {
+    "600": 33.241,
+    "700": 38.215,
+    "800": 45.982
+   },
+   "increment_rule": {
+    "predicted_increment_w": 7.582,
+    "span_w": 8.856,
+    "band_w": 1.328,
+    "phi": 0.7726
+   }
+  },
+  "S2-int8-sparse50-warm55": {
+   "shape": "S2",
+   "arm": "gemmL3x3x2",
+   "type": "int8",
+   "kind": "sparse50",
+   "start": "warm55",
+   "values": "gemmL3x3x2:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+   "P0_w": {
+    "600": 32.031,
+    "700": 36.665,
+    "800": 44.058
+   },
+   "predicted_peak_w": 52.57,
+   "runs_as_designed": true,
+   "G4": {
+    "mhz": 800.0,
+    "w": 44.009,
+    "die": 59.719,
+    "die_start": 54.98,
+    "peak_w_traj": 44.05
+   },
+   "G3_as_frozen": {
+    "mhz": 800.0,
+    "w": 44.56,
+    "die": 60.014,
+    "die_start": 54.99,
+    "peak_w_traj": 44.58
+   },
+   "E136_law": {
+    "mhz": 800.0,
+    "w": 44.058,
+    "die": 57.546
+   },
+   "both_nominal_starts": {
+    "cold": {
+     "G4": {
+      "mhz": 800.0,
+      "w": 45.344,
+      "die": 57.421,
+      "die_start": 46.0,
+      "peak_w_traj": 45.54
+     },
+     "G3_as_frozen": {
+      "mhz": 800.0,
+      "w": 45.2,
+      "die": 57.434,
+      "die_start": 46.0,
+      "peak_w_traj": 45.29
+     }
+    },
+    "warm55": {
+     "G4": {
+      "mhz": 800.0,
+      "w": 44.009,
+      "die": 59.719,
+      "die_start": 54.98,
+      "peak_w_traj": 44.05
+     },
+     "G3_as_frozen": {
+      "mhz": 800.0,
+      "w": 44.56,
+      "die": 60.014,
+      "die_start": 54.99,
+      "peak_w_traj": 44.58
+     }
+    }
+   },
+   "int8_full_P0_w": {
+    "600": 33.241,
+    "700": 38.215,
+    "800": 45.982
+   },
+   "increment_rule": {
+    "predicted_increment_w": 7.683,
+    "span_w": 8.856,
+    "band_w": 1.328,
+    "phi": 0.7828
+   }
+  }
+ }
+}

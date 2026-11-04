@@ -1,0 +1,86 @@
+S1-fp32-randn-cold                   meas  784.5 MHz  55.25 W 62.09 C | G4  780.6  58.07 62.82 | inside {'mhz': True, 'w': False, 'die': True}
+S2-fp32-randn-cold                   meas  697.7 MHz  54.46 W 65.55 C | G4  706.8  53.91 65.41 | inside {'mhz': True, 'w': True, 'die': True}
+S3-fp32-randn-cold                   meas  649.7 MHz  54.00 W 65.66 C | G4  665.0  54.07 65.45 | inside {'mhz': False, 'w': True, 'die': True}
+{
+ "verdict_G4": {
+  "mhz": "FAIL (2 of 3; the rule needs 8 of 9)",
+  "w": "FAIL (2 of 3; the rule needs 8 of 9)",
+  "die": "PASS (3 of 3; the rule needs 8 of 9)"
+ },
+ "increment_rule": {},
+ "G4_rms_below": {
+  "G3_as_frozen": {
+   "mhz": true,
+   "w": true,
+   "die": true
+  },
+  "E136_law": {
+   "mhz": true,
+   "w": true,
+   "die": true
+  }
+ },
+ "summary": {
+  "G4.mhz": {
+   "n": 3,
+   "rms": 10.491,
+   "mean": -6.831,
+   "inside": 2
+  },
+  "G4.w": {
+   "n": 3,
+   "rms": 1.658,
+   "mean": -0.778,
+   "inside": 2
+  },
+  "G4.die": {
+   "n": 3,
+   "rms": 0.445,
+   "mean": -0.124,
+   "inside": 3
+  },
+  "G3_as_frozen.mhz": {
+   "n": 3,
+   "rms": 13.407,
+   "mean": -13.231,
+   "inside": 2
+  },
+  "G3_as_frozen.w": {
+   "n": 3,
+   "rms": 2.155,
+   "mean": -1.033,
+   "inside": 2
+  },
+  "G3_as_frozen.die": {
+   "n": 3,
+   "rms": 0.798,
+   "mean": -0.384,
+   "inside": 2
+  },
+  "E136_law.mhz": {
+   "n": 3,
+   "rms": 71.0,
+   "mean": -62.611,
+   "inside": 0
+  },
+  "E136_law.w": {
+   "n": 3,
+   "rms": 6.481,
+   "mean": -5.826,
+   "inside": 1
+  },
+  "E136_law.die": {
+   "n": 3,
+   "rms": 1.471,
+   "mean": 0.943,
+   "inside": 2
+  },
+  "chain_on_measured.die": {
+   "n": 3,
+   "rms": 0.512,
+   "mean": 0.345,
+   "inside": 3
+  }
+ }
+}
+SELFTEST: E159's three fp32 random holds through score_e168's path reproduce fit_g4's G4 final predictions: worst |diff| 0.0004 (PASS)

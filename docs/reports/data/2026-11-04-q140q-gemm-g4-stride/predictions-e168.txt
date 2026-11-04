@@ -1,0 +1,17 @@
+Q140(q) frozen G4 predictions for E168 (aifoundry2, its own governor). G4 constants: {"k_W_per_C": 0.2, "k_is": "G3's k_eff from the run's start die", "T_ref_C": null, "trip_C": 65.5, "zeros_level": true, "beta": 0.648275414762018, "delta_fallback_w": {"fp16": -1.5067753028963726, "fp32": -1.533979965482577, "int8": -1.5351694510250744}, "dip": {"d_G": 0.12, "P_G_w": 56.0, "f_dip_mhz": 618.0}}
+span fractions (M8): {"real_smol_w8a8_down": 0.7726, "sparse50": 0.7828, "fp32_sparse50_for_reference": 0.2983} ; levels_phi self-check max |diff| 0.00e+00 W
+  S1 gemmL1x3x3: M x N x K fp32 [1024, 1536, 1536], 21 MB with C; lines an op missing the L2: L3 192.0, fresh 0.0
+  S2 gemmL3x3x2: M x N x K fp32 [3072, 1536, 1024], 36 MB with C; lines an op missing the L2: L3 176.0, fresh 0.0
+  S3 gemmL3x5x3: M x N x K fp32 [3072, 2560, 1536], 63 MB with C; lines an op missing the L2: L3 132.4, fresh 59.6
+hold                                     P0 600/700/800   peak |  G4: MHz       W    die  start |  G3: MHz       W    die |         E136 law
+S1-fp32-randn-cold                  47.07/ 55.58/ 67.17   75.7 |    689.2   57.95  65.39   46.0 |    691.2   57.05  65.49 | 745.3  62.1  61.6
+S1-fp32-randn-warm55                47.07/ 55.58/ 67.17   75.7 |    657.0   53.10  65.44   55.0 |    656.8   53.04  65.50 | 745.3  62.1  65.0
+S2-fp32-randn-cold                  47.50/ 56.24/ 68.12   76.6 |    681.9   57.87  65.40   46.0 |    683.9   56.99  65.49 | 738.6  62.1  61.6
+S2-fp32-randn-warm55                47.50/ 56.24/ 68.12   76.6 |    650.6   53.09  65.44   55.0 |    650.4   53.03  65.50 | 738.6  62.1  65.0
+S3-fp32-randn-cold                  42.64/ 49.72/ 59.72   68.2 |    767.3   59.43  64.65   46.0 |    777.1   59.33  65.09 | 796.6  59.4  60.5
+S3-fp32-randn-warm55                42.64/ 49.72/ 59.72   68.2 |    725.0   53.55  65.38   55.0 |    725.7   53.34  65.49 | 796.6  59.4  63.9
+S2-int8-zeros-warm55                27.67/ 31.08/ 37.13   45.6 |    800.0   36.33  55.96   55.0 |    800.0   37.27  56.42 | 800.0  37.1  54.7
+S2-int8-real_smol_w8a8_down-warm55  31.97/ 36.59/ 43.97   52.5 |    800.0   43.91  59.67   55.0 |    800.0   44.46  59.97 | 800.0  44.0  57.5
+S2-int8-sparse50-warm55             32.03/ 36.66/ 44.06   52.6 |    800.0   44.01  59.72   55.0 |    800.0   44.56  60.01 | 800.0  44.1  57.5
+increment rule real_smol_w8a8_down: {'predicted_increment_w': 7.582, 'span_w': 8.856, 'band_w': 1.328, 'phi': 0.7726}
+increment rule sparse50: {'predicted_increment_w': 7.683, 'span_w': 8.856, 'band_w': 1.328, 'phi': 0.7828}
