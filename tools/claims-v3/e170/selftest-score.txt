@@ -1,0 +1,31 @@
+E170 scorer self-test: score_e170.py 7a52c5e799bfbc29607e707d594b2b37a1d107461431946c5a6590730f80cf79, e170_common.py b3daefa73f040b4aeab7cfcdde55e9a8ed414f3fbe72a70ea92e41c63552f4a8, predictions-e170.json 6985b051e1d159629d23f1e618e885a7f99777dc7c77f370e48b37b701fa774f, score_e165.py 03bfd40b728bad2a40a8e3559f16ac4b7e817929729c2090d9f029b4b41fd74c (imported unchanged)
+  parent: E160 results.json 7dbddc797e2f0607e5142735e048caeaa95e0c23971e65e7dde83cd937571887
+ok   E160's ccheck-s1.json decompressed is the file its results name (946fabaa6b981774...)
+ok   E160's s1 reduced again through the imported collect: 150 runs, 150 complete, 150 counted
+ok   E160's registered rules reproduced field for field (9 rules, 53 fields, 0 differ): E160-F1 PASS; E160-F2 PASS; E160-F3 PASS; E160-W1 PASS (better than the reference says); E160-W2 PASS; E160-W3 PASS; E160-H1 PASS; E160-H3 PASS; E160-PK PASS
+ok   E160-C reproduced: PASS, 2596 launches (0 differ)
+ok   E160-R0 reproduced: PASS (0 differ)
+ok   E160's every pass alone reproduced (3 passes, 0 differ)
+ok   E160's rules over the complete runs (C not required) reproduced (0 differ)
+ok   E165's form through pred_card0 (full_level False, kappa 1) equals the frozen burst() on E160's 43 pool tiles (board, clock and burst D field for field: 43 of 43)
+ok   the level in full moves every pinned tile's board by (1 - beta) x its format's session offset (28 pinned tiles, worst 0.0009 W; beta 0.6483; offsets {"fp16": -1.668, "fp32": -1.572, "int8": -1.74})
+ok   the primary's burst D is kappa0 x the frozen burst D on every tile (43 of 43)
+     (information: on aifoundry2 itself, E160's pinned tiles with M8's blind D, the level in full and kappa 1: board rms 0.959 W, mean +0.530 W over 28 tiles)
+ok   measured = the primary (39 tiles): {'E170-W': 'PASS (better than the reference says)', 'E170-B': 'PASS', 'E170-M1': 'BETTER', 'E170-M2': 'BETTER', 'E170-X0': 'PASS', 'E170-F': 'PASS (better than the reference says)', 'E170-W3': 'PASS', 'E170-H1': 'PASS (better than the reference says)', 'E170-H3': 'PASS'}
+ok   boards 0.8 W high: B FAIL LOW, W PASS, X0 PASS
+ok   boards +-1.2 W: B FAIL (rms), W FAIL
+ok   a true scale of 0.90: X0 FAIL (median 0.9), B FAIL HIGH (mean -0.7109 W)
+ok   measured D = M6's chain: M1 WORSE, M2 NOT RESOLVED
+ok   rises 2 C high: H1 FAIL, H3 FAIL
+ok   clocks 6 MHz low: F FAIL
+ok   seven tiles: {'E170-W': 'NOT SCORED (n 7 < 8)', 'E170-B': 'NOT SCORED (n 7 < 8)', 'E170-M1': 'NOT SCORED (n 6 < 10)', 'E170-M2': 'NOT SCORED (n 6 < 10)', 'E170-X0': 'NOT SCORED (n 7 < 8)', 'E170-F': 'NOT SCORED (n 7 < 8)', 'E170-W3': 'NOT SCORED (n 7 < 8)', 'E170-H1': 'NOT SCORED (n 7 < 8)', 'E170-H3': 'NOT SCORED (n 7 < 8)'}
+ok   no zeros-anchor burst: {'note': "no zeros-anchor burst counted: the card term's level cannot be read; every rule NOT SCORED"}
+ok   one counted pass of half A: fewer than 2 counted passes of half A: every rule but E170-C and E170-S NOT SCORED
+ok   the order: 135 runs, every pass opens with the three zeros anchors, half B ascending (55.68 -> 59.80 W, the last fp32.exp_only_pos12)
+ok   a run whose label is not the order's at its idx is refused
+ok   a run of a left-out tile is refused (runs of tiles left out by name: ['b7-fp32.uniform_pm1']); 19 left out by name
+ok   kappa0 0.9463 is the median of its five ratios [0.9416, 0.9428, 0.9463, 0.9543, 0.9583]
+ok   an anchor burst at 752 MHz is not counted, and a format with none takes the others' mean (31.0)
+ok   E170-S's reader on E160: 0 runs under 590 MHz, 60 runs at or over 62 W, board max 79.37 W: FAIL, as it must on aifoundry2's hot tiles
+
+ALL PASS
