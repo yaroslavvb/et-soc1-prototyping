@@ -1,0 +1,89 @@
+# score_e167_x2.py --self-test, run at 11:23 PST on Wed 04 Nov 2026 on the Intel (/usr/bin/python3 3.9.6, numpy 1.26.4), before any E167 data
+self_test_ok: True   problems: 0
+(1) score_e167.py's own self-test, unchanged inside it: ok True (problems 0)
+(2) E161 as committed: X2 {'G1Q': 'complete', 'G2Q': 'complete'}; verdicts {'RK3_b': 'PASS', 'RK3_c_aifoundry2': 'FAIL', 'G1Q carried': 'PASS', 'G1Q carried clock': 'PASS', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}; equal to score_e167's: True
+    per hold: {'G1Q': {'work_processes': 93, 'planned_processes': 93, 'span_s': 782.97, 'span_needed_s': 752.97, 'anchor_lines': 1199, 'plateau_lines': 2997, 'end_reason': 'done', 'failed_processes': 0}, 'G2Q': {'work_processes': 91, 'planned_processes': 91, 'span_s': 770.97, 'span_needed_s': 740.97, 'anchor_lines': 1199, 'plateau_lines': 2998, 'end_reason': 'done', 'failed_processes': 0}}
+    session figures (complete holds): {'n_complete_holds': 2, 'G1Q_plateau_err_from_the_bits_C': 0.636, 'G2Q_clock_err_from_the_bits_MHz': -4.0, 'note': "over the complete holds only (X2); an incomplete hold's readings stay in holds as post hoc"}
+(3) session cases: 16 of 16
+  [ok] E161 as committed (both complete)
+        X2: {'G1Q': 'complete', 'G2Q': 'complete'}  why: {'G1Q': [], 'G2Q': []}
+        verdicts: {'RK3_b': 'PASS', 'RK3_c_aifoundry2': 'FAIL', 'G1Q carried': 'PASS', 'G1Q carried clock': 'PASS', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+  [ok] G1Q cut after 60 processes by the die line (safety mark and reason)
+        X2: {'G1Q': 'ended by a safety line', 'G2Q': 'complete'}  why: {'G1Q': ['the step ended: safety:die 72 C >= 72 C', '60 of 93 work processes', 'span 504.88 s < 752.97 s'], 'G2Q': []}
+        verdicts: {'RK3_b': 'FAIL (ended by a safety line)', 'RK3_c_aifoundry2': 'FAIL', 'G1Q carried': 'FAIL (ended by a safety line)', 'G1Q carried clock': 'FAIL (ended by a safety line)', 'G1Q X2': 'ended by a safety line: the step ended: safety:die 72 C >= 72 C; 60 of 93 work processes; span 504.88 s < 752.97 s', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+        safety line: {'G1Q': {'detail': 'die 72 C >= 72 C', 'from': 'a safety_trip mark', 'first_crossing_in_telemetry': None}}
+        score_e167.py alone read: RK3-b 'PASS', RK3-c 'FAIL'
+  [ok] G1Q cut after 60 by the die line on the hottest-sensor field (the latch at 72 C, the mean at 63 C)
+        X2: {'G1Q': 'ended by a safety line', 'G2Q': 'complete'}  why: {'G1Q': ['the step ended: safety:die 72 C >= 72 C', '60 of 93 work processes', 'span 504.88 s < 752.97 s'], 'G2Q': []}
+        verdicts: {'RK3_b': 'FAIL (ended by a safety line)', 'RK3_c_aifoundry2': 'FAIL', 'G1Q carried': 'FAIL (ended by a safety line)', 'G1Q carried clock': 'FAIL (ended by a safety line)', 'G1Q X2': 'ended by a safety line: the step ended: safety:die 72 C >= 72 C; 60 of 93 work processes; span 504.88 s < 752.97 s', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+        safety line: {'G1Q': {'detail': 'die 72 C >= 72 C', 'from': 'a safety_trip mark', 'first_crossing_in_telemetry': {'t_s': 1793753474.345, 'line': 'die', 'field': "the hottest-sensor field (minshire[2] 72 C, the shires' high latch)"}}}
+        score_e167.py alone read: RK3-b 'PASS', RK3-c 'FAIL'
+  [ok] G1Q cut after 60 by the board line
+        X2: {'G1Q': 'ended by a safety line', 'G2Q': 'complete'}  why: {'G1Q': ['the step ended: safety:board 81.2 W > 80 W on 3 samples', '60 of 93 work processes', 'span 504.88 s < 752.97 s'], 'G2Q': []}
+        verdicts: {'RK3_b': 'FAIL (ended by a safety line)', 'RK3_c_aifoundry2': 'FAIL', 'G1Q carried': 'FAIL (ended by a safety line)', 'G1Q carried clock': 'FAIL (ended by a safety line)', 'G1Q X2': 'ended by a safety line: the step ended: safety:board 81.2 W > 80 W on 3 samples; 60 of 93 work processes; span 504.88 s < 752.97 s', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+        safety line: {'G1Q': {'detail': 'board 81.2 W > 80 W on 3 samples', 'from': 'a safety_trip mark', 'first_crossing_in_telemetry': None}}
+        score_e167.py alone read: RK3-b 'PASS', RK3-c 'FAIL'
+  [ok] G1Q cut after 60 by the queue's cutoff STOP file
+        X2: {'G1Q': 'excluded', 'G2Q': 'complete'}  why: {'G1Q': ['the step ended: stop_file', '60 of 93 work processes', 'span 504.88 s < 752.97 s'], 'G2Q': []}
+        verdicts: {'RK3_b': 'NOT SCORED (incomplete window: the step ended: stop_file; 60 of 93 work processes; span 504.88 s < 752.97 s)', 'RK3_c_aifoundry2': 'NOT SCORED (incomplete windows)', 'G1Q carried': 'NOT SCORED (incomplete window)', 'G1Q carried clock': 'NOT SCORED (incomplete window)', 'G1Q X2': 'excluded: the step ended: stop_file; 60 of 93 work processes; span 504.88 s < 752.97 s', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+        score_e167.py alone read: RK3-b 'PASS', RK3-c 'FAIL'
+  [ok] G1Q cut after 60, STOP file read before the watcher's trip (a safety_trip mark, reason stop_file)
+        X2: {'G1Q': 'ended by a safety line', 'G2Q': 'complete'}  why: {'G1Q': ['the step ended: stop_file', '60 of 93 work processes', 'span 504.88 s < 752.97 s'], 'G2Q': []}
+        verdicts: {'RK3_b': 'FAIL (ended by a safety line)', 'RK3_c_aifoundry2': 'FAIL', 'G1Q carried': 'FAIL (ended by a safety line)', 'G1Q carried clock': 'FAIL (ended by a safety line)', 'G1Q X2': 'ended by a safety line: the step ended: stop_file; 60 of 93 work processes; span 504.88 s < 752.97 s', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+        safety line: {'G1Q': {'detail': 'die 72 C >= 72 C', 'from': 'a safety_trip mark', 'first_crossing_in_telemetry': None}}
+        score_e167.py alone read: RK3-b 'PASS', RK3-c 'FAIL'
+  [ok] G1Q cut after 80 by the protocol's cap (done:max_card_min)
+        X2: {'G1Q': 'excluded', 'G2Q': 'complete'}  why: {'G1Q': ['the step ended: done:max_card_min', '80 of 93 work processes', 'span 673.47 s < 752.97 s'], 'G2Q': []}
+        verdicts: {'RK3_b': 'NOT SCORED (incomplete window: the step ended: done:max_card_min; 80 of 93 work processes; span 673.47 s < 752.97 s)', 'RK3_c_aifoundry2': 'NOT SCORED (incomplete windows)', 'G1Q carried': 'NOT SCORED (incomplete window)', 'G1Q carried clock': 'NOT SCORED (incomplete window)', 'G1Q X2': 'excluded: the step ended: done:max_card_min; 80 of 93 work processes; span 673.47 s < 752.97 s', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+        score_e167.py alone read: RK3-b 'PASS', RK3-c 'FAIL'
+  [ok] G2Q cut after 50 by SIGTERM (G1Q complete, outside)
+        X2: {'G1Q': 'complete', 'G2Q': 'excluded'}  why: {'G1Q': [], 'G2Q': ['the step ended: signal:15', '50 of 91 work processes', 'span 425.53 s < 740.97 s']}
+        verdicts: {'RK3_b': 'PASS', 'RK3_c_aifoundry2': 'FAIL', 'G1Q carried': 'PASS', 'G1Q carried clock': 'PASS', 'G2Q carried': 'NOT SCORED (incomplete window)', 'G2Q carried clock': 'NOT SCORED (incomplete window)', 'G2Q X2': 'excluded: the step ended: signal:15; 50 of 91 work processes; span 425.53 s < 740.97 s'}
+  [ok] G2Q with no end.json
+        X2: {'G1Q': 'complete', 'G2Q': 'excluded'}  why: {'G1Q': [], 'G2Q': ['no end.json']}
+        verdicts: {'RK3_b': 'PASS', 'RK3_c_aifoundry2': 'FAIL', 'G1Q carried': 'PASS', 'G1Q carried clock': 'PASS', 'G2Q carried': 'NOT SCORED (incomplete window)', 'G2Q carried clock': 'NOT SCORED (incomplete window)', 'G2Q X2': 'excluded: no end.json'}
+  [ok] G1Q's plateau window thinned to 2 lines a second
+        X2: {'G1Q': 'excluded', 'G2Q': 'complete'}  why: {'G1Q': ['plateau window 1199 lines (< 1500)'], 'G2Q': []}
+        verdicts: {'RK3_b': 'NOT SCORED (incomplete window: plateau window 1199 lines (< 1500))', 'RK3_c_aifoundry2': 'NOT SCORED (incomplete windows)', 'G1Q carried': 'NOT SCORED (incomplete window)', 'G1Q carried clock': 'NOT SCORED (incomplete window)', 'G1Q X2': 'excluded: plateau window 1199 lines (< 1500)', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+        score_e167.py alone read: RK3-b 'PASS', RK3-c 'FAIL'
+  [ok] G1Q's anchor window thinned to 2 lines a second
+        X2: {'G1Q': 'excluded', 'G2Q': 'complete'}  why: {'G1Q': ['anchor window 480 lines (< 600)'], 'G2Q': []}
+        verdicts: {'RK3_b': 'NOT SCORED (incomplete window: anchor window 480 lines (< 600))', 'RK3_c_aifoundry2': 'NOT SCORED (incomplete windows)', 'G1Q carried': 'NOT SCORED (incomplete window)', 'G1Q carried clock': 'NOT SCORED (incomplete window)', 'G1Q X2': 'excluded: anchor window 480 lines (< 600)', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+        score_e167.py alone read: RK3-b 'PASS', RK3-c 'FAIL'
+  [ok] G1Q one process long, ended done (the desk dry queue's shape)
+        X2: {'G1Q': 'excluded', 'G2Q': 'complete'}  why: {'G1Q': ['1 of 93 work processes', 'span 8.48 s < 752.97 s', 'plateau window 98 lines (< 1500)'], 'G2Q': []}
+        verdicts: {'RK3_b': 'NOT SCORED (incomplete window: 1 of 93 work processes; span 8.48 s < 752.97 s; plateau window 98 lines (< 1500))', 'RK3_c_aifoundry2': 'NOT SCORED (incomplete windows)', 'G1Q carried': 'NOT SCORED (incomplete window)', 'G1Q carried clock': 'NOT SCORED (incomplete window)', 'G1Q X2': 'excluded: 1 of 93 work processes; span 8.48 s < 752.97 s; plateau window 98 lines (< 1500)', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+        score_e167.py alone read: RK3-b 'FAIL', RK3-c 'PASS'
+  [ok] G1Q with one failed process (rc 1), ended done
+        X2: {'G1Q': 'complete', 'G2Q': 'complete'}  why: {'G1Q': [], 'G2Q': []}
+        verdicts: {'RK3_b': 'PASS', 'RK3_c_aifoundry2': 'FAIL', 'G1Q carried': 'PASS', 'G1Q carried clock': 'PASS', 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+  [ok] G1Q stopped at the start gate (exit 6), G2Q as committed (inside)
+        X2: {'G1Q': 'not run', 'G2Q': 'complete'}  why: {'G1Q': ['no HOLD work process', "the step ended: gate:G1Q's REST anchor 49.4 C > 49.0 C"], 'G2Q': []}
+        verdicts: {'RK3_b': 'not scored: the start gate', 'RK3_c_aifoundry2': 'NOT SCORED (incomplete windows)', 'G1Q': 'NOT RUN (the start gate)', 'G1Q X2': "not run: no HOLD work process; the step ended: gate:G1Q's REST anchor 49.4 C > 49.0 C", 'G2Q carried': 'PASS', 'G2Q carried clock': 'PASS'}
+        score_e167.py alone read: RK3-b 'not scored: the start gate', RK3-c 'PASS'
+  [ok] G2Q not run (no step directory: the registered subset)
+        X2: {'G1Q': 'complete', 'G2Q': 'not run'}  why: {'G1Q': [], 'G2Q': ['no step directory']}
+        verdicts: {'RK3_b': 'PASS', 'RK3_c_aifoundry2': 'FAIL', 'G1Q carried': 'PASS', 'G1Q carried clock': 'PASS', 'G2Q': 'not run (no step directory)', 'G2Q X2': 'not run: no step directory'}
+  [ok] the latch at 72 C at idle: G1Q's REST stopped by the die line before any work, the queue ended (no G2Q)
+        X2: {'G1Q': 'not run', 'G2Q': 'not run'}  why: {'G1Q': ['no HOLD work process', 'the step ended: safety:die 72 C >= 72 C'], 'G2Q': ['no step directory']}
+        verdicts: {'RK3_b': "not scored: G1Q's hold did not run", 'RK3_c_aifoundry2': 'NOT SCORED (incomplete windows)', 'G1Q': 'NOT RUN (no HOLD work process)', 'G1Q X2': 'not run: no HOLD work process; the step ended: safety:die 72 C >= 72 C', 'G2Q': 'not run (no step directory)', 'G2Q X2': 'not run: no step directory'}
+        score_e167.py alone read: RK3-b "not scored: G1Q's hold did not run", RK3-c 'NOT SCORED (no rise of 10 C or more)'
+(4) rule cases: 17 of 17
+  [ok] RK3-c both complete and inside: PASS
+  [ok] RK3-c both complete, G1Q outside: FAIL
+  [ok] RK3-c G1Q under 10 C, G2Q inside (R4 as registered): PASS
+  [ok] RK3-c both under 10 C: NOT SCORED (no rise of 10 C or more)
+  [ok] RK3-c G1Q excluded, G2Q inside: NOT SCORED (incomplete windows)
+  [ok] RK3-c G1Q excluded, G2Q outside: FAIL
+  [ok] RK3-c G1Q missing (not in the table), G2Q inside: NOT SCORED (incomplete windows)
+  [ok] RK3-c both excluded: NOT SCORED (incomplete windows)
+  [ok] RK3-c G1Q excluded, G2Q under 10 C: NOT SCORED (incomplete windows)
+  [ok] RK3-b complete PASS: PASS
+  [ok] RK3-b complete FAIL: FAIL
+  [ok] RK3-b safety line: FAIL (ended by a safety line)
+  [ok] RK3-b safety line, the trip regime: not scored: the trip regime
+  [ok] RK3-b excluded: NOT SCORED (incomplete window: the step ended: stop_file)
+  [ok] RK3-b excluded, a FAIL as read: NOT SCORED (incomplete window: the step ended: stop_file)
+  [ok] RK3-b not run (gate): not scored: the start gate
+  [ok] RK3-b the trip edge inside the readout, complete: not scored: the trip edge inside the readout
+(5) the plan X2 reads: {'processes': {'G1Q': 93, 'G2Q': 91}, 'span_s': {'G1Q': 782.97, 'G2Q': 770.97}, 'slack_s': 30.0, 'min_lines_per_s': 5.0, 'stops': {'die_C': {'G1Q': 72.0, 'G2Q': 72.0}, 'board_W': {'G1Q': 80.0, 'G2Q': 80.0}, 'consecutive': {'G1Q': 3, 'G2Q': 3}}, 'expected_large': ['G1Q', 'G2Q']}

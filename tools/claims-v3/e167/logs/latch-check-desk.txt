@@ -1,0 +1,126 @@
+# latch_check_e167.py desk test, Wed 04 Nov 2026 11:11 PST on the Intel: a file read only (no device, no ssh)
+## E161's committed box history, the age check off: python3 tools/claims-v3/e167/latch_check_e167.py --history docs/reports/data/2026-11-03-e161-heat-e2e-aifoundry2/history/aifoundry2-2026-11-04.jsonl.gz --max-age-min 0
+{
+ "latch_check": "GO: the hottest-sensor field reads 70 C, under E167's 72 C die line",
+ "max_C": 70.0,
+ "sources": [
+  {
+   "source": "docs/reports/data/2026-11-03-e161-heat-e2e-aifoundry2/history/aifoundry2-2026-11-04.jsonl.gz",
+   "kind": "the box's 5 s history, card 0's max",
+   "lines": 11,
+   "minutes": 10.0,
+   "newest_age_min": 1060.4,
+   "max_C": 70.0,
+   "values_C": [
+    70.0
+   ],
+   "die_C_range": [
+    48,
+    61
+   ]
+  }
+ ]
+}
+# exit 0
+## E161's committed G1Q sampler lines: python3 tools/claims-v3/e167/latch_check_e167.py docs/reports/data/2026-11-03-e161-heat-e2e-aifoundry2/G1Q/tel
+{
+ "latch_check": "GO: the hottest-sensor field reads 70 C, under E167's 72 C die line",
+ "max_C": 70.0,
+ "sources": [
+  {
+   "source": "docs/reports/data/2026-11-03-e161-heat-e2e-aifoundry2/G1Q/tel/HOLD-00-b6-int8.b_line_zero_ff-r1.jsonl.gz",
+   "kind": "sampler lines, temp_c.minshire[2]",
+   "lines": 50,
+   "max_C": 70.0,
+   "values_C": [
+    70.0
+   ],
+   "mean_C_range": [
+    59,
+    61
+   ]
+  }
+ ]
+}
+# exit 0
+## E161's committed box history with the default age check (15 min): stale: python3 tools/claims-v3/e167/latch_check_e167.py --history docs/reports/data/2026-11-03-e161-heat-e2e-aifoundry2/history/aifoundry2-2026-11-04.jsonl.gz
+{
+ "latch_check": "UNREADABLE: the latch could not be read (the smoke's first samples are then the check: at 72 C or more the queue ends there, before any hold)",
+ "max_C": null,
+ "sources": [
+  {
+   "source": "docs/reports/data/2026-11-03-e161-heat-e2e-aifoundry2/history/aifoundry2-2026-11-04.jsonl.gz",
+   "kind": "the box's 5 s history, card 0's max",
+   "lines": 11,
+   "minutes": 10.0,
+   "newest_age_min": 1060.5,
+   "max_C": 70.0,
+   "values_C": [
+    70.0
+   ],
+   "die_C_range": [
+    48,
+    61
+   ],
+   "why": "the history's newest line is 1060.5 min old (> 15.0 min): the monitor may be down"
+  }
+ ]
+}
+# exit 2
+## made up: the history's last line at max 72 C: python3 tools/claims-v3/e167/latch_check_e167.py --history history-max72.jsonl --max-age-min 0
+{
+ "latch_check": "NO-GO: the hottest-sensor field reads 72 C, at or over E167's 72 C die line: every E167 step would end at its first sample; do not claim or start E167 (resetting the latch is a write, outside the round's rules)",
+ "max_C": 72.0,
+ "sources": [
+  {
+   "source": "history-max72.jsonl",
+   "kind": "the box's 5 s history, card 0's max",
+   "lines": 11,
+   "minutes": 10.0,
+   "newest_age_min": 1060.5,
+   "max_C": 72.0,
+   "values_C": [
+    70.0,
+    72.0
+   ],
+   "die_C_range": [
+    48,
+    61
+   ]
+  }
+ ]
+}
+# exit 3
+## made up: one sampler line with minshire[2] 72 C: python3 tools/claims-v3/e167/latch_check_e167.py tel-minshire2-72.jsonl
+{
+ "latch_check": "NO-GO: the hottest-sensor field reads 72 C, at or over E167's 72 C die line: every E167 step would end at its first sample; do not claim or start E167 (resetting the latch is a write, outside the round's rules)",
+ "max_C": 72.0,
+ "sources": [
+  {
+   "source": "tel-minshire2-72.jsonl",
+   "kind": "sampler lines, temp_c.minshire[2]",
+   "lines": 1,
+   "max_C": 72.0,
+   "values_C": [
+    72.0
+   ],
+   "mean_C_range": [
+    47,
+    47
+   ]
+  }
+ ]
+}
+# exit 3
+## made up: a history with no card line: python3 tools/claims-v3/e167/latch_check_e167.py --history history-nocard.jsonl --max-age-min 0
+{
+ "latch_check": "UNREADABLE: the latch could not be read (the smoke's first samples are then the check: at 72 C or more the queue ends there, before any hold)",
+ "max_C": null,
+ "sources": [
+  {
+   "source": "history-nocard.jsonl",
+   "why": "no card 0 line with a max field"
+  }
+ ]
+}
+# exit 2

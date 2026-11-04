@@ -1,0 +1,57 @@
+# collect_e167_bounded.sh desk test, Wed 04 Nov 2026 11:11 PST on the Intel: fake ssh and rsync first on PATH
+# (they record their arguments and never connect anywhere); the real timeout (GNU coreutils 9.5),
+# python3 for the scrub and the history helpers. Paths under the scratch directory print as <scratch>.
+## case ok (FAKE_RSYNC=ok FAKE_SSH=ok): exit 0 after 5 s
+   stdout: scrub: 0 mark(s) replaced; files still matching: 0
+   file: ./G1Q/launches.jsonl.gz
+   file: ./G1Q/marks.jsonl
+   file: ./G1Q/tel/REST-00-rest-r1.jsonl.gz
+   file: ./history/aifoundry1-2026-11-04.jsonl.gz
+   file: ./history/aifoundry2-2026-11-04.jsonl.gz
+   file: ./history/aifoundry3-2026-11-04.jsonl.gz
+   file: ./queue.out
+   file: ./schedule.json
+   leftover shim sleeps: 0
+## case runs-hang (FAKE_RSYNC=hang E167_RSYNC_TIMEOUT_S=3): exit 3 after 3 s
+   stdout: the runs directory's copy failed (rc 124: timed out after 3 s): 
+   leftover shim sleeps: 0
+## case runs-tailscale (FAKE_RSYNC=tailscale): exit 7 after 1 s
+   stderr: TAILSCALE CHECK NEEDED (rsync of claude/et-soc1-prototyping/build/e167/runs): https://login.tailscale.com/a/DESK-TEST-PLACEHOLDER
+   leftover shim sleeps: 0
+## case history-hang (FAKE_SSH=hang E167_SMALL_TIMEOUT_S=2): exit 0 after 8 s
+   stdout: scrub: 0 mark(s) replaced; files still matching: 0
+   stdout: history aifoundry1 2026-11-04: not read (rc 124)
+   stdout: history aifoundry2 2026-11-04: not read (rc 124)
+   stdout: history aifoundry3 2026-11-04: not read (rc 124)
+   file: ./G1Q/launches.jsonl.gz
+   file: ./G1Q/marks.jsonl
+   file: ./G1Q/tel/REST-00-rest-r1.jsonl.gz
+   file: ./queue.out
+   file: ./schedule.json
+   leftover shim sleeps: 0
+## case history-tailscale (FAKE_SSH=tailscale): exit 7 after 3 s
+   stdout: scrub: 0 mark(s) replaced; files still matching: 0
+   stderr: TAILSCALE CHECK NEEDED (ssh aifoundry1 cat history 2026-11-04): https://login.tailscale.com/a/DESK-TEST-PLACEHOLDER
+   file: ./G1Q/launches.jsonl.gz
+   file: ./G1Q/marks.jsonl
+   file: ./G1Q/tel/REST-00-rest-r1.jsonl.gz
+   file: ./history/aifoundry1.raw
+   file: ./queue.out
+   file: ./schedule.json
+   leftover shim sleeps: 0
+## the shim's calls (every one under timeout, none reached a network):
+   rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 --exclude=STOP aifoundry2:claude/et-soc1-prototyping/build/e167/runs/ <scratch>/collect-desk/ok/
+   rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2:claude/et-soc1-prototyping/build/e167/schedule.json aifoundry2:claude/et-soc1-prototyping/build/e167/queue.out <scratch>/collect-desk/ok/
+   ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 cat ~/live/history/2026-11-04.jsonl
+   ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 cat ~/live/history/2026-11-04.jsonl
+   ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 cat ~/live/history/2026-11-04.jsonl
+   rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 --exclude=STOP aifoundry2:claude/et-soc1-prototyping/build/e167/runs/ <scratch>/collect-desk/runs-hang/
+   rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 --exclude=STOP aifoundry2:claude/et-soc1-prototyping/build/e167/runs/ <scratch>/collect-desk/runs-tailscale/
+   rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 --exclude=STOP aifoundry2:claude/et-soc1-prototyping/build/e167/runs/ <scratch>/collect-desk/history-hang/
+   rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2:claude/et-soc1-prototyping/build/e167/schedule.json aifoundry2:claude/et-soc1-prototyping/build/e167/queue.out <scratch>/collect-desk/history-hang/
+   ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 cat ~/live/history/2026-11-04.jsonl
+   ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 cat ~/live/history/2026-11-04.jsonl
+   ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 cat ~/live/history/2026-11-04.jsonl
+   rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 --exclude=STOP aifoundry2:claude/et-soc1-prototyping/build/e167/runs/ <scratch>/collect-desk/history-tailscale/
+   rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2:claude/et-soc1-prototyping/build/e167/schedule.json aifoundry2:claude/et-soc1-prototyping/build/e167/queue.out <scratch>/collect-desk/history-tailscale/
+   ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 cat ~/live/history/2026-11-04.jsonl
