@@ -11,6 +11,11 @@ about 16:22 PST, before the claim and before any device access. The frozen predi
 on origin/main before this registration. [`reduce_e161.py`](../../../../tools/claims-v3/e161/reduce_e161.py) checked 13 frozen inputs'
 sha256 before scoring and imported `predict_q139e.py` and `score_e144.py` unchanged. Nothing was refitted or tuned.*
 
+*(Dated note, Tue 3 Nov 2026, after verification, C5.) The registration was written between about 15:55 and 16:22 PST, not to 16:30. It
+was committed at 16:22:46 PST and pushed at 16:22:49, before the claim (16:24:03–16:24:16) and the first device access (16:24:30).
+`E161.md`'s header and the heading of its departures say "about 15:55-16:30 PST", which runs past its own commit. The frozen file is left
+as it was.*
+
 *The session, on aifoundry2 card 0 only, under its own governor (nothing set):*
 - *Claimed at 16:24:16 PST by rewriting the day's one `#community-lab` post (message `1567332504330051616`, created 16:19 by another lane):
   the clause `using aifoundry2 for 1.5 h, until ~17:54 PST` joined the two clauses then held. Released at about 17:30 PST (the edit saved
@@ -23,6 +28,23 @@ sha256 before scoring and imported `predict_q139e.py` and `score_e144.py` unchan
 - *No other user was logged in to aifoundry2 at any of the 236 idle-login checks (counts only), and `et-who` showed the card free before the
   go and after the end.*
 
+*Corrected after verification (a dated note, Tue 3 Nov 2026, about 18:10–18:50 PST; desk only: no card, no device command, no ssh, nothing
+re-run). An independent verifier re-derived every registered number and verdict from the committed data and the frozen code, re-ran the
+device-command audit and the check of C, and re-hashed the box's raw files read-only. All of it stands, the reduction and the post hoc
+readings byte for byte. It found one major and four minor faults in what this README and the lane's result draw from them. None changes a
+measured, frozen or registered number, rule, prediction or verdict. Each is corrected by a dated note beside the text it concerns, the text
+itself left as it was, and set out in full in [§ Corrections after verification](#corrections-after-verification-tue-3-nov-2026) at the
+end. Every number is printed by [`corrections_e161.py`](corrections_e161.py) → [`corrections.txt`](corrections.txt), labelled post hoc.*
+
+- ***C1 (major):** the post hoc work share (P1, P2) counted the scoring window's last 6 s, after the work had ended, and each process's
+  start-up as idle. The hold's own kernel duty, from `launches.jsonl` alone, is 0.970. At it the duty takes G1Q's error from −0.90 to
+  −0.39 °C and G2Q's clock error from +12.6 to +5.6 MHz. Across definitions of the share the corrected figures run from −0.88 to +0.12 °C
+  and from +12.3 to −2.2 MHz. So the duty is about half of G1Q's error, not most of it, and M8's level inside the work is the larger part.*
+- ***C2:** "from the bits alone" means from the bits and the idle card's die and board just before each hold, a ±0.5 °C anchor.*
+- ***C3:** this is the first blind score of rank 4's aifoundry2 half, not its answer.*
+- ***C4:** G1Q was scored between the holds; nothing about G2Q changed.*
+- ***C5:** the registration was written by 16:22 PST.*
+
 ## Results first
 
 **All six registered readings PASS.** Heat over minutes predicted from the tile's bits alone, through M8's power, Q138(t)'s frozen chain and
@@ -30,6 +52,14 @@ the governor's trip rule, reads a 13-minute governed hold's plateau to **−0.90
 **−0.40 °C** where the governor holds it (G2Q, band ±0.60 °C). The sustained clock from the bits reads **+12.6 MHz** (band ±35 MHz). Every
 launch's C is bit-exact: **3,354 of 3,354** launches, the smoke's included ([`results.json`](results.json) `verdicts`, `c_check`;
 [`reduce.txt`](reduce.txt)).
+
+*(Dated note, Tue 3 Nov 2026, after verification, C2.) "From the tile's bits alone" goes too far, here and in the registration's own words
+([`E161.md`](../../../../tools/claims-v3/e161/E161.md), [`tools/claims-v3/e161/README.md`](../../../../tools/claims-v3/e161/README.md)).
+Every prediction is anchored on the idle card's measured die and board just before the hold: each REST's last 120 s, 47.0 °C and
+22.12 / 22.19 W ([`results.json`](results.json) `T_rest_C`, `P_ref_W`). The die reads whole degrees, so the anchor is known to ±0.5 °C. Over
+it G1Q's plateau error moves from −0.19 to −1.61 °C and G2Q's clock error from +4.1 to +21.1 MHz, every reading still PASS (the table under
+"Over the rest die's whole-degree reading" below). Read "from the bits" on this page as: from the tile's bits and the idle card's die and
+board just before the hold (a ±0.5 °C anchor). [§ Corrections, C2](#corrections-after-verification-tue-3-nov-2026).*
 
 | hold (rest die, board) | arm | measured | predicted | error | registered band | verdict | beside |
 |---|---|---|---|---|---|---|---|
@@ -54,6 +84,18 @@ the bits on a new kind, is +12.6 MHz (`session`). On G1Q the error from the bits
    drew 45.90 W (46.26 W at ≥ 790 MHz), and 6.0% of the samples fall between processes, where the card idles. The composition assumes
    continuous work. With the switching part scaled by the measured work share, 0.940, the same frozen fixed point reads 62.76 °C, **+0.12 °C**
    from the measured plateau. So most of G1Q's −0.90 °C is the harness's duty, not M8's level or the chain.
+
+   *(Dated note, Tue 3 Nov 2026, after verification, C1.)* The post hoc reading in this item is misdescribed. Of the scoring window's 2,998
+   samples, **2.0% come after the hold's last process ended**: the HOLD file runs 5.9 s past it, idle at 27.3 W, so this is the registered
+   window's end, not a duty. Another 0.3% fall in the gaps between processes, which last about 10 ms each, with the board still at 41.6 W.
+   And **3.4% fall in a process's first 0.3 s, when the card is starting up and already drawing 36–39 W** (the first kernel launch starts
+   0.146–0.203 s in). P1's 0.940 counted all of them as idle, and its 45.90 W is the trimmed windows' figure (45.62 W in the process
+   windows, 45.78 W in the kernel launches). From the harness's own records alone (`launches.jsonl.gz`), the hold's **kernel duty**, the time
+   in kernel launches over the hold's span, is **0.970**. At it the frozen fixed point reads 63.27 °C, **−0.39 °C** from the measured plateau,
+   not +0.12. Across the definitions of the share the error runs from −0.88 to +0.12 °C. **M8's level is the larger part:** inside the
+   kernel launches at ≥ 790 MHz the card drew 0.91 W less than M8's 800 MHz board at the same die. In round figures, the power path's
+   −1.27 °C is about −0.85 °C of M8's level and −0.5 °C of the harness's duty, and the chain's own +0.37 °C given the watts offsets part of
+   it. So the last sentence above does not hold. [§ Corrections, C1](#corrections-after-verification-tue-3-nov-2026).
 3. **The trip was predicted from the rest die and held; the clock came out 12.6 MHz higher than the bits said.** The die settled at 65.50 °C
    (whole-degree readings 65 and 66), the regime the rule names. At this session's 47.0 °C rest the frozen relation gives 667.5 MHz (681.6 at
    the nominal 46.0 °C). The card held 680.1 MHz: 600 MHz in 38.7% of the last 300 s, 700 in 42.5%, 800 in 18.8% (P2). *Post hoc*, the same
@@ -61,6 +103,14 @@ the bits on a new kind, is +12.6 MHz (`session`). On G1Q the error from the bits
    relation then reads **682.3 MHz** (−2.1 MHz). Amendment A1 C2's reading beside the verdict, the trip clock with R set to G1Q's measured
    0.6875 °C per board W, gives 656.0 MHz (+24.1 MHz). Here the heat path's R moves the prediction the wrong way, and the frozen 0.663 does
    better.
+
+   *(Dated note, Tue 3 Nov 2026, after verification, C1.)* P2's −2.1 MHz rounds to **−2.2 MHz** (682.27 against the unrounded 680.09 MHz
+   measured). "The same work share explains it" does not hold: that share counts the window's last 6 s and each process's start-up as idle.
+   At the hold's kernel duty, 0.970, the trip clock reads 674.5 MHz, **+5.6 MHz** from the measured. Across definitions the error runs from
+   +12.3 to −2.2 MHz. M8's level is in the loop here too: inside the kernel launches, M8's board at the clocks the card ran is 1.61 W above
+   the measured. With that level alone the error would be −5.6 MHz, with the level and the duty −12.6 MHz, and with the level and the
+   measured held die (65.50 °C for the rule's 65.9) −0.8 MHz. One hold does not resolve which terms close the clock.
+   [§ Corrections, C1](#corrections-after-verification-tue-3-nov-2026).
 4. **The governor's timing is not M8's cap.** M8 predicted G2Q's first step down at 48 s, from its 65.2 W cap; the highest board sample in the
    first 60 s was 64.9 W, so the cap never bound. The clock held 800 MHz in 580 of the first 600 samples; the exceptions were the start of
    the second process (8.5–9.6 s: 600 MHz, the board down to 38 W, the die 53–54 °C), the kind of process-boundary step E144b's G1 also
@@ -106,6 +156,18 @@ error from −0.90 to +0.12 °C and G2Q's clock error from +12.6 to −2.1 MHz. 
 is quoted. M8's own level at 800 MHz, about 0.8 W high on this tile inside the work, is the smaller part. The heat path's R, raised to the
 session's measured 0.6875 (A1 C2), makes the clock worse (+24.1 MHz), so this session gives no support for moving it.
 
+*(Dated note, Tue 3 Nov 2026, after verification, C1 and C3.)* Two readings in this paragraph go further than the data.
+- ***"Can now be quoted."*** This is the first blind score of rank 4's aifoundry2 half: one session, two holds, with the rest die as a
+  ±0.5 °C anchor (C2). G1Q's registered band, 3.15 °C, is 2.4–3.1 times the critic's decisive 1.0–1.3 °C, so its PASS cannot separate M8
+  from M7 (−0.90 against −1.45 °C). G1Q's plateau error (−0.90 °C) and trajectory rms (1.04 °C) fall inside the critic's 1.3 °C only as a
+  post hoc reading. Rank 4 is not closed until E154's aifoundry3 half and a replicate session have been scored.
+- ***The next term.*** Its size depends on how the work share is defined (C1). The 0.94 counted the window's tail and the processes'
+  start-up as idle. At the hold's kernel duty, 0.970 from `launches.jsonl` alone, the term takes G1Q's error from −0.90 to −0.39 °C and
+  G2Q's clock error from +12.6 to +5.6 MHz. Before it is tested blind on another session, freeze it with that definition and that value,
+  and end the scoring window at the hold's last process (or model the tail). M8's level inside the work, 0.91 W high on G1Q at
+  ≥ 790 MHz and 1.61 W on G2Q's launches, is the larger part on G1Q, not "the smaller part", so the duty term alone will not close the
+  error. [§ Corrections, C1, C3](#corrections-after-verification-tue-3-nov-2026).
+
 ## The session, step by step
 
 | step | ran (PST) | card-min | result |
@@ -142,6 +204,11 @@ statistics reset, no governor, TDP, threshold or clock set, no firmware-revision
   scoring windows (the last 300 s, checkpoints to 750 s) sit inside it.
 - **D8 (after the data): the reducer's "first step down" reads a process boundary**, as E144b's D5 found. [`posthoc_e161.py`](posthoc_e161.py)
   P3 reads the governor from the kernel launches instead. No verdict uses either.
+- *(Dated note, Tue 3 Nov 2026, after verification, C4.)* **An interim look, not disclosed above.** Between the holds the lane ran the
+  registered reducer on G1Q at 16:56:45 PST, which gave its three verdicts PASS and the plateau error −0.898 °C. It checked G1Q's C at
+  16:57:34 PST. Both came before G2Q's step started at 17:13:02 PST ([`queue.jsonl`](queue.jsonl)). Nothing about G2Q changed: its
+  predictions and rules were frozen in `455c46c1`, `e224a3f8` and `ddbd15b1`, the detached queue ran it as registered, and `queue.jsonl`
+  records no skip or stop.
 
 ## What this cannot say
 
@@ -151,6 +218,10 @@ statistics reset, no governor, TDP, threshold or clock set, no firmware-revision
 - G1Q's band (3.15 °C) is wide. Its PASS cannot separate M8 from M7 (−0.90 against −1.45 °C); the errors themselves, E − A and the session
   rms are the informative figures (Q139(e)'s D4).
 - The work-share term is post hoc, read from this session's own samples. It is a candidate, not a tested prediction.
+- *(Dated note, Tue 3 Nov 2026, after verification, C1.)* Its size depends on its definition: −0.88 to +0.12 °C on G1Q, +12.3 to
+  −2.2 MHz on G2Q. Two small effects sit inside the registered readings. The window [t1 − 300, t1) ends 5.9–6.0 s after the hold's last
+  process, which lowers the measured plateau by 0.055 / 0.061 °C and G2Q's clock by 1.4 MHz. And the frozen trajectory's last-300 s mean sits
+  0.067 °C under G1Q's fixed point, the hold's finite length. Both are small next to the registered bands.
 - 13-minute holds read about 98% of the closed loop's plateau on this card; a stage slower than about 10 minutes is not resolved.
 
 ## How to reproduce
@@ -176,3 +247,134 @@ numpy 1.26.4, Python 3.9 at the desk. The reducer reads the `ccheck-*.json` summ
 | `ccheck-SMOKE.json`, `ccheck-STOPTEST-BOARD.json`, `ccheck-G1Q.json`, `ccheck-G2Q.json` | Q139(k)'s check of C, every launch |
 | `results.json`, `reduce.txt` | the registered reduction (`reduce_e161.py`) |
 | `posthoc_e161.py`, `posthoc.txt` | post hoc readings P1–P3 (no verdict uses them) |
+| `corrections_e161.py`, `corrections.txt` | the corrections after verification, C0–C3 (post hoc; no verdict uses them) |
+
+## Corrections after verification (Tue 3 Nov 2026)
+
+*Written Tue 3 Nov 2026, about 18:10–18:50 PST, by the fix pass, after the data, the post hoc readings and the verifier's report. Desk
+only: no card, no device command, no ssh to any box, nothing re-run. No measured, frozen or registered number, rule, prediction or verdict
+changed; the registration (`tools/claims-v3/e161/`, `ddbd15b1`) is untouched. Every number here is printed by
+[`corrections_e161.py`](corrections_e161.py) → [`corrections.txt`](corrections.txt). The script imports `posthoc_e161.py`'s helpers and the
+frozen code unchanged, after `reduce_e161.py`'s sha256 check. It first reproduces P1's and P2's shares, fixed point and trip clock (C0), so
+each alternative below differs from them only in the definition of the share.*
+
+### C1 (major): the post hoc work share
+
+**What the text said.** P1 and P2 read "6.0% of the samples fall between processes, where the card idles". They scaled the switching part
+by a work share of 0.940 / 0.939, which gave G1Q **+0.12 °C** and G2Q's clock **−2.1 MHz**. From that they concluded that "most of G1Q's
+−0.90 °C is the harness's duty, not M8's level or the chain".
+
+**Where the samples fall.** The scoring window is [t1 − 300, t1], 2,998 samples per hold (`corrections.txt` C1
+`where_the_window_samples_fall`):
+
+| samples | G1Q share | G1Q board, clock | G2Q share | G2Q board, clock |
+|---|---|---|---|---|
+| after the hold's last process (the HOLD file runs 5.94 / 5.96 s past it) | 2.00% | 27.3 W, 627 MHz | 2.00% | 27.3 W, 613 MHz |
+| in the gaps between processes (about 10 ms each) | 0.33% | 41.6 W, 800 MHz | 0.07% | 52.4 W, 600 MHz |
+| in a process's first 0.3 s (the first launch starts 0.146–0.203 s in) | 3.37% | 37.7 W, 780 MHz | 3.40% | 37.5 W, 723 MHz |
+| … of which before its first kernel launch | 1.70% | 36.4 W, 784 MHz | 1.67% | 36.2 W, 702 MHz |
+| in a process's last 0.05 s | 0.33% | 45.2 W, 800 MHz | 0.63% | 46.8 W, 658 MHz |
+| in kernel launches | 95.36% | 45.78 W, 794 MHz | 95.53% | 50.91 W, 681 MHz |
+| in the post hoc's trimmed windows (P1, P2) | 93.96% | 45.90 W, 795 MHz | 93.90% | 51.14 W, 680 MHz |
+
+So the 6.0% that P1 counted as idle is three different things:
+- the registered window's last 6 s, after the work had ended (2.0%);
+- each process's start-up, when the card already draws 36–39 W, and its last 0.05 s (3.7–4.0%);
+- the ~10 ms gaps between processes (0.07–0.33%).
+
+The verifier's reading, 2.33% / 2.07% "between processes, at an idle-level board", is the first and last of these together: 2.00 points of
+it are the window's tail.
+
+**The share by definition, and what each gives.** These use P1's and P2's formulas and the frozen code (`corrections.txt` C1
+`work_share_by_definition`, `G1Q_plateau_at_each_share`, `G2Q_clock_at_each_share`):
+
+| definition of the work share | G1Q share | G1Q plateau error | G2Q share | G2Q clock error |
+|---|---|---|---|---|
+| continuous work (as registered) | 1 | −0.90 °C | 1 | +12.6 MHz |
+| `launches.jsonl` alone: process time over the hold's span | 0.999 | −0.88 °C | 0.999 | +12.3 MHz |
+| **`launches.jsonl` alone: kernel-launch time over the hold's span (the hold's kernel duty)** | **0.970** | **−0.39 °C** | **0.970** | **+5.6 MHz** |
+| window samples in process windows (the verifier's "process windows") | 0.977 | −0.51 °C | 0.979 | +7.8 MHz |
+| window samples in kernel launches (the verifier's "kernel launches") | 0.954 | −0.12 °C | 0.955 | +2.0 MHz |
+| window samples in the post hoc's trimmed windows (P1, P2) | 0.940 | +0.12 °C | 0.939 | −2.2 MHz |
+
+- **The tail.** The three window-sample shares count the window's last 6 s as idle work time. The two from `launches.jsonl` count only
+  the hold.
+- **The rounding.** P2's clock, unrounded, is 682.27 MHz against a measured 680.09 MHz: −2.18 MHz, which rounds to **−2.2**, not −2.1
+  (C0).
+- **The window's end** (post hoc). Ended at the hold's last process instead, the window gives a measured plateau 0.055 °C higher on G1Q
+  (0.061 °C on G2Q) and a G2Q clock 1.36 MHz higher. At the kernel duty G1Q would then read −0.33 °C and G2Q +7.0 MHz
+  (`window_tail_effect`, the `…_window_ended_at_last_process…` keys).
+- **The finite hold.** The 13-minute hold's frozen trajectory has a last-300 s mean 0.067 °C under G1Q's fixed point (`finite_hold`).
+
+**What the rest of G1Q's error is** (post hoc; `decomposition_posthoc`). Inside the kernel launches at ≥ 790 MHz the card drew **0.91 W
+less** than M8's 800 MHz board at the same die, sample by sample (47.03 against 46.16 W at the plateau's mean die):
+
+| G1Q fixed point with | share | M8's level | plateau error |
+|---|---|---|---|
+| nothing changed (as registered) | 1 | as frozen | −0.90 °C |
+| the kernel duty alone | 0.970 | as frozen | −0.39 °C |
+| M8's level alone, set to the kernel launches' | 1 | −0.91 W | −0.04 °C |
+| both | 0.970 | −0.91 W | +0.44 °C |
+
+With both changes the error comes to +0.44 °C, near arm A's +0.37 °C given the measured watts. So the power path's −1.27 °C (E − A) is
+about **−0.85 °C from M8's level** and about **−0.5 °C from the harness's kernel duty** (each read alone; together they move the error by
+1.34 °C). The chain's own +0.37 °C offsets part of it. So M8's level is the larger part, not "the smaller part", and at the kernel duty the
+duty is about half of G1Q's −0.90 °C, not most of it.
+
+**At the trip (G2Q) the terms do not separate.** Inside the kernel launches, M8's board at the clocks the card ran is **1.61 W** above the
+measured. With that level alone the clock error would be −5.6 MHz, and with the level and the kernel duty −12.6 MHz. With the level and the
+measured held die (65.50 °C in place of the rule's 65.9) it would be −0.8 MHz, and −7.7 MHz adding the duty. One hold does not say which
+terms close the clock.
+
+**What to freeze before a blind test.**
+- The share, as the hold's kernel duty from `launches.jsonl` alone: the time in kernel launches over the span from the first process's
+  start to the last's end, 0.970 on this harness. Never take it from the telemetry.
+- A scoring window that ends at the hold's last process, or a model of the tail.
+- M8's level, as a separate term. In [E160's session](../2026-11-03-e160-blind6-aifoundry2/README.md) the three zeros anchors read
+  1.49–1.85 W under M8, the same direction.
+
+The duty term alone will not close G1Q's error.
+
+### C2 (minor): "from the bits alone"
+
+The lane's headline, this README's "Results first" and the registration's own words (`E161.md`, `tools/claims-v3/e161/README.md`) say the
+die was predicted "from the tile's bits alone". Every prediction is anchored on the idle card's measured die and board just before the
+hold: the mean of each REST file's last 120 s, 47.0 °C and 22.12 / 22.19 W from 1,199 samples each (`corrections.txt` C2). The die reads
+whole degrees, so the anchor is known to ±0.5 °C. Over that range G1Q's plateau error moves from −0.19 to −1.61 °C, and G2Q's clock error
+from +4.1 to +21.1 MHz. G2Q's plateau error does not move, because the trip does not move with the anchor, and every reading stays PASS
+(`results.json` `posthoc_rest_quantization`). The accurate wording is: **from the tile's bits and the idle card's die and board just before
+the hold (a ±0.5 °C anchor)**.
+
+### C3 (minor): rank 4 is not answered
+
+The lane's result said "Rank 4 is answered on aifoundry2". What E161 gives is **the first blind score of rank 4's aifoundry2 half**: one
+session, two holds.
+- G1Q's registered band, 3.149 °C, is 3.15 times the critic's 1.0 °C and 2.41 times its 1.305 °C (`corrections.txt` C3, from Q139(e)'s
+  frozen `predictions-q139e.json`). So the PASS cannot separate M8 from M7 (−0.90 against −1.45 °C).
+- At the critic's own scale, G1Q's plateau error (−0.90 °C) and trajectory rms (1.04 °C) fall inside 1.305 °C, but only as a post hoc
+  reading.
+- The critic asked for 3–4 kinds held across the two cards; this half held two. Rank 4 is not closed until E154's aifoundry3 half and a
+  replicate session have been scored.
+
+### C4 (minor): an interim look
+
+Between the holds the lane ran the registered reducer on G1Q (16:56:45 PST; its three verdicts PASS, plateau error −0.898 °C) and Q139(k)'s
+check of C on G1Q's launches (16:57:34 PST). Both times come from the lane's own working files, which are not committed. Both came before
+G2Q's step started at 17:13:02 PST (`queue.jsonl`). Nothing about G2Q changed:
+- its predictions and rules were frozen in `455c46c1`, `e224a3f8` and `ddbd15b1`;
+- the detached queue ran it as registered;
+- `queue.jsonl` records no skip or stop.
+
+The README did not say that G1Q was scored between the holds. It does now, in the departures.
+
+### C5 (minor): the registration's writing window
+
+`E161.md` says it was written "about 15:55-16:30 PST", and it dates its departures the same way. It was committed at 16:22:46 PST
+(`git show -s ddbd15b1`) and pushed at 16:22:49, so it was written between about 15:55 and 16:22 PST. The frozen file is not edited.
+
+### How to reproduce
+
+```bash
+/usr/bin/python3 docs/reports/data/2026-11-03-e161-heat-e2e-aifoundry2/corrections_e161.py \
+    > docs/reports/data/2026-11-03-e161-heat-e2e-aifoundry2/corrections.txt
+```

@@ -1,0 +1,464 @@
+{
+ "note": "post hoc, after verification; no registered number, rule, prediction or verdict changes",
+ "C0": {
+  "P1": {
+   "share": 0.9396,
+   "fixed_point_C": 62.762,
+   "plateau_err_C": 0.115
+  },
+  "P2": {
+   "share": 0.939,
+   "trip_clock_MHz": 682.269,
+   "clock_err_MHz": -2.183
+  }
+ },
+ "C1": {
+  "G1Q": {
+   "window": {
+    "t1_minus_last_process_end_s": 5.936,
+    "samples": 2998,
+    "processes": 93,
+    "launches": 1751,
+    "gap_between_processes_s_median_max": [
+     0.01,
+     0.012
+    ],
+    "first_launch_after_process_start_s_min_median_max": [
+     0.146,
+     0.148,
+     0.203
+    ]
+   },
+   "where_the_window_samples_fall": {
+    "after the hold's last process (the window's tail)": {
+     "samples": 60,
+     "share": 0.02,
+     "board_W": 27.32,
+     "MHz": 626.7
+    },
+    "in the gaps between processes": {
+     "samples": 10,
+     "share": 0.0033,
+     "board_W": 41.57,
+     "MHz": 800.0
+    },
+    "in a process's first 0.3 s": {
+     "samples": 101,
+     "share": 0.0337,
+     "board_W": 37.68,
+     "MHz": 780.2
+    },
+    "  of which before its first kernel launch": {
+     "samples": 51,
+     "share": 0.017,
+     "board_W": 36.44,
+     "MHz": 784.3
+    },
+    "  of which in a kernel launch": {
+     "samples": 50,
+     "share": 0.0167,
+     "board_W": 38.94,
+     "MHz": 776.0
+    },
+    "in a process's last 0.05 s": {
+     "samples": 10,
+     "share": 0.0033,
+     "board_W": 45.23,
+     "MHz": 800.0
+    },
+    "in kernel launches": {
+     "samples": 2859,
+     "share": 0.9536,
+     "board_W": 45.78,
+     "MHz": 794.4
+    },
+    "in kernel launches at >= 790 MHz": {
+     "samples": 2772,
+     "share": 0.9246,
+     "board_W": 46.16,
+     "MHz": 800.0
+    },
+    "in process windows": {
+     "samples": 2928,
+     "share": 0.9767,
+     "board_W": 45.62,
+     "MHz": 794.2
+    },
+    "in process windows, not in a kernel launch": {
+     "samples": 69,
+     "share": 0.023,
+     "board_W": 38.87,
+     "MHz": 788.4
+    },
+    "in the post hoc's trimmed windows": {
+     "samples": 2817,
+     "share": 0.9396,
+     "board_W": 45.9,
+     "MHz": 794.7
+    },
+    "in the post hoc's trimmed windows at >= 790 MHz": {
+     "samples": 2736,
+     "share": 0.9126,
+     "board_W": 46.26,
+     "MHz": 800.0
+    }
+   },
+   "work_share_by_definition": {
+    "continuous (as registered)": 1.0,
+    "launches.jsonl alone: process time over the hold's span": 0.9988,
+    "launches.jsonl alone: kernel-launch time over the hold's span (the hold's kernel duty)": 0.9696,
+    "window samples in process windows (the verifier's 'process windows')": 0.9767,
+    "window samples in kernel launches (the verifier's 'kernel launches')": 0.9536,
+    "window samples in the post hoc's trimmed windows (P1/P2)": 0.9396
+   },
+   "registered_readings_unrounded": {
+    "plateau_measured_C": 62.8779,
+    "clock_measured_MHz": 790.894
+   },
+   "window_tail_effect": {
+    "plateau_window_ended_at_last_process_C": 62.9332,
+    "plateau_tail_effect_C": -0.0553,
+    "clock_window_ended_at_last_process_MHz": 794.248,
+    "clock_tail_effect_MHz": -3.354
+   },
+   "G1Q_plateau_at_each_share": {
+    "continuous (as registered)": {
+     "share": 1.0,
+     "fixed_point_C": 63.775,
+     "plateau_err_C": -0.897,
+     "plateau_err_window_ended_at_last_process_C": -0.842
+    },
+    "launches.jsonl alone: process time over the hold's span": {
+     "share": 0.9988,
+     "fixed_point_C": 63.755,
+     "plateau_err_C": -0.877,
+     "plateau_err_window_ended_at_last_process_C": -0.822
+    },
+    "launches.jsonl alone: kernel-launch time over the hold's span (the hold's kernel duty)": {
+     "share": 0.9696,
+     "fixed_point_C": 63.265,
+     "plateau_err_C": -0.387,
+     "plateau_err_window_ended_at_last_process_C": -0.332
+    },
+    "window samples in process windows (the verifier's 'process windows')": {
+     "share": 0.9767,
+     "fixed_point_C": 63.384,
+     "plateau_err_C": -0.506,
+     "plateau_err_window_ended_at_last_process_C": -0.45
+    },
+    "window samples in kernel launches (the verifier's 'kernel launches')": {
+     "share": 0.9536,
+     "fixed_point_C": 62.997,
+     "plateau_err_C": -0.12,
+     "plateau_err_window_ended_at_last_process_C": -0.064
+    },
+    "window samples in the post hoc's trimmed windows (P1/P2)": {
+     "share": 0.9396,
+     "fixed_point_C": 62.762,
+     "plateau_err_C": 0.115,
+     "plateau_err_window_ended_at_last_process_C": 0.171
+    }
+   },
+   "finite_hold": {
+    "fixed_point_C": 63.775,
+    "frozen_trajectory_mean_last300s_C": 63.708,
+    "difference_C": -0.067
+   },
+   "M8_level": {
+    "M8_board_800MHz_at_the_measured_plateau_die_W": 47.03,
+    "board_in_kernel_launches_ge790MHz_W": 46.16,
+    "board_in_trimmed_windows_ge790MHz_W": 46.26,
+    "M8_minus_kernel_launches_ge790_W": 0.87,
+    "board_predicted_last300s_W": 47.4,
+    "board_measured_last300s_all_samples_W": 45.24
+   },
+   "decomposition_posthoc": {
+    "M8_level_offset_in_kernel_launches_ge790MHz_W": 0.911,
+    "fixed_points": {
+     "as registered: continuous work, M8's level": {
+      "share": 1.0,
+      "level_offset_W": 0.0,
+      "fixed_point_C": 63.775,
+      "plateau_err_C": -0.897
+     },
+     "the kernel duty alone": {
+      "share": 0.9696,
+      "level_offset_W": 0.0,
+      "fixed_point_C": 63.265,
+      "plateau_err_C": -0.387
+     },
+     "M8's level alone (set to the kernel launches' at >= 790 MHz)": {
+      "share": 1.0,
+      "level_offset_W": 0.911,
+      "fixed_point_C": 62.921,
+      "plateau_err_C": -0.043
+     },
+     "both": {
+      "share": 0.9696,
+      "level_offset_W": 0.911,
+      "fixed_point_C": 62.436,
+      "plateau_err_C": 0.441
+     }
+    },
+    "arm_A_plateau_err_C_given_the_watts": 0.367,
+    "E_minus_A_plateau_C": -1.265
+   }
+  },
+  "G2Q": {
+   "window": {
+    "t1_minus_last_process_end_s": 5.963,
+    "samples": 2998,
+    "processes": 91,
+    "launches": 1579,
+    "gap_between_processes_s_median_max": [
+     0.01,
+     0.012
+    ],
+    "first_launch_after_process_start_s_min_median_max": [
+     0.146,
+     0.148,
+     0.197
+    ]
+   },
+   "where_the_window_samples_fall": {
+    "after the hold's last process (the window's tail)": {
+     "samples": 60,
+     "share": 0.02,
+     "board_W": 27.32,
+     "MHz": 613.3
+    },
+    "in the gaps between processes": {
+     "samples": 2,
+     "share": 0.0007,
+     "board_W": 52.37,
+     "MHz": 600.0
+    },
+    "in a process's first 0.3 s": {
+     "samples": 102,
+     "share": 0.034,
+     "board_W": 37.47,
+     "MHz": 722.5
+    },
+    "  of which before its first kernel launch": {
+     "samples": 50,
+     "share": 0.0167,
+     "board_W": 36.19,
+     "MHz": 702.0
+    },
+    "  of which in a kernel launch": {
+     "samples": 52,
+     "share": 0.0173,
+     "board_W": 38.71,
+     "MHz": 742.3
+    },
+    "in a process's last 0.05 s": {
+     "samples": 19,
+     "share": 0.0063,
+     "board_W": 46.8,
+     "MHz": 657.9
+    },
+    "in kernel launches": {
+     "samples": 2864,
+     "share": 0.9553,
+     "board_W": 50.91,
+     "MHz": 681.4
+    },
+    "in kernel launches at >= 790 MHz": {
+     "samples": 546,
+     "share": 0.1821,
+     "board_W": 52.17,
+     "MHz": 800.0
+    },
+    "in process windows": {
+     "samples": 2936,
+     "share": 0.9793,
+     "board_W": 50.64,
+     "MHz": 681.5
+    },
+    "in process windows, not in a kernel launch": {
+     "samples": 72,
+     "share": 0.024,
+     "board_W": 39.71,
+     "MHz": 687.5
+    },
+    "in the post hoc's trimmed windows": {
+     "samples": 2815,
+     "share": 0.939,
+     "board_W": 51.14,
+     "MHz": 680.2
+    },
+    "in the post hoc's trimmed windows at >= 790 MHz": {
+     "samples": 519,
+     "share": 0.1731,
+     "board_W": 52.55,
+     "MHz": 800.0
+    }
+   },
+   "work_share_by_definition": {
+    "continuous (as registered)": 1.0,
+    "launches.jsonl alone: process time over the hold's span": 0.9988,
+    "launches.jsonl alone: kernel-launch time over the hold's span (the hold's kernel duty)": 0.9702,
+    "window samples in process windows (the verifier's 'process windows')": 0.9793,
+    "window samples in kernel launches (the verifier's 'kernel launches')": 0.9553,
+    "window samples in the post hoc's trimmed windows (P1/P2)": 0.939
+   },
+   "registered_readings_unrounded": {
+    "plateau_measured_C": 65.5028,
+    "clock_measured_MHz": 680.087
+   },
+   "window_tail_effect": {
+    "plateau_window_ended_at_last_process_C": 65.5635,
+    "plateau_tail_effect_C": -0.0607,
+    "clock_window_ended_at_last_process_MHz": 681.45,
+    "clock_tail_effect_MHz": -1.363
+   },
+   "G2Q_clock_at_each_share": {
+    "continuous (as registered)": {
+     "share": 1.0,
+     "trip_clock_MHz": 667.485,
+     "clock_err_MHz": 12.6,
+     "clock_err_window_ended_at_last_process_MHz": 13.96
+    },
+    "launches.jsonl alone: process time over the hold's span": {
+     "share": 0.9988,
+     "trip_clock_MHz": 667.756,
+     "clock_err_MHz": 12.33,
+     "clock_err_window_ended_at_last_process_MHz": 13.69
+    },
+    "launches.jsonl alone: kernel-launch time over the hold's span (the hold's kernel duty)": {
+     "share": 0.9702,
+     "trip_clock_MHz": 674.464,
+     "clock_err_MHz": 5.62,
+     "clock_err_window_ended_at_last_process_MHz": 6.99
+    },
+    "window samples in process windows (the verifier's 'process windows')": {
+     "share": 0.9793,
+     "trip_clock_MHz": 672.288,
+     "clock_err_MHz": 7.8,
+     "clock_err_window_ended_at_last_process_MHz": 9.16
+    },
+    "window samples in kernel launches (the verifier's 'kernel launches')": {
+     "share": 0.9553,
+     "trip_clock_MHz": 678.126,
+     "clock_err_MHz": 1.96,
+     "clock_err_window_ended_at_last_process_MHz": 3.32
+    },
+    "window samples in the post hoc's trimmed windows (P1/P2)": {
+     "share": 0.939,
+     "trip_clock_MHz": 682.269,
+     "clock_err_MHz": -2.18,
+     "clock_err_window_ended_at_last_process_MHz": -0.82
+    }
+   },
+   "frozen_trip_clock_check_MHz": 667.485,
+   "decomposition_posthoc": {
+    "M8_level_offset_in_kernel_launches_W": 1.612,
+    "trip_clocks": {
+     "as registered: continuous work, M8's level": {
+      "share": 1.0,
+      "level_offset_W": 0.0,
+      "held_die_C": 65.9,
+      "trip_clock_MHz": 667.49,
+      "clock_err_MHz": 12.6
+     },
+     "the kernel duty alone": {
+      "share": 0.9702,
+      "level_offset_W": 0.0,
+      "held_die_C": 65.9,
+      "trip_clock_MHz": 674.46,
+      "clock_err_MHz": 5.62
+     },
+     "M8's level alone (set to the kernel launches')": {
+      "share": 1.0,
+      "level_offset_W": 1.612,
+      "held_die_C": 65.9,
+      "trip_clock_MHz": 685.68,
+      "clock_err_MHz": -5.59
+     },
+     "both": {
+      "share": 0.9702,
+      "level_offset_W": 1.612,
+      "held_die_C": 65.9,
+      "trip_clock_MHz": 692.66,
+      "clock_err_MHz": -12.57
+     },
+     "M8's level, with the measured held die for the rule's 65.9 C": {
+      "share": 1.0,
+      "level_offset_W": 1.612,
+      "held_die_C": 65.503,
+      "trip_clock_MHz": 680.9,
+      "clock_err_MHz": -0.81
+     },
+     "both, with the measured held die": {
+      "share": 0.9702,
+      "level_offset_W": 1.612,
+      "held_die_C": 65.503,
+      "trip_clock_MHz": 687.73,
+      "clock_err_MHz": -7.65
+     }
+    },
+    "arm_A_plateau_err_C_given_the_watts": -0.225
+   }
+  }
+ },
+ "C2": {
+  "G1Q": {
+   "T_rest_C": 47.0,
+   "P_ref_W": 22.124,
+   "rest_samples": 1199,
+   "over_rest_die_pm0p5": {
+    "-0.50": {
+     "plateau_err_C": -0.191,
+     "clock_err_MHz": null
+    },
+    "-0.25": {
+     "plateau_err_C": -0.544,
+     "clock_err_MHz": null
+    },
+    "+0.25": {
+     "plateau_err_C": -1.251,
+     "clock_err_MHz": null
+    },
+    "+0.50": {
+     "plateau_err_C": -1.605,
+     "clock_err_MHz": null
+    }
+   }
+  },
+  "G2Q": {
+   "T_rest_C": 47.0,
+   "P_ref_W": 22.186,
+   "rest_samples": 1199,
+   "over_rest_die_pm0p5": {
+    "-0.50": {
+     "plateau_err_C": -0.397,
+     "clock_err_MHz": 4.1
+    },
+    "-0.25": {
+     "plateau_err_C": -0.397,
+     "clock_err_MHz": 8.4
+    },
+    "+0.25": {
+     "plateau_err_C": -0.397,
+     "clock_err_MHz": 16.9
+    },
+    "+0.50": {
+     "plateau_err_C": -0.397,
+     "clock_err_MHz": 21.1
+    }
+   }
+  }
+ },
+ "C3": {
+  "G1Q_band_95_C": 3.149,
+  "G1Q_fail_beyond_C": 6.297,
+  "critic_scale_C": 1.305,
+  "band_over_critic_scale_1p0_and_critic_scale": [
+   3.15,
+   2.41
+  ],
+  "G1Q_plateau_err_C": -0.898,
+  "G1Q_M7_plateau_err_C": -1.45,
+  "G1Q_checkpoints_rms_C": 1.044
+ }
+}
