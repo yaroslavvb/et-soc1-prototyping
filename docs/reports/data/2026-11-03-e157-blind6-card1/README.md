@@ -2,8 +2,8 @@
 
 *On the kinds page, [section 11, what is still open](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open):
 **item 6**, "a power model across kinds". It bears on three ranks of Q138's final critic: **rank 2** (M8 scored on a sixth blind pool on
-both 600 MHz cards; this is card 1's half, E153 is aifoundry3's), **rank 5** (the card term and a card's scale from cheap reads: handed on
-here, § 7) and **rank 14** (no file tile's C had ever been checked; the complaint was first written in E78's README, § Joins and traps,
+both 600 MHz cards; this is card 1's half, E153 is aifoundry3's), **rank 5** (the card term and a card's scale from cheap reads, § 7: scored
+after E153's commit) and **rank 14** (no file tile's C had ever been checked; the complaint was first written in E78's README, § Joins and traps,
 [`../2026-10-31-e78-kinds-energy-matrix/README.md`](../2026-10-31-e78-kinds-energy-matrix/README.md)). Tue 3 Nov 2026 (week 45), Q139
 resumed, lane `a1c1-e157-blind6`. Pre-registered in **`01676499`** ([`tools/claims-v3/e157/README.md`](../../../../tools/claims-v3/e157/README.md),
 committed and pushed 16:17:57 PST) before the claim (16:19:48) and the first launch (the smoke's, 16:20:31; the stop-path test before it
@@ -17,13 +17,24 @@ was a read** (nine kinds, two of them the PMIC voltage-register reads the owner'
 (`since_reset_ms` −1 in every sample). Card session 16:20:11–17:06:21 PST, **46.2 of the 55 card-minutes allowed**: the stop-path test
 15702, the smoke 15701 and four passes, 15710–15713 (665, 675, 658, 674 s); three kept (15711 set aside by E78's pass gate).*
 
+*Scored since (a dated note, Tue 3 Nov 2026, 17:27 PST; desk only; the first commit of this README, `fb2e5c6e`, 17:22:53, said X1, X2, S1
+and S2 were handed on): E153 committed its primary reduction of pool 6 on aifoundry3 at 17:25:43 (`8e18eb67`), three minutes after this
+lane's reduction and first commit. The registered `score_e157.py`, unchanged, was then run on this directory with `--e153` on that file
+(E153's C check excluded no tile): [`scored-e153.json`](scored-e153.json), [`results-e153.md`](results-e153.md),
+[`posthoc/score_with_e153.sh`](posthoc/score_with_e153.sh). Every other verdict is identical to `scored.json`'s. **X1 PASS**: card 1's float
+D over aifoundry3's on 25 tiles, median **0.9632 [0.9613, 0.9659]**, holds M8's 0.9616 (M7's 0.9711 lies outside); **X2 PASS**: int8, 16 tiles,
+0.9681 [0.9534, 0.9783]; **S1 PASS**: the zeros level's predicted 0.9707 is +0.78% from the measured ratio; **S2 PASS**: 0.9610, −0.74%. § 7
+gives the reading and its sensitivity: on the registered footing the card term and the cheap-read scale hold to 1%; across this card's
+reduction arms the float ratio moves 0.954–0.973, so X1 fails on three of five arms and S1 on two.*
+
 **In plain words.** M8 is the lab's newest model of how much power a matmul draws (watts over the same kernel on zeros) and how far the die
 warms (over a 4.5 s run), from the numbers it multiplies; on this card it carries a measured card term (card 1 draws 0.9616 times what
 aifoundry3 draws on the same tiles). Here it predicted 50 tiles it had never seen, written by someone who never saw it, on the lab's second
 600 MHz card. **The launches' results were right**: every one of the session's 3,170 launches, in every pass and the smoke, stored a C equal
 bit for bit to the reference arithmetic, on all 1,024 minions, including the first silicon reads of int8's 32-bit wraparound, full-range
-int8 operands, fp16 exponents spread wider than anything read before and twelve tiles cut from two public models. So no row here, and no
-pool-5 row on this card, is biased by a silent kernel error. **Power**: M8 errs 0.39 W rms on fp32 (above what its nested score allows: P1
+int8 operands, fp16 exponents spread wider than anything read before and twelve tiles cut from two public models. So no row here is
+biased by a silent kernel error, and the six pool-5 tiles re-run computed the right C on the kernel that measured pool 5 (the rest of pool
+5's rows are covered by that inference, not by a read of their own C). **Power**: M8 errs 0.39 W rms on fp32 (above what its nested score allows: P1
 FAILS), 0.10 W on fp16 and 0.33 W on int8, about 2% of a float kind's switching watts and 7% of an int8 kind's; it is unbiased on its own
 footing (+0.002 W on the floats), and 29 of the 30 priority-1 tiles sit inside its 95% bands. **It is not better than M6**, the model two
 refits older: over the 30 priority-1 tiles M8's rms is 0.040 W larger (95% interval −0.013 to +0.128 W, not resolved), and on the E142 footing
@@ -64,7 +75,7 @@ by E78's own gate (`fp16.zeros departs +0.384 W from its straight line`). The C 
 | **E157-H4** | heat coverage, priority 1 | **29 of 30** (`int8.bheld_bit1` outside) | ≥ 26 | **PASS** | — |
 | **E157-R1** | the 12 real tiles against the pool's own non-real tiles | rms **0.146 W** (the pool's own 0.420 W) | ≤ 0.641 (below 0.175) | **PASS** | — |
 | **E157-R2** | the 12 real tiles inside M8's band | **12 of 12** | all | **PASS** | the session's own slope FAIL (`fp32.real_smol_softmax_v_causal`) |
-| **E157-X1, X2, S1, S2** | the card term and card 1's scale from cheap reads | E153's committed reduction of pool 6 on aifoundry3 did not exist when this lane reduced | — | **NOT SCORED** (handed on, § 7) | — |
+| **E157-X1, X2, S1, S2** | the card term and card 1's scale from cheap reads | not scored at reduction time (E153's reduction did not exist yet); scored at 17:27 on E153's commit (`scored-e153.json`): X1 0.9632 [0.9613, 0.9659], X2 0.9681 [0.9534, 0.9783], S1 +0.78%, S2 −0.74% | holds 0.9616; within 1% | **PASS ×4** (§ 7) | X1 FAIL on E142's own footing, the session's slope and 0.2955; S1 FAIL at the session's slope and 0.3320 |
 
 The dips-kept arm keeps one pass (E78's gates set three aside on the meter's dips: `fp32.randn spans 2.026 W`, `fp16.randn spans 2.445 W`,
 `anchor_pi drifts +0.687 W`, as E142 saw), so it scores nothing. The anchor gates relaxed (all four passes kept) and the slope's interval
@@ -188,14 +199,29 @@ computed the right C. **What it does to the rows**: rank 14's guard holds (no fi
 its reproducibility half fails by the critic's 0.05 W and on one tile by Welch's: a repeated pool-5 tile on this card reproduces to about
 0.1–0.2 W, not 0.05.
 
-**7. The card term (X1, X2) and card 1's scale from cheap reads (S1, S2): NOT SCORED, handed on.** E153's committed primary reduction of pool
-6 on aifoundry3 did not exist when this lane reduced (E153's session ran beside this one, from 16:21 PST). The code is registered:
-`score_e157.py --e153 <E153's e153.json> --e153-drop <tiles E153's C check took out>` scores X1/X2 (the median of D(card 1) / D(aifoundry3)
-against M8's 0.9616, M7's beside) and S1/S2 (the zeros level, physical: 0.9707 floats, 0.9610 int8, within 1% of the measured ratio), and
-E153's own CS1 reads the same ratio from its side. **Reported**: card 1's cheap reads in this session: the pool's own fp32 zeros tile read
-1.833 W of board over idle against the frozen read's 1.661 W (E142's session), +10%, so the registered form with the read re-taken today
-says 1.071 (`primary.reported_card_scale_reread`): the zeros level moves about 10% between sessions on this card, ten times the 1% the
-critic asks of the predicted scale, so it cannot serve as a session-independent cheap read. The idle level reproduced (33.06 W both days).
+**7. The card term (X1, X2) and card 1's scale from cheap reads (S1, S2)** (rank 5; scored at 17:27 PST, after E153's commit: the dated
+note at the top; [`scored-e153.json`](scored-e153.json) › `primary.rules`). When this lane reduced, E153's committed primary reduction of
+pool 6 on aifoundry3 did not exist (E153's session ran beside this one, from 16:21 PST), and the first commit of this README handed the four
+rules on. E153 committed it at 17:25:43 (`8e18eb67`, its C check excluding no tile); the registered scorer, unchanged, then gave:
+
+| rule | tiles (both cards, D ≥ 5 W floats, ≥ 1 W int8) | measured: median D(card 1) / D(aifoundry3) [95%] | prediction | verdict |
+|---|---:|---|---|---|
+| **E157-X1**, floats | 25 | **0.9632** [0.9613, 0.9659] | M8's card term 0.9616 (M7's 0.9711: outside) | **PASS** |
+| **E157-X2**, int8 | 16 | **0.9681** [0.9534, 0.9783] | 0.9616 (M7's 0.9735: inside) | **PASS** |
+| **E157-S1**, floats | X1's | 0.9632 | the zeros level, physical, frozen reads: **0.9707 (+0.78%)** | **PASS** (within 1%) |
+| **E157-S2**, int8 | X2's | 0.9681 | **0.9610 (−0.74%)** | **PASS** |
+
+Every other read and form, against the same measured ratios (floats / int8): V600² 0.9102 / 0.9011 (**−5.5% / −6.9%**: the physical
+candidate fails on card 1 again), V600 fitted −8.8% / −19.6%, the zeros level fitted +2.6% / +0.9%, the leakage slope fitted +1.2% / −1.7%,
+physical +31% / +29%, idle power physical +32% / +30%, fitted +41% / +85%. E153-CS1's reading (the measured median within 1% of M8's 0.9616)
+holds for both families (+0.17%, +0.68%). **The sensitivity, reported** (the same rules at card 1's reduction arms, E153's primary fixed): the
+float ratio is 0.9727 on E142's own footing, 0.9538 at the session's own slope, 0.9658 and 0.9608 at Q139(u)'s slope interval (0.2955,
+0.3320 W/°C) and 0.9632 with the anchor gates relaxed, so X1 FAILS on three of the five scored arms and S1 on two (S2 on three, X2 on one).
+So on the registered footing (Q139(u)'s on both cards) the card term and the zeros-level scale hold to better than 1%; the 1% itself is
+narrower than what the footing alone moves (about ±1%), which is the critic's rank 1 again. And the read must be the frozen one: card 1's
+zeros level re-read in this session (the pool's own fp32 zeros tile, 1.833 W of board over idle against the frozen 1.661 W from E142's
+session, +10%) would put the scale at 1.071 (`primary.reported_card_scale_reread`), so a single session's zeros level is not a cheap read
+stable to 1%. The idle level reproduced (33.06 W both days) but predicts nothing (+32%).
 
 **8. The footing** (reported). The session's own fitted leakage slope is 0.390 W/°C (E142's session: 0.408), above Q139(u)'s frozen 0.3134
 (interval 0.296–0.332). At the session's slope the floats read 0.157 W high (B1 FAIL HIGH) and at E142's 0.2414 0.151 W low (FAIL LOW):
@@ -214,13 +240,14 @@ the bias verdict still turns on the footing, as the critic said; the rms (P1–P
 | real tiles (rank 8) | pool 5: one softmax-times-values tile 0.60 W off on aifoundry3 | **0.146 W rms, 12 of 12 inside** (R1, R2 PASS) |
 | heat, the die's rise over 4.5 s | nested 0.352 / 0.355 / 0.141 °C; E142 0.167 / 0.162 / 0.139 | **0.180 / 0.183 / 0.123 °C** (H1–H4 PASS); 0.1160 °C/W against 0.1151 |
 | validity of file-tile rows (rank 14) | no launch's C ever read on a file tile | **3,170 of 3,170 launches bit-exact**; K1's D reproduces to 0.1–0.2 W, not 0.05 (K1 FAIL) |
-| the card term on pool 6 (rank 5) | E142's X1 failed post hoc (0.982 vs 0.9711) | not scored here (handed on, § 7) |
+| the card term on pool 6 (rank 5) | E142's X1 failed post hoc (0.982 vs 0.9711); no cheap read within 1% in training | **M8's 0.9616 holds** (floats 0.9632, int8 0.9681); the zeros level predicts the scale to **+0.78% / −0.74%** (S1, S2 PASS), on the registered footing; footing-sensitive (0.954–0.973) |
 
 The terms this tests: M8's two new ones and its footing refit. The C-register term earns its place (the two C tiles 0.094 W against M6's
 0.322). The near-whole-byte int8 discount does not: it makes the whole-line tiles 0.72 W rms against M6's 0.34, and the zeros-transport tile
 that tests it most directly misses by +0.78 W where M6 is within 0.04. The footing refit removed the bias on its own footing but did not
 lower the scatter. **For an unseen kind on this card, the honest error now is about 0.3 W rms (2% of a float kind, 5–7% of an int8 kind),
-with M6 as good as M8**; the heat over a run follows from the power to about 0.15 °C.
+with M6 as good as M8**; the heat over a run follows from the power to about 0.15 °C. Carried to another card through the card term, the
+scale is the measured 0.9616 to 0.2% (floats) and 0.7% (int8) on pool 6, and the frozen zeros-level read predicts it to under 1%, on the one footing.
 
 ## Registered against what happened
 
@@ -234,7 +261,7 @@ with M6 as good as M8**; the heat over a run follows from the power to about 0.1
 | stops: board ≥ 66 W or a shire field ≥ 72 °C | none fired: board at most 61.10 W (p99.9 60.33–60.74 per pass), shire mean at most 63 °C, the shire field's high-water latch 65 °C throughout ([`telemetry-max.json`](telemetry-max.json)) |
 | at most 55 card-minutes; no session after 21:00, every run ends by 22:00 PST | 46.2 card-minutes (16:20:11–17:06:21) |
 | every measured launch C-logged and checked at the desk | 3,170 launches logged (the burn-in's included), all PASS |
-| X1, X2, S1, S2 with E153's committed reduction | NOT SCORED: not committed when this lane reduced |
+| X1, X2, S1, S2 with E153's committed reduction | not committed when this lane reduced (17:08-17:20); committed 17:25:43; scored 17:27 with the registered code: PASS ×4 |
 
 ## Departures and post hoc
 
@@ -283,7 +310,7 @@ E142). Mon 2 Nov's post was not touched. [`logs/push-and-claim-times.txt`](logs/
   on card 1** (+0.040 W, not resolved; worse on E142's footing), so "M8 beats M6" must not be quoted for this card. Heat over a run 0.12–0.18 °C.
 - **Rank 2, card 1's half**: not met (M8 − M6 not resolved below zero). **Rank 14**: the C half closes (3,170 of 3,170 bit-exact, the
   first silicon reads of int8's wrap and full range, wide fp16 exponents and real tiles); the D half fails as written (K1 FAIL: 3 of 6 within
-  0.05 W, 5 of 6 within Welch). **Rank 5**: handed on (§ 7); the zeros level is not a session-stable cheap read (+10% between two days).
+  0.05 W, 5 of 6 within Welch). **Rank 5**: on the registered footing M8's card term holds on pool 6 (X1, X2 PASS) and card 1's scale is predicted from its frozen zeros level to +0.78% / −0.74% (S1, S2 PASS, the critic's 1%); V² misses by −5.5%; the verdicts move with the footing (X1 fails on three of five arms), and the zeros level re-read today is 10% off its frozen value, so the predictor is not yet a session-independent cheap read.
 - **For M9** (named, not fitted): drop or cap `bsat` (whole-line int8 L/Z cases), an exponent-field term for fp32 (E case +0.20 W bias),
   int8's held-B tiles (every model 0.3 W high), and B's high mantissa bits in fp32 (`fp32.b_onebit_b20_third`, −1.09 W in every model).
 - **Records to add** (integration lanes): 03-experiments (E157), 05-claims (item 6 on card 1 with pool 6; rank 14's C half), 14-card-behaviour
@@ -295,7 +322,8 @@ E142). Mon 2 Nov's post was not touched. [`logs/push-and-claim-times.txt`](logs/
 |---|---|
 | `e157.json`, `runs.csv`, `reduce.txt`, `reduce.log` | the primary reduction (Q139(u)'s footing, 0.3134 W/°C, dips removed once) |
 | `e157-e142footing.json`, `e157-auto.json`, `e157-dipskept.json`, `e157-leak0.2955.json`, `e157-leak0.3320.json`, `e157-relaxed.json` (with their `runs-*.csv`, `reduce-*.txt`, `.log`) | E142's own footing (0.2414) and the arms |
-| `scored.json`, `results.md`, `score.log` | every rule, every arm, every tile (`score_e157.py`, as registered) |
+| `scored.json`, `results.md`, `score.log` | every rule, every arm, every tile (`score_e157.py`, as registered), at reduction time (X1, X2, S1, S2 NOT SCORED) |
+| `scored-e153.json`, `results-e153.md`, `score-e153.log`, `posthoc/score_with_e153.sh` | the same scorer with `--e153` on E153's committed reduction (`8e18eb67`): X1, X2, S1, S2 scored, every other verdict identical |
 | `ccheck/ccheck-session.txt`, `ccheck/ccheck-session.json.gz` | every launch's C verdict (gunzip the JSON before passing it to `score_e157.py --ccheck`) |
 | `aifoundry1-c1/e157/p157{10..13}/`, `aifoundry1-c1/e157-smoke-p15701/`, `aifoundry1-c1/e157-stoptest-p15702/` | the raw passes: `runs.jsonl`, `marks.jsonl`, `telemetry.jsonl.gz`, `c-log.jsonl.gz`, configs, manifests, the dumped tiles, hashes, `STOP.*` |
 | `logs/` | the session's log, the queue, the session config reads, the box's preflight, binaries, `push-and-claim-times.txt` |
