@@ -8,7 +8,7 @@ nested leave one kind out with M6, M7, M8 and M9 on the same folds, then frozen 
 his words of 2 November 2026: to predict the power requirement and heat generation of numeric computations as accurately as
 possible.*
 
-*Wed 4 Nov 2026 (week 45), 00:29-01:3x PST, Q140(m), desk only, on the Intel (`nice -n 10`, at most 4 threads or bench jobs): no card
+*Wed 4 Nov 2026 (week 45), 00:29-01:12 PST (the freeze commit, `1f244140`, 01:12:04), Q140(m), desk only, on the Intel (`nice -n 10`, at most 4 threads or bench jobs): no card
 was opened, no device command was sent, no lab box, Discord, Modal or archive was touched, and nothing was measured in watts here.
 Every watt comes from a committed experiment, named where it is used. **The registration, [`M9-REGISTRATION.md`](M9-REGISTRATION.md),
 was committed and pushed (`8dfafae3`, 00:45:51 PST) before `fit_m9.py` existed, before any candidate feature was computed on any
