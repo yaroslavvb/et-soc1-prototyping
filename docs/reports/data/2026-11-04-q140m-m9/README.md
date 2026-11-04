@@ -413,3 +413,24 @@ changes, and M9 is not re-frozen. Every original word above stays; the marks "co
 - **C8: a rounding slip.** M8's int8 band k is 2.835 (`m8.json` › `families.int8.band_k`), so 2.84, not 2.83.
 - **C9: the convergence rule's first step** (pending at this commit). The 14 calibration tiles above the bound at nine points are
   being counted at 27 (252 new points, 3 jobs, from 01:54:29 PST). The result is added in the next dated commit.
+  *Result (added after the step ended at 02:35:42 PST; [`recount-rule/recount-rule.txt`](recount-rule/recount-rule.txt), from
+  `recount_rule.py` as committed with the rule).* The bench, its seven files hashing as the bench check's, counted the 252 points in
+  2,473 s at 3 jobs (29.4 s a point on one core), with C equal to software at every point.
+  - **6 of the 16 tiles meet the bound by 27 points:** `pi_b12` and `w79_b12` at nine, then `third_b12`, `w67_b12`, `w79_b17` and
+    `pi_b17`.
+  - **Ten do not:** every bit-20 and bit-21 tile (e(27) 0.17-0.39 W), and bit 17 on 1/3 and E67's word (0.10 and 0.11 W). So **N\*
+    is not yet determined.**
+  - **The error falls about as sampling would.** From 9 to 27 points it fell 1.28-3.30× (median 1.96; the 1/√N law gives 1.73). By
+    that law (planning only), the ten need 28-410 points: the bit-17 pair about 30, the bit-20 tiles 81-193, the bit-21 tiles
+    119-410. `cal_third_b21` is past the cap of 243.
+  - **The rule's next step** is 81 points on those ten: 540 new points, about 1.1 bench-hours at 4 jobs, run by the recount lane
+    before its recount. By the law it would settle the bit-17 pair and perhaps `w79_b20`, not the rest.
+  - **What it means for the recount.** A tile counted to N from its three points costs 0.7, 2.9, 9.6 and 29.4 minutes at 4 jobs for
+    N = 9, 27, 81 and 243. So the 115 tiles of the 77 rows and E147, before pool 7's, cost 1.4 bench-hours at 9 points, 5.6 at 27,
+    18 at 81 and 56 at 243, if every tile went that far. Uniform launch points give a high single bit's launch average to 0.10 W only
+    at that cost. § 4's alternative, points stratified by C's state (which `accum.c` computes for free), registered first, is the
+    cheaper route for those tiles.
+  - **Post hoc, b20_third at 27 points:** the three-point average over-counts it by 0.784 ± 0.267 W (1 s.e.), 2.9 s.e. from zero
+    (0.995 ± 0.508 at nine). M9's error there moves from −0.72 / −1.00 W to +0.07 / −0.24 W (aifoundry3 / card 1), ±0.27 W. The
+    over-count is resolved and of the miss's size; what remains is not resolved from zero. Still one post hoc tile, at a count the
+    rule does not yet call converged. b12_third, like for like (the frozen form): +0.24 / +0.15 → +0.22 / +0.12 W, ±0.06 W.
