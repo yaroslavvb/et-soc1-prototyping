@@ -1,0 +1,186 @@
+{
+ "card": "aifoundry3",
+ "args": {
+  "out": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e154/p15420",
+  "root": "/home/yaroslavvb/aifoundry",
+  "tel_live": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e154/p15420/telemetry.jsonl.raw",
+  "sparsity": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "pass_no": 15420,
+  "card": "aifoundry3",
+  "design": "full",
+  "deadline_epoch": 1793761679.0,
+  "launch_s": 6.8,
+  "overhead_s": 0.75,
+  "min_launch_s": 1.0,
+  "gate_c": 70.0,
+  "hold_c": 72.0,
+  "hold_w": 65.0,
+  "session_c": 74.0,
+  "inlaunch_dw": 4.0,
+  "watch_every_s": 0.05,
+  "stale_s": 3.0,
+  "check_every_s": 60.0,
+  "min_rate_hz": 5.0,
+  "smoke": false,
+  "stoptest": false,
+  "dry": false,
+  "list": false
+ },
+ "holds": {
+  "H_M": "int8.full",
+  "K_S": "fp32.real_smol_softmax_v_causal",
+  "K_Q": "int8.real_qwen_w8a8_v",
+  "K_L": "int8.b_line_zero_ff",
+  "K_O": "fp32.a_onebit_b5_third"
+ },
+ "ks": {
+  "seconds": 3.2,
+  "period_plan_s": 4.37,
+  "period_warm_s": 4.97,
+  "warm_lo_c": 51.5,
+  "warm_hi_c": 53.0
+ },
+ "steps": [
+  [
+   "rest",
+   "R0",
+   300.0
+  ],
+  [
+   "hold",
+   "H_M",
+   660.0
+  ],
+  [
+   "rest",
+   "R1",
+   210.0
+  ],
+  [
+   "hold",
+   "K_S",
+   600.0
+  ],
+  [
+   "rest",
+   "R2",
+   210.0
+  ],
+  [
+   "hold",
+   "K_Q",
+   600.0
+  ],
+  [
+   "rest",
+   "R3",
+   210.0
+  ],
+  [
+   "hold",
+   "K_L",
+   600.0
+  ],
+  [
+   "rest",
+   "R4",
+   210.0
+  ],
+  [
+   "hold",
+   "K_O",
+   600.0
+  ],
+  [
+   "rest",
+   "R5",
+   150.0
+  ]
+ ],
+ "items": [
+  {
+   "name": "fp32.a_onebit_b5_third",
+   "type": "fp32",
+   "kind": "a_onebit_b5_third",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_onebit_b5_third.bin",
+   "bytes": 2048,
+   "sha256": "6d07fe951904d0232dc9b05b3aceea171b2b642e1f615b9de01f7dabc375bca1",
+   "sha256_a": "91dad245806d2a2d5556985312bcca6202b3a01a42ecaf1c049fb734c4272115",
+   "sha256_b": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "values": null,
+   "anchor": false,
+   "pool": "blind6",
+   "hold_candidate": true
+  },
+  {
+   "name": "fp32.real_smol_softmax_v_causal",
+   "type": "fp32",
+   "kind": "real_smol_softmax_v_causal",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_smol_softmax_v_causal.bin",
+   "bytes": 2048,
+   "sha256": "21337776084c35ce58e2b6402bf5b67d0892a26b01e6f96046f6c1a3bb78e4fd",
+   "sha256_a": "a62fccbcab989b38c8556a88b332e009a879a1f889629e33148fe0a85877a102",
+   "sha256_b": "76bc0457acca7d9119b4cd5095c2275df294da132a36cb4ce9197a962dceafe1",
+   "values": null,
+   "anchor": false,
+   "pool": "blind6",
+   "hold_candidate": true
+  },
+  {
+   "name": "int8.b_line_zero_ff",
+   "type": "int8",
+   "kind": "b_line_zero_ff",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_zero_ff.bin",
+   "bytes": 2048,
+   "sha256": "6a50d22072dfca72d1da830063c9b88bdf75f8716955e9b330c1321867040607",
+   "sha256_a": "a877d4a8c70a4f3076dd63e01ffe1dda9db1e8eb0b4e0d90ab317199303d813d",
+   "sha256_b": "259b1863e358a09f418220fda2fed6597d0e29741ebf689d186edb4927c2d11c",
+   "values": null,
+   "anchor": false,
+   "pool": "blind6",
+   "hold_candidate": true
+  },
+  {
+   "name": "int8.full",
+   "type": "int8",
+   "kind": "full",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/tiles/int8/full.bin",
+   "bytes": 2048,
+   "sha256": "f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9",
+   "sha256_a": "ca9b3a28e84eb1147f024b26a30c71bbbf5afc262b8377ac0338eedf1c5d208b",
+   "sha256_b": "2cfbe5b8714ea56cf09294f9a56961bb5bbaac4459344eaf14459130f13c5e87",
+   "values": null,
+   "zero": "int8.zeros",
+   "random": "int8.full",
+   "anchor": true,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 69312,
+   "provisional": true,
+   "cpo": 318.0,
+   "macs_per_op": 16384,
+   "rule": "uniform over -128..127, the whole two's-complement range (E64's int8 `randn`)"
+  },
+  {
+   "name": "int8.real_qwen_w8a8_v",
+   "type": "int8",
+   "kind": "real_qwen_w8a8_v",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_v.bin",
+   "bytes": 2048,
+   "sha256": "b253206379b267bd90d7eb76a0ddfcb2dff4b83c184bd304dddc79e30107668a",
+   "sha256_a": "f7a3aad6d46ff274ee4d45821968890db5aca5a55f4a9e4cb9b3e31767e8b80f",
+   "sha256_b": "c82fc61f004507581cb43c58688d4efc1c3f7d40c2de0ea3472e30d37c2dffcf",
+   "values": null,
+   "anchor": false,
+   "pool": "blind6",
+   "hold_candidate": true
+  }
+ ],
+ "et_devices": null,
+ "ccheck_log": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e154/p15420/c-log.jsonl",
+ "experiment": "E154"
+}
