@@ -1,0 +1,335 @@
+{
+ "experiment": "E170",
+ "request": "Q141(w)",
+ "card": "aifoundry1-c0",
+ "order_seed": "Random('E170|<half>|<pass>')",
+ "note": "E170's stop-path test (die): the registered watcher with one stop lowered, so that it must trip on live samples; the session must end with exit 4",
+ "order": {
+  "source": "tools/claims-v3/e170/predictions-e170.json order",
+  "runs": 135,
+  "passes": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ]
+ },
+ "tools": {
+  "heater": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "kernel": "build/sparsity/kernel/sparsity.elf",
+  "ettelem": "tools/claims-v3/e170/ettelem_guard_e170.sh"
+ },
+ "ccheck": {
+  "host": "build/ccheck/b/host/sparsity_host",
+  "host_sha256": "4f0956ceabb107337c2996636ad712946aa135ecf33f72fb833bae72c8c5e585",
+  "wrapper": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "wrapper_sha256": "d00158d454596a8325ff3a7ffa3dff6e80a2e1798516b022009450f63443b9b7",
+  "kernel": "build/sparsity/kernel/sparsity.elf",
+  "kernel_sha256": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "log": "<session dir>/c-log.jsonl"
+ },
+ "ettelem_real": {
+  "path": "build/ettelem-e84/ettelem",
+  "sha256": "87c1c38c995f0e3c6f442f361398dfc561ef1d4ed8b2304b9e9242d4a133dcc8"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "pool": "tools/claims-v3/kinds/blind7/blind7.json",
+ "predictions": "tools/claims-v3/e170/predictions-e170.json",
+ "left_out_by_name": [
+  "fp16.anchor7_randn_a",
+  "fp16.anchor7_randn_b",
+  "fp16.laplace_both",
+  "fp16.randn_x8",
+  "fp16.real_qwen_l3_softmax_v_h1",
+  "fp16.real_s360_l3_qk",
+  "fp16.real_s360_l3_w8a16_gate",
+  "fp16.sorted_k",
+  "fp16.uniform_pm1",
+  "fp32.anchor7_randn_a",
+  "fp32.anchor7_randn_b",
+  "fp32.dropout30_both",
+  "fp32.exp_b_alt_nib",
+  "fp32.laplace_both",
+  "fp32.mant2_spreadexp",
+  "fp32.real_qwen_l3_softmax_v_sink",
+  "fp32.real_s360_l1_qk",
+  "fp32.real_smol_l3_w8a16_q_outlier",
+  "fp32.uniform_pm1"
+ ],
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 30,
+  "board_cap_w": 65.9,
+  "cap_consecutive": 1
+ },
+ "caps": {
+  "max_card_min": 2
+ },
+ "smoke_cycles": {
+  "b7-int8.anchor7_zeros": 318,
+  "b7-fp32.randn_a24k": 546
+ },
+ "dry_c_w": {
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.anchor7_zeros.bin": 1.396,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.b_onebit_b8_pi.bin": 13.39,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.b_onebit_b9_one.bin": 14.708,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.anchor7_zeros.bin": 1.438,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_full.bin": 13.495,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_one.bin": 14.387,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_pi.bin": 13.406,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_seventh.bin": 13.29,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_third_a1p5.bin": 14.529,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b22_third.bin": 14.177,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_a_gray_walk.bin": 10.487,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_b_alt_b26.bin": 10.96,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_b_alt_lsb.bin": 10.865,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_only_pos12.bin": 15.406,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.randn_a24k.bin": 14.555,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.a_full_b_pos.bin": 8.96,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.anchor7_full_a.bin": 9.055,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.anchor7_full_b.bin": 9.013,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.anchor7_zeros.bin": 2.121,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_0f_f0.bin": 7.874,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_6bit_rand.bin": 9.028,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_7f_80_aconst.bin": 4.005,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_compl_rand.bin": 8.204,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_near7_rand.bin": 8.241,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_zero_55.bin": 6.236,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_zero_7f.bin": 5.575,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_01.bin": 8.283,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_33.bin": 8.65,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_55.bin": 8.64,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_55_asmall.bin": 8.477,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_fd.bin": 8.572,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_ff.bin": 8.503,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_rand.bin": 8.818,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.pos_small.bin": 6.504,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_qwen_l3_w8a8_down_massive.bin": 8.262,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_qwen_l3_w8a8_k_sink.bin": 8.619,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_s360_l2_w8a8_o.bin": 8.173,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_s360_l3_w8a8_q_outlier.bin": 8.556,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_smol_l2_w8a8_up_outlier.bin": 8.677,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_smol_l3_w8a8_down.bin": 8.74,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.relu_q_a.bin": 7.79,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.sparse_rows_a.bin": 7.952
+ },
+ "dma": {
+  "e143_smoke_gap_ms_median": 1.0,
+  "e143_s1_held_s_max": 6.57,
+  "launches": 17,
+  "projected_held_max_s": 7.2,
+  "budget_s": 7.5
+ },
+ "limit_p800_w": 60.0,
+ "peak_lock_w": 62.0,
+ "relation": {
+  "B800": 33.60956684526229,
+  "s800": 1.90517380064275
+ },
+ "admission": {
+  "rest": {
+   "c_ref_w": 0.0,
+   "fixed_p800_w": 21.2,
+   "what": "the idle card (no launch): card 0's highest idle reading in E84"
+  },
+  "b7-fp16.anchor7_zeros": {
+   "fixed_p800_w": 33.964,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp16.b_onebit_b8_pi": {
+   "fixed_p800_w": 55.678,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp16.b_onebit_b9_one": {
+   "fixed_p800_w": 58.102,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.anchor7_zeros": {
+   "fixed_p800_w": 34.28,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.b_onebit_b20_full": {
+   "fixed_p800_w": 56.117,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.b_onebit_b20_one": {
+   "fixed_p800_w": 57.718,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.b_onebit_b20_pi": {
+   "fixed_p800_w": 55.949,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.b_onebit_b20_seventh": {
+   "fixed_p800_w": 55.731,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.b_onebit_b20_third_a1p5": {
+   "fixed_p800_w": 57.985,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.b_onebit_b22_third": {
+   "fixed_p800_w": 57.352,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.exp_a_gray_walk": {
+   "fixed_p800_w": 50.694,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.exp_b_alt_b26": {
+   "fixed_p800_w": 51.687,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.exp_b_alt_lsb": {
+   "fixed_p800_w": 51.474,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.exp_only_pos12": {
+   "fixed_p800_w": 59.796,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-fp32.randn_a24k": {
+   "fixed_p800_w": 58.023,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.a_full_b_pos": {
+   "fixed_p800_w": 47.413,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.anchor7_full_a": {
+   "fixed_p800_w": 47.57,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.anchor7_full_b": {
+   "fixed_p800_w": 47.486,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.anchor7_zeros": {
+   "fixed_p800_w": 35.0,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.b_line_0f_f0": {
+   "fixed_p800_w": 46.353,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.b_line_6bit_rand": {
+   "fixed_p800_w": 47.57,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.b_line_7f_80_aconst": {
+   "fixed_p800_w": 39.66,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.b_line_compl_rand": {
+   "fixed_p800_w": 46.972,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.b_line_near7_rand": {
+   "fixed_p800_w": 46.849,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.b_line_zero_55": {
+   "fixed_p800_w": 42.486,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.b_line_zero_7f": {
+   "fixed_p800_w": 42.055,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.bheld_01": {
+   "fixed_p800_w": 46.426,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.bheld_33": {
+   "fixed_p800_w": 47.112,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.bheld_55": {
+   "fixed_p800_w": 47.018,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.bheld_55_asmall": {
+   "fixed_p800_w": 46.902,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.bheld_fd": {
+   "fixed_p800_w": 46.893,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.bheld_ff": {
+   "fixed_p800_w": 46.812,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.bheld_rand": {
+   "fixed_p800_w": 47.378,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.pos_small": {
+   "fixed_p800_w": 42.984,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.real_qwen_l3_w8a8_down_massive": {
+   "fixed_p800_w": 46.147,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.real_qwen_l3_w8a8_k_sink": {
+   "fixed_p800_w": 46.792,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.real_s360_l2_w8a8_o": {
+   "fixed_p800_w": 45.968,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.real_s360_l3_w8a8_q_outlier": {
+   "fixed_p800_w": 46.673,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.real_smol_l2_w8a8_up_outlier": {
+   "fixed_p800_w": 46.883,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.real_smol_l3_w8a8_down": {
+   "fixed_p800_w": 47.007,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.relu_q_a": {
+   "fixed_p800_w": 45.285,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  },
+  "b7-int8.sparse_rows_a": {
+   "fixed_p800_w": 45.576,
+   "what": "the card-0 estimate of the tile's 95% upper peak (predictions-e170.json)"
+  }
+ },
+ "blocks": [
+  {
+   "name": "STOPTEST",
+   "title": "the die stop's path on live samples",
+   "default": false,
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.anchor7_zeros.bin",
+     "label": "b7-int8.anchor7_zeros",
+     "start": {
+      "mode": "cool",
+      "max_c": 99,
+      "max_wait_s": 5
+     },
+     "launch": {
+      "seconds": 6,
+      "budget": 7.5,
+      "processes": 1
+     },
+     "tail_s": 4
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,18 @@
+E170 kit self-test: run_e170.py 6b0d0ecc1e9ef537..., queue_e170.py 51fa5f12b2c40bf8..., score_e170_a1.py ee3fd65efde3bdf1...
+ok   continuity: E118's gate read passes (module uptime 8689 min; E84's 7240 min + 1448.7 min since its read = 8688.7 (tolerance 2)); a 3 h uptime is NO-GO; rc 1 is unreadable
+ok   holders_why: {"none": null, "card0_other": "card 0's node or lock is held (1 lines)", "card0_lock_ours": "card 0's node or lock is held (1 lines)", "card1_ours": "1 node or lock lines of ours on aifoundr", "card1_other": null} (no login returned)
+ok   the guard refuses 11 forms with exit 97 before the reader starts: {'residency 1 2 3': 97, 'threshold set 70': 97, 'loglevel debug': 97, 'sample --reset-ms 1000': 97, 'sample --seconds 9 --reset-ms 1': 97, 'config extra': 97, 'uptime 1': 97, 'sptrace -x': 97, 'sptrace': 97, '': 97, 'profile': 97}
+ok   ET_DEVICES=1 is refused (97); config, uptime, sample and sptrace <file> pass the allow-list (exec of the absent reader: [126, 126, 126, 126])
+ok   each protocol's BURST runs are the registered order filtered to its passes: {'protocol.json': (135, 135, 0), 'protocol-subset.json': (90, 90, 0), 'protocol-dry.json': (45, 45, 0)}
+ok   the subset's first pass-4 run (idx 64): score_e170.py's main refused it, A1 maps it to pass 4
+ok   protocol_why: the five committed protocols pass; refused: ['a left-out tile', 'admission 82 W', 'board 70 W', 'board on 3 samples', 'die 76 C', 'reader without the guard']
+ok   bash -n: 8 scripts parse (['box/check_box_e170.sh', 'box/launch_e170.sh', 'box/look_e170.sh', 'box/step_e170.sh', 'box/wait_e170.sh', 'collect_e170.sh', 'ettelem_guard_e170.sh', 'preflight_e170.sh'])
+ok   launch_e170.sh's refusals: {'no deadline': 2, 'not a date': 2, 'full, 30 min': 4, 'subset, 20 min': 4, 'card 0 held': 3, 'ours on card 1': 3, 'ours a device process': 3, 'a queue already ran': 5, 'no binaries': 9}; nothing launched
+ok   the launch prints holder counts only, never a login (the fixture login zq9login never appears)
+ok   step_e170.sh lists every step under RB_DRY=1 and runs nothing: {look: rc 0, sync: rc 0, check: rc 0, launch 2026-11-04 19:00 PST: rc 0, launch 2026-11-04 19:00 PST subset: rc 0, wait: rc 0, pull: rc 0}
+     the listing of `launch '2026-11-04 19:00 PST'`:
+       === [e170_launch] dry listing: nothing below is run
+       --- probe aifoundry1, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+       --- launch on aifoundry1 (E170 box step 5: box/launch_e170.sh, deadline 2026-11-04 19:00 PST): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 "bash -s -- '2026-11-04 19:00 PST'" < tools/claims-v3/e170/box/launch_e1
+
+ALL PASS
