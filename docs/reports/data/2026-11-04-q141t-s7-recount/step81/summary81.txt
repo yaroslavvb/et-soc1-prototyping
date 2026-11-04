@@ -1,0 +1,23 @@
+Q141(t) step 3: the convergence rule's 81-point step, by recount_rule.py's main() (recount-rule.json, .txt beside this file)
+
+tile                   e(9)  e(27)  e(81) e27/e81  first N met   projected N (1/sqrt N, planning)
+fp32.cal_pi_b12       0.078      -      -       -            9   -
+fp32.cal_pi_b17       0.123  0.096      -       -           27   -
+fp32.cal_pi_b20       0.653  0.198  0.100    1.97      not yet   82
+fp32.cal_pi_b21       0.429  0.260  0.154    1.69      not yet   192
+fp32.cal_third_b12    0.121  0.060      -       -           27   -
+fp32.cal_third_b17    0.267  0.102  0.062    1.65           81   -
+fp32.cal_third_b20    0.508  0.267  0.147    1.82      not yet   175
+fp32.cal_third_b21    0.978  0.389  0.221    1.76      not yet   395
+fp32.cal_w67_b12      0.105  0.053      -       -           27   -
+fp32.cal_w67_b17      0.165  0.114  0.060    1.90           81   -
+fp32.cal_w67_b20      0.370  0.201  0.115    1.74      not yet   108
+fp32.cal_w67_b21      0.491  0.267  0.140    1.90      not yet   159
+fp32.cal_w79_b12      0.095      -      -       -            9   -
+fp32.cal_w79_b17      0.139  0.083      -       -           27   -
+fp32.cal_w79_b20      0.526  0.173  0.108    1.61      not yet   95
+fp32.cal_w79_b21      0.479  0.209  0.120    1.74      not yet   118
+
+N* = not yet determined; tiles above the bound: 8 of 16
+e(27)/e(81) over the tiles counted at 81: 1.61-1.97 (median 1.76; the 1/sqrt(N) law gives 1.73)
+bench: 540 points in 4647 s of wall time over 5 runs, 34.4 s a point on one core; the 243-point step for the tiles still above the bound: 3.10 bench-hours at 4 jobs
