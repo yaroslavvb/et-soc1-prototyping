@@ -1,0 +1,33 @@
+E168 A2, a desk check at rest floors above 46 C (post hoc to A2's registration, before any E168 data; not registered)
+frozen predictor: docs/reports/data/2026-11-04-q140q-gemm-g4-stride/predict_e168.py; T_COLD as frozen 46.0 C, T_WARM 55.0 C
+hold: S2 int8 zeros, 12 x 8 s; warm55's predecessor S2 fp32 random from cold (both_nominal_starts' own)
+
+self-check at 46.0 C: G4 and G3 as frozen equal predictions-e168.json's both_nominal_starts exactly: PASS
+
+floor  G4 cold W / die (start)        G4 warm55 W / die (start)      dW_G4   h      die gap  G3 dW   E136
+ 46.0   37.660 /  53.662 (46.00)    36.326 /  55.960 (54.98)   +1.334  0.667  -2.298  +0.641  0 (NO START DEPENDENCE)
+ 46.5   37.660 /  54.162 (46.50)    36.401 /  56.350 (55.00)   +1.259  0.629  -2.188  +0.604  0 (NO START DEPENDENCE)
+ 47.0   37.660 /  54.662 (47.00)    36.480 /  56.733 (54.98)   +1.180  0.590  -2.071  +0.566  0 (NO START DEPENDENCE)
+ 47.5   37.660 /  55.162 (47.50)    36.555 /  57.119 (54.99)   +1.105  0.552  -1.957  +0.530  0 (NO START DEPENDENCE)
+ 48.0   37.660 /  55.662 (48.00)    36.632 /  57.501 (54.99)   +1.028  0.514  -1.839  +0.494  0 (NO START DEPENDENCE)
+
+a law in the absolute die, cold - warm55 window board, and the reading A2 gives it
+floor  k_D   (a) linear k_D x G4's die gap      (b) T_D run through run_model (its own die gap)
+ 46.0  0.44  -1.011 W  OPPOSITE SIGN         -1.740 W  OPPOSITE SIGN        (-3.949 C)
+ 46.0  0.47  -1.080 W  OPPOSITE SIGN         -1.906 W  OPPOSITE SIGN        (-4.049 C)
+ 46.0  0.50  -1.149 W  OPPOSITE SIGN         -2.079 W  OPPOSITE SIGN        (-4.151 C)
+ 46.5  0.44  -0.963 W  OPPOSITE SIGN         -1.655 W  OPPOSITE SIGN        (-3.753 C)
+ 46.5  0.47  -1.028 W  OPPOSITE SIGN         -1.811 W  OPPOSITE SIGN        (-3.847 C)
+ 46.5  0.50  -1.094 W  OPPOSITE SIGN         -1.976 W  OPPOSITE SIGN        (-3.945 C)
+ 47.0  0.44  -0.911 W  OPPOSITE SIGN         -1.562 W  OPPOSITE SIGN        (-3.543 C)
+ 47.0  0.47  -0.973 W  OPPOSITE SIGN         -1.710 W  OPPOSITE SIGN        (-3.632 C)
+ 47.0  0.50  -1.035 W  OPPOSITE SIGN         -1.865 W  OPPOSITE SIGN        (-3.724 C)
+ 47.5  0.44  -0.861 W  OPPOSITE SIGN         -1.473 W  OPPOSITE SIGN        (-3.342 C)
+ 47.5  0.47  -0.920 W  OPPOSITE SIGN         -1.610 W  OPPOSITE SIGN        (-3.420 C)
+ 47.5  0.50  -0.979 W  OPPOSITE SIGN         -1.758 W  OPPOSITE SIGN        (-3.511 C)
+ 48.0  0.44  -0.809 W  OPPOSITE SIGN         -1.383 W  OPPOSITE SIGN        (-3.136 C)
+ 48.0  0.47  -0.864 W  OPPOSITE SIGN         -1.513 W  OPPOSITE SIGN        (-3.213 C)
+ 48.0  0.50  -0.919 W  OPPOSITE SIGN         -1.650 W  OPPOSITE SIGN        (-3.294 C)
+
+the absolute-die law reads OPPOSITE SIGN in 30 of 30 cases (floors 46-48 C x k_D x both ways); its closest case lies +0.295 W past -h
+G4's own reading is SUPPORTED by construction (dW = dW_G4 >= h); E136's law reads NO START DEPENDENCE (0).

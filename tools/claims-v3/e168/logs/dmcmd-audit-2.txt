@@ -1,0 +1,38 @@
+# Q141(o)'s fix pass: tools/claims-v3/dmcmd_audit.py (sha256 f29e91ca97705454..., table 50168632931fd8c1...) re-run on E168's run chain at 10:29 PST on Wed 4 Nov 2026, before any E168 data or claim. It is logs/dmcmd-audit.txt's command (a0310012) with one file added, tools/claims-v3/kinds/e78_common.py, which tools/claims-v3/kinds/e101_common.py imports at its line 25 ('import e78_common as ec') and the first audit left out (its verifier's fault 4). No --allow: no WRITE is allowed.
+# files: tools/claims-v3/e168/ tools/claims-v3/e146/run_e146.py tools/claims-v3/e160/e160_common.py tools/claims-v3/e136/rgm136/host/main.cpp tools/claims-v3/e136/rgm136/kernel/sparsity.c tools/claims-v3/e119/run_e119.py tools/claims-v3/kspeed/e105/run_e105.py tools/claims-v3/kspeed/e101/run_e101s.py tools/claims-v3/kinds/e101_common.py tools/claims-v3/kinds/e78_common.py tools/claims-v3/kspeed/run_kspeed.py tools/claims-v3/hpl/run_hpl.py tools/claims-v3/e111/idle_logins_e111.py
+# tools/claims-v3/e168/ at this run (this pass's new files among them; this log is written last): README.md README.md.dated-note.md REGISTRATION-A2-cold-int8-zeros.md REGISTRATION-A2-cold-int8-zeros.md.dated-note.md amendment-a2.txt dry-reduce.txt logs/cap-test-dry.txt logs/dmcmd-audit-2.txt logs/dmcmd-audit.txt logs/dry-queue.txt logs/posthoc-floor.txt logs/rest-chain.txt logs/score-e168-frozen-selftest.txt make_amendment_a2.py make_protocol_e168.py posthoc_floor_e168.py predictions-e168-a2.json protocol-dry.json protocol-stoptest-board-dry.json protocol-stoptest-board.json protocol-stoptest-die-dry.json protocol-stoptest-die.json protocol.json protocol.txt queue_e168.py reduce_e168.py rest_chain_e168.py run_e168.py selftest.txt selftest_e168.py 
+# the one reviewed exception, unchanged: run_hpl.py:622's residency read (run_e119.py rewrites it to raw states 1 2 3, which this ettelem refuses at its argument check before it opens the device; E126's 51, E136's 37, E146's 109, E158's 107 and E159's 21 queries all returned 2 with no record)
+# command: python3 tools/claims-v3/dmcmd_audit.py --except "tools/claims-v3/hpl/run_hpl.py:622:SP_ERROR_LOG=<the reason above>" <the files above>
+dmcmd_audit: GO (19 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e168/queue_e168.py:176: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e168/queue_e168.py:176: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e168/queue_e168.py:176: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e168/queue_e168.py:176: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e168/queue_e168.py:176: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:597: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/hpl/run_hpl.py:618: ettelem sptrace: TRACE_EXTRACT [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:622: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES [READ, pmic none] EXCEPTED: SP_ERROR_LOG: run_e119.py patch_residency rewrites this command to residency 1 2 3, which build/ettelem-hpl/ettelem (ettelem-dv2) refuses at its argument check before it opens the device (E126: 51 queries, E136: 37, E146: 109, E158: 107, E159: 21, every one rc 2, no record) - variant ettelem-dv2; raw states 2 3 4 5 6 (raw 4 5 6 is no state at BL2 0.22.0: 2 SP Runtime Errors each)
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      3 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      3 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      2 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      2 site(s)  ok
+  GET_MODULE_RESIDENCY_THROTTLE_STATES       READ         pmic none      1 site(s)  EXCEPTED
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      2 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      2 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+  TRACE_EXTRACT                              READ         pmic none      1 site(s)  ok
+# exit 0

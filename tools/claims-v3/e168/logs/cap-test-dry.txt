@@ -1,0 +1,20 @@
+# Q141(o)'s fix pass: does E168's 58-min session cap bind a hold whose gate waits past it? A toy-card check on the Intel, Wed 4 Nov 2026, 10:20:58-10:23:29 PST (python3 3.13.11): run_e168.py --dry (no device, no ssh), E168's committed protocol.json unchanged, block A only, A2's hold (12 x 8 s; run_hpl.py's plan_s 141.4 s; cold gate: a die mean of 46 C or less, waiting at most 360 s). The toy card rests near 51 C, so the cold gate never passes and waits. A check of the code, not a measurement.
+#   t1: python3 tools/claims-v3/e168/run_e168.py --protocol tools/claims-v3/e168/protocol.json --out <scratch>/t1 --dry --only A --max-card-min 2.5
+#   t2: python3 tools/claims-v3/e168/run_e168.py --protocol tools/claims-v3/e168/protocol.json --out <scratch>/t2 --dry --only A --max-card-min 2.3
+# t1, the runner's lines:
+10:20:58     e105: admitted, estimate 45.64 W (fixed)
+10:20:58 [1/1] A-00-S2-int8-zeros-cold-r1: 12 x 8 s, 1024 minions, start {'mode': 'cool', 'max_c': 46, 'max_wait_s': 360}
+10:23:29 session ends: done:max_card_min
+10:23:29 exit 0 (done:max_card_min)
+# t1, end.json: {"t_end_ms": 1793816609138, "exit": 0, "reason": "done:max_card_min", "card_min": 2.5}
+# t1, the start rule's record in marks: none: run_hpl.py's guard ended the session, its reason is in end.json
+# the toy sampler during the gate: 1429 lines over 150.1 s; minion-shire mean 51.0-51.0 C (the gate needs <= 46 C); board 23.16-24.24 W
+# t1, work launches recorded: 0
+# t2, the runner's lines:
+10:23:29 [1/1] A-00-S2-int8-zeros-cold-r1: the cap cuts the tail here ({"run": "A-00-S2-int8-zeros-cold-r1", "t_ms": 1793816609867, "elapsed_s": 0.0, "plan_s": 141.4, "cap_s": 138.0})
+10:23:29 session ends: done:cap_cuts_tail
+10:23:29 exit 0 (done:cap_cuts_tail)
+# t2, end.json: {"t_end_ms": 1793816609869, "exit": 0, "reason": "done:cap_cuts_tail", "card_min": 0.0}
+# t2, the start rule's record in marks: {"t_ms": 1793816609867, "kind": "e119_cap_tail", "detail": "{\"run\": \"A-00-S2-int8-zeros-cold-r1\", \"t_ms\": 1793816609867, \"elapsed_s\": 0.0, \"plan_s\": 141.4, \"cap_s\": 138.0}"}
+# t2, work launches recorded: 0
+# git status --porcelain -- tools/claims-v3, before both runs: empty; after: ?? tools/claims-v3/e168/posthoc_floor_e168.py (this pass's own new file, written meanwhile)
