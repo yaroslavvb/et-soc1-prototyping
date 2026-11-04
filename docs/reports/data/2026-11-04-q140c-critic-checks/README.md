@@ -267,7 +267,7 @@ Found by this pass, outside the five:
 
 6. **Four outputs added after the critic's scripts were read**, now disclosed under Against the critic; the verifier named one
    of them, check 1's die-rise column.
-7. **`fp32.b_onebit_b20_third`'s miss.** The kinds page (four places), the Horace Hub's Levels and four record cells quoted it as
+7. **`fp32.b_onebit_b20_third`'s miss.** The kinds page (four places, five in fact: item 6's list holds a fifth, which this pass's first page build, `6450a8475420`, missed), the Horace Hub's Levels and four record cells quoted it as
    0.7–1.1 W, or 1.09 W, under every model; over the three models and both cards it is 0.70–1.21 W (card 1: M8 −1.09, M7 −1.21,
    M6 −1.12 W, as E157's own table gives; [`check-fix-figures.txt`](check-fix-figures.txt), check 2). The page and Levels now say
    0.7–1.2 W; 02's Q139 row, 03's E157 entry and 05's item-15 and card-1 rows carry dated clauses.
@@ -276,6 +276,27 @@ Found by this pass, outside the five:
 moves. It corrects how the records quote four things: check 2 locates the blind power error (the six named-miss tiles carry
 50–75% of its square) without bounding what a term can buy; n = 2.28's side effects outside the governed clock are 0.15 W and
 0.02 MHz; the shares of a kind's watts are per format; and the bit-20 tile's miss reaches 1.21 W.
+
+**Published (Wed 4 Nov 2026, 02:04–02:1x PST).**
+
+- The records' dated notes and the figures: lab `80301c11` (02:04:07 PST). A25's dated note in 04-artifacts and these lines: the
+  commit after it.
+- The kinds page: `6450a8475420` (02:06:39 PST) over `e75e1842ac8a`, then `a312a21d2ffb` (02:08:59 PST), because the first build
+  missed item 6's list; public and unlisted, eight exact replacements in section 11 (none in a generated block), a dated sentence in
+  the How-well section and a Sources clause; source gyroscope `2fea2941`. Read back signed out: the shell frames `a312a21d2ffb`,
+  its `<main>` identical to the deploy copy once 190 auto anchors are removed, 15 of 15 phrase checks (the new wordings in, no
+  "0.7–1.1 W" left), both replaced versions 404, public-text counts unchanged but for the word "verifier".
+- The Horace Hub: `32021b1181af` (02:13:33 PST) over `a3a12e645e74`, public and unlisted: one new Fix entry at the top of week 45
+  (no Log entry edited; its head 256 visible characters; the Log's two-line flags unchanged at 16), Status (its dateline, the
+  page's version, section 11 re-quoted from `a312a21d2ffb` by the integration's quoting rules, which first reproduced the old
+  quote exactly, and Q140(c)'s window and check), Levels stop 5 and the Library line. Read back signed out: `<main>` identical to
+  the deploy copy (276 auto anchors), 30 of 30 phrase checks, public-text counts unchanged against the replaced version. The
+  projects tracker (private): `220bdf89b9b3` (02:13:37 PST) over `7aa0361c0dfc`, one new Fix entry and its Horace row (the page's
+  version, Q140(c)'s window and check); signed out it refuses (302 / 401), signed in its text equals the deploy copy, 7 of 7 phrase
+  checks. Both in gyroscope `61e56a9b`.
+- **Not changed:** the Horace Hub's private notes and the AI Foundry hub; neither quotes the five faults' wordings or the bit-20
+  range outside its append-only Log.
+- No verifier has re-read this pass.
 
 ## Device commands sent
 
