@@ -1,0 +1,21 @@
+E157 order of events, Tue 3 Nov 2026 (PST), from the commit log, the claim and release logs and the box's session log.
+05:39:23  Q139(x) d98d2e34 pushed (pool 6 and M8's, M7's and M6's frozen predictions for its 50 tiles on three cards)
+06:35-06:55  an earlier attempt of this lane wrote most of tools/claims-v3/e157/ on the Intel and stopped on a usage limit (about 07:46): nothing committed, nothing copied to the box, no claim, no device opened
+15:56:26  aifoundry1 looked at (no device access): no tools/claims-v3/e157/ or kinds/blind6/ on the box, binaries and Q139(k)'s patched host as pinned; et-who: no process holds an ET-SoC-1 device node or card lock
+16:00     ref_errors_e157.py re-run on the Intel: ref-errors-m8.json reproduced to 4.5e-13 W (same input hashes)
+16:09-16:14  ccheck.py domain re-run on the 56 tiles at n = 750,000: 56 inside, 36 first-read notes, equal line for line to the earlier attempt's
+16:15:36  box setup on aifoundry1 (no device access): check_e157.py HARNESS OK on 90 files, preflight GO (32 send sites, 0 disallowed), tiles verified, dry pass 15710 and dry smoke 15701 exit 0, from the files committed next
+16:17:57  E157 pre-registration 01676499 committed and pushed (git merge-base --is-ancestor d98d2e34 01676499: yes)
+16:19:42  day's post looked for (under the discord lock): delete_msg.mjs --plan --days 1 listed no card post dated Tue 3 Nov
+16:19:48  the day's one post sent with post.mjs (staged, checked, sent): message 1567332504330051616, "<ai> **Claude says:** using aifoundry1 card 1 for 1.5 h, until ~17:49 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)"; read back
+16:20:11  session launched on the box (E157_T0 = 1793751611); HARNESS OK; preflight GO; et-who: no process holds an ET-SoC-1 device node or card lock
+16:20:11  config-session-start: TDP 65 W, threshold 65 C, 600 MHz, 499 mV (power state low_power)
+16:20:16-18  stop-path test 15702: die, board and watcher stops each fired on a live sample (0.035, 0.03, 0.06 s old)
+16:20:31  the smoke's first launch (15701, ten items, 60 launches); 16:21:09 smoke gate PASS (every launch with its C record, one distinct C per launch); queue starts
+16:21:48-17:06:02  passes 15710-15713, all rc 0 (665, 675, 658, 674 s); p15712's run #64 (fp32.randn, an E78 anchor) skipped by E78's protocol (launch reading not reached)
+by 16:24  the post had been rewritten by the aifoundry3 and aifoundry2 lanes, each adding its clause (its last edit before the release, 16:24, as the 17:06 plan read it)
+16:40-16:48  during the session: pass 15710's C log copied to the Intel and checked with ccheck.py (780 launches, every one PASS); no reduction was read
+17:06:21  budget: stopping before p15714 (T0 + 2,770 s; projected end T0 + 3,445 s > T0 + 3,240 s)
+17:06:21  config-session-end: TDP 65 W, threshold 65 C, 600 MHz, 499 mV (managed_power); et-who: no process holds an ET-SoC-1 device node or card lock; session end (T0 + 2,770 s, 46.2 card-minutes of 55)
+17:06:57-17:07:2x  released by dropping this card's clause, aifoundry3 and aifoundry2 still held (under the discord lock, EXPECT_TEXT, dry run, save): "<ai> **Claude says:** using aifoundry3 for 1.5 h, until ~17:51 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>); using aifoundry2 for 1.5 h, until ~17:54 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)"; the rendered message read back with that text, edited 5:07 PM (the plan's cached source text lagged, as E142 saw)
+17:08     raw passes copied to the Intel clone's build/e157-raw/ (repo-relative); collect_e157.sh run there

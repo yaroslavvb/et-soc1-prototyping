@@ -1,0 +1,70 @@
+E78 aifoundry1-c1: 600 MHz, 498.7 mV, leak 0.2955 W/C (-1 runs), runs kept 227/303, passes [15710, 15712, 15713], idle-invalid runs 0
+  passes set aside: [{'pass': 15711, 'why': ['fp16.zeros departs +0.384 W from its straight line']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 33.06973274691359
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.anchor6_randn         24.001  0.297    25.758      23051    5.628
+    fp32.randn                 23.831  0.158    25.593      22894    5.589
+    fp32.real_qwen_softmax_v   23.438  0.075    25.184      22527    5.500
+    fp32.real_pythia_ln1_q     21.375  0.016    23.175      20750    5.066
+    fp32.real_qwen_dequant_q   19.582  0.446    21.337      19099    4.663
+    fp32.exp_a_pow2wide_b_randn   19.180  0.298    20.858      18667    4.557
+    fp32.c_absorbed            19.119  0.467    20.928      18722    4.571
+    fp32.bf16_wideexp          18.745  0.343    20.501      18359    4.482
+    fp32.negzero_a_b_complement   16.506  0.567    18.293      16386    4.000
+    fp32.signexp_invert_b      16.445  0.398    18.176      16267    3.971
+    fp32.exp_b_alt_shift       15.786  0.323    17.539      15685    3.829
+    fp32.b_exp_busy_a_const    14.829  0.263    16.765      15017    3.666
+    fp32.exp_only_narrow2      14.715  0.560    16.424      14695    3.588
+    fp32.real_smol_softmax_v_causal   12.862  0.184    14.610      13073    3.192
+    fp32.exp_a_walk_fixedmant   12.490  0.547    14.124      12644    3.087
+    fp32.b_onebit_b20_third    12.168  0.267    13.991      12522    3.057
+    fp32.b_onebit_b12_third     9.584  0.278    11.404      10207    2.492
+    fp32.a_onebit_b16_half      9.289  0.243    10.929       9782    2.388
+    fp32.a_onebit_b5_third      8.993  0.502    10.901       9761    2.383
+    anchor_pi                   8.139  0.154     9.911       8871    2.166
+    fp32.a_zeros_b_complement    1.428  0.609     3.150       2818    0.688
+    fp32.zeros                  0.000  0.000     1.809       1619    0.395
+    fp32.anchor6_zeros         -0.042  0.186     1.822       1632    0.398
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 21.394  0.211    23.177      20747    2.533
+    fp16.anchor6_randn         21.238  0.049    23.093      20668    2.523
+    fp16.real_qwen_dequant_v   21.215  0.254    22.965      20549    2.508
+    fp16.real_smol_qk          20.878  0.276    22.565      20198    2.466
+    fp16.c_absorbed            19.101  0.128    20.815      18621    2.273
+    fp16.real_qwen_qk          18.295  0.103    20.065      17958    2.192
+    fp16.e5m2grid_wide         17.239  0.099    19.069      17084    2.085
+    fp16.real_smol_softmax_v   16.817  0.320    18.551      16602    2.027
+    fp16.exp_only              15.670  0.192    17.472      15642    1.909
+    fp16.exp_only_narrow2      15.450  0.142    17.118      15312    1.869
+    fp16.exp_b_alt_shift       15.118  0.265    16.837      15078    1.841
+    fp16.sparse24_aligned      12.379  0.377    14.246      12754    1.557
+    fp16.exp_a_walk_fixedmant   12.252  0.076    14.006      12530    1.530
+    fp16.b_onebit_b6_third     11.803  0.197    13.466      12059    1.472
+    fp16.a_zeros_b_complement    1.428  0.329     3.168       2837    0.346
+    fp16.zeros                  0.000  0.000     1.739       1557    0.190
+    fp16.anchor6_zeros         -0.098  0.208     1.803       1614    0.197
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.b_line_55_aa           7.253  0.479     9.566       4984    0.304
+    int8.anchor6_full           6.848  0.281     9.140       4760    0.291
+    int8.full                   6.840  0.620     9.153       4769    0.291
+    int8.powerlaw_df4_pc        6.463  0.164     8.806       4587    0.280
+    int8.real_qwen_w8a8_gate    6.433  0.090     8.714       4540    0.277
+    int8.real_smol_w8a8_q       6.422  0.441     8.671       4517    0.276
+    int8.real_qwen_w8a8_v       6.187  0.507     8.458       4407    0.269
+    int8.real_qwen_w8a8_down    6.030  0.441     8.417       4384    0.268
+    int8.bheld_bit1             5.649  0.111     8.063       4199    0.256
+    int8.real_smol_w8a8_down    5.301  0.423     7.536       3927    0.240
+    int8.bheld_bit4             5.221  0.149     7.531       3924    0.239
+    int8.bheld_bit7             5.017  0.425     7.344       3826    0.233
+    int8.b_line_zero_full       4.040  0.380     6.412       3340    0.204
+    int8.gray_a                 4.036  0.059     6.295       3280    0.200
+    int8.b_line_zero_ff         3.650  0.194     5.914       3082    0.188
+    int8.b_line_zero_one        3.364  0.280     5.686       2961    0.181
+    int8.a_word_zero_one        2.522  0.758     4.849       2525    0.154
+    int8.powerlaw_df15_pt       2.479  0.586     4.748       2473    0.151
+    int8.bflip_bit2_w           1.945  0.329     4.144       2159    0.132
+    int8.bflip_bit5_w           1.840  0.558     4.229       2203    0.134
+    int8.a_zeros_b_lineflip     0.464  0.198     2.763       1440    0.088
+    int8.anchor6_zeros          0.034  0.339     2.232       1163    0.071
+    int8.zeros                  0.000  0.000     2.310       1203    0.073
+  idle consistency median |S - S0 - D| 0.07616414815874961 W; carry-over {'slope_w_per_w': 0.0045108033766905935, 'se': 0.0009852771336069327, 'n': 224}; pi built-in - file None; rail tau re-fit median None
