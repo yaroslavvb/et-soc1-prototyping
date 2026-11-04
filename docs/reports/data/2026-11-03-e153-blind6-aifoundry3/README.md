@@ -17,18 +17,31 @@ device-management command sent was a read** (nine kinds, two of them PMIC voltag
 allows; `since_reset_ms` −1 in all 29,385 samples). Card session 16:21:44–17:11:40 PST, **49.9 of the 55 card-minutes allowed**: the
 stop-path test 15302, the smoke 15301 and four passes, 15310–15313 (703–746 s each).*
 
+*Corrected after verification (a dated note, Tue 3 Nov 2026, about 18:30 PST; desk only: no card, no device command, nothing re-run).
+An independent verifier re-derived every registered number and verdict from the committed data, with the registered code and with its
+own. It also re-ran the check of C and the device-command audit, and re-hashed the box's files read-only. All of it stands. It found one
+major fault and six minor ones in what this README and the lane's result say about the numbers. **C1 (major): amendment A1 followed an
+interim scoring.** At 16:40 PST the registered scorer was run on pass 15310 listed twice, and it printed every rule's verdict. A1 was
+committed at 16:42:11, after that. The scorer as registered (`359c96b2`, before A1), run on the final data, gives `scored.json` and
+`results.md` exactly, so A1 moved no verdict. C2–C7 do six things: correct what rank 5 reads, add rank 8, give the 3,140 launches by
+input, fix one citation and one rounding, replace "falsified" with "contradicted post hoc", and limit what the C check vouches for to
+the launches it checked. Each passage is marked "corrected after verification, C<n>" where it stands. The old wording is in
+[§ Corrections after verification](#corrections-after-verification-tue-3-nov-2026). Every number is printed by
+[`corrections_e153.py`](corrections_e153.py) → [`corrections.txt`](corrections.txt) ([`corrections.json`](corrections.json)), post hoc.
+No measured, frozen or registered number or verdict changes.*
+
 **In plain words.** M8 is the lab's power-and-heat model: from the bytes a matmul multiplies it predicts the watts the chip draws over the same
 kernel on zeros, and how far the die warms in a 4.5 s run. E153 ran 44 new kinds of numbers (and 6 anchors), written by someone who never saw
 the model, on the card M8's numbers are written for, **with every launch's result C read back and compared bit for bit with the RTL's
 arithmetic**. **The arithmetic is right**: all 3,140 launches (four passes and the smoke, fp32, fp16 and int8, up to 923,021 operations a
 launch) matched exactly, including the first silicon reads of full-range int8, its 32-bit wrap, wide float exponents and real model tiles.
-**The six pool-5 tiles re-run with C checked land within 0.04 W of E141's** on the same footing (K1 PASS), so pool 5's file-tile rows, and
-every model's file-tile training rows, stand as measured. **On one footing M8 has no float bias** (−0.014 W; E141's M7 read −0.23 W on its own
+**The six pool-5 tiles re-run with C checked land within 0.04 W of E141's** on the same footing (K1 PASS), so pool 5's aifoundry3
+file-tile rows stand as measured; card 1's and aifoundry2's rows rest on E157 and E160 (corrected after verification, C7). **On one footing M8 has no float bias** (−0.014 W; E141's M7 read −0.23 W on its own
 session footing, as this session's own footing reads M8, −0.21 W) and **its 95% bands hold 29 of 30 new kinds**; heat is predicted to 0.10–0.13
 °C. **But M8 is no better than the models it replaced**: fp32's error, 0.330 W rms, exceeds what its nested score allows (P1 FAIL; one tile,
 a single high mantissa bit flipping on a 1/3 base word, is 0.81 W over-predicted by every model), int8 reads 0.296 W against M7's 0.231 and
-M6's 0.199, because M8's new discount for B bytes that flip all eight bits over-corrects (+0.36 to +1.31 W on the three tiles where it acts
-most), and **M8 is resolved worse than M7** (M2 WORSE, +0.034 W) and **not resolved from M6** (M1, +0.043 W).
+M6's 0.199, because, post hoc, M8's new discount for B bytes that flip all eight bits over-corrects on the three tiles where it acts most
+(+0.36 to +1.31 W; corrected after verification, C6), and **M8 is resolved worse than M7** (M2 WORSE, +0.034 W) and **not resolved from M6** (M1, +0.043 W).
 
 ## Results
 
@@ -52,6 +65,9 @@ gates): 15310–15313, none set aside, every one of the 300 runs passing every p
 | **E153-K1-W** (Q139(k)'s Welch interval) | **PASS** |
 | **E153-K1** (K1-C and K1-D) / **K1′** (K1-C and K1-W) | **PASS** / **PASS** |
 | **E153-KC** | **PASS**: no pool-6 tile left out |
+
+*By input (added after verification, C4; `corrections.txt` C4):* the 3,140 launches are 1,758 on pool 6's 44 new kinds, 246 on its six
+anchors, 236 on the six K1 tiles, 734 on E78's six anchors and 166 on the tie: 63 distinct inputs, one host and one kernel.
 
 | K1 tile (pool 5) | E153 D, W (passes) | E141 D on the footing (passes) | E153 − E141 | Welch half-width | session-own footings (reported): E153 / E141 / diff |
 |---|---|---|---|---|---|
@@ -116,7 +132,7 @@ differ by a median 0.11 W a tile here, so the floats cannot tell them apart; int
 |---|---:|---|---|---|---|
 | L int8 whole-line / whole-word | 4 | **0.680 / +0.382** | 0.418 / +0.243 | 0.333 / +0.074 | `int8.b_line_55_aa` +1.307 W (priority 2, outside M8's band; M7 +0.821, M6 +0.561), `int8.b_line_zero_ff` +0.360 |
 | S single bits on other base words | 5 | 0.431 / −0.247 | 0.421 / −0.216 | 0.369 / −0.154 | `fp32.b_onebit_b20_third` −0.808 (outside every model's band: bit 20 and bit 12 on the 1/3 base word read 2.92 W apart, every model says 3.85–3.91), `fp16.b_onebit_b6_third` −0.482 |
-| Z zeros' transport | 4 | 0.382 / +0.164 | 0.229 / +0.050 | 0.289 / −0.276 | `int8.a_zeros_b_lineflip` +0.615: measured **+0.276 W**, M8 −0.339 (inside its wide band), M7 +0.049, M6 +0.505; `fp32.negzero_a_b_complement` +0.383 |
+| Z zeros' transport | 4 | 0.382 / +0.164 | 0.229 / +0.050 | 0.289 / −0.276 | `int8.a_zeros_b_lineflip` +0.615: measured **+0.276 W**, M8 −0.339 (inside its wide band), M7 +0.049, M6 +0.505; `fp32.negzero_a_b_complement` +0.383; `fp32.a_zeros_b_complement` −0.181: measured **1.355 W** (±0.174, 4 passes) with each lane's B flipping all 32 bits every cycle behind an all-zero A, M8 1.536, M7 1.535, M6 1.779 (added after verification, C5) |
 | B int8 B-position | 5 | 0.323 / −0.298 | 0.348 / −0.325 | 0.236 / −0.211 | `int8.bheld_bit4` −0.543, `bheld_bit1` −0.276, `bheld_bit7` −0.242: every model over-predicts a held one-bit B |
 | E exponent-heavy | 10 | 0.284 / +0.183 | 0.275 / +0.167 | 0.244 / +0.166 | `fp32.exp_a_pow2wide_b_randn` +0.618 (priority 2, outside), `fp32.exp_a_walk_fixedmant` +0.367, `fp32.exp_b_alt_shift` +0.324: the card pays **more** than M8 on 7 of 10 (than M7 on 7, M6 on 8) |
 | R real tiles | 12 | 0.155 / −0.084 | 0.153 / −0.006 | 0.141 / +0.014 | none above 0.38 W (`fp32.real_smol_softmax_v_causal` −0.376) |
@@ -155,13 +171,17 @@ rms over priority-1 kinds; floats' bias):
 
 So: (1) **the one footing is confirmed as the term that mattered**: on it the float bias is gone (−0.014 W, against −0.210 W for the same data
 on its own session's fit) and the K1 re-run agrees with E141 to 0.04 W where the two sessions' own fits disagree by up to 0.26 W; (2) **M8's
-int8 discount is falsified** on the tiles it was built for (int8 0.296 W against M7's 0.231 W, and +0.36 to +1.31 W on the three whole-byte
-flip-flops), so the next fit should drop it or bound it; (3) **M8's float terms add nothing measurable** over M7 and M6 on new kinds (fp32 0.330
+int8 discount is contradicted, post hoc, on the three tiles where it acts most** (corrected after verification, C6). On all three whole-byte
+flip-flops the card draws more than M8 says (+0.36, +0.62 and +1.31 W), and M7, which has no such term, is closer each time. Two of the three
+still sit inside M8's wide bands, and the third (`int8.b_line_55_aa`, outside its band) is priority 2, outside the registered set, so no
+registered rule tests the term alone. The two priority-1 tiles carry M2's WORSE: without them M8 − M7 is +0.0068 W [−0.0055, +0.0201], not
+resolved (`corrections.txt` C6). int8 reads 0.296 W against M7's 0.231 W. So the next fit should drop the term or bound it; (3) **M8's float terms add nothing measurable** over M7 and M6 on new kinds (fp32 0.330
 against 0.313 / 0.310 W; fp16 0.125 against 0.121 / 0.154 W): fp32's error is one single-bit tile every model misses by 0.7–0.8 W and an
 exponent-heavy excess every model shares (+0.17 to +0.18 W mean), which a next term (an exponent-field price and a bit-position price that
 depends on the base word) would have to carry; (4) **heat from the bits over 4.5 s is predicted to about 0.1 °C** on new kinds, as before;
-(5) **the rows are valid**: 3,140 of 3,140 launches computed exactly what the RTL says, so no training or test row on this card is biased by a
-silent kernel error. Prediction of a new kind's power on this card now stands at about 0.13 W (fp16) to 0.30–0.33 W (fp32, int8) rms, 1–2% of a
+(5) **this session's rows are valid** (corrected after verification, C7): 3,140 of 3,140 launches on 63 distinct inputs computed exactly what
+the RTL says, with one host and one kernel build (`sparsity.elf` `d521e432…`), so no row of this session is biased by a silent kernel error.
+Earlier sessions' rows on other tiles were not re-checked here, and card 1's and aifoundry2's rows rest on E157 and E160. Prediction of a new kind's power on this card now stands at about 0.13 W (fp16) to 0.30–0.33 W (fp32, int8) rms, 1–2% of a
 float kind's watts and about 6% of an int8 kind's, with covering bands; M8 is not the model to quote over M7 or M6.
 
 ## Registered against what happened
@@ -176,7 +196,7 @@ float kind's watts and about 6% of an int8 kind's, with covering bands; M8 is no
 | stops | board ≥ 65 W or `minshire[0]` ≥ 70 °C, live, main path and in-run watcher | highest board 54.26 W (15311), highest `minshire[0]` 62 °C; no stop fired |
 | the C check | every pool-6 launch and the K1 re-run, bit-exact | 3,140 of 3,140 PASS |
 | expectation | (the registration's § Precision) | **K1-D passed, P1 failed, M2 read WORSE**; the rest as frozen |
-| departures | — | **A1** (registered as an amendment before the registered scoring): a pipeline test on pass 15310 alone (16:36–16:40 PST; a scratch copy, one pass, below every rule's minimum, its numbers reported nowhere) showed the scorer counting a tile with no launch as a C failure; the code was aligned with the rule's words. **D1**: E78's runner skipped four runs by its own rule (listed above), as E141's D2. **D2**: the collector's Python was the Intel's `/usr/bin/python3` 3.9.6 with numpy 1.26.4 (E141's D3). **D3**: the committed raw passes keep `c-log.jsonl` gzipped (`c-log.jsonl.gz`, 0.2 MB a pass against 2.2 MB); `ccheck/` holds the per-pass copies `ccheck.py` read, also gzipped. **D4**: the card budget section of the registration said a fourth pass "will not start"; that was its estimate, not a rule, and the budget rule started it |
+| departures | — | **A1** (corrected after verification, C1; committed 16:42:11 PST, before the registered reduction and scoring of the four passes, but after an interim scoring; times from the lane's working files): the collector, the C check and the reduction were first tried on pass 15310 alone (to 16:39:47; with one pass the scorer scored nothing). Then the registered scorer was run on that reduction with 15310 listed twice (16:40:11), and it counted that as two passes. It printed every rule's verdict on that one pass's data: P1 FAIL 0.286 W; P2, P3, B1 (−0.029 W), B2, C1 (28 of 29), H1–H4, R1, R2 and CS0-floats PASS; M1 NOT RESOLVED; M2 WORSE +0.036 W; CS0-int8 FAIL; K1 and CS1 NOT SCORED; KC FAIL. Each fell as in the final data except K1 (NOT SCORED then) and KC. KC's FAIL was the fault: the scorer counted `int8.b_line_zero_full`, which E78's runner skipped in 15310, as a C failure. The code was aligned with the rule's words and re-run on the same copy (16:41:35: KC PASS, nothing else moved). The scorer as registered (`359c96b2`), run on the final data, gives `scored.json` and `results.md` exactly, bar A1's new, empty `c_not_measured` keys, so A1 moved no verdict ([`interim/`](interim/README.md), `corrections.txt` C1). **D1**: E78's runner skipped four runs by its own rule (listed above), as E141's D2. **D2**: the collector's Python was the Intel's `/usr/bin/python3` 3.9.6 with numpy 1.26.4 (E141's D3). **D3**: the committed raw passes keep `c-log.jsonl` gzipped (`c-log.jsonl.gz`, 0.2 MB a pass against 2.2 MB); `ccheck/` holds the per-pass copies `ccheck.py` read, also gzipped. **D4**: the card budget section of the registration said a fourth pass "will not start"; that was its estimate, not a rule, and the budget rule started it |
 
 ## Device commands sent
 
@@ -217,8 +237,24 @@ held: "<ai> **Claude says:** using aifoundry2 for 1.5 h, until ~17:54 PST [doc](
   and base-word-dependent single-bit prices (cases E and S) that no model has.
 - **Rank 14** closes on this card: the six pool-5 re-runs PASS bit-exact and reproduce E141's D on one footing (K1 PASS), and every pool-6 launch
   is checked. E157 holds the second card.
-- **Rank 5**: this card's floats keep M8's scale (0.9995); card 1's scale against this session's D is E157's to score (CS1), and aifoundry2's
-  (E160) reads this `e153.json`.
+- **Rank 5** (corrected after verification, C2): this card's floats keep M8's scale (CS0 0.9995, PASS), but that checks M8's scale of 1 on
+  the card that defines it. **Rank 5's own test, a card's scale predicted from cheap reads to within 1% on a card held out, fails here for
+  the floats.** Predicted from card 1's and aifoundry2's scales and reads (`card-scale-blind6.json`), every read and form misses by more than
+  1%: the closest, the 600 MHz voltage with its exponent fitted on the other two cards, reads 0.982 (−1.7%); idle power fitted −2.2%; the
+  voltage squared +2.2%; the rest 6–34%. The one read that predicts card 1 to within 1% (E157's S1 and S2: the fp32 zeros level, physical)
+  predicts this card 24–27% high. For int8 the test cannot decide. Every form misses the card's scale of 1 (closest +1.3%). One form, the zeros
+  level fitted on the other two cards, lands inside 1% of this session's int8 ratio (0.966 against 0.974, −0.8%; on card 1 +0.9%), but that
+  ratio is itself uncertain by ±2% (95% [0.956, 0.996]). So no cheap read yet predicts a card's float scale on both held-out cards, as
+  Q139(m) found on its training cards (`corrections.txt` C2). **Card 1's scale over this session's D (CS1)** was scored by E157 on this
+  `e153.json` at 17:27 PST with its registered scorer (`80420324`, its § 7): floats 0.9632 [0.9613, 0.9659], int8 0.9681 [0.9534, 0.9783].
+  Both are within 1% of M8's 0.9616 (+0.16%, +0.68%) on the registered footing, and neither is on E142's own footing. `scored.json` keeps
+  E153-CS1 NOT SCORED, as registered. aifoundry2's scale (E160) reads this `e153.json`.
+- **Rank 8** (item 7, real tensors; added after verification, C3): pool 6's real-tile sub-rule passes on this card. Its 12 real tiles were
+  cut from two public models: W8A8 projections in int8; dequantized projections, attention scores and softmax-times-values products in the
+  floats. They read 0.155 W rms against M8, below the whole of the registered line's range (0.186–0.602 W; the pool's own non-real kinds
+  read 0.385 W): **R1 PASS**. All 12 sit inside M8's bands: **R2 PASS**. The largest miss is −0.376 W (`fp32.real_smol_softmax_v_causal`).
+  R1 passes at every arm. R2 fails at five of the seven (5 to 11 of 12 inside; 9 on the session's own footing), so R2 rests on the footing.
+  Card 1's half is E157's (R1 0.146 W, R2 12 of 12).
 - **For E157 and E160**: [`e153.json`](e153.json) is the aifoundry3 footing their card-term and card-scale rules divide by.
 
 ## Files
@@ -230,3 +266,55 @@ the frozen slope with dips kept; leakage 0.1994, 0.3803, 0 with dips removed; ga
 (the session log, the queue, the session's two config reads, the device-command preflight, the binaries' hashes, the pre-commit dry runs, the
 order of events), `aifoundry3/e153/p1531*`, `aifoundry3/e153-smoke/p15301`, `aifoundry3/e153-stoptest/p15302` (raw, as copied from the box;
 `c-log.jsonl` gzipped; the reductions' `dir` fields point here), `aifoundry3/logs/` (the box's copy of the logs).
+
+*Added after verification (Tue 3 Nov 2026):* `corrections_e153.py` → `corrections.txt`, `corrections.json` (C1–C7, post hoc; standard
+library, committed inputs only, and the registered scorer of `359c96b2` read from git and run in memory); [`interim/`](interim/README.md)
+(the two interim printouts C1 discloses, unchanged, with a README; not results).
+
+## Corrections after verification (Tue 3 Nov 2026)
+
+An independent verifier re-derived every registered number and verdict of E153 from the committed data and the box's files and found them
+all as committed. It reported one major fault and six minor ones in what this README, the registration's A1 and the lane's result say about
+them. The fix pass (desk only, about 18:00–18:40 PST) re-checked each against the committed files before correcting it. Two of the
+verifier's readings were narrowed: int8's held-out scale has one form inside 1% of this session's ratio (C2), and the M2 interval without
+the two tiles was recomputed with the registered bootstrap (C6). Every number is in `corrections.txt`. **None changes a measured, frozen or
+registered number or verdict.** In this README the text is corrected in place and marked "corrected after verification, C<n>". The
+registration (`tools/claims-v3/e153/README.md`) keeps its text, with a dated note under A1.
+
+- **C1 (major): A1's account of the interim look.** *It said* (departures row): "a pipeline test on pass 15310 alone (16:36–16:40 PST; a
+  scratch copy, one pass, below every rule's minimum, its numbers reported nowhere)". The registration's A1 says "one pass is below every
+  rule's two-pass minimum, so no verdict exists and its numbers are not results and are reported nowhere". *It says now:* after the
+  one-pass try (to 16:39:47, nothing scored), the registered scorer was run at 16:40:11 on pass 15310 listed twice, and it printed every
+  rule's verdict. They were P1 FAIL 0.286 W; P2, P3, B1, B2, C1, H1–H4, R1, R2 and CS0-floats PASS; M1 NOT RESOLVED; M2 WORSE; CS0-int8
+  FAIL; K1 and CS1 NOT SCORED; KC FAIL. The scorer was fixed and re-run at 16:41:35 (KC PASS, nothing else moved), and A1 was committed at
+  16:42:11. So A1 was written after an interim scoring of data it touches. It moved no verdict: the scorer of `359c96b2`, run in memory on
+  the final reduction, its seven arms and the C check, gives `scored.json`, `scored-session.json`, `results.md` and `results-session.md`
+  exactly, bar A1's eight new, empty `c_not_measured` keys (and one in the session file). Every tile ran in at least three kept passes.
+  Nothing registered changed after the look: `predictions-e153.json` is byte-identical to `359c96b2`'s, and the queue on the box ran its
+  passes by the registered budget rule. The interim verdicts equal the final ones except K1's (then NOT SCORED) and KC's. `corrections.txt`
+  C1; [`interim/`](interim/README.md).
+- **C2: rank 5's own test.** *It said:* "this card's floats keep M8's scale (0.9995); card 1's scale against this session's D is E157's to
+  score (CS1)". *It says now:* CS0 checks only M8's scale of 1 on its own card. Held out, every cheap read misses this card's float scale by
+  more than 1% (closest −1.7%). For int8 one form is inside 1% of this session's ratio (−0.8%) and 3.4% off the card's scale of 1, so
+  int8 cannot decide. The zeros level that predicts card 1 (E157 S1/S2) is 24–27% high here. E157 has since scored CS1's reading on this
+  `e153.json`: +0.16% / +0.68% of M8's 0.9616, on the registered footing only. `corrections.txt` C2.
+- **C3: rank 8 was missing** from What it changes, though the header named it and R1/R2 answer it: R1 PASS (0.155 W), R2 PASS (12 of 12),
+  R2 footing-sensitive. Added. `corrections.txt` C3.
+- **C4: the lane's blog point 1** said "every one of 3,140 matrix launches on 44 new kinds of numbers". About 1,758 were. The 3,140 are
+  1,758 on the 44 new kinds, 246 on pool 6's anchors, 236 on the six K1 tiles, 734 on E78's anchors and 166 on the tie. Added under Results 0.
+  `corrections.txt` C4.
+- **C5: the lane's blog point 7** cited "README.md, Results 3" for "+1.36 W in fp32 when every B bit flips every cycle". That tile
+  (`fp32.a_zeros_b_complement`) was not in Results 3, and its D is 1.3546 ± 0.174 W (4 passes), which rounds to 1.35 W, not 1.36. The tile
+  is now in Results 3's Z row; cite `e153.json` › `items` and `scored.json` › `primary.primary.power_rows`. `corrections.txt` C5.
+- **C6: "falsified"** (What it does (2), and the lane's result) was stronger than the evidence. The claim rests on a post hoc reading of the
+  three tiles where M8's near-whole-byte discount acts most (`bsat` 8192 each; at most 1,064 elsewhere). Two of the three sit inside M8's
+  band, and the third is priority 2. *It says now:* "contradicted, post hoc, on the three tiles where it acts most". The card draws more
+  than M8 says on all three, M7 is closer on each, and the two priority-1 tiles carry M2's WORSE. With the registered `compare_rule` and its
+  seed, M8 − M7 is +0.0343 W [+0.0015, +0.0847] on the 30 (1.7% of draws at or below 0) and +0.0068 W [−0.0055, +0.0201] on the 28 without
+  them, not resolved at any of five seeds. In plain words it now reads "post hoc". `corrections.txt` C6.
+- **C7: what the C check vouches for.** *It said* (in plain words): "so pool 5's file-tile rows, and every model's file-tile training rows,
+  stand as measured"; and (What it does (5)): "the rows are valid … so no training or test row on this card is biased by a silent kernel
+  error". *It says now:* pool 5's aifoundry3 file-tile rows stand as measured, and card 1's and aifoundry2's rest on E157 and E160. This
+  session's rows are valid: 63 distinct inputs, one host (`99ed75fb…`) and one kernel (`d521e432…`). Pool 5's other 30 tiles were not
+  re-run. E157 checked 3,170 of 3,170 launches on card 1, with its K1 D rule failing (3 of 6 within 0.05 W). E160 checked 2,620 of 2,620 on
+  aifoundry2. The registration's "(and so every model's file-tile training rows)" is to be read the same way. `corrections.txt` C7.

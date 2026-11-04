@@ -1,0 +1,121 @@
+E153 (Q139): corrections after verification. POST HOC, never a verdict. Written at the desk on Tue 3 Nov 2026, about 18:20 PST, by the fix pass, after an independent verifier re-derived every registered number and verdict of E153 (all stand) and reported one major and six minor faults in what the README and the lane's result say about them. Nothing here was registered. Nothing frozen, measured or registered changes, and no verdict moves.
+
+C1  The interim look before A1, and what A1 changed
+  inputs: 16:40:11 PST, the scorer as registered (pre-A1), pass 15310 listed twice; 16:41:35 PST, the scorer after the A1 fix, the same input
+    16:40:11 PST, the scorer as registered (pre-A1), pass 15310 listed twice: passes [15310, 15310], C-excluded ['int8.b_line_zero_full'], not measured None; sha256 md b3b358341cfa..., json 4ddd3573a8e9...
+    16:41:35 PST, the scorer after the A1 fix, the same input: passes [15310, 15310], C-excluded [], not measured ['int8.b_line_zero_full']; sha256 md 1956b623276a..., json 2e89d51f50f3...
+  rule             16:40:11 (pre-A1)  16:41:35 (A1)   final (4 passes)  interim reading (pre-A1 printout)
+  E153-P1          FAIL               FAIL            FAIL              rms 0.286 W over 12
+  E153-P2          PASS               PASS            PASS              rms 0.126 W over 6
+  E153-P3          PASS               PASS            PASS              rms 0.315 W over 11
+  E153-B1          PASS               PASS            PASS              mean(measured - M8) -0.029 W over 18
+  E153-B2          PASS               PASS            PASS              mean(measured - M8) -0.070 W over 11
+  E153-C1          PASS               PASS            PASS              28 of 29 inside
+  E153-M1          NOT RESOLVED       NOT RESOLVED    NOT RESOLVED      rms(M8) - rms(other) +0.029 W over 29
+  E153-M2          WORSE              WORSE           WORSE             rms(M8) - rms(other) +0.036 W over 29
+  E153-H1          PASS               PASS            PASS              rms 0.229 C over 12
+  E153-H2          PASS               PASS            PASS              rms 0.175 C over 6
+  E153-H3          PASS               PASS            PASS              rms 0.172 C over 11
+  E153-H4          PASS               PASS            PASS              28 of 29 inside
+  E153-R1          PASS               PASS            PASS              rms 0.147 W over 12
+  E153-R2          PASS               PASS            PASS              12 of 12 real tiles inside
+  E153-K1          NOT SCORED         NOT SCORED      PASS              
+  E153-K1prime     NOT SCORED         NOT SCORED      PASS              
+  E153-K1-C        PASS               PASS            PASS              
+  E153-K1-D        NOT SCORED         NOT SCORED      PASS              
+  E153-K1-W        NOT SCORED         NOT SCORED      PASS              
+  E153-CS0-floats  PASS               PASS            PASS              measured 0.9987 [0.9970, 1.0039] over 27, M8 applies 1.0
+  E153-CS0-int8    FAIL               FAIL            FAIL              measured 0.9722 [0.9590, 1.0100] over 16, M8 applies 1.0
+  E153-CS1         NOT SCORED         NOT SCORED      NOT SCORED        E157's reduction not given (card 1); scored where both exist
+  E153-KC          FAIL               PASS            PASS              
+  rules whose interim (pre-A1) verdict differs from the final: ['E153-K1', 'E153-K1prime', 'E153-K1-D', 'E153-K1-W', 'E153-KC']
+  predictions-e153.json at HEAD equals 359c96b2's: True; pick6.py equals 359c96b2's: True
+  the scorer as registered (359c96b2, before A1), re-run on the committed final reduction: scored.json 8 differences, results.md identical: True; scored-session.json 1 differences, results-session.md identical: True
+      scored.json /arms/auto_dips_removed/c_not_measured: only in the committed file ([])
+      scored.json /arms/gates_off/c_not_measured: only in the committed file ([])
+      scored.json /arms/kfrozen_dips_kept/c_not_measured: only in the committed file ([])
+      scored.json /arms/leak0/c_not_measured: only in the committed file ([])
+      scored.json /arms/leak0.1994/c_not_measured: only in the committed file ([])
+      scored.json /arms/leak0.3803/c_not_measured: only in the committed file ([])
+      scored.json /arms/session_own/c_not_measured: only in the committed file ([])
+      scored.json /primary/c_not_measured: only in the committed file ([])
+      scored-session.json /primary/c_not_measured: only in the committed file ([])
+  the scorer at HEAD (A1), re-run on the committed final reduction: scored.json 0 differences, results.md identical: True; scored-session.json 0 differences, results-session.md identical: True
+  the final data's c_not_measured: []; every tile has D in at least 3 kept passes (fewest: ['fp16.a_zeros_b_complement', 'int8.b_line_zero_full', 'int8.gray_a'])
+
+C2  Rank 5's own test on this card: a card's scale predicted from cheap reads, within 1%, on a held-out card
+  floats: CS0 measured 0.9995 [0.9980, 1.0078] over 27 tiles (M8 applies 1.0): CS0 PASS
+    V600_v|fitted_on_other_two               predicts 0.9822:  -1.78% of 1,  -1.73% of 0.9995  | on card 1 (E157)  -8.84%
+    V600_v|physical                          predicts 1.0220:  +2.20% of 1,  +2.25% of 0.9995  | on card 1 (E157)  -5.50%
+    idle_w|fitted_on_other_two               predicts 0.9772:  -2.28% of 1,  -2.23% of 0.9995  | on card 1 (E157) +40.73%
+    zeros_level_fp32_w|fitted_on_other_two   predicts 0.9373:  -6.27% of 1,  -6.22% of 0.9995  | on card 1 (E157)  +2.57%
+    leak_w_per_c|fitted_on_other_two         predicts 1.0849:  +8.49% of 1,  +8.55% of 0.9995  | on card 1 (E157)  +1.18%
+    idle_w|physical                          predicts 0.8655: -13.45% of 1, -13.40% of 0.9995  | on card 1 (E157) +32.19%
+    zeros_level_fp32_w|physical              predicts 1.2470: +24.70% of 1, +24.77% of 0.9995  | on card 1 (E157)  +0.78%
+    leak_w_per_c|physical                    predicts 0.6570: -34.30% of 1, -34.26% of 0.9995  | on card 1 (E157) +30.99%
+    within 1% of 1: none (closest V600_v|fitted_on_other_two, -1.78%); within 1% of the measured 0.9995: none (closest V600_v|fitted_on_other_two, -1.73%); within 1% here (measured) and on card 1: none
+  int8: CS0 measured 0.9738 [0.9560, 0.9961] over 17 tiles (M8 applies 1.0): CS0 FAIL
+    V600_v|physical                          predicts 1.0128:  +1.28% of 1,  +4.01% of 0.9738  | on card 1 (E157)  -6.93%
+    zeros_level_fp32_w|fitted_on_other_two   predicts 0.9662:  -3.38% of 1,  -0.78% of 0.9738  | on card 1 (E157)  +0.90%
+    idle_w|fitted_on_other_two               predicts 0.9591:  -4.09% of 1,  -1.51% of 0.9738  | on card 1 (E157) +85.33%
+    V600_v|fitted_on_other_two               predicts 0.9583:  -4.17% of 1,  -1.60% of 0.9738  | on card 1 (E157) -19.55%
+    leak_w_per_c|fitted_on_other_two         predicts 0.9415:  -5.85% of 1,  -3.31% of 0.9738  | on card 1 (E157)  -1.71%
+    idle_w|physical                          predicts 0.8578: -14.22% of 1, -11.92% of 0.9738  | on card 1 (E157) +30.21%
+    zeros_level_fp32_w|physical              predicts 1.2359: +23.59% of 1, +26.91% of 0.9738  | on card 1 (E157)  -0.74%
+    leak_w_per_c|physical                    predicts 0.6511: -34.89% of 1, -33.13% of 0.9738  | on card 1 (E157) +29.02%
+    within 1% of 1: none (closest V600_v|physical, +1.28%); within 1% of the measured 0.9738: ['zeros_level_fp32_w|fitted_on_other_two'] (closest zeros_level_fp32_w|fitted_on_other_two, -0.78%); within 1% here (measured) and on card 1: ['zeros_level_fp32_w|fitted_on_other_two']
+  E157-X1 (E157, on this e153.json): median D(card 1) / D(aifoundry3) 0.9632 [0.9613, 0.9659] over 25, M8's card term 0.9616 (+0.16%): PASS; E153-CS1's reading within 1% of M8: True
+  E157-X2 (E157, on this e153.json): median D(card 1) / D(aifoundry3) 0.9681 [0.9534, 0.9783] over 16, M8's card term 0.9616 (+0.68%): PASS; E153-CS1's reading within 1% of M8: True
+  E157-S1 (E157): zeros_level_fp32_w|physical predicts 0.9707 against 0.9632 (+0.78%): PASS
+  E157-S2 (E157): zeros_level_fp32_w|physical predicts 0.9610 against 0.9681 (-0.74%): PASS
+    E157 arm e142_footing: E153-CS1 reading within 1% floats False, int8 False
+    E157 arm session_own_slope: E153-CS1 reading within 1% floats True, int8 True
+    E157 arm dips_kept: not scored there ("1 kept passes, fewer than 2")
+    E157 arm leak0.2955: E153-CS1 reading within 1% floats True, int8 False
+    E157 arm leak0.3320: E153-CS1 reading within 1% floats True, int8 True
+    E157 arm relaxed: E153-CS1 reading within 1% floats True, int8 False
+  scored.json's E153-CS1: NOT SCORED (E157's reduction not given (card 1); scored where both exist)
+
+C3  Rank 8 (item 7, real tensors): pool 6's real-tile sub-rule on this card
+  primary: R1 PASS, rms 0.155 W over 12 real tiles {'fp16': 4, 'fp32': 3, 'int8': 5}, line 0.602 (2.5% point 0.186), the pool's own non-real rms 0.385 W; R2 PASS, 12 of 12 inside, outside []
+  the largest real-tile errors (measured - M8, W): fp32.real_smol_softmax_v_causal -0.376, fp16.real_smol_softmax_v -0.216, int8.real_qwen_w8a8_v -0.214
+    arm session_own: R1 PASS 0.428 W; R2 FAIL 9 of 12
+    arm auto_dips_removed: R1 PASS 0.249 W; R2 FAIL 10 of 12
+    arm kfrozen_dips_kept: R1 PASS 0.328 W; R2 FAIL 11 of 12
+    arm leak0.1994: R1 PASS 0.151 W; R2 PASS 12 of 12
+    arm leak0.3803: R1 PASS 0.458 W; R2 FAIL 5 of 12
+    arm leak0: R1 PASS 0.381 W; R2 FAIL 8 of 12
+    arm gates_off: R1 PASS 0.155 W; R2 PASS 12 of 12
+
+C4  The 3,140 launches of the C check, by input (ccheck/ccheck-all.json, each launch's 'values')
+   1758  pool 6's 44 new kinds (44 distinct)
+    734  E78's six anchors (6 distinct)
+    246  pool 6's six anchors (6 distinct)
+    236  K1: the six re-run pool-5 tiles (6 distinct)
+    166  the tie (pi) (1 distinct)
+  total 3140 launches on 63 distinct inputs; summary 3140 launches, 3140 PASS
+
+C5  fp32.a_zeros_b_complement (blog point 7's fp32 figure)
+  D 1.3546 +- 0.174 W (95%, 4 passes: 15310 1.276, 15311 1.246, 15312 1.465, 15313 1.431)
+  M8 1.536 (error -0.181, band [1.091, 1.982]), M7 1.535, M6 1.779 (scored.json > primary.primary.power_rows)
+  the pool's rule: A every element +0.0 (every micro-op gated); B columns 0-7 random words (sign random, exponent field U{64..191}, random mantissa), column l+8 their bitwise complement: each lane's B flips all 32 bits every cycle, the most B traffic a tile can carry, all of it behind a closed gate
+  beside it, int8.a_zeros_b_lineflip: D 0.2763 +- 0.141 W (4 passes)
+
+C6  M8's int8 near-whole-byte discount (bsat, -56.8 fJ a bit): where it acts, and what carries M2
+  bsat feature by tile: int8.b_line_zero_ff 8192, int8.b_line_55_aa 8192, int8.a_zeros_b_lineflip 8192, int8.real_qwen_w8a8_v 1064, int8.powerlaw_df4_pc 844, int8.real_qwen_w8a8_gate 588, int8.real_smol_w8a8_q 549, int8.real_qwen_w8a8_down 484, int8.powerlaw_df15_pt 410, int8.real_smol_w8a8_down 345, int8.b_line_zero_full 328, int8.a_word_zero_one 292, int8.anchor6_full 157
+  int8.b_line_zero_ff (priority 1): measured 3.748 W; M8 3.388 [2.17, 4.61] inside, error +0.360; M7 3.703 (error +0.045); M6 4.101 (error -0.354)
+  int8.b_line_55_aa (priority 2): measured 7.407 W; M8 6.100 [4.84, 7.36] OUTSIDE, error +1.307; M7 6.586 (error +0.821); M6 6.846 (error +0.561)
+  int8.a_zeros_b_lineflip (priority 1): measured 0.276 W; M8 -0.339 [-1.73, 1.05] inside, error +0.615; M7 0.049 (error +0.227); M6 0.505 (error -0.229)
+  E153-M2 (M8 against M7), the registered 30: d +0.0343 W [+0.0015, +0.0847] WORSE (reproduces scored.json exactly; share of draws <= 0: 0.0172)
+     without ['int8.b_line_zero_ff', 'int8.a_zeros_b_lineflip'] (28, post hoc): d +0.0068 W [-0.0055, +0.0201] NOT RESOLVED (share <= 0: 0.1426); four other seeds: [-0.0062, +0.0209] NOT RESOLVED; [-0.0058, +0.0203] NOT RESOLVED; [-0.0057, +0.0205] NOT RESOLVED; [-0.0060, +0.0203] NOT RESOLVED
+  E153-M1 (M8 against M6), the registered 30: d +0.0428 W [-0.0056, +0.0909] NOT RESOLVED (reproduces scored.json exactly; share of draws <= 0: 0.0424)
+     without ['int8.b_line_zero_ff', 'int8.a_zeros_b_lineflip'] (28, post hoc): d +0.0248 W [-0.0190, +0.0565] NOT RESOLVED (share <= 0: 0.1206); four other seeds: [-0.0190, +0.0580] NOT RESOLVED; [-0.0192, +0.0577] NOT RESOLVED; [-0.0193, +0.0571] NOT RESOLVED; [-0.0214, +0.0573] NOT RESOLVED
+  priority-1 int8 rms, all 12 / without the two (10): M8 0.296 / 0.233 W; M7 0.231 / 0.242 W; M6 0.199 / 0.173 W
+
+C7  What the C check covers, and the other cards' own checks
+  3140 launches: host 99ed75fbcad323b4..., kernel d521e43248d00b4d...
+  distinct inputs checked: 63 (pool 6's 50, K1's 6, E78's 6 anchors, the tie); pool 5's other 30 tiles were not re-run
+  E157 (aifoundry1 card 1): 3170 of 3170 launches PASS; its K1: {'E157-K1C': 'PASS', 'E157-K1D': 'FAIL', 'E157-K1W': 'FAIL', 'E157-K1': 'FAIL', 'E157-K1prime': 'FAIL'}
+  E160 (aifoundry2): ccheck-s1.json.gz 2596 of 2596, ccheck-smoke.json 19 of 19, ccheck-stoptest-board.json 5 of 5; 2620 of 2620 in all
+
+corrections.json written beside this file.

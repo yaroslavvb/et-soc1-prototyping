@@ -370,3 +370,19 @@ K1-C reads FAIL on any launch not PASS, NOT SCORED if a K1 tile has no launch, e
 tile, as registered. Nothing else changes: no tile, prediction, band, reference error, rule threshold, footing or arm; the self-test's C
 plumbing cases (one ROUNDING launch, one launch with no C record) still fail their tile. A tile that runs in some kept passes and not others
 is judged on the launches it has, as before.
+
+*Dated note on A1 (Tue 3 Nov 2026, about 18:40 PST, after verification; A1's text above is left as committed in `e6ca949d`). A1's account
+of the pipeline test is incomplete, and its words "so no verdict exists and its numbers are not results and are reported nowhere" are
+withdrawn. The test ran in two steps (times from the lane's working files). First, to 16:39:47 PST, the collector ran on pass 15310 alone:
+the C check, the reduction and its arms. With one pass the scorer scored nothing. Then the lane listed that pass twice in a copy of the
+primary reduction (`passes` [15310, 15310]) and ran this registration's scorer on it, with the C check, at 16:40:11. The scorer counted
+two passes and printed every rule's verdict on that one pass's data: P1 FAIL (0.286 W); P2, P3, B1 (−0.029 W), B2, C1 (28 of 29),
+H1–H4, R1, R2 and CS0-floats PASS; M1 NOT RESOLVED; M2 WORSE (+0.036 W); CS0-int8 FAIL; K1 and CS1 NOT SCORED; KC FAIL. KC's FAIL was the
+fault this amendment fixes. The scorer was changed and re-run on the same copy at 16:41:35 (KC PASS, every other verdict and number as
+before). The amendment was written at 16:41:53 and committed at 16:42:11. **So A1 was written after an interim scoring of data it
+touches.** It moved no verdict. This registration's scorer (`359c96b2`, before A1), run on the session's final reduction, gives its
+`scored.json` and `results.md` exactly, bar A1's new, empty `c_not_measured` keys, because every tile ran in at least three kept passes.
+An independent verifier found the same. Nothing registered changed after the look: `predictions-e153.json` is unchanged since this
+registration, and the queue on the box ran its passes by the registered budget rule. The two printouts are committed, unchanged and
+labelled, in [`docs/reports/data/2026-11-03-e153-blind6-aifoundry3/interim/`](../../../docs/reports/data/2026-11-03-e153-blind6-aifoundry3/interim/README.md),
+with the re-score in that directory's `corrections.txt` (C1). They are not results.*
