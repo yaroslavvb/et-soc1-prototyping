@@ -1,0 +1,13 @@
+E165 amendment A2 self-test: report_d_e165.py 7290d71ac88bccf2..., check_path_e165.py 5073f782dc84defe..., score_e165.py 03bfd40b728bad2a...
+  E160 results.json 7dbddc797e2f0607..., corrections.json 4df5056ffcda95f1...
+ok   E160: the registered form, from score_e165's own collect and cells_of, equals results.json's D on all 48 pool tiles (0 differ)
+ok   E160: D_795 equals C1's corrected D (D_w and D_runs) on all 12 fp16 tiles that are not the anchor (0 differ); the shift -0.729 to -0.728 W (C1: +0.728 high)
+ok   E160: D_795 equals the registered D on all 33 fp32 and int8 tiles that are not anchors (0 differ)
+ok   E160: the anchors' passes below 795 MHz: fp16 [1] ([752, 800, 800] MHz), fp32 none, int8 none; pass 1's reference 34.645 W (C1: 34.645 W, the anchor's two 800 MHz passes)
+ok   E160: the three zeros anchors get no D_795 (inputs, never scored)
+ok   made up: with the fp16 anchor's pass 1 at 752 MHz and 2.185 W short, all 11 fp16 tiles' registered D read 0.728 W high and their D_795 their made-up D (0 differ)
+ok   made up: every fp32 and int8 tile's D_795 equals its registered D (0 differ)
+ok   made up: score_e165.score() on the two forms differs in the D rows only (rules, lines, coverage, peaks, tiles' clocks and boards identical: True); fp16's M9-as-frozen D mean 0.728 -> -0.0 W
+ok   check_path_e165.py on this tree: rc 0, CHECK-PATH: PASS (every file on the score's path is the registered bytes)
+ok   check_path_e165.py --self-test: rc 0, CHECK-PATH SELF-TEST: ALL PASS
+A2 SELF-TEST: ALL PASS

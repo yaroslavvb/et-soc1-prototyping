@@ -1,0 +1,13 @@
+# E165: check_path_e165.py (amendment A2-5) on the Intel's tree at f13e0b39, Wed 04 Nov 2026 10:52:21 PST, before any E165 data: the run at collection must read the same
+E165 code-path check (amendment A2-5): check_path_e165.py sha256 5073f782dc84defeac51634ec823f220a076eb198062899f9f3fe013e58ef0c4; python 3.13.11
+  1. the registration's pins (e165_common FROZEN + CCHECK_FROZEN): 10 files, 0 differ
+  2. the primary's path beyond FROZEN, at the pins and at provenance-blind7.json: 8 files, 0 differ
+  3. the reduction and E165's own files: 9 files, 0 differ
+  4. the closure: 18 files of the tree read or loaded by score_e165 and the primary on 61 tiles x 2; 0 outside the pins
+  5. the frozen-block recheck: burst() with no session read reproduces M9.a2_q140l on 61 tiles, 1586 fields, 0 differ
+CHECK-PATH: PASS (every file on the score's path is the registered bytes)
+# its self-test (--self-test): a temporary copy of the pinned files, one byte changed
+ok   the copy of the 28 pinned files passes checks 1-3 (0 differ)
+ok   one byte of make_predictions_e119.py changed: refused at exactly that file (1 lines: 2 tools/claims-v3/e119/make_predictions_e119.py: sha256 fbd18d4a3fa3aa971a811bd37609569531c046ff871748a45076a6)
+ok   provenance-blind7.json missing: all 8 primary-path files refused on the cross-check
+CHECK-PATH SELF-TEST: ALL PASS

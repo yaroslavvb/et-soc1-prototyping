@@ -1,0 +1,30 @@
+# the bytes run: collect_e165_bounded.sh sha256 6e5a7160ffe2d3538eb731bc76fe7ae6fda6b0866dd898d0cd41349e77d42f0a, selftest_collect_bounded_e165.sh ec3a20c5d44d715ea7debcecbd4fdeda2f99611626ee5ac6acb7a10e28ab6f4c (both as committed; run from the top of the tree as: bash tools/claims-v3/e165/selftest_collect_bounded_e165.sh <scratch>/cbtest <scratch>/dry)
+# E165 bounded collector, desk test: Wed 04 Nov 2026 10:50:20 PST; ssh on PATH is the stand-in; rsync 3.5.1; timeout /usr/local/bin/timeout
+ok   (a) the probe meets a Tailscale check link: rc 5 after 15 s; 'stopped: aifoundry2 asks for a Tailscale check (the lab approval lapsed): https://login.tailscale.com/a/desk-test-only'; nothing written; no ssh left: yes
+ok   (b) the probe hangs: rc 5 after 16 s; 'stopped: the probe of aifoundry2 did not answer in 15 s (rc 124): nothing collected; collect again l'; nothing written; no ssh left
+ok   (c) the probe answers, the first rsync's remote side hangs: rc 3 after 5 s (bound 4 s + 10 s kill); 'stopped: rsync of the runs failed or ran past 4 s'; no data dir; no ssh or rsync left
+ok   (d) refusals: a non-empty scratch dir rc 2 ('refused: <scratch>/cbtest/d/raw is not empty'), an existing data dir rc 2 ('refused: <scratch>/cbtest/d/data/aifoundry2 exists')
+ok   (e) a dry queue's records collected through the stand-in: rc 0 after 45 s; path check 'CHECK-PATH: PASS (every file on the scor'; box files: 3 differ, the 3 desk stand-in binaries; scored: runs, complete, dry, tiles scored = 114 114 True 52; D report: passes, identical outside D, anchors' passes below 795 MHz = [1, 2] True {'fp16': [], 'fp32': [1], 'int8': []}
+ok   (f) A2-8 shown: the registered collect_e165.sh on the same records: rc 0 after 1 s, yet its scorer stopped on s1.out ('NotADirectoryError: [Errno 20] Not a directory: '<scratch>/cbtest/f/data/aifoundry2/s1.out/session.json''): score.txt has 0 lines, results.json not written; it ends 'collected into <scratch>/cbtest/f/data; scored: '
+## the collector's output in case (e)
+CHECK-PATH: PASS (every file on the score's path is the registered bytes)
+probe: aifoundry2 answered at 10:50:56 PST
+DIFFERS build/ccheck/b/host/sparsity_host ab37a5c044e7779050c901275a5708ccb1ead59c2990049ad7ed831cadab5746 eae32a152b8f0861bd2922c500eac217c931c9b464d3274a6bcf346cc986bfd2
+DIFFERS build/sparsity_t2/kernel/sparsity.elf ab37a5c044e7779050c901275a5708ccb1ead59c2990049ad7ed831cadab5746 990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24
+DIFFERS build/ettelem-hpl/ettelem ab37a5c044e7779050c901275a5708ccb1ead59c2990049ad7ed831cadab5746 77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5
+box files: 3 differ
+cp: <scratch>/cbtest/e/raw/cc/ccheck-*.json: No such file or directory
+collected into <scratch>/cbtest/e/data; scored: E165 scoring: 114 burst runs, 114 complete, 114 counted (complete and every launch's C PASS), passes [1, 2]; dry True; burst D in both forms: E165 burst D in both forms (amendment A2-4, reported only): counted passes [1, 2]; anchors at 795 MHz or more kept
+## every ssh the collector made, all to the stand-in (11 calls)
+ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 nice -n 19 rsync --server --sender -logDtpre.iLsfxCIvu . claude/et-soc1-prototyping/build/e165/runs/
+ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 nice -n 19 rsync --server --sender -logDtpre.iLsfxCIvu . claude/et-soc1-prototyping/build/e165/runs/
+ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 nice -n 19 rsync --server --sender -logDtpre.iLsfxCIvu . claude/et-soc1-prototyping/build/e165/queue.out claude/work/q141-a2-e165-slot.txt
+ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 bash -s
+ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 nice -n 19 rsync --server --sender -logDtpre.iLsfxCIvu . claude/et-soc1-prototyping/build/e165/runs/
+ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 nice -n 19 rsync --server --sender -logDtpre.iLsfxCIvu . claude/et-soc1-prototyping/build/e165/queue.out claude/work/q141-a2-e165-slot.txt
+ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 bash -s
+BOUNDED COLLECTOR DESK TEST: ALL PASS

@@ -1,0 +1,80 @@
+# E165: report_d_e165.py (amendment A2-4) on the dry pass's session (the toy card, Q141(g)'s dry queue of 09:29-09:42 PST: passes 1-2, 114 runs), run by collect_e165_bounded.sh in its desk test's case (e) through a stand-in ssh, Wed 4 Nov 2026 (the desk test began 10:50:20 PST): the code paths only, no number here is a measurement (the toy card's fp32 zeros anchor ran its pass 1 at 766.7 MHz, so the second form's path is exercised)
+E165 burst D in both forms (amendment A2-4, reported only): counted passes [1, 2]; anchors at 795 MHz or more kept
+  fp16 anchor b7-fp16.anchor7_zeros: clock [800, 800] MHz, board [32.31, 33.2] W; passes below 795 MHz: none
+  fp32 anchor b7-fp32.anchor7_zeros: clock [766.7, 800] MHz, board [31.51, 33.53] W; passes below 795 MHz: [1]
+  int8 anchor b7-int8.anchor7_zeros: clock [800, 800] MHz, board [33.9, 34.82] W; passes below 795 MHz: none
+  everything but the D rows identical between the two forms: True
+  set          n   M9 primary D rms / mean (registered -> D_795)     M8 D rms / mean (registered -> D_795)
+  governed      12   4.704 / -3.608 -> 4.892 / -3.861      3.006 / -0.651 -> 3.087 / -0.903
+  pinned        40   1.525 / 1.114 -> 1.218 / 0.811      1.68 / 1.406 -> 1.375 / 1.103
+  all           52   2.626 / 0.024 -> 2.581 / -0.267      2.063 / 0.931 -> 1.911 / 0.64
+  priority1     45   2.72 / 0.059 -> 2.689 / -0.255      2.148 / 0.925 -> 2.003 / 0.611
+  real          10   3.381 / -1.277 -> 3.472 / -1.378      2.209 / 0.067 -> 2.2 / -0.034
+  fp32          15   3.183 / 0.902 -> 3.054 / -0.108      2.888 / 1.542 -> 2.499 / 0.532
+  fp16          11   4.038 / -2.709 -> 4.038 / -2.709      2.305 / -0.184 -> 2.305 / -0.184
+  int8          26   1.022 / 0.674 -> 1.022 / 0.674      1.206 / 1.051 -> 1.206 / 1.051
+  class_0        4   2.056 / -1.39 -> 2.056 / -1.39      0.848 / 0.347 -> 0.848 / 0.347
+  class_E        6   4.192 / 0.257 -> 4.252 / -0.753      3.697 / 1.221 -> 3.496 / 0.211
+  class_H        7   1.382 / 1.162 -> 1.382 / 1.162      1.289 / 1.281 -> 1.289 / 1.281
+  class_L        7   0.477 / 0.215 -> 0.477 / 0.215      1.206 / 1.191 -> 1.206 / 1.191
+  class_R       10   3.381 / -1.277 -> 3.472 / -1.378      2.209 / 0.067 -> 2.2 / -0.034
+  class_S        8   2.289 / 2.125 -> 1.673 / 1.368      2.259 / 2.094 -> 1.657 / 1.337
+  class_U       10   2.548 / -0.861 -> 2.514 / -1.063      1.583 / 0.499 -> 1.468 / 0.297
+  measured_governed  16   4.043 / -3.021 -> 4.263 / -3.274      2.389 / -0.898 -> 2.601 / -1.15
+  measured_pinned  36   1.641 / 1.377 -> 1.244 / 1.069      1.901 / 1.744 -> 1.506 / 1.436
+  tile                                      group     D registered (passes)  ->  D_795 (passes)
+  fp16.anchor7_randn_a                      governed  29.365 [29.88, 28.85]  ->  29.365 [29.88, 28.85]
+  fp16.anchor7_randn_b                      governed  29.255 [29.72, 28.79]  ->  29.255 [29.72, 28.79]
+  fp16.anchor7_zeros                        pinned    0.0 [0.0, 0.0]  ->  not given: a zeros anchor (an input of the primary; never scored)
+  fp16.b_onebit_b8_pi                       pinned    24.85 [25.31, 24.39]  ->  24.85 [25.31, 24.39]
+  fp16.b_onebit_b9_one                      pinned    27.64 [28.12, 27.16]  ->  27.64 [28.12, 27.16]
+  fp16.laplace_both                         governed  29.66 [30.18, 29.14]  ->  29.66 [30.18, 29.14]
+  fp16.randn_x8                             governed  29.74 [30.25, 29.23]  ->  29.74 [30.25, 29.23]
+  fp16.real_qwen_l3_softmax_v_h1            governed  22.56 [23.03, 22.09]  ->  22.56 [23.03, 22.09]
+  fp16.real_s360_l3_qk                      governed  29.095 [29.34, 28.85]  ->  29.095 [29.34, 28.85]
+  fp16.real_s360_l3_w8a16_gate              governed  28.765 [29.26, 28.27]  ->  28.765 [29.26, 28.27]
+  fp16.sorted_k                             governed  26.135 [26.58, 25.69]  ->  26.135 [26.58, 25.69]
+  fp16.uniform_pm1                          governed  29.165 [29.55, 28.78]  ->  29.165 [29.55, 28.78]
+  fp32.anchor7_zeros                        pinned    0.0 [0.0, 0.0]  ->  not given: a zeros anchor (an input of the primary; never scored)
+  fp32.b_onebit_b20_full                    pinned    25.335 [26.33, 24.34]  ->  24.325 [24.31, 24.34]
+  fp32.b_onebit_b20_one                     pinned    27.15 [28.07, 26.23]  ->  26.14 [26.05, 26.23]
+  fp32.b_onebit_b20_pi                      pinned    25.195 [26.24, 24.15]  ->  24.185 [24.22, 24.15]
+  fp32.b_onebit_b20_seventh                 pinned    24.975 [26.01, 23.94]  ->  23.965 [23.99, 23.94]
+  fp32.b_onebit_b20_third_a1p5              pinned    27.52 [28.46, 26.58]  ->  26.51 [26.44, 26.58]
+  fp32.b_onebit_b22_third                   pinned    24.13 [22.4, 25.86]  ->  23.12 [20.38, 25.86]
+  fp32.dropout30_both                       pinned    30.31 [31.38, 29.24]  ->  29.3 [29.36, 29.24]
+  fp32.exp_a_gray_walk                      pinned    19.335 [20.29, 18.38]  ->  18.325 [18.27, 18.38]
+  fp32.exp_b_alt_b26                        pinned    20.385 [21.32, 19.45]  ->  19.375 [19.3, 19.45]
+  fp32.exp_b_alt_lsb                        pinned    20.035 [21.1, 18.97]  ->  19.025 [19.08, 18.97]
+  fp32.exp_b_alt_nib                        governed  32.335 [33.43, 31.24]  ->  31.325 [31.41, 31.24]
+  fp32.exp_only_pos12                       pinned    29.285 [30.26, 28.31]  ->  28.275 [28.24, 28.31]
+  fp32.mant2_spreadexp                      governed  22.27 [23.25, 21.29]  ->  21.26 [21.23, 21.29]
+  fp32.randn_a24k                           pinned    24.31 [22.05, 26.57]  ->  23.3 [20.03, 26.57]
+  fp32.real_smol_l3_w8a16_q_outlier         governed  29.535 [30.52, 28.55]  ->  28.525 [28.5, 28.55]
+  int8.a_full_b_pos                         pinned    14.355 [14.75, 13.96]  ->  14.355 [14.75, 13.96]
+  int8.anchor7_full_a                       pinned    12.42 [15.13, 9.71]  ->  12.42 [15.13, 9.71]
+  int8.anchor7_full_b                       pinned    14.51 [14.97, 14.05]  ->  14.51 [14.97, 14.05]
+  int8.anchor7_zeros                        pinned    0.0 [0.0, 0.0]  ->  not given: a zeros anchor (an input of the primary; never scored)
+  int8.b_line_0f_f0                         pinned    12.255 [12.66, 11.85]  ->  12.255 [12.66, 11.85]
+  int8.b_line_6bit_rand                     pinned    14.55 [15.03, 14.07]  ->  14.55 [15.03, 14.07]
+  int8.b_line_7f_80_aconst                  pinned    4.41 [4.88, 3.94]  ->  4.41 [4.88, 3.94]
+  int8.b_line_compl_rand                    pinned    12.91 [13.36, 12.46]  ->  12.91 [13.36, 12.46]
+  int8.b_line_near7_rand                    pinned    12.985 [13.47, 12.5]  ->  12.985 [13.47, 12.5]
+  int8.b_line_zero_55                       pinned    8.95 [9.43, 8.47]  ->  8.95 [9.43, 8.47]
+  int8.b_line_zero_7f                       pinned    7.625 [8.14, 7.11]  ->  7.625 [8.14, 7.11]
+  int8.bheld_01                             pinned    12.685 [12.83, 12.54]  ->  12.685 [12.83, 12.54]
+  int8.bheld_33                             pinned    13.73 [14.24, 13.22]  ->  13.73 [14.24, 13.22]
+  int8.bheld_55                             pinned    13.7 [14.2, 13.2]  ->  13.7 [14.2, 13.2]
+  int8.bheld_55_asmall                      pinned    13.495 [13.95, 13.04]  ->  13.495 [13.95, 13.04]
+  int8.bheld_fd                             pinned    13.68 [14.24, 13.12]  ->  13.68 [14.24, 13.12]
+  int8.bheld_ff                             pinned    13.495 [13.92, 13.07]  ->  13.495 [13.92, 13.07]
+  int8.bheld_rand                           pinned    14.06 [14.51, 13.61]  ->  14.06 [14.51, 13.61]
+  int8.pos_small                            pinned    7.995 [7.1, 8.89]  ->  7.995 [7.1, 8.89]
+  int8.real_qwen_l3_w8a8_down_massive       pinned    12.97 [13.4, 12.54]  ->  12.97 [13.4, 12.54]
+  int8.real_qwen_l3_w8a8_k_sink             pinned    11.935 [14.23, 9.64]  ->  11.935 [14.23, 9.64]
+  int8.real_s360_l2_w8a8_o                  pinned    12.89 [13.46, 12.32]  ->  12.89 [13.46, 12.32]
+  int8.real_s360_l3_w8a8_q_outlier          pinned    13.465 [14.13, 12.8]  ->  13.465 [14.13, 12.8]
+  int8.real_smol_l2_w8a8_up_outlier         pinned    13.94 [14.42, 13.46]  ->  13.94 [14.42, 13.46]
+  int8.real_smol_l3_w8a8_down               pinned    13.95 [14.41, 13.49]  ->  13.95 [14.41, 13.49]
+  int8.relu_q_a                             pinned    12.05 [12.46, 11.64]  ->  12.05 [12.46, 11.64]
+  int8.sparse_rows_a                        pinned    12.08 [12.21, 11.95]  ->  12.08 [12.21, 11.95]
