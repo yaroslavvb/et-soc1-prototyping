@@ -1,0 +1,19 @@
+CHECK 4. THE 4.5 s RISE FROM THE BITS AGAINST BASELINES THAT NEVER SEE A BIT (post hoc; C rms of measured - predicted)
+
+  aifoundry3:
+    fp32 (12): M8 / M7 / M6 0.098 / 0.100 / 0.106; constant 0.596 (LOO 0.650); proportional to measured D 0.131 (0.1350 C/W); readout floor 0.112
+    fp16 (6): M8 / M7 / M6 0.106 / 0.103 / 0.096; constant 0.277 (LOO 0.333); proportional to measured D 0.070 (0.1284 C/W); readout floor 0.110
+    int8 (12): M8 / M7 / M6 0.128 / 0.126 / 0.122; constant 0.209 (LOO 0.228); proportional to measured D 0.191 (0.1764 C/W); readout floor 0.090
+        10 of 12 read exactly 1.00 C; on those, M8 / M7 / M6 0.130 / 0.124 / 0.114 against the constant 1.00's 0.000
+        without the two lowest-power tiles (int8.a_zeros_b_lineflip, int8.a_word_zero_one): M8 / M7 / M6 0.130 / 0.124 / 0.114 against a constant's 0.000
+        the two: int8.a_zeros_b_lineflip D 0.28 W rise 0.250 C, M8 -0.012, constant -0.672; int8.a_word_zero_one D 2.74 W rise 0.812 C, M8 +0.171, constant -0.109
+
+  aifoundry1c1:
+    fp32 (12): M8 / M7 / M6 0.180 / 0.173 / 0.178; constant 0.678 (LOO 0.739); proportional to measured D 0.136 (0.1344 C/W); readout floor 0.171
+    fp16 (6): M8 / M7 / M6 0.183 / 0.182 / 0.178; constant 0.332 (LOO 0.399); proportional to measured D 0.179 (0.1282 C/W); readout floor 0.133
+    int8 (12): M8 / M7 / M6 0.123 / 0.127 / 0.132; constant 0.283 (LOO 0.308); proportional to measured D 0.105 (0.1622 C/W); readout floor 0.198
+        5 of 12 read exactly 1.00 C; on those, M8 / M7 / M6 0.039 / 0.036 / 0.043 against the constant 1.00's 0.000
+        without the two lowest-power tiles (int8.a_zeros_b_lineflip, int8.a_word_zero_one): M8 / M7 / M6 0.105 / 0.106 / 0.107 against a constant's 0.148
+        the two: int8.a_zeros_b_lineflip D 0.46 W rise 0.133 C, M8 -0.098, constant -0.647; int8.a_word_zero_one D 2.51 W rise 0.333 C, M8 -0.252, constant -0.447
+
+  E154 (heat over minutes, aifoundry3, four pool-6 holds): plateau errors K_S +0.024, K_Q -0.418, K_L +0.492, K_O +0.360 C; rms 0.370 C (committed 0.37); 95% interval on the sigma at 4 df [0.22, 1.06] C

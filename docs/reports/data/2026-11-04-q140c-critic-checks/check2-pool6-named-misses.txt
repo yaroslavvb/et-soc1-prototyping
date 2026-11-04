@@ -1,0 +1,61 @@
+CHECK 2. POOL 6 WITHOUT THE SIX TILES THAT CARRY THE NAMED SHARED MISSES (post hoc; W rms of measured - predicted)
+
+  aifoundry3: 30 priority-1 new kinds (12 fp32, 6 fp16, 12 int8), anchors out; 44 non-anchor new kinds with priority 2. Errors recomputed from measured and pred: max |d| from the committed 'error' 0.0e+00 W
+    M8: 30 tiles 0.286 [0.199, 0.366] -> without the six 0.190 [0.139, 0.235] (34% of the rms); its own six worst removed 0.171 (overlap with the six: 3 of 6); six random removed 0.285
+        by format, 30 -> 24: fp32 0.330 (12) -> 0.245 (11); fp16 0.125 (6) -> 0.125 (6); int8 0.296 (12) -> 0.127 (7)
+        by format, the registered 30: fp32 rms 0.330 [0.19, 0.47] bias -0.007, 2.4% of the mean kind's 13.8 W; fp16 rms 0.125 [0.07, 0.17] bias -0.029, 0.7% of the mean kind's 17.9 W; int8 rms 0.296 [0.17, 0.40] bias -0.071, 6.0% of the mean kind's 4.9 W
+        own six worst: fp32.b_onebit_b20_third, int8.a_zeros_b_lineflip, int8.bheld_bit4, fp32.negzero_a_b_complement, fp32.real_smol_softmax_v_causal, fp32.exp_a_walk_fixedmant
+        the fourth named miss, exponent-heavy fp32 (5 priority-1 tiles, mean error +0.171 W): with a perfect class offset on top of the six removed, 0.173 W
+        44 non-anchor new kinds 0.339 -> without the six (38) 0.302 -> also without fp16.b_onebit_b6_third and int8.b_line_55_aa (36) 0.205
+    M7: 30 tiles 0.252 [0.166, 0.340] -> without the six 0.174 [0.134, 0.211] (31% of the rms); its own six worst removed 0.150 (overlap with the six: 3 of 6); six random removed 0.251
+        by format, 30 -> 24: fp32 0.313 (12) -> 0.221 (11); fp16 0.121 (6) -> 0.121 (6); int8 0.231 (12) -> 0.119 (7)
+        by format, the registered 30: fp32 rms 0.313 [0.18, 0.45] bias -0.005, 2.3% of the mean kind's 13.8 W; fp16 rms 0.121 [0.09, 0.15] bias +0.013, 0.7% of the mean kind's 17.9 W; int8 rms 0.231 [0.13, 0.33] bias -0.097, 4.7% of the mean kind's 4.9 W
+        own six worst: fp32.b_onebit_b20_third, int8.bheld_bit4, fp32.exp_a_walk_fixedmant, fp32.negzero_a_b_complement, fp32.real_smol_softmax_v_causal, int8.bheld_bit1
+        the fourth named miss, exponent-heavy fp32 (5 priority-1 tiles, mean error +0.139 W): with a perfect class offset on top of the six removed, 0.162 W
+        44 non-anchor new kinds 0.281 -> without the six (38) 0.247 -> also without fp16.b_onebit_b6_third and int8.b_line_55_aa (36) 0.200
+    M6: 30 tiles 0.243 [0.175, 0.312] -> without the six 0.193 [0.145, 0.237] (21% of the rms); its own six worst removed 0.155 (overlap with the six: 3 of 6); six random removed 0.242
+        by format, 30 -> 24: fp32 0.310 (12) -> 0.245 (11); fp16 0.154 (6) -> 0.154 (6); int8 0.199 (12) -> 0.112 (7)
+        by format, the registered 30: fp32 rms 0.310 [0.20, 0.42] bias -0.022, 2.3% of the mean kind's 13.8 W; fp16 rms 0.154 [0.09, 0.21] bias +0.052, 0.9% of the mean kind's 17.9 W; int8 rms 0.199 [0.11, 0.27] bias -0.133, 4.1% of the mean kind's 4.9 W
+        own six worst: fp32.b_onebit_b20_third, fp32.a_zeros_b_complement, int8.bheld_bit4, int8.b_line_zero_ff, fp32.exp_b_alt_shift, fp32.exp_a_walk_fixedmant
+        the fourth named miss, exponent-heavy fp32 (5 priority-1 tiles, mean error +0.179 W): with a perfect class offset on top of the six removed, 0.174 W
+        44 non-anchor new kinds 0.245 -> without the six (38) 0.215 -> also without fp16.b_onebit_b6_third and int8.b_line_55_aa (36) 0.192
+    the six (and the two priority-2 tiles of the same classes), M8 / M7 / M6 error in W; 'shared' = |error| >= 0.2 W in every model:
+      fp32.b_onebit_b20_third      D 12.941 W: -0.81 / -0.80 / -0.70   shared: True
+      int8.a_zeros_b_lineflip      D  0.276 W: +0.62 / +0.23 / -0.23   shared: True
+      int8.b_line_zero_ff          D  3.748 W: +0.36 / +0.04 / -0.35   shared: False
+      int8.bheld_bit1              D  5.909 W: -0.28 / -0.30 / -0.15   shared: False
+      int8.bheld_bit4              D  5.312 W: -0.54 / -0.57 / -0.42   shared: True
+      int8.bheld_bit7              D  5.272 W: -0.24 / -0.27 / -0.13   shared: False
+      fp16.b_onebit_b6_third       D 12.245 W: -0.48 / -0.45 / -0.34   shared: True
+      int8.b_line_55_aa            D  7.407 W: +1.31 / +0.82 / +0.56   shared: True
+    within-session readout noise on D (rms over priority-1 tiles of sd / sqrt(n passes)): fp32 0.035 W (max 0.061), fp16 0.035 W (max 0.056), int8 0.052 W (max 0.130)
+
+  aifoundry1c1: 30 priority-1 new kinds (12 fp32, 6 fp16, 12 int8), anchors out; 44 non-anchor new kinds with priority 2. Errors recomputed from measured and pred: max |d| from the committed 'error' 0.0e+00 W
+    M8: 30 tiles 0.323 [0.197, 0.448] -> without the six 0.184 [0.128, 0.234] (43% of the rms); its own six worst removed 0.171 (overlap with the six: 4 of 6); six random removed 0.321
+        by format, 30 -> 24: fp32 0.386 (12) -> 0.235 (11); fp16 0.098 (6) -> 0.098 (6); int8 0.327 (12) -> 0.147 (7)
+        by format, the registered 30: fp32 rms 0.386 [0.17, 0.59] bias -0.014, 2.9% of the mean kind's 13.2 W; fp16 rms 0.098 [0.06, 0.13] bias +0.032, 0.6% of the mean kind's 17.3 W; int8 rms 0.327 [0.19, 0.46] bias -0.033, 6.9% of the mean kind's 4.8 W
+        own six worst: fp32.b_onebit_b20_third, int8.a_zeros_b_lineflip, fp32.negzero_a_b_complement, int8.bheld_bit4, int8.b_line_zero_ff, fp32.real_smol_softmax_v_causal
+        the fourth named miss, exponent-heavy fp32 (5 priority-1 tiles, mean error +0.182 W): with a perfect class offset on top of the six removed, 0.164 W
+        44 non-anchor new kinds 0.366 -> without the six (38) 0.307 -> also without fp16.b_onebit_b6_third and int8.b_line_55_aa (36) 0.204
+    M7: 30 tiles 0.314 [0.184, 0.451] -> without the six 0.174 [0.131, 0.217] (45% of the rms); its own six worst removed 0.153 (overlap with the six: 5 of 6); six random removed 0.311
+        by format, 30 -> 24: fp32 0.395 (12) -> 0.194 (11); fp16 0.136 (6) -> 0.136 (6); int8 0.285 (12) -> 0.171 (7)
+        by format, the registered 30: fp32 rms 0.395 [0.14, 0.63] bias -0.143, 3.0% of the mean kind's 13.2 W; fp16 rms 0.136 [0.06, 0.19] bias -0.099, 0.8% of the mean kind's 17.3 W; int8 rms 0.285 [0.19, 0.37] bias -0.118, 6.0% of the mean kind's 4.8 W
+        own six worst: fp32.b_onebit_b20_third, int8.bheld_bit4, int8.bheld_bit1, int8.a_zeros_b_lineflip, fp32.real_smol_softmax_v_causal, int8.bheld_bit7
+        the fourth named miss, exponent-heavy fp32 (5 priority-1 tiles, mean error -0.001 W): with a perfect class offset on top of the six removed, 0.174 W
+        44 non-anchor new kinds 0.319 -> without the six (38) 0.243 -> also without fp16.b_onebit_b6_third and int8.b_line_55_aa (36) 0.187
+    M6: 30 tiles 0.283 [0.170, 0.414] -> without the six 0.177 [0.131, 0.217] (38% of the rms); its own six worst removed 0.152 (overlap with the six: 3 of 6); six random removed 0.280
+        by format, 30 -> 24: fp32 0.377 (12) -> 0.203 (11); fp16 0.134 (6) -> 0.134 (6); int8 0.222 (12) -> 0.164 (7)
+        by format, the registered 30: fp32 rms 0.377 [0.16, 0.59] bias -0.160, 2.8% of the mean kind's 13.2 W; fp16 rms 0.134 [0.07, 0.19] bias -0.060, 0.8% of the mean kind's 17.3 W; int8 rms 0.222 [0.15, 0.28] bias -0.153, 4.7% of the mean kind's 4.8 W
+        own six worst: fp32.b_onebit_b20_third, int8.bheld_bit4, int8.b_line_zero_ff, int8.real_qwen_w8a8_v, fp32.real_smol_softmax_v_causal, fp32.a_zeros_b_complement
+        the fourth named miss, exponent-heavy fp32 (5 priority-1 tiles, mean error +0.037 W): with a perfect class offset on top of the six removed, 0.176 W
+        44 non-anchor new kinds 0.274 -> without the six (38) 0.208 -> also without fp16.b_onebit_b6_third and int8.b_line_55_aa (36) 0.177
+    the six (and the two priority-2 tiles of the same classes), M8 / M7 / M6 error in W; 'shared' = |error| >= 0.2 W in every model:
+      fp32.b_onebit_b20_third      D 12.132 W: -1.09 / -1.21 / -1.12   shared: True
+      int8.a_zeros_b_lineflip      D  0.457 W: +0.78 / +0.41 / -0.04   shared: False
+      int8.b_line_zero_ff          D  3.633 W: +0.37 / +0.03 / -0.36   shared: False
+      int8.bheld_bit1              D  5.633 W: -0.31 / -0.41 / -0.26   shared: True
+      int8.bheld_bit4              D  5.203 W: -0.43 / -0.52 / -0.38   shared: True
+      int8.bheld_bit7              D  4.996 W: -0.31 / -0.40 / -0.26   shared: True
+      fp16.b_onebit_b6_third       D 11.779 W: -0.46 / -0.55 / -0.44   shared: True
+      int8.b_line_55_aa            D  7.229 W: +1.36 / +0.82 / +0.57   shared: True
+    within-session readout noise on D (rms over priority-1 tiles of sd / sqrt(n passes)): fp32 0.102 W (max 0.147), fp16 0.049 W (max 0.070), int8 0.088 W (max 0.180)

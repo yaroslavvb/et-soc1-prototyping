@@ -1,0 +1,51 @@
+CHECK 1. Q139(s)'s BOARD EXPONENT ON E160, THROUGH Q139(s)'s COMMITTED CHAIN (post hoc; measured - predicted)
+  E160: 48 tiles scored (17 governed, 31 pinned; governed == M8's frozen clock < 795 MHz: True); dropped by E160 (predicted over 82 W): ['fp32.anchor6_randn', 'fp32.real_qwen_softmax_v']
+  E143: 36 tiles (19 governed, 17 pinned)
+  reads (aifoundry2, PVT busy means without E143; the survey's tree predates E160): V = 0.5180 / 0.5679 / 0.6183 V; xfer 1.01538
+  reproduction: A0 (M7 as frozen in m7.json) against E160's own M7 columns, max |d| 0.048 MHz and 0.0050 W over 48 tiles
+  E160's registered M8 scores: F1 6.717 MHz (mean +5.166), F2 3.89 (-0.965), W1 1.391 W (+1.135), W2 1.726 (-1.5)
+
+  E160 (pool 6, run after the exponent was committed): rms (mean) [95% over tiles, one session]
+  arm                                             s800      W* | governed clock MHz           | governed board W           | pinned clock   | pinned board W  
+  A0_M7_frozen                                  1.9052  65.580 |   4.89 ( +2.82) [ 3.14,  6.32] |  1.105 (+0.808) [0.78, 1.39] |  3.88 (-0.99) | 1.718 (-1.533) | rise all 0.660 C
+  A2_n2.00_chain_refit                          1.8999  65.570 |   4.96 ( +2.93) [ 3.25,  6.47] |  1.112 (+0.814) [0.78, 1.41] |  3.88 (-0.99) | 1.722 (-1.539) | rise all 0.661 C
+  A5_n2.28_chain_on_committed_powers            1.9965  65.570 |  10.50 ( +9.47) [ 8.10, 12.65] |  1.121 (+0.675) [0.80, 1.41] |  3.91 (-0.92) | 1.872 (-1.756) | rise all 0.655 C
+  A5c_n2.28_chain_on_E66_rereferred_powers      1.9965  65.587 |  10.45 ( +9.42) [ 8.14, 12.56] |  1.109 (+0.667) [0.78, 1.39] |  3.90 (-0.93) | 1.792 (-1.669) | rise all 0.648 C
+  A4c_ramp_slopes_at_E66_slope_rereferred       1.9946  65.625 |  10.73 ( +9.72) [ 8.39, 12.88] |  1.087 (+0.628) [0.77, 1.36] |  3.90 (-0.93) | 1.856 (-1.739) | rise all 0.653 C
+  A3_n2.43_chain_refit                          2.0503  65.567 |  13.99 (+13.14) [11.57, 16.22] |  1.144 (+0.626) [0.82, 1.43] |  3.94 (-0.85) | 2.000 (-1.888) | rise all 0.655 C
+  M8_frozen_E160_columns                           nan     nan |   6.72 ( +5.17) [ 4.51,  8.55] |  1.391 (+1.135) [1.04, 1.70] |  3.89 (-0.96) | 1.726 (-1.500) | rise all 0.668 C
+
+  E143 (pool 5) through the same arms, for comparison (A0 must equal E143's registered F1/W1/F2/W2 to rounding):
+    registered: F1 6.629 (-4.964), W1 1.601 (+1.174), F2 1.007 (-0.151), W2 1.184 (-0.804)
+  A0_M7_frozen                                 governed clock   6.64 ( -4.97) board  1.601 (+1.174) | pinned clock  1.01 (-0.15) board 1.185 (-0.804)
+  A2_n2.00_chain_refit                         governed clock   6.57 ( -4.87) board  1.609 (+1.181) | pinned clock  1.01 (-0.15) board 1.188 (-0.811)
+  A5_n2.28_chain_on_committed_powers           governed clock   4.82 ( +1.46) board  1.639 (+1.068) | pinned clock  1.08 (-0.05) board 1.257 (-1.057)
+  A5c_n2.28_chain_on_E66_rereferred_powers     governed clock   4.83 ( +1.44) board  1.619 (+1.059) | pinned clock  1.07 (-0.06) board 1.184 (-0.979)
+  A4c_ramp_slopes_at_E66_slope_rereferred      governed clock   4.93 ( +1.90) board  1.587 (+1.016) | pinned clock  1.07 (-0.06) board 1.242 (-1.047)
+  A3_n2.43_chain_refit                         governed clock   6.93 ( +5.01) board  1.646 (+1.020) | pinned clock  1.18 (+0.04) board 1.372 (-1.204)
+
+  WHAT THE EXPONENT CHANGES (governed tiles): the per-tile shift of the predicted clock, arm minus A2 (MHz)
+    A5_n2.28_chain_on_committed_powers           E160: mean  -6.54 MHz (range  -7.56 to  -3.06), board +0.139 W
+    A5_n2.28_chain_on_committed_powers           E143: mean  -6.33 MHz (range  -7.16 to  -3.38), board +0.113 W
+    A5c_n2.28_chain_on_E66_rereferred_powers     E160: mean  -6.48 MHz (range  -7.88 to  -2.63), board +0.147 W
+    A5c_n2.28_chain_on_E66_rereferred_powers     E143: mean  -6.31 MHz (range  -7.55 to  -2.90), board +0.122 W
+    A3_n2.43_chain_refit                         E160: mean -10.20 MHz (range -11.60 to  -5.26), board +0.188 W
+    A3_n2.43_chain_refit                         E143: mean  -9.88 MHz (range -11.22 to  -5.76), board +0.162 W
+    A0_M7_frozen                                 E160: mean  +0.12 MHz (range  +0.06 to  +0.14), board +0.006 W
+    A0_M7_frozen                                 E143: mean  +0.10 MHz (range  +0.06 to  +0.14), board +0.007 W
+
+  OFFSET AGAINST SHAPE (governed clock): each session's mean error, its sd about that mean, and both sessions pooled (36 tiles)
+    A0_M7_frozen                                 E143 mean  -4.97 sd  4.39 | E160 mean  +2.82 sd  3.99 | gap  +7.79 | pooled rms   5.87 MHz, board 1.389 W
+    A2_n2.00_chain_refit                         E143 mean  -4.87 sd  4.41 | E160 mean  +2.93 sd  4.00 | gap  +7.81 | pooled rms   5.87 MHz, board 1.397 W
+    A5_n2.28_chain_on_committed_powers           E143 mean  +1.46 sd  4.59 | E160 mean  +9.47 sd  4.54 | gap  +8.01 | pooled rms   8.02 MHz, board 1.418 W
+    A5c_n2.28_chain_on_E66_rereferred_powers     E143 mean  +1.44 sd  4.61 | E160 mean  +9.42 sd  4.53 | gap  +7.98 | pooled rms   7.99 MHz, board 1.402 W
+    A4c_ramp_slopes_at_E66_slope_rereferred      E143 mean  +1.90 sd  4.55 | E160 mean  +9.72 sd  4.56 | gap  +7.82 | pooled rms   8.20 MHz, board 1.374 W
+    A3_n2.43_chain_refit                         E143 mean  +5.01 sd  4.79 | E160 mean +13.14 sd  4.82 | gap  +8.13 | pooled rms  10.85 MHz, board 1.431 W
+
+  PAIRED BOOTSTRAP over E160's 17 governed tiles (one session): rms(arm) - rms(reference), 95% interval
+    A0_M7_frozen                                 clock vs A2 [ -0.10,  -0.04] MHz; vs A0 [ +0.00,  +0.00]; board vs A2 [-0.008, -0.005] W
+    A5_n2.28_chain_on_committed_powers           clock vs A2 [ +4.73,  +6.31] MHz; vs A0 [ +4.81,  +6.40]; board vs A2 [-0.031, +0.066] W
+    A5c_n2.28_chain_on_E66_rereferred_powers     clock vs A2 [ +4.67,  +6.25] MHz; vs A0 [ +4.68,  +6.33]; board vs A2 [-0.044, +0.055] W
+    A4c_ramp_slopes_at_E66_slope_rereferred      clock vs A2 [ +4.94,  +6.55] MHz; vs A0 [ +4.95,  +6.65]; board vs A2 [-0.070, +0.047] W
+    A3_n2.43_chain_refit                         clock vs A2 [ +8.03,  +9.98] MHz; vs A0 [ +8.08, +10.11]; board vs A2 [-0.019, +0.112] W
+    M8_frozen_E160_columns                       clock vs A2 [ +1.20,  +2.21] MHz; vs A0 [ +1.25,  +2.30]; board vs A2 [+0.224, +0.323] W

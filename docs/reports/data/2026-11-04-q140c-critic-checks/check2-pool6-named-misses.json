@@ -1,0 +1,650 @@
+{
+ "_note": "Q140(c) check 2: post hoc desk check, nothing registered. Pool 6's blind power (switching W over the format's zeros, Q139(u)'s footing) on aifoundry3 card 0 (E153) and aifoundry1 card 1 (E157), measured - predicted.",
+ "aifoundry1c1": {
+  "fp32_exponent_heavy_priority1": [
+   "fp32.bf16_wideexp",
+   "fp32.exp_a_walk_fixedmant",
+   "fp32.exp_b_alt_shift",
+   "fp32.exp_only_narrow2",
+   "fp32.signexp_invert_b"
+  ],
+  "max_abs_error_recomputed_minus_committed_w": 0.0,
+  "models": {
+   "M6": {
+    "bias30": -0.13695672904832382,
+    "by_format": {
+     "fp16": {
+      "bias30": -0.06036126485967349,
+      "mean_measured_D_w": 17.258388735140326,
+      "n24": 6,
+      "n30": 6,
+      "rms24": 0.13381292261605615,
+      "rms30": 0.13381292261605615,
+      "rms30_95": [
+       0.06880442512814743,
+       0.19348269546258565
+      ],
+      "rms30_over_mean_D": 0.007753500322054725
+     },
+     "fp32": {
+      "bias30": -0.159597225175477,
+      "mean_measured_D_w": 13.24009444149119,
+      "n24": 11,
+      "n30": 12,
+      "rms24": 0.2029109709345637,
+      "rms30": 0.37696028846123586,
+      "rms30_95": [
+       0.16128707638281894,
+       0.5936725658890516
+      ],
+      "rms30_over_mean_D": 0.028471117795046484
+     },
+     "int8": {
+      "bias30": -0.1526139650154958,
+      "mean_measured_D_w": 4.7633693683178375,
+      "n24": 7,
+      "n30": 12,
+      "rms24": 0.16368856995437583,
+      "rms30": 0.22241054012454226,
+      "rms30_95": [
+       0.14506133445224378,
+       0.28167544661804295
+      ],
+      "rms30_over_mean_D": 0.04669185253695443
+     }
+    },
+    "fp32_exponent_heavy_mean_error_w": 0.037035593446504575,
+    "own_six_worst": [
+     "fp32.b_onebit_b20_third",
+     "int8.bheld_bit4",
+     "int8.b_line_zero_ff",
+     "int8.real_qwen_w8a8_v",
+     "fp32.real_smol_softmax_v_causal",
+     "fp32.a_zeros_b_complement"
+    ],
+    "own_six_worst_overlap_with_six": [
+     "fp32.b_onebit_b20_third",
+     "int8.b_line_zero_ff",
+     "int8.bheld_bit4"
+    ],
+    "rms24_random_six_removed_mean": 0.2797839021398514,
+    "rms24_without_own_six_worst": 0.1520134604712352,
+    "rms24_without_six": 0.17652838634715676,
+    "rms24_without_six_95": [
+     0.13120219029501384,
+     0.21706744346862944
+    ],
+    "rms24_without_six_and_fp32_exponent_offset_removed": 0.17571714161333632,
+    "rms30": 0.2832090793493698,
+    "rms30_95": [
+     0.16966160650605114,
+     0.41362568839244795
+    ],
+    "rms36_without_six_and_same_class_p2": 0.17700371001553605,
+    "rms38_without_six": 0.20805529793669086,
+    "rms44_nonanchor": 0.2739954062441534,
+    "share_of_rms30_removed_by_six": 0.37668528582238914
+   },
+   "M7": {
+    "bias30": -0.1240167290483239,
+    "by_format": {
+     "fp16": {
+      "bias30": -0.09862793152634038,
+      "mean_measured_D_w": 17.258388735140326,
+      "n24": 6,
+      "n30": 6,
+      "rms24": 0.13615721169398512,
+      "rms30": 0.13615721169398512,
+      "rms30_95": [
+       0.05905266668522989,
+       0.1874570336839369
+      ],
+      "rms30_over_mean_D": 0.007889335081249579
+     },
+     "fp32": {
+      "bias30": -0.14314722517547704,
+      "mean_measured_D_w": 13.24009444149119,
+      "n24": 11,
+      "n30": 12,
+      "rms24": 0.1935883532100077,
+      "rms30": 0.3950324696862097,
+      "rms30_95": [
+       0.14286799257631064,
+       0.6332187556659294
+      ],
+      "rms30_over_mean_D": 0.029836076429203964
+     },
+     "int8": {
+      "bias30": -0.11758063168216255,
+      "mean_measured_D_w": 4.7633693683178375,
+      "n24": 7,
+      "n30": 12,
+      "rms24": 0.17074716468974996,
+      "rms30": 0.28514144226199434,
+      "rms30_95": [
+       0.1873138891160524,
+       0.36599637015581904
+      ],
+      "rms30_over_mean_D": 0.05986129149642048
+     }
+    },
+    "fp32_exponent_heavy_mean_error_w": -0.0013244065534955495,
+    "own_six_worst": [
+     "fp32.b_onebit_b20_third",
+     "int8.bheld_bit4",
+     "int8.bheld_bit1",
+     "int8.a_zeros_b_lineflip",
+     "fp32.real_smol_softmax_v_causal",
+     "int8.bheld_bit7"
+    ],
+    "own_six_worst_overlap_with_six": [
+     "fp32.b_onebit_b20_third",
+     "int8.a_zeros_b_lineflip",
+     "int8.bheld_bit1",
+     "int8.bheld_bit4",
+     "int8.bheld_bit7"
+    ],
+    "rms24_random_six_removed_mean": 0.310633834375897,
+    "rms24_without_own_six_worst": 0.1533695457126493,
+    "rms24_without_six": 0.17411153429734272,
+    "rms24_without_six_95": [
+     0.13069638880642542,
+     0.21676837416020792
+    ],
+    "rms24_without_six_and_fp32_exponent_offset_removed": 0.17411048488739836,
+    "rms30": 0.31408641317304814,
+    "rms30_95": [
+     0.18383261130350487,
+     0.4505178659980751
+    ],
+    "rms36_without_six_and_same_class_p2": 0.1874602449377603,
+    "rms38_without_six": 0.2425442430127923,
+    "rms44_nonanchor": 0.31864077052868317,
+    "share_of_rms30_removed_by_six": 0.44565722363350135
+   },
+   "M8": {
+    "bias30": -0.012433395714990313,
+    "by_format": {
+     "fp16": {
+      "bias30": 0.031805401806993615,
+      "mean_measured_D_w": 17.258388735140326,
+      "n24": 6,
+      "n30": 6,
+      "rms24": 0.0975299808921212,
+      "rms30": 0.0975299808921212,
+      "rms30_95": [
+       0.06299240190658573,
+       0.1266614329647816
+      ],
+      "rms30_over_mean_D": 0.005651163755138825
+     },
+     "fp32": {
+      "bias30": -0.013588891842143458,
+      "mean_measured_D_w": 13.24009444149119,
+      "n24": 11,
+      "n30": 12,
+      "rms24": 0.23455506206864177,
+      "rms30": 0.3863761672477143,
+      "rms30_95": [
+       0.17384450245942387,
+       0.5918641997173777
+      ],
+      "rms30_over_mean_D": 0.029182281814917173
+     },
+     "int8": {
+      "bias30": -0.03339729834882913,
+      "mean_measured_D_w": 4.7633693683178375,
+      "n24": 7,
+      "n30": 12,
+      "rms24": 0.1472572620659741,
+      "rms30": 0.3265420191956743,
+      "rms30_95": [
+       0.1915977599387392,
+       0.4596925512162539
+      ],
+      "rms30_over_mean_D": 0.06855273944690776
+     }
+    },
+    "fp32_exponent_heavy_mean_error_w": 0.18165559344650467,
+    "own_six_worst": [
+     "fp32.b_onebit_b20_third",
+     "int8.a_zeros_b_lineflip",
+     "fp32.negzero_a_b_complement",
+     "int8.bheld_bit4",
+     "int8.b_line_zero_ff",
+     "fp32.real_smol_softmax_v_causal"
+    ],
+    "own_six_worst_overlap_with_six": [
+     "fp32.b_onebit_b20_third",
+     "int8.a_zeros_b_lineflip",
+     "int8.b_line_zero_ff",
+     "int8.bheld_bit4"
+    ],
+    "rms24_random_six_removed_mean": 0.32101160298789966,
+    "rms24_without_own_six_worst": 0.1709157318884907,
+    "rms24_without_six": 0.1841695708915815,
+    "rms24_without_six_95": [
+     0.12793778314239643,
+     0.2343461594336873
+    ],
+    "rms24_without_six_and_fp32_exponent_offset_removed": 0.16444965884546214,
+    "rms30": 0.32290697205469604,
+    "rms30_95": [
+     0.19744934389040655,
+     0.4482233283191561
+    ],
+    "rms36_without_six_and_same_class_p2": 0.2044389613980099,
+    "rms38_without_six": 0.30670992661950014,
+    "rms44_nonanchor": 0.3658341105403176,
+    "share_of_rms30_removed_by_six": 0.4296513026036932
+   }
+  },
+  "n_nonanchor": 44,
+  "n_priority1": 30,
+  "readout_noise_priority1": {
+   "fp16": {
+    "max_w": 0.07035643942692192,
+    "n": 6,
+    "rms_sd_over_sqrt_n_w": 0.04903556365873252
+   },
+   "fp32": {
+    "max_w": 0.14697879830667232,
+    "n": 12,
+    "rms_sd_over_sqrt_n_w": 0.1015840599393285
+   },
+   "int8": {
+    "max_w": 0.17993318519787194,
+    "n": 12,
+    "rms_sd_over_sqrt_n_w": 0.08760720390142344
+   }
+  },
+  "tiles": {
+   "fp16.b_onebit_b6_third": {
+    "M6": -0.44433823733733213,
+    "M7": -0.5482382373373333,
+    "M8": -0.45923823733733293,
+    "measured_w": 11.778561762662667,
+    "shared_over_0.2_w_in_every_model": true
+   },
+   "fp32.b_onebit_b20_third": {
+    "M6": -1.1190563996241014,
+    "M7": -1.208456399624101,
+    "M8": -1.0891563996241018,
+    "measured_w": 12.131543600375899,
+    "shared_over_0.2_w_in_every_model": true
+   },
+   "int8.a_zeros_b_lineflip": {
+    "M6": -0.0353870024403144,
+    "M7": 0.4089129975596856,
+    "M8": 0.7823129975596856,
+    "measured_w": 0.4566129975596856,
+    "shared_over_0.2_w_in_every_model": false
+   },
+   "int8.b_line_55_aa": {
+    "M6": 0.5653127593539766,
+    "M7": 0.8184127593539774,
+    "M8": 1.363512759353977,
+    "measured_w": 7.229412759353977,
+    "shared_over_0.2_w_in_every_model": true
+   },
+   "int8.b_line_zero_ff": {
+    "M6": -0.35962666896109763,
+    "M7": 0.028073331038902083,
+    "M8": 0.3749733310389023,
+    "measured_w": 3.6329733310389023,
+    "shared_over_0.2_w_in_every_model": false
+   },
+   "int8.bheld_bit1": {
+    "M6": -0.26089138860605754,
+    "M7": -0.4136913886060576,
+    "M8": -0.3137913886060577,
+    "measured_w": 5.633208611393942,
+    "shared_over_0.2_w_in_every_model": true
+   },
+   "int8.bheld_bit4": {
+    "M6": -0.37504842767802415,
+    "M7": -0.5209484276780243,
+    "M8": -0.4277484276780239,
+    "measured_w": 5.202651572321976,
+    "shared_over_0.2_w_in_every_model": true
+   },
+   "int8.bheld_bit7": {
+    "M6": -0.2583225194279555,
+    "M7": -0.40132251942795527,
+    "M8": -0.3061225194279551,
+    "measured_w": 4.996077480572045,
+    "shared_over_0.2_w_in_every_model": true
+   }
+  }
+ },
+ "aifoundry3": {
+  "fp32_exponent_heavy_priority1": [
+   "fp32.bf16_wideexp",
+   "fp32.exp_a_walk_fixedmant",
+   "fp32.exp_b_alt_shift",
+   "fp32.exp_only_narrow2",
+   "fp32.signexp_invert_b"
+  ],
+  "max_abs_error_recomputed_minus_committed_w": 0.0,
+  "models": {
+   "M6": {
+    "bias30": -0.05156723027006709,
+    "by_format": {
+     "fp16": {
+      "bias30": 0.0520145065065026,
+      "mean_measured_D_w": 17.885864506506504,
+      "n24": 6,
+      "n30": 6,
+      "rms24": 0.15361549943488578,
+      "rms30": 0.15361549943488578,
+      "rms30_95": [
+       0.08596363393919358,
+       0.20698151186740998
+      ],
+      "rms30_over_mean_D": 0.008588653871273803
+     },
+     "fp32": {
+      "bias30": -0.022395444418551087,
+      "mean_measured_D_w": 13.775812888914784,
+      "n24": 11,
+      "n30": 12,
+      "rms24": 0.24517098735362997,
+      "rms30": 0.31045688422197637,
+      "rms30_95": [
+       0.19518303680342458,
+       0.42281817802329397
+      ],
+      "rms30_over_mean_D": 0.02253637492940957
+     },
+     "int8": {
+      "bias30": -0.13252988450986794,
+      "mean_measured_D_w": 4.917528448823465,
+      "n24": 7,
+      "n30": 12,
+      "rms24": 0.1116912959165311,
+      "rms30": 0.1993194560259289,
+      "rms30_95": [
+       0.1139922688083507,
+       0.2689848335678493
+      ],
+      "rms30_over_mean_D": 0.040532445943168204
+     }
+    },
+    "fp32_exponent_heavy_mean_error_w": 0.17877211471995552,
+    "own_six_worst": [
+     "fp32.b_onebit_b20_third",
+     "fp32.a_zeros_b_complement",
+     "int8.bheld_bit4",
+     "int8.b_line_zero_ff",
+     "fp32.exp_b_alt_shift",
+     "fp32.exp_a_walk_fixedmant"
+    ],
+    "own_six_worst_overlap_with_six": [
+     "fp32.b_onebit_b20_third",
+     "int8.b_line_zero_ff",
+     "int8.bheld_bit4"
+    ],
+    "rms24_random_six_removed_mean": 0.24246357574703647,
+    "rms24_without_own_six_worst": 0.15502663069141914,
+    "rms24_without_six": 0.19258200553312638,
+    "rms24_without_six_95": [
+     0.14453642716836596,
+     0.2374557056752094
+    ],
+    "rms24_without_six_and_fp32_exponent_offset_removed": 0.17444083852850156,
+    "rms30": 0.24323699006903085,
+    "rms30_95": [
+     0.17527702325825462,
+     0.3119404954998233
+    ],
+    "rms36_without_six_and_same_class_p2": 0.1921089679547215,
+    "rms38_without_six": 0.21523951712770653,
+    "rms44_nonanchor": 0.2451940325111459,
+    "share_of_rms30_removed_by_six": 0.2082536234374901
+   },
+   "M7": {
+    "bias30": -0.03828056360340036,
+    "by_format": {
+     "fp16": {
+      "bias30": 0.012614506506502643,
+      "mean_measured_D_w": 17.885864506506504,
+      "n24": 6,
+      "n30": 6,
+      "rms24": 0.12099829087786422,
+      "rms30": 0.12099829087786422,
+      "rms30_95": [
+       0.09078522279760758,
+       0.14504743648744556
+      ],
+      "rms30_over_mean_D": 0.006765023341971956
+     },
+     "fp32": {
+      "bias30": -0.005470444418550842,
+      "mean_measured_D_w": 13.775812888914784,
+      "n24": 11,
+      "n30": 12,
+      "rms24": 0.2212382752683996,
+      "rms30": 0.3125095296443024,
+      "rms30_95": [
+       0.1768580041467489,
+       0.4523516916592841
+      ],
+      "rms30_over_mean_D": 0.022685378508282058
+     },
+     "int8": {
+      "bias30": -0.09653821784320138,
+      "mean_measured_D_w": 4.917528448823465,
+      "n24": 7,
+      "n30": 12,
+      "rms24": 0.1188589231242948,
+      "rms30": 0.23112575901656732,
+      "rms30_95": [
+       0.12841138509938654,
+       0.32902088397161366
+      ],
+      "rms30_over_mean_D": 0.047000390830858316
+     }
+    },
+    "fp32_exponent_heavy_mean_error_w": 0.13927211471995554,
+    "own_six_worst": [
+     "fp32.b_onebit_b20_third",
+     "int8.bheld_bit4",
+     "fp32.exp_a_walk_fixedmant",
+     "fp32.negzero_a_b_complement",
+     "fp32.real_smol_softmax_v_causal",
+     "int8.bheld_bit1"
+    ],
+    "own_six_worst_overlap_with_six": [
+     "fp32.b_onebit_b20_third",
+     "int8.bheld_bit1",
+     "int8.bheld_bit4"
+    ],
+    "rms24_random_six_removed_mean": 0.2507043393927075,
+    "rms24_without_own_six_worst": 0.15041777749386503,
+    "rms24_without_six": 0.1738229154553028,
+    "rms24_without_six_95": [
+     0.13367440597369695,
+     0.21120239386970352
+    ],
+    "rms24_without_six_and_fp32_exponent_offset_removed": 0.16178202063325697,
+    "rms30": 0.2517154073926899,
+    "rms30_95": [
+     0.16641973643395455,
+     0.33994332705712804
+    ],
+    "rms36_without_six_and_same_class_p2": 0.19964853459363235,
+    "rms38_without_six": 0.24658736291091,
+    "rms44_nonanchor": 0.2814845423605338,
+    "share_of_rms30_removed_by_six": 0.3094466594008308
+   },
+   "M8": {
+    "bias30": -0.036940563603400124,
+    "by_format": {
+     "fp16": {
+      "bias30": -0.02861882682683022,
+      "mean_measured_D_w": 17.885864506506504,
+      "n24": 6,
+      "n30": 6,
+      "rms24": 0.1251383604454435,
+      "rms30": 0.1251383604454435,
+      "rms30_95": [
+       0.06605756575664103,
+       0.1725977624758561
+      ],
+      "rms30_over_mean_D": 0.00699649493598259
+     },
+     "fp32": {
+      "bias30": -0.0071537777518839345,
+      "mean_measured_D_w": 13.775812888914784,
+      "n24": 11,
+      "n30": 12,
+      "rms24": 0.2445332609913014,
+      "rms30": 0.3304521204432593,
+      "rms30_95": [
+       0.18773749572220283,
+       0.46997559021865315
+      ],
+      "rms30_over_mean_D": 0.023987849073441595
+     },
+     "int8": {
+      "bias30": -0.07088821784320126,
+      "mean_measured_D_w": 4.917528448823465,
+      "n24": 7,
+      "n30": 12,
+      "rms24": 0.12662237455803857,
+      "rms30": 0.2957730610175823,
+      "rms30_95": [
+       0.17114800557202714,
+       0.39737315001461987
+      ],
+      "rms30_over_mean_D": 0.06014669037417505
+     }
+    },
+    "fp32_exponent_heavy_mean_error_w": 0.17055211471995513,
+    "own_six_worst": [
+     "fp32.b_onebit_b20_third",
+     "int8.a_zeros_b_lineflip",
+     "int8.bheld_bit4",
+     "fp32.negzero_a_b_complement",
+     "fp32.real_smol_softmax_v_causal",
+     "fp32.exp_a_walk_fixedmant"
+    ],
+    "own_six_worst_overlap_with_six": [
+     "fp32.b_onebit_b20_third",
+     "int8.a_zeros_b_lineflip",
+     "int8.bheld_bit4"
+    ],
+    "rms24_random_six_removed_mean": 0.2850114545099196,
+    "rms24_without_own_six_worst": 0.1714530386939527,
+    "rms24_without_six": 0.18973137905363896,
+    "rms24_without_six_95": [
+     0.13914516479585756,
+     0.23508459536325213
+    ],
+    "rms24_without_six_and_fp32_exponent_offset_removed": 0.17302598426790453,
+    "rms30": 0.2860140640994031,
+    "rms30_95": [
+     0.19884369795254359,
+     0.36618752483444933
+    ],
+    "rms36_without_six_and_same_class_p2": 0.20510457450259084,
+    "rms38_without_six": 0.3015095026308217,
+    "rms44_nonanchor": 0.33860249837488704,
+    "share_of_rms30_removed_by_six": 0.3366361907724281
+   }
+  },
+  "n_nonanchor": 44,
+  "n_priority1": 30,
+  "readout_noise_priority1": {
+   "fp16": {
+    "max_w": 0.05639068063871281,
+    "n": 6,
+    "rms_sd_over_sqrt_n_w": 0.03479145778733867
+   },
+   "fp32": {
+    "max_w": 0.060814972247051714,
+    "n": 12,
+    "rms_sd_over_sqrt_n_w": 0.035482861450647746
+   },
+   "int8": {
+    "max_w": 0.13049016600489224,
+    "n": 12,
+    "rms_sd_over_sqrt_n_w": 0.05158855592539244
+   }
+  },
+  "tiles": {
+   "fp16.b_onebit_b6_third": {
+    "M6": -0.3417841363082257,
+    "M7": -0.448684136308227,
+    "M8": -0.48178413630822625,
+    "measured_w": 12.244715863691773,
+    "shared_over_0.2_w_in_every_model": true
+   },
+   "fp32.b_onebit_b20_third": {
+    "M6": -0.7038499698730689,
+    "M7": -0.7959499698730692,
+    "M8": -0.8078499698730681,
+    "measured_w": 12.940850030126931,
+    "shared_over_0.2_w_in_every_model": true
+   },
+   "int8.a_zeros_b_lineflip": {
+    "M6": -0.22907685466335803,
+    "M7": 0.22732314533664194,
+    "M8": 0.6150231453366419,
+    "measured_w": 0.27632314533664193,
+    "shared_over_0.2_w_in_every_model": true
+   },
+   "int8.b_line_55_aa": {
+    "M6": 0.5612830779254079,
+    "M7": 0.8211830779254079,
+    "M8": 1.3068830779254075,
+    "measured_w": 7.4070830779254075,
+    "shared_over_0.2_w_in_every_model": true
+   },
+   "int8.b_line_zero_ff": {
+    "M6": -0.3537630114622541,
+    "M7": 0.04453698853774579,
+    "M8": 0.35953698853774574,
+    "measured_w": 3.7477369885377456,
+    "shared_over_0.2_w_in_every_model": false
+   },
+   "int8.bheld_bit1": {
+    "M6": -0.14598309418967403,
+    "M7": -0.30298309418967406,
+    "M8": -0.2757830941896735,
+    "measured_w": 5.908816905810326,
+    "shared_over_0.2_w_in_every_model": false
+   },
+   "int8.bheld_bit4": {
+    "M6": -0.4178955804283522,
+    "M7": -0.5676955804283521,
+    "M8": -0.5433955804283528,
+    "measured_w": 5.312004419571648,
+    "shared_over_0.2_w_in_every_model": true
+   },
+   "int8.bheld_bit7": {
+    "M6": -0.12586530089356174,
+    "M7": -0.2727653008935613,
+    "M8": -0.24226530089356135,
+    "measured_w": 5.271834699106439,
+    "shared_over_0.2_w_in_every_model": false
+   }
+  }
+ },
+ "inputs": {
+  "aifoundry1c1": "docs/reports/data/2026-11-03-e157-blind6-card1/scored.json primary.power_rows",
+  "aifoundry3": "docs/reports/data/2026-11-03-e153-blind6-aifoundry3/scored.json primary.primary.power_rows"
+ },
+ "same_class_priority2": [
+  "fp16.b_onebit_b6_third",
+  "int8.b_line_55_aa"
+ ],
+ "six": [
+  "fp32.b_onebit_b20_third",
+  "int8.a_zeros_b_lineflip",
+  "int8.b_line_zero_ff",
+  "int8.bheld_bit1",
+  "int8.bheld_bit4",
+  "int8.bheld_bit7"
+ ]
+}

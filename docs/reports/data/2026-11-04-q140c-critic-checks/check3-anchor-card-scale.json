@@ -1,0 +1,193 @@
+{
+ "M8_card_term": 0.9615998850616304,
+ "_note": "Q140(c) check 3: post hoc desk check, nothing registered. Card 1 / aifoundry3 from the random anchors run on both cards.",
+ "anchors": {
+  "fp16": {
+   "E78": {
+    "aifoundry3_D": 22.153852268706892,
+    "card1_D": 21.34378890298535,
+    "passes": [
+     4,
+     3
+    ],
+    "ratio": 0.9634346498344314,
+    "ratio_se": 0.0024549562147178038,
+    "rel_sd_per_pass": [
+     0.0027528943009089172,
+     0.003714171640046432
+    ],
+    "tile": "fp16.randn"
+   },
+   "pool6": {
+    "aifoundry3_D": 22.043592194389298,
+    "card1_D": 21.18700314911006,
+    "ratio": 0.9611411317300061,
+    "ratio_se_assumed": 0.002449112033667232,
+    "tile": "fp16.anchor6_randn"
+   }
+  },
+  "fp32": {
+   "E78": {
+    "aifoundry3_D": 24.703318549947245,
+    "card1_D": 23.77380225349007,
+    "passes": [
+     4,
+     3
+    ],
+    "ratio": 0.962372816648994,
+    "ratio_se": 0.001389846612050131,
+    "rel_sd_per_pass": [
+     0.0007412317957864972,
+     0.002417635736127864
+    ],
+    "tile": "fp32.randn"
+   },
+   "pool6": {
+    "aifoundry3_D": 24.91938063381592,
+    "card1_D": 23.938634482049707,
+    "ratio": 0.9606432372385962,
+    "ratio_se_assumed": 0.0013873487754090428,
+    "tile": "fp32.anchor6_randn"
+   }
+  },
+  "int8": {
+   "E78": {
+    "aifoundry3_D": 7.10639621561428,
+    "card1_D": 6.820097391869207,
+    "passes": [
+     4,
+     3
+    ],
+    "ratio": 0.9597125160125447,
+    "ratio_se": 0.020391567952346704,
+    "rel_sd_per_pass": [
+     0.007774310706734189,
+     0.03618078177403659
+    ],
+    "tile": "int8.full"
+   },
+   "pool6": {
+    "aifoundry3_D": 7.137632338496323,
+    "card1_D": 6.8255228290536865,
+    "ratio": 0.9562726833435653,
+    "ratio_se_assumed": 0.020318479834349,
+    "tile": "int8.anchor6_full"
+   }
+  }
+ },
+ "inputs": {
+  "X1_X2": "docs/reports/data/2026-11-03-e157-blind6-card1/scored-e153.json primary.rules",
+  "aifoundry1c1": "docs/reports/data/2026-11-03-e157-blind6-card1/scored.json primary",
+  "aifoundry3": "docs/reports/data/2026-11-03-e153-blind6-aifoundry3/scored.json primary.primary"
+ },
+ "per_tile_transfer": {
+  "floats": {
+   "max_abs_ratio_vs_committed": 2.220446049250313e-16,
+   "n": 25,
+   "rel_mean_about_M8": 7.363049245943998e-05,
+   "rel_rms_about_M8": 0.0071952797854381734,
+   "rel_rms_about_anchor_scale": 0.007194287290448754,
+   "rel_rms_about_pool_median": 0.007351813413146256,
+   "same_tiles_as_registered": true,
+   "worst": [
+    [
+     "fp32.b_onebit_b20_third",
+     -0.025102725159340422
+    ],
+    [
+     "fp32.a_onebit_b5_third",
+     -0.012864360263272756
+    ],
+    [
+     "fp32.b_onebit_b12_third",
+     -0.008813619140538687
+    ],
+    [
+     "fp32.a_onebit_b16_half",
+     0.007464788794669053
+    ]
+   ]
+  },
+  "int8": {
+   "max_abs_ratio_vs_committed": 0.0,
+   "n": 16,
+   "rel_mean_about_M8": 0.003112307478947071,
+   "rel_rms_about_M8": 0.019706026995278323,
+   "rel_rms_about_anchor_scale": 0.020711421797807588,
+   "rel_rms_about_pool_median": 0.01966521686401278,
+   "same_tiles_as_registered": true,
+   "worst": [
+    [
+     "int8.a_word_zero_one",
+     -0.045562662984531044
+    ],
+    [
+     "int8.bflip_bit2_w",
+     0.028645593331229957
+    ],
+    [
+     "int8.real_smol_w8a8_down",
+     0.027037570999162153
+    ],
+    [
+     "int8.real_smol_w8a8_q",
+     0.024604034245343742
+    ]
+   ]
+  }
+ },
+ "scale": {
+  "floats": {
+   "X1_95": [
+    0.9612786550813279,
+    0.9659454415506324
+   ],
+   "anchor_ratios": [
+    0.962372816648994,
+    0.9606432372385962,
+    0.9634346498344314,
+    0.9611411317300061
+   ],
+   "each_anchor_vs_pool_rel": [
+    -0.0008369571994808478,
+    -0.002632656118404575,
+    0.0002654684490348558,
+    -0.0021157277862401402
+   ],
+   "mean": 0.961897958863007,
+   "mean_se_from_passes": 0.0009962859152651477,
+   "mean_vs_pool_rel": -0.0013299681637726213,
+   "median": 0.9617569741895,
+   "median_vs_M8_rel": 0.0001633622573276039,
+   "median_vs_pool_rel": -0.0014763424928605495,
+   "pool_median_X1": 0.9631789562107831,
+   "pool_vs_M8_rel": 0.0016421290951500467,
+   "rank4_rule_line": 0.01,
+   "rank4_rule_met": true
+  },
+  "int8": {
+   "X2_95": [
+    0.9533564334773397,
+    0.9782934715776233
+   ],
+   "anchor_ratios": [
+    0.9597125160125447,
+    0.9562726833435653
+   ],
+   "each_anchor_vs_pool_rel": [
+    -0.00866721765559908,
+    -0.01222038470681841
+   ],
+   "mean": 0.957992599678055,
+   "mean_se_from_passes": 0.014393198622387764,
+   "mean_vs_pool_rel": -0.0104438011812088,
+   "median": 0.957992599678055,
+   "median_vs_M8_rel": -0.0037513371617595714,
+   "median_vs_pool_rel": -0.0104438011812088,
+   "pool_median_X2": 0.9681032778346365,
+   "pool_vs_M8_rel": 0.006763096454186046,
+   "rank4_rule_line": 0.02,
+   "rank4_rule_met": true
+  }
+ }
+}
