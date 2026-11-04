@@ -1,0 +1,131 @@
+rows 65; T_S rows ['g4k-fp32-real', 'g4k-fp32-sparse50', 'g4k-int8-real', 'g4k-fp16-real']; tasks 2380
+C0 REPRODUCTION of loso-g4.json: {"pooled_losses": {"A0": 127.058, "Z": 100.937, "ZD": 204.557, "ZG": 81.503}, "registered": {"A0": 127.058, "Z": 100.937, "ZD": 204.557, "ZG": 81.503}, "nested_choices_equal": true, "final_key": ["ZG", 0.2, 65.5, 0.12, 56.0], "final_key_registered": ["ZG", 0.2, 65.5, 0.12, 56.0], "G4_nested_pooled": {"mhz": 10.3421, "w": 1.3344, "die": 0.5774}, "G4_nested_registered": {"mhz": 10.3421, "w": 1.3344, "die": 0.5774}, "G3_nested_pooled": {"mhz": 10.4543, "w": 1.8904, "die": 0.7586}, "G3_nested_registered": {"mhz": 10.4543, "w": 1.8904, "die": 0.7586}, "paired_boot_runs": {"mhz": [-1.2854, 1.4124], "w": [0.4145, 0.6909], "die": [0.0856, 0.2624]}, "paired_boot_runs_registered": {"mhz": [-1.2854, 1.4124], "w": [0.4145, 0.6909], "die": [0.0856, 0.2624]}, "eval_equal_fit_g4_eval_cfg_worst": 0.0, "T_S_rows_equal_check_iii_worst": 0.0, "ok": true}
+
+C1 (post hoc): the forward rule with the term selection nested in each outer fold
+  inner_3_of_4: kept by fold {'E119': 'Z', 'E126': 'ZG', 'E136': 'ZG', 'E146': 'Z', 'E159': 'ZG'}
+     E119: T_Z 3/4 87.215->64.605 kept; T_D 1/4 64.605->153.802 not; T_G 2/4 64.605->65.057 not; constants [0.1, 65.1]
+     E126: T_Z 3/4 67.498->60.205 kept; T_D 1/4 60.205->116.963 not; T_G 3/4 60.205->52.905 kept; constants [0.2, 65.5, 0.12, 56.0]
+     E136: T_Z 3/4 111.577->90.08 kept; T_D 1/4 90.08->165.83 not; T_G 4/4 90.08->70.746 kept; constants [0.2, 65.5, 0.12, 56.0]
+     E146: T_Z 3/4 114.761->90.044 kept; T_D 0/4 90.044->202.615 not; T_G 2/4 90.044->83.502 not; constants [0.1, 65.3]
+     E159: T_Z 4/4 105.712->79.626 kept; T_D 1/4 79.626->179.018 not; T_G 3/4 79.626->68.394 kept; constants [0.2, 65.5, 0.06, 44.0]
+     pooled       mhz 11.086 (-5.299) 53/65  w 1.422 (-0.205) 55/65  die 0.598 (-0.030) 58/65  loss 91.647
+     large GEMMs  mhz 11.893 (-4.702) 18/23  w 1.298 (-0.259) 21/23  die 0.692 (-0.090) 19/23  loss 35.169
+     E159         mhz 7.727 (-3.393) 8/9  w 1.812 (-0.414) 7/9  die 0.925 (-0.106) 5/9  loss 17.475
+     + T_S (fold constants as built)   pooled mhz 11.078 (-5.312) 53/65  w 1.468 (-0.164) 54/65  die 0.628 (-0.012) 57/65  loss 96.135
+                                       large  mhz 11.871 (-4.738) 18/23  w 1.436 (-0.145) 20/23  die 0.763 (-0.040) 18/23  loss 39.656
+     + T_S (constants chosen with it)  pooled mhz 11.078 (-5.312) 53/65  w 1.468 (-0.164) 54/65  die 0.628 (-0.012) 57/65  loss 96.135
+  inner_2_of_4: kept by fold {'E119': 'Z', 'E126': 'ZG', 'E136': 'ZG', 'E146': 'ZG', 'E159': 'ZG'}
+     E119: T_Z 3/4 87.215->64.605 kept; T_D 1/4 64.605->153.802 not; T_G 2/4 64.605->65.057 not; constants [0.1, 65.1]
+     E126: T_Z 3/4 67.498->60.205 kept; T_D 1/4 60.205->116.963 not; T_G 3/4 60.205->52.905 kept; constants [0.2, 65.5, 0.12, 56.0]
+     E136: T_Z 3/4 111.577->90.08 kept; T_D 1/4 90.08->165.83 not; T_G 4/4 90.08->70.746 kept; constants [0.2, 65.5, 0.12, 56.0]
+     E146: T_Z 3/4 114.761->90.044 kept; T_D 0/4 90.044->202.615 not; T_G 2/4 90.044->83.502 kept; constants [0.2, 65.5, 0.09, 52.0]
+     E159: T_Z 4/4 105.712->79.626 kept; T_D 1/4 79.626->179.018 not; T_G 3/4 79.626->68.394 kept; constants [0.2, 65.5, 0.06, 44.0]
+     pooled       mhz 10.687 (-5.161) 53/65  w 1.419 (-0.216) 55/65  die 0.596 (-0.031) 58/65  loss 88.775
+     large GEMMs  mhz 10.811 (-4.310) 18/23  w 1.286 (-0.292) 21/23  die 0.686 (-0.094) 19/23  loss 32.297
+     E159         mhz 7.727 (-3.393) 8/9  w 1.812 (-0.414) 7/9  die 0.925 (-0.106) 5/9  loss 17.475
+     + T_S (fold constants as built)   pooled mhz 10.679 (-5.173) 53/65  w 1.465 (-0.176) 54/65  die 0.626 (-0.013) 57/65  loss 93.263
+                                       large  mhz 10.788 (-4.346) 18/23  w 1.426 (-0.177) 20/23  die 0.758 (-0.044) 18/23  loss 36.784
+     + T_S (constants chosen with it)  pooled mhz 10.702 (-5.040) 53/65  w 1.475 (-0.167) 54/65  die 0.631 (-0.011) 57/65  loss 94.277
+
+C2 (post hoc): G4 as frozen, with T_S on E136's four other-kind runs
+  without_T_S_registered         pooled mhz 10.342 (-4.173) 53/65  w 1.334 (-0.323) 57/65  die 0.577 (-0.059) 58/65  loss 81.503
+                                 large  mhz 10.811 (-4.310) 18/23  w 1.286 (-0.292) 21/23  die 0.686 (-0.094) 19/23  loss 32.297
+                                 E136   mhz 10.786 (-2.986) 9/12  w 0.772 (-0.299) 12/12  die 0.460 (-0.188) 12/12  loss 10.53
+  a_registered_fold_constants    pooled mhz 10.333 (-4.186) 53/65  w 1.383 (-0.283) 56/65  die 0.608 (-0.041) 57/65  loss 85.99
+                                 large  mhz 10.788 (-4.346) 18/23  w 1.426 (-0.177) 20/23  die 0.758 (-0.044) 18/23  loss 36.784
+                                 E136   mhz 10.740 (-3.055) 9/12  w 1.149 (-0.080) 11/12  die 0.639 (-0.091) 11/12  loss 15.017
+  b_constants_chosen_with_T_S    pooled mhz 10.357 (-4.052) 53/65  w 1.394 (-0.274) 56/65  die 0.613 (-0.038) 57/65  loss 87.005
+                                 large  mhz 10.853 (-3.969) 18/23  w 1.454 (-0.151) 20/23  die 0.769 (-0.036) 18/23  loss 37.799
+                                 E136   mhz 10.740 (-3.055) 9/12  w 1.149 (-0.080) 11/12  die 0.639 (-0.091) 11/12  loss 15.017
+  G3_nested                      pooled mhz 10.454 (-6.426) 56/65  w 1.890 (-0.708) 39/65  die 0.759 (-0.322) 53/65  loss 127.058
+                                 large  mhz 11.378 (-7.215) 20/23  w 1.537 (-0.890) 16/23  die 0.816 (-0.442) 18/23  loss 42.122
+                                 E136   mhz 9.006 (-4.846) 11/12  w 1.285 (-0.896) 9/12  die 0.719 (-0.527) 10/12  loss 15.481
+  (a) fold constants equal the registered: True; (b) chosen {'E119': ['ZG', 0.2, 65.3, 0.12, 56.0], 'E126': ['ZG', 0.2, 65.5, 0.12, 56.0], 'E136': ['ZG', 0.2, 65.5, 0.12, 56.0], 'E146': ['ZG', 0.2, 65.5, 0.06, 44.0], 'E159': ['ZG', 0.2, 65.5, 0.06, 44.0]}
+  (c) final constants chosen with T_S: ['ZG', 0.2, 65.5, 0.12, 56.0] against g4.json's ['ZG', 0.2, 65.5, 0.12, 56.0]: equal True
+     g4k-fp32-real        without T_S {'mhz': 9.431, 'w': 0.692, 'die': -0.117} | with T_S {'mhz': 8.67, 'w': 0.699, 'die': -0.097}
+     g4k-fp32-sparse50    without T_S {'mhz': 0.0, 'w': 0.378, 'die': 0.504} | with T_S {'mhz': 0.0, 'w': 2.964, 'die': 1.624}
+     g4k-int8-real        without T_S {'mhz': 0.0, 'w': 0.39, 'die': -0.34} | with T_S {'mhz': 0.0, 'w': 0.428, 'die': -0.323}
+     g4k-fp16-real        without T_S {'mhz': -15.055, 'w': -0.347, 'die': -0.023} | with T_S {'mhz': -15.125, 'w': -0.345, 'die': -0.02}
+
+GAINS against G3 nested (rms G3 nested - rms reading; 95%: over runs as registered; over sessions; jackknife range)
+  G4_nested_without_T_S (registered)
+     mhz  rms 10.342  gain +0.112  runs [-1.2854, 1.4124]  sessions [-0.9336, 1.899]  jackknife [-0.342, 0.5595]
+     w    rms 1.334  gain +0.556  runs [0.4145, 0.6909]  sessions [0.1917, 0.784]  jackknife [0.3445, 0.6417]
+     die  rms 0.577  gain +0.181  runs [0.0856, 0.2624]  sessions [0.0452, 0.2869]  jackknife [0.1028, 0.2186]
+  G4_selection_nested_3_of_4
+     mhz  rms 11.086  gain -0.632  runs [-1.5308, 0.183]  sessions [-1.1861, 0.0694]  jackknife [-0.823, -0.3981]
+     w    rms 1.422  gain +0.468  runs [0.3147, 0.6226]  sessions [0.1298, 0.7749]  jackknife [0.2072, 0.5933]
+     die  rms 0.598  gain +0.160  runs [0.0647, 0.2443]  sessions [-0.0052, 0.2844]  jackknife [0.0713, 0.2153]
+  G4_selection_nested_3_of_4_with_T_S
+     mhz  rms 11.078  gain -0.624  runs [-1.522, 0.1933]  sessions [-1.1601, 0.0694]  jackknife [-0.8139, -0.3981]
+     w    rms 1.468  gain +0.422  runs [0.2371, 0.596]  sessions [0.0912, 0.7749]  jackknife [0.1369, 0.5251]
+     die  rms 0.628  gain +0.131  runs [0.013, 0.2309]  sessions [-0.0077, 0.2653]  jackknife [0.0275, 0.1754]
+  G4_selection_nested_2_of_4
+     mhz  rms 10.687  gain -0.233  runs [-1.4398, 0.9846]  sessions [-1.133, 1.5977]  jackknife [-0.7126, 0.0903]
+     w    rms 1.419  gain +0.472  runs [0.3196, 0.6253]  sessions [0.1385, 0.7781]  jackknife [0.213, 0.5989]
+     die  rms 0.596  gain +0.163  runs [0.0674, 0.2456]  sessions [-0.0017, 0.2869]  jackknife [0.0749, 0.2186]
+  G4_selection_nested_2_of_4_with_T_S
+     mhz  rms 10.679  gain -0.225  runs [-1.4337, 0.9905]  sessions [-1.1077, 1.5977]  jackknife [-0.7036, 0.0903]
+     w    rms 1.465  gain +0.426  runs [0.2404, 0.5991]  sessions [0.1047, 0.778]  jackknife [0.1425, 0.5305]
+     die  rms 0.626  gain +0.133  runs [0.0148, 0.2323]  sessions [-0.0017, 0.2672]  jackknife [0.0308, 0.1785]
+  G4_as_frozen_with_T_S (a)
+     mhz  rms 10.333  gain +0.121  runs [-1.2735, 1.4233]  sessions [-0.9189, 1.899]  jackknife [-0.3326, 0.5728]
+     w    rms 1.383  gain +0.507  runs [0.3243, 0.6698]  sessions [0.1047, 0.7832]  jackknife [0.267, 0.5807]
+     die  rms 0.608  gain +0.150  runs [0.0319, 0.2503]  sessions [0.0412, 0.2672]  jackknife [0.0567, 0.1785]
+  G4_as_frozen_with_T_S (b)
+     mhz  rms 10.357  gain +0.097  runs [-1.2679, 1.3387]  sessions [-0.9189, 1.8065]  jackknife [-0.3326, 0.5361]
+     w    rms 1.394  gain +0.496  runs [0.3109, 0.6615]  sessions [0.0685, 0.7698]  jackknife [0.2508, 0.5678]
+     die  rms 0.613  gain +0.145  runs [0.0264, 0.2468]  sessions [0.0114, 0.2593]  jackknife [0.0493, 0.172]
+
+C4 (post hoc): the dip clock
+  600.0 MHz: E159 mhz 7.800 (-2.952) 9/9  w 1.809 (-0.390) 7/9  die 0.929 (-0.092) 5/9  loss 17.562 chosen ['ZG', 0.2, 65.5, 0.06, 44.0]; pooled mhz 10.278 (-4.074) 55/65  w 1.349 (-0.323) 57/65  die 0.584 (-0.060) 58/65  loss 82.239
+  618.0 MHz: E159 mhz 7.727 (-3.393) 8/9  w 1.812 (-0.414) 7/9  die 0.925 (-0.106) 5/9  loss 17.475 chosen ['ZG', 0.2, 65.5, 0.06, 44.0]; pooled mhz 10.342 (-4.173) 53/65  w 1.334 (-0.323) 57/65  die 0.577 (-0.059) 58/65  loss 81.503
+  650.0 MHz: E159 mhz 7.707 (-4.174) 8/9  w 1.818 (-0.455) 7/9  die 0.919 (-0.130) 5/9  loss 17.421 chosen ['ZG', 0.2, 65.5, 0.06, 44.0]; pooled mhz 10.148 (-4.658) 54/65  w 1.344 (-0.345) 57/65  die 0.575 (-0.083) 58/65  loss 80.599
+
+C9 (post hoc, in sample at g4.json's k and trip): the dip's gate above its grid (44-56 W)
+  d_G 0.09 P_G 52.0: mhz 10.190 (-4.467) 54/65  w 1.263 (-0.353) 58/65  die 0.530 (-0.080) 60/65  loss 74.212
+  d_G 0.09 P_G 56.0: mhz 10.122 (-5.382) 53/65  w 1.263 (-0.432) 58/65  die 0.538 (-0.126) 60/65  loss 74.318
+  d_G 0.09 P_G 60.0: mhz 10.434 (-6.582) 53/65  w 1.399 (-0.534) 57/65  die 0.610 (-0.188) 56/65  loss 87.467
+  d_G 0.09 P_G 64.0: mhz 10.498 (-6.593) 53/65  w 1.402 (-0.529) 57/65  die 0.610 (-0.190) 56/65  loss 87.989
+  d_G 0.09 P_G 68.0: mhz 10.410 (-6.505) 55/65  w 1.405 (-0.511) 57/65  die 0.611 (-0.197) 56/65  loss 87.614
+  d_G 0.12 P_G 52.0: mhz 10.794 (-3.697) 53/65  w 1.250 (-0.292) 59/65  die 0.531 (-0.030) 60/65  loss 77.399
+  d_G 0.12 P_G 56.0: mhz 10.418 (-4.952) 53/65  w 1.229 (-0.401) 59/65  die 0.529 (-0.091) 60/65  loss 74.082
+  d_G 0.12 P_G 60.0: mhz 10.522 (-6.620) 53/65  w 1.393 (-0.543) 57/65  die 0.613 (-0.176) 56/65  loss 87.94
+  d_G 0.12 P_G 64.0: mhz 10.602 (-6.634) 53/65  w 1.397 (-0.537) 57/65  die 0.613 (-0.179) 56/65  loss 88.597
+  d_G 0.12 P_G 68.0: mhz 10.482 (-6.525) 55/65  w 1.399 (-0.513) 57/65  die 0.613 (-0.189) 56/65  loss 87.99
+  ZGx at g4.json's constants equals the registered final row: worst |diff| 0.0
+
+C3: the stride term at the power-of-two collapses (fp32)
+  SM's time error at the collapses: E146:D4.fp32 -0.159, E146:D8.fp32 -0.225, E158:D4.fp32 -0.158, E158:K4n8.fp32 -0.130, E158:K6n4.fp32 -0.141
+  SM's time error on far fp32 shapes at other strides (below -10%): E158:K6n5.fp32 -0.184, E158:K6n6.fp32 -0.176, E158:K4n7.fp32 -0.174, E158:K4n6.fp32 -0.171, E158:F6.fp32 -0.168, E146:F6.fp32 -0.167, E158:K2n13.fp32 -0.156, E158:K2n8.fp32 -0.153, E158:K2n12.fp32 -0.151, E158:K2n11.fp32 -0.150, E158:K6n3.fp32 -0.149, E158:K2n10.fp32 -0.144, E158:K4n5.fp32 -0.143, E158:K2n9.fp32 -0.137, E158:D2.fp32 -0.137, E146:D2.fp32 -0.135
+  the step, collapse T800 over the nearest rung that is not one (each of S2's five collapses (fp32) against the nearest rung of its own ladder that is not a collapse, on each side where one exists (D8's nearest, D4, is one, so D2); the step is the collapse's T800 over that rung's):
+     E146:D4.fp32     / E146:D2.fp32     measured 1.262  SM 1.297  ISO 1.187  STRICT 1.010
+     E146:D8.fp32     / E146:D2.fp32     measured 1.305  SM 1.455  ISO 1.190  STRICT 1.066
+     E158:D4.fp32     / E158:D2.fp32     measured 1.265  SM 1.297  ISO 1.187  STRICT 1.010
+     E158:K4n8.fp32   / E158:K4n7.fp32   measured 1.289  SM 1.224  ISO 1.104  STRICT 1.000
+     E158:K6n4.fp32   / E158:K6n3.fp32   measured 1.333  SM 1.320  ISO 1.212  STRICT 1.000
+     E158:K6n4.fp32   / E158:K6n5.fp32   measured 1.149  SM 1.091  ISO 1.000  STRICT 1.000
+  SM's step closer to the card's than ISO's: 5 of 6; than STRICT's: 6 of 6
+
+C6: the stride term's T800 rms by session (ISO's curve was fitted on E158's cells)
+  E158: n 42  SM 0.1231  ISO 0.0469  STRICT 0.1365
+  E146: n 27  SM 0.1398  ISO 0.1002  STRICT 0.1076
+  all: n 69  SM 0.1299  ISO 0.0726  STRICT 0.1260
+  SM below -10%: E146:D8.fp16 -0.228, E146:D8.fp32 -0.225, E146:D8.int8 -0.185, E158:K6n5.fp32 -0.184, E158:K4n7.fp16 -0.178, E158:K6n6.fp32 -0.176, E158:K4n7.fp32 -0.174, E158:K4n6.fp16 -0.172, E146:F6.fp16 -0.171, E158:K4n6.fp32 -0.171, E158:F6.fp16 -0.170, E158:F6.fp32 -0.168, E146:F6.fp32 -0.167, E158:F6.int8 -0.163, E146:D4.fp16 -0.162, E146:F6.int8 -0.160, E146:D4.fp32 -0.159, E158:D4.fp32 -0.158, E158:K2n13.fp32 -0.156, E158:K2n8.fp32 -0.153, E158:K2n12.fp32 -0.151, E158:K2n11.fp32 -0.150, E158:K4n7.int8 -0.150, E158:K6n3.fp32 -0.149, E158:K4n5.fp16 -0.147, E158:K4n6.int8 -0.144, E158:K2n10.fp32 -0.144, E158:K4n5.fp32 -0.143, E158:K6n4.fp32 -0.141, E146:D2.fp16 -0.139, E158:K2n9.fp32 -0.137, E158:D2.fp32 -0.137, E158:K4n5.int8 -0.137, E146:D2.fp32 -0.135, E158:K4n8.fp16 -0.135, E158:K4n8.fp32 -0.130, E146:D4.int8 -0.128, E146:D2.int8 -0.113
+
+C7: check (i), E158's zeros bursts, p800 - predicted (W)
+  die starts [47.33, 48.33] C, i.e. [-7.05, -6.05] C from T_ref; T_Z alone {'rms': 2.586, 'mean': -2.542}
+  k_D 0.44: die law {'rms': 0.539, 'mean': 0.217}; its offset alone at the mean start {'rms': 0.521, 'mean': 0.217, 'offset_w': -2.759}
+  k_D 0.47: die law {'rms': 0.641, 'mean': 0.405}; its offset alone at the mean start {'rms': 0.623, 'mean': 0.405, 'offset_w': -2.947}
+  k_D 0.5: die law {'rms': 0.775, 'mean': 0.593}; its offset alone at the mean start {'rms': 0.759, 'mean': 0.593, 'offset_w': -3.135}
+  the best constant offset: {'rms': 0.474, 'offset_w': -2.542}; k_D 0.47 reproduces checks-g4.json: True
+
+C5: P3's measured span fractions in E136's bursts against M8's phi
+  g2k-fp32-real        measured 1.302  phi_M8 0.9907
+  g2k-fp32-sparse50    measured 0.602  phi_M8 0.2983
+  g4k-fp16-real        measured 1.019  phi_M8 0.9822
+  g4k-fp16-sparse50    measured 0.658  phi_M8 0.6103
+  g4k-fp32-real        measured 0.992  phi_M8 0.9907
+  g4k-fp32-sparse50    measured 0.448  phi_M8 0.2983
+  g4k-int8-real        measured 0.795  phi_M8 0.7864
+  g4k-int8-sparse50    measured 0.768  phi_M8 0.7828

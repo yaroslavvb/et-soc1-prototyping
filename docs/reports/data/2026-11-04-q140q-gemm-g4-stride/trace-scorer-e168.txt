@@ -1,0 +1,20 @@
+self-test: SELFTEST: E159's three fp32 random holds through score_e168's path reproduce fit_g4's G4 final predictions: worst |diff| 0.0004 (PASS)
+the score path, --anchors included, loads 16 repo files (the self-test's own inputs, E159's session, predictions-e159.json and rows-g4.json, left out; `check` also reads frozen-sha256-e168.json):
+  ../2026-11-01-e105-gemm-layout/results-speed.json                             sidecar
+  ../2026-11-01-e107-gemm-placement/e107.json                                   sidecar
+  ../2026-11-01-e107-gemm-placement/scored.json                                 sidecar
+  ../2026-11-02-q138t-heat-model/heat_q138t.py                           check  sidecar
+  ../2026-11-02-q138t-heat-model/model-q138t.json                        check  sidecar
+  ../2026-11-03-q139q-gemm-g3/g3_model.py                                check  sidecar
+  ../2026-11-04-q140l-a2-session-terms/m9_a2.json                        check  sidecar
+  ../2026-11-04-q140l-a2-session-terms/predict_m9_a2.py                  check  sidecar
+  g4_model.py                                                            check  sidecar
+  predictions-e168.json                                                  check  sidecar
+  score_e168.py                                                                 sidecar
+  ../../../../tools/claims-v3/e119/make_predictions_e119.py              check  sidecar
+  ../../../../tools/claims-v3/hpl/surface_hpl.py                                sidecar
+  ../../../../tools/claims-v3/hpl/surface_hpl_t.py                              sidecar
+  ../../../../tools/claims-v3/kinds/predictions-e101.json                       sidecar
+  ../../../../tools/claims-v3/kspeed/e83/predict_e83.py                         sidecar
+hashed by `score_e168.py check`: 8; by neither before this pass: 8; in the sidecar: 16 of 16 (the sidecar also holds frozen-sha256-e168.json, 18 files in all)
+SIDECAR COVERS THE SCORE PATH
