@@ -1,0 +1,68 @@
+{
+ "experiment": "E167",
+ "request": "Q141(h)",
+ "written": "Wed 4 Nov 2026, about 09:45-10:10 PST, on the Intel, desk only, before any E167 data",
+ "answers": {"q139_critic_rank": 3, "q140_critic": ["card_half[4]", "desk_next 3", "desk_next 7"], "kinds_page_section_11_items": [9, 8, 6]},
+ "descends_from": {
+  "q140e_registration": "11174d20",
+  "q140e_frozen_predictions": "c9aaf179",
+  "q140e_amendment_RA1_and_corrections": "a4fe976d",
+  "q140e_readme_dated_note": "ac06c9be",
+  "m9_a2_part": {"model": "5b98bd5c", "registration": "245caffe", "corrections": "5c98c0c5"},
+  "e161_registration": "ddbd15b1",
+  "e161_data": "0158efd6",
+  "e161_corrections": ["d0704105", "77d8b89b"],
+  "e161_dated_note": "57304c1e"
+ },
+ "frozen_inputs_sha256": {
+  "docs/reports/data/2026-11-04-q140e-heat-replicates/REGISTRATION.md": "cc68d93c04b414e3c653edc6bfb049e79393159c6b3ef1a57558590362d66f4c",
+  "docs/reports/data/2026-11-04-q140e-heat-replicates/registration.json": "832dee631f0141dfe6179c8f9416fd602e04c5f8e95b8c0fbe70aa97b27e5b8a",
+  "docs/reports/data/2026-11-04-q140e-heat-replicates/predict_q140e.py": "79dbcfc3e835242cb56459c9917a6ea80b77de5deeb1c34c9edcb7ca8591620f",
+  "docs/reports/data/2026-11-04-q140e-heat-replicates/predictions-q140e.json": "940852b17b4274d91772c5f9f8a5ce0cbac3522689cbec711cfe732678c640e6",
+  "docs/reports/data/2026-11-04-q140e-heat-replicates/posthoc_q140e.py": "4b2cb4b91d36ef1a9c1f092406ca6ce666586ee57b6da1934ff6ba2426eaea44",
+  "docs/reports/data/2026-11-04-q140e-heat-replicates/posthoc.json": "f9bacc35931bde19b7b0df1d21bade1ef742ae053702eb3121fdcfbd9b944725",
+  "docs/reports/data/2026-11-04-q140e-heat-replicates/REGISTRATION-AMENDMENT-1.md": "125de4fa98625e9b3bed313795ba502802477a9b3028a2668b2ca5dd99cb2dd3",
+  "docs/reports/data/2026-11-04-q140e-heat-replicates/corrections.json": "de5bba20657fecdcc6f8edf765cbcb0746da5ce545704dde7f21da966bafb2fa"
+ },
+ "design": {
+  "card": "aifoundry2 card 0 under its own governor (65 W / 65 C as read), nothing set",
+  "steps": ["SMOKE", "STOPTEST-DIE", "STOPTEST-BOARD", "rest 15 min (E98)", "G1Q (REST + 93 x 8 s int8.b_line_zero_ff)", "END",
+            "rest 15 min (E98)", "G2Q (REST + 91 x 8 s fp32.real_smol_softmax_v_causal)", "END2"],
+  "E161_card_minutes": 35.07, "G1Q_wait_max_min": 4.0, "budget_card_minutes": 40,
+  "registered_subset": "SMOKE, the stop tests, G1Q and END (E161's)",
+  "order_on_aifoundry2": "after E165, before E168",
+  "peak_rule_M8_hi95_W": {"G1Q": 53.33, "G2Q": 68.15}, "admission_W": 82.0
+ },
+ "readings": {
+  "anchor": "reduce_e161.rest_reading: mean of minshire[0] and board_w over the REST file's last 120 s",
+  "t0": "the first HOLD work process's start", "b": "the last HOLD work process's end",
+  "plateau_window": "[b - 300 s, b) on the 0.2 s grid", "clock_window": "raw samples in [b - 300 s, b]",
+  "checkpoints_s": [60, 120, 180, 300, 450, 600, 750], "checkpoint_width_s": 5, "end_checkpoint": "[b - 5.5 s, b - 0.5 s)",
+  "kernel_duty": "predict_q140e.a2_records (the hold's own launch records)",
+  "primary": "predict_q140e.a2_hold(item, T_rest, P_ref, span, d, 'M9a') with M9's fallback zeros offset",
+  "arm_A": "fit_q138t.predict_session with aifoundry2's R, heat_q138t.anchor_value over the rest before the hold"
+ },
+ "rules": {
+  "RK3_b": {"hold": "G1Q", "plateau_C": 1.0, "rms_C": 1.0,
+            "scored_only_if": "the primary at T_rest - 0.5, T_rest, T_rest + 0.5 C (measured P_ref, own d) puts G1Q in the 800 MHz regime (RA1.2)",
+            "else": ["not scored: the trip regime", "not scored: the trip edge inside the readout", "not scored: the start gate"]},
+  "RK3_c": {"large_rise_C": 10.0, "max_abs_frac": 0.015, "expected_large": ["G1Q", "G2Q"]},
+  "readout_note": "each RK3 reading also at T_rest +- 0.5 C; a verdict changing inside it is 'not resolved by the readout'; the registered verdict is the reading as is",
+  "carried": {"G1Q_band_C": [3.149, 6.297], "G1Q_clock_share_ge790": {"PASS_ge": 0.90, "FAIL_lt": 0.75},
+              "G2Q_trip_rule_C": [0.60, 1.20], "G2Q_trip_share_below790": 0.50, "G2Q_clock_MHz": [35.0, 70.0],
+              "arm_A_bands_C": {"PASS": "rms <= 1.20 and |plateau| <= 1.30", "FAIL": "rms > 2.20 or |plateau| > 2.40"}},
+  "G2Q_checkpoints": "no skill (Q140(e) C9): printed, never read as a result",
+  "G1_start_gate": {"REST_start": {"mode": "cool", "max_c": 49, "max_wait_s": 240},
+                    "anchor_max_C": 49.0, "min_anchor_lines": 600,
+                    "fail": "no work process; exit 6; G1Q NOT RUN (the start gate); RK3-b not scored; END skipped; the queue goes on to G2Q"},
+  "E2_reported_arm": "the day's zeros-anchor offset from E165 through predict_m9_a2.session_delta, beside D4's fallback; never a verdict"
+ },
+ "reported_arms": ["M8 at d", "M8 continuous (Q139(e))", "M9a referred to 54.38 C (RA1.3)", "M9a with E165's delta (E2)",
+                   "reduce_e161.score unchanged (Q139(e)'s arms on E161's windows)"],
+ "stops": {"die_C": 72.0, "board_W_over": 80.0, "consecutive": 3, "tested_in_the_smoke": ["STOPTEST-DIE (30 C)", "STOPTEST-BOARD (30 W)"]},
+ "go_gate": "RUNS/GO or tools/claims-v3/e167/CLAIMED on origin/main (not created by this lane); the queue's files equal origin/main's",
+ "departures_from_E161_kit": ["D1 G1's start gate (REST cool gate 49 C / 240 s, the anchor check, exit 6, the queue goes on; G1Q cap 21, plan 19.6)",
+                               "D2 score_e167.py on Q140(e)'s functions; reduce_e161.py beside, unchanged",
+                               "D3 no camera-phone read under --dry", "D4 names: E167, build/e167/runs, tools/claims-v3/e167/CLAIMED"],
+ "device_commands": "E161's chain: every command READ, the two PMIC voltage reads allowed (2 Nov 2026), no statistics reset, the residency read answered unsent; dmcmd_audit GO with E161's two exceptions"
+}
