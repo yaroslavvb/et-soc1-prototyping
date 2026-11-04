@@ -1,0 +1,658 @@
+# Q141(k) v2: every change from v1 (lab e962227a), a unified diff per file v2 changes (Wed 04 Nov 2026 15:34 PST).
+# The other twelve files v2 holds are byte for byte v1's (the desk test's case V). README.md and selftest_runbook.sh are v2's own.
+--- v1/rb_common.sh
++++ v2/rb_common.sh
+@@ -1,5 +1,17 @@
+-# Q141(k), the card day's runbook: the part every step script sources (bash 3.2 or later; the Intel's /bin/bash is 3.2).
++# Q141(k) v2, the card day's runbook: the part every step script sources (bash 3.2 or later; the Intel's /bin/bash is 3.2).
+ #
++# The successor of ../rb_common.sh (lab e962227a), which the card half of Wed 4 Nov 2026 ran from 14:18 PST and which stays as it ran.
++# What v2 changes here, each for a fault Q141(k)'s verifier found (v2/README.md, "What v2 changes"):
++#   - a dry job that is lost (no process, no exit status) reads JOB-LOST and the step exits 14; v1 read it as "call again" (17) for
++#     ever (fault 2);
++#   - the runbook's own state on a box counts only when it was written today, by the Pacific calendar: a dry job's exit status, its
++#     script and a session's log offset from an earlier card day are never read as today's (nit 5's dated state);
++#   - ours_live also counts E170's queue on aifoundry1 (queue_e170.py, run_e170.py: card 0 is back in use since the owner's go of
++#     4 Nov 2026, and never two of our sessions on aifoundry1);
++#   - a collector that reaches several boxes can name, in the lock line, the box its login link came from (RB_HOST_FROM; fault 4);
++#   - every step's name carries "_v2" in the log and in its messages, so a day's log says which runbook made each call.
++# Everything else is v1's, line for line.
++#
+ # The go checklist's rule 4 (Q141(f)), made code. Every remote call:
+ #   1. comes after a 15 s hard-killed probe of its box, `ssh -o BatchMode=yes -o ConnectTimeout=10 <box> true` (rb_probe);
+ #   2. runs under rb_run.py with a bound: 60 s for a read, 600 s for a copy, 600 s for one bounded wait (its remote loop stops
+@@ -14,12 +26,12 @@
+ # links for the approvals) and RB_LOCK (the file a login check is appended to; on the Intel the round's tailscale-needed file).
+ #
+ # Exit codes of every step: 0 done; 10 refused (usage, order, a missing input, a refusal on the box); 11 a login link; 12 the
+-# probe got no answer; 13 a call ran past its bound; 14 a call exited non-zero; 15 a holder after 30 minutes in all: skip that
+-# card; 16 a gate says stop (read the message); 17 not yet: call the same step again.
++# probe got no answer; 13 a call ran past its bound; 14 a call exited non-zero (or a dry job is lost); 15 a holder after 30
++# minutes in all: skip that card; 16 a gate says stop (read the message); 17 not yet: call the same step again.
+ # SPDX-License-Identifier: Apache-2.0
+ 
+ RB_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+-RB_REPO=${RB_REPO:-$(cd "$RB_DIR/../../.." && pwd)}
++RB_REPO=${RB_REPO:-$(cd "$RB_DIR/../../../.." && pwd)}   # v2/ sits one level below the runbook's directory
+ RB_PY=${RB_PY:-/usr/bin/python3}
+ RB_SSHO="-o BatchMode=yes -o ConnectTimeout=10"
+ RB_RSH="ssh -o BatchMode=yes -o ConnectTimeout=10"
+@@ -41,13 +53,13 @@
+ rb_say() { if [ -n "${RB_DRY:-}" ]; then echo "[$RB_STEP] (dry listing; a real run would say:) $*"; else echo "[$RB_STEP] $*"; fi; }
+ rb_disp() {  # a command line for the listing: the lab clone and this day's directory by name, never a home path
+   local t=$1
+-  t=${t//$RB_DIR/<lab clone>/tools/claims-v3/q141k-runbook}; t=${t//$RB_REPO/<lab clone>}; [ -n "${RB_OUT:-}" ] && t=${t//$RB_OUT/<RB_OUT>}
++  t=${t//$RB_DIR/<lab clone>/tools/claims-v3/q141k-runbook/v2}; t=${t//$RB_REPO/<lab clone>}; [ -n "${RB_OUT:-}" ] && t=${t//$RB_OUT/<RB_OUT>}
+   echo "$t"
+ }
+ rb_die() { local c=$1; shift; echo "[$RB_STEP] STOP: $*"; [ -n "${RB_LOG:-}" ] && echo "$(date '+%F %T %Z') step=$RB_STEP exit=$c $*" >> "$RB_LOG"; exit "$c"; }
+ 
+ rb_init() {  # rb_init <step>
+-  RB_STEP=$1
++  RB_STEP=${1}_v2
+   [ -n "${RB_OUT:-}" ] || { echo "[$RB_STEP] RB_OUT is not set (this card day's own directory, outside the repo)"; exit $RB_E_USAGE; }
+   [ -n "${RB_LOCK:-}" ] || { echo "[$RB_STEP] RB_LOCK is not set (the lock file a login check is appended to)"; exit $RB_E_USAGE; }
+   mkdir -p "$RB_OUT/calls" || exit $RB_E_USAGE
+@@ -79,9 +91,11 @@
+ }
+ 
+ rb_after() {  # the call's status: a link or a timeout stops the step at once; anything else is the caller's to read
++  local h
+   case "$RB_RC" in
+     0) return 0 ;;
+-    11) rb_die $RB_E_LINK "a login check is needed on $1 (appended to the lock file; the link is in RB_LINKS): approve, then run this step again" ;;
++    11) h=$(tail -n 1 "$RB_LINKS" 2>/dev/null | awk '{print $4}')   # rb_run.py's links line: date, time, zone, the box, the link
++        rb_die $RB_E_LINK "a login check is needed on ${h:-$1} (appended to the lock file; the link is in RB_LINKS): approve, then run this step again" ;;
+     12) rb_die $RB_E_NOANSWER "$1 did not answer" ;;
+     13) rb_die $RB_E_TIMEOUT "a call to $1 ran past its bound and was killed: run this step again" ;;
+     *) return "$RB_RC" ;;
+@@ -125,19 +139,22 @@
+ }
+ 
+ rb_local() {  # rb_local <class> <host the call reaches, or local> <what> <command> [<arg> ...]; RB_CWD=<dir> runs it there;
+-  #             RB_STDOUT=<file> also writes the command's own stdout there, unchanged (a kit's "> file")
+-  local cls=$1 host=$2 what=$3 cwd=${RB_CWD:-$RB_REPO} so=${RB_STDOUT:-}; shift 3
++  #             RB_STDOUT=<file> also writes the command's own stdout there, unchanged (a kit's "> file");
++  #             RB_HOST_FROM=<regex with one group>: a login link names, in the lock line, the box that group matches in the
++  #             call's output (a collector that reaches several boxes), else <host>
++  local cls=$1 host=$2 what=$3 cwd=${RB_CWD:-$RB_REPO} so=${RB_STDOUT:-} hf=${RB_HOST_FROM:-}; shift 3
++  local extra=()
++  [ -n "$so" ] && extra+=(--stdout "$so")
++  [ -n "$hf" ] && extra+=(--host-from "$hf")
+   RB_N=$((RB_N + 1))
+   RB_CAP="$RB_OUT/calls/$(date +%H%M%S)-$$-$RB_STEP-$RB_N-local.out"
+   if [ -n "${RB_DRY:-}" ]; then
+     rb_disp "--- $cls, run on the Intel ($what)$([ "$cwd" != "$RB_REPO" ] && echo ", in ${cwd#$RB_REPO/}"): $(rb_q "$@")$([ -n "$so" ] && echo " > ${so#$RB_REPO/}")"
++    [ -n "$hf" ] && echo "    (a login link it reports names its own box in the lock line: $hf)"
+     RB_RC=0; return 0
+   fi
+-  if [ -n "$so" ]; then
+-    "$RB_PY" -B "$RB_DIR/rb_run.py" --cls "$cls" --host "$host" --step "$RB_STEP" --what "$what" --cwd "$cwd" --cap "$RB_CAP" --stdout "$so" -- "$@"
+-  else
+-    "$RB_PY" -B "$RB_DIR/rb_run.py" --cls "$cls" --host "$host" --step "$RB_STEP" --what "$what" --cwd "$cwd" --cap "$RB_CAP" -- "$@"
+-  fi
++  "$RB_PY" -B "$RB_DIR/rb_run.py" --cls "$cls" --host "$host" --step "$RB_STEP" --what "$what" --cwd "$cwd" --cap "$RB_CAP" \
++    ${extra[@]+"${extra[@]}"} -- "$@"
+   RB_RC=$?
+   rb_after "$host"
+ }
+@@ -150,6 +167,11 @@
+   [ -n "${RB_DRY:-}" ] && { echo DRY; return 0; }
+   sed -nE "s/$1/\\1/p" "$RB_CAP" 2>/dev/null | head -n 1
+ }
++rb_refused() {  # rb_refused: a refusal the box printed ("REFUSED: ..." and exit 3) stops the step with 10 (never in a dry listing)
++  [ -n "${RB_DRY:-}" ] && return 0
++  rb_has '^REFUSED' && rb_die $RB_E_USAGE "refused on the box: $(grep -m1 '^REFUSED' "$RB_CAP")"
++  return 0
++}
+ 
+ rb_launched() {  # rb_launched <run>: the launch's own marker, or why not (a refusal on the box is 10; anything else 14)
+   [ -n "${RB_DRY:-}" ] && return 0
+@@ -197,7 +219,7 @@
+   LG=$(who | wc -l | tr -d ' ')
+   FREE=0
+   if [ "$BOX" = aifoundry1 ]; then
+-    # card 1's own lines decide, and nothing of ours on either card (launch_e164_a1.sh's rule); card 0 is never used
++    # card 1's own lines decide, and nothing of ours on either card (launch_e164_a1.sh's rule)
+     [ "$WRC" -eq 0 ] && [ "$C1" -eq 0 ] && [ "$NO" -eq 0 ] && [ "$PO" -eq 0 ] && FREE=1
+   else
+     # one card: et-who's "No process holds ..." (the E158-E169 queues' rule) and no other user's device process (lib.sh)
+@@ -205,16 +227,16 @@
+   fi
+   echo "holders: et-who rc $WRC, holder lines $NH (ours $NO; card 1's $C1), our device processes $PO, other users' device processes $PX; logins $LG (an idle login does not block)"
+ }
+-ours_live() {  # our real card sessions on this box (a dry pass or a V3_DRY session is not one)
++ours_live() {  # our real card sessions on this box (a dry pass or a V3_DRY session is not one); E170's queue on aifoundry1 counts
+   n=0
+-  for pid in $(pgrep -u "$(id -u)" -f 'session_e16[346]\.sh|queue_e16[5-9]\.py' 2>/dev/null); do
++  for pid in $(pgrep -u "$(id -u)" -f 'session_e16[346]\.sh|queue_e16[5-9]\.py|queue_e170\.py|run_e170\.py' 2>/dev/null); do
+     case "$(tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null)" in *--dry*) continue ;; esac
+     tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | grep -q '^V3_DRY=' && continue
+     n=$((n + 1))
+   done
+   echo "$n"
+ }
+-jobs_live() {  # the runbook's own detached dry jobs still running on this box
++jobs_live() {  # the runbook's own detached dry jobs still running on this box (any day's: a live process is live)
+   n=0
+   for p in build/q141k/jobs/*.pid; do
+     [ -e "$p" ] || continue
+@@ -223,6 +245,12 @@
+   done
+   echo "$n"
+ }
++fresh() {  # fresh <file>: it exists and was written today by the Pacific calendar (the card day's); another day's never counts
++  [ -e "$1" ] && [ "$(TZ=America/Los_Angeles date -r "$1" +%F 2>/dev/null)" = "$(TZ=America/Los_Angeles date +%F)" ]
++}
++job_ok_today() {  # job_ok_today <job>: the runbook's dry job <job> ended rc 0 today
++  fresh "build/q141k/jobs/$1.rc" && [ "$(cat "build/q141k/jobs/$1.rc" 2>/dev/null)" = 0 ]
++}
+ EOF
+ }
+ 
+@@ -272,7 +300,8 @@
+   rb_die $RB_E_FAIL "the dry pass $job did not start on $box (rc $RB_RC): read the output above"
+ }
+ 
+-rb_job_wait() {  # rb_job_wait <box> <job name>: one bounded wait; 0 done rc 0, 14 done non-zero, 17 still running
++rb_job_wait() {  # rb_job_wait <box> <job name>: one bounded wait; 0 done rc 0, 14 done non-zero or lost, 17 still running,
++  #               10 not started today
+   local box=$1 job=$2 f
+   f=$(rb_file "wait-$job")
+   { rb_prelude "$box"
+@@ -282,19 +311,33 @@
+ EOF
+     cat <<'EOF'
+ [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+-t=0
++fresh "$J.sh" || { echo "JOB-UNKNOWN ${J##*/}: not started today (its script is from $(TZ=America/Los_Angeles date -r "$J.sh" +%F)): start it again"; exit 3; }
++t=0; lost=0
+ while [ ! -e "$J.rc" ] && [ "$t" -lt "$LIM" ]; do
+-  if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then sleep 2; [ -e "$J.rc" ] || { echo "JOB-LOST ${J##*/}: no process and no exit status"; break; }; fi
++  if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then
++    # the grace: the job writes its pid as its first line and its exit status as its last; read both again before calling it lost
++    sleep 2; t=$((t + 2))
++    [ -e "$J.rc" ] && break
++    if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then lost=1; break; fi
++    continue
++  fi
+   sleep 10; t=$((t + 10))
+ done
+ tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+-if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"; else echo "JOB-RUNNING ${J##*/} after $t s"; fi
++if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"
++elif [ "$lost" -eq 1 ]; then echo "JOB-LOST ${J##*/}: no process (pid $(cat "$J.pid" 2>/dev/null || echo none)) and no exit status"
++else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+ EOF
+   } > "$f"
+   rb_remote wait "$box" "one bounded wait on the dry pass $job" "$f"
+   [ -n "${RB_DRY:-}" ] && return 0
++  if rb_has '^JOB-UNKNOWN'; then rb_say "$(grep -m1 '^JOB-UNKNOWN' "$RB_CAP")"; return $RB_E_USAGE; fi
+   if rb_has '^JOB-DONE .* rc=0$'; then rb_say "the dry pass $job ended rc 0"; return 0; fi
+   if rb_has '^JOB-DONE'; then rb_say "the dry pass $job ended non-zero: $(rb_val '^JOB-DONE .* rc=([0-9]+)$')"; return $RB_E_FAIL; fi
++  if rb_has '^JOB-LOST'; then
++    rb_say "the dry pass $job is lost on $box: no process and no exit status (read build/q141k/jobs/$job.out there, then start it again)"
++    return $RB_E_FAIL
++  fi
+   if rb_has '^JOB-RUNNING'; then rb_say "the dry pass $job still runs: call the same step again"; return $RB_E_AGAIN; fi
+   rb_say "the dry pass $job: no reading (rc $RB_RC)"; return $RB_E_FAIL
+ }
+--- v1/rb_run.py
++++ v2/rb_run.py
+@@ -1,9 +1,15 @@
+ #!/usr/bin/env python3
+-"""Q141(k), the card day's runbook: the one bounded runner every remote call and every collector goes through.
++"""Q141(k) v2, the card day's runbook: the one bounded runner every remote call and every collector goes through.
+ 
+     python3 -B rb_run.py --cls probe|read|copy|wait|launch|desk --host <box or local> --step <step> --what <text> \
+-        [--stdin <file>] [--cwd <dir>] [--cap <capture file>] [--stdout <file>] -- <command> [<arg> ...]
++        [--stdin <file>] [--cwd <dir>] [--cap <capture file>] [--stdout <file>] [--host-from <regex>] -- <command> [<arg> ...]
+ 
++The successor of ../rb_run.py (lab e962227a), which is unchanged. v2 adds one option and changes nothing else: --host-from, a
++regex with one group, names the box a login link came from when one call reaches several boxes (E167's collector reads the
++history on aifoundry1, aifoundry2 and aifoundry3, and reports a link as "TAILSCALE CHECK NEEDED (ssh <box> ...)"). On a link,
++the lock line and the links line name the group's last match in the call's recent output, or --host when nothing matches;
++the log line then carries link_host=<that box> beside host=. Without --host-from it behaves exactly as v1.
++
+ It runs the command in a new session with stdin from --stdin (or /dev/null), never a terminal, so nothing can prompt; it reads
+ stdout and stderr as they come, and:
+   * a login link (a Tailscale check URL, login.tailscale.com) on either stream kills the call at once (every process under it,
+@@ -136,6 +142,7 @@
+     ap.add_argument("--cwd")
+     ap.add_argument("--cap")
+     ap.add_argument("--stdout", dest="stdout_file")
++    ap.add_argument("--host-from", dest="host_from")
+     ap.add_argument("cmd", nargs=argparse.REMAINDER)
+     a = ap.parse_args()
+     cmd = a.cmd[1:] if a.cmd[:1] == ["--"] else a.cmd
+@@ -169,6 +176,7 @@
+     buf = {proc.stdout: "", proc.stderr: ""}
+     status, link, exited_at = None, None, None
+     known, snap_at = {}, 0.0           # every process seen under the call {pid: pgid}, so one left by an exited parent is found
++    recent = ""                        # the last 8 KB of both streams, for --host-from
+ 
+     def emit(f, text, final=False):
+         buf[f] += text
+@@ -207,6 +215,7 @@
+                 sof.write(text)
+                 sof.flush()
+             scan = tails[f] + text
++            recent = (recent + text)[-8192:]
+             if LINK.search(scan):
+                 m = URL.search(scan)
+                 link = m.group(0) if m else "login.tailscale.com"
+@@ -240,11 +249,16 @@
+         kill_tree(proc, 2, known)
+     secs = time.time() - t0
+     crc = proc.poll()
++    lhost = a.host
++    if status == "link" and a.host_from:
++        found = [m.group(1) for m in re.finditer(a.host_from, recent) if m.groups() and m.group(1)]
++        if found:
++            lhost = found[-1]
+     if status == "link":
+         rc = E_LINK
+-        append(lock, f"{time.strftime('%H:%M:%S')} {a.host} needs a check\n")
+-        append(links, f"{time.strftime('%F %T %Z')} {a.host} {link}\n")
+-        print(f"rb_run: {a.host} printed a login link: the call was killed; '{time.strftime('%H:%M:%S')} {a.host} needs a check' "
++        append(lock, f"{time.strftime('%H:%M:%S')} {lhost} needs a check\n")
++        append(links, f"{time.strftime('%F %T %Z')} {lhost} {link}\n")
++        print(f"rb_run: {lhost} printed a login link: the call was killed; '{time.strftime('%H:%M:%S')} {lhost} needs a check' "
+               f"appended to the lock file; the link is kept in RB_LINKS for the approval", flush=True)
+     elif status == "timeout":
+         rc = E_PROBE if a.cls == "probe" else E_TIMEOUT
+@@ -260,7 +274,8 @@
+         sof.close()
+     if a.cls == "probe" and status == "timeout":
+         status = "no answer"
+-    append(log, f"{time.strftime('%F %T %Z')} step={a.step} class={a.cls} host={a.host} bound={bound:g}s secs={secs:.1f} rc={rc} "
++    lh = f" link_host={lhost}" if lhost != a.host else ""
++    append(log, f"{time.strftime('%F %T %Z')} step={a.step} class={a.cls} host={a.host}{lh} bound={bound:g}s secs={secs:.1f} rc={rc} "
+                 f"child_rc={crc} status={status} what={a.what!r} cmd={shlex.join(cmd)}{' < ' + a.stdin if a.stdin else ''}\n")
+     return rc
+ 
+--- v1/s09_a3_reads.sh
++++ v2/s09_a3_reads.sh
+@@ -5,8 +5,10 @@
+ #   it (LD_LIBRARY_PATH=/opt/et/lib, flock -n on card 0's lock, timeout 10, config only: a READ in both kits' audits), which must
+ #   read TDP 0 W, threshold 65 C, 600 MHz; et-who clean (the holder rule's counts).
+ # Nothing is set. A config that reads otherwise stops both aifoundry3 runs (16): something on the card changed.
++# v2 (Q141(k)'s verifier, nit 1): the config read opens card 0, so it is refused (10) while a card session of ours runs on aifoundry3,
++# as s17's config read is on aifoundry2. Between a session's blocks card 0's lock is free, and v1 would have read the card mid-session.
+ #
+-#   bash tools/claims-v3/q141k-runbook/s09_a3_reads.sh
++#   bash tools/claims-v3/q141k-runbook/v2/s09_a3_reads.sh
+ # SPDX-License-Identifier: Apache-2.0
+ . "$(dirname "${BASH_SOURCE[0]}")/rb_common.sh"
+ rb_init s09_a3_reads
+@@ -16,6 +18,7 @@
+   cat <<'EOF'
+ unset V3_DEVICE ET_DEVICES
+ export LD_LIBRARY_PATH=/opt/et/lib
++if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on aifoundry3: the config read waits (it opens card 0)"; exit 3; fi
+ mkdir -p build/q141k
+ et-lab-manifest | tee build/q141k/et-lab-manifest-$(date +%Y%m%dT%H%M%S).txt
+ c=$(flock -n /run/lock/etsoc-shire0.lock timeout 10 bash tools/claims-v3/e128/ettelem_guard.sh config < /dev/null 2>/dev/null | grep '^{' | tail -1)
+@@ -26,6 +29,7 @@
+ } > "$f"
+ rb_remote read aifoundry3 "et-lab-manifest, the card config read through the guard, et-who" "$f"
+ [ -n "${RB_DRY:-}" ] && exit 0
++rb_refused
+ cfg=$(rb_val '^CONFIG (\{.*\})$')
+ [ -n "$cfg" ] || rb_die $RB_E_GATE "no config read came back (the lock was held, or the guard refused): read the output above"
+ echo "$cfg" | grep -q '"tdp_w":0,' && echo "$cfg" | grep -q '"temp_threshold_c":65,' && echo "$cfg" | grep -q '"minion_mhz":600,' ||
+--- v1/s11_a3_session.sh
++++ v2/s11_a3_session.sh
+@@ -10,11 +10,20 @@
+ # above 53.0 C: s20_wait.sh e166 prints G0-REFUSED), E163 goes first, and a later E166 needs at least 40 minutes of rest after
+ # E163's session end and the earlier smoke moved aside (README.md.dated-note.md: p16601 -> p16601.try1): --later-try does both.
+ #
+-#   bash tools/claims-v3/q141k-runbook/s11_a3_session.sh e166 [--later-try]
+-#   bash tools/claims-v3/q141k-runbook/s11_a3_session.sh e163 [FULL|TWO|SHORT]
++#   bash tools/claims-v3/q141k-runbook/v2/s11_a3_session.sh e166 [--later-try]
++#   bash tools/claims-v3/q141k-runbook/v2/s11_a3_session.sh e163 [FULL|TWO|SHORT]
+ #
+ # Refused (10) before any launch: no window, past the last start, E166 with fewer than 76 minutes left, E163 before E166's session
+ # end (unless the plan is a, E163 instead of E166), a dry pass of the runbook still running there, or a card session of ours there.
++# v2 adds, each for a fault of Q141(k)'s verifier (v2/README.md):
++#   - a plain e166 is refused when an earlier E166 smoke (e166-smoke/p16601) is on the box: that is a later try (E166.md, "A later
++#     try"), and without the move block_begin reads the old smoke as done and the five stop tests do not run (fault 3); and when an
++#     earlier try's smoke was already moved aside (p16601.try1): a further try needs its own amendment;
++#   - --later-try rests 40 minutes from the card's last session end of ours, E163's or E166's own, whichever is later (v1: E163's);
++#   - e163 is refused when its plan's budget from T0 would pass the round's last end (E163.md, Card budget: FULL 70, TWO 38, SHORT 30
++#     card-minutes), so "each launch refuses otherwise" now holds for E163 too (nit 2; E163's queue would otherwise stop starting
++#     passes at E163_DEADLINE, and a FULL with fewer than 70 minutes is not the plan E163.md registers);
++#   - e163's "E166's session has ended" reads only a log offset written today (nit 5: another card day's offset is never today's).
+ # SPDX-License-Identifier: Apache-2.0
+ . "$(dirname "${BASH_SOURCE[0]}")/rb_common.sh"
+ rb_init s11_a3_session
+@@ -31,15 +40,28 @@
+       echo "LAST_START=$(printf '%q' "$RB_LAST_START"); LAST_END=$(printf '%q' "$RB_LAST_END"); LATER=$(printf '%q' "$opt")"
+       rb_guard_text
+       cat <<'EOF'
++SM=build/claims-v3/aifoundry3/e166-smoke
++if [ "$LATER" != --later-try ]; then
++  # v2: an earlier E166 session's smoke is here, so this is a later try (README.md.dated-note.md: without the move, block_begin finds
++  # the old smoke "ok" and exits "already done", session_e166.sh reads the old gate as GO, and the five stop tests do not run again)
++  [ -e "$SM/p16601" ] && { echo "REFUSED: an earlier E166 smoke is on the box ($SM/p16601): this is a later try: run s11_a3_session.sh e166 --later-try"; exit 3; }
++  [ -e "$SM/p16601.try1" ] && { echo "REFUSED: an earlier try's smoke was moved aside ($SM/p16601.try1): a further try needs its own amendment"; exit 3; }
++fi
+ if [ "$LATER" = --later-try ]; then
+-  # E166 README.md.dated-note.md: at least 40 minutes of rest after E163's session end, and the earlier smoke moved aside
+-  last=$(grep 'session end' build/e163/session.log 2>/dev/null | tail -n 1 | cut -d' ' -f1-3)
+-  [ -n "$last" ] || { echo "REFUSED: no E163 session end in build/e163/session.log to rest from"; exit 3; }
++  # E166 README.md.dated-note.md: the earlier smoke moved aside, after at least 40 minutes of rest (E166 README: "if the card was busy,
++  # at least about 40 minutes of rest first"); v2 rests from the card's last session end of ours, E163's or E166's own
++  last=""; lastw=""
++  for w in e163 e166; do
++    l=$(grep 'session end' build/$w/session.log 2>/dev/null | tail -n 1 | cut -d' ' -f1-3)
++    [ -n "$l" ] || continue
++    if [ -z "$last" ] || [ "$(date -d "$l" +%s)" -gt "$(date -d "$last" +%s)" ]; then last=$l; lastw=E${w#e}; fi
++  done
++  [ -n "$last" ] || { echo "REFUSED: no session end of E163 or E166 on the box to rest from"; exit 3; }
+   rest=$(( ($(date +%s) - $(date -d "$last" +%s)) / 60 ))
+-  [ "$rest" -ge 40 ] || { echo "REFUSED: $rest minutes since E163's session end ($last): E166 needs at least 40"; exit 3; }
+-  if [ -e build/claims-v3/aifoundry3/e166-smoke/p16601 ]; then
+-    [ -e build/claims-v3/aifoundry3/e166-smoke/p16601.try1 ] && { echo "REFUSED: p16601.try1 exists already: a third try needs its own amendment"; exit 3; }
+-    mv build/claims-v3/aifoundry3/e166-smoke/p16601 build/claims-v3/aifoundry3/e166-smoke/p16601.try1 && echo "moved the earlier smoke aside: p16601 -> p16601.try1"
++  [ "$rest" -ge 40 ] || { echo "REFUSED: $rest minutes since $lastw's session end ($last): E166 needs at least 40"; exit 3; }
++  if [ -e "$SM/p16601" ]; then
++    [ -e "$SM/p16601.try1" ] && { echo "REFUSED: p16601.try1 exists already: a third try needs its own amendment"; exit 3; }
++    mv "$SM/p16601" "$SM/p16601.try1" && echo "moved the earlier smoke aside: p16601 -> p16601.try1"
+   fi
+ fi
+ mkdir -p build/e166
+@@ -53,14 +75,16 @@
+     ;;
+   e163)
+     plan=${opt:-FULL}
+-    case "$plan" in FULL|TWO|SHORT) ;; *) rb_die $RB_E_USAGE "E163's plan is FULL, TWO or SHORT" ;; esac
++    case "$plan" in FULL) need=4200 ;; TWO) need=2280 ;; SHORT) need=1800 ;; *) rb_die $RB_E_USAGE "E163's plan is FULL, TWO or SHORT" ;; esac
++    rb_need_end "$need"     # v2: the plan's budget from T0 (E163.md, Card budget: FULL 70, TWO 38, SHORT 30 card-minutes)
+     { rb_prelude aifoundry3
+       echo "LAST_START=$(printf '%q' "$RB_LAST_START"); LAST_END=$(printf '%q' "$RB_LAST_END"); PLAN=$plan; DAYPLAN=$RB_PLAN"
+       rb_guard_text
+       cat <<'EOF'
+ if [ "$DAYPLAN" != a ]; then
+   # Q141(f)'s order: E166 first on a rested card, then E163 (if E166's G0 refused, its session still ended: E163 goes next)
+-  off=$(cat build/q141k/e166.log-offset 2>/dev/null) || { echo "REFUSED: E166 has not run today: it goes first on aifoundry3 (plan $DAYPLAN)"; exit 3; }
++  fresh build/q141k/e166.log-offset || { echo "REFUSED: E166 has not run today: it goes first on aifoundry3 (plan $DAYPLAN)"; exit 3; }
++  off=$(cat build/q141k/e166.log-offset)
+   tail -n +"$((off + 1))" build/e166/session.log 2>/dev/null | grep -q 'session end' || { echo "REFUSED: E166's session has not ended"; exit 3; }
+ fi
+ mkdir -p build/e163
+--- v1/s12_a1_check.sh
++++ v2/s12_a1_check.sh
+@@ -6,12 +6,16 @@
+ # The check takes about 4 minutes, so it runs detached on the box as a dry job (the same script, from ~/nekko, where sync_e164.sh put
+ # it), and is waited on with bounded calls. The host's identity (uptime -s before 31 Oct 13:45:24 PDT) is look_e164.sh's (step 5).
+ #
+-#   bash tools/claims-v3/q141k-runbook/s12_a1_check.sh sync     # a copy, 600 s
+-#   bash tools/claims-v3/q141k-runbook/s12_a1_check.sh start    # starts the check, detached: returns at once
+-#   bash tools/claims-v3/q141k-runbook/s12_a1_check.sh wait     # one bounded wait; 17 = call again
++#   bash tools/claims-v3/q141k-runbook/v2/s12_a1_check.sh sync     # a copy, 600 s
++#   bash tools/claims-v3/q141k-runbook/v2/s12_a1_check.sh start    # starts the check, detached: returns at once
++#   bash tools/claims-v3/q141k-runbook/v2/s12_a1_check.sh wait     # one bounded wait; 17 = call again
++# v2 (Q141(k)'s verifier, faults 1 and 2): a clean wait writes RB_OUT/a1-check-clean.txt (the window's day, "clean"), which s13
++# needs before it launches E164, and start removes it; a lost check job (no process, no exit status) exits 14 with JOB-LOST, and a
++# job not started today exits 10.
+ # SPDX-License-Identifier: Apache-2.0
+ . "$(dirname "${BASH_SOURCE[0]}")/rb_common.sh"
+ rb_init s12_a1_check
++rb_window
+ case "${1:-}" in
+   sync)
+     rb_probe aifoundry1
+@@ -20,6 +24,7 @@
+     rb_say "aifoundry1: synced tools/claims-v3/e164/ and pool 7 into ~/nekko"
+     ;;
+   start)
++    [ -n "${RB_DRY:-}" ] || rm -f "$RB_OUT/a1-check-clean.txt"
+     body=$(rb_file body)
+     cat > "$body" <<'EOF'
+ bash tools/claims-v3/e164/box/check_box_e164.sh
+@@ -32,6 +37,8 @@
+     rb_job_wait aifoundry1 a1-check; rc=$?
+     [ -n "${RB_DRY:-}" ] && exit 0
+     [ "$rc" -eq "$RB_E_AGAIN" ] && exit "$rc"
++    [ "$rc" -eq "$RB_E_USAGE" ] && exit "$rc"            # not started today: s12_a1_check.sh start first
++    rb_has '^JOB-LOST' && exit "$RB_E_FAIL"              # lost: start it again (the wait said why)
+     bad=""
+     # check_box_e164.sh's own lines, section by section (each "== <name>" header, then its first "rc=" line)
+     sec() { awk -v want="$1" '/^== /{s=substr($0, 4); next} /^rc=/{ if (s == want && !done) {print; done=1} }' "$RB_CAP"; }
+@@ -44,6 +51,7 @@
+     sec 'dry smoke 16401' | grep -q '^rc=0 (want 0)' || bad="$bad dry-smoke"
+     sec 'dry stop-path test 16402' | grep -q '^rc=1 ' || bad="$bad dry-stoptest"
+     [ -z "$bad" ] || rb_die $RB_E_GATE "aifoundry1's box check did not read clean:$bad (read the output above; a binary that differs needs a dated amendment)"
++    echo "$RB_DAY clean $(date '+%F %T %Z')" > "$RB_OUT/a1-check-clean.txt"     # s13 launches only after this (step 12 before 13)
+     rb_say "aifoundry1 card 1: harness OK, preflight GO, tiles OK, blind7 91, dry pass rc 0, smoke rc 0, stop-path test rc 1 (as a dry run ends)"
+     ;;
+   *) rb_die $RB_E_USAGE "usage: s12_a1_check.sh sync|start|wait" ;;
+--- v1/s13_a1_launch.sh
++++ v2/s13_a1_launch.sh
+@@ -10,7 +10,13 @@
+ # nothing: exit 2 (no deadline, or not a date), 3 (card 1 held, or anything of ours on either card), 4 (less than 1,930 s left),
+ # 9 (check_e164.py not HARNESS OK); this step then exits 14 with the launcher's code in the log.
+ #
+-#   bash tools/claims-v3/q141k-runbook/s13_a1_launch.sh [--drop-p2]
++#   bash tools/claims-v3/q141k-runbook/v2/s13_a1_launch.sh [--drop-p2]
++#
++# v2 (Q141(k)'s verifier, fault 1): the go checklist's order, step 12 before 13, held in code, as every other launch holds it. Before
++# the launcher is sent: s12's wait must have read the box check clean today (RB_OUT/a1-check-clean.txt), and one read on the box
++# (60 s) must find no dry pass of the runbook still running there (s12's check job among them: V3_DRY passes 16410, 16401, 16402), no
++# card session of ours (E170's queue on card 0 counts), and s12's check job ended rc 0 today. A refusal there exits 10 and sends
++# nothing more. v1 sent launch_e164_a1.sh straight away, whose own refusals look only at card holders and our device processes.
+ # SPDX-License-Identifier: Apache-2.0
+ . "$(dirname "${BASH_SOURCE[0]}")/rb_common.sh"
+ rb_init s13_a1_launch
+@@ -21,9 +27,26 @@
+ rb_need_end 1930
+ L=tools/claims-v3/e164/box/launch_e164_a1.sh
+ [ -f "$RB_REPO/$L" ] || rb_die $RB_E_USAGE "$L is missing"
++if [ -z "${RB_DRY:-}" ]; then
++  [ "$(cut -d' ' -f1-2 "$RB_OUT/a1-check-clean.txt" 2>/dev/null)" = "$RB_DAY clean" ] ||
++    rb_die $RB_E_USAGE "s12_a1_check.sh wait has not read aifoundry1's box check clean today ($RB_DAY): step 12, then 13"
++else
++  echo "--- gate: s12_a1_check.sh wait read the box check clean today (RB_OUT/a1-check-clean.txt names the window's day)"
++fi
++g=$(rb_file guard)
++{ rb_prelude aifoundry1
++  rb_guard_text
++  cat <<'EOF'
++job_ok_today a1-check || { echo "REFUSED: s12's box check job has not ended rc 0 today: run s12_a1_check.sh start, then wait"; exit 3; }
++echo "GUARD-OK: no dry pass of the runbook runs on $BOX, no card session of ours, and s12's check job ended rc 0 today"
++EOF
++} > "$g"
+ pre=""; [ "$opt" = --drop-p2 ] && pre="E164_DROP_P2=1 "
+ rcmd="${pre}bash -s -- '$RB_E164_DEADLINE'"
+ rb_probe aifoundry1
++rb_remote read aifoundry1 "the runbook's guard before E164's launch (no dry pass, no session of ours, s12's check today)" "$g"
++rb_refused
++[ -n "${RB_DRY:-}" ] || rb_has '^GUARD-OK' || rb_die $RB_E_FAIL "the guard read gave no reading (rc $RB_RC): nothing launched"
+ rb_remote launch aifoundry1 "box/launch_e164_a1.sh, deadline $RB_E164_DEADLINE" "$RB_REPO/$L" "$rcmd"
+ [ -n "${RB_DRY:-}" ] && exit 0
+ if [ "$RB_RC" -ne 0 ]; then
+--- v1/s14_a2_tree.sh
++++ v2/s14_a2_tree.sh
+@@ -10,7 +10,14 @@
+ # Each run's verdict goes to $RB_OUT/a2-tree.txt. Exit 0 every planned run reads clean; 16 one does not (skip that run, or a dated
+ # amendment first); 17 et-who is not clean (look again with s05_look.sh aifoundry2 --wait).
+ #
+-#   bash tools/claims-v3/q141k-runbook/s14_a2_tree.sh
++#   bash tools/claims-v3/q141k-runbook/v2/s14_a2_tree.sh
++#
++# v2 (Q141(k)'s verifier, fault 5): aifoundry2's firmware identity is gated, by continuity and never by the firmware-revisions query.
++# E69's revisions read (2026-10-27 13:56:26 PDT: release 1.4.0, BL1/BL2 0.22.0, PMIC 1.5.0, minions 0.25.1) was made inside the host
++# boot of 2026-10-26 15:13:03 PDT (E77's CHANGE-RECORD.md, "Firmware identities: by continuity"; E77's G0 row). The read call's
++# `uptime -s` must come before E69's read, as look_e164.sh holds aifoundry1 to E82's; a host booted since then exits 16 for every
++# aifoundry2 run, because every aifoundry2 kit's commands are classified from BL2 0.22.0's source and E168's README step 5 makes
++# another build NO-GO. v1 printed the boot and compared it with nothing (et-lab-manifest reads sysfs and names no firmware).
+ # SPDX-License-Identifier: Apache-2.0
+ . "$(dirname "${BASH_SOURCE[0]}")/rb_common.sh"
+ rb_init s14_a2_tree
+@@ -71,12 +78,17 @@
+ mkdir -p build/q141k
+ et-lab-manifest | tee build/q141k/et-lab-manifest-$(date +%Y%m%dT%H%M%S).txt
+ echo "booted $(uptime -s)"; uptime
++boot=$(date -d "$(uptime -s)" +%s); fw=$(date -d '2026-10-27 13:56:26 PDT' +%s)
++if [ "$boot" -lt "$fw" ]; then echo "IDENTITY-OK: the host booted $(uptime -s), before E69's firmware read of 2026-10-27 13:56:26 PDT (BL2 0.22.0 by continuity)"
++else echo "IDENTITY-STOP: the host booted $(uptime -s), after E69's firmware read of 2026-10-27 13:56:26 PDT: BL2 0.22.0 is not carried"; fi
+ hold_read
+ echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD)"
+ EOF
+ rb_remote read aifoundry2 "et-lab-manifest, uptime, et-who, who" "$f"
+ [ -n "${RB_DRY:-}" ] && exit 0
+-{ echo "$(date '+%F %T %Z') aifoundry2 tree=$tree_ok e165=$v165 e167=$v167 e168=$v168 e169=$v169 (1 = reads clean)"; } >> "$RB_OUT/a2-tree.txt"
++id_ok=1; rb_has '^IDENTITY-OK: ' || id_ok=0
++{ echo "$(date '+%F %T %Z') aifoundry2 tree=$tree_ok e165=$v165 e167=$v167 e168=$v168 e169=$v169 identity=$id_ok (1 = reads clean)"; } >> "$RB_OUT/a2-tree.txt"
++[ "$id_ok" -eq 1 ] || rb_die $RB_E_GATE "aifoundry2's firmware identity is not carried: $(grep -m1 '^IDENTITY-' "$RB_CAP" || echo 'no identity line came back'). No aifoundry2 run until it is shown again on a READ path (never the firmware-revisions query) or a dated amendment says what to do"
+ bad=""
+ [ "$tree_ok" -eq 1 ] || bad="$bad the-tree"
+ for r in $planned; do eval "v=\$v${r#e}"; [ "$v" -eq 1 ] || bad="$bad $r"; done
+--- v1/s16_a2_e165.sh
++++ v2/s16_a2_e165.sh
+@@ -6,7 +6,8 @@
+ # --cap 40 > build/e165/queue.out 2>&1 < /dev/null &`; the registered subset (passes 1-2): --cap 25 and a 1,800 s slot. The queue runs
+ # the smoke, the DMA rule and both stop-path tests itself, and halts with QUEUE-HALT and no session if any fails.
+ #
+-#   bash tools/claims-v3/q141k-runbook/s16_a2_e165.sh [full|subset]
++#   bash tools/claims-v3/q141k-runbook/v2/s16_a2_e165.sh [full|subset]
++# v2 (Q141(k)'s verifier, nit 5): a planned dry pass counts only if it ended rc 0 today; another card day's exit status never does.
+ #
+ # Refused (10) before any launch: past the last start, a slot that would pass the last end, a planned dry pass not ended rc 0, a dry
+ # pass still running, a session of ours on the card, or build/e165/runs already holding a queue.
+@@ -25,8 +26,7 @@
+   rb_guard_text
+   cat <<'EOF'
+ for r in $PLANNED; do
+-  j=build/q141k/jobs/a2-dry-$r
+-  [ "$(cat "$j.rc" 2>/dev/null)" = 0 ] || { echo "REFUSED: the dry pass of $r has not ended rc 0 (s15_a2_dry.sh $r): all four before E165's session"; exit 3; }
++  job_ok_today "a2-dry-$r" || { echo "REFUSED: the dry pass of $r has not ended rc 0 today (s15_a2_dry.sh $r): all planned ones before E165's session"; exit 3; }
+ done
+ [ -e build/e165/runs/queue.jsonl ] && { echo "REFUSED: build/e165/runs already holds a queue"; exit 3; }
+ mkdir -p build/e165
+--- v1/s18_a2_e168.sh
++++ v2/s18_a2_e168.sh
+@@ -5,7 +5,8 @@
+ # ~/claude/work/q141-a2-e168-slot.txt --runs build/e168/runs > build/e168/queue.out 2>&1 < /dev/null &`. The queue runs the smoke
+ # (the check of C on all four launches) and both stop-path tests first; its first cold gate waits at most 360 s for 46 C.
+ #
+-#   bash tools/claims-v3/q141k-runbook/s18_a2_e168.sh
++#   bash tools/claims-v3/q141k-runbook/v2/s18_a2_e168.sh
++# v2 (Q141(k)'s verifier, nit 5): E168's dry pass counts only if it ended rc 0 today.
+ # SPDX-License-Identifier: Apache-2.0
+ . "$(dirname "${BASH_SOURCE[0]}")/rb_common.sh"
+ rb_init s18_a2_e168
+@@ -17,7 +18,7 @@
+ { rb_prelude aifoundry2
+   rb_guard_text
+   cat <<'EOF'
+-[ "$(cat build/q141k/jobs/a2-dry-e168.rc 2>/dev/null)" = 0 ] || { echo "REFUSED: E168's dry pass has not ended rc 0"; exit 3; }
++job_ok_today a2-dry-e168 || { echo "REFUSED: E168's dry pass has not ended rc 0 today (s15_a2_dry.sh e168)"; exit 3; }
+ if [ -e build/e167/runs/status.json ] && ! grep -q '"state": "ended"' build/e167/runs/status.json; then echo "REFUSED: E167's queue has not ended"; exit 3; fi
+ [ -e build/e168/runs/queue.jsonl ] && { echo "REFUSED: build/e168/runs already holds a queue"; exit 3; }
+ mkdir -p build/e168
+--- v1/s19_a2_e169.sh
++++ v2/s19_a2_e169.sh
+@@ -6,7 +6,8 @@
+ # build/e169/queue.out 2>&1 < /dev/null &`. The smoke and both stop-path tests run inside it; if the hottest-sensor field reads 76 C
+ # or more after E168, the smoke's die stop halts the queue before any work launch (safe; a retry needs a dated amendment).
+ #
+-#   bash tools/claims-v3/q141k-runbook/s19_a2_e169.sh
++#   bash tools/claims-v3/q141k-runbook/v2/s19_a2_e169.sh
++# v2 (Q141(k)'s verifier, nit 5): E169's dry pass counts only if it ended rc 0 today.
+ # SPDX-License-Identifier: Apache-2.0
+ . "$(dirname "${BASH_SOURCE[0]}")/rb_common.sh"
+ rb_init s19_a2_e169
+@@ -18,7 +19,7 @@
+ { rb_prelude aifoundry2
+   rb_guard_text
+   cat <<'EOF'
+-[ "$(cat build/q141k/jobs/a2-dry-e169.rc 2>/dev/null)" = 0 ] || { echo "REFUSED: E169's dry pass has not ended rc 0"; exit 3; }
++job_ok_today a2-dry-e169 || { echo "REFUSED: E169's dry pass has not ended rc 0 today (s15_a2_dry.sh e169)"; exit 3; }
+ if [ -e build/e168/runs/status.json ] && ! grep -qE '"state": "(ended|halted)"' build/e168/runs/status.json; then echo "REFUSED: E168's queue has not ended"; exit 3; fi
+ [ -e build/e169/runs ] && { echo "REFUSED: build/e169/runs exists (README.md.dated-note.md, box step 4: the queue must start in an empty directory)"; exit 3; }
+ mkdir -p build/e169
+--- v1/s20_wait.sh
++++ v2/s20_wait.sh
+@@ -8,10 +8,13 @@
+ #   e165, e167, e168, e169 (aifoundry2): status.json until "ended" or "halted", the smoke and stop-test checks and QUEUE-HALT from
+ #     queue.jsonl (E167: also run_e167.sh watch).
+ #
+-#   bash tools/claims-v3/q141k-runbook/s20_wait.sh <e163|e164|e165|e166|e167|e168|e169>
++#   bash tools/claims-v3/q141k-runbook/v2/s20_wait.sh <e163|e164|e165|e166|e167|e168|e169>
+ #
+ # Exit 0 the run has ended (read the lines it printed); 17 still running: call again; 16 it ended at a gate (G0 refused, a smoke or
+-# stop test failed, QUEUE-HALT, no go): read why; 14 the run is gone without an end record.
++# stop test failed, QUEUE-HALT, no go): read why; 14 the run is gone without an end record; 10 (v2) not launched today.
++# v2 (Q141(k)'s verifier, nit 5): only today's launch counts. On aifoundry3 the log offset must have been written today (v1 read the
++# whole session log when no offset was there, so an earlier day's "session end" read as today's); on aifoundry2 a status.json not
++# written today, with no queue process, reads "not launched today".
+ # SPDX-License-Identifier: Apache-2.0
+ . "$(dirname "${BASH_SOURCE[0]}")/rb_common.sh"
+ rb_init s20_wait
+@@ -38,7 +41,8 @@
+   echo "RUN=$run; LIM=$RB_WAIT_LOOP_S"
+   if [ "$box" = aifoundry3 ]; then cat <<'EOF'
+ L=build/$RUN/session.log
+-off=$(cat build/q141k/$RUN.log-offset 2>/dev/null || echo 0)
++fresh build/q141k/$RUN.log-offset || { echo "RUN-UNKNOWN $RUN: not launched today by the runbook (no log offset written today)"; exit 3; }
++off=$(cat build/q141k/$RUN.log-offset)
+ ended() { tail -n +"$((off + 1))" "$L" 2>/dev/null | grep -q 'session end'; }
+ t=0
+ while ! ended && [ "$t" -lt "$LIM" ]; do
+@@ -56,7 +60,10 @@
+ EOF
+   else cat <<'EOF'
+ R=build/$RUN/runs
+-fin() { grep -qE '"state": "(ended|halted)"' "$R/status.json" 2>/dev/null; }
++fin() { fresh "$R/status.json" && grep -qE '"state": "(ended|halted)"' "$R/status.json" 2>/dev/null; }
++if ! fresh "$R/status.json" && ! pgrep -u "$(id -u)" -f "queue_$RUN\.py" > /dev/null; then
++  echo "RUN-UNKNOWN $RUN: no queue process and no status.json written today"; exit 3
++fi
+ t=0
+ while ! fin && [ "$t" -lt "$LIM" ]; do
+   pgrep -u "$(id -u)" -f "queue_$RUN\.py" > /dev/null || { sleep 2; fin || { echo "RUN-GONE $RUN: no queue process and no end in status.json"; break; }; }
+@@ -74,6 +81,7 @@
+ } > "$f"
+ rb_remote wait "$box" "one bounded wait on $run" "$f"
+ [ -n "${RB_DRY:-}" ] && exit 0
++rb_has '^RUN-UNKNOWN' && rb_die $RB_E_USAGE "$(grep -m1 '^RUN-UNKNOWN' "$RB_CAP")"
+ [ "$RB_RC" -eq 0 ] || rb_die $RB_E_FAIL "the wait on $run exited $RB_RC"
+ rb_has '^RUN-GONE' && rb_die $RB_E_FAIL "$run is not running and recorded no end: read the box's logs before anything else"
+ rb_has '^G0-REFUSED' && rb_die $RB_E_GATE "E166's G0 refused (the room above 53.0 C): run s11_a3_session.sh e163 now; E166 later with --later-try"
+--- v1/s22_collect.sh
++++ v2/s22_collect.sh
+@@ -21,7 +21,11 @@
+ # Before any data commit, logs/ are read for et-who lines: E163's and E166's with E164's scrub in --check mode (F3), E164's by its
+ # collector (exit 7 = commit nothing); then the public-text scan. This step commits nothing.
+ #
+-#   bash tools/claims-v3/q141k-runbook/s22_collect.sh <e163|e164|e165|e166|e167|e168|e169|pair> [e167: <from epoch s> <to epoch s>]
++#   bash tools/claims-v3/q141k-runbook/v2/s22_collect.sh <e163|e164|e165|e166|e167|e168|e169|pair> [e167: <from epoch s> <to epoch s>]
++#
++# v2 (Q141(k)'s verifier, fault 4): collect_e167_bounded.sh reads the history on aifoundry1, aifoundry2 and aifoundry3, so e167 probes
++# all three first, and a login link the collector reports ("TAILSCALE CHECK NEEDED (ssh <box> ...)") puts that box in the lock line,
++# not aifoundry2 (rb_run.py's --host-from). Every other collector reaches one box, which its step probes, as in v1.
+ # SPDX-License-Identifier: Apache-2.0
+ . "$(dirname "${BASH_SOURCE[0]}")/rb_common.sh"
+ rb_init s22_collect
+@@ -119,6 +123,8 @@
+   e167)
+     D=$DATA/$DAY-e167-heat-replicate-aifoundry2
+     from=${2:-}; to=${3:-}
++    rb_probe aifoundry1
++    rb_probe aifoundry3
+     rb_probe aifoundry2
+     if [ -z "$from" ] || [ -z "$to" ]; then
+       f=$(rb_file e167-span)
+@@ -135,7 +141,8 @@
+         from=$((a / 1000 - 60)); to=$((b / 1000 + 60))
+       fi
+     fi
+-    rb_local desk aifoundry2 "collect_e167_bounded.sh (the runs copy bounded at 600 s, each small file at 120 s)" \
++    RB_HOST_FROM='TAILSCALE CHECK NEEDED \(ssh (aifoundry[0-9]+) ' \
++      rb_local desk aifoundry2 "collect_e167_bounded.sh (the runs copy bounded at 600 s, each small file at 120 s; the three boxes' history)" \
+       env E167_RSYNC_TIMEOUT_S=600 bash tools/claims-v3/e167/collect_e167_bounded.sh "$D" "$from" "$to"
+     [ "$RB_RC" -eq 0 ] || rb_die $RB_E_FAIL "collect_e167_bounded.sh stopped (3 the runs copy; 4 a login left in a file; 7 a Tailscale check): read the output above"
+     CL=$RB_OUT/e167-clog
+# end

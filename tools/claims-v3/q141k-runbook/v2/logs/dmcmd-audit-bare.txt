@@ -1,0 +1,19 @@
+# Q141(k) v2: the same audit without the guard: NO-GO at exactly step 9's call (the guard's binary unresolved), as any caller
+# of the guard reads when the guard is not scanned with it. Wed 04 Nov 2026 15:34 PST, on the Intel, desk only.
+# /usr/bin/python3 -B tools/claims-v3/dmcmd_audit.py tools/claims-v3/q141k-runbook/v2/
+NO-GO tools/claims-v3/q141k-runbook/v2/s09_a3_reads.sh:24: ettelem config: VARIANT_UNRESOLVED: VARIANT_UNRESOLVED
+dmcmd_audit: NO-GO (6 send site(s), 1 disallowed; allow-list: none)
+tools/claims-v3/q141k-runbook/v2/s09_a3_reads.sh:24: ettelem config: VARIANT_UNRESOLVED [UNCLASSIFIED, pmic unknown] NO-GO: VARIANT_UNRESOLVED - binary from 'tools/claims-v3/e128/ettelem_guard.sh' (the program ettelem_guard.sh, not among the scanned files): which build runs is not visible; its sends are listed as the reviewed variants'
+tools/claims-v3/q141k-runbook/v2/s09_a3_reads.sh:24: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/q141k-runbook/v2/s09_a3_reads.sh:24: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/q141k-runbook/v2/s09_a3_reads.sh:24: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/q141k-runbook/v2/s09_a3_reads.sh:24: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/q141k-runbook/v2/s09_a3_reads.sh:24: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      1 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      1 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  VARIANT_UNRESOLVED                         UNCLASSIFIED pmic unknown   1 site(s)  NO-GO
+exit 3
