@@ -1,0 +1,86 @@
+E164 self-test: score_e164.score on simulated sessions (20 a world, 4 passes, 0.05 W pass noise, 2,000 interval draws, 1,000 paired draws); nothing here is a measurement
+
+[as_good]
+  E164-B1: FAIL LOW 1, PASS 19
+  E164-B2: FAIL LOW 1, PASS 19
+  E164-C1: FAIL 1, PASS 19
+  E164-H1: PASS 20
+  E164-H2: FAIL 1, PASS 19
+  E164-H3: PASS 20
+  E164-H4: PASS 20
+  E164-M1: BETTER 15, NOT RESOLVED 5
+  E164-M2: BETTER 20
+  E164-P1: FAIL 2, PASS 18
+  E164-P2: PASS 20
+  E164-P3: FAIL 2, PASS 18
+  E164-R1: FAIL 2, PASS 18
+  E164-R2: FAIL 7, PASS 13
+  E164-U1: PASS 20
+
+[twice]
+  E164-B1: FAIL HIGH 7, FAIL LOW 2, PASS 11
+  E164-B2: FAIL HIGH 1, FAIL LOW 4, PASS 15
+  E164-C1: FAIL 20
+  E164-H1: FAIL 2, PASS 18
+  E164-H2: PASS 20
+  E164-H3: PASS 20
+  E164-H4: PASS 20
+  E164-M1: BETTER 10, NOT RESOLVED 10
+  E164-M2: BETTER 15, NOT RESOLVED 5
+  E164-P1: FAIL 14, PASS 6
+  E164-P2: FAIL 13, PASS 7
+  E164-P3: FAIL 19, PASS 1
+  E164-R1: PASS 20
+  E164-R2: FAIL 20
+  E164-U1: PASS 20
+
+[bias]
+  E164-B1: FAIL HIGH 20
+  E164-B2: PASS 20
+  E164-C1: FAIL 9, PASS 11
+  E164-H1: PASS 20
+  E164-H2: PASS 20
+  E164-H3: FAIL 3, PASS 17
+  E164-H4: FAIL 1, PASS 19
+  E164-M1: BETTER 20
+  E164-M2: BETTER 19, NOT RESOLVED 1
+  E164-P1: FAIL 15, PASS 5
+  E164-P2: FAIL 12, PASS 8
+  E164-P3: PASS 20
+  E164-R1: FAIL 2, PASS 18
+  E164-R2: FAIL 19, PASS 1
+  E164-U1: PASS 20
+
+[m6_right]
+  E164-B1: FAIL LOW 20
+  E164-B2: PASS 20
+  E164-C1: PASS 20
+  E164-H1: FAIL 1, PASS 19
+  E164-H2: PASS 20
+  E164-H3: FAIL 1, PASS 19
+  E164-H4: PASS 20
+  E164-M1: WORSE 20
+  E164-M2: NOT RESOLVED 20
+  E164-P1: PASS 20
+  E164-P2: PASS 20
+  E164-P3: FAIL 20
+  E164-R1: PASS 20
+  E164-R2: PASS 20
+  E164-U1: FAIL 20
+
+[K7: rank 7's repeat, 0.01 W pass noise]
+  K7, no change: scale {'floats': 1.0001, 'int8': 1.0}; K7D PASS (8 of 8 within 0.05 W; outside []), K7W PASS (outside [])
+  K7, a 2% session gain (D 2% lower in every tile and anchor): scale {'floats': 1.0201, 'int8': 1.02}; K7D PASS (8 of 8 within 0.05 W; outside []), K7W PASS (outside [])
+  K7, int8.bheld_bit4 moved +0.3 W: scale {'floats': 1.0001, 'int8': 1.0}; K7D PASS (7 of 8 within 0.05 W; outside ['int8.bheld_bit4']), K7W PASS (outside [])
+  K7, two tiles moved +0.3 W: scale {'floats': 1.0001, 'int8': 1.0}; K7D FAIL (6 of 8 within 0.05 W; outside ['fp16.real_qwen_qk', 'int8.bheld_bit4']), K7W FAIL (outside ['fp16.real_qwen_qk'])
+  K7, int8.anchor6_full not measured (the int8 scale lacks an anchor): scale {'floats': 1.0001}; K7D NOT SCORED (4 of 4 within 0.05 W; outside []), K7W NOT SCORED (outside [])
+
+[C check]
+  all PASS: K7C PASS (literal PASS), PC PASS, PCa PASS; scored set 61 of 61, excluded []; not PASS []
+  one ROUNDING launch on fp16.real_qwen_qk (K7): K7C FAIL (literal PASS), PC PASS, PCa PASS; scored set 61 of 61, excluded []; not PASS [('fp16.real_qwen_qk', 'ROUNDING')]
+  one unrecorded launch on fp32.exp_b_alt_nib (pool 7): K7C PASS (literal PASS), PC FAIL, PCa PASS; scored set 60 of 61, excluded ['fp32.exp_b_alt_nib']; not PASS [('fp32.exp_b_alt_nib', 'unrecorded')]
+  one FAIL launch on int8.anchor6_full (the scale's anchor): K7C PASS (literal PASS), PC PASS, PCa FAIL; scored set 61 of 61, excluded []; not PASS [('int8.anchor6_full', 'FAIL')]
+
+[X1/X2: the card term with an aifoundry3 session]
+  aifoundry3 at card 1 / M9's own terms: {"E164-X1": "PASS", "E164-X2": "PASS"}; X1 median 0.961600 against 0.961600, X2 0.961585 against 0.961585
+  aifoundry3 at card 1 / 0.98: {"E164-X1": "FAIL", "E164-X2": "FAIL"}; X1 median 0.980000 against 0.961600, X2 0.980000 against 0.961585

@@ -1,0 +1,63 @@
+E164 scorer self-test: score_e164.py run on E157's registration and committed data (nothing here is new data)
+  Python 3.13.11
+  score_e164.py ab491a8948cc17aa...; E157's registration predictions-e157.json 526d3068f6704065... (lab 01676499); E157's scorer score_e157.py e3a8a461c128680a... (not run here)
+  scheme: {"prefix": "E157", "primary": "M8", "models": ["M8", "M7", "M6"], "compare": [["M1", "M6"], ["M2", "M7"]], "reported_compare": [], "unaimed": null, "repeat": {"kind": "k1", "label": "K1"}, "frame_c": ["fp32.zeros", "fp32.randn", "fp16.zeros", "fp16.randn", "int8.zeros", "int8.full", "anchor_pi"], "card_term_rules": ["X1", "X2"], "cheap_read_scale": true, "other_card": "E153", "pool_name": "pool 6", "pool_label": "pool6", "cs1_key": "E153_CS1_reading_within_1pct_of_M8", "script": "score_e157.py"}
+[A, E157 as reduced (X1, X2, S1, S2 not scored)] against scored.json (0d0c19aa2ff58ea6...) and results.md
+  verdicts: 25 reproduced, all equal to the committed ones
+    E157-P1: FAIL
+    E157-P2: PASS
+    E157-P3: PASS
+    E157-B1: PASS   (differs in: e142_footing, session_own_slope)
+    E157-B2: PASS
+    E157-C1: PASS
+    E157-M1: NOT RESOLVED   (differs in: e142_footing)
+    E157-M2: NOT RESOLVED
+    E157-H1: PASS
+    E157-H2: PASS
+    E157-H3: PASS
+    E157-H4: PASS
+    E157-R1: PASS
+    E157-R2: PASS   (differs in: session_own_slope)
+    E157-X1: NOT SCORED
+    E157-X2: NOT SCORED
+    E157-S1: NOT SCORED
+    E157-S2: NOT SCORED
+    E157-PC: PASS
+    E157-K1C: PASS
+    E157-PCa: PASS
+    E157-K1D: FAIL
+    E157-K1W: FAIL
+    E157-K1: FAIL
+    E157-K1prime: FAIL
+  the JSON trees: 8297 leaves compared, 0 differ (1 allowed by name: the input file's name, /c_check/verdict_files[0] 'ccheck-session.json.gz' / 'ccheck-session.json')
+  results.md: byte-identical
+[B, with E153's committed reduction (8e18eb67)] against scored-e153.json (1caecf0d3b639b53...) and results-e153.md
+  verdicts: 25 reproduced, all equal to the committed ones
+    E157-P1: FAIL
+    E157-P2: PASS
+    E157-P3: PASS
+    E157-B1: PASS   (differs in: e142_footing, session_own_slope)
+    E157-B2: PASS
+    E157-C1: PASS
+    E157-M1: NOT RESOLVED   (differs in: e142_footing)
+    E157-M2: NOT RESOLVED
+    E157-H1: PASS
+    E157-H2: PASS
+    E157-H3: PASS
+    E157-H4: PASS
+    E157-R1: PASS
+    E157-R2: PASS   (differs in: session_own_slope)
+    E157-X1: PASS   (differs in: e142_footing, session_own_slope, leak0.2955)
+    E157-S1: PASS   (differs in: session_own_slope, leak0.3320)
+    E157-X2: PASS   (differs in: e142_footing)
+    E157-S2: PASS   (differs in: e142_footing, leak0.2955, relaxed)
+    E157-PC: PASS
+    E157-K1C: PASS
+    E157-PCa: PASS
+    E157-K1D: FAIL
+    E157-K1W: FAIL
+    E157-K1: FAIL
+    E157-K1prime: FAIL
+  the JSON trees: 8960 leaves compared, 0 differ (1 allowed by name: the input file's name, /c_check/verdict_files[0] 'ccheck-session.json.gz' / 'ccheck-session.json')
+  results-e153.md: byte-identical
+SELFTEST PASS: E157's registered verdicts and numbers reproduced by score_e164.py in E157's scheme

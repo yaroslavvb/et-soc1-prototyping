@@ -1,0 +1,22 @@
+(1) score_rank4.py's own self-test on pool 6 (E153 / E157): rc 0; output byte-identical to the committed selftest-rank4.txt: True; last line: SELFTEST PASS: 16 checks, 0 differ
+RANK 4, paired-anchor card scale, pair selftest: card 1 at M9's terms: PASS
+  floats: anchors fp32.anchor7_randn_a 0.9616, fp32.anchor7_randn_b 0.9616, fp16.anchor7_randn_a 0.9616, fp16.anchor7_randn_b 0.9616 -> s_anchor 0.9616 (mean 0.9616 +- 0.0006 from passes); s_pool 0.9616 [0.9616, 0.9616] over 28 tiles; offset +0.00% against +-1%: PASS
+     per tile about s_anchor 0.00% rms, about s_pool 0.00%; s_anchor vs M9/M8's 0.9616: +0.00%; vs M7/M6's 0.9711: -0.98%
+     E78 arm: not run (E78's anchors not measured in both sessions)
+     fp32: anchors' median 0.9616 against its own 19 tiles' 0.9616 (+0.00%)
+     fp16: anchors' median 0.9616 against its own 9 tiles' 0.9616 (-0.00%)
+  int8: anchors int8.anchor7_full_a 0.9616, int8.anchor7_full_b 0.9616 -> s_anchor 0.9616 (mean 0.9616 +- 0.0043 from passes); s_pool 0.9616 [0.9616, 0.9616] over 24 tiles; offset +0.00% against +-2%: PASS
+     per tile about s_anchor 0.00% rms, about s_pool 0.00%; s_anchor vs M9/M8's 0.9616: +0.00%; vs M7/M6's 0.9735: -1.22%
+     E78 arm: not run (E78's anchors not measured in both sessions)
+  expected {'floats': 'PASS', 'int8': 'PASS'}: ok; beside: {"int8_s_anchor_rel_se": 0.004497395103975336, "int8_s_pool_rel_se_from_interval": 0.0, "int8_difference_rel_se": 0.004497395103975336, "registered_forecast_rel_se": [0.0135, 0.0164], "critic_planning_estimate_rel_se": 0.0095}
+RANK 4, paired-anchor card scale, pair selftest: card 1's two int8 random anchors 3% low: FAIL
+  floats: anchors fp32.anchor7_randn_a 0.9616, fp32.anchor7_randn_b 0.9616, fp16.anchor7_randn_a 0.9616, fp16.anchor7_randn_b 0.9616 -> s_anchor 0.9616 (mean 0.9616 +- 0.0006 from passes); s_pool 0.9616 [0.9616, 0.9616] over 28 tiles; offset +0.00% against +-1%: PASS
+     per tile about s_anchor 0.00% rms, about s_pool 0.00%; s_anchor vs M9/M8's 0.9616: +0.00%; vs M7/M6's 0.9711: -0.98%
+     E78 arm: not run (E78's anchors not measured in both sessions)
+     fp32: anchors' median 0.9616 against its own 19 tiles' 0.9616 (+0.00%)
+     fp16: anchors' median 0.9616 against its own 9 tiles' 0.9616 (-0.00%)
+  int8: anchors int8.anchor7_full_a 0.9327, int8.anchor7_full_b 0.9327 -> s_anchor 0.9327 (mean 0.9327 +- 0.0042 from passes); s_pool 0.9616 [0.9616, 0.9616] over 24 tiles; offset -3.00% against +-2%: FAIL
+     per tile about s_anchor 3.09% rms, about s_pool 0.00%; s_anchor vs M9/M8's 0.9616: -3.00%; vs M7/M6's 0.9735: -4.18%
+     E78 arm: not run (E78's anchors not measured in both sessions)
+  expected {'floats': 'PASS', 'int8': 'FAIL'}: ok; beside: {"int8_s_anchor_rel_se": 0.0044973951039753305, "int8_s_pool_rel_se_from_interval": 0.0, "int8_difference_rel_se": 0.0044973951039753305, "registered_forecast_rel_se": [0.0135, 0.0164], "critic_planning_estimate_rel_se": 0.0095}
+SELFTEST PASS
