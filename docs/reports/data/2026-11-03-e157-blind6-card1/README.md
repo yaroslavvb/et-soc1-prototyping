@@ -27,6 +27,25 @@ D over aifoundry3's on 25 tiles, median **0.9632 [0.9613, 0.9659]**, holds M8's 
 gives the reading and its sensitivity: on the registered footing the card term and the cheap-read scale hold to 1%; across this card's
 reduction arms the float ratio moves 0.954–0.973, so X1 fails on three of five arms and S1 on two.*
 
+*Corrected after verification (a dated note, Tue 3 Nov 2026, about 18:00–18:40 PST; desk only: no card, no device command, nothing re-run
+on a box). An independent verifier re-derived what this README reports from the box's own raw data. Every registered verdict and number
+reproduces byte for byte (the reduction, the scorer and the C check re-run), no WRITE was sent, and the blind order holds. It found five
+minor faults in what this README and the lane's result draw from them; while correcting the second, this pass found two more sentences of
+the same kind. None changes a measured, frozen or registered number, prediction or verdict. Each is corrected by a dated note beside the
+text it concerns, the text itself left as it was, and set out in full in
+[§ Corrections after verification](#corrections-after-verification-tue-3-nov-2026) at the end. The numbers are printed by
+[`posthoc/corrections_e157.py`](posthoc/corrections_e157.py) → [`posthoc/corrections.txt`](posthoc/corrections.txt)
+([`posthoc/corrections.json`](posthoc/corrections.json)), labelled post hoc.*
+- ***C1:*** *the twelve real tiles are not M8's best case. They are the best-read of the cases with more than two tiles (0.146 W rms, 12 of
+  12 inside); the two seeded-weight tiles (0.082 W) and the two C-register tiles (0.094 W) read lower.*
+- ***C2:*** *these launches are not the first silicon reads of int8's wrap, full-range int8, wide fp16 exponents or real tiles. E160 read
+  them first, on aifoundry2: 48 of the same pool's 50 tiles, launched 06:41:50–07:12:39 PST, 2,620 of 2,620 launches bit-exact, committed in
+  `6a330635` at 16:31:18 PST. These are the first checked reads of those ranges on card 1, beside E153's on aifoundry3 the same evening. And
+  C had been read back on file tiles before Q139 (E104, this card, Sun 1 Nov): what no check had covered was a power run's own launches.*
+- ***C3:*** *nobody read card 1's build on 3 Nov. "As E156 read it this morning" is wrong: the build named is the one card 1 has reported
+  since 31 Oct 2026 (E82 A1). A same-day read would have taken the firmware-revisions query, which these rounds do not send.*
+- *C4 and C5 correct the lane's integration text and two blog points; this README already gives those numbers right.*
+
 **In plain words.** M8 is the lab's newest model of how much power a matmul draws (watts over the same kernel on zeros) and how far the die
 warms (over a 4.5 s run), from the numbers it multiplies; on this card it carries a measured card term (card 1 draws 0.9616 times what
 aifoundry3 draws on the same tiles). Here it predicted 50 tiles it had never seen, written by someone who never saw it, on the lab's second
@@ -46,6 +65,17 @@ the lanes) draws 1.09 W less than every model says. **Heat**: the die's rise ove
 score on the floats. **K1**: the six pool-5 tiles came back within the reproducibility E142's own spread predicts on five of six; `int8.gray_a`
 read 0.19 W (4.4%) lower than in E142's session, outside Welch's ±0.15 W, so K1 FAILS as registered, and three of six moved more than the
 critic's 0.05 W.
+
+*(Dated note, Tue 3 Nov 2026, after verification, C1 and C2.)* Two phrases above go further than the data.
+- **"The twelve real tiles are its best case."** By case ([`posthoc/corrections.txt`](posthoc/corrections.txt) C1; § 3's table), M8's lowest
+  rms is the two seeded-weight tiles' (W, 0.082 W), then the two C-register tiles' (C, 0.094 W). The real tiles are **the best-read of the
+  cases with more than two tiles**: 0.146 W rms over 12, 12 of 12 inside.
+- **"The first silicon reads of int8's 32-bit wraparound, full-range int8 operands, fp16 exponents spread wider than anything read before
+  and twelve tiles cut from two public models."** They are **the first checked reads of those ranges on card 1**. E160 read them first, on
+  aifoundry2 under its own governor: 48 of pool 6's 50 tiles (all 19 int8 tiles, 11 of the 12 real ones), launched 06:41:50–07:12:39 PST,
+  every launch's C checked at the desk, 2,620 of 2,620 bit-exact, committed in `6a330635` at 16:31:18 PST, while this session ran
+  ([E160's README](../2026-11-03-e160-blind6-aifoundry2/README.md), § The check of C). E153 read all of them on aifoundry3 the same evening
+  (3,140 of 3,140, `8e18eb67`). "Wider than anything read before" holds against E104, the widest read before 3 Nov (§ 6), not against E160.
 
 ## Results
 
@@ -199,6 +229,15 @@ computed the right C. **What it does to the rows**: rank 14's guard holds (no fi
 its reproducibility half fails by the critic's 0.05 W and on one tile by Welch's: a repeated pool-5 tile on this card reproduces to about
 0.1–0.2 W, not 0.05.
 
+*(Dated note, Tue 3 Nov 2026, after verification, C2.)* "These launches are the **first silicon reads** of …", above: of the 36 tiles with
+first-read notes ([`tools/claims-v3/e157/ccheck-domain.txt`](../../../../tools/claims-v3/e157/ccheck-domain.txt)), E160 had run 30 on
+aifoundry2 that morning, every launch bit-exact, its check committed in `6a330635` at 16:31:18 PST: all 31 pool-6 ones but
+`fp32.anchor6_randn` (one of the two tiles E160 dropped at its 82 W line), so 13 of the 14 whose words wrap at 32 bits by n. The other six,
+K1's five pool-5 tiles and `fp32.anchor6_randn`, were first checked on silicon in this session and in E153's, on two cards the same evening
+(E153 checked all 36: 3,140 of 3,140 launches). So these are the first checked reads of those ranges on card 1, and the first anywhere for
+those six only ([`posthoc/corrections.txt`](posthoc/corrections.txt) C2). "The reference's arithmetic holds there too" stands, now on three
+cards.
+
 **7. The card term (X1, X2) and card 1's scale from cheap reads (S1, S2)** (rank 5; scored at 17:27 PST, after E153's commit: the dated
 note at the top; [`scored-e153.json`](scored-e153.json) › `primary.rules`). When this lane reduced, E153's committed primary reduction of
 pool 6 on aifoundry3 did not exist (E153's session ran beside this one, from 16:21 PST), and the first commit of this README handed the four
@@ -248,6 +287,14 @@ that tests it most directly misses by +0.78 W where M6 is within 0.04. The footi
 lower the scatter. **For an unseen kind on this card, the honest error now is about 0.3 W rms (2% of a float kind, 5–7% of an int8 kind),
 with M6 as good as M8**; the heat over a run follows from the power to about 0.15 °C. Carried to another card through the card term, the
 scale is the measured 0.9616 to 0.2% (floats) and 0.7% (int8) on pool 6, and the frozen zeros-level read predicts it to under 1%, on the one footing.
+
+*(Dated note, Tue 3 Nov 2026, after verification, C2; found by the fix pass, not the verifier.)* The table's rank-14 row gives the "before"
+as "no launch's C ever read on a file tile", and the header gives rank 14 as "no file tile's C had ever been checked". Both go too far. E104
+read C back on file tiles on this card on Sun 1 Nov: 110 launches on 44 designed tiles (`--values file:` with `--dump-c`), all PASS
+(Q139(k)'s [`README.md`](../../../../tools/claims-v3/ccheck/README.md), its C8 and its validation table; E104's
+[`E104.md`](../../../../tools/claims-v3/kinds/E104.md), the read-back block). And E160's 2,620 launches on pool 6 were checked and committed
+at 16:31:18 PST, during this session (C2 above). What no check had covered before this round was **a power run's own launches** (Q139(k)'s
+C8). That is the row's "before"; its "after" is unchanged.
 
 ## Registered against what happened
 
@@ -303,6 +350,17 @@ clause was dropped, the other two still held: `<ai> **Claude says:** using aifou
 for 1.5 h, until ~17:54 PST [doc](<…>)`, read back from the rendered message (edited 5:07 PM; the plan's cached source text lagged, as on
 E142). Mon 2 Nov's post was not touched. [`logs/push-and-claim-times.txt`](logs/push-and-claim-times.txt) has the order of events.
 
+*(Dated note, Tue 3 Nov 2026, after verification, C3.)* "As E156 read it this morning" is wrong: **nobody read card 1's build on 3 Nov.** The
+build named is the one card 1 has reported since 31 Oct 2026: release 1.4.0, BL1 and BL2 0.22.0, PMIC 1.3.0, minions 0.25.1, read by E82 at
+13:45:24 PDT that day ([E82's `ident/firmware_pre.txt`](../2026-10-31-e82-kinds-aifoundry1/ident/firmware_pre.txt), its A1; E129's dated
+note C1; [`AGENT.md`](../../../../AGENT.md)'s card table). E156's registration cites the same record rather than a read of its own
+([`tools/claims-v3/e156/README.md`](../../../../tools/claims-v3/e156/README.md), § Device commands sent). A read on the day would have taken the
+firmware-revisions query, which writes the PMIC's firmware-management command register and is not allowed under the owner's rules of
+2 November 2026. E82's own read sent it, as E82's dated note and 05-claims record. Neither E156 nor E157 sent it (§ Device commands sent). The
+verification read the host's uptime as 8 days at 17:42:48 PST, and nothing in these rounds resets or flashes a card. So the source read,
+et-platform `836a4ab` (BL2 0.22.0), and every class in § Device commands sent stand. The same words in the frozen registration are corrected
+beside it, in [`tools/claims-v3/e157/README.md.dated-note.md`](../../../../tools/claims-v3/e157/README.md.dated-note.md).
+
 ## What it changes
 
 - **Kinds page § 11, item 6** (and the "How well power and heat can be predicted" table): card 1's blind figure for a new kind becomes
@@ -316,6 +374,14 @@ E142). Mon 2 Nov's post was not touched. [`logs/push-and-claim-times.txt`](logs/
 - **Records to add** (integration lanes): 03-experiments (E157), 05-claims (item 6 on card 1 with pool 6; rank 14's C half), 14-card-behaviour
   (the session, the K1 scatter of 0.1-0.2 W between days, the zeros level's +10%), 04-artifacts; the Horace hub's Log (a new entry) and Status.
 
+*(Dated note, Tue 3 Nov 2026, after verification, C2 and C5.)*
+- **The rank-14 bullet:** read "the first checked reads on card 1 of int8's wrap and full range, wide fp16 exponents and real tiles" for "the
+  first silicon reads" (C2: E160 read those ranges first, on aifoundry2).
+- **The M9 bullet's "B's high mantissa bits in fp32":** this rests on one fp32 tile, `fp32.b_onebit_b20_third` (−1.089 W, outside every
+  model's band). Its neighbour at bit 12, `fp32.b_onebit_b12_third`, reads +0.080 W, inside every band. The one fp16 tile beside it,
+  `fp16.b_onebit_b6_third`, reads −0.459 W (outside M8's and M6's bands). So it is a lead for M9, not a measured term
+  ([`posthoc/corrections.txt`](posthoc/corrections.txt) C5).
+
 ## Files
 
 | file | what |
@@ -328,7 +394,45 @@ E142). Mon 2 Nov's post was not touched. [`logs/push-and-claim-times.txt`](logs/
 | `aifoundry1-c1/e157/p157{10..13}/`, `aifoundry1-c1/e157-smoke-p15701/`, `aifoundry1-c1/e157-stoptest-p15702/` | the raw passes: `runs.jsonl`, `marks.jsonl`, `telemetry.jsonl.gz`, `c-log.jsonl.gz`, configs, manifests, the dumped tiles, hashes, `STOP.*` |
 | `logs/` | the session's log, the queue, the session config reads, the box's preflight, binaries, `push-and-claim-times.txt` |
 | `telemetry-max.json`, `posthoc/` | reported extremes; post hoc readings (§ Departures and post hoc) |
+| `posthoc/corrections_e157.py` → `posthoc/corrections.txt`, `posthoc/corrections.json` | the numbers § Corrections after verification quotes (added Tue 3 Nov 2026, after verification; post hoc) |
 | `code.sha256` | every file of the code that ran and reduced |
 
 To reproduce from a copy of the raw passes (`e157/`, `e157-smoke/`, `e157-stoptest/`, `logs/`): `PY=<python with numpy> nice -n 10 bash
 tools/claims-v3/e157/collect_e157.sh <copy> [<E153's e153.json> [<its C-excluded tiles>]]`.
+
+## Corrections after verification (Tue 3 Nov 2026)
+
+*Desk only, about 18:00–18:40 PST: no card, no device command, nothing re-run on a box. The lane's verifier (17:35–17:58 PST) re-derived this
+README from the box's raw data. All 41 raw files equal the box's. The registered reduction, the scorer (with and without `--e153`) and the C
+check (3,170 of 3,170) re-run byte for byte. `dmcmd_audit.py` reads GO with the one reviewed exception, and every getter at et-platform
+`836a4ab` is a RAM copy or one of the allowed PMIC voltage-register reads. The statistics reset was never sent (`since_reset_ms` −1 in all
+27,115 samples), and the blind order `122da8b6` → `d98d2e34` → `01676499` holds in git. Its verdict: holds, with five minor fixes. This pass
+made them and found two more sentences under C2. No Discord action was needed: the day's post dropped card 1's clause at 17:07, and its later
+rewrites (17:12, 17:30 and 17:52 PST) never restored it. Every number below is printed by
+[`posthoc/corrections_e157.py`](posthoc/corrections_e157.py) ([`posthoc/corrections.txt`](posthoc/corrections.txt)).*
+
+| | what was said, and where | the correction | evidence |
+|---|---|---|---|
+| **C1** | "the twelve real tiles are its best case" (In plain words); the lane's blog point 4, "the easiest kinds to predict" | the best-read of the cases with more than two tiles: 0.146 W rms over 12, 12 of 12 inside. M8's two seeded-weight tiles (W, 0.082 W) and two C-register tiles (C, 0.094 W) read lower | `corrections.txt` C1 (`scored.json` › `primary.power_rows`); § 3 |
+| **C2** | "the first silicon reads of int8's 32-bit wraparound, full-range int8 operands, fp16 exponents spread wider than anything read before and twelve tiles cut from two public models" (In plain words; § 6; § What it changes, the rank-14 bullet; the lane's headline and `fb2e5c6e`'s subject; the registration's "the first silicon read of their value range") | the first checked reads of those ranges on card 1. E160 read 30 of the 36 first-read tiles first, on aifoundry2: launched 06:41:50–07:12:39 PST, 2,620 of 2,620 launches bit-exact, committed in `6a330635` at 16:31:18 PST; all 19 int8 tiles and 11 of the 12 real ones are among its 48. The six it did not run (K1's five pool-5 tiles and `fp32.anchor6_randn`) were first checked by this session and E153's (3,140 of 3,140 on aifoundry3, `8e18eb67`), the same evening | `corrections.txt` C2; E160's `results.json` › `c_check`, `ccheck-smoke.json` and `ccheck-stoptest-board.json`; E153's `ccheck/ccheck-all.json`; `tools/claims-v3/e157/ccheck-domain.txt` |
+| **C2′** (found by this pass) | "no file tile's C had ever been checked" (the header, for rank 14); "no launch's C ever read on a file tile" (§ 9, the rank-14 row's "before") | no power run's own launch had had its C checked (Q139(k)'s C8). E104 read C back on 44 designed file tiles on this card on Sun 1 Nov (110 launches, all PASS), and E160's pool-6 check was committed during this session | Q139(k)'s README (C8 and its validation table); `tools/claims-v3/kinds/E104.md` (the read-back block) |
+| **C3** | "release 1.4.0 (BL2 0.22.0, as E156 read it this morning)" (§ Card and post); the registration's "E156's session read it this morning" | nobody read card 1's build on 3 Nov. It is the build card 1 has reported since 31 Oct (E82 A1, 13:45:24 PDT; E129's C1), which E156's registration also cites. A same-day read would take the firmware-revisions query (a PMIC write, not allowed); neither E156 nor E157 sent it. The classification at `836a4ab` stands | E82's `ident/firmware_pre.txt`; `tools/claims-v3/e156/README.md`, § Device commands sent; the registration's dated note |
+| **C4** | the lane's result, not this README: "B1 +0.002 W vs M6 −0.137" (`prediction_effect`); "E78 anchors moved <= 0.06 W" (`for_integration`) | M8 +0.002 W against M6's **−0.127 W on the same 18 float tiles**; −0.137 W is M6's bias over all 30 priority-1 tiles, int8 included (M7: −0.128 W on the 18). E78's anchors moved **at most 0.061 W**: `fp32.randn` −0.061, `fp16.randn` +0.017, `int8.full` −0.040 on Q139(u)'s footing, at most 0.058 on E142's own. § 2's table and § 6 already give these right | `corrections.txt` C4 |
+| **C5** | the lane's blog points 5 ("the high mantissa bits of the second operand are cheaper than the models think") and 6 ("a cheap read … predicted that to under 1%") | 5: one tile, B's mantissa bit 20 toggling in a third of the lanes, drew 1.1 W less than every model said, which makes it a lead for the next model (bit 12 reads +0.080 W, inside every band; fp16's bit 6 −0.459 W). 6: true on the lab's one reduction footing, and it moves about 1% with the footing (the float ratio 0.954–0.973 across the five scored arms; X1 FAILS on three, S1 on two). § 7 and § 9 already carry the hedge; § What it changes' M9 bullet reads as a lead (its dated note) | `corrections.txt` C5; `scored-e153.json` › `arms` |
+
+**Where this pass departs from the verifier's words.** For C2 the verifier proposed "E160's morning C logs on aifoundry2 are not yet checked",
+reading E160's registration ([`tools/claims-v3/e160/E160.md`](../../../../tools/claims-v3/e160/E160.md), committed 06:40:07 PST, before any
+check). E160's data commit (`6a330635`, 16:31:18 PST) had checked them by then: 2,620 of 2,620 bit-exact. So the note says E160 read those
+ranges first.
+
+**What it does to predicting power and heat.** Nothing in any model, prediction, band or verdict changes, and every out-of-sample error stands
+as § 9 gives it. Term tested: M8 as a whole (the C-register flip term, the int8 near-whole-byte discount `bsat`, the refit on Q139(u)'s
+footing, the card term 0.9616; M7's heat law carried). Power for a new kind on card 1: before, nested, 0.198 / 0.170 / 0.238 W rms (fp32 /
+fp16 / int8); after, blind, 0.386 / 0.098 / 0.327 W (P1 FAIL), with M6 as good (+0.040 W [−0.013, +0.128]). Heat over a 4.5 s run: before
+0.352 / 0.355 / 0.141 °C, after 0.180 / 0.183 / 0.123 °C. The corrections change only what the numbers are said to mean:
+- the real tiles are the best-read large case, not the best case;
+- the C check's validity reading rests on three cards' checked launches (E160 2,620, E153 3,140, E157 3,170, all bit-exact), of which card
+  1's are these;
+- M8's float bias is +0.002 W against M6's −0.127 W on the same tiles;
+- the single-bit −1.09 W is one tile's lead;
+- the zeros level's 1% holds on the one footing only.

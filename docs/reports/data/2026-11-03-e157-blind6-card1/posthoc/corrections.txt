@@ -1,0 +1,47 @@
+E157 corrections after verification (post hoc and reported only; nothing here is a verdict)
+
+C1 every case, non-anchor tiles, M8's rms (bias), W, lowest first; M7 and M6 beside
+  W (2 tiles): M8 0.082 (-0.080), 2 of 2 inside; M7 0.119; M6 0.113
+  C (2 tiles): M8 0.094 (-0.086), 2 of 2 inside; M7 0.229; M6 0.322
+  R (12 tiles): M8 0.146 (-0.019), 12 of 12 inside; M7 0.184; M6 0.160
+  E (10 tiles): M8 0.293 (+0.204), 9 of 10 inside; M7 0.217; M6 0.167
+  B (5 tiles): M8 0.304 (-0.290), 5 of 5 inside; M7 0.383; M6 0.267
+  Z (4 tiles): M8 0.449 (+0.281), 4 of 4 inside; M7 0.234; M6 0.224
+  S (5 tiles): M8 0.533 (-0.326), 3 of 5 inside; M7 0.600; M6 0.542
+  L (4 tiles): M8 0.717 (+0.363), 3 of 4 inside; M7 0.422; M6 0.340
+  lowest M8 rms of all cases: W (2 tiles); of the cases with more than two tiles: R (12 tiles, 0.146 W)
+
+C2 the first-read ranges (tools/claims-v3/e157/ccheck-domain.txt, written at registration) and who read them
+  E157's domain file: 56 tiles, 36 with first-read notes (31 of pool 6, 5 of pool 5: K1's); its own summary line: {"tiles": 56, "inside": 56, "first_silicon_read": 36}
+  E160 (aifoundry2): s1 2596 PASS of 2596, smoke 19 of 19, board stop test 5 of 5: 2620 of 2620
+  E160 ran 48 of pool 6's 50 tiles, every launch PASS: True; not run: ['fp32.anchor6_randn', 'fp32.real_qwen_softmax_v']
+    int8: 19 of 19; real tiles: 11 of 12
+    of E157's 31 pool-6 first-read tiles, E160 ran 30; not: ['fp32.anchor6_randn']
+    E157's tiles whose notes say the words wrap at 32 bits: 14 (13 run by E160)
+  E153 (aifoundry3): 3140 PASS of 3140; 56 tiles C-checked, 36 of E157's 36 first-read tiles among them, all PASS
+  E157 (aifoundry1 card 1, ccheck/ccheck-session.json.gz): 3170 PASS of 3170 (fp32 1226, fp16 852, int8 1092)
+  E157's first-read tiles E160 did not run (so first checked on silicon by E157 and E153, the same evening): ['fp16.exp_only', 'fp16.sparse24_aligned', 'fp32.anchor6_randn', 'fp32.b_exp_busy_a_const', 'int8.b_line_zero_one', 'int8.gray_a']
+
+C4 bias, measured - model, W, over B1's 18 priority-1 float tiles (12 fp32, 6 fp16) and over all 30 priority-1 tiles
+  M8: +0.00154 over the 18 floats; -0.01243 over the 30
+  M7: -0.12831 over the 18 floats; -0.12402 over the 30
+  M6: -0.12652 over the 18 floats; -0.13696 over the 30
+  E78's random anchors, E157 - E142 (D, W; posthoc_e157.py (b)'s arithmetic)
+    Q139(u)'s footing: fp32.randn -0.061, fp16.randn +0.017, int8.full -0.040; largest move 0.061
+    E142's own footing (0.2414): fp32.randn -0.058, fp16.randn +0.011, int8.full -0.037; largest move 0.058
+
+C5 the single-bit tiles (case S), measured - model, W, and whether each sits inside that model's 95% band
+  fp16.b_onebit_b6_third (fp16, priority 2): M8 -0.459 (OUT); M7 -0.548 (in); M6 -0.444 (OUT)
+  fp32.a_onebit_b16_half (fp32, priority 2): M8 -0.043 (in); M7 -0.106 (in); M6 -0.082 (in)
+  fp32.a_onebit_b5_third (fp32, priority 1): M8 -0.120 (in); M7 -0.157 (in); M6 -0.103 (in)
+  fp32.b_onebit_b12_third (fp32, priority 1): M8 +0.080 (in); M7 +0.015 (in); M6 +0.041 (in)
+  fp32.b_onebit_b20_third (fp32, priority 1): M8 -1.089 (OUT); M7 -1.208 (OUT); M6 -1.119 (OUT)
+  X1, X2 (median D card 1 / aifoundry3) and S1, S2 (the zeros level's error), scored-e153.json, primary and every scored arm
+    primary: X1 0.9632 PASS; X2 0.9681 PASS; S1 +0.78% PASS; S2 -0.74% PASS
+    e142_footing: X1 0.9727 FAIL; X2 0.9826 FAIL; S1 -0.21% PASS; S2 -2.20% FAIL
+    session_own_slope: X1 0.9538 FAIL; X2 0.9520 PASS; S1 +1.77% FAIL; S2 +0.94% PASS
+    dips_kept: not scored (no rules)
+    leak0.2955: X1 0.9658 FAIL; X2 0.9715 PASS; S1 +0.50% PASS; S2 -1.09% FAIL
+    leak0.3320: X1 0.9608 PASS; X2 0.9643 PASS; S1 +1.02% FAIL; S2 -0.35% PASS
+    relaxed: X1 0.9632 PASS; X2 0.9716 PASS; S1 +0.78% PASS; S2 -1.09% FAIL
+  FAIL counts over the 5 scored arms: X1 3, X2 1, S1 2, S2 3
