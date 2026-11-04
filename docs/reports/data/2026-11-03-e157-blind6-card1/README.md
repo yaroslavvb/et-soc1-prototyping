@@ -79,7 +79,7 @@ by E78's own gate (`fp16.zeros departs +0.384 W from its straight line`). The C 
 
 The dips-kept arm keeps one pass (E78's gates set three aside on the meter's dips: `fp32.randn spans 2.026 W`, `fp16.randn spans 2.445 W`,
 `anchor_pi drifts +0.687 W`, as E142 saw), so it scores nothing. The anchor gates relaxed (all four passes kept) and the slope's interval
-(0.2955, 0.3320 W/°C) change no verdict.
+(0.2955, 0.3320 W/°C) change none of the verdicts scored at reduction time; they do move X1, S1 and S2 (§ 7).
 
 **2. Power, the three models on the same tiles** (measured − predicted, W; `scored.json` › `primary.reported`; [`posthoc/posthoc.txt`](posthoc/posthoc.txt) (d)):
 
