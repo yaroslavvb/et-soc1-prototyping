@@ -1,0 +1,19 @@
+THE PAIRED-ANCHOR CARD SCALE'S 95% INTERVAL WITH t QUANTILES (dated note, Wed 4 Nov 2026; post hoc, desk only)
+
+  fp32 E78 anchor fp32.randn: per-pass sd 0.07% / 0.24% of D over 4 / 3 passes (check 3's figures and standard error, to 1e-12: True); ratio 0.9624, relative s.e. 0.14%, Welch df 2.28; the lab's ratio interval (Welch on logs): df 2.28, t 3.83, 95% -0.6% / +0.6%
+  fp16 E78 anchor fp16.randn: per-pass sd 0.28% / 0.37% of D over 4 / 3 passes (check 3's figures and standard error, to 1e-12: True); ratio 0.9634, relative s.e. 0.25%, Welch df 3.58; the lab's ratio interval (Welch on logs): df 3.58, t 2.91, 95% -0.7% / +0.7%
+  int8 E78 anchor int8.full: per-pass sd 0.78% / 3.62% of D over 4 / 3 passes (check 3's figures and standard error, to 1e-12: True); ratio 0.9597, relative s.e. 2.12%, Welch df 2.14; the lab's ratio interval (Welch on logs): df 2.14, t 4.04, 95% -8.2% / +9.0%
+
+  floats scale, the mean of 4 anchors 0.9619: s.e. 0.0010 = 0.10% (check 3: 0.0010, the same to 1e-12: True); degrees of freedom 5.38 with pool 6's errors copied from E78's, 10.76 if they were measured with the same spread
+    95% half-width: 0.23% (df 10.76, t 2.21) to 0.26% (df 5.38, t 2.52); at 2 / 3 / 4 df 0.45% / 0.33% / 0.29%; normal 0.20%; doubled 0.21%
+    the scale's point against the pool's median -0.15%; rank 4's line 1%
+  int8 scale, the mean of 2 anchors 0.9580: s.e. 0.0144 = 1.50% (check 3: 0.0144, the same to 1e-12: True); degrees of freedom 2.14 with pool 6's errors copied from E78's, 4.28 if they were measured with the same spread
+    95% half-width: 4.07% (df 4.28, t 2.71) to 6.08% (df 2.14, t 4.05); at 2 / 3 / 4 df 6.46% / 4.78% / 4.17%; normal 2.94%; doubled 3.00%
+    the scale's point against the pool's median -1.04%; rank 4's line 2%
+
+  M8 float jackknife by kind: 343 kinds, t(0.975, 342) = 1.967
+  M8 int8 jackknife by kind: 66 kinds, t(0.975, 65) = 1.997
+  M9 float jackknife by kind: 370 kinds, t(0.975, 369) = 1.966
+  M9 int8 jackknife by kind: 83 kinds, t(0.975, 82) = 1.989
+
+SUMMARY (rounded): int8's scale is +-4.1-6.1% at 95% with t, against +-3.0% doubled; the floats' +-0.23-0.26% against +-0.21%; the jackknife prices' t(0.975) 1.97-2.00 over 66-370 kinds a family

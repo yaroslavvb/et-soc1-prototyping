@@ -1,0 +1,153 @@
+{
+ "_note": "Dated note, Wed 4 Nov 2026, after Q140's records' second verifier: the paired-anchor card scale's 95% interval with t quantiles. Post hoc, desk only.",
+ "inputs": {
+  "check3": "docs/reports/data/2026-11-04-q140c-critic-checks/check3-anchor-card-scale.json",
+  "aifoundry3": "docs/reports/data/2026-11-03-e153-blind6-aifoundry3/scored.json primary.primary.e78_anchors_D",
+  "aifoundry1c1": "docs/reports/data/2026-11-03-e157-blind6-card1/scored.json primary.e78_anchors_D",
+  "jackknife": [
+   "docs/reports/data/2026-11-03-q139m-model/m8.json",
+   "docs/reports/data/2026-11-04-q140m-m9/m9.json"
+  ]
+ },
+ "anchors": {
+  "fp32": {
+   "tile": "fp32.randn",
+   "passes": [
+    4,
+    3
+   ],
+   "rel_sd_per_pass": [
+    0.0007412317957864972,
+    0.002417635736127864
+   ],
+   "matches_check3": true,
+   "ratio": 0.962372816648994,
+   "rel_se": 0.001444187312864479,
+   "rel_se_check3": 0.0014441873128644795,
+   "welch_df": 2.284370245057819,
+   "lab_ratio_interval": {
+    "method": "Welch on logs (ablcore.py ratio())",
+    "df": 2.28395731496035,
+    "t": 3.8285759278043683,
+    "rel_lo": -0.005516865219331257,
+    "rel_hi": 0.005547469862873022
+   }
+  },
+  "fp16": {
+   "tile": "fp16.randn",
+   "passes": [
+    4,
+    3
+   ],
+   "rel_sd_per_pass": [
+    0.0027528943009089172,
+    0.003714171640046432
+   ],
+   "matches_check3": true,
+   "ratio": 0.9634346498344314,
+   "rel_se": 0.002548129460716089,
+   "rel_se_check3": 0.002548129460716089,
+   "welch_df": 3.582185325547146,
+   "lab_ratio_interval": {
+    "method": "Welch on logs (ablcore.py ratio())",
+    "df": 3.576418543588021,
+    "t": 2.9110659136872075,
+    "rel_lo": -0.007393705957148167,
+    "rel_hi": 0.007448780046551917
+   }
+  },
+  "int8": {
+   "tile": "int8.full",
+   "passes": [
+    4,
+    3
+   ],
+   "rel_sd_per_pass": [
+    0.007774310706734189,
+    0.03618078177403659
+   ],
+   "matches_check3": true,
+   "ratio": 0.9597125160125447,
+   "rel_se": 0.0212475794700172,
+   "rel_se_check3": 0.021247579470017205,
+   "welch_df": 2.1392006852365073,
+   "lab_ratio_interval": {
+    "method": "Welch on logs (ablcore.py ratio())",
+    "df": 2.1403127514572726,
+    "t": 4.043336695017414,
+    "rel_lo": -0.08221215195098286,
+    "rel_hi": 0.08957642240060704
+   }
+  }
+ },
+ "scales": {
+  "floats": {
+   "anchors": 4,
+   "mean": 0.961897958863007,
+   "se": 0.0009962859152651477,
+   "se_check3": 0.0009962859152651477,
+   "se_matches_check3": true,
+   "rel_se": 0.0010357501085071314,
+   "df_low_pool6_copied": 5.38046407244011,
+   "df_high_pool6_independent": 10.760870670610107,
+   "t_low_df": 2.516859476724976,
+   "t_high_df": 2.2069672862305465,
+   "rel_half_width_95": {
+    "t_at_df_low": 0.002606837476115096,
+    "t_at_df_high": 0.0022858666061849778,
+    "normal": 0.0020300329256700716,
+    "doubled": 0.002071500217014263
+   },
+   "rel_half_width_95_at_integer_df": {
+    "2": 0.004456473031706504,
+    "3": 0.0032962191060157166,
+    "4": 0.0028757033189727057
+   },
+   "rank4_line": 0.01,
+   "point_vs_pool_rel": -0.0014763424928605495
+  },
+  "int8": {
+   "anchors": 2,
+   "mean": 0.957992599678055,
+   "se": 0.014393198622387764,
+   "se_check3": 0.014393198622387764,
+   "se_matches_check3": true,
+   "rel_se": 0.015024331740375419,
+   "df_low_pool6_copied": 2.139200685236508,
+   "df_high_pool6_independent": 4.278346210575465,
+   "t_low_df": 4.045179626809864,
+   "t_high_df": 2.7066373354048956,
+   "rel_half_width_95": {
+    "t_at_df_low": 0.06077612066259943,
+    "t_at_df_high": 0.04066541722800892,
+    "normal": 0.029447149335193167,
+    "doubled": 0.030048663480750838
+   },
+   "rel_half_width_95_at_integer_df": {
+    "2": 0.06464448197538769,
+    "3": 0.04781412903651444,
+    "4": 0.04171423231943314
+   },
+   "rank4_line": 0.02,
+   "point_vs_pool_rel": -0.0104438011812088
+  }
+ },
+ "jackknife": {
+  "M8.float": {
+   "n_kinds": 343,
+   "t95": 1.966924645480423
+  },
+  "M8.int8": {
+   "n_kinds": 66,
+   "t95": 1.9971379083919887
+  },
+  "M9.float": {
+   "n_kinds": 370,
+   "t95": 1.96641368394519
+  },
+  "M9.int8": {
+   "n_kinds": 83,
+   "t95": 1.9893185571365786
+  }
+ }
+}

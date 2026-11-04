@@ -3055,7 +3055,12 @@ one standard error; Q140(c)'s rows and every row marked post hoc were read after
 Q140(r)'s verifier: the term table's fitted prices, M8's −56.8 ± 29.4 and M9's −29.3 ± 9.4 fJ a bit, `bpp_r4`'s +2.205 ± 0.271 and
 `xstage`'s +0.65 ± 0.36 fJ, are ± one standard error, the jackknife by kind (Q140(m)'s README, section 3), and so is the
 paired-anchor card scale, −0.15% (±0.10%) for floats and −1.0% ± 1.5% for int8, from the anchors' passes (Q140(c) check 3); a 95%
-interval is about twice as wide, so int8's scale is about ±3% at 95%.)* Pool 7 is described by counts and
+interval is about twice as wide, so int8's scale is about ±3% at 95%.)* *(Dated again, Wed 4 Nov 2026, after the records' second
+verifier: that doubling holds for the jackknife prices, which rest on 66–370 kinds a family, but not for the anchor scale. Its
+standard error rests on a few passes: card 1's three passes of E78's int8 anchor carry almost all of int8's (2.14 degrees of
+freedom), and pool 6's anchor errors are assumed equal to E78's, not measured. With t quantiles, as the lab's pass intervals take
+them, int8's scale is ±4.1–6.1% at 95%, not about ±3%, and the floats' ±0.23–0.26%
+([`2026-11-04-q140-anchor-scale-t95/`](../reports/data/2026-11-04-q140-anchor-scale-t95/README.md)).)* Pool 7 is described by counts and
 classes only, until its runs. 🛑 **To carry from here, beside the earlier sections' items:** (37) **no Q140 figure is a blind
 score:** M9, G4, the heat replicates and rank 4's rule are frozen, and E163–E169 score them; (38) **quote Q140(l)'s and Q140(q)'s
 held-out errors with the selection's label:** nested inside each fold aifoundry2's bursts read 5.1–6.9 MHz / 0.89–0.93 W /
