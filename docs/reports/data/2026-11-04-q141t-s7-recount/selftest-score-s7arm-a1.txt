@@ -1,0 +1,39 @@
+Q141(t) score_s7arm_a1.py --selftest: amendment A1 (REGISTRATION.md.dated-note-2.md) on the frozen score_s7arm.py. Known answers on
+rows built from the arm's own numbers (nothing here is a measurement), the calibration of R5 and R5m when no base-word price
+exists, and the route through E163's and E164's own scorers on their simulated sessions. Python 3.9.6.
+
+T0 the frozen inputs: 10 of 10 hash as committed (score_s7arm.py, arm-s7.json, the two arm27 files, m9.json, rows-m9.json, m7.json, E153's and E157's scored.json, the committed self-test text); score_s7arm.py --selftest re-run in this process: PASS, its text identical to the committed selftest-score-s7arm.txt: True
+   M9's fp32 band pool rms (A1-3's m): aifoundry3 0.2001 W, card 1 0.2112 W; M7's heat coefficient on S (A1-2's g): aifoundry3 0.11855 C/W, card 1 0.11511 C/W
+
+T1 a: all measured, r27 = +0.20 W on every tile: R2-R4 read True, R5 read True, R5m read True, R5-3 False, the frozen r5() alone would read: True; aifoundry3 R5 chi2 0.0000 on 3 df, p 1.0000 (not read); R5m chi2 0.0000, p 1.0000 (not read); both cards as expected: True
+T1 b1: a base-word pattern at chi2 = 1.02 x 7.815: R2-R4 read True, R5 read True, R5m read True, R5-3 False, the frozen r5() alone would read: True; aifoundry3 R5 chi2 7.9713 on 3 df, p 0.0466 (READ); R5m chi2 3.1775, p 0.3651 (not read); both cards as expected: True
+T1 b2: the same pattern at chi2 = 0.98 x 7.815: R2-R4 read True, R5 read True, R5m read True, R5-3 False, the frozen r5() alone would read: True; aifoundry3 R5 chi2 7.6587 on 3 df, p 0.0536 (not read); R5m chi2 3.0529, p 0.3835 (not read); both cards as expected: True
+T1 c: only the four bit-20 tiles of S7 measured (4 of 7): R2-R4 read False, R5 read False, R5m read False, R5-3 False, the frozen r5() alone would read: True; both cards as expected: True
+T1 d: 5 of 7, three bit-20 (b20_full and fp16 b8_pi set aside): R2-R4 read True, R5 read False, R5m read False, R5-3 True, the frozen r5() alone would read: True; aifoundry3 R5-3 chi2 3.4339 on 2 df, p 0.1796 (reported only); both cards as expected: True
+T1 e: 6 of 7, all four bit-20 (fp16 b8_pi set aside): R2-R4 read True, R5 read True, R5m read True, R5-3 False, the frozen r5() alone would read: True; aifoundry3 R5 chi2 7.9713 on 3 df, p 0.0466 (READ); R5m chi2 3.1775, p 0.3651 (not read); both cards as expected: True
+T1 f: 5 of 7, two bit-20 (b20_full and b20_pi set aside): R2-R4 read True, R5 read False, R5m read False, R5-3 False, the frozen r5() alone would read: False; both cards as expected: True
+   (the statistics equal an independent sum to 1e-9 and the p values the closed forms Q(3/2, x/2) = erfc(sqrt(x/2)) + sqrt(2x/pi) exp(-x/2) and exp(-x/2) to 1e-9)
+
+T2 R6 a: D(a1p5) = P27 + 0.25 W, everything measured: aifoundry3 r27 +0.2500 vs pool 6's +0.0642 W, d +0.1858 +- 0.3405; both cards as expected: True
+T2 R6 b: a1p5 not measured: not read (fp32.b_onebit_b20_third_a1p5 not in the run's rows); both cards as expected: True
+T2 R6 c: a1p5 alone measured (no S7 tile): aifoundry3 r27 +0.2500 vs pool 6's +0.0642 W, d +0.1858 +- 0.3405; both cards as expected: True
+
+T3 heat's law: dT3 = g x S3 and dT27 = g x S27 to their 3-decimal rounding on all 16 tile-cards (worst 0.00048 C), and k_dT = g x k to the rounding of two rises (worst 0.00062 C): True
+T3 a: rise = dT27 + 0.10 C everywhere: aifoundry3 rms r3 0.1200 -> r27 0.1000 C, d -0.0200 (95% [-0.0397, +0.0036]), mean r27 95% [+0.1000, +0.1000]; pooled read True; pred flags []; both cards as expected: True
+T3 b: rises on 4 of 7 S7 tiles only (D on all): R2 not read; pooled read False; pred flags []; both cards as expected: True
+T3 c: the run's M9 rise pred off by 0.01 C on fp16 b9_one: aifoundry3 rms r3 0.1200 -> r27 0.1000 C, d -0.0200 (95% [-0.0397, +0.0036]), mean r27 95% [+0.1000, +0.1000]; pooled read True; pred flags ['fp16.b_onebit_b9_one']; both cards as expected: True
+
+T4 how often R5 (and R5m) read a base-word price (p < 0.05), 20,000 draws a world, se 0.03 W a tile, the arm's u; M9's ordinary error = a draw from M9's nested fp32 errors on the card (rows-m9.json, 241 rows on aifoundry3, 171 on card 1):
+   aifoundry3: equal sigma (the exact chi2(3) case, known answer 0.0438-0.0562): R5 0.0505, as expected; the arm's sigma, counting and measurement only: R5 0.0679 (its centring on the unweighted mean gives E[chi2] 3.268, not 3), R5m 0.0008
+   aifoundry3: plus M9's ordinary error, no base-word price: R5 0.3590, R5m 0.0546; plus a 0.6 W price on one bit-20 tile: R5 0.7638, R5m 0.3382
+   aifoundry1c1: equal sigma (the exact chi2(3) case, known answer 0.0438-0.0562): R5 0.0522, as expected; the arm's sigma, counting and measurement only: R5 0.0671 (its centring on the unweighted mean gives E[chi2] 3.267, not 3), R5m 0.0006
+   aifoundry1c1: plus M9's ordinary error, no base-word price: R5 0.3900, R5m 0.0633; plus a 0.6 W price on one bit-20 tile: R5 0.7945, R5m 0.3271
+   So a READ of R5 by itself does not separate a base-word price from M9's ordinary per-tile error; R5m does, at about the stated rate. Both stay reported only.
+
+T5 the route: a simulated E163 session through score_e163.run (arm27 = arm/arm27-aifoundry3.json, the collector's second argument) and a simulated E164 session through score_e164.run (s_recount = arm/arm27-aifoundry1c1.json, the collector's E164_S_RECOUNT), each from its own committed self-test simulator, written as scored.json and read by this file:
+   aifoundry3: scored form under primary.primary; 8 of 8 arm tiles read, D equal to the run's power_rows: True; the run's M9 power pred = P3 on all 8: True, its rise pred = dT3 on all 8: True; R2-R4 True, R5 True, R5m True, R6 True, heat R2 True
+   aifoundry1c1: scored form under primary; 8 of 8 arm tiles read, D equal to the run's power_rows: True; the run's M9 power pred = P3 on all 8: True, its rise pred = dT3 on all 8: True; R2-R4 True, R5 True, R5m True, R6 True, heat R2 True
+   E163's reported_arm27: 8 rows, arm27_D = the file's values: True; E164's reported_s_recount_arm: 8 tiles, recount_pred = the file's values: True; pooled power read True, pooled heat read True
+   the six route files hash as committed (score_e163.py, selftest_e163.py, predictions-e163.json at 442474d5; score_e164.py, selftest_e164.py, predictions-e164.json at f4e75c95): True; route as expected: True
+
+selftest: PASS
