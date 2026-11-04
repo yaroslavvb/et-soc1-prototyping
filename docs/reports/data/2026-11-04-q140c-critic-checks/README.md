@@ -208,6 +208,14 @@ stays on the private notes' list, untouched. Fault 11, pushed commit messages, c
   . --out docs/reports/data/2026-11-04-q140c-critic-checks/<name>.json > docs/reports/data/2026-11-04-q140c-critic-checks/<name>.txt`
   (check 1 needs a python with numpy). The bootstraps use fixed seeds.
 
+## Published (Wed 4 Nov 2026, 00:5x–01:1x PST)
+
+- This folder: lab `45418d44` (00:51:22 PST). The records' dated corrections: lab `9f79b3de` (00:56:07 PST): 05-claims' Q139 section (its note, the item 6 and 9 rows, six How-well rows, the exponent's row, a note after "So:"), 02-requests' Q139 row, the findings README's Q139 paragraph, 03-experiments' Q139(s) entry, Q139(s)'s README (two notes) and E161's README (two notes). A25's dated note in 04-artifacts and this section: the commit after them.
+- The kinds page, [Multiplying different numbers](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers): `e75e1842ac8a` (01:01:02 PST) over `d571349e663f`, public and unlisted, 27 exact replacements outside every generated block, a dated line in the How-well section and a Sources line. Read back signed out: the shell frames `e75e1842ac8a`, its `<main>` identical to the deploy copy once 190 auto anchors are removed, 27 of 27 phrase checks (the new wordings in, the replaced ones gone), public-text counts unchanged.
+- The [Horace Hub](https://spacesheep.dev/@yaroslavvb/horace-hub): `a3a12e645e74` (01:07:51 PST) over `99f33ddbbd17`, public and unlisted: one new Fix entry at the top of week 45 (no Log entry edited; its head 300 visible characters, the Log's two-line flags unchanged at 16), Status (where it stands, the Q139 paragraph, section 11 re-quoted from `e75e1842ac8a` by the integration's quoting rules, Q139's verification), Levels stops 1 and 3, and the Library line. Read back signed out: `<main>` identical to the deploy copy (273 auto anchors), 32 of 32 phrase checks, public-text counts unchanged against the replaced version's deploy copy. The projects tracker (private): `7aa0361c0dfc` over `4e31403d5290`, one new Fix entry and its Horace row (the page's version, heat as each card predicted it); signed out it refuses (302 / 401), signed in its text equals the deploy copy, 8 of 8 phrase checks. Both committed in gyroscope `b44a0ab4`, the page in `6d111335`.
+- **Not changed:** the Horace Hub's private notes and the AI Foundry hub. Neither quotes a faulty sentence outside its Log (the AI Foundry hub's Experiments rows give E154, E157, E160, E161 and Q139(s) as registered, E161's with its kernel-duty figure), and their Logs are append-only. Fault 10 stays on the private notes' list for the owner (its "Small fixes owed").
+- No verifier has re-read this lane's checks or corrections.
+
 ## Device commands sent
 
 None. This lane opened no device node, took no card lock and ran nothing on a lab host. It read committed files only.
