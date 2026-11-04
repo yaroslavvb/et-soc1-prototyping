@@ -1,0 +1,88 @@
+{
+ "lane": "Q140(e)",
+ "what": "the heat replicates' frozen predictions (E166 aifoundry3, E167 aifoundry2): one duty convention, the in-work level, the scoring window, the critic's rank-3 rules, the designs, the long hold",
+ "answers": {"critic": "Q139's final critic, rank 3", "kinds_page_section_11_items": [9, 8, 6]},
+ "written": "Wed 4 Nov 2026, about 02:15-02:40 PST, the Intel, desk only; committed before any prediction, fit or score of this lane",
+ "inputs": {
+  "Q139e": ["455c46c1", "e224a3f8 (amendment A1)"],
+  "E154": ["d037d82a", "d37c787e (corrections)"],
+  "E161": ["0158efd6", "d0704105 (corrections)"],
+  "Q140l": ["245caffe (registration)", "5b98bd5c (m9_a2.json frozen)", "5c98c0c5 (corrections)"],
+  "Q138t": "docs/reports/data/2026-11-02-q138t-heat-model/ (model-q138t.json, heat_q138t.py, score_e144.py)"
+ },
+ "read_before_registering": "the critic's rank 3 and faults 2 and 6; Q139(e), E154, E161 and Q140(l) (its C1 gives E161 G1Q's post hoc plateau error under options (a) +0.51 C and (b) +0.22 C at the kernel duty); the kernel duties in E154's and E161's committed records (E154 0.9611-0.9618 natural chain, 0.7916 K_S; E161 0.9696 G1Q, 0.9702 G2Q). Nothing fitted or predicted.",
+ "R1_duty_convention": {
+  "definition": "d = sum(t_end - t_start) over every kernel-launch record of the hold's work processes (the launch = -1 calibration record included) / (end of the hold's last process - start of its first process); from the launch records alone, never telemetry",
+  "records": {"aifoundry3": "runs.jsonl records of the hold's block; processes = marks.jsonl launch marks of the block",
+              "aifoundry2": "launches.jsonl sparsity entries of the HOLD's work processes (role work, run HOLD*); processes = those work records"},
+  "use": {"aifoundry3": "the records one by one through score_e144.s_on_grid + closed_on_grid, each on at the item's frozen S (E154's registered arm E machinery)",
+          "aifoundry2": "chain input L(T) + d (board(f, T) - L(T)) - P_ref, L(T) = P_ref + 0.442 (T - T_rest); trip clock: P_t = P_ref + (65.9 - T_rest)/R, P_w = L_t + (P_t - L_t)/d, the clock where the in-work board meets P_w (E161 corrections C1)"},
+  "primary_d": "the session's own launch records (E166: every record; E167: each hold's own d)",
+  "plan_d": "the previous session's: E154's records for the same item (aifoundry3), E161's d for the same hold (aifoundry2)",
+  "known_bias": "aifoundry2's process start-up (0.15-0.2 s at 36-39 W before the first kernel launch) is counted as idle"
+ },
+ "R2_level_aifoundry2": {
+  "Q140l_terms_carried": {"T1": "carried (cap plateau)", "T2": "carried (zeros-anchor level)", "T3": "carried (die-start)", "T4": "kept by the rule's letter, nil"},
+  "registered_option": "(a): board9(f, T) = board8(f, T) + [B9(f) + c9 s9(f)] - [B8(f) + c8 s8(f)] + beta x delta_t, f in 600/700/800 MHz, linear between; c8 = Q139(e) c_of; c9 = M9 c_zeros[t] + g x D (D = the same M8 D600 from the bits); delta_t = m9_a2.json fallback_delta_w[t] (no zeros anchor in E167)",
+  "terms_used": ["T2 (through M9's refit relation, which carries T4)"],
+  "terms_not_used": {"T3": "a burst-start law fitted on starts of 45-56 C; the holds' plateaus sit 6-10 C above; it would replace the chain's frozen closure law 0.442 W/C; E159's flat zeros boards (0.06 W over starts 52-57 C) against k_T's 2.0 W", "T1": "the holds sit under the cap but for G2Q's first minute, where the governor's terms stay Q139(e)'s (M8's 65.2 W cap on the in-work board, one 100 MHz step a second)"},
+  "die_law": "one: Q139(e)'s 0.442 W/C from its 56.0 C reference die, the leakage law that also closes Q138(t)'s chain on aifoundry2",
+  "disclosed": "chosen knowing Q140(l)'s post hoc C1 (option (b) reads E161 G1Q closer: +0.22 against +0.51 C at the kernel duty)",
+  "arms": {"primary_E": "M9 level (a) at the session's own d", "beside": ["M8 level at the same d (the duty convention alone)", "M8 level at continuous work (Q139(e) as frozen)", "M9 level with the session's own zeros anchors, if E167's card session runs any on E80's harness"]},
+  "aifoundry3": "M8's frozen S (Q139(e) S_table_W); Q140(l)'s part is aifoundry2's only"
+ },
+ "R3_windows": {
+  "plateau": "mean over [b - 300 s, b), b = the end of the hold's last process (launch records), measured and predicted, as rises over the hold's anchor (aifoundry3: 34-sensor mean, last 120 s of the rest before; aifoundry2: the REST file's last 120 s of raw firmware samples)",
+  "aifoundry2_predicted_plateau": "the frozen trajectory's mean over the same window (800 MHz regime); the trip rule's 65.9 C in the trip regime",
+  "checkpoints_s": {"aifoundry3_10min": [60, 120, 180, 300, 450, 600], "aifoundry2_13min": [60, 120, 180, 300, 450, 600, 750], "long_hold": [60, 120, 180, 300, 450, 600, 900, 1200, 1500]},
+  "checkpoint_rule": "from the first process's start, 5 s means (one launch cycle on K_S), each that ends before b, plus 'end' = the 5 s (one cycle) ending 0.5 s before b; rms over all",
+  "arm_A": "read on the same windows"
+ },
+ "R4_rules": {
+  "RK3_a": {"card": "aifoundry3 (E166)", "rule": "at least 3 of K_S, K_Q, K_L, K_O (K_O = the long hold's first 600 s) have |arm E plateau error| <= critic scale AND arm E checkpoints' rms <= critic scale", "critic_scale_C": {"K_S": 0.278, "K_Q": 0.369, "K_L": 0.574, "K_O": 0.277}, "source": "predictions-q139e.json aifoundry3.session.holds[].critic_scale_C"},
+  "RK3_b": {"card": "aifoundry2 (E167)", "rule": "G1Q: |arm E plateau error| <= 1.0 C AND arm E checkpoints' rms <= 1.0 C"},
+  "RK3_c": {"cards": "both (E166 and E167)", "rule": "every hold with a measured plateau rise >= 10 C over its anchor: |arm A plateau error| / measured rise <= 0.015"},
+  "rank3_answered_on_the_replicates": "all three hold; each reported on its own",
+  "readout_note": "an aifoundry2 REST reading one whole degree in every sample of its last 120 s: each RK3-b/RK3-c reading also given over the anchor's +-0.5 C; a verdict changing inside it is reported as 'not resolved by the readout'; the registered verdict is the reading as is",
+  "carried_secondary": {
+   "aifoundry3_bands": {"K_S": [0.599, 1.3], "K_Q": [0.941, 1.882], "K_L": [1.446, 2.892], "K_O": [0.688, 1.376], "rule": "PASS |pe| <= band_95_C and rms <= band_95_C; FAIL |pe| > fail_beyond_C; else INCONCLUSIVE"},
+   "G1Q": {"band_95_C": 3.149, "fail_beyond_C": 6.297, "clock": "share >= 790 MHz over the window: PASS >= 0.90, FAIL < 0.75"},
+   "G2Q": {"plateau": "PASS within +-0.60 C of 65.9 in the trip regime; FAIL outside +-1.20 or the other regime", "clock": "the clock from the bits at the trip at d: PASS within +-35 MHz, FAIL outside +-70"},
+   "arm_A_bands": "score_e144's, reported"
+  },
+  "session_figures_reported": ["rms of the four replicate holds' arm E plateau errors (aifoundry3)", "G1Q's error (aifoundry2)", "E - A per hold", "M7's and M6's S through the chain (aifoundry3)", "M7's c (aifoundry2)", "E153's measured S (aifoundry3)"]
+ },
+ "R5_designs": {
+  "E166": {"card": "aifoundry3 card 0, 600 MHz pinned, nothing set", "harness": "E154's",
+           "steps": [["R0", 5.0, "rest"], ["K_S", 10.0, "fp32.real_smol_softmax_v_causal", "7 dispatches (--seconds 3.20) every 4.37 s (R0 <= 51.5 C), 4.97 s (51.5-53.0 C); a rest above 53.0 C"],
+                     ["R2", 3.5, "rest"], ["K_Q", 10.0, "int8.real_qwen_w8a8_v", "natural chain"], ["R3", 3.5, "rest"],
+                     ["K_L", 10.0, "int8.b_line_zero_ff", "natural chain"], ["R4", 3.5, "rest"],
+                     ["K_OL", 25.0, "fp32.a_onebit_b5_third", "natural chain; first 600 s = K_O's replicate window"], ["R5", 2.5, "rest"]],
+           "plan_minutes": 73.0, "card_minutes_with_smoke_est": 74.4, "envelope": 76,
+           "planned_records": "each hold's E154 records for the same item at their offsets from E154's hold start; K_S at 4.97 s re-lays E154's K_S launches at that spacing; K_OL repeats E154's K_O block every 600 s, keeping launches that end by 1500 s",
+           "K_O_window": "the first 600 s of K_OL; b = the end of the last process ending at or before 600 s after the first process's start",
+           "long_hold_room_rule": "K_OL runs 25 min if its frozen in-launch peak (34-sensor mean) at R0's room, interpolated in this lane's table, is <= 67.5 C; otherwise it ends at the last whole launch before the plan's first crossing at that room (K_O's window still scored)",
+           "stops": "Q138(t)'s, unchanged: no launch at a firmware reading >= 70 C; a hold ends at >= 72 C or >= 65 W; the session at >= 74 C",
+           "subset": "none"},
+  "E167": {"card": "aifoundry2 card 0, its own governor (65 W / 65 C), nothing set", "harness": "E161's (E144b's runner)",
+           "steps": "SMOKE, STOPTEST-DIE, STOPTEST-BOARD, 15 min no-launch rest, G1Q (REST 2 + 93 x 8 s processes of int8.b_line_zero_ff, 13 min), END 2, 15 min rest, G2Q (REST 2 + 91 x 8 s processes of fp32.real_smol_softmax_v_causal, 13 min), END2 2",
+           "card_minutes": "E161 used 35.07 of 40", "envelope": 40,
+           "peak_rule": "M8's peak rule unchanged (Q140(l)): G1Q 53.33 W, G2Q 68.15 W at 95% (predictions-q139e.json), under section 22's 82 W",
+           "stops": "E161's: a hold ends at a reading >= 72 C or >= 80 W on three consecutive samples (tested in the smoke)"}
+ },
+ "R6_long_hold": {
+  "readings": "arm E and arm A plateau over the long window and checkpoints to 1500 s; band 1.96 sqrt(0.18^2 + (G sigma_S)^2), G = d(plateau)/dS on the long window (computed); verdict by Q139(e)'s rule",
+  "slow_stage_reading": "G_A = arm A plateau error (long window) - arm A plateau error (K_O window), same anchor",
+  "decision_C": {"SLOW STAGE SEEN": "G_A >= +0.15", "INCONCLUSIVE": "+0.05 < G_A < +0.15", "NOT SEEN": "-0.15 < G_A <= +0.05", "LATE OVERSHOOT": "G_A <= -0.15"},
+  "reported_with_it": ["arm A error at every checkpoint from 600 s", "least-squares slope of arm A's error over 600 s -> end (C per 10 min)", "arm A cool-down rms over R5"],
+  "confound": "no inlet thermometer: a room drifting up during K_OL reads as a slow stage; SEEN = a slow stage or a room drift; NOT SEEN excludes both at this size",
+  "scenarios_reported": "the chain plus one parallel stage at tau_s 600 / 1200 / 2400 s, R_s set so the closed loop's rise over K_O's window grows by f = mean(E154 arm A plateau error / measured rise over H_M, K_S, K_O); each scenario's G_A for K_OL on the plan; never a verdict"
+ },
+ "R7_after_this_commit": ["reproduction checks first (Q139(e) aifoundry2 numbers, duty-1 trajectory, E161 C1 fixed point and trip clock at d, Q140(l) C1 level, E154's arm E on its own records); nothing else computed if one fails",
+                          "amendment A2 to Q139(e): E154's design and E161's holds re-predicted for the duty convention only (M8's level), at the plan d, on R3's windows",
+                          "E166's frozen predictions (rooms 49.5-53.0 C), M7/M6 beside, the long hold to 1500 s, the scenarios, the room-rule tables",
+                          "E167's frozen predictions (rest dies 44-48 C and E161's anchors) for M9 level (a) at d (primary), M8 at d, M8 continuous",
+                          "post hoc, labelled: the convention, windows and level on E154's and E161's committed data, the rank-3 rules as they would have read"],
+ "departures": {"D1": "H_M not run; K_S from a rested die", "D2": "K_O's replicate = the first 600 s of K_OL", "D3": "aifoundry2: predicted plateau = the trajectory's window mean; the window ends at the last process; 'end' joins the checkpoints", "D4": "E167's level uses M9's fallback zeros offset", "D5": "no registered subset"},
+ "device_commands": "none (desk only)"
+}
