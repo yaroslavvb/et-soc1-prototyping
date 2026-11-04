@@ -1,0 +1,90 @@
+E160 reduction: 150 burst runs, 150 complete, 150 counted (complete and every launch's C PASS), passes [1, 2, 3]; dry False
+  C check: {"verdict": "PASS", "launches": 2596, "by_verdict": {"PASS": 2596}, "runs_not_all_pass": []}
+tiles scored 48; left out []; dropped ['fp32.anchor6_randn', 'fp32.real_qwen_softmax_v']
+  E160-F1  {"n": 17, "rms": 6.717, "range_2.5_97.5": [4.218, 9.077], "verdict": "PASS", "mean_err": 5.166, "ref_rms": 6.6776, "rms_95_over_tiles": [4.373, 8.686]}
+  E160-F2  {"n": 31, "rms": 3.89, "range_2.5_97.5": [0.746, 12.189], "verdict": "PASS", "mean_err": -0.965, "ref_rms": 7.4454, "rms_95_over_tiles": [0.382, 6.185]}
+  E160-F3  {"n": 48, "inside": 48, "line": 42, "verdict": "PASS"}
+  E160-W1  {"n": 17, "rms": 1.391, "range_2.5_97.5": [1.51, 2.634], "verdict": "PASS (better than the reference says)", "mean_err": 1.135, "ref_rms": 2.102, "rms_95_over_tiles": [1.031, 1.697]}
+  E160-W2  {"n": 31, "rms": 1.726, "range_2.5_97.5": [1.293, 2.135], "verdict": "PASS", "mean_err": -1.5, "ref_rms": 1.6916, "rms_95_over_tiles": [1.497, 1.949]}
+  E160-W3  {"n": 48, "inside": 48, "line": 42, "verdict": "PASS"}
+  E160-H1  {"n": 48, "rms": 0.668, "range_2.5_97.5": [0.547, 0.818], "verdict": "PASS", "mean_err": -0.194, "ref_rms": 0.6845, "rms_95_over_tiles": [0.54, 0.788]}
+  E160-H3  {"n": 48, "inside": 45, "line": 42, "verdict": "PASS"}
+  E160-PK  {"n": 48, "inside": 47, "line": 42, "over": [{"tile": "fp32.b_onebit_b20_third", "peak_w": 66.87, "hi95_w": 65.82}], "verdict": "PASS", "per_burst": {"n": 144, "inside": 142, "rms_vs_expected_w": 2.483, "mean_vs_expected_w": -1.844}}
+  R0       {"verdict": "PASS", "tiles": {"k-fp16-randn": {"n": 3, "burst_mhz": 730.87, "ref_mhz": 727.7, "d_mhz": 3.17, "burst_w": 67.39, "ref_w": 66.585, "d_w": 0.805, "rise_c": 6.667, "within": true, "e143_mhz": 720.13, "d_mhz_vs_e143": 10.74, "e143_w": 67.327, "d_w_vs_e143": 0.063, "peak_w": 79.37}, "k-int8-full": {"n": 3, "burst_mhz": 800, "ref_mhz": 800.0, "d_mhz": 0.0, "burst_w": 49.55, "ref_w": 49.8, "d_w": -0.25, "rise_c": 3.333, "within": true, "e143_mhz": 794.67, "d_mhz_vs_e143": 5.33, "e143_w": 49.467, "d_w_vs_e143": 0.083, "peak_w": 50.56}}}
+  S        {"floats|M8_predicted_D600": {"n": 10, "median": 0.9737, "iqr": [0.9529, 0.9887]}, "floats|predicted": {"V600_v|fitted_on_other_two": 0.9932, "V600_v|physical": 1.0098, "idle_w|fitted_on_other_two": 1.0029, "idle_w|physical": 0.8524, "leak_w_per_c|fitted_on_other_two": 0.9661, "leak_w_per_c|physical": 1.1332, "zeros_level_fp32_w|fitted_on_other_two": 0.9296, "zeros_level_fp32_w|physical": 0.776}, "int8|M8_predicted_D600": {"n": 16, "median": 0.8997, "iqr": [0.8417, 0.9514]}, "int8|predicted": {"V600_v|fitted_on_other_two": 0.9935, "V600_v|physical": 1.0109, "idle_w|fitted_on_other_two": 1.0028, "idle_w|physical": 0.8533, "leak_w_per_c|fitted_on_other_two": 0.9679, "leak_w_per_c|physical": 1.1344, "zeros_level_fp32_w|fitted_on_other_two": 0.9332, "zeros_level_fp32_w|physical": 0.7769}, "M8_applies_g": {"fp16": 0.9816867666703736, "fp32": 0.9816867666703736, "int8": 0.9816867666703736}, "verdict_E160-S": {"floats": "NOT SCORED (no measured aifoundry3 D: E153's, --a3-d)", "int8": "NOT SCORED (no measured aifoundry3 D: E153's, --a3-d)"}}
+  [governed         ] n 17  clock rms M8/M7/M6 6.717/4.888/4.89 MHz  board 1.391/1.104/1.102 W  rise 0.522 C  D 3.339/3.006/3.012 W  mean err M8 5.166 MHz 1.135 W
+  [pinned           ] n 31  clock rms M8/M7/M6 3.89/3.884/3.882 MHz  board 1.726/1.717/1.744 W  rise 0.736 C  D 1.029/0.964/0.959 W  mean err M8 -0.965 MHz -1.5 W
+  [all              ] n 48  clock rms M8/M7/M6 5.075/4.267/4.266 MHz  board 1.615/1.529/1.548 W  rise 0.668 C  D 2.207/1.998/2.0 W  mean err M8 1.207 MHz -0.567 W
+  [priority1        ] n 30  clock rms M8/M7/M6 4.358/3.159/2.907 MHz  board 1.512/1.451/1.496 W  rise 0.533 C  D 2.039/1.851/1.868 W  mean err M8 2.225 MHz -0.581 W
+  [new_kinds        ] n 43  clock rms M8/M7/M6 4.756/3.783/3.784 MHz  board 1.595/1.506/1.529 W  rise 0.583 C  D 2.173/1.968/1.97 W  mean err M8 1.694 MHz -0.507 W
+  [real             ] n 11  clock rms M8/M7/M6 6.054/4.452/4.011 MHz  board 1.551/1.348/1.354 W  rise 0.571 C  D 2.494/2.248/2.26 W  mean err M8 3.498 MHz -0.233 W
+  [fp32             ] n 16  clock rms M8/M7/M6 5.067/3.729/3.934 MHz  board 1.494/1.328/1.346 W  rise 0.596 C  D 2.567/2.346/2.353 W  mean err M8 2.878 MHz 0.137 W
+  [fp16             ] n 13  clock rms M8/M7/M6 6.881/5.827/5.658 MHz  board 1.291/1.126/1.135 W  rise 0.701 C  D 2.974/2.692/2.712 W  mean err M8 2.222 MHz 0.208 W
+  [int8             ] n 19  clock rms M8/M7/M6 3.324/3.324/3.324 MHz  board 1.89/1.884/1.909 W  rise 0.703 C  D 0.89/0.749/0.698 W  mean err M8 -0.895 MHz -1.69 W
+  [class_0          ] n  5  clock rms M8/M7/M6 7.262/7.188/7.18 MHz  board 1.781/1.711/1.7 W  rise 1.167 C  D 2.839/2.563/2.566 W  mean err M8 -2.98 MHz -1.085 W
+  [class_B          ] n  5  clock rms M8/M7/M6 6.453/6.453/6.453 MHz  board 2.466/2.509/2.312 W  rise 0.592 C  D 1.036/1.074/0.911 W  mean err M8 -3.134 MHz -2.424 W
+  [class_C          ] n  2  clock rms M8/M7/M6 9.475/7.224/8.094 MHz  board 1.614/1.274/1.274 W  rise 0.64 C  D 3.606/3.228/3.228 W  mean err M8 7.35 MHz 1.483 W
+  [class_E          ] n 10  clock rms M8/M7/M6 4.218/2.746/3.054 MHz  board 1.166/0.981/0.988 W  rise 0.453 C  D 2.861/2.62/2.638 W  mean err M8 3.522 MHz 0.678 W
+  [class_L          ] n  4  clock rms M8/M7/M6 0.0/0.0/0.0 MHz  board 1.509/1.405/1.64 W  rise 0.553 C  D 1.344/0.85/0.709 W  mean err M8 0.0 MHz -0.902 W
+  [class_R          ] n 11  clock rms M8/M7/M6 6.054/4.452/4.011 MHz  board 1.551/1.348/1.354 W  rise 0.571 C  D 2.494/2.248/2.26 W  mean err M8 3.498 MHz -0.233 W
+  [class_S          ] n  5  clock rms M8/M7/M6 0.588/0.449/0.361 MHz  board 1.27/1.242/1.13 W  rise 0.336 C  D 0.957/1.017/1.103 W  mean err M8 0.3 MHz -1.161 W
+  [class_W          ] n  2  clock rms M8/M7/M6 0.0/0.0/0.0 MHz  board 1.914/1.879/1.867 W  rise 0.726 C  D 0.439/0.416/0.407 W  mean err M8 0.0 MHz -1.907 W
+  [class_Z          ] n  4  clock rms M8/M7/M6 0.7/1.45/1.2 MHz  board 1.515/1.622/2.031 W  rise 0.947 C  D 1.523/1.347/1.385 W  mean err M8 -0.35 MHz -0.907 W
+  [measured_governed] n 17  clock rms M8/M7/M6 8.441/7.121/7.136 MHz  board 1.671/1.447/1.434 W  rise 0.654 C  D 3.333/2.993/2.989 W  mean err M8 3.036 MHz 0.744 W
+  [measured_pinned  ] n 31  clock rms M8/M7/M6 0.896/0.619/0.51 MHz  board 1.584/1.571/1.606 W  rise 0.676 C  D 1.196/1.119/1.131 W  mean err M8 0.204 MHz -1.286 W
+  heat law on the measured W: {"n": 48, "rms_c": 0.517, "mean_c": -0.114, "k": 0.14004345109940583, "P_idle_w": 21.5}
+  kernel clock - sampled: {"n": 48, "mean": -4.38, "governed_mean": -10.47}
+  pass 1: E160-F1 11.74 FAIL; E160-F2 11.613 PASS; E160-F3 43 PASS; E160-W1 1.543 PASS; E160-W2 2.412 FAIL; E160-W3 44 PASS; E160-H1 0.688 PASS; E160-H3 47 PASS; E160-PK 48 PASS
+  pass 2: E160-F1 4.73 PASS; E160-F2 0.772 PASS; E160-F3 48 PASS; E160-W1 1.616 PASS; E160-W2 1.365 PASS; E160-W3 48 PASS; E160-H1 0.784 PASS; E160-H3 45 PASS; E160-PK 47 PASS
+  pass 3: E160-F1 6.916 PASS; E160-F2 0.324 PASS (better than the reference says); E160-F3 48 PASS; E160-W1 1.723 PASS; E160-W2 1.577 PASS; E160-W3 48 PASS; E160-H1 0.85 FAIL; E160-H3 45 PASS; E160-PK 47 PASS
+  as E143 counted (complete runs, C not required): {"E160-F1": [6.717, null, "PASS"], "E160-F2": [3.89, null, "PASS"], "E160-F3": [null, 48, "PASS"], "E160-W1": [1.391, null, "PASS (better than the reference says)"], "E160-W2": [1.726, null, "PASS"], "E160-W3": [null, 48, "PASS"], "E160-H1": [0.668, null, "PASS"], "E160-H3": [null, 45, "PASS"], "E160-PK": [null, 47, "PASS"]}
+tile                                group    p  passes  MHz (M8)        W (M8)          rise C (M8)    D W (M8)     peak W (M8 exp / hi95)
+  fp16.anchor6_randn                 governed 2  3   728.9 ( 726.5)   66.84 ( 65.18)   6.67 ( 6.12)  32.923 (28.91)   79.03 (79.49 / 81.12)
+  fp16.c_absorbed                    governed 2  3   749.2 ( 747.8)   66.05 ( 65.20)   6.33 ( 6.12)  32.13 (28.93)   75.56 (75.36 / 76.99)
+  fp16.e5m2grid_wide                 governed 1  3   775.2 ( 768.7)   65.64 ( 65.15)   6.67 ( 6.11)  31.727 (28.89)   70.85 (71.73 / 73.37)
+  fp16.exp_b_alt_shift               governed 1  3   795.3 ( 791.6)   64.73 ( 64.16)   6.00 ( 5.97)  30.813 (27.9)   67.02 (67.25 / 68.88)
+  fp16.exp_only_narrow2              governed 1  3   793.3 ( 788.8)   63.92 ( 64.47)   6.33 ( 6.02)  30.003 (28.21)   68.04 (67.96 / 69.6)
+  fp16.real_qwen_dequant_v           governed 2  3   729.9 ( 728.3)   66.75 ( 65.18)   6.67 ( 6.12)  32.83 (28.92)   79.11 (79.12 / 80.75)
+  fp16.real_qwen_qk                  governed 1  3   768.3 ( 756.8)   66.85 ( 65.20)   6.67 ( 6.12)  32.93 (28.93)   74.72 (73.76 / 75.39)
+  fp16.real_smol_qk                  governed 1  3   732.4 ( 731.2)   66.35 ( 65.19)   6.33 ( 6.12)  32.43 (28.92)   78.41 (78.54 / 80.17)
+  fp16.real_smol_softmax_v           governed 1  3   784.7 ( 772.8)   65.84 ( 65.11)   7.00 ( 6.11)  31.92 (28.84)   70.03 (71.03 / 72.66)
+  fp32.bf16_wideexp                  governed 1  3   759.5 ( 752.0)   67.55 ( 65.20)   6.33 ( 6.12)  33.053 (28.85)   74.71 (74.61 / 76.46)
+  fp32.c_absorbed                    governed 2  3   759.6 ( 746.3)   67.32 ( 65.20)   7.00 ( 6.12)  32.82 (28.85)   75.61 (75.63 / 77.46)
+  fp32.exp_a_pow2wide_b_randn        governed 2  3   758.5 ( 754.7)   67.76 ( 65.20)   6.67 ( 6.12)  33.26 (28.84)   74.82 (74.14 / 75.97)
+  fp32.exp_b_alt_shift               governed 1  3   789.2 ( 787.3)   64.81 ( 64.60)   6.67 ( 6.04)  30.31 (28.24)   68.95 (68.31 / 70.14)
+  fp32.exp_only_narrow2              governed 1  3   796.7 ( 794.5)   64.27 ( 63.66)   6.00 ( 5.90)  29.767 (27.31)   66.37 (66.33 / 68.16)
+  fp32.negzero_a_b_complement        governed 1  3   780.1 ( 781.5)   66.00 ( 64.90)   6.33 ( 6.08)  31.503 (28.55)   70.47 (69.47 / 71.33)
+  fp32.real_qwen_dequant_q           governed 1  3   754.2 ( 743.0)   66.95 ( 65.20)   6.33 ( 6.12)  32.45 (28.85)   76.05 (76.24 / 78.06)
+  fp32.signexp_invert_b              governed 1  3   782.3 ( 777.4)   65.50 ( 65.03)   7.00 ( 6.10)  31.0 (28.67)   69.82 (70.23 / 72.09)
+  fp16.a_zeros_b_complement          pinned   2  3   800.0 ( 800.0)   37.32 ( 39.11)   1.00 ( 2.47)  3.403 (2.84)   37.76 (41.05 / 42.72)
+  fp16.anchor6_zeros                 pinned   2  3   784.0 ( 800.0)   33.92 ( 36.27)   0.67 ( 2.07)  0.0 (0.0)   34.94 (38.21 / 39.82)
+  fp16.b_onebit_b6_third             pinned   2  3   800.0 ( 799.8)   58.79 ( 60.04)   5.67 ( 5.40)  24.877 (23.77)   63.52 (62.01 / 63.64)
+  fp16.exp_a_walk_fixedmant          pinned   2  3   800.0 ( 799.8)   59.61 ( 59.63)   5.33 ( 5.34)  25.693 (23.37)   60.74 (61.59 / 63.22)
+  fp32.a_onebit_b16_half             pinned   2  3   800.0 ( 800.0)   53.50 ( 54.46)   4.33 ( 4.62)  19.0 (18.1)   55.26 (56.4 / 58.21)
+  fp32.a_onebit_b5_third             pinned   1  3   800.0 ( 800.0)   53.33 ( 54.02)   4.00 ( 4.55)  18.827 (17.67)   54.79 (55.96 / 57.77)
+  fp32.a_zeros_b_complement          pinned   1  3   800.0 ( 800.0)   37.29 ( 39.23)   1.67 ( 2.48)  2.793 (2.87)   37.58 (41.17 / 43.01)
+  fp32.anchor6_zeros                 pinned   2  3   800.0 ( 800.0)   34.50 ( 36.35)   0.67 ( 2.08)  0.0 (0.0)   34.91 (38.29 / 40.1)
+  fp32.b_onebit_b12_third            pinned   1  3   800.0 ( 800.0)   54.00 ( 54.78)   4.67 ( 4.66)  19.497 (18.43)   56.97 (56.72 / 58.53)
+  fp32.b_onebit_b20_third            pinned   1  3   800.0 ( 798.7)   59.78 ( 61.90)   5.33 ( 5.66)  25.28 (25.54)   66.87 (64.01 / 65.82)
+  fp32.exp_a_walk_fixedmant          pinned   1  3   800.0 ( 799.8)   60.02 ( 59.94)   5.67 ( 5.38)  25.523 (23.58)   62.19 (61.9 / 63.72)
+  fp32.real_smol_softmax_v_causal    pinned   1  3   800.0 ( 798.8)   61.09 ( 61.81)   5.67 ( 5.64)  26.593 (25.45)   62.38 (63.9 / 65.72)
+  int8.a_word_zero_one               pinned   1  3   800.0 ( 800.0)   40.95 ( 43.00)   2.33 ( 3.01)  4.79 (5.34)   41.47 (44.94 / 47.3)
+  int8.a_zeros_b_lineflip            pinned   1  3   800.0 ( 800.0)   36.02 ( 37.02)   1.33 ( 2.17)  -0.143 (-0.63)   36.48 (38.96 / 42.57)
+  int8.anchor6_full                  pinned   2  3   798.7 ( 800.0)   49.41 ( 50.80)   4.00 ( 4.10)  13.25 (13.14)   50.89 (52.74 / 55.09)
+  int8.anchor6_zeros                 pinned   2  3   800.0 ( 800.0)   36.16 ( 37.65)   0.67 ( 2.26)  0.0 (0.0)   36.55 (39.59 / 41.9)
+  int8.b_line_55_aa                  pinned   2  3   800.0 ( 800.0)   50.13 ( 49.06)   3.67 ( 3.86)  13.97 (11.41)   50.83 (51.0 / 54.37)
+  int8.b_line_zero_ff                pinned   1  3   800.0 ( 800.0)   43.07 ( 43.99)   2.67 ( 3.15)  6.91 (6.34)   43.60 (45.93 / 49.23)
+  int8.b_line_zero_full              pinned   1  3   800.0 ( 800.0)   43.87 ( 45.58)   2.67 ( 3.37)  7.713 (7.92)   44.83 (47.52 / 49.88)
+  int8.bflip_bit2_w                  pinned   2  3   800.0 ( 800.0)   39.44 ( 41.70)   2.00 ( 2.83)  3.28 (4.04)   39.95 (43.64 / 46.07)
+  int8.bflip_bit5_w                  pinned   2  3   785.6 ( 800.0)   38.58 ( 41.70)   2.00 ( 2.83)  2.42 (4.05)   39.93 (43.64 / 46.07)
+  int8.bheld_bit1                    pinned   1  3   800.0 ( 800.0)   46.48 ( 49.22)   4.00 ( 3.88)  10.323 (11.57)   48.33 (51.16 / 53.68)
+  int8.bheld_bit4                    pinned   1  3   798.7 ( 800.0)   46.42 ( 48.61)   3.33 ( 3.80)  10.263 (10.95)   47.16 (50.55 / 53.04)
+  int8.bheld_bit7                    pinned   1  3   800.0 ( 800.0)   46.15 ( 47.97)   3.33 ( 3.71)  9.993 (10.31)   46.83 (49.91 / 52.37)
+  int8.powerlaw_df15_pt              pinned   2  3   800.0 ( 800.0)   40.91 ( 42.65)   2.00 ( 2.96)  4.75 (4.99)   41.35 (44.59 / 46.95)
+  int8.powerlaw_df4_pc               pinned   1  3   800.0 ( 800.0)   48.23 ( 50.30)   3.67 ( 4.03)  12.067 (12.64)   49.55 (52.24 / 54.58)
+  int8.real_qwen_w8a8_down           pinned   2  3   800.0 ( 800.0)   47.77 ( 49.15)   3.67 ( 3.87)  11.613 (11.5)   48.62 (51.09 / 53.44)
+  int8.real_qwen_w8a8_gate           pinned   1  3   800.0 ( 800.0)   47.78 ( 50.24)   3.67 ( 4.02)  11.617 (12.58)   49.38 (52.18 / 54.52)
+  int8.real_qwen_w8a8_v              pinned   1  3   800.0 ( 800.0)   48.38 ( 50.17)   3.00 ( 4.02)  12.223 (12.52)   48.96 (52.11 / 54.46)
+  int8.real_smol_w8a8_down           pinned   1  3   800.0 ( 800.0)   46.33 ( 47.82)   3.00 ( 3.69)  10.17 (10.17)   47.28 (49.76 / 52.1)
+  int8.real_smol_w8a8_q              pinned   1  3   800.0 ( 800.0)   48.32 ( 49.90)   3.33 ( 3.98)  12.163 (12.24)   48.96 (51.84 / 54.18)
+peaks: {"board_max_w": 79.37, "board_run": "s1/BURST-48-k-fp16-randn-r1.jsonl.gz", "die_mean_max_c": 62, "die_high_max_c": 70, "samples": 17744}

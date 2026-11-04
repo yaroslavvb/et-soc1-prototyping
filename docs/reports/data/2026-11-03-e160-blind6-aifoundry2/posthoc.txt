@@ -1,0 +1,104 @@
+(1) the rest reading, card time, commands
+  the smoke's rest reading (last 30 s): {'board_w': 21.43, 'die_c': 44.0, 'n': 300}
+  card time, the queue's start (its first config read) to its end: 30.82 min; first session start to last session end: 30.82 min; sampler lines 18303; runs with an after-run config read 154; session start/end query records 6; queue snapshots 2
+
+(2) the smoke's checks and the stop-path tests (the queue's records)
+   {"t_ms": 1793716962309, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null, "ccheck": {"c_records": 19, "sparsity_lines": 19, "host_records": 3, "gap_ms_median": 2.5, "delta_ms": 1.5, "projected_held_max_s": 6.596, "limit_s": 7.2, "why": null}}
+   {"t_ms": 1793716966311, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793716965655, "t_third_line_ms": 1793716965591, "launch": [1793716963766, 1793716965748], "trip_after_line_ms": 64, "launch_end_after_trip_ms": 93, "lines": 33}
+   {"t_ms": 1793716966311, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+   {"t_ms": 1793716968312, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793716966548, "t_first_line_ms": 1793716966490, "trip_after_line_ms": 58, "lines": 13}
+   {"t_ms": 1793716968312, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+
+(3) the sampled clock against the kernel's own clock (MHz), per tile, mean over passes
+  b6-fp16.a_zeros_b_complement         sampled  800.00  kernel   799.0  diff   -1.0
+  b6-fp16.anchor6_randn                sampled  728.93  kernel   714.5  diff  -14.4
+  b6-fp16.anchor6_zeros                sampled  784.00  kernel   781.3  diff   -2.7
+  b6-fp16.b_onebit_b6_third            sampled  800.00  kernel   799.0  diff   -1.0
+  b6-fp16.c_absorbed                   sampled  749.17  kernel   740.2  diff   -9.0
+  b6-fp16.e5m2grid_wide                sampled  775.17  kernel   765.7  diff   -9.5
+  b6-fp16.exp_a_walk_fixedmant         sampled  800.00  kernel   799.0  diff   -1.0
+  b6-fp16.exp_b_alt_shift              sampled  795.27  kernel   792.1  diff   -3.2
+  b6-fp16.exp_only_narrow2             sampled  793.27  kernel   789.1  diff   -4.2
+  b6-fp16.real_qwen_dequant_v          sampled  729.87  kernel   715.5  diff  -14.4
+  b6-fp16.real_qwen_qk                 sampled  768.27  kernel   756.3  diff  -12.0
+  b6-fp16.real_smol_qk                 sampled  732.37  kernel   717.2  diff  -15.2
+  b6-fp16.real_smol_softmax_v          sampled  784.67  kernel   776.6  diff   -8.1
+  b6-fp32.a_onebit_b16_half            sampled  800.00  kernel   799.0  diff   -1.0
+  b6-fp32.a_onebit_b5_third            sampled  800.00  kernel   799.0  diff   -1.0
+  b6-fp32.a_zeros_b_complement         sampled  800.00  kernel   799.0  diff   -1.0
+  b6-fp32.anchor6_zeros                sampled  800.00  kernel   799.0  diff   -1.0
+  b6-fp32.b_onebit_b12_third           sampled  800.00  kernel   799.0  diff   -1.0
+  b6-fp32.b_onebit_b20_third           sampled  800.00  kernel   799.0  diff   -1.0
+  b6-fp32.bf16_wideexp                 sampled  759.50  kernel   744.2  diff  -15.3
+  b6-fp32.c_absorbed                   sampled  759.63  kernel   743.1  diff  -16.5
+  b6-fp32.exp_a_pow2wide_b_randn       sampled  758.47  kernel   744.8  diff  -13.7
+  b6-fp32.exp_a_walk_fixedmant         sampled  800.00  kernel   799.1  diff   -0.9
+  b6-fp32.exp_b_alt_shift              sampled  789.20  kernel   782.5  diff   -6.7
+  b6-fp32.exp_only_narrow2             sampled  796.67  kernel   794.7  diff   -2.0
+  b6-fp32.negzero_a_b_complement       sampled  780.10  kernel   772.8  diff   -7.3
+  b6-fp32.real_qwen_dequant_q          sampled  754.20  kernel   737.6  diff  -16.6
+  b6-fp32.real_smol_softmax_v_causal   sampled  800.00  kernel   799.0  diff   -1.0
+  b6-fp32.signexp_invert_b             sampled  782.27  kernel   772.2  diff  -10.1
+  b6-int8.a_word_zero_one              sampled  800.00  kernel   799.1  diff   -0.9
+  b6-int8.a_zeros_b_lineflip           sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.anchor6_full                 sampled  798.67  kernel   799.1  diff   +0.4
+  b6-int8.anchor6_zeros                sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.b_line_55_aa                 sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.b_line_zero_ff               sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.b_line_zero_full             sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.bflip_bit2_w                 sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.bflip_bit5_w                 sampled  785.63  kernel   782.0  diff   -3.6
+  b6-int8.bheld_bit1                   sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.bheld_bit4                   sampled  798.70  kernel   799.1  diff   +0.4
+  b6-int8.bheld_bit7                   sampled  800.00  kernel   799.1  diff   -0.9
+  b6-int8.powerlaw_df15_pt             sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.powerlaw_df4_pc              sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.real_qwen_w8a8_down          sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.real_qwen_w8a8_gate          sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.real_qwen_w8a8_v             sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.real_smol_w8a8_down          sampled  800.00  kernel   799.0  diff   -1.0
+  b6-int8.real_smol_w8a8_q             sampled  800.00  kernel   799.0  diff   -1.0
+  k-fp16-randn                         sampled  730.87  kernel   716.1  diff  -14.8
+  k-int8-full                          sampled  800.00  kernel   799.0  diff   -1.0
+  kernel - sampled over 50 cells: mean -4.52 MHz, rms 7.06
+
+(4) the passes: the spread of a tile's clock and board W between its passes (max - min)
+  50 cells: clock spread median 0.0 MHz, max 48.0; board spread median 0.99 W, max 5.41
+    b6-fp16.anchor6_zeros                  48.0 MHz  [752, 800, 800]
+    b6-int8.bflip_bit5_w                   43.1 MHz  [756.9, 800, 800]
+    b6-fp16.c_absorbed                     25.0 MHz  [732.7, 757.7, 757.1]
+    b6-fp16.real_qwen_qk                   19.2 MHz  [780, 760.8, 764]
+    b6-fp32.real_qwen_dequant_q            14.8 MHz  [762.7, 747.9, 752]
+    b6-fp16.real_smol_softmax_v            14.0 MHz  [792, 778, 784]
+
+(5) the config at the queue's start and end
+  start: {"tdp_w":65,"temp_threshold_c":65,"power_state":3,"power_state_name":"low_power","minion_mhz":600,"minion_mv":519}
+  end: {"tdp_w":65,"temp_threshold_c":65,"power_state":3,"power_state_name":"low_power","minion_mhz":600,"minion_mv":519}
+
+(6) the C log's cost: launch gaps and device-held times, the session against E143's
+  E160 s1 (the C-logging host): {"procs": 150, "gap_ms_median": 3.0, "gap_ms_max": 9, "launches_median": 16.0, "launches_min": 15, "launches_max": 17, "held_s_median": 6.4, "held_s_max": 6.59, "budget_stops": 0}
+  E143 s1 (E80's host):        {"procs": 117, "gap_ms_median": 1.0, "gap_ms_max": 2, "launches_median": 16, "launches_min": 14, "launches_max": 17, "held_s_median": 6.38, "held_s_max": 6.57, "budget_stops": 0}
+
+(7) the residency queries and the idle-login decisions
+  residency_rc after each run: {'2': 154}
+  idle-login decisions 625; with another user counted 0 (counts only)
+
+(8) the peaks: each burst's highest board sample against M8's expected / 95% peak (the ten highest)
+  BURST-09-b6-fp16.real_qwen_dequant_v-r1          peak  79.11 W  M8  79.12 /  80.75 W  first second 77.39
+  BURST-01-b6-fp16.anchor6_randn-r2                peak  79.03 W  M8  79.49 /  81.12 W  first second 77.03
+  BURST-09-b6-fp16.real_qwen_dequant_v-r2          peak  79.01 W  M8  79.12 /  80.75 W  first second 76.42
+  BURST-01-b6-fp16.anchor6_randn-r3                peak  79.01 W  M8  79.49 /  81.12 W  first second 76.68
+  BURST-01-b6-fp16.anchor6_randn-r1                peak  78.57 W  M8  79.49 /  81.12 W  first second 76.54
+  BURST-09-b6-fp16.real_qwen_dequant_v-r3          peak  78.49 W  M8  79.12 /  80.75 W  first second 76.45
+  BURST-11-b6-fp16.real_smol_qk-r3                 peak  78.41 W  M8  78.54 /  80.17 W  first second 76.74
+  BURST-11-b6-fp16.real_smol_qk-r2                 peak  78.09 W  M8  78.54 /  80.17 W  first second 76.03
+  BURST-11-b6-fp16.real_smol_qk-r1                 peak  77.52 W  M8  78.54 /  80.17 W  first second 75.45
+  BURST-26-b6-fp32.real_qwen_dequant_q-r3          peak  76.05 W  M8  76.24 /  78.06 W  first second 74.38
+  bursts at or over 82 W: 0; at or over 85 W: 0
+
+(9) the errors' shape: burst D by format, and the board error against M8's predicted board W
+  fp32: burst D measured - M8 over 15 tiles: mean +2.125 W, rms 2.567 W
+  fp16: burst D measured - M8 over 12 tiles: mean +2.771 W, rms 2.974 W
+  int8: burst D measured - M8 over 18 tiles: mean -0.206 W, rms 0.890 W
+  board error against M8's board W over 48 tiles: slope +0.1178 W per W, mean -0.567 W
+  zeros anchors, board measured - M8: {'fp16.anchor6_zeros': -2.353, 'fp32.anchor6_zeros': -1.85, 'int8.anchor6_zeros': -1.49}

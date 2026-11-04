@@ -1,0 +1,57 @@
+(M1) mid-burst idle statuses (the service processor's POWER_IDLE power-status record before the work's end)
+  E160: 150 bursts, 3 with a mid-burst idle status
+     {"run": "BURST-04-b6-fp16.c_absorbed-r1", "idle_statuses": 2, "power_downs": 6, "launch_gap_ms_max": 3, "launches_below_750mhz": [3, 4, 5, 9, 10, 11, 12, 13, 14]}
+     {"run": "BURST-02-b6-fp16.anchor6_zeros-r1", "idle_statuses": 2, "power_downs": 0, "launch_gap_ms_max": 3, "launches_below_750mhz": [8, 9, 10]}
+     {"run": "BURST-37-b6-int8.bflip_bit5_w-r1", "idle_statuses": 2, "power_downs": 0, "launch_gap_ms_max": 3, "launches_below_750mhz": [1, 4, 5, 6]}
+  E143: 117 bursts, 1 with a mid-burst idle status
+     {"run": "BURST-22-b5-fp32.wideexp48_bgate_alt-r1", "idle_statuses": 2, "power_downs": 0, "launch_gap_ms_max": 2, "launches_below_750mhz": [1, 4, 5, 6]}
+
+(M2) this session against E143's (the evening before)
+  rest_reading: {"E160": {"board_w": 21.43, "die_c": 44.0, "n": 300}, "E143": {"board_w": 21.87, "die_c": 46.0, "n": 300}}
+  die_at_burst_start: {"E160": {"all_mean_c": 53.69, "n": 150, "measured_governed_mean_c": 53.76, "measured_governed_die_max_mean_c": 60.14, "n_governed": 51}, "E143": {"all_mean_c": 55.43, "n": 117, "measured_governed_mean_c": 55.6, "measured_governed_die_max_mean_c": 61.9, "n_governed": 62}}
+  zeros_anchors_byte_identical: {"fp32": {"E160_w": 34.5, "E160_w_runs": [34.29, 34.81, 34.4], "E160_mhz_runs": [800, 800, 800], "E160_w_at_800_passes": 34.5, "E143_w": 35.167, "E160_minus_E143_w_at_800": -0.667}, "fp16": {"E160_w": 33.917, "E160_w_runs": [32.46, 34.78, 34.51], "E160_mhz_runs": [752, 800, 800], "E160_w_at_800_passes": 34.645, "E143_w": 35.16, "E160_minus_E143_w_at_800": -0.515}, "int8": {"E160_w": 36.16, "E160_w_runs": [36.03, 36.04, 36.41], "E160_mhz_runs": [800, 800, 800], "E160_w_at_800_passes": 36.16, "E143_w": 36.333, "E160_minus_E143_w_at_800": -0.173}}
+  replicates_vs_E143: {"k-fp16-randn": {"E160_mhz": 730.87, "E143_mhz": 720.13, "d_mhz": 10.74, "E160_w": 67.39, "E143_w": 67.327, "d_w": 0.063}, "k-int8-full": {"E160_mhz": 800, "E143_mhz": 794.67, "d_mhz": 5.33, "E160_w": 49.55, "E143_w": 49.467, "d_w": 0.083}}
+
+(M3) what M8 leaves on this card
+  capped_tiles: 11
+  capped_measured_board_mean_w: 66.717
+  capped_measured_board_range_w: [65.643, 67.76]
+  against_M8_cap_w: 1.517
+  against_M7_cap_w: 1.137
+  capped_by_type_mean_w: {"fp32": 67.396, "fp16": 66.33}
+  pinned: {"n": 31, "rms_w_as_frozen": 1.726, "mean_w_as_frozen": -1.5, "rms_w_with_E143_zeros_level": 0.905, "mean_w_with_E143_zeros_level": -0.3, "own_zeros_offset_w": {"fp32": -1.85, "fp16": -2.353, "int8": -1.49}, "nonzeros_n": 28, "nonzeros_rms_w_as_frozen": 1.703, "nonzeros_rms_w_with_own_zeros_anchor": 1.03, "nonzeros_mean_w_with_own_zeros_anchor": 0.215, "nonzeros_error_slope_w_per_w": 0.0509}
+
+(M4) F2 with the two pinned passes that carry a mid-burst idle status set aside
+   {"registered_rms_mhz": 3.89, "set_aside_runs": ["BURST-02-b6-fp16.anchor6_zeros-r1", "BURST-37-b6-int8.bflip_bit5_w-r1"], "rms_mhz_with_them_set_aside": 0.466, "mean_mhz_with_them_set_aside": 0.015}
+
+(M5) the one tile over M8's 95% peak (fp32.b_onebit_b20_third): when each pass's highest samples came
+   {"run": "BURST-18-b6-fp32.b_onebit_b20_third-r1", "highest_three_w_s_mhz": [[64.7, 5.3, 800], [64.05, 4.1, 800], [64.05, 4.0, 800]], "burst_window_mean_w": 58.63}
+   {"run": "BURST-18-b6-fp32.b_onebit_b20_third-r2", "highest_three_w_s_mhz": [[66.25, 4.3, 800], [66.25, 4.2, 800], [65.46, 5.2, 800]], "burst_window_mean_w": 60.69}
+   {"run": "BURST-18-b6-fp32.b_onebit_b20_third-r3", "highest_three_w_s_mhz": [[66.87, 5.5, 800], [66.87, 5.4, 800], [65.62, 3.6, 800]], "burst_window_mean_w": 60.02}
+
+(M6) int8's 32-bit wrap: launches with a wrapped C word at their own n, and their verdicts
+   {"int8_launches": 1066, "with_a_wrapped_word": 762, "tiles_with_a_wrapped_word": 15, "wrapped_launches_PASS": 762, "all_int8_PASS": true}
+    full.bin                         {"launches": 54, "with_a_wrapped_word": 54, "most_wrapped_words": 245, "PASS": 54, "wrapped_PASS": 54}
+    int8.a_word_zero_one.bin         {"launches": 54, "with_a_wrapped_word": 0, "most_wrapped_words": 0, "PASS": 54, "wrapped_PASS": 0}
+    int8.a_zeros_b_lineflip.bin      {"launches": 53, "with_a_wrapped_word": 0, "most_wrapped_words": 0, "PASS": 53, "wrapped_PASS": 0}
+    int8.anchor6_full.bin            {"launches": 54, "with_a_wrapped_word": 54, "most_wrapped_words": 247, "PASS": 54, "wrapped_PASS": 54}
+    int8.anchor6_zeros.bin           {"launches": 54, "with_a_wrapped_word": 0, "most_wrapped_words": 0, "PASS": 54, "wrapped_PASS": 0}
+    int8.b_line_55_aa.bin            {"launches": 54, "with_a_wrapped_word": 51, "most_wrapped_words": 256, "PASS": 54, "wrapped_PASS": 51}
+    int8.b_line_zero_ff.bin          {"launches": 53, "with_a_wrapped_word": 0, "most_wrapped_words": 0, "PASS": 53, "wrapped_PASS": 0}
+    int8.b_line_zero_full.bin        {"launches": 53, "with_a_wrapped_word": 50, "most_wrapped_words": 245, "PASS": 53, "wrapped_PASS": 50}
+    int8.bflip_bit2_w.bin            {"launches": 53, "with_a_wrapped_word": 50, "most_wrapped_words": 256, "PASS": 53, "wrapped_PASS": 50}
+    int8.bflip_bit5_w.bin            {"launches": 52, "with_a_wrapped_word": 49, "most_wrapped_words": 256, "PASS": 52, "wrapped_PASS": 49}
+    int8.bheld_bit1.bin              {"launches": 54, "with_a_wrapped_word": 51, "most_wrapped_words": 16, "PASS": 54, "wrapped_PASS": 51}
+    int8.bheld_bit4.bin              {"launches": 53, "with_a_wrapped_word": 50, "most_wrapped_words": 208, "PASS": 53, "wrapped_PASS": 50}
+    int8.bheld_bit7.bin              {"launches": 54, "with_a_wrapped_word": 54, "most_wrapped_words": 256, "PASS": 54, "wrapped_PASS": 54}
+    int8.powerlaw_df15_pt.bin        {"launches": 54, "with_a_wrapped_word": 0, "most_wrapped_words": 0, "PASS": 54, "wrapped_PASS": 0}
+    int8.powerlaw_df4_pc.bin         {"launches": 53, "with_a_wrapped_word": 50, "most_wrapped_words": 168, "PASS": 53, "wrapped_PASS": 50}
+    int8.real_qwen_w8a8_down.bin     {"launches": 54, "with_a_wrapped_word": 51, "most_wrapped_words": 16, "PASS": 54, "wrapped_PASS": 51}
+    int8.real_qwen_w8a8_gate.bin     {"launches": 52, "with_a_wrapped_word": 49, "most_wrapped_words": 143, "PASS": 52, "wrapped_PASS": 49}
+    int8.real_qwen_w8a8_v.bin        {"launches": 53, "with_a_wrapped_word": 50, "most_wrapped_words": 166, "PASS": 53, "wrapped_PASS": 50}
+    int8.real_smol_w8a8_down.bin     {"launches": 52, "with_a_wrapped_word": 49, "most_wrapped_words": 32, "PASS": 52, "wrapped_PASS": 49}
+    int8.real_smol_w8a8_q.bin        {"launches": 53, "with_a_wrapped_word": 50, "most_wrapped_words": 155, "PASS": 53, "wrapped_PASS": 50}
+
+(M7) within a session: the board W and the burst clock against the die reading at the burst's start
+  E160: {"governed_board_w": {"tiles": 17, "slope_per_c": 0.245, "ci95": [0.136, 0.66]}, "governed_clock_mhz": {"tiles": 17, "slope_per_c": -1.603, "ci95": [-2.557, 2.196]}, "pinned_800_board_w": {"tiles": 22, "slope_per_c": 0.368, "ci95": [0.311, 0.422]}}
+  E143: {"governed_board_w": {"tiles": 19, "slope_per_c": -0.075, "ci95": [-0.178, 1.187]}, "governed_clock_mhz": {"tiles": 19, "slope_per_c": -2.612, "ci95": [-3.257, 6.325]}, "pinned_800_board_w": {"tiles": 13, "slope_per_c": 0.394, "ci95": [0.294, 0.522]}}

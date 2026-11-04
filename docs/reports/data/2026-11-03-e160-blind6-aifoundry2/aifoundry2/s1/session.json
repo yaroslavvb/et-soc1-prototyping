@@ -1,0 +1,865 @@
+{
+ "experiment": "E160",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793716968382,
+ "protocol": {
+  "experiment": "E160",
+  "request": "Q139",
+  "card": "aifoundry2",
+  "order_seed": 160,
+  "note": "blind pool 6 under aifoundry2's own governor in 6 s bursts (E143's harness and shape, E80's kernel), every launch's C logged by Q139(k)'s host; two flagged tiles dropped; every start is cool; nothing is set on the card",
+  "tools": {
+   "heater": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "ccheck": {
+   "host": "build/ccheck/b/host/sparsity_host",
+   "host_sha256": "eae32a152b8f0861bd2922c500eac217c931c9b464d3274a6bcf346cc986bfd2",
+   "wrapper": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+   "wrapper_sha256": "d00158d454596a8325ff3a7ffa3dff6e80a2e1798516b022009450f63443b9b7",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "kernel_sha256": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+   "log": "<session dir>/c-log.jsonl"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "pool": "tools/claims-v3/kinds/blind6/blind6.json",
+  "predictions": "tools/claims-v3/e160/predictions-e160.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 76,
+   "board_cap_w": 85,
+   "cap_consecutive": 3
+  },
+  "caps": {
+   "max_card_min": 40
+  },
+  "smoke_cycles": {
+   "b6-fp32.anchor6_zeros": 546,
+   "b6-fp16.anchor6_zeros": 546,
+   "b6-int8.anchor6_zeros": 318
+  },
+  "dry_c_w": {
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.a_zeros_b_complement.bin": 2.887,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.anchor6_randn.bin": 23.064,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.anchor6_zeros.bin": 1.396,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.b_onebit_b6_third.bin": 13.889,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.c_absorbed.bin": 20.896,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.e5m2grid_wide.bin": 18.991,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_a_walk_fixedmant.bin": 13.668,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_b_alt_shift.bin": 16.639,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_only_narrow2.bin": 17.012,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_qwen_dequant_v.bin": 22.87,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_qwen_qk.bin": 20.056,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_smol_qk.bin": 22.565,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_smol_softmax_v.bin": 18.623,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_onebit_b16_half.bin": 10.944,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_onebit_b5_third.bin": 10.713,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_zeros_b_complement.bin": 2.95,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.anchor6_randn.bin": 25.714,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.anchor6_zeros.bin": 1.438,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.b_onebit_b12_third.bin": 11.112,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.b_onebit_b20_third.bin": 14.938,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.bf16_wideexp.bin": 20.502,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.c_absorbed.bin": 21.038,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_a_pow2wide_b_randn.bin": 20.25,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_a_walk_fixedmant.bin": 13.831,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_b_alt_shift.bin": 17.196,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_only_narrow2.bin": 16.156,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.negzero_a_b_complement.bin": 17.804,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_qwen_dequant_q.bin": 21.358,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_qwen_softmax_v.bin": 25.253,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_smol_softmax_v_causal.bin": 14.881,
+   "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.signexp_invert_b.bin": 18.203,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.a_word_zero_one.bin": 4.929,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.a_zeros_b_lineflip.bin": 1.79,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.anchor6_full.bin": 9.023,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.anchor6_zeros.bin": 2.121,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_55_aa.bin": 8.11,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_zero_ff.bin": 5.449,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_zero_full.bin": 6.283,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bflip_bit2_w.bin": 4.247,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bflip_bit5_w.bin": 4.247,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit1.bin": 8.194,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit4.bin": 7.874,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit7.bin": 7.538,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.powerlaw_df15_pt.bin": 4.745,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.powerlaw_df4_pc.bin": 8.761,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_down.bin": 8.157,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_gate.bin": 8.729,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_v.bin": 8.692,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_down.bin": 7.459,
+   "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_q.bin": 8.551,
+   "file:tools/claims-v3/kinds/tiles/fp16/randn.bin": 23.074,
+   "file:tools/claims-v3/kinds/tiles/int8/full.bin": 8.95
+  },
+  "dma": {
+   "e143_smoke_gap_ms_median": 1.0,
+   "e143_s1_held_s_max": 6.57,
+   "launches": 17,
+   "projected_held_max_s": 7.2,
+   "budget_s": 7.5
+  },
+  "limit_p800_w": 82.0,
+  "peak_lock_w": 82.0,
+  "relation": {
+   "B800": 33.60956684526229,
+   "s800": 1.90517380064275
+  },
+  "admission": {
+   "b6-fp16.a_zeros_b_complement": {
+    "c_ref_w": 2.887,
+    "fixed_p800_w": 42.72,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.anchor6_randn": {
+    "c_ref_w": 23.064,
+    "fixed_p800_w": 81.12,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.anchor6_zeros": {
+    "c_ref_w": 1.396,
+    "fixed_p800_w": 39.82,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.b_onebit_b6_third": {
+    "c_ref_w": 13.889,
+    "fixed_p800_w": 63.64,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.c_absorbed": {
+    "c_ref_w": 20.896,
+    "fixed_p800_w": 76.99,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.e5m2grid_wide": {
+    "c_ref_w": 18.991,
+    "fixed_p800_w": 73.37,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.exp_a_walk_fixedmant": {
+    "c_ref_w": 13.668,
+    "fixed_p800_w": 63.22,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.exp_b_alt_shift": {
+    "c_ref_w": 16.639,
+    "fixed_p800_w": 68.88,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.exp_only_narrow2": {
+    "c_ref_w": 17.012,
+    "fixed_p800_w": 69.6,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.real_qwen_dequant_v": {
+    "c_ref_w": 22.87,
+    "fixed_p800_w": 80.75,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.real_qwen_qk": {
+    "c_ref_w": 20.056,
+    "fixed_p800_w": 75.39,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.real_smol_qk": {
+    "c_ref_w": 22.565,
+    "fixed_p800_w": 80.17,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp16.real_smol_softmax_v": {
+    "c_ref_w": 18.623,
+    "fixed_p800_w": 72.66,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.a_onebit_b16_half": {
+    "c_ref_w": 10.944,
+    "fixed_p800_w": 58.21,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.a_onebit_b5_third": {
+    "c_ref_w": 10.713,
+    "fixed_p800_w": 57.77,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.a_zeros_b_complement": {
+    "c_ref_w": 2.95,
+    "fixed_p800_w": 43.01,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.anchor6_randn": {
+    "c_ref_w": 25.714,
+    "fixed_p800_w": 86.36,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.anchor6_zeros": {
+    "c_ref_w": 1.438,
+    "fixed_p800_w": 40.1,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.b_onebit_b12_third": {
+    "c_ref_w": 11.112,
+    "fixed_p800_w": 58.53,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.b_onebit_b20_third": {
+    "c_ref_w": 14.938,
+    "fixed_p800_w": 65.82,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.bf16_wideexp": {
+    "c_ref_w": 20.502,
+    "fixed_p800_w": 76.46,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.c_absorbed": {
+    "c_ref_w": 21.038,
+    "fixed_p800_w": 77.46,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.exp_a_pow2wide_b_randn": {
+    "c_ref_w": 20.25,
+    "fixed_p800_w": 75.97,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.exp_a_walk_fixedmant": {
+    "c_ref_w": 13.831,
+    "fixed_p800_w": 63.72,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.exp_b_alt_shift": {
+    "c_ref_w": 17.196,
+    "fixed_p800_w": 70.14,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.exp_only_narrow2": {
+    "c_ref_w": 16.156,
+    "fixed_p800_w": 68.16,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.negzero_a_b_complement": {
+    "c_ref_w": 17.804,
+    "fixed_p800_w": 71.33,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.real_qwen_dequant_q": {
+    "c_ref_w": 21.358,
+    "fixed_p800_w": 78.06,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.real_qwen_softmax_v": {
+    "c_ref_w": 25.253,
+    "fixed_p800_w": 85.48,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.real_smol_softmax_v_causal": {
+    "c_ref_w": 14.881,
+    "fixed_p800_w": 65.72,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-fp32.signexp_invert_b": {
+    "c_ref_w": 18.203,
+    "fixed_p800_w": 72.09,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.a_word_zero_one": {
+    "c_ref_w": 4.929,
+    "fixed_p800_w": 47.3,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.a_zeros_b_lineflip": {
+    "c_ref_w": 1.79,
+    "fixed_p800_w": 42.57,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.anchor6_full": {
+    "c_ref_w": 9.023,
+    "fixed_p800_w": 55.09,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.anchor6_zeros": {
+    "c_ref_w": 2.121,
+    "fixed_p800_w": 41.9,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.b_line_55_aa": {
+    "c_ref_w": 8.11,
+    "fixed_p800_w": 54.37,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.b_line_zero_ff": {
+    "c_ref_w": 5.449,
+    "fixed_p800_w": 49.23,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.b_line_zero_full": {
+    "c_ref_w": 6.283,
+    "fixed_p800_w": 49.88,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.bflip_bit2_w": {
+    "c_ref_w": 4.247,
+    "fixed_p800_w": 46.07,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.bflip_bit5_w": {
+    "c_ref_w": 4.247,
+    "fixed_p800_w": 46.07,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.bheld_bit1": {
+    "c_ref_w": 8.194,
+    "fixed_p800_w": 53.68,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.bheld_bit4": {
+    "c_ref_w": 7.874,
+    "fixed_p800_w": 53.04,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.bheld_bit7": {
+    "c_ref_w": 7.538,
+    "fixed_p800_w": 52.37,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.powerlaw_df15_pt": {
+    "c_ref_w": 4.745,
+    "fixed_p800_w": 46.95,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.powerlaw_df4_pc": {
+    "c_ref_w": 8.761,
+    "fixed_p800_w": 54.58,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.real_qwen_w8a8_down": {
+    "c_ref_w": 8.157,
+    "fixed_p800_w": 53.44,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.real_qwen_w8a8_gate": {
+    "c_ref_w": 8.729,
+    "fixed_p800_w": 54.52,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.real_qwen_w8a8_v": {
+    "c_ref_w": 8.692,
+    "fixed_p800_w": 54.46,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.real_smol_w8a8_down": {
+    "c_ref_w": 7.459,
+    "fixed_p800_w": 52.1,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "b6-int8.real_smol_w8a8_q": {
+    "c_ref_w": 8.551,
+    "fixed_p800_w": 54.18,
+    "what": "M8's frozen 95% upper peak board sample (peak_board_hi95_w)"
+   },
+   "k-fp16-randn": {
+    "c_ref_w": 23.074,
+    "fixed_p800_w": 80.52,
+    "what": "the larger of E143's highest board sample on this tile and P800 from E143's c plus M8's q95 peak excess"
+   },
+   "k-int8-full": {
+    "c_ref_w": 8.95,
+    "fixed_p800_w": 53.61,
+    "what": "the larger of E143's highest board sample on this tile and P800 from E143's c plus M8's q95 peak excess"
+   },
+   "rest": {
+    "c_ref_w": 0.0,
+    "fixed_p800_w": 33.61,
+    "what": "the idle card (no launch)"
+   }
+  },
+  "blocks": [
+   {
+    "name": "SMOKE",
+    "title": "the idle card with no launch (its last 30 s are the session's rest reading), then a 2 s launch of each type's zeros anchor, C logged",
+    "default": false,
+    "start": {
+     "mode": "cool",
+     "max_c": 99,
+     "max_wait_s": 5
+    },
+    "launch": {
+     "seconds": 2,
+     "budget": 3.5,
+     "processes": 1
+    },
+    "tail_s": 3,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "zeros",
+      "label": "rest",
+      "launch": {
+       "seconds": 2,
+       "budget": 3.5,
+       "processes": 0
+      },
+      "tail_s": 30
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.anchor6_zeros.bin",
+      "label": "b6-fp32.anchor6_zeros"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.anchor6_zeros.bin",
+      "label": "b6-fp16.anchor6_zeros"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.anchor6_zeros.bin",
+      "label": "b6-int8.anchor6_zeros"
+     }
+    ]
+   },
+   {
+    "name": "BURST",
+    "title": "a burst on a cool die: one 6 s process from a die reading <= 55 C (E143's BURST block: E80's, E64's LAD shape), C logged",
+    "passes": 3,
+    "shuffle": true,
+    "start": {
+     "mode": "cool",
+     "max_c": 55,
+     "max_wait_s": 300
+    },
+    "runs": [
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.a_zeros_b_complement.bin",
+      "label": "b6-fp16.a_zeros_b_complement"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.anchor6_randn.bin",
+      "label": "b6-fp16.anchor6_randn"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.anchor6_zeros.bin",
+      "label": "b6-fp16.anchor6_zeros"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.b_onebit_b6_third.bin",
+      "label": "b6-fp16.b_onebit_b6_third"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.c_absorbed.bin",
+      "label": "b6-fp16.c_absorbed"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.e5m2grid_wide.bin",
+      "label": "b6-fp16.e5m2grid_wide"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_a_walk_fixedmant.bin",
+      "label": "b6-fp16.exp_a_walk_fixedmant"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_b_alt_shift.bin",
+      "label": "b6-fp16.exp_b_alt_shift"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.exp_only_narrow2.bin",
+      "label": "b6-fp16.exp_only_narrow2"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_qwen_dequant_v.bin",
+      "label": "b6-fp16.real_qwen_dequant_v"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_qwen_qk.bin",
+      "label": "b6-fp16.real_qwen_qk"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_smol_qk.bin",
+      "label": "b6-fp16.real_smol_qk"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp16/fp16.real_smol_softmax_v.bin",
+      "label": "b6-fp16.real_smol_softmax_v"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_onebit_b16_half.bin",
+      "label": "b6-fp32.a_onebit_b16_half"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_onebit_b5_third.bin",
+      "label": "b6-fp32.a_onebit_b5_third"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_zeros_b_complement.bin",
+      "label": "b6-fp32.a_zeros_b_complement"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.anchor6_zeros.bin",
+      "label": "b6-fp32.anchor6_zeros"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.b_onebit_b12_third.bin",
+      "label": "b6-fp32.b_onebit_b12_third"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.b_onebit_b20_third.bin",
+      "label": "b6-fp32.b_onebit_b20_third"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.bf16_wideexp.bin",
+      "label": "b6-fp32.bf16_wideexp"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.c_absorbed.bin",
+      "label": "b6-fp32.c_absorbed"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_a_pow2wide_b_randn.bin",
+      "label": "b6-fp32.exp_a_pow2wide_b_randn"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_a_walk_fixedmant.bin",
+      "label": "b6-fp32.exp_a_walk_fixedmant"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_b_alt_shift.bin",
+      "label": "b6-fp32.exp_b_alt_shift"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.exp_only_narrow2.bin",
+      "label": "b6-fp32.exp_only_narrow2"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.negzero_a_b_complement.bin",
+      "label": "b6-fp32.negzero_a_b_complement"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_qwen_dequant_q.bin",
+      "label": "b6-fp32.real_qwen_dequant_q"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_smol_softmax_v_causal.bin",
+      "label": "b6-fp32.real_smol_softmax_v_causal"
+     },
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/fp32/fp32.signexp_invert_b.bin",
+      "label": "b6-fp32.signexp_invert_b"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.a_word_zero_one.bin",
+      "label": "b6-int8.a_word_zero_one"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.a_zeros_b_lineflip.bin",
+      "label": "b6-int8.a_zeros_b_lineflip"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.anchor6_full.bin",
+      "label": "b6-int8.anchor6_full"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.anchor6_zeros.bin",
+      "label": "b6-int8.anchor6_zeros"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_55_aa.bin",
+      "label": "b6-int8.b_line_55_aa"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_zero_ff.bin",
+      "label": "b6-int8.b_line_zero_ff"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_zero_full.bin",
+      "label": "b6-int8.b_line_zero_full"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bflip_bit2_w.bin",
+      "label": "b6-int8.bflip_bit2_w"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bflip_bit5_w.bin",
+      "label": "b6-int8.bflip_bit5_w"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit1.bin",
+      "label": "b6-int8.bheld_bit1"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit4.bin",
+      "label": "b6-int8.bheld_bit4"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.bheld_bit7.bin",
+      "label": "b6-int8.bheld_bit7"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.powerlaw_df15_pt.bin",
+      "label": "b6-int8.powerlaw_df15_pt"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.powerlaw_df4_pc.bin",
+      "label": "b6-int8.powerlaw_df4_pc"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_down.bin",
+      "label": "b6-int8.real_qwen_w8a8_down"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_gate.bin",
+      "label": "b6-int8.real_qwen_w8a8_gate"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_v.bin",
+      "label": "b6-int8.real_qwen_w8a8_v"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_down.bin",
+      "label": "b6-int8.real_smol_w8a8_down"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_q.bin",
+      "label": "b6-int8.real_smol_w8a8_q"
+     },
+     {
+      "type": "fp16",
+      "values": "file:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+      "label": "k-fp16-randn"
+     },
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/full.bin",
+      "label": "k-int8-full"
+     }
+    ],
+    "launch": {
+     "seconds": 6,
+     "budget": 7.5,
+     "processes": 1
+    },
+    "tail_s": 4
+   }
+  ]
+ },
+ "runs_planned": [
+  "BURST-44-b6-int8.real_qwen_w8a8_gate-r1",
+  "BURST-38-b6-int8.bheld_bit1-r1",
+  "BURST-10-b6-fp16.real_qwen_qk-r1",
+  "BURST-08-b6-fp16.exp_only_narrow2-r1",
+  "BURST-35-b6-int8.b_line_zero_full-r1",
+  "BURST-12-b6-fp16.real_smol_softmax_v-r1",
+  "BURST-18-b6-fp32.b_onebit_b20_third-r1",
+  "BURST-26-b6-fp32.real_qwen_dequant_q-r1",
+  "BURST-19-b6-fp32.bf16_wideexp-r1",
+  "BURST-04-b6-fp16.c_absorbed-r1",
+  "BURST-40-b6-int8.bheld_bit7-r1",
+  "BURST-20-b6-fp32.c_absorbed-r1",
+  "BURST-28-b6-fp32.signexp_invert_b-r1",
+  "BURST-15-b6-fp32.a_zeros_b_complement-r1",
+  "BURST-48-k-fp16-randn-r1",
+  "BURST-02-b6-fp16.anchor6_zeros-r1",
+  "BURST-46-b6-int8.real_smol_w8a8_down-r1",
+  "BURST-05-b6-fp16.e5m2grid_wide-r1",
+  "BURST-43-b6-int8.real_qwen_w8a8_down-r1",
+  "BURST-36-b6-int8.bflip_bit2_w-r1",
+  "BURST-06-b6-fp16.exp_a_walk_fixedmant-r1",
+  "BURST-42-b6-int8.powerlaw_df4_pc-r1",
+  "BURST-23-b6-fp32.exp_b_alt_shift-r1",
+  "BURST-24-b6-fp32.exp_only_narrow2-r1",
+  "BURST-09-b6-fp16.real_qwen_dequant_v-r1",
+  "BURST-41-b6-int8.powerlaw_df15_pt-r1",
+  "BURST-45-b6-int8.real_qwen_w8a8_v-r1",
+  "BURST-16-b6-fp32.anchor6_zeros-r1",
+  "BURST-29-b6-int8.a_word_zero_one-r1",
+  "BURST-39-b6-int8.bheld_bit4-r1",
+  "BURST-01-b6-fp16.anchor6_randn-r1",
+  "BURST-14-b6-fp32.a_onebit_b5_third-r1",
+  "BURST-03-b6-fp16.b_onebit_b6_third-r1",
+  "BURST-47-b6-int8.real_smol_w8a8_q-r1",
+  "BURST-49-k-int8-full-r1",
+  "BURST-17-b6-fp32.b_onebit_b12_third-r1",
+  "BURST-00-b6-fp16.a_zeros_b_complement-r1",
+  "BURST-30-b6-int8.a_zeros_b_lineflip-r1",
+  "BURST-27-b6-fp32.real_smol_softmax_v_causal-r1",
+  "BURST-13-b6-fp32.a_onebit_b16_half-r1",
+  "BURST-34-b6-int8.b_line_zero_ff-r1",
+  "BURST-31-b6-int8.anchor6_full-r1",
+  "BURST-33-b6-int8.b_line_55_aa-r1",
+  "BURST-22-b6-fp32.exp_a_walk_fixedmant-r1",
+  "BURST-37-b6-int8.bflip_bit5_w-r1",
+  "BURST-11-b6-fp16.real_smol_qk-r1",
+  "BURST-25-b6-fp32.negzero_a_b_complement-r1",
+  "BURST-21-b6-fp32.exp_a_pow2wide_b_randn-r1",
+  "BURST-32-b6-int8.anchor6_zeros-r1",
+  "BURST-07-b6-fp16.exp_b_alt_shift-r1",
+  "BURST-23-b6-fp32.exp_b_alt_shift-r2",
+  "BURST-02-b6-fp16.anchor6_zeros-r2",
+  "BURST-30-b6-int8.a_zeros_b_lineflip-r2",
+  "BURST-06-b6-fp16.exp_a_walk_fixedmant-r2",
+  "BURST-09-b6-fp16.real_qwen_dequant_v-r2",
+  "BURST-26-b6-fp32.real_qwen_dequant_q-r2",
+  "BURST-46-b6-int8.real_smol_w8a8_down-r2",
+  "BURST-40-b6-int8.bheld_bit7-r2",
+  "BURST-12-b6-fp16.real_smol_softmax_v-r2",
+  "BURST-19-b6-fp32.bf16_wideexp-r2",
+  "BURST-08-b6-fp16.exp_only_narrow2-r2",
+  "BURST-25-b6-fp32.negzero_a_b_complement-r2",
+  "BURST-10-b6-fp16.real_qwen_qk-r2",
+  "BURST-22-b6-fp32.exp_a_walk_fixedmant-r2",
+  "BURST-14-b6-fp32.a_onebit_b5_third-r2",
+  "BURST-31-b6-int8.anchor6_full-r2",
+  "BURST-17-b6-fp32.b_onebit_b12_third-r2",
+  "BURST-00-b6-fp16.a_zeros_b_complement-r2",
+  "BURST-29-b6-int8.a_word_zero_one-r2",
+  "BURST-15-b6-fp32.a_zeros_b_complement-r2",
+  "BURST-20-b6-fp32.c_absorbed-r2",
+  "BURST-21-b6-fp32.exp_a_pow2wide_b_randn-r2",
+  "BURST-42-b6-int8.powerlaw_df4_pc-r2",
+  "BURST-43-b6-int8.real_qwen_w8a8_down-r2",
+  "BURST-05-b6-fp16.e5m2grid_wide-r2",
+  "BURST-16-b6-fp32.anchor6_zeros-r2",
+  "BURST-47-b6-int8.real_smol_w8a8_q-r2",
+  "BURST-27-b6-fp32.real_smol_softmax_v_causal-r2",
+  "BURST-38-b6-int8.bheld_bit1-r2",
+  "BURST-45-b6-int8.real_qwen_w8a8_v-r2",
+  "BURST-04-b6-fp16.c_absorbed-r2",
+  "BURST-32-b6-int8.anchor6_zeros-r2",
+  "BURST-49-k-int8-full-r2",
+  "BURST-01-b6-fp16.anchor6_randn-r2",
+  "BURST-41-b6-int8.powerlaw_df15_pt-r2",
+  "BURST-36-b6-int8.bflip_bit2_w-r2",
+  "BURST-07-b6-fp16.exp_b_alt_shift-r2",
+  "BURST-18-b6-fp32.b_onebit_b20_third-r2",
+  "BURST-34-b6-int8.b_line_zero_ff-r2",
+  "BURST-33-b6-int8.b_line_55_aa-r2",
+  "BURST-11-b6-fp16.real_smol_qk-r2",
+  "BURST-24-b6-fp32.exp_only_narrow2-r2",
+  "BURST-35-b6-int8.b_line_zero_full-r2",
+  "BURST-28-b6-fp32.signexp_invert_b-r2",
+  "BURST-39-b6-int8.bheld_bit4-r2",
+  "BURST-03-b6-fp16.b_onebit_b6_third-r2",
+  "BURST-13-b6-fp32.a_onebit_b16_half-r2",
+  "BURST-44-b6-int8.real_qwen_w8a8_gate-r2",
+  "BURST-37-b6-int8.bflip_bit5_w-r2",
+  "BURST-48-k-fp16-randn-r2",
+  "BURST-35-b6-int8.b_line_zero_full-r3",
+  "BURST-06-b6-fp16.exp_a_walk_fixedmant-r3",
+  "BURST-46-b6-int8.real_smol_w8a8_down-r3",
+  "BURST-16-b6-fp32.anchor6_zeros-r3",
+  "BURST-10-b6-fp16.real_qwen_qk-r3",
+  "BURST-21-b6-fp32.exp_a_pow2wide_b_randn-r3",
+  "BURST-11-b6-fp16.real_smol_qk-r3",
+  "BURST-49-k-int8-full-r3",
+  "BURST-25-b6-fp32.negzero_a_b_complement-r3",
+  "BURST-14-b6-fp32.a_onebit_b5_third-r3",
+  "BURST-04-b6-fp16.c_absorbed-r3",
+  "BURST-38-b6-int8.bheld_bit1-r3",
+  "BURST-00-b6-fp16.a_zeros_b_complement-r3",
+  "BURST-15-b6-fp32.a_zeros_b_complement-r3",
+  "BURST-01-b6-fp16.anchor6_randn-r3",
+  "BURST-28-b6-fp32.signexp_invert_b-r3",
+  "BURST-13-b6-fp32.a_onebit_b16_half-r3",
+  "BURST-39-b6-int8.bheld_bit4-r3",
+  "BURST-42-b6-int8.powerlaw_df4_pc-r3",
+  "BURST-31-b6-int8.anchor6_full-r3",
+  "BURST-37-b6-int8.bflip_bit5_w-r3",
+  "BURST-17-b6-fp32.b_onebit_b12_third-r3",
+  "BURST-05-b6-fp16.e5m2grid_wide-r3",
+  "BURST-08-b6-fp16.exp_only_narrow2-r3",
+  "BURST-44-b6-int8.real_qwen_w8a8_gate-r3",
+  "BURST-02-b6-fp16.anchor6_zeros-r3",
+  "BURST-47-b6-int8.real_smol_w8a8_q-r3",
+  "BURST-22-b6-fp32.exp_a_walk_fixedmant-r3",
+  "BURST-33-b6-int8.b_line_55_aa-r3",
+  "BURST-07-b6-fp16.exp_b_alt_shift-r3",
+  "BURST-36-b6-int8.bflip_bit2_w-r3",
+  "BURST-29-b6-int8.a_word_zero_one-r3",
+  "BURST-23-b6-fp32.exp_b_alt_shift-r3",
+  "BURST-45-b6-int8.real_qwen_w8a8_v-r3",
+  "BURST-40-b6-int8.bheld_bit7-r3",
+  "BURST-12-b6-fp16.real_smol_softmax_v-r3",
+  "BURST-48-k-fp16-randn-r3",
+  "BURST-34-b6-int8.b_line_zero_ff-r3",
+  "BURST-41-b6-int8.powerlaw_df15_pt-r3",
+  "BURST-03-b6-fp16.b_onebit_b6_third-r3",
+  "BURST-30-b6-int8.a_zeros_b_lineflip-r3",
+  "BURST-43-b6-int8.real_qwen_w8a8_down-r3",
+  "BURST-09-b6-fp16.real_qwen_dequant_v-r3",
+  "BURST-18-b6-fp32.b_onebit_b20_third-r3",
+  "BURST-20-b6-fp32.c_absorbed-r3",
+  "BURST-27-b6-fp32.real_smol_softmax_v_causal-r3",
+  "BURST-24-b6-fp32.exp_only_narrow2-r3",
+  "BURST-26-b6-fp32.real_qwen_dequant_q-r3",
+  "BURST-32-b6-int8.anchor6_zeros-r3",
+  "BURST-19-b6-fp32.bf16_wideexp-r3"
+ ],
+ "sha256": {
+  "heater": "d00158d454596a8325ff3a7ffa3dff6e80a2e1798516b022009450f63443b9b7",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e160/run_e160.py",
+  "--protocol",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e160/protocol.json",
+  "--out",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e160/runs/s1",
+  "--max-card-min",
+  "40.00"
+ ],
+ "git_head": "0c187e1262b0e0f7fb744da4c22211b5dcfa9958",
+ "git_dirty_hpl": ""
+}
