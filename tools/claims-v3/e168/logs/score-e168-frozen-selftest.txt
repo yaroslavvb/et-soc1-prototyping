@@ -1,0 +1,113 @@
+# Q140(q)'s frozen E168 scorer re-run unchanged on the Intel, Wed 4 Nov 2026 09:37 PST, from docs/reports/data/2026-11-04-q140q-gemm-g4-stride/ (/usr/bin/python3 3.9.6, numpy 1.26.4).
+# 1. score_e168.py check (the 9 files of frozen-sha256-e168.json, e39d06da):
+CHECK OK (9 files)
+# exit 0
+# 2. shasum -a 256 -c frozen-sha256-e168-scorer.txt (the 18-file sidecar, 1bfaa4e4):
+score_e168.py: OK
+frozen-sha256-e168.json: OK
+g4.json: OK
+g4_model.py: OK
+predictions-e168.json: OK
+../2026-11-03-q139q-gemm-g3/g3_model.py: OK
+../2026-11-04-q140l-a2-session-terms/m9_a2.json: OK
+../2026-11-04-q140l-a2-session-terms/predict_m9_a2.py: OK
+../2026-11-02-q138t-heat-model/model-q138t.json: OK
+../2026-11-02-q138t-heat-model/heat_q138t.py: OK
+../../../../tools/claims-v3/e119/make_predictions_e119.py: OK
+../../../../tools/claims-v3/kspeed/e83/predict_e83.py: OK
+../../../../tools/claims-v3/hpl/surface_hpl.py: OK
+../../../../tools/claims-v3/hpl/surface_hpl_t.py: OK
+../2026-11-01-e105-gemm-layout/results-speed.json: OK
+../2026-11-01-e107-gemm-placement/e107.json: OK
+../2026-11-01-e107-gemm-placement/scored.json: OK
+../../../../tools/claims-v3/kinds/predictions-e101.json: OK
+# exit 0
+# 3. score_e168.py selftest (E159's committed session through the scorer's path), then its diff against the committed selftest-score-e168.txt:
+# exit 0
+S1-fp32-randn-cold                   meas  784.5 MHz  55.25 W 62.09 C | G4  780.6  58.07 62.82 | inside {'mhz': True, 'w': False, 'die': True}
+S2-fp32-randn-cold                   meas  697.7 MHz  54.46 W 65.55 C | G4  706.8  53.91 65.41 | inside {'mhz': True, 'w': True, 'die': True}
+S3-fp32-randn-cold                   meas  649.7 MHz  54.00 W 65.66 C | G4  665.0  54.07 65.45 | inside {'mhz': False, 'w': True, 'die': True}
+{
+ "verdict_G4": {
+  "mhz": "FAIL (2 of 3; the rule needs 8 of 9)",
+  "w": "FAIL (2 of 3; the rule needs 8 of 9)",
+  "die": "PASS (3 of 3; the rule needs 8 of 9)"
+ },
+ "increment_rule": {},
+ "G4_rms_below": {
+  "G3_as_frozen": {
+   "mhz": true,
+   "w": true,
+   "die": true
+  },
+  "E136_law": {
+   "mhz": true,
+   "w": true,
+   "die": true
+  }
+ },
+ "summary": {
+  "G4.mhz": {
+   "n": 3,
+   "rms": 10.491,
+   "mean": -6.831,
+   "inside": 2
+  },
+  "G4.w": {
+   "n": 3,
+   "rms": 1.658,
+   "mean": -0.778,
+   "inside": 2
+  },
+  "G4.die": {
+   "n": 3,
+   "rms": 0.445,
+   "mean": -0.124,
+   "inside": 3
+  },
+  "G3_as_frozen.mhz": {
+   "n": 3,
+   "rms": 13.407,
+   "mean": -13.231,
+   "inside": 2
+  },
+  "G3_as_frozen.w": {
+   "n": 3,
+   "rms": 2.155,
+   "mean": -1.033,
+   "inside": 2
+  },
+  "G3_as_frozen.die": {
+   "n": 3,
+   "rms": 0.798,
+   "mean": -0.384,
+   "inside": 2
+  },
+  "E136_law.mhz": {
+   "n": 3,
+   "rms": 71.0,
+   "mean": -62.611,
+   "inside": 0
+  },
+  "E136_law.w": {
+   "n": 3,
+   "rms": 6.481,
+   "mean": -5.826,
+   "inside": 1
+  },
+  "E136_law.die": {
+   "n": 3,
+   "rms": 1.471,
+   "mean": 0.943,
+   "inside": 2
+  },
+  "chain_on_measured.die": {
+   "n": 3,
+   "rms": 0.512,
+   "mean": 0.345,
+   "inside": 3
+  }
+ }
+}
+SELFTEST: E159's three fp32 random holds through score_e168's path reproduce fit_g4's G4 final predictions: worst |diff| 0.0004 (PASS)
+# diff: none (byte-identical to the committed selftest-score-e168.txt, 1797 bytes)

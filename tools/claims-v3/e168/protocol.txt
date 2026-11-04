@@ -1,0 +1,35 @@
+E168 protocol from docs/reports/data/2026-11-04-q140q-gemm-g4-stride/predictions-e168.json (Q140(q), frozen at e39d06da, sha256 430f4afa266a...) and tools/claims-v3/e168/predictions-e168-a2.json (A2, 226249e1, sha256 2afb290f62f7...); session stops {'abs_stop_c': 76, 'board_cap_w': 85, 'cap_consecutive': 3}; admission limit 82.0 W, lock 82.0 W; session cap 58 card-minutes; gates {'cold': {'mode': 'cool', 'max_c': 46, 'max_wait_s': 360}, 'warm55': {'mode': 'cool', 'max_c': 55, 'max_wait_s': 300}}
+block SMOKE: the idle card with no launch (30 s), then a 2 s launch of four cells' zeros, each with its check of C
+  rest                                  0 x 2 s  zeros                                                                      start 99/5 s  estimate 30.0 W  plan   55.0 s + gate   0.0 s (at most   0.0)  cum   0.0 min
+  S1-fp32-zeros                         1 x 2 s  gemmL1x3x3:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin                start 99/5 s  estimate 46.56 W  plan   31.2 s + gate   0.0 s (at most   0.0)  cum   0.0 min
+  S2-fp32-zeros                         1 x 2 s  gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin                start 99/5 s  estimate 46.63 W  plan   31.2 s + gate   0.0 s (at most   0.0)  cum   0.0 min
+  S3-fp32-zeros                         1 x 2 s  gemmL3x5x3:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin                start 99/5 s  estimate 46.86 W  plan   31.2 s + gate   0.0 s (at most   0.0)  cum   0.0 min
+  S2-int8-zeros                         1 x 2 s  gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin                start 99/5 s  estimate 45.64 W  plan   31.2 s + gate   0.0 s (at most   0.0)  cum   0.0 min
+block R: the session's rest reading: 30 s of the idle card, no launch (the chain's start and the first hold's anchor)
+  rest                                  0 x 2 s  zeros                                                                      start 99/5 s  estimate 30.0 W  plan   55.0 s + gate   0.0 s (at most   0.0)  cum   0.9 min
+block H: the registered subset: the six fp32 random holds of Q140(q)'s frozen order (cold, then warm55, per shape)
+  S1-fp32-randn-cold                   12 x 8 s  gemmL1x3x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin                start 46/360 s  estimate 75.68 W  plan  141.4 s + gate  30.0 s (at most 360.0)  cum   3.8 min
+  S1-fp32-randn-warm55                 12 x 8 s  gemmL1x3x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin                start 55/300 s  estimate 75.68 W  plan  141.4 s + gate  10.0 s (at most  10.0)  cum   6.3 min
+  S2-fp32-randn-cold                   12 x 8 s  gemmL3x3x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin                start 46/360 s  estimate 76.63 W  plan  141.4 s + gate 240.0 s (at most 360.0)  cum  12.7 min
+  S2-fp32-randn-warm55                 12 x 8 s  gemmL3x3x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin                start 55/300 s  estimate 76.63 W  plan  141.4 s + gate  10.0 s (at most  10.0)  cum  15.2 min
+  S3-fp32-randn-cold                   12 x 8 s  gemmL3x5x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin                start 46/360 s  estimate 68.23 W  plan  141.4 s + gate 240.0 s (at most 360.0)  cum  21.5 min
+  S3-fp32-randn-warm55                 12 x 8 s  gemmL3x5x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin                start 55/300 s  estimate 68.23 W  plan  141.4 s + gate  10.0 s (at most  10.0)  cum  24.1 min
+block I: the rest of the frozen order: the three int8 holds at S2, warm55
+  S2-int8-zeros-warm55                 12 x 8 s  gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin                start 55/300 s  estimate 45.64 W  plan  141.4 s + gate  10.0 s (at most  10.0)  cum  26.6 min
+  S2-int8-real_smol_w8a8_down-warm55   12 x 8 s  gemmL3x3x2:tiles:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8 start 55/300 s  estimate 52.48 W  plan  141.4 s + gate  10.0 s (at most  10.0)  cum  29.1 min
+  S2-int8-sparse50-warm55              12 x 8 s  gemmL3x3x2:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin          start 55/300 s  estimate 52.57 W  plan  141.4 s + gate  10.0 s (at most  10.0)  cum  31.6 min
+block A: amendment A2 (226249e1): S2 int8 zeros from cold, the tenth and last hold
+  S2-int8-zeros-cold                   12 x 8 s  gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin                start 46/360 s  estimate 45.64 W  plan  141.4 s + gate 240.0 s (at most 360.0)  cum  38.0 min
+the session (R, the nine holds, A2's hold; run_hpl plan_s with its 25 s a run, plus the planned gate waits): 38.0 min planned, 49.5 min if every cold gate waits its 360 s (a rest floor above 46 C; the session cap 58); the nine alone 31.6 / 41.1 min
+with the smoke (3.0 min) and the two stop tests (about 0.8 min): about 42 card-minutes planned, 53 with every cold gate at its bound; the nine without A2 about 35 / 45 (Q140(q)'s design: about 45, cap 55); the slot 66 min, the session ended 3 min before it: at most 63 in all
+highest estimate 76.63 W (limit 82.0 W): every hold runs as designed
+smoke cycles per op at 800 MHz (E146's T0 x 800, the 50-250% check): {'S1-fp32-zeros': 1247.3, 'S2-fp32-zeros': 1188.5, 'S3-fp32-zeros': 1681.3, 'S2-int8-zeros': 1289.3}
+smoke / stop-test admission estimates (E146's zeros level at 800 MHz + 8.51 W): {'S1-fp32-zeros': 46.56, 'S2-fp32-zeros': 46.63, 'S3-fp32-zeros': 46.86, 'S2-int8-zeros': 45.64}
+stop-path test board: safety {'abs_stop_c': 76, 'board_cap_w': 30, 'cap_consecutive': 3}; run S2-fp32-zeros gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin (6 s)
+stop-path test die: safety {'abs_stop_c': 30, 'board_cap_w': 85, 'cap_consecutive': 3}; run S2-fp32-zeros gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin (6 s)
+  protocol.json sha256 ceaae90796064e4e256a1a78a688b466221ce3c9a97dd13efc4b71905b0e7a16
+  protocol-dry.json sha256 ff99738d770250cac9f02ee7a44a1980ded3ede4b3ab18b3b723d8fd5ef930b9
+  protocol-stoptest-board.json sha256 8e6791bdd89b9872875cc4a75b901a98afc0f7116ed1c01badf221bd1a01deaa
+  protocol-stoptest-die.json sha256 be2081af2274455c94fba2f1ddb9aa64227de4ea7ebca3671e905b0a200887e2
+  protocol-stoptest-board-dry.json sha256 2047592c2cf715b459734ce7578681a22a14a77b7e0a3abf26153ed4a71b6886
+  protocol-stoptest-die-dry.json sha256 85250ee4e8216687a0c5cab094709193440e5e6b4fc03fc572ecd5b58e8600c4

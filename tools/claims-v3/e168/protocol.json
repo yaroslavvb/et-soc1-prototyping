@@ -1,0 +1,377 @@
+{
+ "experiment": "E168",
+ "request": "Q141",
+ "card": "aifoundry2",
+ "order_seed": 168,
+ "note": "G4's blind test (Q140(q), frozen at e39d06da): three large-GEMM shapes nobody has run (S1 gemmL1x3x3, S2 gemmL3x3x2, S3 gemmL3x5x3), each held about 106 s (12 processes of 8 s) in fp32 random from a cold (46 C) and a warm (55 C) start, then int8 zeros, W8A8 real and sparse50 at S2 warm, then amendment A2's int8 zeros at S2 from cold (226249e1); under aifoundry2's own governor; nothing is set on the card",
+ "tools": {
+  "heater": "build/e136/host/sparsity_host",
+  "kernel": "build/e136/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "predictions": "docs/reports/data/2026-11-04-q140q-gemm-g4-stride/predictions-e168.json",
+ "predictions_sha256": "430f4afa266a30c35f3e4da44ebef9fbf1d1186c00ceb5e2e8ae312c8c168583",
+ "amendment": "tools/claims-v3/e168/predictions-e168-a2.json",
+ "amendment_sha256": "2afb290f62f7cc722c1f58837c18ab545f914863107a162653c38459c35fafe6",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 76,
+  "board_cap_w": 85,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 58.0
+ },
+ "smoke_cycles": {
+  "S1-fp32-zeros": 1247.3,
+  "S2-fp32-zeros": 1188.5,
+  "S3-fp32-zeros": 1681.3,
+  "S2-int8-zeros": 1289.3
+ },
+ "dry_c_w": {
+  "zeros": 0.0,
+  "gemmL1x3x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 21.616,
+  "gemmL3x3x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 22.043,
+  "gemmL3x5x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 17.188,
+  "gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.213,
+  "gemmL3x3x2:tiles:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_down.bin": 6.518,
+  "gemmL3x3x2:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin": 6.575,
+  "gemmL1x3x3:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.86,
+  "gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.88,
+  "gemmL3x5x3:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.118
+ },
+ "limit_p800_w": 82.0,
+ "peak_lock_w": 82.0,
+ "relation": {
+  "B800": 33.60956684526229,
+  "s800": 1.90517380064275
+ },
+ "admission": {
+  "rest": {
+   "fixed_p800_w": 30.0
+  },
+  "S1-fp32-randn-cold": {
+   "c_ref_w": 21.616,
+   "fixed_p800_w": 75.68
+  },
+  "S1-fp32-randn-warm55": {
+   "c_ref_w": 21.616,
+   "fixed_p800_w": 75.68
+  },
+  "S2-fp32-randn-cold": {
+   "c_ref_w": 22.043,
+   "fixed_p800_w": 76.63
+  },
+  "S2-fp32-randn-warm55": {
+   "c_ref_w": 22.043,
+   "fixed_p800_w": 76.63
+  },
+  "S3-fp32-randn-cold": {
+   "c_ref_w": 17.188,
+   "fixed_p800_w": 68.23
+  },
+  "S3-fp32-randn-warm55": {
+   "c_ref_w": 17.188,
+   "fixed_p800_w": 68.23
+  },
+  "S2-int8-zeros-warm55": {
+   "c_ref_w": 2.212,
+   "fixed_p800_w": 45.64
+  },
+  "S2-int8-real_smol_w8a8_down-warm55": {
+   "c_ref_w": 6.518,
+   "fixed_p800_w": 52.48
+  },
+  "S2-int8-sparse50-warm55": {
+   "c_ref_w": 6.575,
+   "fixed_p800_w": 52.57
+  },
+  "S2-int8-zeros-cold": {
+   "c_ref_w": 2.212,
+   "fixed_p800_w": 45.64
+  },
+  "S1-fp32-zeros": {
+   "c_ref_w": 2.86,
+   "fixed_p800_w": 46.56
+  },
+  "S2-fp32-zeros": {
+   "c_ref_w": 2.88,
+   "fixed_p800_w": 46.63
+  },
+  "S3-fp32-zeros": {
+   "c_ref_w": 3.118,
+   "fixed_p800_w": 46.86
+  },
+  "S2-int8-zeros": {
+   "c_ref_w": 2.213,
+   "fixed_p800_w": 45.64
+  }
+ },
+ "blocks": [
+  {
+   "name": "SMOKE",
+   "title": "the idle card with no launch (30 s), then a 2 s launch of four cells' zeros, each with its check of C",
+   "default": false,
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 5
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 1
+   },
+   "tail_s": 3,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest",
+     "launch": {
+      "seconds": 2,
+      "budget": 3.5,
+      "processes": 0
+     },
+     "tail_s": 30,
+     "start": {
+      "mode": "cool",
+      "max_c": 99,
+      "max_wait_s": 5
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL1x3x3:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "S1-fp32-zeros"
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "S2-fp32-zeros"
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL3x5x3:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+     "label": "S3-fp32-zeros"
+    },
+    {
+     "type": "int8",
+     "values": "gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "S2-int8-zeros"
+    }
+   ]
+  },
+  {
+   "name": "R",
+   "title": "the session's rest reading: 30 s of the idle card, no launch (the chain's start and the first hold's anchor)",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest",
+     "launch": {
+      "seconds": 2,
+      "budget": 3.5,
+      "processes": 0
+     },
+     "tail_s": 30,
+     "start": {
+      "mode": "cool",
+      "max_c": 99,
+      "max_wait_s": 5
+     }
+    }
+   ]
+  },
+  {
+   "name": "H",
+   "title": "the registered subset: the six fp32 random holds of Q140(q)'s frozen order (cold, then warm55, per shape)",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "gemmL1x3x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "S1-fp32-randn-cold",
+     "launch": {
+      "seconds": 8.0,
+      "budget": 9.5,
+      "processes": 12
+     },
+     "tail_s": 6,
+     "start": {
+      "mode": "cool",
+      "max_c": 46,
+      "max_wait_s": 360
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL1x3x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "S1-fp32-randn-warm55",
+     "launch": {
+      "seconds": 8.0,
+      "budget": 9.5,
+      "processes": 12
+     },
+     "tail_s": 6,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL3x3x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "S2-fp32-randn-cold",
+     "launch": {
+      "seconds": 8.0,
+      "budget": 9.5,
+      "processes": 12
+     },
+     "tail_s": 6,
+     "start": {
+      "mode": "cool",
+      "max_c": 46,
+      "max_wait_s": 360
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL3x3x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "S2-fp32-randn-warm55",
+     "launch": {
+      "seconds": 8.0,
+      "budget": 9.5,
+      "processes": 12
+     },
+     "tail_s": 6,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL3x5x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "S3-fp32-randn-cold",
+     "launch": {
+      "seconds": 8.0,
+      "budget": 9.5,
+      "processes": 12
+     },
+     "tail_s": 6,
+     "start": {
+      "mode": "cool",
+      "max_c": 46,
+      "max_wait_s": 360
+     }
+    },
+    {
+     "type": "fp32",
+     "values": "gemmL3x5x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "label": "S3-fp32-randn-warm55",
+     "launch": {
+      "seconds": 8.0,
+      "budget": 9.5,
+      "processes": 12
+     },
+     "tail_s": 6,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    }
+   ]
+  },
+  {
+   "name": "I",
+   "title": "the rest of the frozen order: the three int8 holds at S2, warm55",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "int8",
+     "values": "gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "S2-int8-zeros-warm55",
+     "launch": {
+      "seconds": 8.0,
+      "budget": 9.5,
+      "processes": 12
+     },
+     "tail_s": 6,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmL3x3x2:tiles:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_down.bin",
+     "label": "S2-int8-real_smol_w8a8_down-warm55",
+     "launch": {
+      "seconds": 8.0,
+      "budget": 9.5,
+      "processes": 12
+     },
+     "tail_s": 6,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    },
+    {
+     "type": "int8",
+     "values": "gemmL3x3x2:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin",
+     "label": "S2-int8-sparse50-warm55",
+     "launch": {
+      "seconds": 8.0,
+      "budget": 9.5,
+      "processes": 12
+     },
+     "tail_s": 6,
+     "start": {
+      "mode": "cool",
+      "max_c": 55,
+      "max_wait_s": 300
+     }
+    }
+   ]
+  },
+  {
+   "name": "A",
+   "title": "amendment A2 (226249e1): S2 int8 zeros from cold, the tenth and last hold",
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "int8",
+     "values": "gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+     "label": "S2-int8-zeros-cold",
+     "launch": {
+      "seconds": 8.0,
+      "budget": 9.5,
+      "processes": 12
+     },
+     "tail_s": 6,
+     "start": {
+      "mode": "cool",
+      "max_c": 46,
+      "max_wait_s": 360
+     }
+    }
+   ]
+  }
+ ]
+}

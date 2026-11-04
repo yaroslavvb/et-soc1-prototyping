@@ -1,0 +1,159 @@
+PASS the frozen predictions file has its registered sha256 (e39d06da): 430f4afa266a...
+PASS A2's predictions-e168-a2.json has its registered sha256 (226249e1): 2afb290f62f7...
+PASS A2's file holds the frozen warm cell unchanged, and its cold cell is that cell with both_nominal_starts.cold's G4 and G3 (nothing computed)
+PASS the holds run in the frozen order, then A2's: ['S1-fp32-randn-cold', 'S1-fp32-randn-warm55', 'S2-fp32-randn-cold', 'S2-fp32-randn-warm55', 'S3-fp32-randn-cold', 'S3-fp32-randn-warm55', 'S2-int8-zeros-warm55', 'S2-int8-real_smol_w8a8_down-warm55', 'S2-int8-sparse50-warm55', 'S2-int8-zeros-cold']
+PASS block H is the registered subset, the six fp32 random holds
+PASS block A is A2's one hold, last
+PASS every hold's values string and format are the frozen cell's
+PASS every hold is 12 processes of --seconds 8.0 (budget 9.5, tail 6 s)
+PASS every hold's gate is A2 section 2's for its start: cold 46 C / 360 s, warm55 55 C / 300 s
+PASS the session's stops are the frozen ones: {'abs_stop_c': 76, 'board_cap_w': 85, 'cap_consecutive': 3}
+PASS the smoke, then the session's 30 s rest reading before the first hold
+PASS every hold's admission estimate is its frozen predicted peak
+PASS every hold's predicted peak is at most 82 W (highest 76.63 W): every hold runs as designed
+PASS admission limit 82 W, peak lock 82 W
+PASS every label the queue runs is in the admission table (15 labels)
+PASS the smoke's cycles per op cover its four launches: {'S1-fp32-zeros': 1247.3, 'S2-fp32-zeros': 1188.5, 'S3-fp32-zeros': 1681.3, 'S2-int8-zeros': 1289.3}
+PASS the dry protocol has the same holds in the same order, the same gate temperatures, waits cut to 6 s
+PASS the session's own cap is 58 card-minutes (A2: 63 in all with the smoke and the stop tests)
+PASS the registered protocol's stops and limit pass the runner's check
+PASS the runner refuses a 93 W board stop: board_cap_w 93 W is above 85 W
+PASS the runner refuses an 88 W admission limit: limit_p800_w 88.0 is missing or above 82 W
+PASS the runner refuses a protocol whose stops lack a key the watcher reads
+PASS the board stop test's protocol passes the runner's check
+PASS the die stop test's protocol passes the runner's check
+PASS run_hpl.py's protocol check (run_e101s.py's values check for GEMM values) passes every run: []
+PASS exactly one run names a pool-6 tile: ['S2-int8-real_smol_w8a8_down-warm55']
+PASS E101's imported verify_tiles refuses the frozen W8A8 hold's pool-6 file, the whole session at load: refused: gemmL3x3x2:tiles:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_down.bin: tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol
+PASS run_e168.verify_tiles accepts every run of the session; the W8A8 tile checked against blind6.json (2,048 B, whole/A/B sha256): 9 values
+PASS run_e168.verify_tiles accepts every run of the dry protocol (run_kspeed.py calls it under --dry too)
+PASS pool6_why passes the tile in a copied tree
+PASS one flipped bit in B is refused: int8.real_smol_w8a8_down: sha256 whole d71104919421115f36c5b5ab91f93609e34827055bdba263d9baee4ee30d1255, manif
+PASS an int8 pool-6 tile on an fp32 run is refused: ['gemmL3x3x2:tiles:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_down.bin: a int8 tile, run I-01-S2-int8-real_smol_w8a8_down-warm55-r1 is fp32']
+PASS a changed MANIFEST is refused: tools/claims-v3/kinds/blind6/MANIFEST: sha256 7c769930340a34280a3f01fd9d3832d781bcf21810571fdfff579d
+PASS stop check: a board trip on live samples (a zeros burst over 30 W) passes
+PASS stop check: a trip read at the pass's end fails (b-end: the trip at 1007000 is 5300 ms from the third live line over 30 W)
+PASS stop check: a stop that never fired fails
+PASS stop check: a die trip on the first live sample passes
+PASS stop check: a die trip after a launch, seconds after its sample, fails
+PASS smoke check: four launches, each with an ok check of C and cycles at 110% of the frozen law's, pass (None)
+PASS smoke check (E168's): a launch with no check-of-C record fails (smoke: SMOKE-01-S1-fp32-zeros-r1 carries no ok check of C (rgm136's test "check" records: []))
+FREEZE OK: score_e168.check 9 files; the sidecar 18 of 18 OK; A2's predictions-e168-a2.json 2afb290f62f7... as registered
+
+E168 reduction (registered): Q140(q)'s frozen scorer behind its hash checks, cut holds left out, A7's verdicts, A2's reported test, R0, the safety record
+complete holds: [('s1', 'S1-fp32-randn-cold'), ('s1', 'S2-int8-zeros-warm55'), ('s1', 'S2-fp32-randn-cold'), ('s1', 'S2-int8-zeros-cold'), ('s1', 'S3-fp32-randn-cold')]; cut: []
+hold                                       measured MHz/W/C |                   G4 |             G4 err | in  |         G3 as frozen |             E136 law | chain die | start
+S1-fp32-randn-cold                    784.5  55.25  62.09 |  708.4  60.06  65.27 |  +76.1 -4.80 -3.18 | nnn |  712.3  59.26  65.48 |  745.3  62.06  61.63 |     61.22 |  46.0
+S2-fp32-randn-cold                    697.7  54.46  65.55 |  660.1  53.77  65.44 |  +37.6 +0.69 +0.11 | nyy |  659.4  53.74  65.50 |  738.6  62.06  65.42 |     65.53 |  56.0
+S3-fp32-randn-cold                    649.7  54.00  65.66 |  737.9  54.51  65.38 |  -88.1 -0.50 +0.27 | nyy |  736.8  54.28  65.49 |  796.6  59.37  64.68 |     65.52 |  57.0
+S2-int8-zeros-warm55                  800.0  43.81  59.78 |  800.0  35.79  55.98 |   +0.0 +8.02 +3.80 | ynn |  800.0  37.01  56.56 |  800.0  37.13  55.81 |     60.01 |  58.0
+S2-int8-zeros-cold                    794.3  45.75  60.95 |  800.0  35.77  55.78 |   -5.7 +9.97 +5.17 | ynn |  800.0  37.00  56.35 |  800.0  37.13  55.81 |     60.83 |  58.0 (A2, reported)
+A7, ALL SCORED HOLDS (the primary): G4 {"mhz": "FAIL (1 of 4; the rule needs 8 of 9)", "w": "FAIL (2 of 4; the rule needs 8 of 9)", "die": "FAIL (2 of 4; the rule needs 8 of 9)"}; increment rule {}; G4 rms below {"G3_as_frozen": {"mhz": false, "w": false, "die": false}, "E136_law": {"mhz": true, "w": true, "die": false}}
+   G4                   mhz 61.16 rms (+6.377 mean, 1 of 4 inside); w 4.694 rms (+0.851 mean, 2 of 4 inside); die 2.483 rms (+0.251 mean, 2 of 4 inside)
+   G3_as_frozen         mhz 59.667 rms (+5.829 mean, 1 of 4 inside); w 3.961 rms (+0.808 mean, 2 of 4 inside); die 2.337 rms (+0.013 mean, 2 of 4 inside)
+   E136_law             mhz 78.7 rms (-37.147 mean, 1 of 4 inside); w 6.663 rms (-3.275 mean, 0 of 4 inside); die 2.058 rms (+1.385 mean, 3 of 4 inside)
+   chain_on_measured    die 0.458 rms (+0.202 mean, 4 of 4 inside)
+THE REGISTERED SUBSET (the six fp32 random holds): G4 {"mhz": "FAIL (0 of 3; the rule needs 8 of 9)", "w": "FAIL (2 of 3; the rule needs 8 of 9)", "die": "FAIL (2 of 3; the rule needs 8 of 9)"}; increment rule {}; G4 rms below {"G3_as_frozen": {"mhz": false, "w": false, "die": true}, "E136_law": {"mhz": true, "w": true, "die": false}}
+   G4                   mhz 70.622 rms (+8.502 mean, 0 of 3 inside); w 2.818 rms (-1.538 mean, 2 of 3 inside); die 1.846 rms (-0.932 mean, 2 of 3 inside)
+   G3_as_frozen         mhz 68.897 rms (+7.772 mean, 0 of 3 inside); w 2.353 rms (-1.187 mean, 2 of 3 inside); die 1.959 rms (-1.055 mean, 2 of 3 inside)
+   E136_law             mhz 90.875 rms (-49.529 mean, 0 of 3 inside); w 6.658 rms (-6.593 mean, 0 of 3 inside); die 0.628 rms (+0.524 mean, 3 of 3 inside)
+   chain_on_measured    die 0.512 rms (+0.345 mean, 3 of 3 inside)
+A2 (reported, not in A7): {"dW_meas_w": 1.94, "dW_G4_w": -0.015, "dW_G3_as_frozen_w": -0.008, "dW_E136_law_w": 0.0, "dW_G4_nominal_frozen_w": 1.334, "dW_G3_nominal_frozen_w": 0.641, "dW_meas_minus_G4_w": 1.955, "dW_meas_minus_G3_w": 1.948, "dDie_meas_c": 1.17, "dDie_G4_c": -0.202, "die_start_cold_c": 58.0, "die_start_warm_c": 58.0, "h_w": -0.007, "reading": "NO READING: G4's mechanical difference -0.015 W is 0.2 W or less (the starts too close); the test has no power"}
+   the cold hold's measured - G4 {"mhz": -5.699, "w": 9.973, "die": 5.172}; inside A7's lines {"mhz": true, "w": false, "die": false} (not counted)
+consistency: [{"check": "the recomputed verdicts equal the frozen scorer's own (one session)", "ok": true}, {"check": "the warm zeros hold's row in A2's call equals its A7 row", "ok": true}]
+R0 (checks of C): PASS (2178 kernel records in 108 work launches, 0 not ok; 0 work launches without a check-of-C record)
+safety: peaks {'board_max_w': 76.1, 'die_mean_max_c': 66, 'hottest_field_max_c': 70}; trips []; not admitted []; peak locks 0; config read (TDP W, threshold C) [(65, 65)]; card time {'first_touch_ms': None, 'card_free_ms': None, 'minutes': None}
+gates: S1-fp32-randn-cold 57 C reached True after 0.0 s at 45.0 C; S2-int8-zeros-warm55 57 C reached True after 0.8 s at 57.0 C; S2-fp32-randn-cold 57 C reached True after 0.0 s at 56.0 C; S2-int8-zeros-cold 57 C reached True after 11.0 s at 57.0 C; S3-fp32-randn-cold 57 C reached True after 0.0 s at 56.0 C
+PASS A7's rows are the four relabelled nine-cell holds, A2's left out: ['S1-fp32-randn-cold', 'S2-fp32-randn-cold', 'S3-fp32-randn-cold', 'S2-int8-zeros-warm55']
+PASS the reduction's A7 rows equal score_e168.score's own rows on the same holds (the frozen scorer, unchanged, is the score)
+PASS consistency: the recomputed verdicts equal the scorer's, and A2's call gives the same warm row: [{'check': "the recomputed verdicts equal the frozen scorer's own (one session)", 'ok': True}, {'check': "the warm zeros hold's row in A2's call equals its A7 row", 'ok': True}]
+PASS A2's start dependence is computed from the two rows (code path only; E159's int8 full holds stand in): {"dW_meas_w": 1.94, "dW_G4_w": -0.015, "reading": "NO READING: G4's mechanical difference -0.015 W is 0.2 W or less (the starts too close); the test has no power"}
+PASS R0 PASS on E159's session (2178 kernel records, 108 work launches, every one with a check of C)
+PASS the verdicts are per quantity; the subset is reported incomplete when holds are missing
+
+E168 reduction (registered): Q140(q)'s frozen scorer behind its hash checks, cut holds left out, A7's verdicts, A2's reported test, R0, the safety record
+complete holds: [('s1', 'S1-fp32-randn-cold'), ('s1', 'S2-int8-zeros-warm55'), ('s1', 'S2-int8-zeros-cold'), ('s1', 'S3-fp32-randn-cold')]; cut: [('S2-fp32-randn-cold', '11 of 12 processes recorded')]
+hold                                       measured MHz/W/C |                   G4 |             G4 err | in  |         G3 as frozen |             E136 law | chain die | start
+S1-fp32-randn-cold                    784.5  55.25  62.09 |  708.4  60.06  65.27 |  +76.1 -4.80 -3.18 | nnn |  712.3  59.26  65.48 |  745.3  62.06  61.63 |     61.22 |  46.0
+S3-fp32-randn-cold                    649.7  54.00  65.66 |  737.9  54.51  65.38 |  -88.1 -0.50 +0.27 | nyy |  736.8  54.28  65.49 |  796.6  59.37  64.68 |     65.52 |  57.0
+S2-int8-zeros-warm55                  800.0  43.81  59.78 |  800.0  35.79  55.98 |   +0.0 +8.02 +3.80 | ynn |  800.0  37.01  56.56 |  800.0  37.13  55.81 |     60.01 |  58.0
+S2-int8-zeros-cold                    794.3  45.75  60.95 |  800.0  35.77  55.78 |   -5.7 +9.97 +5.17 | ynn |  800.0  37.00  56.35 |  800.0  37.13  55.81 |     60.83 |  58.0 (A2, reported)
+A7, ALL SCORED HOLDS (the primary): G4 {"mhz": "FAIL (1 of 3; the rule needs 8 of 9)", "w": "FAIL (1 of 3; the rule needs 8 of 9)", "die": "FAIL (1 of 3; the rule needs 8 of 9)"}; increment rule {}; G4 rms below {"G3_as_frozen": {"mhz": false, "w": false, "die": false}, "E136_law": {"mhz": true, "w": true, "die": false}}
+   G4                   mhz 67.212 rms (-4.015 mean, 1 of 3 inside); w 5.405 rms (+0.903 mean, 1 of 3 inside); die 2.866 rms (+0.297 mean, 1 of 3 inside)
+   G3_as_frozen         mhz 65.266 rms (-4.971 mean, 1 of 3 inside); w 4.555 rms (+0.838 mean, 1 of 3 inside); die 2.698 rms (-0.002 mean, 1 of 3 inside)
+   E136_law             mhz 87.752 rms (-35.892 mean, 1 of 3 inside); w 6.32 rms (-1.833 mean, 0 of 3 inside); die 2.375 rms (+1.803 mean, 2 of 3 inside)
+   chain_on_measured    die 0.528 rms (+0.261 mean, 3 of 3 inside)
+THE REGISTERED SUBSET (the six fp32 random holds): G4 {"mhz": "FAIL (0 of 2; the rule needs 8 of 9)", "w": "FAIL (1 of 2; the rule needs 8 of 9)", "die": "FAIL (1 of 2; the rule needs 8 of 9)"}; increment rule {}; G4 rms below {"G3_as_frozen": {"mhz": false, "w": false, "die": true}, "E136_law": {"mhz": true, "w": true, "die": false}}
+   G4                   mhz 82.317 rms (-6.022 mean, 0 of 2 inside); w 3.416 rms (-2.654 mean, 1 of 2 inside); die 2.26 rms (-1.455 mean, 1 of 2 inside)
+   G3_as_frozen         mhz 79.934 rms (-7.457 mean, 0 of 2 inside); w 2.837 rms (-2.14 mean, 1 of 2 inside); die 2.398 rms (-1.611 mean, 1 of 2 inside)
+   E136_law             mhz 107.474 rms (-53.839 mean, 0 of 2 inside); w 6.132 rms (-6.09 mean, 0 of 2 inside); die 0.763 rms (+0.719 mean, 2 of 2 inside)
+   chain_on_measured    die 0.626 rms (+0.506 mean, 2 of 2 inside)
+A2 (reported, not in A7): {"dW_meas_w": 1.94, "dW_G4_w": -0.015, "dW_G3_as_frozen_w": -0.008, "dW_E136_law_w": 0.0, "dW_G4_nominal_frozen_w": 1.334, "dW_G3_nominal_frozen_w": 0.641, "dW_meas_minus_G4_w": 1.955, "dW_meas_minus_G3_w": 1.948, "dDie_meas_c": 1.17, "dDie_G4_c": -0.202, "die_start_cold_c": 58.0, "die_start_warm_c": 58.0, "h_w": -0.007, "reading": "NO READING: G4's mechanical difference -0.015 W is 0.2 W or less (the starts too close); the test has no power"}
+   the cold hold's measured - G4 {"mhz": -5.699, "w": 9.973, "die": 5.172}; inside A7's lines {"mhz": true, "w": false, "die": false} (not counted)
+consistency: [{"check": "the recomputed verdicts equal the frozen scorer's own (one session)", "ok": true}, {"check": "the warm zeros hold's row in A2's call equals its A7 row", "ok": true}]
+R0 (checks of C): PASS (2157 kernel records in 107 work launches, 0 not ok; 0 work launches without a check-of-C record)
+safety: peaks {'board_max_w': 76.1, 'die_mean_max_c': 66, 'hottest_field_max_c': 70}; trips []; not admitted []; peak locks 0; config read (TDP W, threshold C) [(65, 65)]; card time {'first_touch_ms': None, 'card_free_ms': None, 'minutes': None}
+gates: S1-fp32-randn-cold 57 C reached True after 0.0 s at 45.0 C; S2-int8-zeros-warm55 57 C reached True after 0.8 s at 57.0 C; S2-fp32-randn-cold 57 C reached True after 0.0 s at 56.0 C; S2-int8-zeros-cold 57 C reached True after 11.0 s at 57.0 C; S3-fp32-randn-cold 57 C reached True after 0.0 s at 56.0 C
+PASS a hold missing a process is cut and not scored ([('S2-fp32-randn-cold', '11 of 12 processes recorded')])
+
+E168 reduction (registered): Q140(q)'s frozen scorer behind its hash checks, cut holds left out, A7's verdicts, A2's reported test, R0, the safety record
+complete holds: [('s1', 'S1-fp32-randn-cold'), ('s1', 'S2-int8-zeros-warm55'), ('s1', 'S2-fp32-randn-cold'), ('s1', 'S3-fp32-randn-cold')]; cut: [('S2-int8-zeros-cold', "1 process(es) without rgm136's check of C")]
+hold                                       measured MHz/W/C |                   G4 |             G4 err | in  |         G3 as frozen |             E136 law | chain die | start
+S1-fp32-randn-cold                    784.5  55.25  62.09 |  708.4  60.06  65.27 |  +76.1 -4.80 -3.18 | nnn |  712.3  59.26  65.48 |  745.3  62.06  61.63 |     61.22 |  46.0
+S2-fp32-randn-cold                    697.7  54.46  65.55 |  660.1  53.77  65.44 |  +37.6 +0.69 +0.11 | nyy |  659.4  53.74  65.50 |  738.6  62.06  65.42 |     65.53 |  56.0
+S3-fp32-randn-cold                    649.7  54.00  65.66 |  737.9  54.51  65.38 |  -88.1 -0.50 +0.27 | nyy |  736.8  54.28  65.49 |  796.6  59.37  64.68 |     65.52 |  57.0
+S2-int8-zeros-warm55                  800.0  43.81  59.78 |  800.0  35.79  55.98 |   +0.0 +8.02 +3.80 | ynn |  800.0  37.01  56.56 |  800.0  37.13  55.81 |     60.01 |  58.0
+A7, ALL SCORED HOLDS (the primary): G4 {"mhz": "FAIL (1 of 4; the rule needs 8 of 9)", "w": "FAIL (2 of 4; the rule needs 8 of 9)", "die": "FAIL (2 of 4; the rule needs 8 of 9)"}; increment rule {}; G4 rms below {"G3_as_frozen": {"mhz": false, "w": false, "die": false}, "E136_law": {"mhz": true, "w": true, "die": false}}
+   G4                   mhz 61.16 rms (+6.377 mean, 1 of 4 inside); w 4.694 rms (+0.851 mean, 2 of 4 inside); die 2.483 rms (+0.251 mean, 2 of 4 inside)
+   G3_as_frozen         mhz 59.667 rms (+5.829 mean, 1 of 4 inside); w 3.961 rms (+0.808 mean, 2 of 4 inside); die 2.337 rms (+0.013 mean, 2 of 4 inside)
+   E136_law             mhz 78.7 rms (-37.147 mean, 1 of 4 inside); w 6.663 rms (-3.275 mean, 0 of 4 inside); die 2.058 rms (+1.385 mean, 3 of 4 inside)
+   chain_on_measured    die 0.458 rms (+0.202 mean, 4 of 4 inside)
+THE REGISTERED SUBSET (the six fp32 random holds): G4 {"mhz": "FAIL (0 of 3; the rule needs 8 of 9)", "w": "FAIL (2 of 3; the rule needs 8 of 9)", "die": "FAIL (2 of 3; the rule needs 8 of 9)"}; increment rule {}; G4 rms below {"G3_as_frozen": {"mhz": false, "w": false, "die": true}, "E136_law": {"mhz": true, "w": true, "die": false}}
+   G4                   mhz 70.622 rms (+8.502 mean, 0 of 3 inside); w 2.818 rms (-1.538 mean, 2 of 3 inside); die 1.846 rms (-0.932 mean, 2 of 3 inside)
+   G3_as_frozen         mhz 68.897 rms (+7.772 mean, 0 of 3 inside); w 2.353 rms (-1.187 mean, 2 of 3 inside); die 1.959 rms (-1.055 mean, 2 of 3 inside)
+   E136_law             mhz 90.875 rms (-49.529 mean, 0 of 3 inside); w 6.658 rms (-6.593 mean, 0 of 3 inside); die 0.628 rms (+0.524 mean, 3 of 3 inside)
+   chain_on_measured    die 0.512 rms (+0.345 mean, 3 of 3 inside)
+A2 (reported, not in A7): {"reading": "NOT RUN or CUT: A2's hold was not scored (1 process(es) without rgm136's check of C)"}
+consistency: [{"check": "the recomputed verdicts equal the frozen scorer's own (one session)", "ok": true}]
+R0 (checks of C): PASS (2177 kernel records in 108 work launches, 0 not ok; 1 work launches without a check-of-C record)
+safety: peaks {'board_max_w': 76.1, 'die_mean_max_c': 66, 'hottest_field_max_c': 70}; trips []; not admitted []; peak locks 0; config read (TDP W, threshold C) [(65, 65)]; card time {'first_touch_ms': None, 'card_free_ms': None, 'minutes': None}
+gates: S1-fp32-randn-cold 57 C reached True after 0.0 s at 45.0 C; S2-int8-zeros-warm55 57 C reached True after 0.8 s at 57.0 C; S2-fp32-randn-cold 57 C reached True after 0.0 s at 56.0 C; S2-int8-zeros-cold 57 C reached True after 11.0 s at 57.0 C; S3-fp32-randn-cold 57 C reached True after 0.0 s at 56.0 C
+PASS a process with no check-of-C record cuts its hold (here A2's), and A2's reading says so: NOT RUN or CUT: A2's hold was not scored (1 process(es) without rgm136's check of C)
+
+E168 reduction (registered): Q140(q)'s frozen scorer behind its hash checks, cut holds left out, A7's verdicts, A2's reported test, R0, the safety record
+complete holds: [('s1', 'S1-fp32-randn-cold'), ('s1', 'S2-int8-zeros-warm55'), ('s1', 'S2-fp32-randn-cold'), ('s1', 'S2-int8-zeros-cold'), ('s1', 'S3-fp32-randn-cold')]; cut: []
+hold                                       measured MHz/W/C |                   G4 |             G4 err | in  |         G3 as frozen |             E136 law | chain die | start
+S1-fp32-randn-cold                    784.5  55.25  62.09 |  708.4  60.06  65.27 |  +76.1 -4.80 -3.18 | nnn |  712.3  59.26  65.48 |  745.3  62.06  61.63 |     61.22 |  46.0
+S2-fp32-randn-cold                    697.7  54.46  65.55 |  660.1  53.77  65.44 |  +37.6 +0.69 +0.11 | nyy |  659.4  53.74  65.50 |  738.6  62.06  65.42 |     65.53 |  56.0
+S3-fp32-randn-cold                    649.7  54.00  65.66 |  737.9  54.51  65.38 |  -88.1 -0.50 +0.27 | nyy |  736.8  54.28  65.49 |  796.6  59.37  64.68 |     65.52 |  57.0
+S2-int8-zeros-warm55                  800.0  43.81  59.78 |  800.0  35.79  55.98 |   +0.0 +8.02 +3.80 | ynn |  800.0  37.01  56.56 |  800.0  37.13  55.81 |     60.01 |  58.0
+S2-int8-zeros-cold                    794.3  45.75  60.95 |  800.0  35.77  55.77 |   -5.7 +9.97 +5.18 | ynn |  800.0  37.00  56.35 |  800.0  37.13  55.81 |     60.83 |  58.0 (A2, reported)
+A7, ALL SCORED HOLDS (the primary): G4 {"mhz": "FAIL (1 of 4; the rule needs 8 of 9)", "w": "FAIL (2 of 4; the rule needs 8 of 9)", "die": "FAIL (2 of 4; the rule needs 8 of 9)"}; increment rule {}; G4 rms below {"G3_as_frozen": {"mhz": false, "w": false, "die": false}, "E136_law": {"mhz": true, "w": true, "die": false}}
+   G4                   mhz 61.16 rms (+6.377 mean, 1 of 4 inside); w 4.694 rms (+0.851 mean, 2 of 4 inside); die 2.483 rms (+0.251 mean, 2 of 4 inside)
+   G3_as_frozen         mhz 59.667 rms (+5.829 mean, 1 of 4 inside); w 3.961 rms (+0.808 mean, 2 of 4 inside); die 2.337 rms (+0.013 mean, 2 of 4 inside)
+   E136_law             mhz 78.7 rms (-37.147 mean, 1 of 4 inside); w 6.663 rms (-3.275 mean, 0 of 4 inside); die 2.058 rms (+1.385 mean, 3 of 4 inside)
+   chain_on_measured    die 0.458 rms (+0.202 mean, 4 of 4 inside)
+THE REGISTERED SUBSET (the six fp32 random holds): G4 {"mhz": "FAIL (0 of 3; the rule needs 8 of 9)", "w": "FAIL (2 of 3; the rule needs 8 of 9)", "die": "FAIL (2 of 3; the rule needs 8 of 9)"}; increment rule {}; G4 rms below {"G3_as_frozen": {"mhz": false, "w": false, "die": true}, "E136_law": {"mhz": true, "w": true, "die": false}}
+   G4                   mhz 70.622 rms (+8.502 mean, 0 of 3 inside); w 2.818 rms (-1.538 mean, 2 of 3 inside); die 1.846 rms (-0.932 mean, 2 of 3 inside)
+   G3_as_frozen         mhz 68.897 rms (+7.772 mean, 0 of 3 inside); w 2.353 rms (-1.187 mean, 2 of 3 inside); die 1.959 rms (-1.055 mean, 2 of 3 inside)
+   E136_law             mhz 90.875 rms (-49.529 mean, 0 of 3 inside); w 6.658 rms (-6.593 mean, 0 of 3 inside); die 0.628 rms (+0.524 mean, 3 of 3 inside)
+   chain_on_measured    die 0.512 rms (+0.345 mean, 3 of 3 inside)
+A2 (reported, not in A7): {"dW_meas_w": 1.94, "dW_G4_w": -0.016, "dW_G3_as_frozen_w": -0.008, "dW_E136_law_w": 0.0, "dW_G4_nominal_frozen_w": 1.334, "dW_G3_nominal_frozen_w": 0.641, "dW_meas_minus_G4_w": 1.955, "dW_meas_minus_G3_w": 1.948, "dDie_meas_c": 1.17, "dDie_G4_c": -0.206, "die_start_cold_c": 58.0, "die_start_warm_c": 58.0, "h_w": -0.008, "reading": "NO READING: G4's mechanical difference -0.016 W is 0.2 W or less (the starts too close); the test has no power"}
+   the cold hold's measured - G4 {"mhz": -5.699, "w": 9.974, "die": 5.176}; inside A7's lines {"mhz": true, "w": false, "die": false} (not counted)
+consistency: [{"check": "the recomputed verdicts equal the frozen scorer's own (one session)", "ok": true}, {"check": "the warm zeros hold's row in A2's call equals its A7 row", "ok": true}]
+R0 (checks of C): PASS (2177 kernel records in 108 work launches, 0 not ok; 1 work launches without a check-of-C record)
+safety: peaks {'board_max_w': 76.1, 'die_mean_max_c': 66, 'hottest_field_max_c': 70}; trips []; not admitted []; peak locks 0; config read (TDP W, threshold C) [(65, 65)]; card time {'first_touch_ms': None, 'card_free_ms': None, 'minutes': None}
+gates: S1-fp32-randn-cold 57 C reached True after 0.0 s at 45.0 C; S2-int8-zeros-warm55 57 C reached True after 0.8 s at 57.0 C; S2-fp32-randn-cold 57 C reached True after 0.0 s at 56.0 C; S2-int8-zeros-cold 57 C reached True after 11.0 s at 57.0 C; S3-fp32-randn-cold 57 C reached True after 0.0 s at 56.0 C
+PASS the same session marked --dry in its e168.json (the toy card writes no check of C) keeps the hold, and every hold record says it is a dry session
+PASS A2's reading: dW +1.00 W against dW_G4 +1.334 W reads 'G4's start dependence SUPPORTED'
+PASS A2's reading: dW +0.05 W against dW_G4 +1.334 W reads 'NO START DEPENDENCE (E159's reading)'
+PASS A2's reading: dW -1.00 W against dW_G4 +1.334 W reads 'OPPOSITE SIGN: the window board falls with the start (the di'
+PASS A2's reading: dW -0.70 W against dW_G4 +1.334 W reads 'OPPOSITE SIGN: the window board falls with the start (the di'
+PASS A2's reading: dW +0.50 W against dW_G4 +0.150 W reads 'NO READING: G4's mechanical difference +0.150 W is 0.2 W or '
+PASS score_e168.py selftest, re-run unchanged, prints exactly the committed selftest-score-e168.txt (1797 bytes): ["SELFTEST: E159's three fp32 random holds through score_e168's path reproduce fit_g4's G4 final predictions: worst |diff| 0.0004 (PASS)"]
+PASS score_e168.py check: CHECK OK (9 files)
+PASS the 18-file sidecar frozen-sha256-e168-scorer.txt: 18 lines, 18 OK
+PASS E159's registered reduction (reduce_e159.py, unchanged) on E159's committed data reproduces its committed verdicts: all nine {'mhz': 'FAIL (8 of 9)', 'w': 'FAIL (5 of 9)', 'die': 'FAIL (6 of 9)'}, the subset {'mhz': 'FAIL (5 of 6)', 'w': 'FAIL (5 of 6)', 'die': 'FAIL (5 of 6)'}
+PASS and its nine scored rows equal the committed results.json's, number for number
+
+ALL PASS

@@ -1,0 +1,74 @@
+# E168 toy-card dry run of the whole queue on the Intel (no device, no ssh), Wed 4 Nov 2026, about 09:28-09:31 PST: queue_e168.py --dry with protocol-dry.json and the two dry stop-test protocols (python3 3.13.11, standard library only, as on the box), then reduce_e168.py (dry-reduce.txt). The toy card rests near 51 C, so the dry protocol cuts every gate's wait to 6 s: the cold gates time out there, as a real one does when the rest floor is above 46 C. The slot file:
+SLOT E168: start 1793813290 (09:28:10 PST) end 1793817247 (10:34:07 PST) 
+# queue.jsonl, every record:
+{"t_ms": 1793813287426, "zone": "PST", "kind": "queue_start", "slot_start_ms": 1793813290000, "slot_end_ms": 1793817247000, "next_rest_ms": null, "python": "3.13.11", "sensors": false, "protocol": "<lab>/tools/claims-v3/e168/protocol-dry.json"}
+{"t_ms": 1793813290007, "zone": "PST", "kind": "card_free", "waits": {}, "late_s": 0.0}
+{"t_ms": 1793813290008, "zone": "PST", "kind": "before_first_launch", "snapshot": {"tag": "start", "t_ms": 1793813290007, "zone": "PST"}, "history_rows": 0}
+{"t_ms": 1793813290008, "zone": "PST", "kind": "session_start", "name": "smoke", "cap_min": 3.0}
+{"t_ms": 1793813323287, "zone": "PST", "kind": "session_end", "name": "smoke", "rc": 0, "end": {"t_end_ms": 1793813323190, "exit": 0, "reason": "done", "card_min": 0.5}, "slot_stopped": false}
+{"t_ms": 1793813323290, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+{"t_ms": 1793813323291, "zone": "PST", "kind": "session_start", "name": "stoptest-board", "cap_min": 2.0}
+{"t_ms": 1793813326324, "zone": "PST", "kind": "session_end", "name": "stoptest-board", "rc": 4, "end": {"t_end_ms": 1793813325701, "exit": 4, "reason": "safety:board 34.8 W > 30 W on 3 samples", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793813326326, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793813325393, "t_third_line_ms": 1793813325389, "launch": [1793813325140, 1793813325645], "trip_after_line_ms": 4, "launch_end_after_trip_ms": 252, "lines": 18}
+{"t_ms": 1793813326327, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+{"t_ms": 1793813326327, "zone": "PST", "kind": "session_start", "name": "stoptest-die", "cap_min": 2.0}
+{"t_ms": 1793813328339, "zone": "PST", "kind": "session_end", "name": "stoptest-die", "rc": 4, "end": {"t_end_ms": 1793813328116, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793813328340, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793813326805, "t_first_line_ms": 1793813326754, "trip_after_line_ms": 51, "lines": 13}
+{"t_ms": 1793813328341, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+{"t_ms": 1793813328341, "zone": "PST", "kind": "session_start", "name": "s1", "cap_min": 58.0}
+{"t_ms": 1793813468164, "zone": "PST", "kind": "session_end", "name": "s1", "rc": 0, "end": {"t_end_ms": 1793813467604, "exit": 0, "reason": "done", "card_min": 2.3}, "slot_stopped": false}
+{"t_ms": 1793813468164, "zone": "PST", "kind": "s1_end", "rc": 0}
+{"t_ms": 1793813468165, "zone": "PST", "kind": "queue_end", "snapshot": {"tag": "end", "t_ms": 1793813468164, "zone": "PST"}, "card_free_ms": 1793813468165, "before_slot_end_s": 3778.8}
+# smoke.out, stoptest-board.out, stoptest-die.out: the sessions' last lines:
+09:28:43     e105: {"run": "SMOKE-04-S2-int8-zeros-r1", "peak_w": 34.67, "c_w": 0.415, "est_w": 45.64, "rho": 0.1875}
+09:28:43 exit 0 (done)
+09:28:45 session ends: safety:board 34.8 W > 30 W on 3 samples
+09:28:45 exit 4 (safety:board 34.8 W > 30 W on 3 samples)
+09:28:48 session ends: safety:die 54 C >= 30 C
+09:28:48 exit 4 (safety:die 54 C >= 30 C)
+# s1.out, the session's lines:
+09:28:48     e105: admitted, estimate 30.0 W (fixed)
+09:28:48 [1/11] R-00-rest-r1: 0 x 2 s, 1024 minions, start {'mode': 'cool', 'max_c': 99, 'max_wait_s': 5}
+09:28:50     gate: {'mode': 'cool', 'max_c': 99, 'reached': True, 'held_s': 0.0, 'reading': (51.0, 54.0, 23.82, 600.0)}
+09:28:53     e105: {"run": "R-00-rest-r1", "peak_w": 24.16, "c_w": null, "est_w": 30.0}
+09:28:53     e105: admitted, estimate 75.68 W (fixed)
+09:28:53 [2/11] H-00-S1-fp32-randn-cold-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 46, 'max_wait_s': 6}
+09:29:00     gate: {'mode': 'cool', 'max_c': 46, 'reached': False, 'held_s': 6.1, 'reading': (51.0, 54.0, 23.58, 600.0)}
+09:29:07     e105: {"run": "H-00-S1-fp32-randn-cold-r1", "peak_w": 70.42, "c_w": null, "est_w": 75.68}
+09:29:07     e105: admitted, estimate 75.68 W (fixed)
+09:29:07 [3/11] H-01-S1-fp32-randn-warm55-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 55, 'max_wait_s': 6}
+09:29:14     gate: {'mode': 'cool', 'max_c': 55, 'reached': False, 'held_s': 6.2, 'reading': (56.0, 59.0, 25.7, 600.0)}
+09:29:21     e105: {"run": "H-01-S1-fp32-randn-warm55-r1", "peak_w": 71.85, "c_w": null, "est_w": 75.68}
+09:29:21     e105: admitted, estimate 76.63 W (fixed)
+09:29:21 [4/11] H-02-S2-fp32-randn-cold-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 46, 'max_wait_s': 6}
+09:29:29     gate: {'mode': 'cool', 'max_c': 46, 'reached': False, 'held_s': 6.2, 'reading': (56.0, 59.0, 26.04, 600.0)}
+09:29:35     e105: {"run": "H-02-S2-fp32-randn-cold-r1", "peak_w": 73.17, "c_w": null, "est_w": 76.63}
+09:29:35     e105: admitted, estimate 76.63 W (fixed)
+09:29:35 [5/11] H-03-S2-fp32-randn-warm55-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 55, 'max_wait_s': 6}
+09:29:43     gate: {'mode': 'cool', 'max_c': 55, 'reached': False, 'held_s': 6.1, 'reading': (57.0, 60.0, 25.95, 600.0)}
+09:29:49     e105: {"run": "H-03-S2-fp32-randn-warm55-r1", "peak_w": 73.05, "c_w": null, "est_w": 76.63}
+09:29:49     e105: admitted, estimate 68.23 W (fixed)
+09:29:49 [6/11] H-04-S3-fp32-randn-cold-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 46, 'max_wait_s': 6}
+09:29:57     gate: {'mode': 'cool', 'max_c': 46, 'reached': False, 'held_s': 6.1, 'reading': (57.0, 60.0, 25.78, 600.0)}
+09:30:04     e105: {"run": "H-04-S3-fp32-randn-cold-r1", "peak_w": 65.44, "c_w": 16.429, "est_w": 68.23, "rho": 0.9559}
+09:30:04     e105: admitted, estimate 68.23 W (fixed)
+09:30:04 [7/11] H-05-S3-fp32-randn-warm55-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 55, 'max_wait_s': 6}
+09:30:11     gate: {'mode': 'cool', 'max_c': 55, 'reached': False, 'held_s': 6.1, 'reading': (56.0, 59.0, 25.55, 600.0)}
+09:30:18     e105: {"run": "H-05-S3-fp32-randn-warm55-r1", "peak_w": 64.87, "c_w": 16.403, "est_w": 68.23, "rho": 0.9543}
+09:30:18     e105: admitted, estimate 45.64 W (fixed)
+09:30:18 [8/11] I-00-S2-int8-zeros-warm55-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 55, 'max_wait_s': 6}
+09:30:25     gate: {'mode': 'cool', 'max_c': 55, 'reached': False, 'held_s': 6.1, 'reading': (56.0, 59.0, 25.95, 600.0)}
+09:30:32     e105: {"run": "I-00-S2-int8-zeros-warm55-r1", "peak_w": 36.0, "c_w": 1.019, "est_w": 45.64, "rho": 0.4604}
+09:30:32     e105: admitted, estimate 52.48 W (fixed)
+09:30:32 [9/11] I-01-S2-int8-real_smol_w8a8_down-warm55-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 55, 'max_wait_s': 6}
+09:30:34     gate: {'mode': 'cool', 'max_c': 55, 'reached': True, 'held_s': 0.8, 'reading': (55.0, 58.0, 25.42, 600.0)}
+09:30:41     e105: {"run": "I-01-S2-int8-real_smol_w8a8_down-warm55-r1", "peak_w": 45.33, "c_w": 5.512, "est_w": 52.48, "rho": 0.8456}
+09:30:41     e105: admitted, estimate 52.57 W (fixed)
+09:30:41 [10/11] I-02-S2-int8-sparse50-warm55-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 55, 'max_wait_s': 6}
+09:30:46     gate: {'mode': 'cool', 'max_c': 55, 'reached': True, 'held_s': 4.1, 'reading': (55.0, 58.0, 25.74, 600.0)}
+09:30:53     e105: {"run": "I-02-S2-int8-sparse50-warm55-r1", "peak_w": 45.46, "c_w": 5.596, "est_w": 52.57, "rho": 0.851}
+09:30:53     e105: admitted, estimate 45.64 W (fixed)
+09:30:53 [11/11] A-00-S2-int8-zeros-cold-r1: 2 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 46, 'max_wait_s': 6}
+09:31:00     gate: {'mode': 'cool', 'max_c': 46, 'reached': False, 'held_s': 6.1, 'reading': (54.0, 57.0, 24.86, 600.0)}
+09:31:07     e105: {"run": "A-00-S2-int8-zeros-cold-r1", "peak_w": 35.63, "c_w": 0.709, "est_w": 45.64, "rho": 0.3204}
+09:31:07 exit 0 (done)
