@@ -1,0 +1,73 @@
+# E167's desk dry queue on the Intel, Wed 04 Nov 2026 09:51:50 PST, before any E167 data, the claim and the first launch:
+# run_e167.sh dry in a scratch copy of the committed tree with E167's files (E167_TREE); the queue's --dry (run_hpl's toy card, no device
+# opened, no lock, no ettelem; the go gate returns at once; no camera read; the 15-minute rests 5 s); no ssh. Shims on PATH: date -> GNU
+# date (the box's), python3 -> /usr/bin/python3 3.9.6. Paths below are relative to the copy, <tree>.
+== A. the registered gate (49.0 C): the toy card's REST reads about 51 C, so G1Q stops at the gate (exit 6), END is skipped, G2Q runs
+{"experiment": "E167", "zone": "PST", "date": "2026-11-04", "smoke_not_before_ms": 1793814660000, "smoke_latest_ms": 1793817660000, "no_start_after_ms": 1793817960000, "cutoff_ms": 1793818260000, "rest_from_ms": 0, "budget_card_min": 40.0, "local": {"smoke_not_before": "09:51", "smoke_latest": "10:41", "no_start_after": "10:46", "cutoff": "10:51"}}
+dry rc=0 -> <tree>/build/e167/dry-095150
+09:51:50 PST {"t_ms": 1793814710742, "zone": "PST", "kind": "start", "step": "SMOKE", "cmd": ["<tree>/tools/
+09:52:34 PST {"t_ms": 1793814754018, "zone": "PST", "kind": "end", "step": "SMOKE", "rc": 0, "end": {"t_end_ms": 1793814753411, "exit": 0, "reason": "done", "card_min": 0.7}, "cutoff_stopped": false, "step_card_min": 0.72, "card_min_total": 0.72, "config": nul
+09:52:34 PST {"t_ms": 1793814754019, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+09:52:34 PST {"t_ms": 1793814754021, "zone": "PST", "kind": "start", "step": "STOPTEST-DIE", "cmd": ["<tree>
+09:52:36 PST {"t_ms": 1793814756041, "zone": "PST", "kind": "end", "step": "STOPTEST-DIE", "rc": 4, "end": {"t_end_ms": 1793814755709, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}, "cutoff_stopped": false, "step_card_min": 0.03, "card_min_t
+09:52:36 PST {"t_ms": 1793814756043, "zone": "PST", "kind": "stoptest_detail", "name": "STOPTEST-DIE", "stop": "die", "t_trip_ms": 1793814754321, "t_first_line_ms": 1793814754267, "trip_after_line_ms": 54, "lines": 13}
+09:52:36 PST {"t_ms": 1793814756043, "zone": "PST", "kind": "stoptest_check", "name": "STOPTEST-DIE", "rc": 4, "bad": null}
+09:52:36 PST {"t_ms": 1793814756044, "zone": "PST", "kind": "start", "step": "STOPTEST-BOARD", "cmd": ["<scratch>/mirror1
+09:52:39 PST {"t_ms": 1793814759073, "zone": "PST", "kind": "end", "step": "STOPTEST-BOARD", "rc": 4, "end": {"t_end_ms": 1793814758202, "exit": 4, "reason": "safety:board 34.2 W > 30 W on 3 samples", "card_min": 0.0}, "cutoff_stopped": false, "step_card_min":
+09:52:39 PST {"t_ms": 1793814759074, "zone": "PST", "kind": "stoptest_detail", "name": "STOPTEST-BOARD", "stop": "board", "t_trip_ms": 1793814757891, "t_third_line_ms": 1793814757890, "launch": [1793814757609, 1793814758113], "trip_after_line_ms": 1, "launch_e
+09:52:39 PST {"t_ms": 1793814759075, "zone": "PST", "kind": "stoptest_check", "name": "STOPTEST-BOARD", "rc": 4, "bad": null}
+09:52:44 PST {"t_ms": 1793814764080, "zone": "PST", "kind": "start", "step": "G1Q", "cmd": ["<tree>/tools/cl
+09:53:26 PST {"t_ms": 1793814806336, "zone": "PST", "kind": "end", "step": "G1Q", "rc": 6, "end": {"t_end_ms": 1793814806003, "exit": 6, "reason": "gate:G1Q's REST anchor 51.0 C from 396 lines (at most 49 C, at least 100 lines): no work process", "card_min": 0
+09:53:26 PST {"t_ms": 1793814806336, "zone": "PST", "kind": "gate", "step": "G1Q", "rc": 6, "end": {"t_end_ms": 1793814806003, "exit": 6, "reason": "gate:G1Q's REST anchor 51.0 C from 396 lines (at most 49 C, at least 100 lines): no work process", "card_min": 
+09:53:26 PST {"t_ms": 1793814806336, "zone": "PST", "kind": "skip", "step": "END", "why": "G1Q's hold did not run (the start gate): no cool-down to read"}
+09:53:31 PST {"t_ms": 1793814811341, "zone": "PST", "kind": "start", "step": "G2Q", "cmd": ["<tree>/tools/cl
+09:54:09 PST {"t_ms": 1793814849421, "zone": "PST", "kind": "end", "step": "G2Q", "rc": 0, "end": {"t_end_ms": 1793814849182, "exit": 0, "reason": "done", "card_min": 0.6}, "cutoff_stopped": false, "step_card_min": 0.63, "card_min_total": 2.14, "config": null}
+09:54:09 PST {"t_ms": 1793814849422, "zone": "PST", "kind": "start", "step": "END2", "cmd": ["<tree>/tools/c
+09:54:31 PST {"t_ms": 1793814871521, "zone": "PST", "kind": "end", "step": "END2", "rc": 0, "end": {"t_end_ms": 1793814871245, "exit": 0, "reason": "done", "card_min": 0.4}, "cutoff_stopped": false, "step_card_min": 0.37, "card_min_total": 2.51, "config": null
+09:54:31 PST {"t_ms": 1793814871522, "zone": "PST", "kind": "queue_end", "why": "done", "card_min_total": 2.51}
+09:53:26     E167 G1Q start gate: REST anchor 51.0 C from 396 lines, line 49 C: NOT passed
+09:53:26 session ends: gate:G1Q's REST anchor 51.0 C from 396 lines (at most 49 C, at least 100 lines): no work process
+09:53:26 exit 6 (gate:G1Q's REST anchor 51.0 C from 396 lines (at most 49 C, at least 100 lines): no work process)
+{"t_end_ms": 1793814806003, "exit": 6, "reason": "gate:G1Q's REST anchor 51.0 C from 396 lines (at most 49 C, at least 100 lines): no work process", "card_min": 0.7}
+== B. E167_DRY_GATE_C=60 (dry only): G1Q's HOLD path runs, then END, G2Q, END2
+{"experiment": "E167", "zone": "PST", "date": "2026-11-04", "smoke_not_before_ms": 1793814840000, "smoke_latest_ms": 1793817840000, "no_start_after_ms": 1793818140000, "cutoff_ms": 1793818440000, "rest_from_ms": 0, "budget_card_min": 40.0, "local": {"smoke_not_before": "09:54", "smoke_latest": "10:44", "no_start_after": "10:49", "cutoff": "10:54"}}
+dry rc=0 -> <tree>/build/e167/dry-095433
+09:54:33 PST {"t_ms": 1793814873982, "zone": "PST", "kind": "start", "step": "SMOKE", "cmd": ["<tree>/tools/
+09:55:17 PST {"t_ms": 1793814917198, "zone": "PST", "kind": "end", "step": "SMOKE", "rc": 0, "end": {"t_end_ms": 1793814916473, "exit": 0, "reason": "done", "card_min": 0.7}, "cutoff_stopped": false, "step_card_min": 0.72, "card_min_total": 0.72, "config": nul
+09:55:17 PST {"t_ms": 1793814917203, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+09:55:17 PST {"t_ms": 1793814917204, "zone": "PST", "kind": "start", "step": "STOPTEST-DIE", "cmd": ["<tree>
+09:55:19 PST {"t_ms": 1793814919230, "zone": "PST", "kind": "end", "step": "STOPTEST-DIE", "rc": 4, "end": {"t_end_ms": 1793814919156, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}, "cutoff_stopped": false, "step_card_min": 0.03, "card_min_t
+09:55:19 PST {"t_ms": 1793814919232, "zone": "PST", "kind": "stoptest_detail", "name": "STOPTEST-DIE", "stop": "die", "t_trip_ms": 1793814917849, "t_first_line_ms": 1793814917799, "trip_after_line_ms": 50, "lines": 13}
+09:55:19 PST {"t_ms": 1793814919232, "zone": "PST", "kind": "stoptest_check", "name": "STOPTEST-DIE", "rc": 4, "bad": null}
+09:55:19 PST {"t_ms": 1793814919234, "zone": "PST", "kind": "start", "step": "STOPTEST-BOARD", "cmd": ["<scratch>/mirror1
+09:55:22 PST {"t_ms": 1793814922259, "zone": "PST", "kind": "end", "step": "STOPTEST-BOARD", "rc": 4, "end": {"t_end_ms": 1793814921498, "exit": 4, "reason": "safety:board 34.1 W > 30 W on 3 samples", "card_min": 0.0}, "cutoff_stopped": false, "step_card_min":
+09:55:22 PST {"t_ms": 1793814922261, "zone": "PST", "kind": "stoptest_detail", "name": "STOPTEST-BOARD", "stop": "board", "t_trip_ms": 1793814921220, "t_third_line_ms": 1793814921193, "launch": [1793814920951, 1793814921455], "trip_after_line_ms": 27, "launch_
+09:55:22 PST {"t_ms": 1793814922262, "zone": "PST", "kind": "stoptest_check", "name": "STOPTEST-BOARD", "rc": 4, "bad": null}
+09:55:27 PST {"t_ms": 1793814927263, "zone": "PST", "kind": "start", "step": "G1Q", "cmd": ["<tree>/tools/cl
+09:56:25 PST {"t_ms": 1793814985427, "zone": "PST", "kind": "end", "step": "G1Q", "rc": 0, "end": {"t_end_ms": 1793814985227, "exit": 0, "reason": "done", "card_min": 1.0}, "cutoff_stopped": false, "step_card_min": 0.97, "card_min_total": 1.77, "config": null}
+09:56:25 PST {"t_ms": 1793814985428, "zone": "PST", "kind": "start", "step": "END", "cmd": ["<tree>/tools/cl
+09:56:47 PST {"t_ms": 1793815007509, "zone": "PST", "kind": "end", "step": "END", "rc": 0, "end": {"t_end_ms": 1793815007237, "exit": 0, "reason": "done", "card_min": 0.4}, "cutoff_stopped": false, "step_card_min": 0.37, "card_min_total": 2.14, "config": null}
+09:56:52 PST {"t_ms": 1793815012515, "zone": "PST", "kind": "start", "step": "G2Q", "cmd": ["<tree>/tools/cl
+09:57:30 PST {"t_ms": 1793815050651, "zone": "PST", "kind": "end", "step": "G2Q", "rc": 0, "end": {"t_end_ms": 1793815050406, "exit": 0, "reason": "done", "card_min": 0.6}, "cutoff_stopped": false, "step_card_min": 0.64, "card_min_total": 2.78, "config": null}
+09:57:30 PST {"t_ms": 1793815050652, "zone": "PST", "kind": "start", "step": "END2", "cmd": ["<tree>/tools/c
+09:57:52 PST {"t_ms": 1793815072738, "zone": "PST", "kind": "end", "step": "END2", "rc": 0, "end": {"t_end_ms": 1793815072399, "exit": 0, "reason": "done", "card_min": 0.4}, "cutoff_stopped": false, "step_card_min": 0.37, "card_min_total": 3.15, "config": null
+09:57:52 PST {"t_ms": 1793815072739, "zone": "PST", "kind": "queue_end", "why": "done", "card_min_total": 3.15}
+09:56:09     E167 G1Q start gate: REST anchor 51.0 C from 403 lines, line 60 C: passed
+09:56:25 exit 0 (done)
+== C. E167_DRY_GATE_C without --dry is refused before any device
+rc=2 (E167 REFUSED: E167_DRY_GATE_C is for --dry only)
+== D. the protocols as the runner lists them
+SMOKE-03-fp16-ones-r1                    fp16 ones        1024 1x2s start {'mode': 'cool', 'max_c': 99, 'max_wait_s': 5}
+4 runs, about 2 min plus gates; 3 tiles verified against kinds.json (9586568f23a9)
+STOPTEST-00-int8-neg_ones-r1             int8 neg_ones    1024 1x2s start {'mode': 'cool', 'max_c': 99, 'max_wait_s': 5}
+1 runs, about 1 min plus gates; 1 tiles verified against kinds.json (9586568f23a9)
+STOPTEST-00-int8-neg_ones-r1             int8 neg_ones    1024 1x6s start {'mode': 'cool', 'max_c': 99, 'max_wait_s': 5}
+1 runs, about 1 min plus gates; 1 tiles verified against kinds.json (9586568f23a9)
+HOLD-00-b6-int8.b_line_zero_ff-r1        int8 int8.b_line_zero_ff  1024 93x8s start {'mode': 'cool', 'max_c': 57, 'max_wait_s': 300}
+2 runs, about 17 min plus gates; 1 tiles verified against kinds.json (9586568f23a9)
+REST-00-rest-r1                          fp32 zeros       1024 0x2s start {'mode': 'cool', 'max_c': 99, 'max_wait_s': 5}
+1 runs, about 2 min plus gates; 0 tiles verified against kinds.json (9586568f23a9)
+HOLD-00-b6-fp32.real_smol_softmax_v_causal-r1 fp32 fp32.real_smol_softmax_v_causal  1024 91x8s start {'mode': 'cool', 'max_c': 99, 'max_wait_s': 5}
+2 runs, about 17 min plus gates; 1 tiles verified against kinds.json (9586568f23a9)
+REST-00-rest-r1                          fp32 zeros       1024 0x2s start {'mode': 'cool', 'max_c': 99, 'max_wait_s': 5}
+1 runs, about 2 min plus gates; 0 tiles verified against kinds.json (9586568f23a9)

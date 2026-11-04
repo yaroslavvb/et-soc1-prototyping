@@ -1,0 +1,71 @@
+# tools/claims-v3/dmcmd_audit.py (sha256 f29e91ca97705454..., table 50168632931fd8c1...) on E167's run chain, run at 09:59 PST on Wed 04 Nov 2026 on the Intel, before any E167 data, the claim and the first launch.
+# files: tools/claims-v3/e167/ tools/claims-v3/kspeed/run_kspeed.py tools/claims-v3/hpl/run_hpl.py tools/claims-v3/e111/idle_logins_e111.py tools/claims-v3/e160/e160_common.py tools/claims-v3/ccheck/ workloads/sparsity/host/main.cpp workloads/sparsity/kernel/sparsity.c
+# two reviewed exceptions, as E161's: run_hpl.py:622's residency read (raw states 2-6), which run_e167.py answers unsent, and the unit check that hands that line to a stand-in
+## 1. with the reviewed exceptions
+dmcmd_audit: GO (35 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e167/queue_e167.py:192: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/queue_e167.py:192: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e167/queue_e167.py:192: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/queue_e167.py:192: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/queue_e167.py:192: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/run_e167.sh:24: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/run_e167.sh:24: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e167/run_e167.sh:24: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/run_e167.sh:24: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/run_e167.sh:24: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/unitcheck_e167.py:22: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES [READ, pmic none] EXCEPTED: SP_ERROR_LOG: the unit check hands run_hpl.py:622's command line to a stand-in run_out that records it; nothing is executed and no device is opened (E161's second reviewed exception, unitcheck_e161.py) - variant ettelem-dv2; raw states 2 3 4 5 6 (raw 4 5 6 is no state at BL2 0.22.0: 2 SP Runtime Errors each)
+tools/claims-v3/e167/unitcheck_e167.py:24: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/unitcheck_e167.py:24: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e167/unitcheck_e167.py:24: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/unitcheck_e167.py:24: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/unitcheck_e167.py:24: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/unitcheck_e167.py:25: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/unitcheck_e167.py:25: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e167/unitcheck_e167.py:25: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/unitcheck_e167.py:25: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e167/unitcheck_e167.py:25: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:597: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/hpl/run_hpl.py:618: ettelem sptrace: TRACE_EXTRACT [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:622: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES [READ, pmic none] EXCEPTED: SP_ERROR_LOG: run_e167.py patch_no_residency answers this command unsent (no process started, no device opened), as run_e161.py did in E161 (14 times, never sent) and run_e144b.py in E144b; the unit check below - variant ettelem-dv2; raw states 2 3 4 5 6 (raw 4 5 6 is no state at BL2 0.22.0: 2 SP Runtime Errors each)
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      6 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      6 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      2 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      5 site(s)  ok
+  GET_MODULE_RESIDENCY_THROTTLE_STATES       READ         pmic none      2 site(s)  EXCEPTED
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      5 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      5 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+  TRACE_EXTRACT                              READ         pmic none      1 site(s)  ok
+# exit 0
+## 2. without them (expect NO-GO on exactly run_hpl.py:622 and the unit check)
+NO-GO tools/claims-v3/e167/unitcheck_e167.py:22: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES: SP_ERROR_LOG
+NO-GO tools/claims-v3/hpl/run_hpl.py:622: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES: SP_ERROR_LOG
+dmcmd_audit: NO-GO (35 send site(s), 2 disallowed; allow-list: none)
+# exit 3
+## 3. the unit check: run_e167.py's wrapped run_out, handed run_hpl.py:622's command line and one other, with a stand-in run_out (nothing executed)
+residency line answered unsent, stand-in not called: True
+config line passed through to the stand-in: True
+run_hpl.py:622 is that run_out call: True
+# exit 0
+## 4. the host sources: device-management names in sparsity_host's source (the C-logging host is built from main.cpp 0f53a7d5... with Q139(k)'s patch; Q139(k)'s audit read GO with 0 send sites on the patched main.cpp)
+# workloads/sparsity/host/main.cpp at HEAD: 0 lines naming DM_CMD|dev_mngt|ioctl|serviceRequest
+# main.cpp sha256 at HEAD: 0f53a7d505155156c933e2d9a64d38803ca4e0cea3e20242e0aaafbf35e82284
+## 5. G1Q's gate reads the anchor as E161's registered reducer does: run_e167.rest_anchor against reduce_e161.rest_reading on E161's committed REST files
+G1Q: run_e167.rest_anchor 47.000000 C / 22.123595 W / 1199 lines; reduce_e161.rest_reading 47.000000 C / 22.123595 W / 1199 lines; equal: True
+G2Q: run_e167.rest_anchor 47.000000 C / 22.185613 W / 1199 lines; reduce_e161.rest_reading 47.000000 C / 22.185613 W / 1199 lines; equal: True
+anchor reader equal on both: True
+# exit 0

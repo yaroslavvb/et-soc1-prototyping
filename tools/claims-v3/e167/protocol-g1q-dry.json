@@ -1,0 +1,87 @@
+{
+ "experiment": "E167",
+ "request": "Q141(h)",
+ "card": "aifoundry2",
+ "order_seed": 98,
+ "note": "E161's blocks (E144b's, E133's), run by run_e167.py over E144b's chain (run_kspeed.py over E64's run_hpl.py, E111's idle-login rule), with Q139(k)'s C log on every launch (E160's wrapper and host): REST holds no launch; nothing is set on the card; the residency read run_hpl.py makes after every run is not sent; the holds are Q139(e)'s frozen 13 minutes of its frozen pool-6 tiles, scored by Q140(e)'s frozen predictions (E167.md)",
+ "tools": {
+  "heater": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 72,
+  "board_cap_w": 80,
+  "cap_consecutive": 3,
+  "note": "Q139(e)'s frozen E161 stops (predictions-q139e.json rules, 455c46c1): the hold ends at a die reading >= 72 C or a board reading > 80 W on 3 consecutive live samples (section 22: at most 85 W on live samples, tested in the smoke). run_hpl.py's watcher reads every live sampler line and applies 72 C to the die mean and to the hottest sensor. M8's 95% peaks: G1Q 53.3 W, G2Q 68.2 W"
+ },
+ "caps": {
+  "max_card_min": 15
+ },
+ "step": "G1Q",
+ "from": {
+  "protocol": "tools/claims-v3/e161/protocol-g1q.json",
+  "blocks": "E161's REST and HOLD unchanged but for the REST's start gate (cool, 49 C, 240 s: E167.md G1)",
+  "E161_from": {
+   "protocol": "tools/claims-v3/e144b/protocol-g1.json",
+   "blocks": "G1's REST and HOLD, unchanged but for the hold's tile (Q139(e)'s G1q), its 93 processes (was 107) and its title"
+  }
+ },
+ "blocks": [
+  {
+   "name": "REST",
+   "title": "the rest reading: no launch, the 10 Hz sampler on the idle card; it starts once the die reads 49 C or less (at most 240 s of waiting, E167.md G1); the last 120 s are G1Q's anchor",
+   "start": {
+    "mode": "cool",
+    "max_c": 49,
+    "max_wait_s": 20
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 0
+   },
+   "tail_s": 20,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest"
+    }
+   ]
+  },
+  {
+   "name": "HOLD",
+   "title": "E161 G1Q (Q139(e)'s frozen hold): int8.b_line_zero_ff from rest, 93 back-to-back 8 s processes (~13.0 min) behind E98's 57 C gate, every launch's C logged; the steady reading is the last 300 s",
+   "start": {
+    "mode": "cool",
+    "max_c": 57,
+    "max_wait_s": 20
+   },
+   "launch": {
+    "seconds": 8,
+    "budget": 9.5,
+    "processes": 1
+   },
+   "tail_s": 6,
+   "runs": [
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_zero_ff.bin",
+     "label": "b6-int8.b_line_zero_ff"
+    }
+   ]
+  }
+ ],
+ "e167_gate": {
+  "block": "HOLD",
+  "rest_anchor_max_c": 49.0,
+  "window_s": 120.0,
+  "min_lines": 100,
+  "note": "E167.md G1: the HOLD block's work starts only if the REST's anchor (the mean of minshire[0] over the REST file's last 120 s, reduce_e161.rest_reading's reading) is 49.0 C or less from at least 600 lines; else the session ends with exit 6 and no work process (RK3-b: not scored, the start gate) (the dry twin: its REST tail is 20 s, so half of its lines is 100)"
+ }
+}
