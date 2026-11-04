@@ -1,0 +1,42 @@
+1. The runner's bounds
+PASS the registered protocol's stops and limit pass the runner's check
+PASS the board stop test's protocol passes the runner's check
+PASS the board stop test's protocol (dry) passes the runner's check
+PASS the die stop test's protocol passes the runner's check
+PASS the die stop test's protocol (dry) passes the runner's check
+PASS the dry protocol passes the runner's check
+PASS the runner refuses a 93 W board stop: board_cap_w 93 W is above 85 W
+PASS the runner refuses an 80 C die stop (E158's own): abs_stop_c 80 C is above 76 C
+PASS the runner refuses an 88 W admission limit: limit_p800_w 88.0 is missing or above 82 W
+PASS the runner refuses a protocol whose stops lack a key the watcher reads
+
+2. The protocol
+PASS the session's stops {'abs_stop_c': 76, 'board_cap_w': 60, 'cap_consecutive': 3}, limit 82.0 W, lock 60.0 W, as REGISTRATION-A2.md D7
+PASS the stop-path tests lower one stop each: board {'abs_stop_c': 76, 'board_cap_w': 30, 'cap_consecutive': 3}, die {'abs_stop_c': 30, 'board_cap_w': 60, 'cap_consecutive': 3}
+PASS every label of every protocol is in the admission table (23 labels; missing [])
+PASS every estimate is at most 82 W (highest 47.02 W)
+PASS the blocks in order: ['SMOKE', 'A', 'B', 'C', 'D', 'E', 'F']
+PASS block A in its registered order, not shuffled: ['N1-fp32-zeros', 'P1-fp32-zeros', 'N2-fp32-zeros', 'P2-fp32-zeros', 'N3-fp32-zeros', 'P3-fp32-zeros', 'K4n7-fp32-zeros', 'K4n8-fp32-zeros', 'K6n5-fp32-zeros', 'K6n4-fp32-zeros']
+PASS blocks B-E shuffled, F in order
+PASS 50 bursts; the registered subset A-C 26
+PASS passes as reduce_e169 maps the blocks {'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 1}: every E169 fp32 shape in passes 1-5, every tie in 1-2, fp16 and int8 once (block F)
+PASS the smoke: ['rest', 'P1-fp32-zeros', 'N2-fp16-zeros', 'P3-int8-zeros', 'N3-fp32-zeros']; cycles for ['N2-fp16-zeros', 'N3-fp32-zeros', 'P1-fp32-zeros', 'P3-int8-zeros']
+PASS every session burst is E158's: one 6 s process (budget 7.5 s), tail 4 s, a cool start at or below 55 C waiting at most 300 s
+
+3. The order on the card (the harness's planner, order_seed 169)
+PASS run_hpl.load_protocol plans 50 runs (the smoke apart), the same order twice, no complaint []
+     A: N1-fp32 P1-fp32 N2-fp32 P2-fp32 N3-fp32 P3-fp32 K4n7-fp32 K4n8-fp32 K6n5-fp32 K6n4-fp32
+     B: P3-fp32 P1-fp32 P2-fp32 K4n8-fp32 N1-fp32 K4n7-fp32 K6n4-fp32 N2-fp32 K6n5-fp32 N3-fp32
+     C: P3-fp32 N2-fp32 N1-fp32 P1-fp32 N3-fp32 P2-fp32
+     D: N2-fp32 P3-fp32 N3-fp32 N1-fp32 P2-fp32 P1-fp32
+     E: N3-fp32 N2-fp32 P2-fp32 P3-fp32 N1-fp32 P1-fp32
+     F: N1-fp16 P1-fp16 N2-fp16 P2-fp16 N3-fp16 P3-fp16 N1-int8 P1-int8 N2-int8 P2-int8 N3-int8 P3-int8
+
+4. The queue's stop-path check on made-up records
+PASS stop check: a board trip on live samples (a zeros burst over 30 W) passes
+PASS stop check: a trip read at the pass's end fails (b-end: the trip at 1007000 is 5300 ms from the third live line over 30 W)
+PASS stop check: a stop that never fired fails
+PASS stop check: a die trip on the first live sample passes
+PASS stop check: a die trip after a launch, seconds after its sample, fails
+
+ALL PASS

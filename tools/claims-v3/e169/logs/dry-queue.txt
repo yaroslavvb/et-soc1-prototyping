@@ -1,0 +1,37 @@
+# E169's dry pass on the Intel (Wed 4 Nov 2026), before the kit's commit: tools/claims-v3/e169/queue_e169.py --dry with protocol-dry.json and the two dry stop-test protocols, on run_hpl.py's toy card (no device, no lock, no ssh); then score_e169.py on the session (logs/dry-score.txt). The toy card's time per op is its own constant, so the verdicts are not readings: what this shows is that the smoke check, both stop-path checks, the 50 runs, the reduction and the scorer run.
+# queue rc 0; score rc 0
+# queue.jsonl, every record:
+{"t_ms": 1793813844446, "zone": "PST", "kind": "queue_start", "slot_start_ms": 1793813842000, "slot_end_ms": 1793817439000, "next_rest_ms": null, "python": "3.13.11", "sensors": false, "protocol": "<the Intel's clone>/tools/claims-v3/e169/protocol-dry.json"}
+{"t_ms": 1793813844447, "zone": "PST", "kind": "card_free", "waits": {}, "late_s": 2.4}
+{"t_ms": 1793813844447, "zone": "PST", "kind": "before_first_launch", "snapshot": {"tag": "start", "t_ms": 1793813844447, "zone": "PST"}, "history_rows": 0}
+{"t_ms": 1793813844448, "zone": "PST", "kind": "session_start", "name": "smoke", "cap_min": 3.0}
+{"t_ms": 1793813877638, "zone": "PST", "kind": "session_end", "name": "smoke", "rc": 0, "end": {"t_end_ms": 1793813877215, "exit": 0, "reason": "done", "card_min": 0.5}, "slot_stopped": false}
+{"t_ms": 1793813877642, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null}
+{"t_ms": 1793813877643, "zone": "PST", "kind": "session_start", "name": "stoptest-board", "cap_min": 2.0}
+{"t_ms": 1793813880672, "zone": "PST", "kind": "session_end", "name": "stoptest-board", "rc": 4, "end": {"t_end_ms": 1793813880009, "exit": 4, "reason": "safety:board 35.2 W > 30 W on 3 samples", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793813880674, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793813879735, "t_third_line_ms": 1793813879701, "launch": [1793813879460, 1793813879963], "trip_after_line_ms": 34, "launch_end_after_trip_ms": 228, "lines": 18}
+{"t_ms": 1793813880674, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+{"t_ms": 1793813880674, "zone": "PST", "kind": "session_start", "name": "stoptest-die", "cap_min": 2.0}
+{"t_ms": 1793813882690, "zone": "PST", "kind": "session_end", "name": "stoptest-die", "rc": 4, "end": {"t_end_ms": 1793813882576, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793813882691, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793813881273, "t_first_line_ms": 1793813881217, "trip_after_line_ms": 56, "lines": 13}
+{"t_ms": 1793813882692, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+{"t_ms": 1793813882692, "zone": "PST", "kind": "session_start", "name": "s1", "cap_min": 20.0}
+{"t_ms": 1793814136299, "zone": "PST", "kind": "session_end", "name": "s1", "rc": 0, "end": {"t_end_ms": 1793814136072, "exit": 0, "reason": "done", "card_min": 4.2}, "slot_stopped": false}
+{"t_ms": 1793814136300, "zone": "PST", "kind": "s1_end", "rc": 0}
+{"t_ms": 1793814136300, "zone": "PST", "kind": "queue_end", "snapshot": {"tag": "end", "t_ms": 1793814136300, "zone": "PST"}, "card_free_ms": 1793814136300, "before_slot_end_s": 3302.7}
+# s1.out, the session's first and last lines:
+09:38:03     e105: admitted, estimate 46.87 W (fixed)
+09:38:03 [1/50] A-00-N1-fp32-zeros-r1: 1 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 55, 'max_wait_s': 300}
+09:38:04     gate: {'mode': 'cool', 'max_c': 55, 'reached': True, 'held_s': 0.0, 'reading': (51.0, 54.0, 23.85, 600.0)}
+09:38:08     e105: {"run": "A-00-N1-fp32-zeros-r1", "peak_w": 36.31, "c_w": 1.244, "est_w": 46.87, "rho": 0.3973}
+09:38:08     e105: admitted, estimate 46.87 W (fixed)
+09:38:08 [2/50] A-01-P1-fp32-zeros-r1: 1 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 55, 'max_wait_s': 300}
+...
+09:42:06 [49/50] F-10-N3-int8-zeros-r1: 1 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 55, 'max_wait_s': 300}
+09:42:07     gate: {'mode': 'cool', 'max_c': 55, 'reached': True, 'held_s': 0.0, 'reading': (55.0, 58.0, 25.13, 600.0)}
+09:42:11     e105: {"run": "F-10-N3-int8-zeros-r1", "peak_w": 36.36, "c_w": 1.291, "est_w": 46.25, "rho": 0.4819}
+09:42:11     e105: admitted, estimate 46.25 W (fixed)
+09:42:11 [50/50] F-11-P3-int8-zeros-r1: 1 x 2.5 s, 1024 minions, start {'mode': 'cool', 'max_c': 55, 'max_wait_s': 300}
+09:42:12     gate: {'mode': 'cool', 'max_c': 55, 'reached': True, 'held_s': 0.0, 'reading': (55.0, 58.0, 25.46, 600.0)}
+09:42:16     e105: {"run": "F-11-P3-int8-zeros-r1", "peak_w": 36.49, "c_w": 1.286, "est_w": 46.25}
+09:42:16 exit 0 (done)
