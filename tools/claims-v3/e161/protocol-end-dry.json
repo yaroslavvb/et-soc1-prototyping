@@ -1,0 +1,54 @@
+{
+ "experiment": "E161",
+ "request": "Q139",
+ "card": "aifoundry2",
+ "order_seed": 98,
+ "note": "E144b's blocks (E133's), run by run_e161.py over E144b's chain (run_kspeed.py over E64's run_hpl.py, E111's idle-login rule), with Q139(k)'s C log on every launch (E160's wrapper and host): REST holds no launch; nothing is set on the card; the residency read run_hpl.py makes after every run is not sent; the holds are Q139(e)'s frozen 13 minutes of its frozen pool-6 tiles",
+ "tools": {
+  "heater": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 72,
+  "board_cap_w": 80,
+  "cap_consecutive": 3,
+  "note": "Q139(e)'s frozen E161 stops (predictions-q139e.json rules, 455c46c1): the hold ends at a die reading >= 72 C or a board reading > 80 W on 3 consecutive live samples (section 22: at most 85 W on live samples, tested in the smoke). run_hpl.py's watcher reads every live sampler line and applies 72 C to the die mean and to the hottest sensor. M8's 95% peaks: G1Q 53.3 W, G2Q 68.2 W"
+ },
+ "caps": {
+  "max_card_min": 5
+ },
+ "step": "END",
+ "from": {
+  "protocol": "tools/claims-v3/e144b/protocol-end.json",
+  "blocks": "unchanged"
+ },
+ "blocks": [
+  {
+   "name": "REST",
+   "title": "the rest reading: no launch, the 10 Hz sampler on the idle card; the last 60 s are the reading",
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 20
+   },
+   "launch": {
+    "seconds": 2,
+    "budget": 3.5,
+    "processes": 0
+   },
+   "tail_s": 20,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "zeros",
+     "label": "rest"
+    }
+   ]
+  }
+ ]
+}

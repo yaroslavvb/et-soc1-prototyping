@@ -1,0 +1,52 @@
+# reduce_e161.py on the dry queue's runs (collected to the Intel's scratch, tel and launches gzipped as collect_e161.sh does), 16:2x PST: it checks the parsing of the collected layout only. The toy card's numbers mean nothing: its rest reads 51 C, which puts G1Q in the trip regime, and its holds are one process each
+{
+ "steps_scored": [
+  "G1Q",
+  "G2Q"
+ ],
+ "verdicts": {
+  "G1Q E plateau/trajectory": "FAIL",
+  "G1Q E clock": "FAIL",
+  "G1Q A given watts": "FAIL",
+  "G2Q E plateau/trajectory": "FAIL",
+  "G2Q E clock": "PASS",
+  "G2Q A given watts": "FAIL"
+ },
+ "session": {
+  "rms_plateau_err_from_the_bits_C": 11.984,
+  "n_holds": 2,
+  "G1Q_plateau_err_from_the_bits_C": -12.911,
+  "G2Q_clock_err_from_the_bits_MHz": 17.7,
+  "note": "G1Q's plateau is set by the bits through the chain; G2Q's by the governor's trip (its error tests the trip rule)"
+ },
+ "holds": {
+  "G1Q": {
+   "processes": 1,
+   "E_end_to_end": {
+    "T_rest_C": 51.0,
+    "P_ref_W": 23.729,
+    "regime_predicted": "trip",
+    "plateau_predicted_C": 65.9,
+    "plateau_measured_C": 52.989,
+    "hold_s": 14.4,
+    "verdict": "FAIL",
+    "clock_verdict": "FAIL"
+   },
+   "A_given_watts_rms_C": 2.8466861476644487
+  },
+  "G2Q": {
+   "processes": 1,
+   "E_end_to_end": {
+    "T_rest_C": 51.0,
+    "P_ref_W": 23.751,
+    "regime_predicted": "trip",
+    "plateau_predicted_C": 65.9,
+    "plateau_measured_C": 54.922,
+    "hold_s": 14.4,
+    "verdict": "FAIL",
+    "clock_verdict": "PASS"
+   },
+   "A_given_watts_rms_C": 5.667794425748842
+  }
+ }
+}

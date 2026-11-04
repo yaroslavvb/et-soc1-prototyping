@@ -1,0 +1,54 @@
+{
+ "experiment": "E161",
+ "request": "Q139",
+ "card": "aifoundry2",
+ "order_seed": 98,
+ "note": "E161's board stop-path test: E144b's, the smoke's int8 -1s tile, E161's chain",
+ "tools": {
+  "heater": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 72,
+  "board_cap_w": 30,
+  "cap_consecutive": 3,
+  "note": "E161's stop-path test (board): the registered watcher with one stop lowered, so that it must trip on live samples; the session must end with exit 4"
+ },
+ "caps": {
+  "max_card_min": 2
+ },
+ "step": "STOPTEST-BOARD",
+ "from": {
+  "protocol": "tools/claims-v3/e144b/protocol-stoptest-board.json",
+  "blocks": "unchanged"
+ },
+ "blocks": [
+  {
+   "name": "STOPTEST",
+   "title": "the board stop's path on live samples (the stop lowered so that it must trip)",
+   "start": {
+    "mode": "cool",
+    "max_c": 99,
+    "max_wait_s": 20
+   },
+   "launch": {
+    "seconds": 6,
+    "budget": 7.5,
+    "processes": 1
+   },
+   "tail_s": 4,
+   "runs": [
+    {
+     "type": "int8",
+     "values": "file:tools/claims-v3/kinds/tiles/int8/neg_ones.bin",
+     "label": "int8-neg_ones"
+    }
+   ]
+  }
+ ]
+}
