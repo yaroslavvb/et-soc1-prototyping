@@ -8,7 +8,7 @@ nested leave one kind out with M6, M7, M8 and M9 on the same folds, then frozen 
 his words of 2 November 2026: to predict the power requirement and heat generation of numeric computations as accurately as
 possible.*
 
-*Wed 4 Nov 2026 (week 45), 00:29-01:12 PST (the freeze commit, `1f244140`, 01:12:04), Q140(m), desk only, on the Intel (`nice -n 10`, at most 4 threads or bench jobs): no card
+*Wed 4 Nov 2026 (week 45), 00:29-01:12 PST (the freeze commit, `1f244140`, 01:12:04), Q140(m), desk only, on the Intel (`nice -n 10`, at most 4 threads or bench jobs; corrected after verification, C7: for about 2 minutes about 5 processes ran at once): no card
 was opened, no device command was sent, no lab box, Discord, Modal or archive was touched, and nothing was measured in watts here.
 Every watt comes from a committed experiment, named where it is used. **The registration, [`M9-REGISTRATION.md`](M9-REGISTRATION.md),
 was committed and pushed (`8dfafae3`, 00:45:51 PST) before `fit_m9.py` existed, before any candidate feature was computed on any
@@ -17,6 +17,21 @@ read that designer's scratch, and pool 7 is not in the tree. M9 builds on Q139(m
 imported unchanged), Q139(u)'s footing ([`../2026-11-03-q139u-footing/`](../2026-11-03-q139u-footing/README.md)), pool 6's two
 600 MHz sessions ([E153](../2026-11-03-e153-blind6-aifoundry3/README.md), [E157](../2026-11-03-e157-blind6-card1/README.md)), the
 toggle bench (`rtl-sim/fma_toggle_v2/`) and, for aifoundry2, Q140(l)'s part ([`../2026-11-04-q140l-a2-session-terms/`](../2026-11-04-q140l-a2-session-terms/)).*
+
+*Corrected after verification (a dated note, Wed 4 Nov 2026, from 01:45 PST; desk only: no card, no device command, no lab box,
+Discord, Modal or archive). An independent verifier re-ran every committed script (each output byte-identical) and re-derived the
+int8 result independently. It found eight faults; none changes a frozen file, form, price, band, prediction or registered verdict,
+so **M9 is not re-frozen**. Each is marked in place "corrected after verification, C<n>" and set out in
+[§ Corrections after verification](#corrections-after-verification-wed-4-nov-2026) at the end; every original word stays. The main
+one, **C1: the bench check's post hoc finding is stronger than its evidence.** The three-point launch average does over-count
+`b_onebit_b20_third`, by about 1.0 W against nine points at M9's prices. But the nine-point mean itself carries ±0.4-0.5 W (1 s.e.)
+there. So the corrected error (+0.28 / −0.04 W) is not resolved from zero or from ±0.5 W. The title's and § 6's "the miss is the
+bench's three-point launch average, not a price the model lacks" is withdrawn, and so is "the next model needs nine-point counts".
+A convergence rule for the launch average was registered before any count beyond nine points
+([`recount-rule/RECOUNT-RULE.md`](recount-rule/RECOUNT-RULE.md), `b4444dd4`, 01:53:26 PST); its first step is C9. **C3:** pool 6's
+int8 figures are like for like only against the older forms refitted on the same folds: 0.159-0.189 W (aifoundry3) and
+0.169-0.185 W (card 1) → 0.118 / 0.112 W, not the blind 0.20-0.33 W. **C2:** M9 leaves pool 6's int8 4.5 s heat error where it
+was (0.13 °C rms).*
 
 ## Results
 
@@ -27,7 +42,7 @@ the one footing; "blind" marks the frozen models' registered scores on pool 6, w
 | quantity | before | after (M9, nested) | resolved? (paired bootstrap, 95%) | source |
 |---|---|---|---|---|
 | **int8, every row** (174 rows, 83 kinds) | M8's form 0.261 W, M7's 0.256, M6's 0.251 (refitted per fold); M8 / M7 / M6 as frozen 0.267 / 0.252 / 0.242 (in sample on most rows) | **0.177 W** | **yes**, against every one: −0.075 [−0.111, −0.040] W against M6's form, −0.065 [−0.107, −0.027] against M6 as frozen | `nested-m9.json` › `families.int8.same_folds.all`, `paired_bootstrap_over_kinds.all` |
-| **int8, pool 6's 12 priority-1 kinds** | blind: M8 0.296 / 0.327 W, M7 0.231 / 0.285, M6 0.199 / 0.222 (aifoundry3 / card 1) | **0.118 / 0.112 W** | yes against M8 and M7 on both cards; against M6 on card 1 (−0.101 [−0.170, −0.029]), not on aifoundry3 (−0.074 [−0.147, +0.012]) (bootstrap over kinds against the frozen models at each row's measured rate, D1) | `summary-m9.txt`; `nested-m9.json` › `families.int8.paired_bootstrap_over_kinds` |
+| **int8, pool 6's 12 priority-1 kinds** | blind: M8 0.296 / 0.327 W, M7 0.231 / 0.285, M6 0.199 / 0.222 (aifoundry3 / card 1); *like for like (corrected after verification, C3), the forms refitted on the same folds: M8's 0.159 / 0.180, M7's 0.177 / 0.185, M6's 0.189 / 0.169* | **0.118 / 0.112 W** | yes against M8 and M7 on both cards; against M6 on card 1 (−0.101 [−0.170, −0.029]), not on aifoundry3 (−0.074 [−0.147, +0.012]) (bootstrap over kinds against the frozen models at each row's measured rate, D1) | `summary-m9.txt`; `nested-m9.json` › `families.int8.paired_bootstrap_over_kinds` |
 | **floats, every row** (681 rows, 370 kinds) | M8's form 0.194 W, M7's 0.197, M6's 0.198; M8 / M7 / M6 as frozen 0.189 / 0.207 / 0.202 | **0.193 W** | no, against every refitted form (−0.001 [−0.009, +0.007] against M8's) | `families.float.same_folds.all` |
 | **fp32, pool 6's 12 priority-1 kinds** | blind: M8 0.330 / 0.386 W, M7 0.313 / 0.395, M6 0.310 / 0.377 | **0.308 / 0.358 W** | no | `summary-m9.txt` |
 | **fp16, pool 6's 6 priority-1 kinds** | blind: M8 0.125 / 0.098 W, M7 0.121 / 0.136, M6 0.154 / 0.134 | 0.134 / 0.123 W | no | `summary-m9.txt` |
@@ -35,7 +50,7 @@ the one footing; "blind" marks the frozen models' registered scores on pool 6, w
 | the same without the critic's six named-miss tiles (24) | blind: M8 0.190 / 0.184, M7 0.174 / 0.174, M6 0.193 / 0.177 W | 0.186 / 0.173 W | no (within 0.012 W of every model) | `summary-m9.json` |
 | the six named-miss tiles themselves (12 rows) | blind, aifoundry3 / card 1: `int8.bheld_bit4` −0.54 / −0.43 W (M8), `int8.a_zeros_b_lineflip` +0.62 / +0.78, `int8.b_line_zero_ff` +0.36 / +0.38, `fp32.b_onebit_b20_third` −0.81 / −1.09 | bheld_bit4 −0.16 / −0.06, a_zeros_b_lineflip −0.05 / +0.14, b_line_zero_ff −0.01 / +0.02, bheld_bit1 −0.15 / −0.19, bheld_bit7 +0.14 / +0.06; **b20_third −0.72 / −1.00** | — | `summary-m9.txt` |
 | int8 on pool 5's rows (E141 / E142, out of kind) | M8's form 0.352 / 0.294 W; M8 as frozen 0.344 / 0.319 (in sample) | **0.150 / 0.178 W** | — | `families.int8.same_folds.exp E141`, `exp E142` |
-| 95% bands | M8: k 2.20 floats / 2.83 int8 | **k 2.00 floats / 1.86 int8**; floats 647 of 681 inside, pool rows 126 of 133 (each left out of k: 126); int8 165 of 174, pool rows 64 of 65 (64) | a calibration, not a test | `families.*.band` |
+| 95% bands | M8: k 2.20 floats / 2.83 int8 (*2.84: `m8.json` gives 2.835; corrected after verification, C8*) | **k 2.00 floats / 1.86 int8**; floats 647 of 681 inside, pool rows 126 of 133 (each left out of k: 126); int8 165 of 174, pool rows 64 of 65 (64) | a calibration, not a test | `families.*.band` |
 | card 1's scale | M8's C0 0.9616 | **0.9616** (M8's card term kept: the same E78/E82 pairs) | — | `m9.json` › `families.*.card1_scale_by_format` |
 | heat | M7's law (0.1186 / 0.1151 °C per board W over a 4.5 s run) | **carried unchanged**, applied to M9's S | — | `m9.json` › `heat` |
 | aifoundry2 | M8's relation (cap 65.20 W) | **nothing fitted here**: M9's D at 600 MHz goes through M8's frozen relation by default, or Q140(l)'s part with `--a2-terms` | — | `predict_blind7.py` |
@@ -47,12 +62,15 @@ each B byte into four digits; a digit of zero makes its row of partial products 
 flips straight from the tile's bytes (`bpp_r4`, priced at 2.2 ± 0.3 fJ a flip) explains why a B held at one bit (one or two live
 digits) draws less than random B (three on average), and why B lines of 0x55/0xAA (four live digits each) draw more: int8's error
 over every committed row falls from about 0.25 W to 0.18 W out of kind, and on pool 6's int8 tiles from 0.20-0.33 W (blind, the
-older models) to 0.11-0.12 W. **For the floats nothing registered helps on new kinds.** An exponent-stage price (`xstage`, 0.65 ±
+older models) to 0.11-0.12 W *(corrected after verification, C3: like for like, the older forms refitted on the same folds read
+0.16-0.19 W there, so the gain on pool 6 is 0.04-0.06 W)*. **For the floats nothing registered helps on new kinds.** An exponent-stage price (`xstage`, 0.65 ±
 0.36 fJ over the rest's 2.08) passes the rule by 0.004 W over all rows but leaves pool 6's fp32 at 0.31 / 0.36 W, and the term aimed at
 the single bit on a 1/3 base word (`lq1`, from the bench's launch points) does not lower the nested error, so it is dropped; that
 tile still reads 0.7-1.0 W high. **The bench says why:** counted at nine points of a launch instead of three, the bench's own count for
 that tile falls by 18%, which at M9's prices is −1.0 W, the size of the miss; and the same count error runs from −1.0 W to +0.7 W over
 four base words at bit 20. The miss is in how the bench averages a launch, so the next model needs nine-point counts, not another price.
+*(Withdrawn after verification, C1: the nine-point mean itself carries ±0.4-0.5 W at 1 s.e. on that tile, so the miss is not shown to
+be the launch average alone, and nine points are not shown to be enough.)*
 Over all three formats, on the 30 kinds the critic scores, M9 reads 0.217 / 0.243 W (aifoundry3 / card 1) against M6's blind 0.243 /
 0.283 W: better, but not by a margin the bootstrap resolves, and not blind. Pool 7 is the test.
 
@@ -167,7 +185,9 @@ software at every point (`check_mismatch` 0). [`benchcheck_m9.py`](benchcheck_m9
 | π `0x40490FDB` | +0.069 | −0.209 | **+0.665** | +0.367 |
 
 *The bench's own error from averaging a launch at three points instead of nine, at M9's frozen prices (W of D; negative: the
-three-point average over-counts).*
+three-point average over-counts).* *(Corrected after verification, C1: each nine-point mean carries its own error. At 1 s.e., the
+larger of the sample and interleaved-rule estimates, it is 0.08-0.12 W at bit 12, 0.12-0.27 W at bit 17, 0.37-0.65 W at bit 20 and
+0.43-0.98 W at bit 21; per tile in [`recount-rule/RECOUNT-RULE.md`](recount-rule/RECOUNT-RULE.md) § 5.)*
 
 - **Registered expectation: α > 0. MET:** α = +0.224, r(lq1, m3 − m9) = +0.56. A high first point does mean the three-point
   average over-counts.
@@ -180,10 +200,15 @@ three-point average over-counts).*
   frozen prices, **b20_third's M9 error moves from −0.72 / −1.00 W to +0.28 / −0.04 W** (aifoundry3 / card 1; M8 as frozen −0.77 /
   −1.04 → +0.23 / −0.09 W), and b12_third's from +0.32 / +0.22 to +0.28 / +0.18 W. So the critic's "high single B bit on a 1/3 base
   word" miss is the bench's three-point launch average, not a price the model lacks. The base-word term the critic asked for is a
-  count of the launch at more points.
+  count of the launch at more points. *(Corrected after verification, C1: the nine-point mean carries ±0.51 W (1 s.e.) on
+  b20_third, so +0.28 / −0.04 W is not resolved from zero or from ±0.5 W; the direction holds (the three-point average over-counts
+  by about 2-2.6 s.e.), the last two sentences are withdrawn. b12_third's figures mix forms: its nested error comes from the form
+  holding `lq1`, the correction from the frozen form's prices; like for like, the frozen form's own error moves from +0.24 / +0.15
+  to +0.20 / +0.10 W, ±0.12 W.)*
 - **What a nine-point recount would cover (post hoc):** of M9's 611 float rows with a counts row (E147's steps aside), 77 have a
   three-point spread over 10% of their mean and 29 over 20% (median 1.3%). Recounting those, E147's steps and their zeros, and pool 7's
-  tiles at nine points is about two bench-hours at 4 jobs.
+  tiles at nine points is about two bench-hours at 4 jobs. *(Corrected after verification, C1: the recount is sized by the
+  convergence rule in [`recount-rule/`](recount-rule/RECOUNT-RULE.md), not set at nine points; the 77 rows are 45 counted tiles.)*
 
 **7. aifoundry2.** Nothing is fitted here. [`predict_blind7.py`](predict_blind7.py) gives every tile M9's D at 600 MHz on aifoundry3's
 footing with its 95% band, and then:
@@ -194,7 +219,8 @@ footing with its 95% band, and then:
   its `burst(D, t, anchors, die_starts, D_band_hw)` for every tile with M9's D and half-band, the session's own zeros-anchor reads from
   `--a2-session <json>` (`{format: [{burst_w, burst_mhz, die_start}, ...]}`) and a die start from `--a2-die-start`; the result is each
   tile's `M9.a2_q140l` block and `a2_part.primary` = `a2_q140l`. Tested here on Q140(l)'s uncommitted draft (it ran, in scratch);
-  nothing of Q140(l)'s is committed by this lane.
+  nothing of Q140(l)'s is committed by this lane. *(Corrected after verification, C6: Q140(l) had committed its part, `5b98bd5c` at
+  01:04:31 PST, before this README was written. On the committed part the predictor's output equals the draft run's.)*
 - Always: `a2-inputs-aifoundry2.json`, M9's and M8's D at 600 MHz per tile with M9's band, the input any aifoundry2 relation takes.
 
 **8. The predictor and its self-test.** `predict_blind7.py <pool_dir> <card>` (aifoundry3 | aifoundry1c1 | aifoundry2) reads a pool in
@@ -216,7 +242,8 @@ count); a base-word term for single bits from the bench's launch points (`lq1`, 
 held-B int8 term (`bpp_r4`, the radix-4 Booth partial products with B recoded, kept at 2.2 ± 0.3 fJ a flip; the simpler `bnz_a` not).
 **Out-of-sample error before → after** (nested leave one kind out, the same folds, one footing; out of kind, not blind): **int8 over
 every committed row 0.251-0.261 W (M6's, M7's, M8's forms) → 0.177 W, resolved against every model**; int8 on pool 6's 12 priority-1
-kinds, blind before, 0.199-0.296 W (aifoundry3) and 0.222-0.327 W (card 1) → 0.118 and 0.112 W; floats over every row 0.194-0.198 W →
+kinds, blind before, 0.199-0.296 W (aifoundry3) and 0.222-0.327 W (card 1) → 0.118 and 0.112 W *(corrected after verification, C3:
+like for like, the older forms refitted on the same folds, 0.159-0.189 W and 0.169-0.185 W → 0.118 and 0.112 W)*; floats over every row 0.194-0.198 W →
 0.193 W, not resolved; fp32 on pool 6's 12 priority-1 kinds 0.310-0.330 / 0.377-0.395 W blind → 0.308 / 0.358 W; all three formats on
 the 30 kinds the critic scores, M6's blind 0.243 / 0.283 W → 0.217 / 0.243 W (not resolved against M6; resolved against M8). The
 critic's bound, every model at 0.17-0.19 W on the 24 kinds without the six, is where M9 lands (0.186 / 0.173 W): the int8 named misses
@@ -224,8 +251,12 @@ are closed, the fp32 single bit (b20_third, −0.72 / −1.00 W) and the exponen
 **The bench term corrected, post hoc:** the bench's three-point launch average is wrong by −1.04 to +0.67 W on single high mantissa
 bits, depending on the base word, and on b20_third by −1.0 W; with nine points that tile's error would be +0.28 / −0.04 W. The next
 model's single-bit term is a nine-point count (77 of 611 float rows spread over 10% between the three points), registered first.
+*(Corrected after verification, C1: ±0.4-0.5 W at 1 s.e. on that tile, not resolved; the next model's count is sized by the
+convergence rule, not set at nine.)*
 **Heat is unchanged in form**: M7's law is carried, so the die's rise follows M9's predicted board watts; on int8 kinds whose power
 M9 now predicts 0.1-0.4 W better, the 4.5 s rise moves by 0.01-0.05 °C. The blind before → after is pool 7's (E163, E164).
+*(Corrected after verification, C2: that is below the die's whole-degree readout, and pool 6's int8 4.5 s heat error is unchanged:
+0.126 / 0.129 °C rms with M9's D on the 12 priority-1 kinds (aifoundry3 / card 1), against M8's registered 0.128 / 0.123 °C.)*
 
 ## Departures
 
@@ -262,7 +293,8 @@ M9 now predicts 0.1-0.4 W better, the 4.5 s rise moves by 0.01-0.05 °C. The bli
 - **`bsat` survives at half its size** beside `bpp_r4`; with both, b_line_55_aa still reads +0.23 / +0.34 W and the df-1.5 power-law
   tile (61.7% gated) went from −0.11 to +0.18 W.
 - **The single bit on 1/3 is explained post hoc, not fixed.** `lq1` failed the rule. The bench check (§ 6) shows the bench's own
-  three-point launch average over-counts that tile by about 1.0 W at M9's prices, but the nine-point counts exist for 16 tiles only,
+  three-point launch average over-counts that tile by about 1.0 W at M9's prices (±0.4-0.5 W at 1 s.e. of the nine-point mean;
+  corrected after verification, C1), but the nine-point counts exist for 16 tiles only,
   two of them pool 6's; M9's training rows and pool 7's predictions use three-point counts, so M9 keeps the miss on any such tile.
 - One lane wrote M9 and its scoring code; pool 7's designer is independent, and E163 and E164 are its test.
 
@@ -292,6 +324,7 @@ M9 now predicts 0.1-0.4 W better, the 4.5 s rise moves by 0.01-0.05 °C. The bli
 | [`predict_blind7.py`](predict_blind7.py) | the frozen predictor for pool 7 (M9, M8, M7, M6; three cards; aifoundry2 through M8's relation or Q140(l)'s part) |
 | [`selftest_predict_blind7.py`](selftest_predict_blind7.py), [`selftest-predict-blind7.txt`](selftest-predict-blind7.txt) | the self-test on pool 6 |
 | [`benchcheck_m9.py`](benchcheck_m9.py), [`bench-check/`](bench-check/) | § 6: the 16 tiles' maker and manifest, the bench's counts at nine launch points, the build's hashes, the result |
+| [`recount-rule/`](recount-rule/RECOUNT-RULE.md) | *added after verification (C1, C9)*: the convergence rule for the bench's launch average (`RECOUNT-RULE.md`, `recount_rule.py`, the pilot's tiles and points, the recount set), registered in `b4444dd4` before any count beyond nine points; then the 27-point sizing step's counts and result |
 
 sha256 at the freeze: `m9.json` **`322dd73983cb293aebfb7894eb868e7d0b650ae36d30d5626bba283be25e4835`**; `fit_m9.py`
 `0b3f1074c4a84865dd2f6e6e4e018a56ce28e016b22b6fbfd66b74a1520752f5`; `nested-m9.json`
@@ -318,3 +351,65 @@ python3 -B docs/reports/data/2026-11-04-q140m-m9/predict_blind7.py tools/claims-
 python3 -B docs/reports/data/2026-11-04-q140m-m9/predict_blind7.py tools/claims-v3/kinds/blind7 aifoundry2 --counts <counts.json> \
     --a2-terms docs/reports/data/2026-11-04-q140l-a2-session-terms/m9_a2.json
 ```
+
+## Corrections after verification (Wed 4 Nov 2026)
+
+*Desk only, from 01:45 PST: no card, no device command, no lab box, Discord, Modal or archive. Each correction comes after M9's fit,
+scores and freeze (`1f244140`) and touches none of them: no frozen file, form, price, band, prediction or registered verdict
+changes, and M9 is not re-frozen. Every original word above stays; the marks "corrected after verification, C<n>" point here.*
+
+- **C1 (the main one): the post hoc bench finding is stronger than its evidence.** The bench's per-point counts are spiky, not
+  smooth, so the nine-point launch average carries its own error. Priced at M9's frozen prices, the larger of the sample s.e. and the
+  interleaved-rule s.e. (the three interleaved three-point rules among the nine) is 0.51 W on `cal_third_b20` (0.38 W by the sample
+  alone), 0.98 W on `cal_third_b21`, 0.37-0.65 W on the other bit-20 tiles, and 0.08-0.27 W at bits 12 and 17
+  ([`recount-rule/RECOUNT-RULE.md`](recount-rule/RECOUNT-RULE.md) § 5 lists all 16). In the verifier's words: *post hoc, on
+  b20_third the three-point launch average over-counts by about 1.0 W against a nine-point average; the nine-point mean itself carries
+  ±0.4-0.5 W (1 s.e.) of sampling error at M9's prices, so the corrected error (+0.28 / −0.04 W) is not resolved from zero or from
+  ±0.5 W.* The direction holds: on that tile the three-point rule's mean is 2.0-2.6 s.e. above the nine-point one. **Withdrawn:**
+  "not a price the model lacks", "the next model needs nine-point counts, not another price", "the base-word term the critic asked
+  for is a count of the launch at more points", "the next model's single-bit term is a nine-point count", and the title's "shows the
+  bit-20 single-bit miss is its own three-point launch average". How much of the single-bit miss is the bench's quadrature and how
+  much a price is open. The b12_third figures in § 6 mix forms: its nested error comes from the form holding `lq1` (the inner pick in
+  369 of 370 folds), the correction from the frozen form's prices. Like for like, the frozen form's own leave-one-kind-out error goes
+  from +0.244 / +0.148 W to +0.197 / +0.103 W (aifoundry3 / card 1), ±0.12 W. b20_third's fold picked the frozen form, so its figures
+  are like for like. **What replaces "nine points by default":** a convergence rule registered before any count beyond nine
+  ([`recount-rule/RECOUNT-RULE.md`](recount-rule/RECOUNT-RULE.md), lab `b4444dd4`, committed 01:53:26 PST; its header's "about 02:00"
+  is that commit). A tile's N-point average is converged when e(N) ≤ 0.10 W at M9's prices; N is tripled from 9, at most to 243; the
+  calibration set's largest first N meeting the bound is N\*, and the recount of the 77 rows (45 counted tiles), E147's 70 tiles and
+  pool 7's float tiles is sized by it. Its first step is C9.
+- **C2: the heat claim.** The lane's result said "int8 kinds come 0.01-0.05 C closer"; that was never scored and is withdrawn. M7's
+  carried law (g × S, as `predict_blind7.py` computes it) applied to M9's out-of-kind D, against `rows-m9.json`'s measured `dT_win`:
+  on pool 6's 12 priority-1 int8 kinds, 0.126 / 0.129 °C rms (aifoundry3 / card 1) against M8's registered blind heat predictions
+  (Q139(x)'s `predictions-blind6-<card>.json`) at 0.128 / 0.123 °C; on all 17 int8 kinds 0.190 / 0.141 against 0.184 / 0.134 °C.
+  M9 is closer on 6 and 7 of the 12 tiles, 7 and 8 of the 17; the per-tile shift is 0.000-0.127 °C, below the die's whole-degree
+  readout (aifoundry3's measured rises are 0.25, 0.75, 0.81, 1.00 and 1.04 °C). So: **the 4.5 s rise moves by 0.01-0.05 °C on int8
+  kinds M9 predicts 0.1-0.4 W better, below the readout; pool 6's int8 4.5 s heat error is unchanged, 0.13 °C rms on aifoundry3 and
+  card 1.**
+- **C3: pool 6's int8 before → after, like for like.** The "blind before" figures are the frozen models' registered scores; M9's
+  are out of kind, from a fit that holds pool 6's other int8 kinds and features named from pool 6's misses. On the same folds, M8's,
+  M7's and M6's forms refitted read 0.159 / 0.177 / 0.189 W on aifoundry3 and 0.180 / 0.185 / 0.169 W on card 1, against M9's 0.118
+  / 0.112 W (`nested-m9.json` › `families.int8.same_folds['pool 6 int8|a3, priority 1']` and `['pool 6 int8|c1, priority 1']`). The
+  like-for-like gain over the best older form is 0.041 W (aifoundry3) and 0.057 W (card 1), not 0.08-0.21 W. Without the six
+  named-miss tiles (7 int8 kinds) M9 is level with the refitted forms on aifoundry3 (0.118 against 0.115-0.117 W) and 0.04-0.05 W
+  better on card 1 (0.111 against 0.150-0.162 W). The resolved gain over every committed int8 row, 0.251-0.261 → 0.177 W, stands.
+- **C4: the mechanism, in words.** The lane's blog point said three sample points "miss a short early regime". The data say the
+  opposite: on b20_third the bench's first point (n = 91,575, a sixth of the way in) falls in a short regime of high switching (3.53
+  M nets against 1.97 and 1.95 M at its neighbours) and counts it as a third of the launch. On the other spiky tiles the high points
+  fall mid-launch and late. "Where the accumulator's rounding position meets the flipping bit" is the registration's hypothesis, not
+  a tested fact.
+- **C5: the check before pool 7's predictions.** "git diff 1f244140 over M9's directory must be empty" fails as written, because
+  `f4c93ae9` and these corrections change this README and add `recount-rule/`. The check is
+  `git diff --name-only --diff-filter=MDRT 1f244140 -- docs/reports/data/2026-11-04-q140m-m9/ ':!docs/reports/data/2026-11-04-q140m-m9/README.md'`,
+  which must print nothing (no frozen file modified, deleted, renamed or retyped since the freeze; files added later are allowed),
+  with `m9.json`'s and `predict_blind7.py`'s sha256 as in § Files.
+- **C6: Q140(l)'s part was committed.** Q140(l) committed it in `5b98bd5c` (01:04:31 PST), 7.5 minutes before M9's freeze commit;
+  § 7, written 01:06-01:10, still called it a draft. On the committed part (`m9_a2.json` sha256 `cc6fbccc…`, `predict_m9_a2.py`
+  `420b887e…`; the draft's predictor was `e82df306…`), `predict_blind7.py` on pool 6 for aifoundry2 calls Q140(l)'s `burst()` as
+  primary on 50 of 50 tiles, and every one of the 7,450 tile fields equals the draft run's (the verifier found the same on 250 of
+  them). Q140(x) still runs it on pool 7, with the part Q140(l) has committed last.
+- **C7: cores.** The bench check's 4 jobs (00:46:29-01:05:50) overlapped `fit_m9.py` (00:52:25-00:56:46, about 1 core), the
+  self-test, the plug-in tests and `summarize_m9.py`: about 5 busy processes for about 2 minutes in all, over section 24's 4 cores a
+  lane. Desk only; no result is affected. The fix pass ran its bench at 3 jobs, so the lane stays within 4 cores.
+- **C8: a rounding slip.** M8's int8 band k is 2.835 (`m8.json` › `families.int8.band_k`), so 2.84, not 2.83.
+- **C9: the convergence rule's first step** (pending at this commit). The 14 calibration tiles above the bound at nine points are
+  being counted at 27 (252 new points, 3 jobs, from 01:54:29 PST). The result is added in the next dated commit.
