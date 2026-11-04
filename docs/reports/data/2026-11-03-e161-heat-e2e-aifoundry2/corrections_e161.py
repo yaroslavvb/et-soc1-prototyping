@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""E161: corrections after verification (post hoc, written Tue 3 Nov 2026 about 18:15-18:45 PST, after the data, the post hoc readings
+"""E161: corrections after verification (post hoc, written Tue 3 Nov 2026 about 18:10-18:27 PST, after the data, the post hoc readings
 P1-P3 and the verifier's report; NOT registered, no verdict uses them, no registered number or verdict changes). It prints every number
 the README's dated notes and its section "Corrections after verification" quote, from committed files only: each hold's HOLD telemetry and
 launches.jsonl.gz, results.json and Q139(e)'s frozen predictions, with the frozen code imported unchanged after reduce_e161.py's sha256

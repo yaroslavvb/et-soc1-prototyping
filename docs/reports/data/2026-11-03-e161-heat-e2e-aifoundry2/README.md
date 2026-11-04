@@ -28,7 +28,7 @@ as it was.*
 - *No other user was logged in to aifoundry2 at any of the 236 idle-login checks (counts only), and `et-who` showed the card free before the
   go and after the end.*
 
-*Corrected after verification (a dated note, Tue 3 Nov 2026, about 18:10–18:50 PST; desk only: no card, no device command, no ssh, nothing
+*Corrected after verification (a dated note, Tue 3 Nov 2026, about 18:10–18:27 PST; desk only: no card, no device command, no ssh, nothing
 re-run). An independent verifier re-derived every registered number and verdict from the committed data and the frozen code, re-ran the
 device-command audit and the check of C, and re-hashed the box's raw files read-only. All of it stands, the reduction and the post hoc
 readings byte for byte. It found one major and four minor faults in what this README and the lane's result draw from them. None changes a
@@ -251,7 +251,7 @@ numpy 1.26.4, Python 3.9 at the desk. The reducer reads the `ccheck-*.json` summ
 
 ## Corrections after verification (Tue 3 Nov 2026)
 
-*Written Tue 3 Nov 2026, about 18:10–18:50 PST, by the fix pass, after the data, the post hoc readings and the verifier's report. Desk
+*Written Tue 3 Nov 2026, about 18:10–18:27 PST, by the fix pass, after the data, the post hoc readings and the verifier's report. Desk
 only: no card, no device command, no ssh to any box, nothing re-run. No measured, frozen or registered number, rule, prediction or verdict
 changed; the registration (`tools/claims-v3/e161/`, `ddbd15b1`) is untouched. Every number here is printed by
 [`corrections_e161.py`](corrections_e161.py) → [`corrections.txt`](corrections.txt). The script imports `posthoc_e161.py`'s helpers and the
