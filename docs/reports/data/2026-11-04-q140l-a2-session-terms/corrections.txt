@@ -1,0 +1,61 @@
+Q140(l) corrections after verification (post hoc, not registered; nothing frozen depends on them)
+m9_a2.json sha256 cc6fbccc4b63fa80575e91abb02c6296a24ac97984fd52a232dbea04a6c6fec8 (unchanged)
+C0. The import path reproduces loso.json's frozen configuration (T1+T2+T3+T4), every session and pooled: worst |diff| 0.0e+00; the chain with a tuple of left-out dirs equals fit_m9_a2.reads_chain: worst 0.0e+00: OK
+
+C1. The handoff: M9's level composed with exactly one die law (post hoc, linear)
+  E161 G1Q (int8.b_line_zero_ff, D 3.748 W; plateau die 62.88 C): M8's in-work level +0.911 W high (E161 corrections C1)
+    M9's relation minus M8's at 800 MHz +0.0042 W; M9's zeros-level shift beta x fallback(int8) -0.9952 W, at T_ref 54.38 C
+    (a) the shift alone, Q139(e)'s 0.442 W/C from its 56.0 C reference die kept: -0.080 W (the lane's -0.084 left out the relation's +0.0042)
+    (b) M9 whole, its k_T 0.3954 W/C from 54.38 C in place of 0.442 from 56.0, at the plateau die: +0.239 W (k_T was fitted on burst starts of 45-56 C; the plateau is 6.9 C above the highest)
+    plateau error through E161's committed fixed points (linear; 0.937 C per W at continuous work, 0.909 at the kernel duty):
+      M8: continuous -0.90 C, kernel duty -0.39 C; (a) +0.03 / +0.51 C; (b) -0.27 / +0.22 C
+  E159's zeros GEMMs (measured - predicted, W): hold, start die, G3, (a) G3 + M9's shift, (b) G3 + M9's shift + k_T (T_start - T_ref)
+    H1-fp32-zeros: start 57 C, measured 35.98 W; G3 -2.45; (a) -1.45; (b) -2.49
+    H2-fp32-zeros: start 53 C, measured 36.04 W; G3 -2.49; (a) -1.49; (b) -0.95
+    H3-fp32-zeros: start 52 C, measured 36.03 W; G3 -2.43; (a) -1.43; (b) -0.49
+    the measured window boards spread 0.06 W over starts of 52-57 C; a start-die term at k_T spreads the prediction 1.98 W
+  The level referred between 54.38 C (M9's T_ref) and 56.0 C (Q139(e)'s reference): k_T x 1.62 = 0.64 W, 0.442 x 1.62 = 0.72 W
+
+C2. The E143-against-E160 governed-clock offset, held out (means, MHz; from loso.json)
+  R7 (M7 as frozen)    E143  -4.52  E160  +3.43  split  7.95
+  R8 (M8 as frozen)    E143  -2.40  E160  +5.60  split  8.00
+  A0                   E143  -6.80  E160  +5.03  split 11.83
+  T1+T2                E143  -4.26  E160  +4.74  split  9.00
+  T1+T2+T3             E143  -2.63  E160  +1.89  split  4.52
+  T1+T2+T3+T4          E143  -2.62  E160  +1.91  split  4.54
+  final against M7 as frozen: E143's offset 42% removed, E160's 44%, the split 43% (7.95 -> 4.54 MHz); the sign still flips
+  T3's own step (T1+T2 -> T1+T2+T3): split 9.00 -> 4.52 MHz, 50% removed
+  die starts over the scored bursts: E143 55.46 C, E160 53.65 C (gap 1.81 C); the frozen code's clock change per C of die start on the governed cells -2.65 to -1.21 MHz (mean -2.31); x the gap = 4.17 MHz, 53% of M7's split
+
+C4. The selection's optimism: the forward rule run inside each fold on its three training sessions (each inner fold fitted on two)
+  rule at 2 of 3 inner sessions: selected per held-out session: E80 T1+T2+T3+T4, E83 T1+T2+T3+T4, E143 T1+T3, E160 T1+T2+T3+T4
+  nested (selection inside the fold, 2/3) | E80    G  4.92 (+3.11) Bg 1.01 (-0.31) Bp 1.46 (-0.54) | E83    G  6.93 (-1.05) Bg 1.21 (+0.46) Bp 0.66 (-0.33) | E143   G  5.11 (-3.23) Bg 0.94 (+0.01) Bp 1.33 (-1.18) | E160   G  3.71 (+1.91) Bg 0.66 (-0.39) Bp 0.49 (+0.05) | pooled G  5.12 (-0.47) Bg 0.93 (-0.07) Bp 0.92 (-0.38)
+  quoted (T1+T2+T3+T4, registered)   | E80    G  4.92 (+3.11) Bg 1.01 (-0.31) Bp 1.46 (-0.54) | E83    G  6.93 (-1.05) Bg 1.21 (+0.46) Bp 0.66 (-0.33) | E143   G  4.78 (-2.62) Bg 0.83 (+0.05) Bp 0.55 (-0.02) | E160   G  3.71 (+1.91) Bg 0.66 (-0.39) Bp 0.49 (+0.05) | pooled G  5.00 (-0.24) Bg 0.89 (-0.05) Bp 0.75 (-0.15)
+    nested minus quoted, pooled rms: G +0.1211, Bg +0.0424, Bp +0.1715
+    the bands' rule on the nested errors (information; the frozen bands stay): governed n 56 9.77 MHz / 2.06 W, pinned n 78 15.35 MHz / 1.75 W (frozen: 9.65 / 1.85 and 15.35 / 1.26)
+    E80 held out, inner steps: T1 vs A0 kept (carries on ['Bg']); T2 vs T1 kept (carries on ['G', 'Bg', 'Bp']); T3 vs T1+T2 kept (carries on ['G', 'Bp']); T4 vs T1+T2+T3 kept (carries on ['Bp'])
+    E83 held out, inner steps: T1 vs A0 kept (carries on ['Bg']); T2 vs T1 kept (carries on ['G', 'Bg', 'Bp']); T3 vs T1+T2 kept (carries on ['G', 'Bp']); T4 vs T1+T2+T3 kept (carries on ['Bp'])
+    E143 held out, inner steps: T1 vs A0 kept (carries on ['Bg']); T2 vs T1 not kept (carries on ['Bg', 'Bp']); T3 vs T1 kept (carries on ['G']); T4 vs T1+T3 not kept (carries on [])
+    E160 held out, inner steps: T1 vs A0 kept (carries on ['Bg']); T2 vs T1 kept (carries on ['G', 'Bg', 'Bp']); T3 vs T1+T2 kept (carries on ['G', 'Bp']); T4 vs T1+T2+T3 kept (carries on ['Bp'])
+  rule at 3 of 3 inner sessions: selected per held-out session: E80 T1+T2+T3+T4, E83 T1+T2, E143 T1, E160 T1+T2+T3
+  nested (selection inside the fold, 3/3) | E80    G  4.92 (+3.11) Bg 1.01 (-0.31) Bp 1.46 (-0.54) | E83    G  9.20 (-3.62) Bg 1.18 (+0.44) Bp 0.92 (+0.17) | E143   G  8.00 (-6.80) Bg 0.86 (+0.12) Bp 0.91 (-0.59) | E160   G  3.69 (+1.89) Bg 0.65 (-0.39) Bp 0.49 (+0.05) | pooled G  6.90 (-2.32) Bg 0.89 (-0.03) Bp 0.88 (-0.11)
+  quoted (T1+T2+T3+T4, registered)   | E80    G  4.92 (+3.11) Bg 1.01 (-0.31) Bp 1.46 (-0.54) | E83    G  6.93 (-1.05) Bg 1.21 (+0.46) Bp 0.66 (-0.33) | E143   G  4.78 (-2.62) Bg 0.83 (+0.05) Bp 0.55 (-0.02) | E160   G  3.71 (+1.91) Bg 0.66 (-0.39) Bp 0.49 (+0.05) | pooled G  5.00 (-0.24) Bg 0.89 (-0.05) Bp 0.75 (-0.15)
+    nested minus quoted, pooled rms: G +1.9013, Bg +0.0048, Bp +0.1392
+    the bands' rule on the nested errors (information; the frozen bands stay): governed n 55 11.97 MHz / 1.84 W, pinned n 79 15.20 MHz / 1.48 W (frozen: 9.65 / 1.85 and 15.35 / 1.26)
+    E80 held out, inner steps: T1 vs A0 kept (carries on ['Bg']); T2 vs T1 kept (carries on ['Bg', 'Bp']); T3 vs T1+T2 kept (carries on ['G', 'Bp']); T4 vs T1+T2+T3 kept (carries on ['Bp'])
+    E83 held out, inner steps: T1 vs A0 kept (carries on ['Bg']); T2 vs T1 kept (carries on ['G', 'Bg', 'Bp']); T3 vs T1+T2 not kept (carries on []); T4 vs T1+T2 not kept (carries on [])
+    E143 held out, inner steps: T1 vs A0 kept (carries on ['Bg']); T2 vs T1 not kept (carries on ['Bg', 'Bp']); T3 vs T1 not kept (carries on []); T4 vs T1 not kept (carries on [])
+    E160 held out, inner steps: T1 vs A0 kept (carries on ['Bg']); T2 vs T1 kept (carries on ['G', 'Bg', 'Bp']); T3 vs T1+T2 kept (carries on ['G']); T4 vs T1+T2+T3 not kept (carries on [])
+
+C8. The session-format zeros offsets: measured or filled
+  measured 11 of 12; filled: E80 fp32 -1.483 W; the measured ones, die-referred, sit 1.35-1.74 W under the relation's 800 MHz zeros level (m9_a2.json session_deltas_w)
+
+C9. The pinned cells' bursts under 795 MHz (rows-m9a2.json; every scored burst)
+  7 of 351 scored bursts:
+     721.6 MHz  E80   fp32.nn_like             board  50.2 W, start 54 C
+     751.0 MHz  E83   int8.sorted              board  45.6 W, start 56 C
+     755.1 MHz  E80   int8.neg_ones            board  37.3 W, start 55 C
+     756.9 MHz  E160  int8.bflip_bit5_w        board  36.7 W, start 53 C
+     758.3 MHz  E83   int8.wsparse90           board  35.8 W, start 55 C
+     784.0 MHz  E143  int8.full                board  48.4 W, start 56 C
+     787.8 MHz  E143  int8.a_word_flipflop     board  40.9 W, start 55 C
