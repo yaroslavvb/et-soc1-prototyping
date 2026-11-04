@@ -1,0 +1,50 @@
+{
+ "_what": "Q140(x): rank 4's paired-anchor rule, registered before any pool-7 claim (Q139's final critic, open rank 4; section 11 item 6). score_rank4.py beside this file applies it; RANK4-RULE.md says it in words.",
+ "rule": "a card's scale is the median of its anchors' ratios to aifoundry3's; it must land within 1% of the pool's median ratio for floats, and within 2% for int8, in each session pair",
+ "reference_card": "aifoundry3 card 0, 600 MHz pinned",
+ "scaled_card": "aifoundry1 card 1, 600 MHz",
+ "first_pair": ["E163 (pool 7 on aifoundry3)", "E164 (pool 7 on aifoundry1 card 1)"],
+ "pairing": "E163 with E164 first; a later pool-7 session on either card pairs with the most recent pool-7 session on the other card before it. Each pair is scored from its own two sessions only. A family passes if it passes in every scored pair.",
+ "D": "a tile's measured switching W over its format's zeros at 600 MHz: each session's registered primary reduction on Q139(u)'s footing (reduce_footing.K_FROZEN 0.2056 W/C on aifoundry3, 0.3134 W/C on card 1; E82 A2's dip rule once), the mean over the session's kept passes, as its power rules score it (E153's and E157's power_rows measured, pool_anchors measured_D)",
+ "families": {
+  "floats": {
+   "types": ["fp32", "fp16"],
+   "anchors": ["fp32.anchor7_randn_a", "fp32.anchor7_randn_b", "fp16.anchor7_randn_a", "fp16.anchor7_randn_b"],
+   "min_anchors": 3,
+   "pool_min_D_w": 5.0,
+   "line_rel": 0.01
+  },
+  "int8": {
+   "types": ["int8"],
+   "anchors": ["int8.anchor7_full_a", "int8.anchor7_full_b"],
+   "min_anchors": 2,
+   "pool_min_D_w": 1.0,
+   "line_rel": 0.02
+  }
+ },
+ "anchor_ratio": "r = D(card 1) / D(aifoundry3) per anchor, both from the same pair",
+ "card_scale": "s_anchor = the median of the family's anchor ratios (floats: the mean of the middle two of four; int8: the mean of the two)",
+ "pool_median": "s_pool = the median of D(card 1) / D(aifoundry3) over pool 7's non-anchor tiles of the family (any priority) measured in both sessions with D at or above pool_min_D_w on both cards: E157's X1 / X2 selection, on pool 7",
+ "verdict": "PASS if |s_anchor / s_pool - 1| <= line_rel; FAIL if not; NOT SCORED (never PASS) if fewer than min_anchors anchors or fewer than 5 pool tiles of the family are measured on both cards",
+ "min_pool_tiles": 5,
+ "bootstrap": {"draws": 5000, "seed": 20261104, "seed_per_family": "seed + sum(map(ord, family))", "interval": "sorted medians [125], [4874]", "what": "the pool median's 95% interval over tiles (reported, not a verdict)"},
+ "reported_not_verdicts": [
+  "each anchor's ratio, and its standard error from the passes (each card's sd over its passes / sqrt(n), in quadrature on the ratio) where per-pass values exist",
+  "the mean of the anchor ratios beside their median",
+  "the E78 arm: s_anchor with E78's fp32.randn and fp16.randn (floats) and int8.full (int8) joined, if both sessions ran them",
+  "per format (fp32, fp16): the format's two anchors' median against the format's own pool median",
+  "s_anchor and s_pool against the card-1 terms the frozen models apply (M9 and M8 0.9616 for every format; M7 and M6 0.9711 floats, 0.9735 int8)",
+  "the per-tile transfer: the relative rms of the pool tiles' ratios about s_anchor and about s_pool"
+ ],
+ "card_terms_applied": {"M9": {"fp32": 0.9615998850616304, "fp16": 0.9615998850616304, "int8": 0.9615854710541776},
+                        "M8": {"fp32": 0.9615998850616304, "fp16": 0.9615998850616304, "int8": 0.9615854710541771},
+                        "M7": {"fp32": 0.9711174157693975, "fp16": 0.9711174157693975, "int8": 0.9734515623123359},
+                        "M6": {"fp32": 0.9711174157693978, "fp16": 0.9711174157693978, "int8": 0.9734515623123359}},
+ "e78_arm_anchors": {"floats": ["fp32.randn", "fp16.randn"], "int8": ["int8.full"]},
+ "forecast": {
+  "basis": "pool 6, post hoc (Q139's final critic, re-derived by Q140(c)'s check 3 in docs/reports/data/2026-11-04-q140c-critic-checks/check3-anchor-card-scale.json): E78's and pool 6's random anchors on E153 and E157 gave floats 0.9618 against the pool's 0.9632 (-0.15%) and int8 0.9580 against 0.9681 (-1.04%, +-1.5% from the anchors' passes)",
+  "floats": "PASS: about -0.15%, against a line of 1%; the difference's standard error is about 0.16% (the four anchors' 0.10% from their passes and the pool median's 0.12%, its 95% interval [0.9613, 0.9659] over 25 tiles), so a miss would take a real offset of about 1%",
+  "int8": "PASS more likely than not, not secure: about -1%; card 1's int8 anchor read 3.6% sd over its three passes in E157, so the two anchors' scale carries a standard error of 1.2-1.5% (1.2% from both anchors' own passes, score_rank4.py's self-test; 1.5% in check 3, which took E78's tile's spread for pool 6's anchor) and the pool median 0.66% (95% interval [0.9534, 0.9783] over 16 tiles); the difference's is 1.35-1.64%, so the chance of landing inside +-2% is 69-75% with pool 6's -1.04% offset and 78-86% with none (normal approximation). More card-1 passes narrow it"
+ },
+ "registered_by": "Q140(x), Wed 4 Nov 2026 (PST), in the commit that holds pool 7 and the frozen predictions, before any pool-7 claim"
+}

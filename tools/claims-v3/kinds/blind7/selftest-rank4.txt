@@ -1,0 +1,28 @@
+RANK 4, paired-anchor card scale, pair selftest: pool 6, E153/E157, the critic's anchors (E78's and pool 6's): PASS
+  floats: anchors fp32.randn 0.9624, fp32.anchor6_randn 0.9606, fp16.randn 0.9634, fp16.anchor6_randn 0.9611 -> s_anchor 0.9618 (mean 0.9619 +- 0.0010 from passes); s_pool 0.9632 [0.9613, 0.9659] over 25 tiles; offset -0.15% against +-1%: PASS
+     per tile about s_anchor 0.72% rms, about s_pool 0.74%; s_anchor vs M9/M8's 0.9616: +0.02%; vs M7/M6's 0.9711: -0.96%
+     E78 arm: not run (E78's anchors not measured in both sessions)
+     fp32: anchors' median 0.9615 against its own 15 tiles' 0.9619 (-0.04%)
+     fp16: anchors' median 0.9623 against its own 10 tiles' 0.9648 (-0.26%)
+  int8: anchors int8.full 0.9597, int8.anchor6_full 0.9563 -> s_anchor 0.9580 (mean 0.9580 +- 0.0113 from passes); s_pool 0.9681 [0.9534, 0.9783] over 16 tiles; offset -1.04% against +-2%: PASS
+     per tile about s_anchor 2.07% rms, about s_pool 1.97%; s_anchor vs M9/M8's 0.9616: -0.37%; vs M7/M6's 0.9735: -1.59%
+     E78 arm: not run (E78's anchors not measured in both sessions)
+
+inputs: aifoundry3 scored.json (M6/M7/M8), card 1 scored.json (M6/M7/M8); pool manifest blind6.json
+  ok   floats: pool tiles = E157-X1's: 25 tiles / 25 tiles
+  ok   floats: s_pool = E157-X1's median_ratio: 0.963178956211 / 0.963178956211
+  ok   floats: s_anchor = check 3's median: 0.96175697419 / 0.96175697419
+  ok   floats: s_anchor mean = check 3's mean: 0.961897958863 / 0.961897958863
+  ok   floats: offset = check 3's median_vs_pool_rel: -0.00147634249286 / -0.00147634249286
+  ok   floats: verdict = check 3's rank4_rule_met: True / True
+  ok   floats: per-tile rms about s_anchor = check 3's: 0.00719428729045 / 0.00719428729045
+  ok   floats: per-tile rms about s_pool = check 3's: 0.00735181341315 / 0.00735181341315
+  ok   int8: pool tiles = E157-X2's: 16 tiles / 16 tiles
+  ok   int8: s_pool = E157-X2's median_ratio: 0.968103277835 / 0.968103277835
+  ok   int8: s_anchor = check 3's median: 0.957992599678 / 0.957992599678
+  ok   int8: s_anchor mean = check 3's mean: 0.957992599678 / 0.957992599678
+  ok   int8: offset = check 3's median_vs_pool_rel: -0.0104438011812 / -0.0104438011812
+  ok   int8: verdict = check 3's rank4_rule_met: True / True
+  ok   int8: per-tile rms about s_anchor = check 3's: 0.0207114217978 / 0.0207114217978
+  ok   int8: per-tile rms about s_pool = check 3's: 0.019665216864 / 0.019665216864
+SELFTEST PASS: 16 checks, 0 differ
