@@ -1,0 +1,200 @@
+{
+ "card": "aifoundry3",
+ "args": {
+  "out": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e166-smoke/p16601",
+  "root": "/home/yaroslavvb/aifoundry",
+  "tel_live": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e166-smoke/p16601/telemetry.jsonl.raw",
+  "sparsity": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "pass_no": 16601,
+  "card": "aifoundry3",
+  "deadline_epoch": 1793835655.9113007,
+  "launch_s": 6.8,
+  "overhead_s": 0.75,
+  "min_launch_s": 1.0,
+  "gate_c": 70.0,
+  "hold_c": 72.0,
+  "hold_w": 65.0,
+  "session_c": 74.0,
+  "inlaunch_dw": 4.0,
+  "watch_every_s": 0.05,
+  "stale_s": 3.0,
+  "check_every_s": 60.0,
+  "min_rate_hz": 5.0,
+  "smoke": true,
+  "stoptest": true,
+  "dry": false,
+  "list": false
+ },
+ "holds": {
+  "K_S": "fp32.real_smol_softmax_v_causal",
+  "K_Q": "int8.real_qwen_w8a8_v",
+  "K_L": "int8.b_line_zero_ff",
+  "K_OL": "fp32.a_onebit_b5_third"
+ },
+ "ks": {
+  "seconds": 3.2,
+  "period_plan_s": 4.37,
+  "period_warm_s": 4.97,
+  "warm_lo_c": 51.5,
+  "warm_hi_c": 53.0
+ },
+ "start_gate_room_max_c": 53.0,
+ "kol": {
+  "full_s": 1500.0,
+  "peak_line_c": 67.5,
+  "peak_by_room": {
+   "49.5": 62.91,
+   "50.6": 64.26,
+   "51.2": 65.0,
+   "51.5": 65.37,
+   "52.5": 66.62,
+   "53.0": 67.24,
+   "53.5": 67.87
+  },
+  "above_53c": {
+   "53.1": [
+    67.37,
+    null,
+    null
+   ],
+   "53.2": [
+    67.49,
+    null,
+    null
+   ],
+   "53.3": [
+    67.62,
+    764.6,
+    757.8
+   ],
+   "53.4": [
+    67.74,
+    642.6,
+    635.9
+   ],
+   "53.5": [
+    67.87,
+    571.8,
+    566.5
+   ],
+   "54.0": [
+    68.5,
+    399.8,
+    394.5
+   ]
+  }
+ },
+ "steps": [
+  [
+   "rest",
+   "R0",
+   8.0
+  ],
+  [
+   "hold",
+   "K_S",
+   9.0
+  ],
+  [
+   "rest",
+   "R2",
+   2.0
+  ],
+  [
+   "hold",
+   "K_Q",
+   5.0
+  ],
+  [
+   "rest",
+   "R3",
+   2.0
+  ],
+  [
+   "hold",
+   "K_L",
+   5.0
+  ],
+  [
+   "rest",
+   "R4",
+   2.0
+  ],
+  [
+   "hold",
+   "K_OL",
+   5.0
+  ],
+  [
+   "rest",
+   "R5",
+   3.0
+  ]
+ ],
+ "items": [
+  {
+   "name": "fp32.a_onebit_b5_third",
+   "type": "fp32",
+   "kind": "a_onebit_b5_third",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_onebit_b5_third.bin",
+   "bytes": 2048,
+   "sha256": "6d07fe951904d0232dc9b05b3aceea171b2b642e1f615b9de01f7dabc375bca1",
+   "sha256_a": "91dad245806d2a2d5556985312bcca6202b3a01a42ecaf1c049fb734c4272115",
+   "sha256_b": "893a106828fbdb9521e1d868c985aab7ad2ae2f606edc55329265a5e7676006c",
+   "values": null,
+   "anchor": false,
+   "pool": "blind6",
+   "hold_candidate": true
+  },
+  {
+   "name": "fp32.real_smol_softmax_v_causal",
+   "type": "fp32",
+   "kind": "real_smol_softmax_v_causal",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_smol_softmax_v_causal.bin",
+   "bytes": 2048,
+   "sha256": "21337776084c35ce58e2b6402bf5b67d0892a26b01e6f96046f6c1a3bb78e4fd",
+   "sha256_a": "a62fccbcab989b38c8556a88b332e009a879a1f889629e33148fe0a85877a102",
+   "sha256_b": "76bc0457acca7d9119b4cd5095c2275df294da132a36cb4ce9197a962dceafe1",
+   "values": null,
+   "anchor": false,
+   "pool": "blind6",
+   "hold_candidate": true
+  },
+  {
+   "name": "int8.b_line_zero_ff",
+   "type": "int8",
+   "kind": "b_line_zero_ff",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/blind6/tiles/int8/int8.b_line_zero_ff.bin",
+   "bytes": 2048,
+   "sha256": "6a50d22072dfca72d1da830063c9b88bdf75f8716955e9b330c1321867040607",
+   "sha256_a": "a877d4a8c70a4f3076dd63e01ffe1dda9db1e8eb0b4e0d90ab317199303d813d",
+   "sha256_b": "259b1863e358a09f418220fda2fed6597d0e29741ebf689d186edb4927c2d11c",
+   "values": null,
+   "anchor": false,
+   "pool": "blind6",
+   "hold_candidate": true
+  },
+  {
+   "name": "int8.real_qwen_w8a8_v",
+   "type": "int8",
+   "kind": "real_qwen_w8a8_v",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/blind6/tiles/int8/int8.real_qwen_w8a8_v.bin",
+   "bytes": 2048,
+   "sha256": "b253206379b267bd90d7eb76a0ddfcb2dff4b83c184bd304dddc79e30107668a",
+   "sha256_a": "f7a3aad6d46ff274ee4d45821968890db5aca5a55f4a9e4cb9b3e31767e8b80f",
+   "sha256_b": "c82fc61f004507581cb43c58688d4efc1c3f7d40c2de0ea3472e30d37c2dffcf",
+   "values": null,
+   "anchor": false,
+   "pool": "blind6",
+   "hold_candidate": true
+  }
+ ],
+ "et_devices": null,
+ "ccheck_log": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e166-smoke/p16601/c-log.jsonl",
+ "dry_room_c": null,
+ "experiment": "E166"
+}
