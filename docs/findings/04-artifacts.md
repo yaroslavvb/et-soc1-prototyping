@@ -1195,6 +1195,25 @@ Dated notes added by these records: E153's README (its C-checked launches are th
 read pool 6's new ranges first, E157's C2) and Q139(e)'s README (E97's 0.3–0.8 °C is a move within its one session, E144's C3, as
 E154's C13 found).
 
+## Q140's desk half published no new page: six data directories and blind pool 7 (4 November 2026)
+
+Q140's desk lanes built **no new space**; what they made is in this repository, and no card ran. The kinds page (A25) took Q140(c)'s
+corrections in place as `e75e1842ac8a`, then `6450a8475420` and `a312a21d2ffb` (A25's dated notes); the hubs take the round in their
+own pass. The short names are the ones [05-claims.md](05-claims.md), "Q140", uses. Each line's first sha is the registration or the
+data, the last the corrections after verification. "Item N" is the kinds page's section 11 as at `d571349e663f`, "rank N" Q139's
+final critic's open list, and each README's first lines name the item and the rank it answers and say what it does to the
+prediction of power and heat. Pool 7 is described here by counts and classes only, until its runs.
+
+| What | Where | What is in it |
+|---|---|---|
+| **Q140(c)**, Q139's final critic's four desk checks re-derived (post hoc), then its faults 0–9 corrected in the records and pages | [`reports/data/2026-11-04-q140c-critic-checks/`](../reports/data/2026-11-04-q140c-critic-checks/README.md) (`45418d44`, `9f79b3de`, `0ebda6d4`, `80301c11`, `262e814c`) | `check1_exponent_e160.py`, `check2_pool6_named_misses.py`, `check3_anchor_card_scale.py`, `check4_heat_constant.py` and their outputs, `check_fix_figures.py` and its outputs |
+| **Q140(l)**, aifoundry2's level and session terms, M9's aifoundry2 part frozen (items 6, 8, 9, 1; ranks 2, 8) | [`reports/data/2026-11-04-q140l-a2-session-terms/`](../reports/data/2026-11-04-q140l-a2-session-terms/README.md) (`245caffe`, `5b98bd5c`, `5c98c0c5`) | `REGISTRATION.md`, `registration.json`, `REGISTRATION-A1.md`, `fit_m9_a2.py`, `fit-output.txt`, `loso.json`, `rows-m9a2.json`, `m9_a2.json`, `predict_m9_a2.py` and its self-test, `posthoc_q140l.py`, `corrections_q140l.py` and their outputs |
+| **Q140(m)**, M9's 600 MHz part, frozen before blind pool 7 (item 6; rank 1) | [`reports/data/2026-11-04-q140m-m9/`](../reports/data/2026-11-04-q140m-m9/README.md) (`8dfafae3`, `1f244140`, `f4c93ae9`, `b4444dd4`, `5c0a5d1f`, `b85ca0f9`, `e95c3f89`) | `M9-REGISTRATION.md`, `m9.json`, `fit_m9.py`, `nested-m9.json`, `rows-m9.json`, `predict_blind7.py` and its self-test, `summarize_m9.py`, `benchcheck_m9.py` and `bench-check/` (its 16 single-bit calibration tiles), `recount-rule/` (the convergence rule, its 27-point step) |
+| **Blind pool 7** (Q140(b)) and every model's frozen predictions for it, the 82 W list and rank 4's rule (Q140(x)) (items 6, 7; ranks 1, 4, 9) | [`tools/claims-v3/kinds/blind7/`](../../tools/claims-v3/kinds/blind7/README.md) (`75802201`, `3c9bb2ba`) | the pool: 61 tiles (22 fp32, 12 fp16, 27 int8; 52 new kinds, 48 at priority 1, and 9 anchors), `MANIFEST`, `SHA256SUMS`, `blind7.json`, `make_blind7.py`, `fetch_real7.py`, `real/`; the bench's counts `counts-blind7.json`; `predictions-blind7-<card>.json` and `.md` for aifoundry3, aifoundry1c1 and aifoundry2; `admission_aifoundry2.py` and its 82 W list; `RANK4-RULE.md`, `rank4_rule.json`, `score_rank4.py` and its self-test; `README-predictions.md` with dated notes A1 |
+| **Q140(x)'s dated notes**, checked (items 6, 7; ranks 1, 4, 2) | [`reports/data/2026-11-04-q140x-blind7-notes/`](../reports/data/2026-11-04-q140x-blind7-notes/README.md) (`3c9bb2ba`) | `notes_check.py` and `notes-check.json` |
+| **Q140(e)**, the heat replicates' frozen predictions for E166 and E167 (items 9, 8; rank 3) | [`reports/data/2026-11-04-q140e-heat-replicates/`](../reports/data/2026-11-04-q140e-heat-replicates/README.md) (`11174d20`, `c9aaf179`, `a4fe976d`, `ac06c9be`) | `REGISTRATION.md`, `registration.json`, `REGISTRATION-AMENDMENT-1.md`, `predict_q140e.py`, `predictions-q140e.json` and `.txt` (amendment A2 to Q139(e) among them), `posthoc_q140e.py`, `corrections_q140e.py` and their outputs |
+| **Q140(q)**, G4 and a block-stride term, frozen for E168 and E169 (item 1; ranks 5, 6) | [`reports/data/2026-11-04-q140q-gemm-g4-stride/`](../reports/data/2026-11-04-q140q-gemm-g4-stride/README.md) (`49575094`, `e39d06da`, `1bfaa4e4`) | `REGISTRATION.md`, `REGISTRATION-A1.md`, `g4_model.py`, `fit_g4.py`, `g4.json`, `loso-g4.json`, `checks_g4.py`, `predict_e168.py`, `predictions-e168.json`, `score_e168.py` and its self-test, `frozen-sha256-e168.json`, `frozen-sha256-e168-scorer.txt`, `trace_scorer_e168.py`, `stride_sm.py`, `stride-sm.json`, `peaks_e169.py`, `predictions-e169.json`, `posthoc_g4.py`, `posthoc_sm_policies.py`, `corrections_q140q.py` and their outputs |
+
 ## The camera and the details panel (30 September)
 
 For Q74–Q76: the memory levels and the chip diagram (the pages of 28 and 27 September) jumped in the middle of their

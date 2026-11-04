@@ -4,6 +4,16 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-10-31 (Sat, week 44, Q130 addendum fixes)** — Section 5's rule carves the samplers' statistics reset
+  (`ettelem sample --reset-ms`, which the SP forwards to the PMIC) out of "no PMIC commands": it is allowed, and left
+  out of any run that tests the governor's power loop, since it restarts the PMIC's running average; every other PMIC
+  command stays forbidden. Section 6's trap "Firmware 1.4.1 idles at 300 MHz" is replaced by card 0's PMIC alarm (a
+  300 MHz safe state about once a second on fp32 random data at 800 MHz, E84) and its 600 MHz idle under 1.4.0 / BL2
+  0.22.0, which section 4's card 0 row already said. *Why:* preference — the owner's ruling that evening, asked after
+  E85 (C1) found the camera runner's once-a-second reset reaching the PMIC: *"Yes, you can do the statistics reset."*;
+  constraint — the Q130 records' verifier found section 6 contradicting section 4; re-check:
+  `docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/corrections-check.txt` [C6] (every run's idle at 600 MHz,
+  300 MHz only in the alarm runs) and `posthoc/pmic.json` (the alarm lines).
 - **2026-10-31 (Sat, week 44, Q130 addendum)** — Section 3's index reads Q1–Q131, E1–E91 and A1–A25, where it read
   Q1–Q130, E1–E85 (E84 and E85 in progress) and A1–A24: E84–E91 are recorded (the afternoon's speed replicate on
   aifoundry1's card 0 and the camera per kind; the evening round's real-tensor energy and speed, result path,

@@ -370,7 +370,7 @@ beside it, in [`tools/claims-v3/e157/README.md.dated-note.md`](../../../../tools
   first silicon reads of int8's wrap and full range, wide fp16 exponents and real tiles); the D half fails as written (K1 FAIL: 3 of 6 within
   0.05 W, 5 of 6 within Welch). **Rank 5**: on the registered footing M8's card term holds on pool 6 (X1, X2 PASS) and card 1's scale is predicted from its frozen zeros level to +0.78% / −0.74% (S1, S2 PASS, the critic's 1%); V² misses by −5.5%; the verdicts move with the footing (X1 fails on three of five arms), and the zeros level re-read today is 10% off its frozen value, so the predictor is not yet a session-independent cheap read.
 - **For M9** (named, not fitted): drop or cap `bsat` (whole-line int8 L/Z cases), an exponent-field term for fp32 (E case +0.20 W bias),
-  int8's held-B tiles (every model 0.3 W high), and B's high mantissa bits in fp32 (`fp32.b_onebit_b20_third`, −1.09 W in every model).
+  int8's held-B tiles (every model 0.3 W high), and B's high mantissa bits in fp32 (`fp32.b_onebit_b20_third`, −1.09 W in every model). *(Dated note, Q140(r), Wed 4 Nov 2026: per model −1.089 / −1.208 / −1.119 W (M8 / M7 / M6), as this README's table gives them, so 1.09–1.21 W; and post hoc, at 27 launch points the bench's three-point launch average over-counts this tile by 0.784 ± 0.267 W at M9's prices, so part of the miss is the bench's counting ([Q140(m)'s convergence rule](../2026-11-04-q140m-m9/recount-rule/RECOUNT-RULE.md)).)*
 - **Records to add** (integration lanes): 03-experiments (E157), 05-claims (item 6 on card 1 with pool 6; rank 14's C half), 14-card-behaviour
   (the session, the K1 scatter of 0.1-0.2 W between days, the zeros level's +10%), 04-artifacts; the Horace hub's Log (a new entry) and Status.
 
