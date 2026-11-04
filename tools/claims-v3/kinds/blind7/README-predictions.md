@@ -6,6 +6,10 @@
 
 *Independence (the pool's README, Independence): `int8.bheld_fd` was designed and built after M9's freeze commit, by Q140(b)'s fix pass, which never read M9, its commit or its data; it replaced `int8.bheld_7f`, E103's training kind. Every other tile was final before M9 was frozen. M9's and Q140(l)'s lanes never read pool 7.*
 
+*Dated notes after verification, A1-1 to A1-4 (written Wed 4 Nov 2026 from 04:03 PST): see [Dated notes after verification (A1)](#dated-notes-after-verification-a1), with a pointer where each applies.*
+- *When:* after this gate commit `75802201` and after M9's fits and these predictions; before any pool-7 claim, launch, measurement or score.
+- *What changes:* inserted lines only. No number, rule, band, prediction or verdict changes, and no other file of this directory. The pool, the counts, the predictions (`.json` and `.md`), the 82 W list and rank 4's rule stay byte-identical, and the gate stands.
+
 ## Results
 
 **What this does to predicting power and heat.** Nothing is scored here. This commit fixes, before any card runs, what each model says each of pool 7's 61 tiles will draw over the same kernel on zeros (D) at 600 MHz on aifoundry3 and card 1, how far the die will warm over the kinds harness's 4.5 s run, and on aifoundry2 what clock its own governor will settle at in a 6 s burst, the board power there, and how high the board's highest sample will go. **The terms under test** are M9's: for int8, a radix-4 Booth partial-product count with B recoded (`bpp_r4`, +2.205 fJ a flip) beside M8's near-whole-byte discount at half size (`bsat`, -29.3 fJ a bit); for the floats the bench's exponent stage (`xstage`, +0.648 fJ a count) beside M8's C-register term (`c_end`, +6.186 fJ a flip); M9's recalibrated bands (k 1.996 floats, 1.864 int8); M8's card term, kept (card 1 0.9616); M7's heat law, carried; and on aifoundry2 Q140(l)'s three session terms (the cap's plateau, 2.52 W over an effective cap of 64.60 W; the session's zeros level, beta 0.648; the die at a burst's start, 0.395 W/C from 54.38 C) with s(f) at n = 2, on M9's D, and M8's peak rule unchanged for the 82 W stop. Pool 7 aims at every miss pool 6 named (single high B bits on new base words, exponent-heavy fp32, whole-line and near-whole-byte int8, int8 with B held), with 12 kinds aimed at none of them, 10 real tiles at priority 1, and two random anchors per format for rank 4.
@@ -97,6 +101,11 @@ Each predictions file gives, per tile, M9's, M8's, M7's and M6's prediction with
 
 **aifoundry2 (E165): governed against 800 MHz.** M9's part puts 18 of the 61 tiles below 795 MHz in a 6 s burst (705.1 to 790.3 MHz; 13 of them priority 1), M8 18. Report the two sets apart, as E143 and E160 did. With no session read, M9's aifoundry2 predictions use the fallback offset and the reference die; after E165's zeros anchors run, the same frozen code recomputes them mechanically from the session's own reads (`--a2-session`, `--a2-die-start`; Commands, below). Which of the two E165 scores as primary is E165's to register before its claim.
 
+*Dated notes A1-1 and A1-3 (after the gate, before any score); details in [A1](#dated-notes-after-verification-a1):*
+- *The `.md`'s M9 columns.* [`predictions-blind7-aifoundry2.md`](predictions-blind7-aifoundry2.md)'s "M9 MHz" and "M9 board W" columns print M9 through M8's relation, whatever its header says. Against M9's primary they read 1.63-2.50 MHz and 0.68-1.98 W low on the 18 governed tiles, and 0.20-0.99 W high on the 43 pinned ones.
+- ***E165 scores the JSON's `M9.a2_q140l`**, never M9's top-level `burst_*` fields or the `.md`'s M9 columns.*
+- *The pinned-board band.* The frozen ±1.26 W may cover less than 95% of a new session's bursts: the bands' rule gives 1.48-1.75 W on the errors with the term selection nested.
+
 **Rank 4's paired-anchor rule, registered here** ([`RANK4-RULE.md`](RANK4-RULE.md), [`rank4_rule.json`](rank4_rule.json)): a card's scale is the median of its anchors' ratios to aifoundry3's; it must land within 1% of the pool's median ratio for floats, and within 2% for int8, in each session pair. The anchors are pool 7's four float random anchors and two int8 ones; the pool's median is E157's X1 / X2 selection on pool 7 (non-anchor tiles measured on both cards, floats at D >= 5 W, int8 at D >= 1 W); each card's D is its registered primary on Q139(u)'s footing. [`score_rank4.py`](score_rank4.py) applies it; its self-test on pool 6 (E153, E157, with the critic's anchors) reproduces Q140(c)'s check 3 and E157's X1 / X2 exactly (16 checks, 0 differ; [`selftest-rank4.txt`](selftest-rank4.txt)). Forecast, registered: floats PASS (about -0.15%); int8 PASS more likely than not (about -1%, 69-75% inside ±2%).
 
 **Where M9 departs from the frozen models** (D at 600 MHz on aifoundry3; descriptive, nothing fitted), per pool class at priority 1, the mean and the largest of M9 - M8 and M9 - M6:
@@ -147,6 +156,14 @@ Each predictions file gives, per tile, M9's, M8's, M7's and M6's prediction with
 - **aifoundry2.** The left-out tiles above do not run as designed. The zeros anchors run first (E165's design), and M9's part can be recomputed from them mechanically.
 - **The anchors.** All nine run in every session: they are rank 4's inputs and the footing. They are marked priority 2 in the `MANIFEST`, but they are not among the four priority-2 tests a session may drop first to save time (`blind7.json` `subsets.priority2_tests`).
 - **Not registered here** (the card lanes' to register before their claims): the critic's rank-1 coverage share (26 of 30 inside) on pool 7's 48 priority-1 kinds is 42 of 48 at the same rate; the unaimed subset for "no worse than M6" is the 12 U tiles (`unaimed_synthetic`), or 17 with the five float real tiles (`unaimed_with_float_real`), and never the int8 real tiles (they carry near-whole-byte flips); the real-tile sub-rule (rank 9) is over the 10 priority-1 real tiles, or all 12.
+- **Dated notes A1-1 and A1-3, for E165 (after the gate, before any score).**
+  - M9's aifoundry2 prediction is `M9.a2_q140l`, or its mechanical recompute from the session's anchors. It is never M9's top-level `burst_*` fields or the `.md`'s M9 columns: those are M9 through M8's relation.
+  - Score the frozen bands as frozen, and report their coverage beside the nested widths (pinned board ±1.26 W frozen, 1.48-1.75 W on nested errors).
+  - See [A1](#dated-notes-after-verification-a1).
+- **Dated note A1-2, for E163 and E164 (after the gate, before any score).**
+  - `fp32.b_onebit_b20_pi` is byte-identical to M9's bench-calibration tile `fp32.cal_pi_b20`. Its power stays blind, and it stays in every rule.
+  - Report its error beside M9's committed 27-point recount. The three-point launch average reads its D 0.311 ± 0.198 W below the 27-point one, so an error (measured minus predicted) of about +0.3 W is expected there from counting alone.
+  - See [A1](#dated-notes-after-verification-a1).
 
 ## Commands, exactly
 
@@ -204,6 +221,8 @@ Rerunning steps 3 and 4 on these files reproduces the predictions, the admission
 17. 03:26:02 README-predictions.md written from the files and the checks; the pool and --check checked again with all 17 additions beside it
 18. Then: the public-text scan over every text file here, the pool checked once more beside the 17 additions, and one commit through the lab's commit script, before any E163, E164 or E165 claim. That commit is the gate each card lane checks.
 
+*Dated note A1-4 (after the gate). Items 1 and 2 carry 02:50:38, the time the order log was written. The M9 check saw `HEAD` = `origin/main` = `c9aaf179`, so it ran between 02:46:15 and 02:49:40 PST, before that stamp; see [A1](#dated-notes-after-verification-a1).*
+
 ## What this cannot say
 
 - **Nothing here is a measurement or a score.** The predictions are frozen; E163, E164 and E165 measure the tiles and score them by their own registered rules.
@@ -213,6 +232,68 @@ Rerunning steps 3 and 4 on these files reproduces the predictions, the admission
 - **The three zeros anchors are byte-identical** (one tile under three type names, as in pools 5 and 6), each predicted under its own type; their D is near zero by construction.
 - **The C-register descriptor** is make_blind5's, as frozen (above); pool 7's own `c_check` uses the card's rule.
 - The counts are the public RTL bench's (int8's multiply is behavioural there; `bpp_r4` counts a modelled radix-4 Booth array, a fitted price on a count nobody has seen in silicon).
+
+## Dated notes after verification (A1)
+
+*Written Wed 4 Nov 2026 from 04:03 PST by Q140(x)'s fix pass, desk only.*
+- *When.* After this directory's gate commit `75802201` (03:27:39 PST) and its verification. Before any pool-7 claim, launch, measurement or score: no E163, E164 or E165 commit exists. Nothing is fitted, so the notes come after M9's fits (`1f244140`, `5b98bd5c`) and after these predictions, and before every score they touch.
+- *What changes.* They are inserted lines only: no line of this README was changed or removed. They change no number, rule, band, prediction or verdict.
+- *Source.* The numbers are re-derived from git objects by [`notes_check.py`](../../../../docs/reports/data/2026-11-04-q140x-blind7-notes/notes_check.py) → [`notes-check.json`](../../../../docs/reports/data/2026-11-04-q140x-blind7-notes/notes-check.json).
+
+**A1-1. aifoundry2's `.md` prints M9 through M8's relation, not M9's primary.** [`predictions-blind7-aifoundry2.md`](predictions-blind7-aifoundry2.md) is the frozen `predict_blind7.py`'s own output. Its header says "M9 here: Q140(l)'s part (predict_m9_a2.py burst()), called on M9's D600 per tile". Its "M9 MHz" and "M9 board W" columns, though, print M9's top-level `burst_mhz` and `burst_board_w` (`predict_blind7.py` lines 317-328). Those are M9's D through M8's frozen relation, kept beside the primary, as the field list above says. The registered primary is each tile's `M9.a2_q140l` block (`a2_part.primary`). Against it the `.md` reads:
+
+| tiles (by `M9.a2_q140l.group`) | the `.md`'s M9 clock | the `.md`'s M9 board |
+|---|---|---|
+| governed, 18 | 1.63 to 2.50 MHz low (mean 2.30) | 0.68 to 1.98 W low (mean 1.83) |
+| pinned, 43 | 0 to 0.83 MHz low (mean 0.06) | 0.20 to 0.99 W high (mean 0.93) |
+
+- *An example.* `fp16.anchor7_randn_a` reads 726.8 MHz / 65.18 W in the `.md`, and 729.05 MHz / 67.111 W in `M9.a2_q140l` (729.0 / 67.11 in this README's table).
+- *Why it matters.* The gaps are as large as M9's registered aifoundry2 gain (governed board 1.62 → 0.89 W, pinned board 1.52 → 0.75 W). A score read off the `.md` would test the wrong relation.
+- *What it leaves alone.* The `.md`'s peak and "> 82 W?" columns are M9 through M8's relation too. They agree with `M9.a2_q140l`'s peaks to 0.005 W and on all 61 flags, so the 82 W list is unaffected. This README's table above prints `M9.a2_q140l` on all 61 rows. The `.md`'s M8, M7 and M6 columns are those models' own.
+
+**E165 scores `M9.a2_q140l`, or its mechanical recompute from the session's own anchors (Commands). It never scores M9's top-level `burst_*` fields (clock, board, D, die rise and their bands) or the `.md`'s M9 columns.** The `.md` stays byte-identical, since it is frozen-code output.
+
+**A1-2. A byte twin of `fp32.b_onebit_b20_pi` in M9's bench check.** Pool 7's `fp32.b_onebit_b20_pi` (priority 1, class S) is byte-identical to M9's bench-calibration tile [`fp32.cal_pi_b20.bin`](../../../../docs/reports/data/2026-11-04-q140m-m9/bench-check/tiles/fp32.cal_pi_b20.bin), committed with M9 in `1f244140`. Both have sha256 `af4296a239e21ab8b265fb6f2b493c71fdbb68f236958c5172494cdcba8def10` (`bench-check/cal-tiles.json` line 121; this directory's `blind7.json`, `sha256.whole`). The tree holds 10,928 two-kilobyte blobs outside this directory at `75802201`, 1,071 of them all zeros. This is the only whole-tile repeat of a pool-7 tile among them other than the zeros, and a later tip gives the same. Neither this README, the pool's README nor M9's said so.
+
+- *Built independently.* Both tiles have A = 1.0 (`0x3F800000`) on every word. Both have B = π (`0x40490FDB`, the host's word, `make_kinds.py` `PI_F32`) with bit 20 set in columns 8-15 (`0x40590FDB`). M9's bench check (`make_cal_tiles.py`) and pool 7 (`make_blind7.py`, `W_PI`) share that single-bit design, so one recipe gives the same bytes.
+  - M9's copy was made at 00:46:15 PST in its lane's scratch and entered the tree at 01:07:03 (file birth times on the Intel).
+  - Pool 7's copy was made at 00:53:22 in the designer's scratch.
+  - The blind protocol barred each lane from the other's scratch. The designer's uniqueness scan never enters `2026-11-04-q140m-*` or `-q140l-*` directories (`make_blind7.py`, `BLIND_EXCLUDE`), so the repeat could not be seen when pool 7 was built.
+- *Power stays blind.* No card has run either copy. M9's fit and predictor never read the calibration counts: they served R11's bench check and the recount rule's sizing pilot, never a training row or a price. M9's frozen D for the tile uses the bench's three-point counts, like every other tile: 12.093 W [11.67, 12.51] on aifoundry3 and 11.628 W [11.19, 12.07] on card 1.
+- *What M9's lane knew before this gate.* It counted the tile at 9 launch points (00:46:29-01:05:50 PST, before M9's freeze). It counted it again at 27, in the recount rule's pilot (committed `b85ca0f9` at 02:37:55 PST, after the freeze). At M9's prices the three-point launch average reads the tile's D 0.311 ± 0.198 W (1 s.e., e(27)) **below** the 27-point one ([`recount-rule.txt`](../../../../docs/reports/data/2026-11-04-q140m-m9/recount-rule/recount-rule.txt) line 32, `3pt-N` −0.311).
+  - So M9's frozen D there is likely about 0.3 W low from counting alone: an error (measured minus predicted) of about +0.3 ± 0.2 W is expected on either card before any other term.
+  - Pool 6's twin of a calibration tile, `fp32.b_onebit_b20_third`, ran the other way. Its three-point average over-counts by 0.784 W, and replacing it moved M9's error there from −0.718 to +0.066 W (aifoundry3, post hoc, the same file).
+- *For E163's and E164's scorers.* The tile stays in pool 7 and in every registered rule. Report its error beside the committed recount's −0.311 ± 0.198 W.
+- *For the next model's recount.* `recount-rule/RECOUNT-RULE.md` § 6 covers pool 7's float tiles after pool 7 has scored M9. This tile's 27 points are already counted, as `fp32.cal_pi_b20`.
+
+**A1-3. aifoundry2's held-out errors with the selection nested, and the frozen bands.** Results quote Q140(l)'s registered held-out errors beside the nested ranges. The registered figures are governed clock 5.00 MHz, governed board 0.89 W and pinned board 0.75 W (pooled rms over E80, E83, E143 and E160). The nested ranges are 5.1-6.9 MHz, 0.89-0.93 W and 0.88-0.92 W. Results did not say what the nested errors do to the bands. The bands' rule on them gives:
+
+| band (95%) | frozen | on the nested errors (selection rule at 2 of 3 / 3 of 3 inner sessions) |
+|---|---|---|
+| governed clock | ±9.65 MHz | ±9.77 / ±11.97 MHz |
+| governed board | ±1.85 W | ±2.06 / ±1.84 W |
+| pinned clock | ±15.35 MHz | ±15.35 / ±15.20 MHz |
+| pinned board | ±1.26 W | ±1.75 / ±1.48 W |
+
+The source is Q140(l)'s committed corrections, C4 ([`corrections.txt`](../../../../docs/reports/data/2026-11-04-q140l-a2-session-terms/corrections.txt) lines 32-35 and 41-44), as information only. So the frozen pinned-board band may cover less than 95% of a new session's pinned bursts, and the governed clock band a little less. **The frozen bands stay frozen, and E165 scores them as frozen.** It reports their coverage beside these widths.
+
+**A1-4. Two order stamps.** Order items 1 and 2 carry 02:50:38, the time the order log was written, not the time of the work. The M9 check recorded `HEAD` = `origin/main` = `c9aaf179`. By the Intel clone's reflog that held only from 02:46:15 PST, when `origin/main` moved to it, to 02:49:40 PST, when `HEAD` moved to `e39d06da` (Q140(q)'s commit; `origin/main` followed at 02:50:04). So the check ran between 02:46:15 and 02:49:40, at or before about 02:49. The gate is unaffected:
+- the frozen inputs were checked again at 03:21:53 and 03:22:40, with `HEAD` = `origin/main` = `e39d06da` (items 10 and 12);
+- the verifier re-checked them from git objects.
+
+The lane's scratch order log, which is not committed, also repeats item 9's line once; the list above has it once.
+
+**What A1 does to predicting power and heat.** Nothing is fitted, measured or scored, and no frozen prediction or band changes. A1 corrects what this directory tells the scorers in three ways.
+- **E165 scores M9's registered aifoundry2 part.** That is `M9.a2_q140l`, whose clock and board differ from the `.md`'s M9 columns by up to 2.5 MHz and 2.0 W.
+- **aifoundry2's honest held-out error is the nested one** (from M7 as frozen):
+  - governed clock 6.25 → 5.1-6.9 MHz;
+  - governed board 1.62 → 0.89-0.93 W;
+  - pinned board 1.52 → 0.88-0.92 W.
+
+  The pinned-board band may under-cover: 1.26 W frozen against 1.48-1.75 W nested.
+- **One blind tile carries a known counting component.** `fp32.b_onebit_b20_pi` carries about +0.31 ± 0.20 W (measured minus M9) from M9's own committed recount.
+
+Otherwise the error before is as Results give it, and the error after is what E163, E164 and E165 measure.
 
 ## Files
 
@@ -226,6 +307,7 @@ Rerunning steps 3 and 4 on these files reproduces the predictions, the admission
 | [`predictions-blind7-aifoundry1c1.md`](predictions-blind7-aifoundry1c1.md) | the same, as a table | `83e97f5c72c860ee06a8b5f5eb588b74e55944e72e5177cbc33d7f50ebe7e385` |
 | [`predictions-blind7-aifoundry2.json`](predictions-blind7-aifoundry2.json) | M9 (Q140(l)'s part, and through M8's relation), M8, M7, M6 on aifoundry2 | `e2c467c4a60d6409fb9139e8b109ad5f5e758cc1747367984e164ce397c57c01` |
 | [`predictions-blind7-aifoundry2.md`](predictions-blind7-aifoundry2.md) | the same, as a table | `d08d5c9b9afb3ed764a7d9a34ea35162cba7fcc17c4c11252f96207bd08a70dd` |
+| *dated note A1-1 (after the gate), on the row above* | *not "the same" for M9: its "M9 MHz" and "M9 board W" columns print M9 through M8's relation, whatever its header says. M9's registered primary is the JSON's `M9.a2_q140l` ([A1-1](#dated-notes-after-verification-a1)). The file stays byte-identical* | |
 | [`a2-inputs-aifoundry2.json`](a2-inputs-aifoundry2.json) | M9's and M8's D at 600 MHz per tile (any aifoundry2 relation's input) | `ff4f4eaa49dfdcc5aeb59c86ad8225889d737f5d41eb02908e0dc8c1545c3933` |
 | [`admission_aifoundry2.py`](admission_aifoundry2.py) | the 82 W stop's rule, applied | `437f85f5fdfaa426a51ebcde5bf0937f1eb181ea8fd024b08b925b9cbe65ac94` |
 | [`admission-aifoundry2-82w.json`](admission-aifoundry2-82w.json) | its output: the tiles left out on aifoundry2 | `c330806ae93b86ac83e835f50b66398688a002071c817cf77e0d4e0a11caa384` |
