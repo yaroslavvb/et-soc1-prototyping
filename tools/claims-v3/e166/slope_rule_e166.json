@@ -1,0 +1,115 @@
+{
+ "_note": "E166 rule SL (registered in E166.md before any E166 data): thresholds derived from Q140(e) corrections.json C10 (a4fe976d), nothing tuned",
+ "input": {
+  "file": "docs/reports/data/2026-11-04-q140e-heat-replicates/corrections.json",
+  "sha256": "de5bba20657fecdcc6f8edf765cbcb0746da5ce545704dde7f21da966bafb2fa",
+  "commit": "a4fe976d"
+ },
+ "statistic": "arm A's least-squares error slope over [t0 + 300 s, b10) of K_OL, C per 10 min (corrections_q140e.hold_stats slope_from_300s_C_per_10min on K_O's window)",
+ "null_slopes_C_per_10min": {
+  "E144.H_H": -0.073,
+  "E144.H_L": -0.019,
+  "E154.H_M": -0.101,
+  "E154.K_S": 0.513,
+  "E154.K_Q": -0.154,
+  "E154.K_L": -0.03,
+  "E154.K_O": 0.418
+ },
+ "sigma_C_per_10min": {
+  "wide": 0.2614,
+  "narrow": 0.09,
+  "E97_in_sample": 0.1873
+ },
+ "z95": 1.6449,
+ "scenario_slopes_C_per_10min": {
+  "tau_s_600": 0.577,
+  "tau_s_1200": 0.684,
+  "tau_s_2400": 0.692,
+  "gain_D6": 0.101,
+  "chain_as_frozen": 0.0
+ },
+ "s_stage_min_C_per_10min": 0.577,
+ "thresholds_C_per_10min": {
+  "SEEN_at_or_above": 0.43,
+  "NOT_SEEN_at_or_below": 0.147
+ },
+ "rates": {
+  "wide (all seven out of sample)": {
+   "sigma": 0.2614,
+   "false_positive_SEEN": 0.05,
+   "no_slow_stage_read_other_than_NOT_SEEN": 0.287
+  },
+  "narrow (five, without E154's K_S and K_O)": {
+   "sigma": 0.09,
+   "false_positive_SEEN": 0.0,
+   "no_slow_stage_read_other_than_NOT_SEEN": 0.0512
+  },
+  "E97 in sample (G_A / 1.5, reported only)": {
+   "sigma": 0.1873,
+   "false_positive_SEEN": 0.0108,
+   "no_slow_stage_read_other_than_NOT_SEEN": 0.2163
+  }
+ },
+ "power_under_sigma_wide": {
+  "tau_s_600": {
+   "mean_slope": 0.577,
+   "P_SEEN": 0.713,
+   "P_NOT_SEEN": 0.05,
+   "P_INCONCLUSIVE": 0.237
+  },
+  "tau_s_1200": {
+   "mean_slope": 0.684,
+   "P_SEEN": 0.8344,
+   "P_NOT_SEEN": 0.02,
+   "P_INCONCLUSIVE": 0.1457
+  },
+  "tau_s_2400": {
+   "mean_slope": 0.692,
+   "P_SEEN": 0.8419,
+   "P_NOT_SEEN": 0.0185,
+   "P_INCONCLUSIVE": 0.1396
+  },
+  "gain_D6": {
+   "mean_slope": 0.101,
+   "P_SEEN": 0.1041,
+   "P_NOT_SEEN": 0.5698,
+   "P_INCONCLUSIVE": 0.3261
+  },
+  "chain_as_frozen": {
+   "mean_slope": 0.0,
+   "P_SEEN": 0.05,
+   "P_NOT_SEEN": 0.713,
+   "P_INCONCLUSIVE": 0.237
+  }
+ },
+ "committed_holds_posthoc_readings": {
+  "E144.H_H": {
+   "slope": -0.073,
+   "would_read": "SLOPE NOT SEEN"
+  },
+  "E144.H_L": {
+   "slope": -0.019,
+   "would_read": "SLOPE NOT SEEN"
+  },
+  "E154.H_M": {
+   "slope": -0.101,
+   "would_read": "SLOPE NOT SEEN"
+  },
+  "E154.K_S": {
+   "slope": 0.513,
+   "would_read": "SLOPE SEEN"
+  },
+  "E154.K_Q": {
+   "slope": -0.154,
+   "would_read": "SLOPE NOT SEEN"
+  },
+  "E154.K_L": {
+   "slope": -0.03,
+   "would_read": "SLOPE NOT SEEN"
+  },
+  "E154.K_O": {
+   "slope": 0.418,
+   "would_read": "INCONCLUSIVE"
+  }
+ }
+}
