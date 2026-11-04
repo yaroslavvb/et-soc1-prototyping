@@ -1,0 +1,816 @@
+{
+ "_note": "Q140(e) corrections after verification (dated Wed 4 Nov 2026): POST HOC, never a verdict; written after the freeze c9aaf179 and before any E166/E167 claim or data; nothing refitted, no frozen file changed",
+ "lane_files_sha256_at_c9aaf179": {
+  "REGISTRATION.md": "cc68d93c04b414e3c653edc6bfb049e79393159c6b3ef1a57558590362d66f4c",
+  "registration.json": "832dee631f0141dfe6179c8f9416fd602e04c5f8e95b8c0fbe70aa97b27e5b8a",
+  "predict_q140e.py": "79dbcfc3e835242cb56459c9917a6ea80b77de5deeb1c34c9edcb7ca8591620f",
+  "predictions-q140e.json": "940852b17b4274d91772c5f9f8a5ce0cbac3522689cbec711cfe732678c640e6",
+  "predictions-q140e.txt": "88f40021f5933eb36d2492d3128bfaad7a21a9acc1dcfa9e2448662e55505c15",
+  "posthoc_q140e.py": "4b2cb4b91d36ef1a9c1f092406ca6ce666586ee57b6da1934ff6ba2426eaea44",
+  "posthoc.json": "f9bacc35931bde19b7b0df1d21bade1ef742ae053702eb3121fdcfbd9b944725",
+  "posthoc.txt": "c7b7a3c0be384d8df5700378947282b55caedcfb0ef61c73417a42be806f83ac"
+ },
+ "C0": {
+  "E167_G1Q_primary_M9a_at_d_equals_frozen": true,
+  "E167_G1Q_M8_at_d_equals_frozen": true,
+  "E167_G1Q_M8_continuous_equals_frozen": true,
+  "E167_G2Q_primary_M9a_at_d_equals_frozen": true,
+  "E167_G2Q_M8_at_d_equals_frozen": true,
+  "E167_G2Q_M8_continuous_equals_frozen": true,
+  "G1Q_trip_edge_primary_equals_frozen": true,
+  "E161_posthoc_three_arms_worst_abs_diff": 0.0,
+  "gap_W_equals_Q140l_C1": true,
+  "ok": true
+ },
+ "C2": {
+  "Q139e_frozen_table_linear_from_46_47C": {
+   "T800_46C": 62.545,
+   "T800_47C": 63.751,
+   "slope_C_per_C": 1.206,
+   "edge_C": 48.78
+  },
+  "M8_continuous_Q139e_code": 48.78,
+  "M8_at_d_amendment_A2": 49.22,
+  "primary_M9a_at_d": 49.97,
+  "reported_M9a_referred_to_54p38C_at_d": 49.43,
+  "note": "the rest die above which G1Q's 800 MHz fixed point passes 65.9 C, the rest board by p_ref_a2 (predict_q140e's bisection); Q139(e)'s frozen table stops at 47.0 C, so its edge is its own code's (48.78 C), which the table's last two rows give"
+ },
+ "C3": {
+  "gap_W": 0.7153,
+  "T_ref_M9_C": 54.3818,
+  "T_ref_Q139e_C": 56.0,
+  "law_W_per_C": 0.442,
+  "gap_W_at_kT": 0.6398,
+  "at_E161_anchor": {
+   "G1Q": {
+    "reported_M9a_ref54_at_d": {
+     "item": "int8.b_line_zero_ff",
+     "level": "M9a_ref54",
+     "d": 0.9696,
+     "T_rest_C": 47.0,
+     "P_ref_W": 22.124,
+     "span_s": 782.97,
+     "level_offset_W": {
+      "600": -0.3015,
+      "700": -0.261,
+      "800": -0.276
+     },
+     "c_W": 5.4492,
+     "T800_fixed_point_C": 63.014,
+     "regime": "800 MHz",
+     "plateau_C_trajectory_window": 62.947,
+     "plateau_C_predicted": 62.947,
+     "plateau_rise_C_predicted": 15.947,
+     "checkpoint_rise_C": {
+      "60": 9.242,
+      "120": 12.287,
+      "180": 13.89,
+      "300": 15.266,
+      "450": 15.791,
+      "600": 15.944,
+      "750": 15.992,
+      "end": 15.996
+     },
+     "share_ge790MHz_window_sim": 1.0,
+     "clock_MHz_window_sim": 800.0,
+     "board_avg_W_window_sim": 46.25,
+     "board_in_work_W_window_sim": 46.79,
+     "board_in_work_W_max_sim": 46.81,
+     "first_step_down_s_sim": null,
+     "dT800_dP_in_work_C_per_W": 0.9092
+    },
+    "primary_plateau_C": 62.299,
+    "reported_plateau_C": 62.947,
+    "primary_T800_C": 62.364,
+    "reported_T800_C": 63.014,
+    "primary_trip_clock_MHz": null,
+    "reported_trip_clock_MHz": null,
+    "move_plateau_C": 0.648,
+    "move_T800_C": 0.65,
+    "move_trip_clock_MHz": null
+   },
+   "G2Q": {
+    "reported_M9a_ref54_at_d": {
+     "item": "fp32.real_smol_softmax_v_causal",
+     "level": "M9a_ref54",
+     "d": 0.9702,
+     "T_rest_C": 47.0,
+     "P_ref_W": 22.186,
+     "span_s": 770.97,
+     "level_offset_W": {
+      "600": -0.2696,
+      "700": -0.2703,
+      "800": -0.2664
+     },
+     "c_W": 14.8824,
+     "T800_fixed_point_C": 79.328,
+     "regime": "trip",
+     "plateau_C_trajectory_window": 65.604,
+     "plateau_C_predicted": 65.9,
+     "plateau_rise_C_predicted": 18.9,
+     "checkpoint_rise_C": {
+      "60": 17.123,
+      "120": 18.083,
+      "180": 18.778,
+      "300": 18.672,
+      "450": 18.429,
+      "600": 18.427,
+      "750": 18.292,
+      "end": 18.876
+     },
+     "share_ge790MHz_window_sim": 0.0,
+     "clock_MHz_window_sim": 674.0,
+     "board_avg_W_window_sim": 50.26,
+     "board_in_work_W_window_sim": 50.87,
+     "board_in_work_W_max_sim": 65.55,
+     "first_step_down_s_sim": 49.0,
+     "clock_MHz_trip_rule": 677.5,
+     "board_held_W_trip_rule": 50.69,
+     "board_in_work_W_trip_rule": 51.31,
+     "dT800_dP_in_work_C_per_W": 0.9098
+    },
+    "primary_plateau_C": 65.9,
+    "reported_plateau_C": 65.9,
+    "primary_T800_C": 78.678,
+    "reported_T800_C": 79.328,
+    "primary_trip_clock_MHz": 685.6,
+    "reported_trip_clock_MHz": 677.5,
+    "move_plateau_C": 0.0,
+    "move_T800_C": 0.65,
+    "move_trip_clock_MHz": -8.1
+   }
+  },
+  "by_rest_die": {
+   "G1Q": {
+    "44.0": {
+     "regime": "800 MHz",
+     "plateau_C": 59.328,
+     "T800_C": 59.393,
+     "trip_clock_MHz": null,
+     "primary_plateau_C": 58.681,
+     "primary_trip_clock_MHz": null
+    },
+    "45.0": {
+     "regime": "800 MHz",
+     "plateau_C": 60.526,
+     "T800_C": 60.592,
+     "trip_clock_MHz": null,
+     "primary_plateau_C": 59.879,
+     "primary_trip_clock_MHz": null
+    },
+    "46.0": {
+     "regime": "800 MHz",
+     "plateau_C": 61.725,
+     "T800_C": 61.791,
+     "trip_clock_MHz": null,
+     "primary_plateau_C": 61.077,
+     "primary_trip_clock_MHz": null
+    },
+    "47.0": {
+     "regime": "800 MHz",
+     "plateau_C": 62.923,
+     "T800_C": 62.99,
+     "trip_clock_MHz": null,
+     "primary_plateau_C": 62.275,
+     "primary_trip_clock_MHz": null
+    },
+    "48.0": {
+     "regime": "800 MHz",
+     "plateau_C": 64.121,
+     "T800_C": 64.189,
+     "trip_clock_MHz": null,
+     "primary_plateau_C": 63.474,
+     "primary_trip_clock_MHz": null
+    }
+   },
+   "G2Q": {
+    "44.0": {
+     "regime": "trip",
+     "plateau_C": 65.9,
+     "T800_C": 75.763,
+     "trip_clock_MHz": 715.1,
+     "primary_plateau_C": 65.9,
+     "primary_trip_clock_MHz": 720.7
+    },
+    "45.0": {
+     "regime": "trip",
+     "plateau_C": 65.9,
+     "T800_C": 76.962,
+     "trip_clock_MHz": 704.8,
+     "primary_plateau_C": 65.9,
+     "primary_trip_clock_MHz": 710.4
+    },
+    "46.0": {
+     "regime": "trip",
+     "plateau_C": 65.9,
+     "T800_C": 78.162,
+     "trip_clock_MHz": 692.0,
+     "primary_plateau_C": 65.9,
+     "primary_trip_clock_MHz": 700.0
+    },
+    "47.0": {
+     "regime": "trip",
+     "plateau_C": 65.9,
+     "T800_C": 79.361,
+     "trip_clock_MHz": 677.1,
+     "primary_plateau_C": 65.9,
+     "primary_trip_clock_MHz": 685.2
+    },
+    "48.0": {
+     "regime": "trip",
+     "plateau_C": 65.9,
+     "T800_C": 80.56,
+     "trip_clock_MHz": 662.2,
+     "primary_plateau_C": 65.9,
+     "primary_trip_clock_MHz": 670.3
+    }
+   }
+  },
+  "posthoc_E161": {
+   "G1Q": {
+    "reported_M9a_ref54_at_own_d": {
+     "regime": "800 MHz",
+     "plateau_err_C": -0.012,
+     "checkpoints_rms_C": 0.493,
+     "clock_err_MHz": null,
+     "board_in_work_W_window_sim": 46.79
+    },
+    "primary_M9a_at_own_d": {
+     "regime": "800 MHz",
+     "plateau_err_C": 0.636,
+     "checkpoints_rms_C": 0.504,
+     "clock_err_MHz": null,
+     "board_in_work_W_window_sim": 45.78
+    }
+   },
+   "G2Q": {
+    "reported_M9a_ref54_at_own_d": {
+     "regime": "trip",
+     "plateau_err_C": -0.336,
+     "checkpoints_rms_C": 0.397,
+     "clock_err_MHz": 4.1,
+     "board_in_work_W_window_sim": 50.87
+    },
+    "primary_M9a_at_own_d": {
+     "regime": "trip",
+     "plateau_err_C": -0.336,
+     "checkpoints_rms_C": 0.308,
+     "clock_err_MHz": -4.0,
+     "board_in_work_W_window_sim": 51.02
+    }
+   }
+  },
+  "E161_G1Q_in_work_level_high_by_W": {
+   "M8_E161_C1": 0.911,
+   "option_a_shift_alone_Q140l_C1": -0.08,
+   "option_b_M9_whole_Q140l_C1": 0.239,
+   "reported_M9a_ref54_shift_alone_plus_gap": 0.635,
+   "note": "Q140(l) corrections.json C1.E161_G1Q.level_high_by_w: one hold, in sample for the choice of option (a), which was made after reading it"
+  }
+ },
+ "C5": {
+  "primary_plateau_err_C": 0.636,
+  "arm_A_given_the_watts_C": 0.372,
+  "measured_level_at_d_plateau_err_C": 0.563,
+  "split_C": {
+   "heat_path_given_the_watts (arm A)": 0.372,
+   "duty_convention_and_closure (measured-level arm - arm A)": 0.191,
+   "in_work_level_residual (primary - measured-level arm)": 0.073
+  },
+  "idle_counted_samples_estimate": {
+   "idle_law_board_at_plateau_W": 29.17,
+   "parts": {
+    "start-ups: a process's first 0.3 s before its first kernel launch": {
+     "samples": 51,
+     "share_of_R3_window": 0.0174,
+     "board_W": 36.44,
+     "excess_over_idle_law_W": 7.27,
+     "average_excess_W": 0.126
+    },
+    "the rest of process time outside kernel launches (between launches, process ends)": {
+     "samples": 18,
+     "share_of_R3_window": 0.0061,
+     "board_W": 45.75,
+     "excess_over_idle_law_W": 16.59,
+     "average_excess_W": 0.102
+    },
+    "the gaps between processes": {
+     "samples": 10,
+     "share_of_R3_window": 0.0034,
+     "board_W": 41.57,
+     "excess_over_idle_law_W": 12.4,
+     "average_excess_W": 0.042
+    },
+    "_check_share_vs_1_minus_d": {
+     "idle_counted_share": 0.0269,
+     "one_minus_kernel_duty": 0.0304
+    }
+   },
+   "average_excess_W": 0.27,
+   "closed_loop_gain_C_per_average_W": 0.938,
+   "die_C": 0.253,
+   "note": "the processes' start-ups before their first kernel launch and the gaps between processes, which the convention puts at the idle law, from E161 corrections C1's sample classes (approximate: the board reading lags, the classes are E161's)"
+  },
+  "measured_level_arm": {
+   "offset_W_on_M8": -0.911,
+   "board_in_work_W_window_sim": 45.9,
+   "checkpoints_rms_C": 0.467
+  }
+ },
+ "C9": {
+  "G2Q": {
+   "by_P_ref_shift_W": {
+    "-0.0010": {
+     "checkpoint_rise_C": {
+      "60": 18.282,
+      "120": 18.296,
+      "180": 18.919,
+      "300": 18.201,
+      "450": 18.281,
+      "600": 18.637,
+      "750": 18.94,
+      "end": 18.954
+     },
+     "checkpoints_rms_C": 0.317,
+     "plateau_err_C": -0.336,
+     "clock_err_MHz": -4.0
+    },
+    "-0.0004": {
+     "checkpoint_rise_C": {
+      "60": 18.282,
+      "120": 18.295,
+      "180": 18.918,
+      "300": 18.464,
+      "450": 18.265,
+      "600": 18.938,
+      "750": 18.857,
+      "end": 18.917
+     },
+     "checkpoints_rms_C": 0.308,
+     "plateau_err_C": -0.336,
+     "clock_err_MHz": -4.0
+    },
+    "+0.0000": {
+     "checkpoint_rise_C": {
+      "60": 18.282,
+      "120": 18.295,
+      "180": 18.918,
+      "300": 18.463,
+      "450": 18.265,
+      "600": 18.937,
+      "750": 18.857,
+      "end": 18.916
+     },
+     "checkpoints_rms_C": 0.308,
+     "plateau_err_C": -0.336,
+     "clock_err_MHz": -4.0
+    },
+    "+0.0004": {
+     "checkpoint_rise_C": {
+      "60": 18.281,
+      "120": 18.295,
+      "180": 18.917,
+      "300": 18.463,
+      "450": 18.947,
+      "600": 18.953,
+      "750": 18.611,
+      "end": 18.707
+     },
+     "checkpoints_rms_C": 0.276,
+     "plateau_err_C": -0.336,
+     "clock_err_MHz": -4.0
+    },
+    "+0.0010": {
+     "checkpoint_rise_C": {
+      "60": 18.281,
+      "120": 18.29,
+      "180": 18.915,
+      "300": 18.845,
+      "450": 18.814,
+      "600": 18.855,
+      "750": 18.202,
+      "end": 18.57
+     },
+     "checkpoints_rms_C": 0.297,
+     "plateau_err_C": -0.336,
+     "clock_err_MHz": -4.0
+    }
+   },
+   "checkpoint_spread_C": {
+    "60": 0.001,
+    "120": 0.006,
+    "180": 0.004,
+    "300": 0.644,
+    "450": 0.682,
+    "600": 0.316,
+    "750": 0.738,
+    "end": 0.384
+   },
+   "max_checkpoint_spread_C": 0.738,
+   "rms_range_C": [
+    0.276,
+    0.317
+   ],
+   "clock_err_range_MHz": [
+    -4.0,
+    -4.0
+   ]
+  },
+  "G1Q": {
+   "by_P_ref_shift_W": {
+    "-0.0010": {
+     "checkpoint_rise_C": {
+      "60": 8.867,
+      "120": 11.789,
+      "180": 13.327,
+      "300": 14.648,
+      "450": 15.151,
+      "600": 15.298,
+      "750": 15.343,
+      "end": 15.348
+     },
+     "checkpoints_rms_C": 0.503,
+     "plateau_err_C": 0.635,
+     "clock_err_MHz": null
+    },
+    "-0.0004": {
+     "checkpoint_rise_C": {
+      "60": 8.867,
+      "120": 11.788,
+      "180": 13.327,
+      "300": 14.647,
+      "450": 15.151,
+      "600": 15.297,
+      "750": 15.343,
+      "end": 15.347
+     },
+     "checkpoints_rms_C": 0.504,
+     "plateau_err_C": 0.635,
+     "clock_err_MHz": null
+    },
+    "+0.0000": {
+     "checkpoint_rise_C": {
+      "60": 8.867,
+      "120": 11.788,
+      "180": 13.327,
+      "300": 14.647,
+      "450": 15.15,
+      "600": 15.297,
+      "750": 15.343,
+      "end": 15.347
+     },
+     "checkpoints_rms_C": 0.504,
+     "plateau_err_C": 0.636,
+     "clock_err_MHz": null
+    },
+    "+0.0004": {
+     "checkpoint_rise_C": {
+      "60": 8.866,
+      "120": 11.788,
+      "180": 13.326,
+      "300": 14.647,
+      "450": 15.15,
+      "600": 15.297,
+      "750": 15.342,
+      "end": 15.347
+     },
+     "checkpoints_rms_C": 0.504,
+     "plateau_err_C": 0.636,
+     "clock_err_MHz": null
+    },
+    "+0.0010": {
+     "checkpoint_rise_C": {
+      "60": 8.866,
+      "120": 11.787,
+      "180": 13.326,
+      "300": 14.646,
+      "450": 15.149,
+      "600": 15.296,
+      "750": 15.342,
+      "end": 15.346
+     },
+     "checkpoints_rms_C": 0.504,
+     "plateau_err_C": 0.636,
+     "clock_err_MHz": null
+    }
+   },
+   "checkpoint_spread_C": {
+    "60": 0.001,
+    "120": 0.002,
+    "180": 0.001,
+    "300": 0.002,
+    "450": 0.002,
+    "600": 0.002,
+    "750": 0.001,
+    "end": 0.002
+   },
+   "max_checkpoint_spread_C": 0.002,
+   "rms_range_C": [
+    0.503,
+    0.504
+   ],
+   "clock_err_range_MHz": null
+  },
+  "G2Q_anchor_frozen_vs_raw_W": [
+   22.186,
+   22.185613
+  ]
+ },
+ "C10": {
+  "statistic": "arm A's error (the frozen chain on the measured board, anchored over the rest before the hold, score_e144's form): its least-squares slope from 300 s (and 450 s) to the hold's end; G_A at the registered geometry ([1200, 1500) minus [300, 600)) where a hold is that long; G_A-equivalent = the slope x 1.5 (the registered windows' centres are 900 s apart), which assumes the error keeps its slope",
+  "sessions": {
+   "E144": {
+    "out_of_sample_for_the_chain": true,
+    "holds": {
+     "H_H": {
+      "item": "fp32.randn",
+      "length_s": 780.0,
+      "rise_C": 14.997,
+      "A_plateau_err_C": 0.015,
+      "slope_from_300s_C_per_10min": -0.073,
+      "slope_from_450s_C_per_10min": -0.117,
+      "err_at_s_C": {
+       "300": -0.025,
+       "450": 0.108,
+       "600": 0.071,
+       "750": -0.149
+      }
+     },
+     "H_L": {
+      "item": "int8.neg_ones",
+      "length_s": 780.0,
+      "rise_C": 4.254,
+      "A_plateau_err_C": -0.032,
+      "slope_from_300s_C_per_10min": -0.019,
+      "slope_from_450s_C_per_10min": -0.001,
+      "err_at_s_C": {
+       "300": -0.032,
+       "450": -0.041,
+       "600": -0.013,
+       "750": -0.04
+      }
+     }
+    }
+   },
+   "E154": {
+    "out_of_sample_for_the_chain": true,
+    "holds": {
+     "H_M": {
+      "item": "int8.full",
+      "length_s": 659.8,
+      "rise_C": 11.208,
+      "A_plateau_err_C": 0.352,
+      "slope_from_300s_C_per_10min": -0.101,
+      "err_at_s_C": {
+       "300": 0.388,
+       "450": 0.306,
+       "600": 0.4
+      }
+     },
+     "K_S": {
+      "item": "fp32.real_smol_softmax_v_causal",
+      "length_s": 598.1,
+      "rise_C": 11.785,
+      "A_plateau_err_C": 0.418,
+      "slope_from_300s_C_per_10min": 0.513,
+      "err_at_s_C": {
+       "300": 0.244,
+       "450": 0.482
+      }
+     },
+     "K_Q": {
+      "item": "int8.real_qwen_w8a8_v",
+      "length_s": 599.8,
+      "rise_C": 5.673,
+      "A_plateau_err_C": 0.005,
+      "slope_from_300s_C_per_10min": -0.154,
+      "err_at_s_C": {
+       "300": 0.032,
+       "450": 0.011
+      }
+     },
+     "K_L": {
+      "item": "int8.b_line_zero_ff",
+      "length_s": 599.9,
+      "rise_C": 4.024,
+      "A_plateau_err_C": 0.073,
+      "slope_from_300s_C_per_10min": -0.03,
+      "err_at_s_C": {
+       "300": 0.071,
+       "450": 0.071
+      }
+     },
+     "K_O": {
+      "item": "fp32.a_onebit_b5_third",
+      "length_s": 600.0,
+      "rise_C": 11.546,
+      "A_plateau_err_C": 0.536,
+      "slope_from_300s_C_per_10min": 0.418,
+      "err_at_s_C": {
+       "300": 0.317,
+       "450": 0.611
+      }
+     }
+    }
+   },
+   "E97": {
+    "out_of_sample_for_the_chain": false,
+    "holds": {
+     "H1": {
+      "item": "int8.full",
+      "chained": false,
+      "length_s": 1800.0,
+      "rise_C": 11.839,
+      "A_plateau_err_C": 0.366,
+      "slope_from_300s_C_per_10min": -0.057,
+      "slope_from_450s_C_per_10min": -0.081,
+      "G_A_registered_geometry_C": 0.116,
+      "err_at_s_C": {
+       "300": 0.611,
+       "450": 0.612,
+       "600": 0.504,
+       "750": 0.532,
+       "900": 0.556,
+       "1200": 0.951,
+       "1500": 0.533,
+       "1750": 0.337
+      }
+     },
+     "H2": {
+      "item": "fp32.ones",
+      "chained": true,
+      "length_s": 900.0,
+      "rise_C": 13.224,
+      "A_plateau_err_C": 0.771,
+      "slope_from_300s_C_per_10min": 0.351,
+      "slope_from_450s_C_per_10min": 0.155,
+      "err_at_s_C": {
+       "300": 0.455,
+       "450": 0.514,
+       "600": 0.722,
+       "750": 0.695
+      }
+     },
+     "H3": {
+      "item": "fp32.randn",
+      "chained": false,
+      "length_s": 1800.0,
+      "rise_C": 19.737,
+      "A_plateau_err_C": 0.242,
+      "slope_from_300s_C_per_10min": -0.158,
+      "slope_from_450s_C_per_10min": -0.111,
+      "G_A_registered_geometry_C": -0.38,
+      "err_at_s_C": {
+       "300": 0.766,
+       "450": 0.546,
+       "600": 0.505,
+       "750": 0.353,
+       "900": 0.082,
+       "1200": -0.15,
+       "1500": 0.157,
+       "1750": 0.232
+      }
+     }
+    }
+   }
+  },
+  "check_E154_A_plateau_equals_posthoc": true,
+  "scenarios_same_statistic": {
+   "chain_as_frozen": {
+    "K_O_window_600s": {
+     "A_plateau_err_C": 0.0,
+     "slope_from_300s_C_per_10min": 0.0
+    },
+    "whole_K_OL": {
+     "A_plateau_err_C": 0.0,
+     "slope_from_300s_C_per_10min": 0.0,
+     "slope_from_450s_C_per_10min": 0.0
+    },
+    "G_A_frozen_C": 0.0
+   },
+   "tau_s_600": {
+    "K_O_window_600s": {
+     "A_plateau_err_C": 0.449,
+     "slope_from_300s_C_per_10min": 0.577
+    },
+    "whole_K_OL": {
+     "A_plateau_err_C": 0.945,
+     "slope_from_300s_C_per_10min": 0.332,
+     "slope_from_450s_C_per_10min": 0.294
+    },
+    "G_A_frozen_C": 0.495
+   },
+   "tau_s_1200": {
+    "K_O_window_600s": {
+     "A_plateau_err_C": 0.454,
+     "slope_from_300s_C_per_10min": 0.684
+    },
+    "whole_K_OL": {
+     "A_plateau_err_C": 1.243,
+     "slope_from_300s_C_per_10min": 0.529,
+     "slope_from_450s_C_per_10min": 0.503
+    },
+    "G_A_frozen_C": 0.789
+   },
+   "tau_s_2400": {
+    "K_O_window_600s": {
+     "A_plateau_err_C": 0.458,
+     "slope_from_300s_C_per_10min": 0.692
+    },
+    "whole_K_OL": {
+     "A_plateau_err_C": 1.383,
+     "slope_from_300s_C_per_10min": 0.621,
+     "slope_from_450s_C_per_10min": 0.608
+    },
+    "G_A_frozen_C": 0.925
+   },
+   "gain_D6": {
+    "K_O_window_600s": {
+     "A_plateau_err_C": 0.445,
+     "slope_from_300s_C_per_10min": 0.101
+    },
+    "whole_K_OL": {
+     "A_plateau_err_C": 0.476,
+     "slope_from_300s_C_per_10min": 0.02,
+     "slope_from_450s_C_per_10min": 0.01
+    },
+    "G_A_frozen_C": 0.03
+   }
+  },
+  "null": {
+   "G_A_equivalent_out_of_sample_C": {
+    "E144.H_H": -0.109,
+    "E144.H_L": -0.028,
+    "E154.H_M": -0.152,
+    "E154.K_S": 0.77,
+    "E154.K_Q": -0.231,
+    "E154.K_L": -0.045,
+    "E154.K_O": 0.627
+   },
+   "note": "E154's K_S and K_O are its two fp32 large rises; their late slopes are the size a slow stage would give, so the second pool leaves them out in case they carry the effect itself",
+   "all_seven_out_of_sample": {
+    "n": 7,
+    "mean_C": 0.119,
+    "rms_about_zero_C": 0.392,
+    "n_at_or_over_SEEN": 2,
+    "SEEN_false_positive_rate_normal_zero_mean": 0.351,
+    "threshold_for_5pct_false_positives_C": 0.645,
+    "power_at_SEEN_by_scenario": {
+     "tau_s_600": 0.811,
+     "tau_s_1200": 0.948,
+     "tau_s_2400": 0.976,
+     "gain_D6": 0.38
+    }
+   },
+   "without_E154_K_S_and_K_O": {
+    "n": 5,
+    "mean_C": -0.113,
+    "rms_about_zero_C": 0.135,
+    "n_at_or_over_SEEN": 0,
+    "SEEN_false_positive_rate_normal_zero_mean": 0.133,
+    "threshold_for_5pct_false_positives_C": 0.222,
+    "power_at_SEEN_by_scenario": {
+     "tau_s_600": 0.995,
+     "tau_s_1200": 1.0,
+     "tau_s_2400": 1.0,
+     "gain_D6": 0.187
+    }
+   },
+   "E97_in_sample": {
+    "holds": {
+     "H1": {
+      "window_means_C_from_300s_every_300s": [
+       0.58,
+       0.561,
+       0.895,
+       0.696,
+       0.366
+      ],
+      "sd_C": 0.194,
+      "G_A_registered_geometry_C": 0.116
+     },
+     "H3": {
+      "window_means_C_from_300s_every_300s": [
+       0.569,
+       0.326,
+       0.139,
+       0.19,
+       0.242
+      ],
+      "sd_C": 0.169,
+      "G_A_registered_geometry_C": -0.38
+     }
+    },
+    "rms_G_A_about_zero_C": 0.281,
+    "SEEN_false_positive_rate_normal_zero_mean": 0.297,
+    "difference_sd_C_from_window_wander": 0.257,
+    "note": "in sample: Q138(t)'s chain was fitted on E89 and the whole of E97, so the wander left here is what the fit did not absorb"
+   },
+   "thresholds_registered": {
+    "seen": 0.15,
+    "not_seen_hi": 0.05,
+    "overshoot": -0.15
+   }
+  }
+ }
+}

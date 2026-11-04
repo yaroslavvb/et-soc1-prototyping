@@ -16,6 +16,25 @@ checks before anything else. Nothing is refitted.*
 *(Dated note, Wed 4 Nov 2026.) The registration's header and `registration.json` say it was written "about 02:15-02:40 PST". That runs past
 its own commit at 02:23:53 PST: it was written about 02:15-02:23 PST. The frozen files are left as committed.*
 
+*(Dated note, Wed 4 Nov 2026, about 04:10 PST: corrected after verification, C1.) The lane's work ran about **02:03-02:50 PST**, not
+02:10-03:00. Its first step was at 02:03, the freeze commit `c9aaf179` at 02:46:04 and its result at 02:50. D6 was added at 02:36:43 PST,
+not about 03:00.*
+
+*Corrected after verification (dated notes, Wed 4 Nov 2026, about 03:30-04:10 PST; desk only, nothing re-run on a card).*
+- *An independent verifier re-ran the committed code from a scratch mirror. Every output came back byte for byte, and an independent
+  re-implementation gave every number. It found ten minor faults. None is in a frozen number or a registered rule.*
+- *Each fault is corrected by a dated note beside the text it concerns, with that text left as it was, and is set out in full in
+  [§ Corrections after verification](#corrections-after-verification-wed-4-nov-2026) at the end (C1-C10).*
+- *Three of them touch the registered rules. They are written as the registration's dated amendment
+  [`REGISTRATION-AMENDMENT-1.md`](REGISTRATION-AMENDMENT-1.md) (RA1), after the freeze and before any E166 or E167 data:*
+  - *RK3-b is scored only in the 800 MHz regime;*
+  - *R5 governs K_O's window;*
+  - *a reported arm with M9's level referred to its own T_ref.*
+- *The numbers the notes quote are printed by [`corrections_q140e.py`](corrections_q140e.py) into [`corrections.txt`](corrections.txt) and
+  [`corrections.json`](corrections.json). The script reproduces the frozen numbers first (C0).*
+- *`REGISTRATION.md`, `registration.json`, `predictions-q140e.json`/`.txt` and `posthoc.json`/`.txt` are byte-identical to `c9aaf179`, and
+  so are both scripts.*
+
 ## Results first
 
 **Frozen for the two replicate sessions** ([`predictions-q140e.json`](predictions-q140e.json), [`predictions-q140e.txt`](predictions-q140e.txt)):
@@ -70,6 +89,11 @@ watts:
 
 So the hold tells a slow stage of E154's size from a gain error by a factor of 15 or more.
 
+*Corrected after verification, C10 (dated Wed 4 Nov 2026).* *The factor of 15 compares the scenarios with each other, without noise. On
+committed aifoundry3 holds, arm A's error wanders over minutes, and a G_A ≥ +0.15 °C (SEEN) would come up **13-35%** of the time with no
+slow stage (RA1.5; `corrections.json` › `C10.null`). The scenarios' +0.50 to +0.93 °C are about 1.3-7 times that wander's spread, depending
+on the pool.*
+
 **Post hoc on the sessions already seen** ([`posthoc.txt`](posthoc.txt), [`posthoc.json`](posthoc.json); never a verdict). E161's duty is
 its own, and M9's level never saw E161:
 - **E161 G1Q:** the plateau error goes −0.90 °C (as registered) → −0.77 (the new window and plateau) → −0.26 (the duty alone) → **+0.64 °C**
@@ -84,8 +108,23 @@ its own, and M9's level never saw E161:
 - Whether the chain's 2-5% deficit on large rises, given the watts, repeats on both cards in a second session.
 - Whether the 25-minute hold puts it in a slow stage (G_A ≥ 0.15 °C) or in the chain's gain (G_A ≈ 0).
 
+*Corrected after verification, C6 (dated Wed 4 Nov 2026).* *The 2-5% deficit is established on aifoundry3 only, at 3.1-4.6% on its three
+large rises. On aifoundry2, G1Q reads 2.3% low, which the whole-degree readout cannot resolve (−0.8% to +5.3% over the REST's ±0.5 °C), and
+G2Q reads 1.2% high, inside ±1.5% (`posthoc.json` › `E161.rank3_rules_posthoc.RK3_c_aifoundry2`).*
+
 With M9's level, aifoundry2's power path is right to about 0.1 W inside the work. G1Q's remaining +0.64 °C (post hoc) is the heat path's
 +0.37 °C given the watts, plus the convention's counting of process start-ups as idle.
+
+*Corrected after verification, C4 and C5 (dated Wed 4 Nov 2026).*
+- *C4. "About 0.1 W" is Q140(l)'s reading, not this lane's: M9's level reads E161 G1Q's in-work board 0.08 W low (Q140(l)
+  `corrections.json` › `C1.E161_G1Q.level_high_by_w.shift_alone`). That is one hold, and it is in sample for the choice of option (a),
+  which was made after reading it (RA1.1).*
+- *C5. Of the +0.64 °C, about **+0.37 °C** is the heat path's given the watts (arm A). The other **+0.26 °C** is the power path
+  (`corrections.json` › `C5`):*
+  - *about **+0.19 °C** is the time the convention counts at the idle law. It draws 0.27 W of average board over that law. About half is
+    the start-ups before each process's first kernel launch, 0.13 W. The rest is process time between launches and at process ends, 0.10 W,
+    and the gaps between processes, 0.04 W. There the board as read stays at 45.8 and 41.6 W, well above the idle law's 29.2 W;*
+  - *about **+0.07 °C** is M9's in-work level, 0.08 W low.*
 
 ## What this does to predicting power and heat (prediction_effect)
 
@@ -109,9 +148,21 @@ its own; M9's level is out of sample for E161):
   The duty alone gives −0.26 °C and +7.1 MHz. Its closer plateau is M8's 0.9 W-high level cancelling the chain's low gain.
 - **aifoundry3:** unchanged, 0.37 °C rms, because E154's arm E already ran on its realized records.
 
+*Corrected after verification, C4 (dated Wed 4 Nov 2026).* *M9's fit never saw E161. But option (a) was chosen after reading Q140(l)'s C1
+readings on E161's G1Q, both its plateau and its in-work level (RA1.1). So these aifoundry2 figures are in sample for the choice of option.*
+
 **The expected size of the replicates' errors** (the frozen bands):
 - aifoundry3: 0.60-1.45 °C at 95% per hold, the critic's scales 0.28-0.57 °C, and the long hold 0.73 °C;
 - aifoundry2: 3.15 °C on G1Q (the critic's rule 1.0 °C), and ±0.60 °C and ±35 MHz at the trip.
+
+*Corrected after verification, C3, C9 and C10 (dated Wed 4 Nov 2026).* *These are three corrections to the stated uncertainty. None changes
+a frozen number.*
+- *C3. **The level's reference die is worth +0.65 °C on G1Q** and −8.1 MHz on G2Q's trip clock. That is M9's level referred to its own
+  54.38 °C T_ref instead of Q139(e)'s 56.0 °C. It is about five times the ±0.12 °C quoted below for the fallback zeros offset, and it is now
+  a reported arm (RA1.3).*
+- *C9. **G2Q's trip-regime checkpoints carry no skill.** They are set by the governor's limit cycle, and 1 mW at the REST anchor moves
+  them by up to 0.74 °C. Only G2Q's trip plateau and clock are predictions.*
+- *C10. **The slow-stage reading's SEEN threshold has a 13-35% false-positive rate** (RA1.5).*
 
 ## Registered against post hoc, number by number
 
@@ -127,6 +178,16 @@ its own; M9's level is out of sample for E161):
 | 8 | amendment A2 (E154's design and E161's holds at the duty convention alone) | computed after the registration, by registered definitions (R7.2) |
 | 9 | E166's and E167's frozen numbers, bands and room-rule tables | computed after the registration (R7.3, R7.4) |
 | 10 | every reading on E154's and E161's data ([`posthoc_q140e.py`](posthoc_q140e.py)) | **post hoc**, never a verdict (R7.5) |
+
+*Corrected after verification, C4 and C1 (dated Wed 4 Nov 2026).*
+- *Row 2: option (a) was also chosen after reading C1's in-work level on E161's G1Q. That reading favoured (a): 0.08 W low, against 0.24 W
+  high for (b) (RA1.1).*
+- *Row 7: D6 was added at 02:36:43 PST. That was after the three extra-stage scenarios' G_A had been printed (02:31:53) and before the
+  freeze commit (02:46:04) (RA1.6).*
+- *Added after the freeze, before any E166 or E167 data:*
+  - *RA1 (`REGISTRATION-AMENDMENT-1.md`): the RK3-b regime rule, R5's K_O window, the reported reference-die arm, and the slow-stage reading's
+    null with one added reported slope;*
+  - *the post hoc corrections C2-C10 (`corrections_q140e.py`).*
 
 ## The duty convention (R1)
 
@@ -209,6 +270,12 @@ The fixed point and the trip clock at d reproduce E161's corrections C1 exactly 
   - Above 53.0 °C, K_S is a rest (E154's room rule). The registered RK3-a counts a hold that did not run as not inside, so a room above
     53.0 °C leaves it at most 3 of 4.
   - So **E166 is worth starting only with R0's room at or under 53.0 °C**. That is a reading of the registered rules, not a new one.
+  - *Corrected after verification, C7 (dated Wed 4 Nov 2026).*
+    - *"K_O is not scored" contradicts R5, which says that when K_OL ends early "its K_O window still scored". **R5 governs as registered.**
+      D2's b, the end of the last process that ends at or before 600 s, exists at every room in the table: K_OL ends at 566.5 s at 53.5 °C.
+      So K_O is scored on [b − 300 s, b) (RA1.4).*
+    - *The 53.0 °C start gate is advice, not a reading of the registered rules: no rule registers it. E166's own registration may add it,
+      and an incomplete-window exclusion, before its claim.*
 - **The arms beside, at 51.2 °C** (the same chain and records):
 
   | hold | M8 | M7 | M6 | E153's measured S |
@@ -253,6 +320,37 @@ The thresholds are SEEN at +0.15 °C or more, INCONCLUSIVE from +0.05 to +0.15, 
 or less. They sit between the two cases. A slow stage of a third of E154's size or more reads SEEN, and a chain that is merely low reads
 NOT SEEN. **The confound stays:** with no inlet thermometer, a room that warms during K_OL reads as a slow stage.
 
+*Corrected after verification, C10 (dated Wed 4 Nov 2026; post hoc, never a verdict; `corrections.json` › `C10`).* *The thresholds came
+with no false-positive rate. Here it is, from every committed aifoundry3 hold, read the same way: arm A's least-squares error slope from
+300 s to the hold's end, as a G_A-equivalent (× 1.5 for the 900 s between the registered windows' centres).*
+
+| session | for the chain | hold | rise (°C) | slope (°C per 10 min) | as G_A (°C) |
+|---|---|---|---|---|---|
+| E144 (2 Nov) | out of sample | H_H fp32 random, 13 min | 15.0 | −0.07 | −0.11 |
+| | | H_L int8 −1s, 13 min | 4.3 | −0.02 | −0.03 |
+| E154 (3 Nov) | out of sample | H_M `int8.full` | 11.2 | −0.10 | −0.15 |
+| | | **K_S** `fp32.real_smol_softmax_v_causal` | 11.8 | **+0.51** | **+0.77** |
+| | | K_Q `int8.real_qwen_w8a8_v` | 5.7 | −0.15 | −0.23 |
+| | | K_L `int8.b_line_zero_ff` | 4.0 | −0.03 | −0.05 |
+| | | **K_O** `fp32.a_onebit_b5_third` | 11.5 | **+0.42** | **+0.63** |
+| E97 (1 Nov) | in sample | H1 `int8.full`, 30 min | 11.8 | −0.06 | G_A at the registered geometry **+0.12** |
+| | | H3 fp32 random, 30 min | 19.7 | −0.16 | G_A at the registered geometry **−0.38** |
+
+- *SEEN's false-positive rate under a normal null depends on the pool:*
+  - *without E154's two fp32 holds (rms 0.135 °C), **13%**;*
+  - *with them (0.39 °C), **35%**;*
+  - *on E97's two 30-minute holds (0.28 °C), **30%**.*
+
+  *A threshold with a 5% false-positive rate would sit at +0.22 to +0.65 °C. The registered threshold stays (RA1.5).*
+- *The same slope over 300-600 s is the statistic that separates the scenarios on K_O's window:*
+  - *0.58 / 0.68 / 0.69 °C per 10 min for an extra stage at τ 600 / 1200 / 2400 s;*
+  - *0.10 for the gain case;*
+  - *0 for the chain as frozen.*
+
+  *E154's own K_O read **+0.42** and its K_S +0.51. So the late growth E166's K_OL looks for may already be in E154's two fp32 large
+  rises, and not in its int8 holds or in E144's two holds the day before.*
+- *That is post hoc, on two holds of one session, and a room drift reads the same way.*
+
 ## E167: aifoundry2 card 0, its own governor (frozen; `predictions-q140e.json` › `E167`)
 
 E161's design unchanged: SMOKE, the two stop tests, E98's 15-minute rest, G1Q (REST 2 min plus 93 × 8 s processes), END 2 min, the 15-minute
@@ -269,6 +367,12 @@ rest, G2Q (REST 2 min plus 91 × 8 s processes), END2 2 min. Plan d: 0.9696 / 0.
 | G2Q | M8 at d | trip | 65.9 | 18.9 | 79.57 | 674.5 MHz | 50.86 | 45 s |
 | G2Q | M8 continuous | trip | 65.9 | 18.9 | 80.57 | 667.5 MHz | 50.13 | 42 s |
 
+*Added after verification, C3 (dated Wed 4 Nov 2026; a reported arm, never the primary, RA1.3; `corrections.json` › `C3`).* *R2 refers M9's
+zeros-level shift to Q139(e)'s 56.0 °C reference die. M9's own fit refers its level to 54.38 °C. Referred there, the in-work board is
+0.715 W higher, and at E161's anchors:*
+- *G1Q's plateau would be **62.95 °C**, not 62.30 (rise 15.95); its T800 fixed point 63.01 °C;*
+- *G2Q's trip clock would be **677.5 MHz**, not 685.6.*
+
 - **G1Q's primary checkpoints** (rises over the REST, °C):
   - 60 s: 8.87;
   - 120 s: 11.79;
@@ -280,6 +384,13 @@ rest, G2Q (REST 2 min plus 91 × 8 s processes), END2 2 min. Plan d: 0.9696 / 0.
   - the end: 15.35.
 - **Over the REST's ±0.5 °C** the primary's rise moves to 15.10 / 15.50. **The primary puts G1Q in the trip regime above a rest die of
   49.97 °C** (at d, with M9's level; Q139(e)'s frozen table put that edge at about 49.4 °C).
+  - *Corrected after verification, C2 and C8 (dated Wed 4 Nov 2026).*
+    - *C2. Q139(e)'s frozen table puts that edge at **48.8 °C**: its 46 and 47 °C rows rise 1.206 °C per °C and cross 65.9 °C at 48.78. At
+      the duty convention alone it is **49.2 °C**, and with RA1.3's referred level 49.4 °C. So the primary moves the edge +1.2 °C, not
+      +0.6 (`corrections.json` › `C2`).*
+    - *C8. Above the edge, R3 scores G1Q against the trip rule's 65.9 °C, which is not heat from the bits. **RK3-b is scored only where the
+      primary, at E167's measured REST anchors, puts G1Q in the 800 MHz regime over the whole ±0.5 °C readout.** Otherwise it reads "not
+      scored" (RA1.2). E161's REST read 47.0 °C.*
 - **By rest die, the primary:**
   - G1Q 58.68 / 59.88 / 61.08 / 62.28 / 63.47 °C at 44-48 °C;
   - G2Q at the trip, 720.7 / 710.4 / 700.0 / 685.2 / 670.3 MHz.
@@ -317,12 +428,29 @@ K_O's checkpoints' rms differs for the reason in the finding below:
 | G2Q | registered | −0.397 | 0.509 | +12.6 MHz |
 | G2Q | M8 continuous / M8 at d / **primary** | −0.336 (the trip rule) | 0.48 / 0.59 / **0.31** | +14.1 / +7.1 / **−4.0 MHz** |
 
+*Corrected after verification, C9 (dated Wed 4 Nov 2026; `corrections.json` › `C9`).* *G2Q's checkpoints' rms (0.48 / 0.59 / 0.31) carries
+no skill. In the trip regime the checkpoints are set by the phase of the whole-degree governor's limit cycle:*
+- *moving the REST board by ±1 mW moves the primary's 300-750 s checkpoints by up to **0.74 °C** and their rms between 0.28 and 0.32 °C,
+  with its clock error unchanged at −4.0 MHz;*
+- *the frozen table's anchor (22.186 W, rounded) and the raw REST mean (22.185613 W) differ by 0.4 mW;*
+- *G1Q's checkpoints, at 800 MHz, move 0.002 °C or less.*
+
+*E167's scorer should read G2Q's trip plateau and clock only, never its checkpoints, as skill.*
+
 - **RK3-b would have passed** (+0.64 °C, 0.50 °C rms), but **not over the anchor's readout**: at −0.5 °C it reads +1.34 °C.
 - **RK3-c:** G1Q's arm A reads +0.372 °C, **+2.33%** of its 15.9 °C rise (−0.8% to +5.3% over the REST's ±0.5 °C). G2Q's reads −1.16%. So
   RK3-c would have failed on aifoundry2 too, and the readout cannot resolve it there.
 - **Why the duty alone reads G1Q closer than the primary:** M8's level is 0.91 W high inside the work (E161 C1). That cancels most of the
   chain's own +0.37 °C given the watts and the start-up power the convention counts as idle. With M9's level, the in-work board is within
   about 0.1 W of the measured one, so the remaining +0.64 °C is the heat path's.
+  - *Corrected after verification, C5 and C4 (dated Wed 4 Nov 2026).* *"The remaining +0.64 °C is the heat path's" was wrong, and it
+    contradicted § Results first. Split three ways (`corrections.json` › `C5`):*
+    - *the heat path's, given the watts (arm A): **+0.37 °C**;*
+    - *the time the convention counts at the idle law: **+0.19 °C**. This is 0.27 W of average board, about half in start-ups;*
+    - *M9's in-work level, 0.08 W low: **+0.07 °C**.*
+
+    *The 0.1 W is Q140(l) `corrections.json` › `C1.E161_G1Q.level_high_by_w`. It comes from one hold and is in sample for the choice of
+    option (RA1.1).*
 
 ## Departures (dated)
 
@@ -337,6 +465,18 @@ Registered with the plan, Wed 4 Nov 2026, before any prediction (REGISTRATION.md
 Added after the registration, Wed 4 Nov 2026 about 03:00 PST, before any E166 or E167 data:
 - **D6** The gain scenario (`gain_D6`) joins the reported slow-stage scenarios. It is the case the NOT SEEN threshold stands for, reported
   only.
+  - *Corrected after verification, C1 (dated Wed 4 Nov 2026).* *D6 was added at **02:36:43 PST**, not about 03:00. That was after the three
+    extra-stage scenarios' G_A had been printed (02:31:53) and before the freeze commit `c9aaf179` (02:46:04). It stays reported only
+    (RA1.6).*
+
+Added after the freeze, Wed 4 Nov 2026 about 03:30-04:10 PST, after verification and before any E166 or E167 data
+([`REGISTRATION-AMENDMENT-1.md`](REGISTRATION-AMENDMENT-1.md)):
+- **RA1.2** RK3-b is scored only in the 800 MHz regime.
+- **RA1.3** A reported arm: M9's level referred to its own T_ref.
+- **RA1.4** R5 governs K_O's window when K_OL ends early.
+- **RA1.5** The slow-stage reading's null is stated, and one reported slope is added.
+
+RA1.1 and RA1.6 complete the disclosures.
 
 ## What this cannot say
 
@@ -350,6 +490,17 @@ Added after the registration, Wed 4 Nov 2026 about 03:00 PST, before any E166 or
   which is ±0.13 W through β, about ±0.12 °C on G1Q.
 - **E166 changes E154's sequence** (H_M dropped, K_S from rest). It replicates the four kinds and the frozen path, not E154's exact tails.
 
+*Added after verification (dated Wed 4 Nov 2026):*
+- ***C3. The level's reference die is a choice worth +0.65 °C on G1Q.*** *R2 refers M9's zeros-level shift to Q139(e)'s 56.0 °C. Referred to
+  M9's own 54.38 °C instead, E167's G1Q reads 62.95 °C, not 62.30, and G2Q's trip clock 677.5 MHz, not 685.6. That is two-thirds of
+  RK3-b's 1.0 °C and about five times the ±0.12 °C above. E161, in sample for the choice, reads the in-work board 0.08 W low with R2's
+  reference and 0.64 W high with M9's. It is a reported arm now (RA1.3).*
+- ***C8. Above a REST of about 50 °C, E167 does not test heat from the bits on G1Q.*** *The primary trips there. RK3-b is then not scored
+  (RA1.2).*
+- ***C9. G2Q's checkpoints are phase noise of the governor's limit cycle.*** *Only its trip plateau and clock carry skill.*
+- ***C10. A SEEN reading is weak evidence.*** *With no slow stage, G_A ≥ +0.15 °C comes up 13-35% of the time on committed holds. E154's own
+  fp32 holds already read the late growth a slow stage would give, post hoc.*
+
 ## How to reproduce
 
 ```bash
@@ -359,6 +510,15 @@ Added after the registration, Wed 4 Nov 2026 about 03:00 PST, before any E166 or
 ```
 
 numpy 1.26.4, Python 3.9 (the Intel's `/usr/bin/python3`); both outputs are byte-identical on a rerun.
+
+*Added after verification (dated Wed 4 Nov 2026):*
+
+```bash
+/usr/bin/python3 docs/reports/data/2026-11-04-q140e-heat-replicates/corrections_q140e.py > docs/reports/data/2026-11-04-q140e-heat-replicates/corrections.txt   # ~20 s
+```
+
+*It refuses to run if any of this lane's eight committed files differs from `c9aaf179`. It reproduces the frozen E167 arms, the trip edge
+and the post hoc E161 scores exactly (C0) before printing anything else. Its output is byte-identical on a rerun.*
 
 **What the checks reproduce** (`predictions-q140e.json` › `checks`):
 - Q139(e)'s `a2_closed` at d = 1, sample for sample (worst |diff| 0);
@@ -384,3 +544,36 @@ None: this lane opened no device and ran nothing on any box. E166 and E167 each 
 | `predict_q140e.py` | the frozen composition: the checks, amendment A2, E166's and E167's predictions, the scenarios, the room rules |
 | `predictions-q140e.json`, `.txt` | **frozen**: everything above, with each hold's checkpoints by room or rest die |
 | `posthoc_q140e.py`, `posthoc.json`, `posthoc.txt` | the post hoc readings on E154 and E161 (never a verdict) |
+| `REGISTRATION-AMENDMENT-1.md` | *(added after verification)* the registration's dated amendment RA1: after the freeze, before any E166 or E167 data |
+| `corrections_q140e.py`, `corrections.json`, `corrections.txt` | *(added after verification)* the numbers the corrections C1-C10 and RA1 quote (post hoc, never a verdict) |
+
+## Corrections after verification (Wed 4 Nov 2026)
+
+*An independent verifier re-ran this lane from a scratch mirror and re-derived its numbers with independent code. It found ten minor
+faults, none in a frozen number or a registered rule. Each was re-checked against the committed files and the lane's session record
+before it was corrected here. The text above is left as committed in `c9aaf179`, with dated notes beside it. No frozen file, number,
+registered threshold or verdict changes. Three registered rules gained a dated amendment, written after the freeze and before any E166 or
+E167 data (RA1).*
+
+| # | what the text said | what is right | source |
+|---|---|---|---|
+| C1 | the work ran "about 02:10-03:00 PST"; D6 was added "about 03:00 PST" | the work ran about 02:03-02:50 PST; D6 was added at 02:36:43 PST, after the three extra-stage scenarios' G_A had been printed (02:31:53) and before the freeze commit (02:46:04); D6 stays reported only | the lane's session record; `git log` for `c9aaf179`; RA1.6 |
+| C2 | Q139(e)'s frozen table put G1Q's trip edge "at about 49.4 °C" | 48.8 °C (its 46 and 47 °C rows cross 65.9 °C at 48.78); 49.2 °C at the duty convention alone; the primary moves it +1.2 °C to 49.97 | `corrections.json` › `C2` |
+| C3 | the level arm's uncertainty was given as the fallback offset's ±0.12 °C on G1Q | the level's reference die is a choice. Referred to M9's own 54.38 °C instead of Q139(e)'s 56.0 °C, the in-work board is 0.715 W higher: G1Q 62.30 → 62.95 °C, G2Q's trip clock 685.6 → 677.5 MHz, G1Q's edge 49.97 → 49.43 °C. Now a reported arm | `corrections.json` › `C3`; RA1.3; Q140(l) `corrections.json` › `C1.reference_gap_w` |
+| C4 | R2 disclosed only C1's plateau reading (which favoured option (b)); "M9's level is out of sample for E161"; "about 0.1 W" cited to `posthoc.txt` | the option was chosen after reading both of C1's E161 readings. The in-work level favoured (a): 0.08 W low against 0.24 W high. E161's G1Q is in sample for the choice of option, though not for M9's fit. The 0.1 W is Q140(l)'s, from one hold | Q140(l) `corrections.json` › `C1.E161_G1Q.level_high_by_w`; RA1.1 |
+| C5 | "the remaining +0.64 °C is the heat path's" | +0.37 °C is the heat path's given the watts. +0.19 °C is the time the convention counts at the idle law: 0.27 W of average board, half of it start-ups. +0.07 °C is M9's in-work level, 0.08 W low | `corrections.json` › `C5` |
+| C6 | "the chain's 2-5% deficit … on both cards" | 3.1-4.6% low on aifoundry3's three large rises. On aifoundry2 one of two reads 2.3% low, which the whole-degree readout cannot resolve (−0.8% to +5.3%); the other reads 1.2% high | `posthoc.json` › `E161.rank3_rules_posthoc` |
+| C7 | when K_OL's crossing falls before 600 s, "K_O is not scored"; the 53.0 °C start gate is "a reading of the registered rules" | R5 governs: K_O's window is still scored on D2's b, which exists at every room in the table. The start gate is advice, not registered; E166's registration may add it | RA1.4; `predictions-q140e.json` › `E166.room_rules` |
+| C8 | RK3-b had no rule for the trip regime | RK3-b is scored only where the primary, at E167's measured REST anchors, puts G1Q in the 800 MHz regime over the ±0.5 °C readout; otherwise "not scored" | RA1.2; `predictions-q140e.json` › `E167.G1Q_trips_above_rest_die_C` |
+| C9 | G2Q's checkpoints' rms 0.48 / 0.59 / 0.31 °C, side by side | phase noise of the governor's limit cycle: ±1 mW at the REST anchor moves single checkpoints by up to 0.74 °C, the clock not at all; the differences carry no skill | `corrections.json` › `C9` |
+| C10 | SEEN at G_A ≥ +0.15 °C, with no false-positive rate | 13-35% with no slow stage, by pool (E144 and E154's int8 holds 13%; with E154's fp32 holds 35%; E97 in sample 30%). A 5% rate would need +0.22 to +0.65 °C. Post hoc, E154's K_O and K_S already read late slopes of +0.42 and +0.51 °C per 10 min. On the same statistic an extra stage reads 0.58-0.69 and a gain error 0.10 | `corrections.json` › `C10`; RA1.5 |
+
+**What the corrections do to predicting power and heat.**
+- **No frozen prediction changes, and no out-of-sample error moves.** E154 still reads 0.37 °C rms and E161's G1Q −0.90 °C. Nothing scores
+  until E166 and E167.
+- **The stated uncertainty of E167's G1Q widens.**
+  - The level's reference die is a ±0.65 °C choice.
+  - G1Q's trip edge is 49.97 °C, 1.2 °C above Q139(e)'s 48.8.
+  - G2Q's trajectory beyond its plateau and clock is not predictable at all.
+- **The slow-stage reading can say less than it seemed.** A SEEN is weak evidence, at a 13-35% false-positive rate. The 300-600 s slope
+  added in RA1.5 is the sharper statistic. Post hoc on E154 it already points to a slow stage, or a room drift, in the fp32 holds alone.
