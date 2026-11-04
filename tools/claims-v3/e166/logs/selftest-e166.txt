@@ -1,0 +1,16 @@
+# score_e166.py --self-test on the Intel, Wed 04 Nov 2026 09:30:10 PST-09:30:18 PST (/usr/bin/python3 3.9.6 numpy 1.26.4), before any E166 data; exit 0
+self_test_ok: True | problems: []
+E154 (posthoc.json convention window, must come back exactly): room 51.4097 | first process - hold mark (ms): {'H_M': 0.0, 'K_S': 0.0, 'K_Q': 0.0, 'K_L': 0.0, 'K_O': 0.0}
+  H_M  d 0.9615 rise 11.208 | E(M8) +0.193 rms 0.18 | M7 +0.193 M6 +0.193 E153 +0.193 | A +0.352 (+3.14%) | slope from 300 s -0.101 C/10 min -> SL SLOPE NOT SEEN
+  K_S  d 0.7916 rise 11.785 | E(M8) +0.020 rms 0.37 | M7 +0.092 M6 +0.173 E153 +0.413 | A +0.418 (+3.55%) | slope from 300 s +0.513 C/10 min -> SL SLOPE SEEN
+  K_Q  d 0.9618 rise 5.673 | E(M8) -0.418 rms 0.401 | M7 -0.437 M6 -0.475 E153 -0.299 | A +0.005 (+0.08%) | slope from 300 s -0.154 C/10 min -> SL SLOPE NOT SEEN
+  K_L  d 0.9617 rise 4.024 | E(M8) +0.492 rms 0.45 | M7 +0.130 M6 -0.324 E153 -0.087 | A +0.073 (+1.80%) | slope from 300 s -0.030 C/10 min -> SL SLOPE NOT SEEN
+  K_O  d 0.9611 rise 11.546 | E(M8) +0.360 rms 0.315 | M7 +0.529 M6 +0.730 E153 +0.459 | A +0.536 (+4.64%) | slope from 300 s +0.418 C/10 min -> SL INCONCLUSIVE
+  RK3-a {'I_inside': 1, 'F_not_inside': 3, 'X_excluded': 0, 'verdict': 'FAIL'} | RK3-c FAIL {'H_M': False, 'K_S': False, 'K_O': False} | session rms E(M8) 0.37
+plan at 51.2 C (frozen E166.by_room): {'K_S': 14.775, 'K_Q': 6.103, 'K_L': 3.53, 'K_OL': 11.855, 'K_O_window': 11.156}
+  scenario chain_as_frozen: G_A 0.0 (frozen 0.0) -> NOT SEEN; slope 0.0 (C10 0.0) -> SLOPE NOT SEEN
+  scenario tau_s_600: G_A 0.4957 (frozen 0.495) -> SLOW STAGE SEEN; slope 0.577 (C10 0.577) -> SLOPE SEEN
+  scenario tau_s_1200: G_A 0.7886 (frozen 0.789) -> SLOW STAGE SEEN; slope 0.684 (C10 0.684) -> SLOPE SEEN
+  scenario tau_s_2400: G_A 0.9254 (frozen 0.925) -> SLOW STAGE SEEN; slope 0.692 (C10 0.692) -> SLOPE SEEN
+  scenario gain_D6: G_A 0.0304 (frozen 0.03) -> NOT SEEN; slope 0.101 (C10 0.101) -> SLOPE NOT SEEN
+rule cases: 37 of 37 | constants: as registered | runner's K_OL table: run_e166.py not yet written

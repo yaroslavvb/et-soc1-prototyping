@@ -1,0 +1,266 @@
+{
+ "note": "E167's scorer self-test (desk, before any E167 data): (1) on E161's committed data the scorer gives back Q140(e)'s posthoc.json E161 figures exactly (G1Q +0.636 C / 0.504 C rms, G2Q -4.0 MHz) and corrections.json C3's RA1.3 arm; (2) its arms at E161's anchors equal predictions-q140e.json E167 and C3 byte for byte; (3) the start gate, RA1.2's regime rule around the edge, and E2's arm; (4) the constants against the registration",
+ "constants_problems": [],
+ "E161_reproduction": {
+  "verdicts": {
+   "RK3_b": "PASS",
+   "RK3_c_aifoundry2": "FAIL",
+   "G1Q carried": "PASS",
+   "G1Q carried clock": "PASS",
+   "G2Q carried": "PASS",
+   "G2Q carried clock": "PASS"
+  },
+  "session_figures": {
+   "G1Q_plateau_err_from_the_bits_C": 0.636,
+   "G2Q_clock_err_from_the_bits_MHz": -4.0
+  },
+  "RK3_b": {
+   "verdict": "PASS",
+   "plateau_err_C": 0.636,
+   "rms_C": 0.504,
+   "regimes": {
+    "-0.5": "800 MHz",
+    "+0.0": "800 MHz",
+    "+0.5": "800 MHz"
+   },
+   "over_anchor_pm0p5_pass": {
+    "-0.5": false,
+    "+0.5": true
+   },
+   "readout_note": "not resolved by the readout"
+  },
+  "RK3_c": {
+   "verdict": "FAIL",
+   "holds": {
+    "G1Q": {
+     "A_frac": 0.0233,
+     "inside": false,
+     "over_anchor_pm0p5_inside": {
+      "-0.5": false,
+      "+0.5": true
+     },
+     "readout_note": "not resolved by the readout"
+    },
+    "G2Q": {
+     "A_frac": -0.0116,
+     "inside": true,
+     "over_anchor_pm0p5_inside": {
+      "-0.5": true,
+      "+0.5": false
+     },
+     "readout_note": "not resolved by the readout"
+    }
+   },
+   "note": "rank 3 reads RK3-c on E166 and E167 together (both sessions)"
+  },
+  "carried_Q139e_reduce_e161": {
+   "verdicts": {
+    "G1Q E plateau/trajectory": "PASS",
+    "G1Q E clock": "PASS",
+    "G1Q A given watts": "PASS",
+    "G2Q E plateau/trajectory": "PASS",
+    "G2Q E clock": "PASS",
+    "G2Q A given watts": "PASS"
+   },
+   "session": {
+    "rms_plateau_err_from_the_bits_C": 0.694,
+    "n_holds": 2,
+    "G1Q_plateau_err_from_the_bits_C": -0.898,
+    "G2Q_clock_err_from_the_bits_MHz": 12.6,
+    "note": "G1Q's plateau is set by the bits through the chain; G2Q's by the governor's trip (its error tests the trip rule)"
+   },
+   "A_given_watts": {
+    "G1Q": {
+     "rms_C": 0.4844117930186926,
+     "plateau_err_C": 0.3667562685642962,
+     "max_abs_C": 1.3544929799871284,
+     "verdict": "PASS",
+     "registered_bands": {
+      "PASS": "rms <= 1.20 and |plateau| <= 1.30 C",
+      "FAIL": "rms > 2.20 or |plateau| > 2.40 C"
+     }
+    },
+    "G2Q": {
+     "rms_C": 0.4798274346146206,
+     "plateau_err_C": -0.22494969627948672,
+     "max_abs_C": 1.6833828134266469,
+     "verdict": "PASS",
+     "registered_bands": {
+      "PASS": "rms <= 1.20 and |plateau| <= 1.30 C",
+      "FAIL": "rms > 2.20 or |plateau| > 2.40 C"
+     }
+    }
+   }
+  },
+  "holds": {
+   "G1Q": {
+    "d_own": 0.9696,
+    "T_rest_C": 47.0,
+    "P_ref_W": 22.124,
+    "measured_rise_C": 15.935,
+    "measured_clock_MHz_window": 794.4,
+    "primary_M9a_at_own_d": {
+     "regime": "800 MHz",
+     "plateau_predicted_C": 62.299,
+     "plateau_err_C": 0.636,
+     "checkpoints_rms_C": 0.504,
+     "checkpoint_err_C": {
+      "60": 0.133,
+      "120": -0.227,
+      "180": -0.487,
+      "300": 0.353,
+      "450": 0.85,
+      "600": 0.703,
+      "750": 0.546,
+      "end": 0.293
+     },
+     "board_in_work_W_window_sim": 45.78
+    },
+    "reported_M9a_ref54_at_own_d": {
+     "regime": "800 MHz",
+     "plateau_predicted_C": 62.947,
+     "plateau_err_C": -0.012,
+     "checkpoints_rms_C": 0.493,
+     "checkpoint_err_C": {
+      "60": -0.242,
+      "120": -0.726,
+      "180": -1.051,
+      "300": -0.267,
+      "450": 0.209,
+      "600": 0.056,
+      "750": -0.103,
+      "end": -0.356
+     },
+     "board_in_work_W_window_sim": 46.79
+    },
+    "A_plateau_err_C": 0.372,
+    "A_frac_of_rise": 0.0233,
+    "carried": {
+     "rule": "800 MHz regime (G1Q's band)",
+     "verdict": "PASS",
+     "clock_verdict": "PASS"
+    },
+    "plan_at_measured_rest": {
+     "plateau_C_predicted": 62.27,
+     "note": "predictions-q140e.json E167.by_rest_die primary, interpolated in the rest die (the rest board by its law); reported only"
+    }
+   },
+   "G2Q": {
+    "d_own": 0.9702,
+    "T_rest_C": 47.0,
+    "P_ref_W": 22.186,
+    "measured_rise_C": 18.564,
+    "measured_clock_MHz_window": 681.6,
+    "primary_M9a_at_own_d": {
+     "regime": "trip",
+     "plateau_predicted_C": 65.9,
+     "plateau_err_C": -0.336,
+     "checkpoints_rms_C": 0.308,
+     "checkpoint_err_C": {
+      "60": -0.322,
+      "120": 0.265,
+      "180": -0.38,
+      "300": 0.066,
+      "450": 0.335,
+      "600": -0.362,
+      "750": -0.249,
+      "end": -0.363
+     },
+     "board_in_work_W_window_sim": 51.02,
+     "clock_predicted_MHz": 685.6,
+     "clock_err_MHz": -4.0
+    },
+    "reported_M9a_ref54_at_own_d": {
+     "regime": "trip",
+     "plateau_predicted_C": 65.9,
+     "plateau_err_C": -0.336,
+     "checkpoints_rms_C": 0.397,
+     "checkpoint_err_C": {
+      "60": 0.837,
+      "120": 0.477,
+      "180": -0.24,
+      "300": -0.144,
+      "450": 0.17,
+      "600": 0.148,
+      "750": 0.316,
+      "end": -0.323
+     },
+     "board_in_work_W_window_sim": 50.87,
+     "clock_predicted_MHz": 677.5,
+     "clock_err_MHz": 4.1
+    },
+    "A_plateau_err_C": -0.216,
+    "A_frac_of_rise": -0.0116,
+    "carried": {
+     "rule": "trip regime (the trip rule and the trip clock)",
+     "verdict": "PASS",
+     "clock_verdict": "PASS",
+     "trip_plateau_err_C": -0.336,
+     "checkpoints_note": "G2Q's checkpoints carry no skill (Q140(e) C9): printed, never read as a result"
+    },
+    "plan_at_measured_rest": {
+     "clock_MHz_trip_rule": 685.2,
+     "note": "predictions-q140e.json E167.by_rest_die primary, interpolated in the rest die (the rest board by its law); reported only"
+    }
+   }
+  }
+ },
+ "E161_problems": [],
+ "frozen_arms": {
+  "G1Q primary_M9a_at_d": true,
+  "G1Q M8_at_d": true,
+  "G1Q M8_continuous": true,
+  "G1Q RA1.3 at E161's anchor": true,
+  "G2Q primary_M9a_at_d": true,
+  "G2Q M8_at_d": true,
+  "G2Q M8_continuous": true,
+  "G2Q RA1.3 at E161's anchor": true
+ },
+ "frozen_arms_problems": [],
+ "gate_RA1_2_E2": {
+  "gated_session": {
+   "verdicts": {
+    "RK3_b": "not scored: the start gate",
+    "RK3_c_aifoundry2": "PASS",
+    "G2Q carried": "PASS",
+    "G2Q carried clock": "PASS",
+    "G1Q": "NOT RUN (the start gate)"
+   },
+   "G1Q": "NOT RUN (the start gate)",
+   "G2Q_clock_err_MHz": -4.0
+  },
+  "RA1_2_rule_at_the_rest_board_law": {
+   "47.0": "PASS",
+   "49.0": "PASS",
+   "49.4": "not scored: the trip edge inside the readout",
+   "49.6": "not scored: the trip edge inside the readout",
+   "50.5": "not scored: the trip regime"
+  },
+  "readout_edge_C": {
+   "rest_die_above_which_T_rest_plus_0p5_trips_C": 49.38,
+   "frozen_edge_die_and_board_together_C": 49.97,
+   "note": "both at the rest-board law p_ref_a2; the gate at 49.0 C sits under the readout edge"
+  },
+  "E2_no_anchors": {
+   "source": "fallback (no zeros-anchor read)",
+   "identical_to_primary": true
+  },
+  "E2_anchor_case": {
+   "delta_w": {
+    "int8": 1.0,
+    "fp32": 1.0,
+    "fp16": 1.0
+   },
+   "source": "the session's own zeros anchors (formats filled from the others: ['fp16', 'fp32'])",
+   "offset_shift_W": {
+    "600": 1.643488,
+    "700": 1.643488,
+    "800": 1.643488
+   },
+   "beta_x_delta_shift_W": 1.643488
+  }
+ },
+ "gate_RA1_2_E2_problems": [],
+ "problems": [],
+ "self_test_ok": true
+}
