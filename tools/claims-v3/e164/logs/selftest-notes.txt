@@ -1,0 +1,156 @@
+E164 fix-pass self-test (selftest_notes_e164.py): the desk checks behind E164.md.dated-note.md (E164-A1) and README.md.dated-note.md; no device, no ssh; scratch paths are not printed
+
+== 1. The launch: the deadline through ssh's command line (fault 1)
+  [PASS] the sandbox's queue_e164.sh is the committed one
+  A: the committed launch_e164.sh, its own usage line: ssh command [bash -s -- <deadline>] -> rc 0; launched; the session saw E164_DEADLINE [<date>], E164_DROP_P2 [unset]; queue: <time> e164: done, 0 passes, at T0+<n> s
+  [PASS] A reproduces fault 1: the session gets only the date and the queue runs no pass
+  B: launch_e164_a1.sh, the old usage line: ssh command [bash -s -- <deadline>] -> rc 0; launched; the session saw E164_DEADLINE [<deadline>], E164_DROP_P2 [unset]; queue: <time> e164: done, 5 passes, at T0+<n> s
+  [PASS] B launches with the whole deadline
+  C: launch_e164_a1.sh, the new usage line: ssh command [bash -s -- '<deadline>'] -> rc 0; launched; the session saw E164_DEADLINE [<deadline>], E164_DROP_P2 [unset]; queue: <time> e164: done, 5 passes, at T0+<n> s
+    passes expected by the queue's rule: 4 of the 4 planned (two kept passes are the scoring minimum)
+    holders at launch (et-holders and ps, counts only): card 1 ours 0, another user 0; card 0 ours 0, another user 0; other nodes or locks 0; our device processes 0; other users' device processes 0 (CI jobs 0)
+  [PASS] C launches with the whole deadline
+  D: the new line with E164_DROP_P2=1: ssh command [E164_DROP_P2=1 bash -s -- '<deadline>'] -> rc 0; launched; the session saw E164_DEADLINE [<deadline>], E164_DROP_P2 [1]; queue: <time> e164: done, 5 passes, at T0+<n> s
+  [PASS] D launches with the whole deadline
+  E: a deadline already past: ssh command [bash -s -- '<deadline>'] -> rc 4; nothing launched; REFUSED: the deadline is <n> s away; the scoring minimum, two passes, needs at least 1930 s: nothing launched
+  [PASS] E refused with exit 4 before anything is launched
+  F: a deadline 1,200 s away (one pass at most): ssh command [bash -s -- '<deadline>'] -> rc 4; nothing launched; REFUSED: the deadline is <n> s away; the scoring minimum, two passes, needs at least 1930 s: nothing launched
+  [PASS] F refused with exit 4 before anything is launched
+  G: a deadline 2,000 s away (two passes): ssh command [bash -s -- '<deadline>'] -> rc 0; launched; the session saw E164_DEADLINE [<deadline>], E164_DROP_P2 [unset]; queue: <time> e164: done, 5 passes, at T0+<n> s
+  [PASS] G launches with the whole deadline
+  H: not a date: ssh command [bash -s -- 'soon-ish PST'] -> rc 2; nothing launched; not a date: 'soon-ish PST': nothing launched
+  [PASS] H refused with exit 2 before anything is launched
+  I: no deadline: ssh command [bash -s] -> rc 2; nothing launched; usage: the deadline is required (the round's time gate less 10 minutes, 'YYYY-MM-DD HH:MM PST'): nothing launched
+  [PASS] I refused with exit 2 before anything is launched
+  J: card 1 held by another user: ssh command [bash -s -- '<deadline>'] -> rc 3; nothing launched; REFUSED: card 1's nodes or lock are held: nothing launched
+  [PASS] J refused with exit 3 before anything is launched
+  K: card 0 used by another user: ssh command [bash -s -- '<deadline>'] -> rc 0; launched; the session saw E164_DEADLINE [<deadline>], E164_DROP_P2 [unset]; queue: <time> e164: done, 5 passes, at T0+<n> s
+  [PASS] K launches with the whole deadline
+  L: ours on card 0: ssh command [bash -s -- '<deadline>'] -> rc 3; nothing launched; REFUSED: something of ours is on aifoundry1 (never two of our sessions there): nothing launched
+  [PASS] L refused with exit 3 before anything is launched
+  M: our device process running: ssh command [bash -s -- '<deadline>'] -> rc 3; nothing launched; REFUSED: something of ours is on aifoundry1 (never two of our sessions there): nothing launched
+  [PASS] M refused with exit 3 before anything is launched
+  N: et-holders unreadable: ssh command [bash -s -- '<deadline>'] -> rc 3; nothing launched; REFUSED: et-holders unreadable: nothing launched
+  [PASS] N refused with exit 3 before anything is launched
+
+== 2. K7W's planned precision, at E157's per-pass spreads, four E164 passes (fault 2)
+  the scale's standard error (relative): floats 0.0010-0.0022, int8 0.0154
+  [PASS] the re-run reproduces the registered planning numbers exactly (P(K7D) 0.172, P(K7W) 0.902, each tile's P(|delta| <= 0.05 W)) - P(K7D) 0.172, P(K7W) 0.902
+  per tile, nothing changed between the sessions (4,000 simulated session pairs, seed 16407, as registered):
+  | K7 tile | D, W | K7W half-width at E157's spreads, W | simulated half-width, median (5-95%), W | P(inside K7W) | P(|delta| <= 0.05 W) |
+  | fp32.real_qwen_softmax_v | 23.38 | 0.088-0.152 | 0.114 (0.066-0.194) | 0.993 | 0.858 |
+  | fp32.real_smol_softmax_v_causal | 12.83 | 0.148-0.162 | 0.151 (0.085-0.271) | 0.973 | 0.634 |
+  | fp16.real_qwen_qk | 18.26 | 0.089-0.132 | 0.108 (0.064-0.174) | 0.990 | 0.853 |
+  | fp16.e5m2grid_wide | 17.20 | 0.100-0.135 | 0.116 (0.070-0.195) | 0.987 | 0.803 |
+  | int8.powerlaw_df4_pc | 6.44 | 0.288 | 0.295 (0.188-0.461) | 0.981 | 0.357 |
+  | int8.bheld_bit1 | 5.63 | 0.253 | 0.258 (0.166-0.409) | 0.985 | 0.397 |
+  | int8.bheld_bit4 | 5.20 | 0.245 | 0.252 (0.163-0.387) | 0.982 | 0.421 |
+  | int8.real_qwen_w8a8_gate | 6.41 | 0.271 | 0.274 (0.168-0.441) | 0.975 | 0.378 |
+  so K7W's half-width is 0.245-0.288 W on the four int8 tiles and 0.088-0.162 W on the floats; E164.md's column (E157's se and passes only) gave 0.075-0.135 W on int8
+  [PASS] K7W's planned int8 half-width is wider than card 1's 0.1-0.2 W day-to-day floor - 0.245-0.288 W
+  int8.powerlaw_df4_pc's K7W half-width at E157's spreads with 4 / 8 / 16 E164 passes: 0.288 / 0.276 / 0.294 W
+  [PASS] more E164 passes do not narrow K7W's int8 width (E157's three passes set it)
+  a true day-to-day change on one tile, E164 higher by delta, everything else unchanged (2,000 session pairs each, seed 16408):
+  | K7 tile | delta 0.10 W: P(flagged by K7W) / P(outside 0.05 W) | delta 0.20 W | delta 0.30 W |
+  | fp32.real_qwen_softmax_v | 0.37 / 0.93 | 0.92 / 1.00 | 1.00 / 1.00 |
+  | fp32.real_smol_softmax_v_causal | 0.21 / 0.82 | 0.70 / 1.00 | 0.94 / 1.00 |
+  | fp16.real_qwen_qk | 0.42 / 0.92 | 0.95 / 1.00 | 1.00 / 1.00 |
+  | fp16.e5m2grid_wide | 0.36 / 0.91 | 0.92 / 1.00 | 1.00 / 1.00 |
+  | int8.powerlaw_df4_pc | 0.06 / 0.75 | 0.21 / 0.93 | 0.45 / 0.99 |
+  | int8.bheld_bit1 | 0.07 / 0.76 | 0.27 / 0.95 | 0.58 / 1.00 |
+  | int8.bheld_bit4 | 0.07 / 0.75 | 0.28 / 0.96 | 0.60 / 1.00 |
+  | int8.real_qwen_w8a8_gate | 0.07 / 0.75 | 0.23 / 0.94 | 0.52 / 0.99 |
+  [PASS] on int8, K7W flags a true 0.2 W change less than half the time - at most 0.28
+
+== 3. Who blocks E164 on aifoundry1, as the code reads it (fault 3)
+  block_e164.sh lines 28-39 (E164's override, used whenever V3_DEVICE is set: lib.sh refuses aifoundry1 without it); lib.sh lines 62-80 (A3)
+  | fixture | E164's code (block_e164.sh) | lib.sh's A3 rule |
+  | nobody holds anything | does not block | does not block |
+  [PASS] as expected: nobody holds anything
+  | another user holds card 0's node | does not block | blocks |
+  [PASS] as expected: another user holds card 0's node
+  | another user holds card 0's lock | does not block | blocks |
+  [PASS] as expected: another user holds card 0's lock
+  | another user holds card 1's node | blocks | blocks |
+  [PASS] as expected: another user holds card 1's node
+  | another user holds card 1's lock | blocks | blocks |
+  [PASS] as expected: another user holds card 1's lock
+  | another user's device process, no node held | does not block | blocks |
+  [PASS] as expected: another user's device process, no node held
+  | a CI job running (Runner.Worker, root) | does not block | blocks |
+  [PASS] as expected: a CI job running (Runner.Worker, root)
+  | et-holders unreadable | blocks | does not block |
+  [PASS] as expected: et-holders unreadable
+  | our own holder on card 1 (others_present ignores ours) | does not block | does not block |
+  [PASS] as expected: our own holder on card 1 (others_present ignores ours)
+
+== 4. The logs' scrub before the data commit (fault 4)
+  fixture (owner from the logs' /home/<login>/nekko/ path): rc 0; scrub: 1 file(s) rewritten (session.log); 1 other login(s) replaced as words; 2 et-who reading(s) summarised in et-who-summary.txt
+  [PASS] no trace of the other account is left in any file
+  [PASS] the owner's holder lines and the 'No process holds' line are kept byte for byte
+  [PASS] another user's uid in procs=[] is masked
+  [PASS] the queue log, which names nobody, is unchanged
+  et-who-summary.txt: session.log:2: held: card 0 another user 1, card 1 ours 2 | session.log:9: no holder on either card
+  [PASS] the summary counts card 0's other user and card 1's two of ours, no names
+  [PASS] --check reads OK after the scrub - scrub check: OK (0 left)
+  [PASS] --check refuses the unscrubbed fixture (exit 1) - scrub check: FAIL (5 left)
+  [PASS] two logins in the session's own paths and no --owner: refused (exit 2), nothing rewritten
+  [PASS] E157's committed logs (the parent session's; nobody else on the box) come through byte-identical - 13 files; scrub: 0 file(s) rewritten (none); 0 other login(s) replaced as words; 2 et-who reading(s) summarised in et-who-summary.txt
+  E157's et-who readings: session.log:4: no holder on either card | session.log:56: no holder on either card
+
+== 5. Every gate of E164 against E163's, and the rules only one registers (fault 5)
+  | rule | set | E163 needs at least | E164 needs at least | differs |
+  | P1 | priority-1 fp32 (17) | 9 | 6 | yes |
+  | P2 | priority-1 fp16 (9) | 5 | 4 | yes |
+  | P3 | priority-1 int8 (22) | 11 | 6 | yes |
+  | B1 | priority-1 floats (26) | 13 | 8 | yes |
+  | B2 | priority-1 int8 (22) | 11 | 6 | yes |
+  | H1 | priority-1 fp32 (17) | 9 | 6 | yes |
+  | H2 | priority-1 fp16 (9) | 5 | 4 | yes |
+  | H3 | priority-1 int8 (22) | 11 | 6 | yes |
+  | U1 | the 12 U tiles | 8 | 10 | yes |
+  | R1 | the 10 priority-1 real tiles | 7 | 8 | yes |
+  | R2 | the 10 priority-1 real tiles | 7 | 8 | yes |
+  | C1, H4 | the 48 | 10 (NOT SCORED under) | 10 | no |
+  | M1, M2 | the 48 | 10 | 10 | no |
+  [PASS] the machine gates match the words of both registrations
+  [PASS] 11 of the 11 gated rule slots differ (P1-P3, B1-B2, H1-H3, U1, R1, R2) - 11 differ
+  [PASS] R2 is gated with R1 by the real-tile minimum in both scorers
+  E163's rules: E163-KC, E163-P1, E163-P2, E163-P3, E163-B1, E163-B2, E163-C1, E163-M1, E163-M2, E163-M3, E163-U1, E163-H1, E163-H2, E163-H3, E163-H4, E163-R1, E163-R2, E163-RANK1, E163-K14, E163-K14′, E163-KE, E163-KE′
+  E164's rules: E164-PC, E164-P1, E164-P2, E164-P3, E164-B1, E164-B2, E164-C1, E164-M1, E164-M2, E164-U1, E164-H1, E164-H2, E164-H3, E164-H4, E164-R1, E164-R2, E164-X1, E164-X2, RK4, E164-K7C, E164-K7D, E164-K7W, E164-K7, E164-PCa
+  only E163: K14, K14′, KC, KE, KE′, M3, RANK1; only E164: K7, K7C, K7D, K7W, PC, PCa, RK4, X1, X2 (KC and PC are the same C rule, named apart)
+  other differences: bootstrap seed 16300 vs 16400 (both 20,000 draws, paired 5,000); heat references 0.1813 / 0.1589 / 0.2046 C (aifoundry3) vs 0.3519 / 0.3547 / 0.1408 C (card 1); E163 plans 3 kinds passes, E164 4; both score from 2 kept passes
+  [PASS] E163.md says E164 registers the other half of RANK1, and E164.md registers no RANK1
+  [PASS] rank1_e164.py reads E163-RANK1's precedence (PASS / NOT SCORED / FAIL) on six verdict sets
+  [PASS] E164-RANK1 needs exactly what E163-RANK1 needs, rule for rule
+
+== 6. The interpreters of the freeze (fault 6)
+  /usr/bin/python3: Python 3.9.6, numpy 1.26.4; python3 on the PATH: Python 3.13.11
+  [PASS] ref_errors_e164.py under /usr/bin/python3 3.9.6 rewrites ref-errors-m9.json byte for byte - rc 0, 18 s
+  [PASS] make_predictions_e164.py under /usr/bin/python3 3.9.6: predictions-e164.json and planned-intervals.txt byte for byte - rc 0, 95 s
+  python3 3.13.11: rc 0, 56 s; predictions-e164.json differs at lines [4522, 4613]; planned-intervals.txt byte-identical
+    k7.tiles.int8.bheld_bit4.E157.sd: committed 0.05946162350785097, python3 3.13.11 0.059461623507850975 (difference 6.9e-18)
+    k7.scale_anchors_E157.int8.anchor6_full.sd: committed 0.11953140150039766, python3 3.13.11 0.11953140150039768 (difference 1.4e-17)
+  [PASS] under python3 3.10+ only two reported sd fields differ, each in its last digit, and no verdict reads them
+
+== 7. The stops' hottest-tile sentence (E164.md, Stops)
+  pool 7's hottest M9 S on card 1: fp32.uniform_pm1 25.57 W; pool 6's hottest M8 S: fp32.anchor6_randn 25.575 W (run in E157 and again in E164); pool 6's hottest non-anchor tile: fp32.real_qwen_softmax_v 25.121 W
+  [PASS] pool 6's anchor fp32.anchor6_randn, which E164 runs, is predicted hotter than pool 7's hottest tile
+
+== 8. The card-minutes, from E157's measured session on this card
+  E157: first pass at T0+58 s, passes [665, 675, 658, 674] s for 78 launches; scaled to 98: [836, 848, 827, 847] s; four passes, three 10 s gaps and the queue's sleep after the last: the session ends about T0+3455 s = 57.6 card-minutes (56.7-58.2 at the shortest and longest pass)
+  [PASS] the fourth pass starts inside the 3,840 s limit and a fifth does not fit; the session ends inside the 65-minute cap
+
+== 9. Every hash list, and the kit's committed files
+  [PASS] blind7/SHA256SUMS - 91 OK
+  [PASS] frozen-sha256-e168.json - 9 of 9
+  [PASS] frozen-sha256-e168-scorer.txt - 18 of 18
+  [PASS] predict_q140e's FROZEN input hashes - 26 of 26
+  [PASS] check_e164.py --desk (harness-e164.json) - HARNESS OK: 103 files match harness-e164.json (desk: binaries not checked)
+  [PASS] every file of the kit's three commits is unchanged in the tree (only new files are added) - 58 files, 0 changed
+  [PASS] no E164 data exists in the repository's history - 0 paths
+
+== 10. The device-command audit of the new files
+  [PASS] dmcmd_audit.py on the five new files reads GO with no send site - dmcmd_audit: GO (0 send site(s), 0 disallowed; allow-list: none)
+
+RESULT: 56 PASS, 0 FAIL
