@@ -309,3 +309,14 @@ labelled arms), `score_e152.py` (every rule), `collect_e152.sh`, `selftest_e152.
 *Note added after the run (not an amendment: no procedure, prediction or rule changed), Tue 3 Nov 2026, 06:2x PST: § Decision rules
 gives R2's band as [236.6, 289.2] fJ; the frozen value the scorer uses is 0.9 × 262.9449 = 236.650 fJ (236.7 at one decimal) in
 `predictions-e152.json` › `price`. The result: [`docs/reports/data/2026-11-03-e152-gate-dose/`](../../../docs/reports/data/2026-11-03-e152-gate-dose/README.md).*
+
+*Dated note added after verification (not an amendment: no procedure, prediction, rule or verdict changed), Tue 3 Nov 2026, about
+16:50 PST, desk only. This registration does not mention Q139(u)'s one reduction footing, the critic's rank 1, although the footing
+rule (`d4c36bfe`, committed 04:02:21 PST) and its frozen per-card slopes, aifoundry3's 0.2056 W/°C among them (`f47669d1`, 04:20:29),
+were committed 84 minutes before this registration (`2a744f4d`, 05:44:49) and are in its history, and M8's frozen columns above (the
+`m8-bridge/` predictions, "Q139(u)'s footing") are on it. The footing was registered neither as the primary nor as an arm. The primary
+stayed E127's on this card (§ What runs), the reduction E127's frozen price p\* was read on, so R2 compares like with like. The
+results' readings on the footing are post hoc for this reason, not because the footing came later. This file is outside the freeze's
+hashes (`make_predictions_e152.py` leaves `README.md` out), so the note moves no frozen sha256. The result's corrections:
+[`docs/reports/data/2026-11-03-e152-gate-dose/`](../../../docs/reports/data/2026-11-03-e152-gate-dose/README.md) § Corrections after
+verification, C5.*

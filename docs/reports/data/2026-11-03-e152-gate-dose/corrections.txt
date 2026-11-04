@@ -1,0 +1,57 @@
+E152, corrections after verification: the numbers (post hoc, labelled; never a verdict)
+C8* (E127's price x 4,080 flips x the op rate, frozen) = 1.2027 W; tau = 0.10 x C8* = 0.1203 W
+
+C1. How precisely the ladder is linear: the 3% figures are point estimates; the 95% bounds reach about 10%
+  registered: C(8) +1.1617 +- 0.1491 W
+    delta(1) +0.0298 W [-0.0373, +0.0969]: point +2.48% of C8* (+2.57% of the session's C(8)); 95% -3.1% to +8.1% of C8*; |delta| + h = 8.06% of C8*
+    delta(2) +0.0149 W [-0.0949, +0.1247]: point +1.24% of C8* (+1.28% of the session's C(8)); 95% -7.9% to +10.4% of C8*; |delta| + h = 10.37% of C8*
+    delta(4) +0.0254 W [-0.0701, +0.1208]: point +2.11% of C8* (+2.18% of the session's C(8)); 95% -5.8% to +10.0% of C8*; |delta| + h = 10.05% of C8*
+    the three intervals span -7.9% to +10.4% of C8*; the worst |delta| + h is 10.37% of C8* (the rule's line is 10%)
+  footing: C(8) +1.1856 +- 0.1159 W
+    delta(1) +0.0140 W [-0.0515, +0.0796]: point +1.17% of C8* (+1.18% of the session's C(8)); 95% -4.3% to +6.6% of C8*; |delta| + h = 6.62% of C8*
+    delta(2) +0.0089 W [-0.0716, +0.0895]: point +0.74% of C8* (+0.75% of the session's C(8)); 95% -6.0% to +7.4% of C8*; |delta| + h = 7.44% of C8*
+    delta(4) +0.0249 W [-0.0586, +0.1085]: point +2.07% of C8* (+2.10% of the session's C(8)); 95% -4.9% to +9.0% of C8*; |delta| + h = 9.02% of C8*
+    the three intervals span -6.0% to +9.0% of C8*; the worst |delta| + h is 9.02% of C8* (the rule's line is 10%)
+  registered: the least-squares intercept of C(n) on n = 1, 2, 4, 8, fitted per pass, t(5) over the six passes: +0.0308 +- 0.1031 W = -6.0% to +11.1% of C8* (point +2.6%; equal to scored.json's line of the means, +0.0308; C(n) per pass from runs alone matches the scorer's to 0.0e+00 W)
+  footing: the least-squares intercept of C(n) on n = 1, 2, 4, 8, fitted per pass, t(5) over the six passes: +0.0182 +- 0.0861 W = -5.6% to +8.7% of C8* (point +1.5%; equal to scored.json's line of the means, +0.0182; C(n) per pass from runs alone matches the scorer's to 0.0e+00 W)
+  the per-boundary test, gd1h - mean(gd1a, gd1b): +0.020 W [-0.104, +0.144] (a per-boundary cost would make it negative): its interval is 0.247 W wide, against the single-lane contrast C(1) = +0.175 W itself: unresolved
+  mirror pair n=1: +0.038 +- 0.216 W: unresolved
+  mirror pair n=2: +0.054 +- 0.151 W: unresolved
+  mirror pair n=4: +0.039 +- 0.166 W: unresolved
+
+C2. M8's per-flip price against the ladder: 7% is a point estimate, not a resolved difference as registered
+  registered: the ladder's price 251.5 +- 21.9 fJ [229.6, 273.5]; ladder / M8 whole = 1.069 (point)
+    M8 whole at E127's pair 235.3 fJ: INSIDE the interval (by 5.7 fJ)
+    M7 whole at E127's pair 240.9 fJ: INSIDE the interval (by 11.3 fJ)
+    M6 whole at E127's pair 247.9 fJ: INSIDE the interval (by 18.3 fJ)
+  footing: the ladder's price 259.2 +- 20.1 fJ [239.1, 279.3]; ladder / M8 whole = 1.101 (point)
+    M8 whole at E127's pair 235.3 fJ: outside the interval by 3.8 fJ
+    M7 whole at E127's pair 240.9 fJ: INSIDE the interval (by 1.8 fJ)
+    M6 whole at E127's pair 247.9 fJ: INSIDE the interval (by 8.8 fJ)
+  registered C(8) = +1.162 +- 0.149 W = [+1.013, +1.311]: M8's linear-bench +1.076 inside: True; E127's frozen C8* +1.203 inside: True
+  registered: the contrasts' 95% half-widths C(1) 0.078, C(2) 0.138, C(4) 0.103, C(8) 0.149 W (smallest 0.078); rms of measured - predicted over the four contrasts: E127's price 0.0242 W, M8 whole 0.0610 W; both below the smallest half-width: True
+  footing: the contrasts' 95% half-widths C(1) 0.066, C(2) 0.097, C(4) 0.065, C(8) 0.116 W (smallest 0.065); rms of measured - predicted over the four contrasts: E127's price 0.0135 W, M8 whole 0.0713 W; both below the smallest half-width: False
+  M8's errors by dose (registered, measured - predicted): +0.0405, +0.0363, +0.0680, +0.0854 W
+  every C(n) is D(dose n) - D(gd0): D(gd0) = 4.668 +- 0.061 W, so a shift of D(gd0) inside its own 95% half-width moves all four contrasts together by up to 0.061 W, more than M8's gaps at one and two lanes (+0.041, +0.036 W): 'low at every dose' is not four independent readings
+
+C3. The run count: 186 runs planned, 185 ran; one anchor skipped by E78's registered launch gate
+  p15210: planned 31, ran 31 (E152 tiles 11 of 11, failing a run gate 0, int8.zeros 3 of 3)
+  p15211: planned 31, ran 31 (E152 tiles 11 of 11, failing a run gate 0, int8.zeros 3 of 3)
+  p15212: planned 31, ran 30 (E152 tiles 11 of 11, failing a run gate 0, int8.zeros 2 of 3); run.log line 33: 06:04:23 [aifoundry3] pass 15212 #29 int8.zeros: launch reading not reached (hot 59.0 C, now 59.0 C after 0 heats, 0.7 s, quiet 0.71 s): skipped
+  p15213: planned 31, ran 31 (E152 tiles 11 of 11, failing a run gate 0, int8.zeros 3 of 3)
+  p15214: planned 31, ran 31 (E152 tiles 11 of 11, failing a run gate 0, int8.zeros 3 of 3)
+  p15215: planned 31, ran 31 (E152 tiles 11 of 11, failing a run gate 0, int8.zeros 3 of 3)
+  in all: 185 of 186 planned runs ran; every E152 tile ran in every pass; the skipped run is an anchor, which leaves int8's zeros level in that pass on two runs (it is int8.full's reference, an S1 cell only)
+
+C4. Two doses cross tau, not one
+  n=1: |delta| + h = 0.0969 W (8.06% of C8*), -0.0233 W against tau 0.1203
+  n=2: |delta| + h = 0.1247 W (10.37% of C8*), +0.0044 W against tau 0.1203  CROSSES
+  n=4: |delta| + h = 0.1208 W (10.05% of C8*), +0.0006 W against tau 0.1203  CROSSES
+
+C5. Q139(u)'s footing existed when E152 registered; how much of the session's noise the 'auto' slope explains
+  the registration's text before its Amendments: 'Q139(u)' x0, '0.2056' x0, 'footing' x1; the line: | a run | E78's: `sparsity_host --test fma --type fp32 --pattern none --values file:<tile> --shires 0xffffffff --per-shire 32 --seconds 4`, 1,024 minions, heat 
+  m8-bridge (the frozen M8/M7/M6 columns): footing {"a3": 0.20563713796102187, "c1": 0.3134106532552718} W/C, dips 'E82 A2 once' (Q139(u)'s footing)
+  Q2 (q_chk - q_steady) per-pass sd: registered 0.228 W, footing 0.157 W, E127 0.076 W (5 passes; E127's sha256 checked): 3.0x and 2.1x E127's
+  the variance above E127's: registered 0.0462 W^2, footing 0.0190 W^2: the footing's slope removes 59% of it (a point reading from six and five passes' sd)
+
+wrote corrections.json
