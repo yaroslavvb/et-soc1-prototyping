@@ -1,0 +1,37 @@
+{
+ "note": "Section 26 of the round's rules: \"Each scorer is self-tested on its parent run's committed data. The self-test must reproduce the parent's\nregistered verdicts, and its output is committed.\" score_e166.py's self-test gives back Q140(e)'s posthoc.json E154 figures exactly, but not\nE154's own registered verdicts (scored.json's eleven, all PASS, on Q139(e)'s predictions). This script adds that:\n  (1) E154's registered scorer, tools/claims-v3/e154/score_e154.py, unchanged, run exactly as E154's data README gives the command, on\n      E154's committed pass (docs/reports/data/2026-11-03-e154-heat-e2e-aifoundry3/aifoundry3/e154/p15420), into a temporary file: it must\n      equal the committed scored.json byte for byte, and its eleven verdicts must read as registered (every one PASS);\n  (2) score_e166.py --self-test, unchanged, re-run: it must pass and equal the committed logs/selftest-e166-kit.json byte for byte.\nNothing is fitted; nothing in the repo is written (the outputs go to a temporary directory, removed after).",
+ "frozen_sha256": {
+  "tools/claims-v3/e154/score_e154.py": "c911d4d9e6b2cc57",
+  "docs/reports/data/2026-11-03-e154-heat-e2e-aifoundry3/scored.json": "9dc62828bd10d846",
+  "tools/claims-v3/e166/score_e166.py": "752dc6b15d618d7d",
+  "tools/claims-v3/e166/logs/selftest-e166-kit.json": "76708f57133b91a3"
+ },
+ "problems": [],
+ "E154_registered_scorer": {
+  "command": "python3 tools/claims-v3/e154/score_e154.py docs/reports/data/2026-11-03-e154-heat-e2e-aifoundry3/aifoundry3/e154/p15420 --json <tmp>/scored.json",
+  "rc": 0,
+  "byte_identical_to_committed_scored_json": true,
+  "verdicts": {
+   "H_M b": "PASS",
+   "H_M c_replicate": "PASS",
+   "H_M A": "PASS",
+   "K_S E": "PASS",
+   "K_S A": "PASS",
+   "K_Q E": "PASS",
+   "K_Q A": "PASS",
+   "K_L E": "PASS",
+   "K_L A": "PASS",
+   "K_O E": "PASS",
+   "K_O A": "PASS"
+  },
+  "verdicts_as_registered": true,
+  "n_verdicts": 11,
+  "n_PASS": 11
+ },
+ "score_e166_self_test": {
+  "rc": 0,
+  "self_test_ok": true,
+  "byte_identical_to_committed_selftest_e166_kit_json": true
+ },
+ "self_test_ok": true
+}
