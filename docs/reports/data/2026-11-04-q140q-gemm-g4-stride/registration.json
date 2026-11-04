@@ -1,0 +1,40 @@
+{
+ "lane": "Q140(q)",
+ "date": "2026-11-04",
+ "answers": {"critic_q139_ranks": [5, 6], "kinds_page_section_11_items": [1, 6]},
+ "registered_before": "any fit, score or prediction of this lane",
+ "part_A_G4": {
+  "base": "G3 as frozen at 91def7c4 (docs/reports/data/2026-11-03-q139q-gemm-g3/g3_model.py): P0 levels, E119 burst-cap dither 66.15 +- 2.75 W, trip on G3's grid, Q138(t) aifoundry2 chain, OFF_SHARE 0.5, dt 0.2 s, 20 s anchor, window = in-kernel samples of the last 40 s",
+  "terms_in_order": [
+   {"name": "T_Z", "what": "Q140(l)'s zeros level: every level + beta x delta_t", "beta": 0.648275, "delta_fallback_w": {"fp32": -1.533980, "fp16": -1.506775, "int8": -1.535169}, "T_ref_c": 54.3818, "fitted": "nothing"},
+   {"name": "T_D", "what": "one die law: level = P0(f) [+ beta delta] + k_D (T(t) - T_ref), replacing G3's k_eff (T - T_start)", "T_ref_c": 54.3818, "k_D_grid_w_per_c": [0.44, 0.47, 0.50]},
+   {"name": "T_G", "what": "the governor's process-boundary and in-process steps folded into one dip at each process's kernel start: d_G x the process's kernel seconds at 618 MHz when L800(T) >= P_G", "f_dip_mhz": 618.0, "d_G_grid": [0.0, 0.03, 0.06, 0.09, 0.12], "P_G_grid_w": [44, 48, 52, 56]},
+   {"name": "T_S", "what": "M8's span fraction for other kinds (structural, not selected): S(k) = S(zeros) + phi_k (S(top) - S(zeros)), phi_k = D_M8(k) / D_M8(top) at 600 MHz on aifoundry3's footing"}
+  ],
+  "G3_grids": {"k_eff_w_per_c": [0.0, 0.1, 0.2, 0.3, 0.442], "trip_c": [65.1, 65.3, 65.5, 65.7, 65.9]},
+  "rows": "the 56 runs of posthoc-g3-inputs.json (E119, E126, E136, E146) + E159's 9 holds rebuilt on e159_g3.score's path: 65 runs, 5 sessions",
+  "folds": "leave one session out; every constant chosen inside each fold on the other four sessions",
+  "loss": "sum over runs of (clock/15)^2 + (W/2)^2 + (die/1)^2 (G3's)",
+  "forward_rule": "A0 = G3 nested; T_Z, T_D, T_G added in order to the model kept so far; a term carries if the held-out loss falls in >= 3 of 5 sessions and pooled; kept if it carries; G4 = G3 + kept + T_S, constants then chosen on all five sessions and frozen",
+  "scored": "per held-out session and pooled: window clock, board, die (rms, mean, inside 15 MHz / 2 W / 1 C); arms G3 as frozen, G3 nested, E136's law, the chain on the measured trace; paired bootstrap of G3 nested - G4 nested rms over runs (10,000)",
+  "reported_checks": ["E158's 42 zeros bursts' p800 vs P0 + beta delta + k_D (T_start - T_ref)", "E159's three zeros holds' window spread", "E136's four other-kind runs with T_S vs E136's law"],
+  "E168_design": {
+   "shapes": {"S1": "gemmL1x3x3", "S2": "gemmL3x3x2", "S3": "gemmL3x5x3"},
+   "holds": ["S1 fp32 randn cold", "S1 fp32 randn warm55", "S2 fp32 randn cold", "S2 fp32 randn warm55", "S3 fp32 randn cold", "S3 fp32 randn warm55", "S2 int8 zeros warm55", "S2 int8 real_smol_w8a8_down warm55", "S2 int8 sparse50 warm55"],
+   "hold": "12 processes of --seconds 8 (budget 9.5, tail 6), about 106 s, last 40 s read",
+   "primary": "G4 mechanical from each hold's own measured start (e159_g3.score's path); T_Z on the fallback unless the session ran kinds zeros anchors (then a second arm)"
+  },
+  "E168_rules": {"per_hold": {"clock_mhz": 15, "board_w": 2, "window_die_c": 1}, "pass_if_inside_on_at_least": "8 of 9 per quantity", "increment_rule": "int8 W8A8 real and int8 sparse50 at S2, window board minus int8 zeros at S2, within 15% of G4's frozen 800 MHz level span int8 full - int8 zeros at S2 at the hold's window die", "beside": ["E136's law", "G3 as frozen"]},
+  "peak_rule": "P0(800) + 8.51 W <= 82 W (G3's frozen rule, no level term); else duty-cycled or dropped; stops board > 85 W on 3 live samples or die >= 76 C"
+ },
+ "part_B_stride": {
+  "mapping": "L3 shire PA[10:6], bank PA[12:11], sub-bank PA[14:13], set PA[22:15] (256 sets at 32 MB), 4 ways, true LRU assumed; tile set = tile address bits [22:10], 8192 sets x 4 ways of 1 KB tiles",
+  "offsets": "C at 0, A at C's size, B at C's + A's size (runtime first-fit, host order out, a, b)",
+  "term_SM": "E146's l3_steps with the set-mapped L3; E146's split(); MAB's frozen prices; T(f) = C/f + M through 600 and 800 MHz; no constant fitted",
+  "sensitivity_arms": ["all three buffers 8 MB aligned", "A's lines from the L3 as E158, only B from SM"],
+  "dram_term": "not registered: no public source found for the PA-to-memshire interleave",
+  "scored_committed": {"S1": "SM rms on E146's 24 cells and E158's 22 rungs vs ISO (10.6% out of sample / 4.6% in sample) and STRICT", "S2": "SM within 3% on K6n4, K4n8, D4, D8", "S3": "SM's far-B share vs E158's measured share per rung"},
+  "E169_shapes": {"P1": "gemmL1x8x5", "P2": "gemmL2x8x3", "P3": "gemmL1x4x8", "N1": "gemmL1x7x5", "N2": "gemmL2x6x3", "N3": "gemmL1x5x8"},
+  "E169_rules": "SM's frozen T800 within 3% on every shape (fp32 zeros bursts, launches >= 790 MHz); resolved on each power-of-two shape: |T_SM - T_ISO| / T_ISO >= 3% and measured closer to SM than to ISO"
+ }
+}
