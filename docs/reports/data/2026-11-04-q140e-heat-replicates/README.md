@@ -35,6 +35,13 @@ not about 03:00.*
 - *`REGISTRATION.md`, `registration.json`, `predictions-q140e.json`/`.txt` and `posthoc.json`/`.txt` are byte-identical to `c9aaf179`, and
   so are both scripts.*
 
+*(Dated note, Wed 4 Nov 2026, after `a4fe976d`.) Two time stamps of that pass run past its own commit, the same slip as C1's:*
+- *these notes say "about 04:10 PST" and "about 03:30-04:10 PST";*
+- *[`REGISTRATION-AMENDMENT-1.md`](REGISTRATION-AMENDMENT-1.md)'s header says "about 03:30-04:10 PST".*
+
+*They were written about **03:20-03:43 PST** and committed in `a4fe976d` at **03:43:53 PST**. That is after the freeze `c9aaf179`
+(02:46:04) and before any E166 or E167 claim or data. RA1's text is left as committed.*
+
 ## Results first
 
 **Frozen for the two replicate sessions** ([`predictions-q140e.json`](predictions-q140e.json), [`predictions-q140e.txt`](predictions-q140e.txt)):
