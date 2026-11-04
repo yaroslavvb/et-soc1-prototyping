@@ -1,0 +1,49 @@
+PASS the scorer's frozen inputs match their committed bytes (5 files)
+
+1. A negative step (REGISTRATION-A2.md.dated-note-2.md, item 1)
+PASS both decisive pairs at -6%: P1/N1 -6.00% [-6.39, -5.61] 'NONE OF THE THREE: below every zone (ISO's lowest)', presence UNRESOLVED, size NOT SM; P3/N3 -6.00% [-6.39, -5.61] 'NONE OF THE THREE: below every zone (ISO's lowest)', presence UNRESOLVED, size NOT SM -> VERDICT UNRESOLVED
+PASS P1/N1 at +30% (a step, not SM's size), P3/N3 at -6%: P1/N1 presence PRESENT, size NOT SM; P3/N3 -6.00% [-6.39, -5.61] 'NONE OF THE THREE: below every zone (ISO's lowest)', presence UNRESOLVED, size NOT SM -> VERDICT UNRESOLVED
+PASS P1/N1 at SM's step, P3/N3 at -6%: P1/N1 presence PRESENT, size SM; P3/N3 -6.00% [-6.39, -5.61] 'NONE OF THE THREE: below every zone (ISO's lowest)', presence UNRESOLVED, size NOT SM -> VERDICT UNRESOLVED
+PASS P1/N1 at 0 (no step), P3/N3 at -6%: P1/N1 presence ABSENT, size NOT SM; P3/N3 -6.00% [-6.39, -5.61] 'NONE OF THE THREE: below every zone (ISO's lowest)', presence UNRESOLVED, size NOT SM -> VERDICT UNRESOLVED
+PASS P1/N1 on the -3.0 edge, P3/N3 at 0: P1/N1 -3.00% [-3.40, -2.60] 'UNRESOLVED: crosses the edge of ISO's zone, STRICT's zone', presence UNRESOLVED, size NOT SM -> VERDICT UNRESOLVED (the table's 'a presence crosses its edge')
+PASS P2/N2 (reported, not counted) at -6%, both decisive pairs at SM's steps: P2/N2 'NONE OF THE THREE: below every zone (STRICT's lowest)' -> VERDICT INDEX STEP AS SM (unchanged by it)
+PASS sweep, 222 made-up sessions (each decisive pair's step -10% to +45% by 0.5 points, the other at SM's): presence UNRESOLVED exactly when the interval holds -3.0 or +3.0 points (4) or lies wholly below -3.0 points (28), never both; every negative step reads 'NONE OF THE THREE: below every zone' with size NOT SM; the verdict UNRESOLVED exactly then
+
+2. A pass split across two sessions (note-2, item 2; README.md.dated-note.md, step 7)
+     E158's 98 runs cut after run 42 (block C, its pass 2): 14 of block C's 28 runs in s1, 14 in s2
+PASS two sessions: reduce_e169 on s1 + s2 reproduces E158's results.json t800_by_pass exactly
+PASS two sessions: reduce_e169 on s1 + s2 reproduces E158's results.json launches_800_by_pass exactly
+PASS two sessions: reduce_e169 on s1 + s2 reproduces E158's results.json cycles_per_op_800_by_pass exactly
+PASS two sessions: reduce_e169 on s1 + s2 reproduces E158's results.json per_shape exactly
+PASS two sessions: reduce_e169 on s1 + s2 reproduces E158's results.json checks exactly
+PASS two sessions: 98 runs over ['s1', 's2'], each run once
+PASS two sessions: cells, skipped and config_after equal to E158's results.json
+PASS two sessions: peaks the same values in the same runs; only the session in a run's name changes where that run now sits in s2 (board_run, die_mean_run)
+PASS two sessions: E158's registered score() on s1 + s2 reproduces results.json rules and errors exactly (R1 INCONSISTENT, R2 NO SINGLE CURVE, R3 PASS, R4 NOT BETTER, R5 10 of 14)
+PASS two sessions, E158 D4/D2 (pass 2's D4 in s1, D2 in s1): +26.53% [+25.48, +27.59] over 3 passes -> UNRESOLVED, as on one session
+PASS two sessions, E158 K4n8/K4n7 (pass 2's K4n8 in s1, K4n7 in s1): +28.90% [+27.83, +29.98] over 3 passes -> NONE OF THE THREE, as on one session
+PASS two sessions, E158 K6n4/K6n3 (pass 2's K6n4 in s2, K6n3 in s1: split): +33.29% [+32.18, +34.41] over 3 passes -> SUPPORTS SM, as on one session
+PASS two sessions, E158 K6n4/K6n5 (pass 2's K6n4 in s2, K6n5 in s2): +14.85% [+13.90, +15.82] over 3 passes -> NONE OF THE THREE, as on one session
+PASS two sessions: 1 of the four committed collapses have pass 2's two bursts in two sessions, and every one counts
+PASS two sessions: E169's R0 over both reads PASS on 98 runs
+
+3. A dry pass in the real run directory (README.md.dated-note.md, step 4)
+PASS the dry smoke on the toy card: exit 0, end.json exit 0
+PASS a second session into the same directory: exit 2 ('already holds a session'), end.json left as the dry pass wrote it
+PASS the real queue's smoke check on the dry records left there: 'smoke: SMOKE-01-P1-fp32-zeros-r1 546.0 cycles per op, the frozen law's 1596.6' -> QUEUE-HALT, no session (the frozen smoke cycles 1596.6-1700.5, 50-250% allowed; the toy card's 546)
+PASS the same records pass the dry queue's own smoke check (it skips the config and cycles checks), so the box's dry pass itself looks sound
+
+4. The zero tiles (README.md.dated-note.md, step 2)
+PASS the six protocols name 3 tile file(s); frozen-sha256-e169-tiles.txt lists 3, the same set
+PASS tools/claims-v3/kinds/tiles/fp16/zeros.bin: 2048 bytes, every byte zero, sha256 e5a00aa9991ac8a5... (2,048 zero bytes hash to e5a00aa9991ac8a5...)
+PASS tools/claims-v3/kinds/tiles/fp32/zeros.bin: 2048 bytes, every byte zero, sha256 e5a00aa9991ac8a5... (2,048 zero bytes hash to e5a00aa9991ac8a5...)
+PASS tools/claims-v3/kinds/tiles/int8/zeros.bin: 2048 bytes, every byte zero, sha256 e5a00aa9991ac8a5... (2,048 zero bytes hash to e5a00aa9991ac8a5...)
+
+5. B7's point, measured / SM - 1 (note-2, item 3)
+PASS P1 at 1.0305 x SM's T800: measured / SM - 1 = +3.05% -> outside 3%, B7 point FAIL (1 of 6 outside 3%); |SM / measured - 1| = 2.96% would read it inside
+PASS P1 at 0.9705 x SM's T800: measured / SM - 1 = -2.95% -> inside 3%, B7 point PASS; |SM / measured - 1| = 3.04% would read it outside
+
+6. The count of selftest_e169.py's made-up truths (README.md.dated-note.md)
+PASS selftest_e169.py part 3: 22 checks, 0 failed, on 17 made-up reductions (calls of score(): SM's truth carries 4 checks, ISO's 3 with the floor's, every other one 1); with parts 1-2's 20, 42 checks in all
+
+ALL PASS

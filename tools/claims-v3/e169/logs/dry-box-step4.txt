@@ -1,0 +1,35 @@
+# E169's box step 4 (README.md.dated-note.md), rehearsed on the Intel on Wed 4 Nov 2026, 10:32:06-10:36:57 PST, before any E169 claim or data.
+# An archive copy of the lab tree's tools/ and Q140(q)'s data dir, at the commit named below; from the copy's top directory, the note's step 4 as written,
+# ~/claude/work standing in a scratch directory: the dry slot file, queue_e169.py --dry with its own --runs build/e169/dry and the dry protocols,
+# then score_e169.py on build/e169/dry/s[1-6] (step 7's glob). run_hpl.py's toy card: no device, no lock, no ssh. The toy card's time per op is its
+# own constant, so the verdicts are not readings (every one is labelled DRY), and R0 reads FAIL because the toy card writes no check of C, as in
+# the kit's own dry pass (logs/dry-score.txt) and E158's. Made by a scratch script; the lines below are its output.
+tree: archive of 983e9499, started 10:32:06 PST
+queue rc 0
+score rc 0
+build/e169/runs absent: the real queue starts in an empty directory
+session dirs the step-7 glob s[1-6] expands to: s1
+queue records:
+  {"kind": "queue_start"}
+  {"kind": "card_free"}
+  {"kind": "before_first_launch"}
+  {"kind": "session_start", "name": "smoke"}
+  {"kind": "session_end", "name": "smoke", "rc": 0, "end": {"exit": 0, "reason": "done", "card_min": 0.5}}
+  {"kind": "smoke_check", "rc": 0, "bad": null}
+  {"kind": "session_start", "name": "stoptest-board"}
+  {"kind": "session_end", "name": "stoptest-board", "rc": 4, "end": {"exit": 4, "reason": "safety:board 35.1 W > 30 W on 3 samples", "card_min": 0.0}}
+  {"kind": "stoptest_detail", "name": "stoptest-board", "trip_after_line_ms": 1, "launch_end_after_trip_ms": 266}
+  {"kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+  {"kind": "session_start", "name": "stoptest-die"}
+  {"kind": "session_end", "name": "stoptest-die", "rc": 4, "end": {"exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}}
+  {"kind": "stoptest_detail", "name": "stoptest-die", "trip_after_line_ms": 52}
+  {"kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+  {"kind": "session_start", "name": "s1"}
+  {"kind": "session_end", "name": "s1", "rc": 0, "end": {"exit": 0, "reason": "done", "card_min": 4.2}}
+  {"kind": "s1_end", "rc": 0}
+  {"kind": "queue_end"}
+E169: 50 runs in ['s1']; refused by the admission rule: 0; config after every run ['{"tdp_w": 65, "temp_threshold_c": 65}']; peaks {'board_max_w': 37.77, 'board_run': 's1/F-05-P3-fp16-zeros-r1', 'die_mean_max_c': 57, 'die_mean_run': 's1/A-04-N3-fp32-zeros-r1',
+R0 the check of C: FAIL (50 runs; results []); N1-fp32-zeros (A): no check; P1-fp32-zeros (A): no check; N2-fp32-zeros (A): no check; P2-fp32-zeros (A): no check; N3-fp32-zeros (A): no check; P3-fp32-zeros (A): no check; K4n7-fp32-zeros (A): no check; K4n8-fp3
+
+11:VERDICT on the L3's 8 MB index (P1/N1 and P3/N3): NO STEP [R0 FAIL; session not tied to E158; DRY (the toy card: not a reading)]
+ended 10:36:57 PST
