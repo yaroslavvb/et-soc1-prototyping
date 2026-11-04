@@ -1,0 +1,76 @@
+E157 self-test: score_e157.score on simulated sessions (30 a world, 3 passes, 0.05 W pass noise, 2,000 draws); nothing here is a measurement
+
+[as_good]
+  E157-B1: FAIL HIGH 2, PASS 28
+  E157-B2: FAIL HIGH 2, PASS 28
+  E157-C1: PASS 30
+  E157-H1: FAIL 1, PASS 29
+  E157-H2: PASS 30
+  E157-H3: FAIL 1, PASS 29
+  E157-H4: PASS 30
+  E157-M1: BETTER 25, NOT RESOLVED 5
+  E157-M2: BETTER 18, NOT RESOLVED 12
+  E157-P1: PASS 30
+  E157-P2: PASS 30
+  E157-P3: FAIL 1, PASS 29
+  E157-R1: FAIL 4, PASS 26
+  E157-R2: FAIL 12, PASS 18
+
+[twice]
+  E157-B1: FAIL HIGH 3, FAIL LOW 8, PASS 19
+  E157-B2: FAIL HIGH 4, FAIL LOW 6, PASS 20
+  E157-C1: FAIL 21, PASS 9
+  E157-H1: FAIL 1, PASS 29
+  E157-H2: FAIL 1, PASS 29
+  E157-H3: FAIL 1, PASS 29
+  E157-H4: FAIL 1, PASS 29
+  E157-M1: BETTER 17, NOT RESOLVED 13
+  E157-M2: BETTER 10, NOT RESOLVED 20
+  E157-P1: FAIL 23, PASS 7
+  E157-P2: FAIL 16, PASS 14
+  E157-P3: FAIL 18, PASS 12
+  E157-R1: FAIL 7, PASS 23
+  E157-R2: FAIL 28, PASS 2
+
+[bias]
+  E157-B1: FAIL HIGH 30
+  E157-B2: PASS 30
+  E157-C1: FAIL 10, PASS 20
+  E157-H1: FAIL 2, PASS 28
+  E157-H2: FAIL 1, PASS 29
+  E157-H3: FAIL 2, PASS 28
+  E157-H4: PASS 30
+  E157-M1: BETTER 29, NOT RESOLVED 1
+  E157-M2: BETTER 30
+  E157-P1: FAIL 25, PASS 5
+  E157-P2: FAIL 20, PASS 10
+  E157-P3: PASS 30
+  E157-R1: FAIL 1, PASS 29
+  E157-R2: FAIL 25, PASS 5
+
+[m6_right]
+  E157-B1: FAIL LOW 30
+  E157-B2: FAIL LOW 5, PASS 25
+  E157-C1: PASS 30
+  E157-H1: PASS 30
+  E157-H2: FAIL 2, PASS 28
+  E157-H3: PASS 30
+  E157-H4: FAIL 1, PASS 29
+  E157-M1: WORSE 30
+  E157-M2: NOT RESOLVED 5, WORSE 25
+  E157-P1: PASS 30
+  E157-P2: PASS 30
+  E157-P3: FAIL 2, PASS 28
+  E157-R1: PASS 30
+  E157-R2: PASS 30
+
+[C check and K1]
+  all PASS: K1C PASS (critic's literal PASS), PC PASS, PCa PASS; scored set 50 of 50, excluded []; not PASS []
+  one ROUNDING launch on fp16.exp_only (K1): K1C FAIL (critic's literal PASS), PC PASS, PCa PASS; scored set 50 of 50, excluded []; not PASS [('fp16.exp_only', 'ROUNDING')]
+  one unrecorded launch on fp32.c_absorbed: K1C PASS (critic's literal PASS), PC FAIL, PCa PASS; scored set 49 of 50, excluded ['fp32.c_absorbed']; not PASS [('fp32.c_absorbed', 'unrecorded')]
+  one FAIL launch on int8.gray_a (K1): K1C FAIL (critic's literal FAIL), PC PASS, PCa PASS; scored set 50 of 50, excluded []; not PASS [('int8.gray_a', 'FAIL')]
+  one FAIL launch on fp32.zeros (frame): K1C PASS (critic's literal PASS), PC PASS, PCa FAIL; scored set 50 of 50, excluded []; not PASS [('fp32.zeros', 'FAIL')]
+  K1 with int8.gray_a moved +0.0 W: K1D PASS (outside []), K1W PASS (outside [])
+  K1 with int8.gray_a moved +0.3 W: K1D FAIL (outside ['int8.gray_a']), K1W FAIL (outside ['int8.gray_a'])
+  X1/X2/S1/S2 at M8's own card ratio (0.9616): {"E157-X1": "PASS", "E157-S1": "PASS", "E157-X2": "PASS", "E157-S2": "PASS"}; S1 predicted 0.9706684636177277, measured 0.9615998850616304
+  X1/X2/S1/S2 at the zeros level's predicted ratio (0.9707): {"E157-X1": "FAIL", "E157-S1": "PASS", "E157-X2": "FAIL", "E157-S2": "FAIL"}
