@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""E161: post hoc readings (written after the data, Tue 3 Nov 2026 about 17:40 PST; NOT registered, no verdict uses them). They split the
+"""E161: post hoc readings (written after the data, Tue 3 Nov 2026 about 17:32-17:35 PST; NOT registered, no verdict uses them). They split the
 registered errors into their parts with the frozen code, imported unchanged after reduce_e161.py's sha256 check:
 
   P1  G1Q's board: M8's prediction over the last 300 s against the measured, all samples, the samples inside work processes, and those at

@@ -137,7 +137,7 @@ statistics reset, no governor, TDP, threshold or clock set, no firmware-revision
 - **D1–D6, registered before any data** ([`E161.md`](../../../../tools/claims-v3/e161/E161.md#departures-from-q139es-plan-dated-before-any-data-tue-3-nov-2026-1555-1630-pst)):
   the C-logging host; the holds as process counts; the stop-path tests and the go gate; G1Q's FAIL line read on the plateau or the
   trajectory; the anchor and windows defined; E98's rest rule kept before both holds. D6's fallback was not needed: both rests ran in full.
-- **D7 (Tue 3 Nov 2026, about 17:40 PST, after the data): the C log's δ was 2.0 ms a launch**, not E160's 1.5 ms. The DMA rule held (8.75 s of
+- **D7 (Tue 3 Nov 2026, about 17:35 PST, after the data): the C log's δ was 2.0 ms a launch**, not E160's 1.5 ms. The DMA rule held (8.75 s of
   9.2 s). G2Q's processes ran 8.47 s start to start, not the planned 8.58 s, so its 91 processes made a 12.9-minute hold, not 13.0. Both
   scoring windows (the last 300 s, checkpoints to 750 s) sit inside it.
 - **D8 (after the data): the reducer's "first step down" reads a process boundary**, as E144b's D5 found. [`posthoc_e161.py`](posthoc_e161.py)
