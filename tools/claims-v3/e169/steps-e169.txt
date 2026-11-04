@@ -1,0 +1,30 @@
+E169's step rule: the numbers, from committed files (predictions-e169.json, stride_sm.py and stride-sm.json checked against e39d06da: OK)
+
+1. The frozen models' steps, T800(P) / T800(N) - 1 (fp32 primary; zones +-3.0 points):
+  P1/N1 (gemmL1x8x5 over gemmL1x7x5, decisive): SM +37.06%  ISO +0.00%  STRICT +0.00%   (arms: ALIGNED +35.99%, A_STRICT +32.54%; SM to the nearest other 37.06 points)
+      fp16 (printed if run): SM +37.43%  ISO +0.00%  STRICT +0.00%
+      int8 (printed if run): SM +31.69%  ISO +0.00%  STRICT +0.00%
+  P2/N2 (gemmL2x8x3 over gemmL2x6x3, reported): SM +7.94%  ISO +5.76%  STRICT -1.03%   (arms: ALIGNED +10.74%, A_STRICT +6.69%; SM to the nearest other 2.18 points)
+      fp16 (printed if run): SM +8.06%  ISO +5.89%  STRICT -1.01%
+      int8 (printed if run): SM +6.28%  ISO +4.10%  STRICT -1.25%
+  P3/N3 (gemmL1x4x8 over gemmL1x5x8, decisive): SM +30.97%  ISO +0.00%  STRICT +0.00%   (arms: ALIGNED +30.56%, A_STRICT +24.37%; SM to the nearest other 30.97 points)
+      fp16 (printed if run): SM +31.22%  ISO +0.00%  STRICT +0.00%
+      int8 (printed if run): SM +27.17%  ISO +0.00%  STRICT +0.00%
+  against Q140(f)'s e169_steps.json (ratios to 4 decimals): worst |diff| 0.000000: AGREE
+
+2. E158's repeatability: the sd of ln T800 over three passes, pooled over 28 cells (56 df): 0.2374% (worst cell 0.4073%); the step's floor sigma0 = sqrt(2) x that = 0.3358%
+  the 95% half-width at the floor: {'3': 0.834, '4': 0.534, '5': 0.417} points (n = 3, 4, 5 passes); E158 against E146 (another session, 8 cells): -0.31% to +0.29%
+
+3. The card's plateau neighbours (no power-of-two stride; far lines at 39-59 MB), fp32: K2n10/K2n9 +1.29%, K2n11/K2n10 +0.92%, K2n12/K2n11 -0.07%, K2n13/K2n12 -0.55%, K4n7/K4n6 +0.97%, K6n6/K6n5 +0.58%
+
+4. The committed collapses (Q140(q) C3), the step over the nearest rung that is not one, fp32; the rule's machinery on E158's three passes (post hoc for E158):
+  E146:D4/D2         measured +26.18%  SM +29.65%  ISO +18.68%  STRICT  +1.00%  (share of SM's step 0.88)
+  E146:D8/D2         measured +30.51%  SM +45.53%  ISO +19.05%  STRICT  +6.57%  (share of SM's step 0.67)
+  E158:D4/D2         measured +26.54%  SM +29.65%  ISO +18.68%  STRICT  +1.00%  (share of SM's step 0.90)  | rule: +26.53% [+25.48, +27.59] (floor) -> UNRESOLVED; 0.90 of SM's step
+  E158:K4n8/K4n7     measured +28.89%  SM +22.45%  ISO +10.37%  STRICT  +0.00%  (share of SM's step 1.29)  | rule: +28.90% [+27.83, +29.98] (floor) -> NONE OF THE THREE; 1.29 of SM's step
+  E158:K6n4/K6n3     measured +33.29%  SM +32.03%  ISO +21.20%  STRICT  +0.00%  (share of SM's step 1.04)  | rule: +33.29% [+32.18, +34.41] (floor) -> SUPPORTS SM; 1.04 of SM's step
+  E158:K6n4/K6n5     measured +14.86%  SM  +9.11%  ISO  +0.00%  STRICT  +0.00%  (share of SM's step 1.63)  | rule: +14.85% [+13.90, +15.82] (floor) -> NONE OF THE THREE; 1.63 of SM's step
+
+5. E158's tie shapes, fp32 T800: {'K4n7': 1.64871, 'K4n8': 2.12508, 'K6n5': 1.63532, 'K6n4': 1.87826}; steps: K4n8/K4n7 +28.89%, K6n4/K6n5 +14.86%
+
+wrote step-rule-e169.json
