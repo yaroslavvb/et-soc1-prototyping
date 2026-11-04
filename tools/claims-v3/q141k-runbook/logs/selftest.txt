@@ -1,0 +1,168 @@
+# Q141(k) runbook desk test: Wed 04 Nov 2026 14:06:49 PST; ssh and rsync on PATH are the stand-ins; the window's day 2026-11-06 (sample)
+
+== A. success
+ok   A1: s01_probe.sh  -> exit 0 (want 0) in 0.5 s
+ok   A1: no stand-in process left running
+ok   A1: no stand-in login in any file the runbook wrote
+ok   A1: three probe lines in the log, each rc=0 status=ok
+ok   A2: s02_window.sh 2026-11-06 15:30 16:30 full -> exit 0 (want 0) in 0.1 s
+ok   A2: no stand-in process left running
+ok   A2: no stand-in login in any file the runbook wrote
+ok   A2: the window holds E164's deadline, the last end less 10 minutes
+ok   A3: s05_look.sh aifoundry3 -> exit 0 (want 0) in 0.7 s
+ok   A3: no stand-in process left running
+ok   A3: no stand-in login in any file the runbook wrote
+ok   A3: FREE with two idle logins (they do not block)
+ok   A4: s05_look.sh aifoundry2 --wait -> exit 0 (want 0) in 3.2 s
+ok   A4: no stand-in process left running
+ok   A4: no stand-in login in any file the runbook wrote
+ok   A4: a held card polled on the box until free
+ok   A5a: s05_look.sh aifoundry2 --wait -> exit 17 (want 17) in 3.3 s
+ok   A5a: no stand-in process left running
+ok   A5a: no stand-in login in any file the runbook wrote
+ok   A5b: s05_look.sh aifoundry2 --wait -> exit 15 (want 15) in 3.2 s
+ok   A5b: no stand-in process left running
+ok   A5b: no stand-in login in any file the runbook wrote
+ok   A6: s07_a3_sync.sh  -> exit 0 (want 0) in 0.5 s
+ok   A6: no stand-in process left running
+ok   A6: no stand-in login in any file the runbook wrote
+ok   A6: one rsync with E163's step-4 paths and tools/claims-v3/e166/ to aifoundry3:aifoundry/
+ok   A7a: s12_a1_check.sh start -> exit 0 (want 0) in 2.5 s
+ok   A7a: no stand-in process left running
+ok   A7a: no stand-in login in any file the runbook wrote
+ok   A7b: s12_a1_check.sh wait -> exit 0 (want 0) in 0.5 s
+ok   A7b: no stand-in process left running
+ok   A7b: no stand-in login in any file the runbook wrote
+ok   A7: the detached check job ended rc 0 and its lines read clean
+ok   A8: s13_a1_launch.sh  -> exit 0 (want 0) in 8.7 s
+ok   A8: no stand-in process left running
+ok   A8: no stand-in login in any file the runbook wrote
+ok   A8: the session got the whole deadline through ssh ('2026-11-06 16:20 PST', not the date alone)
+ok   A8: launch_e164_a1.sh's usage line, the quoting inside the remote command
+ok   A9: s16_a2_e165.sh full -> exit 0 (want 0) in 3.4 s
+ok   A9: no stand-in process left running
+ok   A9: no stand-in login in any file the runbook wrote
+ok   A9: E165's slot line parses by the queue's own pattern, 2,700 s
+ok   A9: the queue started with --runs build/e165/runs --cap 40
+ok   A10: s20_wait.sh e165 -> exit 0 (want 0) in 0.4 s
+ok   A10: no stand-in process left running
+ok   A10: no stand-in login in any file the runbook wrote
+ok   A11: s05_look.sh aifoundry1 -> exit 17 (want 17) in 0.9 s
+ok   A11: no stand-in process left running
+ok   A11: no stand-in login in any file the runbook wrote
+ok   A11: look_e164.sh's raw et-who line kept with its login and command masked
+ok   A11: look_e164.sh's identity line read (booted before E82's firmware read)
+
+== B. a login link, then a hang
+ok   B1: s05_look.sh aifoundry2 -> exit 11 (want 11) in 0.5 s
+ok   B1: no stand-in process left running
+ok   B1: no stand-in login in any file the runbook wrote
+ok   B1: '<HH:MM:SS> aifoundry2 needs a check' appended to the lock file
+ok   B1: the link kept in RB_OUT/links.txt for the approval
+ok   B1: killed at once (under 6 s, not at the probe's 15 s)
+ok   B2: s09_a3_reads.sh  -> exit 11 (want 11) in 0.7 s
+ok   B2: no stand-in process left running
+ok   B2: no stand-in login in any file the runbook wrote
+ok   B2: the link on a call's stderr: lock line for aifoundry3
+ok   B2: killed at once
+ok   B3: s14_a2_tree.sh  -> exit 11 (want 11) in 0.7 s
+ok   B3: no stand-in process left running
+ok   B3: no stand-in login in any file the runbook wrote
+ok   B3: the link on a call's stdout: lock line for aifoundry2
+ok   B3: killed at once
+ok   B4: s07_a3_sync.sh  -> exit 11 (want 11) in 0.9 s
+ok   B4: no stand-in process left running
+ok   B4: no stand-in login in any file the runbook wrote
+ok   B4: the link on rsync's stderr: lock line for aifoundry3
+ok   B4: killed at once
+ok   B5: s01_probe.sh  -> exit 11 (want 11) in 1.5 s
+ok   B5: no stand-in process left running
+ok   B5: no stand-in login in any file the runbook wrote
+ok   B5: three boxes, three lock lines, three links
+
+== C. a hang with no output
+ok   C1: s05_look.sh aifoundry1 -> exit 12 (want 12) in 15.5 s
+ok   C1: no stand-in process left running
+ok   C1: no stand-in login in any file the runbook wrote
+ok   C1: the probe hard-killed at its 15 s
+ok   C1: no lock line (no link was printed)
+ok   C2: s08_a3_preflight.sh  -> exit 13 (want 13) in 3.8 s
+ok   C2: no stand-in process left running
+ok   C2: no stand-in login in any file the runbook wrote
+ok   C2: a read killed at its bound (60 s; 3 s here)
+ok   C3: s07_a3_sync.sh  -> exit 13 (want 13) in 4.0 s
+ok   C3: no stand-in process left running
+ok   C3: no stand-in login in any file the runbook wrote
+ok   C3: a copy killed at its bound (600 s; 3 s here)
+ok   C4: s13_a1_launch.sh  -> exit 13 (want 13) in 3.8 s
+ok   C4: no stand-in process left running
+ok   C4: no stand-in login in any file the runbook wrote
+ok   C4: a launch killed at its bound (60 s; 3 s here)
+ok   C5: s20_wait.sh e167 -> exit 13 (want 13) in 3.9 s
+ok   C5: no stand-in process left running
+ok   C5: no stand-in login in any file the runbook wrote
+ok   C5: a wait killed at its bound (600 s; 3 s here)
+
+== D. a non-zero exit
+ok   D1: s05_look.sh aifoundry3 -> exit 14 (want 14) in 0.4 s
+ok   D1: no stand-in process left running
+ok   D1: no stand-in login in any file the runbook wrote
+ok   D1: the call's own status (7) in the log line
+ok   D2: s07_a3_sync.sh  -> exit 14 (want 14) in 0.5 s
+ok   D2: no stand-in process left running
+ok   D2: no stand-in login in any file the runbook wrote
+ok   D2: rsync's own status (23) in the log line
+ok   D3: s01_probe.sh aifoundry2 -> exit 12 (want 12) in 0.2 s
+ok   D3: no stand-in process left running
+ok   D3: no stand-in login in any file the runbook wrote
+ok   D4: s13_a1_launch.sh  -> exit 14 (want 14) in 0.5 s
+ok   D4: no stand-in process left running
+ok   D4: no stand-in login in any file the runbook wrote
+ok   D4: launch_e164_a1.sh's own refusal (exit 3) on a card-1 holder, reported
+
+== F. the desk helpers and the window's gates (no ssh)
+ok   F1: frozen26.py on the lab clone: FROZEN 26 OK
+ok   F2: anchors_e165.py writes score.anchors and score.anchor_delta unchanged
+ok   F3: a NOT SCORED E165 writes no anchors file (exit 3)
+ok   F4: s02_window.sh 2026-11-04 14:47 15:37 full -> exit 16 (want 16) in 0.1 s
+ok   F4: no stand-in process left running
+ok   F4: no stand-in login in any file the runbook wrote
+ok   F4: a window under 1 h 45 min fits no plan
+ok   F5: s17_a2_e167.sh go 14:30 13:10 15:00 16:00 -> exit 10 (want 10) in 0.1 s
+ok   F5: no stand-in process left running
+ok   F5: no stand-in login in any file the runbook wrote
+ok   F5: E167's four gates out of order are refused before any call
+ok   F5: no ssh before the gates are read
+ok   F6: s17_a2_e167.sh go 13:00 13:30 16:00 16:30 -> exit 16 (want 16) in 0.1 s
+ok   F6: no stand-in process left running
+ok   F6: no stand-in login in any file the runbook wrote
+ok   F6: a no-start-after past the window's last start is refused
+
+== E. the dry listing
+ok   E: list_steps.sh exits 0
+ok   E: not one ssh or rsync call (0 recorded)
+ok   E: every step listed and exits 0 (50 of 50)
+ok   E: the listing holds: aifoundry1 "bash -s -- '
+ok   E: the listing holds: < tools/claims-v3/e164/box/launch_e164_a1.sh
+ok   E: the listing holds: E164_S_RECOUNT=docs/reports/data/2026-11-04-q141t-s7-recount/arm/arm27-aifoundry1c1.json
+ok   E: the listing holds: tools/claims-v3/dmcmd_table.json tools/claims-v3/e166/ aifoundry3:aifoundry/
+ok   E: the listing holds: anchors_e165.py
+ok   E: the listing holds: --e165-anchors
+ok   E: the listing holds: reduce_e168.py
+ok   E: the listing holds: --anchors
+ok   E: the listing holds: build/e168/runs/
+ok   E: the listing holds: build/e169/runs/
+ok   E: the listing holds: collect_e165_bounded.sh
+ok   E: the listing holds: collect_e167_bounded.sh
+ok   E: the listing holds: latch_check_e167.py
+ok   E: the listing holds: run_e167.sh dry
+ok   E: the listing holds: build/e169/dry
+ok   E: the listing holds: QUEUE-STOP
+ok   E: the listing holds: score_rank4.py
+ok   E: the listing holds: score_s7arm_a1.py
+ok   E: the listing holds: arm27-aifoundry3.json
+ok   E: box/launch_e164.sh (it would run 0 passes) is never sent
+ok   E: no home path in the listing
+
+152 of 152 checks pass
+ALL PASS

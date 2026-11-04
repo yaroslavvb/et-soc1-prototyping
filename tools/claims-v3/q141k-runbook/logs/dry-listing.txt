@@ -1,0 +1,1095 @@
+Q141(k) runbook, dry listing (nothing below was run). Sample window: 2026-11-05, last start 15:30, last end 16:30 (Pacific).
+
+---- the runbook's prelude for aifoundry3: every remote script on aifoundry3 starts with these lines
+    | set -u
+    | cd ~/aifoundry || { echo "NO-TREE: ~/aifoundry"; exit 1; }
+    | BOX=aifoundry3
+    | DEV_COMM='_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$'   # lib.sh's DEV_COMM
+    | OTHER_COMM="$DEV_COMM|^Runner.Worker$"                                                # lib.sh's OTHER_COMM
+    | hold_read() {  # the holder rule's read: et-who (et-holders) and ps, as counts; FREE=1 when nothing blocks this box's card
+    |   W=$(timeout 20 et-who 2>&1); WRC=$?
+    |   ME=$(id -un)
+    |   NH=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/ {n++} END {print n+0}')
+    |   NO=$(printf '%s\n' "$W" | awk -v me="$ME" '($1 ~ /^\/dev\/et/ || $1 ~ /^lock:/) && $2 == me {n++} END {print n+0}')
+    |   C1=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et1_/ || $1 == "lock:etsoc-shire1.lock" {n++} END {print n+0}')
+    |   PO=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $3 ~ re {n++} END {print n+0}')
+    |   PX=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$OTHER_COMM" '$1 != me && $3 ~ re {n++} END {print n+0}')
+    |   LG=$(who | wc -l | tr -d ' ')
+    |   FREE=0
+    |   if [ "$BOX" = aifoundry1 ]; then
+    |     # card 1's own lines decide, and nothing of ours on either card (launch_e164_a1.sh's rule); card 0 is never used
+    |     [ "$WRC" -eq 0 ] && [ "$C1" -eq 0 ] && [ "$NO" -eq 0 ] && [ "$PO" -eq 0 ] && FREE=1
+    |   else
+    |     # one card: et-who's "No process holds ..." (the E158-E169 queues' rule) and no other user's device process (lib.sh)
+    |     case "$(printf '%s\n' "$W" | head -n 1)" in "No process holds"*) [ "$WRC" -eq 0 ] && [ "$PX" -eq 0 ] && FREE=1 ;; esac
+    |   fi
+    |   echo "holders: et-who rc $WRC, holder lines $NH (ours $NO; card 1's $C1), our device processes $PO, other users' device processes $PX; logins $LG (an idle login does not block)"
+    | }
+    | ours_live() {  # our real card sessions on this box (a dry pass or a V3_DRY session is not one)
+    |   n=0
+    |   for pid in $(pgrep -u "$(id -u)" -f 'session_e16[346]\.sh|queue_e16[5-9]\.py' 2>/dev/null); do
+    |     case "$(tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null)" in *--dry*) continue ;; esac
+    |     tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | grep -q '^V3_DRY=' && continue
+    |     n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+    | jobs_live() {  # the runbook's own detached dry jobs still running on this box
+    |   n=0
+    |   for p in build/q141k/jobs/*.pid; do
+    |     [ -e "$p" ] || continue
+    |     [ -e "${p%.pid}.rc" ] && continue
+    |     kill -0 "$(cat "$p")" 2>/dev/null && n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+
+---- the runbook's prelude for aifoundry1: every remote script on aifoundry1 starts with these lines
+    | set -u
+    | cd ~/nekko || { echo "NO-TREE: ~/nekko"; exit 1; }
+    | BOX=aifoundry1
+    | DEV_COMM='_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$'   # lib.sh's DEV_COMM
+    | OTHER_COMM="$DEV_COMM|^Runner.Worker$"                                                # lib.sh's OTHER_COMM
+    | hold_read() {  # the holder rule's read: et-who (et-holders) and ps, as counts; FREE=1 when nothing blocks this box's card
+    |   W=$(timeout 20 et-who 2>&1); WRC=$?
+    |   ME=$(id -un)
+    |   NH=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/ {n++} END {print n+0}')
+    |   NO=$(printf '%s\n' "$W" | awk -v me="$ME" '($1 ~ /^\/dev\/et/ || $1 ~ /^lock:/) && $2 == me {n++} END {print n+0}')
+    |   C1=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et1_/ || $1 == "lock:etsoc-shire1.lock" {n++} END {print n+0}')
+    |   PO=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $3 ~ re {n++} END {print n+0}')
+    |   PX=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$OTHER_COMM" '$1 != me && $3 ~ re {n++} END {print n+0}')
+    |   LG=$(who | wc -l | tr -d ' ')
+    |   FREE=0
+    |   if [ "$BOX" = aifoundry1 ]; then
+    |     # card 1's own lines decide, and nothing of ours on either card (launch_e164_a1.sh's rule); card 0 is never used
+    |     [ "$WRC" -eq 0 ] && [ "$C1" -eq 0 ] && [ "$NO" -eq 0 ] && [ "$PO" -eq 0 ] && FREE=1
+    |   else
+    |     # one card: et-who's "No process holds ..." (the E158-E169 queues' rule) and no other user's device process (lib.sh)
+    |     case "$(printf '%s\n' "$W" | head -n 1)" in "No process holds"*) [ "$WRC" -eq 0 ] && [ "$PX" -eq 0 ] && FREE=1 ;; esac
+    |   fi
+    |   echo "holders: et-who rc $WRC, holder lines $NH (ours $NO; card 1's $C1), our device processes $PO, other users' device processes $PX; logins $LG (an idle login does not block)"
+    | }
+    | ours_live() {  # our real card sessions on this box (a dry pass or a V3_DRY session is not one)
+    |   n=0
+    |   for pid in $(pgrep -u "$(id -u)" -f 'session_e16[346]\.sh|queue_e16[5-9]\.py' 2>/dev/null); do
+    |     case "$(tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null)" in *--dry*) continue ;; esac
+    |     tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | grep -q '^V3_DRY=' && continue
+    |     n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+    | jobs_live() {  # the runbook's own detached dry jobs still running on this box
+    |   n=0
+    |   for p in build/q141k/jobs/*.pid; do
+    |     [ -e "$p" ] || continue
+    |     [ -e "${p%.pid}.rc" ] && continue
+    |     kill -0 "$(cat "$p")" 2>/dev/null && n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+
+---- the runbook's prelude for aifoundry2: every remote script on aifoundry2 starts with these lines
+    | set -u
+    | cd ~/claude/et-soc1-prototyping || { echo "NO-TREE: ~/claude/et-soc1-prototyping"; exit 1; }
+    | BOX=aifoundry2
+    | DEV_COMM='_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$'   # lib.sh's DEV_COMM
+    | OTHER_COMM="$DEV_COMM|^Runner.Worker$"                                                # lib.sh's OTHER_COMM
+    | hold_read() {  # the holder rule's read: et-who (et-holders) and ps, as counts; FREE=1 when nothing blocks this box's card
+    |   W=$(timeout 20 et-who 2>&1); WRC=$?
+    |   ME=$(id -un)
+    |   NH=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/ {n++} END {print n+0}')
+    |   NO=$(printf '%s\n' "$W" | awk -v me="$ME" '($1 ~ /^\/dev\/et/ || $1 ~ /^lock:/) && $2 == me {n++} END {print n+0}')
+    |   C1=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et1_/ || $1 == "lock:etsoc-shire1.lock" {n++} END {print n+0}')
+    |   PO=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $3 ~ re {n++} END {print n+0}')
+    |   PX=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$OTHER_COMM" '$1 != me && $3 ~ re {n++} END {print n+0}')
+    |   LG=$(who | wc -l | tr -d ' ')
+    |   FREE=0
+    |   if [ "$BOX" = aifoundry1 ]; then
+    |     # card 1's own lines decide, and nothing of ours on either card (launch_e164_a1.sh's rule); card 0 is never used
+    |     [ "$WRC" -eq 0 ] && [ "$C1" -eq 0 ] && [ "$NO" -eq 0 ] && [ "$PO" -eq 0 ] && FREE=1
+    |   else
+    |     # one card: et-who's "No process holds ..." (the E158-E169 queues' rule) and no other user's device process (lib.sh)
+    |     case "$(printf '%s\n' "$W" | head -n 1)" in "No process holds"*) [ "$WRC" -eq 0 ] && [ "$PX" -eq 0 ] && FREE=1 ;; esac
+    |   fi
+    |   echo "holders: et-who rc $WRC, holder lines $NH (ours $NO; card 1's $C1), our device processes $PO, other users' device processes $PX; logins $LG (an idle login does not block)"
+    | }
+    | ours_live() {  # our real card sessions on this box (a dry pass or a V3_DRY session is not one)
+    |   n=0
+    |   for pid in $(pgrep -u "$(id -u)" -f 'session_e16[346]\.sh|queue_e16[5-9]\.py' 2>/dev/null); do
+    |     case "$(tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null)" in *--dry*) continue ;; esac
+    |     tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | grep -q '^V3_DRY=' && continue
+    |     n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+    | jobs_live() {  # the runbook's own detached dry jobs still running on this box
+    |   n=0
+    |   for p in build/q141k/jobs/*.pid; do
+    |     [ -e "$p" ] || continue
+    |     [ -e "${p%.pid}.rc" ] && continue
+    |     kill -0 "$(cat "$p")" 2>/dev/null && n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+
+################ s01_probe.sh
+=== [s01_probe] dry listing: nothing below is run
+--- probe aifoundry1, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+(exit 0)
+
+################ s02_window.sh 2026-11-05 15:30 16:30 full
+=== [s02_window] dry listing: nothing below is run
+[s02_window] (dry listing; a real run would say:) window: last start 2026-11-05 15:30 PST, last end 2026-11-05 16:30 PST (1581 min from now); plans that fit: full b a
+# his go, recorded 2026-11-04 14:08:04 PST by s02_window.sh
+RB_DAY=2026-11-05
+RB_LAST_START=2026-11-05\ 15:30\ PST
+RB_LAST_END=2026-11-05\ 16:30\ PST
+RB_LAST_START_EPOCH=1793921400
+RB_LAST_END_EPOCH=1793925000
+RB_LAST_START_HM=15:30
+RB_LAST_END_HM=16:30
+RB_E164_DEADLINE=2026-11-05\ 16:20\ PST
+RB_PLAN=full
+RB_GO_EPOCH=1793830084
+(exit 0)
+
+################ s03_desk.sh
+=== [s03_desk] dry listing: nothing below is run
+--- copy, run on the Intel (git pull --ff-only (the public repo)): git -C <lab clone> pull --ff-only
+--- read, run on the Intel (HEAD descends from c31e7ae3): git -C <lab clone> merge-base --is-ancestor c31e7ae3 HEAD
+--- read, run on the Intel (tools/claims-v3 clean): git -C <lab clone> status --short tools/claims-v3
+--- read, run on the Intel (blind7 SHA256SUMS (91)), in tools/claims-v3/kinds/blind7: sha256sum -c SHA256SUMS
+--- read, run on the Intel (frozen-sha256-e168.json (9)): /usr/bin/python3 -B docs/reports/data/2026-11-04-q140q-gemm-g4-stride/score_e168.py check
+--- read, run on the Intel (frozen-sha256-e168-scorer.txt (18)), in docs/reports/data/2026-11-04-q140q-gemm-g4-stride: shasum -a 256 -c frozen-sha256-e168-scorer.txt
+--- read, run on the Intel (predict_q140e's 26 inputs): /usr/bin/python3 -B <lab clone>/tools/claims-v3/q141k-runbook/frozen26.py <lab clone>
+[s03_desk] (dry listing; a real run would say:) desk check: pulled, HEAD descends from c31e7ae3, tools/claims-v3 clean, blind7 91, E168 9 and 18, predict_q140e 26
+(exit 0)
+
+################ s05_look.sh aifoundry3
+=== [s05_look] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (look first: et-who, who, uptime; the holder rule): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 42 lines: printed once at the top of the listing>
+    | MODE=''
+    | LIM=520; POLL=30
+    | date '+%F %T %Z'; uptime; echo "booted $(uptime -s)"
+    | echo "login $(id -un)"
+    | hold_read
+    | t=0
+    | while [ "$FREE" -eq 0 ] && [ "$MODE" = --wait ] && [ "$t" -lt "$LIM" ]; do
+    |   sleep "$POLL"; t=$((t + POLL)); hold_read
+    | done
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD) after $t s of polls"
+(exit 0)
+
+################ s05_look.sh aifoundry1
+=== [s05_look] dry listing: nothing below is run
+--- probe aifoundry1, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+--- read on aifoundry1 (box/look_e164.sh (E164 box step 1)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 'bash -s' < tools/claims-v3/e164/box/look_e164.sh   (the kit's committed file, unchanged)
+--- read on aifoundry1 (look first: et-who, who, uptime; the holder rule): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry1, 42 lines: printed once at the top of the listing>
+    | MODE=''
+    | LIM=520; POLL=30
+    | date '+%F %T %Z'; uptime; echo "booted $(uptime -s)"
+    | echo "login $(id -un)"
+    | hold_read
+    | t=0
+    | while [ "$FREE" -eq 0 ] && [ "$MODE" = --wait ] && [ "$t" -lt "$LIM" ]; do
+    |   sleep "$POLL"; t=$((t + POLL)); hold_read
+    | done
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD) after $t s of polls"
+(exit 0)
+
+################ s05_look.sh aifoundry2 --wait
+=== [s05_look] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- wait on aifoundry2 (look first: et-who, who, uptime; the holder rule): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | MODE=--wait
+    | LIM=520; POLL=30
+    | date '+%F %T %Z'; uptime; echo "booted $(uptime -s)"
+    | echo "login $(id -un)"
+    | hold_read
+    | t=0
+    | while [ "$FREE" -eq 0 ] && [ "$MODE" = --wait ] && [ "$t" -lt "$LIM" ]; do
+    |   sleep "$POLL"; t=$((t + POLL)); hold_read
+    | done
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD) after $t s of polls"
+(exit 0)
+
+################ go checklist step 6: the day's one post (the main session's, under the Discord lock): not scripted
+
+################ s07_a3_sync.sh
+=== [s07_a3_sync] dry listing: nothing below is run
+--- read, run on the Intel (tools/claims-v3 clean before the sync): git -C <lab clone> status --short tools/claims-v3/
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- copy, run on the Intel (aifoundry3's one rsync: E163's step-4 paths and tools/claims-v3/e166/): rsync -a -c -R --exclude __pycache__ -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' tools/claims-v3/e163/ tools/claims-v3/kinds/blind7/ tools/claims-v3/kinds/blind5/ tools/claims-v3/kinds/e130/ tools/claims-v3/e152/ tools/claims-v3/e151/ tools/claims-v3/ccheck/ tools/claims-v3/dmcmd_audit.py tools/claims-v3/dmcmd_table.json tools/claims-v3/e166/ aifoundry3:aifoundry/
+[s07_a3_sync] (dry listing; a real run would say:) synced E163's step-4 paths and tools/claims-v3/e166/ to aifoundry3:aifoundry/
+(exit 0)
+
+################ s08_a3_preflight.sh
+=== [s08_a3_preflight] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (E163's preflight (README steps 5-7)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 42 lines: printed once at the top of the listing>
+    | echo "blind7 OK: $(cd tools/claims-v3/kinds/blind7 && sha256sum -c SHA256SUMS 2>&1 | grep -c ': OK$')"
+    | python3 tools/claims-v3/e163/check_e163.py; echo "check_e163 rc=$?"
+    | bash tools/claims-v3/e163/preflight_e163.sh > build/e163-preflight-q141k.txt 2>&1; echo "preflight_e163 rc=$? $(grep -m1 '^dmcmd_audit:' build/e163-preflight-q141k.txt)"
+    | python3 tools/claims-v3/e163/e163_common.py --verify | tail -n 3; echo "e163_common rc=${PIPESTATUS[0]}"
+--- read on aifoundry3 (E166's preflight (README box step 3)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 42 lines: printed once at the top of the listing>
+    | sha256sum -c tools/claims-v3/e166/frozen-e166.sha256 > build/e166-frozen-q141k.txt 2>&1; echo "frozen-e166 rc=$? OK $(grep -c ': OK$' build/e166-frozen-q141k.txt)"
+    | grep -v ': OK$' build/e166-frozen-q141k.txt | head -n 5
+    | bash tools/claims-v3/e166/preflight_e166.sh > build/e166-preflight-q141k.txt 2>&1; echo "preflight_e166 rc=$? $(grep -m1 '^dmcmd_audit:' build/e166-preflight-q141k.txt)"
+[s08_a3_preflight] (dry listing; a real run would say:) aifoundry3: blind7 91, HARNESS OK 142, preflight_e163 GO, e163_common verified, frozen-e166 30 OK, preflight_e166 GO
+(exit 0)
+
+################ s09_a3_reads.sh
+=== [s09_a3_reads] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (et-lab-manifest, the card config read through the guard, et-who): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 42 lines: printed once at the top of the listing>
+    | unset V3_DEVICE ET_DEVICES
+    | export LD_LIBRARY_PATH=/opt/et/lib
+    | mkdir -p build/q141k
+    | et-lab-manifest | tee build/q141k/et-lab-manifest-$(date +%Y%m%dT%H%M%S).txt
+    | c=$(flock -n /run/lock/etsoc-shire0.lock timeout 10 bash tools/claims-v3/e128/ettelem_guard.sh config < /dev/null 2>/dev/null | grep '^{' | tail -1)
+    | echo "CONFIG $c"
+    | hold_read
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD)"
+(exit 0)
+
+################ s10_a3_dry.sh start
+=== [s10_a3_dry] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- launch on aifoundry3 (start the dry pass a3-dry, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-dry
+    | MAXJ=1
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/aifoundry || exit 1
+    | echo "$$" > build/q141k/jobs/a3-dry.pid
+    | echo "JOB-BEGIN a3-dry $(date '+%F %T %Z')"
+    | (
+    | LAST_START=2026-11-05\ 15:30\ PST
+    | LAST_END=2026-11-05\ 16:30\ PST
+    | echo "== E166's V3_DRY session (no E166_DESK)"
+    | V3_DRY=1 E166_T0=$(date +%s) E166_LATEST_START="$LAST_START" E166_END_GATE="$LAST_END" bash tools/claims-v3/e166/session_e166.sh
+    | echo "E166 dry session rc=$? (its dry smoke ends 1 and its gate reads NO-GO: expected on a toy card)"
+    | tail -n 12 build/e166/session.log | cut -c1-300
+    | echo "== E163's V3_DRY blocks"
+    | bad=0
+    | V3_DRY=1 bash tools/claims-v3/e163/block_e163.sh 16310; r=$?; echo "E163 dry 16310 rc=$r"; [ "$r" -eq 0 ] || bad=1
+    | V3_DRY=1 bash tools/claims-v3/e163/block_e163.sh 16350; r=$?; echo "E163 dry 16350 rc=$r"; [ "$r" -eq 0 ] || bad=1
+    | V3_DRY=1 bash tools/claims-v3/e163/block_e163.sh 16301 --smoke; r=$?; echo "E163 dry 16301 --smoke rc=$r"; [ "$r" -eq 0 ] || bad=1
+    | echo "== E163's start gate at a past E163_LATEST_START"
+    | V3_DRY=1 E163_T0=$(date +%s) E163_LATEST_START="$(date -d '1 hour ago' '+%F %H:%M %Z')" E163_DEADLINE="$LAST_END" bash tools/claims-v3/e163/session_e163.sh
+    | g=$?; echo "E163 start gate rc=$g (want 8)"; [ "$g" -eq 8 ] || bad=1
+    | [ "$bad" -eq 0 ]
+    | )
+    | rc=$?
+    | echo "JOB-END a3-dry rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a3-dry.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+(exit 0)
+
+################ s10_a3_dry.sh wait
+=== [s10_a3_dry] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on the dry pass a3-dry): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-dry
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | t=0
+    | while [ ! -e "$J.rc" ] && [ "$t" -lt "$LIM" ]; do
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then sleep 2; [ -e "$J.rc" ] || { echo "JOB-LOST ${J##*/}: no process and no exit status"; break; }; fi
+    |   sleep 10; t=$((t + 10))
+    | done
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"; else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+(exit 0)
+
+################ s11_a3_session.sh e166
+=== [s11_a3_session] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 15:30 PST)
+--- gate: now + 76 min <= the round's last end (2026-11-05 16:30 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- launch on aifoundry3 (launch e166, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 42 lines: printed once at the top of the listing>
+    | LAST_START=2026-11-05\ 15:30\ PST; LAST_END=2026-11-05\ 16:30\ PST; LATER=''
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | if [ "$LATER" = --later-try ]; then
+    |   # E166 README.md.dated-note.md: at least 40 minutes of rest after E163's session end, and the earlier smoke moved aside
+    |   last=$(grep 'session end' build/e163/session.log 2>/dev/null | tail -n 1 | cut -d' ' -f1-3)
+    |   [ -n "$last" ] || { echo "REFUSED: no E163 session end in build/e163/session.log to rest from"; exit 3; }
+    |   rest=$(( ($(date +%s) - $(date -d "$last" +%s)) / 60 ))
+    |   [ "$rest" -ge 40 ] || { echo "REFUSED: $rest minutes since E163's session end ($last): E166 needs at least 40"; exit 3; }
+    |   if [ -e build/claims-v3/aifoundry3/e166-smoke/p16601 ]; then
+    |     [ -e build/claims-v3/aifoundry3/e166-smoke/p16601.try1 ] && { echo "REFUSED: p16601.try1 exists already: a third try needs its own amendment"; exit 3; }
+    |     mv build/claims-v3/aifoundry3/e166-smoke/p16601 build/claims-v3/aifoundry3/e166-smoke/p16601.try1 && echo "moved the earlier smoke aside: p16601 -> p16601.try1"
+    |   fi
+    | fi
+    | mkdir -p build/e166
+    | if [ -f build/e166/session.log ]; then wc -l < build/e166/session.log; else echo 0; fi > build/q141k/e166.log-offset
+    | E166_T0=$(date +%s) E166_LATEST_START="$LAST_START" E166_END_GATE="$LAST_END" setsid nohup bash tools/claims-v3/e166/session_e166.sh > build/e166/session.out 2>&1 < /dev/null &
+    | sleep 5
+    | echo "LAUNCHED e166 $(date '+%F %T %Z') (gates: latest start $LAST_START, end gate $LAST_END)"
+    | tail -n +"$(( $(cat build/q141k/e166.log-offset) + 1 ))" build/e166/session.log | tail -n 6 | cut -c1-300
+(exit 0)
+
+################ s11_a3_session.sh e166 --later-try
+=== [s11_a3_session] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 15:30 PST)
+--- gate: now + 76 min <= the round's last end (2026-11-05 16:30 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- launch on aifoundry3 (launch e166, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 42 lines: printed once at the top of the listing>
+    | LAST_START=2026-11-05\ 15:30\ PST; LAST_END=2026-11-05\ 16:30\ PST; LATER=--later-try
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | if [ "$LATER" = --later-try ]; then
+    |   # E166 README.md.dated-note.md: at least 40 minutes of rest after E163's session end, and the earlier smoke moved aside
+    |   last=$(grep 'session end' build/e163/session.log 2>/dev/null | tail -n 1 | cut -d' ' -f1-3)
+    |   [ -n "$last" ] || { echo "REFUSED: no E163 session end in build/e163/session.log to rest from"; exit 3; }
+    |   rest=$(( ($(date +%s) - $(date -d "$last" +%s)) / 60 ))
+    |   [ "$rest" -ge 40 ] || { echo "REFUSED: $rest minutes since E163's session end ($last): E166 needs at least 40"; exit 3; }
+    |   if [ -e build/claims-v3/aifoundry3/e166-smoke/p16601 ]; then
+    |     [ -e build/claims-v3/aifoundry3/e166-smoke/p16601.try1 ] && { echo "REFUSED: p16601.try1 exists already: a third try needs its own amendment"; exit 3; }
+    |     mv build/claims-v3/aifoundry3/e166-smoke/p16601 build/claims-v3/aifoundry3/e166-smoke/p16601.try1 && echo "moved the earlier smoke aside: p16601 -> p16601.try1"
+    |   fi
+    | fi
+    | mkdir -p build/e166
+    | if [ -f build/e166/session.log ]; then wc -l < build/e166/session.log; else echo 0; fi > build/q141k/e166.log-offset
+    | E166_T0=$(date +%s) E166_LATEST_START="$LAST_START" E166_END_GATE="$LAST_END" setsid nohup bash tools/claims-v3/e166/session_e166.sh > build/e166/session.out 2>&1 < /dev/null &
+    | sleep 5
+    | echo "LAUNCHED e166 $(date '+%F %T %Z') (gates: latest start $LAST_START, end gate $LAST_END)"
+    | tail -n +"$(( $(cat build/q141k/e166.log-offset) + 1 ))" build/e166/session.log | tail -n 6 | cut -c1-300
+(exit 0)
+
+################ s11_a3_session.sh e163 FULL
+=== [s11_a3_session] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 15:30 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- launch on aifoundry3 (launch e163, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 42 lines: printed once at the top of the listing>
+    | LAST_START=2026-11-05\ 15:30\ PST; LAST_END=2026-11-05\ 16:30\ PST; PLAN=FULL; DAYPLAN=full
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | if [ "$DAYPLAN" != a ]; then
+    |   # Q141(f)'s order: E166 first on a rested card, then E163 (if E166's G0 refused, its session still ended: E163 goes next)
+    |   off=$(cat build/q141k/e166.log-offset 2>/dev/null) || { echo "REFUSED: E166 has not run today: it goes first on aifoundry3 (plan $DAYPLAN)"; exit 3; }
+    |   tail -n +"$((off + 1))" build/e166/session.log 2>/dev/null | grep -q 'session end' || { echo "REFUSED: E166's session has not ended"; exit 3; }
+    | fi
+    | mkdir -p build/e163
+    | if [ -f build/e163/session.log ]; then wc -l < build/e163/session.log; else echo 0; fi > build/q141k/e163.log-offset
+    | E163_T0=$(date +%s) E163_PLAN="$PLAN" E163_LATEST_START="$LAST_START" E163_DEADLINE="$LAST_END" setsid nohup bash tools/claims-v3/e163/session_e163.sh > build/e163/session.out 2>&1 < /dev/null &
+    | sleep 5
+    | echo "LAUNCHED e163 $(date '+%F %T %Z') (plan $PLAN; gates: latest start $LAST_START, deadline $LAST_END)"
+    | tail -n +"$(( $(cat build/q141k/e163.log-offset) + 1 ))" build/e163/session.log | tail -n 6 | cut -c1-300
+(exit 0)
+
+################ s12_a1_check.sh sync
+=== [s12_a1_check] dry listing: nothing below is run
+--- probe aifoundry1, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+--- copy, run on the Intel (box/sync_e164.sh (E164 box step 2)): bash tools/claims-v3/e164/box/sync_e164.sh
+[s12_a1_check] (dry listing; a real run would say:) aifoundry1: synced tools/claims-v3/e164/ and pool 7 into ~/nekko
+(exit 0)
+
+################ s12_a1_check.sh start
+=== [s12_a1_check] dry listing: nothing below is run
+--- probe aifoundry1, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+--- launch on aifoundry1 (start the dry pass a1-check, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry1, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a1-check
+    | MAXJ=1
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/nekko || exit 1
+    | echo "$$" > build/q141k/jobs/a1-check.pid
+    | echo "JOB-BEGIN a1-check $(date '+%F %T %Z')"
+    | (
+    | bash tools/claims-v3/e164/box/check_box_e164.sh
+    | )
+    | rc=$?
+    | echo "JOB-END a1-check rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a1-check.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+(exit 0)
+
+################ s12_a1_check.sh wait
+=== [s12_a1_check] dry listing: nothing below is run
+--- probe aifoundry1, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+--- wait on aifoundry1 (one bounded wait on the dry pass a1-check): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry1, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a1-check
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | t=0
+    | while [ ! -e "$J.rc" ] && [ "$t" -lt "$LIM" ]; do
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then sleep 2; [ -e "$J.rc" ] || { echo "JOB-LOST ${J##*/}: no process and no exit status"; break; }; fi
+    |   sleep 10; t=$((t + 10))
+    | done
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"; else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+(exit 0)
+
+################ s13_a1_launch.sh
+=== [s13_a1_launch] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 15:30 PST)
+--- gate: now + 32 min <= the round's last end (2026-11-05 16:30 PST)
+--- probe aifoundry1, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+--- launch on aifoundry1 (box/launch_e164_a1.sh, deadline 2026-11-05 16:20 PST): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 "bash -s -- '2026-11-05 16:20 PST'" < tools/claims-v3/e164/box/launch_e164_a1.sh   (the kit's committed file, unchanged)
+(exit 0)
+
+################ s13_a1_launch.sh --drop-p2
+=== [s13_a1_launch] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 15:30 PST)
+--- gate: now + 32 min <= the round's last end (2026-11-05 16:30 PST)
+--- probe aifoundry1, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+--- launch on aifoundry1 (box/launch_e164_a1.sh, deadline 2026-11-05 16:20 PST): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 "E164_DROP_P2=1 bash -s -- '2026-11-05 16:20 PST'" < tools/claims-v3/e164/box/launch_e164_a1.sh   (the kit's committed file, unchanged)
+(exit 0)
+
+################ s14_a2_tree.sh
+=== [s14_a2_tree] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- copy on aifoundry2 (git pull --ff-only; ancestry; tools/claims-v3 clean): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | GIT_TERMINAL_PROMPT=0 git pull --ff-only; echo "pull rc=$?"
+    | git merge-base --is-ancestor c31e7ae3 HEAD; echo "ancestry rc=$?"
+    | echo "porcelain lines: $(git status --porcelain -- tools/claims-v3 | wc -l)"
+    | git log -1 --format='HEAD %h %ad' --date=format:'%F %T %z'
+--- read on aifoundry2 (E165: e165_common, blind7, the binaries): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | python3 tools/claims-v3/e165/e165_common.py | tail -n 4
+    | echo "blind7 OK: $(cd tools/claims-v3/kinds/blind7 && sha256sum -c SHA256SUMS 2>&1 | grep -c ': OK$')"
+    | sha256sum build/ccheck/b/host/sparsity_host build/sparsity_t2/kernel/sparsity.elf build/ettelem-hpl/ettelem | cut -c1-8,65-
+--- read on aifoundry2 (E167: run_e167.sh check; frozen-e167-x2.sha256): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | bash tools/claims-v3/e167/run_e167.sh check
+    | sha256sum -c tools/claims-v3/e167/frozen-e167-x2.sha256 > build/e167-x2-q141k.txt 2>&1; echo "frozen-e167-x2 rc=$? OK $(grep -c ': OK$' build/e167-x2-q141k.txt)"
+--- read on aifoundry2 (E168: E136's binaries; run_e168.py --list): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | sha256sum build/e136/host/sparsity_host build/e136/kernel/sparsity.elf build/ettelem-hpl/ettelem | cut -c1-8,65-
+    | python3 tools/claims-v3/e168/run_e168.py --protocol tools/claims-v3/e168/protocol.json --out build/e168/list --list | tail -n 3; echo "run_e168 list rc=${PIPESTATUS[0]}"
+--- read on aifoundry2 (E169: the two hash lists, score_e169.py check, selftest_kit_e169.py): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | cd tools/claims-v3/e169 || exit 1
+    | echo "e169 frozen OK $(shasum -a 256 -c frozen-sha256-e169.txt 2>&1 | grep -c ': OK$') tiles OK $(shasum -a 256 -c frozen-sha256-e169-tiles.txt 2>&1 | grep -c ': OK$')"
+    | python3 -B score_e169.py check | tail -n 1
+    | python3 -B selftest_kit_e169.py | tail -n 1
+--- read on aifoundry2 (et-lab-manifest, uptime, et-who, who): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | mkdir -p build/q141k
+    | et-lab-manifest | tee build/q141k/et-lab-manifest-$(date +%Y%m%dT%H%M%S).txt
+    | echo "booted $(uptime -s)"; uptime
+    | hold_read
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD)"
+(exit 0)
+
+################ s15_a2_dry.sh e165 start
+=== [s15_a2_dry] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (start the dry pass a2-dry-e165, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a2-dry-e165
+    | MAXJ=2
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/claude/et-soc1-prototyping || exit 1
+    | echo "$$" > build/q141k/jobs/a2-dry-e165.pid
+    | echo "JOB-BEGIN a2-dry-e165 $(date '+%F %T %Z')"
+    | (
+    | MODE=short
+    | mkdir -p build/e165
+    | [ -e build/e165/dry ] && mv build/e165/dry build/e165/dry.before-$(date +%s)
+    | now=$(date +%s)
+    | printf 'SLOT E165: start %s (aifoundry2) end %s \n' "$now" "$((now + 2700))" > ~/claude/work/q141-a2-e165-dry-slot.txt
+    | python3 tools/claims-v3/e165/queue_e165.py --dry --slots ~/claude/work/q141-a2-e165-dry-slot.txt --runs build/e165/dry \
+    |   --protocol tools/claims-v3/e165/protocol-dry.json --stoptest-board tools/claims-v3/e165/protocol-stoptest-board-dry.json \
+    |   --stoptest-die tools/claims-v3/e165/protocol-stoptest-die-dry.json --cap 30 > build/e165/dry.out 2>&1 < /dev/null &
+    | q=$!
+    | if [ "$MODE" = short ]; then
+    |   i=0; while [ "$i" -lt 120 ] && ! grep -q '"kind": "before_first_launch"' build/e165/dry/queue.jsonl 2>/dev/null; do sleep 1; i=$((i + 1)); done
+    |   touch build/e165/dry/QUEUE-STOP && echo "QUEUE-STOP touched: the dry queue ends after the smoke and the stop tests"
+    | fi
+    | wait "$q"; r=$?
+    | echo "E165 dry queue rc=$r"
+    | grep -hE '"kind": "(smoke_check|stoptest_check|queue_halt|stop|s1_end|queue_end)"' build/e165/dry/queue.jsonl | cut -c1-260
+    | [ "$r" -eq 0 ] && grep -q '"kind": "smoke_check".*"bad": null' build/e165/dry/queue.jsonl &&
+    |   [ "$(grep -c '"kind": "stoptest_check".*"bad": null' build/e165/dry/queue.jsonl)" -eq 2 ] &&
+    |   grep -q '"kind": "queue_end"' build/e165/dry/queue.jsonl
+    | )
+    | rc=$?
+    | echo "JOB-END a2-dry-e165 rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a2-dry-e165.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+(exit 0)
+
+################ s15_a2_dry.sh e165 wait
+=== [s15_a2_dry] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- wait on aifoundry2 (one bounded wait on the dry pass a2-dry-e165): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a2-dry-e165
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | t=0
+    | while [ ! -e "$J.rc" ] && [ "$t" -lt "$LIM" ]; do
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then sleep 2; [ -e "$J.rc" ] || { echo "JOB-LOST ${J##*/}: no process and no exit status"; break; }; fi
+    |   sleep 10; t=$((t + 10))
+    | done
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"; else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+(exit 0)
+
+################ s15_a2_dry.sh e167 start
+=== [s15_a2_dry] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (start the dry pass a2-dry-e167, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a2-dry-e167
+    | MAXJ=2
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/claude/et-soc1-prototyping || exit 1
+    | echo "$$" > build/q141k/jobs/a2-dry-e167.pid
+    | echo "JOB-BEGIN a2-dry-e167 $(date '+%F %T %Z')"
+    | (
+    | MODE=short
+    | bash tools/claims-v3/e167/run_e167.sh dry
+    | )
+    | rc=$?
+    | echo "JOB-END a2-dry-e167 rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a2-dry-e167.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+(exit 0)
+
+################ s15_a2_dry.sh e167 wait
+=== [s15_a2_dry] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- wait on aifoundry2 (one bounded wait on the dry pass a2-dry-e167): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a2-dry-e167
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | t=0
+    | while [ ! -e "$J.rc" ] && [ "$t" -lt "$LIM" ]; do
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then sleep 2; [ -e "$J.rc" ] || { echo "JOB-LOST ${J##*/}: no process and no exit status"; break; }; fi
+    |   sleep 10; t=$((t + 10))
+    | done
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"; else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+(exit 0)
+
+################ s15_a2_dry.sh e168 start
+=== [s15_a2_dry] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (start the dry pass a2-dry-e168, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a2-dry-e168
+    | MAXJ=2
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/claude/et-soc1-prototyping || exit 1
+    | echo "$$" > build/q141k/jobs/a2-dry-e168.pid
+    | echo "JOB-BEGIN a2-dry-e168 $(date '+%F %T %Z')"
+    | (
+    | MODE=short
+    | mkdir -p build/e168/dry
+    | [ -e build/e168/dry/runs ] && mv build/e168/dry/runs build/e168/dry/runs.before-$(date +%s)
+    | now=$(( $(date +%s) + 5 )); end=$((now + 3960))
+    | printf 'SLOT E168: start %s (%s) end %s (%s) \n' "$now" "$(date -d @"$now" '+%H:%M %Z')" "$end" "$(date -d @"$end" '+%H:%M %Z')" > build/e168/dry/slot.txt
+    | python3 tools/claims-v3/e168/queue_e168.py --dry --slots build/e168/dry/slot.txt --runs build/e168/dry/runs \
+    |   --protocol tools/claims-v3/e168/protocol-dry.json \
+    |   --stoptest-board tools/claims-v3/e168/protocol-stoptest-board-dry.json \
+    |   --stoptest-die tools/claims-v3/e168/protocol-stoptest-die-dry.json > build/e168/dry.out 2>&1 < /dev/null
+    | r=$?; echo "E168 dry queue rc=$r"
+    | grep -hE '"kind": "(smoke_check|stoptest_check|queue_halt|s1_end|queue_end)"' build/e168/dry/runs/queue.jsonl | cut -c1-260
+    | [ "$r" -eq 0 ] && grep -q '"kind": "queue_end"' build/e168/dry/runs/queue.jsonl && ! [ -e build/e168/dry/runs/QUEUE-HALT ]
+    | )
+    | rc=$?
+    | echo "JOB-END a2-dry-e168 rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a2-dry-e168.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+(exit 0)
+
+################ s15_a2_dry.sh e168 wait
+=== [s15_a2_dry] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- wait on aifoundry2 (one bounded wait on the dry pass a2-dry-e168): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a2-dry-e168
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | t=0
+    | while [ ! -e "$J.rc" ] && [ "$t" -lt "$LIM" ]; do
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then sleep 2; [ -e "$J.rc" ] || { echo "JOB-LOST ${J##*/}: no process and no exit status"; break; }; fi
+    |   sleep 10; t=$((t + 10))
+    | done
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"; else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+(exit 0)
+
+################ s15_a2_dry.sh e169 start
+=== [s15_a2_dry] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (start the dry pass a2-dry-e169, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a2-dry-e169
+    | MAXJ=2
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/claude/et-soc1-prototyping || exit 1
+    | echo "$$" > build/q141k/jobs/a2-dry-e169.pid
+    | echo "JOB-BEGIN a2-dry-e169 $(date '+%F %T %Z')"
+    | (
+    | MODE=short
+    | mkdir -p build/e169
+    | [ -e build/e169/dry ] && mv build/e169/dry build/e169/dry.before-$(date +%s)
+    | now=$(date +%s)
+    | printf 'SLOT E169: start %s (dry pass on the box) end %s (one hour later) \n' "$now" "$((now + 3600))" > ~/claude/work/q141-a2-e169-dry-slot.txt
+    | nice -n 10 python3 -B tools/claims-v3/e169/queue_e169.py --dry --slots ~/claude/work/q141-a2-e169-dry-slot.txt --runs build/e169/dry \
+    |   --protocol tools/claims-v3/e169/protocol-dry.json --stoptest-board tools/claims-v3/e169/protocol-stoptest-board-dry.json \
+    |   --stoptest-die tools/claims-v3/e169/protocol-stoptest-die-dry.json > build/e169/dry.out 2>&1 < /dev/null
+    | q=$?; echo "E169 dry queue rc=$q"
+    | nice -n 10 python3 -B tools/claims-v3/e169/score_e169.py build/e169/dry/s[1-6] --out build/e169/dry-results.json > build/e169/dry-score.txt
+    | s=$?; echo "E169 dry score rc=$s"
+    | test ! -e build/e169/runs && echo "the real run directory is empty"
+    | grep -hE '"kind": "(smoke_check|stoptest_check|queue_halt|s1_end|queue_end)"' build/e169/dry/queue.jsonl | cut -c1-260
+    | [ "$q" -eq 0 ] && [ "$s" -eq 0 ] && test ! -e build/e169/runs
+    | )
+    | rc=$?
+    | echo "JOB-END a2-dry-e169 rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a2-dry-e169.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+(exit 0)
+
+################ s15_a2_dry.sh e169 wait
+=== [s15_a2_dry] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- wait on aifoundry2 (one bounded wait on the dry pass a2-dry-e169): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a2-dry-e169
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | t=0
+    | while [ ! -e "$J.rc" ] && [ "$t" -lt "$LIM" ]; do
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then sleep 2; [ -e "$J.rc" ] || { echo "JOB-LOST ${J##*/}: no process and no exit status"; break; }; fi
+    |   sleep 10; t=$((t + 10))
+    | done
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"; else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+(exit 0)
+
+################ s16_a2_e165.sh full
+=== [s16_a2_e165] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 15:30 PST)
+--- gate: now + 45 min <= the round's last end (2026-11-05 16:30 PST)
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (E165's slot and detached queue (--cap 40)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | PLANNED=e165\ e167\ e168\ e169; SLOT=2700; CAP=40
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | for r in $PLANNED; do
+    |   j=build/q141k/jobs/a2-dry-$r
+    |   [ "$(cat "$j.rc" 2>/dev/null)" = 0 ] || { echo "REFUSED: the dry pass of $r has not ended rc 0 (s15_a2_dry.sh $r): all four before E165's session"; exit 3; }
+    | done
+    | [ -e build/e165/runs/queue.jsonl ] && { echo "REFUSED: build/e165/runs already holds a queue"; exit 3; }
+    | mkdir -p build/e165
+    | now=$(date +%s)
+    | printf 'SLOT E165: start %s (aifoundry2) end %s \n' "$now" "$((now + SLOT))" > ~/claude/work/q141-a2-e165-slot.txt
+    | setsid nohup python3 tools/claims-v3/e165/queue_e165.py --slots ~/claude/work/q141-a2-e165-slot.txt --runs build/e165/runs --cap "$CAP" > build/e165/queue.out 2>&1 < /dev/null &
+    | sleep 3
+    | echo "LAUNCHED e165 $(date '+%F %T %Z') (--cap $CAP, slot $SLOT s)"
+    | cat ~/claude/work/q141-a2-e165-slot.txt; tail -n 3 build/e165/queue.out | cut -c1-300
+(exit 0)
+
+################ s16_a2_e165.sh subset
+=== [s16_a2_e165] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 15:30 PST)
+--- gate: now + 30 min <= the round's last end (2026-11-05 16:30 PST)
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (E165's slot and detached queue (--cap 25)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | PLANNED=e165\ e167\ e168\ e169; SLOT=1800; CAP=25
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | for r in $PLANNED; do
+    |   j=build/q141k/jobs/a2-dry-$r
+    |   [ "$(cat "$j.rc" 2>/dev/null)" = 0 ] || { echo "REFUSED: the dry pass of $r has not ended rc 0 (s15_a2_dry.sh $r): all four before E165's session"; exit 3; }
+    | done
+    | [ -e build/e165/runs/queue.jsonl ] && { echo "REFUSED: build/e165/runs already holds a queue"; exit 3; }
+    | mkdir -p build/e165
+    | now=$(date +%s)
+    | printf 'SLOT E165: start %s (aifoundry2) end %s \n' "$now" "$((now + SLOT))" > ~/claude/work/q141-a2-e165-slot.txt
+    | setsid nohup python3 tools/claims-v3/e165/queue_e165.py --slots ~/claude/work/q141-a2-e165-slot.txt --runs build/e165/runs --cap "$CAP" > build/e165/queue.out 2>&1 < /dev/null &
+    | sleep 3
+    | echo "LAUNCHED e165 $(date '+%F %T %Z') (--cap $CAP, slot $SLOT s)"
+    | cat ~/claude/work/q141-a2-e165-slot.txt; tail -n 3 build/e165/queue.out | cut -c1-300
+(exit 0)
+
+################ s17_a2_e167.sh latch
+=== [s17_a2_e167] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- read on aifoundry2 (E167's latch check on the box's history): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | if [ -e build/e165/runs/status.json ] && ! grep -qE '"state": "(ended|halted)"' build/e165/runs/status.json; then
+    |   echo "REFUSED: E165's queue has not ended (build/e165/runs/status.json)"; exit 3
+    | fi
+    | [ -e build/e165/runs ] || echo "note: E165 did not run today: E167's E2 arm will have no anchors (reported only)"
+    | [ "$(ours_live)" -eq 0 ] || { echo "REFUSED: a card session of ours still runs"; exit 3; }
+    | python3 tools/claims-v3/e167/latch_check_e167.py --history ~/live/history/$(date -u +%F).jsonl
+    | echo "LATCH rc=$?"
+(exit 0)
+
+################ s17_a2_e167.sh config
+=== [s17_a2_e167] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- read on aifoundry2 (run_e167.sh config start (read-only)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | [ "$(ours_live)" -eq 0 ] || { echo "REFUSED: a card session of ours runs: the config read waits"; exit 3; }
+    | bash tools/claims-v3/e167/run_e167.sh config start
+(exit 0)
+
+################ s17_a2_e167.sh go 13:10 14:30 15:30 16:30
+=== [s17_a2_e167] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 15:30 PST)
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (run_e167.sh go and the GO marker): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | NB=13:10; SL=14:30; NSA=15:30; CUT=16:30
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | bash tools/claims-v3/e167/run_e167.sh go "$NB" "$SL" "$NSA" "$CUT"; r=$?
+    | echo "run_e167 go rc=$r"
+    | [ "$r" -eq 0 ] || exit "$r"
+    | [ -e build/e167/runs/queue.jsonl ] || [ -e build/e167/runs/status.json ] || { echo "no queue record: no GO touched"; exit 4; }
+    | touch build/e167/runs/GO && echo "GO touched $(date '+%F %T %Z')"
+    | echo "LAUNCHED e167 $(date '+%F %T %Z') (gates $NB / $SL / $NSA / $CUT)"
+(exit 0)
+
+################ s18_a2_e168.sh
+=== [s18_a2_e168] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 15:30 PST)
+--- gate: now + 66 min <= the round's last end (2026-11-05 16:30 PST)
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (E168's slot (66 min) and detached queue): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | [ "$(cat build/q141k/jobs/a2-dry-e168.rc 2>/dev/null)" = 0 ] || { echo "REFUSED: E168's dry pass has not ended rc 0"; exit 3; }
+    | if [ -e build/e167/runs/status.json ] && ! grep -q '"state": "ended"' build/e167/runs/status.json; then echo "REFUSED: E167's queue has not ended"; exit 3; fi
+    | [ -e build/e168/runs/queue.jsonl ] && { echo "REFUSED: build/e168/runs already holds a queue"; exit 3; }
+    | mkdir -p build/e168
+    | now=$(date +%s); end=$((now + 3960))
+    | printf 'SLOT E168: start %s (%s) end %s (%s) \n' "$now" "$(date -d @"$now" '+%H:%M %Z')" "$end" "$(date -d @"$end" '+%H:%M %Z')" > ~/claude/work/q141-a2-e168-slot.txt
+    | setsid nohup python3 tools/claims-v3/e168/queue_e168.py --slots ~/claude/work/q141-a2-e168-slot.txt --runs build/e168/runs > build/e168/queue.out 2>&1 < /dev/null &
+    | sleep 3
+    | echo "LAUNCHED e168 $(date '+%F %T %Z')"
+    | cat ~/claude/work/q141-a2-e168-slot.txt; tail -n 3 build/e168/queue.out | cut -c1-300
+(exit 0)
+
+################ s19_a2_e169.sh
+=== [s19_a2_e169] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 15:30 PST)
+--- gate: now + 45 min <= the round's last end (2026-11-05 16:30 PST)
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (E169's slot (45 min) and detached queue): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | [ "$(cat build/q141k/jobs/a2-dry-e169.rc 2>/dev/null)" = 0 ] || { echo "REFUSED: E169's dry pass has not ended rc 0"; exit 3; }
+    | if [ -e build/e168/runs/status.json ] && ! grep -qE '"state": "(ended|halted)"' build/e168/runs/status.json; then echo "REFUSED: E168's queue has not ended"; exit 3; fi
+    | [ -e build/e169/runs ] && { echo "REFUSED: build/e169/runs exists (README.md.dated-note.md, box step 4: the queue must start in an empty directory)"; exit 3; }
+    | mkdir -p build/e169
+    | now=$(date +%s); end=$((now + 2700))
+    | printf 'SLOT E169: start %s (%s) end %s (%s) \n' "$now" "$(date -d @"$now" '+%H:%M %Z')" "$end" "$(date -d @"$end" '+%H:%M %Z')" > ~/claude/work/q141-a2-e169-slot.txt
+    | setsid nohup python3 tools/claims-v3/e169/queue_e169.py --slots ~/claude/work/q141-a2-e169-slot.txt --runs build/e169/runs > build/e169/queue.out 2>&1 < /dev/null &
+    | sleep 3
+    | echo "LAUNCHED e169 $(date '+%F %T %Z')"
+    | cat ~/claude/work/q141-a2-e169-slot.txt; tail -n 3 build/e169/queue.out | cut -c1-300
+(exit 0)
+
+################ s20_wait.sh e166
+=== [s20_wait] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on e166): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 42 lines: printed once at the top of the listing>
+    | RUN=e166; LIM=520
+    | L=build/$RUN/session.log
+    | off=$(cat build/q141k/$RUN.log-offset 2>/dev/null || echo 0)
+    | ended() { tail -n +"$((off + 1))" "$L" 2>/dev/null | grep -q 'session end'; }
+    | t=0
+    | while ! ended && [ "$t" -lt "$LIM" ]; do
+    |   pgrep -u "$(id -u)" -f "session_$RUN\.sh" > /dev/null || { sleep 2; ended || { echo "RUN-GONE $RUN: no session process and no session end"; break; }; }
+    |   sleep 15; t=$((t + 15))
+    | done
+    | date '+%F %T %Z'
+    | tail -n +"$((off + 1))" "$L" 2>/dev/null | grep -E 'session start|stop-path|smoke|gate|queue|pass 16620|STOP|no device opened|failed|session end' | cut -c1-300 | tail -n 30
+    | [ -f build/$RUN/queue.out ] && tail -n 3 build/$RUN/queue.out | cut -c1-300
+    | if ended; then echo "RUN-ENDED $RUN"; else echo "RUN-RUNNING $RUN after $t s"; fi
+    | if [ "$RUN" = e166 ] && tail -n +"$((off + 1))" "$L" | grep -q 'pass 16620 rc=7'; then
+    |   echo "G0-REFUSED: the room was above 53.0 C, no hold ran: launch E163 first; a later E166 needs 40 minutes of rest and --later-try"
+    | fi
+    | if tail -n +"$((off + 1))" "$L" | grep -qE 'smoke gate failed|smoke or its gate failed|stop-path test failed|no device opened'; then echo "GATE-STOPPED $RUN"; fi
+(exit 0)
+
+################ s20_wait.sh e163
+=== [s20_wait] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on e163): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 42 lines: printed once at the top of the listing>
+    | RUN=e163; LIM=520
+    | L=build/$RUN/session.log
+    | off=$(cat build/q141k/$RUN.log-offset 2>/dev/null || echo 0)
+    | ended() { tail -n +"$((off + 1))" "$L" 2>/dev/null | grep -q 'session end'; }
+    | t=0
+    | while ! ended && [ "$t" -lt "$LIM" ]; do
+    |   pgrep -u "$(id -u)" -f "session_$RUN\.sh" > /dev/null || { sleep 2; ended || { echo "RUN-GONE $RUN: no session process and no session end"; break; }; }
+    |   sleep 15; t=$((t + 15))
+    | done
+    | date '+%F %T %Z'
+    | tail -n +"$((off + 1))" "$L" 2>/dev/null | grep -E 'session start|stop-path|smoke|gate|queue|pass 16620|STOP|no device opened|failed|session end' | cut -c1-300 | tail -n 30
+    | [ -f build/$RUN/queue.out ] && tail -n 3 build/$RUN/queue.out | cut -c1-300
+    | if ended; then echo "RUN-ENDED $RUN"; else echo "RUN-RUNNING $RUN after $t s"; fi
+    | if [ "$RUN" = e166 ] && tail -n +"$((off + 1))" "$L" | grep -q 'pass 16620 rc=7'; then
+    |   echo "G0-REFUSED: the room was above 53.0 C, no hold ran: launch E163 first; a later E166 needs 40 minutes of rest and --later-try"
+    | fi
+    | if tail -n +"$((off + 1))" "$L" | grep -qE 'smoke gate failed|smoke or its gate failed|stop-path test failed|no device opened'; then echo "GATE-STOPPED $RUN"; fi
+(exit 0)
+
+################ s20_wait.sh e164
+=== [s20_wait] dry listing: nothing below is run
+--- probe aifoundry1, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+--- wait on aifoundry1 (box/wait_e164.sh (E164 box step 6)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 'bash -s' < tools/claims-v3/e164/box/wait_e164.sh   (the kit's committed file, unchanged)
+(exit 0)
+
+################ s20_wait.sh e165
+=== [s20_wait] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- wait on aifoundry2 (one bounded wait on e165): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | RUN=e165; LIM=520
+    | R=build/$RUN/runs
+    | fin() { grep -qE '"state": "(ended|halted)"' "$R/status.json" 2>/dev/null; }
+    | t=0
+    | while ! fin && [ "$t" -lt "$LIM" ]; do
+    |   pgrep -u "$(id -u)" -f "queue_$RUN\.py" > /dev/null || { sleep 2; fin || { echo "RUN-GONE $RUN: no queue process and no end in status.json"; break; }; }
+    |   sleep 15; t=$((t + 15))
+    | done
+    | date '+%F %T %Z'; cat "$R/status.json" 2>/dev/null; echo
+    | [ -e "$R/QUEUE-HALT" ] && { echo "QUEUE-HALT:"; cut -c1-300 "$R/QUEUE-HALT"; }
+    | grep -hE '"kind": "(smoke_check|stoptest_check|queue_halt|go|no_go|go_refused|give_up|stop|gate|s[1-6]_end|queue_end)"' "$R/queue.jsonl" 2>/dev/null | cut -c1-300 | tail -n 14
+    | tail -n 4 build/$RUN/queue.out 2>/dev/null | cut -c1-300
+    | [ "$RUN" = e167 ] && bash tools/claims-v3/e167/run_e167.sh watch | cut -c1-300 | tail -n 20
+    | if fin; then echo "RUN-ENDED $RUN"; else echo "RUN-RUNNING $RUN after $t s"; fi
+    | if [ -e "$R/QUEUE-HALT" ] || grep -qE '"kind": "(no_go|go_refused|give_up)"' "$R/queue.jsonl" 2>/dev/null; then echo "GATE-STOPPED $RUN"; fi
+(exit 0)
+
+################ s20_wait.sh e167
+=== [s20_wait] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- wait on aifoundry2 (one bounded wait on e167): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | RUN=e167; LIM=520
+    | R=build/$RUN/runs
+    | fin() { grep -qE '"state": "(ended|halted)"' "$R/status.json" 2>/dev/null; }
+    | t=0
+    | while ! fin && [ "$t" -lt "$LIM" ]; do
+    |   pgrep -u "$(id -u)" -f "queue_$RUN\.py" > /dev/null || { sleep 2; fin || { echo "RUN-GONE $RUN: no queue process and no end in status.json"; break; }; }
+    |   sleep 15; t=$((t + 15))
+    | done
+    | date '+%F %T %Z'; cat "$R/status.json" 2>/dev/null; echo
+    | [ -e "$R/QUEUE-HALT" ] && { echo "QUEUE-HALT:"; cut -c1-300 "$R/QUEUE-HALT"; }
+    | grep -hE '"kind": "(smoke_check|stoptest_check|queue_halt|go|no_go|go_refused|give_up|stop|gate|s[1-6]_end|queue_end)"' "$R/queue.jsonl" 2>/dev/null | cut -c1-300 | tail -n 14
+    | tail -n 4 build/$RUN/queue.out 2>/dev/null | cut -c1-300
+    | [ "$RUN" = e167 ] && bash tools/claims-v3/e167/run_e167.sh watch | cut -c1-300 | tail -n 20
+    | if fin; then echo "RUN-ENDED $RUN"; else echo "RUN-RUNNING $RUN after $t s"; fi
+    | if [ -e "$R/QUEUE-HALT" ] || grep -qE '"kind": "(no_go|go_refused|give_up)"' "$R/queue.jsonl" 2>/dev/null; then echo "GATE-STOPPED $RUN"; fi
+(exit 0)
+
+################ s20_wait.sh e168
+=== [s20_wait] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- wait on aifoundry2 (one bounded wait on e168): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | RUN=e168; LIM=520
+    | R=build/$RUN/runs
+    | fin() { grep -qE '"state": "(ended|halted)"' "$R/status.json" 2>/dev/null; }
+    | t=0
+    | while ! fin && [ "$t" -lt "$LIM" ]; do
+    |   pgrep -u "$(id -u)" -f "queue_$RUN\.py" > /dev/null || { sleep 2; fin || { echo "RUN-GONE $RUN: no queue process and no end in status.json"; break; }; }
+    |   sleep 15; t=$((t + 15))
+    | done
+    | date '+%F %T %Z'; cat "$R/status.json" 2>/dev/null; echo
+    | [ -e "$R/QUEUE-HALT" ] && { echo "QUEUE-HALT:"; cut -c1-300 "$R/QUEUE-HALT"; }
+    | grep -hE '"kind": "(smoke_check|stoptest_check|queue_halt|go|no_go|go_refused|give_up|stop|gate|s[1-6]_end|queue_end)"' "$R/queue.jsonl" 2>/dev/null | cut -c1-300 | tail -n 14
+    | tail -n 4 build/$RUN/queue.out 2>/dev/null | cut -c1-300
+    | [ "$RUN" = e167 ] && bash tools/claims-v3/e167/run_e167.sh watch | cut -c1-300 | tail -n 20
+    | if fin; then echo "RUN-ENDED $RUN"; else echo "RUN-RUNNING $RUN after $t s"; fi
+    | if [ -e "$R/QUEUE-HALT" ] || grep -qE '"kind": "(no_go|go_refused|give_up)"' "$R/queue.jsonl" 2>/dev/null; then echo "GATE-STOPPED $RUN"; fi
+(exit 0)
+
+################ s20_wait.sh e169
+=== [s20_wait] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- wait on aifoundry2 (one bounded wait on e169): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | RUN=e169; LIM=520
+    | R=build/$RUN/runs
+    | fin() { grep -qE '"state": "(ended|halted)"' "$R/status.json" 2>/dev/null; }
+    | t=0
+    | while ! fin && [ "$t" -lt "$LIM" ]; do
+    |   pgrep -u "$(id -u)" -f "queue_$RUN\.py" > /dev/null || { sleep 2; fin || { echo "RUN-GONE $RUN: no queue process and no end in status.json"; break; }; }
+    |   sleep 15; t=$((t + 15))
+    | done
+    | date '+%F %T %Z'; cat "$R/status.json" 2>/dev/null; echo
+    | [ -e "$R/QUEUE-HALT" ] && { echo "QUEUE-HALT:"; cut -c1-300 "$R/QUEUE-HALT"; }
+    | grep -hE '"kind": "(smoke_check|stoptest_check|queue_halt|go|no_go|go_refused|give_up|stop|gate|s[1-6]_end|queue_end)"' "$R/queue.jsonl" 2>/dev/null | cut -c1-300 | tail -n 14
+    | tail -n 4 build/$RUN/queue.out 2>/dev/null | cut -c1-300
+    | [ "$RUN" = e167 ] && bash tools/claims-v3/e167/run_e167.sh watch | cut -c1-300 | tail -n 20
+    | if fin; then echo "RUN-ENDED $RUN"; else echo "RUN-RUNNING $RUN after $t s"; fi
+    | if [ -e "$R/QUEUE-HALT" ] || grep -qE '"kind": "(no_go|go_refused|give_up)"' "$R/queue.jsonl" 2>/dev/null; then echo "GATE-STOPPED $RUN"; fi
+(exit 0)
+
+################ go checklist step 21: the releases (rewrites of the day's post): not scripted
+
+################ s22_collect.sh e163
+=== [s22_collect] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- copy, run on the Intel (copy back E163's passes, smoke and stop test (dated note, step 11)): rsync -a -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/claims-v3/aifoundry3/e163 aifoundry3:aifoundry/build/claims-v3/aifoundry3/e163-smoke aifoundry3:aifoundry/build/claims-v3/aifoundry3/e163-stoptest <lab clone>/build/e163-raw/
+--- copy, run on the Intel (copy back E163's session logs): rsync -a -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/e163/ <lab clone>/build/e163-raw/logs/
+--- desk, run on the Intel (collect_e163.sh with Q141(t)'s aifoundry3 arm): env PY=/usr/bin/python3 E163_DATE=2026-11-05 nice -n 10 bash tools/claims-v3/e163/collect_e163.sh <lab clone>/build/e163-raw docs/reports/data/2026-11-04-q141t-s7-recount/arm/arm27-aifoundry3.json
+--- read, run on the Intel (et-who lines in build/e163-out/2026-11-05-e163-blind7-aifoundry3/logs (E164's scrub, --check)): /usr/bin/python3 -B tools/claims-v3/e164/scrub_etwho_e164.py --check build/e163-out/2026-11-05-e163-blind7-aifoundry3/logs --owner LOGIN
+[s22_collect] (dry listing; a real run would say:) E163 collected and scored: build/e163-out/2026-11-05-e163-blind7-aifoundry3 (the data directory is docs/reports/data/2026-11-05-e163-blind7-aifoundry3/)
+(exit 0)
+
+################ s22_collect.sh e166
+=== [s22_collect] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- desk, run on the Intel (collect_e166.sh (its rsyncs bounded at 300/120 s)): env PY=/usr/bin/python3 bash tools/claims-v3/e166/collect_e166.sh docs/reports/data/2026-11-05-e166-heat-replicate-aifoundry3
+--- read, run on the Intel (et-who lines in docs/reports/data/2026-11-05-e166-heat-replicate-aifoundry3/logs (E164's scrub, --check)): /usr/bin/python3 -B tools/claims-v3/e164/scrub_etwho_e164.py --check docs/reports/data/2026-11-05-e166-heat-replicate-aifoundry3/logs --owner LOGIN
+[s22_collect] (dry listing; a real run would say:) E166 collected and scored: docs/reports/data/2026-11-05-e166-heat-replicate-aifoundry3
+(exit 0)
+
+################ s22_collect.sh e164
+=== [s22_collect] dry listing: nothing below is run
+--- probe aifoundry1, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+--- copy, run on the Intel (box/pull_e164.sh (E164 box step 7)): bash tools/claims-v3/e164/box/pull_e164.sh
+--- desk, run on the Intel (collect_e164_a1.sh with E164_S_RECOUNT and E163's files): env PY=/usr/bin/python3 PYS=/usr/local/bin/python3.12 E164_DATE=2026-11-05 E164_S_RECOUNT=docs/reports/data/2026-11-04-q141t-s7-recount/arm/arm27-aifoundry1c1.json nice -n 10 bash tools/claims-v3/e164/collect_e164_a1.sh build/e164-raw build/e163-out/2026-11-05-e163-blind7-aifoundry3/e163.json '<primary.c_excluded of E163 scored.json, comma-joined>' build/e163-out/2026-11-05-e163-blind7-aifoundry3/scored.json
+(exit 0)
+
+################ s22_collect.sh e165
+=== [s22_collect] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- desk, run on the Intel (collect_e165_bounded.sh (its own probe, every remote call under 600 s)): bash tools/claims-v3/e165/collect_e165_bounded.sh <RB_OUT>/e165-raw docs/reports/data/2026-11-05-e165-blind7-aifoundry2
+--- read, run on the Intel (E165's score.anchors and score.anchor_delta to files (F9)): /usr/bin/python3 -B <lab clone>/tools/claims-v3/q141k-runbook/anchors_e165.py docs/reports/data/2026-11-05-e165-blind7-aifoundry2
+[s22_collect] (dry listing; a real run would say:) E165 collected and scored: docs/reports/data/2026-11-05-e165-blind7-aifoundry2
+(exit 0)
+
+################ s22_collect.sh e167
+=== [s22_collect] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- read on aifoundry2 (the session's span from E167's queue.jsonl (for the boxes' history)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 42 lines: printed once at the top of the listing>
+    | head -n 1 build/e167/runs/queue.jsonl | sed -nE 's/^\{"t_ms": ([0-9]+),.*/FIRST \1/p'
+    | tail -n 1 build/e167/runs/queue.jsonl | sed -nE 's/^\{"t_ms": ([0-9]+),.*/LAST \1/p'
+--- desk, run on the Intel (collect_e167_bounded.sh (the runs copy bounded at 600 s, each small file at 120 s)): env E167_RSYNC_TIMEOUT_S=600 bash tools/claims-v3/e167/collect_e167_bounded.sh docs/reports/data/2026-11-05-e167-heat-replicate-aifoundry2 '<first t_ms/1000 - 60>' '<last t_ms/1000 + 60>'
+--- desk, run on the Intel (the check of C on SMOKE's C log (as E161's)): nice -n 10 /usr/bin/python3 -B tools/claims-v3/ccheck/ccheck.py check <RB_OUT>/e167-clog/SMOKE/c-log.jsonl --out docs/reports/data/2026-11-05-e167-heat-replicate-aifoundry2/ccheck-SMOKE.json --jobs 2
+--- desk, run on the Intel (the check of C on STOPTEST-DIE's C log (as E161's)): nice -n 10 /usr/bin/python3 -B tools/claims-v3/ccheck/ccheck.py check <RB_OUT>/e167-clog/STOPTEST-DIE/c-log.jsonl --out docs/reports/data/2026-11-05-e167-heat-replicate-aifoundry2/ccheck-STOPTEST-DIE.json --jobs 2
+--- desk, run on the Intel (the check of C on STOPTEST-BOARD's C log (as E161's)): nice -n 10 /usr/bin/python3 -B tools/claims-v3/ccheck/ccheck.py check <RB_OUT>/e167-clog/STOPTEST-BOARD/c-log.jsonl --out docs/reports/data/2026-11-05-e167-heat-replicate-aifoundry2/ccheck-STOPTEST-BOARD.json --jobs 2
+--- desk, run on the Intel (the check of C on G1Q's C log (as E161's)): nice -n 10 /usr/bin/python3 -B tools/claims-v3/ccheck/ccheck.py check <RB_OUT>/e167-clog/G1Q/c-log.jsonl --out docs/reports/data/2026-11-05-e167-heat-replicate-aifoundry2/ccheck-G1Q.json --jobs 2
+--- desk, run on the Intel (the check of C on END's C log (as E161's)): nice -n 10 /usr/bin/python3 -B tools/claims-v3/ccheck/ccheck.py check <RB_OUT>/e167-clog/END/c-log.jsonl --out docs/reports/data/2026-11-05-e167-heat-replicate-aifoundry2/ccheck-END.json --jobs 2
+--- desk, run on the Intel (the check of C on G2Q's C log (as E161's)): nice -n 10 /usr/bin/python3 -B tools/claims-v3/ccheck/ccheck.py check <RB_OUT>/e167-clog/G2Q/c-log.jsonl --out docs/reports/data/2026-11-05-e167-heat-replicate-aifoundry2/ccheck-G2Q.json --jobs 2
+--- desk, run on the Intel (the check of C on END2's C log (as E161's)): nice -n 10 /usr/bin/python3 -B tools/claims-v3/ccheck/ccheck.py check <RB_OUT>/e167-clog/END2/c-log.jsonl --out docs/reports/data/2026-11-05-e167-heat-replicate-aifoundry2/ccheck-END2.json --jobs 2
+--- read, run on the Intel (frozen-e167-x2.sha256): sha256sum -c tools/claims-v3/e167/frozen-e167-x2.sha256
+--- desk, run on the Intel (score_e167_x2.py (X2's registered verdicts; E2 with E165's anchors, reported)): /usr/bin/python3 tools/claims-v3/e167/score_e167_x2.py docs/reports/data/2026-11-05-e167-heat-replicate-aifoundry2 --e165-anchors docs/reports/data/2026-11-05-e165-blind7-aifoundry2/anchors-for-e167-e168.json --json docs/reports/data/2026-11-05-e167-heat-replicate-aifoundry2/scored.json
+[s22_collect] (dry listing; a real run would say:) E167 collected and scored: docs/reports/data/2026-11-05-e167-heat-replicate-aifoundry2
+(exit 0)
+
+################ s22_collect.sh e168
+=== [s22_collect] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- copy, run on the Intel (the bounded copy of build/e168/runs only): rsync -a '--rsync-path=nice -n 19 rsync' -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry2:claude/et-soc1-prototyping/build/e168/runs/ docs/reports/data/2026-11-05-e168-gemm-g4/aifoundry2/
+--- copy, run on the Intel (the queue's output and slot file): rsync -a '--rsync-path=nice -n 19 rsync' -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry2:claude/et-soc1-prototyping/build/e168/queue.out aifoundry2:claude/work/q141-a2-e168-slot.txt docs/reports/data/2026-11-05-e168-gemm-g4/logs/
+--- read, run on the Intel (E111's login scrub (an end reason can hold a login)): /usr/bin/python3 -B tools/claims-v3/e111/scrub_logins_e111.py docs/reports/data/2026-11-05-e168-gemm-g4
+--- read, run on the Intel (gzip the telemetry as E159's sessions): find docs/reports/data/2026-11-05-e168-gemm-g4/aifoundry2 -path '*/tel/*.jsonl' -type f -exec gzip -n '{}' +
+--- read, run on the Intel (gzip the launch records as E159's sessions): find docs/reports/data/2026-11-05-e168-gemm-g4/aifoundry2 '(' -name launches.jsonl -o -name c-log.jsonl ')' -type f -exec gzip -n '{}' +
+--- desk, run on the Intel (reduce_e168.py (A7 primary; G4_own_anchors with E165's reads, reported)): /usr/bin/python3 -B tools/claims-v3/e168/reduce_e168.py docs/reports/data/2026-11-05-e168-gemm-g4/aifoundry2 --out docs/reports/data/2026-11-05-e168-gemm-g4/results.json --anchors docs/reports/data/2026-11-05-e165-blind7-aifoundry2/anchors-for-e167-e168.json > docs/reports/data/2026-11-05-e168-gemm-g4/reduce.txt
+[s22_collect] (dry listing; a real run would say:) e168 collected and scored: docs/reports/data/2026-11-05-e168-gemm-g4
+(exit 0)
+
+################ s22_collect.sh e169
+=== [s22_collect] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- copy, run on the Intel (the bounded copy of build/e169/runs only): rsync -a '--rsync-path=nice -n 19 rsync' -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry2:claude/et-soc1-prototyping/build/e169/runs/ docs/reports/data/2026-11-05-e169-stride-shapes/aifoundry2/
+--- copy, run on the Intel (the queue's output and slot file): rsync -a '--rsync-path=nice -n 19 rsync' -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry2:claude/et-soc1-prototyping/build/e169/queue.out aifoundry2:claude/work/q141-a2-e169-slot.txt docs/reports/data/2026-11-05-e169-stride-shapes/logs/
+--- read, run on the Intel (E111's login scrub (an end reason can hold a login)): /usr/bin/python3 -B tools/claims-v3/e111/scrub_logins_e111.py docs/reports/data/2026-11-05-e169-stride-shapes
+--- read, run on the Intel (gzip the telemetry as E159's sessions): find docs/reports/data/2026-11-05-e169-stride-shapes/aifoundry2 -path '*/tel/*.jsonl' -type f -exec gzip -n '{}' +
+--- read, run on the Intel (gzip the launch records as E159's sessions): find docs/reports/data/2026-11-05-e169-stride-shapes/aifoundry2 '(' -name launches.jsonl -o -name c-log.jsonl ')' -type f -exec gzip -n '{}' +
+--- desk, run on the Intel (score_e169.py on every session directory): /usr/bin/python3 -B tools/claims-v3/e169/score_e169.py 'docs/reports/data/2026-11-05-e169-stride-shapes/aifoundry2/s[1-6]' --out docs/reports/data/2026-11-05-e169-stride-shapes/results.json > docs/reports/data/2026-11-05-e169-stride-shapes/score.txt
+[s22_collect] (dry listing; a real run would say:) e169 collected and scored: docs/reports/data/2026-11-05-e169-stride-shapes
+(exit 0)
+
+################ s22_collect.sh pair
+=== [s22_collect] dry listing: nothing below is run
+--- desk, run on the Intel (rank 4's paired-anchor rule (E163 README; PYS as E164's pair scorer)): /usr/local/bin/python3.12 -B tools/claims-v3/kinds/blind7/score_rank4.py --a3 build/e163-out/2026-11-05-e163-blind7-aifoundry3/scored.json --c1 build/e164-out/2026-11-05-e164-blind7-card1/scored.json --pair E163/E164 --out build/q141k-out/2026-11-05/rank4-e163-e164.json
+--- desk, run on the Intel (Q141(t)'s A1 readings, both cards): /usr/bin/python3 -B docs/reports/data/2026-11-04-q141t-s7-recount/score_s7arm_a1.py --a3 build/e163-out/2026-11-05-e163-blind7-aifoundry3/scored.json --c1 build/e164-out/2026-11-05-e164-blind7-card1/scored.json --out build/q141k-out/2026-11-05/score-s7arm-a1.json
+[s22_collect] (dry listing; a real run would say:) rank 4 and Q141(t)'s readings in build/q141k-out/2026-11-05 (for the records round to place)
+(exit 0)
