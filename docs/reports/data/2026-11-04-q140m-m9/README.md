@@ -434,3 +434,13 @@ changes, and M9 is not re-frozen. Every original word above stays; the marks "co
     (0.995 ± 0.508 at nine). M9's error there moves from −0.72 / −1.00 W to +0.07 / −0.24 W (aifoundry3 / card 1), ±0.27 W. The
     over-count is resolved and of the miss's size; what remains is not resolved from zero. Still one post hoc tile, at a count the
     rule does not yet call converged. b12_third, like for like (the frozen form): +0.24 / +0.15 → +0.22 / +0.12 W, ±0.06 W.
+
+**What these corrections do to predicting power and heat** *(dated, Wed 4 Nov 2026, after C9).* No term, price, band or prediction
+of M9 changes, so its out-of-sample errors stand as registered. **Power, int8:** `bpp_r4` stands, resolved out of kind over every
+committed row (0.251-0.261 → 0.177 W); on pool 6's int8 kinds its like-for-like gain is 0.04-0.06 W (0.159-0.189 / 0.169-0.185 →
+0.118 / 0.112 W, C3), not the 0.08-0.21 W the blind figures suggested. **Heat:** unchanged, 0.13 °C rms over pool 6's int8 4.5 s
+rises with M9's D as with M8's (C2). **The single-bit term (tested, not priced):** the bench's launch average on a high single bit
+carries its own error, 0.17-0.39 W at 27 points on the ten tiles above the bound (C9). A single-bit price fitted on three-point
+counts therefore partly fits the bench's averaging. On b20_third, post hoc, M9's error would be +0.07 / −0.24 W ± 0.27 W at 27
+points instead of −0.72 / −1.00 W, one tile not yet converged. A term that can use such counts needs them at the N the rule sets,
+or a stratified estimator registered first. The blind before → after for M9 is still pool 7's (E163, E164).
