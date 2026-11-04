@@ -1,0 +1,73 @@
+E154 corrections after verification: POST HOC, never a verdict (corrections_e154.py; committed inputs only)
+frozen inputs checked by score_e154 on import: 13; problems: none
+
+C0  the registered scorer re-run in memory on p15420 (plateau errors, C): E (b for H_M) / A
+    H_M: +0.194 / +0.352   scored.json [0.194, 0.352]
+    K_S: +0.024 / +0.418   scored.json [0.024, 0.418]
+    K_Q: -0.418 / +0.005   scored.json [-0.418, 0.005]
+    K_L: +0.492 / +0.073   scored.json [0.492, 0.073]
+    K_O: +0.360 / +0.536   scored.json [0.36, 0.536]
+    session rms over the 4 pool-6 holds: {'M8': 0.37, 'M7': 0.352, 'M6': 0.473, 'E153': 0.347, 'A_given_watts': 0.342}
+
+C1  the critic's rule (plateau AND checkpoints' rms within critic_scale_C), arm E (M8)
+    K_S: plateau +0.024, rms 0.372, scale 0.278: plateau in, rms OUT, both no; at a flat 0.35: plateau in, both no
+    K_Q: plateau -0.418, rms 0.401, scale 0.369: plateau OUT, rms OUT, both no; at a flat 0.35: plateau OUT, both no
+    K_L: plateau +0.492, rms 0.450, scale 0.574: plateau in, rms in, both PASS; at a flat 0.35: plateau OUT, both no
+    K_O: plateau +0.360, rms 0.344, scale 0.277: plateau OUT, rms OUT, both no; at a flat 0.35: plateau OUT, both no
+    counts of 4: {'plateau_within': 2, 'rms_within': 1, "both_within (the critic's rule)": 1, 'flat_0.35_plateau_within': 1, 'flat_0.35_both_within': 0}
+    which: {'plateau_within': ['K_S', 'K_L'], 'rms_within': ['K_L'], "both_within (the critic's rule)": ['K_L'], 'flat_0.35_plateau_within': ['K_S'], 'flat_0.35_both_within': []}
+
+C2  arm A (the chain given the measured board) at arm E's checkpoints (C, measured minus predicted rise)
+    H_M (int8.full, rise 11.209, w 5.0 s): A plateau +0.352 = 3.1% of the rise; A checkpoints' rms 0.326
+        A   60:+0.232 120:+0.315 180:+0.302 300:+0.388 450:+0.306 600:+0.400 end:+0.310
+        b-A 60:-0.110 120:-0.145 180:-0.117 300:-0.191 450:-0.111 600:-0.198 end:-0.135
+    K_S (fp32.real_smol_softmax_v_causal, rise 11.792, w 4.37 s): A plateau +0.418 = 3.5% of the rise; A checkpoints' rms 0.270
+        A   60:-0.137 120:-0.052 180:+0.053 300:+0.228 450:+0.469 end:+0.378
+        E-A 60:-0.261 120:-0.446 180:-0.566 300:-0.540 450:-0.395 end:-0.137
+    K_Q (int8.real_qwen_w8a8_v, rise 5.673, w 5.0 s): A plateau +0.005 = 0.1% of the rise; A checkpoints' rms 0.053
+        A   60:-0.091 120:-0.065 180:-0.051 300:+0.032 450:+0.011 end:-0.024
+        E-A 60:-0.202 120:-0.305 180:-0.354 300:-0.458 450:-0.416 end:-0.458
+    K_L (int8.b_line_zero_ff, rise 4.024, w 5.0 s): A plateau +0.073 = 1.8% of the rise; A checkpoints' rms 0.097
+        A   60:+0.089 120:+0.116 180:+0.150 300:+0.071 450:+0.071 end:+0.053
+        E-A 60:+0.215 120:+0.298 180:+0.350 300:+0.403 450:+0.443 end:+0.410
+    K_O (fp32.a_onebit_b5_third, rise 11.546, w 5.0 s): A plateau +0.536 = 4.6% of the rise; A checkpoints' rms 0.362
+        A   60:+0.027 120:+0.060 180:+0.145 300:+0.317 450:+0.611 600:+0.428 end:+0.487
+        E-A 60:-0.232 120:-0.335 180:-0.345 300:-0.357 450:-0.166 600:+0.054 end:+0.000
+    large rises (> 10 C) ['H_M', 'K_S', 'K_O']: A [0.352, 0.418, 0.536], share [0.0314, 0.0354, 0.0464]
+    small rises ['K_Q', 'K_L']: A [0.005, 0.073], share [0.0008, 0.018]
+    E144 (2 Nov, this card) H_H fp32.randn share 0.4563 from a 51.22 C rest: rise 14.997, A plateau +0.015 (0.10%)
+    E144 (2 Nov, this card) H_L int8.neg_ones share 0.9655 from a 51.646 C rest: rise 4.254, A plateau -0.032 (-0.74%)
+
+C3  the absolute die over the last 300 s, from R0's room (C): measured, predicted, abs error = rise error + anchor error
+    M8: K_S 66.445 vs 66.390 = +0.055 (+0.024 +0.031); K_Q 61.739 vs 61.932 = -0.193 (-0.418 +0.225); K_L 58.606 vs 58.009 = +0.598 (+0.492 +0.106); K_O 64.929 vs 64.483 = +0.446 (+0.360 +0.087)
+        pool-6 rms: absolute 0.386 (mean +0.226), rise 0.370
+    M7: K_S 66.445 vs 66.318 = +0.127 (+0.095 +0.031); K_Q 61.739 vs 61.928 = -0.189 (-0.437 +0.248); K_L 58.606 vs 58.369 = +0.237 (+0.130 +0.107); K_O 64.929 vs 64.421 = +0.508 (+0.529 -0.021)
+        pool-6 rms: absolute 0.303 (mean +0.171), rise 0.352
+    M6: K_S 66.445 vs 66.237 = +0.208 (+0.177 +0.031); K_Q 61.739 vs 61.941 = -0.202 (-0.475 +0.273); K_L 58.606 vs 58.827 = -0.221 (-0.324 +0.103); K_O 64.929 vs 64.357 = +0.572 (+0.730 -0.158)
+        pool-6 rms: absolute 0.339 (mean +0.089), rise 0.473
+    E153: K_S 66.445 vs 65.997 = +0.448 (+0.417 +0.031); K_Q 61.739 vs 61.688 = +0.051 (-0.299 +0.350); K_L 58.606 vs 58.513 = +0.093 (-0.087 +0.180); K_O 64.929 vs 64.534 = +0.395 (+0.459 -0.064)
+        pool-6 rms: absolute 0.303 (mean +0.247), rise 0.347
+    H_M (from rest, E78's S in every arm): {'measured_die_last300s_C': 62.618, 'predicted_die_last300s_C': 62.425, 'abs_err_C': 0.194, 'anchor_err_C': 0.0, 'rise_err_C': 0.194}
+    ranking, best first: absolute ['M7', 'E153', 'M6', 'M8']; rise ['E153', 'M7', 'M8', 'M6']
+
+C4  tails (C): carried-in (the chain), measured rest die above R0, arm E restarted at the hold's own rest
+    H_M: 0.0, 0.0, 0.194
+    K_S: 3.212, 3.243, -3.789
+    K_Q: 4.432, 4.656, -5.389
+    K_L: 3.067, 3.173, -2.75
+    K_O: 1.887, 1.973, -1.827
+    pool-6 holds that started on a tail: 4 of 4
+
+C7  tools/claims-v3/e89/pvt_sample.py: [(208, 'rec["since_reset_ms"] = -1')]
+
+C9  fp32.a_onebit_b5_third: A every word 1/3 (0x3EAAAAAB) with bit 5 set in the odd rows: each step down an A column flips that one bit (the recoded operand, a new base word); B every element 1.0
+
+C11 (c) per board W over the last 300 s (C/W) [interval], score_e144's verdict by E144's rule (not an E154 rule)
+    H_M: 0.873 [0.742, 1.004] (rise 11.209 C / board 12.837 W): PASS
+    K_S: 0.719 [0.673, 0.764] (rise 11.792 C / board 16.402 W): INCONCLUSIVE
+    K_Q: 0.540 [0.468, 0.611] (rise 5.673 C / board 10.515 W): FAIL
+    K_L: 0.558 [0.473, 0.642] (rise 4.024 C / board 7.216 W): FAIL
+    K_O: 0.769 [0.617, 0.920] (rise 11.546 C / board 15.023 W): INCONCLUSIVE
+    H_M t63: {'t63_s': 111.0, 'closed_loop_t63_s': 119.2, 'ratio': 0.931, 'score_e144_verdict_E144_rule': 'PASS'}
+
+C12 counts: {"pass_15420": {"process_launches": 474, "dispatches": 6288, "launches_per_hold": {"H_M": 90, "K_S": 137, "K_Q": 81, "K_L": 82, "K_O": 84}}, "smoke_15401": {"process_launches": 7, "dispatches": 58, "smoke_gate_c_log": {"host_records": 7, "c_records": 58, "launch_records": 58}}, "total": {"process_launches": 481, "dispatches": 6346}, "ccheck_all_summary": {"launches_field_counts_dispatches": 6346, "PASS": 6346, "by_type": {"fp32": 2379, "int8": 3967}}}

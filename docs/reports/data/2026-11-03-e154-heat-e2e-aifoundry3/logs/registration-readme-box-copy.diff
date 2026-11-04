@@ -1,0 +1,42 @@
+# E154 (Q139), C14: the committed registration README (sha256 bf2c9fc9ce2837ac4346bf453522b18a2eb7599f61afb5238acc828e61160e86, commit 8c23853c, 17:51:30 PST)
+# against the copy the box ran beside (sha256 7aec97fbff9aad61ee3008cd26fb9a9245e195e3775c42abe87f5c664ae73aad, as aifoundry3/e154/p15420/code.sha256 records it;
+# file time 17:49:03 PST; read back read-only Tue 3 Nov 2026 19:58 PST by the fix pass). Documentation only: no rule, prediction, stop or design line differs.
+--- tools/claims-v3/e154/README.md (8c23853c)
++++ aifoundry3: aifoundry/tools/claims-v3/e154/README.md (the box copy)
+@@ -148,13 +148,13 @@
+ - If the room rule makes K_S a rest (room above 53.0 °C), K_S is NOT RUN and not scored, and the session figure has three holds. If the
+   runner drops a hold at the deadline, it is NOT RUN, named, and the session figure is over the holds that ran.
+ 
+-**The scorer's self-test** (`score_e154.py --self-test`, 17:48 PST, [`logs/selftest.txt`](logs/selftest.txt)): a synthetic pass made by the
++**The scorer's self-test** (`score_e154.py --self-test`, 17:40 PST, [`logs/selftest.txt`](logs/selftest.txt)): a synthetic pass made by the
+ frozen model itself at the plan's pattern (amendment A1's `plan_records`) gives back A1's arm-E numbers at a 51.2 °C room (K_S 11.722 °C over
+ a 3.211 °C tail, K_Q 6.091 over 4.440, K_L 3.544, K_O 11.203; within 0.002 °C of the frozen table for H_M, K_L and K_O) and reads PASS on every
+ arm; a die offset of +0.3 °C over each hold's last 300 s reads PASS everywhere, +3.0 °C FAIL everywhere, +1.0 and +1.6 °C as the rule says
+ hold by hold; a warm room (52.0 °C, 4.97 s) reads PASS; ten edge cases of the verdict function read as registered.
+ 
+-**The dry run** on aifoundry3 (17:50 PST, `V3_DRY=1`, E97's toy card, no device opened, [`logs/dry.txt`](logs/dry.txt)): the hash check and
++**The dry run** on aifoundry3 (17:45 PST, `V3_DRY=1`, E97's toy card, no device opened, [`logs/dry.txt`](logs/dry.txt)): the hash check and
+ the preflight pass on the box; the full design runs every step (H_M 93 launches, K_S 137 at 4.37 s start to start, K_Q, K_L, K_O 85 each; 72.5
+ minutes of plan); the smoke runs each tile once through the wrapper, and the stop tests read as on E144's toy card (the in-launch board test
+ cannot trip on a toy card whose board never rises, so the dry smoke exits 1 there, as E144's would).
+@@ -205,7 +205,7 @@
+ of the running build by Q136(w)'s table with E144's one change (command 74 group 0 classified READ from the held patch source, E144's README).
+ `tools/claims-v3/dmcmd_audit.py` through [`preflight_e154.sh`](preflight_e154.sh) on every file the session runs or sources reads **GO: 38 send
+ sites, 0 disallowed, no WRITE allowed**, with one reviewed exception, E141's and E144's lib.sh:154 (start_sampler is never called; the guard
+-refuses `--reset-ms`) ([`dmcmd-audit.txt`](dmcmd-audit.txt), also GO on the box at 17:50 PST). Against Q136(w)'s stock table with no exception it
++refuses `--reset-ms`) ([`dmcmd-audit.txt`](dmcmd-audit.txt), also GO on the box at 17:45 PST). Against Q136(w)'s stock table with no exception it
+ reads NO-GO at exactly two sites, command 74 (UNCLASSIFIED there) and lib.sh:154 ([`dmcmd-audit-bare.txt`](dmcmd-audit-bare.txt)), as E144's
+ did. No statistics reset is sent.*
+ 
+@@ -261,11 +261,3 @@
+ | `score_e154.py` | the scorer (13 frozen inputs' hashes; arm E, arm A, M7, M6, E153's measured S, H_M's rules, the session figure) and its self-test |
+ | `collect_e154.sh` | brings the session's data and logs to the Intel, runs the C check and the scorer |
+ | `logs/` | the self-test, the dry run |
+-
+-## The session script's dry run
+-
+-**The session script's dry run** (17:50 PST, `V3_DRY=1 bash session_e154.sh`): the gates chose the full design, the hash check and the
+-preflight passed, the dry smoke exited 1 (the toy card's board never rises, so the in-launch stop test cannot trip), the gate read NO-GO, and
+-no measured pass started: the NO-GO path ends the session after its closing config read. The gate's readers were also run on E144's and E153's
+-real smoke directories on the box: E144's 751 telemetry lines all carry the 34 raw codes (mean 50.9-55.8 °C, within 3 °C of `minshire[0]`, 600
+-MHz) and its config reads pass; E153's C log gives 10 host records naming this host and kernel and 60 C records for 60 launch records.

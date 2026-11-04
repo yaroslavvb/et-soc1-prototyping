@@ -10,6 +10,21 @@ aifoundry2 half. The owner's mandate is his words of 2 November 2026, about 18:4
 model"), with his goal of the same day: "to be able to predict the power requirement and heat generation of various kinds of numeric
 computations as accurately as possible".*
 
+*(Dated note, Tue 3 Nov 2026, about 20:20 PST, after the data and its verification. The registration's text is left as it was at
+`8c23853c`, and every rule, prediction and stop in it stands. Five things in it are imprecise; the evidence is in the data README's
+[§ Corrections after verification](../../../docs/reports/data/2026-11-03-e154-heat-e2e-aifoundry3/README.md#corrections-after-verification-tue-3-nov-2026).)*
+- *C10: it was written about 17:30-17:51 PST, not to 18:00 (here and in the departures' heading). It was committed at 17:51:30 and pushed at
+  17:51:32, before the claim (17:52:43) and the first device access (17:52:59).*
+- *C14: the box ran from a copy of this folder made before the commit. Its 12 code files match `8c23853c` byte for byte. Its copy of this
+  README (sha256 `7aec97fb…`, written 17:49:03, recorded in the pass's `code.sha256`) is a draft. It differs only in three time stamps and
+  the closing section on the session script's dry run.*
+- *C8: § Device commands sent says the commands are classified "from the firmware source of the running build". aifoundry3 runs a non-public
+  0.22.0 build, so every class, not only command 74's, is read from `836a4ab`'s public handlers plus the held command-74 patch, under the
+  table's caveat (`tools/claims-v3/e144/dmcmd_table_e144.json` › `source.caveat`).*
+- *C4: in the full design all four pool-6 holds start on tails (the plan table's 3.21, 4.44, 3.06 and 1.88 °C), not only K_S and K_Q.*
+- *C13: "The plateau moves 0.3-0.8 °C between sessions" (What this cannot say) is E97's move within its one session (E144's C3, 3 Nov). The
+  move between sessions is not yet measured below that scale.*
+
 ## What it does to predicting power and heat
 
 **The term tested** is the whole path from a computation's description to its die over minutes on a pinned card: the tile's bits, then M8's
