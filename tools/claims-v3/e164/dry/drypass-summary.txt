@@ -1,0 +1,96 @@
+== dry tree:  17M; hostname shim -> aifoundry1; date -> date (GNU coreutils) 9.5
+== check_e164 --desk
+HARNESS OK: 103 files match harness-e164.json (desk: binaries not checked)
+rc=0
+== e164_common --verify
+{"pool7_tiles": 61, "k7_tiles": 8, "pool6_anchors": 3, "priority_1": 48, "pool_anchors": 9, "e78_tiles_checked": 6, "problems": []}
+rc=0
+== preflight
+rc=0 dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+== dry pass 16410
+rc=0
+== dry smoke 16401
+rc=0
+== dry stop-path test 16402
+rc=1
+== dry pass 16411, priority-2 tests dropped
+rc=0
+== card 0 refused
+rc=2 E164 runs on aifoundry1 card 1 only (V3_DEVICE=1; this is aifoundry1-c0)
+== no V3_DEVICE refused
+rc=2 aifoundry1 has two cards: set V3_DEVICE=0 or 1
+== queue: no deadline
+rc=1 tools/claims-v3/e164/queue_e164.sh: line 19: E164_DEADLINE: E164_DEADLINE - the last end of a pass, the round time gate less 10 minutes (no default)
+== queue stub: first estimate past the budget
+rc=0
+10:02:57 e164: passes 16410 16411 16412 16413 16414; budget 20 s from the anchor (10:02:57), reserve 0 s, last end 10:03:17, deadline 12:02:00; first estimate 25 s; E164_DROP_P2=0
+10:02:57 budget: stopping before p16410 (now T0+0 s, projected 25 s, would end T0+25 s > T0+20 s or the deadline)
+10:02:57 e164: done, 0 passes, at T0+0 s
+== queue stub: five passes fit
+rc=0
+10:02:57 e164: passes 16410 16411 16412 16413 16414; budget 60 s from the anchor (10:02:57), reserve 0 s, last end 10:03:57, deadline 12:02:00; first estimate 3 s; E164_DROP_P2=0
+10:02:57 p16410 starts at T0+0 s (projected 3 s)
+stub block 16410
+10:02:58 p16410 rc=0 (1 s)
+10:02:58 p16411 starts at T0+1 s (projected 1 s)
+stub block 16411
+10:02:59 p16411 rc=0 (1 s)
+10:02:59 p16412 starts at T0+2 s (projected 1 s)
+stub block 16412
+10:03:00 p16412 rc=0 (1 s)
+10:03:00 p16413 starts at T0+3 s (projected 1 s)
+stub block 16413
+10:03:01 p16413 rc=0 (1 s)
+10:03:02 p16414 starts at T0+4 s (projected 1 s)
+stub block 16414
+10:03:03 p16414 rc=0 (1 s)
+10:03:03 e164: done, 5 passes, at T0+6 s
+== queue stub: deadline already past
+rc=0
+10:03:03 budget: stopping before p16410 (now T0+0 s, projected 3 s, would end T0+3 s > T0+3840 s or the deadline)
+10:03:03 e164: done, 0 passes, at T0+0 s
+== queue stub: STOP file
+rc=0
+10:03:03 STOP: stopping before p16410
+10:03:03 e164: done, 0 passes, at T0+0 s
+== session: no deadline
+rc=1 tools/claims-v3/e164/session_e164.sh: line 30: E164_DEADLINE: E164_DEADLINE - the round time gate less 10 minutes (no default)
+== dry session (check, preflight, stop test, smoke, gate, queue)
+rc=0
+2026-11-04T10:03:05 [aifoundry1-c1] e164-stoptest p16402 begins (die 80 C) -> <dry tree>/build/claims-v3-dry/aif
+DRY ettelem config
+DRY start_sampler <dry tree>/build/claims-v3-dry/aifoundry1-c1/e164-stoptest/p16402/telemetry.jsonl 1740
+10:03:08 [aifoundry1-c1] E78 pass 16402: 11 runs of 11 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 0.2 s quiet; cap 72 C; ET_DEVICES=1; tiles verified against kinds.json
+10:03:08 [aifoundry1-c1] done
+2026-11-04T10:03:08 [aifoundry1-c1] E164 stop-path test (die): run_e164 exit 0
+10:03:10 [aifoundry1-c1] E78 pass 16402: 11 runs of 11 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 0.2 s quiet; cap 72 C; ET_DEVICES=1; tiles verified against kinds.json
+10:03:10 [aifoundry1-c1] done
+2026-11-04T10:03:10 [aifoundry1-c1] E164 stop-path test (board): run_e164 exit 0
+E164 stop-path test (watch) needs --tel-live and no dry run
+2026-11-04T10:03:11 [aifoundry1-c1] E164 stop-path test (watch): run_e164 exit 1
+DRY ettelem config
+2026-11-04T10:03:17 [aifoundry1-c1] e164-stoptest p16402 ends: failed run_e164 exit 1 (stoptest)
+2026-11-04 10:03:17 PST stop-path test rc=1
+2026-11-04T10:03:17 [aifoundry1-c1] E164 pass 16401 (smoke): target 200 preheat 0 quiet 0.2 burnin 0 fma 2 s, die cap 72 C; C log via tools/claims-v3/ccheck/sparsity_ccheck.sh; E164_DROP_P2=0
+2026-11-04T10:03:17 [aifoundry1-c1] e164-smoke p16401 begins (die 80 C) -> <dry tree>/build/claims-v3-dry/aifoun
+DRY ettelem config
+DRY start_sampler <dry tree>/build/claims-v3-dry/aifoundry1-c1/e164-smoke/p16401/telemetry.jsonl 1740
+10:03:20 [aifoundry1-c1] E78 pass 16401: 11 runs of 11 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 0.2 s quiet; cap 72 C; ET_DEVICES=1; tiles verified against kinds.json
+10:03:20 [aifoundry1-c1] done
+DRY ettelem config
+2026-11-04T10:03:25 [aifoundry1-c1] e164-smoke p16401 ends: ok pass 16401 smoke
+2026-11-04 10:03:25 PST smoke rc=0
+smoke config_start: {'dry': True}
+smoke config_end: {'dry': True}
+SMOKE-GATE FAIL {'bad': ['stop test die: rc=0 (want rc=6, EXIT_HOT)', "stop test die: STOP.die does not name the stop and the sample's age: ''", 'stop test board: rc=0 (want rc=6, EXIT_HOT)', "stop test board: STOP.board does not name the stop and the sample's
+2026-11-04 10:03:26 PST DRY: stop test rc 1, smoke rc 0, gate 1 (the gate reads live records; a dry run has none): the queue runs dry
+2026-11-04 10:05:01 PST queue: 10:05:01 e164: done, 5 passes, at T0+118 s
+2026-11-04 10:05:01 PST DRY config config-session-end.json
+2026-11-04 10:05:01 PST session end
+== dry data
+p16410 runs 96, block {"exp":"e164","pass":16410,"card":"aifoundry1-c1","t0_ms":1793815406876,"t1_ms":1793815415266,"die_c_start":80,"die_c_end":80,"status":"ok","note":"pass 16410"}
+p16411 runs 96, block {"exp":"e164","pass":16411,"card":"aifoundry1-c1","t0_ms":1793815425765,"t1_ms":1793815434030,"die_c_start":80,"die_c_end":80,"status":"ok","note":"pass 16411"}
+p16412 runs 96, block {"exp":"e164","pass":16412,"card":"aifoundry1-c1","t0_ms":1793815444481,"t1_ms":1793815452811,"die_c_start":80,"die_c_end":80,"status":"ok","note":"pass 16412"}
+p16413 runs 96, block {"exp":"e164","pass":16413,"card":"aifoundry1-c1","t0_ms":1793815463624,"t1_ms":1793815472240,"die_c_start":80,"die_c_end":80,"status":"ok","note":"pass 16413"}
+p16414 runs 96, block {"exp":"e164","pass":16414,"card":"aifoundry1-c1","t0_ms":1793815482672,"t1_ms":1793815490947,"die_c_start":80,"die_c_end":80,"status":"ok","note":"pass 16414"}
+== done
