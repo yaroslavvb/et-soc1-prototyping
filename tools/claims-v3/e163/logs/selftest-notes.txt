@@ -1,0 +1,77 @@
+E163 notes self-test (Q141(a)'s fix pass): desk only, no device, no ssh; nothing here is a measurement. Inputs: the committed files named in each part; E151's raw blocks are copied into a scratch directory, never written in place.
+
+== 1. KE-C's scope (A1-1): E151's ten committed B blocks as E163's 16350-16359, the collector's E151 reduction, the frozen scorer
+reduce_e163.py --e151 --drop-dips --rail-filter over p16350-p16359: rc 0
+the reduction keeps (its 'passes', KE-C's blocks): [16350, 16351, 16352, 16353, 16354, 16355, 16356, 16357, 16358, 16359]; E78's gates set aside: []
+E151's Book keeps (KE-D's and KE-W's blocks): [16351, 16352, 16353, 16354, 16355, 16357, 16358, 16359]; its train gate sets aside: [16350, 16356]
+  int8.b1_0: E163 path 0.032063 W over 8 blocks, E151 0.032063 W, diff +0.0e+00
+  int8.b1_1: E163 path 0.148209 W over 8 blocks, E151 0.148209 W, diff +0.0e+00
+  int8.b1_2: E163 path 0.087575 W over 8 blocks, E151 0.087575 W, diff +0.0e+00
+  int8.b1_3: E163 path 0.146143 W over 8 blocks, E151 0.146143 W, diff +0.0e+00
+  int8.b1_4: E163 path 0.106899 W over 8 blocks, E151 0.106899 W, diff +0.0e+00
+  int8.b1_5: E163 path 0.164299 W over 8 blocks, E151 0.164299 W, diff +0.0e+00
+largest |difference| 0.0e+00 W; KE-D PASS, KE-W PASS, KE-C NOT SCORED (no C check given), KE NOT SCORED
+launches of the six in the reduction's blocks: 1200 (200 each); in the Book's kept blocks only: 960
+stub C records (every launch of the reduction's blocks given a record; nothing here is a measurement):
+  every launch PASS                                                  KE-C PASS       KE-D PASS  KE PASS  KE' PASS
+  one ROUNDING, int8.b1_3, in 16351 (a block the Book keeps)         KE-C FAIL       KE-D PASS  KE FAIL  KE' FAIL
+  one ROUNDING, int8.b1_3, in 16350 (a block the Book sets aside)    KE-C FAIL       KE-D PASS  KE FAIL  KE' FAIL
+  one launch of int8.b1_0 with no C record, in 16356 (set aside)     KE-C FAIL       KE-D PASS  KE FAIL  KE' FAIL
+  one ROUNDING, int8.hb1 (not one of the six), in 16351              KE-C PASS       KE-D PASS  KE PASS  KE' PASS
+
+== 2. FULL's passes (A1-2): what the queue runs, what the scorer needs, and what decides a set-aside
+queue_e163.sh FULL: SEQ '16310 16311 16312 16350 16351 16352 16313', BUDGET_S 4200 (60 s of it reserved); predictions-e163.json > plan > plans > FULL > sequence [16310, 16311, 16312, 16350, 16351, 16352, 16313]
+queue_e163.sh lines (not comments) naming a reduction or a gate verdict: 0
+scoring floor: predictions-e163.json > plan > min_kept_passes_scored 2, > spec > min_kept_passes_scored 2, > plan > min_tile_passes 2
+  simulated sessions (selftest_e163.fake, M9 as good as its nested score; no C check is given, so K14 reads NOT SCORED):
+  kept passes [16310, 16311, 16312]: scored, 22 verdicts (RANK1 PASS, P1 PASS, C1 PASS, M1 BETTER, K14 NOT SCORED)
+  kept passes [16310, 16311]: scored, 22 verdicts (RANK1 PASS, P1 PASS, C1 PASS, M1 BETTER, K14 NOT SCORED)
+  kept passes [16310]: NOT SCORED (1 kept passes, fewer than 2)
+  this card, E141 on Q139(u)'s footing, dips removed: kept [14110, 14111, 14112, 14113], set aside [] (docs/reports/data/2026-11-03-q139u-footing/reduced/e141-footing.json)
+  this card, E153's registered primary (the footing): kept [15310, 15311, 15312, 15313], set aside [] (docs/reports/data/2026-11-03-e153-blind6-aifoundry3/e153.json)
+  this card, E141's session-own reduction, dips kept: kept [14111, 14112, 14113], set aside [14110] (docs/reports/data/2026-11-02-e141-blind5-aifoundry3/e141.json)
+
+== 3. What KE-D and KE-W can detect (A1-3): a lost step reads 0 and a doubled one 2s, so either departs from E151's by s itself
+KE-D's line: |D_E163 - D_E151| <= 0.05 W on each tile. KE-W: Welch's 95% interval (pick6.welch). The expected half-widths below assume E163's kept blocks scatter as E151's eight kept blocks did (their per-block sd); planned, not measured.
+  tile       step s, W      se per-block sd  KE-D sees s lost/doubled  KE-W half-width, 3 / 2 blocks  KE-W sees it (3 / 2)
+  b1_0          0.0321  0.0075       0.0213                        no          0.0418 / 0.0972             no / no
+  b1_1          0.1482  0.0045       0.0126                       yes          0.0247 / 0.0575            yes / yes
+  b1_2          0.0876  0.0041       0.0116                       yes          0.0227 / 0.0527            yes / yes
+  b1_3          0.1461  0.0076       0.0215                       yes          0.0421 / 0.0979            yes / yes
+  b1_4          0.1069  0.0062       0.0175                       yes          0.0342 / 0.0796            yes / yes
+  b1_5          0.1643  0.0045       0.0128                       yes          0.0251 / 0.0584            yes / yes
+
+== 4a. SHORT's drops (A1-4a): one SHORT pass against one FULL kinds pass, by e163_common.pass_order (the registered order code)
+tiles in 16310: 77; in 16320: 57; left out of 16320: 20 = the four priority-2 tests (4 of 4) and the 16 re-runs (16 of 16), together; other: []
+e163_common.SHORT_NAMES: 57 (pool 7's 61 less the four); any SHORT plan that keeps one set and drops the other: none
+
+== 4b. The predictions' copy (A1-4b): predictions-blind7-aifoundry3.json (75802201) against predictions-e163.json > tiles
+61 tiles x M6-M9: 1525 of 1525 non-null fields equal; left out of predictions-e163.json: {'M9.D600_a3_95': 61} (null in the frozen file on every tile listed); fields added: 0
+E163 code reading D600_a3_95: none
+
+== 4c. The byte twin's figures (as E163.md states them; for the records' wording)
+recount-rule.txt: fp32.cal_pi_b20        27   4.375   -0.311    0.179    0.198  0.198  no  (columns: tile N mean_W 3pt-N_W se_samp se_intl e(N) met)
+spec > byte_twin: tile fp32.b_onebit_b20_pi, expected error (measured - M9) +0.311 +- 0.198 W
+
+== 5. Q141(t)'s 27-point arm (A1-5), as committed
+docs/reports/data/2026-11-04-q141t-s7-recount/arm/arm27-aifoundry3.json: sha256 8db1a78e0e5d570ca52028f92ee7e1afdd03d24884b3b458b30293b7603ff05e; first commit 67d5e44f 2026-11-04 10:07:40 -0800; form {tile: D_w}: True; 8 tiles
+  fp16.b_onebit_b8_pi: arm 12.2153 W, M9 12.1239 W, class S, priority 1
+  fp16.b_onebit_b9_one: arm 13.4708 W, M9 13.5798 W, class S, priority 1
+  fp32.b_onebit_b20_full: arm 12.3087 W, M9 12.2189 W, class S, priority 1
+  fp32.b_onebit_b20_one: arm 12.8763 W, M9 13.177 W, class S, priority 1
+  fp32.b_onebit_b20_pi: arm 12.4041 W, M9 12.0926 W, class S, priority 1
+  fp32.b_onebit_b20_seventh: arm 12.3157 W, M9 11.975 W, class S, priority 1
+  fp32.b_onebit_b20_third_a1p5: arm 12.828 W, M9 13.2175 W, class S, priority 2
+  fp32.b_onebit_b22_third: arm 13.4337 W, M9 12.9139 W, class S, priority 1
+score_e163.run on one simulated session with the arm: reported_arm27 rows 8; the arm sets no verdict (verdict keys with 'arm': [])
+
+== 6. The round's hash lists, the kit's own checks, and this file's device-command audit (read-only)
+tools/claims-v3/kinds/blind7/SHA256SUMS: 91 of 91 OK
+docs/reports/data/2026-11-04-q140q-gemm-g4-stride/frozen-sha256-e168.json: 9 of 9 OK
+docs/reports/data/2026-11-04-q140q-gemm-g4-stride/frozen-sha256-e168-scorer.txt: 18 of 18 OK
+docs/reports/data/2026-11-04-q140e-heat-replicates/predict_q140e.py FROZEN (its input hashes, read by ast, not imported): 26 of 26 OK
+check_e163.check (desk: the box binaries not checked): 138 of 138 OK
+e163_common.py --verify: rc 0, problems []
+dmcmd_audit.py on this file: rc 0; dmcmd_audit: GO (0 send site(s), 0 disallowed; allow-list: none)
+
+SELFTEST-NOTES DONE
