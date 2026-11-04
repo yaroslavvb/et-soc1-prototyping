@@ -1,0 +1,37 @@
+{
+ "_note": "Q140(l) registration, machine-readable copy of REGISTRATION.md (the text governs). Committed before any fit, score or prediction of this lane.",
+ "sessions": {
+  "E80": {"dir": "2026-10-31-e80-kinds-speed", "anchors": {"fp16": "fp16/zeros", "int8": "int8/zeros"}},
+  "E83": {"dir": "2026-10-31-e83-kinds-speed-rest", "anchors": {"fp32": "fp32/zeros", "fp16": "fp16/zeros", "int8": "int8/zeros"}},
+  "E143": {"dir": "2026-11-02-e143-blind5-aifoundry2", "anchors": {"fp32": "b5-fp32.anchor_zeros", "fp16": "b5-fp16.anchor_zeros", "int8": "b5-int8.anchor_zeros"}},
+  "E160": {"dir": "2026-11-03-e160-blind6-aifoundry2", "anchors": {"fp32": "b6-fp32.anchor6_zeros", "fp16": "b6-fp16.anchor6_zeros", "int8": "b6-int8.anchor6_zeros"}}
+ },
+ "expected_scored_cells": {"E80": 16, "E83": 35, "E143": 36, "E160": 47},
+ "D_primary": {
+  "E80_E83_kinds_and_k_cells": "docs/reports/data/2026-11-03-q139u-footing/reduced/e78-footing.json items[<type>.<kind>].D.mean",
+  "E143_pool5": "docs/reports/data/2026-11-03-q139u-footing/reduced/e141-footing.json items[<name>].D.mean",
+  "E160_pool6": "docs/reports/data/2026-11-03-e153-blind6-aifoundry3/e153.json items[<name>].D.mean"
+ },
+ "group_rule": "governed if M8 as frozen (W 65.20, primary D) predicts the cell's burst clock < 795 MHz, else pinned; fixed for every arm and fold",
+ "anchor_run_min_mhz": 795.0,
+ "pinned_fit_run_min_mhz": 795.0,
+ "W_grid": [55.0, 75.0, 0.1],
+ "sigma_w": 2.75,
+ "reference_lines": {"R7": {"W": 65.58008573814928}, "R8": {"W": 65.20000000000014}},
+ "terms_in_order": ["T1_cap_level", "T2_zeros_anchor_level", "T3_die_start", "T4_sf_n2_reads_joint"],
+ "rule": {
+  "quantities": ["G_governed_clock_rms", "Bg_governed_board_rms", "Bp_pinned_board_rms"],
+  "carry": "Q's held-out rms strictly lower in >= 3 of 4 held-out sessions AND Q's pooled held-out rms strictly lower, against the configuration the term is added to",
+  "min_sessions": 3,
+  "keep": "carries on >= 1 of G, Bg, Bp and raises no other pooled rms by more than the tolerance",
+  "tolerance": {"G_governed_clock_rms": 0.15, "Bg_governed_board_rms": 0.03, "Bp_pinned_board_rms": 0.03},
+  "if_none_kept": "M9's aifoundry2 part = M8's as frozen"
+ },
+ "bootstrap": {"draws": 2000, "seed": 140, "unit": "cells inside the held-out session", "use": "reported only"},
+ "rank2_targets_reported": {"G_rms_max_mhz": 4.0, "G_abs_mean_max_mhz": 2.0, "Bg_abs_mean_max_w": 0.5, "Bp_abs_mean_max_w": 0.5, "Bp_rms_max_w": 1.0},
+ "reproduction_checks": {
+  "E143_R7_M7_blind_D_registered_groups": {"G_rms": 6.629, "Bg_rms": 1.601, "pinned_clock_rms": 1.007, "Bp_rms": 1.184},
+  "E160_R8_M8_blind_D_registered_groups": {"G_rms": 6.72, "Bg_rms": 1.39, "pinned_clock_rms": 3.89, "Bp_rms": 1.73}
+ },
+ "never": ["exponent n = 2.28", "any fitted exponent", "any term not listed", "a held-out number other than its zeros-anchor reads and die starts", "pool 7"]
+}
