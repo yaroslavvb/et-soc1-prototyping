@@ -1,0 +1,51 @@
+PASS the scorer's frozen inputs match their committed bytes (5 files: predictions-e169.json, stride_sm.py, peaks_e169.py, step-rule-e169.json, kit-e169.json)
+
+1. E158 -> E169: the ported reduction and E158's registered verdicts
+PASS E158 -> E169: reduce_e169 on E158's committed session reproduces results.json per_shape exactly
+PASS E158 -> E169: reduce_e169 on E158's committed session reproduces results.json t800_by_pass exactly
+PASS E158 -> E169: reduce_e169 on E158's committed session reproduces results.json launches_800_by_pass exactly
+PASS E158 -> E169: reduce_e169 on E158's committed session reproduces results.json cycles_per_op_800_by_pass exactly
+PASS E158 -> E169: reduce_e169 on E158's committed session reproduces results.json cells exactly
+PASS E158 -> E169: reduce_e169 on E158's committed session reproduces results.json checks exactly
+PASS E158 -> E169: reduce_e169 on E158's committed session reproduces results.json peaks exactly
+PASS E158 -> E169: reduce_e169 on E158's committed session reproduces results.json skipped exactly
+PASS E158 -> E169: reduce_e169 on E158's committed session reproduces results.json config_after exactly
+PASS E158 -> E169: 98 runs, as E158's 98
+PASS E158 -> E169: E158's registered score() on the ported reduction reproduces results.json rules exactly
+PASS E158 -> E169: ... and results.json errors exactly
+     E158's registered verdicts, reproduced: R0 PASS (replicate PASS); R1 INCONSISTENT ['K4n8'], SOFT; R2 NO SINGLE CURVE (least rms 0.129); R3 PASS (ISO +0.41% PASS / +0.26% PASS / -0.76% PASS); R4 NOT BETTER (ISO 6.0% vs STRICT-C 7.2%); R5 10 of 14; R7 P0 3.565 W rms
+PASS E158 -> E169: the verdicts are E158's registered ones (R0 PASS; R1 INCONSISTENT [K4n8]; R2 NO SINGLE CURVE; R3 PASS x3 at +0.41 / +0.26 / -0.76%; R4 NOT BETTER; R5 10 of 14)
+PASS E169's R0 on E158's 98 runs: PASS (every run checked, every check ['exact'])
+
+2. The step machinery on E158's committed collapses, and the tie rule on E158's own session
+PASS E158 D4/D2: pair_reading +26.53% [+25.48, +27.59] -> UNRESOLVED: crosses the edge of SM's zone equals steps_e169.py's (+26.53% [+25.48, +27.59] -> UNRESOLVED); presence PRESENT, size UNRESOLVED
+PASS E158 K4n8/K4n7: pair_reading +28.90% [+27.83, +29.98] -> NONE OF THE THREE: beyond every zone (above SM's) equals steps_e169.py's (+28.90% [+27.83, +29.98] -> NONE OF THE THREE); presence PRESENT, size NOT SM
+PASS E158 K6n4/K6n3: pair_reading +33.29% [+32.18, +34.41] -> SUPPORTS SM equals steps_e169.py's (+33.29% [+32.18, +34.41] -> SUPPORTS SM); presence PRESENT, size SM
+PASS E158 K6n4/K6n5: pair_reading +14.85% [+13.90, +15.82] -> NONE OF THE THREE: beyond every zone (above SM's) equals steps_e169.py's (+14.85% [+13.90, +15.82] -> NONE OF THE THREE); presence PRESENT, size NOT SM
+PASS E169's tie rule on E158's own session: TIED (steps K4n8/K4n7 +0.005 points, K6n4/K6n5 -0.003 points)
+
+3. Known truths through score_e169.score()
+PASS SM's truth: INDEX STEP AS SM
+PASS SM's truth: B7 point PASS, resolved 3 of 3
+PASS SM's truth: ties TIED, R0 PASS, labels []
+PASS SM's truth: P2/N2 (not counted) reads 'SUPPORTS SM, ISO' (SM's and ISO's zones overlap)
+PASS ISO's truth: NO STEP
+PASS ISO's truth: B7 point FAIL (6 of 6 outside 3%), resolved 0 of 3
+PASS the floor: P1/N1's half-width 0.417 points over 5 passes of small noise (sigma0's 0.417)
+PASS STRICT's truth: NO STEP; P2/N2 'SUPPORTS STRICT'
+PASS half SM's step on ISO's level: A STRIDE STEP SM DOES NOT SIZE (P1/N1 NONE OF THE THREE: between STRICT's zone and SM's)
+PASS the card's committed steps (+28.9% on P1/N1, +14.9% on P3/N3): A STRIDE STEP SM DOES NOT SIZE; shares of SM's step 0.78 and 0.48
+PASS P1/N1 at SM's step, P3/N3 none: MIXED
+PASS P1/N1 on SM's zone's edge: size UNRESOLVED; A STRIDE STEP, ITS SIZE UNRESOLVED
+PASS P1/N1 at +3.0% (the no-step zone's edge): presence UNRESOLVED; UNRESOLVED
+PASS two passes: NO VERDICT (2 pass(es) counted, 3 needed)
+PASS a pass whose P1 burst had 4 launches at >= 790 MHz is not counted: P1/N1 over 4 passes; INDEX STEP AS SM
+PASS a wrong check of C: R0 FAIL, labels ['R0 FAIL'], the verdict still printed (INDEX STEP AS SM)
+PASS runs with no check of C: R0 FAIL (10 runs named)
+PASS K4n8 3% off E158: NOT TIED (K4n8, K4n8/K4n7); labels ['session not tied to E158']
+PASS passes scattered 1%: the passes' own sd 2.040% is used (floor 0.336%), half-width 3.471 points; UNRESOLVED: crosses the edge of SM's zone
+PASS fp16 printed if run: P1/N1.fp16 +37.43%, nearest SM, not scored; B7 fp16 point PASS (printed)
+PASS N2 not measured: B7 point FAIL (0 of 5 outside 3%; 1 not measured); P2/N2 NO READING; INDEX STEP AS SM
+PASS power at P0 + beta delta from T_ref: err_TZ 0.0, err_TZ_TD 0.0, p800 - P0 mean -0.994 W (beta delta -0.994)
+
+ALL PASS

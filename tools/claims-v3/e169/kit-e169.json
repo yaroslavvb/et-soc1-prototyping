@@ -1,0 +1,437 @@
+{
+ "what": "E169's kit parameters (REGISTRATION-A2.md D3, D7, D8): admission entries, the smoke's cycles, the relation and the clock rule; from frozen inputs only, no scored prediction",
+ "date": "2026-11-04",
+ "frozen_inputs_sha256": {
+  "docs/reports/data/2026-11-04-q140q-gemm-g4-stride/predictions-e169.json": "38ee500fa1e66107ef5c544688263b1e988fb5a675bdee05f9876df1432cf19f",
+  "tools/claims-v3/e158/predictions-e158.json": "b6ee896470614895811b3956f8ef0606d954ec378d8bf859821a54a9e5bdd137"
+ },
+ "fp32_peaks_reproduced_worst_w": 0.0,
+ "cells": {
+  "N1-fp32-zeros": {
+   "shape": "N1",
+   "arm": "gemmL1x7x5",
+   "type": "fp32",
+   "values": "gemmL1x7x5:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "P0_w": {
+    "600": 28.588,
+    "700": 32.154,
+    "800": 38.361
+   },
+   "c600_w": 3.132,
+   "fixed_p800_w": 46.87,
+   "estimate_source": "predictions-e169.json peak.predicted_peak_w (frozen, e39d06da)"
+  },
+  "N1-fp16-zeros": {
+   "shape": "N1",
+   "arm": "gemmL1x7x5",
+   "type": "fp16",
+   "values": "gemmL1x7x5:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+   "P0_w": {
+    "600": 28.68,
+    "700": 32.265,
+    "800": 38.492
+   },
+   "c600_w": 3.224,
+   "fixed_p800_w": 47.0,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "N1-int8-zeros": {
+   "shape": "N1",
+   "arm": "gemmL1x7x5",
+   "type": "int8",
+   "values": "gemmL1x7x5:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "P0_w": {
+    "600": 28.056,
+    "700": 31.527,
+    "800": 37.636
+   },
+   "c600_w": 2.601,
+   "fixed_p800_w": 46.15,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "P1-fp32-zeros": {
+   "shape": "P1",
+   "arm": "gemmL1x8x5",
+   "type": "fp32",
+   "values": "gemmL1x8x5:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "P0_w": {
+    "600": 28.588,
+    "700": 32.154,
+    "800": 38.361
+   },
+   "c600_w": 3.132,
+   "fixed_p800_w": 46.87,
+   "estimate_source": "predictions-e169.json peak.predicted_peak_w (frozen, e39d06da)"
+  },
+  "P1-fp16-zeros": {
+   "shape": "P1",
+   "arm": "gemmL1x8x5",
+   "type": "fp16",
+   "values": "gemmL1x8x5:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+   "P0_w": {
+    "600": 28.68,
+    "700": 32.265,
+    "800": 38.492
+   },
+   "c600_w": 3.224,
+   "fixed_p800_w": 47.0,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "P1-int8-zeros": {
+   "shape": "P1",
+   "arm": "gemmL1x8x5",
+   "type": "int8",
+   "values": "gemmL1x8x5:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "P0_w": {
+    "600": 28.056,
+    "700": 31.527,
+    "800": 37.636
+   },
+   "c600_w": 2.601,
+   "fixed_p800_w": 46.15,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "N2-fp32-zeros": {
+   "shape": "N2",
+   "arm": "gemmL2x6x3",
+   "type": "fp32",
+   "values": "gemmL2x6x3:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "P0_w": {
+    "600": 28.62,
+    "700": 32.188,
+    "800": 38.397
+   },
+   "c600_w": 3.165,
+   "fixed_p800_w": 46.91,
+   "estimate_source": "predictions-e169.json peak.predicted_peak_w (frozen, e39d06da)"
+  },
+  "N2-fp16-zeros": {
+   "shape": "N2",
+   "arm": "gemmL2x6x3",
+   "type": "fp16",
+   "values": "gemmL2x6x3:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+   "P0_w": {
+    "600": 28.697,
+    "700": 32.28,
+    "800": 38.505
+   },
+   "c600_w": 3.242,
+   "fixed_p800_w": 47.02,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "N2-int8-zeros": {
+   "shape": "N2",
+   "arm": "gemmL2x6x3",
+   "type": "int8",
+   "values": "gemmL2x6x3:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "P0_w": {
+    "600": 28.111,
+    "700": 31.59,
+    "800": 37.708
+   },
+   "c600_w": 2.655,
+   "fixed_p800_w": 46.22,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "P2-fp32-zeros": {
+   "shape": "P2",
+   "arm": "gemmL2x8x3",
+   "type": "fp32",
+   "values": "gemmL2x8x3:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "P0_w": {
+    "600": 28.612,
+    "700": 32.18,
+    "800": 38.389
+   },
+   "c600_w": 3.157,
+   "fixed_p800_w": 46.9,
+   "estimate_source": "predictions-e169.json peak.predicted_peak_w (frozen, e39d06da)"
+  },
+  "P2-fp16-zeros": {
+   "shape": "P2",
+   "arm": "gemmL2x8x3",
+   "type": "fp16",
+   "values": "gemmL2x8x3:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+   "P0_w": {
+    "600": 28.693,
+    "700": 32.277,
+    "800": 38.502
+   },
+   "c600_w": 3.238,
+   "fixed_p800_w": 47.01,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "P2-int8-zeros": {
+   "shape": "P2",
+   "arm": "gemmL2x8x3",
+   "type": "int8",
+   "values": "gemmL2x8x3:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "P0_w": {
+    "600": 28.097,
+    "700": 31.575,
+    "800": 37.691
+   },
+   "c600_w": 2.642,
+   "fixed_p800_w": 46.2,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "N3-fp32-zeros": {
+   "shape": "N3",
+   "arm": "gemmL1x5x8",
+   "type": "fp32",
+   "values": "gemmL1x5x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "P0_w": {
+    "600": 28.635,
+    "700": 32.204,
+    "800": 38.414
+   },
+   "c600_w": 3.18,
+   "fixed_p800_w": 46.92,
+   "estimate_source": "predictions-e169.json peak.predicted_peak_w (frozen, e39d06da)"
+  },
+  "N3-fp16-zeros": {
+   "shape": "N3",
+   "arm": "gemmL1x5x8",
+   "type": "fp16",
+   "values": "gemmL1x5x8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+   "P0_w": {
+    "600": 28.706,
+    "700": 32.288,
+    "800": 38.511
+   },
+   "c600_w": 3.25,
+   "fixed_p800_w": 47.02,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "N3-int8-zeros": {
+   "shape": "N3",
+   "arm": "gemmL1x5x8",
+   "type": "int8",
+   "values": "gemmL1x5x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "P0_w": {
+    "600": 28.136,
+    "700": 31.619,
+    "800": 37.741
+   },
+   "c600_w": 2.68,
+   "fixed_p800_w": 46.25,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "P3-fp32-zeros": {
+   "shape": "P3",
+   "arm": "gemmL1x4x8",
+   "type": "fp32",
+   "values": "gemmL1x4x8:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "P0_w": {
+    "600": 28.635,
+    "700": 32.204,
+    "800": 38.414
+   },
+   "c600_w": 3.18,
+   "fixed_p800_w": 46.92,
+   "estimate_source": "predictions-e169.json peak.predicted_peak_w (frozen, e39d06da)"
+  },
+  "P3-fp16-zeros": {
+   "shape": "P3",
+   "arm": "gemmL1x4x8",
+   "type": "fp16",
+   "values": "gemmL1x4x8:tiles:tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+   "P0_w": {
+    "600": 28.706,
+    "700": 32.288,
+    "800": 38.511
+   },
+   "c600_w": 3.25,
+   "fixed_p800_w": 47.02,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "P3-int8-zeros": {
+   "shape": "P3",
+   "arm": "gemmL1x4x8",
+   "type": "int8",
+   "values": "gemmL1x4x8:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin",
+   "P0_w": {
+    "600": 28.136,
+    "700": 31.619,
+    "800": 37.741
+   },
+   "c600_w": 2.68,
+   "fixed_p800_w": 46.25,
+   "estimate_source": "E146's P0(800) for zeros on the desk's 32 MB split + 8.51 W, the frozen fp32 rule's code (this kit)"
+  },
+  "K4n7-fp32-zeros": {
+   "shape": "K4n7",
+   "arm": "gemmL1x7x4",
+   "type": "fp32",
+   "values": "gemmL1x7x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "c600_w": 3.132,
+   "fixed_p800_w": 39.6,
+   "estimate_source": "predictions-e158.json admission (frozen, 2cfc4525)"
+  },
+  "K4n8-fp32-zeros": {
+   "shape": "K4n8",
+   "arm": "gemmL1x8x4",
+   "type": "fp32",
+   "values": "gemmL1x8x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "c600_w": 3.132,
+   "fixed_p800_w": 39.6,
+   "estimate_source": "predictions-e158.json admission (frozen, 2cfc4525)"
+  },
+  "K6n5-fp32-zeros": {
+   "shape": "K6n5",
+   "arm": "gemmL1x5x6",
+   "type": "fp32",
+   "values": "gemmL1x5x6:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "c600_w": 3.132,
+   "fixed_p800_w": 39.6,
+   "estimate_source": "predictions-e158.json admission (frozen, 2cfc4525)"
+  },
+  "K6n4-fp32-zeros": {
+   "shape": "K6n4",
+   "arm": "gemmL1x4x6",
+   "type": "fp32",
+   "values": "gemmL1x4x6:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "c600_w": 3.132,
+   "fixed_p800_w": 39.6,
+   "estimate_source": "predictions-e158.json admission (frozen, 2cfc4525)"
+  }
+ },
+ "admission": {
+  "rest": {
+   "fixed_p800_w": 30.0
+  },
+  "N1-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 46.87
+  },
+  "N1-fp16-zeros": {
+   "c_ref_w": 3.224,
+   "fixed_p800_w": 47.0
+  },
+  "N1-int8-zeros": {
+   "c_ref_w": 2.601,
+   "fixed_p800_w": 46.15
+  },
+  "P1-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 46.87
+  },
+  "P1-fp16-zeros": {
+   "c_ref_w": 3.224,
+   "fixed_p800_w": 47.0
+  },
+  "P1-int8-zeros": {
+   "c_ref_w": 2.601,
+   "fixed_p800_w": 46.15
+  },
+  "N2-fp32-zeros": {
+   "c_ref_w": 3.165,
+   "fixed_p800_w": 46.91
+  },
+  "N2-fp16-zeros": {
+   "c_ref_w": 3.242,
+   "fixed_p800_w": 47.02
+  },
+  "N2-int8-zeros": {
+   "c_ref_w": 2.655,
+   "fixed_p800_w": 46.22
+  },
+  "P2-fp32-zeros": {
+   "c_ref_w": 3.157,
+   "fixed_p800_w": 46.9
+  },
+  "P2-fp16-zeros": {
+   "c_ref_w": 3.238,
+   "fixed_p800_w": 47.01
+  },
+  "P2-int8-zeros": {
+   "c_ref_w": 2.642,
+   "fixed_p800_w": 46.2
+  },
+  "N3-fp32-zeros": {
+   "c_ref_w": 3.18,
+   "fixed_p800_w": 46.92
+  },
+  "N3-fp16-zeros": {
+   "c_ref_w": 3.25,
+   "fixed_p800_w": 47.02
+  },
+  "N3-int8-zeros": {
+   "c_ref_w": 2.68,
+   "fixed_p800_w": 46.25
+  },
+  "P3-fp32-zeros": {
+   "c_ref_w": 3.18,
+   "fixed_p800_w": 46.92
+  },
+  "P3-fp16-zeros": {
+   "c_ref_w": 3.25,
+   "fixed_p800_w": 47.02
+  },
+  "P3-int8-zeros": {
+   "c_ref_w": 2.68,
+   "fixed_p800_w": 46.25
+  },
+  "K4n7-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  },
+  "K4n8-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  },
+  "K6n5-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  },
+  "K6n4-fp32-zeros": {
+   "c_ref_w": 3.132,
+   "fixed_p800_w": 39.6
+  }
+ },
+ "smoke_cells": [
+  "P1-fp32-zeros",
+  "N2-fp16-zeros",
+  "P3-int8-zeros",
+  "N3-fp32-zeros"
+ ],
+ "smoke_cycles": {
+  "P1-fp32-zeros": 1596.6,
+  "N2-fp16-zeros": 1668.4,
+  "P3-int8-zeros": 1694.3,
+  "N3-fp32-zeros": 1700.5
+ },
+ "relation": {
+  "B": {
+   "600": 25.455614671708208,
+   "700": 28.243261128820862,
+   "800": 33.60956684526229
+  },
+  "s800": 1.90517380064275,
+  "s_f": {
+   "600": 1.0,
+   "700": 1.408193628120374,
+   "800": 1.90517380064275
+  }
+ },
+ "rules": {
+  "R2_clock_buys": {
+   "text": "E119's clock_x unchanged (reduce_e158.py imports it through E126's collect): T600 the mean T of launches whose kernel clock is in [590, 610] MHz, T800 of those at or above 790 MHz; at least 2 launches at 600 and 5 at 800, else from the fit T = C/f + M over 590-810 MHz.",
+   "lo_mhz": [
+    590,
+    610
+   ],
+   "hi_mhz": 790,
+   "min_lo": 2,
+   "min_hi": 5
+  }
+ },
+ "safety": {
+  "abs_stop_c": 76,
+  "board_cap_w": 60,
+  "cap_consecutive": 3
+ },
+ "limit_p800_w": 82.0,
+ "peak_lock_w": 60.0,
+ "highest_estimate_w": 47.02
+}
