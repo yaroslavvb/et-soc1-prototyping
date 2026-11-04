@@ -21,6 +21,8 @@ quote are printed by [`corrections-numbers.py`](corrections-numbers.py) → [`co
 clock, 2.13 with no referral. At n = 2.28 the steeper form improves E143's governed clock (6.64 → 4.82-4.83 MHz rms, post
 hoc) and keeps its board totals within 0.07 W of M7's, so "alone it worsens the governed clock" holds only at 2.43-2.45.*
 
+*(Dated note, Wed 4 Nov 2026, Q140(c), post hoc, after Q139's final critic; desk only: no card, no device command.)* **The exponent does not carry out of sample.** n = 2.28 was committed here (`c944ff99`, 05:25:25 PST) before E160 was registered and run (06:40-07:12 PST). Through this lane's chain, imported unchanged, E160's 17 governed tiles read **10.50 MHz rms at n = 2.28** (mean +9.47), against 4.89 for M7 as frozen and 4.96 for s(f) from the reads at n = 2; the governed board moves by 0.02 W. The exponent lowers every governed tile's predicted clock by 3-8 MHz (about 6.5 on average) in both sessions: E143 needed that shift (its mean error −4.87 MHz at n = 2), E160 the opposite (+2.93). Over both sessions' 36 governed tiles it reads 8.02 MHz against 5.87 at n = 2. So the improvement on E143 below ("about a quarter") was that session's offset: quote s(f) from the reads at n = 2, leave n out of the next refit, and look to a session term. [`../2026-11-04-q140c-critic-checks/`](../2026-11-04-q140c-critic-checks/README.md), check 1.
+
 ## Results first
 
 **The voltages are settled, and they are not where M7's governed error lies.** Every committed telemetry record that
@@ -161,6 +163,8 @@ referral supports, the steeper form improves the governed clock by about a quart
 worsening both. The value of n still rests on one card's ramps and on the referral; M8 (Q139(m), frozen at 04:57 PST)
 kept M7's V² s(f), so n is for the refit after it, fitted on aifoundry2's own footing with its zeros level.
 [§ Corrections, C1, C5](#corrections-after-verification-tue-3-nov-2026).
+
+*(Dated note, Wed 4 Nov 2026, Q140(c), post hoc.)* On E160, run after n = 2.28 was committed, the same chain reads the governed clock 10.50 MHz rms against M7's 4.89, so "improves the governed clock by about a quarter" holds on E143 only, and n is not for the refit after it: s(f) at n = 2 from the reads stands (4.96 MHz on E160). See the dated note at the top.
 
 ## What the reads support, and what they cannot
 

@@ -336,7 +336,11 @@ Read [Terms](#terms) first.
    and past 32 MB the L3 keeps about half of a returning B panel (E158). int8's B side is Booth-recoded (E151); the float gate's
    cost is one constant per flip within about ±10% (E152); int8's floor by shape follows address-bit toggles (E155); the memory
    path's encoded term carries to a second card (E156); and on an A100 what costs is A's rows one apart, not neighbours along K
-   (E162). A card nobody has measured still needs a measured reference (E153, E157). →
+   (E162). A card nobody has measured still needs a measured reference (E153, E157). *Corrected by Q140(c) (Wed 4 Nov 2026,
+   post hoc): the 4.5 s figure is a skill on the floats, int8's rises being whole-degree readings; and the two cards' heat
+   over ten minutes is not like for like: aifoundry3's chain ran on the session's realized dispatch records, its 0.37 °C
+   with a 95% interval on the sigma of 0.22–1.06 °C, while aifoundry2's −0.90 °C assumed continuous work (−0.39 °C at the
+   kernel duty).* →
    [03-experiments.md](03-experiments.md), E78–E162; [05-claims.md](05-claims.md), "Q130", "Q130 additions", "Q132",
    "Q133", "Q134", "Q136", "E135", "Q137", "Q138" and "Q139";
    [`reports/data/2026-10-31-e78-kinds-energy-matrix/`](../reports/data/2026-10-31-e78-kinds-energy-matrix/README.md),

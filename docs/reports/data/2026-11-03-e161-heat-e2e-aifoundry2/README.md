@@ -76,6 +76,8 @@ is **0.69 °C**; G1Q's alone, where the bits set the die, is −0.90 °C; G2Q's 
 the bits on a new kind, is +12.6 MHz (`session`). On G1Q the error from the bits is also inside the critic's tighter scale for this card,
 1.0–1.3 °C (Q139(e)'s `critic_scale_C` 1.305; a post hoc reading, not a rule).
 
+*(Dated note, Wed 4 Nov 2026, Q140(c), post hoc, after Q139's final critic.)* The 0.69 °C averages a plateau the bits set (G1Q) with one the trip rule set (G2Q: 65.50 against the rule's 65.9 °C). Quote G1Q, −0.90 °C, as this card's heat over minutes from the bits, assuming continuous work (−0.39 °C at the harness's kernel duty, C1: the figure like for like with E154's, whose chain ran on its realized dispatch records), and G2Q as the trip regime found and its clock, +12.6 MHz, its plateau 0.40 °C under the trip rule: a test of that rule, not of the bits. [`../2026-11-04-q140c-critic-checks/`](../2026-11-04-q140c-critic-checks/README.md).
+
 1. **The heat path given the watts holds on a fourth session, blind.** Q138(t)'s chain (R 0.663 °C per board W, fitted on E111 and E133)
    follows the die through both holds to 0.48 °C rms given the measured board (E144b, the third session: 0.76 / 0.37 °C). M6's frozen
    step response misses by 1.72 and 2.30 °C.
@@ -147,6 +149,8 @@ blind, on a session none of them was fitted on.
 | **The same, given the measured board** (arm A) | 0.37–0.76 °C rms (E144b) | **0.48 / 0.48 °C rms**; plateaus +0.37 / −0.22 °C |
 | **The sustained governed clock of a new kind, from the bits** | never scored (bursts only: M8 7.2 MHz rms in sample; E143's blind 6.6 MHz) | **+12.6 MHz** (one hold; M7 +11.6) |
 | **The power path's share of the heat error** (E − A) | unknown | −1.27 °C (G1Q), −0.17 °C (G2Q) |
+
+*(Dated note, Wed 4 Nov 2026, Q140(c).)* The first row's "rms of the two 0.69 °C" mixes the bits' plateau with the trip rule's; see the dated note under the session figure above.
 
 So heat over minutes from the bits on aifoundry2 can now be quoted at **about 1 °C** at a plateau set by the bits and **about 0.4 °C** at the
 trip, from one session with the rest die's reading as the anchor, and the sustained clock at **about 13 MHz**. Both are well inside Q139(e)'s

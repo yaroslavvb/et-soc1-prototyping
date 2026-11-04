@@ -7361,7 +7361,7 @@ against 0.9616), inside the term's own interval. **Q139(s)**, the clock/voltage 
 verification in `c944ff99` and `158bc319`; post hoc): 4,374,148 committed voltage reads over 113 data dirs and four cards put each
 operating point at a fixed voltage (±1 mV across data dirs, ±2 mV per run, hot runs up to 2 mV low); s(f) refitted on them leaves
 E143's governed scores unchanged (6.57 MHz, 1.61 W); the board's exponent from the ramps is about 2.3, not 2.45 (2.26–2.31 at
-aifoundry2's measured 600 MHz leakage slope), at which E143's governed clock reads 4.82–4.83 MHz; E118's two-clock ratio by V² on
+aifoundry2's measured 600 MHz leakage slope), at which E143's governed clock reads 4.82–4.83 MHz *(but on E160, run after it was committed, 10.50 MHz rms against M7's 4.89: the gain was E143's offset; Q140(c), Wed 4 Nov 2026, post hoc)*; E118's two-clock ratio by V² on
 card 0's own reads 0.740 against 0.697 ± 0.057. **Q139(k)**, the check of C (rank 14;
 [`tools/claims-v3/ccheck/`](../../tools/claims-v3/ccheck/README.md), `60b91395`; corrected after verification in `4946a992`): a
 bit-exact host-side reference of C for `sparsity_host`'s TensorFMA launches, wired to every launch by a two-flag host patch
