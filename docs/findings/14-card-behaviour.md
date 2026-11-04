@@ -634,6 +634,8 @@ not do what it was for", `aifoundry2/admission.json`, `aifoundry2/s1/skipped.jso
 
 **Under aifoundry2's governor the power limit can act before the trip, and a burst can settle either way (E143, E144b, E146; 2 November 2026).** In E144b's 15-minute hold of random fp32 the power limit stepped the clock down 2.3 s after the first process started (the SP's running average 65.5 W against the 65 W TDP, the die at 52 °C), well before the die's first reading of 66 °C, and the clock kept leaving the 600 MHz floor until 70 s after it; the board peaked at 87.98 W, none over 90 W, as in E111 and E133. In E143's 6 s bursts of new kinds, random-like fp32 settled at 694–724 MHz and random-like fp16 at 721–731 MHz while every int8 tile stayed at 796–800; one gated fp32 tile (`fp32.wideexp48_bgate_alt`) ran one pass at 754 MHz and 58.2 W with no power-down event and its other two at 795.8 MHz, and two int8 tiles each ran one pass at 784–788 MHz; the kernel's own clock read 12–18 MHz below the sampled clock on governed tiles, and the governed clock read 4.96 MHz below M7's prediction, about the 8.0 and 7.6 MHz E80's own random tiles had drifted since 31 October (E143's R0). In E146 a fresh 3,072 × 2,048 × 3,072 fp32 GEMM reached the 65 °C trip with random data and the governor held it at 745 MHz. Data: [`2026-11-02-e143-blind5-aifoundry2`](../reports/data/2026-11-02-e143-blind5-aifoundry2/README.md), [`2026-11-02-e144-heat-minutes-aifoundry2`](../reports/data/2026-11-02-e144-heat-minutes-aifoundry2/README.md) C3, [`2026-11-02-e146-gemm-stores`](../reports/data/2026-11-02-e146-gemm-stores/README.md).
 
+**Under aifoundry2's governor its dips are its own, the session moves the clock, and process starts step it (E158–E161, Q139(u), Q139(s); 3 November 2026).** E82 A2's "dips" are not the meter's on this card but the governor's own low-voltage phases: in E143, 98.4% of the 449 dips at 55 W or more fall within ±2 samples of a clock and set-point change (36.8% of the other samples), and matched to kept samples at the same service-processor clock and voltage reading they read −0.03 W from them, where the 600 MHz cards' dips read 7.8–11.0 W below theirs; so aifoundry2's committed dips-kept reduction is its footing (Q139(u) C1). The die reads 518, 567–569 and 618 mV at 600, 700 and 800 MHz against set points of 520, 570 and 620, 700 MHz being a transit point, and hot runs read up to 2 mV low; the service processor's minion-rail voltage statistic lags each step, so read the voltage from `die_mv` or `reg_mv` (Q139(s)). The service processor logged a mid-burst idle status in 3 of E160's 150 bursts (1 of E143's 117), and each of those passes ran slow: the fp16 zeros anchor at 752 MHz where its other passes held 800, `fp16.c_absorbed` at 732.7 against 757–758, `int8.bflip_bit5_w` at 756.9 against 800 (E160 C1). From one session to the next the same tile can run faster at the same power: E80's fp16 random tile ran 10.74 MHz faster in E160 than in E143 at +0.06 W, the die starting each burst 1.7 °C cooler on average (53.69 against 55.43 °C), with the host binary changed too, so session and host are not separated; the capped tiles held 66.72 W (E143 66.89 W), above M8's refitted 65.20 W cap (E160 C7). In a large GEMM hold the governor does not hold, the clock still dips to 600–700 MHz, mostly 0.2–0.3 s into a process and sometimes mid-process (8.5% of E159 H1's window), and at a steady 800 MHz the board rises 0.49–0.50 W per °C of die (E159 H1, 47 → 64 °C); about 3 W (2.1–4.0) of that 46 °C cold start's 7.2 W first-second deficit against P0 is the start die, every burst behind P0 having started at 47–56 °C (E159 C1, C2). In E161's G2Q the clock fell to 600 MHz at the start of the second process (8.5–9.6 s, the board down to 38 W, the die 53–54 °C), the kind of process-boundary step E144b's G1 had shown; M8's 65.2 W cap, from which it predicted G2Q's first step down at 48 s, never bound (the highest board sample in the first 60 s was 64.9 W), and the trip regime followed the die's first 65 °C at about 56 s. The hottest-sensor field read a held 70 °C, the service processor's running maximum, at every sample of E158, E159, E160 and E161. Data: [`2026-11-03-q139u-footing`](../reports/data/2026-11-03-q139u-footing/README.md) C1, [`2026-11-03-q139s-clock-voltage`](../reports/data/2026-11-03-q139s-clock-voltage/README.md), [`2026-11-03-e159-gemm-sustained`](../reports/data/2026-11-03-e159-gemm-sustained/README.md) C1–C2, [`2026-11-03-e160-blind6-aifoundry2`](../reports/data/2026-11-03-e160-blind6-aifoundry2/README.md) C1, C7, [`2026-11-03-e161-heat-e2e-aifoundry2`](../reports/data/2026-11-03-e161-heat-e2e-aifoundry2/README.md).
+
 ## The heat path moves with the hour and the day, and a hold settles slowly (1 November 2026; Q132(g), E98 on aifoundry2, E97 on aifoundry3)
 
 - **The rest die cycles by about 3.5 °C a day.** Nine days of the boxes' own 5 s history: aifoundry2 at rest reads 46.1 °C at
@@ -695,6 +697,16 @@ not do what it was for", `aifoundry2/admission.json`, `aifoundry2/s1/skipped.jso
   yet say format matters: clock, voltage, watts and governor state differ too (E144b C1). Data:
   [`2026-11-02-e144-heat-minutes`](../reports/data/2026-11-02-e144-heat-minutes/README.md),
   [`2026-11-02-e144-heat-minutes-aifoundry2`](../reports/data/2026-11-02-e144-heat-minutes-aifoundry2/README.md).
+- **Heat over minutes predicted from the bits** (dated note, Tue 3 Nov 2026, Q139's records; E154 on aifoundry3, E161 on
+  aifoundry2). On aifoundry3, R0's rest die read 51.41 °C; every pool-6 hold started on a tail of 1.89–4.43 °C carried from the
+  hold before; given the board's watts Q138(t)'s chain read the three 11–12 °C rises 3.1–4.6% low, int8's H_M among them, and the
+  two small int8 rises within 0.07 °C, where E144 had read a 15.0 °C rise to +0.015 °C on 2 November, so the 3–5% belongs to this
+  session, cause not established (no inlet reading); E97's H1, held a third time, rose 0.884 °C per board W at 600 s, 0.984 of
+  E97's 0.898. K_S's duty-cycled peak read 67.54 °C, 0.04 °C over its design line and 4.5 °C under the 72 °C hold stop (E154 C2,
+  C4). On aifoundry2 both of E161's rests read a whole 47.0 °C in all 1,199 samples (22.12 and 22.19 W), so its verdicts carry
+  ±0.5 °C of anchor, over which G1Q's plateau error runs −0.19 to −1.61 °C. Data:
+  [`2026-11-03-e154-heat-e2e-aifoundry3`](../reports/data/2026-11-03-e154-heat-e2e-aifoundry3/README.md),
+  [`2026-11-03-e161-heat-e2e-aifoundry2`](../reports/data/2026-11-03-e161-heat-e2e-aifoundry2/README.md).
 
 Data: [`2026-11-01-q132-governor-desk`](../reports/data/2026-11-01-q132-governor-desk/README.md) §c,
 [`2026-11-01-e98-heat-path-drift`](../reports/data/2026-11-01-e98-heat-path-drift/README.md),
@@ -846,6 +858,13 @@ it is the owner's call (the lab rules below).
   three B runs left E145's registered interval six times wider than planned (its C3). Why the reading returns that register is not
   established. Register a rail-spike filter on this card before the data; E137's post hoc rail figures on card 1 were read without
   one. Data: [`2026-11-02-e145-int8-b-card1`](../reports/data/2026-11-02-e145-int8-b-card1/README.md), `posthoc/rail-spikes.json`.
+- **aifoundry3's minion rail stays clean** (3 November 2026, E151). E151's registered rail filter, which marks E145's 15 glitch
+  samples on card 1 and nothing else, marked none of E151's 19,259 samples and none of 628,575 on aifoundry3 since 1 November.
+  Data: [`2026-11-03-e151-int8-b-aifoundry3`](../reports/data/2026-11-03-e151-int8-b-aifoundry3/README.md), `rail-census.json`.
+- **Card 1's build was not read on 3 November** (E157 C3). It is release 1.4.0 with BL2 0.22.0 as card 1 has reported since 31
+  October (E82 A1); a same-day read would have taken the firmware-revisions query, which these rounds do not send. On card 1 the
+  DDR die rail moves for E156's `el_64z`, where aifoundry3's stays still, and no telemetry field reads the PMIC's own temperature,
+  so the margin to its 75 °C over-temperature alarm was not measured (E156 C6).
 - **On aifoundry3 the `ettelem` that runs is not the reviewed build** (dated, Mon 2 Nov 2026; E132 C1, E134 C6). The
   `build/ettelem/ettelem` in its binaries tree (sha256 `16037641…`, built 25 September) comes from lab `de262730`'s
   `tools/ettelem/ettelem.cpp` (`ba9a0ac3…`), not the `a6cf931b…` Q136(w)'s table binds to that path; its `config()`,
@@ -1442,6 +1461,13 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
   blocks aside. On card 1 a warm die makes passes short: E148's 14-run passes took 172–206 s with a median of one heat a launch,
   against 536–663 s for E129's on its cool morning; card 1's session-fitted leakage slope read 0.408 W/°C in E142's arm and 0.141
   W/°C on E148's low-power runs. Two A rows run on card 1 at the bench's 96 / 94 cycles an op (E148 R6).
+  **Dated note, Tue 3 Nov 2026 (Q139):** a session's own leakage fit can be the noise: on aifoundry3 E152's `auto` fit read 0.308
+  W/°C (E127 0.191, Q139(u)'s footing 0.2056), and at that slope the whole-degree window readings put ±0.3 W steps into quiet
+  tiles' D; the footing's slope removes about 60% of the excess variance (E152 C5). E152's one config read of 19 returned no line
+  within its 10 s timeout, and E78's launch gate skipped one anchor at a 59.0 °C die. On card 1 E157's pass gate set 15711 aside
+  (`fp16.zeros` +0.384 W off its line); six pool-5 tiles re-run there a day apart reproduced their D to 0.1–0.2 W, not 0.05 (K1
+  FAIL), where E153 reproduced E141's on aifoundry3 to 0.04 W on the footing; and card 1's zeros level, re-read on 3 November,
+  read 1.833 W against 1.661 W frozen earlier (+10%).
 - **A watcher can watch the wrong file** (2 November 2026, E139). During a pass the sampler writes `telemetry.jsonl.raw`; `telemetry.jsonl` appears only when the pass ends and is gzipped at once (`mf/block.sh`). E139's board-power watcher followed `telemetry.jsonl`, read no sample all session, and its test passed on a file of that name, so its registered 65 W stop was never armed (the die stop was; the board peaked at 53.52 W). Watch the `.raw` file, and test the watcher on a live pass (E139 C1).
 - **A protocol's stops are armed only under its watcher's keys** (2 November 2026, E146). `run_hpl.py`'s watcher reads
   `safety.abs_stop_c`, `board_cap_w` and `cap_consecutive` (defaults 85 °C, 97 W and 3 samples); E136's `protocol.json` wrote its
@@ -1455,6 +1481,12 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
 - **A file tile's C is not checked** (E80, E143). `sparsity_host --values file:` reports every launch "unchecked" (`main.cpp:589`,
   `:614`), so a file-tile run counts launches by completion, every hart reporting and no tensor error; say so in the registration
   (E143's departure).
+  **Dated note, Tue 3 Nov 2026 (Q139's records):** it is checked now. Q139(k)'s host-side reference
+  ([`tools/claims-v3/ccheck/`](../../tools/claims-v3/ccheck/README.md)) and its two-flag host patch log and check every launch's C
+  bit for bit, and every launch of E153, E154, E157, E160 and E161 passed. Use `--c-poison` (without it a skipped store after a
+  launch of the same length reads PASS), match each SPARSITY line to its C record, and count only a bit-exact PASS: a launch with
+  the tensor mask on or B streamed reads UNMODELLED. The log adds a 1 MiB read a launch (and a 1 MiB write with the poison), which
+  counts against a governed run's budget; E153's duty read 0.9932 against E141's 0.9963.
 - **aifoundry2's admission estimate reads random-like fp32 low** (2 November 2026, E143, as in E105). The estimate built from M7's
   D on aifoundry3's footing put `fp32.wideexp48_dense` at 84.34 W; it drew 1.7–3.6 W more, peaking at 87.95 W, 5 W under E143's 93
   W stop. Size an aifoundry2 table with a margin over the estimate, or with a measured probe.
@@ -1463,6 +1495,17 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
   launch, so three of E142's int8 tiles read 7.1–7.2 s and that arm's int8 heat rms read 1.29 °C, an artefact; with M7's own 5 s
   row rule the term reads 0.131 / 0.110 / 0.176 °C, and read from each run's own marks it moves the other way, so its run-length
   slopes are no run-length law. Cap the length as M7's rows do (5 s).
+- **A scorer's two-pass minimum counts entries, not passes** (3 November 2026, E153 C1). Listing one pass twice let E153's
+  registered scorer print every verdict at 16:40:11, before amendment A1; count distinct passes, and disclose any such look with
+  its printouts.
+- **A day post's plan text lags its save** (3 November 2026, E151, E152, E157, E159). After a save, `delete_msg.mjs --plan`'s text
+  field still showed the previous source, so a rewrite built from it meets exit 7 under `EXPECT_TEXT` (a refusal, never a wrong
+  save); rebuild from the edit box's text.
+- **A session can stop with a finished run uncollected and its claim held** (3 November 2026, E160). E160's detached queue ended
+  on aifoundry2 at 07:12:39, the card free, 34 minutes before the session that started it stopped on a usage limit; its data
+  waited on the box until a resumed lane collected it read-only at 15:56, and its clause stayed in the day's first post, which
+  someone else later deleted. Collect and release as soon as the queue ends, keep the collector beside the run so a resumed lane
+  can collect without opening the device, and say in the records when a claim was left held.
 - **A residency read of a state the build does not have raises SP errors** (1 November 2026, E77 and Q134(a)). On BL2 0.22.0
   raw states 4–6 are no state: each read fails (rc −5), logs two SP ERROR lines and pushes two `SP Runtime Error` events to
   the host, where a session that counts kernel events will see them. Every lab session that read residency since 27 October

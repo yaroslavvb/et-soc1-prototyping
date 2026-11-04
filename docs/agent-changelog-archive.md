@@ -4,6 +4,22 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-10-31 (Sat, week 44, Q130 addendum)** — Section 3's index reads Q1–Q131, E1–E91 and A1–A25, where it read
+  Q1–Q130, E1–E85 (E84 and E85 in progress) and A1–A24: E84–E91 are recorded (the afternoon's speed replicate on
+  aifoundry1's card 0 and the camera per kind; the evening round's real-tensor energy and speed, result path,
+  low-power heat, signs and spread, and the real tiles on card 1, not scored), Q131 is the chip diagram's first-visit
+  pass, and A25 is the kinds-of-numbers page. Its note on governor text, and section 4's card 0 row, now call the
+  cards' BL2 0.22.0 a version, not the build of the `353f20e` source: no card exposes a BL2 git hash, so which 0.22.0
+  they run is not established, while the one-pass governor and the removal of both loops date from 0.21.0
+  (et-platform `60b40c10`) and hold for any 0.22.0. Section 4's card 0 row adds its PMIC's 75 W over-power alarm, which
+  drops fp32 random data at 800 MHz to a 300 MHz safe state about once a second (E84). *Why:* constraint — the Q130
+  records' verifier found that the earlier wording dropped 14-card-behaviour.md's residual (no BL2 git hash is
+  exposed, and 0.22.0 is an open development line whose `[Unreleased]` changelog carries SW-21990 and SW-22147), and
+  E84's trace rings logged the alarm; re-check: in et-platform, `git show 60b40c10:device-bootloaders/CMakeLists.txt`
+  declares VERSION 0.21.0, `git merge-base --is-ancestor 60b40c10 ce729715` holds (`ce729715` starts 0.22.0), and no
+  commit in `ce729715..836a4ab` adds a loop to `thermal_pwr_mgmt.c`; the alarm lines are in
+  `docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/posthoc/pmic.json`; the last rows of
+  `docs/findings/02-requests.md` and `03-experiments.md` are Q131 and E91.
 - **2026-10-31 (Sat, week 44)** — Section 4: the owner's two newest card posts in #community-lab stay, and each
   older one is deleted once its card is released, except one a record cites by id (this repo's data READMEs and
   findings, the owner's research log); only the Intel deletes them, through the Discord client. *Why:* preference —

@@ -201,6 +201,10 @@ size of the composition's error at 95%:
   here explains.
 - **No inlet thermometer.** The rest die stands in for the room (items 8 and 9), and the between-session plateau moves of
   0.3-0.8 °C (E97) remain.
+  *Dated note, Tue 3 Nov 2026 (Q139's records; E154's C13, from E144's verified C3): the 0.3-0.8 °C is how far the plateau moved
+  within E97's one session, cause not established, not a move between sessions; read it so here and in D4 below ("E97's
+  between-session plateau moves of 0.3-0.8 °C"). No number, rule, band or prediction changes, and the frozen files are as
+  committed.*
 
 ## Device commands sent
 

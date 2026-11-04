@@ -9,10 +9,17 @@ E119–E125 and Q134(a) use the same numbering, as the page carried it at `fdcbc
 E126–E134 and Q136's desk lanes use the same list, item 16 included, as the page carried it at `fbb682f9393b`.
 E136–E140 and Q137(m) use the same list as the page carried it at `9fdb534bbc77`.
 E141–E150 and Q138's desk lanes use the same list as the page carried it at `724c17d3dc0b`.
+E151–E162 and Q139's desk lanes use the same list as the page carried it at `8ec9ead107aa`; Q139(c)'s corrections of the page in place (`2ed9794277c1`, `c09062203aa2`) kept its numbering, and "rank N" in them is Q138's final critic's open list.
+
+**Dated note, Tue 3 Nov 2026 (week 45):** the day's first card post, `1567153765390487573`, cited in E151, E152, E155, E156, E158,
+E159 and E160 and their data READMEs, has gone from #community-lab, deleted by someone else (not by the Intel's cleanup, which
+holds no record of it). Its last text was E160's claim, left held when the session running Q139 stopped at about 07:46 PST on a
+usage limit; E160's queue had ended at 07:12:39 and its card was free. The id stays as the record of what was posted, and is never
+cited as live. The evening's claims (E153, E154, E157, E161) are clauses of a second day post, `1567332504330051616`.
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E150**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E162**. E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
@@ -44,7 +51,7 @@ the first launch): what a clock gap buys in E107's last three arms and a second 
 and E111's heat holds again (E133) on aifoundry2; the float B-lane gate (E127), which int8 multiplier (E130), the memory
 path's split (E132) and more single-bit prices (E134) on aifoundry3; and fp16's sign rest (E128), int8's no-issue excess
 with one A row (E129) and E95's real tiles (E131) on aifoundry1's card 1. E135, on 2 November at the owner's OK, is a
-GPU measured the same way: Horace He's kinds of numbers on two A100s rented on Modal, with no lab card. E136–E140 are Q137's of the afternoon of 2 November, run so that power and heat can be predicted: a large GEMM predicted first under aifoundry2's own governor (E136); fp16's sign rest on the matched design on aifoundry1's card 1 (E137); int8's B side on the minion rail (E138), the memory path's split with more passes (E139) and the blind test of the power-and-heat model M6 (E140) on aifoundry3. E141–E150 are Q138's of the evening of 2 November, run to settle the power model's open questions: blind pool 5 scored by the model M7 on aifoundry3 (E141), on aifoundry1's card 1 (E142) and under aifoundry2's own governor (E143); heat over minutes on aifoundry3 (E144) and on aifoundry2 (E144b, its second half); int8's B side on aifoundry1's card 1 (E145); a large GEMM's C stores under aifoundry2's governor (E146); single-bit prices at item 15's open positions on aifoundry3 (E147); int8's no-issue excess with two A rows on aifoundry1's card 1 (E148); and the model checked on GPUs rented on Modal, with no lab card: A100s (E149) and A10Gs (E150).
+GPU measured the same way: Horace He's kinds of numbers on two A100s rented on Modal, with no lab card. E136–E140 are Q137's of the afternoon of 2 November, run so that power and heat can be predicted: a large GEMM predicted first under aifoundry2's own governor (E136); fp16's sign rest on the matched design on aifoundry1's card 1 (E137); int8's B side on the minion rail (E138), the memory path's split with more passes (E139) and the blind test of the power-and-heat model M6 (E140) on aifoundry3. E141–E150 are Q138's of the evening of 2 November, run to settle the power model's open questions: blind pool 5 scored by the model M7 on aifoundry3 (E141), on aifoundry1's card 1 (E142) and under aifoundry2's own governor (E143); heat over minutes on aifoundry3 (E144) and on aifoundry2 (E144b, its second half); int8's B side on aifoundry1's card 1 (E145); a large GEMM's C stores under aifoundry2's governor (E146); single-bit prices at item 15's open positions on aifoundry3 (E147); int8's no-issue excess with two A rows on aifoundry1's card 1 (E148); and the model checked on GPUs rented on Modal, with no lab card: A100s (E149) and A10Gs (E150). E151–E162 are Q139's of 3 November, run on Q138's final critic's open list: on aifoundry3 int8's B side with its rail filter registered first (E151), the float B-lane gate's dose ladder (E152), blind pool 6 scored by the model M8 (E153) and heat over minutes predicted from the bits (E154); on aifoundry1's card 1 int8's no-issue floor by shape (E155), the memory path's encoded term on two new images (E156) and blind pool 6 (E157); under aifoundry2's own governor the L3's retention by reuse distance (E158), a large GEMM's sustained power and clock predicted blind (E159), blind pool 6 in bursts (E160) and heat over minutes from the bits (E161); and, on A100s rented on Modal with no lab card, which operand pairing a GPU pays for (E162).
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
 (aifoundry2, aifoundry3 or both; E35–E46, E48 and E50 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
@@ -6868,6 +6875,524 @@ verification in `f911db07`): with the netlists' own cell delays, B's odd ÷ even
 and glitch-aware counts predict E78's fifteen int8 kinds worse in every netlist (`booth_tree` 0.295 → 0.433 W leave-one-kind-out),
 so the model keeps zero-delay counts. **Q138(v)**, a private archive search, run and kept off this repository.
 
+## E151 — int8's B side on aifoundry3 with its rail filter registered first: the structural verdict (Q139; card runs 2026-11-03, 04:29:51–05:03:25 PST, aifoundry3) — pre-registered
+
+**Asked:** item 12 of section 11, "int8 at gate level", and rank 11 of Q138's final critic: *"E145's design on aifoundry3, its
+rail filter written first. Rule: R1's interval clears the 30.68 fJ line."* **Pre-registered** in
+[`tools/claims-v3/e151/README.md`](../../tools/claims-v3/e151/README.md) (`a81541a3`, committed 04:27:20 PST, pushed 04:27:23),
+before the claim and the first launch; its rail filter was tested first on E145's data, where it marks E145's 15 glitch samples
+and nothing else. Data:
+[`docs/reports/data/2026-11-03-e151-int8-b-aifoundry3/`](../reports/data/2026-11-03-e151-int8-b-aifoundry3/README.md) (`2f70b5ff`;
+corrected after verification in `5e61334d` and `b3a9499a`, C1–C3, wording only: no number, rule or verdict changed). aifoundry3's
+card 0 at 600 MHz, TDP 0 W / 65 °C, max_power, 523 mV at all 28 config reads, never set; **33.6 card-minutes** of 35: ten B blocks
+(177–178 s) and one A block (134 s). Reads only (`since_reset_ms` −1); the board 22.66–32.76 W, `minshire[0]` 49–55 °C. This lane
+created the day's first card post (`1567153765390487573`, 04:29:33 PST).
+
+**Results** (`scored.json` › `primary`: the minion rail, filtered; board-equivalent fJ).
+- **R1 RECODED:** B's odd − even **+39.2 [+33.2, +45.2]** over 8 kept B blocks, its low end clear of the 30.68 fJ line; R4 BOOTH
+  ON B, with E130's registered A verdicts on this card. The frozen expectation, INCONCLUSIVE, was wrong.
+- **The size matches neither netlist group** (R1n, R1q NEITHER: odd ÷ even 2.02 [1.80, 2.30] against Booth on B's 4.16–4.39 and no
+  recoder's 1.05–1.09): the odd bits cost Booth's 78 fJ, the even bits about twice Booth's 18.
+- **The filter removed nothing:** 0 of 19,259 samples marked (0 of 628,575 on aifoundry3 since 1 November). The gates-off arm
+  reads +38.5 [+33.7, +43.3] (RECODED), the board arm +29.6 [+12.4, +46.8] (INCONCLUSIVE, the noisier meter).
+- **Per-position B prices carry**, on the same 26 tiles as E130, E138 and E145, at one B base word (E130's B1, A held at 0x01):
+  card 0 from day to day 9% rms against 36% for one price, card 1 → card 0 10% against 37% (C2).
+- Post hoc: the per-block contrast stepped up after the fourth kept block (26.8 → 36.8 rail fJ), which E138 and E145 did not show;
+  its cause is unknown.
+
+**Scored:** R1 RECODED; R4 BOOTH ON B; R1n, R1q NEITHER; R6 FAILS (B's sign word 2 ÷ word 1 0.61 [0.51, 0.71], BELOW); the
+in-session A rules NOT SCORED (one A block).
+**What it changes.** Item 12's structural verdict is registered: B is Booth-recoded, from one session at one B base word. Why the
+even bits cost about twice Booth's zero-delay count stays open. The per-position B prices are a candidate model term, measured at
+B1 with A = 0x01; their transfer to other base words and kernels is untested.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E152 — the float B-lane gate's price per flip as a dose ladder: 1, 2, 4 and 8 lanes switching at fixed data (Q139; card runs 2026-11-03, 05:47:28–06:20:04 PST, aifoundry3) — pre-registered
+
+**Asked:** item 6's tail of section 11 (the gate's price per flip and its linearity), and rank 12 of Q138's final critic: *"A
+registered dose ladder of gate flips per op at fixed data (1, 2, 4 and 8 lanes switching) with the price frozen from E127. Rule:
+linear within 10%."* **Pre-registered** in [`tools/claims-v3/e152/README.md`](../../tools/claims-v3/e152/README.md) (`2a744f4d`,
+committed 05:44:49 PST, on origin/main by 05:44:54), before the claim (05:47:03) and the first launch (the smoke, 05:47:33); no
+amendments. Data: [`docs/reports/data/2026-11-03-e152-gate-dose/`](../reports/data/2026-11-03-e152-gate-dose/README.md)
+(`99dc31f3`; corrected after verification in `eacfff74`, C1–C5, in the evening, its first verifier having stopped with the session
+at about 07:46 PST; no frozen file, number, rule or verdict changed). aifoundry3's card 0 at 600 MHz, TDP 0 W / 65 °C, max_power,
+522–523 mV at 18 of its 19 config reads (one returned no line), never set; **32.6 card-minutes** of 40, six passes; 185 of 186
+planned runs (one `int8.zeros` anchor skipped by E78's launch gate, the die at 59.0 °C). Reads only (`since_reset_ms` −1 in all
+18,376 samples); the board at most 54.18 W (stop 65), the die 62 °C (stop 70). fp32, every product zero, B's bus at 4,096 changed
+bits an op, every lane live half the time.
+
+**Results** (`scored.json` › `primary`: E78's reduction, this session's leakage `auto` at 0.308 W/°C).
+- **The doses:** over the no-flip dose, 1 lane +0.175 ± 0.078 W, 2 lanes +0.305 ± 0.138, 4 lanes +0.606 ± 0.103, 8 lanes +1.162 ±
+  0.149; from E127's frozen price +0.150, +0.301, +0.601 and +1.203.
+- **R1, linear within 10%, INCONCLUSIVE:** at 1, 2 and 4 lanes the points sit +0.030, +0.015 and +0.025 W off the line through 0
+  and 8 lanes (+2.5, +1.2 and +2.1% of full scale, point estimates), but their 95% intervals reach 8.1, 10.4 and 10.0%, so two
+  doses cross τ, by 0.004 and 0.0006 W (C1).
+- **R2, E127's price carries, INCONCLUSIVE:** 251.5 ± 21.9 fJ [229.6, 273.5] against the band [236.65, 289.24], 0.96 of E127's
+  262.9.
+- **Post hoc, on Q139(u)'s footing** (committed 84 minutes before the registration, which registered neither it nor an arm on it;
+  C5): R1 LINEAR, R2 CARRIES (259.2 ± 20.1 fJ).
+- **Out of sample on the four doses:** E127's one-dose price predicts them to 0.024 W rms and M8's whole per-flip price (235.3 fJ)
+  to 0.061 W, both inside the contrasts' 95% half-widths (0.078–0.149 W), M8's price inside R2's interval, so no correction to M8
+  is resolved as registered (C2); M8's gtr term alone (140.7 fJ) reads 0.31 W, about half the cost.
+- **The session's noise:** its leakage slope fitted 0.308 W/°C (E127 0.191, the footing 0.2056); the footing's slope removes about
+  60% of the variance above E127's, and the session stays about twice as noisy (C5).
+
+**Scored:** R1 and R2 INCONCLUSIVE; S1 and S2 PASS (S2, the bridge to E127's tiles, +1.168 ± 0.239 W against +1.275).
+Arm-sensitive: at a leakage of 0.1994 LINEAR and CARRIES, with the dips kept R2 CARRIES. The frozen expectation (LINEAR, CARRIES)
+was not met as registered.
+**What it changes.** Item 6's tail is narrowed and rank 12 is not closed: a constant per gate flip is supported to about ±10% of
+full scale, not 3%, in this quiet fp32 regime on one card and clock; a part spent whenever any lane flips is excluded only above
+about 11% of full scale (9% on the footing); a model must use the whole per-flip price, about 0.25–0.26 pJ (0.92–0.95 pF at 521.8
+mV). Open: what spends the price, per-boundary and lane-assignment costs, the A side's gate, int8's, other clocks and cards.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E153 — blind pool 6 on aifoundry3: M8 scored blind beside M7 and M6, every launch's C checked, six pool-5 tiles re-run (Q139; card runs 2026-11-03, 16:21:44–17:11:40 PST, aifoundry3) — pre-registered
+
+**Asked:** item 6 of section 11, and three ranks of Q138's final critic: rank 2 (*"M8 minus M6 rms resolved below zero by a paired
+bootstrap over tiles on both 600 MHz cards; bias inside B1/B2; at least 26 of 30 inside"*), rank 14 (*"Re-run 6 pool-5 tiles with
+C checked. Rule: every C exact or within the format's rounding, and D within ±0.05 W of E141's and E142's"*) and rank 5 (the card
+scale), with rank 8's real-tile sub-rule. **Frozen first:** M8 (`122da8b6`), pool 6 and the three models' predictions for this
+card (`d98d2e34`), Q139(k)'s check of C (`4946a992`) and Q139(u)'s footing (`d4c36bfe`, `f47669d1`), each an ancestor of the
+registration. **Pre-registered** in [`tools/claims-v3/e153/README.md`](../../tools/claims-v3/e153/README.md) (`359c96b2`,
+committed 16:18:58 PST, on origin/main by 16:19:13), before the claim (16:21:29) and any pool-6 launch. Amendment A1 (`e6ca949d`,
+16:42:11: the scorer's handling of a tile that never ran) **followed an interim scoring**: at 16:40:11 the registered scorer ran
+on pass 15310 listed twice and printed every verdict; the scorer as registered, run on the final data, gives the final
+`scored.json` exactly, so A1 moved no verdict (C1). Data:
+[`docs/reports/data/2026-11-03-e153-blind6-aifoundry3/`](../reports/data/2026-11-03-e153-blind6-aifoundry3/README.md) (`8e18eb67`;
+corrected after verification in `42e79d23` and `e0f5a18a`, C1–C7; no measured, frozen or registered number or verdict changed).
+aifoundry3's card 0 at 600 MHz, TDP 0 W / 65 °C, max_power, 522–523 mV, never set; **49.9 card-minutes** of 55: the stop-path test
+15302, the smoke 15301 and four passes, 15310–15313 (703–746 s), all kept. Nine command kinds, all READs, two of them PMIC
+voltage-register reads (allowed); `since_reset_ms` −1 in all 29,385 samples; the board at most 54.26 W, `minshire[0]` 62 °C.
+
+**Results** (`scored.json` › `primary`: reduced on Q139(u)'s footing, 0.2056 W/°C with A2 once; measured − M8).
+- **Every launch's C bit-exact:** 3,140 of 3,140 (fp32 1,226, fp16 842, int8 1,072) on 63 distinct inputs, KC PASS: the first
+  checked reads on aifoundry3 of int8's 32-bit wrap, full-range int8, wide fp16 exponents and real tiles (E160 read those ranges
+  first, on aifoundry2; a dated note on the data README, these records).
+- **K1 PASS:** the six pool-5 tiles re-run land −0.040 to −0.001 W from E141's D on the footing (mean −0.019), where the two
+  sessions' own fits put them 0.26 W apart.
+- **Power:** P1 fp32 **0.330 W**, FAIL (line 0.285), carried by `fp32.b_onebit_b20_third`, which every model over-predicts by
+  0.70–0.81 W; P2 fp16 0.125 W and P3 int8 0.296 W PASS; B1, the floats' bias, **−0.014 W** [−0.108, +0.053] PASS; B2, int8's,
+  −0.071 W PASS; C1 **29 of 30** inside, PASS.
+- **Against the older models:** M1 (M8 − M6) +0.043 W [−0.006, +0.091], NOT RESOLVED; M2 (M8 − M7) **+0.034 W [+0.001, +0.085],
+  WORSE** (1.7% of draws at or below 0). Over the 30 priority-1 kinds M8 / M7 / M6 read 0.286 / 0.252 / 0.243 W rms, over all 44
+  new kinds 0.339 / 0.281 / 0.245 W.
+- **Post hoc, M8's int8 near-whole-byte discount is contradicted** on the three tiles where it acts most: the card draws +1.31
+  (`int8.b_line_55_aa`, priority 2, outside its band), +0.62 and +0.36 W more than M8 says, and M7 is closer on all three; without
+  the two priority-1 ones M8 − M7 is +0.0068 W [−0.0055, +0.0201], not resolved (C6). Exponent-heavy kinds read +0.17 to +0.18 W
+  above every model.
+- **Heat:** H1–H3 0.098 / 0.106 / 0.128 °C rms and H4 30 of 30 inside, PASS; 0.1185 °C per board W against M8's 0.1186.
+- **Real tiles (rank 8):** R1 0.155 W rms over 12 (the line 0.186–0.602 W) and R2 12 of 12 inside M8's bands, PASS; R2 fails at 5
+  of the 7 footing arms.
+- **The card scale (rank 5):** CS0 floats 0.9995 PASS (M8's definitional 1 on its own card), int8 0.974 FAIL. Held out, every
+  cheap read and form misses aifoundry3's float scale by more than 1% (closest −1.7%), and the zeros level that passes on card 1
+  (E157) is 24–27% high here (C2). CS1 stays NOT SCORED in `scored.json`; E157 scored its reading on this `e153.json`.
+- **The footing confirmed:** on the session's own leakage fit the same data read the floats −0.210 W (B1 FAIL HIGH) and fp16 0.424
+  W (reported, not a verdict).
+
+**Scored:** KC, K1, P2, P3, B1, B2, C1, H1–H4, R1, R2 PASS; P1 FAIL; M1 NOT RESOLVED; M2 WORSE; CS0 PASS for the floats, FAIL for
+int8; CS1 NOT SCORED.
+**What it changes.** For a new kind on aifoundry3, quote M7 or M6, not M8: M8's float terms add nothing measurable, and its int8
+discount should be dropped or bounded. One footing for every 600 MHz row is confirmed. Pool 5's aifoundry3 file-tile rows stand as
+measured (K1). A card's scale still cannot be read off cheap reads.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E154 — heat over minutes predicted end to end from the bits: four 10-minute holds of new kinds, and E97's H1 again (Q139; card runs 2026-11-03, 17:52:59–19:06:50 PST, aifoundry3) — pre-registered
+
+**Asked:** items 9, 8 and 6 of section 11, and rank 4 of Q138's final critic, its aifoundry3 half: *"Hold 3-4 pool-6 kinds for
+10-13 minutes each, duty-cycled where above the stop, with the die trajectory predicted from the bits only and frozen. Rules: rms
+and plateau within sqrt(chain^2 + (R x power rms)^2), about 0.35 °C on aifoundry3"*. **Frozen first:** Q139(e)'s predictions
+(`455c46c1`, 06:00:48 PST) and amendment A1 (`e224a3f8`, 06:51:54), M8's watts for pool 6's four hold kinds through Q138(t)'s
+closed chain. **Pre-registered** in [`tools/claims-v3/e154/README.md`](../../tools/claims-v3/e154/README.md) (`8c23853c`,
+committed 17:51:30 PST, pushed 17:51:32), before the claim (17:52:43) and the first device access (17:52:59); its post hoc
+readings script (`64aa95ee`, 17:56:09) before any hold's data. Data:
+[`docs/reports/data/2026-11-03-e154-heat-e2e-aifoundry3/`](../reports/data/2026-11-03-e154-heat-e2e-aifoundry3/README.md)
+(`d037d82a`; corrected after verification in `d37c787e`, C1–C14; no frozen file, number, rule, prediction or verdict changed).
+aifoundry3's card 0 at 600 MHz in all 44,259 samples, TDP 0 W / 65 °C, max_power, 523 mV, never set; **73.9 card-minutes** of 76,
+the full design: a rest, H_M (E78's int8 full tile, E97's H1 a third time), then K_S (`fp32.real_smol_softmax_v_causal`,
+duty-cycled, share 0.7891), K_Q (`int8.real_qwen_w8a8_v`), K_L (`int8.b_line_zero_ff`) and K_O (`fp32.a_onebit_b5_third`), ten
+minutes each with rests between. Every command a READ, classified from `836a4ab`'s public handlers and the held command-74 patch
+(aifoundry3 runs a non-public 0.22.0 build: the caveat stands for all ten commands); the board at most 45.34 W, `minshire[0]` 66
+°C, the 34-sensor mean 67.54 °C (K_S, 0.04 °C over the design's 67.5 °C line, 4.5 °C under the 72 °C hold stop).
+
+**Results** (`scored.json`: arm E from the bits, arm A given the measured board).
+- **All 11 registered verdicts PASS:** arm E's plateau-rise errors K_S +0.024, K_Q −0.418, K_L +0.492 and K_O +0.360 °C, inside
+  bands of 0.599–1.446 °C; **0.370 °C rms** over the four (mean +0.115); arm A PASS on all five holds, 0.342 °C rms over the
+  pool-6 four; H_M (b) +0.194 °C, and (c) its rise per board W 0.984 of E97's H1.
+- **The critic's per-hold rule** (the plateau and the checkpoints' rms within each hold's scale) **is met by 1 of 4 holds**, K_L
+  (C1): rank 4's aifoundry3 half has its first blind score, not its answer.
+- **The heat path's miss tracks the size of the rise, not the format** (C2): given the watts the chain reads all three 11–12 °C
+  rises 3.1–4.6% low (H_M +0.352, K_S +0.418, K_O +0.536 °C; H_M is int8) and the two small int8 rises within 0.07 °C. On 2
+  November E144 read a 15.0 °C rise to +0.015 °C, so the 3–5% belongs to this session.
+- **The power path's share:** E − A 0.37 °C rms, partly cancelling the heat path on the fp32 holds; on the small int8 rises the
+  error is M8's in-hold board error (post hoc: K_Q −0.49 W, K_L +0.41 W).
+- **The models through the same chain:** on the rises M8 0.370, M7 0.352, M6 0.473 and E153's measured S 0.347 °C rms; on the
+  absolute die from the room (post hoc) 0.39 / 0.30 / 0.34 / 0.30, M8 last (C3); not resolved at n = 4, and the order depends on
+  the footing. M8's int8 discount over-corrects again on K_L (+0.49 °C; M7 +0.13, M6 −0.32).
+- **All four pool-6 holds started on tails** of 1.89–4.43 °C carried from the hold before (C4).
+- **Every row valid:** 6,346 of 6,346 dispatches, in 481 launches, C bit-exact (C12).
+
+**Scored:** all 11 registered verdicts PASS; the (c) readings on the tail-started holds are E144's rule's, reported only (C11).
+**What it changes.** Items 9, 8 and 6: a new kind's 10-minute plateau rise can be quoted from its bits on aifoundry3 to about ±0.4
+°C, from one session (1σ 0.37 °C; 95% interval for σ 0.22–1.06 °C at n = 4); another session can add a move not yet measured,
+below the 0.3–0.8 °C by which E97's plateau moved within its one session (E144 C3). Item 9's next term is the chain's gain or a
+slow stage on large rises, not an fp32 term; a room drifting through the holds cannot be ruled out without an inlet thermometer.
+Item 8: heat per board W replicates a third time (0.884 °C/W at 600 s).
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E155 — int8's no-issue floor by shape: three A rows against one, both counts frozen (Q139; card runs 2026-11-03, 04:30:48–05:07:01 PST, aifoundry1's card 1) — pre-registered
+
+**Asked:** item 11 of section 11, int8's no-issue floor, and rank 10 of Q138's final critic: *"A registered three-row arm with K =
+8 partners in both formats (avoid four rows, errata type D), both counts' predictions frozen. Rule: the rise from one row to three
+within the frozen count's band, and the per-op difference between the formats bounded below 30 pJ."* **Pre-registered** in
+[`tools/claims-v3/e155/README.md`](../../tools/claims-v3/e155/README.md) (`82b5af8d`, pushed 04:28:26 PST), before the claim and
+any device. Data:
+[`docs/reports/data/2026-11-03-e155-int8-floor-rows/`](../reports/data/2026-11-03-e155-int8-floor-rows/README.md) (`eb0d142b`;
+corrected after verification in `93637c7f` and `268acddd`, C1–C6; no frozen file changed). aifoundry1's card 1 at 600 MHz, TDP 65
+W / 65 °C, 499 mV in all 24 config reads, never set; **36.2 card-minutes** of 40, nine passes (215–239 s), all kept. Reads only
+(`since_reset_ms` −1 in all 20,534 samples); the board at most 59.48 W (stop 66), the hottest-shire latch 65 °C (stop 72).
+
+**Results** (`scored.json`).
+- **D31 = N3 − N1**, the rise from one A row to three (int8 − fp32, nothing issued): **+0.311 ± 0.102 W** [0.208, 0.413]; N1 0.934
+  ± 0.077 W, a third replicate on this card (T1 PASS), N3 1.244 ± 0.083 W.
+- **F1a WALK:** per cycle is excluded, by 0.047 W.
+- **F1b TOGGLES as registered:** D31's interval overlaps the walk counted in TenC read-address bit toggles (band 0.327–0.419 W;
+  the point 0.016 W below it) and misses the new-address count's (0.430–0.549 W) by 0.018 W. But the frozen bands scale all of
+  E148's sixteen-row N − N1, which under the same per-op premise holds 0.087 W of shared per-op work; on bands that take it out
+  the new-address count is not excluded (post hoc, F1b would read INCONCLUSIVE; C1).
+- **Out of sample on D31:** the toggle count −0.062 ± 0.102 W (−0.029 on the premise's footing), the new-address count −0.179
+  (−0.132), per cycle +0.168, the null +0.311; on N3 from E148's N1, the toggles −0.012 ± 0.083 W.
+- **F3 INCONCLUSIVE:** the formats' per-op difference at three rows +8.2 pJ [−18.8, +35.1], against ±30 pJ.
+- R6 PASS ×6: the cycles per op are the bench's plus E109's one constant (m0r3 128 / 110, m0r3k8 72 / 62, to the cycle).
+
+**Scored:** F1a WALK; F1b TOGGLES; F3 INCONCLUSIVE; R6 PASS ×6; T1 PASS.
+**What it changes.** Item 11, answered in part: the per-row term's error falls from the null's 0.31 W to 0.03–0.06 W with the
+toggle count on both footings, inside the measurement's ±0.10 W; the new-address count is excluded only on the registered band
+construction; the toggle price is 44.7 ± 5.8 fJ at sixteen rows (E148, matched footing) and 36.9 ± 17.0 fJ at three (post hoc).
+Open: what stays at one row (0.93 W), the per-op premise below ±30 pJ, and any card but card 1.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E156 — E139's encoded memory term on a second card and two new images (Q139; card runs 2026-11-03, 05:48:01–06:23:09 PST, aifoundry1's card 1) — pre-registered
+
+**Asked:** item 10 of section 11, the memory path, and rank 15 of Q138's final critic: *"E139's design on aifoundry1 card 1 with
+two new images. Rule: the frozen +0.185 W per image predicts within 0.05 W."* **Pre-registered** in
+[`tools/claims-v3/e156/README.md`](../../tools/claims-v3/e156/README.md) (`d55744a5`, committed 05:46:30 PST, pushed 05:46:34),
+before the claim (05:47:41–05:47:55) and the first device open (05:48:01). Data:
+[`docs/reports/data/2026-11-03-e156-memory-images-card1/`](../reports/data/2026-11-03-e156-memory-images-card1/README.md)
+(`68fe3259`; corrected after verification in `42f6ee72`, C1–C7 and O1, in the evening, its first verifier having stopped with the
+session; four verdict files' input paths, no number changed). aifoundry1's card 1 at 600 MHz in all 19,655 samples, TDP 65 W / 65
+°C, 499 mV, never set; **35.1 card-minutes** of 40: the stop-path test, the smoke, a warm-up and nine headline passes, none set
+aside. Reads only (`since_reset_ms` −1); the board at most 59.55 W (stop 66), the hottest-shire latch 65 °C (stop 72); the PMIC's
+own temperature is read by no field, so its margin to the 75 °C over-temperature alarm was not measured (C6).
+
+**Results** (`e156.json`, the registered primary; the images are named by their counts, in code font, to keep them apart from
+experiment numbers).
+- **N1 PASS**, with the critic's 0.05 W line applied to the frozen term per image (E139's price × each image's count, registered
+  before any pass; C4): `E7` +0.117 [0.036, 0.199] W against +0.152 (−0.035), `E32` −0.030 [−0.101, +0.041] W against 0 (−0.030).
+  Read literally ("+0.185 W per image") both would fail, −0.068 and −0.215 W.
+- **C1 PASS:** E139's own images `E56` and `E448` read +0.199 and +0.169 W against +0.213 (−0.013, −0.044 W).
+- **N2 A ONLY:** the 32-bit count and the pins are excluded at every arm (counting at 32 bits would miss `E32` by −0.486 W), the
+  line edge on the primary; the 128-bit addition only on this card's primary and leakage arms, by one pair (`E192`, −0.117
+  [−0.198, −0.035] W), so 64 bits is the reading on present evidence and 64 + 128 is not excluded across cards (C3).
+- **D EVIDENT:** 192 pins held high cost +0.397 W [0.326, 0.468].
+- **No card term is resolved:** the pins read 18–29% higher on card 1, p 0.10 and 0.06 (C2); the encoded price fitted on card 1
+  alone 0.389 [0.286, 0.493] pJ against 0.463.
+- Post hoc (O1): 10 of the 17 in-window dips fell on the encoded-quiet twins (p 0.007), so the dips-kept arm is biased pair by
+  pair.
+
+**Scored:** N1 PASS; C1 PASS; N2 A ONLY; D EVIDENT.
+**What it changes.** Item 10: the encoded term carries to a second card and two new images, its out-of-sample error 0.144 W rms
+with no term → 0.033 W on the four scored pairs; it is counted at 64 bits on present evidence, and if 128-bit toggles add, random
+data's term at full read rate is 1.86 times as large (+0.11 W). Open: the 1.0 pJ split between the memory shires' logic, the PHY
+and the DRAM; where the 256-bit path is; a second card's `E192`.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E157 — blind pool 6 on aifoundry1's card 1: M8 on the second 600 MHz card, every launch's C checked, the card term (Q139; card runs 2026-11-03, 16:20:11–17:06:21 PST, aifoundry1's card 1) — pre-registered
+
+**Asked:** item 6 of section 11, and Q138's final critic's ranks 2, 14 and 5, as E153 (above), on card 1. **Pre-registered** in
+[`tools/claims-v3/e157/README.md`](../../tools/claims-v3/e157/README.md) (`01676499`, committed and pushed 16:17:57 PST;
+`d98d2e34` its ancestor), before the claim (16:19:48, the evening's day post, which this lane created) and the first launch
+(16:20:31). Data: [`docs/reports/data/2026-11-03-e157-blind6-card1/`](../reports/data/2026-11-03-e157-blind6-card1/README.md)
+(`fb2e5c6e`; the card term scored on E153's committed reduction in `80420324`, wording `a3823707`; corrected after verification in
+`7931262e` and `26096a60`, C1–C5 and C2′, beside a dated note on the registration; no number or verdict changed). aifoundry1's
+card 1 at 600 MHz in all 27,115 samples, TDP 65 W / 65 °C, 499 mV in all 14 config reads, never set; **46.2 card-minutes** of 55:
+the stop-path test 15702, the smoke 15701 and four passes, 15710–15713, three kept (15711 set aside by E78's pass gate,
+`fp16.zeros` +0.384 W off its line). Reads only; the board at most 61.10 W (stop 66), the shire mean 63 °C (stop 72).
+
+**Results** (`scored.json` › `primary`: Q139(u)'s footing, 0.3134 W/°C with A2 once).
+- **Every launch's C bit-exact:** 3,170 of 3,170 (fp32 1,226, fp16 852, int8 1,092): the first checked reads on card 1 of int8's
+  wrap, full-range int8, wide fp16 exponents and real tiles; E160 read those ranges first, on aifoundry2 (C2).
+- **K1 FAIL:** the six pool-5 tiles came back within Welch's interval of E142's on 5 of 6 and within 0.05 W on 3 (`int8.gray_a`
+  −0.187 W, outside ±0.152); E78's random anchors moved at most 0.061 W. Repeat D between days on card 1 reproduces to 0.1–0.2 W.
+- **Power:** M8 0.386 / 0.098 / 0.327 W rms (fp32 / fp16 / int8; P1 FAIL, its line 0.302), 0.323 W over the 30 priority-1 tiles
+  (bias −0.012 W), 0.366 W over the 44 new kinds; the floats' bias **+0.002 W** against M6's −0.127 W on the same 18 tiles; **29
+  of 30** inside (`fp32.b_onebit_b20_third` outside, 1.09 W under every model).
+- **Not better than M6:** M8 − M6 +0.040 W [−0.013, +0.128], NOT RESOLVED (+0.086 [+0.021, +0.178], WORSE, on E142's own footing);
+  M6 0.377 / 0.134 / 0.222 W.
+- **By case** (post hoc, C1): the two seeded-weight tiles 0.082 W, the two C-register tiles 0.094 W (M6 0.322: the C-register term
+  works where aimed), the 12 real tiles 0.146 W with 12 of 12 inside (the best-read of the cases with more than two tiles),
+  whole-line int8 0.717 W (the near-whole-byte discount over-corrects: `int8.b_line_55_aa` +1.36, `int8.a_zeros_b_lineflip` +0.78
+  W).
+- **Heat:** 0.180 / 0.183 / 0.123 °C rms, 29 of 30 inside (H1–H4 PASS); 0.1160 °C per board W against 0.1151.
+- **The card term (rank 5)**, scored at 17:27 after E153's commit with the registered code: X1 PASS, card 1's float D over
+  aifoundry3's on 25 tiles **0.9632 [0.9613, 0.9659]** against M8's 0.9616 (M7's 0.9711 outside); X2 PASS, int8 0.9681 [0.9534,
+  0.9783]; S1 and S2 PASS, the frozen zeros-level read predicting the scale to +0.78 / −0.74% (V² −5.5 / −6.9%). On the registered
+  footing only: the ratio moves 0.954–0.973 across card 1's arms (X1 FAIL on 3 of 5, S1 on 2), and the zeros level re-read on the
+  day is +10% off.
+
+**Scored:** the check of C (3,170 of 3,170) and K1-C PASS; P2, P3, B1, B2, C1, H1–H4, R1 and R2 PASS; X1, X2, S1 and S2 PASS,
+scored on E153's reduction; P1 FAIL; K1 FAIL (K1-D, K1-W); M1 and M2 NOT RESOLVED.
+**What it changes.** Item 6 on card 1: M8's refit did not lower the blind error; it removed the float bias on its footing while
+its scatter grew on whole-line int8 and exponent-heavy fp32. Carrying a prediction from aifoundry3 to card 1 costs under 1% on the
+one footing. Rank 14's C half is closed on card 1; its D half fails as written (0.1–0.2 W between days, not 0.05). Named for M9,
+not fitted: cap or drop the whole-byte discount, an fp32 exponent-field term, int8 held-B, B's high mantissa bits.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E158 — a large GEMM's time per op as the L3's retention by reuse distance (Q139; card runs 2026-11-03, 04:39:07–04:59:57 PST, aifoundry2) — pre-registered
+
+**Asked:** item 1 of section 11, and rank 7 of Q138's final critic: *"Register a ladder of B-panel reuse distances from 20 to 56
+MB, with and without C's traffic, with MAB's frozen prices predicting the L3-served share. Rule: the fitted retention curve
+predicts F6's time per op within 3%."* **Pre-registered** in [`tools/claims-v3/e158/`](../../tools/claims-v3/e158/E158.md)
+(`2cfc4525`, committed 04:37:54 PST, on origin 04:37:56), before the claim (04:38:25) and the first card touch (04:39:07). Data:
+[`docs/reports/data/2026-11-03-e158-l3-retention/`](../reports/data/2026-11-03-e158-l3-retention/README.md) (`f8272c64`; corrected
+after verification in `bc89f1bc`, C1–C5; no frozen text, number or verdict changed). aifoundry2's card 0 under its own governor,
+65 W / 65 °C (low_power, 600 MHz, 519 mV) at the start, the end and after every run, nothing set; `dmcmd_audit` GO (19 READ
+sites); **20.8 card-minutes**: 98 zeros bursts in three passes, 23 ladder rungs with one row of blocks in fp32 (22 with far B
+lines), E146's `F6`, `D2` and `D4` again, and the K4 rungs in fp16 and int8, every check of C exact. The board at most 36.1 W, the
+die 48–51 °C per burst; both stops tested on live samples first.
+
+**Results** (`results.json`).
+- **Past 32 MB the L3 keeps about half of a returning B panel:** 0.46–0.56 of the far B lines are L3-served from 39 to 59 MB in
+  every family (0.997–1.012 below 32 MB).
+- **Two one-row-block rungs at a power-of-two stride collapse:** `K6n4` (NB 4, KB 6) keeps 0.18 and `K4n8` (NB 8, KB 4) reads
+  −0.20, 6.5% slower than if every far line came from DRAM; `F6`, `K6n4`'s layout with three row blocks, kept 0.33 (E146 0.327).
+- **R2 NO SINGLE CURVE** as registered (rms 0.129 against 0.06); post hoc, off the two collapses one curve fits, C's lines
+  occupying the L3 like the operands' (w 0.8–1.0, rms 0.026; C4).
+- **R3 PASS ×3, the critic's rule as registered:** the fitted curve (ISO) predicts the time per op of `F6` (never fitted; E146 ran
+  it on 2 November) to +0.41 / +0.26 / −0.76%, where E146's MAB read −10.0 / −10.3 / −9.4%; that pass rests on `K4n8`: refitted
+  without it ISO misses `F6` by +8.0 / +7.9 / +5.9% (C1).
+- **Out of sample on new shapes:** E146's ladder (18 cells with KB ≥ 2) 7.2% → 6.0% rms (R4 NOT BETTER by its 2-point bar), all 24
+  cells 10.9% → 10.6%; `D2` and `D4` 13.1% → 6.3%.
+- **Power:** zeros' burst power against E136's law P0 3.57 W rms with strict lines and 3.48 W with ISO's; P0 reads 2.7–4.4 W high
+  on zeros.
+
+**Scored:** R0 PASS; R1 INCONSISTENT (`K4n8`) and SOFT; R2 NO SINGLE CURVE; R3 PASS ×3; R4 NOT BETTER; R5 10 of 14; R6 every pass
+reproduces; R7 P0 3.57 W rms.
+**What it changes.** Item 1: where a large GEMM's L2-missing lines are served past the L3 is measured, and a new shape's time per
+op comes to about 6% rms out of sample; what E146's MAB lacks is a block-stride term (the L3's set mapping, or the DRAM's channel
+and bank mapping), to be registered with the pools' addresses logged. Open: the KB = 1 A lines, the vendor's binary, a second
+card.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E159 — a large GEMM's sustained power and governed clock: G3 blind on three new shapes (Q139; card runs 2026-11-03, 05:33:58–05:52:55 PST, aifoundry2) — pre-registered
+
+**Asked:** items 1 and 6 of section 11, and rank 3 of Q138's final critic: *"Register G3 (P0's power, closed through the frozen
+chain and the trip rule) for 2-3 new GEMM shapes held 80-120 s in fp32 random, int8 full and zeros, with the predictions frozen
+first. Rules: sustained clock within 15 MHz, board within 2 W, window die within 1 °C."* **Frozen first:** Q139(q)'s G3 with
+E159's design and predictions (`91def7c4`, 04:16:13 PST; corrected in `ea38c8c3`, no frozen file changed). **Pre-registered** in
+[`tools/claims-v3/e159/`](../../tools/claims-v3/e159/E159.md) (`d8badb73`, committed 05:31:46 PST, pushed by 05:32:04), before the
+claim (05:32:57) and the first card touch (05:33:58). Data:
+[`docs/reports/data/2026-11-03-e159-gemm-sustained/`](../reports/data/2026-11-03-e159-gemm-sustained/README.md) (`a84e8570`;
+corrected after verification in `55a43b69`, C1–C7; no frozen file changed). aifoundry2's card 0 under its own governor, 65 W / 65
+°C (low_power, 600 MHz, 519 mV) at the start, the end and after every run, nothing set; `dmcmd_audit` GO (19 READ sites); **18.95
+card-minutes**; all nine holds ran (H1 `gemmL2x4x8`, H2 `gemmL4x2x4` and H3 `gemmL1x2x2`, each in fp32 random, int8 full and
+zeros, twelve processes of 8 s), none cut, no stop fired; the board peaked at 76.1 W, the die mean at 66 °C; both stops tested on
+live samples first.
+
+**Results** (`results.json`).
+- **Blind, G3 beats E136's law on all three:** the governed clock to **8.7 MHz rms** [5.2, 11.5] against 41.2, the board to **1.94
+  W** [1.09, 2.60] against 3.99, the window die to **0.99 °C** [0.64, 1.26] against 1.35 (intervals over holds, post hoc); on the
+  three fp32 random holds the law misses by 71.0 MHz and 6.48 W, G3 by 13.4 MHz and 2.16 W.
+- **G3 FAILS every per-hold rule as registered:** clock 8 of 9, board 5 of 9, die 6 of 9 inside (the registered subset 5 of 6 on
+  each).
+- **What the misses are** (post hoc; C1, C2, C5): H1 fp32 random's clock FAIL, the only one, is the governor's 600–700 MHz dips
+  (8.5% of its window), not P0's level; about 3 W (2.1–4.0) of its 7.2 W first-second deficit is its cold 46 °C start, a start-die
+  term P0 lacks, every burst behind P0 having started at 47–56 °C; G3 reads zeros' board 2.4–2.5 W high on every shape, mostly the
+  level (0.3–0.8 W given the first second).
+- **Heat given the watts carries to a large GEMM, blind:** the chain on the measured trace reads all nine window dies within 1 °C,
+  0.41 °C rms, so every die miss is the power path's.
+- Like for like against Q139(q)'s 14 large GEMMs nested (12.8 MHz, 1.21 W, 0.69 °C), the blind board and die are worse and the
+  clock better (C3).
+
+**Scored:** G3 clock FAIL (8 of 9), board FAIL (5 of 9), die FAIL (6 of 9); G3's rms below E136's law's on all three; the chain on
+the measured trace 9 of 9 inside 1 °C.
+**What it changes.** Rank 3 is answered with a registered FAIL and a large gain: a governed large GEMM's sustained clock, board
+and die follow from its burst levels, the frozen heat chain and the governor's trip to 8.7 MHz, 1.9 W and 1.0 °C rms, about five
+times better than E136's law in clock. The next power terms, in order: a reference die for P0 at the leakage measured inside runs
+(0.44–0.50 W/°C), the governor's clock in and between processes, and P0's per-shape level (rank 7) with a zeros level. Heat needs
+no new term.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E160 — blind pool 6 under aifoundry2's own governor: M8's clock-and-voltage term in 6 s bursts, every launch's C checked (Q139; card runs 2026-11-03, 06:41:50–07:12:39 PST, aifoundry2; collected at 15:56 PST) — pre-registered
+
+**Asked:** item 6 of section 11, and Q138's final critic's rank 2 on this card (*"aifoundry2's zeros level, a cap term rising with
+overshoot and a D scale per format, E143"*), with the pool-6 half of rank 14's check of C. **Pre-registered** in
+[`tools/claims-v3/e160/E160.md`](../../tools/claims-v3/e160/E160.md) (`2e016917`, committed 06:40:07 PST, pushed 06:40:09;
+`d98d2e34` and Q139(k)'s `4946a992` its ancestors), before the claim (06:41:24–06:41:38) and the queue's start (06:41:50). The two
+tiles whose 95% peak passed section 22's 82 W line, `fp32.anchor6_randn` and `fp32.real_qwen_softmax_v`, were dropped as
+registered, with E80's fp32 random replicate, so 48 of the 50 were scored. **Collected late:** the session that ran it stopped at
+about 07:46 PST on a usage limit, 34 minutes after the queue ended and before anything was collected; a resumed lane copied the
+data read-only at 15:56 PST (D1, 8 h 44 min late), every one of the 221 code, tile and prediction files hashing on the box as
+registered and its three binaries as pinned. Data:
+[`docs/reports/data/2026-11-03-e160-blind6-aifoundry2/`](../reports/data/2026-11-03-e160-blind6-aifoundry2/README.md) (`6a330635`,
+16:31:18; corrected after verification in `42ba850f`, C1–C7; no frozen file, measured number, prediction, rule or verdict
+changed). aifoundry2's card 0 under its own governor, 65 W / 65 °C (low_power, 600 MHz, 519 mV) at the queue's start and end and
+after every one of the 160 recorded runs and session reads, nothing set; **30.8 card-minutes**: the smoke, the board and die stop
+tests (each tripped as designed, 64 and 58 ms after its line), then `s1`, 150 bursts in three passes (29.8 card-minutes). Every
+command a READ; the board peaked at 79.37 W (no sampler line of 18,303 reached 80 W), the die mean at 62 °C; no POWER_SAFE or
+thermal throttle in the service processor's ring.
+
+**Results** (`results.json` › `score.rules`; measured − M8, rms over tiles, three passes each).
+- **Every registered rule PASS:** F1, the burst clock on the 17 tiles M8 put below 795 MHz, **6.72 MHz**; F2 on the 31 pinned ones
+  3.89 MHz; F3 48 of 48 inside ±16.9 MHz; W1, the governed board, **1.39 W** (better than its reference line); W2 1.73 W; W3 48 of
+  48 inside ±3.50 W; H1, the die's rise, 0.67 °C; H3 45 of 48 inside ±1.41 °C; PK 47 of 48 tiles at or under M8's 95% peak; R0,
+  the drift check.
+- **Every launch's C bit-exact:** 2,596 of 2,596 in `s1` (fp32 824, fp16 706, int8 1,066), 2,620 with the smoke and the stop test;
+  762 int8 launches carried a C word past the 32-bit wrap, all bit-exact: the first silicon reads of pool 6's new ranges.
+- **Against the last blind score on this card** (M7 on pool 5, E143: governed 6.63 MHz and 1.60 W, pinned 1.01 MHz and 1.18 W,
+  heat 0.585 °C; C2): the governed clock the same (6.72), the governed board a little better (1.39), the heat about the same
+  (0.67); the pinned clock worse as registered (3.89; 0.47 MHz with the two mid-burst idle passes set aside, post hoc) and the
+  pinned board worse (1.73 W, the intervals not overlapping). M7 reads pool 6's pinned tiles as M8 does (3.88 MHz, 1.72 W), so
+  that comes from the pool or the session, not from M8.
+- **In this session M8's one aifoundry2 change, the cap refitted from 65.58 to 65.20 W, read the governed tiles worse than M7 as
+  frozen** (6.72 against 4.89 MHz, 1.39 against 1.10 W; an interval over tiles inside one session, C7): the capped tiles held
+  66.72 W (66.89 W in E143), and the same model's mean governed clock error moved from −4.96 MHz in E143 to +2.82 MHz here.
+- **fp16's burst D was 0.73 W high,** from its zeros anchor's idle first pass at 752 MHz (C1, post hoc); the three zeros anchors
+  sit 1.49–1.85 W under M8 at 800 MHz.
+- **E160-S, rank 5's aifoundry2 scale, NOT SCORED:** E153's D did not yet exist when E160 was reduced; reported against M8's
+  predicted D600, floats 0.9737 and int8 0.8997.
+
+**Scored:** F1, F2, F3, W1, W2, W3, H1, H3, PK, C and R0 PASS; S NOT SCORED.
+**What it changes.** Item 6 on aifoundry2: M8 holds its bands under the governor at E143's size; in this session its cap refit was
+no better than M7's cap. The post hoc candidates for the next terms there are a zeros level, a cap rising with overshoot and a
+session term: the die started each burst 1.7 °C cooler on average than in E143, and the one tile run in both sessions ran 10.7 MHz
+faster at the same watts, with the host binary changed too. Pool 6's real tiles are C-checked on this card.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it. Its claim was the last
+text of the day's first post, which the stop left held and someone else later deleted (the dated note at the top of this file).
+
+## E161 — heat over minutes predicted end to end from the bits under aifoundry2's own governor, with the sustained clock (Q139; card runs 2026-11-03, 16:25:00–17:30:05 PST, aifoundry2) — pre-registered
+
+**Asked:** items 9, 8 and 6 of section 11, and rank 4 of Q138's final critic, its aifoundry2 half (*"about 1-1.3 °C governed on
+aifoundry2"*). **Frozen first:** Q139(e)'s predictions (`455c46c1`) and A1 (`e224a3f8`). **Pre-registered** in
+[`tools/claims-v3/e161/E161.md`](../../tools/claims-v3/e161/E161.md) (`ddbd15b1`, committed 16:22:46 PST and pushed 16:22:49,
+written from about 15:55: C5), before the claim (16:24:03–16:24:16) and the go (16:24:34). Data:
+[`docs/reports/data/2026-11-03-e161-heat-e2e-aifoundry2/`](../reports/data/2026-11-03-e161-heat-e2e-aifoundry2/README.md)
+(`0158efd6`, time stamps `d1eb4fd6`; corrected after verification in `d0704105` and `77d8b89b`, C1–C5; the results, reduction and
+post hoc reproduce byte for byte). aifoundry2's card 0 under its own governor, 65 W / 65 °C (low_power, 600 MHz, 519 mV) at the
+session's start, at every step's start and end (14 reads) and at its end, nothing set; **35.07 card-minutes** of 40, about 65
+minutes of wall time with E98's two 15-minute rests: G1Q (`int8.b_line_zero_ff` at 800 MHz) and G2Q
+(`fp32.real_smol_softmax_v_causal`, in the trip regime), 13 minutes each. Every command a READ; the peaks 46.77 and 65.77 W, the
+die means 63 and 66 °C; both stops tested on live samples first (die 62 ms, board 65 ms).
+
+**Results** (`results.json`; from the bits and the idle card's die and board just before each hold, a whole-degree 47.0 °C anchor
+known to ±0.5 °C: C2).
+- **All six registered readings PASS:** G1Q's plateau 62.88 °C measured against 63.78 predicted (**−0.90 °C**, band 3.149), its
+  trajectory 1.04 °C rms over seven checkpoints, its clock at or above 790 MHz for 0.952 of the last 300 s; G2Q's plateau 65.50 °C
+  against the trip rule's 65.9 (**−0.40 °C**, band 0.60), in the trip regime as predicted (81% of the last 300 s under 790 MHz).
+- **The sustained clock from the bits:** 680.1 MHz measured against 667.5 predicted (**+12.6 MHz**, band 35); with R at G1Q's
+  measured 0.6875 °C/W (A1's C2) 656.0 MHz (+24.1), worse.
+- **Given the watts,** Q138(t)'s chain reads both holds to 0.48 °C rms (plateaus +0.37 / −0.22 °C) on a fourth session; the power
+  path's share, E − A, is −1.27 °C on G1Q and −0.17 °C on G2Q.
+- **What the error is made of** (post hoc, corrected, C1): at the hold's kernel duty from its launch records, 0.970, G1Q's error
+  goes from −0.90 to −0.39 °C and G2Q's clock error from +12.6 to +5.6 MHz (−0.88 to +0.12 °C and +12.3 to −2.2 MHz across six
+  definitions of the share); M8's level inside the work, 0.91 W high on G1Q, is the larger part of its power-path error (with both
+  corrected +0.44 °C, near arm A's +0.37); at the trip the terms do not separate.
+- **Every launch's C bit-exact:** 3,354 of 3,354, G1Q's int8 operands reaching |128|.
+- Between the holds the lane reduced G1Q and checked its C before G2Q began; G2Q ran as registered (C4).
+
+**Scored:** all six registered readings PASS.
+**What it changes.** Items 9, 8 and 6 on aifoundry2: heat over minutes from the bits reads about 1 °C at a plateau the bits set,
+about 0.4 °C at the trip, and the sustained clock to about 13 MHz, from one session and two holds; rank 4's aifoundry2 half has
+its first blind score, not its answer (C3). G1Q's band is 2.4–3.1 times the critic's 1.0–1.3 °C and does not separate M8 from M7
+(−0.90 against −1.45 °C). Next: freeze the duty with its definition, end the scoring window at the hold's last process, carry M8's
+level as a session or zeros-level term, then test on another session.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+## E162 — which operand pairing a GPU pays for, row against K, on A100 boards, and a later generation (Q139; GPU runs 2026-11-03, 04:32:51–05:05:14 PST, on Modal) — pre-registered; no lab card
+
+**Asked:** item 2 of section 11, "A GPU measured the same way", and rank 9 of Q138's final critic: which operand pairing an A100
+pays for, and a later generation with headroom under its cap, *"Rule: blind on held-out kinds on new boards, the row+K form beats
+G1 by a resolved margin and is stable nested."* **Pre-registered** in [`tools/gpu/e162/E162.md`](../../tools/gpu/e162/E162.md)
+(`038db597`, committed 04:32:27 PST, pushed 04:32:29) before any GPU call; amendments A1 and A2 (`0e8479c9`, 04:48:57: the L40S
+arm stops by its rule; two stage-2 passes a board) before any stage-1 data was read; the freeze (`54e8f87d`, 04:54:02) before
+stage 2. Data: [`docs/reports/data/2026-11-03-e162-gpu-row-k/`](../reports/data/2026-11-03-e162-gpu-row-k/README.md) (`c30af4f6`;
+corrected after verification in `a78e754e`, C1–C8; no frozen file, rule, prediction or verdict changed). Reads only on the GPU.
+**Metered $2.28**, under its $6 cap; the GPU checks together $12.67 of the owner's $20.
+
+**Results.**
+- **What an A100 pays for is A's rows one apart** (row-lag 1, A over B), not neighbours along K: a phase per row costs +38.5 to
+  +48.0 W over a shared phase (W1); K neighbours are no pairing even with no row flips (W2 FAILS, −6.7 ± 2.8 W); consecutive rows
+  are (W3, +60.4 ± 2.6 W); ROW > K in bf16, fp16 and int8 (W4, +58.9 / +44.6 / +21.3 W); the row wave costs 88.1 W on A against
+  20.9 W on B (W6); R4b fails again.
+- **Along K, pairs 8 or more apart cost where 1, 2 or 4 apart do not;** which lag from 8 up is not pinned: refitted at K-lag 16 or
+  32 the same form predicts as well blind (15.8 and 16.2 W against 15.7, post hoc), so K-lag 8 is RK's stage-1 choice, not a
+  finding (C1).
+- **Blind, 22 never-measured kinds on two new boards:** the ridge row+K form RK reads **15.7 W rms [9.9, 21.8]** (10.1% of the
+  154.7 W span) against E149's frozen G1 at 52.4 W [39.3, 64.1] (BEAT HOLDS, ratio 0.299) and E149's S1, the best form frozen
+  before E162, at 36.1 W; fully nested, 14.9 / 15.5 / 13.1 W with the column scale recomputed in each fold (STABLE HOLDS).
+- **The L40S** ran every window with its power-cap reason bit set, zeros included at 60–69% of its 350 W limit, so it holds no
+  clock and its arm stopped by the registered rule (C4).
+- HT1 HOLDS (1.28 against 3.33 °C), but it is BEAT in degrees through E149's linear heat model, not a heat test (C6).
+
+**Scored:** V0, W1, W3, BEAT, BEAT_p, STABLE and HT1 HOLD; W4 and W5 ROW > K; W2 and R4b FAIL; the L40S's arm not scored.
+**What it changes.** Item 2 is narrowed: the A100's pairing is A's rows one apart and, along K, pairs 8 or more apart; a toggle
+model in that form predicts new kinds on new boards to 10% of the span, against 34% for the ET-SoC-1's pairing. Open: which K-lag
+from 8 up, how zeros move along rows and along K (the two zero stripes are RK's worst kinds), a later generation under its cap, a
+lower cap.
+**Report:** no page of its own; the data README is the public record, and the kinds page (A25) carries it.
+
+**Q139's desk lanes, beside the register** (no card, no device command; each README names the section-11 item and the critic rank
+it answers).
+**Q139(c)**, Q138's final critic's three desk checks re-derived with new code, post hoc
+([`2026-11-03-q139c-critic-checks/`](../reports/data/2026-11-03-q139c-critic-checks/README.md), `22f8d1f9`, `75910e70`; corrected
+after verification in `33548517` and `5d3200b0`): given the measured watts Q138(t)'s frozen chain reads 56 sustained
+large-GEMM-pattern runs to 0.47–0.63 °C rms against 2.18 °C for E136's law (2.25 °C on the 14 runs the law never saw) and `F6`
+within about 1 °C, so R5's die FAIL is the law's and the power it was fed; E142's X1 FAILS at the registered inputs (0.982 [0.980,
+0.996] against 0.9711) and X2 passes; blind rms 0.365 W [0.29, 0.49] on aifoundry3 and 0.211 W [0.17, 0.28] on card 1; then the
+critic's faults corrected in these records, on the kinds page and on the Horace Hub. **Q139(u)**, one reduction footing (rank 1;
+[`2026-11-03-q139u-footing/`](../reports/data/2026-11-03-q139u-footing/README.md), the rule `d4c36bfe` at 04:02:21 PST before any
+row was read, then `f47669d1` and `97b2843d`; corrected after verification in `ca7dee2a`): per card one leakage slope from that
+card's idle rests pooled over all sessions, aifoundry3 0.2056 W/°C [0.1916, 0.2204] (2,334 rests) and card 1 0.3134 [0.2955,
+0.3320] (2,700), the footing's constants and not a settled leakage (the reverse regression allows up to 0.45 / 0.51), with E82
+A2's dip rule once on the two 600 MHz cards; on aifoundry2 A2's dips are the governor's own low-voltage phases, so its dips-kept
+reduction is its footing (C1); post hoc on the footing, pool 5's float bias under the frozen M7 goes −0.230 → +0.012 W on
+aifoundry3 but reads −0.125 W on card 1, M7's form refitted on it −0.072 / −0.027 W, and X1 still fails by its rule (0.9635
+against 0.9616), inside the term's own interval. **Q139(s)**, the clock/voltage term (rank 13;
+[`2026-11-03-q139s-clock-voltage/`](../reports/data/2026-11-03-q139s-clock-voltage/README.md), `8c16ab2d`; corrected after
+verification in `c944ff99` and `158bc319`; post hoc): 4,374,148 committed voltage reads over 113 data dirs and four cards put each
+operating point at a fixed voltage (±1 mV across data dirs, ±2 mV per run, hot runs up to 2 mV low); s(f) refitted on them leaves
+E143's governed scores unchanged (6.57 MHz, 1.61 W); the board's exponent from the ramps is about 2.3, not 2.45 (2.26–2.31 at
+aifoundry2's measured 600 MHz leakage slope), at which E143's governed clock reads 4.82–4.83 MHz; E118's two-clock ratio by V² on
+card 0's own reads 0.740 against 0.697 ± 0.057. **Q139(k)**, the check of C (rank 14;
+[`tools/claims-v3/ccheck/`](../../tools/claims-v3/ccheck/README.md), `60b91395`; corrected after verification in `4946a992`): a
+bit-exact host-side reference of C for `sparsity_host`'s TensorFMA launches, wired to every launch by a two-flag host patch
+(`--c-log`, `--c-poison`) that adds no device-management command; E104's 110 card reads PASS through it, and its int8 rule equals
+the host's own check, which read int8's C on silicon on small integers on 25 September (C1). **Q139(q)**, G3 (rank 3;
+[`2026-11-03-q139q-gemm-g3/`](../reports/data/2026-11-03-q139q-gemm-g3/README.md), `91def7c4` with E159's design and predictions
+frozen; corrected after verification in `ea38c8c3`, no frozen file changed; post hoc): over 56 sustained GEMM-pattern runs, leave
+one session out, G3 reads the governed clock to 10.8 MHz [8.5, 13.2], the board to 1.86 W [1.60, 2.11] and the window die to 0.72
+°C [0.60, 0.83], against E136's law's 37.7 MHz, 3.71 W and 1.39 °C; its k = 0.1 W/°C is an effective constant that absorbs P0's
+1.57 W over-read, and `F6` out of sample is 36 MHz high. **Q139(b)**, blind pool 6, by a designer who never saw M8 nor anything of
+its lane ([`tools/claims-v3/kinds/blind6/`](../../tools/claims-v3/kinds/blind6/README.md)): 50 tiles (18 fp32, 13 fp16, 19 int8;
+30 priority-1 new kinds; 12 real tiles from two public models; four hold candidates), committed unchanged by **Q139(x)**
+(`d98d2e34`, 05:39:23 PST) with the bench's counts and M8's, M7's and M6's frozen predictions for three cards, before any pool-6
+claim ([`README-predictions.md`](../../tools/claims-v3/kinds/blind6/README-predictions.md)); its dated `CORRECTIONS.md`
+(`e9d20985`): fp16's C follows the card's rule, and no pool hash checks a card's C. Q139(x) had no verifier of its own; it
+recomputed its predictions independently (3,850 fields, none beyond the files' rounding), and E160's verifier matched their hashes
+byte for byte. **Q139(m)**, M8 (ranks 2 and 5; [`2026-11-03-q139m-model/`](../reports/data/2026-11-03-q139m-model/README.md),
+registered `f640fb7a` at 04:43:16 PST before any fit, frozen `122da8b6` at 04:57:59 before pool 6 existed; corrected after
+verification in `7f4ccd0f`, no frozen file changed): M7's structure on the one footing, 767 rows; the floats keep the C register's
+flips at an emulated launch-end state (6.44 ± 2.05 fJ a flip; nested 0.187 → 0.182 W, not resolved, most of the gap to M7 and M6
+as frozen being the footing refit); int8 keeps a near-whole-byte B discount (−56.8 ± 29.4 fJ a bit; 0.256 → 0.241 W, not resolved,
+and worse on pool 5's int8 rows); the exponent-field term, E145's per-position B prices, A's whole-byte flips, an int8 C term and
+aifoundry2's zeros level, D scale per format and overshoot cap were tested and not kept; aifoundry2's cap is refitted from 65.58
+to 65.20 W; a peak rule for section 22's 82 W line; and the card-scale predictor from cheap reads FAILS (V² misses card 1 by
+5.2%). **Q139(e)**, heat over minutes end to end (rank 4's desk half;
+[`2026-11-03-q139e-heat-end-to-end/`](../reports/data/2026-11-03-q139e-heat-end-to-end/README.md), `455c46c1` at 06:00:48 PST and
+amendment A1, its corrections after verification, `e224a3f8` at 06:51:54, both before either card claim; no frozen file edited):
+M8's power for pool 6's four hold kinds through Q138(t)'s frozen chain, and on aifoundry2 through the trip rule and M8's 65.2 W
+cap, with both cards' hold designs; A1 put K_S's plan at +11.72 °C over its 3.21 °C tail, not the frozen table's +11.37, and
+qualified G2q's ±35 MHz as the power path's alone. **Q139(v)**, a private archive search, run and kept off this repository.
+
 **Lane lessons from E78–E83, recorded for the next registration.** (1) A heat column read from a 2 s window over a
 whole-degree die reading resolves a kind only above about 12 W of switching on these cards: register a longer window,
 or a launch away from a step, before quoting heat for low-power kinds. (2) All six card lanes looked at
@@ -7063,3 +7588,35 @@ archive's host name, which these records withhold, reached the data READMEs and 
 quotes of his ask; the READMEs are reworded, the registrations stand as frozen (these records). (85) A desk batch writes its own
 flags into each record: Q138(g)'s check count went wrong because a batch launched from a shell left no record of whether it ran
 the settled-value check, and stopping a queue's parent shell orphaned a batch the Intel's load guard then paused (Q138(g) C2, D7).
+
+**Lane lessons from E151–E162 and Q139's desk lanes, recorded for the next registration.** (86) Register the one footing as the
+primary: E152 registered its session's own leakage fit (0.308 W/°C) 84 minutes after Q139(u)'s footing was committed, and reads R1
+and R2 INCONCLUSIVE where the footing reads LINEAR and CARRIES (E152 C5); E153's own fit reads M8's floats −0.210 W (B1 FAIL HIGH)
+where the footing reads −0.014 W. (87) A scorer's minimum must count distinct passes: E153's accepted one pass listed twice and
+printed every verdict at 16:40:11, before amendment A1 was committed; such a look is disclosed with its printouts (E153 C1). (88)
+Governed by the model is not governed by the card: three of the 17 tiles M8 put below 795 MHz ran at 793–797 MHz; split by the
+measured clock too (E160 C6). (89) An interval over tiles inside one session carries no session term: E160's resolved M8 − M7
+holds in that session, while the same model's mean governed clock error moved from −4.96 to +2.82 MHz between E143 and E160 (E160
+C7). (90) Register what an anchor's idle pass does to the tiles it anchors: fp16's zeros anchor ran its first pass at 752 MHz
+under the service processor's mid-burst idle status and put +0.73 W on every fp16 burst D (E160 C1). (91) Define a duty before the
+data, and end a scoring window with the work: E161's post hoc work share counted the window's last 6 s and each process's start-up
+as idle (0.94), where the hold's kernel duty from its launch records is 0.970 (E161 C1). (92) A pooled curve's pass can rest on
+one rung: E158's registered `F6` pass needs `K4n8`, without which the curve misses by +8.0 / +7.9 / +5.9%; report the
+leave-one-rung-out reading beside it (E158 C1). (93) A cold start is a term: E159's first hold began at 46 °C where every burst
+behind P0 began at 47–56 °C, and about 3 W of its 7.2 W first-second deficit is the start die; gate each hold's start on the die,
+or model it (E159 C2). (94) A first silicon read is the earliest check on any card: E160's morning launches read pool 6's new
+ranges first, checked at 16:31:18, so E153's and E157's are the first checked reads on their cards (E157 C2). (95) Apply a
+critic's rule as written, or say how it was applied: E156 put the 0.05 W line on the frozen term per image, not the literal +0.185
+W (E156 C4); E154's per-hold rule asks the plateau and the checkpoints' rms both, which 1 of 4 holds met (E154 C1). (96) A point
+estimate is not a bound: E152's "within 3% of full scale" were point departures, with 95% bounds reaching 10.4% (E152 C1). (97) A
+price measured at one base word belongs to that word: every per-position int8 B price so far is at E130's B1 with A held at 0x01,
+on the same 26 tiles (E151 C2). (98) A dip rule belongs to a card: on aifoundry2 E82 A2's dips are the governor's own low-voltage
+phases (98.4% within ±2 samples of a clock and set-point change), and removing them would lift E143's governed tiles by 2.46 W
+(Q139(u) C1). (99) Collect and release as soon as a queue ends: E160's detached queue ended at 07:12:39, 34 minutes before the
+session stopped at about 07:46 on a usage limit, and its data waited 8 h 44 min on the box until a resumed lane collected it
+read-only with the first attempt's collector, every file hashing as registered (E160 D1); its clause stayed in the day's first
+post, and that post was later deleted by someone else (E160 D2). (100) Copy a registration to the box after its last edit, or
+record the committed copy's hash: E154's box held a 17:49:03 draft of the registration README, its 12 code files byte-identical to
+`8c23853c` (E154 C14). (101) A day post's plan text lags its save: `delete_msg.mjs --plan`'s text field still showed the previous
+source after each save (E151, E152, E157, E159), so a rewrite built from it meets exit 7 under `EXPECT_TEXT`; rebuild it from the
+edit box's text, as E141's lane did.

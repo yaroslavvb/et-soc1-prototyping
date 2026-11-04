@@ -43,6 +43,15 @@ a single high mantissa bit flipping on a 1/3 base word, is 0.81 W over-predicted
 M6's 0.199, because, post hoc, M8's new discount for B bytes that flip all eight bits over-corrects on the three tiles where it acts most
 (+0.36 to +1.31 W; corrected after verification, C6), and **M8 is resolved worse than M7** (M2 WORSE, +0.034 W) and **not resolved from M6** (M1, +0.043 W).
 
+*Dated note, Tue 3 Nov 2026 (Q139's records; E157's verified C2): "the first silicon reads of full-range int8, its 32-bit wrap,
+wide float exponents and real model tiles", above, and the row "first silicon reads" under Results are **the first checked reads
+of those ranges on aifoundry3**. E160 read them first, on aifoundry2 under its own governor: 48 of pool 6's 50 tiles, launched
+06:41:50–07:12:39 PST, 2,620 of 2,620 launches bit-exact, its check committed in `6a330635` at 16:31:18 PST, before this session's
+(`8e18eb67`, 17:25:43). Of the 36 tiles with first-read notes (the same 36 as E157's), E160 had run 30; the other six, K1's five
+pool-5 tiles and `fp32.anchor6_randn`, were first checked on silicon in this session and in E157's, the same evening ([E157's
+`posthoc/corrections.txt`](../2026-11-03-e157-blind6-card1/posthoc/corrections.txt) C2). No number or verdict changes; the text
+above is as committed.*
+
 ## Results
 
 **All four passes kept on the registered primary** (Q139(u)'s one footing: E78's reduction unchanged through `reduce_e153.py`, leakage frozen at
