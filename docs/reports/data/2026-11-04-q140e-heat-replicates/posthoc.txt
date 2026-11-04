@@ -1,0 +1,24 @@
+Q140(e) post hoc (never a verdict): the duty convention, the windows and the level on E154 and E161
+E154 (aifoundry3), room 51.4097 C
+  H_M  d 0.9615  window end moved -0.183 s | rise 11.208 | E(M8) +0.194 -> +0.193 C, rms 0.18 -> 0.18 | A +0.352 -> +0.352 C (+3.14% of the rise)
+  K_S  d 0.7916  window end moved -1.921 s | rise 11.785 | E(M8) +0.024 -> +0.020 C, rms 0.372 -> 0.37 | A +0.418 -> +0.418 C (+3.55% of the rise) | registered {'E_plateau_err_C': 0.024, 'E_checkpoint_rms_C': 0.372, 'A_plateau_err_C': 0.418}
+  K_Q  d 0.9618  window end moved -0.151 s | rise 5.673 | E(M8) -0.418 -> -0.418 C, rms 0.401 -> 0.401 | A +0.005 -> +0.005 C (+0.08% of the rise) | registered {'E_plateau_err_C': -0.418, 'E_checkpoint_rms_C': 0.401, 'A_plateau_err_C': 0.005}
+  K_L  d 0.9617  window end moved -0.085 s | rise 4.024 | E(M8) +0.492 -> +0.492 C, rms 0.45 -> 0.45 | A +0.073 -> +0.073 C (+1.80% of the rise) | registered {'E_plateau_err_C': 0.492, 'E_checkpoint_rms_C': 0.45, 'A_plateau_err_C': 0.073}
+  K_O  d 0.9611  window end moved -0.017 s | rise 11.546 | E(M8) +0.360 -> +0.360 C, rms 0.315 -> 0.315 | A +0.536 -> +0.536 C (+4.64% of the rise) | registered {'E_plateau_err_C': 0.36, 'E_checkpoint_rms_C': 0.344, 'A_plateau_err_C': 0.536}
+  registered_window: RK3-a 1 of 4 inside the critic scale (FAIL): K_S +0.024/0.372 vs 0.278; K_Q -0.418/0.401 vs 0.369; K_L +0.492/0.45 vs 0.574; K_O +0.360/0.315 vs 0.277 | RK3-c FAIL: H_M +3.14%; K_S +3.54%; K_O +4.64% | session rms 0.37 C
+  convention_window: RK3-a 1 of 4 inside the critic scale (FAIL): K_S +0.020/0.37 vs 0.278; K_Q -0.418/0.401 vs 0.369; K_L +0.492/0.45 vs 0.574; K_O +0.360/0.315 vs 0.277 | RK3-c FAIL: H_M +3.14%; K_S +3.55%; K_O +4.64% | session rms 0.37 C
+E161 (aifoundry2), its own kernel duty (in sample for d), M9's level from Q140(l) (never fitted on E161)
+  G1Q d 0.9696 anchor 47.0 C / 22.124 W; window end moved -5.94 s; measured plateau 62.935 (rise 15.935), clock 794.4 MHz, share>=790 0.9696; registered {'plateau_err_C': -0.898, 'checkpoints_rms_C': 1.044, 'clock_err_MHz': None, 'verdict': 'PASS', 'clock_verdict': 'PASS'}
+    primary_M9a_at_own_d  predicted 62.299 -> plateau err +0.636 C, checkpoints rms 0.504  {'60': 0.133, '120': -0.227, '180': -0.487, '300': 0.353, '450': 0.85, '600': 0.703, '750': 0.546, 'end': 0.293}
+    M8_at_own_d           predicted 63.197 -> plateau err -0.262 C, checkpoints rms 0.651  {'60': -0.387, '120': -0.919, '180': -1.268, '300': -0.506, '450': -0.039, '600': -0.194, '750': -0.354, 'end': -0.607}
+    M8_continuous         predicted 63.705 -> plateau err -0.770 C, checkpoints rms 1.053  {'60': -0.681, '120': -1.31, '180': -1.711, '300': -0.993, '450': -0.542, '600': -0.702, '750': -0.863, 'end': -1.117}
+    primary over the anchor's +-0.5 C: -0.5: +1.336 / 0.63; +0.5: -0.065 / 0.42
+    arm A on the convention's window +0.372 C (+2.33% of the rise; over the anchor's +-0.5 C {'-0.5': 0.053, '+0.5': -0.0083}; registered 0.3667562685642962)
+  G2Q d 0.9702 anchor 47.0 C / 22.186 W; window end moved -5.96 s; measured plateau 65.564 (rise 18.564), clock 681.6 MHz, share>=790 0.1911; registered {'plateau_err_C': -0.397, 'checkpoints_rms_C': 0.509, 'clock_err_MHz': 12.6, 'verdict': 'PASS', 'clock_verdict': 'PASS'}
+    primary_M9a_at_own_d  predicted 65.9 -> plateau err -0.336 C, checkpoints rms 0.308, clock err -4.0 MHz (predicted 685.6)  {'60': -0.322, '120': 0.265, '180': -0.38, '300': 0.066, '450': 0.335, '600': -0.362, '750': -0.249, 'end': -0.363}
+    M8_at_own_d           predicted 65.9 -> plateau err -0.336 C, checkpoints rms 0.588, clock err +7.1 MHz (predicted 674.5)  {'60': 1.442, '120': 0.593, '180': -0.357, '300': -0.089, '450': 0.272, '600': -0.204, '750': -0.213, 'end': 0.187}
+    M8_continuous         predicted 65.9 -> plateau err -0.336 C, checkpoints rms 0.476, clock err +14.1 MHz (predicted 667.5)  {'60': 1.28, '120': 0.184, '180': 0.008, '300': -0.204, '450': -0.143, '600': 0.233, '750': -0.155, 'end': -0.037}
+    primary over the anchor's +-0.5 C: -0.5: -0.336 / 0.699 / -12.7 MHz; +0.5: -0.336 / 0.491 / +4.7 MHz
+    arm A on the convention's window -0.216 C (-1.16% of the rise; over the anchor's +-0.5 C {'-0.5': 0.0149, '+0.5': -0.0396}; registered -0.22494969627948672)
+  RK3-b G1Q: {'plateau_err_C': 0.636, 'rms_C': 0.504, 'pass': True, 'over_anchor_pm0p5': {'-0.5': {'plateau_err_C': 1.336, 'rms_C': 0.63, 'pass': False}, '+0.5': {'plateau_err_C': -0.065, 'rms_C': 0.42, 'pass': True}}}
+  RK3-c aifoundry2: {'G1Q': {'measured_rise_C': 15.935, 'A_frac': 0.0233, 'inside': False}, 'G2Q': {'measured_rise_C': 18.564, 'A_frac': -0.0116, 'inside': True}}
