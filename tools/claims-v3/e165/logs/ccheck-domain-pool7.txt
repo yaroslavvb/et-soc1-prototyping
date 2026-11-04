@@ -1,0 +1,63 @@
+# E165: the check of C's domain screen (E165.md, What runs; amendment A1-1, finished as A2-1), at the desk on the Intel, Wed 4 Nov 2026 10:23:06-10:31:24 PST (Q141(g)'s fix pass), before any E165 claim, launch or data: CCHECK_CACHE=<scratch>/ccache nice -n 10 python3 -B tools/claims-v3/ccheck/ccheck.py domain <the 57 files below: predictions-e165.json tiles.*.values of the 55 tiles not left out, less the file: prefix, then E80's two replicate tiles tools/claims-v3/kinds/tiles/fp16/randn.bin and tools/claims-v3/kinds/tiles/int8/full.bin> --n 1000000 --jobs 2 --out <scratch>/ccheck-domain-pool7.json (committed beside this file as ccheck-domain-pool7.json); E160's screen, its n and its rule (it decides no rule)
+# It resumed from the first run's cache (Q141(g), 09:19-09:39 PST, stopped at 14 of 57 tiles when the Intel was saturated): those 14 finished C files (11 fp16, 3 fp32), keyed by the type, the tile's sha256 and n (ccheck.ref_many), were copied into a fresh cache; the engine was rebuilt there from the sha256-pinned accum.c (ccheck.engine); the other 43 were computed here. Spot check of the reuse, 10:31:59-10:35:16 PST: two of the 14, recomputed from scratch in an empty cache with ccheck.py ref, are byte-identical:
+#   same  fp16  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.laplace_both.bin  lane cache fp16-094cfe3ded0043f4daee-1000000.bin  sha256 9f987c35d0dfc0a3  fresh 9f987c35d0dfc0a3
+#   same  fp32  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_one.bin  lane cache fp32-17c55f8c3c67d6d934e8-1000000.bin  sha256 6fe462cbc817708c  fresh 6fe462cbc817708c
+#   SPOT CHECK: the lane's cached C equals a fresh engine run on both
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.anchor7_randn_a.bin  | first silicon read: 919 distinct operand magnitudes, more than any tile E104 read (662)
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.anchor7_randn_b.bin  | first silicon read: 918 distinct operand magnitudes, more than any tile E104 read (662)
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.anchor7_zeros.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.b_onebit_b8_pi.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.b_onebit_b9_one.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.laplace_both.bin  | first silicon read: 945 distinct operand magnitudes, more than any tile E104 read (662)
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.randn_x8.bin  | first silicon read: 936 distinct operand magnitudes, more than any tile E104 read (662)
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.real_qwen_l3_softmax_v_h1.bin  | first silicon read: 852 distinct operand magnitudes, more than any tile E104 read (662)
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.real_s360_l3_qk.bin  | first silicon read: 945 distinct operand magnitudes, more than any tile E104 read (662)
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.real_s360_l3_w8a16_gate.bin  | first silicon read: 843 distinct operand magnitudes, more than any tile E104 read (662)
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.sorted_k.bin  | first silicon read: 891 distinct operand magnitudes, more than any tile E104 read (662)
+inside  tools/claims-v3/kinds/blind7/tiles/fp16/fp16.uniform_pm1.bin  | first silicon read: 893 distinct operand magnitudes, more than any tile E104 read (662)
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.anchor7_zeros.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_full.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_one.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_pi.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_seventh.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_third_a1p5.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b22_third.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.dropout30_both.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_a_gray_walk.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_b_alt_b26.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_b_alt_lsb.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_b_alt_nib.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_only_pos12.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.mant2_spreadexp.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.randn_a24k.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/fp32/fp32.real_smol_l3_w8a16_q_outlier.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.a_full_b_pos.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 247 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.anchor7_full_a.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 247 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.anchor7_full_b.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 243 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.anchor7_zeros.bin  
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_0f_f0.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 192 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_6bit_rand.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 246 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_7f_80_aconst.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3])
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_compl_rand.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 245 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_near7_rand.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 248 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_zero_55.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 224 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_zero_7f.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 224 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_01.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3])
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_33.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 240 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_55.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 240 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_55_asmall.bin  | first silicon read: operands up to |85| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 176 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_fd.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 80 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_ff.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3])
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_rand.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 247 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.pos_small.bin  | first silicon read: operands up to |15| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 256 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.real_qwen_l3_w8a8_down_massive.bin  | first silicon read: operands up to |127| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 32 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.real_qwen_l3_w8a8_k_sink.bin  | first silicon read: operands up to |127| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 170 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.real_s360_l2_w8a8_o.bin  | first silicon read: operands up to |110| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 150 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.real_s360_l3_w8a8_q_outlier.bin  | first silicon read: operands up to |127| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 87 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.real_smol_l2_w8a8_up_outlier.bin  | first silicon read: operands up to |127| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 129 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.real_smol_l3_w8a8_down.bin  | first silicon read: operands up to |127| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 121 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.relu_q_a.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 229 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/blind7/tiles/int8/int8.sparse_rows_a.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 188 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+inside  tools/claims-v3/kinds/tiles/fp16/randn.bin  | first silicon read: 911 distinct operand magnitudes, more than any tile E104 read (662)
+inside  tools/claims-v3/kinds/tiles/int8/full.bin  | first silicon read: operands up to |128| (the host's small-integer read-backs of 25 Sep held [-3, 3]); 246 of 256 words wrap by n=1000000 (the 32-bit wrap, never read on silicon)
+{"tiles": 57, "inside": 57, "first_silicon_read": 37}
