@@ -1,0 +1,77 @@
+
+== 1a. check_e163.py (dry: the box binaries are not checked)
+HARNESS OK: 138 files match harness-e163.json (desk or dry run: binaries not checked)
+-> PASS
+
+== 1b. preflight_e163.sh (dmcmd_audit, E153's one exception)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS
+
+== 1c. e163_common.py --verify
+{"e163_tiles": 77, "pool7": 61, "reruns": 16, "e151_items": 26, "priority_1": 48, "pool_anchors": 9, "e78_tiles_checked": 6, "problems": []}
+-> PASS
+
+== 2. block_e163.sh 16310 (kinds): expect 97 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 99; heater calls: 0; stubs executed: 0
+2026-11-04T09:51:01 [aifoundry3] E163 pass 16310 (kinds): target 58 preheat 59 quiet 2.0 burnin 2 fma 4 s, die cap 70 C
+E163 runner: pass 16310 (kinds), stops board 65.0 W / die 70.0 C (watcher 65.0 W / 70.0 C)
+09:51:05 [aifoundry3] E78 pass 16310: 97 runs of 84 items (tiers 1,2), about 15 min; launch at 58 C after 59 C, 2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+-> PASS
+
+== 2. block_e163.sh 16320 (short): expect 77 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 79; heater calls: 0; stubs executed: 0
+2026-11-04T09:51:10 [aifoundry3] E163 pass 16320 (short): target 58 preheat 59 quiet 2.0 burnin 2 fma 4 s, die cap 70 C
+E163 runner: pass 16320 (short), stops board 65.0 W / die 70.0 C (watcher 65.0 W / 70.0 C)
+09:51:14 [aifoundry3] E78 pass 16320: 77 runs of 64 items (tiers 1,2), about 12 min; launch at 58 C after 59 C, 2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+-> PASS
+
+== 2. block_e163.sh 16350 (e151): expect 34 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 34; heater calls: 0; stubs executed: 0
+2026-11-04T09:51:19 [aifoundry3] E163 pass 16350 (e151): target 200 preheat 0 quiet 0.2 burnin 0 fma 4 s, die cap 70 C
+E163 runner: pass 16350 (e151), stops board 45.0 W / die 68.0 C (watcher 45.0 W / 68.0 C)
+09:51:23 [aifoundry3] E78 pass 16350: 34 runs of 13 items (tiers 1,2), about 5 min; launch at 200 C after 0 C, 0.2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+-> PASS
+
+== 2. block_e163.sh 16301 (smoke): expect 12 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 12; heater calls: 0; stubs executed: 0
+2026-11-04T09:51:29 [aifoundry3] E163 pass 16301 (smoke): target 200 preheat 0 quiet 0.2 burnin 0 fma 2 s, die cap 70 C
+E163 runner: pass 16301 (S), stops board 65.0 W / die 70.0 C (watcher 65.0 W / 70.0 C)
+09:51:32 [aifoundry3] E78 pass 16301: 12 runs of 12 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 0.2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+-> PASS
+
+== 3a. the queue's budget rule on stub blocks (3 s each; an 8 s budget with a 1 s first estimate admits two, stops before the third)
+09:51:37 e163: plan FULL, items 16310 16311 16312; budget 8 s from the anchor (09:51:37), reserve 0 s, last end 09:51:45, deadline 2026-11-04 10:51:37; first estimates kinds 1 s, short 820 s, e151 190 s
+09:51:37 p16310 (kinds) starts at T0+0 s (projected 1 s)
+09:51:40 p16310 rc=0 (3 s)
+09:51:41 p16311 (kinds) starts at T0+3 s (projected 3 s)
+09:51:44 p16311 rc=0 (3 s)
+09:51:44 budget: stopping before p16312 (kinds; now T0+7 s, projected 3 s, would end T0+10 s > T0+8 s or the deadline)
+09:51:44 e163: done, 2 items, at T0+7 s
+-> PASS
+
+== 3b. the queue's deadline rule (a deadline one minute ago: nothing starts)
+09:51:44 e163: plan FULL, items 16310 16311 16312 16350 16351 16352 16313; budget 4200 s from the anchor (09:51:44), reserve 60 s, last end 11:00:44, deadline 2026-11-04 09:50:44; first estimates kinds 1000 s, short 820 s, e151 190 s
+09:51:44 budget: stopping before p16310 (kinds; now T0+0 s, projected 1000 s, would end T0+1000 s > T0+4140 s or the deadline)
+09:51:44 e163: done, 0 items, at T0+0 s
+-> PASS
+
+== 3c. the queue refuses an unknown plan
+E163_PLAN=HALF: only FULL, TWO or SHORT
+-> PASS
+
+== 3d. session_e163.sh start gate: no time gates (exit 8, no device opened)
+session start (budget anchor T0 09:51:44 PST; plan FULL)
+E163_LATEST_START and E163_DEADLINE are required (the round's time gates, set at his go): no device opened
+-> PASS
+
+== 3d. session_e163.sh start gate: after the latest start (exit 8, no device opened)
+session start (budget anchor T0 09:51:44 PST; plan FULL)
+no new card session after 2026-11-04 09:50:44 PST: no device opened
+-> PASS
+
+== 3d. session_e163.sh start gate: unknown plan (exit 8, no device opened)
+session start (budget anchor T0 09:51:44 PST; plan HALF)
+E163_PLAN=HALF: only FULL, TWO or SHORT: no device opened
+-> PASS
+
+DRY-INTEL PASS: no device opened (V3_DRY=1 and stub binaries that refuse), no ssh
