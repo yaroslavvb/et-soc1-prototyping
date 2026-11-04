@@ -7419,7 +7419,9 @@ scripts were read are disclosed. Then the critic's faults 0–9 corrected in the
 leave one session out over E80, E83, E143 and E160 (134 cells, D measured on aifoundry3 on Q139(u)'s footing), the registered
 forward rule kept a cap level (the capped tiles' plateau, 2.52 W over a 64.60 W cap), the session's zeros-anchor level (β 0.648;
 die-referred, 11 of the 12 measured session-format anchors sit 1.35–1.74 W under the relation's 800 MHz zeros level, their raw
-spread of 1.11–2.71 W mostly the die) and the die at a burst's start (0.395 W/°C, about −2.4 MHz per °C under the cap), and s(f)
+spread of 1.11–2.71 W mostly the die; *dated, Wed 4 Nov 2026, after Q140(r)'s verifier: 11 of the 12 were measured, E80's fp32
+filled at −1.48 W from its other two, and every measured one sits 1.35–1.74 W under*) and the die at a burst's start (0.395 W/°C,
+about −2.4 MHz per °C under the cap), and s(f)
 at n = 2 from the reads by the rule's letter on 0.002 W, its effect nil; n = 2.28 was never used. Pooled held out, M7 as frozen →
 M9's aifoundry2 part: governed clock 6.25 → 5.00 MHz, governed board 1.62 → 0.89 W (bias +1.23 → −0.05 W), pinned board 1.52 →
 0.75 W (−1.22 → −0.15 W); post hoc, with the selection nested in each fold, 5.12 MHz / 0.93 W / 0.92 W (6.90 MHz at a 3-of-3 inner
@@ -7445,10 +7447,15 @@ the bench's three-point launch average over-counts pool 6's bit-20 single-bit ti
 points, one standard error, at M9's prices), leaving M9's error there +0.07 / −0.24 ± 0.27 W; at 27 points 6 of the 16 single-bit
 calibration tiles meet the registered 0.10 W, so N* is undetermined. All three formats on the critic's 30 kinds: 0.217 / 0.243 W
 against M6's blind 0.243 / 0.283, not resolved. Every M9 figure is out of kind, not blind. **Q140(b)**, blind pool 7, by a designer
-who never saw M9, Q140(l)'s part, their data directories or their scratch (ranks 1, 4 and 9;
+who never saw M9, Q140(l)'s part, their data directories or their scratch *(dated, Wed 4 Nov 2026, after Q140(r)'s verifier: never
+read, as its README's section Independence says, which discloses two contacts with no content read: a `git status` listed five
+untracked file names in Q140(l)'s data directory, none opened, and the first `--uniq` scan hashed 2,048-byte `.bin` files across
+the whole tree, with no match and nothing printed)* (ranks 1, 4 and 9;
 [`tools/claims-v3/kinds/blind7/`](../../tools/claims-v3/kinds/blind7/README.md), committed by Q140(x)): 61 tiles (22 fp32, 12 fp16,
 27 int8): 52 new kinds, 48 of them at priority 1 and 4 priority-2 tests, and 9 anchors, a zeros and two random draws per format. At
-priority 1: 7 single high B bits on new base words, 6 exponent-heavy fp32, 7 whole-line or near-whole-byte int8 (6 strict and a
+priority 1: 7 single high B bits on new base words *(dated, Wed 4 Nov 2026, after Q140(r)'s verifier: four on new fp32 base words,
+one on pool 6's 1/3 base word at a new bit, 22, and two on fp16 words)*, 6 exponent-heavy fp32, 7 whole-line or near-whole-byte
+int8 (6 strict and a
 6-bit control), 6 int8 with B held, 12 kinds aimed at none of the four, and 10 real tiles (12 in all, from three public models, 4
 of them int8 tiles whose activations carry outliers). Its verifier found eight faults, two major, fixed before the copy: one
 held-B tile repeated a training kind of E103 and was replaced by a held byte no committed tile holds, designed after M9's freeze
@@ -7735,7 +7742,9 @@ edit box's text, as E141's lane did.
 **Lane lessons from Q140's desk lanes, recorded for the next registration.** (102) Nest the selection, or label the held-out error
 as carrying it: Q140(l)'s and Q140(q)'s terms were chosen on the folds that score them; nested inside each fold aifoundry2's bursts
 read 5.12–6.90 MHz / 0.89–0.93 W / 0.88–0.92 W against the registered 5.00 / 0.89 / 0.75, and G4 about 1.47 W / 0.63 °C against
-1.33 / 0.58 (Q140(l) C4; Q140(q) C1). (103) Score the model as frozen: Q140(q)'s held-out scores were G4 without its span fraction,
+1.33 / 0.58 (Q140(l) C4; Q140(q) C1) *(dated, Wed 4 Nov 2026, after Q140(r)'s verifier: G4's 1.47 W / 0.63 °C are with the
+selection nested and the span fraction applied, C1 and C2; with the selection nested alone 1.42 W / 0.60 °C)*. (103) Score the
+model as frozen: Q140(q)'s held-out scores were G4 without its span fraction,
 a term of the frozen form; with it 1.38 W / 0.61 °C (Q140(q) C2). (104) Register exactly one die law, with its reference
 temperature: two laws over the same span compose to in-work levels 0.3–1.0 W apart (E161's G1Q −0.08 or +0.24 W), and the
 reference die alone moves G1Q's frozen plateau 0.65 °C (Q140(l) C1; Q140(e) C3). (105) Check a blind pool against every committed

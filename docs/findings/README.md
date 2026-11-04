@@ -352,7 +352,9 @@ Read [Terms](#terms) first.
    M8's, M7's and M6's predictions on three cards and rank 4's paired-anchor rule (Q140(x)). The heat replicates are
    frozen on one duty convention (Q140(e)); G4, a governed large GEMM's sustained path, keeps the zeros level and the
    governor's process-boundary dip and rejects a start-die term, its held-out board 1.89 → 1.33 W (about 1.47 W with
-   the choice nested), while a block-stride term from the L3's public set mapping fails (Q140(q)). Every figure is out
+   the choice nested) *(dated, Wed 4 Nov 2026, after Q140(r)'s verifier: with the selection nested and the span fraction
+   applied as frozen; 1.42 W with the selection nested alone)*, while a block-stride term from the L3's public set mapping
+   fails (Q140(q)). Every figure is out
    of kind, held out or post hoc: the card half (E163–E169) scores them blind and waits on the owner's word. →
    [03-experiments.md](03-experiments.md), E78–E162; [05-claims.md](05-claims.md), "Q130", "Q130 additions", "Q132",
    "Q133", "Q134", "Q136", "E135", "Q137", "Q138", "Q139" and "Q140";
