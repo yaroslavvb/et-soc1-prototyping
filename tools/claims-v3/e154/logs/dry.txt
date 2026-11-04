@@ -1,0 +1,79 @@
+17:50:00 PST
+== hash check
+sha rc=0
+== preflight
+preflight rc=0
+dmcmd_audit: GO (38 send site(s), 0 disallowed; allow-list: none)
+== list
+{"design": "full", "steps": [["rest", "R0", 300.0], ["hold", "H_M", 660.0], ["rest", "R1", 210.0], ["hold", "K_S", 600.0], ["rest", "R2", 210.0], ["hold", "K_Q", 600.0], ["rest", "R3", 210.0], ["hold", "K_L", 600.0], ["rest", "R4", 210.0], ["hold", "K_O", 600.0], ["rest", "R5", 150.0]], "items": ["fp32.a_onebit_b5_third", "fp32.real_smol_softmax_v_causal", "int8.b_line_zero_ff", "int8.full", "int8.real_qwen_w8a8_v"], "plan_s": 4350.0, "max_s": 4650, "left_s": 4799, "tile_problems": []}
+list rc=0
+{"design": "smoke", "steps": [["rest", "R0", 8.0], ["hold", "H_M", 5.0], ["rest", "R1", 2.0], ["hold", "K_S", 9.0], ["rest", "R2", 2.0], ["hold", "K_Q", 5.0], ["rest", "R3", 2.0], ["hold", "K_L", 5.0], ["rest", "R4", 2.0], ["hold", "K_O", 5.0], ["rest", "R5", 3.0]], "items": ["fp32.a_onebit_b5_third", "fp32.real_smol_softmax_v_causal", "int8.b_line_zero_ff", "int8.full", "int8.real_qwen_w8a8_v"], "plan_s": 88.0, "max_s": 388, "left_s": 4799, "tile_problems": []}
+list smoke rc=0
+== dry smoke
+dry smoke rc=1
+smoke launches printed: 9
+17:50:41 [aifoundry3] rest R4: 2 s
+17:50:43 [aifoundry3] rest R4 ends after 2 s: 34-sensor mean 51.433 C
+17:50:43 [aifoundry3] rest die before K_O: 34-sensor mean 51.433 C, firmware None C (last 120 s)
+17:50:43 [aifoundry3] hold K_O: fp32.a_onebit_b5_third for 5 s, back to back
+DRY hold10: tools/claims-v3/ccheck/sparsity_ccheck.sh --test fma --type fp32 --pattern none --values file:~/aifoundry/tools/claims-v3/kinds/blind6/tiles/fp32/fp32.a_onebit_b5_third.bin 
+17:50:48 [aifoundry3] hold K_O ends (time) after 5 s, 1 launches, die 51 C
+17:50:48 [aifoundry3] rest R5: 3 s
+17:50:51 [aifoundry3] rest R5 ends after 3 s: 34-sensor mean 51.433 C
+17:50:51 [aifoundry3] rest T0: 5 s
+17:50:56 [aifoundry3] rest T0 ends after 5 s: 34-sensor mean 51.433 C
+17:50:56 [aifoundry3] hold T_gate: fp32.real_smol_softmax_v_causal for 3 s, 3.20 s every 4.37 s
+17:50:56 [aifoundry3] hold T_gate: no launch at a firmware reading of 51 C (>= 1 C)
+17:50:59 [aifoundry3] hold T_gate ends (time) after 3 s, 0 launches, die 51 C
+17:50:59 [aifoundry3] hold T_die: fp32.real_smol_softmax_v_causal for 3 s, 3.20 s every 4.37 s
+17:50:59 [aifoundry3] hold T_die: the hold's line fired (die): the hold ends
+17:50:59 [aifoundry3] hold T_die ends (stop) after 0 s, 0 launches, die 51 C
+17:50:59 [aifoundry3] hold T_board: fp32.real_smol_softmax_v_causal for 3 s, 3.20 s every 4.37 s
+17:50:59 [aifoundry3] hold T_board: the hold's line fired (board): the hold ends
+17:50:59 [aifoundry3] hold T_board ends (stop) after 0 s, 0 launches, die 51 C
+17:50:59 [aifoundry3] rest T1: 3 s
+17:51:02 [aifoundry3] rest T1 ends after 3 s: 34-sensor mean 51.433 C
+17:51:02 [aifoundry3] hold T_inlaunch: fp32.real_smol_softmax_v_causal for 12 s, 3.20 s every 4.37 s
+DRY hold10: tools/claims-v3/ccheck/sparsity_ccheck.sh --test fma --type fp32 --pattern none --values file:~/aifoundry/tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_smol_softmax_v_ca
+DRY hold10: tools/claims-v3/ccheck/sparsity_ccheck.sh --test fma --type fp32 --pattern none --values file:~/aifoundry/tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_smol_softmax_v_ca
+DRY hold10: tools/claims-v3/ccheck/sparsity_ccheck.sh --test fma --type fp32 --pattern none --values file:~/aifoundry/tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_smol_softmax_v_ca
+17:51:14 [aifoundry3] hold T_inlaunch ends (time) after 12 s, 3 launches, die 51 C
+17:51:14 [aifoundry3] rest T2: 3 s
+17:51:17 [aifoundry3] rest T2 ends after 3 s: 34-sensor mean 51.433 C
+17:51:17 [aifoundry3] STOP (6): the session line 1 C: {'rule': 'session', 'line_c': 1.0, 't_sample_ms': 1793757077596, 't_seen_ms': 1793757077596, 'die_c': 51.0, 'mean34_c': None, 'board_w': 24.0, 'wh
+17:51:17 [aifoundry3] stop tests: {"gate": {"launches": 0, "pass": true}, "hold_die": {"why": "stop", "launches": 0, "pass": true}, "hold_board": {"why": "stop", "launches": 0, "pass": true}, "in_laun
+DRY hold10: tools/claims-v3/ccheck/sparsity_ccheck.sh --test fma --type int8 --pattern none --values file:~/aifoundry/tools/claims-v3/kinds/tiles/int8/full.bin --shires 0xffffffff --per-shire 32 --seconds 4.25 --seed 15492 --stop-file ~/aifoundry/build/claims-v3-dry/aifoundry3/e154-smoke/p15491/HOLDSTOP --dump-tiles ~/aifoundry/build/claims-v3-dry/aifou
+DRY hold10: tools/claims-v3/ccheck/sparsity_ccheck.sh --test fma --type fp32 --pattern none --values file:~/aifoundry/tools/claims-v3/kinds/blind6/tiles/fp32/fp32.real_smol_softmax_v_causal.bin --shires 0xffffffff --per-shire 32 --seconds 3.20 --seed 15492 --stop-file ~/aifoundry/build/claims-v3-dry/aifoundry3/e154-smoke/p15491/HOLDSTOP --dump-tiles ~/a
+== dry full
+dry full rc=0
+full launches printed: 485
+17:50:09 [aifoundry3] E154 pass 15492: design full; deadline 2026-11-03 19:10:09 PST, 80.0 min left; lines: gate 70 C, hold 72 C / 65 W, session 74 C
+17:50:09 [aifoundry3] rest R0: 300 s
+17:55:09 [aifoundry3] rest R0 ends after 300 s: 34-sensor mean 51.433 C
+17:55:09 [aifoundry3] room (R0's rest die): 34-sensor mean 51.433 C, firmware None C; K_S: room 51.433 C <= 51.5 C: the plan period
+17:55:09 [aifoundry3] hold H_M: int8.full for 660 s, back to back
+18:06:09 [aifoundry3] hold H_M ends (time) after 660 s, 93 launches, die 51 C
+18:06:09 [aifoundry3] rest R1: 210 s
+18:09:39 [aifoundry3] rest R1 ends after 210 s: 34-sensor mean 51.433 C
+18:09:39 [aifoundry3] hold K_S: fp32.real_smol_softmax_v_causal for 600 s, 3.20 s every 4.37 s
+18:19:39 [aifoundry3] hold K_S ends (time) after 600 s, 137 launches, die 51 C
+18:19:39 [aifoundry3] rest R2: 210 s
+18:23:09 [aifoundry3] rest R2 ends after 210 s: 34-sensor mean 51.433 C
+18:23:09 [aifoundry3] hold K_Q: int8.real_qwen_w8a8_v for 600 s, back to back
+18:33:09 [aifoundry3] hold K_Q ends (time) after 600 s, 85 launches, die 51 C
+18:33:09 [aifoundry3] rest R3: 210 s
+18:36:39 [aifoundry3] rest R3 ends after 210 s: 34-sensor mean 51.433 C
+18:36:39 [aifoundry3] hold K_L: int8.b_line_zero_ff for 600 s, back to back
+18:46:39 [aifoundry3] hold K_L ends (time) after 600 s, 85 launches, die 51 C
+18:46:39 [aifoundry3] rest R4: 210 s
+18:50:09 [aifoundry3] rest R4 ends after 210 s: 34-sensor mean 51.433 C
+18:50:09 [aifoundry3] hold K_O: fp32.a_onebit_b5_third for 600 s, back to back
+19:00:09 [aifoundry3] hold K_O ends (time) after 600 s, 85 launches, die 51 C
+19:00:09 [aifoundry3] rest R5: 150 s
+19:02:39 [aifoundry3] rest R5 ends after 150 s: 34-sensor mean 51.433 C
+19:02:39 [aifoundry3] done
+H_M 485
+build/claims-v3-dry/aifoundry3/e154-smoke/p15491 [('H_M', 1, 5.0), ('K_S', 2, 9.0), ('K_Q', 1, 5.0), ('K_L', 1, 5.0), ('K_O', 1, 5.0), ('T_gate', 0, 3.0), ('T_die', 0, 0.0), ('T_board', 0, 0.0), ('T_inlaunch', 3, 12.0)] [('R0', 8.0), ('R1', 2.0), ('R2', 2.0), ('R3', 2.0), ('R4', 2.0), ('R5', 3.0), ('T0', 5.0), ('T1', 3.0), ('T2', 3.0)]
+K_S launches [(0.0, 3.2), (4.37, 3.2)]
+build/claims-v3-dry/aifoundry3/e154/p15492 [('H_M', 93, 660.0), ('K_S', 137, 600.0), ('K_Q', 85, 600.0), ('K_L', 85, 600.0), ('K_O', 85, 600.0)] [('R0', 300.0), ('R1', 210.0), ('R2', 210.0), ('R3', 210.0), ('R4', 210.0), ('R5', 150.0)]
+K_S launches [(0.0, 3.2), (4.37, 3.2), (8.74, 3.2), (13.11, 3.2)]
