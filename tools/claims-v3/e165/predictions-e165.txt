@@ -1,0 +1,73 @@
+predictions-e165.json sha256 7235109379f9a8f6af5057a205ea5b41c18049045706801ee46b8325380555a2
+recheck: the frozen predictor with no session read reproduces M9.a2_q140l on 61 tiles, 1586 fields, 0 differ
+61 tiles; left out by name (6): ['fp32.anchor7_randn_a', 'fp32.anchor7_randn_b', 'fp32.laplace_both', 'fp32.real_qwen_l3_softmax_v_sink', 'fp32.real_s360_l1_qk', 'fp32.uniform_pm1']; run 55; scored 52 (the zeros anchors are inputs): 12 governed, 40 pinned (groups fixed by the frozen file)
+order: 171 bursts, 3 passes of 57, each opening with the zeros anchors; seed 165
+reference e2e E143: n 33 (19 governed, 14 pinned); reproduces loso.json to 9.1e-14: G 5.119 (-3.066); Bg 0.864 (-0.056); Bp 0.871 (-0.187)
+reference e2e E160: n 45 (17 governed, 28 pinned); reproduces loso.json to 7.5e-14: G 3.683 (+1.545); Bg 0.663 (-0.348); Bp 0.796 (-0.034)
+reference e2e pooled: governed n 36 4.4983 MHz (-0.8886) 0.7757 W (-0.1939); pinned n 42 2.3342 MHz 0.8214 W (-0.0847); heat 112 runs 0.6845 C
+bars at the full plan (2.5%, 97.5% of the bootstrap rms): {"F1_governed_clock_rms_mhz": [2.45, 6.408], "F2_pinned_clock_rms_mhz": [0.288, 4.044], "W1_governed_board_rms_w": [0.415, 1.137], "W2_pinned_board_rms_w": [0.604, 1.037], "H1_die_rise_rms_c": [0.556, 0.811], "coverage_line_all": 46, "coverage_line_governed": 10, "coverage_line_pinned": 35}
+forecast of rank 2's lines (share of draws from the e2e reference): {"G_rms": 0.363, "G_mean": 0.8077, "G_both": 0.3459, "Bg_mean": 0.93, "Bp_mean": 0.9994, "Bp_rms": 0.9477, "Bp_both": 0.9472, "all_lines": 0.3181}
+replicates: {"k-fp16-randn": [80.52, {"e143_highest_w": 80.26, "e160_highest_w": 79.37, "e143_p800_from_c_plus_q95_w": 80.522, "e160_p800_from_c_plus_q95_w": 80.469}], "k-int8-full": [53.67, {"e143_highest_w": 51.01, "e160_highest_w": 50.56, "e143_p800_from_c_plus_q95_w": 53.613, "e160_p800_from_c_plus_q95_w": 53.669}]}
+admission: highest estimates [(81.652, 'b7-fp16.randn_x8'), (81.564, 'b7-fp16.laplace_both'), (81.24, 'b7-fp32.real_smol_l3_w8a16_q_outlier'), (81.073, 'b7-fp16.anchor7_randn_a'), (80.984, 'b7-fp16.anchor7_randn_b'), (80.97, 'b7-fp16.uniform_pm1')]; limit 82.0 W, lock 82.0 W; stops {'abs_stop_c': 76, 'board_cap_w': 85, 'cap_consecutive': 3}
+card time: {"e160_s1_bursts": 150, "e160_s1_min": 29.85, "s_per_burst": 11.94, "e160_before_s1_min": 0.97, "e165_bursts": 171, "e165_session_min": 34.0, "e165_two_pass_subset_bursts": 114, "e165_two_pass_subset_min": 22.7, "session_cap_min": 40.0, "slot_min": 45, "subset_cap_min": 25.0, "subset_slot_min": 30, "source": "docs/reports/data/2026-11-03-e160-blind6-aifoundry2/aifoundry2/queue.jsonl"}
+  governed p2 0 fp16.anchor7_randn_a                   M9  729.05 MHz  67.111 W rise  6.39 | -2.39 MHz/C -0.010 W/W | M8  726.8/ 65.18  M7  730.0/ 65.57  est  81.07 W
+  governed p2 0 fp16.anchor7_randn_b                   M9  729.49 MHz  67.111 W rise  6.39 | -2.39 MHz/C -0.009 W/W | M8  727.3/ 65.18  M7  730.5/ 65.57  est  80.98 W
+  governed p1 U fp16.laplace_both                      M9  726.66 MHz  67.105 W rise  6.39 | -2.38 MHz/C -0.014 W/W | M8  724.6/ 65.17  M7  727.7/ 65.56  est  81.56 W
+  governed p1 U fp16.randn_x8                          M9  726.23 MHz  67.103 W rise  6.39 | -2.38 MHz/C -0.014 W/W | M8  724.2/ 65.17  M7  727.4/ 65.56  est  81.65 W
+  governed p1 R fp16.real_qwen_l3_softmax_v_h1         M9  776.46 MHz  66.680 W rise  6.33 | -2.43 MHz/C +0.186 W/W | M8  774.2/ 65.09  M7  777.1/ 65.42  est  72.42 W
+  governed p1 R fp16.real_s360_l3_qk                   M9  730.89 MHz  67.114 W rise  6.39 | -2.39 MHz/C -0.007 W/W | M8  728.7/ 65.18  M7  731.8/ 65.57  est  80.70 W
+  governed p1 R fp16.real_s360_l3_w8a16_gate           M9  732.41 MHz  67.116 W rise  6.39 | -2.40 MHz/C -0.006 W/W | M8  730.2/ 65.19  M7  733.3/ 65.57  est  80.39 W
+  governed p1 U fp16.sorted_k                          M9  750.74 MHz  67.118 W rise  6.39 | -2.51 MHz/C +0.005 W/W | M8  748.2/ 65.20  M7  751.3/ 65.58  est  76.92 W
+  governed p1 U fp16.uniform_pm1                       M9  729.58 MHz  67.112 W rise  6.39 | -2.39 MHz/C -0.009 W/W | M8  727.3/ 65.18  M7  730.6/ 65.57  est  80.97 W
+  governed p1 E fp32.exp_b_alt_nib                     M9  790.33 MHz  65.161 W rise  6.11 | -1.68 MHz/C +0.500 W/W | M8  789.6/ 64.39  M7  790.8/ 64.65  est  69.76 W
+  governed p1 E fp32.mant2_spreadexp                   M9  779.28 MHz  66.510 W rise  6.30 | -2.33 MHz/C +0.247 W/W | M8  778.1/ 65.01  M7  779.9/ 65.34  est  72.07 W
+  governed p1 R fp32.real_smol_l3_w8a16_q_outlier      M9  728.94 MHz  67.110 W rise  6.39 | -2.38 MHz/C -0.010 W/W | M8  726.9/ 65.18  M7  729.8/ 65.57  est  81.24 W
+  input    pinned   p2 0 fp16.anchor7_zeros                     M9  800.00 MHz  35.289 W rise  1.93 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 36.27  M7  800.0/ 36.27  est  39.84 W
+  pinned   p1 S fp16.b_onebit_b8_pi                    M9  799.96 MHz  57.990 W rise  5.11 | -0.03 MHz/C +0.657 W/W | M8  799.9/ 59.11  M7  800.0/ 59.06  est  62.69 W
+  pinned   p1 S fp16.b_onebit_b9_one                   M9  799.28 MHz  60.804 W rise  5.50 | -0.24 MHz/C +0.687 W/W | M8  799.0/ 61.51  M7  799.3/ 61.50  est  65.25 W
+  input    pinned   p2 0 fp32.anchor7_zeros                     M9  800.00 MHz  35.360 W rise  1.94 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 36.35  M7  800.0/ 36.35  est  40.10 W
+  pinned   p1 S fp32.b_onebit_b20_full                 M9  799.94 MHz  58.242 W rise  5.14 | -0.03 MHz/C +0.659 W/W | M8  799.9/ 59.31  M7  799.9/ 59.22  est  63.08 W
+  pinned   p1 S fp32.b_onebit_b20_one                  M9  799.60 MHz  60.087 W rise  5.40 | -0.17 MHz/C +0.679 W/W | M8  799.4/ 60.95  M7  799.6/ 60.94  est  64.77 W
+  pinned   p1 S fp32.b_onebit_b20_pi                   M9  799.96 MHz  58.003 W rise  5.11 | -0.03 MHz/C +0.656 W/W | M8  799.9/ 59.14  M7  800.0/ 59.10  est  62.90 W
+  pinned   p1 S fp32.b_onebit_b20_seventh              M9  799.97 MHz  57.780 W rise  5.08 | -0.02 MHz/C +0.656 W/W | M8  799.9/ 58.92  M7  800.0/ 58.88  est  62.67 W
+  pinned   p2 S fp32.b_onebit_b20_third_a1p5           M9  799.58 MHz  60.166 W rise  5.42 | -0.18 MHz/C +0.675 W/W | M8  799.3/ 61.20  M7  799.5/ 61.19  est  65.04 W
+  pinned   p1 S fp32.b_onebit_b22_third                M9  799.75 MHz  59.575 W rise  5.33 | -0.11 MHz/C +0.673 W/W | M8  799.6/ 60.57  M7  799.7/ 60.56  est  64.38 W
+  pinned   p1 U fp32.dropout30_both                    M9  796.73 MHz  63.096 W rise  5.83 | -0.83 MHz/C +0.683 W/W | M8  795.8/ 63.32  M7  796.9/ 63.34  est  67.62 W
+  pinned   p1 E fp32.exp_a_gray_walk                   M9  800.00 MHz  52.688 W rise  4.37 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 53.59  M7  800.0/ 53.53  est  57.38 W
+  pinned   p1 E fp32.exp_b_alt_b26                     M9  800.00 MHz  53.716 W rise  4.51 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 54.49  M7  800.0/ 54.47  est  58.42 W
+  pinned   p1 E fp32.exp_b_alt_lsb                     M9  800.00 MHz  53.501 W rise  4.48 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 54.31  M7  800.0/ 54.32  est  58.20 W
+  pinned   p1 E fp32.exp_only_pos12                    M9  797.76 MHz  62.450 W rise  5.74 | -0.61 MHz/C +0.682 W/W | M8  797.6/ 62.64  M7  798.0/ 62.80  est  66.96 W
+  pinned   p1 U fp32.randn_a24k                        M9  799.47 MHz  60.411 W rise  5.45 | -0.19 MHz/C +0.684 W/W | M8  799.2/ 61.25  M7  799.5/ 61.16  est  65.09 W
+  pinned   p1 U int8.a_full_b_pos                      M9  800.00 MHz  49.997 W rise  3.99 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 50.68  M7  800.0/ 50.69  est  54.98 W
+  pinned   p2 0 int8.anchor7_full_a                    M9  800.00 MHz  50.267 W rise  4.03 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 50.86  M7  800.0/ 50.85  est  55.15 W
+  pinned   p2 0 int8.anchor7_full_b                    M9  800.00 MHz  50.163 W rise  4.01 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 50.78  M7  800.0/ 50.74  est  55.06 W
+  input    pinned   p2 0 int8.anchor7_zeros                     M9  800.00 MHz  36.660 W rise  2.12 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 37.65  M7  800.0/ 37.65  est  41.90 W
+  pinned   p1 L int8.b_line_0f_f0                      M9  800.00 MHz  48.407 W rise  3.77 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 48.61  M7  800.0/ 49.39  est  53.84 W
+  pinned   p1 L int8.b_line_6bit_rand                  M9  800.00 MHz  50.467 W rise  4.06 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 50.81  M7  800.0/ 50.34  est  55.16 W
+  pinned   p1 L int8.b_line_7f_80_aconst               M9  800.00 MHz  41.482 W rise  2.80 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 41.24  M7  800.0/ 42.03  est  46.80 W
+  pinned   p1 L int8.b_line_compl_rand                 M9  800.00 MHz  49.846 W rise  3.97 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 49.24  M7  800.0/ 50.14  est  54.53 W
+  pinned   p1 L int8.b_line_near7_rand                 M9  800.00 MHz  49.687 W rise  3.95 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 49.31  M7  800.0/ 50.11  est  54.40 W
+  pinned   p1 L int8.b_line_zero_55                    M9  800.00 MHz  44.956 W rise  3.29 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 45.49  M7  800.0/ 45.25  est  49.80 W
+  pinned   p1 L int8.b_line_zero_7f                    M9  800.00 MHz  43.958 W rise  3.15 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 44.23  M7  800.0/ 44.92  est  49.32 W
+  pinned   p1 H int8.bheld_01                          M9  800.00 MHz  47.551 W rise  3.65 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 49.39  M7  800.0/ 49.43  est  53.87 W
+  pinned   p1 H int8.bheld_33                          M9  800.00 MHz  50.036 W rise  4.00 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 50.09  M7  800.0/ 50.40  est  54.68 W
+  pinned   p1 H int8.bheld_55                          M9  800.00 MHz  49.945 W rise  3.98 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 50.07  M7  800.0/ 50.39  est  54.58 W
+  pinned   p2 H int8.bheld_55_asmall                   M9  800.00 MHz  49.817 W rise  3.97 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 49.76  M7  800.0/ 49.93  est  54.46 W
+  pinned   p1 H int8.bheld_fd                          M9  800.00 MHz  48.621 W rise  3.80 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 49.94  M7  800.0/ 50.13  est  54.39 W
+  pinned   p1 H int8.bheld_ff                          M9  800.00 MHz  47.846 W rise  3.69 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 49.81  M7  800.0/ 49.99  est  54.27 W
+  pinned   p1 H int8.bheld_rand                        M9  800.00 MHz  49.520 W rise  3.92 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 50.41  M7  800.0/ 50.88  est  54.92 W
+  pinned   p1 U int8.pos_small                         M9  800.00 MHz  44.792 W rise  3.26 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 46.00  M7  800.0/ 45.96  est  50.29 W
+  pinned   p1 R int8.real_qwen_l3_w8a8_down_massive    M9  800.00 MHz  48.534 W rise  3.79 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 49.35  M7  800.0/ 49.18  est  53.64 W
+  pinned   p1 R int8.real_qwen_l3_w8a8_k_sink          M9  800.00 MHz  49.045 W rise  3.86 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 50.03  M7  800.0/ 49.99  est  54.31 W
+  pinned   p1 R int8.real_s360_l2_w8a8_o               M9  800.00 MHz  48.326 W rise  3.76 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 49.18  M7  800.0/ 49.09  est  53.45 W
+  pinned   p1 R int8.real_s360_l3_w8a8_q_outlier       M9  800.00 MHz  49.217 W rise  3.88 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 49.91  M7  800.0/ 49.71  est  54.20 W
+  pinned   p1 R int8.real_smol_l2_w8a8_up_outlier      M9  800.00 MHz  49.413 W rise  3.91 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 50.14  M7  800.0/ 50.00  est  54.42 W
+  pinned   p2 R int8.real_smol_l3_w8a8_down            M9  800.00 MHz  49.536 W rise  3.93 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 50.26  M7  800.0/ 50.13  est  54.55 W
+  pinned   p1 U int8.relu_q_a                          M9  800.00 MHz  47.367 W rise  3.62 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 48.45  M7  800.0/ 48.40  est  52.72 W
+  pinned   p1 U int8.sparse_rows_a                     M9  800.00 MHz  47.941 W rise  3.70 | +0.00 MHz/C +0.648 W/W | M8  800.0/ 48.76  M7  800.0/ 48.70  est  53.04 W
+  LEFT OUT governed p2 0 fp32.anchor7_randn_a                   M9  705.26 MHz  66.901 W rise  6.36 | -2.46 MHz/C -0.085 W/W | M8  702.7/ 64.93  M7  706.3/ 65.38  est  86.33 W
+  LEFT OUT governed p2 0 fp32.anchor7_randn_b                   M9  706.04 MHz  66.916 W rise  6.36 | -2.46 MHz/C -0.072 W/W | M8  703.5/ 64.94  M7  707.0/ 65.39  est  86.16 W
+  LEFT OUT governed p1 U fp32.laplace_both                      M9  705.30 MHz  66.902 W rise  6.36 | -2.46 MHz/C -0.086 W/W | M8  702.9/ 64.93  M7  706.3/ 65.38  est  86.29 W
+  LEFT OUT governed p1 R fp32.real_qwen_l3_softmax_v_sink       M9  711.81 MHz  67.004 W rise  6.37 | -2.40 MHz/C -0.050 W/W | M8  709.4/ 65.05  M7  712.3/ 65.47  est  84.91 W
+  LEFT OUT governed p2 R fp32.real_s360_l1_qk                   M9  706.36 MHz  66.921 W rise  6.36 | -2.45 MHz/C -0.072 W/W | M8  703.9/ 64.95  M7  707.4/ 65.40  est  86.07 W
+  LEFT OUT governed p1 U fp32.uniform_pm1                       M9  705.11 MHz  66.898 W rise  6.36 | -2.46 MHz/C -0.085 W/W | M8  702.7/ 64.93  M7  706.2/ 65.38  est  86.34 W
