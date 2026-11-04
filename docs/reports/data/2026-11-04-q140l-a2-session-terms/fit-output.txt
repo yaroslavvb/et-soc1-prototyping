@@ -1,0 +1,78 @@
+Q140(l) fit_m9_a2.py: the registration (registration.json sha256 83e187d29f59cf18), m8.json 8c23aba2307fd18c
+dither self-check: vectorized vs make_predictions_e119.dither, worst |diff| 4.55e-13 MHz over 400 random inputs
+cells: 145; cell value = mean of its runs: max |d| 0.0500 MHz, 0.0050 W
+cells without a measured D (dropped): []
+scored cells per session: {'E80': 16, 'E83': 35, 'E143': 36, 'E160': 47} (registered {'E80': 16, 'E83': 35, 'E143': 36, 'E160': 47}); governed per session: {'E80': 6, 'E83': 11, 'E143': 21, 'E160': 18}
+
+REFERENCE LINES (measured - predicted; rms (mean); primary D = measured aifoundry3 D on the footing)
+  R7 as frozen (W 65.58)             | E80    G  4.80 (+4.49) Bg 1.49 (+1.06) Bp 2.08 (-1.62) | E83    G  8.53 (-0.94) Bg 2.18 (+1.87) Bp 1.55 (-1.24) | E143   G  6.20 (-4.52) Bg 1.67 (+1.29) Bp 0.91 (-0.58) | E160   G  4.97 (+3.43) Bg 1.15 (+0.82) Bp 1.50 (-1.38) | pooled G  6.25 (-0.30) Bg 1.62 (+1.23) Bp 1.52 (-1.22)
+  R8 as frozen (W 65.20)             | E80    G  7.07 (+6.85) Bg 1.79 (+1.43) Bp 2.07 (-1.61) | E83    G  8.63 (+1.41) Bg 2.54 (+2.27) Bp 1.55 (-1.24) | E143   G  4.93 (-2.40) Bg 1.97 (+1.63) Bp 0.91 (-0.57) | E160   G  6.71 (+5.60) Bg 1.44 (+1.16) Bp 1.50 (-1.38) | pooled G  6.60 (+1.92) Bg 1.93 (+1.58) Bp 1.51 (-1.21)
+
+REPRODUCTION CHECKS (registered sets, registered groups, the models' own blind D)
+  E143 R7: n 36 got G_rms 6.635, Bg_rms 1.601, pinned_clock_rms 1.007, Bp_rms 1.185 | registered {'G_rms': 6.629, 'Bg_rms': 1.601, 'pinned_clock_rms': 1.007, 'Bp_rms': 1.184} | OK
+  E160 R8: n 48 got G_rms 6.722, Bg_rms 1.391, pinned_clock_rms 3.891, Bp_rms 1.725 | registered {'G_rms': 6.72, 'Bg_rms': 1.39, 'pinned_clock_rms': 3.89, 'Bp_rms': 1.73} | OK
+
+LEAVE ONE SESSION OUT (each session predicted by the fold that held it out)
+  A0 base (M8's form, W refit)       | E80    G  5.27 (+4.98) Bg 1.55 (+1.14) Bp 2.08 (-1.62) | E83    G  8.54 (-1.07) Bg 2.16 (+1.85) Bp 1.55 (-1.24) | E143   G  8.00 (-6.80) Bg 1.35 (+0.93) Bp 0.91 (-0.58) | E160   G  6.22 (+5.03) Bg 1.36 (+1.07) Bp 1.50 (-1.38) | pooled G  7.33 (-0.61) Bg 1.57 (+1.18) Bp 1.51 (-1.21)
+  A0's W per fold: E80 65.5, E83 65.6, E143 66.0, E160 65.3
+  T1                                 | E80    G  5.27 (+4.98) Bg 1.06 (-0.34) Bp 2.10 (-1.66) | E83    G  8.54 (-1.07) Bg 1.24 (+0.56) Bp 1.55 (-1.25) | E143   G  8.00 (-6.80) Bg 0.86 (+0.12) Bp 0.91 (-0.59) | E160   G  6.22 (+5.03) Bg 0.88 (-0.59) Bp 1.51 (-1.39) | pooled G  7.33 (-0.61) Bg 0.98 (-0.07) Bp 1.52 (-1.23)
+    step T1 vs A0: G lower in 0/4 [] pooled 7.331->7.331 carries False; Bg lower in 4/4 ['E80', 'E83', 'E143', 'E160'] pooled 1.568->0.977 carries True; Bp lower in 2/4 ['E83', 'E143'] pooled 1.515->1.520 carries False -> KEPT (carries on ['Bg'], harms [])
+  T1+T2                              | E80    G  5.05 (+4.91) Bg 1.03 (-0.35) Bp 1.30 (-0.21) | E83    G  9.20 (-3.62) Bg 1.18 (+0.44) Bp 0.92 (+0.17) | E143   G  6.02 (-4.26) Bg 0.80 (+0.14) Bp 0.67 (+0.21) | E160   G  5.92 (+4.74) Bg 0.79 (-0.51) Bp 0.87 (-0.61) | pooled G  6.65 (-0.26) Bg 0.91 (-0.06) Bp 0.92 (-0.16)
+    step T2 vs T1: G lower in 3/4 ['E80', 'E143', 'E160'] pooled 7.331->6.646 carries True; Bg lower in 4/4 ['E80', 'E83', 'E143', 'E160'] pooled 0.977->0.912 carries True; Bp lower in 4/4 ['E80', 'E83', 'E143', 'E160'] pooled 1.520->0.918 carries True -> KEPT (carries on ['G', 'Bg', 'Bp'], harms [])
+  T1+T2+T3                           | E80    G  4.90 (+3.08) Bg 1.01 (-0.30) Bp 1.46 (-0.53) | E83    G  6.93 (-1.06) Bg 1.21 (+0.46) Bp 0.67 (-0.33) | E143   G  4.78 (-2.63) Bg 0.83 (+0.05) Bp 0.55 (-0.02) | E160   G  3.69 (+1.89) Bg 0.65 (-0.39) Bp 0.49 (+0.05) | pooled G  4.99 (-0.26) Bg 0.89 (-0.05) Bp 0.75 (-0.15)
+    step T3 vs T1+T2: G lower in 4/4 ['E80', 'E83', 'E143', 'E160'] pooled 6.646->4.994 carries True; Bg lower in 2/4 ['E80', 'E160'] pooled 0.912->0.888 carries False; Bp lower in 3/4 ['E83', 'E143', 'E160'] pooled 0.918->0.747 carries True -> KEPT (carries on ['G', 'Bp'], harms [])
+  T1+T2+T3+T4                        | E80    G  4.92 (+3.11) Bg 1.01 (-0.31) Bp 1.46 (-0.54) | E83    G  6.93 (-1.05) Bg 1.21 (+0.46) Bp 0.66 (-0.33) | E143   G  4.78 (-2.62) Bg 0.83 (+0.05) Bp 0.55 (-0.02) | E160   G  3.71 (+1.91) Bg 0.66 (-0.39) Bp 0.49 (+0.05) | pooled G  5.00 (-0.24) Bg 0.89 (-0.05) Bp 0.75 (-0.15)
+    step T4 vs T1+T2+T3: G lower in 2/4 ['E83', 'E143'] pooled 4.994->4.998 carries False; Bg lower in 0/4 [] pooled 0.888->0.890 carries False; Bp lower in 3/4 ['E83', 'E143', 'E160'] pooled 0.747->0.745 carries True -> KEPT (carries on ['Bp'], harms [])
+  T4's PVT busy means against Q139(s)'s committed clock-voltage.json (all reads; without E143): worst |diff| 0.0
+  FINAL CONFIGURATION: T1+T2+T3+T4
+
+REPORTED: EACH TERM ALONE AGAINST A0 (marginal; not a selection input)
+  T1 alone                           | E80    G  5.27 (+4.98) Bg 1.06 (-0.34) Bp 2.10 (-1.66) | E83    G  8.54 (-1.07) Bg 1.24 (+0.56) Bp 1.55 (-1.25) | E143   G  8.00 (-6.80) Bg 0.86 (+0.12) Bp 0.91 (-0.59) | E160   G  6.22 (+5.03) Bg 0.88 (-0.59) Bp 1.51 (-1.39) | pooled G  7.33 (-0.61) Bg 0.98 (-0.07) Bp 1.52 (-1.23)
+    T1 vs A0: G 0/4 pooled 7.331->7.331; Bg 4/4 pooled 1.568->0.977; Bp 2/4 pooled 1.515->1.520 -> would be kept
+  T2 alone                           | E80    G  5.05 (+4.91) Bg 2.46 (+2.23) Bp 1.30 (-0.15) | E83    G  9.20 (-3.62) Bg 3.04 (+2.84) Bp 0.94 (+0.18) | E143   G  6.02 (-4.26) Bg 2.32 (+2.07) Bp 0.70 (+0.23) | E160   G  5.92 (+4.74) Bg 2.05 (+1.88) Bp 0.88 (-0.59) | pooled G  6.65 (-0.26) Bg 2.42 (+2.17) Bp 0.93 (-0.14)
+    T2 vs A0: G 3/4 pooled 7.331->6.646; Bg 0/4 pooled 1.568->2.418; Bp 4/4 pooled 1.515->0.932 -> would be not kept
+  T3 alone                           | E80    G  5.22 (+3.66) Bg 1.57 (+1.16) Bp 1.97 (-1.41) | E83    G  7.14 (-1.38) Bg 2.09 (+1.77) Bp 1.38 (-1.24) | E143   G  5.11 (-3.23) Bg 1.38 (+0.86) Bp 1.33 (-1.17) | E160   G  3.81 (+2.31) Bg 1.37 (+1.14) Bp 1.01 (-0.86) | pooled G  5.23 (-0.35) Bg 1.56 (+1.16) Bp 1.34 (-1.11)
+    T3 vs A0: G 4/4 pooled 7.331->5.232; Bg 1/4 pooled 1.568->1.561; Bp 3/4 pooled 1.515->1.344 -> would be kept
+  T4 alone                           | E80    G  5.33 (+5.05) Bg 1.55 (+1.14) Bp 2.08 (-1.62) | E83    G  8.54 (-1.02) Bg 2.16 (+1.86) Bp 1.56 (-1.25) | E143   G  7.97 (-6.76) Bg 1.36 (+0.92) Bp 0.91 (-0.59) | E160   G  6.27 (+5.08) Bg 1.36 (+1.07) Bp 1.51 (-1.39) | pooled G  7.34 (-0.56) Bg 1.57 (+1.18) Bp 1.52 (-1.22)
+    T4 vs A0: G 2/4 pooled 7.331->7.336; Bg 1/4 pooled 1.568->1.569; Bp 0/4 pooled 1.515->1.519 -> would be not kept
+
+PARAMETERS PER FOLD (fitted on the other three sessions)
+  A0           E80: W 65.5 kT 0.000 beta 0.000 dcap 0.000 Tref 54.43 dheld fp32 -2.13, fp16 -1.54, int8 -2.71 | E83: W 65.6 kT 0.000 beta 0.000 dcap 0.000 Tref 54.37 dheld fp32 -2.14, fp16 -2.17, int8 -2.20 | E143: W 66.0 kT 0.000 beta 0.000 dcap 0.000 Tref 53.90 dheld fp32 -1.19, fp16 -1.11, int8 -1.32 | E160: W 65.3 kT 0.000 beta 0.000 dcap 0.000 Tref 54.87 dheld fp32 -1.85, fp16 -1.62, int8 -1.49
+  T1           E80: W 65.5 kT 0.000 beta 0.000 dcap 1.565 Tref 54.43 dheld fp32 -2.13, fp16 -1.54, int8 -2.71 | E83: W 65.6 kT 0.000 beta 0.000 dcap 1.294 Tref 54.37 dheld fp32 -2.14, fp16 -2.17, int8 -2.20 | E143: W 66.0 kT 0.000 beta 0.000 dcap 0.953 Tref 53.90 dheld fp32 -1.19, fp16 -1.11, int8 -1.32 | E160: W 65.3 kT 0.000 beta 0.000 dcap 1.890 Tref 54.87 dheld fp32 -1.85, fp16 -1.62, int8 -1.49
+  T1+T2        E80: W 64.4 kT 0.000 beta 0.639 dcap 2.728 Tref 54.43 dheld fp32 -2.13, fp16 -1.54, int8 -2.71 | E83: W 64.6 kT 0.000 beta 0.657 dcap 2.400 Tref 54.37 dheld fp32 -2.14, fp16 -2.17, int8 -2.20 | E143: W 64.8 kT 0.000 beta 0.637 dcap 2.230 Tref 53.90 dheld fp32 -1.19, fp16 -1.11, int8 -1.32 | E160: W 64.5 kT 0.000 beta 0.493 dcap 2.724 Tref 54.87 dheld fp32 -1.85, fp16 -1.62, int8 -1.49
+  T1+T2+T3     E80: W 64.6 kT 0.387 beta 0.648 dcap 2.561 Tref 54.43 dheld fp32 -1.48, fp16 -1.57, int8 -1.39 | E83: W 64.7 kT 0.388 beta 0.619 dcap 2.315 Tref 54.37 dheld fp32 -1.61, fp16 -1.44, int8 -1.47 | E143: W 64.8 kT 0.395 beta 0.691 dcap 2.286 Tref 53.90 dheld fp32 -1.62, fp16 -1.54, int8 -1.75 | E160: W 64.5 kT 0.417 beta 0.619 dcap 2.751 Tref 54.87 dheld fp32 -1.35, fp16 -1.47, int8 -1.55
+  T1+T2+T3+T4  E80: W 64.6 kT 0.386 beta 0.652 dcap 2.560 Tref 54.43 dheld fp32 -1.48, fp16 -1.57, int8 -1.39 | E83: W 64.7 kT 0.388 beta 0.623 dcap 2.313 Tref 54.37 dheld fp32 -1.61, fp16 -1.44, int8 -1.47 | E143: W 64.8 kT 0.395 beta 0.694 dcap 2.285 Tref 53.90 dheld fp32 -1.62, fp16 -1.54, int8 -1.76 | E160: W 64.5 kT 0.417 beta 0.623 dcap 2.751 Tref 54.87 dheld fp32 -1.35, fp16 -1.47, int8 -1.55
+  T2           E80: W 64.4 kT 0.000 beta 0.639 dcap 0.000 Tref 54.43 dheld fp32 -2.13, fp16 -1.54, int8 -2.71 | E83: W 64.6 kT 0.000 beta 0.657 dcap 0.000 Tref 54.37 dheld fp32 -2.14, fp16 -2.17, int8 -2.20 | E143: W 64.8 kT 0.000 beta 0.637 dcap 0.000 Tref 53.90 dheld fp32 -1.19, fp16 -1.11, int8 -1.32 | E160: W 64.5 kT 0.000 beta 0.493 dcap 0.000 Tref 54.87 dheld fp32 -1.85, fp16 -1.62, int8 -1.49
+  T3           E80: W 65.5 kT 0.387 beta 0.000 dcap 0.000 Tref 54.43 dheld fp32 -1.48, fp16 -1.57, int8 -1.39 | E83: W 65.7 kT 0.388 beta 0.000 dcap 0.000 Tref 54.37 dheld fp32 -1.61, fp16 -1.44, int8 -1.47 | E143: W 66.0 kT 0.395 beta 0.000 dcap 0.000 Tref 53.90 dheld fp32 -1.62, fp16 -1.54, int8 -1.75 | E160: W 65.3 kT 0.417 beta 0.000 dcap 0.000 Tref 54.87 dheld fp32 -1.35, fp16 -1.47, int8 -1.55
+  T4           E80: W 65.5 kT 0.000 beta 0.000 dcap 0.000 Tref 54.43 dheld fp32 -2.13, fp16 -1.54, int8 -2.72 | E83: W 65.6 kT 0.000 beta 0.000 dcap 0.000 Tref 54.37 dheld fp32 -2.14, fp16 -2.17, int8 -2.20 | E143: W 66.0 kT 0.000 beta 0.000 dcap 0.000 Tref 53.90 dheld fp32 -1.19, fp16 -1.11, int8 -1.32 | E160: W 65.3 kT 0.000 beta 0.000 dcap 0.000 Tref 54.87 dheld fp32 -1.85, fp16 -1.62, int8 -1.50
+
+FINAL (T1+T2+T3+T4) AGAINST M7 AND M8 AS FROZEN, per held-out session (paired difference final - reference; 95% over cells inside the session)
+  E80 vs R7: G +0.114 [-2.040, +1.465]; Bg -0.481 [-1.061, +0.433]; Bp -0.616 [-1.080, -0.392] resolved
+  E80 vs R8: G -2.156 [-4.337, -0.808] resolved; Bg -0.781 [-1.418, +0.076]; Bp -0.611 [-1.076, -0.384] resolved
+  E83 vs R7: G -1.599 [-3.452, -0.289] resolved; Bg -0.970 [-1.274, -0.500] resolved; Bp -0.889 [-1.126, -0.641] resolved
+  E83 vs R8: G -1.699 [-4.542, +0.469]; Bg -1.329 [-1.667, -0.806] resolved; Bp -0.890 [-1.126, -0.644] resolved
+  E143 vs R7: G -1.421 [-1.943, -0.932] resolved; Bg -0.839 [-1.086, -0.556] resolved; Bp -0.367 [-0.607, -0.120] resolved
+  E143 vs R8: G -0.150 [-0.449, +0.034]; Bg -1.147 [-1.425, -0.820] resolved; Bp -0.369 [-0.608, -0.122] resolved
+  E160 vs R7: G -1.266 [-2.268, -0.295] resolved; Bg -0.496 [-0.895, -0.085] resolved; Bp -1.016 [-1.257, -0.752] resolved
+  E160 vs R8: G -2.998 [-4.177, -1.800] resolved; Bg -0.783 [-1.209, -0.344] resolved; Bp -1.016 [-1.257, -0.751] resolved
+  the critic's rank-2 targets on the final configuration's held-out numbers: E80 Bg_mean_within_0.5; E83 G_mean_within_2,Bg_mean_within_0.5,Bp_mean_within_0.5,Bp_rms_le_1; E143 Bg_mean_within_0.5,Bp_mean_within_0.5,Bp_rms_le_1; E160 G_rms_le_4,G_mean_within_2,Bg_mean_within_0.5,Bp_mean_within_0.5,Bp_rms_le_1; pooled G_mean_within_2,Bg_mean_within_0.5,Bp_mean_within_0.5,Bp_rms_le_1
+
+REPORTED: END TO END WITH THE MODELS' BLIND D (E143 with M7's frozen D, E160 with M8's), non-anchor registered tiles
+  E143 R7           n 33: G 6.64 (-4.97) Bg 1.60 (+1.17) Bp 1.18 (-0.72)
+  E143 R8           n 33: G 5.25 (-2.85) Bg 1.89 (+1.51) Bp 1.18 (-0.71)
+  E143 A0           n 33: G 8.50 (-7.24) Bg 1.31 (+0.82) Bp 1.18 (-0.72)
+  E143 T1+T2+T3+T4  n 33: G 5.12 (-3.07) Bg 0.86 (-0.06) Bp 0.87 (-0.19)
+  E160 R7           n 45: G 5.14 (+3.03) Bg 1.11 (+0.81) Bp 1.70 (-1.46)
+  E160 R8           n 45: G 6.72 (+5.17) Bg 1.39 (+1.14) Bp 1.70 (-1.46)
+  E160 A0           n 45: G 6.27 (+4.60) Bg 1.31 (+1.05) Bp 1.70 (-1.46)
+  E160 T1+T2+T3+T4  n 45: G 3.68 (+1.55) Bg 0.66 (-0.35) Bp 0.80 (-0.03)
+
+FROZEN m9_a2.json: kept ['T1', 'T2', 'T3', 'T4']; W 64.60 dcap 2.525 beta 0.648 kT 0.395 Tref 54.38; fallback delta {'fp32': -1.533979965482577, 'fp16': -1.5067753028963726, 'int8': -1.5351694510250744} (n {'fp32': 3, 'fp16': 4, 'int8': 4})
+  bands: governed n 56 q95 9.65 MHz / 1.85 W; pinned n 78 q95 15.35 MHz / 1.26 W
+  final, in sample (all four fitted) | E80    G  5.01 (+3.16) Bg 1.00 (-0.27) Bp 1.47 (-0.56) | E83    G  6.85 (-0.65) Bg 1.17 (+0.35) Bp 0.65 (-0.30) | E143   G  4.30 (-1.45) Bg 0.84 (-0.00) Bp 0.54 (-0.04) | E160   G  3.55 (+1.61) Bg 0.60 (-0.29) Bp 0.49 (-0.00) | pooled G  4.79 (+0.18) Bg 0.87 (-0.05) Bp 0.74 (-0.17)
+
+REPORTED CHECKS: E159's zeros GEMMs and E161's first hold (no anchors ran there: the fallback delta)
+  E159 H1-fp32-zeros: measured 35.98 W at 794.9 MHz, G3 38.43 (miss -2.45); with M9's fp32 level shift -0.99: miss -1.45; M8's kinds fp32 zeros level at 800 MHz 36.35 W (measured - it -0.37)
+  E159 H2-fp32-zeros: measured 36.04 W at 794.3 MHz, G3 38.52 (miss -2.49); with M9's fp32 level shift -0.99: miss -1.49; M8's kinds fp32 zeros level at 800 MHz 36.35 W (measured - it -0.32)
+  E159 H3-fp32-zeros: measured 36.03 W at 794.9 MHz, G3 38.46 (miss -2.43); with M9's fp32 level shift -0.99: miss -1.43; M8's kinds fp32 zeros level at 800 MHz 36.35 W (measured - it -0.32)
+  E161 G1Q (int8.b_line_zero_ff, 800 MHz in the kernel launches): M8's level +0.911 W high; with M9's int8 level shift -0.995: -0.084 W
