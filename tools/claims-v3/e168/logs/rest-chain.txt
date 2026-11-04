@@ -1,0 +1,25 @@
+E168 rests from Q138(t)'s frozen aifoundry2 chain (planning aid; nothing here is scored). tau_s [1.0, 3.0, 10.0, 60.0, 120.0] R C/W [0.07364, 0.06598, 0.03889, 0.34285, 0.14159] dt 0.2
+hold                                 start   | window MHz       W    die | die at end | to rest+2     +1  +0.5 C | to 55 C | self-check
+S1-fp32-randn-cold                   cold    |     689.23  57.952  65.39 |      65.50 |    140.0s 197.2s  259.4s |   29.4s | ok (0.0014)
+S1-fp32-randn-cold                   warm55  |     656.95  53.097  65.44 |      65.50 |    147.0s 207.0s  272.4s |   32.0s | ok (0.0037)
+S1-fp32-randn-warm55                 cold    |     689.23  57.952  65.39 |      65.50 |    140.0s 197.2s  259.4s |   29.4s | ok (0.0014)
+S1-fp32-randn-warm55                 warm55  |     656.95  53.097  65.44 |      65.50 |    147.0s 207.0s  272.4s |   32.0s | ok (0.0037)
+S2-fp32-randn-cold                   cold    |     681.89  57.866  65.40 |      65.50 |    140.0s 197.2s  259.6s |   29.4s | ok (0.0075)
+S2-fp32-randn-cold                   warm55  |     650.60  53.088  65.44 |      65.50 |    147.0s 207.0s  272.4s |   32.0s | ok (0.0002)
+S2-fp32-randn-warm55                 cold    |     681.89  57.866  65.40 |      65.50 |    140.0s 197.2s  259.6s |   29.4s | ok (0.0075)
+S2-fp32-randn-warm55                 warm55  |     650.60  53.088  65.44 |      65.50 |    147.0s 207.0s  272.4s |   32.0s | ok (0.0002)
+S3-fp32-randn-cold                   cold    |     767.34  59.430  64.65 |      65.50 |    137.4s 194.2s  256.0s |   27.4s | ok (0.0032)
+S3-fp32-randn-cold                   warm55  |     725.02  53.546  65.38 |      65.50 |    146.2s 206.0s  271.0s |   31.6s | ok (0.0019)
+S3-fp32-randn-warm55                 cold    |     767.34  59.430  64.65 |      65.50 |    137.4s 194.2s  256.0s |   27.4s | ok (0.0032)
+S3-fp32-randn-warm55                 warm55  |     725.02  53.546  65.38 |      65.50 |    146.2s 206.0s  271.0s |   31.6s | ok (0.0019)
+S2-int8-zeros-warm55                 cold    |     800.00  37.661  53.66 |      54.32 |     71.0s 122.8s  178.4s |    0.0s | ok (0.0007)
+S2-int8-zeros-warm55                 warm55  |     800.00  36.326  55.96 |      55.83 |     96.6s 153.8s  216.2s |    0.8s | ok (0.0004)
+S2-int8-real_smol_w8a8_down-warm55   cold    |     800.00  45.242  57.37 |      58.35 |    100.0s 154.0s  212.0s |    3.4s | ok (0.0007)
+S2-int8-real_smol_w8a8_down-warm55   warm55  |     800.00  43.907  59.67 |      59.86 |    120.0s 178.2s  241.6s |   10.2s | ok (0.0005)
+S2-int8-sparse50-warm55              cold    |     800.00  45.343  57.42 |      58.41 |    100.4s 154.2s  212.4s |    3.6s | ok (0.0008)
+S2-int8-sparse50-warm55              warm55  |     800.00  44.008  59.72 |      59.92 |    120.2s 178.4s  242.0s |   10.2s | ok (0.0007)
+
+SELF-CHECK: PASS (every window mean equals predictions-e168.json's frozen G4 nominal, both starts, to 0.01)
+Reading: after a warm fp32 random hold the chain is within 1 C of the rest in about 3.5 min and 0.5 C in about 4.5 min; after the int8 holds sooner;
+a cold hold's end reaches 55 C in about half a minute, most of it inside the 25 s of queries after every run. E161's measured rest (G1Q, 13 min):
+50 C about 2 min after the hold and its 47 C floor from about 4.5 min on. So the cold gate's bound is 360 s and a rest is planned at 4 min.

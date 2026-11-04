@@ -1,0 +1,9 @@
+E168 amendment A2 (Q141(o)): copied from docs/reports/data/2026-11-04-q140q-gemm-g4-stride/predictions-e168.json (sha256 430f4afa266a30c35f3e4da44ebef9fbf1d1186c00ceb5e2e8ae312c8c168583, as frozen)
+  S2-int8-zeros-cold: values gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin; P0 600/700/800 {'600': 27.668, '700': 31.077, '800': 37.126}; predicted peak 45.64 W
+    G4 (frozen nominal cold, from 46.0 C): {"mhz": 800.0, "w": 37.66, "die": 53.662, "die_start": 46.0, "peak_w_traj": 37.79}
+    G3 as frozen (nominal cold):          {"mhz": 800.0, "w": 37.909, "die": 53.84, "die_start": 46.0, "peak_w_traj": 37.97}
+  S2-int8-zeros-warm55 (hold 7, unchanged): G4 {"mhz": 800.0, "w": 36.326, "die": 55.96, "die_start": 54.98, "peak_w_traj": 36.53}
+  start dependence, frozen nominal: G4 cold - warm +1.334 W, window die -2.298 C; G3 as frozen +0.641 W
+  E159's three zeros holds: measured spread 0.057 W, G4 0.442 W
+  order with A2: ['S1-fp32-randn-cold', 'S1-fp32-randn-warm55', 'S2-fp32-randn-cold', 'S2-fp32-randn-warm55', 'S3-fp32-randn-cold', 'S3-fp32-randn-warm55', 'S2-int8-zeros-warm55', 'S2-int8-real_smol_w8a8_down-warm55', 'S2-int8-sparse50-warm55', 'S2-int8-zeros-cold']
+wrote tools/claims-v3/e168/predictions-e168-a2.json sha256 2afb290f62f7cc722c1f58837c18ab545f914863107a162653c38459c35fafe6
