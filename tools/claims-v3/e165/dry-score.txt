@@ -1,0 +1,85 @@
+# E165: score_e165.py on the dry run's session (the toy card; no C log, so E165-C is NOT SCORED and complete runs count), Wed 4 Nov 2026 09:42 PST: the code paths only, no number here is a measurement
+E165 scoring: 114 burst runs, 114 complete, 114 counted (complete and every launch's C PASS), passes [1, 2]; dry True
+  C check: {"verdict": "NOT SCORED (no ccheck output given)", "launches": 456, "by_verdict": {"NO_RECORD": 456}, "runs_not_all_pass": [{"run": "BURST-00-b7-fp16.anchor7_zeros-r1", "verdicts": {"NO_RECORD": 4}}, {"run": "BURST-01-b7-int8.anchor7_zeros-r1", "verdicts": {"NO_RECORD": 4}}, {"run": "BURST-02-b7-fp32.anchor7_zeros-r1", "verdicts": {"NO_RECORD": 4}}, {"run": "BURST-03-b7-int8.bheld_01-r1", "verdicts": {"NO_RECORD": 4}}, {"run": "BURST-04-b7-fp16.uniform_pm1-r1", "verdicts": {"NO_RECORD": 4}}, {"run": "BURST-05-b7-int8.anchor7_full_b-r1", "verdicts": {"NO_RECORD": 4}}, {"run": "BURST-06-b7-fp16.
+tiles scored 52; left out (fewer than 2 counted passes) []; left out by name ['fp32.anchor7_randn_a', 'fp32.anchor7_randn_b', 'fp32.laplace_both', 'fp32.real_qwen_l3_softmax_v_sink', 'fp32.real_s360_l1_qk', 'fp32.uniform_pm1']
+  anchors (the session's zeros-anchor reads): {"fp32": [{"burst_w": 31.51, "burst_mhz": 766.7, "die_start": 53}, {"burst_w": 33.53, "burst_mhz": 800, "die_start": 55}], "fp16": [{"burst_w": 32.31, "burst_mhz": 800, "die_start": 51}, {"burst_w": 33.2, "burst_mhz": 800, "die_start": 54}], "int8": [{"burst_w": 33.9, "burst_mhz": 800, "die_start": 52}, {"burst_w": 34.82, "burst_mhz": 800, "die_start": 55}]}
+  E165-R2  FAIL: G {"n": 12, "rms": 43.815, "mean": -37.3, "rms_le_line": false, "mean_within_line": false, "vs_M7": {"point": 0.6704722987513136, "ci95": [0.23831637264756012, 1.0036953823462156]}, "resolved_better_than_M7": false, "verdict": "FAIL"}
+           Bg {"n": 12, "rms": 6.67, "mean": -5.965, "mean_within_line": false, "vs_M7": {"point": 1.208418644511167, "ci95": [1.0315561230764088, 1.4957719189226193]}, "resolved_better_than_M7": false, "verdict": "FAIL"}
+           Bp {"n": 40, "rms": 1.229, "mean": -0.745, "mean_within_line": false, "rms_le_line": false, "vs_M7": {"point": -1.0960461288490255, "ci95": [-1.223323307205431, -0.9837349939523803]}, "resolved_better_than_M7": true, "verdict": "FAIL"}
+  E165-F1  {"n": 12, "rms": 43.815, "range_2.5_97.5": [2.45, 6.408], "verdict": "FAIL", "mean_err": -37.3, "ref_rms": 4.4983, "rms_95_over_tiles": [29.223, 56.798]}
+  E165-F2  {"n": 40, "rms": 6.367, "range_2.5_97.5": [0.288, 4.044], "verdict": "FAIL", "mean_err": -2.108, "ref_rms": 2.3342, "rms_95_over_tiles": [3.133, 8.796]}
+  E165-W1  {"n": 12, "rms": 6.67, "range_2.5_97.5": [0.415, 1.137], "verdict": "FAIL", "mean_err": -5.965, "ref_rms": 0.7757, "rms_95_over_tiles": [4.834, 8.344]}
+  E165-W2  {"n": 40, "rms": 1.229, "range_2.5_97.5": [0.604, 1.037], "verdict": "FAIL", "mean_err": -0.745, "ref_rms": 0.8214, "rms_95_over_tiles": [0.904, 1.525]}
+  E165-F3  {"n": 52, "inside": 36, "line": 46, "verdict": "FAIL"}
+  E165-W3  {"n": 52, "inside": 30, "line": 46, "verdict": "FAIL"}
+  E165-H1  {"n": 52, "rms": 1.353, "range_2.5_97.5": [0.556, 0.811], "verdict": "FAIL", "mean_err": -1.18, "ref_rms": 0.6845, "rms_95_over_tiles": [1.146, 1.565]}
+  E165-H3  {"n": 52, "inside": 38, "line": 46, "verdict": "FAIL"}
+  R0       {"verdict": "FAIL", "tiles": {"k-fp16-randn": {"n": 2, "burst_mhz": 700, "ref_mhz": 727.7, "d_mhz": -27.7, "burst_w": 62.44, "ref_w": 66.585, "d_w": -4.145, "rise_c": 4, "within": false, "e143_mhz": 720.13, "d_mhz_vs_e143": -20.13, "e143_w": 67.327, "d_w_vs_e143": -4.887, "e160_mhz": 730.87, "d_mhz_vs_e160": -30.87, "e160_w": 67.39, "d_w_vs_e160": -4.95, "peak_w": 75.26}, "k-int8-full": {"n": 2, "burst_mhz": 800, "ref_mhz": 800.0, "d_mhz": 0.0, "burst_w": 49.105, "ref_w": 49.8, "d_w": -0.695, "rise_c": 2.5, "within": true, "e143_mhz": 794.67, "d_mhz_vs_e143": 5.33, "e143_w": 49.467, "d_w_vs_e143": -0.362, "e160_mhz": 800, "d_mhz_vs_e160": 0, "e160_w": 49.55, "d_w_vs_e160": -0.445, "peak_w": 49.43}}}
+  [M9_primary                    ] {"G_rms": 43.815, "G_mean": -37.3, "Bg_rms": 6.67, "Bg_mean": -5.965, "Bp_rms": 1.229, "Bp_mean": -0.745, "Gp_rms": 6.367, "Gp_mean": -2.108, "n_governed": 12, "n_pinned": 40}
+  [M9_as_frozen                  ] {"G_rms": 42.455, "G_mean": -35.838, "Bg_rms": 6.708, "Bg_mean": -6.01, "Bp_rms": 1.651, "Bp_mean": -1.365, "Gp_rms": 6.362, "Gp_mean": -2.049, "n_governed": 12, "n_pinned": 40}
+  [M8                            ] {"G_rms": 40.718, "G_mean": -33.842, "Bg_rms": 5.157, "Bg_mean": -4.24, "Bp_rms": 2.22, "Bp_mean": -2.061, "Gp_rms": 6.349, "Gp_mean": -1.986, "n_governed": 12, "n_pinned": 40}
+  [M7                            ] {"G_rms": 43.145, "G_mean": -36.683, "Bg_rms": 5.462, "Bg_mean": -4.608, "Bp_rms": 2.325, "Bp_mean": -2.155, "Gp_rms": 6.357, "Gp_mean": -2.059, "n_governed": 12, "n_pinned": 40}
+  [M6                            ] {"G_rms": 43.055, "G_mean": -36.508, "Bg_rms": 5.459, "Bg_mean": -4.599, "Bp_rms": 2.327, "Bp_mean": -2.118, "Gp_rms": 6.365, "Gp_mean": -2.066, "n_governed": 12, "n_pinned": 40}
+  [M9_anchors_pass1_only         ] {"G_rms": 43.169, "G_mean": -36.568, "Bg_rms": 6.688, "Bg_mean": -5.99, "Bp_rms": 1.301, "Bp_mean": -0.876, "Gp_rms": 6.364, "Gp_mean": -2.082, "n_governed": 12, "n_pinned": 40}
+  [M9_fallback_with_die_starts   ] {"G_rms": 39.437, "G_mean": -32.231, "Bg_rms": 6.752, "Bg_mean": -6.068, "Bp_rms": 1.948, "Bp_mean": -1.688, "Gp_rms": 6.357, "Gp_mean": -1.964, "n_governed": 12, "n_pinned": 40}
+  [M9_session_anchors_at_Tref    ] {"G_rms": 46.841, "G_mean": -40.777, "Bg_rms": 6.605, "Bg_mean": -5.879, "Bp_rms": 1.03, "Bp_mean": -0.422, "Gp_rms": 6.374, "Gp_mean": -2.155, "n_governed": 12, "n_pinned": 40}
+  peaks vs predictions: {"M9": {"n": 55, "inside": 55, "line": 49, "over": [], "per_burst": {"n": 110, "inside": 110, "rms_vs_expected_w": 4.116, "mean_vs_expected_w": -4.035}}, "M8": {"n": 55, "inside": 55, "line": 49, "over": [], "per_burst": {"n": 110, "inside": 110, "rms_vs_expected_w": 3.916, "mean_vs_expected_w": -3.855}}}
+  kT per burst: {"n_tiles": 15, "n_bursts": 30, "slope_w_per_c": 0.15, "ci95": [0.0293, 0.2514], "M9_kT_w_per_c": 0.3953994254607027, "note": "reported, never a verdict; whole-degree die readings"}
+  coverage at the nested widths: {"inner_2_of_3": {"n": 52, "inside_mhz": 36, "inside_board": 33, "line": 46}, "inner_3_of_3": {"n": 52, "inside_mhz": 36, "inside_board": 32, "line": 46}, "frozen": {"inside_mhz": 36, "inside_board": 30}}
+  zeros anchors: {"fp32.anchor7_zeros": {"n": 2, "burst_mhz": 783.35, "burst_w": 32.52, "die_start_runs": [53, 55], "as_frozen_err_mhz": -16.65, "as_frozen_err_w": -2.84, "M8_err_w": -3.83}, "fp16.anchor7_zeros": {"n": 2, "burst_mhz": 800, "burst_w": 32.755, "die_start_runs": [51, 54], "as_frozen_err_mhz": 0.0, "as_frozen_err_w": -2.534, "M8_err_w": -3.515}, "int8.anchor7_zeros": {"n": 2, "burst_mhz": 800, "burst_w": 34.36, "die_start_runs": [52, 55], "as_frozen_err_mhz": 0.0, "as_frozen_err_w": -2.3, "M8_err_w": -3.29}}
+  pass 1: R2 {'G': 'FAIL', 'Bg': 'FAIL', 'Bp': 'FAIL', 'verdict': 'FAIL'}; lines {"G_rms": 43.419, "G_mean": -36.765, "Bg_rms": 6.682, "Bg_mean": -5.979, "Bp_rms": 1.68, "Bp_mean": -0.972, "Gp_rms": 9.725, "Gp_mean": -2.506, "n_governed": 12, "n_pinned": 40}
+  pass 2: R2 {'G': 'FAIL', 'Bg': 'FAIL', 'Bp': 'FAIL', 'verdict': 'FAIL'}; lines {"G_rms": 43.952, "G_mean": -37.539, "Bg_rms": 6.674, "Bg_mean": -5.974, "Bp_rms": 1.283, "Bp_mean": -0.588, "Gp_rms": 8.245, "Gp_mean": -1.687, "n_governed": 12, "n_pinned": 40}
+tile                                     group    p  passes  MHz (primary / as frozen)   W (primary / as frozen)    rise C (primary)
+  fp16.anchor7_randn_a                     governed 2  2   700.0 ( 730.1 /  729.0)   62.12 ( 67.11 /  67.11)   4.00 ( 6.39)
+  fp16.anchor7_randn_b                     governed 2  2   700.0 ( 730.5 /  729.5)   62.01 ( 67.11 /  67.11)   4.50 ( 6.39)
+  fp16.laplace_both                        governed 1  2   700.0 ( 727.7 /  726.7)   62.41 ( 67.11 /  67.11)   4.50 ( 6.39)
+  fp16.randn_x8                            governed 1  2   700.0 ( 727.3 /  726.2)   62.49 ( 67.11 /  67.10)   4.50 ( 6.39)
+  fp16.real_qwen_l3_softmax_v_h1           governed 1  2   700.0 ( 778.7 /  776.5)   55.31 ( 66.55 /  66.68)   3.50 ( 6.31)
+  fp16.real_s360_l3_qk                     governed 1  2   700.0 ( 732.0 /  730.9)   61.85 ( 67.12 /  67.11)   4.50 ( 6.39)
+  fp16.real_s360_l3_w8a16_gate             governed 1  2   700.0 ( 733.5 /  732.4)   61.52 ( 67.12 /  67.12)   4.50 ( 6.39)
+  fp16.sorted_k                            governed 1  2   700.0 ( 751.9 /  750.7)   58.89 ( 67.12 /  67.12)   4.00 ( 6.39)
+  fp16.uniform_pm1                         governed 1  2   700.0 ( 731.8 /  729.6)   61.92 ( 67.12 /  67.11)   4.50 ( 6.39)
+  fp32.exp_b_alt_nib                       governed 1  2   800.0 ( 791.7 /  790.3)   64.86 ( 64.87 /  65.16)   5.00 ( 6.07)
+  fp32.mant2_spreadexp                     governed 1  2   700.0 ( 781.3 /  779.3)   54.79 ( 66.37 /  66.51)   3.00 ( 6.28)
+  fp32.real_smol_l3_w8a16_q_outlier        governed 1  2   700.0 ( 731.1 /  728.9)   62.05 ( 67.11 /  67.11)   4.00 ( 6.39)
+  fp16.b_onebit_b8_pi                      pinned   1  2   800.0 ( 800.0 /  800.0)   57.60 ( 57.61 /  57.99)   4.50 ( 5.06)
+  fp16.b_onebit_b9_one                     pinned   1  2   800.0 ( 799.6 /  799.3)   60.40 ( 60.20 /  60.80)   5.00 ( 5.42)
+  fp32.b_onebit_b20_full                   pinned   1  2   800.0 ( 800.0 /  799.9)   57.85 ( 57.48 /  58.24)   5.00 ( 5.04)
+  fp32.b_onebit_b20_one                    pinned   1  2   800.0 ( 799.8 /  799.6)   59.67 ( 59.51 /  60.09)   4.50 ( 5.32)
+  fp32.b_onebit_b20_pi                     pinned   1  2   800.0 ( 800.0 /  800.0)   57.72 ( 57.24 /  58.00)   4.50 ( 5.01)
+  fp32.b_onebit_b20_seventh                pinned   1  2   800.0 ( 800.0 /  800.0)   57.49 ( 57.22 /  57.78)   4.00 ( 5.00)
+  fp32.b_onebit_b20_third_a1p5             pinned   2  2   800.0 ( 799.8 /  799.6)   60.04 ( 59.59 /  60.17)   4.50 ( 5.33)
+  fp32.b_onebit_b22_third                  pinned   1  2   783.4 ( 799.9 /  799.8)   56.65 ( 59.01 /  59.58)   4.50 ( 5.25)
+  fp32.dropout30_both                      pinned   1  2   800.0 ( 797.4 /  796.7)   62.83 ( 62.73 /  63.10)   5.00 ( 5.77)
+  fp32.exp_a_gray_walk                     pinned   1  2   800.0 ( 800.0 /  800.0)   51.85 ( 51.94 /  52.69)   4.00 ( 4.26)
+  fp32.exp_b_alt_b26                       pinned   1  2   800.0 ( 800.0 /  800.0)   52.91 ( 52.97 /  53.72)   4.00 ( 4.41)
+  fp32.exp_b_alt_lsb                       pinned   1  2   800.0 ( 800.0 /  800.0)   52.55 ( 52.95 /  53.50)   3.50 ( 4.40)
+  fp32.exp_only_pos12                      pinned   1  2   800.0 ( 798.5 /  797.8)   61.80 ( 61.86 /  62.45)   4.50 ( 5.65)
+  fp32.randn_a24k                          pinned   1  2   780.0 ( 799.6 /  799.5)   56.83 ( 60.04 /  60.41)   4.00 ( 5.40)
+  int8.a_full_b_pos                        pinned   1  2   800.0 ( 800.0 /  800.0)   48.72 ( 49.52 /  50.00)   2.50 ( 3.92)
+  int8.anchor7_full_a                      pinned   2  2   780.0 ( 800.0 /  800.0)   46.78 ( 49.80 /  50.27)   2.50 ( 3.96)
+  int8.anchor7_full_b                      pinned   2  2   800.0 ( 800.0 /  800.0)   48.87 ( 49.69 /  50.16)   2.50 ( 3.95)
+  int8.b_line_0f_f0                        pinned   1  2   800.0 ( 800.0 /  800.0)   46.62 ( 47.74 /  48.41)   3.00 ( 3.67)
+  int8.b_line_6bit_rand                    pinned   1  2   800.0 ( 800.0 /  800.0)   48.91 ( 49.80 /  50.47)   3.00 ( 3.96)
+  int8.b_line_7f_80_aconst                 pinned   1  2   800.0 ( 800.0 /  800.0)   38.77 ( 40.81 /  41.48)   2.00 ( 2.70)
+  int8.b_line_compl_rand                   pinned   1  2   800.0 ( 800.0 /  800.0)   47.27 ( 49.37 /  49.85)   2.50 ( 3.90)
+  int8.b_line_near7_rand                   pinned   1  2   800.0 ( 800.0 /  800.0)   47.34 ( 49.22 /  49.69)   2.50 ( 3.88)
+  int8.b_line_zero_55                      pinned   1  2   800.0 ( 800.0 /  800.0)   43.31 ( 44.29 /  44.96)   2.00 ( 3.19)
+  int8.b_line_zero_7f                      pinned   1  2   800.0 ( 800.0 /  800.0)   41.98 ( 43.29 /  43.96)   2.00 ( 3.05)
+  int8.bheld_01                            pinned   1  2   800.0 ( 800.0 /  800.0)   47.05 ( 46.48 /  47.55)   3.00 ( 3.50)
+  int8.bheld_33                            pinned   1  2   800.0 ( 800.0 /  800.0)   48.09 ( 49.37 /  50.04)   3.00 ( 3.90)
+  int8.bheld_55                            pinned   1  2   800.0 ( 800.0 /  800.0)   48.06 ( 49.27 /  49.95)   3.00 ( 3.89)
+  int8.bheld_55_asmall                     pinned   2  2   800.0 ( 800.0 /  800.0)   47.85 ( 49.34 /  49.82)   2.50 ( 3.90)
+  int8.bheld_fd                            pinned   1  2   800.0 ( 800.0 /  800.0)   48.04 ( 47.95 /  48.62)   3.00 ( 3.70)
+  int8.bheld_ff                            pinned   1  2   800.0 ( 800.0 /  800.0)   47.85 ( 47.17 /  47.85)   3.00 ( 3.60)
+  int8.bheld_rand                          pinned   1  2   800.0 ( 800.0 /  800.0)   48.42 ( 48.85 /  49.52)   3.00 ( 3.83)
+  int8.pos_small                           pinned   1  2   783.4 ( 800.0 /  800.0)   42.35 ( 44.12 /  44.79)   2.00 ( 3.17)
+  int8.real_qwen_l3_w8a8_down_massive      pinned   1  2   800.0 ( 800.0 /  800.0)   47.33 ( 47.86 /  48.53)   3.00 ( 3.69)
+  int8.real_qwen_l3_w8a8_k_sink            pinned   1  2   783.4 ( 800.0 /  800.0)   46.30 ( 48.57 /  49.05)   2.50 ( 3.79)
+  int8.real_s360_l2_w8a8_o                 pinned   1  2   800.0 ( 800.0 /  800.0)   47.25 ( 47.85 /  48.33)   2.50 ( 3.69)
+  int8.real_s360_l3_w8a8_q_outlier         pinned   1  2   800.0 ( 800.0 /  800.0)   47.83 ( 48.35 /  49.22)   3.00 ( 3.76)
+  int8.real_smol_l2_w8a8_up_outlier        pinned   1  2   800.0 ( 800.0 /  800.0)   48.30 ( 48.74 /  49.41)   3.00 ( 3.81)
+  int8.real_smol_l3_w8a8_down              pinned   2  2   800.0 ( 800.0 /  800.0)   48.31 ( 48.87 /  49.54)   3.00 ( 3.83)
+  int8.relu_q_a                            pinned   1  2   800.0 ( 800.0 /  800.0)   46.41 ( 46.70 /  47.37)   3.00 ( 3.53)
+  int8.sparse_rows_a                       pinned   1  2   800.0 ( 800.0 /  800.0)   46.44 ( 47.07 /  47.94)   2.50 ( 3.58)
+peaks: {"board_max_w": 75.34, "board_run": "s1/BURST-54-b7-fp16.laplace_both-r1.jsonl", "die_mean_max_c": 61, "die_high_max_c": 64, "samples": 7036}

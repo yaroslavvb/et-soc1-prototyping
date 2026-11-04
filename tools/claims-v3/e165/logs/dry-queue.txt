@@ -1,0 +1,28 @@
+# E165 dry run of the whole queue on the Intel with run_hpl.py's toy card (no device opened, no lab box reached): queue_e165.py --dry with protocol-dry.json (the registered order's first two passes, 114 runs of 1.5 s bursts, each pass opening with the zeros anchors) and the two dry stop-path protocols, Wed 4 Nov 2026 09:29-09:42 PST. The queue's records (queue.jsonl), the scratch path replaced by <scratch>. The toy card's governor and powers are a toy: its numbers test the code paths only. Under --dry the toy card runs no host, so no C log exists: the smoke's C-log and DMA checks are recorded as skipped (their code is tested on made-up records in selftest.txt, step 7), and the scorer counts complete runs (dry).
+{"t_ms": 1793813370753, "zone": "PST", "kind": "queue_start", "slot_start_ms": 1793813370000, "slot_end_ms": 1793816070000, "next_rest_ms": null, "python": "3.13.11", "sensors": false, "protocol": "<lab repo>/tools/claims-v3/e165/protocol-dry.json"}
+{"t_ms": 1793813370754, "zone": "PST", "kind": "card_free", "waits": {}, "late_s": 0.8}
+{"t_ms": 1793813370755, "zone": "PST", "kind": "before_first_launch", "snapshot": {"tag": "start", "t_ms": 1793813370754, "zone": "PST"}, "history_rows": 0}
+{"t_ms": 1793813370755, "zone": "PST", "kind": "session_start", "name": "smoke", "cap_min": 3.0}
+{"t_ms": 1793813396940, "zone": "PST", "kind": "session_end", "name": "smoke", "rc": 0, "end": {"t_end_ms": 1793813396600, "exit": 0, "reason": "done", "card_min": 0.4}, "slot_stopped": false}
+{"t_ms": 1793813396944, "zone": "PST", "kind": "smoke_ccheck", "skipped": "dry: the toy card runs no host and writes no C log"}
+{"t_ms": 1793813396944, "zone": "PST", "kind": "smoke_check", "rc": 0, "bad": null, "ccheck": null}
+{"t_ms": 1793813396945, "zone": "PST", "kind": "session_start", "name": "stoptest-board", "cap_min": 2.0}
+{"t_ms": 1793813399969, "zone": "PST", "kind": "session_end", "name": "stoptest-board", "rc": 4, "end": {"t_end_ms": 1793813399318, "exit": 4, "reason": "safety:board 31.8 W > 30 W on 3 samples", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793813399971, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-board", "stop": "board", "t_trip_ms": 1793813399023, "t_third_line_ms": 1793813398998, "launch": [1793813398741, 1793813399242], "trip_after_line_ms": 25, "launch_end_after_trip_ms": 219, "lines": 18}
+{"t_ms": 1793813399971, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-board", "rc": 4, "bad": null}
+{"t_ms": 1793813399971, "zone": "PST", "kind": "session_start", "name": "stoptest-die", "cap_min": 2.0}
+{"t_ms": 1793813401992, "zone": "PST", "kind": "session_end", "name": "stoptest-die", "rc": 4, "end": {"t_end_ms": 1793813401788, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}, "slot_stopped": false}
+{"t_ms": 1793813401994, "zone": "PST", "kind": "stoptest_detail", "name": "stoptest-die", "stop": "die", "t_trip_ms": 1793813400468, "t_first_line_ms": 1793813400415, "trip_after_line_ms": 53, "lines": 13}
+{"t_ms": 1793813401994, "zone": "PST", "kind": "stoptest_check", "name": "stoptest-die", "rc": 4, "bad": null}
+{"t_ms": 1793813401995, "zone": "PST", "kind": "session_start", "name": "s1", "cap_min": 30.0}
+{"t_ms": 1793814139322, "zone": "PST", "kind": "session_end", "name": "s1", "rc": 0, "end": {"t_end_ms": 1793814138880, "exit": 0, "reason": "done", "card_min": 12.3}, "slot_stopped": false}
+{"t_ms": 1793814139324, "zone": "PST", "kind": "s1_end", "rc": 0}
+{"t_ms": 1793814139324, "zone": "PST", "kind": "queue_end", "snapshot": {"tag": "end", "t_ms": 1793814139324, "zone": "PST"}, "card_free_ms": 1793814139324, "before_slot_end_s": 1930.7}
+## smoke/end.json
+{"t_end_ms": 1793813396600, "exit": 0, "reason": "done", "card_min": 0.4}
+## stoptest-board/end.json
+{"t_end_ms": 1793813399318, "exit": 4, "reason": "safety:board 31.8 W > 30 W on 3 samples", "card_min": 0.0}
+## stoptest-die/end.json
+{"t_end_ms": 1793813401788, "exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}
+## s1/end.json
+{"t_end_ms": 1793814138880, "exit": 0, "reason": "done", "card_min": 12.3}

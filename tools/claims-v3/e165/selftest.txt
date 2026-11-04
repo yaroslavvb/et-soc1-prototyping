@@ -1,0 +1,16 @@
+ok   frozen inputs, Q139(k)'s three files and 61 tiles as committed (61 tiles, 0 bad; [])
+ok   a changed byte and a short file are refused (fp16.randn_x8: sha256 whole bbbc4ab5fffc54fb29f03e5bf89ab22c...; fp16.randn_x8: 2047 bytes, not 2048)
+ok   predictions-e165.json = Q140(x)'s numbers for 61 tiles x 4 models; 18 governed, 43 pinned in the frozen file; left out ['fp32.anchor7_randn_a', 'fp32.anchor7_randn_b', 'fp32.laplace_both', 'fp32.real_qwen_l3_softmax_v_sink', 'fp32.real_s360_l1_qk', 'fp32.uniform_pm1']; run 55, scored 52 (12 governed, 40 pinned)
+ok   preflight refuses other stop keys: protocol safety lacks abs_stop_c; protocol safety lacks board_cap_w; protocol safety lacks cap_consecutive; to
+ok   preflight refuses a 93 W board stop, E80's own heater and a left-out tile: protocol board stop 93 W is above 85 W; protocol tools.heater is 'build/sparsity_t2/host/sparsity_host', not 'tools/claims-v3/ccheck/sparsity_ccheck.sh'; protocol runs fp32.uniform_pm1, left out by name; tools/claims-v3/
+ok   preflight refuses missing binaries: tools/claims-v3/ccheck/sparsity_ccheck.sh: sha256 None, registered d00158d454596a8325ff3a7ffa3dff6e80a2e1798516b022009450f63443b9b7; tools/claims-v3/c
+ok   the protocol's stops {'abs_stop_c': 76, 'board_cap_w': 85, 'cap_consecutive': 3}, admission limit 82.0 W and lock 82.0 W
+ok   every label in the admission table, highest planned estimate 81.652 W <= 82 W, no left-out label in a run or in the table
+ok   admission refuses the left-out tiles at their frozen estimates ({'fp32.anchor7_randn_a': 'estimate 86.33 W > 82.0 W', 'fp32.anchor7_randn_b': 'estimate 86.16 W > 82.0 W', 'fp32.laplace_both': 'estimate 86.29 W > 82.0 W', 'fp32.real_qwen_l3_softmax_v_sink': 'estimate 84.91 W > 82.0 W', 'fp32.real_s360_l1_qk': 'estimate 86.07 W > 82.0 W', 'fp32.uniform_pm1': 'estimate 86.34 W > 82.0 W'}) and, absent from the table, refuses them anyway (not in the admission table); admits fp16.randn_x8 at 81.65 W; after a lock at 80.5 W refuses it (estimate 81.652 W >= 80.5 W, the estimate of a run that read 82.0 W) but not fp16.sorted_k (76.92 W)
+ok   heater tools/claims-v3/ccheck/sparsity_ccheck.sh (host build/ccheck/b/host/sparsity_host eae32a152b8f...), kernel build/sparsity_t2/kernel/sparsity.elf
+ok   the override keeps other refusals (no card lock /run/lock/etsoc-shire0.lock) and drops only the compiled-heater two (None)
+ok   run_hpl's load_protocol yields the registered order: 171 BURST runs, idx and label as predictions-e165.json's, rep 1; each pass opens with the three zeros anchors and holds the same 57 labels; no check refuses ([]); the dry twin is its first 114 runs
+ok   the stop tests: one 6 s burst of fp32.anchor7_zeros with board_cap_w 30 W, or abs_stop_c 30 C, the rest of the protocol unchanged
+ok   smoke C log: sound None; missing record: smoke: SMOKE-01 launch 2 has no C record; nonzero C: smoke: SMOKE-01 launch 1: a zeros tile's C is not +0 (first ; other kernel: smoke: the C log's host record names eae32a152b8f0; poison off: smoke: SMOKE-01 launch 0: C record ok True poison False mask; 40 ms gaps: smoke: the C log adds 39.0 ms a launch; E143's longest run would hold the device 7.23 s, o
+
+ALL PASS

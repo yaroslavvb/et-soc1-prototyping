@@ -1,0 +1,38 @@
+# tools/claims-v3/dmcmd_audit.py (sha256 f29e91ca97705454..., table 50168632931fd8c1...) on E165's run chain (the paths below), run at 09:41 PST on Wed 4 Nov 2026 at the desk on the Intel, before the kit's commit, any claim and any launch.
+# files: tools/claims-v3/e165/run_e165.py tools/claims-v3/e165/queue_e165.py tools/claims-v3/e165/e165_common.py tools/claims-v3/e165/score_e165.py tools/claims-v3/e165/make_protocol_e165.py tools/claims-v3/e165/make_predictions_e165.py tools/claims-v3/e165/selftest_e165.py tools/claims-v3/e165/selftest_score_e165.py tools/claims-v3/e165/collect_e165.sh tools/claims-v3/ccheck/sparsity_ccheck.sh tools/claims-v3/ccheck/build_host_ccheck.sh tools/claims-v3/ccheck/patch_host_ccheck.py <scratch>/patched/main.cpp (patch_host_ccheck.py applied to a copy of workloads/sparsity/host/main.cpp 0f53a7d5...: sha256 5bd029ca1bc0a3f6..., the source of the C-logging host E160 ran and E165 runs) workloads/sparsity/host/main.cpp workloads/sparsity/kernel/sparsity.c tools/claims-v3/e119/run_e119.py tools/claims-v3/kspeed/e105/run_e105.py tools/claims-v3/kspeed/e101/run_e101s.py tools/claims-v3/kspeed/run_kspeed.py tools/claims-v3/hpl/run_hpl.py tools/claims-v3/e111/idle_logins_e111.py tools/claims-v3/kinds/e101_common.py docs/reports/data/2026-11-04-q140l-a2-session-terms/predict_m9_a2.py
+# the one reviewed exception, E160's (and E143's, E146's, E158's, E159's): run_hpl.py:622's residency read (run_e119.py rewrites it to raw states 1 2 3, which this ettelem refuses at its argument check before it opens the device; E160: 160 attempts, every one rc 2, no record)
+# without the exception the same run prints NO-GO on that one line only, as for E160: dmcmd_audit: NO-GO (19 send site(s), 1 disallowed; allow-list: none)
+# allow-list empty: E165 sends no statistics reset (no --reset-ms), no WRITE of any kind
+dmcmd_audit: GO (19 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e165/queue_e165.py:249: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e165/queue_e165.py:249: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e165/queue_e165.py:249: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e165/queue_e165.py:249: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e165/queue_e165.py:249: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:597: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/hpl/run_hpl.py:618: ettelem sptrace: TRACE_EXTRACT [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:622: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES [READ, pmic none] EXCEPTED: SP_ERROR_LOG: run_e119.py patch_residency rewrites this command to residency 1 2 3, which build/ettelem-hpl/ettelem (ettelem-dv2) refuses at its argument check before it opens the device (E126: 51 queries, E136: 37, E146: 109, E158: 107, E159: 15, E160: 160, every one rc 2, no record) - variant ettelem-dv2; raw states 2 3 4 5 6 (raw 4 5 6 is no state at BL2 0.22.0: 2 SP Runtime Errors each)
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      3 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      3 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      2 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      2 site(s)  ok
+  GET_MODULE_RESIDENCY_THROTTLE_STATES       READ         pmic none      1 site(s)  EXCEPTED
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      2 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      2 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+  TRACE_EXTRACT                              READ         pmic none      1 site(s)  ok
+# exit 0

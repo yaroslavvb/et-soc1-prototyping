@@ -1,0 +1,448 @@
+{
+ "experiment": "E165",
+ "request": "Q141(g)",
+ "card": "aifoundry2",
+ "order_seed": 165,
+ "note": "E165's stop-path test (die): the registered watcher with one stop lowered, so that it must trip on live samples; the session must end with exit 4",
+ "order": {
+  "source": "tools/claims-v3/e165/predictions-e165.json order",
+  "runs": 114,
+  "runs_per_pass": 57,
+  "passes": [
+   1,
+   2
+  ]
+ },
+ "tools": {
+  "heater": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "ccheck": {
+  "host": "build/ccheck/b/host/sparsity_host",
+  "host_sha256": "eae32a152b8f0861bd2922c500eac217c931c9b464d3274a6bcf346cc986bfd2",
+  "wrapper": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "wrapper_sha256": "d00158d454596a8325ff3a7ffa3dff6e80a2e1798516b022009450f63443b9b7",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "kernel_sha256": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "log": "<session dir>/c-log.jsonl"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "pool": "tools/claims-v3/kinds/blind7/blind7.json",
+ "predictions": "tools/claims-v3/e165/predictions-e165.json",
+ "left_out_by_name": [
+  "fp32.anchor7_randn_a",
+  "fp32.anchor7_randn_b",
+  "fp32.laplace_both",
+  "fp32.real_qwen_l3_softmax_v_sink",
+  "fp32.real_s360_l1_qk",
+  "fp32.uniform_pm1"
+ ],
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 30,
+  "board_cap_w": 85,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 2
+ },
+ "smoke_cycles": {
+  "b7-fp32.anchor7_zeros": 546,
+  "b7-fp16.anchor7_zeros": 546,
+  "b7-int8.anchor7_zeros": 318
+ },
+ "dry_c_w": {
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.anchor7_randn_a.bin": 23.032,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.anchor7_randn_b.bin": 22.98,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.anchor7_zeros.bin": 1.396,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.b_onebit_b8_pi.bin": 13.39,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.b_onebit_b9_one.bin": 14.708,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.laplace_both.bin": 23.263,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.randn_x8.bin": 23.31,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.real_qwen_l3_softmax_v_h1.bin": 18.492,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.real_s360_l3_qk.bin": 22.828,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.real_s360_l3_w8a16_gate.bin": 22.67,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.sorted_k.bin": 20.859,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp16/fp16.uniform_pm1.bin": 22.98,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.anchor7_zeros.bin": 1.438,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_full.bin": 13.495,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_one.bin": 14.387,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_pi.bin": 13.406,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_seventh.bin": 13.29,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b20_third_a1p5.bin": 14.529,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.b_onebit_b22_third.bin": 14.177,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.dropout30_both.bin": 15.883,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_a_gray_walk.bin": 10.487,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_b_alt_b26.bin": 10.96,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_b_alt_lsb.bin": 10.865,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_b_alt_nib.bin": 16.912,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.exp_only_pos12.bin": 15.406,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.mant2_spreadexp.bin": 18.135,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.randn_a24k.bin": 14.555,
+  "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.real_smol_l3_w8a16_q_outlier.bin": 23.017,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.a_full_b_pos.bin": 8.96,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.anchor7_full_a.bin": 9.055,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.anchor7_full_b.bin": 9.013,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.anchor7_zeros.bin": 2.121,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_0f_f0.bin": 7.874,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_6bit_rand.bin": 9.028,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_7f_80_aconst.bin": 4.005,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_compl_rand.bin": 8.204,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_near7_rand.bin": 8.241,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_zero_55.bin": 6.236,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.b_line_zero_7f.bin": 5.575,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_01.bin": 8.283,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_33.bin": 8.65,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_55.bin": 8.64,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_55_asmall.bin": 8.477,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_fd.bin": 8.572,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_ff.bin": 8.503,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.bheld_rand.bin": 8.818,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.pos_small.bin": 6.504,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_qwen_l3_w8a8_down_massive.bin": 8.262,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_qwen_l3_w8a8_k_sink.bin": 8.619,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_s360_l2_w8a8_o.bin": 8.173,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_s360_l3_w8a8_q_outlier.bin": 8.556,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_smol_l2_w8a8_up_outlier.bin": 8.677,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.real_smol_l3_w8a8_down.bin": 8.74,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.relu_q_a.bin": 7.79,
+  "file:tools/claims-v3/kinds/blind7/tiles/int8/int8.sparse_rows_a.bin": 7.952,
+  "file:tools/claims-v3/kinds/tiles/fp16/randn.bin": 23.047,
+  "file:tools/claims-v3/kinds/tiles/int8/full.bin": 8.979
+ },
+ "dma": {
+  "e143_smoke_gap_ms_median": 1.0,
+  "e143_s1_held_s_max": 6.57,
+  "launches": 17,
+  "projected_held_max_s": 7.2,
+  "budget_s": 7.5
+ },
+ "limit_p800_w": 82.0,
+ "peak_lock_w": 82.0,
+ "relation": {
+  "B800": 33.60956684526229,
+  "s800": 1.90517380064275
+ },
+ "admission": {
+  "b7-fp16.anchor7_randn_a": {
+   "c_ref_w": 23.032,
+   "fixed_p800_w": 81.073,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp16.anchor7_randn_b": {
+   "c_ref_w": 22.98,
+   "fixed_p800_w": 80.984,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp16.anchor7_zeros": {
+   "c_ref_w": 1.396,
+   "fixed_p800_w": 39.842,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp16.b_onebit_b8_pi": {
+   "c_ref_w": 13.39,
+   "fixed_p800_w": 62.69,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp16.b_onebit_b9_one": {
+   "c_ref_w": 14.708,
+   "fixed_p800_w": 65.25,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp16.laplace_both": {
+   "c_ref_w": 23.263,
+   "fixed_p800_w": 81.564,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp16.randn_x8": {
+   "c_ref_w": 23.31,
+   "fixed_p800_w": 81.652,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp16.real_qwen_l3_softmax_v_h1": {
+   "c_ref_w": 18.492,
+   "fixed_p800_w": 72.424,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp16.real_s360_l3_qk": {
+   "c_ref_w": 22.828,
+   "fixed_p800_w": 80.7,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp16.real_s360_l3_w8a16_gate": {
+   "c_ref_w": 22.67,
+   "fixed_p800_w": 80.394,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp16.sorted_k": {
+   "c_ref_w": 20.859,
+   "fixed_p800_w": 76.92,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp16.uniform_pm1": {
+   "c_ref_w": 22.98,
+   "fixed_p800_w": 80.97,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.anchor7_zeros": {
+   "c_ref_w": 1.438,
+   "fixed_p800_w": 40.1,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.b_onebit_b20_full": {
+   "c_ref_w": 13.495,
+   "fixed_p800_w": 63.08,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.b_onebit_b20_one": {
+   "c_ref_w": 14.387,
+   "fixed_p800_w": 64.77,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.b_onebit_b20_pi": {
+   "c_ref_w": 13.406,
+   "fixed_p800_w": 62.9,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.b_onebit_b20_seventh": {
+   "c_ref_w": 13.29,
+   "fixed_p800_w": 62.67,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.b_onebit_b20_third_a1p5": {
+   "c_ref_w": 14.529,
+   "fixed_p800_w": 65.04,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.b_onebit_b22_third": {
+   "c_ref_w": 14.177,
+   "fixed_p800_w": 64.38,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.dropout30_both": {
+   "c_ref_w": 15.883,
+   "fixed_p800_w": 67.62,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.exp_a_gray_walk": {
+   "c_ref_w": 10.487,
+   "fixed_p800_w": 57.38,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.exp_b_alt_b26": {
+   "c_ref_w": 10.96,
+   "fixed_p800_w": 58.424,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.exp_b_alt_lsb": {
+   "c_ref_w": 10.865,
+   "fixed_p800_w": 58.201,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.exp_b_alt_nib": {
+   "c_ref_w": 16.912,
+   "fixed_p800_w": 69.764,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.exp_only_pos12": {
+   "c_ref_w": 15.406,
+   "fixed_p800_w": 66.96,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.mant2_spreadexp": {
+   "c_ref_w": 18.135,
+   "fixed_p800_w": 72.072,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.randn_a24k": {
+   "c_ref_w": 14.555,
+   "fixed_p800_w": 65.09,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-fp32.real_smol_l3_w8a16_q_outlier": {
+   "c_ref_w": 23.017,
+   "fixed_p800_w": 81.24,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.a_full_b_pos": {
+   "c_ref_w": 8.96,
+   "fixed_p800_w": 54.98,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.anchor7_full_a": {
+   "c_ref_w": 9.055,
+   "fixed_p800_w": 55.15,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.anchor7_full_b": {
+   "c_ref_w": 9.013,
+   "fixed_p800_w": 55.06,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.anchor7_zeros": {
+   "c_ref_w": 2.121,
+   "fixed_p800_w": 41.9,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.b_line_0f_f0": {
+   "c_ref_w": 7.874,
+   "fixed_p800_w": 53.84,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.b_line_6bit_rand": {
+   "c_ref_w": 9.028,
+   "fixed_p800_w": 55.16,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.b_line_7f_80_aconst": {
+   "c_ref_w": 4.005,
+   "fixed_p800_w": 46.8,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.b_line_compl_rand": {
+   "c_ref_w": 8.204,
+   "fixed_p800_w": 54.53,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.b_line_near7_rand": {
+   "c_ref_w": 8.241,
+   "fixed_p800_w": 54.4,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.b_line_zero_55": {
+   "c_ref_w": 6.236,
+   "fixed_p800_w": 49.8,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.b_line_zero_7f": {
+   "c_ref_w": 5.575,
+   "fixed_p800_w": 49.32,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.bheld_01": {
+   "c_ref_w": 8.283,
+   "fixed_p800_w": 53.87,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.bheld_33": {
+   "c_ref_w": 8.65,
+   "fixed_p800_w": 54.68,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.bheld_55": {
+   "c_ref_w": 8.64,
+   "fixed_p800_w": 54.582,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.bheld_55_asmall": {
+   "c_ref_w": 8.477,
+   "fixed_p800_w": 54.46,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.bheld_fd": {
+   "c_ref_w": 8.572,
+   "fixed_p800_w": 54.39,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.bheld_ff": {
+   "c_ref_w": 8.503,
+   "fixed_p800_w": 54.27,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.bheld_rand": {
+   "c_ref_w": 8.818,
+   "fixed_p800_w": 54.92,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.pos_small": {
+   "c_ref_w": 6.504,
+   "fixed_p800_w": 50.29,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.real_qwen_l3_w8a8_down_massive": {
+   "c_ref_w": 8.262,
+   "fixed_p800_w": 53.64,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.real_qwen_l3_w8a8_k_sink": {
+   "c_ref_w": 8.619,
+   "fixed_p800_w": 54.31,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.real_s360_l2_w8a8_o": {
+   "c_ref_w": 8.173,
+   "fixed_p800_w": 53.45,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.real_s360_l3_w8a8_q_outlier": {
+   "c_ref_w": 8.556,
+   "fixed_p800_w": 54.2,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.real_smol_l2_w8a8_up_outlier": {
+   "c_ref_w": 8.677,
+   "fixed_p800_w": 54.42,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.real_smol_l3_w8a8_down": {
+   "c_ref_w": 8.74,
+   "fixed_p800_w": 54.55,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.relu_q_a": {
+   "c_ref_w": 7.79,
+   "fixed_p800_w": 52.72,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "b7-int8.sparse_rows_a": {
+   "c_ref_w": 7.952,
+   "fixed_p800_w": 53.04,
+   "what": "the largest of the tile's three frozen 95% upper peaks (M9_a2_q140l, M9_m8_relation, M8: admission-aifoundry2-82w.json)"
+  },
+  "k-fp16-randn": {
+   "c_ref_w": 23.047,
+   "fixed_p800_w": 80.52,
+   "what": "the larger of E143's and E160's highest board samples on this tile and P800 from their measured c plus M8's q95 peak excess"
+  },
+  "k-int8-full": {
+   "c_ref_w": 8.979,
+   "fixed_p800_w": 53.67,
+   "what": "the larger of E143's and E160's highest board samples on this tile and P800 from their measured c plus M8's q95 peak excess"
+  },
+  "rest": {
+   "c_ref_w": 0.0,
+   "fixed_p800_w": 33.61,
+   "what": "the idle card (no launch)"
+  }
+ },
+ "blocks": [
+  {
+   "name": "STOPTEST",
+   "title": "the die stop's path on live samples",
+   "default": false,
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/blind7/tiles/fp32/fp32.anchor7_zeros.bin",
+     "label": "b7-fp32.anchor7_zeros",
+     "start": {
+      "mode": "cool",
+      "max_c": 99,
+      "max_wait_s": 5
+     },
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5
+    }
+   ]
+  }
+ ]
+}
