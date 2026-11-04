@@ -27,7 +27,7 @@ D over aifoundry3's on 25 tiles, median **0.9632 [0.9613, 0.9659]**, holds M8's 
 gives the reading and its sensitivity: on the registered footing the card term and the cheap-read scale hold to 1%; across this card's
 reduction arms the float ratio moves 0.954–0.973, so X1 fails on three of five arms and S1 on two.*
 
-*Corrected after verification (a dated note, Tue 3 Nov 2026, about 18:00–18:40 PST; desk only: no card, no device command, nothing re-run
+*Corrected after verification (a dated note, Tue 3 Nov 2026, about 17:55–18:11 PST; desk only: no card, no device command, nothing re-run
 on a box). An independent verifier re-derived what this README reports from the box's own raw data. Every registered verdict and number
 reproduces byte for byte (the reduction, the scorer and the C check re-run), no WRITE was sent, and the blind order holds. It found five
 minor faults in what this README and the lane's result draw from them; while correcting the second, this pass found two more sentences of
@@ -402,7 +402,7 @@ tools/claims-v3/e157/collect_e157.sh <copy> [<E153's e153.json> [<its C-excluded
 
 ## Corrections after verification (Tue 3 Nov 2026)
 
-*Desk only, about 18:00–18:40 PST: no card, no device command, nothing re-run on a box. The lane's verifier (17:35–17:58 PST) re-derived this
+*Desk only, about 17:55–18:11 PST: no card, no device command, nothing re-run on a box. The lane's verifier (17:35–17:58 PST) re-derived this
 README from the box's raw data. All 41 raw files equal the box's. The registered reduction, the scorer (with and without `--e153`) and the C
 check (3,170 of 3,170) re-run byte for byte. `dmcmd_audit.py` reads GO with the one reviewed exception, and every getter at et-platform
 `836a4ab` is a RAM copy or one of the allowed PMIC voltage-register reads. The statistics reset was never sent (`since_reset_ms` −1 in all
