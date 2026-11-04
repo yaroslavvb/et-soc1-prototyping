@@ -12,6 +12,8 @@ kinds), with check 4's interval on E154 under **items 9 and 8** (heat over minut
 the lab records, on the kinds page and on the hubs; fault 10 (the archive's host named in public lab files) is the owner's call
 and is left untouched, and fault 11 (pushed commit messages) cannot change.*
 
+*Checked, then corrected (Wed 4 Nov 2026, from about 01:50 PST; insertions only, every earlier word kept): a verifier re-read this lane at 01:15–01:45 PST and found that it holds, with five minor wording faults. Each is corrected by a dated note where it sits and, where the same words were published, on the kinds page and the hubs; the figures the notes quote come from [`check_fix_figures.py`](check_fix_figures.py) → [`check-fix-figures.txt`](check-fix-figures.txt), derived from this folder's committed outputs (§ Corrected after verification).*
+
 ## Results first
 
 **1. Q139(s)'s board exponent n = 2.28 fails out of sample on E160: it doubles the governed clock's error.** n = 2.28 was
@@ -61,6 +63,9 @@ selection itself.** From E153's and E157's committed `power_rows` (the 30 priori
   −1.21 / −1.12 W on card 1, M8 / M7 / M6), `int8.a_zeros_b_lineflip` and `int8.b_line_zero_ff` (M8's near-whole-byte discount:
   +0.62 and +0.36 W in M8, +0.23 and +0.04 W in M7, −0.23 and −0.35 W in M6 on aifoundry3, so these two are M8's misses, not every
   model's), and `int8.bheld_bit1`, `bheld_bit4`, `bheld_bit7` (B held: −0.24 to −0.57 W, every model low).
+
+  *Corrected after verification (Wed 4 Nov 2026; the words above are kept): B held reads −0.13 to −0.57 W over the three models and both cards (M6 −0.15 and −0.13 W on aifoundry3's bits 1 and 7; −0.24 to −0.57 W is M8's and M7's), every model low. And the near-whole-byte pair are not M8's misses alone: every model misses `int8.a_zeros_b_lineflip` by 0.2 W or more on aifoundry3 (+0.62 / +0.23 / −0.23 W, the printout's own `shared` flag), and M7 misses it by +0.41 W on card 1; `int8.b_line_zero_ff` is missed by M8 and by M6 in opposite directions (+0.36 / −0.35 W on aifoundry3, +0.37 / −0.36 W on card 1), and only M7 reads it (+0.04 / +0.03 W) ([`check-fix-figures.txt`](check-fix-figures.txt), check 2).*
+
 - They overlap each model's own six worst in only 3–5 of 6, and removing each model's own six worst gives 0.150–0.171 W: any post
   hoc removal of the 20% worst tiles buys about this much. So 0.17–0.19 W is what fixing exactly those six tiles would leave, not a
   bound: a named term may mend unnamed tiles (`fp32.negzero_a_b_complement` +0.38 / +0.43 W and the real softmax tile −0.38 / −0.34 W
@@ -132,6 +137,9 @@ lane reads them differently:
   so the figure is mostly what dropping a fifth of the tiles post hoc gives, and a term could mend tiles outside the six. Quote it as
   "with the six tiles that carry the named misses taken out, every model reads the other 24 at 0.17–0.19 W (post hoc)". Two of the
   six, the near-whole-byte pair, are M8's misses only: M7 reads them to +0.23 / +0.04 W on aifoundry3.
+
+  *Corrected after verification (Wed 4 Nov 2026): not M8's only. +0.23 W is itself a miss by check 2's 0.2 W line, M6 misses that tile by −0.23 W on aifoundry3, and M7 misses it by +0.41 W on card 1; only M7 reads `int8.b_line_zero_ff` well (+0.04 / +0.03 W), which M6 misses by −0.35 / −0.36 W (check 2's dated note).*
+
 - **Check 4's int8 statement holds on aifoundry3 only.** On card 1 int8 edges a constant on the ten tiles left (0.105 against
   0.148 °C) inside a 0.20 °C readout floor. "A skill on the floats; int8's rises are whole-degree readings" stands for both cards.
 - **Check 3's int8 "about −1%" is −1.0% ± 1.5%:** card 1's int8 anchor spread 3.6% over its passes. The float figure the critic gave
@@ -139,6 +147,8 @@ lane reads them differently:
 - **Check 1 agrees, with one addition:** the two sessions' governed means sit 7.8–8.1 MHz apart in every arm while the spread inside
   each session does not move with n, so no clock-voltage form can remove the gap; the exponent buys E143 its offset and charges E160
   the same amount.
+
+*Disclosed after verification (Wed 4 Nov 2026): four outputs were added after this lane first read the critic's scripts (00:35:29 PST), each with this lane's own code: check 2's arm with a perfect exponent-class offset on top of the six removed (about 00:36), check 2's per-format intervals, biases and shares of the mean kind (00:36:47–00:36:51), check 4's interval on E154's sigma (00:37:12) and check 1's die-rise column (00:50). Everything else in the four checks was printed at 00:30:48–00:35:10 PST, before that read (the lane's tool log; its verifier named the die-rise column).*
 
 ## What it does to predicting power and heat
 
@@ -148,10 +158,16 @@ lane reads them differently:
   The exponent does not carry: quote s(f) from the reads at n = 2, keep the exponent out of M9, and carry a session term instead
   (rank 2; Q140(l) is told not to use 2.28). The board moves by at most about 0.15 W (the pinned board, 1.72 → 1.87 W at 2.28), the pinned clock by at most 0.06 MHz,
   and the die's rise by about 0.01 °C (0.660 → 0.655 °C over the 48 tiles).
+
+  *Corrected after verification (Wed 4 Nov 2026): "at most about 0.15 W … at most 0.06 MHz" took its two figures from two arms. At n = 2.28 (A5), against M7 as frozen, the pinned board's rms moves +0.15 W (1.718 → 1.872 W), the pinned clock's +0.02 MHz (3.884 → 3.906 MHz) and the die's rise −0.005 °C; at n = 2.43 (A3) +0.28 W, +0.05 MHz and −0.005 °C ([`check-fix-figures.txt`](check-fix-figures.txt), check 1).*
+
 - **Power of a new kind, what the named terms can buy (check 2).** Before: 0.24–0.32 W rms over pool 6's 30 kinds per card and model.
   With the six named-miss tiles removed: 0.17–0.19 W; with a perfect exponent-class offset too, 0.16–0.18 W; with each model's own
   worst six removed instead, 0.15–0.17 W. So about a third of the error sits in the named classes' tiles, and M9's gain should be
   scored on unaimed kinds as well (rank 1's rule).
+
+  *Corrected after verification (Wed 4 Nov 2026): this is a post hoc probe of where the error sits, not a bound on what the named terms can buy, as § 2 says (each model's own six worst out leave 0.15–0.17 W, and a term may mend tiles outside the six or hurt others). And "about a third of the error" mixed two measures: removing the six, a fifth of the 30 tiles, cuts the rms by 21–45% (about a third), and the six carry 50–75% of the summed squared error ([`check-fix-figures.txt`](check-fix-figures.txt), check 2).*
+
 - **A card nobody has measured (check 3).** No cheap read lands within 1% held out (E153: the closest −1.7%); two random anchors per
   format, paired on both 600 MHz cards, give card 1's float scale to −0.15% of pool 6's median and int8's to −1.0% ± 1.5%. A measured
   kind carried by the card term errs 0.72% per float tile and 1.97% per int8 tile. On one card pair and one session pair.
@@ -180,8 +196,14 @@ stays on the private notes' list, untouched. Fault 11, pushed commit messages, c
 2. **aifoundry2's burst figures and their offsets.** "So:" and the burst row: where the governor acts (17 of 48 tiles), the clock's
    error mostly a session offset whose sign changed (E143 −5.0, E160 +5.2 MHz), the board's a +1.1 W bias both sessions share; all
    48 read 5.1 MHz and 1.6 W; the brackets are over tiles inside one session.
+
+   *Corrected after verification (Wed 4 Nov 2026): the two numbers come from two models. −5.0 MHz is M7's mean on E143 (−4.96) and +5.2 MHz M8's on E160 (+5.17); with M7 alone the sign still changes, −4.96 then +2.82 MHz ([`check-fix-figures.txt`](check-fix-figures.txt), check 1). The Horace Hub's Fix entry gave the pair without the models; its next Fix entry names them.*
+
 3. **The share of a kind's watts.** "So:" (page) and 05's "So:": 2.4–2.9% of an fp32 kind's watts, under 1% of fp16's, 6–7% of
    int8's (M8), not "about 1–2% of a float kind's" and "4–10% of an int8 kind's".
+
+   *Corrected after verification (Wed 4 Nov 2026): each share is that format's own rms over its mean kind (M8 on aifoundry3 / card 1: fp32 0.330 / 0.386 W of 13.78 / 13.24 W, fp16 0.125 / 0.098 W of 17.89 / 17.26 W, int8 0.296 / 0.327 W of 4.92 / 4.76 W). The page's "So:", the Horace Hub's quote of it and its Fix entry, and 05's note set the shares right after the 30 kinds' 0.29–0.32 W, which is 2.1–2.4% of a mean fp32 kind ([`check-fix-figures.txt`](check-fix-figures.txt), check 2); the page and the quote now say "per format", 05 carries a dated note and the hub's next Fix entry says so.*
+
 4. **The intervals.** Pool 6's per-format and 30-tile bootstrap intervals beside its table and its tile; E154's 0.22–1.06 °C beside
    every quote of its 0.37 °C (the page's tiles, the heat-over-minutes row, item 9, "So:"; 05's "So:").
 5. **"0.69 °C rms over the two".** 05's governed heat row and E161's README (a dated note): G1Q, −0.90 °C, is the heat-from-the-bits
@@ -215,6 +237,45 @@ stays on the private notes' list, untouched. Fault 11, pushed commit messages, c
 - The [Horace Hub](https://spacesheep.dev/@yaroslavvb/horace-hub): `a3a12e645e74` (01:07:51 PST) over `99f33ddbbd17`, public and unlisted: one new Fix entry at the top of week 45 (no Log entry edited; its head 300 visible characters, the Log's two-line flags unchanged at 16), Status (where it stands, the Q139 paragraph, section 11 re-quoted from `e75e1842ac8a` by the integration's quoting rules, Q139's verification), Levels stops 1 and 3, and the Library line. Read back signed out: `<main>` identical to the deploy copy (273 auto anchors), 32 of 32 phrase checks, public-text counts unchanged against the replaced version's deploy copy. The projects tracker (private): `7aa0361c0dfc` over `4e31403d5290`, one new Fix entry and its Horace row (the page's version, heat as each card predicted it); signed out it refuses (302 / 401), signed in its text equals the deploy copy, 8 of 8 phrase checks. Both committed in gyroscope `b44a0ab4`, the page in `6d111335`.
 - **Not changed:** the Horace Hub's private notes and the AI Foundry hub. Neither quotes a faulty sentence outside its Log (the AI Foundry hub's Experiments rows give E154, E157, E160, E161 and Q139(s) as registered, E161's with its kernel-duty figure), and their Logs are append-only. Fault 10 stays on the private notes' list for the owner (its "Small fixes owed").
 - No verifier has re-read this lane's checks or corrections.
+
+*Checked (Wed 4 Nov 2026): a verifier re-read the checks and the corrections at 01:15–01:45 PST; they hold, with five minor wording faults (§ Corrected after verification). This section's window, 00:5x–01:1x PST, is right; the hubs' Fix entries and the Horace Hub's Status gave this lane's window as ending at 01:2x, a time not yet reached when they went live.*
+
+## Corrected after verification (Wed 4 Nov 2026, from about 01:50 PST; post hoc, desk only)
+
+A verifier re-read this lane's four checks and its corrections at 01:15–01:45 PST. Every number re-derived from the committed
+files, the timing and the post hoc labels hold, and the hubs' Logs stayed append-only; it found five minor wording faults and no
+major one. This pass corrects each with a dated note where it sits (insertions only) and, where the same words were published, on
+the kinds page and the hubs. [`check_fix_figures.py`](check_fix_figures.py) → [`check-fix-figures.txt`](check-fix-figures.txt)
+and [`check-fix-figures.json`](check-fix-figures.json) derive the figures the notes quote from this folder's committed outputs
+(standard library, a second; rerun it like the others): nothing is re-measured, and no registered, frozen or scored number
+changes.
+
+1. **Check 2's B-held range and the near-whole-byte pair** (§ 2, Against the critic): B held reads −0.13 to −0.57 W over the
+   three models and both cards; every model misses `int8.a_zeros_b_lineflip` on aifoundry3, and M7 misses it on card 1 (+0.41 W).
+2. **How check 2 and check 1's side effects are described** (What it does, and this lane's result): check 2 is a post hoc probe,
+   not a bound; the six tiles, a fifth of the 30, cut the rms by 21–45% and carry 50–75% of the summed squared error. At
+   n = 2.28 the pinned board moves 0.15 W and the pinned clock 0.02 MHz; the 0.06 MHz was n = 2.43's (where the board moves
+   0.28 W).
+3. **This lane's window** (the two hubs' Fix entries, the Horace Hub's Status): 00:2x–01:1x PST, not to 01:2x. Its deploys were
+   at 01:07:51 and 01:07:55 PST and its last commit at 01:11:57. The Status is rewritten; each Log gets a new Fix entry.
+4. **The sign change, by model** (the Horace Hub's Fix entry; item 2 above): M7's −4.96 MHz on E143 beside M8's +5.17 on E160;
+   with M7 alone, −4.96 then +2.82 MHz.
+5. **The shares of a kind's watts** (the page's "So:", the Horace Hub's quote of it and its Fix entry, 05's note; item 3 above):
+   each format's own rms over its mean kind, "per format"; the 30 kinds' 0.29–0.32 W is 2.1–2.4% of a mean fp32 kind.
+
+Found by this pass, outside the five:
+
+6. **Four outputs added after the critic's scripts were read**, now disclosed under Against the critic; the verifier named one
+   of them, check 1's die-rise column.
+7. **`fp32.b_onebit_b20_third`'s miss.** The kinds page (four places), the Horace Hub's Levels and four record cells quoted it as
+   0.7–1.1 W, or 1.09 W, under every model; over the three models and both cards it is 0.70–1.21 W (card 1: M8 −1.09, M7 −1.21,
+   M6 −1.12 W, as E157's own table gives; [`check-fix-figures.txt`](check-fix-figures.txt), check 2). The page and Levels now say
+   0.7–1.2 W; 02's Q139 row, 03's E157 entry and 05's item-15 and card-1 rows carry dated clauses.
+
+**What this does to predicting power and heat:** no term, fit, prediction, band or verdict changes, and no out-of-sample error
+moves. It corrects how the records quote four things: check 2 locates the blind power error (the six named-miss tiles carry
+50–75% of its square) without bounding what a term can buy; n = 2.28's side effects outside the governed clock are 0.15 W and
+0.02 MHz; the shares of a kind's watts are per format; and the bit-20 tile's miss reaches 1.21 W.
 
 ## Device commands sent
 

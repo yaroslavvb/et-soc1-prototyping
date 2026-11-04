@@ -7125,7 +7125,7 @@ the stop-path test 15702, the smoke 15701 and four passes, 15710–15713, three 
   −0.187 W, outside ±0.152); E78's random anchors moved at most 0.061 W. Repeat D between days on card 1 reproduces to 0.1–0.2 W.
 - **Power:** M8 0.386 / 0.098 / 0.327 W rms (fp32 / fp16 / int8; P1 FAIL, its line 0.302), 0.323 W over the 30 priority-1 tiles
   (bias −0.012 W), 0.366 W over the 44 new kinds; the floats' bias **+0.002 W** against M6's −0.127 W on the same 18 tiles; **29
-  of 30** inside (`fp32.b_onebit_b20_third` outside, 1.09 W under every model).
+  of 30** inside (`fp32.b_onebit_b20_third` outside, 1.09 W under every model) *(M8's 1.09 W; M7 1.21, M6 1.12 W, E157's table; Q140(c)'s fix pass, Wed 4 Nov 2026)*.
 - **Not better than M6:** M8 − M6 +0.040 W [−0.013, +0.128], NOT RESOLVED (+0.086 [+0.021, +0.178], WORSE, on E142's own footing);
   M6 0.377 / 0.134 / 0.222 W.
 - **By case** (post hoc, C1): the two seeded-weight tiles 0.082 W, the two C-register tiles 0.094 W (M6 0.322: the C-register term

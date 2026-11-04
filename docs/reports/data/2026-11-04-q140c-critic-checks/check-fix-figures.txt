@@ -1,0 +1,45 @@
+Q140(c), AFTER ITS VERIFIER: FIGURES FOR THE DATED CORRECTIONS (post hoc; from this folder's committed check outputs)
+
+CHECK 1. E160, each arm against A0 (M7 as frozen): rms of measured - predicted
+  arm                                                  pinned board W         pinned clock MHz       die rise C, all 48       governed board W
+  A2_n2.00_chain_refit                         1.718 -> 1.722 (+0.004)  3.884 -> 3.884 (+0.000)  0.660 -> 0.661 (+0.000) 1.105 -> 1.112 (+0.007)
+  A5_n2.28_chain_on_committed_powers           1.718 -> 1.872 (+0.154)  3.884 -> 3.906 (+0.022)  0.660 -> 0.655 (-0.005) 1.105 -> 1.121 (+0.016)
+  A5c_n2.28_chain_on_E66_rereferred_powers     1.718 -> 1.792 (+0.074)  3.884 -> 3.901 (+0.017)  0.660 -> 0.648 (-0.012) 1.105 -> 1.109 (+0.004)
+  A4c_ramp_slopes_at_E66_slope_rereferred      1.718 -> 1.856 (+0.139)  3.884 -> 3.902 (+0.018)  0.660 -> 0.653 (-0.007) 1.105 -> 1.087 (-0.017)
+  A3_n2.43_chain_refit                         1.718 -> 2.000 (+0.282)  3.884 -> 3.936 (+0.052)  0.660 -> 0.655 (-0.005) 1.105 -> 1.144 (+0.039)
+  So at n = 2.28 (A5) the pinned board moves +0.154 W, the pinned clock +0.022 MHz and the die's rise -0.005 C; at n = 2.43 (A3) +0.282 W, +0.052 MHz and -0.005 C.
+  The governed clock's mean error by model and session (MHz): M7 (A0) on E143 -4.971; M7 on E143, registered F1 -4.964; M7 (A0) on E160 +2.817; M8 on E160, registered F1 +5.166
+  (M8 was frozen after E143 ran, so E143 has no M8 score.)
+
+CHECK 2. POOL 6's 30 PRIORITY-1 NEW KINDS: what the six named-miss tiles carry (W)
+  aifoundry3   M8: rms 0.286 -> 0.190 without the six, a cut of 34%; the six carry 65% of the summed squared error (from their own errors: 65%); each model's own six worst removed 0.171
+  aifoundry3   M7: rms 0.252 -> 0.174 without the six, a cut of 31%; the six carry 62% of the summed squared error (from their own errors: 62%); each model's own six worst removed 0.150
+  aifoundry3   M6: rms 0.243 -> 0.193 without the six, a cut of 21%; the six carry 50% of the summed squared error (from their own errors: 50%); each model's own six worst removed 0.155
+  aifoundry1c1 M8: rms 0.323 -> 0.184 without the six, a cut of 43%; the six carry 74% of the summed squared error (from their own errors: 74%); each model's own six worst removed 0.171
+  aifoundry1c1 M7: rms 0.314 -> 0.174 without the six, a cut of 45%; the six carry 75% of the summed squared error (from their own errors: 75%); each model's own six worst removed 0.153
+  aifoundry1c1 M6: rms 0.283 -> 0.177 without the six, a cut of 38%; the six carry 69% of the summed squared error (from their own errors: 69%); each model's own six worst removed 0.152
+  Over both cards and three models: the six (a fifth of the 30 tiles) cut the rms by 21-45% and carry 50-75% of the summed squared error.
+
+  The 30 kinds' rms against a mean fp32 kind, and each format's own rms over its mean kind (M8):
+  aifoundry3  : all 30 0.286 W = 2.1% of a mean fp32 kind (13.78 W); per format fp32 0.330 W of 13.78 W = 2.4%, fp16 0.125 W of 17.89 W = 0.7%, int8 0.296 W of 4.92 W = 6.0%
+  aifoundry1c1: all 30 0.323 W = 2.4% of a mean fp32 kind (13.24 W); per format fp32 0.386 W of 13.24 W = 2.9%, fp16 0.098 W of 17.26 W = 0.6%, int8 0.327 W of 4.76 W = 6.9%
+
+  The named-miss tiles, error per model (M8 / M7 / M6, W), |error| >= 0.2 W marked *:
+    fp32.b_onebit_b20_third      aifoundry3   -0.808* / -0.796* / -0.704*   missed by M8, M7, M6
+    fp32.b_onebit_b20_third      aifoundry1c1 -1.089* / -1.208* / -1.119*   missed by M8, M7, M6
+    int8.a_zeros_b_lineflip      aifoundry3   +0.615* / +0.227* / -0.229*   missed by M8, M7, M6
+    int8.a_zeros_b_lineflip      aifoundry1c1 +0.782* / +0.409* / -0.035    missed by M8, M7
+    int8.b_line_zero_ff          aifoundry3   +0.360* / +0.045  / -0.354*   missed by M8, M6
+    int8.b_line_zero_ff          aifoundry1c1 +0.375* / +0.028  / -0.360*   missed by M8, M6
+    int8.bheld_bit1              aifoundry3   -0.276* / -0.303* / -0.146    missed by M8, M7
+    int8.bheld_bit1              aifoundry1c1 -0.314* / -0.414* / -0.261*   missed by M8, M7, M6
+    int8.bheld_bit4              aifoundry3   -0.543* / -0.568* / -0.418*   missed by M8, M7, M6
+    int8.bheld_bit4              aifoundry1c1 -0.428* / -0.521* / -0.375*   missed by M8, M7, M6
+    int8.bheld_bit7              aifoundry3   -0.242* / -0.273* / -0.126    missed by M8, M7
+    int8.bheld_bit7              aifoundry1c1 -0.306* / -0.401* / -0.258*   missed by M8, M7, M6
+    fp16.b_onebit_b6_third       aifoundry3   -0.482* / -0.449* / -0.342*   missed by M8, M7, M6
+    fp16.b_onebit_b6_third       aifoundry1c1 -0.459* / -0.548* / -0.444*   missed by M8, M7, M6
+    int8.b_line_55_aa            aifoundry3   +1.307* / +0.821* / +0.561*   missed by M8, M7, M6
+    int8.b_line_55_aa            aifoundry1c1 +1.364* / +0.818* / +0.565*   missed by M8, M7, M6
+  B held, all three models on both cards: -0.126 to -0.568 W (M8 and M7 only: -0.242 to -0.568); every reading negative (every model low).
+  fp32.b_onebit_b20_third, all three models on both cards: -0.704 to -1.208 W.
