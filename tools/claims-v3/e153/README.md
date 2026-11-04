@@ -357,4 +357,16 @@ sha256) and `planned-intervals.txt`; `ref_errors_e153.py` → `ref-errors-m8.jso
 
 ## Amendments
 
-*(none)*
+**A1 (Tue 3 Nov 2026, about 16:40 PST, during the session and before its registered reduction and scoring): a tile that never ran is
+not a C failure.** The session started at 16:21:44 PST. After its first pass (15310) ended at 16:35:07, the collector, the C check and the
+scorer were run once on that pass alone as a pipeline test (a scratch copy, outputs overwritten; one pass is below every rule's two-pass
+minimum, so no verdict exists and its numbers are not results and are reported nowhere). It found a fault in `score_e153.py`'s C status:
+E78's runner had skipped one run by its own rule ("launch reading not reached", `int8.b_line_zero_full`, as E141's D2), and the scorer
+counted a tile with **no launch** in the kept passes as a C failure (`all_pass` required at least one launch), so KC read FAIL and the tile
+was put in the C-excluded set. The registered rule says "every measured launch" (E153-KC above and `predictions-e153.json` › `rules`): a tile
+with no measured launch has nothing to check, and with no D it is outside every rule anyway. **The change** (code only, `score_e153.py`
+`score` and `k1_rules`): a tile with no launch in any kept pass is named in `c_not_measured` and is neither C-excluded nor a KC failure;
+K1-C reads FAIL on any launch not PASS, NOT SCORED if a K1 tile has no launch, else PASS. A kept pass with no `runs.jsonl` still fails every
+tile, as registered. Nothing else changes: no tile, prediction, band, reference error, rule threshold, footing or arm; the self-test's C
+plumbing cases (one ROUNDING launch, one launch with no C record) still fail their tile. A tile that runs in some kept passes and not others
+is judged on the launches it has, as before.

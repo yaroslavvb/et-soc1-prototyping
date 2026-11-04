@@ -273,8 +273,14 @@ def score(res, reg, runs_csv=None, cstat=None, e157=None):
     out["short_tiles"] = {"power": shortD, "heat": shortT}
     # KC: the scored set is the tiles whose every launch PASSed (when the C check is given)
     if cstat is not None:
-        cfail = sorted(t for t in names if not (cstat.get(t) or {}).get("all_pass"))
+        # Amendment A1 (README.md, Tue 3 Nov 2026, before the session's registered scoring): the rule is "every measured launch";
+        # a tile with no launch in any kept pass (E78's runner skipped it there) has no measured launch and no D, so it is named
+        # as not measured, not a C failure. A kept pass with no runs.jsonl still fails every tile (passes_without_log).
+        unmeasured = sorted(t for t in names if not (cstat.get(t) or {}).get("passes_without_log")
+                            and (cstat.get(t) or {}).get("launches", 0) == 0)
+        cfail = sorted(t for t in names if t not in unmeasured and not (cstat.get(t) or {}).get("all_pass"))
         out["c_excluded"] = cfail
+        out["c_not_measured"] = unmeasured
     else:
         cfail = []
         out["c_excluded"] = None
@@ -416,9 +422,13 @@ def k1_rules(reg, res, cstat):
     cv = None
     if cstat is not None:
         cs = {t: cstat.get(t) for t in reg["k1"]}
-        cv = {"verdict": "PASS" if all(s and s["all_pass"] for s in cs.values()) else "FAIL",
-              "critic_literal_pass_or_rounding": "PASS" if all(s and s["pass_or_rounding"] for s in cs.values()) else "FAIL",
-              "per_tile": cs}
+
+        def k1c(key):    # Amendment A1: FAIL on any launch not passing; NOT SCORED if a K1 tile was not measured; else PASS
+            bad = [s for s in cs.values() if s and (s["passes_without_log"] or (s["launches"] > 0 and not s[key]))]
+            if bad:
+                return "FAIL"
+            return "NOT SCORED" if any(not s or s["launches"] == 0 for s in cs.values()) else "PASS"
+        cv = {"verdict": k1c("all_pass"), "critic_literal_pass_or_rounding": k1c("pass_or_rounding"), "per_tile": cs}
     out = {"footing_arm": arm, "tiles": rows,
            "E153-K1-D": {"verdict": "NOT SCORED" if okD is None else ("PASS" if okD else "FAIL"),
                          "rule": f"|D_E153 - D_E141| <= {tol} W on each of the 6 tiles ({arm} footing on both sides)"},
