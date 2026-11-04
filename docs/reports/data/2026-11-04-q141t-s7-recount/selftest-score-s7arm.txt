@@ -1,0 +1,31 @@
+Q141(t) score_s7arm.py --selftest: the reader and the readings on the parent runs' committed data (E153 on aifoundry3, E157 on
+aifoundry1 card 1), with M8 primary as registered then; then the arm's machinery on pool 6's two byte twins (post hoc); then
+known-answer runs of R1-R6 on rows built from the arm's own numbers.
+
+T1 E153 (aifoundry3): 300 power and heat rows of M8, M7 and M6 read; errors reproduced 300 of 300 (worst 0.0e+00), inside flags 300 of 300; the reader's models agree: True
+   E153-P1: rms 0.330452 W (committed 0.330452), verdict FAIL (committed FAIL): reproduced
+   E153-P2: rms 0.125138 W (committed 0.125138), verdict PASS (committed PASS): reproduced
+   E153-P3: rms 0.295773 W (committed 0.295773), verdict PASS (committed PASS): reproduced
+   E153-C1: 29 of 30 inside, outside ['fp32.b_onebit_b20_third'], verdict PASS (committed PASS): reproduced
+   S class (5 tiles), M8: rms 0.4307, bias -0.2474 W, reproduced
+   S class (5 tiles), M7: rms 0.4208, bias -0.2158 W, reproduced
+   S class (5 tiles), M6: rms 0.3686, bias -0.1544 W, reproduced
+T2 E157 (aifoundry1c1): 300 power and heat rows of M8, M7 and M6 read; errors reproduced 300 of 300 (worst 0.0e+00), inside flags 300 of 300; the reader's models agree: True
+   E157-P1: rms 0.386376 W (committed 0.386376), verdict FAIL (committed FAIL): reproduced
+   E157-P2: rms 0.097530 W (committed 0.097530), verdict PASS (committed PASS): reproduced
+   E157-P3: rms 0.326542 W (committed 0.326542), verdict PASS (committed PASS): reproduced
+   E157-C1: 29 of 30 inside, outside ['fp32.b_onebit_b20_third'], verdict PASS (committed PASS): reproduced
+   S class (5 tiles), M8: reproduced
+   S class (5 tiles), M7: reproduced
+   S class (5 tiles), M6: reproduced
+
+T3 E153 fp32.b_onebit_b12_third (twin fp32.cal_third_b12, post hoc): k -0.0261 +- 0.0599 W against the rule's stage-price 3pt-27 -0.0261 (difference +0.0000: the clk term the rule leaves out, and rounding); M9 in sample r3 +0.206 -> r27 +0.180 W (D 10.024 +- 0.027)
+T3 E153 fp32.b_onebit_b20_third (twin fp32.cal_third_b20, post hoc): k +0.7844 +- 0.2667 W against the rule's stage-price 3pt-27 +0.7844 (difference +0.0000: the clk term the rule leaves out, and rounding); M9 in sample r3 -0.720 -> r27 +0.064 W (D 12.941 +- 0.061)
+T3 E157 fp32.b_onebit_b12_third (twin fp32.cal_third_b12, post hoc): k -0.0251 +- 0.0576 W against the rule's stage-price 3pt-27 -0.0251 (difference +0.0000: the clk term the rule leaves out, and rounding); M9 in sample r3 +0.113 -> r27 +0.088 W (D 9.554 +- 0.061)
+T3 E157 fp32.b_onebit_b20_third (twin fp32.cal_third_b20, post hoc): k +0.7542 +- 0.2565 W against the rule's stage-price 3pt-27 +0.7542 (difference +0.0000: the clk term the rule leaves out, and rounding); M9 in sample r3 -1.005 -> r27 -0.251 W (D 12.132 +- 0.063)
+
+T4 D = P27 + 0.30 W: R4 {'aifoundry3': 'COUNT+PRICE', 'aifoundry1c1': 'COUNT+PRICE', 'pooled': 'COUNT+PRICE'} (allowed PRICE or COUNT+PRICE); r3 = r27 - k on every row: True; as expected: True
+T4 D = P27: R4 {'aifoundry3': 'COUNT', 'aifoundry1c1': 'COUNT', 'pooled': 'COUNT'} (allowed COUNT); r3 = r27 - k on every row: True; as expected: True
+T4 D = P3: R4 {'aifoundry3': 'NOT SEPARATED', 'aifoundry1c1': 'NOT SEPARATED', 'pooled': 'NOT SEPARATED'} (allowed PRICE or NOT SEPARATED); r3 = r27 - k on every row: True; as expected: True
+
+selftest: PASS

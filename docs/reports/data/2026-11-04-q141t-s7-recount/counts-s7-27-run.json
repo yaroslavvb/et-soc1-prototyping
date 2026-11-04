@@ -1,0 +1,31 @@
+{
+ "check_mismatch_points": {},
+ "end_epoch": 1793815051,
+ "exit": 0,
+ "jobs": 4,
+ "nice_increment": 10,
+ "nice_observed": {
+  "all_bench_processes_from_about_09_20": 20,
+  "driver_at_start": 0,
+  "run_kinds_at_start": 10
+ },
+ "points": 216,
+ "points_per_tile": 27,
+ "reconstructed": true,
+ "rows": 8,
+ "seconds_per_point_one_core": 50.370370370370374,
+ "start_epoch": 1793812331,
+ "step": "s27",
+ "tiles": [
+  "fp32.b_onebit_b20_one",
+  "fp32.b_onebit_b20_full",
+  "fp32.b_onebit_b20_pi",
+  "fp32.b_onebit_b20_seventh",
+  "fp32.b_onebit_b22_third",
+  "fp16.b_onebit_b9_one",
+  "fp16.b_onebit_b8_pi",
+  "fp32.b_onebit_b20_third_a1p5"
+ ],
+ "wall_s": 2720.0,
+ "why": "bench_s7.py crashed after the bench had finished, at os.nice(0) (PermissionError, EPERM) in the line that writes this record; see REGISTRATION.md.dated-note.md. start_epoch: the runner script printed start 09:12:11 PST just before the driver started; end_epoch: counts-s7-27.json and bench-s7-27.log were written at 09:57:31 PST (their mtime) and the runner printed end 09:57:31; exit 0 is run_kinds.py's: it writes its JSON only after every point has returned (no --keep-going), and the file holds 8 rows of 27 points, every check_mismatch 0. The driver itself exited 1."
+}
