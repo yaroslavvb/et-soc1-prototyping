@@ -275,7 +275,7 @@ library, committed inputs only, and the registered scorer of `359c96b2` read fro
 
 An independent verifier re-derived every registered number and verdict of E153 from the committed data and the box's files and found them
 all as committed. It reported one major fault and six minor ones in what this README, the registration's A1 and the lane's result say about
-them. The fix pass (desk only, about 18:00–18:40 PST) re-checked each against the committed files before correcting it. Two of the
+them. The fix pass (desk only, about 18:05–18:30 PST; committed 18:29) re-checked each against the committed files before correcting it. Two of the
 verifier's readings were narrowed: int8's held-out scale has one form inside 1% of this session's ratio (C2), and the M2 interval without
 the two tiles was recomputed with the registered bootstrap (C6). Every number is in `corrections.txt`. **None changes a measured, frozen or
 registered number or verdict.** In this README the text is corrected in place and marked "corrected after verification, C<n>". The

@@ -371,7 +371,7 @@ tile, as registered. Nothing else changes: no tile, prediction, band, reference 
 plumbing cases (one ROUNDING launch, one launch with no C record) still fail their tile. A tile that runs in some kept passes and not others
 is judged on the launches it has, as before.
 
-*Dated note on A1 (Tue 3 Nov 2026, about 18:40 PST, after verification; A1's text above is left as committed in `e6ca949d`). A1's account
+*Dated note on A1 (Tue 3 Nov 2026, written about 18:25 PST and committed 18:29 PST, after verification; A1's text above is left as committed in `e6ca949d`). A1's account
 of the pipeline test is incomplete, and its words "so no verdict exists and its numbers are not results and are reported nowhere" are
 withdrawn. The test ran in two steps (times from the lane's working files). First, to 16:39:47 PST, the collector ran on pass 15310 alone:
 the C check, the reduction and its arms. With one pass the scorer scored nothing. Then the lane listed that pass twice in a copy of the

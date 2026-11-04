@@ -1,6 +1,6 @@
 # E153: the interim scoring before amendment A1 (disclosed after verification; not results)
 
-*Committed Tue 3 Nov 2026, about 18:40 PST, by E153's fix pass, after an independent verifier found that A1's text misstated this look
+*Committed Tue 3 Nov 2026 at 18:29 PST by E153's fix pass, after an independent verifier found that A1's text misstated this look
 (the data README's § Corrections after verification, C1). These four files are byte for byte what the lane's working copy held. They are
 evidence of what was seen before A1 was written. They are not results, and no number here is quoted as one.*
 
