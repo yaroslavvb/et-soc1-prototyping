@@ -4,6 +4,16 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-11-01 (Sun, week 44, Q132 records)** — Section 3's index reads Q1–Q132 and E1–E104, where it read Q1–Q131 and E1–E91
+  (E92–E104 are the night's thirteen card experiments; A1–A25 is unchanged, and E105 and E106 are not in yet). Section 2's
+  map names `rtl-sim/fma_toggle_v2` and `-fno-dfg`. Section 6 adds three traps: a hot start does not hold the clock down
+  (E101), no host compute on any box beside a card run (E97), a desk emulation is not a read-back with `-fno-dfg` beside it
+  (E102, E104, Q132(b)), and card 0's trap says no measurement shows a PMIC alarm acting on the other three cards. *Why:*
+  constraint — E101's 101.15 W stop, E97's plateau moves (cause not established), E104's read-back and Q132(b)'s optimiser
+  fault; re-check: `docs/reports/data/2026-11-01-e101-real-matmul/README.md` session 2,
+  `docs/reports/data/2026-11-01-e97-heat-low-power-steady/corrections-check.txt` [C2], `.../2026-11-01-e104-c-readback/scored.json`
+  `readback.rows`, `rtl-sim/fma_toggle_v2/verilator_dfg_reproducer.sv`, and the last rows of `docs/findings/02-requests.md` and
+  `03-experiments.md`.
 - **2026-10-31 (Sat, week 44, Q130 addendum fixes)** — Section 5's rule carves the samplers' statistics reset
   (`ettelem sample --reset-ms`, which the SP forwards to the PMIC) out of "no PMIC commands": it is allowed, and left
   out of any run that tests the governor's power loop, since it restarts the PMIC's running average; every other PMIC

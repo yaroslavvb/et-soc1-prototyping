@@ -3266,16 +3266,178 @@ PST. Its verifier found five faults and four nits, fixed as new files in v2 `167
 for byte (E167's collection should use v2's `s22_collect.sh e167`). *(Dated, Wed 4 Nov 2026, after Q141(r)'s verifier: not E167's collection alone. The runbook's own dated note, committed with v2, says "for any later step or card day, use v2/", with the same steps, arguments and exit codes, "so a lane can switch at any step"; besides E167's collection, two of v2's fixes bore on steps after this section was written: E163's plan must end by the last end (under v1 a full E163 launched late starts and is then cut by its own deadline, not refused), and box state counts only when written that day ([the readiness report's dated note](../reports/data/2026-11-04-q141f-readiness/README.md.dated-note.md)).)* **The card half started at 14:11 PST**, on the owner's go of
 about 13:55 PST, with the day's one post (`1567662592850399304`) holding aifoundry3, aifoundry1 (both cards) and aifoundry2;
 aifoundry1's card 0, back in use by his word, takes E170 (Q141(w): `b5ca3e78`, `574dc5b5`, `57e1c6c4`) after E164. **Its results
-follow** in the runs' own data READMEs and the card half's records; none is in this section.
+follow** in the runs' own data READMEs and the card half's records; none is in this section. *(Dated, Wed 4 Nov 2026, the card half's records, Q141(i): they are in the next section, "Q141, the card half".)*
 
 **What remains after the card half.** Integrating E163–E169 and E170: 02, 03 and 05, the kinds page's section 11, one hub entry
 each. Q141(t)'s 243-point step for the 8 bit-20 and bit-21 calibration tiles, run on the mini by Q141(t2) after its fallback
 registration (`9496466c`, `5e1bb309`, `2c1b6362`), is recorded with the card half. Rank 7's second new card-1 session, and rank
-14's card-1 half if it is wanted.
+14's card-1 half if it is wanted. *(Dated, Wed 4 Nov 2026, Q141(i): these records integrate the card half, Q141(t2)'s step with it; what remains now is the next section's list.)*
 
 **Not established by Q141.** Any blind score, any measured card-minute, and whether the plan's 3.5–4 h holds on the card day; the
 runbook on a box beyond the card day's own use (its desk tests used a stand-in ssh and rsync); whether a holder at a session's end
 leaves a login in E163's or E166's logs (F3).
+
+## Q141, the card half: E163–E170 scored blind on four cards (Wed 4 Nov 2026, week 45, 14:11–17:18 PST; the owner's go of about 13:55 PST)
+
+The owner's mandate is still his words of Mon 2 Nov 2026 about 18:40 PST (Q138), with Q137's goal, to predict the power and heat
+of numeric work as accurately as possible. At about 13:55 PST he gave the card half its go, *"go, feel free to use all four cards
+because they're not being used right now."*, and at about 13:56, *"There was a problem with card 0, but that's been fixed."*, which
+put aifoundry1's card 0 back in use; what the fix was is not known. Every run ran to its registered end inside the window (no
+session after 18:15, every end by 19:00 PST): 355.6 card-minutes, the last release at 17:18:22 PST. **Every verdict below is
+registered, scored by the scorer frozen before the data and re-derived by the host's verifier; a row marked post hoc was computed
+afterwards from the committed rows, with no rule registered for it, and changes no verdict.** No frozen prediction, band, rule or
+verdict changed in the card half, and every hash list still passes (blind7 91, E168's 9 and 18, `predict_q140e`'s 26). Short names:
+`E163d/` to `E170d/` are the eight data directories, `docs/reports/data/2026-11-04-e163-blind7-aifoundry3/`,
+`…-e164-blind7-card1/`, `…-e165-blind7-aifoundry2/`, `…-e166-heat-replicate-aifoundry3/`, `…-e167-heat-replicate-aifoundry2/`,
+`…-e168-gemm-g4/`, `…-e169-stride-shapes/` and `…-e170-blind7-card0/`; `Q141t/` is `docs/reports/data/2026-11-04-q141t-s7-recount/`.
+🛑 **To carry from here, beside the earlier sections' items:** (48) **quote a blind figure with its kind**, registered or post hoc,
+and the card and session it was scored on; (49) **the floats' excess over M9 on both 600 MHz cards is a session-wide level or gain
+in D, not separated**, never "a day-level term"; (50) **E164-U1's FAIL is M6's float card term, not its form** (post hoc); (51) **a
+session scale from the session's own random anchors is a candidate term to register, not a result**; (52) **rank 1 fails on both
+600 MHz cards, rank 3 is not answered, rank 4 passes**.
+
+### The runs, as run
+
+| Run | Card | Session (PST) | Card-minutes (cap) | Data; dated notes | Highest board reading; stops |
+|---|---|---|---|---|---|
+| E166 | aifoundry3 card 0, 600 MHz pinned | 14:20:51–15:35:05 | 74.2 (76) | `179549ce` (two lines of its README changed in place by `4293d151`); `3b102b85` | 44.2 W; none fired |
+| E163 | aifoundry3 card 0, 600 MHz pinned | 15:35:54–16:37:40 | 61.8 (70), FULL | `4293d151`; `3b102b85`, and dated note 2 (these records) | 54.3 W (65 W / 70 °C); none fired |
+| E164 | aifoundry1 card 1, 600 MHz | 14:19:34–15:17:53 | 58.3 (65) | `5eecc457`; `708a0a04`, and dated note 2 (these records) | 61.20 W (66 W / 72 °C); none fired |
+| E170 | aifoundry1 card 0, its own governor, 800 MHz cap | 16:19:41–16:48:53 | 29.2 (40) | `81178664`; `708a0a04` | 59.38 W (65.9 W); none fired |
+| E165 | aifoundry2 card 0, its own governor | 14:31:41–15:10:13 | 38.4 (40); 158 of 171 bursts | `4c6665f0`; `7830a9cb` | 81.16 W (85 W on 3 samples); none fired |
+| E167 | aifoundry2 card 0 | 15:12:42–16:18:37, 66 min of wall time | 35.12 (40) | `316445dc` | 65.88 W; none fired |
+| E168 | aifoundry2 card 0 | 16:18:49–17:06:09 | 47.3 (58) | `522749f5`; `7830a9cb` | 76.59 W; none fired |
+| E169 | aifoundry2 card 0 | 17:06:32–17:17:49 | 11.3 (20) | `d878ada6` | 36.95 W; none fired |
+
+E163–E169 used 326.4 card-minutes against Q141(f)'s plan of 312–340, and E170 29.2: aifoundry3 136.0, aifoundry1 87.5 (its two
+cards serial), aifoundry2 132.1. The last release came about 3 h 23 min after the go (the plan said 3.5–4 h).
+
+### The registered verdicts
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **E163, rank 1 on aifoundry3** | **E163-RANK1 FAIL**: M1 (M9 − M6) −0.098 W [−0.148, −0.056] BETTER, U1 and C1 (42 of 48) PASS, but B1 +0.151 W and B2 +0.051 W FAIL LOW; P1 fp32 0.389 W FAIL, P2 0.192 and P3 0.191 W PASS; M2 and M3 BETTER; H1–H4 PASS (0.226 / 0.163 / 0.124 °C); R1 0.158 W and R2 10 of 10 PASS; KC PASS; K14 and K14' FAIL (3 and 11 of 16; every re-run higher, +0.013 to +0.278 W); KE and KE' PASS | M, P→M | Q141, E163 | `E163d/scored.json` › `verdicts`; `E163d/results.md` |
+| **E164, rank 1 on card 1** | **E164-RANK1 FAIL**: M1 −0.048 W [−0.111, +0.013] NOT RESOLVED, U1 +0.078 W FAIL, B1 +0.164 W FAIL LOW, B2 −0.076 W FAIL HIGH, C1 41 of 48 FAIL; P1 0.376 W FAIL, P2 0.175 and P3 0.200 W PASS; M2 −0.118 W BETTER; H1, H2, H4 PASS, H3 0.212 °C FAIL; R1 0.171 W, R2 10 of 10 PASS; X1 0.9621 PASS, X2 0.9418 FAIL; PC, K7C, PCa PASS; K7D FAIL (2 of 8), K7W PASS, K7 FAIL, K7' PASS | M, P→M | Q141, E164 | `E164d/scored.json` › `verdicts`; `E164d/results.md` |
+| **Rank 4, the paired-anchor scale (RK4)** | PASS on both families: floats s_anchor 0.9628 against s_pool 0.9621 (+0.07%, line ±1%); int8 0.9368 against 0.9418 (−0.54%, line ±2%; the difference's standard error 0.51% against a forecast 1.35–1.64%) | M, P→M | Q141, E164 | `E164d/rank4-e163-e164.txt` |
+| **E170, rank 1 on a third card** | E170-W PASS (board 0.727 W rms over 39 tiles, the registered line [0.599, 1.040] W at 20,000 draws), E170-B PASS (mean −0.090 W), M1 −0.158 W [−0.242, −0.094] and M2 −0.246 W BETTER, X0 0.977 [0.963, 0.987] FAIL (κ0 0.9463), F 3.98 MHz PASS, W3 34 of 39 PASS, H1 and H3 FAIL (2.46 °C rms), C and S PASS | M, P→M | Q141, E170 | `E170d/results.json`; `E170d/score.txt` |
+| **E165, rank 2** | **E165-R2 FAIL on resolution only**: G 3.03 MHz rms (mean −1.04), resolved better than M7 [−4.61, −1.95], PASS; Bg 0.71 W (mean −0.43) [−0.96, +0.04] and Bp 0.99 W (mean −0.02) [−0.44, +0.08], not resolved; F1, W1, W2, F3 (51 of 52), H1 (0.455 °C), H3, C, R0 PASS; F2 5.11 MHz and W3 45 of 52 FAIL | M, P→M | Q141, E165 | `E165d/results.json` › `score.rules`; `E165d/score.txt` |
+| **E166, rank 3 on aifoundry3** | RK3-a FAIL (2 of 4; 0.452 °C rms over four plateaus from the bits, M8's watts primary), RK3-c FAIL (the large rises 1.83 / 2.15 / 3.23% low given the watts), G_A SLOW STAGE SEEN (+0.158 °C), SL SLOPE NOT SEEN (−0.295 °C per 10 min), the five bands, G0 and X1 PASS | M, P→M | Q141, E166 | `E166d/scored.json` |
+| **E167, rank 3 on aifoundry2** | RK3-b FAIL, not resolved by the readout (G1Q +1.35 °C, trajectory 0.93 °C rms), RK3-c FAIL (G1Q 5.4% of its 16.79 °C rise; G2Q 0.14%), the carried regimes and clocks PASS (G2Q −0.39 °C, −3.6 MHz). With E166, **rank 3 is not answered** | M, P→M | Q141, E167 | `E167d/scored.json` › `verdicts` |
+| **E168, G4 (rank 5)** | A7: the clock FAILS (6 of 9 within 15 MHz; 30.2 MHz rms, S3 −58.9 and −62.5 MHz), the board PASSES (9 of 9, 0.82 W rms), the window die PASSES (9 of 9, 0.51 °C); both increments PASS (+0.10, +0.80 W); the subset's clock FAIL (4 of 6); R0 PASS; A2 (reported) OPPOSITE SIGN (−0.777 W against G4's +1.079) | M, P→M | Q141, E168 | `E168d/results.json`; `E168d/reduce.txt` |
+| **E169, the stride step (rank 6)** | A STRIDE STEP SM DOES NOT SIZE: P1/N1 +30.00% [+29.36, +30.65] against SM's +37.06% (0.81), P3/N3 +27.11% [+26.53, +27.69] against +30.97% (0.88); B7 FAIL as registered; TIED to E158; R0 PASS; levels ISO 10.2%, STRICT 15.4%, SM 18.7% rms (reported) | M, P→M | Q141, E169 | `E169d/results.json` › `scores`; `E169d/score.txt` |
+| **Every launch's C** | bit-exact: E163 4,062, E164 3,896, E165 2,734, E166 6,692 dispatches, E167 3,377, E170 2,373 (23,134 in all); E168 2,425 kernel records and E169 50 runs checked with E136's GEMM reference | M | Q141 | each directory's `ccheck*`, `results.json` › `R0` |
+
+### The blind figures, before and after (power and heat)
+
+| What is predicted | Before | After, blind (registered) | Post hoc, labelled | Source |
+|---|---|---|---|---|
+| **Power of a new kind at 600 MHz, aifoundry3** | M9 nested 0.200 / 0.168 / 0.169 W; M8 blind on pool 6 0.330 / 0.125 / 0.296 W (E153) | M9 **0.389 / 0.192 / 0.191 W** (0.278 over 48); M8 0.420, M7 0.379, M6 0.376 over 48 | without class S 0.183 W over 41; with the session's own random float anchors (×1.0082) the floats' bias +0.151 → +0.013 W and 0.278 → 0.259 W over 48 | E163; [E164's dated note 2](../reports/data/2026-11-04-e164-blind7-card1/README.md.dated-note-2.md) |
+| **Power of a new kind at 600 MHz, card 1** | M9 nested 0.211 / 0.178 / 0.185 W; M8 blind on pool 6 0.386 / 0.098 / 0.327 W (E157) | M9 **0.376 / 0.175 / 0.200 W** (0.273 over 48); M8 0.390, M7 0.332, M6 0.321 | without class S 0.191 W over 41; the anchors (×1.0095) take the floats' bias +0.164 → +0.010 W and 0.273 → 0.245 W over 48, int8's (×0.9766) over-correct (−0.076 → +0.061 W); M9 × 1.0099, M6's float card term, takes the 8 float U tiles 0.171 → 0.077 W (M6 0.081) | E164; dated note 2 |
+| **The single high B bits (class S)** | 0.7–1.2 W on one pool-6 tile | 0.577 / 0.543 W rms (seven tiles a card), the largest miss on every card; +0.72 W mean on card 0; +1.80 to +2.52 W on five tiles of aifoundry2's pinned board | Q141(t)'s 27-point counts (reported) cut the rms 31% / 41% (36% pooled; R3 0.53 / 0.66 / 0.59) | E163, E164, E170, E165's dated note |
+| **Real model tiles** | M8 0.155 / 0.146 W over 12 (E153, E157) | M9 **0.158 / 0.171 W** over 10, 10 of 10 inside on both cards | — | E163, E164 |
+| **The card term** | M9's 0.9616 for both families | floats 0.9621 (X1 PASS), int8 0.9418 (X2 FAIL); RK4 finds both from the anchors (+0.07%, −0.54%) | — | E164 |
+| **Heat over 4.5 s** | 0.10–0.18 °C (M8 on pool 6) | aifoundry3 **0.226 / 0.163 / 0.124 °C** (H1–H4 PASS); card 1 **0.334 / 0.352 / 0.212 °C** (H3 FAIL; 0.131 °C per board W against 0.1151 carried) | — | E163, E164 |
+| **A card no model had seen** (card 0, governed 800 MHz bursts) | no blind score; aifoundry2's end to end 0.80 W (E160) and 0.87 W (E143) | board **0.727 W** rms, mean −0.09 W, through a card term from three zeros bursts per format and one constant; burst heat 2.46 °C rms (0.24 against 0.14 °C/W) | κ0 referred to each tile's die start 0.931; a leave-one-tile-out session scale per family puts the burst D at 0.425 W rms (reported) | E170 |
+| **aifoundry2's governed bursts** | blind 6.7 MHz / 1.4 W (M8, E160); held out 3.68–5.12 MHz / 0.66–0.87 W (Q140(l)) | the clock **3.03 MHz** where the governor acts (5.11 pinned), the board **0.71 W** governed and **0.99 W** pinned; not resolved better than M7 (1.20 / 1.15 W) | class S holds 57% of the pinned board's squared error (0.695 W without it); the governed board 0.43 W under M9 at the cap | E165; its dated note |
+| **Heat over minutes, aifoundry3** | E154: 0.370 °C rms, 1 of 4 inside the per-hold rule, large rises 3.1–4.6% low given the watts | **0.452 °C** rms over four plateaus with M8's watts (M7 0.289, M6 0.217; 0.281 given the watts); RK3-a 2 of 4; large rises 1.8–3.2% low | K_L's +0.87 °C: +0.47 M8's watts, +0.40 the heat path | E166 |
+| **Heat over minutes, aifoundry2** | E161: G1Q −0.90 °C (+0.64 post hoc), trip clock +12.6 MHz | G1Q **+1.35 °C** (trajectory 0.93 °C), 5.4% low given the watts; the trip −0.39 °C, −3.6 MHz | — | E167 |
+| **A large GEMM, governed (G4)** | G3 blind 8.7 MHz / 1.94 W / 0.99 °C (E159); G4 held out 10.3–11.1 MHz / 1.33–1.47 W / 0.58–0.63 °C | board **0.82 W**, window die **0.51 °C** (9 of 9); clock **30.2 MHz** (6 of 9) | the seven holds other than S3 read 10.8 MHz rms | E168 |
+| **Time per op at power-of-two strides** | ISO 6–11% (E158), misses of 8–13% at those strides | the step is real (+30.0%, +27.1%) and 0.81–0.88 of the L3 set map's; ISO's level 10.2% rms | — | E169 |
+
+**So:** M9 is now the most accurate model by rms on new kinds on both 600 MHz cards and on a third card's governed bursts, and the
+governed-burst clock error halved; but no rank-1 rule holds, the floats carry a session-wide excess no registered term models, the
+single high bits stay the largest miss on every card, and heat needs a coefficient per card and a gain term.
+
+### The card half's critic: one new fault and two post hoc readings (recorded here as dated items)
+
+| | What | Where it is recorded |
+|---|---|---|
+| (1) | E163's D1 says "dated here … before the registered reduction ran", but no file shows its text before the reduction (`e163.json` 16:48:10, `scored.json` 16:48:56 PST); the only draft holding it was last written at 16:53:42. D1 was written down after the reduction; the route was set in the lane's script at 14:31:31, before the session. No data choice changes | [dated note 2 beside E163's README](../reports/data/2026-11-04-e163-blind7-aifoundry3/README.md.dated-note-2.md); 02's Q141 row and 03's E163 entry |
+| (2) | Post hoc: E164-U1's FAIL is M6's float card term (1.0099 times M9's on card 1, 0.9711 against 0.9616, isolated per tile from the committed predictions; M7 carries the same) absorbing the float excess both 600 MHz sessions show; X1 says M9's float ratio is the measured one. Never read U1 as "M6 models unaimed kinds better" | [dated note 2 beside E164's README](../reports/data/2026-11-04-e164-blind7-card1/README.md.dated-note-2.md), with `posthoc_card_term_anchors.py`; 03's E164 entry |
+| (3) | Post hoc: each session's own random float anchors (1.0082 and 1.0095 of M9) would have taken the floats' bias to +0.013 / +0.010 W; int8's anchors over-correct on card 1. A candidate term to register, not a result | the same note; the table above |
+| nit | About 5–6 local processes, 4 of them C-check workers, for about 3 minutes (17:18–17:21 PST), against the round's 4 workers; each lane reported only its own count | here; the next round's lanes share one worker count |
+
+### The lanes' wording, as corrected (quote it so)
+
+| Run | As corrected, from its dated note |
+|---|---|
+| E163 | the excess is a session-wide level or gain in D, not separated (post hoc: the floats −0.100 ± 0.118 W + 1.09 ± 0.59% of D), never "a day-level term" or "ranks kinds correctly"; its card-scale PASS and FAIL labels are readings of a reported item |
+| E166 | K_L: +0.87 °C from the bits, of which +0.47 °C is M8's watts and +0.40 °C the heat path; its README was changed in place in `4293d151` |
+| E165 | the pinned clock's residual is a session term, from six single-pass dips at 752–780 MHz; the pinned board's largest errors are five class-S tiles at +1.80 to +2.52 W (57% of the squared error, 0.695 W without them); the governed board reads 0.43 W under M9 at the cap; `ccheck-s1` is committed gzipped only |
+| E168 | the kit's note checked rest floors of 46–48 °C; A2's OPPOSITE SIGN is unambiguous at the day's 49 and 56 °C starts |
+| E164 | the S class's rms falls 41% / 31% / 36% (R3 0.66 / 0.53 / 0.59), never "53–66% of the rms"; D1 was written after the collection; K7W is wider than planned on the floats only |
+| E170 | the provenance disclosure (below); E170-W's line is [0.599, 1.040] W at 20,000 draws |
+| all | the hosts' boots are PDT (aifoundry3 15:18:24 PDT, aifoundry2 15:13:03 PDT, aifoundry1 15:02:04 PDT); aifoundry2's looks found no other account's device process, terminal, lock or blocking login; the runbook's v1 ran throughout, and v2 from 16:21:01 on aifoundry2 |
+
+### Disclosures
+
+- **E170's provenance:** its last two pre-launch commits, A2 (`6147a9c7`) and the kit's corrections (`0e35ec58`), had no independent
+  verifier read, and `0e35ec58` edited four kit files in place before any data; the card lane read the launch diff; every
+  registration file, scorer, protocol and prediction is as registered, and the box's launch hashes equal git at `efaaa726`.
+- **Two in-place edits:** E163's data commit `4293d151` changed two lines of E166's data README (the figure right, named in
+  `3b102b85`'s note); `0e35ec58`'s four kit files, above.
+- **aifoundry2's tree:** `git pull --ff-only` refused at 14:19:45 (905 local entries, 903 byte-identical to the public main); the
+  checkout was fast-forwarded to `5e1bb309` after a tar and a stash, which are still on the box with an old untracked
+  `reduce_e77.py`.
+- **E165's telemetry_stale end:** 13 bursts short, in a cool gate before any launch; post hoc consistent with a race in
+  `run_hpl.py`'s watcher; the guard failed safe.
+- **The runbook:** v1 (`e962227a`) ran the card day on every host, including after v2 (`16771f36`, 15:34:42) said to use v2 for any
+  later step; v2 ran from 16:21:01 for aifoundry2's later waits, looks, E169's launch and the E167–E169 collections; no gate would
+  have read otherwise; v2 has had no verifier read. Its `s22_collect.sh e163` (v1 line 55, v2 line 59) copies into an absolute
+  `build/e163-raw`, through which `reduce_e78.py` would write the Intel's home path into a public data directory, unfixed in both
+  versions; E163 collected over the data directory's repo-relative copy instead (its D1).
+- **E170's smoke burst** was `fp32.randn_a24k` (fp32 random, A 2:4 sparse, a card-0 estimate of 58 W), as registered in `b5ca3e78`,
+  because E84 read full-density fp32 random at 72.97 W on card 0. Card 0's 75 W alarm was never approached, so E170 says nothing
+  about the fix.
+- **The local worker count**, the critic's nit above.
+- Holders: none at any look; other accounts' idle logins were present on all three hosts, which do not block (the owner's ruling of
+  1 November 2026); no file names them. No Tailscale login link on any call.
+
+### The day's post
+
+One post that day, message `1567662592850399304`, created at 14:11:27 PST by the claim with one clause per host: `<ai> **Claude says:**
+using aifoundry3 for 3 h, until ~17:11 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>); using aifoundry1 for
+3 h, until ~17:11 PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>); using aifoundry2 for 4.25 h, until ~18:26
+PST [doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>)`. At 16:38:11 aifoundry3's clause was dropped, at 16:50:09–15
+aifoundry1's, and at 17:18:22 " — released" was appended, every word kept, each change under the channel lock with `EXPECT_TEXT` and
+read back. It now reads `<ai> **Claude says:** using aifoundry2 for 4.25 h, until ~18:26 PST
+[doc](<https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers>) — released`. Mon 2 Nov's and Tue 3 Nov's posts were not touched.
+
+### Q141(t2), the 243-point step (the mini, reported only)
+
+| Claim | Value | Kind | Source | Verify at |
+|---|---|---|---|---|
+| **The step** | 7 of the 8 calibration tiles above the bound at 81 points meet e(N) ≤ 0.10 W at 243 (e(243) 0.055–0.092 W), so 15 of 16 do; `fp32.cal_third_b21` does not (0.125 W) and the registered fallback F1 carries it as 5.543 ± 0.125 W; N* is not reached by uniform points at the cap | S | Q141(t2) | `Q141t/step243/recount-rule.json`, `summary243.json` |
+| The law | e(81)/e(243) 1.66–1.82, median 1.72 (1/√N gives 1.73); G1's z rms 0.79 over 8 tiles | S | Q141(t2) | `Q141t/step243/readings-243.txt` |
+| What a three-point count costs | −0.284 to +1.049 W at M9's prices on these tiles; on the arm's `fp32.b_onebit_b20_pi` k = −0.157 ± 0.055 W (aifoundry3) and −0.150 ± 0.053 W (card 1) at 243 points | S, D | Q141(t2) | `Q141t/step243/readings-243.txt` |
+| The builds | the mini's and the Intel's: 155 of 155 content-hashed inputs identical, the 126 generated model files identical once their path prefixes are replaced, one point counted on both identical; C checked against software at all 1,296 points | S | Q141(t2) (its fix pass `2c1b6362`) | `Q141t/step243/check-b1-generated.json`, `check-b3.json` |
+
+### What remains (the card half's critic's list, ranked)
+
+1. These records, then their verifier and a fix pass.
+2. M10's registration, then its nested refit, before any more card time on the power model: candidate terms (a) a scale per session
+   and per family from the session's own random anchors, (b) the single-high-bit counts at 27, 81 and 243 points, (c) the 4.5 s rise
+   per board W per card, (d) the heat chain's gain on large rises, (e) κ0's die-start footing; nested leave one kind out on Q139(u)'s
+   footing with every committed row, pool 7's included; then a blind pool 8 by an independent designer.
+3. A registered test of the float excess: a level or a gain in D, and of the day, the session or the card; two short sessions on one
+   600 MHz card the same day, random anchors spanning D and about 12 re-run tiles, the per-session scale rule registered first.
+4. A safer runbook for the next card day: `run_hpl.py`'s telemetry watcher race fixed by a dated amendment and a new kit file with a
+   self-test, `s22_collect.sh e163`'s absolute path fixed, and a verifier read of v2.
+5. Heat over minutes again, once M10's gain term is frozen: a third replicate per card kind and card 0's burst heat with a
+   coefficient per card, an M9-watts arm reported beside M8's on aifoundry3.
+6. G4's clock at S3's geometry, a per-shape term registered from public sources and tested on two or three new shapes; A2's start
+   dependence with cold starts the gates can reach.
+7. The stride term's size, registered, tested on six new power-of-two shapes.
+8. Rank 7's second new card-1 session.
+9. Housekeeping on aifoundry2: the tar, the stash and the old `reduce_e77.py` copy left by the fast-forward (our own files only).
+10. Waiting on the owner's word: anything near card 0's 75 W alarm (full-density fp32 random at 800 MHz), and items 3, 4, 14 and 16.
+
+Unverified commits: `3b102b85`, `7830a9cb` and `708a0a04` (the critic read their notes and re-ran their scripts), `6147a9c7` and
+`0e35ec58`, the runbook's v2 `16771f36`, and Q141(r)'s fix pass (`8215b938`, `44e96e26`).
+
+**Not established by the card half.** Whether the floats' excess is a level or a gain, or of the day, the session or the card; what
+fixed card 0, and whether its 75 W alarm still trips; whether the slow heat stage exists (G_A and SL disagree); whether any
+post hoc reading above holds blind.
 
 ## Ridge points (derived; no card time)
 
