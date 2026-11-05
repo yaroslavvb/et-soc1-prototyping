@@ -3295,6 +3295,12 @@ and the card and session it was scored on; (49) **the floats' excess over M9 on 
 in D, not separated**, never "a day-level term"; (50) **E164-U1's FAIL is M6's float card term, not its form** (post hoc); (51) **a
 session scale from the session's own random anchors is a candidate term to register, not a result**; (52) **rank 1 fails on both
 600 MHz cards, rank 3 is not answered, rank 4 passes**.
+*(Dated, Wed 4 Nov 2026, the records' fix pass after their verifier: three more to carry. (53) **rank 1's rule fails on its bias
+lines on both 600 MHz cards, int8's as well as the floats'** (B2 +0.051 W FAIL LOW on aifoundry3, −0.076 W FAIL HIGH on card 1),
+and on card 1 also on M1, U1 and C1 (41 of 48): never on the float excess alone. (54) **the single high B bits (class S) are M9's
+largest miss on every card, not every model's**: on pool 7 M8's largest are int8's whole lines on aifoundry3 (0.676 W rms) and
+int8 with B held on card 1 (0.654 W), and M7's int8 with B held on both. (55) **G4's blind clock figure is 30.2 MHz rms over the
+nine holds**; the 10.8 MHz over the seven other than S3 is post hoc.)*
 
 ### The runs, as run
 
@@ -3434,6 +3440,12 @@ read back. It now reads `<ai> **Claude says:** using aifoundry2 for 4.25 h, unti
 
 Unverified commits: `3b102b85`, `7830a9cb` and `708a0a04` (the critic read their notes and re-ran their scripts), `6147a9c7` and
 `0e35ec58`, the runbook's v2 `16771f36`, and Q141(r)'s fix pass (`8215b938`, `44e96e26`).
+*(Dated, Wed 4 Nov 2026, the records' fix pass: Q141(r)'s fix pass also includes gyroscope `0855547b`, its hub half. These records
+had a verifier read at about 20:12–20:50 PST, which held them with three minor wording faults, all in the kinds page's and the
+hubs' summaries, and three nits, two of them in this section's list and in [E163's dated note
+2](../reports/data/2026-11-04-e163-blind7-aifoundry3/README.md.dated-note-2.md); the fix pass corrects them, with [a third dated
+note](../reports/data/2026-11-04-e163-blind7-aifoundry3/README.md.dated-note-3.md) beside E163's README, and no verifier has read
+the fix pass.)*
 
 **Not established by the card half.** Whether the floats' excess is a level or a gain, or of the day, the session or the card; what
 fixed card 0, and whether its 75 W alarm still trips; whether the slow heat stage exists (G_A and SL disagree); whether any
