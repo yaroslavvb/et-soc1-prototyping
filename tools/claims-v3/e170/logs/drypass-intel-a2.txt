@@ -1,0 +1,26 @@
+E170 dry pass on the Intel: queue rc 0 in 286 s (the toy card; no device, no lock, no ssh)
+  state_gate         {"verdict": "GO"}
+  session_start      {"name": "stoptest-die"}
+  session_end        {"name": "stoptest-die", "rc": 4, "end": {"exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}}
+  stoptest_detail    {"name": "stoptest-die", "stop": "die", "trip_after_line_ms": 49, "lines": 13}
+  stoptest_check     {"name": "stoptest-die", "rc": 4, "bad": null}
+  session_start      {"name": "stoptest-board"}
+  session_end        {"name": "stoptest-board", "rc": 4, "end": {"exit": 4, "reason": "safety:board 33.0 W > 30 W on 1 samples", "card_min": 0.0}}
+  stoptest_detail    {"name": "stoptest-board", "stop": "board", "trip_after_line_ms": 30, "launch_end_after_trip_ms": 470, "lines": 17}
+  stoptest_check     {"name": "stoptest-board", "rc": 4, "bad": null}
+  session_start      {"name": "smoke"}
+  session_end        {"name": "smoke", "rc": 0, "end": {"exit": 0, "reason": "done", "card_min": 0.3}}
+  smoke_tel          {"lines": 170, "board_max_w": 59.71, "die_max_c": 61, "under_590": 0, "over_stop": 0}
+  smoke_ccheck       {"skipped": "dry: the toy card runs no host and writes no C log"}
+  smoke_check        {"rc": 0, "bad": null}
+  session_start      {"name": "s1"}
+  session_end        {"name": "s1", "rc": 0, "end": {"exit": 0, "reason": "done", "card_min": 4.3}}
+  s1_end             {"rc": 0}
+  queue_end          {}
+  s1:       45 runs recorded; state gate: dry: nothing read (et-holders, uptime -s, ettelem uptime, ettelem config)
+score_e170_a1.py on the dry s1: rc 0
+  E170 scoring (A1): 45 burst runs, 45 complete, 45 counted, passes [1, 4]; dry True; protocols {'s1': (1, 4)}
+    E170-C: {"verdict": "NOT SCORED (no ccheck output given)", "launches": 180, "by_verdict": {"NO_RECORD": 180}}
+    E170-S: {"safety_marks": [], "runs_under_590_mhz": [], "runs_at_or_over_62w": [], "board_max_w": 61.84, "verdict": "PASS"}
+    fewer than 2 counted passes of half A: every rule but E170-C and E170-S NOT SCORED
+  results.md written: <scratch>/results-dry.md

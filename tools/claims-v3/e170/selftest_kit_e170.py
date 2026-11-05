@@ -17,7 +17,11 @@ driver runs as a dry listing (RB_DRY=1), which prints its commands and runs none
   5. Every shell script parses (bash -n).
   6. box/launch_e170.sh's refusals, in a sandbox laid out like ~/nekko with shims for date (GNU), sudo/et-holders and ps: no deadline (2), not a
      date (2), too little time for the full plan (4) and for the subset (4), card 0 held (3), ours on card 1 (3), ours a device process (3), a
-     queue already run (5), and the harness check without the binaries (9). None reaches the launch.
+     queue already run (5), and the harness check without the binaries (9). None reaches the launch. Since E170-A2 (the verifier's F2, F3 and
+     F5): past the round's last start (6), a deadline after its last end (6), a run queue of ours alive with no node, lock or device process
+     (E164's between its passes: 3); the full plan's slot 45 min and the subset's 30; the window's two times as the box run reads them
+     (2026-11-04 18:15 and 19:00 PST: the README's deadline refused only after 18:15, a 19:30 deadline always). Every other case sets the
+     window's two times hours away, so it does not depend on the hour it runs.
   7. box/step_e170.sh lists every step's exact commands under RB_DRY=1 (look, sync, check, launch, wait, pull) and runs none of them.
 SPDX-License-Identifier: Apache-2.0
 """
@@ -145,33 +149,56 @@ with tempfile.TemporaryDirectory() as td:
     hf, pf = os.path.join(td, "holders.txt"), os.path.join(td, "ps.txt")
     uid = os.getuid()
 
-    def launch(args, holders="No process holds an ET-SoC-1 device node or card lock.\n", ps=f"{uid} bash\n", pre=None):
+    def at(minutes):
+        return subprocess.run([gd, "-d", f"@{int(dt.datetime.now().timestamp()) + int(minutes * 60)}", "+%F %T %Z"], capture_output=True, text=True).stdout.strip()
+    WIN = {"E170_LATEST_START": at(600), "E170_END_GATE": at(900)}    # hours away: the cases below do not meet the window unless they set it
+
+    def launch(args, holders="No process holds an ET-SoC-1 device node or card lock.\n", ps=f"{uid} bash\n", pre=None, win=None):
         open(hf, "w").write(holders)
         open(pf, "w").write(ps)
         if pre:
             pre()
         env = dict(os.environ, HOME=home, PATH=shim + os.pathsep + os.environ["PATH"], HOLDERS_FIXTURE=hf, PS_FIXTURE=pf, USER="owner")
+        for k in WIN:
+            env.pop(k, None)
+        env.update(WIN if win is None else win)
         return sh(["bash", "-s", "--"] + args, env=env, stdin=open(L, "rb"))
 
-    def at(minutes):
-        return subprocess.run([gd, "-d", f"@{int(dt.datetime.now().timestamp()) + int(minutes * 60)}", "+%F %T %Z"], capture_output=True, text=True).stdout.strip()
     far = at(120)
     r = {"no deadline": launch([]), "not a date": launch(["garbage", "words"]), "full, 30 min": launch(at(30).split()),
          "subset, 20 min": launch(at(20).split() + ["subset"]),
+         "past the last start": launch(far.split(), win=dict(WIN, E170_LATEST_START=at(-5))),
+         "a deadline after the last end": launch(far.split(), win=dict(WIN, E170_END_GATE=at(60))),
          "card 0 held": launch(far.split(), holders="/dev/et0_mgmt  zq9login 4242 00:10 x\n"),
          "ours on card 1": launch(far.split(), holders="lock:etsoc-shire1.lock owner 99 00:10 flock\n"),
          "ours a device process": launch(far.split(), ps=f"{uid} sparsity_host\n"),
+         "ours a run queue between passes": launch(far.split(), ps=f"{uid} bash tools/claims-v3/e164/queue_e164.sh\n"),
          "a queue already ran": launch(far.split(), pre=lambda: (os.makedirs(os.path.join(nek, "build", "e170", "runs"), exist_ok=True),
                                                                  open(os.path.join(nek, "build", "e170", "runs", "queue.jsonl"), "w").close())),
          }
     shutil.rmtree(os.path.join(nek, "build", "e170"), ignore_errors=True)
     r["no binaries"] = launch(far.split())
-    want = {"no deadline": 2, "not a date": 2, "full, 30 min": 4, "subset, 20 min": 4, "card 0 held": 3, "ours on card 1": 3, "ours a device process": 3,
-            "a queue already ran": 5, "no binaries": 9}
+    r["no binaries, subset"] = launch(far.split() + ["subset"])
+    # the window's two times as the box run reads them (no override): the README's deadline passes the window until 18:15 PST, a 19:30 one never
+    before_last_start = dt.datetime.now(dt.timezone.utc) <= dt.datetime(2026, 11, 5, 2, 15, tzinfo=dt.timezone.utc)      # 18:15 PST
+    r["the README's deadline, the box's window"] = launch(["2026-11-04", "18:55", "PST"], win={})
+    r["a 19:30 deadline, the box's window"] = launch(["2026-11-04", "19:30", "PST"], win={})
+    want = {"no deadline": 2, "not a date": 2, "full, 30 min": 4, "subset, 20 min": 4, "past the last start": 6, "a deadline after the last end": 6,
+            "card 0 held": 3, "ours on card 1": 3, "ours a device process": 3, "ours a run queue between passes": 3, "a queue already ran": 5,
+            "no binaries": 9, "no binaries, subset": 9, "the README's deadline, the box's window": 9 if before_last_start else 6,
+            "a 19:30 deadline, the box's window": 6}
     rcs = {k: v[0] for k, v in r.items()}
     launched = any("launched T0=" in v[1] for v in r.values()) or os.path.exists(os.path.join(nek, "build", "e170", "slot.txt"))
     ok(rcs == want and not launched, f"launch_e170.sh's refusals: {rcs}; nothing launched")
     ok("zq9login" not in "".join(v[1] + v[2] for v in r.values()), "the launch prints holder counts only, never a login (the fixture login zq9login never appears)")
+    why6 = {k: next((ln for ln in r[k][1].splitlines() if ln.startswith("REFUSED")), "")[:110] for k in ("past the last start", "a deadline after the last end",
+                                                                                                          "ours a run queue between passes")}
+    ok(all(why6.values()), f"the new refusals say why: {json.dumps(why6)}")
+    slots = {k: ("slot 45 min" in r[k][1], "slot 30 min" in r[k][1]) for k in ("no binaries", "no binaries, subset")}
+    ok(slots == {"no binaries": (True, False), "no binaries, subset": (False, True)}, f"the full plan's slot is 45 min and the subset's 30 (E170.md): {slots}")
+    src = open(L).read()
+    ok("E170_LATEST_START:-2026-11-04 18:15 PST" in src and "E170_END_GATE:-2026-11-04 19:00 PST" in src and "SLOT_MIN=30" in src and "SLOT_MIN=45" in src,
+       "the box run's window is section 30's (no start after 2026-11-04 18:15 PST, every run ends by 19:00 PST)")
 
 # 7 ----------------------------------------------------------------------------------------------------------------------------------------------
 with tempfile.TemporaryDirectory() as td:
