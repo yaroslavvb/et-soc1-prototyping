@@ -1,0 +1,161 @@
+{
+ "_what": "E171 (Q142(k6)): the machine form of E171.md's session plan; written by make_plan_e171.py after the registration (4441083f)",
+ "experiment": "E171",
+ "card": "aifoundry3",
+ "registration": "tools/claims-v3/e171/E171.md",
+ "registration_sha256": "4c8ccb79a7efe1c33132005b9316828cfb5f5c4023fa1bb1817de940c5d2c3ed",
+ "registration_commit": "4441083f",
+ "frozen_inputs": {
+  "tools/claims-v3/kinds/blind8/blind8.json": "370d8a970bed82c349dfa5f65cc483a20420218c01d099308970396ec4bb0257",
+  "tools/claims-v3/kinds/blind8/MANIFEST": "1f5adbcbb699d4eaec6330e05b33b732edb42eab95c869a5c1de02676eb77598",
+  "tools/claims-v3/kinds/blind8/SHA256SUMS": "606b3d7ee607d6c6d4f3f0ab61f86bf7e14a3de8889572843017738037b7dde8",
+  "tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry3.json": "d68ff9f1e057dc6dd29257c4ff36b521e23d67d0375b79233e5200f8cb88bace",
+  "tools/claims-v3/kinds/blind8/intervals-pool8.json": "05ef01e7a1646f4a865279b567a94d6419bd068555c4dc06c7b883b9fe38efbf"
+ },
+ "frozen_in": {
+  "pool_and_predictions": "4576fb90",
+  "converter_rule": "ebf68c52",
+  "freeze_note": "dfe226f1",
+  "pool8_registration": "3e97f583",
+  "A1": "8a8fa34c",
+  "A2": "68a7c322",
+  "predictor": "9d81d254",
+  "predictor_a2": "97765c0a",
+  "design": "153b720f"
+ },
+ "plan": {
+  "passes": {
+   "kinds": [
+    17110,
+    17119
+   ],
+   "short": [
+    17120,
+    17129
+   ],
+   "smoke": 17101,
+   "stoptest": 17102
+  },
+  "plans": {
+   "FULL": {
+    "seq": [
+     17110,
+     17111,
+     17112,
+     17113
+    ],
+    "budget_s": 4200,
+    "note": "17113 only if the budget rule admits it"
+   },
+   "TWO": {
+    "seq": [
+     17110,
+     17111
+    ],
+    "budget_s": 2280
+   },
+   "SHORT": {
+    "seq": [
+     17120,
+     17121
+    ],
+    "budget_s": 1800
+   }
+  },
+  "reserve_s": 60,
+  "gap_s": 10,
+  "first_estimate_s": {
+   "kinds": 900,
+   "short": 820
+  },
+  "runs_per_pass": {
+   "kinds": 84,
+   "short": 75
+  },
+  "launches_per_pass_with_burnins": {
+   "kinds": 86,
+   "short": 77
+  },
+  "short_drops": [
+   "fp16.u8_ar_i_32349b",
+   "fp16.u8_rowscale_ecc921",
+   "fp16.u8_tdist_93475b",
+   "fp32.r8_granite_l3_x2up_47e54f",
+   "fp32.s8_onebit_b14_3ef6ccbf",
+   "fp32.s8_onebit_b18_be2584eb",
+   "int8.h8_held_v34",
+   "int8.h8_held_vd9",
+   "int8.r8_dsqwen_l1_x1v_927670"
+  ],
+  "stops": {
+   "kinds": {
+    "board_w": 65.0,
+    "die_shire0_c": 70.0
+   },
+   "stoptest_board_w": 1.0,
+   "stoptest_die_c": 1.0,
+   "max_c": 70
+  },
+  "smoke": [
+   "anchor_pi",
+   "fp32.zeros",
+   "fp32.randn",
+   "fp32.u8_lognorm_62af49",
+   "fp32.anchor7_zeros",
+   "fp16.s8_onebit_b7_b945b945",
+   "fp16.zeros",
+   "int8.l8_halfword_d2p2c16_83df",
+   "int8.zeros",
+   "fp32.anchor8_check_randn_319f73"
+  ],
+  "smoke_rule": {
+   "hottest": [
+    "fp32.u8_lognorm_62af49",
+    25.075082231131812
+   ],
+   "fp16": [
+    "fp16.s8_onebit_b7_b945b945",
+    0.35810168958668065
+   ],
+   "int8": [
+    "int8.l8_halfword_d2p2c16_83df",
+    0.054070125374068745
+   ]
+  },
+  "min_kept_passes_scored": 2,
+  "min_tile_passes": 2,
+  "c_log_sessions": {
+   "rule": "e171-smoke/p17101, and every e171/p171NN (17110-17129, never .attempt-*) whose runs.jsonl holds a launch record, whatever its block status; e171-stoptest/p17102 must hold no launch record and no C record",
+   "checker": "tools/claims-v3/p8-600/ccsessions_p8.py --run E171"
+  },
+  "expected_card_minutes": {
+   "FULL_four_passes": [
+    60,
+    62
+   ],
+   "FULL_three_passes": [
+    45,
+    46
+   ],
+   "TWO": 31,
+   "SHORT": 28,
+   "cap": 70
+  },
+  "time_gates": "E171_LATEST_START and E171_DEADLINE required, set at his go"
+ },
+ "scorer": {
+  "code": "tools/claims-v3/p8-600/score_p8_600.py",
+  "commit": "a518aa11",
+  "call": "score --run E171 --reduction <data>/e171.json --raw <raw copy> --ccheck <out>/ccheck/ccheck-all.json [--arm ...]",
+  "primary_reduction": "reduce_e171.py --leak 0.20563713796102187 --no-refit --drop-dips",
+  "arms": {
+   "session_own": "leakage auto, dips kept",
+   "auto_dips_removed": "--drop-dips",
+   "kfrozen_dips_kept": "--leak K --no-refit",
+   "leak0.1994": "--leak 0.1994 --no-refit --drop-dips",
+   "leak0.3803": "--leak 0.3803 --no-refit --drop-dips",
+   "leak0": "--leak 0 --no-refit --drop-dips",
+   "gates_off": "--leak K --no-refit --drop-dips --gates-off"
+  }
+ }
+}

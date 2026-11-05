@@ -1,0 +1,74 @@
+
+== 1a. check_e171.py (dry: the box binaries are not checked)
+HARNESS OK: 97 files match harness-e171.json (desk or dry run: binaries not checked)
+-> PASS
+
+== 1b. preflight_e171.sh (dmcmd_audit, E153's one exception)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS
+
+== 1c. e171_common.py --verify
+{"e171_tiles": 64, "pool8": 64, "priority_1": 40, "pool_anchors": 12, "priority2_kinds_short_drops": 9, "e78_tiles_checked": 6, "problems": []}
+-> PASS
+
+== 2. block_e171.sh 17110 (kinds): expect 84 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 86; heater calls: 0; stubs executed: 0
+2026-11-05T04:02:43 [aifoundry3] E171 pass 17110 (kinds): target 58 preheat 59 quiet 2.0 burnin 2 fma 4 s, die cap 70 C
+E171 runner: pass 17110 (kinds), stops board 65.0 W / die 70.0 C (watcher 65.0 W / 70.0 C)
+04:02:47 [aifoundry3] E78 pass 17110: 84 runs of 71 items (tiers 1,2), about 13 min; launch at 58 C after 59 C, 2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+-> PASS
+
+== 2. block_e171.sh 17120 (short): expect 75 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 77; heater calls: 0; stubs executed: 0
+2026-11-05T04:02:52 [aifoundry3] E171 pass 17120 (short): target 58 preheat 59 quiet 2.0 burnin 2 fma 4 s, die cap 70 C
+E171 runner: pass 17120 (short), stops board 65.0 W / die 70.0 C (watcher 65.0 W / 70.0 C)
+04:02:55 [aifoundry3] E78 pass 17120: 75 runs of 62 items (tiers 1,2), about 12 min; launch at 58 C after 59 C, 2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+-> PASS
+
+== 2. block_e171.sh 17101 (smoke): expect 10 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 10; heater calls: 0; stubs executed: 0
+2026-11-05T04:03:01 [aifoundry3] E171 pass 17101 (smoke): target 200 preheat 0 quiet 0.2 burnin 0 fma 2 s, die cap 70 C
+E171 runner: pass 17101 (S), stops board 65.0 W / die 70.0 C (watcher 65.0 W / 70.0 C)
+04:03:04 [aifoundry3] E78 pass 17101: 10 runs of 10 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 0.2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+-> PASS
+
+== 3a. the queue's budget rule on stub blocks (3 s each; an 8 s budget with a 1 s first estimate admits two, stops before the third)
+04:03:09 e171: plan FULL, items 17110 17111 17112; budget 8 s from the anchor (04:03:09), reserve 0 s, last end 04:03:17, deadline 2026-11-05 05:03:09; first estimates kinds 1 s, short 820 s
+04:03:09 p17110 (kinds) starts at T0+0 s (projected 1 s)
+04:03:12 p17110 rc=0 (3 s)
+04:03:12 p17111 (kinds) starts at T0+3 s (projected 3 s)
+04:03:15 p17111 rc=0 (3 s)
+04:03:15 budget: stopping before p17112 (kinds; now T0+6 s, projected 3 s, would end T0+9 s > T0+8 s or the deadline)
+04:03:15 e171: done, 2 items, at T0+6 s
+-> PASS
+
+== 3b. the queue's deadline rule (a deadline one minute ago: nothing starts)
+04:03:16 e171: plan FULL, items 17110 17111 17112 17113; budget 4200 s from the anchor (04:03:15), reserve 60 s, last end 05:12:15, deadline 2026-11-05 04:02:15; first estimates kinds 900 s, short 820 s
+04:03:16 budget: stopping before p17110 (kinds; now T0+1 s, projected 900 s, would end T0+901 s > T0+4140 s or the deadline)
+04:03:16 e171: done, 0 items, at T0+1 s
+-> PASS
+
+== 3c. the queue refuses an unknown plan
+E171_PLAN=HALF: only FULL, TWO or SHORT
+-> PASS
+
+== 3d. session_e171.sh start gate: no time gates (exit 8, no device opened)
+session start (budget anchor T0 04:03:16 PST; plan FULL)
+E171_LATEST_START and E171_DEADLINE are required (the round's time gates, set at his go): no device opened
+-> PASS
+
+== 3d. session_e171.sh start gate: after the latest start (exit 8, no device opened)
+session start (budget anchor T0 04:03:16 PST; plan FULL)
+no new card session after 2026-11-05 04:02:16 PST: no device opened
+-> PASS
+
+== 3d. session_e171.sh start gate: unknown plan (exit 8, no device opened)
+session start (budget anchor T0 04:03:16 PST; plan HALF)
+E171_PLAN=HALF: only FULL, TWO or SHORT: no device opened
+-> PASS
+
+== 4. no network call: the ssh, rsync and scp stand-ins were never called
+network calls: 0
+-> PASS
+
+DRY-INTEL PASS: no device opened (V3_DRY=1 and stub binaries that refuse), no ssh
