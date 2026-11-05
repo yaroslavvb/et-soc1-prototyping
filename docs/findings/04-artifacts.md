@@ -1218,7 +1218,7 @@ prediction of power and heat. Pool 7 is described here by counts and classes onl
 
 Q141's lanes built **no new space**, and no card ran in them: what they made is in this repository, in new files only. The kinds
 page (A25) took Q141(v)'s phone layouts in place as `208b31c7674f` (A25's dated note); the hubs take the round after these
-records. Each line's shas are its commits in order, the registration first and the fix pass last. "Item N" is the kinds page's
+records. *(They took it in gyroscope `fe077423`, Wed 4 Nov 2026 at 16:35:22 PST: one new Lab entry each on the Horace Hub, the AI Foundry hub and projects.)* Each line's shas are its commits in order, the registration first and the fix pass last. "Item N" is the kinds page's
 section 11, its numbering unchanged since `d571349e663f`, and "rank N" is Q140's final critic's open list. The short names are the
 ones [05-claims.md](05-claims.md), "Q141", uses.
 
