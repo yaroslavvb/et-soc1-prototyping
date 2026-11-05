@@ -113,15 +113,15 @@ samples ran over M10's frozen 95% upper peak on 4 of the 53 tiles that ran, all 
 - **The tree needed no remedy.** The pull fast-forwarded with nothing local in its way, so Wed's D1 remedy (inventory, tar, stash,
   fast-forward) was not used. The collector's re-hash of the box's kit files, tiles and binaries against this tree reads "all as the desk's
   tree and the pins" ([`logs/box-files-check.txt`](logs/box-files-check.txt)).
-- **D1, the desk-path gate (Thu 5 Nov 2026, 12:30-12:41 PST, after the scoring, before any commit).** The collection step ended with exit
-  16 at 12:30:54. v3.1's desk-path gate found the day's scratch directory, an absolute desk path outside the repo, three times in
+- **D1, the desk-path gate (Thu 5 Nov 2026, 12:30:54-12:40:12 PST, after the scoring, before any commit).** The collection step ended
+  with exit 16 at 12:30:54. v3.1's desk-path gate found the day's scratch directory, an absolute desk path outside the repo, three times in
   [`logs/cclist.txt`](logs/cclist.txt). These are the C-log list's three REQUIRED lines: `collect_e173_bounded.sh` tees them with the raw
   copy's paths (line 86) and copies `logs/` into the data dir (line 96). The gate's remedy reads "fix the route, remove the outputs, collect
   again". Collecting again through the committed driver would write the same three lines, because the raw copy always lives in the day's
   directory outside the repo. So only that prefix was replaced, by `<RB_OUT>` (the runbook's own display form), in that one file:
   - sha256 `48807990…` as collected, `5273aabd…` after; nothing else in it changed;
   - the as-collected copy is kept outside the repo;
-  - the step's two gates were then re-run through the runbook's own functions (`rb_common_v3.sh`). The C-log gate read v3's list (3
+  - the step's two gates were then re-run at 12:40:12 through the runbook's own functions (`rb_common_v3.sh`). The C-log gate read v3's list (3
     required, equal to v2's and v1's), with 3 of 3 checks finished and all PASS. The desk-path gate read 425 files, 0 hits: CLEAN;
   - no scored file, rule, number or check changed. E174's collector (`collect_e174.sh` lines 34 and 38) has the same route.
 - **`ccheck-s1.json` is committed gzipped only**, as E165's was: `ccheck-s1.json.gz` (gzip -n). Its gunzip is the bytes whose sha256
