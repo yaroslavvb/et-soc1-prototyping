@@ -1,0 +1,305 @@
+M11's heat registration (Q142(h)): the power of HM-LG and its readings, design only (no fit, no hold, no card)
+
+Inputs (sha256; 'OK' = as tools/claims-v3/m11/SHA256SUMS lists it):
+   62d455a2663cbdc1d759062ae037fb291567853dd93e609292d4e4435e6a673e  docs/reports/data/2026-11-04-q142m-m10/heldout-m10.json  [OK]
+   f6c84268beb5fe9d46d631914e6fb5d48dfcf21680e0cc66df5b02784a646ea5  docs/reports/data/2026-11-04-q142m-m10/section7-m10.json  [OK]
+   57c1d93417367d8ba1d3f39a63e9b68b042a9635785e26f9a9fa772817932860  docs/reports/data/2026-11-02-q138t-heat-model/cv-q138t.json  [OK]
+   313c6840337615b2c474c39f74f095737bf7a35ecc6f9d8ac2356478f6442512  docs/reports/data/2026-11-02-q138t-heat-model/predict_e144.py  [OK]
+   9dbb288f896b7e588fbc155d67f32b1cb7089ffe4ede465c1380d2724d1fb49b  docs/reports/data/2026-11-02-q138t-heat-model/heat_q138t.py  [OK]
+   268b47fd580b330738eb3e1c83ea392f3784aae348a658e7335b734a1168e8fa  docs/reports/data/2026-11-02-q138t-heat-model/model-q138t.json  [OK]
+   b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5  docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json  [OK]
+   db79558c00a74bd10df385251ce957f698fd2784bb01994198d43e7ee606413c  tools/claims-v3/m10/pool8/design_power_groups.py  [OK]
+   ce2d32c046161f30afa794a2fa5e467c6c396fc272a59e7e193f92d7dae02e80  tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry2.json  [OK]
+   328d0c4269e64a1a06afa15843492dd37795efb774fb310438f6d424cf43053d  tools/claims-v3/kinds/blind8/sets-blind8.json  [OK]
+
+1. The noise of one hold's chain miss within a session (P8-LG's rule: a two-term fit for a session of >= 4 holds spanning > 2 C of P, else the session's mean; residuals scaled to their degrees of freedom)
+   aifoundry3 (E144, E154, E166; M10's fitted holds, K_OL_long left out as M10 left it): sigma 0.0884 C over 11 scaled residuals
+     E144: {"n": 2, "fit": "mean", "mean_C": -0.0084}
+     E154: {"n": 5, "fit": "two-term", "a_C": -0.2379, "g": 0.06005, "span_P_C": 7.423}
+     E166: {"n": 4, "fit": "two-term", "a_C": 0.3921, "g": -0.01443, "span_P_C": 8.487}
+   aifoundry2 (E111's and E133's two int8 holds each, each day read by the chain fitted on the other day; cv-q138t.json a2): sigma 0.2296 C over 4 scaled residuals
+     E133: E133-W2 340 s, P 12.65, e +0.215; E133-W1B 1596 s, P 11.71, e +0.591
+     E111: E111-W2 345 s, P 12.62, e +1.096; E111-W1B 1597 s, P 12.13, e +0.833
+   aifoundry2's frozen-chain sessions hold one 800 MHz hold each (they add nothing to a within-session noise): E144b G1 P 12.20 e +0.724; E161 G1Q P 15.51 e +0.367; E167 G1Q P 15.88 e +0.910
+   aifoundry2's readout floor (aifoundry3's sigma with a whole-degree anchor's uniform +-0.5 C added): 0.3019 C
+
+2. The planned holds
+   aifoundry3 at a 49.5 C room: plan 73.3 min + smoke 1.4 = 74.7 card-minutes
+     H_E fp32.randn     share 0.4571  S_eff 12.206 W  carried-in +0.00 C  P (plateau rise over its anchor) 13.856 C  plateau 63.36 C  peak 65.69 C
+     Z   fp32.zeros     share 0.9655  S_eff  1.917 W  carried-in +1.33 C  P (plateau rise over its anchor)  0.784 C  plateau 51.61 C  peak 51.65 C
+     L1  int8.full      share 0.9655  S_eff  9.316 W  carried-in +1.16 C  P (plateau rise over its anchor)  9.454 C  plateau 60.12 C  peak 60.51 C
+     S   int8.neg_ones  share 0.9655  S_eff  4.032 W  carried-in +1.01 C  P (plateau rise over its anchor)  3.432 C  plateau 53.94 C  peak 54.07 C
+     L2  int8.full      share 0.9655  S_eff  9.316 W  carried-in +2.48 C  P (plateau rise over its anchor)  8.182 C  plateau 60.17 C  peak 60.53 C
+   aifoundry3 at a 51.2 C room: plan 73.3 min + smoke 1.4 = 74.7 card-minutes
+     H_E fp32.randn     share 0.4571  S_eff 12.206 W  carried-in +0.00 C  P (plateau rise over its anchor) 14.205 C  plateau 65.41 C  peak 67.79 C
+     Z   fp32.zeros     share 0.9655  S_eff  1.917 W  carried-in +1.43 C  P (plateau rise over its anchor)  0.731 C  plateau 53.36 C  peak 53.40 C
+     L1  int8.full      share 0.9655  S_eff  9.316 W  carried-in +1.21 C  P (plateau rise over its anchor)  9.672 C  plateau 62.08 C  peak 62.50 C
+     S   int8.neg_ones  share 0.9655  S_eff  4.032 W  carried-in +1.09 C  P (plateau rise over its anchor)  3.459 C  plateau 55.75 C  peak 55.88 C
+     L2  int8.full      share 0.9655  S_eff  9.316 W  carried-in +2.58 C  P (plateau rise over its anchor)  8.356 C  plateau 62.13 C  peak 62.52 C
+   aifoundry3 at a 52.0 C room: plan 73.3 min + smoke 1.4 = 74.7 card-minutes
+     H_E fp32.randn     share 0.3716  S_eff  9.921 W  carried-in +0.00 C  P (plateau rise over its anchor) 11.856 C  plateau 63.86 C  peak 66.27 C
+     Z   fp32.zeros     share 0.9655  S_eff  1.917 W  carried-in +1.20 C  P (plateau rise over its anchor)  0.974 C  plateau 54.18 C  peak 54.22 C
+     L1  int8.full      share 0.9655  S_eff  9.316 W  carried-in +1.22 C  P (plateau rise over its anchor)  9.780 C  plateau 63.00 C  peak 63.44 C
+     S   int8.neg_ones  share 0.9655  S_eff  4.032 W  carried-in +1.13 C  P (plateau rise over its anchor)  3.471 C  plateau 56.60 C  peak 56.74 C
+     L2  int8.full      share 0.9655  S_eff  9.316 W  carried-in +2.62 C  P (plateau rise over its anchor)  8.441 C  plateau 63.06 C  peak 63.46 C
+   aifoundry3 at a 53.0 C room: plan 73.3 min + smoke 1.4 = 74.7 card-minutes
+     H_E fp32.randn     share 0.3716  S_eff  9.921 W  carried-in +0.00 C  P (plateau rise over its anchor) 12.032 C  plateau 65.03 C  peak 67.47 C
+     Z   fp32.zeros     share 0.9655  S_eff  1.917 W  carried-in +1.26 C  P (plateau rise over its anchor)  0.951 C  plateau 55.21 C  peak 55.25 C
+     L1  int8.full      share 0.9655  S_eff  9.316 W  carried-in +1.25 C  P (plateau rise over its anchor)  9.916 C  plateau 64.17 C  peak 64.62 C
+     S   int8.neg_ones  share 0.9655  S_eff  4.032 W  carried-in +1.18 C  P (plateau rise over its anchor)  3.485 C  plateau 57.66 C  peak 57.81 C
+     L2  int8.full      share 0.9655  S_eff  9.316 W  carried-in +2.68 C  P (plateau rise over its anchor)  8.550 C  plateau 64.23 C  peak 64.65 C
+   aifoundry2: G1E (E144b's G1 again) P 12.20 C; Z_m (int8.neg_ones on 8 of 32 shires) P 3.05 C; Z_f (int8.zeros, every shire) P 10.46 C (zeros board 33.74 W at a 47 C rest against P_ref 22.58 W)
+
+3. HM-LG's power: the registered test (lg_test with >= 4 holds a session spanning >= 6.0 C of P, n - 2k >= 3), 5000 draws a cell. Shares in %: GAIN / LEVEL / BOTH / NOT SEPARATED / NOT SCORED
+   F points (5%): F(1,3) 10.128; F(2,6) 5.143; F(3,9) 3.863; F(2,4) 6.944; F(4,8) 3.838
+
+   A3 x2 (the plan: two aifoundry3 sessions, rooms 51.2 and 52.0 C): P per session 14.21, 0.73, 9.67, 3.46, 8.36 | 11.86, 0.97, 9.78, 3.47, 8.44
+     sigma 0.0884 C:
+       none                                               1.7 /   1.9 /   3.3 /  93.1 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)               68.3 /   0.4 /   4.3 /  27.1 /   0.0
+       gain 3.20% (the x1.032 arm)                       88.2 /   0.1 /   5.1 /   6.6 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               95.3 /   0.0 /   4.4 /   0.2 /   0.0
+       level 0.15 C                                       1.1 /  44.9 /   3.6 /  50.4 /   0.0
+       level 0.27 C (E154's and E166's level alone)       0.0 /  89.3 /   4.9 /   5.8 /   0.0
+       level 0.40 C (E166's two-term a)                   0.0 /  95.1 /   4.9 /   0.1 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      14.9 /   0.0 /  85.1 /   0.0 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  66.2 /  33.7 /   0.0 /   0.0
+       mixed: E154's fit, then E166's                     1.2 /   0.1 /  98.6 /   0.1 /   0.0
+     sigma 0.1325 C:
+       none                                               2.0 /   1.7 /   3.2 /  93.1 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)               34.9 /   1.1 /   3.8 /  60.2 /   0.0
+       gain 3.20% (the x1.032 arm)                       58.2 /   0.8 /   4.3 /  36.7 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               85.8 /   0.2 /   4.5 /   9.6 /   0.0
+       level 0.15 C                                       1.5 /  20.7 /   3.5 /  74.3 /   0.0
+       level 0.27 C (E154's and E166's level alone)       0.8 /  59.9 /   4.4 /  35.0 /   0.0
+       level 0.40 C (E166's two-term a)                   0.1 /  87.8 /   4.7 /   7.4 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      48.4 /   0.0 /  50.0 /   1.7 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  76.0 /  16.7 /   7.3 /   0.0
+       mixed: E154's fit, then E166's                    14.6 /   2.0 /  74.6 /   8.7 /   0.0
+
+   A3 x1 (one aifoundry3 session, room 51.2 C): P per session 14.21, 0.73, 9.67, 3.46, 8.36
+     sigma 0.0884 C:
+       none                                               1.7 /   1.8 /   3.4 /  93.1 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)               44.6 /   1.3 /   3.7 /  50.4 /   0.0
+       gain 3.20% (the x1.032 arm)                       67.1 /   0.4 /   4.4 /  28.2 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               88.4 /   0.1 /   4.9 /   6.6 /   0.0
+       level 0.15 C                                       1.6 /  27.1 /   3.1 /  68.2 /   0.0
+       level 0.27 C (E154's and E166's level alone)       0.5 /  64.6 /   4.6 /  30.2 /   0.0
+       level 0.40 C (E166's two-term a)                   0.0 /  89.1 /   4.8 /   6.1 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      42.2 /   0.0 /  56.9 /   0.9 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  71.2 /  22.6 /   6.3 /   0.0
+       mixed: E154's fit, then E166's                    42.0 /   0.0 /  57.0 /   1.0 /   0.0
+     sigma 0.1325 C:
+       none                                               1.8 /   2.1 /   3.5 /  92.7 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)               23.6 /   1.6 /   3.1 /  71.7 /   0.0
+       gain 3.20% (the x1.032 arm)                       39.0 /   1.4 /   3.3 /  56.3 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               62.8 /   0.5 /   4.7 /  32.0 /   0.0
+       level 0.15 C                                       2.1 /  13.9 /   2.7 /  81.3 /   0.0
+       level 0.27 C (E154's and E166's level alone)       1.7 /  36.9 /   3.5 /  57.9 /   0.0
+       level 0.40 C (E166's two-term a)                   0.6 /  63.9 /   4.5 /  31.0 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      53.3 /   0.0 /  32.3 /  14.4 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  55.0 /  13.4 /  31.7 /   0.0
+       mixed: E154's fit, then E166's                    53.2 /   0.0 /  31.1 /  15.7 /   0.0
+
+   A3 x3 (three aifoundry3 sessions): P per session 14.21, 0.73, 9.67, 3.46, 8.36 | 11.86, 0.97, 9.78, 3.47, 8.44 | 14.21, 0.73, 9.67, 3.46, 8.36
+     sigma 0.0884 C:
+       none                                               2.1 /   1.8 /   2.3 /  93.8 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)               83.5 /   0.1 /   4.9 /  11.4 /   0.0
+       gain 3.20% (the x1.032 arm)                       94.3 /   0.0 /   5.0 /   0.7 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               95.4 /   0.0 /   4.6 /   0.0 /   0.0
+       level 0.15 C                                       0.4 /  60.3 /   4.5 /  34.8 /   0.0
+       level 0.27 C (E154's and E166's level alone)       0.0 /  94.3 /   4.9 /   0.8 /   0.0
+       level 0.40 C (E166's two-term a)                   0.0 /  95.0 /   5.0 /   0.0 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)       3.5 /   0.0 /  96.5 /   0.0 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  53.3 /  46.7 /   0.0 /   0.0
+       mixed: E154's fit, then E166's                     0.2 /   0.0 /  99.8 /   0.0 /   0.0
+     sigma 0.1325 C:
+       none                                               2.0 /   2.0 /   2.9 /  93.2 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)               50.5 /   0.7 /   4.5 /  44.3 /   0.0
+       gain 3.20% (the x1.032 arm)                       78.0 /   0.2 /   4.6 /  17.1 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               93.4 /   0.0 /   5.0 /   1.5 /   0.0
+       level 0.15 C                                       1.0 /  29.1 /   3.7 /  66.2 /   0.0
+       level 0.27 C (E154's and E166's level alone)       0.3 /  77.1 /   4.9 /  17.7 /   0.0
+       level 0.40 C (E166's two-term a)                   0.0 /  94.2 /   4.9 /   0.9 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      33.3 /   0.0 /  66.7 /   0.1 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  76.3 /  22.8 /   0.9 /   0.0
+       mixed: E154's fit, then E166's                    12.3 /   0.1 /  87.0 /   0.6 /   0.0
+
+   A2 x2 masked (two aifoundry2 sessions: Z_m, G1E, Z_m, G1E): P per session 3.05, 12.20, 3.05, 12.20 | 3.05, 12.20, 3.05, 12.20
+     sigma 0.2296 C:
+       none                                               1.7 /   1.5 /   3.2 /  93.6 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)                9.1 /   1.6 /   3.6 /  85.8 /   0.0
+       gain 3.20% (the x1.032 arm)                       14.9 /   1.4 /   3.5 /  80.2 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               29.1 /   0.9 /   3.7 /  66.3 /   0.0
+       level 0.15 C                                       2.1 /   4.9 /   3.0 /  90.0 /   0.0
+       level 0.27 C (E154's and E166's level alone)       1.6 /  13.7 /   3.0 /  81.7 /   0.0
+       level 0.40 C (E166's two-term a)                   1.2 /  27.6 /   3.8 /  67.4 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      34.8 /   0.1 /  13.6 /  51.5 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.3 /  24.8 /   6.9 /  67.9 /   0.0
+       mixed: E154's fit, then E166's                    11.7 /   4.3 /  18.5 /  65.5 /   0.0
+     sigma 0.3019 C:
+       none                                               2.0 /   1.7 /   3.7 /  92.6 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)                6.2 /   1.9 /   3.5 /  88.4 /   0.0
+       gain 3.20% (the x1.032 arm)                        9.1 /   1.5 /   3.5 /  85.9 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               17.7 /   1.3 /   4.0 /  77.0 /   0.0
+       level 0.15 C                                       1.5 /   3.4 /   2.9 /  92.2 /   0.0
+       level 0.27 C (E154's and E166's level alone)       1.7 /   8.2 /   3.6 /  86.5 /   0.0
+       level 0.40 C (E166's two-term a)                   1.4 /  16.1 /   3.4 /  79.0 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      21.6 /   0.3 /   9.5 /  68.6 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.7 /  14.5 /   5.7 /  79.1 /   0.0
+       mixed: E154's fit, then E166's                     8.1 /   3.5 /  11.3 /  77.0 /   0.0
+     sigma 0.3443 C:
+       none                                               1.6 /   1.8 /   3.2 /  93.4 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)                4.6 /   1.5 /   3.3 /  90.6 /   0.0
+       gain 3.20% (the x1.032 arm)                        7.3 /   1.4 /   3.2 /  88.1 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               14.2 /   1.4 /   3.8 /  80.6 /   0.0
+       level 0.15 C                                       1.6 /   3.4 /   3.1 /  91.9 /   0.0
+       level 0.27 C (E154's and E166's level alone)       1.9 /   6.3 /   3.5 /  88.3 /   0.0
+       level 0.40 C (E166's two-term a)                   1.4 /  11.9 /   3.5 /  83.2 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      17.0 /   0.4 /   8.4 /  74.1 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.7 /  11.4 /   5.6 /  82.3 /   0.0
+       mixed: E154's fit, then E166's                     5.8 /   3.8 /   9.2 /  81.2 /   0.0
+
+   A2 x2 masked, small hold at 6 C: P per session 6.00, 12.20, 6.00, 12.20 | 6.00, 12.20, 6.00, 12.20
+     sigma 0.2296 C:
+       none                                               0.9 /   1.3 /   3.9 /  93.8 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)                4.8 /   1.4 /   3.7 /  90.1 /   0.0
+       gain 3.20% (the x1.032 arm)                        6.6 /   1.3 /   3.5 /  88.6 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               13.2 /   1.2 /   4.1 /  81.6 /   0.0
+       level 0.15 C                                       1.1 /   2.9 /   3.2 /  92.7 /   0.0
+       level 0.27 C (E154's and E166's level alone)       1.6 /   6.0 /   3.7 /  88.7 /   0.0
+       level 0.40 C (E166's two-term a)                   1.6 /  11.4 /   3.5 /  83.5 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      16.9 /   0.1 /   6.9 /  76.1 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.3 /  10.0 /   5.9 /  83.8 /   0.0
+       mixed: E154's fit, then E166's                     6.7 /   2.7 /   9.6 /  81.0 /   0.0
+     sigma 0.3019 C:
+       none                                               1.4 /   1.3 /   3.9 /  93.4 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)                3.4 /   1.5 /   4.3 /  90.8 /   0.0
+       gain 3.20% (the x1.032 arm)                        4.8 /   1.5 /   3.3 /  90.3 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)                8.4 /   1.6 /   4.0 /  86.0 /   0.0
+       level 0.15 C                                       1.0 /   2.1 /   3.7 /  93.1 /   0.0
+       level 0.27 C (E154's and E166's level alone)       1.3 /   4.0 /   3.8 /  91.0 /   0.0
+       level 0.40 C (E166's two-term a)                   1.4 /   7.9 /   3.7 /  87.0 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      10.3 /   0.5 /   6.0 /  83.2 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       1.0 /   5.9 /   4.7 /  88.4 /   0.0
+       mixed: E154's fit, then E166's                     4.3 /   2.0 /   6.6 /  87.2 /   0.0
+     sigma 0.3443 C:
+       none                                               1.3 /   1.0 /   4.0 /  93.7 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)                2.8 /   1.5 /   3.8 /  91.9 /   0.0
+       gain 3.20% (the x1.032 arm)                        4.2 /   1.3 /   4.0 /  90.5 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)                6.7 /   1.5 /   3.6 /  88.1 /   0.0
+       level 0.15 C                                       1.3 /   1.8 /   4.0 /  92.9 /   0.0
+       level 0.27 C (E154's and E166's level alone)       1.1 /   3.6 /   3.6 /  91.6 /   0.0
+       level 0.40 C (E166's two-term a)                   1.1 /   5.6 /   3.6 /  89.7 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)       7.7 /   0.4 /   5.7 /  86.2 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.6 /   4.8 /   4.6 /  90.0 /   0.0
+       mixed: E154's fit, then E166's                     3.9 /   1.8 /   6.6 /  87.7 /   0.0
+
+   A2 x4 masked (four aifoundry2 sessions): P per session 3.05, 12.20, 3.05, 12.20 | 3.05, 12.20, 3.05, 12.20 | 3.05, 12.20, 3.05, 12.20 | 3.05, 12.20, 3.05, 12.20
+     sigma 0.2296 C:
+       none                                               1.6 /   1.6 /   3.1 /  93.7 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)               14.3 /   1.3 /   3.3 /  81.1 /   0.0
+       gain 3.20% (the x1.032 arm)                       26.1 /   0.7 /   4.3 /  68.8 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               51.4 /   0.5 /   4.0 /  44.1 /   0.0
+       level 0.15 C                                       1.3 /   7.2 /   3.3 /  88.2 /   0.0
+       level 0.27 C (E154's and E166's level alone)       0.9 /  23.0 /   4.2 /  71.9 /   0.0
+       level 0.40 C (E166's two-term a)                   0.2 /  51.9 /   4.2 /  43.7 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      58.6 /   0.0 /  21.2 /  20.3 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.1 /  46.0 /   9.9 /  44.0 /   0.0
+       mixed: E154's fit, then E166's                    16.1 /   4.8 /  34.4 /  44.7 /   0.0
+     sigma 0.3019 C:
+       none                                               1.9 /   2.0 /   3.3 /  92.8 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)                7.5 /   1.5 /   3.7 /  87.2 /   0.0
+       gain 3.20% (the x1.032 arm)                       14.8 /   1.1 /   4.1 /  79.9 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               30.6 /   0.8 /   4.6 /  64.1 /   0.0
+       level 0.15 C                                       1.5 /   4.5 /   3.7 /  90.2 /   0.0
+       level 0.27 C (E154's and E166's level alone)       1.4 /  12.5 /   3.8 /  82.3 /   0.0
+       level 0.40 C (E166's two-term a)                   0.5 /  29.1 /   4.2 /  66.1 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      41.2 /   0.1 /  12.8 /  45.9 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.3 /  26.7 /   6.6 /  66.4 /   0.0
+       mixed: E154's fit, then E166's                    11.8 /   5.2 /  18.6 /  64.3 /   0.0
+     sigma 0.3443 C:
+       none                                               2.0 /   1.9 /   2.6 /  93.6 /   0.0
+       gain 2.35% (M10's aifoundry3 gamma)                6.2 /   1.9 /   3.5 /  88.4 /   0.0
+       gain 3.20% (the x1.032 arm)                       11.0 /   1.1 /   4.4 /  83.5 /   0.0
+       gain 4.52% (M10's aifoundry2 gamma)               24.5 /   0.8 /   4.0 /  70.6 /   0.0
+       level 0.15 C                                       1.5 /   4.1 /   2.9 /  91.5 /   0.0
+       level 0.27 C (E154's and E166's level alone)       1.2 /  10.5 /   3.5 /  84.8 /   0.0
+       level 0.40 C (E166's two-term a)                   0.8 /  22.3 /   3.9 /  73.0 /   0.0
+       both: E154's two-term fit (-0.229 C + 5.72%)      30.4 /   0.1 /  11.9 /  57.6 /   0.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.3 /  20.9 /   6.6 /  72.2 /   0.0
+       mixed: E154's fit, then E166's                     9.3 /   4.8 /  13.8 /  72.1 /   0.0
+
+   A2 x2 unmasked (Z_f, G1E, Z_f, G1E): P per session 10.46, 12.20, 10.46, 12.20 | 10.46, 12.20, 10.46, 12.20
+     sigma 0.2296 C:
+       none                                               0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       gain 2.35% (M10's aifoundry3 gamma)                0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       gain 3.20% (the x1.032 arm)                        0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       gain 4.52% (M10's aifoundry2 gamma)                0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       level 0.15 C                                       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       level 0.27 C (E154's and E166's level alone)       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       level 0.40 C (E166's two-term a)                   0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       both: E154's two-term fit (-0.229 C + 5.72%)       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       mixed: E154's fit, then E166's                     0.0 /   0.0 /   0.0 /   0.0 / 100.0
+     sigma 0.3019 C:
+       none                                               0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       gain 2.35% (M10's aifoundry3 gamma)                0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       gain 3.20% (the x1.032 arm)                        0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       gain 4.52% (M10's aifoundry2 gamma)                0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       level 0.15 C                                       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       level 0.27 C (E154's and E166's level alone)       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       level 0.40 C (E166's two-term a)                   0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       both: E154's two-term fit (-0.229 C + 5.72%)       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       mixed: E154's fit, then E166's                     0.0 /   0.0 /   0.0 /   0.0 / 100.0
+     sigma 0.3443 C:
+       none                                               0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       gain 2.35% (M10's aifoundry3 gamma)                0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       gain 3.20% (the x1.032 arm)                        0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       gain 4.52% (M10's aifoundry2 gamma)                0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       level 0.15 C                                       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       level 0.27 C (E154's and E166's level alone)       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       level 0.40 C (E166's two-term a)                   0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       both: E154's two-term fit (-0.229 C + 5.72%)       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /   0.0 /   0.0 /   0.0 / 100.0
+       mixed: E154's fit, then E166's                     0.0 /   0.0 /   0.0 /   0.0 / 100.0
+
+4. S7-W, a held-out session reads worse with the carried term by more than its own noise (sigma / sqrt(n_s)); share of draws in which any held-out session does, at the plan (A3 x2)
+   carried: a common gain, sigma 0.0884 C: none 11.6; gain 2.35% 0.5; gain 3.20% 0.0; gain 4.52% 0.0; level 0.15 C 3.1; level 0.27 C 0.2; level 0.40 C 0.0; both: E154's two-term fit 0.1; both: E166's two-term fit 0.4; mixed: E154's fit, then E166's 0.3
+   carried: a common gain, sigma 0.1325 C: none 11.3; gain 2.35% 3.9; gain 3.20% 0.8; gain 4.52% 0.0; level 0.15 C 7.5; level 0.27 C 1.9; level 0.40 C 0.2; both: E154's two-term fit 0.9; both: E166's two-term fit 2.1; mixed: E154's fit, then E166's 1.6
+   carried: a common level, sigma 0.0884 C: none 10.9; gain 2.35% 1.1; gain 3.20% 0.2; gain 4.52% 0.0; level 0.15 C 2.4; level 0.27 C 0.0; level 0.40 C 0.0; both: E154's two-term fit 0.4; both: E166's two-term fit 0.0; mixed: E154's fit, then E166's 4.0
+   carried: a common level, sigma 0.1325 C: none 10.8; gain 2.35% 4.7; gain 3.20% 1.8; gain 4.52% 0.2; level 0.15 C 6.3; level 0.27 C 0.9; level 0.40 C 0.1; both: E154's two-term fit 2.1; both: E166's two-term fit 0.6; mixed: E154's fit, then E166's 7.0
+
+4b. HM-AG, do the plan's two aifoundry3 sessions share one gain (one level)? Share of draws in which the F test says they differ
+   sigma 0.0884 C (F point 5.987): none 5.4 / 5.1; gain 2.35% 5.7 / 5.4; gain 3.20% 4.6 / 5.4; gain 4.52% 4.7 / 5.4; level 0.15 C 5.6 / 4.8; level 0.27 C 6.3 / 5.0; level 0.40 C 8.9 / 5.7; both: E154's two-term fit 6.2 / 6.3; both: E166's two-term fit 8.3 / 4.8; mixed: E154's fit, then E166's 13.5 / 37.3
+   sigma 0.1325 C (F point 5.987): none 5.0 / 5.1; gain 2.35% 4.8 / 4.7; gain 3.20% 4.8 / 5.3; gain 4.52% 5.4 / 5.4; level 0.15 C 5.5 / 5.4; level 0.27 C 5.4 / 4.9; level 0.40 C 6.9 / 5.2; both: E154's two-term fit 5.7 / 6.1; both: E166's two-term fit 6.6 / 5.2; mixed: E154's fit, then E166's 9.1 / 19.2
+
+5. The E144-like hold H_E in one aifoundry3 session (room 51.2 C): HM-E144 = |e/R| <= 1.5% (RK3-c's line); HM-HE = e(H_E) outside the 95% prediction interval of the two-term fit on the session's other four holds. Shares in %, with a hold-specific miss delta added to H_E
+   none|delta +0.0 C                                              HM-E144 inside  98.5   HM-HE departs   4.8
+   none|delta +0.3 C                                              HM-E144 inside  16.7   HM-HE departs  22.1
+   none|delta +0.5 C                                              HM-E144 inside   0.0   HM-HE departs  47.4
+   gain 2.35% (M10's aifoundry3 gamma)|delta +0.0 C               HM-E144 inside   9.6   HM-HE departs   5.4
+   gain 2.35% (M10's aifoundry3 gamma)|delta +0.3 C               HM-E144 inside   0.0   HM-HE departs  24.0
+   gain 2.35% (M10's aifoundry3 gamma)|delta +0.5 C               HM-E144 inside   0.0   HM-HE departs  47.5
+   gain 3.20% (the x1.032 arm)|delta +0.0 C                       HM-E144 inside   0.2   HM-HE departs   5.3
+   gain 3.20% (the x1.032 arm)|delta +0.3 C                       HM-E144 inside   0.0   HM-HE departs  22.5
+   gain 3.20% (the x1.032 arm)|delta +0.5 C                       HM-E144 inside   0.0   HM-HE departs  46.7
+   gain 4.52% (M10's aifoundry2 gamma)|delta +0.0 C               HM-E144 inside   0.0   HM-HE departs   4.6
+   gain 4.52% (M10's aifoundry2 gamma)|delta +0.3 C               HM-E144 inside   0.0   HM-HE departs  23.2
+   gain 4.52% (M10's aifoundry2 gamma)|delta +0.5 C               HM-E144 inside   0.0   HM-HE departs  45.9
+   level 0.15 C|delta +0.0 C                                      HM-E144 inside  76.5   HM-HE departs   5.4
+   level 0.15 C|delta +0.3 C                                      HM-E144 inside   0.4   HM-HE departs  23.5
+   level 0.15 C|delta +0.5 C                                      HM-E144 inside   0.0   HM-HE departs  47.1
+   level 0.27 C (E154's and E166's level alone)|delta +0.0 C      HM-E144 inside  27.3   HM-HE departs   5.6
+   level 0.27 C (E154's and E166's level alone)|delta +0.3 C      HM-E144 inside   0.0   HM-HE departs  23.2
+   level 0.27 C (E154's and E166's level alone)|delta +0.5 C      HM-E144 inside   0.0   HM-HE departs  47.7
+   level 0.40 C (E166's two-term a)|delta +0.0 C                  HM-E144 inside   2.0   HM-HE departs   5.3
+   level 0.40 C (E166's two-term a)|delta +0.3 C                  HM-E144 inside   0.0   HM-HE departs  22.8
+   level 0.40 C (E166's two-term a)|delta +0.5 C                  HM-E144 inside   0.0   HM-HE departs  46.2
+
+6. The precision a pool-8 card-1 session gives terms (c) and (d) (approximate: M10's committed paired intervals, their half-width scaled by sqrt(n_M10 / n_pool8) for the same per-kind spread)
+   (c) card 1's session heat scale: M10's held-out d -0.1123 C [-0.1367, -0.0852] over 315 kinds; at pool 8's N1 of 31 tiles the half-width is about 0.082 C
+   (d) card 1's int8 (M10's term a on int8, card 1): d +0.0028 W [-0.0043, +0.0112] over 93 kinds; at pool 8's I1 of 12 tiles the half-width is about 0.0215 W
+
+wrote tools/claims-v3/m11/design-power-heat.json
