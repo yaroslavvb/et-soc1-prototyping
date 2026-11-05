@@ -1,0 +1,134 @@
+{
+ "_what": "E172 (Q142(k6)): the machine form of E172.md's session plan; written by make_plan_e172.py after the registration (4441083f)",
+ "experiment": "E172",
+ "card": "aifoundry1c1",
+ "registration": "tools/claims-v3/e172/E172.md",
+ "registration_sha256": "da65b4a494cad12c3d3ff562ce3ed47a87bc0922345be6801748ef387d79f778",
+ "registration_commit": "4441083f",
+ "frozen_inputs": {
+  "tools/claims-v3/kinds/blind8/blind8.json": "370d8a970bed82c349dfa5f65cc483a20420218c01d099308970396ec4bb0257",
+  "tools/claims-v3/kinds/blind8/MANIFEST": "1f5adbcbb699d4eaec6330e05b33b732edb42eab95c869a5c1de02676eb77598",
+  "tools/claims-v3/kinds/blind8/SHA256SUMS": "606b3d7ee607d6c6d4f3f0ab61f86bf7e14a3de8889572843017738037b7dde8",
+  "tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry1c1.json": "1e55ac1ace1cce90446ffb07165e513f36673f9e8db8750b7b2b4a33e52b726e",
+  "tools/claims-v3/kinds/blind8/intervals-pool8.json": "05ef01e7a1646f4a865279b567a94d6419bd068555c4dc06c7b883b9fe38efbf"
+ },
+ "frozen_in": {
+  "pool_and_predictions": "4576fb90",
+  "converter_rule": "ebf68c52",
+  "freeze_note": "dfe226f1",
+  "pool8_registration": "3e97f583",
+  "A1": "8a8fa34c",
+  "A2": "68a7c322",
+  "predictor": "9d81d254",
+  "predictor_a2": "97765c0a",
+  "design": "153b720f"
+ },
+ "plan": {
+  "passes": {
+   "kinds": [
+    17210,
+    17219
+   ],
+   "smoke": 17201,
+   "stoptest": 17202
+  },
+  "plans": {
+   "FULL": {
+    "seq": [
+     17210,
+     17211,
+     17212,
+     17213,
+     17214
+    ],
+    "budget_s": 3900,
+    "note": "four planned as the budget allows; a fifth does not fit (E164's form)"
+   }
+  },
+  "reserve_s": 60,
+  "gap_s": 10,
+  "first_estimate_s": {
+   "kinds": 800
+  },
+  "runs_per_pass": {
+   "kinds": 84,
+   "drop_p2": 75
+  },
+  "launches_per_pass_with_burnins": {
+   "kinds": 86,
+   "drop_p2": 77
+  },
+  "drop_p2_switch": "E172_DROP_P2=1, set before the session and never after a pass has run",
+  "drop_p2": [
+   "fp16.u8_ar_i_32349b",
+   "fp16.u8_rowscale_ecc921",
+   "fp16.u8_tdist_93475b",
+   "fp32.r8_granite_l3_x2up_47e54f",
+   "fp32.s8_onebit_b14_3ef6ccbf",
+   "fp32.s8_onebit_b18_be2584eb",
+   "int8.h8_held_v34",
+   "int8.h8_held_vd9",
+   "int8.r8_dsqwen_l1_x1v_927670"
+  ],
+  "stops": {
+   "board_w": 66.0,
+   "die_hottest_shire_c": 72.0,
+   "stoptest_board_w": 1.0,
+   "stoptest_die_c": 1.0,
+   "max_c": 72
+  },
+  "smoke": [
+   "anchor_pi",
+   "fp32.zeros",
+   "fp32.randn",
+   "fp32.u8_lognorm_62af49",
+   "fp32.anchor7_zeros",
+   "fp16.s8_onebit_b7_b945b945",
+   "fp16.zeros",
+   "int8.l8_halfword_d2p2c16_83df",
+   "int8.zeros",
+   "fp32.anchor8_check_randn_319f73"
+  ],
+  "smoke_rule": {
+   "hottest": [
+    "fp32.u8_lognorm_62af49",
+    24.109655888049563
+   ],
+   "fp16": [
+    "fp16.s8_onebit_b7_b945b945",
+    0.34431772028737306
+   ],
+   "int8": [
+    "int8.l8_halfword_d2p2c16_83df",
+    0.05196777285136012
+   ]
+  },
+  "min_kept_passes_scored": 2,
+  "min_tile_passes": 2,
+  "c_log_sessions": {
+   "rule": "e172-smoke/p17201, and every e172/p172NN (17210-17219, never .attempt-*) whose runs.jsonl holds a launch record, whatever its block status; e172-stoptest/p17202 must hold no launch record and no C record",
+   "checker": "tools/claims-v3/p8-600/ccsessions_p8.py --run E172"
+  },
+  "expected_card_minutes": {
+   "FULL_four_passes": [
+    51,
+    53
+   ],
+   "cap": 65
+  },
+  "time_gates": "E172_DEADLINE required (the round's time gate less 10 minutes), set by box/launch_e172.sh; never two of our sessions on aifoundry1: card 0's E174 starts only after E172 has ended"
+ },
+ "scorer": {
+  "code": "tools/claims-v3/p8-600/score_p8_600.py",
+  "commit": "a518aa11",
+  "call": "score --run E172 --reduction <data>/e172.json --raw <raw copy> --ccheck <out>/ccheck/ccheck-session.json [--arm ...]",
+  "primary_reduction": "reduce_e172.py --leak 0.3134106532552718 --no-refit (dips removed once, E164's reducer)",
+  "arms": {
+   "session_own_slope": "--leak auto --no-refit",
+   "dips_kept": "--keep-dips --leak K --no-refit",
+   "leak0.2955": "--leak 0.2955 --no-refit",
+   "leak0.3320": "--leak 0.3320 --no-refit",
+   "relaxed": "--relax-anchors --leak K --no-refit"
+  }
+ }
+}

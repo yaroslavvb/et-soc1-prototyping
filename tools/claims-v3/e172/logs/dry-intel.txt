@@ -1,0 +1,97 @@
+== dry tree:  19M; hostname shim -> aifoundry1; date -> date (GNU coreutils) 9.5
+== check_e172 --desk
+HARNESS OK: 99 files match harness-e172.json (desk: binaries not checked)
+rc=0
+== e172_common --verify
+{"e172_tiles": 64, "pool8": 64, "priority_1": 40, "pool_anchors": 12, "priority2_kinds_drop_p2": 9, "e78_tiles_checked": 6, "problems": []}
+rc=0
+== preflight
+rc=0 dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+== dry pass 17210
+rc=0
+== dry smoke 17201
+rc=0
+== dry stop-path test 17202
+rc=1
+== dry pass 17211, priority-2 tests dropped
+rc=0
+== card 0 refused
+rc=2 E172 runs on aifoundry1 card 1 only (V3_DEVICE=1; this is aifoundry1-c0)
+== no V3_DEVICE refused
+rc=2 aifoundry1 has two cards: set V3_DEVICE=0 or 1
+== queue: no deadline
+rc=1 tools/claims-v3/e172/queue_e172.sh: line 14: E172_DEADLINE: E172_DEADLINE - the last end of a pass, the round time gate less 10 minutes (no default)
+== queue stub: first estimate past the budget
+rc=0
+04:17:07 e172: passes 17210 17211 17212 17213 17214; budget 20 s from the anchor (04:17:07), reserve 0 s, last end 04:17:27, deadline 06:17:00; first estimate 25 s; E172_DROP_P2=0
+04:17:07 budget: stopping before p17210 (now T0+0 s, projected 25 s, would end T0+25 s > T0+20 s or the deadline)
+04:17:07 e172: done, 0 passes, at T0+0 s
+== queue stub: five passes fit
+rc=0
+04:17:07 e172: passes 17210 17211 17212 17213 17214; budget 60 s from the anchor (04:17:07), reserve 0 s, last end 04:18:07, deadline 06:17:00; first estimate 3 s; E172_DROP_P2=0
+04:17:07 p17210 starts at T0+0 s (projected 3 s)
+stub block 17210
+04:17:08 p17210 rc=0 (1 s)
+04:17:08 p17211 starts at T0+1 s (projected 1 s)
+stub block 17211
+04:17:09 p17211 rc=0 (1 s)
+04:17:09 p17212 starts at T0+2 s (projected 1 s)
+stub block 17212
+04:17:10 p17212 rc=0 (1 s)
+04:17:10 p17213 starts at T0+3 s (projected 1 s)
+stub block 17213
+04:17:12 p17213 rc=0 (1 s)
+04:17:12 p17214 starts at T0+5 s (projected 1 s)
+stub block 17214
+04:17:13 p17214 rc=0 (1 s)
+04:17:13 e172: done, 5 passes, at T0+6 s
+== queue stub: deadline already past
+rc=0
+04:17:13 budget: stopping before p17210 (now T0+0 s, projected 3 s, would end T0+3 s > T0+3840 s or the deadline)
+04:17:13 e172: done, 0 passes, at T0+0 s
+== queue stub: STOP file
+rc=0
+04:17:13 STOP: stopping before p17210
+04:17:13 e172: done, 0 passes, at T0+0 s
+== session: no deadline
+rc=1 tools/claims-v3/e172/session_e172.sh: line 15: E172_DEADLINE: E172_DEADLINE - the round time gate less 10 minutes (no default)
+== dry session (check, preflight, stop test, smoke, gate, queue)
+rc=0
+2026-11-05T04:17:14 [aifoundry1-c1] e172-stoptest p17202 begins (die 80 C) -> <scratch>/drytree/build/claims-v3-dry/ai
+DRY ettelem config
+DRY start_sampler <scratch>/drytree/build/claims-v3-dry/aifoundry1-c1/e172-stoptest/p17202/telemetry.jsonl 1719
+04:17:17 [aifoundry1-c1] E78 pass 17202: 10 runs of 10 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 0.2 s quiet; cap 72 C; ET_DEVICES=1; tiles verified against kinds.json
+04:17:17 [aifoundry1-c1] done
+2026-11-05T04:17:17 [aifoundry1-c1] E172 stop-path test (die): run_e172 exit 0
+04:17:18 [aifoundry1-c1] E78 pass 17202: 10 runs of 10 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 0.2 s quiet; cap 72 C; ET_DEVICES=1; tiles verified against kinds.json
+04:17:18 [aifoundry1-c1] done
+2026-11-05T04:17:18 [aifoundry1-c1] E172 stop-path test (board): run_e172 exit 0
+E172 stop-path test (watch) needs --tel-live and no dry run
+2026-11-05T04:17:20 [aifoundry1-c1] E172 stop-path test (watch): run_e172 exit 1
+DRY ettelem config
+2026-11-05T04:17:26 [aifoundry1-c1] e172-stoptest p17202 ends: failed run_e172 exit 1 (stoptest)
+2026-11-05 04:17:26 PST stop-path test rc=1
+2026-11-05T04:17:26 [aifoundry1-c1] E172 pass 17201 (smoke): target 200 preheat 0 quiet 0.2 burnin 0 fma 2 s, die cap 72 C; C log via tools/claims-v3/ccheck/sparsity_ccheck.sh; E172_DROP_P2=0
+2026-11-05T04:17:26 [aifoundry1-c1] e172-smoke p17201 begins (die 80 C) -> <scratch>/drytree/build/claims-v3-dry/aifou
+DRY ettelem config
+DRY start_sampler <scratch>/drytree/build/claims-v3-dry/aifoundry1-c1/e172-smoke/p17201/telemetry.jsonl 1719
+04:17:29 [aifoundry1-c1] E78 pass 17201: 10 runs of 10 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 0.2 s quiet; cap 72 C; ET_DEVICES=1; tiles verified against kinds.json
+04:17:29 [aifoundry1-c1] done
+DRY ettelem config
+2026-11-05T04:17:34 [aifoundry1-c1] e172-smoke p17201 ends: ok pass 17201 smoke
+2026-11-05 04:17:34 PST smoke rc=0
+smoke config_start: {'dry': True}
+smoke config_end: {'dry': True}
+SMOKE-GATE FAIL {'bad': ['stop test die: rc=0 (want rc=6, EXIT_HOT)', "stop test die: STOP.die does not name the stop and the sample's age: ''", 'stop test board: rc=0 (want rc=6, EXIT_HOT)', "stop test board: STOP.board does not name the stop and the sample's
+2026-11-05 04:17:34 PST DRY: stop test rc 1, smoke rc 0, gate 1 (the gate reads live records; a dry run has none): the queue runs dry
+2026-11-05 04:19:08 PST queue: 04:19:08 e172: done, 5 passes, at T0+115 s
+2026-11-05 04:19:08 PST DRY config config-session-end.json
+2026-11-05 04:19:08 PST session end
+== dry data
+p17210 runs 84, block {"exp":"e172","pass":17210,"card":"aifoundry1-c1","t0_ms":1793881055292,"t1_ms":1793881063558,"die_c_start":80,"die_c_end":80,"status":"ok","note":"pass 17210"}
+p17211 runs 84, block {"exp":"e172","pass":17211,"card":"aifoundry1-c1","t0_ms":1793881073906,"t1_ms":1793881082147,"die_c_start":80,"die_c_end":80,"status":"ok","note":"pass 17211"}
+p17212 runs 84, block {"exp":"e172","pass":17212,"card":"aifoundry1-c1","t0_ms":1793881092551,"t1_ms":1793881100794,"die_c_start":80,"die_c_end":80,"status":"ok","note":"pass 17212"}
+p17213 runs 84, block {"exp":"e172","pass":17213,"card":"aifoundry1-c1","t0_ms":1793881111227,"t1_ms":1793881119527,"die_c_start":80,"die_c_end":80,"status":"ok","note":"pass 17213"}
+p17214 runs 84, block {"exp":"e172","pass":17214,"card":"aifoundry1-c1","t0_ms":1793881129957,"t1_ms":1793881138207,"die_c_start":80,"die_c_end":80,"status":"ok","note":"pass 17214"}
+== network calls (the ssh, rsync and scp stand-ins): 0
+== done
