@@ -1,0 +1,28 @@
+E175 dated note A2's M1 reader, self-test: m1_reading_e175.py d2893717bc7f543d, score_e175.py fd158d348fdabdec, p8gov.py 6adacaf21a46723c, predictions-e175.json 0cbb3878df390c13; seeds M1 80557, M1c 80656
+PASS R1 m10: M1 BETTER [-0.077, -0.0339], M1c BETTER [-0.0446, -0.0247]: reading 'BETTER: evidence on D'
+PASS R2 m9: M1 WORSE [0.0339, 0.077], M1c WORSE [0.0247, 0.0446]: reading 'WORSE: evidence on D'
+PASS R3 low: M1 BETTER [-0.0508, -0.0188], M1c NOT RESOLVED [-0.0158, 0.0117]: reading 'BETTER: the session's board level, not evidence on D', side below (Bg's mean -0.500 W, Bp's -0.500 W)
+PASS R4 high: M1 WORSE [0.0127, 0.0515], M1c NOT RESOLVED [-0.0158, 0.0117]: reading 'WORSE: the session's board level, not evidence on D', side above (Bg's mean +0.500 W, Bp's +0.500 W)
+PASS R5 noise: M1 NOT RESOLVED [-0.0269, 0.0166], M1c NOT RESOLVED [-0.0158, 0.0117]: reading 'NOT RESOLVED: no reading on D'
+PASS R6 9 scored tiles: M1 NOT SCORED (n 9 < 10), reading NOT SCORED, no crash
+PASS R7a in R1-R5 the reader re-derived M1 and the clock beside from the scorer's own tiles, equal field for field (it refuses otherwise)
+PASS R7b the identity in R1-R5 (M1's point below 0 exactly when abar_delta < theta; mean(a^2) - mean(b^2) = 2 mean(delta)(abar_delta - theta)): m10 abar 0.0 theta 0.04523 point -0.0575; m9 abar 0.09046 theta 0.04523 point 0.0575; low abar -0.5 theta 0.04523 point -0.0337; high abar 0.5 theta 0.04523 point 0.0297; noise abar -0.0 theta 0.04523 point -0.0058
+E175-A2-M1, read by dated note A2 (dated note A2 beside E175.md (Q143(g) fix pass): reported, never a verdict; no rule, line, set, stop or order changes)
+  E175-A2-M1 (the registered verdict, re-derived equal: True): BETTER [-0.0508, -0.0188] point -0.0337 (n 24)
+  E175-A2-M1c (reported): NOT RESOLVED [-0.0158, 0.0117] point -0.0022
+  Bg's mean -0.5000 W, Bp's mean -0.5000 W: below; delta mean +0.0365 W (governed 0.0174, pinned 0.0748; the pinned share of sum(delta) 0.6819)
+  abar_delta -0.5 W, theta 0.04523 W; identity: {'mean_a2_minus_mean_b2': -0.0398473, 'two_mean_delta_times_abar_minus_theta': -0.0398473, 'point_below_0': True, 'abar_below_theta': True}
+  READING: BETTER: the session's board level, not evidence on D
+  E175-A2-M1 BETTER: the session's board read below both models' predictions in both groups (Bg's mean -0.500 W, Bp's mean -0.500 W; M9's part's means -0.517 and -0.575 W; abar_delta -0.5000 W against theta 0.0452 W), where M10 carried's lower predictions are nearer: the session's board level, not evidence on D (dated note A2), and the registration's sentence for BETTER is not written; E175-A2-M1c (each group's level removed), reported: NOT RESOLVED
+  clock beside: BETTER [-0.4119, -0.0004]; centred NOT RESOLVED [-0.0413, 0.1914]
+PASS R8a main() on a written results file: rc 0, reading 'BETTER: the session's board level, not evidence on D', the results' sha256 recorded
+refused: E175-A2-M1 re-derived from the results' own tiles is not the scorer's: {'verdict': ('BETTER', 'NOT RESOLVED')}
+PASS R8b a results file whose M1 verdict was altered: refused, rc 2
+refused: the clock beside E175-A2-M1, re-derived, is not the scorer's: {'ci95': ([-0.4119, -0.0004], [0.0, 0.0])}
+PASS R8c a results file whose clock beside was altered: refused, rc 2
+refused: not score_e175.py's results (no score)
+PASS R8d a file that is not the scorer's results: refused, rc 3
+E175-A2-M1, read by dated note A2 (dated note A2 beside E175.md (Q143(g) fix pass): reported, never a verdict; no rule, line, set, stop or order changes)
+  NOT SCORED: fewer than 2 counted passes: every rule NOT SCORED
+PASS R8e a score with fewer than 2 passes: NOT SCORED, rc 0
+ALL PASS: 13 of 13

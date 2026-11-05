@@ -1,0 +1,59 @@
+E175-A2-M1's outcome shares and dated note A2's reading (design only; no E175 session or datum exists)
+
+delta = M9's part - M10 carried at the frozen fallback, 24 kept tiles (burst() with no anchor read gives the same: True):
+  board: mean +0.0338 W, governed +0.0133, pinned +0.0748, range -0.005 to +0.151; M9's part above M10 carried on 19 tiles, equal on 1, below on 4
+  clock: mean -0.487 MHz, governed -0.722, pinned -0.016, range -1.36 to +0.00
+  the pinned tiles' share of sum(delta), their weight in abar_delta and so in M1's point: 0.737
+delta under the session's own reads (burst() recomputed with made-up zeros-anchor reads and die starts):
+  anchors at the fallback level, die starts T_ref: equal to the fallback's: True
+  anchors -1.0 W from the fallback zeros level, die starts T_ref: board mean +0.0365 W (governed +0.0176, pinned +0.0744), largest change from the fallback's 0.0100 W
+  anchors -0.5 W from the fallback zeros level, die starts T_ref: board mean +0.0352 W (governed +0.0155, pinned +0.0746), largest change from the fallback's 0.0040 W
+  anchors +0.5 W from the fallback zeros level, die starts T_ref: board mean +0.0330 W (governed +0.0120, pinned +0.0749), largest change from the fallback's 0.0050 W
+  anchors +1.0 W from the fallback zeros level, die starts T_ref: board mean +0.0315 W (governed +0.0102, pinned +0.0741), largest change from the fallback's 0.0110 W
+  anchors at the fallback level, die starts T_ref -5 C: board mean +0.0444 W (governed +0.0292, pinned +0.0747), largest change from the fallback's 0.0350 W
+  anchors at the fallback level, die starts T_ref +5 C: board mean +0.0277 W (governed +0.0049, pinned +0.0735), largest change from the fallback's 0.0290 W
+
+Shares of 4,000 simulated sessions (%), 16 governed and 8 pinned cells each; M1 by the registered engine (seed 80557, 20,000 draws, [vals[500], vals[19499]]), M1c by the same engine on each group's centred errors (seed 80656):
+  truth                 board mean gov/pin | M1 BETTER WORSE  NR | read as D (B/W)   read as level | M1c BETTER WORSE  NR | clock beside B/W/NR | point median
+  e2e                   -0.194 / -0.085 |   18.5   0.8  80.7 |   1.2 (0.9/0.3)      18.1 |    7.7   4.0  88.3 |   2.2/ 8.0/ 89.8 | -0.0074 W
+  e165                  -0.425 / -0.015 |   27.6   0.2  72.2 |   1.1 (1.1/0.0)      26.7 |    7.4   4.7  87.9 |   0.4/17.3/ 82.2 | -0.0085 W
+  e2e x1.5              -0.291 / -0.127 |   18.9   0.7  80.5 |   0.8 (0.6/0.2)      18.7 |    7.0   4.3  88.6 |   1.9/ 9.7/ 88.4 | -0.0071 W
+  e2e level             +0.306 / +0.415 |    0.1  37.0  63.0 |   0.2 (0.1/0.2)      36.8 |    7.3   4.5  88.2 |  58.0/ 0.0/ 42.0 | +0.0140 W
+  e2e x0.5              -0.097 / -0.042 |   25.0   0.3  74.7 |   1.3 (1.1/0.1)      24.1 |    8.8   3.5  87.7 |   5.2/ 3.4/ 91.4 | -0.0101 W
+  e2e level low         -0.694 / -0.585 |   73.6   0.0  26.4 |   0.1 (0.1/0.0)      73.5 |    6.7   3.5  89.8 |   0.0/78.8/ 21.2 | -0.0226 W
+  e2e centred           +0.000 / +0.000 |    8.8   3.0  88.2 |   1.6 (1.4/0.3)      10.1 |    7.6   4.4  88.0 |   8.9/ 1.6/ 89.5 | -0.0023 W
+  e2e, M9's part right  -0.194 / -0.085 |   11.7   1.7  86.6 |   0.9 (0.6/0.4)      12.4 |    4.8   6.8  88.4 |   0.3/24.7/ 75.0 | -0.0038 W
+
+When M1 resolved, where the session's board lay (below both models' predictions: Bg's and Bp's means, M10 carried's errors, below 0;
+above both: M9's part's errors' means above 0 in both groups; else mixed). Sessions:
+  e2e                   BETTER  739: below both  659, above both   1, mixed   79 | WORSE   34: above both    9, below both   0, mixed   25
+  e165                  BETTER 1105: below both 1031, above both   0, mixed   74 | WORSE    8: above both    0, below both   0, mixed    8
+  e2e x1.5              BETTER  755: below both  680, above both   0, mixed   75 | WORSE   27: above both    8, below both   0, mixed   19
+  e2e level             BETTER    4: below both    2, above both   2, mixed    0 | WORSE 1478: above both 1438, below both   0, mixed   40
+  e2e x0.5              BETTER 1000: below both  888, above both   0, mixed  112 | WORSE   13: above both    2, below both   0, mixed   11
+  e2e level low         BETTER 2944: below both 2937, above both   0, mixed    7 | WORSE    0: above both    0, below both   0, mixed    0
+  e2e centred           BETTER  351: below both  229, above both   3, mixed  119 | WORSE  119: above both   81, below both   0, mixed   38
+  e2e, M9's part right  BETTER  468: below both  411, above both   1, mixed   56 | WORSE   68: above both   19, below both   0, mixed   49
+
+Dated note A2's reading, per truth (% of sessions): M1 resolved | with the board on its side (BETTER below both, WORSE above both): the session's board level | M1c resolving the same way | read as evidence on D (resolved, not on the level's side, M1c the same):
+  e2e                   resolved  19.3 | on the level's side  16.7 | M1c the same  4.6 | evidence on D  1.2 (BETTER 0.9, WORSE 0.3) | read as the session's level  18.1
+  e165                  resolved  27.8 | on the level's side  25.8 | M1c the same  4.6 | evidence on D  1.1 (BETTER 1.1, WORSE 0.0) | read as the session's level  26.7
+  e2e x1.5              resolved  19.6 | on the level's side  17.2 | M1c the same  4.0 | evidence on D  0.8 (BETTER 0.6, WORSE 0.2) | read as the session's level  18.7
+  e2e level             resolved  37.0 | on the level's side  36.0 | M1c the same  3.7 | evidence on D  0.2 (BETTER 0.1, WORSE 0.2) | read as the session's level  36.8
+  e2e x0.5              resolved  25.3 | on the level's side  22.2 | M1c the same  5.5 | evidence on D  1.3 (BETTER 1.1, WORSE 0.1) | read as the session's level  24.1
+  e2e level low         resolved  73.6 | on the level's side  73.4 | M1c the same  6.5 | evidence on D  0.1 (BETTER 0.1, WORSE 0.0) | read as the session's level  73.5
+  e2e centred           resolved  11.8 | on the level's side   7.8 | M1c the same  3.4 | evidence on D  1.6 (BETTER 1.4, WORSE 0.3) | read as the session's level  10.1
+  e2e, M9's part right  resolved  13.4 | on the level's side  10.8 | M1c the same  2.6 | evidence on D  0.9 (BETTER 0.6, WORSE 0.4) | read as the session's level  12.4
+
+The identity: M1's point is below 0 exactly when abar_delta < theta (mismatching sessions, per truth): e2e 0, e165 0, e2e x1.5 0, e2e level 0, e2e x0.5 0, e2e level low 0, e2e centred 0, e2e, M9's part right 0; theta 0.04724 W
+p8gov.paired itself on the first sessions of every truth (board M1, board M1c, clock beside): e2e 12 of 12, e165 12 of 12, e2e x1.5 12 of 12, e2e level 12 of 12, e2e x0.5 12 of 12, e2e level low 12 of 12, e2e centred 12 of 12, e2e, M9's part right 12 of 12
+
+M1's shares with delta recomputed under the session's reads (2,000 sessions; BETTER / WORSE / NOT RESOLVED %):
+  anchors -1.0 W from the fallback zeros level, die starts T_ref: e2e 19.6 / 0.3 / 80.1; e165 30.9 / 0.1 / 69.0
+  anchors -0.5 W from the fallback zeros level, die starts T_ref: e2e 19.6 / 0.3 / 80.0; e165 29.2 / 0.1 / 70.7
+  anchors +0.5 W from the fallback zeros level, die starts T_ref: e2e 18.5 / 0.5 / 81.0; e165 27.1 / 0.2 / 72.7
+  anchors +1.0 W from the fallback zeros level, die starts T_ref: e2e 17.6 / 0.6 / 81.8; e165 26.4 / 0.2 / 73.3
+  anchors at the fallback level, die starts T_ref -5 C: e2e 22.2 / 0.1 / 77.7; e165 37.0 / 0.0 / 63.0
+  anchors at the fallback level, die starts T_ref +5 C: e2e 16.2 / 0.8 / 83.0; e165 22.9 / 0.6 / 76.5
+
+CHECKS: every check agrees
