@@ -1,0 +1,95 @@
+# Q143(k): the runbook's desk test (selftest_runbook_q143k.sh), Thu 05 Nov 2026 12:44:13-12:44:31 PST, on the Intel through the round's local slot;
+# stand-in ssh and rsync first on PATH serve a stand-in box; no lab box reached. Scratch paths read <scratch>.
+
+== A. the dry listing: every step exits 0, no ssh or rsync call
+dry listing: 0 step(s) exited non-zero
+calls: 0
+-> PASS (dry listing)
+
+== L1. a login link at the probe
+[s08_a3_preflight_q143k] STOP: aifoundry3 printed a login link at the probe (lock file appended; link in RB_LINKS): nothing else was called
+<HH:MM:SS> aifoundry3 needs a check
+-> PASS (exit 11 and one lock line)
+
+== L2. a probe that never answers (bound 2 s)
+[s08_a3_preflight_q143k] STOP: aifoundry3 did not answer the probe within 15 s (rc 12): nothing else was called
+-> PASS (exit 12)
+
+== L3. a read past its bound (2 s)
+[s08_a3_preflight_q143k] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again
+-> PASS (exit 13)
+
+== L4. a box whose preflight reads wrong (its three binaries missing: the box list reads 26 of 29)
+[s08_a3_preflight_q143k] STOP: aifoundry3's preflight failed: boxlist run_e176-list (a binary or file differs: a dated amendment first)
+-> PASS (exit 16)
+
+== W1. the session log ends after the offset
+[s20_wait_q143k] e176 has ended
+-> PASS (exit 0)
+
+== W2. no session process and no session end
+RUN-GONE e176: no session process and no session end
+[s20_wait_q143k] STOP: e176 is not running and recorded no end: read the box's logs before anything else
+-> PASS (exit 14)
+
+== W3. the smoke or its gate failed
+GATE-STOPPED e176
+[s20_wait_q143k] STOP: e176 ended at a gate (the smoke, its gate, a STOP file or a session gate): read the lines above
+-> PASS (exit 16)
+
+== W4. the start gate refused the measured pass
+[s20_wait_q143k] STOP: e176's start gate refused (R0's room above 53.0 C): no hold ran; a later try needs a rested card (s11 --later-try)
+-> PASS (exit 16)
+
+== S1. fewer than 76 minutes before the last end
+[s11_a3_session_q143k] STOP: 76 more minutes would pass the round's last end (2026-11-05 13:44 PST): not started
+-> PASS (exit 16, no box call)
+
+== S2. an earlier E176 smoke on the box, without --later-try
+REFUSED: an earlier E176 smoke is on the box (build/claims-v3/aifoundry3/e176-smoke/p17601): this is a later try: run s11_a3_session_q143k.sh --later-try
+[s11_a3_session_q143k] STOP: e176 refused on the box: REFUSED: an earlier E176 smoke is on the box (build/claims-v3/aifoundry3/e176-smoke/p17601): this is a later try: run s11_a3_session_q143k.sh --later-try
+-> PASS (exit 10, the earlier smoke named)
+
+== S3. E171's session ended 10 minutes ago (the card has not rested)
+REFUSED: 10 minutes since E171's session end (2026-11-05 12:34:27 PST): E176 needs a rested card, at least 40
+[s11_a3_session_q143k] STOP: e176 refused on the box: REFUSED: 10 minutes since E171's session end (2026-11-05 12:34:27 PST): E176 needs a rested card, at least 40
+-> PASS (exit 10, E171's session end named)
+
+== C1. a good collection (the check of C finished, the scorer rc 0)
+[s22_collect_q143k] E176 collected and scored: docs/reports/data/2026-11-05-e176-m11-holds-aifoundry3 (scored-m11.json, scored-m11.md)
+-> PASS (C1)
+
+== C2. no check file (the check of C crashed)
+CCHECK-MISSING docs/reports/data/2026-11-05-e176-m11-holds-aifoundry3/ccheck/ccheck-all.json: no file (ccheck.py writes its --out only when the check runs to its end)
+[s22_collect_q143k] STOP: E176's check of C did not finish (the CCHECK- lines above): nothing is scored as registered. Read its ccheck output, remove what the collector wrote, then collect again
+-> PASS (C2)
+
+== C3. a failed copy inside the collector
+[s22_collect_q143k] STOP: a copy inside collect_e176.sh failed (rsync e176 rc=23): docs/reports/data/2026-11-05-e176-m11-holds-aifoundry3 holds a partial copy, and any score in it is not the session's; remove docs/reports/data/202
+-> PASS (C3)
+
+== C4. the scorer not rc 0
+[s22_collect_q143k] STOP: M11's scorer did not read rc 0 (collect_e176.sh exits 0 even then): read the output above
+-> PASS (C4)
+
+== C5. a check file from an earlier try (backdated)
+CCHECK-STALE docs/reports/data/2026-11-05-e176-m11-holds-aifoundry3/ccheck/ccheck-all.json: written 2026-11-05 00:01:00 PST, before this step began: an earlier collection's file, not this one's
+[s22_collect_q143k] STOP: E176's check of C did not finish (the CCHECK- lines above): nothing is scored as registered. Read its ccheck output, remove what the collector wrote, then collect again
+-> PASS (C5)
+
+== C6. a desk path in what the collector wrote
+HIT docs/reports/data/2026-11-05-e176-m11-holds-aifoundry3/scored-m11.md: the forbidden path <scratch>/tree (1 times)
+HIT docs/reports/data/2026-11-05-e176-m11-holds-aifoundry3/scored-m11.md: this user's home (1 times)
+HIT docs/reports/data/2026-11-05-e176-m11-holds-aifoundry3/scored-m11.md: a Mac home path (1 times)
+-> PASS (C6)
+
+== C7. the stand-in named without RB_DESKTEST=1
+[s22_collect_q143k] STOP: Q143K_COLLECT_E176 is a desk-test stand-in and is read only with RB_DESKTEST=1: unset it
+-> PASS (exit 10)
+
+== O1. ours_live's pattern names E176's and E177's processes (and k6's), and not an unrelated command
+named: 10 of 10; unrelated commands matched: 0 of 3
+-> PASS (ours_live's names)
+
+network calls by the stand-ins in the non-dry cases: 10 (to the stand-in box only)
+SELFTEST-RUNBOOK-Q143K PASS
