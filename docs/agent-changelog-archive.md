@@ -4,6 +4,16 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-11-01 (Sun, week 44)** — Section 4: the owner's agents make at most one card post a day in #community-lab.
+  The day's first reservation posts it, and every later change rewrites it with the Intel's `edit_replace.mjs` under
+  `EXPECT_TEXT`. It names every card held, one `; ` clause each: a new reservation erases the released ones, a card
+  released while another is held drops its clause, and the last one gets " — released" appended. A clause's `for <N> h`
+  counts from its hold's start, and today's and yesterday's posts are the two that stay. *Why:* preference — the owner's
+  words that evening, *"only post at most once per day when I'm reserving things. If multiple times I'm reserving, just
+  edit that message with reservation (erasing the previous one)"*, after his agents had made 27 card posts that day;
+  constraint — the reservation reader kept only a post's latest text and started every hold at the post's time, so it
+  now keeps each version, and two sessions sharing one post can overwrite each other; re-check: flush-util
+  `test_lab_reservations` (its section 7) and `EXPECT_TEXT` in `edit_replace.mjs`.
 - **2026-11-01 (Sun, week 44, Q132 records, E105 and E106)** — Section 3's index reads E1–E106, where it read E1–E104, with E105
   (the port's layout) and E106 (held signs on one card). Section 6's hot-start trap adds that random fp32 with tiles that fit the L2
   sits at the 97 W stop, and that a cell's power is estimated from its own kind's S on a pinned card, never a lower kind's rho.

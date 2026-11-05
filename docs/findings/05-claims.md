@@ -3497,6 +3497,13 @@ inside) and 1.829 for int8 (210 of 222). Heat over 4.5 s is M7's form refitted, 
 `card0_burst_heat_k_c_per_w` and `card0_kappa`; `Q142m/heldout-m10.json` › `heat_c2_card0_burst.P_idle_w`; `Q142m/README.md`,
 "M10, frozen".
 
+*(Dated, Thu 5 Nov 2026, Q142's pool-8 records, the Q142(r)/(p)/(d) round critic's fix (i): the clause above is true of M10's
+frozen files, not of pool 8's predictions.)* Q142(p)'s registration (`3e97f583`, 23:11:53 PST, about 1 h 16 min before that clause
+was committed) carries M10's D to aifoundry2 and card 0 by **rule E**, as pool 8's primary there: M10's D at s = 1, the nominal
+rate, aifoundry3's footing and term b's features, through M9's aifoundry2 part and on to card 0 through E170's relation (κ0
+0.9463), with card 0's rise at 0.2415 °C per board W, and M9's part on M9's D beside; **registered and unscored** ("Q142, pool 8",
+below). Outside pool 8, a power prediction on aifoundry2 or card 0 still rests on M9's part.
+
 ### The figures, held out and not blind, with M9 beside on the same rows
 
 | What is predicted | M9 on the same rows | M10, held out (not blind) | Kind | Verify at |
@@ -3510,11 +3517,19 @@ inside) and 1.829 for int8 (210 of 222). Heat over 4.5 s is M7's form refitted, 
 | int8, every row (222) | — | **0.177 W**, unchanged (M9's form refitted) | F, D | `Q142m/tables-m10.md`, int8, "all" |
 | Heat over 4.5 s (932 rows) | M7's law as frozen 0.234 °C | **0.233 °C** (M7's form refitted) | F, D | `Q142m/tables-m10.md`, (c1) |
 | Card 0's 6 s burst rise (one session) | 2.45 °C rms at 0.14004 °C per board W | **0.34 °C** at 0.2415, held out by tile | F, D | `Q142m/tables-m10.md`, (c2) |
-| Heat over minutes, nine large rises in six sessions, given the watts | — | **0.493 °C** rms with the chain unscaled (the primary); 0.294 °C with the ×1.032 arm, held out by session | F, D | `Q142m/heldout-m10.json` › `heat_d_chain_gain.variants.common` |
+| Heat over minutes, nine large rises in six sessions, given the watts | — | **0.493 °C** rms with the chain unscaled (the primary) *(blind given the watts, the grouping post hoc; dated, Thu 5 Nov 2026, below the table)*; 0.294 °C with the ×1.032 arm, held out by session | F, D | `Q142m/heldout-m10.json` › `heat_d_chain_gain.variants.common` |
 | The launch rate below `fit_m5`'s nominal, session means | — | fp32 0.33–0.36%, fp16 0.33–0.35%, int8 0.23–0.28% (all formats 0.29–0.32%; single rows 0.19–0.44%) | D | `Q142m/a2-checks-m10.json` › `rate` |
 | Byte twins (11 tiles under 24 kind labels) merged into one kind each | — | the floats 0.1854 → 0.1856 W; rules (a) for the floats and (b) still enter; int8 has none | D | `Q142m/a2-checks-m10.json` › `byte_twins` |
 | Inputs no hash list names | — | 62: `q132-rtl-bench/counts-v2.json`, `e145/predictions-e145.json` and 60 pool 6 and pool 7 tiles, each unchanged since before `e9367b66` | D | `Q142m/section7-m10.json` › `rerun` |
 | Post hoc, the round critic: card 1's int8 bias on pool 7 against the int8 card ratio (0.9418 / 0.9616) | — | M10's −0.081 W becomes +0.039 W; over every card-1 int8 row 0.185 → 0.210 W: the ratio over-corrects | D | the critic's reading, from `Q142m/rows-m10.json` |
+
+*(Dated, Thu 5 Nov 2026, Q142's pool-8 records, the Q142(r)/(p)/(d) round critic's fix (ii): the heat-over-minutes row's label.)*
+The chain unscaled's **0.493 °C** over the nine large rises is **blind given the watts**, not held out: Q138(t)'s chain was fitted
+on E89, E97, E111 and E133 (with E78's switching powers) and frozen before E144 (`f5473428`, 19:17:58 PST Mon 2 Nov, and
+`c2f9920d`, 20:32:38, before E144's claim), and the nine rises are in E144, E144b, E154, E161, E166 and E167, none of which fed
+that fit. Only the nine-rise grouping is M10's, chosen after the data, so the grouping is post hoc. The ×1.032 arm's **0.294 °C**
+stays held out, by session. Verify at `docs/reports/data/2026-11-02-q138t-heat-model/README.md` (its opening note) and
+`Q142m/heldout-m10.json` › `heat_d_chain_gain.holds` and `variants.common.large_rise_without_rms_c` (0.4928).
 
 **So:** held out, M10 reads new float kinds about 0.02 W closer than M9's form, and pool 7's kinds 0.09–0.11 W closer than M9
 blind did, mostly through the session scale, which needs the session's own anchors, and the recount, on the misses that named
@@ -3592,6 +3607,10 @@ committed 18:25:17. E164's and E170's `README.md.dated-note.md` (`708a0a04`) say
 - *(Dated, Thu 5 Nov 2026, Q142(r)'s fix pass, after these records' verifier.)* **These records' compute:** every local job ran
   one at a time through the round's shared job slots but one, a read-only character diff, which ran outside them on one core for
   about 2 minutes (23:08–23:10 PST) and was stopped; the records lane disclosed it in its result.
+- *(Dated, Thu 5 Nov 2026, Q142's pool-8 records, the Q142(r)/(p)/(d) round critic's fix (iv).)* **These records' verifier's
+  compute:** it ran a whole-file character diff through the round's job slots for about 10 minutes on one core (about 23:48–23:58
+  PST) and stopped it, where the round asked for short jobs; it disclosed this in its own result. The pool-8 lanes' compute is in
+  "Q142, pool 8", Disclosures.
 
 ### What remains (Q142's round critic's next list, ranked)
 
@@ -3599,15 +3618,15 @@ committed 18:25:17. E164's and E170's `README.md.dated-note.md` (`708a0a04`) say
 2. Blind pool 8, drawn by an independent designer, and its predictions frozen: an (x) lane copies the pool unchanged and commits,
    mechanically and before any claim, M9's and M10's predictions, M10's a-priori arm (s = 1), and the heat primary with its ×1.032
    arm beside it, through a predictor that imports `predict_m10_s7` and never takes `predict_m10.chain_gain()` for the primary;
-   about 4–6 agent-hours at the desk, the recount of its float tiles on the mini. Its preparation is under way, in its own lanes.
+   about 4–6 agent-hours at the desk, the recount of its float tiles on the mini. Its preparation is under way, in its own lanes. *(Dated, Thu 5 Nov 2026: done at the desk. Pool 8 was designed by an independent designer, `153b720f`, and M9's and M10's predictions for it were frozen before any claim, `4576fb90`, corrected by `dfe226f1`: "Q142, pool 8", below.)*
 3. M10's D carried through M9's aifoundry2 part and card 0's relation by a registered, mechanical step; otherwise pool 8's
-   registration names M9's part as the primary there, with M10's card-0 burst heat.
+   registration names M9's part as the primary there, with M10's card-0 burst heat. *(Dated, Thu 5 Nov 2026: answered at the desk by rule E, `3e97f583`: M10's D carried is pool 8's primary on aifoundry2 and card 0, with M9's part beside; registered and unscored.)*
 4. The next model's candidates, registered before any fit (M11): heat over minutes as a session level against a gain, with holds at
    two or more rise levels a session; a heat scale for card 1 alone (c1 helped card 1 only, 0.285 → 0.173 °C); int8 on card 1, a
    paired-anchor ratio or a second int8 anchor; section-7 clauses written as numbers with a stated power.
 5. Card time, on the owner's word and fresh lab approvals: pool 8 on the cards, two sessions each on aifoundry3 and card 1, on
    different days if possible, each with its anchors, one with about 12 re-runs and anchors spanning D (the level-or-gain test of
-   the float excess); card 0 and aifoundry2 in governed bursts under their own governors; registered stops, nothing set.
+   the float excess); card 0 and aifoundry2 in governed bursts under their own governors; registered stops, nothing set. *(Dated, Thu 5 Nov 2026: day 1 is registered and kitted as E171–E174, one session a card, and waits on the owner's go and fresh lab approvals; the second session a card is day 2's.)*
 6. Card time: heat over minutes as a registered test of a session level against a gain, two or more rise levels a session and one
    hold like E144's, on aifoundry3 and aifoundry2, with a second card-0 burst-heat session (c2 rests on one).
 7. At the desk, on the mini's bench: E147's 70 single-bit steps recounted by the convergence rule, then term b's prices refitted.
@@ -3633,9 +3652,157 @@ kinds page's M9 fp32 cell without its basis, and these records' one job outside 
 or on the kinds page; every frozen hash list passes. No verifier has read this fix pass. One step more before any run on
 `e77/run_e77.py`, `e120/run_e120.py` or `knob/run_knob.py`: the watcher's fix, by its own amendment ("Q142(s)", above).
 
+*(Dated, Thu 5 Nov 2026, Q142's pool-8 records, the Q142(r)/(p)/(d) round critic's fix (v).)* Q142(r)'s fix pass was read by the
+Q142(r)/(p)/(d) round's critic (about 00:45–01:20 PST): lab `d29ed61d` and `37f11663`, gyroscope `dd76e095` and the page versions
+it deployed, the kinds page's `d7131c8915f4` among them. Its edits are pure insertions, every figure equals `m10.json`'s, the
+hubs' Logs stay append-only and the live pages are as deployed; nothing else needs fixing. Its render checks were not repeated.
+
 **Not established by Q142.** Any blind score of M10; whether the session scale and the recount carry to kinds nobody tuned to;
 whether the heat chain's misses are a session level or a gain; whether card 0's burst coefficient holds in a second session; the
 runbook's v3.1 on a box.
+
+## Q142, pool 8: its registration, its independent design and its predictions frozen, and the card day's runs registered and kitted, none run (Wed 4 – Thu 5 Nov 2026, week 45, from about 22:43 to 06:55 PST; desk only)
+
+The owner's mandate is still his words of Mon 2 Nov 2026 about 18:40 PST (Q138), with Q137's goal; his last words were the card
+half's go of Wed 4 Nov about 13:55 PST, and there is no new word since. Five desk lanes ran beside Q142's records and after them:
+Q142(p) and Q142(d) on Q142's round critic's `m10` field and `next` ranks 2 and 3, then Q142(x), Q142(k6) and Q142(kg) on the
+Q142(r)/(p)/(d) round critic's `next` ranks 1 and 2. No card, no device command, no lab box, no post: **no row below is a
+measurement or a score.** Every row is registered or computed at the desk before any claim, and its figures are the frozen
+predictions' own lines and forecasts. Each lane was read by a separate verifier and corrected in new files (Q142(d)'s faults are
+recorded by Q142(x)'s dated note A1); the readiness critic (about 06:05–06:55 PST) re-ran every hash list, self-test, dry pass and
+audit, re-made aifoundry2's predictions byte for byte, and found the card day **ready** on the owner's word. Short names: `P8reg/`
+is `tools/claims-v3/m10/` (`POOL8-REGISTRATION.md` and its notes), `P8pred/` is
+`docs/reports/data/2026-11-05-q142p-pool8-predictor/`, `B8/` is `tools/claims-v3/kinds/blind8/`, `F8/` is
+`docs/reports/data/2026-11-05-q142x-pool8-freeze/`, and `e171/` to `e174/` and `p8-600/` are under `tools/claims-v3/`. 🛑 **To
+carry from here, beside the earlier sections' items:** (61) **nothing of pool 8 is measured**: quote its figures as frozen
+predictions, registered lines and forecasts, never as results, until E171–E174 run and are scored; (62) **rule E**: on pool 8,
+M10's D carried is the primary on aifoundry2 and card 0, with M9's part beside, registered and unscored; (63) **A2-R2 cannot PASS
+on pool 8**: it reads FAIL if A2-Bp fails, else NOT SCORED, never "NOT SCORED" alone, and A2-G, Bg, F1 and W1 are NOT SCORED at
+pool 8's design, so rank 2's governed clock line gets no blind test from it; (64) **C0-W's 97.5% is coverage by construction,**
+not a power: the informative forecasts are A2-Bp's 88.6% and C0-B's 88.5%; (65) **the chain unscaled's 0.493 °C over the nine
+large rises is blind given the watts**, the grouping post hoc, and the ×1.032 arm's 0.294 °C held out.
+
+### What is registered and frozen (desk only; no row is a measurement)
+
+| What | Value | Kind | Verify at |
+|---|---|---|---|
+| **Rule E**, aifoundry2's and card 0's primary on pool 8 | M10's D carried (s = 1, the nominal rate, aifoundry3's footing, term b's features) through M9's aifoundry2 part, and on to card 0 through E170's relation (κ0 0.9463 carried, the rise 0.2415 °C per board W); M9's part on M9's D beside, scored on the same bursts | R | `P8reg/POOL8-REGISTRATION.md`, section 5 |
+| The one frozen predictor | M10 primary on `m10.json` and `m10-s7.json`, M9 beside; heat over minutes at factor 1.0, the ×1.03199 arm beside, never `predict_m10.chain_gain()` for the primary; the entry point `predict_pool8_a2.py` | R | section 1; `P8pred/predict_pool8_a2.py`; A2-7 |
+| Term b's input | e(N) per float tile by `RECOUNT-RULE.md`, N 9 to 243 launch points, a bound of 0.10 W at M9's float prices; a tile short of its points refused (exit 3, nothing written) | R | section 2; A2-2 |
+| Term a's protocol | E78's three random tiles and the pool's anchors in every 600 MHz session; the scale from the scale anchors only; the check anchors held out (P8-KA); the a-priori arm s = 1 | R | section 3 |
+| The rate | the measured rate primary; the stated rate nominal × (1 − δ): aifoundry3 fp32 0.3355%, fp16 0.335%, int8 0.2275%; card 1 0.346%, 0.3445%, 0.276% | R | section 4 |
+| Card 0's M10 die-rise band | ± 0.593 °C (c2's 95th-percentile leave-one-tile-out residual on E170); the frozen field was M9's law's ± 1.406 °C, which excluded M10's rise on 10 of 10 tiles | R | `P8reg/POOL8-REGISTRATION.md.dated-note-2.md`, A2-1 |
+| LG's power by groups, a 0.6% gain / a 0.11 W level | one group 80 / 88%; 6 + 6 63 / 73%; 8 + 4 63 / 73%; 4 + 4 + 4 44 / 56%; a span of exactly 8 W 22 / 29% | D | `P8reg/pool8/design-power-groups.txt`; A2-4 |
+| What the predictor reads in pool 8 | roles zeros 3, scale 6 and check 3; N1 31 (fp32 11, fp16 8, int8 12); F1 19; I1 12; RR 12; KA 2 | D | `B8/sets-blind8.json`; `B8/DESIGN.md.dated-note-1.md`, A1-3 |
+| Term b's recount (the mini's bench) | 906 points; 36 float tiles end at N 9, 3 at 27, 5 at 81 and 1 at 243 (`fp32.s8_onebit_b19`, e 0.077 W), none above the bound; C 0 mismatches; int8's 19 tiles at their own three points | D | `F8/README.md`; `F8/bench/` |
+| The counting corrections (three points minus N points, W of D at M9's float prices, aifoundry3) | `fp32.s8_onebit_b18` +0.495, `fp32.b_onebit_b20_one` +0.374, `fp16.s8_onebit_b7` −0.337, `fp16.s8_onebit_b10` +0.219, `fp32.s8_onebit_b19` −0.207, `fp32.s8_onebit_b13` (A `0x40080727`) −0.149, `fp16.b_onebit_b8_pi` −0.134; every other float tile within 0.055 | D | `F8/README.md.dated-note-1.md`, section 3 |
+| N1's a-priori D (M10) | aifoundry3 4.33–25.08 W; card 1 4.16–24.11 W (4.16496 W on `int8.u8_sparseq_58e6e0`); the 4.5 s rise 0.82–3.24 and 0.78–3.09 °C | D | `F8/README.md.dated-note-1.md`, section 2 |
+| M10 a priori minus M9 on N1, at the stated rate (mean / rms) | aifoundry3 fp32 −0.015 / 0.105 W, fp16 −0.037 / 0.174, int8 +0.005 / 0.025; card 1 −0.015 / 0.101, −0.035 / 0.168, +0.005 / 0.024: so M1i is expected NOT RESOLVED, as registered | D | `F8/README.md` |
+| aifoundry3's lines at the planned n (E171) | P1 (11) 0.098–0.300 W, P2 (8) 0.063–0.237, P3 (12) 0.101–0.249; B1 (19) −0.097 to +0.064; B2 (12) −0.105 to +0.089; C1 and H4 at least 27 of 31; H1 / H2 / H3 0.104–0.248 / 0.083–0.225 / 0.116–0.261 °C | R | `B8/intervals-pool8.json`; `e171/E171.md` |
+| Card 1's lines (E172) | P1 0.098–0.308 W, P2 0.075–0.268, P3 0.105–0.269; B1 −0.097 to +0.070; B2 −0.115 to +0.096; H1 / H2 / H3 0.179–0.431 / 0.163–0.455 / 0.091–0.212 °C | R | the same; `e172/E172.md` |
+| LG's power at pool 8's own design | aifoundry3 (E153's 8 re-runs, D_ref 1.355–21.878 W, and E163's 4, 9.854–24.814 W; df (2, 8), F 4.459): GAIN 76.4% at a 0.6% gain, 94.6% at 1.0%; LEVEL 90.0% at 0.11 W, 94.8% at 0.15 W; the null NOT SEPARATED 93.6%. Card 1 (E157 and E164): 73.0, 94.6, 89.7, 94.5 and 92.8% | D | `B8/intervals-pool8.json`, LG; `F8/README.md` |
+| aifoundry2 (E173) | 11 fp32 tiles left out at 82 W (upper-95% peaks 84.4–87.3 W; the highest kept 81.88 W); 24 scored, 3 governed (fp16, 727–777 MHz predicted) and 21 pinned; A2-G, Bg, F1 and W1 NOT SCORED; A2-R2 FAIL if A2-Bp fails, else NOT SCORED; Bp, F2 (0.174–4.540 MHz), W2 (0.528–1.113 W), M1 (24 tiles) and H1 (0.491–0.870 °C) scored | R | `B8/predictions-pool8-aifoundry2.json`; `F8/README.md.dated-note-1.md`, section 1; `e173/E173.md` |
+| Card 0 (E174) | C0-W 0.574–1.066 W, C0-F 0.245–4.489 MHz, C0-H1 0.235–0.450 °C (band ± 0.593 °C); the predictions hold 31 scored tiles and no admission; E174 admits 39 of the 64 by E170's rule and scores 21 (fp32 4, fp16 5, int8 12); the highest admitted estimate 58.56 W | R | `B8/predictions-pool8-aifoundry1c0.json`; `e174/E174.md` |
+| The forecasts | A2-Bp 88.6% and C0-B 88.5%, informative; C0-W's 97.5% (`W_at_or_under_line` 0.9747) is coverage by construction, not a power | D | `e173/E173.md`; `e174/E174.md.dated-note-1.md`, section 4 |
+
+### The card day's four runs, registered and kitted, not run (E171–E174)
+
+| Run | Card | What it answers | Card-minutes (cap) | Stops |
+|---|---|---|---|---|
+| **E171** | aifoundry3 card 0, 600 MHz pinned | P8-KC, P1–P3, B1, B2, C1, M1, M1f, M1i, A1, KA, H1–H4, LG and G; HM NOT SCORED | FULL 17110–17113, the fourth pass only if the 70-minute budget admits it: about 60–62 (70); TWO about 31 (38); SHORT about 28 (30) | 65 W, or 70 °C on minshire[0] |
+| **E172** | aifoundry1 card 1, 600 MHz | the same rules on card 1; P8-KA pooled over E171 and E172 (4 tiles), read only by `score_p8_600_v2.py ka-pooled` | four passes, about 51–53, or five when each pass takes about 748 s or less, about 63–64 (65) | 66 W, or 72 °C on any minshire |
+| **E173** | aifoundry2, its own governor, 6 s bursts, E165's form | A2-Bp (21 pinned tiles), F2, W2, M1 (24 tiles) and H1; A2-G, Bg, F1 and W1 NOT SCORED; A2-R2 FAIL through Bp, else NOT SCORED; zeros anchors first | 165 bursts, 3 passes of 55, about 40 (42, slot 48); the subset passes 1–2, 110 bursts (28, slot 34) | above 85 W on three live samples, or 76 °C; the 82 W admission |
+| **E174** | aifoundry1 card 0, its own governor, bursts at the 800 MHz cap, E170's form; after E172 has ended, never beside it | C0-W, C0-B, C0-M1, C0-F, C0-H1 (term c2's second session) and C0-HK | 126 bursts, about 28 (40, slot 45); the subset passes 1, 2, 4 and 5, 84 bursts (25, slot 30) | one sample above 65.9 W, 72 °C, or any sampler line under 590 MHz; a ramped smoke, the hottest kinds last; NO-GO if card 0's module uptime breaks continuity with E84's read |
+
+Every kit's device commands are READ: `dmcmd_audit` reads GO on E171 and E172 at 32 send sites each, E173 at 19 and E174 at 33,
+and NO-GO at exactly each kit's one reviewed exception without it (`lib.sh`:154 for E171 and E172, `run_hpl.py`:622 for E173 and
+E174); none sends the statistics reset or the firmware-revisions query, and nothing is set. The scorers reproduce their parents'
+committed figures: the P8 scorer 783 of 783 leaves on E163 and E164, E173's 34 of 34 on E165, E174's 22 of 22 on E170. In all
+about 180–195 card-minutes (the caps sum to 217), about 2–2.25 h of wall time after the approvals, then about 45 minutes at the
+desk. The plan, the window and the day's one post are the readiness critic's; E174 runs only after E172's end has been read, and
+the v2 drivers are the ones to use (`s22_collect_k6_v2.sh`, `step_e173_v2.sh`, `step_e174_v2.sh`).
+
+### The verifiers, the fix passes and the two round critics: each fault, and where it is answered
+
+| | What | Where it is answered |
+|---|---|---|
+| Q142(p)'s verifier | four minor faults and seven nits: card 0's burst band was M9's law's; a mismatch exited 1, not 3; no line for most rules; LG's power for one group only; the 62's wording; a rule P8-RR never defined; outcomes without meanings; development runs undercounted; the directory's date; A1's dateline; T4's empty proof | A2 (`68a7c322`), `predict_pool8_a2.py` and its self-test U0–U7 (`97765c0a`) |
+| Q142(d)'s verifier | six minor faults: the exposure; the check's traceback on a corrupted S tile; two re-runs flagged `hold` in blind6; "reproduces every byte"; the scanner's fixed list and the doubled attribution lines; the test pool's seed block | Q142(x)'s A1 (`ebf68c52`), items 1–6, with the pool; no tile changed |
+| The Q142(r)/(p)/(d) round critic, fault 1 (moderate) | Q142(p)'s frozen predictor could not read pool 8 as delivered (no `blind8.json`: KeyError, exit 1), and a hand-made file could have emptied N1 or KA silently | A1's converter and its pool-7 round trip (`ebf68c52`), then `blind8.json` and the sets read before any count (`4576fb90`) |
+| The same critic, faults 2 and 3 and its nits | 05's clause and "What remains" said M10's D is not carried; the 0.493 °C filed as held out; "87 of 89"; the records verifier's 10-minute job; no verifier on the records' fix pass | the dated clauses in "Q142", above (fixes (i), (ii), (iv) and (v)); "88 of 90" here and in 03; the kinds page and the hubs |
+| Q142(x)'s verifier | five minor faults: A2-R2's status overstated; the seven counting corrections given as five; card 1's N1 range; Python outside the slot; what the scan covered | dated note 1 beside the freeze's README (`dfe226f1`) |
+| Q142(k6)'s verifier | seven minor faults: `ka-pooled` read one session twice as PASS; a scale anchor whose C fails still set s; the exit codes; E172's fifth pass; the desk test's coverage; a commit with one scan hit; a hand-edited self-test text and runs outside the slot | dated notes 1 (`2502ba81`), `score_p8_600_v2.py` (`86d10a75`), step 22 v2 (`1a76a870`): 1–2 fixed, 3–4 recorded, 5 in part (step 13's cases and JOB-LOST untested; steps 10, 12 and 13 not ported), 6 explained, 7 as disclosed |
+| Q142(kg)'s verifier | two minor faults and five nits: E174's port dropped v3.1's two aifoundry1 gates; `check_path_e173.py`; the frozen inputs' count; the audit's count and the dry logs' times; C0-W's 97.5%; `e78_common.py`; the C-log list's residual | dated notes 1 (`5db9df6b`) and the v2 step drivers (`34436d68`) |
+| The readiness critic, fault 1 (minor) | no verifier read the six fix-pass commits (`dfe226f1`, `2502ba81`, `86d10a75`, `1a76a870`, `5db9df6b`, `34436d68`); it stood in, re-running every test they commit, but did not read `score_p8_600_v2.py`, `rb_common_v2.sh` or `cclist_q142kg_v2.py` line by line, whose behaviour rests on their own tests | recorded here; nothing is needed before the card day |
+| Its fault 2 (minor) | `score_p8_600_v2.py`'s self-test cannot be re-made byte for byte | quote it as: V0–V3 PASS on re-run; 269 of 272 leaves equal, the other 3 hashes of synthetic files that embed the temp directory |
+| Its fault 3 (nit) | the card day's desk step `s03_desk_k6.sh` checks 5 of the 22 hash lists, not `SHA256SUMS-v2`, which pins `score_p8_600_v2.py` | at the go, all 22 lists are checked beside it |
+| Its fault 4 (nit) | E174's "only after E172 has ended": the code reads it as never beside E172, and nothing records E172's end | one sentence before E174's data: E174 runs after E172 has ended, or if E172 never starts, and never beside it |
+| Its fault 5 (nit) | the kg notes say they came "before the code they name": true by commit order; the code was last written at 05:43:05 | quote it as: committed before the code's commit (`34436d68`) and before any data |
+| Carried | k6's desk test does not cover step 13's cases or JOB-LOST (v3.1's code, run on Wed's card half); `ours_live`'s exclusion of a dry pass cannot be shown on macOS (v3.1's rule on the box); the scans ran without the lab's privacy table, absent on the Intel | a later port's desk test; the kits' login scrubs and the public-text scan at each data commit |
+
+### The lanes' wording, as corrected (quote it so)
+
+| Lane | As corrected |
+|---|---|
+| Q142(p) | the 62 are the files neither M10's registration's 174 nor M10's 68 named: 60 of them are pool-6 and pool-7 tiles that blind6's and blind7's lists name, and only `counts-v2.json` and `predictions-e145.json` were in no list (never "the 62 inputs no earlier hash list named") |
+| Q142(p) | A1 was last written at 23:26:28 and committed at 23:26:44; A2 last written 00:21:04, committed 00:21:34; the predictor's directory is dated a day late, and its path stays |
+| Q142(p) | "E163 against E141 read a level" overstates: the registered test reads NOT SEPARATED there, with the null rejected (post hoc, design only); RR is a set, not a rule P8-RR; C0-F reads PASS / FAIL |
+| Q142(d) | a rebuild of the pool is identical in 88 of its 90 files; the other two differ only in `made_at`, `git_head` and that `SHA256SUMS` line (never "87 of 89", never "every byte"); `DESIGN.md` was last written at 23:21:08 and committed at 23:22:03 |
+| Q142(x) | A2-R2 "cannot PASS on pool 8; it reads FAIL if A2-Bp fails, else NOT SCORED", never NOT SCORED alone; card 1's N1 a-priori D is 4.16–24.11 W; the counting corrections are the seven in the README's Results 2, not five; A1-3's 1.36 W is 1.3546 W; dated note 1 was first written at about 03:08 PST |
+| Q142(k6) | the scorer's refusals are "non-zero (1 or 9), nothing written"; E172 runs four passes, or five if each takes about 748 s or less (about 63–64 card-minutes, inside the 65 cap); P8-KA pooled is read only by `score_p8_600_v2.py ka-pooled` for E171 then E172 (exit 6 otherwise) |
+| Q142(kg) | 17 of E173's 26 and 22 of E174's 32 frozen inputs match an earlier committed list, and the other 9 and 10 are pinned first by `frozen-sha256-e173.json` and `-e174.json`; the desk audit covers 25 files, not 26; C0-W's 97.5% is coverage by construction; the notes were committed before the code's commit (`34436d68`) and before any data |
+| The readiness critic | V0–V3 PASS on re-run; 269 of 272 leaves equal, the other 3 hashes of synthetic files that embed the temp directory |
+
+### Disclosures
+
+- **The designer's exposure.** At about 23:19 PST a `git log` line, run to copy the commit-message convention, showed the designer
+  the start of two commit messages, one of which quotes one aggregate held-out float figure of M10; the generator was already
+  written, and its sha256 recorded by itself at 23:18:39 is the committed `make_blind8.py`'s. Its verifier and both round critics
+  read the blind claim as standing.
+- **Compute** (the Q142(r)/(p)/(d) round critic's fix (iv), with this round's lanes). No lab box was used: the lab hosts' sign-in
+  checks were pending from 21:13 PST on Wed 4 Nov. Q142(x)'s bench ran on the mini (10 bench calls, one at a time, at most 4 jobs,
+  910 points with the check), with its staging and its check-build by bounded ssh. Python ran on the Intel through the round's job
+  slots, one job at a time, with sub-second reads outside them: Q142(x) about 15, Q142(k6) about 30 and its fix pass 13, Q142(kg)
+  a handful, the readiness critic about 11, and the designer six interpreter probes before its jobs used the slots. Q142(k6)'s
+  committed self-test text was edited by hand to remove the slot wrapper's lock line; the JSON is the record.
+- **The public-text scans** ran with the lanes' lists and `sanitize_extracts.py`'s fixed list: the lab's private table is absent
+  on the Intel, so lab users' logins were not checked against it. `a518aa11` went in with one hit, a variable name in
+  `p8-600/README.md` (the scan and the commit were chained with ';'); the pool's own files carry 14 matches of the scanner's
+  credential word list, all in the name of the checkpoints' activation quantisation scheme, reviewed and committed unchanged; the
+  k6 and kg commits' other hits are code lines inherited unchanged from the parent kits, reviewed.
+- **Nothing of pool 8 ran.** No card was claimed, no device command sent, no post written; the card day waits on the owner's go
+  and fresh lab approvals. The downloads the designer and its verifier made stay in the round's scratch, and the mini keeps the
+  lane's bench copies, our own files, for the housekeeping step.
+
+### What remains (the readiness critic's next list, ranked)
+
+1. Card time, on the owner's go and fresh lab approvals for aifoundry1–3: pool 8's day 1, E171 on aifoundry3, E172 then E174 on
+   aifoundry1, and E173 on aifoundry2, the boxes in parallel; about 180–195 card-minutes and 2–2.25 h of wall time, one day's
+   post. At the go, about 10 minutes at the desk first: one output directory and the two runbooks' windows, the pull and all 22
+   hash lists, E174's one sentence (fault 4), and the v2 drivers only. It turns M10's held-out figures into blind ones on four
+   cards, and LG decides whether term a's float excess is a gain or a level.
+2. These records, then a verifier and a fix pass.
+3. At the desk: M11's heat registration before any hold, heat over minutes as a session level against a gain with two or more rise
+   levels a session and one hold like E144's, its power stated the way LG's is, with a heat scale for card 1 alone and a
+   paired-anchor int8 term beside it.
+4. At the desk, then about 40 card-minutes: aifoundry2's governed line, a design with at least 8 governed tiles under the 82 W
+   admission, so that A2-G, A2-Bg and A2-R2 can pass on a later aifoundry2 session.
+5. Card time, day 2: a second pool-8 session on aifoundry3 and on card 1, since term a is a session scale, and M11's holds on
+   aifoundry3 and aifoundry2.
+6. On the mini's bench: E147's 70 single-bit steps recounted by the convergence rule, for a later refit of term b's prices (about
+   8.8 bench-hours).
+7. Card time: G4's clock at S3's geometry with a per-shape clock term registered first, and A2's cold starts (about 45
+   card-minutes on aifoundry2).
+8. Card time: the stride term's size, registered as a fraction of SM's step, on six new power-of-two shapes (about 20
+   card-minutes).
+9. Housekeeping after the card day, our own files only: the downloads in the round's scratch, the bench copies on the mini, and
+   aifoundry2's and aifoundry1's old copies.
+10. Waiting on the owner's word: anything near card 0's 75 W alarm (E174's highest admitted estimate is 58.56 W, so day 1 does not
+    test whether its fix removed the alarm), an inlet thermometer, and items 3, 4, 14 and 16.
+
+**Not established by Q142's pool-8 lanes.** Any blind score of M10 on pool 8; whether rule E's carried D reads aifoundry2's pinned
+bursts and card 0 as forecast; whether term a's float excess is a gain or a level; whether the recount's counting corrections show
+on the cards; aifoundry2's governed clock line on new kinds; any of the four kits on a box.
 
 ## Ridge points (derived; no card time)
 
