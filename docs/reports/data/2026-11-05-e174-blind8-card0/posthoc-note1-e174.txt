@@ -1,0 +1,177 @@
+E174 data README, dated note 1: post hoc desk checks (posthoc_note1_e174.py)
+HEAD d34f2be6 (2026-11-05 15:08:19 -0800); run 2026-11-05 15:26:45 PST; python 3.9.6
+
+== 1. the lane's commits, and the lab's main at D1's copy and at E174's launch
+  0a14c7bb (D1's dated note 3): committed 2026-11-05 12:42:29 -0800, parent 03582d2f; 1 file(s) added, 0 other; pushed 2026-11-05 12:42:32 -0800
+  e5206b5b (E174's data): committed 2026-11-05 13:44:06 -0800, parent 16b3d6e3; 346 file(s) added, 0 other; pushed 2026-11-05 13:44:09 -0800
+  b3255af1 (E172's data and P8-KA pooled): committed 2026-11-05 13:44:22 -0800, parent e5206b5b; 433 file(s) added, 0 other; pushed 2026-11-05 13:44:25 -0800
+  the lab's main at D1's copy, 12:43:02: 0a14c7bb 12:42:29 -0800
+  the lab's main at E174's launch, 12:44:48: 0a14c7bb 12:42:29 -0800
+  commits on main between D1's commit and E174's launch: 0 
+
+== 2. the box's own records of D1 (the card day's runbook log and call outputs; desk paths masked)
+  runbook.log, 15 line(s), 12:38:41-12:44:22 PST:
+    2026-11-05 12:38:41 PST step=e174_check_q142kg2 class=probe host=aifoundry1 bound=15s secs=0.3 rc=0 child_rc=0 status=ok what='probe' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+    2026-11-05 12:38:43 PST step=e174_check_q142kg2 class=launch host=aifoundry1 bound=60s secs=2.3 rc=0 child_rc=0 status=ok what='start the dry pass a1c0-check-e174, detached' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 'bash -s' < <RB_OUT>/calls/123841-15602-e174_check_q142kg2-1-job-a1c0-check-e174.sh
+    2026-11-05 12:38:51 PST step=e174_check_q142kg2 class=probe host=aifoundry1 bound=15s secs=0.2 rc=0 child_rc=0 status=ok what='probe' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+    2026-11-05 12:39:11 PST step=e174_check_q142kg2 class=wait host=aifoundry1 bound=600s secs=20.3 rc=0 child_rc=0 status=ok what='one bounded wait on the dry pass a1c0-check-e174' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 'bash -s' < <RB_OUT>/calls/123851-16485-e174_check_q142kg2-1-wait-a1c0-check-e174.sh
+    2026-11-05 12:39:11 PST step=e174_check_q142kg2 exit=16 aifoundry1's box check for E174 did not read clean: tiles box-reading job-rc (read the output above; a rebuilt binary needs a dated amendment first)
+    2026-11-05 12:40:12 PST step=e174_frozen_read_k6 class=probe host=aifoundry1 bound=15s secs=0.2 rc=0 child_rc=0 status=ok what='probe' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+    2026-11-05 12:40:13 PST step=e174_frozen_read_k6 class=read host=aifoundry1 bound=60s secs=0.3 rc=0 child_rc=0 status=ok what="E174's frozen-input check on the box (read only)" cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 'bash -s' < <desk path>
+    2026-11-05 12:43:00 PST step=e174_d1_copy_q142kg2 class=read host=local bound=60s secs=0.1 rc=0 child_rc=0 status=ok what='the 18 files clean in the lab clone before the copy' cmd=git -C <lab clone> status --short -- docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/results.json docs/reports/data/2026-11-01-e118-two-clock-card0/README.md docs/reports/data/2026-11-04-e170-blind7-card0/aifoundry1-c0/queue.jsonl docs/reports/data/2026-11-04-e170-blind7-card0/aifoundry1-c0/state-gate.json docs/reports/data/2026-11-04-e170-blind7-card0/results.json docs/reports/data/2026-11-05-q142p-pool8-predictor/SHA256SUMS docs/reports/data/2026-11-05-q142p-pool8-predictor/SHA256SUMS-a2 docs/reports/data/2026-11-05-q142p-pool8-predictor/predict_pool8.py docs/reports/data/2026-11-05-q142p-pool8-predictor/predict_pool8_a2.py docs/reports/data/2026-11-05-q142x-pool8-freeze/README.md.dated-note-1.md docs/reports/data/2026-11-05-q142x-pool8-freeze/SHA256SUMS tools/claims-v3/e165/predictions-e165.json tools/claims-v3/e165/score_e165.py tools/claims-v3/m10/POOL8-REGISTRATION.md tools/claims-v3/m10/POOL8-REGISTRATION.md.dated-note-1.md tools/claims-v3/m10/POOL8-REGISTRATION.md.dated-note-2.md tools/claims-v3/m10/POOL8-SHA256SUMS tools/claims-v3/m10/pool8-registration.json
+    2026-11-05 12:43:01 PST step=e174_d1_copy_q142kg2 class=probe host=aifoundry1 bound=15s secs=0.3 rc=0 child_rc=0 status=ok what='probe' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+    2026-11-05 12:43:01 PST step=e174_d1_copy_q142kg2 class=read host=aifoundry1 bound=60s secs=0.3 rc=0 child_rc=0 status=ok what="before D1's copy: no card session of ours and no dry pass of the runbook on aifoundry1" cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 'bash -s' < <RB_OUT>/calls/124300-47457-e174_d1_copy_q142kg2-2-quiet.sh
+    2026-11-05 12:43:02 PST step=e174_d1_copy_q142kg2 class=copy host=aifoundry1 bound=600s secs=0.5 rc=0 child_rc=0 status=ok what='D1: the 18 desk-only frozen inputs into aifoundry1:nekko/ (E174.md.dated-note-3.md)' cmd=rsync -a -c -R -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/results.json docs/reports/data/2026-11-01-e118-two-clock-card0/README.md docs/reports/data/2026-11-04-e170-blind7-card0/aifoundry1-c0/queue.jsonl docs/reports/data/2026-11-04-e170-blind7-card0/aifoundry1-c0/state-gate.json docs/reports/data/2026-11-04-e170-blind7-card0/results.json docs/reports/data/2026-11-05-q142p-pool8-predictor/SHA256SUMS docs/reports/data/2026-11-05-q142p-pool8-predictor/SHA256SUMS-a2 docs/reports/data/2026-11-05-q142p-pool8-predictor/predict_pool8.py docs/reports/data/2026-11-05-q142p-pool8-predictor/predict_pool8_a2.py docs/reports/data/2026-11-05-q142x-pool8-freeze/README.md.dated-note-1.md docs/reports/data/2026-11-05-q142x-pool8-freeze/SHA256SUMS tools/claims-v3/e165/predictions-e165.json tools/claims-v3/e165/score_e165.py tools/claims-v3/m10/POOL8-REGISTRATION.md tools/claims-v3/m10/POOL8-REGISTRATION.md.dated-note-1.md tools/claims-v3/m10/POOL8-REGISTRATION.md.dated-note-2.md tools/claims-v3/m10/POOL8-SHA256SUMS tools/claims-v3/m10/pool8-registration.json aifoundry1:nekko/
+    2026-11-05 12:43:09 PST step=e174_check_q142kg2 class=probe host=aifoundry1 bound=15s secs=0.2 rc=0 child_rc=0 status=ok what='probe' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+    2026-11-05 12:43:12 PST step=e174_check_q142kg2 class=launch host=aifoundry1 bound=60s secs=2.3 rc=0 child_rc=0 status=ok what='start the dry pass a1c0-check-e174, detached' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 'bash -s' < <RB_OUT>/calls/124309-48195-e174_check_q142kg2-1-job-a1c0-check-e174.sh
+    2026-11-05 12:43:12 PST step=e174_check_q142kg2 class=probe host=aifoundry1 bound=15s secs=0.3 rc=0 child_rc=0 status=ok what='probe' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 true
+    2026-11-05 12:44:22 PST step=e174_check_q142kg2 class=wait host=aifoundry1 bound=600s secs=69.6 rc=0 child_rc=0 status=ok what='one bounded wait on the dry pass a1c0-check-e174' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry1 'bash -s' < <RB_OUT>/calls/124312-48528-e174_check_q142kg2-1-wait-a1c0-check-e174.sh
+  the first box check (its job's output): 123851-16485-e174_check_q142kg2-1-123851-16485-e174_check_q142kg2-1-wait-a1c0-check-e174.out, 702 bytes, sha256 815be8d065127413
+    | JOB-BEGIN a1c0-check-e174 2026-11-05 12:38:41 PST
+    | 2026-11-05 12:38:41 PST
+    | == check_e174 (harness + binaries)
+    | HARNESS OK 110 + 3 binaries
+    | rc=0
+    | == preflight
+    | rc=0 dmcmd_audit: GO (33 send site(s), 0 disallowed; allow-list: none)
+    | == tiles and frozen inputs
+    | 64 tiles; frozen inputs, Q139(k)'s files and tiles: BAD
+    | kappa0 0.9463
+    | rc=1
+    | == pool 8's SHA256SUMS: 89 OK (want 89)
+    | == dry pass on the box (the toy card; no device)
+    | stoptest-die dry rc=4 (want 4)
+    | smoke dry rc=0 (want 0)
+    | list rc=0 (126 BURST runs listed; want 126)
+    | No process holds an ET-SoC-1 device node or card lock.
+    | check_box_e174.sh rc=0
+    | BOX-CHECK-UNCLEAN: tiles
+    | JOB-END a1c0-check-e174 rc=1 2026-11-05 12:39:01 PST
+    | JOB-DONE a1c0-check-e174 rc=1
+  the box's read-only frozen-input check, 12:40:13: 124012-26587-e174_frozen_read_k6-1-e174_frozen_box.out, 2768 bytes, sha256 d9d5e4a30bc617a7
+    | 2026-11-05 12:40:13 PST
+    | 64 tiles; frozen inputs, Q139(k)'s files and tiles: BAD
+    | kappa0 0.9463
+    |    docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/results.json: sha256 None, frozen 69c76c753a76a0e4b31dd7949a6dd9610c5a86f5aad82a0769d314664249c2ce
+    |    docs/reports/data/2026-11-01-e118-two-clock-card0/README.md: sha256 None, frozen 88c559004b3f34ba494e6925fd6a42f6fbb5a615c7841b7a67828a27f150711a
+    |    docs/reports/data/2026-11-04-e170-blind7-card0/aifoundry1-c0/queue.jsonl: sha256 None, frozen fb6495bbb06e6747fa8ad01e7ead1a035262c76197e9f82c20d9671574a7788b
+    |    docs/reports/data/2026-11-04-e170-blind7-card0/aifoundry1-c0/state-gate.json: sha256 None, frozen dc386ad76fa38d3dc1343e47f9d971f6497f50ba3a1b1a29380986b140f3979d
+    |    docs/reports/data/2026-11-04-e170-blind7-card0/results.json: sha256 None, frozen 09d4d9e2d38682b1c439b4162beb09d550ba31315c3abf460b69acb55a90939a
+    |    docs/reports/data/2026-11-05-q142p-pool8-predictor/SHA256SUMS: sha256 None, frozen fa274e3673865d5681d83c2fc3deb38e76fde001fd6931cef332c6119df85013
+    |    docs/reports/data/2026-11-05-q142p-pool8-predictor/SHA256SUMS-a2: sha256 None, frozen 65942a7669016df1b1f46f5266bb95cb78bcef2083bc873d3832bd5887898b27
+    |    docs/reports/data/2026-11-05-q142p-pool8-predictor/predict_pool8.py: sha256 None, frozen be00022cd72f88556aa5a807a2b50c7d83522567454aa5216c35d4191bfb8d85
+    |    docs/reports/data/2026-11-05-q142p-pool8-predictor/predict_pool8_a2.py: sha256 None, frozen c063456832303fc5f9c4a5f078fd78604101a810aebd0dcdcd3c993ed32b9996
+    |    docs/reports/data/2026-11-05-q142x-pool8-freeze/README.md.dated-note-1.md: sha256 None, frozen 49c40e59f3476fc80d2f11780c990d7dbc1d67ab235adbe7e70c39e437f0ae73
+    |    docs/reports/data/2026-11-05-q142x-pool8-freeze/SHA256SUMS: sha256 None, frozen 26eb0b2511e6f4ed3e6e9cc0646f24106a06cfffd402b388ddb110a5e10ab8d2
+    |    tools/claims-v3/e165/predictions-e165.json: sha256 None, frozen 7235109379f9a8f6af5057a205ea5b41c18049045706801ee46b8325380555a2
+    |    tools/claims-v3/e165/score_e165.py: sha256 None, frozen 03bfd40b728bad2a40a8e3559f16ac4b7e817929729c2090d9f029b4b41fd74c
+    |    tools/claims-v3/m10/POOL8-REGISTRATION.md: sha256 None, frozen a4795d6c761a1aff9bfb3318a941934ed118d2ea9772fc6ceabbe9f854cf36fb
+    |    tools/claims-v3/m10/POOL8-REGISTRATION.md.dated-note-1.md: sha256 None, frozen ab6e39d8378f17dd2c4f02be51612ac5dcc435fa835b631d14c69b1dcf20c43c
+    |    tools/claims-v3/m10/POOL8-REGISTRATION.md.dated-note-2.md: sha256 None, frozen 5dc8fcc9ab60e10333c02ca80e9b1a3dd3e7a2ebd789c483ebd5d6cc166cafa2
+    |    tools/claims-v3/m10/POOL8-SHA256SUMS: sha256 None, frozen 9675e44e1343dd77871d33427efd84ffff43a858659446c3e17edf9dc7c8cd18
+    |    tools/claims-v3/m10/pool8-registration.json: sha256 None, frozen 1a939c408f5a0902ef9873951bbe16f7fe78ceacc0ea11ff1d5a3653f16e761b
+    | e174_common rc=1
+  D1: the 18 files' git status --short in the lab clone, 12:43:00: 124300-47457-e174_d1_copy_q142kg2-1-local.out, 0 bytes, sha256 e3b0c44298fc1c14
+    (empty)
+  D1: the quiet read on the box, 12:43:01: 124301-47457-e174_d1_copy_q142kg2-2-124300-47457-e174_d1_copy_q142kg2-2-quiet.out, 79 bytes, sha256 2e4e8902c4648568
+    | QUIET-OK: no card session of ours and no dry pass of the runbook on aifoundry1
+  D1: the rsync's own output, 12:43:02: 124301-47457-e174_d1_copy_q142kg2-3-local.out, 0 bytes, sha256 e3b0c44298fc1c14
+    (empty)
+  the second box check (its job's output): 124312-48528-e174_check_q142kg2-1-124312-48528-e174_check_q142kg2-1-wait-a1c0-check-e174.out, 692 bytes, sha256 b1fb2296b623cec5
+    | JOB-BEGIN a1c0-check-e174 2026-11-05 12:43:10 PST
+    | 2026-11-05 12:43:10 PST
+    | == check_e174 (harness + binaries)
+    | HARNESS OK 110 + 3 binaries
+    | rc=0
+    | == preflight
+    | rc=0 dmcmd_audit: GO (33 send site(s), 0 disallowed; allow-list: none)
+    | == tiles and frozen inputs
+    | 64 tiles; frozen inputs, Q139(k)'s files and tiles: OK
+    | kappa0 0.9463
+    | rc=0
+    | == pool 8's SHA256SUMS: 89 OK (want 89)
+    | == dry pass on the box (the toy card; no device)
+    | stoptest-die dry rc=4 (want 4)
+    | smoke dry rc=0 (want 0)
+    | list rc=0 (126 BURST runs listed; want 126)
+    | No process holds an ET-SoC-1 device node or card lock.
+    | check_box_e174.sh rc=0
+    | BOX-CHECK-CLEAN
+    | JOB-END a1c0-check-e174 rc=0 2026-11-05 12:43:29 PST
+    | JOB-DONE a1c0-check-e174 rc=0
+  the step's clean mark (a1c0-check-clean-e174.txt): 2026-11-05 clean 2026-11-05 12:44:22 PST
+  files the 12:40:13 read named absent (sha256 None): 18
+
+== 3. D1's inputs: frozen-sha256-e174.json's files, from git
+  tools/claims-v3/e174/e174_common.py: the work tree equals HEAD's blob
+  tools/claims-v3/e174/run_e174.py: the work tree equals HEAD's blob
+  run_e174.py's BOX_FROZEN line read as the 8 names below: yes
+  note 1's sync list (box/step_e174_v2.sh, sync): 27 entries
+  frozen-sha256-e174.json added in c8064454 2026-11-05 03:45:13 -0800; later commits to it: none
+  path | class | frozen sha256 | at c8064454, 0a14c7bb and HEAD | commits since c8064454
+  docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/results.json | outside the sync, absent on the box at 12:40:13 | 69c76c753a76 | OK | -
+  docs/reports/data/2026-11-01-e118-two-clock-card0/README.md | outside the sync, absent on the box at 12:40:13 | 88c559004b3f | OK | -
+  docs/reports/data/2026-11-04-e170-blind7-card0/aifoundry1-c0/queue.jsonl | outside the sync, absent on the box at 12:40:13 | fb6495bbb06e | OK | -
+  docs/reports/data/2026-11-04-e170-blind7-card0/aifoundry1-c0/state-gate.json | outside the sync, absent on the box at 12:40:13 | dc386ad76fa3 | OK | -
+  docs/reports/data/2026-11-04-e170-blind7-card0/results.json | outside the sync, absent on the box at 12:40:13 | 09d4d9e2d386 | OK | -
+  docs/reports/data/2026-11-04-q140l-a2-session-terms/m9_a2.json | synced | cc6fbccc4b63 | OK | -
+  docs/reports/data/2026-11-04-q140l-a2-session-terms/predict_m9_a2.py | synced | 420b887ea57c | OK | -
+  docs/reports/data/2026-11-05-q142p-pool8-predictor/SHA256SUMS | outside the sync, absent on the box at 12:40:13 | fa274e367386 | OK | -
+  docs/reports/data/2026-11-05-q142p-pool8-predictor/SHA256SUMS-a2 | outside the sync, absent on the box at 12:40:13 | 65942a766901 | OK | -
+  docs/reports/data/2026-11-05-q142p-pool8-predictor/predict_pool8.py | outside the sync, absent on the box at 12:40:13 | be00022cd72f | OK | -
+  docs/reports/data/2026-11-05-q142p-pool8-predictor/predict_pool8_a2.py | outside the sync, absent on the box at 12:40:13 | c06345683230 | OK | -
+  docs/reports/data/2026-11-05-q142x-pool8-freeze/README.md.dated-note-1.md | outside the sync, absent on the box at 12:40:13 | 49c40e59f347 | OK | -
+  docs/reports/data/2026-11-05-q142x-pool8-freeze/SHA256SUMS | outside the sync, absent on the box at 12:40:13 | 26eb0b2511e6 | OK | -
+  tools/claims-v3/e165/e165_common.py | BOX_FROZEN, synced | b6c021c122b3 | OK | -
+  tools/claims-v3/e165/predictions-e165.json | outside the sync, absent on the box at 12:40:13 | 7235109379f9 | OK | -
+  tools/claims-v3/e165/score_e165.py | outside the sync, absent on the box at 12:40:13 | 03bfd40b728b | OK | -
+  tools/claims-v3/e170/e170_common.py | BOX_FROZEN, synced | b3daefa73f04 | OK | -
+  tools/claims-v3/e170/ettelem_guard_e170.sh | BOX_FROZEN, synced | ba57ee9aea27 | OK | -
+  tools/claims-v3/e170/harness-e170.json | outside the sync, present on the box at 12:40:13 | cf67d9f5303f | OK | -
+  tools/claims-v3/e170/score_e170.py | outside the sync, present on the box at 12:40:13 | 7a52c5e799bf | OK | -
+  tools/claims-v3/hpl/run_hpl.py | BOX_FROZEN, synced | 68493295504f | OK | -
+  tools/claims-v3/hpl/watcher_q142s.py | BOX_FROZEN, synced | 3f37482d48c7 | OK | -
+  tools/claims-v3/kinds/blind8/MANIFEST | BOX_FROZEN, synced | 1f5adbcbb699 | OK | -
+  tools/claims-v3/kinds/blind8/SHA256SUMS | BOX_FROZEN, synced | 606b3d7ee607 | OK | -
+  tools/claims-v3/kinds/blind8/blind8.json | BOX_FROZEN, synced | 370d8a970bed | OK | -
+  tools/claims-v3/kinds/blind8/intervals-pool8.json | synced | 05ef01e7a164 | OK | -
+  tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry1c0.json | synced | fd2fdc4d4ff8 | OK | -
+  tools/claims-v3/m10/POOL8-REGISTRATION.md | outside the sync, absent on the box at 12:40:13 | a4795d6c761a | OK | -
+  tools/claims-v3/m10/POOL8-REGISTRATION.md.dated-note-1.md | outside the sync, absent on the box at 12:40:13 | ab6e39d8378f | OK | -
+  tools/claims-v3/m10/POOL8-REGISTRATION.md.dated-note-2.md | outside the sync, absent on the box at 12:40:13 | 5dc8fcc9ab60 | OK | -
+  tools/claims-v3/m10/POOL8-SHA256SUMS | outside the sync, absent on the box at 12:40:13 | 9675e44e1343 | OK | -
+  tools/claims-v3/m10/pool8-registration.json | outside the sync, absent on the box at 12:40:13 | 1a939c408f5a | OK | -
+  RESULT: 32 of 32 at their frozen sha256 at c8064454, 0a14c7bb and HEAD, none touched since; 8 BOX_FROZEN (all synced: True); 12 in the sync list; 20 outside it
+  of those 20: 18 absent on the box at 12:40:13 (D1 copied exactly these), 2 present there; files the box named absent that are not outside the sync: none
+  Q139(k)'s run-time files (CCHECK_FROZEN): 3, all in the sync list: True, all at their sha256 at HEAD: True
+
+== 4. the checks of C: as committed, against results.json's record
+  committed beside results.json: ccheck-s1.json.gz, ccheck-smoke.json, ccheck-stoptest-board.json
+  results.json records ccheck-s1.json b113f2ee8f548df8: committed as ccheck-s1.json.gz (50,784 bytes, gunzipped: sha256 b113f2ee8f548df8 = the record)
+  results.json records ccheck-smoke.json 8658143fa8d39dd4: committed as ccheck-smoke.json (12,579 bytes: sha256 8658143fa8d39dd4 = the record)
+  results.json records ccheck-stoptest-board.json 81b66a2e3b9224c7: committed as ccheck-stoptest-board.json (5,563 bytes: sha256 81b66a2e3b9224c7 = the record)
+  the collector's own outputs in the pulled copy's cc/ (gitignored, desk only): 7 files
+    ccheck-s1.json: 2,196,385 bytes, sha256 b113f2ee8f548df8; committed as ccheck-s1.json.gz (equal)
+    ccheck-s1.txt: 199,892 bytes, sha256 3993d7620b8355ab; not committed
+    ccheck-smoke.json: 12,579 bytes, sha256 8658143fa8d39dd4; committed as ccheck-smoke.json (equal)
+    ccheck-smoke.txt: 1,537 bytes, sha256 6ba85e4efecb08f5; not committed
+    ccheck-stoptest-board.json: 5,563 bytes, sha256 81b66a2e3b9224c7; committed as ccheck-stoptest-board.json (equal)
+    ccheck-stoptest-board.txt: 841 bytes, sha256 db92cebc6c7786b2; not committed
+    cclist.txt: 203 bytes, sha256 2ef9ac0fec282206; committed as logs/cclist.txt (equal)
+  gzip -n -c of the pulled copy's ccheck-s1.json (the collector's gzip -n -k, default level): sha256 df3ab47476d34eb5; the committed ccheck-s1.json.gz df3ab47476d34eb5: byte for byte the same
+
+== 5. the registered score replayed from this directory as committed (dated note 1's reproduce command)
+  the session's files read as committed: 128 .gz file(s) under aifoundry1-c0/s1/, none unpacked
+  score_e174.py rc 0, 79 s
+  results.json: byte for byte the committed file (sha256 d6d3cddf0c6bd7b0)
+  score.txt: byte for byte the committed file (sha256 79e102277bfc965f)
+
+== 6. the login check in every directory (scrub_etwho_e164.py --check, unchanged, with the owner's box login)
+  tools/claims-v3/e164/scrub_etwho_e164.py: HEAD blob sha256 abd96734fcb9067e; work tree equal; it reads only the files directly in the directory it is given: yes
+  docs/reports/data/2026-11-05-e174-blind8-card0 (HEAD): 346 committed files, 7 directly in the top directory; in the copy 138 .gz unpacked, 135 .bin tile(s) left out; --check run in 15 directories: 0 left
+    box home paths: the owner's 5,283, another login's 0
+  docs/reports/data/2026-11-05-e172-blind8-card1 (HEAD): 433 committed files, 32 directly in the top directory; in the copy 12 .gz unpacked, 292 .bin tile(s) left out; --check run in 18 directories: 0 left
+    box home paths: the owner's 14,959, another login's 0
+  docs/reports/data/2026-11-04-e170-blind7-card0 (HEAD): 367 committed files, 9 directly in the top directory; in the copy 147 .gz unpacked, 144 .bin tile(s) left out; --check run in 16 directories: 0 left
+    box home paths: the owner's 5,671, another login's 0
+  RESULT: 0 other login(s) left in any directory of the three data directories
