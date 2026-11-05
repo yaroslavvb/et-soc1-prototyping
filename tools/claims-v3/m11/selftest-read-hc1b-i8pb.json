@@ -1,0 +1,379 @@
+{
+ "_note": "Q142(h2) selftest_read_hc1b_i8pb.py: the self-test of M11's HC1-B and I8P-B reader",
+ "parts": {
+  "H0": {
+   "detail": {
+    "anchors_equal_fit_m10": true,
+    "lists": {
+     "SHA256SUMS": 58,
+     "SHA256SUMS-a1": 9,
+     "SHA256SUMS-m11": 6
+    },
+    "min": {
+     "I1": 6,
+     "N1": 10
+    },
+    "scorer": "cd5b602484d7",
+    "seeds": {
+     "M11-HC1-B": 80519,
+     "M11-I8P-B": 80540
+    },
+    "v2": "1c04414680f9",
+    "v3": "fe19d9507503"
+   },
+   "pass": true
+  },
+  "H1a": {
+   "detail": {
+    "max_abs_diff": {
+     "S": 0.0,
+     "T_run": 0.0,
+     "dT": 0.0
+    },
+    "rows_compared": 152
+   },
+   "pass": true
+  },
+  "H1b": {
+   "detail": {
+    "E163": {
+     "anchors": [
+      "fp16.anchor7_randn_a",
+      "fp16.anchor7_randn_b",
+      "fp16.randn",
+      "fp32.anchor7_randn_a",
+      "fp32.anchor7_randn_b",
+      "fp32.randn",
+      "int8.anchor7_full_a",
+      "int8.anchor7_full_b",
+      "int8.full"
+     ],
+     "committed": 1.0047,
+     "diff": 4.3438655038752216e-05,
+     "h": 1.0047434386550387
+    },
+    "E164": {
+     "anchors": [
+      "fp16.anchor6_randn",
+      "fp16.anchor7_randn_a",
+      "fp16.anchor7_randn_b",
+      "fp16.randn",
+      "fp32.anchor6_randn",
+      "fp32.anchor7_randn_a",
+      "fp32.anchor7_randn_b",
+      "fp32.randn",
+      "int8.anchor6_full",
+      "int8.anchor7_full_a",
+      "int8.anchor7_full_b",
+      "int8.full"
+     ],
+     "committed": 1.06,
+     "diff": 4.605673605118099e-05,
+     "h": 1.0599539432639489
+    }
+   },
+   "pass": true
+  },
+  "H1c": {
+   "detail": {
+    "RK4_arm": 0.9382303430101419,
+    "arm_median": 0.9382303430101419,
+    "card_term_ratio": 0.9615854710541776,
+    "k": 0.9763004747811282,
+    "k_independent": 0.976300474781128,
+    "plain_ratio_vs_RK4": {
+     "int8.anchor7_full_a": 0.0,
+     "int8.anchor7_full_b": 0.0
+    },
+    "q": {
+     "int8.anchor7_full_a": 0.9728143710888246,
+     "int8.anchor7_full_b": 0.9763004747811282,
+     "int8.full": 0.9767879466816382
+    }
+   },
+   "pass": true
+  },
+  "H1d": {
+   "detail": {
+    "HC1-B_on_E164": {
+     "bias_with_c": 0.04067218676400336,
+     "bias_without_c": 0.139943757337465,
+     "d_rms_c": -0.060345984460148994,
+     "h": 1.0599539432639489,
+     "hi95": -0.038540081805499726,
+     "lo95": -0.08096998006222478,
+     "n": 48,
+     "overcorrects": false,
+     "rms_with_c": 0.132262370215862,
+     "rms_without_c": 0.192608354676011,
+     "verdict": "BETTER"
+    },
+    "I8P-B_on_E164_E163": {
+     "I1_bias_overcorrects": false,
+     "bias_with_w": 0.061415007207143726,
+     "bias_without_w": -0.07724596274605565,
+     "d_rms_w": -0.0007857590117914814,
+     "hi95": 0.05704089684620646,
+     "k": 0.9763004747811282,
+     "lo95": -0.04338714484809261,
+     "n": 22,
+     "rms_with_w": 0.18014860803056273,
+     "rms_without_w": 0.18093436704235422,
+     "verdict": "NOT RESOLVED"
+    },
+    "label": "stand-in, in-sample, post hoc (E163 and E164 are in M10's training rows; pool 7's priority-1 tiles for N1 and I1)"
+   },
+   "pass": true
+  },
+  "H2-D1": {
+   "detail": {
+    "HC1-B": [
+     "BETTER",
+     0.9,
+     -0.16594945208829937,
+     -0.2010566844748847,
+     -0.12746422271499294,
+     31,
+     "blind"
+    ],
+    "I8P-B": [
+     "BETTER",
+     0.9699999999966954,
+     -0.1768941779016375,
+     -0.18980224148389838,
+     -0.16218076883550142,
+     12,
+     "blind"
+    ],
+    "at_M10_primary_D": "NOT RESOLVED",
+    "check_anchors": [
+     "fp16.anchor8_check_randn_84631a",
+     "fp32.anchor8_check_randn_319f73",
+     "int8.anchor8_check_full_d8b6c8"
+    ],
+    "h3": 1.0,
+    "independent_interval_identical": [
+     true,
+     true
+    ],
+    "int8_check": {
+     "abs_e_with_w": 0.2113793071203176,
+     "abs_e_without_w": 9.999991945619513e-10,
+     "band_half_width_w": 0.343470305098009,
+     "better": false,
+     "inside_M10_band_with": true,
+     "rule": "better if |e| is smaller with k and the measured D lies inside M10's int8 95% band about k x M10"
+    },
+    "line": "{\"HC1-B\": [\"BETTER\", \"blind\"], \"I8P-B\": [\"BETTER\", \"blind\"]}",
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D2": {
+   "detail": {
+    "HC1-B": [
+     "WORSE",
+     "post hoc",
+     {
+      "HC1-B reads WORSE": true,
+      "h1 over-corrects on E172's N1": false,
+      "met": true
+     }
+    ],
+    "I8P-B": [
+     "WORSE",
+     "post hoc"
+    ],
+    "rc": 0,
+    "why": "a session's first launch record precedes the registration's commit"
+   },
+   "pass": true
+  },
+  "H2-D3": {
+   "detail": {
+    "HC1-B": [
+     "NOT RESOLVED",
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "I8P-B": [
+     "NOT RESOLVED",
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D4": {
+   "detail": {
+    "HC1-B": [
+     "WORSE",
+     0.037379074657456685,
+     -0.14145178250079463,
+     true
+    ],
+    "I8P-B": [
+     "WORSE",
+     0.06045543833868402,
+     -0.2418217540518849,
+     true
+    ],
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D5": {
+   "detail": {
+    "P8-KC_E172": "FAIL",
+    "h": 0.9,
+    "h_c_clean": 0.8991,
+    "k": 0.9699999999901443,
+    "left_out": [
+     "int8.anchor8_full_a_4aac84",
+     "int8.full"
+    ],
+    "not_clean": [
+     "int8.anchor8_full_a_4aac84"
+    ],
+    "ratios_range": [
+     0.8927999999999999,
+     0.9072
+    ],
+    "rc": 0,
+    "used": [
+     "int8.anchor8_full_b_935710"
+    ]
+   },
+   "pass": true
+  },
+  "H2-D6": {
+   "detail": {
+    "HC1-B": [
+     "NOT SCORED",
+     "9 tiles, fewer than 10"
+    ],
+    "I8P-B": [
+     "NOT SCORED",
+     "5 tiles, fewer than 6"
+    ],
+    "failed": 22,
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D7": {
+   "detail": {
+    "HC1-B": [
+     "NOT SCORED",
+     "1 kept passes, fewer than 2 (the registrations' rule: every rule NOT SCORED)"
+    ],
+    "I8P-B": [
+     "NOT SCORED",
+     "E172: 1 kept passes, fewer than 2 (the registrations' rule: every rule NOT SCORED)"
+    ],
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D8": {
+   "detail": {
+    "HC1-B": [
+     "NOT SCORED",
+     "no random anchor measured: h = 1 (M10's rule), nothing to test"
+    ],
+    "I8P-B": [
+     "NOT SCORED",
+     "no int8 random anchor measured and C all PASS in both sessions: k cannot be read"
+    ],
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D9": {
+   "detail": {
+    "line": "{\"HC1-B\": [\"BETTER\", \"blind\"], \"I8P-B\": [\"BETTER\", \"blind\"]}",
+    "rc": 0,
+    "same_as_D1": true
+   },
+   "pass": true
+  },
+  "H3": {
+   "detail": {
+    "E171_as_E172": {
+     "line": "REFUSED (exit 6): scored.json is not E172's scored session (HC1-B and I8P-B read E172 on aifoundry1c1 and E171 on aifoundry3 only): run E171 on aifoundry3, not E172 on aifoundry1c1; predictions tools/claims-v3/kinds/blind8/predictions-pool8",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "E172_twice": {
+     "line": "REFUSED (exit 6): ka-pooled v3 reads only E171's and E172's scored sessions as registered (dated note 2): scored.json (the E171 argument): run E172 on aifoundry1c1, not E171 on aifoundry3 (the registered order: <E171 scored.json> <E172 scor",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "m11_list_changed": {
+     "msg": "M11's frozen inputs differ: SHA256SUMS-a1: tools/claims-v3/kspeed/run_kspeed.py",
+     "rc": 9,
+     "want": 9
+    },
+    "no_c_sessions": {
+     "line": "REFUSED (exit 4): E172: no-c-sessions.json was not scored through the C gate (no c_sessions.ok): a session that must carry a C log has no finished check of C (E171.md / E172.md), so nothing is read",
+     "rc": 4,
+     "want": 4,
+     "wrote": false
+    },
+    "no_ccheck": {
+     "line": "REFUSED (exit 4): E172: no check of C beside the scored file (<tmp>/absent.json): the C status cannot be read",
+     "rc": 4,
+     "want": 4,
+     "wrote": false
+    },
+    "other_ccheck": {
+     "line": "REFUSED (exit 6): E172: the check of C given (ccheck.json) does not give the scored file's P8-KC block (recomputed FAIL, 192 launches; the file's PASS, 192)",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "other_reduction": {
+     "line": "REFUSED (exit 6): E172: e172.json is not the reduction the scored file was scored on (reduction_sha256)",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "pair_swapped": {
+     "line": "REFUSED (exit 6): ka-pooled v3 reads only E171's and E172's scored sessions as registered (dated note 2): scored.json (the E171 argument): run E172 on aifoundry1c1, not E171 on aifoundry3 (the registered order: <E171 scored.json> <E172 scor",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "relabelled": {
+     "line": "REFUSED (exit 6): relabelled.json: its rows are not aifoundry1c1's (64 checked; fp16.a_zeros_b_complement: a-priori D 1.519759 W where this card's coefficient gives 1.461400 W; fp16.anchor8_check_randn_84631a: a-priori D 21.934545 W where t",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "runs_table_short": {
+     "line": "REFUSED (exit 6): the runs table is not this reduction's: short-runs.csv holds 251 runs where the reduction kept 252",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "usage": {
+     "line": "REFUSED (exit 2): give --e172-dir (or E172's files by name)",
+     "rc": 2,
+     "want": 2,
+     "wrote": false
+    }
+   },
+   "pass": true
+  }
+ },
+ "reader_sha256": "5d920bacf7edde8d9de455e87dbc78d0ce2c8f5531794f4dc7f3754ed8874618",
+ "selftest_sha256": "ee883e7efc5f701c1bb971c50b87391e7333ffd4c7e8dcadb6ffeca15d509bb0",
+ "verdict": "PASS"
+}
