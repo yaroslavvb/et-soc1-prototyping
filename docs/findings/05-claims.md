@@ -3861,7 +3861,7 @@ reproducing with only temporary paths and times different, and ran adversarial c
 to end. Verdict: **holds with fixes**; nothing makes the card day unsafe. Its seven faults: (1, minor, one the card day could hit)
 v2's `ka-pooled` refused (exit 6) a genuine session that kept fewer than 2 passes, where E171.md and E172.md read P8-KA pooled NOT
 SCORED, and step 22 v2 then stopped with 16; (2, minor, wording) N1's identity checks are by labels, not provenance: E171's
-measurements laid out as E172's raw copy and scored as E172 passed every v2 check (PASS, n 4); (3, nit) `cclist_q142kg_v2.py`
+measurements laid out as E172's raw copy and scored as E172 passed every v2 check (PASS, n 4) *(dated, Thu 5 Nov 2026, after these records' verifier: that "E171" is a synthetic session, built by the committed self-tests' session builders, `selftest_score_p8_600.synth` and the steps of `selftest_score_p8_600_v2.py`, as W4 of `p8-600/selftest_score_p8_600_v3.py` builds it again; no E171–E174 data exists)*; (3, nit) `cclist_q142kg_v2.py`
 never read the names in `session_end` lines; (4, nit) no quiet guard before E172's pull; (5, nit) the kg dry listing never printed
 the prelude it refers to; (6, nit) v2's self-test is not byte-reproducible (269 of 272 leaves equal); (7, nit) N4 named only one
 of E172.md's two fifth-pass sentences.
@@ -3938,7 +3938,7 @@ what was already known. M10, M9 and every frozen file are untouched, and no E nu
   E154-then-E166 pattern in 98.2% of draws, never "rarely sees" (A1-4);
 - what M11 carries at the plan: γ_c in 87.5% of draws at a common 3.2% gain, ā_c in 86.4% at a common 0.27 °C level, nothing in
   99.4% with no effect, and nothing in 98.7% if the sessions repeat E154 then E166 (A1-4);
-- S7-W at 1.5 σ, at the registered threshold, reads 21.9% and 21.3%, not 11.3% and 10.8%; 26.7% with both terms carried (A1-5);
+- S7-W at 1.5 σ, at the registered threshold, reads 21.9% and 21.3%, not 11.3% and 10.8%; 26.7% with both terms carried (A1-5) *(dated, Thu 5 Nov 2026, after these records' verifier: 26.7% is S7-W's rate with both terms carried when the simulated noise is σ itself, 0.0884 °C, and there is no effect, A1-4 (e)'s table; at 1.5 σ, at the registered threshold, with both carried it reads 42.5%, as A1-5 says (`m11/design-power-heat-v2.txt`, section 4'; `m11/registration-a1.json`, `power_at_the_plan_v2` > `S7W_registered_threshold`); the 21.9% and 21.3% stand, and no rule changes)*;
 - I8P's not-wanted clause is named "k varies across the pairs no more than the anchors' own errors give", with 0.9616 × the median
   k reported as a candidate, never carried; the preview ratios 0.9756–1.0086, median 0.9966, are not k (A1-1, A1-3);
 - HC1's bias clause was already known on committed rows: +0.0071 → −0.0026 °C (A1-1);
@@ -3964,6 +3964,8 @@ approvals, with the v3 drivers.
 | Carried (records) | stale since `c9a3e40a` (08:23:02) and `3c31a91d` (07:41:57): "the v2 drivers" and "E174 runs only after E172's end has been read" in "Q142, pool 8"; the hub's Status (its readiness line, What's missing's item 1 and item 3); the kinds page's next step (3) and items 8 and 9 | the dated clauses in "Q142, pool 8", above; the hub's Status and the kinds page, after these records |
 | Carried (earlier critics) | the kinds page's pool-8 paragraph does not name `153b720f`; AGENT.md's "scored" has no pointer; the findings README's index and 03's citation counter read E1–E170; step 13's k6 cases and JOB-LOST are untested at the desk; `ours_live`'s exclusion of a dry pass cannot be shown on macOS; the lab's privacy table is absent on the Intel | the first three by these records (AGENT.md's changelog entry; the README's index and 03's counter now read E1–E174) and the kinds page after them; the other three stay carried |
 | Disclosure (the critic's compute) | one job ran outside the round's job slots, about 09:14–09:20 PST on one core: a character-level diff over whole records files, stopped, writing nothing; re-run hunk by hunk inside the slots (09:20:42–09:20:50) | Disclosures, below |
+
+*(Dated, Thu 5 Nov 2026, after these records' verifier.)* **These records' verifier** (about 10:20–10:44 PST, 11 jobs one at a time in the round's job slots) read lab `370643dc` and `81eeb0ff`, gyroscope `6e063934` and the four pages they deployed. It re-derived 17 groups of figures from the committed files, and all but one hold. It found every records edit a pure insertion at character level but the three index counters (each a single digit) and AGENT.md's moved oldest changelog entry (752 characters, byte for byte), all 40 hash lists in the repo passing (2,011 of 2,011 entries), the hubs' Logs append-only, the pages live as committed with their visibility and access unchanged, no view scrolling sideways at 390 or 1280 px, and nothing of pool 8 measured or claimed. Verdict: **holds with fixes**. One minor fault: "Quote as corrected (A1)", above, gave S7-W's 26.7% as its rate with both terms carried at 1.5 σ, citing A1-5, which reads 42.5%; 26.7% is its rate at σ with no effect, A1-4 (e) (a dated clause beside the item). Two wording nits: the Horace Hub's Status and the AI Foundry hub's Experiments row called the six fix-pass commits of Q142(x), Q142(k6) and Q142(kg) "six fix passes" (three passes made them; rewritten there), and the v2 verifier's fault 2, above, and 03's paragraph call a synthetic session "E171's measurements" (dated clauses beside both). One carried item: the next-step lists these records wrote (What remains, below, carry item (70), above, and the hubs' lists) are the round critic's, as of `f49b7ddd`; the next records round brings them up to date. No figure, verdict, line, rule or frozen file changes. Its fix pass, desk only on the Intel from about 10:47 PST (no card, lab box, post, Modal app or archive; its Python through the round's job slots, one job at a time), wrote these dated clauses, here, in 03's paragraph and in 02's Q142 row, and the hubs' corrections.
 
 ### Disclosures
 
@@ -3993,7 +3995,7 @@ approvals, with the v3 drivers.
    E164's committed sessions (about 45–60 minutes).
 3. At the desk, before any M11 hold: M11's dated amendment with an in-session calibration reading, its power computed with v2's
    committed draws (about 1.5–2 h).
-4. These records, then a verifier and a fix pass.
+4. These records, then a verifier and a fix pass. *(Dated, Thu 5 Nov 2026: done; their verifier held them with fixes, and the fix pass answered it, as the dated paragraph after the round critic's table says.)*
 5. At the desk: M11's kits and scorer (REGISTRATION.md section 13 step 1, as amended): aifoundry3's from E166's, aifoundry2's from
    E167's, `dmcmd_audit` GO and a dry pass, with self-tests of A1-4's path on synthetic sessions (about 2–3 h).
 6. Card time, on the owner's word, after items 3 and 5 and never beside E171–E174: M11's holds on aifoundry3, 2 × 74.7
