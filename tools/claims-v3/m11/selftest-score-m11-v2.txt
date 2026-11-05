@@ -1,0 +1,31 @@
+M11 scorer v2 self-test: lists SHA256SUMS 58, SHA256SUMS-m11 6, SHA256SUMS-a1 9, SHA256SUMS-a2 7, SHA256SUMS-a3 7, SHA256SUMS-a4 6, SHA256SUMS-h2-reader 16, SHA256SUMS-h2-reader-v2 129, SHA256SUMS-h2-refit 6, SHA256SUMS-a5 6, SHA256SUMS-score-m11 4
+  score_m11.py's own self-test, unchanged: PASS (M10's holds: {'n': 9, 'e_all_within_0p001_C': True, 'R_within_0p001_C': 8, 'all_accepted': True}; 11 of 11 synthetic; committed cells {'A2 (design-power-heat-a2.json plan|0.0884|mixed: HM-CAL B/NR/W, enters)': True, "A3 (design-power-heat-a3.json premise_a3, section 0.1's case: HM-CAL BETTER, enters, REPEATS)": True, "A4 (design-power-heat-a4.json, section 0.1's case: I8 BETTER, I8 enters, a per-session calibration)": True})
+  A4-8 read rule: every hold scored                                    PASS  read
+  A4-8 read rule: H_E not scored (A2 reads NOT SCORED; A4 still reads) PASS  read
+  A4-8 read rule: L2 not scored                                        PASS  NOT SCORED: L2 is not scored
+  A4-8 read rule: S not scored                                         PASS  NOT SCORED: S is not scored
+  A4-8 read rule: L1 not scored                                        PASS  NOT SCORED: L1 is not scored
+  A4-8 read rule: L2 run before S ended (a reordering)                 PASS  NOT SCORED: L1 and S did not both end before L2's first launch
+  A4-8 read rule: the pair spans 2.9 C                                 PASS  NOT SCORED: the pair spans 2.900 C of P, under 3.0 C
+  A4-8 read rule: L2's P above L1's (w > 1)                            PASS  NOT SCORED: L2's P 10.070 C lies outside the pair's span [3.459, 9.670] C
+  A4-8 read rule: L2's P below S's (w < 0)                             PASS  NOT SCORED: L2's P 3.059 C lies outside the pair's span [3.459, 9.670] C
+  A4-8 read rule: the pair spans exactly 3.0 C, L2 at its middle       PASS  read
+  A5-4 reason: both sessions' first holds not scored (HM-E144 NOT SCORED)     PASS  v2 'nothing from A4: HM-E144 NOT SCORED' (score_m11.py printed 'nothing from A4: HM-E144 DOES NOT REPEAT')
+  A5-4 reason: L2 launched before S ended in both (HM-CAL-I8 NOT SCORED)      PASS  v2 'nothing from A4: HM-CAL-I8 NOT SCORED' (score_m11.py printed 'nothing from A4: the int8 holds' misses read as noise (E4')')
+  A1-4 BOTH path: a common 0.25 C + 2.5% (A1o)       PASS  ['BOTH', 'both enter', 'replaced', "A1-4's common term (both enter)", None]
+  A1-4 BOTH path: a common 0.06 C + 3.0% (A2o)       PASS  ['BOTH', 'gain enters (BOTH, refitted alone)', 'replaced', "A1-4's common term (gain enters (BOTH, refitted alone))", None]
+  A1-4 BOTH path: a common 0.30 C + 0.5% (A2p)       PASS  ['BOTH', 'level enters (BOTH, refitted alone)', 'reported', "A1-4's common term (level enters (BOTH, refitted alone))", None]
+  A5: section 0.1's case, E154's line then E166's (A4 enters; the lines differ)        PASS  ['A4', 'per session', 'DIFFER', False] X2 11.362
+  A5: section 0.1's case, E154's line in both sessions (A4 enters; one line)           PASS  ['A4', 'common to the sessions, or not separated', 'AGREE', False] X2 0.1601
+  A5: the premise holds, E154's line then E166's (A2 enters; the lines differ; score_m11.py's own case and noise) PASS  ['A2', 'per session', 'DIFFER', False] X2 30.7077
+  A5: section 0.1's case, S1's H_E and Z not scored (HM-LG counts S2; A4 enters on two) PASS  ['A4', 'per session', 'DIFFER', True] X2 11.362
+  A5: one session (nothing enters; both readings NOT SCORED)                           PASS  [None, None, 'NOT SCORED', False] X2 None
+  A5: the two forms of X2_AG on 200 random pairs agree to 9.9e-14
+  A5's committed cell (section 0.1's case, likeliest): {'A2 enters, per session': 21.1, 'A2 enters, common or not separated': 0.5, 'A4 enters, per session': 45.3, 'A4 enters, common or not separated': 14.2} against {'A2 enters, common or not separated': 0.5, 'A2 enters, per session': 21.1, 'A4 enters, common or not separated': 14.2, 'A4 enters, per session': 45.3}: equal; first draw of each form {'A4 enters, common or not separated': 0, 'A4 enters, per session': 1, 'A2 enters, per session': 4, 'A2 enters, common or not separated': 33}
+  staged reading (E154's pass renamed): holds equal v1's True; decisions equal True; lines written before the later holds True; lines file True; post hoc: a registration or amendment commit does not precede a session's first launch record
+    order: read H_E of S1:m11-from-e154 | read Z of S1:m11-from-e154 | stage 1 written: A2's lines | read L1 of S1:m11-from-e154 | read S of S1:m11-from-e154 | stage 2 written: A4's lines | read L2 of S1:m11-from-e154 | stage 3 written: L2 read
+    both stage lines null there (['the pair spans under 6.0 C of P', 'the pair spans 1.717 C of P, under 3.0 C']); a null line goes with a NOT SCORED decision True; the order read from the records equals the final order True
+  staged reading (E154's pass under REN2): holds equal v1's True; decisions equal True; lines first True; A4's stage-2 line {'a_C': -0.40575346552026664, 'g': 0.07246885418494471} read by the decision True and equal to its {'a': -0.4058, 'g': 0.0725, 'w': 0.9374, 'span': 5.699} True; A2 null and NOT SCORED True (its pair was not run first (a reordering, A2-7)); order True
+  the stage lines against the decision's on 4000 synthetic sessions: {'draws': 4000, 'A2 read, line equal': 873, 'A2 line, unread after stage 3': 49, 'A2 null, NOT SCORED': 3078, 'A4 read, line equal': 626, 'A4 line, unread after stage 3': 951, 'A4 null, NOT SCORED': 2423}; problems 0
+  precedence (git, with A5): a first launch now reads blind True; one second before A5's commit False; every commit an ancestor of HEAD: True
+SELF-TEST PASS

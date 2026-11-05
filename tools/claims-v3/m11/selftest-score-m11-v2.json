@@ -1,0 +1,388 @@
+{
+ "a5_cases": {
+  "one session (nothing enters; both readings NOT SCORED)": {
+   "X2": null,
+   "carries": "nothing: one session (the readings are a candidate for the next session)",
+   "got": [
+    null,
+    null,
+    "NOT SCORED",
+    false
+   ],
+   "pass": true,
+   "want": [
+    null,
+    null,
+    "NOT SCORED",
+    false
+   ]
+  },
+  "section 0.1's case, E154's line in both sessions (A4 enters; one line)": {
+   "X2": 0.1601,
+   "carries": "A4's in-session calibration (L1 and S, read on L2)",
+   "got": [
+    "A4",
+    "common to the sessions, or not separated",
+    "AGREE",
+    false
+   ],
+   "pass": true,
+   "want": [
+    "A4",
+    "common to the sessions, or not separated",
+    "AGREE",
+    false
+   ]
+  },
+  "section 0.1's case, E154's line then E166's (A4 enters; the lines differ)": {
+   "X2": 11.362,
+   "carries": "A4's in-session calibration (L1 and S, read on L2)",
+   "got": [
+    "A4",
+    "per session",
+    "DIFFER",
+    false
+   ],
+   "pass": true,
+   "want": [
+    "A4",
+    "per session",
+    "DIFFER",
+    false
+   ]
+  },
+  "section 0.1's case, S1's H_E and Z not scored (HM-LG counts S2; A4 enters on two)": {
+   "X2": 11.362,
+   "carries": "A4's in-session calibration (L1 and S, read on L2)",
+   "got": [
+    "A4",
+    "per session",
+    "DIFFER",
+    true
+   ],
+   "pass": true,
+   "want": [
+    "A4",
+    "per session",
+    "DIFFER",
+    true
+   ]
+  },
+  "the premise holds, E154's line then E166's (A2 enters; the lines differ; score_m11.py's own case and noise)": {
+   "X2": 30.7077,
+   "carries": "A2's in-session calibration (H_E and Z)",
+   "got": [
+    "A2",
+    "per session",
+    "DIFFER",
+    false
+   ],
+   "pass": true,
+   "want": [
+    "A2",
+    "per session",
+    "DIFFER",
+    false
+   ]
+  }
+ },
+ "a5_committed_cell": {
+  "committed": {
+   "A2 enters, common or not separated": 0.5,
+   "A2 enters, per session": 21.1,
+   "A4 enters, common or not separated": 14.2,
+   "A4 enters, per session": 45.3
+  },
+  "equal": true,
+  "first_draw_of_each_form": {
+   "A2 enters, common or not separated": 33,
+   "A2 enters, per session": 4,
+   "A4 enters, common or not separated": 0,
+   "A4 enters, per session": 1
+  },
+  "this_scorer": {
+   "A2 enters, common or not separated": 0.5,
+   "A2 enters, per session": 21.1,
+   "A4 enters, common or not separated": 14.2,
+   "A4 enters, per session": 45.3
+  }
+ },
+ "a5_two_forms_worst_abs": 9.947598300641403e-14,
+ "both_paths": {
+  "a common 0.06 C + 3.0% (A2o)": {
+   "got": [
+    "BOTH",
+    "gain enters (BOTH, refitted alone)",
+    "replaced",
+    "A1-4's common term (gain enters (BOTH, refitted alone))",
+    null
+   ],
+   "pass": true,
+   "want": [
+    "BOTH",
+    "gain enters (BOTH, refitted alone)",
+    "replaced"
+   ]
+  },
+  "a common 0.25 C + 2.5% (A1o)": {
+   "got": [
+    "BOTH",
+    "both enter",
+    "replaced",
+    "A1-4's common term (both enter)",
+    null
+   ],
+   "pass": true,
+   "want": [
+    "BOTH",
+    "both enter",
+    "replaced"
+   ]
+  },
+  "a common 0.30 C + 0.5% (A2p)": {
+   "got": [
+    "BOTH",
+    "level enters (BOTH, refitted alone)",
+    "reported",
+    "A1-4's common term (level enters (BOTH, refitted alone))",
+    null
+   ],
+   "pass": true,
+   "want": [
+    "BOTH",
+    "level enters (BOTH, refitted alone)",
+    "reported"
+   ]
+  }
+ },
+ "lists_checked": {
+  "SHA256SUMS": 58,
+  "SHA256SUMS-a1": 9,
+  "SHA256SUMS-a2": 7,
+  "SHA256SUMS-a3": 7,
+  "SHA256SUMS-a4": 6,
+  "SHA256SUMS-a5": 6,
+  "SHA256SUMS-h2-reader": 16,
+  "SHA256SUMS-h2-reader-v2": 129,
+  "SHA256SUMS-h2-refit": 6,
+  "SHA256SUMS-m11": 6,
+  "SHA256SUMS-score-m11": 4
+ },
+ "pass": true,
+ "precedence_synthetic": {
+  "ancestors": {
+   "A1": true,
+   "A2": true,
+   "A3": true,
+   "A4": true,
+   "A5": true,
+   "REGISTRATION": true
+  },
+  "now": true,
+  "one_second_before_A5": false
+ },
+ "problems": [],
+ "read_rule_cases": {
+  "H_E not scored (A2 reads NOT SCORED; A4 still reads)": {
+   "got": "read",
+   "pass": true,
+   "want": "read"
+  },
+  "L1 not scored": {
+   "got": "NOT SCORED: L1 is not scored",
+   "pass": true,
+   "want": "NOT SCORED: L1 is not scored"
+  },
+  "L2 not scored": {
+   "got": "NOT SCORED: L2 is not scored",
+   "pass": true,
+   "want": "NOT SCORED: L2 is not scored"
+  },
+  "L2 run before S ended (a reordering)": {
+   "got": "NOT SCORED: L1 and S did not both end before L2's first launch",
+   "pass": true,
+   "want": "NOT SCORED: L1 and S did not both end before L2's first launch"
+  },
+  "L2's P above L1's (w > 1)": {
+   "got": "NOT SCORED: L2's P 10.070 C lies outside the pair's span [3.459, 9.670] C",
+   "pass": true,
+   "want": "NOT SCORED: L2's P"
+  },
+  "L2's P below S's (w < 0)": {
+   "got": "NOT SCORED: L2's P 3.059 C lies outside the pair's span [3.459, 9.670] C",
+   "pass": true,
+   "want": "NOT SCORED: L2's P"
+  },
+  "S not scored": {
+   "got": "NOT SCORED: S is not scored",
+   "pass": true,
+   "want": "NOT SCORED: S is not scored"
+  },
+  "every hold scored": {
+   "got": "read",
+   "pass": true,
+   "want": "read"
+  },
+  "the pair spans 2.9 C": {
+   "got": "NOT SCORED: the pair spans 2.900 C of P, under 3.0 C",
+   "pass": true,
+   "want": "NOT SCORED: the pair spans"
+  },
+  "the pair spans exactly 3.0 C, L2 at its middle": {
+   "got": "read",
+   "pass": true,
+   "want": "read"
+  }
+ },
+ "reasons": {
+  "L2 launched before S ended in both (HM-CAL-I8 NOT SCORED)": {
+   "got": "nothing from A4: HM-CAL-I8 NOT SCORED",
+   "pass": true,
+   "score_m11_printed": "nothing from A4: the int8 holds' misses read as noise (E4')",
+   "want": "nothing from A4: HM-CAL-I8 NOT SCORED"
+  },
+  "both sessions' first holds not scored (HM-E144 NOT SCORED)": {
+   "got": "nothing from A4: HM-E144 NOT SCORED",
+   "pass": true,
+   "score_m11_printed": "nothing from A4: HM-E144 DOES NOT REPEAT",
+   "want": "nothing from A4: HM-E144 NOT SCORED"
+  }
+ },
+ "staged_lines_unit": {
+  "counts": {
+   "A2 line, unread after stage 3": 49,
+   "A2 null, NOT SCORED": 3078,
+   "A2 read, line equal": 873,
+   "A4 line, unread after stage 3": 951,
+   "A4 null, NOT SCORED": 2423,
+   "A4 read, line equal": 626,
+   "draws": 4000
+  },
+  "n_problems": 0,
+  "problems": []
+ },
+ "staged_reading": {
+  "blind": false,
+  "decisions_equal_v1": true,
+  "holds": {
+   "H_E": {
+    "P_C": 10.856,
+    "R_C": 11.208,
+    "e_C": 0.352,
+    "scored": true
+   },
+   "L1": {
+    "P_C": 5.668,
+    "R_C": 5.673,
+    "e_C": 0.005,
+    "scored": true
+   },
+   "L2": {
+    "P_C": 11.01,
+    "R_C": 11.546,
+    "e_C": 0.536,
+    "scored": true
+   },
+   "S": {
+    "P_C": 3.951,
+    "R_C": 4.024,
+    "e_C": 0.073,
+    "scored": true
+   },
+   "Z": {
+    "P_C": 11.367,
+    "R_C": 11.785,
+    "e_C": 0.418,
+    "scored": true
+   }
+  },
+  "holds_equal_v1": true,
+  "label": "post hoc: a registration or amendment commit does not precede a session's first launch record",
+  "lines_before_later_holds": true,
+  "lines_file_stages_and_values": true,
+  "lines_null_where_not_scored": true,
+  "order_from_records_equals_final": true,
+  "pass_dir": "E154's committed pass p15420, its holds renamed H_M->H_E, K_S->Z, K_Q->L1, K_L->S, K_O->L2",
+  "reading_order": [
+   "read H_E of S1:m11-from-e154",
+   "read Z of S1:m11-from-e154",
+   "stage 1 written: A2's lines",
+   "read L1 of S1:m11-from-e154",
+   "read S of S1:m11-from-e154",
+   "stage 2 written: A4's lines",
+   "read L2 of S1:m11-from-e154",
+   "stage 3 written: L2 read"
+  ],
+  "stage_lines": {
+   "A2": null,
+   "A4": null,
+   "why": [
+    "the pair spans under 6.0 C of P",
+    "the pair spans 1.717 C of P, under 3.0 C"
+   ]
+  }
+ },
+ "staged_reading_i8": {
+  "A2_line_null_and_not_scored": true,
+  "A2_why": [
+   "its pair was not run first (a reordering, A2-7)",
+   "its pair was not run first (a reordering, A2-7)"
+  ],
+  "A4_line_read_by_the_decision": true,
+  "A4_stage2_line_equals_the_decisions": true,
+  "decision_line": {
+   "a": -0.4058,
+   "g": 0.0725,
+   "span": 5.699,
+   "w": 0.9374
+  },
+  "decisions_equal_v1": true,
+  "holds_equal_v1": true,
+  "label": "post hoc: a registration or amendment commit does not precede a session's first launch record",
+  "lines_before_later_holds": true,
+  "order_from_records_equals_final": true,
+  "pass_dir": "E154's committed pass p15420, its holds renamed H_M->H_E, K_S->L1, K_Q->S, K_L->Z, K_O->L2",
+  "reading_order": [
+   "read H_E of S1:m11-from-e154-i8",
+   "read Z of S1:m11-from-e154-i8",
+   "stage 1 written: A2's lines",
+   "read L1 of S1:m11-from-e154-i8",
+   "read S of S1:m11-from-e154-i8",
+   "stage 2 written: A4's lines",
+   "read L2 of S1:m11-from-e154-i8",
+   "stage 3 written: L2 read"
+  ],
+  "stage2_line": {
+   "a_C": -0.40575346552026664,
+   "g": 0.07246885418494471
+  }
+ },
+ "v1_self_test": {
+  "committed_cells": {
+   "A2 (design-power-heat-a2.json plan|0.0884|mixed: HM-CAL B/NR/W, enters)": true,
+   "A3 (design-power-heat-a3.json premise_a3, section 0.1's case: HM-CAL BETTER, enters, REPEATS)": true,
+   "A4 (design-power-heat-a4.json, section 0.1's case: I8 BETTER, I8 enters, a per-session calibration)": true
+  },
+  "m10_holds": {
+   "R_within_0p001_C": 8,
+   "all_accepted": true,
+   "e_all_within_0p001_C": true,
+   "n": 9
+  },
+  "pass": true,
+  "problems": [],
+  "synthetic": {
+   "E154's line, then E166's (the premise holds)": true,
+   "E154's line, then E166's, H_E read by the chain (section 0.1's case)": true,
+   "H_E not scored in S1 (HM-CAL reads S2 only; HM-CAL-I8 reads both)": true,
+   "L2 not scored in both sessions": true,
+   "L2 run before S ended in both sessions": true,
+   "a common 0.27 C level in both sessions": true,
+   "a common 3.2% gain in both sessions": true,
+   "no effect (noise only)": true,
+   "one session (E154's line)": true,
+   "the pair run in the other order in both sessions": true,
+   "three holds scored in S1 (HM-LG counts S2 only)": true
+  }
+ }
+}
