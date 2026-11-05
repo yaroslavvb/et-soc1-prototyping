@@ -1,0 +1,10 @@
+RANK 4, paired-anchor card scale, pair E163/E164: PASS
+  floats: anchors fp32.anchor7_randn_a 0.9623, fp32.anchor7_randn_b 0.9614, fp16.anchor7_randn_a 0.9634, fp16.anchor7_randn_b 0.9633 -> s_anchor 0.9628 (mean 0.9626 +- 0.0016 from passes); s_pool 0.9621 [0.9603, 0.9651] over 28 tiles; offset +0.07% against +-1%: PASS
+     per tile about s_anchor 0.76% rms, about s_pool 0.75%; s_anchor vs M9/M8's 0.9616: +0.13%; vs M7/M6's 0.9711: -0.86%
+     E78 arm: 6 anchors, s_anchor 0.9628, offset +0.07%, within the line: True
+     fp32: anchors' median 0.9618 against its own 19 tiles' 0.9613 (+0.06%)
+     fp16: anchors' median 0.9634 against its own 9 tiles' 0.9657 (-0.24%)
+  int8: anchors int8.anchor7_full_a 0.9353, int8.anchor7_full_b 0.9382 -> s_anchor 0.9368 (mean 0.9368 +- 0.0041 from passes); s_pool 0.9418 [0.9367, 0.9467] over 24 tiles; offset -0.54% against +-2%: PASS
+     per tile about s_anchor 1.24% rms, about s_pool 1.14%; s_anchor vs M9/M8's 0.9616: -2.58%; vs M7/M6's 0.9735: -3.77%
+     E78 arm: 3 anchors, s_anchor 0.9382, offset -0.38%, within the line: True
+beside (not a verdict): {"int8_s_anchor_rel_se": 0.004325401321970168, "int8_s_pool_rel_se_from_interval": 0.0027048611961916127, "int8_difference_rel_se": 0.005101506707509498, "registered_forecast_rel_se": [0.0135, 0.0164], "critic_planning_estimate_rel_se": 0.0095}

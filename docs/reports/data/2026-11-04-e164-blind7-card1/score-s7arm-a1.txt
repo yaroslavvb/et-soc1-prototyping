@@ -1,0 +1,58 @@
+Q141(t) score_s7arm.py: the arm M9_27pt (M9's frozen prices on 27-point counts) beside M9 as frozen; reported only
+
+aifoundry3 (scored.json, scored form)
+  tile                                    D     se       P3      P27       k      u      r3     r27  in 2 sigma
+  fp32.b_onebit_b20_one              12.501  0.089   13.177   12.876  +0.301  0.142  -0.676  -0.375  no
+  fp32.b_onebit_b20_full             13.046  0.093   12.219   12.309  -0.090  0.127  +0.827  +0.737  no
+  fp32.b_onebit_b20_pi               12.655  0.114   12.093   12.404  -0.311  0.198  +0.563  +0.251  yes
+  fp32.b_onebit_b20_seventh          12.711  0.254   11.975   12.316  -0.341  0.240  +0.736  +0.395  yes
+  fp32.b_onebit_b22_third            13.250  0.146   12.914   13.434  -0.520  0.392  +0.336  -0.184  yes
+  fp16.b_onebit_b9_one               13.621  0.026   13.580   13.471  +0.109  0.202  +0.042  +0.151  yes
+  fp16.b_onebit_b8_pi                12.587  0.025   12.124   12.215  -0.091  0.169  +0.463  +0.371  no
+  fp32.b_onebit_b20_third_a1p5       13.062  0.088   13.217   12.828  +0.390  0.197  -0.156  +0.234  yes
+  S7 (n 7): rms r3 0.577 -> r27 0.396 W (d -0.181, 95% [-0.280, -0.091]); mean r3 +0.327 -> r27 +0.192 W (95% [-0.064, +0.438]); counting share +0.53; R4 NOT SEPARATED
+  R5 bit-20 base words: chi2 23.65 on 3 df, p 0.000 (r3: chi2 48.91, p 0.000); base-word price READ
+  R6 A = 1.5 vs pool 6's A = 1.0 (post hoc half): r27 +0.234 vs +0.064 W, d +0.170 +- 0.348; measured A1.5 - A1.0 +0.121, P27 -0.049, P3 -0.444 W
+
+aifoundry1c1 (scored.json, scored form)
+  tile                                    D     se       P3      P27       k      u      r3     r27  in 2 sigma
+  fp32.b_onebit_b20_one              12.059  0.075   12.671   12.382  +0.289  0.137  -0.612  -0.323  no
+  fp32.b_onebit_b20_full             12.436  0.060   11.750   11.836  -0.086  0.122  +0.687  +0.600  no
+  fp32.b_onebit_b20_pi               12.080  0.046   11.628   11.928  -0.299  0.190  +0.452  +0.153  yes
+  fp32.b_onebit_b20_seventh          12.206  0.045   11.515   11.843  -0.328  0.231  +0.691  +0.363  yes
+  fp32.b_onebit_b22_third            13.043  0.125   12.418   12.918  -0.500  0.377  +0.625  +0.126  yes
+  fp16.b_onebit_b9_one               12.911  0.032   13.058   12.954  +0.105  0.194  -0.148  -0.043  yes
+  fp16.b_onebit_b8_pi                12.009  0.098   11.658   11.746  -0.088  0.163  +0.351  +0.263  yes
+  fp32.b_onebit_b20_third_a1p5       12.615  0.074   12.710   12.335  +0.375  0.189  -0.095  +0.280  yes
+  S7 (n 7): rms r3 0.543 -> r27 0.318 W (d -0.225, 95% [-0.341, -0.123]); mean r3 +0.292 -> r27 +0.163 W (95% [-0.043, +0.358]); counting share +0.66; R4 NOT SEPARATED
+  R5 bit-20 base words: chi2 20.42 on 3 df, p 0.000 (r3: chi2 45.56, p 0.000); base-word price READ
+  R6 A = 1.5 vs pool 6's A = 1.0 (post hoc half): r27 +0.280 vs -0.251 W, d +0.531 +- 0.333; measured A1.5 - A1.0 +0.484, P27 -0.047, P3 -0.426 W
+
+pooled (tiles on both cards, n 7): rms r3 0.560 -> r27 0.359 W (d -0.201, 95% [-0.295, -0.113]); mean r27 +0.178 (95% [-0.050, +0.398]); counting share +0.59; R4 NOT SEPARATED
+
+Amendment A1 (REGISTRATION.md.dated-note-2.md): R5 above is gated by A1-1; R5m (A1-3), R5-3 and heat's R1 and R2 (A1-2) follow. Reported only.
+aifoundry3:
+  R5m (sigma widened by M9's fp32 band pool rms 0.2001 W): chi2 9.52 on 3 df, p 0.023 (r3: chi2 20.43, p 0.000); base-word price beyond M9's ordinary error READ
+  heat R1 (C): tile                                  dT     se     dT3    dT27    k_dT   u_dT      r3     r27  in 2 sigma
+               fp32.b_onebit_b20_one              2.000  0.000   1.797   1.761  +0.036  0.017  +0.203  +0.239  no
+               fp32.b_onebit_b20_full             1.767  0.233   1.683   1.694  -0.011  0.015  +0.084  +0.073  yes
+               fp32.b_onebit_b20_pi               1.933  0.044   1.668   1.705  -0.037  0.023  +0.265  +0.228  no
+               fp32.b_onebit_b20_seventh          2.000  0.000   1.654   1.695  -0.041  0.029  +0.346  +0.305  no
+               fp32.b_onebit_b22_third            2.000  0.000   1.766   1.827  -0.061  0.046  +0.234  +0.173  no
+               fp16.b_onebit_b9_one               2.000  0.000   1.843   1.830  +0.013  0.024  +0.157  +0.170  no
+               fp16.b_onebit_b8_pi                2.000  0.000   1.670   1.681  -0.011  0.020  +0.330  +0.319  no
+               fp32.b_onebit_b20_third_a1p5       1.933  0.067   1.802   1.756  +0.046  0.023  +0.131  +0.177  no
+  heat R2 (S7, n 7): rms r3 0.247 -> r27 0.229 C (d -0.018, 95% [-0.038, +0.006]); mean r3 +0.231 -> r27 +0.215 C (95% [+0.155, +0.271])
+aifoundry1c1:
+  R5m (sigma widened by M9's fp32 band pool rms 0.2112 W): chi2 6.80 on 3 df, p 0.079 (r3: chi2 16.24, p 0.001); base-word price beyond M9's ordinary error not read
+  heat R1 (C): tile                                  dT     se     dT3    dT27    k_dT   u_dT      r3     r27  in 2 sigma
+               fp32.b_onebit_b20_one              1.625  0.156   1.665   1.632  +0.033  0.016  -0.040  -0.007  yes
+               fp32.b_onebit_b20_full             1.912  0.072   1.559   1.569  -0.010  0.014  +0.353  +0.343  no
+               fp32.b_onebit_b20_pi               1.963  0.024   1.545   1.580  -0.035  0.022  +0.418  +0.383  no
+               fp32.b_onebit_b20_seventh          1.900  0.058   1.532   1.570  -0.038  0.027  +0.368  +0.330  no
+               fp32.b_onebit_b22_third            1.963  0.037   1.636   1.694  -0.058  0.043  +0.327  +0.269  no
+               fp16.b_onebit_b9_one               1.825  0.101   1.708   1.696  +0.012  0.022  +0.117  +0.129  yes
+               fp16.b_onebit_b8_pi                2.000  0.000   1.547   1.557  -0.010  0.019  +0.453  +0.443  no
+               fp32.b_onebit_b20_third_a1p5       2.000  0.000   1.670   1.627  +0.043  0.022  +0.330  +0.373  no
+  heat R2 (S7, n 7): rms r3 0.330 -> r27 0.307 C (d -0.023, 95% [-0.038, -0.009]); mean r3 +0.285 -> r27 +0.270 C (95% [+0.157, +0.367])
+pooled heat (tiles on both cards, n 7): rms r3 0.291 -> r27 0.271 C (d -0.021, 95% [-0.037, -0.003]); mean r27 +0.243 C (95% [+0.178, +0.308])
