@@ -1,0 +1,109 @@
+M11's heat registration (Q142(h)), dated amendment A3 (Q142(a2)'s fix pass): A2's power code faults fixed in a new file, A2's cells re-run on v2's committed draws, and the premise rows A3 adds (design only: no fit of any M11 term, no hold, no card)
+
+0. Checked first: tools/claims-v3/m11/SHA256SUMS-m11 6 of 6 OK; tools/claims-v3/m11/SHA256SUMS-a1 9 of 9 OK; tools/claims-v3/m11/SHA256SUMS-a2 7 of 7 OK
+   62d455a2663cbdc1d759062ae037fb291567853dd93e609292d4e4435e6a673e  docs/reports/data/2026-11-04-q142m-m10/heldout-m10.json  [OK]
+   f6c84268beb5fe9d46d631914e6fb5d48dfcf21680e0cc66df5b02784a646ea5  docs/reports/data/2026-11-04-q142m-m10/section7-m10.json  [OK]
+   57c1d93417367d8ba1d3f39a63e9b68b042a9635785e26f9a9fa772817932860  docs/reports/data/2026-11-02-q138t-heat-model/cv-q138t.json  [OK]
+   313c6840337615b2c474c39f74f095737bf7a35ecc6f9d8ac2356478f6442512  docs/reports/data/2026-11-02-q138t-heat-model/predict_e144.py  [OK]
+   9dbb288f896b7e588fbc155d67f32b1cb7089ffe4ede465c1380d2724d1fb49b  docs/reports/data/2026-11-02-q138t-heat-model/heat_q138t.py  [OK]
+   268b47fd580b330738eb3e1c83ea392f3784aae348a658e7335b734a1168e8fa  docs/reports/data/2026-11-02-q138t-heat-model/model-q138t.json  [OK]
+   b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5  docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json  [OK]
+   db79558c00a74bd10df385251ce957f698fd2784bb01994198d43e7ee606413c  tools/claims-v3/m10/pool8/design_power_groups.py  [OK]
+   ce2d32c046161f30afa794a2fa5e467c6c396fc272a59e7e193f92d7dae02e80  tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry2.json  [OK]
+   328d0c4269e64a1a06afa15843492dd37795efb774fb310438f6d424cf43053d  tools/claims-v3/kinds/blind8/sets-blind8.json  [OK]
+
+1. HM-HE's t point (REGISTRATION.md section 3: t at n_s - 3 degrees of freedom). The exact 97.5% points, design_power_heat_v2.t95: 1 df 12.70620, 2 df 4.30265, 3 df 3.18245, 4 df 2.77645, 5 df 2.57058; the committed table: 1 df 12.706, 2 df 4.303, 3 df 3.182, 4 df 2.776, 5 df 2.571. Every M11 session of five holds reads HM-HE at 2 df.
+   H_E in one aifoundry3 session at the exact plan (room 51.2 C), design-power-heat-v2's section 5' re-run on its committed draws: HM-E144 inside 1.5%; HM-HE departs at the committed (rounded) point and at the exact point (%)
+     none|delta +0.0 C                                              inside  98.9  departs   4.9 -> exact   4.9
+     none|delta +0.3 C                                              inside  18.1  departs  21.5 -> exact  21.5
+     none|delta +0.5 C                                              inside   0.0  departs  46.3 -> exact  46.3
+     gain 2.35% (M10's aifoundry3 gamma)|delta +0.0 C               inside   9.1  departs   5.4 -> exact   5.4
+     gain 2.35% (M10's aifoundry3 gamma)|delta +0.3 C               inside   0.0  departs  23.3 -> exact  23.3
+     gain 2.35% (M10's aifoundry3 gamma)|delta +0.5 C               inside   0.0  departs  46.5 -> exact  46.5
+     gain 3.20% (the x1.032 arm)|delta +0.0 C                       inside   0.2  departs   5.2 -> exact   5.2
+     gain 3.20% (the x1.032 arm)|delta +0.3 C                       inside   0.0  departs  21.9 -> exact  21.9
+     gain 3.20% (the x1.032 arm)|delta +0.5 C                       inside   0.0  departs  45.7 -> exact  45.7
+     gain 4.52% (M10's aifoundry2 gamma)|delta +0.0 C               inside   0.0  departs   4.6 -> exact   4.6
+     gain 4.52% (M10's aifoundry2 gamma)|delta +0.3 C               inside   0.0  departs  22.8 -> exact  22.8
+     gain 4.52% (M10's aifoundry2 gamma)|delta +0.5 C               inside   0.0  departs  44.8 -> exact  44.8
+     level 0.15 C|delta +0.0 C                                      inside  78.1  departs   5.3 -> exact   5.3
+     level 0.15 C|delta +0.3 C                                      inside   0.5  departs  22.9 -> exact  23.0   <- changes
+     level 0.15 C|delta +0.5 C                                      inside   0.0  departs  46.2 -> exact  46.2
+     level 0.27 C (E154's and E166's level alone)|delta +0.0 C      inside  29.1  departs   5.6 -> exact   5.6
+     level 0.27 C (E154's and E166's level alone)|delta +0.3 C      inside   0.0  departs  22.7 -> exact  22.7
+     level 0.27 C (E154's and E166's level alone)|delta +0.5 C      inside   0.0  departs  46.4 -> exact  46.4
+     level 0.40 C (E166's two-term a)|delta +0.0 C                  inside   2.3  departs   5.3 -> exact   5.3
+     level 0.40 C (E166's two-term a)|delta +0.3 C                  inside   0.0  departs  22.2 -> exact  22.2
+     level 0.40 C (E166's two-term a)|delta +0.5 C                  inside   0.0  departs  44.9 -> exact  44.9
+
+2. The pair by hold name (A3-6). Synthetic sessions on the plan's first session (P 14.517, 0.695, 9.670, 3.459, 8.354 C), every miss on E154's two-term line e = -0.229 C + 5.72% of P (no noise); design_power_heat_a2.session_cal on the scored holds in run order, against cal_by_name
+     every hold scored                                session_cal: reads pair H_E+Z (span 13.82 C), 3 later holds | by name: reads pair H_E+Z, 3 later holds
+     H_E not scored                                   session_cal: reads pair Z+L1 (span 8.97 C), 2 later holds | by name: NOT SCORED (its pair hold H_E is not scored)
+     Z not scored                                     session_cal: NOT SCORED | by name: NOT SCORED (its pair hold Z is not scored)
+     S not scored                                     session_cal: reads pair H_E+Z (span 13.82 C), 2 later holds | by name: reads pair H_E+Z, 2 later holds
+     L1 and S not scored                              session_cal: NOT SCORED | by name: NOT SCORED (1 later hold(s) scored, fewer than 2)
+     the pair run in the other order (Z, then H_E)    session_cal: reads pair Z+H_E (span 13.82 C), 3 later holds | by name: NOT SCORED (its pair was not run first (a reordering, A2-7))
+
+3. Every cell of design-power-heat-a2.json re-run on v2's committed draws (5000 a cell), with design_power_heat_a2's own functions: the cell as A2's code computes it must equal the committed cell; beside it, N2 at the exact t point and what follows from it (the calibration's entry, BETTER with no clause met)
+   74 of 74 cells equal the committed design-power-heat-a2.json cell for cell (as A2's code computes them)
+   the pair by name against session_cal, every session of every draw: 780000 sessions, 0 differ
+   at the exact t point, the cells whose figures change (1):
+     sessions|A3 x1 (one aifoundry3 session, room 51.2 C)|gain 3.20% (the x1.032 arm): N2 4.7 -> 4.8
+   A2-6's adoption rule at the exact t point: {"(i)": 0.7, "(ii)": {"both: E154's two-term fit (-0.229 C + 5.72%)": 97.8, "both: E166's two-term fit (+0.395 C - 1.43%)": 99.1, "mixed: E154's fit, then E166's": 98.2}, "(iii)": 97.1, "(iv)": 0.7}; ADOPTED (committed: {"(i)": 0.7, "(ii)": {"both: E154's two-term fit (-0.229 C + 5.72%)": 97.8, "both: E166's two-term fit (+0.395 C - 1.43%)": 99.1, "mixed: E154's fit, then E166's": 98.2}, "(iii)": 97.1, "(iv)": 0.7})
+
+4. A1-4's path on the plan, E154's fit then E166's: the row 'BOTH, and HM-AG's BOTH form says they differ' against 'the sessions differ' over every HM-LG verdict (%), the path's own draws
+   simulated sigma 0.0884 C: BOTH and they differ 98.4; the sessions differ, any verdict 98.5 (design-power-heat-v2.json's path: 98.5)
+   simulated sigma 0.1325 C: BOTH and they differ 73.4; the sessions differ, any verdict 74.3 (design-power-heat-v2.json's path: 74.3)
+
+5. HM-E144 beside HM-CAL at the plan (two aifoundry3 sessions, the committed draws): REPEATS = |e(H_E)| / R(H_E) <= 1.5% in every session; jointly with HM-CAL's verdict and the calibration's entry (exact t); and what it would do as a third not-wanted clause N3 (reported only)
+   simulated sigma 0.0884 C:
+     none                           REPEATS  94.0 | with BETTER   0.6  NOT RESOLVED  70.0  WORSE  23.4 | REPEATS and enters   0.6 of enters   0.7 | as N3: enters   0.1, BETTER no clause   0.1
+     gain 2.35%                     REPEATS   1.2 | with BETTER   1.0  NOT RESOLVED   0.2  WORSE   0.0 | REPEATS and enters   0.8 of enters  26.2 | as N3: enters  25.4, BETTER no clause  87.8
+     gain 3.20%                     REPEATS   0.0 | with BETTER   0.0  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.0 of enters  11.7 | as N3: enters  11.7, BETTER no clause  97.6
+     gain 4.52%                     REPEATS   0.0 | with BETTER   0.0  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.0 of enters   7.0 | as N3: enters   7.0, BETTER no clause  99.7
+     level 0.15 C                   REPEATS  50.2 | with BETTER  40.9  NOT RESOLVED   9.0  WORSE   0.3 | REPEATS and enters  18.6 of enters  36.8 | as N3: enters  18.1, BETTER no clause  35.1
+     level 0.27 C                   REPEATS   4.1 | with BETTER   4.1  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.3 of enters  11.4 | as N3: enters  11.1, BETTER no clause  94.7
+     level 0.40 C                   REPEATS   0.1 | with BETTER   0.1  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.0 of enters   6.3 | as N3: enters   6.3, BETTER no clause  99.6
+     both: E154's two-term fit      REPEATS   0.0 | with BETTER   0.0  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.0 of enters   5.2 | as N3: enters   5.2, BETTER no clause  97.8
+     both: E166's two-term fit      REPEATS  20.1 | with BETTER  20.1  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.7 of enters   6.3 | as N3: enters   5.6, BETTER no clause  79.1
+     mixed: E154's fit, then E166's REPEATS   0.0 | with BETTER   0.0  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.0 of enters  97.1 | as N3: enters  97.1, BETTER no clause  98.2
+   simulated sigma 0.1325 C:
+     none                           REPEATS  73.4 | with BETTER   2.3  NOT RESOLVED  45.7  WORSE  25.4 | REPEATS and enters   2.1 of enters   2.9 | as N3: enters   0.8, BETTER no clause   0.8
+     gain 2.35%                     REPEATS   4.4 | with BETTER   2.5  NOT RESOLVED   1.7  WORSE   0.2 | REPEATS and enters   2.3 of enters  37.3 | as N3: enters  35.0, BETTER no clause  61.8
+     gain 3.20%                     REPEATS   0.3 | with BETTER   0.2  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.2 of enters  32.5 | as N3: enters  32.3, BETTER no clause  84.9
+     gain 4.52%                     REPEATS   0.0 | with BETTER   0.0  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.0 of enters  14.1 | as N3: enters  14.1, BETTER no clause  96.4
+     level 0.15 C                   REPEATS  40.0 | with BETTER  20.7  NOT RESOLVED  16.9  WORSE   2.4 | REPEATS and enters  12.6 of enters  33.6 | as N3: enters  21.0, BETTER no clause  28.5
+     level 0.27 C                   REPEATS   9.2 | with BETTER   8.8  NOT RESOLVED   0.4  WORSE   0.0 | REPEATS and enters   2.8 of enters  34.2 | as N3: enters  31.4, BETTER no clause  81.2
+     level 0.40 C                   REPEATS   0.5 | with BETTER   0.5  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.0 of enters  12.7 | as N3: enters  12.7, BETTER no clause  97.6
+     both: E154's two-term fit      REPEATS   0.0 | with BETTER   0.0  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.0 of enters   5.9 | as N3: enters   5.9, BETTER no clause  84.2
+     both: E166's two-term fit      REPEATS  20.6 | with BETTER  20.2  NOT RESOLVED   0.3  WORSE   0.1 | REPEATS and enters   1.7 of enters  11.9 | as N3: enters  10.2, BETTER no clause  72.5
+     mixed: E154's fit, then E166's REPEATS   0.1 | with BETTER   0.1  NOT RESOLVED   0.0  WORSE   0.0 | REPEATS and enters   0.1 of enters  75.3 | as N3: enters  75.2, BETTER no clause  88.3
+   A2-6's (ii)-(iv) if N3 were a clause (sigma_c): {"(ii)": {"both: E154's two-term fit (-0.229 C + 5.72%)": 97.8, "both: E166's two-term fit (+0.395 C - 1.43%)": 79.1, "mixed: E154's fit, then E166's": 98.2}, "(iii)": 97.1, "(iv)": 0.1}
+
+6. The premise rows A3 adds (the plan, sigma_c, each added after the draw to v2's committed draws for the truth named): H_E read by the chain as E144's H_H was (e(H_E) = its noise only: minus the truth's a + g P(H_E) in each session), H_E-specific misses of -0.3 and -0.5 C, and the fp32 pair (H_E and Z) offset by +0.15 and -0.15 C against the int8 later holds. Per row: HM-CAL BETTER / NOT RESOLVED / WORSE; N1; N2 (exact t); HM-E144 REPEATS; the calibration enters and A1-4's common term (exact t); the pooled rms over the later holds, median [5%, 95%], and when the calibration enters (calibrated, and unscaled in those draws)
+     none, H_E read by the chain (e(H_E) = noise only) HM-CAL   0.7 /  72.2 /  27.1 | N1 34.7  N2  0.3  E144 rep  94.0 | enters   0.7  A1-4 common   0.6 | rms: unscaled 0.083  calibrated 0.104 [0.056, 0.166]  when it enters 0.058 (unscaled 0.109)
+     gain 2.35%, H_E read by the chain (e(H_E) = noise only) HM-CAL  15.3 /  66.2 /  18.5 | N1 29.5  N2  6.9  E144 rep  94.4 | enters  13.6  A1-4 common   1.3 | rms: unscaled 0.198  calibrated 0.200 [0.120, 0.284]  when it enters 0.152 (unscaled 0.205)
+     gain 3.20%, H_E read by the chain (e(H_E) = noise only) HM-CAL  20.1 /  62.5 /  17.4 | N1 29.8  N2 15.5  E144 rep  94.2 | enters  17.8  A1-4 common   0.2 | rms: unscaled 0.259  calibrated 0.256 [0.169, 0.344]  when it enters 0.202 (unscaled 0.260)
+     gain 4.52%, H_E read by the chain (e(H_E) = noise only) HM-CAL  25.7 /  60.5 /  13.8 | N1 26.1  N2 39.0  E144 rep  94.3 | enters  18.5  A1-4 common   0.0 | rms: unscaled 0.356  calibrated 0.347 [0.259, 0.436]  when it enters 0.291 (unscaled 0.353)
+     level 0.15 C, H_E read by the chain (e(H_E) = noise only) HM-CAL  49.9 /  47.4 /   2.7 | N1  8.3  N2  1.3  E144 rep  94.0 | enters  17.1  A1-4 common  40.7 | rms: unscaled 0.170  calibrated 0.132 [0.071, 0.210]  when it enters 0.124 (unscaled 0.181)
+     level 0.27 C, H_E read by the chain (e(H_E) = noise only) HM-CAL  93.2 /   6.7 /   0.1 | N1  1.3  N2  4.7  E144 rep  94.1 | enters  10.1  A1-4 common  84.8 | rms: unscaled 0.282  calibrated 0.184 [0.105, 0.267]  when it enters 0.226 (unscaled 0.291)
+     level 0.40 C, H_E read by the chain (e(H_E) = noise only) HM-CAL  99.6 /   0.4 /   0.0 | N1  0.3  N2 13.4  E144 rep  93.6 | enters   2.2  A1-4 common  97.0 | rms: unscaled 0.402  calibrated 0.245 [0.161, 0.337]  when it enters 0.338 (unscaled 0.420)
+     both: E154's two-term fit, H_E read by the chain (e(H_E) = noise only) HM-CAL   1.1 /  30.6 /  68.3 | N1 77.0  N2 27.9  E144 rep  94.2 | enters   0.8  A1-4 common   1.1 | rms: unscaled 0.252  calibrated 0.309 [0.222, 0.396]  when it enters 0.222 (unscaled 0.270)
+     both: E166's two-term fit, H_E read by the chain (e(H_E) = noise only) HM-CAL  99.5 /   0.5 /   0.0 | N1  0.2  N2  2.8  E144 rep  93.9 | enters   1.3  A1-4 common  98.5 | rms: unscaled 0.305  calibrated 0.157 [0.086, 0.240]  when it enters 0.091 (unscaled 0.294)
+     mixed: E154's fit, then E166's, H_E read by the chain (e(H_E) = noise only) HM-CAL  37.1 /  53.1 /   9.9 | N1 60.0  N2 11.5  E144 rep  94.1 | enters  21.6  A1-4 common   6.2 | rms: unscaled 0.278  calibrated 0.256 [0.174, 0.344]  when it enters 0.212 (unscaled 0.282)
+     none, H_E -0.30 C                              HM-CAL   0.2 /   6.3 /  93.5 | N1 95.9  N2  6.2  E144 rep   1.2 | enters   0.0  A1-4 common   6.5 | rms: unscaled 0.083  calibrated 0.199 [0.118, 0.283]  when it enters 0.088 (unscaled 0.126)
+     none, H_E -0.50 C                              HM-CAL   0.0 /   0.2 /  99.8 | N1 99.9  N2 26.8  E144 rep   0.0 | enters   0.0  A1-4 common   4.9 | rms: unscaled 0.083  calibrated 0.303 [0.215, 0.391]
+     none, fp32 pair +0.15 C (H_E and Z)            HM-CAL   0.4 /  11.0 /  88.6 | N1 92.0  N2  1.4  E144 rep  50.4 | enters   0.3  A1-4 common   0.7 | rms: unscaled 0.083  calibrated 0.179 [0.101, 0.266]  when it enters 0.064 (unscaled 0.114)
+     none, fp32 pair -0.15 C (H_E and Z)            HM-CAL   0.4 /  11.7 /  87.9 | N1 91.5  N2  1.3  E144 rep  47.7 | enters   0.3  A1-4 common   0.5 | rms: unscaled 0.083  calibrated 0.179 [0.101, 0.263]  when it enters 0.067 (unscaled 0.106)
+     gain 3.20%, H_E -0.30 C                        HM-CAL  72.6 /  26.5 /   0.8 | N1  5.2  N2  6.0  E144 rep  65.1 | enters  64.8  A1-4 common   4.4 | rms: unscaled 0.259  calibrated 0.199 [0.118, 0.284]  when it enters 0.186 (unscaled 0.261)
+     gain 3.20%, H_E -0.50 C                        HM-CAL   2.3 /  39.6 /  58.1 | N1 70.4  N2 25.2  E144 rep  68.7 | enters   2.0  A1-4 common   0.1 | rms: unscaled 0.259  calibrated 0.303 [0.215, 0.393]  when it enters 0.212 (unscaled 0.257)
+     gain 3.20%, fp32 pair +0.15 C (H_E and Z)      HM-CAL  72.5 /  20.9 /   6.6 | N1 20.2  N2  0.9  E144 rep   0.0 | enters  13.4  A1-4 common  65.5 | rms: unscaled 0.259  calibrated 0.177 [0.102, 0.265]  when it enters 0.183 (unscaled 0.267)
+     gain 3.20%, fp32 pair -0.15 C (H_E and Z)      HM-CAL  83.4 /  16.3 /   0.4 | N1  3.1  N2  1.1  E144 rep   4.4 | enters  20.8  A1-4 common  66.7 | rms: unscaled 0.259  calibrated 0.181 [0.098, 0.266]  when it enters 0.205 (unscaled 0.277)
+     mixed: E154's fit, then E166's, H_E -0.30 C    HM-CAL  85.5 /  14.0 /   0.5 | N1  2.8  N2  7.3  E144 rep  15.4 | enters  70.1  A1-4 common  11.5 | rms: unscaled 0.278  calibrated 0.198 [0.118, 0.285]  when it enters 0.182 (unscaled 0.277)
+     mixed: E154's fit, then E166's, H_E -0.50 C    HM-CAL   8.9 /  51.0 /  40.1 | N1 53.9  N2 26.6  E144 rep  11.0 | enters   6.3  A1-4 common   4.0 | rms: unscaled 0.278  calibrated 0.303 [0.214, 0.394]  when it enters 0.228 (unscaled 0.281)
+     mixed: E154's fit, then E166's, fp32 pair +0.15 C (H_E and Z) HM-CAL  80.1 /  16.0 /   3.9 | N1 15.8  N2  1.3  E144 rep   0.0 | enters  72.8  A1-4 common   8.6 | rms: unscaled 0.278  calibrated 0.179 [0.099, 0.266]  when it enters 0.162 (unscaled 0.288)
+     mixed: E154's fit, then E166's, fp32 pair -0.15 C (H_E and Z) HM-CAL  92.8 /   7.1 /   0.1 | N1  3.1  N2  1.5  E144 rep   0.4 | enters  77.3  A1-4 common  16.5 | rms: unscaled 0.278  calibrated 0.178 [0.101, 0.265]  when it enters 0.166 (unscaled 0.276)
+
+Checks: noise as committed (A2): yes; truth labels as committed (v1): yes; the plan's P equals design-power-heat-a2.json's plan_P_C: yes; v2's one-session H_E readings re-run at the committed point equal design-power-heat-v2.json's he: yes; the pair by name reads each synthetic session as A2-1 says: yes; every cell of design-power-heat-a2.json re-run with A2's functions equals the committed cell: yes; the pair by name equals session_cal on every simulated session (every hold scored): yes; 'the sessions differ' over every verdict equals design-power-heat-v2.json's path: yes
+
+wrote tools/claims-v3/m11/design-power-heat-a3.json
