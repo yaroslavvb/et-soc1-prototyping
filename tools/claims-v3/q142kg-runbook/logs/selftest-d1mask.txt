@@ -1,0 +1,16 @@
+# selftest_d1mask_q142kg.sh: Thu 05 Nov 2026 14:39:01 PST, on the Intel, at the desk; the replay's source is docs/reports/data/2026-11-05-e173-blind8-aifoundry2 as committed at 571d0482
+# the committed logs/cclist.txt: sha256 5273aabd1fd83a972d1de81d7e6cbb1cc3a34cf506a884fef75acd3ddb381e35
+P1 PASS: rc 0 (want 0); E173's D1 replayed: the masked list equals the committed logs/cclist.txt byte for byte, the bytes as collected kept under RB_OUT, of 425 files only logs/cclist.txt changed, the C-log gate 3 of 3 finished, the desk-path gate 425 files CLEAN
+R1 PASS: rc 16 (want 16); a desk path in logs/queue.out as well: stopped before the mask, logs/cclist.txt as collected, no copy kept
+R2 PASS: rc 16 (want 16); RB_OUT on a line that is not a REQUIRED line: stopped, nothing changed
+R3 PASS: rc 10 (want 10); a clean data dir: refused, nothing changed
+R4 PASS: rc 10 (want 10); the step's last stop is exit 14, not the desk-path gate's: refused, nothing changed
+R5 PASS: rc 16 (want 16); a REQUIRED path under the lab clone, not RB_OUT: stopped, nothing changed
+R6 PASS: rc 14 (want 14); a listed check of C missing after the mask: the C-log gate stops (14) and logs/cclist.txt is put back as collected
+R7 PASS: rc 10 (want 10); RB_OUT not set: refused, nothing changed
+R8 PASS: rc 10 (want 10); RB_DRY=1: refused, nothing changed
+R9 PASS: rc 10 (want 10); the data dir committed: refused (a correction is a dated note), nothing changed
+R10 PASS: rc 10 (want 10); a later line of the same collect step after its stop: refused, nothing changed
+U1 PASS: rc 16 (want 16); two files changed: compare stops
+U2 PASS: rc 0 (want 0); E173's collect step's probe line, 12:17:15 PST, reads 1793909835, the --since D1's re-gate used
+SUMMARY: 13 of 13 PASS; stand-in ssh and rsync calls: 0
