@@ -11,6 +11,7 @@ E136–E140 and Q137(m) use the same list as the page carried it at `9fdb534bbc7
 E141–E150 and Q138's desk lanes use the same list as the page carried it at `724c17d3dc0b`.
 E151–E162 and Q139's desk lanes use the same list as the page carried it at `8ec9ead107aa`; Q139(c)'s corrections of the page in place (`2ed9794277c1`, `c09062203aa2`) kept its numbering, and "rank N" in them is Q138's final critic's open list.
 Q140's desk lanes use the same list as the page carried it at `d571349e663f`; Q140(c)'s corrections of the page in place (`e75e1842ac8a`, `6450a8475420`, `a312a21d2ffb`) kept its numbering, and "rank N" in them is Q139's final critic's open list.
+Q141's lanes (E163–E169's registrations and kits, Q141(t)'s recount) use the same list, its numbering unchanged through `aca479a329ac` and Q141(v)'s `208b31c7674f`, which changed only the charts' layout; "rank N", `card_half` and `desk_next` in them are Q140's final critic's.
 
 **Dated note, Tue 3 Nov 2026 (week 45):** the day's first card post, `1567153765390487573`, cited in E151, E152, E155, E156, E158,
 E159 and E160 and their data READMEs, has gone from #community-lab, deleted by someone else (not by the Intel's cleanup, which
@@ -7466,7 +7467,7 @@ verification `3c9bb2ba` at 04:18:24, inserted lines only): pool 7 copied unchang
 `make_blind7.py --check` 0 problems), counted with the bench at its default three launch points (check_mismatch 0 at all 183
 points), and M9's, M8's, M7's and M6's predictions computed mechanically for its 61 tiles on aifoundry3, aifoundry1's card 1 and
 aifoundry2 (M8, M7 and M6 equal to Q139(m)'s `predict_blind6.py`, 13,810 fields, 0 differ; an independent recompute agrees to the
-files' rounding); aifoundry2's M9 is Q140(l)'s committed part, frozen with no session read; the 82 W stop leaves out 6 of 61 dense
+files' rounding); aifoundry2's M9 is Q140(l)'s committed part, frozen with no session read *(dated, Wed 4 Nov 2026, after Q140's final critic, Q141(r): so all 61 of its frozen aifoundry2 predictions assume a die start of 54.38 °C and the fallback zeros offset, and `README-predictions.md`'s recompute command passes one `--a2-die-start` to every tile; E165's registration, `3ef06839`, scores M9.a2_q140l recomputed per tile through `predict_m9_a2.burst` from the session's zeros anchors and each tile's measured die starts, the frozen file beside it, with a dated note beside `README-predictions.md`)*; the 82 W stop leaves out 6 of 61 dense
 fp32 tiles there, keeping priority-1 coverage S 7/7, E 6/6, L 7/7, H 6/6, U 10/12 and R 9/10; rank 4's rule registered
 ([`RANK4-RULE.md`](../../tools/claims-v3/kinds/blind7/RANK4-RULE.md)): a card's scale is the median of its random anchors' ratios
 to aifoundry3's, within 1% (floats) and 2% (int8) of the pool's median ratio in each session pair, its scorer reproducing Q140(c)'s
@@ -7509,7 +7510,55 @@ one shape int8 zeros, one real W8A8 tile pair cycled and int8 sparse50, warm), p
 loads hash-pinned (18 files). The block-stride term from the L3's public set mapping FAILS as registered (13.0% rms over 69
 committed cells against ISO's 7.3%, partly in sample, and STRICT's 12.6%; 14.0% against 10.0% on E146's 27 cells); post hoc its
 step at a power-of-two stride is closer to the card's than ISO's in 5 of 6 pairs, so the 8 MB index stays a candidate cause, which
-E169's six frozen shapes (three at power-of-two strides, peaks at most 46.9 W) test.
+E169's six frozen shapes (three at power-of-two strides, peaks at most 46.9 W) test *(dated, Wed 4 Nov 2026, after Q140's final critic, Q141(r): testing the index needs a step rule, which Q140 did not register; E169 reads the 8 MB index's step by a registered step rule, A2 (E169), `217c94a2` with its note 2 `5c9a62f1`)*.
+
+**Q141's lanes, beside the register** (Wed 4 Nov 2026, from about 08:58 PST; desk only: no card, no device command, no ssh to a
+lab box, no Discord, no Modal, no archive; each lane in its own new files, each registration committed before any data of its run
+and first in its directory, every commit descending from all 14 of Q140's frozen commits; each lane read by a separate verifier,
+holding with fixes, and corrected in new files before any data; E163–E169 get their entries above when their runs are recorded).
+**E163**, blind pool 7 on aifoundry3's card 0 at 600 MHz pinned, ported from E153's kit
+([`tools/claims-v3/e163/`](../../tools/claims-v3/e163/E163.md): `64dff136` 09:33:22 PST, E163.md alone; `442474d5` 09:38:32, the
+freeze; `1c47ce62` 09:52:17, the kit; `f13e0b39` 10:49:52, amendment A1): M9 primary with M8, M7 and M6 beside, rank 1's rules as
+E163-RANK1, and rank 14's C-checked re-runs in pass (K14/K14') and in a block of E151's trains (KE/KE'); its scorer reproduces
+E153's registered verdicts on E153's data (9,853 fields, 0 differ), its dry pass on the Intel passes, and its command audit is GO
+at 32 send sites; FULL plans three kinds passes and scores from two, about 56–59 card-minutes of a 70-minute cap; stops 65 W / 70
+°C (E151's block 45 W / 68 °C). **E164**, pool 7 on aifoundry1's card 1, from E157's kit
+([`tools/claims-v3/e164/`](../../tools/claims-v3/e164/E164.md): `4286f0a8` 09:18:57, `f4e75c95` 09:41:51, `ce10e301` 10:05:44,
+`45aeda12` 11:41:49, amendment E164-A1 with `box/launch_e164_a1.sh` and `collect_e164_a1.sh`): E164-RANK1, the card term (X1/X2),
+rank 4's pair (RK4), rank 7's repeat tiles (K7*) and PCa; four 96-run passes, about 57.6 card-minutes of 65; stops 66 W / 72 °C.
+**E165**, pool 7 in aifoundry2's governed 6 s bursts, zeros anchors first, from E160's kit
+([`tools/claims-v3/e165/`](../../tools/claims-v3/e165/E165.md): `3ef06839` 09:36:11, `a5c56d17` 09:37:49, `e3c4eafc` 09:43:55,
+`fe6f4862` 10:43:24, `a509ff8b` 10:54:04, amendment A2): rank 2 on M9's aifoundry2 part recomputed per tile; its scorer is
+self-tested on E160's committed session, and its domain screen finds all 57 admitted tiles inside; about 36 card-minutes of 40;
+stops above 85 W on three live samples, 76 °C and the 82 W admission. **E166** and **E167**, the heat replicates on aifoundry3 and
+under aifoundry2's governor, from E154's and E161's kits ([`tools/claims-v3/e166/`](../../tools/claims-v3/e166/E166.md),
+[`tools/claims-v3/e167/`](../../tools/claims-v3/e167/E167.md): `2b450e66` 09:16:36, `7ba987b3` 09:16:50, `f830b9e2` 09:31:08,
+`c75bc460` 09:41:09, `4f4e7620` 09:59:53, `48994187` 11:24:19, amendment X2, and `ae39563c` 11:24:33, dated note 2): Q140(e)'s
+frozen predictions scored by R5, G0, X1 and SL on aifoundry3 (about 74.4 card-minutes of 76, no subset) and by E161's design, G1,
+E2 and X2 on aifoundry2 (35–39 of 40, about 66–75 minutes of wall time); E166's scorer reproduces E154's registered verdicts and
+E167's E161's. **E168**, G4's nine sustained holds and A2 (E168)'s cold int8 zeros hold on aifoundry2, from E159's kit
+([`tools/claims-v3/e168/`](../../tools/claims-v3/e168/README.md): `226249e1` 09:18:35, `a0310012` 09:38:43, `d86cafa6` 09:40:30,
+`983e9499` 10:31:55): A7 and A2's start-dependence test; about 42 card-minutes, a cap of 58 that binds in flight, at most 63 in
+all; stops above 85 W on three samples, 76 °C and 82 W. **E169**, the stride shapes on aifoundry2, from E158's harness
+([`tools/claims-v3/e169/`](../../tools/claims-v3/e169/REGISTRATION-A2.md): `217c94a2` 09:22:23, A2 (E169), the step rule;
+`18aaca80` 09:33:28, the scorer; `6a3929ec` 09:46:17, the kit; `2bf8f092` 09:47:26 and `5c9a62f1` 10:44:17, its dated notes): the
+step at P1/N1 and P3/N3 against SM, ISO and STRICT, B7 kept; about 11–16 card-minutes of 20; stops above 60 W on three samples, 76
+°C and 82 W. Every kit's device commands are READ under its parent's command policy, and none sends the statistics reset.
+**Q141(t)**, pool 7's single high bits recounted at 27 launch points, a reported arm for E163 and E164
+([`2026-11-04-q141t-s7-recount/`](../reports/data/2026-11-04-q141t-s7-recount/README.md): registered `0830f65b` 09:11:50; the arm
+M9_27pt frozen `67d5e44f` 10:07:40; the convergence rule's 81-point step `9c7ae1f2` 11:23:07; amendment A1 and dated notes
+`c31e7ae3` 12:16:56, before any pool-7 data): k = P3 − P27 runs −0.52 to +0.30 W, so the 27-point counts move D by −0.30 to +0.52
+W (−0.39 W on the bit-20 tile on a 1/3 base word); at 81 points 2 of the 10 calibration tiles above the bound at 27 meet it
+(e(27)/e(81)'s median 1.75), and N* is not yet determined; its bench ran four jobs on the Intel. **Q141(v)**, the kinds page's
+charts in a phone layout (A25's dated note in [04-artifacts.md](04-artifacts.md)). **Q141(f)**, the readiness critic (about
+12:20–13:10 PST), re-derived the hashes, the ancestry, six scorer self-tests, two dry passes and every kit's audit, and found
+**all seven runs ready**, with nine minor faults or nits in the go checklist and these records, none blocking a blind score, and
+the plan's last release about 3.5–4 h after the owner's go, not 3–3.5 h
+([`2026-11-04-q141f-readiness/`](../reports/data/2026-11-04-q141f-readiness/README.md)). **Q141(k)**, the card day's bounded
+runbook ([`tools/claims-v3/q141k-runbook/`](../../tools/claims-v3/q141k-runbook/README.md)): v1 `e962227a` (14:08:36), which the
+card half runs, and v2 `16771f36` (15:34:42), its verifier's five faults and four nits fixed beside it. **The card half started at
+14:11 PST** on the owner's go of about 13:55 PST (the day's one post, `1567662592850399304`), with E170 on aifoundry1's card 0
+registered and kitted beside it by Q141(w) (`b5ca3e78`, `574dc5b5`, `57e1c6c4`); its entries follow.
 
 **Lane lessons from E78–E83, recorded for the next registration.** (1) A heat column read from a 2 s window over a
 whole-degree die reading resolves a kind only above about 12 W of switching on these cards: register a longer window,

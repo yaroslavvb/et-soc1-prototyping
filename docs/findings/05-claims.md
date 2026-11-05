@@ -3039,7 +3039,7 @@ The owner's mandate is still his words of Mon 2 Nov 2026 about 18:40 PST (Q138),
 of numeric work as accurately as possible; his last words are Q139's, of Tue 3 Nov about 15:47 PST, *"approved both aifoundry and
 [removed: the private archive's host], continue"*, and he has not spoken since (Q140). The targets are Q139's final critic's open
 list (ranks 1–17) and its faults (0–11), against the [kinds page](https://spacesheep.dev/@yaroslavvb/horace-kinds-of-numbers#11-what-is-still-open)'s
-section 11 as at `d571349e663f`. This night ran the desk half only, to freeze what the card half needs (E163–E169, which wait on
+section 11 as at `d571349e663f`. This night ran the desk half only, to freeze what the card half needs *(dated, Wed 4 Nov 2026, after Q140's final critic, Q141(r): it froze the predictions and rules; the registrations, scorers and kits are Q141's, the section after this one)* (E163–E169, which wait on
 his word on timing and on fresh lab approvals): no lane claimed a card, sent a device command, opened an ssh to a lab box,
 read or wrote Discord, started a Modal app or read the archive, so **no row below is a new measurement or a blind score**. Each lane
 that fits or predicts registered its candidate terms, folds and rules and pushed them before any fit, score or prediction; Q140(c)'s
@@ -3060,7 +3060,7 @@ verifier: that doubling holds for the jackknife prices, which rest on 66–370 k
 standard error rests on a few passes: card 1's three passes of E78's int8 anchor carry almost all of int8's (2.14 degrees of
 freedom), and pool 6's anchor errors are assumed equal to E78's, not measured. With t quantiles, as the lab's pass intervals take
 them, int8's scale is ±4.1–6.1% at 95%, not about ±3%, and the floats' ±0.23–0.26%
-([`2026-11-04-q140-anchor-scale-t95/`](../reports/data/2026-11-04-q140-anchor-scale-t95/README.md)).)* Pool 7 is described by counts and
+([`2026-11-04-q140-anchor-scale-t95/`](../reports/data/2026-11-04-q140-anchor-scale-t95/README.md)).)* *(Dated a third time, Wed 4 Nov 2026, after Q140's final critic, Q141(r): pool 6's random anchors have committed passes of their own, one run a pass, in E153's and E157's runs; with each anchor's own passes, on both cards, int8's scale is ±3.7% at 95% at 3.06 Welch degrees of freedom and the floats' ±0.24% at 7.36, so ±4.1–6.1% is too wide; the points, −1.04% and −0.15%, do not move ([the README's dated note](../reports/data/2026-11-04-q140-anchor-scale-t95/README.md.dated-note.md)).)* Pool 7 is described by counts and
 classes only, until its runs. 🛑 **To carry from here, beside the earlier sections' items:** (37) **no Q140 figure is a blind
 score:** M9, G4, the heat replicates and rank 4's rule are frozen, and E163–E169 score them; (38) **quote Q140(l)'s and Q140(q)'s
 held-out errors with the selection's label:** nested inside each fold aifoundry2's bursts read 5.1–6.9 MHz / 0.89–0.93 W /
@@ -3128,11 +3128,11 @@ model missed by about 1 W is the bench's own counting. Heat gets one duty conven
 |---|---|---|---|---|
 | E163 | aifoundry3 card 0, 600 MHz | `75802201` (pool 7, counts, every model's predictions, rank 4's rule), dated notes `3c9bb2ba` | M9 against M8, M7 and M6 on pool 7's 61 tiles; rank 4's anchors | the four priority-2 tests may drop; all nine anchors run |
 | E164 | aifoundry1 card 1, 600 MHz | the same | the same on the second card; rank 4's session pair with E163 | as E163 |
-| E165 | aifoundry2 card 0, its own governor | the same, aifoundry2's M9 through Q140(l)'s `m9_a2.json` (`5b98bd5c`) | M9's aifoundry2 part blind, its zeros anchors first; the frozen bands scored as frozen, their coverage beside the nested widths | 6 of 61 dense fp32 tiles left out at the 82 W stop |
+| E165 | aifoundry2 card 0, its own governor | the same, aifoundry2's M9 through Q140(l)'s `m9_a2.json` (`5b98bd5c`) | M9's aifoundry2 part blind, its zeros anchors first *(dated, Wed 4 Nov 2026, after Q140's final critic, Q141(r): recomputed per tile from the session's anchors and die starts, since all 61 of M9's frozen aifoundry2 predictions assume a die start of 54.38 °C and the fallback zeros offset; E165's registration `3ef06839`, with a dated note beside `README-predictions.md`)*; the frozen bands scored as frozen, their coverage beside the nested widths | 6 of 61 dense fp32 tiles left out at the 82 W stop |
 | E166 | aifoundry3 card 0 | `11174d20`, `c9aaf179`; RA1 in `a4fe976d` | the heat replicates (RK3-a, RK3-c) and the 25-minute hold's slow-stage reading | 73.0 min of plan |
 | E167 | aifoundry2 card 0 | the same | RK3-b in the 800 MHz regime, RK3-c; G2Q's trip plateau and clock | E161's design; peaks 53.3 / 68.2 W by M8's rule |
 | E168 | aifoundry2 card 0 | `e39d06da`; A1 and the scorer's hash sidecar in `1bfaa4e4` | G4's nine holds: clock within 15 MHz, board 2 W and die 1 °C on at least 8 of 9; the int8 increments within ±1.33 W | about 45 card-minutes; peaks at most 76.6 W |
-| E169 | aifoundry2 card 0 | `e39d06da` | SM, ISO and STRICT on six shapes, three at power-of-two strides | peaks at most 46.9 W |
+| E169 | aifoundry2 card 0 | `e39d06da` | SM, ISO and STRICT on six shapes, three at power-of-two strides *(dated, Wed 4 Nov 2026, after Q140's final critic, Q141(r): E169 reads the 8 MB index's step by a registered step rule, A2 (E169) `217c94a2` with its note 2 `5c9a62f1`; Q140 registered none)* | peaks at most 46.9 W |
 
 ### What Q140's desk half refuted, superseded or withdrew
 
@@ -3161,6 +3161,121 @@ large GEMM:** G4's clock (no gain); a stride term (E169); a DRAM channel or bank
 vendor's binary; a second card. **A card nobody has measured:** rank 4's rule on one card pair only. **Not in this round:** rank 7
 (card 1's day-to-day floor), ranks 10–16, and rank 17 (items 3, 4, 14 and 16, item 2's lower cap, the inlet thermometer, aifoundry2's
 PMIC over-power configuration), which waits on the owner's word; every governor move; E117 stays not run.
+
+## Q141, the card half's desk preparation: E163–E169 registered, kitted and verified, the readiness verdict, the plan and the runbook (Wed 4 Nov 2026, week 45, from about 08:58 PST; desk only: no card, no device command, no Modal, no archive)
+
+The owner's mandate is still his words of Mon 2 Nov 2026 about 18:40 PST (Q138), with Q137's goal, to predict the power and heat
+of numeric work as accurately as possible; at about 13:55 PST, after the readiness critic below, he gave the card half its go
+(Q141). Q140's final critic had found no card run ready to claim, so Q141 wrote and verified at the desk everything E163–E169
+need, each lane in its own new files: registrations committed before any data of their runs, scorers self-tested on their parents'
+committed data, and kits ported from their parents'. **No row below is a measurement or a blind score**, and Q141 changes no
+frozen prediction, band, rule or verdict: every hash list still passes (blind7 91, E168's 9 and 18, `predict_q140e`'s 26). Its 33
+lab commits run from `0830f65b` (09:11:50 PST) to `c31e7ae3` (12:16:56 PST), 346 files added and none modified; each lane was read
+by a separate verifier (all: holds with fixes) and corrected in new files before any data. The readiness critic, Q141(f), checked
+it all itself; its verdict, plan, go checklist and faults are a dated report,
+[`2026-11-04-q141f-readiness/`](../reports/data/2026-11-04-q141f-readiness/README.md). Short names, as in 04's Q141 table: `E163/`
+to `E169/` are `tools/claims-v3/e163/` to `e169/`, `Q141t/` is `docs/reports/data/2026-11-04-q141t-s7-recount/` and `Q141k/` is
+`tools/claims-v3/q141k-runbook/`. 🛑 **To carry from here, beside the earlier sections' items:** (43) **the card half reads blind
+only what is registered here**, each run's rules named in the table below; (44) **quote the lanes' wording as corrected** (the
+table after it); (45) **the plan's last release is about 3.5–4 h after the go**, not 3–3.5 h; (46) **every remote call of a card
+day is bounded**: a 15 s hard-killed probe first, then the call under a timeout (F1; Q141(k)); (47) **scrub `logs/` of other
+logins before a data commit** (F3).
+
+### What is registered, per run (before any data)
+
+| Run | Card | Registered (PST) | What it scores | Stops | Card-minutes (cap) |
+|---|---|---|---|---|---|
+| E163 | aifoundry3 card 0, 600 MHz | `64dff136` 09:33:22, `442474d5` 09:38:32, `1c47ce62` 09:52:17, `f13e0b39` 10:49:52 | rank 1's rules as E163-RANK1 (M1 = M9 − M6, U1, B1/B2, C1, P1–P3, H1–H4, R1/R2, M2, M3); rank 14's K14/K14' and KE/KE'; rank 4's reference half; Q141(t)'s arm, reported | 65 W / 70 °C; E151's block 45 W / 68 °C | FULL 56–59 (70); TWO 31–33 (38); SHORT 25–27 (30) |
+| E164 | aifoundry1 card 1, 600 MHz | `4286f0a8` 09:18:57, `f4e75c95` 09:41:51, `ce10e301` 10:05:44, `45aeda12` 11:41:49 | E164-RANK1 (new in A1-3); X1/X2; RK4; K7*; PCa | 66 W / 72 °C | 57.6 (65) |
+| E165 | aifoundry2 card 0, its own governor | `3ef06839` 09:36:11, `a5c56d17` 09:37:49, `e3c4eafc` 09:43:55, `fe6f4862` 10:43:24, `a509ff8b` 10:54:04 | rank 2 on M9's aifoundry2 part, recomputed per tile from the session's anchors and die starts | above 85 W on 3 live samples; 76 °C; the 82 W admission | 36 (40) |
+| E166 | aifoundry3 card 0 | `2b450e66` 09:16:36, `f830b9e2` 09:31:08, `c75bc460` 09:41:09, `ae39563c` 11:24:33 | R5 + G0 + X1 + SL (RK3-a, RK3-c; G_A and SL on the 25-minute hold) | Q138(t)'s | 74.4 (76) |
+| E167 | aifoundry2 card 0 | `7ba987b3` 09:16:50, `f830b9e2` 09:31:08, `4f4e7620` 09:59:53, `48994187` 11:24:19 | E161's design + G1 + E2, with X2 (RK3-b, RK3-c, G2Q's trip) | above 80 W on 3; 72 °C; a static admission | 35–39 (40) |
+| E168 | aifoundry2 card 0 | A2 (E168) `226249e1` 09:18:35; `a0310012` 09:38:43, `d86cafa6` 09:40:30, `983e9499` 10:31:55 | A7 (G4 on at least 8 of 9 holds) + A2's start-dependence test | above 85 W on 3; 76 °C; 82 W | 42 (58; at most 63 in all) |
+| E169 | aifoundry2 card 0 | A2 (E169) `217c94a2` 09:22:23; `18aaca80` 09:33:28, `6a3929ec` 09:46:17, `2bf8f092` 09:47:26, `5c9a62f1` 10:44:17 | A2 (E169)'s step rule; B7 kept | above 60 W on 3; 76 °C; 82 W | 11–16 (20; at most 25) |
+| Q141(t) | the bench, at the desk | `0830f65b` 09:11:50, `67d5e44f` 10:07:40, `9c7ae1f2` 11:23:07, `c31e7ae3` 12:16:56 | the reported arm M9_27pt and A1 (R5 gated, heat's R1/R2, R5m) | — | — |
+
+Every device command each kit sends is READ, and the statistics reset is never sent.
+
+### The readiness verdict and the plan (Q141(f), about 12:20–13:10 PST)
+
+**All seven runs ready to claim**, with only the box steps left after the owner's go and fresh lab approvals. Three cards in
+parallel, serial on each, about 312–340 card-minutes (caps 384): on aifoundry3 E166 then E163, released about T+158 min; on
+aifoundry1's card 1 E164, released about T+80; on aifoundry2 four box dry passes, E165, the latch check, E167, E168 and E169,
+released about T+210–230. **The last release comes about 3.5–4 h after the go, not 3–3.5 h**: E167 holds aifoundry2 about 66–75
+minutes of wall time, and the four dry passes there must come before E165 (F5). The full plan needs the last end at least about 4
+h 15 min after the go and the last start at least 3 h 30 min after it. Subsets: (a) about 1.5 h, E163 (FULL or TWO) with E164 and
+E165, which gives rank 1 on both 600 MHz cards, rank 4's pair and rank 2; (b) about 2.75 h, everything but E168 and E169; (c)
+about 3.5–4 h, all seven. E166 has no subset.
+
+### The readiness critic's faults (F1–F9) and how each is answered
+
+| | The fault | How it is answered |
+|---|---|---|
+| F1 | the kits' remote calls carry BatchMode and ConnectTimeout but no overall bound and no 15 s probe (E163, E164, E166, E168, E169) | the go checklist bounds every call; Q141(k)'s runbook does it in code |
+| F2 | E164's corrected collect command does not set `E164_S_RECOUNT`, so Q141(t)'s card-1 arm would be skipped silently | the checklist's collect line sets it |
+| F3 | E163's and E166's session logs carry raw et-who output into the data directory unscrubbed | before each data commit, the scrub's `--check` or a read by eye, and the public-text scan |
+| F4 | E166's README gives no sync command | one rsync of `tools/claims-v3/e166/` with E163's step-4 paths |
+| F5 | aifoundry2's wall time undercounted: E167's 66–75 minutes, and four dry passes before E165 | the plan above: about 3.5–4 h from the go |
+| F6 | `collect_e163.sh` and `collect_e166.sh` exit 0 when their scorer fails | the operator reads "results.md written" or "score rc=0" |
+| F7 | E164's README step 5 still names `box/launch_e164.sh`, which would run 0 passes | the checklist and these records name `box/launch_e164_a1.sh` |
+| F8 | E167 keeps E161's static admission, not the 82 W run-time one; its live stops are stricter | no change; the records say "a static admission" |
+| F9 | two lanes' open issues said E165 must still emit its zeros anchors for E167's E2 and E168's `--anchors` arms | it already does, at `results.json` `score.anchors` (`score_e165.py:518, 526-527`); the step is writing that object to a file |
+
+### The lanes' wording, as corrected (quote it so)
+
+| Run | As corrected |
+|---|---|
+| E163 | the byte twin's expected error (measured − M9) is +0.311 ± 0.198 W; `predictions-e163.json` copies "every non-null field"; FULL plans 3 kinds passes and scores from 2; KE-D and KE' cannot see a lost or doubled b1_0 |
+| E164 | K7W bounds card 1's day-to-day change only to ±0.25–0.29 W on int8 and ±0.09–0.16 W on floats; K7D is planned to pass 17% and K7W 90% of the time with nothing changed (never "card 1 repeats to 0.05 W"); every gate differs from E163's (P1–P3 and H1–H3 9/5/11 against 6/4/6, B1 13/8, B2 11/6, U1 8/10, R1/R2 7/8); the critic's `--clean-first` became E157's pinned binaries; rank 14's card-1 half is dropped by name |
+| E165 | E165.md's Precision figures are E143's (E160's own: median 0.0 MHz / 0.99 W, largest 48 MHz / 5.41 W); "a dry pass of the whole queue path, passes 1–2 of the order (114 of 171 runs)"; the form of "resolved better" is Q141(g)'s |
+| E166 | the hottest frozen peak under G0 is 67.33 °C; SL's false-positive rate is 5.0% / 8.1% / 10.3% by pool; X1 goes beyond RA1.4 |
+| E167 | X2 (an incomplete-window rule in E166's X1 form); aifoundry2's hottest-sensor field is a latch, so E161's "hottest sensor at 70 °C" is an upper bound wherever it is quoted; the admission is static |
+| E168 | the cap binds in flight (at most 63 card-minutes in all, never "64"); the 47 °C floor keeps A2's readings (a desk check, not registered) |
+| E169 | E158's stops were 60 W / 80 °C (85 W / 76 °C are E159's); cite "A2 (E168)" and "A2 (E169)"; the self-test is 42 checks, 22 of them on 17 made-up reductions; "whether a block-stride step belongs in the next time model" |
+| Q141(t) | k = P3 − P27 runs −0.52 to +0.30 W, so the 27-point counts move D by −0.30 to +0.52 W (−0.39 W on the bit-20 tile on a 1/3 base word); E164's route is `--s-recount`; e(27)/e(81)'s median is 1.75; u is 0.241 and 0.196; quote R5 with its 36–39% false-read rate and R5m beside it (5.5–6.3%); N* is not yet determined |
+| Q141(k) v1 | `dmcmd_audit` is GO only with E128's guard scanned beside the runbook (one call site, `s09_a3_reads.sh:21`, a READ); there were four desk-test runs, not five; its README's "each launch refuses otherwise" was not true for E163 |
+
+### Q140's final critic's faults, corrected here
+
+| Fault | Was | Now | Where |
+|---|---|---|---|
+| 1 | int8's paired-anchor scale ±4.1–6.1% at 95% (`a7fbb2ac`) | ±3.7% at 3.06 Welch degrees of freedom with each anchor's own passes; the floats ±0.24% at 7.36 | the anchor-scale README's dated note; Q140's "How to read ±" above and 02's Q140 row, dated clauses |
+| 2 | the desk half "froze everything its card half needs" | it froze the predictions and rules; Q141 wrote, verified and committed every registration, scorer and kit (`0830f65b`–`c31e7ae3`, 33 commits) | 02's Q140 row and Q140's lead above, dated clauses; the Horace Hub's Status |
+| 3 | "E169 tests" the L3's 8 MB index | E169 reads the 8 MB index's step by a registered step rule, A2 (E169) `217c94a2` with its note 2 `5c9a62f1` | dated notes beside Q140(q)'s `REGISTRATION.md` and `README.md`; 02, 03 and Q140's E169 row above, dated clauses |
+| 4 | all 61 of M9's frozen aifoundry2 predictions assume a die start of 54.38 °C and the fallback zeros offset, one `--a2-die-start` for every tile | E165's primary is M9.a2_q140l recomputed per tile through `predict_m9_a2.burst` from the session's anchors and die starts, the frozen file beside it (`3ef06839`) | [`README-predictions.md.dated-note.md`](../../tools/claims-v3/kinds/blind7/README-predictions.md.dated-note.md); Q140's E165 row above and 03, dated clauses |
+| the nit | the close-out's Horace Hub Fix entry: "M9's fitted prices, a jackknife over 66–370 kinds a family" | M8's and M9's prices: 66 is M8's int8 family, and M9's are 83 and 370 | the Horace Hub's Log, in a new entry (the Log is append-only) |
+
+### Disclosures
+
+- **Compute on the Intel by an override of its batch guard** (`INTEL_BATCH_OK`): Q141(a)'s single-core checks; Q141(h) in
+  `c75bc460` and `4f4e7620`; one call of Q141(o); Q141(v)'s build steps. **Q141(t)'s bench ran 4 jobs on the Intel** from 10:02:28
+  to 11:19:56 PST, after the owner's rule of that morning that batch work leaves the Intel; it had started before the rule reached
+  the round and was left to finish.
+- The privacy table is absent on the Intel, so every public-text scan used the fixed list plus a read by eye.
+- `queue_e167.py:55` carries E161's camera URL, already in 63 committed files.
+- E166 reads command 74 group 0 through E89's `pvt_sample.py`, classified READ in E144's table from the held patch, as E154 did.
+- The readiness critic ran on the Intel only (1–2 processes at `nice -n 10`, about 11 core-minutes; no lab box); one scratch
+  file was briefly written in `/tmp` by its git check and removed.
+
+### The runbook (Q141(k)) and the card half
+
+Q141(k) wrote the card day's bounded runbook after the critic
+([`tools/claims-v3/q141k-runbook/`](../../tools/claims-v3/q141k-runbook/README.md)): v1 `e962227a` (14:08:36 PST), one script per
+box step of the go checklist, each call after a 15 s hard-killed probe and under a timeout; the card half has run it since 14:18
+PST. Its verifier found five faults and four nits, fixed as new files in v2 `16771f36` (15:34:42 PST) beside v1, which stays byte
+for byte (E167's collection should use v2's `s22_collect.sh e167`). **The card half started at 14:11 PST**, on the owner's go of
+about 13:55 PST, with the day's one post (`1567662592850399304`) holding aifoundry3, aifoundry1 (both cards) and aifoundry2;
+aifoundry1's card 0, back in use by his word, takes E170 (Q141(w): `b5ca3e78`, `574dc5b5`, `57e1c6c4`) after E164. **Its results
+follow** in the runs' own data READMEs and the card half's records; none is in this section.
+
+**What remains after the card half.** Integrating E163–E169 and E170: 02, 03 and 05, the kinds page's section 11, one hub entry
+each. Q141(t)'s 243-point step for the 8 bit-20 and bit-21 calibration tiles, run on the mini by Q141(t2) after its fallback
+registration (`9496466c`, `5e1bb309`, `2c1b6362`), is recorded with the card half. Rank 7's second new card-1 session, and rank
+14's card-1 half if it is wanted.
+
+**Not established by Q141.** Any blind score, any measured card-minute, and whether the plan's 3.5–4 h holds on the card day; the
+runbook on a box beyond the card day's own use (its desk tests used a stand-in ssh and rsync); whether a holder at a session's end
+leaves a login in E163's or E166's logs (F3).
 
 ## Ridge points (derived; no card time)
 
