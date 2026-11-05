@@ -1,0 +1,517 @@
+# Q142(s) v3 runbook desk test: Wed 04 Nov 2026 20:08:13 PST; ssh and rsync on PATH are the stand-ins; a sample window, on 2026-11-06
+
+== A. success
+ok   A1: s01_probe.sh  -> exit 0 (want 0) in 0.7 s
+ok   A1: no stand-in process left running
+ok   A1: no stand-in login in any file the runbook wrote
+ok   A1: three probe lines in the log, each rc=0 status=ok
+ok   A1: the log names the step as v3's (step=s01_probe_v3)
+ok   A2: s02_window.sh 2026-11-06 15:30 16:30 full -> exit 0 (want 0) in 0.2 s
+ok   A2: no stand-in process left running
+ok   A2: no stand-in login in any file the runbook wrote
+ok   A2: the window holds E164's deadline, the last end less 10 minutes
+ok   A3: s05_look.sh aifoundry3 -> exit 0 (want 0) in 1.1 s
+ok   A3: no stand-in process left running
+ok   A3: no stand-in login in any file the runbook wrote
+ok   A3: FREE with two idle logins (they do not block)
+ok   A4: s05_look.sh aifoundry2 --wait -> exit 0 (want 0) in 4.0 s
+ok   A4: no stand-in process left running
+ok   A4: no stand-in login in any file the runbook wrote
+ok   A4: a held card polled on the box until free
+ok   A5a: s05_look.sh aifoundry2 --wait -> exit 17 (want 17) in 2.8 s
+ok   A5a: no stand-in process left running
+ok   A5a: no stand-in login in any file the runbook wrote
+ok   A5b: s05_look.sh aifoundry2 --wait -> exit 15 (want 15) in 2.5 s
+ok   A5b: no stand-in process left running
+ok   A5b: no stand-in login in any file the runbook wrote
+ok   A6: s07_a3_sync.sh  -> exit 0 (want 0) in 0.8 s
+ok   A6: no stand-in process left running
+ok   A6: no stand-in login in any file the runbook wrote
+ok   A6: one rsync with E163's step-4 paths and tools/claims-v3/e166/ to aifoundry3:aifoundry/
+ok   A7a: s12_a1_check.sh start -> exit 0 (want 0) in 2.7 s
+ok   A7a: no stand-in process left running
+ok   A7a: no stand-in login in any file the runbook wrote
+ok   A7b: s12_a1_check.sh wait -> exit 0 (want 0) in 0.6 s
+ok   A7b: no stand-in process left running
+ok   A7b: no stand-in login in any file the runbook wrote
+ok   A7: the detached check job ended rc 0 and its lines read clean
+ok   A7: the clean read is recorded for s13 (RB_OUT/a1-check-clean.txt names the window's day)
+ok   A8: s13_a1_launch.sh  -> exit 0 (want 0) in 9.3 s
+ok   A8: no stand-in process left running
+ok   A8: no stand-in login in any file the runbook wrote
+ok   A8: the session got the whole deadline through ssh ('2026-11-06 16:20 PST', not the date alone)
+ok   A8: launch_e164_a1.sh's usage line, the quoting inside the remote command
+ok   A8: the guard read came first and found no dry pass, no session of ours, s12's check of today
+ok   A9: s16_a2_e165.sh full -> exit 0 (want 0) in 3.8 s
+ok   A9: no stand-in process left running
+ok   A9: no stand-in login in any file the runbook wrote
+ok   A9: E165's slot line parses by the queue's own pattern, 2,700 s
+ok   A9: the queue started with --runs build/e165/runs --cap 40
+ok   A10: s20_wait.sh e165 -> exit 0 (want 0) in 0.6 s
+ok   A10: no stand-in process left running
+ok   A10: no stand-in login in any file the runbook wrote
+ok   A11: s05_look.sh aifoundry1 -> exit 17 (want 17) in 1.3 s
+ok   A11: no stand-in process left running
+ok   A11: no stand-in login in any file the runbook wrote
+ok   A11: look_e164.sh's raw et-who line kept with its login and command masked
+ok   A11: look_e164.sh's identity line read (booted before E82's firmware read)
+
+== B. a login link, then a hang
+ok   B1: s05_look.sh aifoundry2 -> exit 11 (want 11) in 0.6 s
+ok   B1: no stand-in process left running
+ok   B1: no stand-in login in any file the runbook wrote
+ok   B1: '<HH:MM:SS> aifoundry2 needs a check' appended to the lock file
+ok   B1: the link kept in RB_OUT/links.txt for the approval
+ok   B1: killed at once (under 6 s, not at the probe's 15 s)
+ok   B2: s09_a3_reads.sh  -> exit 11 (want 11) in 0.9 s
+ok   B2: no stand-in process left running
+ok   B2: no stand-in login in any file the runbook wrote
+ok   B2: the link on a call's stderr: lock line for aifoundry3
+ok   B2: killed at once
+ok   B3: s14_a2_tree.sh  -> exit 11 (want 11) in 0.9 s
+ok   B3: no stand-in process left running
+ok   B3: no stand-in login in any file the runbook wrote
+ok   B3: the link on a call's stdout: lock line for aifoundry2
+ok   B3: killed at once
+ok   B4: s07_a3_sync.sh  -> exit 11 (want 11) in 1.1 s
+ok   B4: no stand-in process left running
+ok   B4: no stand-in login in any file the runbook wrote
+ok   B4: the link on rsync's stderr: lock line for aifoundry3
+ok   B4: killed at once
+ok   B5: s01_probe.sh  -> exit 11 (want 11) in 1.8 s
+ok   B5: no stand-in process left running
+ok   B5: no stand-in login in any file the runbook wrote
+ok   B5: three boxes, three lock lines, three links
+
+== C. a hang with no output
+ok   C1: s05_look.sh aifoundry1 -> exit 12 (want 12) in 15.7 s
+ok   C1: no stand-in process left running
+ok   C1: no stand-in login in any file the runbook wrote
+ok   C1: the probe hard-killed at its 15 s
+ok   C1: no lock line (no link was printed)
+ok   C2: s08_a3_preflight.sh  -> exit 13 (want 13) in 3.9 s
+ok   C2: no stand-in process left running
+ok   C2: no stand-in login in any file the runbook wrote
+ok   C2: a read killed at its bound (60 s; 3 s here)
+ok   C3: s07_a3_sync.sh  -> exit 13 (want 13) in 4.1 s
+ok   C3: no stand-in process left running
+ok   C3: no stand-in login in any file the runbook wrote
+ok   C3: a copy killed at its bound (600 s; 3 s here)
+ok   C4: s13_a1_launch.sh  -> exit 13 (want 13) in 4.2 s
+ok   C4: no stand-in process left running
+ok   C4: no stand-in login in any file the runbook wrote
+ok   C4: a launch killed at its bound (60 s; 3 s here), after its guard read answered
+ok   C5: s20_wait.sh e167 -> exit 13 (want 13) in 3.8 s
+ok   C5: no stand-in process left running
+ok   C5: no stand-in login in any file the runbook wrote
+ok   C5: a wait killed at its bound (600 s; 3 s here)
+
+== D. a non-zero exit
+ok   D1: s05_look.sh aifoundry3 -> exit 14 (want 14) in 0.6 s
+ok   D1: no stand-in process left running
+ok   D1: no stand-in login in any file the runbook wrote
+ok   D1: the call's own status (7) in the log line
+ok   D2: s07_a3_sync.sh  -> exit 14 (want 14) in 0.8 s
+ok   D2: no stand-in process left running
+ok   D2: no stand-in login in any file the runbook wrote
+ok   D2: rsync's own status (23) in the log line
+ok   D3: s01_probe.sh aifoundry2 -> exit 12 (want 12) in 0.3 s
+ok   D3: no stand-in process left running
+ok   D3: no stand-in login in any file the runbook wrote
+ok   D4: s13_a1_launch.sh  -> exit 10 (want 10) in 1.4 s
+ok   D4: no stand-in process left running
+ok   D4: no stand-in login in any file the runbook wrote
+ok   D4: launch_e164_a1.sh's own refusal (exit 3) on a card-1 holder, reported as a refusal (10: fault 11)
+ok   D4v2: v2's s13_a1_launch.sh  -> exit 14 (want 14) in 1.3 s
+ok   D4v2: no stand-in process left running
+ok   D4v2: no stand-in login in any file the runbook wrote
+ok   D4v2: v2 read the same refusal as a failure (14)
+
+== F. the desk helpers and the window's gates (no ssh)
+ok   F1: frozen26.py on the lab clone: FROZEN 26 OK
+ok   F2: anchors_e165.py writes score.anchors and score.anchor_delta unchanged
+ok   F3: a NOT SCORED E165 writes no anchors file (exit 3)
+ok   F4: s02_window.sh 2026-11-04 20:49 21:39 full -> exit 16 (want 16) in 0.1 s
+ok   F4: no stand-in process left running
+ok   F4: no stand-in login in any file the runbook wrote
+ok   F4: a window under 1 h 45 min fits no plan
+ok   F5: s17_a2_e167.sh go 14:30 13:10 15:00 16:00 -> exit 10 (want 10) in 0.1 s
+ok   F5: no stand-in process left running
+ok   F5: no stand-in login in any file the runbook wrote
+ok   F5: E167's four gates out of order are refused before any call
+ok   F5: no ssh before the gates are read
+ok   F6: s17_a2_e167.sh go 13:00 13:30 16:00 16:30 -> exit 16 (want 16) in 0.1 s
+ok   F6: no stand-in process left running
+ok   F6: no stand-in login in any file the runbook wrote
+ok   F6: a no-start-after past the window's last start is refused
+
+== X1-X2. the verifier's two cases that passed in v1, kept
+ok   X1: s22_collect.sh e166 -> exit 11 (want 11) in 0.9 s
+ok   X1: no stand-in process left running
+ok   X1: no stand-in login in any file the runbook wrote
+ok   X1: a link from rsync inside collect_e166.sh (GNU timeout's own process group): lock line for aifoundry3
+ok   X1: killed at once
+ok   X2: a link split across two writes: exit 11, the lock line and the whole link kept
+ok   X2: no stand-in process left running
+
+== X3. fault 1: s13 holds the order of steps 12 and 13
+ok   X3a: s13_a1_launch.sh  -> exit 10 (want 10) in 0.5 s
+ok   X3a: no stand-in process left running
+ok   X3a: no stand-in login in any file the runbook wrote
+ok   X3a: refused on the box while s12's check job still runs (V3_DRY 16410, 16401, 16402)
+ok   X3a: launch_e164_a1.sh never sent
+ok   X3a: no session started in the stand-in box
+ok   X3v1: v1's s13_a1_launch.sh  -> exit 0 (want 0) in 9.0 s
+ok   X3v1: no stand-in process left running
+ok   X3v1: no stand-in login in any file the runbook wrote
+ok   X3v1: v1's s13 in the same state launched E164 beside the running check job (the verifier's X3)
+ok   X3b: s13_a1_launch.sh  -> exit 10 (want 10) in 0.1 s
+ok   X3b: no stand-in process left running
+ok   X3b: no stand-in login in any file the runbook wrote
+ok   X3b: refused without s12's clean read (step 12, then 13)
+ok   X3b: not one ssh call
+ok   X3c: s13_a1_launch.sh  -> exit 10 (want 10) in 0.7 s
+ok   X3c: no stand-in process left running
+ok   X3c: no stand-in login in any file the runbook wrote
+ok   X3c: refused on a check job's exit status from another day
+
+== X4. fault 3: a later E166 try
+ok   X4a: s11_a3_session.sh e166 -> exit 10 (want 10) in 0.7 s
+ok   X4a: no stand-in process left running
+ok   X4a: no stand-in login in any file the runbook wrote
+ok   X4a: a plain e166 refused on the earlier smoke p16601 (it would have read the old gate as GO)
+ok   X4a: p16601 left in place, no session started
+ok   X4v1: v1's s11_a3_session.sh e166 -> exit 0 (want 0) in 5.7 s
+ok   X4v1: no stand-in process left running
+ok   X4v1: no stand-in login in any file the runbook wrote
+ok   X4v1: v1's plain e166 launched over the earlier smoke (the verifier's X4)
+ok   X4b: s11_a3_session.sh e166 -> exit 10 (want 10) in 0.6 s
+ok   X4b: no stand-in process left running
+ok   X4b: no stand-in login in any file the runbook wrote
+ok   X4b: a plain e166 refused when an earlier try's smoke was moved aside (a further try needs its own amendment)
+ok   X4c: s11_a3_session.sh e166 --later-try -> exit 10 (want 10) in 0.7 s
+ok   X4c: no stand-in process left running
+ok   X4c: no stand-in login in any file the runbook wrote
+ok   X4c: --later-try rests from E166's own end, 5 minutes ago (v1 read only E163's, 60)
+ok   X4c: nothing moved
+ok   X4d: s11_a3_session.sh e166 --later-try -> exit 0 (want 0) in 6.2 s
+ok   X4d: no stand-in process left running
+ok   X4d: no stand-in login in any file the runbook wrote
+ok   X4d: 50 and 60 minutes of rest: the earlier smoke moved aside
+ok   X4d: and the later try launched
+ok   X4d: p16601.try1 holds the earlier smoke
+
+== X5. fault 2: a lost dry job
+ok   X5a: s15_a2_dry.sh e167 wait -> exit 14 (want 14) in 2.8 s
+ok   X5a: no stand-in process left running
+ok   X5a: no stand-in login in any file the runbook wrote
+ok   X5a: JOB-LOST read
+ok   X5a: and no JOB-RUNNING line after it
+ok   X5a: at once (the 2 s grace, not the 520 s loop)
+ok   X5a2: s15_a2_dry.sh e167 wait -> exit 14 (want 14) in 2.9 s
+ok   X5a2: no stand-in process left running
+ok   X5a2: no stand-in login in any file the runbook wrote
+ok   X5v1: v1's s15_a2_dry.sh e167 wait -> exit 17 (want 17) in 2.9 s
+ok   X5v1: no stand-in process left running
+ok   X5v1: no stand-in login in any file the runbook wrote
+ok   X5v1: v1's wait read the same lost job as still running: call again (the verifier's X5)
+ok   X5b: s15_a2_dry.sh e167 wait -> exit 17 (want 17) in 12.8 s
+ok   X5b: no stand-in process left running
+ok   X5b: no stand-in login in any file the runbook wrote
+ok   X5b: a job whose pid comes a second late is still running, not lost
+ok   X5c: s15_a2_dry.sh e167 wait -> exit 10 (want 10) in 0.6 s
+ok   X5c: no stand-in process left running
+ok   X5c: no stand-in login in any file the runbook wrote
+ok   X5c: a job started on another day is not today's
+
+== X6. nit 1: s09's config read waits for a session of ours
+ok   X6: s09_a3_reads.sh  -> exit 10 (want 10) in 0.7 s
+ok   X6: no stand-in process left running
+ok   X6: no stand-in login in any file the runbook wrote
+ok   X6: refused while a session of ours runs
+ok   X6: the guard was never called
+ok   X6v1: v1's s09_a3_reads.sh  -> exit 0 (want 0) in 1.0 s
+ok   X6v1: no stand-in process left running
+ok   X6v1: no stand-in login in any file the runbook wrote
+ok   X6v1: v1's s09 read the card through the guard beside the session (the verifier's X6)
+
+== X7. fault 4: E167's collector reaches three boxes
+ok   X7a: s22_collect.sh e167 1793848233 1793850033 -> exit 11 (want 11) in 0.7 s
+ok   X7a: no stand-in process left running
+ok   X7a: no stand-in login in any file the runbook wrote
+ok   X7a: aifoundry1's probe found the check: lock line for aifoundry1
+ok   X7a: the collector never ran
+ok   X7b: s22_collect.sh e167 1793848233 1793850033 -> exit 11 (want 11) in 6.7 s
+ok   X7b: no stand-in process left running
+ok   X7b: no stand-in login in any file the runbook wrote
+ok   X7b: three probes first (aifoundry1, aifoundry3, aifoundry2)
+ok   X7b: a link from aifoundry3's history read names aifoundry3 in the lock line
+ok   X7b: and not aifoundry2
+ok   X7b: the links line names aifoundry3 and keeps the link
+ok   X7b: the log line says host=aifoundry2 link_host=aifoundry3
+ok   X7b: the step's message names aifoundry3
+ok   X7v1: v1's s22_collect.sh e167 1793848233 1793850033 -> exit 11 (want 11) in 6.1 s
+ok   X7v1: no stand-in process left running
+ok   X7v1: no stand-in login in any file the runbook wrote
+ok   X7v1: v1 wrote 'aifoundry2 needs a check' for aifoundry3's link (the verifier's fault 4)
+ok   X7v1: v1 probed one box
+
+== X8. fault 5: aifoundry2's firmware identity by continuity
+ok   X8a: s14_a2_tree.sh  -> exit 16 (want 16) in 2.4 s
+ok   X8a: no stand-in process left running
+ok   X8a: no stand-in login in any file the runbook wrote
+ok   X8a: the boot of record reads IDENTITY-OK
+ok   X8a: so the step goes on to the runs' own checks (the stand-in box holds no kit: 16 there)
+ok   X8a: a2-tree.txt records identity=1
+ok   X8b: s14_a2_tree.sh  -> exit 16 (want 16) in 2.5 s
+ok   X8b: no stand-in process left running
+ok   X8b: no stand-in login in any file the runbook wrote
+ok   X8b: a later boot stops every aifoundry2 run
+ok   X8b: a2-tree.txt records identity=0
+ok   X8v1: v1's s14_a2_tree.sh  -> exit 16 (want 16) in 2.4 s
+ok   X8v1: no stand-in process left running
+ok   X8v1: no stand-in login in any file the runbook wrote
+ok   X8v1: v1 printed the later boot and checked nothing (its stop is the runs' own checks)
+
+== X9. nit 5: another day's state is never today's
+ok   X9a: s16_a2_e165.sh full -> exit 10 (want 10) in 0.8 s
+ok   X9a: no stand-in process left running
+ok   X9a: no stand-in login in any file the runbook wrote
+ok   X9a: dry passes that ended rc 0 on another day do not admit E165
+ok   X9b: s20_wait.sh e166 -> exit 10 (want 10) in 0.6 s
+ok   X9b: no stand-in process left running
+ok   X9b: no stand-in login in any file the runbook wrote
+ok   X9b: a log offset from another day: not launched today
+ok   X9v1: v1's s20_wait.sh e166 -> exit 0 (want 0) in 0.6 s
+ok   X9v1: no stand-in process left running
+ok   X9v1: no stand-in login in any file the runbook wrote
+ok   X9v1: v1 read that day's 'session end' as today's (the verifier's nit 5)
+ok   X9c: s11_a3_session.sh e163 FULL -> exit 10 (want 10) in 0.7 s
+ok   X9c: no stand-in process left running
+ok   X9c: no stand-in login in any file the runbook wrote
+ok   X9c: E163 waits for an E166 launched today, not another day's
+ok   X9d: s20_wait.sh e165 -> exit 10 (want 10) in 0.6 s
+ok   X9d: no stand-in process left running
+ok   X9d: no stand-in login in any file the runbook wrote
+ok   X9d: a queue status from another day: not launched today
+
+== X10. nit 2: E163's plan must end by the last end
+ok   X10a: s11_a3_session.sh e163 FULL -> exit 16 (want 16) in 0.1 s
+ok   X10a: no stand-in process left running
+ok   X10a: no stand-in login in any file the runbook wrote
+ok   X10a: FULL refused with 60 minutes to the last end
+ok   X10a: before any call
+ok   X10b: s11_a3_session.sh e163 TWO -> exit 0 (want 0) in 5.7 s
+ok   X10b: no stand-in process left running
+ok   X10b: no stand-in login in any file the runbook wrote
+ok   X10b: TWO, 38 minutes, launched
+ok   X10v1: v1's s11_a3_session.sh e163 FULL -> exit 0 (want 0) in 5.6 s
+ok   X10v1: no stand-in process left running
+ok   X10v1: no stand-in login in any file the runbook wrote
+ok   X10v1: v1 launched FULL with 60 minutes left (the verifier's nit 2)
+
+== Y1-Y12. what the adversarial read of v2 found (v3/README.md, "What v3 changes"), each with v2 run beside it where that shows it
+
+-- Y1. fault 1: s22 e163 hands collect_e163.sh a repo-relative raw copy
+ok   Y1: s22_collect.sh e163 -> exit 0 (want 0) in 1.7 s
+ok   Y1: no stand-in process left running
+ok   Y1: no stand-in login in any file the runbook wrote
+ok   Y1: collect_e163.sh got the raw copy as build/e163-raw
+ok   Y1: so e163.json's dirs and runs.csv's dir column hold no desk path
+ok   Y1: the no-desk-path gate read E163's outputs CLEAN before the step said collected
+ok   Y1v2: v2's s22_collect.sh e163 -> exit 0 (want 0) in 1.1 s
+ok   Y1v2: no stand-in process left running
+ok   Y1v2: no stand-in login in any file the runbook wrote
+ok   Y1v2: v2's s22 e163 handed collect_e163.sh the clone's absolute raw copy (the card-half critic's fault)
+ok   Y1v2: so its e163.json held the clone's absolute path, and v2 read nothing of it
+
+-- Y1r. the registered reduce_e163.py on one committed E163 pass, by v3's route and by v2's
+ok   Y1r: the registered reducer ran on the committed pass p16310 both ways (rc 0)
+ok   Y1r: by v3's repo-relative route its e163.json and runs.csv hold no desk path (nopath CLEAN)
+ok   Y1r: by v2's absolute route both carry the clone's path, and the gate stops it (exit 3)
+ok   Y1r: by v2's route the path is in 97 rows of runs.csv (reduce_e78.py:172), not only in e163.json's dirs (line 428)
+
+-- Y2. fault 2: a desk path in any collector's output stops the step
+ok   Y2: s22_collect.sh e163 -> exit 16 (want 16) in 1.7 s
+ok   Y2: no stand-in process left running
+ok   Y2: no stand-in login in any file the runbook wrote
+ok   Y2: a collector that writes the clone's path anyway: the step stops (16)
+ok   Y2: and never says collected
+
+-- Y3. fault 3: e166 with a failed copy inside collect_e166.sh
+ok   Y3: s22_collect.sh e166 -> exit 14 (want 14) in 0.7 s
+ok   Y3: no stand-in process left running
+ok   Y3: no stand-in login in any file the runbook wrote
+ok   Y3: the logs' copy failed (rc 23) and the scorer still read rc 0: v3 stops (14), a partial copy
+ok   Y3v2: v2's s22_collect.sh e166 -> exit 0 (want 0) in 0.7 s
+ok   Y3v2: no stand-in process left running
+ok   Y3v2: no stand-in login in any file the runbook wrote
+ok   Y3v2: v2 read only 'score rc=0' and reported the partial copy collected and scored
+
+-- Y4. fault 4: e168's copy, scrub and gzip run in a scratch copy first
+ok   Y4a: s22_collect.sh e168 -> exit 11 (want 11) in 1.2 s
+ok   Y4a: no stand-in process left running
+ok   Y4a: no stand-in login in any file the runbook wrote
+ok   Y4a: a link in the middle of the copy: the lock line for aifoundry2
+ok   Y4a: nothing reached the data directory
+ok   Y4a: and the partial scratch copy is gone
+ok   Y4v2: v2's s22_collect.sh e168 -> exit 11 (want 11) in 1.1 s
+ok   Y4v2: no stand-in process left running
+ok   Y4v2: no stand-in login in any file the runbook wrote
+ok   Y4v2: v2 left the partial, unscrubbed copy in the data directory (a stand-in login in it)
+ok   Y4b: s22_collect.sh e168 -> exit 0 (want 0) in 2.3 s
+ok   Y4b: no stand-in process left running
+ok   Y4b: no stand-in login in any file the runbook wrote
+ok   Y4b: a whole copy reaches the data directory scrubbed (E111's mark replaced, no login)
+ok   Y4b: with the telemetry gzipped, the logs, and the reducer's results
+ok   Y4b: and the scratch copy removed
+
+-- Y5. fault 5: e167's raw history never stays in the data directory
+ok   Y5: s22_collect.sh e167 1793848233 1793850033 -> exit 11 (want 11) in 6.6 s
+ok   Y5: no stand-in process left running
+ok   Y5: no stand-in login in any file the runbook wrote
+ok   Y5: after the stop on aifoundry3's history read, no raw history file is left in the data directory
+ok   Y5v2: v2's s22_collect.sh e167 1793848233 1793850033 -> exit 11 (want 11) in 6.6 s
+ok   Y5v2: no stand-in process left running
+ok   Y5v2: no stand-in login in any file the runbook wrote
+ok   Y5v2: v2 left history/aifoundry3.raw there, after E111's scrub had run
+
+-- Y6. fault 6: a collector's check stop that carries no link still writes the lock line
+ok   Y6: s22_collect.sh e167 1793848233 1793850033 -> exit 11 (want 11) in 6.4 s
+ok   Y6: no stand-in process left running
+ok   Y6: no stand-in login in any file the runbook wrote
+ok   Y6: '<HH:MM:SS> aifoundry3 needs a check' appended, though rb_run.py saw no link
+ok   Y6: and the step exits 11, naming the box
+ok   Y6v2: v2's s22_collect.sh e167 1793848233 1793850033 -> exit 14 (want 14) in 6.2 s
+ok   Y6v2: no stand-in process left running
+ok   Y6v2: no stand-in login in any file the runbook wrote
+ok   Y6v2: v2 exited 14 and appended no lock line
+
+-- Y7. fault 7: s05's identity read on aifoundry1 fails closed
+ok   Y7: s05_look.sh aifoundry1 -> exit 16 (want 16) in 0.5 s
+ok   Y7: no stand-in process left running
+ok   Y7: no stand-in login in any file the runbook wrote
+ok   Y7: look_e164.sh's read failed (rc 14): no identity shown, so 16
+ok   Y7v2: v2's s05_look.sh aifoundry1 -> exit 0 (want 0) in 1.2 s
+ok   Y7v2: no stand-in process left running
+ok   Y7v2: no stand-in login in any file the runbook wrote
+ok   Y7v2: v2 went past the failed read and read the box FREE, its identity never shown
+
+-- Y8. fault 8: a later card day's session counts as ours
+ok   Y8: s09_a3_reads.sh  -> exit 10 (want 10) in 0.6 s
+ok   Y8: no stand-in process left running
+ok   Y8: no stand-in login in any file the runbook wrote
+ok   Y8: a queue_e171.py of ours runs: s09 refuses (10)
+ok   Y8: and the guard is never called
+ok   Y8v2: v2's s09_a3_reads.sh  -> exit 0 (want 0) in 1.5 s
+ok   Y8v2: no stand-in process left running
+ok   Y8v2: no stand-in login in any file the runbook wrote
+ok   Y8v2: v2's ours_live read none, and its guard read the card beside that session
+
+-- Y9. fault 9: a remote wait stops by the box's clock
+ok   Y9: s05_look.sh aifoundry2 --wait -> exit 17 (want 17) in 8.3 s
+ok   Y9: no stand-in process left running
+ok   Y9: no stand-in login in any file the runbook wrote
+ok   Y9: et-who answering in 3 s: v3's loop ends by the clock, inside the call's bound (20 s here; 600 s on a card day)
+ok   Y9v2: v2's s05_look.sh aifoundry2 --wait -> exit 13 (want 13) in 21.2 s
+ok   Y9v2: no stand-in process left running
+ok   Y9v2: no stand-in login in any file the runbook wrote
+ok   Y9v2: v2's loop counted only its 1 s sleeps, ran past the bound and was killed (13)
+
+-- Y10. fault 10: a login link never lands in a kit's --stdout file
+ok   Y10: v3 exits 11, and the killed call leaves no --stdout file
+ok   Y10v2: v2 wrote the link into the --stdout file (s22 writes reduce.txt and score.txt into a data directory so)
+ok   Y10: no stand-in process left running
+
+-- Y11. fault 11: s13's end gate is the launcher's own (D4 above: a refusal on the box is 10)
+ok   Y11: s13_a1_launch.sh  -> exit 16 (want 16) in 0.1 s
+ok   Y11: no stand-in process left running
+ok   Y11: no stand-in login in any file the runbook wrote
+ok   Y11: 35 minutes to the last end: v3 refuses E164 at its own gate (42 minutes: the launcher's 1,930 s before the deadline)
+ok   Y11: before any call
+ok   Y11v2: v2's s13_a1_launch.sh  -> exit 14 (want 14) in 1.0 s
+ok   Y11v2: no stand-in process left running
+ok   Y11v2: no stand-in login in any file the runbook wrote
+ok   Y11v2: v2 passed its own gate, sent the launcher, which refused (its exit 4), and v2 read 14
+
+-- Y12. fault 12: every launch on aifoundry1 and aifoundry2 checks the firmware identity on the box
+ok   Y12a: s13_a1_launch.sh  -> exit 16 (want 16) in 0.7 s
+ok   Y12a: no stand-in process left running
+ok   Y12a: no stand-in login in any file the runbook wrote
+ok   Y12a: a host booted after E82's read: v3 stops E164 at its guard read (16)
+ok   Y12a: launch_e164_a1.sh never sent
+ok   Y12av2: v2's s13_a1_launch.sh  -> exit 0 (want 0) in 9.5 s
+ok   Y12av2: no stand-in process left running
+ok   Y12av2: no stand-in login in any file the runbook wrote
+ok   Y12av2: v2 launched E164 on that host (its identity was read only by s05 without --wait)
+ok   Y12b: s16_a2_e165.sh full -> exit 16 (want 16) in 0.7 s
+ok   Y12b: no stand-in process left running
+ok   Y12b: no stand-in login in any file the runbook wrote
+ok   Y12b: and E165 on aifoundry2 (16)
+ok   Y12bv2: v2's s16_a2_e165.sh full -> exit 0 (want 0) in 3.8 s
+ok   Y12bv2: no stand-in process left running
+ok   Y12bv2: no stand-in login in any file the runbook wrote
+ok   Y12bv2: v2's s16 launched E165 there (only s14 read the identity, and nothing made its 16 binding)
+
+== V. the files v3 keeps from v2
+ok   V: v3/s01_probe.sh is byte for byte v2's
+ok   V: v3/s02_window.sh is byte for byte v2's
+ok   V: v3/s03_desk.sh is byte for byte v2's
+ok   V: v3/s07_a3_sync.sh is byte for byte v2's
+ok   V: v3/s08_a3_preflight.sh is byte for byte v2's
+ok   V: v3/s09_a3_reads.sh is byte for byte v2's
+ok   V: v3/s10_a3_dry.sh is byte for byte v2's
+ok   V: v3/s11_a3_session.sh is byte for byte v2's
+ok   V: v3/s12_a1_check.sh is byte for byte v2's
+ok   V: v3/s14_a2_tree.sh is byte for byte v2's
+ok   V: v3/s15_a2_dry.sh is byte for byte v2's
+ok   V: v3/s16_a2_e165.sh is byte for byte v2's
+ok   V: v3/s17_a2_e167.sh is byte for byte v2's
+ok   V: v3/s18_a2_e168.sh is byte for byte v2's
+ok   V: v3/s19_a2_e169.sh is byte for byte v2's
+ok   V: v3/list_steps.sh is byte for byte v2's
+ok   V: v3/frozen26.py is byte for byte v2's
+ok   V: v3/anchors_e165.py is byte for byte v2's
+
+== E. the dry listing
+ok   E: list_steps.sh exits 0
+ok   E: not one ssh or rsync call (0 recorded)
+ok   E: every step listed and exits 0 (50 of 50)
+ok   E: the listing holds: aifoundry1 "bash -s -- '
+ok   E: the listing holds: < tools/claims-v3/e164/box/launch_e164_a1.sh
+ok   E: the listing holds: E164_S_RECOUNT=docs/reports/data/2026-11-04-q141t-s7-recount/arm/arm27-aifoundry1c1.json
+ok   E: the listing holds: tools/claims-v3/dmcmd_table.json tools/claims-v3/e166/ aifoundry3:aifoundry/
+ok   E: the listing holds: anchors_e165.py
+ok   E: the listing holds: --e165-anchors
+ok   E: the listing holds: reduce_e168.py
+ok   E: the listing holds: --anchors
+ok   E: the listing holds: build/e168/runs/
+ok   E: the listing holds: build/e169/runs/
+ok   E: the listing holds: collect_e165_bounded.sh
+ok   E: the listing holds: collect_e167_bounded.sh
+ok   E: the listing holds: latch_check_e167.py
+ok   E: the listing holds: run_e167.sh dry
+ok   E: the listing holds: build/e169/dry
+ok   E: the listing holds: QUEUE-STOP
+ok   E: the listing holds: score_rank4.py
+ok   E: the listing holds: score_s7arm_a1.py
+ok   E: the listing holds: arm27-aifoundry3.json
+ok   E: the listing holds: GUARD-OK
+ok   E: the listing holds: job_ok_today a1-check
+ok   E: the listing holds: IDENTITY-OK
+ok   E: the listing holds: 2026-10-27 13:56:26 PDT
+ok   E: the listing holds: names its own box in the lock line
+ok   E: the listing holds: probe aifoundry1, hard-killed
+ok   E: the listing holds: REFUSED: an earlier E166 smoke is on the box
+ok   E: the listing holds: fresh build/q141k/e166.log-offset
+ok   E: the listing holds: gate: now + 70 min
+ok   E: the listing holds: _v3] dry listing
+ok   E: the listing holds: gate: no desk path
+ok   E: the listing holds: IDENTITY-STOP
+ok   E: the listing holds: e168-raw
+ok   E: the listing holds: build/e163-raw/
+ok   E: box/launch_e164.sh (it would run 0 passes) is never sent
+ok   E: no home path in the listing
+
+453 of 453 checks pass
+ALL PASS
