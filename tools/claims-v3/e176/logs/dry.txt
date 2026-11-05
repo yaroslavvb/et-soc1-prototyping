@@ -1,0 +1,136 @@
+# E176's desk dry pass on the Intel, Thu 05 Nov 2026 12:33:31 PST, before any E176 data: V3_DRY=1 E176_DESK=1 in a scratch copy of
+# the committed tree with E176's files; E97's toy card (a virtual clock, a die that always reads 51 C, a 34-sensor mean of 51.433 C, a
+# board that never rises); no device opened, no ssh. Shims on PATH: date -> GNU date (the box's), hostname -> aifoundry3 (lib.sh reads
+# the card from it), python3 -> /usr/bin/python3 3.9.6. Paths below are relative to the copy's top directory, <tree>.
+== A. the session script: gates, hash check, preflight, the smoke with its five stop tests, the smoke gate
+session rc=0
+2026-11-05 12:33:31 PST session start (T0 12:33:31 PST)
+2026-11-05 12:33:31 PST the full design (no subset): budget 4560 s from T0, the pass's deadline 13:48:31 PST
+2026-11-05 12:33:31 PST DESK: box-only, not checked here: build/ccheck/b/host/sparsity_host
+2026-11-05 12:33:31 PST DESK: box-only, not checked here: build/sparsity/kernel/sparsity.elf
+2026-11-05 12:33:31 PST DESK: box-only, not checked here: build/ettelem/ettelem
+2026-11-05 12:33:31 PST frozen-e176.sha256: every file as registered
+2026-11-05 12:33:31 PST dmcmd_audit preflight rc=0 (dmcmd_audit: GO (38 send site(s), 0 disallowed; allow-list: none))
+2026-11-05 12:33:31 PST DESK: et-who not run off the box
+2026-11-05 12:33:31 PST DRY config config-session-start.json
+desk dry pass (E176_DESK): box-only, not checked here: missing the C-logging host build/ccheck/b/host/sparsity_host
+desk dry pass (E176_DESK): box-only, not checked here: missing the kernel build/sparsity/kernel/sparsity.elf
+desk dry pass (E176_DESK): box-only, not checked here: missing build/ettelem/ettelem
+2026-11-05T12:33:32 [aifoundry3] e176-smoke p17601 begins (die 80 C) -> <tree>/build/claims-v3-dry/aifoundry3/e176-smoke/p17601
+12:33:35 [aifoundry3] E176 pass 17601: design smoke + stop tests; deadline 2026-11-05 13:53:35 PST, 80.0 min left; lines: gate 70 C, hold 72 C / 65 W, session 74 C
+12:33:35 [aifoundry3] rest R0: 8 s
+12:33:43 [aifoundry3] rest R0 ends after 8 s: 34-sensor mean 51.433 C
+12:33:43 [aifoundry3] room (R0's rest die): 34-sensor mean 51.433 C, firmware None C; H_E: smoke: the cool pattern
+12:33:43 [aifoundry3] rest die before H_E: 34-sensor mean 51.433 C, firmware None C (last 120 s)
+12:33:43 [aifoundry3] hold H_E: fp32.randn for 11 s, 3.20 s every 7.56 s
+12:33:54 [aifoundry3] hold H_E ends (time) after 11 s, 2 launches, die 51 C
+12:33:54 [aifoundry3] rest R1: 2 s
+12:33:56 [aifoundry3] rest R1 ends after 2 s: 34-sensor mean 51.433 C
+12:33:56 [aifoundry3] rest die before Z: 34-sensor mean 51.433 C, firmware None C (last 120 s)
+12:33:56 [aifoundry3] hold Z: fp32.zeros for 5 s, back to back
+12:34:01 [aifoundry3] hold Z ends (time) after 5 s, 1 launches, die 51 C
+12:34:01 [aifoundry3] rest R2: 2 s
+12:34:03 [aifoundry3] rest R2 ends after 2 s: 34-sensor mean 51.433 C
+12:34:03 [aifoundry3] rest die before L1: 34-sensor mean 51.433 C, firmware None C (last 120 s)
+12:34:03 [aifoundry3] hold L1: int8.full for 5 s, back to back
+12:34:08 [aifoundry3] hold L1 ends (time) after 5 s, 1 launches, die 51 C
+12:34:08 [aifoundry3] rest R3: 2 s
+12:34:10 [aifoundry3] rest R3 ends after 2 s: 34-sensor mean 51.433 C
+12:34:10 [aifoundry3] rest die before S: 34-sensor mean 51.433 C, firmware None C (last 120 s)
+12:34:10 [aifoundry3] hold S: int8.neg_ones for 5 s, back to back
+12:34:15 [aifoundry3] hold S ends (time) after 5 s, 1 launches, die 51 C
+12:34:15 [aifoundry3] rest R4: 2 s
+12:34:17 [aifoundry3] rest R4 ends after 2 s: 34-sensor mean 51.433 C
+12:34:17 [aifoundry3] rest die before L2: 34-sensor mean 51.433 C, firmware None C (last 120 s)
+12:34:17 [aifoundry3] hold L2: int8.full for 5 s, back to back
+12:34:22 [aifoundry3] hold L2 ends (time) after 5 s, 1 launches, die 51 C
+12:34:22 [aifoundry3] rest R5: 3 s
+12:34:25 [aifoundry3] rest R5 ends after 3 s: 34-sensor mean 51.433 C
+12:34:25 [aifoundry3] rest T0: 5 s
+12:34:30 [aifoundry3] rest T0 ends after 5 s: 34-sensor mean 51.433 C
+12:34:30 [aifoundry3] hold T_gate: fp32.randn for 3 s, 3.20 s every 7.56 s
+12:34:30 [aifoundry3] hold T_gate: no launch at a firmware reading of 51 C (>= 1 C)
+12:34:33 [aifoundry3] hold T_gate ends (time) after 3 s, 0 launches, die 51 C
+12:34:33 [aifoundry3] hold T_die: fp32.randn for 3 s, 3.20 s every 7.56 s
+12:34:33 [aifoundry3] watch (loop): die line fired at die 51 C (34-sensor mean -), board 24.00 W
+12:34:33 [aifoundry3] hold T_die: the hold's line fired (die): the hold ends
+12:34:33 [aifoundry3] hold T_die ends (stop) after 0 s, 0 launches, die 51 C
+12:34:33 [aifoundry3] hold T_board: fp32.randn for 3 s, 3.20 s every 7.56 s
+12:34:33 [aifoundry3] watch (loop): board line fired at die 51 C (34-sensor mean -), board 24.00 W
+12:34:33 [aifoundry3] hold T_board: the hold's line fired (board): the hold ends
+12:34:33 [aifoundry3] hold T_board ends (stop) after 0 s, 0 launches, die 51 C
+12:34:33 [aifoundry3] rest T1: 3 s
+12:34:36 [aifoundry3] rest T1 ends after 3 s: 34-sensor mean 51.433 C
+12:34:36 [aifoundry3] hold T_inlaunch: fp32.randn for 12 s, 3.20 s every 7.56 s
+12:34:48 [aifoundry3] hold T_inlaunch ends (time) after 12 s, 2 launches, die 51 C
+12:34:48 [aifoundry3] rest T2: 3 s
+12:34:51 [aifoundry3] rest T2 ends after 3 s: 34-sensor mean 51.433 C
+12:34:51 [aifoundry3] watch (loop): session line fired at die 51 C (34-sensor mean -), board 24.00 W
+12:34:51 [aifoundry3] STOP (6): the session line 1 C: {'rule': 'session', 'line_c': 1.0, 't_sample_ms': 1793910891408, 't_seen_ms': 1793910891408, 'die_c': 51.0, 'mean34_c': None, 'board_w': 24.0, 'where': 'loop'}
+12:34:51 [aifoundry3] stop tests: {"gate": {"launches": 0, "pass": true}, "hold_die": {"why": "stop", "launches": 0, "pass": true}, "hold_board": {"why": "stop", "launches": 0, "pass": true}, "in_launch": {"line_w": 28.0, "why": "time", "launches": 2, "pass": false}, "session": {"pass": true, "exit": 6}}
+2026-11-05T12:33:38 [aifoundry3] e176-smoke p17601 ends: failed runner exit 1
+2026-11-05 12:33:38 PST smoke and stop tests rc=1
+2026-11-05 12:33:38 PST smoke gate rc=1: {"gate": "NO-GO", "dir": "build/claims-v3-dry/aifoundry3/e176-smoke/p17601", "problems": ["block.json status 'failed'", "stop tests: {'gate': {'launches': 0, 'pass': True}, 'hold_die': {'why': 'stop', 'launches': 0, 'pass': True}, 'hold_board': {'why': 'stop', 'launches': 0, 'pass': True}, 'in_launch': {'line_w': 28.0, 'why': 'time', 'launches': 2, 'pass': 
+2026-11-05 12:33:38 PST the smoke or its gate failed: no measured pass
+2026-11-05 12:33:38 PST DRY config config-session-end.json
+2026-11-05 12:33:38 PST DESK: et-who not run off the box
+2026-11-05 12:33:38 PST session end
+-- the smoke's runner log (stop tests):
+12:33:35 [aifoundry3] E176 pass 17601: design smoke + stop tests; deadline 2026-11-05 13:53:35 PST, 80.0 min left; lines: gate 70 C, hold 72 C / 65 W, session 74 C
+12:34:30 [aifoundry3] hold T_gate: fp32.randn for 3 s, 3.20 s every 7.56 s
+12:34:30 [aifoundry3] hold T_gate: no launch at a firmware reading of 51 C (>= 1 C)
+12:34:33 [aifoundry3] hold T_gate ends (time) after 3 s, 0 launches, die 51 C
+12:34:33 [aifoundry3] hold T_die: fp32.randn for 3 s, 3.20 s every 7.56 s
+12:34:33 [aifoundry3] hold T_die: the hold's line fired (die): the hold ends
+12:34:33 [aifoundry3] hold T_die ends (stop) after 0 s, 0 launches, die 51 C
+12:34:33 [aifoundry3] hold T_board: fp32.randn for 3 s, 3.20 s every 7.56 s
+12:34:33 [aifoundry3] hold T_board: the hold's line fired (board): the hold ends
+12:34:33 [aifoundry3] hold T_board ends (stop) after 0 s, 0 launches, die 51 C
+12:34:36 [aifoundry3] hold T_inlaunch: fp32.randn for 12 s, 3.20 s every 7.56 s
+12:34:48 [aifoundry3] hold T_inlaunch ends (time) after 12 s, 2 launches, die 51 C
+12:34:51 [aifoundry3] STOP (6): the session line 1 C: {'rule': 'session', 'line_c': 1.0, 't_sample_ms': 1793910891408, 't_seen_ms': 1793910891408, 'die_c': 51.0, 'mean34_c': None, 'board_w': 24.0, 'where': 'loop'}
+12:34:51 [aifoundry3] stop tests: {"gate": {"launches": 0, "pass": true}, "hold_die": {"why": "stop", "launches": 0, "pass": true}, "hold_board": {"why": "stop", "launches": 0, "pass": true}, "in_launch": {"line_w": 28.0, "why": "time", "launches": 2, "pass": false}, "session": {"pass": true, "exit"
+-- the smoke gate's verdict:
+{"gate": "NO-GO", "dir": "build/claims-v3-dry/aifoundry3/e176-smoke/p17601", "problems": ["block.json status 'failed'", "stop tests: {'gate': {'launches': 0, 'pass': True}, 'hold_die': {'why': 'stop', 'launches': 0, 'pass': True}, 'hold_board': {'why': 'stop', 'launches': 0, 'pass': True}, 'in_launch': {'line_w': 28.0, 'why': 'time', 'launches': 2, 'pass': False}, 'session': {'pass': True, 'exit': 6}}", "H_E: 0 launch records for fp32.randn", "Z: 0 launch records for fp32.zeros", "L1: 0 launch records for int8.full", "S: 0 launch records for int8.neg_ones", "L2: 0 launch records for int8.full", "no host record in the C log", "0 C records for 0 launch records", "34 raw codes in 0 of 0 telemet
+== B. the session's gates refuse before any device: no gates set; T0 + 76 min past the end gate; E176_DESK without V3_DRY
+no gates: rc=8 (2026-11-05 12:33:38 PST the day's gates are not set (E176_LATEST_START, E176_END_GATE): no device opened)
+end gate too early: rc=8 (2026-11-05 12:33:38 PST T0 + 76 min passes the end gate 13:33:00 PST and there is no subset: no device opened)
+E176_DESK is for a dry pass only (V3_DRY=1)
+E176_DESK without V3_DRY: rc=2
+== C. the measured pass through the block, the full design (the toy's room, 51.433 C) and the start gate (E176_DRY_ROOM_C=53.4)
+block 17692 rc=0
+12:38:42 [aifoundry3] room (R0's rest die): 34-sensor mean 51.433 C, firmware None C; H_E: room 51.433 C <= 51.5 C: the cool pattern
+12:38:42 [aifoundry3] start gate (E176 G0, E166's): passed
+12:48:42 [aifoundry3] hold H_E ends (time) after 600 s, 80 launches, die 51 C
+13:04:42 [aifoundry3] hold Z ends (time) after 600 s, 85 launches, die 51 C
+13:16:42 [aifoundry3] hold L1 ends (time) after 600 s, 85 launches, die 51 C
+13:32:42 [aifoundry3] hold S ends (time) after 600 s, 85 launches, die 51 C
+13:44:42 [aifoundry3] hold L2 ends (time) after 600 s, 85 launches, die 51 C
+13:47:12 [aifoundry3] done
+{"exp":"e176","pass":17692,"card":"aifoundry3","t0_ms":1793910819161,"t1_ms":1793910825536,"die_c_start":80,"die_c_end":80,"status":"ok","note":"sampler pvt"}
+
+block 17693 (room 53.4 C) rc=7
+12:38:49 [aifoundry3] room (R0's rest die): 34-sensor mean 53.4 C, firmware None C; H_E: room 53.400 C > 53.0 C: no hold (G0)
+12:38:49 [aifoundry3] start gate (E176 G0, E166's): NOT passed
+12:38:49 [aifoundry3] decision: E176 not started: the start gate (R0's room above 53.0 C or unreadable): no hold runs; 69.7 min left to the deadline
+12:38:49 [aifoundry3] STOP (7): the start gate: R0's room 53.4 C (at most 53.0 C)
+{"exp":"e176","pass":17693,"card":"aifoundry3","t0_ms":1793910825774,"t1_ms":1793910832144,"die_c_start":80,"die_c_end":80,"status":"gate","note":"the start gate (E176 G0, E166's): R0's room above 53.0 C or unreadable; no hold ran"}
+
+== D. the warm pattern (E176_DRY_ROOM_C=52.5, the runner alone) and a looser stop line refused
+runner rc=0
+12:38:52 [aifoundry3] room (R0's rest die): 34-sensor mean 52.5 C, firmware None C; H_E: room 52.500 C in (51.5, 53.0] C: the warm pattern
+12:38:52 [aifoundry3] start gate (E176 G0, E166's): passed
+12:38:52 [aifoundry3] hold H_E: fp32.randn for 600 s, 2.60 s every 7.98 s
+12:48:52 [aifoundry3] hold H_E ends (time) after 600 s, 75 launches, die 51 C
+a 70 W hold line: rc=1 (E176: a stop line is looser than registered (gate 70 C, hold 72 C / 65 W, session 74 C))
+E176_DRY_ROOM_C without --dry: rc=1 (E176: E176_DRY_ROOM_C is for --dry only)
+-- the runner's --list (the four E78 tiles against kinds.json):
+{"design": "full", "steps": [["rest", "R0", 300.0], ["hold", "H_E", 600.0], ["rest", "R1", 360.0], ["hold", "Z", 600.0], ["rest", "R2", 120.0], ["hold", "L1", 600.0], ["rest", "R3", 360.0], ["hold", "S", 600.0], ["rest", "R4", 120.0], ["hold", "L2", 600.0], ["rest", "R5", 150.0]], "items": ["fp32.randn", "fp32.zeros", "int8.full", "int8.neg_ones"], "plan_s": 4410.0, "max_s": 4710, "left_s": 4799, "tile_problems": [], "he_pattern": {"cool_at_or_under_51.5C": [3.2, 7.56], "warm_51.5_to_53.0C": [2.6, 7.98]}}
+list rc=0
+== E. the measured pass by hold (the toy writes no launch record): launches, lengths, H_E's start-to-start, the order the scorer reads
+holds (launches, s): {'H_E': (80, 600.0), 'Z': (85, 600.0), 'L1': (85, 600.0), 'S': (85, 600.0), 'L2': (85, 600.0)}
+rests (s): [('R0', 300.0), ('R1', 360.0), ('R2', 120.0), ('R3', 360.0), ('R4', 120.0), ('R5', 150.0)]
+plan minutes: 73.5 | H_E start-to-start (s): [7.56]
+order by first launch: ['H_E', 'Z', 'L1', 'S', 'L2'] | the pair first (H_E, Z): True | L1 and S ended before L2's first launch: True
+start_gate mark: [{'kind': 'start_gate', 't_ms': 1793911122323, 'room_c': 51.4329101562505, 'max_c': 53.0, 'passed': True, 'why': 'room at or under 53.0 C: the design runs'}]
+room mark: [{'kind': 'room', 't_ms': 1793911122323, 'window_s': 120.0, 'mean34_c': 51.4329101562505, 'firmware_c': None, 'he_seconds': 3.2, 'he_period_s': 7.56, 'why': 'room 51.433 C <= 51.5 C: the cool pattern', 'dry_room': False}]

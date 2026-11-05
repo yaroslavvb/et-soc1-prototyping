@@ -1,0 +1,28 @@
+M11 scorer self-test: lists SHA256SUMS 58, SHA256SUMS-m11 6, SHA256SUMS-a1 9, SHA256SUMS-a2 7, SHA256SUMS-a3 7, SHA256SUMS-a4 6, SHA256SUMS-h2-reader 16, SHA256SUMS-h2-reader-v2 129, SHA256SUMS-h2-refit 6
+  M10's per-hold R and e (9 holds): e within 0.001 C in all, R within 0.001 C in 8; every hold accepted
+    E154|H_M           R 11.208 (M10 11.2090)  e +0.352 (M10 +0.3520)  ok
+    E154|K_L           R 4.024 (M10 4.0240)  e +0.073 (M10 +0.0730)  ok
+    E154|K_O           R 11.546 (M10 11.5460)  e +0.536 (M10 +0.5360)  ok
+    E154|K_Q           R 5.673 (M10 5.6730)  e +0.005 (M10 +0.0050)  ok
+    E154|K_S           R 11.785 (M10 11.7920)  e +0.418 (M10 +0.4180)  accepted: R3's window (section 1) reads 11.785, posthoc.json's convention_window exactly; M10's 11.792 is E154's registered window (posthoc.json registered_window), whose end moved -1.921 s
+    E166|K_L           R 4.409 (M10 4.4090)  e +0.403 (M10 +0.4030)  ok
+    E166|K_O_window    R 11.268 (M10 11.2680)  e +0.242 (M10 +0.2420)  ok
+    E166|K_Q           R 6.663 (M10 6.6630)  e +0.200 (M10 +0.2000)  ok
+    E166|K_S           R 12.726 (M10 12.7260)  e +0.233 (M10 +0.2330)  ok
+  post hoc (not a registered result): HM-LG on E154 and E166 as two sessions reads BOTH (k 2, n 9; F_slope 9.8267, F_level 6.2848, point 5.7861; they differ, the form unresolved)
+  synthetic: a common 3.2% gain in both sessions                                    PASS  {"HM_LG": "GAIN", "A1_4": "gain enters", "arm": "replaced", "carries": "A1-4's common term (gain enters)"}
+  synthetic: a common 0.27 C level in both sessions                                 PASS  {"HM_LG": "LEVEL", "A1_4": "level enters", "arm": "retired", "carries": "A1-4's common term (level enters)"}
+  synthetic: E154's line, then E166's (the premise holds)                           PASS  {"HM_LG": "BOTH", "A1_4": "nothing: the sessions differ", "HM_CAL": "BETTER", "A2_3": "the calibration enters", "HM_E144": "DOES NOT REPEAT", "carries": "A2's in-session calibration (H_E and Z)"}
+  synthetic: E154's line, then E166's, H_E read by the chain (section 0.1's case)   PASS  {"HM_E144": "REPEATS", "HM_CAL_I8": "BETTER", "A4_3": "HM-CAL-I8 enters", "carries": "A4's in-session calibration (L1 and S, read on L2)"}
+  synthetic: no effect (noise only)                                                 PASS  {"HM_LG": "NOT SEPARATED", "A1_4": "nothing: NOT SEPARATED", "arm": "retired", "carries": "nothing: the chain unscaled stays M11's primary"}
+  synthetic: one session (E154's line)                                              PASS  {"A1_4": "nothing: one session (a candidate)", "carries": "nothing: one session (the readings are a candidate for the next session)"}
+  synthetic: H_E not scored in S1 (HM-CAL reads S2 only; HM-CAL-I8 reads both)      PASS  {"HM_CAL_S1": "NOT SCORED", "HM_CAL_k": 1, "HM_CAL_I8_k": 2}
+  synthetic: the pair run in the other order in both sessions                       PASS  {"HM_CAL": "NOT SCORED", "A2_3": "nothing from A2: NOT SCORED"}
+  synthetic: L2 not scored in both sessions                                         PASS  {"HM_CAL_I8": "NOT SCORED"}
+  synthetic: L2 run before S ended in both sessions                                 PASS  {"HM_CAL_I8": "NOT SCORED"}
+  synthetic: three holds scored in S1 (HM-LG counts S2 only)                        PASS  {"HM_LG_k": 1}
+  committed cell: A2 (design-power-heat-a2.json plan|0.0884|mixed: HM-CAL B/NR/W, enters): [99.2, 0.7, 0.1, 97.1] against [99.2, 0.7, 0.1, 97.1]: equal
+  committed cell: A3 (design-power-heat-a3.json premise_a3, section 0.1's case: HM-CAL BETTER, enters, REPEATS): [37.1, 21.6, 94.1] against [37.1, 21.6, 94.1]: equal
+  committed cell: A4 (design-power-heat-a4.json, section 0.1's case: I8 BETTER, I8 enters, a per-session calibration): [89.5, 59.4, 81.0] against [89.5, 59.4, 81.0]: equal
+  precedence (git): a first launch now reads blind True; one second before A4's commit False; every registration commit an ancestor of HEAD: True
+SELF-TEST PASS
