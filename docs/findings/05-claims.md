@@ -3680,7 +3680,9 @@ M10's D carried is the primary on aifoundry2 and card 0, with M9's part beside, 
 on pool 8**: it reads FAIL if A2-Bp fails, else NOT SCORED, never "NOT SCORED" alone, and A2-G, Bg, F1 and W1 are NOT SCORED at
 pool 8's design, so rank 2's governed clock line gets no blind test from it; (64) **C0-W's 97.5% is coverage by construction,**
 not a power: the informative forecasts are A2-Bp's 88.6% and C0-B's 88.5%; (65) **the chain unscaled's 0.493 °C over the nine
-large rises is blind given the watts**, the grouping post hoc, and the ×1.032 arm's 0.294 °C held out.
+large rises is blind given the watts**, the grouping post hoc, and the ×1.032 arm's 0.294 °C held out. *(Dated, Thu 5 Nov 2026, after these records' verifier.)* (66) **E174 is scored at its own planned n of 21**, against
+C0-W 0.521–1.118 W, C0-F 0.172–4.540 MHz and C0-H1 0.216–0.472 °C, never against the 31-tile lines the table below gives for
+card 0.
 
 ### What is registered and frozen (desk only; no row is a measurement)
 
@@ -3702,7 +3704,7 @@ large rises is blind given the watts**, the grouping post hoc, and the ×1.032 a
 | Card 1's lines (E172) | P1 0.098–0.308 W, P2 0.075–0.268, P3 0.105–0.269; B1 −0.097 to +0.070; B2 −0.115 to +0.096; H1 / H2 / H3 0.179–0.431 / 0.163–0.455 / 0.091–0.212 °C | R | the same; `e172/E172.md` |
 | LG's power at pool 8's own design | aifoundry3 (E153's 8 re-runs, D_ref 1.355–21.878 W, and E163's 4, 9.854–24.814 W; df (2, 8), F 4.459): GAIN 76.4% at a 0.6% gain, 94.6% at 1.0%; LEVEL 90.0% at 0.11 W, 94.8% at 0.15 W; the null NOT SEPARATED 93.6%. Card 1 (E157 and E164): 73.0, 94.6, 89.7, 94.5 and 92.8% | D | `B8/intervals-pool8.json`, LG; `F8/README.md` |
 | aifoundry2 (E173) | 11 fp32 tiles left out at 82 W (upper-95% peaks 84.4–87.3 W; the highest kept 81.88 W); 24 scored, 3 governed (fp16, 727–777 MHz predicted) and 21 pinned; A2-G, Bg, F1 and W1 NOT SCORED; A2-R2 FAIL if A2-Bp fails, else NOT SCORED; Bp, F2 (0.174–4.540 MHz), W2 (0.528–1.113 W), M1 (24 tiles) and H1 (0.491–0.870 °C) scored | R | `B8/predictions-pool8-aifoundry2.json`; `F8/README.md.dated-note-1.md`, section 1; `e173/E173.md` |
-| Card 0 (E174) | C0-W 0.574–1.066 W, C0-F 0.245–4.489 MHz, C0-H1 0.235–0.450 °C (band ± 0.593 °C); the predictions hold 31 scored tiles and no admission; E174 admits 39 of the 64 by E170's rule and scores 21 (fp32 4, fp16 5, int8 12); the highest admitted estimate 58.56 W | R | `B8/predictions-pool8-aifoundry1c0.json`; `e174/E174.md` |
+| Card 0 (E174) | C0-W 0.574–1.066 W, C0-F 0.245–4.489 MHz, C0-H1 0.235–0.450 °C (band ± 0.593 °C); the predictions hold 31 scored tiles and no admission; E174 admits 39 of the 64 by E170's rule and scores 21 (fp32 4, fp16 5, int8 12); the highest admitted estimate 58.56 W *(Dated, Thu 5 Nov 2026, after these records' verifier: the three lines at the start of this cell are the frozen intervals' at the predictions' 31 scored tiles, which apply no admission (`B8/intervals-pool8.json`, card 0; `e174/predictions-e174.json` › `lines_at_n31`), not E174's. E174 is scored at its own planned n of 21, against its registered lines **C0-W 0.521–1.118 W, C0-F 0.172–4.540 MHz and C0-H1 0.216–0.472 °C** (`e174/E174.md`, its rules table and "Precision, before the data"; `e174/predictions-e174.json` › `lines`). Each rule passes at or below its line's 97.5% point, so a C0-W rms between 1.066 and 1.118 W, a C0-F between 4.489 and 4.540 MHz or a C0-H1 between 0.450 and 0.472 °C passes E174's line and would fail the 31-tile one.)* | R | `B8/predictions-pool8-aifoundry1c0.json`; `e174/E174.md` |
 | The forecasts | A2-Bp 88.6% and C0-B 88.5%, informative; C0-W's 97.5% (`W_at_or_under_line` 0.9747) is coverage by construction, not a power | D | `e173/E173.md`; `e174/E174.md.dated-note-1.md`, section 4 |
 
 ### The card day's four runs, registered and kitted, not run (E171–E174)
@@ -3722,6 +3724,27 @@ about 180–195 card-minutes (the caps sum to 217), about 2–2.25 h of wall tim
 desk. The plan, the window and the day's one post are the readiness critic's; E174 runs only after E172's end has been read, and
 the v2 drivers are the ones to use (`s22_collect_k6_v2.sh`, `step_e173_v2.sh`, `step_e174_v2.sh`).
 
+*(Dated, Thu 5 Nov 2026, after these records' verifier: what the readiness critic's records list quotes and the records above left
+out, each from the committed registrations, kits and notes.)* **The 600 MHz runs** (`e171/E171.md`, `e172/E172.md`): the paired
+rules M1, M1f, M1i and A1 take 20,000 draws from `random.Random(80000 + Σ ord(rule id))`; P8-KA is read per session (KA's two
+tiles) and pooled over E171 and E172 (four tiles, its minimum); P8-G passes when P1, P2, P3, B1, B2 and C1 pass and M1 is not
+WORSE (`P8reg/POOL8-REGISTRATION.md`, section 7); a pass is 84 runs, 86 launches with the two burn-ins, every one of them
+C-logged; the sessions that must carry a C log are the smoke and every pass directory whose `runs.jsonl` holds a launch record,
+and the stop-path test, which launches nothing, must carry none. **The 600 MHz kits' fix pass** also found two cosmetic faults in
+v1's `ka` route, both right in v2 and neither changing a number: its "ka-pooled exited" line could only ever say 14, and its
+closing "P8-KA pooled read:" line printed nothing (`q141k-runbook/k6/README.md.dated-note-1.md`). **The governed runs**
+(`e173/E173.md`, `e174/E174.md`): E173 runs 53 pool tiles, the 11 left out at 82 W in no run; E174's smoke is ramped, a 2 s launch
+of `int8.anchor7_zeros`, then one of `fp32.b_onebit_b20_one` (estimate 57.69 W); κ0 0.9463 is carried unchanged, with E170-X0's
+ratio reported beside it, never a verdict. The governed kits' fix pass added three things its verifier did not ask for: E174's
+sync refuses while a card session of ours or a dry pass runs on aifoundry1, E174's box check reads the tiles line, and `RB_BASE`
+defaults to the kits' commit `5a2a9ba0` (`e174/box/step_e174_v2.sh`, `q142kg-runbook/rb_common_v2.sh`). E174's dated note 1 says
+it was written from about 05:45 PST; by that fix pass's own record it was written from about 05:42. **The readiness critic's own
+checks**, quoted in no earlier record: every file a harness pins is synced on the day or is already on the box with the same
+sha256 from Wednesday's parent run (E171 83 + 14 of 97, E172 84 + 15 of 99, E174 110 + 0 of 110); E172 and E174 pin the same
+binaries at their shared paths on aifoundry1's tree; both runbooks keep their dry jobs in that tree's `build/q141k/jobs`, so
+E172's launch and E174's box check exclude each other both ways; and an independent public-text scan of the 352 added files and
+the 16 commit messages found only the reviewed classes.
+
 ### The verifiers, the fix passes and the two round critics: each fault, and where it is answered
 
 | | What | Where it is answered |
@@ -3739,6 +3762,7 @@ the v2 drivers are the ones to use (`s22_collect_k6_v2.sh`, `step_e173_v2.sh`, `
 | Its fault 4 (nit) | E174's "only after E172 has ended": the code reads it as never beside E172, and nothing records E172's end | one sentence before E174's data: E174 runs after E172 has ended, or if E172 never starts, and never beside it |
 | Its fault 5 (nit) | the kg notes say they came "before the code they name": true by commit order; the code was last written at 05:43:05 | quote it as: committed before the code's commit (`34436d68`) and before any data |
 | Carried | k6's desk test does not cover step 13's cases or JOB-LOST (v3.1's code, run on Wed's card half); `ours_live`'s exclusion of a dry pass cannot be shown on macOS (v3.1's rule on the box); the scans ran without the lab's privacy table, absent on the Intel | a later port's desk test; the kits' login scrubs and the public-text scan at each data commit |
+| *(Dated, Thu 5 Nov 2026)* These records' verifier (about 07:44–08:16 PST) | four minor faults: the Horace Hub's Status still said a blind pool 8 heads the list, and its Levels tab filed the chain's 0.493 °C as held out; the "Card 0 (E174)" row above gives the 31-tile lines, not E174's at n 21; parts of the readiness critic's records list reached no record. Three nits and one carried item: times to the second were when the deploy calls returned; the kinds page's pool-8 paragraph does not name the design commit `153b720f`; "scored" in AGENT.md's changelog entry has no pointer to its meaning; the findings README's index still reads E1–E170 | the dated clause in the "Card 0 (E174)" row, the carry item (66) and the dated paragraph after the runs table (this fix pass); the hub's Status and Levels, rewritten, with one Fix entry in its Log; the times in Disclosures; the other three carried to the next edit of each file |
 
 ### The lanes' wording, as corrected (quote it so)
 
@@ -3776,6 +3800,11 @@ the v2 drivers are the ones to use (`s22_collect_k6_v2.sh`, `step_e173_v2.sh`, `
 - *(Dated, Thu 5 Nov 2026, after these records' first commit.)* **"Scored"** in that commit's message (`f14c4ceb`) and in
   AGENT.md's changelog entry ("E171–E174 registered, scored and kitted") means that each run's scorer was written and
   self-tested, as the lanes' own records use the word; no run has been scored, and nothing of pool 8 is measured.
+- *(Dated, Thu 5 Nov 2026, after these records' verifier.)* **Times to the second.** These records date the kinds page's version
+  `825eac7600b3` at 07:23:25 PST, the time its deploy call returned; the version's own time, `get_space`'s `created_at`, is
+  07:23:23.8 PST, and the hubs' versions differ from their deploy calls' returns in the same way. A later record that quotes a
+  time to the second uses the version's. **This fix pass's compute:** desk only, on the Intel; its Python ran through the round's
+  job slots, one job at a time, with git, the deploys and their reads outside them; no card, lab box, post, Modal app or archive.
 
 ### What remains (the readiness critic's next list, ranked)
 
@@ -3784,7 +3813,8 @@ the v2 drivers are the ones to use (`s22_collect_k6_v2.sh`, `step_e173_v2.sh`, `
    post. At the go, about 10 minutes at the desk first: one output directory and the two runbooks' windows, the pull and all 22
    hash lists, E174's one sentence (fault 4), and the v2 drivers only. It turns M10's held-out figures into blind ones on four
    cards, and LG decides whether term a's float excess is a gain or a level.
-2. These records, then a verifier and a fix pass.
+2. These records, then a verifier and a fix pass. *(Dated, Thu 5 Nov 2026: done; the verifier held them with four minor faults, three nits and one carried
+   item, and this fix pass corrected the four faults here and on the Horace Hub.)*
 3. At the desk: M11's heat registration before any hold, heat over minutes as a session level against a gain with two or more rise
    levels a session and one hold like E144's, its power stated the way LG's is, with a heat scale for card 1 alone and a
    paired-anchor int8 term beside it.
