@@ -1,0 +1,52 @@
+PASS W  s02_window_q142kg.sh writes the day's window (last start 22:00, last end 23:30 tomorrow) with E174's deadline
+PASS A  the dry listing of all 17 steps of the v2 drivers exits 0
+PASS A  the dry listing called no ssh and no rsync
+PASS A  each collect step lists its collector, v2's C-log list, the C-check gate and the desk-path gate
+PASS A  step_e174_v2 check start lists a detached dry job that refuses during a session of ours, running check_box_e174.sh and reading it on the box
+PASS A  step_e174_v2 launch lists the day's clean-check gate, then the box's guard (no dry pass, no session of ours, today's check job), then launch_e174.sh
+PASS A  step_e174_v2 sync reads the box quiet first; step_e173_v2 tree checks ancestry of 5a2a9ba0; the steps are named _q142kg2
+PASS B1 step_e173_v2 look, a free card: 0
+PASS B1 the remote script carries the q142kg prelude's ours_live (E171-E174 named)
+PASS B2 step_e173_v2 look, a host booted after E69's read: 16
+PASS B3 step_e173_v2 look, a held card: 17
+PASS C1 a link at the probe: 11, the lock line appended, the link kept in RB_OUT/links.txt
+PASS C2 a link in step_e174_v2 look's call: 11, the lock line names aifoundry1
+PASS C  no stand-in process left after the link cases
+PASS D1 a probe that hangs: 12
+PASS D2 a call that hangs past its bound: 13
+PASS D  no stand-in process left after the hang cases
+PASS E1 step_e174_v2 launch, the guard passes and launch_e174.sh refuses on the box: 10
+PASS E2 step_e174_v2 launch, launch_e174.sh's own identity stop: 16
+PASS E3 step_e174_v2 launch, the guard passes and launch_e174.sh prints its launch line: 0
+PASS E3 the launch passed the window file's E174 deadline to launch_e174.sh
+PASS E4 step_e173_v2 launch past the day's last start: 16, and no call was made
+PASS F  step_e174_v2 wait: halted 16, ended 0, still running 17
+PASS G  step_e174_v2 sync (the box quiet): a failed copy 14; a link in the copy 11 with its lock line
+PASS H  step_e173_v2 tree: clean 0; the device-command preflight NO-GO 16
+PASS J  ours_live's pattern names E171-E174's queue, runner, session and block processes and v3.1's, and not a desk scorer
+PASS K1 check start beside E172's queue, session, block or runner (the generated job script run in a sandbox): 14 with JOB-REFUSED, no job written, the stale clean file removed
+PASS K2 check start while another dry pass of the runbook runs there (E172's box check): 14 with JOB-REFUSED, no job written
+PASS K3 check start with nothing of ours on aifoundry1: 0; the detached job ran check_box_e174.sh, read it clean on the box and ended rc 0
+PASS K3 check wait: 0, and RB_OUT/a1c0-check-clean-e174.txt names the window's day
+PASS K4 a box check whose preflight reads NO-GO: the job ends rc 1 on the box, check wait 16, and no clean file
+PASS K5 check wait on a check job from another day: 10 (JOB-UNKNOWN), and no clean file
+PASS K6 launch with no clean check today: 10, and no call was made
+PASS K7 launch with a clean check of another day: 10, and no call was made
+PASS K8 launch after K3's clean check (the day's file, and the box's job rc 0 today): the guard reads GUARD-OK, then launch_e174.sh: 0 (probe, guard, launch)
+PASS K9 launch with the day's clean file but, on the box, no check job ended rc 0 today, or a dry pass running, or E172's session alive: 10, launch_e174.sh never sent
+PASS K10 launch on a host booted after the firmware read of record: 16 at the guard
+PASS K11 sync beside E172's runner: 10, and no rsync was made
+PASS K12 sync with nothing of ours on aifoundry1: 0
+PASS K  no stand-in process left after the gate cases
+PASS L0 v1's four I cases through v2's gate: every listed session checked 0; smoke without a C log 14; a stale check 14; a resume s2 unchecked 14
+PASS L1 no queue.jsonl and no smoke directory (the verifier's V7): v2 14 (MISSING-QUEUE); v1's list passed it (0)
+PASS L2 s1's launches.jsonl and C log lost, its runs.jsonl there (V8): v2 14 (s1 added by its runs); v1's list passed it (0)
+PASS L3 stoptest-board's launches and C log lost, its board stop in the queue's record: v2 14; v1's list passed it (0)
+PASS L4 s1's launches, runs and C log lost, 28.3 card-minutes in the queue's record: v2 14 (s1 added by its card-minutes)
+PASS L5 an s1 that ran nothing (no runs, no launches, 0 card-minutes) beside an s2 that ran everything: v2 0 (s2 required, s1 not): no false stop
+PASS L6 an s2 directory with work launches that the queue's record does not start, and no C log: v2 14; v1's list passed it (0)
+     2026-11-04-e165-blind7-aifoundry2: v1 and v2 both list [s1 smoke stoptest-board ]
+     2026-11-04-e170-blind7-card0: v1 and v2 both list [s1 smoke stoptest-board ]
+PASS L7 the parents' committed sessions (E165 on aifoundry2, E170 on card 0) through the whole v2 gate: 0, v2's list equal to v1's, every listed check finished
+PASS    no stand-in process left at the end
+selftest_steps_q142kg_v2: 49 of 49 checks pass
