@@ -1,0 +1,22 @@
+# Q142(s) W5c: W5b's session with the second run at 3 launch processes of 3 s (post hoc, desk only: no device, no ssh)
+# run_hpl.py sha256 68493295504f (committed True); watcher_q142s.py sha256 3f37482d48c7; selftest_watcher_q142s.py sha256 55765a7db092
+
+== OLD: run_hpl.Watcher
+   end 'error:telemetry_stale:NEXT-00-fp32-zeros-1024-r1'; the forced follow() fired: True; the gate's reading t - the run's first line: -0.14 s
+   process 0: 1.3-4.9 s after the run's first telemetry line; at its start the watcher's last reading was -0.1 s, its position 18550 B in a 1545 B file: BLIND
+   process 1: 4.9-8.4 s after the run's first telemetry line; at its start the watcher's last reading was -0.1 s, its position 18550 B in a 5471 B file: BLIND
+
+== NEW: watcher_q142s.Watcher
+   end 'done'; the forced follow() fired: True; the gate's reading t - the run's first line: 1.29 s
+   process 0: 1.3-4.9 s after the run's first telemetry line; at its start the watcher's last reading was 1.3 s, its position 1545 B in a 1545 B file: on its own run
+   process 1: 4.9-8.4 s after the run's first telemetry line; at its start the watcher's last reading was 4.8 s, its position 5467 B in a 5467 B file: on its own run
+   process 2: 8.4-12.0 s after the run's first telemetry line; at its start the watcher's last reading was 8.3 s, its position 9393 B in a 9393 B file: on its own run
+
+== the expectations
+ok   the forced follow() fired in both sessions (the test does not pass vacuously)
+ok   OLD: the second run's gate passed on the first run's reading (W5b)
+ok   OLD: 2 launch processes, not one, ran blind before the guard's 8 s rule ended the session ('error:telemetry_stale:NEXT-00-fp32-zeros-1024-r1')
+ok   NEW: all 3 processes ran, each with the watcher on its own run's telemetry, to 'done'
+
+4 of 4 expectations hold, in 55 s
+W5C OK: with launches under 8 s, the committed watcher's blind window is every process that starts before the guard's 8 s rule: 2 of 3 s here; the new watcher has none

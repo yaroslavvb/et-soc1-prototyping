@@ -1,0 +1,59 @@
+# Q142(s) post hoc desk read for run_hpl.py.dated-note-2.md (committed data only; nothing registered)
+# run_hpl.py sha256 68493295504f (the committed file)
+
+== 1. sessions, follow() calls, run boundaries
+measured run_hpl sessions: 99, in 28 data directories
+follow() calls (runs started): 1771
+run boundaries (follow() calls less each session's first): 1672
+telemetry_stale ends: 1
+   docs/reports/data/2026-11-04-e165-blind7-aifoundry2/aifoundry2/s1: error:telemetry_stale:BURST-158-b7-fp16.randn_x8-r1 cool gate
+
+== 2. the incidence (one event: an estimate, with its exact interval)
+Poisson 95% interval for 1 event(s): 0.0253 to 5.5716
+per run boundary: 0.060% (95%: 0.0015% to 0.33%)
+a session of 150 boundaries ends early: 8.6% (95%: 0.2% to 39.3%)
+a session of 160 boundaries ends early: 9.1% (95%: 0.2% to 41.3%)
+a session of 170 boundaries ends early: 9.7% (95%: 0.3% to 43.2%)
+
+== 3. the gates: whose telemetry each recorded reading is
+runs after a run of their session with a gate reading and both telemetry files: 1669 (by gate mode: {"cool": 1666, "hot": 3})
+own run's line before its first work launch, not the previous run's last line: 1640
+the previous run's last line only (a gate passed on the previous run's reading): 0
+both (identical readings, cannot be told apart): 29; their held_s: [0.0, 0.1, 0.2]
+   docs/reports/data/2026-10-31-e83-kinds-speed-rest/s1 BURST-04-fp32-randn-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-10-31-e83-kinds-speed-rest/s1 SUS-15-fp16-neg_ones-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-01-e105-gemm-layout/aifoundry2/s1 A-15-gemmv1-fp32-ones-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-01-e105-gemm-layout/aifoundry2/s1 B-09-gemmv1-int8-full-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-01-e105-gemm-layout/aifoundry2/s1 D-09-gemmc1-fp32-randn-half-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-01-e114-card0-replicates/s1 SUS-04-int8-full-r2 (cool gate, held 0.1 s)
+   docs/reports/data/2026-11-01-e119-gemm-speed/aifoundry2/s1 D-06-c1-fp16-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-01-e98-heat-path-drift/P1 SUS-04-int8-sparse50-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-01-e98-heat-path-drift/P2 SUS-02-int8-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-02-e126-gemm-arms/aifoundry2/s1 B-02-c16r4-fp32-randn-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-02-e126-gemm-arms/aifoundry2/s1 C-00-c4s-int8-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-02-e126-gemm-arms/aifoundry2/s1 F-01-c4s-fp16-randn-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-02-e126-gemm-arms/aifoundry2/smoke SMOKE-01-c4s-fp32-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-02-e126-gemm-arms/aifoundry2/smoke SMOKE-04-c8s-fp32-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-02-e133-heat-holds/SMOKE SMOKE-01-fp32-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-02-e143-blind5-aifoundry2/aifoundry2/s1 BURST-27-b5-int8.anchor_zeros-r2 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-02-e146-gemm-stores/aifoundry2/s1 B-08-L4-int8-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-02-e146-gemm-stores/aifoundry2/s1 D-03-F6-int8-full-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-03-e158-l3-retention/aifoundry2/s1 C-05-K2n9-fp32-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-03-e158-l3-retention/aifoundry2/s1 C-15-K4n7-fp32-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-03-e160-blind6-aifoundry2/aifoundry2/s1 BURST-18-b6-fp32.b_onebit_b20_third-r3 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-03-e160-blind6-aifoundry2/aifoundry2/smoke SMOKE-03-b6-int8.anchor6_zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-03-e161-heat-e2e-aifoundry2/G2Q HOLD-00-b6-fp32.real_smol_softmax_v_causal-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-04-e165-blind7-aifoundry2/aifoundry2/s1 BURST-03-b7-int8.bheld_01-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-04-e165-blind7-aifoundry2/aifoundry2/s1 BURST-117-b7-fp32.b_onebit_b20_pi-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-04-e169-stride-shapes/aifoundry2/s1 A-04-N3-fp32-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-04-e169-stride-shapes/aifoundry2/s1 B-07-K4n8-fp32-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-04-e169-stride-shapes/aifoundry2/smoke SMOKE-04-N3-fp32-zeros-r1 (cool gate, held 0.0 s)
+   docs/reports/data/2026-11-04-e170-blind7-card0/aifoundry1-c0/s1 BURST-66-b7-fp32.anchor7_zeros-r1 (cool gate, held 0.2 s)
+neither: 0
+
+== 4. E165 s1's end, from two starting points
+end.json: error:telemetry_stale:BURST-158-b7-fp16.randn_x8-r1 cool gate
+BURST-158's first telemetry line t_ms 1793833803923; its sampler_start mark 1793833804172; the end 1793833812298
+from the first telemetry line: 8.375 s (W5a, counted the same way: 8.4 s)
+from the sampler_start mark: 8.126 s (the 8.1 s of E165's README and the first dated amendment)
+the previous run's last line: die 56.0 C (the cool gate's limit 55 C); BURST-158's die first reads 55 C or less at 1102 ms after its first line
