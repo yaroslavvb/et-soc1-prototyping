@@ -1,0 +1,19 @@
+1. The SP trace ring, per session (aifoundry1-c0/<session>/sp/)
+  stoptest-die: dumps 1; new ring entries 72 by kind {'power_up': 18, 'pstat': 27, 'new_op': 27}; PMIC over-power alarm lines 0; entries naming the PMIC 0; POWER_SAFE (throttle state 3) records 0; clock points set {600: 9, 700: 9, 800: 9}
+  stoptest-board: dumps 1; new ring entries 72 by kind {'power_up': 18, 'pstat': 27, 'new_op': 27}; PMIC over-power alarm lines 0; entries naming the PMIC 0; POWER_SAFE (throttle state 3) records 0; clock points set {600: 9, 700: 9, 800: 9}
+  smoke: dumps 5; new ring entries 88 by kind {'power_up': 22, 'pstat': 33, 'new_op': 33}; PMIC over-power alarm lines 0; entries naming the PMIC 0; POWER_SAFE (throttle state 3) records 0; clock points set {600: 11, 700: 11, 800: 11}
+  s1: dumps 137; new ring entries 1472 by kind {'power_up': 368, 'pstat': 552, 'new_op': 552}; PMIC over-power alarm lines 0; entries naming the PMIC 0; POWER_SAFE (throttle state 3) records 0; clock points set {600: 184, 700: 184, 800: 184}
+2. The 6 s burst die rise per board W over 21.5 W (results.json > score.reported.tiles)
+  tiles 39: median rise / (board - 21.5 W) 0.2449 C/W; least squares through the knee 0.2415 C/W; the frozen law 0.1400 C/W; measured - predicted rise mean +2.382 C, rms 2.457 C
+3. Runs whose burst clock (burst_mhz: 1.5 s after the first launch to the end of the work) read under 795 MHz (results.json > run_rows)
+  4 of 135 runs: BURST-00-b7-fp16.anchor7_zeros-r1 754.2 MHz; BURST-55-b7-int8.anchor7_full_b-r1 756 MHz; BURST-128-b7-fp32.b_onebit_b20_full-r1 759.2 MHz; BURST-131-b7-fp32.b_onebit_b20_third_a1p5-r1 756 MHz
+4. Each run's highest board sample against its tile's card-0 admission estimate (predictions-e170.json > tiles.<name>.est_card0_peak_w)
+  13 of 135 runs peaked over their estimate, by +0.59 to +2.24 W; their tiles' aims {'S': 13}; the highest sample 59.38 W
+    fp32.b_onebit_b20_pi: 58.19 W against 55.95 (+2.24), BURST-127-b7-fp32.b_onebit_b20_pi-r1
+    fp32.b_onebit_b20_seventh: 57.85 W against 55.73 (+2.12), BURST-113-b7-fp32.b_onebit_b20_seventh-r1
+    fp32.b_onebit_b22_third: 59.38 W against 57.35 (+2.03), BURST-116-b7-fp32.b_onebit_b22_third-r1
+    fp32.b_onebit_b22_third: 59.31 W against 57.35 (+1.96), BURST-103-b7-fp32.b_onebit_b22_third-r1
+    fp32.b_onebit_b20_seventh: 57.63 W against 55.73 (+1.90), BURST-100-b7-fp32.b_onebit_b20_seventh-r1
+5. E170-X0's ratio with the zeros level referred to each tile's own die starts (X0's tiles: non-anchor, M9's burst D >= 5 W)
+  n 36: median D_w / M9 burst D 0.9766 (X0 as registered: the tile less its pass's zeros anchor); median (board - the card's zeros level at the tile's own die starts) / M9 burst D 0.9312; kappa0 0.9463
+  die start of these tiles' runs less their pass's zeros anchor of the format: mean +1.35 C over 108 runs (x kT 0.3954 W/C = +0.53 W)
