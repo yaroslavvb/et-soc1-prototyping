@@ -1,0 +1,39 @@
+E175's lines at the planned n and each rule's power (design only; no E175 tile, count or prediction exists)
+
+Lines (the frozen engine, seed 80,000 + the rule id's character codes, 20,000 draws), PASS at or below the upper end:
+  E175-A2-F1   n  8: 2.123 to 6.780 MHz (reference n 36, rms 4.4983)
+  E175-A2-F1   n 12: 2.454 to 6.397 MHz (reference n 36, rms 4.4983)
+  E175-A2-F1   n 16: 2.675 to 6.148 MHz (reference n 36, rms 4.4983)
+  E175-A2-W1   n  8: 0.354 to 1.217 W (reference n 36, rms 0.7757)
+  E175-A2-W1   n 12: 0.419 to 1.139 W (reference n 36, rms 0.7757)
+  E175-A2-W1   n 16: 0.461 to 1.093 W (reference n 36, rms 0.7757)
+  E175-A2-F2   n  8: 0.000 to 5.288 MHz (reference n 42, rms 2.3342)
+  E175-A2-W2   n  8: 0.370 to 1.287 W (reference n 42, rms 0.8214)
+  E175-A2-H1   n 16: 0.453 to 0.910 C (reference n 112, rms 0.6845)
+  E175-A2-H1   n 20: 0.474 to 0.887 C (reference n 112, rms 0.6845)
+  E175-A2-H1   n 24: 0.493 to 0.869 C (reference n 112, rms 0.6845)
+
+The truths (rms and mean of the errors drawn):
+  e2e       : governed 36 cells, clock rms 4.498 mean -0.889 MHz, board rms 0.776 mean -0.194 W; pinned 42, clock rms 2.334 MHz, board rms 0.821 mean -0.085 W; heat 112, rms 0.6845 C
+  e165      : governed 12 cells, clock rms 3.032 mean -1.042 MHz, board rms 0.714 mean -0.425 W; pinned 40, clock rms 5.113 MHz, board rms 0.986 mean -0.015 W; heat 52, rms 0.4547 C
+  e2e x1.5  : governed 36 cells, clock rms 6.747 mean -1.333 MHz, board rms 1.163 mean -0.291 W; pinned 42, clock rms 3.501 MHz, board rms 1.232 mean -0.127 W; heat 112, rms 1.0268 C
+  e2e level : governed 36 cells, clock rms 4.889 mean +2.111 MHz, board rms 0.811 mean +0.306 W; pinned 42, clock rms 2.334 MHz, board rms 0.916 mean +0.415 W; heat 112, rms 0.7539 C
+  e2e x0.5  : governed 36 cells, clock rms 2.249 mean -0.444 MHz, board rms 0.388 mean -0.097 W; pinned 42, clock rms 1.167 MHz, board rms 0.411 mean -0.042 W; heat 112, rms 0.3423 C
+
+Power: the share of 20,000 draws reading PASS (%), at n_g governed and 8 pinned:
+  truth      n_g   G_rms  G_mean       G      Bg      Bp      R2      F1      W1      F2      W2      H1
+  e2e          8    40.8    73.3    37.1    87.3    74.5    25.4    97.5    97.7    97.3    97.4    97.3
+  e2e         12    36.3    80.5    34.6    93.2    75.5    25.3    97.5    97.6    97.4    97.6    97.5
+  e2e         16    32.6    83.5    31.5    95.5    74.7    23.1    97.5    97.7    97.3    97.3    97.2
+  e165         8    95.1    82.1    79.8    64.6    50.7    25.7   100.0   100.0    54.6    89.2   100.0
+  e165        12    97.9    87.8    86.7    67.1    50.4    29.1   100.0   100.0    54.8    89.1   100.0
+  e165        16    99.1    91.6    91.0    70.1    50.2    31.9   100.0   100.0    54.7    89.3   100.0
+  e2e x1.5     8    10.0    54.5     8.7    65.8    29.6     1.6    55.8    63.3    82.0    64.5    29.3
+  e2e x1.5    12     4.7    60.8     4.4    72.3    30.0     1.0    45.9    53.4    82.2    64.3    21.9
+  e2e x1.5    16     2.4    64.2     2.2    76.7    30.2     0.5    37.3    44.4    82.2    64.4    15.6
+  e2e level    8    27.1    45.7    17.6    77.9    56.6     6.7    96.0    93.0    97.2    90.2    90.5
+  e2e level   12    21.0    45.8    14.6    82.1    57.2     6.1    95.2    92.7    97.4    90.1    89.4
+  e2e level   16    16.2    45.3    11.6    85.4    57.1     4.9    94.2    91.5    97.3    90.6    88.2
+  e2e x0.5     8    99.9    97.4    97.4    99.9   100.0    97.3   100.0   100.0   100.0   100.0   100.0
+  e2e x0.5    12   100.0    99.1    99.0   100.0    99.9    99.0   100.0   100.0   100.0   100.0   100.0
+  e2e x0.5    16   100.0    99.7    99.7   100.0    99.9    99.6   100.0   100.0   100.0   100.0   100.0
