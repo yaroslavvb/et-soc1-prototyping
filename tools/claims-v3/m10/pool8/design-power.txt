@@ -1,0 +1,72 @@
+Re-run differences between two sessions on one card (floats; D_new - D_old, W), committed rows only
+
+E163 vs E141: n 7, D_old 14.99-23.02 W; mean diff +0.0865 W, sd 0.0266 W; measurement-only sd (rms of the two se's) 0.0431 W
+   fp16.pair_cancel_asign             D_old  16.648  diff +0.0568  meas se 0.0171
+   fp16.pair_nearcancel               D_old  21.927  diff +0.0770  meas se 0.0446
+   fp16.sparse24_straddled            D_old  21.893  diff +0.0525  meas se 0.0393
+   fp32.gray_stream                   D_old  16.684  diff +0.1008  meas se 0.0615
+   fp32.real_pythia_gelu_down         D_old  22.294  diff +0.1214  meas se 0.0539
+   fp32.sorted_k                      D_old  23.019  diff +0.0843  meas se 0.0265
+   fp32.wideexp48_bgate_alt           D_old  14.995  diff +0.1124  meas se 0.0422
+   two-term fit: level +0.1115 W, gain -0.128% of D; residual sd 0.0287 W (n - 2 df)
+
+E163 vs E152: n 6, D_old 4.74-5.40 W; mean diff +0.0589 W, sd 0.0309 W; measurement-only sd (rms of the two se's) 0.0592 W
+   fp32.gd0                           D_old   4.745  diff +0.0576  meas se 0.0580
+   fp32.gd1b                          D_old   4.885  diff +0.0332  meas se 0.0933
+   fp32.gd1h                          D_old   4.925  diff +0.0735  meas se 0.0561
+   fp32.gd2b                          D_old   5.015  diff +0.0945  meas se 0.0365
+   fp32.gd4a                          D_old   5.396  diff +0.0130  meas se 0.0375
+   fp32.gd4b                          D_old   5.329  diff +0.0817  meas se 0.0551
+
+E164 vs E157: n 4, D_old 12.83-23.38 W; mean diff +0.0838 W, sd 0.0449 W; measurement-only sd (rms of the two se's) 0.0762 W
+   fp16.e5m2grid_wide                 D_old  17.196  diff +0.0169  meas se 0.0707
+   fp16.real_qwen_qk                  D_old  18.258  diff +0.1070  meas se 0.0813
+   fp32.real_qwen_softmax_v           D_old  23.381  diff +0.1120  meas se 0.0856
+   fp32.real_smol_softmax_v_causal    D_old  12.827  diff +0.0994  meas se 0.0654
+   two-term fit: level +0.0423 W, gain +0.232% of D; residual sd 0.0536 W (n - 2 df)
+
+pooled residual sd after each set's own fit: 0.0368 W over 17 tiles; measurement-only 0.0580 W
+
+Power of LG (two-term fit diff = a + g D; GAIN: g resolved and a not; LEVEL: a resolved and g not; 5,000 draws, seed 142)
+   n  8, noise 0.0368 W, truth none         : GAIN 1%, LEVEL 1%, BOTH 4%, NEITHER 94%
+   n  8, noise 0.0368 W, truth gain 0.3%    : GAIN 18%, LEVEL 2%, BOTH 2%, NEITHER 77%
+   n  8, noise 0.0368 W, truth gain 0.6%    : GAIN 57%, LEVEL 2%, BOTH 3%, NEITHER 38%
+   n  8, noise 0.0368 W, truth gain 1.0%    : GAIN 91%, LEVEL 0%, BOTH 5%, NEITHER 4%
+   n  8, noise 0.0368 W, truth level 0.05 W : GAIN 2%, LEVEL 19%, BOTH 3%, NEITHER 76%
+   n  8, noise 0.0368 W, truth level 0.11 W : GAIN 2%, LEVEL 68%, BOTH 3%, NEITHER 27%
+   n  8, noise 0.0368 W, truth level 0.15 W : GAIN 0%, LEVEL 89%, BOTH 4%, NEITHER 7%
+   n  8, noise 0.0552 W, truth none         : GAIN 1%, LEVEL 2%, BOTH 4%, NEITHER 93%
+   n  8, noise 0.0552 W, truth gain 0.3%    : GAIN 9%, LEVEL 2%, BOTH 3%, NEITHER 86%
+   n  8, noise 0.0552 W, truth gain 0.6%    : GAIN 29%, LEVEL 2%, BOTH 2%, NEITHER 66%
+   n  8, noise 0.0552 W, truth gain 1.0%    : GAIN 65%, LEVEL 2%, BOTH 3%, NEITHER 30%
+   n  8, noise 0.0552 W, truth level 0.05 W : GAIN 2%, LEVEL 10%, BOTH 3%, NEITHER 85%
+   n  8, noise 0.0552 W, truth level 0.11 W : GAIN 2%, LEVEL 36%, BOTH 2%, NEITHER 59%
+   n  8, noise 0.0552 W, truth level 0.15 W : GAIN 2%, LEVEL 60%, BOTH 3%, NEITHER 35%
+   n 12, noise 0.0368 W, truth none         : GAIN 2%, LEVEL 2%, BOTH 4%, NEITHER 93%
+   n 12, noise 0.0368 W, truth gain 0.3%    : GAIN 29%, LEVEL 2%, BOTH 3%, NEITHER 66%
+   n 12, noise 0.0368 W, truth gain 0.6%    : GAIN 80%, LEVEL 2%, BOTH 3%, NEITHER 15%
+   n 12, noise 0.0368 W, truth gain 1.0%    : GAIN 95%, LEVEL 0%, BOTH 5%, NEITHER 0%
+   n 12, noise 0.0368 W, truth level 0.05 W : GAIN 2%, LEVEL 30%, BOTH 3%, NEITHER 65%
+   n 12, noise 0.0368 W, truth level 0.11 W : GAIN 1%, LEVEL 87%, BOTH 4%, NEITHER 8%
+   n 12, noise 0.0368 W, truth level 0.15 W : GAIN 0%, LEVEL 94%, BOTH 6%, NEITHER 0%
+   n 12, noise 0.0552 W, truth none         : GAIN 1%, LEVEL 2%, BOTH 4%, NEITHER 93%
+   n 12, noise 0.0552 W, truth gain 0.3%    : GAIN 14%, LEVEL 2%, BOTH 3%, NEITHER 81%
+   n 12, noise 0.0552 W, truth gain 0.6%    : GAIN 48%, LEVEL 2%, BOTH 2%, NEITHER 47%
+   n 12, noise 0.0552 W, truth gain 1.0%    : GAIN 86%, LEVEL 1%, BOTH 4%, NEITHER 9%
+   n 12, noise 0.0552 W, truth level 0.05 W : GAIN 2%, LEVEL 16%, BOTH 3%, NEITHER 80%
+   n 12, noise 0.0552 W, truth level 0.11 W : GAIN 3%, LEVEL 60%, BOTH 2%, NEITHER 35%
+   n 12, noise 0.0552 W, truth level 0.15 W : GAIN 1%, LEVEL 82%, BOTH 3%, NEITHER 13%
+   n 16, noise 0.0368 W, truth none         : GAIN 1%, LEVEL 2%, BOTH 4%, NEITHER 93%
+   n 16, noise 0.0368 W, truth gain 0.3%    : GAIN 37%, LEVEL 2%, BOTH 3%, NEITHER 57%
+   n 16, noise 0.0368 W, truth gain 0.6%    : GAIN 90%, LEVEL 1%, BOTH 4%, NEITHER 5%
+   n 16, noise 0.0368 W, truth gain 1.0%    : GAIN 95%, LEVEL 0%, BOTH 5%, NEITHER 0%
+   n 16, noise 0.0368 W, truth level 0.05 W : GAIN 2%, LEVEL 41%, BOTH 2%, NEITHER 54%
+   n 16, noise 0.0368 W, truth level 0.11 W : GAIN 1%, LEVEL 94%, BOTH 5%, NEITHER 1%
+   n 16, noise 0.0368 W, truth level 0.15 W : GAIN 0%, LEVEL 94%, BOTH 6%, NEITHER 0%
+   n 16, noise 0.0552 W, truth none         : GAIN 1%, LEVEL 2%, BOTH 3%, NEITHER 94%
+   n 16, noise 0.0552 W, truth gain 0.3%    : GAIN 19%, LEVEL 2%, BOTH 3%, NEITHER 76%
+   n 16, noise 0.0552 W, truth gain 0.6%    : GAIN 62%, LEVEL 2%, BOTH 2%, NEITHER 33%
+   n 16, noise 0.0552 W, truth gain 1.0%    : GAIN 94%, LEVEL 1%, BOTH 3%, NEITHER 2%
+   n 16, noise 0.0552 W, truth level 0.05 W : GAIN 2%, LEVEL 22%, BOTH 2%, NEITHER 74%
+   n 16, noise 0.0552 W, truth level 0.11 W : GAIN 2%, LEVEL 72%, BOTH 3%, NEITHER 23%
+   n 16, noise 0.0552 W, truth level 0.15 W : GAIN 1%, LEVEL 91%, BOTH 4%, NEITHER 3%
