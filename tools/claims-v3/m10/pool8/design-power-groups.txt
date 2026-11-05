@@ -1,0 +1,139 @@
+P8-LG's power with k reference groups (Q142(p) fix pass, for POOL8-REGISTRATION.md's dated note A2); committed rows only
+
+The noise of one re-run's difference between two sessions on one card, after each committed set's own fit: 0.0368 W over 17 tiles (measurement-only 0.0580 W); design-power.txt: 0.0368 W over 17 tiles, 0.0580 W
+
+1. The replay of design_power.py's one-group power (its seed 142, its draws in order, its t points squared as the F points): 42 of 42 lines identical to design-power.txt
+
+2. The F points used below (5%), from the incomplete beta function, against tabulated values and design_power.py's t points squared:
+   F(1,6) 5.9874 (table 5.9874); F(1,10) 4.9646 (table 4.9646); F(2,8) 4.4590 (table 4.4590); F(2,10) 4.1028 (table 4.1028); F(3,6) 4.7571 (table 4.7571); F(4,8) 3.8379 (table 3.8379); F(6,6) 4.2839 (table 4.2839)
+   sqrt F(1, d) against design_power.py's t(d), d = 6-22: largest difference 0.00021 (the table is rounded to 0.001)
+
+3. The power of P8-LG as registered (two F tests at 5%, (k, n - 2k) df; a group counts with at least 4 tiles spanning 8 W; 5,000 draws a cell; each group's D_ref either drawn evenly over 5-25 W in every draw, as design_power.py did, or fixed and evenly spaced over exactly 8 W, 12-20 W, the registered minimum span). Percentages of GAIN / LEVEL / BOTH / NOT SEPARATED / NOT SCORED.
+
+   re-runs split 12 over 1 reference session(s): counted k 1, n 12, df (1, 10); F point 4.965
+     D_ref 5-25 W        noise 0.0368 W, truth none        : 2 / 1 / 3 / 94 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 0.6%   : 80 / 2 / 3 / 15 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 1.0%   : 95 / 0 / 5 / 0 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.11 W: 1 / 88 / 4 / 7 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.15 W: 0 / 95 / 5 / 0 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth none        : 1 / 1 / 3 / 94 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 0.6%   : 49 / 2 / 2 / 46 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 1.0%   : 87 / 1 / 3 / 9 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.11 W: 3 / 60 / 3 / 35 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.15 W: 1 / 83 / 3 / 13 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth none        : 1 / 1 / 4 / 94 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 0.6%   : 22 / 3 / 3 / 72 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 1.0%   : 53 / 3 / 3 / 41 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.11 W: 2 / 29 / 3 / 66 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.15 W: 2 / 49 / 2 / 46 / 0
+
+   re-runs split 6 + 6 over 2 reference session(s): counted k 2, n 12, df (2, 8); F point 4.459
+     D_ref 5-25 W        noise 0.0368 W, truth none        : 1 / 1 / 4 / 93 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 0.6%   : 63 / 1 / 4 / 32 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 1.0%   : 93 / 0 / 5 / 2 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.11 W: 1 / 73 / 4 / 22 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.15 W: 0 / 92 / 5 / 3 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth none        : 2 / 1 / 4 / 93 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 0.6%   : 31 / 1 / 4 / 64 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 1.0%   : 71 / 1 / 4 / 25 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.11 W: 1 / 39 / 4 / 56 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.15 W: 1 / 65 / 4 / 29 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth none        : 1 / 1 / 4 / 94 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 0.6%   : 16 / 1 / 3 / 80 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 1.0%   : 42 / 1 / 4 / 53 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.11 W: 2 / 20 / 4 / 75 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.15 W: 1 / 36 / 4 / 59 / 0
+
+   re-runs split 8 + 4 over 2 reference session(s): counted k 2, n 12, df (2, 8); F point 4.459
+     D_ref 5-25 W        noise 0.0368 W, truth none        : 2 / 2 / 3 / 94 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 0.6%   : 63 / 1 / 4 / 32 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 1.0%   : 93 / 0 / 5 / 2 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.11 W: 1 / 73 / 4 / 22 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.15 W: 0 / 92 / 4 / 4 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth none        : 2 / 2 / 3 / 93 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 0.6%   : 31 / 1 / 3 / 65 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 1.0%   : 72 / 1 / 4 / 23 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.11 W: 1 / 39 / 3 / 56 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.15 W: 1 / 65 / 4 / 30 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth none        : 1 / 1 / 4 / 95 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 0.6%   : 16 / 2 / 4 / 79 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 1.0%   : 44 / 1 / 4 / 51 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.11 W: 1 / 20 / 4 / 75 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.15 W: 1 / 37 / 4 / 58 / 0
+
+   re-runs split 9 + 3 over 2 reference session(s): counted k 1, n 9, df (1, 7); F point 5.591 (a group under 4 tiles does not count)
+     D_ref 5-25 W        noise 0.0368 W, truth none        : 2 / 1 / 4 / 93 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 0.6%   : 65 / 2 / 3 / 30 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 1.0%   : 94 / 0 / 5 / 2 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.11 W: 2 / 75 / 4 / 20 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.15 W: 0 / 92 / 4 / 4 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth none        : 1 / 2 / 3 / 94 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 0.6%   : 36 / 3 / 3 / 59 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 1.0%   : 72 / 2 / 4 / 22 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.11 W: 2 / 43 / 3 / 52 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.15 W: 2 / 68 / 4 / 27 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth none        : 1 / 0 / 4 / 94 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 0.6%   : 17 / 2 / 2 / 79 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 1.0%   : 41 / 2 / 2 / 54 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.11 W: 2 / 21 / 2 / 75 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.15 W: 3 / 35 / 3 / 60 / 0
+
+   re-runs split 4 + 4 + 4 over 3 reference session(s): counted k 3, n 12, df (3, 6); F point 4.757
+     D_ref 5-25 W        noise 0.0368 W, truth none        : 1 / 1 / 4 / 94 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 0.6%   : 44 / 1 / 4 / 51 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 1.0%   : 86 / 0 / 4 / 10 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.11 W: 0 / 56 / 4 / 39 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.15 W: 0 / 81 / 4 / 14 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth none        : 1 / 1 / 4 / 94 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 0.6%   : 20 / 1 / 5 / 75 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 1.0%   : 53 / 0 / 5 / 42 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.11 W: 1 / 25 / 4 / 70 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.15 W: 0 / 46 / 5 / 48 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth none        : 1 / 1 / 4 / 94 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 0.6%   : 12 / 1 / 4 / 83 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 1.0%   : 34 / 1 / 5 / 61 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.11 W: 1 / 14 / 4 / 80 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.15 W: 1 / 28 / 4 / 67 / 0
+
+   re-runs split 16 over 1 reference session(s): counted k 1, n 16, df (1, 14); F point 4.600
+     D_ref 5-25 W        noise 0.0368 W, truth none        : 1 / 2 / 3 / 94 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 0.6%   : 90 / 1 / 4 / 5 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 1.0%   : 95 / 0 / 5 / 0 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.11 W: 1 / 93 / 5 / 1 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.15 W: 0 / 95 / 5 / 0 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth none        : 1 / 1 / 4 / 94 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 0.6%   : 61 / 3 / 3 / 33 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 1.0%   : 93 / 1 / 4 / 2 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.11 W: 2 / 73 / 2 / 22 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.15 W: 1 / 91 / 4 / 4 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth none        : 1 / 1 / 4 / 94 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 0.6%   : 28 / 3 / 3 / 67 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 1.0%   : 67 / 3 / 2 / 28 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.11 W: 3 / 36 / 3 / 58 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.15 W: 2 / 62 / 2 / 34 / 0
+
+   re-runs split 8 + 8 over 2 reference session(s): counted k 2, n 16, df (2, 12); F point 3.885
+     D_ref 5-25 W        noise 0.0368 W, truth none        : 1 / 2 / 4 / 94 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 0.6%   : 80 / 1 / 4 / 15 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth gain 1.0%   : 94 / 0 / 6 / 0 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.11 W: 0 / 89 / 4 / 7 / 0
+     D_ref 5-25 W        noise 0.0368 W, truth level 0.15 W: 0 / 94 / 5 / 0 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth none        : 1 / 2 / 3 / 94 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 0.6%   : 45 / 2 / 4 / 50 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth gain 1.0%   : 87 / 1 / 5 / 8 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.11 W: 1 / 56 / 4 / 39 / 0
+     D_ref 5-25 W        noise 0.0552 W, truth level 0.15 W: 1 / 83 / 4 / 12 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth none        : 1 / 1 / 4 / 94 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 0.6%   : 22 / 2 / 3 / 72 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth gain 1.0%   : 57 / 1 / 4 / 38 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.11 W: 1 / 28 / 3 / 67 / 0
+     D_ref 12-20 W fixed noise 0.0368 W, truth level 0.15 W: 1 / 49 / 4 / 46 / 0
+
+4. A worked example at a committed design (post hoc design only, never a result): E163's K14 float re-runs, D_ref from scored.json (E141's 7 tiles; E152's 6 span under 8 W and do not count).
+   truth none        : 1 / 0 / 5 / 94 / 0
+   truth gain 0.6%   : 17 / 2 / 2 / 78 / 0
+   truth gain 1.0%   : 42 / 2 / 3 / 53 / 0
+   truth level 0.11 W: 3 / 14 / 3 / 80 / 0
+   truth level 0.15 W: 2 / 26 / 3 / 69 / 0
+   the same test on E163's committed differences (post hoc): NOT SEPARATED, k 1, n 7, F_slope 0.13, F_level 2.60 (point 6.61); null: they differ, the form unresolved; not counted: ['E163 vs E152']
+     E163 vs E141: n 7, span 8.02 W, level +0.1115 W [-0.0664, +0.2894], gain -0.128% [-1.022, +0.767]
