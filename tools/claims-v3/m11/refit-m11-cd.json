@@ -1,0 +1,746 @@
+{
+ "_note": "Q142(h2) refit_m11_cd.py: M11's (c) HC1 and (d) I8P on the committed rows, entry and not-wanted clauses as REGISTRATION.md sections 8-10 and A1 (A1-1, A1-3) register them; held out, not blind; no E171-E174 data read",
+ "c_HC1": {
+  "aifoundry3_reported_unscaled": {
+   "bias_c": 0.012767658218044852,
+   "n": 484,
+   "note": "aifoundry3 keeps h = 1 (section 8)",
+   "rms_c": 0.17169010885341018,
+   "with_a_session_scale_beside_rms_c": 0.17371408048789094
+  },
+  "card1_by_format": {
+   "fp16": {
+    "with": {
+     "n": 153,
+     "rms_c": 0.178
+    },
+    "without": {
+     "n": 153,
+     "rms_c": 0.3185
+    }
+   },
+   "fp32": {
+    "with": {
+     "n": 197,
+     "rms_c": 0.1878
+    },
+    "without": {
+     "n": 197,
+     "rms_c": 0.3089
+    }
+   },
+   "int8": {
+    "with": {
+     "n": 98,
+     "rms_c": 0.1291
+    },
+    "without": {
+     "n": 98,
+     "rms_c": 0.1495
+    }
+   }
+  },
+  "card1_rms": {
+   "with_c": 0.17312149748130956,
+   "without_c": 0.28546759315844783
+  },
+  "enters": false,
+  "entry": {
+   "bias": {
+    "bias_with_c": -0.002561601205485723,
+    "bias_without_c": 0.0071197336906770325,
+    "grows": false,
+    "passes": true,
+    "rule": "does not change sign and grow in size",
+    "sign_changes": true
+   },
+   "pooled": {
+    "d_rms_c": -0.112346,
+    "hi95": -0.085233,
+    "lo95": -0.136676,
+    "n_kinds": 315,
+    "n_rows": 448,
+    "passes": true,
+    "rule": "d <= -0.010 C and the 95% interval below 0"
+   },
+   "two_thirds": {
+    "d_le_0": 9,
+    "needed": 10,
+    "passes": false,
+    "rule": "d <= 0 in at least two thirds of card 1's sessions with at least 10 heat rows (3 x count >= 2 x n)",
+    "sessions_judged": 14,
+    "sessions_left_out_under_10_rows": [
+     "E106|aifoundry1-c1",
+     "E128|aifoundry1-c1"
+    ],
+    "worse_with_h": [
+     "E102|aifoundry1-c1",
+     "E104|aifoundry1-c1",
+     "E142|aifoundry1-c1",
+     "E88|aifoundry1-c1",
+     "E93|aifoundry1-c1"
+    ]
+   }
+  },
+  "frozen_form": {
+   "card": "aifoundry1 card 1 only; aifoundry3 keeps h = 1",
+   "h1": "the median, over the session's random anchors (M10 REGISTRATION section 3a's set where the session ran them, plus pool 8's six scale-role anchors in a pool-8 session; never a check or a zeros anchor), of dT_win / the law at the anchor's measured S and run length; 1 if none",
+   "law": "m10.json heat_4p5s (H2_per_card_runlength), its coefficients unchanged: no refit",
+   "law_coef": {
+    "ST|aifoundry1-c1": -0.071384,
+    "ST|aifoundry3": 0.001668,
+    "S|aifoundry1-c1": 0.119366,
+    "S|aifoundry3": 0.119834
+   },
+   "m10_json_sha256": "37b7fa86d16287917d84797c60b844bea4e8a786fd5420d68db80a80a7ec2e64",
+   "nothing_new_fitted": true
+  },
+  "not_wanted": {
+   "HC1-B WORSE": "blind: read_hc1b_i8pb.py on E172",
+   "over-correction on a new card-1 session's N1": "blind: read_hc1b_i8pb.py on E172's N1"
+  },
+  "per_session_card1": {
+   "E102|aifoundry1-c1": {
+    "d_c": 0.0032327537964205733,
+    "d_le_0": false,
+    "h_all_rows": 1.0052,
+    "judged": true,
+    "n_rows": 33,
+    "rms_with_c": 0.32353962530025393,
+    "rms_without_c": 0.32030687150383336
+   },
+   "E103|aifoundry1-c1": {
+    "d_c": -0.09062927108416277,
+    "d_le_0": true,
+    "h_all_rows": 1.1013,
+    "judged": true,
+    "n_rows": 33,
+    "rms_with_c": 0.16399937775257054,
+    "rms_without_c": 0.2546286488367333
+   },
+   "E104|aifoundry1-c1": {
+    "d_c": 0.00486390260483302,
+    "d_le_0": false,
+    "h_all_rows": 1.0044,
+    "judged": true,
+    "n_rows": 23,
+    "rms_with_c": 0.22481630801959204,
+    "rms_without_c": 0.21995240541475902
+   },
+   "E106|aifoundry1-c1": {
+    "d_c": -0.3023391804479945,
+    "d_le_0": true,
+    "h_all_rows": 0.8173,
+    "judged": false,
+    "n_rows": 8,
+    "rms_with_c": 0.17091574995288783,
+    "rms_without_c": 0.47325493040088235
+   },
+   "E108|aifoundry1-c1": {
+    "d_c": -0.22949625451018116,
+    "d_le_0": true,
+    "h_all_rows": 0.8262,
+    "judged": true,
+    "n_rows": 18,
+    "rms_with_c": 0.2050721890520413,
+    "rms_without_c": 0.43456844356222246
+   },
+   "E128|aifoundry1-c1": {
+    "d_c": -1.0221836579870798,
+    "d_le_0": true,
+    "h_all_rows": 0.6287,
+    "judged": false,
+    "n_rows": 2,
+    "rms_with_c": 0.08895208475853442,
+    "rms_without_c": 1.111135742745614
+   },
+   "E131|aifoundry1-c1": {
+    "d_c": -0.6012242396649048,
+    "d_le_0": true,
+    "h_all_rows": 0.765,
+    "judged": true,
+    "n_rows": 16,
+    "rms_with_c": 0.18541156945731377,
+    "rms_without_c": 0.7866358091222185
+   },
+   "E137|aifoundry1-c1": {
+    "d_c": -0.15599501283302142,
+    "d_le_0": true,
+    "h_all_rows": 0.8726,
+    "judged": true,
+    "n_rows": 11,
+    "rms_with_c": 0.11891672508921397,
+    "rms_without_c": 0.2749117379222354
+   },
+   "E142|aifoundry1-c1": {
+    "d_c": 0.0031257326467650087,
+    "d_le_0": false,
+    "h_all_rows": 0.99,
+    "judged": true,
+    "n_rows": 34,
+    "rms_with_c": 0.11782229714224336,
+    "rms_without_c": 0.11469656449547835
+   },
+   "E157|aifoundry1-c1": {
+    "d_c": -0.019675401862789876,
+    "d_le_0": true,
+    "h_all_rows": 0.9635,
+    "judged": true,
+    "n_rows": 45,
+    "rms_with_c": 0.14548979512449034,
+    "rms_without_c": 0.16516519698728022
+   },
+   "E164|aifoundry1-c1": {
+    "d_c": -0.062355314579066,
+    "d_le_0": true,
+    "h_all_rows": 1.06,
+    "judged": true,
+    "n_rows": 73,
+    "rms_with_c": 0.12430564247552627,
+    "rms_without_c": 0.18666095705459226
+   },
+   "E82|aifoundry1-c1": {
+    "d_c": -0.06692569735050502,
+    "d_le_0": true,
+    "h_all_rows": 1.05,
+    "judged": true,
+    "n_rows": 36,
+    "rms_with_c": 0.10713954173614323,
+    "rms_without_c": 0.17406523908664825
+   },
+   "E88|aifoundry1-c1": {
+    "d_c": 0.004172043965407823,
+    "d_le_0": false,
+    "h_all_rows": 1.0158,
+    "judged": true,
+    "n_rows": 18,
+    "rms_with_c": 0.1599104851607576,
+    "rms_without_c": 0.15573844119534977
+   },
+   "E91|aifoundry1-c1": {
+    "d_c": -0.052522056327200445,
+    "d_le_0": true,
+    "h_all_rows": 1.0906,
+    "judged": true,
+    "n_rows": 16,
+    "rms_with_c": 0.1355553483779742,
+    "rms_without_c": 0.18807740470517464
+   },
+   "E93|aifoundry1-c1": {
+    "d_c": 0.0123153482670528,
+    "d_le_0": false,
+    "h_all_rows": 0.9989,
+    "judged": true,
+    "n_rows": 22,
+    "rms_with_c": 0.13939215802110583,
+    "rms_without_c": 0.12707680975405303
+   },
+   "E94|aifoundry1-c1": {
+    "d_c": -0.09773856789928653,
+    "d_le_0": true,
+    "h_all_rows": 1.0958,
+    "judged": true,
+    "n_rows": 60,
+    "rms_with_c": 0.1854287287442174,
+    "rms_without_c": 0.28316729664350393
+   }
+  },
+  "reproduces_heldout_m10_heat_c1": {
+   "M7_coef": true,
+   "M7_law_as_frozen": true,
+   "base_refit_loko": true,
+   "enters": true,
+   "n_anchor_rows": true,
+   "n_kinds": true,
+   "n_rows": true,
+   "n_sessions": true,
+   "paired_bootstrap_sessscale_minus_base": true,
+   "per_card": true,
+   "refit_coef_all_rows": true,
+   "rows_by_session": true,
+   "rule": true,
+   "session_heat_scales_all_rows": true,
+   "with_session_heat_scale_loko": true
+  },
+  "rows": {
+   "aifoundry3": 484,
+   "card1": 448,
+   "card1_sessions": 16
+  }
+ },
+ "d_I8P": {
+  "anchors_by_session": {
+   "E108|c1": [
+    "int8.full"
+   ],
+   "E121|a3": [
+    "int8.full"
+   ],
+   "E122|a3": [
+    "int8.full"
+   ],
+   "E123|a3": [
+    "int8.full"
+   ],
+   "E131|c1": [
+    "int8.full"
+   ],
+   "E141|a3": [
+    "int8.full"
+   ],
+   "E142|c1": [
+    "int8.full"
+   ],
+   "E153|a3": [
+    "int8.anchor6_full",
+    "int8.full"
+   ],
+   "E157|c1": [
+    "int8.anchor6_full",
+    "int8.full"
+   ],
+   "E163|a3": [
+    "int8.anchor7_full_a",
+    "int8.anchor7_full_b",
+    "int8.full"
+   ],
+   "E164|c1": [
+    "int8.anchor6_full",
+    "int8.anchor7_full_a",
+    "int8.anchor7_full_b",
+    "int8.full"
+   ],
+   "E78|a3": [
+    "int8.full"
+   ],
+   "E82|c1": [
+    "int8.full"
+   ],
+   "E86|a3": [
+    "int8.full"
+   ],
+   "E91|c1": [
+    "int8.full"
+   ],
+   "E93|c1": [
+    "int8.full"
+   ],
+   "E94|c1": [
+    "int8.full"
+   ],
+   "E95|a3": [
+    "int8.full"
+   ]
+  },
+  "constant_beside": {
+   "card_term": 0.9615854710541776,
+   "constant": 0.9583519731491621,
+   "constant_95": [
+    0.948790555857588,
+    0.9672363682855186
+   ],
+   "median_k": 0.9966373265795389,
+   "median_k_95": [
+    0.9866939387275032,
+    1.00587664581199
+   ],
+   "median_k_interval_excludes_1": false,
+   "note": "reported beside, never carried (A1-3): a candidate for the next registration"
+  },
+  "enters": false,
+  "entry": {
+   "E164_priority1_bias": {
+    "bias_with_w": 0.05768296214579858,
+    "bias_without_w": -0.08106860255597961,
+    "n": 22,
+    "passes": false,
+    "rule": "falls in size and keeps its sign"
+   },
+   "every_card1_int8_row": {
+    "n": 108,
+    "passes": true,
+    "rise_w": 0.00031118604223961954,
+    "rms_with_w": 0.1852173187219337,
+    "rms_without_w": 0.18490613267969408,
+    "rule": "the rms rises by no more than 0.001 W"
+   },
+   "pooled": {
+    "d_rms_w": 0.00036,
+    "hi95": 0.018814,
+    "lo95": -0.014233,
+    "n_kinds": 83,
+    "n_rows": 97,
+    "passes": false,
+    "rms_with_w": 0.17811226934463573,
+    "rms_without_w": 0.17775191110438368,
+    "rule": "d <= -0.010 W and the 95% interval below 0"
+   }
+  },
+  "frozen_form": {
+   "card": "aifoundry1 card 1, paired sessions only; other card-1 int8 rows keep M10's prediction",
+   "card_term": 0.9615854710541776,
+   "k": "median over the int8 random anchors run in both sessions (by bytes) of [D_s/Dhat_s]/[D_r/Dhat_r], Dhat = M10's int8 B at each session's measured rate (card term on card 1); the check anchor never in k; 1 if no anchor",
+   "m10_int8_coef_J": [
+    2.7504953377643414e-15,
+    7.981324692713411e-15,
+    2.1594527256861665e-15,
+    2.1487638413549037e-14,
+    -2.552864975870485e-14,
+    2.4435628216689126e-15
+   ],
+   "nothing_new_fitted": true
+  },
+  "not_wanted": {
+   "I8P-B WORSE": "blind: read_hc1b_i8pb.py on E172 with E171",
+   "met_on_committed_rows": true,
+   "overcorrects": {
+    "met": true,
+    "readings": {
+     "E164's int8 rows": {
+      "bias_with_w": 0.06557021297473757,
+      "bias_without_w": -0.074848856834627,
+      "n": 24,
+      "overcorrects": false
+     },
+     "the paired sessions' card-1 int8 rows": {
+      "bias_with_w": 0.0410320714403753,
+      "bias_without_w": -0.0028863714347019107,
+      "n": 97,
+      "overcorrects": true
+     }
+    }
+   },
+   "spread_A1_3": {
+    "every_fold": {
+     "folds_reading_every_anchor": 106,
+     "folds_taking_anchors_away": {
+      "int8.full": {
+       "met": false,
+       "pairs_read": 2,
+       "pairs_without_anchor": [
+        "E108|c1",
+        "E131|c1",
+        "E142|c1",
+        "E82|c1",
+        "E91|c1",
+        "E93|c1",
+        "E94|c1"
+       ],
+       "ratio": 1.826273956922864
+      }
+     },
+     "ratio_range": [
+      1.2843006449064138,
+      1.284300644906448
+     ],
+     "verdicts": [
+      false
+     ]
+    },
+    "left_out_no_anchor": [],
+    "left_out_no_se": [],
+    "met": false,
+    "observed_sd": 0.009794109305228654,
+    "observed_sd_every_pair": 0.009794109305228654,
+    "pairs": {
+     "E108|c1": {
+      "anchors": [
+       "int8.full"
+      ],
+      "k": 0.9967030799900711,
+      "sd_from_own_errors": 0.0038364958068654196,
+      "se_missing": 0
+     },
+     "E131|c1": {
+      "anchors": [
+       "int8.full"
+      ],
+      "k": 0.990118504149144,
+      "sd_from_own_errors": 0.0070552359165165154,
+      "se_missing": 0
+     },
+     "E142|c1": {
+      "anchors": [
+       "int8.full"
+      ],
+      "k": 0.9989287173909214,
+      "sd_from_own_errors": 0.00877332148562096,
+      "se_missing": 0
+     },
+     "E157|c1": {
+      "anchors": [
+       "int8.anchor6_full",
+       "int8.full"
+      ],
+      "k": 0.9966373265795389,
+      "sd_from_own_errors": 0.01171962146051112,
+      "se_missing": 0
+     },
+     "E164|c1": {
+      "anchors": [
+       "int8.anchor7_full_a",
+       "int8.anchor7_full_b",
+       "int8.full"
+      ],
+      "k": 0.9763004747811284,
+      "sd_from_own_errors": 0.004712816702380577,
+      "se_missing": 0
+     },
+     "E82|c1": {
+      "anchors": [
+       "int8.full"
+      ],
+      "k": 0.9959975622013426,
+      "sd_from_own_errors": 0.006024238960370172,
+      "se_missing": 0
+     },
+     "E91|c1": {
+      "anchors": [
+       "int8.full"
+      ],
+      "k": 0.9866939387275032,
+      "sd_from_own_errors": 0.006919268608410286,
+      "se_missing": 0
+     },
+     "E93|c1": {
+      "anchors": [
+       "int8.full"
+      ],
+      "k": 1.00587664581199,
+      "sd_from_own_errors": 0.010862689879712027,
+      "se_missing": 0
+     },
+     "E94|c1": {
+      "anchors": [
+       "int8.full"
+      ],
+      "k": 1.0085893884719344,
+      "sd_from_own_errors": 0.004496021593656608,
+      "se_missing": 0
+     }
+    },
+    "pairs_read": 9,
+    "ratio": 1.2843006449064267,
+    "rule": "the sd of k over the nine pairs no larger than the sd drawing each anchor's D as D + se x N(0, 1) gives (2,000 draws, seed 142): met means a constant card term would do as well",
+    "sd_expected_from_own_errors": 0.007626025373476508
+   }
+  },
+  "per_pair": {
+   "E108/E122": {
+    "anchors": [
+     "int8.full"
+    ],
+    "bias_with_w": null,
+    "bias_without_w": null,
+    "card1_int8_rows": 0,
+    "k_all_rows": 0.9967030799900711,
+    "k_fold_range": [
+     0.9954021287921564,
+     0.9991464742392155
+    ],
+    "k_preview_A1_1": 0.9967,
+    "q": {
+     "int8.full": 0.9967030799900711
+    },
+    "rms_with_w": null,
+    "rms_without_w": null
+   },
+   "E131/E95": {
+    "anchors": [
+     "int8.full"
+    ],
+    "bias_with_w": 0.1297382799042551,
+    "bias_without_w": 0.0888912062242428,
+    "card1_int8_rows": 12,
+    "k_all_rows": 0.990118504149144,
+    "k_fold_range": [
+     0.9888261474985921,
+     0.9925457564648824
+    ],
+    "k_preview_A1_1": 0.99011,
+    "q": {
+     "int8.full": 0.990118504149144
+    },
+    "rms_with_w": 0.15475695605069748,
+    "rms_without_w": 0.11748516469099793
+   },
+   "E142/E141": {
+    "anchors": [
+     "int8.full"
+    ],
+    "bias_with_w": -0.02348844269676098,
+    "bias_without_w": -0.028830270431586938,
+    "card1_int8_rows": 9,
+    "k_all_rows": 0.9989287173909214,
+    "k_fold_range": [
+     0.997624861169734,
+     1.0013775677380103
+    ],
+    "k_preview_A1_1": 0.99892,
+    "q": {
+     "int8.full": 0.9989287173909214
+    },
+    "rms_with_w": 0.15996986705448626,
+    "rms_without_w": 0.1608861166131652
+   },
+   "E157/E153": {
+    "anchors": [
+     "int8.anchor6_full",
+     "int8.full"
+    ],
+    "bias_with_w": -0.005400218376201579,
+    "bias_without_w": -0.02062737507603389,
+    "card1_int8_rows": 17,
+    "k_all_rows": 0.9966373265795389,
+    "k_fold_range": [
+     0.9937938095041879,
+     0.9990805596357379
+    ],
+    "k_preview_A1_1": 0.99664,
+    "q": {
+     "int8.anchor6_full": 0.9946992348650496,
+     "int8.full": 0.9985754182940281
+    },
+    "rms_with_w": 0.12273860471133888,
+    "rms_without_w": 0.12399755283695571
+   },
+   "E164/E163": {
+    "anchors": [
+     "int8.anchor7_full_a",
+     "int8.anchor7_full_b",
+     "int8.full"
+    ],
+    "bias_with_w": 0.06557021297473757,
+    "bias_without_w": -0.074848856834627,
+    "card1_int8_rows": 24,
+    "k_all_rows": 0.9763004747811284,
+    "k_fold_range": [
+     0.9736703316661659,
+     0.9786938525216093
+    ],
+    "k_preview_A1_1": 0.9756,
+    "q": {
+     "int8.anchor7_full_a": 0.9728143710888244,
+     "int8.anchor7_full_b": 0.9763004747811284,
+     "int8.full": 0.9767879466816382
+    },
+    "rms_with_w": 0.19344083720318675,
+    "rms_without_w": 0.19067971207048642
+   },
+   "E82/E78": {
+    "anchors": [
+     "int8.full"
+    ],
+    "bias_with_w": -0.0596284763057894,
+    "bias_without_w": -0.07160303629583234,
+    "card1_int8_rows": 15,
+    "k_all_rows": 0.9959975622013426,
+    "k_fold_range": [
+     0.9946975318837084,
+     0.9984392268901573
+    ],
+    "k_preview_A1_1": 0.99599,
+    "q": {
+     "int8.full": 0.9959975622013426
+    },
+    "rms_with_w": 0.14321182265536522,
+    "rms_without_w": 0.14481611576584769
+   },
+   "E91/E86": {
+    "anchors": [
+     "int8.full"
+    ],
+    "bias_with_w": 0.13645469446565972,
+    "bias_without_w": 0.06294068594405777,
+    "card1_int8_rows": 4,
+    "k_all_rows": 0.9866939387275032,
+    "k_fold_range": [
+     0.9854060520064389,
+     0.9891127958013438
+    ],
+    "k_preview_A1_1": 0.98669,
+    "q": {
+     "int8.full": 0.9866939387275032
+    },
+    "rms_with_w": 0.20486666649960308,
+    "rms_without_w": 0.1662852814140731
+   },
+   "E93/E121": {
+    "anchors": [
+     "int8.full"
+    ],
+    "bias_with_w": 0.01143109586186486,
+    "bias_without_w": 0.03616966909433552,
+    "card1_int8_rows": 5,
+    "k_all_rows": 1.00587664581199,
+    "k_fold_range": [
+     1.0045637207758429,
+     1.008342528842822
+    ],
+    "k_preview_A1_1": 1.00587,
+    "q": {
+     "int8.full": 1.00587664581199
+    },
+    "rms_with_w": 0.21021591064763312,
+    "rms_without_w": 0.21953594280781696
+   },
+   "E94/E123": {
+    "anchors": [
+     "int8.full"
+    ],
+    "bias_with_w": 0.13129264032298132,
+    "bias_without_w": 0.15466112050368033,
+    "card1_int8_rows": 11,
+    "k_all_rows": 1.0085893884719344,
+    "k_fold_range": [
+     1.0072729226161754,
+     1.0110619217278416
+    ],
+    "k_preview_A1_1": 1.00858,
+    "q": {
+     "int8.full": 1.0085893884719344
+    },
+    "rms_with_w": 0.253855948545912,
+    "rms_without_w": 0.28059093949095926
+   }
+  },
+  "pool6_anchor_chain_check": {
+   "fp16.anchor6_randn": 0.0,
+   "fp32.anchor6_randn": 0.0,
+   "int8.anchor6_full": 0.0
+  },
+  "reproduces_M10_B": {
+   "card_term_rel_diff": 0.0,
+   "card_term_within_1e-9": true,
+   "coef_max_rel_diff": 3.186628760934849e-14,
+   "coef_within_1e-9": true,
+   "kinds": 107,
+   "max_abs_err_vs_rows_m10_w": 4.965738880269473e-07,
+   "rows": 222
+  },
+  "rows": {
+   "E164_int8": 24,
+   "E164_priority1_int8": 22,
+   "card1_int8": 108,
+   "card1_int8_unpaired_sessions": [
+    "E103",
+    "E88"
+   ],
+   "paired": 97
+  }
+ },
+ "decided": {
+  "c_HC1": "DOES NOT ENTER: M11's card-1 4.5 s heat stays M10's law; HC1-B is still read on E172 and reported, and cannot bring it in",
+  "d_I8P": "DOES NOT ENTER: M11's card-1 int8 stays M10's (card term 0.9616); I8P-B is still read on E172 with E171 and reported, and cannot bring it in"
+ },
+ "draws": 2000,
+ "fit_m10_sha256": "28de38b712205dac5e788469d87d959c569c1e1d702f2b7b024ca55378e83382",
+ "m10_registered_inputs": 174,
+ "m11_lists": {
+  "SHA256SUMS": 58,
+  "SHA256SUMS-a1": 9,
+  "SHA256SUMS-m11": 6
+ },
+ "refit_sha256": "506982565ec050d240d1d4eff50537dbaa85210de14e93512ee5283fb14833ff",
+ "seed": 142
+}

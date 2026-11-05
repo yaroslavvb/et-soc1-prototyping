@@ -1,0 +1,43 @@
+M11 refit (c) and (d): M11's lists {'SHA256SUMS': 58, 'SHA256SUMS-m11': 6, 'SHA256SUMS-a1': 9}; M10's 174 registered inputs pass
+(c) HC1: reproduces heldout-m10.json's heat_c1 (15 of 15 fields); card 1 448 rows in 16 sessions
+    pooled d -0.112346 C [-0.136676, -0.085233]: PASS
+    two thirds: d <= 0 in 9 of 14 sessions with >= 10 rows (needed 10; worse with h: ['E102|aifoundry1-c1', 'E104|aifoundry1-c1', 'E142|aifoundry1-c1', 'E88|aifoundry1-c1', 'E93|aifoundry1-c1']): FAIL
+    bias +0.007120 -> -0.002562 C: PASS
+      E102|aifoundry1-c1     n  33  rms 0.3203 -> 0.3235  d +0.0032  h 1.0052
+      E103|aifoundry1-c1     n  33  rms 0.2546 -> 0.1640  d -0.0906  h 1.1013
+      E104|aifoundry1-c1     n  23  rms 0.2200 -> 0.2248  d +0.0049  h 1.0044
+      E106|aifoundry1-c1     n   8  rms 0.4733 -> 0.1709  d -0.3023  h 0.8173  (fewer than 10 rows: not judged)
+      E108|aifoundry1-c1     n  18  rms 0.4346 -> 0.2051  d -0.2295  h 0.8262
+      E128|aifoundry1-c1     n   2  rms 1.1111 -> 0.0890  d -1.0222  h 0.6287  (fewer than 10 rows: not judged)
+      E131|aifoundry1-c1     n  16  rms 0.7866 -> 0.1854  d -0.6012  h 0.765
+      E137|aifoundry1-c1     n  11  rms 0.2749 -> 0.1189  d -0.1560  h 0.8726
+      E142|aifoundry1-c1     n  34  rms 0.1147 -> 0.1178  d +0.0031  h 0.99
+      E157|aifoundry1-c1     n  45  rms 0.1652 -> 0.1455  d -0.0197  h 0.9635
+      E164|aifoundry1-c1     n  73  rms 0.1867 -> 0.1243  d -0.0624  h 1.06
+      E82|aifoundry1-c1      n  36  rms 0.1741 -> 0.1071  d -0.0669  h 1.05
+      E88|aifoundry1-c1      n  18  rms 0.1557 -> 0.1599  d +0.0042  h 1.0158
+      E91|aifoundry1-c1      n  16  rms 0.1881 -> 0.1356  d -0.0525  h 1.0906
+      E93|aifoundry1-c1      n  22  rms 0.1271 -> 0.1394  d +0.0123  h 0.9989
+      E94|aifoundry1-c1      n  60  rms 0.2832 -> 0.1854  d -0.0977  h 1.0958
+    HC1 DOES NOT ENTER
+(d) I8P: M10's B reproduced (max |err - rows-m10| 4.97e-07 W; prices and card term within 1e-9: 3.2e-14, 0.0e+00); rows {'card1_int8': 108, 'paired': 97, 'E164_int8': 24, 'E164_priority1_int8': 22, 'card1_int8_unpaired_sessions': ['E103', 'E88']}
+    pooled d +0.000360 W [-0.014233, +0.018814] over 97 rows: FAIL
+    E164 priority-1 bias -0.081069 -> +0.057683 W: FAIL
+    every card-1 int8 row: rms 0.184906 -> 0.185217 W (rise +0.000311): PASS
+    I8P DOES NOT ENTER
+    not wanted, over-correction on E164's int8 rows: bias -0.074849 -> +0.065570 W: False
+    not wanted, over-correction on the paired sessions' card-1 int8 rows: bias -0.002886 -> +0.041032 W: True
+    not wanted, the spread (A1-3): observed sd of k 0.009794 over 9 pairs against 0.007626 from the anchors' own errors (ratio 1.284): met False; left out (no se) []
+      every fold reading every anchor (106): ratio 1.284301-1.284301, verdicts [False]; folds taking anchors away: {"int8.full": {"ratio": 1.826273956922864, "met": false, "pairs_read": 2, "pairs_without_anchor": ["E108|c1", "E131|c1", "E142|c1", "E82|c1", "E91|c1", "E93|c1", "E94|c1"]}}
+      E82/E78    k 0.99600 (folds 0.99470-0.99844; preview 0.99599) anchors ['int8.full'] rows 15
+      E91/E86    k 0.98669 (folds 0.98541-0.98911; preview 0.98669) anchors ['int8.full'] rows 4
+      E131/E95   k 0.99012 (folds 0.98883-0.99255; preview 0.99011) anchors ['int8.full'] rows 12
+      E93/E121   k 1.00588 (folds 1.00456-1.00834; preview 1.00587) anchors ['int8.full'] rows 5
+      E108/E122  k 0.99670 (folds 0.99540-0.99915; preview 0.9967) anchors ['int8.full'] rows 0
+      E94/E123   k 1.00859 (folds 1.00727-1.01106; preview 1.00858) anchors ['int8.full'] rows 11
+      E142/E141  k 0.99893 (folds 0.99762-1.00138; preview 0.99892) anchors ['int8.full'] rows 9
+      E157/E153  k 0.99664 (folds 0.99379-0.99908; preview 0.99664) anchors ['int8.anchor6_full', 'int8.full'] rows 17
+      E164/E163  k 0.97630 (folds 0.97367-0.97869; preview 0.9756) anchors ['int8.anchor7_full_a', 'int8.anchor7_full_b', 'int8.full'] rows 24
+    beside: the constant 0.961585 x median k 0.99664 = 0.95835 [0.94879, 0.96724]; the median k's interval excludes 1: False
+DECIDED (c) DOES NOT ENTER: M11's card-1 4.5 s heat stays M10's law; HC1-B is still read on E172 and reported, and cannot bring it in
+DECIDED (d) DOES NOT ENTER: M11's card-1 int8 stays M10's (card term 0.9616); I8P-B is still read on E172 with E171 and reported, and cannot bring it in
