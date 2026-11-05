@@ -4,6 +4,13 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-11-01 (Sun, week 44, Q133 records)** — Section 3's index reads Q1–Q133 and E1–E118, where it read Q1–Q132
+  and E1–E106: E107–E116 are Q133's ten card experiments, E117 the governor move it did not run and E118 the one it
+  made on aifoundry1's card 0; E77's line says it was registered and run on 1 November and is recorded after its
+  verification. *Why:* constraint — Q133's lanes committed E107–E118's data and their corrections after verification that
+  day; re-check: the data READMEs under `docs/reports/data/2026-11-01-e1*/` and the last rows of
+  `docs/findings/02-requests.md` and `03-experiments.md`. And preference — the owner's ask that morning, *"continue
+  filling out the missing parts (Esperanto only) found by the critics"*.
 - **2026-11-01 (Sun, week 44)** — Section 4: the owner's agents make at most one card post a day in #community-lab.
   The day's first reservation posts it, and every later change rewrites it with the Intel's `edit_replace.mjs` under
   `EXPECT_TEXT`. It names every card held, one `; ` clause each: a new reservation erases the released ones, a card

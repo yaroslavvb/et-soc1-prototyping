@@ -3712,7 +3712,7 @@ card 0.
 | Run | Card | What it answers | Card-minutes (cap) | Stops |
 |---|---|---|---|---|
 | **E171** | aifoundry3 card 0, 600 MHz pinned | P8-KC, P1–P3, B1, B2, C1, M1, M1f, M1i, A1, KA, H1–H4, LG and G; HM NOT SCORED | FULL 17110–17113, the fourth pass only if the 70-minute budget admits it: about 60–62 (70); TWO about 31 (38); SHORT about 28 (30) | 65 W, or 70 °C on minshire[0] |
-| **E172** | aifoundry1 card 1, 600 MHz | the same rules on card 1; P8-KA pooled over E171 and E172 (4 tiles), read only by `score_p8_600_v2.py ka-pooled` | four passes, about 51–53, or five when each pass takes about 748 s or less, about 63–64 (65) | 66 W, or 72 °C on any minshire |
+| **E172** | aifoundry1 card 1, 600 MHz | the same rules on card 1; P8-KA pooled over E171 and E172 (4 tiles), read only by `score_p8_600_v2.py ka-pooled` *(dated, Thu 5 Nov 2026: now only by `score_p8_600_v3.py ka-pooled`, E172.md's dated note 2)* | four passes, about 51–53, or five when each pass takes about 748 s or less, about 63–64 (65) | 66 W, or 72 °C on any minshire |
 | **E173** | aifoundry2, its own governor, 6 s bursts, E165's form | A2-Bp (21 pinned tiles), F2, W2, M1 (24 tiles) and H1; A2-G, Bg, F1 and W1 NOT SCORED; A2-R2 FAIL through Bp, else NOT SCORED; zeros anchors first | 165 bursts, 3 passes of 55, about 40 (42, slot 48); the subset passes 1–2, 110 bursts (28, slot 34) | above 85 W on three live samples, or 76 °C; the 82 W admission |
 | **E174** | aifoundry1 card 0, its own governor, bursts at the 800 MHz cap, E170's form; after E172 has ended, never beside it | C0-W, C0-B, C0-M1, C0-F, C0-H1 (term c2's second session) and C0-HK | 126 bursts, about 28 (40, slot 45); the subset passes 1, 2, 4 and 5, 84 bursts (25, slot 30) | one sample above 65.9 W, 72 °C, or any sampler line under 590 MHz; a ramped smoke, the hottest kinds last; NO-GO if card 0's module uptime breaks continuity with E84's read |
 
@@ -3722,7 +3722,7 @@ E174); none sends the statistics reset or the firmware-revisions query, and noth
 committed figures: the P8 scorer 783 of 783 leaves on E163 and E164, E173's 34 of 34 on E165, E174's 22 of 22 on E170. In all
 about 180–195 card-minutes (the caps sum to 217), about 2–2.25 h of wall time after the approvals, then about 45 minutes at the
 desk. The plan, the window and the day's one post are the readiness critic's; E174 runs only after E172's end has been read, and
-the v2 drivers are the ones to use (`s22_collect_k6_v2.sh`, `step_e173_v2.sh`, `step_e174_v2.sh`).
+the v2 drivers are the ones to use (`s22_collect_k6_v2.sh`, `step_e173_v2.sh`, `step_e174_v2.sh`). *(Dated, Thu 5 Nov 2026, Q142(v2) and Q142(h)'s records: dated notes 2 beside E171.md–E174.md (`c9a3e40a`, 08:23:02 PST, committed before the code they name and before any data) supersede both clauses. E174 runs after E172 has ended, or if E172 never starts, and never beside it; E172 is collected only when aifoundry1 is quiet, so after E174 has ended or been skipped; and the drivers are the v3 ones: `s03b_lists_k6.sh` after `s03_desk_k6.sh`, `s22_collect_k6_v3.sh`, `step_e173_v3.sh` and `step_e174_v3.sh`, with `score_p8_600_v3.py ka-pooled` the only registered pooled KA read. "Q142(v2) and Q142(h)", below, has the rest.)*
 
 *(Dated, Thu 5 Nov 2026, after these records' verifier: what the readiness critic's records list quotes and the records above left
 out, each from the committed registrations, kits and notes.)* **The 600 MHz runs** (`e171/E171.md`, `e172/E172.md`): the paired
@@ -3756,13 +3756,13 @@ the 16 commit messages found only the reviewed classes.
 | Q142(x)'s verifier | five minor faults: A2-R2's status overstated; the seven counting corrections given as five; card 1's N1 range; Python outside the slot; what the scan covered | dated note 1 beside the freeze's README (`dfe226f1`) |
 | Q142(k6)'s verifier | seven minor faults: `ka-pooled` read one session twice as PASS; a scale anchor whose C fails still set s; the exit codes; E172's fifth pass; the desk test's coverage; a commit with one scan hit; a hand-edited self-test text and runs outside the slot | dated notes 1 (`2502ba81`), `score_p8_600_v2.py` (`86d10a75`), step 22 v2 (`1a76a870`): 1–2 fixed, 3–4 recorded, 5 in part (step 13's cases and JOB-LOST untested; steps 10, 12 and 13 not ported), 6 explained, 7 as disclosed |
 | Q142(kg)'s verifier | two minor faults and five nits: E174's port dropped v3.1's two aifoundry1 gates; `check_path_e173.py`; the frozen inputs' count; the audit's count and the dry logs' times; C0-W's 97.5%; `e78_common.py`; the C-log list's residual | dated notes 1 (`5db9df6b`) and the v2 step drivers (`34436d68`) |
-| The readiness critic, fault 1 (minor) | no verifier read the six fix-pass commits (`dfe226f1`, `2502ba81`, `86d10a75`, `1a76a870`, `5db9df6b`, `34436d68`); it stood in, re-running every test they commit, but did not read `score_p8_600_v2.py`, `rb_common_v2.sh` or `cclist_q142kg_v2.py` line by line, whose behaviour rests on their own tests | recorded here; nothing is needed before the card day |
-| Its fault 2 (minor) | `score_p8_600_v2.py`'s self-test cannot be re-made byte for byte | quote it as: V0–V3 PASS on re-run; 269 of 272 leaves equal, the other 3 hashes of synthetic files that embed the temp directory |
-| Its fault 3 (nit) | the card day's desk step `s03_desk_k6.sh` checks 5 of the 22 hash lists, not `SHA256SUMS-v2`, which pins `score_p8_600_v2.py` | at the go, all 22 lists are checked beside it |
-| Its fault 4 (nit) | E174's "only after E172 has ended": the code reads it as never beside E172, and nothing records E172's end | one sentence before E174's data: E174 runs after E172 has ended, or if E172 never starts, and never beside it |
+| The readiness critic, fault 1 (minor) | no verifier read the six fix-pass commits (`dfe226f1`, `2502ba81`, `86d10a75`, `1a76a870`, `5db9df6b`, `34436d68`); it stood in, re-running every test they commit, but did not read `score_p8_600_v2.py`, `rb_common_v2.sh` or `cclist_q142kg_v2.py` line by line, whose behaviour rests on their own tests | recorded here; nothing is needed before the card day *(dated, Thu 5 Nov 2026: a verifier then read all six, holding them with fixes, and its fix pass answered it, before any data; "Q142(v2) and Q142(h)", below)* |
+| Its fault 2 (minor) | `score_p8_600_v2.py`'s self-test cannot be re-made byte for byte | quote it as: V0–V3 PASS on re-run; 269 of 272 leaves equal, the other 3 hashes of synthetic files that embed the temp directory *(dated, Thu 5 Nov 2026: v3's self-test, W0–W6, is byte for byte the same in any temporary directory)* |
+| Its fault 3 (nit) | the card day's desk step `s03_desk_k6.sh` checks 5 of the 22 hash lists, not `SHA256SUMS-v2`, which pins `score_p8_600_v2.py` | at the go, all 22 lists are checked beside it *(dated, Thu 5 Nov 2026: by `s03b_lists_k6.sh`, `e2b48f5a`, which checks the 22 and v3's 2 and exits 16 on a mismatch)* |
+| Its fault 4 (nit) | E174's "only after E172 has ended": the code reads it as never beside E172, and nothing records E172's end | one sentence before E174's data: E174 runs after E172 has ended, or if E172 never starts, and never beside it *(dated, Thu 5 Nov 2026: written, in E174's dated note 2, section 1, `c9a3e40a`)* |
 | Its fault 5 (nit) | the kg notes say they came "before the code they name": true by commit order; the code was last written at 05:43:05 | quote it as: committed before the code's commit (`34436d68`) and before any data |
 | Carried | k6's desk test does not cover step 13's cases or JOB-LOST (v3.1's code, run on Wed's card half); `ours_live`'s exclusion of a dry pass cannot be shown on macOS (v3.1's rule on the box); the scans ran without the lab's privacy table, absent on the Intel | a later port's desk test; the kits' login scrubs and the public-text scan at each data commit |
-| *(Dated, Thu 5 Nov 2026)* These records' verifier (about 07:44–08:16 PST) | four minor faults: the Horace Hub's Status still said a blind pool 8 heads the list, and its Levels tab filed the chain's 0.493 °C as held out; the "Card 0 (E174)" row above gives the 31-tile lines, not E174's at n 21; parts of the readiness critic's records list reached no record. Three nits and one carried item: times to the second were when the deploy calls returned; the kinds page's pool-8 paragraph does not name the design commit `153b720f`; "scored" in AGENT.md's changelog entry has no pointer to its meaning; the findings README's index still reads E1–E170 | the dated clause in the "Card 0 (E174)" row, the carry item (66) and the dated paragraph after the runs table (this fix pass); the hub's Status and Levels, rewritten, with one Fix entry in its Log; the times in Disclosures; the other three carried to the next edit of each file |
+| *(Dated, Thu 5 Nov 2026)* These records' verifier (about 07:44–08:16 PST) | four minor faults: the Horace Hub's Status still said a blind pool 8 heads the list, and its Levels tab filed the chain's 0.493 °C as held out; the "Card 0 (E174)" row above gives the 31-tile lines, not E174's at n 21; parts of the readiness critic's records list reached no record. Three nits and one carried item: times to the second were when the deploy calls returned; the kinds page's pool-8 paragraph does not name the design commit `153b720f`; "scored" in AGENT.md's changelog entry has no pointer to its meaning; the findings README's index still reads E1–E170 | the dated clause in the "Card 0 (E174)" row, the carry item (66) and the dated paragraph after the runs table (this fix pass); the hub's Status and Levels, rewritten, with one Fix entry in its Log; the times in Disclosures; the other three carried to the next edit of each file *(dated, Thu 5 Nov 2026, Q142(v2) and Q142(h)'s records: the round critic of Q142(v2), (r2) and (h) read this fix pass, lab `23a8b44f`, gyroscope `f295a107` and the two hub pages it deployed: insert-only, 0 characters lost; the Logs append-only; visibility and access unchanged; the two corrected hub sentences in place; the n-21 lines here equal `e174/predictions-e174.json`'s. The three carried items are taken by those records: AGENT.md's changelog entry, the findings README's index and 03's counter, and the kinds page)* |
 
 ### The lanes' wording, as corrected (quote it so)
 
@@ -3773,7 +3773,7 @@ the 16 commit messages found only the reviewed classes.
 | Q142(p) | "E163 against E141 read a level" overstates: the registered test reads NOT SEPARATED there, with the null rejected (post hoc, design only); RR is a set, not a rule P8-RR; C0-F reads PASS / FAIL |
 | Q142(d) | a rebuild of the pool is identical in 88 of its 90 files; the other two differ only in `made_at`, `git_head` and that `SHA256SUMS` line (never "87 of 89", never "every byte"); `DESIGN.md` was last written at 23:21:08 and committed at 23:22:03 |
 | Q142(x) | A2-R2 "cannot PASS on pool 8; it reads FAIL if A2-Bp fails, else NOT SCORED", never NOT SCORED alone; card 1's N1 a-priori D is 4.16–24.11 W; the counting corrections are the seven in the README's Results 2, not five; A1-3's 1.36 W is 1.3546 W; dated note 1 was first written at about 03:08 PST |
-| Q142(k6) | the scorer's refusals are "non-zero (1 or 9), nothing written"; E172 runs four passes, or five if each takes about 748 s or less (about 63–64 card-minutes, inside the 65 cap); P8-KA pooled is read only by `score_p8_600_v2.py ka-pooled` for E171 then E172 (exit 6 otherwise) |
+| Q142(k6) | the scorer's refusals are "non-zero (1 or 9), nothing written"; E172 runs four passes, or five if each takes about 748 s or less (about 63–64 card-minutes, inside the 65 cap); P8-KA pooled is read only by `score_p8_600_v2.py ka-pooled` for E171 then E172 (exit 6 otherwise) *(dated, Thu 5 Nov 2026: superseded by dated notes 2, `c9a3e40a`: only by `score_p8_600_v3.py ka-pooled`, where a session that kept fewer than 2 passes reads NOT SCORED, as registered)* |
 | Q142(kg) | 17 of E173's 26 and 22 of E174's 32 frozen inputs match an earlier committed list, and the other 9 and 10 are pinned first by `frozen-sha256-e173.json` and `-e174.json`; the desk audit covers 25 files, not 26; C0-W's 97.5% is coverage by construction; the notes were committed before the code's commit (`34436d68`) and before any data |
 | The readiness critic | V0–V3 PASS on re-run; 269 of 272 leaves equal, the other 3 hashes of synthetic files that embed the temp directory |
 
@@ -3811,13 +3811,13 @@ the 16 commit messages found only the reviewed classes.
 1. Card time, on the owner's go and fresh lab approvals for aifoundry1–3: pool 8's day 1, E171 on aifoundry3, E172 then E174 on
    aifoundry1, and E173 on aifoundry2, the boxes in parallel; about 180–195 card-minutes and 2–2.25 h of wall time, one day's
    post. At the go, about 10 minutes at the desk first: one output directory and the two runbooks' windows, the pull and all 22
-   hash lists, E174's one sentence (fault 4), and the v2 drivers only. It turns M10's held-out figures into blind ones on four
+   hash lists, E174's one sentence (fault 4), and the v2 drivers only. *(Dated, Thu 5 Nov 2026: since Q142(v2)'s fix pass the desk items at the go read: one output directory and both runbooks' windows; `s03_desk_k6.sh`, then `s03b_lists_k6.sh` for all 22 lists and v3's 2; no sentence owed, since E174's dated note 2 holds it; and the v3 drivers.)* It turns M10's held-out figures into blind ones on four
    cards, and LG decides whether term a's float excess is a gain or a level.
 2. These records, then a verifier and a fix pass. *(Dated, Thu 5 Nov 2026: done; the verifier held them with four minor faults, three nits and one carried
    item, and this fix pass corrected the four faults here and on the Horace Hub.)*
 3. At the desk: M11's heat registration before any hold, heat over minutes as a session level against a gain with two or more rise
    levels a session and one hold like E144's, its power stated the way LG's is, with a heat scale for card 1 alone and a
-   paired-anchor int8 term beside it.
+   paired-anchor int8 term beside it. *(Dated, Thu 5 Nov 2026: registered, M11, `3c31a91d`, amended by A1, `f49b7ddd`; its kits, scorer and holds remain; "Q142(v2) and Q142(h)", below.)*
 4. At the desk, then about 40 card-minutes: aifoundry2's governed line, a design with at least 8 governed tiles under the 82 W
    admission, so that A2-G, A2-Bg and A2-R2 can pass on a later aifoundry2 session.
 5. Card time, day 2: a second pool-8 session on aifoundry3 and on card 1, since term a is a session scale, and M11's holds on
@@ -3836,6 +3836,184 @@ the 16 commit messages found only the reviewed classes.
 **Not established by Q142's pool-8 lanes.** Any blind score of M10 on pool 8; whether rule E's carried D reads aifoundry2's pinned
 bursts and card 0 as forecast; whether term a's float excess is a gain or a level; whether the recount's counting corrections show
 on the cards; aifoundry2's governed clock line on new kinds; any of the four kits on a box.
+
+## Q142(v2) and Q142(h): the card day's code read and fixed (the v3 drivers), and M11's heat registration with its amendment A1 (Thu 5 Nov 2026, week 45, from about 06:58 to 09:35 PST; desk only)
+
+The owner's mandate is still his words of Mon 2 Nov 2026 about 18:40 PST (Q138), with Q137's goal; his last words were the card
+half's go of Wed 4 Nov about 13:55 PST, and there is no new word since. Two desk lanes ran beside Q142's pool-8 records, on the
+pool-8 readiness critic's fault 1 (Q142(v2)) and `next` rank 3 (Q142(h)), each read by a separate verifier and corrected in new
+files, then a round critic (about 08:52–09:35 PST). No card, no device command, no lab box, no post: **no row below is a
+measurement or a score.** Q142(v2) is desk code and its tests; Q142(h) is a registration, design only. Short names: `m11/` is
+`tools/claims-v3/m11/`, `k6/` is `tools/claims-v3/q141k-runbook/k6/`, `kg/` is `tools/claims-v3/q142kg-runbook/`, and `e171/` to
+`e174/` and `p8-600/` are under `tools/claims-v3/`. 🛑 **To carry from here, beside the earlier sections' items:** (67) **the card
+day runs the v3 drivers** (the table below), and E174 is collected with `step_e174_v3.sh collect`, whatever v2's printed hint
+names; (68) **P8-KA pooled is read only by `score_p8_600_v3.py ka-pooled`**, and if E171 or E172 never runs or is never collected,
+`ka` is not called and P8-KA pooled is recorded as NOT SCORED (fewer than 4 check anchors); (69) **M11 is registered, design
+only**: its figures are registered powers and plans, never results; (70) **HC1-B and I8P-B are blind by registration only**
+(`3c31a91d` precedes every launch), and at `f49b7ddd` no code computes them.
+
+### Q142(v2): the card day's code, read and fixed (desk only, code and tests)
+
+**The verifier** (about 06:58–07:40 PST, 13 jobs one at a time in the round's job slots) was the first to read the six fix-pass
+commits of Q142(x), Q142(k6) and Q142(kg) (`dfe226f1`, `2502ba81`, `86d10a75`, `1a76a870`, `5db9df6b`, `34436d68`). It re-ran
+every committed test (`dfe226f1`'s figures, V0–V3, the k6 desk test 35 of 35, the kg desk test 49 of 49 and the audits), each
+reproducing with only temporary paths and times different, and ran adversarial cases on `score_p8_600_v2.py` and on step 22 v2 end
+to end. Verdict: **holds with fixes**; nothing makes the card day unsafe. Its seven faults: (1, minor, one the card day could hit)
+v2's `ka-pooled` refused (exit 6) a genuine session that kept fewer than 2 passes, where E171.md and E172.md read P8-KA pooled NOT
+SCORED, and step 22 v2 then stopped with 16; (2, minor, wording) N1's identity checks are by labels, not provenance: E171's
+measurements laid out as E172's raw copy and scored as E172 passed every v2 check (PASS, n 4); (3, nit) `cclist_q142kg_v2.py`
+never read the names in `session_end` lines; (4, nit) no quiet guard before E172's pull; (5, nit) the kg dry listing never printed
+the prelude it refers to; (6, nit) v2's self-test is not byte-reproducible (269 of 272 leaves equal); (7, nit) N4 named only one
+of E172.md's two fifth-pass sentences.
+
+**The fix pass** (about 07:42–08:35 PST, 14 jobs one at a time), before any E171–E174 data, in three commits: dated notes 2 beside
+E171.md, E172.md, E173.md and E174.md, committed alone, before the code they name (`c9a3e40a`, 08:23:02 PST); the v3 code with its
+desk tests and logs (`e2b48f5a`, 08:27:12, 25 files); and step 3b's desk test log, run at `e2b48f5a`, with dated notes 2 beside
+the READMEs of `p8-600/`, both runbooks and the four kits (`6f4b48e4`, 08:31:18, 8 files). Each of the seven faults is fixed: (1)
+by v3's `ka-pooled` (W2: v2 exit 6, v3 NOT SCORED at n 2, 2 and 0, equal to the committed reading); (2) by v3's check 7 and the
+notes' wording (W4: v2 PASS at n 4, v3 refused, 62 of 62 shared non-zero D bit-identical; W6: E163 against E164, 0 of 65); (3) by
+`cclist_q142kg_v3.py` and the v3 drivers' collect; (4) by step 22 v3's quiet read of aifoundry1, exit 17; (5) by the kg listing
+v3, which prints the preludes; (6) by v3's self-test, which masks before it cuts and hashes masked bytes, three runs
+byte-identical; (7) by E172's dated note 2, section 2.4. It also answers the readiness critic's fault 3 (`s03b_lists_k6.sh`) and
+fault 4 (E174's one sentence, now in its dated note 2, section 1). Tests: the v3 self-test W0–W6, the k6 desk test 39 of 39, the
+kg desk test 19 of 19, step 3b's 11 of 11, and the kg v2 test re-run, 49 of 49; `dmcmd_audit` GO on k6 at 11 READ send sites
+(without its guard NO-GO only at `s09_a3_reads_k6.sh`:20, as in v2) and on kg at 0.
+
+**What Q142(v2) registers** (quote these; no rule, line, set, admission, stop, cap or forecast changes):
+
+| What | As registered by dated notes 2 | Verify at |
+|---|---|---|
+| P8-KA pooled | read only through `score_p8_600_v3.py ka-pooled`: v2's checks 1–5; check 6 accepts the committed scorer's own NOT SCORED session (the mark `<k> kept passes, fewer than 2`, with no rows); check 7 refuses when at least 3, and at least half, of the shared non-zero D values are bit-identical | `e171/E171.md.dated-note-2.md`, sections 2.1–2.2; `p8-600/score_p8_600_v3.py` |
+| What v3 refuses | one file twice, a byte copy, the pair swapped, a relabelled file, another scorer or predictions file, no C gate, a forged mark, and the same measured D; it cannot tell a copy re-reduced with the other card's footing | the same; `p8-600/selftest-score-p8-600-v3.txt` |
+| E172's collection | only when aifoundry1 is quiet (exit 17 otherwise), so after E174 has ended or been skipped; N4 supersedes both E172.md:92 and :121 | `e172/E172.md.dated-note-2.md`, sections 2.4–2.5 |
+| E174's order | E174 runs after E172 has ended, or if E172 never starts, and never beside it | `e174/E174.md.dated-note-2.md`, section 1 |
+| The kg C-log list | adds the names in `session_end` lines; v3 only adds sessions | `e174/E174.md.dated-note-2.md`, section 2; `kg/cclist_q142kg_v3.py` |
+| Step 3b | checks the readiness critic's 22 hash lists and v3's 2 at the go, and exits 16 on a mismatch | `k6/s03b_lists_k6.sh`; `k6/logs/selftest-lists22.txt` |
+| v2's self-test | quoted as "V0–V3 PASS on re-run; 269 of 272 leaves equal" | `p8-600/README.md.dated-note-2.md` |
+
+**The drivers the card day uses** (replacing "the v2 drivers only"; under `tools/claims-v3/`):
+
+| Run | The drivers, in order | Never |
+|---|---|---|
+| E171 and E172 (k6) | `k6/s02_window_k6.sh`, `s03_desk_k6.sh`, then `s03b_lists_k6.sh`; `s05_look_k6.sh`, `s07_a3_sync_k6.sh` to `s13_a1_launch_k6.sh` and `s20_wait_k6.sh`; then `s22_collect_k6_v3.sh e171`, `e172` (only after E174 has ended or been skipped) and `ka` | `s22_collect_k6.sh` (v1) or `s22_collect_k6_v2.sh` |
+| E173 and E174 (kg) | `kg/s02_window_q142kg.sh`, then `e173/box/step_e173_v3.sh` and `e174/box/step_e174_v3.sh` for every step, each handing every step but collect to v2 unchanged | `step_e17N.sh` (v1), or `step_e17N_v2.sh` by name |
+| The scorers | `p8-600/score_p8_600.py score` (through the collectors), `score_p8_600_v2.py scale-c` and `score_p8_600_v3.py ka-pooled`; `e173/score_e173.py` and `e174/score_e174.py` through their collectors | any other pooled KA read |
+| The round critic's two go items | collect E174 with `step_e174_v3.sh collect`, whatever v2's printed hint after `pull` names; if a 600 MHz session never runs or is never collected, do not call `ka`, and record P8-KA pooled as NOT SCORED | — |
+
+### Q142(h): M11's heat registration (registered, design only)
+
+Registered `3c31a91d` (07:41:57 PST, 7 new files in `m11/`), before any M11 hold, fit, kit, scorer or run number, and before any
+E171–E174 data; none of these exists at `f49b7ddd`. Its verifier (about 07:45–08:15 PST) re-ran the power code byte for byte from
+the committed blobs and found the registration holding with fixes: four minor faults (HC1's bias clause is already known on
+committed rows; the 0.2 s grid understates H_E's planned rise and peak; I8P's not-wanted words did not match the test it computes;
+the BOTH path and the ×1.032 arm differed between the MD and the JSON, and were not simulated) and a nit on wording and precision.
+Its fix pass committed dated amendment A1, with the power code fixed in a new file and re-run, before any output it governs
+(`f49b7ddd`, 08:44:59 PST, 7 new files: `REGISTRATION.md.dated-note-1.md`, `registration-a1.json`, `design_power_heat_v2.py` with
+`design-power-heat-v2.txt` and `.json`, `design-power-heat.txt.dated-note-1.md`, and `SHA256SUMS-a1`, 9). A1 changes no form,
+statistic, set, seed, design, stop, card-minute figure or entry size; it states the BOTH path and the arm in full, names I8P's
+not-wanted clause for the test it computes, re-plans H_E on an exact grid, re-reads S7-W at the registered threshold and discloses
+what was already known. M10, M9 and every frozen file are untouched, and no E number is taken.
+
+**What M11 registers** (as amended by A1; nothing is measured):
+
+| What | As registered | Verify at |
+|---|---|---|
+| HM-LG, heat over minutes as a session level against a gain | P8-LG's two F tests on the frozen chain's misses given the watts, e = R − P, with a card kind's M11 hold sessions as the groups; a session counts with at least 4 scored holds spanning at least 6.0 °C of P, and n − 2k must be at least 3; GAIN, LEVEL, BOTH or NOT SEPARATED; HM-AG (do the sessions share one gain or level), HM-E144 and HM-HE read beside it | `m11/REGISTRATION.md`, sections 1–3; A1-4 |
+| The noise of one hold's miss | aifoundry3 0.0884 °C (11 residuals, 6 degrees of freedom); aifoundry2 0.2296 °C (4 residuals) | section 4 |
+| The holds on aifoundry3, the primary | two sessions on different days, each on a rested card at 600 MHz pinned, nothing set: R0 5 minutes, then H_E (E144's pattern held 10 minutes), Z, L1, S and L2, with rests between; 74.7 card-minutes a session (cap 76); E166's stops (70, 72 and 74 °C, 65 W) | section 5; A1-2 |
+| The holds on aifoundry2, optional | E167's harness under the card's own governor: a masked small hold and E144b's G1 again, twice; about 58 card-minutes a session; HM-LG-A2 at about 29% power with two sessions | section 5 |
+| HC1, card 1's heat scale | a session's 4.5 s heat scale from its own random anchors, on card 1 only; its blind reading HC1-B on E172's N1, 20,000 paired draws, seed 80,000 plus the character codes of `M11-HC1-B`, half-width about 0.082 °C | section 8 |
+| I8P, card 1's paired-anchor int8 term | k, the anchors' measured over predicted D paired across the cards; its blind reading I8P-B on E172 with E171, over I1, half-width about 0.021 W; expected not wanted | section 9; A1-3 |
+| Entry and not-wanted rules | as numbers, in M10's form; a not-wanted clause never brings in a term that failed its entry rule | section 10 |
+| Pool 8's day | never beside E171–E174; HC1-B and I8P-B read E171's and E172's committed files after their own scoring, and count as blind only if `3c31a91d` precedes those sessions' first launch records | section 11 |
+| The card time | aifoundry3 2 × 74.7 card-minutes on different days (the least 1 × 74.7); aifoundry2 optional, 2 × about 58; it waits on the owner's word | section 12 |
+
+**Quote as corrected (A1):**
+
+- H_E's planned rise P is 14.52 °C at a 51.2 °C room (not 14.21), its peak 68.13 °C there and 68.51 °C at 51.5 °C, 3.49 °C under
+  the 72 °C hold line; the plan's P per session 14.52 / 0.69 / 9.67 / 3.46 / 8.35 °C (A1-2);
+- HM-LG-A3 at the plan: GAIN 68.9 / 88.5 / 95.4% at 2.35 / 3.20 / 4.52%; LEVEL 45.0 / 89.4 / 95.1% at 0.15 / 0.27 / 0.40 °C; NOT
+  SEPARATED 93.1% with no effect; at 1.5 σ 58.8% and 60.2%; one session 68.6% and 65.2%; three sessions 94.5% and 94.5% (A1-7);
+- HM-AG's matched false rates are 4.5–5.8% (gain), 4.8–5.7% (level) and 4.4–5.3% (both), never 4.6–8.9%; its BOTH form sees an
+  E154-then-E166 pattern in 98.2% of draws, never "rarely sees" (A1-4);
+- what M11 carries at the plan: γ_c in 87.5% of draws at a common 3.2% gain, ā_c in 86.4% at a common 0.27 °C level, nothing in
+  99.4% with no effect, and nothing in 98.7% if the sessions repeat E154 then E166 (A1-4);
+- S7-W at 1.5 σ, at the registered threshold, reads 21.9% and 21.3%, not 11.3% and 10.8%; 26.7% with both terms carried (A1-5);
+- I8P's not-wanted clause is named "k varies across the pairs no more than the anchors' own errors give", with 0.9616 × the median
+  k reported as a candidate, never carried; the preview ratios 0.9756–1.0086, median 0.9966, are not k (A1-1, A1-3);
+- HC1's bias clause was already known on committed rows: +0.0071 → −0.0026 °C (A1-1);
+- 6 degrees of freedom, and |ā_c| (A1-6).
+
+### The round critic: its faults, and where each is answered (about 08:52–09:35 PST)
+
+It re-checked lab `f49b7ddd`, origin's main, with the tree clean: all 27 hash lists pass, each written in one commit and never
+changed since; every Q142(v2) test and M11's power code re-run, one job each, byte for byte or identical once clocks and paths are
+masked; `dmcmd_audit` GO; no E171–E174 data, claim, post or card-day lane anywhere; the records' edits pure insertions at
+character level, but AGENT.md's two counters and its moved oldest entry; the hubs' Logs append-only; the four pages' visibility
+and access as before; and an independent public-text scan of the 51 added files, the 245 lines added to the records and the 8
+commit messages found only reviewed classes. Verdict: the pool-8 card day stays **ready** on the owner's word and fresh lab
+approvals, with the v3 drivers.
+
+| | What | Where it is answered |
+|---|---|---|
+| Fault 1 (minor, the card day's own path) | `step_e174_v3.sh` hands every step but collect to `step_e174_v2.sh` unchanged, and v2's pull step ends with the hint "collect with step_e174_v2.sh collect", which the committed v3 dry listing prints too; an agent that followed it would collect E174 through v2's C-log list, which differs from v3's only when the queue's record has lost a session's start line; no desk test covers the hint | carry item (67): at the go, E174 is collected with `step_e174_v3.sh collect`, whatever the hint names; no code change before the day (a later v4 may reword the hint) |
+| Fault 2 (nit, a registered reading with no route) | if E171 or E172 never runs or is never collected, `s22_collect_k6_v3.sh ka` exits 10 and writes nothing, while E171.md reads P8-KA pooled once both are collected, at a minimum of 4 check anchors; nothing said the reading is then NOT SCORED, and an exit 10 reads as an operator's error | carry item (68) |
+| Fault 3 (gap, design, Q142(h)) | M11's registered holds most likely carry no heat-over-minutes term: if the two aifoundry3 sessions repeat the committed pattern (E154's gain, then E166's level), HM-AG's BOTH form sees the difference in 98.2% of draws and M11 carries nothing in 98.7%, so the 149.4 card-minutes as registered would most likely buy only "the sessions differ" | open: before any hold, a dated amendment with an in-session calibration reading, each session's own level or gain fitted on its first holds and scored blind on its later holds against the chain unscaled (the critic's `next` rank 3) |
+| Fault 4 (minor gap, blindness, Q142(h)) | HC1-B and I8P-B count as blind because `3c31a91d` precedes every launch, but no code computes them yet: REGISTRATION.md section 13 step 4 computes them after E171's and E172's own scoring, with a reader written then | carry item (70); open: the reader committed and self-tested on E163's and E164's committed sessions before their data (the critic's `next` rank 2), else the records say "registered before the data; computed by code written after it" |
+| Nit (coverage) | no verifier read this round's three fix passes: Q142(v2)'s `c9a3e40a`, `e2b48f5a` and `6f4b48e4`; Q142(h)'s `f49b7ddd`; Q142(r2)'s lab `23a8b44f`, gyroscope `f295a107` and the two hub pages it deployed | the critic stood in: it re-ran every committed test, read `score_p8_600_v3.py`, the step 22 v2-to-v3 diff, both `step_e17N_v3.sh`, `rb_common_v3.sh` and `cclist_q142kg_v3.py` line by line, read A1 in full with v2's `decide()`, S7-W and HM-AG code and `registration-a1.json`, and checked the records' insertions, the Logs, the pages and the two corrected hub sentences; not read line by line: `lists22_k6.py` (its output agrees with the critic's own checker), the self-tests' internals, `list_steps_k6_v3.sh` and `design_power_heat_v2.py`'s planning code (its output reproduces); nothing is needed before the card day |
+| Carried (records) | stale since `c9a3e40a` (08:23:02) and `3c31a91d` (07:41:57): "the v2 drivers" and "E174 runs only after E172's end has been read" in "Q142, pool 8"; the hub's Status (its readiness line, What's missing's item 1 and item 3); the kinds page's next step (3) and items 8 and 9 | the dated clauses in "Q142, pool 8", above; the hub's Status and the kinds page, after these records |
+| Carried (earlier critics) | the kinds page's pool-8 paragraph does not name `153b720f`; AGENT.md's "scored" has no pointer; the findings README's index and 03's citation counter read E1–E170; step 13's k6 cases and JOB-LOST are untested at the desk; `ours_live`'s exclusion of a dry pass cannot be shown on macOS; the lab's privacy table is absent on the Intel | the first three by these records (AGENT.md's changelog entry; the README's index and 03's counter now read E1–E174) and the kinds page after them; the other three stay carried |
+| Disclosure (the critic's compute) | one job ran outside the round's job slots, about 09:14–09:20 PST on one core: a character-level diff over whole records files, stopped, writing nothing; re-run hunk by hunk inside the slots (09:20:42–09:20:50) | Disclosures, below |
+
+### Disclosures
+
+- **Compute.** No lab box was used: the lab hosts' sign-in checks have been pending since 21:13 PST on Wed 4 Nov. The lanes'
+  Python ran on the Intel through the round's job slots, one job at a time, with git, checksums and sub-second reads outside them;
+  the critic's one longer job outside the slots is in the table above.
+- **A cache file.** Q142(h)'s fix pass ran one syntax check that left a `.pyc` in `m11/__pycache__/`; it was removed at once and
+  never staged.
+- **The scans** ran with the lanes' lists and `sanitize_extracts.py`'s fixed list: the lab's private table is absent on the Intel,
+  so lab users' logins were not checked against it. The kg dry listing v3 carries two reviewed matches, v3.1's inherited gate
+  message, already public in `0d2cb5dd` and in v2's listing; the pushed commit messages carry the attribution lines, a reviewed
+  class.
+- **Not committed.** Q142(v2)'s end-to-end check of step 22 v3 (10 of 10) stays in the round's scratch.
+- **Nothing of pool 8 ran.** No card was claimed, no device command sent and no post written; the card day waits on the owner's go
+  and fresh lab approvals.
+- **These records** are desk only, on the Intel: their Python ran through the round's job slots, one job at a time, with git, the
+  deploys and their reads outside them; no card, lab box, post, Modal app or archive.
+
+### What remains (the round critic's next list, ranked)
+
+1. Card time, on the owner's go and fresh lab approvals for aifoundry1–3: pool 8's day 1, E171 on aifoundry3, E172 on aifoundry1's
+   card 1 and then E174 on card 0 (after E172, or without it, never beside it), and E173 on aifoundry2, the boxes in parallel,
+   with the v3 drivers and the critic's two go items; about 180–195 card-minutes (the caps sum to 217), about 2–2.25 h of wall
+   time after the approvals, then about 45 minutes at the desk; one day's post. It makes M10's held-out figures blind on four
+   cards, and its re-runs say whether the floats' excess is a gain or a level.
+2. At the desk, time-sensitive, before E171's and E172's data: the HC1-B and I8P-B reader, committed and self-tested on E163's and
+   E164's committed sessions (about 45–60 minutes).
+3. At the desk, before any M11 hold: M11's dated amendment with an in-session calibration reading, its power computed with v2's
+   committed draws (about 1.5–2 h).
+4. These records, then a verifier and a fix pass.
+5. At the desk: M11's kits and scorer (REGISTRATION.md section 13 step 1, as amended): aifoundry3's from E166's, aifoundry2's from
+   E167's, `dmcmd_audit` GO and a dry pass, with self-tests of A1-4's path on synthetic sessions (about 2–3 h).
+6. Card time, on the owner's word, after items 3 and 5 and never beside E171–E174: M11's holds on aifoundry3, 2 × 74.7
+   card-minutes on different days (aifoundry2 optional, 2 × about 58).
+7. At the desk: M11's refit on the committed rows, for HC1 (its two-thirds clause) and I8P (its spread clause), frozen with a hash
+   list (about 1–1.5 h).
+8. At the desk, then card time: day 2, a second pool-8 session on aifoundry3 and on card 1, since term a is a session scale (about
+   1.5 h, then about 2 × 60 card-minutes).
+9. At the desk, then about 40 card-minutes: aifoundry2's governed line, a design with at least 8 governed tiles under the 82 W
+   admission.
+10. On the mini's bench: E147's 70 single-bit steps recounted by the convergence rule (about 8.8 bench-hours).
+11. At the desk, then card time: G4's clock at S3's geometry with a per-shape clock term registered first and A2's cold starts,
+    and the stride term's size as a fraction of SM's step (about 2.5 h, then about 45 + 20 card-minutes on aifoundry2).
+12. Housekeeping after the card day, our own files only: the downloads in the round's scratch, the bench copies on the mini, and
+    aifoundry2's and aifoundry1's old copies.
+13. Waiting on the owner's explicit word: anything near card 0's 75 W alarm (E174's highest admitted estimate is 58.56 W), an
+    inlet thermometer, and items 3, 4, 14 and 16.
+
+**Not established by Q142(v2) and Q142(h).** Any blind score of M10 on pool 8, or of anything M11 registers; whether heat over
+minutes is a gain, a level or a session's own; whether HC1 or I8P enters; any v3 driver on a box.
 
 ## Ridge points (derived; no card time)
 
