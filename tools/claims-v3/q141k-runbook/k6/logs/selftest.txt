@@ -1,0 +1,65 @@
+
+== A. the dry listing: every step exits 0, no ssh or rsync call
+dry listing: 0 step(s) exited non-zero
+calls: 0
+-> PASS (dry listing)
+
+== L1. a login link at the probe
+[s08_a3_preflight_k6] STOP: aifoundry3 printed a login link at the probe (lock file appended; link in RB_LINKS): nothing else was called
+<HH:MM:SS> aifoundry3 needs a check
+-> PASS (exit 11 and one lock line)
+
+== L2. a probe that never answers (bound 2 s)
+[s08_a3_preflight_k6] STOP: aifoundry3 did not answer the probe within 15 s (rc 12): nothing else was called
+-> PASS (exit 12)
+
+== L3. a read past its bound (2 s)
+[s08_a3_preflight_k6] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again
+-> PASS (exit 13)
+
+== L4. a box whose preflight reads wrong (pool 8 short of one file)
+[s08_a3_preflight_k6] STOP: aifoundry3's preflight failed: blind8 preflight_e171 (a binary or file differs: a dated amendment first)
+-> PASS (exit 16)
+
+== C1. s22 e171 on a good layout (the smoke and three passes, each checked to its end)
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+ccsessions: 4 of 4 listed sessions checked to the end: FINISHED
+[s22_collect_k6] E171 collected and scored: build/e171-out/2026-11-05-e171-blind8-aifoundry3 (the data directory is docs/reports/data/2026-11-05-e171-blind8-aifoundry3/)
+-> PASS (C1)
+
+== C2. one pass with no C log
+CCSESSION-MISSING e171/p17111: no C log (c-log.jsonl), though the session must carry one
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_k6] STOP: E171: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it 
+-> PASS (C2)
+
+== C3. a check that skipped one session's log
+CCSESSION-UNCHECKED e171/p17111: the check judged no launch from c-log-p17111.jsonl
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_k6] STOP: E171: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it 
+-> PASS (C3)
+
+== C4. a check file written before the step began
+CCHECK-STALE build/e171-out/2026-11-05-e171-blind8-aifoundry3/ccheck/ccheck-all.json: written 2026-11-05 00:01:00 PST, before this step began: an earlier collection's file, not this one's
+CCSESSION-UNFINISHED e171-smoke/p17101: the check of C did not finish (CCHECK-STALE build/e171-out/2026-11-05-e171-blind8-aifoundry3/ccheck/ccheck-all.json)
+CCSESSION-UNFINISHED e171/p17110: the check of C did not finish (CCHECK-STALE build/e171-out/2026-11-05-e171-blind8-aifoundry3/ccheck/ccheck-all.json)
+-> PASS (C4)
+
+== C5. a stop-path test with a launch record
+STOPTEST-LAUNCHED e171-stoptest/p17102: 1 launch file(s) with records and 0 C records (want none)
+[s22_collect_k6] STOP: E171: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it 
+-> PASS (C5)
+
+== C6. a desk path in what the collector wrote
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+HIT build/e171-out/2026-11-05-e171-blind8-aifoundry3/results.md: the forbidden path <scratch>/tree (1 times)
+HIT build/e171-out/2026-11-05-e171-blind8-aifoundry3/results.md: this user's home (1 times)
+-> PASS (C6)
+
+== O1. ours_live's pattern names E171's and E172's processes, and E173's and E174's queues
+pattern: (queue|session)_e[0-9]+[a-z0-9_]*\.(py|sh)|(session|queue|block)_e17[12]\.sh|run_e17[12]\.py|queue_e17[34]\.py|session_e16[346]\.sh|queue_e16[5-9]\.py|queue_e170\.py|run_e170\.py
+named: 10 of 10; an unrelated command matched: 0
+-> PASS (ours_live's names)
+
+network calls by the stand-ins in the non-dry cases: 24 (to the stand-in box only)
+SELFTEST-RUNBOOK-K6 PASS
