@@ -1,0 +1,20 @@
+M10 refit: 174 registered inputs hash as tools/claims-v3/m10/SHA256SUMS
+rows: 959 (104 pool 7); missing []
+footing consistency: {'rows_compared': 889, 'largest_abs_diff_w': 0.0}; pool 6 anchors' chain check {'fp32.anchor6_randn': 0.0, 'fp16.anchor6_randn': 0.0, 'int8.anchor6_full': 0.0}
+S class: 13 tiles, 26 rows; three-point chain vs committed rows: max 0
+S tiles: b_onebit_b12_third N=27 e=0.060; b_onebit_b20_third N=243 e=0.088; a_onebit_b5_third N=9 e=0.006; a_onebit_b16_half N=9 e=0.027; b_onebit_b6_third N=243 e=0.041; b_onebit_b20_one N=81 e=0.095; b_onebit_b20_full N=81 e=0.073; b_onebit_b20_pi N=243 e=0.055; b_onebit_b20_seventh N=243 e=0.089; b_onebit_b22_third N=243 e=0.119; b_onebit_b9_one N=81 e=0.087; b_onebit_b8_pi N=81 e=0.094; b_onebit_b20_third_a1p5 N=81 e=0.082
+self-test PASS: {'float': {'max_abs_row_diff_vs_Fam_w': 1.3322676295501878e-12, 'rms_mine': 0.19246883204642387, 'rms_nested_m9': 0.19246883204642445}, 'int8': {'max_abs_row_diff_vs_Fam_w': 3.4638958368304884e-14, 'rms_mine': 0.17687877405824737, 'rms_nested_m9': 0.17687877405824748}}
+  float B: held-out rms 0.2080 W over 737 rows, 398 kinds
+  float B+a: held-out rms 0.2017 W over 737 rows, 398 kinds
+  float B+b: held-out rms 0.1924 W over 737 rows, 398 kinds
+  float B+a+b: held-out rms 0.1854 W over 737 rows, 398 kinds
+  float: entry {'a': True, 'b': True} -> B+a+b
+  int8 B: held-out rms 0.1772 W over 222 rows, 107 kinds
+  int8 B+a: held-out rms 0.1790 W over 222 rows, 107 kinds
+  int8: entry {'a': False} -> B
+heat (c1):
+  heat rows 932 (453 kinds, 30 sessions, 107 anchor rows)
+  base {'n': 932, 'rms_c': 0.2334, 'bias_c': 0.0101}; with session scale {'n': 932, 'rms_c': 0.1734, 'bias_c': 0.0274}; enters False
+c2: frozen {'rms_c': 2.4541, 'bias_c': 2.3946} loto {'rms_c': 0.3385, 'bias_c': 0.0295} enters True
+e: kappa0 {'rms_w': 0.7276, 'bias_w': -0.0897} loto {'rms_w': 0.6311, 'bias_w': -0.0082} enters False
+d: {"common": {"large_rise_without_rms_c": 0.4928, "large_rise_with_rms_c": 0.2942, "passes": true, "gamma_all_holds": {"all": 0.03199}}, "per_card_kind": {"large_rise_without_rms_c": 0.4928, "large_rise_with_rms_c": 0.3124, "passes": false, "gamma_all_holds": {"aifoundry3": 0.02349, "aifoundry2": 0.04515}}} enters common
