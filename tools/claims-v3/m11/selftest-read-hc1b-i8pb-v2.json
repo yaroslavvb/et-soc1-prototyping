@@ -1,0 +1,729 @@
+{
+ "_note": "Q142(h2) fix pass selftest_read_hc1b_i8pb_v2.py: the self-test of M11's HC1-B and I8P-B reader, v2 (README-h2-reader.md.dated-note-1.md)",
+ "parts": {
+  "H0": {
+   "detail": {
+    "anchors_equal_fit_m10": true,
+    "c_session_code": {
+     "tools/claims-v3/ccheck/ccheck.py": "2f806fe6080b",
+     "tools/claims-v3/p8-600/ccsessions_p8.py": "cbee5792f719",
+     "tools/claims-v3/q141k-runbook/v3.1/ccdone_q142s.py": "997e2075e5eb"
+    },
+    "heat_trun_max": [
+     5.0,
+     5.0
+    ],
+    "lists": {
+     "SHA256SUMS": 58,
+     "SHA256SUMS-a1": 9,
+     "SHA256SUMS-m11": 6
+    },
+    "min": {
+     "I1": 6,
+     "N1": 10
+    },
+    "scorer": "cd5b602484d7",
+    "seeds": {
+     "M11-HC1-B": 80519,
+     "M11-I8P-B": 80540
+    },
+    "v1_list": [
+     16,
+     []
+    ],
+    "v2": "1c04414680f9",
+    "v3": "fe19d9507503"
+   },
+   "pass": true
+  },
+  "H1a": {
+   "detail": {
+    "max_abs_diff": {
+     "S": 0.0,
+     "T_run": 0.0,
+     "dT": 0.0
+    },
+    "rows_compared": 152
+   },
+   "pass": true
+  },
+  "H1b": {
+   "detail": {
+    "E163": {
+     "anchors": [
+      "fp16.anchor7_randn_a",
+      "fp16.anchor7_randn_b",
+      "fp16.randn",
+      "fp32.anchor7_randn_a",
+      "fp32.anchor7_randn_b",
+      "fp32.randn",
+      "int8.anchor7_full_a",
+      "int8.anchor7_full_b",
+      "int8.full"
+     ],
+     "committed": 1.0047,
+     "diff": 4.3438655038752216e-05,
+     "h": 1.0047434386550387,
+     "long_anchors": []
+    },
+    "E164": {
+     "anchors": [
+      "fp16.anchor6_randn",
+      "fp16.anchor7_randn_a",
+      "fp16.anchor7_randn_b",
+      "fp16.randn",
+      "fp32.anchor6_randn",
+      "fp32.anchor7_randn_a",
+      "fp32.anchor7_randn_b",
+      "fp32.randn",
+      "int8.anchor6_full",
+      "int8.anchor7_full_a",
+      "int8.anchor7_full_b",
+      "int8.full"
+     ],
+     "committed": 1.06,
+     "diff": 4.605673605118099e-05,
+     "h": 1.0599539432639489,
+     "long_anchors": []
+    }
+   },
+   "pass": true
+  },
+  "H1c": {
+   "detail": {
+    "RK4_arm": 0.9382303430101419,
+    "arm_median": 0.9382303430101419,
+    "card_term_ratio": 0.9615854710541776,
+    "k": 0.9763004747811282,
+    "k_independent": 0.976300474781128,
+    "plain_ratio_vs_RK4": {
+     "int8.anchor7_full_a": 0.0,
+     "int8.anchor7_full_b": 0.0
+    },
+    "q": {
+     "int8.anchor7_full_a": 0.9728143710888246,
+     "int8.anchor7_full_b": 0.9763004747811282,
+     "int8.full": 0.9767879466816382
+    }
+   },
+   "pass": true
+  },
+  "H1d": {
+   "detail": {
+    "HC1-B_on_E164": {
+     "bias_with_c": 0.04067218676400336,
+     "bias_without_c": 0.139943757337465,
+     "d_rms_c": -0.060345984460148994,
+     "h": 1.0599539432639489,
+     "hi95": -0.038540081805499726,
+     "lo95": -0.08096998006222478,
+     "n": 48,
+     "overcorrects": false,
+     "rms_with_c": 0.132262370215862,
+     "rms_without_c": 0.192608354676011,
+     "verdict": "BETTER"
+    },
+    "I8P-B_on_E164_E163": {
+     "I1_bias_overcorrects": false,
+     "bias_with_w": 0.061415007207143726,
+     "bias_without_w": -0.07724596274605565,
+     "d_rms_w": -0.0007857590117914814,
+     "hi95": 0.05704089684620646,
+     "k": 0.9763004747811282,
+     "lo95": -0.04338714484809261,
+     "n": 22,
+     "rms_with_w": 0.18014860803056273,
+     "rms_without_w": 0.18093436704235422,
+     "verdict": "NOT RESOLVED"
+    },
+    "label": "stand-in, in-sample, post hoc (E163 and E164 are in M10's training rows; pool 7's priority-1 tiles for N1 and I1)"
+   },
+   "pass": true
+  },
+  "H1e": {
+   "detail": {
+    "max_abs_diff_any": 1.7763568394002505e-15,
+    "named": {
+     "E141": {
+      "compared": 37,
+      "heat_rows": 37,
+      "kept": 166,
+      "max_abs_diff": 0.0,
+      "rows": 222,
+      "set_aside": [
+       "14110"
+      ]
+     },
+     "E157": {
+      "compared": 45,
+      "heat_rows": 45,
+      "kept": 227,
+      "max_abs_diff": 0.0,
+      "rows": 303,
+      "set_aside": [
+       "15711"
+      ]
+     },
+     "E82": {
+      "compared": 36,
+      "heat_rows": 36,
+      "kept": 320,
+      "max_abs_diff": 0.0,
+      "rows": 450,
+      "set_aside": [
+       "8210",
+       "8216"
+      ]
+     }
+    },
+    "refused_by_v2": [],
+    "rows_compared": 902,
+    "sessions": 30,
+    "set_aside_sessions": [
+     "E104",
+     "E115",
+     "E137",
+     "E140",
+     "E141",
+     "E157",
+     "E82",
+     "E86",
+     "E88",
+     "E91",
+     "E92",
+     "E95"
+    ],
+    "v1_refused_exactly_those": true
+   },
+   "pass": true
+  },
+  "H1f": {
+   "detail": {
+    "accepted": 45,
+    "refused": [],
+    "setting_a_pass_aside": 14,
+    "which": [
+     "E82",
+     "E86",
+     "E88",
+     "E91",
+     "E104",
+     "E109",
+     "E115",
+     "E116",
+     "E92",
+     "E95",
+     "E137",
+     "E140",
+     "E141",
+     "E157"
+    ]
+   },
+   "pass": true
+  },
+  "H1g": {
+   "detail": {
+    "E163_committed": {
+     "all_committed": true,
+     "files": {
+      "ccheck": {
+       "commit": "4293d151",
+       "commit_time_s": 1793840071,
+       "committed": true,
+       "path": "docs/reports/data/2026-11-04-e163-blind7-aifoundry3/ccheck/ccheck-all.json"
+      },
+      "raw": {
+       "commit": "4293d151",
+       "commit_time_s": 1793840071,
+       "committed": true,
+       "path": "docs/reports/data/2026-11-04-e163-blind7-aifoundry3/aifoundry3"
+      },
+      "reduction": {
+       "commit": "4293d151",
+       "commit_time_s": 1793840071,
+       "committed": true,
+       "path": "docs/reports/data/2026-11-04-e163-blind7-aifoundry3/e163.json"
+      },
+      "runs": {
+       "commit": "4293d151",
+       "commit_time_s": 1793840071,
+       "committed": true,
+       "path": "docs/reports/data/2026-11-04-e163-blind7-aifoundry3/runs.csv"
+      },
+      "scored": {
+       "commit": "4293d151",
+       "commit_time_s": 1793840071,
+       "committed": true,
+       "path": "docs/reports/data/2026-11-04-e163-blind7-aifoundry3/scored.json"
+      }
+     },
+     "latest_commit": "4293d151"
+    },
+    "copy_outside": {
+     "ccheck": true,
+     "raw": true,
+     "reduction": false,
+     "runs": false,
+     "scored": false
+    }
+   },
+   "pass": true
+  },
+  "H1h": {
+   "detail": {
+    "E163": {
+     "ccdone": true,
+     "code": "tools/claims-v3/p8-600/ccsessions_p8.py check (unchanged), no --since",
+     "differ_from_scored": [
+      "e163-smoke/p16301",
+      "e163/p16310",
+      "e163/p16311",
+      "e163/p16312",
+      "e163/p16350",
+      "e163/p16351",
+      "e163/p16352"
+     ],
+     "listed": 7,
+     "listed_at_scoring": 0,
+     "ok": true,
+     "same_record_as_scored": 0,
+     "stoptest": "OK"
+    }
+   },
+   "pass": true
+  },
+  "H2-D1": {
+   "detail": {
+    "HC1-B": [
+     "BETTER",
+     0.9,
+     -0.16594945208829937,
+     -0.2010566844748847,
+     -0.12746422271499294,
+     31,
+     "blind"
+    ],
+    "I8P-B": [
+     "BETTER",
+     0.9699999999966954,
+     -0.1768941779016375,
+     -0.18980224148389838,
+     -0.16218076883550142,
+     12,
+     "blind"
+    ],
+    "at_M10_primary_D": "NOT RESOLVED",
+    "c_sessions_rerun": {
+     "ccdone": true,
+     "code": "tools/claims-v3/p8-600/ccsessions_p8.py check (unchanged), no --since",
+     "differ_from_scored": [],
+     "listed": 4,
+     "listed_at_scoring": 4,
+     "ok": true,
+     "same_record_as_scored": 4,
+     "stoptest": "OK"
+    },
+    "h3": 1.0,
+    "independent_interval_identical": [
+     true,
+     true
+    ],
+    "line": "{\"HC1-B\": [\"BETTER\", \"blind\"], \"I8P-B\": [\"BETTER\", \"blind\"], \"files\": \"DEPARTURE: not all committed\"}",
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D10": {
+   "detail": {
+    "differ": [],
+    "reduction": {
+     "config_flagged": [
+      17214
+     ],
+     "failed": [
+      [
+       17211,
+       "anchor_pi",
+       83,
+       [
+        "window 3 samples, gap 900 ms (a synthetic per-run gate)"
+       ]
+      ]
+     ],
+     "kept": 251,
+     "passes": [
+      17210,
+      17211,
+      17212
+     ],
+     "runs": 420,
+     "set_aside": [
+      17213
+     ]
+    },
+    "runs_table": {
+     "failed_list": 1,
+     "failed_runs": 1,
+     "kept_pass_rows_without_fail": 251,
+     "kept_passes": [
+      "17210",
+      "17211",
+      "17212"
+     ],
+     "other_passes": {
+      "17213": {
+       "rows": 84,
+       "why": "set aside"
+      },
+      "17214": {
+       "rows": 84,
+       "why": "configuration-flagged"
+      }
+     },
+     "passes_config_flags": [
+      "17214"
+     ],
+     "passes_set_aside": [
+      "17213"
+     ],
+     "reduction_kept": 251,
+     "reduction_runs": 420,
+     "rows": 420
+    },
+    "same_as_D1": true,
+    "scorer_rc": 0,
+    "v1_line": "REFUSED (exit 6): the runs table is not this reduction's: runs.csv holds 420 runs where the reduction kept 251; runs.csv holds passes ['17213', '17214'] the reduction did not keep",
+    "v1_rc": 6,
+    "v1_wrote": false,
+    "v2_line": "{\"HC1-B\": [\"BETTER\", \"blind\"], \"I8P-B\": [\"BETTER\", \"blind\"], \"files\": \"DEPARTURE: not all committed\"}",
+    "v2_rc": 0
+   },
+   "pass": true
+  },
+  "H2-D11": {
+   "detail": {
+    "no_scored_clog_missing_v1": {
+     "line": "REFUSED (exit 2): E172: missing scored (<tmp>/d11c-e172/scored.json)",
+     "rc": 2,
+     "wrote": false
+    },
+    "no_scored_clog_missing_v2": {
+     "line": "REFUSED (exit 4): E172: no scored file, and the C-session check (ccsessions_p8.check, re-run on the raw copy given) does not read ok, so the scorer refused (its exit 4): CCSESSION-MISSING e172/p17211: no C log (c-log.jsonl), though the session must carry one |",
+     "rc": 4,
+     "wrote": false
+    },
+    "no_scored_clogs_fine_v2": {
+     "line": "REFUSED (exit 2): E172: missing scored (<tmp>/d11d-e172/scored.json)",
+     "rc": 2,
+     "wrote": false
+    },
+    "pass_clog_removed_after_scoring_v1": {
+     "line": "{\"HC1-B\": [\"BETTER\", \"blind\"], \"I8P-B\": [\"BETTER\", \"blind\"]}",
+     "rc": 0,
+     "wrote": true
+    },
+    "pass_clog_removed_after_scoring_v2": {
+     "line": "REFUSED (exit 4): E172: the C-session check (ccsessions_p8.check, the committed scorer's C gate, re-run on the raw copy given) does not read ok, so nothing is read: CCSESSION-MISSING e172/p17211: no C log (c-log.jsonl), though the session must carry one | ccse",
+     "rc": 4,
+     "wrote": false
+    },
+    "scorer_with_clog_missing": {
+     "rc": 4,
+     "scored_written": false
+    },
+    "smoke_clog_removed_after_scoring_v1": {
+     "line": "{\"HC1-B\": [\"BETTER\", \"blind\"], \"I8P-B\": [\"BETTER\", \"blind\"]}",
+     "rc": 0,
+     "wrote": true
+    },
+    "smoke_clog_removed_after_scoring_v2": {
+     "line": "REFUSED (exit 4): E172: the C-session check (ccsessions_p8.check, the committed scorer's C gate, re-run on the raw copy given) does not read ok, so nothing is read: CCSESSION-MISSING e172-smoke/p17201: no C log (c-log.jsonl), though the session must carry one ",
+     "rc": 4,
+     "wrote": false
+    }
+   },
+   "pass": true
+  },
+  "H2-D12": {
+   "detail": {
+    "c_clean": 8,
+    "h1": 0.8991,
+    "h1_want": 0.8991,
+    "h_with_long": 0.8982,
+    "h_with_long_want": 0.8982,
+    "long_left_out": [
+     "fp32.randn"
+    ],
+    "long_tiles_named": [
+     "fp16.r8_dsqwen_l1_pv_188e98"
+    ],
+    "n": 31,
+    "rc": 0,
+    "verdict": "BETTER"
+   },
+   "pass": true
+  },
+  "H2-D13": {
+   "detail": {
+    "E172_files": {
+     "ccheck": "outside this repository",
+     "raw": "outside this repository",
+     "reduction": "outside this repository",
+     "runs": "outside this repository",
+     "scored": "outside this repository"
+    },
+    "departure": "read from files not committed and unchanged at HEAD (E171: ccheck, raw, reduction, runs, scored; E172: ccheck, raw, reduction, runs, scored): REGISTRATION.md sections 8 and 11 compute these readings from E171's and E172's committed files, after their own scoring, so this reading departs from that"
+   },
+   "pass": true
+  },
+  "H2-D2": {
+   "detail": {
+    "HC1-B": [
+     "WORSE",
+     "post hoc",
+     {
+      "HC1-B reads WORSE": true,
+      "h1 over-corrects on E172's N1": false,
+      "met": true
+     }
+    ],
+    "I8P-B": [
+     "WORSE",
+     "post hoc"
+    ],
+    "rc": 0,
+    "why": "a session's first launch record precedes the registration's commit"
+   },
+   "pass": true
+  },
+  "H2-D3": {
+   "detail": {
+    "HC1-B": [
+     "NOT RESOLVED",
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "I8P-B": [
+     "NOT RESOLVED",
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D4": {
+   "detail": {
+    "HC1-B": [
+     "WORSE",
+     0.037379074657456685,
+     -0.14145178250079463,
+     true
+    ],
+    "I8P-B": [
+     "WORSE",
+     0.06045543833868402,
+     -0.2418217540518849,
+     true
+    ],
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D5": {
+   "detail": {
+    "P8-KC_E172": "FAIL",
+    "h": 0.9,
+    "h_c_clean": 0.8991,
+    "k": 0.9699999999901443,
+    "left_out": [
+     "int8.anchor8_full_a_4aac84",
+     "int8.full"
+    ],
+    "not_clean": [
+     "int8.anchor8_full_a_4aac84"
+    ],
+    "ratios_range": [
+     0.8927999999999999,
+     0.9072
+    ],
+    "rc": 0,
+    "used": [
+     "int8.anchor8_full_b_935710"
+    ]
+   },
+   "pass": true
+  },
+  "H2-D6": {
+   "detail": {
+    "HC1-B": [
+     "NOT SCORED",
+     "9 tiles, fewer than 10"
+    ],
+    "I8P-B": [
+     "NOT SCORED",
+     "5 tiles, fewer than 6"
+    ],
+    "failed": 22,
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D7": {
+   "detail": {
+    "HC1-B": [
+     "NOT SCORED",
+     "1 kept passes, fewer than 2 (the registrations' rule: every rule NOT SCORED)"
+    ],
+    "I8P-B": [
+     "NOT SCORED",
+     "E172: 1 kept passes, fewer than 2 (the registrations' rule: every rule NOT SCORED)"
+    ],
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D8": {
+   "detail": {
+    "HC1-B": [
+     "NOT SCORED",
+     "no random anchor measured: h = 1 (M10's rule), nothing to test"
+    ],
+    "I8P-B": [
+     "NOT SCORED",
+     "no int8 random anchor measured and C all PASS in both sessions: k cannot be read"
+    ],
+    "rc": 0
+   },
+   "pass": true
+  },
+  "H2-D9": {
+   "detail": {
+    "line": "{\"HC1-B\": [\"BETTER\", \"blind\"], \"I8P-B\": [\"BETTER\", \"blind\"], \"files\": \"DEPARTURE: not all committed\"}",
+    "rc": 0,
+    "same_as_D1": true
+   },
+   "pass": true
+  },
+  "H2-V1": {
+   "detail": {
+    "differ": [],
+    "same": true,
+    "v1_line": "{\"HC1-B\": [\"BETTER\", \"blind\"], \"I8P-B\": [\"BETTER\", \"blind\"]}",
+    "v1_rc": 0
+   },
+   "pass": true
+  },
+  "H3": {
+   "detail": {
+    "E157_kept_only_table": {
+     "line": "the runs table is not this reduction's (reduce_e78's form, read_hc1b_i8pb_v2 change 1): (a) e157-kept-only.csv holds 227 runs where the reduction read 303",
+     "names": true,
+     "rc": 6,
+     "want": 6
+    },
+    "E171_as_E172": {
+     "line": "REFUSED (exit 6): scored.json is not E172's scored session (HC1-B and I8P-B read E172 on aifoundry1c1 and E171 on aifoundry3 only): run E171 on aifoundry3, not E172 on aifoundry1c1; predictions tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry3.json (d68ff9f1e057) are not the freeze's tools/c",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "E172_twice": {
+     "line": "REFUSED (exit 6): ka-pooled v3 reads only E171's and E172's scored sessions as registered (dated note 2): scored.json (the E171 argument): run E172 on aifoundry1c1, not E171 on aifoundry3 (the registered order: <E171 scored.json> <E172 scored.json>); scored.json (the E171 argument): predictions tool",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "c_session_list_changed": {
+     "msg": "tools/claims-v3/p8-600/ccsessions_p8.py is not its committed file (<tmp>/p8-SHA256SUMS)",
+     "rc": 9,
+     "want": 9
+    },
+    "m11_list_changed": {
+     "msg": "M11's frozen inputs differ: SHA256SUMS-a1: tools/claims-v3/kspeed/run_kspeed.py",
+     "rc": 9,
+     "want": 9
+    },
+    "no_c_sessions": {
+     "line": "REFUSED (exit 4): E172: no-c-sessions.json was not scored through the C gate (no c_sessions.ok): a session that must carry a C log has no finished check of C (E171.md / E172.md), so nothing is read",
+     "rc": 4,
+     "want": 4,
+     "wrote": false
+    },
+    "no_ccheck": {
+     "line": "REFUSED (exit 4): E172: no check of C beside the scored file (<tmp>/absent.json): the C status cannot be read",
+     "rc": 4,
+     "want": 4,
+     "wrote": false
+    },
+    "other_ccheck": {
+     "line": "REFUSED (exit 6): E172: the check of C given (ccheck.json) does not give the scored file's P8-KC block (recomputed FAIL, 192 launches; the file's PASS, 192)",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "other_reduction": {
+     "line": "REFUSED (exit 6): E172: e172.json is not the reduction the scored file was scored on (reduction_sha256)",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "pair_swapped": {
+     "line": "REFUSED (exit 6): ka-pooled v3 reads only E171's and E172's scored sessions as registered (dated note 2): scored.json (the E171 argument): run E172 on aifoundry1c1, not E171 on aifoundry3 (the registered order: <E171 scored.json> <E172 scored.json>); scored.json (the E171 argument): predictions tool",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "relabelled": {
+     "line": "REFUSED (exit 6): relabelled.json: its rows are not aifoundry1c1's (64 checked; fp16.a_zeros_b_complement: a-priori D 1.519759 W where this card's coefficient gives 1.461400 W; fp16.anchor8_check_randn_84631a: a-priori D 21.934545 W where this card's coefficient gives 21.092256 W; fp16.anchor8_randn",
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "runs_table_kept_pass_relabelled": {
+     "line": "REFUSED (exit 6): the runs table is not this reduction's (reduce_e78's form, read_hc1b_i8pb_v2 change 1): (b) kept passes ['17212'] have no run in relab.csv; (c) the kept passes' runs without a fail number 168 where the reduction kept 252; (d) passes ['17219'] are in relab.csv but neither kept, set ",
+     "names": true,
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "runs_table_kept_run_marked_failed": {
+     "line": "REFUSED (exit 6): the runs table is not this reduction's (reduce_e78's form, read_hc1b_i8pb_v2 change 1): (c) the kept passes' runs without a fail number 251 where the reduction kept 252; (e) the runs flag.csv marks failed (1) are not the reduction's failed list (0)",
+     "names": true,
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "runs_table_other_pass": {
+     "line": "REFUSED (exit 6): the runs table is not this reduction's (reduce_e78's form, read_hc1b_i8pb_v2 change 1): (a) extra.csv holds 336 runs where the reduction read 252; (d) passes ['17219'] are in extra.csv but neither kept, set aside, configuration-flagged nor wholly failed",
+     "names": true,
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "runs_table_short": {
+     "line": "REFUSED (exit 6): the runs table is not this reduction's (reduce_e78's form, read_hc1b_i8pb_v2 change 1): (a) short.csv holds 251 runs where the reduction read 252; (c) the kept passes' runs without a fail number 251 where the reduction kept 252",
+     "names": true,
+     "rc": 6,
+     "want": 6,
+     "wrote": false
+    },
+    "usage": {
+     "line": "REFUSED (exit 2): give --e172-dir (or E172's files by name)",
+     "rc": 2,
+     "want": 2,
+     "wrote": false
+    }
+   },
+   "pass": true
+  }
+ },
+ "reader_sha256": "5605aa5b6ce4650cead197cc33855c75a8ffcd97c025b861a6205c5f920dd0e2",
+ "reader_v1_sha256": "5d920bacf7edde8d9de455e87dbc78d0ce2c8f5531794f4dc7f3754ed8874618",
+ "selftest_sha256": "e57ccfacf8535e855f588f019ad972ec6ddf22786bdc30c16e394a7c9eb3283c",
+ "verdict": "PASS"
+}
