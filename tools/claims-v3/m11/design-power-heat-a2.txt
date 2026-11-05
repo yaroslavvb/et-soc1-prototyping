@@ -1,0 +1,142 @@
+M11's heat registration (Q142(h)), dated amendment A2 (Q142(a2)): the power of HM-CAL, the in-session calibration reading of heat over minutes, on v2's committed draws (design only: no fit of any M11 term, no hold, no card)
+
+0. Checked first: tools/claims-v3/m11/SHA256SUMS-m11 6 of 6 OK; tools/claims-v3/m11/SHA256SUMS-a1 9 of 9 OK
+   62d455a2663cbdc1d759062ae037fb291567853dd93e609292d4e4435e6a673e  docs/reports/data/2026-11-04-q142m-m10/heldout-m10.json  [OK]
+   f6c84268beb5fe9d46d631914e6fb5d48dfcf21680e0cc66df5b02784a646ea5  docs/reports/data/2026-11-04-q142m-m10/section7-m10.json  [OK]
+   57c1d93417367d8ba1d3f39a63e9b68b042a9635785e26f9a9fa772817932860  docs/reports/data/2026-11-02-q138t-heat-model/cv-q138t.json  [OK]
+   313c6840337615b2c474c39f74f095737bf7a35ecc6f9d8ac2356478f6442512  docs/reports/data/2026-11-02-q138t-heat-model/predict_e144.py  [OK]
+   9dbb288f896b7e588fbc155d67f32b1cb7089ffe4ede465c1380d2724d1fb49b  docs/reports/data/2026-11-02-q138t-heat-model/heat_q138t.py  [OK]
+   268b47fd580b330738eb3e1c83ea392f3784aae348a658e7335b734a1168e8fa  docs/reports/data/2026-11-02-q138t-heat-model/model-q138t.json  [OK]
+   b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5  docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json  [OK]
+   db79558c00a74bd10df385251ce957f698fd2784bb01994198d43e7ee606413c  tools/claims-v3/m10/pool8/design_power_groups.py  [OK]
+   ce2d32c046161f30afa794a2fa5e467c6c396fc272a59e7e193f92d7dae02e80  tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry2.json  [OK]
+   328d0c4269e64a1a06afa15843492dd37795efb774fb310438f6d424cf43053d  tools/claims-v3/kinds/blind8/sets-blind8.json  [OK]
+
+1. The noise (design_power_heat.noise, unchanged): aifoundry3 sigma_c 0.0884 C (6 degrees of freedom), aifoundry2 0.2296 C. A2's thresholds: HM-CAL tau = sigma_c / sqrt(n_L) over the pooled scored later holds (at the plan n_L 6: 0.0361 C on aifoundry3); N1, a session worse on its own, d >= sigma_c / sqrt(n_s) (0.0510 C for 3 later holds). The x1.032 arm's gamma 0.03199 (section7-m10.json, the common gamma)
+
+2. The plan's P per hold (v2's exact plan; H_E, Z, L1, S, L2): 14.517, 0.695, 9.670, 3.459, 8.354 | 11.723, 0.986, 9.778, 3.471, 8.439; the calibration pair H_E and Z spans 13.82 and 10.74 C of P; the scored later holds L1, S, L2
+   If the premise holds exactly, the calibrated later holds read about sigma_c x sqrt(mean(1 + v)): 0.1121 C at the plan (one session 0.1110, three 0.1117), v the two-point line's own noise carried to each later hold
+   Post hoc preview (A2-0; heldout-m10.json's fitted aifoundry3 holds, in the order listed; not a registered result):
+     E154: holds H_M P 10.86 e +0.352; K_S P 11.37 e +0.418; K_Q P 5.67 e +0.005; K_L P 3.95 e +0.073; K_O P 11.01 e +0.536
+       first pair H_M+K_S spans 0.52 C: NOT SCORED (under 6 C)
+       every pair spanning 6 C (3): d from -0.260 to -0.149 C, 3 of 3 below 0: H_M+K_L -0.260; K_S+K_L -0.252; K_L+K_O -0.149
+     E166: holds K_S P 12.49 e +0.233; K_Q P 6.46 e +0.200; K_L P 4.01 e +0.403; K_O_window P 11.03 e +0.242
+       first pair K_S+K_Q spans 6.03 C: a +0.165 C, g +0.55%; later rms unscaled 0.332, calibrated 0.153, d -0.179 C (one session's line 0.062 over 2 holds)
+       every pair spanning 6 C (3): d from -0.179 to -0.112 C, 3 of 3 below 0: K_S+K_Q -0.179; K_S+K_L -0.112; K_L+K_O_window -0.112
+
+3. HM-CAL-A3 at the plan (A3 x2 (the plan: two aifoundry3 sessions, rooms 51.2 and 52.0 C)), 5000 draws a cell, v2's committed draws. Per truth: HM-CAL BETTER / NOT RESOLVED / WORSE (%); N1 and N2 met (%); with A2, M11 carries the calibration ('enters') or A1-4's common term (%); the pooled rms over the later holds (C), median [5%, 95%] for the calibration
+   simulated sigma 0.0884 C (thresholds at sigma_c 0.0884 C):
+     none                           HM-CAL   0.7 /  72.2 /  27.1 | N1 34.7  N2  0.3 | enters   0.7  A1-4 common   0.6 | rms: unscaled 0.083  calibrated 0.104 [0.056, 0.166]  arm 0.258
+     gain 2.35%                     HM-CAL  89.7 /   9.6 /   0.7 | N1  4.7  N2  0.2 | enters  26.2  A1-4 common  67.3 | rms: unscaled 0.198  calibrated 0.104 [0.056, 0.165]  arm 0.105
+     gain 3.20%                     HM-CAL  98.5 /   1.5 /   0.1 | N1  1.2  N2  0.4 | enters  11.7  A1-4 common  87.6 | rms: unscaled 0.259  calibrated 0.105 [0.057, 0.167]  arm 0.084
+     gain 4.52%                     HM-CAL 100.0 /   0.0 /   0.0 | N1  0.0  N2  0.3 | enters   7.0  A1-4 common  92.9 | rms: unscaled 0.356  calibrated 0.104 [0.058, 0.166]  arm 0.130
+     level 0.15 C                   HM-CAL  76.6 /  21.4 /   2.0 | N1  8.3  N2  0.2 | enters  36.8  A1-4 common  43.1 | rms: unscaled 0.170  calibrated 0.104 [0.058, 0.166]  arm 0.143
+     level 0.27 C                   HM-CAL  99.5 /   0.5 /   0.0 | N1  0.7  N2  0.4 | enters  11.4  A1-4 common  88.0 | rms: unscaled 0.282  calibrated 0.104 [0.057, 0.166]  arm 0.125
+     level 0.40 C                   HM-CAL 100.0 /   0.0 /   0.0 | N1  0.0  N2  0.3 | enters   6.3  A1-4 common  93.7 | rms: unscaled 0.402  calibrated 0.105 [0.058, 0.166]  arm 0.202
+     both: E154's two-term fit      HM-CAL  98.6 /   1.3 /   0.1 | N1  1.2  N2  0.3 | enters   5.2  A1-4 common  94.8 | rms: unscaled 0.252  calibrated 0.104 [0.056, 0.164]  arm 0.116
+     both: E166's two-term fit      HM-CAL  99.7 /   0.2 /   0.0 | N1  0.4  N2  0.4 | enters   6.3  A1-4 common  93.6 | rms: unscaled 0.305  calibrated 0.104 [0.057, 0.165]  arm 0.162
+     mixed: E154's fit, then E166's HM-CAL  99.2 /   0.7 /   0.1 | N1  1.0  N2  0.4 | enters  97.1  A1-4 common   1.3 | rms: unscaled 0.278  calibrated 0.104 [0.058, 0.166]  arm 0.141
+   simulated sigma 0.1325 C (thresholds at sigma_c 0.0884 C):
+     none                           HM-CAL   3.1 /  54.3 /  42.6 | N1 51.4  N2  0.2 | enters   2.9  A1-4 common   0.9 | rms: unscaled 0.126  calibrated 0.157 [0.085, 0.249]  arm 0.274
+     gain 2.35%                     HM-CAL  66.5 /  26.2 /   7.3 | N1 19.0  N2  0.3 | enters  37.3  A1-4 common  33.7 | rms: unscaled 0.218  calibrated 0.157 [0.085, 0.251]  arm 0.141
+     gain 3.20%                     HM-CAL  87.9 /   9.9 /   2.2 | N1  9.9  N2  0.2 | enters  32.5  A1-4 common  57.7 | rms: unscaled 0.272  calibrated 0.158 [0.084, 0.248]  arm 0.125
+     gain 4.52%                     HM-CAL  98.3 /   1.4 /   0.2 | N1  2.9  N2  0.2 | enters  14.1  A1-4 common  84.5 | rms: unscaled 0.367  calibrated 0.158 [0.085, 0.252]  arm 0.159
+     level 0.15 C                   HM-CAL  50.5 /  37.7 /  11.8 | N1 26.0  N2  0.2 | enters  33.6  A1-4 common  19.6 | rms: unscaled 0.193  calibrated 0.157 [0.084, 0.250]  arm 0.169
+     level 0.27 C                   HM-CAL  92.4 /   6.2 /   1.4 | N1  7.1  N2  0.3 | enters  34.2  A1-4 common  58.4 | rms: unscaled 0.295  calibrated 0.157 [0.084, 0.247]  arm 0.155
+     level 0.40 C                   HM-CAL  99.4 /   0.4 /   0.1 | N1  1.6  N2  0.2 | enters  12.7  A1-4 common  86.5 | rms: unscaled 0.412  calibrated 0.158 [0.086, 0.253]  arm 0.222
+     both: E154's two-term fit      HM-CAL  87.5 /  10.0 /   2.6 | N1 10.6  N2  0.2 | enters   5.9  A1-4 common  92.9 | rms: unscaled 0.269  calibrated 0.155 [0.084, 0.247]  arm 0.148
+     both: E166's two-term fit      HM-CAL  95.1 /   4.1 /   0.9 | N1  5.5  N2  0.3 | enters  11.9  A1-4 common  86.1 | rms: unscaled 0.320  calibrated 0.158 [0.085, 0.248]  arm 0.185
+     mixed: E154's fit, then E166's HM-CAL  91.5 /   7.0 /   1.4 | N1  7.9  N2  0.3 | enters  75.3  A1-4 common  16.0 | rms: unscaled 0.294  calibrated 0.158 [0.086, 0.249]  arm 0.166
+   joint, on E154's fit then E166's (sigma_c): A1-4 common | HM-CAL BETTER 1.2; A1-4 common | HM-CAL NOT RESOLVED 0.1; A1-4 common | HM-CAL WORSE 0.0; A1-4 nothing | HM-CAL BETTER 98.0; A1-4 nothing | HM-CAL NOT RESOLVED 0.6; A1-4 nothing | HM-CAL WORSE 0.0
+   rms over the later holds there: unscaled {'median': 0.2781, 'p05': 0.2205, 'p95': 0.3369}, calibrated {'median': 0.1036, 'p05': 0.0575, 'p95': 0.1655}, x1.032 arm {'median': 0.1407, 'p05': 0.0886, 'p95': 0.1966}; one session's own calibrated rms {'median': 0.0972, 'p05': 0.037, 'p95': 0.1828}
+   where A1-4 carries a common term, that term refitted on the other session, over the same later holds (median C), against the calibration's: gain 2.35% 0.081 / 0.104; gain 3.20% 0.086 / 0.105; gain 4.52% 0.088 / 0.104; level 0.15 C 0.077 / 0.104; level 0.27 C 0.086 / 0.104; level 0.40 C 0.088 / 0.105; both: E154's two-term fit 0.092 / 0.104; both: E166's two-term fit 0.092 / 0.104; mixed: E154's fit, then E166's 0.131 / 0.104
+
+4. The reported arms at the plan (sigma_c; the same draws and later holds): the pair's GAIN alone (sum e P / sum P^2 over H_E and Z), the pair's LEVEL alone (the mean e), and H_E's gain alone (e / P of H_E). HM-CAL BETTER / NOT RESOLVED / WORSE (%)
+     none                           both:   0.7 /  72.2 /  27.1 (rms 0.104) | gain:   0.5 /  85.2 /  14.2 (rms 0.095) | level:   0.7 /  77.1 /  22.2 (rms 0.100) | gain_HE:   0.5 /  85.0 /  14.5 (rms 0.096)
+     gain 2.35%                     both:  89.7 /   9.6 /   0.7 (rms 0.104) | gain:  93.0 /   6.6 /   0.4 (rms 0.096) | level:  86.2 /  13.0 /   0.8 (rms 0.119) | gain_HE:  92.9 /   6.7 /   0.4 (rms 0.096)
+     gain 3.20%                     both:  98.5 /   1.5 /   0.1 (rms 0.105) | gain:  99.0 /   0.9 /   0.0 (rms 0.096) | level:  97.5 /   2.4 /   0.1 (rms 0.134) | gain_HE:  99.1 /   0.9 /   0.0 (rms 0.096)
+     gain 4.52%                     both: 100.0 /   0.0 /   0.0 (rms 0.104) | gain: 100.0 /   0.0 /   0.0 (rms 0.096) | level:  99.9 /   0.1 /   0.0 (rms 0.161) | gain_HE: 100.0 /   0.0 /   0.0 (rms 0.096)
+     level 0.15 C                   both:  76.6 /  21.4 /   2.0 (rms 0.104) | gain:  71.3 /  28.3 /   0.4 (rms 0.118) | level:  79.7 /  18.7 /   1.6 (rms 0.100) | gain_HE:  68.8 /  30.9 /   0.4 (rms 0.120)
+     level 0.27 C                   both:  99.5 /   0.5 /   0.0 (rms 0.104) | gain:  99.7 /   0.3 /   0.0 (rms 0.157) | level:  99.6 /   0.4 /   0.0 (rms 0.100) | gain_HE:  99.6 /   0.4 /   0.0 (rms 0.162)
+     level 0.40 C                   both: 100.0 /   0.0 /   0.0 (rms 0.105) | gain: 100.0 /   0.0 /   0.0 (rms 0.209) | level: 100.0 /   0.0 /   0.0 (rms 0.102) | gain_HE: 100.0 /   0.0 /   0.0 (rms 0.216)
+     both: E154's two-term fit      both:  98.6 /   1.3 /   0.1 (rms 0.104) | gain:  89.8 /   9.5 /   0.7 (rms 0.142) | level:  82.4 /  17.2 /   0.4 (rms 0.189) | gain_HE:  87.9 /  11.0 /   1.1 (rms 0.146)
+     both: E166's two-term fit      both:  99.7 /   0.2 /   0.0 (rms 0.104) | gain:  98.2 /   1.8 /   0.0 (rms 0.208) | level:  99.7 /   0.3 /   0.0 (rms 0.108) | gain_HE:  96.9 /   3.1 /   0.0 (rms 0.216)
+     mixed: E154's fit, then E166's both:  99.2 /   0.7 /   0.1 (rms 0.104) | gain:  93.9 /   5.9 /   0.2 (rms 0.172) | level:  97.6 /   2.2 /   0.2 (rms 0.151) | gain_HE:  92.0 /   7.8 /   0.3 (rms 0.180)
+
+5. What the reading does when its premise fails, at the plan, sigma_c: a miss specific to H_E or to Z (delta added to that hold's e in every session), or a level that drifts through the session (c per hold: 0, c, 2c, 3c, 4c for H_E, Z, L1, S, L2), each added after the draw to v2's committed draws for the truth named
+     none, H_E +0.30 C              HM-CAL   0.2 /   5.8 /  94.0 | N1 95.8  N2  6.5 | enters   0.1  A1-4 common   7.4 | rms: unscaled 0.083  calibrated 0.198 [0.119, 0.283]  arm 0.258
+     none, H_E +0.50 C              HM-CAL   0.0 /   0.2 /  99.8 | N1 100.0  N2 26.2 | enters   0.0  A1-4 common   5.3 | rms: unscaled 0.083  calibrated 0.302 [0.216, 0.391]  arm 0.258
+     none, Z +0.15 C                HM-CAL   0.8 /  40.7 /  58.5 | N1 66.1  N2  0.2 | enters   0.5  A1-4 common   5.3 | rms: unscaled 0.083  calibrated 0.128 [0.068, 0.204]  arm 0.258
+     none, Z +0.30 C                HM-CAL   0.3 /   7.9 /  91.8 | N1 94.6  N2  0.0 | enters   0.1  A1-4 common  12.1 | rms: unscaled 0.083  calibrated 0.186 [0.110, 0.271]  arm 0.258
+     none, drift +0.05 C per hold   HM-CAL  23.8 /  65.1 /  11.2 | N1 20.8  N2  0.7 | enters  17.7  A1-4 common   7.3 | rms: unscaled 0.175  calibrated 0.165 [0.092, 0.247]  arm 0.152
+     none, drift +0.10 C per hold   HM-CAL  52.7 /  43.9 /   3.4 | N1 10.5  N2  0.5 | enters  45.3  A1-4 common   7.2 | rms: unscaled 0.322  calibrated 0.283 [0.197, 0.370]  arm 0.169
+     gain 3.20%, H_E +0.30 C        HM-CAL  63.0 /  26.4 /  10.7 | N1 27.9  N2  6.8 | enters   0.5  A1-4 common  96.6 | rms: unscaled 0.259  calibrated 0.197 [0.119, 0.284]  arm 0.084
+     gain 3.20%, H_E +0.50 C        HM-CAL  15.4 /  30.7 /  53.9 | N1 72.2  N2 25.6 | enters   0.0  A1-4 common  93.7 | rms: unscaled 0.259  calibrated 0.302 [0.216, 0.392]  arm 0.084
+     gain 3.20%, Z +0.15 C          HM-CAL  92.1 /   7.0 /   0.8 | N1  5.4  N2  0.2 | enters  35.4  A1-4 common  56.1 | rms: unscaled 0.259  calibrated 0.127 [0.068, 0.204]  arm 0.084
+     gain 3.20%, Z +0.30 C          HM-CAL  70.2 /  22.8 /   6.9 | N1 20.4  N2  0.0 | enters  42.5  A1-4 common  26.2 | rms: unscaled 0.259  calibrated 0.185 [0.111, 0.270]  arm 0.084
+     gain 3.20%, drift +0.05 C per hold HM-CAL 100.0 /   0.0 /   0.0 | N1  0.0  N2  0.8 | enters  41.8  A1-4 common  57.9 | rms: unscaled 0.399  calibrated 0.166 [0.093, 0.248]  arm 0.176
+     gain 3.20%, drift +0.10 C per hold HM-CAL 100.0 /   0.0 /   0.0 | N1  0.0  N2  0.3 | enters  90.3  A1-4 common   9.4 | rms: unscaled 0.547  calibrated 0.283 [0.196, 0.371]  arm 0.322
+     mixed: E154's fit, then E166's, H_E +0.30 C HM-CAL  72.6 /  20.9 /   6.5 | N1 19.8  N2  6.1 | enters  57.4  A1-4 common  26.9 | rms: unscaled 0.278  calibrated 0.198 [0.119, 0.284]  arm 0.141
+     mixed: E154's fit, then E166's, H_E +0.50 C HM-CAL  22.0 /  33.7 /  44.3 | N1 63.3  N2 26.1 | enters   9.9  A1-4 common  79.2 | rms: unscaled 0.278  calibrated 0.303 [0.215, 0.393]  arm 0.141
+     mixed: E154's fit, then E166's, Z +0.15 C HM-CAL  95.5 /   4.1 /   0.4 | N1  4.3  N2  0.2 | enters  91.7  A1-4 common   2.1 | rms: unscaled 0.278  calibrated 0.128 [0.069, 0.202]  arm 0.141
+     mixed: E154's fit, then E166's, Z +0.30 C HM-CAL  78.7 /  17.2 /   4.1 | N1 17.5  N2  0.0 | enters  66.3  A1-4 common  17.9 | rms: unscaled 0.278  calibrated 0.186 [0.110, 0.268]  arm 0.141
+     mixed: E154's fit, then E166's, drift +0.05 C per hold HM-CAL 100.0 /   0.0 /   0.0 | N1  0.0  N2  0.7 | enters  92.2  A1-4 common   7.2 | rms: unscaled 0.414  calibrated 0.164 [0.093, 0.248]  arm 0.214
+     mixed: E154's fit, then E166's, drift +0.10 C per hold HM-CAL 100.0 /   0.0 /   0.0 | N1  0.0  N2  0.3 | enters  54.4  A1-4 common  45.5 | rms: unscaled 0.560  calibrated 0.281 [0.196, 0.371]  arm 0.347
+
+6. One aifoundry3 session (the least, 74.7 card-minutes) and three, sigma_c, v2's committed draws for those designs
+   A3 x1 (one aifoundry3 session, room 51.2 C):
+     none                           HM-CAL   1.5 /  80.5 /  18.0 | N1 18.0  N2  4.9 | enters   0.0  A1-4 common   0.0 | rms: unscaled 0.079  calibrated 0.097 [0.036, 0.181]  arm 0.255
+     gain 2.35%                     HM-CAL  78.4 /  19.4 /   2.2 | N1  2.2  N2  5.4 | enters   0.0  A1-4 common   0.0 | rms: unscaled 0.193  calibrated 0.097 [0.038, 0.184]  arm 0.100
+     gain 3.20%                     HM-CAL  92.9 /   6.5 /   0.7 | N1  0.7  N2  4.7 | enters   0.0  A1-4 common   0.0 | rms: unscaled 0.255  calibrated 0.097 [0.036, 0.183]  arm 0.078
+     gain 4.52%                     HM-CAL  99.2 /   0.7 /   0.1 | N1  0.1  N2  5.1 | enters   0.0  A1-4 common   0.0 | rms: unscaled 0.352  calibrated 0.097 [0.036, 0.183]  arm 0.124
+     level 0.15 C                   HM-CAL  64.9 /  31.1 /   4.1 | N1  4.1  N2  4.9 | enters   0.0  A1-4 common   0.0 | rms: unscaled 0.168  calibrated 0.097 [0.038, 0.184]  arm 0.138
+     level 0.27 C                   HM-CAL  95.8 /   3.8 /   0.4 | N1  0.4  N2  5.2 | enters   0.0  A1-4 common   0.0 | rms: unscaled 0.279  calibrated 0.096 [0.036, 0.182]  arm 0.119
+     level 0.40 C                   HM-CAL  99.7 /   0.3 /   0.0 | N1  0.0  N2  5.0 | enters   0.0  A1-4 common   0.0 | rms: unscaled 0.401  calibrated 0.096 [0.037, 0.184]  arm 0.199
+     both: E154's two-term fit      HM-CAL  92.1 /   7.3 /   0.6 | N1  0.6  N2  4.9 | enters   0.0  A1-4 common   0.0 | rms: unscaled 0.246  calibrated 0.096 [0.036, 0.182]  arm 0.111
+     both: E166's two-term fit      HM-CAL  97.9 /   2.1 /   0.0 | N1  0.0  N2  4.9 | enters   0.0  A1-4 common   0.0 | rms: unscaled 0.304  calibrated 0.097 [0.037, 0.182]  arm 0.158
+     mixed: E154's fit, then E166's HM-CAL  92.0 /   7.3 /   0.7 | N1  0.7  N2  4.7 | enters   0.0  A1-4 common   0.0 | rms: unscaled 0.248  calibrated 0.097 [0.036, 0.184]  arm 0.111
+   A3 x3 (three aifoundry3 sessions):
+     none                           HM-CAL   0.4 /  64.4 /  35.2 | N1 46.0  N2  0.0 | enters   0.3  A1-4 common   0.2 | rms: unscaled 0.085  calibrated 0.106 [0.067, 0.157]  arm 0.259
+     gain 2.35%                     HM-CAL  95.2 /   4.6 /   0.2 | N1  6.6  N2  0.1 | enters  14.7  A1-4 common  82.9 | rms: unscaled 0.199  calibrated 0.107 [0.067, 0.155]  arm 0.106
+     gain 3.20%                     HM-CAL  99.7 /   0.3 /   0.0 | N1  1.9  N2  0.0 | enters   7.5  A1-4 common  92.5 | rms: unscaled 0.259  calibrated 0.106 [0.067, 0.158]  arm 0.085
+     gain 4.52%                     HM-CAL 100.0 /   0.0 /   0.0 | N1  0.2  N2  0.0 | enters   6.7  A1-4 common  93.3 | rms: unscaled 0.356  calibrated 0.107 [0.066, 0.158]  arm 0.131
+     level 0.15 C                   HM-CAL  84.3 /  14.7 /   0.9 | N1 11.8  N2  0.0 | enters  29.6  A1-4 common  57.8 | rms: unscaled 0.172  calibrated 0.107 [0.066, 0.157]  arm 0.144
+     level 0.27 C                   HM-CAL 100.0 /   0.0 /   0.0 | N1  1.1  N2  0.0 | enters   7.3  A1-4 common  92.6 | rms: unscaled 0.283  calibrated 0.106 [0.065, 0.157]  arm 0.127
+     level 0.40 C                   HM-CAL 100.0 /   0.0 /   0.0 | N1  0.0  N2  0.0 | enters   6.7  A1-4 common  93.3 | rms: unscaled 0.404  calibrated 0.106 [0.066, 0.156]  arm 0.204
+     both: E154's two-term fit      HM-CAL  99.6 /   0.4 /   0.0 | N1  1.9  N2  0.0 | enters   4.8  A1-4 common  95.2 | rms: unscaled 0.252  calibrated 0.106 [0.065, 0.155]  arm 0.118
+     both: E166's two-term fit      HM-CAL 100.0 /   0.0 /   0.0 | N1  0.5  N2  0.0 | enters   5.8  A1-4 common  94.2 | rms: unscaled 0.306  calibrated 0.106 [0.065, 0.155]  arm 0.161
+     mixed: E154's fit, then E166's HM-CAL  99.9 /   0.1 /   0.0 | N1  1.8  N2  0.0 | enters  97.4  A1-4 common   0.8 | rms: unscaled 0.270  calibrated 0.107 [0.066, 0.157]  arm 0.135
+
+7. aifoundry2's masked design (registered beside, reported): the pair Z_m and G1E, the later Z_m2 and G1E2; sigma_c 0.2296 C; v1's committed draws for these designs (design-power-heat.json)
+   A2 x2 masked (two aifoundry2 sessions: Z_m, G1E, Z_m, G1E), simulated sigma 0.2296 C:
+     none                           HM-CAL   1.4 /  59.4 /  39.2 | N1 47.1  N2  0.0 | enters   1.1  A1-4 common   1.3 | rms: unscaled 0.213  calibrated 0.299 [0.135, 0.506]  arm 0.350
+     gain 4.52%                     HM-CAL  60.2 /  35.2 /   4.6 | N1 15.9  N2  0.0 | enters  33.9  A1-4 common  27.9 | rms: unscaled 0.450  calibrated 0.300 [0.140, 0.505]  arm 0.238
+     level 0.40 C                   HM-CAL  59.0 /  35.8 /   5.1 | N1 15.3  N2  0.0 | enters  34.4  A1-4 common  26.6 | rms: unscaled 0.441  calibrated 0.296 [0.137, 0.499]  arm 0.291
+     mixed: E154's fit, then E166's HM-CAL  40.3 /  50.5 /   9.2 | N1 22.6  N2  0.0 | enters  33.3  A1-4 common   9.4 | rms: unscaled 0.373  calibrated 0.295 [0.137, 0.496]  arm 0.269
+   A2 x2 masked (two aifoundry2 sessions: Z_m, G1E, Z_m, G1E), simulated sigma 0.3019 C:
+     none                           HM-CAL   3.9 /  45.7 /  50.4 | N1 60.6  N2  0.0 | enters   3.3  A1-4 common   1.4 | rms: unscaled 0.277  calibrated 0.392 [0.177, 0.658]  arm 0.391
+     gain 4.52%                     HM-CAL  45.6 /  40.8 /  13.6 | N1 29.2  N2  0.0 | enters  29.5  A1-4 common  16.7 | rms: unscaled 0.482  calibrated 0.391 [0.175, 0.652]  arm 0.297
+     level 0.40 C                   HM-CAL  43.3 /  42.2 /  14.5 | N1 31.3  N2  0.0 | enters  28.7  A1-4 common  14.8 | rms: unscaled 0.475  calibrated 0.391 [0.182, 0.674]  arm 0.344
+     mixed: E154's fit, then E166's HM-CAL  28.5 /  49.1 /  22.4 | N1 39.6  N2  0.0 | enters  23.6  A1-4 common   5.7 | rms: unscaled 0.408  calibrated 0.390 [0.182, 0.663]  arm 0.320
+   A2 x2 masked (two aifoundry2 sessions: Z_m, G1E, Z_m, G1E), simulated sigma 0.3443 C:
+     none                           HM-CAL   4.4 /  40.3 /  55.3 | N1 67.1  N2  0.0 | enters   3.7  A1-4 common   1.4 | rms: unscaled 0.312  calibrated 0.448 [0.211, 0.747]  arm 0.416
+     gain 4.52%                     HM-CAL  38.7 /  41.6 /  19.6 | N1 37.6  N2  0.0 | enters  25.6  A1-4 common  13.3 | rms: unscaled 0.501  calibrated 0.443 [0.204, 0.748]  arm 0.331
+     level 0.40 C                   HM-CAL  36.6 /  41.8 /  21.6 | N1 39.8  N2  0.0 | enters  24.9  A1-4 common  11.2 | rms: unscaled 0.501  calibrated 0.454 [0.207, 0.760]  arm 0.380
+     mixed: E154's fit, then E166's HM-CAL  25.8 /  45.9 /  28.3 | N1 45.8  N2  0.0 | enters  20.9  A1-4 common   4.6 | rms: unscaled 0.438  calibrated 0.445 [0.212, 0.747]  arm 0.361
+   A2 x4 masked (four aifoundry2 sessions), simulated sigma 0.2296 C:
+     none                           HM-CAL   0.8 /  43.7 /  55.5 | N1 72.1  N2  0.0 | enters   0.8  A1-4 common   0.3 | rms: unscaled 0.220  calibrated 0.313 [0.192, 0.454]  arm 0.358
+     gain 4.52%                     HM-CAL  72.1 /  25.7 /   2.1 | N1 28.5  N2  0.0 | enters  24.0  A1-4 common  48.8 | rms: unscaled 0.452  calibrated 0.312 [0.189, 0.453]  arm 0.246
+     level 0.40 C                   HM-CAL  72.1 /  25.8 /   2.1 | N1 27.6  N2  0.0 | enters  23.6  A1-4 common  49.2 | rms: unscaled 0.451  calibrated 0.310 [0.189, 0.452]  arm 0.302
+     mixed: E154's fit, then E166's HM-CAL  47.5 /  45.6 /   6.9 | N1 39.2  N2  0.0 | enters  32.2  A1-4 common  17.6 | rms: unscaled 0.383  calibrated 0.309 [0.187, 0.448]  arm 0.278
+
+8. The adoption rule (A2-6), read at the plan (two aifoundry3 sessions, sigma_c), stated before this output:
+   (i) HM-CAL-A3 BETTER at most 5% with no effect: met
+   (ii) BETTER with no clause met (N1, N2) in at least 80% under each committed pattern: met
+   (iii) under E154's fit then E166's, the calibration enters in at least 80%: met
+   (iv) the calibration enters at most 5% with no effect: met
+   values: {"(i)": 0.7, "(ii)": {"both: E154's two-term fit (-0.229 C + 5.72%)": 97.8, "both: E166's two-term fit (+0.395 C - 1.43%)": 99.1, "mixed: E154's fit, then E166's": 98.2}, "(iii)": 97.1, "(iv)": 0.7}
+   A2 is ADOPTED at the registered design (two aifoundry3 sessions of 74.7 card-minutes)
+
+Checks: noise as committed (v2): yes; truth labels as committed (v2): yes; v2's exact plan re-run at 51.2 and 52.0 C equals design-power-heat-v2.json's designs_exact_P_C: yes; HM-LG's verdicts at the plan equal design-power-heat-v2.json's power table (v2's draws): yes; A1-4's path at the plan equals design-power-heat-v2.json's path (v2's draws and decide): yes; HM-LG's verdicts for one and three sessions equal design-power-heat-v2.json's (v2's draws): yes; HM-LG's verdicts on aifoundry2's designs equal design-power-heat.json's (v1's draws): yes
+
+wrote tools/claims-v3/m11/design-power-heat-a2.json
