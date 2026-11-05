@@ -1,0 +1,25 @@
+E174 scorer self-test: score_e174.py 9002b97da2218659, p8gov.py 6adacaf21a46723c, predictions-e174.json 96e99a139b1c4850
+PASS S1a the zeros anchors' counted bursts give E170's committed score.anchors (18 reads), from the zeros anchors only
+PASS S1b e170_common.pred_card0 recomputed per tile equals E170's committed primary: 39 tiles, 0 fields differ
+PASS S1c the board errors reproduce E170-W and E170-B: rms 0.7274, mean -0.0896; C0-B's lines read PASS, as E170-B
+PASS S1d the clock errors reproduce E170-F: rms 3.9773, mean -1.1267
+PASS S1e the die-rise errors under M9's law reproduce E170-H1: rms 2.4566, mean 2.382
+PASS S1f E170's own engine (seeds 170-172) reproduces its committed lines W [0.5988, 1.0398], F [0.2909, 4.0958], H1 [0.5314, 0.8273]
+PASS S1g E170's paired engine (seed 1701) reproduces E170-M1 on the D errors: n 34, d -0.1582, [-0.2423, -0.0944]
+     information: P8's paired engine on E170's M9-M6 D errors: {"n": 34, "point": -0.1582, "ci95": [-0.2408, -0.0951], "verdict": "BETTER"}
+PASS S1h in sample (c2 was fitted on E170): C0-HK's pair on E170's 39 tiles reads BETTER [-2.3146, -1.9421] (k 0.2415 against 0.14004345109940583)
+PASS S1i C0-H1's reference: 39 residuals, rms 0.3385 (heldout-m10.json's 0.3385)
+PASS S2a the P8 lines at n 21 equal predictions-e174.json's {"P8-C0-W": [0.521, 1.118], "P8-C0-F": [0.172, 4.54], "P8-C0-H1": [0.216, 0.472]}
+PASS S2b the same engine at n 31 gives intervals-pool8.json's committed card-0 lines
+PASS S3a the made-up session scores 21 tiles: 21
+PASS S3b designed errors: C0-W 0.3207 W PASS, C0-B mean 0.1143 PASS, C0-F 1.5 MHz PASS, C0-H1 0.2 C PASS
+PASS S3c HM NOT SCORED (no hold)
+PASS S3d measured D = M10 carried's: C0-M1 BETTER; = M9 carried's: WORSE
+PASS S3e the rise at exactly M10's k: C0-HK BETTER; at M9's: WORSE
+PASS S3f fewer than 2 counted passes of half A: fewer than 2 counted passes of half A: every rule but E174-C and E174-S NOT SCORED
+PASS S3g no zeros-anchor burst: no zeros-anchor burst counted: the card term's level cannot be read; every rule NOT SCORED
+PASS S3h a tile with a launch not PASS leaves every scored set (20 scored)
+PASS S4a E170's queue order (die test, board test, smoke, s1): required ['stoptest-board', 'smoke', 's1']; with only s1's check, missing ['stoptest-board', 'smoke']
+PASS S4b a tile other than the zeros anchors reaching the anchors input is refused
+PASS S4c a run of a tile left out by name, or not admitted, is refused; an admitted one is not
+ALL PASS: 22 of 22

@@ -1,0 +1,40 @@
+E173 scorer self-test: score_e173.py a7f10691c02478f6, p8gov.py 6adacaf21a46723c, predictions-e173.json 54d75e8b36ec4676, predict_pool8_a2.py c063456832303fc5
+PASS S1a the zeros anchors' counted bursts give E165's committed score.anchors (9 reads)
+PASS S1b only the three zeros anchors reached the anchors input
+PASS S1c M9's part recomputed per tile equals E165's committed primary: 52 tiles, 0 fields differ
+PASS S1d the sets: 12 governed, 40 pinned, 52 scored (E165's)
+PASS S1e A2-G's lines on E165's governed clock: rms 3.0318, mean -1.0425 (committed 3.032, -1.042): both lines hold, as E165's
+PASS S1f A2-Bg's line on E165's governed board: mean -0.4248 (committed -0.425): PASS (E165's FAIL was its resolution test against M7, not a P8 line)
+PASS S1g A2-Bp's lines on E165's pinned board: mean -0.015, rms 0.9864 (committed -0.015, 0.986): PASS
+PASS S1h F1/F2/W1/W2/H1's rms reproduce E165's committed [3.032, 5.113, 0.714, 0.986, 0.455]
+PASS S1i E165's own engine (seed 165) reproduces its committed lines: {'E165-F1': [2.45, 6.408], 'E165-F2': [0.288, 4.044], 'E165-W1': [0.415, 1.137], 'E165-W2': [0.604, 1.037], 'E165-H1': [0.556, 0.811]}
+PASS S1j E165's paired engine (seed 1651) reproduces its committed G vs M7 interval [-4.612, -1.947]
+     information: P8-A2-F2 on E165's 40 pinned clock errors: {"n": 40, "rms": 5.1133, "range_95": [0.28858428708091505, 4.046705305029018], "point": null, "ci95": null, "verdict": "FAIL"}
+     information: P8-A2-W2 on E165's pinned board: {"n": 40, "rms": 0.9864, "range_95": [0.6008037531091164, 1.0324458162538122], "point": null, "ci95": null, "verdict": "PASS"}
+     information: P8-A2-H1 on E165's die rise: {"n": 52, "rms": 0.4547, "range_95": [0.5537027839371844, 0.8113532203251671], "point": null, "ci95": null, "verdict": "PASS"}
+     information: P8 paired engine, M9 against M7 on E165's board: {"n": 52, "rms": null, "range_95": null, "point": -0.2271, "ci95": [-0.4757, -0.0061], "verdict": "BETTER"}
+PASS S1k on P8's own engines E165's pinned clock still FAILs and its pinned board PASSes, as E165-F2 and E165-W2 read
+PASS S2 the P8 lines at the planned n equal predictions-e173.json's (and intervals-pool8.json's) {"P8-A2-F1": [1.292, 8.31], "P8-A2-F2": [0.174, 4.54], "P8-A2-W1": [0.195, 1.458], "P8-A2-W2": [0.528, 1.113], "P8-A2-H1": [0.491, 0.87]}
+PASS S2b p8gov.boot_rule reads the same line and seed at n 21
+PASS S3a the made-up session scores 24 tiles: 3 governed, 21 pinned
+PASS S3b Bp reads the designed pinned errors (mean 0.1095, rms 0.2278): PASS
+PASS S3c G, Bg, F1 and W1 read NOT SCORED at 3 governed tiles (minimum 8)
+PASS S3d A2-R2 reads NOT SCORED when Bp PASSes and G, Bg are NOT SCORED (it cannot PASS on pool 8)
+PASS S3e W2 (0.2278 W) and H1 (0.3 C) below their 2.5% points, F2 (1.0 MHz) PASS
+PASS S3f HM NOT SCORED (no hold)
+PASS S3g a +0.7 W pinned level: Bp FAIL (mean measured above predicted), A2-R2 FAIL (the registered FAIL through Bp)
+PASS S3h measured = M10 carried: M1 BETTER [-0.3094, -0.0786]; = M9's part: WORSE [0.0786, 0.3094]
+PASS S3i a tile with a launch not PASS leaves every scored set (23 scored)
+PASS S3j no scored tile: every rule NOT SCORED, no crash
+PASS S4a the C-log list: required ['smoke', 'stoptest-board', 's1']; with only s1's check given, missing ['smoke', 'stoptest-board']: refused (the scorer's exit 5)
+PASS S4b with the three checks given (one gzipped) nothing is missing
+PASS S4c a resume s2 that ran a work launch must carry a C log too: missing ['s2']
+PASS S4d a dry session (the toy card writes no C log) needs none
+PASS S4e a tile other than the zeros anchors reaching the anchors input is refused
+PASS S4f the kit's protocol maps 165 runs to the registered order
+PASS S4g a run not its protocol's at its index is refused
+PASS S4h a protocol not one of the kit's is refused
+PASS S4i a protocol whose entry is not the registered order's run is refused
+PASS S4j a protocol whose bytes are not the recorded ones is refused
+PASS S4k a run of a tile left out by name is refused (runs of tiles left out by name: ['b8-fp32.anchor8_check_randn_319f73'])
+ALL PASS: 34 of 34
