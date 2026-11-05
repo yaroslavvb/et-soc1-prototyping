@@ -1,0 +1,22 @@
+E173 dated note 1, post hoc figures from results.json (no scorer import)
+scored tiles 24: governed 3, pinned 21; counted passes on them 72
+
+[4] pinned tiles with a counted pass under 800 MHz (board error = mean of the counted passes - M10 carried's burst_board_w):
+  fp16.r8_granite_l3_pv_e993b7: passes (pass, MHz, W) [(1, 800, 48.54), (2, 800, 48.51), (3, 752.9, 44.99)]; M10 carried 49.188 W; error -1.841 W (the tile's mean in results.json: -1.841); its 800 MHz passes alone -0.663 W; the dipped passes' share -1.178 W
+  int8.l8_flip_d2p2c16_231d: passes (pass, MHz, W) [(1, 800, 50.43), (2, 779.6, 49.21), (3, 752.9, 46.04)]; M10 carried 50.602 W; error -2.042 W (the tile's mean in results.json: -2.042); its 800 MHz passes alone -0.172 W; the dipped passes' share -1.870 W
+  int8.r8_granite_l4_actdown_b076f2: passes (pass, MHz, W) [(1, 796, 49.27), (2, 800, 49.31), (3, 800, 47.21)]; M10 carried 49.198 W; error -0.601 W (the tile's mean in results.json: -0.601); its 800 MHz passes alone -0.938 W; the dipped passes' share +0.337 W
+  int8.u8_ar_k_0a9fe5: passes (pass, MHz, W) [(1, 800, 49.21), (2, 750, 45.03), (3, 800, 49.84)]; M10 carried 50.322 W; error -2.295 W (the tile's mean in results.json: -2.295); its 800 MHz passes alone -0.797 W; the dipped passes' share -1.498 W
+  the pinned clock rms over 21 tiles: 7.0119 MHz; over the 17 with no dipped pass: 0.0733 MHz
+
+[5] M1's paired difference: d = M10 carried - M9's part, board prediction per scored tile:
+  governed n  3: d mean -0.0090 W, sd 0.0208, min -0.0330, max +0.0040; 1 negative, 2 positive; error mean M10 -0.3610 W, M9 -0.3700 W; rms M10 0.4632, M9 0.4806
+  pinned   n 21: d mean +0.0310 W, sd 0.2327, min -0.5590, max +0.6810; 11 negative, 10 positive; error mean M10 -0.0353 W, M9 -0.0044 W; rms M10 1.0937, M9 1.1468
+  all      n 24: d mean +0.0260 W, sd 0.2175, min -0.5590, max +0.6810; 12 negative, 12 positive; error mean M10 -0.0760 W, M9 -0.0501 W; rms M10 1.0361, M9 1.0861
+  the five lowest d: fp16.s8_onebit_b10_c127c127 -0.559, fp32.s8_onebit_b26_bffdf029 -0.153, int8.u8_sparseq_58e6e0 -0.078, fp16.s8_onebit_b2_c46ec46e -0.064, fp16.s8_onebit_b4_c2e2c2e2 -0.057
+  the five highest d: int8.l8_cycle3_d3p3c15_c6d5 +0.054, int8.l8_halfword_d2p2c16_83df +0.102, fp32.s8_onebit_b13_41783e4a_A40080727 +0.243, fp32.s8_onebit_b19_c11b3dd2 +0.457, fp16.s8_onebit_b7_b945b945 +0.681
+  d by case: H n 1 mean -0.012 (|d| largest 0.012); L n 4 mean +0.063 (|d| largest 0.102); R n 6 mean -0.018 (|d| largest 0.042); S n 8 mean +0.072 (|d| largest 0.681); U n 5 mean -0.017 (|d| largest 0.078)
+  rms(a)^2 - rms(b)^2 = -0.10615 W^2 (the identity mean(-d (2b - d)): -0.10615); with every d set to its mean +0.0260 W: +0.00327 W^2 (what a constant offset gives through the session's mean error, -0.0501 W); rms(a) - rms(b) = -0.0500 W
+
+[3] the boot time:
+  11:36:02 PST less 'up 9 days, 21:22' = 2026-10-26 22:14 UTC = 15:14 PDT = 14:14 PST (to uptime's minute)
+  uptime -s's 2026-10-26 15:13:03 in PDT = 14:13:03 PST = 2026-10-26 22:13:03 UTC; E69's firmware read (2026-10-27 13:56:26 PDT) is 22.72 h after it (21.72 h if the boot were read as PST)
