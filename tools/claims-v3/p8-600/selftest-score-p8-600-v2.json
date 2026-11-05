@@ -1,0 +1,459 @@
+{
+ "PASS": true,
+ "V0": {
+  "e78_common": [
+   "fp32.zeros",
+   "fp32.randn",
+   "fp16.zeros",
+   "fp16.randn",
+   "int8.zeros",
+   "int8.full",
+   "anchor_pi"
+  ],
+  "e78_items": [
+   "fp32.zeros",
+   "fp32.randn",
+   "fp16.zeros",
+   "fp16.randn",
+   "int8.zeros",
+   "int8.full",
+   "anchor_pi"
+  ],
+  "pass": true,
+  "pool8_inputs": 209,
+  "predictor_lists": {
+   "SHA256SUMS": 16,
+   "SHA256SUMS-a2": 9
+  },
+  "scorer_listed": "cd5b602484d7a6455979fd70b72db5b34997a9f79170301d7c723e10669a3f97",
+  "scorer_sha256": "cd5b602484d7a6455979fd70b72db5b34997a9f79170301d7c723e10669a3f97"
+ },
+ "V1": {
+  "--scale-c in order (positive control)": {
+   "beside": "PASS",
+   "beside_n": 4,
+   "line": "{\"verdict\": \"PASS\", \"n\": 4}",
+   "rc": 0,
+   "verdict": "PASS",
+   "wrote": true
+  },
+  "--scale-c swapped": {
+   "line": "REFUSED (exit 6): scale-c-v1.json: not the scale-c.json written for scored.json (run E172 on aifoundry1c1, scored_sha256 0fd11fea2a82, want E171 on aifoundry3, 23b23b786515)",
+   "rc": 6,
+   "wrote": false
+  },
+  "E171 twice": {
+   "line": "REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): scored.json (the E172 argument): run E171 on aifoundry3, not E172 on aifoundry1c1 (the registered order: <E171 scored.json> <E172 scored.json>); scored.json (the E172 argument): predictions tools/claims-",
+   "rc": 6,
+   "wrote": false
+  },
+  "E171's file relabelled as E172's": {
+   "line": "REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): variant-relabelled.json (the E172 argument): its rows are not aifoundry1c1's (64 checked; fp16.a_zeros_b_complement: a-priori D 1.519759 W where this card's coefficient gives 1.461400 W; fp16.anchor8_che",
+   "rc": 6,
+   "wrote": false
+  },
+  "E172 twice": {
+   "line": "REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): scored.json (the E171 argument): run E172 on aifoundry1c1, not E171 on aifoundry3 (the registered order: <E171 scored.json> <E172 scored.json>); scored.json (the E171 argument): predictions tools/claims-",
+   "rc": 6,
+   "wrote": false
+  },
+  "a file with no c_sessions": {
+   "line": "REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): variant-nocsessions.json (the E172 argument): not scored through the C gate (no c_sessions.ok)",
+   "rc": 6,
+   "wrote": false
+  },
+  "a missing file": {
+   "line": "REFUSED (exit 6): <tmp>/no-such.json: no such file (scored.json)",
+   "rc": 6,
+   "wrote": false
+  },
+  "a predictions_sha256 not the freeze's": {
+   "line": "REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): variant-predsha.json (the E172 argument): predictions_sha256 000000000000 is not the freeze's 1e55ac1ace1c",
+   "rc": 6,
+   "wrote": false
+  },
+  "a scorer_sha256 not the committed one": {
+   "line": "REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): variant-scorersha.json (the E172 argument): scorer_sha256 000000000000 is not the committed scorer's cd5b602484d7",
+   "rc": 6,
+   "wrote": false
+  },
+  "differences": [],
+  "pass": true,
+  "the pair swapped": {
+   "line": "REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): scored.json (the E171 argument): run E172 on aifoundry1c1, not E171 on aifoundry3 (the registered order: <E171 scored.json> <E172 scored.json>); scored.json (the E171 argument): predictions tools/claims-",
+   "rc": 6,
+   "wrote": false
+  },
+  "the right pair": {
+   "line": "{\"verdict\": \"PASS\", \"n\": 4}",
+   "n": 4,
+   "rc": 0,
+   "same_as_committed": true,
+   "verdict": "PASS",
+   "wrote": true
+  }
+ },
+ "V2": {
+  "(a) aifoundry1c1: every anchor C all PASS": {
+   "all_pass": true,
+   "arm": null,
+   "footing": {
+    "anchor_pi": [
+     6,
+     true
+    ],
+    "fp16.zeros": [
+     9,
+     true
+    ],
+    "fp32.zeros": [
+     9,
+     true
+    ],
+    "int8.full": [
+     9,
+     true
+    ],
+    "int8.zeros": [
+     9,
+     true
+    ]
+   },
+   "in_s": 6,
+   "launches": {
+    "fp16.anchor8_randn_a_8c7827": 3,
+    "fp16.anchor8_randn_b_3a0fef": 3,
+    "fp16.randn": 9,
+    "fp32.anchor8_randn_a_989b8a": 3,
+    "fp32.anchor8_randn_b_833ac3": 3,
+    "fp32.randn": 9
+   },
+   "line": "SCALE-C E172: 6 anchors in s, every one C all PASS: the arm c_clean_scale is the primary",
+   "rc": 0
+  },
+  "(a) aifoundry3: every anchor C all PASS": {
+   "all_pass": true,
+   "arm": null,
+   "footing": {
+    "anchor_pi": [
+     6,
+     true
+    ],
+    "fp16.zeros": [
+     9,
+     true
+    ],
+    "fp32.zeros": [
+     9,
+     true
+    ],
+    "int8.full": [
+     9,
+     true
+    ],
+    "int8.zeros": [
+     9,
+     true
+    ]
+   },
+   "in_s": 6,
+   "launches": {
+    "fp16.anchor8_randn_a_8c7827": 3,
+    "fp16.anchor8_randn_b_3a0fef": 3,
+    "fp16.randn": 9,
+    "fp32.anchor8_randn_a_989b8a": 3,
+    "fp32.anchor8_randn_b_833ac3": 3,
+    "fp32.randn": 9
+   },
+   "line": "SCALE-C E171: 6 anchors in s, every one C all PASS: the arm c_clean_scale is the primary",
+   "rc": 0
+  },
+  "(b) aifoundry1c1: pool 8's scale anchor fp16.anchor8_randn_a_8c7827 FAILs": {
+   "KC_in_scored": "FAIL",
+   "anchor": "fp16.anchor8_randn_a_8c7827",
+   "arm_verdicts": {
+    "P8-A1": "BETTER",
+    "P8-B1": "PASS",
+    "P8-B2": "FAIL LOW",
+    "P8-C1": "PASS",
+    "P8-G": "FAIL",
+    "P8-H1": "PASS",
+    "P8-H2": "PASS",
+    "P8-H3": "FAIL",
+    "P8-H4": "FAIL",
+    "P8-HM": "NOT SCORED",
+    "P8-KA": "PASS",
+    "P8-KC": "FAIL",
+    "P8-LG": "GAIN",
+    "P8-M1": "BETTER",
+    "P8-M1f": "BETTER",
+    "P8-M1i": "NOT RESOLVED",
+    "P8-P1": "PASS",
+    "P8-P2": "PASS",
+    "P8-P3": "FAIL"
+   },
+   "differs": {},
+   "excluded_in_scored": true,
+   "line": "SCALE-C E172: 1 of 6 anchors in s not C all PASS (fp16.anchor8_randn_a_8c7827): the arm c_clean_scale reads s 1.00600 against 1.00500, 0 rule(s) differ (reported beside)",
+   "named": [
+    "fp16.anchor8_randn_a_8c7827"
+   ],
+   "rc": 0,
+   "s_arm": 1.0060000000000002,
+   "s_expected": 1.0060000000000002,
+   "s_primary": 1.0050000000000003
+  },
+  "(b) aifoundry3: pool 8's scale anchor fp16.anchor8_randn_a_8c7827 FAILs": {
+   "KC_in_scored": "FAIL",
+   "anchor": "fp16.anchor8_randn_a_8c7827",
+   "arm_verdicts": {
+    "P8-A1": "BETTER",
+    "P8-B1": "PASS",
+    "P8-B2": "FAIL LOW",
+    "P8-C1": "PASS",
+    "P8-G": "FAIL",
+    "P8-H1": "PASS",
+    "P8-H2": "PASS",
+    "P8-H3": "FAIL",
+    "P8-H4": "FAIL",
+    "P8-HM": "NOT SCORED",
+    "P8-KA": "PASS",
+    "P8-KC": "FAIL",
+    "P8-LG": "GAIN",
+    "P8-M1": "BETTER",
+    "P8-M1f": "BETTER",
+    "P8-M1i": "NOT RESOLVED",
+    "P8-P1": "PASS",
+    "P8-P2": "PASS",
+    "P8-P3": "FAIL"
+   },
+   "differs": {},
+   "excluded_in_scored": true,
+   "line": "SCALE-C E171: 1 of 6 anchors in s not C all PASS (fp16.anchor8_randn_a_8c7827): the arm c_clean_scale reads s 1.00600 against 1.00500, 0 rule(s) differ (reported beside)",
+   "named": [
+    "fp16.anchor8_randn_a_8c7827"
+   ],
+   "rc": 0,
+   "s_arm": 1.006,
+   "s_expected": 1.006,
+   "s_primary": 1.005
+  },
+  "(c) E78's fp32.randn FAILs": {
+   "KC_in_scored": "PASS",
+   "line": "SCALE-C E171: 1 of 6 anchors in s not C all PASS (fp32.randn): the arm c_clean_scale reads s 1.00600 against 1.00500, 0 rule(s) differ (reported beside)",
+   "named": [
+    "fp32.randn"
+   ],
+   "rc": 0,
+   "s_arm": 1.006,
+   "s_expected": 1.006
+  },
+  "(d) every anchor in s FAILs": {
+   "KA_arm": "NOT SCORED",
+   "line": "SCALE-C E171: 6 of 6 anchors in s not C all PASS (fp32.randn, fp16.randn, fp16.anchor8_randn_a_8c7827, fp16.anchor8_randn_b_3a0fef, fp32.anchor8_randn_a_989b8a, fp32.anchor8_randn_b_833ac3): the arm c_clean_scale reads s 1.00000 against 1.00500, 5 rule(s) differ (reported beside)",
+   "rc": 0,
+   "s_arm": 1.0
+  },
+  "(e) E78's fp32.zeros FAILs": {
+   "arm": null,
+   "footing_not_all_pass": [
+    "fp32.zeros"
+   ],
+   "line": "SCALE-C E171: 6 anchors in s, every one C all PASS: the arm c_clean_scale is the primary; footing items not C all PASS: fp32.zeros",
+   "rc": 0
+  },
+  "(f) refusals": {
+   "a scored file without c_sessions": {
+    "line": "REFUSED (exit 6): nocs-scored.json is not E171's scored session on these inputs (dated note 1, N2): not scored through the C gate (no c_sessions.ok)",
+    "rc": 6,
+    "wrote": false
+   },
+   "another session's check of C": {
+    "line": "REFUSED (exit 6): the check of C given (ccheck-all.json) does not give the scored file's P8-KC block: it is not the check this session was scored with (recomputed FAIL, 192 launches; the file's PASS, 192)",
+    "rc": 6,
+    "wrote": false
+   },
+   "another session's reduction": {
+    "line": "REFUSED (exit 6): scored.json is not E171's scored session on these inputs (dated note 1, N2): the reduction given is not the one the scored file was scored on (reduction_sha256)",
+    "rc": 6,
+    "wrote": false
+   },
+   "predictions not the freeze's": {
+    "line": "REFUSED (exit 9): tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry3.json: sha256 d68ff9f1e057 is not the freeze's 000000000000 (Q142(x) SHA256SUMS)",
+    "rc": 9,
+    "wrote": false
+   },
+   "the other card's scored file": {
+    "line": "REFUSED (exit 6): scored.json is not E171's scored session on these inputs (dated note 1, N2): run E172 on aifoundry1c1, not E171 on aifoundry3; predictions_sha256 is not this card's frozen predictions'; the reduction given is not the one t",
+    "rc": 6,
+    "wrote": false
+   },
+   "the other run named": {
+    "line": "REFUSED (exit 6): scored.json is not E172's scored session on these inputs (dated note 1, N2): run E171 on aifoundry3, not E172 on aifoundry1c1; predictions_sha256 is not this card's frozen predictions'",
+    "rc": 6,
+    "wrote": false
+   },
+   "the predictor's stop": {
+    "stopped": "POOL8 STOPPED: a test stand-in for a changed input",
+    "wrote": false
+   }
+  },
+  "(g) ka-pooled --scale-c with an arm": {
+   "beside": [
+    "PASS",
+    4
+   ],
+   "beside_rows_are_the_arm's": true,
+   "committed": [
+    "PASS",
+    4
+   ],
+   "n": 4,
+   "rc": 0,
+   "sessions": [
+    {
+     "from": "the arm c_clean_scale",
+     "run": "E171",
+     "s_float": 1.006,
+     "scale_c": "scale-c-g.json",
+     "scale_c_sha256": "7266ba75688b3a2be9e631b21f150652e2dfc9eb962fa102672fed01f5b3e439"
+    },
+    {
+     "from": "the primary (every anchor in s is C all PASS)",
+     "run": "E172",
+     "s_float": 1.0050000000000003,
+     "scale_c": "scale-c-g.json",
+     "scale_c_sha256": "ef840363d3da617e1c0c6ecbc2689ca05437571da7699546a926e3dba34cbdb4"
+    }
+   ],
+   "verdict": "PASS"
+  },
+  "differences": [],
+  "pass": true
+ },
+ "V3": {
+  "E163": {
+   "kept_passes": [
+    16310,
+    16311,
+    16312
+   ],
+   "not_ran": [
+    "fp32.anchor6_randn",
+    "fp16.anchor6_randn"
+   ],
+   "pass": true,
+   "ran": {
+    "anchor_pi": {
+     "all_pass": true,
+     "launches": 60
+    },
+    "fp16.anchor7_randn_a": {
+     "all_pass": true,
+     "launches": 30
+    },
+    "fp16.anchor7_randn_b": {
+     "all_pass": true,
+     "launches": 30
+    },
+    "fp16.randn": {
+     "all_pass": true,
+     "launches": 90
+    },
+    "fp16.zeros": {
+     "all_pass": true,
+     "launches": 90
+    },
+    "fp32.anchor7_randn_a": {
+     "all_pass": true,
+     "launches": 30
+    },
+    "fp32.anchor7_randn_b": {
+     "all_pass": true,
+     "launches": 30
+    },
+    "fp32.randn": {
+     "all_pass": true,
+     "launches": 90
+    },
+    "fp32.zeros": {
+     "all_pass": true,
+     "launches": 90
+    },
+    "int8.full": {
+     "all_pass": true,
+     "launches": 90
+    },
+    "int8.zeros": {
+     "all_pass": true,
+     "launches": 90
+    }
+   }
+  },
+  "E164": {
+   "kept_passes": [
+    16410,
+    16411,
+    16412,
+    16413
+   ],
+   "not_ran": [],
+   "pass": true,
+   "ran": {
+    "anchor_pi": {
+     "all_pass": true,
+     "launches": 80
+    },
+    "fp16.anchor6_randn": {
+     "all_pass": true,
+     "launches": 40
+    },
+    "fp16.anchor7_randn_a": {
+     "all_pass": true,
+     "launches": 40
+    },
+    "fp16.anchor7_randn_b": {
+     "all_pass": true,
+     "launches": 40
+    },
+    "fp16.randn": {
+     "all_pass": true,
+     "launches": 110
+    },
+    "fp16.zeros": {
+     "all_pass": true,
+     "launches": 110
+    },
+    "fp32.anchor6_randn": {
+     "all_pass": true,
+     "launches": 40
+    },
+    "fp32.anchor7_randn_a": {
+     "all_pass": true,
+     "launches": 40
+    },
+    "fp32.anchor7_randn_b": {
+     "all_pass": true,
+     "launches": 30
+    },
+    "fp32.randn": {
+     "all_pass": true,
+     "launches": 120
+    },
+    "fp32.zeros": {
+     "all_pass": true,
+     "launches": 110
+    },
+    "int8.full": {
+     "all_pass": true,
+     "launches": 120
+    },
+    "int8.zeros": {
+     "all_pass": true,
+     "launches": 120
+    }
+   }
+  },
+  "pass": true
+ }
+}

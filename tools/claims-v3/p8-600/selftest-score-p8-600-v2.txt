@@ -1,0 +1,33 @@
+V0 scorer cd5b602484d7 listed cd5b602484d7; E78 items True: PASS
+V1 the right pair: rc 0, wrote True | {"verdict": "PASS", "n": 4}
+V1 E171 twice: rc 6, wrote False | REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): scored.json (the E172 argument): run E171 on aifoundr
+V1 E172 twice: rc 6, wrote False | REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): scored.json (the E171 argument): run E172 on aifoundr
+V1 the pair swapped: rc 6, wrote False | REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): scored.json (the E171 argument): run E172 on aifoundr
+V1 E171's file relabelled as E172's: rc 6, wrote False | REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): variant-relabelled.json (the E172 argument): its rows
+V1 a predictions_sha256 not the freeze's: rc 6, wrote False | REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): variant-predsha.json (the E172 argument): predictions
+V1 a scorer_sha256 not the committed one: rc 6, wrote False | REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): variant-scorersha.json (the E172 argument): scorer_sh
+V1 a file with no c_sessions: rc 6, wrote False | REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): variant-nocsessions.json (the E172 argument): not sco
+V1 a missing file: rc 6, wrote False | REFUSED (exit 6): <tmp>/no-such.json: no such file (scored.json)
+V1 --scale-c swapped: rc 6, wrote False | REFUSED (exit 6): scale-c-v1.json: not the scale-c.json written for scored.json (run E172 on aifoundry1c1, scored_sha256 0fd11fea2a82, want E171 on ai
+V1 --scale-c in order (positive control): rc 0, wrote True | {"verdict": "PASS", "n": 4}
+V1 PASS []
+V2 (a) aifoundry3: every anchor C all PASS: {"rc": 0, "line": "SCALE-C E171: 6 anchors in s, every one C all PASS: the arm c_clean_scale is the primary", "in_s": 6, "all_pass": true, "arm": null}
+V2 (a) aifoundry1c1: every anchor C all PASS: {"rc": 0, "line": "SCALE-C E172: 6 anchors in s, every one C all PASS: the arm c_clean_scale is the primary", "in_s": 6, "all_pass": true, "arm": null}
+V2 (b) aifoundry3: pool 8's scale anchor fp16.anchor8_randn_a_8c7827 FAILs: {"rc": 0, "line": "SCALE-C E171: 1 of 6 anchors in s not C all PASS (fp16.anchor8_randn_a_8c7827): the arm c_clean_scale reads s 1.00600 against 1.00500, 0 rule(s) differ (reported beside)", "anchor": "fp16.anchor8_randn_a_8c7827", "KC_in_scored": "FAIL", "excluded_in_scored": true, "named": ["fp16.anchor8_randn_a_8c7827"], "s_p
+V2 (b) aifoundry1c1: pool 8's scale anchor fp16.anchor8_randn_a_8c7827 FAILs: {"rc": 0, "line": "SCALE-C E172: 1 of 6 anchors in s not C all PASS (fp16.anchor8_randn_a_8c7827): the arm c_clean_scale reads s 1.00600 against 1.00500, 0 rule(s) differ (reported beside)", "anchor": "fp16.anchor8_randn_a_8c7827", "KC_in_scored": "FAIL", "excluded_in_scored": true, "named": ["fp16.anchor8_randn_a_8c7827"], "s_p
+V2 (c) E78's fp32.randn FAILs: {"rc": 0, "line": "SCALE-C E171: 1 of 6 anchors in s not C all PASS (fp32.randn): the arm c_clean_scale reads s 1.00600 against 1.00500, 0 rule(s) differ (reported beside)", "KC_in_scored": "PASS", "named": ["fp32.randn"], "s_arm": 1.006, "s_expected": 1.006}
+V2 (d) every anchor in s FAILs: {"rc": 0, "line": "SCALE-C E171: 6 of 6 anchors in s not C all PASS (fp32.randn, fp16.randn, fp16.anchor8_randn_a_8c7827, fp16.anchor8_randn_b_3a0fef, fp32.anchor8_randn_a_989b8a, fp32.anchor8_randn_b_833ac3): the arm c_clean_scale reads s 1.00000 against 1.00500, 5 rule(s) differ (reported beside)", "s_arm": 1.0, "KA_arm": "NOT
+V2 (e) E78's fp32.zeros FAILs: {"rc": 0, "line": "SCALE-C E171: 6 anchors in s, every one C all PASS: the arm c_clean_scale is the primary; footing items not C all PASS: fp32.zeros", "footing_not_all_pass": ["fp32.zeros"], "arm": null}
+V2 (g) ka-pooled --scale-c with an arm: {"rc": 0, "verdict": "PASS", "n": 4, "committed": ["PASS", 4], "beside": ["PASS", 4], "beside_rows_are_the_arm's": true}
+V2 (f) the other card's scored file: {"rc": 6, "wrote": false, "line": "REFUSED (exit 6): scored.json is not E171's scored session on these inputs (dated note 1, N2): run E172 on aifoundry1c1, not E171 on aifoundry3; predictions_sha256 is not this card's frozen predictions'; the reduction given is not the one t"}
+V2 (f) another session's reduction: {"rc": 6, "wrote": false, "line": "REFUSED (exit 6): scored.json is not E171's scored session on these inputs (dated note 1, N2): the reduction given is not the one the scored file was scored on (reduction_sha256)"}
+V2 (f) another session's check of C: {"rc": 6, "wrote": false, "line": "REFUSED (exit 6): the check of C given (ccheck-all.json) does not give the scored file's P8-KC block: it is not the check this session was scored with (recomputed FAIL, 192 launches; the file's PASS, 192)"}
+V2 (f) a scored file without c_sessions: {"rc": 6, "wrote": false, "line": "REFUSED (exit 6): nocs-scored.json is not E171's scored session on these inputs (dated note 1, N2): not scored through the C gate (no c_sessions.ok)"}
+V2 (f) the other run named: {"rc": 6, "wrote": false, "line": "REFUSED (exit 6): scored.json is not E172's scored session on these inputs (dated note 1, N2): run E171 on aifoundry3, not E172 on aifoundry1c1; predictions_sha256 is not this card's frozen predictions'"}
+V2 (f) predictions not the freeze's: {"rc": 9, "wrote": false, "line": "REFUSED (exit 9): tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry3.json: sha256 d68ff9f1e057 is not the freeze's 000000000000 (Q142(x) SHA256SUMS)"}
+V2 (f) the predictor's stop: {"stopped": "POOL8 STOPPED: a test stand-in for a changed input", "wrote": false}
+V2 PASS []
+V3 E163: kept passes [16310, 16311, 16312]; fp32.randn 90, fp16.randn 90, fp32.anchor7_randn_a 30, fp32.anchor7_randn_b 30, fp16.anchor7_randn_a 30, fp16.anchor7_randn_b 30, fp32.zeros 90, fp16.zeros 90, int8.zeros 90, int8.full 90, anchor_pi 60; not run: ['fp32.anchor6_randn', 'fp16.anchor6_randn']
+V3 E164: kept passes [16410, 16411, 16412, 16413]; fp32.randn 120, fp16.randn 110, fp32.anchor6_randn 40, fp16.anchor6_randn 40, fp32.anchor7_randn_a 40, fp32.anchor7_randn_b 30, fp16.anchor7_randn_a 40, fp16.anchor7_randn_b 40, fp32.zeros 110, fp16.zeros 110, int8.zeros 120, int8.full 120, anchor_pi 80; not run: []
+V3 PASS []
+SELFTEST-SCORE-P8-600-V2 PASS {"V0": true, "V1": true, "V2": true, "V3": true}
