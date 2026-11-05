@@ -1,0 +1,803 @@
+{
+ "PASS": true,
+ "U0": {
+  "POOL8-SHA256SUMS": 209,
+  "frozen_predictor_sha256": "be00022cd72f88556aa5a807a2b50c7d83522567454aa5216c35d4191bfb8d85",
+  "lists": {
+   "SHA256SUMS": 16,
+   "SHA256SUMS-a2": 9
+  },
+  "pass": true
+ },
+ "U1": {
+  "identical_to_committed": true,
+  "keys_differing": [],
+  "pass": true,
+  "rc": 0,
+  "summary": "{\"PASS\": true, \"T1\": true, \"T2\": true, \"T3\": true, \"T4\": true, \"T5\": true, \"T6\": true, \"T7\": true, \"T8\": true, \"T9\": true, \"inputs\": {\"POOL8-SHA256SUMS\": 209, \"ok\": true}, \"rate\": {\"a3\": {\"fp16\": 0.335, \"fp32\": 0.3355, \"int8\": 0.2275}, \"c1\": {\"fp16\": 0.3445, \"fp32\": 0.346, \"int8\": 0.276}}}"
+ },
+ "U2": {
+  "cases": {
+   "a point counted twice with different records": {
+    "a2": {
+     "expected_rc": 3,
+     "files_written": [],
+     "message": "\"refused_point\": \"fp32.b_onebit_b20_one n0=91575 counted twice with different records\",",
+     "ok": true,
+     "rc": 3
+    },
+    "frozen": {
+     "expected_rc": 1,
+     "files_written": [],
+     "message": "POOL8 STOPPED: fp32.b_onebit_b20_one n0=91575 counted twice with different records",
+     "ok": true,
+     "rc": 1
+    }
+   },
+   "a point with a check_mismatch": {
+    "a2": {
+     "expected_rc": 3,
+     "files_written": [],
+     "message": "\"refused_point\": \"fp32.b_onebit_b20_one n0=91575 check_mismatch in counts-mismatch.json\",",
+     "ok": true,
+     "rc": 3
+    },
+    "frozen": {
+     "expected_rc": 1,
+     "files_written": [],
+     "message": "POOL8 STOPPED: fp32.b_onebit_b20_one n0=91575 check_mismatch in counts-mismatch.json",
+     "ok": true,
+     "rc": 1
+    }
+   },
+   "an int8 tile with its three points (control)": {
+    "a2": {
+     "expected_rc": 0,
+     "files_written": [
+      "predictions-pool8-aifoundry3.json",
+      "predictions-pool8-aifoundry3.md"
+     ],
+     "message": "Sets: N1 0; F1 0; I1 0; by_format 0; RR 0; RR_int8 1; KA 0; scale_anchors_pool8 0; zeros_anchors 0; other_priorities 0",
+     "ok": true,
+     "rc": 0
+    },
+    "frozen": {
+     "expected_rc": 0,
+     "files_written": [
+      "predictions-pool8-aifoundry3.json",
+      "predictions-pool8-aifoundry3.md"
+     ],
+     "message": "Sets: N1 0; F1 0; I1 0; by_format 0; RR 0; RR_int8 1; KA 0; scale_anchors_pool8 0; zeros_anchors 0; other_priorities 0",
+     "ok": true,
+     "rc": 0
+    }
+   },
+   "control: predictions bytes identical between the two files": true,
+   "pass-through: heat-minutes 10.0": {
+    "arm_c": [
+     10.3199
+    ],
+    "ok": true,
+    "primary_c": [
+     10.0
+    ],
+    "rc": 0
+   },
+   "plan: a point with a check_mismatch": {
+    "a2": {
+     "expected_rc": 3,
+     "files_written": [],
+     "message": "\"refused_point\": \"fp32.b_onebit_b20_one n0=91575 check_mismatch in counts-mismatch.json\",",
+     "ok": true,
+     "rc": 3
+    },
+    "frozen": {
+     "expected_rc": 1,
+     "files_written": [],
+     "message": "POOL8 STOPPED: fp32.b_onebit_b20_one n0=91575 check_mismatch in counts-mismatch.json",
+     "ok": true,
+     "rc": 1
+    }
+   },
+   "points short of the convergence rule's N": {
+    "a2": {
+     "expected_rc": 3,
+     "files_written": [],
+     "message": "\"why\": \"the convergence rule needs N = 9\"",
+     "ok": true,
+     "rc": 3
+    },
+    "frozen": {
+     "expected_rc": 3,
+     "files_written": [],
+     "message": "\"why\": \"the convergence rule needs N = 9\"",
+     "ok": true,
+     "rc": 3
+    }
+   },
+   "random anchors' roles unreadable": {
+    "a2": {
+     "expected_rc": 3,
+     "files_written": [],
+     "message": "anchor roles: fp32: 3 random anchors and none reads as a check anchor; pass --roles from the design file",
+     "ok": true,
+     "rc": 3
+    },
+    "frozen": {
+     "expected_rc": 3,
+     "files_written": [],
+     "message": "anchor roles: fp32: 3 random anchors and none reads as a check anchor; pass --roles from the design file",
+     "ok": true,
+     "rc": 3
+    }
+   }
+  },
+  "pass": true
+ },
+ "U3": {
+  "by_tile": {
+   "fp16.b_onebit_b8_pi": {
+    "M10_band": [
+     6.465,
+     7.651
+    ],
+    "M10_rise_c": 7.058,
+    "frozen_band_M9_law": [
+     2.687,
+     5.499
+    ],
+    "frozen_band_contains_the_rise": false
+   },
+   "fp16.b_onebit_b9_one": {
+    "M10_band": [
+     7.251,
+     8.437
+    ],
+    "M10_rise_c": 7.844,
+    "frozen_band_M9_law": [
+     3.143,
+     5.955
+    ],
+    "frozen_band_contains_the_rise": false
+   },
+   "fp32.b_onebit_b20_full": {
+    "M10_band": [
+     6.808,
+     7.993
+    ],
+    "M10_rise_c": 7.401,
+    "frozen_band_M9_law": [
+     2.885,
+     5.697
+    ],
+    "frozen_band_contains_the_rise": false
+   },
+   "fp32.b_onebit_b20_one": {
+    "M10_band": [
+     6.987,
+     8.173
+    ],
+    "M10_rise_c": 7.58,
+    "frozen_band_M9_law": [
+     2.99,
+     5.802
+    ],
+    "frozen_band_contains_the_rise": false
+   },
+   "fp32.b_onebit_b20_pi": {
+    "M10_band": [
+     6.743,
+     7.929
+    ],
+    "M10_rise_c": 7.336,
+    "frozen_band_M9_law": [
+     2.848,
+     5.66
+    ],
+    "frozen_band_contains_the_rise": false
+   },
+   "fp32.b_onebit_b20_seventh": {
+    "M10_band": [
+     6.771,
+     7.957
+    ],
+    "M10_rise_c": 7.364,
+    "frozen_band_M9_law": [
+     2.864,
+     5.676
+    ],
+    "frozen_band_contains_the_rise": false
+   },
+   "fp32.b_onebit_b20_third_a1p5": {
+    "M10_band": [
+     7.015,
+     8.201
+    ],
+    "M10_rise_c": 7.608,
+    "frozen_band_M9_law": [
+     3.006,
+     5.818
+    ],
+    "frozen_band_contains_the_rise": false
+   },
+   "fp32.b_onebit_b22_third": {
+    "M10_band": [
+     7.268,
+     8.454
+    ],
+    "M10_rise_c": 7.861,
+    "frozen_band_M9_law": [
+     3.153,
+     5.965
+    ],
+    "frozen_band_contains_the_rise": false
+   },
+   "int8.b_line_0f_f0": {
+    "M10_band": [
+     4.301,
+     5.487
+    ],
+    "M10_rise_c": 4.894,
+    "frozen_band_M9_law": [
+     1.432,
+     4.244
+    ],
+    "frozen_band_contains_the_rise": false
+   },
+   "int8.bheld_33": {
+    "M10_band": [
+     4.658,
+     5.844
+    ],
+    "M10_rise_c": 5.251,
+    "frozen_band_M9_law": [
+     1.639,
+     4.451
+    ],
+    "frozen_band_contains_the_rise": false
+   }
+  },
+  "faults": [],
+  "frozen_band_excludes_M10_rise_on": [
+   "fp16.b_onebit_b8_pi",
+   "fp16.b_onebit_b9_one",
+   "fp32.b_onebit_b20_full",
+   "fp32.b_onebit_b20_one",
+   "fp32.b_onebit_b20_pi",
+   "fp32.b_onebit_b20_seventh",
+   "fp32.b_onebit_b20_third_a1p5",
+   "fp32.b_onebit_b22_third",
+   "int8.b_line_0f_f0",
+   "int8.bheld_33"
+  ],
+  "hw_c": 0.5929730592569771,
+  "hw_c_stdlib_linear": 0.5929730592569771,
+  "in_sample_inside_hw_at_measured_board": "37 of 39",
+  "loto_rms_c": 0.3385209874829421,
+  "pass": true,
+  "residuals_equal_committed_T6": true,
+  "residuals_n": 39,
+  "tiles": 10
+ },
+ "U4": {
+  "cards": {
+   "aifoundry1c0": {
+    "c0_references_as_registered": true,
+    "intervals_end_to_end_rules": 7,
+    "lines": {
+     "P8-C0-F": [
+      0.017202790471315985,
+      4.896297054407545
+     ],
+     "P8-C0-H1": [
+      0.17294292456631133,
+      0.5367422913417137
+     ],
+     "P8-C0-W": [
+      0.4052647788791915,
+      1.241705349911967
+     ]
+    },
+    "missing": [],
+    "n": {
+     "P8-C0-B": 10,
+     "P8-C0-F": 10,
+     "P8-C0-H1": 10,
+     "P8-C0-HK": 10,
+     "P8-C0-M1": 10,
+     "P8-C0-W": 10
+    },
+    "pass": true,
+    "rules": 7
+   },
+   "aifoundry1c1": {
+    "LG_on_the_real_sets": {
+     "df": [
+      0,
+      0
+     ],
+     "groups": {
+      "E164": {
+       "D_ref_max_w": 13.043344458557247,
+       "D_ref_min_w": 12.00948547327908,
+       "counts": false,
+       "n": 8,
+       "span_w": 1.033858985278167,
+       "tiles": [
+        "fp16.b_onebit_b8_pi",
+        "fp16.b_onebit_b9_one",
+        "fp32.b_onebit_b20_full",
+        "fp32.b_onebit_b20_one",
+        "fp32.b_onebit_b20_pi",
+        "fp32.b_onebit_b20_seventh",
+        "fp32.b_onebit_b20_third_a1p5",
+        "fp32.b_onebit_b22_third"
+       ]
+      }
+     },
+     "k": 0,
+     "n": 0,
+     "n_rr": 8,
+     "tiles_with_no_reference": []
+    },
+    "P1_P3_equal_predict_pool8_intervals": true,
+    "heat_reference_ok": true,
+    "heat_reference_rms_over_registered": {
+     "fp16": 0.9749589858292986,
+     "fp32": 0.9880009391057814,
+     "int8": 0.9983972444251238
+    },
+    "intervals_end_to_end_rules": 18,
+    "lines": {
+     "P8-B1": [
+      -0.15102875000000002,
+      0.11397550000000001
+     ],
+     "P8-B2": [
+      -0.2777955,
+      0.24723650000000003
+     ],
+     "P8-C1": 8,
+     "P8-H1": [
+      0.1396719513233732,
+      0.47858788451403506
+     ],
+     "P8-H2": [
+      0.04839220535936171,
+      0.5886072289349731
+     ],
+     "P8-H3": [
+      0.024470055941807796,
+      0.28129686316226493
+     ],
+     "P8-H4": 8,
+     "P8-P1": [
+      0.07266356121651805,
+      0.3439131809376702
+     ],
+     "P8-P2": [
+      0.016643217131912927,
+      0.3862067756332092
+     ],
+     "P8-P3": [
+      0.027100159132374114,
+      0.3823471290332909
+     ]
+    },
+    "missing": [],
+    "n": {
+     "P8-A1": 8,
+     "P8-B1": 8,
+     "P8-B2": 2,
+     "P8-C1": 10,
+     "P8-H1": 6,
+     "P8-H2": 2,
+     "P8-H3": 2,
+     "P8-H4": 10,
+     "P8-KA": 0,
+     "P8-LG": 0,
+     "P8-M1": 10,
+     "P8-M1f": 8,
+     "P8-M1i": 2,
+     "P8-P1": 6,
+     "P8-P2": 2,
+     "P8-P3": 2
+    },
+    "pass": true,
+    "references": {
+     "fp16": [
+      154,
+      0.1651
+     ],
+     "fp32": [
+      190,
+      0.2004
+     ],
+     "int8": [
+      108,
+      0.1849
+     ]
+    },
+    "references_as_registered": true,
+    "rules": 18,
+    "single_format_mix_equals_boot_range": true
+   },
+   "aifoundry2": {
+    "e165_references_as_registered": true,
+    "groups": {
+     "governed": 0,
+     "left_out_82w": [],
+     "pinned": 10
+    },
+    "intervals_end_to_end_rules": 11,
+    "lines": {
+     "P8-A2-F2": [
+      0.0,
+      4.764984584340226
+     ],
+     "P8-A2-H1": [
+      0.3893074041415087,
+      0.9671603989937759
+     ],
+     "P8-A2-W2": [
+      0.4093515249757841,
+      1.2482873547384834
+     ]
+    },
+    "missing": [],
+    "n": {
+     "P8-A2-Bg": 0,
+     "P8-A2-Bp": 10,
+     "P8-A2-F1": 0,
+     "P8-A2-F2": 10,
+     "P8-A2-G": 0,
+     "P8-A2-H1": 10,
+     "P8-A2-M1": 10,
+     "P8-A2-W1": 0,
+     "P8-A2-W2": 10
+    },
+    "pass": true,
+    "rules": 11
+   },
+   "aifoundry3": {
+    "LG_on_the_real_sets": {
+     "df": [
+      0,
+      0
+     ],
+     "groups": {
+      "E163": {
+       "D_ref_max_w": 13.621499795645846,
+       "D_ref_min_w": 12.501280022549716,
+       "counts": false,
+       "n": 8,
+       "span_w": 1.1202197730961299,
+       "tiles": [
+        "fp16.b_onebit_b8_pi",
+        "fp16.b_onebit_b9_one",
+        "fp32.b_onebit_b20_full",
+        "fp32.b_onebit_b20_one",
+        "fp32.b_onebit_b20_pi",
+        "fp32.b_onebit_b20_seventh",
+        "fp32.b_onebit_b20_third_a1p5",
+        "fp32.b_onebit_b22_third"
+       ]
+      }
+     },
+     "k": 0,
+     "n": 0,
+     "n_rr": 8,
+     "tiles_with_no_reference": []
+    },
+    "P1_P3_equal_predict_pool8_intervals": true,
+    "heat_reference_ok": true,
+    "heat_reference_rms_over_registered": {
+     "fp16": 1.016688483423679,
+     "fp32": 1.0140040897381148,
+     "int8": 1.000994366385805
+    },
+    "intervals_end_to_end_rules": 18,
+    "lines": {
+     "P8-B1": [
+      -0.155777375,
+      0.10286375
+     ],
+     "P8-B2": [
+      -0.2586425,
+      0.213706
+     ],
+     "P8-C1": 8,
+     "P8-H1": [
+      0.07885974493693433,
+      0.2741160497599203
+     ],
+     "P8-H2": [
+      0.025295727875484796,
+      0.2877149210056613
+     ],
+     "P8-H3": [
+      0.027804579617804803,
+      0.3511683122037344
+     ],
+     "P8-H4": 8,
+     "P8-P1": [
+      0.0712352796185523,
+      0.3325612917997222
+     ],
+     "P8-P2": [
+      0.016800095907464337,
+      0.326128659435199
+     ],
+     "P8-P3": [
+      0.017032979554382138,
+      0.3205653566965713
+     ]
+    },
+    "missing": [],
+    "n": {
+     "P8-A1": 8,
+     "P8-B1": 8,
+     "P8-B2": 2,
+     "P8-C1": 10,
+     "P8-H1": 6,
+     "P8-H2": 2,
+     "P8-H3": 2,
+     "P8-H4": 10,
+     "P8-KA": 0,
+     "P8-LG": 0,
+     "P8-M1": 10,
+     "P8-M1f": 8,
+     "P8-M1i": 2,
+     "P8-P1": 6,
+     "P8-P2": 2,
+     "P8-P3": 2
+    },
+    "pass": true,
+    "references": {
+     "fp16": [
+      133,
+      0.1476
+     ],
+     "fp32": [
+      260,
+      0.2019
+     ],
+     "int8": [
+      114,
+      0.1696
+     ]
+    },
+    "references_as_registered": true,
+    "rules": 18,
+    "single_format_mix_equals_boot_range": true
+   }
+  },
+  "pass": true
+ },
+ "U5": {
+  "E164_committed_48": 42,
+  "E164_precision_reproduced": {
+   "E164-B1": true,
+   "E164-B2": true,
+   "E164-H1": true,
+   "E164-H2": true,
+   "E164-H3": true,
+   "E164-P1": true,
+   "E164-P2": true,
+   "E164-P3": true
+  },
+  "binom_low_48": 42,
+  "binom_low_equals_e165_coverage_line_n_0_200": true,
+  "committed": {
+   "E164-B1": [
+    -0.086,
+    -0.0046,
+    0.068
+   ],
+   "E164-B2": [
+    -0.0732,
+    0.0057,
+    0.0835
+   ],
+   "E164-H1": [
+    0.2392,
+    0.3509,
+    0.4713
+   ],
+   "E164-H2": [
+    0.1973,
+    0.3444,
+    0.5222
+   ],
+   "E164-H3": [
+    0.1017,
+    0.142,
+    0.1841
+   ],
+   "E164-P1": [
+    0.1135,
+    0.1969,
+    0.3254
+   ],
+   "E164-P2": [
+    0.0888,
+    0.1607,
+    0.2965
+   ],
+   "E164-P3": [
+    0.1323,
+    0.1828,
+    0.2345
+   ]
+  },
+  "got": {
+   "E164-B1": [
+    -0.086,
+    -0.0046,
+    0.068
+   ],
+   "E164-B2": [
+    -0.0732,
+    0.0057,
+    0.0835
+   ],
+   "E164-H1": [
+    0.2392,
+    0.3509,
+    0.4713
+   ],
+   "E164-H2": [
+    0.1973,
+    0.3444,
+    0.5222
+   ],
+   "E164-H3": [
+    0.1017,
+    0.142,
+    0.1841
+   ],
+   "E164-P1": [
+    0.1135,
+    0.1969,
+    0.3254
+   ],
+   "E164-P2": [
+    0.0888,
+    0.1607,
+    0.2965
+   ],
+   "E164-P3": [
+    0.1323,
+    0.1828,
+    0.2345
+   ]
+  },
+  "pass": true
+ },
+ "U6": {
+  "F_points_max_diff_vs_table": 4.664544406773885e-05,
+  "F_tests": {
+   "committed re-runs (E163 vs E141 and E152, E164 vs E157)": {
+    "F_level": 0.8660037415441277,
+    "F_slope": 0.14704903137102568,
+    "k": 2,
+    "n": 11,
+    "verdict": "NOT SEPARATED"
+   },
+   "random, k 1": {
+    "F_level": 0.7340135901147168,
+    "F_slope": 0.035861078939115755,
+    "k": 1,
+    "n": 6,
+    "verdict": "NOT SEPARATED"
+   },
+   "random, k 2": {
+    "F_level": 1.1007897083002376,
+    "F_slope": 1.93372237127,
+    "k": 2,
+    "n": 14,
+    "verdict": "NOT SEPARATED"
+   },
+   "random, k 3": {
+    "F_level": 1.383499426056702,
+    "F_slope": 0.6583974091066886,
+    "k": 3,
+    "n": 24,
+    "verdict": "NOT SEPARATED"
+   }
+  },
+  "closed_form_vs_numpy_max_rel_diff": 2.6222809336423297e-15,
+  "design_power_n8_block_replayed_identical": true,
+  "groups_from_predictions": {
+   "df": [
+    1,
+    5
+   ],
+   "groups": {
+    "E153": {
+     "D_ref_max_w": 22.0,
+     "D_ref_min_w": 21.0,
+     "counts": false,
+     "n": 2,
+     "span_w": 1.0,
+     "tiles": [
+      "fp32.r6",
+      "fp32.r7"
+     ]
+    },
+    "E163": {
+     "D_ref_max_w": 21.0,
+     "D_ref_min_w": 8.0,
+     "counts": true,
+     "n": 7,
+     "span_w": 13.0,
+     "tiles": [
+      "fp32.r0",
+      "fp32.r1",
+      "fp32.r2",
+      "fp32.r3",
+      "fp32.r4",
+      "fp32.r5",
+      "fp32.r8"
+     ]
+    }
+   },
+   "k": 1,
+   "n": 7,
+   "power_pct": {
+    "gain 0.6%": {
+     "BOTH": 2.6,
+     "GAIN": 33.8,
+     "LEVEL": 2.3,
+     "NOT SCORED": 0.0,
+     "NOT SEPARATED": 61.3
+    },
+    "gain 1.0%": {
+     "BOTH": 3.9,
+     "GAIN": 71.2,
+     "LEVEL": 1.3,
+     "NOT SCORED": 0.0,
+     "NOT SEPARATED": 23.6
+    },
+    "level 0.11 W": {
+     "BOTH": 3.5,
+     "GAIN": 2.3,
+     "LEVEL": 42.8,
+     "NOT SCORED": 0.0,
+     "NOT SEPARATED": 51.4
+    },
+    "level 0.15 W": {
+     "BOTH": 3.5,
+     "GAIN": 1.0,
+     "LEVEL": 66.3,
+     "NOT SCORED": 0.0,
+     "NOT SEPARATED": 29.2
+    },
+    "none": {
+     "BOTH": 4.2,
+     "GAIN": 1.2,
+     "LEVEL": 1.2,
+     "NOT SCORED": 0.0,
+     "NOT SEPARATED": 93.4
+    }
+   },
+   "tiles_with_more_than_one_reference": [
+    "fp32.r8"
+   ],
+   "tiles_with_no_reference": [
+    "fp32.r9"
+   ]
+  },
+  "noise_tiles": 17,
+  "noise_w": 0.036767109095564576,
+  "pass": true,
+  "replayed_lines": 14
+ },
+ "U7": {
+  "files_opened_or_imported": 233,
+  "listed_bad": [],
+  "listed_entries": 234,
+  "pass": true,
+  "unlisted": []
+ }
+}
