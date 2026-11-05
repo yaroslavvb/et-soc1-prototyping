@@ -1,0 +1,4687 @@
+{
+ "E170_state_gate": {
+  "continuity": "module uptime 13098 min; E84's 7240 min + 5857.7 min since its read = 13097.7 (tolerance 2)",
+  "host_boot": "2026-10-26 15:02:04",
+  "verdict": "GO"
+ },
+ "E170_zeros_levels_at_the_cap": {
+  "fp16": {
+   "a2_fallback_zeros_board_w": 35.289,
+   "bursts": 6,
+   "mean_burst_w": 28.825
+  },
+  "fp32": {
+   "a2_fallback_zeros_board_w": 35.36,
+   "bursts": 6,
+   "mean_burst_w": 29.255
+  },
+  "int8": {
+   "a2_fallback_zeros_board_w": 36.66,
+   "bursts": 6,
+   "mean_burst_w": 30.2083
+  }
+ },
+ "N1_left_out": [
+  "fp16.r8_dsqwen_l1_pv_188e98",
+  "fp16.r8_dsqwen_l1_x2gate_2e4efa",
+  "fp16.u8_cauchy_96e015",
+  "fp32.r8_dsqwen_l1_qk_f0161a",
+  "fp32.r8_granite_l3_qk_02f7c6",
+  "fp32.u8_ar_i_a662b4",
+  "fp32.u8_ar_k_3297d2",
+  "fp32.u8_bimodal_1f57eb",
+  "fp32.u8_lognorm_62af49",
+  "fp32.u8_uniform_e7e045"
+ ],
+ "_note": "E174's machine registration (E174.md); every model number copied by key from frozen files after their sha256 was checked; nothing fitted",
+ "admission": {
+  "card0_zeros_p800_w": {
+   "fp16": 29.46,
+   "fp32": 29.59,
+   "int8": 29.81
+  },
+  "card0_zeros_source": "docs/reports/data/2026-10-31-e84-speed-aifoundry1-card0/results.json cells.<type>/zeros.p800_w",
+  "formula": "for each of M10's and M9's blocks: max(M10, M9 peak_board_hi95_w) - (block zeros_board_w - card 0's E84 zeros p800) - 0.05 x (block P800_w - block zeros_board_w); the larger of the two estimates (e170_common.est_card0)",
+  "line_w": 60.0,
+  "peak_lock_w": 62.0,
+  "switch_ceiling": 0.95,
+  "tier_b_above_w": 52.0
+ },
+ "card": "aifoundry1-c0",
+ "card_term": {
+  "E170_X0_read": "E170-X0 read 0.9766 [0.963, 0.987] (FAIL against 0.9463), 0.9312 die-start referred (post hoc): kappa0 is carried unchanged, as rule E registered it; a ratio is reported, never a verdict",
+  "kappa0": 0.9463,
+  "source": "tools/claims-v3/e170/e170_common.py (E170.md 'The card term'), unchanged"
+ },
+ "card_time": {
+  "cap_card_min": 40,
+  "e170_before_s1_min": 0.91,
+  "e170_s1_bursts": 135,
+  "e170_s1_min": 28.3,
+  "e174_bursts": 126,
+  "e174_card_min": 27.3,
+  "e174_session_min": 26.4,
+  "s_per_burst": 12.58,
+  "slot_min": 45,
+  "source": "docs/reports/data/2026-11-04-e170-blind7-card0/aifoundry1-c0/queue.jsonl (s1 start and end), docs/reports/data/2026-11-04-e170-blind7-card0/results.json runs",
+  "subset_bursts": 84,
+  "subset_cap_min": 25,
+  "subset_passes": [
+   1,
+   2,
+   4,
+   5
+  ],
+  "subset_session_min": 17.6,
+  "subset_slot_min": 30
+ },
+ "commits": {
+  "E118": [
+   "28e625c9",
+   "f37fa285"
+  ],
+  "E165": [
+   "3ef06839",
+   "a5c56d17"
+  ],
+  "E170": [
+   "b5ca3e78",
+   "574dc5b5",
+   "57e1c6c4",
+   "6147a9c7",
+   "0e35ec58"
+  ],
+  "E170_data": "81178664",
+  "E84": [
+   "337b03b2",
+   "1713a3f9"
+  ],
+  "M10": [
+   "6829c9ba",
+   "d1581099",
+   "c996d135"
+  ],
+  "M9": [
+   "1f244140",
+   "8dfafae3"
+  ],
+  "M9_a2": [
+   "5b98bd5c",
+   "245caffe",
+   "5c98c0c5"
+  ],
+  "pool8_A1": "ebf68c52",
+  "pool8_freeze": "4576fb90",
+  "pool8_note1": "dfe226f1",
+  "predictor": "9d81d254",
+  "predictor_a2": "97765c0a",
+  "registration": "3e97f583",
+  "registration_A1": "8a8fa34c",
+  "registration_A2": "68a7c322",
+  "runbook_v3_1": "0d2cb5dd",
+  "watcher": [
+   "abe6b0f2",
+   "33661416"
+  ]
+ },
+ "dry_order": [
+  {
+   "half": "A",
+   "idx": 0,
+   "label": "b8-fp32.anchor7_zeros",
+   "name": "fp32.anchor7_zeros",
+   "pass": 1,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 1,
+   "label": "b8-int8.anchor7_zeros",
+   "name": "int8.anchor7_zeros",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 2,
+   "label": "b8-fp16.anchor7_zeros",
+   "name": "fp16.anchor7_zeros",
+   "pass": 1,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 3,
+   "label": "b8-fp16.r8_granite_l3_pv_e993b7",
+   "name": "fp16.r8_granite_l3_pv_e993b7",
+   "pass": 1,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 4,
+   "label": "b8-fp32.s8_onebit_b7_3ee13961",
+   "name": "fp32.s8_onebit_b7_3ee13961",
+   "pass": 1,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 5,
+   "label": "b8-fp16.s8_onebit_b10_c127c127",
+   "name": "fp16.s8_onebit_b10_c127c127",
+   "pass": 1,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 6,
+   "label": "b8-int8.h8_held_line4cea",
+   "name": "int8.h8_held_line4cea",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 7,
+   "label": "b8-fp32.s8_onebit_b26_bffdf029",
+   "name": "fp32.s8_onebit_b26_bffdf029",
+   "pass": 1,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 8,
+   "label": "b8-int8.l8_cycle3_d3p3c15_c6d5",
+   "name": "int8.l8_cycle3_d3p3c15_c6d5",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 9,
+   "label": "b8-int8.anchor7_zeros",
+   "name": "int8.anchor7_zeros",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 10,
+   "label": "b8-fp16.anchor7_zeros",
+   "name": "fp16.anchor7_zeros",
+   "pass": 2,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 11,
+   "label": "b8-fp32.anchor7_zeros",
+   "name": "fp32.anchor7_zeros",
+   "pass": 2,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 12,
+   "label": "b8-fp32.s8_onebit_b26_bffdf029",
+   "name": "fp32.s8_onebit_b26_bffdf029",
+   "pass": 2,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 13,
+   "label": "b8-int8.l8_cycle3_d3p3c15_c6d5",
+   "name": "int8.l8_cycle3_d3p3c15_c6d5",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 14,
+   "label": "b8-fp16.s8_onebit_b10_c127c127",
+   "name": "fp16.s8_onebit_b10_c127c127",
+   "pass": 2,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 15,
+   "label": "b8-fp32.s8_onebit_b7_3ee13961",
+   "name": "fp32.s8_onebit_b7_3ee13961",
+   "pass": 2,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 16,
+   "label": "b8-fp16.r8_granite_l3_pv_e993b7",
+   "name": "fp16.r8_granite_l3_pv_e993b7",
+   "pass": 2,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 17,
+   "label": "b8-int8.h8_held_line4cea",
+   "name": "int8.h8_held_line4cea",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "B",
+   "idx": 18,
+   "label": "b8-fp16.anchor7_zeros",
+   "name": "fp16.anchor7_zeros",
+   "pass": 4,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 19,
+   "label": "b8-fp32.anchor7_zeros",
+   "name": "fp32.anchor7_zeros",
+   "pass": 4,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 20,
+   "label": "b8-int8.anchor7_zeros",
+   "name": "int8.anchor7_zeros",
+   "pass": 4,
+   "type": "int8"
+  },
+  {
+   "half": "B",
+   "idx": 21,
+   "label": "b8-fp16.s8_onebit_b2_c46ec46e",
+   "name": "fp16.s8_onebit_b2_c46ec46e",
+   "pass": 4,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 22,
+   "label": "b8-fp16.s8_onebit_b4_c2e2c2e2",
+   "name": "fp16.s8_onebit_b4_c2e2c2e2",
+   "pass": 4,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 23,
+   "label": "b8-fp32.s8_onebit_b19_c11b3dd2",
+   "name": "fp32.s8_onebit_b19_c11b3dd2",
+   "pass": 4,
+   "type": "fp32"
+  }
+ ],
+ "dry_order_seed": "Random('E174|dry|<half>|<pass>')",
+ "experiment": "E174",
+ "forecast_information_only": {
+  "E170_read_on_this_card": "E170-W 0.727 W rms, mean -0.090 W over 39 pool-7 tiles (M9 carried); class S read +0.72 W (8 tiles); half B +0.63 W",
+  "at_n": 21,
+  "draws": 20000,
+  "from_42_pinned_e2e_errors": {
+   "B_both": 0.8847,
+   "B_mean": 0.9911,
+   "B_rms": 0.8915,
+   "W_at_or_under_line": 0.9747
+  },
+  "seed": 1741
+ },
+ "frozen_list": "tools/claims-v3/e174/frozen-sha256-e174.json",
+ "frozen_list_sha256": "cc31984b518ad430b8bc658ee9abf11d2a523c3d340fb38baf10ea57dbcc8b66",
+ "highest_estimates_w": [
+  [
+   58.559,
+   "fp32.real_smol_softmax_v_causal"
+  ],
+  [
+   57.694,
+   "fp32.b_onebit_b20_one"
+  ],
+  [
+   56.797,
+   "fp32.s8_onebit_b13_41783e4a_A40080727"
+  ],
+  [
+   55.826,
+   "fp32.s8_onebit_b18_be2584eb"
+  ],
+  [
+   55.755,
+   "fp16.b_onebit_b8_pi"
+  ],
+  [
+   55.517,
+   "fp16.s8_onebit_b7_b945b945"
+  ]
+ ],
+ "identity": {
+  "e84_read_epoch": 1793486520.286,
+  "e84_uptime_min": 7240,
+  "host_boot_before": "2026-10-31 15:42:00 PDT",
+  "identity": "release 1.4.0, BL1 0.22.0, BL2 0.22.0, PMIC 1.6.1, minions 0.25.1 (E84 amendment A1; E114's start read; E118's continuity)",
+  "tol_min": 2.0
+ },
+ "intervals_sha256": "05ef01e7a1646f4a865279b567a94d6419bd068555c4dc06c7b883b9fe38efbf",
+ "left_out": {
+  "fp16.anchor8_check_randn_84631a": {
+   "N1": false,
+   "est_card0_peak_w": 73.182,
+   "type": "fp16",
+   "why": "card-0 estimate 73.18 W > 60 W (E170's admission)"
+  },
+  "fp16.anchor8_randn_a_8c7827": {
+   "N1": false,
+   "est_card0_peak_w": 72.869,
+   "type": "fp16",
+   "why": "card-0 estimate 72.87 W > 60 W (E170's admission)"
+  },
+  "fp16.anchor8_randn_b_3a0fef": {
+   "N1": false,
+   "est_card0_peak_w": 72.866,
+   "type": "fp16",
+   "why": "card-0 estimate 72.87 W > 60 W (E170's admission)"
+  },
+  "fp16.exp_b_alt_shift": {
+   "N1": false,
+   "est_card0_peak_w": 61.722,
+   "type": "fp16",
+   "why": "card-0 estimate 61.72 W > 60 W (E170's admission)"
+  },
+  "fp16.r8_dsqwen_l1_pv_188e98": {
+   "N1": true,
+   "est_card0_peak_w": 64.89,
+   "type": "fp16",
+   "why": "card-0 estimate 64.89 W > 60 W (E170's admission)"
+  },
+  "fp16.r8_dsqwen_l1_x2gate_2e4efa": {
+   "N1": true,
+   "est_card0_peak_w": 72.621,
+   "type": "fp16",
+   "why": "card-0 estimate 72.62 W > 60 W (E170's admission)"
+  },
+  "fp16.real_qwen_dequant_v": {
+   "N1": false,
+   "est_card0_peak_w": 72.869,
+   "type": "fp16",
+   "why": "card-0 estimate 72.87 W > 60 W (E170's admission)"
+  },
+  "fp16.u8_ar_i_32349b": {
+   "N1": false,
+   "est_card0_peak_w": 72.62,
+   "type": "fp16",
+   "why": "card-0 estimate 72.62 W > 60 W (E170's admission)"
+  },
+  "fp16.u8_cauchy_96e015": {
+   "N1": true,
+   "est_card0_peak_w": 73.658,
+   "type": "fp16",
+   "why": "card-0 estimate 73.66 W > 60 W (E170's admission)"
+  },
+  "fp16.u8_rowscale_ecc921": {
+   "N1": false,
+   "est_card0_peak_w": 73.645,
+   "type": "fp16",
+   "why": "card-0 estimate 73.64 W > 60 W (E170's admission)"
+  },
+  "fp16.u8_tdist_93475b": {
+   "N1": false,
+   "est_card0_peak_w": 73.41,
+   "type": "fp16",
+   "why": "card-0 estimate 73.41 W > 60 W (E170's admission)"
+  },
+  "fp32.anchor8_check_randn_319f73": {
+   "N1": false,
+   "est_card0_peak_w": 78.129,
+   "type": "fp32",
+   "why": "card-0 estimate 78.13 W > 60 W (E170's admission)"
+  },
+  "fp32.anchor8_randn_a_989b8a": {
+   "N1": false,
+   "est_card0_peak_w": 77.865,
+   "type": "fp32",
+   "why": "card-0 estimate 77.86 W > 60 W (E170's admission)"
+  },
+  "fp32.anchor8_randn_b_833ac3": {
+   "N1": false,
+   "est_card0_peak_w": 77.658,
+   "type": "fp32",
+   "why": "card-0 estimate 77.66 W > 60 W (E170's admission)"
+  },
+  "fp32.bf16_wideexp": {
+   "N1": false,
+   "est_card0_peak_w": 69.039,
+   "type": "fp32",
+   "why": "card-0 estimate 69.04 W > 60 W (E170's admission)"
+  },
+  "fp32.exp_only_narrow2": {
+   "N1": false,
+   "est_card0_peak_w": 60.97,
+   "type": "fp32",
+   "why": "card-0 estimate 60.97 W > 60 W (E170's admission)"
+  },
+  "fp32.r8_dsqwen_l1_qk_f0161a": {
+   "N1": true,
+   "est_card0_peak_w": 76.38,
+   "type": "fp32",
+   "why": "card-0 estimate 76.38 W > 60 W (E170's admission)"
+  },
+  "fp32.r8_granite_l3_qk_02f7c6": {
+   "N1": true,
+   "est_card0_peak_w": 77.558,
+   "type": "fp32",
+   "why": "card-0 estimate 77.56 W > 60 W (E170's admission)"
+  },
+  "fp32.r8_granite_l3_x2up_47e54f": {
+   "N1": false,
+   "est_card0_peak_w": 73.98,
+   "type": "fp32",
+   "why": "card-0 estimate 73.98 W > 60 W (E170's admission)"
+  },
+  "fp32.real_s360_l1_qk": {
+   "N1": false,
+   "est_card0_peak_w": 77.918,
+   "type": "fp32",
+   "why": "card-0 estimate 77.92 W > 60 W (E170's admission)"
+  },
+  "fp32.u8_ar_i_a662b4": {
+   "N1": true,
+   "est_card0_peak_w": 78.231,
+   "type": "fp32",
+   "why": "card-0 estimate 78.23 W > 60 W (E170's admission)"
+  },
+  "fp32.u8_ar_k_3297d2": {
+   "N1": true,
+   "est_card0_peak_w": 77.748,
+   "type": "fp32",
+   "why": "card-0 estimate 77.75 W > 60 W (E170's admission)"
+  },
+  "fp32.u8_bimodal_1f57eb": {
+   "N1": true,
+   "est_card0_peak_w": 77.57,
+   "type": "fp32",
+   "why": "card-0 estimate 77.57 W > 60 W (E170's admission)"
+  },
+  "fp32.u8_lognorm_62af49": {
+   "N1": true,
+   "est_card0_peak_w": 79.102,
+   "type": "fp32",
+   "why": "card-0 estimate 79.10 W > 60 W (E170's admission)"
+  },
+  "fp32.u8_uniform_e7e045": {
+   "N1": true,
+   "est_card0_peak_w": 77.694,
+   "type": "fp32",
+   "why": "card-0 estimate 77.69 W > 60 W (E170's admission)"
+  }
+ },
+ "lines": {
+  "P8-C0-B": {
+   "line": "|mean| <= 0.5 W AND rms <= 1.0 W",
+   "minimum": 8,
+   "n": 21,
+   "quantity": "the same errors",
+   "scored_at_planned_n": true,
+   "set": "every scored tile",
+   "verdict_form": "PASS if the line holds, else FAIL"
+  },
+  "P8-C0-F": {
+   "minimum": 8,
+   "n": 21,
+   "quantity": "burst clock",
+   "range_95": [
+    0.1722299694622059,
+    4.539932066200361
+   ],
+   "reference": {
+    "mean": -0.41072619047619047,
+    "n": 42,
+    "rms": 2.3341537858402517,
+    "source": "tools/claims-v3/e165/predictions-e165.json reference.e2e.pinned.mhz_err"
+   },
+   "scored_at_planned_n": true,
+   "seed": 80411,
+   "set": "every scored tile",
+   "statistic": "rms",
+   "unit": "MHz",
+   "verdict_form": "PASS at or below the 97.5% point, else FAIL (dated note A2-5)"
+  },
+  "P8-C0-H1": {
+   "minimum": 8,
+   "n": 21,
+   "quantity": "die rise, M10's 0.2415 C/W on the predicted board",
+   "range_95": [
+    0.21557003689027976,
+    0.472346718991628
+   ],
+   "reference": {
+    "mean": 0.029536502590642257,
+    "n": 39,
+    "rms": 0.3385209874829421,
+    "source": "term c2's 39 leave-one-tile-out residuals on E170 (predict_pool8.t6_card0)"
+   },
+   "scored_at_planned_n": true,
+   "seed": 80462,
+   "set": "every scored tile",
+   "statistic": "rms",
+   "unit": "C",
+   "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+  },
+  "P8-C0-HK": {
+   "form": "paired: the 95% interval of rms(M10's k) - rms(M9's k) over the set's tiles drawn with replacement, 20,000 draws",
+   "line": "none before the data",
+   "minimum": 8,
+   "n": 21,
+   "quantity": "die rise at the measured board: M10's k against M9's 0.1400",
+   "scored_at_planned_n": true,
+   "set": "every scored tile",
+   "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+  },
+  "P8-C0-M1": {
+   "form": "paired: the 95% interval of rms(M10 carried) - rms(M9 carried) over the set's tiles drawn with replacement, 20,000 draws",
+   "line": "none before the data",
+   "minimum": 10,
+   "n": 21,
+   "quantity": "burst D: M10 carried against M9 carried",
+   "scored_at_planned_n": true,
+   "set": "every scored tile",
+   "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+  },
+  "P8-C0-W": {
+   "minimum": 8,
+   "n": 21,
+   "quantity": "board W, M10 carried through the card term",
+   "range_95": [
+    0.521246480403785,
+    1.1176808297286203
+   ],
+   "reference": {
+    "mean": -0.08473809523809528,
+    "n": 42,
+    "rms": 0.8213769209020158,
+    "source": "tools/claims-v3/e165/predictions-e165.json reference.e2e.pinned.w_err"
+   },
+   "scored_at_planned_n": true,
+   "seed": 80428,
+   "set": "every scored tile",
+   "statistic": "rms",
+   "unit": "W",
+   "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+  },
+  "P8-HM": {
+   "line": "none before the data (paired)",
+   "minimum": 4,
+   "planned_holds": 0,
+   "quantity": "heat over minutes: rms(primary, 1.0 x the chain) - rms(arm, 1.032 x), holds rising 10 C or more",
+   "verdict_form": "PRIMARY BETTER / ARM BETTER / NOT RESOLVED; NOT SCORED under 4 such holds (expected: pool 8's sessions hold nothing)"
+  },
+  "_m10_card0_rise_band": {
+   "hw_c": 0.5929730592569771,
+   "n_residuals": 39,
+   "reported": "no rule reads it (A2-1)"
+  },
+  "_sets": {
+   "scored": 21
+  }
+ },
+ "lines_at_n31": {
+  "P8-C0-B": {
+   "line": "|mean| <= 0.5 W AND rms <= 1.0 W",
+   "minimum": 8,
+   "n": 31,
+   "quantity": "the same errors",
+   "scored_at_planned_n": true,
+   "set": "every scored tile",
+   "verdict_form": "PASS if the line holds, else FAIL"
+  },
+  "P8-C0-F": {
+   "minimum": 8,
+   "n": 31,
+   "quantity": "burst clock",
+   "range_95": [
+    0.24479816175780406,
+    4.488834557957073
+   ],
+   "reference": {
+    "mean": -0.41072619047619047,
+    "n": 42,
+    "rms": 2.3341537858402517,
+    "source": "tools/claims-v3/e165/predictions-e165.json reference.e2e.pinned.mhz_err"
+   },
+   "scored_at_planned_n": true,
+   "seed": 80411,
+   "set": "every scored tile",
+   "statistic": "rms",
+   "unit": "MHz",
+   "verdict_form": "PASS at or below the 97.5% point, else FAIL (dated note A2-5)"
+  },
+  "P8-C0-H1": {
+   "minimum": 8,
+   "n": 31,
+   "quantity": "die rise, M10's 0.2415 C/W on the predicted board",
+   "range_95": [
+    0.23506776819833478,
+    0.4495991301672138
+   ],
+   "reference": {
+    "mean": 0.029536502590642257,
+    "n": 39,
+    "rms": 0.3385209874829421,
+    "source": "term c2's 39 leave-one-tile-out residuals on E170 (predict_pool8.t6_card0)"
+   },
+   "scored_at_planned_n": true,
+   "seed": 80462,
+   "set": "every scored tile",
+   "statistic": "rms",
+   "unit": "C",
+   "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+  },
+  "P8-C0-HK": {
+   "form": "paired: the 95% interval of rms(M10's k) - rms(M9's k) over the set's tiles drawn with replacement, 20,000 draws",
+   "line": "none before the data",
+   "minimum": 8,
+   "n": 31,
+   "quantity": "die rise at the measured board: M10's k against M9's 0.1400",
+   "scored_at_planned_n": true,
+   "set": "every scored tile",
+   "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+  },
+  "P8-C0-M1": {
+   "form": "paired: the 95% interval of rms(M10 carried) - rms(M9 carried) over the set's tiles drawn with replacement, 20,000 draws",
+   "line": "none before the data",
+   "minimum": 10,
+   "n": 31,
+   "quantity": "burst D: M10 carried against M9 carried",
+   "scored_at_planned_n": true,
+   "set": "every scored tile",
+   "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+  },
+  "P8-C0-W": {
+   "minimum": 8,
+   "n": 31,
+   "quantity": "board W, M10 carried through the card term",
+   "range_95": [
+    0.5739231062916738,
+    1.0656448694297438
+   ],
+   "reference": {
+    "mean": -0.08473809523809528,
+    "n": 42,
+    "rms": 0.8213769209020158,
+    "source": "tools/claims-v3/e165/predictions-e165.json reference.e2e.pinned.w_err"
+   },
+   "scored_at_planned_n": true,
+   "seed": 80428,
+   "set": "every scored tile",
+   "statistic": "rms",
+   "unit": "W",
+   "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+  },
+  "P8-HM": {
+   "line": "none before the data (paired)",
+   "minimum": 4,
+   "planned_holds": 0,
+   "quantity": "heat over minutes: rms(primary, 1.0 x the chain) - rms(arm, 1.032 x), holds rising 10 C or more",
+   "verdict_form": "PRIMARY BETTER / ARM BETTER / NOT RESOLVED; NOT SCORED under 4 such holds (expected: pool 8's sessions hold nothing)"
+  },
+  "_m10_card0_rise_band": {
+   "hw_c": 0.5929730592569771,
+   "n_residuals": 39,
+   "reported": "no rule reads it (A2-1)"
+  },
+  "_sets": {
+   "scored": 31
+  }
+ },
+ "lines_at_n31_equal_intervals_pool8": true,
+ "min_mhz_alarm": 590.0,
+ "n_admitted": 39,
+ "n_scored": 21,
+ "order": [
+  {
+   "half": "A",
+   "idx": 0,
+   "label": "b8-fp16.anchor7_zeros",
+   "name": "fp16.anchor7_zeros",
+   "pass": 1,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 1,
+   "label": "b8-int8.anchor7_zeros",
+   "name": "int8.anchor7_zeros",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 2,
+   "label": "b8-fp32.anchor7_zeros",
+   "name": "fp32.anchor7_zeros",
+   "pass": 1,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 3,
+   "label": "b8-fp16.s8_onebit_b10_c127c127",
+   "name": "fp16.s8_onebit_b10_c127c127",
+   "pass": 1,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 4,
+   "label": "b8-int8.anchor8_check_full_d8b6c8",
+   "name": "int8.anchor8_check_full_d8b6c8",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 5,
+   "label": "b8-int8.anchor8_full_a_4aac84",
+   "name": "int8.anchor8_full_a_4aac84",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 6,
+   "label": "b8-fp16.r8_granite_l3_pv_e993b7",
+   "name": "fp16.r8_granite_l3_pv_e993b7",
+   "pass": 1,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 7,
+   "label": "b8-int8.l8_flip_d2p2c16_231d",
+   "name": "int8.l8_flip_d2p2c16_231d",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 8,
+   "label": "b8-int8.h8_held_v34",
+   "name": "int8.h8_held_v34",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 9,
+   "label": "b8-fp32.s8_onebit_b26_bffdf029",
+   "name": "fp32.s8_onebit_b26_bffdf029",
+   "pass": 1,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 10,
+   "label": "b8-int8.u8_sparseq_58e6e0",
+   "name": "int8.u8_sparseq_58e6e0",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 11,
+   "label": "b8-fp16.a_zeros_b_complement",
+   "name": "fp16.a_zeros_b_complement",
+   "pass": 1,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 12,
+   "label": "b8-int8.l8_halfword_d2p2c16_83df",
+   "name": "int8.l8_halfword_d2p2c16_83df",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 13,
+   "label": "b8-int8.anchor8_full_b_935710",
+   "name": "int8.anchor8_full_b_935710",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 14,
+   "label": "b8-int8.r8_granite_l4_x1q_13fe82",
+   "name": "int8.r8_granite_l4_x1q_13fe82",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 15,
+   "label": "b8-int8.r8_granite_l4_actdown_b076f2",
+   "name": "int8.r8_granite_l4_actdown_b076f2",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 16,
+   "label": "b8-int8.u8_biased_14548f",
+   "name": "int8.u8_biased_14548f",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 17,
+   "label": "b8-fp32.a_onebit_b5_third",
+   "name": "fp32.a_onebit_b5_third",
+   "pass": 1,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 18,
+   "label": "b8-int8.r8_dsqwen_l1_actdown_f6a2cb",
+   "name": "int8.r8_dsqwen_l1_actdown_f6a2cb",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 19,
+   "label": "b8-fp32.a_zeros_b_complement",
+   "name": "fp32.a_zeros_b_complement",
+   "pass": 1,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 20,
+   "label": "b8-int8.u8_ar_k_0a9fe5",
+   "name": "int8.u8_ar_k_0a9fe5",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 21,
+   "label": "b8-int8.l8_cycle3_d3p3c15_c6d5",
+   "name": "int8.l8_cycle3_d3p3c15_c6d5",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 22,
+   "label": "b8-int8.h8_held_vd9",
+   "name": "int8.h8_held_vd9",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 23,
+   "label": "b8-fp32.s8_onebit_b7_3ee13961",
+   "name": "fp32.s8_onebit_b7_3ee13961",
+   "pass": 1,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 24,
+   "label": "b8-int8.r8_dsqwen_l1_x1v_927670",
+   "name": "int8.r8_dsqwen_l1_x1v_927670",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 25,
+   "label": "b8-int8.u8_relu_tq_1fb940",
+   "name": "int8.u8_relu_tq_1fb940",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 26,
+   "label": "b8-fp32.exp_b_alt_b26",
+   "name": "fp32.exp_b_alt_b26",
+   "pass": 1,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 27,
+   "label": "b8-int8.l8_period2_d2p4c8_4ea3",
+   "name": "int8.l8_period2_d2p4c8_4ea3",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 28,
+   "label": "b8-int8.h8_held_line4cea",
+   "name": "int8.h8_held_line4cea",
+   "pass": 1,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 29,
+   "label": "b8-fp16.anchor7_zeros",
+   "name": "fp16.anchor7_zeros",
+   "pass": 2,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 30,
+   "label": "b8-fp32.anchor7_zeros",
+   "name": "fp32.anchor7_zeros",
+   "pass": 2,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 31,
+   "label": "b8-int8.anchor7_zeros",
+   "name": "int8.anchor7_zeros",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 32,
+   "label": "b8-int8.h8_held_vd9",
+   "name": "int8.h8_held_vd9",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 33,
+   "label": "b8-int8.r8_granite_l4_actdown_b076f2",
+   "name": "int8.r8_granite_l4_actdown_b076f2",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 34,
+   "label": "b8-int8.r8_granite_l4_x1q_13fe82",
+   "name": "int8.r8_granite_l4_x1q_13fe82",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 35,
+   "label": "b8-int8.h8_held_line4cea",
+   "name": "int8.h8_held_line4cea",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 36,
+   "label": "b8-int8.u8_sparseq_58e6e0",
+   "name": "int8.u8_sparseq_58e6e0",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 37,
+   "label": "b8-int8.anchor8_check_full_d8b6c8",
+   "name": "int8.anchor8_check_full_d8b6c8",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 38,
+   "label": "b8-fp32.a_zeros_b_complement",
+   "name": "fp32.a_zeros_b_complement",
+   "pass": 2,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 39,
+   "label": "b8-fp32.exp_b_alt_b26",
+   "name": "fp32.exp_b_alt_b26",
+   "pass": 2,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 40,
+   "label": "b8-int8.r8_dsqwen_l1_actdown_f6a2cb",
+   "name": "int8.r8_dsqwen_l1_actdown_f6a2cb",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 41,
+   "label": "b8-fp16.s8_onebit_b10_c127c127",
+   "name": "fp16.s8_onebit_b10_c127c127",
+   "pass": 2,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 42,
+   "label": "b8-int8.l8_cycle3_d3p3c15_c6d5",
+   "name": "int8.l8_cycle3_d3p3c15_c6d5",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 43,
+   "label": "b8-fp32.s8_onebit_b26_bffdf029",
+   "name": "fp32.s8_onebit_b26_bffdf029",
+   "pass": 2,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 44,
+   "label": "b8-fp16.r8_granite_l3_pv_e993b7",
+   "name": "fp16.r8_granite_l3_pv_e993b7",
+   "pass": 2,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 45,
+   "label": "b8-int8.u8_ar_k_0a9fe5",
+   "name": "int8.u8_ar_k_0a9fe5",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 46,
+   "label": "b8-fp16.a_zeros_b_complement",
+   "name": "fp16.a_zeros_b_complement",
+   "pass": 2,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 47,
+   "label": "b8-int8.l8_flip_d2p2c16_231d",
+   "name": "int8.l8_flip_d2p2c16_231d",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 48,
+   "label": "b8-int8.anchor8_full_a_4aac84",
+   "name": "int8.anchor8_full_a_4aac84",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 49,
+   "label": "b8-fp32.a_onebit_b5_third",
+   "name": "fp32.a_onebit_b5_third",
+   "pass": 2,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 50,
+   "label": "b8-int8.l8_period2_d2p4c8_4ea3",
+   "name": "int8.l8_period2_d2p4c8_4ea3",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 51,
+   "label": "b8-int8.l8_halfword_d2p2c16_83df",
+   "name": "int8.l8_halfword_d2p2c16_83df",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 52,
+   "label": "b8-int8.h8_held_v34",
+   "name": "int8.h8_held_v34",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 53,
+   "label": "b8-int8.anchor8_full_b_935710",
+   "name": "int8.anchor8_full_b_935710",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 54,
+   "label": "b8-int8.u8_biased_14548f",
+   "name": "int8.u8_biased_14548f",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 55,
+   "label": "b8-int8.r8_dsqwen_l1_x1v_927670",
+   "name": "int8.r8_dsqwen_l1_x1v_927670",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 56,
+   "label": "b8-fp32.s8_onebit_b7_3ee13961",
+   "name": "fp32.s8_onebit_b7_3ee13961",
+   "pass": 2,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 57,
+   "label": "b8-int8.u8_relu_tq_1fb940",
+   "name": "int8.u8_relu_tq_1fb940",
+   "pass": 2,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 58,
+   "label": "b8-int8.anchor7_zeros",
+   "name": "int8.anchor7_zeros",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 59,
+   "label": "b8-fp16.anchor7_zeros",
+   "name": "fp16.anchor7_zeros",
+   "pass": 3,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 60,
+   "label": "b8-fp32.anchor7_zeros",
+   "name": "fp32.anchor7_zeros",
+   "pass": 3,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 61,
+   "label": "b8-int8.r8_granite_l4_x1q_13fe82",
+   "name": "int8.r8_granite_l4_x1q_13fe82",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 62,
+   "label": "b8-int8.l8_halfword_d2p2c16_83df",
+   "name": "int8.l8_halfword_d2p2c16_83df",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 63,
+   "label": "b8-int8.l8_flip_d2p2c16_231d",
+   "name": "int8.l8_flip_d2p2c16_231d",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 64,
+   "label": "b8-fp32.exp_b_alt_b26",
+   "name": "fp32.exp_b_alt_b26",
+   "pass": 3,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 65,
+   "label": "b8-int8.l8_period2_d2p4c8_4ea3",
+   "name": "int8.l8_period2_d2p4c8_4ea3",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 66,
+   "label": "b8-int8.anchor8_full_b_935710",
+   "name": "int8.anchor8_full_b_935710",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 67,
+   "label": "b8-int8.u8_relu_tq_1fb940",
+   "name": "int8.u8_relu_tq_1fb940",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 68,
+   "label": "b8-int8.h8_held_v34",
+   "name": "int8.h8_held_v34",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 69,
+   "label": "b8-int8.u8_biased_14548f",
+   "name": "int8.u8_biased_14548f",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 70,
+   "label": "b8-int8.r8_dsqwen_l1_x1v_927670",
+   "name": "int8.r8_dsqwen_l1_x1v_927670",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 71,
+   "label": "b8-int8.h8_held_vd9",
+   "name": "int8.h8_held_vd9",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 72,
+   "label": "b8-int8.anchor8_check_full_d8b6c8",
+   "name": "int8.anchor8_check_full_d8b6c8",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 73,
+   "label": "b8-fp16.r8_granite_l3_pv_e993b7",
+   "name": "fp16.r8_granite_l3_pv_e993b7",
+   "pass": 3,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 74,
+   "label": "b8-fp32.a_zeros_b_complement",
+   "name": "fp32.a_zeros_b_complement",
+   "pass": 3,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 75,
+   "label": "b8-int8.anchor8_full_a_4aac84",
+   "name": "int8.anchor8_full_a_4aac84",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 76,
+   "label": "b8-fp32.s8_onebit_b7_3ee13961",
+   "name": "fp32.s8_onebit_b7_3ee13961",
+   "pass": 3,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 77,
+   "label": "b8-int8.l8_cycle3_d3p3c15_c6d5",
+   "name": "int8.l8_cycle3_d3p3c15_c6d5",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 78,
+   "label": "b8-fp32.a_onebit_b5_third",
+   "name": "fp32.a_onebit_b5_third",
+   "pass": 3,
+   "type": "fp32"
+  },
+  {
+   "half": "A",
+   "idx": 79,
+   "label": "b8-int8.r8_dsqwen_l1_actdown_f6a2cb",
+   "name": "int8.r8_dsqwen_l1_actdown_f6a2cb",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 80,
+   "label": "b8-int8.r8_granite_l4_actdown_b076f2",
+   "name": "int8.r8_granite_l4_actdown_b076f2",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 81,
+   "label": "b8-int8.u8_ar_k_0a9fe5",
+   "name": "int8.u8_ar_k_0a9fe5",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 82,
+   "label": "b8-fp16.a_zeros_b_complement",
+   "name": "fp16.a_zeros_b_complement",
+   "pass": 3,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 83,
+   "label": "b8-fp16.s8_onebit_b10_c127c127",
+   "name": "fp16.s8_onebit_b10_c127c127",
+   "pass": 3,
+   "type": "fp16"
+  },
+  {
+   "half": "A",
+   "idx": 84,
+   "label": "b8-int8.u8_sparseq_58e6e0",
+   "name": "int8.u8_sparseq_58e6e0",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 85,
+   "label": "b8-int8.h8_held_line4cea",
+   "name": "int8.h8_held_line4cea",
+   "pass": 3,
+   "type": "int8"
+  },
+  {
+   "half": "A",
+   "idx": 86,
+   "label": "b8-fp32.s8_onebit_b26_bffdf029",
+   "name": "fp32.s8_onebit_b26_bffdf029",
+   "pass": 3,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 87,
+   "label": "b8-fp16.anchor7_zeros",
+   "name": "fp16.anchor7_zeros",
+   "pass": 4,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 88,
+   "label": "b8-fp32.anchor7_zeros",
+   "name": "fp32.anchor7_zeros",
+   "pass": 4,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 89,
+   "label": "b8-int8.anchor7_zeros",
+   "name": "int8.anchor7_zeros",
+   "pass": 4,
+   "type": "int8"
+  },
+  {
+   "half": "B",
+   "idx": 90,
+   "label": "b8-fp32.s8_onebit_b14_3ef6ccbf",
+   "name": "fp32.s8_onebit_b14_3ef6ccbf",
+   "pass": 4,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 91,
+   "label": "b8-fp16.s8_onebit_b2_c46ec46e",
+   "name": "fp16.s8_onebit_b2_c46ec46e",
+   "pass": 4,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 92,
+   "label": "b8-fp16.s8_onebit_b4_c2e2c2e2",
+   "name": "fp16.s8_onebit_b4_c2e2c2e2",
+   "pass": 4,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 93,
+   "label": "b8-fp32.s8_onebit_b19_c11b3dd2",
+   "name": "fp32.s8_onebit_b19_c11b3dd2",
+   "pass": 4,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 94,
+   "label": "b8-fp16.s8_onebit_b7_b945b945",
+   "name": "fp16.s8_onebit_b7_b945b945",
+   "pass": 4,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 95,
+   "label": "b8-fp16.b_onebit_b8_pi",
+   "name": "fp16.b_onebit_b8_pi",
+   "pass": 4,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 96,
+   "label": "b8-fp32.s8_onebit_b18_be2584eb",
+   "name": "fp32.s8_onebit_b18_be2584eb",
+   "pass": 4,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 97,
+   "label": "b8-fp32.s8_onebit_b13_41783e4a_A40080727",
+   "name": "fp32.s8_onebit_b13_41783e4a_A40080727",
+   "pass": 4,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 98,
+   "label": "b8-fp32.b_onebit_b20_one",
+   "name": "fp32.b_onebit_b20_one",
+   "pass": 4,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 99,
+   "label": "b8-fp32.real_smol_softmax_v_causal",
+   "name": "fp32.real_smol_softmax_v_causal",
+   "pass": 4,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 100,
+   "label": "b8-int8.anchor7_zeros",
+   "name": "int8.anchor7_zeros",
+   "pass": 5,
+   "type": "int8"
+  },
+  {
+   "half": "B",
+   "idx": 101,
+   "label": "b8-fp16.anchor7_zeros",
+   "name": "fp16.anchor7_zeros",
+   "pass": 5,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 102,
+   "label": "b8-fp32.anchor7_zeros",
+   "name": "fp32.anchor7_zeros",
+   "pass": 5,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 103,
+   "label": "b8-fp32.s8_onebit_b14_3ef6ccbf",
+   "name": "fp32.s8_onebit_b14_3ef6ccbf",
+   "pass": 5,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 104,
+   "label": "b8-fp16.s8_onebit_b2_c46ec46e",
+   "name": "fp16.s8_onebit_b2_c46ec46e",
+   "pass": 5,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 105,
+   "label": "b8-fp16.s8_onebit_b4_c2e2c2e2",
+   "name": "fp16.s8_onebit_b4_c2e2c2e2",
+   "pass": 5,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 106,
+   "label": "b8-fp32.s8_onebit_b19_c11b3dd2",
+   "name": "fp32.s8_onebit_b19_c11b3dd2",
+   "pass": 5,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 107,
+   "label": "b8-fp16.s8_onebit_b7_b945b945",
+   "name": "fp16.s8_onebit_b7_b945b945",
+   "pass": 5,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 108,
+   "label": "b8-fp16.b_onebit_b8_pi",
+   "name": "fp16.b_onebit_b8_pi",
+   "pass": 5,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 109,
+   "label": "b8-fp32.s8_onebit_b18_be2584eb",
+   "name": "fp32.s8_onebit_b18_be2584eb",
+   "pass": 5,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 110,
+   "label": "b8-fp32.s8_onebit_b13_41783e4a_A40080727",
+   "name": "fp32.s8_onebit_b13_41783e4a_A40080727",
+   "pass": 5,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 111,
+   "label": "b8-fp32.b_onebit_b20_one",
+   "name": "fp32.b_onebit_b20_one",
+   "pass": 5,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 112,
+   "label": "b8-fp32.real_smol_softmax_v_causal",
+   "name": "fp32.real_smol_softmax_v_causal",
+   "pass": 5,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 113,
+   "label": "b8-int8.anchor7_zeros",
+   "name": "int8.anchor7_zeros",
+   "pass": 6,
+   "type": "int8"
+  },
+  {
+   "half": "B",
+   "idx": 114,
+   "label": "b8-fp16.anchor7_zeros",
+   "name": "fp16.anchor7_zeros",
+   "pass": 6,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 115,
+   "label": "b8-fp32.anchor7_zeros",
+   "name": "fp32.anchor7_zeros",
+   "pass": 6,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 116,
+   "label": "b8-fp32.s8_onebit_b14_3ef6ccbf",
+   "name": "fp32.s8_onebit_b14_3ef6ccbf",
+   "pass": 6,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 117,
+   "label": "b8-fp16.s8_onebit_b2_c46ec46e",
+   "name": "fp16.s8_onebit_b2_c46ec46e",
+   "pass": 6,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 118,
+   "label": "b8-fp16.s8_onebit_b4_c2e2c2e2",
+   "name": "fp16.s8_onebit_b4_c2e2c2e2",
+   "pass": 6,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 119,
+   "label": "b8-fp32.s8_onebit_b19_c11b3dd2",
+   "name": "fp32.s8_onebit_b19_c11b3dd2",
+   "pass": 6,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 120,
+   "label": "b8-fp16.s8_onebit_b7_b945b945",
+   "name": "fp16.s8_onebit_b7_b945b945",
+   "pass": 6,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 121,
+   "label": "b8-fp16.b_onebit_b8_pi",
+   "name": "fp16.b_onebit_b8_pi",
+   "pass": 6,
+   "type": "fp16"
+  },
+  {
+   "half": "B",
+   "idx": 122,
+   "label": "b8-fp32.s8_onebit_b18_be2584eb",
+   "name": "fp32.s8_onebit_b18_be2584eb",
+   "pass": 6,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 123,
+   "label": "b8-fp32.s8_onebit_b13_41783e4a_A40080727",
+   "name": "fp32.s8_onebit_b13_41783e4a_A40080727",
+   "pass": 6,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 124,
+   "label": "b8-fp32.b_onebit_b20_one",
+   "name": "fp32.b_onebit_b20_one",
+   "pass": 6,
+   "type": "fp32"
+  },
+  {
+   "half": "B",
+   "idx": 125,
+   "label": "b8-fp32.real_smol_softmax_v_causal",
+   "name": "fp32.real_smol_softmax_v_causal",
+   "pass": 6,
+   "type": "fp32"
+  }
+ ],
+ "order_seed": "Random('E174|<half>|<pass>')",
+ "passes": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6
+ ],
+ "primary": {
+  "anchors": "the session's zeros-anchor reads: per format, every counted burst of its anchor7_zeros tile; the level reads those at 795 MHz or more (pred_card0); no anchor burst at all: no prediction, every rule NOT SCORED",
+  "beside": "M9 carried the same way (the call's M9 block, its rise by M9's burst heat law, 0.1400 C/W): C0-M1's and C0-HK's comparisons",
+  "model": "M10 carried by rule E (POOL8-REGISTRATION.md section 5) through E170's card term: predict_pool8_a2.py burst on predictions-pool8-aifoundry1c0.json, M10 block: e170_common.pred_card0 on M10's D600 (kappa0 0.9463, the session's zeros level in full at the tile's die starts), its die rise replaced by M10's term c2 (0.2415 C per board W over 21.5 W)"
+ },
+ "recheck_frozen_blocks": {
+  "differ": [],
+  "fields": 3456,
+  "tiles": 64
+ },
+ "reference": {
+  "c2_band_hw_c": 0.5929730592569771,
+  "c2_residuals_c": [
+   0.6078553639115434,
+   -0.03347774240092072,
+   -0.565480367973545,
+   -0.29333553005633295,
+   -0.10864187526847502,
+   0.1318501137954078,
+   0.19658762938854402,
+   -0.38120967274377193,
+   0.07919686482593402,
+   0.12071670915404908,
+   -0.031507465447002225,
+   -1.1404025728440033,
+   -0.2530474052261482,
+   0.44574005598155253,
+   -0.24293008768253888,
+   0.1021234441507568,
+   0.16772432339163412,
+   -0.15155521466334143,
+   0.19199226696665894,
+   -0.1811755502260599,
+   -0.21328018771119606,
+   0.05648049233637353,
+   -0.5442594112811352,
+   -0.06616430018279917,
+   0.23262205209794473,
+   -0.1663636250575813,
+   0.4646614281441188,
+   0.17656456666924036,
+   0.4485981608003211,
+   0.23188419773544933,
+   0.32836770645953095,
+   -0.09604583093815755,
+   0.08073412652614742,
+   0.18393056919948414,
+   0.00864826417868958,
+   0.36112910550713995,
+   0.5913194698509141,
+   0.049875910899601195,
+   0.36219761876702083
+  ],
+  "pin_mhz": [
+   0.0,
+   0.0,
+   0.6717,
+   -4.07,
+   0.0,
+   0.7158,
+   0.0,
+   0.3138,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.3234,
+   0.0,
+   0.0,
+   0.0,
+   0.696,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0544,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   -1.3,
+   0.0,
+   0.1099,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.7867,
+   0.0,
+   0.0,
+   -1.33,
+   0.0,
+   0.1478,
+   -14.37
+  ],
+  "pin_w": [
+   -0.2513,
+   -0.7759,
+   0.8597,
+   -1.491,
+   -1.6764,
+   0.2827,
+   -0.4374,
+   1.0762,
+   0.425,
+   -0.448,
+   -1.2596,
+   0.843,
+   0.2571,
+   -0.0153,
+   -0.0274,
+   -0.4445,
+   0.0338,
+   -0.7955,
+   -0.3531,
+   -0.5911,
+   -0.1706,
+   0.0839,
+   -0.6545,
+   1.48,
+   -0.7476,
+   -0.5494,
+   -0.4703,
+   -0.3065,
+   -0.7218,
+   0.0859,
+   0.0959,
+   0.0259,
+   0.4118,
+   -0.7914,
+   0.601,
+   0.3323,
+   0.1001,
+   0.4028,
+   -0.0645,
+   2.5272,
+   1.2153,
+   -1.6555
+  ],
+  "source": "tools/claims-v3/e165/predictions-e165.json reference (predict_pool8_a2.e165_refs); C0-H1: term c2's 39 leave-one-tile-out residuals on E170 (predict_pool8_a2.c0_band)"
+ },
+ "request": "Q142(kg)",
+ "rules": {
+  "E174-S": "no safety stop, no sampler line under 590 MHz in any BURST run, no run's highest board sample at or above 62 W: PASS, else FAIL (E170-S's form; the day's behaviour, a diagnostic)",
+  "bootstrap_draws": 20000,
+  "c_check": "a burst counts only if every SPARSITY line of it has a C record that reads PASS in ccheck.py check (bit-exact); a tile with any launch not PASS leaves every scored set",
+  "c_log_rule": "smoke, stoptest-board and every BURST session s1-s6 the queue started that ran a work launch must carry a C log and a finished check of it; stoptest-die runs no launch and carries none; a missing one: the collection stops (14) and the scorer refuses (exit 5)",
+  "c_log_sessions": [
+   "smoke",
+   "stoptest-board",
+   "s1"
+  ],
+  "min_passes": 2,
+  "minimum_tiles": {
+   "A1": 8,
+   "A2_all": 10,
+   "A2_group": 8,
+   "B1": 8,
+   "B2": 6,
+   "C0": 8,
+   "C0_M1": 10,
+   "C1": 10,
+   "H1": 6,
+   "H2": 4,
+   "H3": 6,
+   "H4": 10,
+   "HM_large_rises": 4,
+   "KA_pooled": 4,
+   "KA_session": 1,
+   "M1": 10,
+   "M1f": 8,
+   "M1i": 6,
+   "P1": 6,
+   "P2": 4,
+   "P3": 6
+  },
+  "paired_draws": 20000,
+  "paired_engine": "E173's (tools/claims-v3/e173/E173.md 'The paired engine'): rng = random.Random(80000 + the sum of the rule id's character codes); 20,000 draws of n tile indices with replacement; rms(a) - rms(b); [vals[int(0.025 x 20000)], vals[int(0.975 x 20000) - 1]]",
+  "seed_base": 80000
+ },
+ "runs": 126,
+ "safety": {
+  "abs_stop_c": 72,
+  "board_cap_w": 65.9,
+  "cap_consecutive": 1
+ },
+ "scored": [
+  "fp16.r8_granite_l3_pv_e993b7",
+  "fp16.s8_onebit_b10_c127c127",
+  "fp16.s8_onebit_b2_c46ec46e",
+  "fp16.s8_onebit_b4_c2e2c2e2",
+  "fp16.s8_onebit_b7_b945b945",
+  "fp32.s8_onebit_b13_41783e4a_A40080727",
+  "fp32.s8_onebit_b19_c11b3dd2",
+  "fp32.s8_onebit_b26_bffdf029",
+  "fp32.s8_onebit_b7_3ee13961",
+  "int8.h8_held_line4cea",
+  "int8.l8_cycle3_d3p3c15_c6d5",
+  "int8.l8_flip_d2p2c16_231d",
+  "int8.l8_halfword_d2p2c16_83df",
+  "int8.l8_period2_d2p4c8_4ea3",
+  "int8.r8_dsqwen_l1_actdown_f6a2cb",
+  "int8.r8_granite_l4_actdown_b076f2",
+  "int8.r8_granite_l4_x1q_13fe82",
+  "int8.u8_ar_k_0a9fe5",
+  "int8.u8_biased_14548f",
+  "int8.u8_relu_tq_1fb940",
+  "int8.u8_sparseq_58e6e0"
+ ],
+ "scored_by_type": {
+  "fp16": 5,
+  "fp32": 4,
+  "int8": 12
+ },
+ "smoke": {
+  "E170_measured_on_this_card": {
+   "fp32.b_onebit_b20_one": {
+    "burst_mhz": 800,
+    "burst_w": 53.027,
+    "n": 3,
+    "peak_w": 56.41,
+    "rise_c": 7.333
+   },
+   "int8.anchor7_zeros": {
+    "burst_mhz": 800,
+    "burst_w": 30.208,
+    "n": 6,
+    "peak_w": 30.69,
+    "rise_c": 2.333
+   }
+  },
+  "rest_w": 21.2,
+  "stoptest_tile": "int8.anchor7_zeros",
+  "tiles": [
+   "int8.anchor7_zeros",
+   "fp32.b_onebit_b20_one"
+  ]
+ },
+ "tier_A": [
+  "fp16.a_zeros_b_complement",
+  "fp16.r8_granite_l3_pv_e993b7",
+  "fp16.s8_onebit_b10_c127c127",
+  "fp32.a_onebit_b5_third",
+  "fp32.a_zeros_b_complement",
+  "fp32.exp_b_alt_b26",
+  "fp32.s8_onebit_b26_bffdf029",
+  "fp32.s8_onebit_b7_3ee13961",
+  "int8.anchor8_check_full_d8b6c8",
+  "int8.anchor8_full_a_4aac84",
+  "int8.anchor8_full_b_935710",
+  "int8.h8_held_line4cea",
+  "int8.h8_held_v34",
+  "int8.h8_held_vd9",
+  "int8.l8_cycle3_d3p3c15_c6d5",
+  "int8.l8_flip_d2p2c16_231d",
+  "int8.l8_halfword_d2p2c16_83df",
+  "int8.l8_period2_d2p4c8_4ea3",
+  "int8.r8_dsqwen_l1_actdown_f6a2cb",
+  "int8.r8_dsqwen_l1_x1v_927670",
+  "int8.r8_granite_l4_actdown_b076f2",
+  "int8.r8_granite_l4_x1q_13fe82",
+  "int8.u8_ar_k_0a9fe5",
+  "int8.u8_biased_14548f",
+  "int8.u8_relu_tq_1fb940",
+  "int8.u8_sparseq_58e6e0"
+ ],
+ "tier_B": [
+  "fp32.s8_onebit_b14_3ef6ccbf",
+  "fp16.s8_onebit_b2_c46ec46e",
+  "fp16.s8_onebit_b4_c2e2c2e2",
+  "fp32.s8_onebit_b19_c11b3dd2",
+  "fp16.s8_onebit_b7_b945b945",
+  "fp16.b_onebit_b8_pi",
+  "fp32.s8_onebit_b18_be2584eb",
+  "fp32.s8_onebit_b13_41783e4a_A40080727",
+  "fp32.b_onebit_b20_one",
+  "fp32.real_smol_softmax_v_causal"
+ ],
+ "tiles": {
+  "fp16.a_zeros_b_complement": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 42.753,
+   "anchor_role": null,
+   "case": "Z",
+   "est_card0_by_model_w": {
+    "M10": 36.732,
+    "M9": 36.731
+   },
+   "est_card0_peak_w": 36.732,
+   "label": "b8-fp16.a_zeros_b_complement",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      1.2031,
+      1.8466
+     ],
+     "D600_a3_footing_w": 1.5249,
+     "a2_fallback": {
+      "P800_w": 39.12,
+      "burst_D_w": 2.853,
+      "burst_board_w": 38.142,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 42.671,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 2.7,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      1.1833,
+      1.8902
+     ],
+     "D600_a3_footing_w": 1.5368,
+     "a2_fallback": {
+      "P800_w": 39.14,
+      "burst_D_w": 2.876,
+      "burst_board_w": 38.165,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 42.753,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 2.722,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": [
+    "blind6:fp16.a_zeros_b_complement"
+   ],
+   "scored": false,
+   "tier": "A",
+   "type": "fp16",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.a_zeros_b_complement.bin",
+   "zeros_anchor": false
+  },
+  "fp16.anchor7_zeros": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 39.842,
+   "anchor_role": "zeros",
+   "case": "0",
+   "est_card0_by_model_w": {
+    "M10": 33.964,
+    "M9": 33.964
+   },
+   "est_card0_peak_w": 33.964,
+   "label": "b8-fp16.anchor7_zeros",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      -0.2954,
+      0.2954
+     ],
+     "D600_a3_footing_w": 0.0,
+     "a2_fallback": {
+      "P800_w": 36.27,
+      "burst_D_w": 0.0,
+      "burst_board_w": 35.289,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 39.77,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 0.0,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      -0.3343,
+      0.3343
+     ],
+     "D600_a3_footing_w": 0.0,
+     "a2_fallback": {
+      "P800_w": 36.27,
+      "burst_D_w": 0.0,
+      "burst_board_w": 35.289,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 39.842,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 0.0,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": false,
+   "rerun_of": [
+    "blind6:fp16.anchor6_zeros",
+    "blind7:fp16.anchor7_zeros"
+   ],
+   "scored": false,
+   "tier": "A",
+   "type": "fp16",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.anchor7_zeros.bin",
+   "zeros_anchor": true
+  },
+  "fp16.b_onebit_b8_pi": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 62.767,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 55.741,
+    "M9": 55.755
+   },
+   "est_card0_peak_w": 55.755,
+   "label": "b8-fp16.b_onebit_b8_pi",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      11.9655,
+      12.5918
+     ],
+     "D600_a3_footing_w": 12.2786,
+     "a2_fallback": {
+      "P800_w": 59.23,
+      "burst_D_w": 22.995,
+      "burst_board_w": 58.283,
+      "burst_mhz": 799.94,
+      "group": "pinned",
+      "peak_board_hi95_w": 62.767,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 21.76,
+      "burst_mhz": 799.94,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      11.7721,
+      12.4757
+     ],
+     "D600_a3_footing_w": 12.1239,
+     "a2_fallback": {
+      "P800_w": 58.94,
+      "burst_D_w": 22.701,
+      "burst_board_w": 57.99,
+      "burst_mhz": 799.96,
+      "group": "pinned",
+      "peak_board_hi95_w": 62.55,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 21.482,
+      "burst_mhz": 799.96,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": [
+    "blind7:fp16.b_onebit_b8_pi"
+   ],
+   "scored": false,
+   "tier": "B",
+   "type": "fp16",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.b_onebit_b8_pi.bin",
+   "zeros_anchor": false
+  },
+  "fp16.r8_granite_l3_pv_e993b7": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 53.014,
+   "anchor_role": null,
+   "case": "R",
+   "est_card0_by_model_w": {
+    "M10": 46.48,
+    "M9": 46.478
+   },
+   "est_card0_peak_w": 46.48,
+   "label": "b8-fp16.r8_granite_l3_pv_e993b7",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.7048,
+      7.3213
+     ],
+     "D600_a3_footing_w": 7.013,
+     "a2_fallback": {
+      "P800_w": 49.38,
+      "burst_D_w": 13.122,
+      "burst_board_w": 48.411,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 52.91,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.417,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.6946,
+      7.3769
+     ],
+     "D600_a3_footing_w": 7.0357,
+     "a2_fallback": {
+      "P800_w": 49.42,
+      "burst_D_w": 13.165,
+      "burst_board_w": 48.454,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 53.014,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.458,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": true,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "fp16",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.r8_granite_l3_pv_e993b7.bin",
+   "zeros_anchor": false
+  },
+  "fp16.s8_onebit_b10_c127c127": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 57.895,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 51.144,
+    "M9": 51.116
+   },
+   "est_card0_peak_w": 51.144,
+   "label": "b8-fp16.s8_onebit_b10_c127c127",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      9.0334,
+      9.6454
+     ],
+     "D600_a3_footing_w": 9.3394,
+     "a2_fallback": {
+      "P800_w": 53.73,
+      "burst_D_w": 17.475,
+      "burst_board_w": 52.764,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 57.257,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 16.537,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      9.2899,
+      9.9868
+     ],
+     "D600_a3_footing_w": 9.6383,
+     "a2_fallback": {
+      "P800_w": 54.29,
+      "burst_D_w": 18.034,
+      "burst_board_w": 53.323,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 57.895,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 17.066,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "fp16",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.s8_onebit_b10_c127c127.bin",
+   "zeros_anchor": false
+  },
+  "fp16.s8_onebit_b2_c46ec46e": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 60.412,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 53.509,
+    "M9": 53.506
+   },
+   "est_card0_peak_w": 53.509,
+   "label": "b8-fp16.s8_onebit_b2_c46ec46e",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      10.6484,
+      11.2624
+     ],
+     "D600_a3_footing_w": 10.9554,
+     "a2_fallback": {
+      "P800_w": 56.76,
+      "burst_D_w": 20.501,
+      "burst_board_w": 55.79,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 60.281,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 19.4,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      10.646,
+      11.3324
+     ],
+     "D600_a3_footing_w": 10.9892,
+     "a2_fallback": {
+      "P800_w": 56.82,
+      "burst_D_w": 20.564,
+      "burst_board_w": 55.853,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 60.412,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 19.46,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "B",
+   "type": "fp16",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.s8_onebit_b2_c46ec46e.bin",
+   "zeros_anchor": false
+  },
+  "fp16.s8_onebit_b4_c2e2c2e2": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 60.781,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 53.86,
+    "M9": 53.857
+   },
+   "est_card0_peak_w": 53.86,
+   "label": "b8-fp16.s8_onebit_b4_c2e2c2e2",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      10.8468,
+      11.4623
+     ],
+     "D600_a3_footing_w": 11.1545,
+     "a2_fallback": {
+      "P800_w": 57.13,
+      "burst_D_w": 20.874,
+      "burst_board_w": 56.163,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 60.655,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 19.753,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      10.8406,
+      11.5295
+     ],
+     "D600_a3_footing_w": 11.185,
+     "a2_fallback": {
+      "P800_w": 57.18,
+      "burst_D_w": 20.931,
+      "burst_board_w": 56.22,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 60.781,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 19.807,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "B",
+   "type": "fp16",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.s8_onebit_b4_c2e2c2e2.bin",
+   "zeros_anchor": false
+  },
+  "fp16.s8_onebit_b7_b945b945": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 62.496,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 55.483,
+    "M9": 55.517
+   },
+   "est_card0_peak_w": 55.517,
+   "label": "b8-fp16.s8_onebit_b7_b945b945",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      11.8227,
+      12.4465
+     ],
+     "D600_a3_footing_w": 12.1346,
+     "a2_fallback": {
+      "P800_w": 58.96,
+      "burst_D_w": 22.721,
+      "burst_board_w": 58.01,
+      "burst_mhz": 799.96,
+      "group": "pinned",
+      "peak_board_hi95_w": 62.496,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 21.501,
+      "burst_mhz": 799.96,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      11.4264,
+      12.1242
+     ],
+     "D600_a3_footing_w": 11.7753,
+     "a2_fallback": {
+      "P800_w": 58.29,
+      "burst_D_w": 22.042,
+      "burst_board_w": 57.331,
+      "burst_mhz": 799.99,
+      "group": "pinned",
+      "peak_board_hi95_w": 61.893,
+      "zeros_board_w": 35.289
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 20.858,
+      "burst_mhz": 799.99,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "B",
+   "type": "fp16",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.s8_onebit_b7_b945b945.bin",
+   "zeros_anchor": false
+  },
+  "fp32.a_onebit_b5_third": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 57.734,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 51.034,
+    "M9": 51.03
+   },
+   "est_card0_peak_w": 51.034,
+   "label": "b8-fp32.a_onebit_b5_third",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      9.0004,
+      9.8203
+     ],
+     "D600_a3_footing_w": 9.4104,
+     "a2_fallback": {
+      "P800_w": 53.95,
+      "burst_D_w": 17.608,
+      "burst_board_w": 52.968,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 57.672,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 16.662,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      9.0463,
+      9.8538
+     ],
+     "D600_a3_footing_w": 9.45,
+     "a2_fallback": {
+      "P800_w": 54.03,
+      "burst_D_w": 17.682,
+      "burst_board_w": 53.042,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 57.734,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 16.732,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": [
+    "blind6:fp32.a_onebit_b5_third"
+   ],
+   "scored": false,
+   "tier": "A",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.a_onebit_b5_third.bin",
+   "zeros_anchor": false
+  },
+  "fp32.a_zeros_b_complement": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 42.987,
+   "anchor_role": null,
+   "case": "Z",
+   "est_card0_by_model_w": {
+    "M10": 37.023,
+    "M9": 37.022
+   },
+   "est_card0_peak_w": 37.023,
+   "label": "b8-fp32.a_zeros_b_complement",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      1.1167,
+      1.9652
+     ],
+     "D600_a3_footing_w": 1.5409,
+     "a2_fallback": {
+      "P800_w": 39.23,
+      "burst_D_w": 2.883,
+      "burst_board_w": 38.243,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 42.98,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 2.728,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      1.1371,
+      1.9688
+     ],
+     "D600_a3_footing_w": 1.553,
+     "a2_fallback": {
+      "P800_w": 39.26,
+      "burst_D_w": 2.906,
+      "burst_board_w": 38.266,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 42.987,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 2.75,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": [
+    "blind6:fp32.a_zeros_b_complement"
+   ],
+   "scored": false,
+   "tier": "A",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.a_zeros_b_complement.bin",
+   "zeros_anchor": false
+  },
+  "fp32.anchor7_zeros": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 40.061,
+   "anchor_role": "zeros",
+   "case": "0",
+   "est_card0_by_model_w": {
+    "M10": 34.241,
+    "M9": 34.241
+   },
+   "est_card0_peak_w": 34.241,
+   "label": "b8-fp32.anchor7_zeros",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      -0.4042,
+      0.4042
+     ],
+     "D600_a3_footing_w": 0.0,
+     "a2_fallback": {
+      "P800_w": 36.35,
+      "burst_D_w": 0.0,
+      "burst_board_w": 35.36,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 40.061,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 0.0,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      -0.3993,
+      0.3993
+     ],
+     "D600_a3_footing_w": 0.0,
+     "a2_fallback": {
+      "P800_w": 36.35,
+      "burst_D_w": 0.0,
+      "burst_board_w": 35.36,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 40.052,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 0.0,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": false,
+   "rerun_of": [
+    "blind6:fp32.anchor6_zeros",
+    "blind7:fp32.anchor7_zeros"
+   ],
+   "scored": false,
+   "tier": "A",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.anchor7_zeros.bin",
+   "zeros_anchor": true
+  },
+  "fp32.b_onebit_b20_one": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 64.71,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 57.694,
+    "M9": 57.658
+   },
+   "est_card0_peak_w": 57.694,
+   "label": "b8-fp32.b_onebit_b20_one",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      12.3745,
+      13.1979
+     ],
+     "D600_a3_footing_w": 12.7862,
+     "a2_fallback": {
+      "P800_w": 60.27,
+      "burst_D_w": 23.968,
+      "burst_board_w": 59.328,
+      "burst_mhz": 799.81,
+      "group": "pinned",
+      "peak_board_hi95_w": 63.989,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 22.681,
+      "burst_mhz": 799.81,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      12.7703,
+      13.5838
+     ],
+     "D600_a3_footing_w": 13.177,
+     "a2_fallback": {
+      "P800_w": 61.0,
+      "burst_D_w": 24.727,
+      "burst_board_w": 60.087,
+      "burst_mhz": 799.6,
+      "group": "pinned",
+      "peak_board_hi95_w": 64.71,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 23.399,
+      "burst_mhz": 799.6,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": [
+    "blind7:fp32.b_onebit_b20_one"
+   ],
+   "scored": false,
+   "tier": "B",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.b_onebit_b20_one.bin",
+   "zeros_anchor": false
+  },
+  "fp32.exp_b_alt_b26": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 58.424,
+   "anchor_role": null,
+   "case": "E",
+   "est_card0_by_model_w": {
+    "M10": 51.696,
+    "M9": 51.687
+   },
+   "est_card0_peak_w": 51.696,
+   "label": "b8-fp32.exp_b_alt_b26",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      9.2976,
+      10.1256
+     ],
+     "D600_a3_footing_w": 9.7116,
+     "a2_fallback": {
+      "P800_w": 54.52,
+      "burst_D_w": 18.172,
+      "burst_board_w": 53.532,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 58.243,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 17.196,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      9.3984,
+      10.2224
+     ],
+     "D600_a3_footing_w": 9.8104,
+     "a2_fallback": {
+      "P800_w": 54.7,
+      "burst_D_w": 18.357,
+      "burst_board_w": 53.716,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 58.424,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 17.371,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": [
+    "blind7:fp32.exp_b_alt_b26"
+   ],
+   "scored": false,
+   "tier": "A",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.exp_b_alt_b26.bin",
+   "zeros_anchor": false
+  },
+  "fp32.real_smol_softmax_v_causal": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 65.653,
+   "anchor_role": null,
+   "case": "R",
+   "est_card0_by_model_w": {
+    "M10": 58.559,
+    "M9": 58.554
+   },
+   "est_card0_peak_w": 58.559,
+   "label": "b8-fp32.real_smol_softmax_v_causal",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      13.2189,
+      14.051
+     ],
+     "D600_a3_footing_w": 13.6349,
+     "a2_fallback": {
+      "P800_w": 61.85,
+      "burst_D_w": 25.629,
+      "burst_board_w": 60.989,
+      "burst_mhz": 799.18,
+      "group": "pinned",
+      "peak_board_hi95_w": 65.584,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 24.253,
+      "burst_mhz": 799.18,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      13.2818,
+      14.0879
+     ],
+     "D600_a3_footing_w": 13.6848,
+     "a2_fallback": {
+      "P800_w": 61.95,
+      "burst_D_w": 25.727,
+      "burst_board_w": 61.087,
+      "burst_mhz": 799.11,
+      "group": "pinned",
+      "peak_board_hi95_w": 65.653,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 24.345,
+      "burst_mhz": 799.11,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": true,
+   "rerun_of": [
+    "blind6:fp32.real_smol_softmax_v_causal"
+   ],
+   "scored": false,
+   "tier": "B",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.real_smol_softmax_v_causal.bin",
+   "zeros_anchor": false
+  },
+  "fp32.s8_onebit_b13_41783e4a_A40080727": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 63.791,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 56.785,
+    "M9": 56.797
+   },
+   "est_card0_peak_w": 56.797,
+   "label": "b8-fp32.s8_onebit_b13_41783e4a_A40080727",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      12.2682,
+      13.092
+     ],
+     "D600_a3_footing_w": 12.6801,
+     "a2_fallback": {
+      "P800_w": 60.07,
+      "burst_D_w": 23.763,
+      "burst_board_w": 59.123,
+      "burst_mhz": 799.84,
+      "group": "pinned",
+      "peak_board_hi95_w": 63.791,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 22.487,
+      "burst_mhz": 799.84,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      12.1511,
+      12.9592
+     ],
+     "D600_a3_footing_w": 12.5551,
+     "a2_fallback": {
+      "P800_w": 59.83,
+      "burst_D_w": 23.524,
+      "burst_board_w": 58.884,
+      "burst_mhz": 799.88,
+      "group": "pinned",
+      "peak_board_hi95_w": 63.542,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 22.261,
+      "burst_mhz": 799.88,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "B",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b13_41783e4a_A40080727.bin",
+   "zeros_anchor": false
+  },
+  "fp32.s8_onebit_b14_3ef6ccbf": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 60.108,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 53.286,
+    "M9": 53.288
+   },
+   "est_card0_peak_w": 53.288,
+   "label": "b8-fp32.s8_onebit_b14_3ef6ccbf",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      10.301,
+      11.1227
+     ],
+     "D600_a3_footing_w": 10.7119,
+     "a2_fallback": {
+      "P800_w": 56.39,
+      "burst_D_w": 20.044,
+      "burst_board_w": 55.404,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 60.108,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 18.968,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      10.2905,
+      11.1013
+     ],
+     "D600_a3_footing_w": 10.6959,
+     "a2_fallback": {
+      "P800_w": 56.36,
+      "burst_D_w": 20.014,
+      "burst_board_w": 55.374,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 60.067,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 18.939,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": false,
+   "rerun_of": null,
+   "scored": false,
+   "tier": "B",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b14_3ef6ccbf.bin",
+   "zeros_anchor": false
+  },
+  "fp32.s8_onebit_b18_be2584eb": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 62.735,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 55.826,
+    "M9": 55.783
+   },
+   "est_card0_peak_w": 55.826,
+   "label": "b8-fp32.s8_onebit_b18_be2584eb",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      11.2344,
+      12.0631
+     ],
+     "D600_a3_footing_w": 11.6487,
+     "a2_fallback": {
+      "P800_w": 58.14,
+      "burst_D_w": 21.804,
+      "burst_board_w": 57.164,
+      "burst_mhz": 799.99,
+      "group": "pinned",
+      "peak_board_hi95_w": 61.866,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 20.633,
+      "burst_mhz": 799.99,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      11.6951,
+      12.5274
+     ],
+     "D600_a3_footing_w": 12.1113,
+     "a2_fallback": {
+      "P800_w": 59.0,
+      "burst_D_w": 22.678,
+      "burst_board_w": 58.038,
+      "burst_mhz": 799.96,
+      "group": "pinned",
+      "peak_board_hi95_w": 62.735,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 21.46,
+      "burst_mhz": 799.96,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": false,
+   "rerun_of": null,
+   "scored": false,
+   "tier": "B",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b18_be2584eb.bin",
+   "zeros_anchor": false
+  },
+  "fp32.s8_onebit_b19_c11b3dd2": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 62.29,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 55.36,
+    "M9": 55.382
+   },
+   "est_card0_peak_w": 55.382,
+   "label": "b8-fp32.s8_onebit_b19_c11b3dd2",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      11.4601,
+      12.2898
+     ],
+     "D600_a3_footing_w": 11.875,
+     "a2_fallback": {
+      "P800_w": 58.56,
+      "burst_D_w": 22.231,
+      "burst_board_w": 57.591,
+      "burst_mhz": 799.98,
+      "group": "pinned",
+      "peak_board_hi95_w": 62.29,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 21.037,
+      "burst_mhz": 799.98,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      11.2216,
+      12.0473
+     ],
+     "D600_a3_footing_w": 11.6345,
+     "a2_fallback": {
+      "P800_w": 58.11,
+      "burst_D_w": 21.777,
+      "burst_board_w": 57.137,
+      "burst_mhz": 799.99,
+      "group": "pinned",
+      "peak_board_hi95_w": 61.837,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 20.608,
+      "burst_mhz": 799.99,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "B",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b19_c11b3dd2.bin",
+   "zeros_anchor": false
+  },
+  "fp32.s8_onebit_b26_bffdf029": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 57.575,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 50.888,
+    "M9": 50.88
+   },
+   "est_card0_peak_w": 50.888,
+   "label": "b8-fp32.s8_onebit_b26_bffdf029",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      8.8652,
+      9.6898
+     ],
+     "D600_a3_footing_w": 9.2775,
+     "a2_fallback": {
+      "P800_w": 53.7,
+      "burst_D_w": 17.359,
+      "burst_board_w": 52.719,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 57.428,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 16.427,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      8.9497,
+      9.7688
+     ],
+     "D600_a3_footing_w": 9.3593,
+     "a2_fallback": {
+      "P800_w": 53.86,
+      "burst_D_w": 17.512,
+      "burst_board_w": 52.872,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 57.575,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 16.572,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b26_bffdf029.bin",
+   "zeros_anchor": false
+  },
+  "fp32.s8_onebit_b7_3ee13961": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 56.376,
+   "anchor_role": null,
+   "case": "S",
+   "est_card0_by_model_w": {
+    "M10": 49.741,
+    "M9": 49.742
+   },
+   "est_card0_peak_w": 49.742,
+   "label": "b8-fp32.s8_onebit_b7_3ee13961",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      8.311,
+      9.1278
+     ],
+     "D600_a3_footing_w": 8.7194,
+     "a2_fallback": {
+      "P800_w": 52.66,
+      "burst_D_w": 16.315,
+      "burst_board_w": 51.675,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 56.376,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 15.439,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      8.3027,
+      9.1082
+     ],
+     "D600_a3_footing_w": 8.7054,
+     "a2_fallback": {
+      "P800_w": 52.63,
+      "burst_D_w": 16.289,
+      "burst_board_w": 51.649,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 56.34,
+      "zeros_board_w": 35.36
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 15.414,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "fp32",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b7_3ee13961.bin",
+   "zeros_anchor": false
+  },
+  "int8.anchor7_zeros": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 41.196,
+   "anchor_role": "zeros",
+   "case": "0",
+   "est_card0_by_model_w": {
+    "M10": 34.297,
+    "M9": 34.297
+   },
+   "est_card0_peak_w": 34.297,
+   "label": "b8-int8.anchor7_zeros",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      -0.3102,
+      0.3102
+     ],
+     "D600_a3_footing_w": 0.0,
+     "a2_fallback": {
+      "P800_w": 37.65,
+      "burst_D_w": 0.0,
+      "burst_board_w": 36.66,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 41.186,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 0.0,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      -0.3156,
+      0.3156
+     ],
+     "D600_a3_footing_w": 0.0,
+     "a2_fallback": {
+      "P800_w": 37.65,
+      "burst_D_w": 0.0,
+      "burst_board_w": 36.66,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 41.196,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 0.0,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": false,
+   "rerun_of": [
+    "blind6:int8.anchor6_zeros",
+    "blind7:int8.anchor7_zeros"
+   ],
+   "scored": false,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.anchor7_zeros.bin",
+   "zeros_anchor": true
+  },
+  "int8.anchor8_check_full_d8b6c8": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 54.94,
+   "anchor_role": "check",
+   "case": "0",
+   "est_card0_by_model_w": {
+    "M10": 47.353,
+    "M9": 47.357
+   },
+   "est_card0_peak_w": 47.357,
+   "label": "b8-int8.anchor8_check_full_d8b6c8",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      7.0312,
+      7.6642
+     ],
+     "D600_a3_footing_w": 7.3477,
+     "a2_fallback": {
+      "P800_w": 51.4,
+      "burst_D_w": 13.748,
+      "burst_board_w": 50.409,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.94,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 13.01,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.9819,
+      7.6431
+     ],
+     "D600_a3_footing_w": 7.3125,
+     "a2_fallback": {
+      "P800_w": 51.33,
+      "burst_D_w": 13.683,
+      "burst_board_w": 50.343,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.901,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.948,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": false,
+   "rerun_of": null,
+   "scored": false,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.anchor8_check_full_d8b6c8.bin",
+   "zeros_anchor": false
+  },
+  "int8.anchor8_full_a_4aac84": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 54.792,
+   "anchor_role": "scale",
+   "case": "0",
+   "est_card0_by_model_w": {
+    "M10": 47.213,
+    "M9": 47.216
+   },
+   "est_card0_peak_w": 47.216,
+   "label": "b8-int8.anchor8_full_a_4aac84",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.9517,
+      7.5846
+     ],
+     "D600_a3_footing_w": 7.2682,
+     "a2_fallback": {
+      "P800_w": 51.25,
+      "burst_D_w": 13.6,
+      "burst_board_w": 50.26,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.792,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.87,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.9059,
+      7.5649
+     ],
+     "D600_a3_footing_w": 7.2354,
+     "a2_fallback": {
+      "P800_w": 51.19,
+      "burst_D_w": 13.538,
+      "burst_board_w": 50.198,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.755,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.811,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": false,
+   "rerun_of": null,
+   "scored": false,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.anchor8_full_a_4aac84.bin",
+   "zeros_anchor": false
+  },
+  "int8.anchor8_full_b_935710": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 54.872,
+   "anchor_role": "scale",
+   "case": "0",
+   "est_card0_by_model_w": {
+    "M10": 47.289,
+    "M9": 47.292
+   },
+   "est_card0_peak_w": 47.292,
+   "label": "b8-int8.anchor8_full_b_935710",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.9946,
+      7.6276
+     ],
+     "D600_a3_footing_w": 7.3111,
+     "a2_fallback": {
+      "P800_w": 51.33,
+      "burst_D_w": 13.68,
+      "burst_board_w": 50.34,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.872,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.945,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.9477,
+      7.6077
+     ],
+     "D600_a3_footing_w": 7.2777,
+     "a2_fallback": {
+      "P800_w": 51.27,
+      "burst_D_w": 13.617,
+      "burst_board_w": 50.278,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.835,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.886,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": false,
+   "rerun_of": null,
+   "scored": false,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.anchor8_full_b_935710.bin",
+   "zeros_anchor": false
+  },
+  "int8.h8_held_line4cea": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 53.358,
+   "anchor_role": null,
+   "case": "H",
+   "est_card0_by_model_w": {
+    "M10": 45.854,
+    "M9": 45.853
+   },
+   "est_card0_peak_w": 45.854,
+   "label": "b8-int8.h8_held_line4cea",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.1285,
+      6.7955
+     ],
+     "D600_a3_footing_w": 6.462,
+     "a2_fallback": {
+      "P800_w": 49.74,
+      "burst_D_w": 12.091,
+      "burst_board_w": 48.751,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 53.316,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 11.442,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.119,
+      6.8184
+     ],
+     "D600_a3_footing_w": 6.4687,
+     "a2_fallback": {
+      "P800_w": 49.75,
+      "burst_D_w": 12.104,
+      "burst_board_w": 48.764,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 53.358,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 11.454,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.h8_held_line4cea.bin",
+   "zeros_anchor": false
+  },
+  "int8.h8_held_v34": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 53.489,
+   "anchor_role": null,
+   "case": "H",
+   "est_card0_by_model_w": {
+    "M10": 45.975,
+    "M9": 45.978
+   },
+   "est_card0_peak_w": 45.978,
+   "label": "b8-int8.h8_held_v34",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.2425,
+      6.8832
+     ],
+     "D600_a3_footing_w": 6.5628,
+     "a2_fallback": {
+      "P800_w": 49.93,
+      "burst_D_w": 12.28,
+      "burst_board_w": 48.94,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 53.48,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 11.621,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.1902,
+      6.8881
+     ],
+     "D600_a3_footing_w": 6.5391,
+     "a2_fallback": {
+      "P800_w": 49.88,
+      "burst_D_w": 12.235,
+      "burst_board_w": 48.896,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 53.489,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 11.578,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": false,
+   "rerun_of": null,
+   "scored": false,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.h8_held_v34.bin",
+   "zeros_anchor": false
+  },
+  "int8.h8_held_vd9": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 54.436,
+   "anchor_role": null,
+   "case": "H",
+   "est_card0_by_model_w": {
+    "M10": 46.875,
+    "M9": 46.88
+   },
+   "est_card0_peak_w": 46.88,
+   "label": "b8-int8.h8_held_vd9",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.7519,
+      7.3946
+     ],
+     "D600_a3_footing_w": 7.0733,
+     "a2_fallback": {
+      "P800_w": 50.88,
+      "burst_D_w": 13.235,
+      "burst_board_w": 49.895,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.436,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.524,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.6559,
+      7.3878
+     ],
+     "D600_a3_footing_w": 7.0218,
+     "a2_fallback": {
+      "P800_w": 50.79,
+      "burst_D_w": 13.139,
+      "burst_board_w": 49.799,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.423,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.433,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": false,
+   "rerun_of": null,
+   "scored": false,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.h8_held_vd9.bin",
+   "zeros_anchor": false
+  },
+  "int8.l8_cycle3_d3p3c15_c6d5": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 54.765,
+   "anchor_role": null,
+   "case": "L",
+   "est_card0_by_model_w": {
+    "M10": 47.187,
+    "M9": 47.19
+   },
+   "est_card0_peak_w": 47.19,
+   "label": "b8-int8.l8_cycle3_d3p3c15_c6d5",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.9382,
+      7.5705
+     ],
+     "D600_a3_footing_w": 7.2544,
+     "a2_fallback": {
+      "P800_w": 51.22,
+      "burst_D_w": 13.574,
+      "burst_board_w": 50.234,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.765,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.845,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.8964,
+      7.5548
+     ],
+     "D600_a3_footing_w": 7.2256,
+     "a2_fallback": {
+      "P800_w": 51.17,
+      "burst_D_w": 13.52,
+      "burst_board_w": 50.18,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.736,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.794,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.l8_cycle3_d3p3c15_c6d5.bin",
+   "zeros_anchor": false
+  },
+  "int8.l8_flip_d2p2c16_231d": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 54.547,
+   "anchor_role": null,
+   "case": "L",
+   "est_card0_by_model_w": {
+    "M10": 46.98,
+    "M9": 46.983
+   },
+   "est_card0_peak_w": 46.983,
+   "label": "b8-int8.l8_flip_d2p2c16_231d",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.8234,
+      7.454
+     ],
+     "D600_a3_footing_w": 7.1387,
+     "a2_fallback": {
+      "P800_w": 51.01,
+      "burst_D_w": 13.357,
+      "burst_board_w": 50.017,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.547,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.64,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.7811,
+      7.4415
+     ],
+     "D600_a3_footing_w": 7.1113,
+     "a2_fallback": {
+      "P800_w": 50.95,
+      "burst_D_w": 13.306,
+      "burst_board_w": 49.966,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.524,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.591,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.l8_flip_d2p2c16_231d.bin",
+   "zeros_anchor": false
+  },
+  "int8.l8_halfword_d2p2c16_83df": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 54.196,
+   "anchor_role": null,
+   "case": "L",
+   "est_card0_by_model_w": {
+    "M10": 46.647,
+    "M9": 46.652
+   },
+   "est_card0_peak_w": 46.652,
+   "label": "b8-int8.l8_halfword_d2p2c16_83df",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.6258,
+      7.2664
+     ],
+     "D600_a3_footing_w": 6.9461,
+     "a2_fallback": {
+      "P800_w": 50.65,
+      "burst_D_w": 12.997,
+      "burst_board_w": 49.657,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.196,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.299,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.5394,
+      7.2444
+     ],
+     "D600_a3_footing_w": 6.8919,
+     "a2_fallback": {
+      "P800_w": 50.54,
+      "burst_D_w": 12.896,
+      "burst_board_w": 49.556,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.155,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.203,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.l8_halfword_d2p2c16_83df.bin",
+   "zeros_anchor": false
+  },
+  "int8.l8_period2_d2p4c8_4ea3": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 54.311,
+   "anchor_role": null,
+   "case": "L",
+   "est_card0_by_model_w": {
+    "M10": 46.756,
+    "M9": 46.758
+   },
+   "est_card0_peak_w": 46.758,
+   "label": "b8-int8.l8_period2_d2p4c8_4ea3",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.692,
+      7.3277
+     ],
+     "D600_a3_footing_w": 7.0099,
+     "a2_fallback": {
+      "P800_w": 50.76,
+      "burst_D_w": 13.116,
+      "burst_board_w": 49.776,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.311,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.412,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.6501,
+      7.3202
+     ],
+     "D600_a3_footing_w": 6.9851,
+     "a2_fallback": {
+      "P800_w": 50.72,
+      "burst_D_w": 13.07,
+      "burst_board_w": 49.73,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.297,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.368,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.l8_period2_d2p4c8_4ea3.bin",
+   "zeros_anchor": false
+  },
+  "int8.r8_dsqwen_l1_actdown_f6a2cb": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 50.276,
+   "anchor_role": null,
+   "case": "R",
+   "est_card0_by_model_w": {
+    "M10": 42.924,
+    "M9": 42.923
+   },
+   "est_card0_peak_w": 42.924,
+   "label": "b8-int8.r8_dsqwen_l1_actdown_f6a2cb",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      4.5182,
+      5.1504
+     ],
+     "D600_a3_footing_w": 4.8343,
+     "a2_fallback": {
+      "P800_w": 46.7,
+      "burst_D_w": 9.046,
+      "burst_board_w": 45.706,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 50.239,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 8.56,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      4.5236,
+      5.1703
+     ],
+     "D600_a3_footing_w": 4.847,
+     "a2_fallback": {
+      "P800_w": 46.72,
+      "burst_D_w": 9.069,
+      "burst_board_w": 45.729,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 50.276,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 8.582,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": true,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.r8_dsqwen_l1_actdown_f6a2cb.bin",
+   "zeros_anchor": false
+  },
+  "int8.r8_dsqwen_l1_x1v_927670": {
+   "N1": false,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 53.495,
+   "anchor_role": null,
+   "case": "R",
+   "est_card0_by_model_w": {
+    "M10": 45.981,
+    "M9": 45.981
+   },
+   "est_card0_peak_w": 45.981,
+   "label": "b8-int8.r8_dsqwen_l1_x1v_927670",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.256,
+      6.887
+     ],
+     "D600_a3_footing_w": 6.5715,
+     "a2_fallback": {
+      "P800_w": 49.94,
+      "burst_D_w": 12.296,
+      "burst_board_w": 48.956,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 53.487,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 11.636,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.2444,
+      6.8914
+     ],
+     "D600_a3_footing_w": 6.5679,
+     "a2_fallback": {
+      "P800_w": 49.94,
+      "burst_D_w": 12.289,
+      "burst_board_w": 48.949,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 53.495,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 11.629,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 2,
+   "real": true,
+   "rerun_of": null,
+   "scored": false,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.r8_dsqwen_l1_x1v_927670.bin",
+   "zeros_anchor": false
+  },
+  "int8.r8_granite_l4_actdown_b076f2": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 53.158,
+   "anchor_role": null,
+   "case": "R",
+   "est_card0_by_model_w": {
+    "M10": 45.661,
+    "M9": 45.661
+   },
+   "est_card0_peak_w": 45.661,
+   "label": "b8-int8.r8_granite_l4_actdown_b076f2",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.0721,
+      6.7047
+     ],
+     "D600_a3_footing_w": 6.3884,
+     "a2_fallback": {
+      "P800_w": 49.6,
+      "burst_D_w": 11.953,
+      "burst_board_w": 48.614,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 53.146,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 11.311,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.0619,
+      6.7112
+     ],
+     "D600_a3_footing_w": 6.3866,
+     "a2_fallback": {
+      "P800_w": 49.6,
+      "burst_D_w": 11.95,
+      "burst_board_w": 48.61,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 53.158,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 11.308,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": true,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.r8_granite_l4_actdown_b076f2.bin",
+   "zeros_anchor": false
+  },
+  "int8.r8_granite_l4_x1q_13fe82": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 52.934,
+   "anchor_role": null,
+   "case": "R",
+   "est_card0_by_model_w": {
+    "M10": 45.449,
+    "M9": 45.448
+   },
+   "est_card0_peak_w": 45.449,
+   "label": "b8-int8.r8_granite_l4_x1q_13fe82",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      5.9468,
+      6.5786
+     ],
+     "D600_a3_footing_w": 6.2627,
+     "a2_fallback": {
+      "P800_w": 49.37,
+      "burst_D_w": 11.718,
+      "burst_board_w": 48.378,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 52.91,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 11.089,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      5.9457,
+      6.5916
+     ],
+     "D600_a3_footing_w": 6.2687,
+     "a2_fallback": {
+      "P800_w": 49.38,
+      "burst_D_w": 11.729,
+      "burst_board_w": 48.39,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 52.934,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 11.099,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": true,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.r8_granite_l4_x1q_13fe82.bin",
+   "zeros_anchor": false
+  },
+  "int8.u8_ar_k_0a9fe5": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 54.272,
+   "anchor_role": null,
+   "case": "U",
+   "est_card0_by_model_w": {
+    "M10": 46.718,
+    "M9": 46.719
+   },
+   "est_card0_peak_w": 46.719,
+   "label": "b8-int8.u8_ar_k_0a9fe5",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.673,
+      7.3051
+     ],
+     "D600_a3_footing_w": 6.9891,
+     "a2_fallback": {
+      "P800_w": 50.73,
+      "burst_D_w": 13.077,
+      "burst_board_w": 49.738,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.269,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.375,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.6552,
+      7.3069
+     ],
+     "D600_a3_footing_w": 6.981,
+     "a2_fallback": {
+      "P800_w": 50.71,
+      "burst_D_w": 13.062,
+      "burst_board_w": 49.722,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 54.272,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.361,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.u8_ar_k_0a9fe5.bin",
+   "zeros_anchor": false
+  },
+  "int8.u8_biased_14548f": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 53.944,
+   "anchor_role": null,
+   "case": "U",
+   "est_card0_by_model_w": {
+    "M10": 46.408,
+    "M9": 46.408
+   },
+   "est_card0_peak_w": 46.408,
+   "label": "b8-int8.u8_biased_14548f",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      6.4863,
+      7.12
+     ],
+     "D600_a3_footing_w": 6.8032,
+     "a2_fallback": {
+      "P800_w": 50.38,
+      "burst_D_w": 12.73,
+      "burst_board_w": 49.39,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 53.923,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.046,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      6.4819,
+      7.1316
+     ],
+     "D600_a3_footing_w": 6.8068,
+     "a2_fallback": {
+      "P800_w": 50.38,
+      "burst_D_w": 12.736,
+      "burst_board_w": 49.396,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 53.944,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 12.052,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.u8_biased_14548f.bin",
+   "zeros_anchor": false
+  },
+  "int8.u8_relu_tq_1fb940": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 51.0,
+   "anchor_role": null,
+   "case": "U",
+   "est_card0_by_model_w": {
+    "M10": 43.612,
+    "M9": 43.611
+   },
+   "est_card0_peak_w": 43.612,
+   "label": "b8-int8.u8_relu_tq_1fb940",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      4.9038,
+      5.5391
+     ],
+     "D600_a3_footing_w": 5.2215,
+     "a2_fallback": {
+      "P800_w": 47.42,
+      "burst_D_w": 9.77,
+      "burst_board_w": 46.43,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 50.966,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 9.245,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      4.9078,
+      5.5572
+     ],
+     "D600_a3_footing_w": 5.2325,
+     "a2_fallback": {
+      "P800_w": 47.44,
+      "burst_D_w": 9.791,
+      "burst_board_w": 46.451,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 51.0,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 9.265,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.u8_relu_tq_1fb940.bin",
+   "zeros_anchor": false
+  },
+  "int8.u8_sparseq_58e6e0": {
+   "N1": true,
+   "a2_group_M10": "pinned",
+   "adm_a2_peak_w": 49.424,
+   "anchor_role": null,
+   "case": "U",
+   "est_card0_by_model_w": {
+    "M10": 42.118,
+    "M9": 42.114
+   },
+   "est_card0_peak_w": 42.118,
+   "label": "b8-int8.u8_sparseq_58e6e0",
+   "models": {
+    "M10": {
+     "D600_a3_95": [
+      4.0212,
+      4.6655
+     ],
+     "D600_a3_footing_w": 4.3433,
+     "a2_fallback": {
+      "P800_w": 45.78,
+      "burst_D_w": 8.127,
+      "burst_board_w": 44.787,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 49.332,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 7.691,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    },
+    "M9": {
+     "D600_a3_95": [
+      4.0559,
+      4.7147
+     ],
+     "D600_a3_footing_w": 4.3853,
+     "a2_fallback": {
+      "P800_w": 45.86,
+      "burst_D_w": 8.205,
+      "burst_board_w": 44.866,
+      "burst_mhz": 800.0,
+      "group": "pinned",
+      "peak_board_hi95_w": 49.424,
+      "zeros_board_w": 36.66
+     },
+     "card0_fallback": {
+      "board": "the session's zeros level for the format at the tile's die starts + burst_D_w (burst mode)",
+      "burst_D_w": 7.764,
+      "burst_mhz": 800.0,
+      "kappa": 0.9463
+     }
+    }
+   },
+   "priority": 1,
+   "real": false,
+   "rerun_of": null,
+   "scored": true,
+   "tier": "A",
+   "type": "int8",
+   "values": "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.u8_sparseq_58e6e0.bin",
+   "zeros_anchor": false
+  }
+ },
+ "want_config": {
+  "tdp_w": 65,
+  "temp_threshold_c": 65
+ },
+ "want_idle_mhz": 600
+}

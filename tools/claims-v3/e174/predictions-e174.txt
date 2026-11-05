@@ -1,0 +1,86 @@
+frozen-sha256-e174.json: 32 files (22 matched against a committed list)
+predictions-e174.json sha256 96e99a139b1c48502f0d169afcc526c1f2584871cba34bcf1c0a7e7abcfec3be
+recheck: the frozen a2_fallback and card0_fallback blocks reproduce on 64 tiles, 3456 fields, 0 differ
+E174: 39 admitted (21 scored: {'fp32': 4, 'fp16': 5, 'int8': 12}), 25 left out by name (10 of N1)
+  kappa0 0.9463; card 0's 800 MHz zeros (E84) {'fp32': 29.59, 'fp16': 29.46, 'int8': 29.81}
+  tier A 26 + 3 zeros anchors, tier B 10; highest estimates [(58.559, 'fp32.real_smol_softmax_v_causal'), (57.694, 'fp32.b_onebit_b20_one'), (56.797, 'fp32.s8_onebit_b13_41783e4a_A40080727'), (55.826, 'fp32.s8_onebit_b18_be2584eb'), (55.755, 'fp16.b_onebit_b8_pi'), (55.517, 'fp16.s8_onebit_b7_b945b945')]
+  the order: 126 bursts (half A passes 1-3 of 29, half B passes 4-6 of 13); dry twin 24 runs
+  lines at n 31 equal intervals-pool8.json's aifoundry1c0 block: True
+  _sets: {"scored": 21}
+  _m10_card0_rise_band: {"hw_c": 0.5929730592569771, "n_residuals": 39, "reported": "no rule reads it (A2-1)"}
+  P8-C0-W    n 21 min 8 scored_at_planned_n True range [0.5212, 1.1177]
+  P8-C0-B    n 21 min 8 scored_at_planned_n True line |mean| <= 0.5 W AND rms <= 1.0 W
+  P8-C0-M1   n 21 min 10 scored_at_planned_n True line none before the data
+  P8-C0-F    n 21 min 8 scored_at_planned_n True range [0.1722, 4.5399]
+  P8-C0-H1   n 21 min 8 scored_at_planned_n True range [0.2156, 0.4723]
+  P8-C0-HK   n 21 min 8 scored_at_planned_n True line none before the data
+  P8-HM      n None min 4 scored_at_planned_n None line none before the data (paired)
+  forecast (information only) at n 21: {"W_at_or_under_line": 0.9747, "B_mean": 0.9911, "B_rms": 0.8915, "B_both": 0.8847}
+  smoke ramp ['int8.anchor7_zeros', 'fp32.b_onebit_b20_one']; E170 measured on this card: {"int8.anchor7_zeros": {"burst_w": 30.208, "peak_w": 30.69, "rise_c": 2.333, "burst_mhz": 800, "n": 6}, "fp32.b_onebit_b20_one": {"burst_w": 53.027, "peak_w": 56.41, "rise_c": 7.333, "burst_mhz": 800, "n": 3}}
+  card time: {"e170_s1_bursts": 135, "e170_s1_min": 28.3, "s_per_burst": 12.58, "e170_before_s1_min": 0.91, "e174_bursts": 126, "e174_session_min": 26.4, "e174_card_min": 27.3, "cap_card_min": 40, "slot_min": 45, "subset_passes": [1, 2, 4, 5], "subset_bursts": 84, "subset_session_min": 17.6, "subset_cap_min": 25, "subset_slot_min": 30, "source": "docs/reports/data/2026-11-04-e170-blind7-card0/aifoundry1-c0/queue.jsonl (s1 start and end), docs/reports/data/2026-11-04-e170-blind7-card0/results.json runs"}
+admitted (card-0 estimate of the 95% upper peak, W):
+  fp16.anchor7_zeros                           fp16 p2 tier A        est  33.96 (aifoundry2  39.84)  M10 D600   0.000
+  fp32.anchor7_zeros                           fp32 p2 tier A        est  34.24 (aifoundry2  40.06)  M10 D600   0.000
+  int8.anchor7_zeros                           int8 p2 tier A        est  34.30 (aifoundry2  41.20)  M10 D600   0.000
+  fp16.a_zeros_b_complement                    fp16 p1 tier A        est  36.73 (aifoundry2  42.75)  M10 D600   1.525
+  fp32.a_zeros_b_complement                    fp32 p1 tier A        est  37.02 (aifoundry2  42.99)  M10 D600   1.541
+  int8.u8_sparseq_58e6e0                       int8 p1 tier A scored est  42.12 (aifoundry2  49.42)  M10 D600   4.343
+  int8.r8_dsqwen_l1_actdown_f6a2cb             int8 p1 tier A scored est  42.92 (aifoundry2  50.28)  M10 D600   4.834
+  int8.u8_relu_tq_1fb940                       int8 p1 tier A scored est  43.61 (aifoundry2  51.00)  M10 D600   5.221
+  int8.r8_granite_l4_x1q_13fe82                int8 p1 tier A scored est  45.45 (aifoundry2  52.93)  M10 D600   6.263
+  int8.r8_granite_l4_actdown_b076f2            int8 p1 tier A scored est  45.66 (aifoundry2  53.16)  M10 D600   6.388
+  int8.h8_held_line4cea                        int8 p1 tier A scored est  45.85 (aifoundry2  53.36)  M10 D600   6.462
+  int8.h8_held_v34                             int8 p2 tier A        est  45.98 (aifoundry2  53.49)  M10 D600   6.563
+  int8.r8_dsqwen_l1_x1v_927670                 int8 p2 tier A        est  45.98 (aifoundry2  53.49)  M10 D600   6.572
+  int8.u8_biased_14548f                        int8 p1 tier A scored est  46.41 (aifoundry2  53.94)  M10 D600   6.803
+  fp16.r8_granite_l3_pv_e993b7                 fp16 p1 tier A scored est  46.48 (aifoundry2  53.01)  M10 D600   7.013
+  int8.l8_halfword_d2p2c16_83df                int8 p1 tier A scored est  46.65 (aifoundry2  54.20)  M10 D600   6.946
+  int8.u8_ar_k_0a9fe5                          int8 p1 tier A scored est  46.72 (aifoundry2  54.27)  M10 D600   6.989
+  int8.l8_period2_d2p4c8_4ea3                  int8 p1 tier A scored est  46.76 (aifoundry2  54.31)  M10 D600   7.010
+  int8.h8_held_vd9                             int8 p2 tier A        est  46.88 (aifoundry2  54.44)  M10 D600   7.073
+  int8.l8_flip_d2p2c16_231d                    int8 p1 tier A scored est  46.98 (aifoundry2  54.55)  M10 D600   7.139
+  int8.l8_cycle3_d3p3c15_c6d5                  int8 p1 tier A scored est  47.19 (aifoundry2  54.77)  M10 D600   7.254
+  int8.anchor8_full_a_4aac84                   int8 p2 tier A        est  47.22 (aifoundry2  54.79)  M10 D600   7.268
+  int8.anchor8_full_b_935710                   int8 p2 tier A        est  47.29 (aifoundry2  54.87)  M10 D600   7.311
+  int8.anchor8_check_full_d8b6c8               int8 p2 tier A        est  47.36 (aifoundry2  54.94)  M10 D600   7.348
+  fp32.s8_onebit_b7_3ee13961                   fp32 p1 tier A scored est  49.74 (aifoundry2  56.38)  M10 D600   8.719
+  fp32.s8_onebit_b26_bffdf029                  fp32 p1 tier A scored est  50.89 (aifoundry2  57.58)  M10 D600   9.277
+  fp32.a_onebit_b5_third                       fp32 p1 tier A        est  51.03 (aifoundry2  57.73)  M10 D600   9.410
+  fp16.s8_onebit_b10_c127c127                  fp16 p1 tier A scored est  51.14 (aifoundry2  57.90)  M10 D600   9.339
+  fp32.exp_b_alt_b26                           fp32 p1 tier A        est  51.70 (aifoundry2  58.42)  M10 D600   9.712
+  fp32.s8_onebit_b14_3ef6ccbf                  fp32 p2 tier B        est  53.29 (aifoundry2  60.11)  M10 D600  10.712
+  fp16.s8_onebit_b2_c46ec46e                   fp16 p1 tier B scored est  53.51 (aifoundry2  60.41)  M10 D600  10.955
+  fp16.s8_onebit_b4_c2e2c2e2                   fp16 p1 tier B scored est  53.86 (aifoundry2  60.78)  M10 D600  11.155
+  fp32.s8_onebit_b19_c11b3dd2                  fp32 p1 tier B scored est  55.38 (aifoundry2  62.29)  M10 D600  11.875
+  fp16.s8_onebit_b7_b945b945                   fp16 p1 tier B scored est  55.52 (aifoundry2  62.50)  M10 D600  12.135
+  fp16.b_onebit_b8_pi                          fp16 p1 tier B        est  55.76 (aifoundry2  62.77)  M10 D600  12.279
+  fp32.s8_onebit_b18_be2584eb                  fp32 p2 tier B        est  55.83 (aifoundry2  62.73)  M10 D600  11.649
+  fp32.s8_onebit_b13_41783e4a_A40080727        fp32 p1 tier B scored est  56.80 (aifoundry2  63.79)  M10 D600  12.680
+  fp32.b_onebit_b20_one                        fp32 p1 tier B        est  57.69 (aifoundry2  64.71)  M10 D600  12.786
+  fp32.real_smol_softmax_v_causal              fp32 p2 tier B        est  58.56 (aifoundry2  65.65)  M10 D600  13.635
+left out by name:
+  fp32.exp_only_narrow2                        fp32 est  60.97
+  fp16.exp_b_alt_shift                         fp16 est  61.72
+  fp16.r8_dsqwen_l1_pv_188e98                  fp16 est  64.89  (N1)
+  fp32.bf16_wideexp                            fp32 est  69.04
+  fp16.u8_ar_i_32349b                          fp16 est  72.62
+  fp16.r8_dsqwen_l1_x2gate_2e4efa              fp16 est  72.62  (N1)
+  fp16.anchor8_randn_b_3a0fef                  fp16 est  72.87
+  fp16.anchor8_randn_a_8c7827                  fp16 est  72.87
+  fp16.real_qwen_dequant_v                     fp16 est  72.87
+  fp16.anchor8_check_randn_84631a              fp16 est  73.18
+  fp16.u8_tdist_93475b                         fp16 est  73.41
+  fp16.u8_rowscale_ecc921                      fp16 est  73.64
+  fp16.u8_cauchy_96e015                        fp16 est  73.66  (N1)
+  fp32.r8_granite_l3_x2up_47e54f               fp32 est  73.98
+  fp32.r8_dsqwen_l1_qk_f0161a                  fp32 est  76.38  (N1)
+  fp32.r8_granite_l3_qk_02f7c6                 fp32 est  77.56  (N1)
+  fp32.u8_bimodal_1f57eb                       fp32 est  77.57  (N1)
+  fp32.anchor8_randn_b_833ac3                  fp32 est  77.66
+  fp32.u8_uniform_e7e045                       fp32 est  77.69  (N1)
+  fp32.u8_ar_k_3297d2                          fp32 est  77.75  (N1)
+  fp32.anchor8_randn_a_989b8a                  fp32 est  77.86
+  fp32.real_s360_l1_qk                         fp32 est  77.92
+  fp32.anchor8_check_randn_319f73              fp32 est  78.13
+  fp32.u8_ar_i_a662b4                          fp32 est  78.23  (N1)
+  fp32.u8_lognorm_62af49                       fp32 est  79.10  (N1)
