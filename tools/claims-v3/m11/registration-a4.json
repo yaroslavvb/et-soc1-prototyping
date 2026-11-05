@@ -1,0 +1,3520 @@
+{
+ "_note": "Q142(h), M11's heat registration: registration-a3.json (ed24bc6e) with dated amendment A4 (REGISTRATION.md.dated-note-A4.md, Q143(k)) applied. REGISTRATION.md, A1, A2, A3 and A4 govern where this copy differs.",
+ "descends_from": {
+  "q138t_chain": [
+   "f5473428",
+   "c2f9920d"
+  ],
+  "m10": [
+   "e9367b66",
+   "6829c9ba",
+   "ef74dd0d",
+   "d1581099",
+   "c996d135"
+  ],
+  "pool8_registration": "3e97f583",
+  "pool8_freeze": [
+   "4576fb90",
+   "dfe226f1"
+  ],
+  "e171_e172_registrations": "4441083f",
+  "e173_e174_registrations": "c8064454",
+  "e166_post_hoc_note": "f3ebb62d",
+  "lab_main_at_writing": "ea12f108",
+  "m11_registration": "3c31a91d",
+  "amendment": "A4, tools/claims-v3/m11/REGISTRATION.md.dated-note-A4.md (this commit)",
+  "m11_amendment_a1": "f49b7ddd",
+  "m11_amendment_a2": "d3d97fe2",
+  "m11_amendment_a3": "ed24bc6e",
+  "q142h2_reader_v2_and_refit": [
+   "21666b23",
+   "2b33103c",
+   "ea12f108"
+  ]
+ },
+ "a_heat_over_minutes": {
+  "per_hold": {
+   "R": "measured plateau rise over the hold's anchor (mean over [b - 300 s, b), anchor = last 120 s of the rest before the hold)",
+   "P": "Q138(t)'s frozen chain on the session's measured board trace (arm A), read the same way",
+   "e": "R - P"
+  },
+  "forms": {
+   "LEVEL": "e = a_s",
+   "GAIN": "e = g_s * P",
+   "BOTH": "e = a_s + g_s * P",
+   "null": "e = 0"
+  },
+  "fit": "ordinary least squares per session on its scored holds; nothing shared between sessions or card kinds",
+  "test_HM_LG": {
+   "code": "tools/claims-v3/m10/pool8/design_power_groups.lg_test(groups, min_tiles=4, min_span_w=6.0, min_df=3)",
+   "groups": "the card kind's M11 hold sessions",
+   "alpha": 0.05,
+   "F_slope_df": "(k, n - 2k)",
+   "F_level_df": "(k, n - 2k)",
+   "F_null_df": "(2k, n - 2k)",
+   "min_holds_per_session": 4,
+   "min_span_P_C": 6.0,
+   "min_residual_df": 3,
+   "verdicts": [
+    "GAIN",
+    "LEVEL",
+    "BOTH",
+    "NOT SEPARATED",
+    "NOT SCORED"
+   ],
+   "primary": "HM-LG-A3",
+   "also_registered": "HM-LG-A2",
+   "reported": "HM-LG pooled over both card kinds with e and P divided by the card kind's sigma"
+  },
+  "test_HM_AG": {
+   "read_when": "HM-LG reads GAIN, LEVEL or BOTH and k >= 2",
+   "s2": "RSS_BOTH / (n - 2k), the per-session two-term fits",
+   "GAIN": {
+    "F": "[(RSS_one_gain - RSS_GAIN) / (k - 1)] / s2",
+    "df": "(k - 1, n - 2k)",
+    "one_gain": "e = gamma P over all the card kind's scored holds"
+   },
+   "LEVEL": {
+    "F": "[(RSS_one_level - RSS_LEVEL) / (k - 1)] / s2",
+    "df": "(k - 1, n - 2k)",
+    "one_level": "e = abar over all the card kind's scored holds"
+   },
+   "BOTH": {
+    "F": "[(RSS_one_two_term - RSS_BOTH) / (2 (k - 1))] / s2",
+    "df": "(2 (k - 1), n - 2k)",
+    "one_two_term": "e = abar + gamma P over all the card kind's scored holds"
+   },
+   "alpha": 0.05,
+   "verdict": "the sessions share one (the test does not reject) / they differ"
+  },
+  "reading_HM_E144": {
+   "line": "|e(H_E)| / R(H_E) <= 0.015",
+   "verdict": "E144 REPEATS (inside in every session that ran H_E) / DOES NOT REPEAT",
+   "beside_HM_CAL": "printed per session and over the card kind beside HM-CAL's verdict, RMS_u and A2-3's outcome, as the flag of section 0.1's case (H_E read by the chain while the later holds miss); reported, never a clause (A3-5)"
+  },
+  "reading_HM_HE": {
+   "line": "e(H_E) outside the 95% prediction interval (t at n_s - 3 df) of the two-term fit on the session's other scored holds",
+   "verdict": "H_E DEPARTS / HOLDS",
+   "t_point": "the exact 97.5% point of Student's t at n_s - 3 degrees of freedom (4.30265 at 2, design_power_heat_v2.t95), computed and printed by the scorer; never a rounded table (A3-7 (c))"
+  },
+  "noise_sigma_C": {
+   "aifoundry3": 0.0884,
+   "aifoundry2": 0.2296,
+   "aifoundry2_readout_floor": 0.3019,
+   "aifoundry3_degrees_of_freedom": 6
+  },
+  "entry": {
+   "GAIN_and_sessions_share": "gamma_c = sum(e P) / sum(P^2) over the card kind's scored M11 holds, carried as (1 + gamma_c) on the chain if |gamma_c| >= 0.010, its 95% interval (t at n - 1) excludes 0, and S7-W with the gain carried is not met",
+   "LEVEL_and_sessions_share": "abar_c = mean(e) over those holds, added to every hold's rise, if |abar_c| >= 0.10 C, its 95% interval (t at n - 1) excludes 0, and S7-W with the level carried is not met",
+   "BOTH_and_sessions_share": {
+    "fit": "e = abar_c + gamma_c P by least squares over those holds; each 95% interval at t(n - 2)",
+    "each_term": "gamma_c passes if |gamma_c| >= 0.010 and its interval excludes 0; abar_c if |abar_c| >= 0.10 C and its interval excludes 0",
+    "both_pass": "both enter at their jointly fitted values, unless S7-W with the two-term form carried is met (then nothing enters; the pair is a reported arm)",
+    "one_passes": "that term is refitted alone (the GAIN or LEVEL row's constant) and enters only by that row's rule (its size, its interval at t(n - 1), S7-W with it alone); a jointly fitted value is never carried alone",
+    "neither_passes": "nothing enters"
+   },
+   "GAIN_LEVEL_or_BOTH_and_sessions_differ": "nothing enters by A1-4; A2's HM-CAL, the per-session reading this row deferred to the next registration, decides (a2_in_session_calibration_HM_CAL.entry)",
+   "NOT_SEPARATED_or_NOT_SCORED": "nothing enters by A1-4; A2's HM-CAL decides (a2_in_session_calibration_HM_CAL.entry); with nothing from either, the chain unscaled stays M11's primary, as M10's",
+   "one_session": "k = 1: neither HM-AG nor S7-W can be read, so nothing enters the primary; the verdict and the constant are reported as a candidate, labelled 'one session'. A2: HM-CAL and its blind error are read and reported, labelled 'one session'; nothing enters."
+  },
+  "not_wanted": {
+   "S7_W": "leave one M11 session out: with the carried form (a common gain, a common level, or the two-term form under BOTH) fitted on the card kind's other M11 sessions, the held-out session's rms over its scored holds rises by more than sigma_c / sqrt(n_s), sigma_c fixed as registered (0.0884 C on aifoundry3, 0.2296 C on aifoundry2)",
+   "HE": "HM-HE reads DEPARTS in every session that ran H_E",
+   "sign": "a carried term's sign differs between the card kinds"
+  },
+  "x1p032_arm_aifoundry3": {
+   "GAIN, gamma_c enters": "replaced by M11's gamma_c",
+   "GAIN, nothing enters (the sessions differ, its size or interval, S7-W)": "stays a reported arm",
+   "LEVEL, whatever enters": "retired from M11's readings",
+   "BOTH, gamma_c enters (with abar_c, or alone by the one_passes rule)": "replaced by M11's carried form",
+   "BOTH, otherwise": "stays a reported arm (the slope test rejected: a gain is present)",
+   "NOT SEPARATED, the null not rejected": "retired from M11's readings",
+   "NOT SEPARATED, the null rejected (they differ from zero, the form unresolved)": "stays a reported arm",
+   "NOT SCORED": "stays a reported arm",
+   "k = 1": "as above, except that nothing enters, so the arm is never replaced"
+  }
+ },
+ "b_holds": {
+  "aifoundry3": {
+   "harness": "E166's (run_e166.py, E97's natural chain, the 10 Hz 34-sensor sampler, the C-logging host)",
+   "clock": "600 MHz pinned, nothing set",
+   "R0_min": 5.0,
+   "holds": [
+    {
+     "name": "H_E",
+     "item": "fp32.randn",
+     "pattern": "E144's H_H (A1.1): --seconds 3.20 every 7.56 s (3.456 s recorded, share 0.4571) if R0's room <= 51.5 C; --seconds 2.60 every 7.98 s (2.965 s, share 0.3716) in (51.5, 53.0]",
+     "minutes": 10.0,
+     "rest_after_min": 6.0
+    },
+    {
+     "name": "Z",
+     "item": "fp32.zeros",
+     "pattern": "natural chain",
+     "minutes": 10.0,
+     "rest_after_min": 2.0
+    },
+    {
+     "name": "L1",
+     "item": "int8.full",
+     "pattern": "natural chain",
+     "minutes": 10.0,
+     "rest_after_min": 6.0
+    },
+    {
+     "name": "S",
+     "item": "int8.neg_ones",
+     "pattern": "natural chain",
+     "minutes": 10.0,
+     "rest_after_min": 2.0
+    },
+    {
+     "name": "L2",
+     "item": "int8.full",
+     "pattern": "natural chain",
+     "minutes": 10.0,
+     "rest_after_min": 2.5
+    }
+   ],
+   "planned_P_C_at_51p2": [
+    14.517,
+    0.695,
+    9.67,
+    3.459,
+    8.354
+   ],
+   "planned_P_C_at_52p0": [
+    11.723,
+    0.986,
+    9.778,
+    3.471,
+    8.439
+   ],
+   "plan_minutes": 73.28,
+   "smoke_minutes": 1.4,
+   "card_minutes_per_session": 74.7,
+   "envelope_per_session": 76,
+   "sessions": 2,
+   "gate_G0": "R0's room (34-sensor mean, last 120 s) <= 53.0 C, else no hold starts",
+   "stops": "no launch at a firmware reading >= 70 C; a hold ends at any live sample >= 72 C (firmware or 34-sensor mean) or board >= 65 W; the pass ends at >= 74 C; E97's guards",
+   "planned_peak_C": {
+    "H_E_at_51p2": 68.13,
+    "H_E_at_51p5": 68.51,
+    "H_E_at_52p0": 66.15,
+    "H_E_at_53p0": 67.35,
+    "H_E_highest_admitted": {
+     "peak_C": 68.51,
+     "room_C": 51.5
+    },
+    "others_max": 64.65
+   },
+   "planned_P_window": "the registered window [b - 300 s, b), b the end of the hold's last process",
+   "plan_grid": {
+    "cool pattern (room <= 51.5 C)": "0.008 s",
+    "warm pattern (51.5, 53.0] C": "0.005 s",
+    "rule": "every piece of the schedule a whole number of steps, the marks on the same grid (design_power_heat_v2.plan_exact); a plan on Q138(t)'s 0.2 s grid states its H_E share error (-2.1% cool, +0.9% warm)"
+   },
+   "H_E_note": "E144's H_H pattern held 10 minutes (E144 held 13): the plateau window is the hold's 300-600 s"
+  },
+  "aifoundry2": {
+   "harness": "E167's (run_e167.py over E80's run_kspeed.py and E64's run_hpl.py, E98's 15-minute rest, the C-logging host)",
+   "clock": "its own governor, 65 W / 65 C as read, nothing set",
+   "holds": [
+    {
+     "name": "Z_m",
+     "item": "int8.neg_ones on shires mask 0x11111111 (8 of 32: every fourth shire by number)",
+     "processes": 72,
+     "seconds": 8,
+     "planned_P_C": 3.05
+    },
+    {
+     "name": "G1E",
+     "item": "int8.neg_ones, every shire (E144b's G1 again)",
+     "processes": 72,
+     "seconds": 8,
+     "planned_P_C": 12.2
+    },
+    {
+     "name": "Z_m2",
+     "item": "as Z_m",
+     "processes": 72,
+     "seconds": 8,
+     "planned_P_C": 3.05
+    },
+    {
+     "name": "G1E2",
+     "item": "as G1E",
+     "processes": 72,
+     "seconds": 8,
+     "planned_P_C": 12.2
+    }
+   ],
+   "each_hold_blocks": "REST (start: cool, max_c 49, max_wait_s 240; 120 s anchor) + HOLD + END (120 s)",
+   "protocol_card_minutes_per_session": 58.1,
+   "with_gate_waits_at_most": 74.1,
+   "rests_between_holds_min": 15,
+   "sessions": "optional: 2 (or 4)",
+   "regime": "800 MHz only: the hold is scored if at least 90% of its window's samples read >= 790 MHz",
+   "stops": "die >= 72 C on one live sample; board > 80 W on 3 consecutive live samples; every hold's predicted peak <= 82 W"
+  },
+  "card0": "not designed: no frozen heat chain exists for aifoundry1 card 0 (or card 1), so a hold there has no chain miss to test",
+  "never_beside": "E171-E174 (pool 8's card day): M11's sessions run after them, on their own claims, runs and directories"
+ },
+ "c_card1_heat_scale_HC1": {
+  "form": "on aifoundry1 card 1 only: dT_win = h1(s) * M10's 4.5 s law (H2_per_card_runlength, m10.json heat_4p5s, refitted per fold) at the item's measured S and run length; h1(s) = median over the session's random anchors (M10 REGISTRATION section 3a's set and pool 8's scale anchors, both families; check and zeros anchors never) of dT_win / the law; aifoundry3 keeps h = 1",
+  "rows": "M10's heat rows (fit_m7.heat_rows' rule with E141, E142, E153, E157, E163, E164): card 1's 448 judged, aifoundry3's 484 reported",
+  "entry": {
+   "pooled_d_rms_C_at_most": -0.01,
+   "interval": "95% paired bootstrap over kinds (2,000 draws, seed 142) below 0",
+   "sessions": "d <= 0 in at least 2/3 of card 1's sessions with >= 10 heat rows",
+   "bias": "card 1's heat bias does not change sign and grow in size"
+  },
+  "not_wanted": [
+   "HC1-B reads WORSE on a new card-1 session",
+   "h1 over-corrects on a new card-1 session's N1 (its bias changes sign and grows)"
+  ],
+  "blind_reading_HC1_B": {
+   "session": "E172 (pool 8 on card 1), only if this commit precedes E172's first launch",
+   "set": "N1 (31 tiles), C-gated as P8-KC",
+   "statistic": "rms(dT_win - h1 law) - rms(dT_win - law), paired bootstrap over the tiles, 20,000 draws, seed 80,000 + the character codes of 'M11-HC1-B'",
+   "verdicts": [
+    "BETTER",
+    "WORSE",
+    "NOT RESOLVED"
+   ],
+   "precision_half_width_C": 0.082,
+   "precision_note": "0.082 C scales M10's pooled interval to N1's 31 tiles: one session's effect scales with its own |h1 - 1| (card 1's 16 sessions 0.63-1.10), so BETTER at M10's held-out effect is the average case, not a forecast for E172"
+  },
+  "entry_known_posthoc": {
+   "pooled": "passes (REGISTRATION.md section 0.4: -0.112 C [-0.137, -0.085])",
+   "bias": "passes: card 1's held-out heat bias +0.0071 C without the scale, -0.0026 C with it (heldout-m10.json heat_c1)",
+   "two_thirds_of_sessions": "unknown: no per-session d is committed; 14 of card 1's 16 sessions have at least 10 heat rows"
+  }
+ },
+ "d_card1_paired_anchor_int8_I8P": {
+  "form": "k(s, r) = median over the int8 random anchors a run in both the card-1 session s and its paired aifoundry3 session r of [D_s(a) / Dhat_s(a)] / [D_r(a) / Dhat_r(a)], Dhat = M10's int8 B at the session's measured rate (card term 0.9616 on card 1); card 1's int8 prediction in s = k * M10's",
+  "pairs_committed": [
+   [
+    "E82",
+    "E78"
+   ],
+   [
+    "E91",
+    "E86"
+   ],
+   [
+    "E131",
+    "E95"
+   ],
+   [
+    "E93",
+    "E121"
+   ],
+   [
+    "E108",
+    "E122"
+   ],
+   [
+    "E94",
+    "E123"
+   ],
+   [
+    "E142",
+    "E141"
+   ],
+   [
+    "E157",
+    "E153"
+   ],
+   [
+    "E164",
+    "E163"
+   ]
+  ],
+  "entry": {
+   "pooled_d_rms_W_at_most": -0.01,
+   "interval": "95% paired bootstrap over kinds (2,000 draws, seed 142) below 0",
+   "pool7": "E164's priority-1 int8 bias falls in size and keeps its sign",
+   "all_card1_int8": "the rms over every card-1 int8 row rises by no more than 0.001 W"
+  },
+  "not_wanted": [
+   "it over-corrects (the bias changes sign and grows) on E164's int8 rows or over the paired sessions' card-1 int8 rows",
+   "k varies across the pairs no more than the anchors' own errors give: the sd of k over the nine pairs no larger than the sd that drawing each anchor's D as D + se N(0, 1) gives (2,000 draws, seed 142). Met: a per-session k is not wanted, because a constant card term would do as well; I8P is then a reported arm, and the constant 0.9616 x the median k over the pairs is reported beside it with its 95% interval (bootstrap over the pairs, 2,000 draws, seed 142), a candidate for the next registration, never carried by M11",
+   "I8P-B reads WORSE"
+  ],
+  "blind_reading_I8P_B": {
+   "sessions": "E172 with E171 (pool 8's pair), only if this commit precedes both first launches",
+   "anchors": [
+    "int8.full",
+    "int8.anchor8_full_a_4aac84",
+    "int8.anchor8_full_b_935710"
+   ],
+   "check_anchor": "int8.anchor8_check_full_d8b6c8 (never in k)",
+   "set": "I1 (12 tiles)",
+   "statistic": "paired bootstrap as HC1-B, seed 80,000 + the character codes of 'M11-I8P-B'",
+   "precision_half_width_W": 0.0215
+  },
+  "reported_beside": "|median k - 1| against that interval: the constant would differ from M10's card term if it excludes 1 (never a clause)",
+  "preview_posthoc": {
+   "what": "the ratio of M10's int8 term-a session scales, card-1 session / its aifoundry3 pair (heldout-m10.json power.int8.session_scales_term_a_all_rows); a preview of k, not k",
+   "pairs": {
+    "E82/E78": 0.99599,
+    "E91/E86": 0.98669,
+    "E131/E95": 0.99011,
+    "E93/E121": 1.00587,
+    "E108/E122": 0.9967,
+    "E94/E123": 1.00858,
+    "E142/E141": 0.99892,
+    "E157/E153": 0.99664,
+    "E164/E163": 0.9756
+   },
+   "range": [
+    0.9756,
+    1.00858
+   ],
+   "median": 0.99664
+  }
+ },
+ "card_time_needed": {
+  "aifoundry3": "2 sessions x 74.7 card-minutes (149.4; cap 152), different days, rested card",
+  "aifoundry2": "optional: 2 sessions x about 58 protocol card-minutes (up to 74 with the gate waits; about 105-120 minutes held each with the 15-minute rests)",
+  "card0": 0,
+  "card1": 0,
+  "minimum": "one aifoundry3 session (74.7 card-minutes): HM-LG-A3 at df (1, 3)",
+  "a2": "unchanged by A2",
+  "a3": "unchanged by A3"
+ },
+ "power_at_the_plan_v2": {
+  "source": "design-power-heat-v2.json (the exact plan; 5,000 draws a cell; the committed draws)",
+  "A3_x2_sigma": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "BOTH": 85.3,
+    "GAIN": 14.7,
+    "LEVEL": 0.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.0
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "BOTH": 34.4,
+    "GAIN": 0.0,
+    "LEVEL": 65.6,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.0
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "BOTH": 4.3,
+    "GAIN": 68.9,
+    "LEVEL": 0.3,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 26.4
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "BOTH": 5.2,
+    "GAIN": 88.5,
+    "LEVEL": 0.1,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 6.2
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "BOTH": 4.5,
+    "GAIN": 95.4,
+    "LEVEL": 0.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.2
+   },
+   "level 0.15 C": {
+    "BOTH": 3.8,
+    "GAIN": 1.0,
+    "LEVEL": 45.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 50.2
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "BOTH": 4.9,
+    "GAIN": 0.0,
+    "LEVEL": 89.4,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 5.7
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "BOTH": 4.8,
+    "GAIN": 0.0,
+    "LEVEL": 95.1,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.1
+   },
+   "mixed: E154's fit, then E166's": {
+    "BOTH": 98.6,
+    "GAIN": 1.3,
+    "LEVEL": 0.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.1
+   },
+   "none": {
+    "BOTH": 3.2,
+    "GAIN": 1.8,
+    "LEVEL": 1.9,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 93.1
+   }
+  },
+  "A3_x1_sigma": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "BOTH": 57.7,
+    "GAIN": 41.6,
+    "LEVEL": 0.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.7
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "BOTH": 23.1,
+    "GAIN": 0.0,
+    "LEVEL": 71.2,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 5.7
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "BOTH": 3.8,
+    "GAIN": 46.1,
+    "LEVEL": 1.2,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 48.9
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "BOTH": 4.4,
+    "GAIN": 68.6,
+    "LEVEL": 0.4,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 26.6
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "BOTH": 5.0,
+    "GAIN": 89.1,
+    "LEVEL": 0.1,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 5.8
+   },
+   "level 0.15 C": {
+    "BOTH": 3.2,
+    "GAIN": 1.6,
+    "LEVEL": 27.5,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 67.7
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "BOTH": 4.7,
+    "GAIN": 0.5,
+    "LEVEL": 65.2,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 29.5
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "BOTH": 4.7,
+    "GAIN": 0.0,
+    "LEVEL": 89.4,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 5.9
+   },
+   "mixed: E154's fit, then E166's": {
+    "BOTH": 57.7,
+    "GAIN": 41.6,
+    "LEVEL": 0.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.7
+   },
+   "none": {
+    "BOTH": 3.3,
+    "GAIN": 1.8,
+    "LEVEL": 1.8,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 93.0
+   }
+  },
+  "HM_AG_exact_plan_sigma": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "both differ": 4.9,
+    "gains differ": 6.7,
+    "levels differ": 6.9
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "both differ": 4.4,
+    "gains differ": 9.7,
+    "levels differ": 4.8
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "both differ": 5.3,
+    "gains differ": 5.8,
+    "levels differ": 5.4
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "both differ": 4.9,
+    "gains differ": 4.5,
+    "levels differ": 5.7
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "both differ": 4.7,
+    "gains differ": 4.7,
+    "levels differ": 5.8
+   },
+   "level 0.15 C": {
+    "both differ": 4.9,
+    "gains differ": 5.8,
+    "levels differ": 4.8
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "both differ": 4.6,
+    "gains differ": 7.0,
+    "levels differ": 5.0
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "both differ": 5.3,
+    "gains differ": 10.8,
+    "levels differ": 5.7
+   },
+   "mixed: E154's fit, then E166's": {
+    "both differ": 98.2,
+    "gains differ": 13.7,
+    "levels differ": 35.8
+   },
+   "none": {
+    "both differ": 5.3,
+    "gains differ": 5.4,
+    "levels differ": 5.1
+   }
+  },
+  "HM_AG_matched_false_rates_sigma": {
+   "both test under any shared truth": [
+    4.4,
+    5.3
+   ],
+   "gain test under a shared gain or none": [
+    4.5,
+    5.8
+   ],
+   "level test under a shared level or none": [
+    4.8,
+    5.7
+   ],
+   "power under the mixed truth (gain / level / both)": [
+    13.7,
+    35.8,
+    98.2
+   ]
+  },
+  "S7W_registered_threshold": {
+   "exact plan|both|0.0884": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 0.0,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 0.0,
+    "gain 2.35% (M10's aifoundry3 gamma)": 1.1,
+    "gain 3.20% (the x1.032 arm)": 0.1,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.0,
+    "level 0.15 C": 3.4,
+    "level 0.27 C (E154's and E166's level alone)": 0.1,
+    "level 0.40 C (E166's two-term a)": 0.0,
+    "mixed: E154's fit, then E166's": 49.3,
+    "none": 26.7
+   },
+   "exact plan|both|0.1325": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 1.1,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 1.4,
+    "gain 2.35% (M10's aifoundry3 gamma)": 8.3,
+    "gain 3.20% (the x1.032 arm)": 2.6,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.3,
+    "level 0.15 C": 17.7,
+    "level 0.27 C (E154's and E166's level alone)": 2.3,
+    "level 0.40 C (E166's two-term a)": 0.1,
+    "mixed: E154's fit, then E166's": 56.7,
+    "none": 42.5
+   },
+   "exact plan|gain|0.0884": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 0.1,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 0.7,
+    "gain 2.35% (M10's aifoundry3 gamma)": 0.5,
+    "gain 3.20% (the x1.032 arm)": 0.0,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.0,
+    "level 0.15 C": 3.2,
+    "level 0.27 C (E154's and E166's level alone)": 0.3,
+    "level 0.40 C (E166's two-term a)": 0.0,
+    "mixed: E154's fit, then E166's": 0.3,
+    "none": 11.7
+   },
+   "exact plan|gain|0.1325": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 1.5,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 4.4,
+    "gain 2.35% (M10's aifoundry3 gamma)": 5.8,
+    "gain 3.20% (the x1.032 arm)": 1.5,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.1,
+    "level 0.15 C": 13.3,
+    "level 0.27 C (E154's and E166's level alone)": 3.6,
+    "level 0.40 C (E166's two-term a)": 0.6,
+    "mixed: E154's fit, then E166's": 3.3,
+    "none": 21.9
+   },
+   "exact plan|level|0.0884": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 0.5,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 0.0,
+    "gain 2.35% (M10's aifoundry3 gamma)": 1.1,
+    "gain 3.20% (the x1.032 arm)": 0.2,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.0,
+    "level 0.15 C": 2.4,
+    "level 0.27 C (E154's and E166's level alone)": 0.0,
+    "level 0.40 C (E166's two-term a)": 0.0,
+    "mixed: E154's fit, then E166's": 3.7,
+    "none": 10.9
+   },
+   "exact plan|level|0.1325": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 5.0,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 1.0,
+    "gain 2.35% (M10's aifoundry3 gamma)": 8.1,
+    "gain 3.20% (the x1.032 arm)": 3.1,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.5,
+    "level 0.15 C": 10.8,
+    "level 0.27 C (E154's and E166's level alone)": 1.7,
+    "level 0.40 C (E166's two-term a)": 0.2,
+    "mixed: E154's fit, then E166's": 10.2,
+    "none": 21.3
+   }
+  },
+  "path_at_the_plan_sigma": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "carries": {
+     "both enter": 80.0,
+     "gain enters": 14.5,
+     "gain enters (BOTH, refitted alone)": 0.2,
+     "nothing: the sessions differ": 5.2
+    },
+    "arm": {
+     "replaced": 94.8,
+     "reported": 5.2,
+     "retired": 0.0
+    }
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "carries": {
+     "both enter": 28.3,
+     "level enters": 63.9,
+     "level enters (BOTH, refitted alone)": 1.4,
+     "nothing: the sessions differ": 6.3
+    },
+    "arm": {
+     "replaced": 28.3,
+     "reported": 6.1,
+     "retired": 65.6
+    }
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "carries": {
+     "both enter": 0.8,
+     "gain enters": 64.9,
+     "gain enters (BOTH, refitted alone)": 1.3,
+     "level enters": 0.3,
+     "nothing: NOT SEPARATED": 26.4,
+     "nothing: its size or interval": 0.1,
+     "nothing: the sessions differ": 6.2
+    },
+    "arm": {
+     "replaced": 66.9,
+     "reported": 30.4,
+     "retired": 2.7
+    }
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "carries": {
+     "both enter": 1.3,
+     "gain enters": 84.9,
+     "gain enters (BOTH, refitted alone)": 1.3,
+     "level enters": 0.1,
+     "nothing: NOT SEPARATED": 6.2,
+     "nothing: the sessions differ": 6.1
+    },
+    "arm": {
+     "replaced": 87.5,
+     "reported": 12.4,
+     "retired": 0.1
+    }
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "carries": {
+     "both enter": 1.0,
+     "gain enters": 91.1,
+     "gain enters (BOTH, refitted alone)": 0.8,
+     "nothing: NOT SEPARATED": 0.2,
+     "nothing: the sessions differ": 6.9
+    },
+    "arm": {
+     "replaced": 92.9,
+     "reported": 7.1,
+     "retired": 0.0
+    }
+   },
+   "level 0.15 C": {
+    "carries": {
+     "both enter": 0.8,
+     "gain enters": 0.9,
+     "gain enters (BOTH, refitted alone)": 0.1,
+     "level enters": 40.8,
+     "level enters (BOTH, refitted alone)": 0.6,
+     "nothing: NOT SEPARATED": 50.2,
+     "nothing: S7-W met": 0.1,
+     "nothing: its size or interval": 0.6,
+     "nothing: the sessions differ": 6.0
+    },
+    "arm": {
+     "replaced": 1.7,
+     "reported": 37.7,
+     "retired": 60.6
+    }
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "carries": {
+     "both enter": 1.5,
+     "level enters": 85.6,
+     "level enters (BOTH, refitted alone)": 0.8,
+     "nothing: NOT SEPARATED": 5.7,
+     "nothing: the sessions differ": 6.3
+    },
+    "arm": {
+     "replaced": 1.6,
+     "reported": 9.0,
+     "retired": 89.4
+    }
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "carries": {
+     "both enter": 1.5,
+     "level enters": 91.4,
+     "level enters (BOTH, refitted alone)": 0.8,
+     "nothing: NOT SEPARATED": 0.1,
+     "nothing: the sessions differ": 6.3
+    },
+    "arm": {
+     "replaced": 1.5,
+     "reported": 3.4,
+     "retired": 95.1
+    }
+   },
+   "mixed: E154's fit, then E166's": {
+    "carries": {
+     "gain enters": 1.2,
+     "gain enters (BOTH, refitted alone)": 0.1,
+     "nothing: NOT SEPARATED": 0.1,
+     "nothing: its size or interval": 0.1,
+     "nothing: the sessions differ": 98.5
+    },
+    "arm": {
+     "replaced": 1.3,
+     "reported": 98.7,
+     "retired": 0.0
+    }
+   },
+   "none": {
+    "carries": {
+     "both enter": 0.6,
+     "nothing: NOT SEPARATED": 93.1,
+     "nothing: S7-W met": 0.1,
+     "nothing: its size or interval": 3.0,
+     "nothing: the sessions differ": 3.2
+    },
+    "arm": {
+     "replaced": 0.6,
+     "reported": 5.6,
+     "retired": 93.8
+    }
+   }
+  }
+ },
+ "precedence_a1": "A1 is committed before every output it governs (no M11 kit, scorer, fit, hold or claim exists). It changes no statistic, set, seed or verdict of HC1-B or I8P-B, whose precedence stays 3c31a91d's (REGISTRATION.md section 11).",
+ "a2_in_session_calibration_HM_CAL": {
+  "amendment": "A2, tools/claims-v3/m11/REGISTRATION.md.dated-note-A2.md",
+  "why": "A1-4 (e): if the two aifoundry3 sessions repeat E154's fit then E166's, HM-LG reads BOTH (98.6%), HM-AG's BOTH form says the sessions differ (98.2%) and M11 carries nothing (98.7%); section 6 then defers the term to a per-session reading. A2 reads it now from holds the plan already has (H_E and Z run first).",
+  "per_session": {
+   "calibration_pair": "by hold name: aifoundry3 H_E and Z, aifoundry2 Z_m and G1E, never by position among the scored holds; they must be the session's first two holds by their launch records' times (A3-6)",
+   "later_holds": "by hold name, those scored: aifoundry3 L1, S, L2; aifoundry2 Z_m2, G1E2 (A3-6)",
+   "fit": "the two-term line through the pair (1 = H_E, 2 = Z): g = (e1 - e2) / (P1 - P2), a = e2 - g * P2",
+   "prediction_blind_given_the_watts": "each later hold h: R_hat(h) = P(h) + a + g * P(h); e_c(h) = e(h) - a - g * P(h); nothing of a later hold enters the line",
+   "read_if": "both pair holds scored (a pair hold not scored: NOT SCORED, naming it), the pair run first, spanning at least 6.0 C of P, and at least 2 later holds scored; else NOT SCORED with its reason (A3-6)",
+   "min_pair_span_P_C": 6.0,
+   "min_later_holds": 2
+  },
+  "statistic": "D = RMS_c - RMS_u over the scored later holds of every read session of the card kind, pooled (n_L holds)",
+  "threshold": {
+   "tau": "sigma_c / sqrt(n_L), sigma_c fixed as section 7's",
+   "sigma_c_C": {
+    "aifoundry3": 0.0884,
+    "aifoundry2": 0.2296
+   },
+   "tau_at_the_plan_C": 0.0361
+  },
+  "verdicts": {
+   "BETTER": "D <= -tau",
+   "WORSE": "D >= +tau",
+   "NOT RESOLVED": "otherwise",
+   "NOT SCORED": "no session read"
+  },
+  "primary": "HM-CAL-A3",
+  "beside": "HM-CAL-A2 (its own low power; no aifoundry2 card time recommended for it)",
+  "reported_per_session": "a_s and g_s; rms_u(s), rms_c(s), d(s) = rms_c - rms_u; the session's own verdict at sigma_c / sqrt(n_s)",
+  "blind_error_delivered": "RMS_c, M11's blind per-session heat-over-minutes error given the watts, with its chi-square interval at n_L degrees of freedom (approximate), beside RMS_u, the x1.032 arm's rms over the same holds, and the floor the premise implies, sigma_c * sqrt(mean over the later holds of 1 + (1 - w)^2 + w^2), w = (P - P_Z) / (P_HE - P_Z); established for int8 holds on E97's natural chain (the later holds' format and pattern) within the pair's span of P, and for no other hold (A3-4); read on the holds that decide the calibration's entry, so it flatters where entry is rare (A3-2)",
+  "floor_if_the_premise_holds_C": {
+   "A3 x1 (one aifoundry3 session, room 51.2 C)": 0.111,
+   "A3 x2 (the plan: two aifoundry3 sessions, rooms 51.2 and 52.0 C)": 0.1121,
+   "A3 x3 (three aifoundry3 sessions)": 0.1117
+  },
+  "not_wanted": {
+   "N1": "a read session worse on its own: d(s) >= sigma_c / sqrt(n_s) (0.051 C for three later holds)",
+   "N2": "HM-HE departs in every session that ran H_E (aifoundry3 only), at the exact t point (A3-7 (c))",
+   "one_way_only": "a clause met makes the calibration a reported arm, never the primary; a clause never brings a term in"
+  },
+  "reported_arms": {
+   "gain": "the pair's gain alone, sum(e P) / sum(P^2) over H_E and Z",
+   "level": "the pair's level alone, the mean e",
+   "gain_HE": "H_E's gain alone, e(H_E) / P(H_E)"
+  },
+  "entry": {
+   "order": "A1-4's path first, unchanged, over all of each session's scored holds (the pair included); HM-CAL after it, on the later holds only",
+   "A1_4_carries_a_common_term": "that term stays M11's primary; the calibration is a reported arm; both blind errors over the later holds are reported (the common term refitted on the other sessions, S7-W's fit)",
+   "A1_4_carries_nothing_and_HM_CAL_BETTER_no_clause_met": "the calibration enters: a session that runs the pair first (H_E then Z, section 5's pattern) has each later hold predicted as P + a_s + g_s * P from its own pair; a session without the pair keeps the chain unscaled; M11 states RMS_c as its error, within the pair's span of P; for int8 holds on E97's natural chain only (A3-4)",
+   "otherwise": "nothing from A2; A1-4's outcome; RMS_c reported",
+   "one_session": "k = 1: nothing enters (section 6); HM-CAL and RMS_c reported, labelled 'one session', as a candidate",
+   "A1_4_carries_nothing_rows": {
+    "BOTH_and_sessions_differ": "nothing enters by A1-4; HM-CAL decides (98.4% of draws on E154's fit then E166's; 'the sessions differ' over every verdict 98.5%; A3-7 (a))",
+    "BOTH_share_neither_passes_or_S7W_met": "nothing enters by A1-4; HM-CAL decides",
+    "BOTH_share_one_term_passes_but_fails_refitted_alone": "nothing enters by A1-4 (its size, its interval or S7-W with it alone); HM-CAL decides (A3-7 (b))",
+    "GAIN_or_LEVEL_share_fails_size_interval_or_S7W": "nothing enters by A1-4; HM-CAL decides (A3-7 (b))",
+    "GAIN_or_LEVEL_and_sessions_differ": "nothing enters by A1-4; HM-CAL decides",
+    "NOT_SEPARATED_or_NOT_SCORED": "nothing enters by A1-4; HM-CAL decides"
+   }
+  },
+  "meaning": {
+   "BETTER": "the session's own line, read from its first two holds, predicts its later holds better than the chain unscaled, blind given the watts: heat over minutes on the card kind is set per session and the pair reads it",
+   "NOT RESOLVED": "the calibrated and unscaled misses differ by less than tau",
+   "WORSE": "the first holds' misses do not carry to the later holds: the chain already right (HM-LG's null not rejected), or misses that belong to the holds or drift through the session (the null rejected, or HM-HE departing)",
+   "NOT SCORED": "no session read"
+  },
+  "x1p032_arm": "A1-4 (d)'s table, unchanged in every case; its rms over the later holds reported beside HM-CAL",
+  "adoption": {
+   "rule": "at sigma_c on two aifoundry3 sessions at the exact plan: (i) BETTER at most 5% with no effect; (ii) BETTER with no clause met at least 80% under each committed pattern (E154's fit, E166's fit, E154's then E166's); (iii) on E154's then E166's the calibration enters at least 80%; (iv) with no effect it enters at most 5%",
+   "values": {
+    "(i)": 0.7,
+    "(ii)": {
+     "both: E154's two-term fit (-0.229 C + 5.72%)": 97.8,
+     "both: E166's two-term fit (+0.395 C - 1.43%)": 99.1,
+     "mixed: E154's fit, then E166's": 98.2
+    },
+    "(iii)": 97.1,
+    "(iv)": 0.7
+   },
+   "adopted": true
+  },
+  "card_time": "unchanged: aifoundry3 two sessions of 74.7 card-minutes on different days (149.4; cap 76 each), H_E then Z first; aifoundry2 optional; the least one session (74.7), where HM-CAL is reported and nothing enters",
+  "kit_and_scorer": "the kit runs H_E then Z first (a reordering is a named departure, and that session's HM-CAL reads NOT SCORED); the scorer fits each line on its pair only and writes it before reading any later hold, prints every reading of A2-2 to A2-4, self-tests A2-3's table on synthetic sessions, reproduces one cell of design-power-heat-a2.json (E154's fit then E166's at sigma_c), and checks SHA256SUMS, -m11, -a1 and -a2 first; and, by A3-9: the pair and the later holds by hold name with the launch-order check; HM-HE and N2 at the exact t point, printed; HM-E144 printed beside HM-CAL with RMS_u; RMS_c labelled with A3-4's scope; self-tests adding H_E not scored, Z not scored and the pair reordered (each NOT SCORED) and one later hold not scored (read with two); one cell of design-power-heat-a3.json reproduced (section 0.1's case on E154's fit then E166's); never design_power_heat_a2.session_cal on a measured session; SHA256SUMS-a3 checked too",
+  "precedence": "HM-CAL counts as blind only if A2's commit precedes the first launch record of every M11 session it reads (git and the launch records' times, as section 11); else post hoc; the scorer also checks that A3's commit precedes them, as A3-5's flag and A3-6's pair rule are read from it",
+  "unchanged": "REGISTRATION.md and A1 with every file of 3c31a91d and f49b7ddd; HM-LG, HM-AG, HM-E144, HM-HE, S7-W; section 6's and A1-4's tables, verdicts and the arm's fate; the holds, stops and card-minutes; (c) HC1 and (d) I8P with HC1-B and I8P-B; M10, M9, Q138(t)'s chain, pool 8, E171-E174's registrations"
+ },
+ "power_at_the_plan_a2": {
+  "source": "design-power-heat-a2.json (two aifoundry3 sessions at v2's exact plan; 5,000 draws a cell; v2's committed draws)",
+  "A3_x2_sigma_c": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     98.6,
+     1.3,
+     0.1
+    ],
+    "BETTER_no_clause_met_pct": 97.8,
+    "calibration_enters_pct": 5.2,
+    "A1_4_common_term_pct": 94.8,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2521,
+     "calibrated": 0.1042,
+     "x1p032_arm": 0.1161
+    }
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     99.7,
+     0.2,
+     0.0
+    ],
+    "BETTER_no_clause_met_pct": 99.1,
+    "calibration_enters_pct": 6.3,
+    "A1_4_common_term_pct": 93.6,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.3049,
+     "calibrated": 0.1039,
+     "x1p032_arm": 0.1615
+    }
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     89.7,
+     9.6,
+     0.7
+    ],
+    "BETTER_no_clause_met_pct": 88.7,
+    "calibration_enters_pct": 26.2,
+    "A1_4_common_term_pct": 67.3,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.1979,
+     "calibrated": 0.1039,
+     "x1p032_arm": 0.1049
+    }
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     98.5,
+     1.5,
+     0.1
+    ],
+    "BETTER_no_clause_met_pct": 97.6,
+    "calibration_enters_pct": 11.7,
+    "A1_4_common_term_pct": 87.6,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.259,
+     "calibrated": 0.1049,
+     "x1p032_arm": 0.0842
+    }
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     100.0,
+     0.0,
+     0.0
+    ],
+    "BETTER_no_clause_met_pct": 99.7,
+    "calibration_enters_pct": 7.0,
+    "A1_4_common_term_pct": 92.9,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.356,
+     "calibrated": 0.1044,
+     "x1p032_arm": 0.1299
+    }
+   },
+   "level 0.15 C": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     76.6,
+     21.4,
+     2.0
+    ],
+    "BETTER_no_clause_met_pct": 75.7,
+    "calibration_enters_pct": 36.8,
+    "A1_4_common_term_pct": 43.1,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.1703,
+     "calibrated": 0.1037,
+     "x1p032_arm": 0.1431
+    }
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     99.5,
+     0.5,
+     0.0
+    ],
+    "BETTER_no_clause_met_pct": 98.7,
+    "calibration_enters_pct": 11.4,
+    "A1_4_common_term_pct": 88.0,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2819,
+     "calibrated": 0.1042,
+     "x1p032_arm": 0.1253
+    }
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     100.0,
+     0.0,
+     0.0
+    ],
+    "BETTER_no_clause_met_pct": 99.6,
+    "calibration_enters_pct": 6.3,
+    "A1_4_common_term_pct": 93.7,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.402,
+     "calibrated": 0.105,
+     "x1p032_arm": 0.2019
+    }
+   },
+   "mixed: E154's fit, then E166's": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     99.2,
+     0.7,
+     0.1
+    ],
+    "BETTER_no_clause_met_pct": 98.2,
+    "calibration_enters_pct": 97.1,
+    "A1_4_common_term_pct": 1.3,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2781,
+     "calibrated": 0.1036,
+     "x1p032_arm": 0.1407
+    }
+   },
+   "none": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     0.7,
+     72.2,
+     27.1
+    ],
+    "BETTER_no_clause_met_pct": 0.7,
+    "calibration_enters_pct": 0.7,
+    "A1_4_common_term_pct": 0.6,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.0829,
+     "calibrated": 0.1042,
+     "x1p032_arm": 0.2583
+    }
+   }
+  },
+  "A3_x2_1p5_sigma": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     87.5,
+     10.0,
+     2.6
+    ],
+    "BETTER_no_clause_met_pct": 84.3,
+    "calibration_enters_pct": 5.9,
+    "A1_4_common_term_pct": 92.9,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2689,
+     "calibrated": 0.1554,
+     "x1p032_arm": 0.1482
+    }
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     95.1,
+     4.1,
+     0.9
+    ],
+    "BETTER_no_clause_met_pct": 92.4,
+    "calibration_enters_pct": 11.9,
+    "A1_4_common_term_pct": 86.1,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.3196,
+     "calibrated": 0.1575,
+     "x1p032_arm": 0.1848
+    }
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     66.5,
+     26.2,
+     7.3
+    ],
+    "BETTER_no_clause_met_pct": 64.2,
+    "calibration_enters_pct": 37.3,
+    "A1_4_common_term_pct": 33.7,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2181,
+     "calibrated": 0.1568,
+     "x1p032_arm": 0.1415
+    }
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     87.9,
+     9.9,
+     2.2
+    ],
+    "BETTER_no_clause_met_pct": 85.1,
+    "calibration_enters_pct": 32.5,
+    "A1_4_common_term_pct": 57.7,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2722,
+     "calibrated": 0.1584,
+     "x1p032_arm": 0.1249
+    }
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     98.3,
+     1.4,
+     0.2
+    ],
+    "BETTER_no_clause_met_pct": 96.4,
+    "calibration_enters_pct": 14.1,
+    "A1_4_common_term_pct": 84.5,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.3673,
+     "calibrated": 0.1582,
+     "x1p032_arm": 0.159
+    }
+   },
+   "level 0.15 C": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     50.5,
+     37.7,
+     11.8
+    ],
+    "BETTER_no_clause_met_pct": 48.8,
+    "calibration_enters_pct": 33.6,
+    "A1_4_common_term_pct": 19.6,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.1927,
+     "calibrated": 0.157,
+     "x1p032_arm": 0.1687
+    }
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     92.4,
+     6.2,
+     1.4
+    ],
+    "BETTER_no_clause_met_pct": 89.9,
+    "calibration_enters_pct": 34.2,
+    "A1_4_common_term_pct": 58.4,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2947,
+     "calibrated": 0.1565,
+     "x1p032_arm": 0.1548
+    }
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     99.4,
+     0.4,
+     0.1
+    ],
+    "BETTER_no_clause_met_pct": 98.0,
+    "calibration_enters_pct": 12.7,
+    "A1_4_common_term_pct": 86.5,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.4125,
+     "calibrated": 0.1576,
+     "x1p032_arm": 0.2221
+    }
+   },
+   "mixed: E154's fit, then E166's": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     91.5,
+     7.0,
+     1.4
+    ],
+    "BETTER_no_clause_met_pct": 88.4,
+    "calibration_enters_pct": 75.3,
+    "A1_4_common_term_pct": 16.0,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2936,
+     "calibrated": 0.1579,
+     "x1p032_arm": 0.1663
+    }
+   },
+   "none": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     3.1,
+     54.3,
+     42.6
+    ],
+    "BETTER_no_clause_met_pct": 3.1,
+    "calibration_enters_pct": 2.9,
+    "A1_4_common_term_pct": 0.9,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.1259,
+     "calibrated": 0.1571,
+     "x1p032_arm": 0.2735
+    }
+   }
+  },
+  "mixed_joint_with_A1_4": {
+   "A1-4 common | HM-CAL BETTER": 1.2,
+   "A1-4 common | HM-CAL NOT RESOLVED": 0.1,
+   "A1-4 common | HM-CAL WORSE": 0.0,
+   "A1-4 nothing | HM-CAL BETTER": 98.0,
+   "A1-4 nothing | HM-CAL NOT RESOLVED": 0.6,
+   "A1-4 nothing | HM-CAL WORSE": 0.0
+  },
+  "mixed_one_session_own_calibrated_rms_C": {
+   "median": 0.0972,
+   "p05": 0.037,
+   "p95": 0.1828
+  },
+  "mixed_calibrated_rms_C": {
+   "median": 0.1036,
+   "p05": 0.0575,
+   "p95": 0.1655
+  },
+  "checks": {
+   "A1-4's path at the plan equals design-power-heat-v2.json's path (v2's draws and decide)": true,
+   "HM-LG's verdicts at the plan equal design-power-heat-v2.json's power table (v2's draws)": true,
+   "HM-LG's verdicts for one and three sessions equal design-power-heat-v2.json's (v2's draws)": true,
+   "HM-LG's verdicts on aifoundry2's designs equal design-power-heat.json's (v1's draws)": true,
+   "noise as committed (v2)": true,
+   "truth labels as committed (v2)": true,
+   "v2's exact plan re-run at 51.2 and 52.0 C equals design-power-heat-v2.json's designs_exact_P_C": true
+  }
+ },
+ "precedence_a2": "A2 is committed before every output it governs (no M11 kit, scorer, fit, hold, run number or claim exists; no E171-E174 data in any ref). It changes nothing of (c) HC1 or (d) I8P, so their precedence stays 3c31a91d's.",
+ "a3_premise_scope_flag_pair": {
+  "amendment": "A3, tools/claims-v3/m11/REGISTRATION.md.dated-note-A3.md",
+  "answers": "an adversarial read of d3d97fe2 (Thu 5 Nov 2026, about 10:11-10:40 PST; holds with fixes): F1 (minor) the premise account and scope, F2 (nit) the pair by position, F3 (nit) wording and the t point",
+  "premise_evidence": "REGISTRATION.md section 0.1: of the nine large rises (R >= 10 C) the chain read eight 1.83-5.60% low and E144's H_H (fp32 random, duty-cycled, R 15.00 C) to +0.10% (e +0.015 C); H_E is that pattern, the plan's only duty-cycled hold, and with Z one of its two fp32 holds; the later holds are int8 on E97's natural chain",
+  "premise_qualifier": "A2-5's 'a blind heat-over-minutes error near the noise floor (0.112 C), whatever HM-AG reads' holds if the premise holds (each session's misses follow one line in P, the pair's included, plus independent noise); A2's 97.1% and 0.104 C are quoted with 'if the premise holds' (A3-3)",
+  "scope": "the line and RMS_c cover int8 holds on E97's natural chain (int8.full, int8.neg_ones) whose P lies within the pair's span; for a hold of another format, kind or duty pattern, or outside the span, no calibrated error is established (A3-4)",
+  "flag_HM_E144": {
+   "what": "section 3's HM-E144, unchanged, printed beside HM-CAL with RMS_u and A2-3's outcome; reported, never a clause",
+   "repeats_when_H_E_read_by_the_chain_pct": [
+    93.6,
+    94.4
+   ],
+   "repeats_premise_holding_at_the_plan_sigma_c_pct": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 0.0,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 20.1,
+    "gain 2.35% (M10's aifoundry3 gamma)": 1.2,
+    "gain 3.20% (the x1.032 arm)": 0.0,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.0,
+    "level 0.15 C": 50.2,
+    "level 0.27 C (E154's and E166's level alone)": 4.1,
+    "level 0.40 C (E166's two-term a)": 0.1,
+    "mixed: E154's fit, then E166's": 0.0,
+    "none": 94.0
+   },
+   "why_not_a_clause": {
+    "adoption_ii_under_E166s_fit_pct": 79.1,
+    "entry_under_a_0p15C_level_pct": [
+     36.8,
+     18.1
+    ],
+    "entry_in_section_0p1s_case_pct": [
+     21.6,
+     1.1
+    ],
+    "note": "as a third not-wanted clause it would fail A2-6's (ii) under E166's fit, halve the entry under a 0.15 C level, and keep out a calibration that on entry still reads better than the chain unscaled in section 0.1's case; chosen with these figures in view; no rule changes"
+   }
+  },
+  "pair_by_name": {
+   "rule": "the pair and the later holds by hold name; a pair hold not scored, or the pair not run first, reads NOT SCORED (A3-6)",
+   "reference": "design_power_heat_a3.cal_by_name; design_power_heat_a2.session_cal (first two scored holds) is never used on a measured session",
+   "simulated_sessions_checked": 780000,
+   "differ_from_session_cal": 0,
+   "synthetic": {
+    "H_E not scored": {
+     "cal_by_name": "NOT SCORED: its pair hold H_E is not scored",
+     "scored_in_run_order": [
+      "Z",
+      "L1",
+      "S",
+      "L2"
+     ],
+     "session_cal": {
+      "a_C": -0.229,
+      "g": 0.0572,
+      "later": 2,
+      "pair": [
+       "Z",
+       "L1"
+      ],
+      "rms_c_C": 0.0
+     }
+    },
+    "L1 and S not scored": {
+     "cal_by_name": "NOT SCORED: 1 later hold(s) scored, fewer than 2",
+     "scored_in_run_order": [
+      "H_E",
+      "Z",
+      "L2"
+     ],
+     "session_cal": "NOT SCORED"
+    },
+    "S not scored": {
+     "cal_by_name": {
+      "a_C": -0.229,
+      "g": 0.0572,
+      "later": 2,
+      "pair": [
+       "H_E",
+       "Z"
+      ],
+      "rms_c_C": 0.0
+     },
+     "scored_in_run_order": [
+      "H_E",
+      "Z",
+      "L1",
+      "L2"
+     ],
+     "session_cal": {
+      "a_C": -0.229,
+      "g": 0.0572,
+      "later": 2,
+      "pair": [
+       "H_E",
+       "Z"
+      ],
+      "rms_c_C": 0.0
+     }
+    },
+    "Z not scored": {
+     "cal_by_name": "NOT SCORED: its pair hold Z is not scored",
+     "scored_in_run_order": [
+      "H_E",
+      "L1",
+      "S",
+      "L2"
+     ],
+     "session_cal": "NOT SCORED"
+    },
+    "every hold scored": {
+     "cal_by_name": {
+      "a_C": -0.229,
+      "g": 0.0572,
+      "later": 3,
+      "pair": [
+       "H_E",
+       "Z"
+      ],
+      "rms_c_C": 0.0
+     },
+     "scored_in_run_order": [
+      "H_E",
+      "Z",
+      "L1",
+      "S",
+      "L2"
+     ],
+     "session_cal": {
+      "a_C": -0.229,
+      "g": 0.0572,
+      "later": 3,
+      "pair": [
+       "H_E",
+       "Z"
+      ],
+      "rms_c_C": 0.0
+     }
+    },
+    "the pair run in the other order (Z, then H_E)": {
+     "cal_by_name": "NOT SCORED: its pair was not run first (a reordering, A2-7)",
+     "scored_in_run_order": [
+      "Z",
+      "H_E",
+      "L1",
+      "S",
+      "L2"
+     ],
+     "session_cal": {
+      "a_C": -0.229,
+      "g": 0.0572,
+      "later": 3,
+      "pair": [
+       "Z",
+       "H_E"
+      ],
+      "rms_c_C": 0.0
+     }
+    }
+   }
+  },
+  "t_point": {
+   "exact": {
+    "1": 12.70620473617441,
+    "2": 4.302652729749548,
+    "3": 3.182446305283681,
+    "4": 2.7764451051977748,
+    "5": 2.570581835636284
+   },
+   "committed_table": {
+    "1": 12.706,
+    "2": 4.303,
+    "3": 3.182,
+    "4": 2.776,
+    "5": 2.571
+   },
+   "changes_in_a2_cells": [
+    {
+     "cell": "sessions|A3 x1 (one aifoundry3 session, room 51.2 C)|gain 3.20% (the x1.032 arm)",
+     "changes": [
+      "N2 4.7 -> 4.8"
+     ]
+    }
+   ],
+   "changes_in_v2_one_session_table": [
+    "level 0.15 C|delta +0.3 C"
+   ],
+   "adoption_values_at_the_exact_point": {
+    "(i)": 0.7,
+    "(ii)": {
+     "both: E154's two-term fit (-0.229 C + 5.72%)": 97.8,
+     "both: E166's two-term fit (+0.395 C - 1.43%)": 99.1,
+     "mixed: E154's fit, then E166's": 98.2
+    },
+    "(iii)": 97.1,
+    "(iv)": 0.7
+   },
+   "adopted": true
+  },
+  "wording": {
+   "a": "A2-3's 98.5% for 'BOTH, and HM-AG's BOTH form says they differ' reads 98.4%; 98.5% is 'the sessions differ' over every verdict",
+   "b": "A2-3's list gains: BOTH, share, one term passes but fails refitted alone; GAIN or LEVEL, share, failing its size, interval or S7-W: nothing enters by A1-4, HM-CAL decides",
+   "c": "HM-HE (and N2) at the exact t point",
+   "d": "a_heat_over_minutes.entry.one_session as two sentences"
+  },
+  "both_and_differ": {
+   "0.0884": {
+    "BOTH_and_the_sessions_differ": 98.4,
+    "committed_v2_path_the_sessions_differ": 98.5,
+    "the_sessions_differ_any_verdict": 98.5
+   },
+   "0.1325": {
+    "BOTH_and_the_sessions_differ": 73.4,
+    "committed_v2_path_the_sessions_differ": 74.3,
+    "the_sessions_differ_any_verdict": 74.3
+   }
+  },
+  "card_time": "unchanged: aifoundry3 two sessions of 74.7 card-minutes on different days (149.4; cap 76 each), H_E then Z first",
+  "unchanged": "REGISTRATION.md, A1 and A2 with every file of 3c31a91d, f49b7ddd and d3d97fe2; every rule, threshold, clause, verdict, adoption value, hold, stop and card-minute figure; HM-LG, HM-AG, HM-E144, HM-HE, S7-W; (c) HC1 and (d) I8P with HC1-B and I8P-B; M10, M9, Q138(t)'s chain, pool 8, E171-E174's registrations"
+ },
+ "power_at_the_plan_a3": {
+  "source": "design-power-heat-a3.json (two aifoundry3 sessions at v2's exact plan; 5,000 draws a cell; v2's committed draws)",
+  "premise_rows_sigma_c": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)|H_E read by the chain (e(H_E) = noise only)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     1.1,
+     30.6,
+     68.3
+    ],
+    "N1_pct": 77.0,
+    "N2_exact_t_pct": 27.9,
+    "HM_E144_repeats_every_session_pct": 94.2,
+    "calibration_enters_pct": 0.8,
+    "A1_4_common_term_pct": 1.1,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2521,
+     "calibrated": 0.3094,
+     "calibrated_when_it_enters": 0.2217,
+     "chain_unscaled_when_it_enters": 0.2703
+    }
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)|H_E read by the chain (e(H_E) = noise only)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     99.5,
+     0.5,
+     0.0
+    ],
+    "N1_pct": 0.2,
+    "N2_exact_t_pct": 2.8,
+    "HM_E144_repeats_every_session_pct": 93.9,
+    "calibration_enters_pct": 1.3,
+    "A1_4_common_term_pct": 98.5,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.3049,
+     "calibrated": 0.1569,
+     "calibrated_when_it_enters": 0.091,
+     "chain_unscaled_when_it_enters": 0.2937
+    }
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)|H_E read by the chain (e(H_E) = noise only)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     15.3,
+     66.2,
+     18.5
+    ],
+    "N1_pct": 29.5,
+    "N2_exact_t_pct": 6.9,
+    "HM_E144_repeats_every_session_pct": 94.4,
+    "calibration_enters_pct": 13.6,
+    "A1_4_common_term_pct": 1.3,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.1979,
+     "calibrated": 0.1995,
+     "calibrated_when_it_enters": 0.1523,
+     "chain_unscaled_when_it_enters": 0.2048
+    }
+   },
+   "gain 3.20% (the x1.032 arm)|H_E -0.30 C": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     72.6,
+     26.5,
+     0.8
+    ],
+    "N1_pct": 5.2,
+    "N2_exact_t_pct": 6.0,
+    "HM_E144_repeats_every_session_pct": 65.1,
+    "calibration_enters_pct": 64.8,
+    "A1_4_common_term_pct": 4.4,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.259,
+     "calibrated": 0.1989,
+     "calibrated_when_it_enters": 0.1859,
+     "chain_unscaled_when_it_enters": 0.2613
+    }
+   },
+   "gain 3.20% (the x1.032 arm)|H_E -0.50 C": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     2.3,
+     39.6,
+     58.1
+    ],
+    "N1_pct": 70.4,
+    "N2_exact_t_pct": 25.2,
+    "HM_E144_repeats_every_session_pct": 68.7,
+    "calibration_enters_pct": 2.0,
+    "A1_4_common_term_pct": 0.1,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.259,
+     "calibrated": 0.3035,
+     "calibrated_when_it_enters": 0.2121,
+     "chain_unscaled_when_it_enters": 0.257
+    }
+   },
+   "gain 3.20% (the x1.032 arm)|H_E read by the chain (e(H_E) = noise only)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     20.1,
+     62.5,
+     17.4
+    ],
+    "N1_pct": 29.8,
+    "N2_exact_t_pct": 15.5,
+    "HM_E144_repeats_every_session_pct": 94.2,
+    "calibration_enters_pct": 17.8,
+    "A1_4_common_term_pct": 0.2,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.259,
+     "calibrated": 0.2562,
+     "calibrated_when_it_enters": 0.2023,
+     "chain_unscaled_when_it_enters": 0.2599
+    }
+   },
+   "gain 3.20% (the x1.032 arm)|fp32 pair +0.15 C (H_E and Z)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     72.5,
+     20.9,
+     6.6
+    ],
+    "N1_pct": 20.2,
+    "N2_exact_t_pct": 0.9,
+    "HM_E144_repeats_every_session_pct": 0.0,
+    "calibration_enters_pct": 13.4,
+    "A1_4_common_term_pct": 65.5,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.259,
+     "calibrated": 0.1775,
+     "calibrated_when_it_enters": 0.1833,
+     "chain_unscaled_when_it_enters": 0.2668
+    }
+   },
+   "gain 3.20% (the x1.032 arm)|fp32 pair -0.15 C (H_E and Z)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     83.4,
+     16.3,
+     0.4
+    ],
+    "N1_pct": 3.1,
+    "N2_exact_t_pct": 1.1,
+    "HM_E144_repeats_every_session_pct": 4.4,
+    "calibration_enters_pct": 20.8,
+    "A1_4_common_term_pct": 66.7,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.259,
+     "calibrated": 0.1806,
+     "calibrated_when_it_enters": 0.2055,
+     "chain_unscaled_when_it_enters": 0.2767
+    }
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)|H_E read by the chain (e(H_E) = noise only)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     25.7,
+     60.5,
+     13.8
+    ],
+    "N1_pct": 26.1,
+    "N2_exact_t_pct": 39.0,
+    "HM_E144_repeats_every_session_pct": 94.3,
+    "calibration_enters_pct": 18.5,
+    "A1_4_common_term_pct": 0.0,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.356,
+     "calibrated": 0.3472,
+     "calibrated_when_it_enters": 0.2913,
+     "chain_unscaled_when_it_enters": 0.3528
+    }
+   },
+   "level 0.15 C|H_E read by the chain (e(H_E) = noise only)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     49.9,
+     47.4,
+     2.7
+    ],
+    "N1_pct": 8.3,
+    "N2_exact_t_pct": 1.3,
+    "HM_E144_repeats_every_session_pct": 94.0,
+    "calibration_enters_pct": 17.1,
+    "A1_4_common_term_pct": 40.7,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.1703,
+     "calibrated": 0.1322,
+     "calibrated_when_it_enters": 0.124,
+     "chain_unscaled_when_it_enters": 0.1808
+    }
+   },
+   "level 0.27 C (E154's and E166's level alone)|H_E read by the chain (e(H_E) = noise only)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     93.2,
+     6.7,
+     0.1
+    ],
+    "N1_pct": 1.3,
+    "N2_exact_t_pct": 4.7,
+    "HM_E144_repeats_every_session_pct": 94.1,
+    "calibration_enters_pct": 10.1,
+    "A1_4_common_term_pct": 84.8,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2819,
+     "calibrated": 0.1836,
+     "calibrated_when_it_enters": 0.2263,
+     "chain_unscaled_when_it_enters": 0.2909
+    }
+   },
+   "level 0.40 C (E166's two-term a)|H_E read by the chain (e(H_E) = noise only)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     99.6,
+     0.4,
+     0.0
+    ],
+    "N1_pct": 0.3,
+    "N2_exact_t_pct": 13.4,
+    "HM_E144_repeats_every_session_pct": 93.6,
+    "calibration_enters_pct": 2.2,
+    "A1_4_common_term_pct": 97.0,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.402,
+     "calibrated": 0.2454,
+     "calibrated_when_it_enters": 0.3381,
+     "chain_unscaled_when_it_enters": 0.4196
+    }
+   },
+   "mixed: E154's fit, then E166's|H_E -0.30 C": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     85.5,
+     14.0,
+     0.5
+    ],
+    "N1_pct": 2.8,
+    "N2_exact_t_pct": 7.3,
+    "HM_E144_repeats_every_session_pct": 15.4,
+    "calibration_enters_pct": 70.1,
+    "A1_4_common_term_pct": 11.5,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2781,
+     "calibrated": 0.198,
+     "calibrated_when_it_enters": 0.1824,
+     "chain_unscaled_when_it_enters": 0.2765
+    }
+   },
+   "mixed: E154's fit, then E166's|H_E -0.50 C": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     8.9,
+     51.0,
+     40.1
+    ],
+    "N1_pct": 53.9,
+    "N2_exact_t_pct": 26.6,
+    "HM_E144_repeats_every_session_pct": 11.0,
+    "calibration_enters_pct": 6.3,
+    "A1_4_common_term_pct": 4.0,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2781,
+     "calibrated": 0.3033,
+     "calibrated_when_it_enters": 0.2279,
+     "chain_unscaled_when_it_enters": 0.2815
+    }
+   },
+   "mixed: E154's fit, then E166's|H_E read by the chain (e(H_E) = noise only)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     37.1,
+     53.1,
+     9.9
+    ],
+    "N1_pct": 60.0,
+    "N2_exact_t_pct": 11.5,
+    "HM_E144_repeats_every_session_pct": 94.1,
+    "calibration_enters_pct": 21.6,
+    "A1_4_common_term_pct": 6.2,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2781,
+     "calibrated": 0.2561,
+     "calibrated_when_it_enters": 0.2125,
+     "chain_unscaled_when_it_enters": 0.2817
+    }
+   },
+   "mixed: E154's fit, then E166's|fp32 pair +0.15 C (H_E and Z)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     80.1,
+     16.0,
+     3.9
+    ],
+    "N1_pct": 15.8,
+    "N2_exact_t_pct": 1.3,
+    "HM_E144_repeats_every_session_pct": 0.0,
+    "calibration_enters_pct": 72.8,
+    "A1_4_common_term_pct": 8.6,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2781,
+     "calibrated": 0.1789,
+     "calibrated_when_it_enters": 0.1618,
+     "chain_unscaled_when_it_enters": 0.2879
+    }
+   },
+   "mixed: E154's fit, then E166's|fp32 pair -0.15 C (H_E and Z)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     92.8,
+     7.1,
+     0.1
+    ],
+    "N1_pct": 3.1,
+    "N2_exact_t_pct": 1.5,
+    "HM_E144_repeats_every_session_pct": 0.4,
+    "calibration_enters_pct": 77.3,
+    "A1_4_common_term_pct": 16.5,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.2781,
+     "calibrated": 0.1784,
+     "calibrated_when_it_enters": 0.166,
+     "chain_unscaled_when_it_enters": 0.2762
+    }
+   },
+   "none|H_E -0.30 C": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     0.2,
+     6.3,
+     93.5
+    ],
+    "N1_pct": 95.9,
+    "N2_exact_t_pct": 6.2,
+    "HM_E144_repeats_every_session_pct": 1.2,
+    "calibration_enters_pct": 0.0,
+    "A1_4_common_term_pct": 6.5,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.0829,
+     "calibrated": 0.1986,
+     "calibrated_when_it_enters": 0.0882,
+     "chain_unscaled_when_it_enters": 0.1258
+    }
+   },
+   "none|H_E -0.50 C": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     0.0,
+     0.2,
+     99.8
+    ],
+    "N1_pct": 99.9,
+    "N2_exact_t_pct": 26.8,
+    "HM_E144_repeats_every_session_pct": 0.0,
+    "calibration_enters_pct": 0.0,
+    "A1_4_common_term_pct": 4.9,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.0829,
+     "calibrated": 0.3035,
+     "calibrated_when_it_enters": null,
+     "chain_unscaled_when_it_enters": null
+    }
+   },
+   "none|H_E read by the chain (e(H_E) = noise only)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     0.7,
+     72.2,
+     27.1
+    ],
+    "N1_pct": 34.7,
+    "N2_exact_t_pct": 0.3,
+    "HM_E144_repeats_every_session_pct": 94.0,
+    "calibration_enters_pct": 0.7,
+    "A1_4_common_term_pct": 0.6,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.0829,
+     "calibrated": 0.1042,
+     "calibrated_when_it_enters": 0.0584,
+     "chain_unscaled_when_it_enters": 0.1092
+    }
+   },
+   "none|fp32 pair +0.15 C (H_E and Z)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     0.4,
+     11.0,
+     88.6
+    ],
+    "N1_pct": 92.0,
+    "N2_exact_t_pct": 1.4,
+    "HM_E144_repeats_every_session_pct": 50.4,
+    "calibration_enters_pct": 0.3,
+    "A1_4_common_term_pct": 0.7,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.0829,
+     "calibrated": 0.1786,
+     "calibrated_when_it_enters": 0.0638,
+     "chain_unscaled_when_it_enters": 0.1139
+    }
+   },
+   "none|fp32 pair -0.15 C (H_E and Z)": {
+    "HM_CAL_BETTER_NOT_RESOLVED_WORSE_pct": [
+     0.4,
+     11.7,
+     87.9
+    ],
+    "N1_pct": 91.5,
+    "N2_exact_t_pct": 1.3,
+    "HM_E144_repeats_every_session_pct": 47.7,
+    "calibration_enters_pct": 0.3,
+    "A1_4_common_term_pct": 0.5,
+    "rms_later_median_C": {
+     "chain_unscaled": 0.0829,
+     "calibrated": 0.1792,
+     "calibrated_when_it_enters": 0.0674,
+     "chain_unscaled_when_it_enters": 0.1063
+    }
+   }
+  },
+  "hm_e144_at_the_plan": {
+   "0.0884": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 97.8,
+      "the calibration enters": 5.2
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 98.6,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 1.3,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 0.1
+     },
+     "repeats_and_the_calibration_enters": 0.0,
+     "repeats_in_every_session": 0.0,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": null,
+      "chain_unscaled": null
+     }
+    },
+    "both: E166's two-term fit (+0.395 C - 1.43%)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 79.1,
+      "the calibration enters": 5.6
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 79.6,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 0.2,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 0.0,
+      "HM-E144 REPEATS | HM-CAL BETTER": 20.1,
+      "HM-E144 REPEATS | HM-CAL NOT RESOLVED": 0.0
+     },
+     "repeats_and_the_calibration_enters": 0.7,
+     "repeats_in_every_session": 20.1,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.0644,
+       "p05": 0.0321,
+       "p95": 0.1036
+      },
+      "chain_unscaled": {
+       "median": 0.2972,
+       "p05": 0.2369,
+       "p95": 0.3327
+      }
+     }
+    },
+    "gain 2.35% (M10's aifoundry3 gamma)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 87.8,
+      "the calibration enters": 25.4
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 88.7,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 9.4,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 0.7,
+      "HM-E144 REPEATS | HM-CAL BETTER": 1.0,
+      "HM-E144 REPEATS | HM-CAL NOT RESOLVED": 0.2
+     },
+     "repeats_and_the_calibration_enters": 0.8,
+     "repeats_in_every_session": 1.2,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.1321,
+       "p05": 0.0917,
+       "p95": 0.1819
+      },
+      "chain_unscaled": {
+       "median": 0.2062,
+       "p05": 0.1477,
+       "p95": 0.2466
+      }
+     }
+    },
+    "gain 3.20% (the x1.032 arm)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 97.6,
+      "the calibration enters": 11.7
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 98.5,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 1.5,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 0.1
+     },
+     "repeats_and_the_calibration_enters": 0.0,
+     "repeats_in_every_session": 0.0,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": null,
+      "chain_unscaled": null
+     }
+    },
+    "gain 4.52% (M10's aifoundry2 gamma)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 99.7,
+      "the calibration enters": 7.0
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 100.0,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 0.0
+     },
+     "repeats_and_the_calibration_enters": 0.0,
+     "repeats_in_every_session": 0.0,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": null,
+      "chain_unscaled": null
+     }
+    },
+    "level 0.15 C": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 35.1,
+      "the calibration enters": 18.1
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 35.7,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 12.4,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 1.7,
+      "HM-E144 REPEATS | HM-CAL BETTER": 40.9,
+      "HM-E144 REPEATS | HM-CAL NOT RESOLVED": 9.0,
+      "HM-E144 REPEATS | HM-CAL WORSE": 0.3
+     },
+     "repeats_and_the_calibration_enters": 18.6,
+     "repeats_in_every_session": 50.2,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.1093,
+       "p05": 0.0585,
+       "p95": 0.1648
+      },
+      "chain_unscaled": {
+       "median": 0.1777,
+       "p05": 0.1297,
+       "p95": 0.2345
+      }
+     }
+    },
+    "level 0.27 C (E154's and E166's level alone)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 94.7,
+      "the calibration enters": 11.1
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 95.4,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 0.5,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 0.0,
+      "HM-E144 REPEATS | HM-CAL BETTER": 4.1,
+      "HM-E144 REPEATS | HM-CAL NOT RESOLVED": 0.0
+     },
+     "repeats_and_the_calibration_enters": 0.3,
+     "repeats_in_every_session": 4.1,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.1343,
+       "p05": 0.0388,
+       "p95": 0.2301
+      },
+      "chain_unscaled": {
+       "median": 0.2869,
+       "p05": 0.212,
+       "p95": 0.3474
+      }
+     }
+    },
+    "level 0.40 C (E166's two-term a)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 99.6,
+      "the calibration enters": 6.3
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 99.9,
+      "HM-E144 REPEATS | HM-CAL BETTER": 0.1
+     },
+     "repeats_and_the_calibration_enters": 0.0,
+     "repeats_in_every_session": 0.1,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": null,
+      "chain_unscaled": null
+     }
+    },
+    "mixed: E154's fit, then E166's": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 98.2,
+      "the calibration enters": 97.1
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 99.2,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 0.7,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 0.1
+     },
+     "repeats_and_the_calibration_enters": 0.0,
+     "repeats_in_every_session": 0.0,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": null,
+      "chain_unscaled": null
+     }
+    },
+    "none": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 0.1,
+      "the calibration enters": 0.1
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 0.1,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 2.2,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 3.7,
+      "HM-E144 REPEATS | HM-CAL BETTER": 0.6,
+      "HM-E144 REPEATS | HM-CAL NOT RESOLVED": 70.0,
+      "HM-E144 REPEATS | HM-CAL WORSE": 23.4
+     },
+     "repeats_and_the_calibration_enters": 0.6,
+     "repeats_in_every_session": 94.0,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.0568,
+       "p05": 0.029,
+       "p95": 0.1002
+      },
+      "chain_unscaled": {
+       "median": 0.1067,
+       "p05": 0.078,
+       "p95": 0.139
+      }
+     }
+    }
+   },
+   "0.1325": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 84.2,
+      "the calibration enters": 5.9
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 87.5,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 10.0,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 2.6,
+      "HM-E144 REPEATS | HM-CAL BETTER": 0.0
+     },
+     "repeats_and_the_calibration_enters": 0.0,
+     "repeats_in_every_session": 0.0,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.1836,
+       "p05": 0.1836,
+       "p95": 0.1836
+      },
+      "chain_unscaled": {
+       "median": 0.2432,
+       "p05": 0.2432,
+       "p95": 0.2432
+      }
+     }
+    },
+    "both: E166's two-term fit (+0.395 C - 1.43%)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 72.5,
+      "the calibration enters": 10.2
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 74.9,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 3.8,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 0.8,
+      "HM-E144 REPEATS | HM-CAL BETTER": 20.2,
+      "HM-E144 REPEATS | HM-CAL NOT RESOLVED": 0.3,
+      "HM-E144 REPEATS | HM-CAL WORSE": 0.1
+     },
+     "repeats_and_the_calibration_enters": 1.7,
+     "repeats_in_every_session": 20.6,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.1636,
+       "p05": 0.0513,
+       "p95": 0.3059
+      },
+      "chain_unscaled": {
+       "median": 0.3151,
+       "p05": 0.2213,
+       "p95": 0.4056
+      }
+     }
+    },
+    "gain 2.35% (M10's aifoundry3 gamma)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 61.8,
+      "the calibration enters": 35.0
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 64.0,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 24.6,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 7.1,
+      "HM-E144 REPEATS | HM-CAL BETTER": 2.5,
+      "HM-E144 REPEATS | HM-CAL NOT RESOLVED": 1.7,
+      "HM-E144 REPEATS | HM-CAL WORSE": 0.2
+     },
+     "repeats_and_the_calibration_enters": 2.3,
+     "repeats_in_every_session": 4.4,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.1604,
+       "p05": 0.0875,
+       "p95": 0.242
+      },
+      "chain_unscaled": {
+       "median": 0.2281,
+       "p05": 0.1591,
+       "p95": 0.3084
+      }
+     }
+    },
+    "gain 3.20% (the x1.032 arm)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 84.9,
+      "the calibration enters": 32.3
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 87.6,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 9.9,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 2.2,
+      "HM-E144 REPEATS | HM-CAL BETTER": 0.2,
+      "HM-E144 REPEATS | HM-CAL NOT RESOLVED": 0.0
+     },
+     "repeats_and_the_calibration_enters": 0.2,
+     "repeats_in_every_session": 0.3,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.1995,
+       "p05": 0.1248,
+       "p95": 0.2475
+      },
+      "chain_unscaled": {
+       "median": 0.2765,
+       "p05": 0.2267,
+       "p95": 0.3092
+      }
+     }
+    },
+    "gain 4.52% (M10's aifoundry2 gamma)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 96.4,
+      "the calibration enters": 14.1
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 98.3,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 1.4,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 0.2
+     },
+     "repeats_and_the_calibration_enters": 0.0,
+     "repeats_in_every_session": 0.0,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": null,
+      "chain_unscaled": null
+     }
+    },
+    "level 0.15 C": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 28.5,
+      "the calibration enters": 21.0
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 29.7,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 20.8,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 9.4,
+      "HM-E144 REPEATS | HM-CAL BETTER": 20.7,
+      "HM-E144 REPEATS | HM-CAL NOT RESOLVED": 16.9,
+      "HM-E144 REPEATS | HM-CAL WORSE": 2.4
+     },
+     "repeats_and_the_calibration_enters": 12.6,
+     "repeats_in_every_session": 40.0,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.1503,
+       "p05": 0.0803,
+       "p95": 0.2244
+      },
+      "chain_unscaled": {
+       "median": 0.2149,
+       "p05": 0.1523,
+       "p95": 0.2894
+      }
+     }
+    },
+    "level 0.27 C (E154's and E166's level alone)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 81.2,
+      "the calibration enters": 31.4
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 83.6,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 5.8,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 1.4,
+      "HM-E144 REPEATS | HM-CAL BETTER": 8.8,
+      "HM-E144 REPEATS | HM-CAL NOT RESOLVED": 0.4,
+      "HM-E144 REPEATS | HM-CAL WORSE": 0.0
+     },
+     "repeats_and_the_calibration_enters": 2.8,
+     "repeats_in_every_session": 9.2,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.1942,
+       "p05": 0.08,
+       "p95": 0.2831
+      },
+      "chain_unscaled": {
+       "median": 0.3001,
+       "p05": 0.2218,
+       "p95": 0.387
+      }
+     }
+    },
+    "level 0.40 C (E166's two-term a)": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 97.6,
+      "the calibration enters": 12.7
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 98.9,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 0.4,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 0.1,
+      "HM-E144 REPEATS | HM-CAL BETTER": 0.5
+     },
+     "repeats_and_the_calibration_enters": 0.0,
+     "repeats_in_every_session": 0.5,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.34,
+       "p05": 0.34,
+       "p95": 0.34
+      },
+      "chain_unscaled": {
+       "median": 0.4394,
+       "p05": 0.4394,
+       "p95": 0.4394
+      }
+     }
+    },
+    "mixed: E154's fit, then E166's": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 88.3,
+      "the calibration enters": 75.2
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 91.4,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 7.0,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 1.4,
+      "HM-E144 REPEATS | HM-CAL BETTER": 0.1
+     },
+     "repeats_and_the_calibration_enters": 0.1,
+     "repeats_in_every_session": 0.1,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.2036,
+       "p05": 0.1801,
+       "p95": 0.213
+      },
+      "chain_unscaled": {
+       "median": 0.2632,
+       "p05": 0.2517,
+       "p95": 0.3142
+      }
+     }
+    },
+    "none": {
+     "if_it_were_a_third_clause_N3": {
+      "BETTER_no_clause_met": 0.8,
+      "the calibration enters": 0.8
+     },
+     "joint_with_HM_CAL": {
+      "HM-E144 DOES NOT REPEAT | HM-CAL BETTER": 0.9,
+      "HM-E144 DOES NOT REPEAT | HM-CAL NOT RESOLVED": 8.6,
+      "HM-E144 DOES NOT REPEAT | HM-CAL WORSE": 17.2,
+      "HM-E144 REPEATS | HM-CAL BETTER": 2.3,
+      "HM-E144 REPEATS | HM-CAL NOT RESOLVED": 45.7,
+      "HM-E144 REPEATS | HM-CAL WORSE": 25.4
+     },
+     "repeats_and_the_calibration_enters": 2.1,
+     "repeats_in_every_session": 73.4,
+     "rms_later_C_when_it_repeats_and_enters": {
+      "calibrated": {
+       "median": 0.0946,
+       "p05": 0.0525,
+       "p95": 0.1648
+      },
+      "chain_unscaled": {
+       "median": 0.146,
+       "p05": 0.1006,
+       "p95": 0.2129
+      }
+     }
+    }
+   }
+  },
+  "a2_cells_reproduced": {
+   "cells": 74,
+   "equal": 74
+  },
+  "checks": {
+   "'the sessions differ' over every verdict equals design-power-heat-v2.json's path": true,
+   "every cell of design-power-heat-a2.json re-run with A2's functions equals the committed cell": true,
+   "noise as committed (A2)": true,
+   "the pair by name equals session_cal on every simulated session (every hold scored)": true,
+   "the pair by name reads each synthetic session as A2-1 says": true,
+   "the plan's P equals design-power-heat-a2.json's plan_P_C": true,
+   "truth labels as committed (v1)": true,
+   "v2's one-session H_E readings re-run at the committed point equal design-power-heat-v2.json's he": true
+  }
+ },
+ "precedence_a3": "A3 is committed before every output it governs (no M11 kit, scorer, fit, hold, run number or claim exists; no E171-E174 data in any ref). It changes no statistic, threshold or clause of HM-CAL, so HM-CAL's precedence stays A2's, and nothing of (c) HC1 or (d) I8P.",
+ "a4_int8_pair_HM_CAL_I8": {
+  "amendment": "A4, tools/claims-v3/m11/REGISTRATION.md.dated-note-A4.md",
+  "answers": "the critic of Q142(h2), (a2) and (r3), fault 1 (a design gap: A3 quantified the case that breaks A2's premise, H_E read by the chain as E144's H_H was, and registered no reading that survives it) and its next rank 3",
+  "card_kind": "aifoundry3 only (aifoundry2's A2 pair and later holds are all int8.neg_ones: section 0.1's fp32 and duty-cycle case does not arise)",
+  "per_session": {
+   "pair": "by hold name: L1 (int8.full) and S (int8.neg_ones), both on E97's natural chain",
+   "later": "by hold name: L2 (int8.full); one later hold a session",
+   "line": "g = (e_L1 - e_S) / (P_L1 - P_S), a = e_S - g * P_S; nothing of L2 enters the line",
+   "prediction_blind_given_the_watts": "R_hat(L2) = P(L2) + a + g * P(L2); e_c(L2) = e(L2) - a - g * P(L2)",
+   "read_if": "L1, S and L2 scored (section 1); L1 and S both ended before L2's first launch (launch records); the pair spans at least 3.0 C of P; L2's P inside the pair's span (w = (P_L2 - P_S) / (P_L1 - P_S) in [0, 1]); else NOT SCORED with the reason",
+   "min_pair_span_P_C": 3.0,
+   "why_not_6C": "the plan's span is 6.211 / 6.307 C, only 0.2-0.3 C over HM-LG's 6.0 C; L2 is read by interpolation, so its noise sigma_c * sqrt(1 + (1 - w)^2 + w^2) is at most sqrt(2) sigma_c whatever the span",
+   "plan_w": [
+    0.7881,
+    0.7877
+   ],
+   "plan_span_C": [
+    6.211,
+    6.307
+   ]
+  },
+  "statistic": "D_I8 = RMS_c - RMS_u over the read sessions' L2 holds, pooled (n_L holds)",
+  "threshold": {
+   "tau": "sigma_c / sqrt(n_L), sigma_c 0.0884 C (section 7)",
+   "tau_at_the_plan_C": 0.0625,
+   "tau_one_session_C": 0.0884
+  },
+  "verdicts": {
+   "BETTER": "D_I8 <= -tau",
+   "WORSE": "D_I8 >= +tau",
+   "NOT RESOLVED": "otherwise",
+   "NOT SCORED": "no session read"
+  },
+  "reported_per_session": "a, g, the span and w; e(L2), e_c(L2), d = |e_c(L2)| - |e(L2)|; the session's own verdict at sigma_c",
+  "blind_error_delivered": "RMS_c(I8), with its chi-square interval at n_L degrees of freedom (approximate, wide at n_L 2), beside RMS_u, the x1.032 arm and A2's line on L2, and the floor sigma_c * sqrt(mean 1 + (1 - w)^2 + w^2)",
+  "floor_if_the_premise_holds_C": {
+   "A3 x1 (one aifoundry3 session, room 51.2 C)": 0.1141,
+   "A3 x2 (the plan: two aifoundry3 sessions, rooms 51.2 and 52.0 C)": 0.114,
+   "A3 x3 (three aifoundry3 sessions)": 0.114
+  },
+  "scope": "int8 holds on E97's natural chain whose P lies inside the session's L1-S span",
+  "not_wanted": {
+   "N1_I8": "a read session with |e_c(L2)| - |e(L2)| >= sigma_c / sqrt(1) = 0.0884 C",
+   "one_way_only": "a clause met makes HM-CAL-I8 a reported arm, never the primary; a clause never brings a term in"
+  },
+  "entry": {
+   "order": "A1-4's path, then A2-3 (exact t point), both unchanged; HM-CAL-I8 after them",
+   "E1": "A1-4's path carries nothing",
+   "E2": "A2's calibration does not enter (HM-CAL not BETTER, N1 or N2 met, or NOT SCORED)",
+   "E3": "HM-E144 reads REPEATS (|e(H_E)| / R(H_E) <= 1.5% in every session that ran H_E)",
+   "E4_prime": "the chain misses the int8 holds: X2 = sum over the read sessions' L1, S and L2 of (e / sigma_c)^2 above chi-square's 95% point at 3k degrees of freedom (k read sessions; 12.5916 at 6); it reads no fp32 hold",
+   "E5": "at least 2 sessions read by HM-CAL-I8 (one session: nothing enters, a candidate)",
+   "E6": "HM-CAL-I8 reads BETTER and N1-I8 is not met",
+   "chi2_95_points": {
+    "3": 7.814727903251166,
+    "6": 12.591587243743945,
+    "9": 16.918977604620437
+   },
+   "when_it_enters": "a session that runs L1 and S before a later int8 hold on E97's natural chain has that hold's rise predicted as P + a + g * P from its own pair's line, inside the pair's span; M11 states RMS_c(I8) as that prediction's error",
+   "otherwise": "A1-4's or A2-3's outcome; HM-CAL-I8 reported beside (a reported arm)",
+   "x1p032_arm": "A1-4 (d)'s table, unchanged in every case"
+  },
+  "how_fixed": {
+   "rule_fixed_PST": "12:02:52 (before any A4 code ran), with E4 = HM-LG's reading (GAIN, LEVEL or BOTH, or NOT SEPARATED with its null rejected) and the adoption criteria",
+   "development_run_PST": "12:05:45-12:05:52, 300 draws a cell, scratch only: section 0.1's case combined entry 42.0%, E4 blocking 47.3% (HM-LG's null not rejected: H_E's near-zero miss inflates the residual)",
+   "revision_PST": "12:07:32, the only one: E4 -> E4' (the int8 holds' own null test); nothing else changed",
+   "full_run_PST": "12:08:14-12:09:50 (scratch)",
+   "committed_run_PST": "12:10:36-12:12:25 (JSON byte-identical)",
+   "route_as_first_fixed": {
+    "values": {
+     "(i)": 0.2,
+     "(ii)": 36.8,
+     "(iii)": {
+      "H_E +0.30 C": 0.0,
+      "H_E +0.50 C": 0.0,
+      "H_E -0.30 C": 0.0,
+      "H_E -0.50 C": 0.0,
+      "Z +0.15 C": 0.3,
+      "Z +0.30 C": 0.3,
+      "fp32 pair +0.15 C (H_E and Z)": 0.1,
+      "fp32 pair -0.15 C (H_E and Z)": 0.1
+     }
+    },
+    "would_be_adopted": false
+   }
+  },
+  "adoption": {
+   "rule": "at sigma_c on two aifoundry3 sessions at the exact plan: (i) with no effect the route enters at most 5%; (ii) in section 0.1's case on E154's fit then E166's a per-session calibration (A2's or A4's) enters at least 80%; (iii) in each premise row where only the fp32 pair misses the route enters at most 5%; else a reported arm only",
+   "values": {
+    "(i)": 0.4,
+    "(ii)": 81.0,
+    "(iii)": {
+     "H_E +0.30 C": 0.0,
+     "H_E +0.50 C": 0.0,
+     "H_E -0.30 C": 0.0,
+     "H_E -0.50 C": 0.0,
+     "Z +0.15 C": 0.3,
+     "Z +0.30 C": 0.3,
+     "fp32 pair +0.15 C (H_E and Z)": 0.1,
+     "fp32 pair -0.15 C (H_E and Z)": 0.2
+    }
+   },
+   "adopted": true
+  },
+  "qualifies": {
+   "a3_flag_HM_E144": "A3-5's 'reported, never a clause: it decides nothing' reads: never a clause of HM-CAL (A2); it is condition E3 of HM-CAL-I8's entry route"
+  },
+  "kit_and_scorer": "the kit runs section 5's order H_E, Z, L1, S, L2 with each hold's name and launch times; the scorer selects L1, S, L2 by name, checks order and span, writes a and g before reading L2's e, prints HM-CAL-I8 per session and pooled with E4''s X2, A4-3's outcome beside A1-4's and A2-3's, RMS_c(I8) with its interval, the floor, A2's line and the arm on L2; self-tests on synthetic sessions and one committed cell (section 0.1's case on the likeliest pattern: BETTER 89.5, the route enters 59.4, a per-session calibration 81.0); checks SHA256SUMS, -m11, -a1, -a2, -a3 and -a4 first",
+  "card_time": "unchanged: aifoundry3 two sessions of 74.7 card-minutes on different days (149.4; cap 76 each), section 5's order; aifoundry2 optional; no new hold",
+  "precedence": "HM-CAL-I8 counts as blind only if A4's commit precedes the first launch record of every M11 session it reads (git and the launch records' times, section 11); otherwise post hoc",
+  "unchanged": "REGISTRATION.md, A1, A2 and A3 with every file of 3c31a91d, f49b7ddd, d3d97fe2 and ed24bc6e; every rule, threshold, clause, verdict, adoption value, hold, stop and card-minute figure they state; (c) HC1 and (d) I8P; M10, M9, Q138(t)'s chain, pool 8 and E171-E174's registrations"
+ },
+ "power_at_the_plan_a4": {
+  "source": "design-power-heat-a4.json (two aifoundry3 sessions at v2's exact plan; 5,000 draws a cell; v2's committed draws)",
+  "sigma_c_H_E_read_by_the_chain": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "HM_CAL_I8": {
+     "BETTER": 88.5,
+     "NOT RESOLVED": 10.6,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.9
+    },
+    "N1_I8_met": 7.4,
+    "HM_E144_repeats": 94.2,
+    "carries": {
+     "A1-4's common term": 1.1,
+     "A2's calibration": 0.8,
+     "HM-CAL-I8 enters": 80.6,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 9.9,
+     "nothing from A4: HM-CAL-I8 WORSE": 0.9,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 5.2,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 1.6,
+     "nothing from A4: the int8 holds' misses read as noise (E4')": 0.0
+    },
+    "a_per_session_calibration_enters": 81.5,
+    "as_first_fixed": 1.0,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2595,
+      "p05": 0.16,
+      "p95": 0.3596
+     },
+     "I8_calibrated": {
+      "median": 0.0954,
+      "p05": 0.0257,
+      "p95": 0.1928
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.3301,
+      "p05": 0.2046,
+      "p95": 0.4546
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0874,
+      "p05": 0.0232,
+      "p95": 0.1756
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.2689,
+      "p05": 0.1878,
+      "p95": 0.3644
+     }
+    }
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "HM_CAL_I8": {
+     "BETTER": 91.0,
+     "NOT RESOLVED": 8.3,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.7
+    },
+    "N1_I8_met": 6.4,
+    "HM_E144_repeats": 93.9,
+    "carries": {
+     "A1-4's common term": 98.5,
+     "A2's calibration": 1.3,
+     "HM-CAL-I8 enters": 0.1,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 0.1
+    },
+    "a_per_session_calibration_enters": 1.4,
+    "as_first_fixed": 1.3,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2834,
+      "p05": 0.1783,
+      "p95": 0.3844
+     },
+     "I8_calibrated": {
+      "median": 0.0947,
+      "p05": 0.0262,
+      "p95": 0.2005
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.1566,
+      "p05": 0.0493,
+      "p95": 0.2771
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0655,
+      "p05": 0.0227,
+      "p95": 0.1104
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.3482,
+      "p05": 0.2703,
+      "p95": 0.409
+     }
+    }
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "HM_CAL_I8": {
+     "BETTER": 75.0,
+     "NOT RESOLVED": 22.0,
+     "NOT SCORED": 0.0,
+     "WORSE": 3.0
+    },
+    "N1_I8_met": 12.7,
+    "HM_E144_repeats": 94.4,
+    "carries": {
+     "A1-4's common term": 1.3,
+     "A2's calibration": 13.6,
+     "HM-CAL-I8 enters": 58.7,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 17.4,
+     "nothing from A4: HM-CAL-I8 WORSE": 2.5,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 4.0,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 0.9,
+     "nothing from A4: the int8 holds' misses read as noise (E4')": 1.7
+    },
+    "a_per_session_calibration_enters": 72.3,
+    "as_first_fixed": 14.3,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2075,
+      "p05": 0.1084,
+      "p95": 0.31
+     },
+     "I8_calibrated": {
+      "median": 0.0951,
+      "p05": 0.0263,
+      "p95": 0.2009
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.2053,
+      "p05": 0.0894,
+      "p95": 0.3292
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0792,
+      "p05": 0.0229,
+      "p95": 0.1726
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.2245,
+      "p05": 0.1518,
+      "p95": 0.3198
+     }
+    }
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "HM_CAL_I8": {
+     "BETTER": 90.7,
+     "NOT RESOLVED": 8.3,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.9
+    },
+    "N1_I8_met": 6.7,
+    "HM_E144_repeats": 94.2,
+    "carries": {
+     "A1-4's common term": 0.2,
+     "A2's calibration": 17.8,
+     "HM-CAL-I8 enters": 69.5,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 6.4,
+     "nothing from A4: HM-CAL-I8 WORSE": 0.8,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 4.1,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 1.2,
+     "nothing from A4: the int8 holds' misses read as noise (E4')": 0.0
+    },
+    "a_per_session_calibration_enters": 87.3,
+    "as_first_fixed": 18.3,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2741,
+      "p05": 0.1764,
+      "p95": 0.3813
+     },
+     "I8_calibrated": {
+      "median": 0.0969,
+      "p05": 0.0257,
+      "p95": 0.1998
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.2702,
+      "p05": 0.1463,
+      "p95": 0.3944
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0877,
+      "p05": 0.0232,
+      "p95": 0.1776
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.2823,
+      "p05": 0.1994,
+      "p95": 0.3839
+     }
+    }
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "HM_CAL_I8": {
+     "BETTER": 98.4,
+     "NOT RESOLVED": 1.5,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.1
+    },
+    "N1_I8_met": 1.6,
+    "HM_E144_repeats": 94.3,
+    "carries": {
+     "A2's calibration": 18.5,
+     "HM-CAL-I8 enters": 75.9,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 1.2,
+     "nothing from A4: HM-CAL-I8 WORSE": 0.1,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 3.9,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 0.5
+    },
+    "a_per_session_calibration_enters": 94.4,
+    "as_first_fixed": 19.0,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.3836,
+      "p05": 0.2818,
+      "p95": 0.4869
+     },
+     "I8_calibrated": {
+      "median": 0.0942,
+      "p05": 0.0262,
+      "p95": 0.1968
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.3709,
+      "p05": 0.2475,
+      "p95": 0.4999
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0896,
+      "p05": 0.0247,
+      "p95": 0.1859
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.3861,
+      "p05": 0.2912,
+      "p95": 0.4881
+     }
+    }
+   },
+   "level 0.15 C": {
+    "HM_CAL_I8": {
+     "BETTER": 56.0,
+     "NOT RESOLVED": 37.5,
+     "NOT SCORED": 0.0,
+     "WORSE": 6.5
+    },
+    "N1_I8_met": 19.3,
+    "HM_E144_repeats": 94.0,
+    "carries": {
+     "A1-4's common term": 40.7,
+     "A2's calibration": 17.1,
+     "HM-CAL-I8 enters": 17.5,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 12.6,
+     "nothing from A4: HM-CAL-I8 WORSE": 2.8,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 3.3,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 0.3,
+     "nothing from A4: the int8 holds' misses read as noise (E4')": 5.6
+    },
+    "a_per_session_calibration_enters": 34.6,
+    "as_first_fixed": 19.2,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.1634,
+      "p05": 0.0661,
+      "p95": 0.2637
+     },
+     "I8_calibrated": {
+      "median": 0.0949,
+      "p05": 0.027,
+      "p95": 0.1977
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.1263,
+      "p05": 0.0363,
+      "p95": 0.2399
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0743,
+      "p05": 0.0216,
+      "p95": 0.1706
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.1962,
+      "p05": 0.1338,
+      "p95": 0.2833
+     }
+    }
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "HM_CAL_I8": {
+     "BETTER": 91.9,
+     "NOT RESOLVED": 7.4,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.7
+    },
+    "N1_I8_met": 5.7,
+    "HM_E144_repeats": 94.1,
+    "carries": {
+     "A1-4's common term": 84.8,
+     "A2's calibration": 10.1,
+     "HM-CAL-I8 enters": 3.5,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 0.2,
+     "nothing from A4: HM-CAL-I8 WORSE": 0.0,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 1.1,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 0.1
+    },
+    "a_per_session_calibration_enters": 13.7,
+    "as_first_fixed": 10.5,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2775,
+      "p05": 0.1774,
+      "p95": 0.3814
+     },
+     "I8_calibrated": {
+      "median": 0.0939,
+      "p05": 0.0239,
+      "p95": 0.1976
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.1877,
+      "p05": 0.073,
+      "p95": 0.3101
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0826,
+      "p05": 0.018,
+      "p95": 0.171
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.2983,
+      "p05": 0.2165,
+      "p95": 0.4008
+     }
+    }
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "HM_CAL_I8": {
+     "BETTER": 99.3,
+     "NOT RESOLVED": 0.7,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.0
+    },
+    "N1_I8_met": 1.0,
+    "HM_E144_repeats": 93.6,
+    "carries": {
+     "A1-4's common term": 97.0,
+     "A2's calibration": 2.2,
+     "HM-CAL-I8 enters": 0.5,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 0.2,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 0.0
+    },
+    "a_per_session_calibration_enters": 2.8,
+    "as_first_fixed": 2.5,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.3992,
+      "p05": 0.2995,
+      "p95": 0.5039
+     },
+     "I8_calibrated": {
+      "median": 0.0962,
+      "p05": 0.0275,
+      "p95": 0.1974
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.2583,
+      "p05": 0.1354,
+      "p95": 0.3866
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0745,
+      "p05": 0.0163,
+      "p95": 0.1241
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.4526,
+      "p05": 0.3845,
+      "p95": 0.5277
+     }
+    }
+   },
+   "mixed: E154's fit, then E166's": {
+    "HM_CAL_I8": {
+     "BETTER": 89.5,
+     "NOT RESOLVED": 9.7,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.8
+    },
+    "N1_I8_met": 6.5,
+    "HM_E144_repeats": 94.1,
+    "carries": {
+     "A1-4's common term": 6.2,
+     "A2's calibration": 21.6,
+     "HM-CAL-I8 enters": 59.4,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 6.7,
+     "nothing from A4: HM-CAL-I8 WORSE": 0.6,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 4.6,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 0.9
+    },
+    "a_per_session_calibration_enters": 81.0,
+    "as_first_fixed": 36.8,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2686,
+      "p05": 0.1657,
+      "p95": 0.3706
+     },
+     "I8_calibrated": {
+      "median": 0.0952,
+      "p05": 0.0262,
+      "p95": 0.195
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.2708,
+      "p05": 0.1477,
+      "p95": 0.3949
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0848,
+      "p05": 0.022,
+      "p95": 0.1732
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.278,
+      "p05": 0.1941,
+      "p95": 0.3751
+     }
+    }
+   },
+   "none": {
+    "HM_CAL_I8": {
+     "BETTER": 2.4,
+     "NOT RESOLVED": 78.9,
+     "NOT SCORED": 0.0,
+     "WORSE": 18.7
+    },
+    "N1_I8_met": 23.3,
+    "HM_E144_repeats": 94.0,
+    "carries": {
+     "A1-4's common term": 0.6,
+     "A2's calibration": 0.7,
+     "HM-CAL-I8 enters": 0.4,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 1.9,
+     "nothing from A4: HM-CAL-I8 WORSE": 2.0,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 5.9,
+     "nothing from A4: the int8 holds' misses read as noise (E4')": 88.6
+    },
+    "a_per_session_calibration_enters": 1.1,
+    "as_first_fixed": 0.9,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.0734,
+      "p05": 0.0208,
+      "p95": 0.1518
+     },
+     "I8_calibrated": {
+      "median": 0.095,
+      "p05": 0.0248,
+      "p95": 0.1982
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.0906,
+      "p05": 0.0248,
+      "p95": 0.1899
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0707,
+      "p05": 0.0198,
+      "p95": 0.1504
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.1504,
+      "p05": 0.0959,
+      "p95": 0.2159
+     }
+    }
+   }
+  },
+  "sigma_c_premise_holds": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "HM_CAL_I8": {
+     "BETTER": 88.5,
+     "NOT RESOLVED": 10.6,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.9
+    },
+    "N1_I8_met": 7.4,
+    "HM_E144_repeats": 0.0,
+    "carries": {
+     "A1-4's common term": 94.8,
+     "A2's calibration": 5.2
+    },
+    "a_per_session_calibration_enters": 5.2,
+    "as_first_fixed": 5.2,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2595,
+      "p05": 0.16,
+      "p95": 0.3596
+     },
+     "I8_calibrated": {
+      "median": 0.0954,
+      "p05": 0.0257,
+      "p95": 0.1928
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.0922,
+      "p05": 0.0246,
+      "p95": 0.188
+     },
+     "I8_calibrated_when_it_enters": null,
+     "chain_unscaled_when_I8_enters": null
+    }
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "HM_CAL_I8": {
+     "BETTER": 91.0,
+     "NOT RESOLVED": 8.3,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.7
+    },
+    "N1_I8_met": 6.4,
+    "HM_E144_repeats": 20.1,
+    "carries": {
+     "A1-4's common term": 93.6,
+     "A2's calibration": 6.3,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 0.1
+    },
+    "a_per_session_calibration_enters": 6.3,
+    "as_first_fixed": 6.3,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2834,
+      "p05": 0.1783,
+      "p95": 0.3844
+     },
+     "I8_calibrated": {
+      "median": 0.0947,
+      "p05": 0.0262,
+      "p95": 0.2005
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.0924,
+      "p05": 0.0255,
+      "p95": 0.1883
+     },
+     "I8_calibrated_when_it_enters": null,
+     "chain_unscaled_when_I8_enters": null
+    }
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "HM_CAL_I8": {
+     "BETTER": 75.0,
+     "NOT RESOLVED": 22.0,
+     "NOT SCORED": 0.0,
+     "WORSE": 3.0
+    },
+    "N1_I8_met": 12.7,
+    "HM_E144_repeats": 1.2,
+    "carries": {
+     "A1-4's common term": 67.3,
+     "A2's calibration": 26.2,
+     "HM-CAL-I8 enters": 0.2,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 0.0,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 6.3
+    },
+    "a_per_session_calibration_enters": 26.4,
+    "as_first_fixed": 26.2,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2075,
+      "p05": 0.1084,
+      "p95": 0.31
+     },
+     "I8_calibrated": {
+      "median": 0.0951,
+      "p05": 0.0263,
+      "p95": 0.2009
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.0902,
+      "p05": 0.024,
+      "p95": 0.1903
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0796,
+      "p05": 0.0072,
+      "p95": 0.1757
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.2245,
+      "p05": 0.1623,
+      "p95": 0.394
+     }
+    }
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "HM_CAL_I8": {
+     "BETTER": 90.7,
+     "NOT RESOLVED": 8.3,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.9
+    },
+    "N1_I8_met": 6.7,
+    "HM_E144_repeats": 0.0,
+    "carries": {
+     "A1-4's common term": 87.6,
+     "A2's calibration": 11.7,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 0.7
+    },
+    "a_per_session_calibration_enters": 11.7,
+    "as_first_fixed": 11.7,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2741,
+      "p05": 0.1764,
+      "p95": 0.3813
+     },
+     "I8_calibrated": {
+      "median": 0.0969,
+      "p05": 0.0257,
+      "p95": 0.1998
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.0926,
+      "p05": 0.0234,
+      "p95": 0.1889
+     },
+     "I8_calibrated_when_it_enters": null,
+     "chain_unscaled_when_I8_enters": null
+    }
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "HM_CAL_I8": {
+     "BETTER": 98.4,
+     "NOT RESOLVED": 1.5,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.1
+    },
+    "N1_I8_met": 1.6,
+    "HM_E144_repeats": 0.0,
+    "carries": {
+     "A1-4's common term": 92.9,
+     "A2's calibration": 7.0,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 0.0
+    },
+    "a_per_session_calibration_enters": 7.0,
+    "as_first_fixed": 7.0,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.3836,
+      "p05": 0.2818,
+      "p95": 0.4869
+     },
+     "I8_calibrated": {
+      "median": 0.0942,
+      "p05": 0.0262,
+      "p95": 0.1968
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.0918,
+      "p05": 0.0252,
+      "p95": 0.1884
+     },
+     "I8_calibrated_when_it_enters": null,
+     "chain_unscaled_when_I8_enters": null
+    }
+   },
+   "level 0.15 C": {
+    "HM_CAL_I8": {
+     "BETTER": 56.0,
+     "NOT RESOLVED": 37.5,
+     "NOT SCORED": 0.0,
+     "WORSE": 6.5
+    },
+    "N1_I8_met": 19.3,
+    "HM_E144_repeats": 50.2,
+    "carries": {
+     "A1-4's common term": 43.1,
+     "A2's calibration": 36.8,
+     "HM-CAL-I8 enters": 2.1,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 2.3,
+     "nothing from A4: HM-CAL-I8 WORSE": 0.7,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 12.5,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 0.1,
+     "nothing from A4: the int8 holds' misses read as noise (E4')": 2.4
+    },
+    "a_per_session_calibration_enters": 38.9,
+    "as_first_fixed": 37.6,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.1634,
+      "p05": 0.0661,
+      "p95": 0.2637
+     },
+     "I8_calibrated": {
+      "median": 0.0949,
+      "p05": 0.027,
+      "p95": 0.1977
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.0915,
+      "p05": 0.0254,
+      "p95": 0.191
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0688,
+      "p05": 0.0175,
+      "p95": 0.1653
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.18,
+      "p05": 0.1231,
+      "p95": 0.2764
+     }
+    }
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "HM_CAL_I8": {
+     "BETTER": 91.9,
+     "NOT RESOLVED": 7.4,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.7
+    },
+    "N1_I8_met": 5.7,
+    "HM_E144_repeats": 4.1,
+    "carries": {
+     "A1-4's common term": 88.0,
+     "A2's calibration": 11.4,
+     "HM-CAL-I8 enters": 0.0,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 0.5,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 0.0
+    },
+    "a_per_session_calibration_enters": 11.4,
+    "as_first_fixed": 11.4,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2775,
+      "p05": 0.1774,
+      "p95": 0.3814
+     },
+     "I8_calibrated": {
+      "median": 0.0939,
+      "p05": 0.0239,
+      "p95": 0.1976
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.0904,
+      "p05": 0.0254,
+      "p95": 0.192
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0047,
+      "p05": 0.0047,
+      "p95": 0.0047
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.2292,
+      "p05": 0.2292,
+      "p95": 0.2292
+     }
+    }
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "HM_CAL_I8": {
+     "BETTER": 99.3,
+     "NOT RESOLVED": 0.7,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.0
+    },
+    "N1_I8_met": 1.0,
+    "HM_E144_repeats": 0.1,
+    "carries": {
+     "A1-4's common term": 93.7,
+     "A2's calibration": 6.3
+    },
+    "a_per_session_calibration_enters": 6.3,
+    "as_first_fixed": 6.3,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.3992,
+      "p05": 0.2995,
+      "p95": 0.5039
+     },
+     "I8_calibrated": {
+      "median": 0.0962,
+      "p05": 0.0275,
+      "p95": 0.1974
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.0923,
+      "p05": 0.0267,
+      "p95": 0.1877
+     },
+     "I8_calibrated_when_it_enters": null,
+     "chain_unscaled_when_I8_enters": null
+    }
+   },
+   "mixed: E154's fit, then E166's": {
+    "HM_CAL_I8": {
+     "BETTER": 89.5,
+     "NOT RESOLVED": 9.7,
+     "NOT SCORED": 0.0,
+     "WORSE": 0.8
+    },
+    "N1_I8_met": 6.5,
+    "HM_E144_repeats": 0.0,
+    "carries": {
+     "A1-4's common term": 1.3,
+     "A2's calibration": 97.1,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 1.6
+    },
+    "a_per_session_calibration_enters": 97.1,
+    "as_first_fixed": 97.1,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2686,
+      "p05": 0.1657,
+      "p95": 0.3706
+     },
+     "I8_calibrated": {
+      "median": 0.0952,
+      "p05": 0.0262,
+      "p95": 0.195
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.092,
+      "p05": 0.0244,
+      "p95": 0.1894
+     },
+     "I8_calibrated_when_it_enters": null,
+     "chain_unscaled_when_I8_enters": null
+    }
+   },
+   "none": {
+    "HM_CAL_I8": {
+     "BETTER": 2.4,
+     "NOT RESOLVED": 78.9,
+     "NOT SCORED": 0.0,
+     "WORSE": 18.7
+    },
+    "N1_I8_met": 23.3,
+    "HM_E144_repeats": 94.0,
+    "carries": {
+     "A1-4's common term": 0.6,
+     "A2's calibration": 0.7,
+     "HM-CAL-I8 enters": 0.4,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 1.9,
+     "nothing from A4: HM-CAL-I8 WORSE": 2.0,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 5.9,
+     "nothing from A4: the int8 holds' misses read as noise (E4')": 88.6
+    },
+    "a_per_session_calibration_enters": 1.1,
+    "as_first_fixed": 0.9,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.0734,
+      "p05": 0.0208,
+      "p95": 0.1518
+     },
+     "I8_calibrated": {
+      "median": 0.095,
+      "p05": 0.0248,
+      "p95": 0.1982
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.0906,
+      "p05": 0.0248,
+      "p95": 0.1899
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.0707,
+      "p05": 0.0198,
+      "p95": 0.1504
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.1504,
+      "p05": 0.0959,
+      "p95": 0.2159
+     }
+    }
+   }
+  },
+  "1p5_sigma_likeliest_pattern": {
+   "premise holds": {
+    "HM_CAL_I8": {
+     "BETTER": 74.8,
+     "NOT RESOLVED": 18.4,
+     "NOT SCORED": 0.0,
+     "WORSE": 6.8
+    },
+    "N1_I8_met": 21.2,
+    "HM_E144_repeats": 0.1,
+    "carries": {
+     "A1-4's common term": 16.0,
+     "A2's calibration": 75.3,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 8.7,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 0.0
+    },
+    "a_per_session_calibration_enters": 75.3,
+    "as_first_fixed": 75.3,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2768,
+      "p05": 0.131,
+      "p95": 0.4349
+     },
+     "I8_calibrated": {
+      "median": 0.1427,
+      "p05": 0.0411,
+      "p95": 0.2966
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.1413,
+      "p05": 0.0384,
+      "p95": 0.2851
+     },
+     "I8_calibrated_when_it_enters": null,
+     "chain_unscaled_when_I8_enters": null
+    }
+   },
+   "H_E read by the chain (e(H_E) = noise only)": {
+    "HM_CAL_I8": {
+     "BETTER": 74.8,
+     "NOT RESOLVED": 18.4,
+     "NOT SCORED": 0.0,
+     "WORSE": 6.8
+    },
+    "N1_I8_met": 21.2,
+    "HM_E144_repeats": 72.7,
+    "carries": {
+     "A1-4's common term": 4.6,
+     "A2's calibration": 23.8,
+     "HM-CAL-I8 enters": 36.3,
+     "nothing from A4: HM-CAL-I8 NOT RESOLVED": 9.7,
+     "nothing from A4: HM-CAL-I8 WORSE": 3.3,
+     "nothing from A4: HM-E144 DOES NOT REPEAT": 20.0,
+     "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 2.3,
+     "nothing from A4: the int8 holds' misses read as noise (E4')": 0.0
+    },
+    "a_per_session_calibration_enters": 60.0,
+    "as_first_fixed": 30.2,
+    "rms_L2_C": {
+     "chain_unscaled": {
+      "median": 0.2768,
+      "p05": 0.131,
+      "p95": 0.4349
+     },
+     "I8_calibrated": {
+      "median": 0.1427,
+      "p05": 0.0411,
+      "p95": 0.2966
+     },
+     "A2_calibrated_on_L2": {
+      "median": 0.2884,
+      "p05": 0.1091,
+      "p95": 0.4706
+     },
+     "I8_calibrated_when_it_enters": {
+      "median": 0.1171,
+      "p05": 0.034,
+      "p95": 0.253
+     },
+     "chain_unscaled_when_I8_enters": {
+      "median": 0.3063,
+      "p05": 0.1971,
+      "p95": 0.4483
+     }
+    }
+   }
+  },
+  "1p5_sigma_none": {
+   "HM_CAL_I8": {
+    "BETTER": 7.1,
+    "NOT RESOLVED": 60.3,
+    "NOT SCORED": 0.0,
+    "WORSE": 32.6
+   },
+   "N1_I8_met": 43.5,
+   "HM_E144_repeats": 73.4,
+   "carries": {
+    "A1-4's common term": 0.9,
+    "A2's calibration": 2.9,
+    "HM-CAL-I8 enters": 3.4,
+    "nothing from A4: HM-CAL-I8 NOT RESOLVED": 15.8,
+    "nothing from A4: HM-CAL-I8 WORSE": 14.3,
+    "nothing from A4: HM-E144 DOES NOT REPEAT": 25.4,
+    "nothing from A4: N1-I8, a session worse on its own (a reported arm)": 0.1,
+    "nothing from A4: the int8 holds' misses read as noise (E4')": 37.2
+   },
+   "a_per_session_calibration_enters": 6.3,
+   "as_first_fixed": 3.2,
+   "rms_L2_C": {
+    "chain_unscaled": {
+     "median": 0.1101,
+     "p05": 0.0312,
+     "p95": 0.2288
+    },
+    "I8_calibrated": {
+     "median": 0.1432,
+     "p05": 0.0392,
+     "p95": 0.2941
+    },
+    "A2_calibrated_on_L2": {
+     "median": 0.1365,
+     "p05": 0.0378,
+     "p95": 0.2841
+    },
+    "I8_calibrated_when_it_enters": {
+     "median": 0.0827,
+     "p05": 0.0224,
+     "p95": 0.1876
+    },
+    "chain_unscaled_when_I8_enters": {
+     "median": 0.1743,
+     "p05": 0.1145,
+     "p95": 0.2935
+    }
+   }
+  },
+  "committed_cells_compared": {
+   "cells": 80,
+   "differences": []
+  },
+  "checks": {
+   "every cell A2 or A3 committed, re-read here (80), equals the committed figures (HM-LG, HM-CAL, A1-4's path, A2-3's outcome at the exact t point, HM-E144)": true,
+   "noise as committed (A2)": true,
+   "the plan's P equals design-power-heat-a2.json's plan_P_C": true,
+   "the read rule reads each synthetic session as A4-1 says (and the line is exact on a noiseless line)": true
+  }
+ },
+ "precedence_a4": "A4 is committed before every output it governs (no M11 kit, scorer, fit, hold or claim exists; E176 and E177 were assigned at about 11:53 PST and no file of either exists in any ref). It adds one reading and one entry route; it changes no statistic, threshold, clause or verdict of REGISTRATION.md, A1, A2 or A3."
+}
