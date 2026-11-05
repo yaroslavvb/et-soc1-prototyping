@@ -3487,6 +3487,16 @@ A2 (`ef74dd0d`, 21:23:36 PST) was written after the verifier read section 7 as m
 any section-7 output (the first run 21:23:50), pool 8 (none exists) and any prediction made with M10. The registration had stated
 section 7's criteria but not their consequence; a critic may weigh A2's reading.
 
+*(Dated, Thu 5 Nov 2026, Q142(r)'s fix pass, after these records' verifier: what M10 is, beside its terms, as the round critic
+listed it.)* M10's power terms are fitted and held out on the two 600 MHz cards only, aifoundry3 and card 1: **aifoundry2 keeps
+M9's part unchanged, and M10's D is not carried to aifoundry2 or card 0** (item 3 of "What remains", below), so a power prediction
+there still rests on M9's. Card 1's term is 0.9616 for both families; the bands are k 2.002 for the floats (700 of 737 rows
+inside) and 1.829 for int8 (210 of 222). Heat over 4.5 s is M7's form refitted, 0.1198 °C per W on aifoundry3 and 0.1194 on card 1
+(M7's 0.1186 and 0.1151); card 0's 6 s burst rise is 0.2415 °C per board W over 21.5 W; card 0's κ stays κ0 = 0.9463. Verify at
+`Q142m/m10.json` › `families.float` and `families.int8` (`card1_scale`, `band_k`, `band_coverage_all_rows`), `heat_4p5s.coef`,
+`card0_burst_heat_k_c_per_w` and `card0_kappa`; `Q142m/heldout-m10.json` › `heat_c2_card0_burst.P_idle_w`; `Q142m/README.md`,
+"M10, frozen".
+
 ### The figures, held out and not blind, with M9 beside on the same rows
 
 | What is predicted | M9 on the same rows | M10, held out (not blind) | Kind | Verify at |
@@ -3532,6 +3542,13 @@ PASS → FAIL, made v3 stop for the wrong reason (16) and makes v3.1 stop at its
 GO with 11 send sites, all READ, and the public-text scan is clean. Every test ran at the desk with a stand-in ssh and rsync;
 none ran against a lab box.
 
+*(Dated, Thu 5 Nov 2026, Q142(r)'s fix pass, after these records' verifier: two facts the round critic listed and this section
+left out.)* `e77/run_e77.py`, `e120/run_e120.py` and `knob/run_knob.py` keep their unlocked watchers: each reads its path and
+position outside its lock, as `run_hpl.py` did, and the amendment does not change them (`HPL/run_hpl.py.dated-note.md`, "Not
+covered"), so a run on one of them needs the same fix first, by its own amendment. And v3.1's audit without its guard reads NO-GO
+at exactly step 9's call (`RB31/s09_a3_reads.sh`:24, 6 send sites), as v2's and v3's do (`RB31/logs/dmcmd-audit-bare.txt`); with
+the guard it reads GO.
+
 ### Q142's round critic: its faults, and where each is answered
 
 | | What | Where it is recorded |
@@ -3541,6 +3558,13 @@ none ran against a lab box.
 | (3) | v3.1's gate stops a collection whose check of C did not finish, but not one that skips a session with no C log (e165, e167) | item (60) above; the next card day's kit lists, per run, the sessions that must carry a C log |
 | (4) | Three of Q142(s)'s new files state times after their commit: last written 21:43:38 (E163's `README.md.dated-note-q142s.md`, "about 22:00 PST"), 21:40:44 (v3's `README.md.dated-note.md`, the same) and 21:57:36 (v3.1's `README.md`, "about 21:15–22:15"); all three committed at 21:58:29 | 03's Q142 paragraph; here |
 | (5) | M10's A4 and README note 2 say "written about 21:37–21:39 PST": written by 21:37:06, committed at 21:37:24 | 03's Q142 paragraph; here |
+
+*(Dated, Thu 5 Nov 2026, Q142(r)'s fix pass, after these records' verifier: five more notes state a time after their own commit,
+fault (4)'s class, and no record named them. No verdict or precedence depends on them, and no note is rewritten.)* E163's
+`README.md.dated-note-3.md` (Q141(i)'s fix pass, `1613f496`) is titled "about 21:1x PST": last written 21:07:54, committed
+21:07:56. E165's and E168's `README.md.dated-note.md` (`7830a9cb`) say "about 18:30 PST": last written 18:22:56 and 18:23:17,
+committed 18:25:17. E164's and E170's `README.md.dated-note.md` (`708a0a04`) say "about 18:30 PST": last written 18:23:58 and
+18:24:50, committed 18:28:49. The times are the files' modification times in the Intel's clone and the commits' own.
 
 ### The lanes' wording, as corrected (quote it so)
 
@@ -3565,6 +3589,9 @@ none ran against a lab box.
 - **The scratch copies:** the M10 lane's working copy of the lab tree stays on the mini and on aifoundry1, untouched since.
 - **Q142(p) and Q142(d)**, pool 8's prerequisites and its independent designer, run beside these records; nothing of pool 8 is
   recorded here.
+- *(Dated, Thu 5 Nov 2026, Q142(r)'s fix pass, after these records' verifier.)* **These records' compute:** every local job ran
+  one at a time through the round's shared job slots but one, a read-only character diff, which ran outside them on one core for
+  about 2 minutes (23:08–23:10 PST) and was stopped; the records lane disclosed it in its result.
 
 ### What remains (Q142's round critic's next list, ranked)
 
@@ -3596,6 +3623,15 @@ Unverified commits: Q141(i)'s fix pass (`1613f496`, `77e12cad`, gyroscope `849fd
 (`ef74dd0d`, `d1581099`, `c996d135`); Q142(s)'s (`33661416`, `0d2cb5dd`); and from before, `6147a9c7` and `0e35ec58` (E170's kit),
 Q141(r)'s fix pass (`8215b938`, `44e96e26`, gyroscope `0855547b`) and `3b102b85`, `7830a9cb` and `708a0a04`, which the card half's
 critic read but no verifier has.
+
+*(Dated, Thu 5 Nov 2026, Q142(r)'s fix pass: item 1 is done.)* These records' verifier (about 23:35 PST Wed to 00:16 PST Thu) read
+these records and, as their first verifier, Q141(i)'s fix pass (`1613f496`, `77e12cad`, gyroscope `849fd0bf` and its four pages),
+Q142(m)'s (`ef74dd0d`, `d1581099`, `c996d135`) and Q142(s)'s (`33661416`, `0d2cb5dd`), and, more lightly, `6147a9c7`, `0e35ec58`,
+`8215b938`, `44e96e26`, gyroscope `0855547b`, `3b102b85`, `7830a9cb` and `708a0a04`. They hold, with one minor fault (M10's scope,
+now beside its terms above) and four nits (the three runners' unlocked watchers and v3.1's bare audit, the five notes' times, the
+kinds page's M9 fp32 cell without its basis, and these records' one job outside the slots), none in a figure, each answered here
+or on the kinds page; every frozen hash list passes. No verifier has read this fix pass. One step more before any run on
+`e77/run_e77.py`, `e120/run_e120.py` or `knob/run_knob.py`: the watcher's fix, by its own amendment ("Q142(s)", above).
 
 **Not established by Q142.** Any blind score of M10; whether the session scale and the recount carry to kinds nobody tuned to;
 whether the heat chain's misses are a session level or a gain; whether card 0's burst coefficient holds in a second session; the
