@@ -1,0 +1,688 @@
+# Q142(s) v3.1: every change from v3 (tools/claims-v3/q141k-runbook/v3/, lab 326f1293), as a unified diff of each file v3.1 changes.
+# New in v3.1: ccdone_q142s.py and e2e_ccheck_q142s.sh (no v3 counterparts).
+--- v3/rb_common.sh
++++ v3.1/rb_common.sh
+@@ -1,5 +1,13 @@
+-# Q142(s) v3, the card day's runbook: the part every step script sources (bash 3.2 or later; the Intel's /bin/bash is 3.2).
++# Q142(s) v3.1, the card day's runbook: the part every step script sources (bash 3.2 or later; the Intel's /bin/bash is 3.2).
+ #
++# v3.1 (Wed 4 Nov 2026, after v3's verifier; v3.1/README.md, "What v3.1 changes") is ../v3/rb_common.sh (lab 326f1293), which stays as
++# committed, with three changes:
++#   - rb_nopath: an output that is not there stops the step (16) with its own message. v3's nopath_q142s.py printed MISSING and read
++#     CLEAN, so a collector that wrote somewhere else passed the gate unread (the verifier's nit 8);
++#   - every step's name carries "_v3.1" in the log and its messages;
++#   - the dry listing names this directory, v3.1/.
++# Everything else is v3's, line for line. What v3 changed from v2:
++#
+ # The successor of ../v2/rb_common.sh (lab 16771f36), which stays as it ran on 4 Nov 2026 (from 16:21 PST on aifoundry2). What v3
+ # changes here, each for a fault the adversarial read of v2 found (v3/README.md, "What v3 changes"):
+ #   - ours_live also counts, by the lab's naming convention, any queue_eNNN.py or session_eNNN.sh of ours, so a next card day's run
+@@ -65,13 +73,13 @@
+ rb_say() { if [ -n "${RB_DRY:-}" ]; then echo "[$RB_STEP] (dry listing; a real run would say:) $*"; else echo "[$RB_STEP] $*"; fi; }
+ rb_disp() {  # a command line for the listing: the lab clone and this day's directory by name, never a home path
+   local t=$1
+-  t=${t//$RB_DIR/<lab clone>/tools/claims-v3/q141k-runbook/v3}; t=${t//$RB_REPO/<lab clone>}; [ -n "${RB_OUT:-}" ] && t=${t//$RB_OUT/<RB_OUT>}
++  t=${t//$RB_DIR/<lab clone>/tools/claims-v3/q141k-runbook/v3.1}; t=${t//$RB_REPO/<lab clone>}; [ -n "${RB_OUT:-}" ] && t=${t//$RB_OUT/<RB_OUT>}
+   echo "$t"
+ }
+ rb_die() { local c=$1; shift; echo "[$RB_STEP] STOP: $*"; [ -n "${RB_LOG:-}" ] && echo "$(date '+%F %T %Z') step=$RB_STEP exit=$c $*" >> "$RB_LOG"; exit "$c"; }
+ 
+ rb_init() {  # rb_init <step>
+-  RB_STEP=${1}_v3
++  RB_STEP=${1}_v3.1
+   [ -n "${RB_OUT:-}" ] || { echo "[$RB_STEP] RB_OUT is not set (this card day's own directory, outside the repo)"; exit $RB_E_USAGE; }
+   [ -n "${RB_LOCK:-}" ] || { echo "[$RB_STEP] RB_LOCK is not set (the lock file a login check is appended to)"; exit $RB_E_USAGE; }
+   mkdir -p "$RB_OUT/calls" || exit $RB_E_USAGE
+@@ -377,9 +385,13 @@
+ }
+ 
+ # ---- v3: no desk path in what a collector wrote (faults 1 and 2) -----------------------------------------------------------
++# v3.1 (the verifier's nit 8): v3.1's nopath_q142s.py counts a path that is not there as a hit (MISSING, exit 3), so the gate never
++# passes an output it did not read; that stop has its own message here.
+ rb_nopath() {  # rb_nopath <dir or file> ...: nopath_q142s.py over what the step wrote; a hit stops the step (16) before it says done
+-  if [ -n "${RB_DRY:-}" ]; then rb_disp "--- gate: no desk path (the lab clone's, RB_OUT's, a Mac home, a scratch root) in $(rb_q "$@")"; return 0; fi
++  if [ -n "${RB_DRY:-}" ]; then rb_disp "--- gate: no desk path (the lab clone's, RB_OUT's, a Mac home, a scratch root) in $(rb_q "$@"), and each of them there"; return 0; fi
+   rb_local desk local "no desk path in what was written (nopath_q142s.py)" "$RB_PY" -B "$RB_DIR/nopath_q142s.py" --forbid "$RB_REPO" \
+     --forbid "$RB_OUT" "$@"
+-  [ "$RB_RC" -eq 0 ] || rb_die $RB_E_GATE "a desk path reached what this step wrote (the HIT lines above): commit nothing; fix the route, remove the outputs, collect again"
++  [ "$RB_RC" -eq 0 ] && return 0
++  rb_has '^MISSING ' && rb_die $RB_E_GATE "an output this step should have written is not there (the MISSING lines above): the collector wrote somewhere else, or nothing; commit nothing, and read its output above"
++  rb_die $RB_E_GATE "a desk path reached what this step wrote (the HIT lines above): commit nothing; fix the route, remove the outputs, collect again"
+ }
+--- v3/nopath_q142s.py
++++ v3.1/nopath_q142s.py
+@@ -13,6 +13,10 @@
+ A box's own path (/home/<the owner's box login>/...) is not a desk path: the committed data holds those, as the boxes wrote them.
+ It prints one HIT line per file and kind (the file, what was found, how many times; never the text around it) and exits 3 on any
+ hit, 0 when clean, 2 on a usage error. Standard library only; it reads, and never writes, anything it scans.
++
++v3.1 (Wed 4 Nov 2026, after v3's verifier, its nit 8): a path given that is not there is a hit. It prints "MISSING <path>" and
++counts it, so the run exits 3. v3's copy (../v3/nopath_q142s.py, lab 326f1293, unchanged) printed MISSING and still read CLEAN,
++so a collector that wrote somewhere else passed the gate without one file of its output being read. Nothing else changes.
+ SPDX-License-Identifier: Apache-2.0
+ """
+ import gzip
+@@ -85,8 +89,10 @@
+                         print(f"HIT {p}: {why} ({c} times)")
+                         hits += 1
+     for m in missing:
+-        print(f"MISSING {m}")
+-    print(f"nopath: {files} files read under {len(paths) - len(missing)} path(s); {hits} hit(s): {'CLEAN' if not hits else 'NOT CLEAN'}")
++        print(f"MISSING {m}: nothing there to read (a hit: the gate never passes an output it did not read)")
++        hits += 1                                     # v3.1: v3 printed the line and still read CLEAN
++    print(f"nopath: {files} files read under {len(paths) - len(missing)} path(s); {len(missing)} missing; {hits} hit(s): "
++          f"{'CLEAN' if not hits else 'NOT CLEAN'}")
+     return 3 if hits else 0
+ 
+ 
+--- v3/s13_a1_launch.sh
++++ v3.1/s13_a1_launch.sh
+@@ -25,6 +25,13 @@
+ # less 10 minutes: 2,530 s before the last end (v2 checked 1,930 s before the last end, so for 10 minutes it passed a launch the
+ # launcher then refused).
+ #   bash tools/claims-v3/q141k-runbook/v3/s13_a1_launch.sh [--drop-p2]
++#
++# v3.1 (Wed 4 Nov 2026, after v3's verifier, its nit 5): v3's pattern for a refusal ('^REFUSED|^usage|^not a date') missed exit 9.
++# Its line is check_e164.py's own, "HARNESS DIFFERS - refusing:" (check_e164.py:49, through launch_e164_a1.sh:64), so v3 read that
++# refusal as a failure (14), against its own header above. v3.1 reads it as a refusal (10), so every refusal the header lists
++# exits 10: 2 and 9 with their messages, 3 and 4 with their REFUSED lines. A launcher that fails any other way, a check_e164.py that
++# crashes among them (no HARNESS DIFFERS line), still exits 14.
++#   bash tools/claims-v3/q141k-runbook/v3.1/s13_a1_launch.sh [--drop-p2]
+ # SPDX-License-Identifier: Apache-2.0
+ . "$(dirname "${BASH_SOURCE[0]}")/rb_common.sh"
+ rb_init s13_a1_launch
+@@ -59,7 +66,7 @@
+ rb_remote launch aifoundry1 "box/launch_e164_a1.sh, deadline $RB_E164_DEADLINE" "$RB_REPO/$L" "$rcmd"
+ [ -n "${RB_DRY:-}" ] && exit 0
+ if [ "$RB_RC" -ne 0 ]; then
+-  why=$(grep -m1 -E '^REFUSED|^usage|^not a date' "$RB_CAP")
++  why=$(grep -m1 -E '^REFUSED|^usage|^not a date|^HARNESS DIFFERS' "$RB_CAP")    # v3.1: exit 9's line too (nit 5)
+   [ -n "$why" ] && rb_die $RB_E_USAGE "launch_e164_a1.sh refused on the box (nothing launched): $why"
+   rb_die $RB_E_FAIL "launch_e164_a1.sh failed (rc in the log): read the output above"
+ fi
+--- v3/s22_collect.sh
++++ v3.1/s22_collect.sh
+@@ -43,6 +43,23 @@
+ #         after E111's scrub had run (fault 5). A "TAILSCALE CHECK NEEDED" stop whose line carries no link (rb_run.py then sees none)
+ #         still appends the lock line for the box it names and exits 11 (fault 6).
+ #   bash tools/claims-v3/q141k-runbook/v3/s22_collect.sh <e163|e164|e165|e166|e167|e168|e169|pair> [e167: <from epoch s> <to epoch s>]
++#
++# v3.1 (Wed 4 Nov 2026, after v3's verifier; v3.1/README.md, "What v3.1 changes"):
++#   e163, e164, e165, e166, e167  every check of C the collection ran must have finished before the step says "collected" (the
++#         verifier's fault 1, which it found in e163 and e166; the same holds in e164, e165 and e167). ccheck.py exits 1 both on a
++#         crash and on a C FAIL (ccheck.py:732), and writes its --out file only when it runs to its end (ccheck.py:729-731). The
++#         collectors print "ccheck rc=N" and go on, and no version of this step read it: so a check that crashed was scored as if
++#         C had failed or gone unrecorded, and the step still said "collected and scored". cc_gate reads each --out file with
++#         ccdone_q142s.py: there, with ccheck.py's summary, written since the collector began; else the step stops (14) and nothing
++#         is scored as registered. A C FAIL is a finished check: it goes on to the registered C rules, as before. The files read:
++#           e163  build/e163-out/<day>-e163-blind7-aifoundry3/ccheck/ccheck-all.json (collect_e163.sh step 1)
++#           e164  build/e164-out/<day>-e164-blind7-card1/ccheck/ccheck-session.json (collect_e164.sh step 3)
++#           e165  <data dir>/ccheck-<s>.json for each of smoke, stoptest-board, s1, s2, s3 that holds a C log
++#                 (collect_e165_bounded.sh step 4)
++#           e166  <data dir>/ccheck/ccheck-all.json (collect_e166.sh)
++#           e167  <data dir>/ccheck-<step>.json for each step with a C log (this step's own checks, below)
++#   all   v3.1's nopath_q142s.py counts an output that is not there as a hit, so rb_nopath never passes what it did not read (nit 8).
++#   bash tools/claims-v3/q141k-runbook/v3.1/s22_collect.sh <e163|e164|e165|e166|e167|e168|e169|pair> [e167: <from epoch s> <to epoch s>]
+ # SPDX-License-Identifier: Apache-2.0
+ . "$(dirname "${BASH_SOURCE[0]}")/rb_common.sh"
+ rb_init s22_collect
+@@ -69,6 +86,16 @@
+ gz159() {  # launches.jsonl and tel/*.jsonl gzipped as E159's (and E158's) committed sessions: collect_e165_bounded.sh's own two lines
+   rb_local read local "gzip the telemetry as E159's sessions" find "$1" -path '*/tel/*.jsonl' -type f -exec gzip -n {} +
+   rb_local read local "gzip the launch records as E159's sessions" find "$1" \( -name launches.jsonl -o -name c-log.jsonl \) -type f -exec gzip -n {} +
++}
++cc_gate() {  # v3.1 (fault 1): cc_gate <run> <since, epoch s> <ccheck --out json> ...: every check of C the collection ran finished,
++  #           else 14 before "collected"; no file at all (no C log was checked) is a stop too. A C FAIL is no stop: it reaches the rules
++  local run=$1 since=$2; shift 2
++  if [ $# -eq 0 ]; then
++    [ -n "${RB_DRY:-}" ] && return 0
++    rb_die $RB_E_FAIL "$run: no C log was collected, so no check of C ran and nothing is scored as registered: read the collector's output above"
++  fi
++  rb_local read local "$run's checks of C finished (ccdone_q142s.py)" "$RB_PY" -B "$RB_DIR/ccdone_q142s.py" --since "$since" "$@"
++  [ "$RB_RC" -eq 0 ] || rb_die $RB_E_FAIL "$run's check of C did not finish (the CCHECK- lines above; ccheck.py exits 1 on a crash and on a C FAIL alike, and writes its --out file only at its end): nothing is scored as registered. Read its ccheck output, remove what the collector wrote, then collect again"
+ }
+ 
+ case "$run" in
+@@ -82,9 +109,12 @@
+     [ "$RB_RC" -eq 0 ] || rb_die $RB_E_FAIL "the copy back exited non-zero"
+     rb_local copy aifoundry3 "copy back E163's session logs" rsync -a -e "$RB_RSH" aifoundry3:aifoundry/build/e163/ "$RAW/logs/"
+     [ "$RB_RC" -eq 0 ] || rb_die $RB_E_FAIL "the logs' copy exited non-zero"
++    t_cc=$(date +%s)       # v3.1: the C check's file must be this collection's
+     rb_local desk local "collect_e163.sh with Q141(t)'s aifoundry3 arm" env PY=/usr/bin/python3 E163_DATE="$DAY" \
+       nice -n 10 bash tools/claims-v3/e163/collect_e163.sh "$RAW" "$ARM3"
+     rb_has '^results\.md written' || rb_die $RB_E_FAIL "score_e163 did not write results.md (collect_e163.sh exits 0 even then): read the output above"
++    cc_gate E163 "$t_cc" "$E163OUT/ccheck/ccheck-all.json"      # v3.1 (fault 1): a crashed check leaves the scorer's line; after it,
++                                                               # as rb_has reads the last call's output
+     scrub_check "$E163OUT/logs" aifoundry3
+     rb_nopath "$E163OUT"
+     rb_say "E163 collected and scored: $E163OUT (the data directory is $DATA/$DAY-e163-blind7-aifoundry3/)"
+@@ -92,11 +122,13 @@
+   e166)
+     D=$DATA/$DAY-e166-heat-replicate-aifoundry3
+     rb_probe aifoundry3
++    t_cc=$(date +%s)       # v3.1: collect_e166.sh never clears $D/ccheck, so an earlier try's file could still be there
+     rb_local desk aifoundry3 "collect_e166.sh (its rsyncs bounded at 300/120 s)" env PY=/usr/bin/python3 bash tools/claims-v3/e166/collect_e166.sh "$D"
+     if [ -z "${RB_DRY:-}" ] && rb_has '^rsync .* rc=[0-9]+'; then   # v3 (fault 3): collect_e166.sh scores whatever arrived
+       rb_die $RB_E_FAIL "a copy inside collect_e166.sh failed ($(grep -m1 -E '^rsync .* rc=' "$RB_CAP")): $D holds a partial copy, and any score in it is not the session's; remove $D, then run this step again"
+     fi
+     rb_has '^score rc=0$' || rb_die $RB_E_FAIL "score_e166 did not read rc 0 (collect_e166.sh exits 0 even then): read the output above"
++    cc_gate E166 "$t_cc" "$D/ccheck/ccheck-all.json"            # v3.1 (fault 1): collect_e166.sh:24 prints "ccheck rc=" and goes on
+     scrub_check "$D/logs" aifoundry3
+     rb_nopath "$D"
+     rb_say "E166 collected and scored: $D"
+@@ -118,14 +150,16 @@
+     rb_local copy aifoundry1 "box/pull_e164.sh (E164 box step 7)" bash tools/claims-v3/e164/box/pull_e164.sh
+     { [ "$RB_RC" -eq 0 ] && ! rb_has '^rsync .* failed$'; } || [ -n "${RB_DRY:-}" ] || rb_die $RB_E_FAIL "pull_e164.sh did not copy everything: run this step again"
+     own=$(cat "$RB_OUT/box-login-aifoundry1.txt" 2>/dev/null)
++    t_cc=$(date +%s)       # v3.1: the C check's file must be this collection's
+     rb_local desk local "collect_e164_a1.sh with E164_S_RECOUNT and E163's files" env PY=/usr/bin/python3 PYS="$PYS" E164_DATE="$DAY" \
+       E164_S_RECOUNT="$ARM1" ${own:+E164_OWNER=$own} nice -n 10 bash tools/claims-v3/e164/collect_e164_a1.sh build/e164-raw \
+       "$E163OUT/e163.json" "$drop" "$E163OUT/scored.json"
+-    [ -n "${RB_DRY:-}" ] && exit 0
++    if [ -n "${RB_DRY:-}" ]; then cc_gate E164 "$t_cc" "$E164OUT/ccheck/ccheck-session.json"; exit 0; fi   # v3.1: listed, as below
+     rb_has '^scrub (check )?failed|nothing to scrub' && rb_die $RB_E_GATE "collect_e164_a1.sh's scrub failed: commit nothing (its exit 7)"
+     [ "$RB_RC" -eq 0 ] || rb_die $RB_E_FAIL "collect_e164_a1.sh exited non-zero: read the output above"
+     rb_has '^results\.md written' || rb_die $RB_E_FAIL "score_e164 did not write results.md: read the output above"
+     rb_has 's-recount|S_RECOUNT|arm27' || rb_say "note: no line names Q141(t)'s arm in the scorer's output; read results.md for M9_27pt"
++    cc_gate E164 "$t_cc" "$E164OUT/ccheck/ccheck-session.json"  # v3.1 (fault 1): collect_e164.sh:84 prints "ccheck rc=" and goes on
+     rb_nopath "$E164OUT"
+     rb_say "E164 collected and scored: $E164OUT"
+     ;;
+@@ -134,11 +168,18 @@
+     RAW=$RB_OUT/e165-raw
+     [ -n "$(ls -A "$RAW" 2>/dev/null)" ] && rb_die $RB_E_USAGE "$RAW is not empty: the bounded collector needs a new, empty scratch dir"
+     rb_probe aifoundry2
++    t_cc=$(date +%s)       # v3.1: the C checks' files must be this collection's
+     rb_local desk aifoundry2 "collect_e165_bounded.sh (its own probe, every remote call under 600 s)" \
+       bash tools/claims-v3/e165/collect_e165_bounded.sh "$RAW" "$D"
+     if [ "$RB_RC" -ne 0 ]; then
+       rb_die $RB_E_FAIL "collect_e165_bounded.sh refused or stopped (2 a dir; 3 a remote call; 4 no session; 5 no answer; 6 the code path; 7 the scorer): read the output above"
+     fi
++    CCJ=()                 # v3.1 (fault 1): collect_e165_bounded.sh:83 checks C for each of these sessions that holds a C log, reads
++    for s in smoke stoptest-board s1 s2 s3; do      # nothing of it, and scores with the files that happen to be there
++      [ -s "$D/aifoundry2/$s/c-log.jsonl.gz" ] && CCJ+=("$D/ccheck-$s.json")
++    done
++    [ -n "${RB_DRY:-}" ] && CCJ=("$D/ccheck-<s>.json, for each of smoke, stoptest-board, s1, s2, s3 with a C log")
++    cc_gate E165 "$t_cc" ${CCJ[@]+"${CCJ[@]}"}
+     rb_local read local "E165's score.anchors and score.anchor_delta to files (F9)" "$RB_PY" -B "$RB_DIR/anchors_e165.py" "$D"
+     [ "$RB_RC" -eq 0 ] || rb_say "no anchors file: E167's E2 arm and E168's --anchors arm run without it (both reported only)"
+     rb_nopath "$D"
+@@ -178,13 +219,16 @@
+     fi
+     [ "$RB_RC" -eq 0 ] || rb_die $RB_E_FAIL "collect_e167_bounded.sh stopped (3 the runs copy; 4 a login left in a file; 7 a Tailscale check): read the output above"
+     CL=$RB_OUT/e167-clog
++    t_cc=$(date +%s); CCJ=()    # v3.1 (fault 1): v3 read nothing of these checks (their rb_local status went unread)
+     for s in SMOKE STOPTEST-DIE STOPTEST-BOARD G1Q END G2Q END2; do
+       [ -n "${RB_DRY:-}" ] || [ -s "$D/$s/c-log.jsonl.gz" ] || continue
+       mkdir -p "$CL/$s"
+       [ -n "${RB_DRY:-}" ] || gzip -dc "$D/$s/c-log.jsonl.gz" > "$CL/$s/c-log.jsonl"
+       rb_local desk local "the check of C on $s's C log (as E161's)" nice -n 10 "$RB_PY" -B tools/claims-v3/ccheck/ccheck.py check \
+         "$CL/$s/c-log.jsonl" --out "$D/ccheck-$s.json" --jobs 2
++      CCJ+=("$D/ccheck-$s.json")
+     done
++    cc_gate E167 "$t_cc" ${CCJ[@]+"${CCJ[@]}"}
+     rb_local read local "frozen-e167-x2.sha256" sha256sum -c tools/claims-v3/e167/frozen-e167-x2.sha256
+     [ "$RB_RC" -eq 0 ] || rb_die $RB_E_GATE "frozen-e167-x2.sha256 does not pass: do not score until a dated amendment says why"
+     A=(); [ -n "${RB_DRY:-}" ] || [ -s "$ANCH" ] && A=(--e165-anchors "$ANCH")
+--- v3/selftest_runbook.sh
++++ v3.1/selftest_runbook.sh
+@@ -1,4 +1,24 @@
+ #!/usr/bin/env bash
++# Q142(s) v3.1: the runbook's desk test, v3's (../v3/selftest_runbook.sh, lab 326f1293, unchanged) run against v3.1, with Z0-Z7 added
++# for what v3's verifier found (v3.1/README.md, "What v3.1 changes"), each with v3 run beside it where that shows the fault:
++#   Z0   the C-check reader on the card half's committed C checks (E163, E164, E165, E166, E167): every one reads finished, with the
++#        launch counts the runs' READMEs give, so the gate passes these kits' real outputs
++#   Z1   fault 1, e163: a C check that crashed (no --out file) stops the step (14) before "collected"; v3 reported it collected and
++#        scored. A genuine C FAIL still collects (it reaches the registered C rules); an unreadable or empty check stops (14)
++#   Z2   fault 1, e166 (the real collect_e166.sh, a stand-in ccheck.py): a crashed check stops (14), as does an earlier try's file
++#        left in the data directory; v3 reported both collected and scored
++#   Z3   nit 5: s13 reads the launcher's exit 9 (check_e164.py's HARNESS DIFFERS) as a refusal (10); v3 read 14. A check_e164.py that
++#        crashes is still a failure (14)
++#   Z4   nit 8: the desk-path gate reads a path that is not there as a hit (nopath exit 3, rb_nopath 16); v3's read CLEAN and passed
++#   Z5   fault 1, e164 (stand-in pull and collector): a crashed check stops (14); v3 reported it collected and scored
++#   Z6   fault 1, e165 (a stand-in bounded collector): s1's crashed check stops (14); v3 reported it collected and scored
++#   Z7   fault 1, e167 (a stand-in collector and scorer; this step's own checks of C): a crashed check stops (14); v3 went on to score
++#   V    the files v3.1 keeps from v3 are byte for byte v3's.
++# The stand-ins' sleeps are 3647 and 3648 s here (v1's test uses 3617, v2's and v3's 3637 and 3638), so no test's clean-up touches
++# another's. In the cases kept from v3, a check's text that says "v3" names the version under test, here v3.1. v3's header follows,
++# unchanged (its last lines name v3's own sleeps).
++#   bash tools/claims-v3/q141k-runbook/v3.1/selftest_runbook.sh <a new, empty scratch dir> > tools/claims-v3/q141k-runbook/v3.1/logs/selftest.txt
++#
+ # Q142(s) v3: the runbook's desk test. It never reaches a lab box: a stand-in `ssh` and `rsync`, first on PATH in the scratch dir, take
+ # every call. The stand-in ssh answers the probe (`true`) and, for a remote script, runs it in a stand-in box (a scratch HOME holding
+ # ~/aifoundry, ~/nekko and ~/claude/et-soc1-prototyping, with stub et-who, who, uptime, sudo, setsid, flock and a GNU date on PATH), or
+@@ -38,13 +58,14 @@
+ D=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+ V1=$(cd "$D/.." && pwd)
+ V2=$(cd "$D/../v2" && pwd)
++V3=$(cd "$D/../v3" && pwd)        # v3.1: v3 runs beside it in the Z cases
+ LAB=$(cd "$D/../../../.." && pwd)
+ mkdir -p "$T/bin" "$T/stubs" "$T/home" "$T/state" "$T/repo" "$T/carry" || exit 2
+ T=$(cd "$T" && pwd -P)
+ GDATE=$(command -v gdate || command -v date)
+ GTOUCH=$(command -v gtouch || command -v touch)
+ 
+-# ---- the stand-in ssh: it never connects anywhere (its sleeps are 3637 s; v1's test uses 3617, so neither clean-up touches the other)
++# ---- the stand-in ssh: it never connects anywhere (its sleeps are 3647 s; v1's test uses 3617, so neither clean-up touches the other)
+ cat > "$T/bin/ssh" <<'EOS'
+ #!/bin/bash
+ [ -n "${FAKE_LOG:-}" ] && [ -n "${FAKE_HOME:-}" ] || { echo "stand-in ssh: not inside the desk test" >&2; exit 255; }
+@@ -64,12 +85,12 @@
+ case "$mode" in
+   ok) ;;
+   link) echo "# Tailscale SSH requires an additional check." >&2
+-        echo "# To authenticate, visit: https://login.tailscale.com/a/desk-test-$host" >&2; exec sleep 3637 ;;
+-  link-stdout) echo "To authenticate, visit: https://login.tailscale.com/a/desk-test-stdout"; exec sleep 3637 ;;
+-  hang) exec sleep 3637 ;;
++        echo "# To authenticate, visit: https://login.tailscale.com/a/desk-test-$host" >&2; exec sleep 3647 ;;
++  link-stdout) echo "To authenticate, visit: https://login.tailscale.com/a/desk-test-stdout"; exec sleep 3647 ;;
++  hang) exec sleep 3647 ;;
+   fail) echo "stand-in ssh: the remote command failed" >&2; exit 7 ;;
+   refuse) echo "ssh: connect to host $host port 22: Connection refused" >&2; exit 255 ;;
+-  link-nourl) echo "# To authenticate, visit: login.tailscale.com/a/desk-test-nourl" >&2; exec sleep 3637 ;;
++  link-nourl) echo "# To authenticate, visit: login.tailscale.com/a/desk-test-nourl" >&2; exec sleep 3647 ;;
+ esac
+ [ "$*" = true ] && exit 0
+ cd "$FAKE_HOME" || exit 255
+@@ -89,11 +110,11 @@
+ fi
+ case "${FAKE_RSYNC:-ok}" in
+   ok) echo "stand-in rsync: nothing copied"; exit 0 ;;
+-  link) echo "# To authenticate, visit: https://login.tailscale.com/a/desk-test-rsync" >&2; exec sleep 3637 ;;
+-  hang) exec sleep 3637 ;;
++  link) echo "# To authenticate, visit: https://login.tailscale.com/a/desk-test-rsync" >&2; exec sleep 3647 ;;
++  hang) exec sleep 3647 ;;
+   fail) echo "rsync error: some files could not be transferred (code 23)" >&2; exit 23 ;;
+   partial-link) mkdir -p "$dst/s1"; echo '{"reason": "other_user:users:zz_other_user"}' > "$dst/s1/end.json"
+-                echo "# To authenticate, visit: https://login.tailscale.com/a/desk-test-rsync-partial" >&2; exec sleep 3637 ;;
++                echo "# To authenticate, visit: https://login.tailscale.com/a/desk-test-rsync-partial" >&2; exec sleep 3647 ;;
+   fixture) case "$dst" in
+              */aifoundry2/) mkdir -p "$dst/s1/tel"; echo '{"reason": "other_user:users:zz_other_user"}' > "$dst/s1/end.json"
+                             echo '{"t_ms": 1}' > "$dst/s1/tel/x.jsonl" ;;
+@@ -206,8 +227,83 @@
+ p=$RAW/e163/p16310; [ -n "${FAKE_E163_ABS:-}" ] && p=$PWD/build/e163-raw/e163/p16310
+ printf '{"experiment": "E78", "dirs": ["%s"]}\n' "$p" > "$O/e163.json"
+ printf 'pass,dir\n16310,%s\n' "$p" > "$O/runs.csv"
++# v3.1's test: the C check as collect_e163.sh step 1 runs it (the stand-in ccheck.py below, FAKE_CCHECK picks how it ends); the real
++# collector, too, goes on to score whatever the check left
++mkdir -p "$O/ccheck"
++python3 -B tools/claims-v3/ccheck/ccheck.py check x --out "$O/ccheck/ccheck-all.json" > "$O/ccheck/ccheck.txt" 2>&1
++echo "ccheck rc=$? ($(tail -1 "$O/ccheck/ccheck.txt" | head -c 200))"
++echo "results.md written"
++EOS
++# ---- v3.1's stand-ins (the Z cases) ------------------------------------------------------------------------------------------
++mkdir -p "$T/repo/tools/claims-v3/ccheck" "$T/repo/tools/claims-v3/e165" "$T/repo/docs/reports/data/2026-11-04-q141t-s7-recount/arm"
++cat > "$T/repo/tools/claims-v3/ccheck/ccheck.py" <<'EOS'
++# stand-in ccheck.py (v3.1's desk test): `check <logs> --out <json>` as Q139(k)'s, which writes --out only at its end and exits 1 on a
++# crash and on a C FAIL alike. FAKE_CCHECK: ok (3 launches, all PASS), fail (one launch FAIL), crash (a traceback, no --out file),
++# garbled (a truncated --out file), empty (a summary of 0 launches)
++import json, os, sys
++a = sys.argv[1:]
++out = a[a.index("--out") + 1]
++mode = os.environ.get("FAKE_CCHECK", "ok")
++if mode == "crash":
++    print("Traceback (most recent call last):\nFileNotFoundError: [Errno 2] No such file or directory: 'rtl-sim/fma_toggle_v2/accum.c'")
++    sys.exit(1)
++if mode == "garbled":
++    open(out, "w").write('{"summary": {"launches": 3, "PASS"')
++    sys.exit(1)
++rows = [] if mode == "empty" else [{"verdict": "FAIL" if (mode == "fail" and i == 0) else "PASS", "type": "fp32"} for i in range(3)]
++s = {"launches": len(rows), "PASS": sum(r["verdict"] == "PASS" for r in rows), "ROUNDING": 0, "UNMODELLED": 0,
++     "FAIL": sum(r["verdict"] == "FAIL" for r in rows)}
++s["all_pass"] = s["PASS"] == s["launches"] and s["launches"] > 0
++json.dump({"summary": s, "launches": rows}, open(out, "w"))
++print(json.dumps(s))
++sys.exit(0 if s["all_pass"] else 1)
++EOS
++cat > "$T/repo/tools/claims-v3/e164/collect_e164_a1.sh" <<'EOS'
++#!/usr/bin/env bash
++# stand-in collect_e164_a1.sh (v3.1's desk test): collect_e164.sh's C check (step 3, the stand-in ccheck.py), its scorer's line, a
++# clean scrub; it exits 0 whatever the C check did, as the real one does
++cd "$(dirname "${BASH_SOURCE[0]}")/../../.."
++O=build/e164-out/${E164_DATE:-today}-e164-blind7-card1
++mkdir -p "$O/logs" "$O/ccheck"
++python3 -B tools/claims-v3/ccheck/ccheck.py check x --out "$O/ccheck/ccheck-session.json" > "$O/ccheck/ccheck-session.txt" 2>&1
++echo "ccheck rc=$? $(tail -1 "$O/ccheck/ccheck-session.txt" | cut -c1-200)"
++echo '{"stand-in": "score_e164"}' > "$O/scored.json"
+ echo "results.md written"
++exit 0
+ EOS
++printf '#!/usr/bin/env bash\necho "stand-in pull_e164.sh: nothing to copy"\nexit 0\n' > "$T/repo/tools/claims-v3/e164/box/pull_e164.sh"
++echo '{}' > "$T/repo/docs/reports/data/2026-11-04-q141t-s7-recount/arm/arm27-aifoundry1c1.json"
++cat > "$T/repo/tools/claims-v3/e165/collect_e165_bounded.sh" <<'EOS'
++#!/usr/bin/env bash
++# stand-in collect_e165_bounded.sh <raw> <data dir> (v3.1's desk test): two sessions with a C log (smoke, s1), each checked as step 4
++# checks it, reading nothing of the check; s1's check follows FAKE_CCHECK. It exits 0, as the real one does after a crashed check
++cd "$(dirname "${BASH_SOURCE[0]}")/../../.."
++RAW=$1; D=$2
++mkdir -p "$RAW/cc" "$D/aifoundry2/smoke" "$D/aifoundry2/s1"
++for s in smoke s1; do
++  echo '{"kind": "c"}' | gzip -n > "$D/aifoundry2/$s/c-log.jsonl.gz"
++  m=${FAKE_CCHECK:-ok}; [ "$s" = smoke ] && m=ok
++  FAKE_CCHECK=$m python3 -B tools/claims-v3/ccheck/ccheck.py check x --out "$D/ccheck-$s.json" > "$RAW/cc/ccheck-$s.txt" 2>&1
++done
++echo '{"score": {"note": "stand-in"}}' > "$D/results.json"
++echo "collected into $D; scored: stand-in"
++exit 0
++EOS
++cat > "$T/repo/tools/claims-v3/e167/score_e167_x2.py" <<'EOS'
++import json, sys
++a = sys.argv[1:]
++json.dump({"stand-in": "score_e167_x2"}, open(a[a.index("--json") + 1], "w"))
++print("stand-in score_e167_x2")
++EOS
++( cd "$T/repo" && sha256sum tools/claims-v3/e167/score_e167_x2.py > tools/claims-v3/e167/frozen-e167-x2.sha256 ) || exit 2
++cat > "$T/c167-standin.sh" <<'EOS'
++#!/usr/bin/env bash
++# stand-in collect_e167_bounded.sh <data dir> <from> <to> (v3.1's desk test, Z7 only): two steps with a C log, SMOKE and G1Q
++cd "$(dirname "${BASH_SOURCE[0]}")/../../.."
++for s in SMOKE G1Q; do mkdir -p "$1/$s"; echo '{"kind": "c"}' | gzip -n > "$1/$s/c-log.jsonl.gz"; done
++echo "stand-in collect_e167_bounded.sh: two C logs"
++exit 0
++EOS
+ printf 'print("stand-in score_e166")\n' > "$T/repo/tools/claims-v3/e166/score_e166.py"
+ cat > "$T/repo/tools/claims-v3/e168/reduce_e168.py" <<'EOS'
+ import json, sys
+@@ -225,10 +321,10 @@
+ print(datetime.date.today() + datetime.timedelta(days=2))
+ PY
+ DAY=$(/usr/bin/python3 -I "$T/day.py")
+-echo "# Q142(s) v3 runbook desk test: $(date '+%a %d %b %Y %H:%M:%S %Z'); ssh and rsync on PATH are the stand-ins; a sample window, on $DAY"
++echo "# Q142(s) v3.1 runbook desk test: $(date '+%a %d %b %Y %H:%M:%S %Z'); ssh and rsync on PATH are the stand-ins; a sample window, on $DAY"
+ fails=0; n=0
+ ok() { n=$((n + 1)); if [ "$1" = 1 ]; then echo "ok   $2"; else echo "FAIL $2"; fails=$((fails + 1)); fi; }
+-left() { pgrep -f 'sleep 3637' > /dev/null && { pkill -f 'sleep 3637'; echo yes; } || echo no; }
++left() { pgrep -f 'sleep 3647' > /dev/null && { pkill -f 'sleep 3647'; echo yes; } || echo no; }
+ secs() { /usr/bin/python3 -I "$T/secs.py" "$1" "$2"; }
+ cat > "$T/secs.py" <<'PY'
+ import sys
+@@ -252,13 +348,14 @@
+   RC=$?
+   t1=$("$GDATE" +%s.%N)
+   SECS=$(secs "$t0" "$t1")
+-  ok "$([ "$RC" = "$want" ] && echo 1 || echo 0)" "$name: $([ "$dir" = "$V1" ] && echo "v1's ")$([ "$dir" = "$V2" ] && echo "v2's ")$1 ${*:2} -> exit $RC (want $want) in $SECS s"
++  ok "$([ "$RC" = "$want" ] && echo 1 || echo 0)" "$name: $([ "$dir" = "$V1" ] && echo "v1's ")$([ "$dir" = "$V2" ] && echo "v2's ")$([ "$dir" = "$V3" ] && echo "v3's ")$1 ${*:2} -> exit $RC (want $want) in $SECS s"
+   ok "$([ "$(left)" = no ] && echo 1 || echo 0)" "$name: no stand-in process left running"
+   ok "$(grep -rqs 'zz_other_user' "$O" && echo 0 || echo 1)" "$name: no stand-in login in any file the runbook wrote"
+ }
+ case_() { run_ "$D" "$@"; }
+ case_v1() { run_ "$V1" "$@"; }
+ case_v2() { run_ "$V2" "$@"; }
++case_v3() { run_ "$V3" "$@"; }
+ lockline() { grep -qE "^[0-2][0-9]:[0-5][0-9]:[0-5][0-9] $1 needs a check$" "$O/lock.txt" 2>/dev/null && echo 1 || echo 0; }
+ fast() { /usr/bin/python3 -I "$T/cmpf.py" "$SECS" lt "$1" && echo 1 || echo 0; }
+ between() { /usr/bin/python3 -I "$T/cmpf.py" "$SECS" ge "$1" && /usr/bin/python3 -I "$T/cmpf.py" "$SECS" lt "$2" && echo 1 || echo 0; }
+@@ -269,7 +366,7 @@
+ echo; echo "== A. success"
+ case_ A1 0 s01_probe.sh
+ ok "$( [ "$(grep -c 'class=probe .*rc=0 .*status=ok' "$O/runbook.log")" -eq 3 ] && echo 1 || echo 0)" "A1: three probe lines in the log, each rc=0 status=ok"
+-ok "$(grep -q 'step=s01_probe_v3 ' "$O/runbook.log" && echo 1 || echo 0)" "A1: the log names the step as v3's (step=s01_probe_v3)"
++ok "$(grep -q 'step=s01_probe_v3.1 ' "$O/runbook.log" && echo 1 || echo 0)" "A1: the log names the step as v3.1's (step=s01_probe_v3.1)"
+ case_ A2 0 s02_window.sh "$DAY" 15:30 16:30 full
+ cp "$O/window.env" "$T/carry/window.env"
+ ok "$(grep -q "^RB_E164_DEADLINE=.*$DAY\\\\ 16:20\\\\ P[SD]T" "$T/carry/window.env" && echo 1 || echo 0)" "A2: the window holds E164's deadline, the last end less 10 minutes"
+@@ -395,7 +492,7 @@
+ ok "$(lockline aifoundry3)" "X1: a link from rsync inside collect_e166.sh (GNU timeout's own process group): lock line for aifoundry3"
+ ok "$(fast 6)" "X1: killed at once"
+ cat > "$T/split.sh" <<'EOS'
+-printf 'visit https://login.tail' >&2; sleep 1; printf 'scale.com/a/split-check\n' >&2; exec sleep 3637
++printf 'visit https://login.tail' >&2; sleep 1; printf 'scale.com/a/split-check\n' >&2; exec sleep 3647
+ EOS
+ O=$T/out-X2; mkdir -p "$O"
+ RB_LOCK=$O/lock.txt RB_LOG=$O/log.txt RB_LINKS=$O/links.txt /usr/bin/python3 -B "$D/rb_run.py" --cls read --host aifoundry2 --step X2 --what split -- bash "$T/split.sh" > "$O/stdout.txt" 2>&1; r=$?
+@@ -405,7 +502,7 @@
+ 
+ echo; echo "== X3. fault 1: s13 holds the order of steps 12 and 13"
+ J1=$A1/build/q141k/jobs/a1-check
+-printf 'exec sleep 3638\n' > "$T/sleeper.sh"     # a live check job: 3638, killed by pid below (left() looks for 3637 only)
++printf 'exec sleep 3648\n' > "$T/sleeper.sh"     # a live check job: 3648, killed by pid below (left() looks for 3647 only)
+ bash "$T/sleeper.sh" > /dev/null 2>&1 < /dev/null &
+ SP=$!
+ echo "$SP" > "$J1.pid"; rm -f "$J1.rc"; echo "true" > "$J1.sh"
+@@ -461,7 +558,7 @@
+ case_v1 X5v1 17 s15_a2_dry.sh e167 wait
+ ok "$(has '^JOB-RUNNING')" "X5v1: v1's wait read the same lost job as still running: call again (the verifier's X5)"
+ rm -f "$J2.pid"
+-printf 'sleep 1\necho "$$" > "$1"\nexec sleep 3638\n' > "$T/late_pid.sh"
++printf 'sleep 1\necho "$$" > "$1"\nexec sleep 3648\n' > "$T/late_pid.sh"
+ bash "$T/late_pid.sh" "$J2.pid" > /dev/null 2>&1 < /dev/null &
+ LP=$!
+ RB_WAIT_LOOP_S=5 case_ X5b 17 s15_a2_dry.sh e167 wait
+@@ -474,7 +571,7 @@
+ 
+ echo; echo "== X6. nit 1: s09's config read waits for a session of ours"
+ mkdir -p "$T/fakesess/tools/claims-v3/e166"
+-printf 'sleep 3638\n' > "$T/fakesess/tools/claims-v3/e166/session_e166.sh"     # a session of ours: bash stays its parent
++printf 'sleep 3648\n' > "$T/fakesess/tools/claims-v3/e166/session_e166.sh"     # a session of ours: bash stays its parent
+ bash "$T/fakesess/tools/claims-v3/e166/session_e166.sh" > /dev/null 2>&1 < /dev/null &
+ FS=$!
+ sleep 1
+@@ -484,7 +581,7 @@
+ ok "$([ ! -e "$H/guard-calls.txt" ] && echo 1 || echo 0)" "X6: the guard was never called"
+ case_v1 X6v1 0 s09_a3_reads.sh
+ ok "$([ "$(wc -l < "$H/guard-calls.txt" 2>/dev/null | tr -d ' ')" = 1 ] && echo 1 || echo 0)" "X6v1: v1's s09 read the card through the guard beside the session (the verifier's X6)"
+-kill "$FS" 2>/dev/null; wait "$FS" 2>/dev/null; pkill -f 'sleep 3638' 2>/dev/null; true
++kill "$FS" 2>/dev/null; wait "$FS" 2>/dev/null; pkill -f 'sleep 3648' 2>/dev/null; true
+ 
+ echo; echo "== X7. fault 4: E167's collector reaches three boxes"
+ now=$(date +%s); fr=$((now - 3600)); to=$((now - 1800))
+@@ -651,7 +748,7 @@
+ 
+ echo; echo "-- Y8. fault 8: a later card day's session counts as ours"
+ mkdir -p "$T/fakesess/tools/claims-v3/e171"
+-printf 'sleep 3638\n' > "$T/fakesess/tools/claims-v3/e171/queue_e171.py"     # named as a queue; bash runs it, so it stays the parent
++printf 'sleep 3648\n' > "$T/fakesess/tools/claims-v3/e171/queue_e171.py"     # named as a queue; bash runs it, so it stays the parent
+ bash "$T/fakesess/tools/claims-v3/e171/queue_e171.py" > /dev/null 2>&1 < /dev/null &
+ QP=$!
+ sleep 1
+@@ -661,7 +758,7 @@
+ ok "$([ ! -e "$H/guard-calls.txt" ] && echo 1 || echo 0)" "Y8: and the guard is never called"
+ case_v2 Y8v2 0 s09_a3_reads.sh
+ ok "$([ "$(wc -l < "$H/guard-calls.txt" 2>/dev/null | tr -d ' ')" = 1 ] && echo 1 || echo 0)" "Y8v2: v2's ours_live read none, and its guard read the card beside that session"
+-kill "$QP" 2>/dev/null; wait "$QP" 2>/dev/null; pkill -f 'sleep 3638' 2>/dev/null; true
++kill "$QP" 2>/dev/null; wait "$QP" 2>/dev/null; pkill -f 'sleep 3648' 2>/dev/null; true
+ 
+ echo; echo "-- Y9. fault 9: a remote wait stops by the box's clock"
+ echo 999 > "$T/state/etwho-held"
+@@ -673,7 +770,7 @@
+ rm -f "$T/state/etwho-held"
+ 
+ echo; echo "-- Y10. fault 10: a login link never lands in a kit's --stdout file"
+-printf 'echo "a result line"\necho "To authenticate, visit: https://login.tailscale.com/a/desk-test-stdout2"\nexec sleep 3637\n' > "$T/y10.sh"
++printf 'echo "a result line"\necho "To authenticate, visit: https://login.tailscale.com/a/desk-test-stdout2"\nexec sleep 3647\n' > "$T/y10.sh"
+ for v in v3 v2; do
+   if [ "$v" = v3 ]; then R=$D; else R=$V2; fi
+   O=$T/out-Y10-$v; mkdir -p "$O"
+@@ -719,11 +816,174 @@
+ ok "$(has 'LAUNCHED e165')" "Y12bv2: v2's s16 launched E165 there (only s14 read the identity, and nothing made its 16 binding)"
+ rm -f "$T/state/boot"
+ 
+-echo; echo "== V. the files v3 keeps from v2"
++echo; echo "== Z0-Z7. what v3's verifier found (v3.1/README.md, \"What v3.1 changes\"), each with v3 run beside it where that shows it"
++
++echo; echo "-- Z0. the C-check reader on the card half's committed checks of C (read only)"
++K=docs/reports/data/2026-11-04
++( cd "$LAB" && /usr/bin/python3 -B "$D/ccdone_q142s.py" $K-e163-blind7-aifoundry3/ccheck/ccheck-all.json $K-e164-blind7-card1/ccheck/ccheck-session.json \
++    $K-e165-blind7-aifoundry2/ccheck-smoke.json $K-e165-blind7-aifoundry2/ccheck-stoptest-board.json $K-e165-blind7-aifoundry2/ccheck-s1.json \
++    $K-e166-heat-replicate-aifoundry3/ccheck/ccheck-all.json $K-e167-heat-replicate-aifoundry2/ccheck-SMOKE.json \
++    $K-e167-heat-replicate-aifoundry2/ccheck-STOPTEST-BOARD.json $K-e167-heat-replicate-aifoundry2/ccheck-G1Q.json \
++    $K-e167-heat-replicate-aifoundry2/ccheck-G2Q.json ) > "$T/z0.txt"; r=$?
++cat > "$T/z0sum.py" <<'PY'
++import re, sys
++want = {"e163": 4062, "e164": 3896, "e165": 2758, "e166": 6692, "e167": 3377}
++got = {}
++for ln in open(sys.argv[1]):
++    m = re.match(r"CCHECK-DONE \S*?-(e16[3-7])-\S*: (\d+) launches, PASS (\d+),", ln)
++    if m:
++        got[m.group(1)] = got.get(m.group(1), 0) + int(m.group(2))
++print(", ".join(f"{k.upper()} {got.get(k, 0)}" for k in sorted(want)))
++sys.exit(0 if got == want else 1)
++PY
++z0=$(/usr/bin/python3 -I "$T/z0sum.py" "$T/z0.txt"); r2=$?
++ok "$([ "$r" = 0 ] && [ "$r2" = 0 ] && echo 1 || echo 0)" "Z0: all 10 committed checks of C read finished (exit $r); launches: $z0 (E165: s1 2734, smoke 20, stop test 4)"
++ok "$([ "$(grep -c '^CCHECK-DONE .*all_pass True$' "$T/z0.txt")" = 10 ] && echo 1 || echo 0)" "Z0: every one all PASS, as the runs' READMEs say"
++ok "$(grep -c '\.json\.gz: ' "$T/z0.txt" | grep -qx 2 && echo 1 || echo 0)" "Z0: E164's and E165's s1 file, committed gzipped only, read through gzip"
++rm -rf "${D:?}/__pycache__"
++
++echo; echo "-- Z1. fault 1, e163: the check of C must have finished before the step says collected"
++rm -rf "${T:?}/repo/build/e163-out"
++FAKE_CCHECK=crash case_ Z1a 14 s22_collect.sh e163
++ok "$(has "^CCHECK-MISSING build/e163-out/$DAY-e163-blind7-aifoundry3/ccheck/ccheck-all.json: ")" "Z1a: the crashed check left no --out file: CCHECK-MISSING"
++ok "$(has "E163's check of C did not finish")" "Z1a: so the step stops (14), with that reason (v3 stopped such a check only when its traceback held a desk path, as 16)"
++ok "$(hasnot 'E163 collected and scored')" "Z1a: and never says collected"
++rm -rf "${T:?}/repo/build/e163-out"
++FAKE_CCHECK=crash case_v3 Z1v3 0 s22_collect.sh e163
++ok "$(has 'E163 collected and scored')" "Z1v3: v3 reported the same crashed check collected and scored (no desk path in its output, so its gate read CLEAN)"
++rm -rf "${T:?}/repo/build/e163-out"
++FAKE_CCHECK=fail case_ Z1b 0 s22_collect.sh e163
++ok "$(has '^CCHECK-DONE .*FAIL 1, all_pass False$')" "Z1b: a genuine C FAIL is a finished check (CCHECK-DONE, all_pass False)"
++ok "$(has 'E163 collected and scored')" "Z1b: and goes on to the registered C rules (no stop)"
++rm -rf "${T:?}/repo/build/e163-out"
++FAKE_CCHECK=garbled case_ Z1c 14 s22_collect.sh e163
++ok "$(has '^CCHECK-UNREAD ')" "Z1c: a truncated --out file reads CCHECK-UNREAD (14)"
++rm -rf "${T:?}/repo/build/e163-out"
++FAKE_CCHECK=empty case_ Z1d 14 s22_collect.sh e163
++ok "$(has '^CCHECK-EMPTY ')" "Z1d: a check that read 0 launches reads CCHECK-EMPTY (14)"
++rm -rf "${T:?}/repo/build/e163-out"
++
++echo; echo "-- Z2. fault 1, e166: the real collect_e166.sh (a stand-in ccheck.py; the stand-in rsync copies nothing)"
++D66=$T/repo/docs/reports/data/$DAY-e166-heat-replicate-aifoundry3
++z2prep() {  # a fresh data directory holding the measured pass's marks and C log, as a copy would leave them
++  rm -rf "${T:?}/repo/docs/reports/data/$DAY-e166-heat-replicate-aifoundry3"
++  mkdir -p "$D66/aifoundry3/e166/p16620"
++  echo '{"kind": "stand-in"}' > "$D66/aifoundry3/e166/p16620/marks.jsonl"
++  echo '{"kind": "c"}' > "$D66/aifoundry3/e166/p16620/c-log.jsonl"
++}
++z2old() {  # an earlier try's ccheck-all.json, written yesterday, left in the data directory
++  mkdir -p "$D66/ccheck"
++  printf '{"summary": {"launches": 3, "PASS": 3, "all_pass": true}, "launches": [{}, {}, {}]}\n' > "$D66/ccheck/ccheck-all.json"
++  stale "$D66/ccheck/ccheck-all.json"
++}
++z2prep; FAKE_CCHECK=crash case_ Z2a 14 s22_collect.sh e166
++ok "$(has '^ccheck rc=1 ')" "Z2a: collect_e166.sh printed its 'ccheck rc=1' line and went on (collect_e166.sh:24)"
++ok "$(has "^CCHECK-MISSING docs/reports/data/$DAY-e166-heat-replicate-aifoundry3/ccheck/ccheck-all.json: ")" "Z2a: no --out file: CCHECK-MISSING"
++ok "$(has "E166's check of C did not finish")" "Z2a: the step stops (14) before collected"
++z2prep; FAKE_CCHECK=crash case_v3 Z2v3 0 s22_collect.sh e166
++ok "$(has 'E166 collected and scored')" "Z2v3: v3 read only 'score rc=0' and reported it collected and scored"
++z2prep; case_ Z2b 0 s22_collect.sh e166
++ok "$(has '^CCHECK-DONE .*all_pass True$')" "Z2b: a check that ran to its end reads CCHECK-DONE"
++ok "$(has 'E166 collected and scored')" "Z2b: and the step collects"
++z2prep; z2old; FAKE_CCHECK=crash case_ Z2c 14 s22_collect.sh e166
++ok "$(has '^CCHECK-STALE ')" "Z2c: this try's check crashed beside an earlier try's file: CCHECK-STALE (14), never read as this one's"
++z2prep; z2old; FAKE_CCHECK=crash case_v3 Z2cv3 0 s22_collect.sh e166
++ok "$(has 'E166 collected and scored')" "Z2cv3: v3 collected and scored over it"
++rm -rf "${T:?}/repo/docs/reports/data/$DAY-e166-heat-replicate-aifoundry3"
++
++echo; echo "-- Z3. nit 5: s13 reads the launcher's exit 9 as a refusal"
++C164=$A1/tools/claims-v3/e164/check_e164.py
++cp "$C164" "$T/check_e164.keep"
++printf 'import sys\nprint("HARNESS DIFFERS - refusing:\\n  tools/claims-v3/e164/run_e164.py: sha256 differs")\nsys.exit(9)\n' > "$C164"
++nl0=$(cat "$A1/build/e164/session.log" 2>/dev/null | wc -l | tr -d ' ')
++case_ Z3 10 s13_a1_launch.sh
++ok "$(has 'refused on the box \(nothing launched\): HARNESS DIFFERS - refusing:')" "Z3: check_e164.py's HARNESS DIFFERS (the launcher's exit 9) reads as a refusal (10)"
++ok "$([ "$(cat "$A1/build/e164/session.log" 2>/dev/null | wc -l | tr -d ' ')" = "$nl0" ] && echo 1 || echo 0)" "Z3: no session started in the stand-in box"
++case_v3 Z3v3 14 s13_a1_launch.sh
++ok "$(has 'launch_e164_a1.sh failed')" "Z3v3: v3 read the same refusal as a failure (14), against its own header"
++printf 'import sys\nsys.stderr.write("Traceback (most recent call last):\\nKeyError: files\\n")\nsys.exit(1)\n' > "$C164"
++case_ Z3b 14 s13_a1_launch.sh
++ok "$(has 'launch_e164_a1.sh failed')" "Z3b: a check_e164.py that crashes (exit 9 with no HARNESS DIFFERS line) is still a failure (14)"
++cp "$T/check_e164.keep" "$C164"
++
++echo; echo "-- Z4. nit 8: the desk-path gate never passes an output it did not read"
++mkdir -p "$T/z4"
++/usr/bin/python3 -B "$D/nopath_q142s.py" "$T/z4/nowhere" > "$T/z4/v31.txt"; r1=$?
++/usr/bin/python3 -B "$V3/nopath_q142s.py" "$T/z4/nowhere" > "$T/z4/v3.txt"; r2=$?
++ok "$([ "$r1" = 3 ] && grep -q '^MISSING ' "$T/z4/v31.txt" && grep -q 'NOT CLEAN$' "$T/z4/v31.txt" && echo 1 || echo 0)" "Z4a: v3.1's nopath on a path that is not there: MISSING, NOT CLEAN, exit $r1"
++ok "$([ "$r2" = 0 ] && grep -q ': CLEAN$' "$T/z4/v3.txt" && echo 1 || echo 0)" "Z4v3: v3's read the same path CLEAN, exit $r2"
++cat > "$T/z4/gate.sh" <<'EOS'
++. "$1/rb_common.sh"
++rb_init z4_gate
++rb_nopath "$2"
++echo "GATE-PASSED"
++EOS
++for v in v31 v3; do
++  R=$D; [ "$v" = v3 ] && R=$V3
++  O=$T/out-Z4-$v; mkdir -p "$O"
++  RB_OUT=$O RB_LOCK=$O/lock.txt bash "$T/z4/gate.sh" "$R" build/nowhere-z4 > "$O/stdout.txt" 2>&1; echo $? > "$O/rc"
++done
++ok "$([ "$(cat "$T/out-Z4-v31/rc")" = 16 ] && grep -q 'an output this step should have written is not there' "$T/out-Z4-v31/stdout.txt" && ! grep -q GATE-PASSED "$T/out-Z4-v31/stdout.txt" && echo 1 || echo 0)" "Z4b: through rb_nopath a missing output stops the step (16), with its own message"
++ok "$([ "$(cat "$T/out-Z4-v3/rc")" = 0 ] && grep -q GATE-PASSED "$T/out-Z4-v3/stdout.txt" && echo 1 || echo 0)" "Z4bv3: v3's rb_nopath passed it"
++rm -rf "${D:?}/__pycache__" "${V3:?}/__pycache__"
++
++echo; echo "-- Z5. fault 1, e164: collect_e164.sh's check of C (its step 3) must have finished"
++E3=$T/repo/build/e163-out/$DAY-e163-blind7-aifoundry3
++z5prep() {  # E163's files, which s22 e164 reads first, and no E164 output yet
++  rm -rf "${T:?}/repo/build/e163-out" "${T:?}/repo/build/e164-out"
++  mkdir -p "$E3"; echo '{"stand-in": "e163"}' > "$E3/e163.json"; echo '{"primary": {"c_excluded": []}}' > "$E3/scored.json"
++}
++z5prep; FAKE_CCHECK=crash case_ Z5a 14 s22_collect.sh e164
++ok "$(has "^CCHECK-MISSING build/e164-out/$DAY-e164-blind7-card1/ccheck/ccheck-session.json: ")" "Z5a: no --out file: CCHECK-MISSING"
++ok "$(has "E164's check of C did not finish")" "Z5a: the step stops (14) before collected"
++z5prep; FAKE_CCHECK=crash case_v3 Z5v3 0 s22_collect.sh e164
++ok "$(has 'E164 collected and scored')" "Z5v3: v3 reported it collected and scored"
++z5prep; case_ Z5b 0 s22_collect.sh e164
++ok "$(has '^CCHECK-DONE .*all_pass True$')" "Z5b: a finished check reads CCHECK-DONE"; ok "$(has 'E164 collected and scored')" "Z5b: and the step collects"
++rm -rf "${T:?}/repo/build/e163-out" "${T:?}/repo/build/e164-out"
++
++echo; echo "-- Z6. fault 1, e165: each session's check of C (collect_e165_bounded.sh step 4) must have finished"
++D65=docs/reports/data/$DAY-e165-blind7-aifoundry2
++rm -rf "${T:?}/repo/$D65"
++FAKE_CCHECK=crash case_ Z6a 14 s22_collect.sh e165
++ok "$(has "^CCHECK-DONE $D65/ccheck-smoke.json: ")" "Z6a: the smoke's check ran to its end"
++ok "$(has "^CCHECK-MISSING $D65/ccheck-s1.json: ")" "Z6a: s1's crashed: CCHECK-MISSING"
++ok "$(has "E165's check of C did not finish")" "Z6a: the step stops (14) before collected"
++rm -rf "${T:?}/repo/$D65"
++FAKE_CCHECK=crash case_v3 Z6v3 0 s22_collect.sh e165
++ok "$(has 'E165 collected and scored')" "Z6v3: v3 reported it collected and scored"
++rm -rf "${T:?}/repo/$D65"
++case_ Z6b 0 s22_collect.sh e165
++ok "$( [ "$(grep -c '^CCHECK-DONE ' "$O/stdout.txt")" = 2 ] && echo 1 || echo 0)" "Z6b: both sessions' checks read CCHECK-DONE"; ok "$(has 'E165 collected and scored')" "Z6b: and the step collects"
++rm -rf "${T:?}/repo/$D65"
++
++echo; echo "-- Z7. fault 1, e167: this step's own checks of C must have finished (a stand-in collector and scorer)"
++D67r=docs/reports/data/$DAY-e167-heat-replicate-aifoundry2
++cp "$T/repo/tools/claims-v3/e167/collect_e167_bounded.sh" "$T/c167-real.keep"
++cp "$T/c167-standin.sh" "$T/repo/tools/claims-v3/e167/collect_e167_bounded.sh"
++rm -rf "${T:?}/repo/$D67r"
++FAKE_CCHECK=crash case_ Z7a 14 s22_collect.sh e167 "$fr" "$to"
++ok "$(has "^CCHECK-MISSING $D67r/ccheck-SMOKE.json: ")" "Z7a: no --out file for SMOKE's check"; ok "$(has "^CCHECK-MISSING $D67r/ccheck-G1Q.json: ")" "Z7a: nor for G1Q's"
++ok "$(has "E167's check of C did not finish")" "Z7a: the step stops (14)"; ok "$(hasnot 'stand-in score_e167_x2')" "Z7a: before the scorer"
++rm -rf "${T:?}/repo/$D67r"
++FAKE_CCHECK=crash case_v3 Z7v3 0 s22_collect.sh e167 "$fr" "$to"
++ok "$(has 'stand-in score_e167_x2')" "Z7v3: v3 read nothing of its own checks and went on to score"; ok "$(has 'E167 collected and scored')" "Z7v3: and reported collected and scored"
++rm -rf "${T:?}/repo/$D67r"
++case_ Z7b 0 s22_collect.sh e167 "$fr" "$to"
++ok "$( [ "$(grep -c '^CCHECK-DONE ' "$O/stdout.txt")" = 2 ] && echo 1 || echo 0)" "Z7b: both checks read CCHECK-DONE"; ok "$(has 'E167 collected and scored')" "Z7b: and the step collects"
++cp "$T/c167-real.keep" "$T/repo/tools/claims-v3/e167/collect_e167_bounded.sh"
++rm -rf "${T:?}/repo/$D67r"
++
++echo; echo "== V. the files v3.1 keeps from v3 (18 of them v2's too)"
++for f in s01_probe.sh s02_window.sh s03_desk.sh s05_look.sh s07_a3_sync.sh s08_a3_preflight.sh s09_a3_reads.sh s10_a3_dry.sh \
++         s11_a3_session.sh s12_a1_check.sh s14_a2_tree.sh s15_a2_dry.sh s16_a2_e165.sh s17_a2_e167.sh s18_a2_e168.sh s19_a2_e169.sh \
++         s20_wait.sh list_steps.sh frozen26.py anchors_e165.py rb_run.py; do
++  ok "$(cmp -s "$V3/$f" "$D/$f" && echo 1 || echo 0)" "V: v3.1/$f is byte for byte v3's"
++done
+ for f in s01_probe.sh s02_window.sh s03_desk.sh s07_a3_sync.sh s08_a3_preflight.sh s09_a3_reads.sh s10_a3_dry.sh s11_a3_session.sh \
+          s12_a1_check.sh s14_a2_tree.sh s15_a2_dry.sh s16_a2_e165.sh s17_a2_e167.sh s18_a2_e168.sh s19_a2_e169.sh \
+          list_steps.sh frozen26.py anchors_e165.py; do
+-  ok "$(cmp -s "$V2/$f" "$D/$f" && echo 1 || echo 0)" "V: v3/$f is byte for byte v2's"
++  ok "$(cmp -s "$V2/$f" "$D/$f" && echo 1 || echo 0)" "V: v3.1/$f is byte for byte v2's"
+ done
+ 
+ echo; echo "== E. the dry listing"
+@@ -739,13 +999,13 @@
+          "build/e168/runs/" "build/e169/runs/" "collect_e165_bounded.sh" "collect_e167_bounded.sh" "latch_check_e167.py" "run_e167.sh dry" \
+          "build/e169/dry" "QUEUE-STOP" "score_rank4.py" "score_s7arm_a1.py" "arm27-aifoundry3.json" \
+          "GUARD-OK" "job_ok_today a1-check" "IDENTITY-OK" "2026-10-27 13:56:26 PDT" "names its own box in the lock line" "probe aifoundry1, hard-killed" \
+-         "REFUSED: an earlier E166 smoke is on the box" "fresh build/q141k/e166.log-offset" "gate: now + 70 min" "_v3] dry listing" "gate: no desk path" "IDENTITY-STOP" "e168-raw" "build/e163-raw/"; do
++         "REFUSED: an earlier E166 smoke is on the box" "fresh build/q141k/e166.log-offset" "gate: now + 70 min" "_v3.1] dry listing" "gate: no desk path" "and each of them there" "ccdone_q142s.py" "checks of C finished" "IDENTITY-STOP" "e168-raw" "build/e163-raw/"; do
+   ok "$(grep -qF -- "$k" "$O/listing.txt" && echo 1 || echo 0)" "E: the listing holds: $k"
+ done
+ ok "$(grep -qE 'box/launch_e164\.sh([^_]|$)' "$O/listing.txt" && echo 0 || echo 1)" "E: box/launch_e164.sh (it would run 0 passes) is never sent"
+ ok "$(grep -qE '/Use[r]s/|/home/[a-z]' "$O/listing.txt" && echo 0 || echo 1)" "E: no home path in the listing"
+ rm -rf "${D:?}/__pycache__"
+-pgrep -f 'sleep 3638' > /dev/null && { pkill -f 'sleep 3638'; echo "note: a 3638 stand-in was still running at the end (killed)"; }
++pgrep -f 'sleep 3648' > /dev/null && { pkill -f 'sleep 3648'; echo "note: a 3648 stand-in was still running at the end (killed)"; }
+ echo; echo "$((n - fails)) of $n checks pass"
+ [ "$fails" -eq 0 ] && echo "ALL PASS" || echo "$fails FAIL"
+ exit $([ "$fails" -eq 0 ] && echo 0 || echo 1)

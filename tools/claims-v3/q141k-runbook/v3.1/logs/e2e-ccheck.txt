@@ -1,0 +1,56 @@
+# Q142(s) v3.1 end-to-end test of s22 e163, Wed 04 Nov 2026 21:52:28 PST: the scratch clone at c996d135 2026-11-04 21:37:24
+# v3.1 under test: s22_collect.sh 7988cb0bd251, ccdone_q142s.py 997e2075e5eb, nopath_q142s.py 0e496e421074, rb_common.sh 93acb9ee8f73 (sha256, first 12)
+the stand-in box: 8 pass directories from E163's committed raw layout
+
+== 1. the C check crashes (no rtl-sim/fma_toggle_v2/ in the clone)
+-- v3.1: s22_collect.sh e163 exit 14 in 46 s
+   ccheck rc=1 (FileNotFoundError: [Errno 2] No such file or directory: '<S>/lab/rtl-sim/fma_toggle_v2/accum.c')
+   CCHECK-MISSING build/e163-out/2026-11-04-e163-blind7-aifoundry3/ccheck/ccheck-all.json: no file (ccheck.py writes its --out only when the check runs to its end)
+   ccdone: 0 of 1 C checks finished (0 of them all PASS): NOT FINISHED
+   [s22_collect_v3.1] STOP: E163's check of C did not finish (the CCHECK- lines above; ccheck.py exits 1 on a crash and on a C FAIL alike, and writes its --out file only at its end): nothing is scored as registered. Read its ccheck output, remove what the collect
+-- v3: s22_collect.sh e163 exit 16 in 52 s
+   ccheck rc=1 (FileNotFoundError: [Errno 2] No such file or directory: '<S>/lab/rtl-sim/fma_toggle_v2/accum.c')
+   nopath: 488 files read under 1 path(s); 4 hit(s): NOT CLEAN
+   [s22_collect_v3] STOP: a desk path reached what this step wrote (the HIT lines above): commit nothing; fix the route, remove the outputs, collect again
+-- v2: s22_collect.sh e163 exit 0 in 54 s
+   ccheck rc=1 (FileNotFoundError: [Errno 2] No such file or directory: '<S>/lab/rtl-sim/fma_toggle_v2/accum.c')
+   [s22_collect_v2] E163 collected and scored: build/e163-out/2026-11-04-e163-blind7-aifoundry3 (the data directory is docs/reports/data/2026-11-04-e163-blind7-aifoundry3/)
+   what the scorer wrote over the crashed check, against the committed scored.json's 28 registered verdicts:
+     NOT SCORED: 17 of 28: E163-P1, E163-P2, E163-P3, E163-B1, E163-B2, E163-C1, E163-M1, E163-M2, E163-M3, E163-U1, E163-H1, E163-H2, E163-H3, E163-H4, E163-R1, E163-R2, E163-RANK1
+     changed otherwise: 5: E163-K14-C PASS -> FAIL; E163-KC PASS -> FAIL; E163-KE PASS -> FAIL; E163-KEprime PASS -> FAIL; E163-KE-C PASS -> FAIL
+     added, not registered: E163-CS0-floats NOT SCORED; E163-CS0-int8 NOT SCORED
+   (the same scored.json under all three versions: the collector wrote it; v2 reported it as collected and scored)
+
+== 2. the clone gets rtl-sim/fma_toggle_v2/: v3.1's s22 e163 again
+-- v3.1: s22_collect.sh e163 exit 0 in 68 s
+   ccheck rc=0 ({"launches": 4062, "PASS": 4062, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 1296, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "fp16": {"PASS": 648, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "int8": {"PASS": 2118, "RO
+   CCHECK-DONE build/e163-out/2026-11-04-e163-blind7-aifoundry3/ccheck/ccheck-all.json: 4062 launches, PASS 4062, ROUNDING 0, UNMODELLED 0, FAIL 0, all_pass True
+   ccdone: 1 of 1 C checks finished (1 of them all PASS): FINISHED
+   nopath: 489 files read under 1 path(s); 0 missing; 0 hit(s): CLEAN
+   [s22_collect_v3.1] E163 collected and scored: build/e163-out/2026-11-04-e163-blind7-aifoundry3 (the data directory is docs/reports/data/2026-11-04-e163-blind7-aifoundry3/)
+   top-level files written: 43; byte-identical to the committed directory once the pass prefix is normalised: 43; differ: 0 []; not in the committed directory: 0 []
+   verdicts: 28, identical to the committed scored.json's: True
+   e163.json dirs: ['build/e163-raw/e163/p16310', 'build/e163-raw/e163/p16311', 'build/e163-raw/e163/p16312']
+
+== the stand-ins' calls (none reached a box)
+   21:52:29 ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+   21:52:29 rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3:aifoundry/build/claims-v3/aifoundry3/e163 aifoundry3:aifoundry/build/claims-v3/aifound
+   21:52:29 rsync --server -g -l -o -p -D -r -t -W --dirs . build/e163-raw/
+   21:52:30 rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3:aifoundry/build/e163/ build/e163-raw/logs/
+   21:52:30 rsync --server -g -l -o -p -D -r -t -W --dirs . build/e163-raw/logs/
+   21:53:15 ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+   21:53:15 rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3:aifoundry/build/claims-v3/aifoundry3/e163 aifoundry3:aifoundry/build/claims-v3/aifound
+   21:53:15 rsync --server -g -l -o -p -D -r -t -W --dirs . build/e163-raw/
+   21:53:16 rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3:aifoundry/build/e163/ build/e163-raw/logs/
+   21:53:16 rsync --server -g -l -o -p -D -r -t -W --dirs . build/e163-raw/logs/
+   21:54:07 ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+   21:54:08 rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3:aifoundry/build/claims-v3/aifoundry3/e163 aifoundry3:aifoundry/build/claims-v3/aifound
+   21:54:08 rsync --server -g -l -o -p -D -r -t -W --dirs . <S>/lab/build/e163-raw/
+   21:54:08 rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3:aifoundry/build/e163/ <S>/lab/build/e163-raw/logs/
+   21:54:08 rsync --server -g -l -o -p -D -r -t -W --dirs . <S>/lab/build/e163-raw/logs/
+   21:55:03 ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+   21:55:03 rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3:aifoundry/build/claims-v3/aifoundry3/e163 aifoundry3:aifoundry/build/claims-v3/aifound
+   21:55:03 rsync --server -g -l -o -p -D -r -t -W --dirs . build/e163-raw/
+   21:55:03 rsync -a -e ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3:aifoundry/build/e163/ build/e163-raw/logs/
+   21:55:03 rsync --server -g -l -o -p -D -r -t -W --dirs . build/e163-raw/logs/
+   lock file lines: 0
