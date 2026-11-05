@@ -3352,7 +3352,7 @@ cards serial), aifoundry2 132.1. The last release came about 3 h 23 min after th
 
 **So:** M9 is now the most accurate model by rms on new kinds on both 600 MHz cards and on a third card's governed bursts, and the
 governed-burst clock error halved; but no rank-1 rule holds, the floats carry a session-wide excess no registered term models, the
-single high bits stay the largest miss on every card, and heat needs a coefficient per card and a gain term.
+single high bits stay the largest miss on every card, and heat needs a coefficient per card and a gain term. *(Dated, Wed 4 Nov 2026, Q142's records, after Q142's round critic: a gain or a session level, not separated, post hoc: E166's misses are flat in the rise and E154's grow with it, and E144's one large rise was read to 0.1% ([E166's dated note 2](../reports/data/2026-11-04-e166-heat-replicate-aifoundry3/README.md.dated-note-2.md)). M10 carries the chain's gain as a reported arm only ("Q142", below).)*
 
 ### The card half's critic: one new fault and two post hoc readings (recorded here as dated items)
 
@@ -3446,10 +3446,160 @@ hubs' summaries, and three nits, two of them in this section's list and in [E163
 2](../reports/data/2026-11-04-e163-blind7-aifoundry3/README.md.dated-note-2.md); the fix pass corrects them, with [a third dated
 note](../reports/data/2026-11-04-e163-blind7-aifoundry3/README.md.dated-note-3.md) beside E163's README, and no verifier has read
 the fix pass.)*
+*(Dated, Wed 4 Nov 2026, Q142's records: items 2 and 4 are done at the desk, and unverified past their fix passes. Item 2: M10 is registered and refitted, held out and not blind ("Q142", below); a blind pool 8 by an independent designer is next, its preparation under way. Item 4: the watcher's fix and runbook v3.1 (Q142(s)). Item 5's "once M10's gain term is frozen" no longer holds: the gain is a reported arm, and heat over minutes needs a registered test of a session level against a gain first. Unverified until a verifier reads them: Q141(i)'s fix pass (`1613f496`, `77e12cad`, gyroscope `849fd0bf` and the four pages it published), Q142(m)'s (`ef74dd0d`, `d1581099`, `c996d135`) and Q142(s)'s (`33661416`, `0d2cb5dd`), with those listed above.)*
 
 **Not established by the card half.** Whether the floats' excess is a level or a gain, or of the day, the session or the card; what
 fixed card 0, and whether its 75 W alarm still trips; whether the slow heat stage exists (G_A and SL disagree); whether any
 post hoc reading above holds blind.
+
+## Q142, the model's registered refit M10 (held out, not blind) and a safer runbook (Wed 4 Nov 2026, week 45, from about 19:15 PST; desk only)
+
+The owner's mandate is still his words of Mon 2 Nov 2026 about 18:40 PST (Q138), with Q137's goal, to predict the power and heat
+of numeric work as accurately as possible; his last words were the card half's go of about 13:55 PST, and there is no new word
+since. Two desk lanes ran on the card half's critic's next list, ranks 2 and 4: no card, no device command, no card step on a lab
+box, so **no row below is a new measurement or a blind score**. M10 was registered and pushed before any fit output; its figures
+are leave one kind out on Q139(u)'s footing, **held out, not blind**: two of its terms were named after pool 7's own misses, and
+its entry rules read the errors they report. Pool 8, drawn by an independent designer, is the blind test. Each lane was read by a
+separate verifier and corrected in new files; Q142's round critic re-ran M10's committed fitter and its section-7 code against the
+committed outputs (within 8.5e-14 and 2.1e-13 W; `m10-s7.json` identical) and found no fault in a figure below. Short names:
+`Q142m/` is `docs/reports/data/2026-11-04-q142m-m10/`, `M10reg/` is `tools/claims-v3/m10/`, `HPL/` is `tools/claims-v3/hpl/`
+and `RB31/` is `tools/claims-v3/q141k-runbook/v3.1/`. 🛑 **To carry from here, beside the earlier sections' items:** (56) **M10's
+figures are held out, not blind**: quote them so, with M9 beside on the same rows, until pool 8 scores them; (57) **M10's primary is
+`m10-s7.json`**: `m10.json` still holds the heat chain's gamma, `predict_m10.chain_gain()` returns the arm's factor, and the
+primary's factor for heat over minutes is 1.0; (58) **the heat chain's misses on large rises are a session level or a gain, not
+separated** (post hoc), never "a gain deficit": given the watts, 8 of the 9 large rises read 1.8–5.6% low and E144's to 0.1%; (59)
+**card 1's int8 bias on pool 7 is not the int8 card ratio** (post hoc): int8's next term is a paired-anchor scale, not a new card
+constant; (60) **v3.1's gate on the checks of C covers each check that ran**, not each session that should carry one.
+
+### Each term of M10, by its registered rules (section 6, then section 7 by amendment A2)
+
+| Term | Before: the base, M9's form refitted | With the term, held out | Section 6 | Section 7, read by A2 | In M10's primary | Verify at |
+|---|---|---|---|---|---|---|
+| **(a) a float scale per session**, from the session's own random anchors | floats 0.208 W rms over 737 rows; pool 7's float bias +0.178 / +0.192 W | 0.202 W alone; the bias +0.090 / +0.101 W | enters: pooled −0.0063 W [−0.0105, −0.0024]; card 1 −0.0054 [−0.0106, −0.0001], a thin margin | not met: the sessions' scales spread 2.9× (aifoundry3) and 2.2× (card 1) their anchors' own noise | yes | `Q142m/tables-m10.md`; `section7-m10.json`, `section7.a_float` |
+| (a) for int8 | int8 0.177 W | 0.179 W; it over-corrects pool 7 on aifoundry3 (+0.047 → −0.055 W) | does not enter | met, reported | no | `Q142m/tables-m10.md`, int8 |
+| **(b) the single high bits counted** by the convergence rule at 9–243 launch points | class S 0.502 W | 0.257 W alone; 0.234 W with (a) | enters: the S rows −0.245 W [−0.381, −0.110] | not met: the S rows 0.497 → 0.287 W (aifoundry3) and 0.507 → 0.223 W (card 1); 4 of 13 tiles within e(N) | yes | `Q142m/tables-m10.md`; `section7-m10.json`, `section7.b` |
+| (c1) a 4.5 s heat scale per session | 0.233 °C over 932 rows (aifoundry3 0.172, card 1 0.285) | 0.173 °C (card 1 0.173) | does not enter: aifoundry3 +0.002 °C [−0.003, +0.007] | met, reported | no | `Q142m/tables-m10.md`, (c1) |
+| **(c2) card 0's 6 s burst rise per board W** | 2.45 °C rms at the frozen 0.14004 °C per W | 0.34 °C at 0.2415 (leave one tile out 0.2407–0.2433) | enters: −2.12 °C [−2.31, −1.93] | not met | yes; one session, held out by tile | `Q142m/tables-m10.md`, (c2) |
+| (d) the heat chain's gain on large rises, one common gamma | nine large rises 0.493 °C rms | 0.294 °C (×1.032, gamma 0.03199) | enters: −0.199 °C [−0.327, −0.002] | **met**: E144's one large rise, read by the chain to 0.1%, reads 0.015 → 0.547 °C with its fold's gamma | **no**: a reported arm | `Q142m/section7-m10.json`, `section7.d`; `m10-s7.json` |
+| (e) κ0's die-start footing (card 0) | board 0.728 W at κ0 0.9463 | 0.631 W | does not enter: −0.096 W [−0.180, +0.016] | met, reported | no | `Q142m/tables-m10.md`, (e) |
+
+A2 (`ef74dd0d`, 21:23:36 PST) was written after the verifier read section 7 as met for (d), and says so; it binds section 7 before
+any section-7 output (the first run 21:23:50), pool 8 (none exists) and any prediction made with M10. The registration had stated
+section 7's criteria but not their consequence; a critic may weigh A2's reading.
+
+### The figures, held out and not blind, with M9 beside on the same rows
+
+| What is predicted | M9 on the same rows | M10, held out (not blind) | Kind | Verify at |
+|---|---|---|---|---|
+| **Float power at 600 MHz**, every committed float row (737) | M9's form refitted, left out by kind: 0.208 W rms | **0.185 W** (bias −0.016) | F, D | `Q142m/tables-m10.md`, float, "all" |
+| The same on M9's own 855 rows, like for like on the same folds (its 681 float rows) | M9's frozen form left out by kind: 0.1925 W | **0.185 W**; fp32 0.199 / 0.201 against 0.211 / 0.216 (aifoundry3 / card 1), fp16 0.147 / 0.168 against 0.146 / 0.165: a gain on fp32 only | F, D | `Q142m/tables-m10.md`; `docs/reports/data/2026-11-04-q140m-m9/nested-m9.json` › `families.float.same_folds`, `M9_frozen_form_loko` |
+| int8 on M9's own rows (aifoundry3 / card 1) | 0.169 / 0.185 W | 0.165 / 0.183 W (M9's form refitted; int8's anchors do not enter) | F, D | the same two files, int8 |
+| **Pool 7's 48 priority-1 kinds** (aifoundry3 / card 1) | M9 as frozen, blind: 0.278 / 0.273 W as registered at nominal rates; 0.298 / 0.292 W at the measured rates | **0.205 / 0.187 W** (bias +0.050 / −0.000); M9's form refitted 0.287 / 0.282 W | F, D | `Q142m/tables-m10.md`, "Pool 7's 48 priority-1 kinds"; E163, E164 |
+| Pool 7's priority-1 rows by format, at the measured rates (aifoundry3 / card 1) | fp32 0.421 / 0.408, fp16 0.214 / 0.215, int8 0.196 / 0.195 W | fp32 **0.244 / 0.200**, fp16 **0.150 / 0.117**, int8 0.191 / 0.199 W | F, D | `Q142m/tables-m10.md`, "pool 7, priority 1" |
+| Class S, the single high B bits, every row | M9 as frozen 0.499 W | **0.234 W** | F, D | `Q142m/tables-m10.md`, "S class" |
+| int8, every row (222) | — | **0.177 W**, unchanged (M9's form refitted) | F, D | `Q142m/tables-m10.md`, int8, "all" |
+| Heat over 4.5 s (932 rows) | M7's law as frozen 0.234 °C | **0.233 °C** (M7's form refitted) | F, D | `Q142m/tables-m10.md`, (c1) |
+| Card 0's 6 s burst rise (one session) | 2.45 °C rms at 0.14004 °C per board W | **0.34 °C** at 0.2415, held out by tile | F, D | `Q142m/tables-m10.md`, (c2) |
+| Heat over minutes, nine large rises in six sessions, given the watts | — | **0.493 °C** rms with the chain unscaled (the primary); 0.294 °C with the ×1.032 arm, held out by session | F, D | `Q142m/heldout-m10.json` › `heat_d_chain_gain.variants.common` |
+| The launch rate below `fit_m5`'s nominal, session means | — | fp32 0.33–0.36%, fp16 0.33–0.35%, int8 0.23–0.28% (all formats 0.29–0.32%; single rows 0.19–0.44%) | D | `Q142m/a2-checks-m10.json` › `rate` |
+| Byte twins (11 tiles under 24 kind labels) merged into one kind each | — | the floats 0.1854 → 0.1856 W; rules (a) for the floats and (b) still enter; int8 has none | D | `Q142m/a2-checks-m10.json` › `byte_twins` |
+| Inputs no hash list names | — | 62: `q132-rtl-bench/counts-v2.json`, `e145/predictions-e145.json` and 60 pool 6 and pool 7 tiles, each unchanged since before `e9367b66` | D | `Q142m/section7-m10.json` › `rerun` |
+| Post hoc, the round critic: card 1's int8 bias on pool 7 against the int8 card ratio (0.9418 / 0.9616) | — | M10's −0.081 W becomes +0.039 W; over every card-1 int8 row 0.185 → 0.210 W: the ratio over-corrects | D | the critic's reading, from `Q142m/rows-m10.json` |
+
+**So:** held out, M10 reads new float kinds about 0.02 W closer than M9's form, and pool 7's kinds 0.09–0.11 W closer than M9
+blind did, mostly through the session scale, which needs the session's own anchors, and the recount, on the misses that named
+those two terms; on M9's own rows it gains on fp32 only. So the blind error to expect on new kinds lies between M10's 0.19–0.21 W
+and M9's 0.27–0.28 W until pool 8 says where. Heat over minutes keeps the frozen chain, and its misses are not yet a model.
+
+### Q142(s): the watcher's race and the runbook's v3.1
+
+`run_hpl.py`'s Watcher read its path and position outside its lock (`run_hpl.py`:344, 348), so a `follow()` between the two reads
+re-read the old file from the start and stamped its last line fresh: E165's `telemetry_stale` end, 13 bursts short, and in the
+committed sessions 1 such end in 1,672 run boundaries (1,771 `follow()` calls), 0.060% (95% 0.0015–0.33%), about 9.1% of 160-run
+sessions (95% 0.2–41.3%), a one-event estimate (`HPL/posthoc-watcher-q142s.txt`, sections 1–2). When it strikes, every launch
+process that starts in a run's first 8 s runs with the registered stops blind (`HPL/selftest-watcher-q142s-w5c.txt`: two 3 s
+launches); of 1,669 committed gates, 1,640 read their own run, none only the previous run's last line, and 29 are undecidable
+(section 3), so the committed power and heat scores rest on each run's own telemetry. The fix, `HPL/watcher_q142s.py`, applies an
+iteration's read only if no `follow()` came after its snapshot; its self-test passes 15 of 15 (the committed watcher fails W1, W2,
+W5a and W5b), it sends no device command, and `run_hpl.py` is untouched (sha256 `68493295…f227`); runs registered after the
+amendment install it. Runbook v3 fixed v2's twelve faults (three moderate, six minor, three nits; the e163 route repo-relative, a
+desk-path gate on every collection, an identity check at every aifoundry1 and aifoundry2 launch), and v3.1 its verifier's nine:
+step 22 stops (14) unless every check of C a collection ran finished, s13 reads exit 9 as a refusal (10), and the desk-path gate
+reads a missing output as a hit (16). Its desk test passes 589 of 589 (`RB31/logs/selftest.txt`); the real collector end to end on
+E163's layout, with a crashed check of C, made v2 report "collected and scored" with 17 of 28 rules NOT SCORED and 5 C rules
+PASS → FAIL, made v3 stop for the wrong reason (16) and makes v3.1 stop at its gate (14), and with the check whole v3.1 wrote 43 of
+43 outputs byte for byte (`RB31/logs/e2e-ccheck.txt`); the dry listing passes 50 of 50 with no ssh or rsync, `dmcmd_audit` reads
+GO with 11 send sites, all READ, and the public-text scan is clean. Every test ran at the desk with a stand-in ssh and rsync;
+none ran against a lab box.
+
+### Q142's round critic: its faults, and where each is answered
+
+| | What | Where it is recorded |
+|---|---|---|
+| (1) | The kinds page's summary said the chain reads every large rise "a few percent low in every session"; E144's one large rise was read to 0.1%, and the other eight 1.8–5.6% low | the kinds page's section 11 (A25's dated note); item (58) above |
+| (2) | "A gain deficit" (E166's README, 03's E166 entry) and "a gain term" (the summaries): post hoc, E166's misses are flat in the rise and E154's grow with it, so a session level or a gain, not separated | [E166's dated note 2](../reports/data/2026-11-04-e166-heat-replicate-aifoundry3/README.md.dated-note-2.md), with `posthoc_heat_level_gain.py`; 03's E166 entry; the card-half section's "So:" above; the kinds page; the hubs |
+| (3) | v3.1's gate stops a collection whose check of C did not finish, but not one that skips a session with no C log (e165, e167) | item (60) above; the next card day's kit lists, per run, the sessions that must carry a C log |
+| (4) | Three of Q142(s)'s new files state times after their commit: last written 21:43:38 (E163's `README.md.dated-note-q142s.md`, "about 22:00 PST"), 21:40:44 (v3's `README.md.dated-note.md`, the same) and 21:57:36 (v3.1's `README.md`, "about 21:15–22:15"); all three committed at 21:58:29 | 03's Q142 paragraph; here |
+| (5) | M10's A4 and README note 2 say "written about 21:37–21:39 PST": written by 21:37:06, committed at 21:37:24 | 03's Q142 paragraph; here |
+
+### The lanes' wording, as corrected (quote it so)
+
+| Lane | As corrected |
+|---|---|
+| Q142(m) | the heat chain's gain passes section 6, but section 7 shows it is not wanted (E144); M10 carries the chain unscaled, with the gain as a reported arm, never "the gain enters" |
+| Q142(m) | fitted on every non-trip hold, the chain reads rises 2.3% low on aifoundry3 and 4.5% low on aifoundry2 (one common gamma, 3.2%), never "3.2% low on both card kinds"; on aifoundry3 the large rises improve by only 0.085 °C rms |
+| Q142(m) | the launch rate below `fit_m5`'s nominal is fp32 0.33–0.36%, fp16 0.33–0.35% and int8 0.23–0.28% (session means), never "0.28–0.36%" |
+| Q142(m) | A1-1: `nested-m9.json` holds `M9_frozen_form_loko` 197 times (109 aggregates and 88 per-row values for pool 6); only a per-row list over all 855 rows is missing |
+| Q142(m) | the registration's section 3a: the three random anchors are rows in E78 and E82 only, not E94 |
+| Q142(m) | the datelines: the registration written by 19:33:32, committed 19:33:42; A1 last written 19:43:38, committed 19:43:44 (not "about 19:50"); the README by 20:24:01, committed 20:24:58 (its 20:45 was the planned end); A2 by 21:22:07, committed 21:23:36; README note 1 and A3 by 21:34:16, committed 21:35:05; A4 and README note 2 by 21:37:06, committed 21:37:24 |
+| Q142(m) | the compute: one development fit on aifoundry1 with term b's counts not yet complete, its a, c1, c2, d and e numbers equal to the registered run's; the registered runs on aifoundry1 at 20:21 and 20:22; the fix pass on the Intel |
+| Q142(s) | as its second dated note corrects the first: every launch process that starts in a run's first 8 s runs blind, not "at most one"; the committed records do bound a stale gate; the incidence is 1 in 1,672 run boundaries (1,771 `follow()` calls), a one-event estimate; 8.4 s and 8.1 s are one end timed from two points; the runner is `kspeed/e101/run_e101s.py` |
+
+### Disclosures
+
+- **A2 was written knowing the verifier's reading** of section 7 for term (d), and says so; it came before any section-7 output,
+  but the registration itself had not written down section 7's consequence.
+- **Compute:** the M10 lane's bench counts ran on the mini, its registered fit and one development fit on aifoundry1 through the
+  remote runner; its fix pass, Q142(s) and the round critic ran on the Intel, one local job at a time, because the lab hosts'
+  sign-in checks were pending from 21:13 PST and the mini has no numpy. No card, device command or card step on any box.
+- **The scratch copies:** the M10 lane's working copy of the lab tree stays on the mini and on aifoundry1, untouched since.
+- **Q142(p) and Q142(d)**, pool 8's prerequisites and its independent designer, run beside these records; nothing of pool 8 is
+  recorded here.
+
+### What remains (Q142's round critic's next list, ranked)
+
+1. These records, then one verifier over them and over the three fix passes no verifier has read, then a fix pass.
+2. Blind pool 8, drawn by an independent designer, and its predictions frozen: an (x) lane copies the pool unchanged and commits,
+   mechanically and before any claim, M9's and M10's predictions, M10's a-priori arm (s = 1), and the heat primary with its ×1.032
+   arm beside it, through a predictor that imports `predict_m10_s7` and never takes `predict_m10.chain_gain()` for the primary;
+   about 4–6 agent-hours at the desk, the recount of its float tiles on the mini. Its preparation is under way, in its own lanes.
+3. M10's D carried through M9's aifoundry2 part and card 0's relation by a registered, mechanical step; otherwise pool 8's
+   registration names M9's part as the primary there, with M10's card-0 burst heat.
+4. The next model's candidates, registered before any fit (M11): heat over minutes as a session level against a gain, with holds at
+   two or more rise levels a session; a heat scale for card 1 alone (c1 helped card 1 only, 0.285 → 0.173 °C); int8 on card 1, a
+   paired-anchor ratio or a second int8 anchor; section-7 clauses written as numbers with a stated power.
+5. Card time, on the owner's word and fresh lab approvals: pool 8 on the cards, two sessions each on aifoundry3 and card 1, on
+   different days if possible, each with its anchors, one with about 12 re-runs and anchors spanning D (the level-or-gain test of
+   the float excess); card 0 and aifoundry2 in governed bursts under their own governors; registered stops, nothing set.
+6. Card time: heat over minutes as a registered test of a session level against a gain, two or more rise levels a session and one
+   hold like E144's, on aifoundry3 and aifoundry2, with a second card-0 burst-heat session (c2 rests on one).
+7. At the desk, on the mini's bench: E147's 70 single-bit steps recounted by the convergence rule, then term b's prices refitted.
+8. Card time: G4's clock at S3's geometry, with a per-shape clock term registered from public sources, and A2's start dependence
+   with cold starts the gates can reach.
+9. Card time: the stride term's size, registered as a fraction of SM's step, on six new power-of-two shapes; rank 7's second card-1
+   session folded into pool 8's second card-1 session.
+10. Box steps after the approvals: aifoundry2's backup tar, stash and old `reduce_e77.py` copy, and the M10 lane's scratch copies
+    (our own files only).
+11. Waiting on the owner's word: anything near card 0's 75 W alarm, an inlet thermometer, and items 3, 4, 14 and 16.
+
+Unverified commits: Q141(i)'s fix pass (`1613f496`, `77e12cad`, gyroscope `849fd0bf` and the four pages it published); Q142(m)'s
+(`ef74dd0d`, `d1581099`, `c996d135`); Q142(s)'s (`33661416`, `0d2cb5dd`); and from before, `6147a9c7` and `0e35ec58` (E170's kit),
+Q141(r)'s fix pass (`8215b938`, `44e96e26`, gyroscope `0855547b`) and `3b102b85`, `7830a9cb` and `708a0a04`, which the card half's
+critic read but no verifier has.
+
+**Not established by Q142.** Any blind score of M10; whether the session scale and the recount carry to kinds nobody tuned to;
+whether the heat chain's misses are a session level or a gain; whether card 0's burst coefficient holds in a second session; the
+runbook's v3.1 on a box.
 
 ## Ridge points (derived; no card time)
 

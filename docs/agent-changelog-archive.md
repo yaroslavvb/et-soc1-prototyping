@@ -4,6 +4,12 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-11-01 (Sun, week 44, Q132 records, E105 and E106)** — Section 3's index reads E1–E106, where it read E1–E104, with E105
+  (the port's layout) and E106 (held signs on one card). Section 6's hot-start trap adds that random fp32 with tiles that fit the L2
+  sits at the 97 W stop, and that a cell's power is estimated from its own kind's S on a pinned card, never a lower kind's rho.
+  *Why:* constraint — E105's power rule admitted the one cell it existed to catch: estimated 87.83 W, read 95.2 W, peaked at 96.25 W;
+  re-check: `docs/reports/data/2026-11-01-e105-gemm-layout/README.md`, "The power rule did not do what it was for",
+  `aifoundry2/admission.json`, and the last rows of `docs/findings/03-experiments.md`.
 - **2026-11-01 (Sun, week 44, Q132 records)** — Section 3's index reads Q1–Q132 and E1–E104, where it read Q1–Q131 and E1–E91
   (E92–E104 are the night's thirteen card experiments; A1–A25 is unchanged, and E105 and E106 are not in yet). Section 2's
   map names `rtl-sim/fma_toggle_v2` and `-fno-dfg`. Section 6 adds three traps: a hot start does not hold the clock down
