@@ -1,0 +1,47 @@
+{
+ "_note": "Q142(m): M10's registration in numbers (REGISTRATION.md is the text of record); written before any M10 fit output exists",
+ "footing": "Q139(u): reduce_footing.K_FROZEN 0.2056 W/C aifoundry3, 0.3134 W/C card 1; E82 A2's dip rule once",
+ "rows": {
+  "power": {"m9_rows": "docs/reports/data/2026-11-04-q140m-m9/rows-m9.json (855)", "pool7": "52 new kinds x {E163 a3, E164 c1} = 104",
+            "expected_total": 959, "pool7_kind_label": "<type>.blind7:<name>"},
+  "heat_c1": "fit_m7.heat_rows (M6's rule, T_run <= 5.0 s) + E141, E142, E153, E157, E163, E164 by the same rule",
+  "card0_c2_e": "E170 results.json score.reported.tiles (39)",
+  "holds_d": {"fit": "every committed arm-A hold except the trip regime (E144b G2, E161 G2Q, E167 G2Q) and E166 K_OL_long",
+              "large_rise_C": 10.0}
+ },
+ "forms": {"float": "G8+c_end+xstage", "int8": "J8+bsat+bpp_r4", "card_term": "C0_M5_E78E82_family (value refitted per fold)"},
+ "terms": {
+  "a": {"anchors": ["fp32.randn", "fp16.randn", "int8.full", "fp32.anchor6_randn", "fp16.anchor6_randn", "int8.anchor6_full",
+                    "fp32.anchor7_randn_a", "fp32.anchor7_randn_b", "fp16.anchor7_randn_a", "fp16.anchor7_randn_b",
+                    "int8.anchor7_full_a", "int8.anchor7_full_b"],
+        "families": {"floats": ["fp32", "fp16"], "int8": ["int8"]}, "statistic": "median of D_meas / D_hat(pass-1 prices, card term)",
+        "no_anchor": "s = 1", "held_out_anchor_kinds": "never read in their own fold", "passes": 2,
+        "card_term_in_pass_2": "pass 1's, unchanged"},
+  "b": {"s_class_pool6": ["fp32.b_onebit_b12_third", "fp32.b_onebit_b20_third", "fp32.a_onebit_b5_third", "fp32.a_onebit_b16_half",
+                          "fp16.b_onebit_b6_third"],
+        "s_class_pool7": ["fp32.b_onebit_b20_one", "fp32.b_onebit_b20_full", "fp32.b_onebit_b20_pi", "fp32.b_onebit_b20_seventh",
+                          "fp32.b_onebit_b22_third", "fp16.b_onebit_b9_one", "fp16.b_onebit_b8_pi", "fp32.b_onebit_b20_third_a1p5"],
+        "twins": {"fp32.b_onebit_b12_third": "fp32.cal_third_b12", "fp32.b_onebit_b20_third": "fp32.cal_third_b20",
+                  "fp32.b_onebit_b20_pi": "fp32.cal_pi_b20"},
+        "rule": "RECOUNT-RULE.md sections 1-4: triple N while e(N) > 0.10 W at M9's frozen float prices; cap 243",
+        "bench": "the mini's build recorded in step243/build-record-mini.json; at most 4 jobs; one new point checked on the Intel's build",
+        "entry": "N-point mean_rows, points = the three standard ones; features through predict_blind7's chain"},
+  "c1": {"base": "H2_per_card_runlength refitted leave one kind out", "candidate": "h(session) = median over its random anchors of dT_win / law(S, T_run)"},
+  "c2": {"base_k_c_per_w": 0.14004345109940583, "P_idle_w": 21.5, "candidate": "k for card 0, leave one tile out on E170"},
+  "d": {"variants": ["common gamma", "gamma per card kind"], "fit": "gamma = sum(e P) / sum(P^2), leave one session out"},
+  "e": {"base_kappa0": 0.9463, "candidate": "kappa per family, median over E170's other tiles (a2_burst_D_w > 1 W) of (burst_w - zeros_level_w) / a2_burst_D_w"}
+ },
+ "bootstrap": {"draws": 2000, "seed": 142, "level": 0.95},
+ "entry_rules": {
+  "a_floats": {"pooled_d_rms_w_max": -0.005, "ci_below_zero": true, "each_card_d_below_zero": true},
+  "a_int8": {"pooled_d_rms_w_max": -0.005, "ci_below_zero": true, "each_card_d_below_zero": true},
+  "b": {"s_rows_d_rms_w_max": -0.05, "ci_below_zero_over_s_kinds": true, "each_card_d_below_zero": true, "pooled_float_rise_w_max": 0.001},
+  "c1": {"pooled_d_rms_c_max": -0.010, "ci_below_zero": true, "each_card_d_below_zero": true},
+  "c2": {"d_rms_c_max": -0.25, "ci_below_zero": true},
+  "d": {"large_rise_d_rms_c_max": -0.10, "ci_below_zero": true, "each_card_kind_d_below_zero": true, "both_pass": "lower held-out rms; tie keeps common"},
+  "e": {"d_rms_w_max": -0.05, "ci_below_zero": true}
+ },
+ "selftest": "B on M9's 855 rows reproduces nested-m9.json M9_frozen_form_loko within 1e-6 W",
+ "band_rule": "M9's: k sqrt(pool^2 + s^2 x'Cx); pools = M10 held-out rms per format and card; k = max(q95 all rows, q95 pools 3-7 rows)",
+ "blind": "none here: the blind test is pool 8, by an independent designer, in a later round"
+}
