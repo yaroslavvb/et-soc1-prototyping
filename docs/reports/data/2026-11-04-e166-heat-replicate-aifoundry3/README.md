@@ -14,8 +14,8 @@ and heat generation of various kinds of numeric computations as accurately as po
 - **G0, the start gate, passed:** R0's room (the 34-sensor mean over its last 120 s) read **51.924 °C** (firmware 51.0 °C) at 14:27:00, at or
   under 53.0 °C. So K_S ran the warm-room period, 3.20 s every 4.97 s (E154's room rule), and K_OL its full 25 minutes (its frozen in-launch
   peak at this room 65.90 °C, under the 67.5 °C line).
-- **Every dispatch's C is bit-exact:** 6,692 of 6,692 PASS against the RTL's arithmetic (Q139(k)'s `ccheck.py`, `--jobs 2`): the smoke's 48 and
-  the pass's 6,644 (fp32 4,130, int8 2,562; no ROUNDING, UNMODELLED or FAIL; no broken record), in the pass's 493 process launches.
+- **Every dispatch's C is bit-exact:** 6,692 of 6,692 PASS against the RTL's arithmetic (Q139(k)'s `ccheck.py`, `--jobs 2`; fp32 4,130, int8
+  2,562; no ROUNDING, UNMODELLED or FAIL; no broken record): the smoke's 48 and the pass's 6,644, the latter in the pass's 493 process launches.
 - **Every device-management command sent was a read**, as registered and audited (§ Device commands sent). **No statistics reset was sent.**
 - **No stop fired in the measured pass.** The highest live readings were 44.2 W board (K_S) and 66 °C `minshire[0]`, against the hold's 65 W /
   72 °C, the gate's 70 °C and the session's 74 °C. The five stop tests in the smoke all fired as designed on live samples.
