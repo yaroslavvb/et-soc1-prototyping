@@ -1,0 +1,85 @@
+{
+ "experiment": "E167",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793834053061,
+ "protocol": {
+  "experiment": "E167",
+  "request": "Q141(h)",
+  "card": "aifoundry2",
+  "order_seed": 98,
+  "note": "E167's (E161's, unchanged) die stop-path test: E144b's, the smoke's int8 -1s tile, E167's (E161's, unchanged) chain",
+  "tools": {
+   "heater": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 30,
+   "board_cap_w": 80,
+   "cap_consecutive": 3,
+   "note": "E161's stop-path test (die): the registered watcher with one stop lowered, so that it must trip on live samples; the session must end with exit 4"
+  },
+  "caps": {
+   "max_card_min": 2
+  },
+  "step": "STOPTEST-DIE",
+  "from": {
+   "protocol": "tools/claims-v3/e161/protocol-stoptest-die.json",
+   "blocks": "unchanged",
+   "E161_from": {
+    "protocol": "tools/claims-v3/e144b/protocol-stoptest-die.json",
+    "blocks": "unchanged"
+   }
+  },
+  "blocks": [
+   {
+    "name": "STOPTEST",
+    "title": "the die stop's path on live samples (the stop lowered so that it must trip)",
+    "start": {
+     "mode": "cool",
+     "max_c": 99,
+     "max_wait_s": 5
+    },
+    "launch": {
+     "seconds": 2,
+     "budget": 3.5,
+     "processes": 1
+    },
+    "tail_s": 4,
+    "runs": [
+     {
+      "type": "int8",
+      "values": "file:tools/claims-v3/kinds/tiles/int8/neg_ones.bin",
+      "label": "int8-neg_ones"
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "STOPTEST-00-int8-neg_ones-r1"
+ ],
+ "sha256": {
+  "heater": "d00158d454596a8325ff3a7ffa3dff6e80a2e1798516b022009450f63443b9b7",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e167/run_e167.py",
+  "--protocol",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e167/protocol-stoptest-die.json",
+  "--out",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e167/runs/STOPTEST-DIE",
+  "--max-card-min",
+  "2"
+ ],
+ "git_head": "5e1bb30923e134ef4f50deb9a975f1020b7ae8f9",
+ "git_dirty_hpl": ""
+}
