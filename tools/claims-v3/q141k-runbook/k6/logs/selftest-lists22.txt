@@ -1,0 +1,42 @@
+== at e2b48f5a (HEAD); the clone's HEAD e2b48f5a
+LISTS22: 22 of 22 PASS
+LISTS-V3: 2 of 2 PASS
+ALL LISTS PASS
+PASS T1 at HEAD: 22 of 22 and 2 of 2, exit 0
+FAIL p8-600/SHA256SUMS-v3: 0 entries (expected 4); committed 0; work tree 0; the list is not in the revision
+FAIL k6/SHA256SUMS-drivers-v3 (the card day's drivers): 0 entries (expected 39); committed 0; work tree 0; the list is not in the revision
+LISTS22: 22 of 22 PASS
+LISTS-V3: 0 of 2 PASS
+A LIST FAILS
+PASS T2 at 1a76a870: the 22 pass, this pass's two are not there, exit 4
+FAIL k6/SHA256SUMS-drivers-v3 (the card day's drivers): 0 entries (expected 39); committed 0; work tree 0; the list is not in the revision
+LISTS22: 12 of 22 PASS
+LISTS-V3: 0 of 2 PASS
+A LIST FAILS
+PASS T3 at 37f11663: 12 of 22 (the round's ten not there), exit 4
+FAIL p8-600/SHA256SUMS-v3: 4 entries (expected 4); committed 4; work tree 3; 1 work-tree file(s) differ: tools/claims-v3/p8-600/score_p8_600_v3.py
+LISTS22: 22 of 22 PASS
+LISTS-V3: 1 of 2 PASS
+A LIST FAILS
+PASS T4 score_p8_600_v3.py changed in the work tree: exit 4, the file named
+FAIL freeze SHA256SUMS (Q142(x)): 160 entries (expected 160); committed 160; work tree 159; 1 work-tree file(s) differ: tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry3.json
+FAIL harness-e171.json (repo files): 97 entries (expected 97); committed 97; work tree 96; 1 work-tree file(s) differ: tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry3.json
+LISTS22: 20 of 22 PASS
+LISTS-V3: 2 of 2 PASS
+A LIST FAILS
+PASS T5 pool 8's aifoundry3 predictions changed in the work tree: exit 4, 2 list(s) that pin it FAIL
+FAIL p8-600/SHA256SUMS-v2: 4 entries (expected 4); committed 4; work tree 4; the list's work-tree copy is not its committed blob
+LISTS22: 21 of 22 PASS
+LISTS-V3: 2 of 2 PASS
+A LIST FAILS
+PASS T6 a list's own work-tree copy changed (SHA256SUMS-v2): exit 4
+PASS T7 a revision that is not a commit: exit 2
+[s03b_lists_k6] lists: LISTS22: 22 of 22 PASS; LISTS-V3: 2 of 2 PASS; lists22_k6.py sha256 8a201b2024a2e174f370a5f7d7c995b520d4eb70a74faebf4ce65b2435133483
+PASS S1 s03b on the clone: exit 0
+[s03b_lists_k6] STOP: a hash list does not match (the FAIL lines above): stop here; nothing is synced, launched or scored until it is read
+PASS S2 s03b with T4's changed work tree: exit 16
+[s03b_lists_k6] STOP: K6_LISTS_WT is a desk-test stand-in and is read only with RB_DESKTEST=1: unset it (the card day never sets it)
+PASS S3 the stand-in set without RB_DESKTEST: exit 10, the checker never run
+--- desk, run on the Intel (the readiness critic's 22 hash lists and this pass's two, committed and in the work tree (lists22_k6.py)): /usr/bin/python3 -B <lab clone>/tools/claims-v3/q141k-runbook/k6/lists22_k6.py --repo
+PASS S4 the dry listing: exit 0, the checker listed and never run
+selftest_lists22_k6: 11 of 11 checks pass
