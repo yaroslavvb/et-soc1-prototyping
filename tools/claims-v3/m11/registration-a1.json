@@ -1,0 +1,815 @@
+{
+ "_note": "Q142(h), M11's heat registration: registration.json (3c31a91d) with dated amendment A1 (REGISTRATION.md.dated-note-1.md) applied. REGISTRATION.md, as amended by A1, governs; this file supersedes registration.json, which stays as committed. Written before any M11 kit, scorer, fit, hold, run number or claim, and before any E171-E174 data. Design figures come from design-power-heat-v2.json (design_power_heat_v2.py); nothing here is fitted.",
+ "descends_from": {
+  "q138t_chain": [
+   "f5473428",
+   "c2f9920d"
+  ],
+  "m10": [
+   "e9367b66",
+   "6829c9ba",
+   "ef74dd0d",
+   "d1581099",
+   "c996d135"
+  ],
+  "pool8_registration": "3e97f583",
+  "pool8_freeze": [
+   "4576fb90",
+   "dfe226f1"
+  ],
+  "e171_e172_registrations": "4441083f",
+  "e173_e174_registrations": "c8064454",
+  "e166_post_hoc_note": "f3ebb62d",
+  "lab_main_at_writing": "c9a3e40a",
+  "m11_registration": "3c31a91d",
+  "amendment": "A1, tools/claims-v3/m11/REGISTRATION.md.dated-note-1.md (this commit)"
+ },
+ "a_heat_over_minutes": {
+  "per_hold": {
+   "R": "measured plateau rise over the hold's anchor (mean over [b - 300 s, b), anchor = last 120 s of the rest before the hold)",
+   "P": "Q138(t)'s frozen chain on the session's measured board trace (arm A), read the same way",
+   "e": "R - P"
+  },
+  "forms": {
+   "LEVEL": "e = a_s",
+   "GAIN": "e = g_s * P",
+   "BOTH": "e = a_s + g_s * P",
+   "null": "e = 0"
+  },
+  "fit": "ordinary least squares per session on its scored holds; nothing shared between sessions or card kinds",
+  "test_HM_LG": {
+   "code": "tools/claims-v3/m10/pool8/design_power_groups.lg_test(groups, min_tiles=4, min_span_w=6.0, min_df=3)",
+   "groups": "the card kind's M11 hold sessions",
+   "alpha": 0.05,
+   "F_slope_df": "(k, n - 2k)",
+   "F_level_df": "(k, n - 2k)",
+   "F_null_df": "(2k, n - 2k)",
+   "min_holds_per_session": 4,
+   "min_span_P_C": 6.0,
+   "min_residual_df": 3,
+   "verdicts": [
+    "GAIN",
+    "LEVEL",
+    "BOTH",
+    "NOT SEPARATED",
+    "NOT SCORED"
+   ],
+   "primary": "HM-LG-A3",
+   "also_registered": "HM-LG-A2",
+   "reported": "HM-LG pooled over both card kinds with e and P divided by the card kind's sigma"
+  },
+  "test_HM_AG": {
+   "read_when": "HM-LG reads GAIN, LEVEL or BOTH and k >= 2",
+   "s2": "RSS_BOTH / (n - 2k), the per-session two-term fits",
+   "GAIN": {
+    "F": "[(RSS_one_gain - RSS_GAIN) / (k - 1)] / s2",
+    "df": "(k - 1, n - 2k)",
+    "one_gain": "e = gamma P over all the card kind's scored holds"
+   },
+   "LEVEL": {
+    "F": "[(RSS_one_level - RSS_LEVEL) / (k - 1)] / s2",
+    "df": "(k - 1, n - 2k)",
+    "one_level": "e = abar over all the card kind's scored holds"
+   },
+   "BOTH": {
+    "F": "[(RSS_one_two_term - RSS_BOTH) / (2 (k - 1))] / s2",
+    "df": "(2 (k - 1), n - 2k)",
+    "one_two_term": "e = abar + gamma P over all the card kind's scored holds"
+   },
+   "alpha": 0.05,
+   "verdict": "the sessions share one (the test does not reject) / they differ"
+  },
+  "reading_HM_E144": {
+   "line": "|e(H_E)| / R(H_E) <= 0.015",
+   "verdict": "E144 REPEATS (inside in every session that ran H_E) / DOES NOT REPEAT"
+  },
+  "reading_HM_HE": {
+   "line": "e(H_E) outside the 95% prediction interval (t at n_s - 3 df) of the two-term fit on the session's other scored holds",
+   "verdict": "H_E DEPARTS / HOLDS"
+  },
+  "noise_sigma_C": {
+   "aifoundry3": 0.0884,
+   "aifoundry2": 0.2296,
+   "aifoundry2_readout_floor": 0.3019,
+   "aifoundry3_degrees_of_freedom": 6
+  },
+  "entry": {
+   "GAIN_and_sessions_share": "gamma_c = sum(e P) / sum(P^2) over the card kind's scored M11 holds, carried as (1 + gamma_c) on the chain if |gamma_c| >= 0.010, its 95% interval (t at n - 1) excludes 0, and S7-W with the gain carried is not met",
+   "LEVEL_and_sessions_share": "abar_c = mean(e) over those holds, added to every hold's rise, if |abar_c| >= 0.10 C, its 95% interval (t at n - 1) excludes 0, and S7-W with the level carried is not met",
+   "BOTH_and_sessions_share": {
+    "fit": "e = abar_c + gamma_c P by least squares over those holds; each 95% interval at t(n - 2)",
+    "each_term": "gamma_c passes if |gamma_c| >= 0.010 and its interval excludes 0; abar_c if |abar_c| >= 0.10 C and its interval excludes 0",
+    "both_pass": "both enter at their jointly fitted values, unless S7-W with the two-term form carried is met (then nothing enters; the pair is a reported arm)",
+    "one_passes": "that term is refitted alone (the GAIN or LEVEL row's constant) and enters only by that row's rule (its size, its interval at t(n - 1), S7-W with it alone); a jointly fitted value is never carried alone",
+    "neither_passes": "nothing enters"
+   },
+   "GAIN_LEVEL_or_BOTH_and_sessions_differ": "nothing enters; the next registration reads the term from each session itself (a calibration hold first)",
+   "NOT_SEPARATED_or_NOT_SCORED": "nothing enters; the chain unscaled stays M11's primary, as M10's",
+   "one_session": "k = 1: neither HM-AG nor S7-W can be read, so nothing enters the primary; the verdict and the constant are reported as a candidate labelled one session"
+  },
+  "not_wanted": {
+   "S7_W": "leave one M11 session out: with the carried form (a common gain, a common level, or the two-term form under BOTH) fitted on the card kind's other M11 sessions, the held-out session's rms over its scored holds rises by more than sigma_c / sqrt(n_s), sigma_c fixed as registered (0.0884 C on aifoundry3, 0.2296 C on aifoundry2)",
+   "HE": "HM-HE reads DEPARTS in every session that ran H_E",
+   "sign": "a carried term's sign differs between the card kinds"
+  },
+  "x1p032_arm_aifoundry3": {
+   "GAIN, gamma_c enters": "replaced by M11's gamma_c",
+   "GAIN, nothing enters (the sessions differ, its size or interval, S7-W)": "stays a reported arm",
+   "LEVEL, whatever enters": "retired from M11's readings",
+   "BOTH, gamma_c enters (with abar_c, or alone by the one_passes rule)": "replaced by M11's carried form",
+   "BOTH, otherwise": "stays a reported arm (the slope test rejected: a gain is present)",
+   "NOT SEPARATED, the null not rejected": "retired from M11's readings",
+   "NOT SEPARATED, the null rejected (they differ from zero, the form unresolved)": "stays a reported arm",
+   "NOT SCORED": "stays a reported arm",
+   "k = 1": "as above, except that nothing enters, so the arm is never replaced"
+  }
+ },
+ "b_holds": {
+  "aifoundry3": {
+   "harness": "E166's (run_e166.py, E97's natural chain, the 10 Hz 34-sensor sampler, the C-logging host)",
+   "clock": "600 MHz pinned, nothing set",
+   "R0_min": 5.0,
+   "holds": [
+    {
+     "name": "H_E",
+     "item": "fp32.randn",
+     "pattern": "E144's H_H (A1.1): --seconds 3.20 every 7.56 s (3.456 s recorded, share 0.4571) if R0's room <= 51.5 C; --seconds 2.60 every 7.98 s (2.965 s, share 0.3716) in (51.5, 53.0]",
+     "minutes": 10.0,
+     "rest_after_min": 6.0
+    },
+    {
+     "name": "Z",
+     "item": "fp32.zeros",
+     "pattern": "natural chain",
+     "minutes": 10.0,
+     "rest_after_min": 2.0
+    },
+    {
+     "name": "L1",
+     "item": "int8.full",
+     "pattern": "natural chain",
+     "minutes": 10.0,
+     "rest_after_min": 6.0
+    },
+    {
+     "name": "S",
+     "item": "int8.neg_ones",
+     "pattern": "natural chain",
+     "minutes": 10.0,
+     "rest_after_min": 2.0
+    },
+    {
+     "name": "L2",
+     "item": "int8.full",
+     "pattern": "natural chain",
+     "minutes": 10.0,
+     "rest_after_min": 2.5
+    }
+   ],
+   "planned_P_C_at_51p2": [
+    14.517,
+    0.695,
+    9.67,
+    3.459,
+    8.354
+   ],
+   "planned_P_C_at_52p0": [
+    11.723,
+    0.986,
+    9.778,
+    3.471,
+    8.439
+   ],
+   "plan_minutes": 73.28,
+   "smoke_minutes": 1.4,
+   "card_minutes_per_session": 74.7,
+   "envelope_per_session": 76,
+   "sessions": 2,
+   "gate_G0": "R0's room (34-sensor mean, last 120 s) <= 53.0 C, else no hold starts",
+   "stops": "no launch at a firmware reading >= 70 C; a hold ends at any live sample >= 72 C (firmware or 34-sensor mean) or board >= 65 W; the pass ends at >= 74 C; E97's guards",
+   "planned_peak_C": {
+    "H_E_at_51p2": 68.13,
+    "H_E_at_51p5": 68.51,
+    "H_E_at_52p0": 66.15,
+    "H_E_at_53p0": 67.35,
+    "H_E_highest_admitted": {
+     "peak_C": 68.51,
+     "room_C": 51.5
+    },
+    "others_max": 64.65
+   },
+   "planned_P_window": "the registered window [b - 300 s, b), b the end of the hold's last process",
+   "plan_grid": {
+    "cool pattern (room <= 51.5 C)": "0.008 s",
+    "warm pattern (51.5, 53.0] C": "0.005 s",
+    "rule": "every piece of the schedule a whole number of steps, the marks on the same grid (design_power_heat_v2.plan_exact); a plan on Q138(t)'s 0.2 s grid states its H_E share error (-2.1% cool, +0.9% warm)"
+   },
+   "H_E_note": "E144's H_H pattern held 10 minutes (E144 held 13): the plateau window is the hold's 300-600 s"
+  },
+  "aifoundry2": {
+   "harness": "E167's (run_e167.py over E80's run_kspeed.py and E64's run_hpl.py, E98's 15-minute rest, the C-logging host)",
+   "clock": "its own governor, 65 W / 65 C as read, nothing set",
+   "holds": [
+    {
+     "name": "Z_m",
+     "item": "int8.neg_ones on shires mask 0x11111111 (8 of 32: every fourth shire by number)",
+     "processes": 72,
+     "seconds": 8,
+     "planned_P_C": 3.05
+    },
+    {
+     "name": "G1E",
+     "item": "int8.neg_ones, every shire (E144b's G1 again)",
+     "processes": 72,
+     "seconds": 8,
+     "planned_P_C": 12.2
+    },
+    {
+     "name": "Z_m2",
+     "item": "as Z_m",
+     "processes": 72,
+     "seconds": 8,
+     "planned_P_C": 3.05
+    },
+    {
+     "name": "G1E2",
+     "item": "as G1E",
+     "processes": 72,
+     "seconds": 8,
+     "planned_P_C": 12.2
+    }
+   ],
+   "each_hold_blocks": "REST (start: cool, max_c 49, max_wait_s 240; 120 s anchor) + HOLD + END (120 s)",
+   "protocol_card_minutes_per_session": 58.1,
+   "with_gate_waits_at_most": 74.1,
+   "rests_between_holds_min": 15,
+   "sessions": "optional: 2 (or 4)",
+   "regime": "800 MHz only: the hold is scored if at least 90% of its window's samples read >= 790 MHz",
+   "stops": "die >= 72 C on one live sample; board > 80 W on 3 consecutive live samples; every hold's predicted peak <= 82 W"
+  },
+  "card0": "not designed: no frozen heat chain exists for aifoundry1 card 0 (or card 1), so a hold there has no chain miss to test",
+  "never_beside": "E171-E174 (pool 8's card day): M11's sessions run after them, on their own claims, runs and directories"
+ },
+ "c_card1_heat_scale_HC1": {
+  "form": "on aifoundry1 card 1 only: dT_win = h1(s) * M10's 4.5 s law (H2_per_card_runlength, m10.json heat_4p5s, refitted per fold) at the item's measured S and run length; h1(s) = median over the session's random anchors (M10 REGISTRATION section 3a's set and pool 8's scale anchors, both families; check and zeros anchors never) of dT_win / the law; aifoundry3 keeps h = 1",
+  "rows": "M10's heat rows (fit_m7.heat_rows' rule with E141, E142, E153, E157, E163, E164): card 1's 448 judged, aifoundry3's 484 reported",
+  "entry": {
+   "pooled_d_rms_C_at_most": -0.01,
+   "interval": "95% paired bootstrap over kinds (2,000 draws, seed 142) below 0",
+   "sessions": "d <= 0 in at least 2/3 of card 1's sessions with >= 10 heat rows",
+   "bias": "card 1's heat bias does not change sign and grow in size"
+  },
+  "not_wanted": [
+   "HC1-B reads WORSE on a new card-1 session",
+   "h1 over-corrects on a new card-1 session's N1 (its bias changes sign and grows)"
+  ],
+  "blind_reading_HC1_B": {
+   "session": "E172 (pool 8 on card 1), only if this commit precedes E172's first launch",
+   "set": "N1 (31 tiles), C-gated as P8-KC",
+   "statistic": "rms(dT_win - h1 law) - rms(dT_win - law), paired bootstrap over the tiles, 20,000 draws, seed 80,000 + the character codes of 'M11-HC1-B'",
+   "verdicts": [
+    "BETTER",
+    "WORSE",
+    "NOT RESOLVED"
+   ],
+   "precision_half_width_C": 0.082,
+   "precision_note": "0.082 C scales M10's pooled interval to N1's 31 tiles: one session's effect scales with its own |h1 - 1| (card 1's 16 sessions 0.63-1.10), so BETTER at M10's held-out effect is the average case, not a forecast for E172"
+  },
+  "entry_known_posthoc": {
+   "pooled": "passes (REGISTRATION.md section 0.4: -0.112 C [-0.137, -0.085])",
+   "bias": "passes: card 1's held-out heat bias +0.0071 C without the scale, -0.0026 C with it (heldout-m10.json heat_c1)",
+   "two_thirds_of_sessions": "unknown: no per-session d is committed; 14 of card 1's 16 sessions have at least 10 heat rows"
+  }
+ },
+ "d_card1_paired_anchor_int8_I8P": {
+  "form": "k(s, r) = median over the int8 random anchors a run in both the card-1 session s and its paired aifoundry3 session r of [D_s(a) / Dhat_s(a)] / [D_r(a) / Dhat_r(a)], Dhat = M10's int8 B at the session's measured rate (card term 0.9616 on card 1); card 1's int8 prediction in s = k * M10's",
+  "pairs_committed": [
+   [
+    "E82",
+    "E78"
+   ],
+   [
+    "E91",
+    "E86"
+   ],
+   [
+    "E131",
+    "E95"
+   ],
+   [
+    "E93",
+    "E121"
+   ],
+   [
+    "E108",
+    "E122"
+   ],
+   [
+    "E94",
+    "E123"
+   ],
+   [
+    "E142",
+    "E141"
+   ],
+   [
+    "E157",
+    "E153"
+   ],
+   [
+    "E164",
+    "E163"
+   ]
+  ],
+  "entry": {
+   "pooled_d_rms_W_at_most": -0.01,
+   "interval": "95% paired bootstrap over kinds (2,000 draws, seed 142) below 0",
+   "pool7": "E164's priority-1 int8 bias falls in size and keeps its sign",
+   "all_card1_int8": "the rms over every card-1 int8 row rises by no more than 0.001 W"
+  },
+  "not_wanted": [
+   "it over-corrects (the bias changes sign and grows) on E164's int8 rows or over the paired sessions' card-1 int8 rows",
+   "k varies across the pairs no more than the anchors' own errors give: the sd of k over the nine pairs no larger than the sd that drawing each anchor's D as D + se N(0, 1) gives (2,000 draws, seed 142). Met: a per-session k is not wanted, because a constant card term would do as well; I8P is then a reported arm, and the constant 0.9616 x the median k over the pairs is reported beside it with its 95% interval (bootstrap over the pairs, 2,000 draws, seed 142), a candidate for the next registration, never carried by M11",
+   "I8P-B reads WORSE"
+  ],
+  "blind_reading_I8P_B": {
+   "sessions": "E172 with E171 (pool 8's pair), only if this commit precedes both first launches",
+   "anchors": [
+    "int8.full",
+    "int8.anchor8_full_a_4aac84",
+    "int8.anchor8_full_b_935710"
+   ],
+   "check_anchor": "int8.anchor8_check_full_d8b6c8 (never in k)",
+   "set": "I1 (12 tiles)",
+   "statistic": "paired bootstrap as HC1-B, seed 80,000 + the character codes of 'M11-I8P-B'",
+   "precision_half_width_W": 0.0215
+  },
+  "reported_beside": "|median k - 1| against that interval: the constant would differ from M10's card term if it excludes 1 (never a clause)",
+  "preview_posthoc": {
+   "what": "the ratio of M10's int8 term-a session scales, card-1 session / its aifoundry3 pair (heldout-m10.json power.int8.session_scales_term_a_all_rows); a preview of k, not k",
+   "pairs": {
+    "E82/E78": 0.99599,
+    "E91/E86": 0.98669,
+    "E131/E95": 0.99011,
+    "E93/E121": 1.00587,
+    "E108/E122": 0.9967,
+    "E94/E123": 1.00858,
+    "E142/E141": 0.99892,
+    "E157/E153": 0.99664,
+    "E164/E163": 0.9756
+   },
+   "range": [
+    0.9756,
+    1.00858
+   ],
+   "median": 0.99664
+  }
+ },
+ "card_time_needed": {
+  "aifoundry3": "2 sessions x 74.7 card-minutes (149.4; cap 152), different days, rested card",
+  "aifoundry2": "optional: 2 sessions x about 58 protocol card-minutes (up to 74 with the gate waits; about 105-120 minutes held each with the 15-minute rests)",
+  "card0": 0,
+  "card1": 0,
+  "minimum": "one aifoundry3 session (74.7 card-minutes): HM-LG-A3 at df (1, 3)"
+ },
+ "power_at_the_plan_v2": {
+  "source": "design-power-heat-v2.json (the exact plan; 5,000 draws a cell; the committed draws)",
+  "A3_x2_sigma": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "BOTH": 85.3,
+    "GAIN": 14.7,
+    "LEVEL": 0.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.0
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "BOTH": 34.4,
+    "GAIN": 0.0,
+    "LEVEL": 65.6,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.0
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "BOTH": 4.3,
+    "GAIN": 68.9,
+    "LEVEL": 0.3,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 26.4
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "BOTH": 5.2,
+    "GAIN": 88.5,
+    "LEVEL": 0.1,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 6.2
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "BOTH": 4.5,
+    "GAIN": 95.4,
+    "LEVEL": 0.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.2
+   },
+   "level 0.15 C": {
+    "BOTH": 3.8,
+    "GAIN": 1.0,
+    "LEVEL": 45.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 50.2
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "BOTH": 4.9,
+    "GAIN": 0.0,
+    "LEVEL": 89.4,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 5.7
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "BOTH": 4.8,
+    "GAIN": 0.0,
+    "LEVEL": 95.1,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.1
+   },
+   "mixed: E154's fit, then E166's": {
+    "BOTH": 98.6,
+    "GAIN": 1.3,
+    "LEVEL": 0.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.1
+   },
+   "none": {
+    "BOTH": 3.2,
+    "GAIN": 1.8,
+    "LEVEL": 1.9,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 93.1
+   }
+  },
+  "A3_x1_sigma": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "BOTH": 57.7,
+    "GAIN": 41.6,
+    "LEVEL": 0.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.7
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "BOTH": 23.1,
+    "GAIN": 0.0,
+    "LEVEL": 71.2,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 5.7
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "BOTH": 3.8,
+    "GAIN": 46.1,
+    "LEVEL": 1.2,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 48.9
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "BOTH": 4.4,
+    "GAIN": 68.6,
+    "LEVEL": 0.4,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 26.6
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "BOTH": 5.0,
+    "GAIN": 89.1,
+    "LEVEL": 0.1,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 5.8
+   },
+   "level 0.15 C": {
+    "BOTH": 3.2,
+    "GAIN": 1.6,
+    "LEVEL": 27.5,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 67.7
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "BOTH": 4.7,
+    "GAIN": 0.5,
+    "LEVEL": 65.2,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 29.5
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "BOTH": 4.7,
+    "GAIN": 0.0,
+    "LEVEL": 89.4,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 5.9
+   },
+   "mixed: E154's fit, then E166's": {
+    "BOTH": 57.7,
+    "GAIN": 41.6,
+    "LEVEL": 0.0,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 0.7
+   },
+   "none": {
+    "BOTH": 3.3,
+    "GAIN": 1.8,
+    "LEVEL": 1.8,
+    "NOT SCORED": 0.0,
+    "NOT SEPARATED": 93.0
+   }
+  },
+  "HM_AG_exact_plan_sigma": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "both differ": 4.9,
+    "gains differ": 6.7,
+    "levels differ": 6.9
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "both differ": 4.4,
+    "gains differ": 9.7,
+    "levels differ": 4.8
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "both differ": 5.3,
+    "gains differ": 5.8,
+    "levels differ": 5.4
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "both differ": 4.9,
+    "gains differ": 4.5,
+    "levels differ": 5.7
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "both differ": 4.7,
+    "gains differ": 4.7,
+    "levels differ": 5.8
+   },
+   "level 0.15 C": {
+    "both differ": 4.9,
+    "gains differ": 5.8,
+    "levels differ": 4.8
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "both differ": 4.6,
+    "gains differ": 7.0,
+    "levels differ": 5.0
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "both differ": 5.3,
+    "gains differ": 10.8,
+    "levels differ": 5.7
+   },
+   "mixed: E154's fit, then E166's": {
+    "both differ": 98.2,
+    "gains differ": 13.7,
+    "levels differ": 35.8
+   },
+   "none": {
+    "both differ": 5.3,
+    "gains differ": 5.4,
+    "levels differ": 5.1
+   }
+  },
+  "HM_AG_matched_false_rates_sigma": {
+   "both test under any shared truth": [
+    4.4,
+    5.3
+   ],
+   "gain test under a shared gain or none": [
+    4.5,
+    5.8
+   ],
+   "level test under a shared level or none": [
+    4.8,
+    5.7
+   ],
+   "power under the mixed truth (gain / level / both)": [
+    13.7,
+    35.8,
+    98.2
+   ]
+  },
+  "S7W_registered_threshold": {
+   "exact plan|both|0.0884": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 0.0,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 0.0,
+    "gain 2.35% (M10's aifoundry3 gamma)": 1.1,
+    "gain 3.20% (the x1.032 arm)": 0.1,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.0,
+    "level 0.15 C": 3.4,
+    "level 0.27 C (E154's and E166's level alone)": 0.1,
+    "level 0.40 C (E166's two-term a)": 0.0,
+    "mixed: E154's fit, then E166's": 49.3,
+    "none": 26.7
+   },
+   "exact plan|both|0.1325": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 1.1,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 1.4,
+    "gain 2.35% (M10's aifoundry3 gamma)": 8.3,
+    "gain 3.20% (the x1.032 arm)": 2.6,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.3,
+    "level 0.15 C": 17.7,
+    "level 0.27 C (E154's and E166's level alone)": 2.3,
+    "level 0.40 C (E166's two-term a)": 0.1,
+    "mixed: E154's fit, then E166's": 56.7,
+    "none": 42.5
+   },
+   "exact plan|gain|0.0884": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 0.1,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 0.7,
+    "gain 2.35% (M10's aifoundry3 gamma)": 0.5,
+    "gain 3.20% (the x1.032 arm)": 0.0,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.0,
+    "level 0.15 C": 3.2,
+    "level 0.27 C (E154's and E166's level alone)": 0.3,
+    "level 0.40 C (E166's two-term a)": 0.0,
+    "mixed: E154's fit, then E166's": 0.3,
+    "none": 11.7
+   },
+   "exact plan|gain|0.1325": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 1.5,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 4.4,
+    "gain 2.35% (M10's aifoundry3 gamma)": 5.8,
+    "gain 3.20% (the x1.032 arm)": 1.5,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.1,
+    "level 0.15 C": 13.3,
+    "level 0.27 C (E154's and E166's level alone)": 3.6,
+    "level 0.40 C (E166's two-term a)": 0.6,
+    "mixed: E154's fit, then E166's": 3.3,
+    "none": 21.9
+   },
+   "exact plan|level|0.0884": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 0.5,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 0.0,
+    "gain 2.35% (M10's aifoundry3 gamma)": 1.1,
+    "gain 3.20% (the x1.032 arm)": 0.2,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.0,
+    "level 0.15 C": 2.4,
+    "level 0.27 C (E154's and E166's level alone)": 0.0,
+    "level 0.40 C (E166's two-term a)": 0.0,
+    "mixed: E154's fit, then E166's": 3.7,
+    "none": 10.9
+   },
+   "exact plan|level|0.1325": {
+    "both: E154's two-term fit (-0.229 C + 5.72%)": 5.0,
+    "both: E166's two-term fit (+0.395 C - 1.43%)": 1.0,
+    "gain 2.35% (M10's aifoundry3 gamma)": 8.1,
+    "gain 3.20% (the x1.032 arm)": 3.1,
+    "gain 4.52% (M10's aifoundry2 gamma)": 0.5,
+    "level 0.15 C": 10.8,
+    "level 0.27 C (E154's and E166's level alone)": 1.7,
+    "level 0.40 C (E166's two-term a)": 0.2,
+    "mixed: E154's fit, then E166's": 10.2,
+    "none": 21.3
+   }
+  },
+  "path_at_the_plan_sigma": {
+   "both: E154's two-term fit (-0.229 C + 5.72%)": {
+    "carries": {
+     "both enter": 80.0,
+     "gain enters": 14.5,
+     "gain enters (BOTH, refitted alone)": 0.2,
+     "nothing: the sessions differ": 5.2
+    },
+    "arm": {
+     "replaced": 94.8,
+     "reported": 5.2,
+     "retired": 0.0
+    }
+   },
+   "both: E166's two-term fit (+0.395 C - 1.43%)": {
+    "carries": {
+     "both enter": 28.3,
+     "level enters": 63.9,
+     "level enters (BOTH, refitted alone)": 1.4,
+     "nothing: the sessions differ": 6.3
+    },
+    "arm": {
+     "replaced": 28.3,
+     "reported": 6.1,
+     "retired": 65.6
+    }
+   },
+   "gain 2.35% (M10's aifoundry3 gamma)": {
+    "carries": {
+     "both enter": 0.8,
+     "gain enters": 64.9,
+     "gain enters (BOTH, refitted alone)": 1.3,
+     "level enters": 0.3,
+     "nothing: NOT SEPARATED": 26.4,
+     "nothing: its size or interval": 0.1,
+     "nothing: the sessions differ": 6.2
+    },
+    "arm": {
+     "replaced": 66.9,
+     "reported": 30.4,
+     "retired": 2.7
+    }
+   },
+   "gain 3.20% (the x1.032 arm)": {
+    "carries": {
+     "both enter": 1.3,
+     "gain enters": 84.9,
+     "gain enters (BOTH, refitted alone)": 1.3,
+     "level enters": 0.1,
+     "nothing: NOT SEPARATED": 6.2,
+     "nothing: the sessions differ": 6.1
+    },
+    "arm": {
+     "replaced": 87.5,
+     "reported": 12.4,
+     "retired": 0.1
+    }
+   },
+   "gain 4.52% (M10's aifoundry2 gamma)": {
+    "carries": {
+     "both enter": 1.0,
+     "gain enters": 91.1,
+     "gain enters (BOTH, refitted alone)": 0.8,
+     "nothing: NOT SEPARATED": 0.2,
+     "nothing: the sessions differ": 6.9
+    },
+    "arm": {
+     "replaced": 92.9,
+     "reported": 7.1,
+     "retired": 0.0
+    }
+   },
+   "level 0.15 C": {
+    "carries": {
+     "both enter": 0.8,
+     "gain enters": 0.9,
+     "gain enters (BOTH, refitted alone)": 0.1,
+     "level enters": 40.8,
+     "level enters (BOTH, refitted alone)": 0.6,
+     "nothing: NOT SEPARATED": 50.2,
+     "nothing: S7-W met": 0.1,
+     "nothing: its size or interval": 0.6,
+     "nothing: the sessions differ": 6.0
+    },
+    "arm": {
+     "replaced": 1.7,
+     "reported": 37.7,
+     "retired": 60.6
+    }
+   },
+   "level 0.27 C (E154's and E166's level alone)": {
+    "carries": {
+     "both enter": 1.5,
+     "level enters": 85.6,
+     "level enters (BOTH, refitted alone)": 0.8,
+     "nothing: NOT SEPARATED": 5.7,
+     "nothing: the sessions differ": 6.3
+    },
+    "arm": {
+     "replaced": 1.6,
+     "reported": 9.0,
+     "retired": 89.4
+    }
+   },
+   "level 0.40 C (E166's two-term a)": {
+    "carries": {
+     "both enter": 1.5,
+     "level enters": 91.4,
+     "level enters (BOTH, refitted alone)": 0.8,
+     "nothing: NOT SEPARATED": 0.1,
+     "nothing: the sessions differ": 6.3
+    },
+    "arm": {
+     "replaced": 1.5,
+     "reported": 3.4,
+     "retired": 95.1
+    }
+   },
+   "mixed: E154's fit, then E166's": {
+    "carries": {
+     "gain enters": 1.2,
+     "gain enters (BOTH, refitted alone)": 0.1,
+     "nothing: NOT SEPARATED": 0.1,
+     "nothing: its size or interval": 0.1,
+     "nothing: the sessions differ": 98.5
+    },
+    "arm": {
+     "replaced": 1.3,
+     "reported": 98.7,
+     "retired": 0.0
+    }
+   },
+   "none": {
+    "carries": {
+     "both enter": 0.6,
+     "nothing: NOT SEPARATED": 93.1,
+     "nothing: S7-W met": 0.1,
+     "nothing: its size or interval": 3.0,
+     "nothing: the sessions differ": 3.2
+    },
+    "arm": {
+     "replaced": 0.6,
+     "reported": 5.6,
+     "retired": 93.8
+    }
+   }
+  }
+ },
+ "precedence_a1": "A1 is committed before every output it governs (no M11 kit, scorer, fit, hold or claim exists). It changes no statistic, set, seed or verdict of HC1-B or I8P-B, whose precedence stays 3c31a91d's (REGISTRATION.md section 11)."
+}

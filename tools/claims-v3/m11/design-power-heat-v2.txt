@@ -1,0 +1,205 @@
+M11's heat registration (Q142(h)), dated amendment A1: design_power_heat.py's faults fixed in a new file (design only: no fit, no hold, no card)
+
+Checked first: tools/claims-v3/m11/design_power_heat.py and its committed output tools/claims-v3/m11/design-power-heat.json against tools/claims-v3/m11/SHA256SUMS-m11: OK
+Inputs (sha256; 'OK' = as tools/claims-v3/m11/SHA256SUMS lists it):
+   62d455a2663cbdc1d759062ae037fb291567853dd93e609292d4e4435e6a673e  docs/reports/data/2026-11-04-q142m-m10/heldout-m10.json  [OK]
+   f6c84268beb5fe9d46d631914e6fb5d48dfcf21680e0cc66df5b02784a646ea5  docs/reports/data/2026-11-04-q142m-m10/section7-m10.json  [OK]
+   57c1d93417367d8ba1d3f39a63e9b68b042a9635785e26f9a9fa772817932860  docs/reports/data/2026-11-02-q138t-heat-model/cv-q138t.json  [OK]
+   313c6840337615b2c474c39f74f095737bf7a35ecc6f9d8ac2356478f6442512  docs/reports/data/2026-11-02-q138t-heat-model/predict_e144.py  [OK]
+   9dbb288f896b7e588fbc155d67f32b1cb7089ffe4ede465c1380d2724d1fb49b  docs/reports/data/2026-11-02-q138t-heat-model/heat_q138t.py  [OK]
+   268b47fd580b330738eb3e1c83ea392f3784aae348a658e7335b734a1168e8fa  docs/reports/data/2026-11-02-q138t-heat-model/model-q138t.json  [OK]
+   b7463b6c2c159eb70bd59418f729c4c9144f6eec778126ef660fe781cc724da5  docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json  [OK]
+   db79558c00a74bd10df385251ce957f698fd2784bb01994198d43e7ee606413c  tools/claims-v3/m10/pool8/design_power_groups.py  [OK]
+   ce2d32c046161f30afa794a2fa5e467c6c396fc272a59e7e193f92d7dae02e80  tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry2.json  [OK]
+   328d0c4269e64a1a06afa15843492dd37795efb774fb310438f6d424cf43053d  tools/claims-v3/kinds/blind8/sets-blind8.json  [OK]
+
+1. The noise (unchanged; design_power_heat.noise): aifoundry3 sigma_c 0.0884 C over 11 scaled residuals (E144 mean, 2 holds: 1 degree of freedom; E154 two-term, 5: 3; E166 two-term, 4: 2; in all 6); aifoundry2 0.2296 C over 4; readout floor 0.3019 C
+
+2'. The planned aifoundry3 session on an exact grid (each piece a whole number of steps; the marks on the same grid). P = the plateau rise over the anchor, over the registered window [b - 300 s, b), b the end of the hold's last process; P(t1) = over describe's window, as the committed plan read it; '0.2 s' = the committed plan (design_power_heat.plan_a3, reproduced)
+   room 49.5 C: grid 0.008 s; plan 73.28 min + smoke 1.4 = 74.68 card-minutes (0.2 s grid: 74.73); H_E's share on the grid 0.4571 against the recorded 0.4571 (0.2 s grid: 0.4474, -2.1%)
+     H_E fp32.randn     carried-in +0.000 C  P 14.161 C  P(t1) 14.180  plateau 63.66  peak 66.02 C  | 0.2 s: P(t1) 13.856, peak 65.69
+     Z   fp32.zeros     carried-in +1.361 C  P  0.751 C  P(t1)  0.751  plateau 51.61  peak 51.65 C  | 0.2 s: P(t1)  0.784, peak 51.65
+     L1  int8.full      carried-in +1.163 C  P  9.453 C  P(t1)  9.453  plateau 60.12  peak 60.51 C  | 0.2 s: P(t1)  9.454, peak 60.51
+     S   int8.neg_ones  carried-in +1.012 C  P  3.432 C  P(t1)  3.432  plateau 53.94  peak 54.07 C  | 0.2 s: P(t1)  3.432, peak 54.07
+     L2  int8.full      carried-in +2.486 C  P  8.180 C  P(t1)  8.180  plateau 60.17  peak 60.53 C  | 0.2 s: P(t1)  8.182, peak 60.53
+   room 51.2 C: grid 0.008 s; plan 73.28 min + smoke 1.4 = 74.68 card-minutes (0.2 s grid: 74.73); H_E's share on the grid 0.4571 against the recorded 0.4571 (0.2 s grid: 0.4474, -2.1%)
+     H_E fp32.randn     carried-in +0.000 C  P 14.517 C  P(t1) 14.538  plateau 65.72  peak 68.13 C  | 0.2 s: P(t1) 14.205, peak 67.79
+     Z   fp32.zeros     carried-in +1.469 C  P  0.695 C  P(t1)  0.695  plateau 53.36  peak 53.40 C  | 0.2 s: P(t1)  0.731, peak 53.40
+     L1  int8.full      carried-in +1.206 C  P  9.670 C  P(t1)  9.671  plateau 62.08  peak 62.50 C  | 0.2 s: P(t1)  9.672, peak 62.50
+     S   int8.neg_ones  carried-in +1.089 C  P  3.459 C  P(t1)  3.459  plateau 55.75  peak 55.88 C  | 0.2 s: P(t1)  3.459, peak 55.88
+     L2  int8.full      carried-in +2.578 C  P  8.354 C  P(t1)  8.355  plateau 62.13  peak 62.52 C  | 0.2 s: P(t1)  8.356, peak 62.52
+   room 51.5 C: grid 0.008 s; plan 73.28 min + smoke 1.4 = 74.68 card-minutes (0.2 s grid: 74.73); H_E's share on the grid 0.4571 against the recorded 0.4571 (0.2 s grid: 0.4474, -2.1%)
+     H_E fp32.randn     carried-in +0.000 C  P 14.582 C  P(t1) 14.603  plateau 66.08  peak 68.51 C  | 0.2 s: P(t1) 14.268, peak 68.17
+     Z   fp32.zeros     carried-in +1.489 C  P  0.684 C  P(t1)  0.684  plateau 53.67  peak 53.71 C  | 0.2 s: P(t1)  0.721, peak 53.71
+     L1  int8.full      carried-in +1.214 C  P  9.709 C  P(t1)  9.710  plateau 62.42  peak 62.85 C  | 0.2 s: P(t1)  9.711, peak 62.85
+     S   int8.neg_ones  carried-in +1.104 C  P  3.463 C  P(t1)  3.463  plateau 56.07  peak 56.20 C  | 0.2 s: P(t1)  3.464, peak 56.20
+     L2  int8.full      carried-in +2.595 C  P  8.386 C  P(t1)  8.386  plateau 62.48  peak 62.87 C  | 0.2 s: P(t1)  8.388, peak 62.87
+   room 52.0 C: grid 0.005 s; plan 73.30 min + smoke 1.4 = 74.70 card-minutes (0.2 s grid: 74.73); H_E's share on the grid 0.3716 against the recorded 0.3716 (0.2 s grid: 0.3750, +0.9%)
+     H_E fp32.randn     carried-in +0.000 C  P 11.723 C  P(t1) 11.735  plateau 63.72  peak 66.15 C  | 0.2 s: P(t1) 11.856, peak 66.27
+     Z   fp32.zeros     carried-in +1.191 C  P  0.986 C  P(t1)  0.986  plateau 54.18  peak 54.22 C  | 0.2 s: P(t1)  0.974, peak 54.22
+     L1  int8.full      carried-in +1.224 C  P  9.778 C  P(t1)  9.779  plateau 63.00  peak 63.44 C  | 0.2 s: P(t1)  9.780, peak 63.44
+     S   int8.neg_ones  carried-in +1.128 C  P  3.471 C  P(t1)  3.471  plateau 56.60  peak 56.74 C  | 0.2 s: P(t1)  3.471, peak 56.74
+     L2  int8.full      carried-in +2.623 C  P  8.439 C  P(t1)  8.439  plateau 63.06  peak 63.46 C  | 0.2 s: P(t1)  8.441, peak 63.46
+   room 53.0 C: grid 0.005 s; plan 73.30 min + smoke 1.4 = 74.70 card-minutes (0.2 s grid: 74.73); H_E's share on the grid 0.3716 against the recorded 0.3716 (0.2 s grid: 0.3750, +0.9%)
+     H_E fp32.randn     carried-in +0.000 C  P 11.895 C  P(t1) 11.908  plateau 64.89  peak 67.35 C  | 0.2 s: P(t1) 12.032, peak 67.47
+     Z   fp32.zeros     carried-in +1.245 C  P  0.964 C  P(t1)  0.964  plateau 55.21  peak 55.25 C  | 0.2 s: P(t1)  0.951, peak 55.25
+     L1  int8.full      carried-in +1.251 C  P  9.914 C  P(t1)  9.915  plateau 64.17  peak 64.62 C  | 0.2 s: P(t1)  9.916, peak 64.62
+     S   int8.neg_ones  carried-in +1.179 C  P  3.485 C  P(t1)  3.485  plateau 57.66  peak 57.81 C  | 0.2 s: P(t1)  3.485, peak 57.81
+     L2  int8.full      carried-in +2.681 C  P  8.547 C  P(t1)  8.548  plateau 64.23  peak 64.65 C  | 0.2 s: P(t1)  8.550, peak 64.65
+   highest planned in-launch peak (34-sensor mean) at an admitted room: H_E 68.51 C at 51.5 C; every other hold at most 64.65 C (the hold line 72 C, the launch gate 70 C on the firmware's reading)
+
+3'. HM-LG's power at the exact plan (the registered test, lg_test with >= 4 holds a session spanning >= 6.0 C of P, n - 2k >= 3; 5000 draws a cell, the committed draws). Shares in %: GAIN / LEVEL / BOTH / NOT SEPARATED / NOT SCORED; [committed] = design-power-heat.json at the 0.2 s plan
+
+   A3 x2 (the plan: two aifoundry3 sessions, rooms 51.2 and 52.0 C): P per session 14.52, 0.69, 9.67, 3.46, 8.35 | 11.72, 0.99, 9.78, 3.47, 8.44
+     sigma 0.0884 C:
+       none                                               1.8 /   1.9 /   3.2 /  93.1 /   0.0   [committed 1.7 / 1.9 / 3.3 / 93.1]
+       gain 2.35% (M10's aifoundry3 gamma)               68.9 /   0.3 /   4.3 /  26.4 /   0.0   [committed 68.3 / 0.4 / 4.3 / 27.1]
+       gain 3.20% (the x1.032 arm)                       88.5 /   0.1 /   5.2 /   6.2 /   0.0   [committed 88.2 / 0.1 / 5.1 / 6.6]
+       gain 4.52% (M10's aifoundry2 gamma)               95.4 /   0.0 /   4.5 /   0.2 /   0.0   [committed 95.3 / 0.0 / 4.4 / 0.2]
+       level 0.15 C                                       1.0 /  45.0 /   3.8 /  50.2 /   0.0   [committed 1.1 / 44.9 / 3.6 / 50.4]
+       level 0.27 C (E154's and E166's level alone)       0.0 /  89.4 /   4.9 /   5.7 /   0.0   [committed 0.0 / 89.3 / 4.9 / 5.8]
+       level 0.40 C (E166's two-term a)                   0.0 /  95.1 /   4.8 /   0.1 /   0.0   [committed 0.0 / 95.1 / 4.9 / 0.1]
+       both: E154's two-term fit (-0.229 C + 5.72%)      14.7 /   0.0 /  85.3 /   0.0 /   0.0   [committed 14.9 / 0.0 / 85.1 / 0.0]
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  65.6 /  34.4 /   0.0 /   0.0   [committed 0.0 / 66.2 / 33.7 / 0.0]
+       mixed: E154's fit, then E166's                     1.3 /   0.0 /  98.6 /   0.1 /   0.0   [committed 1.2 / 0.1 / 98.6 / 0.1]
+     sigma 0.1325 C:
+       none                                               2.0 /   1.7 /   3.1 /  93.1 /   0.0   [committed 2.0 / 1.7 / 3.2 / 93.1]
+       gain 2.35% (M10's aifoundry3 gamma)               35.4 /   1.2 /   3.7 /  59.7 /   0.0   [committed 34.9 / 1.1 / 3.8 / 60.2]
+       gain 3.20% (the x1.032 arm)                       58.8 /   0.8 /   4.4 /  36.0 /   0.0   [committed 58.2 / 0.8 / 4.3 / 36.7]
+       gain 4.52% (M10's aifoundry2 gamma)               86.2 /   0.1 /   4.6 /   9.1 /   0.0   [committed 85.8 / 0.2 / 4.5 / 9.6]
+       level 0.15 C                                       1.5 /  20.8 /   3.6 /  74.0 /   0.0   [committed 1.5 / 20.7 / 3.5 / 74.3]
+       level 0.27 C (E154's and E166's level alone)       0.8 /  60.2 /   4.4 /  34.6 /   0.0   [committed 0.8 / 59.9 / 4.4 / 35.0]
+       level 0.40 C (E166's two-term a)                   0.1 /  87.9 /   4.8 /   7.2 /   0.0   [committed 0.1 / 87.8 / 4.7 / 7.4]
+       both: E154's two-term fit (-0.229 C + 5.72%)      48.3 /   0.0 /  50.3 /   1.5 /   0.0   [committed 48.4 / 0.0 / 50.0 / 1.7]
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  76.0 /  16.9 /   7.1 /   0.0   [committed 0.0 / 76.0 / 16.7 / 7.3]
+       mixed: E154's fit, then E166's                    15.4 /   1.5 /  75.1 /   8.0 /   0.0   [committed 14.6 / 2.0 / 74.6 / 8.7]
+
+   A3 x1 (one aifoundry3 session, room 51.2 C): P per session 14.52, 0.69, 9.67, 3.46, 8.35
+     sigma 0.0884 C:
+       none                                               1.8 /   1.8 /   3.3 /  93.0 /   0.0   [committed 1.7 / 1.8 / 3.4 / 93.1]
+       gain 2.35% (M10's aifoundry3 gamma)               46.1 /   1.2 /   3.8 /  48.9 /   0.0   [committed 44.6 / 1.3 / 3.7 / 50.4]
+       gain 3.20% (the x1.032 arm)                       68.6 /   0.4 /   4.4 /  26.6 /   0.0   [committed 67.1 / 0.4 / 4.4 / 28.2]
+       gain 4.52% (M10's aifoundry2 gamma)               89.1 /   0.1 /   5.0 /   5.8 /   0.0   [committed 88.4 / 0.1 / 4.9 / 6.6]
+       level 0.15 C                                       1.6 /  27.5 /   3.2 /  67.7 /   0.0   [committed 1.6 / 27.1 / 3.1 / 68.2]
+       level 0.27 C (E154's and E166's level alone)       0.5 /  65.2 /   4.7 /  29.5 /   0.0   [committed 0.5 / 64.6 / 4.6 / 30.2]
+       level 0.40 C (E166's two-term a)                   0.0 /  89.4 /   4.7 /   5.9 /   0.0   [committed 0.0 / 89.1 / 4.8 / 6.1]
+       both: E154's two-term fit (-0.229 C + 5.72%)      41.6 /   0.0 /  57.7 /   0.7 /   0.0   [committed 42.2 / 0.0 / 56.9 / 0.9]
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  71.2 /  23.1 /   5.7 /   0.0   [committed 0.0 / 71.2 / 22.6 / 6.3]
+       mixed: E154's fit, then E166's                    41.6 /   0.0 /  57.7 /   0.7 /   0.0   [committed 42.0 / 0.0 / 57.0 / 1.0]
+     sigma 0.1325 C:
+       none                                               1.8 /   2.1 /   3.5 /  92.6 /   0.0   [committed 1.8 / 2.1 / 3.5 / 92.7]
+       gain 2.35% (M10's aifoundry3 gamma)               24.6 /   1.6 /   3.1 /  70.8 /   0.0   [committed 23.6 / 1.6 / 3.1 / 71.7]
+       gain 3.20% (the x1.032 arm)                       40.4 /   1.3 /   3.4 /  55.0 /   0.0   [committed 39.0 / 1.4 / 3.3 / 56.3]
+       gain 4.52% (M10's aifoundry2 gamma)               64.6 /   0.4 /   4.7 /  30.3 /   0.0   [committed 62.8 / 0.5 / 4.7 / 32.0]
+       level 0.15 C                                       2.1 /  14.0 /   2.7 /  81.2 /   0.0   [committed 2.1 / 13.9 / 2.7 / 81.3]
+       level 0.27 C (E154's and E166's level alone)       1.7 /  37.4 /   3.5 /  57.4 /   0.0   [committed 1.7 / 36.9 / 3.5 / 57.9]
+       level 0.40 C (E166's two-term a)                   0.6 /  64.5 /   4.5 /  30.5 /   0.0   [committed 0.6 / 63.9 / 4.5 / 31.0]
+       both: E154's two-term fit (-0.229 C + 5.72%)      54.2 /   0.0 /  32.6 /  13.2 /   0.0   [committed 53.3 / 0.0 / 32.3 / 14.4]
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  55.4 /  13.8 /  30.8 /   0.0   [committed 0.0 / 55.0 / 13.4 / 31.7]
+       mixed: E154's fit, then E166's                    54.2 /   0.0 /  31.5 /  14.4 /   0.0   [committed 53.2 / 0.0 / 31.1 / 15.7]
+
+   A3 x3 (three aifoundry3 sessions): P per session 14.52, 0.69, 9.67, 3.46, 8.35 | 11.72, 0.99, 9.78, 3.47, 8.44 | 14.52, 0.69, 9.67, 3.46, 8.35
+     sigma 0.0884 C:
+       none                                               2.1 /   1.9 /   2.3 /  93.7 /   0.0   [committed 2.1 / 1.8 / 2.3 / 93.8]
+       gain 2.35% (M10's aifoundry3 gamma)               84.6 /   0.1 /   4.8 /  10.4 /   0.0   [committed 83.5 / 0.1 / 4.9 / 11.4]
+       gain 3.20% (the x1.032 arm)                       94.5 /   0.0 /   5.0 /   0.5 /   0.0   [committed 94.3 / 0.0 / 5.0 / 0.7]
+       gain 4.52% (M10's aifoundry2 gamma)               95.3 /   0.0 /   4.7 /   0.0 /   0.0   [committed 95.4 / 0.0 / 4.6 / 0.0]
+       level 0.15 C                                       0.3 /  60.8 /   4.4 /  34.4 /   0.0   [committed 0.4 / 60.3 / 4.5 / 34.8]
+       level 0.27 C (E154's and E166's level alone)       0.0 /  94.5 /   4.8 /   0.7 /   0.0   [committed 0.0 / 94.3 / 4.9 / 0.8]
+       level 0.40 C (E166's two-term a)                   0.0 /  95.0 /   5.0 /   0.0 /   0.0   [committed 0.0 / 95.0 / 5.0 / 0.0]
+       both: E154's two-term fit (-0.229 C + 5.72%)       3.4 /   0.0 /  96.6 /   0.0 /   0.0   [committed 3.5 / 0.0 / 96.5 / 0.0]
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  52.4 /  47.6 /   0.0 /   0.0   [committed 0.0 / 53.3 / 46.7 / 0.0]
+       mixed: E154's fit, then E166's                     0.2 /   0.0 /  99.8 /   0.0 /   0.0   [committed 0.2 / 0.0 / 99.8 / 0.0]
+     sigma 0.1325 C:
+       none                                               2.1 /   2.0 /   2.8 /  93.1 /   0.0   [committed 2.0 / 2.0 / 2.9 / 93.2]
+       gain 2.35% (M10's aifoundry3 gamma)               51.9 /   0.7 /   4.5 /  42.9 /   0.0   [committed 50.5 / 0.7 / 4.5 / 44.3]
+       gain 3.20% (the x1.032 arm)                       79.1 /   0.2 /   4.7 /  15.9 /   0.0   [committed 78.0 / 0.2 / 4.6 / 17.1]
+       gain 4.52% (M10's aifoundry2 gamma)               93.5 /   0.0 /   5.1 /   1.3 /   0.0   [committed 93.4 / 0.0 / 5.0 / 1.5]
+       level 0.15 C                                       1.1 /  29.5 /   3.7 /  65.7 /   0.0   [committed 1.0 / 29.1 / 3.7 / 66.2]
+       level 0.27 C (E154's and E166's level alone)       0.3 /  77.6 /   5.0 /  17.2 /   0.0   [committed 0.3 / 77.1 / 4.9 / 17.7]
+       level 0.40 C (E166's two-term a)                   0.0 /  94.3 /   4.9 /   0.8 /   0.0   [committed 0.0 / 94.2 / 4.9 / 0.9]
+       both: E154's two-term fit (-0.229 C + 5.72%)      32.7 /   0.0 /  67.3 /   0.0 /   0.0   [committed 33.3 / 0.0 / 66.7 / 0.1]
+       both: E166's two-term fit (+0.395 C - 1.43%)       0.0 /  75.6 /  23.6 /   0.8 /   0.0   [committed 0.0 / 76.3 / 22.8 / 0.9]
+       mixed: E154's fit, then E166's                    12.3 /   0.0 /  87.2 /   0.4 /   0.0   [committed 12.3 / 0.1 / 87.0 / 0.6]
+
+4'. S7-W as registered: the held-out session's rms with the carried term minus without exceeds sigma_c / sqrt(n_s), sigma_c 0.0884 C fixed (REGISTRATION.md section 7), at each simulated noise; share of draws in which any held-out session does, at the plan (A3 x2), the committed draws for a gain and a level; 'both' (A1-4) the two-term form fitted on the other sessions
+   exact plan, carried gain, simulated sigma 0.0884 C: none 11.7; gain 2.35% 0.5; gain 3.20% 0.0; gain 4.52% 0.0; level 0.15 C 3.2; level 0.27 C 0.3; level 0.40 C 0.0; both: E154's two-term fit 0.1; both: E166's two-term fit 0.7; mixed: E154's fit, then E166's 0.3
+   exact plan, carried gain, simulated sigma 0.1325 C: none 21.9; gain 2.35% 5.8; gain 3.20% 1.5; gain 4.52% 0.1; level 0.15 C 13.3; level 0.27 C 3.6; level 0.40 C 0.6; both: E154's two-term fit 1.5; both: E166's two-term fit 4.4; mixed: E154's fit, then E166's 3.3
+   exact plan, carried level, simulated sigma 0.0884 C: none 10.9; gain 2.35% 1.1; gain 3.20% 0.2; gain 4.52% 0.0; level 0.15 C 2.4; level 0.27 C 0.0; level 0.40 C 0.0; both: E154's two-term fit 0.5; both: E166's two-term fit 0.0; mixed: E154's fit, then E166's 3.7
+   exact plan, carried level, simulated sigma 0.1325 C: none 21.3; gain 2.35% 8.1; gain 3.20% 3.1; gain 4.52% 0.5; level 0.15 C 10.8; level 0.27 C 1.7; level 0.40 C 0.2; both: E154's two-term fit 5.0; both: E166's two-term fit 1.0; mixed: E154's fit, then E166's 10.2
+   exact plan, carried both, simulated sigma 0.0884 C: none 26.7; gain 2.35% 1.1; gain 3.20% 0.1; gain 4.52% 0.0; level 0.15 C 3.4; level 0.27 C 0.1; level 0.40 C 0.0; both: E154's two-term fit 0.0; both: E166's two-term fit 0.0; mixed: E154's fit, then E166's 49.3
+   exact plan, carried both, simulated sigma 0.1325 C: none 42.5; gain 2.35% 8.3; gain 3.20% 2.6; gain 4.52% 0.3; level 0.15 C 17.7; level 0.27 C 2.3; level 0.40 C 0.1; both: E154's two-term fit 1.1; both: E166's two-term fit 1.4; mixed: E154's fit, then E166's 56.7
+   0.2 s plan, carried gain, simulated sigma 0.0884 C: none 11.6; gain 2.35% 0.5; gain 3.20% 0.0; gain 4.52% 0.0; level 0.15 C 3.1; level 0.27 C 0.2; level 0.40 C 0.0; both: E154's two-term fit 0.1; both: E166's two-term fit 0.4; mixed: E154's fit, then E166's 0.3
+   0.2 s plan, carried gain, simulated sigma 0.1325 C: none 21.8; gain 2.35% 5.9; gain 3.20% 1.6; gain 4.52% 0.1; level 0.15 C 13.0; level 0.27 C 3.3; level 0.40 C 0.5; both: E154's two-term fit 1.4; both: E166's two-term fit 3.7; mixed: E154's fit, then E166's 3.3
+   0.2 s plan, carried level, simulated sigma 0.0884 C: none 10.9; gain 2.35% 1.1; gain 3.20% 0.2; gain 4.52% 0.0; level 0.15 C 2.4; level 0.27 C 0.0; level 0.40 C 0.0; both: E154's two-term fit 0.4; both: E166's two-term fit 0.0; mixed: E154's fit, then E166's 4.0
+   0.2 s plan, carried level, simulated sigma 0.1325 C: none 21.3; gain 2.35% 8.3; gain 3.20% 2.9; gain 4.52% 0.5; level 0.15 C 10.8; level 0.27 C 1.7; level 0.40 C 0.2; both: E154's two-term fit 4.6; both: E166's two-term fit 1.0; mixed: E154's fit, then E166's 11.1
+   0.2 s plan, carried both, simulated sigma 0.0884 C: none 26.1; gain 2.35% 1.1; gain 3.20% 0.1; gain 4.52% 0.0; level 0.15 C 3.3; level 0.27 C 0.1; level 0.40 C 0.0; both: E154's two-term fit 0.0; both: E166's two-term fit 0.0; mixed: E154's fit, then E166's 50.7
+   0.2 s plan, carried both, simulated sigma 0.1325 C: none 42.1; gain 2.35% 8.3; gain 3.20% 2.7; gain 4.52% 0.3; level 0.15 C 17.5; level 0.27 C 2.3; level 0.40 C 0.1; both: E154's two-term fit 1.0; both: E166's two-term fit 1.5; mixed: E154's fit, then E166's 57.8
+   (the committed 1.5-sigma rates divided the simulated 1.5 sigma, not sigma_c: design-power-heat.json s7w|*|0.1325)
+
+4b'. HM-AG: do the plan's two aifoundry3 sessions share one gain / one level / one two-term form? Share of draws in which the F test says they differ (gain and level against F(k - 1, n - 2k), both against F(2(k - 1), n - 2k)), on the committed draws
+   0.2 s plan, sigma 0.0884 C (F points 5.987 and 5.143): none 5.4 / 5.1 / 5.4; gain 2.35% 5.7 / 5.4 / 5.4; gain 3.20% 4.6 / 5.4 / 4.8; gain 4.52% 4.7 / 5.4 / 4.6; level 0.15 C 5.6 / 4.8 / 5.0; level 0.27 C 6.3 / 5.0 / 4.7; level 0.40 C 8.9 / 5.7 / 5.3; both: E154's two-term fit 6.2 / 6.3 / 5.0; both: E166's two-term fit 8.3 / 4.8 / 4.3; mixed: E154's fit, then E166's 13.5 / 37.3 / 98.0
+   0.2 s plan, sigma 0.1325 C (F points 5.987 and 5.143): none 5.0 / 5.1 / 4.8; gain 2.35% 4.8 / 4.7 / 4.8; gain 3.20% 4.8 / 5.3 / 5.1; gain 4.52% 5.4 / 5.4 / 4.9; level 0.15 C 5.5 / 5.4 / 5.0; level 0.27 C 5.4 / 4.9 / 4.8; level 0.40 C 6.9 / 5.2 / 5.1; both: E154's two-term fit 5.7 / 6.1 / 5.0; both: E166's two-term fit 6.6 / 5.2 / 5.1; mixed: E154's fit, then E166's 9.1 / 19.2 / 77.5
+   exact plan, sigma 0.0884 C (F points 5.987 and 5.143): none 5.4 / 5.1 / 5.3; gain 2.35% 5.8 / 5.4 / 5.3; gain 3.20% 4.5 / 5.7 / 4.9; gain 4.52% 4.7 / 5.8 / 4.7; level 0.15 C 5.8 / 4.8 / 4.9; level 0.27 C 7.0 / 5.0 / 4.6; level 0.40 C 10.8 / 5.7 / 5.3; both: E154's two-term fit 6.7 / 6.9 / 4.9; both: E166's two-term fit 9.7 / 4.8 / 4.4; mixed: E154's fit, then E166's 13.7 / 35.8 / 98.2
+   exact plan, sigma 0.1325 C (F points 5.987 and 5.143): none 5.1 / 5.1 / 4.8; gain 2.35% 4.8 / 4.7 / 4.8; gain 3.20% 4.7 / 5.4 / 5.0; gain 4.52% 5.4 / 5.8 / 4.9; level 0.15 C 5.5 / 5.3 / 5.1; level 0.27 C 5.7 / 5.0 / 4.9; level 0.40 C 7.7 / 5.2 / 5.0; both: E154's two-term fit 6.1 / 6.4 / 5.1; both: E166's two-term fit 7.2 / 5.2 / 5.1; mixed: E154's fit, then E166's 9.1 / 18.5 / 77.8
+   matched false rates at the exact plan, sigma 0.0884 C: gain test under a shared gain or none 4.5-5.8; level test under a shared level or none 4.8-5.7; both test under any shared truth 4.4-5.3; power under the mixed truth (gain / level / both) 13.7 / 35.8 / 98.2
+   matched false rates at the exact plan, sigma 0.1325 C: gain test under a shared gain or none 4.7-5.4; level test under a shared level or none 5.0-5.3; both test under any shared truth 4.8-5.1; power under the mixed truth (gain / level / both) 9.1 / 18.5 / 77.8
+
+4c. Amended section 6 (A1-4) at the plan (A3 x2, the exact plan), on the committed HM-LG draws: what M11 carries on aifoundry3, and the x1.032 arm's fate, in % of draws. S7-W at sigma_c fixed.
+   simulated sigma 0.0884 C:
+     none                         carries: both enter 0.6; nothing: the sessions differ 3.2; nothing: its size or interval 3.0; nothing: S7-W met 0.1; nothing: NOT SEPARATED 93.1 | arm: replaced 0.6 / retired 93.8 / reported 5.6
+     gain 2.35%                   carries: both enter 0.8; gain enters 64.9; gain enters (BOTH, refitted alone) 1.3; level enters 0.3; nothing: the sessions differ 6.2; nothing: its size or interval 0.1; nothing: NOT SEPARATED 26.4 | arm: replaced 66.9 / retired 2.7 / reported 30.4
+     gain 3.20%                   carries: both enter 1.3; gain enters 84.9; gain enters (BOTH, refitted alone) 1.3; level enters 0.1; nothing: the sessions differ 6.1; nothing: NOT SEPARATED 6.2 | arm: replaced 87.5 / retired 0.1 / reported 12.4
+     gain 4.52%                   carries: both enter 1.0; gain enters 91.1; gain enters (BOTH, refitted alone) 0.8; nothing: the sessions differ 6.9; nothing: NOT SEPARATED 0.2 | arm: replaced 92.9 / retired 0.0 / reported 7.1
+     level 0.15 C                 carries: both enter 0.8; gain enters 0.9; gain enters (BOTH, refitted alone) 0.1; level enters 40.8; level enters (BOTH, refitted alone) 0.6; nothing: the sessions differ 6.0; nothing: its size or interval 0.6; nothing: S7-W met 0.1; nothing: NOT SEPARATED 50.2 | arm: replaced 1.7 / retired 60.6 / reported 37.7
+     level 0.27 C                 carries: both enter 1.5; level enters 85.6; level enters (BOTH, refitted alone) 0.8; nothing: the sessions differ 6.3; nothing: NOT SEPARATED 5.7 | arm: replaced 1.6 / retired 89.4 / reported 9.0
+     level 0.40 C                 carries: both enter 1.5; level enters 91.4; level enters (BOTH, refitted alone) 0.8; nothing: the sessions differ 6.3; nothing: NOT SEPARATED 0.1 | arm: replaced 1.5 / retired 95.1 / reported 3.4
+     both: E154's two-term fit    carries: both enter 80.0; gain enters 14.5; gain enters (BOTH, refitted alone) 0.2; nothing: the sessions differ 5.2 | arm: replaced 94.8 / retired 0.0 / reported 5.2
+     both: E166's two-term fit    carries: both enter 28.3; level enters 63.9; level enters (BOTH, refitted alone) 1.4; nothing: the sessions differ 6.3 | arm: replaced 28.3 / retired 65.6 / reported 6.1
+     mixed: E154's fit, then E166's carries: gain enters 1.2; gain enters (BOTH, refitted alone) 0.1; nothing: the sessions differ 98.5; nothing: its size or interval 0.1; nothing: NOT SEPARATED 0.1 | arm: replaced 1.3 / retired 0.0 / reported 98.7
+   simulated sigma 0.1325 C:
+     none                         carries: both enter 0.6; gain enters 0.2; level enters 0.1; nothing: the sessions differ 3.4; nothing: its size or interval 2.4; nothing: S7-W met 0.1; nothing: NOT SEPARATED 93.1 | arm: replaced 0.8 / retired 93.8 / reported 5.4
+     gain 2.35%                   carries: both enter 0.8; gain enters 31.5; gain enters (BOTH, refitted alone) 0.5; level enters 0.9; nothing: the sessions differ 5.9; nothing: its size or interval 0.1; nothing: S7-W met 0.6; nothing: NOT SEPARATED 59.7 | arm: replaced 32.8 / retired 28.1 / reported 39.1
+     gain 3.20%                   carries: both enter 1.1; gain enters 55.2; gain enters (BOTH, refitted alone) 0.7; level enters 0.7; nothing: the sessions differ 6.1; nothing: its size or interval 0.1; nothing: S7-W met 0.2; nothing: NOT SEPARATED 36.0 | arm: replaced 56.9 / retired 6.5 / reported 36.6
+     gain 4.52%                   carries: both enter 1.3; gain enters 82.4; gain enters (BOTH, refitted alone) 0.8; level enters 0.1; nothing: the sessions differ 6.4; nothing: NOT SEPARATED 9.1 | arm: replaced 84.4 / retired 0.3 / reported 15.3
+     level 0.15 C                 carries: both enter 0.6; gain enters 1.1; gain enters (BOTH, refitted alone) 0.1; level enters 17.4; level enters (BOTH, refitted alone) 0.4; nothing: the sessions differ 5.1; nothing: its size or interval 0.7; nothing: S7-W met 0.6; nothing: NOT SEPARATED 74.0 | arm: replaced 1.8 / retired 71.1 / reported 27.1
+     level 0.27 C                 carries: both enter 1.2; gain enters 0.6; gain enters (BOTH, refitted alone) 0.1; level enters 55.8; level enters (BOTH, refitted alone) 0.6; nothing: the sessions differ 6.6; nothing: its size or interval 0.1; nothing: S7-W met 0.3; nothing: NOT SEPARATED 34.6 | arm: replaced 1.9 / retired 65.5 / reported 32.6
+     level 0.40 C                 carries: both enter 1.7; gain enters 0.1; level enters 84.2; level enters (BOTH, refitted alone) 0.6; nothing: the sessions differ 6.3; nothing: NOT SEPARATED 7.2 | arm: replaced 1.8 / retired 88.0 / reported 10.2
+     both: E154's two-term fit    carries: both enter 45.4; gain enters 46.7; gain enters (BOTH, refitted alone) 0.9; nothing: the sessions differ 5.1; nothing: S7-W met 0.5; nothing: NOT SEPARATED 1.5 | arm: replaced 92.9 / retired 0.9 / reported 6.2
+     both: E166's two-term fit    carries: both enter 11.7; level enters 72.8; level enters (BOTH, refitted alone) 1.5; nothing: the sessions differ 6.6; nothing: S7-W met 0.3; nothing: NOT SEPARATED 7.1 | arm: replaced 11.7 / retired 77.8 / reported 10.5
+     mixed: E154's fit, then E166's carries: gain enters 14.4; gain enters (BOTH, refitted alone) 0.5; level enters 1.1; nothing: the sessions differ 74.3; nothing: its size or interval 1.1; nothing: S7-W met 0.6; nothing: NOT SEPARATED 8.0 | arm: replaced 14.9 / retired 2.5 / reported 82.6
+
+5'. H_E in one aifoundry3 session at the exact plan (room 51.2 C): HM-E144 = |e/R| <= 1.5%; HM-HE = e(H_E) outside the 95% prediction interval of the two-term fit on the other four holds. Shares in %, the committed draws, with a hold-specific miss delta on H_E
+   none|delta +0.0 C                                              HM-E144 inside  98.9   HM-HE departs   4.9   [committed 98.5 / 4.8]
+   none|delta +0.3 C                                              HM-E144 inside  18.1   HM-HE departs  21.5   [committed 16.7 / 22.1]
+   none|delta +0.5 C                                              HM-E144 inside   0.0   HM-HE departs  46.3   [committed 0.0 / 47.4]
+   gain 2.35% (M10's aifoundry3 gamma)|delta +0.0 C               HM-E144 inside   9.1   HM-HE departs   5.4   [committed 9.6 / 5.4]
+   gain 2.35% (M10's aifoundry3 gamma)|delta +0.3 C               HM-E144 inside   0.0   HM-HE departs  23.3   [committed 0.0 / 24.0]
+   gain 2.35% (M10's aifoundry3 gamma)|delta +0.5 C               HM-E144 inside   0.0   HM-HE departs  46.5   [committed 0.0 / 47.5]
+   gain 3.20% (the x1.032 arm)|delta +0.0 C                       HM-E144 inside   0.2   HM-HE departs   5.2   [committed 0.2 / 5.3]
+   gain 3.20% (the x1.032 arm)|delta +0.3 C                       HM-E144 inside   0.0   HM-HE departs  21.9   [committed 0.0 / 22.5]
+   gain 3.20% (the x1.032 arm)|delta +0.5 C                       HM-E144 inside   0.0   HM-HE departs  45.7   [committed 0.0 / 46.7]
+   gain 4.52% (M10's aifoundry2 gamma)|delta +0.0 C               HM-E144 inside   0.0   HM-HE departs   4.6   [committed 0.0 / 4.6]
+   gain 4.52% (M10's aifoundry2 gamma)|delta +0.3 C               HM-E144 inside   0.0   HM-HE departs  22.8   [committed 0.0 / 23.2]
+   gain 4.52% (M10's aifoundry2 gamma)|delta +0.5 C               HM-E144 inside   0.0   HM-HE departs  44.8   [committed 0.0 / 45.9]
+   level 0.15 C|delta +0.0 C                                      HM-E144 inside  78.1   HM-HE departs   5.3   [committed 76.5 / 5.4]
+   level 0.15 C|delta +0.3 C                                      HM-E144 inside   0.5   HM-HE departs  22.9   [committed 0.4 / 23.5]
+   level 0.15 C|delta +0.5 C                                      HM-E144 inside   0.0   HM-HE departs  46.2   [committed 0.0 / 47.1]
+   level 0.27 C (E154's and E166's level alone)|delta +0.0 C      HM-E144 inside  29.1   HM-HE departs   5.6   [committed 27.3 / 5.6]
+   level 0.27 C (E154's and E166's level alone)|delta +0.3 C      HM-E144 inside   0.0   HM-HE departs  22.7   [committed 0.0 / 23.2]
+   level 0.27 C (E154's and E166's level alone)|delta +0.5 C      HM-E144 inside   0.0   HM-HE departs  46.4   [committed 0.0 / 47.7]
+   level 0.40 C (E166's two-term a)|delta +0.0 C                  HM-E144 inside   2.3   HM-HE departs   5.3   [committed 2.0 / 5.3]
+   level 0.40 C (E166's two-term a)|delta +0.3 C                  HM-E144 inside   0.0   HM-HE departs  22.2   [committed 0.0 / 22.8]
+   level 0.40 C (E166's two-term a)|delta +0.5 C                  HM-E144 inside   0.0   HM-HE departs  44.9   [committed 0.0 / 46.2]
+
+6. Precision (as committed): (c) HC1-B's half-width at N1's 31 tiles about 0.082 C (M10's held-out d -0.1123 C over 315 kinds); (d) I8P-B's at I1's 12 tiles about 0.0215 W. Both scale M10's pooled intervals: one session's effect scales with that session's own |h1 - 1| (or |k - 1|). Card 1's 16 session heat scales (heat_c1.session_heat_scales_all_rows), sorted: E128 0.629, E131 0.765, E106 0.817, E108 0.826, E137 0.873, E157 0.964, E142 0.990, E93 0.999, E104 1.004, E102 1.005, E88 1.016, E82 1.050, E164 1.060, E91 1.091, E94 1.096, E103 1.101
+
+7. Post hoc previews from M10's committed outputs (A1-1; not M11 readings):
+   HC1's bias clause on committed rows: card 1's held-out heat bias +0.0071 C without the session scale, -0.0026 C with it (rms 0.2855 -> 0.1731 C): the sign changes and the size falls, so 'does not change sign and grow in size' passes
+   HC1's two-thirds clause: heldout-m10.json holds no per-session d; card 1 has 16 sessions, 14 with at least 10 heat rows (448 rows)
+   I8P's preview: the ratio of M10's int8 term-a session scales (power.int8.session_scales_term_a_all_rows; all rows, each session's median over its int8 anchors), card-1 session / its aifoundry3 pair, with each session's anchor count: E82/E78 0.97161 / 0.97552 = 0.9960 (1, 1); E91/E86 0.97623 / 0.98940 = 0.9867 (1, 1); E131/E95 0.97554 / 0.98528 = 0.9901 (1, 1); E93/E121 0.98634 / 0.98058 = 1.0059 (1, 1); E108/E122 0.97921 / 0.98245 = 0.9967 (1, 1); E94/E123 0.98241 / 0.97405 = 1.0086 (1, 1); E142/E141 0.98336 / 0.98442 = 0.9989 (1, 1); E157/E153 0.98072 / 0.98403 = 0.9966 (2, 2); E164/E163 0.97559 / 0.99999 = 0.9756 (4, 3)
+   range 0.9756-1.0086, median 0.9966. Not k: k takes each anchor's ratio and each fold's D-hat.
+
+Checks: truth labels as committed: yes; noise as committed: yes; 0.2 s plan reproduces the committed plan_a3 at 49.5, 51.2, 52.0 and 53.0 C: yes; S7-W at sigma_c on the 0.2 s plan reproduces the committed gain and level rates: yes; HM-AG on the 0.2 s plan reproduces the committed gain and level shares: yes; the path's HM-LG verdicts equal the power table's (same draws): yes
+
+wrote tools/claims-v3/m11/design-power-heat-v2.json
