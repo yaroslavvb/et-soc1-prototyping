@@ -1,0 +1,180 @@
+
+== A. the dry listing with step 22 v2: every step exits 0, no ssh or rsync call
+dry listing: 0 step(s) exited non-zero
+calls: 0; v2 named 3 times
+-> PASS (A dry listing)
+
+== L1. a login link at the probe
+[s08_a3_preflight_k6] STOP: aifoundry3 printed a login link at the probe (lock file appended; link in RB_LINKS): nothing else was called
+<HH:MM:SS> aifoundry3 needs a check
+-> PASS (L1 exit 11 and one lock line)
+
+== L2. a probe that never answers (bound 2 s)
+[s08_a3_preflight_k6] STOP: aifoundry3 did not answer the probe within 15 s (rc 12): nothing else was called
+-> PASS (L2 exit 12)
+
+== L3. a read past its bound (2 s)
+[s08_a3_preflight_k6] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again
+-> PASS (L3 exit 13)
+
+== L4. a box whose preflight reads wrong (pool 8 short of one file)
+[s08_a3_preflight_k6] STOP: aifoundry3's preflight failed: blind8 preflight_e171 (a binary or file differs: a dated amendment first)
+-> PASS (L4 exit 16)
+
+== K12. s08: a remote read that exits non-zero
+[s08_a3_preflight_k6] STOP: aifoundry3's preflight failed: blind8 harness check_e171 preflight_e171 e171_common (a binary or file differs: a dated amendment first)
+-> PASS (K12 (rc 16, not 0))
+
+== C1. e171 on a good layout (the smoke and four passes, each checked to its end), scale-c's SCALE-C line read
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_v2_k6] E171 collected and scored: build/e171-out/2026-11-05-e171-blind8-aifoundry3 (the data directory is docs/reports/data/2026-11-05-e171-blind8-aifoundry3/)
+-> PASS (C1)
+SCALE-C E171: 6 anchors in s, every one C all PASS: the arm c_clean_scale is the primary
+
+== C2. e171: one pass with no C log
+CCSESSION-MISSING e171/p17111: no C log (c-log.jsonl), though the session must carry one
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_v2_k6] STOP: E171: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, 
+-> PASS (C2)
+
+== C3. e171: a check that skipped one session's log
+CCSESSION-UNCHECKED e171/p17111: the check judged no launch from c-log-p17111.jsonl
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_v2_k6] STOP: E171: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, 
+-> PASS (C3)
+
+== C4. e171: a check file written before the step began
+CCHECK-STALE build/e171-out/2026-11-05-e171-blind8-aifoundry3/ccheck/ccheck-all.json: written 2026-11-05 00:01:00 PST, before this step began: an earlier collection's file, not this one's
+CCSESSION-UNFINISHED e171-smoke/p17101: the check of C did not finish (CCHECK-STALE build/e171-out/2026-11-05-e171-blind8-aifoundry3/ccheck/ccheck-all.json)
+CCSESSION-UNFINISHED e171/p17110: the check of C did not finish (CCHECK-STALE build/e171-out/2026-11-05-e171-blind8-aifoundry3/ccheck/ccheck-all.json)
+-> PASS (C4)
+
+== C5. e171: a stop-path test with a launch record
+STOPTEST-LAUNCHED e171-stoptest/p17102: 1 launch file(s) with records and 0 C records (want none)
+[s22_collect_v2_k6] STOP: E171: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, 
+-> PASS (C5)
+
+== C6. e171: a desk path in what the collector wrote
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+HIT build/e171-out/2026-11-05-e171-blind8-aifoundry3/results.md: the forbidden path <scratch>/tree (1 times)
+HIT build/e171-out/2026-11-05-e171-blind8-aifoundry3/results.md: this user's home (1 times)
+-> PASS (C6)
+
+== K1. e171 control: smoke, three ok passes and one FAILED pass with launches, every log checked
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+ccsessions: 5 of 5 listed sessions checked to the end: FINISHED
+-> PASS (K1)
+
+== K2. e171: the smoke's C log missing
+CCSESSION-MISSING e171-smoke/p17101: no C log (c-log.jsonl), though the session must carry one
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_v2_k6] STOP: E171: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, 
+-> PASS (K2)
+
+== K3. e171: a FAILED pass with launches and no C log
+CCSESSION-MISSING e171/p17113: no C log (c-log.jsonl), though the session must carry one
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_v2_k6] STOP: E171: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, 
+-> PASS (K3)
+
+== K4. e171: a C log with no host record
+CCSESSION-NOHOST e171/p17111: its C log holds no host record (the wrapper did not run)
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_v2_k6] STOP: E171: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, 
+-> PASS (K4)
+
+== K5. e171: the check's --out never written
+CCHECK-MISSING build/e171-out/2026-11-05-e171-blind8-aifoundry3/ccheck/ccheck-all.json: no file (ccheck.py writes its --out only when the check runs to its end)
+CCSESSION-UNFINISHED e171-smoke/p17101: the check of C did not finish (CCHECK-MISSING build/e171-out/2026-11-05-e171-blind8-aifoundry3/ccheck/ccheck-all.json)
+CCSESSION-UNFINISHED e171/p17110: the check of C did not finish (CCHECK-MISSING build/e171-out/2026-11-05-e171-blind8-aifoundry3/ccheck/ccheck-all.json)
+-> PASS (K5)
+
+== K6. e171: one launch of one log not judged
+CCSESSION-SHORT e171/p17112: the check judged 2 launches of the 3 its log holds
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_v2_k6] STOP: E171: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, 
+-> PASS (K6)
+
+== K7. e171: the collector's success line missing, the C gate clean
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_v2_k6] STOP: score_p8_600 did not write results.md: read the collector's output above
+-> PASS (K7)
+
+== K8. e172 control (pull through the stand-in rsync), scale-c's SCALE-C line read
+STOPTEST-OK e172-stoptest/p17202: no launch record and no C record
+[s22_collect_v2_k6] E172 collected and scored: build/e172-out/2026-11-05-e172-blind8-card1 (the data directory is docs/reports/data/2026-11-05-e172-blind8-card1/)
+-> PASS (K8)
+SCALE-C E172: 6 anchors in s, every one C all PASS: the arm c_clean_scale is the primary
+
+== K9. e172: one pass with no C log
+CCSESSION-MISSING e172/p17211: no C log (c-log.jsonl), though the session must carry one
+STOPTEST-OK e172-stoptest/p17202: no launch record and no C record
+[s22_collect_v2_k6] STOP: E172: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, 
+-> PASS (K9)
+
+== K10. e172: a stop-path test with a launch record
+STOPTEST-LAUNCHED e172-stoptest/p17202: 1 launch file(s) with records and 0 C records (want none)
+[s22_collect_v2_k6] STOP: E172: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, 
+-> PASS (K10)
+
+== K11. e172: one directory missing on the box (pull's rsync fails)
+rsync: [sender] change_dir "<scratch>/box/aifoundry1/nekko/build/claims-v3/aifoundry1-c1/e172-smoke" failed: No such file or directory (2)
+rsync e172-smoke failed
+[s22_collect_v2_k6] STOP: pull_e172.sh did not copy everything: run this step again
+-> PASS (K11 (stopped before any collection))
+
+== S1. e171: scale-c refuses (6)
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_v2_k6] STOP: E171: score_p8_600_v2.py scale-c exited 6 (its REFUSED line above): the scale anchors' C status is not recorded, so nothing is collected. Read it, remove what the collector wrote, then collect again
+-> PASS (S1)
+
+== S2. e172: scale-c refuses (6)
+STOPTEST-OK e172-stoptest/p17202: no launch record and no C record
+[s22_collect_v2_k6] STOP: E172: score_p8_600_v2.py scale-c exited 6 (its REFUSED line above): the scale anchors' C status is not recorded, so nothing is collected. Read it, remove what the collector wrote, then collect again
+-> PASS (S2)
+
+== S3. e171: scale-c exits 0 with no SCALE-C line
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+[s22_collect_v2_k6] STOP: E171: scale-c printed no SCALE-C line: read its output above
+-> PASS (S3)
+
+== S4. e171: a desk path in scale-c.md
+STOPTEST-OK e171-stoptest/p17102: no launch record and no C record
+HIT build/e171-out/2026-11-05-e171-blind8-aifoundry3/scale-c.md: the forbidden path <scratch>/tree (1 times)
+HIT build/e171-out/2026-11-05-e171-blind8-aifoundry3/scale-c.md: this user's home (1 times)
+-> PASS (S4)
+
+== S5. a desk-test stand-in set without RB_DESKTEST=1
+[s22_collect_v2_k6] STOP: K6_COLLECT_E171 is a desk-test stand-in and is read only with RB_DESKTEST=1: unset it (the card day never sets it)
+-> PASS (S5 (refused before any call))
+
+== KA1. ka: the pooled read and the arm's beside
+[s22_collect_v2_k6] P8-KA pooled read: PASS; beside, the c_clean_scale arm: PASS
+-> PASS (KA1)
+
+== KA2. ka-pooled refuses the pair (6)
+[s22_collect_v2_k6] STOP: ka-pooled refused the pair (exit 6): they are not E171's and E172's own scored sessions (its REFUSED line above); nothing is pooled
+-> PASS (KA2)
+
+== KA3. ka-pooled exits 9
+[s22_collect_v2_k6] STOP: ka-pooled exited 9
+-> PASS (KA3)
+
+== KA4. no scale-c.json beside E172's scored.json
+[s22_collect_v2_k6] STOP: no scale-c.json beside a scored.json: collect both with s22_collect_k6_v2.sh (v1's s22_collect_k6.sh never wrote it)
+-> PASS (KA4)
+-> PASS (KA4 (ka-pooled never called))
+
+== KA5. the real score_p8_600_v2.py, given E171's scored file in E172's place
+REFUSED (exit 6): ka-pooled reads only E171's and E172's own scored sessions (dated note 1, N1): build/e171-out/2026-11-05-e171-blind8-aifoundry3/scored.json (the E171 argument): predictions None, not tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry3.j
+[s22_collect_v2_k6] STOP: ka-pooled refused the pair (exit 6): they are not E171's and E172's own scored sessions (its REFUSED line above); nothing is pooled
+-> PASS (KA5 (the real v2's refusal reaches the gate))
+
+== O1. ours_live's pattern names E171's and E172's processes, and E173's and E174's queues
+named: 10 of 10; an unrelated command matched: 0
+-> PASS (O1 ours_live's names)
+
+stand-in calls: 81 (to the stand-in boxes only; refused hosts: 0)
+  25 aifoundry1
+  56 aifoundry3
+SELFTEST-RUNBOOK-K6-V2 PASS: 35 of 35 checks
