@@ -1,0 +1,226 @@
+E175's box steps, dry listing (RB_DRY=1; nothing below is run), 2026-11-05 13:10 PST, the window 2026-11-05 21:00-22:00 (E175.md's default)
+
+################ step_e175_v3.sh look
+=== [e175_look_q142kg3] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- read on aifoundry2 (E175 step 1: et-who, who, uptime, the identity): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 58 lines: printed once at the top of the listing>
+    | date '+%F %T %Z'; uptime
+    | boot=$(date -d "$(uptime -s)" +%s); fw=$(date -d '2026-10-27 13:56:26 PDT' +%s)
+    | if [ "$boot" -lt "$fw" ]; then echo "IDENTITY-OK: the host booted $(uptime -s), before E69's firmware read of 2026-10-27 13:56:26 PDT (BL2 0.22.0 by continuity)"
+    | else echo "IDENTITY-STOP: the host booted $(uptime -s), after E69's firmware read of 2026-10-27 13:56:26 PDT: BL2 0.22.0 is not carried"; fi
+    | hold_read
+    | echo "ours: $(ours_live) card sessions of ours; $(jobs_live) dry jobs of the runbook"
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD)"
+(exit 0)
+
+################ step_e175_v3.sh tree
+=== [e175_tree_q142kg3] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- copy on aifoundry2 (git pull --ff-only; ancestry of c50ff493; tools/claims-v3 clean): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 58 lines: printed once at the top of the listing>
+    | GIT_TERMINAL_PROMPT=0 git pull --ff-only; echo "pull rc=$?"
+    | git merge-base --is-ancestor c50ff493 HEAD; echo "ancestry rc=$?"
+    | echo "porcelain lines: $(git status --porcelain -- tools/claims-v3 | wc -l)"
+    | git log -1 --format='HEAD %h %ad' --date=format:'%F %T %z'
+--- read on aifoundry2 (E175: harness and binaries, tiles, the pool, the device-command preflight, the run list): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 58 lines: printed once at the top of the listing>
+    | python3 -B tools/claims-v3/e175/check_e175.py | tail -n 3
+    | python3 -B tools/claims-v3/e175/e175_common.py | tail -n 3
+    | echo "pool OK: $(cd tools/claims-v3/e175/pool && sha256sum -c SHA256SUMS 2>&1 | grep -c ': OK$')"
+    | bash tools/claims-v3/e175/preflight_e175.sh > build/e175-preflight.txt 2>&1; echo "preflight rc=$? $(grep -m1 '^dmcmd_audit:' build/e175-preflight.txt)"
+    | python3 -B tools/claims-v3/e175/run_e175.py --protocol tools/claims-v3/e175/protocol.json --out build/e175/list --dry --list > build/e175-list.txt 2>&1; echo "list rc=$? ($(grep -c 'BURST-' build/e175-list.txt) BURST runs listed)"
+(exit 0)
+
+################ step_e175_v3.sh dry start
+=== [e175_dry_q142kg3] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (start the dry pass a2-dry-e175, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 58 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a2-dry-e175
+    | MAXJ=1
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/claude/et-soc1-prototyping || exit 1
+    | echo "$$" > build/q141k/jobs/a2-dry-e175.pid
+    | echo "JOB-BEGIN a2-dry-e175 $(date '+%F %T %Z')"
+    | (
+    | mkdir -p build/e175
+    | [ -e build/e175/dry ] && mv build/e175/dry build/e175/dry.before-$(date +%s)
+    | now=$(date +%s)
+    | printf 'SLOT E175: start %s (aifoundry2, dry) end %s \n' "$now" "$((now + 2400))" > ~/claude/work/q143-a2-e175-dry-slot.txt
+    | python3 tools/claims-v3/e175/queue_e175.py --dry --slots ~/claude/work/q143-a2-e175-dry-slot.txt --runs build/e175/dry \
+    |   --protocol tools/claims-v3/e175/protocol-dry.json --stoptest-board tools/claims-v3/e175/protocol-stoptest-board-dry.json \
+    |   --stoptest-die tools/claims-v3/e175/protocol-stoptest-die-dry.json --cap 12 > build/e175/dry.out 2>&1 < /dev/null
+    | r=$?
+    | echo "E175 dry queue rc=$r"
+    | grep -hE '"kind": "(smoke_check|stoptest_check|queue_halt|stop|s1_end|queue_end)"' build/e175/dry/queue.jsonl | cut -c1-260
+    | [ "$r" -eq 0 ] && grep -q '"kind": "smoke_check".*"bad": null' build/e175/dry/queue.jsonl &&
+    |   [ "$(grep -c '"kind": "stoptest_check".*"bad": null' build/e175/dry/queue.jsonl)" -eq 2 ] &&
+    |   grep -q '"kind": "queue_end"' build/e175/dry/queue.jsonl
+    | )
+    | rc=$?
+    | echo "JOB-END a2-dry-e175 rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a2-dry-e175.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+(exit 0)
+
+################ step_e175_v3.sh dry wait
+=== [e175_dry_q142kg3] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- wait on aifoundry2 (one bounded wait on the dry pass a2-dry-e175): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 58 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a2-dry-e175
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | fresh "$J.sh" || { echo "JOB-UNKNOWN ${J##*/}: not started today (its script is from $(TZ=America/Los_Angeles date -r "$J.sh" +%F)): start it again"; exit 3; }
+    | t=0; lost=0
+    | while [ ! -e "$J.rc" ] && [ "$SECONDS" -lt "$LIM" ]; do      # v3: the box's clock bounds the loop, not the sum of its sleeps
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then
+    |     # the grace: the job writes its pid as its first line and its exit status as its last; read both again before calling it lost
+    |     sleep 2
+    |     [ -e "$J.rc" ] && break
+    |     if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then lost=1; break; fi
+    |     continue
+    |   fi
+    |   sleep 10
+    | done
+    | t=$SECONDS
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"
+    | elif [ "$lost" -eq 1 ]; then echo "JOB-LOST ${J##*/}: no process (pid $(cat "$J.pid" 2>/dev/null || echo none)) and no exit status"
+    | else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+(exit 0)
+
+################ step_e175_v3.sh launch
+=== [e175_launch_q142kg3] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 21:00 PST)
+--- gate: now + 48 min <= the round's last end (2026-11-05 22:00 PST)
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (E175's slot and detached queue (--cap 42, full)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 58 lines: printed once at the top of the listing>
+    | SLOT=2880; CAP=42; PROTO=tools/claims-v3/e175/protocol.json; AFTER=600
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | case "$BOX" in   # the firmware identity by continuity, never the firmware-revisions query (look_e164.sh's E82 rule; s14's E69 rule)
+    |   aifoundry1) FWREAD='2026-10-31 13:45:24 PDT'; FWWHO="E82's firmware read" ;;
+    |   aifoundry2) FWREAD='2026-10-27 13:56:26 PDT'; FWWHO="E69's firmware read" ;;
+    |   *) FWREAD="" ;;
+    | esac
+    | if [ -n "$FWREAD" ]; then
+    |   BOOTED=$(uptime -s 2>/dev/null); boot=$(date -d "$BOOTED" +%s 2>/dev/null); fw=$(date -d "$FWREAD" +%s)
+    |   if [ -z "$BOOTED" ] || [ -z "$boot" ] || [ "$boot" -ge "$fw" ]; then
+    |     echo "IDENTITY-STOP: $BOX booted '$BOOTED', not before $FWWHO of $FWREAD: its firmware build is not carried by continuity: nothing launched"; exit 3
+    |   fi
+    |   echo "identity: $BOX booted $BOOTED, before $FWWHO of $FWREAD: ok"
+    | fi
+    | job_ok_today a2-dry-e175 || { echo "REFUSED: E175's dry pass has not ended rc 0 today (step_e175_v3.sh dry start, then dry wait)"; exit 3; }
+    | # E175.md, The window: after E173, never beside it: E173's queue ended (or halted) at least AFTER s before, or it never started today
+    | if pgrep -u "$(id -u)" -f 'queue_e173\.py' > /dev/null; then echo "REFUSED: E173's queue still runs on this box (E175 runs after it, never beside it)"; exit 3; fi
+    | E3=build/e173/runs/status.json
+    | if fresh "$E3"; then
+    |   grep -qE '"state": "(ended|halted)"' "$E3" || { echo "REFUSED: E173's status.json (written today) does not read ended or halted"; exit 3; }
+    |   age=$(( $(date +%s) - $(stat -c %Y "$E3") ))
+    |   [ "$age" -ge "$AFTER" ] || { echo "REFUSED: E173's queue ended $age s ago; E175 waits $AFTER s after it (E175.md, The window)"; exit 3; }
+    |   echo "after E173: its queue ended $age s ago (at least $AFTER s): ok"
+    | else
+    |   echo "after E173: no E173 queue record written today on this box: ok"
+    | fi
+    | [ -e build/e175/runs/queue.jsonl ] && { echo "REFUSED: build/e175/runs already holds a queue"; exit 3; }
+    | mkdir -p build/e175 ~/claude/work
+    | now=$(date +%s)
+    | printf 'SLOT E175: start %s (aifoundry2) end %s \n' "$now" "$((now + SLOT))" > ~/claude/work/q143-a2-e175-slot.txt
+    | setsid nohup python3 tools/claims-v3/e175/queue_e175.py --slots ~/claude/work/q143-a2-e175-slot.txt --runs build/e175/runs --cap "$CAP" --protocol "$PROTO" > build/e175/queue.out 2>&1 < /dev/null &
+    | sleep 3
+    | echo "LAUNCHED e175 $(date '+%F %T %Z') (--cap $CAP, slot $SLOT s, $PROTO)"
+    | cat ~/claude/work/q143-a2-e175-slot.txt; tail -n 3 build/e175/queue.out | cut -c1-300
+(exit 0)
+
+################ step_e175_v3.sh launch subset
+=== [e175_launch_q142kg3] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-05 21:00 PST)
+--- gate: now + 31 min <= the round's last end (2026-11-05 22:00 PST)
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- launch on aifoundry2 (E175's slot and detached queue (--cap 25, subset)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 58 lines: printed once at the top of the listing>
+    | SLOT=1860; CAP=25; PROTO=tools/claims-v3/e175/protocol-subset.json; AFTER=600
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | case "$BOX" in   # the firmware identity by continuity, never the firmware-revisions query (look_e164.sh's E82 rule; s14's E69 rule)
+    |   aifoundry1) FWREAD='2026-10-31 13:45:24 PDT'; FWWHO="E82's firmware read" ;;
+    |   aifoundry2) FWREAD='2026-10-27 13:56:26 PDT'; FWWHO="E69's firmware read" ;;
+    |   *) FWREAD="" ;;
+    | esac
+    | if [ -n "$FWREAD" ]; then
+    |   BOOTED=$(uptime -s 2>/dev/null); boot=$(date -d "$BOOTED" +%s 2>/dev/null); fw=$(date -d "$FWREAD" +%s)
+    |   if [ -z "$BOOTED" ] || [ -z "$boot" ] || [ "$boot" -ge "$fw" ]; then
+    |     echo "IDENTITY-STOP: $BOX booted '$BOOTED', not before $FWWHO of $FWREAD: its firmware build is not carried by continuity: nothing launched"; exit 3
+    |   fi
+    |   echo "identity: $BOX booted $BOOTED, before $FWWHO of $FWREAD: ok"
+    | fi
+    | job_ok_today a2-dry-e175 || { echo "REFUSED: E175's dry pass has not ended rc 0 today (step_e175_v3.sh dry start, then dry wait)"; exit 3; }
+    | # E175.md, The window: after E173, never beside it: E173's queue ended (or halted) at least AFTER s before, or it never started today
+    | if pgrep -u "$(id -u)" -f 'queue_e173\.py' > /dev/null; then echo "REFUSED: E173's queue still runs on this box (E175 runs after it, never beside it)"; exit 3; fi
+    | E3=build/e173/runs/status.json
+    | if fresh "$E3"; then
+    |   grep -qE '"state": "(ended|halted)"' "$E3" || { echo "REFUSED: E173's status.json (written today) does not read ended or halted"; exit 3; }
+    |   age=$(( $(date +%s) - $(stat -c %Y "$E3") ))
+    |   [ "$age" -ge "$AFTER" ] || { echo "REFUSED: E173's queue ended $age s ago; E175 waits $AFTER s after it (E175.md, The window)"; exit 3; }
+    |   echo "after E173: its queue ended $age s ago (at least $AFTER s): ok"
+    | else
+    |   echo "after E173: no E173 queue record written today on this box: ok"
+    | fi
+    | [ -e build/e175/runs/queue.jsonl ] && { echo "REFUSED: build/e175/runs already holds a queue"; exit 3; }
+    | mkdir -p build/e175 ~/claude/work
+    | now=$(date +%s)
+    | printf 'SLOT E175: start %s (aifoundry2) end %s \n' "$now" "$((now + SLOT))" > ~/claude/work/q143-a2-e175-slot.txt
+    | setsid nohup python3 tools/claims-v3/e175/queue_e175.py --slots ~/claude/work/q143-a2-e175-slot.txt --runs build/e175/runs --cap "$CAP" --protocol "$PROTO" > build/e175/queue.out 2>&1 < /dev/null &
+    | sleep 3
+    | echo "LAUNCHED e175 $(date '+%F %T %Z') (--cap $CAP, slot $SLOT s, $PROTO)"
+    | cat ~/claude/work/q143-a2-e175-slot.txt; tail -n 3 build/e175/queue.out | cut -c1-300
+(exit 0)
+
+################ step_e175_v3.sh wait
+=== [e175_wait_q142kg3] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- wait on aifoundry2 (one bounded wait on e175): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry2, 58 lines: printed once at the top of the listing>
+    | RUN=e175; LIM=520
+    | R=build/$RUN/runs
+    | fin() { fresh "$R/status.json" && grep -qE '"state": "(ended|halted)"' "$R/status.json" 2>/dev/null; }
+    | if ! fresh "$R/status.json" && ! pgrep -u "$(id -u)" -f "queue_$RUN\.py" > /dev/null; then
+    |   echo "RUN-UNKNOWN $RUN: no queue process and no status.json written today"; exit 3
+    | fi
+    | while ! fin && [ "$SECONDS" -lt "$LIM" ]; do
+    |   pgrep -u "$(id -u)" -f "queue_$RUN\.py" > /dev/null || { sleep 2; fin || { echo "RUN-GONE $RUN: no queue process and no end in status.json"; break; }; }
+    |   sleep 15
+    | done
+    | t=$SECONDS
+    | date '+%F %T %Z'; cat "$R/status.json" 2>/dev/null; echo
+    | [ -e "$R/QUEUE-HALT" ] && { echo "QUEUE-HALT:"; cut -c1-300 "$R/QUEUE-HALT"; }
+    | grep -hE '"kind": "(smoke_check|stoptest_check|queue_halt|give_up|stop|s[1-6]_end|queue_end)"' "$R/queue.jsonl" 2>/dev/null | cut -c1-300 | tail -n 14
+    | tail -n 4 build/$RUN/queue.out 2>/dev/null | cut -c1-300
+    | if fin; then echo "RUN-ENDED $RUN"; else echo "RUN-RUNNING $RUN after $t s"; fi
+    | if [ -e "$R/QUEUE-HALT" ] || grep -qE '"kind": "give_up"' "$R/queue.jsonl" 2>/dev/null; then echo "GATE-STOPPED $RUN"; fi
+(exit 0)
+
+################ step_e175_v3.sh collect
+=== [e175_collect_q142kg3] dry listing: nothing below is run
+--- probe aifoundry2, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry2 true
+--- desk, run on the Intel (collect_e175_bounded.sh (its own probe, every remote call under 600 s, the C-log list, the registered scorer)): bash tools/claims-v3/e175/collect_e175_bounded.sh <RB_OUT>/e175-raw docs/reports/data/2026-11-05-e175-governed-aifoundry2
+--- read, run on the Intel (E175: the sessions that must carry a C log (cclist_q142kg_v3.py)): /usr/bin/python3 -B <lab clone>/tools/claims-v3/q142kg-runbook/cclist_q142kg_v3.py docs/reports/data/2026-11-05-e175-governed-aifoundry2/aifoundry2 docs/reports/data/2026-11-05-e175-governed-aifoundry2
+--- read, run on the Intel (E175: every listed check of C finished (v3.1's ccdone_q142s.py)): /usr/bin/python3 -B <lab clone>/tools/claims-v3/q141k-runbook/v3.1/ccdone_q142s.py --since 1793913024 'docs/reports/data/2026-11-05-e175-governed-aifoundry2/ccheck-<each listed session>.json'
+--- gate: no desk path (the lab clone's, RB_OUT's, a Mac home, a scratch root) in docs/reports/data/2026-11-05-e175-governed-aifoundry2, and each of them there
+[e175_collect_q142kg3] (dry listing; a real run would say:) E175 collected and scored (the C-log gate with v3's list): docs/reports/data/2026-11-05-e175-governed-aifoundry2
+(exit 0)
+
+stand-in ssh and rsync calls during the listing: 0

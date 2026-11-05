@@ -1,0 +1,48 @@
+frozen-sha256-e175.json: 33 files, every one matched against the committed list that names it (25 listed; the others committed clean and recorded with their last commit)
+predictions-e175.json sha256 0cbb3878df390c1308aa070cb4990404b06438e61123fef4c8c842a210938cdf
+recheck: no session read reproduces the frozen M10 and M9 blocks on 27 tiles, 1404 fields, 0 differ
+27 tiles; run 27 pool tiles + 2 replicates; scored 24 (governed 16, pinned 8)
+strata: {"1": 4, "2": 4, "3": 4, "4": 4}
+order: 145 bursts, 5 passes of 29, each opening with the zeros anchors; seed 175; dry twin 22 runs (passes [1, 2])
+lines equal design-power-e175.json's at the same n: {'E175-A2-F1': True, 'E175-A2-W1': True, 'E175-A2-F2': True, 'E175-A2-W2': True, 'E175-A2-H1': True}
+  _sets: {"scored": 24, "governed": 16, "pinned": 8, "strata": {"1": 4, "2": 4, "3": 4, "4": 4}}
+  E175-A2-G   n 16 min 8 scored_at_planned_n True line rms <= 4.0 MHz AND |mean| <= 2.0 MHz
+  E175-A2-Bg  n 16 min 8 scored_at_planned_n True line |mean| <= 0.5 W
+  E175-A2-Bp  n 8 min 8 scored_at_planned_n True line |mean| <= 0.5 W AND rms <= 1.0 W
+  E175-A2-R2  n None min None scored_at_planned_n None 
+  E175-A2-F1  n 16 min 8 scored_at_planned_n True range [2.6755, 6.1483]
+  E175-A2-F2  n 8 min 8 scored_at_planned_n True range [0.0, 5.2876]
+  E175-A2-W1  n 16 min 8 scored_at_planned_n True range [0.4608, 1.0931]
+  E175-A2-W2  n 8 min 8 scored_at_planned_n True range [0.3698, 1.2873]
+  E175-A2-M1  n 24 min 10 scored_at_planned_n True line none before the data (paired)
+  E175-A2-H1  n 24 min 10 scored_at_planned_n True range [0.4932, 0.8688]
+models differ on the kept tiles (information for M1): {"board_w_median_abs": 0.01100000000000989, "board_w_max_abs": 0.15100000000000335, "mhz_max_abs": 1.3600000000000136, "board_w_over_0p2": 0, "n": 24}
+admission: highest estimates [(81.527, 'e5-fp32.e5c09_uniform_t6_dad136'), (80.52, 'k-fp16-randn'), (80.185, 'e5-fp16.e5c18_lognorm_t2_38ac9e'), (80.162, 'e5-fp32.e5c05_expo_t8_06469f'), (78.612, 'e5-fp32.e5c10_ar_i_t10_adc630')]; limit 82.0 W, lock 82.0 W; stops {'abs_stop_c': 76, 'board_cap_w': 85, 'cap_consecutive': 3}
+card time: {"e165_spacing_s": {"governed": {"n": 40, "mean_s": 16.22}, "pinned": {"n": 117, "mean_s": 13.53}}, "per_pass": {"governed_bursts": 17, "pinned_bursts": 12, "s": 438.1}, "e165_before_s1_min": 0.97, "e175_bursts": 145, "e175_session_min": 36.5, "e175_card_min": 37.5, "session_cap_min": 42, "slot_min": 48, "subset_passes": [1, 2, 3], "subset_bursts": 87, "subset_session_min": 21.9, "subset_cap_min": 25, "subset_slot_min": 31, "source": "docs/reports/data/2026-11-04-e165-blind7-aifoundry2/aifoundry2/s1/launches.jsonl.gz (one run's first launch to the next run's, by the run's measured group) and docs/reports/data/2026-11-04-e165-blind7-aifoundry2/aifoundry2/queue.jsonl"}
+  governed S1 fp16 fp16.e5c18_lognorm_t2_38ac9e             M10  734.65 MHz  67.119 W rise  6.39; M9  733.47 MHz  67.117 W; est  80.19 W
+  governed S1 fp32 fp32.e5c05_expo_t8_06469f                M10  734.57 MHz  67.119 W rise  6.39; M9  734.28 MHz  67.118 W; est  80.16 W
+  governed S1 fp32 fp32.e5c09_uniform_t6_dad136             M10  727.89 MHz  67.108 W rise  6.39; M9  727.53 MHz  67.107 W; est  81.53 W
+  governed S1 fp32 fp32.e5c10_ar_i_t10_adc630               M10  742.75 MHz  67.122 W rise  6.39; M9  742.25 MHz  67.122 W; est  78.61 W
+  governed S2 fp16 fp16.e5c03_ar_k_t4_5b8e8e                M10  756.33 MHz  67.103 W rise  6.39; M9  755.58 MHz  67.106 W; est  76.03 W
+  governed S2 fp16 fp16.e5c06_rowscale_t5_6d624f            M10  750.78 MHz  67.118 W rise  6.39; M9  749.42 MHz  67.120 W; est  77.15 W
+  governed S2 fp16 fp16.e5c17_bimodal_t5_a9b319             M10  759.28 MHz  67.087 W rise  6.38; M9  757.98 MHz  67.095 W; est  75.61 W
+  governed S2 fp16 fp16.e5c24_grid_t1_cdcbf7                M10  756.69 MHz  67.102 W rise  6.39; M9  755.33 MHz  67.107 W; est  76.08 W
+  governed S3 fp16 fp16.e5c08_ar_k_t6_6dd6a1                M10  763.90 MHz  67.044 W rise  6.38; M9  763.20 MHz  67.052 W; est  74.71 W
+  governed S3 fp16 fp16.e5c21_bimodal_t5_b1c552             M10  764.15 MHz  67.040 W rise  6.38; M9  763.06 MHz  67.053 W; est  74.73 W
+  governed S3 fp32 fp32.e5c07_expo_t16_2700b2               M10  766.66 MHz  67.002 W rise  6.37; M9  766.00 MHz  67.013 W; est  74.37 W
+  governed S3 fp32 fp32.e5c22_ar_i_t15_f64ec4               M10  763.33 MHz  67.051 W rise  6.38; M9  762.27 MHz  67.062 W; est  75.01 W
+  governed S4 fp16 fp16.e5c02_ar_k_t10_5a2fd3               M10  793.84 MHz  64.271 W rise  5.99; M9  793.64 MHz  64.336 W; est  68.67 W
+  governed S4 fp32 fp32.e5c11_grid_t21_b0b91b               M10  788.83 MHz  65.443 W rise  6.15; M9  788.58 MHz  65.482 W; est  70.19 W
+  governed S4 fp32 fp32.e5c13_bimodal_t22_48a100            M10  793.69 MHz  64.321 W rise  6.00; M9  793.67 MHz  64.326 W; est  68.81 W
+  governed S4 fp32 fp32.e5c15_mixture_t21_2c53f6            M10  783.27 MHz  66.177 W rise  6.26; M9  782.80 MHz  66.224 W; est  71.41 W
+  pinned   S- fp16 fp16.e5c04_sparse_t4_3d3b51              M10  800.00 MHz  54.183 W rise  4.58; M9  800.00 MHz  54.334 W; est  58.88 W
+  pinned   S- fp16 fp16.e5c16_sparse_t1_9f47b2              M10  800.00 MHz  54.456 W rise  4.62; M9  800.00 MHz  54.569 W; est  59.12 W
+  pinned   S- fp16 fp16.e5c32_sparse_t2_42cc31              M10  800.00 MHz  54.240 W rise  4.58; M9  800.00 MHz  54.369 W; est  58.92 W
+  pinned   S- fp32 fp32.e5c12_tdist_t23_f74165              M10  796.78 MHz  63.067 W rise  5.82; M9  796.69 MHz  63.117 W; est  67.59 W
+  pinned   S- fp32 fp32.e5c14_ar_k_t22_a444f5               M10  798.16 MHz  62.135 W rise  5.69; M9  798.16 MHz  62.130 W; est  66.67 W
+  pinned   S- fp32 fp32.e5c29_sparse_t19_93b1d2             M10  799.97 MHz  57.783 W rise  5.08; M9  799.97 MHz  57.892 W; est  62.57 W
+  pinned   S- fp32 fp32.e5c50_ar_k_t22_16d78b               M10  795.86 MHz  63.522 W rise  5.88; M9  795.82 MHz  63.539 W; est  68.00 W
+  pinned   S- fp32 fp32.e5c65_sparse_t5_254f07              M10  800.00 MHz  46.025 W rise  3.44; M9  800.00 MHz  46.059 W; est  50.75 W
+  zeros    S- fp16 fp16.anchor7_zeros                       M10  800.00 MHz  35.289 W rise  1.93; M9  800.00 MHz  35.289 W; est  39.84 W
+  zeros    S- fp32 fp32.anchor7_zeros                       M10  800.00 MHz  35.360 W rise  1.94; M9  800.00 MHz  35.360 W; est  40.06 W
+  zeros    S- int8 int8.anchor7_zeros                       M10  800.00 MHz  36.660 W rise  2.12; M9  800.00 MHz  36.660 W; est  41.20 W

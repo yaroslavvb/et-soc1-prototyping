@@ -1,0 +1,41 @@
+E175 dry pass on the Intel (Python 3.13.11): queue rc 0 in 166 s (the toy card; no device, no lock, no ssh)
+  session_start      {"name": "smoke"}
+  session_end        {"name": "smoke", "rc": 0, "end": {"exit": 0, "reason": "done", "card_min": 0.4}}
+  smoke_ccheck       {"skipped": "dry: the toy card runs no host and writes no C log"}
+  smoke_check        {"rc": 0, "bad": null}
+  session_start      {"name": "stoptest-board"}
+  session_end        {"name": "stoptest-board", "rc": 4, "end": {"exit": 4, "reason": "safety:board 32.1 W > 30 W on 3 samples", "card_min": 0.0}}
+  stoptest_detail    {"name": "stoptest-board", "stop": "board", "trip_after_line_ms": 14, "launch_end_after_trip_ms": 219, "lines": 18}
+  stoptest_check     {"name": "stoptest-board", "rc": 4, "bad": null}
+  session_start      {"name": "stoptest-die"}
+  session_end        {"name": "stoptest-die", "rc": 4, "end": {"exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}}
+  stoptest_detail    {"name": "stoptest-die", "stop": "die", "trip_after_line_ms": 51, "lines": 13}
+  stoptest_check     {"name": "stoptest-die", "rc": 4, "bad": null}
+  session_start      {"name": "s1"}
+  session_end        {"name": "s1", "rc": 0, "end": {"exit": 0, "reason": "done", "card_min": 2.2}}
+  s1_end             {"rc": 0}
+  queue_end          {}
+  s1: 22 runs recorded; the watcher: tools/claims-v3/hpl/watcher_q142s.py 3f37482d48c7 installed True
+score_e175.py on the dry s1: rc 0
+  E175 scoring: 22 burst runs, 22 complete, 22 counted, passes [1, 2]; dry True; protocols {'s1': 'protocol-dry.json'}
+    C-log coverage: required [], missing []
+    E175-C: {"verdict": "NOT SCORED (dry: the toy card writes no C log)"}
+    tiles C excludes: []
+    tiles scored 6 (governed 3, pinned 3); left out ['fp16.e5c08_ar_k_t6_6dd6a1', 'fp16.e5c17_bimodal_t5_a9b319', 'fp16.e5c18_lognorm_t2_38ac9e', 'fp16.e5c21_bimodal_t5_b1c552', 'fp16.e5c24_grid_t1_cdcbf7', 'fp32.e5c05_expo_t8_06469f', 'fp32.e5c07_expo_t16_2700b2', 'fp32.e5c09_uniform_t6_dad136', 'fp32.e5c10_ar_i_t10_adc630', 'fp32.e5c11_grid_t21_b0b91b', 'fp32.e5c12_tdist_t23_f74165', 'fp32.e5c13_b
+    anchors: {"fp32": [{"burst_w": 32.26, "burst_mhz": 800, "die_start": 51}, {"burst_w": 33.34, "burst_mhz": 800, "die_start": 55}], "fp16": [{"burst_w": 32.71, "burst_mhz": 800, "die_start": 53}, {"burst_w": 33.14, "burst_mhz": 800, "die_start": 54}], "int8": [{"burst_w": 33.82, "burst_mhz": 800, "die_start": 
+    E175-A2-G  {"rule": "E175-A2-G", "n": 3, "minimum": 8, "line": "rms <= 4.0 MHz AND |mean| <= 2.0 MHz", "rms": 45.5654, "mean": -35.3433, "verdict": "NOT SCORED (n 3 < 8)"}
+    E175-A2-Bg {"rule": "E175-A2-Bg", "n": 3, "minimum": 8, "line": "|mean| <= 0.5 W", "rms": 7.1559, "mean": -5.8273, "verdict": "NOT SCORED (n 3 < 8)"}
+    E175-A2-Bp {"rule": "E175-A2-Bp", "n": 3, "minimum": 8, "line": "|mean| <= 0.5 W AND rms <= 1.0 W", "rms": 3.1757, "mean": -2.5587, "verdict": "NOT SCORED (n 3 < 8)"}
+    E175-A2-R2 {"rule": "E175-A2-R2", "components": {"E175-A2-G": "NOT SCORED (n 3 < 8)", "E175-A2-Bg": "NOT SCORED (n 3 < 8)", "E175-A2-Bp": "NOT SCORED (n 3 < 8)"}, "verdict": "NOT SCORED", "form": "PASS if G, Bg and Bp all PASS; FAIL if any FAILs; else NOT SCORED"}
+    E175-A2-F1 {"rule": "E175-A2-F1", "n": 3, "minimum": 8, "stat": "rms", "seed": 80550, "ref_n": 36, "ref_rms": 4.4983, "verdict": "NOT SCORED (n 3 < 8)", "rms": 45.5654, "mean": -35.3433}
+    E175-A2-F2 {"rule": "E175-A2-F2", "n": 3, "minimum": 8, "stat": "rms", "seed": 80551, "ref_n": 42, "ref_rms": 2.3342, "verdict": "NOT SCORED (n 3 < 8)", "rms": 24.1055, "mean": -18.8833}
+    E175-A2-W1 {"rule": "E175-A2-W1", "n": 3, "minimum": 8, "stat": "rms", "seed": 80567, "ref_n": 36, "ref_rms": 0.7757, "verdict": "NOT SCORED (n 3 < 8)", "rms": 7.1559, "mean": -5.8273}
+    E175-A2-W2 {"rule": "E175-A2-W2", "n": 3, "minimum": 8, "stat": "rms", "seed": 80568, "ref_n": 42, "ref_rms": 0.8214, "verdict": "NOT SCORED (n 3 < 8)", "rms": 3.1757, "mean": -2.5587}
+    E175-A2-M1 {"rule": "E175-A2-M1", "n": 6, "minimum": 10, "seed": 80557, "verdict": "NOT SCORED (n 6 < 10)"}
+    E175-A2-H1 {"rule": "E175-A2-H1", "n": 6, "minimum": 10, "stat": "rms", "seed": 80552, "ref_n": 112, "ref_rms": 0.6845, "verdict": "NOT SCORED (n 6 < 10)", "rms": 1.591, "mean": -1.3705}
+    E175-GS (reported): {"rule": "E175-GS", "n": 3, "note": "reported, never a verdict (E175.md)", "slope_mhz_per_mhz": 1.5139, "intercept_mhz": -1199.044, "x_span_mhz": [752.83, 794.8], "range_95": [-1.0, 1.74725], "resamples_skipped": 2241, "resolved": "neither"}
+    M9's part, R2 (reported): {"rule": "E175-A2-R2", "components": {"E175-A2-G": "NOT SCORED (n 3 < 8)", "E175-A2-Bg": "NOT SCORED (n 3 < 8)", "E175-A2-Bp": "NOT SCORED (n 3 < 8)"}, "verdict": "NOT SCORED", "form": "PASS if G, Bg and Bp all PASS; FAIL if any FAILs; else NOT SCORED"}
+    by set: {"governed": {"n": 3, "M10_mhz_rms": 45.565, "M10_mhz_mean": -35.343, "M9_mhz_rms": 44.724, "M9_mhz_mean": -34.577, "M10_w_rms": 7.156, "M10_w_mean": -5.827, "M9_w_rms": 7.158, "M9_w_mean": -5.852, "M10_rise_rms": 2.024, "M10_rise_mean": -1.907, "M9_rise_rms": 2.026, "M9_rise_mean": -1.91}, "pinned": {"n": 3, "M10_mhz_rms": 24.105, "M10_mhz_mean": -18.883, "M9_mhz_rms": 24.105, "M9_mhz_m
+    E175-R0: {"verdict": "FAIL", "tiles": {"k-fp16-randn": {"n": 2, "burst_mhz": 700, "ref_mhz": 727.7, "d_mhz": -27.7, "burst_w": 62.045, "ref_w": 66.585, "d_w": -4.54, "rise_c": 5, "within": false, "e143_mhz": 720.13, "d_mhz_vs_e143": -20.13, "e143_w": 67.327, "d_w_vs_e143": -5.282, "e160_mhz": 730.87, "d_mhz_vs_e160": -30.87, "e160_w": 67.39, "d_w_vs_e160": -5.345, "peak_w": 75.02, "e165_mhz": 71
+    peaks: {"board_max_w": 75.02, "board_run": "s1/BURST-16-k-fp16-randn-r1.jsonl", "die_mean_max_c": 61, "die_high_max_c": 64, "samples": 1260}
+stand-in ssh and rsync calls during the dry pass: 0 (their first lines: )
