@@ -1,0 +1,169 @@
+{
+ "experiment": "E168",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793837993673,
+ "protocol": {
+  "experiment": "E168",
+  "request": "Q141",
+  "card": "aifoundry2",
+  "order_seed": 168,
+  "note": "E168's stop-path test (die): the registered watcher with one stop lowered, so that it must trip on live samples; the session must end with exit 4",
+  "tools": {
+   "heater": "build/e136/host/sparsity_host",
+   "kernel": "build/e136/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "predictions": "docs/reports/data/2026-11-04-q140q-gemm-g4-stride/predictions-e168.json",
+  "predictions_sha256": "430f4afa266a30c35f3e4da44ebef9fbf1d1186c00ceb5e2e8ae312c8c168583",
+  "amendment": "tools/claims-v3/e168/predictions-e168-a2.json",
+  "amendment_sha256": "2afb290f62f7cc722c1f58837c18ab545f914863107a162653c38459c35fafe6",
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 30,
+   "board_cap_w": 85,
+   "cap_consecutive": 3
+  },
+  "caps": {
+   "max_card_min": 2
+  },
+  "smoke_cycles": {
+   "S1-fp32-zeros": 1247.3,
+   "S2-fp32-zeros": 1188.5,
+   "S3-fp32-zeros": 1681.3,
+   "S2-int8-zeros": 1289.3
+  },
+  "dry_c_w": {
+   "zeros": 0.0,
+   "gemmL1x3x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 21.616,
+   "gemmL3x3x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 22.043,
+   "gemmL3x5x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin": 17.188,
+   "gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/int8/zeros.bin": 2.213,
+   "gemmL3x3x2:tiles:tools/claims-v3/kinds/blind6/tiles/int8/int8.real_smol_w8a8_down.bin": 6.518,
+   "gemmL3x3x2:sparse50:tools/claims-v3/kinds/tiles/int8/sparse50.bin": 6.575,
+   "gemmL1x3x3:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.86,
+   "gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 2.88,
+   "gemmL3x5x3:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin": 3.118
+  },
+  "limit_p800_w": 82.0,
+  "peak_lock_w": 82.0,
+  "relation": {
+   "B800": 33.60956684526229,
+   "s800": 1.90517380064275
+  },
+  "admission": {
+   "rest": {
+    "fixed_p800_w": 30.0
+   },
+   "S1-fp32-randn-cold": {
+    "c_ref_w": 21.616,
+    "fixed_p800_w": 75.68
+   },
+   "S1-fp32-randn-warm55": {
+    "c_ref_w": 21.616,
+    "fixed_p800_w": 75.68
+   },
+   "S2-fp32-randn-cold": {
+    "c_ref_w": 22.043,
+    "fixed_p800_w": 76.63
+   },
+   "S2-fp32-randn-warm55": {
+    "c_ref_w": 22.043,
+    "fixed_p800_w": 76.63
+   },
+   "S3-fp32-randn-cold": {
+    "c_ref_w": 17.188,
+    "fixed_p800_w": 68.23
+   },
+   "S3-fp32-randn-warm55": {
+    "c_ref_w": 17.188,
+    "fixed_p800_w": 68.23
+   },
+   "S2-int8-zeros-warm55": {
+    "c_ref_w": 2.212,
+    "fixed_p800_w": 45.64
+   },
+   "S2-int8-real_smol_w8a8_down-warm55": {
+    "c_ref_w": 6.518,
+    "fixed_p800_w": 52.48
+   },
+   "S2-int8-sparse50-warm55": {
+    "c_ref_w": 6.575,
+    "fixed_p800_w": 52.57
+   },
+   "S2-int8-zeros-cold": {
+    "c_ref_w": 2.212,
+    "fixed_p800_w": 45.64
+   },
+   "S1-fp32-zeros": {
+    "c_ref_w": 2.86,
+    "fixed_p800_w": 46.56
+   },
+   "S2-fp32-zeros": {
+    "c_ref_w": 2.88,
+    "fixed_p800_w": 46.63
+   },
+   "S3-fp32-zeros": {
+    "c_ref_w": 3.118,
+    "fixed_p800_w": 46.86
+   },
+   "S2-int8-zeros": {
+    "c_ref_w": 2.213,
+    "fixed_p800_w": 45.64
+   }
+  },
+  "blocks": [
+   {
+    "name": "STOPTEST",
+    "title": "the die stop's path on live samples",
+    "default": false,
+    "passes": 1,
+    "shuffle": false,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "gemmL3x3x2:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+      "label": "S2-fp32-zeros",
+      "start": {
+       "mode": "cool",
+       "max_c": 99,
+       "max_wait_s": 5
+      },
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "STOPTEST-00-S2-fp32-zeros-r1"
+ ],
+ "sha256": {
+  "heater": "76475508f8e88983edfe16bcc8757dd23094877a31c78c302f6003993ee5fe74",
+  "kernel": "aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e168/run_e168.py",
+  "--protocol",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e168/protocol-stoptest-die.json",
+  "--out",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e168/runs/stoptest-die",
+  "--only",
+  "STOPTEST",
+  "--max-card-min",
+  "2.00"
+ ],
+ "git_head": "5e1bb30923e134ef4f50deb9a975f1020b7ae8f9",
+ "git_dirty_hpl": ""
+}
