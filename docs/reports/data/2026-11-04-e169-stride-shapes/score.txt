@@ -1,0 +1,23 @@
+E169: 50 runs in ['s1']; refused by the admission rule: 0; config after every run ['{"tdp_w": 65, "temp_threshold_c": 65}']; peaks {'board_max_w': 36.95, 'board_run': 's1/D-02-N2-fp32-zeros-r1', 'die_mean_max_c': 55, 'die_mean_run': 's1/B-00-N1-fp32-zeros-r1', 'die_high_max_c': 70, 'die_high_run': 's1/A-00-N1-fp32-zeros-r1', 'samples': 6047}; cool gates not reached: 0
+R0 the check of C: PASS (50 runs; results ['exact'])
+
+THE STEP RULE (REGISTRATION-A2.md S1-S4), fp32: T800(P) / T800(N) - 1, 95% interval from the passes (floor sigma0 0.336%), zones +-3.0 points
+  P1/N1 (decisive): +30.00% [+29.36, +30.65] over 5 passes (sd 0.401%); SM +37.06  ISO +0.00  STRICT +0.00 -> NONE OF THE THREE: between STRICT's zone and SM's; presence PRESENT, size NOT SM; share of SM's step 0.81 [0.79, 0.83]
+      per pass: pass1 +30.58%, pass2 +29.62%, pass3 +29.39%, pass4 +29.95%, pass5 +30.47%; pooled T800 ratio +30.00%; arms (B3, reported) ALIGNED +35.99%, A_STRICT +32.54%
+  P2/N2 (reported, not counted): +4.47% [+3.81, +5.14] over 5 passes (sd 0.512%); SM +7.94  ISO +5.76  STRICT -1.03 -> SUPPORTS ISO; share of SM's step 0.56 [0.48, 0.65]
+      per pass: pass1 +5.15%, pass2 +4.89%, pass3 +3.96%, pass4 +3.97%, pass5 +4.41%; pooled T800 ratio +4.47%; arms (B3, reported) ALIGNED +10.74%, A_STRICT +6.69%
+  P3/N3 (decisive): +27.11% [+26.53, +27.69] over 5 passes (sd 0.368%); SM +30.97  ISO +0.00  STRICT +0.00 -> NONE OF THE THREE: between STRICT's zone and SM's; presence PRESENT, size NOT SM; share of SM's step 0.88 [0.86, 0.89]
+      per pass: pass1 +26.91%, pass2 +26.49%, pass3 +27.07%, pass4 +27.31%, pass5 +27.75%; pooled T800 ratio +27.10%; arms (B3, reported) ALIGNED +30.56%, A_STRICT +24.37%
+VERDICT on the L3's 8 MB index (P1/N1 and P3/N3): A STRIDE STEP SM DOES NOT SIZE
+formats, printed if run (one pass each, no reading): P1/N1.fp16 +29.36% (SM +37.43, ISO +0.00, STRICT +0.00; nearest SM); P1/N1.int8 +28.69% (SM +31.69, ISO +0.00, STRICT +0.00; nearest SM); P2/N2.fp16 +4.81% (SM +8.06, ISO +5.89, STRICT -1.01; nearest ISO); P2/N2.int8 +4.02% (SM +6.28, ISO +4.10, STRICT -1.25; nearest ISO); P3/N3.fp16 +27.56% (SM +31.22, ISO +0.00, STRICT +0.00; nearest SM); P3/N3.int8 +26.79% (SM +27.17, ISO +0.00, STRICT +0.00; nearest SM)
+
+B7 AS REGISTERED (49575094): SM's frozen T800 within 3% on every shape; resolved on P1-P3 (|SM - ISO| / ISO >= 3% and the measured T800 closer to SM)
+  fp32: point FAIL (6 of 6 outside 3%): P1 -21.9%, P2 -16.1%, P3 -22.0%, N1 -17.7%, N2 -13.3%, N3 -19.7%; resolved 0 of 3: P1 no, P2 no, P3 no
+  fp16 (printed): point FAIL (6 of 6 outside 3%): P1 -22.5%, P2 -16.1%, P3 -22.4%, N1 -17.7%, N2 -13.5%, N3 -20.2%; resolved 0 of 3: P1 no, P2 no, P3 no
+  int8 (printed): point FAIL (6 of 6 outside 3%): P1 -17.5%, P2 -14.2%, P3 -18.9%, N1 -15.6%, N2 -12.3%, N3 -18.6%; resolved 0 of 3: P1 no, P2 no, P3 no
+levels, measured / frozen - 1 (rms over the measured shapes): fp32: SM 18.7%, ISO 10.2%, STRICT 15.4%; fp16: SM 19.0%, ISO 10.2%, STRICT 15.6%; int8: SM 16.4%, ISO 10.1%, STRICT 14.3%
+
+TIES to E158 (D6): TIED; T800 K4n7 -0.03%, K4n8 +0.21%, K6n5 +0.28%, K6n4 -0.19%; steps K4n8/K4n7 +29.20% (E158 +28.89%, +0.30 points, 2 passes), K6n4/K6n5 +14.32% (E158 +14.86%, -0.54 points, 2 passes)
+POWER, reported (D12), fp32: p800 - P0 rms 2.508 W (mean -2.497); - (P0 + beta delta) 1.522 W (-1.503); - (P0 + beta delta + 0.47 (T_start - T_ref)) 0.72 W (-0.681); n 6 shapes
+POWER, reported (D12), fp16: p800 - P0 rms 2.718 W (mean -2.71); - (P0 + beta delta) 1.744 W (-1.734); - (P0 + beta delta + 0.47 (T_start - T_ref)) 0.645 W (-0.615); n 6 shapes
+POWER, reported (D12), int8: p800 - P0 rms 2.56 W (mean -2.555); - (P0 + beta delta) 1.568 W (-1.561); - (P0 + beta delta + 0.47 (T_start - T_ref)) 0.467 W (-0.441); n 6 shapes
