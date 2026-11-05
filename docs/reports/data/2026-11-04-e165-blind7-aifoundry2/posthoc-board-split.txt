@@ -1,0 +1,34 @@
+E165, post hoc: the board's blind error (measured - M9's aifoundry2 part, recomputed per tile; W), by tile.
+Source: results.json > score > reported > tiles (burst_w, primary.burst_board_w) and cells (burst_mhz_runs).
+
+self-check, pinned board: n 40, rms 0.986 W, mean -0.015 W; the registered E165-R2 Bp: n 40, rms 0.986, mean -0.015: EQUAL
+
+self-check, governed board: n 12, rms 0.714 W, mean -0.425 W; the registered E165-R2 Bg: n 12, rms 0.714, mean -0.425: EQUAL
+
+THE PINNED BOARD, 40 tiles: rms 0.986 W, squared error 38.920 W^2
+
+(a) class S (single high B bits): 8 pinned tiles, 61% of the squared error; each one:
+    fp32.b_onebit_b22_third            +2.520 W   (measured 62.803, M9's part 60.283)
+    fp32.b_onebit_b20_pi               +2.044 W   (measured 60.470, M9's part 58.426)
+    fp32.b_onebit_b20_full             +2.029 W   (measured 60.965, M9's part 58.936)
+    fp16.b_onebit_b8_pi                +2.024 W   (measured 60.837, M9's part 58.813)
+    fp32.b_onebit_b20_seventh          +1.805 W   (measured 60.275, M9's part 58.470)
+    fp32.b_onebit_b20_third_a1p5       +0.462 W   (measured 61.343, M9's part 60.881)
+    fp32.b_onebit_b20_one              -0.848 W   (measured 59.953, M9's part 60.801)
+    fp16.b_onebit_b9_one               -0.955 W   (measured 60.567, M9's part 61.522)
+    over by more than 1 W: 5 tiles, +1.80 to +2.52 W, 57% of the squared error
+    the pinned board without those 5: rms 0.695 W over 35 tiles (mean -0.315)
+
+(b) a single-pass clock dip (one counted pass under 790 MHz, the others at 800): 6 pinned tiles, 22% of the board's squared error; each one:
+    int8.bheld_55_asmall               dip 752.0 MHz (passes 800.0, 752.0, 800.0); board error -1.485 W
+    fp16.b_onebit_b9_one               dip 754.2 MHz (passes 800.0, 800.0, 754.2); board error -0.955 W
+    int8.a_full_b_pos                  dip 754.2 MHz (passes 754.2, 800.0, 800.0); board error -1.832 W
+    fp32.exp_a_gray_walk               dip 756.0 MHz (passes 756.0, 800.0, 800.0); board error -0.775 W
+    fp32.dropout30_both                dip 758.8 MHz (passes 800.0, 758.8, 800.0); board error -1.144 W
+    fp32.exp_b_alt_lsb                 dip 780.0 MHz (passes 800.0, 800.0, 780.0); board error +0.278 W
+    the dips span 752.0-780.0 MHz
+    the pinned board without those 6: rms 0.947 W over 34 tiles
+    without both sets: rms 0.540 W over 29 tiles
+
+(c) THE GOVERNED BOARD, 12 tiles (the burst clock under the cap): rms 0.714 W = a level (the mean) -0.425 W and a spread about it 0.574 W (population SD; rms^2 = mean^2 + SD^2);
+    the level is 35% of the mean squared error; 10 of 12 tiles read under M9's part; the errors run -1.571 to +0.626 W
