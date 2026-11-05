@@ -1,0 +1,43 @@
+E174 dry pass on the Intel (Python 3.13.11): queue rc 0 in 150 s (the toy card; no device, no lock, no ssh)
+  state_gate         {"verdict": "GO"}
+  session_start      {"name": "stoptest-die"}
+  session_end        {"name": "stoptest-die", "rc": 4, "end": {"exit": 4, "reason": "safety:die 54 C >= 30 C", "card_min": 0.0}}
+  stoptest_detail    {"name": "stoptest-die", "stop": "die", "trip_after_line_ms": 56, "lines": 13}
+  stoptest_check     {"name": "stoptest-die", "rc": 4, "bad": null}
+  session_start      {"name": "stoptest-board"}
+  session_end        {"name": "stoptest-board", "rc": 4, "end": {"exit": 4, "reason": "safety:board 33.2 W > 30 W on 1 samples", "card_min": 0.0}}
+  stoptest_detail    {"name": "stoptest-board", "stop": "board", "trip_after_line_ms": 23, "launch_end_after_trip_ms": 396, "lines": 17}
+  stoptest_check     {"name": "stoptest-board", "rc": 4, "bad": null}
+  session_start      {"name": "smoke"}
+  session_end        {"name": "smoke", "rc": 0, "end": {"exit": 0, "reason": "done", "card_min": 0.3}}
+  smoke_tel          {"lines": 172, "board_max_w": 58.65, "die_max_c": 61, "under_590": 0, "over_stop": 0}
+  smoke_ccheck       {"skipped": "dry: the toy card runs no host and writes no C log"}
+  smoke_check        {"rc": 0, "bad": null}
+  session_start      {"name": "s1"}
+  session_end        {"name": "s1", "rc": 0, "end": {"exit": 0, "reason": "done", "card_min": 2.1}}
+  s1_end             {"rc": 0}
+  queue_end          {}
+  s1: 24 runs recorded; state gate: dry: nothing read (et-holders, uptime -s, ettelem uptime, ettelem config)
+  the watcher: tools/claims-v3/hpl/watcher_q142s.py 3f37482d48c7 installed True
+score_e174.py on the dry s1: rc 0
+  E174 scoring: 24 burst runs, 24 complete, 24 counted, passes [1, 2, 4]; dry True; protocols {'s1': 'protocol-dry.json'}
+    C-log coverage: required [], missing []
+    E174-C: {"verdict": "NOT SCORED (dry: the toy card writes no C log)"}
+    E174-S: {"safety_marks": [], "runs_under_590_mhz": [], "runs_at_or_over_62w": [], "board_max_w": 57.4, "verdict": "PASS"}
+    tiles C excludes: []
+    tiles scored 6; left out ['fp16.s8_onebit_b2_c46ec46e', 'fp16.s8_onebit_b4_c2e2c2e2', 'fp16.s8_onebit_b7_b945b945', 'fp32.s8_onebit_b13_41783e4a_A40080727', 'fp32.s8_onebit_b19_c11b3dd2', 'int8.l8_flip_d2p2c16_231d', 'int8.l8_halfword_d2p2c16_83df', 'int8.l8_period2_d2p4c8_4ea3', 'int8.r8_dsqwen_l1_actdown_f6a2cb', 'int8.r8_granite_l4_actdown_b076f2', 'int8.r8_granite_l4_x1q_13fe82', 'int8.u8_ar
+    P8-C0-W    {"rule": "P8-C0-W", "n": 6, "minimum": 8, "stat": "rms", "seed": 80428, "ref_n": 42, "ref_rms": 0.8214, "verdict": "NOT SCORED (n 6 < 8)", "rms": 1.6415, "mean": 1.606}
+    P8-C0-B    {"rule": "P8-C0-B", "n": 6, "minimum": 8, "line": "|mean| <= 0.5 W AND rms <= 1.0 W", "rms": 1.6415, "mean": 1.606, "verdict": "NOT SCORED (n 6 < 8)"}
+    P8-C0-M1   {"rule": "P8-C0-M1", "n": 6, "minimum": 10, "seed": 80467, "verdict": "NOT SCORED (n 6 < 10)"}
+    P8-C0-F    {"rule": "P8-C0-F", "n": 6, "minimum": 8, "stat": "rms", "seed": 80411, "ref_n": 42, "ref_rms": 2.3342, "verdict": "NOT SCORED (n 6 < 8)", "rms": 0.0, "mean": 0.0}
+    P8-C0-H1   {"rule": "P8-C0-H1", "n": 6, "minimum": 8, "stat": "rms", "seed": 80462, "ref_n": 39, "ref_rms": 0.3385, "verdict": "NOT SCORED (n 6 < 8)", "rms": 3.2195, "mean": -3.188}
+    P8-C0-HK   {"rule": "P8-C0-HK", "n": 6, "minimum": 8, "seed": 80488, "verdict": "NOT SCORED (n 6 < 8)", "k_a": 0.2415, "k_b": 0.14004345109940583}
+    P8-HM      {"rule": "P8-HM", "verdict": "NOT SCORED (no hold runs in E174)"}
+    [M9_carried] {"board": {"rms": 1.5133, "mean": 1.4977}, "clock": {"rms": 0.0}, "rise_M9_law": {"rms": 0.6614, "mean": -0.4985}}
+    [X0_ratio_reported] {"median": 1.0938024558015376, "ci95": [1.0863812993300526, 1.1005364142564749], "n": 6, "kappa0": 0.9463}
+    [rise_per_board_w_over_21p5_least_squares] 0.1154
+    [by_format] {"fp16": {"n": 2, "rms": 1.8797, "mean": 1.867}, "fp32": {"n": 2, "rms": 1.7646, "mean": 1.7525}, "int8": {"n": 2, "rms": 1.1986, "mean": 1.1985}}
+    [by_tier] {"A": {"n": 6, "rms": 1.6415, "mean": 1.606}}
+    [by_case] {"H": {"n": 1, "rms": 1.184, "mean": 1.184}, "L": {"n": 1, "rms": 1.213, "mean": 1.213}, "R": {"n": 1, "rms": 1.649, "mean": 1.649}, "S": {"n": 3, "rms": 1.8775, "mean": 1.8633}}
+    [zeros_levels] {"fp32": {"bursts": 3, "mean_burst_w": 32.9433}, "fp16": {"bursts": 3, "mean_burst_w": 33.13}, "int8": {"bursts": 3, "mean_burst_w": 34.4967}}
+    peaks: {"board_max_w": 57.4, "board_run": "s1/BURST-23-b8-fp32.s8_onebit_b19_c11b3dd2-r1.jsonl", "die_mean_max_c": 59, "die_high_max_c": 62, "samples": 1155}

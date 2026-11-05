@@ -1,0 +1,443 @@
+{
+ "experiment": "E173",
+ "request": "Q142(kg)",
+ "card": "aifoundry2",
+ "kind": "stoptest-die",
+ "order_seed": 173,
+ "note": "E173's stop-path test (die): the registered watcher with one stop lowered, so that it must trip on live samples; the session must end with exit 4",
+ "order_source": "none",
+ "order_entries": [],
+ "order": {
+  "source": "tools/claims-v3/e173/predictions-e173.json dry_order",
+  "runs": 22,
+  "passes": [
+   1,
+   2
+  ]
+ },
+ "tools": {
+  "heater": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "ettelem": "build/ettelem-hpl/ettelem"
+ },
+ "ccheck": {
+  "host": "build/ccheck/b/host/sparsity_host",
+  "host_sha256": "eae32a152b8f0861bd2922c500eac217c931c9b464d3274a6bcf346cc986bfd2",
+  "wrapper": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "wrapper_sha256": "d00158d454596a8325ff3a7ffa3dff6e80a2e1798516b022009450f63443b9b7",
+  "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+  "kernel_sha256": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "log": "<session dir>/c-log.jsonl"
+ },
+ "kinds": "tools/claims-v3/kinds/kinds.json",
+ "pool": "tools/claims-v3/kinds/blind8/blind8.json",
+ "predictions": "tools/claims-v3/e173/predictions-e173.json",
+ "left_out_by_name": [
+  "fp32.anchor8_check_randn_319f73",
+  "fp32.anchor8_randn_a_989b8a",
+  "fp32.anchor8_randn_b_833ac3",
+  "fp32.r8_dsqwen_l1_qk_f0161a",
+  "fp32.r8_granite_l3_qk_02f7c6",
+  "fp32.real_s360_l1_qk",
+  "fp32.u8_ar_i_a662b4",
+  "fp32.u8_ar_k_3297d2",
+  "fp32.u8_bimodal_1f57eb",
+  "fp32.u8_lognorm_62af49",
+  "fp32.u8_uniform_e7e045"
+ ],
+ "sampler": {
+  "every_ms": 100
+ },
+ "safety": {
+  "abs_stop_c": 30,
+  "board_cap_w": 85,
+  "cap_consecutive": 3
+ },
+ "caps": {
+  "max_card_min": 2
+ },
+ "smoke_cycles": {
+  "b8-fp32.anchor7_zeros": 546,
+  "b8-fp16.anchor7_zeros": 546,
+  "b8-int8.anchor7_zeros": 318
+ },
+ "dry_c_w": {
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.a_zeros_b_complement.bin": 2.891,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.anchor7_zeros.bin": 1.394,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.anchor8_check_randn_84631a.bin": 22.999,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.anchor8_randn_a_8c7827.bin": 22.822,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.anchor8_randn_b_3a0fef.bin": 22.811,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.b_onebit_b8_pi.bin": 13.448,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.exp_b_alt_shift.bin": 16.629,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.r8_dsqwen_l1_pv_188e98.bin": 18.395,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.r8_dsqwen_l1_x2gate_2e4efa.bin": 22.646,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.r8_granite_l3_pv_e993b7.bin": 8.279,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.real_qwen_dequant_v.bin": 22.826,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.s8_onebit_b10_c127c127.bin": 10.563,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.s8_onebit_b2_c46ec46e.bin": 12.149,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.s8_onebit_b4_c2e2c2e2.bin": 12.344,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.s8_onebit_b7_b945b945.bin": 13.307,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.u8_ar_i_32349b.bin": 22.663,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.u8_cauchy_96e015.bin": 23.225,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.u8_rowscale_ecc921.bin": 23.21,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp16/fp16.u8_tdist_93475b.bin": 23.106,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.a_onebit_b5_third.bin": 10.678,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.a_zeros_b_complement.bin": 2.953,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.anchor7_zeros.bin": 1.44,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.b_onebit_b20_one.bin": 13.992,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.bf16_wideexp.bin": 20.57,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.exp_b_alt_b26.bin": 10.974,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.exp_only_narrow2.bin": 16.192,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.r8_granite_l3_x2up_47e54f.bin": 23.303,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.real_smol_softmax_v_causal.bin": 14.825,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b13_41783e4a_A40080727.bin": 13.888,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b14_3ef6ccbf.bin": 11.956,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b18_be2584eb.bin": 12.875,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b19_c11b3dd2.bin": 13.098,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b26_bffdf029.bin": 10.548,
+  "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.s8_onebit_b7_3ee13961.bin": 10.0,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.anchor7_zeros.bin": 2.123,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.anchor8_check_full_d8b6c8.bin": 9.336,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.anchor8_full_a_4aac84.bin": 9.258,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.anchor8_full_b_935710.bin": 9.3,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.h8_held_line4cea.bin": 8.467,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.h8_held_v34.bin": 8.566,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.h8_held_vd9.bin": 9.067,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.l8_cycle3_d3p3c15_c6d5.bin": 9.245,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.l8_flip_d2p2c16_231d.bin": 9.131,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.l8_halfword_d2p2c16_83df.bin": 8.942,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.l8_period2_d2p4c8_4ea3.bin": 9.005,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.r8_dsqwen_l1_actdown_f6a2cb.bin": 6.869,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.r8_dsqwen_l1_x1v_927670.bin": 8.574,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.r8_granite_l4_actdown_b076f2.bin": 8.394,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.r8_granite_l4_x1q_13fe82.bin": 8.271,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.u8_ar_k_0a9fe5.bin": 8.984,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.u8_biased_14548f.bin": 8.802,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.u8_relu_tq_1fb940.bin": 7.249,
+  "file:tools/claims-v3/kinds/blind8/tiles/int8/int8.u8_sparseq_58e6e0.bin": 6.387,
+  "file:tools/claims-v3/kinds/tiles/fp16/randn.bin": 23.047,
+  "file:tools/claims-v3/kinds/tiles/int8/full.bin": 8.979
+ },
+ "dma": {
+  "e143_smoke_gap_ms_median": 1.0,
+  "e143_s1_held_s_max": 6.57,
+  "launches": 17,
+  "projected_held_max_s": 7.2,
+  "budget_s": 7.5
+ },
+ "limit_p800_w": 82.0,
+ "peak_lock_w": 82.0,
+ "relation": {
+  "B800": 33.60956684526229,
+  "s800": 1.90517380064275
+ },
+ "admission": {
+  "b8-fp16.a_zeros_b_complement": {
+   "c_ref_w": 2.891,
+   "fixed_p800_w": 42.753,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.anchor7_zeros": {
+   "c_ref_w": 1.394,
+   "fixed_p800_w": 39.842,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.anchor8_check_randn_84631a": {
+   "c_ref_w": 22.999,
+   "fixed_p800_w": 81.118,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.anchor8_randn_a_8c7827": {
+   "c_ref_w": 22.822,
+   "fixed_p800_w": 80.788,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.anchor8_randn_b_3a0fef": {
+   "c_ref_w": 22.811,
+   "fixed_p800_w": 80.784,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.b_onebit_b8_pi": {
+   "c_ref_w": 13.448,
+   "fixed_p800_w": 62.767,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.exp_b_alt_shift": {
+   "c_ref_w": 16.629,
+   "fixed_p800_w": 69.051,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.r8_dsqwen_l1_pv_188e98": {
+   "c_ref_w": 18.395,
+   "fixed_p800_w": 72.388,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.r8_dsqwen_l1_x2gate_2e4efa": {
+   "c_ref_w": 22.646,
+   "fixed_p800_w": 80.523,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.r8_granite_l3_pv_e993b7": {
+   "c_ref_w": 8.279,
+   "fixed_p800_w": 53.014,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.real_qwen_dequant_v": {
+   "c_ref_w": 22.826,
+   "fixed_p800_w": 80.789,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.s8_onebit_b10_c127c127": {
+   "c_ref_w": 10.563,
+   "fixed_p800_w": 57.895,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.s8_onebit_b2_c46ec46e": {
+   "c_ref_w": 12.149,
+   "fixed_p800_w": 60.412,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.s8_onebit_b4_c2e2c2e2": {
+   "c_ref_w": 12.344,
+   "fixed_p800_w": 60.781,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.s8_onebit_b7_b945b945": {
+   "c_ref_w": 13.307,
+   "fixed_p800_w": 62.496,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.u8_ar_i_32349b": {
+   "c_ref_w": 22.663,
+   "fixed_p800_w": 80.524,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.u8_cauchy_96e015": {
+   "c_ref_w": 23.225,
+   "fixed_p800_w": 81.616,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.u8_rowscale_ecc921": {
+   "c_ref_w": 23.21,
+   "fixed_p800_w": 81.601,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp16.u8_tdist_93475b": {
+   "c_ref_w": 23.106,
+   "fixed_p800_w": 81.356,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.a_onebit_b5_third": {
+   "c_ref_w": 10.678,
+   "fixed_p800_w": 57.734,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.a_zeros_b_complement": {
+   "c_ref_w": 2.953,
+   "fixed_p800_w": 42.987,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.anchor7_zeros": {
+   "c_ref_w": 1.44,
+   "fixed_p800_w": 40.061,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.b_onebit_b20_one": {
+   "c_ref_w": 13.992,
+   "fixed_p800_w": 64.71,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.bf16_wideexp": {
+   "c_ref_w": 20.57,
+   "fixed_p800_w": 76.681,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.exp_b_alt_b26": {
+   "c_ref_w": 10.974,
+   "fixed_p800_w": 58.424,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.exp_only_narrow2": {
+   "c_ref_w": 16.192,
+   "fixed_p800_w": 68.195,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.r8_granite_l3_x2up_47e54f": {
+   "c_ref_w": 23.303,
+   "fixed_p800_w": 81.882,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.real_smol_softmax_v_causal": {
+   "c_ref_w": 14.825,
+   "fixed_p800_w": 65.653,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.s8_onebit_b13_41783e4a_A40080727": {
+   "c_ref_w": 13.888,
+   "fixed_p800_w": 63.791,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.s8_onebit_b14_3ef6ccbf": {
+   "c_ref_w": 11.956,
+   "fixed_p800_w": 60.108,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.s8_onebit_b18_be2584eb": {
+   "c_ref_w": 12.875,
+   "fixed_p800_w": 62.735,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.s8_onebit_b19_c11b3dd2": {
+   "c_ref_w": 13.098,
+   "fixed_p800_w": 62.29,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.s8_onebit_b26_bffdf029": {
+   "c_ref_w": 10.548,
+   "fixed_p800_w": 57.575,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-fp32.s8_onebit_b7_3ee13961": {
+   "c_ref_w": 10.0,
+   "fixed_p800_w": 56.376,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.anchor7_zeros": {
+   "c_ref_w": 2.123,
+   "fixed_p800_w": 41.196,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.anchor8_check_full_d8b6c8": {
+   "c_ref_w": 9.336,
+   "fixed_p800_w": 54.94,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.anchor8_full_a_4aac84": {
+   "c_ref_w": 9.258,
+   "fixed_p800_w": 54.792,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.anchor8_full_b_935710": {
+   "c_ref_w": 9.3,
+   "fixed_p800_w": 54.872,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.h8_held_line4cea": {
+   "c_ref_w": 8.467,
+   "fixed_p800_w": 53.358,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.h8_held_v34": {
+   "c_ref_w": 8.566,
+   "fixed_p800_w": 53.489,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.h8_held_vd9": {
+   "c_ref_w": 9.067,
+   "fixed_p800_w": 54.436,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.l8_cycle3_d3p3c15_c6d5": {
+   "c_ref_w": 9.245,
+   "fixed_p800_w": 54.765,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.l8_flip_d2p2c16_231d": {
+   "c_ref_w": 9.131,
+   "fixed_p800_w": 54.547,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.l8_halfword_d2p2c16_83df": {
+   "c_ref_w": 8.942,
+   "fixed_p800_w": 54.196,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.l8_period2_d2p4c8_4ea3": {
+   "c_ref_w": 9.005,
+   "fixed_p800_w": 54.311,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.r8_dsqwen_l1_actdown_f6a2cb": {
+   "c_ref_w": 6.869,
+   "fixed_p800_w": 50.276,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.r8_dsqwen_l1_x1v_927670": {
+   "c_ref_w": 8.574,
+   "fixed_p800_w": 53.495,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.r8_granite_l4_actdown_b076f2": {
+   "c_ref_w": 8.394,
+   "fixed_p800_w": 53.158,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.r8_granite_l4_x1q_13fe82": {
+   "c_ref_w": 8.271,
+   "fixed_p800_w": 52.934,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.u8_ar_k_0a9fe5": {
+   "c_ref_w": 8.984,
+   "fixed_p800_w": 54.272,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.u8_biased_14548f": {
+   "c_ref_w": 8.802,
+   "fixed_p800_w": 53.944,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.u8_relu_tq_1fb940": {
+   "c_ref_w": 7.249,
+   "fixed_p800_w": 51.0,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "b8-int8.u8_sparseq_58e6e0": {
+   "c_ref_w": 6.387,
+   "fixed_p800_w": 49.424,
+   "what": "the larger of M10's and M9's frozen 95% upper peaks (predictions-pool8-aifoundry2.json, the 82 W rule's own value)"
+  },
+  "k-fp16-randn": {
+   "c_ref_w": null,
+   "fixed_p800_w": 80.52,
+   "what": "E165's estimate for E80's tile (predictions-e165.json replicate)"
+  },
+  "k-int8-full": {
+   "c_ref_w": null,
+   "fixed_p800_w": 53.67,
+   "what": "E165's estimate for E80's tile (predictions-e165.json replicate)"
+  },
+  "rest": {
+   "c_ref_w": 0.0,
+   "fixed_p800_w": 33.61,
+   "what": "the idle card (no launch)"
+  }
+ },
+ "blocks": [
+  {
+   "name": "STOPTEST",
+   "title": "the die stop's path on live samples",
+   "default": false,
+   "passes": 1,
+   "shuffle": false,
+   "runs": [
+    {
+     "type": "fp32",
+     "values": "file:tools/claims-v3/kinds/blind8/tiles/fp32/fp32.anchor7_zeros.bin",
+     "label": "b8-fp32.anchor7_zeros",
+     "start": {
+      "mode": "cool",
+      "max_c": 99,
+      "max_wait_s": 5
+     },
+     "launch": {
+      "seconds": 2.5,
+      "budget": 4,
+      "processes": 1
+     },
+     "tail_s": 0.5
+    }
+   ]
+  }
+ ]
+}

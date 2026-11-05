@@ -1,0 +1,51 @@
+# tools/claims-v3/dmcmd_audit.py on E174's session chain through tools/claims-v3/e174/preflight_e174.sh, at the desk on the Intel, Thu 05 Nov 2026 04:16 PST, before the kit's commit, any claim and any launch
+# the one reviewed exception, E170's: run_hpl.py:622's residency read (run_e119.py rewrites it to raw states 1 2 3; E170's guard refuses residency with exit 97 before the reader starts: never sent)
+# allow-list empty: E174 sends no statistics reset (no --reset-ms), no WRITE of any kind
+dmcmd_audit: GO (33 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e174/queue_e174.py:276: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e174/queue_e174.py:276: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e174/queue_e174.py:276: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e174/queue_e174.py:276: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e174/queue_e174.py:276: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e170/ettelem_guard_e170.sh:22: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:22: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:22: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:22: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:22: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:25: ettelem uptime: GET_MODULE_UPTIME [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:29: ettelem sptrace: TRACE_EXTRACT [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:42: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:42: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:42: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:42: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:42: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e170/ettelem_guard_e170.sh:42: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/kspeed/e84/run_e84.py:204: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:545: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:597: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/hpl/run_hpl.py:618: ettelem sptrace: TRACE_EXTRACT [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:622: ettelem residency: GET_MODULE_RESIDENCY_THROTTLE_STATES [READ, pmic none] EXCEPTED: SP_ERROR_LOG: run_e119.py patch_residency rewrites this command to residency 1 2 3, and E170's ettelem_guard_e170.sh refuses residency (exit 97) before build/ettelem-e84/ettelem starts: never sent - variant ettelem-dv2; raw states 2 3 4 5 6 (raw 4 5 6 is no state at BL2 0.22.0: 2 SP Runtime Errors each)
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/hpl/run_hpl.py:626: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      5 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      5 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      2 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      4 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      3 site(s)  ok
+  GET_MODULE_RESIDENCY_THROTTLE_STATES       READ         pmic none      1 site(s)  EXCEPTED
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      3 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      3 site(s)  ok
+  GET_MODULE_UPTIME                          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      2 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      2 site(s)  ok
+  TRACE_EXTRACT                              READ         pmic none      2 site(s)  ok
+preflight_e174.sh rc=0
