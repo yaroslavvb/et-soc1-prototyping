@@ -3773,6 +3773,9 @@ the v2 drivers are the ones to use (`s22_collect_k6_v2.sh`, `step_e173_v2.sh`, `
 - **Nothing of pool 8 ran.** No card was claimed, no device command sent, no post written; the card day waits on the owner's go
   and fresh lab approvals. The downloads the designer and its verifier made stay in the round's scratch, and the mini keeps the
   lane's bench copies, our own files, for the housekeeping step.
+- *(Dated, Thu 5 Nov 2026, after these records' first commit.)* **"Scored"** in that commit's message (`f14c4ceb`) and in
+  AGENT.md's changelog entry ("E171–E174 registered, scored and kitted") means that each run's scorer was written and
+  self-tested, as the lanes' own records use the word; no run has been scored, and nothing of pool 8 is measured.
 
 ### What remains (the readiness critic's next list, ranked)
 
