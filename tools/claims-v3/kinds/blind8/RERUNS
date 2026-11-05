@@ -1,0 +1,15 @@
+fp32.anchor7_zeros  fp32  case=0  role=anchor  from=blind7  bus_bits_per_op=0  pick=floor
+fp16.anchor7_zeros  fp16  case=0  role=anchor  from=blind7  bus_bits_per_op=0  pick=floor
+int8.anchor7_zeros  int8  case=0  role=anchor  from=blind7  bus_bits_per_op=0  pick=floor
+fp32.a_onebit_b5_third  fp32  case=S  role=rerun  from=blind6  bus_bits_per_op=2048  pick=min
+fp32.a_zeros_b_complement  fp32  case=Z  role=rerun  from=blind6  bus_bits_per_op=129036  pick=max
+fp32.b_onebit_b20_one  fp32  case=S  role=rerun  from=blind7  bus_bits_per_op=4096  pick=stratum_1_of_6_(ranks_2-7_of_35)
+fp32.bf16_wideexp  fp32  case=E  role=rerun  from=blind6  bus_bits_per_op=49138  pick=stratum_4_of_6_(ranks_20-24_of_35)
+fp32.exp_b_alt_b26  fp32  case=E  role=rerun  from=blind7  bus_bits_per_op=6132  pick=stratum_2_of_6_(ranks_8-13_of_35)
+fp32.exp_only_narrow2  fp32  case=E  role=rerun  from=blind6  bus_bits_per_op=24518  pick=stratum_3_of_6_(ranks_14-19_of_35)
+fp32.real_s360_l1_qk  fp32  case=R  role=rerun  from=blind7  bus_bits_per_op=82866  pick=stratum_6_of_6_(ranks_30-34_of_35)
+fp32.real_smol_softmax_v_causal  fp32  case=R  role=rerun  from=blind6  bus_bits_per_op=73550  pick=stratum_5_of_6_(ranks_25-29_of_35)
+fp16.a_zeros_b_complement  fp16  case=Z  role=rerun  from=blind6  bus_bits_per_op=129020  pick=max
+fp16.b_onebit_b8_pi  fp16  case=S  role=rerun  from=blind7  bus_bits_per_op=8192  pick=min
+fp16.exp_b_alt_shift  fp16  case=E  role=rerun  from=blind6  bus_bits_per_op=20034  pick=stratum_1_of_2_(ranks_2-10_of_20)
+fp16.real_qwen_dequant_v  fp16  case=R  role=rerun  from=blind6  bus_bits_per_op=81586  pick=stratum_2_of_2_(ranks_11-19_of_20)

@@ -1,0 +1,3781 @@
+{
+ "pool": "blind8",
+ "made_by": {
+  "file": "make_blind8.py",
+  "sha256": "fee9a4f01d32795e526c0b8ec06657b04024e8413351302080422643a76d14ea",
+  "git_blob": "7a443e6deaa3d7599a5cebca011756a32c1247e8",
+  "git_head_blob": "7a443e6deaa3d7599a5cebca011756a32c1247e8",
+  "git_head": "153b720f50df90e926ddd8fb9cfd342892eb1301",
+  "committed": true,
+  "design_md_blob": "d5ce6fa20c012883d451fb8b871038685326e0d6"
+ },
+ "seed": {
+  "commit": "c996d1357609c10009c80e59dd8e85bcc652343f",
+  "rule": "int(sha256(ascii of the 40-hex commit string).hexdigest()[:16], 16)",
+  "value": 2135266859847067653,
+  "hex": "0x1da1fde559d92805"
+ },
+ "make_kinds_sha256": "339a192d62a34c355717c3e602d3c8f83f7265b7a1c05606db3d845b0a09c2dc",
+ "python": "3.10.10",
+ "numpy": "1.24.2",
+ "made_at": "2026-11-04 23:24:16 PST",
+ "counts": {
+  "S": 10,
+  "U": 13,
+  "R": 10,
+  "LH": 7,
+  "0": 9,
+  "rerun": 12,
+  "floor": 3,
+  "int8_w8a8_outlier": 4,
+  "real_models": 2,
+  "total": 64
+ },
+ "quota": {
+  "S": "at least 8 single high B bits at new bit positions and base words (fp32 and fp16)",
+  "U": "at least 12 kinds from the generator aimed at no named class",
+  "R": "at least 8 real tiles from two or more public models used in no earlier pool, int8 W8A8 outlier activations among them",
+  "LH": "at least 6 int8 whole-line or held-B tiles",
+  "0": "two random anchors per format plus a check anchor per format",
+  "rerun": "about 12 re-runs of pool 6/7 float tiles under their own labels (scored apart), chosen by a rule from their bytes and the seed so that they span the range of the data term"
+ },
+ "quota_ok": {
+  "S": true,
+  "U": true,
+  "R": true,
+  "LH": true,
+  "0": true,
+  "rerun": true,
+  "real_models>=2": true,
+  "int8_w8a8>=1": true
+ },
+ "refused": [],
+ "inputs": {
+  "earlier": {
+   "blind3": {
+    "tiles": 25,
+    "sha256sums_agree": 25,
+    "sha256sums_disagree": 0
+   },
+   "blind4": {
+    "tiles": 25,
+    "sha256sums_agree": 25,
+    "sha256sums_disagree": 0
+   },
+   "blind5": {
+    "tiles": 36,
+    "sha256sums_agree": 36,
+    "sha256sums_disagree": 0
+   },
+   "blind6": {
+    "tiles": 50,
+    "sha256sums_agree": 50,
+    "sha256sums_disagree": 0
+   },
+   "blind7": {
+    "tiles": 61,
+    "sha256sums_agree": 61,
+    "sha256sums_disagree": 0
+   }
+  },
+  "single_bit_earlier": [
+   {
+    "pool": "blind6",
+    "label": "fp32.a_onebit_b16_half",
+    "side": "A",
+    "bit": 16,
+    "base": "0x3f000000"
+   },
+   {
+    "pool": "blind6",
+    "label": "fp32.a_onebit_b5_third",
+    "side": "A",
+    "bit": 5,
+    "base": "0x3eaaaa8b"
+   },
+   {
+    "pool": "blind6",
+    "label": "fp32.b_onebit_b12_third",
+    "side": "B",
+    "bit": 12,
+    "base": "0x3eaaaaab"
+   },
+   {
+    "pool": "blind6",
+    "label": "fp32.b_onebit_b20_third",
+    "side": "B",
+    "bit": 20,
+    "base": "0x3eaaaaab"
+   },
+   {
+    "pool": "blind6",
+    "label": "fp16.b_onebit_b6_third",
+    "side": "B",
+    "bit": 6,
+    "base": "0x35553555"
+   },
+   {
+    "pool": "blind7",
+    "label": "fp32.b_onebit_b20_full",
+    "side": "B",
+    "bit": 20,
+    "base": "0x3fffffff"
+   },
+   {
+    "pool": "blind7",
+    "label": "fp32.b_onebit_b20_one",
+    "side": "B",
+    "bit": 20,
+    "base": "0x3f800000"
+   },
+   {
+    "pool": "blind7",
+    "label": "fp32.b_onebit_b20_pi",
+    "side": "B",
+    "bit": 20,
+    "base": "0x40490fdb"
+   },
+   {
+    "pool": "blind7",
+    "label": "fp32.b_onebit_b20_seventh",
+    "side": "B",
+    "bit": 20,
+    "base": "0x3e124925"
+   },
+   {
+    "pool": "blind7",
+    "label": "fp32.b_onebit_b20_third_a1p5",
+    "side": "B",
+    "bit": 20,
+    "base": "0x3eaaaaab"
+   },
+   {
+    "pool": "blind7",
+    "label": "fp32.b_onebit_b22_third",
+    "side": "B",
+    "bit": 22,
+    "base": "0x3eaaaaab"
+   },
+   {
+    "pool": "blind7",
+    "label": "fp16.b_onebit_b8_pi",
+    "side": "B",
+    "bit": 8,
+    "base": "0x42484248"
+   },
+   {
+    "pool": "blind7",
+    "label": "fp16.b_onebit_b9_one",
+    "side": "B",
+    "bit": 9,
+    "base": "0x3c003c00"
+   }
+  ],
+  "used_bits": {
+   "fp32": [
+    5,
+    12,
+    16,
+    20,
+    22
+   ],
+   "fp16": [
+    6,
+    8,
+    9
+   ]
+  },
+  "held_bytes_earlier": [
+   0,
+   1,
+   2,
+   16,
+   51,
+   85,
+   90,
+   128,
+   253,
+   255
+  ],
+  "single_bit_words_earlier": 21,
+  "rerun_candidates": {
+   "fp32": [
+    {
+     "label": "fp32.a_onebit_b5_third",
+     "pool": "blind6",
+     "stat": 2048
+    },
+    {
+     "label": "fp32.a_onebit_b16_half",
+     "pool": "blind6",
+     "stat": 2048
+    },
+    {
+     "label": "fp32.exp_a_gray_walk",
+     "pool": "blind7",
+     "stat": 3504
+    },
+    {
+     "label": "fp32.b_onebit_b20_one",
+     "pool": "blind7",
+     "stat": 4096
+    },
+    {
+     "label": "fp32.b_onebit_b20_third",
+     "pool": "blind6",
+     "stat": 4096
+    },
+    {
+     "label": "fp32.b_onebit_b20_full",
+     "pool": "blind7",
+     "stat": 4096
+    },
+    {
+     "label": "fp32.b_onebit_b20_seventh",
+     "pool": "blind7",
+     "stat": 4096
+    },
+    {
+     "label": "fp32.b_onebit_b20_third_a1p5",
+     "pool": "blind7",
+     "stat": 4096
+    },
+    {
+     "label": "fp32.b_onebit_b12_third",
+     "pool": "blind6",
+     "stat": 4096
+    },
+    {
+     "label": "fp32.b_onebit_b22_third",
+     "pool": "blind7",
+     "stat": 4096
+    },
+    {
+     "label": "fp32.b_onebit_b20_pi",
+     "pool": "blind7",
+     "stat": 4096
+    },
+    {
+     "label": "fp32.exp_b_alt_lsb",
+     "pool": "blind7",
+     "stat": 6100
+    },
+    {
+     "label": "fp32.exp_b_alt_b26",
+     "pool": "blind7",
+     "stat": 6132
+    },
+    {
+     "label": "fp32.exp_a_walk_fixedmant",
+     "pool": "blind6",
+     "stat": 11216
+    },
+    {
+     "label": "fp32.exp_b_alt_shift",
+     "pool": "blind6",
+     "stat": 14568
+    },
+    {
+     "label": "fp32.exp_b_alt_nib",
+     "pool": "blind7",
+     "stat": 17866
+    },
+    {
+     "label": "fp32.exp_only_pos12",
+     "pool": "blind7",
+     "stat": 24426
+    },
+    {
+     "label": "fp32.exp_only_narrow2",
+     "pool": "blind6",
+     "stat": 24518
+    },
+    {
+     "label": "fp32.mant2_spreadexp",
+     "pool": "blind7",
+     "stat": 34090
+    },
+    {
+     "label": "fp32.signexp_invert_b",
+     "pool": "blind6",
+     "stat": 37792
+    },
+    {
+     "label": "fp32.bf16_wideexp",
+     "pool": "blind6",
+     "stat": 49138
+    },
+    {
+     "label": "fp32.real_smol_l3_w8a16_q_outlier",
+     "pool": "blind7",
+     "stat": 56866
+    },
+    {
+     "label": "fp32.real_qwen_dequant_q",
+     "pool": "blind6",
+     "stat": 58452
+    },
+    {
+     "label": "fp32.exp_a_pow2wide_b_randn",
+     "pool": "blind6",
+     "stat": 64464
+    },
+    {
+     "label": "fp32.real_smol_softmax_v_causal",
+     "pool": "blind6",
+     "stat": 73550
+    },
+    {
+     "label": "fp32.c_absorbed",
+     "pool": "blind6",
+     "stat": 79586
+    },
+    {
+     "label": "fp32.uniform_pm1",
+     "pool": "blind7",
+     "stat": 80746
+    },
+    {
+     "label": "fp32.real_qwen_softmax_v",
+     "pool": "blind6",
+     "stat": 80812
+    },
+    {
+     "label": "fp32.randn_a24k",
+     "pool": "blind7",
+     "stat": 81158
+    },
+    {
+     "label": "fp32.real_s360_l1_qk",
+     "pool": "blind7",
+     "stat": 82866
+    },
+    {
+     "label": "fp32.real_qwen_l3_softmax_v_sink",
+     "pool": "blind7",
+     "stat": 83824
+    },
+    {
+     "label": "fp32.dropout30_both",
+     "pool": "blind7",
+     "stat": 87102
+    },
+    {
+     "label": "fp32.laplace_both",
+     "pool": "blind7",
+     "stat": 88360
+    },
+    {
+     "label": "fp32.negzero_a_b_complement",
+     "pool": "blind6",
+     "stat": 129008
+    },
+    {
+     "label": "fp32.a_zeros_b_complement",
+     "pool": "blind6",
+     "stat": 129036
+    }
+   ],
+   "fp16": [
+    {
+     "label": "fp16.b_onebit_b8_pi",
+     "pool": "blind7",
+     "stat": 8192
+    },
+    {
+     "label": "fp16.b_onebit_b6_third",
+     "pool": "blind6",
+     "stat": 8192
+    },
+    {
+     "label": "fp16.b_onebit_b9_one",
+     "pool": "blind7",
+     "stat": 8192
+    },
+    {
+     "label": "fp16.exp_a_walk_fixedmant",
+     "pool": "blind6",
+     "stat": 13050
+    },
+    {
+     "label": "fp16.exp_b_alt_shift",
+     "pool": "blind6",
+     "stat": 20034
+    },
+    {
+     "label": "fp16.exp_only_narrow2",
+     "pool": "blind6",
+     "stat": 36754
+    },
+    {
+     "label": "fp16.e5m2grid_wide",
+     "pool": "blind6",
+     "stat": 48556
+    },
+    {
+     "label": "fp16.real_qwen_qk",
+     "pool": "blind6",
+     "stat": 66502
+    },
+    {
+     "label": "fp16.sorted_k",
+     "pool": "blind7",
+     "stat": 75864
+    },
+    {
+     "label": "fp16.real_qwen_l3_softmax_v_h1",
+     "pool": "blind7",
+     "stat": 77480
+    },
+    {
+     "label": "fp16.c_absorbed",
+     "pool": "blind6",
+     "stat": 78830
+    },
+    {
+     "label": "fp16.real_smol_qk",
+     "pool": "blind6",
+     "stat": 80476
+    },
+    {
+     "label": "fp16.real_smol_softmax_v",
+     "pool": "blind6",
+     "stat": 80770
+    },
+    {
+     "label": "fp16.real_qwen_dequant_v",
+     "pool": "blind6",
+     "stat": 81586
+    },
+    {
+     "label": "fp16.uniform_pm1",
+     "pool": "blind7",
+     "stat": 82488
+    },
+    {
+     "label": "fp16.real_s360_l3_qk",
+     "pool": "blind7",
+     "stat": 83928
+    },
+    {
+     "label": "fp16.real_s360_l3_w8a16_gate",
+     "pool": "blind7",
+     "stat": 84918
+    },
+    {
+     "label": "fp16.laplace_both",
+     "pool": "blind7",
+     "stat": 91640
+    },
+    {
+     "label": "fp16.randn_x8",
+     "pool": "blind7",
+     "stat": 92700
+    },
+    {
+     "label": "fp16.a_zeros_b_complement",
+     "pool": "blind6",
+     "stat": 129020
+    }
+   ]
+  },
+  "n_earlier_tiles": 197
+ },
+ "tiles": [
+  {
+   "label": "fp32.anchor7_zeros",
+   "fmt": "fp32",
+   "cls": "0",
+   "role": "anchor",
+   "prio": "p2",
+   "flag": "rerun:blind7",
+   "sha": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "file": "tiles/fp32/fp32.anchor7_zeros.bin",
+   "rule": "the all-zero floor, byte for byte pool 7's tile under pool 7's label",
+   "params": {
+    "from_pool": "blind7",
+    "from_label": "fp32.anchor7_zeros"
+   },
+   "stats": {
+    "bus_bits_per_op": 0,
+    "gated_lane_frac": 1.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "a_zero_word_frac": 1.0,
+    "b_zero_word_frac": 1.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.a_zeros_b_complement",
+     "fp16.anchor6_zeros",
+     "fp16.anchor7_zeros",
+     "fp16.anchor_zeros",
+     "fp32.a_zeros_b_complement",
+     "fp32.anchor6_zeros"
+    ],
+    "B": [
+     "fp16.anchor6_zeros",
+     "fp16.anchor7_zeros",
+     "fp16.anchor_zeros",
+     "fp32.anchor6_zeros",
+     "fp32.anchor7_zeros",
+     "fp32.anchor_zeros"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp32.anchor8_randn_a_989b8a",
+   "fmt": "fp32",
+   "cls": "0",
+   "role": "anchor",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "989b8a2802a44bab3dd78217891ad3f22dc54a06d770e55f7e4014faf1188c1e",
+   "file": "tiles/fp32/fp32.anchor8_randn_a_989b8a.bin",
+   "rule": "A and B standard normal (pool 7's float anchor rule) on stream anchor/fp32/a",
+   "params": {
+    "stream": [
+     "anchor",
+     "fp32",
+     "a"
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 83858,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.8633,
+     "sign": 0.2305,
+     "exp": 0.8008,
+     "mant": 5.832
+    },
+    "b_hamming": {
+     "all": 13.6099,
+     "sign": 0.5142,
+     "exp": 1.5581,
+     "mant": 11.5376
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "989b8a",
+   "slot": "anchor8_randn_a"
+  },
+  {
+   "label": "fp32.anchor8_randn_b_833ac3",
+   "fmt": "fp32",
+   "cls": "0",
+   "role": "anchor",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "833ac3b58b050a9b6183ea91cca6c81924fb4939e43e67ee6a042acf84ee242e",
+   "file": "tiles/fp32/fp32.anchor8_randn_b_833ac3.bin",
+   "rule": "A and B standard normal (pool 7's float anchor rule) on stream anchor/fp32/b",
+   "params": {
+    "stream": [
+     "anchor",
+     "fp32",
+     "b"
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 82778,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.7852,
+     "sign": 0.2773,
+     "exp": 0.8398,
+     "mant": 5.668
+    },
+    "b_hamming": {
+     "all": 13.4243,
+     "sign": 0.5366,
+     "exp": 1.7202,
+     "mant": 11.1675
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "833ac3",
+   "slot": "anchor8_randn_b"
+  },
+  {
+   "label": "fp32.anchor8_check_randn_319f73",
+   "fmt": "fp32",
+   "cls": "0",
+   "role": "check",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "319f739af820c25098eef4bbe54b73e734d75622ae59a9238d04a7580ea86b07",
+   "file": "tiles/fp32/fp32.anchor8_check_randn_319f73.bin",
+   "rule": "A and B standard normal (pool 7's float anchor rule) on stream anchor/fp32/check",
+   "params": {
+    "stream": [
+     "anchor",
+     "fp32",
+     "check"
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 84434,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.7812,
+     "sign": 0.2227,
+     "exp": 0.6758,
+     "mant": 5.8828
+    },
+    "b_hamming": {
+     "all": 13.8325,
+     "sign": 0.4995,
+     "exp": 1.4897,
+     "mant": 11.8433
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "319f73",
+   "slot": "anchor8_check_randn"
+  },
+  {
+   "label": "fp16.anchor7_zeros",
+   "fmt": "fp16",
+   "cls": "0",
+   "role": "anchor",
+   "prio": "p2",
+   "flag": "rerun:blind7",
+   "sha": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "file": "tiles/fp16/fp16.anchor7_zeros.bin",
+   "rule": "the all-zero floor, byte for byte pool 7's tile under pool 7's label",
+   "params": {
+    "from_pool": "blind7",
+    "from_label": "fp16.anchor7_zeros"
+   },
+   "stats": {
+    "bus_bits_per_op": 0,
+    "gated_lane_frac": 1.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "a_zero_word_frac": 1.0,
+    "b_zero_word_frac": 1.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.a_zeros_b_complement",
+     "fp16.anchor6_zeros",
+     "fp16.anchor7_zeros",
+     "fp16.anchor_zeros",
+     "fp32.a_zeros_b_complement",
+     "fp32.anchor6_zeros"
+    ],
+    "B": [
+     "fp16.anchor6_zeros",
+     "fp16.anchor7_zeros",
+     "fp16.anchor_zeros",
+     "fp32.anchor6_zeros",
+     "fp32.anchor7_zeros",
+     "fp32.anchor_zeros"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp16.anchor8_randn_a_8c7827",
+   "fmt": "fp16",
+   "cls": "0",
+   "role": "anchor",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "8c7827c94628a4baeab22a4654f463d7aca3a21e5684170e3fdf4919c7f80dc9",
+   "file": "tiles/fp16/fp16.anchor8_randn_a_8c7827.bin",
+   "rule": "A and B standard normal, rounded to fp16 (pool 7's float anchor rule) on stream anchor/fp16/a",
+   "params": {
+    "stream": [
+     "anchor",
+     "fp16",
+     "a"
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 82176,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.7969,
+     "sign": 0.5195,
+     "exp": 1.3789,
+     "mant": 4.8984
+    },
+    "b_hamming": {
+     "all": 13.2656,
+     "sign": 0.9097,
+     "exp": 2.5649,
+     "mant": 9.791
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "8c7827",
+   "slot": "anchor8_randn_a"
+  },
+  {
+   "label": "fp16.anchor8_randn_b_3a0fef",
+   "fmt": "fp16",
+   "cls": "0",
+   "role": "anchor",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "3a0fef53eb4b38147806ddf36e5e10ef89994efe1e5e870831d3ab5ba79633be",
+   "file": "tiles/fp16/fp16.anchor8_randn_b_3a0fef.bin",
+   "rule": "A and B standard normal, rounded to fp16 (pool 7's float anchor rule) on stream anchor/fp16/b",
+   "params": {
+    "stream": [
+     "anchor",
+     "fp16",
+     "b"
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 82092,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.8984,
+     "sign": 0.5078,
+     "exp": 1.4414,
+     "mant": 4.9492
+    },
+    "b_hamming": {
+     "all": 13.1436,
+     "sign": 1.043,
+     "exp": 2.5781,
+     "mant": 9.5225
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "3a0fef",
+   "slot": "anchor8_randn_b"
+  },
+  {
+   "label": "fp16.anchor8_check_randn_84631a",
+   "fmt": "fp16",
+   "cls": "0",
+   "role": "check",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "84631a30cda9b1f88aab9db18ebcedc82ffef9622cc717e9dbc72310ef0ba9c4",
+   "file": "tiles/fp16/fp16.anchor8_check_randn_84631a.bin",
+   "rule": "A and B standard normal, rounded to fp16 (pool 7's float anchor rule) on stream anchor/fp16/check",
+   "params": {
+    "stream": [
+     "anchor",
+     "fp16",
+     "check"
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 85408,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.8125,
+     "sign": 0.4688,
+     "exp": 1.3945,
+     "mant": 4.9492
+    },
+    "b_hamming": {
+     "all": 14.0391,
+     "sign": 0.9756,
+     "exp": 2.8364,
+     "mant": 10.2271
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "84631a",
+   "slot": "anchor8_check_randn"
+  },
+  {
+   "label": "int8.anchor7_zeros",
+   "fmt": "int8",
+   "cls": "0",
+   "role": "anchor",
+   "prio": "p2",
+   "flag": "rerun:blind7",
+   "sha": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "file": "tiles/int8/int8.anchor7_zeros.bin",
+   "rule": "the all-zero floor, byte for byte pool 7's tile under pool 7's label",
+   "params": {
+    "from_pool": "blind7",
+    "from_label": "int8.anchor7_zeros"
+   },
+   "stats": {
+    "bus_bits_per_op": 0,
+    "gated_lane_frac": 1.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "mag": 0.0
+    },
+    "b_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "mag": 0.0
+    },
+    "a_zero_word_frac": 1.0,
+    "b_zero_word_frac": 1.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.a_zeros_b_complement",
+     "fp16.anchor6_zeros",
+     "fp16.anchor7_zeros",
+     "fp16.anchor_zeros",
+     "fp32.a_zeros_b_complement",
+     "fp32.anchor6_zeros"
+    ],
+    "B": [
+     "fp16.anchor6_zeros",
+     "fp16.anchor7_zeros",
+     "fp16.anchor_zeros",
+     "fp32.anchor6_zeros",
+     "fp32.anchor7_zeros",
+     "fp32.anchor_zeros"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "int8.anchor8_full_a_4aac84",
+   "fmt": "int8",
+   "cls": "0",
+   "role": "anchor",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "4aac84b55ef565fc301161caea6a4a2a39aa9de119f4d6564d2edf9dbd24c18f",
+   "file": "tiles/int8/int8.anchor8_full_a_4aac84.bin",
+   "rule": "A and B uniform over -128..127 (pool 7's int8 anchor rule) on stream anchor/int8/a",
+   "params": {
+    "stream": [
+     "anchor",
+     "int8",
+     "a"
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 70312,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 16.1484,
+     "sign": 1.8828,
+     "mag": 14.2656
+    },
+    "b_hamming": {
+     "all": 1.0176,
+     "sign": 0.1284,
+     "mag": 0.8892
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "4aac84",
+   "slot": "anchor8_full_a"
+  },
+  {
+   "label": "int8.anchor8_full_b_935710",
+   "fmt": "int8",
+   "cls": "0",
+   "role": "anchor",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "9357109846b903eff0c80629962f6c9f2fadc8b079877387ef44febb3dbc1c5f",
+   "file": "tiles/int8/int8.anchor8_full_b_935710.bin",
+   "rule": "A and B uniform over -128..127 (pool 7's int8 anchor rule) on stream anchor/int8/b",
+   "params": {
+    "stream": [
+     "anchor",
+     "int8",
+     "b"
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 69952,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 16.0859,
+     "sign": 2.0547,
+     "mag": 14.0312
+    },
+    "b_hamming": {
+     "all": 0.9922,
+     "sign": 0.1226,
+     "mag": 0.8696
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "935710",
+   "slot": "anchor8_full_b"
+  },
+  {
+   "label": "int8.anchor8_check_full_d8b6c8",
+   "fmt": "int8",
+   "cls": "0",
+   "role": "check",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "d8b6c8651c8694f12f634b0fa92a3236792f8cf41aba4ac70c7d3302da80d027",
+   "file": "tiles/int8/int8.anchor8_check_full_d8b6c8.bin",
+   "rule": "A and B uniform over -128..127 (pool 7's int8 anchor rule) on stream anchor/int8/check",
+   "params": {
+    "stream": [
+     "anchor",
+     "int8",
+     "check"
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 70734,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 16.2578,
+     "sign": 2.0781,
+     "mag": 14.1797
+    },
+    "b_hamming": {
+     "all": 1.0112,
+     "sign": 0.1235,
+     "mag": 0.8877
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "d8b6c8",
+   "slot": "anchor8_check_full"
+  },
+  {
+   "label": "fp32.s8_onebit_b13_41783e4a_A40080727",
+   "fmt": "fp32",
+   "cls": "S",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "09e5e5f8a4f13bc18c907c9f928b15f99a1200b58914befd254bac1486ccceb7",
+   "file": "tiles/fp32/fp32.s8_onebit_b13_41783e4a_A40080727.bin",
+   "rule": "A every word 0x40080727; B columns 0-7 0x41783e4a, columns 8-15 0x41781e4a (bit 13 flipped), every line",
+   "params": {
+    "stratum": "mant_mid",
+    "candidates": [
+     8,
+     9,
+     10,
+     11,
+     13,
+     14,
+     15
+    ],
+    "bit": 13,
+    "base": "0x41783e4a",
+    "flipped": "0x41781e4a",
+    "a_word": "0x40080727",
+    "base_draws": 1,
+    "values": [
+     15.515207290649414,
+     15.507394790649414
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 4096,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 1.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 1.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "b13_41783e4a_A40080727",
+   "slot": "s8_onebit"
+  },
+  {
+   "label": "fp32.s8_onebit_b14_3ef6ccbf",
+   "fmt": "fp32",
+   "cls": "S",
+   "role": "kind",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "22098defc627c5a127c7f03d54eafea7cf876c12cb7669df6311d0874766973d",
+   "file": "tiles/fp32/fp32.s8_onebit_b14_3ef6ccbf.bin",
+   "rule": "A every word 0x3f800000; B columns 0-7 0x3ef6ccbf, columns 8-15 0x3ef68cbf (bit 14 flipped), every line",
+   "params": {
+    "stratum": "mant_mid",
+    "candidates": [
+     8,
+     9,
+     10,
+     11,
+     13,
+     14,
+     15
+    ],
+    "bit": 14,
+    "base": "0x3ef6ccbf",
+    "flipped": "0x3ef68cbf",
+    "a_word": "0x3f800000",
+    "base_draws": 1,
+    "values": [
+     0.48203083872795105,
+     0.48154255747795105
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 4096,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 1.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 1.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.b_onebit_b12_third",
+     "fp32.b_onebit_b20_full",
+     "fp32.b_onebit_b20_one",
+     "fp32.b_onebit_b20_pi",
+     "fp32.b_onebit_b20_seventh",
+     "fp32.b_onebit_b20_third"
+    ],
+    "B": []
+   },
+   "byte_sig": "b14_3ef6ccbf",
+   "slot": "s8_onebit"
+  },
+  {
+   "label": "fp32.s8_onebit_b18_be2584eb",
+   "fmt": "fp32",
+   "cls": "S",
+   "role": "kind",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "23c424f815fd1eedb8a136136a6007cfc47b5c4528cc5ace0fe29803bf96dbef",
+   "file": "tiles/fp32/fp32.s8_onebit_b18_be2584eb.bin",
+   "rule": "A every word 0x3f800000; B columns 0-7 0xbe2584eb, columns 8-15 0xbe2184eb (bit 18 flipped), every line",
+   "params": {
+    "stratum": "mant_hi",
+    "candidates": [
+     17,
+     18,
+     19,
+     21
+    ],
+    "bit": 18,
+    "base": "0xbe2584eb",
+    "flipped": "0xbe2184eb",
+    "a_word": "0x3f800000",
+    "base_draws": 1,
+    "values": [
+     -0.16163985431194305,
+     -0.15773360431194305
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 4096,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 1.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 1.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.b_onebit_b12_third",
+     "fp32.b_onebit_b20_full",
+     "fp32.b_onebit_b20_one",
+     "fp32.b_onebit_b20_pi",
+     "fp32.b_onebit_b20_seventh",
+     "fp32.b_onebit_b20_third"
+    ],
+    "B": []
+   },
+   "byte_sig": "b18_be2584eb",
+   "slot": "s8_onebit"
+  },
+  {
+   "label": "fp32.s8_onebit_b19_c11b3dd2",
+   "fmt": "fp32",
+   "cls": "S",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "0760dc36a906f280e9e277aca7695ee8fae827d3cb2f328623d5934d741909e8",
+   "file": "tiles/fp32/fp32.s8_onebit_b19_c11b3dd2.bin",
+   "rule": "A every word 0x3f800000; B columns 0-7 0xc11b3dd2, columns 8-15 0xc1133dd2 (bit 19 flipped), every line",
+   "params": {
+    "stratum": "mant_hi",
+    "candidates": [
+     17,
+     18,
+     19,
+     21
+    ],
+    "bit": 19,
+    "base": "0xc11b3dd2",
+    "flipped": "0xc1133dd2",
+    "a_word": "0x3f800000",
+    "base_draws": 1,
+    "values": [
+     -9.702592849731445,
+     -9.202592849731445
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 4096,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 1.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 1.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.b_onebit_b12_third",
+     "fp32.b_onebit_b20_full",
+     "fp32.b_onebit_b20_one",
+     "fp32.b_onebit_b20_pi",
+     "fp32.b_onebit_b20_seventh",
+     "fp32.b_onebit_b20_third"
+    ],
+    "B": []
+   },
+   "byte_sig": "b19_c11b3dd2",
+   "slot": "s8_onebit"
+  },
+  {
+   "label": "fp32.s8_onebit_b26_bffdf029",
+   "fmt": "fp32",
+   "cls": "S",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "01fc3126749844d207b3974e2b2443731a60140f5fb0e13e1f46265e050535e2",
+   "file": "tiles/fp32/fp32.s8_onebit_b26_bffdf029.bin",
+   "rule": "A every word 0x3f800000; B columns 0-7 0xbffdf029, columns 8-15 0xbbfdf029 (bit 26 flipped), every line",
+   "params": {
+    "stratum": "exp_sign",
+    "candidates": [
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     31
+    ],
+    "bit": 26,
+    "base": "0xbffdf029",
+    "flipped": "0xbbfdf029",
+    "a_word": "0x3f800000",
+    "base_draws": 1,
+    "values": [
+     -1.9838916063308716,
+     -0.007749576587229967
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 4096,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 1.0,
+     "sign": 0.0,
+     "exp": 1.0,
+     "mant": 0.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.b_onebit_b12_third",
+     "fp32.b_onebit_b20_full",
+     "fp32.b_onebit_b20_one",
+     "fp32.b_onebit_b20_pi",
+     "fp32.b_onebit_b20_seventh",
+     "fp32.b_onebit_b20_third"
+    ],
+    "B": []
+   },
+   "byte_sig": "b26_bffdf029",
+   "slot": "s8_onebit"
+  },
+  {
+   "label": "fp32.s8_onebit_b7_3ee13961",
+   "fmt": "fp32",
+   "cls": "S",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "b641b6caac6f1db3f5cc3bd0915b7642ba335b03fda9efce79d012b52b035cb9",
+   "file": "tiles/fp32/fp32.s8_onebit_b7_3ee13961.bin",
+   "rule": "A every word 0x3f800000; B columns 0-7 0x3ee13961, columns 8-15 0x3ee139e1 (bit 7 flipped), every line",
+   "params": {
+    "stratum": "mant_lo",
+    "candidates": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     6,
+     7
+    ],
+    "bit": 7,
+    "base": "0x3ee13961",
+    "flipped": "0x3ee139e1",
+    "a_word": "0x3f800000",
+    "base_draws": 1,
+    "values": [
+     0.43989089131355286,
+     0.4398947060108185
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 4096,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 1.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 1.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.b_onebit_b12_third",
+     "fp32.b_onebit_b20_full",
+     "fp32.b_onebit_b20_one",
+     "fp32.b_onebit_b20_pi",
+     "fp32.b_onebit_b20_seventh",
+     "fp32.b_onebit_b20_third"
+    ],
+    "B": []
+   },
+   "byte_sig": "b7_3ee13961",
+   "slot": "s8_onebit"
+  },
+  {
+   "label": "fp16.s8_onebit_b10_c127c127",
+   "fmt": "fp16",
+   "cls": "S",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "eacddd3bc6ab8c0c9626fe042d4e3a039f1181c1081eeb6d4e60bd1655a0f2ea",
+   "file": "tiles/fp16/fp16.s8_onebit_b10_c127c127.bin",
+   "rule": "A every word 0x3c003c00; B columns 0-7 0xc127c127, columns 8-15 0xc527c527 (bit 10 flipped in both halves), every line",
+   "params": {
+    "stratum": "exp_sign",
+    "candidates": [
+     10,
+     11,
+     12,
+     15
+    ],
+    "bit": 10,
+    "base": "0xc127c127",
+    "flipped": "0xc527c527",
+    "a_word": "0x3c003c00",
+    "base_draws": 1,
+    "values": [
+     -2.576171875,
+     -5.15234375
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 8192,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 2.0,
+     "sign": 0.0,
+     "exp": 2.0,
+     "mant": 0.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.b_onebit_b6_third",
+     "fp16.b_onebit_b8_pi",
+     "fp16.b_onebit_b9_one"
+    ],
+    "B": []
+   },
+   "byte_sig": "b10_c127c127",
+   "slot": "s8_onebit"
+  },
+  {
+   "label": "fp16.s8_onebit_b2_c46ec46e",
+   "fmt": "fp16",
+   "cls": "S",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "ad3fd767fc638bd4e88e39d66aade9e3de1050a2345d0be82ffeff32218fe7b0",
+   "file": "tiles/fp16/fp16.s8_onebit_b2_c46ec46e.bin",
+   "rule": "A every word 0x3c003c00; B columns 0-7 0xc46ec46e, columns 8-15 0xc46ac46a (bit 2 flipped in both halves), every line",
+   "params": {
+    "stratum": "mant_lo",
+    "candidates": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "bit": 2,
+    "base": "0xc46ec46e",
+    "flipped": "0xc46ac46a",
+    "a_word": "0x3c003c00",
+    "base_draws": 1,
+    "values": [
+     -4.4296875,
+     -4.4140625
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 8192,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 2.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 2.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.b_onebit_b6_third",
+     "fp16.b_onebit_b8_pi",
+     "fp16.b_onebit_b9_one"
+    ],
+    "B": []
+   },
+   "byte_sig": "b2_c46ec46e",
+   "slot": "s8_onebit"
+  },
+  {
+   "label": "fp16.s8_onebit_b4_c2e2c2e2",
+   "fmt": "fp16",
+   "cls": "S",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "1844a3c63a6452ad1e0da2effdf0966691f13fa1d6410758fccde29c598b5324",
+   "file": "tiles/fp16/fp16.s8_onebit_b4_c2e2c2e2.bin",
+   "rule": "A every word 0x3c003c00; B columns 0-7 0xc2e2c2e2, columns 8-15 0xc2f2c2f2 (bit 4 flipped in both halves), every line",
+   "params": {
+    "stratum": "mant_lo",
+    "candidates": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "bit": 4,
+    "base": "0xc2e2c2e2",
+    "flipped": "0xc2f2c2f2",
+    "a_word": "0x3c003c00",
+    "base_draws": 1,
+    "values": [
+     -3.44140625,
+     -3.47265625
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 8192,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 2.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 2.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.b_onebit_b6_third",
+     "fp16.b_onebit_b8_pi",
+     "fp16.b_onebit_b9_one"
+    ],
+    "B": []
+   },
+   "byte_sig": "b4_c2e2c2e2",
+   "slot": "s8_onebit"
+  },
+  {
+   "label": "fp16.s8_onebit_b7_b945b945",
+   "fmt": "fp16",
+   "cls": "S",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "2700ab4b0cd55df9562c4f014c28775805720bf5b1c5b87b9215fc968edca911",
+   "file": "tiles/fp16/fp16.s8_onebit_b7_b945b945.bin",
+   "rule": "A every word 0x3c003c00; B columns 0-7 0xb945b945, columns 8-15 0xb9c5b9c5 (bit 7 flipped in both halves), every line",
+   "params": {
+    "stratum": "mant_hi",
+    "candidates": [
+     7
+    ],
+    "bit": 7,
+    "base": "0xb945b945",
+    "flipped": "0xb9c5b9c5",
+    "a_word": "0x3c003c00",
+    "base_draws": 1,
+    "values": [
+     -0.65869140625,
+     -0.72119140625
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 8192,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 2.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 2.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.b_onebit_b6_third",
+     "fp16.b_onebit_b8_pi",
+     "fp16.b_onebit_b9_one"
+    ],
+    "B": []
+   },
+   "byte_sig": "b7_b945b945",
+   "slot": "s8_onebit"
+  },
+  {
+   "label": "fp32.u8_ar_i_a662b4",
+   "fmt": "fp32",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "a662b4e61510724c48292c77e4193aa897c43d40ace0483b8a399f2b80b9b755",
+   "file": "tiles/fp32/fp32.u8_ar_i_a662b4.bin",
+   "rule": "family ar_i on stream U/fp32/ar_i",
+   "params": {
+    "rho": 0.8372209078071691,
+    "along": "A rows i, B columns j"
+   },
+   "stats": {
+    "bus_bits_per_op": 80546,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.3008,
+     "sign": 0.1094,
+     "exp": 0.6133,
+     "mant": 5.5781
+    },
+    "b_hamming": {
+     "all": 13.3638,
+     "sign": 0.396,
+     "exp": 1.4141,
+     "mant": 11.5537
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "a662b4",
+   "slot": "u8_ar_i"
+  },
+  {
+   "label": "fp32.u8_ar_k_3297d2",
+   "fmt": "fp32",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "3297d2138db133229c51825566eda98750ddbdb2f3e31b036645832f70c4d663",
+   "file": "tiles/fp32/fp32.u8_ar_k_3297d2.bin",
+   "rule": "family ar_k on stream U/fp32/ar_k",
+   "params": {
+    "rho": 0.8937470658794869,
+    "along": "k on both sides"
+   },
+   "stats": {
+    "bus_bits_per_op": 83418,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.668,
+     "sign": 0.2578,
+     "exp": 0.7227,
+     "mant": 5.6875
+    },
+    "b_hamming": {
+     "all": 13.6978,
+     "sign": 0.5088,
+     "exp": 1.4858,
+     "mant": 11.7031
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "3297d2",
+   "slot": "u8_ar_k"
+  },
+  {
+   "label": "fp32.u8_bimodal_1f57eb",
+   "fmt": "fp32",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "1f57eb35027f3ab0954b669fb628dc74ef09ad2806e366a3eea621423abed6b6",
+   "file": "tiles/fp32/fp32.u8_bimodal_1f57eb.bin",
+   "rule": "family bimodal on stream U/fp32/bimodal",
+   "params": {
+    "mode": 0.7627637986809614,
+    "sd": 0.1659225610997613
+   },
+   "stats": {
+    "bus_bits_per_op": 75800,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.1562,
+     "sign": 0.2344,
+     "exp": 0.1953,
+     "mant": 5.7266
+    },
+    "b_hamming": {
+     "all": 12.3496,
+     "sign": 0.5664,
+     "exp": 0.3281,
+     "mant": 11.4551
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "1f57eb",
+   "slot": "u8_bimodal"
+  },
+  {
+   "label": "fp32.u8_lognorm_62af49",
+   "fmt": "fp32",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "62af49b1437e857355abef4d0f075c3553c2f3b61b254f2fa7ba7e66151e634a",
+   "file": "tiles/fp32/fp32.u8_lognorm_62af49.bin",
+   "rule": "family lognorm on stream U/fp32/lognorm",
+   "params": {
+    "mu": 0.6846050247238136,
+    "sigma": 1.7186519449714894,
+    "p_negative": 0.31504392957924976
+   },
+   "stats": {
+    "bus_bits_per_op": 97496,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 7.9102,
+     "sign": 0.2305,
+     "exp": 1.9609,
+     "mant": 5.7188
+    },
+    "b_hamming": {
+     "all": 15.8926,
+     "sign": 0.4604,
+     "exp": 3.9751,
+     "mant": 11.457
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "62af49",
+   "slot": "u8_lognorm"
+  },
+  {
+   "label": "fp32.u8_uniform_e7e045",
+   "fmt": "fp32",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "e7e045441264cfc0047034129ba8a1167f2e9f1a141d0c54038fab80a4b40966",
+   "file": "tiles/fp32/fp32.u8_uniform_e7e045.bin",
+   "rule": "family uniform on stream U/fp32/uniform",
+   "params": {
+    "half_width": 0.2098873478737974
+   },
+   "stats": {
+    "bus_bits_per_op": 84386,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.668,
+     "sign": 0.2383,
+     "exp": 0.7383,
+     "mant": 5.6914
+    },
+    "b_hamming": {
+     "all": 13.9341,
+     "sign": 0.5298,
+     "exp": 1.646,
+     "mant": 11.7583
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "e7e045",
+   "slot": "u8_uniform"
+  },
+  {
+   "label": "fp16.u8_ar_i_32349b",
+   "fmt": "fp16",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "32349beacb5b744a52a1e3e86bfce82fdf678eebc58be489a61d11e4667d8432",
+   "file": "tiles/fp16/fp16.u8_ar_i_32349b.bin",
+   "rule": "family ar_i on stream U/fp16/ar_i",
+   "params": {
+    "rho": 0.9005073980476633,
+    "along": "A rows i, B columns j"
+   },
+   "stats": {
+    "bus_bits_per_op": 80990,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.1641,
+     "sign": 0.125,
+     "exp": 1.0859,
+     "mant": 4.9531
+    },
+    "b_hamming": {
+     "all": 13.6089,
+     "sign": 0.6826,
+     "exp": 2.7012,
+     "mant": 10.2251
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "32349b",
+   "slot": "u8_ar_i"
+  },
+  {
+   "label": "fp16.u8_cauchy_96e015",
+   "fmt": "fp16",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "96e0152308bea6384ccac49b62d516002c6c8149b55961d158de47a0d0024827",
+   "file": "tiles/fp16/fp16.u8_cauchy_96e015.bin",
+   "rule": "family cauchy on stream U/fp16/cauchy",
+   "params": {
+    "scale": 0.125,
+    "clip": 125.0
+   },
+   "stats": {
+    "bus_bits_per_op": 89524,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 7.0977,
+     "sign": 0.4883,
+     "exp": 1.6758,
+     "mant": 4.9336
+    },
+    "b_hamming": {
+     "all": 14.7588,
+     "sign": 1.0898,
+     "exp": 3.5806,
+     "mant": 10.0884
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "96e015",
+   "slot": "u8_cauchy"
+  },
+  {
+   "label": "fp16.u8_rowscale_ecc921",
+   "fmt": "fp16",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "ecc921fca4fe95137c8d9e3a91892468bd41709b0f882587a7b51b12ce1230ed",
+   "file": "tiles/fp16/fp16.u8_rowscale_ecc921.bin",
+   "rule": "family rowscale on stream U/fp16/rowscale",
+   "params": {
+    "a_row_log_sd": 0.5091610630498565,
+    "b_column_log_sd": 0.7566583993698707
+   },
+   "stats": {
+    "bus_bits_per_op": 89824,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 7.4023,
+     "sign": 0.4961,
+     "exp": 1.9219,
+     "mant": 4.9844
+    },
+    "b_hamming": {
+     "all": 14.5273,
+     "sign": 1.0225,
+     "exp": 3.603,
+     "mant": 9.9019
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "ecc921",
+   "slot": "u8_rowscale"
+  },
+  {
+   "label": "fp16.u8_tdist_93475b",
+   "fmt": "fp16",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "93475b75b06bae56cbcae6dfe33ac94bf91eb708180d769beb5d9f5ff1a8594c",
+   "file": "tiles/fp16/fp16.u8_tdist_93475b.bin",
+   "rule": "family tdist on stream U/fp16/tdist",
+   "params": {
+    "df": 2.70850026655535,
+    "scale": 0.125,
+    "clip": 8.0
+   },
+   "stats": {
+    "bus_bits_per_op": 87922,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 7.1758,
+     "sign": 0.5078,
+     "exp": 1.6094,
+     "mant": 5.0586
+    },
+    "b_hamming": {
+     "all": 14.2896,
+     "sign": 1.0547,
+     "exp": 3.0601,
+     "mant": 10.1748
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "93475b",
+   "slot": "u8_tdist"
+  },
+  {
+   "label": "int8.u8_ar_k_0a9fe5",
+   "fmt": "int8",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "0a9fe5c9686b947d096ad371158c24939b327a532ad6246427c52513de014fac",
+   "file": "tiles/int8/int8.u8_ar_k_0a9fe5.bin",
+   "rule": "family ar_k on stream U/int8/ar_k",
+   "params": {
+    "rho": 0.9243258336382424,
+    "scale": 25.641057283156215,
+    "along": "k on both sides"
+   },
+   "stats": {
+    "bus_bits_per_op": 69850,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 16.2109,
+     "sign": 2.0625,
+     "mag": 14.1484
+    },
+    "b_hamming": {
+     "all": 0.8423,
+     "sign": 0.0596,
+     "mag": 0.7827
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "0a9fe5",
+   "slot": "u8_ar_k"
+  },
+  {
+   "label": "int8.u8_biased_14548f",
+   "fmt": "int8",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "14548f9a615a9b865e4f4e095de8a2c3beafb6c6890849d64004b69eeadf5a33",
+   "file": "tiles/int8/int8.u8_biased_14548f.bin",
+   "rule": "family biased on stream U/int8/biased",
+   "params": {
+    "mean": -1.119880208215875,
+    "sd": 14.488559270216696
+   },
+   "stats": {
+    "bus_bits_per_op": 71678,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 16.4844,
+     "sign": 2.0234,
+     "mag": 14.4609
+    },
+    "b_hamming": {
+     "all": 1.0151,
+     "sign": 0.127,
+     "mag": 0.8882
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "14548f",
+   "slot": "u8_biased"
+  },
+  {
+   "label": "int8.u8_relu_tq_1fb940",
+   "fmt": "int8",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "1fb940ce154c885e737871eeb30e156ac4479f25edc74143e06e7c9f4547d6df",
+   "file": "tiles/int8/int8.u8_relu_tq_1fb940.bin",
+   "rule": "family relu_tq on stream U/int8/relu_tq",
+   "params": {
+    "a_relu_scale": 36.943428252892645,
+    "b_df": 2.8639400689029144,
+    "b_scale": 20.909404893710708
+   },
+   "stats": {
+    "bus_bits_per_op": 38444,
+    "gated_lane_frac": 0.082031,
+    "a_hamming": {
+     "all": 8.3672,
+     "sign": 0.0,
+     "mag": 8.3672
+    },
+    "b_hamming": {
+     "all": 1.0186,
+     "sign": 0.1299,
+     "mag": 0.8887
+    },
+    "a_zero_word_frac": 0.08203125,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "1fb940",
+   "slot": "u8_relu_tq"
+  },
+  {
+   "label": "int8.u8_sparseq_58e6e0",
+   "fmt": "int8",
+   "cls": "U",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "58e6e082267acc60f40f8e602821b9db2c35728feb8f5c39a1d29648ee1d3578",
+   "file": "tiles/int8/int8.u8_sparseq_58e6e0.bin",
+   "rule": "family sparseq on stream U/int8/sparseq",
+   "params": {
+    "zero_p": 0.5776519122866051,
+    "scale": 15.300096353975682
+   },
+   "stats": {
+    "bus_bits_per_op": 45796,
+    "gated_lane_frac": 0.124023,
+    "a_hamming": {
+     "all": 10.5312,
+     "sign": 1.3281,
+     "mag": 9.2031
+    },
+    "b_hamming": {
+     "all": 0.6494,
+     "sign": 0.0801,
+     "mag": 0.5693
+    },
+    "a_zero_word_frac": 0.1171875,
+    "b_zero_word_frac": 0.14453125
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "58e6e0",
+   "slot": "u8_sparseq"
+  },
+  {
+   "label": "int8.l8_cycle3_d3p3c15_c6d5",
+   "fmt": "int8",
+   "cls": "L",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "c6d539f3db8f5e1658f7a514c16aa35d23e8834d1d50bf1c975eb52402a62790",
+   "file": "tiles/int8/int8.l8_cycle3_d3p3c15_c6d5.bin",
+   "rule": "A uniform -128..127; B lines cycle X, Y, Z (three random lines)",
+   "params": {},
+   "stats": {
+    "bus_bits_per_op": 70362,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 16.2578,
+     "sign": 2.0234,
+     "mag": 14.2344
+    },
+    "b_hamming": {
+     "all": 0.9204,
+     "sign": 0.1074,
+     "mag": 0.813
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "d3p3c15_c6d5",
+   "slot": "l8_cycle3"
+  },
+  {
+   "label": "int8.l8_flip_d2p2c16_231d",
+   "fmt": "int8",
+   "cls": "L",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "231da744b2b80963e1395b16acb30f129414a33a1a858e16baa6c39a31fc6501",
+   "file": "tiles/int8/int8.l8_flip_d2p2c16_231d.bin",
+   "rule": "A uniform -128..127; B lines alternate X, Y with Y = X xor a mask of 3 bits in every byte",
+   "params": {
+    "bits_per_byte": 3
+   },
+   "stats": {
+    "bus_bits_per_op": 68032,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 15.8594,
+     "sign": 2.125,
+     "mag": 13.7344
+    },
+    "b_hamming": {
+     "all": 0.75,
+     "sign": 0.1055,
+     "mag": 0.6445
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "d2p2c16_231d",
+   "slot": "l8_flip"
+  },
+  {
+   "label": "int8.l8_halfword_d2p2c16_83df",
+   "fmt": "int8",
+   "cls": "L",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "83df253bae462d67a9d2c90d8d4ed4633dc13cb11b1552583224d1cfea5adc13",
+   "file": "tiles/int8/int8.l8_halfword_d2p2c16_83df.bin",
+   "rule": "A uniform -128..127; B lines alternate X, Y with Y = X with words 8-15 (columns 8-15) complemented: half of each line's words change at every boundary",
+   "params": {},
+   "stats": {
+    "bus_bits_per_op": 69344,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 15.9297,
+     "sign": 1.9688,
+     "mag": 13.9609
+    },
+    "b_hamming": {
+     "all": 1.0,
+     "sign": 0.125,
+     "mag": 0.875
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "d2p2c16_83df",
+   "slot": "l8_halfword"
+  },
+  {
+   "label": "int8.l8_period2_d2p4c8_4ea3",
+   "fmt": "int8",
+   "cls": "L",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "4ea38fd64a7310405744d960eebb01c85c0f03054b2ecf5e55a29b078763b6fa",
+   "file": "tiles/int8/int8.l8_period2_d2p4c8_4ea3.bin",
+   "rule": "A uniform -128..127; B lines X, X, Y, Y, ... (random lines; a change at every second boundary)",
+   "params": {},
+   "stats": {
+    "bus_bits_per_op": 67760,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 16.0312,
+     "sign": 1.9922,
+     "mag": 14.0391
+    },
+    "b_hamming": {
+     "all": 0.5117,
+     "sign": 0.0566,
+     "mag": 0.4551
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "d2p4c8_4ea3",
+   "slot": "l8_period2"
+  },
+  {
+   "label": "int8.h8_held_line4cea",
+   "fmt": "int8",
+   "cls": "H",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "54f6567272b3665893b56d9501e62524cdb0457f04c5b0cc4a0ffdf8ebfa82f4",
+   "file": "tiles/int8/int8.h8_held_line4cea.bin",
+   "rule": "A uniform -128..127; one B line of round(12*N(0,1)) bytes, held for all 16 k-groups",
+   "params": {
+    "line_scale": 12.0
+   },
+   "stats": {
+    "bus_bits_per_op": 65696,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 16.0391,
+     "sign": 1.9609,
+     "mag": 14.0781
+    },
+    "b_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "mag": 0.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "line4cea",
+   "slot": "h8_held"
+  },
+  {
+   "label": "int8.h8_held_v34",
+   "fmt": "int8",
+   "cls": "H",
+   "role": "kind",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "ae67f0b850ba2adf32b3186e4a1cbbc976f8b14f803a3069c7d4f5daacc096a1",
+   "file": "tiles/int8/int8.h8_held_v34.bin",
+   "rule": "A uniform -128..127; every B byte 0x34",
+   "params": {
+    "held_byte": 52,
+    "candidates": [
+     7,
+     11,
+     13,
+     14,
+     19,
+     21,
+     22,
+     25,
+     26,
+     28,
+     35,
+     37,
+     38,
+     41,
+     42,
+     44,
+     49,
+     50,
+     52,
+     56,
+     67,
+     69,
+     70,
+     73,
+     74,
+     76,
+     81,
+     82,
+     84,
+     88,
+     97,
+     98,
+     100,
+     104,
+     112,
+     131,
+     133,
+     134,
+     137,
+     138,
+     140,
+     145,
+     146,
+     148,
+     152,
+     161,
+     162,
+     164,
+     168,
+     176,
+     193,
+     194,
+     196,
+     200,
+     208,
+     224
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 65856,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 16.0781,
+     "sign": 2.0469,
+     "mag": 14.0312
+    },
+    "b_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "mag": 0.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "v34",
+   "slot": "h8_held"
+  },
+  {
+   "label": "int8.h8_held_vd9",
+   "fmt": "int8",
+   "cls": "H",
+   "role": "kind",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "25e8774c3313f74fcf4b7c4530c19d88fe69ad28764c9053f69add6b3208496e",
+   "file": "tiles/int8/int8.h8_held_vd9.bin",
+   "rule": "A uniform -128..127; every B byte 0xd9",
+   "params": {
+    "held_byte": 217,
+    "candidates": [
+     143,
+     151,
+     155,
+     157,
+     158,
+     159,
+     167,
+     171,
+     173,
+     174,
+     175,
+     179,
+     181,
+     182,
+     183,
+     185,
+     186,
+     187,
+     188,
+     189,
+     190,
+     199,
+     203,
+     205,
+     206,
+     207,
+     211,
+     213,
+     214,
+     215,
+     217,
+     218,
+     219,
+     220,
+     221,
+     222,
+     227,
+     229,
+     230,
+     231,
+     233,
+     234,
+     235,
+     236,
+     237,
+     238,
+     241,
+     242,
+     243,
+     244,
+     245,
+     246,
+     248,
+     249,
+     250,
+     252
+    ]
+   },
+   "stats": {
+    "bus_bits_per_op": 64800,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 15.8203,
+     "sign": 2.0078,
+     "mag": 13.8125
+    },
+    "b_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "mag": 0.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "vd9",
+   "slot": "h8_held"
+  },
+  {
+   "label": "fp32.r8_dsqwen_l1_qk_f0161a",
+   "fmt": "fp32",
+   "cls": "R",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "f0161afcd59e7cf176e0dc383646d2aac6cb688e1a95915fc89608e87647094f",
+   "file": "tiles/fp32/fp32.r8_dsqwen_l1_qk_f0161a.bin",
+   "rule": "RedHatAI/DeepSeek-R1-Distill-Qwen-1.5B-quantized.w8a8: A = layer 1 head 10: rotary queries, tokens 0-15, head dims 16-31; B = layer 1 KV head 1: rotary keys of tokens 0-15, head dims 16-31, transposed",
+   "params": {
+    "model": "dsqwen",
+    "layer": 1,
+    "cut": "qk",
+    "what_A": "layer 1 head 10: rotary queries, tokens 0-15, head dims 16-31",
+    "what_B": "layer 1 KV head 1: rotary keys of tokens 0-15, head dims 16-31, transposed",
+    "pick": {},
+    "outliers": null
+   },
+   "stats": {
+    "bus_bits_per_op": 82888,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.4688,
+     "sign": 0.168,
+     "exp": 0.6133,
+     "mant": 5.6875
+    },
+    "b_hamming": {
+     "all": 13.7676,
+     "sign": 0.4229,
+     "exp": 1.3291,
+     "mant": 12.0156
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "f0161a",
+   "slot": "r8_dsqwen_l1_qk"
+  },
+  {
+   "label": "fp32.r8_granite_l3_qk_02f7c6",
+   "fmt": "fp32",
+   "cls": "R",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "02f7c623219160a6cffebb54c3c00b075aeb2a2dcd8ded4e2eb6468bc6a2396d",
+   "file": "tiles/fp32/fp32.r8_granite_l3_qk_02f7c6.bin",
+   "rule": "RedHatAI/granite-3.1-2b-instruct-quantized.w8a8: A = layer 3 head 15: rotary queries, tokens 0-15, head dims 0-15; B = layer 3 KV head 3: rotary keys of tokens 0-15, head dims 0-15, transposed",
+   "params": {
+    "model": "granite",
+    "layer": 3,
+    "cut": "qk",
+    "what_A": "layer 3 head 15: rotary queries, tokens 0-15, head dims 0-15",
+    "what_B": "layer 3 KV head 3: rotary keys of tokens 0-15, head dims 0-15, transposed",
+    "pick": {},
+    "outliers": null
+   },
+   "stats": {
+    "bus_bits_per_op": 93134,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 7.3125,
+     "sign": 0.1016,
+     "exp": 1.3906,
+     "mant": 5.8203
+    },
+    "b_hamming": {
+     "all": 15.4253,
+     "sign": 0.2949,
+     "exp": 3.4077,
+     "mant": 11.7227
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "02f7c6",
+   "slot": "r8_granite_l3_qk"
+  },
+  {
+   "label": "fp32.r8_granite_l3_x2up_47e54f",
+   "fmt": "fp32",
+   "cls": "R",
+   "role": "kind",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "47e54f482d4e912765d776dae4bd402d4e5c8438f27fda5c9b34a7647019cd48",
+   "file": "tiles/fp32/fp32.r8_granite_l3_x2up_47e54f.bin",
+   "rule": "RedHatAI/granite-3.1-2b-instruct-quantized.w8a8: A = layer 3 post_attention_layernorm output, tokens 0-15, dims 16-31; B = layer 3 up_proj weight dequantised (int8 x its channel's bf16 scale, exact in float32) rows 7344-7359 x dims 16-31, transposed",
+   "params": {
+    "model": "granite",
+    "layer": 3,
+    "cut": "x2up",
+    "what_A": "layer 3 post_attention_layernorm output, tokens 0-15, dims 16-31",
+    "what_B": "layer 3 up_proj weight dequantised (int8 x its channel's bf16 scale, exact in float32) rows 7344-7359 x dims 16-31, transposed",
+    "pick": {},
+    "outliers": null
+   },
+   "stats": {
+    "bus_bits_per_op": 60728,
+    "gated_lane_frac": 0.019531,
+    "a_hamming": {
+     "all": 6.7148,
+     "sign": 0.2188,
+     "exp": 0.7383,
+     "mant": 5.7578
+    },
+    "b_hamming": {
+     "all": 8.1113,
+     "sign": 0.5288,
+     "exp": 1.9087,
+     "mant": 5.6738
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.01953125
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "47e54f",
+   "slot": "r8_granite_l3_x2up"
+  },
+  {
+   "label": "fp16.r8_dsqwen_l1_pv_188e98",
+   "fmt": "fp16",
+   "cls": "R",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "188e9850ed7e13dce215c8ac6ca37627a293fe242223cffbebda875118829abf",
+   "file": "tiles/fp16/fp16.r8_dsqwen_l1_pv_188e98.bin",
+   "rule": "RedHatAI/DeepSeek-R1-Distill-Qwen-1.5B-quantized.w8a8: A = layer 1 head 5: causal softmax, query tokens 16-31 x key tokens 0-31; B = layer 1 KV head 0: values of tokens 0-31, head dims 16-31",
+   "params": {
+    "model": "dsqwen",
+    "layer": 1,
+    "cut": "pv",
+    "what_A": "layer 1 head 5: causal softmax, query tokens 16-31 x key tokens 0-31",
+    "what_B": "layer 1 KV head 0: values of tokens 0-31, head dims 16-31",
+    "pick": {},
+    "outliers": null
+   },
+   "stats": {
+    "bus_bits_per_op": 74184,
+    "gated_lane_frac": 0.21875,
+    "a_hamming": {
+     "all": 4.4023,
+     "sign": 0.0,
+     "exp": 0.5625,
+     "mant": 3.8398
+    },
+    "b_hamming": {
+     "all": 13.709,
+     "sign": 0.9146,
+     "exp": 3.0,
+     "mant": 9.7944
+    },
+    "a_zero_word_frac": 0.21875,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "188e98",
+   "slot": "r8_dsqwen_l1_pv"
+  },
+  {
+   "label": "fp16.r8_dsqwen_l1_x2gate_2e4efa",
+   "fmt": "fp16",
+   "cls": "R",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "2e4efa85e13df41aa12b7ebb3732c6b16b8a9478049930bc44e44ded84835da4",
+   "file": "tiles/fp16/fp16.r8_dsqwen_l1_x2gate_2e4efa.bin",
+   "rule": "RedHatAI/DeepSeek-R1-Distill-Qwen-1.5B-quantized.w8a8: A = layer 1 post_attention_layernorm output, tokens 16-31, dims 1504-1535; B = layer 1 gate_proj weight dequantised (int8 x its channel's bf16 scale, exact in float32) rows 6016-6031 x dims 1504-1535, transposed",
+   "params": {
+    "model": "dsqwen",
+    "layer": 1,
+    "cut": "x2gate",
+    "what_A": "layer 1 post_attention_layernorm output, tokens 16-31, dims 1504-1535",
+    "what_B": "layer 1 gate_proj weight dequantised (int8 x its channel's bf16 scale, exact in float32) rows 6016-6031 x dims 1504-1535, transposed",
+    "pick": {},
+    "outliers": null
+   },
+   "stats": {
+    "bus_bits_per_op": 81154,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.8086,
+     "sign": 0.418,
+     "exp": 1.4766,
+     "mant": 4.9141
+    },
+    "b_hamming": {
+     "all": 13.0044,
+     "sign": 0.9692,
+     "exp": 3.0801,
+     "mant": 8.9551
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "2e4efa",
+   "slot": "r8_dsqwen_l1_x2gate"
+  },
+  {
+   "label": "fp16.r8_granite_l3_pv_e993b7",
+   "fmt": "fp16",
+   "cls": "R",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "e993b701266541183cc80a021762c34d59ef47ff634ae406545a9f46de6ed047",
+   "file": "tiles/fp16/fp16.r8_granite_l3_pv_e993b7.bin",
+   "rule": "RedHatAI/granite-3.1-2b-instruct-quantized.w8a8: A = layer 3 head 26: causal softmax, query tokens 0-15 x key tokens 0-31; B = layer 3 KV head 6: values of tokens 0-31, head dims 48-63",
+   "params": {
+    "model": "granite",
+    "layer": 3,
+    "cut": "pv",
+    "what_A": "layer 3 head 26: causal softmax, query tokens 0-15 x key tokens 0-31",
+    "what_B": "layer 3 KV head 6: values of tokens 0-31, head dims 48-63",
+    "pick": {},
+    "outliers": null
+   },
+   "stats": {
+    "bus_bits_per_op": 65134,
+    "gated_lane_frac": 0.71875,
+    "a_hamming": {
+     "all": 1.9297,
+     "sign": 0.0,
+     "exp": 0.4492,
+     "mant": 1.4805
+    },
+    "b_hamming": {
+     "all": 13.9722,
+     "sign": 1.0474,
+     "exp": 3.0835,
+     "mant": 9.8413
+    },
+    "a_zero_word_frac": 0.71875,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "e993b7",
+   "slot": "r8_granite_l3_pv"
+  },
+  {
+   "label": "int8.r8_dsqwen_l1_actdown_f6a2cb",
+   "fmt": "int8",
+   "cls": "R",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "f6a2cb18cca82a80471afc9c6de683c8ab405b5672c0cfd40b937befe3be2d38",
+   "file": "tiles/int8/int8.r8_dsqwen_l1_actdown_f6a2cb.bin",
+   "rule": "RedHatAI/DeepSeek-R1-Distill-Qwen-1.5B-quantized.w8a8: A = layer 1 SiLU(gate) * up (the down_proj input), tokens 16-31, units 7168-7231, quantised per token over all 8960 units; the block holds unit 7218, the top unit of token 20, the window's most outlying token (largest max/median of |x|); B = layer 1 down_proj int8 weight rows 224-239 x units 7168-7231, transposed",
+   "params": {
+    "model": "dsqwen",
+    "layer": 1,
+    "cut": "actdown",
+    "what_A": "layer 1 SiLU(gate) * up (the down_proj input), tokens 16-31, units 7168-7231, quantised per token over all 8960 units; the block holds unit 7218, the top unit of token 20, the window's most outlying token (largest max/median of |x|)",
+    "what_B": "layer 1 down_proj int8 weight rows 224-239 x units 7168-7231, transposed",
+    "pick": {
+     "outlier_token": 20,
+     "outlier_unit": 7218
+    },
+    "outliers": {
+     "row_max_abs": [
+      0.15965,
+      0.12148,
+      0.60002,
+      0.30873,
+      1.37586,
+      0.28792,
+      0.30164,
+      0.46735,
+      1.11501,
+      0.0934,
+      0.12989,
+      0.64732,
+      0.39313,
+      1.14278,
+      0.11443,
+      0.09489
+     ],
+     "row_max_over_median": [
+      148.9,
+      180.92,
+      505.55,
+      444.85,
+      1978.35,
+      226.37,
+      178.17,
+      236.65,
+      501.41,
+      161.18,
+      178.76,
+      611.86,
+      399.28,
+      825.2,
+      202.7,
+      217.82
+     ],
+     "row_argmax": [
+      8929,
+      4843,
+      7134,
+      6775,
+      7218,
+      1828,
+      6593,
+      8461,
+      6015,
+      3937,
+      1828,
+      484,
+      4687,
+      4194,
+      5585,
+      3937
+     ],
+     "row_int8_small_share": [
+      0.6554,
+      0.7122,
+      0.8994,
+      0.8695,
+      0.9815,
+      0.7618,
+      0.6912,
+      0.7584,
+      0.8952,
+      0.6884,
+      0.7211,
+      0.9138,
+      0.8701,
+      0.9494,
+      0.7404,
+      0.774
+     ]
+    }
+   },
+   "stats": {
+    "bus_bits_per_op": 41990,
+    "gated_lane_frac": 0.179688,
+    "a_hamming": {
+     "all": 9.2266,
+     "sign": 1.0391,
+     "mag": 8.1875
+    },
+    "b_hamming": {
+     "all": 1.0249,
+     "sign": 0.1299,
+     "mag": 0.895
+    },
+    "a_zero_word_frac": 0.1796875,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "f6a2cb",
+   "slot": "r8_dsqwen_l1_actdown"
+  },
+  {
+   "label": "int8.r8_dsqwen_l1_x1v_927670",
+   "fmt": "int8",
+   "cls": "R",
+   "role": "kind",
+   "prio": "p2",
+   "flag": "-",
+   "sha": "9276706db044876fa8cc5a03b54c49b1ac69cbf8d7db00f20e8b3cea0dbc0e49",
+   "file": "tiles/int8/int8.r8_dsqwen_l1_x1v_927670.bin",
+   "rule": "RedHatAI/DeepSeek-R1-Distill-Qwen-1.5B-quantized.w8a8: A = layer 1 input_layernorm output (the v_proj input), tokens 0-15, dims 128-191, quantised per token over all 1536 dims; the block holds dim 147, the commonest per-token argmax of |x| over those tokens; B = layer 1 v_proj int8 weight rows 32-47 x input dims 128-191, transposed",
+   "params": {
+    "model": "dsqwen",
+    "layer": 1,
+    "cut": "x1v",
+    "what_A": "layer 1 input_layernorm output (the v_proj input), tokens 0-15, dims 128-191, quantised per token over all 1536 dims; the block holds dim 147, the commonest per-token argmax of |x| over those tokens",
+    "what_B": "layer 1 v_proj int8 weight rows 32-47 x input dims 128-191, transposed",
+    "pick": {
+     "outlier_dim": 147
+    },
+    "outliers": {
+     "row_max_abs": [
+      0.51709,
+      0.73947,
+      0.78936,
+      0.87138,
+      0.92018,
+      0.93679,
+      0.95218,
+      0.76032,
+      0.94573,
+      0.72437,
+      0.85045,
+      0.79304,
+      1.04047,
+      0.95282,
+      0.76457,
+      1.0235
+     ],
+     "row_max_over_median": [
+      8.09,
+      9.82,
+      10.55,
+      11.26,
+      13.16,
+      12.84,
+      13.14,
+      10.96,
+      14.98,
+      10.55,
+      11.03,
+      12.35,
+      14.68,
+      14.99,
+      12.45,
+      15.28
+     ],
+     "row_argmax": [
+      940,
+      147,
+      147,
+      147,
+      147,
+      147,
+      147,
+      147,
+      147,
+      147,
+      147,
+      147,
+      147,
+      147,
+      147,
+      147
+     ],
+     "row_int8_small_share": [
+      0.0566,
+      0.0566,
+      0.071,
+      0.0755,
+      0.0898,
+      0.0814,
+      0.0716,
+      0.0736,
+      0.0866,
+      0.0618,
+      0.0781,
+      0.0762,
+      0.0938,
+      0.0892,
+      0.0762,
+      0.1003
+     ]
+    }
+   },
+   "stats": {
+    "bus_bits_per_op": 65324,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 14.9688,
+     "sign": 1.6641,
+     "mag": 13.3047
+    },
+    "b_hamming": {
+     "all": 0.9795,
+     "sign": 0.1211,
+     "mag": 0.8584
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "927670",
+   "slot": "r8_dsqwen_l1_x1v"
+  },
+  {
+   "label": "int8.r8_granite_l4_actdown_b076f2",
+   "fmt": "int8",
+   "cls": "R",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "b076f27e7a3384547e0be819fd0f975682f48b3a6037fa1849998719d72aec45",
+   "file": "tiles/int8/int8.r8_granite_l4_actdown_b076f2.bin",
+   "rule": "RedHatAI/granite-3.1-2b-instruct-quantized.w8a8: A = layer 4 SiLU(gate) * up (the down_proj input), tokens 0-15, units 7040-7103, quantised per token over all 8192 units; the block holds unit 7099, the top unit of token 1, the window's most outlying token (largest max/median of |x|); B = layer 4 down_proj int8 weight rows 1664-1679 x units 7040-7103, transposed",
+   "params": {
+    "model": "granite",
+    "layer": 4,
+    "cut": "actdown",
+    "what_A": "layer 4 SiLU(gate) * up (the down_proj input), tokens 0-15, units 7040-7103, quantised per token over all 8192 units; the block holds unit 7099, the top unit of token 1, the window's most outlying token (largest max/median of |x|)",
+    "what_B": "layer 4 down_proj int8 weight rows 1664-1679 x units 7040-7103, transposed",
+    "pick": {
+     "outlier_token": 1,
+     "outlier_unit": 7099
+    },
+    "outliers": {
+     "row_max_abs": [
+      0.21576,
+      1.16002,
+      0.59826,
+      0.7771,
+      0.61252,
+      0.66461,
+      1.38413,
+      0.86521,
+      0.7753,
+      0.53986,
+      1.30934,
+      0.38438,
+      0.50459,
+      0.7706,
+      0.36038,
+      0.39212
+     ],
+     "row_max_over_median": [
+      42.51,
+      117.78,
+      54.92,
+      54.03,
+      41.84,
+      54.05,
+      100.56,
+      75.55,
+      70.97,
+      47.03,
+      109.9,
+      34.07,
+      44.28,
+      55.14,
+      29.41,
+      39.6
+     ],
+     "row_argmax": [
+      717,
+      7099,
+      8135,
+      7073,
+      717,
+      1203,
+      1203,
+      4758,
+      7960,
+      8114,
+      1508,
+      2956,
+      5933,
+      3898,
+      2271,
+      3428
+     ],
+     "row_int8_small_share": [
+      0.298,
+      0.6122,
+      0.3589,
+      0.3564,
+      0.2946,
+      0.3607,
+      0.5679,
+      0.4628,
+      0.4447,
+      0.3245,
+      0.5939,
+      0.2594,
+      0.2979,
+      0.3599,
+      0.2119,
+      0.276
+     ]
+    }
+   },
+   "stats": {
+    "bus_bits_per_op": 62542,
+    "gated_lane_frac": 0.003906,
+    "a_hamming": {
+     "all": 14.2734,
+     "sign": 1.6172,
+     "mag": 12.6562
+    },
+    "b_hamming": {
+     "all": 0.9956,
+     "sign": 0.1323,
+     "mag": 0.8633
+    },
+    "a_zero_word_frac": 0.00390625,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "b076f2",
+   "slot": "r8_granite_l4_actdown"
+  },
+  {
+   "label": "int8.r8_granite_l4_x1q_13fe82",
+   "fmt": "int8",
+   "cls": "R",
+   "role": "kind",
+   "prio": "p1",
+   "flag": "-",
+   "sha": "13fe824f456a3072158d2d30bd6e4bfccda25bc3f08dee1a036916a5babff7a4",
+   "file": "tiles/int8/int8.r8_granite_l4_x1q_13fe82.bin",
+   "rule": "RedHatAI/granite-3.1-2b-instruct-quantized.w8a8: A = layer 4 input_layernorm output (the q_proj input), tokens 16-31, dims 1216-1279, quantised per token over all 2048 dims; the block holds dim 1221, the commonest per-token argmax of |x| over those tokens; B = layer 4 q_proj int8 weight rows 688-703 x input dims 1216-1279, transposed",
+   "params": {
+    "model": "granite",
+    "layer": 4,
+    "cut": "x1q",
+    "what_A": "layer 4 input_layernorm output (the q_proj input), tokens 16-31, dims 1216-1279, quantised per token over all 2048 dims; the block holds dim 1221, the commonest per-token argmax of |x| over those tokens",
+    "what_B": "layer 4 q_proj int8 weight rows 688-703 x input dims 1216-1279, transposed",
+    "pick": {
+     "outlier_dim": 1221
+    },
+    "outliers": {
+     "row_max_abs": [
+      2.14027,
+      1.95686,
+      1.44944,
+      1.57067,
+      1.6218,
+      1.65032,
+      1.78899,
+      1.36701,
+      1.59534,
+      2.15296,
+      1.91028,
+      1.50732,
+      1.66748,
+      2.06139,
+      1.48231,
+      2.12849
+     ],
+     "row_max_over_median": [
+      23.47,
+      19.3,
+      13.81,
+      17.54,
+      21.76,
+      20.11,
+      25.73,
+      16.26,
+      20.38,
+      24.78,
+      19.99,
+      17.13,
+      19.61,
+      22.73,
+      16.28,
+      25.27
+     ],
+     "row_argmax": [
+      1221,
+      1221,
+      1221,
+      158,
+      1221,
+      1221,
+      158,
+      1221,
+      158,
+      1221,
+      158,
+      158,
+      158,
+      1221,
+      1221,
+      1221
+     ],
+     "row_int8_small_share": [
+      0.1455,
+      0.127,
+      0.0918,
+      0.1152,
+      0.1357,
+      0.1299,
+      0.1621,
+      0.1113,
+      0.1362,
+      0.1606,
+      0.1133,
+      0.1089,
+      0.1206,
+      0.1646,
+      0.104,
+      0.1602
+     ]
+    }
+   },
+   "stats": {
+    "bus_bits_per_op": 63210,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 14.4375,
+     "sign": 1.6172,
+     "mag": 12.8203
+    },
+    "b_hamming": {
+     "all": 0.9946,
+     "sign": 0.1245,
+     "mag": 0.8701
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [],
+    "B": []
+   },
+   "byte_sig": "13fe82",
+   "slot": "r8_granite_l4_x1q"
+  },
+  {
+   "label": "fp32.a_onebit_b5_third",
+   "fmt": "fp32",
+   "cls": "S",
+   "role": "rerun",
+   "prio": "p1",
+   "flag": "rerun:blind6",
+   "sha": "6d07fe951904d0232dc9b05b3aceea171b2b642e1f615b9de01f7dabc375bca1",
+   "file": "tiles/fp32/fp32.a_onebit_b5_third.bin",
+   "rule": "re-run of blind6 fp32.a_onebit_b5_third (case=S), byte for byte",
+   "params": {
+    "from_pool": "blind6",
+    "from_label": "fp32.a_onebit_b5_third",
+    "from_case": "S",
+    "bus_bits_per_op": 2048,
+    "pick": "min"
+   },
+   "stats": {
+    "bus_bits_per_op": 2048,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.5,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.5
+    },
+    "b_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.a_onebit_b5_third"
+    ],
+    "B": [
+     "fp32.a_onebit_b16_half",
+     "fp32.a_onebit_b5_third"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp32.a_zeros_b_complement",
+   "fmt": "fp32",
+   "cls": "Z",
+   "role": "rerun",
+   "prio": "p1",
+   "flag": "rerun:blind6",
+   "sha": "6f3b15348b1f9e0f4fd7a60862c4e76328a32c5e66f1526d0aee1a2780f22435",
+   "file": "tiles/fp32/fp32.a_zeros_b_complement.bin",
+   "rule": "re-run of blind6 fp32.a_zeros_b_complement (case=Z), byte for byte",
+   "params": {
+    "from_pool": "blind6",
+    "from_label": "fp32.a_zeros_b_complement",
+    "from_case": "Z",
+    "bus_bits_per_op": 129036,
+    "pick": "max"
+   },
+   "stats": {
+    "bus_bits_per_op": 129036,
+    "gated_lane_frac": 1.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 31.5029,
+     "sign": 0.9834,
+     "exp": 7.8799,
+     "mant": 22.6396
+    },
+    "a_zero_word_frac": 1.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.a_zeros_b_complement",
+     "fp16.anchor6_zeros",
+     "fp16.anchor7_zeros",
+     "fp16.anchor_zeros",
+     "fp32.a_zeros_b_complement",
+     "fp32.anchor6_zeros"
+    ],
+    "B": [
+     "fp32.a_zeros_b_complement"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp32.b_onebit_b20_one",
+   "fmt": "fp32",
+   "cls": "S",
+   "role": "rerun",
+   "prio": "p1",
+   "flag": "rerun:blind7",
+   "sha": "17c55f8c3c67d6d934e859e801a6f78f95f7b395a1f160917761e83b563177bb",
+   "file": "tiles/fp32/fp32.b_onebit_b20_one.bin",
+   "rule": "re-run of blind7 fp32.b_onebit_b20_one (case=S), byte for byte",
+   "params": {
+    "from_pool": "blind7",
+    "from_label": "fp32.b_onebit_b20_one",
+    "from_case": "S",
+    "bus_bits_per_op": 4096,
+    "pick": "stratum 1 of 6 (ranks 2-7 of 35)"
+   },
+   "stats": {
+    "bus_bits_per_op": 4096,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 1.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 1.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.b_onebit_b12_third",
+     "fp32.b_onebit_b20_full",
+     "fp32.b_onebit_b20_one",
+     "fp32.b_onebit_b20_pi",
+     "fp32.b_onebit_b20_seventh",
+     "fp32.b_onebit_b20_third"
+    ],
+    "B": [
+     "fp32.b_onebit_b20_one"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp32.bf16_wideexp",
+   "fmt": "fp32",
+   "cls": "E",
+   "role": "rerun",
+   "prio": "p1",
+   "flag": "rerun:blind6",
+   "sha": "0535bb7277cf74b9ea2e52f1c747632ed34fe78cf038b5c5dd3049129c90355a",
+   "file": "tiles/fp32/fp32.bf16_wideexp.bin",
+   "rule": "re-run of blind6 fp32.bf16_wideexp (case=E), byte for byte",
+   "params": {
+    "from_pool": "blind6",
+    "from_label": "fp32.bf16_wideexp",
+    "from_case": "E",
+    "bus_bits_per_op": 49138,
+    "pick": "stratum 4 of 6 (ranks 20-24 of 35)"
+   },
+   "stats": {
+    "bus_bits_per_op": 49138,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 3.9609,
+     "sign": 0.2461,
+     "exp": 1.9922,
+     "mant": 1.7227
+    },
+    "b_hamming": {
+     "all": 8.0356,
+     "sign": 0.4712,
+     "exp": 3.999,
+     "mant": 3.5654
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.bf16_wideexp"
+    ],
+    "B": [
+     "fp32.bf16_wideexp"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp32.exp_b_alt_b26",
+   "fmt": "fp32",
+   "cls": "E",
+   "role": "rerun",
+   "prio": "p1",
+   "flag": "rerun:blind7",
+   "sha": "fae3e9c1af145f67e4cb57d31c02ce57ffd9d4c40b88d9289072df4c3fb5a231",
+   "file": "tiles/fp32/fp32.exp_b_alt_b26.bin",
+   "rule": "re-run of blind7 fp32.exp_b_alt_b26 (case=E), byte for byte",
+   "params": {
+    "from_pool": "blind7",
+    "from_label": "fp32.exp_b_alt_b26",
+    "from_case": "E",
+    "bus_bits_per_op": 6132,
+    "pick": "stratum 2 of 6 (ranks 8-13 of 35)"
+   },
+   "stats": {
+    "bus_bits_per_op": 6132,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 1.4971,
+     "sign": 0.0171,
+     "exp": 1.1182,
+     "mant": 0.3618
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.b_exp_busy_a_const",
+     "fp32.exp_b_alt_b26",
+     "fp32.exp_b_alt_lsb",
+     "fp32.exp_b_alt_nib",
+     "fp32.signexp_invert_b"
+    ],
+    "B": [
+     "fp32.exp_b_alt_b26"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp32.exp_only_narrow2",
+   "fmt": "fp32",
+   "cls": "E",
+   "role": "rerun",
+   "prio": "p2",
+   "flag": "rerun:blind6",
+   "sha": "14ce8cc730ee59b442b76a79056a75c07f795d6889b69d264df5b5e2d1389135",
+   "file": "tiles/fp32/fp32.exp_only_narrow2.bin",
+   "rule": "re-run of blind6 fp32.exp_only_narrow2 (case=E), byte for byte",
+   "params": {
+    "from_pool": "blind6",
+    "from_label": "fp32.exp_only_narrow2",
+    "from_case": "E",
+    "bus_bits_per_op": 24518,
+    "pick": "stratum 3 of 6 (ranks 14-19 of 35)"
+   },
+   "stats": {
+    "bus_bits_per_op": 24518,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 2.1562,
+     "sign": 0.2578,
+     "exp": 1.8984,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 3.8296,
+     "sign": 0.5088,
+     "exp": 3.3208,
+     "mant": 0.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.exp_only_narrow2"
+    ],
+    "B": [
+     "fp32.exp_only_narrow2"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp32.real_s360_l1_qk",
+   "fmt": "fp32",
+   "cls": "R",
+   "role": "rerun",
+   "prio": "p1",
+   "flag": "rerun:blind7",
+   "sha": "63844d7459bad008c8d695ca7b42c45fae36722fd85201b277f204806aa3c197",
+   "file": "tiles/fp32/fp32.real_s360_l1_qk.bin",
+   "rule": "re-run of blind7 fp32.real_s360_l1_qk (case=R), byte for byte",
+   "params": {
+    "from_pool": "blind7",
+    "from_label": "fp32.real_s360_l1_qk",
+    "from_case": "R",
+    "bus_bits_per_op": 82866,
+    "pick": "stratum 6 of 6 (ranks 30-34 of 35)"
+   },
+   "stats": {
+    "bus_bits_per_op": 82866,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.6953,
+     "sign": 0.1602,
+     "exp": 0.7656,
+     "mant": 5.7695
+    },
+    "b_hamming": {
+     "all": 13.5356,
+     "sign": 0.4688,
+     "exp": 1.7246,
+     "mant": 11.3423
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.real_s360_l1_qk"
+    ],
+    "B": [
+     "fp32.real_s360_l1_qk"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp32.real_smol_softmax_v_causal",
+   "fmt": "fp32",
+   "cls": "R",
+   "role": "rerun",
+   "prio": "p2",
+   "flag": "rerun:blind6",
+   "sha": "21337776084c35ce58e2b6402bf5b67d0892a26b01e6f96046f6c1a3bb78e4fd",
+   "file": "tiles/fp32/fp32.real_smol_softmax_v_causal.bin",
+   "rule": "re-run of blind6 fp32.real_smol_softmax_v_causal (case=R), byte for byte",
+   "params": {
+    "from_pool": "blind6",
+    "from_label": "fp32.real_smol_softmax_v_causal",
+    "from_case": "R",
+    "bus_bits_per_op": 73550,
+    "pick": "stratum 5 of 6 (ranks 25-29 of 35)"
+   },
+   "stats": {
+    "bus_bits_per_op": 73550,
+    "gated_lane_frac": 0.46875,
+    "a_hamming": {
+     "all": 3.9141,
+     "sign": 0.0,
+     "exp": 0.5664,
+     "mant": 3.3477
+    },
+    "b_hamming": {
+     "all": 14.0425,
+     "sign": 0.5605,
+     "exp": 1.873,
+     "mant": 11.6089
+    },
+    "a_zero_word_frac": 0.46875,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp32.real_smol_softmax_v_causal"
+    ],
+    "B": [
+     "fp32.real_smol_softmax_v_causal"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp16.a_zeros_b_complement",
+   "fmt": "fp16",
+   "cls": "Z",
+   "role": "rerun",
+   "prio": "p1",
+   "flag": "rerun:blind6",
+   "sha": "07c6f08cc915a182b37e60cccd958cc67476ec8f14e879d01dc508ca03de7211",
+   "file": "tiles/fp16/fp16.a_zeros_b_complement.bin",
+   "rule": "re-run of blind6 fp16.a_zeros_b_complement (case=Z), byte for byte",
+   "params": {
+    "from_pool": "blind6",
+    "from_label": "fp16.a_zeros_b_complement",
+    "from_case": "Z",
+    "bus_bits_per_op": 129020,
+    "pick": "max"
+   },
+   "stats": {
+    "bus_bits_per_op": 129020,
+    "gated_lane_frac": 1.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 31.499,
+     "sign": 1.9683,
+     "exp": 9.8398,
+     "mant": 19.6909
+    },
+    "a_zero_word_frac": 1.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.a_zeros_b_complement",
+     "fp16.anchor6_zeros",
+     "fp16.anchor7_zeros",
+     "fp16.anchor_zeros",
+     "fp32.a_zeros_b_complement",
+     "fp32.anchor6_zeros"
+    ],
+    "B": [
+     "fp16.a_zeros_b_complement"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp16.b_onebit_b8_pi",
+   "fmt": "fp16",
+   "cls": "S",
+   "role": "rerun",
+   "prio": "p1",
+   "flag": "rerun:blind7",
+   "sha": "4ead4e02db338a2696f0e364f9f2892fc39c8d1626086070d35c4f03fa92662f",
+   "file": "tiles/fp16/fp16.b_onebit_b8_pi.bin",
+   "rule": "re-run of blind7 fp16.b_onebit_b8_pi (case=S), byte for byte",
+   "params": {
+    "from_pool": "blind7",
+    "from_label": "fp16.b_onebit_b8_pi",
+    "from_case": "S",
+    "bus_bits_per_op": 8192,
+    "pick": "min"
+   },
+   "stats": {
+    "bus_bits_per_op": 8192,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 2.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 2.0
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.b_onebit_b6_third",
+     "fp16.b_onebit_b8_pi",
+     "fp16.b_onebit_b9_one"
+    ],
+    "B": [
+     "fp16.b_onebit_b8_pi"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp16.exp_b_alt_shift",
+   "fmt": "fp16",
+   "cls": "E",
+   "role": "rerun",
+   "prio": "p1",
+   "flag": "rerun:blind6",
+   "sha": "8e326bf126a975492a404a8de5bd701391ff00970d61a2e0eb73a20ed4eb42c0",
+   "file": "tiles/fp16/fp16.exp_b_alt_shift.bin",
+   "rule": "re-run of blind6 fp16.exp_b_alt_shift (case=E), byte for byte",
+   "params": {
+    "from_pool": "blind6",
+    "from_label": "fp16.exp_b_alt_shift",
+    "from_case": "E",
+    "bus_bits_per_op": 20034,
+    "pick": "stratum 1 of 2 (ranks 2-10 of 20)"
+   },
+   "stats": {
+    "bus_bits_per_op": 20034,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 0.0,
+     "sign": 0.0,
+     "exp": 0.0,
+     "mant": 0.0
+    },
+    "b_hamming": {
+     "all": 4.8911,
+     "sign": 0.0322,
+     "exp": 4.542,
+     "mant": 0.3169
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.exp_b_alt_shift"
+    ],
+    "B": [
+     "fp16.exp_b_alt_shift"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  },
+  {
+   "label": "fp16.real_qwen_dequant_v",
+   "fmt": "fp16",
+   "cls": "R",
+   "role": "rerun",
+   "prio": "p2",
+   "flag": "rerun:blind6",
+   "sha": "c1ac6a45560f90493b84ef8b654075073289b0d69a16568065cf8951f8f9cd7a",
+   "file": "tiles/fp16/fp16.real_qwen_dequant_v.bin",
+   "rule": "re-run of blind6 fp16.real_qwen_dequant_v (case=R), byte for byte",
+   "params": {
+    "from_pool": "blind6",
+    "from_label": "fp16.real_qwen_dequant_v",
+    "from_case": "R",
+    "bus_bits_per_op": 81586,
+    "pick": "stratum 2 of 2 (ranks 11-19 of 20)"
+   },
+   "stats": {
+    "bus_bits_per_op": 81586,
+    "gated_lane_frac": 0.0,
+    "a_hamming": {
+     "all": 6.9414,
+     "sign": 0.4961,
+     "exp": 1.4688,
+     "mant": 4.9766
+    },
+    "b_hamming": {
+     "all": 12.9771,
+     "sign": 0.9917,
+     "exp": 2.9785,
+     "mant": 9.0068
+    },
+    "a_zero_word_frac": 0.0,
+    "b_zero_word_frac": 0.0
+   },
+   "half_twins": {
+    "A": [
+     "fp16.real_qwen_dequant_v"
+    ],
+    "B": [
+     "fp16.real_qwen_dequant_v"
+    ]
+   },
+   "byte_sig": null,
+   "slot": null
+  }
+ ]
+}

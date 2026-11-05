@@ -1,0 +1,1015 @@
+{
+ "_note": "Q142(p) predict_pool8_a2.py intervals: every section-7 line at the pool's own n (dated note A2-3, A2-4; lab 68a7c322). A verdict reads the line at its scored n, from the same function and seed; these are the forecasts at the planned n.",
+ "a2_commit": "68a7c322",
+ "cards": {
+  "aifoundry1c0": {
+   "card": "aifoundry1c0",
+   "predictions": "tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry1c0.json",
+   "predictions_sha256": "fd2fdc4d4ff88fccf21aeee29f9481ad41c6dc6e906f50ab55d50bc92e2aee98",
+   "rules": {
+    "P8-C0-B": {
+     "line": "|mean| <= 0.5 W AND rms <= 1.0 W",
+     "minimum": 8,
+     "n": 31,
+     "quantity": "the same errors",
+     "scored_at_planned_n": true,
+     "set": "every scored tile",
+     "verdict_form": "PASS if the line holds, else FAIL"
+    },
+    "P8-C0-F": {
+     "minimum": 8,
+     "n": 31,
+     "quantity": "burst clock",
+     "range_95": [
+      0.24479816175780406,
+      4.488834557957073
+     ],
+     "reference": {
+      "mean": -0.41072619047619047,
+      "n": 42,
+      "rms": 2.3341537858402517,
+      "source": "tools/claims-v3/e165/predictions-e165.json reference.e2e.pinned.mhz_err"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80411,
+     "set": "every scored tile",
+     "statistic": "rms",
+     "unit": "MHz",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL (dated note A2-5)"
+    },
+    "P8-C0-H1": {
+     "minimum": 8,
+     "n": 31,
+     "quantity": "die rise, M10's 0.2415 C/W on the predicted board",
+     "range_95": [
+      0.23506776819833478,
+      0.4495991301672138
+     ],
+     "reference": {
+      "mean": 0.029536502590642257,
+      "n": 39,
+      "rms": 0.3385209874829421,
+      "source": "term c2's 39 leave-one-tile-out residuals on E170 (predict_pool8.t6_card0)"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80462,
+     "set": "every scored tile",
+     "statistic": "rms",
+     "unit": "C",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-C0-HK": {
+     "form": "paired: the 95% interval of rms(M10's k) - rms(M9's k) over the set's tiles drawn with replacement, 20,000 draws",
+     "line": "none before the data",
+     "minimum": 8,
+     "n": 31,
+     "quantity": "die rise at the measured board: M10's k against M9's 0.1400",
+     "scored_at_planned_n": true,
+     "set": "every scored tile",
+     "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+    },
+    "P8-C0-M1": {
+     "form": "paired: the 95% interval of rms(M10 carried) - rms(M9 carried) over the set's tiles drawn with replacement, 20,000 draws",
+     "line": "none before the data",
+     "minimum": 10,
+     "n": 31,
+     "quantity": "burst D: M10 carried against M9 carried",
+     "scored_at_planned_n": true,
+     "set": "every scored tile",
+     "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+    },
+    "P8-C0-W": {
+     "minimum": 8,
+     "n": 31,
+     "quantity": "board W, M10 carried through the card term",
+     "range_95": [
+      0.5739231062916738,
+      1.0656448694297438
+     ],
+     "reference": {
+      "mean": -0.08473809523809528,
+      "n": 42,
+      "rms": 0.8213769209020158,
+      "source": "tools/claims-v3/e165/predictions-e165.json reference.e2e.pinned.w_err"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80428,
+     "set": "every scored tile",
+     "statistic": "rms",
+     "unit": "W",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-HM": {
+     "line": "none before the data (paired)",
+     "minimum": 4,
+     "planned_holds": 0,
+     "quantity": "heat over minutes: rms(primary, 1.0 x the chain) - rms(arm, 1.032 x), holds rising 10 C or more",
+     "verdict_form": "PRIMARY BETTER / ARM BETTER / NOT RESOLVED; NOT SCORED under 4 such holds (expected: pool 8's sessions hold nothing)"
+    },
+    "_m10_card0_rise_band": {
+     "hw_c": 0.5929730592569771,
+     "n_residuals": 39,
+     "reported": "no rule reads it (A2-1)"
+    },
+    "_sets": {
+     "scored": 31
+    }
+   }
+  },
+  "aifoundry1c1": {
+   "card": "aifoundry1c1",
+   "predictions": "tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry1c1.json",
+   "predictions_sha256": "1e55ac1ace1cce90446ffb07165e513f36673f9e8db8750b7b2b4a33e52b726e",
+   "rules": {
+    "P8-A1": {
+     "form": "paired: the 95% interval of rms(M10 primary) - rms(M10 a priori) over the set's tiles drawn with replacement, 20,000 draws",
+     "line": "none before the data",
+     "minimum": 8,
+     "n": 19,
+     "quantity": "the session-scale arm against the a-priori arm (s = 1)",
+     "scored_at_planned_n": true,
+     "set": "F1",
+     "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+    },
+    "P8-B1": {
+     "minimum": 8,
+     "mix": {
+      "fp16": 8,
+      "fp32": 11
+     },
+     "n": 19,
+     "quantity": "mean(D - M10 primary), floats",
+     "range_95": [
+      -0.09703736842105262,
+      0.06963552631578947
+     ],
+     "reference": {
+      "n": {
+       "fp16": 154,
+       "fp32": 190
+      },
+      "source": "fp32 and fp16 as P8-P1 and P8-P2, the same format mix"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80296,
+     "set": "F1",
+     "statistic": "mean",
+     "unit": "W",
+     "verdict_form": "PASS inside; FAIL HIGH below (M10 predicts too much); FAIL LOW above"
+    },
+    "P8-B2": {
+     "minimum": 6,
+     "n": 12,
+     "quantity": "mean(D - M10 primary), int8",
+     "range_95": [
+      -0.11504400000000002,
+      0.09565466666666667
+     ],
+     "reference": {
+      "mean": -0.008907666666666673,
+      "n": 108,
+      "rms": 0.18490613908202785,
+      "source": "rows-m10.json err_w[B], int8 rows on c1"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80297,
+     "set": "I1",
+     "statistic": "mean",
+     "unit": "W",
+     "verdict_form": "PASS inside; FAIL HIGH below (M10 predicts too much); FAIL LOW above"
+    },
+    "P8-C1": {
+     "inside_at_least": 27,
+     "minimum": 10,
+     "n": 31,
+     "quantity": "M10's 95% power band",
+     "scored_at_planned_n": true,
+     "set": "N1",
+     "verdict_form": "PASS if at least that many are inside the band, else FAIL"
+    },
+    "P8-G": {
+     "components": [
+      "P8-P1",
+      "P8-P2",
+      "P8-P3",
+      "P8-B1",
+      "P8-B2",
+      "P8-C1",
+      "P8-M1"
+     ],
+     "quantity": "M10 generalises on this card",
+     "verdict_form": "PASS if P1, P2, P3, B1, B2 and C1 PASS and M1 is not WORSE; FAIL if any FAILs or M1 is WORSE; else NOT SCORED"
+    },
+    "P8-H1": {
+     "minimum": 6,
+     "n": 11,
+     "quantity": "rms(dT_win - M10's 4.5 s rise at its primary D), fp32",
+     "range_95": [
+      0.17931592479945063,
+      0.43138710119539947
+     ],
+     "reference": {
+      "mean": -0.009364640255630287,
+      "n": 2000,
+      "rms": 0.30519349008977587,
+      "source": "2,000 normal draws, Random('P8|heat-reference|aifoundry1c1|fp32'), sd 0.3089 C"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80302,
+     "set": "N1's fp32",
+     "statistic": "rms",
+     "unit": "C",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-H2": {
+     "minimum": 4,
+     "n": 8,
+     "quantity": "rms(dT_win - M10's 4.5 s rise at its primary D), fp16",
+     "range_95": [
+      0.16264822178849436,
+      0.4547220259928984
+     ],
+     "reference": {
+      "mean": 0.015241121413322622,
+      "n": 2000,
+      "rms": 0.3105244369866316,
+      "source": "2,000 normal draws, Random('P8|heat-reference|aifoundry1c1|fp16'), sd 0.3185 C"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80303,
+     "set": "N1's fp16",
+     "statistic": "rms",
+     "unit": "C",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-H3": {
+     "minimum": 6,
+     "n": 12,
+     "quantity": "rms(dT_win - M10's 4.5 s rise at its primary D), int8",
+     "range_95": [
+      0.0905219670855434,
+      0.21178724693417514
+     ],
+     "reference": {
+      "mean": 0.004375500478318221,
+      "n": 2000,
+      "rms": 0.149260388041556,
+      "source": "2,000 normal draws, Random('P8|heat-reference|aifoundry1c1|int8'), sd 0.1495 C"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80304,
+     "set": "N1's int8",
+     "statistic": "rms",
+     "unit": "C",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-H4": {
+     "inside_at_least": 27,
+     "minimum": 10,
+     "n": 31,
+     "quantity": "M10's 4.5 s heat band",
+     "scored_at_planned_n": true,
+     "set": "N1",
+     "verdict_form": "PASS if at least that many are inside the band, else FAIL"
+    },
+    "P8-HM": {
+     "line": "none before the data (paired)",
+     "minimum": 4,
+     "planned_holds": 0,
+     "quantity": "heat over minutes: rms(primary, 1.0 x the chain) - rms(arm, 1.032 x), holds rising 10 C or more",
+     "verdict_form": "PRIMARY BETTER / ARM BETTER / NOT RESOLVED; NOT SCORED under 4 such holds (expected: pool 8's sessions hold nothing)"
+    },
+    "P8-KA": {
+     "line": "none before the data",
+     "minimum": {
+      "pooled": 4,
+      "session": 1
+     },
+     "n": 2,
+     "quantity": "the check anchors: sum e_p^2 < sum e_0^2, and every |e_p| inside M10's 95% band",
+     "set": "KA",
+     "verdict_form": "PASS / FAIL; NOT SCORED if s = 1"
+    },
+    "P8-LG": {
+     "F_null_point_5pct": 3.837853354555932,
+     "F_point_5pct": 4.4589701075245785,
+     "df": [
+      2,
+      8
+     ],
+     "groups": {
+      "E157": {
+       "D_ref_max_w": 21.166878419010363,
+       "D_ref_min_w": 1.4211673415829864,
+       "counts": true,
+       "n": 8,
+       "span_w": 19.745711077427377,
+       "tiles": [
+        "fp16.a_zeros_b_complement",
+        "fp16.exp_b_alt_shift",
+        "fp16.real_qwen_dequant_v",
+        "fp32.a_onebit_b5_third",
+        "fp32.a_zeros_b_complement",
+        "fp32.bf16_wideexp",
+        "fp32.exp_only_narrow2",
+        "fp32.real_smol_softmax_v_causal"
+       ]
+      },
+      "E164": {
+       "D_ref_max_w": 23.857503065158483,
+       "D_ref_min_w": 9.428960411629234,
+       "counts": true,
+       "n": 4,
+       "span_w": 14.428542653529249,
+       "tiles": [
+        "fp16.b_onebit_b8_pi",
+        "fp32.b_onebit_b20_one",
+        "fp32.exp_b_alt_b26",
+        "fp32.real_s360_l1_qk"
+       ]
+      }
+     },
+     "k": 2,
+     "n": 12,
+     "n_rr": 12,
+     "noise_w": 0.0368,
+     "power_pct": {
+      "gain 0.6%": {
+       "BOTH": 4.2,
+       "GAIN": 73.0,
+       "LEVEL": 0.7,
+       "NOT SCORED": 0.0,
+       "NOT SEPARATED": 22.1
+      },
+      "gain 1.0%": {
+       "BOTH": 4.9,
+       "GAIN": 94.6,
+       "LEVEL": 0.0,
+       "NOT SCORED": 0.0,
+       "NOT SEPARATED": 0.4
+      },
+      "level 0.11 W": {
+       "BOTH": 4.8,
+       "GAIN": 0.1,
+       "LEVEL": 89.7,
+       "NOT SCORED": 0.0,
+       "NOT SEPARATED": 5.4
+      },
+      "level 0.15 W": {
+       "BOTH": 5.3,
+       "GAIN": 0.0,
+       "LEVEL": 94.5,
+       "NOT SCORED": 0.0,
+       "NOT SEPARATED": 0.2
+      },
+      "none": {
+       "BOTH": 3.5,
+       "GAIN": 2.1,
+       "LEVEL": 1.6,
+       "NOT SCORED": 0.0,
+       "NOT SEPARATED": 92.8
+      }
+     },
+     "power_under_50pct_for": [],
+     "quantity": "the float re-runs' level or gain (F tests, registration section 7)",
+     "scored_at_planned_n": true,
+     "set": "RR",
+     "tiles_with_more_than_one_reference": [],
+     "tiles_with_no_reference": [],
+     "verdict_form": "GAIN / LEVEL / BOTH / NOT SEPARATED (with the null beside); NOT SCORED if no group counts or n - 2k < 4"
+    },
+    "P8-M1": {
+     "form": "paired: the 95% interval of rms(M10 primary) - rms(M9) over the set's tiles drawn with replacement, 20,000 draws",
+     "line": "none before the data",
+     "minimum": 10,
+     "n": 31,
+     "quantity": "M10 primary against M9, both at the measured rate",
+     "scored_at_planned_n": true,
+     "set": "N1",
+     "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+    },
+    "P8-M1f": {
+     "form": "paired: the 95% interval of rms(M10 primary) - rms(M9) over the set's tiles drawn with replacement, 20,000 draws",
+     "line": "none before the data",
+     "minimum": 8,
+     "n": 19,
+     "quantity": "the same",
+     "scored_at_planned_n": true,
+     "set": "F1",
+     "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+    },
+    "P8-M1i": {
+     "form": "paired: the 95% interval of rms(M10 primary) - rms(M9) over the set's tiles drawn with replacement, 20,000 draws",
+     "line": "none before the data",
+     "minimum": 6,
+     "n": 12,
+     "quantity": "the same",
+     "scored_at_planned_n": true,
+     "set": "I1",
+     "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+    },
+    "P8-P1": {
+     "minimum": 6,
+     "n": 11,
+     "quantity": "rms(D - M10 primary), fp32",
+     "range_95": [
+      0.09800756423729381,
+      0.30825815241390836
+     ],
+     "reference": {
+      "mean": -0.021814452631578968,
+      "n": 190,
+      "rms": 0.20043563412963125,
+      "source": "rows-m10.json err_w[B+a+b], fp32 rows on c1"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80310,
+     "set": "N1's fp32",
+     "statistic": "rms",
+     "unit": "W",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL; below the 2.5% point: better than held out says"
+    },
+    "P8-P2": {
+     "minimum": 4,
+     "n": 8,
+     "quantity": "rms(D - M10 primary), fp16",
+     "range_95": [
+      0.074679720801567,
+      0.2680419464822623
+     ],
+     "reference": {
+      "mean": 0.0022660194805194885,
+      "n": 154,
+      "rms": 0.1650640381970452,
+      "source": "rows-m10.json err_w[B+a+b], fp16 rows on c1"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80311,
+     "set": "N1's fp16",
+     "statistic": "rms",
+     "unit": "W",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL; below the 2.5% point: better than held out says"
+    },
+    "P8-P3": {
+     "minimum": 6,
+     "n": 12,
+     "quantity": "rms(D - M10 primary), int8",
+     "range_95": [
+      0.10473800556189396,
+      0.269483114596722
+     ],
+     "reference": {
+      "mean": -0.008907666666666673,
+      "n": 108,
+      "rms": 0.18490613908202785,
+      "source": "rows-m10.json err_w[B], int8 rows on c1"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80312,
+     "set": "N1's int8",
+     "statistic": "rms",
+     "unit": "W",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL; below the 2.5% point: better than held out says"
+    }
+   }
+  },
+  "aifoundry2": {
+   "card": "aifoundry2",
+   "predictions": "tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry2.json",
+   "predictions_sha256": "ce2d32c046161f30afa794a2fa5e467c6c396fc272a59e7e193f92d7dae02e80",
+   "rules": {
+    "P8-A2-Bg": {
+     "line": "|mean| <= 0.5 W",
+     "minimum": 8,
+     "n": 3,
+     "quantity": "board W",
+     "scored_at_planned_n": false,
+     "set": "governed",
+     "verdict_form": "PASS if the line holds, else FAIL"
+    },
+    "P8-A2-Bp": {
+     "line": "|mean| <= 0.5 W AND rms <= 1.0 W",
+     "minimum": 8,
+     "n": 21,
+     "quantity": "board W",
+     "scored_at_planned_n": true,
+     "set": "pinned",
+     "verdict_form": "PASS if the line holds, else FAIL"
+    },
+    "P8-A2-F1": {
+     "minimum": 8,
+     "n": 3,
+     "quantity": "burst clock",
+     "range_95": [
+      1.2916760816861168,
+      8.310341436427267
+     ],
+     "reference": {
+      "mean": -0.8886138888888894,
+      "n": 36,
+      "rms": 4.498267751930242,
+      "source": "tools/claims-v3/e165/predictions-e165.json reference.e2e.governed.mhz_err"
+     },
+     "scored_at_planned_n": false,
+     "seed": 80460,
+     "set": "governed",
+     "statistic": "rms",
+     "unit": "MHz",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-A2-F2": {
+     "minimum": 8,
+     "n": 21,
+     "quantity": "burst clock",
+     "range_95": [
+      0.173979237951243,
+      4.540317335825767
+     ],
+     "reference": {
+      "mean": -0.41072619047619047,
+      "n": 42,
+      "rms": 2.3341537858402517,
+      "source": "tools/claims-v3/e165/predictions-e165.json reference.e2e.pinned.mhz_err"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80461,
+     "set": "pinned",
+     "statistic": "rms",
+     "unit": "MHz",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-A2-G": {
+     "line": "rms <= 4.0 MHz AND |mean| <= 2.0 MHz",
+     "minimum": 8,
+     "n": 3,
+     "quantity": "burst clock, M10 carried",
+     "scored_at_planned_n": false,
+     "set": "governed",
+     "verdict_form": "PASS if the line holds, else FAIL"
+    },
+    "P8-A2-H1": {
+     "minimum": 10,
+     "n": 24,
+     "quantity": "burst die rise, aifoundry2's own law",
+     "range_95": [
+      0.4905598722699826,
+      0.870086961050374
+     ],
+     "reference": {
+      "mean": -0.1502490178571428,
+      "n": 112,
+      "rms": 0.6845045411807125,
+      "source": "tools/claims-v3/e165/predictions-e165.json reference.heat.rise_err_c"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80462,
+     "set": "all scored",
+     "statistic": "rms",
+     "unit": "C",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-A2-M1": {
+     "form": "paired: the 95% interval of rms(M10 carried) - rms(M9) over the set's tiles drawn with replacement, 20,000 draws",
+     "line": "none before the data",
+     "minimum": 10,
+     "n": 24,
+     "quantity": "board W: M10 carried against M9's part on M9's D",
+     "scored_at_planned_n": true,
+     "set": "all scored",
+     "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+    },
+    "P8-A2-R2": {
+     "components": [
+      "P8-A2-G",
+      "P8-A2-Bg",
+      "P8-A2-Bp"
+     ],
+     "quantity": "rank 2 on M10 carried",
+     "verdict_form": "PASS if G, Bg and Bp all PASS; FAIL if any FAILs; else NOT SCORED"
+    },
+    "P8-A2-W1": {
+     "minimum": 8,
+     "n": 3,
+     "quantity": "board W",
+     "range_95": [
+      0.19504509734930534,
+      1.458081288314658
+     ],
+     "reference": {
+      "mean": -0.19391388888888894,
+      "n": 36,
+      "rms": 0.7756567881837658,
+      "source": "tools/claims-v3/e165/predictions-e165.json reference.e2e.governed.w_err"
+     },
+     "scored_at_planned_n": false,
+     "seed": 80477,
+     "set": "governed",
+     "statistic": "rms",
+     "unit": "W",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-A2-W2": {
+     "minimum": 8,
+     "n": 21,
+     "quantity": "board W",
+     "range_95": [
+      0.5278421530831243,
+      1.113297650269342
+     ],
+     "reference": {
+      "mean": -0.08473809523809528,
+      "n": 42,
+      "rms": 0.8213769209020158,
+      "source": "tools/claims-v3/e165/predictions-e165.json reference.e2e.pinned.w_err"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80478,
+     "set": "pinned",
+     "statistic": "rms",
+     "unit": "W",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-HM": {
+     "line": "none before the data (paired)",
+     "minimum": 4,
+     "planned_holds": 0,
+     "quantity": "heat over minutes: rms(primary, 1.0 x the chain) - rms(arm, 1.032 x), holds rising 10 C or more",
+     "verdict_form": "PRIMARY BETTER / ARM BETTER / NOT RESOLVED; NOT SCORED under 4 such holds (expected: pool 8's sessions hold nothing)"
+    },
+    "_sets": {
+     "governed": 3,
+     "left_out_82w": [
+      "fp32.r8_dsqwen_l1_qk_f0161a",
+      "fp32.r8_granite_l3_qk_02f7c6",
+      "fp32.u8_ar_i_a662b4",
+      "fp32.u8_ar_k_3297d2",
+      "fp32.u8_bimodal_1f57eb",
+      "fp32.u8_lognorm_62af49",
+      "fp32.u8_uniform_e7e045"
+     ],
+     "pinned": 21,
+     "scored": 24
+    }
+   }
+  },
+  "aifoundry3": {
+   "card": "aifoundry3",
+   "predictions": "tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry3.json",
+   "predictions_sha256": "d68ff9f1e057dc6dd29257c4ff36b521e23d67d0375b79233e5200f8cb88bace",
+   "rules": {
+    "P8-A1": {
+     "form": "paired: the 95% interval of rms(M10 primary) - rms(M10 a priori) over the set's tiles drawn with replacement, 20,000 draws",
+     "line": "none before the data",
+     "minimum": 8,
+     "n": 19,
+     "quantity": "the session-scale arm against the a-priori arm (s = 1)",
+     "scored_at_planned_n": true,
+     "set": "F1",
+     "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+    },
+    "P8-B1": {
+     "minimum": 8,
+     "mix": {
+      "fp16": 8,
+      "fp32": 11
+     },
+     "n": 19,
+     "quantity": "mean(D - M10 primary), floats",
+     "range_95": [
+      -0.09701926315789472,
+      0.06378778947368421
+     ],
+     "reference": {
+      "n": {
+       "fp16": 133,
+       "fp32": 260
+      },
+      "source": "fp32 and fp16 as P8-P1 and P8-P2, the same format mix"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80296,
+     "set": "F1",
+     "statistic": "mean",
+     "unit": "W",
+     "verdict_form": "PASS inside; FAIL HIGH below (M10 predicts too much); FAIL LOW above"
+    },
+    "P8-B2": {
+     "minimum": 6,
+     "n": 12,
+     "quantity": "mean(D - M10 primary), int8",
+     "range_95": [
+      -0.10495491666666668,
+      0.08889599999999999
+     ],
+     "reference": {
+      "mean": -0.005144596491228068,
+      "n": 114,
+      "rms": 0.16963275542595985,
+      "source": "rows-m10.json err_w[B], int8 rows on a3"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80297,
+     "set": "I1",
+     "statistic": "mean",
+     "unit": "W",
+     "verdict_form": "PASS inside; FAIL HIGH below (M10 predicts too much); FAIL LOW above"
+    },
+    "P8-C1": {
+     "inside_at_least": 27,
+     "minimum": 10,
+     "n": 31,
+     "quantity": "M10's 95% power band",
+     "scored_at_planned_n": true,
+     "set": "N1",
+     "verdict_form": "PASS if at least that many are inside the band, else FAIL"
+    },
+    "P8-G": {
+     "components": [
+      "P8-P1",
+      "P8-P2",
+      "P8-P3",
+      "P8-B1",
+      "P8-B2",
+      "P8-C1",
+      "P8-M1"
+     ],
+     "quantity": "M10 generalises on this card",
+     "verdict_form": "PASS if P1, P2, P3, B1, B2 and C1 PASS and M1 is not WORSE; FAIL if any FAILs or M1 is WORSE; else NOT SCORED"
+    },
+    "P8-H1": {
+     "minimum": 6,
+     "n": 11,
+     "quantity": "rms(dT_win - M10's 4.5 s rise at its primary D), fp32",
+     "range_95": [
+      0.10370868303791224,
+      0.24794434627495068
+     ],
+     "reference": {
+      "mean": 7.987055435242448e-05,
+      "n": 2000,
+      "rms": 0.17633531120545817,
+      "source": "2,000 normal draws, Random('P8|heat-reference|aifoundry3|fp32'), sd 0.1739 C"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80302,
+     "set": "N1's fp32",
+     "statistic": "rms",
+     "unit": "C",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-H2": {
+     "minimum": 4,
+     "n": 8,
+     "quantity": "rms(dT_win - M10's 4.5 s rise at its primary D), fp16",
+     "range_95": [
+      0.08305796112744482,
+      0.22481376024899288
+     ],
+     "reference": {
+      "mean": 0.0018756869876449945,
+      "n": 2000,
+      "rms": 0.15301161675526367,
+      "source": "2,000 normal draws, Random('P8|heat-reference|aifoundry3|fp16'), sd 0.1505 C"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80303,
+     "set": "N1's fp16",
+     "statistic": "rms",
+     "unit": "C",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-H3": {
+     "minimum": 6,
+     "n": 12,
+     "quantity": "rms(dT_win - M10's 4.5 s rise at its primary D), int8",
+     "range_95": [
+      0.1158151542481351,
+      0.2614861854737449
+     ],
+     "reference": {
+      "mean": 0.0005062073807577509,
+      "n": 2000,
+      "rms": 0.18968843243011005,
+      "source": "2,000 normal draws, Random('P8|heat-reference|aifoundry3|int8'), sd 0.1895 C"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80304,
+     "set": "N1's int8",
+     "statistic": "rms",
+     "unit": "C",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL"
+    },
+    "P8-H4": {
+     "inside_at_least": 27,
+     "minimum": 10,
+     "n": 31,
+     "quantity": "M10's 4.5 s heat band",
+     "scored_at_planned_n": true,
+     "set": "N1",
+     "verdict_form": "PASS if at least that many are inside the band, else FAIL"
+    },
+    "P8-HM": {
+     "line": "none before the data (paired)",
+     "minimum": 4,
+     "planned_holds": 0,
+     "quantity": "heat over minutes: rms(primary, 1.0 x the chain) - rms(arm, 1.032 x), holds rising 10 C or more",
+     "verdict_form": "PRIMARY BETTER / ARM BETTER / NOT RESOLVED; NOT SCORED under 4 such holds (expected: pool 8's sessions hold nothing)"
+    },
+    "P8-KA": {
+     "line": "none before the data",
+     "minimum": {
+      "pooled": 4,
+      "session": 1
+     },
+     "n": 2,
+     "quantity": "the check anchors: sum e_p^2 < sum e_0^2, and every |e_p| inside M10's 95% band",
+     "set": "KA",
+     "verdict_form": "PASS / FAIL; NOT SCORED if s = 1"
+    },
+    "P8-LG": {
+     "F_null_point_5pct": 3.837853354555932,
+     "F_point_5pct": 4.4589701075245785,
+     "df": [
+      2,
+      8
+     ],
+     "groups": {
+      "E153": {
+       "D_ref_max_w": 21.877913013017146,
+       "D_ref_min_w": 1.3546097593974666,
+       "counts": true,
+       "n": 8,
+       "span_w": 20.52330325361968,
+       "tiles": [
+        "fp16.a_zeros_b_complement",
+        "fp16.exp_b_alt_shift",
+        "fp16.real_qwen_dequant_v",
+        "fp32.a_onebit_b5_third",
+        "fp32.a_zeros_b_complement",
+        "fp32.bf16_wideexp",
+        "fp32.exp_only_narrow2",
+        "fp32.real_smol_softmax_v_causal"
+       ]
+      },
+      "E163": {
+       "D_ref_max_w": 24.813671340804373,
+       "D_ref_min_w": 9.853768230277149,
+       "counts": true,
+       "n": 4,
+       "span_w": 14.959903110527224,
+       "tiles": [
+        "fp16.b_onebit_b8_pi",
+        "fp32.b_onebit_b20_one",
+        "fp32.exp_b_alt_b26",
+        "fp32.real_s360_l1_qk"
+       ]
+      }
+     },
+     "k": 2,
+     "n": 12,
+     "n_rr": 12,
+     "noise_w": 0.0368,
+     "power_pct": {
+      "gain 0.6%": {
+       "BOTH": 4.5,
+       "GAIN": 76.4,
+       "LEVEL": 0.4,
+       "NOT SCORED": 0.0,
+       "NOT SEPARATED": 18.6
+      },
+      "gain 1.0%": {
+       "BOTH": 5.0,
+       "GAIN": 94.6,
+       "LEVEL": 0.0,
+       "NOT SCORED": 0.0,
+       "NOT SEPARATED": 0.3
+      },
+      "level 0.11 W": {
+       "BOTH": 4.5,
+       "GAIN": 0.2,
+       "LEVEL": 90.0,
+       "NOT SCORED": 0.0,
+       "NOT SEPARATED": 5.4
+      },
+      "level 0.15 W": {
+       "BOTH": 5.0,
+       "GAIN": 0.0,
+       "LEVEL": 94.8,
+       "NOT SCORED": 0.0,
+       "NOT SEPARATED": 0.2
+      },
+      "none": {
+       "BOTH": 3.3,
+       "GAIN": 1.6,
+       "LEVEL": 1.4,
+       "NOT SCORED": 0.0,
+       "NOT SEPARATED": 93.6
+      }
+     },
+     "power_under_50pct_for": [],
+     "quantity": "the float re-runs' level or gain (F tests, registration section 7)",
+     "scored_at_planned_n": true,
+     "set": "RR",
+     "tiles_with_more_than_one_reference": [],
+     "tiles_with_no_reference": [],
+     "verdict_form": "GAIN / LEVEL / BOTH / NOT SEPARATED (with the null beside); NOT SCORED if no group counts or n - 2k < 4"
+    },
+    "P8-M1": {
+     "form": "paired: the 95% interval of rms(M10 primary) - rms(M9) over the set's tiles drawn with replacement, 20,000 draws",
+     "line": "none before the data",
+     "minimum": 10,
+     "n": 31,
+     "quantity": "M10 primary against M9, both at the measured rate",
+     "scored_at_planned_n": true,
+     "set": "N1",
+     "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+    },
+    "P8-M1f": {
+     "form": "paired: the 95% interval of rms(M10 primary) - rms(M9) over the set's tiles drawn with replacement, 20,000 draws",
+     "line": "none before the data",
+     "minimum": 8,
+     "n": 19,
+     "quantity": "the same",
+     "scored_at_planned_n": true,
+     "set": "F1",
+     "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+    },
+    "P8-M1i": {
+     "form": "paired: the 95% interval of rms(M10 primary) - rms(M9) over the set's tiles drawn with replacement, 20,000 draws",
+     "line": "none before the data",
+     "minimum": 6,
+     "n": 12,
+     "quantity": "the same",
+     "scored_at_planned_n": true,
+     "set": "I1",
+     "verdict_form": "BETTER if its upper end < 0, WORSE if its lower end > 0, else NOT RESOLVED"
+    },
+    "P8-P1": {
+     "minimum": 6,
+     "n": 11,
+     "quantity": "rms(D - M10 primary), fp32",
+     "range_95": [
+      0.09755563591985485,
+      0.29983922628392945
+     ],
+     "reference": {
+      "mean": -0.03732228846153844,
+      "n": 260,
+      "rms": 0.20190828459147755,
+      "source": "rows-m10.json err_w[B+a+b], fp32 rows on a3"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80310,
+     "set": "N1's fp32",
+     "statistic": "rms",
+     "unit": "W",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL; below the 2.5% point: better than held out says"
+    },
+    "P8-P2": {
+     "minimum": 4,
+     "n": 8,
+     "quantity": "rms(D - M10 primary), fp16",
+     "range_95": [
+      0.06256662725746849,
+      0.23739325029315808
+     ],
+     "reference": {
+      "mean": 0.015310270676691742,
+      "n": 133,
+      "rms": 0.14757735724992563,
+      "source": "rows-m10.json err_w[B+a+b], fp16 rows on a3"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80311,
+     "set": "N1's fp16",
+     "statistic": "rms",
+     "unit": "W",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL; below the 2.5% point: better than held out says"
+    },
+    "P8-P3": {
+     "minimum": 6,
+     "n": 12,
+     "quantity": "rms(D - M10 primary), int8",
+     "range_95": [
+      0.10074908651984558,
+      0.24853029937430834
+     ],
+     "reference": {
+      "mean": -0.005144596491228068,
+      "n": 114,
+      "rms": 0.16963275542595985,
+      "source": "rows-m10.json err_w[B], int8 rows on a3"
+     },
+     "scored_at_planned_n": true,
+     "seed": 80312,
+     "set": "N1's int8",
+     "statistic": "rms",
+     "unit": "W",
+     "verdict_form": "PASS at or below the 97.5% point, else FAIL; below the 2.5% point: better than held out says"
+    }
+   }
+  }
+ },
+ "predictor_commit": "9d81d254",
+ "this_file_sha256": "c063456832303fc5f9c4a5f078fd78604101a810aebd0dcdcd3c993ed32b9996"
+}

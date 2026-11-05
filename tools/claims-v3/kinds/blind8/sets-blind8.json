@@ -1,0 +1,291 @@
+{
+ "PASS": true,
+ "_note": "Q142(x) blind8_json.py sets: what Q142(p)'s frozen predictor reads from pool 8 before any count (dated note A1-3)",
+ "differences": {},
+ "expected": {
+  "F1": 19,
+  "I1": 12,
+  "KA": 2,
+  "N1": 31,
+  "RR": 12,
+  "by_format": {
+   "fp16": 8,
+   "fp32": 11,
+   "int8": 12
+  },
+  "roles": {
+   "check": 3,
+   "scale": 6,
+   "zeros": 3
+  }
+ },
+ "inputs_checked": 209,
+ "manifest_picked": "tools/claims-v3/kinds/blind8/blind8.json",
+ "manifest_sha256": "370d8a970bed82c349dfa5f65cc483a20420218c01d099308970396ec4bb0257",
+ "n_tiles": 64,
+ "predictor": "predict_pool8_a2.P() -> predict_pool8.py (lab 9d81d254 / 97765c0a), its own manifest(), roles(), earlier_tiles(), tile_bytes() and make_sets()",
+ "read": {
+  "F1": 19,
+  "I1": 12,
+  "KA": 2,
+  "N1": 31,
+  "RR": 12,
+  "by_format": {
+   "fp16": 8,
+   "fp32": 11,
+   "int8": 12
+  },
+  "roles": {
+   "check": 3,
+   "scale": 6,
+   "zeros": 3
+  }
+ },
+ "rerun_of": {
+  "fp16.a_zeros_b_complement": [
+   "blind6:fp16.a_zeros_b_complement"
+  ],
+  "fp16.anchor7_zeros": [
+   "blind6:fp16.anchor6_zeros",
+   "blind7:fp16.anchor7_zeros"
+  ],
+  "fp16.b_onebit_b8_pi": [
+   "blind7:fp16.b_onebit_b8_pi"
+  ],
+  "fp16.exp_b_alt_shift": [
+   "blind6:fp16.exp_b_alt_shift"
+  ],
+  "fp16.real_qwen_dequant_v": [
+   "blind6:fp16.real_qwen_dequant_v"
+  ],
+  "fp32.a_onebit_b5_third": [
+   "blind6:fp32.a_onebit_b5_third"
+  ],
+  "fp32.a_zeros_b_complement": [
+   "blind6:fp32.a_zeros_b_complement"
+  ],
+  "fp32.anchor7_zeros": [
+   "blind6:fp32.anchor6_zeros",
+   "blind7:fp32.anchor7_zeros"
+  ],
+  "fp32.b_onebit_b20_one": [
+   "blind7:fp32.b_onebit_b20_one"
+  ],
+  "fp32.bf16_wideexp": [
+   "blind6:fp32.bf16_wideexp"
+  ],
+  "fp32.exp_b_alt_b26": [
+   "blind7:fp32.exp_b_alt_b26"
+  ],
+  "fp32.exp_only_narrow2": [
+   "blind6:fp32.exp_only_narrow2"
+  ],
+  "fp32.real_s360_l1_qk": [
+   "blind7:fp32.real_s360_l1_qk"
+  ],
+  "fp32.real_smol_softmax_v_causal": [
+   "blind6:fp32.real_smol_softmax_v_causal"
+  ],
+  "int8.anchor7_zeros": [
+   "blind6:int8.anchor6_zeros",
+   "blind7:int8.anchor7_zeros"
+  ]
+ },
+ "role_sources": {
+  "check": [
+   "role"
+  ],
+  "scale": [
+   "default"
+  ],
+  "zeros": [
+   "bytes"
+  ]
+ },
+ "roles": {
+  "check": [
+   "fp16.anchor8_check_randn_84631a",
+   "fp32.anchor8_check_randn_319f73",
+   "int8.anchor8_check_full_d8b6c8"
+  ],
+  "scale": [
+   "fp16.anchor8_randn_a_8c7827",
+   "fp16.anchor8_randn_b_3a0fef",
+   "fp32.anchor8_randn_a_989b8a",
+   "fp32.anchor8_randn_b_833ac3",
+   "int8.anchor8_full_a_4aac84",
+   "int8.anchor8_full_b_935710"
+  ],
+  "zeros": [
+   "fp16.anchor7_zeros",
+   "fp32.anchor7_zeros",
+   "int8.anchor7_zeros"
+  ]
+ },
+ "sets": {
+  "F1": [
+   "fp16.r8_dsqwen_l1_pv_188e98",
+   "fp16.r8_dsqwen_l1_x2gate_2e4efa",
+   "fp16.r8_granite_l3_pv_e993b7",
+   "fp16.s8_onebit_b10_c127c127",
+   "fp16.s8_onebit_b2_c46ec46e",
+   "fp16.s8_onebit_b4_c2e2c2e2",
+   "fp16.s8_onebit_b7_b945b945",
+   "fp16.u8_cauchy_96e015",
+   "fp32.r8_dsqwen_l1_qk_f0161a",
+   "fp32.r8_granite_l3_qk_02f7c6",
+   "fp32.s8_onebit_b13_41783e4a_A40080727",
+   "fp32.s8_onebit_b19_c11b3dd2",
+   "fp32.s8_onebit_b26_bffdf029",
+   "fp32.s8_onebit_b7_3ee13961",
+   "fp32.u8_ar_i_a662b4",
+   "fp32.u8_ar_k_3297d2",
+   "fp32.u8_bimodal_1f57eb",
+   "fp32.u8_lognorm_62af49",
+   "fp32.u8_uniform_e7e045"
+  ],
+  "I1": [
+   "int8.h8_held_line4cea",
+   "int8.l8_cycle3_d3p3c15_c6d5",
+   "int8.l8_flip_d2p2c16_231d",
+   "int8.l8_halfword_d2p2c16_83df",
+   "int8.l8_period2_d2p4c8_4ea3",
+   "int8.r8_dsqwen_l1_actdown_f6a2cb",
+   "int8.r8_granite_l4_actdown_b076f2",
+   "int8.r8_granite_l4_x1q_13fe82",
+   "int8.u8_ar_k_0a9fe5",
+   "int8.u8_biased_14548f",
+   "int8.u8_relu_tq_1fb940",
+   "int8.u8_sparseq_58e6e0"
+  ],
+  "KA": [
+   "fp16.anchor8_check_randn_84631a",
+   "fp32.anchor8_check_randn_319f73"
+  ],
+  "N1": [
+   "fp16.r8_dsqwen_l1_pv_188e98",
+   "fp16.r8_dsqwen_l1_x2gate_2e4efa",
+   "fp16.r8_granite_l3_pv_e993b7",
+   "fp16.s8_onebit_b10_c127c127",
+   "fp16.s8_onebit_b2_c46ec46e",
+   "fp16.s8_onebit_b4_c2e2c2e2",
+   "fp16.s8_onebit_b7_b945b945",
+   "fp16.u8_cauchy_96e015",
+   "fp32.r8_dsqwen_l1_qk_f0161a",
+   "fp32.r8_granite_l3_qk_02f7c6",
+   "fp32.s8_onebit_b13_41783e4a_A40080727",
+   "fp32.s8_onebit_b19_c11b3dd2",
+   "fp32.s8_onebit_b26_bffdf029",
+   "fp32.s8_onebit_b7_3ee13961",
+   "fp32.u8_ar_i_a662b4",
+   "fp32.u8_ar_k_3297d2",
+   "fp32.u8_bimodal_1f57eb",
+   "fp32.u8_lognorm_62af49",
+   "fp32.u8_uniform_e7e045",
+   "int8.h8_held_line4cea",
+   "int8.l8_cycle3_d3p3c15_c6d5",
+   "int8.l8_flip_d2p2c16_231d",
+   "int8.l8_halfword_d2p2c16_83df",
+   "int8.l8_period2_d2p4c8_4ea3",
+   "int8.r8_dsqwen_l1_actdown_f6a2cb",
+   "int8.r8_granite_l4_actdown_b076f2",
+   "int8.r8_granite_l4_x1q_13fe82",
+   "int8.u8_ar_k_0a9fe5",
+   "int8.u8_biased_14548f",
+   "int8.u8_relu_tq_1fb940",
+   "int8.u8_sparseq_58e6e0"
+  ],
+  "RR": [
+   "fp16.a_zeros_b_complement",
+   "fp16.b_onebit_b8_pi",
+   "fp16.exp_b_alt_shift",
+   "fp16.real_qwen_dequant_v",
+   "fp32.a_onebit_b5_third",
+   "fp32.a_zeros_b_complement",
+   "fp32.b_onebit_b20_one",
+   "fp32.bf16_wideexp",
+   "fp32.exp_b_alt_b26",
+   "fp32.exp_only_narrow2",
+   "fp32.real_s360_l1_qk",
+   "fp32.real_smol_softmax_v_causal"
+  ],
+  "RR_int8": [],
+  "by_format": {
+   "fp16": [
+    "fp16.r8_dsqwen_l1_pv_188e98",
+    "fp16.r8_dsqwen_l1_x2gate_2e4efa",
+    "fp16.r8_granite_l3_pv_e993b7",
+    "fp16.s8_onebit_b10_c127c127",
+    "fp16.s8_onebit_b2_c46ec46e",
+    "fp16.s8_onebit_b4_c2e2c2e2",
+    "fp16.s8_onebit_b7_b945b945",
+    "fp16.u8_cauchy_96e015"
+   ],
+   "fp32": [
+    "fp32.r8_dsqwen_l1_qk_f0161a",
+    "fp32.r8_granite_l3_qk_02f7c6",
+    "fp32.s8_onebit_b13_41783e4a_A40080727",
+    "fp32.s8_onebit_b19_c11b3dd2",
+    "fp32.s8_onebit_b26_bffdf029",
+    "fp32.s8_onebit_b7_3ee13961",
+    "fp32.u8_ar_i_a662b4",
+    "fp32.u8_ar_k_3297d2",
+    "fp32.u8_bimodal_1f57eb",
+    "fp32.u8_lognorm_62af49",
+    "fp32.u8_uniform_e7e045"
+   ],
+   "int8": [
+    "int8.h8_held_line4cea",
+    "int8.l8_cycle3_d3p3c15_c6d5",
+    "int8.l8_flip_d2p2c16_231d",
+    "int8.l8_halfword_d2p2c16_83df",
+    "int8.l8_period2_d2p4c8_4ea3",
+    "int8.r8_dsqwen_l1_actdown_f6a2cb",
+    "int8.r8_granite_l4_actdown_b076f2",
+    "int8.r8_granite_l4_x1q_13fe82",
+    "int8.u8_ar_k_0a9fe5",
+    "int8.u8_biased_14548f",
+    "int8.u8_relu_tq_1fb940",
+    "int8.u8_sparseq_58e6e0"
+   ]
+  },
+  "other_priorities": [
+   "fp16.u8_ar_i_32349b",
+   "fp16.u8_rowscale_ecc921",
+   "fp16.u8_tdist_93475b",
+   "fp32.r8_granite_l3_x2up_47e54f",
+   "fp32.s8_onebit_b14_3ef6ccbf",
+   "fp32.s8_onebit_b18_be2584eb",
+   "int8.h8_held_v34",
+   "int8.h8_held_vd9",
+   "int8.r8_dsqwen_l1_x1v_927670"
+  ],
+  "scale_anchors_pool8": [
+   "fp16.anchor8_randn_a_8c7827",
+   "fp16.anchor8_randn_b_3a0fef",
+   "fp32.anchor8_randn_a_989b8a",
+   "fp32.anchor8_randn_b_833ac3"
+  ],
+  "zeros_anchors": [
+   "fp16.anchor7_zeros",
+   "fp32.anchor7_zeros",
+   "int8.anchor7_zeros"
+  ]
+ },
+ "sizes": {
+  "F1": 19,
+  "I1": 12,
+  "KA": 2,
+  "N1": 31,
+  "RR": 12,
+  "RR_int8": 0,
+  "by_format": {
+   "fp16": 8,
+   "fp32": 11,
+   "int8": 12
+  },
+  "other_priorities": 9,
+  "scale_anchors_pool8": 4,
+  "zeros_anchors": 3
+ }
+}
