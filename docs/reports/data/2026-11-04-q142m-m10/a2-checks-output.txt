@@ -1,0 +1,15 @@
+a2_checks_m10 (Q142(m) A2): numpy 1.26.4; registered inputs 174 hash as committed
+1. nested-m9.json holds M9_frozen_form_loko 197 times: {'/families/float/same_folds/<cell>': 65, '/families/float/pool6_rows[]': 54, '/families/int8/same_folds/<cell>': 44, '/families/int8/pool6_rows[]': 34}; per-row check {'float': {'rows': 54, 'max_abs_diff_w': 4.988626321816847e-05, 'signs_agree': 54, 'file_rounding': '1e-4 W', 'within_rounding': True}, 'int8': {'rows': 34, 'max_abs_diff_w': 4.676386966287471e-05, 'signs_agree': 34, 'file_rounding': '1e-4 W', 'within_rounding': True}}
+2. section 3a: the anchors as rows of rows-m9.json: {'fp32.randn': ['E78', 'E82'], 'fp16.randn': ['E78', 'E82'], 'int8.full': ['E78', 'E82']}
+3. rate against the nominal, per format (session means, %): {'fp32': {'session_means_pct': [-0.356, -0.329]}, 'fp16': {'session_means_pct': [-0.349, -0.329]}, 'int8': {'session_means_pct': [-0.277, -0.227]}}; per session {'E153': {'n': 44, 'mean_pct': -0.293, 'min_pct': -0.38, 'max_pct': -0.209}, 'E157': {'n': 44, 'mean_pct': -0.316, 'min_pct': -0.441, 'max_pct': -0.245}, 'E163': {'n': 52, 'mean_pct': -0.287, 'min_pct': -0.383, 'max_pct': -0.192}, 'E164': {'n': 52, 'mean_pct': -0.316, 'min_pct': -0.423, 'max_pct': -0.245}}
+4. byte twins: 11 tiles carry 24 kind labels
+   float B: rms 0.20801 -> twins merged 0.20821 W; affected rows 24
+   float B+a: rms 0.20169 -> twins merged 0.20187 W; affected rows 24
+   float B+b: rms 0.19235 -> twins merged 0.19257 W; affected rows 24
+   float B+a+b: rms 0.18537 -> twins merged 0.18557 W; affected rows 24
+   float rule a with the twins merged: {'d_rms_w': -0.006342, 'lo95': -0.010336, 'hi95': -0.002315, 'resolved': True, 'n_kinds': 385, 'n_rows': 737} enters True
+   float rule b with the twins merged: {'d_rms_w': -0.245194, 'lo95': -0.380575, 'hi95': -0.109817, 'resolved': True, 'n_kinds': 13, 'n_rows': 26} enters True
+   int8 B: rms 0.17723 -> twins merged 0.17723 W; affected rows 0
+   int8 B+a: rms 0.17898 -> twins merged 0.17898 W; affected rows 0
+   int8 rule a with the twins merged: {'d_rms_w': 0.001751, 'lo95': -0.003137, 'hi95': 0.006793, 'resolved': False, 'n_kinds': 107, 'n_rows': 222} enters False
+wrote a2-checks-m10.json, a2-checks-output.txt (4.3 s)
