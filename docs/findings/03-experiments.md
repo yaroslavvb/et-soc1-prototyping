@@ -8131,7 +8131,7 @@ above the measured interval), the read limit with D(85) − D(127) a reported co
 named october-forecast-model, with its freeze line's form. **Kitted** [`a4aafc6f`](../../tools/claims-v3/e178/KIT.md) (23:06:28 Thu; 47
 files, `SHA256SUMS-e178-kit` 72), with [kit note 1](../../tools/claims-v3/e178/KIT.md.dated-note-1.md) `763307e7` (01:56:48 Fri; 21 files,
 `SHA256SUMS-e178-kit-note1` 47): the kit verifier's faults fixed before any datum (sync v2 from the harness, s03 v2, s22 v2, collect v2,
-`scrub_tree_e178.py`); box steps 2, 5 and 11 run their v2 files. **Not run; 0 card-minutes.** Planned: four passes of all 40 kinds, about
+`scrub_tree_e178.py`); box steps 2, 5 and 11 run their v2 files. *(dated, Fri 6 Nov 2026, after Q148(r)'s verifier: kit note 1's four fixes, each by its section: (1) the sync takes every file the harness names but the box binaries, closing the E174 class; (2) E178-R-int8 is read on the scored P, as registered, with its power at that reading; (3) the login check reads every directory of the output, and run_e78's own stop line; (4) a failed arm is dropped, never left in the output, a collection rule registered before any datum.)* **Not run; 0 card-minutes.** Planned: four passes of all 40 kinds, about
 45–54 card-minutes (cap 60), on the same card after E181. *(A dated note A3, `77768027`, 05:17:12 PST Fri, a reported minion-rail arm, was
 committed by the next desk round beside these records; its verifier had not reported at these records.)*
 
@@ -8243,7 +8243,7 @@ release; s22 v2, with one RB_OUT outside the repository and one RB_LOCK for both
 s11 or after E178's session, never during it. About 75 card-minutes (cap 76); the stops 70 / 72 °C, or 65 W / 74 °C; a 4,560 s budget.
 **Not run; 0 card-minutes.** A8-6 is settled for E181 by A9's reported arm: with one session nothing enters M11, so every E181 record
 quotes HM-E144, HM-HE and HM-CAL on the registered chain and on the arm, labelled "reported (A9)"; the arm's fate is owed in a dated
-amendment before M11's session 3.
+amendment before M11's session 3. *(dated, Fri 6 Nov 2026, after Q148(r)'s verifier: post hoc, the arm moves each first hold toward its session's other holds, E154's from −0.089 to +0.050 °C off their line and E166's from −0.129 to −0.012 °C; each offset is inside its prediction's standard error either way (about 0.14 and 0.23 °C), so this supports the arm's size without resolving it ([A9](../../tools/claims-v3/m11/REGISTRATION.md.dated-note-A9.md) and `a9-posthoc.txt`). Also: the kit's first runbook audit log, `rb/logs/dmcmd-audit.txt`, was made on step 11's file before its rename to `s11_a3_launch_e181.sh`; its result holds on the committed files, and the v2 log, `rb/logs/dmcmd-audit-v2.txt`, whose header carries its command line, shows the same 11 send sites, all READ (the kit's [note 1](../../tools/claims-v3/e181/README.md.dated-note-1.md), its fault 6).)*
 **Report:** the kinds page (A25), section 11, items 8 and 9.
 
 **Q145's first steps, beside the register** (Thu 5 Nov about 22:15 PST – Fri 6 Nov about 05:05 PST; desk only: no card, no device
