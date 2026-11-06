@@ -8045,7 +8045,7 @@ headed "G0-REFUSED: no hold ran, nothing scored, not a failed prediction", under
 
 **The readings** (measured; the rows marked post hoc decide nothing). The card's idle floor at the smoke's first sample (17:21:17, 4 h 46
 min after E171 ended): 53.202 °C 34-sensor mean, firmware 52 °C, board 23.97 W, already above G0's line. R0 fell from 54.81 to 53.49 °C
-after the smoke (−1.69 °C per 10 min over its last 240 s), so G0's window sat about 0.38 °C above the floor. *Post hoc:* the floor moves
+after the smoke (−1.69 °C per 10 min over its last 240 s), so G0's window sat about 0.38 °C above the floor. *(dated, Thu 5 Nov 2026, after Q143(r)'s verifier: 54.81 °C is the measured pass's first sample, 3.3 s before R0 began, and 53.49 °C rounds R0's sample at +299 s; R0 fell from 54.75 °C at its start to 53.48 °C at its end. G0's room, the slope and the 0.38 °C margin are unchanged; [E176's data dated note 1](../reports/data/2026-11-05-e176-m11-holds-aifoundry3/README.md.dated-note-1.md) § 2.)* *Post hoc:* the floor moves
 2–3 °C between sessions and within a day (E154 50.98 °C, E166 51.84 °C, firmware 49 °C at E171 this morning, 53.20 °C this evening). **No
 later try:** the room rule the lane wrote first (17:34:16 PST, before its comparison window) needed the host's NVMe composite at least
 0.5 °C under its baseline, and it read 38.850 °C in every sample of five windows; *post hoc*, that sensor reports whole kelvins, so the rule
