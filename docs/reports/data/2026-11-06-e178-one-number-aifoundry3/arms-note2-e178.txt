@@ -1,0 +1,197 @@
+E178's data README, dated note 2: E178's three REPORTED arms on the committed data (arms_note2_e178.py). REPORTED, never a verdict of E178: no E178 rule, threshold or verdict reads it.
+Inputs, each checked against its committed hash list: docs/reports/data/2026-11-06-e178-one-number-aifoundry3/scored.json (31c3efd8d08d); docs/reports/data/2026-11-06-e178-one-number-aifoundry3/e178.json (811f371e6412); docs/reports/data/2026-11-06-e178-one-number-aifoundry3/runs.csv (2cdd84c80304); docs/reports/data/2026-11-06-e178-one-number-aifoundry3/rail-arm-e178.json (25628f2196d6); tools/claims-v3/e178/m1-october-forecast-model.json (52e321072d72); tools/claims-v3/e178/score_e178.py (4c2b14eb4a51); tools/claims-v3/e178/power_e178.py (2d979182daf3); tools/claims-v3/e178/rail_e178.py (c1d9e9aeeac4); tools/claims-v3/e178/forecast-e178.json (7cb8fda874e5); tools/claims-v3/e178/kinds-e178.json (6e86a068f5b2); tools/claims-v3/m10-c/termc.py (fc52fe46e94f); tools/claims-v3/m10-c/termc-fit.json (6bea23dba823); tools/claims-v3/m10-c/forecast-m10c-e178.json (e979c083b659); tools/claims-v3/m10-s/term_s.py (d4d671d93c85); docs/reports/data/2026-11-04-q142m-m10/predict_m10.py (65dd307bffa1); docs/reports/data/2026-11-04-q142m-m10/fit_m10.py (28de38b71220); tools/claims-v3/m10-c/termc_note2.py (5466c18b79cb); tools/claims-v3/m10-c/termc-note2.json (b0aaa0edeeac).
+
+(1) Q148(c)'s constant-lane term, its registered rule (termc.py score; re-run here in memory, byte for byte):
+  C1 over 27 float kinds: rms(x) 0.0754 -> rms(x') 0.0610 W, d -0.0143 W, 95% [-0.0275, +0.0015]: NOT RESOLVED
+  C2: d fp32 -0.0309, fp16 +0.0082 W; holds: False; enters M10 for the next blind pool: False
+  rms by format (W): fp32 0.0908 -> 0.0599 (14 kinds); fp16 0.0540 -> 0.0622 (13 kinds)
+  m fp32: +0.0832 [+0.0615, +0.1050] W over 14 kinds, against L +0.0354 [-0.0533, +0.1241] (aifoundry3's own arm K-card +0.1101 [+0.0982, +0.1221])
+  m fp16: +0.0286 [-0.0002, +0.0574] W over 13 kinds, against L +0.0703 [+0.0241, +0.1164] (aifoundry3's own arm K-card +0.0810 [+0.0138, +0.1483])
+  the arms' d: K-card -0.0167, R -0.0201 W
+  what would show the term is not wanted: C1 WORSE False; m holds 0 {'fp32': False, 'fp16': True}; m excludes L's interval {'fp32': False, 'fp16': False}: shown not wanted: False
+  the split (dated note 2, REPORTED), the 23 new kinds: C1 d -0.0084 [-0.0229, +0.0094] NOT RESOLVED; C2 d fp32 -0.0304, fp16 +0.0257, holds False; agrees with the rule True
+    m fp32 (new): +0.0807 [+0.0561, +0.1053] over 12
+    m fp16 (new): +0.0169 [-0.0070, +0.0408] over 11
+  the 4 bridge kinds apart: fp16.neg_ones x +0.1420; fp16.ones x +0.0438; fp32.neg_ones x +0.0716; fp32.ones x +0.1251; m fp32 +0.0983 (n 2); fp16 +0.0929 (n 2)
+  beside, not registered: D inside the frozen predictive interval (s = 1): fp32 {'inside': 14, 'above': 0, 'below': 0}; fp16 {'inside': 12, 'above': 1, 'below': 0}; x' within +-1.96 sigma_C: fp32 {'inside': 14, 'above': 0, 'below': 0}; fp16 {'inside': 12, 'above': 0, 'below': 1}
+  kind               bridge        D P(scored)        x       x' frozen P+L      pred. 95% (s=1) D-in   x'-in
+  fp16.e178_a4_b5             8.3164    8.2935  +0.0229  -0.0478     8.3132 [  8.2053,   8.4211] inside inside
+  fp16.e178_a5_b4             8.2570    8.2957  -0.0388  -0.1095     8.3132 [  8.2053,   8.4211] inside below
+  fp16.e178_v0p5              8.3024    8.2717  +0.0306  -0.0400     8.2932 [  8.1853,   8.4011] inside inside
+  fp16.e178_v1p5              8.3648    8.2981  +0.0667  -0.0040     8.3146 [  8.2067,   8.4225] inside inside
+  fp16.e178_v2                8.2430    8.2731  -0.0301  -0.1008     8.2942 [  8.1863,   8.4021] inside inside
+  fp16.e178_v3                8.3039    8.2940  +0.0099  -0.0608     8.3137 [  8.2058,   8.4216] inside inside
+  fp16.e178_v4                8.2721    8.2743  -0.0023  -0.0729     8.2952 [  8.1872,   8.4031] inside inside
+  fp16.e178_v5                8.3265    8.2916  +0.0349  -0.0357     8.3119 [  8.2040,   8.4198] inside inside
+  fp16.e178_v6                8.3275    8.2936  +0.0339  -0.0368     8.3146 [  8.2067,   8.4225] inside inside
+  fp16.e178_v7                8.3607    8.2908  +0.0699  -0.0008     8.3112 [  8.2033,   8.4191] inside inside
+  fp16.e178_v8                8.2643    8.2761  -0.0118  -0.0825     8.2961 [  8.1882,   8.4040] inside inside
+  fp16.neg_ones      yes      8.4179    8.2759  +0.1420  +0.0713     8.2952 [  8.1872,   8.4031] above  inside
+  fp16.ones          yes      8.3177    8.2740  +0.0438  -0.0269     8.2952 [  8.1872,   8.4031] inside inside
+  fp32.e178_a4_b5             8.3687    8.2964  +0.0723  +0.0367     8.2843 [  8.0997,   8.4689] inside inside
+  fp32.e178_a5_b4             8.3404    8.2966  +0.0437  +0.0081     8.2843 [  8.0997,   8.4689] inside inside
+  fp32.e178_uf                8.3604    8.2062  +0.1542  +0.1185     8.1920 [  8.0074,   8.3766] inside inside
+  fp32.e178_v0p5              8.4078    8.2810  +0.1268  +0.0912     8.2659 [  8.0813,   8.4505] inside inside
+  fp32.e178_v1p5              8.3865    8.2924  +0.0941  +0.0585     8.2801 [  8.0955,   8.4647] inside inside
+  fp32.e178_v2                8.3303    8.2829  +0.0474  +0.0118     8.2688 [  8.0842,   8.4534] inside inside
+  fp32.e178_v3                8.3415    8.2885  +0.0531  +0.0175     8.2791 [  8.0945,   8.4637] inside inside
+  fp32.e178_v4                8.3489    8.2821  +0.0668  +0.0312     8.2679 [  8.0833,   8.4525] inside inside
+  fp32.e178_v5                8.4023    8.2908  +0.1115  +0.0759     8.2778 [  8.0932,   8.4624] inside inside
+  fp32.e178_v6                8.3629    8.2916  +0.0713  +0.0357     8.2801 [  8.0955,   8.4647] inside inside
+  fp32.e178_v7                8.3966    8.2900  +0.1067  +0.0711     8.2802 [  8.0956,   8.4648] inside inside
+  fp32.e178_v8                8.3031    8.2822  +0.0208  -0.0148     8.2688 [  8.0842,   8.4534] inside inside
+  fp32.neg_ones      yes      8.3513    8.2797  +0.0716  +0.0360     8.2669 [  8.0823,   8.4515] inside inside
+  fp32.ones          yes      8.4055    8.2805  +0.1251  +0.0895     8.2669 [  8.0823,   8.4515] inside inside
+
+(2) october-forecast-model, by E178's dated note M1, M1-4 (the scored figure: floats table 1's a3 column; int8 int8 v2's a3 die column):
+  route check: the reader's pass-form statistic reproduces its 48 pass-form contrasts on the board and rail to 5.6e-17 W
+  ranking fp32: Spearman rho +0.073 over 14 kinds (E178's scored P beside: -0.046)
+  ranking fp16: Spearman rho +0.162 over 13 kinds (E178's scored P beside: +0.280)
+  ranking int8: Spearman rho +0.357 over 13 kinds (E178's scored P beside: +0.643)
+  the five rule contrasts and the model's extremes, against the board and rail intervals:
+    E178-H-int8                  int8.e178_v5 - int8.e178_v4: model +0.0392 (the die); board +0.0532 [+0.0217, +0.0848] -> inside; rail +0.0261 [-0.0281, +0.0804] -> inside; E178's frozen P +0.1862 above [the reader (rail-arm-e178.json)]
+    E178-H-fp32                  fp32.e178_v5 - fp32.e178_v4: model +0.0128 (as table 1 states it); board +0.0523 [-0.0459, +0.1505] -> inside; rail +0.0422 [-0.0887, +0.1731] -> inside; E178's frozen P +0.0099 inside [the reader (rail-arm-e178.json)]
+    E178-H-fp16                  fp16.e178_v5 - fp16.e178_v4: model +0.0114 (as table 1 states it); board +0.0558 [-0.0038, +0.1154] -> inside; rail +0.0292 [-0.0251, +0.0835] -> inside; E178's frozen P +0.0167 inside [the reader (rail-arm-e178.json)]
+    E178-U                       fp32.ones - fp32.e178_uf: model +0.0421 (as table 1 states it); board +0.0452 [-0.0314, +0.1217] -> inside; rail +0.0328 [-0.1174, +0.1829] -> inside; E178's frozen P +0.0749 inside [the reader (rail-arm-e178.json)]
+    E178-S-int8                  int8.e178_v85 - int8.neg_ones: model +0.0696 (the die); board +0.0582 [-0.0770, +0.1935] -> inside; rail +0.0688 [-0.0436, +0.1812] -> inside; E178's frozen P +0.3549 above [the reader (rail-arm-e178.json)]
+    the model's extreme, fp32    fp32.e178_v5 - fp32.e178_uf: model +0.0552 (as table 1 states it); board +0.0419 [-0.0989, +0.1828] -> inside; rail +0.0396 [-0.0694, +0.1485] -> inside [not among the reader's 52: the reader's pass-form statistic, here]
+    the model's extreme, fp16    fp16.e178_a5_b4 - fp16.e178_v0p5: model +0.0126 (as table 1 states it); board -0.0354 [-0.2728, +0.2019] -> inside; rail -0.0418 [-0.4756, +0.3921] -> inside [not among the reader's 52: the reader's pass-form statistic, here]
+    the model's extreme, int8    int8.e178_v85 - int8.neg_ones: model +0.0696 (the die); board +0.0582 [-0.0770, +0.1935] -> inside; rail +0.0688 [-0.0436, +0.1812] -> inside [the reader (rail-arm-e178.json: E178-S-int8)]
+  int8 5s - 4s, the model's own board-equivalent +0.047 W: inside the couple-form board interval, inside the pass-form one
+  ties in the model's figures (reported only):
+    fp32.e178_v2 - fp32.e178_v8: model +0.0000; board +0.0272 [-0.0057, +0.0602] (spans 0), rail +0.0412 [-0.1436, +0.2260] (spans 0) [the reader (rail-arm-e178.json: equal_flips_different_values 4: fp32.e178_v2 - fp32.e178_v8)]
+    fp32.neg_ones - fp32.ones: model +0.0000; board -0.0543 [-0.1166, +0.0081] (spans 0), rail +0.0564 [-0.2660, +0.3788] (spans 0) [the reader (rail-arm-e178.json: bridge 0: fp32.neg_ones - fp32.ones)]
+    fp16.e178_v1p5 - fp16.e178_v5: model +0.0000; board +0.0382 [-0.0689, +0.1454] (spans 0), rail +0.0788 [-0.0663, +0.2238] (spans 0) [not among the reader's 52: the reader's pass-form statistic, here]
+  E178-E's equal groups beside (spreads, W): fp32: model 0.0021, scored P 0.0033, measured 0.1048 (line 0.1958); fp16: model 0.0018, scored P 0.0043, measured 0.1749 (line 0.1811); int8: model 0.0026, scored P 0.0003, measured 0.0669 (line 0.2460)
+  over the reader's 52 (48 distinct): model inside / above / below the board interval {'inside': 45, 'above': 3, 'below': 0}, the rail interval {'inside': 45, 'above': 1, 'below': 2}; E178's frozen P beside: board {'inside': 38, 'above': 10, 'below': 0}, rail {'inside': 39, 'above': 7, 'below': 2} (all 52: model board {'inside': 49, 'above': 3, 'below': 0}, rail {'inside': 48, 'above': 1, 'below': 3})
+  the 6 distinct board intervals that do not span 0: model {'inside': 3, 'above': 3, 'below': 0}, P {'inside': 1, 'above': 5, 'below': 0}: E178-H-int8; crossed 5: int8.e178_a4_b5 - int8.e178_v4; equal_flips_different_values 9: fp16.e178_v2 - fp16.neg_ones; equal_flips_different_values 11: fp16.e178_v4 - fp16.neg_ones; equal_flips_different_values 18: int8.e178_v4 - int8.e178_v8; his_4_5 2: int8.e178_v5 - int8.e178_v4
+  the 3 distinct rail intervals that do not span 0: model {'inside': 0, 'above': 1, 'below': 2}, P {'inside': 0, 'above': 1, 'below': 2}: crossed 0: fp32.e178_a4_b5 - fp32.e178_a5_b4; crossed 1: fp32.e178_a4_b5 - fp32.e178_v4; equal_popcount_different_flips 4: int8.e178_v5 - int8.e178_v3
+    bridge: 3; model board {'inside': 3, 'above': 0, 'below': 0}, rail {'inside': 3, 'above': 0, 'below': 0}; P board {'inside': 3, 'above': 0, 'below': 0}
+    crossed: 6; model board {'inside': 6, 'above': 0, 'below': 0}, rail {'inside': 4, 'above': 0, 'below': 2}; P board {'inside': 6, 'above': 0, 'below': 0}
+    equal_flips_different_values: 21; model board {'inside': 18, 'above': 3, 'below': 0}, rail {'inside': 21, 'above': 0, 'below': 0}; P board {'inside': 18, 'above': 3, 'below': 0}
+    equal_popcount_different_flips: 6; model board {'inside': 6, 'above': 0, 'below': 0}, rail {'inside': 5, 'above': 1, 'below': 0}; P board {'inside': 5, 'above': 1, 'below': 0}
+    extremes: 2; model board {'inside': 2, 'above': 0, 'below': 0}, rail {'inside': 2, 'above': 0, 'below': 0}; P board {'inside': 0, 'above': 2, 'below': 0}
+    his_4_5: 3; model board {'inside': 3, 'above': 0, 'below': 0}, rail {'inside': 3, 'above': 0, 'below': 0}; P board {'inside': 2, 'above': 1, 'below': 0}
+    reported (A1-1): 1; model board {'inside': 1, 'above': 0, 'below': 0}, rail {'inside': 1, 'above': 0, 'below': 0}; P board {'inside': 0, 'above': 1, 'below': 0}
+    reported (A2-2): 1; model board {'inside': 1, 'above': 0, 'below': 0}, rail {'inside': 1, 'above': 0, 'below': 0}; P board {'inside': 1, 'above': 0, 'below': 0}
+    rule: 5; model board {'inside': 5, 'above': 0, 'below': 0}, rail {'inside': 5, 'above': 0, 'below': 0}; P board {'inside': 3, 'above': 2, 'below': 0}
+  E178's frozen P on the board against the scorer's own reading of its scored dP: 51 compared, differ in 0
+  the levels (each kind's figure against its measured D and Drail, unscaled; intervals over kept passes):
+    fp32 (as table 1 states it), 14 kinds: D - model +0.1841 [+0.1650, +0.2031] W (D - scored P beside +0.0832); model/D 0.973-0.985 (mean 0.978); model/Drail 1.157-1.190; model inside / above / below D's interval {'inside': 1, 'above': 0, 'below': 13}, Drail's {'inside': 0, 'above': 14, 'below': 0}; the check kinds' model/D fp32.neg_ones 0.979, fp32.ones 0.973; the blind kinds' 0.973-0.985
+    fp16 (as table 1 states it), 13 kinds: D - model +0.1244 [+0.0953, +0.1535] W (D - scored P beside +0.0286); model/D 0.972-0.993 (mean 0.985); model/Drail 1.160-1.183; model inside / above / below D's interval {'inside': 2, 'above': 0, 'below': 11}, Drail's {'inside': 0, 'above': 13, 'below': 0}; the check kinds' model/D fp16.neg_ones 0.972, fp16.ones 0.984; the blind kinds' 0.980-0.993
+    int8 (the die), 13 kinds: D - model +0.1565 [+0.1207, +0.1923] W (D - scored P beside -0.1598); model/D 0.852-0.950 (mean 0.908); model/Drail 0.971-1.072; model inside / above / below D's interval {'inside': 2, 'above': 0, 'below': 11}, Drail's {'inside': 7, 'above': 6, 'below': 0}; the check kinds' model/D int8.neg_ones 0.852, int8.ones 0.922; the blind kinds' 0.856-0.950
+      int8 D/model 1.053-1.173 (mean 1.102), against int8 v2's units, as written: 'the board adds roughly a quarter on these cards'; table 1's int8 ones/D 0.943, against table 1's units, as written: '0.99x / 0.93x for int8 ones' (table 1's int8 rows, superseded by int8 v2: reported only)
+      against int8 v2's own band (beside, not scored): D {'inside': 0, 'above': 13, 'below': 0}, Drail {'inside': 3, 'above': 0, 'below': 10} (Drail inside: int8.e178_v127, int8.e178_v85, int8.neg_ones)
+    the model's own level band, as written: on the committed ones kinds the model reads 0.97-0.98x the measured D on aifoundry3 and 0.93x on card 1 (fp32 and fp16 alike), and 0.99x / 0.93x for int8 ones
+  kind                  model        D               D 95% is      Drail           Drail 95% is   model/D
+  fp16.e178_a4_b5      8.1915   8.3164 [  8.1996,   8.4332] below    7.0115 [  6.7312,   7.2917] above  0.9850
+  fp16.e178_a5_b4      8.1948   8.2570 [  8.1032,   8.4108] inside   6.9744 [  6.7526,   7.1963] above  0.9925
+  fp16.e178_v0p5       8.1822   8.3024 [  8.2476,   8.3571] below    7.0291 [  6.9069,   7.1514] above  0.9855
+  fp16.e178_v1p5       8.1947   8.3648 [  8.2360,   8.4936] below    7.0669 [  6.9021,   7.2317] above  0.9797
+  fp16.e178_v2         8.1832   8.2430 [  8.1755,   8.3105] inside   6.9498 [  6.8492,   7.0505] above  0.9927
+  fp16.e178_v3         8.1943   8.3039 [  8.2553,   8.3525] below    6.9240 [  6.8470,   7.0009] above  0.9868
+  fp16.e178_v4         8.1833   8.2721 [  8.2205,   8.3237] below    6.9536 [  6.9407,   6.9665] above  0.9893
+  fp16.e178_v5         8.1947   8.3265 [  8.3042,   8.3489] below    6.9881 [  6.9489,   7.0273] above  0.9842
+  fp16.e178_v6         8.1944   8.3275 [  8.2226,   8.4324] below    6.9728 [  6.7653,   7.1803] above  0.9840
+  fp16.e178_v7         8.1934   8.3607 [  8.2900,   8.4314] below    6.9788 [  6.8985,   7.0590] above  0.9800
+  fp16.e178_v8         8.1840   8.2643 [  8.1961,   8.3325] below    6.9988 [  6.8811,   7.1165] above  0.9903
+  fp16.neg_ones        8.1831   8.4179 [  8.3773,   8.4584] below    7.0177 [  6.8702,   7.1651] above  0.9721
+  fp16.ones            8.1834   8.3177 [  8.2388,   8.3967] below    7.0125 [  6.8567,   7.1684] above  0.9838
+  fp32.e178_a4_b5      8.1870   8.3687 [  8.0430,   8.6943] inside   7.0261 [  6.8570,   7.1952] above  0.9783
+  fp32.e178_a5_b4      8.1902   8.3404 [  8.2225,   8.4582] below    6.9643 [  6.8398,   7.0888] above  0.9820
+  fp32.e178_uf         8.1368   8.3604 [  8.2719,   8.4488] below    6.9828 [  6.9298,   7.0357] above  0.9733
+  fp32.e178_v0p5       8.1801   8.4078 [  8.2745,   8.5411] below    6.9661 [  6.8370,   7.0951] above  0.9729
+  fp32.e178_v1p5       8.1848   8.3865 [  8.3144,   8.4585] below    7.0058 [  6.8869,   7.1246] above  0.9760
+  fp32.e178_v2         8.1810   8.3303 [  8.2636,   8.3971] below    6.9161 [  6.7500,   7.0821] above  0.9821
+  fp32.e178_v3         8.1847   8.3415 [  8.3019,   8.3812] below    7.0016 [  6.8817,   7.1214] above  0.9812
+  fp32.e178_v4         8.1792   8.3489 [  8.2683,   8.4295] below    6.9665 [  6.8729,   7.0602] above  0.9797
+  fp32.e178_v5         8.1920   8.4023 [  8.3225,   8.4820] below    7.0224 [  6.9611,   7.0836] above  0.9750
+  fp32.e178_v6         8.1850   8.3629 [  8.3028,   8.4230] below    6.9768 [  6.7545,   7.1991] above  0.9787
+  fp32.e178_v7         8.1893   8.3966 [  8.3119,   8.4813] below    7.0714 [  6.9417,   7.2011] above  0.9753
+  fp32.e178_v8         8.1810   8.3031 [  8.2521,   8.3540] below    6.8749 [  6.7982,   6.9516] above  0.9853
+  fp32.neg_ones        8.1789   8.3513 [  8.3083,   8.3942] below    7.0720 [  6.9107,   7.2333] above  0.9794
+  fp32.ones            8.1789   8.4055 [  8.3299,   8.4811] below    7.0156 [  6.8344,   7.1967] above  0.9730
+  int8.e178_a4_b5      1.5412   1.6854 [  1.6314,   1.7394] below    1.4666 [  1.3988,   1.5343] above  0.9145
+  int8.e178_a5_b4      1.5394   1.6826 [  1.5710,   1.7942] below    1.4434 [  1.3774,   1.5094] above  0.9149
+  int8.e178_v127       1.5295   1.7866 [  1.6930,   1.8801] below    1.5622 [  1.5107,   1.6138] inside 0.8561
+  int8.e178_v2         1.5115   1.6503 [  1.5743,   1.7263] below    1.4486 [  1.3931,   1.5041] above  0.9159
+  int8.e178_v3         1.5390   1.6741 [  1.6168,   1.7314] below    1.5101 [  1.4716,   1.5486] inside 0.9193
+  int8.e178_v4         1.5116   1.5917 [  1.5724,   1.6110] below    1.4192 [  1.3557,   1.4827] above  0.9497
+  int8.e178_v5         1.5508   1.6641 [  1.5994,   1.7287] below    1.4470 [  1.4260,   1.4679] above  0.9319
+  int8.e178_v6         1.5391   1.6464 [  1.5290,   1.7638] inside   1.4621 [  1.3565,   1.5678] inside 0.9348
+  int8.e178_v7         1.5424   1.6730 [  1.6267,   1.7193] below    1.5141 [  1.4440,   1.5842] inside 0.9219
+  int8.e178_v8         1.5102   1.6586 [  1.6143,   1.7029] below    1.4483 [  1.4207,   1.4760] above  0.9105
+  int8.e178_v85        1.5690   1.8176 [  1.7219,   1.9134] below    1.6134 [  1.5637,   1.6630] inside 0.8632
+  int8.neg_ones        1.4994   1.7594 [  1.7145,   1.8043] below    1.5445 [  1.4737,   1.6153] inside 0.8522
+  int8.ones            1.5090   1.6367 [  1.3434,   1.9300] inside   1.4816 [  1.3205,   1.6427] inside 0.9220
+  every contrast of the reader's 52 (model; board interval -> model, P; rail interval -> model, P):
+    E178-H-int8                                                +0.0392; B +0.0532 [+0.0217, +0.0848] inside, above; R +0.0261 [-0.0281, +0.0804] inside, above
+    E178-H-fp32                                                +0.0128; B +0.0523 [-0.0459, +0.1505] inside, inside; R +0.0422 [-0.0887, +0.1731] inside, inside
+    E178-H-fp16                                                +0.0114; B +0.0558 [-0.0038, +0.1154] inside, inside; R +0.0292 [-0.0251, +0.0835] inside, inside
+    E178-U                                                     +0.0421; B +0.0452 [-0.0314, +0.1217] inside, inside; R +0.0328 [-0.1174, +0.1829] inside, inside
+    E178-S-int8                                                +0.0696; B +0.0582 [-0.0770, +0.1935] inside, above; R +0.0688 [-0.0436, +0.1812] inside, above
+    beside: 127 - neg_ones                                     +0.0301; B +0.0271 [-0.0828, +0.1371] inside, above; R +0.0177 [-0.0856, +0.1210] inside, above
+    beside: 85 - 127                                           +0.0395; B +0.0311 [-0.1188, +0.1810] inside, inside; R +0.0512 [-0.0243, +0.1266] inside, inside
+    bridge 0: fp32.neg_ones - fp32.ones                        +0.0000; B -0.0543 [-0.1166, +0.0081] inside, inside; R +0.0564 [-0.2660, +0.3788] inside, inside
+    bridge 1: fp16.neg_ones - fp16.ones                        -0.0003; B +0.1001 [-0.0115, +0.2118] inside, inside; R +0.0051 [-0.2767, +0.2870] inside, inside
+    bridge 2: int8.neg_ones - int8.ones                        -0.0096; B +0.1227 [-0.2126, +0.4579] inside, inside; R +0.0630 [-0.1142, +0.2401] inside, inside
+    crossed 0: fp32.e178_a4_b5 - fp32.e178_a5_b4               -0.0032; B +0.0595 [-0.2502, +0.3692] inside, inside; R +0.0967 [+0.0075, +0.1859] below, below
+    crossed 1: fp32.e178_a4_b5 - fp32.e178_v4                  +0.0078; B +0.0364 [-0.3523, +0.4251] inside, inside; R +0.0612 [+0.0470, +0.0753] below, below
+    crossed 2: fp16.e178_a4_b5 - fp16.e178_a5_b4               -0.0033; B +0.0930 [-0.0543, +0.2403] inside, inside; R +0.1116 [-0.2366, +0.4597] inside, inside
+    crossed 3: fp16.e178_a4_b5 - fp16.e178_v4                  +0.0082; B +0.0443 [-0.0791, +0.1678] inside, inside; R +0.0579 [-0.2297, +0.3455] inside, inside
+    crossed 4: int8.e178_a4_b5 - int8.e178_a5_b4               +0.0018; B +0.0028 [-0.1231, +0.1286] inside, inside; R +0.0232 [-0.0671, +0.1135] inside, inside
+    crossed 5: int8.e178_a4_b5 - int8.e178_v4                  +0.0296; B +0.0937 [+0.0282, +0.1591] inside, inside; R +0.0474 [-0.0706, +0.1653] inside, inside
+    equal_flips_different_values 0: fp32.e178_v0p5 - fp32.neg_ +0.0012; B +0.0566 [-0.0533, +0.1665] inside, inside; R -0.1059 [-0.3710, +0.1592] inside, inside
+    equal_flips_different_values 1: fp32.e178_v0p5 - fp32.ones +0.0012; B +0.0023 [-0.1206, +0.1253] inside, inside; R -0.0495 [-0.1523, +0.0533] inside, inside
+    equal_flips_different_values 2: fp32.e178_v1p5 - fp32.e178 +0.0001; B +0.0449 [-0.0113, +0.1012] inside, inside; R +0.0042 [-0.1791, +0.1875] inside, inside
+    equal_flips_different_values 3: fp32.e178_v1p5 - fp32.e178 -0.0002; B +0.0236 [-0.0647, +0.1119] inside, inside; R +0.0290 [-0.1583, +0.2162] inside, inside
+    equal_flips_different_values 4: fp32.e178_v2 - fp32.e178_v +0.0000; B +0.0272 [-0.0057, +0.0602] inside, inside; R +0.0412 [-0.1436, +0.2260] inside, inside
+    equal_flips_different_values 5: fp32.e178_v4 - fp32.neg_on +0.0003; B -0.0023 [-0.0611, +0.0565] inside, inside; R -0.1054 [-0.2518, +0.0410] inside, inside
+    equal_flips_different_values 6: fp32.e178_v4 - fp32.ones   +0.0003; B -0.0566 [-0.1710, +0.0578] inside, inside; R -0.0490 [-0.2788, +0.1808] inside, inside
+    equal_flips_different_values 7: fp32.e178_v5 - fp32.e178_v +0.0027; B +0.0056 [-0.1199, +0.1311] inside, inside; R -0.0491 [-0.1520, +0.0538] inside, inside
+    equal_flips_different_values 8: fp16.e178_v1p5 - fp16.e178 +0.0003; B +0.0373 [-0.0240, +0.0985] inside, inside; R +0.0941 [-0.2097, +0.3978] inside, inside
+    equal_flips_different_values 9: fp16.e178_v2 - fp16.neg_on +0.0001; B -0.1749 [-0.2496, -0.1001] above, above; R -0.0679 [-0.2165, +0.0808] inside, inside
+    equal_flips_different_values 10: fp16.e178_v2 - fp16.ones  -0.0002; B -0.0747 [-0.1848, +0.0353] inside, inside; R -0.0627 [-0.2271, +0.1016] inside, inside
+    equal_flips_different_values 11: fp16.e178_v4 - fp16.neg_o +0.0002; B -0.1458 [-0.1661, -0.1255] above, above; R -0.0641 [-0.2106, +0.0824] inside, inside
+    equal_flips_different_values 12: fp16.e178_v4 - fp16.ones  -0.0001; B -0.0457 [-0.1677, +0.0763] inside, inside; R -0.0590 [-0.2191, +0.1012] inside, inside
+    equal_flips_different_values 13: fp16.e178_v5 - fp16.e178_ +0.0013; B -0.0342 [-0.0828, +0.0145] inside, inside; R +0.0093 [-0.0621, +0.0807] inside, inside
+    equal_flips_different_values 14: int8.e178_v2 - int8.e178_ -0.0001; B +0.0586 [-0.0119, +0.1291] inside, inside; R +0.0294 [-0.0282, +0.0870] inside, inside
+    equal_flips_different_values 15: int8.e178_v2 - int8.e178_ +0.0013; B -0.0083 [-0.1234, +0.1069] inside, inside; R +0.0002 [-0.0812, +0.0817] inside, inside
+    equal_flips_different_values 16: int8.e178_v2 - int8.ones  +0.0025; B +0.0136 [-0.3158, +0.3430] inside, inside; R -0.0330 [-0.2085, +0.1425] inside, inside
+    equal_flips_different_values 17: int8.e178_v3 - int8.e178_ -0.0001; B +0.0277 [-0.1242, +0.1796] inside, inside; R +0.0480 [-0.0385, +0.1345] inside, inside
+    equal_flips_different_values 18: int8.e178_v4 - int8.e178_ +0.0014; B -0.0669 [-0.1241, -0.0097] above, above; R -0.0291 [-0.1070, +0.0487] inside, inside
+    equal_flips_different_values 19: int8.e178_v4 - int8.ones  +0.0026; B -0.0450 [-0.3396, +0.2496] inside, inside; R -0.0624 [-0.2126, +0.0878] inside, inside
+    equal_flips_different_values 20: int8.e178_v8 - int8.ones  +0.0012; B +0.0219 [-0.2398, +0.2835] inside, inside; R -0.0332 [-0.2014, +0.1349] inside, inside
+    equal_popcount_different_flips 0: fp32.ones - fp32.e178_uf +0.0421; B +0.0452 [-0.0314, +0.1217] inside, inside; R +0.0328 [-0.1174, +0.1829] inside, inside
+    equal_popcount_different_flips 1: fp16.e178_v5 - fp16.e178 +0.0125; B +0.0242 [-0.0527, +0.1011] inside, inside; R -0.0410 [-0.1956, +0.1135] inside, inside
+    equal_popcount_different_flips 2: fp16.e178_v6 - fp16.e178 +0.0122; B +0.0251 [-0.1284, +0.1787] inside, inside; R -0.0563 [-0.2990, +0.1863] inside, inside
+    equal_popcount_different_flips 3: fp16.e178_v7 - fp16.ones +0.0100; B +0.0430 [-0.0661, +0.1520] inside, inside; R -0.0338 [-0.2198, +0.1523] inside, inside
+    equal_popcount_different_flips 4: int8.e178_v5 - int8.e178 +0.0118; B -0.0100 [-0.0615, +0.0415] inside, above; R -0.0632 [-0.1174, -0.0090] above, above
+    equal_popcount_different_flips 5: int8.e178_v5 - int8.e178 +0.0117; B +0.0177 [-0.1420, +0.1774] inside, inside; R -0.0152 [-0.1382, +0.1079] inside, inside
+    his_4_5 0: fp32.e178_v5 - fp32.e178_v4                     +0.0128; B +0.0533 [-0.0434, +0.1501] inside, inside; R +0.0558 [-0.0429, +0.1545] inside, inside
+    his_4_5 1: fp16.e178_v5 - fp16.e178_v4                     +0.0114; B +0.0545 [-0.0063, +0.1153] inside, inside; R +0.0345 [-0.0162, +0.0852] inside, inside
+    his_4_5 2: int8.e178_v5 - int8.e178_v4                     +0.0392; B +0.0724 [+0.0117, +0.1331] inside, above; R +0.0278 [-0.0221, +0.0776] inside, above
+    extremes 0: fp32.e178_a5_b4 - fp32.e178_uf                 +0.0534; B -0.0200 [-0.1165, +0.0766] inside, above; R -0.0185 [-0.0908, +0.0539] inside, above
+    extremes 1: fp32.e178_a4_b5 - fp32.e178_a5_b4              -0.0032; B +0.0595 [-0.2502, +0.3692] inside, inside; R +0.0967 [+0.0075, +0.1859] below, below
+    extremes 2: fp16.e178_v6 - fp16.e178_v0p5                  +0.0122; B +0.0251 [-0.1284, +0.1787] inside, inside; R -0.0563 [-0.2990, +0.1863] inside, inside
+    extremes 3: fp16.e178_a4_b5 - fp16.e178_a5_b4              -0.0033; B +0.0930 [-0.0543, +0.2403] inside, inside; R +0.1116 [-0.2366, +0.4597] inside, inside
+    extremes 4: int8.e178_v85 - int8.ones                      +0.0600; B +0.1809 [-0.0297, +0.3915] inside, above; R +0.1318 [-0.0001, +0.2637] inside, above
+    extremes 5: int8.e178_v2 - int8.e178_v4                    -0.0001; B +0.0586 [-0.0119, +0.1291] inside, inside; R +0.0294 [-0.0282, +0.0870] inside, inside
+
+(3) the minion-rail arm as committed (rail_e178_v2.py (dated note A4), sha256 062861b011b0): kept passes [17810, 17811, 17812, 17813]; 299 kept runs, 0 without a Drail; flagged 0; cross-check with scored.json True; 52 contrasts, 48 distinct readings
+  recount over 52: the rail P forecast {'inside': 42, 'above': 7, 'below': 3}; the rail interval {'reads above 0': 3, 'reads below 0': 1, 'spans 0': 48}; the off-rail P forecast {'inside': 49, 'above': 1, 'below': 2}; the off-rail interval {'reads above 0': 2, 'reads below 0': 1, 'spans 0': 49}; the board interval {'reads above 0': 3, 'reads below 0': 3, 'spans 0': 46}
+  the rail P forecast above: E178-H-int8; E178-S-int8; beside: 127 - neg_ones; equal_popcount_different_flips 4: int8.e178_v5 - int8.e178_v3; his_4_5 2: int8.e178_v5 - int8.e178_v4; extremes 0: fp32.e178_a5_b4 - fp32.e178_uf; extremes 4: int8.e178_v85 - int8.ones
+  the rail P forecast below: crossed 0: fp32.e178_a4_b5 - fp32.e178_a5_b4; crossed 1: fp32.e178_a4_b5 - fp32.e178_v4; extremes 1: fp32.e178_a4_b5 - fp32.e178_a5_b4
+  the rail reads above 0: crossed 0: fp32.e178_a4_b5 - fp32.e178_a5_b4; crossed 1: fp32.e178_a4_b5 - fp32.e178_v4; extremes 1: fp32.e178_a4_b5 - fp32.e178_a5_b4; below 0: equal_popcount_different_flips 4: int8.e178_v5 - int8.e178_v3
+  off the rail, the P forecast above: equal_flips_different_values 13: fp16.e178_v5 - fp16.e178_v7; below: equal_flips_different_values 14: int8.e178_v2 - int8.e178_v4; extremes 5: int8.e178_v2 - int8.e178_v4
+  off the rail, the interval reads above 0: equal_flips_different_values 14: int8.e178_v2 - int8.e178_v4; extremes 5: int8.e178_v2 - int8.e178_v4; below 0: equal_flips_different_values 13: fp16.e178_v5 - fp16.e178_v7
+    E178-H-int8                                  board +0.0532 [+0.0217, +0.0848]; rail +0.0261 [-0.0281, +0.0804] (spans 0), P +0.1560 above; off +0.0271 [-0.0189, +0.0731] (spans 0), P +0.0302 inside
+    E178-H-fp32                                  board +0.0523 [-0.0459, +0.1505]; rail +0.0422 [-0.0887, +0.1731] (spans 0), P +0.0080 inside; off +0.0101 [-0.1610, +0.1812] (spans 0), P +0.0019 inside
+    E178-H-fp16                                  board +0.0558 [-0.0038, +0.1154]; rail +0.0292 [-0.0251, +0.0835] (spans 0), P +0.0135 inside; off +0.0266 [-0.0646, +0.1177] (spans 0), P +0.0032 inside
+    E178-U                                       board +0.0452 [-0.0314, +0.1217]; rail +0.0328 [-0.1174, +0.1829] (spans 0), P +0.0606 inside; off +0.0124 [-0.1461, +0.1709] (spans 0), P +0.0143 inside
+    E178-S-int8                                  board +0.0582 [-0.0770, +0.1935]; rail +0.0688 [-0.0436, +0.1812] (spans 0), P +0.2974 above; off -0.0106 [-0.1177, +0.0965] (spans 0), P +0.0575 inside
+    beside: 127 - neg_ones                       board +0.0271 [-0.0828, +0.1371]; rail +0.0177 [-0.0856, +0.1210] (spans 0), P +0.2029 above; off +0.0095 [-0.1296, +0.1485] (spans 0), P +0.0393 inside
+    beside: 85 - 127                             board +0.0311 [-0.1188, +0.1810]; rail +0.0512 [-0.0243, +0.1266] (spans 0), P +0.0944 inside; off -0.0201 [-0.1015, +0.0614] (spans 0), P +0.0183 inside
+    bridge 2: int8.neg_ones - int8.ones          board +0.1227 [-0.2126, +0.4579]; rail +0.0630 [-0.1142, +0.2401] (spans 0), P +0.0921 inside; off +0.0597 [-0.1166, +0.2360] (spans 0), P +0.0178 inside
+    his_4_5 2: int8.e178_v5 - int8.e178_v4       board +0.0724 [+0.0117, +0.1331]; rail +0.0278 [-0.0221, +0.0776] (spans 0), P +0.1560 above; off +0.0446 [-0.0528, +0.1421] (spans 0), P +0.0302 inside
+    extremes 4: int8.e178_v85 - int8.ones        board +0.1809 [-0.0297, +0.3915]; rail +0.1318 [-0.0001, +0.2637] (spans 0), P +0.3894 above; off +0.0491 [-0.0355, +0.1338] (spans 0), P +0.0754 inside
