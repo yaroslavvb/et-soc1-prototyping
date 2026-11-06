@@ -1,0 +1,2582 @@
+{
+ "_what": "E178's dated note M1 (E178.md section 12 step 2, A2-4): october-forecast-model's two freeze lines and its frozen per-kind forecasts for E178's 40 kinds, copied as written from the model's publishable hand-off; a REPORTED arm, read after E178's data and never one of E178's rules. Every figure is a model output, never a measurement.",
+ "note": "E178.md.dated-note-M1.md",
+ "model": "october-forecast-model",
+ "freeze_lines": {
+  "october-forecast-model": "october-forecast-model, frozen Fri 6 Nov 2026 00:00:55 PST, sha256 ac61758a2bab36762d4f4326652f429879e8beb899a165c73234d38389418c95, covering E178's 40 kinds (lab commit f421c67a), fp32/fp16 one-number grids (100 ordered pairs each over 0.5-8), int8 one-number grid (144 ordered pairs over 1-8, 0x55, 0x7F, 0xFF, 0x80), vector fadd/fmadd one-number and 18 rotation pairs, and the zeros/random anchors (433 kinds)",
+  "october-forecast-model int8 v2": "october-forecast-model int8 v2, frozen Fri 6 Nov 2026 01:39:53 PST, sha256 125e6549c194ee828a741e2cfeeef2dda8386b277615cb46fc09b8178a5fbc69, covering the int8 one-number grid (144 ordered pairs over 1-8, 0x55, 0x7F, 0xFF, 0x80, including E178's 13 int8 kinds) and the int8 zeros/full anchors (146 kinds); it supersedes the int8 rows above."
+ },
+ "freezes": [
+  {
+   "name": "october-forecast-model",
+   "frozen": "Fri 6 Nov 2026 00:00:55 PST",
+   "sha256": "ac61758a2bab36762d4f4326652f429879e8beb899a165c73234d38389418c95",
+   "covers_e178": "all 40 kinds, as E178's list stood at lab commit f421c67a"
+  },
+  {
+   "name": "october-forecast-model int8 v2",
+   "frozen": "Fri 6 Nov 2026 01:39:53 PST",
+   "sha256": "125e6549c194ee828a741e2cfeeef2dda8386b277615cb46fc09b8178a5fbc69",
+   "covers_e178": "the 13 int8 kinds; it supersedes the first freeze's int8 rows (its own words)"
+  }
+ ],
+ "handoff_read": {
+  "at": "2026-11-06 09:43:28 PST",
+  "bytes": 82677,
+  "sha256": "498454bda6f5c0658008f5ca1751a515cd19d95a58fdb96c10b0fb011adefb10",
+  "section": "october-forecast-model: forecasts, publishable"
+ },
+ "order": {
+  "last_check_pst": "Fri 6 Nov 2026 10:01:14 PST",
+  "check": "git log --all --oneline -- 'docs/reports/data/*e178*'",
+  "check_printed_lines": 0,
+  "first_datum": "the session's opening config read on the card (A2-4); not yet when this note was committed"
+ },
+ "units": {
+  "october-forecast-model": "Units: floats per lane-op (one lane, one micro-op slot; a TensorFMA op is 4,096 lane-ops); int8 per integer slot-op (4 int8\nMACs; 512 slot-ops per lane per op). Card voltages: aifoundry3 (a3) 0.522 V, card 1 (c1) 0.499 V. Energy is heat (half CV²\nper transition plus internal energy). Electrons count the charge drawn from the supply. Power is the model's energy above\nthe zeros anchor times the lab's measured op rate at 600 MHz. \"Data flips\" is the part that follows the operands (for int8 it\nstill includes the integer unit's clock, see above). The band is kind-to-kind: an assumed per-set-operand-bit term (0 to 0.32 fJ\nper set bit, from the lab's int8 residual) plus a third of the shared-bus wire term. The level band is separate: on the\ncommitted ones kinds the model reads 0.97-0.98x the measured D on aifoundry3 and 0.93x on card 1 (fp32 and fp16 alike), and\n0.99x / 0.93x for int8 ones.",
+  "october-forecast-model int8 v2": "Per integer slot-op (4 int8 MACs). \"Data flips\" now excludes the integer unit's clock, which is given beside them. Power here\nis at the die (the model's energy above zeros times the op rate), not at the board: the board adds roughly a quarter on these\ncards. The band is the held-operand term (0 up to the lab's measured ones-against-neg_ones residual per set operand bit)."
+ },
+ "per_pair_as_written": {
+  "october-forecast-model": "Per pair, from the same forecast (aifoundry3 / card 1): fp32 5s - 4s +0.0128 / +0.0116 W; fp16 +0.0114 / +0.0103 W; int8 +0.039 / +0.036 W (v1, see the weakness above; E178 registered +0.186 W).",
+  "october-forecast-model int8 v2": "int8 v2, 5s - 4s: +4.97 fJ per slot-op above zeros on aifoundry3 (+4.53 on card 1); D +0.039 W at the die (band +0.039 to +0.050), about +0.047 W board-equivalent, against E178's registered +0.186 W at the board. Data flips alone are 1.66x; the clock's held-state term is -2.3 fJ."
+ },
+ "columns": {
+  "october-forecast-model": [
+   "kind",
+   "v",
+   "w",
+   "data toggles per lane-op",
+   "E per op, a3 (fJ)",
+   "E above zeros, a3 / c1 (fJ)",
+   "of which data flips, a3 (fJ)",
+   "electrons per op, a3",
+   "power above zeros at 600 MHz, a3 / c1 (W)",
+   "kind-to-kind band (W)"
+  ],
+  "october-forecast-model int8 v2": [
+   "kind",
+   "v",
+   "w",
+   "data toggles per slot-op",
+   "E above zeros, a3 / c1 (fJ)",
+   "of which data flips / integer-unit clock, a3 (fJ)",
+   "electrons above zeros, a3",
+   "power above zeros at 600 MHz, die, a3 / c1 (W)",
+   "band, a3 (W)"
+  ]
+ },
+ "rows": {
+  "october-forecast-model": [
+   {
+    "kind": "fp32.e178_v0p5",
+    "type": "fp32",
+    "name": "e178_v0p5",
+    "v": 0.5,
+    "w": 0.5,
+    "as_written": {
+     "kind": "fp32.e178_v0p5",
+     "v": "0.5",
+     "w": "0.5",
+     "data toggles per lane-op": "15.17",
+     "E per op, a3 (fJ)": "2,144.0",
+     "E above zeros, a3 / c1 (fJ)": "1,782.9 / 1,615.3",
+     "of which data flips, a3 (fJ)": "15.41",
+     "electrons per op, a3": "2.564e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1801 / 7.4118",
+     "kind-to-kind band (W)": "-0.002 / +0.019"
+    },
+    "values": {
+     "kind": "fp32.e178_v0p5",
+     "v": 0.5,
+     "w": 0.5,
+     "data toggles per lane-op": 15.17,
+     "E per op, a3 (fJ)": 2144.0,
+     "E above zeros, a3 / c1 (fJ)": [
+      1782.9,
+      1615.3
+     ],
+     "of which data flips, a3 (fJ)": 15.41,
+     "electrons per op, a3": 25640000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1801,
+      7.4118
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.019
+     ]
+    }
+   },
+   {
+    "kind": "fp32.ones",
+    "type": "fp32",
+    "name": "ones",
+    "v": 1.0,
+    "w": 1.0,
+    "as_written": {
+     "kind": "fp32.ones",
+     "v": "1.0",
+     "w": "1.0",
+     "data toggles per lane-op": "15.05",
+     "E per op, a3 (fJ)": "2,143.8",
+     "E above zeros, a3 / c1 (fJ)": "1,782.6 / 1,615.0",
+     "of which data flips, a3 (fJ)": "15.24",
+     "electrons per op, a3": "2.563e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1789 / 7.4107",
+     "kind-to-kind band (W)": "-0.002 / +0.022"
+    },
+    "values": {
+     "kind": "fp32.ones",
+     "v": 1.0,
+     "w": 1.0,
+     "data toggles per lane-op": 15.05,
+     "E per op, a3 (fJ)": 2143.8,
+     "E above zeros, a3 / c1 (fJ)": [
+      1782.6,
+      1615.0
+     ],
+     "of which data flips, a3 (fJ)": 15.24,
+     "electrons per op, a3": 25630000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1789,
+      7.4107
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.022
+     ]
+    }
+   },
+   {
+    "kind": "fp32.e178_v1p5",
+    "type": "fp32",
+    "name": "e178_v1p5",
+    "v": 1.5,
+    "w": 1.5,
+    "as_written": {
+     "kind": "fp32.e178_v1p5",
+     "v": "1.5",
+     "w": "1.5",
+     "data toggles per lane-op": "16.22",
+     "E per op, a3 (fJ)": "2,145.1",
+     "E above zeros, a3 / c1 (fJ)": "1,783.9 / 1,616.2",
+     "of which data flips, a3 (fJ)": "16.34",
+     "electrons per op, a3": "2.565e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1848 / 7.4160",
+     "kind-to-kind band (W)": "-0.002 / +0.025"
+    },
+    "values": {
+     "kind": "fp32.e178_v1p5",
+     "v": 1.5,
+     "w": 1.5,
+     "data toggles per lane-op": 16.22,
+     "E per op, a3 (fJ)": 2145.1,
+     "E above zeros, a3 / c1 (fJ)": [
+      1783.9,
+      1616.2
+     ],
+     "of which data flips, a3 (fJ)": 16.34,
+     "electrons per op, a3": 25650000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1848,
+      7.416
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.025
+     ]
+    }
+   },
+   {
+    "kind": "fp32.e178_v2",
+    "type": "fp32",
+    "name": "e178_v2",
+    "v": 2.0,
+    "w": 2.0,
+    "as_written": {
+     "kind": "fp32.e178_v2",
+     "v": "2.0",
+     "w": "2.0",
+     "data toggles per lane-op": "15.26",
+     "E per op, a3 (fJ)": "2,144.2",
+     "E above zeros, a3 / c1 (fJ)": "1,783.1 / 1,615.5",
+     "of which data flips, a3 (fJ)": "15.67",
+     "electrons per op, a3": "2.564e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1810 / 7.4126",
+     "kind-to-kind band (W)": "-0.002 / +0.005"
+    },
+    "values": {
+     "kind": "fp32.e178_v2",
+     "v": 2.0,
+     "w": 2.0,
+     "data toggles per lane-op": 15.26,
+     "E per op, a3 (fJ)": 2144.2,
+     "E above zeros, a3 / c1 (fJ)": [
+      1783.1,
+      1615.5
+     ],
+     "of which data flips, a3 (fJ)": 15.67,
+     "electrons per op, a3": 25640000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.181,
+      7.4126
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.005
+     ]
+    }
+   },
+   {
+    "kind": "fp32.e178_v3",
+    "type": "fp32",
+    "name": "e178_v3",
+    "v": 3.0,
+    "w": 3.0,
+    "as_written": {
+     "kind": "fp32.e178_v3",
+     "v": "3.0",
+     "w": "3.0",
+     "data toggles per lane-op": "16.18",
+     "E per op, a3 (fJ)": "2,145.1",
+     "E above zeros, a3 / c1 (fJ)": "1,783.9 / 1,616.2",
+     "of which data flips, a3 (fJ)": "16.21",
+     "electrons per op, a3": "2.565e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1847 / 7.4160",
+     "kind-to-kind band (W)": "-0.002 / +0.008"
+    },
+    "values": {
+     "kind": "fp32.e178_v3",
+     "v": 3.0,
+     "w": 3.0,
+     "data toggles per lane-op": 16.18,
+     "E per op, a3 (fJ)": 2145.1,
+     "E above zeros, a3 / c1 (fJ)": [
+      1783.9,
+      1616.2
+     ],
+     "of which data flips, a3 (fJ)": 16.21,
+     "electrons per op, a3": 25650000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1847,
+      7.416
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.008
+     ]
+    }
+   },
+   {
+    "kind": "fp32.e178_v4",
+    "type": "fp32",
+    "name": "e178_v4",
+    "v": 4.0,
+    "w": 4.0,
+    "as_written": {
+     "kind": "fp32.e178_v4",
+     "v": "4.0",
+     "w": "4.0",
+     "data toggles per lane-op": "15.12",
+     "E per op, a3 (fJ)": "2,143.9",
+     "E above zeros, a3 / c1 (fJ)": "1,782.7 / 1,615.1",
+     "of which data flips, a3 (fJ)": "15.31",
+     "electrons per op, a3": "2.563e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1792 / 7.4110",
+     "kind-to-kind band (W)": "-0.002 / +0.008"
+    },
+    "values": {
+     "kind": "fp32.e178_v4",
+     "v": 4.0,
+     "w": 4.0,
+     "data toggles per lane-op": 15.12,
+     "E per op, a3 (fJ)": 2143.9,
+     "E above zeros, a3 / c1 (fJ)": [
+      1782.7,
+      1615.1
+     ],
+     "of which data flips, a3 (fJ)": 15.31,
+     "electrons per op, a3": 25630000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1792,
+      7.411
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.008
+     ]
+    }
+   },
+   {
+    "kind": "fp32.e178_v5",
+    "type": "fp32",
+    "name": "e178_v5",
+    "v": 5.0,
+    "w": 5.0,
+    "as_written": {
+     "kind": "fp32.e178_v5",
+     "v": "5.0",
+     "w": "5.0",
+     "data toggles per lane-op": "16.97",
+     "E per op, a3 (fJ)": "2,146.6",
+     "E above zeros, a3 / c1 (fJ)": "1,785.5 / 1,617.7",
+     "of which data flips, a3 (fJ)": "17.15",
+     "electrons per op, a3": "2.567e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1920 / 7.4226",
+     "kind-to-kind band (W)": "-0.002 / +0.011"
+    },
+    "values": {
+     "kind": "fp32.e178_v5",
+     "v": 5.0,
+     "w": 5.0,
+     "data toggles per lane-op": 16.97,
+     "E per op, a3 (fJ)": 2146.6,
+     "E above zeros, a3 / c1 (fJ)": [
+      1785.5,
+      1617.7
+     ],
+     "of which data flips, a3 (fJ)": 17.15,
+     "electrons per op, a3": 25670000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.192,
+      7.4226
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.011
+     ]
+    }
+   },
+   {
+    "kind": "fp32.e178_v6",
+    "type": "fp32",
+    "name": "e178_v6",
+    "v": 6.0,
+    "w": 6.0,
+    "as_written": {
+     "kind": "fp32.e178_v6",
+     "v": "6.0",
+     "w": "6.0",
+     "data toggles per lane-op": "16.29",
+     "E per op, a3 (fJ)": "2,145.1",
+     "E above zeros, a3 / c1 (fJ)": "1,784.0 / 1,616.2",
+     "of which data flips, a3 (fJ)": "16.36",
+     "electrons per op, a3": "2.565e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1850 / 7.4162",
+     "kind-to-kind band (W)": "-0.002 / +0.011"
+    },
+    "values": {
+     "kind": "fp32.e178_v6",
+     "v": 6.0,
+     "w": 6.0,
+     "data toggles per lane-op": 16.29,
+     "E per op, a3 (fJ)": 2145.1,
+     "E above zeros, a3 / c1 (fJ)": [
+      1784.0,
+      1616.2
+     ],
+     "of which data flips, a3 (fJ)": 16.36,
+     "electrons per op, a3": 25650000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.185,
+      7.4162
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.011
+     ]
+    }
+   },
+   {
+    "kind": "fp32.e178_v7",
+    "type": "fp32",
+    "name": "e178_v7",
+    "v": 7.0,
+    "w": 7.0,
+    "as_written": {
+     "kind": "fp32.e178_v7",
+     "v": "7.0",
+     "w": "7.0",
+     "data toggles per lane-op": "16.91",
+     "E per op, a3 (fJ)": "2,146.0",
+     "E above zeros, a3 / c1 (fJ)": "1,784.9 / 1,617.1",
+     "of which data flips, a3 (fJ)": "17.14",
+     "electrons per op, a3": "2.566e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1893 / 7.4201",
+     "kind-to-kind band (W)": "-0.002 / +0.014"
+    },
+    "values": {
+     "kind": "fp32.e178_v7",
+     "v": 7.0,
+     "w": 7.0,
+     "data toggles per lane-op": 16.91,
+     "E per op, a3 (fJ)": 2146.0,
+     "E above zeros, a3 / c1 (fJ)": [
+      1784.9,
+      1617.1
+     ],
+     "of which data flips, a3 (fJ)": 17.14,
+     "electrons per op, a3": 25660000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1893,
+      7.4201
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.014
+     ]
+    }
+   },
+   {
+    "kind": "fp32.e178_v8",
+    "type": "fp32",
+    "name": "e178_v8",
+    "v": 8.0,
+    "w": 8.0,
+    "as_written": {
+     "kind": "fp32.e178_v8",
+     "v": "8.0",
+     "w": "8.0",
+     "data toggles per lane-op": "15.33",
+     "E per op, a3 (fJ)": "2,144.2",
+     "E above zeros, a3 / c1 (fJ)": "1,783.1 / 1,615.5",
+     "of which data flips, a3 (fJ)": "15.69",
+     "electrons per op, a3": "2.564e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1810 / 7.4126",
+     "kind-to-kind band (W)": "-0.002 / +0.008"
+    },
+    "values": {
+     "kind": "fp32.e178_v8",
+     "v": 8.0,
+     "w": 8.0,
+     "data toggles per lane-op": 15.33,
+     "E per op, a3 (fJ)": 2144.2,
+     "E above zeros, a3 / c1 (fJ)": [
+      1783.1,
+      1615.5
+     ],
+     "of which data flips, a3 (fJ)": 15.69,
+     "electrons per op, a3": 25640000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.181,
+      7.4126
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.008
+     ]
+    }
+   },
+   {
+    "kind": "fp32.e178_a4_b5",
+    "type": "fp32",
+    "name": "e178_a4_b5",
+    "v": 4.0,
+    "w": 5.0,
+    "as_written": {
+     "kind": "fp32.e178_a4_b5",
+     "v": "4.0",
+     "w": "5.0",
+     "data toggles per lane-op": "16.32",
+     "E per op, a3 (fJ)": "2,145.6",
+     "E above zeros, a3 / c1 (fJ)": "1,784.4 / 1,616.6",
+     "of which data flips, a3 (fJ)": "16.81",
+     "electrons per op, a3": "2.565e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1870 / 7.4180",
+     "kind-to-kind band (W)": "-0.002 / +0.010"
+    },
+    "values": {
+     "kind": "fp32.e178_a4_b5",
+     "v": 4.0,
+     "w": 5.0,
+     "data toggles per lane-op": 16.32,
+     "E per op, a3 (fJ)": 2145.6,
+     "E above zeros, a3 / c1 (fJ)": [
+      1784.4,
+      1616.6
+     ],
+     "of which data flips, a3 (fJ)": 16.81,
+     "electrons per op, a3": 25650000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.187,
+      7.418
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.01
+     ]
+    }
+   },
+   {
+    "kind": "fp32.e178_a5_b4",
+    "type": "fp32",
+    "name": "e178_a5_b4",
+    "v": 5.0,
+    "w": 4.0,
+    "as_written": {
+     "kind": "fp32.e178_a5_b4",
+     "v": "5.0",
+     "w": "4.0",
+     "data toggles per lane-op": "16.32",
+     "E per op, a3 (fJ)": "2,146.2",
+     "E above zeros, a3 / c1 (fJ)": "1,785.1 / 1,617.3",
+     "of which data flips, a3 (fJ)": "16.81",
+     "electrons per op, a3": "2.566e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1902 / 7.4210",
+     "kind-to-kind band (W)": "-0.002 / +0.010"
+    },
+    "values": {
+     "kind": "fp32.e178_a5_b4",
+     "v": 5.0,
+     "w": 4.0,
+     "data toggles per lane-op": 16.32,
+     "E per op, a3 (fJ)": 2146.2,
+     "E above zeros, a3 / c1 (fJ)": [
+      1785.1,
+      1617.3
+     ],
+     "of which data flips, a3 (fJ)": 16.81,
+     "electrons per op, a3": 25660000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1902,
+      7.421
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.01
+     ]
+    }
+   },
+   {
+    "kind": "fp32.neg_ones",
+    "type": "fp32",
+    "name": "neg_ones",
+    "v": -1.0,
+    "w": -1.0,
+    "as_written": {
+     "kind": "fp32.neg_ones",
+     "v": "-1.0",
+     "w": "-1.0",
+     "data toggles per lane-op": "15.05",
+     "E per op, a3 (fJ)": "2,143.8",
+     "E above zeros, a3 / c1 (fJ)": "1,782.6 / 1,615.0",
+     "of which data flips, a3 (fJ)": "15.24",
+     "electrons per op, a3": "2.563e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1789 / 7.4107",
+     "kind-to-kind band (W)": "-0.002 / +0.025"
+    },
+    "values": {
+     "kind": "fp32.neg_ones",
+     "v": -1.0,
+     "w": -1.0,
+     "data toggles per lane-op": 15.05,
+     "E per op, a3 (fJ)": 2143.8,
+     "E above zeros, a3 / c1 (fJ)": [
+      1782.6,
+      1615.0
+     ],
+     "of which data flips, a3 (fJ)": 15.24,
+     "electrons per op, a3": 25630000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1789,
+      7.4107
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.025
+     ]
+    }
+   },
+   {
+    "kind": "fp32.e178_uf",
+    "type": "fp32",
+    "name": "e178_uf",
+    "v": 8.131516293641283e-20,
+    "w": 8.131516293641283e-20,
+    "as_written": {
+     "kind": "fp32.e178_uf",
+     "v": "8.131516293641283e-20",
+     "w": "8.131516293641283e-20",
+     "data toggles per lane-op": "7.88",
+     "E per op, a3 (fJ)": "2,134.6",
+     "E above zeros, a3 / c1 (fJ)": "1,773.5 / 1,606.7",
+     "of which data flips, a3 (fJ)": "7.39",
+     "electrons per op, a3": "2.552e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1368 / 7.3725",
+     "kind-to-kind band (W)": "-0.000 / +0.021"
+    },
+    "values": {
+     "kind": "fp32.e178_uf",
+     "v": 8.131516293641283e-20,
+     "w": 8.131516293641283e-20,
+     "data toggles per lane-op": 7.88,
+     "E per op, a3 (fJ)": 2134.6,
+     "E above zeros, a3 / c1 (fJ)": [
+      1773.5,
+      1606.7
+     ],
+     "of which data flips, a3 (fJ)": 7.39,
+     "electrons per op, a3": 25520000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1368,
+      7.3725
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.021
+     ]
+    }
+   },
+   {
+    "kind": "fp16.e178_v0p5",
+    "type": "fp16",
+    "name": "e178_v0p5",
+    "v": 0.5,
+    "w": 0.5,
+    "as_written": {
+     "kind": "fp16.e178_v0p5",
+     "v": "0.5",
+     "w": "0.5",
+     "data toggles per lane-op": "14.54",
+     "E per op, a3 (fJ)": "2,141.6",
+     "E above zeros, a3 / c1 (fJ)": "1,783.4 / 1,615.7",
+     "of which data flips, a3 (fJ)": "15.00",
+     "electrons per op, a3": "2.561e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1822 / 7.4137",
+     "kind-to-kind band (W)": "-0.002 / +0.019"
+    },
+    "values": {
+     "kind": "fp16.e178_v0p5",
+     "v": 0.5,
+     "w": 0.5,
+     "data toggles per lane-op": 14.54,
+     "E per op, a3 (fJ)": 2141.6,
+     "E above zeros, a3 / c1 (fJ)": [
+      1783.4,
+      1615.7
+     ],
+     "of which data flips, a3 (fJ)": 15.0,
+     "electrons per op, a3": 25610000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1822,
+      7.4137
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.019
+     ]
+    }
+   },
+   {
+    "kind": "fp16.ones",
+    "type": "fp16",
+    "name": "ones",
+    "v": 1.0,
+    "w": 1.0,
+    "as_written": {
+     "kind": "fp16.ones",
+     "v": "1.0",
+     "w": "1.0",
+     "data toggles per lane-op": "14.67",
+     "E per op, a3 (fJ)": "2,141.9",
+     "E above zeros, a3 / c1 (fJ)": "1,783.6 / 1,615.9",
+     "of which data flips, a3 (fJ)": "15.28",
+     "electrons per op, a3": "2.561e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1834 / 7.4148",
+     "kind-to-kind band (W)": "-0.002 / +0.025"
+    },
+    "values": {
+     "kind": "fp16.ones",
+     "v": 1.0,
+     "w": 1.0,
+     "data toggles per lane-op": 14.67,
+     "E per op, a3 (fJ)": 2141.9,
+     "E above zeros, a3 / c1 (fJ)": [
+      1783.6,
+      1615.9
+     ],
+     "of which data flips, a3 (fJ)": 15.28,
+     "electrons per op, a3": 25610000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1834,
+      7.4148
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.025
+     ]
+    }
+   },
+   {
+    "kind": "fp16.e178_v1p5",
+    "type": "fp16",
+    "name": "e178_v1p5",
+    "v": 1.5,
+    "w": 1.5,
+    "as_written": {
+     "kind": "fp16.e178_v1p5",
+     "v": "1.5",
+     "w": "1.5",
+     "data toggles per lane-op": "16.95",
+     "E per op, a3 (fJ)": "2,144.3",
+     "E above zeros, a3 / c1 (fJ)": "1,786.1 / 1,618.2",
+     "of which data flips, a3 (fJ)": "17.27",
+     "electrons per op, a3": "2.564e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1947 / 7.4251",
+     "kind-to-kind band (W)": "-0.002 / +0.031"
+    },
+    "values": {
+     "kind": "fp16.e178_v1p5",
+     "v": 1.5,
+     "w": 1.5,
+     "data toggles per lane-op": 16.95,
+     "E per op, a3 (fJ)": 2144.3,
+     "E above zeros, a3 / c1 (fJ)": [
+      1786.1,
+      1618.2
+     ],
+     "of which data flips, a3 (fJ)": 17.27,
+     "electrons per op, a3": 25640000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1947,
+      7.4251
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.031
+     ]
+    }
+   },
+   {
+    "kind": "fp16.e178_v2",
+    "type": "fp16",
+    "name": "e178_v2",
+    "v": 2.0,
+    "w": 2.0,
+    "as_written": {
+     "kind": "fp16.e178_v2",
+     "v": "2.0",
+     "w": "2.0",
+     "data toggles per lane-op": "14.63",
+     "E per op, a3 (fJ)": "2,141.8",
+     "E above zeros, a3 / c1 (fJ)": "1,783.6 / 1,615.9",
+     "of which data flips, a3 (fJ)": "15.11",
+     "electrons per op, a3": "2.561e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1832 / 7.4146",
+     "kind-to-kind band (W)": "-0.002 / +0.008"
+    },
+    "values": {
+     "kind": "fp16.e178_v2",
+     "v": 2.0,
+     "w": 2.0,
+     "data toggles per lane-op": 14.63,
+     "E per op, a3 (fJ)": 2141.8,
+     "E above zeros, a3 / c1 (fJ)": [
+      1783.6,
+      1615.9
+     ],
+     "of which data flips, a3 (fJ)": 15.11,
+     "electrons per op, a3": 25610000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1832,
+      7.4146
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.008
+     ]
+    }
+   },
+   {
+    "kind": "fp16.e178_v3",
+    "type": "fp16",
+    "name": "e178_v3",
+    "v": 3.0,
+    "w": 3.0,
+    "as_written": {
+     "kind": "fp16.e178_v3",
+     "v": "3.0",
+     "w": "3.0",
+     "data toggles per lane-op": "16.90",
+     "E per op, a3 (fJ)": "2,144.2",
+     "E above zeros, a3 / c1 (fJ)": "1,786.0 / 1,618.1",
+     "of which data flips, a3 (fJ)": "17.09",
+     "electrons per op, a3": "2.564e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1943 / 7.4247",
+     "kind-to-kind band (W)": "-0.002 / +0.014"
+    },
+    "values": {
+     "kind": "fp16.e178_v3",
+     "v": 3.0,
+     "w": 3.0,
+     "data toggles per lane-op": 16.9,
+     "E per op, a3 (fJ)": 2144.2,
+     "E above zeros, a3 / c1 (fJ)": [
+      1786.0,
+      1618.1
+     ],
+     "of which data flips, a3 (fJ)": 17.09,
+     "electrons per op, a3": 25640000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1943,
+      7.4247
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.014
+     ]
+    }
+   },
+   {
+    "kind": "fp16.e178_v4",
+    "type": "fp16",
+    "name": "e178_v4",
+    "v": 4.0,
+    "w": 4.0,
+    "as_written": {
+     "kind": "fp16.e178_v4",
+     "v": "4.0",
+     "w": "4.0",
+     "data toggles per lane-op": "14.73",
+     "E per op, a3 (fJ)": "2,141.9",
+     "E above zeros, a3 / c1 (fJ)": "1,783.6 / 1,615.9",
+     "of which data flips, a3 (fJ)": "15.26",
+     "electrons per op, a3": "2.561e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1833 / 7.4148",
+     "kind-to-kind band (W)": "-0.002 / +0.013"
+    },
+    "values": {
+     "kind": "fp16.e178_v4",
+     "v": 4.0,
+     "w": 4.0,
+     "data toggles per lane-op": 14.73,
+     "E per op, a3 (fJ)": 2141.9,
+     "E above zeros, a3 / c1 (fJ)": [
+      1783.6,
+      1615.9
+     ],
+     "of which data flips, a3 (fJ)": 15.26,
+     "electrons per op, a3": 25610000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1833,
+      7.4148
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.013
+     ]
+    }
+   },
+   {
+    "kind": "fp16.e178_v5",
+    "type": "fp16",
+    "name": "e178_v5",
+    "v": 5.0,
+    "w": 5.0,
+    "as_written": {
+     "kind": "fp16.e178_v5",
+     "v": "5.0",
+     "w": "5.0",
+     "data toggles per lane-op": "16.60",
+     "E per op, a3 (fJ)": "2,144.3",
+     "E above zeros, a3 / c1 (fJ)": "1,786.1 / 1,618.2",
+     "of which data flips, a3 (fJ)": "17.11",
+     "electrons per op, a3": "2.564e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1947 / 7.4251",
+     "kind-to-kind band (W)": "-0.002 / +0.020"
+    },
+    "values": {
+     "kind": "fp16.e178_v5",
+     "v": 5.0,
+     "w": 5.0,
+     "data toggles per lane-op": 16.6,
+     "E per op, a3 (fJ)": 2144.3,
+     "E above zeros, a3 / c1 (fJ)": [
+      1786.1,
+      1618.2
+     ],
+     "of which data flips, a3 (fJ)": 17.11,
+     "electrons per op, a3": 25640000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1947,
+      7.4251
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.02
+     ]
+    }
+   },
+   {
+    "kind": "fp16.e178_v6",
+    "type": "fp16",
+    "name": "e178_v6",
+    "v": 6.0,
+    "w": 6.0,
+    "as_written": {
+     "kind": "fp16.e178_v6",
+     "v": "6.0",
+     "w": "6.0",
+     "data toggles per lane-op": "17.01",
+     "E per op, a3 (fJ)": "2,144.3",
+     "E above zeros, a3 / c1 (fJ)": "1,786.0 / 1,618.1",
+     "of which data flips, a3 (fJ)": "17.25",
+     "electrons per op, a3": "2.564e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1944 / 7.4248",
+     "kind-to-kind band (W)": "-0.002 / +0.020"
+    },
+    "values": {
+     "kind": "fp16.e178_v6",
+     "v": 6.0,
+     "w": 6.0,
+     "data toggles per lane-op": 17.01,
+     "E per op, a3 (fJ)": 2144.3,
+     "E above zeros, a3 / c1 (fJ)": [
+      1786.0,
+      1618.1
+     ],
+     "of which data flips, a3 (fJ)": 17.25,
+     "electrons per op, a3": 25640000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1944,
+      7.4248
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.02
+     ]
+    }
+   },
+   {
+    "kind": "fp16.e178_v7",
+    "type": "fp16",
+    "name": "e178_v7",
+    "v": 7.0,
+    "w": 7.0,
+    "as_written": {
+     "kind": "fp16.e178_v7",
+     "v": "7.0",
+     "w": "7.0",
+     "data toggles per lane-op": "16.55",
+     "E per op, a3 (fJ)": "2,144.1",
+     "E above zeros, a3 / c1 (fJ)": "1,785.8 / 1,617.9",
+     "of which data flips, a3 (fJ)": "17.09",
+     "electrons per op, a3": "2.564e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1934 / 7.4239",
+     "kind-to-kind band (W)": "-0.002 / +0.025"
+    },
+    "values": {
+     "kind": "fp16.e178_v7",
+     "v": 7.0,
+     "w": 7.0,
+     "data toggles per lane-op": 16.55,
+     "E per op, a3 (fJ)": 2144.1,
+     "E above zeros, a3 / c1 (fJ)": [
+      1785.8,
+      1617.9
+     ],
+     "of which data flips, a3 (fJ)": 17.09,
+     "electrons per op, a3": 25640000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1934,
+      7.4239
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.025
+     ]
+    }
+   },
+   {
+    "kind": "fp16.e178_v8",
+    "type": "fp16",
+    "name": "e178_v8",
+    "v": 8.0,
+    "w": 8.0,
+    "as_written": {
+     "kind": "fp16.e178_v8",
+     "v": "8.0",
+     "w": "8.0",
+     "data toggles per lane-op": "14.73",
+     "E per op, a3 (fJ)": "2,142.0",
+     "E above zeros, a3 / c1 (fJ)": "1,783.8 / 1,616.1",
+     "of which data flips, a3 (fJ)": "15.33",
+     "electrons per op, a3": "2.561e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1840 / 7.4154",
+     "kind-to-kind band (W)": "-0.002 / +0.013"
+    },
+    "values": {
+     "kind": "fp16.e178_v8",
+     "v": 8.0,
+     "w": 8.0,
+     "data toggles per lane-op": 14.73,
+     "E per op, a3 (fJ)": 2142.0,
+     "E above zeros, a3 / c1 (fJ)": [
+      1783.8,
+      1616.1
+     ],
+     "of which data flips, a3 (fJ)": 15.33,
+     "electrons per op, a3": 25610000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.184,
+      7.4154
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.013
+     ]
+    }
+   },
+   {
+    "kind": "fp16.e178_a4_b5",
+    "type": "fp16",
+    "name": "e178_a4_b5",
+    "v": 4.0,
+    "w": 5.0,
+    "as_written": {
+     "kind": "fp16.e178_a4_b5",
+     "v": "4.0",
+     "w": "5.0",
+     "data toggles per lane-op": "15.89",
+     "E per op, a3 (fJ)": "2,143.6",
+     "E above zeros, a3 / c1 (fJ)": "1,785.4 / 1,617.5",
+     "of which data flips, a3 (fJ)": "16.80",
+     "electrons per op, a3": "2.563e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1915 / 7.4222",
+     "kind-to-kind band (W)": "-0.003 / +0.017"
+    },
+    "values": {
+     "kind": "fp16.e178_a4_b5",
+     "v": 4.0,
+     "w": 5.0,
+     "data toggles per lane-op": 15.89,
+     "E per op, a3 (fJ)": 2143.6,
+     "E above zeros, a3 / c1 (fJ)": [
+      1785.4,
+      1617.5
+     ],
+     "of which data flips, a3 (fJ)": 16.8,
+     "electrons per op, a3": 25630000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1915,
+      7.4222
+     ],
+     "kind-to-kind band (W)": [
+      -0.003,
+      0.017
+     ]
+    }
+   },
+   {
+    "kind": "fp16.e178_a5_b4",
+    "type": "fp16",
+    "name": "e178_a5_b4",
+    "v": 5.0,
+    "w": 4.0,
+    "as_written": {
+     "kind": "fp16.e178_a5_b4",
+     "v": "5.0",
+     "w": "4.0",
+     "data toggles per lane-op": "15.89",
+     "E per op, a3 (fJ)": "2,144.4",
+     "E above zeros, a3 / c1 (fJ)": "1,786.1 / 1,618.2",
+     "of which data flips, a3 (fJ)": "16.80",
+     "electrons per op, a3": "2.564e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1948 / 7.4252",
+     "kind-to-kind band (W)": "-0.003 / +0.017"
+    },
+    "values": {
+     "kind": "fp16.e178_a5_b4",
+     "v": 5.0,
+     "w": 4.0,
+     "data toggles per lane-op": 15.89,
+     "E per op, a3 (fJ)": 2144.4,
+     "E above zeros, a3 / c1 (fJ)": [
+      1786.1,
+      1618.2
+     ],
+     "of which data flips, a3 (fJ)": 16.8,
+     "electrons per op, a3": 25640000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1948,
+      7.4252
+     ],
+     "kind-to-kind band (W)": [
+      -0.003,
+      0.017
+     ]
+    }
+   },
+   {
+    "kind": "fp16.neg_ones",
+    "type": "fp16",
+    "name": "neg_ones",
+    "v": -1.0,
+    "w": -1.0,
+    "as_written": {
+     "kind": "fp16.neg_ones",
+     "v": "-1.0",
+     "w": "-1.0",
+     "data toggles per lane-op": "14.67",
+     "E per op, a3 (fJ)": "2,141.8",
+     "E above zeros, a3 / c1 (fJ)": "1,783.5 / 1,615.9",
+     "of which data flips, a3 (fJ)": "15.28",
+     "electrons per op, a3": "2.561e+07",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "8.1831 / 7.4145",
+     "kind-to-kind band (W)": "-0.002 / +0.031"
+    },
+    "values": {
+     "kind": "fp16.neg_ones",
+     "v": -1.0,
+     "w": -1.0,
+     "data toggles per lane-op": 14.67,
+     "E per op, a3 (fJ)": 2141.8,
+     "E above zeros, a3 / c1 (fJ)": [
+      1783.5,
+      1615.9
+     ],
+     "of which data flips, a3 (fJ)": 15.28,
+     "electrons per op, a3": 25610000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      8.1831,
+      7.4145
+     ],
+     "kind-to-kind band (W)": [
+      -0.002,
+      0.031
+     ]
+    }
+   },
+   {
+    "kind": "int8.ones",
+    "type": "int8",
+    "name": "ones",
+    "v": 1.0,
+    "w": 1.0,
+    "as_written": {
+     "kind": "int8.ones",
+     "v": "1",
+     "w": "1",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "507.9",
+     "E above zeros, a3 / c1 (fJ)": "195.9 / 177.2",
+     "of which data flips, a3 (fJ)": "194.88",
+     "electrons per op, a3": "6.073e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5439 / 1.3968",
+     "kind-to-kind band (W)": "-0.000 / +0.020"
+    },
+    "values": {
+     "kind": "int8.ones",
+     "v": 1.0,
+     "w": 1.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 507.9,
+     "E above zeros, a3 / c1 (fJ)": [
+      195.9,
+      177.2
+     ],
+     "of which data flips, a3 (fJ)": 194.88,
+     "electrons per op, a3": 6073000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.5439,
+      1.3968
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.02
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v2",
+    "type": "int8",
+    "name": "e178_v2",
+    "v": 2.0,
+    "w": 2.0,
+    "as_written": {
+     "kind": "int8.e178_v2",
+     "v": "2",
+     "w": "2",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "508.0",
+     "E above zeros, a3 / c1 (fJ)": "195.9 / 177.3",
+     "of which data flips, a3 (fJ)": "194.35",
+     "electrons per op, a3": "6.074e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5442 / 1.3971",
+     "kind-to-kind band (W)": "-0.000 / +0.020"
+    },
+    "values": {
+     "kind": "int8.e178_v2",
+     "v": 2.0,
+     "w": 2.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 508.0,
+     "E above zeros, a3 / c1 (fJ)": [
+      195.9,
+      177.3
+     ],
+     "of which data flips, a3 (fJ)": 194.35,
+     "electrons per op, a3": 6074000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.5442,
+      1.3971
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.02
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v3",
+    "type": "int8",
+    "name": "e178_v3",
+    "v": 3.0,
+    "w": 3.0,
+    "as_written": {
+     "kind": "int8.e178_v3",
+     "v": "3",
+     "w": "3",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "511.5",
+     "E above zeros, a3 / c1 (fJ)": "199.4 / 180.5",
+     "of which data flips, a3 (fJ)": "197.95",
+     "electrons per op, a3": "6.116e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5722 / 1.4226",
+     "kind-to-kind band (W)": "-0.000 / +0.040"
+    },
+    "values": {
+     "kind": "int8.e178_v3",
+     "v": 3.0,
+     "w": 3.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 511.5,
+     "E above zeros, a3 / c1 (fJ)": [
+      199.4,
+      180.5
+     ],
+     "of which data flips, a3 (fJ)": 197.95,
+     "electrons per op, a3": 6116000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.5722,
+      1.4226
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.04
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v4",
+    "type": "int8",
+    "name": "e178_v4",
+    "v": 4.0,
+    "w": 4.0,
+    "as_written": {
+     "kind": "int8.e178_v4",
+     "v": "4",
+     "w": "4",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "508.0",
+     "E above zeros, a3 / c1 (fJ)": "195.9 / 177.3",
+     "of which data flips, a3 (fJ)": "194.66",
+     "electrons per op, a3": "6.074e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5443 / 1.3972",
+     "kind-to-kind band (W)": "-0.000 / +0.020"
+    },
+    "values": {
+     "kind": "int8.e178_v4",
+     "v": 4.0,
+     "w": 4.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 508.0,
+     "E above zeros, a3 / c1 (fJ)": [
+      195.9,
+      177.3
+     ],
+     "of which data flips, a3 (fJ)": 194.66,
+     "electrons per op, a3": 6074000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.5443,
+      1.3972
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.02
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v5",
+    "type": "int8",
+    "name": "e178_v5",
+    "v": 5.0,
+    "w": 5.0,
+    "as_written": {
+     "kind": "int8.e178_v5",
+     "v": "5",
+     "w": "5",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "513.0",
+     "E above zeros, a3 / c1 (fJ)": "200.9 / 181.9",
+     "of which data flips, a3 (fJ)": "199.48",
+     "electrons per op, a3": "6.133e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5837 / 1.4331",
+     "kind-to-kind band (W)": "-0.000 / +0.040"
+    },
+    "values": {
+     "kind": "int8.e178_v5",
+     "v": 5.0,
+     "w": 5.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 513.0,
+     "E above zeros, a3 / c1 (fJ)": [
+      200.9,
+      181.9
+     ],
+     "of which data flips, a3 (fJ)": 199.48,
+     "electrons per op, a3": 6133000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.5837,
+      1.4331
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.04
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v6",
+    "type": "int8",
+    "name": "e178_v6",
+    "v": 6.0,
+    "w": 6.0,
+    "as_written": {
+     "kind": "int8.e178_v6",
+     "v": "6",
+     "w": "6",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "511.5",
+     "E above zeros, a3 / c1 (fJ)": "199.5 / 180.5",
+     "of which data flips, a3 (fJ)": "197.82",
+     "electrons per op, a3": "6.116e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5723 / 1.4227",
+     "kind-to-kind band (W)": "-0.000 / +0.040"
+    },
+    "values": {
+     "kind": "int8.e178_v6",
+     "v": 6.0,
+     "w": 6.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 511.5,
+     "E above zeros, a3 / c1 (fJ)": [
+      199.5,
+      180.5
+     ],
+     "of which data flips, a3 (fJ)": 197.82,
+     "electrons per op, a3": 6116000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.5723,
+      1.4227
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.04
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v7",
+    "type": "int8",
+    "name": "e178_v7",
+    "v": 7.0,
+    "w": 7.0,
+    "as_written": {
+     "kind": "int8.e178_v7",
+     "v": "7",
+     "w": "7",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "511.9",
+     "E above zeros, a3 / c1 (fJ)": "199.9 / 180.9",
+     "of which data flips, a3 (fJ)": "198.38",
+     "electrons per op, a3": "6.121e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5755 / 1.4257",
+     "kind-to-kind band (W)": "-0.000 / +0.061"
+    },
+    "values": {
+     "kind": "int8.e178_v7",
+     "v": 7.0,
+     "w": 7.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 511.9,
+     "E above zeros, a3 / c1 (fJ)": [
+      199.9,
+      180.9
+     ],
+     "of which data flips, a3 (fJ)": 198.38,
+     "electrons per op, a3": 6121000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.5755,
+      1.4257
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.061
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v8",
+    "type": "int8",
+    "name": "e178_v8",
+    "v": 8.0,
+    "w": 8.0,
+    "as_written": {
+     "kind": "int8.e178_v8",
+     "v": "8",
+     "w": "8",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "507.8",
+     "E above zeros, a3 / c1 (fJ)": "195.7 / 177.2",
+     "of which data flips, a3 (fJ)": "194.37",
+     "electrons per op, a3": "6.072e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5430 / 1.3960",
+     "kind-to-kind band (W)": "-0.000 / +0.020"
+    },
+    "values": {
+     "kind": "int8.e178_v8",
+     "v": 8.0,
+     "w": 8.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 507.8,
+     "E above zeros, a3 / c1 (fJ)": [
+      195.7,
+      177.2
+     ],
+     "of which data flips, a3 (fJ)": 194.37,
+     "electrons per op, a3": 6072000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.543,
+      1.396
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.02
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v85",
+    "type": "int8",
+    "name": "e178_v85",
+    "v": 85.0,
+    "w": 85.0,
+    "as_written": {
+     "kind": "int8.e178_v85",
+     "v": "85",
+     "w": "85",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "515.3",
+     "E above zeros, a3 / c1 (fJ)": "203.2 / 184.0",
+     "of which data flips, a3 (fJ)": "201.50",
+     "electrons per op, a3": "6.161e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.6020 / 1.4499",
+     "kind-to-kind band (W)": "-0.000 / +0.081"
+    },
+    "values": {
+     "kind": "int8.e178_v85",
+     "v": 85.0,
+     "w": 85.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 515.3,
+     "E above zeros, a3 / c1 (fJ)": [
+      203.2,
+      184.0
+     ],
+     "of which data flips, a3 (fJ)": 201.5,
+     "electrons per op, a3": 6161000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.602,
+      1.4499
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.081
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v127",
+    "type": "int8",
+    "name": "e178_v127",
+    "v": 127.0,
+    "w": 127.0,
+    "as_written": {
+     "kind": "int8.e178_v127",
+     "v": "127",
+     "w": "127",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "510.4",
+     "E above zeros, a3 / c1 (fJ)": "198.3 / 179.5",
+     "of which data flips, a3 (fJ)": "197.68",
+     "electrons per op, a3": "6.102e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5631 / 1.4144",
+     "kind-to-kind band (W)": "-0.000 / +0.141"
+    },
+    "values": {
+     "kind": "int8.e178_v127",
+     "v": 127.0,
+     "w": 127.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 510.4,
+     "E above zeros, a3 / c1 (fJ)": [
+      198.3,
+      179.5
+     ],
+     "of which data flips, a3 (fJ)": 197.68,
+     "electrons per op, a3": 6102000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.5631,
+      1.4144
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.141
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_a4_b5",
+    "type": "int8",
+    "name": "e178_a4_b5",
+    "v": 4.0,
+    "w": 5.0,
+    "as_written": {
+     "kind": "int8.e178_a4_b5",
+     "v": "4",
+     "w": "5",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "511.7",
+     "E above zeros, a3 / c1 (fJ)": "199.7 / 180.7",
+     "of which data flips, a3 (fJ)": "197.88",
+     "electrons per op, a3": "6.119e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5740 / 1.4243",
+     "kind-to-kind band (W)": "-0.001 / +0.031"
+    },
+    "values": {
+     "kind": "int8.e178_a4_b5",
+     "v": 4.0,
+     "w": 5.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 511.7,
+     "E above zeros, a3 / c1 (fJ)": [
+      199.7,
+      180.7
+     ],
+     "of which data flips, a3 (fJ)": 197.88,
+     "electrons per op, a3": 6119000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.574,
+      1.4243
+     ],
+     "kind-to-kind band (W)": [
+      -0.001,
+      0.031
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_a5_b4",
+    "type": "int8",
+    "name": "e178_a5_b4",
+    "v": 5.0,
+    "w": 4.0,
+    "as_written": {
+     "kind": "int8.e178_a5_b4",
+     "v": "5",
+     "w": "4",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "511.5",
+     "E above zeros, a3 / c1 (fJ)": "199.4 / 180.5",
+     "of which data flips, a3 (fJ)": "197.66",
+     "electrons per op, a3": "6.116e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5722 / 1.4227",
+     "kind-to-kind band (W)": "-0.001 / +0.031"
+    },
+    "values": {
+     "kind": "int8.e178_a5_b4",
+     "v": 5.0,
+     "w": 4.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 511.5,
+     "E above zeros, a3 / c1 (fJ)": [
+      199.4,
+      180.5
+     ],
+     "of which data flips, a3 (fJ)": 197.66,
+     "electrons per op, a3": 6116000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.5722,
+      1.4227
+     ],
+     "kind-to-kind band (W)": [
+      -0.001,
+      0.031
+     ]
+    }
+   },
+   {
+    "kind": "int8.neg_ones",
+    "type": "int8",
+    "name": "neg_ones",
+    "v": -1.0,
+    "w": -1.0,
+    "as_written": {
+     "kind": "int8.neg_ones",
+     "v": "-1",
+     "w": "-1",
+     "data toggles per lane-op": "—",
+     "E per op, a3 (fJ)": "506.7",
+     "E above zeros, a3 / c1 (fJ)": "194.6 / 176.1",
+     "of which data flips, a3 (fJ)": "195.10",
+     "electrons per op, a3": "6.059e+06",
+     "power above zeros at 600 MHz, a3 / c1 (W)": "1.5343 / 1.3879",
+     "kind-to-kind band (W)": "-0.000 / +0.161"
+    },
+    "values": {
+     "kind": "int8.neg_ones",
+     "v": -1.0,
+     "w": -1.0,
+     "data toggles per lane-op": null,
+     "E per op, a3 (fJ)": 506.7,
+     "E above zeros, a3 / c1 (fJ)": [
+      194.6,
+      176.1
+     ],
+     "of which data flips, a3 (fJ)": 195.1,
+     "electrons per op, a3": 6059000.0,
+     "power above zeros at 600 MHz, a3 / c1 (W)": [
+      1.5343,
+      1.3879
+     ],
+     "kind-to-kind band (W)": [
+      -0.0,
+      0.161
+     ]
+    }
+   }
+  ],
+  "october-forecast-model int8 v2": [
+   {
+    "kind": "int8.ones",
+    "type": "int8",
+    "name": "ones",
+    "v": 1.0,
+    "w": 1.0,
+    "as_written": {
+     "kind": "int8.ones",
+     "v": "1",
+     "w": "1",
+     "data toggles per slot-op": "40.7",
+     "E above zeros, a3 / c1 (fJ)": "191.4 / 173.2",
+     "of which data flips / integer-unit clock, a3 (fJ)": "10.77 / 179.71",
+     "electrons above zeros, a3": "2,394,391",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5090 / 1.3652",
+     "band, a3 (W)": "1.5090-1.5202"
+    },
+    "values": {
+     "kind": "int8.ones",
+     "v": 1.0,
+     "w": 1.0,
+     "data toggles per slot-op": 40.7,
+     "E above zeros, a3 / c1 (fJ)": [
+      191.4,
+      173.2
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      10.77,
+      179.71
+     ],
+     "electrons above zeros, a3": 2394391.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.509,
+      1.3652
+     ],
+     "band, a3 (W)": [
+      1.509,
+      1.5202
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v2",
+    "type": "int8",
+    "name": "e178_v2",
+    "v": 2.0,
+    "w": 2.0,
+    "as_written": {
+     "kind": "int8.e178_v2",
+     "v": "2",
+     "w": "2",
+     "data toggles per slot-op": "40.1",
+     "E above zeros, a3 / c1 (fJ)": "191.7 / 173.5",
+     "of which data flips / integer-unit clock, a3 (fJ)": "10.46 / 179.73",
+     "electrons above zeros, a3": "2,398,314",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5115 / 1.3675",
+     "band, a3 (W)": "1.5115-1.5226"
+    },
+    "values": {
+     "kind": "int8.e178_v2",
+     "v": 2.0,
+     "w": 2.0,
+     "data toggles per slot-op": 40.1,
+     "E above zeros, a3 / c1 (fJ)": [
+      191.7,
+      173.5
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      10.46,
+      179.73
+     ],
+     "electrons above zeros, a3": 2398314.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.5115,
+      1.3675
+     ],
+     "band, a3 (W)": [
+      1.5115,
+      1.5226
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v3",
+    "type": "int8",
+    "name": "e178_v3",
+    "v": 3.0,
+    "w": 3.0,
+    "as_written": {
+     "kind": "int8.e178_v3",
+     "v": "3",
+     "w": "3",
+     "data toggles per slot-op": "53.2",
+     "E above zeros, a3 / c1 (fJ)": "195.2 / 176.7",
+     "of which data flips / integer-unit clock, a3 (fJ)": "15.31 / 178.42",
+     "electrons above zeros, a3": "2,441,957",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5390 / 1.3925",
+     "band, a3 (W)": "1.5390-1.5613"
+    },
+    "values": {
+     "kind": "int8.e178_v3",
+     "v": 3.0,
+     "w": 3.0,
+     "data toggles per slot-op": 53.2,
+     "E above zeros, a3 / c1 (fJ)": [
+      195.2,
+      176.7
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      15.31,
+      178.42
+     ],
+     "electrons above zeros, a3": 2441957.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.539,
+      1.3925
+     ],
+     "band, a3 (W)": [
+      1.539,
+      1.5613
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v4",
+    "type": "int8",
+    "name": "e178_v4",
+    "v": 4.0,
+    "w": 4.0,
+    "as_written": {
+     "kind": "int8.e178_v4",
+     "v": "4",
+     "w": "4",
+     "data toggles per slot-op": "40.7",
+     "E above zeros, a3 / c1 (fJ)": "191.8 / 173.5",
+     "of which data flips / integer-unit clock, a3 (fJ)": "10.70 / 179.79",
+     "electrons above zeros, a3": "2,398,465",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5116 / 1.3675",
+     "band, a3 (W)": "1.5116-1.5227"
+    },
+    "values": {
+     "kind": "int8.e178_v4",
+     "v": 4.0,
+     "w": 4.0,
+     "data toggles per slot-op": 40.7,
+     "E above zeros, a3 / c1 (fJ)": [
+      191.8,
+      173.5
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      10.7,
+      179.79
+     ],
+     "electrons above zeros, a3": 2398465.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.5116,
+      1.3675
+     ],
+     "band, a3 (W)": [
+      1.5116,
+      1.5227
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_a4_b5",
+    "type": "int8",
+    "name": "e178_a4_b5",
+    "v": 4.0,
+    "w": 5.0,
+    "as_written": {
+     "kind": "int8.e178_a4_b5",
+     "v": "4",
+     "w": "5",
+     "data toggles per slot-op": "55.3",
+     "E above zeros, a3 / c1 (fJ)": "195.5 / 177.0",
+     "of which data flips / integer-unit clock, a3 (fJ)": "15.98 / 177.72",
+     "electrons above zeros, a3": "2,445,441",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5412 / 1.3946",
+     "band, a3 (W)": "1.5412-1.5635"
+    },
+    "values": {
+     "kind": "int8.e178_a4_b5",
+     "v": 4.0,
+     "w": 5.0,
+     "data toggles per slot-op": 55.3,
+     "E above zeros, a3 / c1 (fJ)": [
+      195.5,
+      177.0
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      15.98,
+      177.72
+     ],
+     "electrons above zeros, a3": 2445441.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.5412,
+      1.3946
+     ],
+     "band, a3 (W)": [
+      1.5412,
+      1.5635
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_a5_b4",
+    "type": "int8",
+    "name": "e178_a5_b4",
+    "v": 5.0,
+    "w": 4.0,
+    "as_written": {
+     "kind": "int8.e178_a5_b4",
+     "v": "5",
+     "w": "4",
+     "data toggles per slot-op": "54.6",
+     "E above zeros, a3 / c1 (fJ)": "195.3 / 176.8",
+     "of which data flips / integer-unit clock, a3 (fJ)": "15.77 / 177.72",
+     "electrons above zeros, a3": "2,442,593",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5394 / 1.3929",
+     "band, a3 (W)": "1.5394-1.5561"
+    },
+    "values": {
+     "kind": "int8.e178_a5_b4",
+     "v": 5.0,
+     "w": 4.0,
+     "data toggles per slot-op": 54.6,
+     "E above zeros, a3 / c1 (fJ)": [
+      195.3,
+      176.8
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      15.77,
+      177.72
+     ],
+     "electrons above zeros, a3": 2442593.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.5394,
+      1.3929
+     ],
+     "band, a3 (W)": [
+      1.5394,
+      1.5561
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v5",
+    "type": "int8",
+    "name": "e178_v5",
+    "v": 5.0,
+    "w": 5.0,
+    "as_written": {
+     "kind": "int8.e178_v5",
+     "v": "5",
+     "w": "5",
+     "data toggles per slot-op": "59.3",
+     "E above zeros, a3 / c1 (fJ)": "196.7 / 178.1",
+     "of which data flips / integer-unit clock, a3 (fJ)": "17.79 / 177.51",
+     "electrons above zeros, a3": "2,460,643",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5508 / 1.4032",
+     "band, a3 (W)": "1.5508-1.5731"
+    },
+    "values": {
+     "kind": "int8.e178_v5",
+     "v": 5.0,
+     "w": 5.0,
+     "data toggles per slot-op": 59.3,
+     "E above zeros, a3 / c1 (fJ)": [
+      196.7,
+      178.1
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      17.79,
+      177.51
+     ],
+     "electrons above zeros, a3": 2460643.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.5508,
+      1.4032
+     ],
+     "band, a3 (W)": [
+      1.5508,
+      1.5731
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v6",
+    "type": "int8",
+    "name": "e178_v6",
+    "v": 6.0,
+    "w": 6.0,
+    "as_written": {
+     "kind": "int8.e178_v6",
+     "v": "6",
+     "w": "6",
+     "data toggles per slot-op": "52.7",
+     "E above zeros, a3 / c1 (fJ)": "195.2 / 176.7",
+     "of which data flips / integer-unit clock, a3 (fJ)": "15.11 / 178.50",
+     "electrons above zeros, a3": "2,442,162",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5391 / 1.3927",
+     "band, a3 (W)": "1.5391-1.5614"
+    },
+    "values": {
+     "kind": "int8.e178_v6",
+     "v": 6.0,
+     "w": 6.0,
+     "data toggles per slot-op": 52.7,
+     "E above zeros, a3 / c1 (fJ)": [
+      195.2,
+      176.7
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      15.11,
+      178.5
+     ],
+     "electrons above zeros, a3": 2442162.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.5391,
+      1.3927
+     ],
+     "band, a3 (W)": [
+      1.5391,
+      1.5614
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v7",
+    "type": "int8",
+    "name": "e178_v7",
+    "v": 7.0,
+    "w": 7.0,
+    "as_written": {
+     "kind": "int8.e178_v7",
+     "v": "7",
+     "w": "7",
+     "data toggles per slot-op": "57.8",
+     "E above zeros, a3 / c1 (fJ)": "195.7 / 177.1",
+     "of which data flips / integer-unit clock, a3 (fJ)": "17.24 / 176.95",
+     "electrons above zeros, a3": "2,447,383",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5424 / 1.3957",
+     "band, a3 (W)": "1.5424-1.5759"
+    },
+    "values": {
+     "kind": "int8.e178_v7",
+     "v": 7.0,
+     "w": 7.0,
+     "data toggles per slot-op": 57.8,
+     "E above zeros, a3 / c1 (fJ)": [
+      195.7,
+      177.1
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      17.24,
+      176.95
+     ],
+     "electrons above zeros, a3": 2447383.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.5424,
+      1.3957
+     ],
+     "band, a3 (W)": [
+      1.5424,
+      1.5759
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v8",
+    "type": "int8",
+    "name": "e178_v8",
+    "v": 8.0,
+    "w": 8.0,
+    "as_written": {
+     "kind": "int8.e178_v8",
+     "v": "8",
+     "w": "8",
+     "data toggles per slot-op": "40.1",
+     "E above zeros, a3 / c1 (fJ)": "191.6 / 173.4",
+     "of which data flips / integer-unit clock, a3 (fJ)": "10.43 / 179.78",
+     "electrons above zeros, a3": "2,396,294",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5102 / 1.3663",
+     "band, a3 (W)": "1.5102-1.5214"
+    },
+    "values": {
+     "kind": "int8.e178_v8",
+     "v": 8.0,
+     "w": 8.0,
+     "data toggles per slot-op": 40.1,
+     "E above zeros, a3 / c1 (fJ)": [
+      191.6,
+      173.4
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      10.43,
+      179.78
+     ],
+     "electrons above zeros, a3": 2396294.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.5102,
+      1.3663
+     ],
+     "band, a3 (W)": [
+      1.5102,
+      1.5214
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v85",
+    "type": "int8",
+    "name": "e178_v85",
+    "v": 85.0,
+    "w": 85.0,
+    "as_written": {
+     "kind": "int8.e178_v85",
+     "v": "85",
+     "w": "85",
+     "data toggles per slot-op": "65.1",
+     "E above zeros, a3 / c1 (fJ)": "199.0 / 180.2",
+     "of which data flips / integer-unit clock, a3 (fJ)": "21.61 / 175.71",
+     "electrons above zeros, a3": "2,489,607",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5690 / 1.4200",
+     "band, a3 (W)": "1.5690-1.6137"
+    },
+    "values": {
+     "kind": "int8.e178_v85",
+     "v": 85.0,
+     "w": 85.0,
+     "data toggles per slot-op": 65.1,
+     "E above zeros, a3 / c1 (fJ)": [
+      199.0,
+      180.2
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      21.61,
+      175.71
+     ],
+     "electrons above zeros, a3": 2489607.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.569,
+      1.42
+     ],
+     "band, a3 (W)": [
+      1.569,
+      1.6137
+     ]
+    }
+   },
+   {
+    "kind": "int8.e178_v127",
+    "type": "int8",
+    "name": "e178_v127",
+    "v": 127.0,
+    "w": 127.0,
+    "as_written": {
+     "kind": "int8.e178_v127",
+     "v": "127",
+     "w": "127",
+     "data toggles per slot-op": "57.7",
+     "E above zeros, a3 / c1 (fJ)": "194.0 / 175.6",
+     "of which data flips / integer-unit clock, a3 (fJ)": "18.07 / 175.39",
+     "electrons above zeros, a3": "2,426,916",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.5295 / 1.3839",
+     "band, a3 (W)": "1.5295-1.6077"
+    },
+    "values": {
+     "kind": "int8.e178_v127",
+     "v": 127.0,
+     "w": 127.0,
+     "data toggles per slot-op": 57.7,
+     "E above zeros, a3 / c1 (fJ)": [
+      194.0,
+      175.6
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      18.07,
+      175.39
+     ],
+     "electrons above zeros, a3": 2426916.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.5295,
+      1.3839
+     ],
+     "band, a3 (W)": [
+      1.5295,
+      1.6077
+     ]
+    }
+   },
+   {
+    "kind": "int8.neg_ones",
+    "type": "int8",
+    "name": "neg_ones",
+    "v": -1.0,
+    "w": -1.0,
+    "as_written": {
+     "kind": "int8.neg_ones",
+     "v": "-1",
+     "w": "-1",
+     "data toggles per slot-op": "45.2",
+     "E above zeros, a3 / c1 (fJ)": "190.2 / 172.1",
+     "of which data flips / integer-unit clock, a3 (fJ)": "12.15 / 178.54",
+     "electrons above zeros, a3": "2,379,203",
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": "1.4994 / 1.3563",
+     "band, a3 (W)": "1.4994-1.5888"
+    },
+    "values": {
+     "kind": "int8.neg_ones",
+     "v": -1.0,
+     "w": -1.0,
+     "data toggles per slot-op": 45.2,
+     "E above zeros, a3 / c1 (fJ)": [
+      190.2,
+      172.1
+     ],
+     "of which data flips / integer-unit clock, a3 (fJ)": [
+      12.15,
+      178.54
+     ],
+     "electrons above zeros, a3": 2379203.0,
+     "power above zeros at 600 MHz, die, a3 / c1 (W)": [
+      1.4994,
+      1.3563
+     ],
+     "band, a3 (W)": [
+      1.4994,
+      1.5888
+     ]
+    }
+   }
+  ]
+ },
+ "scored": {
+  "figure": "per kind: the a3 figure of the power-above-zeros column of the rows named",
+  "kinds": {
+   "fp32.e178_v0p5": {
+    "w_a3": 8.1801,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.ones": {
+    "w_a3": 8.1789,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.e178_v1p5": {
+    "w_a3": 8.1848,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.e178_v2": {
+    "w_a3": 8.181,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.e178_v3": {
+    "w_a3": 8.1847,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.e178_v4": {
+    "w_a3": 8.1792,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.e178_v5": {
+    "w_a3": 8.192,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.e178_v6": {
+    "w_a3": 8.185,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.e178_v7": {
+    "w_a3": 8.1893,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.e178_v8": {
+    "w_a3": 8.181,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.e178_a4_b5": {
+    "w_a3": 8.187,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.e178_a5_b4": {
+    "w_a3": 8.1902,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.neg_ones": {
+    "w_a3": 8.1789,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp32.e178_uf": {
+    "w_a3": 8.1368,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.e178_v0p5": {
+    "w_a3": 8.1822,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.ones": {
+    "w_a3": 8.1834,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.e178_v1p5": {
+    "w_a3": 8.1947,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.e178_v2": {
+    "w_a3": 8.1832,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.e178_v3": {
+    "w_a3": 8.1943,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.e178_v4": {
+    "w_a3": 8.1833,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.e178_v5": {
+    "w_a3": 8.1947,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.e178_v6": {
+    "w_a3": 8.1944,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.e178_v7": {
+    "w_a3": 8.1934,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.e178_v8": {
+    "w_a3": 8.184,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.e178_a4_b5": {
+    "w_a3": 8.1915,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.e178_a5_b4": {
+    "w_a3": 8.1948,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "fp16.neg_ones": {
+    "w_a3": 8.1831,
+    "rows": "october-forecast-model",
+    "column": "power above zeros at 600 MHz, a3 / c1 (W), first figure (a3)",
+    "at": "as table 1 states it"
+   },
+   "int8.ones": {
+    "w_a3": 1.509,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.e178_v2": {
+    "w_a3": 1.5115,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.e178_v3": {
+    "w_a3": 1.539,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.e178_v4": {
+    "w_a3": 1.5116,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.e178_a4_b5": {
+    "w_a3": 1.5412,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.e178_a5_b4": {
+    "w_a3": 1.5394,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.e178_v5": {
+    "w_a3": 1.5508,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.e178_v6": {
+    "w_a3": 1.5391,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.e178_v7": {
+    "w_a3": 1.5424,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.e178_v8": {
+    "w_a3": 1.5102,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.e178_v85": {
+    "w_a3": 1.569,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.e178_v127": {
+    "w_a3": 1.5295,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   },
+   "int8.neg_ones": {
+    "w_a3": 1.4994,
+    "rows": "october-forecast-model int8 v2",
+    "column": "power above zeros at 600 MHz, die, a3 / c1 (W), first figure (a3)",
+    "at": "the die"
+   }
+  }
+ },
+ "not_scored": [
+  "card 1's figures (E178 runs on aifoundry3 card 0)",
+  "the first freeze's int8 rows (superseded by int8 v2)",
+  "every column other than the scored one",
+  "the anchors' rows (zeros, random, int8 full): not among E178's 40 kinds",
+  "every october-forecast-model output these two lines do not freeze"
+ ],
+ "labels": {
+  "all": "modelled: model outputs frozen before any E178 datum; none is a measurement",
+  "blind": [
+   "fp32.e178_v0p5",
+   "fp32.e178_v1p5",
+   "fp32.e178_v2",
+   "fp32.e178_v3",
+   "fp32.e178_v4",
+   "fp32.e178_v5",
+   "fp32.e178_v6",
+   "fp32.e178_v7",
+   "fp32.e178_v8",
+   "fp32.e178_a4_b5",
+   "fp32.e178_a5_b4",
+   "fp32.e178_uf",
+   "fp16.e178_v0p5",
+   "fp16.e178_v1p5",
+   "fp16.e178_v2",
+   "fp16.e178_v3",
+   "fp16.e178_v4",
+   "fp16.e178_v5",
+   "fp16.e178_v6",
+   "fp16.e178_v7",
+   "fp16.e178_v8",
+   "fp16.e178_a4_b5",
+   "fp16.e178_a5_b4",
+   "int8.e178_v2",
+   "int8.e178_v3",
+   "int8.e178_v4",
+   "int8.e178_v5",
+   "int8.e178_v6",
+   "int8.e178_v7",
+   "int8.e178_v8",
+   "int8.e178_v85",
+   "int8.e178_v127",
+   "int8.e178_a4_b5",
+   "int8.e178_a5_b4"
+  ],
+  "check_not_test": [
+   "fp32.ones",
+   "fp32.neg_ones",
+   "fp16.ones",
+   "fp16.neg_ones",
+   "int8.ones",
+   "int8.neg_ones"
+  ],
+  "why_blind": "the 34 new tiles of E178.md section 2",
+  "why_check": "ones and neg_ones are the committed tiles earlier sessions measured; the level band reads the model against the committed ones kinds, and int8 v2's band rests on the lab's measured ones-against-neg_ones residual (the units paragraphs)"
+ },
+ "reading": {
+  "ranking": "by format: Spearman's rho, average ranks for ties (power_e178.py's spearman, imported unchanged; the statistic of E178-R-int8), of the scored figure against E178's measured D per kind over the kinds E178's scorer keeps; reported with n",
+  "pairs": "a contrast a - b reads the scored figure of a less that of b, set against the board and rail intervals A3's reader (v2, A4) gives for the same contrast: inside, above or below; for E178's five rule contrasts, each format's model extremes, and every contrast A3-1 lists",
+  "int8": "int8 figures are at the die, as int8 v2 states; nothing is scaled, and each reading names its column",
+  "equal_pairs": "the publishable rows name no equal pair among E178's kinds: none is scored; ties are reported only",
+  "words": "never the scorer's verdict words; never one of E178's rules"
+ },
+ "rule_contrasts": [
+  {
+   "rule": "E178-H-int8",
+   "a": "int8.e178_v5",
+   "b": "int8.e178_v4",
+   "e178_frozen_P_w_a3": 0.1862,
+   "model_w_a3": 0.0392,
+   "model_at": "the die",
+   "how": "table 2; stated +0.039 W at the die (band +0.039 to +0.050), about +0.047 W board-equivalent"
+  },
+  {
+   "rule": "E178-H-fp32",
+   "a": "fp32.e178_v5",
+   "b": "fp32.e178_v4",
+   "e178_frozen_P_w_a3": 0.0099,
+   "model_w_a3": 0.0128,
+   "model_at": "as table 1 states it",
+   "how": "table 1; stated +0.0128 W"
+  },
+  {
+   "rule": "E178-H-fp16",
+   "a": "fp16.e178_v5",
+   "b": "fp16.e178_v4",
+   "e178_frozen_P_w_a3": 0.0167,
+   "model_w_a3": 0.0114,
+   "model_at": "as table 1 states it",
+   "how": "table 1; stated +0.0114 W"
+  },
+  {
+   "rule": "E178-U",
+   "a": "fp32.ones",
+   "b": "fp32.e178_uf",
+   "e178_frozen_P_w_a3": 0.0749,
+   "model_w_a3": 0.0421,
+   "model_at": "as table 1 states it",
+   "how": "table 1, by subtraction"
+  },
+  {
+   "rule": "E178-S-int8",
+   "a": "int8.e178_v85",
+   "b": "int8.neg_ones",
+   "e178_frozen_P_w_a3": 0.3549,
+   "model_w_a3": 0.0696,
+   "model_at": "the die",
+   "how": "table 2, by subtraction"
+  }
+ ],
+ "model_extremes": {
+  "fp32": {
+   "highest": "fp32.e178_v5",
+   "lowest": "fp32.e178_uf",
+   "model_w_a3": 0.0552,
+   "at": "as table 1 states it"
+  },
+  "fp16": {
+   "highest": "fp16.e178_a5_b4",
+   "lowest": "fp16.e178_v0p5",
+   "model_w_a3": 0.0126,
+   "at": "as table 1 states it"
+  },
+  "int8": {
+   "highest": "int8.e178_v85",
+   "lowest": "int8.neg_ones",
+   "model_w_a3": 0.0696,
+   "at": "the die"
+  }
+ }
+}
