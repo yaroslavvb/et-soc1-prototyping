@@ -1,0 +1,71 @@
+POST HOC (the term was registered in 7a099fb9 after these sessions' data existed)
+
+1. DT-N's formula on E100's committed session (aifoundry2, 800 MHz), arm by arm
+  A0   procs  24 eligible gaps   453 (stamp gap 1.28 ms)  expected {'delta_0.0_ms': 0.58, 'delta_0.7_ms': 0.897, 'delta_1.2_ms': 1.124}  band [0, 4]  falls (kernel rule) 3  PASS  | E100: falls 3 (kernel 3), predicted 0.96 in [0, 4]
+  A5   procs  24 eligible gaps   447 (stamp gap 6.427 ms)  expected {'delta_0.0_ms': 2.873, 'delta_0.7_ms': 3.186, 'delta_1.2_ms': 3.409}  band [0, 7]  falls (kernel rule) 3  PASS  | E100: falls 3 (kernel 3), predicted 3.59 in [0, 7]
+  A20  procs  24 eligible gaps   408 (stamp gap 21.711 ms)  expected {'delta_0.0_ms': 8.858, 'delta_0.7_ms': 9.144, 'delta_1.2_ms': 9.348}  band [4, 16]  falls (kernel rule) 10  PASS  | E100: falls 10 (kernel 10), predicted 8.51 in [3, 14]
+  A100 procs  24 eligible gaps   258 (stamp gap 99.624 ms)  expected {'delta_0.0_ms': 25.703, 'delta_0.7_ms': 25.883, 'delta_1.2_ms': 26.012}  band [16, 36]  falls (kernel rule) 33  PASS  | E100: falls 33 (kernel 33), predicted 29.78 in [20, 42]
+  N    procs  50 eligible gaps     0 (stamp gap None ms)  expected {'delta_0.0_ms': 0.0, 'delta_0.7_ms': 0.0, 'delta_1.2_ms': 0.0}  band [0, 0]  falls (kernel rule) 0  PASS  | E100: falls 0 (kernel 0), predicted 0.0 in [0, 0]
+  R    procs  24 eligible gaps   398 (stamp gap 20.982 ms)  expected {'delta_0.0_ms': 8.351, 'delta_0.7_ms': 8.63, 'delta_1.2_ms': 8.829}  band [3, 15]  falls (kernel rule) 11  PASS  | E100: falls 12 (kernel 10), predicted 8.51 in [3, 14]
+
+== E173 (a2)
+  2. period from its 6 falls: 1000.01036 ms (sd 0.00061; prior (1000.0095, 0.0015)), spanning 1876 beats; ring lattice on the SP tick {'records': 175, 'period_us': 1000000.92, 'R': 0.9953, 'res_ms_p10_p50_p90': [-14.4, -2.0, 13.3]}
+     fall at 600 MHz {'n': 4, 'median': 1.101, 'min': 1.1, 'max': 1.101}, at 700 MHz {'n': 4, 'median': 0.201}; first 800 reading after the process start {'n': 165, 'median': 0.925, 'max': 1.53}; late climbs seen 3: [{'run': 'BURST-08-b8-fp16.s8_onebit_b7_b945b945-r1', 'first_800_s': 1.53}, {'run': 'BURST-58-b8-int8.anchor8_full_a_4aac84-r1', 'first_800_s': 1.53}, {'run': 'BURST-134-b8-fp16.s8_onebit_b2_c46ec46e-r1', 'first_800_s': 1.53}]
+     falls in their zones: [(1.73, 1.97), (1.88, 1.82), (2.46, 1.24), (2.52, 1.18), (1.33, 2.37), (1.17, 2.53)]
+     in-sample lattice table {'point_in_zone_fell': 6, 'point_in_zone_no_fall': 3, 'no_point_fell': 0, 'note': "in sample: the lattice is fitted on these falls (Q132(g)'s caveat)"}; ring POWER_IDLE per run {'runs_with_a_fall': {'n': 6, 'records': {1: 2, 2: 4}}, 'runs_without': {'n': 159, 'records': {0: 2, 1: 156, 9: 1}}}
+  3. DT-N: eligible gaps 2101 (stamp gap 2.633 ms), expected {'delta_0.0_ms': 5.532, 'delta_0.7_ms': 7.003, 'delta_1.2_ms': 8.053}, band [1, 14], falls 6: PASS
+     DT-L: later falls 5, sensitivity 1.0, PPV 0.625: PASS; P at each later fall [0.8, 0.868, 0.777, 0.723, 0.84]; off lattice []
+  4. the rules with the term
+     none    falls expected   0.00, late climbs  0.00  {'DT-P8-A2-F2': (7.0119, -2.6567, 'FAIL'), 'DT-P8-A2-Bp': (1.0937, -0.0353, 'FAIL')}
+     count   falls expected   7.49, late climbs  1.09  {'DT-P8-A2-F2': (6.5332, -0.3862, 'FAIL'), 'DT-P8-A2-Bp': (1.1255, 0.2004, 'FAIL')}
+     seq     falls expected   7.91, late climbs  0.12  {'DT-P8-A2-F2': (1.5819, -0.23, 'PASS'), 'DT-P8-A2-Bp': (0.8848, 0.1932, 'PASS')}
+     oracle  falls expected   8.76, late climbs  0.00  {'DT-P8-A2-F2': (0.4134, 0.0021, 'PASS'), 'DT-P8-A2-Bp': (0.8412, 0.2141, 'PASS')}
+     reference, selected on the outcome: {'every pass with a fall dropped': {'n': 21, 'rms': 0.2983, 'mean': -0.044}, 'every tile with a dipped pass (< 799 MHz) dropped': {'n': 17, 'rms': 0.0733, 'mean': 0.0241}}
+  5. what each fall cost its pass (the tile's other passes with no fall as the reference) against the term's cost
+     int8.h8_held_v34                   other    pass 1 fall at  3.62 s: 752 against 800.0 MHz, cost 48.0 measured, 48.45 term; board 3.775 W measured, 3.92 term
+     int8.u8_ar_k_0a9fe5                pinned   pass 2 fall at  1.87 s: 750 against 800.0 MHz, cost 50.0 measured, 51.14 term; board 4.495 W measured, 4.235 term
+     int8.l8_flip_d2p2c16_231d          pinned   pass 2 fall at  5.84 s: 779.6 against 800.0 MHz, cost 20.4 measured, 19.63 term; board 1.22 W measured, 0.966 term
+     fp16.u8_tdist_93475b               other    pass 3 fall at  5.52 s: 700 against 725.6 MHz, cost 25.6 measured, 38.67 term; board 2.155 W measured, 4.51 term
+     int8.l8_flip_d2p2c16_231d          pinned   pass 3 fall at  4.75 s: 752.9 against 800.0 MHz, cost 47.1 measured, 47.8 term; board 4.39 W measured, 3.991 term
+     fp16.r8_granite_l3_pv_e993b7       pinned   pass 3 fall at  3.65 s: 752.9 against 800.0 MHz, cost 47.1 measured, 47.72 term; board 3.535 W measured, 3.799 term
+
+== E174 (c0)
+  2. period from its 6 falls: 1000.01939 ms (sd 0.00072; prior (1000.019, 0.001)), spanning 1332 beats; ring lattice on the SP tick {'records': 138, 'period_us': 1000001.14, 'R': 0.9981, 'res_ms_p10_p50_p90': [-12.9, -0.6, 11.7]}
+     fall at 600 MHz {'n': 4, 'median': 1.062, 'min': 1.017, 'max': 1.185}, at 700 MHz {'n': 4, 'median': 0.25}; first 800 reading after the process start {'n': 126, 'median': 1.07, 'max': 1.98}; late climbs seen 3: [{'run': 'BURST-18-b8-int8.r8_dsqwen_l1_actdown_f6a2cb-r1', 'first_800_s': 1.98}, {'run': 'BURST-29-b8-fp16.anchor7_zeros-r1', 'first_800_s': 1.97}, {'run': 'BURST-54-b8-int8.u8_biased_14548f-r1', 'first_800_s': 1.57}]
+     falls in their zones: [(2.28, 1.42), (2.2, 1.5), (0.31, 3.39), (2.58, 1.12), (1.22, 1.48), (2.11, 1.59)]
+     in-sample lattice table {'point_in_zone_fell': 6, 'point_in_zone_no_fall': 1, 'no_point_fell': 0, 'note': "in sample: the lattice is fitted on these falls (Q132(g)'s caveat)"}; ring POWER_IDLE per run {'runs_with_a_fall': {'n': 6, 'records': {1: 2, 2: 4}}, 'runs_without': {'n': 120, 'records': {1: 119, 9: 1}}}
+  3. DT-N: eligible gaps 1690 (stamp gap 2.727 ms), expected {'delta_0.0_ms': 4.609, 'delta_0.7_ms': 5.792, 'delta_1.2_ms': 6.637}, band [1, 12], falls 6: PASS
+     DT-L: later falls 5, sensitivity 0.8, PPV 0.571: PASS; P at each later fall [0.8, 0.427, 0.823, 0.96, 0.99]; off lattice []
+  4. the rules with the term
+     none    falls expected   0.00, late climbs  0.00  {'DT-P8-C0-F': (4.5431, -1.6048, 'FAIL')}
+     count   falls expected   5.54, late climbs  5.89  {'DT-P8-C0-F': (4.3818, 0.5726, 'PASS')}
+     seq     falls expected   6.90, late climbs  7.15  {'DT-P8-C0-F': (2.9156, 0.9024, 'PASS')}
+     oracle  falls expected   7.22, late climbs  7.13  {'DT-P8-C0-F': (2.0243, 0.6652, 'PASS')}
+     reference, selected on the outcome: {'every pass with a fall dropped': {'n': 21, 'rms': 0.797, 'mean': -0.2254}, 'every tile with a dipped pass (< 799 MHz) dropped': {'n': 17, 'rms': 0.0, 'mean': 0.0}}
+  5. what each fall cost its pass (the tile's other passes with no fall as the reference) against the term's cost
+     int8.anchor8_full_a_4aac84         anchor   pass 1 fall at  5.76 s: 778.7 against 800.0 MHz, cost 21.3 measured, 19.87 term; board 0.715 W measured, None term
+     int8.l8_flip_d2p2c16_231d          pinned   pass 3 fall at  1.36 s: 755.1 against 800.0 MHz, cost 44.9 measured, 45.1 term; board 3.645 W measured, None term
+     fp32.anchor7_zeros                 anchor   pass 4 fall at  4.31 s: 754 against 800.0 MHz, cost 46.0 measured, 49.81 term; board 1.404 W measured, None term
+     int8.anchor7_zeros                 anchor   pass 4 fall at  5.76 s: 778.7 against 799.2 MHz, cost 20.5 measured, 19.82 term; board 0.52 W measured, None term
+     fp16.s8_onebit_b4_c2e2c2e2         pinned   pass 4 fall at  1.38 s: 758 against 800.0 MHz, cost 42.0 measured, 44.95 term; board 4.165 W measured, None term
+     fp32.real_smol_softmax_v_causal    other    pass 5 fall at  4.35 s: 755.1 against 800.0 MHz, cost 44.9 measured, 49.54 term; board 3.76 W measured, None term
+
+== E175 (a2)
+  2. period from its 4 falls: 1000.00971 ms (sd 0.00093; prior (1000.0095, 0.0015)), spanning 1148 beats; ring lattice on the SP tick {'records': 135, 'period_us': 1000000.94, 'R': 0.9924, 'res_ms_p10_p50_p90': [-13.2, -2.0, 13.7]}
+     fall at 600 MHz {'n': 4, 'median': 1.101, 'min': 1.001, 'max': 1.201}, at 700 MHz {'n': 4, 'median': 0.2}; first 800 reading after the process start {'n': 126, 'median': 1.023, 'max': 2.03}; late climbs seen 5: [{'run': 'BURST-61-e5-fp16.e5c18_lognorm_t2_38ac9e-r1', 'first_800_s': 1.52}, {'run': 'BURST-64-k-fp16-randn-r1', 'first_800_s': 1.53}, {'run': 'BURST-79-e5-fp32.e5c12_tdist_t23_f74165-r1', 'first_800_s': 1.53}, {'run': 'BURST-83-e5-fp16.e5c17_bimodal_t5_a9b319-r1', 'first_800_s': 2.03}, {'run': 'BURST-115-e5-fp16.e5c16_sparse_t1_9f47b2-r1', 'first_800_s': 1.53}]
+     falls in their zones: [(1.93, 1.77), (2.01, 1.69), (1.09, 1.61), (2.07, 1.63)]
+     in-sample lattice table {'point_in_zone_fell': 4, 'point_in_zone_no_fall': 0, 'no_point_fell': 0, 'note': "in sample: the lattice is fitted on these falls (Q132(g)'s caveat)"}; ring POWER_IDLE per run {'runs_with_a_fall': {'n': 4, 'records': {1: 1, 2: 3}}, 'runs_without': {'n': 122, 'records': {1: 121, 7: 1}}}
+  3. DT-N: eligible gaps 1567 (stamp gap 2.599 ms), expected {'delta_0.0_ms': 4.073, 'delta_0.7_ms': 5.17, 'delta_1.2_ms': 5.953}, band [1, 11], falls 4: PASS
+     DT-L: later falls 3, sensitivity 1.0, PPV 1.0: PASS; P at each later fall [0.853, 0.667, 0.963]; off lattice []
+  4. the rules with the term
+     none    falls expected   0.00, late climbs  0.00  {'DT-E175-A2-G': (4.4923, 0.1206, 'FAIL'), 'DT-E175-A2-Bp': (0.668, 0.532, 'FAIL')}
+     count   falls expected   5.53, late climbs  0.75  {'DT-E175-A2-G': (4.819, 1.7105, 'FAIL'), 'DT-E175-A2-Bp': (0.8957, 0.7908, 'FAIL')}
+     seq     falls expected   6.35, late climbs  1.10  {'DT-E175-A2-G': (5.1456, 1.969, 'FAIL'), 'DT-E175-A2-Bp': (0.9098, 0.7755, 'FAIL')}
+     oracle  falls expected   5.57, late climbs  0.94  {'DT-E175-A2-G': (4.4083, 2.0424, 'FAIL'), 'DT-E175-A2-Bp': (0.7861, 0.6993, 'FAIL')}
+     E175-A2-F2: {'none': (1.2391, 0.6512, 'PASS'), 'count': (2.9711, 2.781, 'PASS'), 'seq': (2.9378, 2.4513, 'PASS'), 'oracle': (2.8364, 1.6043, 'PASS')}
+     reference, selected on the outcome: {'every pass with a fall dropped': {'n': 16, 'rms': 3.816, 'mean': 1.1757}}
+  5. what each fall cost its pass (the tile's other passes with no fall as the reference) against the term's cost
+     fp32.e5c10_ar_i_t10_adc630         governed pass 3 fall at  4.68 s: 708 against 732.23 MHz, cost 24.23 measured, 32.36 term; board 4.093 W measured, 4.205 term
+     int8.anchor7_zeros                 anchor   pass 4 fall at  1.34 s: 757.1 against 800.0 MHz, cost 42.9 measured, 42.84 term; board 2.022 W measured, 2.547 term
+     fp16.e5c17_bimodal_t5_a9b319       governed pass 4 fall at  3.02 s: 736.7 against 758.43 MHz, cost 21.73 measured, 37.5 term; board 2.143 W measured, 4.862 term
+     fp16.e5c08_ar_k_t6_6dd6a1          governed pass 5 fall at  4.54 s: 736.7 against 763.67 MHz, cost 26.97 measured, 39.24 term; board 3.575 W measured, 4.934 term
