@@ -1,0 +1,95 @@
+# E181's DRY-INTEL dry pass on the Intel, Fri 06 Nov 2026 03:52:45 PST: V3_DRY=1 E181_DESK=1 in a tree built from step 7's sync list
+# alone (22 box-list files and tools/claims-v3/e181/; 74 files); E97's toy card; no device, no ssh.
+# Shims on PATH: hostname -> aifoundry3, date -> GNU date, python3 -> /usr/bin/python3 (Python 3.9.6), et-who and network stand-ins.
+
+== A. the session: gates, the box list, the preflight, A6-1's floor mark, the smoke with its five stop tests, the smoke gate
+session rc=0
+session start (T0 03:52:45 PST) DRY
+the full design (no subset): budget 4560 s from T0, the pass's deadline 05:07:45 PST
+DESK: box-only, not checked here: build/ccheck/b/host/sparsity_host
+DESK: box-only, not checked here: build/sparsity/kernel/sparsity.elf
+DESK: box-only, not checked here: build/ettelem/ettelem
+frozen-e181.sha256: every file as registered
+dmcmd_audit preflight rc=0 (dmcmd_audit: GO (38 send site(s), 0 disallowed; allow-list: none))
+DESK: et-who not run off the box
+DRY config config-session-start.json
+(E181_DESK): box-only, not checked here: missing the C-logging host build/ccheck/b/host/sparsity_host
+(E181_DESK): box-only, not checked here: missing the kernel build/sparsity/kernel/sparsity.elf
+(E181_DESK): box-only, not checked here: missing build/ettelem/ettelem
+p18101 begins (die 80 C) -> <tree>/build/claims-v3-dry/aifoundry3/e181-smoke/p18101
+
+1290
+pass 18101: design smoke + stop tests; deadline 2026-11-06 05:12:49 PST, 80.0 min left; lines: gate 70 C, hold 72 C / 65 W, session 74 C
+F0 (A6-1, the first 3 s of the pass's samples): 34-sensor mean 51.433 C over 15 samples, firmware None C, board 24.0 W
+R0: 8 s
+R0 ends after 8 s: 34-sensor mean 51.433 C
+(R0's rest die): 34-sensor mean 51.433 C, firmware None C; H_E: smoke: the cool pattern
+die before H_E: 34-sensor mean 51.433 C, firmware None C (last 120 s)
+H_E: fp32.randn for 11 s, 3.20 s every 7.56 s
+--test fma --type fp32 --pattern none --values file:<tree>/tools/claims-v3/kinds/tiles/fp32/randn.bin --shires 0xffffffff --per-shire 32 --seconds 3.20 --seed 18102 --stop-file <tree>/build/claims-v3-dry/aifoundry3/e181-smoke/p18101/HOLDSTO
+--test fma --type fp32 --pattern none --values file:<tree>/tools/claims-v3/kinds/tiles/fp32/randn.bin --shires 0xffffffff --per-shire 32 --seconds 2.69 --seed 18102 --stop-file <tree>/build/claims-v3-dry/aifoundry3/e181-smoke/p18101/HOLDSTO
+H_E ends (time) after 11 s, 2 launches, die 51 C
+R1: 2 s
+R1 ends after 2 s: 34-sensor mean 51.433 C
+die before Z: 34-sensor mean 51.433 C, firmware None C (last 120 s)
+Z: fp32.zeros for 5 s, back to back
+--test fma --type fp32 --pattern none --values file:<tree>/tools/claims-v3/kinds/tiles/fp32/zeros.bin --shires 0xffffffff --per-shire 32 --seconds 4.25 --seed 18102 --stop-file <tree>/build/claims-v3-dry/aifoundry3/e181-smoke/p18101/HOLDSTO
+Z ends (time) after 5 s, 1 launches, die 51 C
+R2: 2 s
+R2 ends after 2 s: 34-sensor mean 51.433 C
+die before L1: 34-sensor mean 51.433 C, firmware None C (last 120 s)
+L1: int8.full for 5 s, back to back
+--test fma --type int8 --pattern none --values file:<tree>/tools/claims-v3/kinds/tiles/int8/full.bin --shires 0xffffffff --per-shire 32 --seconds 4.25 --seed 18102 --stop-file <tree>/build/claims-v3-dry/aifoundry3/e181-smoke/p18101/HOLDSTOP
+L1 ends (time) after 5 s, 1 launches, die 51 C
+R3: 2 s
+R3 ends after 2 s: 34-sensor mean 51.433 C
+die before S: 34-sensor mean 51.433 C, firmware None C (last 120 s)
+floor F0 (A6-1, the first 3 s of the pass's samples): 34-sensor mean 51.433 C over 15 samples, firmware None C, board 24.0 W
+the real log build/e181/session.log: not written; floor marks in the dry smoke: 1; stop tests (all_pass, results): False {"gate": {"launches": 0, "pass": true}, "hold_die": {"why": "stop", "launches": 0, "pass": true}, "hold_board": {"why": "stop", "launches": 0, "pass": true}, "in_launch": {"line_w": 28.0, "why": "time", "launches": 2, "pass": false}, "session": {"pass": true, "exit": 6}}
+-> PASS (session rc 0; box list clean (27 repo files) with 3 box-only binaries; preflight GO; one floor mark; the toy's smoke gate NO-GO; the real log untouched)
+
+== B. the session's gates refuse before any device
+E181_DESK is for a dry pass only (V3_DRY=1)
+session start (T0 03:52:52 PST) DRY
+the day's gates are not set (E181_LATEST_START, E181_END_GATE): no device opened
+session start (T0 03:52:52 PST) DRY
+T0 + 76 min passes the end gate 04:52:00 PST and there is no subset: no device opened
+-> PASS (no gates set 8; T0 + 76 min past the end gate 8; E181_DESK without V3_DRY 2)
+
+== C. the measured pass through the block, F0 from the dry smoke's floor mark (the toy's room 51.433 C: the cool pattern)
+block 18120 rc=0
+{"kind": "start_gate", "t_ms": 1793966276466, "room_c": 51.4329101562505, "max_c": 53.9, "floor_c": 51.43291015625004, "floor_from": "build/claims-v3-dry/aifoundry3/e181-smoke/p18101/marks.jsonl", "residue_c": 4.618527782440651e-13, "residue_pred_c": 0.414, "residue_excess_c": -0.4139999999995381, "residue_line_c": 0.5, "room_ok": true, "residue_ok": true, "passed": true, "why": "room 51.433 C <= 53.9 C and R0's room
+  H_E: 80 launches over 600.0 s, start to start 7.56 s, ended time
+  Z: 85 launches over 600.0 s, start to start 7.12 s, ended time
+  L1: 85 launches over 600.0 s, start to start 7.12 s, ended time
+  S: 85 launches over 600.0 s, start to start 7.12 s, ended time
+  L2: 85 launches over 600.0 s, start to start 7.12 s, ended time
+  plan 73.5 min; the order by first launch ['H_E', 'Z', 'L1', 'S', 'L2']; rests ['R0', 'R1', 'R2', 'R3', 'R4', 'R5']
+CHECK True
+-> PASS (the full design ran: passed, F0 the dry smoke's 51.433 C (the toy's code 1950), H_E 80 launches at the cool pattern)
+
+== D. the start gate on the toy: the room line, A8-4's residue line, the warm pattern, the room line's edge
+  pass 18191 (room 54.0): rc 7; start gate (G0-A6 with A8-4): NOT passed: room 54.000 C > 53.9 C
+  pass 18192 (room 52.5): rc 7; start gate (G0-A6 with A8-4): NOT passed: R0's room - F0 - 0.414 = +0.653 C > 0.5 C (A8-4)
+  pass 18193 (room 52.0): rc 0; start gate (G0-A6 with A8-4): passed: room 52.000 C <= 53.9 C and R0's room - F0 - 0.414 = +0.153 C <= 0.5 C: the design runs
+  pass 18193's H_E: 2.6 7.98 (the warm pattern: 2.6 7.98)
+  pass 18194 (room 53.9, F0 53.5): rc 0; start gate (G0-A6 with A8-4): passed: room 53.900 C <= 53.9 C and R0's room - F0 - 0.414 = -0.014 C <= 0.5 C: the design runs
+-> PASS (room 54.0 refused 7; residue at 52.5 refused 7; 52.0 runs the warm pattern; the 53.9 edge runs)
+
+== E. A6-1: a 54.0 C floor ends the smoke before its first launch
+floor F0 (A6-1, the first 3 s of the pass's samples): 34-sensor mean 54.0 C over 15 samples, firmware None C, board 24.0 W
+STOP (7): A6-1: F0 54.000 C above 53.9 C: the session ends before the smoke's first launch, no hold
+-> PASS (exit 7, no launch, block status gate)
+
+== F. refusals and the runner's --list
+E181: a stop line is looser than registered (gate 70 C, hold 72 C / 65 W, session 74 C)
+E181: E181_DRY_ROOM_C is for --dry only
+E181: E181_DRY_FLOOR_C is for --dry only
+  --list: tile problems and gates: 0 {'A6-1_floor_max_c': 53.9, 'A6-2_room_max_c': 53.9, 'A8-4_residue_pred_c': 0.414, 'A8-4_residue_line_c': 0.5}
+-> PASS (a looser stop line, the two dry overrides without --dry refused; --list rc 0, no tile problem)
+
+== G. no network call
+network stand-in calls: 0
+-> PASS (no ssh, rsync or scp)
+
+DRY-INTEL PASS

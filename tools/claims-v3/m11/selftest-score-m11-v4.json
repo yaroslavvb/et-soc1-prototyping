@@ -1,0 +1,129 @@
+{
+ "cases": {
+  "A1 every registered reading is v3's, unchanged, with the arm beside it (A9-3)": {
+   "got": {
+    "HM_CAL": "NOT SCORED",
+    "HM_E144": "DOES NOT REPEAT",
+    "HM_LG": "GAIN",
+    "same": true
+   },
+   "pass": true
+  },
+  "A2 the arm on E154's pass with its smoke: SCORED; R the registered R for all 5 holds; H_E's delta e within 0.005 C of A9's post hoc H_M (fit_q138t.score_hold); the later holds' within 0.001 C": {
+   "got": {
+    "R_same": true,
+    "arm_HM_CAL": "NOT SCORED",
+    "arm_HM_E144": "DOES NOT REPEAT",
+    "delta_e_H_E": 0.131,
+    "gap_s": 2.514,
+    "later_max": 0.0,
+    "posthoc_H_M": 0.13106,
+    "reads": "SCORED (reported)"
+   },
+   "pass": true
+  },
+  "A3 no smoke named, or a smoke a day before the pass: the arm NOT SCORED with its reason; the registered readings v3's": {
+   "got": {
+    "far_smoke": [
+     "the gap between the passes is 69354.9 s, not in (0, 600] s"
+    ],
+    "no_smoke": [
+     "no smoke pass named (--smoke)"
+    ]
+   },
+   "pass": true
+  },
+  "A4 E176's committed pass beside it: excluded (its own G0); the arm not read there, read on the passing session": {
+   "got": {
+    "E176": "the start gate did not pass (pre-A6 G0 (that kit's own line)): room 53.582 C > 53.0 C",
+    "arm_not_read": {
+     "S1:p17620": "the session did not pass its start gate"
+    },
+    "arm_sessions": [
+     "S2:p18120"
+    ]
+   },
+   "pass": true
+  },
+  "E1 A6-3's pattern edge: a passed gate with no H_E pattern flagged; a pattern, or a refused gate, not flagged": {
+   "got": {
+    "edge": true,
+    "refused_gate": false,
+    "with_pattern": false
+   },
+   "pass": true
+  },
+  "H1 A6-5's host windows read: the NVMe composite and coretemp 2-9 at the start and end, and their change": {
+   "got": {
+    "change": {
+     "coretemp_2_9_mean_C": 1.5,
+     "nvme_temp1_mean_C": 1.0
+    },
+    "start": [
+     38.85,
+     33.1
+    ]
+   },
+   "pass": true
+  },
+  "L1 v4's lists read before any import: SHA256SUMS-a9 and SHA256SUMS-score-m11-v3": {
+   "got": {
+    "SHA256SUMS-a9": 4,
+    "SHA256SUMS-score-m11-v3": 6
+   },
+   "pass": true
+  },
+  "P1 the precedence counts A9: now blind, one second before A9's commit post hoc": {
+   "got": {
+    "before_A9": false,
+    "commits": [
+     "REGISTRATION",
+     "A1",
+     "A2",
+     "A3",
+     "A4",
+     "A5",
+     "A6",
+     "A7",
+     "A8",
+     "A9"
+    ],
+    "now": true
+   },
+   "pass": true
+  },
+  "W1 a start_gate mark that disagrees with its numbers: REFUSED before any file is written (no lines file, no staging file)": {
+   "got": {
+    "files": [],
+    "refusal": "M11 scorer v4 REFUSED before any file was written: S1:p18120: the start_gate mark's passed=True disagrees with its own n"
+   },
+   "pass": true
+  },
+  "W2 a refusal after v2's stages: the staging file removed, no lines file left": {
+   "got": {
+    "files": [],
+    "refusal": "M11 scorer v4 REFUSED: the self-test's refusal after the staged stages"
+   },
+   "pass": true
+  },
+  "W3 a passing session: the lines file under its own name, stages 1-6 in order, no staging file left": {
+   "got": {
+    "stages": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "pass": true
+  }
+ },
+ "lists_checked": {
+  "SHA256SUMS-a9": 4,
+  "SHA256SUMS-score-m11-v3": 6
+ },
+ "pass": true,
+ "problems": []
+}

@@ -1,0 +1,13 @@
+M11 scorer v4 self-test: lists SHA256SUMS-a9 4, SHA256SUMS-score-m11-v3 6
+  W1 a start_gate mark that disagrees with its numbers: REFUSED before any file is written (no lines file, no staging file) PASS  {"refusal": "M11 scorer v4 REFUSED before any file was written: S1:p18120: the start_gate mark's passed=True disagrees with its own n", "files": []}
+  W2 a refusal after v2's stages: the staging file removed, no lines file left                         PASS  {"refusal": "M11 scorer v4 REFUSED: the self-test's refusal after the staged stages", "files": []}
+  W3 a passing session: the lines file under its own name, stages 1-6 in order, no staging file left   PASS  {"stages": [1, 2, 3, 4, 5, 6]}
+  A1 every registered reading is v3's, unchanged, with the arm beside it (A9-3)                        PASS  {"same": true, "HM_LG": "GAIN", "HM_E144": "DOES NOT REPEAT", "HM_CAL": "NOT SCORED"}
+  A2 the arm on E154's pass with its smoke: SCORED; R the registered R for all 5 holds; H_E's delta e within 0.005 C of A9's post hoc H_M (fit_q138t.score_hold); the later holds' within 0.001 C PASS  {"reads": "SCORED (reported)", "delta_e_H_E": 0.131, "posthoc_H_M": 0.13106, "later_max": 0.0, "R_same": true, "arm_HM_E144": "DOES NOT REPEAT", "arm_HM_CAL": "NOT SCORED", "gap_s": 2.514}
+  H1 A6-5's host windows read: the NVMe composite and coretemp 2-9 at the start and end, and their change PASS  {"start": [38.85, 33.1], "change": {"nvme_temp1_mean_C": 1.0, "coretemp_2_9_mean_C": 1.5}}
+  A3 no smoke named, or a smoke a day before the pass: the arm NOT SCORED with its reason; the registered readings v3's PASS  {"no_smoke": ["no smoke pass named (--smoke)"], "far_smoke": ["the gap between the passes is 69354.9 s, not in (0, 600] s"]}
+  A4 E176's committed pass beside it: excluded (its own G0); the arm not read there, read on the passing session PASS  {"E176": "the start gate did not pass (pre-A6 G0 (that kit's own line)): room 53.582 C > 53.0 C", "arm_not_read": {"S1:p17620": "the session did not pass its start gate"}, "arm_sessions": ["S2:p18120"]}
+  E1 A6-3's pattern edge: a passed gate with no H_E pattern flagged; a pattern, or a refused gate, not flagged PASS  {"edge": true, "with_pattern": false, "refused_gate": false}
+  P1 the precedence counts A9: now blind, one second before A9's commit post hoc                       PASS  {"now": true, "before_A9": false, "commits": ["REGISTRATION", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9"]}
+  L1 v4's lists read before any import: SHA256SUMS-a9 and SHA256SUMS-score-m11-v3                      PASS  {"SHA256SUMS-a9": 4, "SHA256SUMS-score-m11-v3": 6}
+SELF-TEST PASS

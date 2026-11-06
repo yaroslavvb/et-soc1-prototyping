@@ -1,0 +1,372 @@
+# E181's runbook desk test v2: bash tools/claims-v3/e181/rb/selftest_rb_e181_v2.sh <a scratch dir outside the repo> (Fri 06 Nov 2026 03:49:27-03:52:45 PST, on the Intel, one job through the round's local slot; stand-in ssh and rsync, no lab box). This header line was added after the run; every line below is the test's own output.
+
+== A. the dry listing v2: every step exits 0, no ssh or rsync call
+dry listing: 0 step(s) exited non-zero
+calls: 0
+-> PASS (dry listing v2)
+
+== P1. a file the runbook pins changed (v3.1's rb_run.py): 16, before any call
+[s08_a3_preflight_e181] STOP: a file this runbook pins differs from its pinned hash: tools/claims-v3/q141k-runbook/v3.1/rb_run.py
+-> PASS (exit 16, no call)
+
+== L1. a login link at the probe
+[s08_a3_preflight_e181] STOP: aifoundry3 printed a login link at the probe (lock file appended; link in RB_LINKS): nothing else was called
+<HH:MM:SS> aifoundry3 needs a check
+-> PASS (exit 11 and one lock line)
+
+== L2. a probe that never answers (bound 2 s)
+[s08_a3_preflight_e181] STOP: aifoundry3 did not answer the probe within 15 s (rc 12): nothing else was called
+-> PASS (exit 12)
+
+== L3. a read past its bound (2 s)
+[s08_a3_preflight_e181] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again
+-> PASS (exit 13)
+
+== L4. a box whose preflight reads wrong (its three binaries missing: the box list reads 27 of 30)
+[s08_a3_preflight_e181] STOP: aifoundry3's preflight failed: boxlist (a binary or file differs: a dated amendment first)
+-> PASS (exit 16, the box list named)
+
+== W1. the session log ends after the offset
+[s20_wait_e181] e181 has ended
+-> PASS (exit 0)
+
+== W2. no session process and no session end
+RUN-GONE e181: no session process and no session end
+[s20_wait_e181] STOP: e181 is not running and recorded no end: read the box's logs before anything else
+-> PASS (exit 14)
+
+== W3. the smoke or its gate failed
+GATE-STOPPED e181
+[s20_wait_e181] STOP: e181 ended at a gate (the smoke, its gate, a STOP file or a session gate): read the lines above
+-> PASS (exit 16)
+
+== W4. G0-A6 with A8-4 refused the measured pass
+[s20_wait_e181] STOP: e181's start gate refused (G0-A6 with A8-4: R0's room above 53.9 C, or its residue less 0.414 C above 0.50 C): no hold ran; a later try needs a rested card (s11 --later-try)
+-> PASS (exit 16, G0-REFUSED)
+
+== W5. A6-1 ended the session before the smoke's first launch
+2026-11-06 03:49:44 PST A6-1: F0 above 53.9 C or unreadable (the smoke's floor mark): the session ends before the smoke's first launch, no hold (exit 7)
+A61-STOPPED e181
+-> PASS (exit 16, A6-1 read on its own)
+
+== S1. fewer than 76 minutes before the last end (s11 v2)
+[s11_a3_launch_v2_e181] STOP: 76 more minutes would pass the round's last end (2026-11-06 04:49 PST): not started
+-> PASS (exit 16, no box call)
+
+== S2. an earlier E181 smoke on the box, without --later-try
+REFUSED: an earlier E181 smoke is on the box (build/claims-v3/aifoundry3/e181-smoke/p18101): this is a later try: run s11_a3_launch_e181_v2.sh --later-try
+[s11_a3_launch_v2_e181] STOP: e181 refused on the box: REFUSED: an earlier E181 smoke is on the box (build/claims-v3/aifoundry3/e181-smoke/p18101): this is a later try: run s11_a3_launch_e181_v2.sh --later-try
+-> PASS (exit 10, the earlier smoke named)
+
+== S3. E176's real session ended 10 minutes ago (the 40-minute gate)
+REFUSED: 10 minutes since E176's session end (2026-11-06 03:39:47 PST): E181 needs a rested card, at least 40 (the runbook's gate)
+[s11_a3_launch_v2_e181] STOP: e181 refused on the box: REFUSED: 10 minutes since E176's session end (2026-11-06 03:39:47 PST): E181 needs a rested card, at least 40 (the runbook's gate)
+-> PASS (exit 10, E176's session end named)
+
+== S4. the note-2 defect fixed: dry sessions' ends 10 minutes ago are skipped; the real end 3 h ago decides
+rest: 180 minutes since E176's session end (2026-11-06 00:49:48 PST; dry sessions and blocks that opened no device skipped)
+LAUNCHED e181 2026-11-06 03:49:53 PST (gates: latest start 2026-11-06 23:58 PST, end gate 2026-11-06 23:59 PST)
+-> PASS (launched; the rest read 180 minutes from E176's real end)
+
+== S5. a real session end 50 minutes ago: A7-4's hour
+REFUSED: 50 minutes since E176's session end (2026-11-06 02:59:54 PST): A7-4's plan asks for an hour; to launch anyway, run again with --under-an-hour
+[s11_a3_launch_v2_e181] STOP: e181 refused on the box: REFUSED: 50 minutes since E176's session end (2026-11-06 02:59:54 PST): A7-4's plan asks for an hour; to launch anyway, run again with --under-an-hour
+departure: --under-an-hour: 50 minutes since E176's session end (A7-4's plan asks for an hour; the gate's 40 holds)
+-> PASS (refused without the flag; launched with it, the departure logged)
+
+== S6. at 12:05 PST by the desk test's clock: the cool-hour plan
+[s11_a3_launch_v2_e181] STOP: it is 1205 PST: A6's and A7's cool-hour plan asks for a launch before 12:00 PST; to launch anyway, run again with --after-noon (a stated departure from the plan)
+-> PASS (refused without --after-noon; past the check with it, logged)
+
+== S7. FAULT 7: a real block with no session end 25 minutes ago (killed), after a real end 3 h ago
+note: E176's last real session block has no 'session end': counted as ended at 2026-11-06 03:25:06 PST
+REFUSED: 25 minutes since E176's last real session line (its block has no session end: counted as ended at its last line) (2026-11-06 03:25:06 PST): E181 needs a rested card, at least 40 (the runbook's gate)
+rest: 180 minutes since E176's session end (2026-11-06 00:50:06 PST; dry sessions skipped)
+LAUNCHED e181 2026-11-06 03:50:13 PST (gates: latest start 2026-11-06 23:58 PST, end gate 2026-11-06 23:59 PST)
+-> PASS (v2 refused, the unended block counted at its last line; v1 launched on the end 3 h ago (the fault))
+
+== S8. a block that ended at a session gate (no device opened) 10 minutes ago, after a real end 3 h ago
+rest: 180 minutes since E176's session end (2026-11-06 00:50:13 PST; dry sessions and blocks that opened no device skipped)
+LAUNCHED e181 2026-11-06 03:50:19 PST (gates: latest start 2026-11-06 23:58 PST, end gate 2026-11-06 23:59 PST)
+-> PASS (the gate block skipped; launched on the real end 3 h ago)
+
+== H1. step 12's start window on a stand-in hwmon tree (A6-5)
+HOST-WINDOW start: nvme temp1 38.850 C; coretemp 2-9 mean 33.000 (8 sensors) C; written to build/e181/host-start.out
+[s12_a3_host_e181] HOST-WINDOW start: nvme temp1 38.850 C; coretemp 2-9 mean 33.000 (8 sensors) C; written to build/e181/host-start.out (A6-5: reported, never a gate)
+-> PASS (read: the NVMe composite and coretemp 2-9; another hwmon left out; host-start.out on the box)
+
+== H2. step 12's end window
+-> PASS (host-end.out on the box)
+
+== H3. the stand-in hwmon tree named without RB_DESKTEST=1: ignored (the dry listing shows the box's own /sys/class/hwmon, 10 s apart)
+    | ACT=start; HW=/sys/class/hwmon; EVERY=10
+-> PASS (the box's own sysfs and the 10 s spacing, the stand-ins ignored)
+
+== C1. a good collection (the check finished and covers every launch; the score after the gates, rc 0)
+[s22_collect_v2_e181] E181 collected and scored: docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3 (scored-m11.json, scored-m11.md, scored-m11-lines.jsonl, written after the gates; A9's arm and A6-5's host readings reported beside)
+-> PASS (C1)
+
+== C2. no check file (the check of C crashed)
+CCHECK-MISSING docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/ccheck/ccheck-all.json: no file (ccheck.py writes its --out only when the check runs to its end)
+[s22_collect_v2_e181] STOP: E181's check of C did not finish (the CCHECK- lines above): nothing is scored. Read its ccheck output, remove what the collector wrote, then collect again
+-> PASS (C2)
+   scored files in the data directory after C2: 0
+
+== C3. a failed copy inside the collector
+[s22_collect_v2_e181] STOP: a copy inside the collector failed (rsync e181 rc=23): docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3 holds a partial copy; remove docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3, then run this step again
+-> PASS (C3)
+   scored files in the data directory after C3: 0
+
+== C4. the scorer not rc 0 (the stand-in scorer wrote its files first; the step names them)
+[s22_collect_v2_e181] STOP: M11's scorer did not read rc 0: read the output above (the gates passed; the collection stands; scored files left: scored-m11.json scored-m11.md scored-m11-lines.jsonl)
+-> PASS (C4)
+
+== C5. a check file from an earlier try (backdated)
+CCHECK-STALE docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/ccheck/ccheck-all.json: written 2026-11-05 00:01:00 PST, before this step began: an earlier collection's file, not this one's
+[s22_collect_v2_e181] STOP: E181's check of C did not finish (the CCHECK- lines above): nothing is scored. Read its ccheck output, remove what the collector wrote, then collect again
+-> PASS (C5)
+   scored files in the data directory after C5: 0
+
+== C6. a desk path in a scored file
+HIT docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/scored-m11.md: the forbidden path <scratch>/tree (1 times)
+HIT docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/scored-m11.md: this user's home (1 times)
+HIT docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/scored-m11.md: a Mac home path (1 times)
+-> PASS (C6)
+
+== C7. the stand-ins named without RB_DESKTEST=1
+[s22_collect_v2_e181] STOP: E181_COLLECT and E181_SCORE are desk-test stand-ins, read only with RB_DESKTEST=1: unset them
+-> PASS (exit 10)
+   scored files in the data directory after C7: 0
+
+== C8. the measured pass carries no C log, the smoke's is checked
+MISSING-CLOG p18120: its marks record 5 launch(es) and no C log with a line was collected (ccheck/c-log-p18120.jsonl)
+cclaunch: 1 pass(es) with a C log read against their marks; 1 problem(s): STOP
+[s22_collect_v2_e181] STOP: E181's check of C does not cover the launches its passes' marks record (the MISSING-/NO-LAUNCH/COUNT-/ORPHAN lines above): nothing is scored. Find the C log on the box (read-only), remove what the collector wrote, then collect again
+-> PASS (C8)
+   scored files in the data directory after C8: 0
+
+== C9. a short check: the measured pass's last process one launch short
+COUNT-SHORT p18120: the check read 14 launch(es) in its log, the marks record 15 in 5 process(es); 1 process(es) differ (process 5 at t_start_ms 1793900640000: records 3, checked 2)
+cclaunch: 2 pass(es) with a C log read against their marks; 1 problem(s): STOP
+[s22_collect_v2_e181] STOP: E181's check of C does not cover the launches its passes' marks record (the MISSING-/NO-LAUNCH/COUNT-/ORPHAN lines above): nothing is scored. Find the C log on the box (read-only), remove what the collector wrote, then collect again
+-> PASS (C9)
+   scored files in the data directory after C9: 0
+
+== C10. the smoke's marks show launches and it carries no C log
+MISSING-CLOG p18101: its marks record 2 launch(es) and no C log with a line was collected (ccheck/c-log-p18101.jsonl)
+cclaunch: 1 pass(es) with a C log read against their marks; 1 problem(s): STOP
+[s22_collect_v2_e181] STOP: E181's check of C does not cover the launches its passes' marks record (the MISSING-/NO-LAUNCH/COUNT-/ORPHAN lines above): nothing is scored. Find the C log on the box (read-only), remove what the collector wrote, then collect again
+-> PASS (C10)
+   scored files in the data directory after C10: 0
+
+== C11. the smoke ran no launch and carries no C log (not required)
+NOT-REQUIRED p18101: its marks record no launch, so it carries no C log
+-> PASS (C11)
+
+== C12. a checked launch outside every launch mark's window
+ORPHAN p18120: 1 checked launch(es) fall outside every launch mark's window
+cclaunch: 2 pass(es) with a C log read against their marks; 1 problem(s): STOP
+[s22_collect_v2_e181] STOP: E181's check of C does not cover the launches its passes' marks record (the MISSING-/NO-LAUNCH/COUNT-/ORPHAN lines above): nothing is scored. Find the C log on the box (read-only), remove what the collector wrote, then collect again
+-> PASS (C12)
+   scored files in the data directory after C12: 0
+
+== C13. the measured pass ran no launch with its gate passed
+NO-LAUNCH p18120: its marks record no launch: no hold ran, so nothing is scored (read the session log: the start gate?)
+cclaunch: 1 pass(es) with a C log read against their marks; 1 problem(s): STOP
+[s22_collect_v2_e181] STOP: E181's check of C does not cover the launches its passes' marks record (the MISSING-/NO-LAUNCH/COUNT-/ORPHAN lines above): nothing is scored. Find the C log on the box (read-only), remove what the collector wrote, then collect again
+-> PASS (C13)
+   scored files in the data directory after C13: 0
+
+== C14. the measured pass's C log empty
+MISSING-CLOG p18120: its marks record 5 launch(es) and no C log with a line was collected (ccheck/c-log-p18120.jsonl)
+cclaunch: 1 pass(es) with a C log read against their marks; 1 problem(s): STOP
+[s22_collect_v2_e181] STOP: E181's check of C does not cover the launches its passes' marks record (the MISSING-/NO-LAUNCH/COUNT-/ORPHAN lines above): nothing is scored. Find the C log on the box (read-only), remove what the collector wrote, then collect again
+-> PASS (C14)
+   scored files in the data directory after C14: 0
+
+== C15. a launch mark without records
+COUNT-UNREAD p18120: 1 launch mark(s) carry no integer records, so the launches they hold are not known
+cclaunch: 2 pass(es) with a C log read against their marks; 1 problem(s): STOP
+[s22_collect_v2_e181] STOP: E181's check of C does not cover the launches its passes' marks record (the MISSING-/NO-LAUNCH/COUNT-/ORPHAN lines above): nothing is scored. Find the C log on the box (read-only), remove what the collector wrote, then collect again
+-> PASS (C15)
+   scored files in the data directory after C15: 0
+
+== C16. a listed file that differs: 16, before any box call
+[s22_collect_v2_e181] STOP: a file of tools/claims-v3/e181/rb/SHA256SUMS-rb-e181 differs from its committed hash (the FAILED lines above): nothing was collected
+-> PASS (exit 16, no box call, the list named)
+   scored files in the data directory after C16: 0
+
+== C17. G0-REFUSED: the measured pass's start gate refused
+G0-REFUSED p18120: its start_gate mark did not pass (desk test: the start gate (G0-A6 with A8-4): room 54.200 C > 53.9 C): no hold ran: nothing to score
+[s22_collect_v2_e181] STOP: G0-REFUSED p18120: its start_gate mark did not pass (desk test: the start gate (G0-A6 with A8-4): room 54.200 C > 53.9 C): no hold ran: nothing to score. Nothing is scored, and no scored file was written; docs/reports/data/2026-11-0
+-> PASS (C17)
+   scored files in the data directory after C17: 0
+
+== C18. F0-STOPPED: A6-1 ended the session before the smoke's first launch
+F0-STOPPED p18101: A6-1's floor mark did not pass (F0 54.200 C > 53.9 C): the session ended before the smoke's first launch, and no measured pass ran: nothing to score
+[s22_collect_v2_e181] STOP: F0-STOPPED p18101: A6-1's floor mark did not pass (F0 54.200 C > 53.9 C): the session ended before the smoke's first launch, and no measured pass ran: nothing to score. Nothing is scored, and no scored file was written; docs/reports
+-> PASS (C18)
+   scored files in the data directory after C18: 0
+
+== C19. the fault-2 fix of note 2: a gate stops the step (COUNT-SHORT) before the scorer, so no scored file exists
+COUNT-SHORT p18120: the check read 14 launch(es) in its log, the marks record 15 in 5 process(es); 1 process(es) differ (process 5 at t_start_ms 1793900640000: records 3, checked 2)
+cclaunch: 2 pass(es) with a C log read against their marks; 1 problem(s): STOP
+[s22_collect_v2_e181] STOP: E181's check of C does not cover the launches its passes' marks record (the MISSING-/NO-LAUNCH/COUNT-/ORPHAN lines above): nothing is scored. Find the C log on the box (read-only), remove what the collector wrote, then collect again
+-> PASS (C19)
+   scored files in the data directory after C19: 0
+
+== C20. duplicate t_start_ms in the measured pass's launch marks
+COUNT-DUP p18120: 1 launch mark(s) share a t_start_ms with another, so the rows cannot be matched to them one for one
+cclaunch: 2 pass(es) with a C log read against their marks; 1 problem(s): STOP
+[s22_collect_v2_e181] STOP: E181's check of C does not cover the launches its passes' marks record (the MISSING-/NO-LAUNCH/COUNT-/ORPHAN lines above): nothing is scored. Find the C log on the box (read-only), remove what the collector wrote, then collect again
+-> PASS (C20)
+   scored files in the data directory after C20: 0
+
+== C21. SMOKE-STOPPED: the session's last block says the smoke or its gate failed; no measured pass
+[s22_collect_v2_e181] STOP: SMOKE-STOPPED: the session's last block says the smoke or its gate failed, so no measured pass ran: nothing to score; docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3 is the stop's evidence (logs/session.log, logs/smoke-gat
+-> PASS (C21)
+   scored files in the data directory after C21: 0
+
+== C22. STOP-FILE: a STOP file before the measured pass
+[s22_collect_v2_e181] STOP: STOP-FILE: the session's last block says a STOP file stopped it before the measured pass: nothing to score; docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3 is the stop's evidence
+-> PASS (C22)
+   scored files in the data directory after C22: 0
+
+== C23. NO-DEVICE: the session ended at a session gate, no device opened
+[s22_collect_v2_e181] STOP: NO-DEVICE: the session's last block ended at a session gate with no device opened (2026-11-06 09:00:00 PST no new card session after 2026-11-06 08:00:00 PST: no device opened): nothing to score
+-> PASS (C23)
+   scored files in the data directory after C23: 0
+
+== C24. no session log collected
+[s22_collect_v2_e181] STOP: NO-SESSION-LOG: the box held no build/e181/session.log, so no real session of E181 ran there: nothing to score; docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3 is the evidence
+-> PASS (C24)
+   scored files in the data directory after C24: 0
+
+== U1. E166's committed session (4 Nov), renamed to E181's passes
+COUNT-OK p18120: 6644 checked launches in 493 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+COUNT-OK p18101: 48 checked launches in 6 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+cclaunch: 2 pass(es) with a C log read against their marks; 0 problem(s): OK
+-> PASS (U1)
+
+== U2. E154's committed session (3 Nov), renamed
+COUNT-OK p18120: 6288 checked launches in 474 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+COUNT-OK p18101: 58 checked launches in 7 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+cclaunch: 2 pass(es) with a C log read against their marks; 0 problem(s): OK
+-> PASS (U2)
+
+== E1. the real collector v2 and M11's scorer v4: both C logs on the box, and step 12's two host windows in build/e181/
+stand-in box passes from 2026-11-03-e154-heat-e2e-aifoundry3 (p15401 -> p18101, p15420 -> p18120, M11's names; F0 50.987 C) -> aifoundry3/aifoundry/build; faults none
+ccheck rc=0 ({"launches": 6346, "PASS": 6346, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 2379, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "int8": {"PASS": 3967, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "bro
+GATES-PASSED: the smoke's floor mark True; p18120's start gate True
+CCHECK-DONE docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/ccheck/ccheck-all.json: 6346 launches, PASS 6346, ROUNDING 0, UNMODELLED 0, FAIL 0, all_pass True
+COUNT-OK p18120: 6288 checked launches in 474 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+COUNT-OK p18101: 58 checked launches in 7 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+score rc=0
+[s22_collect_v2_e181] E181 collected and scored: docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3 (scored-m11.json, scored-m11.md, scored-m11-lines.jsonl, written after the gates; A9's arm and A6-5's host readings reported beside)
+stand-in calls: 3 rsync, 3 ssh (the stand-in box only)
+-> PASS (E1)
+   scored-m11.json: scorer tools/claims-v3/m11/score_m11_v4.py; E176 excluded: the start gate did not pass (pre-A6 G0 (that kit's own line)): room 53.582 C > 53.0 C; holds scored 5 of 5; start gate A6-2 with A8-4 passed True; FL5(c) PASS (diff -0.006392410125267867); HM-LG GAIN; label post hoc:; lines file stages [1, 2, 3, 4, 5, 6]; staging left False
+   A9's arm: SCORED (reported); H_E's delta e 0.131 C; smoke named p18101; A6-5 host: True; A6-3 edge False
+   A6-5's host windows (collected from build/e181/): NVMe composite 38.85 -> 39.85 C, coretemp 2-9 33.0 -> 34.5 C
+E1-SCORED-CHECK PASS
+
+== E2. the real collector v2: the measured pass's C log absent on the box
+stand-in box passes from 2026-11-03-e154-heat-e2e-aifoundry3 (p15401 -> p18101, p15420 -> p18120, M11's names; F0 50.987 C) -> aifoundry3/aifoundry/build; faults ['no-measured-clog']
+ccheck rc=0 ({"launches": 58, "PASS": 58, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 28, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "int8": {"PASS": 30, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_reco
+GATES-PASSED: the smoke's floor mark True; p18120's start gate True
+CCHECK-DONE docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/ccheck/ccheck-all.json: 58 launches, PASS 58, ROUNDING 0, UNMODELLED 0, FAIL 0, all_pass True
+MISSING-CLOG p18120: its marks record 474 launch(es) and no C log with a line was collected (ccheck/c-log-p18120.jsonl)
+COUNT-OK p18101: 58 checked launches in 7 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+cclaunch: 1 pass(es) with a C log read against their marks; 1 problem(s): STOP
+[s22_collect_v2_e181] STOP: E181's check of C does not cover the launches its passes' marks record (the MISSING-/NO-LAUNCH/COUNT-/ORPHAN lines above): nothing is scored. Find the C log on the box (read-only), remove what the collector wrote
+stand-in calls: 3 rsync, 3 ssh (the stand-in box only)
+-> PASS (E2)
+   scored files after E2: 0
+
+== E3. FAULT 2: A6-1 as the real box leaves it (no e181/ directory, step 10's dry smoke gate in build/e181/): s22 v2
+stand-in box passes from 2026-11-03-e154-heat-e2e-aifoundry3 (p15401 -> p18101, p15420 -> p18120, M11's names; F0 50.987 C) -> aifoundry3/aifoundry/build; faults ['f0-stopped', 'measured-nolaunch', 'smoke-nolaunch']
+absent on the box: build/claims-v3/aifoundry3/e181/ (no such pass directory: nothing to copy; step 22 reads the session's gates)
+not this session's: logs/smoke-gate.json -> logs/not-this-session/ (no 'smoke gate rc=' in the session's last block)
+F0-STOPPED p18101: A6-1's floor mark did not pass (F0 54.200 C > 53.9 C): the session ended before the smoke's first launch, and no measured pass ran: nothing to score
+[s22_collect_v2_e181] STOP: F0-STOPPED p18101: A6-1's floor mark did not pass (F0 54.200 C > 53.9 C): the session ended before the smoke's first launch, and no measured pass ran: nothing to score. Nothing is scored, and no scored file was w
+stand-in calls: 2 rsync, 3 ssh (the stand-in box only)
+-> PASS (E3)
+   absent directory named, the dry smoke gate set aside, the real config kept: 1; scored files: 0
+-> PASS (E3's collection)
+
+== E3v1. the same box with step 22 v1 (the fault)
+stand-in box passes from 2026-11-03-e154-heat-e2e-aifoundry3 (p15401 -> p18101, p15420 -> p18120, M11's names; F0 50.987 C) -> aifoundry3/aifoundry/build; faults ['f0-stopped', 'measured-nolaunch', 'smoke-nolaunch']
+[s22_collect_e181] STOP: a copy inside collect_e181.sh failed (rsync e181 rc=23): docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3 holds a partial copy; remove docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3, then run thi
+stand-in calls: 3 rsync, 1 ssh (the stand-in box only)
+-> PASS (E3v1)
+
+== E4. G0-REFUSED with the real collector v2
+stand-in box passes from 2026-11-03-e154-heat-e2e-aifoundry3 (p15401 -> p18101, p15420 -> p18120, M11's names; F0 50.987 C) -> aifoundry3/aifoundry/build; faults ['g0-refused', 'measured-nolaunch']
+ccheck rc=0 ({"launches": 58, "PASS": 58, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 28, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "int8": {"PASS": 30, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_reco
+G0-REFUSED p18120: its start_gate mark did not pass (desk test: the start gate (G0-A6 with A8-4): room 54.200 C > 53.9 C): no hold ran: nothing to score
+[s22_collect_v2_e181] STOP: G0-REFUSED p18120: its start_gate mark did not pass (desk test: the start gate (G0-A6 with A8-4): room 54.200 C > 53.9 C): no hold ran: nothing to score. Nothing is scored, and no scored file was written; docs/re
+stand-in calls: 3 rsync, 3 ssh (the stand-in box only)
+-> PASS (E4)
+   scored files after E4: 0
+
+== E5. FAULT 5: another login in a pass directory: s22 v2's scrub in every directory
+stand-in box passes from 2026-11-03-e154-heat-e2e-aifoundry3 (p15401 -> p18101, p15420 -> p18120, M11's names; F0 50.987 C) -> aifoundry3/aifoundry/build; faults none
+ccheck rc=0 ({"launches": 6346, "PASS": 6346, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 2379, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "int8": {"PASS": 3967, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "bro
+GATES-PASSED: the smoke's floor mark True; p18120's start gate True
+CCHECK-DONE docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/ccheck/ccheck-all.json: 6346 launches, PASS 6346, ROUNDING 0, UNMODELLED 0, FAIL 0, all_pass True
+COUNT-OK p18120: 6288 checked launches in 474 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+COUNT-OK p18101: 58 checked launches in 7 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+LOGIN-LEFT aifoundry3/e181/p18120/ (rc 1): scrub check: run.log:31: another account's holder line is left scrub check: FAIL (1 left)
+SCRUB-ALL LOGIN-LEFT: 8 directories and 4 .gz file(s) unpacked, each read by E164's scrub --check
+[s22_collect_v2_e181] STOP: another login is in docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3 (the LOGIN-LEFT lines above): scrub that directory (scrub_etwho_e164.py without --check) before any commit
+stand-in calls: 3 rsync, 3 ssh (the stand-in box only)
+-> PASS (E5)
+   the pass directory named: 1; scored files: 0
+-> PASS (E5's scrub)
+
+== E5v1. the same with step 22 v1 (it reads logs/ only, and scores: the fault)
+stand-in box passes from 2026-11-03-e154-heat-e2e-aifoundry3 (p15401 -> p18101, p15420 -> p18120, M11's names; F0 50.987 C) -> aifoundry3/aifoundry/build; faults none
+ccheck rc=0 ({"launches": 6346, "PASS": 6346, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 2379, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "int8": {"PASS": 3967, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "bro
+GATES-PASSED: the smoke's floor mark True; p18120's start gate True
+CCHECK-DONE docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/ccheck/ccheck-all.json: 6346 launches, PASS 6346, ROUNDING 0, UNMODELLED 0, FAIL 0, all_pass True
+COUNT-OK p18120: 6288 checked launches in 474 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+COUNT-OK p18101: 58 checked launches in 7 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+score rc=0
+[s22_collect_e181] E181 collected and scored: docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3 (scored-m11.json, scored-m11.md, scored-m11-lines.jsonl, written after the gates)
+stand-in calls: 3 rsync, 1 ssh (the stand-in box only)
+-> PASS (E5v1)
+
+== E6. FAULT 4: a start_gate mark that lies reaches the score: v4 refuses before any file
+stand-in box passes from 2026-11-03-e154-heat-e2e-aifoundry3 (p15401 -> p18101, p15420 -> p18120, M11's names; F0 50.987 C) -> aifoundry3/aifoundry/build; faults none
+ccheck rc=0 ({"launches": 6346, "PASS": 6346, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 2379, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "int8": {"PASS": 3967, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "bro
+GATES-PASSED: the smoke's floor mark True; p18120's start gate True
+CCHECK-DONE docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/ccheck/ccheck-all.json: 6346 launches, PASS 6346, ROUNDING 0, UNMODELLED 0, FAIL 0, all_pass True
+COUNT-OK p18120: 6288 checked launches in 474 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+COUNT-OK p18101: 58 checked launches in 7 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+score rc=1
+[s22_collect_v2_e181] STOP: M11's scorer did not read rc 0: read the output above (the gates passed; the collection stands; scored files left: none)
+stand-in calls: 3 rsync, 3 ssh (the stand-in box only)
+-> PASS (E6)
+   scored files after E6: 0
+-> PASS (E6: no scored file left)
+
+== E6v1. the same with step 22 v1 and M11's scorer v3 (the fault: the lines file left behind)
+stand-in box passes from 2026-11-03-e154-heat-e2e-aifoundry3 (p15401 -> p18101, p15420 -> p18120, M11's names; F0 50.987 C) -> aifoundry3/aifoundry/build; faults none
+ccheck rc=0 ({"launches": 6346, "PASS": 6346, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 2379, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "int8": {"PASS": 3967, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "bro
+GATES-PASSED: the smoke's floor mark True; p18120's start gate True
+CCHECK-DONE docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/ccheck/ccheck-all.json: 6346 launches, PASS 6346, ROUNDING 0, UNMODELLED 0, FAIL 0, all_pass True
+COUNT-OK p18120: 6288 checked launches in 474 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+COUNT-OK p18101: 58 checked launches in 7 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+score rc=1
+[s22_collect_e181] STOP: M11's scorer did not read rc 0: read the output above (the gates passed; the collection stands)
+stand-in calls: 3 rsync, 1 ssh (the stand-in box only)
+-> PASS (E6v1)
+   scored-m11-lines.jsonl left by v3: 1
+-> PASS (E6v1: v3 left the lines file (the fault))
+
+== O1. ours_live's pattern names E181's, E178's and E180's processes (and q143k's and k6's), and none of the note's new names
+named: 14 of 14; unrelated commands matched: 0 of 12
+-> PASS (ours_live's names)
+
+network calls by the stand-ins: to the stand-in boxes only; elapsed 197 s
+SELFTEST-RB-E181-V2 PASS
