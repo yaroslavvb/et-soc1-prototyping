@@ -1,0 +1,7 @@
+{"experiment": "kit v4 one-kernel option (dry pass only)", "request": "Q145(b)", "card": "aifoundry2", "kind": "dry", "order_seed": 145,
+ "note": "the dry pass of the one-kernel option on run_hpl.py's toy card: three bursts of E173's shape (one 6 s process each, a 1.5 s window opening, a 2 s tail), built-in kinds only, so no tile file is read; never a card",
+ "tools": {"heater": "build/sparsity_t2/host/sparsity_host", "kernel": "build/sparsity_t2/kernel/sparsity.elf", "ettelem": "build/ettelem-hpl/ettelem"},
+ "sampler": {"every_ms": 100}, "safety": {"abs_stop_c": 76, "board_cap_w": 85, "cap_consecutive": 3}, "caps": {"max_card_min": 5},
+ "blocks": [{"name": "BURST", "title": "three bursts, one process each", "start": {"mode": "cool", "max_c": 99, "max_wait_s": 5},
+             "launch": {"seconds": 6, "budget": 7.5, "processes": 1}, "tail_s": 2,
+             "runs": [{"type": "fp32", "values": "zeros"}, {"type": "int8", "values": "zeros"}, {"type": "fp16", "values": "randn"}]}]}

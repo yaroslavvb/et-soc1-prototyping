@@ -1,0 +1,232 @@
+kit v4 one-kernel option, dry pass on the Intel (Python 3.9.6): run_hpl.py --dry rc 0 in 31 s (v3 form); run_hpl_onekernel.py --dry rc 0 in 23 s (one kernel per burst); the toy card, no device, no lock, no ssh
+the v4 session's install record (onekernel.json):
+  watcher tools/claims-v3/hpl/watcher_q142s.py 3f37482d48c7 installed True
+  onekernel 8813ce7bed2f installed True run_hpl 68493295504f t600_s 5.5 iters {'fp16': 6043956, 'fp32': 6043956, 'int8': 10377358}
+the v3 session's end: {"t_end_ms": 1793962398046, "exit": 0, "reason": "done", "card_min": 0.5}
+the v4 session's end: {"t_end_ms": 1793962421637, "exit": 0, "reason": "done", "card_min": 0.4}
+selftest_onekernel.py --dry: rc 0
+{
+ "T6_launch_records": {
+  "ok": true,
+  "v3": [
+   {
+    "gaps": 12,
+    "gaps_in_window": 10,
+    "iters": [
+     732600
+    ],
+    "launch_numbers": [
+     null
+    ],
+    "launches": 13,
+    "ok": true,
+    "process_s": 6.592,
+    "rc": 0,
+    "run": "BURST-00-fp32-zeros-1024-r1",
+    "wall_s": 6.5
+   },
+   {
+    "gaps": 12,
+    "gaps_in_window": 10,
+    "iters": [
+     732600
+    ],
+    "launch_numbers": [
+     null
+    ],
+    "launches": 13,
+    "ok": true,
+    "process_s": 6.602,
+    "rc": 0,
+    "run": "BURST-01-int8-zeros-1024-r1",
+    "wall_s": 6.5
+   },
+   {
+    "gaps": 12,
+    "gaps_in_window": 10,
+    "iters": [
+     549450,
+     641025
+    ],
+    "launch_numbers": [
+     null
+    ],
+    "launches": 13,
+    "ok": true,
+    "process_s": 6.605,
+    "rc": 0,
+    "run": "BURST-02-fp16-randn-1024-r1",
+    "wall_s": 6.5
+   }
+  ],
+  "v4": [
+   {
+    "gaps": 0,
+    "gaps_in_window": 0,
+    "iters": [
+     6043956
+    ],
+    "launch_numbers": [
+     -1
+    ],
+    "launches": 1,
+    "ok": true,
+    "process_s": 4.153,
+    "rc": 0,
+    "run": "BURST-00-fp32-zeros-1024-r1",
+    "wall_s": 4.152
+   },
+   {
+    "gaps": 0,
+    "gaps_in_window": 0,
+    "iters": [
+     10377358
+    ],
+    "launch_numbers": [
+     -1
+    ],
+    "launches": 1,
+    "ok": true,
+    "process_s": 4.149,
+    "rc": 0,
+    "run": "BURST-01-int8-zeros-1024-r1",
+    "wall_s": 4.149
+   },
+   {
+    "gaps": 0,
+    "gaps_in_window": 0,
+    "iters": [
+     6043956
+    ],
+    "launch_numbers": [
+     -1
+    ],
+    "launches": 1,
+    "ok": true,
+    "process_s": 4.785,
+    "rc": 0,
+    "run": "BURST-02-fp16-randn-1024-r1",
+    "wall_s": 4.785
+   }
+  ]
+ },
+ "T7_reduction": {
+  "ok": true,
+  "v3": [
+   {
+    "burst_ghz_kernel": 0.8,
+    "burst_mhz": 800,
+    "burst_n": 48,
+    "burst_rate": 12.291,
+    "burst_w": 33.88,
+    "run": "BURST-00-fp32-zeros-1024-r1",
+    "v4_burst_rate_from_clock": 12.291,
+    "v4_gaps_in_window": 10,
+    "v4_launches_in_window": 11,
+    "v4_one_kernel": false,
+    "v4_whole_kernel_ghz": 0.8,
+    "v4_work_s": 6.592
+   },
+   {
+    "burst_ghz_kernel": 0.8,
+    "burst_mhz": 800,
+    "burst_n": 47,
+    "burst_rate": 49.164,
+    "burst_w": 34.44,
+    "run": "BURST-01-int8-zeros-1024-r1",
+    "v4_burst_rate_from_clock": 84.414,
+    "v4_gaps_in_window": 10,
+    "v4_launches_in_window": 11,
+    "v4_one_kernel": false,
+    "v4_whole_kernel_ghz": 0.8,
+    "v4_work_s": 6.602
+   },
+   {
+    "burst_ghz_kernel": 0.65,
+    "burst_mhz": 652.1,
+    "burst_n": 48,
+    "burst_rate": 19.973,
+    "burst_w": 63.07,
+    "run": "BURST-02-fp16-randn-1024-r1",
+    "v4_burst_rate_from_clock": 20.037,
+    "v4_gaps_in_window": 10,
+    "v4_launches_in_window": 11,
+    "v4_one_kernel": false,
+    "v4_whole_kernel_ghz": 0.6615,
+    "v4_work_s": 6.605
+   }
+  ],
+  "v4": [
+   {
+    "burst_ghz_kernel": null,
+    "burst_mhz": 800,
+    "burst_n": 25,
+    "burst_rate": null,
+    "burst_w": 33.66,
+    "run": "BURST-00-fp32-zeros-1024-r1",
+    "v4_burst_rate_from_clock": 12.291,
+    "v4_gaps_in_window": 0,
+    "v4_launches_in_window": 1,
+    "v4_one_kernel": true,
+    "v4_whole_kernel_ghz": 0.7947,
+    "v4_work_s": 4.153
+   },
+   {
+    "burst_ghz_kernel": null,
+    "burst_mhz": 800,
+    "burst_n": 25,
+    "burst_rate": null,
+    "burst_w": 34.11,
+    "run": "BURST-01-int8-zeros-1024-r1",
+    "v4_burst_rate_from_clock": 84.414,
+    "v4_gaps_in_window": 0,
+    "v4_launches_in_window": 1,
+    "v4_one_kernel": true,
+    "v4_whole_kernel_ghz": 0.7953,
+    "v4_work_s": 4.149
+   },
+   {
+    "burst_ghz_kernel": null,
+    "burst_mhz": 684.4,
+    "burst_n": 32,
+    "burst_rate": null,
+    "burst_w": 66.83,
+    "run": "BURST-02-fp16-randn-1024-r1",
+    "v4_burst_rate_from_clock": 21.03,
+    "v4_gaps_in_window": 0,
+    "v4_launches_in_window": 1,
+    "v4_one_kernel": true,
+    "v4_whole_kernel_ghz": 0.6897,
+    "v4_work_s": 4.785
+   }
+  ]
+ },
+ "T8_dipterm_exposure": {
+  "ok": true,
+  "v3": {
+   "band": [
+    0,
+    1
+   ],
+   "eligible_gaps": 29,
+   "expected": {
+    "delta_0.0_ms": 0.003,
+    "delta_0.7_ms": 0.023,
+    "delta_1.2_ms": 0.038
+   }
+  },
+  "v4": {
+   "band": [
+    0,
+    0
+   ],
+   "eligible_gaps": 0,
+   "expected": {
+    "delta_0.0_ms": 0.0,
+    "delta_0.7_ms": 0.0,
+    "delta_1.2_ms": 0.0
+   }
+  }
+ },
+ "ok": true
+}
