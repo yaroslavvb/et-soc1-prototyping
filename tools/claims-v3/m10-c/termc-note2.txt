@@ -1,0 +1,80 @@
+Q148(c), REGISTRATION.md dated note 2. Labels: the split is a REPORTED arm (never a verdict, never the entry rule); its power is
+design arithmetic; the tie, the accumulator levels and the df readings are POST HOC.
+
+E178'S 27 FLOAT KINDS BY BYTES (sha256 against the term's fit kinds):
+  bridge fp16.neg_ones    = fit kind fp16.neg_ones: 2 rows in 2 runs (role bridge)
+  bridge fp16.ones        = fit kind fp16.ones: 10 rows in 10 runs (role grid)
+  bridge fp32.neg_ones    = fit kind fp32.neg_ones: 2 rows in 2 runs (role bridge)
+  bridge fp32.ones        = fit kind fp32.ones: 9 rows in 9 runs (role grid)
+  new fp32 (12): e178_a4_b5, e178_a5_b4, e178_uf, e178_v0p5, e178_v1p5, e178_v2, e178_v3, e178_v4, e178_v5, e178_v6, e178_v7, e178_v8
+  new fp16 (11): e178_a4_b5, e178_a5_b4, e178_v0p5, e178_v1p5, e178_v2, e178_v3, e178_v4, e178_v5, e178_v6, e178_v7, e178_v8
+  committed .bin files at 6b5ad913: 15231; any of the 23 outside tools/claims-v3/e178/: none
+  M10's float rows holding a new kind's bytes: none
+  E178 kinds with a host built-in's bytes: {'fp16.ones': 'ones', 'fp32.e178_v2': 'twos', 'fp32.ones': 'ones'}
+  'twos' named in committed data (git grep -w):
+    docs/reports/data/2026-09-20-power-aifoundry2: E7 and E8, this chip: aifoundry2, the fp32 TensorFMA, 20 Sep 2026 (superseded by E9)
+    docs/reports/data/2026-10-31-q130-literature: text: Horace He's list of kinds
+    docs/reports/data/2026-11-01-q132-governor-desk: text: Horace He's A100 gist numbers
+    docs/reports/data/2026-11-02-e135-a100-kinds: E135, an A100 GPU
+    docs/reports/data/2026-11-02-e149-gpu-model-check: E149, an A100 GPU
+    docs/reports/data/2026-11-02-e150-second-gpu: E150, a second GPU
+    docs/reports/data/2026-11-03-e162-gpu-row-k: E162, GPUs
+    E7: 28 launches of fp32 fma, 0.583-0.600 GHz, [1024] minions (docs/reports/data/2026-09-20-power-aifoundry2/horace-runs.jsonl)
+    E8: 28 launches of fp32 fma, 0.584-0.599 GHz, [1024] minions (docs/reports/data/2026-09-20-power-aifoundry2/horace2-runs.jsonl)
+
+THE SPLIT'S POWER (design arithmetic, 12 fp32 + 11 fp16 kinds) beside the registered rule's (14 + 13, reproduced exactly):
+  L_true 1.0 x L, sigma_common 0.00 W: rule enters 0.5560, WORSE 0.0000 | split C1 BETTER with C2 0.4850, WORSE 0.0000
+  L_true 1.0 x L, sigma_common 0.02 W: rule enters 0.4875, WORSE 0.0155 | split C1 BETTER with C2 0.4660, WORSE 0.0160
+  L_true 1.0 x L, sigma_common 0.04 W: rule enters 0.5320, WORSE 0.1000 | split C1 BETTER with C2 0.4875, WORSE 0.1130
+  L_true 0.5 x L, sigma_common 0.00 W: rule enters 0.0370, WORSE 0.0370 | split C1 BETTER with C2 0.0330, WORSE 0.0390
+  L_true 0.5 x L, sigma_common 0.02 W: rule enters 0.1585, WORSE 0.1385 | split C1 BETTER with C2 0.1340, WORSE 0.1440
+  L_true 0.5 x L, sigma_common 0.04 W: rule enters 0.2615, WORSE 0.2780 | split C1 BETTER with C2 0.2575, WORSE 0.2480
+  L_true 0.0 x L, sigma_common 0.00 W: rule enters 0.0005, WORSE 0.5925 | split C1 BETTER with C2 0.0000, WORSE 0.5440
+  L_true 0.0 x L, sigma_common 0.02 W: rule enters 0.0085, WORSE 0.5390 | split C1 BETTER with C2 0.0060, WORSE 0.5145
+  L_true 0.0 x L, sigma_common 0.04 W: rule enters 0.1020, WORSE 0.5030 | split C1 BETTER with C2 0.0980, WORSE 0.5230
+  the README's 'at most 0.10' is 0.102 (no level, sigma_common 0.04 W)
+
+A STEP THAT ADDS 0 (by bytes; E178's arithmetic: fp32 round to nearest even with DAZ/FTZ, fp16 the 2-term update):
+  fit kinds that cannot move the accumulator: fp16.c_cancel, fp16.nz_both, fp32.dn1_both, fp32.nz_both (of 11)
+    fp16.c_cancel    A 3c003c00 B bc003c00: step 0.0
+    fp16.nz_both     A 80008000 B 80008000: step 0.0
+    fp32.dn1_both    A 00000001 B 00000001: step 0.0
+    fp32.nz_both     A 80000000 B 80000000: step 0.0
+  E178 kinds that cannot move the accumulator: fp32.e178_uf (of 27)
+    fp32.e178_uf     A 1fc00000 B 1fc00000: step 0.0
+
+POST HOC: THE TIE AGAINST fp32.pi's BYTES AS A KIND ROW (Q139(u)'s footing):
+  E78 (aifoundry3): tie 8.3557 (se 0.0280), fp32.pi 8.4637 (se 0.0442): kind - tie +0.1080 W, z 2.06; paired over 6 passes +0.1080 +- 0.0545 W (t 1.98)
+  E82 (aifoundry1-c1): tie 8.0634 (se 0.0373), fp32.pi 8.0998 (se 0.0447): kind - tie +0.0364 W, z 0.63; paired over 7 passes +0.0364 +- 0.0504 W (t 0.72)
+  pooled: independent +0.0760 +- 0.0389 W; paired +0.0694 +- 0.0370 W; the tie is 32 of pi's 34 rows
+  fp32 L on aifoundry3 with pooled_independent: +0.0475 W (+0.0121 from the registered +0.0354)
+  fp32 L on aifoundry3 with pooled_paired: +0.0464 W (+0.0110 from the registered +0.0354)
+  fp32 L on aifoundry3 with pi_from_its_kind_rows_only: +0.0450 W (+0.0096 from the registered +0.0354)
+
+POST HOC: THE LEVEL WITHOUT THE KINDS WHOSE ACCUMULATOR CANNOT MOVE (registered estimator and jackknife on what is left):
+  fp32: registered +0.0354 [-0.0533, +0.1241] (6 kinds, 32 runs); without fp32.dn1_both, fp32.nz_both +0.0266 [-0.0738, +0.1270] (4 kinds, 32 runs); those kinds alone +0.0530
+        fp32.dn1_both alone left out: +0.0301
+        fp32.nz_both alone left out: +0.0337
+  fp16: registered +0.0703 [+0.0241, +0.1164] (5 kinds, 13 runs); without fp16.c_cancel, fp16.nz_both +0.0550 [-0.0025, +0.1125] (3 kinds, 11 runs); those kinds alone +0.0931
+        fp16.c_cancel alone left out: +0.0578
+        fp16.nz_both alone left out: +0.0713
+
+THE JACKKNIFE'S DEGREES OF FREEDOM (a reported caveat; the registered interval stands):
+  fp32: registered df 31 (t 2.0395): [-0.0533, +0.1241] W; runs moving L by over 0.005 W: 5 (E78|a3 -0.0194, E82|c1 +0.0202, E93|c1 +0.0206, E102|c1 +0.0181, E121|a3 -0.0205); the other runs at most 0.0017 W; Kish effective runs 5.04
+        at df 4 (t 2.7764): [-0.0854, +0.1562] W, holds 0: True
+  fp16: registered df 12 (t 2.1788): [+0.0241, +0.1164] W; runs moving L by over 0.005 W: 6 (E78|a3 -0.0070, E82|c1 +0.0080, E88|c1 -0.0104, E93|c1 -0.0054, E102|c1 +0.0141, E121|a3 +0.0054); the other runs at most 0.0020 W; Kish effective runs 4.06
+        at df 4 (t 2.7764): [+0.0114, +0.1291] W, holds 0: False
+        at df 5 (t 2.5706): [+0.0158, +0.1247] W, holds 0: False
+
+CHECKS:
+  [1] termc-fit.json sha256 6bea23dba823 = SHA256SUMS' 6bea23dba823; 14 fit kinds re-hashed from their 18 tile paths  OK
+  [2] E178's float kinds by sha256 against the fit's kinds: bridge {'fp16.neg_ones': (2, 2), 'fp16.ones': (10, 10), 'fp32.neg_ones': (2, 2), 'fp32.ones': (9, 9)}; new {'fp32': 12, 'fp16': 11}  OK
+  [3] at 6b5ad913: 15231 committed .bin files (12427 of 2,048 bytes); kinds found outside tools/claims-v3/e178/: ['fp16.neg_ones', 'fp16.ones', 'fp32.neg_ones', 'fp32.ones']; M10's 737 float rows holding an E178 kind's bytes: ['fp16.neg_ones', 'fp16.ones', 'fp32.neg_ones', 'fp32.ones']; M10 float rows with no tile file: 0  OK
+  [4] built-in constant kinds (main.cpp lines present True): E178 kinds with a built-in's bytes {'fp16.ones': 'ones', 'fp32.e178_v2': 'twos', 'fp32.ones': 'ones'}; 'twos' named in 7 data dirs, measured on this chip only in ['2026-09-20-power-aifoundry2']; launches E7 28 (fp32, 0.583-0.600 GHz); E8 28 (fp32, 0.584-0.599 GHz)  OK
+  [5] a step that adds 0 (E178's arithmetic: fp32 DAZ/FTZ, fp16 2-term): fit kinds {'fp32': ['fp32.dn1_both', 'fp32.nz_both'], 'fp16': ['fp16.c_cancel', 'fp16.nz_both']}; E178 kinds ['fp32.e178_uf'] of 27; pairing changes none True  OK
+  [6] E78 and E82: per-pass D of anchor_pi and fp32.pi reproduce items.D.mean and n  OK
+  [7] split on a synthetic session, truth P + L: rule C1 BETTER (passed through unchanged True); split C1 BETTER d -0.0509 W on 23 kinds, C2 True, bridge 4 (want BETTER)  OK
+  [7] split on a synthetic session, truth P    : rule C1 WORSE (passed through unchanged True); split C1 WORSE d +0.0556 W on 23 kinds, C2 False, bridge 4 (want WORSE)  OK
+  [7] one kept pass: rule NOT SCORED, split NOT SCORED  OK
+  [8] t(0.975, 4) 2.776445 (2.776445), t(0.975, 5) 2.570582 (2.570582)  OK
+  SELFTEST PASS
