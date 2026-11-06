@@ -1,0 +1,135 @@
+{
+ "a1_power": "A1 section 2: with no difference E180-H reads POSITIVE 0.02 at 6 passes at every noise level; its half-width is 0.103-0.198 W at 6 passes (0.121-0.232 W at 5), 25-48x the arm (29-56x at 5)",
+ "arm_W": {
+  "4s_above_zeros": 0.02980698673,
+  "5s_above_zeros": 0.0339734562,
+  "5s_minus_4s": 0.004166469466
+ },
+ "card": "aifoundry3",
+ "fragility": "the arm is a near-cancellation: the bubble term, 3x the net (+27.38 fJ against +9.09 fJ), is labelled 'assumed' in the model's ledger ('modelled' in its per-instruction table), and the model gives no band; 10% on the bubble term moves the arm by 30%, 10% on the leakage term by 20%",
+ "inputs": {
+  "m1": {
+   "name": "tools/claims-v3/e180/m1-october-forecast-model-e180.json",
+   "sha256": "83745199c43b2270536bdb1d2d795d8257fe868faa3cb8e649ccc91f6e766d59"
+  },
+  "reduced": {
+   "name": "reduced-e180-v3.json",
+   "sha256": "a914be262c7828799121c36fda6a48e1f911dd24933f0c5c108b1feecb6ecf4e"
+  },
+  "scored": {
+   "name": "scored-e180.json",
+   "sha256": "97b8c17211c3516b85929d6ab2ce7168c69ccc7212708a9a1300190e699badbb"
+  }
+ },
+ "kept_passes": [
+  "18010",
+  "18011",
+  "18012",
+  "18013",
+  "18014",
+  "18015"
+ ],
+ "n": 6,
+ "never": "REPORTED (october-forecast-model, E180's dated notes M1 and M2): read beside E180's verdicts, never one of them; it changes no rule, statistic, threshold or verdict",
+ "readings": {
+  "4s_above_zeros": {
+   "arm_W": 0.02980698673,
+   "d_kind_alone_mean": 10.796855748323345,
+   "half_width": 0.12058082585347785,
+   "hi": 0.14265372737209103,
+   "lo": -0.09850792433486467,
+   "mean": 0.022072901518613186,
+   "n": 6,
+   "statistic": "D(fadd.ps/f_4) - D(fadd.ps/zeros) in each kept pass (the scorer's footing for every kind)",
+   "words": "PASS",
+   "x": [
+    -0.09834539993503277,
+    -0.11659572580092714,
+    0.05254649056069027,
+    0.0766177988605321,
+    0.1903661562553154,
+    0.027848089171101265
+   ]
+  },
+  "5s_above_zeros": {
+   "arm_W": 0.0339734562,
+   "d_kind_alone_mean": 10.823838812923375,
+   "half_width": 0.10926287107010405,
+   "hi": 0.15831883718874729,
+   "lo": -0.06020690495146081,
+   "mean": 0.049055966118643234,
+   "n": 6,
+   "statistic": "D(fadd.ps/f_5) - D(fadd.ps/zeros) in each kept pass (the scorer's footing for every kind)",
+   "words": "PASS",
+   "x": [
+    0.07254807447558242,
+    -0.12832476034542495,
+    0.07976690142360887,
+    0.040177902788656183,
+    0.19390568292599752,
+    0.03626199544343933
+   ]
+  },
+  "H_board": {
+   "arm_W": 0.004166469466,
+   "arm_and_no_difference": "read alike",
+   "bracket_00_00_55": {
+    "W": [
+     0.0040335457976,
+     0.004766917760800001
+    ],
+    "fJ": [
+     8.8,
+     10.4
+    ],
+    "point_W": 0.0044002317792,
+    "point_fJ": 9.6,
+    "same_words_across": true,
+    "words_at_ends": [
+     "PASS",
+     "PASS"
+    ]
+   },
+   "half_width": 0.07730943855173752,
+   "half_width_over_arm": 18.555143433214237,
+   "hi": 0.10429250315176757,
+   "lo": -0.050326373951707484,
+   "mean": 0.026983064600030044,
+   "n": 6,
+   "scorer_verdict": "NOT RESOLVED, SIZE FAIL HIGH",
+   "statistic": "D(fadd.ps/f_5) - D(fadd.ps/f_4) in each kept pass (E180-H's, on the board)",
+   "words": "PASS",
+   "x": [
+    0.1708934744106152,
+    -0.011729034544497807,
+    0.027220410862918598,
+    -0.03643989607187592,
+    0.003539526670682136,
+    0.008413906272338068
+   ],
+   "zero": "NOT RESOLVED",
+   "zero_words": "PASS"
+  },
+  "RA2_rail": {
+   "arm_W": 0.004166469466,
+   "half_width": 0.06126351736272537,
+   "hi": 0.04521493803555728,
+   "lo": -0.07731209668989344,
+   "mean": -0.016048579327168078,
+   "n": 6,
+   "statistic": "R(fadd.ps/f_5) - R(fadd.ps/f_4) in each kept pass with a rail reading (A1's RA2, the net minion rail)",
+   "words": "PASS",
+   "x": [
+    0.04521307628771609,
+    -0.012804478407270281,
+    -0.007188390296933633,
+    -0.06578781903619024,
+    0.04438434455453155,
+    -0.10010820906486195
+   ],
+   "zero": "NOT RESOLVED"
+  }
+ },
+ "status": "READ",
+ "what": "E180's dated note M1's arm, read by arm_m1_e180.py (E180.md.dated-note-M2.md section 1)"
+}
