@@ -1,0 +1,31 @@
+E178 dated note 1: E178-R-int8's power at the scorer's reading (power_r_e178_note1.py). 20,000 draws a case; E178.md section 6's
+noise model, unchanged; aifoundry3's frozen P. The frozen P's tied groups: [['int8.e178_v2', 'int8.e178_v4', 'int8.e178_v8', 'int8.ones'], ['int8.e178_v3', 'int8.e178_v6']]. The scored P breaks them by the measured rate
+(each kind's rate x (1 + N(0, 1.6419e-04)), E171's int8 spread). Both readings on the same draws of D.
+
+(1) The registered grid (power_e178.py: random.Random(17805) a case; truth P or flat; model error 0 or 0.03 W):
+    n 4, sigma1 0.125, model 0.0, truth P: PASS 0.9987 on the frozen P (registered 0.9987, EQUAL), 0.9979 on the scored P
+    n 4, sigma1 0.125, model 0.0, truth flat: PASS 0.0246 on the frozen P (registered 0.0246, EQUAL), 0.0250 on the scored P
+    n 4, sigma1 0.125, model 0.03, truth P: PASS 0.9952 on the frozen P (registered 0.9952, EQUAL), 0.9935 on the scored P
+    n 4, sigma1 0.125, model 0.03, truth flat: PASS 0.0248 on the frozen P (registered 0.0248, EQUAL), 0.0249 on the scored P
+    n 3, sigma1 0.125, model 0.0, truth P: PASS 0.9973 on the frozen P (registered 0.9973, EQUAL), 0.9954 on the scored P
+    n 3, sigma1 0.125, model 0.0, truth flat: PASS 0.0251 on the frozen P (registered 0.0251, EQUAL), 0.0259 on the scored P
+    n 3, sigma1 0.125, model 0.03, truth P: PASS 0.9912 on the frozen P (registered 0.9912, EQUAL), 0.9871 on the scored P
+    n 3, sigma1 0.125, model 0.03, truth flat: PASS 0.0242 on the frozen P (registered 0.0242, EQUAL), 0.0244 on the scored P
+    n 2, sigma1 0.125, model 0.0, truth P: PASS 0.9894 on the frozen P (registered 0.9894, EQUAL), 0.9850 on the scored P
+    n 2, sigma1 0.125, model 0.0, truth flat: PASS 0.0246 on the frozen P (registered 0.0246, EQUAL), 0.0245 on the scored P
+    n 2, sigma1 0.125, model 0.03, truth P: PASS 0.9791 on the frozen P (registered 0.9791, EQUAL), 0.9733 on the scored P
+    n 2, sigma1 0.125, model 0.03, truth flat: PASS 0.0257 on the frozen P (registered 0.0257, EQUAL), 0.0267 on the scored P
+CHECK (1): the frozen-P column equals power-e178.json's E178-R-int8 p_pass in all 36 cases: PASS
+
+(2) A1's alternatives (power_e178_a1.py (A): its truths and seeds; sigma1 0.125, model error 0):
+    P, n 4: PASS 0.9987 on the frozen P (A1 0.9987, EQUAL), 0.9975 on the scored P
+    P, n 3: PASS 0.9969 on the frozen P (A1 0.9969, EQUAL), 0.9951 on the scored P
+    1-bits of the A and B words, at P's spread, n 4: PASS 0.6663 on the frozen P (A1 0.6663, EQUAL), 0.6414 on the scored P
+    1-bits of the A and B words, at P's spread, n 3: PASS 0.6100 on the frozen P (A1 0.6100, EQUAL), 0.5836 on the scored P
+    1-bits of the A and B words, at the bridge's size, n 4: PASS 0.1116 on the frozen P (A1 0.1116, EQUAL), 0.1086 on the scored P
+    1-bits of the A and B words, at the bridge's size, n 3: PASS 0.0972 on the frozen P (A1 0.0972, EQUAL), 0.0936 on the scored P
+    0-bits of the A and B words, at P's spread, n 4: PASS 0.0000 on the frozen P (A1 0.0000, EQUAL), 0.0000 on the scored P
+    0-bits of the A and B words, at P's spread, n 3: PASS 0.0000 on the frozen P (A1 0.0000, EQUAL), 0.0000 on the scored P
+    flat, n 4: PASS 0.0259 on the frozen P (A1 0.0259, EQUAL), 0.0263 on the scored P
+    flat, n 3: PASS 0.0249 on the frozen P (A1 0.0249, EQUAL), 0.0257 on the scored P
+CHECK (2): the frozen-P column equals power-e178-a1.json's (A) R_int8_PASS in all 10 cases: PASS

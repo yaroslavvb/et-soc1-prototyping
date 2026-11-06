@@ -1,0 +1,83 @@
+E178 KIT.md.dated-note-1.md: every check re-run with the note's files in place, on the Intel, one core at nice 10, through the round's
+local slot (Fri 6 Nov 2026, PST), as job 4 of lane kitfix-q146f. A v1 check is compared with its committed log with dates and times
+masked; where only clock readings differ (the window's minutes from now, an epoch, a read latency), the lines are shown.
+
+---- job 4
+== j4 start 2026-11-06 01:45:30 PST HEAD 80b92990
+== the frozen lists and the rebuild checks 01:45:30
+  SHA256SUMS-e178-registration: 76 of 76 OK (want 76)
+  SHA256SUMS-e178-a1: 27 of 27 OK (want 27)
+  SHA256SUMS-e178-kit: 72 of 72 OK (want 72)
+  SHA256SUMS-e178-a2: 17 of 17 OK (want 17)
+  make_e178_kinds: {"check": "PASS", "kinds": 40, "bad": 0}
+  forecast_e178: CHECK PASS
+  plan_e178: CHECK PASS
+  flips_e178_a1: CHECK PASS
+  make_kit_e178: CHECK PASS
+  make_harness_e178: CHECK PASS (84 files)
+  e178_common --verify: {"e178_kinds": 40, "new_tiles": 34, "committed_e78_items": 6, "planned_passes": [17810, 17811, 17812, 17813], "card": "aifoundry3", "runs_per_pass": 76, "smoke": 10, "problems": []}
+
+  check_e178 --desk: HARNESS OK: 80 files match harness-e178.json (desk or dry run: binaries not checked)
+  power_r_e178_note1 --check: CHECK PASS: power-r-e178-note1.json and .txt re-made byte for byte
+== the Intel dry pass (dry_intel_e178.sh, unchanged) 01:49:13
+  rc 0: DRY-INTEL PASS: no device opened (V3_DRY=1 and stub binaries that refuse), no ssh; 18 PASS, 0 FAIL
+  dry-intel: identical to the committed log (dates and times masked)
+== the scorer's self-test (unchanged) 01:50:19
+  rc 0: SELFTEST-SCORE-E178 PASS: 16 of 16 checks
+  selftest-score: identical to the committed log (dates and times masked)
+== the runbook's desk test, v1 (unchanged) 01:51:05
+  rc 0: SELFTEST-RB-E178 PASS: 17 of 17 cases (stand-in ssh and rsync; no lab box reached)
+  selftest-rb: identical to the committed log (dates and times masked)
+== the runbook's desk test, v2 (new) 01:51:23
+  rc 0: SELFTEST-RB-E178-V2 PASS: 31 of 31 cases (stand-in ssh and rsync; no lab box reached)
+== the dry listings, v1 and v2 01:52:41
+  v1 rc 0: dry listing: 0 step(s) exited non-zero
+  dry-listing: DIFFERS from the committed log (dates and times masked):
+57c57
+< [s02_window_e178] (dry listing; a real run would say:) window: last start <date> 15:30 PST, last end <date> 16:30 PST (877 min from now); E178 plans that fit now: E178-FULL E178-TWO
+---
+> [s02_window_e178] (dry listing; a real run would say:) window: last start <date> 15:30 PST, last end <date> 16:30 PST (1049 min from now); E178 plans that fit now: E178-FULL E178-TWO
+67c67
+< RB_GO_EPOCH=1793958761
+---
+> RB_GO_EPOCH=1793948450
+  v2 rc 0: dry listing: 0 step(s) exited non-zero
+== the watcher test (unchanged) 01:52:44
+  rc 0: }
+  selftest-watcher: DIFFERS from the committed log (dates and times masked):
+3,5c3,5
+<   "after": 1793958764354,
+<   "before": 1793958801054,
+<   "new_newest": 1793958764354,
+---
+>   "after": 1793946968736,
+>   "before": 1793947005436,
+>   "new_newest": 1793946968736,
+== the collection's desk tests, v1 (unchanged) and v2 (new) 01:52:44
+  v1 rc 0: SELFTEST-COLLECT-E178 PASS: 5 of 5 checks (build/e178-raw-desktest and build/e178-out removed)
+  selftest-collect: identical to the committed log (dates and times masked)
+  v2 rc 0: SELFTEST-COLLECT-E178-V2 PASS: 6 of 6 checks (build/e178-raw-desktest, build/e178-out, build/e178-dropped-arms and the work directory removed)
+== dmcmd_audit: the kit's four audits as the kit ran them (the runbook's with v1's eleven step files), and two new ones 01:54:36
+  preflight rc 0: dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+  dmcmd-audit: identical to the committed log
+  no exception rc 3: NO-GO tools/claims-v3/lib.sh:154: ettelem sample: STATS_RESET: WRITE not in the allow-list
+  dmcmd-audit-noexcept: identical to the committed log
+  desk rc 0: dmcmd_audit: GO (0 send site(s), 0 disallowed; allow-list: none)
+  dmcmd-audit-desk: identical to the committed log
+  runbook (v1's files) rc 0: dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+  dmcmd-audit-rb: identical to the committed log
+  runbook as it now runs (every rb/ step file, v1 and v2, with k6's steps 5 and 9 and the guard) rc 0: dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+  dated note 1's desk files rc 0: dmcmd_audit: GO (0 send site(s), 0 disallowed; allow-list: none)
+== the box-side files: the firmware-revisions query, the statistics reset, SET and residency (counts; want none outside comments)
+  tools/claims-v3/e178/rb/s03_desk_e178_v2.sh: fw-revisions 0, --reset-ms 0, SET/residency 0
+  tools/claims-v3/e178/rb/s07_a3_sync_e178_v2.sh: fw-revisions 0, --reset-ms 0, SET/residency 0
+  tools/claims-v3/e178/rb/s22_collect_e178_v2.sh: fw-revisions 0, --reset-ms 0, SET/residency 0
+  tools/claims-v3/e178/rb/list_steps_e178_v2.sh: fw-revisions 0, --reset-ms 0, SET/residency 0
+  tools/claims-v3/e178/rb/selftest_rb_e178_v2.sh: fw-revisions 0, --reset-ms 0, SET/residency 0
+  tools/claims-v3/e178/collect_e178_v2.sh: fw-revisions 0, --reset-ms 0, SET/residency 0
+  tools/claims-v3/e178/scrub_tree_e178.py: fw-revisions 0, --reset-ms 0, SET/residency 0
+  tools/claims-v3/e178/sync_paths_e178.py: fw-revisions 0, --reset-ms 0, SET/residency 0
+  tools/claims-v3/e178/power_r_e178_note1.py: fw-revisions 0, --reset-ms 0, SET/residency 0
+  tools/claims-v3/e178/selftest_collect_e178_v2.py: fw-revisions 0, --reset-ms 0, SET/residency 0
+== porcelain: tracked changes 0; untracked under e178: 19; build/e178*: 0; E178 data in any ref: 0
+== j4 end 2026-11-06 01:54:38 PST

@@ -1,0 +1,159 @@
+scratch repository: 1490 files committed
+
+== A. the dry listing (v2 steps): every step exits 0, no ssh or rsync call
+dry listing: 0 step(s) exited non-zero
+-> PASS (A dry listing)
+
+== S2. step 7 v1 on a clean stand-in box: the tree its rsync alone builds (the fault, shown)
+[s07_a3_sync_e178] synced E178's directory, E78's committed one-number tiles and the pinned watcher files to aifoundry3:aifoundry/
+v1's sync alone: 20 non-binary harness files absent (14 card-code files, 6 anchor tiles), 0 differing, 4 binaries absent (the box's own)
+-> PASS (S2 v1's sync alone leaves the 14 card-code files and the 6 anchor tiles to the box)
+
+== S1. step 7 v2 on a clean stand-in box, then the box's own checks in the tree built from its rsync alone (+ 4 stub binaries)
+[s07_a3_sync_v2_e178] the sync list: v1's 10 paths (they hold 60 of the harness's 80 files) and its 20 other files: all 80 of them; its 4 box binaries are checked in step 8
+[s07_a3_sync_v2_e178] synced to aifoundry3:aifoundry/ every file of harness-e178.json but its box binaries (80 files, in 30 paths)
+v2's sync alone: 0 non-binary harness files absent, 0 differing; 4 box binaries absent (never synced: the box builds them)
+-> PASS (S1a step 7 v2 exits 0 with one rsync, and its tree holds all 80 non-binary harness files at their sha256)
+with the four stubs: 84 of 84 harness files present
+  V3_DRY block 17810: rc 0, 78 launches through the C wrapper, 0 stubs executed
+  V3_DRY block 17811: rc 0, 78 launches through the C wrapper, 0 stubs executed
+  V3_DRY block 17812: rc 0, 78 launches through the C wrapper, 0 stubs executed
+  V3_DRY block 17813: rc 0, 78 launches through the C wrapper, 0 stubs executed
+  V3_DRY block 17801: rc 0, 10 launches through the C wrapper, 0 stubs executed
+HARNESS OK: 80 files match harness-e178.json (desk or dry run: binaries not checked)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+{"e178_kinds": 40, "new_tiles": 34, "committed_e78_items": 6, "planned_passes": [17810, 17811, 17812, 17813], "card": "aifoundry3", "runs_per_pass": 76, "smoke": 10, "problems": []}
+
+box-side checks (check, preflight, verify, blocks failing, start gate, import errors): 0.0.0.0.8.0; network calls: 0
+-> PASS (S1b in that tree: HARNESS OK 80, GO, 0 problems, 4 x 78 and 10 launches, start gate 8, imports resolve, no network call)
+
+== S3. step 7 v2 with an uncommitted change in a harness file outside E178's directory (lib.sh)
+[s07_a3_sync_v2_e178] STOP: E178's paths have uncommitted changes: sync only the pushed commit
+-> PASS (S3 exit 16, no rsync)
+
+== S4. step 7 v2 after a COMMITTED change to a harness file outside E178's directory (lib.sh): it differs from the harness
+[s07_a3_sync_v2_e178] STOP: a file the sync would send differs from harness-e178.json (the lines above): nothing is synced; a dated amendment registers it first
+-> PASS (S4 exit 16, no rsync: nothing that differs from the harness is ever sent)
+
+== L1. a login link at the probe
+[s08_a3_preflight_e178] STOP: aifoundry3 printed a login link at the probe (lock file appended; link in RB_LINKS): nothing else was called
+<HH:MM:SS> aifoundry3 needs a check
+-> PASS (L1 exit 11 and one lock line)
+
+== L2. a probe that never answers (bound 2 s)
+[s08_a3_preflight_e178] STOP: aifoundry3 did not answer the probe within 15 s (rc 12): nothing else was called
+-> PASS (L2 exit 12)
+
+== L3. a read past its bound (2 s)
+[s08_a3_preflight_e178] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again
+-> PASS (L3 exit 13)
+
+== L4. a box whose preflight reads wrong (83 files where the harness holds 84)
+[s08_a3_preflight_e178] STOP: aifoundry3's preflight failed: harness (a binary or file differs: a dated amendment first)
+-> PASS (L4 exit 16)
+
+== G1. step 11 with no window recorded
+[s11_a3_session_e178] STOP: no window yet: run s02_window.sh with his go's day, last start and last end
+-> PASS (G1 exit 10)
+
+== G2. step 11 past the round's last start
+[s11_a3_session_e178] STOP: past the round's last start (2026-11-06 00:00 PST): no new card session
+-> PASS (G2 exit 16)
+
+== G3. step 11 in the window (tomorrow's, so the plan's budget fits), but no dry pass ended rc 0 today on the box: refused there
+REFUSED: E178's dry pass (s10_a3_dry_e178.sh) has not ended rc 0 today
+-> PASS (G3 exit 10, no session launched)
+
+== W1. step 20 with no launch offset written today
+[s20_wait_e178] STOP: RUN-UNKNOWN e178: not launched today by the runbook (no log offset written today)
+-> PASS (W1 exit 10)
+
+== C1. a good layout (the smoke and four passes, each checked to its end)
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+[s22_collect_v2_e178] E178 collected and scored: build/e178-out/2026-11-07-e178-one-number-aifoundry3 (the data directory is docs/reports/data/2026-11-07-e178-one-number-aifoundry3/); arms dropped: 0
+-> PASS (C1)
+
+== C2. one pass with no C log
+CCSESSION-MISSING e178/p17811: no C log (c-log.jsonl), though the session must carry one
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+[s22_collect_v2_e178] STOP: E178: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, then collect again
+-> PASS (C2)
+
+== C3. the smoke's C log missing
+CCSESSION-MISSING e178-smoke/p17801: no C log (c-log.jsonl), though the session must carry one
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+[s22_collect_v2_e178] STOP: E178: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, then collect again
+-> PASS (C3)
+
+== C4. a check file written before the step began
+CCHECK-STALE build/e178-out/2026-11-07-e178-one-number-aifoundry3/ccheck/ccheck-all.json: written 2026-11-05 00:01:00 PST, before this step began: an earlier collection's file, not this one's
+CCSESSION-UNFINISHED e178-smoke/p17801: the check of C did not finish (CCHECK-STALE build/e178-out/2026-11-07-e178-one-number-aifoundry3/ccheck/ccheck-all.json)
+CCSESSION-UNFINISHED e178/p17810: the check of C did not finish (CCHECK-STALE build/e178-out/2026-11-07-e178-one-number-aifoundry3/ccheck/ccheck-all.json)
+-> PASS (C4)
+
+== C5. a stop-path test with a launch record
+STOPTEST-LAUNCHED e178-stoptest/p17802: 1 launch file(s) with records and 0 C records (want none)
+[s22_collect_v2_e178] STOP: E178: a session that must carry a C log has no finished check of C (the CCSESSION-, CCHECK- and STOPTEST- lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, then collect again
+-> PASS (C5)
+
+== C6. a desk path in what the collector wrote
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+HIT build/e178-out/2026-11-07-e178-one-number-aifoundry3/results.md: the forbidden path <scratch>/tree (1 times)
+HIT build/e178-out/2026-11-07-e178-one-number-aifoundry3/results.md: this user's home (1 times)
+-> PASS (C6)
+
+== C7. the collector's success line missing, the C gate clean
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+[s22_collect_v2_e178] STOP: score_e178 did not write results.md: read the collector's output above
+-> PASS (C7)
+
+== P1. run_e78's stop line with another account's uid (the ps form) in a pass directory's run.log and STOP
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+scrub-tree: aifoundry3/e178/p17811/STOP:1: another account's uid or login in run_e78's stop list is left
+scrub-tree: aifoundry3/e178/p17811/run.log:2: another account's uid or login in run_e78's stop list is left
+-> PASS (P1)
+-> PASS (P1 the stop came after the desk-path gate, and names the remedy)
+
+== P2. run_e78's stop line with another login (the et-holders form) in the smoke's run.log
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+scrub-tree: aifoundry3/e178-smoke/p17801/run.log:2: another account's uid or login in run_e78's stop list is left
+[s22_collect_v2_e178] STOP: another account's login or uid is left in build/e178-out/2026-11-07-e178-one-number-aifoundry3 (the scrub-tree lines above). Every other gate has passed. Before any commit: python3 -B tools/claims-v3/e178/scrub_tree_e178.py build/e1
+-> PASS (P2)
+
+== P3. E164's others-present form with another login, in a pass directory
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+scrub-tree: aifoundry3/e178/p17811/block.log:1: another account's holders login is left
+[s22_collect_v2_e178] STOP: another account's login or uid is left in build/e178-out/2026-11-07-e178-one-number-aifoundry3 (the scrub-tree lines above). Every other gate has passed. Before any commit: python3 -B tools/claims-v3/e178/scrub_tree_e178.py build/e1
+-> PASS (P3)
+
+== P4. the owner's own et-who holder line in logs/ (box login recorded)
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+[s22_collect_v2_e178] E178 collected and scored: build/e178-out/2026-11-07-e178-one-number-aifoundry3 (the data directory is docs/reports/data/2026-11-07-e178-one-number-aifoundry3/); arms dropped: 0
+-> PASS (P4)
+
+== P5. the same with no box login recorded: every login counts as another's
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+scrub-tree: logs/session.log:1: another account's holder line is left
+[s22_collect_v2_e178] STOP: another account's login or uid is left in build/e178-out/2026-11-07-e178-one-number-aifoundry3 (the scrub-tree lines above). Every other gate has passed. Before any commit: python3 -B tools/claims-v3/e178/scrub_tree_e178.py build/e1
+-> PASS (P5)
+
+== P6. v1's step 22 on P1's layout: the uid passes v1's check (the hole v2 closes)
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+[s22_collect_e178] E178 collected and scored: build/e178-out/2026-11-07-e178-one-number-aifoundry3 (the data directory is docs/reports/data/2026-11-07-e178-one-number-aifoundry3/)
+-> PASS (P6)
+
+== P7. P1's remedy: scrub_tree_e178.py without --check on the output, then --check
+STOPTEST-OK e178-stoptest/p17802: no launch record and no C record
+scrub-tree: aifoundry3/e178/p17811/STOP:1: another account's uid or login in run_e78's stop list is left
+scrub-tree: aifoundry3/e178/p17811/run.log:2: another account's uid or login in run_e78's stop list is left
+-> PASS (P7a)
+scrub-tree: rewrote 2 file(s): aifoundry3/e178/p17811/STOP, aifoundry3/e178/p17811/run.log; 0 other account(s) seen (not named)
+scrub-tree: OK (6 files in 4 directories read, 0 left)
+scrub-tree: OK (6 files in 4 directories read, 0 left)
+-> PASS (P7 rewritten, then 0 left, the two stop lines kept with the uid withheld)
+
+== D1. the collector stand-in set without RB_DESKTEST=1: refused before any call
+[s22_collect_v2_e178] STOP: K6E178_COLLECT is a desk-test stand-in and is read only with RB_DESKTEST=1: unset it (the card day never sets it)
+-> PASS (D1 exit 10, no call)
+
+SELFTEST-RB-E178-V2 PASS: 31 of 31 cases (stand-in ssh and rsync; no lab box reached)
