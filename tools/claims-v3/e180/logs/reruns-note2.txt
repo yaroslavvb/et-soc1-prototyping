@@ -1,0 +1,38 @@
+E180, the kit's dated note 2: every check re-run with the note's files in place (Fri 6 Nov 2026, PST, the Intel, through the round's local
+slot at nice 10, one core, one job at a time; desk only: no card, no lab box, no network call). The tests ran in the lane's own clone of
+the lab repository at 6b5ad913, never in the lab clone, and every v1 or v2 output was compared with its committed log, dates, times and
+scratch paths masked.
+
+The earlier files, unchanged (job 1, 06:05:43-06:08:52):
+  SHA256SUMS-e180-registration 71 of 71 OK; SHA256SUMS-e180-kit 55 of 55 OK; SHA256SUMS-e180-a1 41 of 41 OK; SHA256SUMS-e180-kit-note1 90 of 90 OK
+  plan_e180.py --check CHECK PASS; forecast_e180.py --check CHECK PASS
+  make_harness_e180_v2.py --check CHECK PASS; check_e180_v2.py harness: HARNESS OK: 86 files (v2), identical to logs/harness-check-v2.txt
+  selftest_elf_e180.py (v1's walk): SELFTEST-ELF-E180 PASS 9 of 9, identical to logs/selftest-elf-e180.txt
+  selftest_score_e180.py (v1) under /usr/bin/python3: SELFTEST PASS 12 of 12, identical to logs/selftest-score-e180.txt
+  selftest_score_e180_v2.py: SELFTEST-V2 PASS 7 of 7, identical to logs/selftest-score-e180-v2.txt
+  selftest_others_e180_v2.sh (D1 outside V3_DRY): 13 of 13, identical to logs/selftest-others-e180-v2.txt                06:06:43-59
+  dry_intel_e180_v2.sh, the dry pass: DRY-INTEL-V2 PASS, 24 of 24 checks, 24 PASS lines, 0 FAIL, identical to logs/dry-intel-v2.txt  06:06:59-06:07:45
+  rb/selftest_rb_e180_v2.sh: SELFTEST-RB-E180-V2 PASS 26 of 26; only "scratch repository: 534 files committed" differs from the
+    committed 511 (an environment count: the tree now holds this note's files)
+  rb/list_steps_e180_v2.sh: 0 steps exit non-zero; only the window's "minutes from now" differs                         06:07:45-06:08:28
+  dmcmd_audit, the v2 session's file set (preflight_e180_v2.sh): GO, 32 send sites, 0 disallowed; byte for byte with logs/dmcmd-audit-v2.txt
+  dmcmd_audit, the same without E153's exception: NO-GO only at lib.sh:154, STATS_RESET; byte for byte with logs/dmcmd-audit-noexcept-v2.txt
+  dmcmd_audit, the v2 runbook steps with k6's steps 5 and 9: GO, 11 send sites; byte for byte with logs/dmcmd-audit-rb-v2.txt
+  dmcmd_audit, the v2 and A1 desk files: GO, 0 send sites; byte for byte with logs/dmcmd-audit-desk-v2.txt               06:08:50-52
+  the clone after the tests: 0 tracked files changed
+
+This note's files (job 2, 06:11:15-06:12:26, after step 3 v3's count and the note were in place; job 1 had made the same readings at
+06:05:44-06:08:52):
+  selftest_elf_e180_v2.py: SELFTEST-ELF-E180-V2 PASS 35 of 35 (logs/selftest-elf-e180-v2.txt)                          06:11:15-23
+  selftest_score_e180_v3.py: SELFTEST-V3 PASS 14 of 14 (logs/selftest-score-e180-v3.txt)                               06:11:23-06:12:02
+    and once more as job 3, 06:14:24-06:15:06, after the public-text scan had its made-up symlink target moved to a neutral path:
+    14 of 14 (the committed log is this run's)
+  rb/selftest_rb_e180_v3.sh: SELFTEST-RB-E180-V3 PASS 18 of 18 (logs/selftest-rb-e180-v3.txt)                          06:12:02-23
+  rb/list_steps_e180_v3.sh: the dry listing, 0 steps exit non-zero, no network call (logs/dry-listing-e180-v3.txt)     06:12:23-25
+  dmcmd_audit, note 2's desk files: GO, 0 send sites (logs/dmcmd-audit-desk-v3.txt)
+  dmcmd_audit, the runbook as it now runs (note 2's v3 steps, note 1's v2 box steps, k6's steps 5 and 9, E128's guard): GO, 11 send
+    sites, every one READ, the same 11 as logs/dmcmd-audit-rb-v2.txt (logs/dmcmd-audit-rb-v3.txt)                      06:12:25-26
+
+The lane's development runs before these (the same tests on earlier drafts, no log kept): the walk's test 05:51:05-13 (35 of 35), the
+scorer's 05:58:34-05:59:13 (14 of 14), the runbook's 06:01:05-25 (18 of 18).
+Removed afterwards, by literal path: the dry pass's, the D1 test's and the runbook tests' scratch trees.

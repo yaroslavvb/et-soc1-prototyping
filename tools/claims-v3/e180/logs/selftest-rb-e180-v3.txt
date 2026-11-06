@@ -1,0 +1,69 @@
+scratch repository: 555 files committed
+
+== A. the dry listing (v3 steps): every step exits 0, no ssh or rsync call
+dry listing: 0 step(s) exited non-zero
+-> PASS (A dry listing, with s03 v3 and s22 v3 in it)
+the E1 listing: 20365 lines; the box's v1 walk on it: UNREAD fadd.ps.acc                  mode|PASS fadd.pi.acc                  mode 2|PASS fadd.ps (mode 160, control)  mode 1|
+
+== C1. a good layout: the session, the box's walk line, its listing and BUILD-E180.json
+[s22_collect_v3_e180] E180 collected and scored (kit v3): build/e180-out/2026-11-06-e180-vector-add-aifoundry3 (the data directory is docs/reports/data/2026-11-06-e180-vector-add-aifoundry3/)
+-> PASS (C1)
+build record back: 1 1 3; the listing byte for byte: yes
+-> PASS (C1b BUILD-E180.json and the listing in build/e180-raw/build-record/, three copies)
+
+== B1. the box's walk line says step 6 found no objdump: the listing is not asked for
+[s22_collect_v3_e180] the box's walk line says step 6 found no objdump or no kernel: the listing was never written and is not asked for (A1-7 reads UNREAD, no objdump)
+-> PASS (B1)
+-> PASS (B1b BUILD-E180.json alone came back; no copy named the listing)
+
+== B2. no walk line in the box's logs: the listing is not asked for
+[s22_collect_v3_e180] no walk line from step 6 v2 in the logs: the box's kernel listing is not asked for (A1-7 reads UNREAD, no objdump)
+-> PASS (B2)
+-> PASS (B2b BUILD-E180.json alone came back)
+
+== B3. BUILD-E180.json not on the box
+[s22_collect_v3_e180] STOP: the build record's copy exited non-zero (BUILD-E180.json, or the listing step 6 v2 wrote, did not come back): run this step again; both are A1-7's and the build's evidence
+-> PASS (B3)
+-> PASS (B3b the collector was not called)
+
+== B4. the listing not on the box while the walk line says it was made
+[s22_collect_v3_e180] STOP: the build record's copy exited non-zero (BUILD-E180.json, or the listing step 6 v2 wrote, did not come back): run this step again; both are A1-7's and the build's evidence
+-> PASS (B4)
+-> PASS (B4b the collector was not called)
+
+== C5. a stop-path test with a launch record
+[s22_collect_v3_e180] STOP: STOPTEST-LAUNCHED: the stop-path test recorded a launch (build/e180-raw/e180-stoptest/p18002/runs.jsonl): nothing is scored as registered
+-> PASS (C5)
+
+== C6. a desk path in what the collector wrote
+HIT build/e180-out/2026-11-06-e180-vector-add-aifoundry3/scored-e180.md: the forbidden path <scratch>/tree (1 times)
+HIT build/e180-out/2026-11-06-e180-vector-add-aifoundry3/scored-e180.md: this user's home (1 times)
+HIT build/e180-out/2026-11-06-e180-vector-add-aifoundry3/scored-e180.md: a Mac home path (1 times)
+-> PASS (C6)
+
+== C7. the collector's success line missing
+[s22_collect_v3_e180] STOP: score_e180_v3 did not write scored-e180.md: read the collector's output above
+-> PASS (C7)
+
+== P1. D1's others-present line (another account's uid and login) in a pass directory's run.log
+[s22_collect_v3_e180] STOP: another account's login or uid is left in build/e180-out/2026-11-06-e180-vector-add-aifoundry3 (the scrub-tree lines above). Every other gate has passed. Before any commit: python3 -B tools/claims-v3/e1
+-> PASS (P1)
+
+== P2. the owner's own et-who holder line in logs/
+[s22_collect_v3_e180] E180 collected and scored (kit v3): build/e180-out/2026-11-06-e180-vector-add-aifoundry3 (the data directory is docs/reports/data/2026-11-06-e180-vector-add-aifoundry3/)
+-> PASS (P2)
+
+== D1. the collector stand-in set without RB_DESKTEST=1: refused before any call
+[s22_collect_v3_e180] STOP: K6E180_COLLECT is a desk-test stand-in and is read only with RB_DESKTEST=1: unset it (the card day never sets it)
+-> PASS (D1 exit 10, no call)
+
+== E1. the REAL collector (collect_e180_v3.sh) on the stand-in box: the box's listing in the box's order, its own v1 walk line, a made-up toolchain owner
+check_elf_e180_v2 rc=0: ELFCHECK-E180-V2: 3 PASS, 0 FAIL, 0 UNREAD (of 3; 20359 instructions parsed; A1-7's words, KIT.md.dated-note-2.md section 1)
+PASS fadd.ps.acc                  mode 261: RUN body of 64 ops found once, loop 800581398c-8005813aa6 (72 instructions); the case's own zeroing block 56 bytes before the body, outside the loop, 8 inst
+PASS fadd.pi.acc                  mode 262: RUN body of 64 ops found once, loop 80058137dc-80058138f6 (72 instructions); the case's own zeroing block 56 bytes before the body, outside the loop, 8 inst
+PASS fadd.ps (mode 160, control)  mode 160: RUN body of 64 ops found once, loop 800580baf6-800580bc10 (72 instructions)
+[s22_collect_v3_e180] E180 collected and scored (kit v3): build/e180-out/2026-11-06-e180-vector-add-aifoundry3 (the data directory is docs/reports/data/2026-11-06-e180-vector-add-aifoundry3/)
+the desk walk (261 262): PASS PASS ; the box's own 261: UNREAD; files naming the made-up toolchain owner: 0; the walk label in scored-e180.md: 1
+-> PASS (E1 the real collector: 0; 261 and 262 PASS at the desk; the box's UNREAD kept beside; no owner)
+
+SELFTEST-RB-E180-V3 PASS: 18 of 18 cases (stand-in ssh and rsync; no lab box reached)
