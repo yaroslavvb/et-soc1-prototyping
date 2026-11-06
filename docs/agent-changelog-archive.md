@@ -4,6 +4,13 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-11-01 (Sun, week 44, Q133 records, corrections after verification)** — Section 3's index says E114 re-ran
+  card 0's fp16 and int8 sustained cells on the same card, where it counted them among the replicates on second cards.
+  The changelog keeps its newest 15 entries here, and 14 October's moved verbatim to
+  [`docs/agent-changelog-archive.md`](docs/agent-changelog-archive.md). *Why:* constraint — E114 ran on aifoundry1's
+  card 0, the card E84 ran on, as the Q133 records' verifier found; re-check: the headers of
+  `docs/reports/data/2026-11-01-e114-card0-replicates/README.md` and E84's data README. And preference — the owner's
+  rule of 10 October 2026 for agent instruction files, which keeps the newest 15 entries inline.
 - **2026-11-01 (Sun, week 44, Q133 records)** — Section 3's index reads Q1–Q133 and E1–E118, where it read Q1–Q132
   and E1–E106: E107–E116 are Q133's ten card experiments, E117 the governor move it did not run and E118 the one it
   made on aifoundry1's card 0; E77's line says it was registered and run on 1 November and is recorded after its

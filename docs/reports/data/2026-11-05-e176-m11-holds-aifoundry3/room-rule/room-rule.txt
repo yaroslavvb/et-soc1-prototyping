@@ -1,0 +1,23 @@
+card-a3-e176: the rule for "the room has cooled" (the later-try condition of the task and the readiness critic), written at about 17:35 PST
+on Thu 5 Nov 2026, after G0's refusal (17:27:34, R0's room 53.582 C) and the host baseline window (17:31:50-17:33:50), BEFORE the
+comparison window. Nothing of the card is read for it: the card's own temperature can be read only inside a session (the kit's drivers),
+and no other driver is used.
+
+Facts in view when it was written (all read from files already on the box, or committed):
+- the card's idle floor at the session's start, after 4 h 46 min of rest since E171 (12:35:33): the 34-sensor mean 53.202 C, firmware 52 C,
+  board 23.97 W (the smoke's first sample, 17:21:17). E171's first sample this morning (11:38:27) read firmware 49 C, board 23.52 W; E166's
+  (Wed 14:20:52) 51.838 C / 51 C; E154's (Tue 17:53:00) 50.982 C / 50 C. So the floor itself sits above G0's 53.0 C line this evening: a
+  rest alone cannot pass G0, only a cooler room can;
+- R0 (17:22:34-17:27:34) fell from 54.81 to 53.49 C (the smoke's heat leaving), its last 120 s 53.582 C: about 0.38 C over the floor.
+  So G0 passes only if the floor falls by about 0.6 C or more;
+- the host's own sensors at the baseline: nvme temp1 38.85 C in all 13 samples (1 K steps), acpitz 16.8 / 27.8 (fixed values), coretemp
+  cores 2-9 31.8-34.5 C means (load 0.47).
+
+The rule: the room has cooled if BOTH
+ (1) the host's NVMe composite (hwmon nvme temp1_input), averaged over a 2-minute window of 13 samples ending just before the later try
+     (about 18:05:40-18:07:40), reads at least 0.5 C under the baseline's 38.850 C (that is, at or under 38.350 C: the drive's 1 K step to
+     37.85 C in at least half the samples), and
+ (2) the mean of coretemp temp2-temp9 over that window is no more than 1.0 C above the baseline's (host load unchanged).
+If both hold, and s11 --later-try's own gates pass (40 minutes since E176's 17:27:38 session end, launch by 18:30, 76 minutes before
+20:30), the one later try runs (s05's look, then s11 --later-try). Otherwise no later try runs: E176 is recorded as G0-REFUSED, no hold run,
+nothing scored, never a failed prediction. Never a third try.
