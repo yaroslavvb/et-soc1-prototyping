@@ -1,0 +1,56 @@
+# tools/claims-v3/dmcmd_audit.py (sha256 f29e91ca97705454...) through preflight_e181.sh, Fri 06 Nov 2026 02:05 PST, on the Intel, before any E181 data: E144's table, E154's one reviewed exception (lib.sh:154)
+dmcmd_audit: GO (38 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e89/pvt_sample.py:0: raw ioctl client (reviewed source): GET_MODULE_POWER [READ, pmic none] ok - lines 72
+tools/claims-v3/e89/pvt_sample.py:0: raw ioctl client (reviewed source): GET_SP_STATS [READ, pmic none] ok - lines 72
+tools/claims-v3/e89/pvt_sample.py:0: raw ioctl client (reviewed source): GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - lines 72
+tools/claims-v3/e89/pvt_sample.py:0: raw ioctl client (reviewed source): GET_ASIC_PVT_SAMPLES [READ, pmic none] ok - lines 72
+tools/claims-v3/e89/pvt_sample.py:0: raw ioctl client (reviewed source): GET_ASIC_VOLTAGE [READ, pmic read] ok - lines 72
+tools/claims-v3/e89/pvt_sample.py:0: raw ioctl client (reviewed source): GET_ASIC_FREQUENCIES [READ, pmic none] ok - lines 72
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:139: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/lib.sh:143: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: STATS_RESET [WRITE, pmic write] (conditional) EXCEPTED: STATS_RESET: E181 never calls lib.sh's start_sampler (block_e181.sh starts E89's pvt_sample.py), and ettelem_guard.sh refuses --reset-ms before the device opens - variant ettelem; forwarded arguments may carry --reset-ms
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+note: tools/claims-v3/e181/session_e181.sh:38: 'config' goes through tools/claims-v3/e128/ettelem_guard.sh, which is scanned: its own lines are what it sends
+note: tools/claims-v3/e181/block_e181.sh:100: 'config' goes through tools/claims-v3/e128/ettelem_guard.sh, which is scanned: its own lines are what it sends
+note: tools/claims-v3/e89/pvt_sample.py: reviewed source (sha256 c4e4aed59fbd), taken from the table
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      6 site(s)  ok
+  GET_ASIC_PVT_SAMPLES                       READ         pmic none      1 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      6 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      5 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      7 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      4 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      5 site(s)  ok
+  STATS_RESET                                WRITE        pmic write     1 site(s)  EXCEPTED
+# exit 0

@@ -1,0 +1,169 @@
+{
+ "cases": {
+  "F1 FL5(c): FL1's own law reads PASS; a slope 0.05 W/C above it FAIL; 250 samples NOT SCORED": {
+   "got": {
+    "beside_law": "PASS",
+    "few": "NOT SCORED",
+    "law": [
+     "PASS",
+     -0.0006
+    ],
+    "plus_0.05": [
+     "FAIL",
+     0.0503
+    ]
+   },
+   "pass": true
+  },
+  "F2 the dry run on E97's rests, degrees 52-58, equals the footing law's N1 item 5": {
+   "got": {
+    "committed": [
+     [
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58
+     ],
+     0.3196,
+     0.3106,
+     0.009
+    ],
+    "v3": [
+     [
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58
+     ],
+     0.3196,
+     0.3106,
+     0.009
+    ]
+   },
+   "pass": true
+  },
+  "G1 the gate's constants equal run_e181.py's": {
+   "got": {
+    "EPS_C": 1e-09,
+    "FLOOR_MAX_C": 53.9,
+    "REGISTRATION": {
+     "a1": "f49b7ddd",
+     "a2": "d3d97fe2",
+     "a3": "ed24bc6e",
+     "a4": "0b554d25",
+     "a5": "9b084c66",
+     "a6": "95c75047",
+     "a7": "65a93fbb",
+     "a8": "80b92990",
+     "m11": "3c31a91d"
+    },
+    "RESIDUE_LINE_C": 0.5,
+    "RESIDUE_PRED_C": 0.414,
+    "ROOM_MAX_C": 53.9,
+    "WARM_HI": 53.9
+   },
+   "pass": true
+  },
+  "G2 A8-4's frozen 0.414 C is residue-a8.json's prediction to 3 decimals": {
+   "got": 0.4143642180437668,
+   "pass": true
+  },
+  "G3 gate_reading: pass / room / residue / a lying mark / a looser line / the line's edge": {
+   "got": {
+    "edge_excess": 0.5000000000000016,
+    "edge_recomputed": true,
+    "lie_agrees": false,
+    "loose_agrees": false,
+    "pass": true,
+    "residue": false,
+    "room": false
+   },
+   "pass": true
+  },
+  "P1 the precedence counts A6-A8: now blind, one second before A8 post hoc": {
+   "got": {
+    "before_A8": false,
+    "commits": [
+     "REGISTRATION",
+     "A1",
+     "A2",
+     "A3",
+     "A4",
+     "A5",
+     "A6",
+     "A7",
+     "A8"
+    ],
+    "now": true
+   },
+   "pass": true
+  },
+  "S1 a passing session: scored, its gate read whole, FL5(c) on its rests (both coordinates)": {
+   "got": {
+    "FL5c": "PASS",
+    "FL5c_34": "PASS",
+    "FL5c_diff": -0.0064,
+    "HM_LG": "GAIN",
+    "gate": true,
+    "holds_scored": 5,
+    "label": "post hoc:",
+    "residue_excess_c": 0.0084
+   },
+   "pass": true
+  },
+  "S2 S-RES: refused at the start gate, NOT SCORED, the mark's reason carried": {
+   "got": {
+    "excluded": "the start gate did not pass (A6-2 with A8-4): R0's room - F0 - 0.414 = +0.600 C > 0.5 C (A8-4)",
+    "verdict": "NOT SCORED: no session passed its start gate",
+    "why_has": true
+   },
+   "pass": true
+  },
+  "S2 S-ROOM: refused at the start gate, NOT SCORED, the mark's reason carried": {
+   "got": {
+    "excluded": "the start gate did not pass (A6-2 with A8-4): room 54.000 C > 53.9 C",
+    "verdict": "NOT SCORED: no session passed its start gate",
+    "why_has": true
+   },
+   "pass": true
+  },
+  "S3 a pre-A6 mark (E176's kit form) read as that kit's own G0": {
+   "got": {
+    "agrees": true,
+    "form": "pre-A6 G0 (that kit's own line)",
+    "max_c": 53.0,
+    "passed": true,
+    "recomputed": true,
+    "room_c": 51.409838125191484,
+    "why": "self-test: a pre-A6 G0 mark"
+   },
+   "pass": true
+  },
+  "S4 a start_gate mark whose passed disagrees with its numbers: REFUSED": {
+   "got": "M11 scorer v3 REFUSED: S1:p18120: the start_gate mark's passed=True disagrees with its own numbers ({'form': 'A6-2 with A8-4', 'room_c': 51.409838125191484, 'ma",
+   "pass": true
+  },
+  "S5 E176's committed pass beside it: excluded (pre-A6 G0, 53.582 C > 53.0 C); the passing session scored": {
+   "got": {
+    "E176": "the start gate did not pass (pre-A6 G0 (that kit's own line)): room 53.582 C > 53.0 C",
+    "second": "scored"
+   },
+   "pass": true
+  }
+ },
+ "lists_checked": {
+  "SHA256SUMS-a6": 9,
+  "SHA256SUMS-a7": 7,
+  "SHA256SUMS-a8": 4,
+  "footing-law/SHA256SUMS": 7,
+  "footing-law/SHA256SUMS-note1": 4
+ },
+ "pass": true,
+ "problems": []
+}
