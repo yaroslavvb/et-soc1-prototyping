@@ -1,0 +1,47 @@
+E175, dated note 1: post hoc reads of committed files (posthoc_note1_e175.py)
+results.json sha256 b75d93f8cf5464213a1be8b1b3644f480b15f935364e553ce9d2a78a9aa59d2f
+
+1. THE HOST'S BOOT
+  queue.out: at 2026-11-05 16:42:59 PST the box read 'up 10 days, 2:29': the boot lies in (15:12:59, 15:13:59] PDT on 2026-10-26
+  queue.out: at 2026-11-05 17:25:45 PST the box read 'up 10 days, 3:12': the boot lies in (15:12:45, 15:13:45] PDT on 2026-10-26
+  both reads: the boot lies in (2026-10-26 15:12:59, 15:13:45] PDT = (14:12:59, 14:13:45] PST
+  docs/reports/data/2026-10-27-e69-governor-knob/err_events.txt: the host's boot epoch 2026-10-26T15:13:03.080007-07:00 = 2026-10-26 15:13:03 PDT = 14:13:03 PST = 22:13:03 UTC; inside both reads: True
+  read as PST, '2026-10-26 15:13:03' would be 16:13:03 PDT: inside both reads: False
+
+2. THE FILES (this directory as committed in 9f13d7c3; the note's own three files left out)
+  files 349 (the note's own three files are not counted)
+  as the lane's public-text scan told them apart: text 213 (of them .gz, read through: 139), binary 136
+  the binary files, by folder: {'aifoundry2/s1/sp': 128, 'aifoundry2/smoke/sp': 6, 'aifoundry2/stoptest-board/sp': 1, 'aifoundry2/stoptest-die/sp': 1}; all named *.bin: True
+  E111's login scrub reads (every level; .json .jsonl .log .out .txt): 71 files; it does not read: {'(none)': 2, '.bin': 136, '.gz': 139, '.md': 1}
+  the files with no suffix (name, bytes): [('aifoundry2/stoptest-board/STOP', 0), ('aifoundry2/stoptest-die/STOP', 0)]
+  logs/scrub.txt (the collection's scrub): scrub: 0 mark(s) replaced; files still matching: 0
+
+3. E175-A2-H1: THE PREDICTED RISE IS THE BURST HEAT LAW ON THE PREDICTED BOARD W
+  docs/reports/data/2026-11-04-q140l-a2-session-terms/m9_a2.json (sha256 cc6fbccc4b63fa80...) > burst_heat: k_used_c_per_w 0.14004, P_idle_w 21.5
+  M10: 24 scored tiles, max |frozen rise - k x (predicted board W - P_idle)| = 0.0000 C
+  M9: 24 scored tiles, max |frozen rise - k x (predicted board W - P_idle)| = 0.0000 C
+  e.g. fp16.e5c02_ar_k_t10_5a2fd3: 0.14004 x (64.895 - 21.5) = 6.077 C; frozen 6.077 C; measured 6.75 C; the measured board W (65.11) enters nothing
+  H1 re-read: rms 0.5815 C, mean +0.5280 C over 24 (results.json > score.rules.E175-A2-H1: 0.5815, PASS)
+
+4. E175-A2-G, POST HOC (never a verdict: G FAILS as registered, and no pass is set aside)
+  M10 carried (the primary): as scored, n 16: rms 4.492 MHz, mean +0.121 MHz (outside a line)
+  M9's part (beside): as scored, n 16: rms 4.749 MHz, mean +0.844 MHz (outside a line)
+  results.json > score.rules.E175-A2-G: rms 4.4923, mean 0.1206, FAIL
+  fp32.e5c10_ar_i_t10_adc630: passes [1, 2, 3, 4]: burst MHz [732.7, 734, 708, 730], board W [66.3, 66.94, 62.81, 67.47], kernel MHz [713.9, 724.2, 695.6, 723.2], die starts [56, 56, 56, 56] C; the cell 726.17 MHz; M10 carried 738.44 MHz, M9's part 737.94 MHz
+  without pass 3: the tile's mean over passes [1, 2, 4] = 732.23 MHz; its die starts [56, 56, 56] C are the four's value, and the frozen predictor averages its prediction over the tile's die starts (predict_m9_a2.py's _cell), so the prediction is the scored one
+  M10: without the tile (n 15): rms 3.390, mean +0.947 MHz (within both lines); without only its pass 3 (n 16, the tile at -6.21 MHz): rms 3.631, mean +0.499 MHz (within both lines)
+  M9: without the tile (n 15): rms 3.850, mean +1.685 MHz (within both lines); without only its pass 3 (n 16, the tile at -5.71 MHz): rms 3.991, mean +1.222 MHz (within both lines)
+  stratum S1 (n 4): M10 rms 6.468, mean -4.198 MHz (by_set: 6.468 / -4.198)
+  stratum S2 (n 4): M10 rms 5.662, mean +3.537 MHz (by_set: 5.662 / 3.537)
+  stratum S3 (n 4): M10 rms 2.543, mean +1.593 MHz (by_set: 2.543 / 1.593)
+  stratum S4 (n 4): M10 rms 0.596, mean -0.450 MHz (by_set: 0.596 / -0.45)
+
+5. THE BURSTS DURING THE TWO WAIT POLLERS' OVERLAP (16:49:23-16:52:06 PST)
+  BURST-19-e5-fp32.e5c29_sparse_t19_93b1d2-r1: 16:49:38-16:49:44 PST
+  BURST-20-e5-fp32.e5c11_grid_t21_b0b91b-r1: 16:49:59-16:50:06 PST
+  BURST-21-e5-fp16.e5c04_sparse_t4_3d3b51-r1: 16:50:23-16:50:29 PST
+  BURST-22-e5-fp16.e5c21_bimodal_t5_b1c552-r1: 16:50:42-16:50:49 PST
+  BURST-23-e5-fp16.e5c17_bimodal_t5_a9b319-r1: 16:51:06-16:51:12 PST
+  BURST-24-e5-fp32.e5c12_tdist_t23_f74165-r1: 16:51:30-16:51:36 PST
+  BURST-25-e5-fp32.e5c50_ar_k_t22_16d78b-r1: 16:51:52-16:51:59 PST
+  7 of s1's bursts ran inside the window, in part or whole
