@@ -1,0 +1,307 @@
+{
+ "experiment": "E175",
+ "host": "aifoundry2",
+ "dry": false,
+ "user": "yaroslavvb",
+ "t_start_ms": 1793925836442,
+ "protocol": {
+  "experiment": "E175",
+  "request": "Q143(g)",
+  "card": "aifoundry2",
+  "kind": "stoptest-die",
+  "order_seed": 175,
+  "note": "E175's stop-path test (die): the registered watcher with one stop lowered, so that it must trip on live samples; the session must end with exit 4",
+  "order_source": "none",
+  "order_entries": [],
+  "order": {
+   "source": "tools/claims-v3/e175/predictions-e175.json order",
+   "runs": 145,
+   "passes": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "tools": {
+   "heater": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "ettelem": "build/ettelem-hpl/ettelem"
+  },
+  "ccheck": {
+   "host": "build/ccheck/b/host/sparsity_host",
+   "host_sha256": "eae32a152b8f0861bd2922c500eac217c931c9b464d3274a6bcf346cc986bfd2",
+   "wrapper": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+   "wrapper_sha256": "d00158d454596a8325ff3a7ffa3dff6e80a2e1798516b022009450f63443b9b7",
+   "kernel": "build/sparsity_t2/kernel/sparsity.elf",
+   "kernel_sha256": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+   "log": "<session dir>/c-log.jsonl"
+  },
+  "kinds": "tools/claims-v3/kinds/kinds.json",
+  "pool": "tools/claims-v3/e175/pool/e175.json",
+  "predictions": "tools/claims-v3/e175/predictions-e175.json",
+  "left_out_by_name": [],
+  "sampler": {
+   "every_ms": 100
+  },
+  "safety": {
+   "abs_stop_c": 30,
+   "board_cap_w": 85,
+   "cap_consecutive": 3
+  },
+  "caps": {
+   "max_card_min": 2
+  },
+  "smoke_cycles": {
+   "e5-fp32.anchor7_zeros": 546,
+   "e5-fp16.anchor7_zeros": 546,
+   "e5-int8.anchor7_zeros": 318
+  },
+  "dry_c_w": {
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.anchor7_zeros.bin": 1.394,
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.e5c02_ar_k_t10_5a2fd3.bin": 16.482,
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.e5c03_ar_k_t4_5b8e8e.bin": 20.316,
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.e5c04_sparse_t4_3d3b51.bin": 11.307,
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.e5c06_rowscale_t5_6d624f.bin": 20.836,
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.e5c08_ar_k_t6_6dd6a1.bin": 19.628,
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.e5c16_sparse_t1_9f47b2.bin": 11.45,
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.e5c17_bimodal_t5_a9b319.bin": 20.046,
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.e5c18_lognorm_t2_38ac9e.bin": 22.439,
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.e5c21_bimodal_t5_b1c552.bin": 19.606,
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.e5c24_grid_t1_cdcbf7.bin": 20.283,
+   "file:tools/claims-v3/e175/pool/tiles/fp16/fp16.e5c32_sparse_t2_42cc31.bin": 11.337,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.anchor7_zeros.bin": 1.44,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c05_expo_t8_06469f.bin": 22.457,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c07_expo_t16_2700b2.bin": 19.39,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c09_uniform_t6_dad136.bin": 23.166,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c10_ar_i_t10_adc630.bin": 21.625,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c11_grid_t21_b0b91b.bin": 17.219,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c12_tdist_t23_f74165.bin": 15.855,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c13_bimodal_t22_48a100.bin": 16.518,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c14_ar_k_t22_a444f5.bin": 15.391,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c15_mixture_t21_2c53f6.bin": 17.84,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c22_ar_i_t15_f64ec4.bin": 19.689,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c29_sparse_t19_93b1d2.bin": 13.197,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c50_ar_k_t22_16d78b.bin": 16.088,
+   "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.e5c65_sparse_t5_254f07.bin": 7.035,
+   "file:tools/claims-v3/e175/pool/tiles/int8/int8.anchor7_zeros.bin": 2.123,
+   "file:tools/claims-v3/kinds/tiles/fp16/randn.bin": 23.047,
+   "file:tools/claims-v3/kinds/tiles/int8/full.bin": 8.979
+  },
+  "dma": {
+   "e143_smoke_gap_ms_median": 1.0,
+   "e143_s1_held_s_max": 6.57,
+   "launches": 17,
+   "projected_held_max_s": 7.2,
+   "budget_s": 7.5
+  },
+  "limit_p800_w": 82.0,
+  "peak_lock_w": 82.0,
+  "relation": {
+   "B800": 33.60956684526229,
+   "s800": 1.90517380064275
+  },
+  "admission": {
+   "e5-fp16.anchor7_zeros": {
+    "c_ref_w": 1.394,
+    "fixed_p800_w": 39.842,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp16.e5c02_ar_k_t10_5a2fd3": {
+    "c_ref_w": 16.482,
+    "fixed_p800_w": 68.668,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp16.e5c03_ar_k_t4_5b8e8e": {
+    "c_ref_w": 20.316,
+    "fixed_p800_w": 76.031,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp16.e5c04_sparse_t4_3d3b51": {
+    "c_ref_w": 11.307,
+    "fixed_p800_w": 58.885,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp16.e5c06_rowscale_t5_6d624f": {
+    "c_ref_w": 20.836,
+    "fixed_p800_w": 77.147,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp16.e5c08_ar_k_t6_6dd6a1": {
+    "c_ref_w": 19.628,
+    "fixed_p800_w": 74.709,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp16.e5c16_sparse_t1_9f47b2": {
+    "c_ref_w": 11.45,
+    "fixed_p800_w": 59.121,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp16.e5c17_bimodal_t5_a9b319": {
+    "c_ref_w": 20.046,
+    "fixed_p800_w": 75.613,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp16.e5c18_lognorm_t2_38ac9e": {
+    "c_ref_w": 22.439,
+    "fixed_p800_w": 80.185,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp16.e5c21_bimodal_t5_b1c552": {
+    "c_ref_w": 19.606,
+    "fixed_p800_w": 74.733,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp16.e5c24_grid_t1_cdcbf7": {
+    "c_ref_w": 20.283,
+    "fixed_p800_w": 76.085,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp16.e5c32_sparse_t2_42cc31": {
+    "c_ref_w": 11.337,
+    "fixed_p800_w": 58.92,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.anchor7_zeros": {
+    "c_ref_w": 1.44,
+    "fixed_p800_w": 40.061,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c05_expo_t8_06469f": {
+    "c_ref_w": 22.457,
+    "fixed_p800_w": 80.162,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c07_expo_t16_2700b2": {
+    "c_ref_w": 19.39,
+    "fixed_p800_w": 74.374,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c09_uniform_t6_dad136": {
+    "c_ref_w": 23.166,
+    "fixed_p800_w": 81.527,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c10_ar_i_t10_adc630": {
+    "c_ref_w": 21.625,
+    "fixed_p800_w": 78.612,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c11_grid_t21_b0b91b": {
+    "c_ref_w": 17.219,
+    "fixed_p800_w": 70.187,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c12_tdist_t23_f74165": {
+    "c_ref_w": 15.855,
+    "fixed_p800_w": 67.588,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c13_bimodal_t22_48a100": {
+    "c_ref_w": 16.518,
+    "fixed_p800_w": 68.814,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c14_ar_k_t22_a444f5": {
+    "c_ref_w": 15.391,
+    "fixed_p800_w": 66.674,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c15_mixture_t21_2c53f6": {
+    "c_ref_w": 17.84,
+    "fixed_p800_w": 71.408,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c22_ar_i_t15_f64ec4": {
+    "c_ref_w": 19.689,
+    "fixed_p800_w": 75.009,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c29_sparse_t19_93b1d2": {
+    "c_ref_w": 13.197,
+    "fixed_p800_w": 62.567,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c50_ar_k_t22_16d78b": {
+    "c_ref_w": 16.088,
+    "fixed_p800_w": 67.996,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-fp32.e5c65_sparse_t5_254f07": {
+    "c_ref_w": 7.035,
+    "fixed_p800_w": 50.75,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "e5-int8.anchor7_zeros": {
+    "c_ref_w": 2.123,
+    "fixed_p800_w": 41.196,
+    "what": "the larger of M10's and M9's frozen 95% upper peaks (E175's frozen predictions, the 82 W rule's own value)"
+   },
+   "k-fp16-randn": {
+    "c_ref_w": null,
+    "fixed_p800_w": 80.52,
+    "what": "E165's estimate for E80's tile (predictions-e165.json replicate)"
+   },
+   "k-int8-full": {
+    "c_ref_w": null,
+    "fixed_p800_w": 53.67,
+    "what": "E165's estimate for E80's tile (predictions-e165.json replicate)"
+   },
+   "rest": {
+    "c_ref_w": 0.0,
+    "fixed_p800_w": 33.61,
+    "what": "the idle card (no launch)"
+   }
+  },
+  "blocks": [
+   {
+    "name": "STOPTEST",
+    "title": "the die stop's path on live samples",
+    "default": false,
+    "passes": 1,
+    "shuffle": false,
+    "runs": [
+     {
+      "type": "fp32",
+      "values": "file:tools/claims-v3/e175/pool/tiles/fp32/fp32.anchor7_zeros.bin",
+      "label": "e5-fp32.anchor7_zeros",
+      "start": {
+       "mode": "cool",
+       "max_c": 99,
+       "max_wait_s": 5
+      },
+      "launch": {
+       "seconds": 6,
+       "budget": 7.5,
+       "processes": 1
+      },
+      "tail_s": 4
+     }
+    ]
+   }
+  ]
+ },
+ "runs_planned": [
+  "STOPTEST-00-e5-fp32.anchor7_zeros-r1"
+ ],
+ "sha256": {
+  "heater": "d00158d454596a8325ff3a7ffa3dff6e80a2e1798516b022009450f63443b9b7",
+  "kernel": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24",
+  "ettelem": "77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5",
+  "runner": "68493295504fba5d4e9056b4f7e7387179d555e4157bbae32075b4197f3df227"
+ },
+ "argv": [
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e175/run_e175.py",
+  "--protocol",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/tools/claims-v3/e175/protocol-stoptest-die.json",
+  "--out",
+  "/home/yaroslavvb/claude/et-soc1-prototyping/build/e175/runs/stoptest-die",
+  "--only",
+  "STOPTEST",
+  "--max-card-min",
+  "2.00"
+ ],
+ "git_head": "04159d145b66b852247952d909d186475a62af5e",
+ "git_dirty_hpl": ""
+}
