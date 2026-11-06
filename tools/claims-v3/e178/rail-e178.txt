@@ -1,0 +1,57 @@
+E178, dated note A3: the reported minion-rail arm's frozen forecasts (rail_e178.py freeze; aifoundry3; W). reported beside the board verdicts, never a verdict (E178.md.dated-note-A3.md).
+Rule: for a contrast (a, b) of type t: the registered board forecast (forecast-e178.json, aifoundry3's frozen P and F of a less b) times r_t on the minion rail and times (1 - r_t) off it; r_t = the median, over every item of E171's committed reduction (e171.json items) of type t whose D mean over passes is above 2 W, of Drail.mean / D.mean; not rescaled by the session's s or rates; aifoundry3 only.
+r_t: fp32 0.8096 (26 items, 0.7905-0.8410); fp16 0.8080 (18 items, 0.7986-0.8426); int8 0.8379 (19 items, 0.8233-0.8464). Pool 8's tiles alone (reported, not used): fp32 0.8096 (24); fp16 0.8086 (17); int8 0.8381 (18); no frozen forecast moves by more than 0.000086 W.
+
+contrast                                                           type    board P   board F    rail P    rail F     off P     off F
+E178-H-int8                                                        int8    +0.1862   +0.1877   +0.1560   +0.1573   +0.0302   +0.0304
+E178-H-fp32                                                        fp32    +0.0099   +0.0314   +0.0080   +0.0254   +0.0019   +0.0060
+E178-H-fp16                                                        fp16    +0.0167   +0.0382   +0.0135   +0.0309   +0.0032   +0.0073
+E178-U                                                             fp32    +0.0749   +0.1306   +0.0606   +0.1057   +0.0143   +0.0249
+E178-S-int8                                                        int8    +0.3549   +0.3573   +0.2974   +0.2994   +0.0575   +0.0579
+beside: 127 - neg_ones                                             int8    +0.2422   +0.2441   +0.2029   +0.2045   +0.0393   +0.0396
+beside: 85 - 127                                                   int8    +0.1127   +0.1132   +0.0944   +0.0949   +0.0183   +0.0184
+bridge 0: fp32.neg_ones - fp32.ones                                fp32    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+bridge 1: fp16.neg_ones - fp16.ones                                fp16    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+bridge 2: int8.neg_ones - int8.ones                                int8    +0.1099   +0.1099   +0.0921   +0.0921   +0.0178   +0.0178
+crossed 0: fp32.e178_a4_b5 - fp32.e178_a5_b4                       fp32    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+crossed 1: fp32.e178_a4_b5 - fp32.e178_v4                          fp32    +0.0165   +0.0327   +0.0133   +0.0265   +0.0031   +0.0062
+crossed 2: fp16.e178_a4_b5 - fp16.e178_a5_b4                       fp16    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+crossed 3: fp16.e178_a4_b5 - fp16.e178_v4                          fp16    +0.0180   +0.0343   +0.0146   +0.0277   +0.0035   +0.0066
+crossed 4: int8.e178_a4_b5 - int8.e178_a5_b4                       int8    +0.0157   +0.0157   +0.0132   +0.0132   +0.0025   +0.0025
+crossed 5: int8.e178_a4_b5 - int8.e178_v4                          int8    +0.1248   +0.1233   +0.1046   +0.1033   +0.0202   +0.0200
+equal_flips_different_values 0: fp32.e178_v0p5 - fp32.neg_ones     fp32    -0.0010   -0.0010   -0.0008   -0.0008   -0.0002   -0.0002
+equal_flips_different_values 1: fp32.e178_v0p5 - fp32.ones         fp32    -0.0010   -0.0010   -0.0008   -0.0008   -0.0002   -0.0002
+equal_flips_different_values 2: fp32.e178_v1p5 - fp32.e178_v3      fp32    +0.0010   +0.0010   +0.0008   +0.0008   +0.0002   +0.0002
+equal_flips_different_values 3: fp32.e178_v1p5 - fp32.e178_v6      fp32    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_flips_different_values 4: fp32.e178_v2 - fp32.e178_v8        fp32    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_flips_different_values 5: fp32.e178_v4 - fp32.neg_ones       fp32    +0.0010   +0.0010   +0.0008   +0.0008   +0.0002   +0.0002
+equal_flips_different_values 6: fp32.e178_v4 - fp32.ones           fp32    +0.0010   +0.0010   +0.0008   +0.0008   +0.0002   +0.0002
+equal_flips_different_values 7: fp32.e178_v5 - fp32.e178_v7        fp32    -0.0024   -0.0010   -0.0020   -0.0008   -0.0005   -0.0002
+equal_flips_different_values 8: fp16.e178_v1p5 - fp16.e178_v6      fp16    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_flips_different_values 9: fp16.e178_v2 - fp16.neg_ones       fp16    -0.0010   -0.0010   -0.0008   -0.0008   -0.0002   -0.0002
+equal_flips_different_values 10: fp16.e178_v2 - fp16.ones          fp16    -0.0010   -0.0010   -0.0008   -0.0008   -0.0002   -0.0002
+equal_flips_different_values 11: fp16.e178_v4 - fp16.neg_ones      fp16    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_flips_different_values 12: fp16.e178_v4 - fp16.ones          fp16    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_flips_different_values 13: fp16.e178_v5 - fp16.e178_v7       fp16    +0.0007   +0.0021   +0.0005   +0.0017   +0.0001   +0.0004
+equal_flips_different_values 14: int8.e178_v2 - int8.e178_v4       int8    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_flips_different_values 15: int8.e178_v2 - int8.e178_v8       int8    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_flips_different_values 16: int8.e178_v2 - int8.ones          int8    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_flips_different_values 17: int8.e178_v3 - int8.e178_v6       int8    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_flips_different_values 18: int8.e178_v4 - int8.e178_v8       int8    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_flips_different_values 19: int8.e178_v4 - int8.ones          int8    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_flips_different_values 20: int8.e178_v8 - int8.ones          int8    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+equal_popcount_different_flips 0: fp32.ones - fp32.e178_uf         fp32    +0.0749   +0.1306   +0.0606   +0.1057   +0.0143   +0.0249
+equal_popcount_different_flips 1: fp16.e178_v5 - fp16.e178_v0p5    fp16    +0.0187   +0.0401   +0.0151   +0.0324   +0.0036   +0.0077
+equal_popcount_different_flips 2: fp16.e178_v6 - fp16.e178_v0p5    fp16    +0.0214   +0.0319   +0.0173   +0.0258   +0.0041   +0.0061
+equal_popcount_different_flips 3: fp16.e178_v7 - fp16.ones         fp16    +0.0161   +0.0361   +0.0130   +0.0292   +0.0031   +0.0069
+equal_popcount_different_flips 4: int8.e178_v5 - int8.e178_v3      int8    +0.0545   +0.0531   +0.0457   +0.0445   +0.0088   +0.0086
+equal_popcount_different_flips 5: int8.e178_v5 - int8.e178_v6      int8    +0.0545   +0.0531   +0.0457   +0.0445   +0.0088   +0.0086
+his_4_5 0: fp32.e178_v5 - fp32.e178_v4                             fp32    +0.0099   +0.0314   +0.0080   +0.0254   +0.0019   +0.0060
+his_4_5 1: fp16.e178_v5 - fp16.e178_v4                             fp16    +0.0167   +0.0382   +0.0135   +0.0309   +0.0032   +0.0073
+his_4_5 2: int8.e178_v5 - int8.e178_v4                             int8    +0.1862   +0.1877   +0.1560   +0.1573   +0.0302   +0.0304
+extremes 0: fp32.e178_a5_b4 - fp32.e178_uf                         fp32    +0.0923   +0.1642   +0.0748   +0.1330   +0.0176   +0.0313
+extremes 1: fp32.e178_a4_b5 - fp32.e178_a5_b4                      fp32    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+extremes 2: fp16.e178_v6 - fp16.e178_v0p5                          fp16    +0.0214   +0.0319   +0.0173   +0.0258   +0.0041   +0.0061
+extremes 3: fp16.e178_a4_b5 - fp16.e178_a5_b4                      fp16    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000
+extremes 4: int8.e178_v85 - int8.ones                              int8    +0.4648   +0.4672   +0.3894   +0.3915   +0.0754   +0.0757
+extremes 5: int8.e178_v2 - int8.e178_v4                            int8    +0.0000   +0.0000   +0.0000   +0.0000   +0.0000   +0.0000

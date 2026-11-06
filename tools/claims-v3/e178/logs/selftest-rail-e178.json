@@ -1,0 +1,154 @@
+{
+ "S1 the forecast true on both lines": {
+  "detail": "52 contrasts read; the board column reproduces the scorer's own readings (rules and reported pairs): True; H-int8 rail +0.1564 [+0.1539, +0.1588] W reads above 0, its forecast +0.1560 inside; rail forecasts inside 51 of 52; board = rail + off to 1.0e-17 W; A2-2's identity to 0.0e+00 W",
+  "pass": true
+ },
+ "S2 int8's difference all off the minion rail (the rail flat)": {
+  "detail": "H-int8 rail -0.0002 [-0.0026, +0.0022] spans 0 (forecast above); off +0.1857 reads above 0; E178-C not applied without scored.json",
+  "pass": true
+ },
+ "S3 one kept run without a Drail": {
+  "detail": "named: ['p17811 int8.e178_v5']; H-int8 read on the runs that have one, and flagged (rail_reads_the_board_runs False, board - rail - off up to 0.0020 W in that pass)",
+  "pass": true
+ },
+ "S4 one kept pass": {
+  "detail": "52 of 52 contrasts NOT READ; '1 kept passes, fewer than 2'",
+  "pass": true
+ },
+ "S5 E178-C leaves int8.e178_v85 out": {
+  "detail": "left out: ['E178-S-int8', 'beside: 85 - 127', 'extremes 4: int8.e178_v85 - int8.ones']",
+  "pass": true
+ },
+ "S6 a reduction that is not the runs.csv's session": {
+  "detail": "exit 6",
+  "pass": true
+ },
+ "S7 a scored.json the board column does not reproduce": {
+  "detail": "exit 7",
+  "pass": true
+ },
+ "S8 card 1": {
+  "detail": "exit 2: the arm is frozen for aifoundry3 only",
+  "pass": true
+ },
+ "S9 a changed rail-e178.json": {
+  "detail": "exit 9: one digit of a ratio changed in a copy",
+  "pass": true
+ },
+ "T1 the pinned inputs, and rail-e178.json and .txt rebuilt from them": {
+  "detail": "5 pinned sha256 match: True; rail-e178.json and rail-e178.txt byte for byte: True; 52 contrasts",
+  "pass": true
+ },
+ "T2 the ratios r_t, re-derived": {
+  "detail": "e171.json, items with D > 2 W: fp32 0.809569 (n 26); fp16 0.808013 (n 18); int8 0.837874 (n 19); from E171's runs.csv the same to 0.0e+00; pool 8's tiles alone: fp32 0.809569 (n 24); fp16 0.808627 (n 17); int8 0.838058 (n 18) (largest change of any frozen forecast 0.000086 W)",
+  "pass": true
+ },
+ "T3 the example: int8 5s against 4s": {
+  "detail": "board +0.1862 W, rail +0.1560 W, off +0.0302 W (P); F +0.1877 / +0.1573 / +0.0304 W",
+  "pass": true
+ },
+ "T4 E171's committed session (runs.csv and e171.json) through the reader": {
+  "detail": "runs.csv's per-pass means against e171.json: D to 0.0e+00 W, Drail to 0.0e+00 W over 283 (pass, item) entries; kept runs 335, without a Drail 0; three couples (each anchor against its zeros, 3 complete couples a pass) and three same-format pool-8 anchor pairs: the board column equals score_e178.couple_xs / pair_xs called directly, board = rail + off in every pass, and an independent mean, sd and t give the three intervals to 3.6e-15 W: 6 of 6",
+  "pass": true
+ },
+ "T4_halfwidths_e171_post_hoc": {
+  "fp16.anchor8_randn_a_8c7827 - fp16.anchor8_randn_b_3a0fef": {
+   "board": 0.1420066165070182,
+   "mean": {
+    "board": 0.02978131536645101,
+    "off": -0.0444877048466239,
+    "rail": 0.07426902021307491
+   },
+   "off": 0.4210137775363067,
+   "rail": 0.49194057572058675
+  },
+  "fp16.randn - fp16.zeros": {
+   "board": 0.049489643502954345,
+   "mean": {
+    "board": 22.14139291365913,
+    "off": 4.352104655810456,
+    "rail": 17.789288257848675
+   },
+   "off": 0.11908957079168636,
+   "rail": 0.12364785634080282
+  },
+  "fp32.anchor8_randn_a_989b8a - fp32.anchor8_randn_b_833ac3": {
+   "board": 0.17210369315446877,
+   "mean": {
+    "board": 0.10947103703017991,
+    "off": -0.06837194034747807,
+    "rail": 0.17784297737765797
+   },
+   "off": 0.20902106359184575,
+   "rail": 0.28119862149731545
+  },
+  "fp32.randn - fp32.zeros": {
+   "board": 0.07373003726841201,
+   "mean": {
+    "board": 24.697512095305335,
+    "off": 5.052395913821729,
+    "rail": 19.645116181483605
+   },
+   "off": 0.15274435763880823,
+   "rail": 0.1544089933015673
+  },
+  "int8.anchor8_full_a_4aac84 - int8.anchor8_full_b_935710": {
+   "board": 0.09485137051833545,
+   "mean": {
+    "board": -0.040637282821940346,
+    "off": -0.1168149903129998,
+    "rail": 0.07617770749105945
+   },
+   "off": 0.25573294020453,
+   "rail": 0.24098860970005942
+  },
+  "int8.full - int8.zeros": {
+   "board": 0.09854474446372197,
+   "mean": {
+    "board": 7.111200063815506,
+    "off": 1.1580729676033559,
+    "rail": 5.9531270962121505
+   },
+   "off": 0.11218117932655572,
+   "rail": 0.08332997448097827
+  }
+ },
+ "T5 the anatomy's committed pairs (anatomy.json tensor_pairs; E78 and E82 at Q139(u)'s footing), re-read": {
+  "detail": "12 pairs, every mean and 95% half-width of D and Drail to 3.3e-12 W; int8 -1 against 1: E78 board +0.0686 +- 0.1158, rail +0.0934 +- 0.0178, off -0.0248 +- 0.1177 W; E82 board +0.1162 +- 0.1191, rail +0.1623 +- 0.0634, off -0.0462 +- 0.1075 W",
+  "pass": true
+ },
+ "T5_int8_minus1_against_1": {
+  "E78": {
+   "board": [
+    0.06858160017890864,
+    0.11584400641002228
+   ],
+   "off": [
+    -0.02484053476671762,
+    0.11770110092652881
+   ],
+   "rail": [
+    0.09342213494562628,
+    0.017829180903422812
+   ]
+  },
+  "E82": {
+   "board": [
+    0.11615212581589926,
+    0.11908992438113118
+   ],
+   "off": [
+    -0.04619316539600352,
+    0.10753023293044653
+   ],
+   "rail": [
+    0.16234529121190278,
+    0.06343540651344576
+   ]
+  }
+ },
+ "T7 the kit's collector (collect_e178_v2.sh) on its relabelled real session, then the reader": {
+  "detail": "collector exit 0, arms dropped 0; read with its runs.csv, e178.json and scored.json: kept passes [17810, 17811, 17812, 17813], kept runs 304 (every one with a Drail), runs.csv's per-pass means against e178.json to 0.0e+00 W; E178-C applied (left out []); the board column reproduces scored.json's rules and reported pairs (0 differences); 52 of 52 contrasts read on the rail; board = rail + off to 1.8e-15 W; the command line of A3-4 (repo-relative paths): exit 0, its json equal to the call's True, its md 52 contrast rows, no desk path in either True (E171's tiles under E178's labels: no figure of it is quoted)",
+  "pass": true
+ }
+}
