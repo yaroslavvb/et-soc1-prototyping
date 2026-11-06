@@ -1,0 +1,61 @@
+
+== A. the dry listing: every step exits 0, no ssh or rsync call
+dry listing: 0 step(s) exited non-zero
+-> PASS (A dry listing)
+
+== L1. a login link at the probe
+[s08_a3_build_e180] STOP: aifoundry3 printed a login link at the probe (lock file appended; link in RB_LINKS): nothing else was called
+<HH:MM:SS> aifoundry3 needs a check
+-> PASS (L1 exit 11 and one lock line)
+
+== L2. a probe that never answers (bound 2 s)
+[s08_a3_build_e180] STOP: aifoundry3 did not answer the probe within 15 s (rc 12): nothing else was called
+-> PASS (L2 exit 12)
+
+== L3. a launch past its bound (2 s)
+[s08_a3_build_e180] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again
+-> PASS (L3 exit 13)
+
+== G1. step 11 with no window recorded
+[s11_a3_session_e180] STOP: no window yet: run s02_window.sh with his go's day, last start and last end
+-> PASS (G1 exit 10)
+
+== G2. step 11 past the round's last start
+[s11_a3_session_e180] STOP: past the round's last start (2026-11-06 00:00 PST): no new card session
+-> PASS (G2 exit 16)
+
+== G3. step 11 in the window (tomorrow's, so the plan's budget fits), but no dry pass and no build ended rc 0 today on the box: refused there
+REFUSED: E180's dry pass (s10_a3_dry_e180.sh) has not ended rc 0 today
+-> PASS (G3 exit 10, no session launched)
+
+== W1. step 20 with no launch offset written today
+[s20_wait_e180] STOP: RUN-UNKNOWN e180: not launched today by the runbook (no log offset written today)
+-> PASS (W1 exit 10)
+
+== L4. step 20 on a session whose log reads a failed smoke gate and its end
+GATE-STOPPED e180
+-> PASS (L4 exit 16)
+
+== C1. a good layout (the smoke, six passes and a launch-free stop-path test)
+[s22_collect_e180] E180 collected and scored: build/e180-out/2026-11-07-e180-vector-add-aifoundry3 (the data directory is docs/reports/data/2026-11-07-e180-vector-add-aifoundry3/)
+-> PASS (C1)
+
+== C5. a stop-path test with a launch record
+[s22_collect_e180] STOP: STOPTEST-LAUNCHED: the stop-path test recorded a launch (build/e180-raw/e180-stoptest/p18002/runs.jsonl): nothing is scored as registered
+-> PASS (C5)
+
+== C6. a desk path in what the collector wrote
+HIT build/e180-out/2026-11-07-e180-vector-add-aifoundry3/scored-e180.md: the forbidden path <scratch>/tree (1 times)
+HIT build/e180-out/2026-11-07-e180-vector-add-aifoundry3/scored-e180.md: this user's home (1 times)
+HIT build/e180-out/2026-11-07-e180-vector-add-aifoundry3/scored-e180.md: a Mac home path (1 times)
+-> PASS (C6)
+
+== C7. the collector's success line missing
+[s22_collect_e180] STOP: score_e180 did not write scored-e180.md: read the collector's output above
+-> PASS (C7)
+
+== D1. the collector stand-in set without RB_DESKTEST=1: refused before any call
+[s22_collect_e180] STOP: K6E180_COLLECT is a desk-test stand-in and is read only with RB_DESKTEST=1: unset it (the card day never sets it)
+-> PASS (D1 exit 10, no call)
+
+SELFTEST-RB-E180 PASS: 14 of 14 cases (stand-in ssh and rsync; no lab box reached)

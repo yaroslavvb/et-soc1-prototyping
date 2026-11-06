@@ -1,0 +1,133 @@
+
+== 1a. check_e180.py harness (dry: the box's E180 build is not checked)
+HARNESS OK: 81 files
+-> PASS
+
+== 1b. preflight_e180.sh (dmcmd_audit, E153's one exception)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS
+
+== 1c. build_e180.sh (dry: the appended modes equal acc-modes-e180.inc; nothing built)
+DRY build: python3 -B tools/claims-v3/e180/gen_acc_e180.py --src workloads/enercat --dst build/enercat-e180-src
+DRY build: done (nothing built)
+-> PASS
+
+== 2. block_e180.sh 18010 (pass): expect 47 runs through the E180 host, no stub executed
+block rc=0; runs through the E180 host: 47; stop-path tests: 0; stubs executed: 0
+configs.json (the order the runner ran) equals plan-e180.json's pass 18010: True (47 runs)
+-> PASS
+
+== 2. block_e180.sh 18011 (pass): expect 47 runs through the E180 host, no stub executed
+block rc=0; runs through the E180 host: 47; stop-path tests: 0; stubs executed: 0
+configs.json (the order the runner ran) equals plan-e180.json's pass 18011: True (47 runs)
+-> PASS
+
+== 2. block_e180.sh 18012 (pass): expect 47 runs through the E180 host, no stub executed
+block rc=0; runs through the E180 host: 47; stop-path tests: 0; stubs executed: 0
+configs.json (the order the runner ran) equals plan-e180.json's pass 18012: True (47 runs)
+-> PASS
+
+== 2. block_e180.sh 18013 (pass): expect 47 runs through the E180 host, no stub executed
+block rc=0; runs through the E180 host: 47; stop-path tests: 0; stubs executed: 0
+configs.json (the order the runner ran) equals plan-e180.json's pass 18013: True (47 runs)
+-> PASS
+
+== 2. block_e180.sh 18014 (pass): expect 47 runs through the E180 host, no stub executed
+block rc=0; runs through the E180 host: 47; stop-path tests: 0; stubs executed: 0
+configs.json (the order the runner ran) equals plan-e180.json's pass 18014: True (47 runs)
+-> PASS
+
+== 2. block_e180.sh 18015 (pass): expect 47 runs through the E180 host, no stub executed
+block rc=0; runs through the E180 host: 47; stop-path tests: 0; stubs executed: 0
+configs.json (the order the runner ran) equals plan-e180.json's pass 18015: True (47 runs)
+-> PASS
+
+== 2. block_e180.sh 18001 (smoke): expect 4 runs through the E180 host, no stub executed
+block rc=0; runs through the E180 host: 4; stop-path tests: 0; stubs executed: 0
+-> PASS
+
+== 2. block_e180.sh 18002 (stoptest): expect 0 runs through the E180 host, no stub executed
+block rc=0; runs through the E180 host: 0; stop-path tests: 2; stubs executed: 0
+-> PASS
+
+== 2b. block_e180.sh 18016 (plain): refused before any device call
+preflight: runner --list: pass 18016 is not a planned pass (18010, 18011, 18012, 18013, 18014, 18015)
+-> PASS
+
+== 2b. block_e180.sh 18001 (plain): refused before any device call
+preflight: runner --list: pass 18001 is not a planned pass (18010, 18011, 18012, 18013, 18014, 18015)
+-> PASS
+
+== 2b. block_e180.sh 18010 (card0): refused before any device call
+unknown card aifoundry3-c0
+-> PASS
+
+== 3a. the queue's budget rule on stub blocks (3 s each; an 8 s budget with a 1 s first estimate admits two, stops before the third)
+01:37:07 e180: plan FULL, items 18010 18011 18012; budget 8 s from the anchor (01:37:07), reserve 0 s, last end 01:37:15, deadline 2026-11-06 02:37:07; first estimate 1 s
+01:37:07 p18010 starts at T0+0 s (projected 1 s)
+01:37:10 p18010 rc=0 (3 s)
+01:37:10 p18011 starts at T0+3 s (projected 3 s)
+01:37:13 p18011 rc=0 (3 s)
+01:37:13 budget: stopping before p18012 (now T0+6 s, projected 3 s, would end T0+9 s > T0+8 s or the deadline)
+01:37:13 e180: done, 2 items, at T0+6 s
+-> PASS
+
+== 3b. the queue's deadline rule (a deadline one minute ago: nothing starts)
+01:37:13 e180: plan FULL, items 18010 18011 18012 18013 18014 18015; budget 3000 s from the anchor (01:37:13), reserve 60 s, last end 02:26:13, deadline 2026-11-06 01:36:13; first estimate 420 s
+01:37:13 budget: stopping before p18010 (now T0+0 s, projected 420 s, would end T0+420 s > T0+2940 s or the deadline)
+01:37:13 e180: done, 0 items, at T0+0 s
+-> PASS
+
+== 3c. the queue refuses an unknown plan
+E180_PLAN=SHORT: only FULL or TWO
+-> PASS
+
+== 3c'. FULL's plan: 18010-18015 under a 3,000 s budget; the 420 s first estimate admits the first pass at T0; 3 s stubs run all six
+01:37:14 e180: plan FULL, items 18010 18011 18012 18013 18014 18015; budget 3000 s from the anchor (01:37:13), reserve 60 s, last end 02:26:13, deadline 2026-11-06 03:37:13; first estimate 420 s
+01:37:14 p18010 starts at T0+1 s (projected 420 s)
+-> PASS
+
+== 3d. session_e180.sh start gate: no time gates (exit 8, no device opened)
+session start (budget anchor T0 01:37:32 PST; plan FULL)
+E180_LATEST_START and E180_DEADLINE are required (the round's time gates, set at his go): no device opened
+-> PASS
+
+== 3d. session_e180.sh start gate: after the latest start (exit 8, no device opened)
+session start (budget anchor T0 01:37:32 PST; plan FULL)
+no new card session after 2026-11-06 01:36:32 PST: no device opened
+-> PASS
+
+== 3d. session_e180.sh start gate: unknown plan (exit 8, no device opened)
+session start (budget anchor T0 01:37:33 PST; plan SHORT)
+E180_PLAN=SHORT: only FULL or TWO: no device opened
+-> PASS
+
+== 3e. a whole dry session: the stop-path test, the smoke and the queue's six dry passes; the real session's log is never written
+session start (budget anchor T0 01:37:33 PST; plan FULL)
+files
+dmcmd_audit preflight rc=0 (dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none))
+the Intel: no et-who here)
+DRY config config-session-start.json
+p18002 begins (die 80 C) -> <dry-tree>/build/claims-v3-dry/aifoundry3/e180-stoptest/p18002
+p18002: 0 runs, <= 1 min; idle 600 MHz
+330
+p18002 ends: ok stop-path test: board and die stops fired before a run and in the watcher
+stop-path test rc=0
+p18001 begins (die 80 C) -> <dry-tree>/build/claims-v3-dry/aifoundry3/e180-smoke/p18001
+p18001: 4 runs, <= 1 min; idle 600 MHz
+339
+--pattern fadd.ps --operands zeros --harts 2 --seconds 1 --window 240000000
+--pattern fadd.ps --operands file:tools/claims-v3/e180/images/f_5.bin --harts 2 --seconds 1 --window 240000000
+--pattern fadd.ps.acc --operands file:tools/claims-v3/e180/images/f_5.bin --harts 2 --seconds 1 --window 240000000
+--pattern fadd.pi --operands random --harts 2 --seconds 1 --window 240000000
+p18001 ends: ok dry run (runner rc 0)
+smoke rc=0
+DRY: the smoke gate needs a real smoke; not run
+01:37:40 e180: done, 6 items, at T0+7 s
+-> PASS
+
+== 4. no network call: the ssh, rsync and scp stand-ins were never called
+network calls: 0
+-> PASS
+
+DRY-INTEL PASS: no device opened (V3_DRY=1 and stub binaries that refuse), no ssh
