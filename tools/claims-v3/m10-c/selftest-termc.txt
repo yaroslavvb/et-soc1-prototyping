@@ -1,0 +1,15 @@
+[1] other                              posthoc n  651 bias -0.023589 | here n  651 bias -0.023589  OK
+[1] single B bit, eight base words     posthoc n   26 bias -0.036318 | here n   26 bias -0.036318  OK
+[1] single B bit, one base word        posthoc n   23 bias +0.098336 | here n   23 bias +0.098336  OK
+[1] zero, eight lane words             posthoc n    3 bias +0.078369 | here n    3 bias +0.078369  OK
+[1] zero, one word in every lane       posthoc n   34 bias +0.068845 | here n   34 bias +0.068845  OK
+[2] E78|a3 fp32.pi: d600 vs M10_insample_pred_w |diff| 1.78e-15 W; s 1.00337260 rounds to m10.json's 1.00337  OK
+[2] E82|c1 fp32.pi: d600 vs M10_insample_pred_w |diff| 0.00e+00 W; s 1.00418861 rounds to m10.json's 1.00419  OK
+[3] E178's 27 float kinds: d600 at s = 1 and E171's zeros rate vs forecast-e178.json P_w, both cards: max |diff| 0.00e+00 W  OK
+[4] E178's float tiles by bytes (sha256 as kinds-e178.json): {('fp16', 'zero', 'one'): 13, ('fp32', 'zero', 'one'): 14}  OK
+[5] pi.bin: 2048 bytes, words ['0x40490fdb']; the host's 3.14159274f = 0x40490fdb; sha256 = fp32.pi's rows' 29a5aff802de  OK
+[6] score on a synthetic session, truth P + L: C1 BETTER d -0.0519 W, C2 True, enters True (want BETTER)  OK
+[6] score on a synthetic session, truth P    : C1 WORSE d +0.0563 W, C2 False, enters False (want WORSE)  OK
+[6] score with one kept pass: NOT SCORED  OK
+[7] t(0.975, 12) 2.178813 (2.178813), t(0.975, 31) 2.039513 (2.039513)  OK
+SELFTEST PASS
