@@ -1,0 +1,106 @@
+
+== 1a. check_e178.py (dry: the box binaries are not checked)
+HARNESS OK: 80 files match harness-e178.json (desk or dry run: binaries not checked)
+-> PASS
+
+== 1b. preflight_e178.sh (dmcmd_audit, E153's one exception)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS
+
+== 1c. e178_common.py --verify
+{"e178_kinds": 40, "new_tiles": 34, "committed_e78_items": 6, "planned_passes": [17810, 17811, 17812, 17813], "card": "aifoundry3", "runs_per_pass": 76, "smoke": 10, "problems": []}
+-> PASS
+
+== 2. block_e178.sh 17810 (kinds): expect 76 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 78; heater calls: 0; stubs executed: 0
+2026-11-05T22:57:48 [aifoundry3] E178 pass 17810 (kinds): target 58 preheat 59 quiet 2.0 burnin 2 fma 4 s, die cap 70 C
+E178 runner: pass 17810 (kinds), stops board 65.0 W / die 70.0 C (watcher 65.0 W / 70.0 C)
+22:57:51 [aifoundry3] E78 pass 17810: 76 runs of 47 items (tiers 1,2), about 12 min; launch at 58 C after 59 C, 2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+plan.json (the order run_e78 ran) equals plan-e178.json's pass 17810: True (76 runs)
+-> PASS
+
+== 2. block_e178.sh 17811 (kinds): expect 76 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 78; heater calls: 0; stubs executed: 0
+2026-11-05T22:57:57 [aifoundry3] E178 pass 17811 (kinds): target 58 preheat 59 quiet 2.0 burnin 2 fma 4 s, die cap 70 C
+E178 runner: pass 17811 (kinds), stops board 65.0 W / die 70.0 C (watcher 65.0 W / 70.0 C)
+22:58:00 [aifoundry3] E78 pass 17811: 76 runs of 47 items (tiers 1,2), about 12 min; launch at 58 C after 59 C, 2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+plan.json (the order run_e78 ran) equals plan-e178.json's pass 17811: True (76 runs)
+-> PASS
+
+== 2. block_e178.sh 17812 (kinds): expect 76 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 78; heater calls: 0; stubs executed: 0
+2026-11-05T22:58:05 [aifoundry3] E178 pass 17812 (kinds): target 58 preheat 59 quiet 2.0 burnin 2 fma 4 s, die cap 70 C
+E178 runner: pass 17812 (kinds), stops board 65.0 W / die 70.0 C (watcher 65.0 W / 70.0 C)
+22:58:09 [aifoundry3] E78 pass 17812: 76 runs of 47 items (tiers 1,2), about 12 min; launch at 58 C after 59 C, 2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+plan.json (the order run_e78 ran) equals plan-e178.json's pass 17812: True (76 runs)
+-> PASS
+
+== 2. block_e178.sh 17813 (kinds): expect 76 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 78; heater calls: 0; stubs executed: 0
+2026-11-05T22:58:14 [aifoundry3] E178 pass 17813 (kinds): target 58 preheat 59 quiet 2.0 burnin 2 fma 4 s, die cap 70 C
+E178 runner: pass 17813 (kinds), stops board 65.0 W / die 70.0 C (watcher 65.0 W / 70.0 C)
+22:58:18 [aifoundry3] E78 pass 17813: 76 runs of 47 items (tiers 1,2), about 12 min; launch at 58 C after 59 C, 2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+plan.json (the order run_e78 ran) equals plan-e178.json's pass 17813: True (76 runs)
+-> PASS
+
+== 2. block_e178.sh 17801 (smoke): expect 10 runs, every launch through the C wrapper, no stub executed
+block rc=0; launches through the wrapper: 10; heater calls: 0; stubs executed: 0
+2026-11-05T22:58:23 [aifoundry3] E178 pass 17801 (smoke): target 200 preheat 0 quiet 0.2 burnin 0 fma 2 s, die cap 70 C
+E178 runner: pass 17801 (S), stops board 65.0 W / die 70.0 C (watcher 65.0 W / 70.0 C)
+22:58:26 [aifoundry3] E78 pass 17801: 10 runs of 10 items (tiers 1,2), about 1 min; launch at 200 C after 0 C, 0.2 s quiet; cap 70 C; ET_DEVICES=None; tiles verified against kinds.json
+-> PASS
+
+== 2b. block_e178.sh 17814: a pass the plan does not hold for aifoundry3 is refused before any device call
+preflight: run_e178 --list (tiles against their sha256, the order against plan-e178.json): E178: refusing pass 17814 on aifoundry3: pass 17814 is not planned for aifoundry3 in plan-e178.json 
+preflight: bad run_e178 --list output: 
+-> PASS
+
+== 2b. block_e178.sh 17820: a pass the plan does not hold for aifoundry3 is refused before any device call
+pass 17820 is no E178 pass on aifoundry3 (kinds 17810-17819; the plan holds 17810-17813)
+-> PASS
+
+== 3a. the queue's budget rule on stub blocks (3 s each; an 8 s budget with a 1 s first estimate admits two, stops before the third)
+22:58:32 e178: plan FULL, items 17810 17811 17812; budget 8 s from the anchor (22:58:32), reserve 0 s, last end 22:58:40, deadline 2026-11-05 23:58:32; first estimate kinds 1 s
+22:58:32 p17810 (kinds) starts at T0+0 s (projected 1 s)
+22:58:35 p17810 rc=0 (3 s)
+22:58:35 p17811 (kinds) starts at T0+3 s (projected 3 s)
+22:58:38 p17811 rc=0 (3 s)
+22:58:38 budget: stopping before p17812 (kinds; now T0+6 s, projected 3 s, would end T0+9 s > T0+8 s or the deadline)
+22:58:38 e178: done, 2 items, at T0+6 s
+-> PASS
+
+== 3b. the queue's deadline rule (a deadline one minute ago: nothing starts)
+22:58:38 e178: plan FULL, items 17810 17811 17812 17813; budget 3600 s from the anchor (22:58:38), reserve 60 s, last end 23:57:38, deadline 2026-11-05 22:57:38; first estimate kinds 800 s
+22:58:38 budget: stopping before p17810 (kinds; now T0+0 s, projected 800 s, would end T0+800 s > T0+3540 s or the deadline)
+22:58:38 e178: done, 0 items, at T0+0 s
+-> PASS
+
+== 3c. the queue refuses an unknown plan (SHORT is E171's, not E178's)
+E178_PLAN=SHORT: only FULL or TWO
+-> PASS
+
+== 3c'. FULL's plan: 17810-17813 under a 3,600 s budget; the 800 s first estimate admits the first pass at T0; 3 s stubs run all four, and no fifth is listed
+22:58:38 e178: plan FULL, items 17810 17811 17812 17813; budget 3600 s from the anchor (22:58:38), reserve 60 s, last end 23:57:38, deadline 2026-11-06 00:58:38; first estimate kinds 800 s
+22:58:39 p17810 (kinds) starts at T0+1 s (projected 800 s)
+-> PASS
+
+== 3d. session_e178.sh start gate: no time gates (exit 8, no device opened)
+session start (budget anchor T0 22:58:51 PST; plan FULL)
+E178_LATEST_START and E178_DEADLINE are required (the round's time gates, set at his go): no device opened
+-> PASS
+
+== 3d. session_e178.sh start gate: after the latest start (exit 8, no device opened)
+session start (budget anchor T0 22:58:51 PST; plan FULL)
+no new card session after 2026-11-05 22:57:51 PST: no device opened
+-> PASS
+
+== 3d. session_e178.sh start gate: unknown plan (exit 8, no device opened)
+session start (budget anchor T0 22:58:51 PST; plan SHORT)
+E178_PLAN=SHORT: only FULL or TWO: no device opened
+-> PASS
+
+== 4. no network call: the ssh, rsync and scp stand-ins were never called
+network calls: 0
+-> PASS
+
+DRY-INTEL PASS: no device opened (V3_DRY=1 and stub binaries that refuse), no ssh
