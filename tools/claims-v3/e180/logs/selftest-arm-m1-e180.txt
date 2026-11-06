@@ -1,0 +1,16 @@
+M0 check: the pinned inputs and M1's values: PASS - CHECK PASS: m1-october-forecast-model-e180.json 83745199c43b..., power_e180.py 7db37ef73167...; M1's arm +0.0041665 / +0.0298070 / +0.0339735 W (5s - 4s / 4s / 5s above zeros); the 00:00:55 bracket 8.
+M1 P's truth: the arm FAIL LOW on all four: PASS - scorer E180-H POSITIVE, SIZE PASS; reader ['FAIL LOW', 'FAIL LOW', 'FAIL LOW', 'FAIL LOW']; H +0.1649 [+0.1461, +0.1837] (the test's own [+0.1461, +0.1837]) against +0.0042 W
+M2 the model's truth: PASS on all four, on the D - D(zeros) footing: PASS - reader ['PASS', 'PASS', 'PASS', 'PASS']; 4s above zeros +0.0298 against +0.0298 W; D(4s) alone 26.0298 W [26.0183, 26.0413] would read FAIL LOW
+M3 no difference: the arm PASS, 0 inside, read alike: PASS - reader ['PASS', 'PASS', 'PASS', 'PASS']; H [-0.0939, +0.0939]; zero NOT RESOLVED; read alike
+M4 the card below the model: FAIL HIGH on all four: PASS - reader ['FAIL HIGH', 'FAIL HIGH', 'FAIL HIGH', 'FAIL HIGH']
+M5 an end of E180-H's interval inside the 00:00:55 bracket: named: PASS - H [+0.00445, +0.00821]; M1's +0.00417: FAIL LOW; bracket +0.00403 to +0.00477: ['FAIL LOW', 'PASS']
+M6 an end of E180-H's interval between 0 and the arm: read differently: PASS - H [+0.00200, +0.00576]; the arm PASS, 0 W FAIL LOW: read differently; bracket ends ['PASS', 'PASS']
+M7 one kept pass: NOT READ, exit 0: PASS - scorer NOT SCORED; reader rc 0: M1 ARM: NOT READ (1 kept pass(es); 2 needed (E180.md section 5: every rule NOT SCORED)) | M1 ARM: wrote arm-m1-e180.json and arm-m1-e180.md
+M8 a reduction that is not the one scored: exit 3, nothing written: PASS - M1 ARM REFUSED (exit 3): E180-H recomputed from the reduction (mean +0.181582, +0.126174 to +0.236989) differs from the scorer's record (mean +0.164915, +0.146139 to +0.183691)
+M9 the kept passes differ: exit 3, nothing written: PASS - M1 ARM REFUSED (exit 3): the scorer's kept passes ['18010', '18011', '18012', '18013', '18014', '18015'] are not the reduction's ['18010', '18011', '18012', '18013', '18014']
+M10 no rail: RA2 not read, the board's three readings stand: PASS - reader ['FAIL LOW', 'not read', 'FAIL LOW', 'FAIL LOW']; RA2: 0 kept pass(es) with a rail reading; 2 needed
+M11 --write twice: exit 4, both files byte for byte: PASS - M1 ARM REFUSED (exit 4): arm-m1-e180.json, arm-m1-e180.md already in the output directory: nothing written
+M12 a pinned input differs: check and read exit 9, nothing written: PASS - check rc 9, read rc 9: M1 ARM REFUSED (exit 9): pinned input differs: m1-october-forecast-model-e180.json sha256 53ff2614708e19a8... (pinned 83745199c43b2270...)
+M13 a card other than aifoundry3: exit 2, nothing written: PASS - M1 ARM REFUSED (exit 2): the scored session's card is 'aifoundry1-c1': M1's arm is aifoundry3's (card 1's table is not converted)
+M14 no output names a directory of the test; every written file says REPORTED, never a verdict: PASS - 31 outputs scanned for 6 directories: 0 found; 16 written files
+SELFTEST-ARM-M1-E180 PASS 15 of 15

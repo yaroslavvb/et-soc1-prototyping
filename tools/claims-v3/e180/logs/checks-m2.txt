@@ -1,0 +1,42 @@
+E180, dated note M2: the checks (Fri 6 Nov 2026, PST, the Intel; Q149, lane fix-m1-e180). Desk only: no card, no lab box, no
+network call but git's own fetch and ls-remote. Each Python job ran through the round's local slot at nice 10, one job at a time,
+in this lane's own test tree (copies of the committed inputs), never in the lab clone.
+
+The reader, its self-test and the device-command audit (the final run):
+  copies equal HEAD 97a5e16b: yes
+  check rc 0 (10:36:16-10:36:16): CHECK PASS: m1-october-forecast-model-e180.json 83745199c43b..., power_e180.py 7db37ef73167...; M1's arm +0.0041665 / +0.0298070 / +0.0339735 W (5s - 4s / 4s / 5s above zeros); the 00:00:55 bracket 8.8 to 10.4 fJ, +0.0040335 to +0.0047669 W
+  selftest rc 0 (10:36:16-10:36:20): SELFTEST-ARM-M1-E180 PASS 15 of 15
+  dmcmd_audit rc 0 (10:36:20-10:36:20): dmcmd_audit: GO (0 send site(s), 0 disallowed; allow-list: none)
+  tmp after: []
+
+This note's figures, re-made from the committed files (m1-october-forecast-model-e180.json, power-e180-a1.json,
+noise/noise-e180.json) at build time, each found in the note as printed:
+  '+0.0041665': re-made '+0.0041665' OK
+  '+0.0298070': re-made '+0.0298070' OK
+  '+0.0339735': re-made '+0.0339735' OK
+  '+8.8 to +10.4': re-made '+8.8 to +10.4' OK
+  '+0.0040335 to +0.0047669': re-made '+0.0040335 to +0.0047669' OK
+  '+0.0044002': re-made '+0.0044002' OK
+  '+9.6': re-made '+9.6' OK
+  '+0.0041252': re-made '+0.0041252' OK
+  '65.03 / 8 = 8.13': re-made '65.03 / 8 = 8.13' OK
+  '74.12 / 8 = 9.265': re-made '74.12 / 8 = 9.265' OK
+  '3.0x the net': re-made '3.0x the net' OK
+  '+27.38': re-made '+27.38' OK
+  '-18.29': re-made '-18.29' OK
+  '+0.0125': re-made '+0.0125' OK
+  '-0.0084': re-made '-0.0084' OK
+  '2.74 fJ, which is 30%': re-made '2.74 fJ, which is 30%' OK
+  '(+-0.0013 W)': re-made '(+-0.0013 W)' OK
+  '1.83 fJ, 20%': re-made '1.83 fJ, 20%' OK
+  '(+-0.0008 W)': re-made '(+-0.0008 W)' OK
+  '| half-width (W) | 0.103 | 0.122 | 0.163 | 0.198 | 0.188 |': re-made '| half-width (W) | 0.103 | 0.122 | 0.163 | 0.198 | 0.188 |' OK
+  '0.121-0.232 W': re-made '0.121-0.232 W' OK
+  '25-48x at 6 passes and 29-56x at 5': re-made '25-48x at 6 passes and 29-56x at 5' OK
+  'POSITIVE **0.02**': re-made 'POSITIVE **0.02**' OK
+  'read 10.2 W over idle': re-made 'read 10.2 W over idle' OK
+
+Before the commit, at 10:42:11 PST: git log --all --oneline -- 'docs/reports/data/*e180*' printed nothing (HEAD 97a5e16b);
+the public repo's 4 branch heads were all in the clone; E180's card lane had not started.
+After this record was written: the hash lists, the reader's check in the lab clone and the public-text scan (their results are
+in the commit's lane record, since this file is in the hash list).

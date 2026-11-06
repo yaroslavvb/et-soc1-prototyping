@@ -1,0 +1,275 @@
+{
+ "what": "E180's dated note M2: dated note M1's verifier's five faults fixed before any E180 datum (the machine-readable copy of E180.md.dated-note-M2.md)",
+ "note": "tools/claims-v3/e180/E180.md.dated-note-M2.md",
+ "status": "the reading of a REPORTED arm, fixed before any E180 datum; it changes no rule, statistic, threshold, verdict word, plan, order, forecast or kit file of E180, and none of M1's numbers",
+ "answers": {
+  "note": "tools/claims-v3/e180/E180.md.dated-note-M1.md",
+  "commit": "b38d09e3",
+  "verifier": "Q149 lane verify-m1-e180, 09:55-10:10 PST: holds with fixes, five faults, all minor"
+ },
+ "before_any_datum": {
+  "checked_at": "2026-11-06 10:42:11 PST",
+  "git_log_all_docs_reports_data_e180": "",
+  "clone_head": "97a5e16b",
+  "remote_branch_heads": 4,
+  "all_remote_heads_in_clone": true,
+  "e180_card_lane_started": false
+ },
+ "reading": {
+  "interval": "m +- t(0.975, n - 1) sd / sqrt(n) over the kept passes (E180.md section 5; power_e180.interval)",
+  "words": {
+   "PASS": "the arm's value inside the interval",
+   "FAIL HIGH": "the value above the interval (the model prices more than the card reads)",
+   "FAIL LOW": "the value below the interval"
+  },
+  "not_read": "fewer than 2 kept passes (every rule NOT SCORED)",
+  "lines": [
+   {
+    "name": "E180-H, the board",
+    "statistic": "D(fadd.ps/f_5) - D(fadd.ps/f_4) in each kept pass",
+    "scorer_record": "rules['E180-H'] mean, lo, hi",
+    "arm_W": 0.004166469466
+   },
+   {
+    "name": "RA2, the net minion rail (A1 section 4.2)",
+    "statistic": "R(fadd.ps/f_5) - R(fadd.ps/f_4) in each kept pass with a rail reading",
+    "scorer_record": "reported_v2['RA2_his_pair']['R'] mean, lo, hi",
+    "arm_W": 0.004166469466,
+    "why": "M1 section 5 reads the arm against the board and the net minion rail as each stands; its section 6 lists the board only"
+   },
+   {
+    "name": "4s above the zeros, the board",
+    "statistic": "D(fadd.ps/f_4) - D(fadd.ps/zeros) in each kept pass",
+    "scorer_record": "reported['kinds']['fadd.ps/f_4']['D_above_zeros_mean']",
+    "arm_W": 0.02980698673
+   },
+   {
+    "name": "5s above the zeros, the board",
+    "statistic": "D(fadd.ps/f_5) - D(fadd.ps/zeros) in each kept pass",
+    "scorer_record": "reported['kinds']['fadd.ps/f_5']['D_above_zeros_mean']",
+    "arm_W": 0.0339734562
+   }
+  ],
+  "never": "D(kind) alone: a kind's whole over-idle power (the catalogue's fadd.ps zeros read 10.2 W over idle on aifoundry3)",
+  "beside_H": [
+   "E180-H's SIGN against 0",
+   "0 W placed in the arm's words (they differ only when an end of the interval falls between 0 and the arm)",
+   "the half-width as a multiple of the arm",
+   "the words at the two ends of the 00:00:55 bracket"
+  ],
+  "where": "E180's data README beside its verdicts, labelled REPORTED (october-forecast-model, dated notes M1 and M2); never a verdict",
+  "reader": {
+   "file": "tools/claims-v3/e180/arm_m1_e180.py",
+   "command": "python3 -B tools/claims-v3/e180/arm_m1_e180.py read --session <E180's data dir> --write <E180's data dir>",
+   "check": "python3 -B tools/claims-v3/e180/arm_m1_e180.py check",
+   "outputs": [
+    "arm-m1-e180.json",
+    "arm-m1-e180.md"
+   ],
+   "exits": {
+    "0": "read, or NOT READ",
+    "2": "usage: a file missing or unreadable, a card other than aifoundry3",
+    "3": "the two files are not one session's",
+    "4": "an output file exists (nothing written)",
+    "9": "a pinned input differs"
+   },
+   "selftest": "tools/claims-v3/e180/selftest_arm_m1_e180.py: 15 of 15 (tools/claims-v3/e180/logs/selftest-arm-m1-e180.txt)"
+  },
+  "plan": "Q149's order has an arms step for E178 after its data and none for E180: an arms step for E180 after its data commit, or E180's desk lane, runs the reader and quotes its .md in the README"
+ },
+ "freeze": {
+  "m1_said": "Section 2's tables give the same two figures to two decimals, 65.03 and 74.12 fJ.",
+  "frozen_sentence": "Vector fadd.ps on one-number vectors, above zeros per lane-op: 4s +8.1 fJ, 5s +9.3 fJ (about 65 and 74 fJ per 8-lane instruction).",
+  "per_lane_op_fJ": {
+   "4s": 8.1,
+   "5s": 9.3
+  },
+  "breakdown_per_lane_op_fJ": {
+   "4s": 8.12875,
+   "5s": 9.265
+  },
+  "tensorfma_breakdown_against_frozen_fJ_per_lane_op_aifoundry3": {
+   "4s_above_zeros": {
+    "breakdown": 1775.07,
+    "frozen": 1782.7
+   },
+   "5s_minus_4s": {
+    "breakdown": 2.3,
+    "frozen": 2.8,
+    "source_says": "the frozen figure counts the register-file and on-die grid lines as well"
+   }
+  },
+  "rows_5s_minus_4s": [
+   {
+    "what": "M1's arm, from the breakdown, frozen by M1 at 09:29:14 PST",
+    "fJ": 9.09,
+    "W": 0.00416646946593
+   },
+   {
+    "what": "the 00:00:55 sentence, 8 x (9.3 - 8.1)",
+    "fJ": 9.6,
+    "W": 0.0044002317792
+   },
+   {
+    "what": "the same at its rounding (each figure +- 0.05 fJ)",
+    "fJ": [
+     8.8,
+     10.4
+    ],
+    "W": [
+     0.0040335457976,
+     0.004766917760800001
+    ]
+   },
+   {
+    "what": "the sentence's parenthesis, about 65 and 74 fJ",
+    "fJ": 9,
+    "W": 0.004125217293000001
+   }
+  ],
+  "scored": "M1's +9.09 fJ and +0.0042 W, unchanged (M1's freeze, 09:29:14 PST, sha256 498454bda6f5c0658008f5ca1751a515cd19d95a58fdb96c10b0fb011adefb10, committed b38d09e3 before any E180 datum)",
+  "records_words": "consistent with the 00:00:55 frozen sentence at its rounding (5s - 4s 8.8-10.4 fJ, +0.0040 to +0.0048 W), never 'the same'"
+ },
+ "power": {
+  "m1_quoted": "E180.md section 5 gives E180-H POSITIVE 0.03 at 6 passes if there is none",
+  "a1_section_2": "with no difference, 0.02 at every level (20,000 draws a case)",
+  "no_difference_POSITIVE_6_passes": {
+   "registered": 0.0243,
+   "debiased": 0.0245,
+   "near_rms": 0.02435,
+   "rms": 0.0249,
+   "mixture": 0.0197
+  },
+  "half_width_W_6_passes": {
+   "registered": 0.1034811404,
+   "debiased": 0.1222696932,
+   "near_rms": 0.1633491624,
+   "rms": 0.1984876461,
+   "mixture": 0.1879197353
+  },
+  "half_width_W_5_passes": {
+   "registered": 0.1208912996,
+   "debiased": 0.1443040391,
+   "near_rms": 0.1881069493,
+   "rms": 0.2316054589,
+   "mixture": 0.2129330041
+  },
+  "half_width_over_arm": {
+   "6_passes": [
+    24.836649168905733,
+    47.639289743927286
+   ],
+   "5_passes": [
+    29.015285144057746,
+    55.58794101096624
+   ]
+  },
+  "readme_sentence": "With no difference E180-H reads POSITIVE 0.02 at 6 passes at every noise level (A1 section 2); its 6-pass half-width, 0.103-0.198 W, is 25-48x the arm."
+ },
+ "near_cancellation": {
+  "lines": [
+   {
+    "line": "bubble transitions between operations",
+    "5s_minus_4s_fJ": 27.38,
+    "W": 0.01254982772026,
+    "label_table": "modelled",
+    "label_ledger": "assumed"
+   },
+   {
+    "line": "leakage within the logic",
+    "5s_minus_4s_fJ": -18.29,
+    "W": -0.00838335825433,
+    "label_table": "modelled",
+    "label_ledger": "modelled"
+   },
+   {
+    "line": "the other eight lines",
+    "5s_minus_4s_fJ": 0,
+    "W": 0.0
+   }
+  ],
+  "net_fJ": 9.09,
+  "net_W": 0.00416646946593,
+  "bubble_over_net": 3.012101210121012,
+  "ten_pct_on_bubble": {
+   "fJ": 2.738,
+   "share_of_arm": 0.3012101210121012,
+   "W": 0.0012549827720260002
+  },
+  "ten_pct_on_leakage": {
+   "fJ": 1.829,
+   "share_of_arm": 0.2012101210121012,
+   "W": 0.000838335825433
+  },
+  "band": null,
+  "readme_line": "The arm is a near-cancellation: the bubble term, 3x the net, is labelled assumed in the model's ledger, and the model gives no band."
+ },
+ "corrections_to_m1": [
+  {
+   "where": "section 1",
+   "said": "Section 2's tables give the same two figures to two decimals, 65.03 and 74.12 fJ.",
+   "read_instead": "Section 2's tables (65.03 and 74.12 fJ) are consistent with the 00:00:55 frozen sentence at its rounding; the arm is scored at M1's own frozen value."
+  },
+  {
+   "where": "section 6, first bullet",
+   "said": "E180.md section 5 gives E180-H POSITIVE 0.03 at 6 passes if there is none",
+   "read_instead": "With no difference E180-H reads POSITIVE 0.02 at 6 passes at every noise level (A1 section 2); its 6-pass half-width is 0.103-0.198 W, 25-48x the arm."
+  },
+  {
+   "where": "section 7, item 2 (Used)",
+   "said": "no entry for kit note 1, which section 6 cites",
+   "read_instead": "Kit note 1 (90a1312f): its open item 3, aifoundry1 card 1 has no runbook."
+  },
+  {
+   "where": "section 7, item 3 (Not used)",
+   "said": "its freeze of E178's kinds (H27)",
+   "read_instead": "its 00:00:55 freeze of E178's kinds: E178's, not E180's; H27 is E178's registration (48171930, Thu 5 Nov 2026 20:51:01 PST), which precedes that freeze; checked, not used."
+  },
+  {
+   "where": "section 7, item 4 (Tiers)",
+   "said": "the forecasts and the comparisons with the lab; nothing else from its source enters",
+   "read_instead": "also the model's outputs from its own ledger (line counts by 5s/4s, the two differing lines' ratios, shares and labels, the share above the anchor, the difference over the 4s board energy, the equal section and heat shares); public under the model's name by the owner's answer of 5 Nov 2026; no other value of the ledger enters"
+  }
+ ],
+ "hand_off_correction": {
+  "said": "read D(4s) against +0.0298 W and D(5s) against +0.0340 W",
+  "read_instead": "D(4s) - D(fadd.ps zeros) against +0.0298 W, D(5s) - D(fadd.ps zeros) against +0.0340 W, E180-H's interval and RA2 on the rail against +0.0042 W, all REPORTED"
+ },
+ "files": {
+  "new": [
+   "tools/claims-v3/e180/E180.md.dated-note-M2.md",
+   "tools/claims-v3/e180/m2-arm-reading-e180.json",
+   "tools/claims-v3/e180/arm_m1_e180.py",
+   "tools/claims-v3/e180/selftest_arm_m1_e180.py",
+   "tools/claims-v3/e180/logs/selftest-arm-m1-e180.txt",
+   "tools/claims-v3/e180/logs/checks-m2.txt",
+   "tools/claims-v3/e180/SHA256SUMS-e180-m2"
+  ],
+  "cited_unchanged": [
+   "tools/claims-v3/e180/E180.md.dated-note-M1.md",
+   "tools/claims-v3/e180/m1-october-forecast-model-e180.json",
+   "tools/claims-v3/e180/SHA256SUMS-e180-m1",
+   "tools/claims-v3/e180/E180.md",
+   "tools/claims-v3/e180/E180.md.dated-note-A1.md",
+   "tools/claims-v3/e180/KIT.md.dated-note-1.md",
+   "tools/claims-v3/e180/KIT.md.dated-note-2.md",
+   "tools/claims-v3/e180/power_e180.py",
+   "tools/claims-v3/e180/score_e180.py",
+   "tools/claims-v3/e180/score_e180_v2.py",
+   "tools/claims-v3/e180/score_e180_v3.py",
+   "tools/claims-v3/e180/forecast-e180.json",
+   "tools/claims-v3/e180/footing-e180-a1.json",
+   "tools/claims-v3/e180/offset-e180-a1.json",
+   "tools/claims-v3/e180/noise/noise-e180.json",
+   "tools/claims-v3/e180/collect_e180_v3.sh",
+   "tools/claims-v3/e180/reduce_e180_v3.py",
+   "tools/claims-v3/e180/selftest_score_e180.py",
+   "tools/claims-v3/e180/power-e180-a1.json",
+   "tools/claims-v3/e178/E178.md.dated-note-M1.md",
+   "tools/claims-v3/e178/E178.md.dated-note-A3.md",
+   "tools/claims-v3/e178/E178.md.dated-note-A4.md",
+   "tools/claims-v3/dmcmd_audit.py",
+   "tools/claims-v3/dmcmd_table.json"
+  ]
+ }
+}
