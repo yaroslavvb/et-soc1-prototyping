@@ -1,0 +1,68 @@
+
+== U1. two other users' idle logins, nothing else
+check-others rc 1: 
+preflight: harness: HARNESS FAULTS: missing tools/claims-v3/dmcmd_audit.py; missing tools/claims-v3/dmcmd_table.json; missing workloads/enercat/CMakeLists.txt; missing workloads/enercat/README.md; mis
+-> PASS (U1: D1 rc 1 (0 present, 1 no one), runner 0 (3 present, 0 no one), block 2 (3 stopped by the test, 2 past it))
+others present: users=[u_idle_a u_idle_b ] procs=[]
+-> PASS (U1': the fault shown: lib.sh's stock test reads someone present (rc 0) and v1's block exits 3)
+
+== U2. another user holds card 0's node
+2026-11-06T03:48:42 [aifoundry3] others present: procs=[] holders=[u_other_c:12345 ]
+check-others rc 0: 2026-11-06T03:48:42 [aifoundry3] others present: procs=[] holders=[u_other_c:12345 ]
+2026-11-06T03:48:42 [aifoundry3] others present: procs=[] holders=[u_other_c:12345 ]
+-> PASS (U2: D1 rc 0 (0 present, 1 no one), runner 3 (3 present, 0 no one), block 3 (3 stopped by the test, 2 past it))
+
+== U3. another user holds card 0's lock
+2026-11-06T03:48:42 [aifoundry3] others present: procs=[] holders=[u_other_c:12346 ]
+check-others rc 0: 2026-11-06T03:48:42 [aifoundry3] others present: procs=[] holders=[u_other_c:12346 ]
+2026-11-06T03:48:42 [aifoundry3] others present: procs=[] holders=[u_other_c:12346 ]
+-> PASS (U3: D1 rc 0 (0 present, 1 no one), runner 3 (3 present, 0 no one), block 3 (3 stopped by the test, 2 past it))
+
+== U4. another user's device process
+2026-11-06T03:48:42 [aifoundry3] others present: procs=[1001:4444:sparsity_host ] holders=[]
+check-others rc 0: 2026-11-06T03:48:43 [aifoundry3] others present: procs=[1001:4444:sparsity_host ] holders=[]
+2026-11-06T03:48:43 [aifoundry3] others present: procs=[1001:4444:sparsity_host ] holders=[]
+-> PASS (U4: D1 rc 0 (0 present, 1 no one), runner 3 (3 present, 0 no one), block 3 (3 stopped by the test, 2 past it))
+
+== U5. a CI job
+2026-11-06T03:48:43 [aifoundry3] others present: procs=[0:5555:Runner.Worker ] holders=[]
+check-others rc 0: 2026-11-06T03:48:43 [aifoundry3] others present: procs=[0:5555:Runner.Worker ] holders=[]
+2026-11-06T03:48:43 [aifoundry3] others present: procs=[0:5555:Runner.Worker ] holders=[]
+-> PASS (U5: D1 rc 0 (0 present, 1 no one), runner 3 (3 present, 0 no one), block 3 (3 stopped by the test, 2 past it))
+
+== U6. et-holders unreadable (fails closed)
+2026-11-06T03:48:43 [aifoundry3] others present: et-holders unreadable: sudo: a password is required
+check-others rc 0: 2026-11-06T03:48:43 [aifoundry3] others present: et-holders unreadable: sudo: a password is required
+2026-11-06T03:48:43 [aifoundry3] others present: et-holders unreadable: sudo: a password is required
+-> PASS (U6: D1 rc 0 (0 present, 1 no one), runner 3 (3 present, 0 no one), block 3 (3 stopped by the test, 2 past it))
+
+== U7. our own holder line only
+check-others rc 1: 
+preflight: harness: HARNESS FAULTS: missing tools/claims-v3/dmcmd_audit.py; missing tools/claims-v3/dmcmd_table.json; missing workloads/enercat/CMakeLists.txt; missing workloads/enercat/README.md; mis
+-> PASS (U7: D1 rc 1 (0 present, 1 no one), runner 0 (3 present, 0 no one), block 2 (3 stopped by the test, 2 past it))
+
+== U8. another user on card 1's node only (our card is 0)
+check-others rc 1: 
+preflight: harness: HARNESS FAULTS: missing tools/claims-v3/dmcmd_audit.py; missing tools/claims-v3/dmcmd_table.json; missing workloads/enercat/CMakeLists.txt; missing workloads/enercat/README.md; mis
+-> PASS (U8: D1 rc 1 (0 present, 1 no one), runner 0 (3 present, 0 no one), block 2 (3 stopped by the test, 2 past it))
+
+== R1. the runner's check before every run: a 47-run pass with the idle logins
+runner rc 0; host calls 47; run.log's last line: done
+-> PASS (R1 every run checked and run, the pass done)
+
+== R2. another user's device process appears after the third run
+others present: <time> [aifoundry3] others present: procs=[1001:6666:sparsity_host ] holders=[]
+-> PASS (R2 the pass stops before its fourth run (exit 3 after 3 host calls), the line recorded)
+
+== S1. that run.log through scrub_tree_e178.py: caught, then rewritten and clean
+scrub-tree: run.log:5: another account's procs uid is left
+scrub-tree: FAIL (3 files in 1 directories read, 1 left)
+scrub-tree: OK (3 files in 1 directories read, 0 left)
+others present: <time> [aifoundry3] others present: procs=[<another-uid>:6666:sparsity_host ] holders=[]
+-> PASS (S1 the uid caught by --check (rc 1), the rewrite then reads 0 left (rc 0))
+
+== N. no network call: the ssh, rsync and scp stand-ins were never called
+network calls: 0
+-> PASS (N no network call)
+
+SELFTEST-OTHERS-E180-V2 PASS: 13 of 13 cases (D1 outside V3_DRY; stand-in who, ps, sudo; no device, no network)

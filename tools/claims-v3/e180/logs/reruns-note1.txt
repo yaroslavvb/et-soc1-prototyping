@@ -1,0 +1,27 @@
+E180, the kit's dated note 1: every check re-run with the note's files in place (Fri 6 Nov 2026, PST, the Intel, through the round's local
+slot at nice 10, one core, one job at a time; desk only: no card, no lab box, no network call).
+
+The registration's side (dated note A1, 879197e3, committed 03:34:44):
+  SHA256SUMS-e180-registration 71 of 71 OK; SHA256SUMS-e180-kit 55 of 55 OK; SHA256SUMS-e180-a1 41 of 41 OK          03:46:51-56
+  plan_e180.py --check CHECK PASS; forecast_e180.py --check CHECK PASS                                              03:46:51-56
+  (A1's own re-makes, power, footing, offset, noise and the walk's steps, byte for byte: see E180.md.dated-note-A1.md section 9)
+
+The kit v1 (c92f627b), unchanged files:
+  selftest_score_e180.py under /usr/bin/python3 (3.9, numpy 1.26.4): SELFTEST PASS 12 of 12, identical to logs/selftest-score-e180.txt
+  the same under the PATH python3 (3.13, no numpy): SELFTEST FAIL 10 of 12 (S9 and S10 need analyze_catalogue's numpy): the nit 11 case
+  make_harness_e180.py --check CHECK PASS; check_e180.py harness: HARNESS OK: 81 files                               03:46:51-56
+
+The kit v2 (this note), after the last edit to a v2 file (03:48):
+  make_harness_e180_v2.py: harness-e180-v2.json, 61 files; --check CHECK PASS; check_e180_v2.py harness: HARNESS OK: 86 files (v2)   03:48:32
+  selftest_elf_e180.py: SELFTEST-ELF-E180 PASS 9 of 9 (logs/selftest-elf-e180.txt)                                 03:48:32
+  selftest_score_e180_v2.py: SELFTEST-V2 PASS 7 of 7 (logs/selftest-score-e180-v2.txt)                             03:48:33-41
+  selftest_others_e180_v2.sh: SELFTEST-OTHERS-E180-V2 PASS 13 of 13 (logs/selftest-others-e180-v2.txt)            03:48:41-57
+  dry_intel_e180_v2.sh: DRY-INTEL-V2 PASS, 24 of 24 checks (logs/dry-intel-v2.txt)                                  03:48:57-03:49:39
+  rb/selftest_rb_e180_v2.sh: SELFTEST-RB-E180-V2 PASS 26 of 26 (logs/selftest-rb-e180-v2.txt)                       03:51:07-50
+  rb/list_steps_e180_v2.sh: dry listing, 0 steps exit non-zero, no network call (logs/dry-listing-e180-v2.txt)      03:51:50-52
+  dmcmd_audit, the v2 session's file set (preflight_e180_v2.sh): GO, 32 send sites, 0 disallowed (logs/dmcmd-audit-v2.txt)
+  dmcmd_audit, the same without E153's exception: NO-GO only at lib.sh:154, STATS_RESET (logs/dmcmd-audit-noexcept-v2.txt)
+  dmcmd_audit, the v2 and A1 desk files: GO, 0 send sites (logs/dmcmd-audit-desk-v2.txt)
+  dmcmd_audit, the v2 runbook steps with k6's steps 5 and 9: GO, 11 send sites, every one READ, all E128's guard's (logs/dmcmd-audit-rb-v2.txt)
+                                                                                                                    03:50:22-23, 03:51:52-53
+Removed afterwards, by literal path: the dry pass's, the D1 test's and the runbook test's scratch trees.
