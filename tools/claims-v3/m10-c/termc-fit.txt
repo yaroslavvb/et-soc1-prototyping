@@ -1,0 +1,111 @@
+Q148(c): M10's constant-lane term (REGISTRATION.md, c71fbc7f). Labels: levels fitted on committed rows; held-out figures POST HOC;
+E178 forecasts FROZEN, a REPORTED arm; power = design arithmetic.
+
+rows: M10's T_S zeros 37, the tie 32 (absent: E147|a3)
+  fp32|one     rows  50 runs  32 kinds  6
+  fp32|eight   rows   2 runs   1 kinds  2
+  fp16|one     rows  16 runs  13 kinds  5
+  fp16|eight   rows   1 runs   1 kinds  1
+  fp32.pi held out vs in sample: E78|a3 +0.1640 / +0.1617 (gap +0.0023); E82|c1 +0.1137 / +0.1115 (gap +0.0022)
+
+THE TERM (primary K: kind-weighted, the tie included, cards pooled), one word in every lane:
+  fp32: lambda +31.681 pJ/op; L aifoundry3 +0.0354 W [-0.0533, +0.1241] (jackknife over 32 runs, t 2.040); boot [-0.0053, +0.0986]; card 1 +0.0340 W; sigma_C 0.0942 W
+        eight lane words: +53.235 pJ/op, fitted on E102|c1 (in sample; one run)
+  fp16: lambda +62.890 pJ/op; L aifoundry3 +0.0703 W [+0.0241, +0.1164] (jackknife over 13 runs, t 2.179); boot [+0.0450, +0.0993]; card 1 +0.0676 W; sigma_C 0.0551 W
+        eight lane words: +110.557 pJ/op, fitted on E102|c1 (in sample; one run)
+ARMS (reported):
+  K-card a3 fp32: L +0.1101 W [+0.0982, +0.1221] (15 runs)
+  K-card a3 fp16: L +0.0810 W [+0.0138, +0.1483] (5 runs)
+  K-card c1 fp32: L -0.0107 W [-0.0580, +0.0366] (17 runs)
+  K-card c1 fp16: L +0.0643 W [+0.0173, +0.1113] (8 runs)
+  R fp32: L aifoundry3 +0.0627 W
+  R fp16: L aifoundry3 +0.0769 W
+  R check: rows (a) one word, both formats, row mean of e +0.068845 W (posthoc-structure +0.069)
+
+KINDS (mean held-out e of M10, W):
+  fp16 eight fp16.hq                                      A 3c003c00 rows   1 runs  1 e +0.1198  a3  0 +0.0000  c1  1 +0.1198  e' +0.0380
+  fp16 one   fp16.neg_ones                                A bc00bc00 rows   2 runs  2 e +0.0681  a3  1 +0.0951  c1  1 +0.0412  e' -0.0016
+  fp16 one   fp16.c_cancel                                A 3c003c00 rows   1 runs  1 e +0.1165  a3  0 +0.0000  c1  1 +0.1165  e' +0.0585
+  fp16 one   fp16.aq                                      A 3dc43dc4 rows   1 runs  1 e +0.0134  a3  0 +0.0000  c1  1 +0.0134  e' -0.0684
+  fp16 one   fp16.ones                                    A 3c003c00 rows  10 runs 10 e +0.0818  a3  4 +0.1104  c1  6 +0.0627  e' +0.0139
+  fp16 one   fp16.nz_both                                 A 80008000 rows   2 runs  2 e +0.0647  a3  1 +0.0393  c1  1 +0.0901  e' -0.0048
+  fp32 eight fp32.hq                                      A 3f800000 rows   1 runs  1 e +0.0171  a3  0 +0.0000  c1  1 +0.0171  e' -0.0347
+  fp32 eight fp32.hq_e64                                  A 3f800000 rows   1 runs  1 e +0.0983  a3  0 +0.0000  c1  1 +0.0983  e' +0.0464
+  fp32 one   anchor_pi,fp32.pi                            A 40490fdb rows  34 runs 32 e +0.0817  a3 16 +0.1113  c1 18 +0.0553  e' +0.0463
+  fp32 one   fp32.dn1_both                                A 00000001 rows   2 runs  2 e +0.0626  a3  1 +0.1417  c1  1 -0.0164  e' +0.0280
+  fp32 one   fp32.aq                                      A 3fbd207c rows   1 runs  1 e -0.0494  a3  0 +0.0000  c1  1 -0.0494  e' -0.1012
+  fp32 one   fp32.neg_ones                                A bf800000 rows   2 runs  2 e +0.0004  a3  1 +0.1115  c1  1 -0.1107  e' -0.0346
+  fp32 one   fp32.nz_both                                 A 80000000 rows   2 runs  2 e +0.0443  a3  1 +0.0872  c1  1 +0.0014  e' +0.0096
+  fp32 one   fp32.ones                                    A 3f800000 rows   9 runs  9 e +0.0760  a3  4 +0.1025  c1  5 +0.0549  e' +0.0414
+
+HELD OUT BY RUN, POST HOC (M10 -> M10-C; rms (bias), W; kind-weighted beside):
+  primary_K              fp32|one|all   n  50 kinds  6: 0.0967 (+0.0725) -> 0.0793 (+0.0370); kind-weighted 0.0883 (+0.0359) -> 0.0942 (-0.0017)
+  primary_K              fp32|one|a3    n  23 kinds  5: 0.1166 (+0.1101) -> 0.0901 (+0.0808); kind-weighted 0.1147 (+0.1108) -> 0.0947 (+0.0892)
+  primary_K              fp32|one|c1    n  27 kinds  6: 0.0757 (+0.0405) -> 0.0688 (-0.0002); kind-weighted 0.0665 (-0.0108) -> 0.0931 (-0.0593)
+  primary_K              fp32|eight|all n   2 kinds  2: 0.0705 (+0.0577) -> 0.0410 (+0.0058); kind-weighted 0.0705 (+0.0577) -> 0.0410 (+0.0058)
+  primary_K              fp32|eight|c1  n   2 kinds  2: 0.0705 (+0.0577) -> 0.0410 (+0.0058); kind-weighted 0.0705 (+0.0577) -> 0.0410 (+0.0058)
+  primary_K              fp16|one|all   n  16 kinds  5: 0.0956 (+0.0758) -> 0.0620 (+0.0073); kind-weighted 0.0839 (+0.0689) -> 0.0551 (-0.0005)
+  primary_K              fp16|one|a3    n   6 kinds  3: 0.1063 (+0.0960) -> 0.0558 (+0.0268); kind-weighted 0.0911 (+0.0816) -> 0.0463 (+0.0121)
+  primary_K              fp16|one|c1    n  10 kinds  5: 0.0886 (+0.0637) -> 0.0654 (-0.0045); kind-weighted 0.0809 (+0.0648) -> 0.0557 (-0.0044)
+  primary_K              fp16|eight|all n   1 kinds  1: 0.1198 (+0.1198) -> 0.0380 (+0.0380); kind-weighted 0.1198 (+0.1198) -> 0.0380 (+0.0380)
+  primary_K              fp16|eight|c1  n   1 kinds  1: 0.1198 (+0.1198) -> 0.0380 (+0.0380); kind-weighted 0.1198 (+0.1198) -> 0.0380 (+0.0380)
+  primary_K_without_tie  fp32|one|all   n  18 kinds  6: 0.0964 (+0.0626) -> 0.0887 (+0.0270); kind-weighted 0.0972 (+0.0455) -> 0.1001 (+0.0078)
+  primary_K_without_tie  fp32|one|a3    n   8 kinds  5: 0.1189 (+0.1143) -> 0.0984 (+0.0914); kind-weighted 0.1253 (+0.1214) -> 0.1082 (+0.1029)
+  primary_K_without_tie  fp32|one|c1    n  10 kinds  6: 0.0736 (+0.0213) -> 0.0801 (-0.0246); kind-weighted 0.0743 (-0.0011) -> 0.0929 (-0.0522)
+  primary_K_without_tie  fp16|one|all   n  16 kinds  5: 0.0956 (+0.0758) -> 0.0620 (+0.0073); kind-weighted 0.0839 (+0.0689) -> 0.0551 (-0.0005)
+  primary_K_without_tie  fp16|one|a3    n   6 kinds  3: 0.1063 (+0.0960) -> 0.0558 (+0.0268); kind-weighted 0.0911 (+0.0816) -> 0.0463 (+0.0121)
+  primary_K_without_tie  fp16|one|c1    n  10 kinds  5: 0.0886 (+0.0637) -> 0.0654 (-0.0045); kind-weighted 0.0809 (+0.0648) -> 0.0557 (-0.0044)
+  arm_K_card             fp32|one|a3    n  23 kinds  5: 0.1166 (+0.1101) -> 0.0393 (-0.0005); kind-weighted 0.1147 (+0.1108) -> 0.0305 (+0.0010)
+  arm_K_card             fp32|one|c1    n  27 kinds  6: 0.0757 (+0.0405) -> 0.0823 (+0.0478); kind-weighted 0.0665 (-0.0108) -> 0.0723 (-0.0059)
+  arm_K_card             fp16|one|a3    n   6 kinds  3: 0.1063 (+0.0960) -> 0.0585 (+0.0152); kind-weighted 0.0911 (+0.0816) -> 0.0541 (-0.0009)
+  arm_K_card             fp16|one|c1    n  10 kinds  5: 0.0886 (+0.0637) -> 0.0666 (-0.0012); kind-weighted 0.0809 (+0.0648) -> 0.0563 (-0.0013)
+  arm_R                  fp32|one       n  18 kinds  6: 0.0964 (+0.0626) -> 0.0788 (+0.0008); kind-weighted 0.0972 (+0.0455) -> 0.0935 (-0.0175)
+  arm_R                  fp32|eight     n   2 kinds  2: 0.0705 (+0.0577) -> 0.0417 (-0.0096); kind-weighted 0.0705 (+0.0577) -> 0.0417 (-0.0096)
+  arm_R                  fp16|one       n  16 kinds  5: 0.0956 (+0.0758) -> 0.0623 (-0.0001); kind-weighted 0.0839 (+0.0689) -> 0.0516 (-0.0080)
+  arm_R                  fp16|eight     n   1 kinds  1: 0.1198 (+0.1198) -> 0.0411 (+0.0411); kind-weighted 0.1198 (+0.1198) -> 0.0411 (+0.0411)
+  tie only               all            n  32: 0.0968 (+0.0781) -> 0.0735 (+0.0427)
+  tie only               a3             n  15: 0.1153 (+0.1078) -> 0.0853 (+0.0751)
+  tie only               c1             n  17: 0.0769 (+0.0519) -> 0.0613 (+0.0141)
+
+POST HOC, NOT FIT ROWS: single-bit T_S tiles with their class's level added
+  M10 rows fp32|one|all     n  17: 0.2727 (+0.0959) -> 0.2624 (+0.0611)
+  M10 rows fp32|one|a3      n   9: 0.3088 (+0.1203) -> 0.2968 (+0.0850)
+  M10 rows fp32|one|c1      n   8: 0.2253 (+0.0686) -> 0.2172 (+0.0341)
+  M10 rows fp32|eight|all   n   8: 0.2070 (+0.0055) -> 0.2111 (-0.0474)
+  M10 rows fp32|eight|a3    n   1: 0.2542 (+0.2542) -> 0.1942 (+0.1942)
+  M10 rows fp32|eight|c1    n   7: 0.1994 (-0.0301) -> 0.2134 (-0.0819)
+  M10 rows fp16|one|all     n   6: 0.1751 (+0.1051) -> 0.1441 (+0.0356)
+  M10 rows fp16|one|a3      n   3: 0.1816 (+0.1544) -> 0.1270 (+0.0835)
+  M10 rows fp16|one|c1      n   3: 0.1683 (+0.0558) -> 0.1593 (-0.0123)
+  M10 rows fp16|eight|all   n   3: 0.0195 (+0.0151) -> 0.0678 (-0.0667)
+  M10 rows fp16|eight|c1    n   3: 0.0195 (+0.0151) -> 0.0678 (-0.0667)
+  pool 8 a3                 n  12: 0.2809 (+0.1384) -> 0.2537 (+0.0881)
+  pool 8 c1                 n  12: 0.2282 (+0.1214) -> 0.2057 (+0.0731)
+
+POWER of the entry rule (design arithmetic; aifoundry3's L; 14 fp32 + 13 fp16 kinds):
+  L_true 1.0 x L, sigma_common 0.00 W: enters 0.556, C1 WORSE 0.000
+  L_true 1.0 x L, sigma_common 0.02 W: enters 0.487, C1 WORSE 0.015
+  L_true 1.0 x L, sigma_common 0.04 W: enters 0.532, C1 WORSE 0.100
+  L_true 0.5 x L, sigma_common 0.00 W: enters 0.037, C1 WORSE 0.037
+  L_true 0.5 x L, sigma_common 0.02 W: enters 0.159, C1 WORSE 0.139
+  L_true 0.5 x L, sigma_common 0.04 W: enters 0.262, C1 WORSE 0.278
+  L_true 0.0 x L, sigma_common 0.00 W: enters 0.001, C1 WORSE 0.593
+  L_true 0.0 x L, sigma_common 0.02 W: enters 0.009, C1 WORSE 0.539
+  L_true 0.0 x L, sigma_common 0.04 W: enters 0.102, C1 WORSE 0.503
+
+CHECKS:
+  [1] other                              posthoc n  651 bias -0.023589 | here n  651 bias -0.023589  OK
+  [1] single B bit, eight base words     posthoc n   26 bias -0.036318 | here n   26 bias -0.036318  OK
+  [1] single B bit, one base word        posthoc n   23 bias +0.098336 | here n   23 bias +0.098336  OK
+  [1] zero, eight lane words             posthoc n    3 bias +0.078369 | here n    3 bias +0.078369  OK
+  [1] zero, one word in every lane       posthoc n   34 bias +0.068845 | here n   34 bias +0.068845  OK
+  [2] E78|a3 fp32.pi: d600 vs M10_insample_pred_w |diff| 1.78e-15 W; s 1.00337260 rounds to m10.json's 1.00337  OK
+  [2] E82|c1 fp32.pi: d600 vs M10_insample_pred_w |diff| 0.00e+00 W; s 1.00418861 rounds to m10.json's 1.00419  OK
+  [3] E178's 27 float kinds: d600 at s = 1 and E171's zeros rate vs forecast-e178.json P_w, both cards: max |diff| 0.00e+00 W  OK
+  [4] E178's float tiles by bytes (sha256 as kinds-e178.json): {('fp16', 'zero', 'one'): 13, ('fp32', 'zero', 'one'): 14}  OK
+  [5] pi.bin: 2048 bytes, words ['0x40490fdb']; the host's 3.14159274f = 0x40490fdb; sha256 = fp32.pi's rows' 29a5aff802de  OK
+  [6] score on a synthetic session, truth P + L: C1 BETTER d -0.0519 W, C2 True, enters True (want BETTER)  OK
+  [6] score on a synthetic session, truth P    : C1 WORSE d +0.0563 W, C2 False, enters False (want WORSE)  OK
+  [6] score with one kept pass: NOT SCORED  OK
+  [7] t(0.975, 12) 2.178813 (2.178813), t(0.975, 31) 2.039513 (2.039513)  OK
+  SELFTEST PASS
