@@ -1,0 +1,155 @@
+Q145(a), dated note 1, POST HOC: the anatomy's verifier's faults re-run (posthoc_note1_q145a.py).
+
+F1 CHECKS (the raw V3-CATFULL telemetry against catalogue.json):
+  aifoundry3: 1176 bursts (0 unmatched), 9 blocks, rail tau 1.235 s; die_c_busy re-derived to 4.8e-07 C, die_c_before to 4.3e-07 C; median rise over the rails' windows 1.000 C raw, 0.349 C through the filter
+  aifoundry1-c1: 1176 bursts (0 unmatched), 9 blocks, rail tau 1.153 s; die_c_busy re-derived to 4.8e-07 C, die_c_before to 4.8e-07 C; median rise over the rails' windows 1.000 C raw, 0.557 C through the filter
+  aifoundry2: 1176 bursts (0 unmatched), 9 blocks, rail tau 1.133 s; die_c_busy re-derived to 4.8e-07 C, die_c_before to 4.3e-07 C; median rise over the rails' windows 1.000 C raw, 0.356 C through the filter
+
+F1 THE SECTION 4.3 FIT RE-MADE (configuration means, no intercept; minion, SRAM, NoC coefficients; rms W):
+  aifoundry3     published  minion 0.1810 +- 0.0025, SRAM 0.0426, NoC 0.2940, DRAM 72.71 pJ/B; rms 0.3078 W, n 392  [reproduces unmetered_fit.json to 9.9e-15 relative]
+  aifoundry3     A          minion 0.2166 +- 0.0023, SRAM 0.0754, NoC 0.3424, DRAM 72.42 pJ/B; rms 0.2824 W, n 392
+  aifoundry3     Au         minion 0.2370 +- 0.0025, SRAM 0.0960, NoC 0.3640, DRAM 72.86 pJ/B; rms 0.2901 W, n 392
+  aifoundry3     B          minion 0.1947 +- 0.0024, SRAM 0.0554, NoC 0.3124, DRAM 72.60 pJ/B; rms 0.2952 W, n 392
+  aifoundry3     q136b      minion 0.2070 +- 0.0023, SRAM 0.0661, NoC 0.3311, DRAM 72.45 pJ/B; rms 0.2871 W, n 392  [reproduces Q136(b)'s recut.json measured_split_filtered to 2.5e-12 relative]
+  aifoundry1-c1  published  minion 0.1022 +- 0.0037, SRAM 0.5402, NoC 0.2047, DRAM 81.63 pJ/B; rms 0.4780 W, n 392  [reproduces unmetered_fit.json to 2.1e-15 relative]
+  aifoundry1-c1  A          minion 0.1428 +- 0.0038, SRAM 0.5939, NoC 0.2611, DRAM 80.96 pJ/B; rms 0.4714 W, n 392
+  aifoundry1-c1  Au         minion 0.1642 +- 0.0040, SRAM 0.6239, NoC 0.2818, DRAM 82.07 pJ/B; rms 0.4864 W, n 392
+  aifoundry2     published  minion 0.1879 +- 0.0027, SRAM 0.0340, NoC 0.2906, DRAM 72.74 pJ/B; rms 0.3323 W, n 392  [reproduces unmetered_fit.json to 1.4e-14 relative]
+  aifoundry2     A          minion 0.2527 +- 0.0025, SRAM 0.0906, NoC 0.3820, DRAM 71.06 pJ/B; rms 0.2913 W, n 392
+  aifoundry2     Au         minion 0.2830 +- 0.0028, SRAM 0.1301, NoC 0.4079, DRAM 72.24 pJ/B; rms 0.3265 W, n 392
+  aifoundry2     B          minion 0.2243 +- 0.0025, SRAM 0.0653, NoC 0.3432, DRAM 71.82 pJ/B; rms 0.2966 W, n 392
+  aifoundry2     q136b      minion 0.2341 +- 0.0024, SRAM 0.0698, NoC 0.3604, DRAM 70.95 pJ/B; rms 0.2946 W, n 392  [reproduces Q136(b)'s recut.json measured_split_filtered to 8.8e-12 relative]
+
+F1 THE VECTOR ROWS, the minion rail's own heating and the re-split on footing A (pJ an instruction, wall rate):
+  card / cfg: board | heat line | minion raw -> A (heating A; Au; B; A as a share of the raw line) | off-rail committed -> A | reg (published) | gap (published)
+  aifoundry3 fadd.pi/const/h2: 69.83 | 0.49 | 10.70 -> 10.40 (0.30; 0.54; 0.12; 2.8%) | 1.75 -> 2.05 | 1.97 | -0.22
+  aifoundry3 fadd.pi/random/h2: 76.80 | 0.51 | 16.25 -> 15.85 (0.40; 0.72; 0.16; 2.5%) | 3.09 -> 3.49 | 2.98 | 0.11
+  aifoundry3 fadd.pi/zeros/h2: 69.68 | 0.30 | 10.45 -> 10.26 (0.19; 0.37; 0.08; 1.8%) | 2.02 -> 2.22 | 1.92 | 0.10
+  aifoundry3 fadd.ps/const/h2: 79.42 | 0.69 | 19.36 -> 18.63 (0.73; 1.12; 0.30; 3.8%) | 3.00 -> 3.73 | 3.56 | -0.56
+  aifoundry3 fadd.ps/random/h2: 99.12 | 1.18 | 34.46 -> 33.30 (1.16; 1.66; 0.45; 3.4%) | 6.28 -> 7.44 | 6.33 | -0.05
+  aifoundry3 fadd.ps/zeros/h2: 79.22 | 0.60 | 19.06 -> 18.57 (0.50; 0.67; 0.20; 2.6%) | 2.94 -> 3.44 | 3.50 | -0.55
+  aifoundry3 fence/zeros/h2: 60.56 | 0.17 | 3.58 -> 3.60 (-0.03; 0.11; -0.01; -0.8%) | 0.88 -> 0.85 | 0.64 | 0.24
+  aifoundry3 fmadd.ps/const/h2: 85.99 | 0.86 | 22.73 -> 22.08 (0.65; 1.04; 0.26; 2.9%) | 3.85 -> 4.50 | 4.18 | -0.33
+  aifoundry3 fmadd.ps/random/h1: 125.80 | 1.41 | 42.94 -> 41.61 (1.33; 1.73; 0.52; 3.1%) | 8.38 -> 9.71 | 7.88 | 0.50
+  aifoundry3 fmadd.ps/random/h2: 116.24 | 1.76 | 46.16 -> 44.52 (1.65; 2.54; 0.63; 3.6%) | 9.21 -> 10.86 | 8.47 | 0.74
+  aifoundry3 fmadd.ps/zeros/h2: 85.63 | 0.90 | 22.53 -> 21.60 (0.93; 1.37; 0.37; 4.1%) | 3.77 -> 4.70 | 4.15 | -0.38
+  aifoundry3 nop/zeros/h2: 59.12 | 0.00 | 4.20 -> 4.25 (-0.04; 0.00; -0.02; -1.1%) | 1.02 -> 0.98 | 0.76 | 0.26
+  aifoundry1-c1 fadd.pi/const/h2: 87.53 | 0.44 | 10.98 -> 10.64 (0.34; 0.63; -; 3.1%) | 1.26 -> 1.59 | 1.28 | -0.02
+  aifoundry1-c1 fadd.pi/random/h2: 94.86 | 0.80 | 16.78 -> 16.15 (0.63; 1.03; -; 3.8%) | 1.91 -> 2.55 | 1.92 | -0.00
+  aifoundry1-c1 fadd.pi/zeros/h2: 87.25 | 0.44 | 10.76 -> 10.42 (0.34; 0.56; -; 3.2%) | 1.38 -> 1.72 | 1.27 | 0.10
+  aifoundry1-c1 fadd.ps/const/h2: 101.66 | 0.94 | 19.97 -> 19.36 (0.61; 0.79; -; 3.1%) | 2.23 -> 2.85 | 2.26 | -0.03
+  aifoundry1-c1 fadd.ps/random/h2: 118.11 | 1.67 | 35.86 -> 34.24 (1.62; 2.10; -; 4.5%) | 3.75 -> 5.36 | 4.03 | -0.29
+  aifoundry1-c1 fadd.ps/zeros/h2: 97.41 | 0.82 | 19.58 -> 18.97 (0.61; 0.86; -; 3.1%) | 2.19 -> 2.81 | 2.23 | -0.04
+  aifoundry1-c1 fence/zeros/h2: 82.04 | 0.26 | 3.37 -> 3.56 (-0.18; 0.00; -; -5.4%) | 1.06 -> 0.87 | 0.33 | 0.73
+  aifoundry1-c1 fmadd.ps/const/h2: 104.39 | 0.96 | 23.54 -> 22.62 (0.92; 1.22; -; 3.9%) | 3.61 -> 4.52 | 2.49 | 1.12
+  aifoundry1-c1 fmadd.ps/random/h1: 148.44 | 1.90 | 44.77 -> 42.90 (1.87; 2.53; -; 4.2%) | 4.08 -> 5.95 | 5.00 | -0.92
+  aifoundry1-c1 fmadd.ps/random/h2: 134.79 | 1.93 | 47.54 -> 45.55 (1.99; 2.68; -; 4.2%) | 6.52 -> 8.51 | 5.36 | 1.16
+  aifoundry1-c1 fmadd.ps/zeros/h2: 103.91 | 0.89 | 23.21 -> 22.28 (0.93; 1.22; -; 4.0%) | 2.56 -> 3.49 | 2.72 | -0.16
+  aifoundry1-c1 nop/zeros/h2: 76.47 | 0.47 | 4.36 -> 4.15 (0.22; 0.42; -; 5.0%) | 0.47 -> 0.68 | 0.49 | -0.03
+  aifoundry2 fadd.pi/const/h2: 82.47 | 0.58 | 10.69 -> 10.46 (0.23; 0.67; 0.14; 2.2%) | 1.86 -> 2.10 | 2.04 | -0.18
+  aifoundry2 fadd.pi/random/h2: 99.76 | 1.17 | 16.62 -> 15.57 (1.05; 1.80; 0.54; 6.3%) | 3.41 -> 4.46 | 3.19 | 0.21
+  aifoundry2 fadd.pi/zeros/h2: 82.54 | 0.78 | 10.51 -> 9.99 (0.52; 0.68; 0.32; 4.9%) | 1.84 -> 2.36 | 2.01 | -0.17
+  aifoundry2 fadd.ps/const/h2: 93.88 | 1.20 | 19.52 -> 18.45 (1.08; 1.40; 0.64; 5.5%) | 2.97 -> 4.05 | 3.75 | -0.78
+  aifoundry2 fadd.ps/random/h2: 112.02 | 2.29 | 34.62 -> 32.41 (2.21; 3.03; 1.36; 6.4%) | 5.86 -> 8.07 | 6.64 | -0.78
+  aifoundry2 fadd.ps/zeros/h2: 91.63 | 1.17 | 19.07 -> 18.22 (0.85; 1.09; 0.53; 4.4%) | 3.05 -> 3.89 | 3.65 | -0.61
+  aifoundry2 fence/zeros/h2: 75.39 | 0.40 | 3.57 -> 3.61 (-0.04; 0.00; -0.03; -1.2%) | 0.96 -> 0.92 | 0.67 | 0.30
+  aifoundry2 fmadd.ps/const/h2: 101.69 | 1.21 | 22.74 -> 21.71 (1.03; 1.39; 0.61; 4.5%) | 4.38 -> 5.41 | 4.36 | 0.02
+  aifoundry2 fmadd.ps/random/h1: 146.63 | 2.77 | 43.28 -> 40.95 (2.33; 3.12; 1.35; 5.4%) | 8.35 -> 10.68 | 8.31 | 0.04
+  aifoundry2 fmadd.ps/random/h2: 128.38 | 2.75 | 46.00 -> 43.25 (2.75; 3.79; 1.69; 6.0%) | 8.41 -> 11.16 | 8.81 | -0.40
+  aifoundry2 fmadd.ps/zeros/h2: 107.97 | 1.80 | 22.97 -> 21.39 (1.58; 2.15; 0.81; 6.9%) | 3.87 -> 5.45 | 4.42 | -0.55
+  aifoundry2 nop/zeros/h2: 71.02 | 0.40 | 4.20 -> 4.23 (-0.03; 0.09; -0.02; -0.7%) | 1.02 -> 1.00 | 0.79 | 0.24
+  books after the re-split: max |lines - board| 6.7e-07 W
+
+F1 THE NOTE'S RANDOM ROWS ON ONE FOOTING (pJ an instruction):
+  fmadd.ps/random/h2:
+    aifoundry3     board net 56.25 (raw 58.01); minion raw 46.16, A 44.52, Au 43.62, B 45.53; device rate: board 56.04, minion raw 45.99, A 44.35; board/minion: committed mix 1.219, A 1.264, Au 1.290, raw/raw 1.257, B 1.235
+    aifoundry1-c1  board net 55.44 (raw 57.36); minion raw 47.54, A 45.55, Au 44.86, B -; device rate: board 55.20, minion raw 47.33, A 45.35; board/minion: committed mix 1.166, A 1.217, Au 1.236, raw/raw 1.207, B -
+    aifoundry2     board net 55.59 (raw 58.34); minion raw 46.00, A 43.25, Au 42.21, B 44.32; device rate: board 55.38, minion raw 45.83, A 43.09; board/minion: committed mix 1.208, A 1.285, Au 1.317, raw/raw 1.268, B 1.254
+    3-card mean    board net 55.76 (raw 57.91); minion raw 46.57, A 44.44, Au 43.56, B -; device rate: board 55.54, minion raw 46.38, A 44.26; board/minion: committed mix 1.198, A 1.255, Au 1.281, raw/raw 1.244, B -
+  fadd.ps/random/h2:
+    aifoundry3     board net 41.40 (raw 42.58); minion raw 34.46, A 33.30, Au 32.80, B 34.01; device rate: board 41.24, minion raw 34.33, A 33.18; board/minion: committed mix 1.201, A 1.243, Au 1.262, raw/raw 1.236, B 1.217
+    aifoundry1-c1  board net 40.64 (raw 42.31); minion raw 35.86, A 34.24, Au 33.76, B -; device rate: board 40.47, minion raw 35.71, A 34.10; board/minion: committed mix 1.133, A 1.187, Au 1.204, raw/raw 1.180, B -
+    aifoundry2     board net 41.38 (raw 43.67); minion raw 34.62, A 32.41, Au 31.59, B 33.25; device rate: board 41.21, minion raw 34.48, A 32.28; board/minion: committed mix 1.195, A 1.277, Au 1.310, raw/raw 1.261, B 1.244
+    3-card mean    board net 41.14 (raw 42.85); minion raw 34.98, A 33.32, Au 32.72, B -; device rate: board 40.97, minion raw 34.84, A 33.18; board/minion: committed mix 1.177, A 1.236, Au 1.259, raw/raw 1.226, B -
+  fadd.pi/random/h2:
+    aifoundry3     board net 19.73 (raw 20.24); minion raw 16.25, A 15.85, Au 15.53, B 16.09; device rate: board 19.65, minion raw 16.19, A 15.79; board/minion: committed mix 1.214, A 1.245, Au 1.270, raw/raw 1.245, B 1.226
+    aifoundry1-c1  board net 19.19 (raw 19.99); minion raw 16.78, A 16.15, Au 15.75, B -; device rate: board 19.11, minion raw 16.71, A 16.08; board/minion: committed mix 1.144, A 1.189, Au 1.219, raw/raw 1.191, B -
+    aifoundry2     board net 20.58 (raw 21.74); minion raw 16.62, A 15.57, Au 14.82, B 16.08; device rate: board 20.49, minion raw 16.55, A 15.50; board/minion: committed mix 1.238, A 1.322, Au 1.388, raw/raw 1.308, B 1.280
+    3-card mean    board net 19.83 (raw 20.66); minion raw 16.55, A 15.85, Au 15.37, B -; device rate: board 19.75, minion raw 16.48, A 15.79; board/minion: committed mix 1.199, A 1.252, Au 1.292, raw/raw 1.248, B -
+
+F1 THE PAIRS POOLED OVER THREE CARDS (card-blocked, df 6; pJ an instruction, mean +- 95% half-width):
+  check against the committed anatomy.json extras.vector_pooled: max |diff| 0.0e+00 pJ
+  fadd.pi const - zeros: board +0.054 +- 0.220; minion raw +0.217 +- 0.569, A +0.281 +- 0.427, Au +0.141 +- 0.452; off-rail raw -0.123 +- 0.720, A -0.186 +- 0.534; the minion heating A itself -0.063 +- 0.293
+  fadd.pi random - zeros: board +7.154 +- 0.408; minion raw +5.975 +- 0.256, A +5.632 +- 0.213, Au +5.330 +- 0.137; off-rail raw +1.057 +- 0.450, A +1.400 +- 0.467; the minion heating A itself +0.343 +- 0.346
+  fadd.ps const - zeros: board +0.443 +- 0.442; minion raw +0.383 +- 0.308, A +0.227 +- 0.241, Au +0.154 +- 0.410; off-rail raw +0.006 +- 0.663, A +0.162 +- 0.655; the minion heating A itself +0.156 +- 0.231
+  fadd.ps random - zeros: board +18.696 +- 0.474; minion raw +15.742 +- 0.467, A +14.733 +- 0.433, Au +14.354 +- 0.417; off-rail raw +2.570 +- 0.739, A +3.578 +- 0.625; the minion heating A itself +1.008 +- 0.154
+  fmadd.ps const - zeros: board +0.147 +- 0.387; minion raw +0.096 +- 0.340, A +0.379 +- 0.336, Au +0.454 +- 0.428; off-rail raw +0.548 +- 0.826, A +0.265 +- 1.018; the minion heating A itself -0.283 +- 0.377
+  fmadd.ps random - zeros: board +28.672 +- 1.249; minion raw +23.661 +- 0.446, A +22.681 +- 0.488, Au +22.234 +- 0.570; off-rail raw +4.650 +- 1.438, A +5.630 +- 1.597; the minion heating A itself +0.980 +- 0.268
+
+F1 CARD 1 / AIFOUNDRY3 AFTER V^2, THE VECTOR MINION RAIL (0.499 / 0.523 V):
+  fmadd.ps/random/h2: raw 1.1312 (committed 1.1312), A 1.1240, Au 1.1297
+  fadd.ps/random/h2: raw 1.1430 (committed 1.1430), A 1.1293, Au 1.1305
+  fadd.pi/random/h2: raw 1.1342 (committed 1.1342), A 1.1190, Au 1.1136
+
+F2 THE VECTOR ROWS' NAMED GAP IS THE FIT'S OWN RESIDUAL:
+  36 vector rows, all in the fit's training set ({'aifoundry3': 392, 'aifoundry1-c1': 392, 'aifoundry2': 392} configurations a card; missing []); max |gap - the fit's exact residual on that row| 6.2e-15 W; against the rounded per_config 0.0015 W; the fit's rms {'aifoundry3': 0.30784475282208745, 'aifoundry1-c1': 0.477983981450813, 'aifoundry2': 0.33232207024916977}
+
+F3 AND THE FIT'S FOOTING: the TensorFMA ledgers' regulators' cross-cut by term, and the named gap under each fit (W; share of the board):
+  check against the committed cross-cuts: max |diff| 4.4e-16 W
+  E171 anchor_pi (aifoundry3, off-rail above rest 1.538 W, board 36.472): published: minion 1.572 + SRAM 0.005 + mesh 0.014 = 1.590, gap -0.052 (-0.14%); A: minion 1.881 + SRAM 0.009 + mesh 0.016 = 1.906, gap -0.367 (-1.01%); Au: minion 2.058 + SRAM 0.011 + mesh 0.017 = 2.086, gap -0.548 (-1.50%); q136b_committed: minion 1.797 + SRAM 0.008 + mesh 0.016 = 1.821, gap -0.282 (-0.77%)
+  E171 fp16.randn (aifoundry3, off-rail above rest 4.270 W, board 50.607): published: minion 3.529 + SRAM 0.008 + mesh 0.046 = 3.583, gap +0.687 (+1.36%); A: minion 4.223 + SRAM 0.014 + mesh 0.054 = 4.291, gap -0.021 (-0.04%); Au: minion 4.621 + SRAM 0.018 + mesh 0.058 = 4.696, gap -0.426 (-0.84%); q136b_committed: minion 4.036 + SRAM 0.012 + mesh 0.052 = 4.101, gap +0.170 (+0.34%)
+  E171 fp32.randn (aifoundry3, off-rail above rest 4.982 W, board 53.256): published: minion 3.863 + SRAM 0.008 + mesh 0.052 = 3.923, gap +1.059 (+1.99%); A: minion 4.623 + SRAM 0.015 + mesh 0.060 = 4.698, gap +0.284 (+0.53%); Au: minion 5.058 + SRAM 0.019 + mesh 0.064 = 5.141, gap -0.159 (-0.30%); q136b_committed: minion 4.418 + SRAM 0.013 + mesh 0.058 = 4.489, gap +0.493 (+0.93%)
+  E171 int8.full (aifoundry3, off-rail above rest 1.355 W, board 35.764): published: minion 1.483 + SRAM 0.002 + mesh 0.014 = 1.499, gap -0.144 (-0.40%); A: minion 1.774 + SRAM 0.003 + mesh 0.016 = 1.794, gap -0.439 (-1.23%); Au: minion 1.942 + SRAM 0.004 + mesh 0.017 = 1.963, gap -0.608 (-1.70%); q136b_committed: minion 1.696 + SRAM 0.003 + mesh 0.016 = 1.714, gap -0.359 (-1.01%)
+  E172 anchor_pi (aifoundry1-c1, off-rail above rest 1.078 W, board 43.257): published: minion 0.894 + SRAM 0.064 + mesh 0.016 = 0.974, gap +0.104 (+0.24%); A: minion 1.250 + SRAM 0.070 + mesh 0.020 = 1.340, gap -0.262 (-0.61%); Au: minion 1.437 + SRAM 0.074 + mesh 0.022 = 1.533, gap -0.455 (-1.05%)
+  E172 fp16.randn (aifoundry1-c1, off-rail above rest 3.289 W, board 57.153): published: minion 1.980 + SRAM 0.108 + mesh 0.059 = 2.147, gap +1.142 (+2.00%); A: minion 2.768 + SRAM 0.119 + mesh 0.075 = 2.961, gap +0.328 (+0.57%); Au: minion 3.183 + SRAM 0.125 + mesh 0.081 = 3.388, gap -0.099 (-0.17%)
+  E172 fp32.randn (aifoundry1-c1, off-rail above rest 3.708 W, board 59.745): published: minion 2.191 + SRAM 0.124 + mesh 0.061 = 2.376, gap +1.333 (+2.23%); A: minion 3.062 + SRAM 0.137 + mesh 0.078 = 3.276, gap +0.433 (+0.72%); Au: minion 3.521 + SRAM 0.144 + mesh 0.084 = 3.748, gap -0.040 (-0.07%)
+  E172 int8.full (aifoundry1-c1, off-rail above rest 0.907 W, board 42.599): published: minion 0.831 + SRAM 0.026 + mesh 0.014 = 0.871, gap +0.036 (+0.09%); A: minion 1.162 + SRAM 0.029 + mesh 0.017 = 1.208, gap -0.301 (-0.71%); Au: minion 1.336 + SRAM 0.030 + mesh 0.019 = 1.385, gap -0.478 (-1.12%)
+  E78 anchor_pi (aifoundry3, off-rail above rest 1.378 W, board 36.422): published: minion 1.602 + SRAM 0.005 + mesh 0.014 = 1.621, gap -0.242 (-0.67%); A: minion 1.917 + SRAM 0.009 + mesh 0.016 = 1.942, gap -0.564 (-1.55%); Au: minion 2.098 + SRAM 0.011 + mesh 0.017 = 2.126, gap -0.748 (-2.05%); q136b_committed: minion 1.832 + SRAM 0.008 + mesh 0.016 = 1.855, gap -0.477 (-1.31%)
+  E78 fp16.neg_ones (aifoundry3, off-rail above rest 1.495 W, board 36.513): published: minion 1.572 + SRAM 0.005 + mesh 0.015 = 1.592, gap -0.097 (-0.27%); A: minion 1.881 + SRAM 0.009 + mesh 0.018 = 1.908, gap -0.413 (-1.13%); Au: minion 2.058 + SRAM 0.012 + mesh 0.019 = 2.089, gap -0.593 (-1.62%); q136b_committed: minion 1.798 + SRAM 0.008 + mesh 0.017 = 1.823, gap -0.328 (-0.90%)
+  E78 fp16.ones (aifoundry3, off-rail above rest 1.439 W, board 36.523): published: minion 1.584 + SRAM 0.005 + mesh 0.016 = 1.606, gap -0.167 (-0.46%); A: minion 1.896 + SRAM 0.009 + mesh 0.019 = 1.925, gap -0.486 (-1.33%); Au: minion 2.075 + SRAM 0.012 + mesh 0.020 = 2.107, gap -0.668 (-1.83%); q136b_committed: minion 1.812 + SRAM 0.008 + mesh 0.019 = 1.839, gap -0.400 (-1.10%)
+  E78 fp16.randn (aifoundry3, off-rail above rest 4.342 W, board 50.596): published: minion 3.513 + SRAM 0.008 + mesh 0.046 = 3.566, gap +0.776 (+1.53%); A: minion 4.204 + SRAM 0.014 + mesh 0.053 = 4.271, gap +0.071 (+0.14%); Au: minion 4.600 + SRAM 0.018 + mesh 0.056 = 4.674, gap -0.332 (-0.66%); q136b_committed: minion 4.018 + SRAM 0.012 + mesh 0.051 = 4.081, gap +0.261 (+0.52%)
+  E78 fp32.neg_ones (aifoundry3, off-rail above rest 1.549 W, board 36.485): published: minion 1.567 + SRAM 0.005 + mesh 0.014 = 1.586, gap -0.037 (-0.10%); A: minion 1.875 + SRAM 0.009 + mesh 0.016 = 1.901, gap -0.351 (-0.96%); Au: minion 2.052 + SRAM 0.012 + mesh 0.017 = 2.081, gap -0.531 (-1.46%); q136b_committed: minion 1.792 + SRAM 0.008 + mesh 0.016 = 1.816, gap -0.267 (-0.73%)
+  E78 fp32.ones (aifoundry3, off-rail above rest 1.439 W, board 36.528): published: minion 1.591 + SRAM 0.005 + mesh 0.017 = 1.614, gap -0.175 (-0.48%); A: minion 1.905 + SRAM 0.009 + mesh 0.020 = 1.934, gap -0.494 (-1.35%); Au: minion 2.084 + SRAM 0.011 + mesh 0.022 = 2.117, gap -0.677 (-1.85%); q136b_committed: minion 1.820 + SRAM 0.008 + mesh 0.020 = 1.848, gap -0.408 (-1.12%)
+  E78 fp32.pi (aifoundry3, off-rail above rest 1.475 W, board 36.559): published: minion 1.581 + SRAM 0.005 + mesh 0.016 = 1.602, gap -0.127 (-0.35%); A: minion 1.893 + SRAM 0.010 + mesh 0.018 = 1.920, gap -0.445 (-1.22%); Au: minion 2.071 + SRAM 0.012 + mesh 0.019 = 2.102, gap -0.627 (-1.72%); q136b_committed: minion 1.809 + SRAM 0.008 + mesh 0.018 = 1.835, gap -0.360 (-0.98%)
+  E78 fp32.randn (aifoundry3, off-rail above rest 4.885 W, board 53.270): published: minion 3.884 + SRAM 0.008 + mesh 0.052 = 3.944, gap +0.941 (+1.77%); A: minion 4.648 + SRAM 0.015 + mesh 0.060 = 4.723, gap +0.162 (+0.30%); Au: minion 5.086 + SRAM 0.019 + mesh 0.064 = 5.169, gap -0.284 (-0.53%); q136b_committed: minion 4.442 + SRAM 0.013 + mesh 0.058 = 4.513, gap +0.372 (+0.70%)
+  E78 int8.full (aifoundry3, off-rail above rest 1.336 W, board 35.785): published: minion 1.493 + SRAM 0.002 + mesh 0.015 = 1.509, gap -0.173 (-0.48%); A: minion 1.786 + SRAM 0.003 + mesh 0.017 = 1.807, gap -0.470 (-1.31%); Au: minion 1.954 + SRAM 0.004 + mesh 0.018 = 1.977, gap -0.640 (-1.79%); q136b_committed: minion 1.707 + SRAM 0.003 + mesh 0.017 = 1.726, gap -0.390 (-1.09%)
+  E78 int8.neg_ones (aifoundry3, off-rail above rest 0.529 W, board 30.280): published: minion 0.657 + SRAM 0.000 + mesh 0.001 = 0.659, gap -0.130 (-0.43%); A: minion 0.787 + SRAM 0.001 + mesh 0.001 = 0.789, gap -0.260 (-0.86%); Au: minion 0.861 + SRAM 0.001 + mesh 0.001 = 0.863, gap -0.334 (-1.10%); q136b_committed: minion 0.752 + SRAM 0.001 + mesh 0.001 = 0.754, gap -0.225 (-0.74%)
+  E78 int8.ones (aifoundry3, off-rail above rest 0.439 W, board 30.246): published: minion 0.668 + SRAM 0.001 + mesh 0.000 = 0.669, gap -0.230 (-0.76%); A: minion 0.800 + SRAM 0.001 + mesh 0.000 = 0.801, gap -0.361 (-1.20%); Au: minion 0.875 + SRAM 0.001 + mesh 0.000 = 0.876, gap -0.437 (-1.44%); q136b_committed: minion 0.764 + SRAM 0.001 + mesh 0.000 = 0.765, gap -0.326 (-1.08%)
+  E82 anchor_pi (aifoundry1-c1, off-rail above rest 1.092 W, board 43.338): published: minion 0.887 + SRAM 0.074 + mesh 0.009 = 0.969, gap +0.122 (+0.28%); A: minion 1.239 + SRAM 0.081 + mesh 0.011 = 1.332, gap -0.240 (-0.55%); Au: minion 1.425 + SRAM 0.085 + mesh 0.012 = 1.523, gap -0.431 (-0.99%)
+  E82 fp16.neg_ones (aifoundry1-c1, off-rail above rest 1.150 W, board 43.382): published: minion 0.877 + SRAM 0.050 + mesh 0.015 = 0.942, gap +0.208 (+0.48%); A: minion 1.226 + SRAM 0.055 + mesh 0.019 = 1.300, gap -0.150 (-0.34%); Au: minion 1.410 + SRAM 0.058 + mesh 0.021 = 1.488, gap -0.338 (-0.78%)
+  E82 fp16.ones (aifoundry1-c1, off-rail above rest 1.105 W, board 43.357): published: minion 0.865 + SRAM 0.066 + mesh 0.016 = 0.947, gap +0.159 (+0.37%); A: minion 1.209 + SRAM 0.072 + mesh 0.020 = 1.302, gap -0.196 (-0.45%); Au: minion 1.390 + SRAM 0.076 + mesh 0.022 = 1.488, gap -0.383 (-0.88%)
+  E82 fp16.randn (aifoundry1-c1, off-rail above rest 3.236 W, board 57.192): published: minion 1.999 + SRAM 0.108 + mesh 0.049 = 2.157, gap +1.080 (+1.89%); A: minion 2.794 + SRAM 0.119 + mesh 0.063 = 2.976, gap +0.261 (+0.46%); Au: minion 3.213 + SRAM 0.125 + mesh 0.068 = 3.406, gap -0.169 (-0.30%)
+  E82 fp32.neg_ones (aifoundry1-c1, off-rail above rest 1.065 W, board 43.250): published: minion 0.877 + SRAM 0.066 + mesh 0.017 = 0.959, gap +0.106 (+0.24%); A: minion 1.226 + SRAM 0.072 + mesh 0.021 = 1.319, gap -0.254 (-0.59%); Au: minion 1.410 + SRAM 0.076 + mesh 0.023 = 1.508, gap -0.443 (-1.03%)
+  E82 fp32.ones (aifoundry1-c1, off-rail above rest 1.133 W, board 43.287): published: minion 0.863 + SRAM 0.064 + mesh 0.016 = 0.943, gap +0.190 (+0.44%); A: minion 1.206 + SRAM 0.071 + mesh 0.020 = 1.297, gap -0.164 (-0.38%); Au: minion 1.387 + SRAM 0.074 + mesh 0.022 = 1.483, gap -0.350 (-0.81%)
+  E82 fp32.pi (aifoundry1-c1, off-rail above rest -0.045 W, board 43.440): published: minion 0.998 + SRAM 0.068 + mesh 0.016 = 1.082, gap -1.127 (-2.60%); A: minion 1.395 + SRAM 0.075 + mesh 0.020 = 1.490, gap -1.535 (-3.53%); Au: minion 1.604 + SRAM 0.078 + mesh 0.022 = 1.705, gap -1.750 (-4.03%)
+  E82 fp32.randn (aifoundry1-c1, off-rail above rest 3.718 W, board 59.791): published: minion 2.193 + SRAM 0.119 + mesh 0.062 = 2.373, gap +1.345 (+2.25%); A: minion 3.065 + SRAM 0.130 + mesh 0.078 = 3.274, gap +0.445 (+0.74%); Au: minion 3.524 + SRAM 0.137 + mesh 0.085 = 3.746, gap -0.028 (-0.05%)
+  E82 int8.full (aifoundry1-c1, off-rail above rest 0.914 W, board 42.650): published: minion 0.836 + SRAM 0.029 + mesh 0.015 = 0.880, gap +0.034 (+0.08%); A: minion 1.169 + SRAM 0.031 + mesh 0.019 = 1.219, gap -0.306 (-0.72%); Au: minion 1.344 + SRAM 0.033 + mesh 0.020 = 1.398, gap -0.484 (-1.13%)
+  E82 int8.neg_ones (aifoundry1-c1, off-rail above rest 0.373 W, board 37.480): published: minion 0.381 + SRAM 0.014 + mesh 0.001 = 0.396, gap -0.023 (-0.06%); A: minion 0.532 + SRAM 0.015 + mesh 0.001 = 0.549, gap -0.176 (-0.47%); Au: minion 0.612 + SRAM 0.016 + mesh 0.001 = 0.630, gap -0.257 (-0.68%)
+  E82 int8.ones (aifoundry1-c1, off-rail above rest 0.369 W, board 37.285): published: minion 0.364 + SRAM 0.013 + mesh 0.001 = 0.377, gap -0.008 (-0.02%); A: minion 0.508 + SRAM 0.014 + mesh 0.001 = 0.523, gap -0.154 (-0.41%); Au: minion 0.584 + SRAM 0.015 + mesh 0.001 = 0.600, gap -0.231 (-0.62%)
+
+F5 CARD 1 / AIFOUNDRY3 AT THE BOARD AFTER V^2:
+  E82 (31 Oct, README lines 20 and 298-299): (0.5217 / 0.4987)^2 / 1.031 = 1.0615
+  pool 8 anchor_pi: raw 0.9571; after V^2 at the items' own volts (0.522 / 0.499) 1.0474; at E82's 1.0474
+  pool 8 fp16.randn: raw 0.9657; after V^2 at the items' own volts (0.521 / 0.498) 1.0570; at E82's 1.0569
+  pool 8 fp32.randn: raw 0.9655; after V^2 at the items' own volts (0.521 / 0.498) 1.0567; at E82's 1.0566
+  pool 8 int8.full: raw 0.9496; after V^2 at the items' own volts (0.522 / 0.499) 1.0392; at E82's 1.0392
+  E78/E82 fp32.ones: raw 0.9516; after V^2 1.0414; at E82's volts 1.0414
+  E78/E82 fp32.neg_ones: raw 0.9363; after V^2 1.0246; at E82's volts 1.0246
+  E78/E82 fp32.pi: raw 0.9571; after V^2 1.0474; at E82's volts 1.0475
+  E78/E82 anchor_pi: raw 0.9650; after V^2 1.0560; at E82's volts 1.0560
+  E78/E82 fp32.randn: raw 0.9621; after V^2 1.0531; at E82's volts 1.0529
+  E78/E82 fp16.ones: raw 0.9383; after V^2 1.0268; at E82's volts 1.0269
+  E78/E82 fp16.neg_ones: raw 0.9564; after V^2 1.0466; at E82's volts 1.0467
+  E78/E82 fp16.randn: raw 0.9626; after V^2 1.0536; at E82's volts 1.0535
+  E78/E82 int8.full: raw 0.9577; after V^2 1.0481; at E82's volts 1.0481
+
+F7 THE NITS:
+  (a) the virus loop: 24 fmadd.ps a block (12 pairs, destinations f4-f27), the block run 20 times = 240 pairs (480 instructions) before each gold check; the triples alternate across block boundaries too: True
+  (b) books: TensorFMA ledgers 1.4e-14 W, vector ledgers 6.7e-07 W
+  (c) the SRAM 0.54 s arm moves the SRAM lines by at most 0.0275 W
+  (d) the NoC data line over every non-zeros item: 0.010 to 0.357 W; by session {"E171": [0.041, 0.191], "E172": [0.077, 0.357], "E78": [0.01, 0.194], "E82": [0.031, 0.342]}
+  (e) volts: E171 fp32.randn {'input_nominal': 12.0, 'minion': 0.521, 'noc': 0.484, 'sram': 0.698}, E172 fp32.randn {'input_nominal': 12.0, 'minion': 0.498, 'noc': 0.486, 'sram': 0.751}; sessions' mean minion 0.5216062686567164 / 0.4986582329317269; data minion 17.585 nJ an op = 2.1067e+11 electrons at the item's volts, 2.1043e+11 at 0.5216 V
+  (f) awake: sram 0.0719 W at 0.698 V = 5.754e+08 electrons; noc -0.0160 W at 0.484 V = -1.852e+08 electrons
+  (f) data: sram 0.1216 W at 0.698 V = 9.730e+08 electrons; noc 0.1913 W at 0.484 V = 2.208e+09 electrons
+
+INPUTS (sha256): {"docs/reports/data/2026-09-23-energy-manual/catalogue.json": "1186a9764838330369bc87f90f9ed4aed03d9d1373fd3185a8f107cf2eb1a7ae", "docs/reports/data/2026-09-23-energy-manual/unmetered_fit.json": "80910974fd2b4687a7a8da4dc29d193446e51cddbbbb429df512e659e730b8b0", "docs/reports/data/2026-11-02-q136b-rail-row/recut.json": "91d82c1ae45a1ef568b2391a8c02e49162f96898664f2f559969b8650b5a35b0", "docs/reports/data/2026-11-05-e171-blind8-aifoundry3/e171.json": "da1be39fa1992a60ccbce1e6743c03c38fee5b1ea3a045e1e2f49fa6289b7f8f", "docs/reports/data/2026-11-05-e172-blind8-card1/e172.json": "ed95819b4c6fb843b8fa49a94acd07919681050a5a398172cd7a2479bece2c0b", "docs/reports/data/2026-11-05-q145a-anatomy-top-lines/anatomy.json": "429f3c6c033345cdaa2f74efaadf8db2244dcd27a1b73abc81704b82d6e6ecb6", "external/et-platform/test-compute-kernels/src/vpu_txfma_power_virus/kernel.h": "24c8ce520abd1863fef2703fb6a25fe577b9383f794b0696d223a50e1cd64715", "raw_catfull_telemetry_blocks": {"aifoundry1-c1": 9, "aifoundry2": 9, "aifoundry3": 9}}
