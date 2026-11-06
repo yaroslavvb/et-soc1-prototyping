@@ -948,7 +948,7 @@ law into watts, a clock and a die temperature for a whole load. Four predictions
 blind**: the session read the four experiments' records while choosing their operating points, and three
 constants in the model come from those same held-out loads (`load_model.HELD_OUT_LEAKS` names them; E39's
 own rail voltage made E39's worst number worse, not better). `LM` means
-`docs/reports/data/2026-10-26-load-model/`.
+`docs/reports/data/2026-10-26-load-model/`. *(Dated, Fri 6 Nov 2026, Q148(r)'s records: the joined model is retired on the owner's word of 5 November 2026 (02's Q147, item 8): the post's question is served by M10, the heat laws and E178, and a whole-workload predictor lies outside it. Its held-out scores below stay as frozen; [the dated note](../reports/data/2026-10-26-load-model/README.md.dated-note-1.md) says what would revive it.)*
 
 | Claim | Value | Kind | Source | Verify at |
 |---|---|---|---|---|
@@ -4273,6 +4273,134 @@ which writes no lab file; Q146, one-number matrices, which registers E178 at the
 
 **Not established by Q143.** Any M11 reading of heat over minutes; whether G0's line or the warm pattern should move; int8 on aifoundry2's
 governed line; whether HC1 or I8P would enter on a second card-1 session.
+
+## Q145, Q146 and Q147: the stock-take's first steps, the one-number forecasts, the owner's answers, and E178–E181 registered and kitted, none run (Thu 5 – Fri 6 Nov 2026, week 45, from about 18:53 to 05:15 PST; desk only)
+
+No card ran in this span, so **nothing here is blind**. Each claim is labelled **registered** (committed before any data of its run:
+E178's and E180's forecasts, the footing law FL1–FL6, M11's A6–A9, the dip term and its A1, term S), **held out** (term S on the price
+lists, leave one list out) or **post hoc** (read on data that existed first: the anatomy, the law's study, the floor, the dips' re-scores,
+term S on pool 8, "M10 on the law", the firmware study's card check). No committed verdict changes; M10, M9 and every frozen file stay as
+committed. The per-electron model is named **october-forecast-model** in public text from the owner's answer of 5 November about 22:35 PST
+(02's Q147); its freeze line is not committed, so none of its numbers appear here. Short names: `ANAT/` is
+`docs/reports/data/2026-11-05-q145a-anatomy-top-lines/`, `FLD/` `…-q145a-footing-law/`, `FLOOR/` `…-q145a-a3-idle-floor/`, `DIPS/`
+`docs/reports/data/2026-11-06-q145b-dips-posthoc/`, `MS/` `…-q145b-m10-s/`; `FL/` is `tools/claims-v3/footing-law/` and `DT/`
+`tools/claims-v3/dipterm/`. 🛑 **To carry from here:** (82) **adding is not null** (E178's A1-2): the float write-back returns to zero
+between results, so a one-number float add pays a popcount-of-the-result term; never "the vector add's null"; (83) **E178's and E180's
+figures are registered forecasts, not measurements**, and E180's pair power is A1's sentence, never 0.88 alone; (84) **E179 is assigned,
+not registered, not built, not run**, never "failed"; (85) **the anatomy's minion-rail data line is 36.9% of the board on the registered
+footing (36.2–37.5% across the footing law's slope and the minion rail's share of the leakage rise)**, measured net of a modelled leakage
+correction, and its named gap is footing-bound, never "2%"; (86) **the dip term moves six rules, three better and three worse**: quote all
+six; DT-N is a rate check, never "the dips are predicted"; (87) **"M10 on the law" is post hoc**: "M10's lead over M9 does not hang on the
+footing (post hoc)", never blind, and it does not trigger FL3's switch (FL's dated note 2); (88) **term S does not enter**; (89) **one
+footing per `fmadd.ps` pair:** 55.8 pJ at the board with 44.4 pJ on the minion rail (both net, footing A), or 57.9 with 46.6 pJ (both raw),
+never 55.76 with 46.57 or 46.38; (90) **the per-electron model is october-forecast-model**, and its numbers follow only its committed freeze
+line.
+
+### What was registered, before any data of its run
+
+| What | Registered | Kind | Verify at |
+|---|---|---|---|
+| **E178**, one-number matrices on the TensorFMA (Q146) | 40 kinds (int8 1–8, 85, 127, −1, 4 × 5 both ways; fp32 and fp16 0.5–8, −1, 4 × 5; fp32 1.5 × 2⁻⁶⁴); flips per op forecast by an exact model of the operand and partial-sum bit sequences and the toggle bench, watts by M10's prices: **int8 5s against 4s 23,360 against 10,240 flips, +0.186 W** (power 0.90 at 4 kept passes); fp32 +0.010 W and fp16 +0.017 W, below resolution; int8 85s against neg_ones +0.355 W (E178-S-int8, power 0.93); int8 85s against 1s +0.465 W; int8 1, 2, 4 and 8 identical; about 7.5 fJ a flip (`48171930`, A1 `f421c67a`, A2 `c212a345`; kit `a4aafc6f` with note 1 `763307e7`) | P (registered) | `tools/claims-v3/e178/E178.md`, its dated notes A1 and A2, `KIT.md` and its dated note 1 |
+| **E180**, one-number vector adds (Q146(f)) | his pair, 5 + 5 = 10.0 (three 1-bits) against 4 + 4 = 8.0 (two): **+0.1649 W** at the main price (arms +0.019 to +0.220 W), 24.995 flips per result bit per instruction, from the result wires returning to zero in the vector unit's write gaps; the ladder about +0.165 W a result bit (0.5s +1.15 W and 8s +0.49 W over zeros); the integer add flat; c += v +2.96 W over the plain add (A1's band +0.75 to +4.26 W); its rule's power as A1 words it, "POSITIVE 0.37–0.88 if P's price is right (about 0.75 at the debiased noise, 0.47 under the catalogue pairs' heavy tail), 6 passes" (`4dc5035f`, kit `c92f627b`, A1 `879197e3`, kit v2 `90a1312f`) | P (registered) | `tools/claims-v3/e180/E180.md`, its dated note A1, `KIT.md` and its dated note 1 |
+| **The footing law** (Q145(a)) | FL1 one quasi-static leakage law per card at its idle operating point (aifoundry3 0.3509 W/°C at 58 °C on the firmware reading, nine cycles; card 1 0.4757, three; aifoundry2 0.3381, eighteen); FL2 the heat chain's loop keeps E97's law; FL3 a session's slope k_s = k_c(T_mid) (E171 0.36007 at 58.775 °C, E172 0.49300 at 58.85 °C), a registered arm of every 600 MHz kinds session registered after it until "M10 on the law" is frozen for a pool; FL4 the scale at the law's k; FL5 the checks; FL6 aifoundry2's governed bursts and card 0 unchanged. Registered 22:46:56 PST on 5 Nov, **corrected by its dated note 1 at 00:28:50 PST before any session it governs**: FL2's self-check FAILS in one die coordinate; FL5(a) and (c) set in one coordinate; FL3 does not bind E178, registered before it (`c14e5f35`, `65a93fbb`) | P (registered) | `FL/FOOTING-LAW.md` and its dated notes 1 and 2 |
+| **M11's A6–A9** (Q145(a); E181's kit round) | A6: G0 referred to the card's own floor F0 (the room at most 53.9 °C and at most 0.50 °C over F0, a pre-smoke stop above 53.9 °C, the warm pattern to 53.9, a cool-hour plan); A7: A6-5 in one coordinate, "settled" where meant, an hour's rest in the plan; A8: the residue line referred to the prediction, room − F0 − 0.414 ≤ 0.50 °C (the smoke's predicted residue 0.414 °C; the committed misses' sd 0.128 °C); A9: a REPORTED two-pass arm for A8-6 (`95c75047`, `65a93fbb`, `80b92990`, `cd5bed77`) | P (registered) | `tools/claims-v3/m11/REGISTRATION.md.dated-note-A6.md` to `-A9.md` |
+| **The dip term DT** (Q145(b)) | the governor's idle-reset falls as a counted session term: expected falls = the inter-launch gaps where a fall can show over the card's heartbeat period, the lattice phase an in-session calibration; F2, C0-F and G scored on the predicted clock, dipped launches carried into Bp; amended by **A1** (`3002edaf`, before any session it governs): a fall is a launch at 0.55–0.62 GHz after one at full clock (≥ 0.79), or after one at ≥ 0.65 GHz in a process whose ring shows no governor or alarm step; burst blocks only; the calibration's first fall in a clear process (`7a099fb9`, notes 1–5, scorer v4 with `SHA256SUMS-5`) | P (registered) | `DT/REGISTRATION.md` and its dated notes 1–5 |
+| **Term S** (Q145(b)) | a per-position single-high-B-bit term for M10 by format and clock, fitted nested (leave one run out) on the committed single-bit price lists, with its entry rules E1–E3 (`dfc005bf`, code `23e23210`) | P (registered) | `tools/claims-v3/m10-s/REGISTRATION.md` and its dated notes 1 and 2 |
+| **Kit v4's one kernel a burst** (Q145(b)) | an option, new driver files with a desk test and a dry pass only; no kit uses it, no card has run it (`f64ab6cd`, `7a7464c7`) | design | `tools/claims-v3/kitv4-onekernel/README.md` and its dated note 1 |
+
+### The anatomy of one TensorFMA step: every place its energy goes (post hoc; Q145(a))
+
+One random fp32 TensorFMA step on aifoundry3 (E171; a 16 × 16 × 16 tile, 4,096 multiply-adds) costs **47.67 nJ at the board, 11.64 pJ a
+MAC**; card 1 (E172) reads 53.48 nJ, 13.06 pJ a MAC. Read after the fact from each card's own meters (`ANAT/README.md`, `anatomy.json`, its
+dated notes 1 and 2):
+
+| Where it goes, aifoundry3 | Share of the board | Label |
+|---|---|---|
+| At rest, off the three metered rails (DRAM and its interface, PCIe and I/O, the IO shire, PLLs, the regulators' own draw) | 24.4% | measured |
+| At rest, the minion rail | 15.6% | measured (the regulator's telemetry, its scale not calibrated against the board meter) |
+| At rest, the SRAM rail (the shire SRAM, as L2, L3 or scratchpad) | 4.2% | measured |
+| At rest, the NoC rail | 4.9% | measured |
+| Awake on zeros, the minion rail (issuing, the tensor state machines, the L1 scratchpad's reads of zero words, the core's clocks) | 3.2% | measured |
+| Awake on zeros, SRAM, NoC and off-rail together | 0.6% | measured |
+| **The minion rail's data-dependent switching** (17.6 nJ, 2.1 × 10¹¹ electrons a step at 0.52 V; the L1 scratchpad's data bits among it) | **36.9%** (36.2–37.5%) | measured, net of a modelled leakage correction |
+| Data-dependent, the SRAM and NoC rails | 0.6% | measured, raw |
+| Off-rail in step with the work (mostly the regulators' loss on the extra minion watts) | 8.9% | measured as a remainder |
+| The 2 s window's own heating | 0.9% | modelled (the footing slope × the measured rise) |
+
+The lines add up to the board exactly. Cross-cuts: the regulators' conversion loss is 7.3% by the published fit, 8.7% on footing A; the
+named gap, off-rail above rest less the whole fit, is 2.0% on the fit as published and 0.5% on footing A (−0.3% to +0.9% across the lab's
+net footings: footing-bound); "the temperature-dependent part of rest by the idle law, most of it the die's leakage" is 26.1%. The host's
+supply and fans are outside the card's meter and unmeasured; the card is assumed fanless. On the minion rail's data line, the band
+36.2–37.5% is round A's critic's own reading (0.391 W lower at the footing law's k_s 0.36007, 0.314 W higher at the rail ledger's 0.32
+share of the leakage rise); the c_rb sensitivity of that line is +0.31 W (1.6% of the line), not "about 0.23 W (1.2%)". The minion rail
+carries 79–85% of D on aifoundry3 and 81–94% on card 1, which corrects the stock-take's 81–86%. Card 1 against aifoundry3 after each card's
+V²: the data-dependent minion rail 1.08–1.10, the board 1.039–1.057, just below E82's interquartile range (1.058–1.068) and inside its
+extremes, the cause not placed. The heat's split, 65% on the rails and 34% off them, rests on the regulators' uncalibrated scale (each 1%
+moves it about 0.65 points). **The split inside the logic** (gate charge, wires, internal and short-circuit energy, glitches, the lane clock
+tree, leakage by kind) is **pending: october-forecast-model's**, once its freeze line is committed.
+
+**One-number differences (post hoc).** Only the minion rail's data line resolves one on the TensorFMA: int8 −1 against 1 reads
+**+0.093 ± 0.018 W** on aifoundry3 (E78) and **+0.162 ± 0.063 W** on card 1 (E82), positive in every pass; the board's D cannot (±0.12 W).
+The rail is finer than D for the int8 pair only. fp32 and fp16 1.0 against −1.0 read zero; fp32 pi against 1.0 is not resolved. The vector
+unit's const (1.0f) against zeros resolves nothing per card or pooled on any footing (the board, `fadd.ps` +0.44 ± 0.44 pJ; the minion
+rail only net of its heating, +0.23 ± 0.24 pJ), and 4s against 5s on the vector unit is unmeasured: E180 owns it. **The vector arm's public
+facts (post hoc):** the public TXFMA power virus flips 334 (hart 0) and 348 (hart 1) operand-port bits an instruction, 318–352 if the
+harts interleave, against 286.7 for the lab's random rotation and 0 for its constant; the lab's random `fmadd.ps` is 55.8 pJ at the board
+with 44.4 pJ on the minion rail (both net, footing A; board over rail 1.264 / 1.217 / 1.285 by card), or 57.9 with 46.6 pJ (both raw);
+issue rate 0.730 per minion-cycle; `nop` 0.390 per hart-cycle; 102 of the 150 random-data two-hart rows at 0.30–0.45 (another selection
+than the stock-take's 113 of 163, not a correction).
+
+### The leakage law and aifoundry3's idle floor (post hoc beside the registrations; Q145(a))
+
+| Claim | Value | Kind | Source |
+|---|---|---|---|
+| **One quasi-static leakage law per card** | aifoundry3 0.351 W/°C at 58 °C on the firmware reading, card 1 0.476; read in one die coordinate, E97's rests sit 0.005–0.015 W/°C above it at 55–62 °C, about what its own two seasons differ by, so **FL2's registered 0.01 line is exceeded over part of that range**; the in-pass and in-run slopes are consistent with it but not measured in-run; only it closes E97's steady heat balance (0.99–1.00). Never "within 0.0028", "two sensors, one law", "never fitted before", "physically identified" or "answered at the desk" | post hoc | `FLD/README.md`, `fl7/`, its dated note 1 |
+| Card 1's first board-power slope at 58–62 °C | 0.531 W/°C, stated as such (E44's IDLE-a fitted the same cycles as a residual over aifoundry2's September law) | post hoc | the same |
+| E60 | kept in the governor model, which was fitted with it; possibly understated at 800 MHz; open | post hoc | the same |
+| The estimators | a quantisation-only model of the in-run fits reads 1.8–3.2× below the observed medians, so dilution does not explain them | post hoc | the same |
+| **The footing caveat** (round A's fix, quoted in full) | "M1 BETTER, A1 BETTER and KA PASS on the registered footing; with the session's own leakage slope, M1, M1f and A1 read NOT RESOLVED and KA FAILS. Post hoc (6 Nov): those arms mixed footings; to first order a footing shared by model and data is a common gain, under which a first-order companion reads M1 BETTER (E171 by a hair: its interval ends at −0.004 W), A1 BETTER and KA PASS on both cards; that shows the verdicts do not hang on a shared footing, not that the leakage law is right; the exact refit, M10 on the law, is owed." Beside it, E172's plain-law arm reads M1i WORSE (+0.0093 W) and E171's P2 goes FAIL → PASS | blind, then post hoc | `FLD/README.md` and its dated note 1 |
+| **aifoundry3's floor** | the room amplified by the card's own leakage loop: E176's +2.314 °C against E144 is +1.922 °C of room and +0.392 °C the card's own (board +0.45 W); settled November floors by hour, on the firmware reading: 48–49 °C before noon, 50–51 °C from 12 to 17 h, 50–52 °C after 17 h. G0-A6 would pass every settled (at least an hour's rest) November floor, 12 of 12; of all 24, 22 (G0 21). M6's slowest pole bounds an earlier run's tail only on a settled card (0.023 °C at an hour, not 0.005); two floors after 40–41 minutes of rest read 3–4 °C up, the cause not identified. Card to card: "process spread or card 1's older firmware's idle state, not voltage". The residue line's margin was 0.07 °C over the worst committed residue (0.43 °C) until A8 referred it to the prediction | post hoc | `FLOOR/README.md` and its dated note 1; M11's A8 |
+
+### Round B: the dips, class S and "M10 on the law" (Q145(b))
+
+| Claim | Value | Kind | Source |
+|---|---|---|---|
+| **The dip term on E173–E175, all six rules** (seq arm, A1, 4,000 draws, Monte Carlo se) | where a session's first fall came early, the term turns three rules from FAIL to PASS: E173's F2 **7.01 → 2.07 ± 0.02 MHz** and its Bp **1.094 → 0.894 W**, E174's C0-F **4.54 → 2.80 ± 0.01 MHz**; on E175, whose first usable fall came at burst 87 of 126, **all three of its rules read worse**: G 4.49 → 5.18 MHz (FAIL; seq-gc 4.77, reported), F2 1.24 → 3.18 MHz (still PASS), Bp 0.668 → 0.918 W (FAIL stays FAIL). The committed verdicts stand: never "the dips are solved" or "F2 passes" | post hoc | `DIPS/README.md.dated-note-1.md`, `posthoc-dips-a1.txt` |
+| The count | DT-N is a rate check, "the count matches the gaps": 5 against 6.11, 6 against 5.79, 3 against 4.40 expected; DT-L PASS on E173 (4 of 4, PPV 0.57) and E174 (4 of 5, PPV 0.57), NOT SCORED on E175. The registered fall rule fails on Q132(g)'s six sessions (188 falls against 27.3); A1 passes them (23 against 22.3), but its count where no ring is clear equals Q132(g)'s own rule session by session (2, 2, 5, 7, 5, 2), so that pass largely restates Q132(g)'s count (23 against 21.6). E100 pooled over its five gapped arms reads 60 falls against 47.7 (P 0.048): never "reproduces". The two falls A1 drops sit on the lattice (0.89 and 0.17 ms off). The study's F2 1.58 was one favourable seed (1.67 for the registered rule at 4,000 draws). A governed fall costs 0.58–0.75 of the term's figure (mean 0.67, n 3) | post hoc | the same; `DT/REGISTRATION.md.dated-note-4.md` |
+| The late climbs at a process start | at the sampler's resolution (one 0.1 s sample past the edge) the oracle lattice predicts 0 / 1 / 1 on E173 / E174 / E175 and the telemetry shows 0 / 2 / 1, so the registered start climb fits to the sampler's resolution on both cards; this replaces the dip study's result 7 ("0.12, 7.20 and 0.55 expected against 3, 3 and 5 seen") | post hoc (oracle lattice) | `DIPS/README.md.dated-note-2.md` |
+| Card 0's fall and aifoundry2's pass | card 0's fall is over-stated +2.9 MHz with the registered climb and −0.6 MHz with A1-5's (in sample); aifoundry2's SP pass under the 10 Hz sampler is about 0.165 s | post hoc | `DT/climb-c0-a1.txt`; the meter's note 2 |
+| **Term S** | does not enter: on the 95 steps as run and the 99 of section 3.1 (E67's four single-B-bit steps included), S0 0.222 / 0.218 → S3 0.179 W; E1 −0.043 / −0.040 holds by its registered step bootstrap but, resampled by list, reaches +0.002 / +0.009 W, so the gain is not resolved by list; E2 fails (card 1 +0.018 / +0.008) and E3 fails (+0.008). Strike "E67 has no B single bit" and "no E67 item passes" everywhere. S0 is "M10 as frozen", in sample for M10 on 25 of the 95 steps (0.004 W of optimism) | held out | `MS/term-s-reg.json`, `note2-*`; `tools/claims-v3/m10-s/REGISTRATION.md.dated-note-2.md` |
+| Term S on pool 8 | moves every class-S figure the wrong way: 0.273 → 0.357 and 0.238 → 0.323 W at 600 MHz, +1.06 → +1.18 and +0.71 → +0.83 W at the cap, B1 +0.092 → +0.120 and +0.105 → +0.132 W | post hoc | `MS/README.md` |
+| **Where class S's miss sits** | M10 misses tiles whose lanes each hold a constant word by about +0.07 W, whether the lanes hold one word or eight (eight: 3 rows, card 1), and prices a bit's own step about 0.10 W higher with eight lane words than with one (−0.07 against +0.03 W); never the README's "the miss follows one word in every lane, not the bit position" unqualified. The A-word hint fails (A = pi −0.438 W over 5 steps, E67's word +0.002 over 4). The band, computed post hoc, widens 0.31–0.41 → 0.53–0.55 W; the exponent bits' measured steps 0.74–1.10 W | post hoc | `MS/posthoc-structure.txt`, the data README's dated note 1 |
+| **"M10 on the law"** | with every training session re-reduced by FL3 and M10 and M9 both refitted, P8-M1 reads BETTER on both cards: −0.052 W [−0.105, −0.003] on aifoundry3 (narrow: the upper end −0.002 to −0.003 across seeds; no single tile left out flips it) and −0.091 W [−0.144, −0.040] on card 1; M1f and A1 BETTER, M1i NOT RESOLVED. **M10's lead over M9 does not hang on the footing (post hoc).** FL3 moves E78's pass gate in nine sessions (E141 keeps 1 of 4, E163 1 of 3); `m10-law.json` is not frozen for a pool, so it does not switch FL3 (FL's dated note 2) | post hoc | `MS/m10-law.json`, `p8-law.json`, `README.md` |
+| **The meter** (public facts and the lab's data) | the public PMIC firmware (et-boards `e5e0cf2`, runtime 1.7.0) applies one fixed CUR_ADJ_FACTOR of 1.0787 to every board; the cards run 1.3.0 / 1.5.0 / 1.6.1, unread; `board_w` is the SP's instantaneous copy, refreshed once per SP pass; the rails cannot place the card term (card 1 about 1.10× aifoundry3 on the minion rail after V²); E64's fitted 1.3 s is 0.20–0.25 s longer than E58's measured filter, one aifoundry2 pass (about 0.16–0.17 s) leaves 0.03–0.09 s unexplained, and E64's 0.24 s pass sat at the edge of its fit's grid. Owed: the check on E64's own traces and the card schematic's R406 | public source; post hoc | `docs/energy-manual/09-method.md.dated-note-1.md` and `-2.md` |
+| Kit v4 | an option, dry pass only (no kit, no card run, the A/B check owed); under card 0's alarm a one-kernel burst overruns the host's 6 s timeout; the wall at the cap is 4.18–4.43 s; a safety stop waits for the kernel's end | design, post hoc sizing | `tools/claims-v3/kitv4-onekernel/README.md.dated-note-1.md` |
+
+### Q147: the owner's answers, and the firmware study (a desk study; its card check post hoc)
+
+| Claim | Value | Kind | Source |
+|---|---|---|---|
+| **The patch** | does not help the anatomy's op rate, an issue rate, the governor model, the card-to-card gap or class S; loading it is a flash update and a card reset that may power-cycle the card (a definite power cycle after an update that wrote the PMIC, otherwise a PMIC-forced reset; `dmcmd_audit` NO-GO, both commands WRITE; the MM-reset route forbidden too); NO-GO at G0 and G1; **not attempted** | desk study, no measurement | `tools/claims-v3/fw-q147/README.md` and its dated notes 1 and 2 |
+| The open RTL's op events | `TIMA_OPS`, the int8 op event, is zero-gated (core-et `b38a1a3`, `vpu_ctrl.v:817-830`, `:1681`): it counts only cycles with an ungated lane; the float op events are control events. Q130(g)'s counter proposal for the zero gate, answered: it supports NO | public source | the study's dated note 2 |
+| **The card check** (pool 8's 71 common items) | aifoundry3 and card 1 do the same work per op: the cycles a step are identical (546.001 / 546.001 / 318.0) and the op-rate ratio has median 0.9998 (0.9984–1.0009). After each session's own V² ((498.7/521.6 mV)² = 0.914), that is switched capacitance per op, card 1's minion rail reads 1.103× on floats and 1.081× on int8 (medians; int8 1.014–1.104); the raw rail energy per op is 1.008× / 0.988×; the raw board ratio, 0.965× / 0.954×, sits beside M10's frozen card-1 term 0.9616 and E82's 1.061 after C·V² | post hoc | `tools/claims-v3/fw-q147/posthoc-card-check.json` |
+| The catalogue's issue rates | 102 of the 150 two-hart random rows run 0.30–0.45 issues a hart-cycle, median 0.369, the fastest, `nop`, 0.390; `fmadd.ps` 0.3649 with both harts and 0.5814 with one (measured 26 Sep) | measured (26 Sep) | `ANAT/NOTE-2026-11-05-fmadd-ps-public-facts.md` |
+| The anatomy's op rate | known two ways within 0.72% (1.1171 × 10⁹ fp32 steps a second from the launch records, 1.1253 × 10⁹ from 546.001 cycles a step); the gap is launch gaps | post hoc | the study's section 2, dated note 2 |
+| E179 | assigned, not registered, not built, not run | — | 03's E179 |
+
+### Disclosures
+
+- **Process, as the lanes and critics recorded them.** Every lane ran its Python through the round's local slots, one job at a time at
+  nice 10, with sub-second structure reads outside them; the firmware lane ran its scanner and result writer outside the slots (sub-second,
+  found by its verifier). The one-number design's first tile job used an interpreter without numpy (re-run); E178's power simulation ran
+  6 min 9 s on one core, and E180's was stopped once to add rounding; a scratch file outside the repository in each of E178's kit lane and E180's lane was removed;
+  a slot message's scratch path was removed from `tiles-check-e178.txt` before its commit; a private host's name was caught in E178's kit note's
+  first draft by the scan; two kit comment lines were reworded after the scan; the anatomy lane's BSD `sed` with `\b` did nothing once (redone,
+  outputs re-made byte for byte); other lanes' untracked E178 files sat in the clone at commit time, and each commit staged only its own
+  paths; the heat lane masked one scratch path in E172's three scored files with a label before its commit. Round B's critic named its
+  housekeeping: three scratch copies of re-reductions (about 130 MB) and an ignored `__pycache__` in `DT/`, our files only.
+- **Coverage.** The public-text scans check fixed lists only: there is no privacy name table or foundry-identifier list on the Intel.
+- **Card time and approvals.** None used. The lab approvals lapsed at about 23:00 PST on Thu 5 Nov; the next card day (E181, then E178,
+  then E180, all on aifoundry3 card 0 at 600 MHz) waits on the owner's go and fresh approvals.
 
 ## Ridge points (derived; no card time)
 

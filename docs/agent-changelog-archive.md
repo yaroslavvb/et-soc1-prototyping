@@ -4,6 +4,14 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-11-01 (Sun, week 44, Q134 records)** — Section 3's index reads Q1–Q135 and E1–E125, where it read Q1–Q133 and
+  E1–E118: E119–E125 are Q134's seven card experiments, E120 among them a governor move; E77's line says it is recorded
+  beside E120, its redesign, where it said "recorded after its verification". The 27 October entry, the oldest of 16,
+  moved verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelog-archive.md). *Why:* constraint — Q134's
+  records add E119–E125 and E77's corrected result to `docs/findings/03-experiments.md`, and
+  `docs/findings/02-requests.md` already cites Q1...Q135 (Q135, another session's request, recorded in `fbcc6803`);
+  re-check: the last entry heading of 03-experiments.md and the "Cite as" line of 02-requests.md. And preference — the
+  owner's rule of 10 October 2026 for agent instruction files, which keeps the newest 15 entries inline.
 - **2026-11-01 (Sun, week 44, Q133 records, corrections after verification)** — Section 3's index says E114 re-ran
   card 0's fp16 and int8 sustained cells on the same card, where it counted them among the replicates on second cards.
   The changelog keeps its newest 15 entries here, and 14 October's moved verbatim to
