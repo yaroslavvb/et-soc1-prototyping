@@ -1,0 +1,615 @@
+{
+ "_note": "E178's data README, dated note 1: figures re-read from the committed data (posthoc_note1_e178.py); post hoc, no verdict",
+ "inputs": {
+  "committed_files": 347,
+  "kit_text_sha256": {
+   "E178.md": "a09ff85be66c293a2607025f901f649abd189fb9fd57e8d42ceb1b972c468437",
+   "power_e178.py": "2d979182daf334568f8654a7b2eba571ee6bf1e313a4e1f64e8d5b9b58aa7b72",
+   "score_e178.py": "4c2b14eb4a51986f90e980b4dae181dd3362d7918ef2d3190a29a0c26408b8c5"
+  },
+  "readme_sha256": "d1f584e6c98dfe754fad0f32ee61ec969b4f05ed95124065c34cc57cd9b99bb2",
+  "scored_json_sha256": "31c3efd8d08db965e2202813d464e9c5d5e91bc87208a574f977f28b47d5064a",
+  "sha256sums_bad": [],
+  "sha256sums_listed": 345
+ },
+ "readme_lines_sections_4_5": {
+  "## Who checked it": [
+   180
+  ],
+  "after its C-session gate": [
+   66
+  ],
+  "until ~13:49 PST": [
+   217
+  ]
+ },
+ "section_1": {
+  "e178_md_limit": "(weak by design: no rule may claim equality finer than 0.2 W)",
+  "e178_md_row_line": 184,
+  "groups": {
+   "fp16": {
+    "highest": [
+     "fp16.neg_ones",
+     8.417868067751337
+    ],
+    "line_w": 0.18107534938978592,
+    "lowest": [
+     "fp16.e178_v2",
+     8.24300910318708
+    ],
+    "members": {
+     "fp16.e178_v0p5": 8.302383410481992,
+     "fp16.e178_v2": 8.24300910318708,
+     "fp16.e178_v4": 8.272060663568974,
+     "fp16.e178_v8": 8.264292581778864,
+     "fp16.neg_ones": 8.417868067751337,
+     "fp16.ones": 8.317743742856683
+    },
+    "pairs_inside": 4,
+    "reading": "read equal",
+    "resolved_inside": [
+     {
+      "P_inside": false,
+      "a": "fp16.e178_v2",
+      "b": "fp16.neg_ones",
+      "dP_w": -0.002764826549134014,
+      "hi95_w": -0.1001170762618369,
+      "lo95_w": -0.2496008528666795,
+      "mean_w": -0.1748589645642582,
+      "n": 4,
+      "sign": "NEGATIVE"
+     },
+     {
+      "P_inside": false,
+      "a": "fp16.e178_v4",
+      "b": "fp16.neg_ones",
+      "dP_w": -0.00159650589442073,
+      "hi95_w": -0.1254786959333347,
+      "lo95_w": -0.1661361124313925,
+      "mean_w": -0.1458074041823636,
+      "n": 4,
+      "sign": "NEGATIVE"
+     }
+    ],
+    "spread_equals_max_minus_min": true,
+    "spread_w": 0.1748589645642582,
+    "verdict": "PASS"
+   },
+   "fp32": {
+    "highest": [
+     "fp32.e178_v0p5",
+     8.407828710277826
+    ],
+    "line_w": 0.19577324362666004,
+    "lowest": [
+     "fp32.e178_v8",
+     8.303077458541196
+    ],
+    "members": {
+     "fp32.e178_v0p5": 8.407828710277826,
+     "fp32.e178_v2": 8.330315158695072,
+     "fp32.e178_v4": 8.34893494166601,
+     "fp32.e178_v8": 8.303077458541196,
+     "fp32.neg_ones": 8.351256581909773,
+     "fp32.ones": 8.405508729733429
+    },
+    "pairs_inside": 5,
+    "reading": "read equal",
+    "resolved_inside": [],
+    "spread_equals_max_minus_min": true,
+    "spread_w": 0.10475125173663002,
+    "verdict": "PASS"
+   },
+   "int8": {
+    "highest": [
+     "int8.e178_v8",
+     1.6586023976577273
+    ],
+    "line_w": 0.24600309364994677,
+    "lowest": [
+     "int8.e178_v4",
+     1.5916916802079744
+    ],
+    "members": {
+     "int8.e178_v2": 1.6503179932297343,
+     "int8.e178_v4": 1.5916916802079744,
+     "int8.e178_v8": 1.6586023976577273,
+     "int8.ones": 1.636736499143181
+    },
+    "pairs_inside": 6,
+    "reading": "read equal",
+    "resolved_inside": [
+     {
+      "P_inside": false,
+      "a": "int8.e178_v4",
+      "b": "int8.e178_v8",
+      "dP_w": 0.00027253203815225113,
+      "hi95_w": -0.009686038477337178,
+      "lo95_w": -0.12413539642216875,
+      "mean_w": -0.06691071744975297,
+      "n": 4,
+      "sign": "NEGATIVE"
+     }
+    ],
+    "spread_equals_max_minus_min": true,
+    "spread_w": 0.06691071744975297,
+    "verdict": "PASS"
+   }
+  },
+  "pairs_inside_groups": 15,
+  "pairs_total": 21,
+  "readme_checks": {
+   "E178-E-fp16 spread 0.1749 printed": true,
+   "E178-E-fp32 spread 0.1048 printed": true,
+   "E178-E-int8 spread 0.0669 printed": true,
+   "fp16.e178_v2 - fp16.neg_ones −0.1749 [−0.2496, −0.1001] printed": true,
+   "fp16.e178_v4 - fp16.neg_ones −0.1458 [−0.1661, −0.1255] printed": true,
+   "int8.e178_v4 - int8.e178_v8 −0.0669 [−0.1241, −0.0097] printed": true
+  },
+  "readme_lines": {
+   "equal-flip kinds read equal in all three formats": [
+    1
+   ],
+   "read alike": [
+    62
+   ],
+   "the equal-flip groups in all three formats": [
+    261
+   ]
+  },
+  "resolved_all": 3
+ },
+ "section_2": {
+  "E178-H-fp16": {
+   "a": "fp16.e178_v5",
+   "b": "fp16.e178_v4",
+   "couples": 11,
+   "couples_per_pass": {
+    "17810": 3,
+    "17811": 3,
+    "17812": 3,
+    "17813": 2
+   },
+   "equals_scored_json": true,
+   "hi95_w": 0.11535662897092713,
+   "lo95_w": -0.0038084031813093236,
+   "mean_w": 0.0557741128948089,
+   "n": 4,
+   "negative_couples": 1,
+   "negative_couples_per_pass": {
+    "17810": 1,
+    "17811": 0,
+    "17812": 0,
+    "17813": 0
+   },
+   "per_pass_x_w": {
+    "17810": 0.11124347028684767,
+    "17811": 0.04182397205339683,
+    "17812": 0.02892896824846976,
+    "17813": 0.041100040990521336
+   },
+   "posthoc": {
+    "couple_df": 7,
+    "couple_error_reading": {
+     "halfwidth_w": 0.07776982005294497,
+     "hi95_w": 0.13354393294775388,
+     "lo95_w": -0.02199570715813607,
+     "t": 2.365
+    },
+    "couple_sd_pooled_within_w": 0.10739753432996883,
+    "draws": 40000,
+    "fraction_of_draws_at_or_below_ratio": 0.197025,
+    "pass_mean_sd_expected_from_couples_w": 0.06576728968536572,
+    "pass_mean_sd_w": 0.03744972726343069,
+    "ratio": 0.5694278636476008,
+    "seed": 17892
+   },
+   "segment_diffs_w": {
+    "17810": [
+     0.00045924673915820335,
+     0.33877116412138975,
+     -0.005500000000004945
+    ],
+    "17811": [
+     0.055608363774851455,
+     0.011363552385343922,
+     0.05849999999999511
+    ],
+    "17812": [
+     0.007475339597842634,
+     0.060811565147577795,
+     0.01849999999998886
+    ],
+    "17813": [
+     0.047700081981041365,
+     0.03450000000000131
+    ]
+   },
+   "t": 3.182,
+   "verdict": "NOT RESOLVED"
+  },
+  "E178-H-fp32": {
+   "a": "fp32.e178_v5",
+   "b": "fp32.e178_v4",
+   "couples": 11,
+   "couples_per_pass": {
+    "17810": 3,
+    "17811": 3,
+    "17812": 2,
+    "17813": 3
+   },
+   "equals_scored_json": true,
+   "hi95_w": 0.15052280597109766,
+   "lo95_w": -0.04593625591373149,
+   "mean_w": 0.052293275028683084,
+   "n": 4,
+   "negative_couples": 1,
+   "negative_couples_per_pass": {
+    "17810": 1,
+    "17811": 0,
+    "17812": 0,
+    "17813": 0
+   },
+   "per_pass_x_w": {
+    "17810": 0.004127825930038871,
+    "17811": 0.13730199129496037,
+    "17812": 0.009268241288712176,
+    "17813": 0.058475041601020905
+   },
+   "posthoc": {
+    "couple_df": 7,
+    "couple_error_reading": {
+     "halfwidth_w": 0.05836406049777572,
+     "hi95_w": 0.1106573355264588,
+     "lo95_w": -0.006070785469092635,
+     "t": 2.365
+    },
+    "couple_sd_pooled_within_w": 0.08059882595432191,
+    "draws": 40000,
+    "fraction_of_draws_at_or_below_ratio": 0.722875,
+    "pass_mean_sd_expected_from_couples_w": 0.04935649936386952,
+    "pass_mean_sd_w": 0.06174074854960061,
+    "ratio": 1.250914253347488,
+    "seed": 17891
+   },
+   "segment_diffs_w": {
+    "17810": [
+     -0.10061673154941886,
+     0.0692779871173208,
+     0.04372222222221467
+    ],
+    "17811": [
+     0.2136752166673368,
+     0.196230757217549,
+     0.001999999999995339
+    ],
+    "17812": [
+     0.005536482577433333,
+     0.012999999999991019
+    ],
+    "17813": [
+     0.06926016026557136,
+     0.03216496453749329,
+     0.07399999999999807
+    ]
+   },
+   "t": 3.182,
+   "verdict": "NOT RESOLVED"
+  },
+  "E178-H-int8": {
+   "a": "int8.e178_v5",
+   "b": "int8.e178_v4",
+   "couples": 11,
+   "couples_per_pass": {
+    "17810": 2,
+    "17811": 3,
+    "17812": 3,
+    "17813": 3
+   },
+   "equals_scored_json": true,
+   "hi95_w": 0.08476234575729945,
+   "lo95_w": 0.021651298383282183,
+   "mean_w": 0.053206822070290816,
+   "n": 4,
+   "negative_couples": 4,
+   "negative_couples_per_pass": {
+    "17810": 1,
+    "17811": 1,
+    "17812": 1,
+    "17813": 1
+   },
+   "per_pass_x_w": {
+    "17810": 0.04520260264905751,
+    "17811": 0.08159682090147886,
+    "17812": 0.05016534502816228,
+    "17813": 0.0358625197024646
+   },
+   "posthoc": {
+    "couple_df": 7,
+    "couple_error_reading": {
+     "halfwidth_w": 0.09110729701339475,
+     "hi95_w": 0.14431411908368558,
+     "lo95_w": -0.03790047494310393,
+     "t": 2.365
+    },
+    "couple_sd_pooled_within_w": 0.12581614631543955,
+    "draws": 40000,
+    "fraction_of_draws_at_or_below_ratio": 0.024925,
+    "pass_mean_sd_expected_from_couples_w": 0.07704633996904417,
+    "pass_mean_sd_w": 0.019833767245134276,
+    "ratio": 0.257426468967937,
+    "seed": 17890
+   },
+   "segment_diffs_w": {
+    "17810": [
+     0.1244786294630309,
+     -0.03407342416491588
+    ],
+    "17811": [
+     -0.04793583967621018,
+     0.03681185984025248,
+     0.2559144425403943
+    ],
+    "17812": [
+     0.06256718000437544,
+     0.14428413614308866,
+     -0.05635528106297727
+    ],
+    "17813": [
+     0.13040158771321586,
+     -0.09887774240193181,
+     0.07606371379610977
+    ]
+   },
+   "t": 3.182,
+   "verdict": "POSITIVE"
+  },
+  "E178-U": {
+   "a": "fp32.ones",
+   "b": "fp32.e178_uf",
+   "couples": 12,
+   "couples_per_pass": {
+    "17810": 3,
+    "17811": 3,
+    "17812": 3,
+    "17813": 3
+   },
+   "equals_scored_json": true,
+   "hi95_w": 0.12168430755609422,
+   "lo95_w": -0.03136903832048996,
+   "mean_w": 0.045157634617802124,
+   "n": 4,
+   "negative_couples": 2,
+   "negative_couples_per_pass": {
+    "17810": 1,
+    "17811": 0,
+    "17812": 0,
+    "17813": 1
+   },
+   "per_pass_x_w": {
+    "17810": 0.0354391671294915,
+    "17811": 0.11452872956256026,
+    "17812": 0.026617089091695096,
+    "17813": 0.004045552687461651
+   },
+   "posthoc": {
+    "couple_df": 8,
+    "couple_error_reading": {
+     "halfwidth_w": 0.03877338300317369,
+     "hi95_w": 0.08393101762097582,
+     "lo95_w": 0.006384251614628432,
+     "t": 2.306
+    },
+    "couple_sd_pooled_within_w": 0.05824585372317813,
+    "draws": 40000,
+    "fraction_of_draws_at_or_below_ratio": 0.8141,
+    "pass_mean_sd_expected_from_couples_w": 0.03362825932625646,
+    "pass_mean_sd_w": 0.048099731576550654,
+    "ratio": 1.4303366436512246,
+    "seed": 17893
+   },
+   "segment_diffs_w": {
+    "17810": [
+     0.051109309655569035,
+     -0.007791808267089806,
+     0.06299999999999528
+    ],
+    "17811": [
+     0.2228247833326762,
+     0.06926140535501446,
+     0.05149999999999011
+    ],
+    "17812": [
+     0.07347232770117174,
+     0.0023789395739157726,
+     0.003999999999997783
+    ],
+    "17813": [
+     -0.03953528094492498,
+     0.012171939007320276,
+     0.039499999999989654
+    ]
+   },
+   "t": 3.182,
+   "verdict": "NOT RESOLVED"
+  },
+  "_registered_couple_sd_w": 0.125,
+  "beside_his_pair": {
+   "E178-W-int8": {
+    "hi95_fJ": 4.052774473080073,
+    "line_fJ": 7.48427067120598,
+    "lo95_fJ": 1.5095452332099561,
+    "mean_rate_per_s": 1920524155.8868644,
+    "n": 13,
+    "reading": "the forecast is above the measured interval: the model prices more than the card reads",
+    "scored_P_slope_fJ_per_flip": 7.483098524720219,
+    "slope_fJ_per_flip": 2.7811598531450143,
+    "t": 2.201,
+    "verdict": "FAIL HIGH"
+   },
+   "arms": {
+    "auto_dips_removed": {
+     "E178-H-int8": "POSITIVE",
+     "kept_passes": [
+      17810,
+      17811,
+      17812,
+      17813
+     ]
+    },
+    "gates_off": {
+     "E178-H-int8": "POSITIVE",
+     "kept_passes": [
+      17810,
+      17811,
+      17812,
+      17813
+     ]
+    },
+    "kfrozen_dips_kept": {
+     "E178-H-int8": "NOT SCORED",
+     "kept_passes": [
+      17813
+     ]
+    },
+    "leak0": {
+     "E178-H-int8": "POSITIVE",
+     "kept_passes": [
+      17810,
+      17811,
+      17812,
+      17813
+     ]
+    },
+    "leak0.1994": {
+     "E178-H-int8": "POSITIVE",
+     "kept_passes": [
+      17810,
+      17811,
+      17812,
+      17813
+     ]
+    },
+    "leak0.3803": {
+     "E178-H-int8": "NOT RESOLVED",
+     "kept_passes": [
+      17810,
+      17811,
+      17812,
+      17813
+     ]
+    },
+    "session_own": {
+     "E178-H-int8": "NOT RESOLVED",
+     "kept_passes": [
+      17812,
+      17813
+     ]
+    }
+   },
+   "pass_form": {
+    "hi95_w": 0.1331414769971055,
+    "lo95_w": 0.011662439245604242,
+    "mean_w": 0.07240195812135486,
+    "n": 4,
+    "sign": "POSITIVE"
+   },
+   "rail_column": {
+    "hi95_w": 0.08037432649573234,
+    "interval_reads": "spans 0",
+    "lo95_w": -0.028096550165986833,
+    "mean_w": 0.026138888164872753,
+    "n": 4
+   }
+  },
+  "readme_lines": {
+   "all four passes": [
+    60
+   ],
+   "resolved in": [
+    59
+   ],
+   "the int8 couple's per-pass sd": [
+    150
+   ]
+  }
+ },
+ "section_3": {
+  "files": 347,
+  "gz": 16,
+  "owner_from_configs_tree_key": true,
+  "pattern_counts_every_file": {
+   "gz": {
+    "home_path_other": 0,
+    "home_path_owner": 2502,
+    "tree_key_word": 0
+   },
+   "text": {
+    "home_path_other": 0,
+    "home_path_owner": 12212,
+    "tree_key_word": 6
+   },
+   "tile": {
+    "home_path_other": 0,
+    "home_path_owner": 0,
+    "tree_key_word": 0
+   }
+  },
+  "readme_lines": {
+   "262 text files": [
+    228
+   ],
+   "scanned on their own": [
+    231
+   ]
+  },
+  "text": 135,
+  "text_not_utf8": [],
+  "tiles": 196,
+  "tiles_by_format_utf8_not": {
+   "anchor_pi": [
+    0,
+    5
+   ],
+   "fp16": [
+    53,
+    8
+   ],
+   "fp32": [
+    21,
+    45
+   ],
+   "int8": [
+    55,
+    9
+   ]
+  },
+  "tiles_not_utf8": 67,
+  "tiles_utf8": 129,
+  "tiles_with_8_printable_bytes_in_a_row": {
+   "aifoundry3/e178-smoke/p17801/tiles/int8.e178_v85.b17801.bin": [
+    "U"
+   ],
+   "aifoundry3/e178/p17810/tiles/int8.e178_v85.b17810.bin": [
+    "U"
+   ],
+   "aifoundry3/e178/p17811/tiles/int8.e178_v85.b17811.bin": [
+    "U"
+   ],
+   "aifoundry3/e178/p17812/tiles/int8.e178_v85.b17812.bin": [
+    "U"
+   ],
+   "aifoundry3/e178/p17813/tiles/int8.e178_v85.b17813.bin": [
+    "U"
+   ]
+  },
+  "utf8_reader_all": {
+   "files_read": 264,
+   "gz": 16
+  },
+  "utf8_reader_without_readme_and_sums": {
+   "files_read": 262,
+   "gz": 16
+  }
+ }
+}

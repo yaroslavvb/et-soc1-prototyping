@@ -1,0 +1,65 @@
+E178's data README, dated note 1: the figures it cites, re-read from the committed data (posthoc_note1_e178.py)
+
+== inputs
+the data commit's files: 347 (SHA256SUMS lists 345; README.md and SHA256SUMS beside); SHA256SUMS re-hashed here: 345 of 345 OK
+scored.json sha256 31c3efd8d08db965e2202813d464e9c5d5e91bc87208a574f977f28b47d5064a (its SHA256SUMS line)
+read as text: tools/claims-v3/e178/E178.md sha256 a09ff85be66c293a2607025f901f649abd189fb9fd57e8d42ceb1b972c468437
+read as text: tools/claims-v3/e178/power_e178.py sha256 2d979182daf334568f8654a7b2eba571ee6bf1e313a4e1f64e8d5b9b58aa7b72
+read as text: tools/claims-v3/e178/score_e178.py sha256 4c2b14eb4a51986f90e980b4dae181dd3362d7918ef2d3190a29a0c26408b8c5
+
+== section 1: E178-E's equal-flip groups, and the reported equal-flip pairs inside them (fault 1 (a))
+E178.md section 5, the E178-E row (line 184): its power cell ends '(weak by design: no rule may claim equality finer than 0.2 W)'
+E178-E-int8: PASS (read equal): spread 0.0669 W (max - min, int8.e178_v8 1.6586 W less int8.e178_v4 1.5917 W) against its 95% line 0.2460 W; members int8.ones 1.6367, int8.e178_v2 1.6503, int8.e178_v4 1.5917, int8.e178_v8 1.6586
+  reported equal-flip pairs inside the group: 6; resolved (sign not NOT RESOLVED): 1
+    int8.e178_v4 - int8.e178_v8: −0.0669 [−0.1241, −0.0097] W, n 4, NEGATIVE; dP +0.0003 W, P inside: False
+E178-E-fp32: PASS (read equal): spread 0.1048 W (max - min, fp32.e178_v0p5 8.4078 W less fp32.e178_v8 8.3031 W) against its 95% line 0.1958 W; members fp32.e178_v0p5 8.4078, fp32.ones 8.4055, fp32.neg_ones 8.3513, fp32.e178_v2 8.3303, fp32.e178_v4 8.3489, fp32.e178_v8 8.3031
+  reported equal-flip pairs inside the group: 5; resolved (sign not NOT RESOLVED): 0
+E178-E-fp16: PASS (read equal): spread 0.1749 W (max - min, fp16.neg_ones 8.4179 W less fp16.e178_v2 8.2430 W) against its 95% line 0.1811 W; members fp16.e178_v0p5 8.3024, fp16.ones 8.3177, fp16.neg_ones 8.4179, fp16.e178_v2 8.2430, fp16.e178_v4 8.2721, fp16.e178_v8 8.2643
+  reported equal-flip pairs inside the group: 4; resolved (sign not NOT RESOLVED): 2
+    fp16.e178_v2 - fp16.neg_ones: −0.1749 [−0.2496, −0.1001] W, n 4, NEGATIVE; dP −0.0028 W, P inside: False
+    fp16.e178_v4 - fp16.neg_ones: −0.1458 [−0.1661, −0.1255] W, n 4, NEGATIVE; dP −0.0016 W, P inside: False
+all 21 reported equal-flip pairs: 15 inside E178-E's three groups; 3 resolved, every one inside a group
+README lines: 'read alike' at [62]; 'equal-flip kinds read equal in all three formats' at [1]; 'the equal-flip groups in all three formats' at [261]
+README transcription checks: E178-E-int8 spread 0.0669 printed: True; int8.e178_v4 - int8.e178_v8 −0.0669 [−0.1241, −0.0097] printed: True; E178-E-fp32 spread 0.1048 printed: True; E178-E-fp16 spread 0.1749 printed: True; fp16.e178_v2 - fp16.neg_ones −0.1749 [−0.2496, −0.1001] printed: True; fp16.e178_v4 - fp16.neg_ones −0.1458 [−0.1661, −0.1255] printed: True
+
+== section 2: the couple rules pass by pass (fault 1 (b)); the last block is post hoc and decides nothing
+t(0.975, df) as registered: power_e178.T975 {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 10: 2.228, 11: 2.201}, with score_e178's {7: 2.365, 8: 2.306, 9: 2.262, 12: 2.179} beside
+E178-H-int8 (int8.e178_v5 - int8.e178_v4): POSITIVE; per pass 17810 +0.0452 (2 couples, 1 below 0), 17811 +0.0816 (3 couples, 1 below 0), 17812 +0.0502 (3 couples, 1 below 0), 17813 +0.0359 (3 couples, 1 below 0)
+  the registered interval re-made: +0.0532 [+0.0217, +0.0848] W, n 4, t 3.182; equals scored.json to 1e-12: True
+  couples: 17810 +0.1245, −0.0341; 17811 −0.0479, +0.0368, +0.2559; 17812 +0.0626, +0.1443, −0.0564; 17813 +0.1304, −0.0989, +0.0761
+  post hoc: the couples' sd pooled within passes 0.1258 W (7 df); the pass means' sd 0.0198 W against 0.0770 W expected from the couples' scatter; ratio 0.257; draws at or below it 0.0249 (40000 draws, seed 17890)
+  post hoc, not registered: the mean of the pass means with the couples' scatter as its error, +0.0532 ± 0.0911 W (t(7) 2.365) = [−0.0379, +0.1443]
+E178-H-fp32 (fp32.e178_v5 - fp32.e178_v4): NOT RESOLVED; per pass 17810 +0.0041 (3 couples, 1 below 0), 17811 +0.1373 (3 couples, 0 below 0), 17812 +0.0093 (2 couples, 0 below 0), 17813 +0.0585 (3 couples, 0 below 0)
+  the registered interval re-made: +0.0523 [−0.0459, +0.1505] W, n 4, t 3.182; equals scored.json to 1e-12: True
+  couples: 17810 −0.1006, +0.0693, +0.0437; 17811 +0.2137, +0.1962, +0.0020; 17812 +0.0055, +0.0130; 17813 +0.0693, +0.0322, +0.0740
+  post hoc: the couples' sd pooled within passes 0.0806 W (7 df); the pass means' sd 0.0617 W against 0.0494 W expected from the couples' scatter; ratio 1.251; draws at or below it 0.7229 (40000 draws, seed 17891)
+  post hoc, not registered: the mean of the pass means with the couples' scatter as its error, +0.0523 ± 0.0584 W (t(7) 2.365) = [−0.0061, +0.1107]
+E178-H-fp16 (fp16.e178_v5 - fp16.e178_v4): NOT RESOLVED; per pass 17810 +0.1112 (3 couples, 1 below 0), 17811 +0.0418 (3 couples, 0 below 0), 17812 +0.0289 (3 couples, 0 below 0), 17813 +0.0411 (2 couples, 0 below 0)
+  the registered interval re-made: +0.0558 [−0.0038, +0.1154] W, n 4, t 3.182; equals scored.json to 1e-12: True
+  couples: 17810 +0.0005, +0.3388, −0.0055; 17811 +0.0556, +0.0114, +0.0585; 17812 +0.0075, +0.0608, +0.0185; 17813 +0.0477, +0.0345
+  post hoc: the couples' sd pooled within passes 0.1074 W (7 df); the pass means' sd 0.0374 W against 0.0658 W expected from the couples' scatter; ratio 0.569; draws at or below it 0.1970 (40000 draws, seed 17892)
+  post hoc, not registered: the mean of the pass means with the couples' scatter as its error, +0.0558 ± 0.0778 W (t(7) 2.365) = [−0.0220, +0.1335]
+E178-U (fp32.ones - fp32.e178_uf): NOT RESOLVED; per pass 17810 +0.0354 (3 couples, 1 below 0), 17811 +0.1145 (3 couples, 0 below 0), 17812 +0.0266 (3 couples, 0 below 0), 17813 +0.0040 (3 couples, 1 below 0)
+  the registered interval re-made: +0.0452 [−0.0314, +0.1217] W, n 4, t 3.182; equals scored.json to 1e-12: True
+  couples: 17810 +0.0511, −0.0078, +0.0630; 17811 +0.2228, +0.0693, +0.0515; 17812 +0.0735, +0.0024, +0.0040; 17813 −0.0395, +0.0122, +0.0395
+  post hoc: the couples' sd pooled within passes 0.0582 W (8 df); the pass means' sd 0.0481 W against 0.0336 W expected from the couples' scatter; ratio 1.430; draws at or below it 0.8141 (40000 draws, seed 17893)
+  post hoc, not registered: the mean of the pass means with the couples' scatter as its error, +0.0452 ± 0.0388 W (t(8) 2.306) = [+0.0064, +0.0839]
+the three float couple rules' ratios: 0.569 to 1.430; his pair's 0.257
+beside his pair: the reported pass form +0.0724 [+0.0117, +0.1331] W, n 4, POSITIVE; the rail arm's minion-rail column (rail-arm-e178.json) +0.0261 [−0.0281, +0.0804] W, spans 0
+  the seven reduction arms' E178-H-int8: auto_dips_removed POSITIVE (4 passes); gates_off POSITIVE (4 passes); kfrozen_dips_kept NOT SCORED (1 passes); leak0 POSITIVE (4 passes); leak0.1994 POSITIVE (4 passes); leak0.3803 NOT RESOLVED (4 passes); session_own NOT RESOLVED (2 passes)
+  E178-W-int8: hi95_fJ 4.052774473080073, line_fJ 7.48427067120598, lo95_fJ 1.5095452332099561, mean_rate_per_s 1920524155.8868644, n 13, reading the forecast is above the measured interval: the model prices more than the card reads, scored_P_slope_fJ_per_flip 7.483098524720219, slope_fJ_per_flip 2.7811598531450143, t 2.201, verdict FAIL HIGH
+README lines: 'resolved in' at [59]; 'all four passes' at [60]; "the int8 couple's per-pass sd" at [150]
+
+== section 3: the directory's files by class, and what a UTF-8 reader reads of them (fault 1 (c))
+files: 347 = 135 text (README.md and SHA256SUMS among them; 0 not UTF-8) + 16 .gz + 196 tiles (.bin)
+tiles whose bytes decode as UTF-8: 129; that do not: 67; by format (decode, not): anchor_pi 0/5, fp16 53/8, fp32 21/45, int8 55/9
+a UTF-8 reader that skips what fails, over every file but README.md and SHA256SUMS: 262 files read and 16 .gz (133 text + 129 tiles); over all 347: 264 and 16
+tiles with 8 or more printable bytes in a row: 5: aifoundry3/e178-smoke/p17801/tiles/int8.e178_v85.b17801.bin 'U'; aifoundry3/e178/p17810/tiles/int8.e178_v85.b17810.bin 'U'; aifoundry3/e178/p17811/tiles/int8.e178_v85.b17811.bin 'U'; aifoundry3/e178/p17812/tiles/int8.e178_v85.b17812.bin 'U'; aifoundry3/e178/p17813/tiles/int8.e178_v85.b17813.bin 'U'
+two of the public-text scan's patterns over every file (text as UTF-8, the .gz decompressed, the tiles byte by byte): text: the owner's own box home path 12212, another account's 0, the configs' tree-key word 6; gz: the owner's own box home path 2502, another account's 0, the configs' tree-key word 0; tile: the owner's own box home path 0, another account's 0, the configs' tree-key word 0
+  in all: the owner's own box home path 14714, another account's 0, the configs' tree-key word 6 (the account read from the configs' tree key, never printed: found)
+README lines: '262 text files' at [228]; 'scanned on their own' at [231]
+
+== the README lines the note's sections 4 and 5 cite (the post's next clause; the score and step 22's later gates)
+README lines: 'until ~13:49 PST' at [217]; 'after its C-session gate' at [66]; '## Who checked it' at [180]
+
+nothing here is a rule or a verdict; every rule, verdict and figure of README.md stands but the sentences the note corrects
