@@ -1,0 +1,62 @@
+== 1. the inputs
+ccheck.py sha256 2f806fe6080baeea33558ddd49fded16f2ebcb8c02f494217dfd32cc033c0a22 (the file E163 recorded)
+engine rtl-sim/fma_toggle_v2/accum.c sha256 dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf; pinned dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf
+the re-check's engine block {'src': 'rtl-sim/fma_toggle_v2/accum.c', 'sha256': 'dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf'}; the committed check's {'src': 'rtl-sim/fma_toggle_v2/accum.c', 'sha256': 'dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf'}
+the committed check: docs/reports/data/2026-11-05-e172-blind8-card1/ccheck/ccheck-session.json.gz (gzip), 3,523,730 bytes decompressed, sha256 089ff1d019a50f8912b3bf85a3aa9e5525508d48b84761e18bfd470c358f3e14
+the re-check: ccheck-session.recheck.json, 3,523,730 bytes, sha256 089ff1d019a50f8912b3bf85a3aa9e5525508d48b84761e18bfd470c358f3e14
+
+== 2. the whole file
+byte for byte: IDENTICAL
+summary: equal: {"launches": 3470, "PASS": 3470, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 1456, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "fp16": {"PASS": 1002, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "int8": {"PASS": 1012, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "binaries": [{"host_sha256": "4f0956ceabb107337c2996636ad712946aa135ecf33f72fb833bae72c8c5e585", "kernel_sha256": "990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24"}], "all_pass": true}
+
+== 3. every C record, log by log (key: the log's name and line)
+records: re-check 3470 (3470 distinct keys), committed 3470 (3470 distinct keys)
+only in the re-check 0; only in the committed 0; in both 3470, of which differing in any field 0 
+fields compared per record (22): by_group, counts, flags, groups, host, host_sha256, kernel, kernel_from, kernel_sha256, launch, line, log, n, ok, participants, poison, t_end_ms, t_start_ms, tile_sha256, type, values, verdict
+record order: the same
+| log | re-check: launches, verdicts | committed: launches, verdicts | fp32 / fp16 / int8 |
+| c-log-p17201.jsonl | 60, PASS 60 | 60, PASS 60 | 36 / 12 / 12 |
+| c-log-p17210.jsonl | 860, PASS 860 | 860, PASS 860 | 360 / 250 / 250 |
+| c-log-p17211.jsonl | 850, PASS 850 | 850, PASS 850 | 360 / 240 / 250 |
+| c-log-p17212.jsonl | 840, PASS 840 | 840, PASS 840 | 340 / 250 / 250 |
+| c-log-p17213.jsonl | 860, PASS 860 | 860, PASS 860 | 360 / 250 / 250 |
+
+== 4. the four passes (p17210-p17213) and the smoke
+the four passes: re-check 3410 C records, committed 3410; identical in every field 3410; verdicts {'PASS': 3410}; by type {'fp32': 1420, 'int8': 1000, 'fp16': 990}; 66 distinct tiles
+the smoke: re-check 60 C records, committed 60; identical in every field 60; verdicts {'PASS': 60}; by type {'fp32': 36, 'fp16': 12, 'int8': 12}; 7 distinct tiles
+  p17210: the committed c-log.jsonl.gz sha256 768ba992eea1a7f4…; launches the checker's reader finds in it: 860; judged in the re-check: 860
+  p17211: the committed c-log.jsonl.gz sha256 82695bef83b91ec3…; launches the checker's reader finds in it: 850; judged in the re-check: 850
+  p17212: the committed c-log.jsonl.gz sha256 65d98bdbf49c64cc…; launches the checker's reader finds in it: 840; judged in the re-check: 840
+  p17213: the committed c-log.jsonl.gz sha256 943dc5e708f418e7…; launches the checker's reader finds in it: 860; judged in the re-check: 860
+  p17201: the committed c-log.jsonl.gz sha256 5a66c6d2af67a907…; launches the checker's reader finds in it: 60; judged in the re-check: 60
+
+== 5. what each count counts (C records against the runs tables' launch records, matched by t_start_ms and t_end_ms)
+pool 8's tiles in tools/claims-v3/kinds/blind8/predictions-pool8-aifoundry1c1.json: 64; the registered primary's kept passes: p17210, p17211, p17212; set aside: p17213
+| session | C records | runs-table launch records | matched | C records with no runs-table record | of runs-table records: pool 8 / other items | of pool 8's: PASS |
+| p17201 | 60 | 60 | 60 | 0 (-) | 30 / 30 | 30 |
+| p17210 | 860 | 840 | 840 | 20 (pi 20) | 640 / 200 | 640 |
+| p17211 | 850 | 830 | 830 | 20 (pi 20) | 640 / 190 | 640 |
+| p17212 | 840 | 820 | 820 | 20 (pi 20) | 620 / 200 | 620 |
+| p17213 | 860 | 840 | 840 | 20 (pi 20) | 640 / 200 | 640 |
+totals: C records 3470; runs-table launch records 3390 (all matched: True); C records outside the runs tables 80; pool 8's launch records 2570 in all, 1900 in the kept passes (1900 PASS)
+
+== 6. P8-KC re-read from the re-check (score_p8_600.c_status and score_p8_600_v2.kc_of, unchanged)
+from the re-check: {"PASS": 1900, "c_excluded": [], "launches": 1900, "not_measured": [], "verdict": "PASS"}
+scored.json › primary.rules.P8-KC: {"PASS": 1900, "c_excluded": [], "launches": 1900, "not_measured": [], "verdict": "PASS"}
+equal: True
+reported beside, never a rule: the same over all four passes (the set-aside p17213 included): launches 2540, PASS 2540, c_excluded []
+reported beside: E78's six items over the four passes: fp32.zeros 120/120; fp32.randn 120/120; fp16.zeros 110/110; fp16.randn 120/120; int8.zeros 120/120; int8.full 120/120
+
+== 7. the C-session gate on the re-check (ccsessions_p8.check, unchanged, no --since)
+  CCHECK-DONE ccheck-session.recheck.json: 3470 launches, PASS 3470, ROUNDING 0, UNMODELLED 0, FAIL 0, all_pass True
+  CCSESSION-OK e172-smoke/p17201: 60 launches in its C log, 60 judged
+  CCSESSION-OK e172/p17210: 860 launches in its C log, 860 judged
+  CCSESSION-OK e172/p17211: 850 launches in its C log, 850 judged
+  CCSESSION-OK e172/p17212: 840 launches in its C log, 840 judged
+  CCSESSION-OK e172/p17213: 860 launches in its C log, 860 judged
+  STOPTEST-OK e172-stoptest/p17202: no launch record and no C record
+  ccsessions: 5 of 5 listed sessions checked to the end: FINISHED
+ok True; listed 5; stop-path test OK; sessions with the same record as scored.json's c_sessions: 5 of 5
+
+== verdict
+AS COMMITTED: every one of the 3470 C records re-derived from a fresh cache equals the committed record in every field (and the file is byte-identical); P8-KC and the C-session gate read as committed
