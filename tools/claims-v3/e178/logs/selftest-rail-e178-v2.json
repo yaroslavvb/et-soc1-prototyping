@@ -1,0 +1,95 @@
+{
+ "F1 T7's guard: it runs only where nothing but the desk test's own output would be removed (fault 1)": {
+  "detail": "a session's output: refuses, naming build/e178-out/2026-11-06-e178-one-number-aifoundry3; a dropped arm: refuses, naming build/e178-dropped-arms/session_own; the desk test's own output alone: runs; nothing: runs; every stand-in file kept",
+  "pass": true
+ },
+ "F2a one kept pass, with the REAL scorer's scored.json (fault 2)": {
+  "detail": "A3's reader refuses 7 ('the board column does not reproduce scored.json (the files are not one session's): bridge ...'); this reader: '1 kept passes, fewer than 2 (the scorer's own NOT SCORED: 1 kept passes, fewer than 2)', 52 of 52 NOT READ in all three columns, the rules' scorer verdict NOT SCORED carried on 5, cross-check ok; the CLI with --scored exits 0 and writes the md: True",
+  "pass": true
+ },
+ "F2b two kept passes read against the scorer; a scored.json that is not this session's still refuses 7, saying which": {
+  "detail": "two passes, the real scorer: 0 differences; the one-pass scored.json beside a four-pass session: exit 7 ('scored.json's primary kept passes [17810], the reduction's [17810, 17811, 17812, 17813]: the files a'); the same without its kept_passes: exit 7 ('scored.json's primary reads NOT SCORED (1 kept passes, fewer than 2) beside the reduction's 4 kept passes: the'); a four-pass scored.json with no reported pairs: exit 7",
+  "pass": true
+ },
+ "F2c a two-pass session with one pass set aside, with the REAL scorer's scored.json (fault 2, the verifier's case)": {
+  "detail": "A3's reader refuses 7; this reader: kept passes [17810] (17811 set aside, its 76 rows without a D), '1 kept passes, fewer than 2 (the scorer's own NOT SCORED: 1 kept passes, fewer than 2)', exit 0",
+  "pass": true
+ },
+ "F3 one kept run without a Drail is flagged in both forms; the pass-form remainder on the runs that have one (fault 3)": {
+  "detail": "named: ['p17811 int8.e178_v5']; flagged here: ['E178-H-int8', 'equal_popcount_different_flips 4: int8.e178_v5 - int8.e178_v3', 'equal_popcount_different_flips 5: int8.e178_v5 - int8.e178_v6', 'his_4_5 2: int8.e178_v5 - int8.e178_v4'] (A3's reader left unflagged ['equal_popcount_different_flips 4: int8.e178_v5 - int8.e178_v3', 'equal_popcount_different_flips 5: int8.e178_v5 - int8.e178_v6', 'his_4_5 2: int8.e178_v5 - int8.e178_v4']); the 3 pass-form remainders in p17811 equal the mean over the runs with a Drail of D - Drail, a less b, to 5.6e-17 W; every other contrast equal to A3's reader's: True",
+  "pass": true
+ },
+ "S A3's synthetic cases through this reader, and A3's reader changed": {
+  "detail": "S2 the rail flat: H-int8 rail -0.0002 W spans 0, forecast above; S5 E178-C leaves int8.e178_v85 out: ['E178-S-int8', 'beside: 85 - 127', 'extremes 4: int8.e178_v85 - int8.ones']; S6 a reduction not the runs.csv's: exit 6; S7 a scored.json not reproduced: exit 7; S8 card 1: exit 2; S9 a changed rail-e178.json: exit 9; a copy of the pinned files: exit 0, then with A3's reader changed by one line: exit 9",
+  "pass": true
+ },
+ "T1 A3's five pinned inputs, A3's reader at its sha256, rail-e178.json and .txt rebuilt from them": {
+  "detail": "pinned: match; A3's reader c1d9e9aeeac4; rail-e178.json and .txt byte for byte: True; 52 contrasts; ratios fp32 0.809569, fp16 0.808013, int8 0.837874",
+  "pass": true
+ },
+ "T2 A3's committed post hoc readings re-made through this reader (logs/selftest-rail-e178.json T4 and T5)": {
+  "detail": "E171's six contrasts (three couples, three same-format pairs): every mean and half-width equal to A3's committed figures: True; int8 -1 against 1 on E78 and E82 (the anatomy's pairs): equal: True (E78 rail +0.0934 +- 0.0178 W, board +0.0686 +- 0.1158 W); E171's 335 kept runs all with a Drail; none of the six flagged",
+  "pass": true
+ },
+ "T3 E171's and E172's committed sessions": {
+  "detail": "E171 read: 52 contrasts, 52 NOT READ (E171 holds no E178 kind), every figure A3's reader writes equal here: True; E172 (pass 17213 set aside, its rows without a D): runs.csv against e172.json over 211 entries, D to 0.0e+00 W, Drail to 0.0e+00 W, kept passes [17210, 17211, 17212]",
+  "pass": true
+ },
+ "T7 the kit's collector (collect_e178_v2.sh) on its relabelled real session, then the card day's command line": {
+  "detail": "guard: nothing found; collector exit 0, arms dropped 0; scored.json's kept passes [17810, 17811, 17812, 17813] = the reduction's; kept runs 304 (every one with a Drail); E178-C applied (left out []); the board column reproduces scored.json (0 differences); 52 of 52 contrasts read on the rail; board = rail + off to 1.8e-15 W; every figure A3's reader writes on these files equal here: True; the command line of A4-5 (repo-relative paths): exit 0, its json equal to the call's True, its md 52 contrast rows, no desk path in either True (E171's tiles under E178's labels: no figure of it is quoted)",
+  "pass": true
+ },
+ "V0 every figure A3's reader writes, equal here, where every kept run has a Drail": {
+  "detail": "S1's session (the forecast true; the scorer's readings by its functions): equal; the same session scored by the REAL score_e178.score_reduction: equal, 0 differences against it, 52 of 52 read on the rail; H-int8 rail +0.1564 [+0.1539, +0.1588] W reads above 0; flagged 0",
+  "pass": true
+ },
+ "W1 the md's board cell names the frozen P and the scored dP (A4-4)": {
+  "detail": "H-fp32 at s = 1.05, the real scorer: '(frozen P +0.0099; scored dP +0.0104)' (A3's reader printed only '(P +0.0099)')",
+  "pass": true
+ },
+ "W2 the contrast list's distinct readings (A4-4)": {
+  "detail": "52 contrasts, 48 distinct readings of 44 kind pairs; repeated: crossed 0: fp32.e178_a4_b5 - fp32.e178_a5_b4 = extremes 1: fp32.e178_a4_b5 - fp32.e178_a5_b4; crossed 2: fp16.e178_a4_b5 - fp16.e178_a5_b4 = extremes 3: fp16.e178_a4_b5 - fp16.e178_a5_b4; equal_flips_different_values 14: int8.e178_v2 - int8.e178_v4 = extremes 5: int8.e178_v2 - int8.e178_v4; equal_popcount_different_flips 2: fp16.e178_v6 - fp16.e178_v0p5 = extremes 2: fp16.e178_v6 - fp16.e178_v0p5; read in both forms: E178-H-int8 and his_4_5 2: int8.e178_v5 - int8.e178_v4; E178-H-fp32 and his_4_5 0: fp32.e178_v5 - fp32.e178_v4; E178-H-fp16 and his_4_5 1: fp16.e178_v5 - fp16.e178_v4; E178-U and equal_popcount_different_flips 0: fp32.ones - fp32.e178_uf",
+  "pass": true
+ },
+ "distinct": {
+  "contrasts": 52,
+  "distinct_kind_pairs": 44,
+  "distinct_readings": 48,
+  "pairs_read_in_both_forms": [
+   [
+    "E178-H-int8",
+    "his_4_5 2: int8.e178_v5 - int8.e178_v4"
+   ],
+   [
+    "E178-H-fp32",
+    "his_4_5 0: fp32.e178_v5 - fp32.e178_v4"
+   ],
+   [
+    "E178-H-fp16",
+    "his_4_5 1: fp16.e178_v5 - fp16.e178_v4"
+   ],
+   [
+    "E178-U",
+    "equal_popcount_different_flips 0: fp32.ones - fp32.e178_uf"
+   ]
+  ],
+  "readings_repeated": [
+   [
+    "crossed 0: fp32.e178_a4_b5 - fp32.e178_a5_b4",
+    "extremes 1: fp32.e178_a4_b5 - fp32.e178_a5_b4"
+   ],
+   [
+    "crossed 2: fp16.e178_a4_b5 - fp16.e178_a5_b4",
+    "extremes 3: fp16.e178_a4_b5 - fp16.e178_a5_b4"
+   ],
+   [
+    "equal_flips_different_values 14: int8.e178_v2 - int8.e178_v4",
+    "extremes 5: int8.e178_v2 - int8.e178_v4"
+   ],
+   [
+    "equal_popcount_different_flips 2: fp16.e178_v6 - fp16.e178_v0p5",
+    "extremes 2: fp16.e178_v6 - fp16.e178_v0p5"
+   ]
+  ]
+ }
+}
