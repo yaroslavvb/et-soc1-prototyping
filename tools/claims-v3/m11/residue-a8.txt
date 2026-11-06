@@ -1,0 +1,17 @@
+M6: {'tau_s': [1.005, 15.98, 138.21229024038436, 1500.0], 'weights': [0.1475254229632836, 0.010046642157033103, 0.8323210084796046, 0.010103839662738784], 'gain': 0.9}
+E144: F0 50.884 C (first sample 50.888), P0 23.35 W, R0 480 s from 92.4 s; room mark None; L300 meas +0.168 pred +0.266 miss -0.098; L360 meas +0.187 pred +0.204 miss -0.017; L420 meas +0.271 pred +0.171 miss +0.099; L480 meas +0.336 pred +0.154 miss +0.181
+E154: F0 50.987 C (first sample 50.982), P0 23.38 W, R0 300 s from 74.9 s; room mark 51.409838125191484; L300 meas +0.422 pred +0.366 miss +0.057
+E166: F0 51.839 C (first sample 51.838), P0 23.56 W, R0 300 s from 67.9 s; room mark 51.924207119810816; L300 meas +0.085 pred +0.332 miss -0.247
+E176: F0 53.199 C (first sample 53.202), P0 23.98 W, R0 300 s from 76.9 s; room mark 53.58212805175781; L300 meas +0.383 pred +0.414 miss -0.031
+misses at 300 s: [-0.098, 0.057, -0.247, -0.031]; mean -0.080, sd 0.128, rms 0.137 C (n 4)
+E181 predicted residue 0.414 C (smoke pass 0.237 + R0 0.177); 0.086 C under the line; within about 0.1: True; expected reading 0.335 +/- 0.128 C
+  by floor: 49.400 C: 0.386; 51.500 C: 0.402; 53.199 C: 0.414; 53.900 C: 0.420
+  timeline R0 300 s: L2 starts T0 + 3739.3 s, 760.7 s left, spare 130.7 s, R5 160.7 s
+  timeline R0 360 s: L2 starts T0 + 3799.3 s, 700.7 s left, spare 70.7 s, R5 100.7 s
+  timeline R0 420 s: L2 starts T0 + 3859.3 s, 640.7 s left, spare 10.7 s, R5 40.7 s
+  timeline R0 480 s: L2 starts T0 + 3919.3 s, 580.7 s left, spare -49.3 s, R5 0.0 s
+(a) R0 360 s: predicted 0.314 (held 0.317) C; P(refuse settled) 0.0191 (held 0.0200); misses over margin {'proportional': 0, 'held': 0}
+(b) R0's room - F0 - 0.414 <= 0.50 C: P(refuse settled) 3.02e-06; misses over margin 0
+as A6 has it: P(refuse settled) 0.0983; misses over margin 0
+rule A8-R -> (b)
+first hold's e from the unseen smoke residue (estimate): E144 R0 480 s: -0.119; E154 R0 300 s: -0.282; E166 R0 300 s: -0.253; E176 R0 300 s: -0.310; E181 R0 300 s -0.304, R0 360 s -0.231 C
