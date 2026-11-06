@@ -1,0 +1,79 @@
+E171: reduce_e78.py unchanged via reduce_e171.py (kinds passes; dips removed (E82 A2))
+E78 aifoundry3: 600 MHz, 521.6 mV, leak 0.3601 W/C (-1 runs), runs kept 251/335, passes [17110, 17111, 17112], idle-invalid runs 0
+  passes set aside: [{'pass': 17113, 'why': ['int8.zeros departs +0.268 W from its straight line']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.78235500646244
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.u8_lognorm_62af49     24.883  0.026    27.070      24231    5.916
+    fp32.u8_ar_i_a662b4        24.362  0.037    26.510      23727    5.793
+    fp32.anchor8_check_randn_319f73   24.358  0.195    26.477      23721    5.791
+    fp32.real_s360_l1_qk       24.207  0.191    26.402      23623    5.767
+    fp32.randn                 24.193  0.034    26.343      23578    5.756
+    fp32.anchor8_randn_a_989b8a   24.176  0.042    26.387      23619    5.766
+    fp32.anchor8_randn_b_833ac3   24.100  0.231    26.084      23346    5.700
+    fp32.u8_ar_k_3297d2        24.068  0.146    26.250      23486    5.734
+    fp32.u8_uniform_e7e045     24.041  0.121    26.127      23379    5.708
+    fp32.u8_bimodal_1f57eb     23.899  0.140    26.083      23343    5.699
+    fp32.r8_granite_l3_qk_02f7c6   23.895  0.100    26.087      23354    5.702
+    fp32.r8_dsqwen_l1_qk_f0161a   23.439  0.051    25.535      22852    5.579
+    fp32.r8_granite_l3_x2up_47e54f   21.843  0.169    23.929      21426    5.231
+    fp32.bf16_wideexp          18.984  0.090    21.116      18903    4.615
+    fp32.exp_only_narrow2      14.818  0.063    16.955      15174    3.705
+    fp32.real_smol_softmax_v_causal   13.003  0.061    15.111      13528    3.303
+    fp32.s8_onebit_b13_41783e4a_A40080727   12.223  0.197    14.348      12842    3.135
+    fp32.b_onebit_b20_one      12.001  0.195    14.036      12564    3.067
+    fp32.s8_onebit_b19_c11b3dd2   11.909  0.732    14.080      12602    3.077
+    fp32.s8_onebit_b18_be2584eb   11.467  0.162    13.622      12189    2.976
+    fp32.s8_onebit_b14_3ef6ccbf   10.756  0.175    12.859      11502    2.808
+    fp32.exp_b_alt_b26          9.540  0.154    11.681      10455    2.552
+    fp32.s8_onebit_b26_bffdf029    9.253  0.286    11.343      10152    2.479
+    fp32.a_onebit_b5_third      9.202  0.184    11.359      10164    2.481
+    fp32.s8_onebit_b7_3ee13961    8.837  0.199    10.928       9778    2.387
+    anchor_pi                   8.231  0.065    10.307       9225    2.252
+    fp32.a_zeros_b_complement    1.222  0.339     3.372       3017    0.737
+    fp32.zeros                  0.000  0.000     2.103       1882    0.460
+    fp32.anchor7_zeros         -0.083  0.312     2.000       1791    0.437
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.u8_cauchy_96e015      21.878  0.105    24.001      21480    2.622
+    fp16.u8_rowscale_ecc921    21.835  0.069    23.969      21455    2.619
+    fp16.u8_tdist_93475b       21.741  0.094    23.818      21306    2.601
+    fp16.randn                 21.705  0.063    23.776      21279    2.597
+    fp16.anchor8_check_randn_84631a   21.569  0.228    23.754      21256    2.595
+    fp16.anchor8_randn_a_8c7827   21.527  0.192    23.690      21200    2.588
+    fp16.anchor8_randn_b_3a0fef   21.521  0.072    23.682      21207    2.589
+    fp16.real_qwen_dequant_v   21.482  0.106    23.618      21143    2.581
+    fp16.u8_ar_i_32349b        21.375  0.077    23.535      21067    2.572
+    fp16.r8_dsqwen_l1_x2gate_2e4efa   21.229  0.054    23.357      20913    2.553
+    fp16.r8_dsqwen_l1_pv_188e98   16.721  0.060    18.829      16846    2.056
+    fp16.exp_b_alt_shift       15.389  0.118    17.520      15680    1.914
+    fp16.b_onebit_b8_pi        12.285  0.148    14.394      12885    1.573
+    fp16.s8_onebit_b7_b945b945   12.048  0.157    14.115      12631    1.542
+    fp16.s8_onebit_b2_c46ec46e   11.224  0.176    13.292      11898    1.452
+    fp16.s8_onebit_b4_c2e2c2e2   11.069  0.192    13.143      11763    1.436
+    fp16.s8_onebit_b10_c127c127    9.298  0.326    11.400      10202    1.245
+    fp16.r8_granite_l3_pv_e993b7    6.745  0.061     8.847       7916    0.966
+    fp16.a_zeros_b_complement    1.266  0.335     3.380       3025    0.369
+    fp16.anchor7_zeros          0.010  0.123     2.153       1927    0.235
+    fp16.zeros                  0.000  0.000     2.133       1910    0.233
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.anchor8_check_full_d8b6c8    7.115  0.096     9.732       5069    0.309
+    int8.anchor8_full_a_4aac84    7.093  0.133     9.710       5055    0.309
+    int8.h8_held_vd9            7.088  0.204     9.701       5050    0.308
+    int8.anchor8_full_b_935710    7.083  0.053     9.721       5062    0.309
+    int8.l8_halfword_d2p2c16_83df    7.025  0.107     9.582       4989    0.305
+    int8.l8_cycle3_d3p3c15_c6d5    6.992  0.626     9.696       5049    0.308
+    int8.full                   6.987  0.095     9.571       4984    0.304
+    int8.l8_flip_d2p2c16_231d    6.985  0.150     9.611       5004    0.305
+    int8.l8_period2_d2p4c8_4ea3    6.978  0.293     9.565       4981    0.304
+    int8.u8_ar_k_0a9fe5         6.678  0.190     9.250       4815    0.294
+    int8.h8_held_v34            6.605  0.086     9.306       4845    0.296
+    int8.u8_biased_14548f       6.566  0.194     9.222       4803    0.293
+    int8.r8_dsqwen_l1_x1v_927670    6.437  0.207     8.994       4684    0.286
+    int8.h8_held_line4cea       6.376  0.210     8.992       4683    0.286
+    int8.r8_granite_l4_actdown_b076f2    6.273  0.076     8.888       4627    0.282
+    int8.r8_granite_l4_x1q_13fe82    6.145  0.290     8.767       4564    0.279
+    int8.u8_relu_tq_1fb940      5.109  0.300     7.705       4011    0.245
+    int8.r8_dsqwen_l1_actdown_f6a2cb    4.820  0.181     7.452       3881    0.237
+    int8.u8_sparseq_58e6e0      4.424  0.203     7.045       3668    0.224
+    int8.zeros                  0.000  0.000     2.608       1358    0.083
+    int8.anchor7_zeros         -0.087  0.420     2.571       1339    0.082
+  idle consistency median |S - S0 - D| 0.06343151164223038 W; carry-over {'slope_w_per_w': 0.00029061362243381153, 'se': 0.0004702716179917799, 'n': 248}; pi built-in - file None; rail tau re-fit median None
