@@ -1,0 +1,11 @@
+E178 rule power by simulation (20,000 draws each; noise from committed reductions; E178.md section 6).
+
+E178-H-fp32: dP +0.0099 W, dF +0.0314 W; n 4, sigma1 0.125: half-width 0.102 W; P(resolved +) 0.051 if P true, 0.103 if F true, 0.033 if null; P(dP inside) 0.933 if P true, 0.912 if F true, 0.926 if null
+E178-H-fp16: dP +0.0167 W, dF +0.0382 W; n 4, sigma1 0.125: half-width 0.102 W; P(resolved +) 0.069 if P true, 0.134 if F true, 0.037 if null; P(dP inside) 0.929 if P true, 0.907 if F true, 0.916 if null
+E178-H-int8: dP +0.1862 W, dF +0.1877 W; n 4, sigma1 0.125: half-width 0.102 W; P(resolved +) 0.904 if P true, 0.908 if F true, 0.034 if null; P(dP inside) 0.933 if P true, 0.932 if F true, 0.100 if null
+E178-U: dP +0.0749 W, dF +0.1306 W; n 4, sigma1 0.125: half-width 0.103 W; P(resolved +) 0.313 if P true, 0.666 if F true, 0.034 if null; P(dP inside) 0.931 if P true, 0.789 if F true, 0.692 if null
+E178-R-int8: Spearman >= 0.56 over 13 kinds; n 4, sigma1 0.125: P(PASS) 0.999 (P true, model 0), 0.995 (P true, model 0.03), 0.025 if every kind costs the same; median rho 0.88
+E178-W-int8: slope P implies 7.484 fJ per (i) flip; n 4, sigma1 0.125: 95% half-width 1.95 fJ (model 0) / 2.18 fJ (model 0.03); P(P's slope inside) 0.949 / 0.950
+E178-E-int8: 4 kinds; n 4: equal reads PASS below a spread of 0.212 W (5% false FAIL); one kind off by 0.05 W is caught 0.087, by 0.10 W 0.209
+E178-E-fp32: 6 kinds; n 4: equal reads PASS below a spread of 0.237 W (5% false FAIL); one kind off by 0.05 W is caught 0.086, by 0.10 W 0.196
+E178-E-fp16: 6 kinds; n 4: equal reads PASS below a spread of 0.237 W (5% false FAIL); one kind off by 0.05 W is caught 0.086, by 0.10 W 0.196
