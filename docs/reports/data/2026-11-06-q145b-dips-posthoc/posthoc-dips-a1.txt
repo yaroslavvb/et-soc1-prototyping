@@ -1,0 +1,124 @@
+POST HOC (the data existed before A1, 3002edaf; A1's rule was chosen after reading the verifier's Q132(g) check and E173-E175's rings)
+
+1. Q132(g)'s six sessions: falls / expected at delta 0, 0.7, 1.2 ms / band: verdict
+  E64 (119 processes, 0 in burst blocks)
+     registered             gaps  1420  falls   8  expected [1.81, 2.8, 3.51]  band [0, 8]  PASS  (falls at ineligible gaps 3)
+     q132_rule              gaps  1044  falls   2  expected [1.34, 2.07, 2.59]  band [0, 6]  PASS
+     a1_all_blocks          gaps  1078  falls   2  expected [1.38, 2.13, 2.67]  band [0, 6]  PASS  (not counted 6, clear 54 of 119 in scope)
+     registered_burst_only  gaps     0  falls   0  expected [0.0, 0.0, 0.0]  band [0, 0]  PASS  (falls at ineligible gaps 0)
+     a1_burst_only          gaps     0  falls   0  expected [0.0, 0.0, 0.0]  band [0, 0]  PASS  (not counted 0, clear 0 of 0 in scope)
+     the registered rule's falls A1 does not count, by reason: {"inside the process's first heartbeat period": 3, 'a dither launch in a process that is not clear': 3}
+  E69 (63 processes, 24 in burst blocks)
+     registered             gaps   804  falls   7  expected [1.0, 1.56, 1.96]  band [0, 5]  FAIL high  (falls at ineligible gaps 0)
+     q132_rule              gaps   565  falls   2  expected [0.71, 1.1, 1.38]  band [0, 4]  PASS
+     a1_all_blocks          gaps   587  falls   2  expected [0.73, 1.14, 1.44]  band [0, 4]  PASS  (not counted 5, clear 23 of 63 in scope)
+     registered_burst_only  gaps   248  falls   5  expected [0.31, 0.48, 0.6]  band [0, 2]  FAIL high  (falls at ineligible gaps 0)
+     a1_burst_only          gaps   200  falls   1  expected [0.25, 0.39, 0.49]  band [0, 2]  PASS  (not counted 4, clear 14 of 24 in scope)
+     the registered rule's falls A1 does not count, by reason: {'an alarm step': 4, 'a dither launch in a process that is not clear': 1}
+  E80 (225 processes, 36 in burst blocks)
+     registered             gaps  2694  falls  35  expected [3.47, 5.36, 6.71]  band [0, 12]  FAIL high  (falls at ineligible gaps 12)
+     q132_rule              gaps  1898  falls   5  expected [2.46, 3.79, 4.73]  band [0, 9]  PASS
+     a1_all_blocks          gaps  2007  falls   5  expected [2.59, 4.0, 5.0]  band [0, 10]  PASS  (not counted 30, clear 122 of 225 in scope)
+     registered_burst_only  gaps   461  falls   3  expected [0.59, 0.91, 1.14]  band [0, 4]  PASS  (falls at ineligible gaps 0)
+     a1_burst_only          gaps   429  falls   2  expected [0.54, 0.84, 1.06]  band [0, 3]  PASS  (not counted 1, clear 32 of 36 in scope)
+     the registered rule's falls A1 does not count, by reason: {'an alarm step': 1, "inside the process's first heartbeat period": 12, 'a dither launch in a process that is not clear': 17}
+  E83 (454 processes, 76 in burst blocks)
+     registered             gaps  5578  falls  54  expected [7.17, 11.07, 13.86]  band [2, 22]  FAIL high  (falls at ineligible gaps 31)
+     q132_rule              gaps  4693  falls   7  expected [6.02, 9.31, 11.65]  band [2, 19]  PASS
+     a1_all_blocks          gaps  4803  falls   7  expected [6.17, 9.53, 11.93]  band [2, 19]  PASS  (not counted 47, clear 255 of 454 in scope)
+     registered_burst_only  gaps   941  falls   5  expected [1.2, 1.86, 2.33]  band [0, 6]  PASS  (falls at ineligible gaps 0)
+     a1_burst_only          gaps   803  falls   3  expected [1.02, 1.58, 1.98]  band [0, 5]  PASS  (not counted 2, clear 57 of 76 in scope)
+     the registered rule's falls A1 does not count, by reason: {'a dither launch in a process that is not clear': 16, "inside the process's first heartbeat period": 31}
+  E87 (183 processes, 30 in burst blocks)
+     registered             gaps  1536  falls  39  expected [1.99, 3.07, 3.84]  band [0, 8]  FAIL high  (falls at ineligible gaps 26)
+     q132_rule              gaps  1121  falls   5  expected [1.46, 2.24, 2.81]  band [0, 6]  PASS
+     a1_all_blocks          gaps  1141  falls   5  expected [1.48, 2.28, 2.85]  band [0, 7]  PASS  (not counted 34, clear 68 of 183 in scope)
+     registered_burst_only  gaps   343  falls   2  expected [0.43, 0.67, 0.84]  band [0, 3]  PASS  (falls at ineligible gaps 0)
+     a1_burst_only          gaps   217  falls   1  expected [0.27, 0.42, 0.53]  band [0, 2]  PASS  (not counted 1, clear 14 of 30 in scope)
+     the registered rule's falls A1 does not count, by reason: {'a dither launch in a process that is not clear': 8, "inside the process's first heartbeat period": 26}
+  E84 (139 processes, 22 in burst blocks)
+     registered             gaps  1686  falls  45  expected [2.26, 3.44, 4.28]  band [0, 9]  FAIL high  (falls at ineligible gaps 12)
+     q132_rule              gaps  1530  falls   2  expected [2.05, 3.12, 3.89]  band [0, 8]  PASS
+     a1_all_blocks          gaps  1576  falls   2  expected [2.11, 3.22, 4.0]  band [0, 8]  PASS  (not counted 43, clear 101 of 119 in scope)
+     registered_burst_only  gaps   283  falls   7  expected [0.39, 0.59, 0.73]  band [0, 3]  FAIL high  (falls at ineligible gaps 0)
+     a1_burst_only          gaps   270  falls   0  expected [0.37, 0.56, 0.7]  band [0, 3]  PASS  (not counted 7, clear 20 of 20 in scope)
+     the registered rule's falls A1 does not count, by reason: {'an alarm step': 32, "inside the process's first heartbeat period": 1, 'a dither launch in a process that is not clear': 10}
+  pooled: {"registered": {"falls": 188, "e07": 27.3, "pass": 1, "P(X>=falls)": 0.0, "P(X<=falls)": 1.0}, "q132_rule": {"falls": 23, "e07": 21.63, "pass": 6, "P(X>=falls)": 0.4123, "P(X<=falls)": 0.6671}, "a1_all_blocks": {"falls": 23, "e07": 22.3, "pass": 6, "P(X>=falls)": 0.469, "P(X<=falls)": 0.613}, "registered_burst_only": {"falls": 22, "e07": 4.51, "pass": 4, "P(X>=falls)": 0.0, "P(X<=falls)": 1.0}, "a1_burst_only": {"falls": 7, "e07": 3.79, "pass": 6, "P(X>=falls)": 0.09, "P(X<=falls)": 0.9604}, "registered_falls_not_counted_by_A1": {"inside the process's first heartbeat period": 73, "a dither launch in a process that is not clear": 55, "an alarm step": 37}}
+  Q132(g)'s README (13de3994), 'What the data show': 25 falls in six sessions against 23.5 expected (2 ms in 1000.01 ms over 11,781 kernel boundaries at 800 MHz), 95% interval 16.2-36.9
+
+2. E100, arm by arm
+  A0   registered: 3 falls, [0.58, 0.9, 1.12] expected, PASS;  A1: 3 falls, [0.58, 0.9, 1.12] expected, PASS (clear 24 of 24);  E100's prediction 0.96 in [0, 4], falls 3 (kernel 3)
+  A5   registered: 3 falls, [2.87, 3.19, 3.41] expected, PASS;  A1: 3 falls, [2.87, 3.19, 3.41] expected, PASS (clear 24 of 24);  E100's prediction 3.59 in [0, 7], falls 3 (kernel 3)
+  A20  registered: 10 falls, [8.86, 9.14, 9.35] expected, PASS;  A1: 10 falls, [8.86, 9.14, 9.35] expected, PASS (clear 24 of 24);  E100's prediction 8.51 in [3, 14], falls 10 (kernel 10)
+  A100 registered: 33 falls, [25.7, 25.88, 26.01] expected, PASS;  A1: 33 falls, [25.7, 25.88, 26.01] expected, PASS (clear 24 of 24);  E100's prediction 29.78 in [20, 42], falls 33 (kernel 33)
+  N    registered: 0 falls, [0.0, 0.0, 0.0] expected, PASS;  A1: 0 falls, [0.0, 0.0, 0.0] expected, PASS (clear 50 of 50);  E100's prediction 0.0 in [0, 0], falls 0 (kernel 0)
+  R    registered: 11 falls, [8.35, 8.63, 8.83] expected, PASS;  A1: 11 falls, [8.35, 8.63, 8.83] expected, PASS (clear 24 of 24);  E100's prediction 8.51 in [3, 14], falls 12 (kernel 10)
+  pooled over A0, A5, A20, A100 and R: {"registered": {"falls": 60, "expected_0.7": 47.74, "z": 1.77, "P(X>=falls)": 0.0483}, "a1": {"falls": 60, "expected_0.7": 47.74, "z": 1.77, "P(X>=falls)": 0.0483}}
+
+== E173 (a2): 165 processes, 165 in scope, 131 clear
+  3. DT-N (A1): gaps 1832, expected {'delta_0.0_ms': 4.826, 'delta_0.7_ms': 6.108, 'delta_1.2_ms': 7.024}, band [1, 13], falls 5: PASS
+     falls: [('BURST-18-b8-int8.h8_held_v34-r', 10, 0.799, 'full clock'), ('BURST-64-b8-int8.u8_ar_k_0a9fe', 5, 0.799, 'full clock'), ('BURST-91-b8-int8.l8_flip_d2p2c', 16, 0.799, 'full clock'), ('BURST-147-b8-int8.l8_flip_d2p2', 13, 0.799, 'full clock'), ('BURST-161-b8-fp16.r8_granite_l', 10, 0.799, 'full clock')]
+     registered falls not counted: [('BURST-141-b8-fp16.u8_tdist_934', 14, 0.764, "the launch before read 0.764 GHz, under 0.79, and the process is not clear (3 governor or alarm steps to <= 620 MHz in the run's ring)")]
+     registered DT-N, for reference: gaps 2101, expected {'delta_0.0_ms': 5.532, 'delta_0.7_ms': 7.003, 'delta_1.2_ms': 8.053}, band [1, 14], falls 6: PASS
+     DT-L (A1): first fall in BURST-18-b8-int8.h8_held_v34-r1; later falls 4, sensitivity 1.0, PPV 0.571: PASS; P at each later fall [0.801, 0.879, 0.541, 0.853]; skipped as first []; off lattice []
+     none    falls expected   0.00, late climbs  0.00  {'DT-P8-A2-F2': (7.0119, 0.0, -2.6567, 0.0, 'FAIL', []), 'DT-P8-A2-Bp': (1.0937, 0.0, -0.0353, 0.0, 'FAIL', [])}
+     count   falls expected   7.30, late climbs  1.10  {'DT-P8-A2-F2': (6.5434, 0.0154, -0.4764, 0.0171, 'FAIL', []), 'DT-P8-A2-Bp': (1.1279, 0.0012, 0.1943, 0.0014, 'FAIL', [])}
+     seq     falls expected   7.91, late climbs  0.12  {'DT-P8-A2-F2': (2.0655, 0.0242, -0.3543, 0.014, 'PASS', []), 'DT-P8-A2-Bp': (0.8936, 0.0007, 0.1817, 0.0012, 'PASS', [])}
+     oracle  falls expected   9.02, late climbs  0.00  {'DT-P8-A2-F2': (0.6712, 0.0195, 0.0869, 0.0052, 'PASS', []), 'DT-P8-A2-Bp': (0.8382, 0.0002, 0.2213, 0.0005, 'PASS', [])}
+     seq-gc  falls expected   7.91, late climbs  0.12  {'DT-P8-A2-F2': (2.0655, 0.0242, -0.3543, 0.014, 'PASS', []), 'DT-P8-A2-Bp': (0.8936, 0.0007, 0.1817, 0.0012, 'PASS', [])}
+     seq-lag falls expected   7.91, late climbs  0.12  {'DT-P8-A2-Bp': (0.8732, 0.0007, 0.1671, 0.0012, 'PASS', [])}
+     the registered rule at A1-4's draws (the study's arms without its one seed's noise): {"count": {"DT-P8-A2-F2": {"n": 21, "rms": 6.5434, "mc_se_rms": 0.0154, "mean": -0.4764, "mc_se_mean": 0.0171, "verdict": "FAIL"}, "DT-P8-A2-Bp": {"n": 21, "rms": 1.1279, "mc_se_rms": 0.0012, "mean": 0.1943, "mc_se_mean": 0.0014, "verdict": "FAIL"}}, "seq": {"DT-P8-A2-F2": {"n": 21, "rms": 1.6655, "mc_se_rms": 0.026, "mean": -0.2515, "mc_se_mean": 0.0169, "verdict": "PASS"}, "DT-P8-A2-Bp": {"n": 21, "rms": 0.884, "mc_se_rms": 0.0008, "mean": 0.191, "mc_se_mean": 0.0014, "verdict": "PASS"}}}
+     each registered fall against the lattice of the session's other falls: [{"run": "BURST-18-b8-int8.h8_held_v34-r1", "gap": 10, "residual_ms": 0.26, "lattice_sd_ms": 1.23}, {"run": "BURST-64-b8-int8.u8_ar_k_0a9fe5-r1", "gap": 5, "residual_ms": -0.04, "lattice_sd_ms": 0.64}, {"run": "BURST-91-b8-int8.l8_flip_d2p2c16_231d-r1", "gap": 16, "residual_ms": -0.75, "lattice_sd_ms": 0.51}, {"run": "BURST-141-b8-fp16.u8_tdist_93475b-r1", "gap": 14, "residual_ms": -0.89, "lattice_sd_ms": 0.63}, {"run": "BURST-147-b8-int8.l8_flip_d2p2c16_231d-r1", "gap": 13, "residual_ms": 0.71, "lattice_sd_ms": 0.67}, {"run": "BURST-161-b8-fp16.r8_granite_l3_pv_e993b7-r1", "gap": 10, "residual_ms": 1.03, "lattice_sd_ms": 0.8}]
+  4. periods: {"registered falls": {"falls": 6, "with_prior_ms": [1000.01036, 0.00061], "without_prior_ms": [1000.01054, 0.00067], "prior_ms": [1000.0095, 0.0015]}, "A1 falls": {"falls": 5, "with_prior_ms": [1000.0105, 0.00064], "without_prior_ms": [1000.01072, 0.00071], "prior_ms": [1000.0095, 0.0015]}}
+  5. SP pass under the 10 Hz sampler (mean time between board_w changes at 800 MHz, per run): {'runs': 165, 'median_ms': 164.9, 'p10_ms': 156.0, 'p90_ms': 175.2}
+  6. fall costs (MHz): measured, the term with the registered climb, with A1-5's
+     int8.h8_held_v34                     other    at  3.62 s: 48.0, 48.45, 48.45
+     int8.u8_ar_k_0a9fe5                  pinned   at  1.87 s: 50.0, 51.14, 51.14
+     int8.l8_flip_d2p2c16_231d            pinned   at  5.84 s: 20.4, 19.62, 19.62
+     int8.l8_flip_d2p2c16_231d            pinned   at  4.75 s: 47.1, 47.8, 47.8
+     fp16.r8_granite_l3_pv_e993b7         pinned   at  3.65 s: 47.1, 47.72, 47.72
+
+== E174 (c0): 126 processes, 126 in scope, 126 clear
+  3. DT-N (A1): gaps 1690, expected {'delta_0.0_ms': 4.609, 'delta_0.7_ms': 5.792, 'delta_1.2_ms': 6.637}, band [1, 12], falls 6: PASS
+     falls: [('BURST-05-b8-int8.anchor8_full_', 16, 0.799, 'full clock'), ('BURST-63-b8-int8.l8_flip_d2p2c', 4, 0.799, 'full clock'), ('BURST-88-b8-fp32.anchor7_zeros', 12, 0.799, 'full clock'), ('BURST-89-b8-int8.anchor7_zeros', 16, 0.799, 'full clock'), ('BURST-92-b8-fp16.s8_onebit_b4_', 4, 0.799, 'full clock'), ('BURST-112-b8-fp32.real_smol_so', 12, 0.799, 'full clock')]
+     registered falls not counted: []
+     registered DT-N, for reference: gaps 1690, expected {'delta_0.0_ms': 4.609, 'delta_0.7_ms': 5.792, 'delta_1.2_ms': 6.637}, band [1, 12], falls 6: PASS
+     DT-L (A1): first fall in BURST-05-b8-int8.anchor8_full_a_4aac84-r1; later falls 5, sensitivity 0.8, PPV 0.571: PASS; P at each later fall [0.832, 0.384, 0.852, 0.964, 0.993]; skipped as first []; off lattice []
+     none    falls expected   0.00, late climbs  0.00  {'DT-P8-C0-F': (4.5431, 0.0, -1.6048, 0.0, 'FAIL', [])}
+     count   falls expected   5.80, late climbs  5.95  {'DT-P8-C0-F': (4.2482, 0.0139, 0.549, 0.0136, 'PASS', [])}
+     seq     falls expected   6.92, late climbs  7.20  {'DT-P8-C0-F': (2.8042, 0.0127, 0.7445, 0.0112, 'PASS', [])}
+     oracle  falls expected   7.21, late climbs  7.14  {'DT-P8-C0-F': (1.9006, 0.0242, 0.4982, 0.0074, 'PASS', [])}
+     seq-gc  falls expected   6.92, late climbs  7.20  {'DT-P8-C0-F': (2.8042, 0.0127, 0.7445, 0.0112, 'PASS', [])}
+     the registered rule at A1-4's draws (the study's arms without its one seed's noise): {"count": {"DT-P8-C0-F": {"n": 21, "rms": 4.2648, "mc_se_rms": 0.0143, "mean": 0.6792, "mc_se_mean": 0.0145, "verdict": "PASS"}}, "seq": {"DT-P8-C0-F": {"n": 21, "rms": 2.933, "mc_se_rms": 0.0146, "mean": 0.9078, "mc_se_mean": 0.0117, "verdict": "PASS"}}}
+     each registered fall against the lattice of the session's other falls: [{"run": "BURST-05-b8-int8.anchor8_full_a_4aac84-r1", "gap": 16, "residual_ms": -0.84, "lattice_sd_ms": 1.08}, {"run": "BURST-63-b8-int8.l8_flip_d2p2c16_231d-r1", "gap": 4, "residual_ms": -0.42, "lattice_sd_ms": 0.49}, {"run": "BURST-88-b8-fp32.anchor7_zeros-r1", "gap": 12, "residual_ms": 1.83, "lattice_sd_ms": 0.48}, {"run": "BURST-89-b8-int8.anchor7_zeros-r1", "gap": 16, "residual_ms": -0.87, "lattice_sd_ms": 0.48}, {"run": "BURST-92-b8-fp16.s8_onebit_b4_c2e2c2e2-r1", "gap": 4, "residual_ms": 0.18, "lattice_sd_ms": 0.53}, {"run": "BURST-112-b8-fp32.real_smol_softmax_v_causal-r1", "gap": 12, "residual_ms": -0.33, "lattice_sd_ms": 0.61}]
+  4. periods: {"registered falls": {"falls": 6, "with_prior_ms": [1000.01939, 0.00072], "without_prior_ms": [1000.01981, 0.00105], "prior_ms": [1000.019, 0.001]}, "A1 falls": {"falls": 6, "with_prior_ms": [1000.01939, 0.00072], "without_prior_ms": [1000.01981, 0.00105], "prior_ms": [1000.019, 0.001]}}
+  5. SP pass under the 10 Hz sampler (mean time between board_w changes at 800 MHz, per run): {'runs': 126, 'median_ms': 161.9, 'p10_ms': 157.3, 'p90_ms': 175.1}
+  6. fall costs (MHz): measured, the term with the registered climb, with A1-5's
+     int8.anchor8_full_a_4aac84           other    at  5.76 s: 21.3, 19.87, 19.87
+     int8.l8_flip_d2p2c16_231d            pinned   at  1.36 s: 44.9, 45.1, 41.54
+     fp32.anchor7_zeros                   other    at  4.31 s: 46.0, 49.81, 46.3
+     int8.anchor7_zeros                   other    at  5.76 s: 20.5, 19.82, 19.82
+     fp16.s8_onebit_b4_c2e2c2e2           pinned   at  1.38 s: 42.0, 44.95, 41.45
+     fp32.real_smol_softmax_v_causal      other    at  4.35 s: 44.9, 49.54, 46.05
+
+== E175 (a2): 126 processes, 126 in scope, 96 clear
+  3. DT-N (A1): gaps 1330, expected {'delta_0.0_ms': 3.465, 'delta_0.7_ms': 4.396, 'delta_1.2_ms': 5.061}, band [0, 10], falls 3: PASS
+     falls: [('BURST-87-e5-int8.anchor7_zeros', 4, 0.799, 'full clock'), ('BURST-112-e5-fp16.e5c17_bimoda', 8, 0.774, 'clear process'), ('BURST-123-e5-fp16.e5c08_ar_k_t', 12, 0.738, 'clear process')]
+     registered falls not counted: [('BURST-68-e5-fp32.e5c10_ar_i_t1', 12, 0.683, "the launch before read 0.683 GHz, under 0.79, and the process is not clear (3 governor or alarm steps to <= 620 MHz in the run's ring)")]
+     registered DT-N, for reference: gaps 1567, expected {'delta_0.0_ms': 4.073, 'delta_0.7_ms': 5.17, 'delta_1.2_ms': 5.953}, band [1, 11], falls 4: PASS
+     DT-L (A1): first fall in BURST-87-e5-int8.anchor7_zeros-r1; later falls 2, sensitivity 1.0, PPV 1.0: NOT SCORED (2 later falls < 3); P at each later fall [0.651, 0.962]; skipped as first []; off lattice []
+     none    falls expected   0.00, late climbs  0.00  {'DT-E175-A2-G': (4.4923, 0.0, 0.1206, 0.0, 'FAIL', []), 'DT-E175-A2-Bp': (0.668, 0.0, 0.532, 0.0, 'FAIL', [])}
+     count   falls expected   5.34, late climbs  0.79  {'DT-E175-A2-G': (4.8533, 0.0138, 1.6643, 0.0169, 'FAIL', []), 'DT-E175-A2-Bp': (0.8905, 0.0016, 0.7877, 0.0029, 'FAIL', [])}
+     seq     falls expected   6.09, late climbs  0.55  {'DT-E175-A2-G': (5.1834, 0.0111, 2.067, 0.0114, 'FAIL', []), 'DT-E175-A2-Bp': (0.9177, 0.0019, 0.7943, 0.0021, 'FAIL', [])}
+     oracle  falls expected   5.73, late climbs  0.87  {'DT-E175-A2-G': (4.4644, 0.0097, 2.028, 0.0047, 'FAIL', []), 'DT-E175-A2-Bp': (0.813, 0.0029, 0.7236, 0.0024, 'FAIL', [])}
+     seq-gc  falls expected   6.09, late climbs  0.55  {'DT-E175-A2-G': (4.7651, 0.0071, 1.4247, 0.0076, 'FAIL', []), 'DT-E175-A2-Bp': (0.9177, 0.0019, 0.7943, 0.0021, 'FAIL', [])}
+     seq-lag falls expected   6.09, late climbs  0.55  {'DT-E175-A2-Bp': (0.8872, 0.002, 0.7616, 0.002, 'FAIL', [])}
+     E175-A2-F2: {'none': (1.2391, 0.0, 0.6512, 'PASS'), 'count': (2.92, 0.0227, 2.7549, 'PASS'), 'seq': (3.1798, 0.0184, 2.7505, 'PASS'), 'oracle': (3.2123, 0.0338, 1.8216, 'PASS'), 'seq-gc': (3.1798, 0.0184, 2.7505, 'PASS')}
+     the registered rule at A1-4's draws (the study's arms without its one seed's noise): {"count": {"DT-E175-A2-G": {"n": 16, "rms": 4.8533, "mc_se_rms": 0.0138, "mean": 1.6643, "mc_se_mean": 0.0169, "verdict": "FAIL"}, "DT-E175-A2-Bp": {"n": 8, "rms": 0.8905, "mc_se_rms": 0.0016, "mean": 0.7877, "mc_se_mean": 0.0029, "verdict": "FAIL"}, "DT-E175-A2-F2": {"n": 8, "rms": 2.92, "mc_se_rms": 0.0227, "mean": 2.7549, "mc_se_mean": 0.0261, "verdict": "PASS"}}, "seq": {"DT-E175-A2-G": {"n": 16, "rms": 5.1574, "mc_se_rms": 0.0153, "mean": 1.8979, "mc_se_mean": 0.0125, "verdict": "FAIL"}, "DT-E175-A2-Bp": {"n": 8, "rms": 0.8961, "mc_se_rms": 0.002, "mean": 0.7655, "mc_se_mean": 0.002, "verdict": "FAIL"}, "DT-E175-A2-F2": {"n": 8, "rms": 2.7576, "mc_se_rms": 0.0186, "mean": 2.3526, "mc_se_mean": 0.0179, "verdict": "PASS"}}}
+     each registered fall against the lattice of the session's other falls: [{"run": "BURST-68-e5-fp32.e5c10_ar_i_t10_adc630-r1", "gap": 12, "residual_ms": -0.17, "lattice_sd_ms": 1.19}, {"run": "BURST-87-e5-int8.anchor7_zeros-r1", "gap": 4, "residual_ms": -0.21, "lattice_sd_ms": 0.65}, {"run": "BURST-112-e5-fp16.e5c17_bimodal_t5_a9b319-r1", "gap": 8, "residual_ms": 0.48, "lattice_sd_ms": 0.77}, {"run": "BURST-123-e5-fp16.e5c08_ar_k_t6_6dd6a1-r1", "gap": 12, "residual_ms": -0.35, "lattice_sd_ms": 0.84}]
+  4. periods: {"registered falls": {"falls": 4, "with_prior_ms": [1000.00971, 0.00093], "without_prior_ms": [1000.00983, 0.00119], "prior_ms": [1000.0095, 0.0015]}, "A1 falls": {"falls": 3, "with_prior_ms": [1000.00962, 0.00121], "without_prior_ms": [1000.00985, 0.00206], "prior_ms": [1000.0095, 0.0015]}}
+  5. SP pass under the 10 Hz sampler (mean time between board_w changes at 800 MHz, per run): {'runs': 126, 'median_ms': 166.8, 'p10_ms': 160.1, 'p90_ms': 183.5}
+  6. fall costs (MHz): measured, the term with the registered climb, with A1-5's
+     int8.anchor7_zeros                   other    at  1.34 s: 42.9, 42.84, 42.84
+     fp16.e5c17_bimodal_t5_a9b319         governed at  3.02 s: 21.73, 37.5, 37.5
+     fp16.e5c08_ar_k_t6_6dd6a1            governed at  4.54 s: 26.97, 39.24, 39.24
