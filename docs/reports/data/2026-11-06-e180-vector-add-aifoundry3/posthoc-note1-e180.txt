@@ -1,0 +1,172 @@
+E180's data README, dated note 1: the figures it cites, re-read from the committed data (posthoc_note1_e180.py)
+
+== inputs
+the data commit's files: 91 (SHA256SUMS lists 89; README.md and SHA256SUMS beside); SHA256SUMS re-hashed here: 89 of 89 OK
+scored-e180.json sha256 97b8c17211c3516b85929d6ab2ce7168c69ccc7212708a9a1300190e699badbb (its SHA256SUMS line)
+reduced-e180-v3.json sha256 a914be262c7828799121c36fda6a48e1f911dd24933f0c5c108b1feecb6ecf4e (its SHA256SUMS line)
+read as text: tools/claims-v3/e180/E180.md sha256 959b9d74dd85df5958175abdfac3382ebd1f17dcc1d15a404085c4df77f4dbf0
+read as text: tools/claims-v3/e180/E180.md.dated-note-A1.md sha256 8bfa404f91008c30720e4bee837ac849d1144c641e87972f0e719a138dd9b57d
+read as text: tools/claims-v3/e180/power_e180.py sha256 7db37ef73167bcb5a9496fd2b675d570595bba46c62df0ec36cef5603953c4e1
+read as text: tools/claims-v3/e180/score_e180.py sha256 3da95da280564cbe9a9b7cb98f0afac912931a00b73ab618c105c7e89625912c
+read as text: tools/claims-v3/e180/score_e180_v2.py sha256 cbf55993bff2445be5955950497327c62d4b32009e5baba927a5bbccdb775d6b
+read as data: tools/claims-v3/e180/forecast-e180.json sha256 385b1051894666d89aed93a8682da665d0755eaa3e20548454852ee6fe4eb411
+
+== section 1: E180-I, the integer path, re-made by the registered statistic (fault 1)
+E180.md section 5, the E180-I row (line 200): threshold 'NULL if the interval lies inside +-0.30 W' found; power_e180.I_MARGIN 0.3; t(0.975, 5) = power_e180.T975[5] = 2.571
+score_e180.py's E180-I block (line 116): the margin test at line 120 comes first, then 'lo > 0' (POSITIVE) at line 122 and 'hi < 0' (NEGATIVE) at line 124: an interval inside the margin reads NULL whatever its sign
+the 8 kinds: fadd.pi/f_4, fadd.pi/f_5, fadd.pi/i_0000ffff, fadd.pi/i_1, fadd.pi/i_4, fadd.pi/i_5, fadd.pi/i_55555555, fadd.pi/i_7fffffff; less fadd.pi/zeros; kept passes 18010, 18011, 18012, 18013, 18014, 18015
+per pass, mean D(8 kinds) - D(fadd.pi zeros), W: 18010 +0.2060, 18011 +0.0968, 18012 +0.1348, 18013 +0.0567, 18014 +0.0797, 18015 +0.0392; above 0 in 6 of 6
+re-made: +0.1022 [+0.0385, +0.1659] W (sd 0.0607, half-width 0.0637); equals scored-e180.json rules.E180-I to 1e-12: True
+inside the +-0.30 W margin: True, so the registered verdict is NULL (scored: NULL); by the sign test alone the interval lies above 0
+the arms' forecasts (scored-e180.json, the mean of the 8 kinds' frozen W) against the interval: P +0.0000 below; C +0.0000 below; E +0.0000 below; F +0.0410 inside; A +0.0461 inside
+README lines holding the word 'flat': [1, 58, 226]; 'the integer add is flat (E180-I NULL)' at [1]; 'the integer add reads flat inside its' at [58]; "the integer add's held write-back is flat" at [226]; 'within ±0.30 W (E180-I NULL)' at [227]; '+0.1022 W [+0.0385, +0.1659]' at [47]
+
+== section 2: the die's rise over a burst (fault 2)
+A1 section 4.3 (E180.md.dated-note-A1.md line 239): reported per kind, the mean rise (Tb - Ti) over passes, and a kind more than 0.5 C from the median named; score_e180_v2.py line 130 takes the median over the kinds' means
+the kinds' mean rises (41 kinds, each the mean over 6 passes): median 0.8703 C, mean 0.7934 C; more than 0.5 C off the median: fadd.ps/random (1.598 C); equals scored-e180.json reported_v2.rise: True
+the bursts (282: every kept burst of the 6 passes, reduced-e180-v3.json passes.*.runs_v2): median 0.8696 C, mean 0.7993 C, quartiles 0.6739 / 1.0000 C, least 0.0000, most 1.6900 C; bursts at exactly 0: 14
+the (kind, pass) means (246): median 0.8519 C, mean 0.7934 C
+README lines: 'median 0.870' at [84]; "a burst's mean rise was 0.87" at [233]
+the live die reading, temp_c.minshire[0], over the session's 24301 samples (8 telemetry files): 50-57 C (the six passes alone 50-57 C); board at most 44.70 W; unreadable lines 0
+  e180-stoptest/p18002 50-50 C; e180-smoke/p18001 50-51 C; e180/p18010 50-56 C; e180/p18011 53-56 C; e180/p18012 53-56 C; e180/p18013 53-56 C; e180/p18014 53-56 C; e180/p18015 53-57 C
+
+== section 3: the README's rounded figures, each against its committed value at the printed precision (fault 3)
+lines 84-96, the bullets after the reported table: 64 figures; agree 58; disagree 6, of which double roundings 6; fragments not found on their line: 0
+  DISAGREES line 90: fadd.ps const D: printed +0.068, committed +0.067456, at the printed precision +0.067; the printed figure is the committed one rounded to 4 decimals (+0.0675) and rounded again
+  DISAGREES line 90: fadd.ps 3s D: printed +0.094, committed +0.093467, at the printed precision +0.093; the printed figure is the committed one rounded to 4 decimals (+0.0935) and rounded again
+  DISAGREES line 91: fadd.ps -4 D: printed +0.060, committed +0.059492, at the printed precision +0.059; the printed figure is the committed one rounded to 4 decimals (+0.0595) and rounded again
+  DISAGREES line 91: fadd.pi random P: printed +9.639, committed +9.638474, at the printed precision +9.638; the printed figure is the committed one rounded to 4 decimals (+9.6385) and rounded again
+  DISAGREES line 93: fadd.pi.acc int 1 P: printed +1.199, committed +1.198499, at the printed precision +1.198; the printed figure is the committed one rounded to 4 decimals (+1.1985) and rounded again
+  DISAGREES line 93: fadd.pi.acc int 4 P: printed +1.199, committed +1.198499, at the printed precision +1.198; the printed figure is the committed one rounded to 4 decimals (+1.1985) and rounded again
+  every figure (line: what, printed, committed, at the printed precision, agrees):
+    84: the die rise: the kinds' mean rises' median (section 2), 0.870, +0.870303, 0.870, yes
+    85: fadd.ps rate, least (10^11 a second), 4.5871, +4.587081, 4.5871, yes
+    85: fadd.ps rate, most, 4.5930, +4.592995, 4.5930, yes
+    86: fadd.ps rates apart (%), 0.13, +0.128920, 0.13, yes
+    86: fadd.pi rate, least, 4.563, +4.563058, 4.563, yes
+    86: fadd.pi rate, most, 4.568, +4.567659, 4.568, yes
+    86: fadd.ps.acc rate, least, 4.509, +4.509356, 4.509, yes
+    86: fadd.ps.acc rate, most, 4.515, +4.514596, 4.515, yes
+    86: fadd.pi.acc rate, least, 4.586, +4.585524, 4.586, yes
+    86: fadd.pi.acc rate, most, 4.586, +4.585892, 4.586, yes
+    89: fadd.ps r3_max D, +0.326, +0.325566, 0.326, yes
+    89: fadd.ps r3_max P, +4.947, +4.947449, 4.947, yes
+    89: fadd.ps r3_k24 D, +0.189, +0.189123, 0.189, yes
+    89: fadd.ps r3_k20 D, +0.254, +0.254146, 0.254, yes
+    89: fadd.ps r3_k16 D, +0.209, +0.209041, 0.209, yes
+    89: fadd.ps r3_k12 D, +0.206, +0.206340, 0.206, yes
+    89: fadd.ps r3_k8 D, +0.158, +0.158255, 0.158, yes
+    89: fadd.ps r3_k4 D, +0.125, +0.125430, 0.125, yes
+    90: fadd.ps 0.5s D, +0.096, +0.095713, 0.096, yes
+    90: fadd.ps 0.5s P, +1.154, +1.154405, 1.154, yes
+    90: fadd.ps 1.5s D, +0.102, +0.101599, 0.102, yes
+    90: fadd.ps 1.5s P, +0.330, +0.329830, 0.330, yes
+    90: fadd.ps const D, +0.068, +0.067456, 0.067, NO
+    90: fadd.ps const P, +0.165, +0.164915, 0.165, yes
+    90: fadd.ps 2s D, −0.024, -0.023878, -0.024, yes
+    90: fadd.ps 3s D, +0.094, +0.093467, 0.093, NO
+    90: fadd.ps 4s D, +0.022, +0.022073, 0.022, yes
+    90: fadd.ps 5s D, +0.049, +0.049056, 0.049, yes
+    90: fadd.ps 6s D, +0.064, +0.064336, 0.064, yes
+    90: fadd.ps 7s D, +0.060, +0.060163, 0.060, yes
+    91: fadd.ps 8s D, +0.084, +0.083842, 0.084, yes
+    91: fadd.ps 8s P, +0.495, +0.494745, 0.495, yes
+    91: fadd.ps -1 D, −0.001, -0.001094, -0.001, yes
+    91: fadd.ps -4 D, +0.060, +0.059492, 0.059, NO
+    91: fadd.ps -5 D, +0.059, +0.058919, 0.059, yes
+    91: fadd.ps random D, +8.455, +8.454640, 8.455, yes
+    91: fadd.ps random P, +8.726, +8.726347, 8.726, yes
+    91: fadd.pi random D, +3.171, +3.170874, 3.171, yes
+    91: fadd.pi random P, +9.639, +9.638474, 9.638, NO
+    91: fadd.pi random F, +3.186, +3.185912, 3.186, yes
+    92: fadd.pi R4 kinds' D, least, −0.102, -0.102291, -0.102, yes
+    92: fadd.pi R4 kinds' D, most, +0.373, +0.372650, 0.373, yes
+    92: fadd.ps.acc 4s D, +0.382, +0.381697, 0.382, yes
+    92: fadd.ps.acc 5s D, +0.696, +0.696071, 0.696, yes
+    92: fadd.ps.acc const D, +0.383, +0.382648, 0.383, yes
+    92: fadd.ps.acc 4s P, +3.293, +3.292902, 3.293, yes
+    92: fadd.ps.acc 5s P, +3.281, +3.281148, 3.281, yes
+    92: fadd.ps.acc const P, +3.293, +3.292902, 3.293, yes
+    92: fadd.pi.acc int 1 D, +0.239, +0.239443, 0.239, yes
+    93: fadd.pi.acc int 4 D, +0.269, +0.268814, 0.269, yes
+    93: fadd.pi.acc int 5 D, +0.348, +0.348407, 0.348, yes
+    93: fadd.pi.acc int 1 P, +1.199, +1.198499, 1.198, NO
+    93: fadd.pi.acc int 4 P, +1.199, +1.198499, 1.198, NO
+    93: fadd.pi.acc int 5 P, +1.816, +1.815674, 1.816, yes
+    94: pair 0.5s - 1.5s D, −0.006, -0.005885, -0.006, yes
+    94: pair 0.5s - 1.5s P, +0.825, +0.824575, 0.825, yes
+    94: pair const - 2s D, +0.091, +0.091335, 0.091, yes
+    94: pair const - 2s P, −0.165, -0.164915, -0.165, yes
+    95: pair fadd.ps 5s - fadd.pi 5s D, −0.018, -0.017583, -0.018, yes
+    95: pair fadd.ps 5s - fadd.pi 5s P, +0.495, +0.494745, 0.495, yes
+    95: pair fadd.ps.acc 5s - 4s D, +0.314, +0.314375, 0.314, yes
+    95: pair fadd.ps.acc 5s - 4s P, −0.012, -0.011754, -0.012, yes
+    95: pair fadd.ps.acc 5s - 4s F, +0.132, +0.132117, 0.132, yes
+    96: pair fadd.pi.acc 5 - 4 D, +0.080, +0.079592, 0.080, yes
+the two tables (the rules, lines 42-49; the reported arms, lines 73-82), every figure of their measured and forecast cells and the E180-A band; every cell's count of figures matches the list: 123 figures; agree 123; disagree 0, of which double roundings 0; fragments not found on their line: 0
+  (each of these figures is in posthoc-note1-e180.json section_3.tables)
+elsewhere (lines 1, 55-64 and 218-233: the figures printed to three decimals or fewer from a committed figure): 60 figures; agree 59; disagree 1, of which double roundings 0; fragments not found on their line: 0
+  DISAGREES line 233: the bursts' mean rise, as the word 'mean' says (section 2): printed 0.87, committed +0.799299, at the printed precision +0.80
+  every figure (line: what, printed, committed, at the printed precision, agrees):
+    1: E180-H mean, +0.027, +0.026983, 0.027, yes
+    1: E180-H low end, -0.050, -0.050326, -0.050, yes
+    1: E180-H high end, +0.104, +0.104293, 0.104, yes
+    1: E180-H P, +0.165, +0.164915, 0.165, yes
+    1: E180-L mean, 0.0097, +0.009693, 0.0097, yes
+    1: E180-L low end, +0.0027, +0.002734, 0.0027, yes
+    1: E180-L high end, +0.0167, +0.016652, 0.0167, yes
+    1: P's ladder slope over the measured slope, 17, +17.014326, 17, yes
+    1: E180-R rho, +0.800, +0.800444, 0.800, yes
+    1: E180-A mean, +0.36, +0.359624, 0.36, yes
+    1: E180-A mean over its P, 0.12, +0.121369, 0.12, yes
+    55: E180-L mean, 0.0097, +0.009693, 0.0097, yes
+    55: E180-L P, 0.1649, +0.164915, 0.1649, yes
+    56: E180-L A, 0.0192, +0.019187, 0.0192, yes
+    57: his pair at the measured price (one result bit), 0.01, +0.009693, 0.01, yes
+    57: E180-H half-width, 0.08, +0.077309, 0.08, yes
+    57: E180-H P, +0.165, +0.164915, 0.165, yes
+    58: E180-O half-width, 0.012, +0.011712, 0.012, yes
+    59: E180-A mean, +0.36, +0.359624, 0.36, yes
+    59: E180-A mean over its P, 0.12, +0.121369, 0.12, yes
+    59: E180-A P, +2.96, +2.963072, 2.96, yes
+    62: the registered fadd.ps rate (10^11 a second), 4.5836, +4.583575, 4.5836, yes
+    62: E180-L mean over the rate (fJ), 21, +21.146622, 21, yes
+    63: E180-L low end over the rate (fJ), 6, +5.964209, 6, yes
+    63: E180-L high end over the rate (fJ), 36, +36.329034, 36, yes
+    63: per lane, of eight (fJ), 2.6, +2.643328, 2.6, yes
+    63: P's slope over the rate (fJ), 360, +359.795522, 360, yes
+    63: named flips per result bit (forecast-e180.json pairs), 24.995, +24.994553, 24.995, yes
+    64: per named flip (fJ), 0.85, +0.846049, 0.85, yes
+    64: per named flip, low end, 0.24, +0.238620, 0.24, yes
+    64: per named flip, high end, 1.45, +1.453478, 1.45, yes
+    64: P per named flip, 14.395, +14.394957, 14.395, yes
+    218: E180-L mean, 0.0097, +0.009693, 0.0097, yes
+    218: P's ladder slope over the measured slope, 17, +17.014326, 17, yes
+    218: E180-L P, 0.1649, +0.164915, 0.1649, yes
+    219: E180-L A, 0.0192, +0.019187, 0.0192, yes
+    220: the random row below the catalogue's (%), 3, +2.767700, 3, yes
+    220: RA5 fadd.ps random - zeros, D, +8.45, +8.454640, 8.45, yes
+    220: RA5 the catalogue's random - zeros, +8.70, +8.695300, 8.70, yes
+    222: his pair at the measured price (one result bit), 0.01, +0.009693, 0.01, yes
+    222: E180-H half-width, 0.08, +0.077309, 0.08, yes
+    223: E180-L half-width, 0.007, +0.006959, 0.007, yes
+    223: E180-L mean over the rate (fJ), 21, +21.146622, 21, yes
+    224: RA3 on the rail, mean, +0.0093, +0.009253, 0.0093, yes
+    224: RA3 on the rail, low end, +0.0060, +0.006038, 0.0060, yes
+    225: RA3 on the rail, high end, +0.0125, +0.012468, 0.0125, yes
+    226: E180-O half-width, 0.012, +0.011712, 0.012, yes
+    227: E180-I margin, 0.30, +0.300000, 0.30, yes
+    227: E180-A mean over its P, 0.12, +0.121369, 0.12, yes
+    228: E180-H P, +0.165, +0.164915, 0.165, yes
+    229: E180-X P, +0.5, +0.494745, 0.5, yes
+    229: E180-A P, +2.96, +2.963072, 2.96, yes
+    231: E180-L mean, 0.0097, +0.009693, 0.0097, yes
+    231: E180-L low end, 0.0027, +0.002734, 0.0027, yes
+    231: E180-L high end, 0.0167, +0.016652, 0.0167, yes
+    232: per named flip (fJ), 0.85, +0.846049, 0.85, yes
+    233: the live die reading, least (section 2), 50, +50.000000, 50, yes
+    233: the live die reading, most (section 2), 57, +57.000000, 57, yes
+    233: the bursts' mean rise, as the word 'mean' says (section 2), 0.87, +0.799299, 0.80, NO
+    233: the kinds' mean rises' median (section 2), 0.87, +0.870303, 0.87, yes
+
+nothing here is a rule or a verdict; every rule, verdict and figure of README.md stands but the words and figures the note corrects
