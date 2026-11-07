@@ -1,0 +1,20 @@
+host_patch_e184: <repo>/workloads/enercat -> <scratch>/enercat-e184-src, host/main.cpp 7360e5e1501c66a1517a1173f188dcd2e4b4bb97b5049744374c8bf1152409c6
+== H0 the patched host compiles against the stubs (-fsyntax-only -Wall) and links with the mock runtime
+syntax rc 0 (       0 warning lines), link rc 0
+-> PASS
+== H1 a quad's schedule
+rc 0, 18 lines, segments as planned, copies' nonzero words [0, 0, 0, 384, 384, 0], every launch ok True
+-> PASS
+== H2 the stop file present
+rc 8, 0 launches, stop file <scratch>/STOP: stopping before segment 0 launch 0
+-> PASS
+== H3 an image of the wrong size
+rc 1, 0 launches, FAIL: --schedule: <scratch>/img/short.bin is not 524288 bytes
+-> PASS
+== H4 the budget
+rc 9, 2 launches of 18, over the 0.1 s budget before segment 1 launch 0
+-> PASS
+== H5 no --schedule: the catalogue's loop
+rc 0, 9 launches, with seg 0, operands zeros 9
+-> PASS
+DESKTEST-HOST-E184 PASS
