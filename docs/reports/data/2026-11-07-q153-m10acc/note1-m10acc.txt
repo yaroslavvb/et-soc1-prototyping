@@ -1,0 +1,117 @@
+Q153(m10acc) fix, dated note 1's figures (note1_m10acc.py). Post hoc unless marked; W are measured - predicted.
+anchors primary: float 884 rows in 39 runs, re-read equal; int8 265 rows in 24 runs, re-read equal
+N1 primary: F-P9 in P8-M1's words (registered interval) | P8-M1's paired(), 20000 draws
+  float pool8 a3             n 25  d -0.0024 [-0.0070, +0.0005] NOT RESOLVED | [-0.0070, +0.0006] NOT RESOLVED (seed 80409)
+  float pool8 class S a3     n  8  d +0.0011 [+0.0010, +0.0013] WORSE        | [+0.0010, +0.0013] WORSE (seed 80409)
+  float pool8 c1             n 25  d -0.0044 [-0.0082, -0.0013] BETTER       | [-0.0083, -0.0012] BETTER (seed 80409)
+  float pool8 class S c1     n  8  d +0.0005 [+0.0003, +0.0007] WORSE        | [+0.0003, +0.0007] WORSE (seed 80409)
+  float source b (both cards, held out by run): n 50, M10 0.1940 -> 0.1906, d -0.0034
+  int8 pool8 a3              n 15  d +0.0027 [-0.0013, +0.0061] NOT RESOLVED | [-0.0011, +0.0061] NOT RESOLVED (seed 80412)
+  int8 pool8 c1              n 15  d +0.0004 [-0.0020, +0.0025] NOT RESOLVED | [-0.0020, +0.0026] NOT RESOLVED (seed 80412)
+  int8 source b (both cards, held out by run): n 30, M10 0.1306 -> 0.1321, d +0.0016
+N2 primary: the rule's power
+  primary float tau_acc: R1 first holds at +5.7 / -5.7 fJ; enters at +5.7 / -18.0 fJ
+  primary float tau_bth: R1 first holds at +0.33 / -0.42 fJ; enters at +None / -0.42 fJ
+  primary int8 tau_acc: R1 first holds at +2.1 / -1.8 fJ; enters at +2.1 / -1.8 fJ
+  primary float tau_acc: chance by an outer runs bootstrap (jackknife 95% [-3.306, +3.553] fJ):
+    t -18.000 fJ: R1 1.000, R2 1.000, R3 0.503, enters 0.503
+    t -3.306 fJ: R1 0.001, R2 0.177, R3 0.001, enters 0.000
+    t +0.000 fJ: R1 0.000, R2 0.021, R3 0.060, enters 0.000
+    t +2.850 fJ: R1 0.136, R2 0.481, R3 0.996, enters 0.136
+    t +3.553 fJ: R1 0.262, R2 0.556, R3 0.996, enters 0.261
+    t +4.275 fJ: R1 0.404, R2 0.627, R3 0.996, enters 0.386
+    t +5.700 fJ: R1 0.600, R2 0.760, R3 0.996, enters 0.576
+    t +7.125 fJ: R1 0.788, R2 0.845, R3 0.996, enters 0.754
+    t +8.550 fJ: R1 0.910, R2 0.905, R3 0.996, enters 0.860
+    t +11.400 fJ: R1 0.994, R2 0.979, R3 0.996, enters 0.971
+  primary float tau_bth: chance by an outer runs bootstrap (jackknife 95% [-0.135, +0.265] fJ):
+    t -0.420 fJ: R1 0.501, R2 0.548, R3 0.873, enters 0.321
+    t -0.135 fJ: R1 0.000, R2 0.006, R3 0.116, enters 0.000
+    t +0.000 fJ: R1 0.000, R2 0.021, R3 0.060, enters 0.000
+    t +0.165 fJ: R1 0.055, R2 0.430, R3 0.052, enters 0.003
+    t +0.247 fJ: R1 0.289, R2 0.667, R3 0.052, enters 0.010
+    t +0.265 fJ: R1 0.358, R2 0.708, R3 0.052, enters 0.011
+    t +0.330 fJ: R1 0.550, R2 0.818, R3 0.052, enters 0.016
+    t +0.413 fJ: R1 0.790, R2 0.904, R3 0.052, enters 0.036
+    t +0.495 fJ: R1 0.908, R2 0.953, R3 0.052, enters 0.044
+    t +0.660 fJ: R1 0.989, R2 0.990, R3 0.052, enters 0.051
+  primary int8 tau_acc: chance by an outer runs bootstrap (jackknife 95% [-0.998, +0.830] fJ):
+    t -1.800 fJ: R1 0.512, R2 0.823, enters 0.503
+    t -0.998 fJ: R1 0.155, R2 0.519, enters 0.150
+    t +0.000 fJ: R1 0.000, R2 0.000, enters 0.000
+    t +0.830 fJ: R1 0.072, R2 0.381, enters 0.070
+    t +1.050 fJ: R1 0.136, R2 0.498, enters 0.134
+    t +1.575 fJ: R1 0.353, R2 0.712, enters 0.348
+    t +2.100 fJ: R1 0.575, R2 0.837, enters 0.564
+    t +2.625 fJ: R1 0.769, R2 0.908, enters 0.754
+    t +3.150 fJ: R1 0.898, R2 0.956, enters 0.886
+    t +4.200 fJ: R1 0.991, R2 0.988, enters 0.983
+  primary S-class shift, acc at its upper end: S +0.0412 W (max +0.0514), other whole +0.0299 W, difference +0.0113 W; pool 8 S minus other -0.0054 W
+  primary S-class shift, bth at its upper end: S +0.0005 W (max +0.0097), other whole +0.0244 W, difference -0.0239 W; pool 8 S minus other -0.0625 W
+  primary S-class shift, both at their upper ends: S +0.0417 W (max +0.0514), other whole +0.0543 W, difference -0.0126 W; pool 8 S minus other -0.0679 W
+  primary P9 float pool8 a3           n 25: t +0.000 fJ: B 0.304 W 0.004 NR 0.692; t +3.553 fJ: B 0.932 W 0.000 NR 0.068; t +5.700 fJ: B 0.978 W 0.000 NR 0.022
+  primary P9 float pool8 class S a3   n  8: t +0.000 fJ: B 0.000 W 1.000 NR 0.000; t +3.553 fJ: B 0.883 W 0.000 NR 0.117; t +5.700 fJ: B 0.906 W 0.000 NR 0.094
+  primary P9 float pool8 c1           n 25: t +0.000 fJ: B 0.873 W 0.000 NR 0.127; t +3.553 fJ: B 0.973 W 0.000 NR 0.027; t +5.700 fJ: B 0.996 W 0.000 NR 0.004
+  primary P9 float pool8 class S c1   n  8: t +0.000 fJ: B 0.000 W 0.883 NR 0.117; t +3.553 fJ: B 0.622 W 0.000 NR 0.378; t +5.700 fJ: B 0.724 W 0.000 NR 0.276
+  primary P9 int8 pool8 a3            n 15: t +0.000 fJ: B 0.002 W 0.364 NR 0.634; t +0.830 fJ: B 0.569 W 0.000 NR 0.431; t +2.100 fJ: B 0.890 W 0.000 NR 0.110
+  primary P9 int8 pool8 c1            n 15: t +0.000 fJ: B 0.010 W 0.084 NR 0.906; t +0.830 fJ: B 0.215 W 0.006 NR 0.779; t +2.100 fJ: B 0.614 W 0.000 NR 0.386
+N4 primary: E67 at min N 269962: tau_acc +0.1242 fJ, tau_bth +0.0647 fJ, d +0.0013, enters False; median N 456502: tau_acc +0.1236 fJ, tau_bth +0.0647 fJ, d +0.0013, enters False; max N 543669: tau_acc +0.1235 fJ, tau_bth +0.0647 fJ, d +0.0013, enters False
+N3: rows (a) 959, equal to rows-m10.json err_w 959 (max diff 0.0e+00 W); M10 README line 25
+anchors A1: float 884 rows in 39 runs, re-read equal; int8 265 rows in 24 runs, re-read equal
+N1 A1: F-P9 in P8-M1's words (registered interval) | P8-M1's paired(), 20000 draws
+  float pool8 a3             n 25  d +0.0005 [-0.0068, +0.0051] NOT RESOLVED | [-0.0063, +0.0052] NOT RESOLVED (seed 80409)
+  float pool8 class S a3     n  8  d +0.0081 [+0.0032, +0.0122] WORSE        | [+0.0032, +0.0124] WORSE (seed 80409)
+  float pool8 c1             n 25  d -0.0021 [-0.0079, +0.0031] NOT RESOLVED | [-0.0078, +0.0030] NOT RESOLVED (seed 80409)
+  float pool8 class S c1     n  8  d +0.0056 [+0.0012, +0.0100] WORSE        | [+0.0011, +0.0102] WORSE (seed 80409)
+  float source b (both cards, held out by run): n 50, M10 0.1940 -> 0.1932, d -0.0008
+  int8 pool8 a3              n 15  d -0.0052 [-0.0132, +0.0044] NOT RESOLVED | [-0.0136, +0.0043] NOT RESOLVED (seed 80412)
+  int8 pool8 c1              n 15  d -0.0010 [-0.0103, +0.0093] NOT RESOLVED | [-0.0108, +0.0097] NOT RESOLVED (seed 80412)
+  int8 source b (both cards, held out by run): n 30, M10 0.1306 -> 0.1275, d -0.0031
+N2 A1: the rule's power
+  A1 float tau_acc: R1 first holds at +1.5 / -1.3 fJ; enters at +1.5 / -5.2 fJ
+  A1 float tau_bth: R1 first holds at +0.27 / -0.41 fJ; enters at +None / -3.98 fJ
+  A1 int8 tau_acc: R1 first holds at +0.6 / -0.9 fJ; enters at +0.6 / -0.9 fJ
+  A1 float tau_acc: chance by an outer runs bootstrap (jackknife 95% [-1.074, +0.518] fJ):
+    t -5.200 fJ: R1 1.000, R2 1.000, R3 0.510, enters 0.510
+    t -1.074 fJ: R1 0.299, R2 0.707, R3 0.000, enters 0.000
+    t +0.000 fJ: R1 0.000, R2 0.029, R3 0.000, enters 0.000
+    t +0.518 fJ: R1 0.001, R2 0.266, R3 0.996, enters 0.001
+    t +0.750 fJ: R1 0.068, R2 0.425, R3 0.996, enters 0.067
+    t +1.125 fJ: R1 0.321, R2 0.660, R3 0.996, enters 0.313
+    t +1.500 fJ: R1 0.545, R2 0.796, R3 0.996, enters 0.535
+    t +1.875 fJ: R1 0.726, R2 0.890, R3 0.996, enters 0.704
+    t +2.250 fJ: R1 0.863, R2 0.947, R3 0.996, enters 0.847
+    t +3.000 fJ: R1 0.978, R2 0.988, R3 0.996, enters 0.970
+  A1 float tau_bth: chance by an outer runs bootstrap (jackknife 95% [-0.051, +0.291] fJ):
+    t -3.980 fJ: R1 1.000, R2 1.000, R3 0.492, enters 0.492
+    t -0.051 fJ: R1 0.000, R2 0.002, R3 0.000, enters 0.000
+    t +0.000 fJ: R1 0.000, R2 0.029, R3 0.000, enters 0.000
+    t +0.135 fJ: R1 0.008, R2 0.372, R3 0.000, enters 0.000
+    t +0.203 fJ: R1 0.194, R2 0.566, R3 0.000, enters 0.000
+    t +0.270 fJ: R1 0.476, R2 0.744, R3 0.000, enters 0.000
+    t +0.291 fJ: R1 0.559, R2 0.776, R3 0.000, enters 0.000
+    t +0.338 fJ: R1 0.722, R2 0.835, R3 0.000, enters 0.000
+    t +0.405 fJ: R1 0.870, R2 0.907, R3 0.000, enters 0.000
+    t +0.540 fJ: R1 0.977, R2 0.970, R3 0.000, enters 0.000
+  A1 int8 tau_acc: chance by an outer runs bootstrap (jackknife 95% [-0.170, +0.530] fJ):
+    t -0.900 fJ: R1 0.504, R2 0.821, enters 0.493
+    t -0.170 fJ: R1 0.000, R2 0.000, enters 0.000
+    t +0.000 fJ: R1 0.000, R2 0.202, enters 0.000
+    t +0.300 fJ: R1 0.267, R2 0.613, enters 0.258
+    t +0.450 fJ: R1 0.453, R2 0.762, enters 0.443
+    t +0.530 fJ: R1 0.553, R2 0.828, enters 0.547
+    t +0.600 fJ: R1 0.635, R2 0.874, enters 0.627
+    t +0.750 fJ: R1 0.818, R2 0.940, enters 0.807
+    t +0.900 fJ: R1 0.930, R2 0.971, enters 0.918
+    t +1.200 fJ: R1 0.999, R2 0.999, enters 0.998
+  A1 S-class shift, acc at its upper end: S +0.0194 W (max +0.0312), other whole +0.0169 W, difference +0.0026 W; pool 8 S minus other -0.0146 W
+  A1 S-class shift, bth at its upper end: S +0.0005 W (max +0.0107), other whole +0.0269 W, difference -0.0264 W; pool 8 S minus other -0.0688 W
+  A1 S-class shift, both at their upper ends: S +0.0199 W (max +0.0312), other whole +0.0437 W, difference -0.0238 W; pool 8 S minus other -0.0834 W
+  A1 P9 float pool8 a3           n 25: t +0.000 fJ: B 0.027 W 0.057 NR 0.916; t +0.518 fJ: B 0.806 W 0.000 NR 0.194; t +1.500 fJ: B 0.968 W 0.000 NR 0.032
+  A1 P9 float pool8 class S a3   n  8: t +0.000 fJ: B 0.000 W 0.911 NR 0.089; t +0.518 fJ: B 0.539 W 0.001 NR 0.460; t +1.500 fJ: B 0.745 W 0.000 NR 0.255
+  A1 P9 float pool8 c1           n 25: t +0.000 fJ: B 0.140 W 0.010 NR 0.850; t +0.518 fJ: B 0.964 W 0.000 NR 0.036; t +1.500 fJ: B 0.994 W 0.000 NR 0.006
+  A1 P9 float pool8 class S c1   n  8: t +0.000 fJ: B 0.000 W 0.722 NR 0.278; t +0.518 fJ: B 0.416 W 0.002 NR 0.582; t +1.500 fJ: B 0.643 W 0.000 NR 0.357
+  A1 P9 int8 pool8 a3            n 15: t +0.000 fJ: B 0.273 W 0.003 NR 0.724; t +0.530 fJ: B 0.572 W 0.000 NR 0.428; t +0.600 fJ: B 0.634 W 0.000 NR 0.366
+  A1 P9 int8 pool8 c1            n 15: t +0.000 fJ: B 0.060 W 0.018 NR 0.922; t +0.530 fJ: B 0.238 W 0.006 NR 0.756; t +0.600 fJ: B 0.309 W 0.000 NR 0.691
+N4 A1: E67 at min N 269962: tau_acc -0.2779 fJ, tau_bth +0.1201 fJ, d +0.0008, enters False; median N 456502: tau_acc -0.2778 fJ, tau_bth +0.1201 fJ, d +0.0008, enters False; max N 543669: tau_acc -0.2777 fJ, tau_bth +0.1201 fJ, d +0.0008, enters False
+N5: the by-A-word table is in docs/reports/data/2026-11-06-q145b-m10-s/README.md.dated-note-1.md, 2. M10's step error by list and A word, post hoc (n = 4 and ... (holds it: True); the cited tools/claims-v3/m10-s/REGISTRATION.md.dated-note-2.md section 2 is 2. E1's interval resamples steps, but the steps of... (holds -0.438: False)
