@@ -4,6 +4,19 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-11-02 (Mon, week 45, Q136(w))** — Section 5 gains "Device commands: the owner's three rules of 2 November
+  2026": no power cycles and nothing that risks one; read-only PMIC voltage-register reads allowed (a GET that writes a
+  PMIC register, such as the firmware-revisions query, is not one); every command a run can send classified READ or
+  WRITE from the running build's source before the first launch and listed in its README, a disallowed or unclassified
+  write NO-GO, with the new [`tools/claims-v3/dmcmd_table.json`](tools/claims-v3/dmcmd_table.json) and
+  `tools/claims-v3/dmcmd_audit.py` to do it. The 28 October entry, the oldest of 16, moved verbatim to
+  [`docs/agent-changelog-archive.md`](docs/agent-changelog-archive.md). *Why:* preference — the owner's words that
+  morning, *"continue the experiments but don't do any power cycles, read only PMIC voltage reads should be fine, take
+  more care for writing commands"*. And constraint — at et-platform `836a4ab` two commands named GET write the PMIC (the
+  firmware-revisions query and `GET_FRU`), the lab's statistics reset also turns the SP stats trace off, and a raw-4
+  residency read logs SP errors; re-check: `python3 tools/claims-v3/dmcmd_audit.py --table-only` and the handler lines
+  it prints. And preference — the owner's rule of 10 October 2026 for agent instruction files, which keeps the newest
+  15 entries inline.
 - **2026-11-02 (Mon, week 45, Q134 records, corrections after verification)** — The 31 October (Q130 records) entry gains
   a dated note, its text unedited: the re-check it names, the "read-only" `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`, is a
   PMIC command, so the note re-checks each card's firmware by its module uptime against section 4's committed read
