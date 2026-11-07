@@ -1,0 +1,44 @@
+scratch repository: 1593 files committed
+
+== A. the dry listing: every step exits 0, no ssh or rsync call
+dry listing: 0 step(s) exited non-zero
+-> PASS (A dry listing)
+
+== K. kit v5: step 3 with no window in RB_OUT (s02 not run)
+[s03_desk_e182] STOP: no window in RB_OUT: run s02_window_e182.sh first (kit v5: s02 before s03)
+-> PASS (K step 3 refuses without step 2's window)
+
+== S1. step 7 on a clean stand-in box, then the box's own checks in the tree built from its rsync alone (+ the stub binaries)
+[s07_a3_sync_e182] the sync list: E182's 12 paths (they hold 46 of the harness's 66 files) and its 20 other files: all 66 of them; the 5 built on the box are checked in step 8
+[s07_a3_sync_e182] synced to aifoundry3:aifoundry/ every file of harness-e182.json but what the box builds (66 files, in 32 paths)
+the sync alone: 0 harness files absent, 0 differing; 5 built on the box (never synced)
+-> PASS (S1a step 7 exits 0 with one rsync, and its tree holds all 66 non-built harness files at their sha256)
+  V3_DRY block 18220: rc 0, 70 kinds launches and 0 train processes through the C wrapper, 0 stubs executed
+  V3_DRY block 18215: rc 0, 4 kinds launches and 64 train processes through the C wrapper, 0 stubs executed
+  V3_DRY block 18201: rc 0, 10 kinds launches and 2 train processes through the C wrapper, 0 stubs executed
+HARNESS OK: 66 files match harness-e182.json (desk or dry run: binaries and the train host not checked)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+new_tiles": 16, "e178_reused": 6, "e78_own": 2, "planned_passes": [18220, 18221, 18222, 18223], "trains": [18210, 18211, 18212, 18213, 18214, 18215], "runs_per_pass": 68, "smoke": 10, "problems": []}
+
+box-side checks (check, preflight, verify, blocks failing, start gate): 0.0.0.0.8; network calls: 0
+-> PASS (S1b in that tree: HARNESS OK 66, GO, 0 problems, the three V3_DRY blocks, start gate 8, no network call)
+
+== S3. step 7 with an uncommitted change in a harness file outside E182's directory (lib.sh)
+[s07_a3_sync_e182] STOP: E182's paths have uncommitted changes: sync only the pushed commit
+-> PASS (S3 exit 16, no rsync)
+
+== G1. step 11 with no window
+-> PASS (G1 no window: 10)
+
+== G2. step 11 past the last start
+[s11_a3_session_e182] STOP: past the round's last start (2026-11-06 10:00 PST): no new card session
+-> PASS (G2 past the last start: 16)
+
+== W1. step 20 with no launch offset written today on the box
+RUN-UNKNOWN e182: not launched today by the runbook (no log offset written today)
+-> PASS (W1 RUN-UNKNOWN: 10)
+
+== C1. step 22 with the collector's stand-in set but RB_DESKTEST unset
+-> PASS (C1 the stand-in refused: 10, no call)
+
+SELFTEST-RB-E182 9 of 9 PASS

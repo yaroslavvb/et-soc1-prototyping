@@ -1,0 +1,41 @@
+t1_sffs rc=0
+t1_fssf rc=0
+t2_sffs rc=0
+t5_fssf rc=0
+t6_sffs rc=0
+refuse_nolaunches rc=1
+refuse_ori rc=1
+refuse_builtin rc=1
+plain rc=0
+t1_sffs ccheck rc=0 {"launches": 14, "PASS": 14, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"int8": {"PASS": 14, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+t1_fssf ccheck rc=0 {"launches": 14, "PASS": 14, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"int8": {"PASS": 14, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+t2_sffs ccheck rc=0 {"launches": 14, "PASS": 14, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"int8": {"PASS": 14, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+t5_fssf ccheck rc=0 {"launches": 14, "PASS": 14, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 14, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+t6_sffs ccheck rc=0 {"launches": 14, "PASS": 14, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 14, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+plain ccheck rc=0 {"launches": 12, "PASS": 12, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"int8": {"PASS": 12, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "broken_records": 0, "flags_unlogged": 0, "all_pass": true}
+PASS D1 t1_sffs: 14 records, kinds SSSFFSSFFSSFFS against SSSFFSSFFSSFFS
+PASS D2 t1_sffs: tiles records 2, C records 14, each C record's fnv the scheduled kind's
+PASS D3 t1_sffs: ccheck {'launches': 14, 'PASS': 14, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0, 'by_type': {'int8': {'PASS': 14, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0}}, 'broken_records': 0, 'flags_unlogged': 0, 'all_pass': True}
+PASS D4 t1_sffs: dumped F and S tiles equal their files
+PASS D1 t1_fssf: 14 records, kinds FFFSSFFSSFFSSF against FFFSSFFSSFFSSF
+PASS D2 t1_fssf: tiles records 2, C records 14, each C record's fnv the scheduled kind's
+PASS D3 t1_fssf: ccheck {'launches': 14, 'PASS': 14, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0, 'by_type': {'int8': {'PASS': 14, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0}}, 'broken_records': 0, 'flags_unlogged': 0, 'all_pass': True}
+PASS D4 t1_fssf: dumped F and S tiles equal their files
+PASS D1 t2_sffs: 14 records, kinds SSSFFSSFFSSFFS against SSSFFSSFFSSFFS
+PASS D2 t2_sffs: tiles records 2, C records 14, each C record's fnv the scheduled kind's
+PASS D3 t2_sffs: ccheck {'launches': 14, 'PASS': 14, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0, 'by_type': {'int8': {'PASS': 14, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0}}, 'broken_records': 0, 'flags_unlogged': 0, 'all_pass': True}
+PASS D4 t2_sffs: dumped F and S tiles equal their files
+PASS D1 t5_fssf: 14 records, kinds FFFSSFFSSFFSSF against FFFSSFFSSFFSSF
+PASS D2 t5_fssf: tiles records 2, C records 14, each C record's fnv the scheduled kind's
+PASS D3 t5_fssf: ccheck {'launches': 14, 'PASS': 14, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0, 'by_type': {'fp32': {'PASS': 14, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0}}, 'broken_records': 0, 'flags_unlogged': 0, 'all_pass': True}
+PASS D4 t5_fssf: dumped F and S tiles equal their files
+PASS D1 t6_sffs: 14 records, kinds SSSFFSSFFSSFFS against SSSFFSSFFSSFFS
+PASS D2 t6_sffs: tiles records 2, C records 14, each C record's fnv the scheduled kind's
+PASS D3 t6_sffs: ccheck {'launches': 14, 'PASS': 14, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0, 'by_type': {'fp32': {'PASS': 14, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0}}, 'broken_records': 0, 'flags_unlogged': 0, 'all_pass': True}
+PASS D4 t6_sffs: dumped F and S tiles equal their files
+PASS D5 refuse_nolaunches: refused with 'E182: a train needs --launches', no launch
+PASS D5 refuse_ori: refused with 'E182: --abba is SFFS or FSSF', no launch
+PASS D5 refuse_builtin: refused with 'E182: a train takes --values file: and --values-b file:', no launch
+PASS D6 plain run: 12 records with no train field, ccheck {'launches': 12, 'PASS': 12, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0, 'by_type': {'int8': {'PASS': 12, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 0}}, 'broken_records': 0, 'flags_unlogged': 0, 'all_pass': True}
+PASS D7 tampered pairing: ccheck rc 1, {'launches': 14, 'PASS': 13, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 1, 'by_type': {'int8': {'PASS': 13, 'ROUNDING': 0, 'UNMODELLED': 0, 'FAIL': 1}}, 'broken_records': 0, 'flags_unlogged': 0, 'all_pass': False}
+DESKTEST-HOST-E182 25 of 25 PASS

@@ -1,0 +1,13 @@
+PASS A1 E178-W-int8 again: slope 2.7811598531 against 2.7811598531, interval [1.50955, 4.05277] against [1.50955, 4.05277]
+PASS A2 E178-R-int8 again: rho 0.642857142857 against 0.642857142857
+PASS A3 the train functions on E178's telemetry: quad sd {'int8': 0.03485, 'float': 0.03804} against noise-e182.json {'float': 0.03804, 'int8': 0.03485} (134 and 304 quads)
+PASS B1 arm E's world: {'E182-A': 'NULL', 'E182-B': 'POSITIVE', 'E182-C': 'PASS', 'E182-F': 'NULL', 'E182-H32T': 'NOT RESOLVED', 'E182-HT': 'POSITIVE', 'E182-R-int8': 'PASS', 'E182-SPLIT': 'B-ONLY', 'E182-TR-H': 'BETTER', 'E182-TR-N': 'AS FORECAST', 'E182-W-int8': 'PASS', 'E182-X': 'CONSISTENT'}; the arm (the same reduction passed as leak0) reads W PASS, R PASS, 24 levels
+PASS B2 half of B's price on A: {'E182-A': 'POSITIVE', 'E182-B': 'POSITIVE', 'E182-C': 'PASS', 'E182-F': 'NULL', 'E182-H32T': 'NOT RESOLVED', 'E182-HT': 'POSITIVE', 'E182-R-int8': 'PASS', 'E182-SPLIT': 'A+B', 'E182-TR-H': 'BETTER', 'E182-TR-N': 'AS FORECAST', 'E182-W-int8': 'PASS', 'E182-X': 'CONSISTENT'}
+PASS B3 P's world: {'E182-A': 'NULL', 'E182-B': 'POSITIVE', 'E182-C': 'PASS', 'E182-F': 'POSITIVE', 'E182-H32T': 'POSITIVE', 'E182-HT': 'POSITIVE', 'E182-R-int8': 'PASS', 'E182-SPLIT': 'B-ONLY', 'E182-TR-H': 'BETTER', 'E182-TR-N': 'AS FORECAST', 'E182-W-int8': 'FAIL LOW', 'E182-X': 'CONSISTENT'}; SIZE P PASS, B PASS, W PASS
+PASS B4 noise at 2.5 times: TR-N FAILS (ratio 2.487934925413985)
+PASS B5 T3 cut to 6 processes: {'E182-A': 'NOT SCORED', 'E182-B': 'NOT SCORED', 'E182-C': 'PASS', 'E182-F': 'NULL', 'E182-H32T': 'NOT RESOLVED', 'E182-HT': 'POSITIVE', 'E182-R-int8': 'FAIL', 'E182-SPLIT': 'NOT SCORED', 'E182-TR-H': 'BETTER', 'E182-TR-N': 'AS FORECAST', 'E182-W-int8': 'PASS', 'E182-X': 'CONSISTENT'}
+PASS B6 a C FAIL in T5: {'E182-A': 'NULL', 'E182-B': 'POSITIVE', 'E182-C': 'FAIL', 'E182-F': 'NOT SCORED', 'E182-H32T': 'NOT RESOLVED', 'E182-HT': 'POSITIVE', 'E182-R-int8': 'PASS', 'E182-SPLIT': 'B-ONLY', 'E182-TR-H': 'BETTER', 'E182-TR-N': 'AS FORECAST', 'E182-W-int8': 'PASS', 'E182-X': 'CONSISTENT'}
+PASS B7 one kinds pass: W NOT SCORED, R NOT SCORED
+PASS B8 the C-session list: ['e182-smoke/p18201', 'e182/p18210', 'e182/p18215', 'e182/p18220']
+PASS B9 the smoke gate's train part: a good smoke (0, "SMOKE-GATE (train) PASS {'bad': []}"); one launch off the schedule (1, "SMOKE-GATE (train) FAIL {'bad': ['train process 0 (FSSF): launches [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], kinds FFFFSFFSSFFSSF against FFFSSFFSSFFSSF',")
+SELFTEST-SCORE-E182 12 of 12 PASS
