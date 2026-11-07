@@ -4,6 +4,16 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-11-02 (Mon, week 45, Q134 records, corrections after verification)** — The 31 October (Q130 records) entry gains
+  a dated note, its text unedited: the re-check it names, the "read-only" `DM_CMD_GET_MODULE_FIRMWARE_REVISIONS`, is a
+  PMIC command, so the note re-checks each card's firmware by its module uptime against section 4's committed read
+  instead. The 27 October correction entry, the oldest of 16, moved verbatim to
+  [`docs/agent-changelog-archive.md`](docs/agent-changelog-archive.md). *Why:* constraint — at et-platform `836a4ab` that
+  query writes the PMIC's firmware-management command register twice (E114's C1), a PMIC command by E85 C1's standard,
+  which section 5 forbids; the verifier of Q134's records found two data READMEs still telling runs to send it, and this
+  changelog's re-check was a third such instruction; re-check: C1 of
+  `docs/reports/data/2026-11-01-e114-card0-replicates/README.md` and the handler chain it cites. And preference — the
+  owner's rule of 10 October 2026 for agent instruction files, which keeps the newest 15 entries inline.
 - **2026-11-01 (Sun, week 44, Q134 records)** — Section 3's index reads Q1–Q135 and E1–E125, where it read Q1–Q133 and
   E1–E118: E119–E125 are Q134's seven card experiments, E120 among them a governor move; E77's line says it is recorded
   beside E120, its redesign, where it said "recorded after its verification". The 27 October entry, the oldest of 16,

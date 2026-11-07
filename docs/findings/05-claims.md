@@ -4404,6 +4404,52 @@ than the stock-take's 113 of 163, not a correction).
 - **Card time and approvals.** None used. The lab approvals lapsed at about 23:00 PST on Thu 5 Nov; the next card day (E181, then E178,
   then E180, all on aifoundry3 card 0 at 600 MHz) waits on the owner's go and fresh approvals.
 
+## Q149 and Q150: the card day blind on aifoundry3 (E181, E178, E180) and the power sensors, post hoc (Fri 6 Nov 2026, week 45, from about 09:20 to 16:45 PST)
+
+**Labels.** **Blind** (registered before its run's first datum: E181 09:55:33.020, E178 11:33:24 and E180 12:54:50 PST): every E181, E178 and E180 verdict and reading below. E181 is one session: a candidate, and nothing enters M11. **Reported**, never a verdict: the minion-rail arm; Q148(c)'s constant-lane term (blind for 23 of its 27 float kinds); october-forecast-model (blind for 34 of its 40 E178 kinds, by E178's dated note M1; on E180 by its notes M1 and M2); E180's RA1–RA5; E181's A9 arm and FL5(c). **Post hoc:** the three runs' dated notes' readings, the data verifiers' readings (E180's low bursts among them), the price conversions (21 fJ per result bit, 0.85 fJ per named flip), the residue's miss against A8, the day's critic's order-term and carry-over findings, and every Q150 figure. M10, M9, M11 and every frozen file stay as committed. Short names: `D178/` is `docs/reports/data/2026-11-06-e178-one-number-aifoundry3/`, `D180/` `…-e180-vector-add-aifoundry3/`, `D181/` `…-e181-m11-session2-aifoundry3/`, `QM/` `…-q150-meter-checks/` and `QX/` `…-q150-sensor-crosscheck/`. 🛑 **To carry from here:** (91) **his int8 pair is POSITIVE at +0.053 W [+0.022, +0.085], positive in each of the four passes**, never "resolved in all four passes", and its size is footing-bound (+0.035 to +0.075 W across three footings, post hoc); (92) **equal flips read equal only at E178-E's 0.2 W resolution**, and three pairs inside those groups resolve (int8 4 − 8 −0.067 W); (93) **the flips get the direction and the order right, the frozen prices are too high**: about 3.5× for the int8 multiply (2.78 fJ a flip against 7.48) and 17× per result bit for the add (0.0097 against 0.1649 W); (94) **E180-I is NULL within its ±0.30 W margin** at +0.10 W [+0.04, +0.17], never "flat"; (95) **october-forecast-model is reported, never a verdict**: never "it passed"; on E180-H 0 lies inside too, and the ladder is not read against it; (96) **E181's misses**: H_E and S within noise, Z, L1 and L2 warmer; never "every int8 hold ran warmer" or "the chain under-reads the int8 and zeros holds", and the ×1.032 arm is not retired at k = 1; (97) **Q148(c)'s term does not enter M10**; (98) **Q150's figures are post hoc**: card 1's SRAM rail about 1.4× its reading is a hypothesis, and no per-shire power sensor is documented in any public source.
+
+### Blind on aifoundry3 card 0 at 600 MHz pinned, one session a run
+
+| Claim | Measured (95%) | Frozen forecast | Reading | Verify at |
+|---|---|---|---|---|
+| E178-H-int8: int8 5s − 4s at the board | **+0.0532 W [+0.0217, +0.0848]**; per pass +0.045, +0.082, +0.050, +0.036 | P +0.1857, F +0.1871 | POSITIVE; SIZE FAIL HIGH (P and F) | `D178/scored.json`, `D178/README.md`, its dated note 1 § 2 |
+| E178-W-int8: price per flip over 13 int8 kinds | **2.78 fJ [1.51, 4.05]** | 7.48 fJ | FAIL HIGH | `D178/scored.json` |
+| E178-R-int8: rank of 13 int8 kinds | **rho +0.643** | line 0.56 | PASS | `D178/scored.json` |
+| E178-H-fp32, -fp16: 5s − 4s | +0.0523 [−0.0459, +0.1505]; +0.0558 [−0.0038, +0.1154] W | P +0.0087, +0.0173 | NOT RESOLVED; SIZE PASS | `D178/scored.json` |
+| E178-U: fp32 ones − 1.5 × 2⁻⁶⁴ | +0.0452 W [−0.0314, +0.1217] | P +0.0743, F +0.1303 | NOT RESOLVED; SIZE PASS / FAIL HIGH | `D178/scored.json` |
+| E178-S-int8: 85 − neg_ones | +0.0582 W [−0.0770, +0.1935] | P +0.3555 | NOT RESOLVED; SIZE FAIL HIGH | `D178/scored.json` |
+| E178-E, int8 / fp32 / fp16 | spreads 0.0669 / 0.1048 / 0.1749 W | 95% points 0.2460 / 0.1958 / 0.1811 | PASS at the rule's 0.2 W resolution only | `D178/scored.json`, dated note 1 § 1 |
+| E178-C | 2,190 of 2,190 launches C-checked PASS (3,130 of 3,130 in all) | all | PASS | `D178/ccheck/ccheck-all.json` |
+| E180-H: 5 + 5 − 4 + 4 | **+0.0270 W [−0.0503, +0.1043]** | P +0.1649 (C +0.2197, E +0.0687, F +0.0352, A +0.0192) | NOT RESOLVED; SIZE FAIL HIGH for P and C | `D180/scored-e180.json` |
+| E180-L: price per result 1-bit, 21 kinds | **+0.0097 W [+0.0027, +0.0167]** | P 0.1649 (A 0.0192) | SIZE FAIL HIGH for every arm | `D180/scored-e180.json` |
+| E180-R: rank of 21 kinds | **rho +0.800** | line 0.433 | PASS | `D180/scored-e180.json` |
+| E180-O, -E, -X | +0.0046 W a bit [−0.0071, +0.0163]; PASS, PASS; −0.0176 W [−0.1892, +0.1541] | NULL ±0.02; equality; P +0.4947 | NULL; PASS; NOT RESOLVED | `D180/scored-e180.json` |
+| E180-I: the integer path | +0.1022 W [+0.0385, +0.1659] | NULL ±0.30 (P 0) | NULL within the margin (dated note 1 § 1) | `D180/scored-e180.json`, dated note 1 |
+| E180-A: c += v against plain | **+0.3596 W [+0.0683, +0.6510]** | P +2.9631 (band +0.752 to +4.261) | POSITIVE; SIZE FAIL HIGH for every arm; outside P's band | `D180/scored-e180.json` |
+| E181: five 10-minute holds, e = R − P | H_E −0.039, Z +0.345, L1 +0.253, S −0.008, L2 +0.496 °C; **0.293 °C rms**, **0.322 °C** over the three large rises | the frozen chain given the measured watts (0.493 °C held out before) | HM-E144 REPEATS (0.28%); HM-LG NOT SEPARATED; HM-HE does not depart; HM-CAL NOT RESOLVED; HM-CAL-I8 BETTER, a candidate; one session: nothing enters M11 | `D181/scored-m11.json`, `D181/README.md`, its dated note 1 |
+| E181's start gate G0-A6 with A8-4 | room 50.817 °C, residue 0.513 °C | A8's 0.414 °C line | PASSED (the residue +0.099 °C over A8, post hoc) | `D181/scored-m11.json` |
+
+### Reported, never a verdict
+
+- **october-forecast-model on E178** (`D178/README.md.dated-note-2.md` § 1–2): inside the board and minion-rail intervals of all five rule contrasts, and inside 45 of 48 distinct board contrasts (P 38); int8 5s − 4s +0.039 W at the die (board equivalent +0.047 W); Spearman rho fp32 +0.07, fp16 +0.16, int8 +0.36; float levels 0.972–0.993 of D, int8 die figures 0.852–0.950 of D.
+- **october-forecast-model on E180** (`D180/README.md.dated-note-2.md`): +0.0042 W inside E180-H's interval, and 0 inside too; inside on the net minion rail and for 4s and 5s above the zeros; not read on E180-L (no per-bit figure was frozen).
+- **Q148(c)'s constant-lane term** (`D178/README.md.dated-note-2.md` § 1): C1 d −0.014 W [−0.028, +0.001] NOT RESOLVED; C2 fails in fp16 (+0.008 W); the measured levels above P fp32 +0.083 W [+0.062, +0.105] and fp16 +0.029 W [−0.000, +0.057], against L +0.035 and +0.070 W. The term does not enter M10.
+- **The minion rail on his int8 pair:** +0.026 W [−0.028, +0.080]; its forecast +0.156 W lies above. The board resolved what the rail did not.
+- **E181:** FL5(c) PASS (0.3231 against 0.3166 W/°C); A9's arm moves e(H_E) by +0.140 °C, and on it HM-CAL reads BETTER; the ×1.032 arm 0.154 °C over L1, S and L2, a candidate.
+- **E180's reported readings** as its README gives them (RA1–RA5 among them): fadd.ps const − zeros +0.067 W [−0.039, +0.174] (RA1); the anchor, fadd.ps random − zeros, +8.45 W against the catalogue's +8.70 W (3% low).
+
+### Post hoc
+
+- **The day's critic** (deciding nothing): E178's int8 couple carries a per-run order term of +0.066 W, made by the leak correction on whole-degree die readings (raw −0.051 W; the 0.3803 arm +0.165 W); the alternating plan cancels it to about +0.006 W in his pair, which reads POSITIVE on the raw footing too (+0.075 W [+0.042, +0.107]). No carry-over from the run before: E178 −0.0001 W per W [−0.0008, +0.0006] over 290 runs, E180 +0.0018 W per W [−0.0026, +0.0062] over 276 bursts; E180's 13 low bursts are not made by the run before.
+- **The levels above zeros** on E178's 34 kinds new to every model: M10 rms 0.126 W (fp32 +0.081 W bias, fp16 +0.017, int8 −0.177); on E180's 19 fadd.ps one-number and ladder kinds (measured mean +0.112 W) rms P 1.76, C 2.38, E 0.66, F 0.27 and A 0.097 W.
+- **Q150, the power sensors** (`QM/`, `QX/` and their dated notes; every figure post hoc, on committed data): one power chain, with no per-shire current or power sensor in any public source; per shire three voltage monitors and one thermometer; the minion rail +22.0 mW a hart on aifoundry3 at 600 MHz (about 1.4 W a 64-hart shire), the board +27.1 mW a hart; card 1's SRAM rail about 0.70 (0.69–0.73) of the rail under the two-phase hypothesis, so about 1.4× its reading, from three datasets; card 1's minion-rail average returning its running maximum in about 0.1% of samples; aifoundry3's meter pass 155 ms since at least 20 October (283 ms on 29 September), the board refreshing with the rails every pass; the die's voltage monitors within 2–4 mV of the regulators' settings; aifoundry2 reading 1.117 × card 0 + 2.46 W at the same work; E178's int8 pair seen alike on the board (+0.053 W registered, +0.075 W before the leak correction) and the minion rail (+0.026 to +0.054 W), so not a meter artifact. Its ranked methods (the A B B A train forecast at ±0.003–0.006 W in 30–40 card-minutes; the train protocol ±0.015–0.025 W; more passes ±0.054–0.063 W at 8 and ±0.034–0.040 W at 16) are forecasts from E178's data, untested.
+
+### Disclosures
+
+- **Process:** the claim lane ran E181's s03 v2 before s02 (harmless; s03 v2 never reads the window). The card lanes for E178 and E180 paced themselves between bounded remote waits with a local foreground wait of at most 540 s, which the round's own rules forbid; it touched no card and no data. The rail reader's JSON depends on the interpreter in the 17th digit (3.9 against 3.12 or later), and E180's arm JSON in three floats of the 5s reading by 2.8e-17 W (the last bit of `statistics.stdev`); no printed figure moves. arms-e178's note header gives an estimate (14:10–14:45 PST) written before its commit at 14:31:28. The data verifiers' own corrections were off by two in each of E178's scan counts (133 + 129, not 135 + 127), as E178's note 1 says.
+- **Not yet done:** E180's 13 low bursts against the meter's refresh (Q150's synthesis could not read E180's data); a verifier of these records; M11's session 3 amendment and kit v5.
+- **Card time:** 162.1 card-minutes on aifoundry3 card 0, nothing on aifoundry1 or aifoundry2; Q150 used none.
+
 ## Ridge points (derived; no card time)
 
 Peak compute divided by each level's measured bandwidth, at 600 MHz on 1,024 minions. Kind `D`: arithmetic on
