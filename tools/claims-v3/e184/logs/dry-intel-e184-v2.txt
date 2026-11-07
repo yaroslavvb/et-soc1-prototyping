@@ -1,0 +1,206 @@
+
+== 1a. check_e184_v2.py harness (dry: the box's E184 build is not checked)
+HARNESS OK: 59 files (harness-e184-v2.json)
+-> PASS
+
+== 1b. preflight_e184_v2.sh S (dmcmd_audit on arm S's kit-v2 file set)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS
+
+== 1b. preflight_e184_v2.sh B (dmcmd_audit on arm B's kit-v2 file set)
+dmcmd_audit: GO (34 send site(s), 0 disallowed; allow-list: STATS_RESET)
+-> PASS
+
+== 1c. build_e184.sh (dry: the patch applies and gives the pinned file; nothing built)
+host_patch_e184 --check: input 3cad4adc16534b845cc142f78a28907192b62fe21081e282d6df67342200359c (the committed file), patched 7360e5e1501c66a1517a1173f188dcd2e4b4bb97b5049744374c8bf1152409c6 (the pinned result)
+host_patch_e184: workloads/enercat -> build/enercat-e184-src, host/main.cpp 7360e5e1501c66a1517a1173f188dcd2e4b4bb97b5049744374c8bf1152409c6
+DRY build: done (the patched tree is build/enercat-e184-src; nothing built)
+patched host/main.cpp 7360e5e1501c66a1517a1173f188dcd2e4b4bb97b5049744374c8bf1152409c6
+-> PASS
+
+== 1d. the telemetry guards
+arm S's block sets E128's guard: 1; arm B's sets E184's: 1; direct reader calls: 0; E184's guard: 'READER config' / 'READER sample --seconds 2 --every-ms 100' / 'READER sample --seconds 2 --every-ms 100 --reset-ms 1000'; refusals rc 97 97 97
+-> PASS
+
+== 2. arm S, block 18402 (stoptest): expect 0 planned host processes, no stub executed
+block rc=0; planned host processes: 0; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm S, block 18401 (smoke): expect 4 planned host processes, no stub executed
+block rc=0; planned host processes: 4; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm S, block 18410 (pass): expect 108 planned host processes, no stub executed
+block rc=0; planned host processes: 108; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm S, block 18411 (pass): expect 108 planned host processes, no stub executed
+block rc=0; planned host processes: 108; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm S, block 18412 (pass): expect 108 planned host processes, no stub executed
+block rc=0; planned host processes: 108; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm S, block 18413 (pass): expect 2 planned host processes, no stub executed
+cal.json: M_op 15, M_s 22 (dry True)
+block rc=0; planned host processes: 2; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm S, block 18414 (pass): expect 80 planned host processes, no stub executed
+block rc=0; planned host processes: 80; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm S, block 18415 (pass): expect 80 planned host processes, no stub executed
+block rc=0; planned host processes: 80; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm S, block 18416 (pass): expect 80 planned host processes, no stub executed
+block rc=0; planned host processes: 80; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm S, block 18417 (pass): expect 150 planned host processes, no stub executed
+block rc=0; planned host processes: 150; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm S, block 18418 (pass): expect 150 planned host processes, no stub executed
+block rc=0; planned host processes: 150; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm B, block 18432 (stoptest): expect 0 planned host processes, no stub executed
+block rc=0; planned host processes: 0; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm B, block 18431 (smoke): expect 3 planned host processes, no stub executed
+block rc=0; planned host processes: 3; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm B, block 18440 (pass): expect 36 planned host processes, no stub executed
+block rc=0; planned host processes: 36; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm B, block 18441 (pass): expect 36 planned host processes, no stub executed
+block rc=0; planned host processes: 36; stubs executed: 0; reset sampler starts: 1
+-> PASS
+
+== 2. arm B, block 18442 (pass): expect 6 planned host processes, no stub executed
+block rc=0; planned host processes: 6; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm B, block 18443 (pass): expect 16 planned host processes, no stub executed
+block rc=0; planned host processes: 16; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2. arm B, block 18444 (pass): expect 16 planned host processes, no stub executed
+block rc=0; planned host processes: 16; stubs executed: 0; reset sampler starts: 0
+-> PASS
+
+== 2b. refused before any device call: pass 18442 by S's block on aifoundry3
+pass 18442 is not arm S's
+-> PASS
+
+== 2b. refused before any device call: pass 18410 by B's block on aifoundry1
+pass 18410 is not arm B's
+-> PASS
+
+== 2b. refused before any device call: pass 18440 by B0's block on aifoundry1
+E184 never runs on aifoundry1 card 0
+-> PASS
+
+== 2b. refused before any device call: pass 18401 by S's block on aifoundry3
+18401 is the smoke: --smoke
+-> PASS
+
+== 3a. the queue's budget rule on stub blocks (3 s each, planned 1 s: after the first the ratio 3 projects 3 s, so an 8 s budget admits two and stops before the third)
+13:50:36 e184 arm S: items 18410 18411 18412; budget 8 s from the anchor (13:50:36), reserve 0 s, last end 13:50:44, deadline 2026-11-07 14:50:36
+13:50:36 p18410 starts at T0+0 s (projected 1 s)
+13:50:39 p18410 rc=0 (3 s)
+13:50:39 p18411 starts at T0+3 s (projected 3 s)
+13:50:42 p18411 rc=0 (3 s)
+13:50:42 budget: stopping before p18412 (now T0+6 s, projected 3 s, would end T0+9 s > T0+8 s or the deadline)
+13:50:42 e184 arm S: done, 2 items, at T0+6 s
+-> PASS
+
+== 3b. the queue's deadline rule (a deadline one minute ago: nothing starts)
+13:50:42 e184 arm B: items 18440 18441 18442 18443 18444; budget 1500 s from the anchor (13:50:42), reserve 60 s, last end 14:14:42, deadline 2026-11-07 13:49:42
+13:50:43 budget: stopping before p18440 (now T0+1 s, projected 330 s, would end T0+331 s > T0+1440 s or the deadline)
+13:50:43 e184 arm B: done, 0 items, at T0+1 s
+-> PASS
+
+== 3c. the plans: arm S nine passes under 8,100 s, arm B five under 1,500 s (3 s stub blocks, planned 1 s)
+13:50:43 e184 arm S: items 18410 18411 18412 18413 18414 18415 18416 18417 18418; budget 8100 s from the anchor (13:50:43), reserve 60 s, last end 16:04:43, deadline 2026-11-07 15:50:43
+13:51:12 e184 arm S: done, 9 items, at T0+29 s
+13:51:12 e184 arm B: items 18440 18441 18442 18443 18444; budget 1500 s from the anchor (13:51:12), reserve 60 s, last end 14:15:12, deadline 2026-11-07 15:51:12
+13:51:28 e184 arm B: done, 5 items, at T0+16 s
+-> PASS
+
+== 3d. session_e184s.sh or session_e184b.sh start gate, arm S: no time gates (exit 8, no device opened)
+session start, arm S, kit v2 (budget anchor T0 1794088288 = 13:51:28 PST)
+E184_LATEST_START and E184_DEADLINE are required (the round's time gates, set at his go): no device opened
+-> PASS
+
+== 3d. session_e184s.sh or session_e184b.sh start gate, arm S: after the latest start (exit 8, no device opened)
+session start, arm S, kit v2 (budget anchor T0 1794088288 = 13:51:28 PST)
+no new card session after 2026-11-07 13:50:28 PST: no device opened
+-> PASS
+
+== 3d. session_e184s.sh or session_e184b.sh start gate, arm S: on aifoundry1 (exit 8, no device opened)
+session start, arm S, kit v2 (budget anchor T0 1794088288 = 13:51:28 PST)
+arm S runs on aifoundry3, not aifoundry1: no device opened
+-> PASS
+
+== 3d. session_e184s.sh or session_e184b.sh start gate, arm B: on aifoundry3 (exit 8, no device opened)
+session start, arm B, kit v2 (budget anchor T0 1794088288 = 13:51:28 PST)
+arm B runs on aifoundry1, not aifoundry3: no device opened
+-> PASS
+
+== 3e. a whole dry session, arm S: the stop-path test, the smoke and the queue's dry passes; the real session's log is never written
+session start, arm S, kit v2 (budget anchor T0 1794088289 = 13:51:29 PST)
+files (harness-e184-v2.json)
+dmcmd_audit preflight rc=0 (dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none))
+the Intel: no et-who here)
+DRY config config-S-t1794088289-start.json
+p18402 begins (die 80 C) -> <dry-tree>/build/claims-v3-dry/aifoundry3/e184-stoptest/p18402
+p18402: 0 items, <= 1 min; idle 600 MHz (E184 arm S)
+330
+p18402 ends: ok stop-path test: board and die stops fired before a run and in the watcher
+stop-path test rc=0
+p18401 begins (die 80 C) -> <dry-tree>/build/claims-v3-dry/aifoundry3/e184-smoke/p18401
+p18401: 4 items, <= 1 min; idle 600 MHz (E184 arm S)
+13:51:38 e184 arm S: done, 9 items, at T0+9 s
+-> PASS
+
+== 3e. a whole dry session, arm B: the stop-path test, the smoke and the queue's dry passes; the real session's log is never written
+session start, arm B, kit v2 (budget anchor T0 1794088298 = 13:51:38 PST)
+files (harness-e184-v2.json)
+dmcmd_audit preflight rc=0 (dmcmd_audit: GO (34 send site(s), 0 disallowed; allow-list: STATS_RESET))
+the Intel: no et-who here)
+DRY config config-B-t1794088298-start.json
+p18432 begins (die 80 C) -> <dry-tree>/build/claims-v3-dry/aifoundry1-c1/e184-stoptest/p18432
+p18432: 0 items, <= 1 min; idle 600 MHz (E184 arm B)
+330
+p18432 ends: ok stop-path test: board and die stops fired before a run and in the watcher
+stop-path test rc=0
+p18431 begins (die 80 C) -> <dry-tree>/build/claims-v3-dry/aifoundry1-c1/e184-smoke/p18431
+p18431: 3 items, <= 1 min; idle 600 MHz (E184 arm B)
+13:51:44 e184 arm B: done, 5 items, at T0+6 s
+-> PASS
+
+== 3f. the queue v2 goes on after a partial pass (rc 7) and stops after a failed one (rc 1)
+13:51:44 e184 arm S: items 18410 18411 18412 18413; budget 8100 s from the anchor (13:51:44), reserve 60 s, last end 16:05:44, deadline 2026-11-07 14:51:44
+13:51:44 p18410 starts at T0+0 s (projected 1 s)
+13:51:44 p18410 rc=7 (0 s)
+13:51:44 p18410 partial (rc 7): its readable items are kept; the queue goes on (kit v2)
+13:51:45 p18411 starts at T0+1 s (projected 1 s)
+13:51:45 p18411 rc=0 (0 s)
+13:51:45 p18412 starts at T0+1 s (projected 1 s)
+13:51:45 p18412 rc=1 (0 s)
+13:51:45 stopping after p18412 (rc 1)
+13:51:45 e184 arm S: done, 2 items, at T0+1 s
+-> PASS
+
+== 4. no network call: the ssh, rsync and scp stand-ins were never called
+network calls: 0
+-> PASS
+
+DRY-INTEL-E184-V2 PASS: no device opened (V3_DRY=1 and stub binaries that refuse), no network call

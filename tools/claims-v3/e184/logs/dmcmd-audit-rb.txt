@@ -1,0 +1,38 @@
+dmcmd_audit: GO (23 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e184/ettelem_guard_e184.sh:20: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e184/ettelem_guard_e184.sh:20: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e184/ettelem_guard_e184.sh:20: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e184/ettelem_guard_e184.sh:20: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e184/ettelem_guard_e184.sh:20: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e184/ettelem_guard_e184.sh:30: reset option passed on: STATS_RESET [WRITE, pmic write] (conditional) EXCEPTED: STATS_RESET: the runbook calls E184's guard with config only (s09_reads_e184.sh); the reset's one caller is block_e184b_v2.sh, pass 18441, audited by preflight_e184_v2.sh B - --reset-ms : a sampler wrapper forwards it to ettelem sample
+tools/claims-v3/e184/ettelem_guard_e184.sh:36: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e184/ettelem_guard_e184.sh:36: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e184/ettelem_guard_e184.sh:36: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e184/ettelem_guard_e184.sh:36: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e184/ettelem_guard_e184.sh:36: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e184/ettelem_guard_e184.sh:36: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+note: tools/claims-v3/e184/rb/s09_reads_e184.sh:24: 'config' goes through tools/claims-v3/e128/ettelem_guard.sh, which is scanned: its own lines are what it sends
+note: tools/claims-v3/e184/rb/s09_reads_e184.sh:27: 'config' goes through tools/claims-v3/e184/ettelem_guard_e184.sh, which is scanned: its own lines are what it sends
+note: tools/claims-v3/q141k-runbook/k6/s09_a3_reads_k6.sh:20: 'config' goes through tools/claims-v3/e128/ettelem_guard.sh, which is scanned: its own lines are what it sends
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      4 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      4 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      2 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      2 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      2 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      2 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      2 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      2 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      2 site(s)  ok
+  STATS_RESET                                WRITE        pmic write     1 site(s)  EXCEPTED
