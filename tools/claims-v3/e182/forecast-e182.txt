@@ -1,0 +1,52 @@
+E182 forecasts, frozen before any card datum (forecast_e182.py). Per TensorFMA op on one minion; W at 600 MHz, s = 1, aifoundry3.
+(i) flips: E178's exact model, launch mean at E178's N; (ii) nets: the bench's vpu nets_map above zeros; P: M10 frozen on (ii);
+P+ACC: P plus M10-ACC's frozen term (it did not enter M10); E: E178's measured line (int8 2.781 fJ a flip; fp32 0.352 fJ). D = W over zeros.
+
+int8: kind                     A word     B word     pcA pcB  hd  (i) flips  c_store  tenb_rz     scp  (ii) nets    P W  P+ACC W     E W
+  neg_ones                 0xffffffff 0xffffffff  32  32   0      17408     8192     8192       0      19040  1.8161   1.8148  1.6728
+  ones                     0x01010101 0x01010101   4   4   0      10240     8192     1024       0      11872  1.7062   1.7049  1.6345
+  e182_a127_b1             0x7f7f7f7f 0x01010101  28   4  24      25456    16256     1024    6144      30021  1.8818   1.8792  1.7157
+  e182_a1_b127             0x01010101 0x7f7f7f7f   4  28  24      31600    16256     7168    6144      36165  1.9760   1.9734  1.7486
+  e182_am127_bm1           0x81818181 0xffffffff   8  32  24      32624    16256     8192    6144      37189  1.9917   1.9890  1.7540
+  e182_am1_bm127           0xffffffff 0x81818181  32   8  24      26480    16256     2048    6144      31045  1.8975   1.8949  1.7212
+  e182_a15_b1              0x0f0f0f0f 0x01010101  16   4  12      21376    15360     1024    3072      24544  1.8452   1.8427  1.6940
+  e182_a1_b15              0x01010101 0x0f0f0f0f   4  16  12      24448    15360     4096    3072      27616  1.8923   1.8898  1.7104
+  e182_am15_bm1            0xf1f1f1f1 0xffffffff  20  32  12      28544    15360     8192    3072      31712  1.9550   1.9525  1.7322
+  e182_am1_bm15            0xffffffff 0xf1f1f1f1  32  20  12      25472    15360     5120    3072      28640  1.9079   1.9055  1.7158
+  e178_v4                  0x04040404 0x04040404   4   4   0      10240     8192     1024       0      11872  1.7062   1.7049  1.6345
+  e178_a4_b5               0x04040404 0x05050505   4   8   4      19200    14336     2048    1024      21536  1.8310   1.8287  1.6823
+  e178_a5_b4               0x05050505 0x04040404   8   4   4      18176    14336     1024    1024      20512  1.8153   1.8130  1.6769
+  e178_v5                  0x05050505 0x05050505   8   8   0      23360    18944     2048       0      24885  1.8924   1.8893  1.7045
+  e182_a1_b85              0x01010101 0x55555555   4  16  12      35824    25472     4096    3072      38832  2.0518   2.0477  1.7711
+  e182_a85_b1              0x55555555 0x01010101  16   4  12      32752    25472     1024    3072      35760  2.0047   2.0006  1.7547
+  e182_am1_bm85            0xffffffff 0xabababab  32  20  12      36848    25472     5120    3072      39856  2.0675   2.0634  1.7766
+  e182_am85_bm1            0xabababab 0xffffffff  20  32  12      39920    25472     8192    3072      42928  2.1146   2.1105  1.7930
+  e182_a1_bm1              0x01010101 0xffffffff   4  32  28      24576     8192     8192    7168      29701  1.8715   1.8702  1.7110
+  e182_am1_b1              0xffffffff 0x01010101  32   4  28      17408     8192     1024    7168      22533  1.7617   1.7604  1.6728
+
+fp32: kind                     A word     B word     pcA pcB  hd  (i) flips  c_store  tenb_rz     scp  (ii) nets    P W  P+ACC W     E W
+  e178_v4                  0x40800000 0x40800000   2   2   0      23889     8192        0       0      39825  8.2321   8.2333  8.3648
+  e178_v5                  0x40a00000 0x40a00000   3   3   0      28291    11352        0       0      44187  8.2421   8.2436  8.3665
+  e182_a1_b3fffffff        0x3f800000 0x3fffffff   7  30  23      37660     8192        0   11408      56137  8.3058   8.3069  8.3702
+  e182_a3fffffff_b1        0x3fffffff 0x3f800000  30   7  23      37660     8192        0   11408      56137  8.3058   8.3069  8.3702
+
+the registered pairs, D(first) - D(second), W at aifoundry3 (card 1 in forecast-e182.json):
+  T1 int8.e178_v5             - int8.e178_v4             d(i)   +13120  d(ii)   +13013  dP +0.1862  dP+ACC +0.1844  dE +0.0701  fit sd 0.0339
+  T2 int8.e182_a1_bm1         - int8.e182_am1_b1         d(i)    +7168  d(ii)    +7168  dP +0.1099  dP+ACC +0.1099  dE +0.0383  fit sd 0.0208
+  T3 int8.neg_ones            - int8.ones                d(i)    +7168  d(ii)    +7168  dP +0.1099  dP+ACC +0.1099  dE +0.0383  fit sd 0.0208
+  T4 int8.e178_a4_b5          - int8.e178_a5_b4          d(i)    +1024  d(ii)    +1024  dP +0.0157  dP+ACC +0.0157  dE +0.0055  fit sd 0.0030
+  T5 fp32.e182_a1_b3fffffff   - fp32.e182_a3fffffff_b1   d(i)       +0  d(ii)       +0  dP +0.0000  dP+ACC +0.0000  dE +0.0000  fit sd 0.0000
+  T6 fp32.e178_v5             - fp32.e178_v4             d(i)    +4403  d(ii)    +4363  dP +0.0099  dP+ACC +0.0104  dE +0.0017  fit sd 0.0009
+
+the held-bit split each arm predicts (W per held 1-bit a byte; +-1 set by the trains' formulas / the quartet fit):
+  P_a3     beta_A -0.00000 / -0.00000   beta_B +0.01570 / +0.01570   (x_sign +0.1099, x_swap +0.1099)
+  P_c1     beta_A -0.00000 / +0.00000   beta_B +0.01509 / +0.01509   (x_sign +0.1056, x_swap +0.1056)
+  PACC_a3  beta_A -0.00000 / -0.00000   beta_B +0.01570 / +0.01570   (x_sign +0.1099, x_swap +0.1099)
+  PACC_c1  beta_A -0.00000 / -0.00000   beta_B +0.01509 / +0.01509   (x_sign +0.1056, x_swap +0.1056)
+  E_a3     beta_A +0.00000 / -0.00000   beta_B +0.00547 / +0.00547   (x_sign +0.0383, x_swap +0.0383)
+  E_c1     beta_A +0.00000 / -0.00000   beta_B +0.00526 / +0.00526   (x_sign +0.0368, x_swap +0.0368)
+
+arm E's lines (re-fitted from E178's committed scored.json): int8 2.7812 fJ a flip (se 0.578), intercept +1.5798 W, n 13; fp32 0.3519 fJ a flip (se 1.152), intercept +8.3554 W, n 14
+per-flip slope over E182's 20 int8 kinds, by arm (fJ a flip): P 7.043, PACC 6.991, E 2.781
+check: P against E178's frozen P at this rate, largest |diff| 2.2e-16 W over 8 kinds; M10-ACC's term against its frozen grid, largest |diff| 8.7e-19 W over 22 kinds
+bench check (vpu nets_map, this run against E178's committed counts): fp32.zeros equal, fp16.zeros equal, int8.zeros equal, int8.e178_v4 equal, int8.e178_v5 equal, int8.e178_a4_b5 equal, int8.e178_a5_b4 equal, fp32.e178_v4 equal, fp32.e178_v5 equal, int8.ones equal, int8.neg_ones equal
