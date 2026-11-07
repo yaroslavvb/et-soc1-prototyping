@@ -1,0 +1,14 @@
+POST HOC, A1 (x_acc below is x_lane; after A1's fit; readings, not tests)
+(1) the lists' 70 steps: r(measured step, z_acc step) +0.891; r(measured step, M10's step) +0.993; x_acc's step per micro-op: median +17.91 (p10 +0.02, p90 +92.99); measured steps median 1.485 W
+    field exp: n 13, r 0.738
+    field mant: n 55, r 0.877
+    field sign: n 2, r None
+(2) M10's float whole tiles (M9's rows, no steps): n 611; r(x_acc, c_end) +0.374; R^2 of x_acc on M10's ten float features 0.888
+(3) x_acc per micro-op (the lanes of one micro-op summed), p10 / median / p90:
+    pool 8 class S                 n   16     9.70 /   49.49 /   87.79
+    M10 S class                    n   26    20.62 /   94.51 /  103.31
+    E178 one-word floats           n   27     0.50 /    0.59 /    0.68
+    M10 other float whole tiles    n  641     0.03 /   61.93 /  109.66
+    E178 int8                      n   13     2.00 /    3.50 /    5.70
+    M10 int8 whole tiles           n  222     4.82 /  237.75 /  255.35
+(4) one-number int8 grid: 153 of 153 (a, b) / (b, a) pairs read the same x_acc (the step is 4 x a x b)

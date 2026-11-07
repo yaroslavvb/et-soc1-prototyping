@@ -1,0 +1,57 @@
+Q153(m10acc): M10-ACC, the accumulator-toggle term (fit_m10acc.py fit; REGISTRATION.md b5586759). Errors are measured - predicted, W.
+
+rows 1149: a|float|a3 393, a|float|c1 344, a|int8|a3 114, a|int8|c1 108, b|float|a3 25, b|float|c1 25, b|int8|a3 15, b|int8|c1 15, c|float|a3 70, d|float|a3 27, d|int8|a3 13
+
+== float: 884 rows in 39 runs; primary form acc+bth
+  tau_acc = +0.1236 fJ a toggle; jackknife 95% [-3.3059, +3.5532] (se 1.6941, t 2.024); runs bootstrap [-2.7040, +2.7329]; OLS se 0.7278; LORO range [-0.1360, +1.6548]
+  tau_bth = +0.0647 fJ a toggle; jackknife 95% [-0.1352, +0.2646] (se 0.0987, t 2.024); runs bootstrap [-0.1207, +0.2293]; OLS se 0.0538; LORO range [-0.0016, +0.0965]
+  all                      n  884  M10 0.1873 (-0.0151)  M10-ACC 0.1886 (-0.0211)  d +0.0013
+  card a3                  n  515  M10 0.1877 (-0.0240)  M10-ACC 0.1887 (-0.0288)  d +0.0010
+  card c1                  n  369  M10 0.1866 (-0.0027)  M10-ACC 0.1884 (-0.0103)  d +0.0018
+  type fp16                n  338  M10 0.1624 (+0.0031)  M10-ACC 0.1633 (-0.0016)  d +0.0009
+  type fp16 card a3        n  173  M10 0.1573 (+0.0012)  M10-ACC 0.1579 (-0.0024)  d +0.0006
+  type fp16 card c1        n  165  M10 0.1675 (+0.0051)  M10-ACC 0.1687 (-0.0007)  d +0.0012
+  type fp32                n  546  M10 0.2012 (-0.0264)  M10-ACC 0.2027 (-0.0332)  d +0.0015
+  type fp32 card a3        n  342  M10 0.2014 (-0.0367)  M10-ACC 0.2025 (-0.0422)  d +0.0011
+  type fp32 card c1        n  204  M10 0.2008 (-0.0091)  M10-ACC 0.2030 (-0.0181)  d +0.0022
+  source a                 n  737  M10 0.1854 (-0.0156)  M10-ACC 0.1871 (-0.0222)  d +0.0018
+  source b                 n   50  M10 0.1940 (+0.0975)  M10-ACC 0.1906 (+0.0892)  d -0.0034
+  source c                 n   70  M10 0.2281 (-0.1184)  M10-ACC 0.2285 (-0.1187)  d +0.0004
+  source d                 n   27  M10 0.0754 (+0.0569)  M10-ACC 0.0761 (+0.0580)  d +0.0007
+  S class                  n   42  M10 0.2425 (+0.1039)  M10-ACC 0.2428 (+0.1043)  d +0.0004
+  R1 d +0.0013 [-0.0004, +0.0036] -> fails; R2 a3 +0.0010 c1 +0.0018 -> fails; R3 d_S +0.0004 over 42 -> fails; ENTERS: no
+
+== int8: 265 rows in 24 runs; primary form acc
+  tau_acc = -0.0843 fJ a toggle; jackknife 95% [-0.9984, +0.8298] (se 0.4419, t 2.069); runs bootstrap [-0.9543, +0.6911]; OLS se 0.2617; LORO range [-0.2786, +0.0946]
+  all                      n  265  M10 0.1729 (-0.0096)  M10-ACC 0.1748 (-0.0063)  d +0.0018
+  card a3                  n  142  M10 0.1675 (-0.0135)  M10-ACC 0.1699 (-0.0093)  d +0.0024
+  card c1                  n  123  M10 0.1790 (-0.0050)  M10-ACC 0.1802 (-0.0027)  d +0.0012
+  type int8                n  265  M10 0.1729 (-0.0096)  M10-ACC 0.1748 (-0.0063)  d +0.0018
+  type int8 card a3        n  142  M10 0.1675 (-0.0135)  M10-ACC 0.1699 (-0.0093)  d +0.0024
+  type int8 card c1        n  123  M10 0.1790 (-0.0050)  M10-ACC 0.1802 (-0.0027)  d +0.0012
+  source a                 n  222  M10 0.1772 (-0.0070)  M10-ACC 0.1790 (-0.0037)  d +0.0018
+  source b                 n   30  M10 0.1306 (+0.0364)  M10-ACC 0.1321 (+0.0429)  d +0.0016
+  source d                 n   13  M10 0.1841 (-0.1598)  M10-ACC 0.1871 (-0.1626)  d +0.0031
+  R1 d +0.0018 [+0.0008, +0.0029] -> fails; R2 a3 +0.0024 c1 +0.0012 -> fails; ENTERS: no
+
+arm ACC1 (floats, x_acc alone): tau_acc +0.6368 fJ; all d +0.0008; S class d -0.0020
+arm strict (float, fitted on a and c): tau acc -0.5605 fJ, bth +0.0573 fJ; (b, d) from (a, c): all d -0.0000, source b d -0.0009, source d d +0.0042
+arm strict (int8, fitted on a and c): tau acc +0.0140 fJ; (b, d) from (a, c): all d +0.0001, source b d -0.0001, source d d +0.0005
+
+F-P9, forecasts for a pool drawn like pool 8 (held-out errors of pool 8's rows; bootstrap over kinds):
+  float pool8 a3             n  25  d -0.0024 [-0.0070, +0.0005]  M10 0.1851 -> 0.1828
+  float pool8 class S a3     n   8  d +0.0011 [+0.0010, +0.0013]  M10 0.2731 -> 0.2742
+  float pool8 c1             n  25  d -0.0044 [-0.0082, -0.0013]  M10 0.2025 -> 0.1982
+  float pool8 class S c1     n   8  d +0.0005 [+0.0003, +0.0007]  M10 0.2380 -> 0.2386
+  int8 pool8 a3             n  15  d +0.0027 [-0.0013, +0.0061]  M10 0.1328 -> 0.1355
+  int8 pool8 c1             n  15  d +0.0004 [-0.0020, +0.0025]  M10 0.1283 -> 0.1287
+
+POST HOC (pool 8 and E178 were read before the registration):
+  pool 8 class S a3 (n 8): M10 0.273 (+0.195); M10-ACC 0.274 (+0.196); ACC1 0.270 (+0.190); strict 0.278 (+0.201)
+  pool 8 class S c1 (n 8): M10 0.238 (+0.138); M10-ACC 0.239 (+0.138); ACC1 0.236 (+0.135); strict 0.242 (+0.144)
+  E178 int8 levels (n 13): D-P 0.184 (-0.160); D-F 0.186 (-0.162); M10-ACC 0.187 (-0.163); strict 0.185 (-0.160)
+  his int8 pair 5s - 4s: measured +0.0532 [+0.0217, +0.0848]; P +0.1857; P + term +0.1876 (LORO), +0.1839 (frozen), +0.1860 (strict)
+  E178 fp32 levels (n 14): D-P 0.091 (+0.083); D-F 0.091 (+0.078); M10-ACC 0.092 (+0.084); strict 0.096 (+0.089)
+  E178 fp16 levels (n 13): D-P 0.054 (+0.029); D-F 0.050 (+0.019); M10-ACC 0.055 (+0.030); strict 0.057 (+0.034)
+
+E67's launch sensitivity (x_acc step at N min, median, max): fp32.ix_b0 -0.0/-0.0/-0.0; fp32.ix_b16 78.1/45.9/38.5; fp32.ix_b22 599.6/399.0/335.0; fp32.ix_b8 0.1/0.0/0.0
