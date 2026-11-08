@@ -1,0 +1,39 @@
+E182: reduce_e78.py unchanged via reduce_e182.py (kinds passes; dips kept)
+E78 aifoundry3: 600 MHz, 521.9 mV, leak 0.0892 W/C (150 runs), runs kept 203/270, passes [18220, 18221, 18222], idle-invalid runs 0
+  passes set aside: [{'pass': 18223, 'why': ['fp32.randn spans 1.380 W']}]
+  cycles per op {'fp32': 546.001, 'fp16': 546.001, 'int8': 318.0}; idle level 25.94872573291526
+  fp32: kind  D(over fp32 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp32.randn                 25.110  0.017    26.988      24155    5.897
+    fp32.e182_a1_b3fffffff      8.876  0.135    10.812       9679    2.363
+    fp32.e182_a3fffffff_b1      8.677  0.101    10.584       9474    2.313
+    anchor_pi                   8.602  0.079    10.539       9433    2.303
+    fp32.e178_v5                8.494  0.109    10.451       9355    2.284
+    fp32.e178_v4                8.452  0.124    10.402       9310    2.273
+    fp32.zeros                  0.000  0.000     1.889       1690    0.413
+  fp16: kind  D(over fp16 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    fp16.randn                 22.461  0.193    24.384      21824    2.664
+    fp16.zeros                  0.000  0.000     1.863       1667    0.203
+  int8: kind  D(over int8 zeros) W  +-95%   S(over idle) W  pJ/op(S)  pJ/MAC(S)
+    int8.full                   7.138  0.303     9.756       5079    0.310
+    int8.e182_a1_b127           1.940  0.187     4.465       2324    0.142
+    int8.e182_am1_bm127         1.937  0.656     4.544       2366    0.144
+    int8.e182_am1_bm15          1.936  0.116     4.576       2383    0.145
+    int8.e182_a127_b1           1.928  0.172     4.479       2332    0.142
+    int8.e182_am85_bm1          1.914  0.131     4.428       2306    0.141
+    int8.e182_am1_bm85          1.912  0.139     4.469       2327    0.142
+    int8.e182_am1_b1            1.902  0.088     4.492       2338    0.143
+    int8.e182_am15_bm1          1.895  0.246     4.474       2330    0.142
+    int8.e182_a1_bm1            1.866  0.061     4.458       2321    0.142
+    int8.e182_a1_b85            1.859  0.059     4.379       2281    0.139
+    int8.e182_am127_bm1         1.802  0.763     4.349       2265    0.138
+    int8.e182_a85_b1            1.762  0.387     4.357       2268    0.138
+    int8.e182_a1_b15            1.748  0.396     4.322       2251    0.137
+    int8.neg_ones               1.746  0.118     4.317       2247    0.137
+    int8.e178_a5_b4             1.743  0.076     4.288       2232    0.136
+    int8.e178_v5                1.740  0.134     4.286       2231    0.136
+    int8.e178_a4_b5             1.711  0.083     4.322       2250    0.137
+    int8.e178_v4                1.689  0.122     4.225       2200    0.134
+    int8.ones                   1.660  0.145     4.214       2194    0.134
+    int8.e182_a15_b1            1.621  0.523     4.236       2206    0.135
+    int8.zeros                  0.000  0.000     2.550       1328    0.081
+  idle consistency median |S - S0 - D| 0.043592203132259755 W; carry-over {'slope_w_per_w': 0.0005968792868974454, 'se': 0.0009765828117006621, 'n': 200}; pi built-in - file None; rail tau re-fit median 0.95

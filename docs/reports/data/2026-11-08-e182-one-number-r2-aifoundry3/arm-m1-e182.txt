@@ -1,0 +1,32 @@
+october-forecast-model's reported arm (E182.md.dated-note-M1.md, M1-4); the model at the card rail, E182 at the board
+TRAINS (each covered train's model figure against the train's estimate and 95% interval, e182_stats.py's):
+  T1: model +0.03911 W against +0.04700 [+0.04028, +0.05372] W (32 units): below, the estimate's sign
+  T2: model +0.01110 W against +0.01078 [+0.00631, +0.01525] W (32 units): inside, the estimate's sign
+  T3: model -0.00955 W against +0.12749 [+0.12246, +0.13252] W (32 units): below, the other sign
+  T4: model +0.00179 W against -0.00333 [-0.00858, +0.00192] W (32 units): inside, the other sign
+  T5: not read (not covered by the model)
+  T6: model +0.01273 W against +0.02853 [+0.02249, +0.03457] W (38 units): below, the estimate's sign
+THE HELD-BIT SPLIT (the model's beta_A = (T3 - T2) / 14 and beta_B = (T3 + T2) / 14, W a held 1-bit a byte):
+  beta_A: model -0.001475 against +0.008336 [+0.007865, +0.008808]: below, the other sign
+  beta_B: model +0.000111 against +0.009876 [+0.009405, +0.010348]: below, the estimate's sign
+  the model's own statement: What the model gives: neither side, at E182's resolution (the export's own words, M1-3); beside it, E182-SPLIT reads A+B
+THE KINDS PASSES (covered int8 kinds the scorer keeps: Spearman rho, average ranks, of the scored figure against the measured D):
+  rho +0.231, n 12 (of the 12 covered int8 kinds)
+  fp32.e178_v4: model +8.1576 - measured +8.3320 = -0.1744 W (4 passes; kind by kind only)
+  fp32.e178_v5: model +8.1704 - measured +8.3682 = -0.1978 W (4 passes; kind by kind only)
+  int8.e178_a4_b5: model +1.5379 - measured +1.7969 = -0.2590 W (4 passes)
+  int8.e178_a5_b4: model +1.5361 - measured +1.7959 = -0.2597 W (4 passes)
+  int8.e178_v4: model +1.5084 - measured +1.6971 = -0.1888 W (4 passes)
+  int8.e178_v5: model +1.5475 - measured +1.7121 = -0.1646 W (4 passes)
+  int8.e182_a127_b1: model +1.5387 - measured +1.9612 = -0.4225 W (4 passes)
+  int8.e182_a1_b127: model +1.5330 - measured +1.9684 = -0.4354 W (4 passes)
+  int8.e182_a1_b85: model +1.5647 - measured +1.8717 = -0.3070 W (4 passes)
+  int8.e182_a1_bm1: model +1.5586 - measured +1.9296 = -0.3710 W (4 passes)
+  int8.e182_a85_b1: model +1.5521 - measured +1.7957 = -0.2436 W (4 passes)
+  int8.e182_am1_b1: model +1.5474 - measured +1.9805 = -0.4330 W (4 passes)
+  int8.neg_ones: model +1.4963 - measured +1.8400 = -0.3437 W (4 passes)
+  int8.ones: model +1.5058 - measured +1.7446 = -0.2388 W (4 passes)
+THE QUARTET SWAPS (the export's two, beside the same kinds' measured D difference; reported only):
+  (1,85)-(85,1)_W: model +0.01257; measured D difference +0.07596 W
+  (1,127)-(127,1)_W: model -0.00564; measured D difference +0.00728 W
+Labels: REPORTED, never a rule; the model's figures are modelled (frozen Fri 6 Nov 2026); E182's are blind measurements.
