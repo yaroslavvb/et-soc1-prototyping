@@ -1,0 +1,36 @@
+1. COPY-BACK EXACT, against aifoundry3's own listing (copyback-box-list-arm-s.txt)
+OK   the session's own files (build/e184/ on the box, its operand images left out): 12 on the box, 12 here; only on the box []; only here []; sha256 differ []
+OK   the pass directories this T0's log names (e184-smoke, e184-stoptest): 20 on the box, 20 here; sha256 differ []
+OK   no e184 pass directory on the box, and none here: the box: absent ['e184']
+OK   no non-regular entry in the box's listing: []
+     the operand images left out on the box, by step 11 v4's design: 13 files
+OK   the session's files by name: missing []; step 7's reads ['config-S-step7-1794133226.json', 'config-S-step7-1794133494.json']; dry logs ['session-S-dry-t1794133234.log']; others []
+2. the collector re-made from the committed files (reduce_e184_v4.py with A4, score_e184_v3.py; kit note 3's collector)
+OK   reduce_e184_v4.py --arm S --t0 1794133299: rc 0 and reduced-e184s-v4.json the committed one, byte for byte: rc 0, sha256 1aa191ee940b5df9
+OK   reduce_e184_v4.py --arm B --t0 1794125719: rc 0 and reduced-e184b-v4.json the committed one, byte for byte: rc 0, sha256 9f2980a9b3488140
+OK   score_e184_v3.py: rc 0 and scored-e184-v3.json the committed scored-e184-v3-arms-bs.json, byte for byte: rc 0
+OK   score_e184_v3.py: rc 0 and scored-e184-v3.md the committed scored-e184-v3-arms-bs.md, byte for byte: rc 0
+3. arm B's section of the both-arm files, against arm B's committed scored-e184-v3.json and .md (8bf74b26)
+OK   arm_B equal
+OK   every other top-level key but arm_S equal: keys ['t_crit_a2', 'what']
+     arm_S in arm B's committed file: null
+OK   the .md's '## Arm B' section equal
+OK   the .md's header equal
+     arm B's committed .md, its '## Arm S' section: 'NOT SCORED (no reduced file)\n\n'
+4. arm S: the session gate (reduce_e184_v4.py, A3-3 with A4) and the session's config reads
+     gate_ok False; reasons ["the session log has no 'smoke gate passed' line", 'the smoke, checked again at the desk: SMOKE NO-GO: m16 n19 read 0.358 W, outside -0.15-0.30']; T0 1794133299; session logs found [1794133299]; log_session_end True; log_smoke_gate_passed False; departures []
+OK   the session gate does not hold (A3-1: arm S not run)
+     the start read (the session's own read, complete, attempted 2026-11-08T10:21:39Z): {"minion_mhz": 600, "minion_mv": 523, "power_state": 0, "power_state_name": "max_power", "tdp_w": 0, "temp_threshold_c": 65}: as registered
+OK   the start config read is TDP 0 W, 65 C, 600 MHz as registered
+     the end read (the session's own read, complete, attempted 2026-11-08T10:22:24Z): {"minion_mhz": 600, "minion_mv": 523, "power_state": 0, "power_state_name": "max_power", "tdp_w": 0, "temp_threshold_c": 65}: as registered
+OK   the end config read is TDP 0 W, 65 C, 600 MHz as registered
+     arm S's rules in the both-arm scored file: {'E184-C': 'NOT SCORED', 'E184-J': 'NOT SCORED', 'E184-L': 'NOT SCORED', 'E184-N': 'NOT SCORED', 'E184-P': 'NOT SCORED'}
+OK   every arm S rule NOT SCORED (E184-C, -J, -L, -N, -P)
+5. the readers f8d94224 committed, re-run on raw/aifoundry3/e184-smoke/p18401
+OK   check_e184_v2.py smoke: the committed smoke-gate-desk-arm-s.txt, byte for byte (rc 1)
+OK   posthoc_arms_e184.py: the committed posthoc-arms-e184.json, byte for byte (rc 0)
+6. the committed hash lists
+OK   SHA256SUMS-arm-b: 80 of 80 OK: want 80
+OK   SHA256SUMS-arm-s: 23 of 23 OK: want 23
+OK   SHA256SUMS-note1: 4 of 4 OK: want 4
+CHECK-NOTE2-E184 PASS: 0 failed
