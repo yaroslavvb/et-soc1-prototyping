@@ -1,0 +1,583 @@
+{
+ "BLIND": {
+  "hi": 0.016651684563547417,
+  "lo": 0.0027337397648482453,
+  "mean": 0.009692712164197832,
+  "verdict_e180": "SIZE FAIL HIGH; inside: none",
+  "x_by_pass": [
+   0.016403657829249792,
+   0.009741660818736935,
+   -0.002833215131144489,
+   0.013687971273913193,
+   0.010979184416620814,
+   0.010177013777810736
+  ]
+ },
+ "C_slope_W_per_result_bit": 0.2196618048,
+ "E_slope_W_per_result_bit": 0.06873864275,
+ "OFM": {
+  "covers": [
+   "T5 (5s - 4s)",
+   "fadd.ps/f_4 and fadd.ps/f_5 above zeros"
+  ],
+  "freeze_line": "october-forecast-model, frozen Fri 6 Nov 2026 09:29:14 PST, sha256 498454bda6f5c0658008f5ca1751a515cd19d95a58fdb96c10b0fb011adefb10, covering E180's fadd.ps one-number kinds 4s and 5s (his pair), per instruction (8 lanes), above the fadd.ps zeros, on aifoundry3 and aifoundry1 card 1",
+  "rate": 458357477000.0,
+  "reader_check": "check_pinned passed",
+  "values_W": {
+   "T5": 0.004166469466,
+   "fadd.ps/f_4": 0.02980698673,
+   "fadd.ps/f_5": 0.0339734562
+  }
+ },
+ "P_check_against_e180": {
+  "fadd.ps/const": {
+   "abs_diff_W": 0.0,
+   "e180_P_W": 0.1649149678,
+   "slope_times_popcount_W": 0.1649149678
+  },
+  "fadd.ps/f_0p5": {
+   "abs_diff_W": 3.999998110515435e-10,
+   "e180_P_W": 1.154404775,
+   "slope_times_popcount_W": 1.1544047746
+  },
+  "fadd.ps/f_1p5": {
+   "abs_diff_W": 0.0,
+   "e180_P_W": 0.3298299356,
+   "slope_times_popcount_W": 0.3298299356
+  },
+  "fadd.ps/f_2": {
+   "abs_diff_W": 0.0,
+   "e180_P_W": 0.3298299356,
+   "slope_times_popcount_W": 0.3298299356
+  },
+  "fadd.ps/f_4": {
+   "abs_diff_W": 0.0,
+   "e180_P_W": 0.3298299356,
+   "slope_times_popcount_W": 0.3298299356
+  },
+  "fadd.ps/f_5": {
+   "abs_diff_W": 0.0,
+   "e180_P_W": 0.4947449034,
+   "slope_times_popcount_W": 0.4947449034
+  }
+ },
+ "P_slope_W_per_result_bit": 0.1649149678,
+ "_what": "E183's frozen forecasts (forecast_e183.py; E183.md section 4): watts above the fadd.ps zeros for every kind and D(first) - D(second) for every train, on aifoundry3 card 0 at 600 MHz pinned",
+ "arms": [
+  "P",
+  "BLIND",
+  "OPER",
+  "BOTH",
+  "NONE"
+ ],
+ "card": "aifoundry3",
+ "inputs_sha256": {
+  "docs/reports/data/2026-11-06-e180-vector-add-aifoundry3/reduced-e180-v3.json": "a914be262c7828799121c36fda6a48e1f911dd24933f0c5c108b1feecb6ecf4e",
+  "docs/reports/data/2026-11-06-e180-vector-add-aifoundry3/scored-e180.json": "97b8c17211c3516b85929d6ab2ce7168c69ccc7212708a9a1300190e699badbb",
+  "tools/claims-v3/e180/arm_m1_e180.py": "f8b5f9880700260e2d78cd4fc9fece45e13a46e0d7b248552aaed8d7c6067ad0",
+  "tools/claims-v3/e180/forecast-e180.json": "385b1051894666d89aed93a8682da665d0755eaa3e20548454852ee6fe4eb411",
+  "tools/claims-v3/e180/m1-october-forecast-model-e180.json": "83745199c43b2270536bdb1d2d795d8257fe868faa3cb8e649ccc91f6e766d59",
+  "tools/claims-v3/e180/power_e180.py": "7db37ef73167bcb5a9496fd2b675d570595bba46c62df0ec36cef5603953c4e1",
+  "tools/claims-v3/e183/kinds-e183.json": "0811ad4bfcca4cc74780773904a09446111d5b842bf846184bb95c219f47e2af"
+ },
+ "kinds": {
+  "fadd.ps/const": {
+   "BLIND_band_W": [
+    0.0027337398,
+    0.0166516846
+   ],
+   "C_W": 0.2196618048,
+   "E_W": 0.0687386427,
+   "OFM_W": null,
+   "W": {
+    "BLIND": 0.0096927122,
+    "BOTH": 0.0366425162,
+    "NONE": 0.0,
+    "OPER": 0.0581079503,
+    "P": 0.1649149678
+   },
+   "note": "watts above the fadd.ps zeros; BOTH's intercept a is left out (a difference cancels it)",
+   "operand_popcount": 7,
+   "result_popcount": 1,
+   "result_word": "0x40000000",
+   "word": "0x3f800000"
+  },
+  "fadd.ps/e7fj16": {
+   "BLIND_band_W": [
+    0.046473576,
+    0.2830786376
+   ],
+   "C_W": 3.7342506816,
+   "E_W": 1.1685569268,
+   "OFM_W": null,
+   "W": {
+    "BLIND": 0.1647761068,
+    "BOTH": 0.183541355,
+    "NONE": 0.0,
+    "OPER": 0.1909261225,
+    "P": 2.8035544526
+   },
+   "note": "watts above the fadd.ps zeros; BOTH's intercept a is left out (a difference cancels it)",
+   "operand_popcount": 23,
+   "result_popcount": 17,
+   "result_word": "0x407fff80",
+   "word": "0x3fffff80"
+  },
+  "fadd.ps/e7fj17": {
+   "BLIND_band_W": [
+    0.0492073158,
+    0.2997303221
+   ],
+   "C_W": 3.9539124864,
+   "E_W": 1.2372955695,
+   "OFM_W": null,
+   "W": {
+    "BLIND": 0.174468819,
+    "BOTH": 0.1927225324,
+    "NONE": 0.0,
+    "OPER": 0.1992272583,
+    "P": 2.9684694204
+   },
+   "note": "watts above the fadd.ps zeros; BOTH's intercept a is left out (a difference cancels it)",
+   "operand_popcount": 24,
+   "result_popcount": 18,
+   "result_word": "0x407fffc0",
+   "word": "0x3fffffc0"
+  },
+  "fadd.ps/e80j16": {
+   "BLIND_band_W": [
+    0.0492073158,
+    0.2997303221
+   ],
+   "C_W": 3.9539124864,
+   "E_W": 1.2372955695,
+   "OFM_W": null,
+   "W": {
+    "BLIND": 0.174468819,
+    "BOTH": 0.1606843038,
+    "NONE": 0.0,
+    "OPER": 0.1411193079,
+    "P": 2.9684694204
+   },
+   "note": "watts above the fadd.ps zeros; BOTH's intercept a is left out (a difference cancels it)",
+   "operand_popcount": 17,
+   "result_popcount": 18,
+   "result_word": "0x40ffff80",
+   "word": "0x407fff80"
+  },
+  "fadd.ps/e80j22": {
+   "BLIND_band_W": [
+    0.0656097544,
+    0.3996404295
+   ],
+   "C_W": 5.2718833152,
+   "E_W": 1.649727426,
+   "OFM_W": null,
+   "W": {
+    "BLIND": 0.2326250919,
+    "BOTH": 0.2157713683,
+    "NONE": 0.0,
+    "OPER": 0.1909261225,
+    "P": 3.9579592272
+   },
+   "note": "watts above the fadd.ps zeros; BOTH's intercept a is left out (a difference cancels it)",
+   "operand_popcount": 23,
+   "result_popcount": 24,
+   "result_word": "0x40fffffe",
+   "word": "0x407ffffe"
+  },
+  "fadd.ps/e80j6": {
+   "BLIND_band_W": [
+    0.0218699181,
+    0.1332134765
+   ],
+   "C_W": 1.7572944384,
+   "E_W": 0.549909142,
+   "OFM_W": null,
+   "W": {
+    "BLIND": 0.0775416973,
+    "BOTH": 0.0688725296,
+    "NONE": 0.0,
+    "OPER": 0.0581079503,
+    "P": 1.3193197424
+   },
+   "note": "watts above the fadd.ps zeros; BOTH's intercept a is left out (a difference cancels it)",
+   "operand_popcount": 7,
+   "result_popcount": 8,
+   "result_word": "0x40fe0000",
+   "word": "0x407e0000"
+  },
+  "fadd.ps/f_0p5": {
+   "BLIND_band_W": [
+    0.0191361784,
+    0.1165617919
+   ],
+   "C_W": 1.5376326336,
+   "E_W": 0.4811704992,
+   "OFM_W": null,
+   "W": {
+    "BLIND": 0.0678489851,
+    "BOTH": 0.0596913522,
+    "NONE": 0.0,
+    "OPER": 0.0498068146,
+    "P": 1.1544047746
+   },
+   "note": "watts above the fadd.ps zeros; BOTH's intercept a is left out (a difference cancels it)",
+   "operand_popcount": 6,
+   "result_popcount": 7,
+   "result_word": "0x3f800000",
+   "word": "0x3f000000"
+  },
+  "fadd.ps/f_1p5": {
+   "BLIND_band_W": [
+    0.0054674795,
+    0.0333033691
+   ],
+   "C_W": 0.4393236096,
+   "E_W": 0.1374772855,
+   "OFM_W": null,
+   "W": {
+    "BLIND": 0.0193854243,
+    "BOTH": 0.0458236936,
+    "NONE": 0.0,
+    "OPER": 0.0664090861,
+    "P": 0.3298299356
+   },
+   "note": "watts above the fadd.ps zeros; BOTH's intercept a is left out (a difference cancels it)",
+   "operand_popcount": 8,
+   "result_popcount": 2,
+   "result_word": "0x40400000",
+   "word": "0x3fc00000"
+  },
+  "fadd.ps/f_2": {
+   "BLIND_band_W": [
+    0.0054674795,
+    0.0333033691
+   ],
+   "C_W": 0.4393236096,
+   "E_W": 0.1374772855,
+   "OFM_W": null,
+   "W": {
+    "BLIND": 0.0193854243,
+    "BOTH": 0.013785465,
+    "NONE": 0.0,
+    "OPER": 0.0083011358,
+    "P": 0.3298299356
+   },
+   "note": "watts above the fadd.ps zeros; BOTH's intercept a is left out (a difference cancels it)",
+   "operand_popcount": 1,
+   "result_popcount": 2,
+   "result_word": "0x40800000",
+   "word": "0x40000000"
+  },
+  "fadd.ps/f_4": {
+   "BLIND_band_W": [
+    0.0054674795,
+    0.0333033691
+   ],
+   "C_W": 0.4393236096,
+   "E_W": 0.1374772855,
+   "OFM_W": 0.0298069867,
+   "W": {
+    "BLIND": 0.0193854243,
+    "BOTH": 0.0183623548,
+    "NONE": 0.0,
+    "OPER": 0.0166022715,
+    "P": 0.3298299356
+   },
+   "note": "watts above the fadd.ps zeros; BOTH's intercept a is left out (a difference cancels it)",
+   "operand_popcount": 2,
+   "result_popcount": 2,
+   "result_word": "0x41000000",
+   "word": "0x40800000"
+  },
+  "fadd.ps/f_5": {
+   "BLIND_band_W": [
+    0.0082012193,
+    0.0499550537
+   ],
+   "C_W": 0.6589854144,
+   "E_W": 0.2062159282,
+   "OFM_W": 0.0339734562,
+   "W": {
+    "BLIND": 0.0290781365,
+    "BOTH": 0.0275435323,
+    "NONE": 0.0,
+    "OPER": 0.0249034073,
+    "P": 0.4947449034
+   },
+   "note": "watts above the fadd.ps zeros; BOTH's intercept a is left out (a difference cancels it)",
+   "operand_popcount": 3,
+   "result_popcount": 3,
+   "result_word": "0x41200000",
+   "word": "0x40a00000"
+  }
+ },
+ "labels": {
+  "BLIND": "E180's measured price E180-L (blind on 6 Nov 2026, c8a3a6ee): the blind number for E183",
+  "BOTH": "post hoc for its fit (E180-O's two-term regression); reported beside",
+  "NONE": "no difference",
+  "OFM": "october-forecast-model (E180's dated note M1, its reader arm_m1_e180.py): T5 only",
+  "OPER": "post hoc for its fit (E180's committed reduction, read after E180's data); a forecast for E183",
+  "P": "registered in E180 (4dc5035f), frozen; E180's primary, not M10 (M10 prices no vector add)"
+ },
+ "posthoc_fits_e180": {
+  "corr_result_operand_popcounts": 0.9482970432547834,
+  "kinds": [
+   "fadd.ps/zeros",
+   "fadd.ps/const",
+   "fadd.ps/f_0p5",
+   "fadd.ps/f_1p5",
+   "fadd.ps/f_2",
+   "fadd.ps/f_3",
+   "fadd.ps/f_4",
+   "fadd.ps/f_5",
+   "fadd.ps/f_6",
+   "fadd.ps/f_7",
+   "fadd.ps/f_8",
+   "fadd.ps/f_m1",
+   "fadd.ps/f_m4",
+   "fadd.ps/f_m5",
+   "fadd.ps/r3_k4",
+   "fadd.ps/r3_k8",
+   "fadd.ps/r3_k12",
+   "fadd.ps/r3_k16",
+   "fadd.ps/r3_k20",
+   "fadd.ps/r3_k24",
+   "fadd.ps/r3_max"
+  ],
+  "oper_enters": true,
+  "operand_only": {
+   "hi": 0.014269072838874585,
+   "lo": 0.002333198683850274,
+   "mean": 0.008301135761362429,
+   "x_by_pass": [
+    0.012507768308242642,
+    0.009775228844248347,
+    -0.0026640668440415295,
+    0.012861764836185612,
+    0.009153230958656403,
+    0.0081728884648831
+   ]
+  },
+  "result_only": {
+   "hi": 0.016651684563547417,
+   "lo": 0.0027337397648482453,
+   "mean": 0.009692712164197832,
+   "x_by_pass": [
+    0.016403657829249792,
+    0.009741660818736935,
+    -0.002833215131144489,
+    0.013687971273913193,
+    0.010979184416620814,
+    0.010177013777810736
+   ]
+  },
+  "rms_W_on_kind_means": {
+   "operand_only": 0.03976860048256701,
+   "result_only": 0.04046315471789173,
+   "what": "each one-term OLS fit to the 21 kinds' mean D above zeros, its residual rms (n - 2 df)"
+  },
+  "rule_oper_enters": "the operand-only slope's 95% interval lies above 0",
+  "two_term_b": {
+   "hi": 0.01814330419719601,
+   "lo": -0.008934728943447434,
+   "mean": 0.004604287626874287,
+   "x_by_pass": [
+    0.024797925941859734,
+    -0.011179025318952766,
+    0.0012766493651648046,
+    -0.006068385127939124,
+    0.00797104763872182,
+    0.01082751326239125
+   ]
+  },
+  "two_term_c": {
+   "hi": 0.016288657926666766,
+   "lo": -0.007134878335714357,
+   "mean": 0.004576889795476204,
+   "x_by_pass": [
+    -0.00755039988964917,
+    0.018817548377816132,
+    -0.003696703515198838,
+    0.017770267663041774,
+    0.0027057314933483113,
+    -0.0005851053565009874
+   ]
+  }
+ },
+ "prices": {
+  "BLIND": {
+   "b_W_per_result_bit": 0.0096927122,
+   "c_W_per_operand_bit": 0.0
+  },
+  "BOTH": {
+   "b_W_per_result_bit": 0.0046042876,
+   "c_W_per_operand_bit": 0.0045768898
+  },
+  "NONE": {
+   "b_W_per_result_bit": 0.0,
+   "c_W_per_operand_bit": 0.0
+  },
+  "OPER": {
+   "b_W_per_result_bit": 0.0,
+   "c_W_per_operand_bit": 0.0083011358
+  },
+  "P": {
+   "b_W_per_result_bit": 0.1649149678,
+   "c_W_per_operand_bit": 0.0
+  }
+ },
+ "trains": {
+  "T1": {
+   "BLIND_band_W": [
+    0.0191361784,
+    0.1165617919
+   ],
+   "C_W": 1.5376326336,
+   "E_W": 0.4811704992,
+   "OFM_W": null,
+   "OPER_band_W": [
+    0.0,
+    0.0
+   ],
+   "W": {
+    "BLIND": 0.0678489851,
+    "BOTH": 0.0322300134,
+    "NONE": 0.0,
+    "OPER": 0.0,
+    "P": 1.1544047746
+   },
+   "dO": 0,
+   "dR": 7,
+   "first": "fadd.ps/e80j6",
+   "pair": "R0",
+   "second": "fadd.ps/const"
+  },
+  "T2": {
+   "BLIND_band_W": [
+    0.0,
+    0.0
+   ],
+   "C_W": 0.0,
+   "E_W": 0.0,
+   "OFM_W": null,
+   "OPER_band_W": [
+    0.0163323908,
+    0.0998835099
+   ],
+   "W": {
+    "BLIND": 0.0,
+    "BOTH": 0.0320382286,
+    "NONE": 0.0,
+    "OPER": 0.0581079503,
+    "P": 0.0
+   },
+   "dO": 7,
+   "dR": 0,
+   "first": "fadd.ps/f_1p5",
+   "pair": "O0",
+   "second": "fadd.ps/f_2"
+  },
+  "T3": {
+   "BLIND_band_W": [
+    0.0191361784,
+    0.1165617919
+   ],
+   "C_W": 1.5376326336,
+   "E_W": 0.4811704992,
+   "OFM_W": null,
+   "OPER_band_W": [
+    0.0,
+    0.0
+   ],
+   "W": {
+    "BLIND": 0.0678489851,
+    "BOTH": 0.0322300134,
+    "NONE": 0.0,
+    "OPER": 0.0,
+    "P": 1.1544047746
+   },
+   "dO": 0,
+   "dR": 7,
+   "first": "fadd.ps/e80j22",
+   "pair": "R16",
+   "second": "fadd.ps/e7fj16"
+  },
+  "T4": {
+   "BLIND_band_W": [
+    0.0,
+    0.0
+   ],
+   "C_W": 0.0,
+   "E_W": 0.0,
+   "OFM_W": null,
+   "OPER_band_W": [
+    0.0163323908,
+    0.0998835099
+   ],
+   "W": {
+    "BLIND": 0.0,
+    "BOTH": 0.0320382286,
+    "NONE": 0.0,
+    "OPER": 0.0581079503,
+    "P": 0.0
+   },
+   "dO": 7,
+   "dR": 0,
+   "first": "fadd.ps/e7fj17",
+   "pair": "O16",
+   "second": "fadd.ps/e80j16"
+  },
+  "T5": {
+   "BLIND_band_W": [
+    0.0027337398,
+    0.0166516846
+   ],
+   "C_W": 0.2196618048,
+   "E_W": 0.0687386427,
+   "OFM_W": 0.0041664695,
+   "OPER_band_W": [
+    0.0023331987,
+    0.0142690728
+   ],
+   "W": {
+    "BLIND": 0.0096927122,
+    "BOTH": 0.0091811774,
+    "NONE": 0.0,
+    "OPER": 0.0083011358,
+    "P": 0.1649149678
+   },
+   "dO": 1,
+   "dR": 1,
+   "first": "fadd.ps/f_5",
+   "pair": "H",
+   "second": "fadd.ps/f_4"
+  },
+  "T6": {
+   "BLIND_band_W": [
+    0.0164024386,
+    0.0999101074
+   ],
+   "C_W": 1.3179708288,
+   "E_W": 0.4124318565,
+   "OFM_W": null,
+   "OPER_band_W": [
+    -0.0142690728,
+    -0.0023331987
+   ],
+   "W": {
+    "BLIND": 0.058156273,
+    "BOTH": 0.023048836,
+    "NONE": 0.0,
+    "OPER": -0.0083011358,
+    "P": 0.9894898068
+   },
+   "dO": -1,
+   "dR": 6,
+   "first": "fadd.ps/f_0p5",
+   "pair": "X",
+   "second": "fadd.ps/const"
+  }
+ }
+}

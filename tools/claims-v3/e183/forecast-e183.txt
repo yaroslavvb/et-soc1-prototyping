@@ -1,0 +1,39 @@
+E183 forecasts (forecast_e183.py), aifoundry3 card 0, 600 MHz pinned. W above the fadd.ps zeros (kinds) and D(first) - D(second)
+(trains). P: E180's frozen primary. BLIND: E180-L, +0.009693 W a result 1-bit [+0.002734, +0.016652]. OPER: operand-only, post
+hoc fit on E180. BOTH: E180-O's two-term fit, post hoc. OFM: october-forecast-model, T5 only.
+
+E180's 21 kinds: corr(pop_R, pop_O) 0.9483
+  result_only   +0.009693 W a bit [+0.002734, +0.016652]
+  operand_only  +0.008301 W a bit [+0.002333, +0.014269]
+  two_term_b    +0.004604 W a bit [-0.008935, +0.018143]
+  two_term_c    +0.004577 W a bit [-0.007135, +0.016289]
+  one-term fits' residual rms over the kinds' means: result-only 0.0405 W, operand-only 0.0398 W
+  OPER enters (its interval above 0): True
+
+train pair first           second            dR  dO         P     BLIND                  band      OPER      BOTH       OFM
+T1    R0   e80j6           const             +7  +0   +1.1544   +0.0678    [+0.0191, +0.1166]   +0.0000   +0.0322         -
+T2    O0   f_1p5           f_2               +0  +7   +0.0000   +0.0000    [+0.0000, +0.0000]   +0.0581   +0.0320         -
+T3    R16  e80j22          e7fj16            +7  +0   +1.1544   +0.0678    [+0.0191, +0.1166]   +0.0000   +0.0322         -
+T4    O16  e7fj17          e80j16            +0  +7   +0.0000   +0.0000    [+0.0000, +0.0000]   +0.0581   +0.0320         -
+T5    H    f_5             f_4               +1  +1   +0.1649   +0.0097    [+0.0027, +0.0167]   +0.0083   +0.0092  +0.00417
+T6    X    f_0p5           const             +6  -1   +0.9895   +0.0582    [+0.0164, +0.0999]   -0.0083   +0.0230         -
+
+kind            word         pop_O pop_R         P     BLIND      OPER      BOTH       OFM
+const           0x3f800000       7     1   +0.1649   +0.0097   +0.0581   +0.0366         -
+e7fj16          0x3fffff80      23    17   +2.8036   +0.1648   +0.1909   +0.1835         -
+e7fj17          0x3fffffc0      24    18   +2.9685   +0.1745   +0.1992   +0.1927         -
+e80j16          0x407fff80      17    18   +2.9685   +0.1745   +0.1411   +0.1607         -
+e80j22          0x407ffffe      23    24   +3.9580   +0.2326   +0.1909   +0.2158         -
+e80j6           0x407e0000       7     8   +1.3193   +0.0775   +0.0581   +0.0689         -
+f_0p5           0x3f000000       6     7   +1.1544   +0.0678   +0.0498   +0.0597         -
+f_1p5           0x3fc00000       8     2   +0.3298   +0.0194   +0.0664   +0.0458         -
+f_2             0x40000000       1     2   +0.3298   +0.0194   +0.0083   +0.0138         -
+f_4             0x40800000       2     2   +0.3298   +0.0194   +0.0166   +0.0184  +0.02981
+f_5             0x40a00000       3     3   +0.4947   +0.0291   +0.0249   +0.0275  +0.03397
+
+What each arm says E183-B (b, W per result bit) and E183-C (c, W per operand bit) read:
+  P      b +0.164915   c +0.000000
+  BLIND  b +0.009693   c +0.000000
+  OPER   b +0.000000   c +0.008301
+  BOTH   b +0.004604   c +0.004577
+  NONE   b +0.000000   c +0.000000
