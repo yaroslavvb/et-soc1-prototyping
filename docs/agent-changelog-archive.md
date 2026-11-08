@@ -4,6 +4,19 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-11-02 (Mon, week 45, Q136(w), corrections after verification)** — Section 5, rule 3: the table is
+  `836a4ab`, the public source of BL2 0.22.0, and aifoundry3's 0.22.0 is a non-public build (it answers command 74), so
+  for aifoundry3 it is the nearest public source with a known divergence (it said "the build all four cards report");
+  the checker's example allows `STATS_RESET`, the ruled form of the statistics reset (type 1, control 2), and says that
+  `dev_mngt_service -t SPST:…`/`MMST:…` are other forms; the checker also refuses an `ettelem` build outside the
+  reviewed ones, one it cannot see, and a subcommand that build lacks. The 28 October correction entry, the oldest of
+  16, moved verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelog-archive.md). *Why:* constraint — the
+  verifier of Q136(w): `--allow SET_STATS_RUN_CONTROL` passed `SPST:enable` (control 1), `SPST:reset` (control 7) and
+  `MMST` (type 2), an unknown subcommand or build was dropped or read as a reviewed one, and the 31 October E89 run
+  shows aifoundry3's build answering command 74; re-check: `python3 tools/claims-v3/test_dmcmd_audit.py` (the
+  verifier's probes are its TestForms, TestVariants and TestWrappers) and E89's README, "Joins and traps". And
+  preference — the owner's words of that morning, *"take more care for writing commands"*, and his rule of 10 October
+  2026 for agent instruction files, which keeps the newest 15 entries inline.
 - **2026-11-02 (Mon, week 45, Q136(w))** — Section 5 gains "Device commands: the owner's three rules of 2 November
   2026": no power cycles and nothing that risks one; read-only PMIC voltage-register reads allowed (a GET that writes a
   PMIC register, such as the firmware-revisions query, is not one); every command a run can send classified READ or

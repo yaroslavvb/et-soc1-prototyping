@@ -19,6 +19,7 @@ Q142(v2) and Q142(h) use the same list, as the page carried it at `825eac7600b3`
 Q142(h2), Q142(a2), E171–E177 and Q143's lanes use the same list, as the page carried it at `749d88fcc9fd`, its numbering unchanged; "rank N", `next` and "fault N" in them are the critics' that each entry names *(dated, Thu 5 Nov 2026, Q143(r)'s records)*.
 Q145(a), Q145(b), Q146, Q146(f), Q147(fw) and E178–E181 use the same list, as the page carried it at `ab6f0636b534`, its numbering unchanged; "rank N", `next` and "fault N" in them are the critics' that each entry names *(dated, Fri 6 Nov 2026, Q148(r)'s records)*.
 The card day's runs (E178, E180 and E181), Q146(g), Q148(c) and Q150 use the same list, as the page carried it at `7bd4e36068ba`, its numbering unchanged; "rank N", `next` and "fault N" in them are the critics' that each entry names *(dated, Fri 6 Nov 2026, Q149's records)*.
+Q153's lanes (M10-ACC with its amendment A1, E182 and E184) use the same list, as the page carried it at `ca0fe24f0251`, its numbering unchanged; "fault N" and `next` in them are the critics' that each entry names *(dated, Sat 7 Nov 2026, Q153's records)*.
 
 **Dated note, Tue 3 Nov 2026 (week 45):** the day's first card post, `1567153765390487573`, cited in E151, E152, E155, E156, E158,
 E159 and E160 and their data READMEs, has gone from #community-lab, deleted by someone else (not by the Intel's cleanup, which
@@ -28,7 +29,7 @@ cited as live. The evening's claims (E153, E154, E157, E161) are clauses of a se
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E181**. *(E171–E174 are registered for Q142's pool-8 card day and have not run; dated, Thu 5 Nov 2026.)* *(E171–E176 ran on 5 November, E176 refused at its start gate with nothing scored; E177 is reserved, not built, not run; E178 is Q146's, its registration under way; dated, Thu 5 Nov 2026, Q143(r)'s records.)* *(E178 is registered, amended and kitted, not run; E179 is assigned, not registered, not built, not run; E180 is registered and kitted, not run; E181, M11's second session, is kitted and read READY, not run; dated, Fri 6 Nov 2026, Q148(r)'s records.)* *(E178, E180 and E181 ran on 6 November, blind, and were scored and fixed; E179 stays assigned, not registered, not built, not run; dated, Fri 6 Nov 2026, Q149's records.)* E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E184**. *(E171–E174 are registered for Q142's pool-8 card day and have not run; dated, Thu 5 Nov 2026.)* *(E171–E176 ran on 5 November, E176 refused at its start gate with nothing scored; E177 is reserved, not built, not run; E178 is Q146's, its registration under way; dated, Thu 5 Nov 2026, Q143(r)'s records.)* *(E178 is registered, amended and kitted, not run; E179 is assigned, not registered, not built, not run; E180 is registered and kitted, not run; E181, M11's second session, is kitted and read READY, not run; dated, Fri 6 Nov 2026, Q148(r)'s records.)* *(E178, E180 and E181 ran on 6 November, blind, and were scored and fixed; E179 stays assigned, not registered, not built, not run; dated, Fri 6 Nov 2026, Q149's records.)* *(E182 and E184 are registered and kitted, not run; E183 is reserved for the one-number vector add's round 2, not built, not run; dated, Sat 7 Nov 2026, Q153's records.)* E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
@@ -60,7 +61,7 @@ the first launch): what a clock gap buys in E107's last three arms and a second 
 and E111's heat holds again (E133) on aifoundry2; the float B-lane gate (E127), which int8 multiplier (E130), the memory
 path's split (E132) and more single-bit prices (E134) on aifoundry3; and fp16's sign rest (E128), int8's no-issue excess
 with one A row (E129) and E95's real tiles (E131) on aifoundry1's card 1. E135, on 2 November at the owner's OK, is a
-GPU measured the same way: Horace He's kinds of numbers on two A100s rented on Modal, with no lab card. E136–E140 are Q137's of the afternoon of 2 November, run so that power and heat can be predicted: a large GEMM predicted first under aifoundry2's own governor (E136); fp16's sign rest on the matched design on aifoundry1's card 1 (E137); int8's B side on the minion rail (E138), the memory path's split with more passes (E139) and the blind test of the power-and-heat model M6 (E140) on aifoundry3. E141–E150 are Q138's of the evening of 2 November, run to settle the power model's open questions: blind pool 5 scored by the model M7 on aifoundry3 (E141), on aifoundry1's card 1 (E142) and under aifoundry2's own governor (E143); heat over minutes on aifoundry3 (E144) and on aifoundry2 (E144b, its second half); int8's B side on aifoundry1's card 1 (E145); a large GEMM's C stores under aifoundry2's governor (E146); single-bit prices at item 15's open positions on aifoundry3 (E147); int8's no-issue excess with two A rows on aifoundry1's card 1 (E148); and the model checked on GPUs rented on Modal, with no lab card: A100s (E149) and A10Gs (E150). E151–E162 are Q139's of 3 November, run on Q138's final critic's open list: on aifoundry3 int8's B side with its rail filter registered first (E151), the float B-lane gate's dose ladder (E152), blind pool 6 scored by the model M8 (E153) and heat over minutes predicted from the bits (E154); on aifoundry1's card 1 int8's no-issue floor by shape (E155), the memory path's encoded term on two new images (E156) and blind pool 6 (E157); under aifoundry2's own governor the L3's retention by reuse distance (E158), a large GEMM's sustained power and clock predicted blind (E159), blind pool 6 in bursts (E160) and heat over minutes from the bits (E161); and, on A100s rented on Modal with no lab card, which operand pairing a GPU pays for (E162). E163–E169 are reserved for Q140's card half (4 November): blind pool 7 on aifoundry3 (E163), on aifoundry1's card 1 (E164) and in bursts under aifoundry2's own governor (E165), the heat replicates on aifoundry3 (E166) and aifoundry2 (E167), and a large GEMM's sustained holds (E168) and the stride shapes (E169) on aifoundry2; each has its predictions frozen at the desk, and none has run: they wait on the owner's word. *(dated, Wed 4 Nov 2026, the card half's records, Q141(i): they ran that afternoon, 14:11–17:18 PST, on the owner's go of about 13:55 PST, with E170, blind pool 7 on aifoundry1's card 0 under its own governor, back in use at his word, beside them; their entries are below)* E171–E174 are registered for Q142's pool-8 card day (5 November): blind pool 8 at 600 MHz on aifoundry3 (E171) and on aifoundry1's card 1 (E172), in bursts under aifoundry2's own governor (E173), and in governed bursts on aifoundry1's card 0 after card 1 (E174); each has its registration, scorer and kit committed and its predictions frozen at the desk before any claim, and none has run: they wait on the owner's word *(dated, Thu 5 Nov 2026, Q142's pool-8 records)*. *(dated, Thu 5 Nov 2026, Q143(r)'s records: they ran that day, 11:38–13:12 PST, on the owner's go of about 11:15 PST, 175.0 card-minutes; their entries are below)* E175–E178 are Q143's and Q146's of 5 November: aifoundry2's governed line, run (E175); M11's first heat-over-minutes session on aifoundry3, run and refused at its start gate, nothing scored (E176); M11's holds on aifoundry2, reserved, optional, not built, not run (E177); and one-number matrices, Q146's, being registered, not run (E178) *(dated, Thu 5 Nov 2026, Q143(r)'s records)*. *(dated, Fri 6 Nov 2026, Q148(r)'s records: E178 is registered (`48171930`), amended by A1 and A2 and kitted with its kit note 1, not run)* E179–E181 are Q147's, Q146(f)'s and Q145(a)'s of 5–6 November: the public power viruses on a 600 MHz card, number assigned, not registered, not built, not run (E179); the one-number vector add on aifoundry3, registered, amended by A1 and kitted (kit v2), not run (E180); and M11's second heat-over-minutes session on aifoundry3, carrying M11's A6–A9, kitted with its kit note 1 and read READY, not run (E181) *(dated, Fri 6 Nov 2026, Q148(r)'s records)*. *(dated, Fri 6 Nov 2026, Q149's records: E181, E178 and E180 ran that day on aifoundry3 card 0, in that order (09:49–11:04, 11:33–12:18 and 12:54–13:36 PST, 162.1 card-minutes), on the owner's go of about 09:20 PST; E179 stays assigned, not registered, not built, not run; the runs' results are in their entries below)*
+GPU measured the same way: Horace He's kinds of numbers on two A100s rented on Modal, with no lab card. E136–E140 are Q137's of the afternoon of 2 November, run so that power and heat can be predicted: a large GEMM predicted first under aifoundry2's own governor (E136); fp16's sign rest on the matched design on aifoundry1's card 1 (E137); int8's B side on the minion rail (E138), the memory path's split with more passes (E139) and the blind test of the power-and-heat model M6 (E140) on aifoundry3. E141–E150 are Q138's of the evening of 2 November, run to settle the power model's open questions: blind pool 5 scored by the model M7 on aifoundry3 (E141), on aifoundry1's card 1 (E142) and under aifoundry2's own governor (E143); heat over minutes on aifoundry3 (E144) and on aifoundry2 (E144b, its second half); int8's B side on aifoundry1's card 1 (E145); a large GEMM's C stores under aifoundry2's governor (E146); single-bit prices at item 15's open positions on aifoundry3 (E147); int8's no-issue excess with two A rows on aifoundry1's card 1 (E148); and the model checked on GPUs rented on Modal, with no lab card: A100s (E149) and A10Gs (E150). E151–E162 are Q139's of 3 November, run on Q138's final critic's open list: on aifoundry3 int8's B side with its rail filter registered first (E151), the float B-lane gate's dose ladder (E152), blind pool 6 scored by the model M8 (E153) and heat over minutes predicted from the bits (E154); on aifoundry1's card 1 int8's no-issue floor by shape (E155), the memory path's encoded term on two new images (E156) and blind pool 6 (E157); under aifoundry2's own governor the L3's retention by reuse distance (E158), a large GEMM's sustained power and clock predicted blind (E159), blind pool 6 in bursts (E160) and heat over minutes from the bits (E161); and, on A100s rented on Modal with no lab card, which operand pairing a GPU pays for (E162). E163–E169 are reserved for Q140's card half (4 November): blind pool 7 on aifoundry3 (E163), on aifoundry1's card 1 (E164) and in bursts under aifoundry2's own governor (E165), the heat replicates on aifoundry3 (E166) and aifoundry2 (E167), and a large GEMM's sustained holds (E168) and the stride shapes (E169) on aifoundry2; each has its predictions frozen at the desk, and none has run: they wait on the owner's word. *(dated, Wed 4 Nov 2026, the card half's records, Q141(i): they ran that afternoon, 14:11–17:18 PST, on the owner's go of about 13:55 PST, with E170, blind pool 7 on aifoundry1's card 0 under its own governor, back in use at his word, beside them; their entries are below)* E171–E174 are registered for Q142's pool-8 card day (5 November): blind pool 8 at 600 MHz on aifoundry3 (E171) and on aifoundry1's card 1 (E172), in bursts under aifoundry2's own governor (E173), and in governed bursts on aifoundry1's card 0 after card 1 (E174); each has its registration, scorer and kit committed and its predictions frozen at the desk before any claim, and none has run: they wait on the owner's word *(dated, Thu 5 Nov 2026, Q142's pool-8 records)*. *(dated, Thu 5 Nov 2026, Q143(r)'s records: they ran that day, 11:38–13:12 PST, on the owner's go of about 11:15 PST, 175.0 card-minutes; their entries are below)* E175–E178 are Q143's and Q146's of 5 November: aifoundry2's governed line, run (E175); M11's first heat-over-minutes session on aifoundry3, run and refused at its start gate, nothing scored (E176); M11's holds on aifoundry2, reserved, optional, not built, not run (E177); and one-number matrices, Q146's, being registered, not run (E178) *(dated, Thu 5 Nov 2026, Q143(r)'s records)*. *(dated, Fri 6 Nov 2026, Q148(r)'s records: E178 is registered (`48171930`), amended by A1 and A2 and kitted with its kit note 1, not run)* E179–E181 are Q147's, Q146(f)'s and Q145(a)'s of 5–6 November: the public power viruses on a 600 MHz card, number assigned, not registered, not built, not run (E179); the one-number vector add on aifoundry3, registered, amended by A1 and kitted (kit v2), not run (E180); and M11's second heat-over-minutes session on aifoundry3, carrying M11's A6–A9, kitted with its kit note 1 and read READY, not run (E181) *(dated, Fri 6 Nov 2026, Q148(r)'s records)*. *(dated, Fri 6 Nov 2026, Q149's records: E181, E178 and E180 ran that day on aifoundry3 card 0, in that order (09:49–11:04, 11:33–12:18 and 12:54–13:36 PST, 162.1 card-minutes), on the owner's go of about 09:20 PST; E179 stays assigned, not registered, not built, not run; the runs' results are in their entries below)* E182–E184 are Q153's of 7 November: where a held 1-bit costs power, one-number kinds read as A B B A trains launch by launch and in E178's kinds passes on aifoundry3 card 0, registered, kitted and given dated notes 1, not run (E182); the one-number vector add's round 2, reserved, not built, not run (E183); and the board meter read against steps of known size on aifoundry3 card 0, with card 1's SRAM-rail statistic on aifoundry1's card 1, registered, amended by A1 and A2 and kitted (kit v2), not run (E184); both wait on the owner's go *(dated, Sat 7 Nov 2026, Q153's records)*.
 
 Card work up to E19, and E33–E34, is on **aifoundry2**, one ET-SoC-1 PCIe card; from E20 each entry names its card
 (aifoundry2, aifoundry3 or both; E35–E46, E48 and E50 also aifoundry1's card 1). Firmware behaviour is read from the et-platform
@@ -8289,6 +8290,162 @@ anatomy's op rate, an issue rate, the governor model, the card-to-card gap or cl
 manual's gates G0 and G1 (G2 FAIL, G3 UNKNOWN); not attempted. Its verifier held with fixes (1 major: the open RTL's int8 op event
 `TIMA_OPS` is zero-gated; 7 minor), answered by its dated note 2 (these records), with the patch's hazards beside `patches/README.md`.
 
+## E182 — where a held 1-bit costs power: one-number kinds whose A and B popcounts differ, read as A B B A trains launch by launch and in E178's kinds passes (Q153; registered, kitted, dated notes 1; aifoundry3 card 0 at 600 MHz pinned) — not run
+
+**Asked (Q146, a second time, and Q150):** which side's held 1-bits cost power in a one-number TensorFMA. E178 read his int8 pair, 5s
+against 4s, at +0.053 W [+0.022, +0.085], about 0.29 of M10's frozen +0.186 W, and could not say whether the held operand bits or the
+accumulator's flips set the order; its 13 int8 kinds had A's and B's bits nearly in step. **What it is:** in a one-number kind no operand
+bit changes inside a launch; what switches is the accumulator walking 0, p, 2p, …, its buses, and buses that return to zero between
+uses, so a held 1-bit can cost only where a bus returns to zero. **The 24 kinds, by a stated rule**
+([`make_e182_kinds.py`](../../tools/claims-v3/e182/make_e182_kinds.py)): int8 (1, 1), (−1, −1), (1, −1) and (−1, 1); for b in 15, 85
+and 127, (1, b), (b, 1), (−1, −b) and (−b, −1), where for odd factors −x = (~x) | 1, so popcount(−x) = 9 − popcount(x); int8 4s, 5s,
+(4, 5) and (5, 4); fp32 4.0s, 5.0s, and (1.0, 0x3FFFFFFF) both ways. Swaps and sign flips at one product keep the accumulator's walk and
+the A/B Hamming distance and move only where the held 1-bits sit. Six pairs run as **A B B A trains**, the two kinds alternated launch
+by launch inside one host process (a train is 64 processes of 13 launches in int8, 76 in fp32), and all 24 kinds run again in E178's
+kinds passes on E178's footing. **Registered** [`58b88850`](../../tools/claims-v3/e182/E182.md) (13:57:12 PST Sat 7 Nov, committed alone before any kit
+file; 33 files, `SHA256SUMS-e182-registration` 32). **Kitted** [`41865c18`](../../tools/claims-v3/e182/KIT.md) (14:29:57; 48 files,
+`SHA256SUMS-e182-kit` 79): a host-only change that alternates two kinds launch by launch (its desk test on a mock runtime 25 of 25, every
+train launch's C checked against its own tiles), the scorer self-tested on E178's committed data (12 of 12), `dmcmd_audit` GO on 32 send
+sites, the desk machine's dry pass 29 of 29, and the runbook's desk test with a stand-in for the box, 9 of 9. **Dated notes 1** for the
+registration and the kit, [`6c158cd2`](../../tools/claims-v3/e182/KIT.md.dated-note-1.md) (16:22:21; 26 files,
+`SHA256SUMS-e182-note1` 50), after a verifier that held both with fixes (2 major, 7 minor): the registered fallback, PASSES after a
+failed train-host build, now runs end to end through steps 6, 8, 9 and 11 v2; the train host is built only from its 8 pinned build
+inputs and `main.cpp`, which step 5 v2 sends to the box (the E174 class); the train runner's own stops are tested live at the desk (8 of
+8); the runbook's v2 desk test reads 19 of 19. No rule, forecast, threshold, statistic, power figure, plan, cap or stop changed. **Not run;
+0 card-minutes.**
+
+**The frozen forecasts** (registered, not measured; aifoundry3, W, the first kind minus the second; P is M10 frozen, P + ACC is M10 with
+M10-ACC's frozen term, E is E178's measured 2.7812 fJ a flip):
+
+| Train | Pair | P | P + ACC | E |
+|---|---|---:|---:|---:|
+| T1 | int8 5s − 4s (his pair) | +0.1862 | +0.1844 | +0.0701 |
+| T2 | int8 (A 1, B −1) − (A −1, B 1): A and B swap 1 against 8 bits a byte | +0.1099 | +0.1099 | +0.0383 |
+| T3 | int8 −1s − 1s: both sides go from 1 to 8 bits a byte | +0.1099 | +0.1099 | +0.0383 |
+| T4 | int8 (A 4, B 5) − (A 5, B 4): one bit a byte swapped | +0.0157 | +0.0157 | +0.0055 |
+| T5 | fp32 (A 1.0, B 0x3FFFFFFF) − (A 0x3FFFFFFF, B 1.0): 23 held bits swapped | 0 | 0 | 0 |
+| T6 | fp32 5.0s − 4.0s | +0.0099 | +0.0104 | +0.0017 |
+
+From T3 = 7 (β_A + β_B) and T2 = 7 (β_B − β_A), **every forecast says B-ONLY**: β_A 0 and β_B +0.01570 W a held bit a byte (P and
+P + ACC) or +0.00547 W (E). **A train's half-width is 0.0051 W** at the registered t statistic (int8 0.00513 over 32 units, fp32 0.00510),
+**0.0102 W** with E178's noise doubled (the registration's dated note 1; never ±0.0049, the z value). The split is read right as B-ONLY
+with power 0.95 at base noise and 0.92 with it doubled, A+B 1.00 and 1.00, A-ONLY 0.95 and 0.93, NEITHER 0.90 and 0.86. **E182-W-int8's
+verdict is its SIZE word against P (size_P)**; the scorer's `verdict` field carries size_E, arm E's reading, and every record quotes
+size_P. E182-R-int8's line 0.4421 has size 0.026, not 0.025. Blind when run: T2 and T5 for every forecast; T1, T4 and T6 for P only; T3
+for none; E182-W-int8 against E for 14 of its 20 kinds (dated note 1, section 2). **Planned:** FULL, the stop-path test, the smoke, the
+trains T4, T5, T3, T6, T2 and T1, then kinds passes 18220–18222 (18223 if it fits): about 83.4–93.0 card-minutes, cap 100, the day's
+post "for 2 h"; if the train host's first build fails, the registered fallback PASSES, about 31, cap 40, "for 1 h". E171's stops; every
+device command a read (the excepted statistics-reset site in `lib.sh` is never passed); its october-forecast-model section is empty.
+**The readiness critic** (Q153's, about 16:20–17:05 PST, every check re-run in its own clone): **READY WITH GAPS**, on the owner's go and
+a fresh lab approval for aifoundry3. (a) Step 6 v2 runs the train host's first, from-scratch build inside one bounded read of 60 s; an
+overrun exits 13, every re-run rebuilds from scratch, and the step never reaches the registered fallback, so the six trains, every
+primary rule, could be lost for the day; E180's box build took 4 s, so it will probably fit, but no desk case nears the bound (a kit
+note 2 advised before the go). (b) Note 1 had no adversarial verifier. Stated, not gaps: the train host's first real compile is on the
+box; the collector has never run end to end on a raw tree. **Kit note 2 and a verifier of notes 1 and 2 are under way at these records
+(Q154).** **Corrections, quoted as corrected** (the kit's note 1, section 4, and the verifier's nits): KIT.md's "73 files" includes the
+built host; its test runs were nine host runs, not seven short runs, and the runbook tests took 36 s, not about a minute; "every one
+READ" excepts the statistics-reset site in `lib.sh`, a write that is never sent; the committed dry listing's "the two hash lists (32 and
+)" was made before the kit's list existed; the float noise pools fp16 with fp32, and fp32 alone reads 0.03935 W over 172 quads, 3%
+higher, which moves nothing.
+**Report:** the kinds page (A25), section 11, item 6.
+
+## E183 — the one-number vector add's round 2 (Q153; reserved) — not built, not run
+
+Reserved by Q153 for the follow-up of E180, the one-number vector add, planned with E180-L's measured price, about 0.0097 W a result 1-bit,
+as its blind number. **Not built, not run:** no registration, forecast, rule, kit or scorer exists, and no `e183` path is in any ref.
+Never "failed".
+
+## E184 — the board meter read against steps of known size: a staircase of fadd.ps minions switched from zeros to random operands on aifoundry3, read A B B A inside one process, and card 1's SRAM-rail statistic in reset windows (Q153; registered, amended by A1 and A2, kitted with kit v2; aifoundry3 card 0 at 600 MHz pinned, and aifoundry1's card 1) — not run
+
+**Asked (Q150):** *"Are there more accurate ways of checking power draw? Maybe there are multiple sensors. I think there are per-shire
+power draw sensors. Also, allow the possibility that maybe there's something wrong with the sensors."* Q150 answered it post hoc and
+drafted a sensor-validation run; E184 is that run, registered. **Arm S**, aifoundry3 card 0 at 600 MHz pinned (TDP 0 W, nothing set):
+the energy catalogue's `fadd.ps` on both harts of every minion of the active shires, on a zeros base; a step switches n minions to random
+[0.5, 2) operands through a host-only change (`--schedule` and `--stop-file`; the patched `host/main.cpp` pinned by its sha256 and built
+on the box from a copy; the kernel unchanged), so the rate, the clocks and the issue never change. One quad is one host process under
+`timeout 10`: the settle, then A B B A or B A A B. Part L, the ladder at 32 shires: the null step n = 0 and n = 3–121, visited up, down
+and up (324 quads); part Cal (2); part P, at E178's int8 operating point (30.132 W; 240 quads); part C, a scan across the board current
+reading's code 1024 (32.78–34.46 W by the public PMIC conversion; 25 levels against n = 144; 300 quads): 870 quads in eleven passes. **Arm
+B**, aifoundry1's card 1 at 600 MHz, never card 0: the SRAM-rail statistic in 1 s reset windows (B1, with the statistics reset in pass
+18441 only), the SRAM rail's step response (B2), a cross-card set of 16 configurations read against September's aifoundry3 rows (B3),
+and a glitch census (B4). **Registered** [`c6417611`](../../tools/claims-v3/e184/E184.md) (11:27:45 PST Sat 7 Nov, committed alone
+before any kit file; 12 files, `SHA256SUMS-e184-registration` 11; the 467 operand images by their hashes). **Kitted** with dated
+amendment [A1](../../tools/claims-v3/e184/E184.md.dated-note-A1.md), [`65f844be`](../../tools/claims-v3/e184/KIT.md) (12:23:35; 45
+files, `SHA256SUMS-e184-kit` 44): E184-T read with E58's filter model, which reproduces E58 on its own data (the registered reader read
+E58's card-1 SRAM bursts at 0.625 s against 0.525 s); the scorer's self-test 14 of 14, two readers among it checked on committed data;
+the host change's desk test on a mock runtime; the desk machine's dry pass. **Amended** by
+[A2](../../tools/claims-v3/e184/E184.md.dated-note-A2.md) `a887fc74` (14:04:38, committed alone; 7 files, `SHA256SUMS-e184-a2` 6) and
+**kitted again** by [kit note 1](../../tools/claims-v3/e184/KIT.md.dated-note-1.md) with kit v2, `eab0c70e` (14:11:30; 46 files,
+`SHA256SUMS-e184-kit-note1` 45), after a verifier that held the registration and the kit with fixes (4 major, 9 minor). A2: E184-C read
+with an intercept, the scan's reference level set aside as its own null (A2-1, t* 3.004: one missing code at the reference reads SEEN in
+0.04–0.07 of sessions, against 0.52 under the registered statistic); the registered R governs E184-L and E184-P unless the part's own null
+reads OFFSET (A2-2); the readings are the board's response to the minion count, a LOW or HIGH names the meter only when the rail's own R
+reads LINEAR, and METER EXCLUDED is bounded to a static compression of `fadd.ps` steps (A2-3); the scorer's gates registered (A2-4); a
+refresh more than 0.5 W from its block's median set aside (A2-5); A1's reader off on one of E58's 12 card-1 bursts (A2-6); the smoke's
+16-shire band a gross check, so it no longer censors E184-P (A2-7); three records corrected (A2-8). Kit v2: the pass and session gates
+before the scorer, every hold process gated, a partial pass going on, and the runbook ported onto k6's drivers with every session file
+named by its start time and an exact copy-back. Every forecast stands. Checks: the scorer's self-test v2 17 of 17, the runbook's desk
+test 27 of 27, the dry pass v2 38 of 38, `dmcmd_audit` GO for each arm. **Not run; 0 card-minutes.**
+
+**The frozen forecasts** (registered, not measured; E184.md, section 0, with A2):
+
+| Rule | What is read | Forecast | Power, base noise / twice it |
+|---|---|---|---|
+| E184-L | the board's reading of small known steps (3–19 minions, +0.025 to +0.157 W) over large ones (30–121 minions, +0.25 to +1.0 W), at a 35.5 W base | LINEAR: the slope ratio inside 1 ± 0.10 | LINEAR 0.99 / 0.08 as registered, 0.953 at base noise under A2-2; a 20% shortfall reads LOW 1.00 / 0.98 |
+| E184-P | the same at E178's int8 operating point (30.13 W) | LINEAR inside 1 ± 0.12, and METER EXCLUDED: the board cannot read a small step at under half its size | LINEAR 1.00 / 0.34; EXCLUDED 1.00 / 1.00 (0.00 if the meter read E178's 0.29) |
+| E184-C | a step where the 12-bit current reading crosses code 1024 (32.8–34.5 W) | NONE SEEN | a one-code step SEEN 0.93–0.99 at base noise under A2-1 (0.933 at the 12.0 V carry) |
+| E184-N and E184-J | the null step; a jump between ladder levels | NULL within ±0.020 W; NONE SEEN | NULL 0.95 / 0.02; a 0.05 W jump SEEN 0.79 / 0.20 |
+| E184-M | card 1's SRAM-rail minimum and maximum over its average in 1 s reset windows, at idle and nine loads | the two-phase reading SUPPORTED: min/avg about 0.63 and max/avg about 1.59 at every load | SUPPORTED 1.00 if the ratios are constant |
+| E184-T | the SRAM rail's step response | tau inside 0.44–0.64 s, rise and fall | |
+
+**The phase-shedding question** has a plain answer before any card: **no stock READ returns the regulators' phase-shedding setting** (the
+device-management table at et-platform `836a4ab60`; the service processor's PMIC register map, 0x01–0x33, has no phase register; the raw
+PMIC read is reached by no device-management command; the public PMIC firmware sets its phase mode at start-up and never reads or sets
+shedding), so the null steps, the zeros base inside every quad and the ladder's up-and-down visits guard against it; never that the
+setting was read. **Planned:** arm S about 125 card-minutes (870 quads at about 8.3 s), cap 135, the day's post "for 2.5 h"; arm B about
+18, cap 25, "for 1 h". Device commands: arm S `dmcmd_audit` GO on 32 sites, every one a read; arm B GO on 34, the statistics reset in pass
+18441 its only write (the owner's ruling of 31 October 2026); the runbook GO 23. The stops: aifoundry3's board at or above 65 W, or its
+minshire 0 at or above 70 °C, on a live sample; card 1's board at or above 66 W, or any minshire at or above 72 °C. **The readiness
+critic: READY WITH GAPS**, on the owner's go and fresh lab approvals for aifoundry3 and aifoundry1. (a) A2 and kit note 1 (53 files) had
+no adversarial verifier. (b) Both arms' patched hosts are first compiles on their boxes; a failed build skips that arm for the day. (c)
+Arm B runs only if aifoundry1 has not rebooted since E82's firmware read (31 October 2026, 13:45:24 PDT): the look and the launch guard
+stop it otherwise (IDENTITY STOP), with no firmware query. Stated limits: A2-1 costs E184-C power in the middle of the carry band; a LOW or
+HIGH will most likely read "not separated"; METER EXCLUDED excludes a static compression only; B3 is read against September's rows. **A
+verifier of A2 and kit note 1 is under way at these records (Q154).** **Corrections, quoted as corrected** (A2-8 and its fix pass): PREREG
+`7d4fabad` is a sha256, and its commit is `5538de2a`; E184.md's inventory was read at 11:17 PST, not "about 11:30"; Q150's draft
+registration moves from Used to Checked in its Builds on block; the line-3 comment of `lib.sh` on aifoundry3's tree is stale; "E178's int8
+pair is the card's answer" holds only against a static compression (A2-3).
+**Report:** the kinds page (A25), section 11, item 6.
+
+**Q153(m10acc), M10's accumulator-toggle term, beside the register** *(dated, Sat 7 Nov 2026, Q153's records)* (Sat 7 Nov about
+10:40–13:00 PST; desk only: no card, no device command, no lab box; the traces ran on a desk Mac; new files only). **What it is:**
+M10-ACC adds to M10, for every tile, a price per toggle of the accumulator register over the whole launch, counted exactly by stepping the
+lab's committed accumulator arithmetic (`rtl-sim/fma_toggle_v2/accum.c`, unchanged) through every op of a launch of the kit's own size,
+and, for floats, a price per partial-product row of A beyond A = 1.0's (the open RTL recodes A) times each toggled significand bit of B.
+**Registered** [`b5586759`](../../tools/claims-v3/m10-acc/REGISTRATION.md) (10:56:49 PST, committed alone, before its code `b48cf669`,
+11:02:22, and before any trace); amended by [A1](../../tools/claims-v3/m10-acc/REGISTRATION.md.dated-note-A1.md) `ceb643ca` (11:20:21: a
+second reading, the accumulator words a lane takes in from one micro-op to the next, its form chosen after one look at the primary's
+result and before its own first output); fitted and frozen [`d87bb417`](../reports/data/2026-11-07-q153-m10acc/README.md) (11:42:30); its
+verifier held it with fixes (2 minor, 3 nits), answered by
+[dated note 1](../reports/data/2026-11-07-q153-m10acc/README.md.dated-note-1.md) `c0c1f39a` (12:57:55), no number, rule or verdict
+changed. **Held out, leave one run out over 1,149 committed rows in 39 runs** (M10's 959; pool 8's 40 kinds on E171 and E172; five
+single-bit lists' 70 steps; E178's 40 kinds): floats 0.1873 → 0.1886 W rms (d +0.0013 W [−0.0004, +0.0036]), int8 0.1729 → 0.1748 W
+(d +0.0018 W [+0.0008, +0.0029]); R1–R3 fail in both families, so **the term does not enter M10**, nor does A1's (floats d +0.0008 W);
+M10 stays as frozen, and both are reported arms for the next blind pool and for E182. The frozen prices: floats τ_acc +0.124 fJ a toggle
+[−3.31, +3.55] and τ_bth +0.065 fJ [−0.14, +0.26]; int8 τ_acc −0.084 fJ [−1.00, +0.83]. **Post hoc** (pool 8 and E178 were read before
+the registration): pool 8's class S stays at 0.273 and 0.238 W rms; E178's 13 int8 levels keep their bias (−0.160 → −0.163 W); his int8
+pair reads P + term +0.188 W against +0.053 W measured. Why, post hoc: the single-bit lists' measured steps follow the step of the
+register's toggles at r −0.03, the lane's accumulator words at r +0.89, and M10's own bench step at r +0.99, so M10 already prices that
+path. **Lines for the records, quoted from its dated note 1:** *"F-P9, read in P8-M1's form (no resolution floor): floats BETTER on card 1
+(d −0.0044 W [−0.0082, −0.0013]) and NOT RESOLVED on aifoundry3; class S WORSE on both cards (+0.0011 and +0.0005 W); int8 NOT RESOLVED on
+both. Neither term entered, so these are readings of reported arms, not rule verdicts."*; *"M10-ACC fails its entry rule in both
+families; its one held-out gain is on pool 8's 50 float rows, 0.1940 → 0.1906 W (post hoc)."*; *"R1-R3 would let a float accumulator
+price in with chance about 0.6 at +5.7 fJ a toggle, and 0.26 at the registered interval's upper end (+3.55 fJ); 'does not enter' bounds
+the price, it does not set it to 0. R3 makes the floats' rule blind to a Booth price."* Never "P9-ACC is forecast NOT RESOLVED", and never
+"carries nothing M10 does not already price" without the clause on pool 8's float rows. For E182 the term moves the frozen forecasts by at
+most 0.0017 W and cannot tell A from B: in one-number int8 kinds it depends on the product of the bytes only. **Report:** the kinds page
+(A25), section 11, item 6.
+
 **Lane lessons from E78–E83, recorded for the next registration.** (1) A heat column read from a 2 s window over a
 whole-degree die reading resolves a kind only above about 12 W of switching on these cards: register a longer window,
 or a launch away from a step, before quoting heat for low-power kinds. (2) All six card lanes looked at
@@ -8554,3 +8711,5 @@ alone (E174's D1). (120) A plan read lags a saved edit by up to about 90 s: take
 
 **Lane lessons from E178–E181 and the desk lanes of Q145–Q147, recorded for the next registration.** (121) Quote every rule a post hoc term moves, better and worse: the dip term turns three rules from fail to pass and makes all three of E175's worse. (122) Read an event's timing at its sampler's resolution: a climb that ends just past a window edge is seen one 0.1 s sample later. (123) Name the interpreter of a byte-for-byte rebuild: Python 3.12 changed how `sum()` adds floats. (124) Pair figures on one footing: 55.8 pJ at the board is net of the rail's own heating, so its minion-rail partner is 44.4 pJ, never the raw 46.4. (125) Build a box list from every file the runner and its imports read, and test it on a tree built from the sync list alone (E176's `reduce_e89.py`). (126) A switch that waits on a refit waits on a refit frozen for a pool, with its band, not on a post hoc one (FL3). (127) In public text a model kept elsewhere goes by its public name only, its numbers only after its freeze line (october-forecast-model).
 (128) A leak correction read on whole-degree die readings can make a per-run order term (E178's int8 couple, +0.066 W): keep the alternating order, and read the footing from a sub-degree sensor when the runner samples one. (129) When a model's figure lies inside a measured interval that also holds 0, say both: the card cannot tell the model from no difference (E180-H). (130) Pin the readers' interpreter: `statistics.stdev`'s last bit and `sum()` differ between Python 3.9 and 3.12 or later (E180's arm, E178's rail reader). (131) Quote a run's lines for the records from its dated notes, never from the README sentence they correct.
+
+**Lane lessons from Q153's registrations (M10-ACC, E182 and E184), recorded for the next registration.** (132) State a rule's power before any data, and let a class rule read only a class the feature exercises: M10-ACC's float rule let a price in with chance 0.26 at its interval's upper end, and its class rule was blind to a Booth price (its dated note 1, N2). (133) Build on a box as a detached job, or under a bound that covers the build, never inside a bounded read: E182's step 6 v2 builds inside a 60 s read, and an overrun rebuilds from scratch without reaching the fallback (E180's and E184's builds are detached jobs). (134) When two kits share a box on one day, write down their order and guard every box step against a live session of ours: E182's step 6 has no such guard. (135) Pin each hash list's count from the file that states it, never from the list's own line count (E182's step 2 v2; E184's step 2 pins 11, 44, 6 and 45). (136) Look before the post in every runbook: a post before the look claims a card that may be held. (137) A desk stand-in for the remote shell pipes the script into `bash -s`, never a seekable file: the desk machine's bash 3.2 re-reads part of a script after a background fork (E182's and E184's desk tests; E180's runbook test keeps the latent case). (138) A forecast's half-width uses the rule's own statistic: E182's trains read ±0.0051 W at t(n − 1), not the z value's ±0.0049.

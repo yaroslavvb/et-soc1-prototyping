@@ -4450,6 +4450,107 @@ than the stock-take's 113 of 163, not a correction).
 - **Not yet done:** E180's 13 low bursts against the meter's refresh (Q150's synthesis could not read E180's data); a verifier of these records; M11's session 3 amendment and kit v5. *(dated, Fri 6 Nov 2026, after Q149's records' verifier: that verifier read these records at about 18:00–18:34 PST and held them with fixes, seven minor faults, each corrected by a dated clause marked "after Q149's records' verifier")*
 - **Card time:** 162.1 card-minutes on aifoundry3 card 0, nothing on aifoundry1 or aifoundry2; Q150 used none.
 
+## Q153: M10's accumulator-toggle term (held out; it does not enter), and E182 and E184 registered and kitted, none run (Sat 7 Nov 2026, week 45, from about 10:35 to 17:05 PST; desk only)
+
+No card ran in this round, so **nothing here is blind**. Each claim is labelled **registered** (committed before any datum of its run, or,
+for the term, before its fit), **held out** (the term's fit, leave one run out) or **post hoc** (read on data that existed first). No
+committed verdict changes; M10 and every frozen file stay as committed. Short names: `MA/` is `tools/claims-v3/m10-acc/`, `ACC/`
+`docs/reports/data/2026-11-07-q153-m10acc/`, `X2/` `tools/claims-v3/e182/` and `X4/` `tools/claims-v3/e184/`. 🛑 **To carry from here:**
+(99) **M10-ACC does not enter M10**, in either family, held out and never blind: *"M10-ACC fails its entry rule in both families; its one
+held-out gain is on pool 8's 50 float rows, 0.1940 → 0.1906 W (post hoc)."*; never "carries nothing M10 does not already price" without
+that clause; (100) **the test bounds the accumulator's price, it does not set it to 0**: *"R1-R3 would let a float accumulator price in
+with chance about 0.6 at +5.7 fJ a toggle, and 0.26 at the registered interval's upper end (+3.55 fJ); 'does not enter' bounds the price,
+it does not set it to 0. R3 makes the floats' rule blind to a Booth price."*; (101) **F-P9 in P8-M1's words**: floats BETTER on card 1
+(d −0.0044 W [−0.0082, −0.0013]) and NOT RESOLVED on aifoundry3, class S WORSE on both cards (+0.0011 and +0.0005 W), int8 NOT RESOLVED
+on both, readings of reported arms, not rule verdicts; never "P9-ACC is forecast NOT RESOLVED"; (102) **a train's half-width is 0.0051 W**
+(doubled, 0.0102–0.0103 W), never ±0.0049; (103) **E182-W-int8's verdict is size_P**, and size_E is arm E's reading, never the scorer's
+`verdict` field; (104) **"E178's int8 pair is the card's answer" only "against a static compression"** (E184's A2-3); (105) **no stock READ
+returns the regulators' phase-shedding setting**, never that it was read; (106) **E184-C reads with A2-1's intercept** (t* 3.004); (107)
+**E182 and E184 are registered and kitted, not run, and E183 is reserved, not built**: every figure of E182 and E184 is a forecast or a
+design figure, and E183 never "failed".
+
+### Registered, before any datum of its run
+
+| What | Registered | Kind | Verify at |
+|---|---|---|---|
+| **M10-ACC**, M10's accumulator-toggle term | M10's D plus s × c × rate × (τ_acc × x_acc + τ_bth × x_bth): x_acc the accumulator register's Hamming toggles per op over the launch, exact (`accum.c` stepped through every op at each kit's median launch size); x_bth, floats only, A's non-zero radix-4 Booth digits beyond A = 1.0's times B's toggled significand bits; OLS through the origin, leave one run out, the jackknife over runs; the entry rule R1 (d ≤ −0.005 W, its interval below 0), R2 (d < 0 on each card) and R3 (the S class no worse) (`b5586759`, code `b48cf669`); A1, x_lane, the accumulator words a lane takes in from one micro-op to the next, its form chosen after one look at the primary's result (`ceb643ca`) | P (registered) | `MA/REGISTRATION.md`, its dated amendment A1 and its dated note 1 |
+| **E182**, where a held 1-bit costs power | 24 kinds; six A B B A trains and E178's kinds passes; every forecast B-ONLY (β_A 0; β_B +0.01570 W a held bit a byte under P and P + ACC, +0.00547 W under E); T1 +0.1862 / +0.1844 / +0.0701 W, T2 = T3 +0.1099 / +0.1099 / +0.0383, T4 +0.0157 / +0.0157 / +0.0055, T5 0, T6 +0.0099 / +0.0104 / +0.0017 (P / P + ACC / E); a train's half-width 0.0051 W (0.0102 doubled); the split read right with power 0.86–1.00; FULL about 83.4–93.0 card-minutes, cap 100; PASSES about 31, cap 40 (`58b88850`, kit `41865c18`, notes 1 `6c158cd2`) | P (registered) | `X2/E182.md` and its dated note 1, `X2/KIT.md` and its dated note 1 |
+| **E184**, the board meter against steps of known size | E184-L LINEAR (1 ± 0.10); E184-P LINEAR (1 ± 0.12) and METER EXCLUDED; E184-C NONE SEEN; E184-N NULL (±0.020 W); E184-J NONE SEEN; E184-M the two-phase reading SUPPORTED (min/avg 0.628, max/avg 1.589); E184-T tau 0.44–0.64 s; A2-1 to A2-7; arm S about 125 card-minutes, cap 135; arm B about 18, cap 25 (`c6417611`, the kit with A1 `65f844be`, A2 `a887fc74`, kit note 1 `eab0c70e`) | P (registered) | `X4/E184.md` and its dated amendments A1 and A2, `X4/KIT.md` and its dated note 1 |
+
+### Held out: M10-ACC on 1,149 committed rows, leave one run out (`ACC/fit-m10acc.json`, `ACC/fit-output.txt`)
+
+| Rows | n | M10 rms | M10-ACC rms | d, W (95%) | The rule |
+|---|---:|---:|---:|---|---|
+| floats, all (39 runs) | 884 | 0.1873 W | 0.1886 W | +0.0013 [−0.0004, +0.0036] | R1, R2 and R3 fail: does not enter |
+| floats, aifoundry3 / card 1 | 515 / 369 | 0.1877 / 0.1866 | 0.1887 / 0.1884 | +0.0010 / +0.0018 | |
+| floats, the S class (M10's 26, pool 8's 16) | 42 | 0.2425 | 0.2428 | +0.0004 | |
+| int8, all (24 runs) | 265 | 0.1729 | 0.1748 | +0.0018 [+0.0008, +0.0029] | R1 and R2 fail: does not enter |
+
+The frozen prices (`ACC/m10acc.json`, jackknife 95%): floats τ_acc +0.124 fJ a toggle [−3.31, +3.55] and τ_bth +0.065 fJ [−0.14,
++0.26]; int8 τ_acc −0.084 fJ [−1.00, +0.83]. A1's lane reading (`ACC/m10acc-a1.json`): floats τ_L −0.278 fJ [−1.07, +0.52], d +0.0008 W,
+its S class +0.0071 W; int8 τ_L +0.180 fJ [−0.17, +0.53], d +0.0007 W; it does not enter either.
+
+### Post hoc
+
+- **M10-ACC** (`ACC/posthoc-m10acc.txt`, `ACC/README.md.dated-note-1.md`; pool 8 and E178 were read before the registration): pool 8's
+  class S 0.273 → 0.274 W rms on aifoundry3 and 0.238 → 0.239 W on card 1 (term S had 0.357 and 0.323); E178's 13 int8 levels, D − P,
+  0.184 (bias −0.160) → 0.187 (−0.163) W; his int8 pair, 5s − 4s, P + term +0.188 W against +0.053 W measured. Why: the single-bit lists'
+  measured steps follow the step of x_acc at r −0.03, of A1's x_lane at r +0.89, and M10's own bench step at r +0.99, so M10 already
+  prices that path. Note 1's N2, design figures that decide nothing: R1 first holds at +5.7 fJ for floats and +2.1 fJ for int8; at τ_acc's
+  upper end, +3.553 fJ, the term would add 0.011 W more to the S class than to the other whole float tiles, against that class's excess of
+  +0.104 W. N3: rows (a) are M10's leave-one-kind-out errors, and M10 is not refitted inside the term's folds; any leak favours the term,
+  which fails anyway. N4: E67's launch size moves τ_acc only between +0.1235 and +0.1242 fJ. For E182 the term moves the frozen forecasts
+  by at most 0.0017 W and cannot tell A from B (in one-number int8 kinds it depends on the product of the bytes only).
+- **E182's inputs** (`X2/E182.md`, section 9): E178's levels (arm E's line), E178's telemetry (the trains' noise, the quad sd 0.03485 W
+  int8 and 0.03804 W floats), E178's run times (the card-minutes), Q150's quad scatter, E178's measured pairs; note 1's sections 4 and 6
+  (the start band, read from E178's committed passes; the noise split, fp32 0.03935 W over 172 quads and fp16 0.03640 W over 132).
+- **E184's inputs** (`X4/E184.md`, section 8, and A2): E180's noise and anchors, the energy catalogue's rows and shares, E178's operating
+  point, September's reset windows, E58's filters, E172's glitch rate, the heat and leakage laws' product, Q150's figures; A2-5's dip rate
+  (5 of E180's 2,649 refreshes set aside) and A2-6. Public source, no measurement: the PMIC and service-processor firmware's conversion,
+  averaging, register map and start-up.
+
+### Labels, run by run (the readiness critic's)
+
+- **M10-ACC:** held out, the fit; post hoc, pool 8, E178, A1's choice, the why-readings and note 1's N2–N4; registered, N1's verdict
+  words, the registered form applied to the registered forecast; a correction, the note's fifth section (the by-A-word table's
+  citation is term S's data note 1, section 2); blind, nothing.
+- **E182:** registered, every forecast, rule, power figure and the plan, and note 1's readings; post hoc, E178's levels, telemetry and
+  run times, Q150's quad scatter, note 1's sections 4 and 6; blind, nothing yet. When it runs: T2 and T5 blind for every forecast, T1, T4
+  and T6 for P only, T3 for none; E182-W-int8 against E blind for 14 of its 20 kinds.
+- **E184:** registered, the forecasts and A2-1 to A2-7; post hoc, E180's noise and anchors, the catalogue, E178's operating point,
+  September's reset windows, E58, E172, A2-5's dip rate and A2-6; public source, the PMIC and service-processor firmware facts; blind,
+  nothing yet.
+
+### The readiness critic's new findings (Q153's critic, about 16:20–17:05 PST)
+
+- **E182's step 6 v2** builds the train host from scratch inside one bounded read of 60 s, though the script gives the build 500 s and
+  E180's runbook builds as a detached job; an overrun exits 13, every re-run rebuilds, and the registered fallback is never reached
+  (minor; a kit note 2 advised before the go).
+- **The shared box:** no kit says how E182 and E184's arm S share aifoundry3 on one day, and E182's step 6 build has no guard against a
+  live session of ours (minor). The order: E182, its step 11 copy-back, then E184 S's look; never E182's step 6 while a session of ours
+  runs.
+- **E182's step 2 v2** pins only the registration list's count (32); the kit's 79 and note 1's 50 are checked against the lists' own line
+  counts (a nit): run it with `E182_KIT_N=79 E182_NOTE1_N=50`.
+- **Both kits list the day's post before the look** (a nit): look first, then post.
+- From E184's fix pass: the line-3 comment of `lib.sh` on aifoundry3's tree is stale, and E180's runbook desk test feeds `bash -s` a
+  seekable file, a latent fault.
+
+### Disclosures
+
+- **Process:** the term's code commit `b48cf669` went in with its public-text scan unread (a pipe masked the scan's exit status); its 16
+  hits, checked after, are the variable name for the tree's top directory, as in M10's committed fit. Several datelines are estimates
+  written before their commits: the term's registration says "about 10:55–11:25" (committed 10:56:49); E184.md's inventory read "about
+  11:30" (truly 11:17, A2-8); E184's KIT.md "about 11:30–12:50" and A1 "about 12:30" (the kit 12:23:35); A2 "about 13:50–14:10"
+  (14:04:38); E184's kit note 1 "about 13:20–14:15" (14:11:30); E182's two notes 1 "about 16:00–16:40" and "15:35–16:45" (16:22:21).
+  Some sub-second Python calls ran outside the round's local slot (E182's lane and its fix pass), and a stray file list in the system's
+  temporary directory was removed at once by its literal path. The term's fix pass's first run took 244 s on one core. `6c158cd2`'s push
+  retried once after an HTTP/2 framing error. E184's fix pass read the round's own run log once, read only, to date its inventory read.
+  The lab's privacy table is absent on the desk machine, so each scan used the lab's fixed list and the round's own patterns. The
+  readiness critic ran two local jobs at once for about 2 s, against one job at a time.
+- **Not yet done:** E182's kit note 2 and the verifiers of E182's notes 1 and 2 and of E184's A2 and kit note 1 (Q154, under way at these
+  records); a verifier of these records; the card day for E182 and E184, on the owner's go.
+- **Card time:** none in Q153.
+
 ## Ridge points (derived; no card time)
 
 Peak compute divided by each level's measured bandwidth, at 600 MHz on 1,024 minions. Kind `D`: arithmetic on
