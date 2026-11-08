@@ -8336,7 +8336,7 @@ for none; E182-W-int8 against E for 14 of its 20 kinds (dated note 1, section 2)
 trains T4, T5, T3, T6, T2 and T1, then kinds passes 18220–18222 (18223 if it fits): about 83.4–93.0 card-minutes, cap 100, the day's
 post "for 2 h"; if the train host's first build fails, the registered fallback PASSES, about 31, cap 40, "for 1 h". E171's stops; every
 device command a read (the excepted statistics-reset site in `lib.sh` is never passed); its october-forecast-model section is empty.
-**The readiness critic** (Q153's, about 16:20–17:05 PST, every check re-run in its own clone): **READY WITH GAPS**, on the owner's go and
+**The readiness critic** (Q153's, about 16:20–17:05 PST, every check re-run in its own clone) *(dated, Sat 7 Nov 2026, after Q153's records' verifier: the critic ran about 16:27–17:05 PST, not from 16:20: it began after E182's fix pass returned at 16:26:38, its first file is dated 16:29:49 and its first job ran at 16:32:53)*: **READY WITH GAPS**, on the owner's go and
 a fresh lab approval for aifoundry3. (a) Step 6 v2 runs the train host's first, from-scratch build inside one bounded read of 60 s; an
 overrun exits 13, every re-run rebuilds from scratch, and the step never reaches the registered fallback, so the six trains, every
 primary rule, could be lost for the day; E180's box build took 4 s, so it will probably fit, but no desk case nears the bound (a kit
@@ -8414,7 +8414,7 @@ HIGH will most likely read "not separated"; METER EXCLUDED excludes a static com
 verifier of A2 and kit note 1 is under way at these records (Q154).** **Corrections, quoted as corrected** (A2-8 and its fix pass): PREREG
 `7d4fabad` is a sha256, and its commit is `5538de2a`; E184.md's inventory was read at 11:17 PST, not "about 11:30"; Q150's draft
 registration moves from Used to Checked in its Builds on block; the line-3 comment of `lib.sh` on aifoundry3's tree is stale; "E178's int8
-pair is the card's answer" holds only against a static compression (A2-3).
+pair is the card's answer" holds only against a static compression (A2-3). *(dated, Sat 7 Nov 2026, after Q153's records' verifier: three more of kit note 1's records, its section 7, items (d), (f) and (g), which these records left out, quoted: (d) "`score_e184.py`'s docstring gives "1.8 and 0.06 W" for B2's minion and NoC steps; A1-2 and the catalogue's card-1 row give **1.86 and 0.12 W**. The code uses neither."; (f) "The self-test's E184-G check allowed three binomial sd (+-0.107 percentage points at 6,886 samples). The generator itself wrote **12 glitches in 6,886 samples** (0.174%, a high draw from its 0.087%): self-test v2's B1 counts them again from the raw files and finds the reader's count equal. The reader is right; the check was weak."; (g) "`logs/desktest-host-e184.txt` (H5) and `logs/desktest-runner-e184.txt` (U3) carry launch counts that depend on timing (launches in a fixed time on a mock), so they do not re-make byte for byte; both pass. The same holds for v2's runner log.")*
 **Report:** the kinds page (A25), section 11, item 6.
 
 **Q153(m10acc), M10's accumulator-toggle term, beside the register** *(dated, Sat 7 Nov 2026, Q153's records)* (Sat 7 Nov about
@@ -8430,7 +8430,7 @@ verifier held it with fixes (2 minor, 3 nits), answered by
 [dated note 1](../reports/data/2026-11-07-q153-m10acc/README.md.dated-note-1.md) `c0c1f39a` (12:57:55), no number, rule or verdict
 changed. **Held out, leave one run out over 1,149 committed rows in 39 runs** (M10's 959; pool 8's 40 kinds on E171 and E172; five
 single-bit lists' 70 steps; E178's 40 kinds): floats 0.1873 → 0.1886 W rms (d +0.0013 W [−0.0004, +0.0036]), int8 0.1729 → 0.1748 W
-(d +0.0018 W [+0.0008, +0.0029]); R1–R3 fail in both families, so **the term does not enter M10**, nor does A1's (floats d +0.0008 W);
+(d +0.0018 W [+0.0008, +0.0029]); R1–R3 fail in both families *(dated, Sat 7 Nov 2026, after Q153's records' verifier: floats fail R1–R3, and int8 fails R1 and R2, its whole rule; R3, the S class no worse, is the floats' rule alone)*, so **the term does not enter M10**, nor does A1's (floats d +0.0008 W);
 M10 stays as frozen, and both are reported arms for the next blind pool and for E182. The frozen prices: floats τ_acc +0.124 fJ a toggle
 [−3.31, +3.55] and τ_bth +0.065 fJ [−0.14, +0.26]; int8 τ_acc −0.084 fJ [−1.00, +0.83]. **Post hoc** (pool 8 and E178 were read before
 the registration): pool 8's class S stays at 0.273 and 0.238 W rms; E178's 13 int8 levels keep their bias (−0.160 → −0.163 W); his int8

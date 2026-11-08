@@ -4523,6 +4523,8 @@ its S class +0.0071 W; int8 τ_L +0.180 fJ [−0.17, +0.53], d +0.0007 W; it doe
 
 ### The readiness critic's new findings (Q153's critic, about 16:20–17:05 PST)
 
+*(dated, Sat 7 Nov 2026, after Q153's records' verifier: the critic ran about 16:27–17:05 PST, not from 16:20: it began after E182's fix pass returned at 16:26:38, its first file is dated 16:29:49 and its first job ran at 16:32:53.)*
+
 - **E182's step 6 v2** builds the train host from scratch inside one bounded read of 60 s, though the script gives the build 500 s and
   E180's runbook builds as a detached job; an overrun exits 13, every re-run rebuilds, and the registered fallback is never reached
   (minor; a kit note 2 advised before the go).
@@ -4548,7 +4550,7 @@ its S class +0.0071 W; int8 τ_L +0.180 fJ [−0.17, +0.53], d +0.0007 W; it doe
   The lab's privacy table is absent on the desk machine, so each scan used the lab's fixed list and the round's own patterns. The
   readiness critic ran two local jobs at once for about 2 s, against one job at a time.
 - **Not yet done:** E182's kit note 2 and the verifiers of E182's notes 1 and 2 and of E184's A2 and kit note 1 (Q154, under way at these
-  records); a verifier of these records; the card day for E182 and E184, on the owner's go.
+  records); a verifier of these records *(dated, Sat 7 Nov 2026, after Q153's records' verifier: done, about 18:06–18:35 PST; it held these records with fixes, four minor faults and five nits, none in a measured number, a registered verdict or a frozen file; the five in this repository's text are corrected by dated clauses marked "after Q153's records' verifier", and the rest on the owner's private pages or in the round's working notes)*; the card day for E182 and E184, on the owner's go.
 - **Card time:** none in Q153.
 
 ## Ridge points (derived; no card time)
