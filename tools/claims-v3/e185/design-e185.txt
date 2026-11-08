@@ -1,0 +1,50 @@
+planner check (section 5's design at 51.2 C against plan_exact): SAME []
+seed 0x6eeb44da64c52e21 from e0d319031847fc50e71d40244352cdb3ab167e7e: order H_E L1 L2 H_E2 S S2
+reading two_pass: gains G_B 1.02678, G_Rl 1.19380; kappa fp32.randn 0.8386, int8.neg_ones 0.8999, int8.full 0.8713  (one-pass beside: G_B 1.02350, G_Rl 1.18978)
+room 49.4 C: plan 100.73 min, card 102.13 min; peak 34-mean 65.90 C (firmware about 64.9; margins 6.10 to 72 C mean, 5.10 to 70 C firmware)
+room 50.3 C: plan 100.73 min, card 102.13 min; peak 34-mean 67.02 C (firmware about 66.0; margins 4.98 to 72 C mean, 3.98 to 70 C firmware)
+room 50.8 C: plan 100.73 min, card 102.13 min; peak 34-mean 67.64 C (firmware about 66.6; margins 4.36 to 72 C mean, 3.36 to 70 C firmware)
+room 51.5 C: plan 100.73 min, card 102.13 min; peak 34-mean 68.52 C (firmware about 67.5; margins 3.48 to 72 C mean, 2.48 to 70 C firmware)
+room 52.5 C: plan 100.78 min, card 102.18 min; peak 34-mean 66.76 C (firmware about 65.8; margins 5.24 to 72 C mean, 4.24 to 70 C firmware)
+room 53.0 C: plan 100.78 min, card 102.18 min; peak 34-mean 67.36 C (firmware about 66.4; margins 4.64 to 72 C mean, 3.64 to 70 C firmware)
+room 53.9 C: plan 100.78 min, card 102.18 min; peak 34-mean 68.45 C (firmware about 67.4; margins 3.55 to 72 C mean, 2.55 to 70 C firmware)
+FORECASTS at 50.8 C (C): hold, P_F, P_B, P_Rl; cool P_F/P_B/P_Rl; peak
+  H_E   fp32.randn      14.431  14.818  14.447  cool 2.498/2.565/2.585  peak 67.63
+  L1    int8.full       10.176  10.448  10.584  cool 1.185/1.217/1.191  peak 62.02
+  L2    int8.full       10.329  10.605  10.743  cool 1.345/1.381/1.351  peak 62.02
+  H_E2  fp32.randn      13.997  14.372  14.012  cool 2.042/2.097/2.113  peak 67.64
+  S     int8.neg_ones    3.888   3.992   4.177  peak 55.45
+  S2    int8.neg_ones    2.017   2.071   2.167  peak 55.47
+FORECASTS at 52.5 C (C): hold, P_F, P_B, P_Rl; cool P_F/P_B/P_Rl; peak
+  H_E   fp32.randn      11.808  12.124  11.821  cool 2.098/2.155/2.172  peak 66.75
+  L1    int8.full       10.526  10.808  10.949  cool 1.391/1.428/1.397  peak 64.02
+  L2    int8.full       10.554  10.836  10.977  cool 1.419/1.457/1.426  peak 64.02
+  H_E2  fp32.randn      11.332  11.636  11.345  cool 1.600/1.643/1.656  peak 66.76
+  S     int8.neg_ones    4.077   4.186   4.380  peak 57.26
+  S2    int8.neg_ones    2.035   2.089   2.186  peak 57.29
+what separates them at 50.8 C (C): H_E B-F +0.387, Rl-F +0.016, Rl-B -0.371; L1 B-F +0.273, Rl-F +0.408, Rl-B +0.136; L2 B-F +0.277, Rl-F +0.414, Rl-B +0.138; H_E2 B-F +0.375, Rl-F +0.015, Rl-B -0.359; S B-F +0.104, Rl-F +0.289, Rl-B +0.185; S2 B-F +0.054, Rl-F +0.150, Rl-B +0.096
+residue pools: {"F": {"n": 16, "mean_C": 0.2438, "rms_C": 0.3088}, "B": {"n": 16, "mean_C": 0.0404, "rms_C": 0.2355}, "Rl": {"n": 16, "mean_C": -0.0096, "rms_C": 0.1905}}
+  truth F | normal_sigma_c: RF {'NOT RESOLVED': 0.1, 'WORSE': 99.9}  BF {'NOT RESOLVED': 0.1, 'WORSE': 100.0}  RB {'BETTER': 13.7, 'NOT RESOLVED': 76.2, 'WORSE': 10.1}  BEST {'F': 99.9, 'NOT SEPARATED (B, F)': 0.1, 'NOT SEPARATED (F, Rl)': 0.1}
+  truth F | normal_1.5_sigma_c: RF {'BETTER': 0.2, 'NOT RESOLVED': 1.9, 'WORSE': 98.0}  BF {'BETTER': 0.1, 'NOT RESOLVED': 1.8, 'WORSE': 98.1}  RB {'BETTER': 22.3, 'NOT RESOLVED': 58.6, 'WORSE': 19.1}  BEST {'B': 0.1, 'F': 96.5, 'NOT SEPARATED (B, F)': 1.4, 'NOT SEPARATED (B, F, Rl)': 0.3, 'NOT SEPARATED (B, Rl)': 0.0, 'NOT SEPARATED (F, Rl)': 1.5, 'Rl': 0.1}
+  truth F | committed_residues: RF {'BETTER': 59.7, 'NOT RESOLVED': 27.7, 'WORSE': 12.6}  BF {'BETTER': 71.4, 'NOT RESOLVED': 20.8, 'WORSE': 7.8}  RB {'BETTER': 22.3, 'NOT RESOLVED': 31.9, 'WORSE': 45.8}  BEST {'B': 39.7, 'F': 4.3, 'NOT SEPARATED (B, F)': 5.6, 'NOT SEPARATED (B, F, Rl)': 5.6, 'NOT SEPARATED (B, Rl)': 22.7, 'NOT SEPARATED (F, Rl)': 3.4, 'Rl': 18.6}
+  truth F | committed_residues_centred: RF {'BETTER': 1.4, 'NOT RESOLVED': 7.6, 'WORSE': 91.0}  BF {'BETTER': 1.6, 'NOT RESOLVED': 6.7, 'WORSE': 91.8}  RB {'BETTER': 29.1, 'NOT RESOLVED': 43.9, 'WORSE': 26.9}  BEST {'B': 1.3, 'F': 85.8, 'NOT SEPARATED (B, F)': 4.9, 'NOT SEPARATED (B, F, Rl)': 1.1, 'NOT SEPARATED (B, Rl)': 0.3, 'NOT SEPARATED (F, Rl)': 5.5, 'Rl': 1.1}
+  truth B | normal_sigma_c: RF {'BETTER': 46.9, 'NOT RESOLVED': 50.0, 'WORSE': 3.1}  BF {'BETTER': 99.9, 'NOT RESOLVED': 0.1}  RB {'BETTER': 0.0, 'NOT RESOLVED': 0.3, 'WORSE': 99.7}  BEST {'B': 99.6, 'NOT SEPARATED (B, F)': 0.1, 'NOT SEPARATED (B, Rl)': 0.3, 'Rl': 0.0}
+  truth B | normal_1.5_sigma_c: RF {'BETTER': 46.5, 'NOT RESOLVED': 43.7, 'WORSE': 9.8}  BF {'BETTER': 98.2, 'NOT RESOLVED': 1.6, 'WORSE': 0.1}  RB {'BETTER': 0.3, 'NOT RESOLVED': 3.9, 'WORSE': 95.8}  BEST {'B': 94.5, 'F': 0.1, 'NOT SEPARATED (B, F)': 1.3, 'NOT SEPARATED (B, F, Rl)': 0.3, 'NOT SEPARATED (B, Rl)': 3.5, 'NOT SEPARATED (F, Rl)': 0.0, 'Rl': 0.3}
+  truth B | committed_residues: RF {'BETTER': 59.4, 'NOT RESOLVED': 28.0, 'WORSE': 12.6}  BF {'BETTER': 92.3, 'NOT RESOLVED': 5.9, 'WORSE': 1.8}  RB {'BETTER': 5.0, 'NOT RESOLVED': 12.8, 'WORSE': 82.2}  BEST {'B': 78.7, 'F': 1.4, 'NOT SEPARATED (B, F)': 3.1, 'NOT SEPARATED (B, F, Rl)': 1.4, 'NOT SEPARATED (B, Rl)': 10.4, 'NOT SEPARATED (F, Rl)': 0.4, 'Rl': 4.6}
+  truth B | committed_residues_centred: RF {'BETTER': 48.0, 'NOT RESOLVED': 31.6, 'WORSE': 20.4}  BF {'BETTER': 86.1, 'NOT RESOLVED': 9.8, 'WORSE': 4.1}  RB {'BETTER': 5.9, 'NOT RESOLVED': 12.9, 'WORSE': 81.2}  BEST {'B': 73.9, 'F': 3.1, 'NOT SEPARATED (B, F)': 6.1, 'NOT SEPARATED (B, F, Rl)': 1.8, 'NOT SEPARATED (B, Rl)': 9.3, 'NOT SEPARATED (F, Rl)': 0.8, 'Rl': 5.0}
+  truth Rl | normal_sigma_c: RF {'BETTER': 100.0, 'NOT RESOLVED': 0.1}  BF {'BETTER': 43.3, 'NOT RESOLVED': 53.0, 'WORSE': 3.7}  RB {'BETTER': 99.8, 'NOT RESOLVED': 0.2}  BEST {'NOT SEPARATED (B, F, Rl)': 0.0, 'NOT SEPARATED (B, Rl)': 0.2, 'NOT SEPARATED (F, Rl)': 0.0, 'Rl': 99.8}
+  truth Rl | normal_1.5_sigma_c: RF {'BETTER': 98.1, 'NOT RESOLVED': 1.8, 'WORSE': 0.1}  BF {'BETTER': 44.8, 'NOT RESOLVED': 44.1, 'WORSE': 11.1}  RB {'BETTER': 96.2, 'NOT RESOLVED': 3.5, 'WORSE': 0.3}  BEST {'B': 0.3, 'F': 0.1, 'NOT SEPARATED (B, F)': 0.0, 'NOT SEPARATED (B, F, Rl)': 0.2, 'NOT SEPARATED (B, Rl)': 3.2, 'NOT SEPARATED (F, Rl)': 1.4, 'Rl': 94.7}
+  truth Rl | committed_residues: RF {'BETTER': 89.1, 'NOT RESOLVED': 8.5, 'WORSE': 2.4}  BF {'BETTER': 41.3, 'NOT RESOLVED': 36.6, 'WORSE': 22.1}  RB {'BETTER': 87.0, 'NOT RESOLVED': 10.7, 'WORSE': 2.3}  BEST {'B': 1.9, 'F': 2.0, 'NOT SEPARATED (B, F)': 0.4, 'NOT SEPARATED (B, F, Rl)': 1.5, 'NOT SEPARATED (B, Rl)': 8.1, 'NOT SEPARATED (F, Rl)': 5.9, 'Rl': 80.1}
+  truth Rl | committed_residues_centred: RF {'BETTER': 91.1, 'NOT RESOLVED': 7.1, 'WORSE': 1.7}  BF {'BETTER': 45.1, 'NOT RESOLVED': 36.2, 'WORSE': 18.7}  RB {'BETTER': 86.7, 'NOT RESOLVED': 10.9, 'WORSE': 2.4}  BEST {'B': 2.2, 'F': 1.5, 'NOT SEPARATED (B, F)': 0.2, 'NOT SEPARATED (B, F, Rl)': 1.4, 'NOT SEPARATED (B, Rl)': 8.6, 'NOT SEPARATED (F, Rl)': 4.8, 'Rl': 81.2}
+  E185-C mu +0.00 C | sigma_c: {'NOT RESOLVED': 82.6, 'THE SHAPE HOLDS': 13.4, 'THE SHAPE MISSES (cooler than the chain)': 1.9, 'THE SHAPE MISSES (warmer than the chain)': 2.1}
+  E185-C mu -0.05 C | sigma_c: {'NOT RESOLVED': 79.1, 'THE SHAPE HOLDS': 8.4, 'THE SHAPE MISSES (cooler than the chain)': 12.3, 'THE SHAPE MISSES (warmer than the chain)': 0.2}
+  E185-C mu -0.10 C | sigma_c: {'NOT RESOLVED': 63.0, 'THE SHAPE HOLDS': 1.8, 'THE SHAPE MISSES (cooler than the chain)': 35.2}
+  E185-C mu +0.10 C | sigma_c: {'NOT RESOLVED': 63.6, 'THE SHAPE HOLDS': 1.7, 'THE SHAPE MISSES (cooler than the chain)': 0.0, 'THE SHAPE MISSES (warmer than the chain)': 34.7}
+  E185-C mu +0.00 C | sigma_c/2: {'NOT RESOLVED': 26.3, 'THE SHAPE HOLDS': 72.6, 'THE SHAPE MISSES (cooler than the chain)': 0.6, 'THE SHAPE MISSES (warmer than the chain)': 0.5}
+  E185-C mu -0.05 C | sigma_c/2: {'NOT RESOLVED': 44.6, 'THE SHAPE HOLDS': 27.6, 'THE SHAPE MISSES (cooler than the chain)': 27.8}
+  E185-C mu -0.10 C | sigma_c/2: {'NOT RESOLVED': 15.4, 'THE SHAPE HOLDS': 0.4, 'THE SHAPE MISSES (cooler than the chain)': 84.2}
+  E185-C mu +0.10 C | sigma_c/2: {'NOT RESOLVED': 15.9, 'THE SHAPE HOLDS': 0.5, 'THE SHAPE MISSES (warmer than the chain)': 83.6}
+  HM-LG at k = 2 (E181 + E185), none (the chain right): {'NOT SEPARATED': 100.0}
+  HM-LG at k = 2 (E181 + E185), a gain of 2.68% (arm B's): {'GAIN': 1.5, 'NOT SEPARATED': 98.5}
+  HM-LG at k = 2 (E181 + E185), the rail chain (arm Rl): {'LEVEL': 2.7, 'NOT SEPARATED': 97.3}
+  HM-LG at k = 2 (E181 + E185), a level of +0.27 C: {'LEVEL': 18.8, 'NOT SEPARATED': 81.2}
