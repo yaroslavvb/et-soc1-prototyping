@@ -1,0 +1,75 @@
+E186 kit note 4 (Q158): the dry listing v4's two step 11 v4 blocks (FULL, then the fallback), verbatim, from
+  bash tools/claims-v3/e186/rb/list_steps_e186_v4.sh <an empty scratch dir>    (at Sun 08 Nov 2026 14:33:47 PST, on the Intel; nothing was run)
+The other blocks are the dry listing v3's (kit note 3) but for the sample's times and step 2's line, which lists note M2's two lists
+(reported, never a gate). The listing's last line:
+  dry listing: 19 steps listed, 0 exited non-zero
+################ tools/claims-v3/e186/rb/s22_collect_e186_v4.sh 
+=== [s22_collect_v4_e186] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) and naming today; its last start and last end read
+=== [s22_collect_v2_e186] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) and naming today; its last start and last end read
+--- gate: now + 10 min <= the round's last end (2026-11-10 14:30 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (the session the runbook launched (T0 SAMPLE): its manifest, the block directories its blocks.txt names, the day's step-6 record): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | T0='SAMPLE'; S6='build/e186-build-attempts.txt build/e186-build-logs/2026-11-10 build/e186host/SHA256 build/e186-build-host.txt'
+    | fresh build/q141k/e186.T0 && [ "$(cat build/q141k/e186.T0)" = "$T0" ] || { echo "REFUSED: the box's launch marker build/q141k/e186.T0 is not today's T0 $T0"; exit 3; }
+    | [ "$(cat build/e186/LAST_T0 2>/dev/null)" = "$T0" ] || { echo "REFUSED: build/e186/LAST_T0 is not $T0 (a later session ran here)"; exit 3; }
+    | SD=build/e186/T$T0
+    | [ -s "$SD/MANIFEST.sha256" ] || { echo "REFUSED: $SD/MANIFEST.sha256 is not written (the session has not ended: wait with step 10)"; exit 3; }
+    | grep -q 'session end' "$SD/session.log" 2>/dev/null || { echo "REFUSED: $SD/session.log has no session end"; exit 3; }
+    | echo "MANIFEST $(grep -c . "$SD/MANIFEST.sha256") files"
+    | if [ -f "$SD/blocks.txt" ]; then while IFS= read -r b; do [ -n "$b" ] || continue; if [ -d "$b" ]; then echo "BLOCK $b"; else echo "BLOCK-ABSENT $b"; fi; done < "$SD/blocks.txt"; fi
+    | for s in $S6; do if [ -e "$s" ]; then echo "HAVE $s"; else echo "ABSENT $s"; fi; done
+--- copy, run on the Intel (copy back the session's own directory build/e186/TSAMPLE/ (its manifest among its files)): rsync -a -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/e186/TSAMPLE/ build/e186-raw/logs/
+--- copy, run on the Intel (copy back the 1 e186 block directories blocks.txt names, by name (no telemetry.jsonl.raw)): rsync -a --exclude telemetry.jsonl.raw -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/claims-v3/aifoundry3/e186/p18610 build/e186-raw/e186/
+--- copy, run on the Intel (copy back the 1 e186-smoke block directories blocks.txt names, by name (no telemetry.jsonl.raw)): rsync -a --exclude telemetry.jsonl.raw -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/claims-v3/aifoundry3/e186-smoke/p18601 build/e186-raw/e186-smoke/
+--- copy, run on the Intel (copy back the 1 e186-stoptest block directories blocks.txt names, by name (no telemetry.jsonl.raw)): rsync -a --exclude telemetry.jsonl.raw -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/claims-v3/aifoundry3/e186-stoptest/p18602 build/e186-raw/e186-stoptest/
+--- copy, run on the Intel (copy back the day's step-6 record (those of its four sources the box holds)): rsync -a -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/e186-build-attempts.txt build/e186-raw/logs/step6/
+--- read, run on the Intel (COPY-BACK EXACT against the session's MANIFEST.sha256 (copyback_e186.py)): /usr/bin/python3 -B tools/claims-v3/e186/copyback_e186.py build/e186-raw SAMPLE
+--- read, run on the Intel (the history check v2 before any scoring: no change but an addition since a41408d9 on E186's paths and the scale route's, no shadowing addition, nothing uncommitted (check_history_e186_v2.py)): /usr/bin/python3 -I -B tools/claims-v3/e186/rb/check_history_e186_v2.py tree --anchor a41408d9
+--- desk, run on the Intel (collect_e186_v2.sh (the check of C over every listed session, the reductions, score_e186_v2.py with the pairing check)): env PY=/usr/bin/python3 E186_DATE=2026-11-10 nice -n 10 bash tools/claims-v3/e186/collect_e186_v2.sh build/e186-raw
+--- read, run on the Intel (E186's sessions that must carry a C log, each checked to its end (ccsessions_e186.py)): /usr/bin/python3 -B tools/claims-v3/e186/ccsessions_e186.py --run E186 --raw build/e186-raw --ccheck build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3/ccheck/ccheck-all.json --since 1794177230
+--- gate: no desk path (the lab clone's, RB_OUT's, a Mac home, a session scratch directory) in build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3, and each of them there
+--- read, run on the Intel (another account's login or uid in any directory of build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3 (scrub_tree_e178.py --check, E178's, unchanged)): /usr/bin/python3 -B tools/claims-v3/e178/scrub_tree_e178.py --check build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3 --owner LOGIN
+--- read, run on the Intel (october-forecast-model's reported arm through its gate (E186.md.dated-note-M1.md's reader, after the score; a refusal is recorded, never a stop)): /usr/bin/python3 -I -B tools/claims-v3/e186/rb/check_history_e186.py m1 --anchor a41408d9 --data build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3
+[s22_collect_v2_e186] (dry listing; a real run would say:) E186 collected and scored: build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3 (the data directory is docs/reports/data/2026-11-10-e186-one-number-r3-aifoundry3/); COPY-BACK EXACT; the history check v2 HISTORY OK; the pairing check (read from the scorer's verdicts); arms dropped: 0; the M1 arm read (arm-m1-e186.json and .txt); the day's step-6 record in logs/step6/ (or named in logs/absent-on-box.txt); before the data commit, scan its message with the files
+--- desk, run on the Intel (october-forecast-model's note M2 through its gate v2: SHA256SUMS-e186-m2-v2 at 9 entries and its pinned bytes, then its reader v2 on a copy of the scorer's file, after note M1's (a refusal reads M2 NOT READ, never a stop)): /usr/bin/python3 -I -B tools/claims-v3/e186/rb/check_m2_e186_v2.py --list tools/claims-v3/e186/SHA256SUMS-e186-m2-v2 --count 9 --sha256 db3b69256b39edadb62d7a487744a7f4df4501a5220f1fc86a255fdcdd78f941 --data build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3 --work <RB_OUT>/m2-work
+[s22_collect_v4_e186] (dry listing; a real run would say:) step 11 v2 read 0 (its last line above); october-forecast-model's note M2 arm read (arm-m2-e186.json and .txt, by note M2's reader v2); before the data commit, scan its message with the files
+(exit 0)
+
+################ tools/claims-v3/e186/rb/s22_collect_e186_v4.sh 
+=== [s22_collect_v4_e186] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) and naming today; its last start and last end read
+=== [s22_collect_v2_e186] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) and naming today; its last start and last end read
+--- gate: now + 10 min <= the round's last end (2026-11-10 14:30 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (the session the runbook launched (T0 SAMPLE): its manifest, the block directories its blocks.txt names, the day's step-6 record): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | T0='SAMPLE'; S6='build/e186-build-attempts.txt build/e186-build-logs/2026-11-10 build/e186host/SHA256 build/e186-build-host.txt'
+    | fresh build/q141k/e186.T0 && [ "$(cat build/q141k/e186.T0)" = "$T0" ] || { echo "REFUSED: the box's launch marker build/q141k/e186.T0 is not today's T0 $T0"; exit 3; }
+    | [ "$(cat build/e186/LAST_T0 2>/dev/null)" = "$T0" ] || { echo "REFUSED: build/e186/LAST_T0 is not $T0 (a later session ran here)"; exit 3; }
+    | SD=build/e186/T$T0
+    | [ -s "$SD/MANIFEST.sha256" ] || { echo "REFUSED: $SD/MANIFEST.sha256 is not written (the session has not ended: wait with step 10)"; exit 3; }
+    | grep -q 'session end' "$SD/session.log" 2>/dev/null || { echo "REFUSED: $SD/session.log has no session end"; exit 3; }
+    | echo "MANIFEST $(grep -c . "$SD/MANIFEST.sha256") files"
+    | if [ -f "$SD/blocks.txt" ]; then while IFS= read -r b; do [ -n "$b" ] || continue; if [ -d "$b" ]; then echo "BLOCK $b"; else echo "BLOCK-ABSENT $b"; fi; done < "$SD/blocks.txt"; fi
+    | for s in $S6; do if [ -e "$s" ]; then echo "HAVE $s"; else echo "ABSENT $s"; fi; done
+--- copy, run on the Intel (copy back the session's own directory build/e186/TSAMPLE/ (its manifest among its files)): rsync -a -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/e186/TSAMPLE/ build/e186-raw/logs/
+--- copy, run on the Intel (copy back the 1 e186 block directories blocks.txt names, by name (no telemetry.jsonl.raw)): rsync -a --exclude telemetry.jsonl.raw -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/claims-v3/aifoundry3/e186/p18610 build/e186-raw/e186/
+--- copy, run on the Intel (copy back the 1 e186-smoke block directories blocks.txt names, by name (no telemetry.jsonl.raw)): rsync -a --exclude telemetry.jsonl.raw -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/claims-v3/aifoundry3/e186-smoke/p18601 build/e186-raw/e186-smoke/
+--- copy, run on the Intel (copy back the 1 e186-stoptest block directories blocks.txt names, by name (no telemetry.jsonl.raw)): rsync -a --exclude telemetry.jsonl.raw -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/claims-v3/aifoundry3/e186-stoptest/p18602 build/e186-raw/e186-stoptest/
+--- copy, run on the Intel (copy back the day's step-6 record (those of its four sources the box holds)): rsync -a -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/e186-build-attempts.txt build/e186-raw/logs/step6/
+--- read, run on the Intel (COPY-BACK EXACT against the session's MANIFEST.sha256 (copyback_e186.py)): /usr/bin/python3 -B tools/claims-v3/e186/copyback_e186.py build/e186-raw SAMPLE
+--- read, run on the Intel (the history check v2 before any scoring: no change but an addition since a41408d9 on E186's paths and the scale route's, no shadowing addition, nothing uncommitted (check_history_e186_v2.py)): /usr/bin/python3 -I -B tools/claims-v3/e186/rb/check_history_e186_v2.py tree --anchor a41408d9
+--- desk, run on the Intel (collect_e186_v2.sh (the check of C over every listed session, the reductions, score_e186_v2.py with the pairing check)): env PY=/usr/bin/python3 E186_DATE=2026-11-10 nice -n 10 bash tools/claims-v3/e186/collect_e186_v2.sh build/e186-raw
+--- read, run on the Intel (E186's sessions that must carry a C log, each checked to its end (ccsessions_e186.py)): /usr/bin/python3 -B tools/claims-v3/e186/ccsessions_e186.py --run E186 --raw build/e186-raw --ccheck build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3/ccheck/ccheck-all.json --since 1794177231
+--- gate: no desk path (the lab clone's, RB_OUT's, a Mac home, a session scratch directory) in build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3, and each of them there
+--- read, run on the Intel (another account's login or uid in any directory of build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3 (scrub_tree_e178.py --check, E178's, unchanged)): /usr/bin/python3 -B tools/claims-v3/e178/scrub_tree_e178.py --check build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3 --owner LOGIN
+--- read, run on the Intel (october-forecast-model's reported arm through its gate (E186.md.dated-note-M1.md's reader, after the score; a refusal is recorded, never a stop)): /usr/bin/python3 -I -B tools/claims-v3/e186/rb/check_history_e186.py m1 --anchor a41408d9 --data build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3
+[s22_collect_v2_e186] (dry listing; a real run would say:) E186 collected and scored: build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3 (the data directory is docs/reports/data/2026-11-10-e186-one-number-r3-aifoundry3/); COPY-BACK EXACT; the history check v2 HISTORY OK; the pairing check (read from the scorer's verdicts); arms dropped: 0; the M1 arm read (arm-m1-e186.json and .txt); the day's step-6 record in logs/step6/ (or named in logs/absent-on-box.txt); before the data commit, scan its message with the files
+--- desk, run on the Intel (october-forecast-model's note M2 through its gate v2: SHA256SUMS-e186-m2-v2 at 9 entries and its pinned bytes, then its reader v2 on a copy of the scorer's file, after note M1's (a refusal reads M2 NOT READ, never a stop)): /usr/bin/python3 -I -B tools/claims-v3/e186/rb/check_m2_e186_v2.py --list tools/claims-v3/e186/SHA256SUMS-e186-m2-v2 --count 9 --sha256 db3b69256b39edadb62d7a487744a7f4df4501a5220f1fc86a255fdcdd78f941 --data build/e186-out/2026-11-10-e186-one-number-r3-aifoundry3 --work <RB_OUT>/m2-work
+[s22_collect_v4_e186] (dry listing; a real run would say:) step 11 v2 read 0 (its last line above); october-forecast-model's note M2 arm read (arm-m2-e186.json and .txt, by note M2's reader v2); before the data commit, scan its message with the files
+(exit 0)
+

@@ -1,0 +1,17 @@
+PASS P: the planned session, every arm's every word and error as placed here {"v4-M12": 9, "v5": 10, "v6": 10, "v7": 10}
+PASS P: v4 (M12's set) reads 9 session trains (H16 not covered), v5, v6 and v7 read all 10, no kind read 
+PASS A: each arm at its own centres reads inside everywhere with rms error 0, and every other arm as placed here 
+PASS H: every train +0.1 W and every kind +0.3 W off v7's: every arm's words and errors as placed here, v7's rms 0.1 W 
+PASS L: every train -0.1 W and every kind -0.3 W off v7's: every arm's words and errors as placed here, v7's rms 0.1 W 
+PASS F: the fallback: no train read (every session train NOT SCORED), the fifteen kinds read by v5-v7 and thirteen by v4 (M12's set) {"v4-M12": 13, "v5": 15, "v6": 15, "v7": 15}
+PASS N: a NOT SCORED train reads 'not read' in every arm 
+PASS T: a model file with one digit changed is refused (exit 2) 
+PASS K: E186's list with one byte changed is refused (exit 2) 
+PASS X: a scorer's file without trains is refused (exit 3) 
+PASS W: the reader writes arm-m2-e186.json and .txt and nothing else 
+PASS NT: a train whose mean, lo and hi are NaN reads 'not read' in every arm; the arms' errors over the other trains (v4 8, v5-v7 9), finite {"v4-M12": 8, "v5": 9, "v6": 9, "v7": 9}
+PASS IT: a train whose hi is infinite reads 'not read' in every arm that covers it; every other word and error as placed here 
+PASS NK: in the fallback, a kind (K11) whose D_w is NaN reads 'not read' in every arm; the kinds' errors over the others (v4 12, v5-v7 14), finite {"v4-M12": 12, "v5": 14, "v6": 14, "v7": 14}
+PASS CK: in the fallback, a kind (K13) with c_kept false reads 'not read' in every arm, the why naming it; the kinds' errors over the others (v4 12, v5-v7 14) {"v4-M12": 12, "v5": 14, "v6": 14, "v7": 14}
+PASS S: every output json this test made (14) parses strictly, with no NaN or Infinity token and every error finite 
+SELFTEST-ARM-M2-E186-V2 16 of 16 PASS
