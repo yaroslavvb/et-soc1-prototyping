@@ -4762,10 +4762,52 @@ Since `45e514e3`, Q156 to Q158b added 829 files (598 + 85 + 128 + 18) and edited
 - **Process, Q158b:** a desk test's first run read 22 of 23 on the test's own commit helper; the first additions count matched another
   round's directories through a recursive pathspec, fixed by glob pathspecs; pre-scan hits on case names and an address-shaped test
   string, renamed before the commit; one audit job's relative output path after a change of directory, re-run.
-- **Not yet done:** a verifier of these records; chain A of Q158 (a verifier of `1e74546a`, `17cf100f` and `88750359`, the notes M2 and
+- **Not yet done:** a verifier of these records *(dated, Sun 8 Nov 2026, after these records' verifier: done, about 11:57–12:46 PST; it held these records with fixes, two minor faults and three nits, none in a measured number, a registered verdict or a frozen file, answered in the dated paragraph at the end of this section, in 02's Q157 row and on the owner's private page)*; chain A of Q158 (a verifier of `1e74546a`, `17cf100f` and `88750359`, the notes M2 and
   their verifier), under way at these records; the critic of day 2's and E186's readiness; day 2 and E186 on the owner's go.
 - **Card time:** about 116 card-minutes in Q156 (E182 98.1, arm B 17.2, arm S 0.75); none in Q154, Q155, Q157, Q158a, Q158b or these
   records.
+
+*(Dated, Sun 8 Nov 2026, after these records' verifier.)* **These records' verifier** (about 11:57–12:46 PST, desk only) re-read lab
+`7eddbe6c` and the four pages these records deployed. Its re-derived figures, counts and git times hold; the records edits are
+insertions, but for the index counters and the agents file's moved oldest entry; every hash list reads as these records give it; and
+the day's checks read 0 on the shared clone, with no box call. Of its two minor faults, one is a time on the owner's private page,
+corrected there; the other is the lines these records owed, carried here:
+
+- **The day's own lists**, each read at its own bytes: E182's `D2/SHA256SUMS` 465 of 465 OK and `D2/SHA256SUMS-note1` 4 of 4; E184's
+  `D4/SHA256SUMS-arm-b` 80 of 80, `D4/SHA256SUMS-arm-s` 23 of 23, `D4/SHA256SUMS-note1` 4 of 4 and the collection's
+  `D4/SHA256SUMS-note2` 20 of 20; and `X4/SHA256SUMS-e184-kit-note4` 10 of 10, its paths from the repository's top.
+- **"Blind" in this section means registered before T0.** Every E182 verdict and reading: by E182.md (`58b88850`) with its dated notes
+  1–3 and the kit's notes 1–4 (`6c158cd2` to `6b2d2ae6`, all Sat 7 Nov), before T0 at 00:15:41 PST. Every reading of E184's arm B: by
+  E184.md (`c6417611`) with A1–A4 (`65f844be`, `a887fc74`, `3b48cf7b`, `a5f8ec1a`) and the kit with its notes 1–3, all Sat 7 Nov,
+  before T0 at 00:15:19 PST. And arm S's smoke-gate readings, against their registered bands.
+- **E184's kit note 4** (`8092c27a`, 03:37:08) **and its dated notes 1** (`9a8b9d3e`, 03:43:07) were written after the data, and change
+  no rule or reading.
+- **Post hoc, from Q155** (each labelled so where it stands, deciding nothing): E185's gains fitted on E181 alone (`X5/E185.md`);
+  E185's rules read on E181 as a stand-in (`X5/E185.md.dated-note-A1.md`, A1-1); its planning with the noise drawn by item (A1-8); the
+  count of 2,206 committed config reads, none partial, behind E184's A4 (`X4/E184.md.dated-note-A4.md`); the case C1 figures from the
+  run of the verifier of E184's kit note 2 (`X4/KIT.md.dated-note-3.md`, section 6); and E180's 4 s box build, of another target than
+  E182's train host (`X2/E182.md.dated-note-2.md` and `-3.md`).
+- **Q157's two records lines:** the T0 log's "session end" line is not a gate in kit note 4's step 11 v4 (the day's log has it:
+  `log_session_end` true in README-arm-s's dated note 2); and the collection's fix pass committed nothing, its verifier's two nits
+  being records lines ("The collection", above).
+- **Process, Q158a:** M12's fix pass saw another lane's untracked files under `X5/rb/` (work in progress) in an early scratch run's
+  status, and its committed checks log lists only `M12/` and no tracked change; two of its verifier's figures differ from its re-run in
+  the last digits, and note 2 quotes the re-run's (k_walk from T1 alone, and k_walk's move under n − p); and its verifier gave the
+  fixes for faults 1 and 5 as notes beside `M12/README.md`, `M12/heldout-m12.md` and `M12/FREEZE-m12.md`, where the fix pass's task
+  named one beside `M12/REFIT.md`, so note 2 carries every fault and the three files got short pointer notes. E186's kit lane corrected
+  test forms before its final runs, the code unchanged by them, and set aside one runbook test run whose script was edited while it
+  ran; it also found that E182's dry pass passed its step 2c vacuously (the harness skips a block directory that exists), so E186's dry
+  pass moves the smoke's dry directory out first and counts its 11 items. E186's fix pass ran the history and runbook desk tests with
+  kit note 1's list provisional (their cases do not read it) and remade the list twice after the note's last edits; and its A1 commit
+  job's output went through `tail`, with the commit's exit status printed inside the job, every scan's exit status read unpiped.
+- **Process, Q158b:** the day-2 check's fix pass added cases AD4 (an E185 file sharing a module's name with one of M11's) and AD5 (an
+  `e185/numpy.py`) after its second development run, and extended the check to refuse them; the third run read 25 of 25.
+- **A link left as moved:** AGENT.md's oldest changelog entry went to `docs/agent-changelog-archive.md` verbatim, as the file's rule
+  says, so the link it carries now resolves from that file to `docs/docs/agent-changelog-archive.md`, which does not exist.
+- **02's Q157 row** gains a dated clause: M12 holds out the 32 of E178's 40 kinds new to E182, and the other 8, fitted by word in E182,
+  are a session transfer.
+
+The verifier's third nit, on the second candidate list's name, changes no text here: later records name it as E186's A1-3 does.
 
 ## Ridge points (derived; no card time)
 
