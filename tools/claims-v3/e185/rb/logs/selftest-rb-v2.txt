@@ -1,0 +1,77 @@
+
+== A2. the dry listing v2: every step exits 0, no ssh or rsync call, the look before the post
+dry listing: 0 step(s) exited non-zero
+calls: 0; look-first; v2 steps listed: 4
+-> PASS (the dry listing v2 (s03 v2, s11 v2 twice, s22 v2))
+
+== K. step 2 v2 without the go's window: refused before any call
+[s03_desk_v2_e185] STOP: no window yet: run s02_window.sh with his go's day, last start and last end
+[s03_desk_v2_e185] STOP: the window in RB_OUT was not written today: run s02_window_e185.sh with his go's day, last start and last end first
+-> PASS (no window 10; a window from another day 10; no call either time)
+
+== R4. the rest rule: E183's T0-named log, its session ended 30 minutes ago ('session end (T0 <epoch>)')
+rest: no real session of ours in build/e17x, e18x or e185/T*/session.log
+REFUSED: 30 minutes since E183's session end (2026-11-07 22:12:09 PST): E185 needs a rested card, at least 40 (the runbook's gate)
+-> PASS (v1 cannot see E183's log and launches; v2 refuses, 30 minutes after E183's session end)
+
+== R5. the rest rule: E184 v2's log ended 3 h ago in the '(T0 <epoch>)' form: a session end, with no note
+rest: 180 minutes since E184's session end (2026-11-07 19:42:17 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (v1 notes a block without its end; v2 reads the (T0) form as the end: rest about 180 minutes, no note)
+
+== R1-R3. v1's rest cases, run after noon with --after-noon so the rest rule is reached (v1's committed desk test ran them without it, after 12:00 PST, so its R1 and R2 were refused by the noon gate first)
+v1 R1 R2 R3, v2 R1 R2 R3: 10:rest 10:rest 0:launched 10:rest 10:rest 0:launched
+-> PASS (both versions: E185's own end 25 min ago and E184's 30 min ago refused by the rest rule itself; a dry log skipped and E181 3 h ago launched)
+
+== L1. a later try's box: p18501.try1 and p18520.attempt-* beside this session's passes
+stand-in box: 37 files in the manifest; T0 1794000000; faults none
+COPY-BACK EXTRA: files the session's manifest does not list: aifoundry3/e185-smoke/p18501.try1/HOLDSTOP; aifoundry3/e185-smoke/p18501.try1/STOP; aifoundry3/e185
+stand-in box: 37 files in the manifest; T0 1794000000; faults none
+left on the box (not this session's manifest; an earlier try's, not copied): e185-smoke/p18501.try1 e185/p18520.attempt-1793990000
+COPY-BACK EXACT 37 files (every manifest line read back, and nothing else)
+-> PASS (v1 EXTRA (4); v2 EXACT 37 files, both earlier entries named and left on the box, none copied)
+
+== L2. a second collection into the data directory L1 left: refused before any box call
+refusing: docs/reports/data/2026-11-08-e185-m11-session3-aifoundry3 holds files already (an earlier collection, or another source): the exact copy-back needs an empty data directory; remove docs/repor
+-> PASS (refused (3), no ssh or rsync call)
+
+== L3. the presence read fails: named as a failed read, and the collector stops
+stand-in box: 37 files in the manifest; T0 1794000000; faults none
+rsync e185-smoke/p18501 rc=255 (the presence read did not answer PRESENT or ABSENT: ssh: connect to host aifoundry3: stand-in failure; nothing copied)
+rsync e185/p18520 rc=255 (the presence read did not answer PRESENT or ABSENT: ssh: connect to host aifoundry3: stand-in failure; nothing copied)
+rsync presence rc=255 (the presence read did not finish: ssh: connect to host aifoundry3: stand-in failure)
+COPY-BACK DIFFERS: missing: build/claims-v3/aifoundry3/e185-smoke/p18501/HOLDSTOP; missing: build/claims-v3/aifoundry3/e185-smoke/p18501/STOP; missing: build/claims-v3/aifoundry3/e185-smoke/p18501/bin
+-> PASS (both pass directories named as not copied (rc 255), the copy-back not exact (4))
+
+== C2-C4. v2 on v1's copy-back faults
+stand-in box: 37 files in the manifest; T0 1794000000; faults ['differs']
+stand-in box: 37 files in the manifest; T0 1794000000; faults ['extra']
+stand-in box: 37 files in the manifest; T0 1794000000; faults ['no-manifest']
+-> PASS (DIFFERS, EXTRA (a stray inside the measured pass) and NO-MANIFEST each stop v2 (4))
+
+== E2. step 14 v2 end to end on the later try's box: the lists, the collector v2, the gates, the check of C, the scrub, the scorer v5
+stand-in box: 37 files in the manifest; T0 1794000000; faults none
+left on the box (not this session's manifest; an earlier try's, not copied): e185-smoke/p18501.try1 e185/p18520.attempt-1793990000
+COPY-BACK EXACT 37 files (every manifest line read back, and nothing else)
+[s22_collect_v2_e185] left on the box (not this session's manifest; an earlier try's, not copied): e185-smoke/p18501.try1 e185/p18520.attempt-1793990000
+COUNT-OK p18520: 5700 checked launches in 407 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+COUNT-OK p18501: 57 checked launches in 7 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+score rc=0
+[s22_collect_v2_e185] E185 collected and scored: docs/reports/data/2026-11-08-e185-m11-session3-aifoundry3 (the copy-back exact; scored-m11.json, scored-m11.md, scored-m11-lines.jsonl, written after the gates: A10's reading, E185's rules, A
+scored: score_m11_v5.py|SCORED|SCORED|5|NOT SEPARATED (B, Rl)|9|False
+-> PASS (collected (EXACT) and scored after a later try: A10 SCORED, E185's rules SCORED on 5 holds, stages to 9, no staging file, the left line logged)
+
+== G1. step 14 v2 again into E2's data directory: the collector refuses (16), no rsync call
+[s22_collect_v2_e185] STOP: refusing: docs/reports/data/2026-11-08-e185-m11-session3-aifoundry3 holds files already (an earlier collection, or another source): the exact copy-back needs an empty data 
+-> PASS (a used data directory: 16 on the refusal, nothing copied)
+
+== S1. step 14 v2 with a stand-in scorer that exits 1: 14, and the message says to remove the data directory first
+stand-in box: 37 files in the manifest; T0 1794000000; faults none
+[s22_collect_v2_e185] STOP: M11's scorer v5 did not read rc 0: read the output above (the gates passed, and docs/reports/data/2026-11-08-e185-m11-session3-aifoundry3 stands as their evidence; scored files left: none). To collect again, remo
+-> PASS (the scorer failed: 14, the removal named, no scored file)
+
+== Z. nothing the test started is left running
+processes under the scratch tree or box: 0
+-> PASS (nothing left running)
+
+network calls by the stand-ins: to the stand-in box only; elapsed 129 s
+SELFTEST-RB-E185-V2 PASS
