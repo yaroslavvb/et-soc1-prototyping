@@ -1,0 +1,91 @@
+# SELFTEST-RB-E185, Sat 07 Nov 2026 21:14 PST, on the Intel: bash tools/claims-v3/e185/rb/selftest_rb_e185.sh <scratch>
+
+== A. the dry listing: every step exits 0, no ssh or rsync call, the look before the post
+dry listing: 0 step(s) exited non-zero
+calls: 0; look-first
+-> PASS (the dry listing)
+
+== K. step 2 without the go's window: refused before any call
+[s03_desk_e185] STOP: no window yet: run s02_window.sh with his go's day, last start and last end
+[s03_desk_e185] STOP: the window in RB_OUT was not written today: run s02_window_e185.sh with his go's day, last start and last end first
+-> PASS (no window 10; a window from another day 10; no call either time)
+
+== P1. a file the runbook pins changed (v3.1's rb_run.py): 16 before any call
+[s05_look_e185] STOP: a file this runbook pins differs from its pinned hash: tools/claims-v3/q141k-runbook/v3.1/rb_run.py
+-> PASS (a pinned file changed: 16, no call)
+
+== O. ours_live's pattern names our sessions on this card, and none of the runbook's own names
+named: 14 of 14; the runbook's own commands matched: 0 of 10
+-> PASS (ours_live's names)
+
+== J1. step 11 beside a running dry job of the runbook (jobs_live): refused before any launch
+[s11_a3_launch_e185] STOP: it is 2114 PST: A6's and A7's cool-hour plan asks for a launch before 12:00 PST; to launch anyway, run again with --after-noon (a stated departure from the plan)
+-> PASS (a dry pass still runs: refused, nothing launched)
+
+== J2. step 10's dry job beside a card session of ours (ours_live): JOB-REFUSED, nothing started
+JOB-REFUSED: a card session of ours runs on aifoundry3: no dry pass during a session
+-> PASS (a session of ours runs: the dry job refused)
+
+== R1. the rest rule: E185's own T0-named real session ended 25 minutes ago
+-> PASS (25 minutes since E185's session end: refused)
+
+== R2. the rest rule: E184's T0-named session log ended 30 minutes ago
+-> PASS (30 minutes since E184's session end: refused)
+
+== R3. a dry T0 directory 5 minutes old, E181's real end 3 h ago: launched, its T0 written
+rest: 180 minutes since E181's session end (2026-11-07 18:14:41 PST; dry sessions and blocks that opened no device skipped)
+LAUNCHED e185 2026-11-07 21:14:47 PST T0 1794114882 (gates: latest start 2026-11-07 23:58 PST, end gate 2026-11-07 23:59 PST; its files in build/e185/T1794114882/)
+-> PASS (launched, about 180 minutes of rest, the T0 written)
+
+== W. step 20 on the T0 directory: the manifest is the session's last act
+RUN-GONE e185: no session process and no session end
+[s20_wait_e185] e185 has ended
+2026-11-07 21:13:47 PST pass 18520 rc=6: a stop line ended the pass (E171's stops); the holds after it did not run
+[s20_wait_e185] e185: a stop line ended the measured pass (E171's stops); the holds before it are read by step 22
+-> PASS (no manifest and no session: RUN-GONE 14; the manifest: ended 0; a stop line named, ended 0)
+
+== C1. the real collector: the exact copy-back, the host windows by T0, one copy of each C log
+stand-in box: 37 files in the manifest; T0 1794000000; faults none
+T0 1794000000 (2026-11-06 13:20:00 PST)
+COPY-BACK EXACT 37 files (every manifest line read back, and nothing else)
+host window start: start-1793999900.out -> logs/host-start.out
+host window end: end-1794114922.out -> logs/host-end.out
+ccheck rc=0 ({"launches": 5757, "PASS": 5757, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0, "by_type": {"fp32": {"PASS": 1920, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}, "int8": {"PASS": 3837, "ROUNDING": 0, "UNMODELLED": 0, "FAIL": 0}}, "bro
+-> PASS (EXACT; the start window 100 s before T0; an end window; no C log left in a pass directory, two in ccheck/)
+
+== C2-C4. the copy-back refuses what the session did not write
+stand-in box: 37 files in the manifest; T0 1794000000; faults ['differs']
+COPY-BACK DIFFERS: differs: build/claims-v3/aifoundry3/e185/p18520/marks.jsonl
+stand-in box: 37 files in the manifest; T0 1794000000; faults ['extra']
+COPY-BACK EXTRA: files the session's manifest does not list: aifoundry3/e185/p18520/stray.txt
+stand-in box: 37 files in the manifest; T0 1794000000; faults ['no-manifest']
+COPY-BACK NO-MANIFEST: the session's MANIFEST.sha256 is not there (a session that never ended, or nothing copied)
+-> PASS (DIFFERS, EXTRA and NO-MANIFEST each stop the collector (4))
+
+== G1. step 22 on a box whose copy-back differs: 16, nothing scored
+stand-in box: 37 files in the manifest; T0 1794000000; faults ['differs']
+COPY-BACK DIFFERS: differs: build/claims-v3/aifoundry3/e185/p18520/marks.jsonl
+-> PASS (the copy-back gate)
+
+== G2. step 22: the session's last block says the smoke or its gate failed: 16 SMOKE-STOPPED, nothing scored
+stand-in box: 37 files in the manifest; T0 1794000000; faults ['smoke-stopped']
+[s22_collect_e185] STOP: SMOKE-STOPPED: the session's last block says the smoke or its gate failed, so no measured pass ran: nothing to score; docs/reports/data/2026-11-07-e185-m11-session3-aifoundry3 is the stop's evidence (logs/session.lo
+-> PASS (SMOKE-STOPPED)
+
+== E1. step 22 end to end: the gates, the check of C, the scrub, then M11's scorer v5
+stand-in box: 37 files in the manifest; T0 1794000000; faults none
+COPY-BACK EXACT 37 files (every manifest line read back, and nothing else)
+COUNT-OK p18520: 5700 checked launches in 407 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+COUNT-OK p18501: 57 checked launches in 7 processes, each process's records equal to its rows (C FAIL rows 0: no registered rule reads them; 'computed correctly' only when all_pass is True)
+score rc=0
+[s22_collect_e185] E185 collected and scored: docs/reports/data/2026-11-07-e185-m11-session3-aifoundry3 (the copy-back exact; scored-m11.json, scored-m11.md, scored-m11-lines.jsonl, written after the gates: A10's reading, E185's rules, A6-5
+scored: score_m11_v5.py|SCORED|SCORED|5|NOT SEPARATED (B, Rl)|9|False
+-> PASS (collected and scored: A10 SCORED, E185's rules SCORED on 5 holds, lines stages to 9, no staging file)
+
+== Z. nothing the test started is left running
+processes under the scratch tree or box: 0
+-> PASS (nothing left running)
+
+network calls by the stand-ins: to the stand-in box only (37 ssh, 26 rsync in the last cases); elapsed 97 s
+SELFTEST-RB-E185 PASS
+# exit 0

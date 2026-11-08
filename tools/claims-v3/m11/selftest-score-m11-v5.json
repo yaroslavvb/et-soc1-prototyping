@@ -1,0 +1,190 @@
+{
+ "cases": {
+  "V1 v4's registered readings on E176 + E181 equal E181's committed score (the aifoundry3 block and each session's holds)": {
+   "got": {
+    "aifoundry3_same": true
+   },
+   "pass": true
+  },
+  "V10 no int8.neg_ones hold scored: every arm rule NOT SCORED": {
+   "got": {
+    "verdict": "NOT SCORED",
+    "why": "4 holds scored by all three arms; no int8.neg_ones hold"
+   },
+   "pass": true
+  },
+  "V11 rail rows missing on both int8.neg_ones holds: those holds leave the three-arm rules, which then read NOT SCORED": {
+   "got": {
+    "BEST": {
+     "verdict": "NOT SCORED",
+     "why": "4 holds scored by all three arms; no int8.neg_ones hold"
+    },
+    "not_read": {
+     "S": "the rail rows miss a window",
+     "S2": "the rail rows miss a window"
+    }
+   },
+   "pass": true
+  },
+  "V12 no smoke named: A10-3 reads E181 on the measured pass alone, named, and its HM-LG is the registered one": {
+   "got": {
+    "HM_LG_same_as_registered": true,
+    "how": {
+     "S1:p17620": "excluded: the session did not pass its start gate",
+     "S2:p18120": "the measured pass alone (A10-3: no smoke pass named (--smoke))"
+    }
+   },
+   "pass": true
+  },
+  "V2 A10's primary readings on E181 equal the committed A9 arm's readings, decision by decision (A10-3: E181 read on the arm)": {
+   "got": {
+    "HM_CAL": "BETTER",
+    "committed_HM_CAL": "BETTER",
+    "how": {
+     "S1:p17620": "excluded: the session did not pass its start gate",
+     "S2:p18120": "the chain over the smoke and the measured pass (A9-1)"
+    },
+    "reads": "SCORED"
+   },
+   "pass": true
+  },
+  "V3 the lines file holds v4's stages 1-6 then A10's 7-9, and no staging file is left": {
+   "got": {
+    "stages": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   },
+   "pass": true
+  },
+  "V4 E185's arms on E181's five holds (A10's reading, frozen gains) give arms-e185-e181.json's two-pass held-out misses within 1e-4 C": {
+   "got": {
+    "max_diff_C": 0.0
+   },
+   "pass": true
+  },
+  "V5 E185's rules read on E181 (a stand-in session: H_E and S present, n 5): rms F / B / Rl as the registration's held-out 0.2963 / 0.2312 / 0.1978 C": {
+   "got": {
+    "BEST": {
+     "rms_C": {
+      "B": 0.2312,
+      "F": 0.2963,
+      "Rl": 0.1978
+     },
+     "verdict": "NOT SEPARATED (B, Rl)"
+    },
+    "BF": "BETTER",
+    "C_F": {
+     "n": 2,
+     "verdict": "NOT SCORED",
+     "why": "2 big holds with a complete cool-down window (at least 3)"
+    },
+    "RB": "NOT RESOLVED",
+    "RF": "BETTER"
+   },
+   "pass": true
+  },
+  "V6 E181's E185 reading is labelled post hoc for A10 and E185's registration (both commits after E181's first launch)": {
+   "got": {
+    "A10": {
+     "ancestor_of_HEAD": true,
+     "commit": "5e708747",
+     "precedes_first_launch": false
+    },
+    "E185": {
+     "ancestor_of_HEAD": true,
+     "commit": "98fe28b7",
+     "precedes_first_launch": false
+    }
+   },
+   "pass": true
+  },
+  "V7 synthetic holds whose R is arm B's P (+/-0.01 C): E185-BEST reads B": {
+   "got": {
+    "BEST": {
+     "rms_C": {
+      "B": 0.01,
+      "F": 0.2748,
+      "Rl": 0.2407
+     },
+     "verdict": "B"
+    },
+    "BF": "BETTER",
+    "RB": "WORSE",
+    "RF": "NOT RESOLVED"
+   },
+   "pass": true
+  },
+  "V7 synthetic holds whose R is arm F's P (+/-0.01 C): E185-BEST reads F": {
+   "got": {
+    "BEST": {
+     "rms_C": {
+      "B": 0.2755,
+      "F": 0.01,
+      "Rl": 0.2725
+     },
+     "verdict": "F"
+    },
+    "BF": "WORSE",
+    "RB": "NOT RESOLVED",
+    "RF": "WORSE"
+   },
+   "pass": true
+  },
+  "V7 synthetic holds whose R is arm Rl's P (+/-0.01 C): E185-BEST reads Rl": {
+   "got": {
+    "BEST": {
+     "rms_C": {
+      "B": 0.2396,
+      "F": 0.2707,
+      "Rl": 0.01
+     },
+     "verdict": "Rl"
+    },
+    "BF": "NOT RESOLVED",
+    "RB": "BETTER",
+    "RF": "BETTER"
+   },
+   "pass": true
+  },
+  "V8 a cool-down 0.10 C under the plateau on four big holds: E185-C reads THE SHAPE MISSES (cooler) on F": {
+   "got": {
+    "ci95_C": [
+     -0.1011,
+     -0.0929
+    ],
+    "mean_d_C": -0.097,
+    "n": 4,
+    "verdict": "THE SHAPE MISSES (cooler than the chain)"
+   },
+   "pass": true
+  },
+  "V9 a cool-down equal to the plateau's miss: E185-C reads THE SHAPE HOLDS on F": {
+   "got": {
+    "ci95_C": [
+     -0.0011,
+     0.0071
+    ],
+    "mean_d_C": 0.003,
+    "n": 4,
+    "verdict": "THE SHAPE HOLDS"
+   },
+   "pass": true
+  }
+ },
+ "label": "checks of the code on E181's committed data and on synthetic holds, never a reading of a session",
+ "lists_checked": {
+  "tools/claims-v3/e185/SHA256SUMS-e185-registration": 8,
+  "tools/claims-v3/m11/SHA256SUMS-a10": 4,
+  "tools/claims-v3/m11/SHA256SUMS-score-m11-v4": 5
+ },
+ "pass": true,
+ "problems": []
+}
