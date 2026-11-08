@@ -1,0 +1,14 @@
+M12 dated note 2, fault 8 (the bench build): a read-only check, after the fact, of the toggle bench build that bench_m12.sh's run
+named (its BENCH directory on the mini). fix-m12 (Q158), Sun 8 Nov 2026, through the batch-work door from the Intel:
+run_remote --host mini --max-gb 1 --timeout 60, a script that prints each file's sha256 and modification time (PST) and writes nothing.
+The committed build record is docs/reports/data/2026-11-04-q141t-s7-recount/step243/build-record-mini.json. Its output, verbatim:
+
+run_remote: mini (Darwin, 10 GB free, load 2.1), capped at 1 GB and 60 s
+host mini at 2026-11-08 06:14:26 PST
+a740318ce8d8a097c3d42911a3191acc01825aa3790d711021261280750f6c57  obj_vpu/Vtb  mtime 2026-11-04 13:16:49
+aeddf308e18ac74928beddff960662c4065659b28381b912a1cad1774ca500bc  accum  mtime 2026-11-04 13:16:49
+9da18b7582db59ba5d05e8205fe3a5813aecceea30d8d9d90507ee6e2ba6d437  settle_count  mtime 2026-11-04 13:16:50
+fa8112e9ff953f714f3a2161990a581c37617884a44cc6dddfb6bbe5e6133110  run_kinds.py  mtime 2026-11-01 10:54:53
+
+All four equal the build record's hashes (note2-m12.json > f8_records > build_record), and each was last modified before M12's bench
+ran (Sun 8 Nov 05:03:09-05:05:19 PST). Post hoc: it shows the files at that directory now, not a hash taken at the run.

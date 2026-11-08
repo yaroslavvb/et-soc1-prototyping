@@ -1,0 +1,34 @@
+M12 dated note 2: re-run log (fix-m12, Q158a). Started Sun 08 Nov 2026 06:27:11 PST on the Intel,
+/usr/bin/python3 3.9.6, lab HEAD 13a4b34d, from the repo root.
+
+== /usr/bin/python3 -B tools/claims-v3/m12/note2_m12.py --root .          (writes note2-m12.json, logs/note2-m12.txt)
+rc 0
+== /usr/bin/python3 -B tools/claims-v3/m12/note2_m12.py --root . --check
+CHECK PASS
+rc 0
+== /usr/bin/python3 -B tools/claims-v3/m12/fit_m12.py --root . --check
+CHECK PASS
+rc 0
+== /usr/bin/python3 -B tools/claims-v3/m12/heldout_m12.py --root . --check
+CHECK PASS
+rc 0
+== /usr/bin/python3 -B tools/claims-v3/m12/candidates_m12.py --root . check
+CHECK PASS
+rc 0
+== /usr/bin/python3 -B tools/claims-v3/m12/selftest_m12.py --root .   (stdout against logs/selftest-m12.txt)
+rc 0
+selftest stdout BYTE-EQUAL to logs/selftest-m12.txt (its last line: 10 of 10 PASS)
+== shasum -a 256 -c SHA256SUMS-m12 ; shasum -a 256 -c SHA256SUMS-m12-rules   (in tools/claims-v3/m12)
+SHA256SUMS-m12 rc 0 : 37 OK, 0 not OK
+SHA256SUMS-m12-rules rc 0 : 1 OK, 0 not OK
+== git status --short -- tools/claims-v3/m12 (this directory after the runs: only this lane's new, untracked files; no tracked file changed)
+?? tools/claims-v3/m12/FREEZE-m12.md.dated-note-1.md
+?? tools/claims-v3/m12/README.md.dated-note-1.md
+?? tools/claims-v3/m12/REFIT.md.dated-note-2.md
+?? tools/claims-v3/m12/heldout-m12.md.dated-note-1.md
+?? tools/claims-v3/m12/logs/note2-bench-build-m12.txt
+?? tools/claims-v3/m12/logs/note2-m12.txt
+?? tools/claims-v3/m12/note2-m12.json
+?? tools/claims-v3/m12/note2_m12.py
+tracked files changed anywhere in the clone: 0
+Ended 06:27:30 PST.

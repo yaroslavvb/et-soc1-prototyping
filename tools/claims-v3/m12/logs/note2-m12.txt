@@ -1,0 +1,71 @@
+M12, dated note 2's re-runs (note2_m12.py), POST HOC, from committed files only; nothing of M12 is refitted or changed.
+
+f1 his pair is E182's T1 (in-sample by construction):
+  T1's kinds ['int8.e178_v5', 'int8.e178_v4'] = E178-H-int8's ['int8.e178_v5', 'int8.e178_v4'], same words: True ({'int8.e178_v5': ['0x05050505', '0x05050505'], 'int8.e178_v4': ['0x04040404', '0x04040404']})
+  E182 T1 (blind, registered) +0.0470 [+0.0403, +0.0537] W, se 0.0033; E182-HT {'verdict': 'POSITIVE', 'sign': 'POSITIVE', 'repeat': 'AGREES', 'size_P': 'FAIL HIGH', 'size_E': 'FAIL HIGH', 'size_PACC': 'FAIL HIGH'}
+  E178-H-int8 (blind, registered) +0.0532 [+0.0217, +0.0848]; M10 +0.1857
+  M12 on E178's pair +0.047023 (se 0.0032); minus T1 +0.000022; M12's in-sample T1 +0.047035 (z -0.010)
+  leverage of each train in the int8 fit: T1 0.9534, T2 0.9797, T3 0.9926, T4 0.0145
+  k_walk fitted 1.23907 fJ (se 0.1393); from T1 alone at the fitted betas and k_scp 1.23762 fJ, at E182-A's and E182-B's betas 1.23917 fJ; T1's design row [0.0, 0.023232, 0.0, 1.0, 1.0]
+
+f2 E178's held-out kinds, new to E182 or also fitted by E182 (by word); rms M10 -> M12 (bias), centred, 0 inside, rms(M12) - rms(M10) [95%, heldout_m12.py's bootstrap]:
+  E178 all (40)                  n 40: 0.1218 (-0.0135) -> 0.0678 (-0.0383); centred 0.1211 -> 0.0559; inside 19 -> 32; -0.0541 [-0.0831, -0.0241]
+  E178 new to E182 (32)          n 32: 0.1205 (+0.0009) -> 0.0604 (-0.0331); centred 0.1205 -> 0.0505; inside 17 -> 28; -0.0601 [-0.0960, -0.0234]
+  E178 E182 also fitted (8)      n  8: 0.1270 (-0.0711) -> 0.0915 (-0.0588); centred 0.1052 -> 0.0702; inside 2 -> 4; -0.0354 [-0.0711, +0.0014]
+  E178 int8 new to E182          n  7: 0.2166 (-0.1901) -> 0.0858 (-0.0812); centred 0.1038 -> 0.0279; inside 1 -> 4; -0.1308 [-0.2065, -0.0513]
+  E178 int8 E182 also fitted     n  6: 0.1367 (-0.1246) -> 0.0996 (-0.0983); centred 0.0562 -> 0.0157; inside 1 -> 2; -0.0371 [-0.0813, +0.0093]
+  E178 fp32 new to E182          n 12: 0.0906 (+0.0822) -> 0.0368 (+0.0217); centred 0.0381 -> 0.0297; inside 5 -> 12; -0.0539 [-0.0720, -0.0340]
+  E178 fp32 E182 also fitted     n  2: 0.0919 (+0.0892) -> 0.0615 (+0.0598); centred 0.0223 -> 0.0142; inside 1 -> 2; -0.0304 [-0.0375, -0.0212]
+  E178 fp16 (all new to E182)    n 13: 0.0540 (+0.0286) -> 0.0614 (-0.0578); centred 0.0458 -> 0.0205; inside 11 -> 12; +0.0074 [-0.0258, +0.0343]
+  the 8 E182 also fitted: fp32.e178_v4, fp32.e178_v5, int8.e178_a4_b5, int8.e178_a5_b4, int8.e178_v4, int8.e178_v5, int8.neg_ones, int8.ones
+
+f3 train noise: registered se 0.00250 W (half-width 0.0051 at 32 units); measured int8 0.00252, fp32 0.00298; fp16: none measured (E182 ran no fp16 train): fp32's measured se and df 37 stand in
+  each: T1 0.00330, T2 0.00219, T3 0.00247, T4 0.00257, T5 0.00298, T6 0.00298
+  train: M12 (se), M10 | registered: power if M12, separation | measured: power if M12, separation | REFIT's letter (train se alone): separation registered, measured
+  A15-A7    +0.0441 (0.0069), +0.0199 | 1.000, 3.31 | 1.000, 3.23 | 9.69, 8.13
+  A23-A15   +0.0585 (0.0069), +0.0343 | 1.000, 3.31 | 1.000, 3.23 | 9.69, 8.13
+  B15-B7    +0.1261 (0.0069), +0.0199 | 1.000, 14.51 | 1.000, 14.17 | 42.49, 35.67
+  B23-B15   +0.1405 (0.0069), +0.0343 | 1.000, 14.51 | 1.000, 14.17 | 42.49, 35.67
+  EA        -0.0023 (0.0000), -0.0023 | 0.129, 0.00 | 0.105, 0.00 | 0.00, 0.00
+  EB        -0.0023 (0.0000), -0.0023 | 0.129, 0.00 | 0.105, 0.00 | 0.00, 0.00
+  H16       +0.2051 (0.0026), +0.0000 | 1.000, 57.03 | 1.000, 52.00 | 82.00, 68.84
+  Q3-sign   +0.1080 (0.0021), +0.0785 | 1.000, 8.99 | 1.000, 8.95 | 11.81, 11.72
+  Q3-swap   +0.0015 (0.0003), +0.0157 | 0.079, 5.65 | 0.079, 5.60 | 5.69, 5.64
+  Q63-sign  +0.0292 (0.0017), -0.0471 | 1.000, 25.21 | 1.000, 25.07 | 30.49, 30.24
+  Q63-swap  +0.0073 (0.0016), +0.0785 | 0.777, 24.18 | 0.771, 24.04 | 28.45, 28.22
+  S15       +0.0820 (0.0010), +0.0000 | 1.000, 30.31 | 1.000, 26.02 | 32.80, 27.54
+  S23       +0.1640 (0.0021), +0.0000 | 1.000, 50.57 | 1.000, 45.25 | 65.60, 55.07
+  X8        +0.1510 (0.0137), +0.1553 | 1.000, 0.30 | 1.000, 0.30 | 1.70, 1.69
+
+f4 fp16's held-bit level as a fraction of F16-SAME's (e = D - (P10 + c_f) regressed through 0 on M12's held-bit increment x = gamma_A pc_A + gamma_B pc_B, E178's rows; slope 1 = F16-SAME's level per bit, 0 = no held-bit term):
+  fp16, 13 E178 kinds: 0.497 (se 0.086); fp32, 14 kinds: 1.202 (se 0.135); fp16 rows with equal A and B words: 11
+  H16: F16-SAME +0.2051 (se 0.0026), M10 +0.0000; at fp16's fraction +0.1019 (se 0.0176) [+0.0674, +0.1364] W
+  at fp32's measured train noise (each arm's own se combined): the scaled value is 5.7 se from M10 and 5.7 se from F16-SAME; power if it is true 1.000
+
+f5 int8 session level, E178's D minus E182's on the kinds both ran: int8.e178_a4_b5 -0.1116, int8.e178_a5_b4 -0.1133, int8.e178_v4 -0.1054, int8.e178_v5 -0.0480, int8.neg_ones -0.0806, int8.ones -0.1079
+  range -0.1133 to -0.0480 W, mean -0.0945; M12's bias on E178's 13 int8 kinds -0.0891; M12-S1's shift -0.0737; c8 1.6820 (se 0.0144)
+
+f7a flip model (E178's, compiled unchanged) on E182's kinds: 24 of 24 equal to forecast-e182.json's launch means; unequal []
+f7b reference rows, counts-m12.json against the committed counts: fp32.e182_a1_b3fffffff vs E182: mean True, 3 points True; fp32.ones vs E178: mean True, 3 points True; int8.zeros vs E178: mean True, 3 points True; fp32.zeros vs E178: mean True, 3 points True; fp16.zeros vs E178: mean True, 3 points True
+f7c M10's int8 rate: the mean used 1.920619e+09 /s, the median 1.920658e+09 (+0.0020%); M10's int8 kinds move at most 4.06e-05 W and its int8 trains 3.18e-06 W; the rates used against E182's registered: fp16 -0.0042%, fp32 +0.0026%, int8 +0.0084%
+f7d the two power forms: in f3 (committed = registered, train se combined with M12's; REFIT's letter = the train's se alone)
+f7e sigma_K: the code's denominator 17.940 effective dof (sigma_K 0.03609 W); n_K - p (15): sigma_K 0.03948, d k_walk +1.87e-05 fJ, d k_scp +8.69e-04 fJ, d beta_A -3.0e-06, d beta_B -2.9e-06, d c8 +1.7e-05 W; n_K - 1 (19): sigma_K 0.03507, d k_walk -6.92e-06 fJ, d k_scp -3.13e-04 fJ, d beta_A +1.1e-06, d beta_B +1.0e-06, d c8 -6.0e-06 W; n_K (20): sigma_K 0.03418, d k_walk -1.35e-05 fJ, d k_scp -6.08e-04 fJ, d beta_A +2.1e-06, d beta_B +2.0e-06, d c8 -1.2e-05 W
+f7f pool 8's class S tiles (E171): 13 of 13 hold one word on one side and two words one bit apart on the other (fp16: at most one bit a half)
+     fp16.b_onebit_b8_pi: fp16, distinct A 1, B 2, xor popcount 2, halves [1, 1]
+     fp16.s8_onebit_b10_c127c127: fp16, distinct A 1, B 2, xor popcount 2, halves [1, 1]
+     fp16.s8_onebit_b2_c46ec46e: fp16, distinct A 1, B 2, xor popcount 2, halves [1, 1]
+     fp16.s8_onebit_b4_c2e2c2e2: fp16, distinct A 1, B 2, xor popcount 2, halves [1, 1]
+     fp16.s8_onebit_b7_b945b945: fp16, distinct A 1, B 2, xor popcount 2, halves [1, 1]
+     fp32.a_onebit_b5_third: fp32, distinct A 2, B 1, xor popcount 1, halves [1, 0]
+     fp32.b_onebit_b20_one: fp32, distinct A 1, B 2, xor popcount 1, halves [0, 1]
+     fp32.s8_onebit_b13_41783e4a_A40080727: fp32, distinct A 1, B 2, xor popcount 1, halves [1, 0]
+     fp32.s8_onebit_b14_3ef6ccbf: fp32, distinct A 1, B 2, xor popcount 1, halves [1, 0]
+     fp32.s8_onebit_b18_be2584eb: fp32, distinct A 1, B 2, xor popcount 1, halves [0, 1]
+     fp32.s8_onebit_b19_c11b3dd2: fp32, distinct A 1, B 2, xor popcount 1, halves [0, 1]
+     fp32.s8_onebit_b26_bffdf029: fp32, distinct A 1, B 2, xor popcount 1, halves [0, 1]
+     fp32.s8_onebit_b7_3ee13961: fp32, distinct A 1, B 2, xor popcount 1, halves [1, 0]
+
+f8 the committed build record (docs/reports/data/2026-11-04-q141t-s7-recount/step243/build-record-mini.json): accum aeddf308e18ac74928beddff960662c4065659b28381b912a1cad1774ca500bc, obj_vpu/Vtb a740318ce8d8a097c3d42911a3191acc01825aa3790d711021261280750f6c57, settle_count 9da18b7582db59ba5d05e8205fe3a5813aecceea30d8d9d90507ee6e2ba6d437, run_kinds.py fa8112e9ff953f714f3a2161990a581c37617884a44cc6dddfb6bbe5e6133110
+f8 placement on E178's 14 fp32 kinds (gamma_A pc_A + gamma_B pc_B = (gamma_A + gamma_B)(pc_A + pc_B)/2 + (gamma_B - gamma_A)(pc_B - pc_A)/2): 12 of 14 with pc_A = pc_B; the placement part at most 0.0051 W; the level part 0.0163 to 0.1305 W
+     fp32.e178_a4_b5: pc 2/3, placement part +0.0051, level part 0.0408
+     fp32.e178_a5_b4: pc 3/2, placement part -0.0051, level part 0.0408
