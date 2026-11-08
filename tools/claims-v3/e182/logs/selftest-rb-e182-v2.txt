@@ -1,0 +1,103 @@
+scratch repository: 1631 files committed (13 of them the workload's)
+
+== A. the dry listing v2 (FULL and the fallback): every step exits 0, no ssh or rsync call
+dry listing v2: 18 steps listed, 0 exited non-zero
+-> PASS (A dry listing v2)
+
+== K. step 3 v2 with no window in RB_OUT (s02 not run)
+[s03_desk_v2_e182] STOP: no window in RB_OUT: run s02_window_e182.sh first (kit v5: s02 before s03)
+-> PASS (K step 3 v2 refuses without step 2's window)
+
+== S1. step 7 v2 on a clean stand-in box, then the box's own build and checks in the tree built from its rsync alone
+[s07_a3_sync_v2_e182] harness-e182.json: 66 files to sync, all covered (46 by E182's 12 paths, 20 more); 5 built on the box, checked in step 8
+[s07_a3_sync_v2_e182] harness-e182-note1.json: 10 files to sync, all covered (2 by E182's 12 paths, 8 more); 0 built on the box, checked in step 8
+[s07_a3_sync_v2_e182] the sync list: 40 paths
+[s07_a3_sync_v2_e182] synced to aifoundry3:aifoundry/ (40 paths); the rsync sent 126 files' contents there, 9 of them under workloads/sparsity/
+the sync alone: harness-e182.json 0 absent, 0 differing, 5 built on the box; harness-e182-note1.json 0 absent, 0 differing
+-> PASS (S1a step 7 v2 exits 0 with one rsync; its tree holds all 66 non-built files of harness-e182.json and all 10 of harness-e182-note1.json at their sha256)
+NOTE1 FILES OK: 10 files match harness-e182-note1.json (8 build inputs, 2 box files)
+BUILD INPUTS OK: 9 files in the build's copy at their pins, and nothing else
+BUILD OK: build/e182host/b/host/sparsity_host
+the build: rc 0, BUILD INPUTS OK 1, BUILD OK 1, 9 files in its copy (9 inputs; main.cpp patched in place), record names the registered patched source 1; check_e182.py on the box's terms: rc 9, 4 differences, 4 of them the four stand-in box binaries
+-> PASS (S1b build_host_e182_v2.sh on the synced tree: BUILD OK from exactly the 9 pinned inputs (the copy's main.cpp compiled against the mock runtime); only the four stand-in binaries differ on the box's terms)
+  V3_DRY block 18220: rc 0, 70 kinds launches and 0 train processes through the C wrapper, 0 stubs executed
+  V3_DRY block 18215: rc 0, 4 kinds launches and 64 train processes through the C wrapper, 0 stubs executed
+  V3_DRY block 18201: rc 0, 10 kinds launches and 2 train processes through the C wrapper, 0 stubs executed
+HARNESS OK: 66 files match harness-e182.json (desk or dry run: binaries and the train host not checked)
+NOTE1 FILES OK: 10 files match harness-e182-note1.json (8 build inputs, 2 box files)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+new_tiles": 16, "e178_reused": 6, "e78_own": 2, "planned_passes": [18220, 18221, 18222, 18223], "trains": [18210, 18211, 18212, 18213, 18214, 18215], "runs_per_pass": 68, "smoke": 10, "problems": []}
+
+box-side checks (check, inputs, preflight, verify, blocks failing, start gate): 0.0.0.0.0.8; network calls: 0
+-> PASS (S1c in that tree, V3_DRY: HARNESS OK 66, NOTE1 FILES OK 10, GO, 0 problems, the three V3_DRY blocks with the host the build made, start gate 8, no network call)
+
+== S3. step 7 v2 with an uncommitted change in lib.sh, then in a build input (sparsity_args.h)
+[s07_a3_sync_v2_e182] STOP: the synced paths have uncommitted changes: sync only the pushed commit
+[s07_a3_sync_v2_e182] STOP: the synced paths have uncommitted changes: sync only the pushed commit
+-> PASS (S3 exit 16 each, no rsync)
+
+== G1. step 11 v2 FULL yes with no window
+-> PASS (G1 no window: 10)
+
+== G2. step 11 v2 FULL yes past the last start
+[s11_a3_session_v2_e182] STOP: past the round's last start (2026-11-06 10:00 PST): no new card session
+-> PASS (G2 past the last start: 16)
+
+== W1. step 20 (v1, unchanged) with no launch offset written today on the box
+RUN-UNKNOWN e182: not launched today by the runbook (no log offset written today)
+-> PASS (W1 RUN-UNKNOWN: 10)
+
+== C1. step 22 v2 with the collector's stand-in set but RB_DESKTEST unset
+-> PASS (C1 the stand-in refused: 10, no call)
+
+== F1b. a build input changed on the box: step 8 v2 builds nothing; step 7 v2 again restores it
+[s08_a3_preflight_v2_e182] STOP: the train host's build inputs on aifoundry3 are not the pinned ones (the lines above), so nothing was built: run step 7 v2 once more, then this step; if they differ again, no train runs today: run step 8 v2 with --no-trains, th
+[s07_a3_sync_v2_e182] synced to aifoundry3:aifoundry/ (40 paths); the rsync sent 1 files' contents there, 1 of them under workloads/sparsity/
+[s07_a3_sync_v2_e182] NOTE: the box held other copies of 1 workload files until now (the itemized lines above): its new copies are the committed ones; step 8 v2 checks them before the build, and the s
+-> PASS (F1b inputs differ: 16, nothing built (S1's build removed first); the sync again restores the file and names it)
+
+== F1. the build fails on the box (FAKE_CMAKE_FAIL=build): step 8 v2 stops with the fallback
+[s08_a3_preflight_v2_e182] STOP: the train host did not build on aifoundry3 (the lines above): no train runs today: run step 8 v2 with --no-trains, then step 10 v2 with --no-trains (start, then wait), then step 11 v2 PASSES no (E182.md section 7's registered fallback; every train rule reads NOT SCORED)
+-> PASS (F1 build failed: 16, the fallback's three v2 steps named, no train host and no build record on the box)
+
+== F2. the fallback's dry pass: step 10 v2 start --no-trains, then wait --no-trains
+JOB-STARTED a3-dry-e182-nt 2026-11-07 16:12:39 PST pid 76697
+E182 dry 18220 rc=0
+E182 dry 18201 --smoke trains=no rc=0
+E182 start gate rc=8 (want 8)
+E182 dry 18220 rc=0
+E182 dry 18201 --smoke trains=no rc=0
+E182 start gate rc=8 (want 8)
+-> PASS (F2 job a3-dry-e182-nt ends rc 0 with no train host on the box: 18220 0, the smoke with the trains off 0, the start gate 8; no network call from the box)
+
+== F2v. the fault, shown: v1's step 10 on the same box, then v1's step 11 PASSES no
+E182 dry 18220 rc=0
+E182 dry 18215 rc=2
+E182 dry 18201 --smoke rc=2
+E182 start gate rc=8 (want 8)
+E182 dry 18220 rc=0
+E182 dry 18215 rc=2
+E182 dry 18201 --smoke rc=2
+E182 start gate rc=8 (want 8)
+[s11_a3_session_e182] STOP: e182 refused on the box: REFUSED: E182's dry pass (s10_a3_dry_e182.sh) has not ended rc 0 today
+-> PASS (F2v v1's dry job ends non-zero (18215 rc 2: no train host), and v1's step 11 refuses: the fallback was blocked)
+
+== F3. step 11 v2: FULL no, FULL yes (the trains' dry job ended 1), PASSES no
+[s11_a3_session_v2_e182] STOP: e182 refused on the box: REFUSED: E182's dry pass for plan FULL (step 10 v2's job: a3-dry-e182) has not ended rc 0 today
+[s11_a3_session_v2_e182] e182 launched on aifoundry3 (plan PASSES, trains no); wait with s20_wait_e182.sh (bounded), and read its smoke gate before counting it as started
+session start (budget anchor T0 16:13:14 PST; plan PASSES; trains no)
+harness check failed: no device opened
+-> PASS (F3 FULL no 10 (no call); FULL yes refused on the box 10, nothing launched; PASSES no launched, and the stand-in session refuses at its harness check)
+
+== F4. step 22 v2 after the failed build (no build record on the box)
+[s22_collect_v2_e182] absent on the box, named in build/e182-raw/logs/absent-on-box.txt: build/e182host/SHA256
+STOPTEST-OK e182-stoptest/p18202: no launch record and no C record
+[s22_collect_v2_e182] STOP: E182: a session that must carry a C log has no finished check of C (the lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, then collect again
+-> PASS (F4a both copies exit 0, the absent record named, the session and build logs copied; the step goes on to the C-session gate (14 here by design))
+[s22_collect_e182] STOP: the logs' copy exited non-zero
+-> PASS (F4v the fault, shown: v1's step 22 dies at its logs' copy)
+-> PASS (F4c with a build record on the box, v2 copies it and names nothing of it absent)
+[s22_collect_v2_e182] STOP: aifoundry3 holds no E182 block, smoke or stop test: the session ran nothing to collect (read build/e182/session.log there)
+-> PASS (F4d nothing to collect: 16, before any copy)
+
+SELFTEST-RB-E182-V2 19 of 19 PASS
