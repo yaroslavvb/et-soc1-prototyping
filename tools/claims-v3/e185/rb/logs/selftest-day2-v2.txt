@@ -1,0 +1,117 @@
+scratch clone: shared and sparse (72 data and bench directories the lists name), HEAD the lab clone's 7eddbe6c with the working E183 and E185 files committed over it (11 files changed, 1445 insertions(+)); a local bare upstream and a helper clone of it
+
+== A. the dry listings: E185's v5 and E183's v4, every step exiting 0 with no call, in their order
+dry listing: 0 step(s) exited non-zero
+dry listing: 13 steps listed, 0 exited non-zero
+calls: 0; E185 look-first.2.14-after.m1-after; E183 1.look-first.m1-after
+-> PASS (A the dry listings: 0 failing, no call, the look before the post, E185's step 2 v5 twice with step 14 after the second, each M1 gate v2 after its collection)
+
+== K. no window, then a window written on another day: refused before the day-2 check
+[s03_desk_v5_e185] STOP: no window yet: run s02_window_e185.sh with his go's day, last start and last end
+[s03_desk_v4_e183] STOP: no window in RB_OUT: run s02_window_e183.sh first (kit v5: s02 before s03)
+[s03_desk_v5_e185] STOP: the window in RB_OUT was not written today: run s02_window_e185.sh with his go's day, last start and last end first
+[s03_desk_v4_e183] STOP: RB_OUT's window was not written today: run s02_window_e183.sh first
+-> PASS (K E185 v5 and E183 v4: 10 without a window and 10 with another day's, the day-2 check never reached, no call)
+
+== P0. the intact clone: the checks v2 and v1, E185 v5, E183 v4, and the earlier step 2s
+[check_day2_v2]   untracked: 0 untracked file(s) in the day's 156 directories, none a module
+[check_day2_v2]   the day's paths: 6 directories and 592 named files outside them (47 lists); 156 directories read for additions and untracked modules
+[check_day2_v2] DAY2-CHECK-V2 OK at 7245fed78d00: v1 at its committed bytes; HEAD descends from 6860643c; 45 lists at their counts, own bytes and entries (E183's brief list's M1 entries and the two M1 lists reported); no change but an addition since 6860643c on the day's paths; no shadowing addition; no uncommitted change; no un
+[s03_desk_v5_e185] desk check v5: the day-2 check v2 passed at 7245fed78d00 (pulled; v1 at its committed bytes; the day's 47 lists at their counts, own bytes and entries; no change but an addition since 6860643c on the day's paths; no shadowing addition; nothing uncommitted; no untracked module in the day's directories), then st
+[s03_desk_v4_e183] desk check v4: the day-2 check v2 passed at 7245fed78d00 (pulled; v1 at its committed bytes; the day's 47 lists at their counts, own bytes and entries; no change but an addition since 6860643c on the day's paths; no shadowing addition; nothing uncommitted; no untracked module in the day's directories), then st
+  additions since 6860643c in v2's directories at the clone's HEAD: 29
+  E185 v4 alone 0, E183 v3 alone 0
+-> PASS (P0 v2 0 and v1 0; E185 v5 0 (v2 OK at HEAD, v4's v1 OK, v3's M1 line 21 of 21); E183 v4 0; E185 v4 and E183 v3 each 0)
+
+== L3. M11's imported hpl/surface_hpl.py edited and committed: v1 passes (the fault), v2, E185 v5 and E183 v4 refuse
+  v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: e185/rb/SHA256SUMS-day2-closure-v2 (1 entry not OK: tools/claims-v3/hpl/surface_hpl.py) | history: 1 change(s) other than an addition since 6860643c on the day's paths: M tools/claims-v3/hpl/surface_hpl.py (d52ffea5)
+0.16
+-> PASS (L3 v1 0 (the fault, re-made); v2 16 (the history and the closure list name it); E185 v5 16 and E183 v4 16, where E185 v4 and E183 v3 alone read 0)
+
+== L4. E78's committed runs.csv (the scorer opens it) edited and committed: v1 passes, v2 refuses
+  v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: m10/SHA256SUMS (1 entry not OK: docs/reports/data/2026-10-31-e78-kinds-energy-matrix/runs.csv) | m11/SHA256SUMS-h2-reader-v2 (1 entry not OK: docs/reports/data/2026-10-31-e78-kinds-energy-matrix/runs.csv) | e185/rb/SHA256SUMS-day2-closure-v2 (1 entry not OK: docs/rep
+0.16
+-> PASS (L4 v1 0; v2 16, the history names it)
+
+== L5. the check of C (ccheck.py) edited and committed: v1 passes, v2 refuses
+  v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: m11/SHA256SUMS-h2-reader-v2 (1 entry not OK: tools/claims-v3/ccheck/ccheck.py) | e185/rb/SHA256SUMS-day2-closure-v2 (1 entry not OK: tools/claims-v3/ccheck/ccheck.py) | history: 1 change(s) other than an addition since 6860643c on the day's paths: M tools/claims-v3/c
+0.16
+-> PASS (L5 v1 0; v2 16)
+
+== L2. M5's fit_m5.py edited together with its line in M10's SHA256SUMS (the scorer opens that list): v1 passes, v2 refuses
+  v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: m10/SHA256SUMS (its own bytes differ from the pin) | m11/SHA256SUMS-h2-reader-v2 (1 entry not OK: docs/reports/data/2026-11-01-q133b-power-model/fit_m5.py) | m11/SHA256SUMS-h2-refit (1 entry not OK: tools/claims-v3/m10/SHA256SUMS) | e185/rb/SHA256SUMS-day2-closure-v2
+0.16
+-> PASS (L2 v1 0 (the fault: the file and its line rewritten together); v2 16, M10's list off its own bytes and the file in the history)
+
+== E1. E181's committed measured-pass marks (score_e185.sh's own input) edited and committed: v1 passes, v2 refuses
+  v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: e185/rb/SHA256SUMS-day2-closure-v2 (1 entry not OK: docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/aifoundry3/e181/p18120/marks.jsonl) | history: 1 change(s) other than an addition since 6860643c on the day's paths: M docs/reports/data/2026-11-06-e181-m11-
+0.16
+-> PASS (E1 v1 0; v2 16)
+
+== A2. the bench's accum.c (read by the check of C) edited and committed: v1 passes, v2 refuses
+  v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: e185/rb/SHA256SUMS-day2-closure-v2 (1 entry not OK: rtl-sim/fma_toggle_v2/accum.c) | history: 1 change(s) other than an addition since 6860643c on the day's paths: M rtl-sim/fma_toggle_v2/accum.c (6dab98d2)
+0.16
+-> PASS (A2 v1 0; v2 16)
+
+== S7. an added kspeed/e83/statistics.py (on M11's scorer's sys.path), committed: v1 passes, v2 refuses (shadowing)
+  v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: additions: tools/claims-v3/kspeed/e83/statistics.py (shadows the module 'statistics' the system python finds)
+0.16
+-> PASS (S7 v1 0; v2 16, named as shadowing)
+
+== CL. kspeed/e83/predict_e83.py edited together with its line in the closure list: v2 refuses
+  v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: e185/rb/SHA256SUMS-day2-closure-v2 (its own bytes differ from the pin) | history: 2 change(s) other than an addition since 6860643c on the day's paths: M tools/claims-v3/e185/rb/SHA256SUMS-day2-closure-v2 (4f51b67e); M tools/claims-v3/kspeed/e83/predict_e83.py (4f51b
+16.16
+-> PASS (CL v1 16 (the list is in e185, a core directory) and v2 16: the closure list off its own bytes and in the history)
+
+== U3, U5, U7, U8. untracked modules outside the core directories: v1 passes, v2 refuses
+  U3 v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: untracked: 1 untracked module(s) in the day's directories: tools/claims-v3/e164/json.py
+0.16
+  U5 v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: untracked: 1 untracked module(s) in the day's directories: tools/claims-v3/hpl/statistics.py
+0.16
+  U7 v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: untracked: 1 untracked module(s) in the day's directories: tools/claims-v3/e164/json/__init__.py
+0.16
+  U8 v1.v2 [check_day2_v2] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: untracked: 1 untracked module(s) in the day's directories: tools/claims-v3/hpl/statistics.cpython-39-darwin.so
+0.16
+-> PASS (U3 json.py, U5 statistics.py, U7 a json package, U8 an extension module: v1 0, v2 16, each named)
+
+== U6. an untracked working note outside the core directories: v2 passes, the file counted
+  v1.v2 0.0
+-> PASS (U6 v1 0 and v2 0 (a note is not a module), counted)
+
+== W. an untracked working note under e183 (a core directory): E183 v4 and E185 v5 refuse (status)
+[s03_desk_v4_e183] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: status: 1 uncommitted change(s) on the day's paths: ?? tools/claims-v3/e183/working-note.md
+-> PASS (W E183 v4 16 and E185 v5 16, the note named (an uncommitted file on the day's paths))
+
+== B. rb/check_day2_v1.py changed and not committed: v2 refuses before any read
+[check_day2_v2] DAY2-CHECK-V2 STOP: rb/check_day2_v1.py is not at its committed bytes (sha256 1b4645f294377d21..., pinned 8b49ddee192076ca...)
+-> PASS (B v2 16 on v1's bytes, nothing else read)
+
+== R. the M1 readers' gate v2
+[check_day2_v2] M1-READER-GATE-V2 e185 OK at 4753b2b4fda7: running /usr/bin/python3 -B tools/claims-v3/e185/arm_m1_read_e185.py --data docs/reports/data/2026-11-09-e185-m11-session3-aifoundry3 --out docs/reports/data/2026-11-09-e185-m11-session3-aifoundry3/arm-m1-e185
+[check_day2_v2] READER-RC 0 (a refusal or a non-zero exit is recorded, never a block)
+[check_day2_v2] M1 reader outputs: 2 new file(s) in docs/reports/data/2026-11-09-e185-m11-session3-aifoundry3, nothing else changed; commit them with a dated note beside the data README
+[check_day2_v2] M1-READER-GATE STOP: the M1 reader gate v2 for E185 refused, the reader not run: docs/reports/data/2026-11-09-e185-m11-session3-aifoundry3: 1 uncommitted change(s): ?? docs/reports/data/2026-11-09-e185-m11-session3-aifoundry3/extra-uncommitted.txt
+[check_day2_v2] M1-READER-GATE-V2 e183 OK at 4753b2b4fda7: running /usr/bin/python3 -B tools/claims-v3/e183/arm_m1_read_e183.py --reduced docs/reports/data/2026-11-09-e183-vector-add-r2-aifoundry3/reduced-e183.json --scored docs/reports/data/2026-11-09-e183-vector-add-r2-aifoundry3/scored-e183.json --out docs/reports/data/2026-1
+[check_day2_v2] READER-RC 1 (a refusal or a non-zero exit is recorded, never a block)
+[check_day2_v2] M1 reader outputs: 0 new file(s) in docs/reports/data/2026-11-09-e183-vector-add-r2-aifoundry3, nothing else changed; commit them with a dated note beside the data README
+[check_day2_v2] M1-READER-GATE STOP: the M1 reader gate v2 for E185 refused, the reader not run: e185/rb/SHA256SUMS-day2-closure-v2 (1 entry not OK: tools/claims-v3/hpl/surface_hpl.py) | history: 1 change(s) other than an addition since 6860643c on the day's paths: M tools/claims-v3/hpl/surface_hpl.py (aacd9e95)
+-> PASS (R1 E185's gate v2 0, the reader run (rc 0), its two outputs the only new files; R2 uncommitted 16, not run; R4 E183's gate v2 0, the reader's rc 1 printed, nothing written; R6 a scorer module changed: v1's gate 0 (the fault), v2's 16, not run)
+
+== LM. the upstream gains an addition between the check v2's pull and step 2 v4's: v5 refuses
+[s03_desk_v5_e185] STOP: the lab clone moved during step 2 v4 (562cdb9956f9 to 5ee7a7856dd8): run step 2 v5 again
+-> PASS (LM the lab moved during step 2 v4: v5 16)
+
+== U. the upstream gone: v5 refuses, the pull the network's
+[s03_desk_v5_e185] DAY2-CHECK-V2 STOP: the day-2 check v2 failed: pull: the upstream did not answer (the network's: run this step again once it answers)
+-> PASS (U upstream gone: v5 16, the network's)
+
+== C. coverage: every file the day's 47 lists, E183's harness and E185's runbook pins name lies under v2's paths, and v1's paths
+lists 47; named 953; v2's paths 598 (6 directories); not covered 0; v1's paths not under v2's 0; the closure list 168, not covered 0
+-> PASS (C every named file, every one of v1's paths and the closure list's 168 under v2's paths)
+
+== Z. nothing the test started is left running
+processes under the scratch clone: 0
+-> PASS (Z nothing left running)
+
+calls to any box by the stand-ins: 0; lock lines: 0; elapsed 184 s
+SELFTEST-DAY2-V2 PASS, 20 of 20
