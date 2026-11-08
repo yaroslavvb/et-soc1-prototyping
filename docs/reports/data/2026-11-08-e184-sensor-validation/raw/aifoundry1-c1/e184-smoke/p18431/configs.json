@@ -1,0 +1,73 @@
+{
+ "host": "aifoundry1",
+ "card": "aifoundry1-c1",
+ "arm": "arm_B",
+ "pass": 18431,
+ "what": "the smoke: each of B1's three configurations once, 2 s, on 32 shires",
+ "items": [
+  {
+   "args": [
+    "--pattern",
+    "tstore",
+    "--operands",
+    "random",
+    "--slice-bytes",
+    "32K",
+    "--scp",
+    "--shires",
+    "0xffffffff"
+   ],
+   "burst_s": 2.0,
+   "cfg": "tstore/scp/random",
+   "gap_s": 4.5,
+   "kind": "burst",
+   "mask_m": 32,
+   "seq": 0
+  },
+  {
+   "args": [
+    "--pattern",
+    "fswl.ps",
+    "--operands",
+    "random",
+    "--harts",
+    "2",
+    "--shires",
+    "0xffffffff"
+   ],
+   "burst_s": 2.0,
+   "cfg": "fswl.ps/random/h2",
+   "gap_s": 4.5,
+   "kind": "burst",
+   "mask_m": 32,
+   "seq": 1
+  },
+  {
+   "args": [
+    "--pattern",
+    "flwl.ps",
+    "--operands",
+    "random",
+    "--harts",
+    "2",
+    "--shires",
+    "0xffffffff"
+   ],
+   "burst_s": 2.0,
+   "cfg": "flwl.ps/random/h2",
+   "gap_s": 4.5,
+   "kind": "burst",
+   "mask_m": 32,
+   "seq": 2
+  }
+ ],
+ "host_bin": "build/enercat-e184/host/enercat_host",
+ "stops": [
+  66.0,
+  72.0,
+  "minshire_any"
+ ],
+ "lead_s": 3.0,
+ "dry": false,
+ "desk": false
+}
