@@ -1,0 +1,989 @@
+{
+ "N_launch": {
+  "fp16": 538872,
+  "fp32": 539132,
+  "int8": 913813
+ },
+ "_what": "M12's candidate forecasts for a next one-number TensorFMA run (candidates_m12.py; REFIT.md section 5); a candidate for the next registration, NOT registered",
+ "card": "aifoundry3, s = 1, W over each format's zeros",
+ "checks": {
+  "bench": {
+   "check_mismatch_all_zero": true,
+   "fp16.zeros": {
+    "equal": true,
+    "vpu_nets_map": 58382.0
+   },
+   "fp32.ones": {
+    "equal": true,
+    "vpu_nets_map": 97693.33333333333
+   },
+   "fp32.zeros": {
+    "equal": true,
+    "vpu_nets_map": 58258.0
+   },
+   "int8.zeros": {
+    "equal": true,
+    "vpu_nets_map": 19068.0
+   }
+  },
+  "flip_model_reproduces_e182": {
+   "fp32.e178_v4": true,
+   "int8.e182_a1_b15": true,
+   "int8.ones": true
+  }
+ },
+ "inputs_sha256": {
+  "docs/reports/data/2026-11-04-q142m-m10/m10.json": "37b7fa86d16287917d84797c60b844bea4e8a786fd5420d68db80a80a7ec2e64",
+  "docs/reports/data/2026-11-08-e182-one-number-r2-aifoundry3/e182.json": "78d24195994eb5fcffe7c04cb4edf259a285096cceb01b76ce634bba07cc62b8",
+  "docs/reports/data/2026-11-08-e182-one-number-r2-aifoundry3/scored.json": "be852f6b6482efe71f76f493e23c2f03efc0eee2b0f36e0f9422f332d4b592b3",
+  "rtl-sim/fma_toggle_v2/accum.c": "dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf",
+  "tools/claims-v3/e178/bench/counts-e178.json": "74eac3feffe347a3dbde515eda9458e90ce0835f69d94580fc2ca7edd7f2692b",
+  "tools/claims-v3/e178/flipmodel_e178.c": "af787fd98f6bf4690f74def69339969a69bb954e48b1cca1cb7a6794b7a28ed5",
+  "tools/claims-v3/e182/forecast-e182.json": "850ca2ceebb3ac9cb40593236eaf908d35362ba3bed9246506c51ce97eeec39f",
+  "tools/claims-v3/m12/bench/counts-m12.json": "b29bef08d9f87a1c1f501cf84f4f33e0a5497186370d76cd1d4173e5cb08f57d",
+  "tools/claims-v3/m12/kinds-m12.json": "ef72e1e53724c2d40da7c17b22ad1b0587427e9e76d31430dd02989ce875d09e",
+  "tools/claims-v3/m12/m12.json": "34118a60d338a33c0d4983f51f438156d9b9065a7ec1864f87b6b4da1ca05e56"
+ },
+ "kinds": {
+  "fp16.m12_a3c00_b3fff": {
+   "M12_se_w": 0.021614788302530063,
+   "M12_w": 8.661960295747425,
+   "P10_w": 8.277325684464223,
+   "a_word": "0x3c003c00",
+   "b_word": "0x3fff3fff",
+   "design_row": [
+    1.0,
+    8,
+    28
+   ],
+   "flips_launch_mean": {
+    "byp": 12696.61,
+    "c_in": 353.9608,
+    "c_out": 0.0,
+    "c_store": 11326.744,
+    "scp": 9920.0,
+    "tenb_rz": 0.0,
+    "total": 38529.5182,
+    "wb_rz": 4232.2033
+   },
+   "new_tile": true,
+   "pc_a": 8,
+   "pc_b": 28,
+   "set": "C16",
+   "tile": "tools/claims-v3/m12/tiles/fp16/m12_a3c00_b3fff.bin",
+   "type": "fp16"
+  },
+  "fp16.m12_a3fff_b3c00": {
+   "M12_se_w": 0.021562291903041465,
+   "M12_w": 8.45690089368856,
+   "P10_w": 8.277325684464223,
+   "a_word": "0x3fff3fff",
+   "b_word": "0x3c003c00",
+   "design_row": [
+    1.0,
+    28,
+    8
+   ],
+   "flips_launch_mean": {
+    "byp": 12696.61,
+    "c_in": 353.9608,
+    "c_out": 0.0,
+    "c_store": 11326.744,
+    "scp": 9920.0,
+    "tenb_rz": 0.0,
+    "total": 38529.5182,
+    "wb_rz": 4232.2033
+   },
+   "new_tile": true,
+   "pc_a": 28,
+   "pc_b": 8,
+   "set": "C16",
+   "tile": "tools/claims-v3/m12/tiles/fp16/m12_a3fff_b3c00.bin",
+   "type": "fp16"
+  },
+  "fp32.e182_a1_b3fffffff": {
+   "M12_se_w": 0.02218471257303727,
+   "M12_w": 8.714183711863342,
+   "P10_w": 8.306015810412132,
+   "a_word": "0x3f800000",
+   "b_word": "0x3fffffff",
+   "design_row": [
+    1.0,
+    7,
+    30
+   ],
+   "flips_launch_mean": {
+    "byp": 13353.2503,
+    "c_in": 256.0001,
+    "c_out": 0.0,
+    "c_store": 8192.0028,
+    "scp": 11408.0,
+    "tenb_rz": 0.0,
+    "total": 37660.3366,
+    "wb_rz": 4451.0834
+   },
+   "new_tile": false,
+   "pc_a": 7,
+   "pc_b": 30,
+   "set": "C32B reference",
+   "tile": "tools/claims-v3/e182/tiles/fp32/e182_a1_b3fffffff.bin",
+   "type": "fp32"
+  },
+  "fp32.m12_a1_b3f80000f": {
+   "M12_se_w": 0.01672951435930449,
+   "M12_w": 8.392773332091128,
+   "P10_w": 8.236931511876119,
+   "a_word": "0x3f800000",
+   "b_word": "0x3f80000f",
+   "design_row": [
+    1.0,
+    7,
+    11
+   ],
+   "flips_launch_mean": {
+    "byp": 12200.3323,
+    "c_in": 256.0004,
+    "c_out": 0.0,
+    "c_store": 8192.0142,
+    "scp": 1984.0,
+    "tenb_rz": 0.0,
+    "total": 26699.1244,
+    "wb_rz": 4066.7774
+   },
+   "new_tile": true,
+   "pc_a": 7,
+   "pc_b": 11,
+   "set": "CEQ",
+   "tile": "tools/claims-v3/m12/tiles/fp32/m12_a1_b3f80000f.bin",
+   "type": "fp32"
+  },
+  "fp32.m12_a1_b3f8000ff": {
+   "M12_se_w": 0.016737656862008014,
+   "M12_w": 8.460256556447934,
+   "P10_w": 8.251293455972672,
+   "a_word": "0x3f800000",
+   "b_word": "0x3f8000ff",
+   "design_row": [
+    1.0,
+    7,
+    15
+   ],
+   "flips_launch_mean": {
+    "byp": 12200.8705,
+    "c_in": 256.0149,
+    "c_out": 0.0,
+    "c_store": 8192.4758,
+    "scp": 3968.0,
+    "tenb_rz": 0.0,
+    "total": 28684.3179,
+    "wb_rz": 4066.9568
+   },
+   "new_tile": true,
+   "pc_a": 7,
+   "pc_b": 15,
+   "set": "C32B",
+   "tile": "tools/claims-v3/m12/tiles/fp32/m12_a1_b3f8000ff.bin",
+   "type": "fp32"
+  },
+  "fp32.m12_a1_b3f80ffff": {
+   "M12_se_w": 0.018755389250785525,
+   "M12_w": 8.600752407498755,
+   "P10_w": 8.285546746502988,
+   "a_word": "0x3f800000",
+   "b_word": "0x3f80ffff",
+   "design_row": [
+    1.0,
+    7,
+    23
+   ],
+   "flips_launch_mean": {
+    "byp": 12305.9487,
+    "c_in": 259.8291,
+    "c_out": 0.0,
+    "c_store": 8314.532,
+    "scp": 7936.0,
+    "tenb_rz": 0.0,
+    "total": 32918.2927,
+    "wb_rz": 4101.9829
+   },
+   "new_tile": true,
+   "pc_a": 7,
+   "pc_b": 23,
+   "set": "C32B",
+   "tile": "tools/claims-v3/m12/tiles/fp32/m12_a1_b3f80ffff.bin",
+   "type": "fp32"
+  },
+  "fp32.m12_a1_b3ff80000": {
+   "M12_se_w": 0.01672951435930449,
+   "M12_w": 8.39051773186234,
+   "P10_w": 8.234675911647331,
+   "a_word": "0x3f800000",
+   "b_word": "0x3ff80000",
+   "design_row": [
+    1.0,
+    7,
+    11
+   ],
+   "flips_launch_mean": {
+    "byp": 12620.5061,
+    "c_in": 271.0571,
+    "c_out": 0.0,
+    "c_store": 8673.8264,
+    "scp": 1984.0,
+    "tenb_rz": 0.0,
+    "total": 27756.225,
+    "wb_rz": 4206.8354
+   },
+   "new_tile": true,
+   "pc_a": 7,
+   "pc_b": 11,
+   "set": "CEQ",
+   "tile": "tools/claims-v3/m12/tiles/fp32/m12_a1_b3ff80000.bin",
+   "type": "fp32"
+  },
+  "fp32.m12_a3f80000f_b1": {
+   "M12_se_w": 0.01672235493763958,
+   "M12_w": 8.351761451679355,
+   "P10_w": 8.236931511876119,
+   "a_word": "0x3f80000f",
+   "b_word": "0x3f800000",
+   "design_row": [
+    1.0,
+    11,
+    7
+   ],
+   "flips_launch_mean": {
+    "byp": 12200.3323,
+    "c_in": 256.0004,
+    "c_out": 0.0,
+    "c_store": 8192.0142,
+    "scp": 1984.0,
+    "tenb_rz": 0.0,
+    "total": 26699.1244,
+    "wb_rz": 4066.7774
+   },
+   "new_tile": true,
+   "pc_a": 11,
+   "pc_b": 7,
+   "set": "CEQ",
+   "tile": "tools/claims-v3/m12/tiles/fp32/m12_a3f80000f_b1.bin",
+   "type": "fp32"
+  },
+  "fp32.m12_a3f8000ff_b1": {
+   "M12_se_w": 0.016720500250168843,
+   "M12_w": 8.378232795624386,
+   "P10_w": 8.251293455972672,
+   "a_word": "0x3f8000ff",
+   "b_word": "0x3f800000",
+   "design_row": [
+    1.0,
+    15,
+    7
+   ],
+   "flips_launch_mean": {
+    "byp": 12200.8705,
+    "c_in": 256.0149,
+    "c_out": 0.0,
+    "c_store": 8192.4758,
+    "scp": 3968.0,
+    "tenb_rz": 0.0,
+    "total": 28684.3179,
+    "wb_rz": 4066.9568
+   },
+   "new_tile": true,
+   "pc_a": 15,
+   "pc_b": 7,
+   "set": "C32A",
+   "tile": "tools/claims-v3/m12/tiles/fp32/m12_a3f8000ff_b1.bin",
+   "type": "fp32"
+  },
+  "fp32.m12_a3f80ffff_b1": {
+   "M12_se_w": 0.018714604525987912,
+   "M12_w": 8.436704885851661,
+   "P10_w": 8.285546746502988,
+   "a_word": "0x3f80ffff",
+   "b_word": "0x3f800000",
+   "design_row": [
+    1.0,
+    23,
+    7
+   ],
+   "flips_launch_mean": {
+    "byp": 12305.9487,
+    "c_in": 259.8291,
+    "c_out": 0.0,
+    "c_store": 8314.532,
+    "scp": 7936.0,
+    "tenb_rz": 0.0,
+    "total": 32918.2927,
+    "wb_rz": 4101.9829
+   },
+   "new_tile": true,
+   "pc_a": 23,
+   "pc_b": 7,
+   "set": "C32A",
+   "tile": "tools/claims-v3/m12/tiles/fp32/m12_a3f80ffff_b1.bin",
+   "type": "fp32"
+  },
+  "fp32.m12_a3ff80000_b1": {
+   "M12_se_w": 0.01672235493763958,
+   "M12_w": 8.349505851450568,
+   "P10_w": 8.234675911647331,
+   "a_word": "0x3ff80000",
+   "b_word": "0x3f800000",
+   "design_row": [
+    1.0,
+    11,
+    7
+   ],
+   "flips_launch_mean": {
+    "byp": 12620.5061,
+    "c_in": 271.0571,
+    "c_out": 0.0,
+    "c_store": 8673.8264,
+    "scp": 1984.0,
+    "tenb_rz": 0.0,
+    "total": 27756.225,
+    "wb_rz": 4206.8354
+   },
+   "new_tile": true,
+   "pc_a": 11,
+   "pc_b": 7,
+   "set": "CEQ",
+   "tile": "tools/claims-v3/m12/tiles/fp32/m12_a3ff80000_b1.bin",
+   "type": "fp32"
+  },
+  "fp32.ones": {
+   "M12_se_w": 0.017415346567055342,
+   "M12_w": 8.334112900275692,
+   "P10_w": 8.231392360320935,
+   "a_word": "0x3f800000",
+   "b_word": "0x3f800000",
+   "design_row": [
+    1.0,
+    7,
+    7
+   ],
+   "flips_launch_mean": {
+    "byp": 11405.4653,
+    "c_in": 255.9998,
+    "c_out": 0.0,
+    "c_store": 8191.9948,
+    "scp": 0.0,
+    "tenb_rz": 0.0,
+    "total": 23655.2817,
+    "wb_rz": 3801.8218
+   },
+   "new_tile": false,
+   "pc_a": 7,
+   "pc_b": 7,
+   "set": "C32B/C32A reference",
+   "tile": "tools/claims-v3/kinds/tiles/fp32/ones.bin",
+   "type": "fp32"
+  },
+  "int8.m12_a1_b3": {
+   "M12-1K_w": 1.8184197533213255,
+   "M12_se_w": 0.011097190685010885,
+   "M12_w": 1.7683464304645964,
+   "P10_w": 1.7929391789736617,
+   "a_word": "0x01010101",
+   "b_word": "0x03030303",
+   "design_row": [
+    1.0,
+    0.026550623849201913,
+    0.0019667134183372213,
+    1.0,
+    2.0
+   ],
+   "flips_launch_mean": {
+    "byp": 0.0,
+    "c_in": 767.9998,
+    "c_out": 767.9998,
+    "c_store": 12287.9966,
+    "scp": 1024.0,
+    "tenb_rz": 2048.0,
+    "total": 16895.9962,
+    "wb_rz": 0.0
+   },
+   "new_tile": true,
+   "pc_a": 4,
+   "pc_b": 8,
+   "set": "C8",
+   "tile": "tools/claims-v3/m12/tiles/int8/m12_a1_b3.bin",
+   "type": "int8"
+  },
+  "int8.m12_a1_b63": {
+   "M12-1K_w": 1.878260811837713,
+   "M12_se_w": 0.010188754221515295,
+   "M12_w": 1.9193449591560834,
+   "P10_w": 1.9481904470591385,
+   "a_word": "0x01010101",
+   "b_word": "0x3f3f3f3f",
+   "design_row": [
+    1.0,
+    0.03484769665899764,
+    0.009833567091686106,
+    1.0,
+    6.0
+   ],
+   "flips_launch_mean": {
+    "byp": 0.0,
+    "c_in": 1007.9998,
+    "c_out": 1007.9998,
+    "c_store": 16127.9969,
+    "scp": 5120.0,
+    "tenb_rz": 6144.0,
+    "total": 29407.9965,
+    "wb_rz": 0.0
+   },
+   "new_tile": true,
+   "pc_a": 4,
+   "pc_b": 24,
+   "set": "C8",
+   "tile": "tools/claims-v3/m12/tiles/int8/m12_a1_b63.bin",
+   "type": "int8"
+  },
+  "int8.m12_a3_b1": {
+   "M12-1K_w": 1.816951073163446,
+   "M12_se_w": 0.011097191857303223,
+   "M12_w": 1.7668781662658228,
+   "P10_w": 1.777242200604396,
+   "a_word": "0x03030303",
+   "b_word": "0x01010101",
+   "design_row": [
+    1.0,
+    0.026550623849201913,
+    0.0019667134183372213,
+    2.0,
+    1.0
+   ],
+   "flips_launch_mean": {
+    "byp": 0.0,
+    "c_in": 767.9998,
+    "c_out": 767.9998,
+    "c_store": 12287.9966,
+    "scp": 1024.0,
+    "tenb_rz": 1024.0,
+    "total": 15871.9962,
+    "wb_rz": 0.0
+   },
+   "new_tile": true,
+   "pc_a": 8,
+   "pc_b": 4,
+   "set": "C8",
+   "tile": "tools/claims-v3/m12/tiles/int8/m12_a3_b1.bin",
+   "type": "int8"
+  },
+  "int8.m12_a63_b1": {
+   "M12-1K_w": 1.8709174110483149,
+   "M12_se_w": 0.010188749205085584,
+   "M12_w": 1.912003638162216,
+   "P10_w": 1.86970555521281,
+   "a_word": "0x3f3f3f3f",
+   "b_word": "0x01010101",
+   "design_row": [
+    1.0,
+    0.03484769665899764,
+    0.009833567091686106,
+    6.0,
+    1.0
+   ],
+   "flips_launch_mean": {
+    "byp": 0.0,
+    "c_in": 1007.9998,
+    "c_out": 1007.9998,
+    "c_store": 16127.9969,
+    "scp": 5120.0,
+    "tenb_rz": 1024.0,
+    "total": 24287.9965,
+    "wb_rz": 0.0
+   },
+   "new_tile": true,
+   "pc_a": 24,
+   "pc_b": 4,
+   "set": "C8",
+   "tile": "tools/claims-v3/m12/tiles/int8/m12_a63_b1.bin",
+   "type": "int8"
+  },
+  "int8.m12_am1_bm3": {
+   "M12-1K_w": 1.9263815089549692,
+   "M12_se_w": 0.011199798080547461,
+   "M12_w": 1.876370782686451,
+   "P10_w": 1.8714240708199898,
+   "a_word": "0xffffffff",
+   "b_word": "0xfdfdfdfd",
+   "design_row": [
+    1.0,
+    0.026550623849201913,
+    0.0019667134183372213,
+    8.0,
+    7.0
+   ],
+   "flips_launch_mean": {
+    "byp": 0.0,
+    "c_in": 767.9998,
+    "c_out": 767.9998,
+    "c_store": 12287.9966,
+    "scp": 1024.0,
+    "tenb_rz": 7168.0,
+    "total": 22015.9962,
+    "wb_rz": 0.0
+   },
+   "new_tile": true,
+   "pc_a": 32,
+   "pc_b": 28,
+   "set": "C8",
+   "tile": "tools/claims-v3/m12/tiles/int8/m12_am1_bm3.bin",
+   "type": "int8"
+  },
+  "int8.m12_am1_bm63": {
+   "M12-1K_w": 1.9073942229788228,
+   "M12_se_w": 0.010190291135925698,
+   "M12_w": 1.9485011769690923,
+   "P10_w": 1.9010995119513412,
+   "a_word": "0xffffffff",
+   "b_word": "0xc1c1c1c1",
+   "design_row": [
+    1.0,
+    0.03484769665899764,
+    0.009833567091686106,
+    8.0,
+    3.0
+   ],
+   "flips_launch_mean": {
+    "byp": 0.0,
+    "c_in": 1007.9998,
+    "c_out": 1007.9998,
+    "c_store": 16127.9969,
+    "scp": 5120.0,
+    "tenb_rz": 3072.0,
+    "total": 26335.9965,
+    "wb_rz": 0.0
+   },
+   "new_tile": true,
+   "pc_a": 32,
+   "pc_b": 12,
+   "set": "C8",
+   "tile": "tools/claims-v3/m12/tiles/int8/m12_am1_bm63.bin",
+   "type": "int8"
+  },
+  "int8.m12_am3_bm1": {
+   "M12-1K_w": 1.9278501891128488,
+   "M12_se_w": 0.011199796896791497,
+   "M12_w": 1.8778390468852246,
+   "P10_w": 1.8871210491892556,
+   "a_word": "0xfdfdfdfd",
+   "b_word": "0xffffffff",
+   "design_row": [
+    1.0,
+    0.026550623849201913,
+    0.0019667134183372213,
+    7.0,
+    8.0
+   ],
+   "flips_launch_mean": {
+    "byp": 0.0,
+    "c_in": 767.9998,
+    "c_out": 767.9998,
+    "c_store": 12287.9966,
+    "scp": 1024.0,
+    "tenb_rz": 8192.0,
+    "total": 23039.9962,
+    "wb_rz": 0.0
+   },
+   "new_tile": true,
+   "pc_a": 28,
+   "pc_b": 32,
+   "set": "C8",
+   "tile": "tools/claims-v3/m12/tiles/int8/m12_am3_bm1.bin",
+   "type": "int8"
+  },
+  "int8.m12_am63_bm1": {
+   "M12-1K_w": 1.9147376237682208,
+   "M12_se_w": 0.010190296110924531,
+   "M12_w": 1.9558424979629594,
+   "P10_w": 1.9795844037976698,
+   "a_word": "0xc1c1c1c1",
+   "b_word": "0xffffffff",
+   "design_row": [
+    1.0,
+    0.03484769665899764,
+    0.009833567091686106,
+    3.0,
+    8.0
+   ],
+   "flips_launch_mean": {
+    "byp": 0.0,
+    "c_in": 1007.9998,
+    "c_out": 1007.9998,
+    "c_store": 16127.9969,
+    "scp": 5120.0,
+    "tenb_rz": 8192.0,
+    "total": 31455.9965,
+    "wb_rz": 0.0
+   },
+   "new_tile": true,
+   "pc_a": 12,
+   "pc_b": 32,
+   "set": "C8",
+   "tile": "tools/claims-v3/m12/tiles/int8/m12_am63_bm1.bin",
+   "type": "int8"
+  }
+ },
+ "label": "forecast, frozen; post hoc model; blind for a run only if a later registration commits this file before its first datum",
+ "rates_per_s": {
+  "fp16": 1117240975.8876286,
+  "fp32": 1117211037.5775151,
+  "int8": 1920618572.5949426
+ },
+ "rates_rule": "int8: the mean over E182's 20 int8 kinds; fp32: the median over E182's 4 fp32 kinds; fp16: the median of E182's fp16.randn anchor's per-pass rates",
+ "train_noise": {
+  "halfwidth_w": 0.0051,
+  "se_w": 0.002500596409404599,
+  "units": 32
+ },
+ "trains": {
+  "A15-A7": {
+   "M10_w": 0.019901095651736256,
+   "M12_se_w": 0.006869514589218832,
+   "M12_w": 0.04411989534869498,
+   "d_flips": {
+    "byp": 795.4052000000011,
+    "c_in": 0.015100000000018099,
+    "c_out": 0.0,
+    "c_store": 0.48099999999976717,
+    "scp": 3968.0,
+    "tenb_rz": 0.0,
+    "total": 5029.036199999999,
+    "wb_rz": 265.13499999999976
+   },
+   "d_pc_a": 8,
+   "d_pc_b": 0,
+   "first": "fp32.m12_a3f8000ff_b1",
+   "power_excludes_0_if_M10": 0.9999999983807331,
+   "power_excludes_0_if_M12": 0.9999999528960389,
+   "second": "fp32.ones",
+   "separation_M12_M10_in_se": 3.3128848053276303,
+   "set": "C32A",
+   "what": "A gains 8 held bits from 1.0, B = 1.0"
+  },
+  "A23-A15": {
+   "M10_w": 0.034253290530315894,
+   "M12_se_w": 0.006869514589218832,
+   "M12_w": 0.05847209022727462,
+   "d_flips": {
+    "byp": 105.07819999999992,
+    "c_in": 3.814199999999971,
+    "c_out": 0.0,
+    "c_store": 122.05619999999908,
+    "scp": 3968.0,
+    "tenb_rz": 0.0,
+    "total": 4233.9748,
+    "wb_rz": 35.02610000000004
+   },
+   "d_pc_a": 8,
+   "d_pc_b": 0,
+   "first": "fp32.m12_a3f80ffff_b1",
+   "power_excludes_0_if_M10": 1.0,
+   "power_excludes_0_if_M12": 0.9999999999998569,
+   "second": "fp32.m12_a3f8000ff_b1",
+   "separation_M12_M10_in_se": 3.3128848053276303,
+   "set": "C32A",
+   "what": "A gains 8 held bits, B = 1.0"
+  },
+  "B15-B7": {
+   "M10_w": 0.019901095651736256,
+   "M12_se_w": 0.0068833352213327394,
+   "M12_w": 0.12614365617224133,
+   "d_flips": {
+    "byp": 795.4052000000011,
+    "c_in": 0.015100000000018099,
+    "c_out": 0.0,
+    "c_store": 0.48099999999976717,
+    "scp": 3968.0,
+    "tenb_rz": 0.0,
+    "total": 5029.036199999999,
+    "wb_rz": 265.13499999999976
+   },
+   "d_pc_a": 0,
+   "d_pc_b": 8,
+   "first": "fp32.m12_a1_b3f8000ff",
+   "power_excludes_0_if_M10": 0.9999999983807331,
+   "power_excludes_0_if_M12": 1.0,
+   "second": "fp32.ones",
+   "separation_M12_M10_in_se": 14.507124066796539,
+   "set": "C32B",
+   "what": "B gains 8 held bits from 1.0, A = 1.0"
+  },
+  "B23-B15": {
+   "M10_w": 0.034253290530315894,
+   "M12_se_w": 0.0068833352213327394,
+   "M12_w": 0.14049585105082096,
+   "d_flips": {
+    "byp": 105.07819999999992,
+    "c_in": 3.814199999999971,
+    "c_out": 0.0,
+    "c_store": 122.05619999999908,
+    "scp": 3968.0,
+    "tenb_rz": 0.0,
+    "total": 4233.9748,
+    "wb_rz": 35.02610000000004
+   },
+   "d_pc_a": 0,
+   "d_pc_b": 8,
+   "first": "fp32.m12_a1_b3f80ffff",
+   "power_excludes_0_if_M10": 1.0,
+   "power_excludes_0_if_M12": 1.0,
+   "second": "fp32.m12_a1_b3f8000ff",
+   "separation_M12_M10_in_se": 14.507124066796539,
+   "set": "C32B",
+   "what": "B gains 8 held bits, A = 1.0"
+  },
+  "EA": {
+   "M10_w": -0.0022556002287874577,
+   "M12_se_w": 0.0,
+   "M12_w": -0.0022556002287874577,
+   "d_flips": {
+    "byp": 420.1738000000005,
+    "c_in": 15.056699999999978,
+    "c_out": 0.0,
+    "c_store": 481.8122000000003,
+    "scp": 0.0,
+    "tenb_rz": 0.0,
+    "total": 1057.100599999998,
+    "wb_rz": 140.058
+   },
+   "d_pc_a": 0,
+   "d_pc_b": 0,
+   "first": "fp32.m12_a3ff80000_b1",
+   "power_excludes_0_if_M10": 0.12929998731257897,
+   "power_excludes_0_if_M12": 0.12929998731257897,
+   "second": "fp32.m12_a3f80000f_b1",
+   "separation_M12_M10_in_se": 0.0,
+   "set": "CEQ",
+   "what": "the A-side mirror"
+  },
+  "EB": {
+   "M10_w": -0.0022556002287874577,
+   "M12_se_w": 0.0,
+   "M12_w": -0.0022556002287874577,
+   "d_flips": {
+    "byp": 420.1738000000005,
+    "c_in": 15.056699999999978,
+    "c_out": 0.0,
+    "c_store": 481.8122000000003,
+    "scp": 0.0,
+    "tenb_rz": 0.0,
+    "total": 1057.100599999998,
+    "wb_rz": 140.058
+   },
+   "d_pc_a": 0,
+   "d_pc_b": 0,
+   "first": "fp32.m12_a1_b3ff80000",
+   "power_excludes_0_if_M10": 0.12929998731257897,
+   "power_excludes_0_if_M12": 0.12929998731257897,
+   "second": "fp32.m12_a1_b3f80000f",
+   "separation_M12_M10_in_se": 0.0,
+   "set": "CEQ",
+   "what": "B's four mantissa bits at the top against the bottom (popcount 11 each)"
+  },
+  "H16": {
+   "F16-NOHB_w (M10's difference alone)": 0.0,
+   "M10_w": 0.0,
+   "M12_se_w": 0.002583724732776828,
+   "M12_w": 0.20505940205886586,
+   "d_flips": {
+    "byp": 0.0,
+    "c_in": 0.0,
+    "c_out": 0.0,
+    "c_store": 0.0,
+    "scp": 0.0,
+    "tenb_rz": 0.0,
+    "total": 0.0,
+    "wb_rz": 0.0
+   },
+   "d_pc_a": -20,
+   "d_pc_b": 20,
+   "first": "fp16.m12_a3c00_b3fff",
+   "power_excludes_0_if_M10": 0.04139881065236528,
+   "power_excludes_0_if_M12": 1.0,
+   "second": "fp16.m12_a3fff_b3c00",
+   "separation_M12_M10_in_se": 57.03003920938848,
+   "set": "C16",
+   "what": "the fp16 swap: 20 held bits a 32-bit word moved from A to B"
+  },
+  "Q3-sign": {
+   "M10_w": 0.07848489184632812,
+   "M12-1K_w": 0.10796175563364353,
+   "M12_se_w": 0.0021296390659590065,
+   "M12_w": 0.10802435222185466,
+   "d_flips": {
+    "byp": 0.0,
+    "c_in": 0.0,
+    "c_out": 0.0,
+    "c_store": 0.0,
+    "scp": 0.0,
+    "tenb_rz": 5120.0,
+    "total": 5120.0,
+    "wb_rz": 0.0
+   },
+   "d_pc_a": 28,
+   "d_pc_b": 20,
+   "first": "int8.m12_am1_bm3",
+   "power_excludes_0_if_M10": 1.0,
+   "power_excludes_0_if_M12": 1.0,
+   "second": "int8.m12_a1_b3",
+   "separation_M12_M10_in_se": 8.993425578427248,
+   "set": "C8",
+   "what": "the sign flip at product 3: (8, 7) against (1, 2) bits a byte"
+  },
+  "Q3-swap": {
+   "M10_w": 0.015696978369265757,
+   "M12-1K_w": 0.0014686801578796468,
+   "M12_se_w": 0.00031010428294297093,
+   "M12_w": 0.0014682641987734096,
+   "d_flips": {
+    "byp": 0.0,
+    "c_in": 0.0,
+    "c_out": 0.0,
+    "c_store": 0.0,
+    "scp": 0.0,
+    "tenb_rz": 1024.0,
+    "total": 1024.0000000000018,
+    "wb_rz": 0.0
+   },
+   "d_pc_a": -4,
+   "d_pc_b": 4,
+   "first": "int8.m12_a1_b3",
+   "power_excludes_0_if_M10": 0.9999887129782252,
+   "power_excludes_0_if_M12": 0.07931977939756801,
+   "second": "int8.m12_a3_b1",
+   "separation_M12_M10_in_se": 5.646872237136582,
+   "set": "C8",
+   "what": "A and B swap at product 3: (1, 2) against (2, 1) bits a byte"
+  },
+  "Q63-sign": {
+   "M10_w": -0.04709093510779727,
+   "M12-1K_w": 0.029133411141109494,
+   "M12_se_w": 0.001702163811324884,
+   "M12_w": 0.029156217813008974,
+   "d_flips": {
+    "byp": 0.0,
+    "c_in": 0.0,
+    "c_out": 0.0,
+    "c_store": 0.0,
+    "scp": 0.0,
+    "tenb_rz": -3072.0,
+    "total": -3072.0,
+    "wb_rz": 0.0
+   },
+   "d_pc_a": 28,
+   "d_pc_b": -12,
+   "first": "int8.m12_am1_bm63",
+   "power_excludes_0_if_M10": 1.0,
+   "power_excludes_0_if_M12": 0.9999999999999991,
+   "second": "int8.m12_a1_b63",
+   "separation_M12_M10_in_se": 25.206057347757515,
+   "set": "C8",
+   "what": "the sign flip at product 63: (8, 3) against (1, 6)"
+  },
+  "Q63-swap": {
+   "M10_w": 0.07848489184632856,
+   "M12-1K_w": 0.007343400789398241,
+   "M12_se_w": 0.001550521414714855,
+   "M12_w": 0.007341320993867043,
+   "d_flips": {
+    "byp": 0.0,
+    "c_in": 0.0,
+    "c_out": 0.0,
+    "c_store": 0.0,
+    "scp": 0.0,
+    "tenb_rz": 5120.0,
+    "total": 5120.0,
+    "wb_rz": 0.0
+   },
+   "d_pc_a": -20,
+   "d_pc_b": 20,
+   "first": "int8.m12_a1_b63",
+   "power_excludes_0_if_M10": 1.0,
+   "power_excludes_0_if_M12": 0.7769099805684498,
+   "second": "int8.m12_a63_b1",
+   "separation_M12_M10_in_se": 24.179619707614496,
+   "set": "C8",
+   "what": "A and B swap at product 63: (1, 6) against (6, 1)"
+  },
+  "S15": {
+   "M10_w": 0.0,
+   "M12_se_w": 0.0010334898931107298,
+   "M12_w": 0.08202376082354634,
+   "d_flips": {
+    "byp": 0.0,
+    "c_in": 0.0,
+    "c_out": 0.0,
+    "c_store": 0.0,
+    "scp": 0.0,
+    "tenb_rz": 0.0,
+    "total": 0.0,
+    "wb_rz": 0.0
+   },
+   "d_pc_a": -8,
+   "d_pc_b": 8,
+   "first": "fp32.m12_a1_b3f8000ff",
+   "power_excludes_0_if_M10": 0.04139881065236528,
+   "power_excludes_0_if_M12": 1.0,
+   "second": "fp32.m12_a3f8000ff_b1",
+   "separation_M12_M10_in_se": 30.314610331940244,
+   "set": "C32S",
+   "what": "8 held bits moved from A to B (T5 moved 23)"
+  },
+  "S23": {
+   "M10_w": 0.0,
+   "M12_se_w": 0.0020669797862214595,
+   "M12_w": 0.1640475216470927,
+   "d_flips": {
+    "byp": 0.0,
+    "c_in": 0.0,
+    "c_out": 0.0,
+    "c_store": 0.0,
+    "scp": 0.0,
+    "tenb_rz": 0.0,
+    "total": 0.0,
+    "wb_rz": 0.0
+   },
+   "d_pc_a": -16,
+   "d_pc_b": 16,
+   "first": "fp32.m12_a1_b3f80ffff",
+   "power_excludes_0_if_M10": 0.04139881065236528,
+   "power_excludes_0_if_M12": 1.0,
+   "second": "fp32.m12_a3f80ffff_b1",
+   "separation_M12_M10_in_se": 50.56507081727267,
+   "set": "C32S",
+   "what": "16 held bits moved from A to B"
+  },
+  "X8": {
+   "M10_w": 0.15525126808547673,
+   "M12-1K_w": 0.05984105851638763,
+   "M12_se_w": 0.013746482386741175,
+   "M12_w": 0.15099852869148683,
+   "d_flips": {
+    "byp": 0.0,
+    "c_in": 240.0,
+    "c_out": 240.0,
+    "c_store": 3840.0002999999997,
+    "scp": 4096.0,
+    "tenb_rz": 4096.0,
+    "total": 12512.0003,
+    "wb_rz": 0.0
+   },
+   "d_pc_a": 0,
+   "d_pc_b": 16,
+   "first": "int8.m12_a1_b63",
+   "power_excludes_0_if_M10": 1.0,
+   "power_excludes_0_if_M12": 1.0,
+   "second": "int8.m12_a1_b3",
+   "separation_M12_M10_in_se": 0.3043743105055561,
+   "set": "C8",
+   "what": "across products 63 and 3 at A = 1: the walk, the A/B switching and B's held bits"
+  }
+ }
+}

@@ -1,0 +1,45 @@
+M12 (Q157), fitted POST HOC on E182's committed rows only (fit_m12.py; REFIT.md section 3). aifoundry3, W over each format's zeros.
+
+int8 one-number tiles: D8 = c8 + R (k_walk F_walk + k_scp F_scp) + beta_A h_A + beta_B h_B   (joint WLS: 20 kinds + trains T1-T4)
+  c8_w         +1.682020  (se 0.014392)
+  k_walk_fJ    +1.239066  (se 0.139268)
+  k_scp_fJ     +12.874758  (se 1.741145)
+  beta_A_w     +0.008390  (se 0.000234)
+  beta_B_w     +0.009859  (se 0.000234)
+  sigma_K 0.0361 W on 17.94 effective dof, 6 iterations; mean int8 rate 1.920619e+09 /s
+  trains (measured, fit, z): T1 +0.0470 +0.0470 -0.01; T2 +0.0108 +0.0103 +0.23; T3 +0.1275 +0.1277 -0.10; T4 -0.0033 +0.0015 -1.86
+  kinds (D, fit, resid, M10's P):
+    int8.e178_a4_b5        1.7969 1.7738 +0.0231   P10 1.8313
+    int8.e178_a5_b4        1.7959 1.7724 +0.0235   P10 1.8155
+    int8.e178_v4           1.6971 1.7222 -0.0251   P10 1.7062
+    int8.e178_v5           1.7121 1.7692 -0.0571   P10 1.8929
+    int8.e182_a127_b1      1.9612 1.9461 +0.0151   P10 1.8821
+    int8.e182_a15_b1       1.8386 1.8425 -0.0039   P10 1.8448
+    int8.e182_a1_b127      1.9684 1.9549 +0.0135   P10 1.9765
+    int8.e182_a1_b15       1.8448 1.8469 -0.0021   P10 1.8920
+    int8.e182_a1_b85       1.8717 1.8740 -0.0023   P10 2.0516
+    int8.e182_a1_bm1       1.9296 1.9685 -0.0389   P10 1.8717
+    int8.e182_a85_b1       1.7957 1.8696 -0.0739   P10 2.0052
+    int8.e182_am127_bm1    1.9827 1.9731 +0.0097   P10 1.9914
+    int8.e182_am15_bm1     1.9169 1.9199 -0.0030   P10 1.9550
+    int8.e182_am1_b1       1.9805 1.9582 +0.0223   P10 1.7619
+    int8.e182_am1_bm127    1.9095 1.9643 -0.0548   P10 1.8977
+    int8.e182_am1_bm15     1.9708 1.9155 +0.0553   P10 1.9081
+    int8.e182_am1_bm85     1.9875 1.9426 +0.0449   P10 2.0681
+    int8.e182_am85_bm1     1.9883 1.9470 +0.0413   P10 2.1148
+    int8.neg_ones          1.8400 1.8499 -0.0100   P10 1.8163
+    int8.ones              1.7446 1.7222 +0.0224   P10 1.7064
+arm M12-1K (one price, joint): c8_w +1.754290 (0.015729), k_fJ +1.263733 (0.141436), beta_A_w +0.008385 (0.000235), beta_B_w +0.009854 (0.000235); trains z T1 -0.18, T2 +0.23, T3 -0.07, T4 -1.86
+arm M12-KO (one price, kinds alone, betas fixed): c8 +1.6941 (0.0449), k 2.750 fJ (1.052), resid sd 0.0638 W; its T1 +0.0821 W
+
+float held-word tiles: Df = P10 + c_f + gamma_A pc_A + gamma_B pc_B   (WLS: 4 fp32 kinds + T5, T6)
+  c_f_w        -0.011433  (se 0.023897)
+  gamma_A_w    +0.003027  (se 0.000859)
+  gamma_B_w    +0.013280  (se 0.000860)
+  placement gamma_B - gamma_A +0.010253 W a held bit (se 0.000129)
+  kinds (D - P10, fit, resid): fp32.e178_v4 +0.0220 +0.0212 +0.0008; fp32.e178_v5 +0.0476 +0.0375 +0.0101; fp32.e182_a1_b3fffffff +0.3817 +0.4082 -0.0264; fp32.e182_a3fffffff_b1 +0.1738 +0.1723 +0.0015
+  trains (target, fit, z): T5 +0.2359 +0.2358 +0.02; T6 +0.0180 +0.0163 +0.57
+arm M12-G (gain): g_f +0.998630 (0.002884), gamma_A_w +0.003030 (0.000865), gamma_B_w +0.013283 (0.000867)
+arms M10-O / M10-G on E182's kinds: int8 c -0.0228 W, g 0.98625 (n 20); fp32 c +0.1563 W, g 1.01878 (n 4)
+arm M12-S1: E182's D(int8.full) 7.1644 W
+reported candidate, never applied: card 1's SRAM rail carries 1.41205 x its reading (E184-M NOT RESOLVED, f 0.708189)
