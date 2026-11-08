@@ -1,0 +1,108 @@
+scratch repository: 1680 files committed (13 of them the workload's), with an origin
+
+== A. the dry listing v5 (FULL and the fallback, the look before the post): every step exits 0, no ssh or rsync call
+dry listing v5: 19 steps listed, 0 exited non-zero
+-> PASS (A dry listing v5: 0 failing, no call, the look listed before the post, step 6 v5 three times and step 2 v5 once)
+
+== K. step 2 v5 with no window in RB_OUT (s02 not run)
+[s03_desk_v5_e182] STOP: no window in RB_OUT: run s02_window_e182.sh first (kit v5: s02 before s03)
+-> PASS (K step 2 v5 refuses without step 1's window)
+
+== P1. step 2 v5 on the scratch repository (every listed file there, an origin, the stand-in note-4 list of 19)
+[s03_desk_v5_e182] desk check v5: the window written today, pulled, HEAD descends from 587153a9dcf6fe35f0e80001d27a6e380505fd17, E182's paths and the workload clean, the six hash lists at their pinned counts (32, 79, 50, 49, 89 and 19), both harness files rebuilt, the orders and trains verified, HARNESS OK 66, NOTE1 FILES OK 10,
+-> PASS (P1 step 2 v5 passes the intact tree at the pins 32, 79, 50, 49, 89 and 19)
+
+== P2. note 4's list one line short (committed): step 2 v5, then step 2 v4, on the same tree
+[s03_desk_v5_e182] STOP: the desk check failed: SHA256SUMS-e182-note4(18 OK of 18; pinned 19)
+[s03_desk_v4_e182] desk check v4: the window written today, pulled, HEAD descends from 587153a9dcf6fe35f0e80001d27a6e380505fd17, E182's paths and the workload clean, the five hash lists at their pinned counts (32, 79, 50, 49 and 89), both harness files rebuilt
+-> PASS (P2 step 2 v5 refuses note 4's short list against its pin (16); step 2 v4, which reads no note-4 list, passes it (0))
+
+== S1. step 5 v2 on a clean stand-in box, its stand-in binaries and pins, then step 6 v5 start and wait (the fast stand-in cmake)
+[s07_a3_sync_v2_e182] synced to aifoundry3:aifoundry/ (40 paths); the rsync sent 149 files' contents there, 9 of them under workloads/sparsity/
+the stand-in box's harness-e182.json now pins its 4 stand-in binaries (the desk's stand-in for E178's binaries on aifoundry3)
+JOB-STARTED a3-build-e182 2026-11-07 21:08:00 PST pid 80051
+[s08_a3_preflight_v5_e182] the train host's build runs on aifoundry3 as the detached job a3-build-e182 (its own bound 500 s): run this step's wait, again while it says 17
+E182-BUILD-ATTEMPT 1 today (the day's start 1)
+HARNESS OK: 73 files match harness-e182.json
+NOTE1 FILES OK: 10 files match harness-e182-note1.json (8 build inputs, 2 box files)
+TRAIN-HOST-BUILT rc=0
+[s08_a3_preflight_v5_e182] aifoundry3: the train host built by the detached job a3-build-e182; NOTE1 FILES OK 10, HARNESS OK 73, preflight_e182 GO, e182_common verified, each in its own bounded read
+check_e182 rc=0
+e182_common rc=0
+preflight_e182 rc=0 dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS (S1 step 6 v5 on the synced box: the build job, then the four checks, each in its own 60 s read (5 reads with the one before the build); no call past a bound; one build counted)
+
+== X3. a second start after the good build: refused (v4's refusal, kept)
+[s08_a3_preflight_v5_e182] STOP: refused on the box: REFUSED: the train host was built on aifoundry3 today (job a3-build-e182 ended rc 0 with TRAIN-HOST-BUILT, its build record present): run this step's wait, which reads its checks; a second build would remove it
+-> PASS (X3 step 6 v5 refuses a second start after a good build (10), the host unchanged, the count unchanged)
+
+== N1. (critic-q154's nit 2) the wait call cut (exit 255) while the first build runs
+[s08_a3_preflight_v5_e182] STOP: no reading of the build job on aifoundry3 (the wait call exited 14 before the box printed JOB-DONE, JOB-LOST or JOB-RUNNING: it failed or was cut, which is not the build's failure): nothing is counted; run this step's wait again, and no other step-6 call (start or --no-trains) until it reads
+[s08_a3_preflight_v5_e182] STOP: refused on the box: REFUSED: the train host was built on aifoundry3 today (job a3-build-e182 ended rc 0 with TRAIN-HOST-BUILT, its build record present): run this step's wait, which reads its checks; a second build would remove it
+-> PASS (N1 the cut wait reads 14 'no reading of the build job' and names neither a failed build nor a re-run; wait then reads the good build (0); a start after it is refused (10); one build counted)
+
+== N1b. the wait call cut after the first build ended good
+[s08_a3_preflight_v5_e182] STOP: no reading of the build job on aifoundry3 (the wait call exited 14 before the box printed JOB-DONE, JOB-LOST or JOB-RUNNING: it failed or was cut, which is not the build's failure): nothing is counted; run this step's wait again, and no other step-6 call (start or --no-trains) until it reads
+-> PASS (N1b the cut wait after a good build reads 14 'no reading'; wait then reads it (0); a start is refused (10))
+
+== N2. (verify-q154k's fault 1) the first build fails; the re-run runs; its wait call is cut (the day's build 2)
+[s08_a3_preflight_v5_e182] STOP: no reading of the build job on aifoundry3 (the wait call exited 14 before the box printed JOB-DONE, JOB-LOST or JOB-RUNNING: it failed or was cut, which is not the build's failure): nothing is counted; run this step's wait again, and no other step-6 call (start or --no-trains) until it reads
+[s08_a3_preflight_v5_e182] STOP: refused on the box: REFUSED: 1 runbook job(s) still run on aifoundry3: E182's step 6 starts alone (read them with their own step first)
+[s08_a3_preflight_v5_e182] STOP: refused on the box: REFUSED: the train host was built on aifoundry3 today (job a3-build-e182 ended rc 0 with TRAIN-HOST-BUILT, its build record present): the registered fallback is for a failed build, so the trains are not given up beside a good host: run this step's wait, which reads its checks
+-> PASS (N2 the cut wait of the re-run reads 14 'no reading' and does NOT name the fallback; --no-trains is refused while the job runs (10) and after the good build (10, the good-build refusal), never reaching its checks; wait reads the good build (0); two builds counted)
+
+== N2v. the fault shown: step 6 v4 on the same sequence
+[s08_a3_preflight_v4_e182] STOP: the train host's build failed on aifoundry3 (the lines above), and it was the day's build 2 (the first and its one re-run are spent): no train runs today: run step 6 v4 with --no-trains (rb/s08_a3_preflight_e182_v4.sh --no-trains), then step 8 v2 with --no-trains (rb/s10_a3_dry_e182_v2.sh start -
+HARNESS OK: 70 files match harness-e182.json (the trains off: the train host not checked)
+[s08_a3_preflight_v4_e182] aifoundry3: the trains off (the fallback, PASSES): HARNESS OK 70, preflight_e182 GO, e182_common verified, each in its own bounded read; next step 7 (k6's reads), then step 
+-> PASS (N2v step 6 v4 names the FALLBACK on the cut wait (16), and its --no-trains passes (0) beside the good host: a network fault would lose the trains)
+
+== N4. the same, the re-run already ended good when its wait call is cut
+[s08_a3_preflight_v5_e182] STOP: no reading of the build job on aifoundry3 (the wait call exited 14 before the box printed JOB-DONE, JOB-LOST or JOB-RUNNING: it failed or was cut, which is not the build's failure): nothing is counted; run this step's wait again, and no other step-6 call (start or --no-trains) until it reads
+[s08_a3_preflight_v5_e182] STOP: refused on the box: REFUSED: the train host was built on aifoundry3 today (job a3-build-e182 ended rc 0 with TRAIN-HOST-BUILT, its build record present): the registered fallback is for a failed build, so the trains are not given up beside a good host: run this step's wait, which reads its checks
+-> PASS (N4 the cut wait reads 14 'no reading', the fallback not named; --no-trains refused beside the good host (10); wait reads it (0))
+
+== N4v. the fault shown: step 6 v4 on the same sequence
+[s08_a3_preflight_v4_e182] STOP: the train host's build failed on aifoundry3 (the lines above), and it was the day's build 2 (the first and its one re-run are spent): no train runs today: run step 6 v4 with --no-trains (rb/s08_a3_preflight_e182_v4.sh --no-trains), then step 8 v2 with --no-trains (rb/s10_a3_dry_e182_v2.sh start -
+-> PASS (N4v step 6 v4 names the FALLBACK (16) and its --no-trains passes at once (0))
+
+== N6. (fix-q154k) the first check's read after a good build is cut
+[s08_a3_preflight_v5_e182] STOP: no reading of inputs (rc 14) on aifoundry3 (each call exited non-zero with no result line of its own: it failed or was cut, which is not a failed check): run this step's wait again
+-> PASS (N6 a cut check read is 14 'no reading of inputs' (never 'a dated amendment first'); wait then reads all four checks (0))
+
+== N6v. the same under step 6 v4
+[s08_a3_preflight_v4_e182] STOP: aifoundry3's checks after the build failed: inputs check_inputs_e182 (a binary or file differs: a dated amendment first)
+-> PASS (N6v step 6 v4 reads the cut read as a failed check: 16, 'a binary or file differs: a dated amendment first')
+
+== O. a card session of ours on the box (the stand-in pgrep reports one): start, the fallback, then wait's checks
+-> PASS (O each refused (10) beside a session of ours, no build started or counted)
+
+== R1. the re-run rule with REAL failed builds: a fresh day, the stand-in build fails (FAKE_CMAKE_FAIL=build): the first failure
+[s08_a3_preflight_v5_e182] STOP: the train host's build failed on aifoundry3 (the lines above; build 1 of at most 2 today): run this step's start once more (the one re-run), then its wait; if that build does not read TRAIN-HOST-BUILT either, no train runs today: run step 6 v5 with --no-trains (rb/s08_a3_preflight_e182_v5.sh --no
+-> PASS (R1 the first failed build (JOB-DONE rc 1): 16, one re-run asked for, one build counted)
+
+== R2. the one re-run fails too
+[s08_a3_preflight_v5_e182] STOP: the train host's build failed on aifoundry3 (the lines above), and it was the day's build 2 (the first and its one re-run are spent): no train runs today: run step 6 v5 with --no-trains (rb/s08_a3_preflight_e182_v5.sh --no-trains), then step 8 v2 with --no-trains (rb/s10_a3_dry_e182_v2.sh start -
+-> PASS (R2 the second failed build: 16, the fallback named (step 6 v5 --no-trains), two builds counted)
+
+== R3. a third start
+[s08_a3_preflight_v5_e182] STOP: two train-host builds were started on aifoundry3 today (the first and its one re-run): no third. no train runs today: run step 6 v5 with --no-trains (rb/s08_a3_preflight_e182_v5.sh --no-trains), then step 8 v2 with --no-trains (rb/s10_a3_dry_e182_v2.sh start --no-trains, then wait --no-trains), t
+-> PASS (R3 no third build: 16, the fallback named, no job started)
+
+== R4. the fallback: step 6 v5 --no-trains with its first read cut, then again; then step 8 v2 --no-trains
+[s08_a3_preflight_v5_e182] STOP: no reading of harness (rc 14) on aifoundry3 (each call exited non-zero with no result line of its own: it failed or was cut, which is not a failed check): run this step's --no-trains again
+HARNESS OK: 70 files match harness-e182.json (the trains off: the train host not checked)
+[s08_a3_preflight_v5_e182] aifoundry3: the trains off (the fallback, PASSES): no good build today, HARNESS OK 70, preflight_e182 GO, e182_common verified, each in its own bounded read; next step 7 (k6
+e182_common rc=0
+preflight_e182 rc=0 dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS (R4 a cut fallback read is 14 'no reading of harness'; then the fallback runs: --no-trains 0 (HARNESS OK 70, GO, verify), step 8 v2 --no-trains job rc 0; no network call)
+
+== L. a lost job: a fresh day, the 90 s stand-in cmake, the job's processes killed on the stand-in box mid-build
+JOB-LOST a3-build-e182: no process (pid 11773) and no exit status
+[s08_a3_preflight_v5_e182] STOP: the train host's build job was lost (no process and no exit status) on aifoundry3 (the lines above; build 1 of at most 2 today): run this step's start once more (the one re-run), then its wait; if that build does not read TRAIN-HOST-BUILT either, no train runs today: run step 6 v5 with --no-train
+-> PASS (L the lost job: JOB-LOST is still a build's failure under v5: one re-run asked for (16), one build counted)
+
+== Z. no process of this test left running
+-> PASS (Z nothing of this test's stand-in box or builds left running)
+
+SELFTEST-RB-E182-V5 21 of 21 PASS
