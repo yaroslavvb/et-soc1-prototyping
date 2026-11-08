@@ -4,6 +4,16 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-11-02 (Mon, week 45, Q136 records)** — Section 3's index reads Q1–Q136 and E1–E134, where it read Q1–Q135 and
+  E1–E125: Q136 is the owner's ask of that morning with its three rules on device commands, and E126–E134 are its nine card
+  experiments, none of which sent a WRITE command. Its "known stale spots" add that a record calling the stock telemetry's PMIC
+  voltage-register reads an open question is stale since that ruling. The 31 October entry on a reservation post's
+  `for <N> h`, the oldest of 16, moved verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelog-archive.md).
+  *Why:* constraint — Q136's records add E126–E134 to `docs/findings/03-experiments.md` and the Q136 row to
+  `docs/findings/02-requests.md`; re-check: the last E entry heading of 03-experiments.md and the "Cite as" line of
+  02-requests.md. And preference — the owner's words that morning, *"continue the experiments but don't do any power cycles,
+  read only PMIC voltage reads should be fine, take more care for writing commands"*, and his rule of 10 October 2026 for
+  agent instruction files, which keeps the newest 15 entries inline.
 - **2026-11-02 (Mon, week 45, Q136(w), corrections after verification)** — Section 5, rule 3: the table is
   `836a4ab`, the public source of BL2 0.22.0, and aifoundry3's 0.22.0 is a non-public build (it answers command 74), so
   for aifoundry3 it is the nearest public source with a known divergence (it said "the build all four cards report");

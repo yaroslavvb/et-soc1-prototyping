@@ -1405,6 +1405,67 @@ Q153's records, Sat 7 Nov 2026 evening.)*
 
 By lane: M10-ACC 40 files (34 in its four commits, 20 of them in the data directory and 14 under `tools/claims-v3/m10-acc/`, and 6 in its fix); E184 110 (12 + 45 + 7 + 46); E182 107 (33 + 48 + 26). All nine hash lists the lanes committed pass, 341 of 341 entries (49, 25, 32, 79, 50, 11, 44, 6 and 45), and no E182 or E184 datum exists in any ref (the one data file whose name holds `e182` is M10-ACC's forecast grid).
 
+## Q154–Q158 published no new page: E182's and E184's last notes, card day 1's data, E183, E185 and E186 registered and kitted, M12, and the day-2 check (7–8 November 2026)
+
+These five rounds built **no new space**: what they made is in this repository, in **37 commits that add 1,075 files and edit none**
+(`22da6a7b` to `88750359`), besides Q153's records and their fix (`1ccf9ad7`, `eb15a69b`), which edit only the records files. The table
+gives each commit with git's own time (PST), its round, what it holds and its file count, in git's order; "item N" is the kinds page's
+section 11 as at `3c145b6261c4`. The short names are the ones [05-claims.md](05-claims.md), "Q154–Q158", uses. *(Recorded by Q154–Q158's
+records, Sun 8 Nov 2026.)*
+
+| Commit (git's time, PST) | Round | What (where) | Files |
+|---|---|---|---|
+| `1ccf9ad7` (Sat 7 Nov, 17:38:44) | Q154 | Q153's records: 02–05, the findings README, `AGENT.md` and `docs/agent-changelog-archive.md` | 7 edited, insert-only bar the counters and one moved entry |
+| `22da6a7b` (17:51:23) | Q154 | E182's kit note 2 ([`tools/claims-v3/e182/`](../../tools/claims-v3/e182/KIT.md.dated-note-2.md)): step 6 v3 as one detached build, step 2 v3, the 90 s stand-in build, the card lane's brief (item 6) | 15 |
+| `3b48cf7b` (18:10:08) | Q154 | E184's dated amendment A3, alone ([`tools/claims-v3/e184/`](../../tools/claims-v3/e184/E184.md.dated-note-A3.md)) | 4 |
+| `571511d0` (18:30:34) | Q154 | E184's kit note 2: score v3, reduce v3, step 7 v2, step 10b | 21 |
+| `eb15a69b` (18:52:48) | Q154 | Q153's records after their verifier: dated clauses in 02, 03 and 05 | 3 edited, insert-only |
+| `e0d31903` (19:09:23) | Q154 | E182's kit note 3: step 6 v4, step 11 v3, step 2 v4; E182.md's dated note 2 (the departure); the brief's note 1 | 14 |
+| `5e708747` (20:25:30) | Q155 | M11's dated amendment A10, alone ([`tools/claims-v3/m11/`](../../tools/claims-v3/m11/REGISTRATION.md.dated-note-A10.md); items 9 and 8) | 5 |
+| `98fe28b7` (20:40:51) | Q155 | E185's registration, alone ([`tools/claims-v3/e185/`](../../tools/claims-v3/e185/E185.md)) | 9 |
+| `c98a7287` (20:47:49) | Q155 | E183's registration, alone ([`tools/claims-v3/e183/`](../../tools/claims-v3/e183/E183.md)) | 21 |
+| `a5f8ec1a` (21:11:38) | Q155 | E184's dated amendment A4, alone | 2 |
+| `f9dcddac` (21:13:30) | Q155 | E184's kit note 3: reduce v4, step 2 v3 (eight lists), step 11 v3 | 19 |
+| `6b2d2ae6` (21:16:52) | Q155 | E182's kit note 4: step 6 v5, step 2 v5; E182.md's dated note 3; the brief's note 2 | 13 |
+| `460c352f` (21:17:55) | Q155 | E185's kit v5 (35 files) with M11's scorer v5 (5 files under `m11/`) | 40 |
+| `cc597bf2` (21:53:34) | Q155 | E183's kit | 47 |
+| `df4e6763` (22:27:33) | Q155 | E185's dated amendment A1, alone, with A10's dated note 1 (under `m11/`) | 6 |
+| `ad2ed873` (22:45:02) | Q155 | E185's kit note 1: the collector v2, steps 2, 11 and 14 v2 | 12 |
+| `45e514e3` (23:09:50) | Q155 | E183's kit note 1 and E183.md's dated note 1: the reduction v2, the collector v2, steps 2 and 11 v2 | 18 |
+| `c958e33b` (Sun 8 Nov, 00:03:19) | Q156 | E182's dated note M1: october-forecast-model's freeze lines and frozen forecasts | 3 |
+| `8bf74b26` (00:43:41) | Q156 | E184 arm B's data ([`docs/reports/data/2026-11-08-e184-sensor-validation/`](../reports/data/2026-11-08-e184-sensor-validation/README.md)) | 82 |
+| `0f6a8c45` (02:09:59) | Q156 | E182's data ([`docs/reports/data/2026-11-08-e182-one-number-r2-aifoundry3/`](../reports/data/2026-11-08-e182-one-number-r2-aifoundry3/README.md)): the trains, the kinds passes, the C checks, the scored files and the M1 arm's reading | 467 |
+| `f8d94224` (02:36:34) | Q156 | E184's arm S not run: the smoke's and the stop test's pass files, `README-arm-s.md` | 25 |
+| `a8ae359a` (03:15:11) | Q156 | E182's data note 1 | 5 |
+| `8092c27a` (03:37:08) | Q156 | E184's kit note 4: step 11 v4, which collects a gate-stopped session | 11 |
+| `9a8b9d3e` (03:43:07) | Q156 | E184's dated notes 1 beside both arms' READMEs | 5 |
+| `d5eb87b5` (04:56:09) | Q157 | M12's rules, `REFIT.md`, alone ([`tools/claims-v3/m12/`](../../tools/claims-v3/m12/REFIT.md)) | 2 |
+| `8b85b498` (05:11:13) | Q157 | M12's fit, held-out scores, bench counts and frozen candidates | 37 |
+| `06286213` (05:13:09) | Q157 | E183's dated note M1: october-forecast-model v3 and v4, with a reader | 6 |
+| `2f6a4440` (05:14:15) | Q157 | E185's dated note M1: v3 = v4, with a reader | 6 |
+| `13a4b34d` (05:18:11) | Q157 | E184 arm S's own session files (12), collected, the both-arm scored files under new names, dated note 2 | 21 |
+| `0e15e968` (06:29:49) | Q158a | M12's `REFIT.md.dated-note-2.md` and its three pointer notes | 10 |
+| `408a9a9e` (06:48:51) | Q157 | E185's kit note 2: step 2 v3 pinning five lists by count and bytes; the day-2 brief | 10 |
+| `6860643c` (06:49:00) | Q157 | E183's note M1's dated note 1 and the day-2 brief | 3 |
+| `80d53792` (06:57:39) | Q158a | M12 for E186: the merged candidate list, its forecasts and freeze note | 25 |
+| `a41408d9` (07:15:08) | Q158a | E186's registration, alone ([`tools/claims-v3/e186/`](../../tools/claims-v3/e186/E186.md)) | 11 |
+| `3adb8bfe` (07:18:53) | Q158a | E186's dated note M1: october-forecast-model v4, a reported arm | 6 |
+| `1e74546a` (08:37:53) | Q158b | the day-2 check, with E185's kit note 3 (11 files) and E183's kit note 2 (7) | 18 |
+| `523002be` (08:57:34) | Q158a | E186's kit | 51 |
+| `17cf100f` (10:18:16) | Q158a | E186's dated amendment A1, alone | 5 |
+| `88750359` (10:28:34) | Q158a | E186's kit note 1 | 20 |
+
+By round: Q154, 54 files in its four kit commits (15 + 4 + 21 + 14), besides its records; Q155, 192 (5 + 9 + 21 + 2 + 19 + 13 + 40 + 47
++ 6 + 12 + 18); Q156, 598 (3 + 82 + 467 + 25 + 5 + 11 + 5); Q157, 85 (2 + 37 + 6 + 6 + 21 + 10 + 3); Q158a, 128 (10 + 25 + 11 + 6 + 51 +
+5 + 20); Q158b, 18. Q158a's commits carry "Q158" in their subjects, Q158b's "Q158b", and four commits carry no Q number (`c958e33b` and
+`0f6a8c45`, Q156's; `06286213` and `2f6a4440`, Q157's). **The hash lists, as each round's lanes counted them** (every tracked file whose
+name holds SHA256SUMS; the only misses, every time, are E85's code list, whose 17 entries match their files under `tools/claims-v3/hlc`,
+`hlk` and `hm`, as this file's dated clause of 7 November says): 111 lists, 3,744 of 3,761 entries OK at `1ccf9ad7` and 115, 3,905 of
+3,922 at `e0d31903` (Q154); 128, 4,138 of 4,155 at `45e514e3` (Q155); 135, 4,739 of 4,756 at `9a8b9d3e` (Q156); 140, 4,843 of 4,860 at
+`13a4b34d` and 143, 4,883 of 4,900 at `6860643c` (Q157); 146, 4,922 of 4,939 at `3adb8bfe` and 148, 4,953 of 4,970 at `1e74546a`
+(Q158b); 151, 5,081 of 5,098 at `88750359` (Q158a); and, counted by these records on their own commit over `88750359`, 151 lists, 5,081 of 5,098 entries OK, the 17 misses E85's. No
+E183, E185 or E186 datum is in any ref.
+
 ## The camera and the details panel (30 September)
 
 For Q74–Q76: the memory levels and the chip diagram (the pages of 28 and 27 September) jumped in the middle of their
