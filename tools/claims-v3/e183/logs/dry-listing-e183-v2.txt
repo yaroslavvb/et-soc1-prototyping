@@ -1,0 +1,419 @@
+E183 runbook (aifoundry3), dry listing v2 (note 1: step 2 v2, step 11 v2; nothing below was run). Sample window: 2026-11-09, last start 15:30, last end 17:30 (Pacific).
+
+---- the runbook's prelude for aifoundry3: every remote script on aifoundry3 starts with these lines
+    | set -u
+    | cd ~/aifoundry || { echo "NO-TREE: ~/aifoundry"; exit 1; }
+    | BOX=aifoundry3
+    | DEV_COMM='_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$'   # lib.sh's DEV_COMM
+    | OTHER_COMM="$DEV_COMM|^Runner.Worker$"                                                # lib.sh's OTHER_COMM
+    | hold_read() {  # the holder rule's read: et-who (et-holders) and ps, as counts; FREE=1 when nothing blocks this box's card
+    |   W=$(timeout 20 et-who 2>&1); WRC=$?
+    |   ME=$(id -un)
+    |   NH=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/ {n++} END {print n+0}')
+    |   NO=$(printf '%s\n' "$W" | awk -v me="$ME" '($1 ~ /^\/dev\/et/ || $1 ~ /^lock:/) && $2 == me {n++} END {print n+0}')
+    |   C1=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et1_/ || $1 == "lock:etsoc-shire1.lock" {n++} END {print n+0}')
+    |   PO=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $3 ~ re {n++} END {print n+0}')
+    |   PX=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$OTHER_COMM" '$1 != me && $3 ~ re {n++} END {print n+0}')
+    |   LG=$(who | wc -l | tr -d ' ')
+    |   FREE=0
+    |   if [ "$BOX" = aifoundry1 ]; then
+    |     # card 1's own lines decide, and nothing of ours on either card (launch_e164_a1.sh's rule)
+    |     [ "$WRC" -eq 0 ] && [ "$C1" -eq 0 ] && [ "$NO" -eq 0 ] && [ "$PO" -eq 0 ] && FREE=1
+    |   else
+    |     # one card: et-who's "No process holds ..." (the E158-E169 queues' rule) and no other user's device process (lib.sh)
+    |     case "$(printf '%s\n' "$W" | head -n 1)" in "No process holds"*) [ "$WRC" -eq 0 ] && [ "$PX" -eq 0 ] && FREE=1 ;; esac
+    |   fi
+    |   echo "holders: et-who rc $WRC, holder lines $NH (ours $NO; card 1's $C1), our device processes $PO, other users' device processes $PX; logins $LG (an idle login does not block)"
+    | }
+    | ours_live() {  # our real card sessions on this box (a dry pass or a V3_DRY session is not one); E170's queue on aifoundry1 counts;
+    |   #             v3: any queue_eNNN.py or session_eNNN.sh of ours (the lab's naming convention), so a later card day's run counts too;
+    |   #             k6: E171's and E172's processes by name (their sessions, queues, blocks and runners), and E173's and E174's queues
+    |   n=0
+    |   for pid in $(pgrep -u "$(id -u)" -f '(queue|session)_e[0-9]+[a-z0-9_]*\.(py|sh)|(session|queue|block)_e17[12]\.sh|run_e17[12]\.py|queue_e17[34]\.py|session_e16[346]\.sh|queue_e16[5-9]\.py|queue_e170\.py|run_e170\.py' 2>/dev/null); do
+    |     case "$(tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null)" in *--dry*) continue ;; esac
+    |     tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | grep -q '^V3_DRY=' && continue
+    |     n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+    | jobs_live() {  # the runbook's own detached dry jobs still running on this box (any day's: a live process is live)
+    |   n=0
+    |   for p in build/q141k/jobs/*.pid; do
+    |     [ -e "$p" ] || continue
+    |     [ -e "${p%.pid}.rc" ] && continue
+    |     kill -0 "$(cat "$p")" 2>/dev/null && n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+    | fresh() {  # fresh <file>: it exists and was written today by the Pacific calendar (the card day's); another day's never counts
+    |   [ -e "$1" ] && [ "$(TZ=America/Los_Angeles date -r "$1" +%F 2>/dev/null)" = "$(TZ=America/Los_Angeles date +%F)" ]
+    | }
+    | job_ok_today() {  # job_ok_today <job>: the runbook's dry job <job> ended rc 0 today
+    |   fresh "build/q141k/jobs/$1.rc" && [ "$(cat "build/q141k/jobs/$1.rc" 2>/dev/null)" = 0 ]
+    | }
+
+==================== FULL (or SHORT at step 9)
+
+################ tools/claims-v3/e183/rb/s02_window_e183.sh 2026-11-09 15:30 17:30
+=== [s02_window_e183] dry listing: nothing below is run
+[s02_window_e183] (dry listing; a real run would say:) window: last start 2026-11-09 15:30 PST, last end 2026-11-09 17:30 PST (2547 min from now); E183 plans that fit now: E183-FULL E183-SHORT
+# his go, recorded 2026-11-07 23:02:42 PST by s02_window_e183.sh
+RB_DAY=2026-11-09
+RB_LAST_START=2026-11-09\ 15:30\ PST
+RB_LAST_END=2026-11-09\ 17:30\ PST
+RB_LAST_START_EPOCH=1794267000
+RB_LAST_END_EPOCH=1794274200
+RB_LAST_START_HM=15:30
+RB_LAST_END_HM=17:30
+RB_PLAN=e183
+RB_GO_EPOCH=1794121362
+(exit 0)
+
+################ tools/claims-v3/e183/rb/s03_desk_e183_v2.sh 
+=== [s03_desk_v2_e183] dry listing: nothing below is run
+--- copy, run on the Intel (git pull --ff-only (the public repo)): git -C <lab clone> pull --ff-only
+--- read, run on the Intel (HEAD descends from c98a7287): git -C <lab clone> merge-base --is-ancestor c98a7287 HEAD
+--- read, run on the Intel (E183's paths and the workload clean): git -C <lab clone> status --short tools/claims-v3/e183 workloads/enercat
+--- read, run on the Intel (the hash list SHA256SUMS-e183-registration (pinned at 20 entries)): shasum -a 256 -c tools/claims-v3/e183/SHA256SUMS-e183-registration
+--- read, run on the Intel (the hash list SHA256SUMS-e183-kit (pinned at 46 entries)): shasum -a 256 -c tools/claims-v3/e183/SHA256SUMS-e183-kit
+--- read, run on the Intel (the hash list SHA256SUMS-e183-note1 (pinned at 46 entries)): shasum -a 256 -c tools/claims-v3/e183/SHA256SUMS-e183-note1
+--- read, run on the Intel (harness-e183.json rebuilt): /usr/bin/python3 -B tools/claims-v3/e183/make_harness_e183.py --check
+--- read, run on the Intel (the registration's files, images, plan and schedule (e183_common.py --verify)): /usr/bin/python3 -B tools/claims-v3/e183/e183_common.py --verify
+--- read, run on the Intel (the harness without binaries (check_e183.py harness)): /usr/bin/python3 -B tools/claims-v3/e183/check_e183.py harness
+--- read, run on the Intel (the build inputs at their pins (check_inputs_e183.py)): /usr/bin/python3 -B tools/claims-v3/e183/check_inputs_e183.py
+--- read, run on the Intel (a desk test's log, as committed: logs/desktest-host-e183.txt): grep -cE '^DESKTEST-HOST-E183.PASS' tools/claims-v3/e183/logs/desktest-host-e183.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/selftest-score-e183.txt): grep -cE '^SELFTEST-SCORE-E183.[0-9]+.of.[0-9]+.PASS' tools/claims-v3/e183/logs/selftest-score-e183.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/selftest-rb-e183.txt): grep -cE '^SELFTEST-RB-E183.[0-9]+.of.[0-9]+.PASS' tools/claims-v3/e183/logs/selftest-rb-e183.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/dry-intel-e183.txt): grep -cE '^DRY-INTEL-E183.PASS' tools/claims-v3/e183/logs/dry-intel-e183.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/selftest-score-e183-v2.txt): grep -cE '^SELFTEST-SCORE-E183-V2.[0-9]+.of.[0-9]+.PASS' tools/claims-v3/e183/logs/selftest-score-e183-v2.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/selftest-rb-e183-v2.txt): grep -cE '^SELFTEST-RB-E183-V2.[0-9]+.of.[0-9]+.PASS' tools/claims-v3/e183/logs/selftest-rb-e183-v2.txt
+--- read, run on the Intel (E183 data in any ref (want none before the session)): git -C <lab clone> log --all --oneline -- 'docs/reports/data/*-e183-*'
+[s03_desk_v2_e183] (dry listing; a real run would say:) desk check v2: the window written today, pulled, HEAD descends from c98a7287, E183's paths and the workload clean, the three hash lists at their pinned counts (20, 46 and 46), harness-e183.json rebuilt, the registration verified, HARNESS OK 80, BUILD INPUTS OK 40, the six desk tests' logs; october-forecast-model note M1 absent (his pair only, by E180 M2 reader: E183.md section 8); commits naming E183 data: 0
+(exit 0)
+
+################ tools/claims-v3/q141k-runbook/k6/s05_look_k6.sh aifoundry3
+=== [s05_look_k6] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (look first: et-who, who, uptime; the holder rule): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | MODE=''
+    | LIM=520; POLL=30
+    | date '+%F %T %Z'; uptime; echo "booted $(uptime -s)"
+    | echo "login $(id -un)"
+    | hold_read
+    | while [ "$FREE" -eq 0 ] && [ "$MODE" = --wait ] && [ "$SECONDS" -lt "$LIM" ]; do   # v3: the box's clock bounds the loop
+    |   sleep "$POLL"; hold_read
+    | done
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD) after $SECONDS s of polls"
+(exit 0)
+
+################ KIT.md box step 3, the day's one post, made AFTER the look above reads FREE (the card lane's, under the post's lock): not scripted
+
+################ tools/claims-v3/e183/rb/s07_a3_sync_e183.sh 
+=== [s07_a3_sync_e183] dry listing: nothing below is run
+[s07_a3_sync_e183] (dry listing; a real run would say:) the sync list: E183's directory (it holds 31 of the harness's 80 files) and its 49 other files: all 80 of them
+--- read, run on the Intel (E183's paths clean before the sync): git -C <lab clone> status --short tools/claims-v3/e183/ tools/claims-v3/dmcmd_audit.py tools/claims-v3/dmcmd_table.json tools/claims-v3/e128/ettelem_guard.sh tools/claims-v3/e180/acc-modes-e180.inc tools/claims-v3/e180/gen_acc_e180.py tools/claims-v3/e180/images/f_0p5.bin tools/claims-v3/e180/images/f_1p5.bin tools/claims-v3/e180/images/f_2.bin tools/claims-v3/e180/images/f_4.bin tools/claims-v3/e180/images/f_5.bin tools/claims-v3/e180/others_d1_e180.sh tools/claims-v3/lib.sh workloads/enercat/CMakeLists.txt workloads/enercat/README.md workloads/enercat/analyze_catalogue.py workloads/enercat/analyze_enercat.py workloads/enercat/analyze_gs.py workloads/enercat/analyze_wire.py workloads/enercat/analyze_wire_v3.py workloads/enercat/enercat_args.h workloads/enercat/enercat_df.h workloads/enercat/enercat_df_modes.json workloads/enercat/enercat_gs.h workloads/enercat/enercat_gs_modes.json workloads/enercat/enercat_modes.h workloads/enercat/enercat_modes.json workloads/enercat/enercat_tr.h workloads/enercat/enercat_tr_modes.json workloads/enercat/gen_df.py workloads/enercat/gen_gs.py workloads/enercat/gen_ops.py workloads/enercat/gen_tr.py workloads/enercat/gs_catalogue.py workloads/enercat/host/CMakeLists.txt workloads/enercat/host/Constants.h.in workloads/enercat/host/enercat_gs_host.inc workloads/enercat/host/main.cpp workloads/enercat/kernel/CMakeLists.txt workloads/enercat/kernel/crt.S workloads/enercat/kernel/enercat.c workloads/enercat/kernel/enercat_df.inc workloads/enercat/kernel/enercat_gs.c workloads/enercat/kernel/enercat_gs.inc workloads/enercat/kernel/enercat_ops.inc workloads/enercat/kernel/enercat_tr.inc workloads/enercat/kernel/sections.ld workloads/enercat/run_catalogue.py workloads/enercat/run_enercat.sh workloads/enercat/run_wire.py
+--- read, run on the Intel (the lab clone's copies of the harness's files at their sha256 (check_e183.py harness)): /usr/bin/python3 -B tools/claims-v3/e183/check_e183.py harness
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- copy, run on the Intel (aifoundry3's rsync: E183's directory, the committed workloads/enercat and the harness's other files): rsync -a -c -R --exclude __pycache__ --exclude build -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' tools/claims-v3/e183/ tools/claims-v3/dmcmd_audit.py tools/claims-v3/dmcmd_table.json tools/claims-v3/e128/ettelem_guard.sh tools/claims-v3/e180/acc-modes-e180.inc tools/claims-v3/e180/gen_acc_e180.py tools/claims-v3/e180/images/f_0p5.bin tools/claims-v3/e180/images/f_1p5.bin tools/claims-v3/e180/images/f_2.bin tools/claims-v3/e180/images/f_4.bin tools/claims-v3/e180/images/f_5.bin tools/claims-v3/e180/others_d1_e180.sh tools/claims-v3/lib.sh workloads/enercat/CMakeLists.txt workloads/enercat/README.md workloads/enercat/analyze_catalogue.py workloads/enercat/analyze_enercat.py workloads/enercat/analyze_gs.py workloads/enercat/analyze_wire.py workloads/enercat/analyze_wire_v3.py workloads/enercat/enercat_args.h workloads/enercat/enercat_df.h workloads/enercat/enercat_df_modes.json workloads/enercat/enercat_gs.h workloads/enercat/enercat_gs_modes.json workloads/enercat/enercat_modes.h workloads/enercat/enercat_modes.json workloads/enercat/enercat_tr.h workloads/enercat/enercat_tr_modes.json workloads/enercat/gen_df.py workloads/enercat/gen_gs.py workloads/enercat/gen_ops.py workloads/enercat/gen_tr.py workloads/enercat/gs_catalogue.py workloads/enercat/host/CMakeLists.txt workloads/enercat/host/Constants.h.in workloads/enercat/host/enercat_gs_host.inc workloads/enercat/host/main.cpp workloads/enercat/kernel/CMakeLists.txt workloads/enercat/kernel/crt.S workloads/enercat/kernel/enercat.c workloads/enercat/kernel/enercat_df.inc workloads/enercat/kernel/enercat_gs.c workloads/enercat/kernel/enercat_gs.inc workloads/enercat/kernel/enercat_ops.inc workloads/enercat/kernel/enercat_tr.inc workloads/enercat/kernel/sections.ld workloads/enercat/run_catalogue.py workloads/enercat/run_enercat.sh workloads/enercat/run_wire.py aifoundry3:aifoundry/
+[s07_a3_sync_e183] (dry listing; a real run would say:) synced to aifoundry3:aifoundry/ every file of harness-e183.json (80 files, in 50 paths)
+(exit 0)
+
+################ tools/claims-v3/e183/rb/s08_a3_build_e183.sh start
+=== [s08_a3_build_e183] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (before the build: no session or job of ours, no good build today, today's builds, the build inputs at their pins): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on $BOX: E183's step 6 never builds or checks beside one (one session of ours at a time)"; exit 3; fi
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: $(jobs_live) runbook job(s) still run on $BOX: E183's step 6 starts alone (read them with their own step first)"; exit 3; fi
+    | if job_ok_today a3-build-e183 && grep -q '^TRAIN-HOST-BUILT rc=0' build/q141k/jobs/a3-build-e183.out 2>/dev/null && [ -s build/enercat-e183/BUILD-E183.json ]; then
+    |   echo "REFUSED: the train host was built on $BOX today (job a3-build-e183 ended rc 0 with TRAIN-HOST-BUILT, its build record present): run this step's wait, which reads its checks; a second build would remove it"; exit 3
+    | fi
+    | TODAY=$(TZ=America/Los_Angeles date +%F)
+    | n=0
+    | if [ -f build/e183-build-attempts.txt ]; then
+    |   ns=$(grep -c "^$TODAY .* a3-build-e183 started\$" build/e183-build-attempts.txt)
+    |   nd=$(grep -c "^$TODAY .* a3-build-e183 ended rc=[0-9]*: TRAIN-HOST-INPUTS-DIFFER" build/e183-build-attempts.txt)
+    |   n=$((ns - nd))
+    | fi
+    | echo "E183-BUILDS-TODAY $n"
+    | if [ "$n" -ge 2 ]; then echo "NO-THIRD-BUILD: $n train-host builds were started here today (the first and its one re-run)"; exit 0; fi
+    | mkdir -p build
+    | python3 -B tools/claims-v3/e183/check_inputs_e183.py > build/e183-inputs.txt 2>&1; ci=$?
+    | head -n 12 build/e183-inputs.txt | cut -c1-240; echo "check_inputs_e183 rc=$ci"
+    | if [ "$ci" -ne 0 ]; then
+    |   rm -rf build/enercat-e183 build/enercat-e183-src build/e183-enercat-stage     # no train host of an earlier build outlives a refused one
+    |   echo "$TODAY $(TZ=America/Los_Angeles date '+%T %Z') a3-build-e183 not started: TRAIN-HOST-INPUTS-DIFFER at the read before the build" >> build/e183-build-attempts.txt
+    |   echo "TRAIN-HOST-INPUTS-DIFFER rc=$ci"
+    | fi
+--- launch on aifoundry3 (start the dry pass a3-build-e183, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-build-e183
+    | MAXJ=1
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/aifoundry || exit 1
+    | echo "$$" > build/q141k/jobs/a3-build-e183.pid
+    | echo "JOB-BEGIN a3-build-e183 $(date '+%F %T %Z')"
+    | (
+    | BUILD_S=500
+    | mkdir -p build
+    | TODAY=$(TZ=America/Los_Angeles date +%F)
+    | echo "$TODAY $(TZ=America/Los_Angeles date '+%T %Z') a3-build-e183 started" >> build/e183-build-attempts.txt
+    | k=$(grep -c "^$TODAY .* a3-build-e183 started\$" build/e183-build-attempts.txt)
+    | nd=$(grep -c "^$TODAY .* a3-build-e183 ended rc=[0-9]*: TRAIN-HOST-INPUTS-DIFFER" build/e183-build-attempts.txt)
+    | echo "E183-BUILD-ATTEMPT $((k - nd)) today (the day's start $k)"
+    | L=build/e183-build-logs/$TODAY; mkdir -p "$L"; LOG=$L/e183-build-host-start$k.txt
+    | t0=$(date +%s)
+    | timeout -k 15 "$BUILD_S" bash tools/claims-v3/e183/build_host_e183.sh > "$LOG" 2>&1; b=$?
+    | cp -p "$LOG" build/e183-build-host.txt
+    | echo "build_host_e183 rc=$b after $(( $(date +%s) - t0 )) s (its own bound $BUILD_S s); its log on the box: $LOG"
+    | tail -n 6 "$LOG" | cut -c1-240
+    | if [ "$b" -eq 0 ] && grep -q '^BUILD OK' "$LOG"; then
+    |   res="TRAIN-HOST-BUILT rc=0"; code=0
+    | else
+    |   rm -rf build/enercat-e183 build/enercat-e183-src build/e183-enercat-stage     # no train host of a failed build outlives it
+    |   if grep -q '^TRAIN-HOST-INPUTS-DIFFER' "$LOG"; then
+    |     res="TRAIN-HOST-INPUTS-DIFFER rc=$b: build_host_e183.sh found a build input or its tree off its pin and built nothing (not a build)"
+    |   else
+    |     case "$b" in
+    |       124|137) res="TRAIN-HOST-BUILD-OVERRAN rc=$b: past the build's own $BUILD_S s bound" ;;
+    |       *) res="TRAIN-HOST-BUILD-FAILED rc=$b" ;;
+    |     esac
+    |   fi
+    |   code=1
+    | fi
+    | echo "$TODAY $(TZ=America/Los_Angeles date '+%T %Z') a3-build-e183 ended rc=$b: $res" >> build/e183-build-attempts.txt
+    | echo "$res"
+    | exit "$code"
+    | )
+    | rc=$?
+    | echo "JOB-END a3-build-e183 rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a3-build-e183.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+[s08_a3_build_e183] (dry listing; a real run would say:) the train host's build runs on aifoundry3 as the detached job a3-build-e183 (its own bound 500 s): run this step's wait, again while it says 17
+(exit 0)
+
+################ tools/claims-v3/e183/rb/s08_a3_build_e183.sh wait
+=== [s08_a3_build_e183] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on the dry pass a3-build-e183): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-build-e183
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | fresh "$J.sh" || { echo "JOB-UNKNOWN ${J##*/}: not started today (its script is from $(TZ=America/Los_Angeles date -r "$J.sh" +%F)): start it again"; exit 3; }
+    | t=0; lost=0
+    | while [ ! -e "$J.rc" ] && [ "$SECONDS" -lt "$LIM" ]; do      # v3: the box's clock bounds the loop, not the sum of its sleeps
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then
+    |     # the grace: the job writes its pid as its first line and its exit status as its last; read both again before calling it lost
+    |     sleep 2
+    |     [ -e "$J.rc" ] && break
+    |     if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then lost=1; break; fi
+    |     continue
+    |   fi
+    |   sleep 10
+    | done
+    | t=$SECONDS
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"
+    | elif [ "$lost" -eq 1 ]; then echo "JOB-LOST ${J##*/}: no process (pid $(cat "$J.pid" 2>/dev/null || echo none)) and no exit status"
+    | else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+--- read on aifoundry3 (after the build: the build inputs at their pins (check_inputs_e183.py)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on $BOX: E183's step 6 never builds or checks beside one (one session of ours at a time)"; exit 3; fi
+    | python3 -B tools/claims-v3/e183/check_inputs_e183.py | head -n 12 | cut -c1-240; echo "check_inputs_e183 rc=${PIPESTATUS[0]}"
+--- read on aifoundry3 (after the build: the harness with the train host and its build tree (check_e183.py harness --binaries)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on $BOX: E183's step 6 never builds or checks beside one (one session of ours at a time)"; exit 3; fi
+    | python3 -B tools/claims-v3/e183/check_e183.py harness --binaries | head -n 20 | cut -c1-240; echo "check_e183 rc=${PIPESTATUS[0]}"
+--- read on aifoundry3 (after the build: the device-command preflight (preflight_e183.sh)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on $BOX: E183's step 6 never builds or checks beside one (one session of ours at a time)"; exit 3; fi
+    | bash tools/claims-v3/e183/preflight_e183.sh > build/e183-preflight-rb.txt 2>&1; echo "preflight_e183 rc=$? $(grep -m1 '^dmcmd_audit:' build/e183-preflight-rb.txt)"
+--- read on aifoundry3 (after the build: the registration's files, images, plan and schedule (e183_common.py --verify)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on $BOX: E183's step 6 never builds or checks beside one (one session of ours at a time)"; exit 3; fi
+    | python3 -B tools/claims-v3/e183/e183_common.py --verify | tail -n 3; echo "e183_common rc=${PIPESTATUS[0]}"
+[s08_a3_build_e183] (dry listing; a real run would say:) aifoundry3: the train host built by the detached job a3-build-e183; BUILD INPUTS OK 40, HARNESS OK with the binaries and the build tree, preflight_e183 GO, the registration verified, each in its own bounded read
+(exit 0)
+
+################ step 6's re-run rule: after a build that failed, overran or was lost, start then wait ONCE more; after a second, the fallback (SKIP: no E183 session today; drop E183's clause from the post); after TRAIN-HOST-INPUTS-DIFFER, step 5 once more, then start; after 11-14 on start or wait, wait before any second start
+
+################ tools/claims-v3/q141k-runbook/k6/s09_a3_reads_k6.sh 
+=== [s09_a3_reads_k6] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (et-lab-manifest, the card config read through the guard, et-who): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | unset V3_DEVICE ET_DEVICES
+    | export LD_LIBRARY_PATH=/opt/et/lib
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on aifoundry3: the config read waits (it opens card 0)"; exit 3; fi
+    | mkdir -p build/q141k
+    | et-lab-manifest | tee build/q141k/et-lab-manifest-$(date +%Y%m%dT%H%M%S).txt
+    | c=$(flock -n /run/lock/etsoc-shire0.lock timeout 10 bash tools/claims-v3/e128/ettelem_guard.sh config < /dev/null 2>/dev/null | grep '^{' | tail -1)
+    | echo "CONFIG $c"
+    | hold_read
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD)"
+(exit 0)
+
+################ tools/claims-v3/e183/rb/s10_a3_dry_e183.sh start
+=== [s10_a3_dry_e183] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- launch on aifoundry3 (start the dry pass a3-dry-e183, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-dry-e183
+    | MAXJ=1
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/aifoundry || exit 1
+    | echo "$$" > build/q141k/jobs/a3-dry-e183.pid
+    | echo "JOB-BEGIN a3-dry-e183 $(date '+%F %T %Z')"
+    | (
+    | LAST_START=2026-11-09\ 15:30\ PST
+    | LAST_END=2026-11-09\ 17:30\ PST
+    | echo "== E183's V3_DRY blocks"
+    | bad=0
+    | V3_DRY=1 bash tools/claims-v3/e183/block_e183.sh 18310; r=$?; echo "E183 dry 18310 rc=$r"; [ "$r" -eq 0 ] || bad=1
+    | V3_DRY=1 bash tools/claims-v3/e183/block_e183.sh 18301 --smoke; r=$?; echo "E183 dry 18301 --smoke rc=$r"; [ "$r" -eq 0 ] || bad=1
+    | V3_DRY=1 bash tools/claims-v3/e183/block_e183.sh 18302 --stoptest; r=$?; echo "E183 dry 18302 --stoptest rc=$r"; [ "$r" -eq 0 ] || bad=1
+    | echo "== E183's start gate at a past E183_LATEST_START"
+    | V3_DRY=1 E183_T0=$(date +%s) E183_LATEST_START="$(date -d '1 hour ago' '+%F %H:%M %Z')" E183_DEADLINE="$LAST_END" bash tools/claims-v3/e183/session_e183.sh
+    | g=$?; echo "E183 start gate rc=$g (want 8)"; [ "$g" -eq 8 ] || bad=1
+    | rm -rf build/claims-v3-dry/aifoundry3/e183 build/claims-v3-dry/aifoundry3/e183-smoke build/claims-v3-dry/aifoundry3/e183-stoptest
+    | [ "$bad" -eq 0 ]
+    | )
+    | rc=$?
+    | echo "JOB-END a3-dry-e183 rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a3-dry-e183.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+(exit 0)
+
+################ tools/claims-v3/e183/rb/s10_a3_dry_e183.sh wait
+=== [s10_a3_dry_e183] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on the dry pass a3-dry-e183): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-dry-e183
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | fresh "$J.sh" || { echo "JOB-UNKNOWN ${J##*/}: not started today (its script is from $(TZ=America/Los_Angeles date -r "$J.sh" +%F)): start it again"; exit 3; }
+    | t=0; lost=0
+    | while [ ! -e "$J.rc" ] && [ "$SECONDS" -lt "$LIM" ]; do      # v3: the box's clock bounds the loop, not the sum of its sleeps
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then
+    |     # the grace: the job writes its pid as its first line and its exit status as its last; read both again before calling it lost
+    |     sleep 2
+    |     [ -e "$J.rc" ] && break
+    |     if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then lost=1; break; fi
+    |     continue
+    |   fi
+    |   sleep 10
+    | done
+    | t=$SECONDS
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"
+    | elif [ "$lost" -eq 1 ]; then echo "JOB-LOST ${J##*/}: no process (pid $(cat "$J.pid" 2>/dev/null || echo none)) and no exit status"
+    | else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+(exit 0)
+
+################ tools/claims-v3/e183/rb/s11_a3_session_e183.sh FULL
+=== [s11_a3_session_e183] dry listing: nothing below is run
+--- gate: now <= the round's last start (2026-11-09 15:30 PST)
+--- gate: now + 65 min <= the round's last end (2026-11-09 17:30 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- launch on aifoundry3 (launch e183, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | LAST_START=2026-11-09\ 15:30\ PST; LAST_END=2026-11-09\ 17:30\ PST; PLAN=FULL
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | case "$BOX" in   # the firmware identity by continuity, never the firmware-revisions query (look_e164.sh's E82 rule; s14's E69 rule)
+    |   aifoundry1) FWREAD='2026-10-31 13:45:24 PDT'; FWWHO="E82's firmware read" ;;
+    |   aifoundry2) FWREAD='2026-10-27 13:56:26 PDT'; FWWHO="E69's firmware read" ;;
+    |   *) FWREAD="" ;;
+    | esac
+    | if [ -n "$FWREAD" ]; then
+    |   BOOTED=$(uptime -s 2>/dev/null); boot=$(date -d "$BOOTED" +%s 2>/dev/null); fw=$(date -d "$FWREAD" +%s)
+    |   if [ -z "$BOOTED" ] || [ -z "$boot" ] || [ "$boot" -ge "$fw" ]; then
+    |     echo "IDENTITY-STOP: $BOX booted '$BOOTED', not before $FWWHO of $FWREAD: its firmware build is not carried by continuity: nothing launched"; exit 3
+    |   fi
+    |   echo "identity: $BOX booted $BOOTED, before $FWWHO of $FWREAD: ok"
+    | fi
+    | job_ok_today a3-dry-e183 || { echo "REFUSED: E183's dry pass (s10_a3_dry_e183.sh) has not ended rc 0 today"; exit 3; }
+    | { job_ok_today a3-build-e183 && grep -q '^TRAIN-HOST-BUILT rc=0' build/q141k/jobs/a3-build-e183.out 2>/dev/null; } ||
+    |   { echo "REFUSED: E183's train host (s08_a3_build_e183.sh) was not built today"; exit 3; }
+    | mkdir -p build/e183 build/q141k
+    | T0=$(date +%s)
+    | echo "$T0" > build/q141k/e183.t0
+    | E183_T0=$T0 E183_PLAN="$PLAN" E183_LATEST_START="$LAST_START" E183_DEADLINE="$LAST_END" setsid nohup bash tools/claims-v3/e183/session_e183.sh > "build/e183/session-t$T0.out" 2>&1 < /dev/null &
+    | sleep 5
+    | echo "LAUNCHED e183 T0=$T0 $(date '+%F %T %Z') (plan $PLAN; gates: latest start $LAST_START, deadline $LAST_END)"
+    | head -n 6 "build/e183/session-t$T0.log" 2>/dev/null | cut -c1-300
+(exit 0)
+
+################ tools/claims-v3/e183/rb/s20_wait_e183.sh 
+=== [s20_wait_e183] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on e183): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | LIM=520
+    | TF=build/q141k/e183.t0
+    | fresh "$TF" || { echo "RUN-UNKNOWN e183: not launched today by the runbook (no T0 written today)"; exit 3; }
+    | T0=$(cat "$TF")
+    | L=build/e183/session-t$T0.log
+    | if [ -s "$L" ] && ! head -n 1 "$L" | grep -q "(T0 $T0 "; then echo "RUN-UNKNOWN e183: $L does not open with T0 $T0"; exit 3; fi
+    | ended() { grep -q "session end (T0 $T0)" "$L" 2>/dev/null; }
+    | gone=0
+    | while ! ended && [ "$SECONDS" -lt "$LIM" ]; do      # the box's clock bounds the loop
+    |   pgrep -u "$(id -u)" -f "session_e183\.sh" > /dev/null || { sleep 2; ended || { gone=1; break; }; }
+    |   sleep 15
+    | done
+    | t=$SECONDS
+    | date '+%F %T %Z'
+    | echo "T0 $T0, log $L"
+    | grep -E 'session start|stop-path|smoke|gate|queue|STOP|no device opened|failed|session end' "$L" 2>/dev/null | cut -c1-300 | tail -n 30
+    | [ -f "build/e183/queue-t$T0.out" ] && tail -n 3 "build/e183/queue-t$T0.out" | cut -c1-300
+    | if ended; then echo "RUN-ENDED e183"; elif [ "$gone" -eq 1 ]; then echo "RUN-GONE e183: no session process and no session end for T0 $T0"
+    | else echo "RUN-RUNNING e183 after $t s"; fi
+    | if grep -qE 'smoke gate failed|stop-path test failed|no device opened' "$L" 2>/dev/null; then echo "GATE-STOPPED e183"; fi
+(exit 0)
+
+################ step 11's release (a rewrite of the day's post): not scripted
+
+################ tools/claims-v3/e183/rb/s22_collect_e183_v2.sh 
+=== [s22_collect_v2_e183] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (which of E183's sources exist on the box, and the box's manifest of every file under them (sha256)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | SRCS='build/claims-v3/aifoundry3/e183 build/claims-v3/aifoundry3/e183-smoke build/claims-v3/aifoundry3/e183-stoptest build/e183/session-tT0.log build/e183/session-tT0.out build/e183/queue-tT0.out build/e183/dmcmd-preflight-tT0.txt build/e183/config-tT0-start.json build/e183/config-tT0-start.json.time build/e183/config-tT0-start.json.err build/e183/config-tT0-end.json build/e183/config-tT0-end.json.time build/e183/config-tT0-end.json.err build/enercat-e183/BUILD-E183.json build/e183-kernel-dis.txt build/e183-build-attempts.txt build/e183-build-host.txt build/e183-build-logs/2026-11-09'
+    | for s in $SRCS; do
+    |   if [ -e "$s" ]; then echo "HAVE $s"; else echo "ABSENT $s"; fi
+    | done
+    | for s in $SRCS; do
+    |   [ -e "$s" ] || continue
+    |   find "$s" -type f | LC_ALL=C sort | while read -r p; do echo "SUM $(sha256sum "$p" | cut -d' ' -f1) $p"; done
+    | done
+--- copy, run on the Intel (copy back E183's blocks, smoke and stop test (those the box holds)): rsync -a -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/claims-v3/aifoundry3/e183 aifoundry3:aifoundry/build/claims-v3/aifoundry3/e183-smoke aifoundry3:aifoundry/build/claims-v3/aifoundry3/e183-stoptest build/e183-raw/
+--- copy, run on the Intel (copy back the session's T0-named files and the train host's records (those the box holds)): rsync -a -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/e183/session-tT0.log aifoundry3:aifoundry/build/e183/session-tT0.out aifoundry3:aifoundry/build/e183/queue-tT0.out aifoundry3:aifoundry/build/e183/dmcmd-preflight-tT0.txt aifoundry3:aifoundry/build/e183/config-tT0-start.json aifoundry3:aifoundry/build/e183/config-tT0-start.json.time aifoundry3:aifoundry/build/e183/config-tT0-start.json.err aifoundry3:aifoundry/build/e183/config-tT0-end.json aifoundry3:aifoundry/build/e183/config-tT0-end.json.time aifoundry3:aifoundry/build/e183/config-tT0-end.json.err aifoundry3:aifoundry/build/enercat-e183/BUILD-E183.json aifoundry3:aifoundry/build/e183-kernel-dis.txt aifoundry3:aifoundry/build/e183-build-attempts.txt aifoundry3:aifoundry/build/e183-build-host.txt build/e183-raw/logs/
+--- copy, run on the Intel (copy back the day's build logs (step 6's, one a build)): rsync -a -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/e183-build-logs/2026-11-09/ build/e183-raw/logs/e183-build-logs/
+--- read, run on the Intel (the exact copy-back: the box's manifest against the copy (copycheck_e183.py)): /usr/bin/python3 -B tools/claims-v3/e183/copycheck_e183.py build/e183-raw/logs/box-manifest.txt build/e183-raw 2026-11-09
+--- desk, run on the Intel (collect_e183_v2.sh for T0 T0 (the pins, the reduction v2, the scorer, the kernel's loop against E180's)): env PY=/usr/bin/python3 E183_DATE=2026-11-09 E183_T0=T0 nice -n 10 bash tools/claims-v3/e183/collect_e183_v2.sh build/e183-raw
+--- gate: no desk path (the lab clone's, RB_OUT's, a Mac home, a session scratch directory) in build/e183-out/2026-11-09-e183-vector-add-r2-aifoundry3, and each of them there
+--- read, run on the Intel (another account's login or uid in any directory of build/e183-out/2026-11-09-e183-vector-add-r2-aifoundry3 (scrub_tree_e178.py --check, E178's, unchanged)): /usr/bin/python3 -B tools/claims-v3/e178/scrub_tree_e178.py --check build/e183-out/2026-11-09-e183-vector-add-r2-aifoundry3 --owner LOGIN
+[s22_collect_v2_e183] (dry listing; a real run would say:) E183 collected and scored (step 11 v2, the reduction v2): build/e183-out/2026-11-09-e183-vector-add-r2-aifoundry3 (the data directory is docs/reports/data/2026-11-09-e183-vector-add-r2-aifoundry3/), T0 T0, the copy exact; the day's step-6 record in its logs/; before the data commit, scan its message with the files
+(exit 0)
+
+dry listing: 12 steps listed, 0 exited non-zero

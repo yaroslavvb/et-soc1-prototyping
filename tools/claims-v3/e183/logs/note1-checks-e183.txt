@@ -1,0 +1,72 @@
+PART 1: the power figures E183.md section 5.2 quotes, against power-e183.json (c98a7287) at two decimals
+rule       the words                                            case         BASE quoted  DOUBLED quoted  reading
+E183-B     POSITIVE if BLIND is true                            BLIND      1.0000   1.00   1.0000   1.00  OK
+E183-B     POSITIVE at E180-L's lower end                       BLIND-LO   0.9995   1.00   0.7475   0.75  OK
+E183-B     SIZE PASS against BLIND if BLIND is true             BLIND      0.9490   0.95   0.9473   0.95  OK
+E183-B     REPEAT AGREES at BLIND                               BLIND      1.0000   1.00   1.0000   1.00  OK
+E183-B     REPEAT AGREES at E180-L's two ends (lower)           BLIND-LO   0.9808   0.98   0.9760   0.97  DOUBLED QUOTED 0.97, IS 0.98
+E183-B     REPEAT AGREES at E180-L's two ends (upper)           BLIND-HI   0.9792   0.98   0.9738   0.97  OK
+E183-B     DIFFERS LOW under OPER                               OPER       1.0000   1.00   0.7438   0.74  OK
+E183-B     NULL under OPER                                      OPER       0.9523   0.95   0.9320   0.93  OK
+E183-C     NULL under BLIND                                     BLIND      0.9493   0.95   0.9327   0.93  OK
+E183-C     NULL under P                                         P          0.9465   0.95   0.9265   0.93  OK
+E183-C     NULL under E180-L's ends (lower)                     BLIND-LO   0.9453   0.95   0.9240   0.93  DOUBLED QUOTED 0.93, IS 0.92
+E183-C     NULL under E180-L's ends (upper)                     BLIND-HI   0.9457   0.95   0.9255   0.93  OK
+E183-C     POSITIVE under OPER                                  OPER       1.0000   1.00   1.0000   1.00  OK
+E183-C     POSITIVE under BOTH                                  BOTH       1.0000   1.00   0.9940   0.99  OK
+E183-C     POSITIVE at c = +0.004                               C-EDGE     1.0000   1.00   0.9728   0.97  OK
+E183-C     POSITIVE at c = +0.002                               C-HALF     0.9732   0.97   0.4878   0.49  OK
+E183-C     SIZE PASS against OPER if OPER is true               OPER       0.9510   0.95   0.9497   0.95  OK
+E183-C     REPEAT DIFFERS LOW under BLIND                       BLIND      0.9940   0.99   0.6085   0.61  OK
+E183-MECH  RESULT (BLIND)                                       BLIND      0.9493   0.95   0.9327   0.93  OK
+E183-MECH  OPERAND (OPER)                                       OPER       0.9523   0.95   0.9320   0.93  OK
+E183-MECH  BOTH (BOTH)                                          BOTH       1.0000   1.00   0.9895   0.99  OK
+E183-MECH  NEITHER (no difference)                              NONE       0.9048   0.91   0.8555   0.86  BASE QUOTED 0.91, IS 0.90
+E183-MECH  the corner: RESULT at E180-L's lower end             BLIND-LO   0.9447      -   0.6917   0.69  OK
+E183-MECH  the corner: NEITHER at E180-L's lower end            BLIND-LO   0.0005      -   0.1725   0.17  OK
+E183-HT    POSITIVE if BLIND is true                            BLIND      0.9607   0.96   0.4778   0.48  OK
+E183-HT    POSITIVE under OPER                                  OPER       0.8932   0.89   0.3490   0.35  OK
+E183-HT    POSITIVE under OFM                                   OFM        0.3548   0.36   0.1168   0.12  BASE QUOTED 0.36, IS 0.35
+E183-HT    POSITIVE under no difference                         NONE       0.0248   0.03   0.0240   0.02  BASE QUOTED 0.03, IS 0.02
+E183-HT    SIZE PASS against BLIND if BLIND is true             BLIND      0.9500   0.95   0.9483   0.95  OK
+E183-HT    SIZE PASS against OFM if OFM is                      OFM        0.9547   0.96   0.9477   0.95  BASE QUOTED 0.96, IS 0.95
+E183-HT    REPEAT DIFFERS HIGH under P                          P          1.0000   1.00   1.0000   1.00  OK
+E183-X     INCONSISTENT when T6 lies 0.020 W above 6 b - c      X-OFF      0.9097   0.91   0.3835   0.38  OK
+E183-J     T3 - T1 INCONSISTENT when T3 lies 0.020 W above T1   J-OFF      0.7885   0.79   0.2807   0.28  OK
+E183-TR    N AS FORECAST at BASE                                BLIND      1.0000   1.00   0.0000      -  OK
+E183-TR    N WORSE at DOUBLED                                   BLIND      0.0000      -   0.4953   0.50  OK
+E183-TR    N FAILS at DOUBLED                                   BLIND      0.0000      -   0.5048   0.50  OK
+E183-TR    H AS PLANNED at BASE                                 BLIND      0.9990   1.00   0.0000      -  OK
+E183-TR    H WORSE at DOUBLED                                   BLIND      0.0010      -   0.2650   0.27  OK
+E183-TR    H FAILS at DOUBLED                                   BLIND      0.0000      -   0.7350   0.73  OK
+6 quoted figures differ from power-e183.json at two decimals
+E183-X X CONSISTENT under every arm (10 cases, the off-rule cases left out), BASE: 0.9487-0.9557 (quoted 0.95)
+E183-X X CONSISTENT under every arm (10 cases, the off-rule cases left out), DOUBLED: 0.9453-0.9573 (quoted 0.95)
+E183-J J_R CONSISTENT under every arm (10 cases, the off-rule cases left out), BASE: 0.9467-0.9547 (quoted 0.95)
+E183-J J_R CONSISTENT under every arm (10 cases, the off-rule cases left out), DOUBLED: 0.9460-0.9603 (quoted 0.95)
+E183-J J_O CONSISTENT under every arm (10 cases, the off-rule cases left out), BASE: 0.9470-0.9575 (quoted 0.95)
+E183-J J_O CONSISTENT under every arm (10 cases, the off-rule cases left out), DOUBLED: 0.9460-0.9563 (quoted 0.95)
+E183-X CONSISTENT under J-OFF (T3 0.020 W above T1; b pools T3), BASE: 0.7075 (not quoted)
+E183-X CONSISTENT under J-OFF (T3 0.020 W above T1; b pools T3), DOUBLED: 0.8868 (not quoted)
+the largest wrong mechanism word under BLIND, OPER, BOTH and NONE, BASE: 0.0257 (quoted at most 0.03)
+the largest wrong mechanism word under BLIND, OPER, BOTH and NONE, DOUBLED: 0.0235 (quoted at most 0.03)
+the true mechanism word under those four, both noises: 0.8555-1.0000 (section 6 quotes 0.86-1.00)
+the median half-widths in power-e183.json, BLIND, BASE: {'B': 0.001019, 'C': 0.001018, 'T5': 0.005055}
+the median half-widths in power-e183.json, BLIND, DOUBLED: {'B': 0.002035, 'C': 0.002033, 'T5': 0.010105}
+
+PART 2: a train's 95% half-width under the registered statistic; sigma_q 0.06249 W, kappa 0.01413 W, quad loss 0.01, 4,000 sessions a level, seed 18399
+BASE    T3  52 processes (26 units): the median t half-width 0.01023 W; plug-in t(0.975, 25) sigma / sqrt(156) = 0.01030; the plan's z value 0.00981; median over z 1.043
+BASE    T1  52 processes (26 units): the median t half-width 0.01031 W; plug-in t(0.975, 25) sigma / sqrt(156) = 0.01030; the plan's z value 0.00981; median over z 1.051
+BASE    T4  52 processes (26 units): the median t half-width 0.01026 W; plug-in t(0.975, 25) sigma / sqrt(156) = 0.01030; the plan's z value 0.00981; median over z 1.046
+BASE    T6  52 processes (26 units): the median t half-width 0.01029 W; plug-in t(0.975, 25) sigma / sqrt(156) = 0.01030; the plan's z value 0.00981; median over z 1.049
+BASE    T2  52 processes (26 units): the median t half-width 0.01017 W; plug-in t(0.975, 25) sigma / sqrt(156) = 0.01030; the plan's z value 0.00981; median over z 1.037
+BASE    T5 202 processes (101 units): the median t half-width 0.00505 W; plug-in t(0.975, 100) sigma / sqrt(606) = 0.00504; the plan's z value 0.00498; median over z 1.015
+BASE    TR-H's statistic (the median over the six trains of the half-width over half_width_base_w): median 1.035 (5%-95% 0.941-1.139)
+DOUBLED T3  52 processes (26 units): the median t half-width 0.02039 W; plug-in t(0.975, 25) sigma / sqrt(156) = 0.02061; the plan's z value 0.01961; median over z 1.040
+DOUBLED T1  52 processes (26 units): the median t half-width 0.02047 W; plug-in t(0.975, 25) sigma / sqrt(156) = 0.02061; the plan's z value 0.01961; median over z 1.044
+DOUBLED T4  52 processes (26 units): the median t half-width 0.02056 W; plug-in t(0.975, 25) sigma / sqrt(156) = 0.02061; the plan's z value 0.01961; median over z 1.048
+DOUBLED T6  52 processes (26 units): the median t half-width 0.02044 W; plug-in t(0.975, 25) sigma / sqrt(156) = 0.02061; the plan's z value 0.01961; median over z 1.042
+DOUBLED T2  52 processes (26 units): the median t half-width 0.02052 W; plug-in t(0.975, 25) sigma / sqrt(156) = 0.02061; the plan's z value 0.01961; median over z 1.046
+DOUBLED T5 202 processes (101 units): the median t half-width 0.01012 W; plug-in t(0.975, 100) sigma / sqrt(606) = 0.01007; the plan's z value 0.00995; median over z 1.018
+DOUBLED TR-H's statistic (the median over the six trains of the half-width over half_width_base_w): median 2.075 (5%-95% 1.878-2.279)
+t(0.975, 25) 2.0595; t(0.975, 100) 1.9840; 1.96 for the plan's z value
