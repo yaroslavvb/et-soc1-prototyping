@@ -1,0 +1,161 @@
+scratch repository: 706 files committed
+
+== A. the dry listing (both arms): every step exits 0, no ssh or rsync call
+dry listing: 0 step(s) exited non-zero
+-> PASS (A dry listing)
+
+== K. step 2 v3 with no window in its RB_OUT (s02 not run)
+[s03_desk_e184] STOP: no window in RB_OUT: run s02_window_e184.sh first (kit v5: s02 before s03)
+-> PASS (K step 2 v3 refuses without step 1's window, no call)
+
+== S1. step 5 arm S on a clean stand-in aifoundry3, then the box's own checks in the tree its rsync alone built (+ stub binaries)
+[s07_sync_e184] the sync list: E184's 2 paths (they hold 54 of the harness's 59 files) and its 5 other files: all 59 of them
+[s07_sync_e184] synced to aifoundry3:aifoundry/ every file of harness-e184-v2.json (59 files, in 7 paths)
+the sync alone: 0 harness files absent, 0 differing
+-> PASS (S1a step 5 S exits 0 with one rsync, and its tree holds every harness file at its sha256)
+HARNESS OK: 59 files (harness-e184-v2.json)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+box-side checks (harness, preflight, block rc, quads, stubs run, start gate): 0.0.0.108.0.8; network calls: 0
+-> PASS (S1b in that tree: HARNESS OK, GO, 108 quads through the E184 host, the start gate 8, no network call)
+
+== S2. step 5 arm B on a clean stand-in aifoundry1 (~/nekko)
+[s07_sync_e184] synced to aifoundry1:nekko/ every file of harness-e184-v2.json (59 files, in 7 paths)
+-> PASS (S2 step 5 B exits 0 with one rsync into ~/nekko, every harness file at its sha256)
+
+== S3. step 5 with an uncommitted change in a harness file outside E184's directory (lib.sh)
+[s07_sync_e184] STOP: E184's paths have uncommitted changes: sync only the pushed commit
+-> PASS (S3 exit 16, no rsync)
+
+== L1. a login link at the probe (step 6)
+[s08_build_e184] STOP: aifoundry3 printed a login link at the probe (lock file appended; link in RB_LINKS): nothing else was called
+<HH:MM:SS> aifoundry3 needs a check
+-> PASS (L1 exit 11 and one lock line)
+
+== L2. a probe that never answers (bound 2 s)
+[s08_build_e184] STOP: aifoundry3 did not answer the probe within 15 s (rc 12): nothing else was called
+-> PASS (L2 exit 12)
+
+== L3. a launch past its bound (2 s)
+[s08_build_e184] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again
+-> PASS (L3 exit 13)
+
+== G1. step 9 with no window recorded
+[s11_session_e184] STOP: no window yet: run s02_window.sh with his go's day, last start and last end
+-> PASS (G1 exit 10)
+
+== G2. step 9 past the round's last start
+[s11_session_e184] STOP: past the round's last start (2026-11-07 00:00 PST): no new card session
+-> PASS (G2 exit 16)
+
+== G3. step 9 in the window (tomorrow's), no build or dry job ended rc 0 today on the box: refused there (arm S, then arm B)
+REFUSED: E184's dry pass (s10_dry_e184.sh S) has not ended rc 0 today
+identity: aifoundry1 booted 2026-10-30 10:00:00, before E82's firmware read of 2026-10-31 13:45:24 PDT: ok
+-> PASS (G3 exit 10 on both boxes, nothing launched)
+
+== G4. step 9 arm S with the build and dry jobs ended rc 0 today: launched with a T0; the session refuses at its host check
+LAUNCHED e184s T0=1794114168 2026-11-07 21:02:53 PST (gates: latest start 2026-11-08 23:58 PST, deadline 2026-11-08 23:59 PST)
+session start, arm S, kit v2 (budget anchor T0 1794114168 = 21:02:48 PST)
+arm S runs on aifoundry3, not Intel-mbp: no device opened
+-> PASS (G4 launched, the same T0 on the box and in RB_OUT, the T0's own log opens with it and reads the refusal)
+
+== W1. step 10 with no T0 written today
+[s20_wait_e184] STOP: RUN-UNKNOWN e184s: not launched today by the runbook (no T0 written today)
+-> PASS (W1 exit 10)
+
+== W2. step 10 after G4: the T0's log reads a refusal and no session process runs
+GATE-STOPPED e184s
+-> PASS (W2 exit 16 (a gate stop))
+
+== W3. the rest rule: an earlier T0's log ends 'session end' beside this T0's open log, the session running
+RUN-RUNNING e184s after 15 s
+'session end' lines in all of build/e184/session-S-t*.log: 1 (a wait on any of them would have stopped)
+-> PASS (W3 exit 17: the earlier T0's end does not count)
+
+== W4. this T0's log then ends
+[s20_wait_e184] e184s has ended (its own T0's log says so)
+-> PASS (W4 exit 0)
+
+== W5. a log under this T0's name whose first line names another T0
+[s20_wait_e184] STOP: RUN-UNKNOWN e184s: build/e184/session-S-t1794114368.log does not open with T0 1794114368
+-> PASS (W5 exit 10)
+
+== R1. step 7 v2 on the stand-in aifoundry3: the config read kept on the box as step 7's read
+[s09_reads_e184] aifoundry3: manifest kept on the box (build/q141k/), config read (TDP 0 W / 65 C / 600 MHz), kept as step 7's read build/e184/config-S-step7-<epoch>.json (before), et-who clean
+-> PASS (R1 exit 0, one step-7 file on the box holding the read, named in RB_OUT)
+
+== R2. step 7 v2 beside a session of ours
+[s09_reads_e184] STOP: refused on the box: REFUSED: a card session of ours runs on aifoundry3: the config read waits (it opens the card)
+-> PASS (R2 refused (10), no file)
+
+== R3. step 7 v2 after: T0 recorded, its log on the box without its end line
+[s09_reads_e184] STOP: refused on the box: REFUSED: build/e184/session-S-t1794115068.log has no 'session end (T0 1794115068)' line: step 10 first (the read after a session follows its end)
+-> PASS (R3 refused (10), no file)
+
+== R4. step 7 v2 after, that T0's log ended
+[s09_reads_e184] aifoundry3: manifest kept on the box (build/q141k/), config read (TDP 0 W / 65 C / 600 MHz), kept as step 7's read build/e184/config-S-step7-<epoch>.json (after, after T0 1794115068's session end), et-wh
+-> PASS (R4 exit 0, one more file)
+
+== R5. step 7 v2 on a moved config (TDP 65 W)
+[s09_reads_e184] STOP: aifoundry3's config is not TDP 0 W / 65 C / 600 MHz: {"tdp_w":65,"temp_threshold_c":65,"minion_mhz":600,"source":"desk-test stand-in"} (step 7's read is kept on the box: build/e
+-> PASS (R5 exit 16, the moved read still kept on the box)
+
+== C1. arm S, the real collector on a synthetic session staged on the stand-in aifoundry3
+[s22_collect_e184] E184 arm S collected and scored (kit note 3: reduce v4 with A4, score v3): build/e184-out/2026-11-08-e184-sensor-validation (the data directory is docs/reports/data/2026-11-08-e184-sensor-validation/)
+-> PASS (C1)
+scored: gate True dep 0 L LINEAR P LINEAR C NONE SEEN; raw layout: <scratch>/tree/build/e184-raw/aifoundry3/e184/p18410; images copied back: 0
+-> PASS (C1 the layout the reducer reads (no images), and the scores)
+
+== C1b. arm B, the real collector on a synthetic session staged on the stand-in aifoundry1
+[s22_collect_e184] E184 arm B collected and scored (kit note 3: reduce v4 with A4, score v3): build/e184-out/2026-11-08-e184-sensor-validation (the data directory is docs/reports/data/2026-11-08-e184-sensor-validation/)
+-> PASS (C1b)
+scored: gate True M SUPPORTED
+-> PASS (C1b the layout and the scores)
+
+== C2. arm S, the end config read empty on the box, step 7's read 2 minutes after its attempt: one departure (A3-3)
+scored: gate True dep 1 True L LINEAR
+-> PASS (C2 collected; the gate holds with one departure naming step 7's read)
+
+== C2n. the same with no step-7 read
+scored: gate False L NOT SCORED
+-> PASS (C2n collected; the gate does not hold, every rule NOT SCORED)
+
+== C2p. step 11 v3, arm S, the END read partial (temp_threshold_c null), step 7's read 2 minutes after its attempt: one departure (A4)
+scored: gate True dep 1 True L LINEAR all-NS False
+departure: the end config read for T0 1794500000 is missing (its attempt at 2026-11-12T18:23:20Z: failed (no value for temp_threshold_c))
+-> PASS (C2p collected; the partial read is MISSING and replaced by step 7's (one departure), E184-L LINEAR)
+
+== C2e. step 11 v3, arm S, the START read {} and the END read MOVED (TDP 65 W) (verify-q154k's H4)
+scored: gate False dep 0 False L NOT SCORED all-NS True
+-> PASS (C2e collected; the moved end read is checked on its own: the gate does not hold, every rule NOT SCORED)
+
+== C2ev. the fault shown: step 11 v2 (reduce_e184_v3.py) on the same box
+scored: gate True dep 0 False L LINEAR all-NS False
+-> PASS (C2ev step 11 v2 holds the gate on the same reads and scores the arm (the fault A4 fixes))
+
+== C5. a stop-path test with a launch record
+[s22_collect_e184] STOP: STOPTEST-LAUNCHED: the stop-path test recorded a launch (build/e184-raw/aifoundry3/e184-stoptest/p18402/runs.jsonl): nothing is scored as registered
+-> PASS (C5)
+
+== C6. a desk path in what the collector wrote
+HIT build/e184-out/2026-11-08-e184-sensor-validation/scored-e184-v3.md: the forbidden path <scratch>/tree (1 times)
+HIT build/e184-out/2026-11-08-e184-sensor-validation/scored-e184-v3.md: this user's home (1 times)
+HIT build/e184-out/2026-11-08-e184-sensor-validation/scored-e184-v3.md: a Mac home path (1 times)
+-> PASS (C6)
+
+== C7. the collector's success line missing
+[s22_collect_e184] STOP: score_e184_v3 did not write scored-e184-v3.md: read the collector's output above
+-> PASS (C7)
+
+== C8. the copy holds no session log for the recorded T0
+[s22_collect_e184] STOP: the copy holds no session-S-t1794500000.log: the session step 9 launched is not in it
+-> PASS (C8)
+
+== P1. D1's others-present line (another account's uid and login) in a pass directory's run.log
+[s22_collect_e184] STOP: another account's login or uid is left in build/e184-out/2026-11-08-e184-sensor-validation (the scrub-tree lines above). Every other gate has passed. Before any commit: python3 -B tools/claims-v3/e178/scru
+-> PASS (P1)
+
+== D1. the collector stand-in set without RB_DESKTEST=1: refused before any call
+[s22_collect_e184] STOP: K6E184_COLLECT is a desk-test stand-in and is read only with RB_DESKTEST=1: unset it (the card day never sets it)
+-> PASS (D1 exit 10, no call)
+
+SELFTEST-RB-E184-V3 PASS: 38 of 38 cases (stand-in ssh and rsync; no lab box reached)
