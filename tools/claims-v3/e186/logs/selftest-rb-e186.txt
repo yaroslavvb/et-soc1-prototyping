@@ -1,0 +1,117 @@
+scratch repository: 1784 files committed (13 of them the workload's), with an origin; the kit list's stand-in 74 files
+
+== A. the dry listing (FULL and the fallback, the look before the post): every step exits 0, no ssh or rsync call
+dry listing: 19 steps listed, 0 exited non-zero
+-> PASS (A the dry listing: 0 failing, no call, the look before the post, step 6 three times, step 2 once, step 11 twice with its exact copy-back)
+
+== K. step 2 with no window in RB_OUT (step 1 not run)
+[s03_desk_e186] STOP: no window in RB_OUT: run s02_window_e186.sh with his go's day, last start and last end first
+-> PASS (K step 2 refuses without step 1's window, before any call)
+
+== W1-W3. the window rule: a window written yesterday, one written for another runbook, and step 1 with a day not today
+[s03_desk_e186] STOP: RB_OUT's window was not written today (Pacific): run s02_window_e186.sh with his go's day, last start and last end first
+[s03_desk_e186] STOP: RB_OUT's window was written for e182, not E186: one RB_OUT per runbook
+[s02_window_e186] STOP: the window's day 2026-11-09 is not today (Pacific): a window serves the day it is written
+-> PASS (W1-W3 a window not written today, one for another runbook, and a window for another day are each refused (10))
+
+== G. step 2 with no RB_GITLOCK (the lab-git lock)
+[s03_desk_e186] STOP: RB_GITLOCK is not set (the lab-git lock every commit to the shared lab clone takes; a path outside the repo)
+-> PASS (G step 2 refuses a pull without the lab-git lock)
+
+== P1. step 2 on the scratch repository (every listed file, an origin, the kit list's stand-in of 74, the logs' stand-ins)
+[s03_desk_e186] desk check: the window written today for E186; pulled under the lab-git lock, HEAD descends from ef350c515eb949db36823015a5395d03ae94c685, ef350c515eb949db36823015a5395d03ae94c685 and ef350c515eb949db36823015a5395d03ae94c685, the paths clean, no change but an addition since ef350c515eb949db36823015a5395d03ae94c685 on E186's paths (HISTORY OK), the eleven lists at their pinned count
+-> PASS (P1 step 2 passes the intact tree at every pin, its pull under the lab-git lock)
+
+== P2-P4. a pinned list one line short; a file and its line rewritten together; the kit's list one line short
+[s03_desk_e186] STOP: the desk check failed: history SHA256SUMS-e186-registration(9 OK of 9; pinned 10; its own bytes differ from the pin) harness-rebuild items harness
+[s03_desk_e186] STOP: the desk check failed: history SHA256SUMS-e186-registration(10 OK of 10; pinned 10; its own bytes differ from the pin) harness-rebuild items harness forecast
+[s03_desk_e186] STOP: the desk check failed: history SHA256SUMS-e186-kit(73 OK of 73; pinned 74)
+-> PASS (P2-P4 each refused (16) and named against its pin: a short list, a rewritten list (count kept, bytes not), the kit's short list)
+
+== H1. a committed edit of a kit file no list pins at its bytes (score_e186.py): the history check refuses it
+[s03_desk_e186] STOP: the desk check failed: history
+-> PASS (H1 refused (16) by the history check alone, naming the file (P1's intact tree read HISTORY OK))
+
+== S1. step 5 on a clean stand-in box, its stand-in binaries and pins, then step 6 start and wait (the fast stand-in cmake)
+[s07_a3_sync_e186] synced to aifoundry3:aifoundry/ (55 paths); the rsync sent 109 files' contents there, 9 of them under workloads/sparsity/
+the stand-in box's harness-e186.json now pins its 4 stand-in binaries
+JOB-STARTED a3-build-e186 2026-11-08 08:51:57 PST pid 59855
+[s08_a3_build_e186] the train host's build runs on aifoundry3 as the detached job a3-build-e186 (its own bound 500 s): run this step's wait, again while it says 17
+E186-BUILD-ATTEMPT 1 today (the day's start 1)
+HARNESS OK: 78 files match harness-e186.json
+NOTE1 FILES OK: 10 files match harness-e182-note1.json (8 build inputs, 2 box files)
+TRAIN-HOST-BUILT rc=0
+[s08_a3_build_e186] aifoundry3: the train host built by the detached job a3-build-e186; NOTE1 FILES OK 10, HARNESS OK 78, preflight_e186 GO, e186_common verified, each in its own bounded read
+check_e186 rc=0
+e186_common rc=0
+preflight_e186 rc=0 dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS (S1 the sync, the build job, then the four checks, each in its own 60 s read (5 with the one before the build); HARNESS OK 78; one build counted)
+
+== X3. a second start after the good build: refused
+[s08_a3_build_e186] STOP: refused on the box: REFUSED: the train host was built on aifoundry3 today (job a3-build-e186 ended rc 0 with TRAIN-HOST-BUILT, its build record present): run this step's wait, which reads its checks; a second build would remove it
+-> PASS (X3 step 6 refuses a second start after a good build (10), the count unchanged)
+
+== N1. the wait call cut (exit 255) after the good build
+[s08_a3_build_e186] STOP: no reading of the build job on aifoundry3 (the wait call exited 14 before the box printed JOB-DONE, JOB-LOST or JOB-RUNNING: it failed or was cut, which is not the build's failure): nothing is counted; run this step's wait again, and no other step-6 call (start or --no-trains) until it reads
+-> PASS (N1 a cut wait reads 14 'no reading', nothing counted; wait then reads the good build (0))
+
+== D. step 8, the trains' dry job, on the box step 6 left
+E186 dry 18610 rc=0
+E186 dry 18611 rc=0
+E186 dry 18612 rc=0
+E186 dry 18620 rc=0
+E186 dry 18601 --smoke rc=0
+E186 start gate rc=8 (want 8)
+E186 dry 18610 rc=0
+E186 dry 18611 rc=0
+E186 dry 18612 rc=0
+E186 dry 18620 rc=0
+E186 dry 18601 --smoke rc=0
+E186 start gate rc=8 (want 8)
+-> PASS (D the dry job rc 0: the fp16 train 18610, 18611, 18612, the pass 18620, the smoke, the start gate's 8; no network or device-tool call on the box)
+
+== O. a card session of ours on the box: step 6's start, step 8's start and step 9's launch each refused
+[s11_a3_session_e186] STOP: e186 refused on the box: REFUSED: a card session of ours already runs on aifoundry3 (one at a time)
+-> PASS (O beside a session of ours: step 6 refused (10), step 8's job refused on the box (14, JOB-REFUSED), step 9 refused (10))
+
+== R. the re-run rule with REAL failed builds, then the fallback
+HARNESS OK: 75 files match harness-e186.json (the trains off: the train host not checked)
+[s08_a3_build_e186] aifoundry3: the trains off (the fallback, PASSES): no good build today, HARNESS OK 75, preflight_e186 GO, e186_common verified, each in its own bounded read; next step 7 (k6's read
+e186_common rc=0
+preflight_e186 rc=0 dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS (R one re-run asked for (16); the second failure names the fallback (16); no third (16); two builds counted; the fallback: --no-trains 0 (HARNESS OK 75), step 8 --no-trains rc 0)
+
+== V. the box build under its bound: a fresh day, a stand-in cmake that sleeps 90 s (past the 60 s a read gets); the detached job, waited on
+HARNESS OK: 78 files match harness-e186.json
+TRAIN-HOST-BUILT rc=0
+[s08_a3_build_e186] aifoundry3: the train host built by the detached job a3-build-e186; NOTE1 FILES OK 10, HARNESS OK 78, preflight_e186 GO, e186_common verified, each in its own bounded read
+build_host_e186 rc=0 after 95 s (its own bound 500 s); its log on the box: build/e186-build-logs/2026-11-08/e186-build-host-start1.txt
+-> PASS (V a 90 s build: the job ran past one read's 60 s (104 s of waits, 3 of them 17), no call past a bound, then the checks (HARNESS OK 78); one build counted)
+
+== N6. the first check's read after the good build cut: no reading of a check, never a failed check
+[s08_a3_build_e186] STOP: no reading of inputs (rc 14) on aifoundry3 (each call exited non-zero with no result line of its own: it failed or was cut, which is not a failed check): run this step's wait again
+-> PASS (N6 a cut check read is 14 'no reading of inputs' (never 16 'a dated amendment first'); wait then reads all four checks (0))
+
+== LJ. a lost job: a fresh day, the 90 s stand-in cmake, the job's processes killed on the stand-in box mid-build
+[s08_a3_build_e186] STOP: the train host's build job was lost (no process and no exit status) on aifoundry3 (the lines above; build 1 of at most 2 today): run this step's start once more (the one re-run), then its wait; if that build does not read TRAIN-HOST-BUILT either, no train runs today: run step 6 with --no-trains (rb/s08_
+-> PASS (LJ the lost job: JOB-LOST is a build's failure: one re-run asked for (16), one build counted)
+
+== L. step 9 FULL yes on the box with the committed binaries' pins put back (step 5 again): the session stops at its own harness check
+LAUNCHED e186 T0 1794156957 2026-11-08 08:56:02 PST (plan FULL, trains yes; gates: latest start 2026-11-08 09:21 PST, deadline 2026-11-08 11:51 PST)
+[s11_a3_session_e186] e186 launched on aifoundry3 (plan FULL, trains yes, T0 1794156957); wait with s20_wait_e186.sh (bounded), and read its smoke gate before counting it as started
+[s20_wait_e186] STOP: e186 ended at a gate (a smoke or stop test, or no go): read the lines above; step 11 still collects it
+-> PASS (L the launch (0); the session stops at its harness check, no device opened, its manifest written; step 10 reads a gate stop (16) with the manifest)
+
+== C. step 11 on a session staged on the box: the copies by name, COPY-BACK EXACT, then the C gate (14, by design)
+COPY-BACK EXACT 6 files (every manifest line read back, and nothing else)
+STOPTEST-OK e186-stoptest/p18602: no launch record and no C record
+[s22_collect_e186] STOP: E186: a session that must carry a C log has no finished check of C (the lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, then 
+[s22_collect_e186] STOP: build/e186-raw already holds files (an earlier collection): the exact copy-back needs empty directories: move build/e186-raw aside first (never merge into it)
+[s22_collect_e186] STOP: COPY-BACK DIFFERS: build/claims-v3/aifoundry3/e186/p18610/train.jsonl: copied with other bytes: the copy is not the session's; nothing is scored; move build/e186-raw aside, read the box (read-only), then collect again
+[s22_collect_e186] STOP: 10 more minutes would pass the round's last end (2026-11-08 09:01 PST): not started
+-> PASS (C COPY-BACK EXACT (6 files), the history check OK before any scoring, then the C gate (14, by design); C2 a used output refused (10); C3 a changed box file: COPY-BACK DIFFERS (16); C4 the last end 5 minutes away: refused (16) before any call)
+
+== Z. no process of this test left running
+-> PASS (Z nothing left running)
+
+SELFTEST-RB-E186 19 of 19 PASS

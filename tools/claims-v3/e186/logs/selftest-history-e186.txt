@@ -1,0 +1,56 @@
+clone: 55671 files tracked, 60 of E186's paths; the kit's commit 918bc80e; the lab's HEAD 1e74546a
+
+== T0. the intact tree
+note M1's files: 0 changed since a41408d9 (reported, never a gate here; step 11's M1 gate reads them)
+HISTORY OK: E186's paths: 5 directories and 55 named files outside them; 56 file(s) added since a41408d9, none a shadowing module; no change but an addition since a41408d9; no uncommitted change
+the kit's list on the intact tree: 68 of 71 entries OK
+-> PASS (T0 the intact tree: HISTORY OK, no change but an addition since the anchor, none shadowing, nothing uncommitted)
+
+== T1. a kit file and its line in the kit's list rewritten together, committed
+note M1's files: 0 changed since a41408d9 (reported, never a gate here; step 11's M1 gate reads them)
+HISTORY REFUSED: E186's paths: 5 directories and 55 named files outside them; 56 file(s) added since a41408d9; history: 2 change(s) other than an addition since a41408d9 on E186's paths: M tools/claims-v3/e186/SHA256SUMS-e186-kit (8c251738); M tools/claims-v3/e186/score_e186.py (8c251738)
+-> PASS (T1 the kit's list reads as on the intact tree (68 of 71 OK, its count kept: the count-only pin passes it); the history check refuses (16), naming the file and the list)
+
+== T2. the card lane's brief edited, committed
+note M1's files: 0 changed since a41408d9 (reported, never a gate here; step 11's M1 gate reads them)
+HISTORY REFUSED: E186's paths: 5 directories and 55 named files outside them; 56 file(s) added since a41408d9; history: 1 change(s) other than an addition since a41408d9 on E186's paths: M tools/claims-v3/e186/KIT-BRIEF.md (d61e9d8f)
+-> PASS (T2 a committed change to the brief is refused (16), naming it)
+
+== T3. a committed json.py beside E186's scripts
+note M1's files: 0 changed since a41408d9 (reported, never a gate here; step 11's M1 gate reads them)
+HISTORY REFUSED: E186's paths: 5 directories and 55 named files outside them; 57 file(s) added since a41408d9; additions: tools/claims-v3/e186/json.py (shadows the module 'json' the system python finds)
+-> PASS (T3 an added module the system python finds is refused (16))
+
+== T4. a committed copy of score_e186.py in M12's directory
+note M1's files: 0 changed since a41408d9 (reported, never a gate here; step 11's M1 gate reads them)
+HISTORY REFUSED: E186's paths: 5 directories and 55 named files outside them; 57 file(s) added since a41408d9; additions: tools/claims-v3/e186/score_e186.py (its module name 'score_e186' is also tools/claims-v3/m12/score_e186.py's); tools/claims-v3/m12/score_e186.py (its module name 'score_e186' is also tools/claims-v3/e186/score_e186.py's)
+-> PASS (T4 an added module whose name another of E186's modules has is refused (16))
+
+== T5. an untracked file in the workload's directory
+note M1's files: 0 changed since a41408d9 (reported, never a gate here; step 11's M1 gate reads them)
+HISTORY REFUSED: E186's paths: 5 directories and 55 named files outside them; 56 file(s) added since a41408d9; status: 1 uncommitted change(s) on E186's paths: ?? workloads/sparsity/desktest-untracked.txt
+-> PASS (T5 an untracked file on E186's paths is refused (16))
+
+== T6. a committed rename of a file E182's lists name
+note M1's files: 0 changed since a41408d9 (reported, never a gate here; step 11's M1 gate reads them)
+HISTORY REFUSED: E186's paths: 5 directories and 55 named files outside them; 56 file(s) added since a41408d9; history: 1 change(s) other than an addition since a41408d9 on E186's paths: R tools/claims-v3/e182/e182_stats.py -> tools/claims-v3/e182/e182_stats.py.renamed (783d33b0)
+-> PASS (T6 a committed rename is refused (16), naming the file)
+
+== T7. note M1's reader and its line in note M1's list rewritten together, committed
+note M1's files: 2 changed since a41408d9 (reported, never a gate here; step 11's M1 gate reads them): M tools/claims-v3/e186/SHA256SUMS-e186-m1 (6bb0760b); M tools/claims-v3/e186/arm_m1_read_e186.py (6bb0760b)
+HISTORY OK: E186's paths: 5 directories and 55 named files outside them; 56 file(s) added since a41408d9, none a shadowing module; no change but an addition since a41408d9; no uncommitted change
+M1-NOT-RUN SHA256SUMS-e186-m1's own bytes differ from the pin; a change other than an addition to note M1's files or list since a41408d9 (the reader never ran; recorded for the data README, never a stop)
+-> PASS (T7 the tree check passes and reports note M1's two files; the M1 gate refuses (16, its list's bytes) and the reader never ran)
+
+== T8. the M1 gate on the intact tree: no scored file; then a stand-in scored file
+M1-NOT-RUN no <scratch>/data8a/scored-e186.json (the reader never ran; recorded for the data README, never a stop)
+REFUSED: the scorer's file has no trains
+M1-READER-REFUSED rc 3 (the reader's own refusal; recorded for the data README, never a stop)
+-> PASS (T8 no scored file: M1-NOT-RUN (16); a stand-in: the reader ran and refused it (the checker 2), nothing else in the data directory changed)
+
+== T9. an anchor HEAD does not descend from
+note M1's files: 0 changed since f349eda2 (reported, never a gate here; step 11's M1 gate reads them)
+HISTORY REFUSED: E186's paths: 5 directories and 55 named files outside them; 0 file(s) added since f349eda2; ancestry (HEAD does not descend from f349eda2)
+-> PASS (T9 refused (16): ancestry)
+
+SELFTEST-HISTORY-E186 10 of 10 PASS
