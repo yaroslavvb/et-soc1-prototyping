@@ -1,0 +1,52 @@
+# E185.md's dated note M1: the reader's self-test, run Sun 8 Nov 2026 05:11:26-05:11:28 PST on the Intel (/usr/bin/python3 3.9 with numpy, one job),
+# in a scratch clone of the lab at d5eb87b5 holding this note's files: /usr/bin/python3 -B tools/claims-v3/e185/selftest_arm_m1_e185.py <scratch dir>
+K1: PASS - sigma_c 0.0884 (score_m11_v5) = 0.0884 (design_e185); G_B 1.0267769787454892 = arms-e185-train.json's 1.0267769787454892
+C1: PASS - rc 0; rises inside, max |z| 0.0000; cool-downs inside, max |z| 0.0203; recovered cool-downs within 0.0018 C of the truth; plateau recovery within 0.0016 C; S/S2 cool-downs not covered; v4 as v3 True; planned arms' rise rms F 0.2471, B 0.1108, Rl 0.1298 C
+C2: PASS - room 50.55: the model's rises and cool-downs equal this test's interpolation to 0.0e+00; 'interpolated between the plan rooms 50.3 and 50.8 C'; every rise inside
+C3: PASS - room 52.0, warm in the mark: 'extrapolated 0.500 C below the plan room 52.5 C (from 52.5 and 53.0)'; equal to this test's own to 0.0e+00; pattern from 'the room mark's H_E pattern (2.6 s every 7.98 s)'
+C4: PASS - H_E +0.30: below, R inside the band, z +1.89; L1 -0.40: above, R below the band; rms 0.2041 C = this test's 0.2041
+C5: PASS - S2: 'not read: the score reads this hold not scored'; H_E2 cool-down: 'not read: the score gives no cool-down window for this hold'; rises read ['H_E', 'L1', 'L2', 'H_E2', 'S']
+C6: PASS - no marks file: pattern cool from 'no H_E pattern in the measured pass's room mark: A6-3's rule on the room (51.200 C <= 51.5 C)'
+C7: PASS - 'not read: E185's score reads 'NOT SCORED: the pass did not pass its start gate''
+C8: PASS - L2's plateau recovery -0.0498 C: cool-down 'not read: the recovery misses the plateau's R by -0.0498 C'; L1's read
+R1: PASS - a json with one digit changed: rc 2, REFUSED: m1-bad.json sha256 8010ff6171fca481 is not the committed note's d09b7c80e46254b8
+R2: PASS - a score whose G_B moved 1e-6: rc 3, REFUSED: the score's frozen G_B 1.0267779787454892 is not arms-e185-train.json's 1.0267769787454892
+--- the reader's text in C4's world, for the record:
+october-forecast-model's reported arms for E185 (E185.md.dated-note-M1.md, M1-4): v3 and v4 against E185's measured holds
+  october-forecast-model v3, frozen Sat 7 Nov 2026 23:32:50 PST, sha256 292c8c30c1acd5c0d017e3c422e7a1dc147ce0f94015c5fdde045c14493380e5, covering E185's 6 holds (the hold's rise) and 4 cool-down windows, at all seven plan rooms
+  october-forecast-model v4, frozen Sun 8 Nov 2026 03:59:42 PST, sha256 10bf2782de1411f920dbd596f319b75cb3539e329b967eccf394ee089b659c77, covering E185's 6 holds (the hold's rise) and 4 cool-down windows, at all 7 plan rooms
+  the model: C, forecasts from the plan's watts; E185: the 34-sensor die's rises as step 22's score gives them; REPORTED, never a rule
+  the session S3:p18520: room 50.800 C; the cool pattern (the room mark's H_E pattern (3.2 s every 7.56 s)); the score's reading: the chain over the smoke and the measured pass (A10)
+ARM v3 (october-forecast-model v3), at room 50.800 C, the cool pattern:
+  H_E rise: model 14.648 +- 0.159 C (at the plan room 50.8 C) against R 14.948 [14.775, 15.121] C: below; R inside the model's 95% band, z +1.89
+  H_E cool-down: model 2.574 +- 0.090 C against R 2.572 [2.399, 2.745] C (recovered): inside; R inside the model's 95% band, z -0.02
+  L1 rise: model 10.512 +- 0.115 C (at the plan room 50.8 C) against R 10.112 [9.939, 10.285] C: above; R below the model's 95% band, z -3.48
+  L1 cool-down: model 1.205 +- 0.089 C against R 1.205 [1.032, 1.378] C (recovered): inside; R inside the model's 95% band, z -0.00
+  L2 rise: model 10.670 +- 0.116 C (at the plan room 50.8 C) against R 10.670 [10.497, 10.843] C: inside; R inside the model's 95% band, z +0.00
+  L2 cool-down: model 1.367 +- 0.089 C against R 1.368 [1.195, 1.541] C (recovered): inside; R inside the model's 95% band, z +0.01
+  H_E2 rise: model 14.207 +- 0.156 C (at the plan room 50.8 C) against R 14.207 [14.034, 14.380] C: inside; R inside the model's 95% band, z +0.00
+  H_E2 cool-down: model 2.105 +- 0.089 C against R 2.103 [1.930, 2.276] C (recovered): inside; R inside the model's 95% band, z -0.02
+  S rise: model 4.078 +- 0.105 C (at the plan room 50.8 C) against R 4.078 [3.905, 4.251] C: inside; R inside the model's 95% band, z +0.00
+  S cool-down: not covered
+  S2 rise: model 2.115 +- 0.093 C (at the plan room 50.8 C) against R 2.115 [1.942, 2.288] C: inside; R inside the model's 95% band, z +0.00
+  S2 cool-down: not covered
+  v3 over the 6 rises read: rms 0.2041 C, mean miss -0.0167 C; over the 4 cool-downs read: rms 0.0014 C, mean -0.0006 C
+  beside: E185-BEST's rms (measured watts) {'B': 0.1675, 'F': 0.3218, 'Rl': 0.2984} (B); the registered arms' planned forecasts at this room, rise rms F 0.2820, B 0.1686, Rl 0.2969 C
+ARM v4 (october-forecast-model v4), at room 50.800 C, the cool pattern:
+  H_E rise: model 14.648 +- 0.159 C (at the plan room 50.8 C) against R 14.948 [14.775, 15.121] C: below; R inside the model's 95% band, z +1.89
+  H_E cool-down: model 2.574 +- 0.090 C against R 2.572 [2.399, 2.745] C (recovered): inside; R inside the model's 95% band, z -0.02
+  L1 rise: model 10.512 +- 0.115 C (at the plan room 50.8 C) against R 10.112 [9.939, 10.285] C: above; R below the model's 95% band, z -3.48
+  L1 cool-down: model 1.205 +- 0.089 C against R 1.205 [1.032, 1.378] C (recovered): inside; R inside the model's 95% band, z -0.00
+  L2 rise: model 10.670 +- 0.116 C (at the plan room 50.8 C) against R 10.670 [10.497, 10.843] C: inside; R inside the model's 95% band, z +0.00
+  L2 cool-down: model 1.367 +- 0.089 C against R 1.368 [1.195, 1.541] C (recovered): inside; R inside the model's 95% band, z +0.01
+  H_E2 rise: model 14.207 +- 0.156 C (at the plan room 50.8 C) against R 14.207 [14.034, 14.380] C: inside; R inside the model's 95% band, z +0.00
+  H_E2 cool-down: model 2.105 +- 0.089 C against R 2.103 [1.930, 2.276] C (recovered): inside; R inside the model's 95% band, z -0.02
+  S rise: model 4.078 +- 0.105 C (at the plan room 50.8 C) against R 4.078 [3.905, 4.251] C: inside; R inside the model's 95% band, z +0.00
+  S cool-down: not covered
+  S2 rise: model 2.115 +- 0.093 C (at the plan room 50.8 C) against R 2.115 [1.942, 2.288] C: inside; R inside the model's 95% band, z +0.00
+  S2 cool-down: not covered
+  v4 over the 6 rises read: rms 0.2041 C, mean miss -0.0167 C; over the 4 cool-downs read: rms 0.0014 C, mean -0.0006 C
+  beside: E185-BEST's rms (measured watts) {'B': 0.1675, 'F': 0.3218, 'Rl': 0.2984} (B); the registered arms' planned forecasts at this room, rise rms F 0.2820, B 0.1686, Rl 0.2969 C
+v4 reads exactly as v3 (its forecasts equal v3 at every room).
+Labels: REPORTED, never a rule; the model's figures are modelled and frozen before any E185 datum; E185's are blind measurements; a cool-down's R is recovered from the score's 4-decimal misses (about +-0.004 C).
+SELFTEST-ARM-M1-E185 11 of 11 PASS
