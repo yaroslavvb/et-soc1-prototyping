@@ -1,0 +1,509 @@
+{
+ "best_noise_by_item": {
+  "BEST_pct": {
+   "B": 0.1,
+   "F": 2.6,
+   "NOT SEPARATED (B, F)": 0.8,
+   "NOT SEPARATED (B, F, Rl)": 7.3,
+   "NOT SEPARATED (B, Rl)": 17.4,
+   "NOT SEPARATED (F, Rl)": 5.3,
+   "Rl": 66.5
+  },
+  "misses_by_item": {
+   "fp32.randn": [
+    {
+     "e_F_C": 0.0355,
+     "hold": "H_H",
+     "session": "E144"
+    },
+    {
+     "e_F_C": 0.1007,
+     "hold": "H_E",
+     "session": "E181"
+    }
+   ],
+   "int8.full": [
+    {
+     "e_F_C": 0.4833,
+     "hold": "H_M",
+     "session": "E154"
+    },
+    {
+     "e_F_C": 0.2532,
+     "hold": "L1",
+     "session": "E181"
+    },
+    {
+     "e_F_C": 0.4957,
+     "hold": "L2",
+     "session": "E181"
+    }
+   ],
+   "int8.neg_ones": [
+    {
+     "e_F_C": -0.0316,
+     "hold": "H_L",
+     "session": "E144"
+    },
+    {
+     "e_F_C": -0.0077,
+     "hold": "S",
+     "session": "E181"
+    }
+   ]
+  },
+  "tau_C": 0.0361
+ },
+ "cool": {
+  "one_pass": {
+   "by_arm": {
+    "B": {
+     "mean_C": 0.2081,
+     "sd_C": 0.0618
+    },
+    "F": {
+     "mean_C": -0.0503,
+     "sd_C": 0.0411
+    },
+    "Rl": {
+     "mean_C": -0.0081,
+     "sd_C": 0.269
+    }
+   },
+   "windows": [
+    {
+     "d_B_C": 0.2788,
+     "d_F_C": -0.015,
+     "d_Rl_C": -0.119,
+     "hold": "H_H",
+     "item": "fp32.randn",
+     "session": "E144 (training: in-sample for B and Rl)"
+    },
+    {
+     "d_B_C": 0.1808,
+     "d_F_C": -0.0955,
+     "d_Rl_C": -0.2039,
+     "hold": "H_E",
+     "item": "fp32.randn",
+     "session": "E181 (held out)"
+    },
+    {
+     "d_B_C": 0.1647,
+     "d_F_C": -0.0405,
+     "d_Rl_C": 0.2987,
+     "hold": "L1",
+     "item": "int8.full",
+     "session": "E181 (held out)"
+    }
+   ]
+  },
+  "own_scaling_at_E185_forecasts": [
+   {
+    "d_B_less_d_F_C": 0.3196,
+    "d_Rl_less_d_F_C": -0.0713,
+    "hold": "H_E",
+    "item": "fp32.randn"
+   },
+   {
+    "d_B_less_d_F_C": 0.2408,
+    "d_Rl_less_d_F_C": 0.4027,
+    "hold": "L1",
+    "item": "int8.full"
+   },
+   {
+    "d_B_less_d_F_C": 0.2406,
+    "d_Rl_less_d_F_C": 0.4081,
+    "hold": "L2",
+    "item": "int8.full"
+   },
+   {
+    "d_B_less_d_F_C": 0.3202,
+    "d_Rl_less_d_F_C": -0.0558,
+    "hold": "H_E2",
+    "item": "fp32.randn"
+   }
+  ],
+  "own_scaling_summary": {
+   "B": {
+    "mean_C": 0.2803,
+    "sd_C": 0.0457
+   },
+   "Rl": {
+    "mean_C": 0.1709,
+    "sd_C": 0.2708
+   }
+  },
+  "reads_when_the_shape_is_exact": {
+   "B | the chain's shape exact | sigma_c": {
+    "NOT RESOLVED": 4.5,
+    "THE SHAPE MISSES (warmer than the chain)": 95.5
+   },
+   "B | the chain's shape exact | sigma_c/2": {
+    "THE SHAPE MISSES (warmer than the chain)": 100.0
+   },
+   "F | the chain's shape exact | sigma_c": {
+    "NOT RESOLVED": 82.0,
+    "THE SHAPE HOLDS": 13.4,
+    "THE SHAPE MISSES (cooler than the chain)": 2.3,
+    "THE SHAPE MISSES (warmer than the chain)": 2.3
+   },
+   "F | the chain's shape exact | sigma_c/2": {
+    "NOT RESOLVED": 26.0,
+    "THE SHAPE HOLDS": 73.1,
+    "THE SHAPE MISSES (cooler than the chain)": 0.5,
+    "THE SHAPE MISSES (warmer than the chain)": 0.5
+   },
+   "Rl | the chain's shape exact | sigma_c": {
+    "NOT RESOLVED": 99.9,
+    "THE SHAPE MISSES (warmer than the chain)": 0.1
+   },
+   "Rl | the chain's shape exact | sigma_c/2": {
+    "NOT RESOLVED": 100.0
+   }
+  },
+  "two_pass": {
+   "by_arm": {
+    "B": {
+     "mean_C": 0.2449,
+     "sd_C": 0.0664
+    },
+    "F": {
+     "mean_C": -0.0496,
+     "sd_C": 0.0399
+    },
+    "Rl": {
+     "mean_C": 0.03,
+     "sd_C": 0.2627
+    }
+   },
+   "windows": [
+    {
+     "d_B_C": 0.3198,
+     "d_F_C": -0.015,
+     "d_Rl_C": -0.0772,
+     "hold": "H_H",
+     "item": "fp32.randn",
+     "session": "E144 (training: in-sample for B and Rl)"
+    },
+    {
+     "d_B_C": 0.2217,
+     "d_F_C": -0.0932,
+     "d_Rl_C": -0.1622,
+     "hold": "H_E",
+     "item": "fp32.randn",
+     "session": "E181 (held out)"
+    },
+    {
+     "d_B_C": 0.1932,
+     "d_F_C": -0.0405,
+     "d_Rl_C": 0.3293,
+     "hold": "L1",
+     "item": "int8.full",
+     "session": "E181 (held out)"
+    }
+   ]
+  }
+ },
+ "e181_stand_in": {
+  "B_rms_change_pct": -12.0913,
+  "one_pass (the reading stated at 20:03 PST)": {
+   "E185-BEST": "Rl",
+   "E185-BF": {
+    "D_C": -0.0304,
+    "verdict": "NOT RESOLVED"
+   },
+   "E185-RB": {
+    "D_C": -0.0682,
+    "verdict": "BETTER"
+   },
+   "E185-RF": {
+    "D_C": -0.0986,
+    "verdict": "BETTER"
+   },
+   "holds": [
+    "H_E",
+    "L1",
+    "L2",
+    "S",
+    "Z"
+   ],
+   "rms_C": {
+    "B": 0.263,
+    "F": 0.2934,
+    "Rl": 0.1948
+   },
+   "tau_C": 0.0395
+  },
+  "two_pass (A10's reading)": {
+   "E185-BEST": "NOT SEPARATED (B, Rl)",
+   "E185-BF": {
+    "D_C": -0.0652,
+    "verdict": "BETTER"
+   },
+   "E185-RB": {
+    "D_C": -0.0333,
+    "verdict": "NOT RESOLVED"
+   },
+   "E185-RF": {
+    "D_C": -0.0985,
+    "verdict": "BETTER"
+   },
+   "holds": [
+    "H_E",
+    "L1",
+    "L2",
+    "S",
+    "Z"
+   ],
+   "rms_C": {
+    "B": 0.2312,
+    "F": 0.2963,
+    "Rl": 0.1978
+   },
+   "tau_C": 0.0395
+  }
+ },
+ "gains": {
+  "one_pass": {
+   "G_B": 1.0234991155283695,
+   "G_Rl": 1.1897775062192668,
+   "abs_diff": [
+    1.9412239209426474e-06,
+    3.1767774852919928e-06
+   ],
+   "frozen_G_B": 1.0235010567522904,
+   "frozen_G_Rl": 1.189780682996752,
+   "n_holds": 11,
+   "within_2e-4": true
+  },
+  "two_pass": {
+   "G_B": 1.026775133744791,
+   "G_Rl": 1.1937942574511593,
+   "abs_diff": [
+    1.8450006982195788e-06,
+    1.039590434626092e-06
+   ],
+   "frozen_G_B": 1.0267769787454892,
+   "frozen_G_Rl": 1.193795297041594,
+   "n_holds": 11,
+   "within_2e-4": true
+  }
+ },
+ "hm_lg_k2": {
+  "E185_holds_counted": {
+   "four (M11's decision code: score_m11.NAMES_A3)": [
+    "H_E",
+    "L1",
+    "L2",
+    "S"
+   ],
+   "six (the registration's figure)": [
+    "H_E",
+    "L1",
+    "L2",
+    "H_E2",
+    "S",
+    "S2"
+   ]
+  },
+  "cells": {
+   "a level of +0.27 C": {
+    "four": {
+     "NOT SEPARATED": 100.0
+    },
+    "six": {
+     "LEVEL": 19.5,
+     "NOT SEPARATED": 80.5
+    }
+   },
+   "arm B's gain": {
+    "four": {
+     "NOT SEPARATED": 100.0
+    },
+    "six": {
+     "GAIN": 1.9,
+     "NOT SEPARATED": 98.1
+    }
+   },
+   "none (the chain right)": {
+    "four": {
+     "NOT SEPARATED": 100.0
+    },
+    "six": {
+     "NOT SEPARATED": 100.0
+    }
+   },
+   "the rail chain (arm Rl)": {
+    "four": {
+     "LEVEL": 0.2,
+     "NOT SEPARATED": 99.8
+    },
+    "six": {
+     "LEVEL": 2.4,
+     "NOT SEPARATED": 97.6
+    }
+   }
+  }
+ },
+ "inputs_sha256": {
+  "docs/reports/data/2026-11-02-q137m-model/m6.json": "87c17e086ee36699d7bb96609c02c471b5ba6b7bcdc20ead576d26f89e136e82",
+  "docs/reports/data/2026-11-05-e176-m11-holds-aifoundry3/aifoundry3/e176-smoke/p17601/marks.jsonl": "1edb2403c3be11ca849106f0268be45dcf0e68ddc389f95f443b7b1ae9b95aeb",
+  "docs/reports/data/2026-11-05-e176-m11-holds-aifoundry3/aifoundry3/e176-smoke/p17601/telemetry.jsonl.gz": "b1c02934b98398ddaeabecba5d15ca6ede523a7f52fd29cb3e6d6d051b8a874e",
+  "docs/reports/data/2026-11-05-e176-m11-holds-aifoundry3/aifoundry3/e176/p17620/marks.jsonl": "e7ffe09c2060a4ca69b30353df4ee166a7b6c39ecd1e86b287498438150fa547",
+  "docs/reports/data/2026-11-05-e176-m11-holds-aifoundry3/aifoundry3/e176/p17620/telemetry.jsonl.gz": "c84d88516ba0c2d6c7893855fe388e31e38e4618a8c9c49f0144cb0c28e50b7f",
+  "docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/aifoundry3/e181-smoke/p18101/marks.jsonl": "6f8bd656bd8c870e119e4ce6c998bd8ff359fe7d65252638560068bdf6cc77f4",
+  "docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/aifoundry3/e181-smoke/p18101/telemetry.jsonl.gz": "eed159abf68b26210b19d9de0784e393c6d9fcdd2e2c0f687764c031e63313fd",
+  "docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/aifoundry3/e181/p18120/marks.jsonl": "9610e91b6e9e38c9c8276c03c7aa9738c823d26a8ba21a7196b20858b7eae010",
+  "docs/reports/data/2026-11-06-e181-m11-session2-aifoundry3/aifoundry3/e181/p18120/telemetry.jsonl.gz": "55e2608996fe0059790379904bc12c41ba3ad97e0bd644d5bd1e6970aaaf6bf4",
+  "tools/claims-v3/e185/arms-e185-e181.json": "f9d4c54b7ce81413dc1c999ab961216c40e86b3d7f923133bc3d04b11ece5514",
+  "tools/claims-v3/e185/arms-e185-train.json": "8cd1217ff71c2f2704b314831859448261203441d130ffead9ec887f64db73e9",
+  "tools/claims-v3/e185/design-e185.json": "45d08c2a54b04bc66646e0406d70c847d96dedf1d0b6ac9590fe2498cfbf2a8f",
+  "tools/claims-v3/e185/run_e185.py": "6459f20a1796695c42f3da3860ffa2bfa38d723f2cc2453d197b45419ae236fb",
+  "tools/claims-v3/m11/residue-a8.json": "ceea7639494bb9a8b93041c0f217e0d0243d7f8435aacc3f1c2248d6969a1b75"
+ },
+ "smoke_residue": {
+  "E176 (A8's planned smoke, unspliced; the check of A8's 0.414)": {
+   "predicted_C": 0.4143642180437668,
+   "smoke_pass_part_C": 0.237153471210747
+  },
+  "E181 (its own smoke, cut and laid back in its own order: the splice's check)": {
+   "F0_C": 50.303186513863366,
+   "P0_W": 23.199,
+   "R0_length_s": 300.0,
+   "measured_C": 0.5133556757905922,
+   "predicted_C": 0.3995656280189434,
+   "smoke_pass_part_C": 0.23213211575055634,
+   "smoke_span_s": 71.1
+  },
+  "E181 by residue_a8.run_session, unspliced": {
+   "measured_C": 0.5133556757905922,
+   "predicted_C": 0.3995656280189434
+  },
+  "E185 (E181's smoke laid in E185's order)": {
+   "F0_C": 50.303186513863366,
+   "P0_W": 23.199,
+   "R0_length_s": 300.0,
+   "predicted_C": 0.5138466694027229,
+   "smoke_pass_part_C": 0.34641315713433335,
+   "smoke_span_s": 84.12,
+   "what": "a prediction only: E181's committed smoke segments in E185's order, then E181's committed R0; nothing of E185 measured"
+  },
+  "E185_planned": {
+   "A8_4_line_on_the_residue_C": 0.9143642180437668,
+   "P_refuse_settled (A8-R's normal form, at the first figure)": 0.00014015871932356624,
+   "P_refuse_settled at E181's planned 0.414 (A8's figure)": 3.0249946865465885e-06,
+   "misses_mean_sd_C": [
+    -0.07982032150461353,
+    0.1281474311489131
+   ],
+   "post hoc: E181's own miss": 0.11379004777164875,
+   "post hoc: P_refuse_settled with E181's miss among the five": 0.0012137378759826685,
+   "post hoc: five misses' mean_sd_C": [
+    -0.041098247649361076,
+    0.14075978865005162
+   ],
+   "predicted_residue_C (A8's 0.414 + that change)": 0.5286452594275438,
+   "predicted_residue_C (the splice directly)": 0.5138466694027229,
+   "smoke_part_change_from_E181s_C": 0.11428104138377701
+  },
+  "M6": {
+   "gain": 0.9,
+   "tau_s": [
+    1.005,
+    15.98,
+    138.21229024038436,
+    1500.0
+   ],
+   "weights": [
+    0.1475254229632836,
+    0.010046642157033103,
+    0.8323210084796046,
+    0.010103839662738784
+   ]
+  }
+ },
+ "timeline": {
+  "measured_pass": [
+   {
+    "end_min": 5.0,
+    "kind": "rest",
+    "name": "R0",
+    "start_min": 0.0
+   },
+   {
+    "end_min": 15.0,
+    "kind": "hold",
+    "name": "H_E",
+    "start_min": 5.0
+   },
+   {
+    "end_min": 23.0,
+    "kind": "rest",
+    "name": "R1",
+    "start_min": 15.0
+   },
+   {
+    "end_min": 33.0,
+    "kind": "hold",
+    "name": "L1",
+    "start_min": 23.0
+   },
+   {
+    "end_min": 41.0,
+    "kind": "rest",
+    "name": "R2",
+    "start_min": 33.0
+   },
+   {
+    "end_min": 51.0,
+    "kind": "hold",
+    "name": "L2",
+    "start_min": 41.0
+   },
+   {
+    "end_min": 59.0,
+    "kind": "rest",
+    "name": "R3",
+    "start_min": 51.0
+   },
+   {
+    "end_min": 69.0,
+    "kind": "hold",
+    "name": "H_E2",
+    "start_min": 59.0
+   },
+   {
+    "end_min": 77.0,
+    "kind": "rest",
+    "name": "R4",
+    "start_min": 69.0
+   },
+   {
+    "end_min": 87.0,
+    "kind": "hold",
+    "name": "S",
+    "start_min": 77.0
+   },
+   {
+    "end_min": 89.0,
+    "kind": "rest",
+    "name": "R5",
+    "start_min": 87.0
+   },
+   {
+    "end_min": 99.0,
+    "kind": "hold",
+    "name": "S2",
+    "start_min": 89.0
+   },
+   {
+    "end_min": 101.0,
+    "kind": "rest",
+    "name": "R6",
+    "start_min": 99.0
+   }
+  ],
+  "measured_pass_min": 101.0,
+  "smoke_plan_s (before its stop tests)": 63.0
+ }
+}

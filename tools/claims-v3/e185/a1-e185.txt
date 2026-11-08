@@ -1,0 +1,31 @@
+E185 dated amendment A1: its figures, from committed files only
+gains, one_pass: re-derived G_B 1.02350, G_Rl 1.18978 over 11 holds (rows to 4 decimals); frozen 1.02350, 1.18978; |diff| 1.9e-06, 3.2e-06; within 2e-4 True
+gains, two_pass: re-derived G_B 1.02678, G_Rl 1.19379 over 11 holds (rows to 4 decimals); frozen 1.02678, 1.19380; |diff| 1.8e-06, 1.0e-06; within 2e-4 True
+E185's rules on E181's held-out misses, one_pass (the reading stated at 20:03 PST): rms F/B/Rl 0.2934/0.263/0.1948; tau 0.0395; RF BETTER (-0.0986), BF NOT RESOLVED (-0.0304), RB BETTER (-0.0682); BEST Rl
+E185's rules on E181's held-out misses, two_pass (A10's reading): rms F/B/Rl 0.2963/0.2312/0.1978; tau 0.0395; RF BETTER (-0.0985), BF BETTER (-0.0652), RB NOT RESOLVED (-0.0333); BEST NOT SEPARATED (B, Rl)
+  B's E181 held-out rms, two-pass against one-pass: -12.1%
+E185-C's d on the committed windows, two_pass: E144 H_H F -0.015 B +0.320 Rl -0.077; E181 H_E F -0.093 B +0.222 Rl -0.162; E181 L1 F -0.041 B +0.193 Rl +0.329
+  by arm: F mean -0.050 sd 0.040; B mean +0.245 sd 0.066; Rl mean +0.030 sd 0.263
+E185-C's d on the committed windows, one_pass: E144 H_H F -0.015 B +0.279 Rl -0.119; E181 H_E F -0.096 B +0.181 Rl -0.204; E181 L1 F -0.041 B +0.165 Rl +0.299
+  by arm: F mean -0.050 sd 0.041; B mean +0.208 sd 0.062; Rl mean -0.008 sd 0.269
+each arm's own scaling in d at E185's forecasts (d_arm - d_F when R is the frozen chain's): H_E B +0.320 Rl -0.071; L1 B +0.241 Rl +0.403; L2 B +0.241 Rl +0.408; H_E2 B +0.320 Rl -0.056
+  summary: {"B": {"mean_C": 0.2803, "sd_C": 0.0457}, "Rl": {"mean_C": 0.1709, "sd_C": 0.2708}}
+  E185-C, F | the chain's shape exact | sigma_c/2: {'NOT RESOLVED': 26.0, 'THE SHAPE HOLDS': 73.1, 'THE SHAPE MISSES (cooler than the chain)': 0.5, 'THE SHAPE MISSES (warmer than the chain)': 0.5}
+  E185-C, B | the chain's shape exact | sigma_c/2: {'THE SHAPE MISSES (warmer than the chain)': 100.0}
+  E185-C, Rl | the chain's shape exact | sigma_c/2: {'NOT RESOLVED': 100.0}
+  E185-C, F | the chain's shape exact | sigma_c: {'NOT RESOLVED': 82.0, 'THE SHAPE HOLDS': 13.4, 'THE SHAPE MISSES (cooler than the chain)': 2.3, 'THE SHAPE MISSES (warmer than the chain)': 2.3}
+  E185-C, B | the chain's shape exact | sigma_c: {'NOT RESOLVED': 4.5, 'THE SHAPE MISSES (warmer than the chain)': 95.5}
+  E185-C, Rl | the chain's shape exact | sigma_c: {'NOT RESOLVED': 99.9, 'THE SHAPE MISSES (warmer than the chain)': 0.1}
+HM-LG at k = 2: E185 counted over {"six (the registration's figure)": ["H_E", "L1", "L2", "H_E2", "S", "S2"], "four (M11's decision code: score_m11.NAMES_A3)": ["H_E", "L1", "L2", "S"]}
+  none (the chain right): six {'NOT SEPARATED': 100.0}; four {'NOT SEPARATED': 100.0}
+  arm B's gain: six {'GAIN': 1.9, 'NOT SEPARATED': 98.1}; four {'NOT SEPARATED': 100.0}
+  the rail chain (arm Rl): six {'LEVEL': 2.4, 'NOT SEPARATED': 97.6}; four {'LEVEL': 0.2, 'NOT SEPARATED': 99.8}
+  a level of +0.27 C: six {'LEVEL': 19.5, 'NOT SEPARATED': 80.5}; four {'NOT SEPARATED': 100.0}
+E185-BEST with R = P_F + the chain's committed miss on the same item + normal(0, sigma_c/2): {"B": 0.1, "F": 2.6, "NOT SEPARATED (B, F)": 0.8, "NOT SEPARATED (B, F, Rl)": 7.3, "NOT SEPARATED (B, Rl)": 17.4, "NOT SEPARATED (F, Rl)": 5.3, "Rl": 66.5}
+  misses by item: {"fp32.randn": [0.0355, 0.1007], "int8.neg_ones": [-0.0316, -0.0077], "int8.full": [0.4833, 0.2532, 0.4957]}
+smoke residue, E176 (A8's planned smoke, unspliced; the check of A8's 0.414): {"predicted_C": 0.4144, "smoke_pass_part_C": 0.2372}
+smoke residue, E181 (its own smoke, cut and laid back in its own order: the splice's check): {"predicted_C": 0.3996, "smoke_pass_part_C": 0.2321, "measured_C": 0.5134, "F0_C": 50.3032, "P0_W": 23.199, "smoke_span_s": 71.1, "R0_length_s": 300.0}
+smoke residue, E181 by residue_a8.run_session, unspliced: {"predicted_C": 0.3996, "measured_C": 0.5134}
+smoke residue, E185 (E181's smoke laid in E185's order): {"predicted_C": 0.5138, "smoke_pass_part_C": 0.3464, "F0_C": 50.3032, "P0_W": 23.199, "smoke_span_s": 84.12, "R0_length_s": 300.0, "what": "a prediction only: E181's committed smoke segments in E185's order, then E181's committed R0; nothing of E185 measured"}
+smoke residue, E185_planned: {"smoke_part_change_from_E181s_C": 0.1143, "predicted_residue_C (A8's 0.414 + that change)": 0.5286, "predicted_residue_C (the splice directly)": 0.5138, "A8_4_line_on_the_residue_C": 0.9144, "P_refuse_settled (A8-R's normal form, at the first figure)": "1.40e-04", "P_refuse_settled at E181's planned 0.414 (A8's figure)": "3.02e-06", "misses_mean_sd_C": [-0.0798, 0.1281], "post hoc: E181's own miss": 0.1138, "post hoc: P_refuse_settled with E181's miss among the five": "1.21e-03", "post hoc: five misses' mean_sd_C": [-0.0411, 0.1408]}
+timeline: H_E 5.0-15.0; L1 23.0-33.0; L2 41.0-51.0; H_E2 59.0-69.0; S 77.0-87.0; S2 89.0-99.0; the measured pass 101.0 min; the smoke's plan 63.0 s before its stop tests
