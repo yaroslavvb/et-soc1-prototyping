@@ -1,0 +1,28 @@
+E182 kit note 2: step 6 v2 (rb/s08_a3_preflight_e182_v2.sh, as committed) against a stand-in cmake that sleeps 90 s in its build phase
+(rb/fake_cmake_slow_e182.sh), on the desk test's stand-in box, with rb_run.py's own bounds (no RB_<CLS>_S set): 2026-11-07 17:45:00 PST
+
+---- run 1: exit 13 after 61 s
+NOTE1 FILES OK: 10 files match harness-e182-note1.json (8 build inputs, 2 box files)
+check_inputs_e182 rc=0
+rb_run: no end within 60 s: killed
+[s08_a3_preflight_v2_e182] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again
+  the runbook log's lines for this run:
+    2026-11-07 17:45:00 PST step=s08_a3_preflight_v2_e182 class=probe host=aifoundry3 bound=15s secs=0.1 rc=0 child_rc=0 status=ok what='probe' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+    2026-11-07 17:46:01 PST step=s08_a3_preflight_v2_e182 class=read host=aifoundry3 bound=60s secs=60.4 rc=13 child_rc=-15 status=timeout what="E182's preflight on the box (v2: the build inputs checked, then the train host built from them)" cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 '
+    2026-11-07 17:46:01 PST step=s08_a3_preflight_v2_e182 exit=13 a call to aifoundry3 ran past its bound and was killed: run this step again
+  the box after it: train host absent, build record absent; the build's configure log written 17:45:01 PST (a fresh configure: the build started from scratch)
+
+---- run 2: exit 13 after 61 s
+NOTE1 FILES OK: 10 files match harness-e182-note1.json (8 build inputs, 2 box files)
+check_inputs_e182 rc=0
+rb_run: no end within 60 s: killed
+[s08_a3_preflight_v2_e182] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again
+  the runbook log's lines for this run:
+    2026-11-07 17:46:01 PST step=s08_a3_preflight_v2_e182 class=probe host=aifoundry3 bound=15s secs=0.1 rc=0 child_rc=0 status=ok what='probe' cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+    2026-11-07 17:47:02 PST step=s08_a3_preflight_v2_e182 class=read host=aifoundry3 bound=60s secs=60.5 rc=13 child_rc=-15 status=timeout what="E182's preflight on the box (v2: the build inputs checked, then the train host built from them)" cmd=ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 '
+    2026-11-07 17:47:02 PST step=s08_a3_preflight_v2_e182 exit=13 a call to aifoundry3 ran past its bound and was killed: run this step again
+  the box after it: train host absent, build record absent; the build's configure log written 17:46:02 PST (a fresh configure: the build started from scratch)
+
+---- what it shows: each run of step 6 v2 is killed at its 60 s read bound (13) and says 'run this step again'; the build
+started from scratch each time (build_host_e182_v2.sh removes src/, b/ and the record first), so a re-run is killed the same way;
+neither message names the registered fallback (PASSES). Processes of the killed builds left running: 0.
