@@ -1,0 +1,55 @@
+# E183.md's dated note M1: the reader's self-test, run Sun 8 Nov 2026 05:11:13-05:11:26 PST on the Intel (/usr/bin/python3 3.9, one job),
+# in a scratch clone of the lab at d5eb87b5 holding this note's files: /usr/bin/python3 -B tools/claims-v3/e183/selftest_arm_m1_e183.py <scratch dir>
+W3-form: PASS - v3's six trains are b dR with b = 0.0094964 W a result bit, c = 0: largest departure 5.7e-07 W
+F-W3: PASS - the reader's trains, b, c and MECH equal the scorer's (MECH RESULT); trains scored ['T1', 'T2', 'T3', 'T4', 'T5', 'T6']
+P-W3-v3: PASS - every placement: T1 inside, T2 inside, T3 inside, T4 inside, T5 inside, T6 inside, b inside, c inside, j_T3_minus_T1 inside, j_T4_minus_T2 inside, x inside
+P-W3-v4: PASS - every placement: T1 below, T2 above, T3 below, T4 above, T5 inside, T6 below, b below, c above, j_T3_minus_T1 below, j_T4_minus_T2 inside, x inside
+F-W4: PASS - the reader's trains, b, c and MECH equal the scorer's (MECH BOTH); trains scored ['T1', 'T2', 'T3', 'T4', 'T5', 'T6']
+P-W4-v3: PASS - every placement: T1 above, T2 below, T3 above, T4 below, T5 above, T6 above, b above, c below, j_T3_minus_T1 above, j_T4_minus_T2 inside, x inside
+P-W4-v4: PASS - every placement: T1 inside, T2 inside, T3 inside, T4 inside, T5 inside, T6 inside, b inside, c inside, j_T3_minus_T1 inside, j_T4_minus_T2 inside, x inside
+F-WC: PASS - the reader's trains, b, c and MECH equal the scorer's (MECH RESULT); trains scored ['T1', 'T2', 'T4', 'T5', 'T6']
+P-WC-v3: PASS - every placement: T1 inside, T2 inside, T3 not read, T4 inside, T5 inside, T6 inside, b inside, c inside, j_T3_minus_T1 not read, j_T4_minus_T2 inside, x inside
+P-WC-v4: PASS - every placement: T1 below, T2 above, T3 not read, T4 above, T5 below, T6 below, b below, c above, j_T3_minus_T1 not read, j_T4_minus_T2 inside, x inside
+F-WS: PASS - the reader's trains, b, c and MECH equal the scorer's (MECH RESULT); trains scored ['T1', 'T2', 'T3', 'T4']
+P-WS-v3: PASS - every placement: T1 inside, T2 inside, T3 inside, T4 inside, T5 not read, T6 not read, b inside, c inside, j_T3_minus_T1 inside, j_T4_minus_T2 inside, x not read
+P-WS-v4: PASS - every placement: T1 below, T2 above, T3 below, T4 above, T5 not read, T6 not read, b below, c above, j_T3_minus_T1 inside, j_T4_minus_T2 inside, x not read
+K-W3: PASS - MECH RESULT; v3 the same word, v4 a different word; v4 T1/T3/T6 ['below', 'below', 'below'], T2/T4 ['above', 'above'], b below, c above; v3 T2 sign 'no sign to compare'
+K-W4: PASS - MECH BOTH; v4 the same word, v3 a different word; v3 T1/T3/T6 ['above', 'above', 'above'], T2/T4 ['below', 'below'], c below
+N-WC: PASS - T3 not read: E183 reads this train NOT SCORED; the model's b from ['T1'] = 0.0094964 (its T1 / 7)
+N-WS: PASS - T5 not read: E183 reads this train NOT SCORED; T6 not read: E183 reads this train NOT SCORED; x not read: E183 reads it NOT SCORED
+R1: PASS - a json with one digit changed: rc 2, REFUSED: m1-bad.json sha256 2ee07076d71ff55e is not the committed note's fe81bf2d0c2857b8
+R2: PASS - a scorer's file with T1 moved 1e-6 W: rc 3, REFUSED: the reduction and the scorer's file disagree: T1 mean: 0.06648931623931596 against the scorer's 0.06649031623931596
+--- the reader's text in W3, for the record:
+october-forecast-model's reported arms for E183 (E183.md.dated-note-M1.md, M1-4): v3 and v4 against E183's measured trains
+  october-forecast-model v3, frozen Sat 7 Nov 2026 23:32:50 PST, sha256 292c8c30c1acd5c0d017e3c422e7a1dc147ce0f94015c5fdde045c14493380e5, covering E183's 11 kinds and its 6 trains (fadd.ps one-number, above the fadd.ps zeros)
+  october-forecast-model v4, frozen Sun 8 Nov 2026 03:59:42 PST, sha256 10bf2782de1411f920dbd596f319b75cb3539e329b967eccf394ee089b659c77, covering E183's 11 kinds and its 6 trains (fadd.ps one-number, above the fadd.ps zeros)
+  the model: W above the fadd.ps zeros at E183's rate (aifoundry3 board); E183: W at the board; REPORTED, never a rule
+ARM v3 (october-forecast-model v3):
+  T1: model +0.06648 W against +0.06649 [+0.06416, +0.06882] W (26 units): inside, the estimate's sign; the estimate inside the model's band [+0.01594, +0.11701]
+  T2: model +0.00000 W against +0.00154 [-0.00071, +0.00379] W (26 units): inside, no sign to compare; the estimate above the model's band [+0.00000, +0.00000]
+  T3: model +0.06648 W against +0.06801 [+0.06454, +0.07148] W (26 units): inside, the estimate's sign; the estimate inside the model's band [+0.01594, +0.11701]
+  T4: model +0.00000 W against +0.00033 [-0.00205, +0.00272] W (26 units): inside, no sign to compare; the estimate above the model's band [+0.00000, +0.00000]
+  T5: model +0.00950 W against +0.00938 [+0.00819, +0.01057] W (101 units): inside, the estimate's sign; the estimate inside the model's band [+0.00228, +0.01672]
+  T6: model +0.05698 W against +0.05573 [+0.05319, +0.05828] W (26 units): inside, the estimate's sign; the estimate inside the model's band [+0.01366, +0.10030]
+  b, W a result 1-bit (E183-B): model +0.009496 against +0.009607 [+0.009315, +0.009899]: inside, the estimate's sign
+  c, W an operand 1-bit (E183-C): model +0.000000 against +0.000134 [-0.000094, +0.000362]: inside, no sign to compare
+  T6 - (6 b - c), W (E183-X): model -0.000001 against -0.001774 [-0.004819, +0.001270]: inside, the estimate's sign
+  T3 - T1, W (E183-J): model +0.000000 against +0.001521 [-0.002571, +0.005613]: inside, no sign to compare
+  T4 - T2, W (E183-J): model +0.000000 against -0.001209 [-0.004405, +0.001987]: inside, no sign to compare
+  the word: the model's RESULT beside E183-MECH's RESULT (B POSITIVE, C NULL): the same word
+ARM v4 (october-forecast-model v4):
+  T1: model +0.02596 W against +0.06649 [+0.06416, +0.06882] W (26 units): below, the estimate's sign; the estimate inside the model's band [+0.00069, +0.11701]
+  T2: model +0.04140 W against +0.00154 [-0.00071, +0.00379] W (26 units): above, the estimate's sign; the estimate inside the model's band [+0.00000, +0.10944]
+  T3: model +0.02211 W against +0.06801 [+0.06454, +0.07148] W (26 units): below, the estimate's sign; the estimate inside the model's band [-0.00497, +0.11701]
+  T4: model +0.04052 W against +0.00033 [-0.00205, +0.00272] W (26 units): above, the estimate's sign; the estimate inside the model's band [+0.00000, +0.10712]
+  T5: model +0.00849 W against +0.00938 [+0.00819, +0.01057] W (101 units): inside, the estimate's sign; the estimate inside the model's band [+0.00178, +0.01672]
+  T6: model +0.01418 W against +0.05573 [+0.05319, +0.05828] W (26 units): below, the estimate's sign; the estimate inside the model's band [-0.01688, +0.10030]
+  b, W a result 1-bit (E183-B): model +0.003434 against +0.009607 [+0.009315, +0.009899]: below, the estimate's sign
+  c, W an operand 1-bit (E183-C): model +0.005852 against +0.000134 [-0.000094, +0.000362]: above, the estimate's sign
+  T6 - (6 b - c), W (E183-X): model -0.000570 against -0.001774 [-0.004819, +0.001270]: inside, the estimate's sign
+  T3 - T1, W (E183-J): model -0.003845 against +0.001521 [-0.002571, +0.005613]: below, the other sign
+  T4 - T2, W (E183-J): model -0.000879 against -0.001209 [-0.004405, +0.001987]: inside, the estimate's sign
+  the word: the model's BOTH beside E183-MECH's RESULT (B POSITIVE, C NULL): a different word
+Not read: card 1's figures (E183 runs on aifoundry3 card 0) and the kinds' levels (E183 reads no level).
+Labels: REPORTED, never a rule; the model's figures are modelled and frozen before any E183 datum; E183's are blind measurements.
+SELFTEST-ARM-M1-E183 19 of 19 PASS
