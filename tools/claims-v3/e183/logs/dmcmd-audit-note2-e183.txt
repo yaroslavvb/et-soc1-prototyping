@@ -1,0 +1,32 @@
+E183 kit note 2 (Q158b): dmcmd_audit (tools/claims-v3/dmcmd_audit.py, sha256 f29e91ca97705454..., unchanged), on the Intel through the slot, /usr/bin/python3, Sun 08 Nov 2026 08:36 PST
+
+== (a) the runbook as note 2 runs it: rb/ (every step file, v1's, note 1's and note 2's), E185's rb/check_day2_v1.py (the day-2 check step 2 v3 runs first), k6's rb_common.sh, s05_look_k6.sh and s09_a3_reads_k6.sh, E128's guard
+dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+note: tools/claims-v3/q141k-runbook/k6/s09_a3_reads_k6.sh:20: 'config' goes through tools/claims-v3/e128/ettelem_guard.sh, which is scanned: its own lines are what it sends
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      2 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      2 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+# exit 0
+
+== (b) the day-2 note's new desk files, E183's and E185's: rb/s03_desk_e183_v3.sh, rb/list_steps_e183_v3.sh, and E185's rb/check_day2_v1.py, rb/s03_desk_e185_v4.sh, rb/list_steps_e185_v4.sh, rb/selftest_day2_v1.sh
+dmcmd_audit: GO (0 send site(s), 0 disallowed; allow-list: none)
+summary:
+# exit 0

@@ -1,0 +1,124 @@
+scratch clone: shared and sparse (16 data directories the lists name), HEAD the lab clone's 3adb8bfe with the working E183 and E185 files committed over it (18 files changed, 2845 insertions(+)); a local bare upstream and a helper clone of it
+
+== A. the dry listings: E185's v4 and E183's v3, every step exiting 0 with no call, in their order
+dry listing: 0 step(s) exited non-zero
+dry listing: 13 steps listed, 0 exited non-zero
+calls: 0; E185 look-first.2.14-after.m1-after; E183 1.look-first.m1-after
+-> PASS (A the dry listings: 0 failing, no call, the look before the post, E185's step 2 v4 twice with step 14 after the second, each M1 gate after its collection)
+
+== K. no window, then a window written on another day: refused before the day-2 check
+[s03_desk_v4_e185] STOP: no window yet: run s02_window_e185.sh with his go's day, last start and last end
+[s03_desk_v3_e183] STOP: no window in RB_OUT: run s02_window_e183.sh first (kit v5: s02 before s03)
+[s03_desk_v4_e185] STOP: the window in RB_OUT was not written today: run s02_window_e185.sh with his go's day, last start and last end first
+[s03_desk_v3_e183] STOP: RB_OUT's window was not written today: run s02_window_e183.sh first
+-> PASS (K E185 v4 and E183 v3: 10 without a window and 10 with another day's, the day-2 check never reached, no call)
+
+== P0. the intact clone: the day-2 check, E185 v4, E183 v3, and the earlier step 2s
+[check_day2_v1]   the day's paths: 6 directories and 133 named files outside them
+[check_day2_v1] DAY2-CHECK OK at 83a304bcc149: HEAD descends from 6860643c; 30 lists at their counts, own bytes and entries (E183's brief list's M1 entries and the two M1 lists reported); no change but an addition since 6860643c on the day's paths; no shadowing addition; no uncommitted change
+[s03_desk_v4_e185] desk check v4: the day-2 check passed at 83a304bcc149 (pulled; HEAD descends from 6860643c; the day's lists at their counts, own bytes and entries; no change but an addition since 6860643c on the day's paths; no shadowing addition; nothing uncommitted), then step 2 v3 passed on the same HEAD (its line above)
+[s03_desk_v3_e183] desk check v3: the day-2 check passed at 83a304bcc149 (pulled; HEAD descends from 6860643c; the day's lists at their counts, own bytes and entries; no change but an addition since 6860643c on the day's paths; no shadowing addition; nothing uncommitted), then step 2 v2 passed on the same HEAD (its line above)
+  additions since 6860643c in the day's directories at the clone's HEAD (this kit's new files): 18
+  E185 v3 alone 0, E185 v2 0, E183 v2 0
+-> PASS (P0 the check 0; E185 v4 0 (the check OK at HEAD, then v3's M1 line 21 of 21); E183 v3 0; v3, v2 and E183's v2 each 0)
+
+== H2b. E185's brief rewritten together with its line in the kit note 2's list: v4 refuses, v3 alone passes
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: e185/SHA256SUMS-e185-kit-note2 (its own bytes differ from the pin) | e183/SHA256SUMS-e183-brief (1 entry not OK: tools/claims-v3/e185/CARD-LANE-BRIEF.md) | history: 2 change(s) other than an addition since 6860643c on the day's paths: M tools/claims-v3/e185/CARD-LANE-BR
+-> PASS (H2b v4 16 (the kit note 2's list off its bytes; the brief's change in the history); v3 0 (the fault, re-made))
+
+== H2c. E185's M1 reader rewritten together with its line in the M1 list: v4 passes (reported), the M1 gate refuses
+[s03_desk_v4_e185] desk check v4: the day-2 check passed at 26c63f57fbbe (pulled; HEAD descends from 6860643c; the day's lists at their counts, own bytes and entries; no change but an addition since 6860643c on the day's paths; no shadowing addition; nothing uncommitted), then step 2 v3 passed on the same HEAD (its line above)
+[check_day2_v1] M1-READER-GATE STOP: the M1 reader gate for E185 refused, the reader not run: e185/SHA256SUMS-e185-m1: 21 OK of 21; pinned 21; its own bytes differ from the pin | E185's M1 files changed since 6860643c: M tools/claims-v3/e185/SHA256SUMS-e185-m1; M tools/claims-v3/e185/arm_m1_read_e185.py | step 2 v3's last M1 lin
+-> PASS (H2c v4 0 with the M1 change reported; the M1 gate 16 on the list's own bytes, the reader not run)
+
+== H2d. M11's scorer v5 rewritten together with its line in SHA256SUMS-score-m11-v5: v4 refuses, v3 alone passes
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: m11/SHA256SUMS-score-m11-v5 (its own bytes differ from the pin) | history: 2 change(s) other than an addition since 6860643c on the day's paths: M tools/claims-v3/m11/SHA256SUMS-score-m11-v5 (78267f53); M tools/claims-v3/m11/score_m11_v5.py (78267f53)
+-> PASS (H2d v4 16 (the scorer's list off its bytes; the scorer's change in the history); v3 0 (the fault, re-made))
+
+== H2f. E183's M1 reader rewritten together with its line: E183 v3 passes (reported), the M1 gate for E183 refuses
+[s03_desk_v3_e183] desk check v3: the day-2 check passed at 280e3819a871 (pulled; HEAD descends from 6860643c; the day's lists at their counts, own bytes and entries; no change but an addition since 6860643c on the day's paths; no shadowing addition; nothing uncommitted), then step 2 v2 passed on the same HEAD (its line above)
+[check_day2_v1] M1-READER-GATE STOP: the M1 reader gate for E183 refused, the reader not run: e183/SHA256SUMS-e183-m1: 25 OK of 25; pinned 25; its own bytes differ from the pin | E183's M1 files changed since 6860643c: M tools/claims-v3/e183/SHA256SUMS-e183-m1; M tools/claims-v3/e183/arm_m1_read_e183.py
+-> PASS (H2f E183 v3 0, the M1 change and the brief list's two M1 entries reported; the M1 gate 16, the reader not run)
+
+== H3b. the kit note 2's line for E185's brief replaced by a copy of another line, the brief changed: v4 refuses
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: e185/SHA256SUMS-e185-kit-note2 (its own bytes differ from the pin) | e183/SHA256SUMS-e183-brief (1 entry not OK: tools/claims-v3/e185/CARD-LANE-BRIEF.md) | history: 2 change(s) other than an addition since 6860643c on the day's paths: M tools/claims-v3/e185/CARD-LANE-BR
+-> PASS (H3b a copied line (the count kept, every line OK): v4 16)
+
+== H3c. SHA256SUMS-score-m11-v5's line for the scorer replaced by a copy of another, the scorer changed: v4 refuses
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: m11/SHA256SUMS-score-m11-v5 (its own bytes differ from the pin) | history: 2 change(s) other than an addition since 6860643c on the day's paths: M tools/claims-v3/m11/SHA256SUMS-score-m11-v5 (50c36907); M tools/claims-v3/m11/score_m11_v5.py (50c36907)
+-> PASS (H3c a copied line in M11's list (the count kept, every line OK): v4 16)
+
+== H4e. SHA256SUMS-score-m11-v5 reordered (every line OK): v4 refuses
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: m11/SHA256SUMS-score-m11-v5 (its own bytes differ from the pin) | history: 1 change(s) other than an addition since 6860643c on the day's paths: M tools/claims-v3/m11/SHA256SUMS-score-m11-v5 (c40066ee)
+-> PASS (H4e M11's list reordered: v4 16)
+
+== H7. E183's brief changed and committed: E183 v3 and E185 v4 refuse; E183's v2 alone passes
+[s03_desk_v3_e183] DAY2-CHECK STOP: the day-2 check failed: e183/SHA256SUMS-e183-brief (1 entry not OK: tools/claims-v3/e183/CARD-LANE-BRIEF.md) | history: 1 change(s) other than an addition since 6860643c on the day's paths: M tools/claims-v3/e183/CARD-LANE-BRIEF.md (0de2f4d6)
+-> PASS (H7 E183 v3 16 and E185 v4 16, the brief named; E183's v2 0 (the fault, re-made))
+
+== AD1. a dated note M2 added under e185: v4 passes, the addition counted
+[s03_desk_v4_e185] desk check v4: the day-2 check passed at 865700ee3966 (pulled; HEAD descends from 6860643c; the day's lists at their counts, own bytes and entries; no change but an addition since 6860643c on the day's paths; no shadowing addition; nothing uncommitted), then step 2 v3 passed on the same HEAD (its line above)
+-> PASS (AD1 an added dated note: v4 0, counted)
+
+== AD2. a json.py added beside E185's readers: v4 and E183 v3 refuse (it shadows the standard module)
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: additions: tools/claims-v3/e185/json.py (shadows the module 'json' the system python finds)
+-> PASS (AD2 an added json.py: v4 16 and E183 v3 16, named as shadowing)
+
+== AD3. a byte-code file forced in under m11/__pycache__: v4 refuses
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: additions: tools/claims-v3/m11/__pycache__/score_m11_v4.cpython-39.pyc (a byte-code or .pth file)
+-> PASS (AD3 an added byte-code file: v4 16)
+
+== AD4. an e185/score_m11_v4.py added (a module name of M11's): v4 refuses
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: additions: tools/claims-v3/e185/score_m11_v4.py (its module name 'score_m11_v4' is also tools/claims-v3/m11/score_m11_v4.py's)
+-> PASS (AD4 an added file sharing a module name with M11's v4: v4 16, named)
+
+== AD5. an e185/numpy.py added (the scorers' numpy is in the user site): v4 refuses
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: additions: tools/claims-v3/e185/numpy.py (shadows the module 'numpy' the system python finds)
+-> PASS (AD5 an added numpy.py: v4 16, named as shadowing)
+
+== S1. E183's brief changed and not committed: E185 v4 refuses (status); v3 alone passes
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: e183/SHA256SUMS-e183-brief (1 entry not OK: tools/claims-v3/e183/CARD-LANE-BRIEF.md) | status: 1 uncommitted change(s) on the day's paths: M tools/claims-v3/e183/CARD-LANE-BRIEF.md
+-> PASS (S1 an uncommitted E183 brief: E185 v4 16 (status, named); v3 0)
+
+== R. the M1 readers' gate on the intact tree
+[check_day2_v1] M1-READER-GATE e185 OK at 45d3be42723a: running /usr/bin/python3 -B tools/claims-v3/e185/arm_m1_read_e185.py --data docs/reports/data/2026-11-09-e185-m11-session3-aifoundry3 --out docs/reports/data/2026-11-09-e185-m11-session3-aifoundry3/arm-m1-e185
+[check_day2_v1] READER-RC 0 (a refusal or a non-zero exit is recorded, never a block)
+[check_day2_v1] M1 reader outputs: 2 new file(s) in docs/reports/data/2026-11-09-e185-m11-session3-aifoundry3, nothing else changed; commit them with a dated note beside the data README
+[check_day2_v1] M1-READER-GATE STOP: the M1 reader gate for E185 refused, the reader not run: docs/reports/data/2026-11-09-e185-m11-session3-aifoundry3: 1 uncommitted change(s): ?? docs/reports/data/2026-11-09-e185-m11-session3-aifoundry3/extra-uncommitted.txt
+[check_day2_v1] M1-READER-GATE STOP: the M1 reader gate for E185 refused, the reader not run: step 2 v3's last M1 line in E185's RB_OUT log does not read '21 of 21 at its pinned bytes' (no such line)
+[check_day2_v1] M1-READER-GATE e183 OK at 45d3be42723a: running /usr/bin/python3 -B tools/claims-v3/e183/arm_m1_read_e183.py --reduced docs/reports/data/2026-11-09-e183-vector-add-r2-aifoundry3/reduced-e183.json --scored docs/reports/data/2026-11-09-e183-vector-add-r2-aifoundry3/scored-e183.json --out docs/reports/data/2026-11-0
+[check_day2_v1] READER-RC 1 (a refusal or a non-zero exit is recorded, never a block)
+[check_day2_v1] M1 reader outputs: 0 new file(s) in docs/reports/data/2026-11-09-e183-vector-add-r2-aifoundry3, nothing else changed; commit them with a dated note beside the data README
+[check_day2_v1] STOP: tools/claims-v3/e185 is not E185's data directory (docs/reports/data/<day>-...)
+-> PASS (R1 E185's gate 0, the reader run (rc 0 on a NOT SCORED stand-in), its two outputs the only new files; R2 uncommitted 16, not run; R3 no M1 line 16; R4 E183's gate 0, the reader's rc 1 (no reduction) printed, nothing written; R5 not a data dir 10)
+
+== L1. step 2 v4 passes; then the upstream gains a commit rewriting the launch step with its line (the lab moved); v4 again refuses
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: e185/SHA256SUMS-e185-kit-note1 (its own bytes differ from the pin) | e185/SHA256SUMS-e185-kit-note2 (its own bytes differ from the pin) | history: 3 change(s) other than an addition since 6860643c on the day's paths: M tools/claims-v3/e185/SHA256SUMS-e185-kit-note1 (634
+-> PASS (L1 v4 0, then the lab moves: the re-run pulls it and refuses (16))
+
+== LM. the upstream gains an addition between the day-2 check's pull and step 2 v3's: v4 refuses
+[s03_desk_v4_e185] STOP: the lab clone moved during step 2 v3 (d281aa278c48 to b5c31c3bb78d): run step 2 v4 again
+-> PASS (LM the lab moved during step 2 v3: v4 16)
+
+== D. a diverged clone: v4 refuses, the pull not the network's
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: pull: the clone has diverged from its upstream (not the network's: a dated note first)
+-> PASS (D diverged: v4 16, not the network's)
+
+== X. a detached HEAD: v4 refuses, the pull not the network's
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: pull: HEAD is detached (not the network's: a dated note first)
+-> PASS (X detached: v4 16, not the network's)
+
+== U. the upstream gone: v4 refuses, the pull the network's
+[s03_desk_v4_e185] DAY2-CHECK STOP: the day-2 check failed: pull: the upstream did not answer (the network's: run this step again once it answers)
+-> PASS (U upstream gone: v4 16, the network's)
+
+== C. coverage: every file the day's lists, E183's harness and E185's runbook pins name lies under the day-2 check's paths
+named 446; the check's paths 139 (6 directories); not covered 0
+-> PASS (C every named file under the day-2 check's paths)
+
+== Z. nothing the test started is left running
+processes under the scratch clone: 0
+-> PASS (Z nothing left running)
+
+calls to any box by the stand-ins: 0; lock lines: 0; elapsed 163 s
+SELFTEST-DAY2-V1 PASS, 25 of 25
