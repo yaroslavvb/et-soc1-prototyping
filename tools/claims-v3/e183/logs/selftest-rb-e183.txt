@@ -1,0 +1,80 @@
+scratch repository: 1051 files committed, with an origin; the kit's pin 46, the harness's 80
+
+== A. the dry listing: every step exits 0, the look before the post, no ssh or rsync call
+dry listing: 12 steps listed, 0 exited non-zero
+-> PASS (A the dry listing: 0 steps failing, no call, the look listed before the post)
+
+== K. step 2 with no window in RB_OUT (step 1 not run)
+[s03_desk_e183] STOP: no window in RB_OUT: run s02_window_e183.sh first (kit v5: s02 before s03)
+-> PASS (K step 2 refuses without step 1's window)
+
+== P1. step 2 on the scratch repository (the lab's files, an origin, the stand-in kit list at its pin)
+[s03_desk_e183] desk check: the window written today, pulled, HEAD descends from d42b86a59affd75ebf0d40e1d99e39a9fc72335c, E183's paths and the workload clean, the two hash lists at their pinned counts, harness-e183.json rebuilt, the registration verified, HARNESS OK 80, BUILD INPUTS OK 40, the four desk tests' logs; october-for
+-> PASS (P1 step 2 passes the intact tree at its pins)
+
+== S1. step 5 on a clean stand-in box, then step 6 start and wait (the fast stand-in cmake)
+[s07_a3_sync_e183] synced to aifoundry3:aifoundry/ every file of harness-e183.json (80 files, in 50 paths)
+[s08_a3_build_e183] the train host's build runs on aifoundry3 as the detached job a3-build-e183 (its own bound 500 s): run this step's wait, again while it says 17
+BUILD INPUTS OK: 40 files match harness-e183.json (37 of workloads/enercat, E180's generator and its text, the patch)
+E183-BUILD-ATTEMPT 1 today (the day's start 1)
+HARNESS OK: 120 files
+TRAIN-HOST-BUILT rc=0
+[s08_a3_build_e183] aifoundry3: the train host built by the detached job a3-build-e183; BUILD INPUTS OK 40, HARNESS OK with the binaries and the build tree, preflight_e183 GO, the registration verified, each in its own b
+check_e183 rc=0
+e183_common rc=0
+preflight_e183 rc=0 dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS (S1 step 6 on the synced box: the build job, then the four checks, each in its own 60 s read (5 reads with the one before the build); one build counted, its ended line and its own log kept)
+
+== S2. step 8 (the dry pass) on the box step 6 left
+E183 dry 18301 --smoke rc=0
+E183 dry 18302 --stoptest rc=0
+E183 dry 18310 rc=0
+E183 start gate rc=8 (want 8)
+-> PASS (S2 job a3-dry-e183 rc 0: 18310 0, the smoke 0, the start gate 8; no network call from the box)
+
+== X3. a second start after the good build: refused; wait reads the checks again
+-> PASS (X3 a second start after a good build refused (10): no job, the host unchanged; wait reads its checks again (0))
+
+== X2. a build input off its pin on the box: no job, no build counted, step 5's words; then step 5, then step 6 builds
+[s08_a3_build_e183] STOP: the train host's build inputs on aifoundry3 are not the pinned ones (the lines above), so nothing was built and no build is counted: run step 5 (rb/s07_a3_sync_e183.sh) once more, then this step's start; if they differ again, E183 doe
+-> PASS (X2 an input off its pin: 16 with step 5's words, no job, no build counted; step 5 then step 6: built (0))
+
+== V. the 90 s stand-in cmake: one job, a second start refused while it runs, waits that say 17, then the checks
+-> PASS (V a 90 s build as one detached job (the call 97 s in all; 4 waits said 17): a second start refused while it ran (10), no call past a bound, one build counted)
+
+== O. a card session of ours on the box: start refused, and wait's first check refused
+-> PASS (O beside a session of ours: start refused (10), wait's checks refused (10))
+
+== R1-R3. the re-run rule (the stand-in build fails): one re-run, then the fallback named, then a third start refused
+-> PASS (R1-R3 the re-run rule: 16 asking one re-run; 16 naming the fallback SKIP; a third start refused (16); two builds counted)
+
+== T. the build past its own bound (E183_BUILD_S=5, RB_DESKTEST=1, the 90 s cmake): OVERRAN, one re-run; the bound without RB_DESKTEST refused
+-> PASS (T a build past its own 5 s bound: OVERRAN, one re-run asked (16); E183_BUILD_S without RB_DESKTEST refused (10) with no call)
+
+== W. (N1) a wait call that fails before it reads the job (the network cut on the wait's call): 14, run wait again, never a failed build
+-> PASS (W a dropped wait call: 14 with 'no reading of the build job', no build named failed; the next wait reads the build (0))
+
+== N2. the first build fails; the re-run runs; its wait call is cut (the day's build 2)
+[s08_a3_build_e183] STOP: no reading of the build job: the wait call did not read the build job (it exited 14 before the box printed a whole JOB-DONE, JOB-LOST or JOB-RUNNING line: a failed or cut call, not a failed build): nothing is counted; run this step's 
+-> PASS (N2 the cut wait of the re-run reads 14 'no reading' and does NOT name the fallback; wait then reads the good build (0), and a start after it is refused (10); two builds counted)
+
+== N6. the first check's read after a good build is cut
+[s08_a3_build_e183] STOP: no reading of inputs (rc 14) on aifoundry3 (each call exited non-zero with no result line of its own: it failed or was cut, which is not a failed check): run this step's wait again
+-> PASS (N6 a cut check read is 14 'no reading of inputs' (never 'a dated amendment first'); wait then reads all four checks (0))
+
+== L. a lost job: a fresh day, the 90 s stand-in cmake, the job's processes killed on the stand-in box mid-build
+JOB-LOST a3-build-e183: no process (pid 96153) and no exit status
+-> PASS (L the lost job: JOB-LOST is still a build's failure: one re-run asked for (16), one build counted)
+
+== C1-C3. step 11: the exact copy-back of a stand-in session's T0-named files, the collector (a stand-in), then a second run and a changed copy
+COPY EXACT: 15 files, each at the box's sha256, and nothing else
+[s22_collect_e183] E183 collected and scored: build/e183-out/2026-11-07-e183-vector-add-r2-aifoundry3 (the data directory is docs/reports/data/2026-11-07-e183-vector-add-r2-aifoundry3/), T0 1794117070, the copy exact; the day's step-6 recor
+COPY NOT EXACT:
+  differs from the box: <scratch>/tree/build/e183-raw/e183/p18310/run.log
+-> PASS (C1 step 11: COPY EXACT and the collector ran (0); C2 the same step again into the same raw tree refused (10); C3 a changed copy reads COPY NOT EXACT (9))
+
+== Z. no process of this test is left running
+leftovers: 0
+-> PASS (Z nothing left running)
+
+SELFTEST-RB-E183 17 of 17 PASS

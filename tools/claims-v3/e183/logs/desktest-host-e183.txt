@@ -1,0 +1,29 @@
+patched <scratch>/enercat-e183-src/host/main.cpp sha256 9b8f1a088a7a83c00af64387c80f0f92b0522dcb89ce3a330853ca8e00b0c5f1
+== H0 the patched host compiles against E184's stubs (-fsyntax-only -Wall) and links with the mock runtime
+syntax rc 0 (0 warning lines), link rc 0
+-> PASS
+== H1 a train, SFFS, 13 launches
+rc 0, 13 lines, kinds SSFFSSFFSSFFS, source words by kind right, operands by kind right, launch numbers right, every launch ok True
+-> PASS
+== H2 the same train, FSSF
+rc 0, 13 lines, kinds FFSSFFSSFFSSF, source words by kind right, operands by kind right, launch numbers right, every launch ok True
+-> PASS
+== H3 no --launches
+rc 1, 0 launches, FAIL: E183: a train needs --launches
+-> PASS
+== H4 a bad orientation
+rc 1, 0 launches, FAIL: E183: --abba is SFFS or FSSF
+-> PASS
+== H5 a built-in fill with --operands-b
+rc 1, 0 launches, FAIL: E183: a train takes --operands file: and --operands-b file:
+-> PASS
+== H6 an S image of the wrong size
+rc 1, 0 launches, FAIL: --operands file: needs exactly 256 bytes: <scratch>/short.bin
+-> PASS
+== H7 no --operands-b: the catalogue's own loop
+rc 0, 9 launches, with a train field 0, running the --operands image 9
+-> PASS
+== H8 the budget cuts a train short
+rc 3, 2 launches of 13, E183: the train ended after 2 of 13 launches
+-> PASS
+DESKTEST-HOST-E183 PASS

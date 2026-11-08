@@ -1,0 +1,147 @@
+
+== 1a. check_e183.py harness (dry: the train host's build is not checked)
+HARNESS OK: 80 files
+-> PASS
+
+== 1b. preflight_e183.sh (dmcmd_audit on the session's file set, E180's one reviewed exception)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS
+
+== 1c. build_host_e183.sh (dry: the inputs at their pins, the stage, E180's generator, the patch, the tree at its pins; nothing built)
+patched build/enercat-e183-src/host/main.cpp sha256 9b8f1a088a7a83c00af64387c80f0f92b0522dcb89ce3a330853ca8e00b0c5f1
+BUILD TREE OK: 38 files at their pins, and nothing else
+DRY build: done (the patched tree is build/enercat-e183-src; nothing built)
+-> PASS
+
+== 1d. the block's telemetry reader is E128's guard and its drain a refusal; the session's config reads go through the guard
+the block sets the guard: 1; its drain is a refusal: 1; the session's config reads through the guard: 1; direct reader calls in the block and runner: 0
+-> PASS
+
+== 2. block_e183.sh 18310 (block): expect 56 runs through the train host, 52 of them train processes, no stub executed
+configs.json's processes (the orientations the runner ran) equal plan-e183.json's block 18310: True (52 processes)
+block rc=0; runs through the train host: 56 (train processes 52); stop-path tests: 0; stubs executed: 0
+-> PASS
+
+== 2. block_e183.sh 18311 (block): expect 56 runs through the train host, 52 of them train processes, no stub executed
+configs.json's processes (the orientations the runner ran) equal plan-e183.json's block 18311: True (52 processes)
+block rc=0; runs through the train host: 56 (train processes 52); stop-path tests: 0; stubs executed: 0
+-> PASS
+
+== 2. block_e183.sh 18312 (block): expect 56 runs through the train host, 52 of them train processes, no stub executed
+configs.json's processes (the orientations the runner ran) equal plan-e183.json's block 18312: True (52 processes)
+block rc=0; runs through the train host: 56 (train processes 52); stop-path tests: 0; stubs executed: 0
+-> PASS
+
+== 2. block_e183.sh 18313 (block): expect 56 runs through the train host, 52 of them train processes, no stub executed
+configs.json's processes (the orientations the runner ran) equal plan-e183.json's block 18313: True (52 processes)
+block rc=0; runs through the train host: 56 (train processes 52); stop-path tests: 0; stubs executed: 0
+-> PASS
+
+== 2. block_e183.sh 18314 (block): expect 56 runs through the train host, 52 of them train processes, no stub executed
+configs.json's processes (the orientations the runner ran) equal plan-e183.json's block 18314: True (52 processes)
+block rc=0; runs through the train host: 56 (train processes 52); stop-path tests: 0; stubs executed: 0
+-> PASS
+
+== 2. block_e183.sh 18315 (block): expect 206 runs through the train host, 202 of them train processes, no stub executed
+configs.json's processes (the orientations the runner ran) equal plan-e183.json's block 18315: True (202 processes)
+block rc=0; runs through the train host: 206 (train processes 202); stop-path tests: 0; stubs executed: 0
+-> PASS
+
+== 2. block_e183.sh 18301 (smoke): expect 6 runs through the train host, 2 of them train processes, no stub executed
+block rc=0; runs through the train host: 6 (train processes 2); stop-path tests: 0; stubs executed: 0
+-> PASS
+
+== 2. block_e183.sh 18302 (stoptest): expect 0 runs through the train host, 0 of them train processes, no stub executed
+block rc=0; runs through the train host: 0 (train processes 0); stop-path tests: 2; stubs executed: 0
+-> PASS
+
+== 2b. block_e183.sh 18316 (plain): refused before any device call
+preflight: runner --list: 'block 18316 is not a planned train block (18310-18315)'
+-> PASS
+
+== 2b. block_e183.sh 18301 (plain): refused before any device call
+preflight: runner --list: 'block 18301 is not a planned train block (18310-18315)'
+-> PASS
+
+== 2b. block_e183.sh 18310 (card0): refused before any device call
+unknown card aifoundry3-c0
+-> PASS
+
+== 2b. block_e183.sh 18310 (card1): refused before any device call
+unknown card aifoundry3-c1
+-> PASS
+
+== 3a. the queue's budget rule on stub blocks (5 s each): with 390 s to the last end and 382 s projected, two start, the third stops
+21:52:25 e183: plan FULL, items 18310 18311 18312; budget 390 s from the anchor (21:52:24), reserve 0 s, last end 21:58:54, deadline 2026-11-07 22:52:24
+21:52:25 p18310 starts at T0+1 s (projected 382 s: plan 352 s x 100% + 30 s)
+21:52:30 p18310 rc=0 (5 s)
+21:52:30 p18311 starts at T0+6 s (projected 382 s: plan 352 s x 100% + 30 s)
+21:52:35 p18311 rc=0 (5 s)
+21:52:35 budget: stopping before p18312 (now T0+11 s, projected 382 s, would end T0+393 s > T0+390 s or the deadline)
+21:52:35 e183: done, 2 items, at T0+11 s
+-> PASS
+
+== 3b. the queue's deadline rule (a deadline one minute ago: nothing starts)
+21:52:35 e183: plan FULL, items 18310 18311 18312 18313 18314 18315; budget 3900 s from the anchor (21:52:35), reserve 60 s, last end 22:56:35, deadline 2026-11-07 21:51:35
+21:52:35 budget: stopping before p18310 (now T0+0 s, projected 382 s, would end T0+382 s > T0+3840 s or the deadline)
+21:52:35 e183: done, 0 items, at T0+0 s
+-> PASS
+
+== 3c. the queue refuses an unknown plan
+E183_PLAN=PASSES: only FULL or SHORT
+-> PASS
+
+== 3c'. FULL's plan: 18310-18315 under a 3,900 s budget, all six on 1 s stubs; SHORT's: 18310 18311 18312 18314 under 1,920 s
+21:52:35 e183: plan FULL, items 18310 18311 18312 18313 18314 18315; budget 3900 s from the anchor (21:52:35), reserve 60 s, last end 22:56:35, deadline 2026-11-07 23:52:35
+21:52:42 e183: done, 6 items, at T0+7 s
+21:52:42 e183: plan SHORT, items 18310 18311 18312 18314; budget 1920 s from the anchor (21:52:42), reserve 60 s, last end 22:23:42, deadline 2026-11-07 23:52:42
+21:52:47 e183: done, 4 items, at T0+5 s
+-> PASS
+
+== 3d. session_e183.sh start gate: no time gates (exit 8, no device opened, the log named by T0)
+session start (T0 1794117167 = 21:52:47 PST), kit v1; plan FULL
+E183_LATEST_START and E183_DEADLINE are required (the round's time gates, set at his go): no device opened
+session end (T0 1794117167)
+-> PASS
+
+== 3d. session_e183.sh start gate: after the latest start (exit 8, no device opened, the log named by T0)
+session start (T0 1794117168 = 21:52:48 PST), kit v1; plan FULL
+no new card session after 2026-11-07 21:51:48 PST: no device opened
+session end (T0 1794117168)
+-> PASS
+
+== 3d. session_e183.sh start gate: unknown plan (exit 8, no device opened, the log named by T0)
+session start (T0 1794117169 = 21:52:49 PST), kit v1; plan PASSES
+E183_PLAN=PASSES: only FULL or SHORT: no device opened
+session end (T0 1794117169)
+-> PASS
+
+== 3e. a whole dry session: the stop-path test, the smoke and the queue's six dry blocks; every file named by its T0; the real log never written
+session start (T0 1794117171 = 21:52:51 PST), kit v1; plan FULL
+files
+dmcmd_audit preflight rc=0 (dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none))
+the Intel: no et-who here)
+DRY config config-t1794117171-start.json
+p18302 begins (die 80 C) -> <dry-tree>/build/claims-v3-dry/aifoundry3/e183-stoptest/p18302
+p18302: 0 bursts, 0 train processes, <= 1 min; idle 600 MHz
+330
+p18302 ends: ok stop-path test: board and die stops fired before a run and in the watcher
+stop-path test rc=0
+p18301 begins (die 80 C) -> <dry-tree>/build/claims-v3-dry/aifoundry3/e183-smoke/p18301
+p18301: 4 bursts, 2 train processes, <= 1 min; idle 600 MHz
+353
+--pattern fadd.ps --operands zeros --harts 2 --seconds 1 --window 240000000
+--pattern fadd.ps --operands random --harts 2 --seconds 1 --window 240000000
+--pattern fadd.ps --operands file:tools/claims-v3/e180/images/f_5.bin --harts 2 --seconds 1 --window 240000000
+--pattern fadd.ps --operands file:tools/claims-v3/e180/images/f_4.bin --harts 2 --seconds 1 --window 240000000
+--pattern fadd.ps --operands file:tools/claims-v3/e180/images/f_5.bin --operands-b file:tools/claims-v3/e180/images/f_4.bin --abba SFFS --launches 13 --harts 2 --seconds 30 --window 240000000
+--pattern fadd.ps --operands file:tools/claims-v3/e180/images/f_5.bin --operands-b file:tools/claims-v3/e180/images/f_4.bin --abba FSSF --launches 13 --harts 2 --seconds 30 --window 240000000
+p18301 ends: ok dry run (runner rc 0)
+21:52:58 e183: done, 6 items, at T0+7 s
+-> PASS
+
+== 4. no network call: the ssh, rsync and scp stand-ins were never called
+network calls: 0
+-> PASS
+
+DRY-INTEL-E183 PASS: no device opened (V3_DRY=1 and stub binaries that refuse), no ssh
