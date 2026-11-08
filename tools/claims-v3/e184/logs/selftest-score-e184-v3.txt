@@ -1,0 +1,33 @@
+PASS Q V1 reads the same under v3: {"E184-C": "NONE SEEN", "E184-J": "NONE SEEN", "E184-L": "LINEAR", "E184-N": "NULL", "E184-P": "LINEAR/METER EXCLUDED", "gate": true}
+PASS Q V2 reads the same under v3: {"E184-C": "SEEN", "E184-J": "SEEN", "E184-L": "LOW", "E184-N": "NULL", "E184-P": "LOW/METER EXCLUDED", "gate": true}
+PASS Q V3 reads the same under v3: {"E184-C": "SEEN", "E184-J": "SEEN", "E184-L": "LOW", "E184-N": "NULL", "E184-P": "LOW/METER NOT EXCLUDED", "gate": true}
+PASS Q V4 reads the same under v3: {"E184-C": "SEEN", "E184-J": "NONE SEEN", "E184-L": "LINEAR", "E184-N": "NULL", "E184-P": "LINEAR/METER EXCLUDED", "gate": true}
+PASS Q V5 reads the same under v3: {"E184-C": "SEEN", "E184-J": "SEEN", "E184-L": "LOW", "E184-N": "NULL", "E184-P": "LINEAR/METER EXCLUDED", "gate": true}
+PASS Q V6 reads the same under v3: {"E184-C": "NONE SEEN", "E184-J": "NONE SEEN", "E184-L": "LINEAR", "E184-N": "NULL", "E184-P": "LINEAR/METER EXCLUDED", "gate": true}
+PASS Q V7 reads the same under v3: {"E184-C": "NONE SEEN", "E184-J": "NONE SEEN", "E184-L": "NOT RESOLVED", "E184-N": "OFFSET", "E184-P": "LINEAR/METER EXCLUDED", "gate": true}
+PASS Q V8 reads the same under v3: {"E184-C": "NONE SEEN", "E184-J": "NONE SEEN", "E184-L": "LINEAR", "E184-N": "NULL", "E184-P": "LINEAR/METER EXCLUDED", "gate": true}
+PASS Q V9 reads the same under v3: {"E184-C": "NONE SEEN", "E184-J": "NONE SEEN", "E184-L": "LINEAR", "E184-N": "NULL", "E184-P": "LINEAR/METER EXCLUDED", "gate": true}
+PASS Q V10 reads the same under v3: {"E184-C": "NONE SEEN", "E184-J": "NONE SEEN", "E184-L": "LINEAR", "E184-N": "NULL", "E184-P": "LINEAR/METER EXCLUDED", "gate": true}
+PASS Q V11 reads the same under v3: {"E184-C": "NOT SCORED", "E184-J": "NOT SCORED", "E184-L": "NOT SCORED", "E184-N": "NOT SCORED", "E184-P": "NOT SCORED", "gate": false}
+PASS Q V12 reads the same under v3: {"E184-C": "NOT SCORED", "E184-J": "NOT SCORED", "E184-L": "NOT SCORED", "E184-N": "NOT SCORED", "E184-P": "NOT SCORED", "gate": false}
+PASS Q V13 reads the same under v3: {"E184-C": "NONE SEEN", "E184-J": "NONE SEEN", "E184-L": "LINEAR", "E184-N": "NULL", "E184-P": "LINEAR/METER EXCLUDED", "gate": true}
+PASS Q B1 reads the same under v3: {"E184-M": "SUPPORTED", "E184-T sram_w fall": "PASS", "E184-T sram_w rise": "PASS", "gate": true}
+PASS Q B2 reads the same under v3: {"E184-M": "NOT SCORED", "E184-T": "NOT SCORED", "gate": false}
+PASS F1 V7: the governing reading at the top level, METER read on it: L NOT RESOLVED by the null-corrected R (th, governing R 0.983784 [0.89464, 1.07293] (registered 1.17694 [1.13429, 1.2196] reads HIGH); P LINEAR METER EXCLUDED, governing R 1.01168 [0.911224, 1.11214], registered 1.21894 [1.17545, 1.26244]; md: - **E184-P**: LINEAR {"governing_R": 1.01168, "governing_ci95": [0.911224, 1.11214], "governing_rule": "the null-corrected R (the own null reads OFFSE
+PASS F1b +40 mW and small steps at 0.29: the governing interval decides the meter: part P's own null OFFSET; governing 0.278327 [0.174556, 0.382097] -> METER NOT EXCLUDED; the registered interval [0.523423, 0.603134] (alone: EXCLUDED); v2's meter METER NOT EXCLUDED
+PASS F2 15 scan levels cut to 2 quads: v3 NOT SCORED (9 scan levels besides the reference with at least 4 kept quads (A2-4 and A3-4: a); left out 15 levels; v2 NONE SEEN on 24 levels
+PASS F2b 3 scan levels cut to 3 quads: v3 NONE SEEN on 21 levels, 252 quads (the kept levels' 252; V1 288), left out {"36": 3, "48": 3, "60": 3}; v2 NONE SEEN on 24 levels
+PASS G0 every read present: no departure; a step-7 read after is reported only: gate True, from {"end": "the session's own read", "start": "the session's own read"}, reported after-read config-S-step7-1794507920.json
+PASS G1 the end read empty, a step-7 read 2 minutes after its attempt: one departure, scored as V1: v3 gate True, departure: the end config read for T0 1794500000 is missing (its attempt at 2026-11-12T18:23:20Z returned nothing); replaced by step 7's read config-S-step7-1794; v3 verdicts as V1's: True; v2 on the same session: L NOT SCORED
+PASS G2 no step-7 read: NOT SCORED: no end config read for T0 1794500000 (its attempt at 2026-11-12T18:23:20Z returned nothing), and no step-7 read in A3-3's window (the 30 minutes after that attempt): not replaced
+PASS G3 the only step-7 read 40 minutes after (outside 30): NOT SCORED: no end config read for T0 1794500000 (its attempt at 2026-11-12T18:23:20Z returned nothing), and no step-7 read in A3-3's window (the 30 minutes after that attempt): not replaced
+PASS G4 a step-7 read before T0 only: NOT SCORED: no end config read for T0 1794500000 (its attempt at 2026-11-12T18:23:20Z returned nothing), and no step-7 read in A3-3's window (the 30 minutes after that attempt): not replaced
+PASS G5 the end read moved, a good step-7 read after: NOT SCORED: the end config read (the session's own read) is not TDP 0 W / 65 C / 600 MHz: {"minion_mhz": 600, "synthetic": true, "tdp_w": 65, "temp_threshold_c": 65}
+PASS G6 the step-7 read itself moved: NOT SCORED: the end config read (step 7's read config-S-step7-1794507920.json (A3-3)) is not TDP 0 W / 65 C / 600 MHz: {"minion_mhz": 600, "synthetic": true, "tdp_w": 65, "temp_threshold_c": 65} [departure recorded: the end config read for T0 1794500000 is missing (its attempt at 2026-11-12T18:2]
+PASS G8 the end read absent, no record of its attempt: NOT SCORED: no end config read for T0 1794500000, and no record of its attempt (no .time file): not replaced (A3-3)
+PASS G9 a dry read in the session's end file: NOT SCORED: the end config read for T0 1794500000 is a dry read in a real session's file (never replaced)
+PASS G7 the start read empty: the newest step-7 read in the 90 minutes before T0: gate True, start from step 7's read config-S-step7-1794499400.json (A3-3)
+PASS G10 arm B: a step-7 read whose TDP differs from the start read's NOT SCORED; the same TDP holds: different TDP: tdp_w changed between the start and end reads (40, 41); the same: gate True (step 7's read config-B-step7-1794501490.json (A3-3))
+PASS G11 two step-7 reads after: the oldest is used: gate True, end from step 7's read config-S-step7-1794507920.json (A3-3)
+PASS ID score_e184_v3's A2 statistics are score_e184_v2's (power_e184_a2.py's text): t*_A2 3.004; power_e184_a2.py sha256 806ecfbf3fd77d0b
+SELFTEST-SCORE-E184-V3: 32 of 32 PASS
