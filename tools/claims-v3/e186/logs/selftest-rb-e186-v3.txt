@@ -1,0 +1,50 @@
+scratch repository: 2092 files committed (13 of them the workload's), with an origin; note M2's list pinned at 8 entries
+
+== A3. the dry listing v3 (FULL and the fallback): every step exits 0, no ssh or rsync call; step 11 v3 twice with step 11 v2 inside and note M2's gate
+dry listing: 19 steps listed, 0 exited non-zero
+-> PASS (A3 the dry listing v3: 0 failing, no call; step 11 v3 twice, step 11 v2 inside each with its exact copy-back; note M2's gate twice at 8 entries)
+
+== K3. step 11 v3 with a stand-in for step 11 v2 and no RB_DESKTEST=1
+[s22_collect_v3_e186] STOP: K6E186_S22V2 is a desk-test stand-in and is read only with RB_DESKTEST=1: unset it (the card day never sets it)
+-> PASS (K3 refused (10) before any call; nothing written)
+
+== C. step 11 v3 on a session staged on the box, the REAL step 11 v2: v2's copies, COPY-BACK EXACT, the history check v2, then its C gate (14, by design)
+COPY-BACK EXACT 6 files (every manifest line read back, and nothing else)
+HISTORY-V2: v1's perimeter with the scale route's 6 lists and kit note 1's 2 added: tools/claims-v3/m10/POOL8-SHA256SUMS 209, docs/reports/data/2026-11-05-q142p-pool8-predictor/SHA256SUMS 16, docs/rep
+STOPTEST-OK e186-stoptest/p18602: no launch record and no C record
+[s22_collect_v2_e186] STOP: E186: a session that must carry a C log has no finished check of C (the lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, th
+[s22_collect_v3_e186] STOP: step 11 v2 exited 14 (its lines above): note M2's gate and reader were not run
+-> PASS (C step 11 v2 inside v3: COPY-BACK EXACT (6 files), HISTORY OK, its C gate (14); v3 exits 14 and never calls note M2's gate)
+
+== S. a stand-in step 11 v2 that exits 16
+[s22_collect_v3_e186] STOP: step 11 v2 exited 16 (its lines above): note M2's gate and reader were not run
+-> PASS (S v3 exits 16 with step 11 v2, and note M2's gate is never called)
+
+== M. a stand-in step 11 v2 that writes a synthetic scorer's file and exits 0: note M2 read
+[s22_collect_v3_e186] step 11 v2 read 0 (its last line above); october-forecast-model's note M2 arm read (arm-m2-e186.json and .txt); before the data commit, scan its message with the files
+-> PASS (M v3 exits 0; M2-READ; the two outputs in the data directory, byte for byte the reader's by-hand run; the scorer's file unchanged; the status file 'read'; v7 inside on all 10 session trains)
+
+== G1. note M2's list one line short, committed
+[s22_collect_v3_e186] step 11 v2 read 0 (its last line above); october-forecast-model's note M2 arm M2 NOT READ (SHA256SUMS-e186-m2 holds 7 entries, pinned 8; SHA256SUMS-e186-m2's own bytes differ from step 11 v3's pin (the gate refused; the reader never ran; recorded for the data README, never a st
+-> PASS (G1 M2 NOT READ (its count off the pin), v3 exits 0, no arm-m2 output, the scorer's file unchanged)
+
+== G2. the reader and its line in note M2's list rewritten together, committed
+[s22_collect_v3_e186] step 11 v2 read 0 (its last line above); october-forecast-model's note M2 arm M2 NOT READ (SHA256SUMS-e186-m2's own bytes differ from step 11 v3's pin (the gate refused; the reader never ran; recorded for the data README, never a stop)): recorded for the data README; no E186 ru
+-> PASS (G2 every entry OK (8 of 8), but the list's own bytes off step 11 v3's pin: M2 NOT READ, v3 exits 0, no arm-m2 output)
+
+== G3. note M2's json changed and not committed
+[s22_collect_v3_e186] step 11 v2 read 0 (its last line above); october-forecast-model's note M2 arm M2 NOT READ (1 entr(ies) not at their bytes: tools/claims-v3/e186/m2-october-forecast-model-e186.json; 1 uncommitted change(s) to note M2's files: M tools/claims-v3/e186/m2-october-forecast-model-e186
+-> PASS (G3 M2 NOT READ (an entry off its bytes, an uncommitted change), v3 exits 0, no arm-m2 output)
+
+== R. a stand-in step 11 v2 whose scorer's file has no trains: the reader refuses
+[s22_collect_v3_e186] step 11 v2 read 0 (its last line above); october-forecast-model's note M2 arm M2 NOT READ (the reader refused, rc 3 (recorded for the data README, never a stop)): recorded for the data README; no E186 rule depends on it; before the data commit, scan its message with the files
+-> PASS (R the reader refuses (3): M2 NOT READ, v3 exits 0, no arm-m2 output)
+
+== O. a stand-in reader that also writes a file into the data directory
+[s22_collect_v3_e186] STOP: M2-WROTE-OTHER planted.txt (the data directory changed beside note M2's two outputs; reader rc 0): nothing is committed; read the data directory first
+-> PASS (O M2-WROTE-OTHER: v3 stops (16) before any commit, naming the file)
+
+== Z. no process of this test left running
+-> PASS (Z nothing left running)
+
+SELFTEST-RB-E186-V3 11 of 11 PASS
