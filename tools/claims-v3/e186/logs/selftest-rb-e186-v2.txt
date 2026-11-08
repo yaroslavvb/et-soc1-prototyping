@@ -1,0 +1,61 @@
+scratch repository: 2072 files committed (13 of them the workload's), with an origin; kit note 1's list's stand-in 40 files
+
+== A2. the dry listing v2 (FULL and the fallback, the look before the post): every step exits 0, no ssh or rsync call
+dry listing: 19 steps listed, 0 exited non-zero
+-> PASS (A2 the dry listing v2: 0 failing, no call, the look before the post; step 2 v2 once (v1 inside it), step 5 v2 once, step 11 v2 twice with its exact copy-back; the history check v2 in step 2 and both step 11s)
+
+== K2. step 2 v2 with no window in RB_OUT
+[s03_desk_v2_e186] STOP: no window in RB_OUT: run s02_window_e186.sh with his go's day, last start and last end first
+-> PASS (K2 step 2 v2 refuses without step 1's window, before any call)
+
+== G2. step 2 v2 with no RB_GITLOCK
+[s03_desk_v2_e186] STOP: step 2 v1 exited 10 (its lines above): the desk check fails; no box step today
+-> PASS (G2 step 2 v1 refuses a pull without the lab-git lock (10), and v2 stops with it)
+
+== P1. step 2 v2 on the scratch repository
+[s03_desk_e186] desk check: the window written today for E186; pulled under the lab-git lock, HEAD descends from b6846b3c1f0b96d71bb209c5e7149485617292c4, b6846b3c1f0b96d71bb209c5e7149485617292c4 and b6846b3c1f0b96d71bb209c5e7149485617292c4, the paths clean, no change but an addition since b6846b3c1
+[s03_desk_v2_e186] desk check v2: step 2 v1 read 0; the history check v2 HISTORY OK (the scale route's six lists and kit note 1's two in the perimeter); the scale route's lists at their pinned counts and bytes (209, 16, 9, 68, 10, 160), A1's list at its pinned count and bytes (14), kit note 1's list
+-> PASS (P1 step 2 v2 passes the intact tree: v1's line, v2's line, the history check v2 HISTORY OK)
+
+== P5. M10's SHA256SUMS-a2 one line short, committed
+[s03_desk_v2_e186] STOP: the desk check v2 failed: history-v2 tools/claims-v3/m10/POOL8-SHA256SUMS(208 OK of 209; pinned 209) docs/reports/data/2026-11-04-q142m-m10/SHA256SUMS-a2(9 OK of 9; pinned 10; its own bytes differ from the pin)
+-> PASS (P5 step 2 v1 reads 0; step 2 v2 refuses (16), the list named against its pin)
+
+== P6. the verifier's case: m10.json and its line in M10's SHA256SUMS-a2 rewritten together, committed
+[s03_desk_v2_e186] STOP: the desk check v2 failed: history-v2 tools/claims-v3/m10/POOL8-SHA256SUMS(207 OK of 209; pinned 209) docs/reports/data/2026-11-04-q142m-m10/SHA256SUMS(67 OK of 68; pinned 68) docs/reports/data/2026-11-04-q142m-m10/SHA256SUMS-a2(10 OK of 10; pinned 10; its own bytes differ from the pin)
+-> PASS (P6 M10's list reads 10 of 10 OK; step 2 v1 reads 0 (the hole); step 2 v2 refuses (16): the history check v2 and the list's own bytes)
+
+== P7. kit note 1's list one line short, committed
+[s03_desk_v2_e186] STOP: step 2 v1 exited 16 (its lines above): the desk check fails; no box step today
+-> PASS (P7 refused (16): step 2 v1's history check names the list before v2's own count pin is reached)
+
+== S1. step 5 v2 on a clean stand-in box
+NOT-BESIDE-OURS: no card session of ours and no runbook job on aifoundry3
+[s07_a3_sync_v2_e186] no card session of ours and no runbook job on aifoundry3: step 5 v1 next, unchanged
+[s07_a3_sync_e186] synced to aifoundry3:aifoundry/ (55 paths); the rsync sent 128 files' contents there, 9 of them under workloads/sparsity/
+-> PASS (S1 step 5 v2: the read on the box (NOT-BESIDE-OURS), then step 5 v1's one rsync; the tree synced)
+
+== HS. the verifier's case: a card session of ours on the box
+[s07_a3_sync_v2_e186] STOP: refused on the box: REFUSED: a card session of ours runs on aifoundry3: E186's step 5 never syncs beside one (kit note 1; one session of ours at a time)
+-> PASS (HS step 5 v1 syncs beside a session of ours (0, one rsync call: the fault); step 5 v2 refuses (10) with no rsync call)
+
+== HJ. a runbook job still running on the box
+[s07_a3_sync_v2_e186] STOP: refused on the box: REFUSED: 1 runbook job(s) still run on aifoundry3: E186's step 5 never syncs under one (kit note 1; read them with their own step first)
+-> PASS (HJ step 5 v2 refuses beside a live runbook job (10) with no rsync call)
+
+== C. step 11 v2 on a session staged on the box: the copies by name, COPY-BACK EXACT, the history check v2, then the C gate (14, by design)
+COPY-BACK EXACT 6 files (every manifest line read back, and nothing else)
+HISTORY-V2: v1's perimeter with the scale route's 6 lists and kit note 1's 2 added: tools/claims-v3/m10/POOL8-SHA256SUMS 209, docs/reports/data/2026-11-05-q142p-pool8-predictor/SHA256SUMS 16, docs/rep
+HISTORY OK: E186's paths: 5 directories and 501 named files outside them; 0 file(s) added since b6846b3c, none a shadowing module; no change but an addition since b6846b3c; no uncommitted change
+STOPTEST-OK e186-stoptest/p18602: no launch record and no C record
+[s22_collect_v2_e186] STOP: E186: a session that must carry a C log has no finished check of C (the lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, th
+-> PASS (C COPY-BACK EXACT (6 files), the history check v2 HISTORY OK before any scoring, then the C gate (14, by design))
+
+== C5. m10.json and its list line rewritten together after step 2, then step 11 v2: the history check v2 stops it before any scoring
+[s22_collect_v2_e186] STOP: HISTORY REFUSED: E186's paths: 5 directories and 501 named files outside them; 0 file(s) added since b6846b3c; history: 2 change(s) other than an addition since b6846b3c on E186's paths: M docs/reports/data/2026-11-04-q142m-m10/SHA2
+-> PASS (C5 step 11 v2: COPY-BACK EXACT, then the history check v2 stops it (16), nothing scored, the raw copy kept; step 11 v1 on the same tree goes on to the C gate (14))
+
+== Z. no process of this test left running
+-> PASS (Z nothing left running)
+
+SELFTEST-RB-E186-V2 13 of 13 PASS

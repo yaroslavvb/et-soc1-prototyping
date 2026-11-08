@@ -1,0 +1,13 @@
+PASS P1 E182's six committed trains: [('T4', 896, 896, True), ('T5', 1064, 1064, True), ('T3', 896, 896, True), ('T6', 1064, 1064, True), ('T2', 896, 896, True), ('T1', 896, 896, True)]; 5712 launch records, every one paired with its C record's fnv the scheduled kind's tile's
+PASS P2 pairing_e186.fnv64 equals ccheck.fnv64 on 15 of E186's 15 kinds' tiles
+PASS P3 E182's T4 block, a fault made in a copy: [('train_kind', False, {'train_kind': 1}, '1 launch(es) not paired'), ('train_values', False, {'train_values': 1}, '1 launch(es) not paired'), ('c_fnv', False, {'c_fnv': 1}, '1 launch(es) not paired'), ('no_c_record', False, {'no_c_record': 1}, '1 launch(es) not paired'), ('no_c_log', False, {'no_c_record': 896}, 'no C log for the block')]
+PASS Q1 --world M12: v2's file equals v1's but for the pairing (True); E186-PAIR PASS over 10; note M1's reader on v2's file {'kinds': {'not covered': 18, 'not run': 21}, 'trains': {'not covered': 14, 'not run': 8}}
+PASS Q2 --world M10: v2's file equals v1's but for the pairing (True); E186-PAIR PASS over 10
+PASS Q3 --world M12 --no-anchors: v2's file equals v1's but for the pairing (True); E186-PAIR PASS over 10; s read False; E186-M over ['S23', 'Q63-sign', 'Q63-swap', 'Q3-sign', 'Q3-swap'] (M12)
+PASS Q4 --pair-kind S23: C PASS; PAIR FAIL ['S23'] ({'train_kind': 1}, 1 launch(es) not paired); S23 NOT SCORED; E186-S23R NOT SCORED; E186-M over 8 (M12); TR-N AS FORECAST; other trains equal to v1: True []
+PASS Q5 --pair-values Q63-swap: C PASS; PAIR FAIL ['Q63-swap'] ({'train_values': 1}, 1 launch(es) not paired); Q63-swap NOT SCORED; E186-SPLIT63 NOT SCORED; E186-M over 8 (M12); TR-N AS FORECAST; other trains equal to v1: True []
+PASS Q6 --pair-fnv B23-B15: C PASS; PAIR FAIL ['B23-B15'] ({'c_fnv': 1}, 1 launch(es) not paired); B23-B15 NOT SCORED; no derived rule named; E186-M over 8 (M12); TR-N AS FORECAST; other trains equal to v1: True []; GB v1 +0.01355 (two ladder trains), v2 +0.01375 (B15-B7's 8 bits alone)
+PASS Q7 --pair-noc Q3-sign: C PASS; PAIR FAIL ['Q3-sign'] ({'no_c_record': 1}, 1 launch(es) not paired); Q3-sign NOT SCORED; E186-SPLIT3 NOT SCORED; E186-M over 8 (M12); TR-N AS FORECAST; other trains equal to v1: True []
+PASS Q8 --no-clog H16: C PASS; PAIR FAIL ['H16'] ({'no_c_record': 1064}, no C log for the block); H16 NOT SCORED; no derived rule named; E186-M over 9 (M12); TR-N AS FORECAST; other trains equal to v1: True []
+PASS Q9 the pairing check's own text on Q4's raw copy: rc 0, 'PAIRING FAILED (10 trains read)'
+SELFTEST-SCORE-E186-V2 12 of 12 PASS
