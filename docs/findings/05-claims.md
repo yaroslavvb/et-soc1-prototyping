@@ -4901,7 +4901,7 @@ note does. Each line below is a dated clause of these records:
   above); the entry these records move, of 2 November on E135's records, carries the same link, and it stays as written.
 - **The second candidate list's file:** from these records on, the text names it as E186's A1-3 does, "its file stem"; 05's two earlier
   uses stand as written.
-- **Not yet done:** a verifier of these records *(dated, Sun 8 Nov 2026, after these records' verifier: done, about 16:47–17:31 PST; it held these records with fixes, one minor fault, in an item on the owner's private page alone, and six nits, none in a measured number, a registered verdict or a frozen file, answered in the dated paragraph below)*; chain C's post hoc reading, kept off this repository, and Q159's critic; day 2 and E186,
+- **Not yet done:** a verifier of these records *(dated, Sun 8 Nov 2026, after these records' verifier: done, about 16:47–17:31 PST; it held these records with fixes, one minor fault, in an item on the owner's private page alone, and six nits, none in a measured number, a registered verdict or a frozen file, answered in the dated paragraph below)*; chain C's post hoc reading, kept off this repository, and Q159's critic *(dated, Sun 8 Nov 2026 evening, Q160's records: both done, in the dated paragraph at the end of this section)*; day 2 and E186,
   each on the owner's go with a fresh lab approval for aifoundry3.
 
 *(Dated, Sun 8 Nov 2026, after these records' verifier; Q159's fix.)* The verifier (about 16:47–17:31 PST, desk only, 0 card-minutes) re-read
@@ -4922,8 +4922,78 @@ number, a registered verdict or a frozen file. Each line below is a dated clause
 - **The kinds page** now cites [E180's dated note M1](../../tools/claims-v3/e180/E180.md.dated-note-M1.md) (`b38d09e3`, Fri 6 Nov
   09:49:37 PST, before E180's first datum) where it says october-forecast-model's forecasts were frozen before each run's first datum; it
   cited E180's data note 2, written after the data.
-- **Not yet done:** chain C's post hoc reading, kept off this repository, and Q159's critic; day 2 and E186, each on the owner's go with a
+- **Not yet done:** chain C's post hoc reading, kept off this repository, and Q159's critic *(dated, Sun 8 Nov 2026 evening, Q160's records: both done, in the dated paragraph at the end of this section)*; day 2 and E186, each on the owner's go with a
   fresh lab approval for aifoundry3.
+
+*(Dated, Sun 8 Nov 2026 evening, Q160's records of Q159.)* **Q159** (about 15:50–18:51 PST by the clock, desk only, 0 card-minutes; no
+card, lab box, Discord or Modal) was Q159's records of Q158's chain A, their verifier and their fix (chain B), and the round's critic
+last. Q159 chain C: a private post hoc reading, verified; nothing committed. Each line below is a dated clause of these
+records; every earlier word stays as written.
+
+- **Chain B, by git's times** (Sun 8 Nov 2026, PST): `2d14b6c7` (16:15:32), the seven records files, insert-only bar the Q index
+  counters and the agents file's oldest changelog entry, moved verbatim; `f69619d4` (17:55:17), 02 (+556 characters by the fix's own
+  gate), 03 (+494) and 05 (+2,490), insert-only, none lost. The kinds page `06bd6862adc2` (16:21:50), then `d165bf6889b2` (17:45:39); the
+  owner's private pages at the same times. GitHub main is `f69619d4`.
+- **Labels:** registered: no new rule, forecast, threshold, plan, cap or stop; desk checks of code: every re-run, count, scan and
+  read-back below. Nothing blind, held out or measured is new.
+- **Verdicts:** their verifier held Q159's records with fixes, one minor fault, in an item on the owner's private page alone, and six
+  nits; their fix answered the fault and nits 2–5 and 7, and left nit 6 to the round's critic (the ruling below). The round's critic:
+  **day 2 (E185, then E183) READY WITH GAPS; E186 READY WITH GAPS; Q159's records HOLD AS FIXED.**
+- **The critic's re-runs** (desk checks of code, at `f69619d4`, on a scratch clone and then for real, with stand-in windows written
+  that day in scratch output directories and stand-in box commands that refuse every call): day 2's lines 1 and 2 read 0, line 3 as
+  stated, line 4 20 of 20 and 19 of 19, line 6 nothing, and the optional line 8 as stated; E186's lines 9 and 10 read 0, line 11 as
+  stated, and line 12 40 of 40 and 17 of 17 with nothing printed; the check v2 by hand (`check_day2_v2.py tree --pull`) 0; E185's step
+  2 v5 0 and 0; E183's step 2 v4 0; E186's step 2 v2 0; beside them, all 0: the check v1, E185's v4, E183's v3, E186's history checks
+  v1 and v2, and the M1 gates' dry lines. The readers' self-tests 19 of 19, 11 of 11, 8 of 8, 11 of 11 and 16 of 16, byte for byte
+  their committed logs; SELFTEST-RB-E186-V4 14 of 14 and SELFTEST-DAY2-V2 20 of 20; `dmcmd_audit` as at `565523d3`, its bodies byte
+  for byte; 160 lists, 5,372 entries, 5,355 OK (the 17 others E85's code list); box lists 30, 1,056 entries, 335 repo-side OK; 55,752
+  tracked files; 0 box calls.
+- **The go lines are unchanged** since `e8e9f4e1` and `565523d3`, and true at `f69619d4`: day 2's (commit
+  `e8e9f4e1c5c0407e7e29268c378d3c26d899433c`; `SHA256SUMS-e185-kit-note4` `d96616c1…`, 20 of 20 OK; `SHA256SUMS-e183-kit-note3`
+  `3b472e38…`, 19 of 19 OK; no E185 or E183 datum in any ref) and E186's recommended ones (commit
+  `565523d3b316394248073bb7b50bf61e1b1c15b9`; `SHA256SUMS-e186-note1` `f36ddb57…`, 40 of 40 OK; `SHA256SUMS-e186-note4` `17e1dc50…`, 17
+  of 17 OK; no E186 datum in any ref), as this section's dated paragraph of Q159's records gives them in full.
+- **Records lines:** the round critic's first finding of Q158 is answered (02, 05 and the owner's private page print `e8e9f4e1`'s
+  lines); E186's two possible days now read alike on the owner's private page; the kinds page cites E180's dated note M1 for "frozen
+  before".
+- **A ruling, in one line** (the round's critic, on the verifier's nit 6): the findings README's Q149-era sentence on
+  october-forecast-model's reported arm (there since `234380d7`, Fri 6 Nov 17:37 PST), and the few like it in 02, 03 and 05 from earlier
+  rounds, stay as written: they were written under the owner's rule of 5 November 2026, and the stricter wording since binds new text
+  only.
+- **The critic's findings on Q159's records**, both nits and none blocking: the owner's private page gave day 2's and E186's lines as
+  true at `565523d3` and `2d14b6c7`, where they are also true at `f69619d4` (answered there now); and 02's Q159 row and this section's
+  "Not yet done" lines said Q159's critic was still under way (answered by the dated clauses there).
+- **Gaps** (the critic's, none blocking): day 2's box steps have run only against stand-ins, and E183's train host first compiles on
+  the box (one re-run, then the registered SKIP, with no card time); the check v2's closure is a run-time trace; from E185's step 2 to
+  E183's data commit nothing else may write or commit in the lab clone (an untracked module anywhere under `tools/claims-v3`, or any
+  uncommitted file under `e183/` or `e185/`, stops each step 2), so these records (Q160's) run before day 2's window; E183's step 2
+  only reports E183 data already in a ref, and E185's reads none (go line 6 closes this); E185's S and S2 run last; E185-C is weak at
+  σ_c, and HM-LG reads NOT SEPARATED in 97–100% of draws; SHORT reads neither T5 nor T6, so the window should fit FULL (6,300 s before
+  the last end at E185's launch, then 3,900 s at E183's). E186 has never run on a card; its six equal-C trains' pairing rests on the
+  host's record; its history checks see no untracked file outside the core directories; its brief asks the go for no anchor line (lines
+  9–12 close this); its step 2 only reports E186 data already in a ref; a non-finite board sample would reach its registered train rules
+  (latent); and it runs only after day 2's two sessions are collected, never beside a session of ours.
+- **Process, Q159**, none safety-related, one line per lane: Q159's records: one read-only one-line Python read at the
+  start, sub-second helpers outside the round's local slot, one extra read-only run of the check v2 (no pull) under the lab-commit
+  lock, one scan hit reworded before the commit, the private page's checker artifacts fixed in the checker, that page's deploy waiting
+  for the next ten-minute window by a background loop, and one render-script bug; their verifier: a 5-minute one-core diff job outside
+  the slot, stopped and re-done, stdin heredoc reads and one one-line Python read, and two read-only listings of the remote's refs
+  outside the lab-commit lock; their fix: the private page's first build stopped on the two-line rule and its head was shortened,
+  sub-second helpers outside the slot, and two read-only listings of the remote's refs outside the lock; the critic: short read-only
+  Python inspections and two sub-second edits of its own scratch scripts outside the slot, a first check of the private page that cut
+  its log wrongly and was re-done (one insert, 10 of 10 lines), one read-only check whose output went nowhere, git reads, checksums and
+  page reads outside the slot (its one pull and both remote-ref listings under the lab-commit lock), and its scratch clone and
+  desk-test trees removed by guarded paths. Nothing but Q159's two records commits wrote in the lab clone.
+- **These records' own checks** (desk checks of code): before their commit the same commit was made in a scratch clone, never pushed,
+  where day 2's lines 1–4 and 6 and E186's lines 9–12 read as stated, and the check v2, E185's step 2 v5 (twice), E183's step 2 v4 and
+  E186's step 2 v2 each read 0, with no box call; 160 lists, 5,372 entries, 5,355 OK. None of the five files they edit lies in any of
+  the day's perimeters (the check v1's 139 paths and v2's 598; E186's history checks' 60 and 506), and no tracked hash list names one.
+- **A link left as moved, once more:** the entry these records move from the agents file's changelog, of 2 November on Q137's records,
+  carries the same link to `docs/agent-changelog-archive.md` ("A link left as moved", above), and it stays as written.
+- **Still open:** E186's optional kit note 5 (a step 2 v3 refusing E186 data in a ref, and a dated amendment reading a non-finite
+  launch sample NOT SCORED); the launch reading's finite test (latent); day 2 and E186, each on the owner's go with a fresh lab approval
+  for aifoundry3.
+- **Not yet done:** a verifier of these records.
 
 ## Ridge points (derived; no card time)
 
