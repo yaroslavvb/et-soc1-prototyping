@@ -1,0 +1,87 @@
+{
+ "card": "aifoundry3",
+ "args": {
+  "out": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e186/p18610/a0",
+  "root": "/home/yaroslavvb/aifoundry",
+  "kinds": null,
+  "tel_live": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e186/p18610/telemetry.jsonl.raw",
+  "heater": "build/sparsity/host/sparsity_host",
+  "sparsity": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "first_block": 18610,
+  "seed": 18610,
+  "tiers": "1,2",
+  "items": "fp16.zeros,fp16.randn",
+  "target": 58.0,
+  "preheat": 59.0,
+  "quiet_s": 2.0,
+  "max_heats": 15,
+  "max_wait": 600.0,
+  "max_c": 70.0,
+  "stale_s": 3.0,
+  "fma_s": 4.0,
+  "shires": "0xffffffff",
+  "per_shire": "32",
+  "burnin": 0,
+  "card": "aifoundry3",
+  "dry": false,
+  "list": false
+ },
+ "items": [
+  {
+   "name": "fp16.randn",
+   "type": "fp16",
+   "kind": "randn",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/tiles/fp16/randn.bin",
+   "bytes": 2048,
+   "sha256": "2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974",
+   "sha256_a": "d8659464e2ec2603f15d1ba55cd0002d8473fccd28b90dcdb40be77624dfe9c6",
+   "sha256_b": "9656c6d96211560bb89cb56e71945508c68c30e2a54cf872866fd88c9003c787",
+   "values": null,
+   "zero": "fp16.zeros",
+   "random": "fp16.randn",
+   "anchor": true,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 84416,
+   "provisional": false,
+   "cpo": 546.0,
+   "macs_per_op": 8192,
+   "rule": "standard normal, sigma 1, rounded to fp16"
+  },
+  {
+   "name": "fp16.zeros",
+   "type": "fp16",
+   "kind": "zeros",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/tiles/fp16/zeros.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "sha256_a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "sha256_b": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "values": null,
+   "zero": "fp16.zeros",
+   "random": "fp16.randn",
+   "anchor": true,
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 0,
+   "provisional": false,
+   "cpo": 546.0,
+   "macs_per_op": 8192,
+   "rule": "every element +0.0 (0x0000): every lane gated"
+  }
+ ],
+ "order": [
+  {
+   "pos": 0,
+   "item": "fp16.zeros",
+   "segment": 0
+  },
+  {
+   "pos": 1,
+   "item": "fp16.randn",
+   "segment": 0
+  }
+ ],
+ "et_devices": null,
+ "experiment": "E78"
+}

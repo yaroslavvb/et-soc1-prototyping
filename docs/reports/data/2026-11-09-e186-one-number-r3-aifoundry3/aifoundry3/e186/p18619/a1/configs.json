@@ -1,0 +1,87 @@
+{
+ "card": "aifoundry3",
+ "args": {
+  "out": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e186/p18619/a1",
+  "root": "/home/yaroslavvb/aifoundry",
+  "kinds": null,
+  "tel_live": "/home/yaroslavvb/aifoundry/build/claims-v3/aifoundry3/e186/p18619/telemetry.jsonl.raw",
+  "heater": "build/sparsity/host/sparsity_host",
+  "sparsity": "tools/claims-v3/ccheck/sparsity_ccheck.sh",
+  "first_block": 18619,
+  "seed": 18619,
+  "tiers": "1,2",
+  "items": "fp32.randn,fp32.zeros",
+  "target": 58.0,
+  "preheat": 59.0,
+  "quiet_s": 2.0,
+  "max_heats": 15,
+  "max_wait": 600.0,
+  "max_c": 70.0,
+  "stale_s": 3.0,
+  "fma_s": 4.0,
+  "shires": "0xffffffff",
+  "per_shire": "32",
+  "burnin": 0,
+  "card": "aifoundry3",
+  "dry": false,
+  "list": false
+ },
+ "items": [
+  {
+   "name": "fp32.randn",
+   "type": "fp32",
+   "kind": "randn",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/tiles/fp32/randn.bin",
+   "bytes": 2048,
+   "sha256": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa",
+   "sha256_a": "11ce14be9310c675be0eaf1b5e4235d7a9e99423ce855b6c7bca055cf7355abc",
+   "sha256_b": "9851fe6cf28fbe4491269f6d25eee093d531c26442b6e536892dd015a4f90994",
+   "values": null,
+   "zero": "fp32.zeros",
+   "random": "fp32.randn",
+   "anchor": true,
+   "gated_lane_frac": 0.0,
+   "bus_bits_per_op": 82214,
+   "provisional": false,
+   "cpo": 546.0,
+   "macs_per_op": 4096,
+   "rule": "standard normal, sigma 1"
+  },
+  {
+   "name": "fp32.zeros",
+   "type": "fp32",
+   "kind": "zeros",
+   "tier": 1,
+   "tile": "tools/claims-v3/kinds/tiles/fp32/zeros.bin",
+   "bytes": 2048,
+   "sha256": "e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad",
+   "sha256_a": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "sha256_b": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+   "values": null,
+   "zero": "fp32.zeros",
+   "random": "fp32.randn",
+   "anchor": true,
+   "gated_lane_frac": 1.0,
+   "bus_bits_per_op": 0,
+   "provisional": false,
+   "cpo": 546.0,
+   "macs_per_op": 4096,
+   "rule": "every element +0.0 (0x00000000): every lane gated on an accumulate pass"
+  }
+ ],
+ "order": [
+  {
+   "pos": 0,
+   "item": "fp32.randn",
+   "segment": 0
+  },
+  {
+   "pos": 1,
+   "item": "fp32.zeros",
+   "segment": 0
+  }
+ ],
+ "et_devices": null,
+ "experiment": "E78"
+}
