@@ -4763,7 +4763,7 @@ Since `45e514e3`, Q156 to Q158b added 829 files (598 + 85 + 128 + 18) and edited
   round's directories through a recursive pathspec, fixed by glob pathspecs; pre-scan hits on case names and an address-shaped test
   string, renamed before the commit; one audit job's relative output path after a change of directory, re-run.
 - **Not yet done:** a verifier of these records *(dated, Sun 8 Nov 2026, after these records' verifier: done, about 11:57–12:46 PST; it held these records with fixes, two minor faults and three nits, none in a measured number, a registered verdict or a frozen file, answered in the dated paragraph at the end of this section, in 02's Q157 row and on the owner's private page)*; chain A of Q158 (a verifier of `1e74546a`, `17cf100f` and `88750359`, the notes M2 and
-  their verifier), under way at these records; the critic of day 2's and E186's readiness; day 2 and E186 on the owner's go.
+  their verifier), under way at these records; the critic of day 2's and E186's readiness; day 2 and E186 on the owner's go. *(dated, Sun 8 Nov 2026 evening, Q159's records: chain A and the critic of day 2's and E186's readiness are done, recorded in the dated paragraph at the end of this section; day 2 and E186 still wait on the owner's go)*
 - **Card time:** about 116 card-minutes in Q156 (E182 98.1, arm B 17.2, arm S 0.75); none in Q154, Q155, Q157, Q158a, Q158b or these
   records.
 
@@ -4808,6 +4808,101 @@ corrected there; the other is the lines these records owed, carried here:
   are a session transfer.
 
 The verifier's third nit, on the second candidate list's name, changes no text here: later records name it as E186's A1-3 does.
+
+*(Dated, Sun 8 Nov 2026 evening, Q159's records of Q158's chain A and its critic.)* **Chain A** (about 10:42–14:40 PST, desk only, 0
+card-minutes) added 55 files in four commits and edited none: `e8e9f4e1` (12:13:55 PST, 21 files), `8c808677` (13:03:15, 16), `f349d11d`
+(13:04:44, 3) and `565523d3` (14:36:50, 15); 04's section on them names every file, and 03's E183, E185 and E186 entries say what each
+note does. Each line below is a dated clause of these records:
+
+- **Labels**, as the round's critic gives them: **registered**: every step, gate, pin, plan, cap and stop; E186's A1; E183's scoring rule
+  M2-4; E186's step 11 v4 and its gate v2. **Reported, modelled, blind**: october-forecast-model's notes M2 for E186 and E183, and E185's
+  records line (03, E185). **Post hoc**: the four kinds measured before every freeze and their figures (K09 8.4055 W and K37 1.6586 W,
+  E178; K10 8.7665 W and K21 8.5584 W, E182; 4 passes each), and E182's committed trains pairing 5,712 of 5,712 by E186's pairing check.
+  **Desk checks of code**: every test, audit, scan, count and re-run below. Nothing held out or measured is new.
+- **Day 2's go lines**, as the day-2 brief's dated note 2 requires: commit `e8e9f4e1c5c0407e7e29268c378d3c26d899433c`, with
+  `tools/claims-v3/e185/SHA256SUMS-e185-kit-note4` reading sha256 `d96616c17d6bddae95f416ee29b269a641735ad884575dc05cdc668e36b7455c` (20 of
+  20 OK) and `tools/claims-v3/e183/SHA256SUMS-e183-kit-note3` reading `3b472e387e24dd41eff814a60b6dd5da0ad11daeea147c8a4b76f30bf3515c22` (19
+  of 19 OK). In the lab clone, before anything: `git merge-base --is-ancestor` of that commit and HEAD exits 0; `git diff --quiet` from that
+  commit over the two lists exits 0; `shasum -a 256` of each list reads its value; and `shasum -a 256 -c` of each, from the lab's top, reads
+  every line OK. They **supersede `1e74546a`'s**, which this section's earlier lines give (the registered table's "The day-2 check" row, and
+  the Q158b lines) and which stay as written: still true, they pin neither the check v2 nor E185's step 2 v5 or E183's step 2 v4. The
+  critic adds a sixth line: `git log --all --oneline` over E185's and E183's data paths prints nothing before E185's step 1. Then, each
+  under the lab-commit lock: the check v2 by hand (`check_day2_v2.py tree --pull`) before each run's step 1; E185's step 2 v5, and again
+  just before step 14 (step 14 only on its 0); E183's step 2 v4; after each data commit, the M1 readers only through the check v2's gate
+  (`check_day2_v2.py m1 e185` and `m1 e183`); never E185's step 2 v4 or an older one alone, E183's v3 or an older one alone, nor the
+  check v1 by hand.
+- **E186's lines, the critic's recommendation, not the brief's requirement** (E186's brief asks the go for none): commit
+  `565523d3b316394248073bb7b50bf61e1b1c15b9`, with `tools/claims-v3/e186/SHA256SUMS-e186-note1` reading sha256
+  `f36ddb57cbe5887005b82418b62dc9bfe78e9286dad7e0d9e7ed619d19ec24a1` (40 of 40 OK) and `tools/claims-v3/e186/SHA256SUMS-e186-note4` reading
+  `17e1dc50281c1efbe14c0c1a7c7115eee520378dfcd3078b50dffd72f35cccf2` (17 of 17 OK), the same four checks, and `git log --all --oneline` over
+  E186's data paths printing nothing; then steps 2 and 5 as v2 and step 11 as v4, by the brief's dated notes 1–3.
+- **Corrections**, each text staying as written and read as corrected: (a) day 2's go lines are `e8e9f4e1`'s, above, here and on the
+  owner's private page; (b) E186's kit note 3, section 3, and the brief's dated note 2, item 5 ("a list off its bytes … reads M2 NOT
+  READ"), read as kit note 4, section 3, corrects them: the history check stops first, with 16, in step 2 and inside step 11 v2; (c) note
+  M2's "only K09 and K10 were measured before" reads K09, K10, K21 and K37 (the figures above; R3 − R4 = K10 − K21 = E182's T5, +0.2359 W
+  [+0.2299, +0.2419]), as note M2's dated note 1, section 1, gives them with its post hoc reading; (d) the units string of E183's note M2
+  json, on card 1's figures, is copied verbatim from note M1's committed json (`06286213`, `m1-october-forecast-model-e183.json` line
+  675), so nothing new is disclosed; (e) the day-2 verifier's nits 3–7 on E186 read as E186's kit note 2 gives them (03, E186); (f) the
+  day-2 verifier's scripted hostile case L2 did not test its stated form (it changed a file the day's code does not load, beside a list
+  that does not name it), and the fix's L2, `fit_m5.py` with its line in M10's list, does; (g) the owner's private page said chain A was
+  under way at these records; it is done (this paragraph).
+- **The critic's findings, one line each:** (1) minor: these records and the owner's private page gave day 2's go lines as `1e74546a`'s
+  (answered above and there); (2) minor: E186's step 2 only reports, never refuses, an E186 dataset already in a ref (a stand-in E186 data
+  commit on a scratch clone: step 2 v2 rc 0, "commits naming E186 data: 1"); the box's refusal of an E186 block directory already there
+  (exit 8) and step 11's refusal of a used output stand behind it, and the go line above closes it; (3) minor: E186's brief asks the go
+  for no anchor line, so nothing outside the clone pins step 2 v2 and the history checks (the recommended lines above); (4) nit: the check
+  v2's untracked-module read passes the day's directories to git as plain pathspecs, so it reads every directory below them, and an
+  untracked module anywhere under `tools/claims-v3` stops it with 16 (fail closed; wider than the brief's "the day's 156 directories");
+  (5) nit: E182's launch reading has no finite test, so a non-finite power sample would reach E186's registered train rules (latent:
+  E182's 5,712 launch records held none; the reader v2 reads it "not read", the registered scorer does not); (6) nit: E186's brief allows
+  day 2's own day after E183's step 11 copy-back if one window fits all, the plan is a day after day 2, and the owner's go names the day;
+  (7) nit: K09, fp32 ones, has been measured as a kind since 21 Sep 2026 (117 committed copies of its tile bytes), not only by E178; K10,
+  K21 and K37 appear only in E182's and E178's passes.
+- **The verifiers, one line each:** the day-2 check and E186's fixes held with fixes, 2 minor faults (check v1's perimeter missed the 160
+  files E185's registered scorer loads, 168 by the fix's run-time trace; an untracked module beside a named file outside the core
+  directories was unseen) and 6 nits, all answered by `e8e9f4e1`; the notes M2 held with fixes, 4 minor faults (kit note 3's sentence on a
+  list off its bytes; the reader reading a NaN; the reader reading a kind whose check of C failed; note M2's kinds measured before) and 1
+  nit (the E183 json's units string), the faults answered by `565523d3` and the nit by (d) above; these records held with fixes, 2 minor
+  faults and 3 nits, answered by `d04d36ae` and on the owner's private page, the third nit standing by its own ruling.
+- **Readiness** (the critic, desk checks of code, at `565523d3`): **day 2 (E185, then E183) READY WITH GAPS; E186 READY WITH GAPS; these
+  records HOLD AS FIXED.** The gaps, none blocking: every box step has run only against stand-ins, and both new hosts first compile on the
+  box; nothing else may write or commit in the lab clone from E185's step 2 to E183's data commit (an untracked module anywhere under
+  `tools/claims-v3` stops each step 2); E185's S and S2 run last, so a heat stop leaves its arm rules NOT SCORED; E183's SHORT plan reads
+  neither T5 nor T6 (FULL is preferred); E186's six equal-C trains' pairing rests on the host's record.
+- **The counts:** at `565523d3`, 160 SHA256SUMS lists, 5,372 entries, 5,355 OK, the 17 not OK E85's code list alone, whose bytes sit
+  among tracked files (`tools/claims-v3/hlc`, `hlc/prereg`, `hlk`, `hm` and E85's session directory); box lists 30, 1,056 entries, 335
+  repo-side all OK; 55,752 tracked files; the day-2 check v1's paths 139 and v2's 598; E186's history check v1's 60 and v2's 506; no
+  records file in any of them. Counted by these records on their own commit over `565523d3`: 160 lists, 5,372 entries, 5,355 OK, the 17 not OK E85's code list alone.
+- **Re-runs to quote** (the critic's, desk checks of code, at `565523d3`, on a scratch clone and then for real, each with a stand-in window
+  written that day in a scratch output directory and stand-in box commands that refuse every call), every rc 0: the day-2 lines (0, 0, 20
+  of 20, 19 of 19) and `1e74546a`'s (0, 0, 16 of 16, 15 of 15); the check v1 and the check v2; E185's step 2 v4, and v5 twice; E183's step
+  2 v3 and v4; E186's step 2 v2; E186's history checks v1 and v2; the M1 gates' dry lines. The readers' self-tests 19 of 19, 11 of 11, 8 of
+  8, 11 of 11 and 16 of 16, each byte for byte its committed log; SELFTEST-RB-E186-V4 14 of 14; SELFTEST-DAY2-V2 20 of 20. `dmcmd_audit`:
+  E185's runbook GO 11, all READ (bare NO-GO at step 9's guard); E183's GO 11, all READ; E186's runbook as it runs that day GO 11, all
+  READ; the readers and gates GO 0; the session preflights GO 32, 38 and 32, each with E153's one excepted conditional reset, never
+  reached. The critic's hostile cases ran on a scratch clone only.
+- **Process, Q158:** the day-2 check's verifier: a void first job (its stand-in copy first on the path changed three tracked modes in
+  its scratch clone; re-run), a slow scan stopped and re-run, two failed pairing runs before its final one, one foreground sleep refused
+  and never run; the day-2 check's fix: one committed directory name (E130's) masked in its scan by one stated exception, a trace-mapping
+  artifact corrected before the closure was taken, one foreground sleep refused; the notes M2: E186's json re-made before any commit, 13
+  benign scan hits removed, none masked, the committed dry-listing log keeping only step 11 v3's blocks, step 2 v1's cosmetic grep
+  complaint in a dry listing, a trial pre-commit run, and one `git fetch` outside the lab-commit lock at 13:10:18, refs only; their
+  verifier: relative-path re-runs, re-made, a tier scan that crashed and then ran past its call bound in the background, one read-only
+  listing of the remote's refs; their fix: 4 benign scan hits removed, a hostile step run without its lock variable (rc 10) and re-run,
+  two scratch commits never pushed, two read-only one-line Python reads outside the round's local slot; these records' first part: the
+  owner's private page redeployed once for formatting only, a stopped character-level diff job, the agents file's older-entries file written by its
+  own rule, scan iterations, and the deploy tool's scrub of a private machine's name on the private page; their verifier: two stopped
+  jobs; their fix: one `git fetch` outside the lab-commit lock at about 13:10, refs only, and 05's paragraph written about five minutes
+  ahead of the private page's Fix entry; the critic: its scan's number step held two cores for about 5 minutes in two tries, stopped and
+  re-run as a file loop, a void first hostile job (no output directory passed), fixed and re-run, one 2-second foreground sleep,
+  sub-second helpers outside the slot, and its scratch clone and desk-test trees removed by guarded paths.
+- **A link left as moved, said once:** the agents file's changelog moves its oldest entries verbatim, by the owner's rule, so an entry's
+  own link to `docs/agent-changelog-archive.md` resolves from that file to `docs/docs/agent-changelog-archive.md` ("A link left as moved",
+  above); the entry these records move, of 2 November on E135's records, carries the same link, and it stays as written.
+- **The second candidate list's file:** from these records on, the text names it as E186's A1-3 does, "its file stem"; 05's two earlier
+  uses stand as written.
+- **Not yet done:** a verifier of these records; chain C's post hoc reading, kept off this repository, and Q159's critic; day 2 and E186,
+  each on the owner's go with a fresh lab approval for aifoundry3.
 
 ## Ridge points (derived; no card time)
 

@@ -30,7 +30,7 @@ cited as live. The evening's claims (E153, E154, E157, E161) are clauses of a se
 
 Every measurement in this directory has an ID here. An entry says what question it answers, exactly when and where it
 ran, the command that produced it, where the **raw** data lives in this repository, and what it cannot tell you. Cite
-as **E1**...**E186**. *(E171–E174 are registered for Q142's pool-8 card day and have not run; dated, Thu 5 Nov 2026.)* *(E171–E176 ran on 5 November, E176 refused at its start gate with nothing scored; E177 is reserved, not built, not run; E178 is Q146's, its registration under way; dated, Thu 5 Nov 2026, Q143(r)'s records.)* *(E178 is registered, amended and kitted, not run; E179 is assigned, not registered, not built, not run; E180 is registered and kitted, not run; E181, M11's second session, is kitted and read READY, not run; dated, Fri 6 Nov 2026, Q148(r)'s records.)* *(E178, E180 and E181 ran on 6 November, blind, and were scored and fixed; E179 stays assigned, not registered, not built, not run; dated, Fri 6 Nov 2026, Q149's records.)* *(E182 and E184 are registered and kitted, not run; E183 is reserved for the one-number vector add's round 2, not built, not run; dated, Sat 7 Nov 2026, Q153's records.)* *(E182 ran on 8 November, FULL, blind; E184's arm B ran, blind, and its arm S was not run, stopped by its registered smoke gate; E183 and E185 are registered and kitted, not run; E186 is registered, amended by A1 and kitted, not run; dated, Sun 8 Nov 2026, Q154–Q158's records.)* E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
+as **E1**...**E186**. *(E171–E174 are registered for Q142's pool-8 card day and have not run; dated, Thu 5 Nov 2026.)* *(E171–E176 ran on 5 November, E176 refused at its start gate with nothing scored; E177 is reserved, not built, not run; E178 is Q146's, its registration under way; dated, Thu 5 Nov 2026, Q143(r)'s records.)* *(E178 is registered, amended and kitted, not run; E179 is assigned, not registered, not built, not run; E180 is registered and kitted, not run; E181, M11's second session, is kitted and read READY, not run; dated, Fri 6 Nov 2026, Q148(r)'s records.)* *(E178, E180 and E181 ran on 6 November, blind, and were scored and fixed; E179 stays assigned, not registered, not built, not run; dated, Fri 6 Nov 2026, Q149's records.)* *(E182 and E184 are registered and kitted, not run; E183 is reserved for the one-number vector add's round 2, not built, not run; dated, Sat 7 Nov 2026, Q153's records.)* *(E182 ran on 8 November, FULL, blind; E184's arm B ran, blind, and its arm S was not run, stopped by its registered smoke gate; E183 and E185 are registered and kitted, not run; E186 is registered, amended by A1 and kitted, not run; dated, Sun 8 Nov 2026, Q154–Q158's records.)* *(E183, E185 and E186 stay registered and kitted, not run: E185's kit note 4, E183's kit note 3 and E186's kit notes 2–4, with october-forecast-model's dated notes M2 for E186 and E183, are committed before any datum; E187 is reserved for E186's reserve trains, not registered, not built, not run; dated, Sun 8 Nov 2026 evening, Q159's records.)* E33 and E34 are the 18 September memory-hierarchy and on-chip communication sessions,
 registered on 25 September; they are numbered last so that no other number moves. E35–E47 are version 3 of the claims
 check (25–26 September, three cards; E47 was registered and not run), E48 the gathers and scatters run on the
 same three cards after each card's campaign blocks (26 September), E49 a card-free test of the runtime's log-level race,
@@ -8426,6 +8426,17 @@ Q158b, 7 of its 18 files) runs the day-2 check before the old step 2 and gates t
 again while it says 17, or 14 with no reading. The readiness critic (Q155's) read it READY WITH GAPS. **Not run; 0 card-minutes;** no
 E183 datum is in any ref.
 
+**Kit note 3 and dated note M2, not run** *(dated, Sun 8 Nov 2026 evening, Q159's records)*. [Kit note 3](../../tools/claims-v3/e183/KIT.md.dated-note-3.md) (`e8e9f4e1`, 12:13:55 PST, Q158, 7 of its 21 files;
+`SHA256SUMS-e183-kit-note3`, 19 entries, sha256 `3b472e38…`): E183's step 2 v4 (`rb/s03_desk_e183_v4.sh`) runs the day-2 check v2
+before step 2 v3, and the M1 reader runs behind the check v2's gate; no box file, rule, forecast, threshold, plan, cap, stop or order of
+box steps changes. [Dated note M2](../../tools/claims-v3/e183/E183.md.dated-note-M2.md) (`f349d11d`, 13:04:44, 3 files;
+`SHA256SUMS-e183-m2`, 9 entries): october-forecast-model's v5, v6 and v7, their freeze lines and their frozen forecasts for E183's 11
+kinds and six trains, **numbers only**: three reported arms, never one of E183's rules, with no reader, step or gate on the day; v5
+equals v4 on all 17 items, and v6 and v7 keep v4's centres with wider bands (v7 = v6). Its rule **M2-4**, registered before any datum,
+is read from the committed `scored-e183.json` after E183's data commit, in a later records round, against the registered t statistic's
+intervals; those readings will be labelled blind and reported. A verifier read both before any datum. **Registered and kitted, not run;
+0 card-minutes;** no E183 datum is in any ref.
+
 ## E184 — the board meter read against steps of known size: a staircase of fadd.ps minions switched from zeros to random operands on aifoundry3, read A B B A inside one process, and card 1's SRAM-rail statistic in reset windows (Q153; registered, amended by A1 and A2, kitted with kit v2; aifoundry3 card 0 at 600 MHz pinned, and aifoundry1's card 1) — not run
 
 **Asked (Q150):** *"Are there more accurate ways of checking power draw? Maybe there are multiple sensors. I think there are per-shire
@@ -8583,6 +8594,32 @@ card-minutes (cap 105), day 2's first run, in the cool morning hour, launched be
 real session on aifoundry3; E183 follows only after E185's **step 14**, its collection (`s22_collect_e185_v2.sh`), never "step 11",
 which is the wait. Stops: minshire 0 at 70 °C, the board at 65 W, or the 34-sensor mean at 72 °C ends the hold and the pass. The
 readiness critic (Q155's) read it READY WITH GAPS. **Not run; 0 card-minutes;** no E185 datum is in any ref.
+
+**Kit note 4, and no dated note M2** *(dated, Sun 8 Nov 2026 evening, Q159's records)*: [kit note 4](../../tools/claims-v3/e185/KIT.md.dated-note-4.md) (`e8e9f4e1`,
+12:13:55 PST, Q158, 12 of its 21 files; `SHA256SUMS-e185-kit-note4`, 20 entries, sha256 `d96616c1…`) adds
+[the day-2 check v2](../../tools/claims-v3/e185/rb/check_day2_v2.py): v1's check at its committed bytes, then v1's checks on a wider
+perimeter, 47 lists (45 of them gates at their counts, own bytes and entries, the two M1 lists reported), 6 directories and 592 named
+files outside them, among them [the closure list](../../tools/claims-v3/e185/rb/SHA256SUMS-day2-closure-v2) of the 168 files E185's
+scorer and collector load by a run-time trace; it refuses any change but an addition since `6860643c` on its paths, any added file that
+shadows a module, and any untracked module in the day's 156 directories. E185's step 2 v5 (`rb/s03_desk_e185_v5.sh`) runs it before step
+2 v4, as step 2 and again just before step 14, and the M1 reader runs behind its gate; the day-2 brief's dated note 2 gives the go's lines
+and "writes or commits" (desk test 20 of 20). No box file, rule, forecast, threshold, plan, cap, stop or order of box steps changes.
+**E185 gets no dated note M2.** The records line, verbatim as the arms lane wrote it: "E185 gets no dated note M2. october-forecast-model v7 = v6 = v5 = v4 = v3 exactly on every hold and window. At each of the seven plan rooms, the six holds' rises and the four big holds' cool-down window rises, each with its 1 sd, equal note M1's v3 and v4 (m1-october-forecast-model-e185.json, 2f6a4440) to the last digit. That is 140 numbers a version. No number is new and nothing more is scored. Labels: modelled; blind for E185; reported." The three freeze lines,
+verbatim:
+
+```
+october-forecast-model v5, frozen Sun 8 Nov 2026 06:23:22 PST, sha256 0b0ae65732ffb3ac73720c0571594c76bdbbd1c7d88225070dbf1f806eb49ce8, covering E183's 11 kinds and 6 trains, E185's holds and windows, E186-CANDIDATES' 23 kinds and 9 trains and M12's 20 kinds and 14 trains
+```
+
+```
+october-forecast-model v6, frozen Sun 8 Nov 2026 07:33:13 PST, sha256 bfe31884cf06c602f1779988cc50497487284ecc80e3437343d54a2057c3354b, covering E183's 11 kinds and 6 trains, E185's holds and windows, E186-CANDIDATES' 23 kinds and 9 trains and M12's 20 kinds and 14 trains
+```
+
+```
+october-forecast-model v7, frozen Sun 8 Nov 2026 08:11:58 PST, sha256 9c547229d16499d4b796d3b970b20dfdc7bc1de9a9b1ddff220db15b9e98a489, covering E183's 11 kinds and 6 trains, E185's holds and windows, E186-CANDIDATES' 23 kinds and 9 trains and M12's 20 kinds and 14 trains
+```
+
+**Registered and kitted, not run; 0 card-minutes;** no E185 datum is in any ref.
 **Report:** the kinds page (A25), section 11, items 9 and 8.
 
 ## E186 — a tensor round 3 on aifoundry3: M12's frozen candidate forecasts tested blind against M10 (frozen) in ten A B B A trains (Q158; registered, amended by A1, kitted with kit note 1; aifoundry3 card 0 at 600 MHz pinned) — not run
@@ -8621,6 +8658,28 @@ and 13 of 13). **Planned:** FULL about 93 card-minutes at the registered block t
 longest the queue stops before A23-A15), cap 100; the fallback PASSES, five kinds passes of 15 kinds, about 28, cap 40, in which E186-PAIR
 reads over no train block, so it is quoted "no train block read"; about 2.5 h with the box steps, after day 2, on the owner's go with one
 PST window and a fresh lab approval for aifoundry3. **Not run; 0 card-minutes;** no E186 datum is in any ref.
+
+**Kit notes 2–4, dated note M2 and its dated note 1** *(dated, Sun 8 Nov 2026 evening, Q159's records)*, each before any datum:
+[kit note 2](../../tools/claims-v3/e186/KIT.md.dated-note-2.md) (`e8e9f4e1`, 12:13:55 PST, Q158, 2 of its 21 files; `SHA256SUMS-e186-note2`,
+9 entries): records lines for the verifier's nits 3–7 on A1 and kit note 1 (kit note 1's history and runbook logs hold a provisional
+tree's counts; a change on the scale route stops the scorer at scoring, rc 1, its v2 rc 9, never "s not read"; the pairing's hash is the
+C-logging host's FNV-1a-form 64-bit hash, offset basis 1469598103934665603; A1's 1,000-session power shares with ±2 se, 0.895–0.995;
+E186-PAIR a check of the records present, quoted in PASSES as "no train block read").
+[Dated note M2](../../tools/claims-v3/e186/E186.md.dated-note-M2.md) with [kit note 3](../../tools/claims-v3/e186/KIT.md.dated-note-3.md)
+and the brief's dated note 2 (`8c808677`, 13:03:15, 16 files; `SHA256SUMS-e186-m2`, 8 entries, and `SHA256SUMS-e186-note3`, 15):
+october-forecast-model's later versions as four reported arms, v4 on M12's set, v5, v6 and v7, with their freeze lines and frozen
+forecasts for E186's 39 kinds and 22 trains, read after the data by `arm_m2_read_e186.py` (11 of 11 on synthetic sessions), never one
+of E186's rules; v4 on M12's set covers 18 of the 20 kinds and 13 of the 14 trains (9 of the session's 10), v5–v7 all 39 kinds and 22
+trains; on every int8 and fp32 item v5 = v6 = v7 = v4, and they differ only on the fp16 swap H16 and the two fp16 kinds K19 and K20,
+which v4 does not cover; step 11 v3 runs step 11 v2 unchanged, then the reader through its own gate.
+[Note M2's dated note 1](../../tools/claims-v3/e186/E186.md.dated-note-M2.md.dated-note-1.md) with
+[kit note 4](../../tools/claims-v3/e186/KIT.md.dated-note-4.md) and the brief's dated note 3 (`565523d3`, 14:36:50, 15 files;
+`SHA256SUMS-e186-m2-v2`, 9 entries, and `SHA256SUMS-e186-note4`, 17, sha256 `17e1dc50…`): post hoc, the four kinds measured as kinds
+before every freeze, 4 passes each, are K09 (fp32 ones) 8.4055 W and K37 1.6586 W (E178, `f7820e70`) and K10 8.7665 W and K21 8.5584 W
+(E182, `0f6a8c45`), and R3 − R4 = K10 − K21 is E182's T5, +0.2359 W [+0.2299, +0.2419]; the reader v2 (16 of 16) reads a non-finite
+figure, or a kind whose check of C failed, as "not read" and writes strict json; step 11 v4 runs it through a gate v2 (the runbook's
+desk test 14 of 14), and kit note 4, section 3, corrects kit note 3: a change to note M2's files stops step 2 and step 11 v2 with 16
+from the history check, never "M2 NOT READ". **Registered and kitted, not run; 0 card-minutes;** no E186 datum is in any ref.
 **Report:** the kinds page (A25), section 11, item 6.
 
 **M12, M10 refitted post hoc on E182's rows, beside the register** *(dated, Sun 8 Nov 2026, Q154–Q158's records)* (Q157 and Q158a;

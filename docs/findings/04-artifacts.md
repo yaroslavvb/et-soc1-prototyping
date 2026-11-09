@@ -1466,6 +1466,27 @@ name holds SHA256SUMS; the only misses, every time, are E85's code list, whose 1
 (Q158b); 151, 5,081 of 5,098 at `88750359` (Q158a); and, counted by these records on their own commit over `88750359`, 151 lists, 5,081 of 5,098 entries OK, the 17 misses E85's. No
 E183, E185 or E186 datum is in any ref.
 
+## Q158's chain A, and the records' fix, published no new page: the day-2 check v2, october-forecast-model's notes M2 for E186 and E183, and their fixes (8 November 2026)
+
+These commits built **no new space**: chain A's four commits add 55 files and edit none (`e8e9f4e1` to `565523d3`), and the records' fix
+(`d04d36ae`) edits only 02 and 05, insert-only. The table gives each commit with git's own time (PST, Sun 8 Nov), its round, the files it
+holds and their count. The short names are the ones [05-claims.md](05-claims.md), "Q154–Q158", uses. *(Recorded by Q159's records, Sun 8
+Nov 2026 evening.)*
+
+| Commit (git's time, PST) | Round | The files (where) | Files |
+|---|---|---|---|
+| `e8e9f4e1` (12:13:55) | Q158, chain A | under [`tools/claims-v3/e185/`](../../tools/claims-v3/e185/KIT.md.dated-note-4.md): `KIT.md.dated-note-4.md`, `CARD-LANE-BRIEF.md.dated-note-2.md`, `SHA256SUMS-e185-kit-note4`, `rb/check_day2_v2.py`, `rb/SHA256SUMS-day2-closure-v2`, `rb/s03_desk_e185_v5.sh`, `rb/list_steps_e185_v5.sh`, `rb/selftest_day2_v2.sh` and four logs in `rb/logs/` (12); under [`tools/claims-v3/e183/`](../../tools/claims-v3/e183/KIT.md.dated-note-3.md): `KIT.md.dated-note-3.md`, `CARD-LANE-BRIEF.md.dated-note-2.md`, `SHA256SUMS-e183-kit-note3`, `rb/s03_desk_e183_v4.sh`, `rb/list_steps_e183_v4.sh` and two logs in `logs/` (7); under [`tools/claims-v3/e186/`](../../tools/claims-v3/e186/KIT.md.dated-note-2.md): `KIT.md.dated-note-2.md` and `SHA256SUMS-e186-note2` (2) | 21 |
+| `8c808677` (13:03:15) | Q158, chain A | under `tools/claims-v3/e186/`: [`E186.md.dated-note-M2.md`](../../tools/claims-v3/e186/E186.md.dated-note-M2.md), `m2-october-forecast-model-e186.json`, `arm_m2_read_e186.py`, `selftest_arm_m2_e186.py`, `SHA256SUMS-e186-m2`, `KIT.md.dated-note-3.md`, `KIT-BRIEF.md.dated-note-2.md`, `SHA256SUMS-e186-note3`, `rb/check_m2_e186.py`, `rb/s22_collect_e186_v3.sh`, `rb/list_steps_e186_v3.sh`, `rb/selftest_rb_e186_v3.sh` and four logs in `logs/` | 16 |
+| `f349d11d` (13:04:44) | Q158, chain A | under `tools/claims-v3/e183/`: [`E183.md.dated-note-M2.md`](../../tools/claims-v3/e183/E183.md.dated-note-M2.md), `m2-october-forecast-model-e183.json` and `SHA256SUMS-e183-m2` | 3 |
+| `d04d36ae` (13:10:12) | Q158, chain B | the records' fix: dated clauses in [02](02-requests.md) and [05](05-claims.md) | 2 edited, insert-only |
+| `565523d3` (14:36:50) | Q158, chain A | under `tools/claims-v3/e186/`: [`E186.md.dated-note-M2.md.dated-note-1.md`](../../tools/claims-v3/e186/E186.md.dated-note-M2.md.dated-note-1.md), `arm_m2_read_e186_v2.py`, `selftest_arm_m2_e186_v2.py`, `SHA256SUMS-e186-m2-v2`, `KIT.md.dated-note-4.md`, `KIT-BRIEF.md.dated-note-3.md`, `SHA256SUMS-e186-note4`, `rb/check_m2_e186_v2.py`, `rb/s22_collect_e186_v4.sh`, `rb/list_steps_e186_v4.sh`, `rb/selftest_rb_e186_v4.sh` and four logs in `logs/` | 15 |
+
+Every chain A commit carries "Q158" in its subject. **The hash lists** (every tracked file whose name holds SHA256SUMS; the only misses,
+every time, are E85's code list, whose 17 entries match their files under `tools/claims-v3/hlc`, `hlk` and `hm`, as this file's dated
+clause of 7 November says), as each lane counted them: 155 lists, 5,297 of 5,314 entries OK at `e8e9f4e1`; 158, 5,329 of 5,346 at
+`f349d11d` and at `d04d36ae`; 160, 5,355 of 5,372 at `565523d3`; and, counted by these records on their own commit over `565523d3`,
+160 lists, 5,372 entries, 5,355 OK, the 17 not OK E85's code list alone. No E183, E185 or E186 datum is in any ref.
+
 ## The camera and the details panel (30 September)
 
 For Q74–Q76: the memory levels and the chip diagram (the pages of 28 and 27 September) jumped in the middle of their

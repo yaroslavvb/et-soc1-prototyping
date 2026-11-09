@@ -4,6 +4,7 @@
 owner's rule of 10 October 2026 for agent instruction files). Newest first. Changes before 14 October 2026 are in
 `git log -- AGENT.md`.*
 
+- **2026-11-02 (Mon, week 45, E135 records)** — Section 3's index reads E1–E135, where it read E1–E134: E135 is a GPU measured the same way, Horace He's kinds of numbers on two A100s rented on Modal at the owner's OK, with no lab card. The 31 October entry, the oldest of 16, moved verbatim to [`docs/agent-changelog-archive.md`](docs/agent-changelog-archive.md). *Why:* constraint — E135's records add its entry to `docs/findings/03-experiments.md`, its data in `docs/reports/data/2026-11-02-e135-a100-kinds/`; re-check: the last entry heading of 03-experiments.md. And preference — the owner's OK of 2 November 2026 about 10:23 PST, *"btw you can do 'gpu measured the same way' by using modal, not exceeding $10 in experiments (use A100 or cheaper)"*, and his rule of 10 October 2026 for agent instruction files, which keeps the newest 15 entries inline.
 - **2026-11-02 (Mon, week 45, Q136 records)** — Section 3's index reads Q1–Q136 and E1–E134, where it read Q1–Q135 and
   E1–E125: Q136 is the owner's ask of that morning with its three rules on device commands, and E126–E134 are its nine card
   experiments, none of which sent a WRITE command. Its "known stale spots" add that a record calling the stock telemetry's PMIC
