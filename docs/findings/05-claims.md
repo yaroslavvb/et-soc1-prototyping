@@ -4933,7 +4933,7 @@ records; every earlier word stays as written.
 - **Chain B, by git's times** (Sun 8 Nov 2026, PST): `2d14b6c7` (16:15:32), the seven records files, insert-only bar the Q index
   counters and the agents file's oldest changelog entry, moved verbatim; `f69619d4` (17:55:17), 02 (+556 characters by the fix's own
   gate), 03 (+494) and 05 (+2,490), insert-only, none lost. The kinds page `06bd6862adc2` (16:21:50), then `d165bf6889b2` (17:45:39); the
-  owner's private pages at the same times. GitHub main is `f69619d4`.
+  owner's private pages at the same times. GitHub main is `f69619d4`. *(dated, Sun 8 Nov 2026, after these records' verifier: not at the same times. The owner's three private pages took new versions at 16:41:14–16:41:33 PST, and two of them again at 18:05:07–18:05:16 PST, each about 20 minutes after a kinds-page version; GitHub main read `f69619d4` at 18:16:28 and 18:42:37 PST, and these records' `4c452bb7` (git 19:17:21 PST) at 19:18:49 and 20:12:26 PST.)*
 - **Labels:** registered: no new rule, forecast, threshold, plan, cap or stop; desk checks of code: every re-run, count, scan and
   read-back below. Nothing blind, held out or measured is new.
 - **Verdicts:** their verifier held Q159's records with fixes, one minor fault, in an item on the owner's private page alone, and six
@@ -4993,7 +4993,43 @@ records; every earlier word stays as written.
 - **Still open:** E186's optional kit note 5 (a step 2 v3 refusing E186 data in a ref, and a dated amendment reading a non-finite
   launch sample NOT SCORED); the launch reading's finite test (latent); day 2 and E186, each on the owner's go with a fresh lab approval
   for aifoundry3.
-- **Not yet done:** a verifier of these records.
+- **Not yet done:** a verifier of these records. *(dated, Sun 8 Nov 2026, after these records' verifier: done, about 19:37–20:15 PST; it held these records with fixes, one minor fault and four nits, none in a measured number, a registered verdict, a frozen file or one of the day's perimeters, answered in the dated paragraph below)*
+
+*(Dated, Sun 8 Nov 2026, after these records' verifier; Q160's fix.)* The verifier (about 19:37–20:15 PST, desk only, 0 card-minutes)
+re-read these records' commit `4c452bb7` against `f69619d4` character by character, the times and figures it quotes against git, the
+committed files and each page's own list of versions, and the owner's private pages, and re-ran day 2's and E186's lines and checks
+for real at `4c452bb7`, each reading as stated (desk checks of code). It held these records with fixes: one minor fault and four nits,
+none in a measured number, a registered verdict, a frozen file or one of the day's perimeters. Each line below is a dated clause of
+these records; every earlier word stays as written.
+
+- **The pages' times** (the minor fault): the Chain B line above said the owner's private pages took their versions at the kinds
+  page's times; each came about 20 minutes later, and the dated clause there gives the times. 02's clause on the Q159 row gives the
+  kinds page's times alone, and they stand.
+- **GitHub main** (a nit): the same line's "GitHub main is `f69619d4`" was true only until these records' push; the same dated clause
+  gives it as reads, each with its time.
+- **The agents file's re-check** (a nit, carried from earlier rounds): the changelog entries in `AGENT.md` for Q154–Q158's records,
+  for Q159's and for these records back "no E183, E185 or E186 datum in any ref" with
+  `git log --all -- tools/claims-v3/e183 tools/claims-v3/e185 tools/claims-v3/e186` (with more paths in the first), which lists the
+  kits' own commits (21 at `4c452bb7` for those three paths), not data, so it cannot show the claim. The re-check that shows it is
+  `git log --all --oneline -- 'docs/reports/data/*-e185-*' 'docs/reports/data/*-e183-*' 'docs/reports/data/*e186*'`, the paths day
+  2's line 6 and E186's line 12 read; it prints nothing at `4c452bb7`. Those entries stay as written, and the agents file's next
+  changelog entry gives this re-check.
+- **02's Q160 row** (a nit) names four of the five files these records edit: `4c452bb7` also adds the agents file's oldest changelog
+  entry, moved verbatim, to `docs/agent-changelog-archive.md`. A dated clause on that row now says so.
+- **One nit in an item on the owner's private page alone:** its go list, which follows the round critic's, had dropped one of the
+  critic's example windows (an early window like day 1's), and this fix restores it there.
+- **The verifier's re-runs** (desk checks of code, for real at `4c452bb7`, with stand-in windows written that day in scratch output
+  directories and stand-in box commands that refuse every call): day 2's lines 1 and 2 read 0, line 3 as stated, line 4 20 of 20 and
+  19 of 19, line 6 nothing, and the optional line 8 as stated; E186's lines 9 and 10 read 0, line 11 as stated, and line 12 40 of 40
+  and 17 of 17 with nothing printed; the check v2 by hand (`check_day2_v2.py tree --pull`) 0; E185's step 2 v5 0 and 0; E183's step
+  2 v4 0; E186's step 2 v2 0; beside them, all 0: the check v1, E185's v4, E183's v3 and E186's history checks v1 and v2; 160 lists,
+  5,372 entries, 5,355 OK (the 17 others E85's code list); 0 box calls.
+- **This fix's own checks** (desk checks of code): before this commit the same commit was made in a scratch clone, never pushed, where
+  day 2's lines 1–4 and 6 and E186's lines 9–12 read as stated, and the check v2, E185's step 2 v5 (twice), E183's step 2 v4 and
+  E186's step 2 v2 each read 0, with no box call; 160 lists, 5,372 entries, 5,355 OK. Neither file this fix edits (02 and 05) lies in
+  any of the day's perimeters (the check v1's 139 paths and v2's 598; E186's history checks' 60 and 506), and no tracked hash list
+  names one.
+- **Not yet done:** a verifier of this fix; day 2 and E186, each on the owner's go with a fresh lab approval for aifoundry3.
 
 ## Ridge points (derived; no card time)
 
