@@ -4901,8 +4901,29 @@ note does. Each line below is a dated clause of these records:
   above); the entry these records move, of 2 November on E135's records, carries the same link, and it stays as written.
 - **The second candidate list's file:** from these records on, the text names it as E186's A1-3 does, "its file stem"; 05's two earlier
   uses stand as written.
-- **Not yet done:** a verifier of these records; chain C's post hoc reading, kept off this repository, and Q159's critic; day 2 and E186,
+- **Not yet done:** a verifier of these records *(dated, Sun 8 Nov 2026, after these records' verifier: done, about 16:47–17:31 PST; it held these records with fixes, one minor fault, in an item on the owner's private page alone, and six nits, none in a measured number, a registered verdict or a frozen file, answered in the dated paragraph below)*; chain C's post hoc reading, kept off this repository, and Q159's critic; day 2 and E186,
   each on the owner's go with a fresh lab approval for aifoundry3.
+
+*(Dated, Sun 8 Nov 2026, after these records' verifier; Q159's fix.)* The verifier (about 16:47–17:31 PST, desk only, 0 card-minutes) re-read
+these records' commit `2d14b6c7` against `565523d3`, the figures they quote against the committed files, the kinds page and the owner's
+private pages, and re-ran day 2's and E186's lines and checks for real at `2d14b6c7`, each reading as stated (desk checks of code). It
+held them with fixes: one minor fault, in an item on the owner's private page alone, rewritten there, and six nits, none in a measured
+number, a registered verdict or a frozen file. Each line below is a dated clause of these records; every earlier word stays as written.
+
+- **R3 − R4, read as a train** (correction (c) above, and 03's E186 entry): E182's T5 is the R3 − R4 contrast measured as an A B B A
+  train, +0.2359 W [+0.2299, +0.2419]; the two kinds' own levels, K10 8.7665 W and K21 8.5584 W, differ by 0.208 W, which E182's kinds
+  pass reads as +0.1995 W [+0.1742, +0.2247] (`0f6a8c45`; the train is E182-F's registered reading, blind, and the kinds pass E182-K's,
+  reported; post hoc here).
+- **Three more of the round critic's gaps**, none blocking, beside the six in the readiness line above: the day-2 check v2's closure
+  list is a run-time trace, so a code path no desk test reached could open a file outside it (E185's kit note 4 says so); E185-C is weak
+  if the cool-down's noise is σ_c, and M11's HM-LG at k = 2 reads NOT SEPARATED in 97–100% of draws under no effect, arm B's gain or the
+  rail chain (E185.md section 7, its registered power); and E186's history checks see no untracked file outside its core directories
+  (E186's kit note 1, section 4).
+- **The kinds page** now cites [E180's dated note M1](../../tools/claims-v3/e180/E180.md.dated-note-M1.md) (`b38d09e3`, Fri 6 Nov
+  09:49:37 PST, before E180's first datum) where it says october-forecast-model's forecasts were frozen before each run's first datum; it
+  cited E180's data note 2, written after the data.
+- **Not yet done:** chain C's post hoc reading, kept off this repository, and Q159's critic; day 2 and E186, each on the owner's go with a
+  fresh lab approval for aifoundry3.
 
 ## Ridge points (derived; no card time)
 

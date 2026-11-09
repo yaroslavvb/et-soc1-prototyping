@@ -8680,6 +8680,10 @@ before every freeze, 4 passes each, are K09 (fp32 ones) 8.4055 W and K37 1.6586 
 figure, or a kind whose check of C failed, as "not read" and writes strict json; step 11 v4 runs it through a gate v2 (the runbook's
 desk test 14 of 14), and kit note 4, section 3, corrects kit note 3: a change to note M2's files stops step 2 and step 11 v2 with 16
 from the history check, never "M2 NOT READ". **Registered and kitted, not run; 0 card-minutes;** no E186 datum is in any ref.
+*(Dated, Sun 8 Nov 2026, after these records' verifier.)* "R3 − R4 = K10 − K21 is E182's T5" above names the contrast, not a
+difference of the two levels: E182's T5 measured R3 − R4 as an A B B A train, +0.2359 W [+0.2299, +0.2419]; K10's and K21's own levels,
+8.7665 W and 8.5584 W, differ by 0.208 W, and E182's kinds pass reads that contrast as +0.1995 W [+0.1742, +0.2247] (`0f6a8c45`: the
+train is E182-F's registered reading, blind, and the kinds pass E182-K's, reported; post hoc here).
 **Report:** the kinds page (A25), section 11, item 6.
 
 **M12, M10 refitted post hoc on E182's rows, beside the register** *(dated, Sun 8 Nov 2026, Q154–Q158's records)* (Q157 and Q158a;
