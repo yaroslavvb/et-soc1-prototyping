@@ -5071,7 +5071,7 @@ Each claim is labelled **blind** (measured on a run whose rules and forecasts we
 - **The int8 price per held bit** moves with the word on A's side only: β_A +0.0054 at product 3 and +0.0107 at 63, the intervals apart, while β_B's two readings, +0.0141 and +0.0129, agree within their intervals.
 - **E186-S23R** DIFFERS LOW by the registered rule, with a 0.000065 W gap between intervals from two sessions.
 - **Logins:** "no login is named in any file" means that no other account's login is named; the owner's own box login stands in 56,407 home paths, the reviewed class the README's privacy section counts.
-- **The first wait call** has a probe line (12:41:17 PST) and no wait line in the runbook's log; it was stopped at about 12:45:50, and the next call, at 12:46:05, carried the waits on (so `b880ed63`'s "stopped at the desk and re-made" reads).
+- **The first wait call** has a probe line (12:41:17 PST) and no wait line in the runbook's log; it was stopped at about 12:45:50, and the next call, at 12:46:05, carried the waits on (so `b880ed63`'s "stopped at the desk and re-made" reads). *(dated, Mon 9 Nov 2026, after these records' verifier: that is, read `b880ed63`'s "stopped at the desk and re-made" as this account: the call was stopped, and the next call carried the waits on, as the data's dated note 1, item 5, says)*
 - **A2-3's sentence** on day 2's checks was committed at 12:26:15 PST, after the scratch clone's run (12:25:02–12:25:55) and before the lab clone's (12:26:25–12:27:07), which then read 0 as it says.
 - **A2-2** holds as written: Q158's arms verifier read `e8e9f4e1` (the kit's note 2) and re-ran its tests; its result does not quote that note's text (a nit).
 - **The release:** 14:19:41 PST by the channel's own edit time (the lane's save ran 14:19:37–14:19:43).
@@ -5103,7 +5103,30 @@ shasum -a 256 -c tools/claims-v3/e186/SHA256SUMS-e186-a2    10 of 10 OK, from th
 - **Process, Q161**, none safety-related, one line per lane: the claim: one inline loop of a name check (it ran no shell) and one sub-second read outside the round's local slot, and A2-3's sentence committed between the scratch and lab clones' runs (above); the card lane: step 10's first wait call stopped at the desk (above), sub-second helpers outside the slot, one long data check moved to the background (rc 0), and the data commit's message loose where the README's departure line is exact; the data verifier: two sub-second reads outside the slot, a fresh-cache check of C found stopped and ended with no verdict file, and one scan pattern broken by its own edit, the word counted another way; the fix pass: the desk machine's load guard paused three of its jobs, one scratch clone's push address pointed at the shared lab clone for about 12 minutes before it was disabled, with nothing pushed, and no Python check re-run after its commit (its tree is the checked one, by git's tree hash); the critic: two exports of the commit without the scale route's inputs, which failed closed, before a full one reproduced every file, and 12 interval ends that differ from the kit's by 5e-12 to 1e-9 W in its own code (a fractional degrees-of-freedom quantile; every mean, se and word equal). Nothing of ours was left running on the box.
 - **These records' own gate** (desk checks of code): this commit was made only after the same commit, in a scratch clone never pushed, read day 2's lines 1–4 and 6 as stated, and the check v2 (`check_day2_v2.py tree --pull`), E185's step 2 v5 and E183's step 2 v4 each 0, with no box call. None of the seven files these records edit lies in any of the day's perimeters (the day-2 check v1's 139 paths and v2's 598; E186's history checks' 60 and 506), and no tracked hash list names one.
 - **A link left as moved, once more:** the entry these records move from the agents file's changelog, of 3 November on Q138's records, carries the same link to `docs/agent-changelog-archive.md`, and it stays as written.
-- **Not yet done:** a verifier of these records, and a fix pass if it finds faults; the check of day 2's readiness at the final head; day 2 on the owner's fresh approval for aifoundry3.
+- **Not yet done:** a verifier of these records, and a fix pass if it finds faults; the check of day 2's readiness at the final head; day 2 on the owner's fresh approval for aifoundry3. *(dated, Mon 9 Nov 2026, after these records' verifier: the verifier is done, about 18:23–19:01 PST; it held these records with fixes, one minor fault and five nits, none in a measured number, a registered verdict, a frozen file or one of the day's perimeters, answered in the dated paragraph below)*
+
+*(Dated, Mon 9 Nov 2026, after these records' verifier; Q162's fix.)* The verifier (about 18:23–19:01 PST, desk only, 0 card-minutes)
+re-read these records' commit `8ef1e29a` against `c7786e5d` character by character, re-derived the verdicts and figures they quote from
+`D6/scored-e186.json` and the committed data, read the kinds page and the owner's private pages, and re-ran day 2's lines and checks for
+real at `8ef1e29a`, each reading as stated (desk checks of code). It held these records with fixes: one minor fault and five nits, none
+in a measured number, a registered verdict, a frozen file or one of the day's perimeters. Each line below is a dated clause of these
+records; every earlier word stays as written.
+
+- **S23R's gap** (the minor fault): 02's Q161 row gave E186-S23R's DIFFERS LOW without its 0.000065 W gap, which (127) carries; a dated
+  clause there now gives it, labelled post hoc as above. This section's table, (127) and its wording line had it.
+- **The first wait call** (a nit): the wording line above ended on the data commit's phrase without saying how it reads; a dated clause
+  there now says, as the data's dated note 1, item 5, does.
+- **The other nits:** three in items on the owner's private page alone, answered there, and one in a character count in the records
+  lane's own return, which no file here carries.
+- **The verifier's re-runs** (desk checks of code, for real at `8ef1e29a`, with stand-in windows written that day in scratch output
+  directories and stand-in box commands that refuse every call): day 2's lines 1 and 2 read 0, line 3 as stated, line 4 20 of 20 and
+  19 of 19, line 6 nothing; the check v2 by hand (`check_day2_v2.py tree --pull`) 0; E185's step 2 v5 0; E183's step 2 v4 0; E186's
+  later anchor line as stated (376, 6 and 10 OK); 163 lists, 5,764 entries, 5,747 OK (the 17 others E85's code list); 0 box calls.
+- **This fix's own checks** (desk checks of code): before this commit the same commit was made in a scratch clone, never pushed, where
+  day 2's lines 1–4 and 6 read as stated, and the check v2, E185's step 2 v5 and E183's step 2 v4 each read 0, with no box call; 163
+  lists, 5,764 entries, 5,747 OK. Neither file this fix edits (02 and 05) lies in any of the day's perimeters (the check v1's 139 paths
+  and v2's 598; E186's history checks' 60 and 506), and none of the 2,598 tracked list files names one.
+- **Not yet done:** the check of day 2's readiness at the final head; day 2 on the owner's fresh approval for aifoundry3.
 
 ## Ridge points (derived; no card time)
 
