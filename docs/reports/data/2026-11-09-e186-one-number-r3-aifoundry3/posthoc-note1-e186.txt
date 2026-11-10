@@ -1,0 +1,49 @@
+E186's data README, dated note 1: post hoc figures from this directory's committed files (posthoc_note1_e186.py)
+inputs: README.md (as text), trains-e186.json, scored-e186.json, tools/claims-v3/e186/forecast-e186.json (the candidates' rates)
+
+## 0. The README lines the note cites (each found by its anchor on its first line; the lines' text is not copied)
+lines 74-76 (plain words: the int8 price per held bit): anchor 'the price per bit moves with' FOUND on line 74
+lines 77-78 (plain words: E186-S23R): anchor 'Moving 16 bits costs less than 16/23' FOUND on line 77
+lines 96-98 (reported beside: rates against the candidates'): anchor "Each train's lines at s = 1" FOUND on line 96
+lines 99-99 (reported beside: the head of the arms' bullet): anchor "**october-forecast-model's arms**" FOUND on line 99
+lines 100-101 (reported beside: the note M1 sub-bullet): anchor '**Note M1, v4**' FOUND on line 100
+lines 102-104 (reported beside: the note M2 sub-bullet): anchor '**Note M2**' FOUND on line 102
+lines 103-104 (reported beside: the passage set aside, from): anchor "Each arm's" FOUND on line 103
+lines 106-111 (reported beside: the arms table): anchor '| arm | trains read |' FOUND on line 106
+lines 113-113 (reported beside: the arms table's parenthesis): anchor "(error = the arm's" FOUND on line 113
+lines 117-123 (the readings, labelled): anchor '**Blind:**' FOUND on line 117
+lines 170-172 (departures: the first wait call): anchor '**The first wait call was stopped at the desk.**' FOUND on line 170
+lines 208-208 (card and post: the login sentence): anchor 'No login is named in any file.' FOUND on line 208
+lines 245-245 (files: note M1's row): anchor '| `arm-m1-e186.json`' FOUND on line 245
+lines 246-246 (files: note M2's row): anchor '| `arm-m2-e186.json`' FOUND on line 246
+lines 259-262 (what it does to predicting power: M12's structure): anchor "**M12's structure carries" FOUND on line 259
+lines 260-260 (what it does to predicting power: beta_A alone): anchor 'beta_A 0.0054 at product 3' FOUND on line 260
+lines 261-261 (what it does to predicting power: S23R's clause): anchor 'moving 16 bits costs less than 16/23' FOUND on line 261
+lines 263-265 (what it does to predicting power: the bullet set aside): anchor '**october-forecast-model (reported):**' FOUND on line 263
+lines 266-266 (what it does to predicting power: the last bullet): anchor '**E186 is the first blind test' FOUND on line 266
+README.md: 268 lines
+
+## 1. Each train's measured rate over the candidates' rate for its type (README lines 96-98; fault 2)
+candidates' rates (forecast-e186.json > rates_per_s): fp16 1.117241e+09, fp32 1.117211e+09, int8 1.920619e+09 TensorFMA ops a second
+H16       fp16  measured 1.118960e+09, candidates' 1.117241e+09, ratio 1.001538; the scorer used 1.118960e+09 (the measured rate, exactly)
+S23       fp32  measured 1.119048e+09, candidates' 1.117211e+09, ratio 1.001644; the scorer used 1.119048e+09 (the measured rate, exactly)
+Q63-sign  int8  measured 1.921254e+09, candidates' 1.920619e+09, ratio 1.000331; the scorer used 1.921254e+09 (the measured rate, exactly)
+Q63-swap  int8  measured 1.921245e+09, candidates' 1.920619e+09, ratio 1.000326; the scorer used 1.921245e+09 (the measured rate, exactly)
+B15-B7    fp32  measured 1.119052e+09, candidates' 1.117211e+09, ratio 1.001647; the scorer used 1.119052e+09 (the measured rate, exactly)
+B23-B15   fp32  measured 1.118976e+09, candidates' 1.117211e+09, ratio 1.001580; the scorer used 1.118976e+09 (the measured rate, exactly)
+Q3-sign   int8  measured 1.921175e+09, candidates' 1.920619e+09, ratio 1.000290; the scorer used 1.921175e+09 (the measured rate, exactly)
+Q3-swap   int8  measured 1.921200e+09, candidates' 1.920619e+09, ratio 1.000303; the scorer used 1.921200e+09 (the measured rate, exactly)
+A15-A7    fp32  measured 1.119050e+09, candidates' 1.117211e+09, ratio 1.001646; the scorer used 1.119050e+09 (the measured rate, exactly)
+A23-A15   fp32  measured 1.119056e+09, candidates' 1.117211e+09, ratio 1.001652; the scorer used 1.119056e+09 (the measured rate, exactly)
+float: 6 trains; ratio 1.00154 (H16) to 1.00165 (A23-A15), to 4 decimals 1.0015-1.0017; the README prints 1.0016-1.0017: DIFFERS. Rates 1.11896e9-1.11906e9; the README prints 1.11896e9-1.11906e9: OK
+int8: 4 trains; ratio 1.00029 (Q3-sign) to 1.00033 (Q63-sign), to 4 decimals 1.0003; the README prints 1.0004: DIFFERS. Rates 1.92117e9-1.92125e9; the README prints 1.92117e9-1.92125e9: OK
+the scorer's lines used each train's measured rate, exactly: 10 of 10 trains (so no rule reads the README's rounded ratios)
+
+## 2. beta_A and beta_B at products 3 and 63 (README lines 74-76; fault 4a)
+beta_A: product 3 +0.00544 [+0.00325, +0.00763], product 63 +0.01071 [+0.00912, +0.01230] W a held 1-bit a byte; the 95% intervals ARE APART. Post hoc arithmetic, no rule reads it: 63 less 3 +0.0053 W, se 0.0013 (the two products' trains are separate blocks), z +3.9
+beta_B: product 3 +0.01406 [+0.01102, +0.01709], product 63 +0.01285 [+0.01057, +0.01513] W a held 1-bit a byte; the 95% intervals OVERLAP. Post hoc arithmetic, no rule reads it: 63 less 3 -0.0012 W, se 0.0019 (the two products' trains are separate blocks), z -0.6
+verdicts as scored: E186-SPLIT3 A+B, E186-SPLIT63 A+B
+
+## 3. E186-S23R: S23 x 23/16 against E182's T5 (README lines 77-78 and 261; fault 4b)
+S23 +0.1545 [+0.1491, +0.1599] W; times 23/16 +0.22209 [+0.21438, +0.22979] (half-width 0.0077); E182's T5 +0.23589 [+0.22986, +0.24192]
+the gap, T5's lower end less the scaled upper end: +0.000065 W (0.84% of the scaled half-width); the intervals do not overlap: DIFFERS LOW as scored
