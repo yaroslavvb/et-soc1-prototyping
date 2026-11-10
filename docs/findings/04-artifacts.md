@@ -1487,6 +1487,18 @@ clause of 7 November says), as each lane counted them: 155 lists, 5,297 of 5,314
 `f349d11d` and at `d04d36ae`; 160, 5,355 of 5,372 at `565523d3`; and, counted by these records on their own commit over `565523d3`,
 160 lists, 5,372 entries, 5,355 OK, the 17 not OK E85's code list alone. No E183, E185 or E186 datum is in any ref.
 
+## Q161 published no new page: E186's amendment A2, its data and the data's dated note 1 (9 November 2026)
+
+These commits built **no new space**: Q161's three commits add 386 files and edit none (`1456f6d8` to `c7786e5d`, over `e633b20f`). The table gives each commit with git's own time (PST, Mon 9 Nov), its lane, the files it holds and their count. The short names are the ones [05-claims.md](05-claims.md), "Q161", uses. *(Recorded by Q162's records, Mon 9 Nov 2026.)*
+
+| Commit (git's time, PST) | Round | The files (where) | Files |
+|---|---|---|---|
+| `1456f6d8` (12:26:15) | Q161, the claim | under [`tools/claims-v3/e186/`](../../tools/claims-v3/e186/E186.md.dated-amendment-A2.md): `E186.md.dated-amendment-A2.md`, `KIT-BRIEF.md.dated-note-4.md` and `SHA256SUMS-e186-a2` (10 entries, sha256 `b7a940b2…`) | 3 |
+| `b880ed63` (14:40:13) | Q161, the card lane | [`docs/reports/data/2026-11-09-e186-one-number-r3-aifoundry3/`](../reports/data/2026-11-09-e186-one-number-r3-aifoundry3/README.md): step 11 v4's collection and score as it left them (376 files: the ten trains, the smoke and the stop-path test as the box wrote them, the check of C, the pairing check, the reductions, the scorer's output and october-forecast-model's arm files), `README.md` and `SHA256SUMS` (376 entries, sha256 `7eaf01e5…`) | 378 |
+| `c7786e5d` (16:39:56) | Q161, the fix pass | in the same directory: [`README.md.dated-note-1.md`](../reports/data/2026-11-09-e186-one-number-r3-aifoundry3/README.md.dated-note-1.md), `posthoc_note1_e186.py`, `posthoc-note1-e186.txt`, `posthoc-note1-e186.json` and `SHA256SUMS-note1` (6 entries, sha256 `f430d869…`) | 5 |
+
+Two of the three carry "Q161" in their subjects; the data commit's subject names E186 and the owner's go (A2). **The hash lists** (every tracked file whose name holds SHA256SUMS; the only misses, every time, are E85's code list, whose 17 entries match their files under `tools/claims-v3/hlc`, `hlk` and `hm`): 163 lists, 5,747 of 5,764 entries OK at `c7786e5d` (the fix pass's count and the critic's), the 17 not OK E85's code list alone. E186's data is in these two commits; no E183 or E185 datum is in any ref.
+
 ## The camera and the details panel (30 September)
 
 For Q74–Q76: the memory levels and the chip diagram (the pages of 28 and 27 September) jumped in the middle of their

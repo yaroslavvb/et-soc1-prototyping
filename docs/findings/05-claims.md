@@ -4640,7 +4640,7 @@ list"**, never the export's file stem; (123) git's commit times, never a watcher
 
 - **E184's arm S** (0.75 card-minutes, its smoke gate): no reading of E184-L, -P, -N, -J or -C; the meter's linearity and the 0.29
   question are not measured.
-- **E183, E185 and E186:** registered and kitted, no datum in any ref. Day 2 (E185, then E183) and E186 wait on the owner's go.
+- **E183, E185 and E186:** registered and kitted, no datum in any ref. Day 2 (E185, then E183) and E186 wait on the owner's go. *(dated, Mon 9 Nov 2026, Q162's records: E186 ran on 9 November, blind, before day 2, on the owner's go of that morning (section "Q161" below); E183 and E185 are still registered and kitted, with no datum in any ref, and day 2 is set for Tue 10 Nov 2026 on the owner's fresh approval for aifoundry3.)*
 
 ### Wording, quoted only as corrected
 
@@ -5029,7 +5029,81 @@ these records; every earlier word stays as written.
   E186's step 2 v2 each read 0, with no box call; 160 lists, 5,372 entries, 5,355 OK. Neither file this fix edits (02 and 05) lies in
   any of the day's perimeters (the check v1's 139 paths and v2's 598; E186's history checks' 60 and 506), and no tracked hash list
   names one.
-- **Not yet done:** a verifier of this fix; day 2 and E186, each on the owner's go with a fresh lab approval for aifoundry3.
+- **Not yet done:** a verifier of this fix; day 2 and E186, each on the owner's go with a fresh lab approval for aifoundry3. *(dated, Mon 9 Nov 2026, Q162's records: no verifier has read this fix's own text (`e633b20f`), and day 2's lines read as stated at every later commit; E186 ran on 9 November, before day 2 (section "Q161" below); day 2 waits on the owner's fresh approval, set for Tue 10 Nov 2026.)*
+
+## Q161: E186 blind on aifoundry3, before day 2 by its amendment A2, and the data's dated note 1 (Mon 9 Nov 2026, week 46; on the owner's go of about 11:52 PST)
+
+Each claim is labelled **blind** (measured on a run whose rules and forecasts were committed before its first datum), **registered** (committed before any datum of its run), **held out** (read on rows its fit never used), **reported** (an arm read beside a rule, never a verdict), **post hoc** (read on data that existed first, deciding nothing) or **not run**. No committed verdict changes; M10, M12 and every frozen file stay as committed. Short names: `X6/` is `tools/claims-v3/e186/` and `D6/` `docs/reports/data/2026-11-09-e186-one-number-r3-aifoundry3/`. The owner's words of that morning are in 02's Q161 row. 🛑 **To carry from here:** (124) **october-forecast-model's E186 arms only as `D6/arm-m1-e186.txt` and `D6/arm-m2-e186.txt` commit them**, never the README's three passages that its dated note 1 sets aside, and no summary or score of the model; (125) **the measured rates are 1.0015–1.0017 (floats) and 1.0003 (int8) of the candidates'**, never 1.0016–1.0017 and 1.0004; (126) **of the int8 prices per held bit only β_A's move with the word is resolved** (β_B's two intervals overlap); (127) **E186-S23R DIFFERS LOW by 0.000065 W**, 0.84% of its half-width, across two sessions; (128) **"no other account's login is named"**: the owner's own box home path is the reviewed class, 56,407 times; (129) **the first wait call** has a probe line at 12:41:17 and no wait line, was stopped at about 12:45:50, and the next call (12:46:05) carried the waits on; (130) **A2-3's sentence on day 2's checks** was committed at 12:26:15, between the scratch clone's run and the lab clone's, which then read 0; (131) **A2-2 holds as written**: Q158's arms verifier read `e8e9f4e1` and re-ran its tests; (132) **the release's time is 14:19:41 PST**, by the channel's own edit time; (133) **98.2 card-minutes** against the go's "about 93" (cap 100; 89–99 at E182's measured block times).
+
+### Blind, measured on 9 November (E186; aifoundry3 card 0 at 600 MHz pinned)
+
+| What | Reading | Forecast, frozen first | Verify at |
+|---|---|---|---|
+| **E186-H16**, the fp16 swap | +0.2031 W [+0.1978, +0.2084], POSITIVE: **F16-SAME** | M12's F16-SAME +0.2051 (se 0.0026), PASS; the fp16-scaled arm +0.1019 (se 0.0176) and M10's 0, FAIL LOW | `D6/scored-e186.json`, `D6/results-e186.md` |
+| **The nine other trains' WHICH** | **M12** on Q63-swap, B15-B7, B23-B15, Q3-sign and A23-A15; **NEITHER** on S23 (M12 FAIL HIGH), Q63-sign, Q3-swap and A15-A7 (M12 FAIL LOW); M10 on none; every SIGN POSITIVE | M12's and M10's lines at the session's s and each train's measured rate | |
+| **E186-GB, E186-GA**, fp32's held mantissa bit | B +0.01387 [+0.01345, +0.01429], A +0.00421 [+0.00373, +0.00469] W a held bit: POSITIVE, SIZE M12 PASS, M10 FAIL LOW | M12 +0.01328 and +0.00303 (se 0.00086); M10 0 | |
+| **E186-SPLIT3, E186-SPLIT63** | **A+B** at both products: β_A +0.00544 and +0.01071, β_B +0.01406 and +0.01285 W a held bit a byte | M12 +0.00839 / +0.00986 (se 0.00023); M10 B-ONLY (0, +0.01570) | |
+| **E186-S23R** | **DIFFERS LOW**: S23 × 23/16 [+0.21438, +0.22979] against E182's T5 [+0.22986, +0.24192] | that the two intervals overlap (E186.md's rule) | |
+| **E186-M**, nine trains | **NEITHER**: M12 Q 32.48, M10 Q 10,229.8 | χ²(9)'s 95% point, 16.92 | |
+| E186-TR-N, E186-C, E186-PAIR, E186-LV | AS FORECAST (1.022 int8, 1.035 float); 10,462 of 10,462 bit-exact, PASS; 9,968 of 9,968 paired, PASS; NOT SCORED (FULL) | at most 1.25; every launch; every train record; FULL runs no kinds pass | |
+
+### Reported, never verdicts
+
+- **The joint words over all ten trains and by family** (`D6/scored-e186.json` > `reported`): NEITHER over ten, M12 Q 32.78 against χ²(10)'s 18.31, M10 16,268; float M12 18.63 against 12.59, int8 14.15 against 9.49 (M10 14,543 and 1,725). γ_B / γ_A 3.29 (M12's ratio 4.4). Each train's lines at s = 1 and the candidates' rates.
+- **october-forecast-model's arms** (notes M1 and M2, frozen and committed before T0): note M1's v4 reads nothing (it covers none of the ten trains, and FULL reads no kind); note M2's reader v2 read the four arms (M2-READ). They stand as `D6/arm-m1-e186.txt` and `D6/arm-m2-e186.txt` commit them, never as a verdict.
+
+### Post hoc
+
+- **The lines' error** (arithmetic on blind lines that no rule reads): M12 0.0087 W rms over the ten trains (0.0091 over E186-M's nine), M10 0.102 (0.084), so M12's lines sit about twelve times closer.
+- **The product differences** (`D6/posthoc-note1-e186.txt`): β_A at product 63 less product 3, +0.0053 W (se 0.0013, z +3.9); β_B, −0.0012 W (se 0.0019, z −0.6).
+- **S23R's gap**, 0.000065 W, 0.84% of the scaled interval's 0.0077 W half-width.
+- **E186-M without the scale** (the critic's): over A1-1's five trains that no s touches (S23, Q63-sign, Q63-swap, Q3-sign and Q3-swap), M12's Q is 22.24 against χ²(5)'s 11.07, so its NEITHER does not depend on s.
+- **The data's dated note 1's figures** (`D6/posthoc-note1-e186.txt` and `.json`): the rates, the betas' intervals and S23R's margin.
+
+### Not run
+
+- **E183 and E185:** registered and kitted, not run, no datum in any ref; day 2 (E185, then E183) is set for Tue 10 Nov 2026 on the owner's fresh approval for aifoundry3. E186's running first changes no input of any of their rules (A2-3).
+- **E187:** reserved for E186's reserve trains, not registered.
+
+### Wording, quoted only as corrected
+
+- **The rates:** the measured rates are 1.0015–1.0017 of the candidates' for the float trains and 1.0003 for the int8 trains (the data's dated note 1, section 2); the printed rates hold, and the scorer used each train's measured rate exactly.
+- **The int8 price per held bit** moves with the word on A's side only: β_A +0.0054 at product 3 and +0.0107 at 63, the intervals apart, while β_B's two readings, +0.0141 and +0.0129, agree within their intervals.
+- **E186-S23R** DIFFERS LOW by the registered rule, with a 0.000065 W gap between intervals from two sessions.
+- **Logins:** "no login is named in any file" means that no other account's login is named; the owner's own box login stands in 56,407 home paths, the reviewed class the README's privacy section counts.
+- **The first wait call** has a probe line (12:41:17 PST) and no wait line in the runbook's log; it was stopped at about 12:45:50, and the next call, at 12:46:05, carried the waits on (so `b880ed63`'s "stopped at the desk and re-made" reads).
+- **A2-3's sentence** on day 2's checks was committed at 12:26:15 PST, after the scratch clone's run (12:25:02–12:25:55) and before the lab clone's (12:26:25–12:27:07), which then read 0 as it says.
+- **A2-2** holds as written: Q158's arms verifier read `e8e9f4e1` (the kit's note 2) and re-ran its tests; its result does not quote that note's text (a nit).
+- **The release:** 14:19:41 PST by the channel's own edit time (the lane's save ran 14:19:37–14:19:43).
+- **Card-minutes:** 98.2 against the go's "about 93" (cap 100); E182's measured block times gave 89–99.
+
+### The data verifier's and the critic's findings, one line each
+
+- **The data verifier** (about 14:44–15:30 PST): holds with fixes. 1 major, not blocking: three README passages summed october-forecast-model's arms up as a score, against the tier, with two slips in one of them (S23 is the 16-bit fp32 order swap, not a small swap; v4 on M12's set reads nine trains); 3 minor: the README's rate ratios, A2-2's sentence on its verifiers, and β_B's move with S23R's margin; 2 nits: A2-3's order, and "no login" with the data commit's "stopped ... and re-made". The fix pass answered faults 1, 2 and 4–6 in the data's dated note 1 and did not take fault 3; the critic upheld that.
+- **The critic** (about 16:48–17:2x PST): THE DAY HOLDS. Its findings: (a) A2-2 holds (Q158's arms verifier lists `e8e9f4e1` among the commits it read and re-ran its tests; its result does not quote the kit's note 2's text, a nit); (b) E186-M's NEITHER does not depend on s: over A1-1's five s-free trains M12's Q is 22.24 against χ²(5)'s 11.07 (post hoc; no rule reads it); (c) the session scale's route reads 49 directories outside E186's (pool 8's predictor and freeze, M10's and the lists they name): a partial export read "s not read", fail closed as A1-1 and the kit say, and the full set reproduced every file; (d) a pause of the desk machine's load guard turned E183's step 2 v4 into a 16 on the fix pass's scratch run, a hazard for day 2; (e) since 15:04 PST #community-lab has gained three messages that are not card posts, one from the owner's account at 15:42:30 PST, which no Q161 lane's record names, and two from another account at 17:08; the day's one card post stands.
+
+### The counts
+
+At `c7786e5d`: 163 lists, 5,764 entries, 5,747 OK; the 17 others are E85's code list, 17 of 17 matching under `tools/claims-v3/{hlc,hlk,hm}`. `D6/SHA256SUMS` 376 of 376 and `D6/SHA256SUMS-note1` 6 of 6; A2's list 10 of 10. Since `e633b20f`: 3 commits, 386 files added, none edited. No E183 or E185 datum is in any ref; E186's data is in two commits, `b880ed63` and `c7786e5d`.
+
+### The go lines, and E186's anchor line for later runs
+
+- **Day 2's lines are unchanged** since `e8e9f4e1` and true at `c7786e5d` (the critic's check): commit `e8e9f4e1c5c0407e7e29268c378d3c26d899433c`; `SHA256SUMS-e185-kit-note4` `d96616c1…`, 20 of 20 OK; `SHA256SUMS-e183-kit-note3` `3b472e38…`, 19 of 19 OK; no E185 or E183 datum in any ref.
+- **E186's line 12** ("no E186 data in any ref") is superseded since `b880ed63`. For any later run that reads E186's data, the anchor line is:
+
+```
+git merge-base --is-ancestor c7786e5d7c7861e1d39857ede0a6f71cd8815c78 HEAD    (exit 0)
+(cd docs/reports/data/2026-11-09-e186-one-number-r3-aifoundry3 && shasum -a 256 -c SHA256SUMS)    376 of 376 OK; the list's own sha256 7eaf01e5aff31a000d7294a8c1f853574c2c29b25cc5a6ada0fb15304e6c4ad6
+(cd docs/reports/data/2026-11-09-e186-one-number-r3-aifoundry3 && shasum -a 256 -c SHA256SUMS-note1)    6 of 6 OK; its own sha256 f430d8695609ed8fe1b577f4e6cbb866d83e1e94736b6df6307d95367d0fd2c1
+shasum -a 256 -c tools/claims-v3/e186/SHA256SUMS-e186-a2    10 of 10 OK, from the lab's top; its own sha256 b7a940b27092782ea7b7f54ee0f4662a139c5afc409cf7b4e58c9edf37dfc518
+```
+
+### Disclosures
+
+- **Process, Q161**, none safety-related, one line per lane: the claim: one inline loop of a name check (it ran no shell) and one sub-second read outside the round's local slot, and A2-3's sentence committed between the scratch and lab clones' runs (above); the card lane: step 10's first wait call stopped at the desk (above), sub-second helpers outside the slot, one long data check moved to the background (rc 0), and the data commit's message loose where the README's departure line is exact; the data verifier: two sub-second reads outside the slot, a fresh-cache check of C found stopped and ended with no verdict file, and one scan pattern broken by its own edit, the word counted another way; the fix pass: the desk machine's load guard paused three of its jobs, one scratch clone's push address pointed at the shared lab clone for about 12 minutes before it was disabled, with nothing pushed, and no Python check re-run after its commit (its tree is the checked one, by git's tree hash); the critic: two exports of the commit without the scale route's inputs, which failed closed, before a full one reproduced every file, and 12 interval ends that differ from the kit's by 5e-12 to 1e-9 W in its own code (a fractional degrees-of-freedom quantile; every mean, se and word equal). Nothing of ours was left running on the box.
+- **These records' own gate** (desk checks of code): this commit was made only after the same commit, in a scratch clone never pushed, read day 2's lines 1–4 and 6 as stated, and the check v2 (`check_day2_v2.py tree --pull`), E185's step 2 v5 and E183's step 2 v4 each 0, with no box call. None of the seven files these records edit lies in any of the day's perimeters (the day-2 check v1's 139 paths and v2's 598; E186's history checks' 60 and 506), and no tracked hash list names one.
+- **A link left as moved, once more:** the entry these records move from the agents file's changelog, of 3 November on Q138's records, carries the same link to `docs/agent-changelog-archive.md`, and it stays as written.
+- **Not yet done:** a verifier of these records, and a fix pass if it finds faults; the check of day 2's readiness at the final head; day 2 on the owner's fresh approval for aifoundry3.
 
 ## Ridge points (derived; no card time)
 
