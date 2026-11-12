@@ -1,0 +1,145 @@
+E183 kit note 4 (Q164; kit-e183n, then fix-kit183 before the land): rb/selftest_rb_e183_v3.sh <scratch dir>, on the Intel through the round's slot, Thu 12 Nov 2026 10:46 PST
+
+scratch repository: 1075 files committed
+
+== A. the dry listing v5: every step exits 0; the look before the post; step 5a before step 5 and step 6; no ssh or rsync call
+dry listing: 14 steps listed, 0 exited non-zero
+-> PASS (A the dry listing v5: 0 steps failing, no call; the look, the post, step 5a, step 5, step 6 in that order)
+
+== K. step 2 v5 with no window in RB_OUT
+[s03_desk_v5_e183] STOP: no window in RB_OUT: run s02_window_e183.sh first (kit v5: s02 before s03)
+-> PASS (K step 2 v5 refuses without step 1's window)
+
+== R0. step 6 v2's start before step 5a: refused, no call
+[s08_a3_build_v2_e183] STOP: no copy of aifoundry3's E183 build records in RB_OUT: run step 5a (rb/s06_a3_records_e183.sh) first; this build rewrites the cmake log, the inputs and tree checks and the 
+-> PASS (R0 no build before the records' copy)
+
+== R1. step 5a on the stand-in box: one probe, ONE rsync, all 11 records, the compiler line, the box unchanged
+[s06_a3_records_e183] the box's compiler, from build/enercat-e183-cmake.log: -- The C compiler identification is GNU 11.4.0;-- The CXX compiler identification is GNU 11.4.0;
+[s06_a3_records_e183] RECORDS COPIED: 11 files of E183's build records into RB_OUT/box-records-e183/ (RECORDS-COPIED lists them and their sha256); nothing on the box was written or moved
+-> PASS (R1 the records copied read-only (11 files at the box's own bytes), the compiler named, the box's build/ unchanged)
+
+== R2. two records absent on the box: COPIED WITH GAPS, the two named
+[s06_a3_records_e183] COPIED WITH GAPS: 9 files of E183's build records into RB_OUT/box-records-e183/ (RECORDS-COPIED lists them and their sha256); not on the box: build/e183-inputs.txt build/q141k/jobs/a3-build-e183.pid
+-> PASS (R2 a partial copy names its gaps and writes the marker)
+
+== R3. a login link at the probe: 11, the lock file appended, no rsync
+[s06_a3_records_e183] STOP: aifoundry3 printed a login link at the probe (lock file appended; link in RB_LINKS): nothing else was called
+-> PASS (R3 a login link stops the copy before it starts)
+
+== R4. the rsync failing otherwise: 14, no marker
+[s06_a3_records_e183] STOP: the records' copy exited 14: rsync exited 12, and only its 23 (a partial transfer) can mean records not on the box; not copied, and not named missing by the box's rsync: bu
+-> PASS (R4 a failed copy writes no marker)
+
+== R5. remote mode, all 11 records on the box: one probe, one transport, 11 files at the box's bytes, the box unchanged
+[s06_a3_records_e183] RECORDS COPIED: 11 files of E183's build records into RB_OUT/box-records-e183/ (RECORDS-COPIED lists them and their sha256); nothing on the box was written or moved
+-> PASS (R5 remote mode: the whole copy, read-only)
+
+== R6. remote mode, two records absent: rsync's 23, each named missing by the box's own rsync: COPIED WITH GAPS
+rsync: [sender] link_stat "<box>/aifoundry3/aifoundry/build/e183-inputs.txt" failed: No such file or directory (2)
+rsync: [sender] link_stat "<box>/aifoundry3/aifoundry/build/q141k/jobs/a3-build-e183.pid" failed: No such file or directory (2)
+[s06_a3_records_e183] rsync's code 23: the box's own rsync names each of these records missing (one 'link_stat ... No such file or directory' line each): build/e183-inputs.txt build/q141k/jobs/a3-buil
+[s06_a3_records_e183] COPIED WITH GAPS: 9 files of E183's build records into RB_OUT/box-records-e183/ (RECORDS-COPIED lists them and their sha256); not on the box: build/e183-inputs.txt build/q141k/jo
+-> PASS (R6 a partial copy, its gaps proven by the box's rsync)
+
+== R7. remote mode, EVERY record absent (verify-kit183's MR4): COPIED WITH GAPS, 0 files, the marker written
+rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1983) [Receiver=3.5.1]
+rsync: [Receiver] write error: Broken pipe (32)
+[s06_a3_records_e183] rsync's code 23: the box's own rsync names each of these records missing (one 'link_stat ... No such file or directory' line each): build/e183-build-logs build/e183-build-attempt
+[s06_a3_records_e183] COPIED WITH GAPS: 0 files of E183's build records into RB_OUT/box-records-e183/ (RECORDS-COPIED lists them and their sha256); not on the box: build/e183-build-logs build/e183-bui
+   (reported) rsync's own lines: receiver's 'write error: Broken pipe' 1; sender's link_stat 10
+-> PASS (R7 nothing on the box: COPIED WITH GAPS (0 files), the marker written, so step 6 v2 can build)
+
+== R8. remote mode, a record on the box that cannot be read: 14, no marker (a gap the box's rsync did not name missing)
+[s06_a3_records_e183] STOP: the records' copy exited 14: not copied, and not named missing by the box's rsync: build/e183-tree-check.txt; other lines: rsync: [sender] send_files failed to open "<scratch>/box/aifoundry3/aifoundry/build/e183-
+-> PASS (R8 a record present but not copied is never read as a gap)
+
+== R9. remote mode, the box's whole tree missing: 14, no marker (rsync's change_dir line, no record named missing)
+[s06_a3_records_e183] STOP: the records' copy exited 14: not copied, and not named missing by the box's rsync: build/e183-build-logs build/e183-build-attempts.txt build/enercat-e183-cmake.log build/e183-inputs.txt build/e183-inputs-build.tx
+-> PASS (R9 no tree on the box: a failed copy, never COPIED WITH GAPS)
+
+== R10. step 5a again in an RB_OUT that already holds RECORDS-COPIED: 16, no call, the marker unchanged
+[s06_a3_records_e183] STOP: RB_OUT/box-records-e183/RECORDS-COPIED is already here (E183's build records copied from aifoundry3:aifoundry/ by s06_a3_records_e183.sh, 2026-11-12 10:46:42 PST; rsync rc 0): step 5a copies once a day, before st
+-> PASS (R10 a second run never overwrites the day's copy)
+
+== R11. remote mode, a login link during the copy's transport (not at the probe): 11, the lock file appended, no marker
+[s06_a3_records_e183] STOP: a login check is needed on aifoundry3 (appended to the lock file; the link is in RB_LINKS): approve, then run this step again
+-> PASS (R11 a link mid-copy stops it)
+-> PASS (R5-R11 the stand-in box's build/ as before them)
+
+== B1. step 5 (v1, unchanged) syncs E183's directory with note 4's files; step 6 V1 with GCC -O2: the host lacks the train change
+[s07_a3_sync_e183] synced to aifoundry3:aifoundry/ every file of harness-e183.json (80 files, in 50 paths)
+E183-BUILD-ATTEMPT 1 today (the day's start 1)
+TRAIN-HOST-BUILD-FAILED rc=1
+[s08_a3_build_e183] STOP: the train host's build failed on aifoundry3 (the lines above; build 1 of at most 2 today): run this step's start once more (the one re-run), then its wait; if that build does not read TRAIN-HOST
+the host lacks the train change
+-> PASS (B1 the sync carries note 4's 8 files; v1's build of a GCC -O2 host fails its own grep (one re-run asked))
+
+== B2. the re-run, by step 6 v2: TRAIN-CHANGE OK, then the four checks
+BUILD INPUTS OK: 40 files match harness-e183.json (37 of workloads/enercat, E180's generator and its text, the patch)
+E183-BUILD-ATTEMPT 2 today (the day's start 2)
+HARNESS OK: 127 files (v1's check: HARNESS OK: 120 files; note 4's 7 box files at their pins)
+TRAIN-CHANGE OK: build/enercat-e183/host/enercat_host accepts --operands-b, --abba and --launches and stops at the empty --kernel (rc 1, before any device call); --list names E180's fadd.ps.acc and fadd.pi.acc (rc 0)
+TRAIN-HOST-BUILT rc=0
+[s08_a3_build_v2_e183] aifoundry3: the train host built by the detached job a3-build-e183 (build v2: TRAIN-CHANGE OK, read from the host's behaviour); BUILD INPUTS OK 40, HARNESS OK with the binaries, the build tree and 
+e183_common rc=0
+harness_e183_v2 rc=0
+preflight_e183_v2 rc=0 dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS (B2 build v2 of the same GCC -O2 host passes (TRAIN-CHANGE OK in its log), HARNESS OK 127, preflight v2 GO; two builds; no device record)
+
+== B3. a third start: refused (a good build today)
+-> PASS (B3 no second build after a good one)
+
+== D. step 8 v2 (the dry pass) on that box: block v2 on the GCC -O2 host, the start gate of session v2
+E183 dry 18301 --smoke rc=0
+E183 dry 18302 --stoptest rc=0
+E183 dry 18310 rc=0
+E183 start gate rc=8 (want 8)
+-> PASS (D job a3-dry-e183 rc 0: 18310 0, the smoke 0, the start gate 8; no network call from the box; no device record)
+
+== S1. step 9 v2's rest rule: E185's form (build/e185/T1794600000/session.log) ending 10 minutes ago
+REFUSED: 10 minutes since E185's session end (2026-11-12 10:37:29 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (S1 under 40 minutes after E185's end: refused, nothing launched)
+
+== S2. step 9 v2's rest rule: E186's form (build/e186/T1794600100/session.log) ending 15 minutes ago
+REFUSED: 15 minutes since E186's session end (2026-11-12 10:32:29 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (S2 under 40 minutes after E186's end: refused, nothing launched)
+
+== S3. step 9 v2's rest rule: E184's form (build/e184/session-S-t1794600200.log) ending 20 minutes ago
+REFUSED: 20 minutes since E184's session end (2026-11-12 10:27:30 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (S3 under 40 minutes after E184's end: refused, nothing launched)
+
+== S4. all three ended 41 minutes ago or more: the rest line, then the next gate (the dry pass made yesterday's for this case)
+rest: 41 minutes since E185's session end (2026-11-12 10:06:30 PST; dry sessions and blocks that opened no device skipped)
+REFUSED: E183's dry pass (s10_a3_dry_e183.sh) has not ended rc 0 today
+[s11_a3_session_v2_e183] STOP: e183 refused on the box: REFUSED: E183's dry pass (s10_a3_dry_e183.sh) has not ended rc 0 today
+-> PASS (S4 the rest rule passes (41 minutes) and the launch's next gate refuses: nothing launched)
+
+== P. step 2 v5's own checks on a scratch repository (step 2 v4 a stand-in there; a stand-in note 4 list pinned in v5's copy)
+P's repository: 443 files; the stand-in note 4 list: 25 entries
+[s03_desk_v5_e183] reported; SHA256SUMS-e183-m1 25 OK of 25 (pinned 25), own bytes as pinned (reported); SHA256SUMS-e183-m2 9 OK of 9 (pinned 9), own bytes as pinned (reported)
+[s03_desk_v5_e183] desk check v5: step 2 v4 passed, then on the same HEAD c83523c7b814 E183's lists by SHA256SUMS anywhere in a name: the six gate lists at their counts, own bytes and entries (note 4's 25 among them), the brief's count and bytes, notes M1's an
+-> PASS (P1 step 2 v5 passes at its pins)
+[s03_desk_v5_e183] reported; SHA256SUMS-e183-m1 25 OK of 25 (pinned 25), own bytes as pinned (reported); SHA256SUMS-e183-m2 9 OK of 9 (pinned 9), own bytes as pinned (reported)
+[s03_desk_v5_e183] STOP: the desk check failed: SHA256SUMS-e183-kit-note4(24 OK of 25; pinned 25 and its own bytes, own e48f568e1303)
+-> PASS (P2 a changed entry in note 4's list: refused)
+[s03_desk_v5_e183] reported; SHA256SUMS-e183-m1 25 OK of 25 (pinned 25), own bytes as pinned (reported); SHA256SUMS-e183-m2 9 OK of 9 (pinned 9), own bytes as pinned (reported)
+[s03_desk_v5_e183] STOP: the desk check failed: SHA256SUMS-e183-kit-note4(24 OK of 24; pinned 25 and its own bytes, own cc224c4e8a4f)
+-> PASS (P3 note 4's list one line short: refused)
+[s03_desk_v5_e183] reported; SHA256SUMS-e183-m1 25 OK of 25 (pinned 25), own bytes as pinned (reported); SHA256SUMS-e183-m2 9 OK of 9 (pinned 9), own bytes as pinned (reported)
+[s03_desk_v5_e183] STOP: the desk check failed: SHA256SUMS-e183-kit-note3(18 OK of 18; pinned 19 and its own bytes, own 6e3bc52593e7)
+-> PASS (P4 kit note 3's list one line short: refused)
+[s03_desk_v5_e183] reported; tools/claims-v3/e183/logs/extra-SHA256SUMS-x: a list this step does not know (reported, never a gate; 2 lines); SHA256SUMS-e183-m1 25 OK of 25 (pinned 25), own bytes as pinned (reported); SHA256SUMS-e183-m2 9 OK of 9 (pinned 9), ow
+[s03_desk_v5_e183] desk check v5: step 2 v4 passed, then on the same HEAD d766ca7d6abd E183's lists by SHA256SUMS anywhere in a name: the six gate lists at their counts, own bytes and entries (note 4's 25 among them), the brief's count and bytes, notes M1's an
+-> PASS (P5 SHA256SUMS in the middle of a name is found; unknown, reported, never a gate)
+[s03_desk_v5_e183] reported; SHA256SUMS-e183-m1 24 OK of 24 (pinned 25), own bytes NOT as pinned (reported); SHA256SUMS-e183-m2 9 OK of 9 (pinned 9), own bytes as pinned (reported)
+[s03_desk_v5_e183] desk check v5: step 2 v4 passed, then on the same HEAD b7a5190b428e E183's lists by SHA256SUMS anywhere in a name: the six gate lists at their counts, own bytes and entries (note 4's 25 among them), the brief's count and bytes, notes M1's an
+-> PASS (P6 note M1's list changed: reported, never a gate)
+[s03_desk_v5_e183] STOP: step 2 v4 exited 16 (its STOP line above names why)
+-> PASS (P7 step 2 v4's 16 stops v5 before its own checks)
+
+== Z. no process of this test left running; the device record
+-> PASS (Z nothing left running; no device record in any case)
+
+SELFTEST-RB-E183-V3 PASS (31 of 31)
+# exit 0

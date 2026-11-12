@@ -1,0 +1,43 @@
+E183 kit note 4 (Q164; kit-e183n, then fix-kit183 before the land): rb/selftest_rest_e183.sh <scratch dir>, on the Intel through the round's slot, Thu 12 Nov 2026 10:46 PST
+
+== RS1 E184's form (build/e184/session-S-t<T0>.log)
+    REFUSED: 30 minutes since E184's session end (2026-11-08 02:22:24 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (30 minutes after E184's end: REFUSED)
+    rest: 41 minutes since E184's session end (2026-11-08 02:22:24 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (41 minutes after: rest 41)
+== RS2 E185's form (build/e185/T<T0>/session.log)
+    REFUSED: 39 minutes since E185's session end (2026-11-12 06:15:21 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (39 minutes after E185's end: REFUSED)
+    rest: 40 minutes since E185's session end (2026-11-12 06:15:21 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (40 minutes after: rest 40 (the gate's edge passes))
+== RS3 E186's form (build/e186/T<T0>/session.log)
+    REFUSED: 10 minutes since E186's session end (2026-11-09 14:19:08 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (10 minutes after E186's end: REFUSED, naming E186)
+   E185's step 10 v2 rest lines (50-89, committed, unchanged) on the same tree, the same now:
+    rest: no real session of ours in build/e17x, e18x (session.log and session-*.log) or e185/T*/session.log
+-> PASS (E185's v2 lines are blind to E186's form (verify-e185d's finding, reproduced))
+== RS4 every form at once (E182, E183's own, E184, E185, E186)
+    rest: 104 minutes since E185's session end (2026-11-12 06:15:21 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (the latest end of all five forms is E185's: rest 104)
+== RS5 dry and no-device logs only, each ending 5 minutes before now
+    rest: no real session of ours in build/e*/session.log, session-*.log or T*/session*.log
+-> PASS (dry logs and a block that opened no device do not count)
+== RS6 a real E186-form session cut without its 'session end'
+    note: E186's last real session block has no 'session end': counted as ended at 2026-11-12 07:40:00 PST
+    REFUSED: 20 minutes since E186's last real session line (its block has no session end: counted as ended at its last line) (2026-11-12 07:40:00 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (a cut session counts as ended at its last line: REFUSED)
+== RS7 no session log at all
+    rest: no real session of ours in build/e*/session.log, session-*.log or T*/session*.log
+-> PASS (no log: rest reads none)
+== RS8 a REAL session whose lines carry the words DRY and DESK: inside them (not as markers), ended 10 minutes before now
+    REFUSED: 10 minutes since E185's session end (2026-11-12 07:50:00 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (the kits' markers only: a real block with DRY inside a line counts, REFUSED)
+   E185's step 10 v2 rest lines (any DRY or DESK: in a line marks a dry block) on the same tree, the same now:
+    rest: no real session of ours in build/e17x, e18x (session.log and session-*.log) or e185/T*/session.log
+-> PASS (E185's v2 reading skips that real session (verify-kit183's nit, reproduced))
+== RS9 every dry marker the kits write, inside logs named as real ones, each dry block ending 5 minutes before now; one real block 50 minutes before
+    rest: 50 minutes since E171's session end (2026-11-12 07:10:00 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (every kit's dry marker skips its block (E171's DRY config and DRY:, E172's '; DRY)', E176's DESK:, E181's ' DRY' start and untimed DRY lines): rest 50)
+
+SELFTEST-REST-E183 PASS (13 of 13)
+# exit 0

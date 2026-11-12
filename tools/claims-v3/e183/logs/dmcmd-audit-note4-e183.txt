@@ -1,0 +1,81 @@
+E183 kit note 4 (Q164, kit-e183n): dmcmd_audit (tools/claims-v3/dmcmd_audit.py, sha256 f29e91ca97705454..., unchanged), on the Intel through the slot, /usr/bin/python3, Thu 12 Nov 2026 09:07 PST
+
+== (a) the runbook as note 4 runs it: rb/ (every step file: v1's, notes 1-3's and note 4's, with rb/rest_rule_e183.sh), E185's rb/check_day2_v2.py and rb/check_day2_v1.py, k6's rb_common.sh, s05_look_k6.sh and s09_a3_reads_k6.sh, E128's guard
+dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+note: tools/claims-v3/q141k-runbook/k6/s09_a3_reads_k6.sh:20: 'config' goes through tools/claims-v3/e128/ettelem_guard.sh, which is scanned: its own lines are what it sends
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      2 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      2 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+# exit 0
+
+== (b) the box session's file set as preflight_e183_v2.sh audits it before any device opens (v1's files and note 4's box files; E180's one reviewed exception)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:103: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:105: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:139: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/lib.sh:143: name: GET_MODULE_POWER [READ, pmic none] ok
+tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/lib.sh:154: ettelem sample: STATS_RESET [WRITE, pmic write] (conditional) EXCEPTED: STATS_RESET: E183 never forwards a --reset-ms: block_e183.sh's start_sampler call passes the file and the duration only - variant ettelem; forwarded arguments may carry --reset-ms
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+note: tools/claims-v3/e183/session_e183.sh:37: 'config' goes through tools/claims-v3/e128/ettelem_guard.sh, which is scanned: its own lines are what it sends
+note: tools/claims-v3/e183/session_e183_v2.sh:45: 'config' goes through tools/claims-v3/e128/ettelem_guard.sh, which is scanned: its own lines are what it sends
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      5 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      5 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      4 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      6 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      4 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      4 site(s)  ok
+  STATS_RESET                                WRITE        pmic write     1 site(s)  EXCEPTED
+# exit 0
+
+== (c) note 4's desk files: desk/desktest_train_check_e183.sh, desk/mock_runtime_e183_v2.cpp, dry_intel_e183_v2.sh, make_harness_e183_v2.py, rb/selftest_rest_e183.sh, rb/selftest_rb_e183_v3.sh, rb/fake_cmake_gcc_e183.sh
+dmcmd_audit: GO (0 send site(s), 0 disallowed; allow-list: none)
+summary:
+# exit 0

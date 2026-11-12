@@ -1,0 +1,116 @@
+E183 kit note 4 (Q164, kit-e183n): desk/desktest_train_check_e183.sh <scratch dir>, on the Intel through the round's slot, Thu 12 Nov 2026 09:04 PST
+
+compilers: g++-13 (Homebrew GCC 13.2.0) 13.2.0; Apple clang version 21.0.0 (clang-2100.1.1.101)
+
+== 1. the two trees (E180's generator, unchanged; the patch on one)
+patched <scratch>/src-patched/host/main.cpp sha256 9b8f1a088a7a83c00af64387c80f0f92b0522dcb89ce3a330853ca8e00b0c5f1
+patched host/main.cpp sha256 9b8f1a088a7a83c00af64387c80f0f92b0522dcb89ce3a330853ca8e00b0c5f1; E180's (unpatched) 3cad4adc16534b845cc142f78a28907192b62fe21081e282d6df67342200359c
+-> PASS (the patched source is the pinned 9b8f1a08...)
+-> PASS (the unpatched source is E180's, the committed 3cad4adc...)
+
+== 2. eight builds (each: the compiler, its flag, E184's stubs, the tree, main.cpp and the recording mock)
+g++-13 -std=c++17 -O2 -I<stubs> -I<src-patched> <src-patched>/host/main.cpp <mock v2> -o host-patched-gcc13-O2: rc 0; sha256 7bcc771000b604af12be75a27641a154b692a899cf7ff8f218d7949f87b12b60; 4 lines on stderr
+-> PASS (host-patched-gcc13-O2 built)
+g++-13 -std=c++17 -O3 -I<stubs> -I<src-patched> <src-patched>/host/main.cpp <mock v2> -o host-patched-gcc13-O3: rc 0; sha256 17251edd08bc4b4a9067122f51bd89d6963a1a2ed6bdf183e9aee10a3e2fa6a4; 4 lines on stderr
+-> PASS (host-patched-gcc13-O3 built)
+clang++ -std=c++17 -O1 -I<stubs> -I<src-patched> <src-patched>/host/main.cpp <mock v2> -o host-patched-clang-O1: rc 0; sha256 6e1d7d436bf966a69db0dfaf304b3e722316308ed439fba364c017f861fd5dbf; 0 lines on stderr
+-> PASS (host-patched-clang-O1 built)
+clang++ -std=c++17 -O2 -I<stubs> -I<src-patched> <src-patched>/host/main.cpp <mock v2> -o host-patched-clang-O2: rc 0; sha256 7c75325d163efb3450200f25afcd038a86ba4881b1460213f52e8d2c401c2850; 0 lines on stderr
+-> PASS (host-patched-clang-O2 built)
+g++-13 -std=c++17 -O2 -I<stubs> -I<src-unpatched> <src-unpatched>/host/main.cpp <mock v2> -o host-unpatched-gcc13-O2: rc 0; sha256 f03d922caccfa2e49b70928a983e0890cbd3cc40b46e2fa4e834ad7bbbcdf234; 4 lines on stderr
+-> PASS (host-unpatched-gcc13-O2 built)
+g++-13 -std=c++17 -O3 -I<stubs> -I<src-unpatched> <src-unpatched>/host/main.cpp <mock v2> -o host-unpatched-gcc13-O3: rc 0; sha256 0c42eb483c23a72d6b93358f78d27490b830f8ffcd857a043d61a14c5f7bcfa6; 4 lines on stderr
+-> PASS (host-unpatched-gcc13-O3 built)
+clang++ -std=c++17 -O1 -I<stubs> -I<src-unpatched> <src-unpatched>/host/main.cpp <mock v2> -o host-unpatched-clang-O1: rc 0; sha256 006f6317a3651c2b8fe1931fc9658a8ac1e9c4d57f25ba3984c863fce35af2a7; 0 lines on stderr
+-> PASS (host-unpatched-clang-O1 built)
+clang++ -std=c++17 -O2 -I<stubs> -I<src-unpatched> <src-unpatched>/host/main.cpp <mock v2> -o host-unpatched-clang-O2: rc 0; sha256 f75931d2d10ac5866048295286a7fbddb2654290ba255ecf389abb0e41bd3fb3; 0 lines on stderr
+-> PASS (host-unpatched-clang-O2 built)
+
+== 3. on each binary: the OLD grep, the NEW check with the device record, and the CONTROL
+-- host-patched-gcc13-O2
+OLD line 68 (= block line 48): fail ('--operands-b' yes, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-patched-gcc13-O2 reads fail)
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-gcc13-O2 accepts --operands-b, --abba and --launches and stops at the empty --kernel (rc 1, before any device call); --list names E180's fadd.ps.acc and fadd.pi.acc (rc 0)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-gcc13-O2: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-gcc13-O2 opened no device (the record is empty))
+tools/claims-v3/e183/desk/desktest_train_check_e183.sh: line 77: 17481 Segmentation fault: 11  E183_DEVICE_RECORD="$R2" E183_MOCK_LAUNCH_MS=1 timeout 10 "$b" --kernel "$S/kernel.elf" --pattern fadd.ps --harts 2 --operands "file:$F" --operands-b "file:$SI" --abba SFFS --seconds 1 > "$S/rec/ctl-$t-$c.out" 2> "$S/rec/ctl-$t-$c.err" < /dev/null
+CONTROL (--operands-b without --launches) rc 139: ; device record: 10 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,mallocDevice,mallocDevice,memcpyHostToDevice,waitForStream)
+-> PASS (CONTROL on host-patched-gcc13-O2 reaches the device layer, the kernel load and the operand copy before its refusal)
+tools/claims-v3/e183/desk/desktest_train_check_e183.sh: line 77: 17494 Segmentation fault: 11  E183_MOCK_LAUNCH_MS=1 timeout 10 "$b" --kernel "$S/kernel.elf" --pattern nosuch --seconds 1 > /dev/null 2> "$S/rec/tc-$t-$c.err" < /dev/null
+toolchain note (reported): an unknown --pattern, thrown in run() after Session is built, exits 139: 
+-- host-patched-gcc13-O3
+OLD line 68 (= block line 48): fail ('--operands-b' yes, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-patched-gcc13-O3 reads fail)
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-gcc13-O3 accepts --operands-b, --abba and --launches and stops at the empty --kernel (rc 1, before any device call); --list names E180's fadd.ps.acc and fadd.pi.acc (rc 0)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-gcc13-O3: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-gcc13-O3 opened no device (the record is empty))
+tools/claims-v3/e183/desk/desktest_train_check_e183.sh: line 77: 17525 Segmentation fault: 11  E183_DEVICE_RECORD="$R2" E183_MOCK_LAUNCH_MS=1 timeout 10 "$b" --kernel "$S/kernel.elf" --pattern fadd.ps --harts 2 --operands "file:$F" --operands-b "file:$SI" --abba SFFS --seconds 1 > "$S/rec/ctl-$t-$c.out" 2> "$S/rec/ctl-$t-$c.err" < /dev/null
+CONTROL (--operands-b without --launches) rc 139: ; device record: 10 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,mallocDevice,mallocDevice,memcpyHostToDevice,waitForStream)
+-> PASS (CONTROL on host-patched-gcc13-O3 reaches the device layer, the kernel load and the operand copy before its refusal)
+tools/claims-v3/e183/desk/desktest_train_check_e183.sh: line 77: 17538 Segmentation fault: 11  E183_MOCK_LAUNCH_MS=1 timeout 10 "$b" --kernel "$S/kernel.elf" --pattern nosuch --seconds 1 > /dev/null 2> "$S/rec/tc-$t-$c.err" < /dev/null
+toolchain note (reported): an unknown --pattern, thrown in run() after Session is built, exits 139: 
+-- host-patched-clang-O1
+OLD line 68 (= block line 48): pass ('--operands-b' yes, 'train_kind' yes); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-patched-clang-O1 reads pass)
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-clang-O1 accepts --operands-b, --abba and --launches and stops at the empty --kernel (rc 1, before any device call); --list names E180's fadd.ps.acc and fadd.pi.acc (rc 0)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-clang-O1: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-clang-O1 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 1: FAIL: E183: a train needs --launches; device record: 14 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,mallocDevice,mallocDevice,memcpyHostToDevice,waitForStream,freeDevice,freeDevice,unloadCode,destroyStream)
+-> PASS (CONTROL on host-patched-clang-O1 reaches the device layer, the kernel load and the operand copy before its refusal)
+toolchain note (reported): an unknown --pattern, thrown in run() after Session is built, exits 1: FAIL: unknown --pattern nosuch
+-- host-patched-clang-O2
+OLD line 68 (= block line 48): pass ('--operands-b' yes, 'train_kind' yes); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-patched-clang-O2 reads pass)
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-clang-O2 accepts --operands-b, --abba and --launches and stops at the empty --kernel (rc 1, before any device call); --list names E180's fadd.ps.acc and fadd.pi.acc (rc 0)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-clang-O2: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-clang-O2 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 1: FAIL: E183: a train needs --launches; device record: 14 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,mallocDevice,mallocDevice,memcpyHostToDevice,waitForStream,freeDevice,freeDevice,unloadCode,destroyStream)
+-> PASS (CONTROL on host-patched-clang-O2 reaches the device layer, the kernel load and the operand copy before its refusal)
+toolchain note (reported): an unknown --pattern, thrown in run() after Session is built, exits 1: FAIL: unknown --pattern nosuch
+-- host-unpatched-gcc13-O2
+OLD line 68 (= block line 48): fail ('--operands-b' no, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-unpatched-gcc13-O2 reads fail)
+TRAIN-CHANGE MISSING: <scratch>/bin/host-unpatched-gcc13-O2; the options were refused, rc 2: unknown option --operands-b
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-unpatched-gcc13-O2: TRAIN-CHANGE MISSING (unknown option --operands-b))
+-> PASS (NEW on host-unpatched-gcc13-O2 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 2: unknown option --operands-b; device record: 0 lines ()
+-> PASS (CONTROL on host-unpatched-gcc13-O2: unknown option, no device call)
+-- host-unpatched-gcc13-O3
+OLD line 68 (= block line 48): fail ('--operands-b' no, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-unpatched-gcc13-O3 reads fail)
+TRAIN-CHANGE MISSING: <scratch>/bin/host-unpatched-gcc13-O3; the options were refused, rc 2: unknown option --operands-b
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-unpatched-gcc13-O3: TRAIN-CHANGE MISSING (unknown option --operands-b))
+-> PASS (NEW on host-unpatched-gcc13-O3 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 2: unknown option --operands-b; device record: 0 lines ()
+-> PASS (CONTROL on host-unpatched-gcc13-O3: unknown option, no device call)
+-- host-unpatched-clang-O1
+OLD line 68 (= block line 48): fail ('--operands-b' no, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-unpatched-clang-O1 reads fail)
+TRAIN-CHANGE MISSING: <scratch>/bin/host-unpatched-clang-O1; the options were refused, rc 2: unknown option --operands-b
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-unpatched-clang-O1: TRAIN-CHANGE MISSING (unknown option --operands-b))
+-> PASS (NEW on host-unpatched-clang-O1 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 2: unknown option --operands-b; device record: 0 lines ()
+-> PASS (CONTROL on host-unpatched-clang-O1: unknown option, no device call)
+-- host-unpatched-clang-O2
+OLD line 68 (= block line 48): fail ('--operands-b' no, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-unpatched-clang-O2 reads fail)
+TRAIN-CHANGE MISSING: <scratch>/bin/host-unpatched-clang-O2; the options were refused, rc 2: unknown option --operands-b
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-unpatched-clang-O2: TRAIN-CHANGE MISSING (unknown option --operands-b))
+-> PASS (NEW on host-unpatched-clang-O2 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 2: unknown option --operands-b; device record: 0 lines ()
+-> PASS (CONTROL on host-unpatched-clang-O2: unknown option, no device call)
+
+== K. reported: the kernel path block_e183.sh line 50 greps, with a box-like KERNEL_ELF (E184's stub Constants.h names "x")
+host-k-gcc13-O2: compile rc 0; line 50's grep reads '/opt/desk-stand-in/aifoundry/build/enercat-e183/kernel/enercat.elf'
+host-k-clang-O2: compile rc 0; line 50's grep reads '/opt/desk-stand-in/aifoundry/build/enercat-e183/kernel/enercat.elf'
+
+DESKTEST-TRAIN-CHECK-E183 PASS (42 of 42)
+# exit 0
