@@ -1,0 +1,723 @@
+{
+ "_what": "E188's lines (forecast_e188.py): M12 as committed (no refit) and M10 frozen, for the seven trains, the kinds pass's eight kinds and the fallback's fifteen kinds; frozen by E188's registration before any E188 datum",
+ "card": "aifoundry3 card 0, 600 MHz, s = 1, W over fp32 zeros (kinds) or first minus second (trains)",
+ "checks": {
+  "aall_is_e186_r4": {
+   "M10_w": true,
+   "M12_se_w": true,
+   "M12_w": true,
+   "first": true,
+   "second": true
+  },
+  "bench": {
+   "check_mismatch_all_zero": true,
+   "fp32.e178_v4": {
+    "against": "tools/claims-v3/e178/bench/counts-e178.json",
+    "mean_equal": true,
+    "points_equal": true
+   },
+   "fp32.e182_a1_b3fffffff": {
+    "against": "tools/claims-v3/m12/bench/counts-m12-e186.json",
+    "mean_equal": true,
+    "points_equal": true
+   },
+   "fp32.e182_a3fffffff_b1": {
+    "against": "tools/claims-v3/e182/bench/counts-e182.json",
+    "mean_equal": true,
+    "points_equal": true
+   },
+   "fp32.e186_a1_b3fc00000": {
+    "against": "tools/claims-v3/m12/bench/counts-m12-e186.json",
+    "mean_equal": true,
+    "points_equal": true
+   },
+   "fp32.ones": {
+    "against": "tools/claims-v3/e178/bench/counts-e178.json",
+    "mean_equal": true,
+    "points_equal": true
+   },
+   "fp32.zeros": {
+    "against": "tools/claims-v3/e178/bench/counts-e178.json",
+    "mean_equal": true,
+    "points_equal": true
+   }
+  },
+  "e186_kinds_reproduced": {
+   "equal": 4,
+   "keys": [
+    "fp32.e182_a1_b3fffffff",
+    "fp32.e182_a3fffffff_b1",
+    "fp32.e186_a1_b3fc00000",
+    "fp32.ones"
+   ],
+   "of": 4
+  }
+ },
+ "derived": {
+  "M10_held_bit_w": 0.0,
+  "M12_one_bit_B_increment_w": {
+   "B04": 0.013280320065063134,
+   "B05": 0.013280320065063134,
+   "B10": 0.013280320065063134,
+   "B19": 0.013280320065063134,
+   "B22": 0.013280320065063134
+  },
+  "M12_position_spread_w": 0.0,
+  "gamma_A_se_w": 0.000858689323652354,
+  "gamma_A_w": 0.0030273499621198408,
+  "gamma_B_se_w": 0.0008604169026665924,
+  "gamma_B_w": 0.013280320065063134,
+  "note": "M12 prices a held fp32 mantissa bit at one price a side, whatever its position or partner: each one-bit B train's M12 line less its M10 line is gamma_B, and PAIR's M12 line equals its M10 line (equal popcounts)"
+ },
+ "fallback_kinds": [
+  "fp32.aq_h0",
+  "fp32.e178_v4",
+  "fp32.e178_v5",
+  "fp32.e182_a1_b3fffffff",
+  "fp32.e182_a3fffffff_b1",
+  "fp32.e186_a1_b3fc00000",
+  "fp32.e188_a1_b3f800010",
+  "fp32.e188_a1_b3f800020",
+  "fp32.e188_a1_b3f800400",
+  "fp32.e188_a1_b3f800c00",
+  "fp32.e188_a1_b3f804400",
+  "fp32.e188_a1_b3f880000",
+  "fp32.lq_h0",
+  "fp32.ones",
+  "fp32.pi"
+ ],
+ "inputs_sha256": {
+  "docs/reports/data/2026-11-04-q142m-m10/fit_m10.py": "28de38b712205dac5e788469d87d959c569c1e1d702f2b7b024ca55378e83382",
+  "docs/reports/data/2026-11-04-q142m-m10/m10.json": "37b7fa86d16287917d84797c60b844bea4e8a786fd5420d68db80a80a7ec2e64",
+  "docs/reports/data/2026-11-04-q142m-m10/predict_m10.py": "65dd307bffa19b21bfab3112bbd21aa3ff5b971eb8e9b36b56c7666bf8b0061b",
+  "docs/reports/data/2026-11-08-e182-one-number-r2-aifoundry3/trains-e182.json": "392a9e3afd2bbd55a3ced8cd11576bc90d3c3f59b79948c2fd17973408ffb21c",
+  "tools/claims-v3/e178/bench/counts-e178.json": "74eac3feffe347a3dbde515eda9458e90ce0835f69d94580fc2ca7edd7f2692b",
+  "tools/claims-v3/e182/bench/counts-e182.json": "d64ff3d09cc6227a341a56e707f6782d2a7121b86ba15572e722e1d6656063d3",
+  "tools/claims-v3/e188/bench/counts-e188.json": "e4c7d5a35d0493d45fb2d3089ddbc22dda5badbc157c65f8efbe5abe12e6737b",
+  "tools/claims-v3/e188/kinds-e188.json": "e5a663ce71283a50b3b002ecac69fa187ffa7d42cbef2ee65befafaf3448babe",
+  "tools/claims-v3/m12/bench/counts-m12-e186.json": "32f6cc61cae98486bbc54fd36baca14ac4741ab9bf400707f6c696242b3cf72b",
+  "tools/claims-v3/m12/bench/counts-m12.json": "b29bef08d9f87a1c1f501cf84f4f33e0a5497186370d76cd1d4173e5cb08f57d",
+  "tools/claims-v3/m12/candidates-m12-e186.json": "810423fa5d439dcc3f61fbe9bbbda411cada138f46f9cbe16a13e0c3adae4d1b",
+  "tools/claims-v3/m12/candidates-m12.json": "e97a2ae4fb27d6d161d1fd209f13a7fad91c10c1455a86b984625862fb734907",
+  "tools/claims-v3/m12/candidates_m12.py": "8bc265f49cb0d0d6837debca4a104526e729aa166a711de3ab0f6853998d7f61",
+  "tools/claims-v3/m12/m12.json": "34118a60d338a33c0d4983f51f438156d9b9065a7ec1864f87b6b4da1ca05e56",
+  "tools/claims-v3/m12/m12_common.py": "5f3e0001b19fff761345ca8c62582428575dc69d16b5e6207d0a87e4267eb940"
+ },
+ "kinds": {
+  "fp32.aq_h0": {
+   "M10_w": 8.262054794958578,
+   "M12_se_w": 0.017682709832353823,
+   "M12_w": 8.404130884420892,
+   "P10_w": 8.262054794958578,
+   "a_word": [
+    "0x3fbbc9e4"
+   ],
+   "b_word": [
+    "0x3f800000"
+   ],
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    20.0,
+    7.0
+   ],
+   "pc_a": 20.0,
+   "pc_b": 7.0,
+   "tile": "docs/reports/data/2026-10-27-e67-a-side-bit-prices/aifoundry3/hl/p750/tiles/aq_h0.b750.bin"
+  },
+  "fp32.e178_v4": {
+   "M10_w": 8.23236101449275,
+   "M12_se_w": 0.021567500421978563,
+   "M12_w": 8.253543204311592,
+   "P10_w": 8.23236101449275,
+   "a_word": "0x40800000",
+   "b_word": "0x40800000",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    2.0,
+    2.0
+   ],
+   "pc_a": 2.0,
+   "pc_b": 2.0,
+   "tile": "tools/claims-v3/e178/tiles/fp32/e178_v4.bin"
+  },
+  "fp32.e178_v5": {
+   "M10_w": 8.24229439695081,
+   "M12_se_w": 0.02051901455477631,
+   "M12_w": 8.279784256796834,
+   "P10_w": 8.24229439695081,
+   "a_word": "0x40a00000",
+   "b_word": "0x40a00000",
+   "counts_from": "tools/claims-v3/e178/bench/counts-e178.json",
+   "design_row": [
+    1.0,
+    3.0,
+    3.0
+   ],
+   "pc_a": 3.0,
+   "pc_b": 3.0,
+   "tile": "tools/claims-v3/e178/tiles/fp32/e178_v5.bin"
+  },
+  "fp32.e182_a1_b3fffffff": {
+   "M10_w": 8.306015810412132,
+   "M12_se_w": 0.02218471257303727,
+   "M12_w": 8.714183711863342,
+   "P10_w": 8.306015810412132,
+   "a_word": "0x3f800000",
+   "b_word": "0x3fffffff",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    7.0,
+    30.0
+   ],
+   "pc_a": 7.0,
+   "pc_b": 30.0,
+   "tile": "tools/claims-v3/e182/tiles/fp32/e182_a1_b3fffffff.bin"
+  },
+  "fp32.e182_a3fffffff_b1": {
+   "M10_w": 8.306015810412132,
+   "M12_se_w": 0.0221243424082402,
+   "M12_w": 8.478365399495646,
+   "P10_w": 8.306015810412132,
+   "a_word": "0x3fffffff",
+   "b_word": "0x3f800000",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    30.0,
+    7.0
+   ],
+   "pc_a": 30.0,
+   "pc_b": 7.0,
+   "tile": "tools/claims-v3/e182/tiles/fp32/e182_a3fffffff_b1.bin"
+  },
+  "fp32.e186_a1_b3fc00000": {
+   "M10_w": 8.246247631800502,
+   "M12_se_w": 0.01718193624052148,
+   "M12_w": 8.362248491820322,
+   "P10_w": 8.246247631800502,
+   "a_word": "0x3f800000",
+   "b_word": "0x3fc00000",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    7.0,
+    8.0
+   ],
+   "pc_a": 7.0,
+   "pc_b": 8.0,
+   "tile": "tools/claims-v3/m12/tiles-e186/fp32/e186_a1_b3fc00000.bin"
+  },
+  "fp32.e188_a1_b3f800010": {
+   "M10_w": 8.233117764641742,
+   "M12_se_w": 0.01718193624052148,
+   "M12_w": 8.349118624661562,
+   "P10_w": 8.233117764641742,
+   "a_word": "0x3f800000",
+   "b_word": "0x3f800010",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    7.0,
+    8.0
+   ],
+   "pc_a": 7.0,
+   "pc_b": 8.0,
+   "tile": "tools/claims-v3/e188/tiles/fp32/e188_a1_b3f800010.bin"
+  },
+  "fp32.e188_a1_b3f800020": {
+   "M10_w": 8.231378336932233,
+   "M12_se_w": 0.01718193624052148,
+   "M12_w": 8.347379196952053,
+   "P10_w": 8.231378336932233,
+   "a_word": "0x3f800000",
+   "b_word": "0x3f800020",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    7.0,
+    8.0
+   ],
+   "pc_a": 7.0,
+   "pc_b": 8.0,
+   "tile": "tools/claims-v3/e188/tiles/fp32/e188_a1_b3f800020.bin"
+  },
+  "fp32.e188_a1_b3f800400": {
+   "M10_w": 8.231300269022382,
+   "M12_se_w": 0.01718193624052148,
+   "M12_w": 8.347301129042203,
+   "P10_w": 8.231300269022382,
+   "a_word": "0x3f800000",
+   "b_word": "0x3f800400",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    7.0,
+    8.0
+   ],
+   "pc_a": 7.0,
+   "pc_b": 8.0,
+   "tile": "tools/claims-v3/e188/tiles/fp32/e188_a1_b3f800400.bin"
+  },
+  "fp32.e188_a1_b3f800c00": {
+   "M10_w": 8.233099847174708,
+   "M12_se_w": 0.01698894359249077,
+   "M12_w": 8.362381027259591,
+   "P10_w": 8.233099847174708,
+   "a_word": "0x3f800000",
+   "b_word": "0x3f800c00",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    7.0,
+    9.0
+   ],
+   "pc_a": 7.0,
+   "pc_b": 9.0,
+   "tile": "tools/claims-v3/e188/tiles/fp32/e188_a1_b3f800c00.bin"
+  },
+  "fp32.e188_a1_b3f804400": {
+   "M10_w": 8.231771270921884,
+   "M12_se_w": 0.01698894359249077,
+   "M12_w": 8.361052451006767,
+   "P10_w": 8.231771270921884,
+   "a_word": "0x3f800000",
+   "b_word": "0x3f804400",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    7.0,
+    9.0
+   ],
+   "pc_a": 7.0,
+   "pc_b": 9.0,
+   "tile": "tools/claims-v3/e188/tiles/fp32/e188_a1_b3f804400.bin"
+  },
+  "fp32.e188_a1_b3f880000": {
+   "M10_w": 8.230125092781009,
+   "M12_se_w": 0.01718193624052148,
+   "M12_w": 8.34612595280083,
+   "P10_w": 8.230125092781009,
+   "a_word": "0x3f800000",
+   "b_word": "0x3f880000",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    7.0,
+    8.0
+   ],
+   "pc_a": 7.0,
+   "pc_b": 8.0,
+   "tile": "tools/claims-v3/e188/tiles/fp32/e188_a1_b3f880000.bin"
+  },
+  "fp32.lq_h0": {
+   "M10_w": 8.262763162098874,
+   "M12_se_w": 0.017123158857381537,
+   "M12_w": 8.506587102744927,
+   "P10_w": 8.262763162098874,
+   "a_word": [
+    "0x3f800000"
+   ],
+   "b_word": [
+    "0x3f8e4131",
+    "0x3f91265d",
+    "0x3fafb39c",
+    "0x3fba8469",
+    "0x3fdd14b3",
+    "0x3fed014c",
+    "0x3fee2295",
+    "0x3fef5821"
+   ],
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    7.0,
+    17.625
+   ],
+   "pc_a": 7.0,
+   "pc_b": 17.625,
+   "tile": "docs/reports/data/2026-10-20-bitflip-ladder/aifoundry3/hl/p1/tiles/lq_h0.b1.bin"
+  },
+  "fp32.ones": {
+   "M10_w": 8.231392360320935,
+   "M12_se_w": 0.017415346567055342,
+   "M12_w": 8.334112900275692,
+   "P10_w": 8.231392360320935,
+   "a_word": "0x3f800000",
+   "b_word": "0x3f800000",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    7.0,
+    7.0
+   ],
+   "pc_a": 7.0,
+   "pc_b": 7.0,
+   "tile": "tools/claims-v3/kinds/tiles/fp32/ones.bin"
+  },
+  "fp32.pi": {
+   "M10_w": 8.246115749587132,
+   "M12_se_w": 0.017987000200539387,
+   "M12_w": 8.46298997973217,
+   "P10_w": 8.246115749587132,
+   "a_word": "0x40490fdb",
+   "b_word": "0x40490fdb",
+   "counts_from": "tools/claims-v3/e188/bench/counts-e188.json",
+   "design_row": [
+    1.0,
+    14.0,
+    14.0
+   ],
+   "pc_a": 14.0,
+   "pc_b": 14.0,
+   "tile": "tools/claims-v3/kinds/tiles/fp32/pi.bin"
+  }
+ },
+ "kinds_pass": {
+  "1.0 x 1.0": {
+   "M10_w": 0.0,
+   "M12_se_w": 0.0,
+   "M12_w": 0.0,
+   "key": "fp32.ones",
+   "level_M10_w": 8.231392360320935,
+   "level_M12_se_w": 0.017415346567055342,
+   "level_M12_w": 8.334112900275692
+  },
+  "4.0 x 4.0": {
+   "M10_w": 0.0009686541718139097,
+   "M12_se_w": 0.00857123112242476,
+   "M12_w": -0.08056969596409935,
+   "key": "fp32.e178_v4",
+   "level_M10_w": 8.23236101449275,
+   "level_M12_se_w": 0.021567500421978563,
+   "level_M12_w": 8.253543204311592
+  },
+  "5.0 x 5.0": {
+   "M10_w": 0.01090203662987399,
+   "M12_se_w": 0.006856984897939808,
+   "M12_w": -0.054328643478857686,
+   "key": "fp32.e178_v5",
+   "level_M10_w": 8.24229439695081,
+   "level_M12_se_w": 0.02051901455477631,
+   "level_M12_w": 8.279784256796834
+  },
+  "AALL (0x3fffffff, 1.0)": {
+   "M10_w": 0.07462345009119709,
+   "M12_se_w": 0.019749854444004143,
+   "M12_w": 0.1442524992199541,
+   "key": "fp32.e182_a3fffffff_b1",
+   "level_M10_w": 8.306015810412132,
+   "level_M12_se_w": 0.0221243424082402,
+   "level_M12_w": 8.478365399495646
+  },
+  "BALL (1.0, 0x3fffffff)": {
+   "M10_w": 0.07462345009119709,
+   "M12_se_w": 0.019789588761331623,
+   "M12_w": 0.3800708115876503,
+   "key": "fp32.e182_a1_b3fffffff",
+   "level_M10_w": 8.306015810412132,
+   "level_M12_se_w": 0.02218471257303727,
+   "level_M12_w": 8.714183711863342
+  },
+  "aq_h0": {
+   "M10_w": 0.030662434637642733,
+   "M12_se_w": 0.011162961207480601,
+   "M12_w": 0.07001798414520088,
+   "key": "fp32.aq_h0",
+   "level_M10_w": 8.262054794958578,
+   "level_M12_se_w": 0.017682709832353823,
+   "level_M12_w": 8.404130884420892
+  },
+  "lq_h0": {
+   "M10_w": 0.03137080177793905,
+   "M12_se_w": 0.009141929590832544,
+   "M12_w": 0.1724742024692354,
+   "key": "fp32.lq_h0",
+   "level_M10_w": 8.262763162098874,
+   "level_M12_se_w": 0.017123158857381537,
+   "level_M12_w": 8.506587102744927
+  },
+  "pi x pi (the tie, built-in)": {
+   "M10_w": 0.014723389266196207,
+   "M12_se_w": 0.011999723571394663,
+   "M12_w": 0.12887707945647797,
+   "key": "anchor_pi (the host's built-in --values pi, 0x40490fdb both sides)",
+   "note": "the same words as the pi x pi tile, so the same lines (the models see words, not the launch path)"
+  },
+  "pi x pi (tile)": {
+   "M10_w": 0.014723389266196207,
+   "M12_se_w": 0.011999723571394663,
+   "M12_w": 0.12887707945647797,
+   "key": "fp32.pi",
+   "level_M10_w": 8.246115749587132,
+   "level_M12_se_w": 0.017987000200539387,
+   "level_M12_w": 8.46298997973217
+  }
+ },
+ "label": "forecast, frozen; M12 a post hoc model (fitted on E182), M10 frozen; blind for E188 (no E188 datum exists)",
+ "m12": {
+  "file": "tools/claims-v3/m12/m12.json",
+  "float_b": [
+   -0.011433150235523826,
+   0.0030273499621198408,
+   0.013280320065063134
+  ],
+  "float_names": [
+   "c_f_w",
+   "gamma_A_w",
+   "gamma_B_w"
+  ],
+  "sha256": "34118a60d338a33c0d4983f51f438156d9b9065a7ec1864f87b6b4da1ca05e56"
+ },
+ "rate_fp32_per_s": 1117211037.5775151,
+ "rate_rule": "candidates-m12.json's fp32 rate (E182's median measured fp32 rate), unchanged",
+ "train_noise": {
+  "measured": {
+   "df": 37,
+   "halfwidth_w": 0.006035343734393794,
+   "rule": "E182's fp32 trains T5 and T6, the mean of their se (as E186)",
+   "se_w": 0.0029786626120688487
+  },
+  "registered": {
+   "halfwidth_w": 0.0051,
+   "rule": "E182's sizing rule: 76 fp32 processes (38 units) at the registered sigma_q 0.03804 W",
+   "se_w": 0.002500596409404599,
+   "units": 38
+  }
+ },
+ "trains": {
+  "AALL": {
+   "M10_w": 0.07462345009119709,
+   "M12_increment_w": 0.06962904912875634,
+   "M12_se_w": 0.019749854444004143,
+   "M12_w": 0.14425249921995342,
+   "d_pc_a": 23.0,
+   "d_pc_b": 0.0,
+   "first": "fp32.e182_a3fffffff_b1",
+   "first_words": [
+    "0x3fffffff",
+    "0x3f800000"
+   ],
+   "measured_noise": {
+    "halfwidth_w": 0.006035343734393794,
+    "power_excludes_0_if_M10": 1.0,
+    "power_excludes_0_if_M12": 0.9999999999977702,
+    "se_w": 0.0029786626120688487,
+    "separation_M12_M10_in_se": 3.4861218381975396
+   },
+   "registered_noise": {
+    "halfwidth_w": 0.0051,
+    "power_excludes_0_if_M10": 1.0,
+    "power_excludes_0_if_M12": 0.9999999999986564,
+    "se_w": 0.002500596409404599,
+    "separation_M12_M10_in_se": 3.4976237979826905
+   },
+   "second": "fp32.ones",
+   "second_words": [
+    "0x3f800000",
+    "0x3f800000"
+   ],
+   "what": "A gains all 23 mantissa bits (0x3fffffff), B 1.0 in both: one half of E182's T5"
+  },
+  "B04": {
+   "M10_w": 0.0017254043208065895,
+   "M12_increment_w": 0.013280320065063134,
+   "M12_se_w": 0.0008604169026665924,
+   "M12_w": 0.015005724385869723,
+   "d_pc_a": 0.0,
+   "d_pc_b": 1.0,
+   "first": "fp32.e188_a1_b3f800010",
+   "first_words": [
+    "0x3f800000",
+    "0x3f800010"
+   ],
+   "measured_noise": {
+    "halfwidth_w": 0.006035343734393794,
+    "power_excludes_0_if_M10": 0.07854489904839684,
+    "power_excludes_0_if_M12": 0.998093657172515,
+    "se_w": 0.0029786626120688487,
+    "separation_M12_M10_in_se": 4.283361794870865
+   },
+   "registered_noise": {
+    "halfwidth_w": 0.0051,
+    "power_excludes_0_if_M10": 0.0917570108365875,
+    "power_excludes_0_if_M12": 0.9999100919046449,
+    "se_w": 0.002500596409404599,
+    "separation_M12_M10_in_se": 5.021893210675158
+   },
+   "second": "fp32.ones",
+   "second_words": [
+    "0x3f800000",
+    "0x3f800000"
+   ],
+   "what": "B one held mantissa bit, bit 4; A 1.0 in both"
+  },
+  "B05": {
+   "M10_w": -1.4023388702710804e-05,
+   "M12_increment_w": 0.013280320065063134,
+   "M12_se_w": 0.0008604169026665924,
+   "M12_w": 0.013266296676360423,
+   "d_pc_a": 0.0,
+   "d_pc_b": 1.0,
+   "first": "fp32.e188_a1_b3f800020",
+   "first_words": [
+    "0x3f800000",
+    "0x3f800020"
+   ],
+   "measured_noise": {
+    "halfwidth_w": 0.006035343734393794,
+    "power_excludes_0_if_M10": 0.04274736590859962,
+    "power_excludes_0_if_M12": 0.9901557557279208,
+    "se_w": 0.0029786626120688487,
+    "separation_M12_M10_in_se": 4.283361794870865
+   },
+   "registered_noise": {
+    "halfwidth_w": 0.0051,
+    "power_excludes_0_if_M10": 0.04140200813176065,
+    "power_excludes_0_if_M12": 0.9989926213997505,
+    "se_w": 0.002500596409404599,
+    "separation_M12_M10_in_se": 5.021893210675158
+   },
+   "second": "fp32.ones",
+   "second_words": [
+    "0x3f800000",
+    "0x3f800000"
+   ],
+   "what": "B one held mantissa bit, bit 5; A 1.0 in both"
+  },
+  "B10": {
+   "M10_w": -9.209129855314302e-05,
+   "M12_increment_w": 0.013280320065063134,
+   "M12_se_w": 0.0008604169026665924,
+   "M12_w": 0.01318822876650999,
+   "d_pc_a": 0.0,
+   "d_pc_b": 1.0,
+   "first": "fp32.e188_a1_b3f800400",
+   "first_words": [
+    "0x3f800000",
+    "0x3f800400"
+   ],
+   "measured_noise": {
+    "halfwidth_w": 0.006035343734393794,
+    "power_excludes_0_if_M10": 0.04284427106322952,
+    "power_excludes_0_if_M12": 0.9894740511345685,
+    "se_w": 0.0029786626120688487,
+    "separation_M12_M10_in_se": 4.283361794870865
+   },
+   "registered_noise": {
+    "halfwidth_w": 0.0051,
+    "power_excludes_0_if_M10": 0.04153672027822458,
+    "power_excludes_0_if_M12": 0.9988878608475108,
+    "se_w": 0.002500596409404599,
+    "separation_M12_M10_in_se": 5.021893210675158
+   },
+   "second": "fp32.ones",
+   "second_words": [
+    "0x3f800000",
+    "0x3f800000"
+   ],
+   "what": "B one held mantissa bit, bit 10; A 1.0 in both"
+  },
+  "B19": {
+   "M10_w": -0.0012672675399265643,
+   "M12_increment_w": 0.013280320065063134,
+   "M12_se_w": 0.0008604169026665924,
+   "M12_w": 0.01201305252513657,
+   "d_pc_a": 0.0,
+   "d_pc_b": 1.0,
+   "first": "fp32.e188_a1_b3f880000",
+   "first_words": [
+    "0x3f800000",
+    "0x3f880000"
+   ],
+   "measured_noise": {
+    "halfwidth_w": 0.006035343734393794,
+    "power_excludes_0_if_M10": 0.06182714352682345,
+    "power_excludes_0_if_M12": 0.9730735280046734,
+    "se_w": 0.0029786626120688487,
+    "separation_M12_M10_in_se": 4.283361794870865
+   },
+   "registered_noise": {
+    "halfwidth_w": 0.0051,
+    "power_excludes_0_if_M10": 0.06811511184702729,
+    "power_excludes_0_if_M12": 0.9955273770568118,
+    "se_w": 0.002500596409404599,
+    "separation_M12_M10_in_se": 5.021893210675158
+   },
+   "second": "fp32.ones",
+   "second_words": [
+    "0x3f800000",
+    "0x3f800000"
+   ],
+   "what": "B one held mantissa bit, bit 19; A 1.0 in both"
+  },
+  "B22": {
+   "M10_w": 0.014855271479566667,
+   "M12_increment_w": 0.013280320065063134,
+   "M12_se_w": 0.0008604169026665924,
+   "M12_w": 0.0281355915446298,
+   "d_pc_a": 0.0,
+   "d_pc_b": 1.0,
+   "first": "fp32.e186_a1_b3fc00000",
+   "first_words": [
+    "0x3f800000",
+    "0x3fc00000"
+   ],
+   "measured_noise": {
+    "halfwidth_w": 0.006035343734393794,
+    "power_excludes_0_if_M10": 0.9984669703763431,
+    "power_excludes_0_if_M12": 0.9999999999994912,
+    "se_w": 0.0029786626120688487,
+    "separation_M12_M10_in_se": 4.283361794870865
+   },
+   "registered_noise": {
+    "halfwidth_w": 0.0051,
+    "power_excludes_0_if_M10": 0.999952137117966,
+    "power_excludes_0_if_M12": 1.0,
+    "se_w": 0.002500596409404599,
+    "separation_M12_M10_in_se": 5.021893210675158
+   },
+   "second": "fp32.ones",
+   "second_words": [
+    "0x3f800000",
+    "0x3f800000"
+   ],
+   "what": "B one held mantissa bit, bit 22; A 1.0 in both"
+  },
+  "PAIR": {
+   "M10_w": 0.0013285762528241207,
+   "M12_increment_w": 0.0,
+   "M12_se_w": 0.0,
+   "M12_w": 0.0013285762528241207,
+   "d_pc_a": 0.0,
+   "d_pc_b": 0.0,
+   "first": "fp32.e188_a1_b3f800c00",
+   "first_words": [
+    "0x3f800000",
+    "0x3f800c00"
+   ],
+   "measured_noise": {
+    "halfwidth_w": 0.006035343734393794,
+    "power_excludes_0_if_M10": 0.06374873750080379,
+    "power_excludes_0_if_M12": 0.06374873750080379,
+    "se_w": 0.0029786626120688487,
+    "separation_M12_M10_in_se": 0.0
+   },
+   "registered_noise": {
+    "halfwidth_w": 0.0051,
+    "power_excludes_0_if_M10": 0.07082337673112105,
+    "power_excludes_0_if_M12": 0.07082337673112105,
+    "se_w": 0.002500596409404599,
+    "separation_M12_M10_in_se": 0.0
+   },
+   "second": "fp32.e188_a1_b3f804400",
+   "second_words": [
+    "0x3f800000",
+    "0x3f804400"
+   ],
+   "what": "B two held mantissa bits, adjacent (10, 11) against spaced (10, 14); A 1.0 in both; equal popcounts"
+  }
+ }
+}

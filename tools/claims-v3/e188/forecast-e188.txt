@@ -1,0 +1,48 @@
+E188's lines (forecast_e188.py), frozen by E188's registration before any E188 datum. M12 as committed (m12.json, no refit; a post hoc
+model, fitted on E182), M10 frozen. aifoundry3, s = 1, fp32 rate 1.117211e+09 /s (candidates-m12.json's). W.
+
+Train noise: registered half-width 0.0051 W at 38 units (se 0.00250); measured (E182's fp32 trains) se 0.00298, half-width 0.0060.
+
+THE SEVEN TRAINS (first - second)
+train first (A, B)             second (A, B)                  M12    M12 se      M10   M12-M10 sep reg sep mea
+AALL  (0x3fffffff, 0x3f800000) (0x3f800000, 0x3f800000)  +0.14425   0.01975 +0.07462  +0.06963     3.5     3.5
+B04   (0x3f800000, 0x3f800010) (0x3f800000, 0x3f800000)  +0.01501   0.00086 +0.00173  +0.01328     5.0     4.3
+B05   (0x3f800000, 0x3f800020) (0x3f800000, 0x3f800000)  +0.01327   0.00086 -0.00001  +0.01328     5.0     4.3
+B10   (0x3f800000, 0x3f800400) (0x3f800000, 0x3f800000)  +0.01319   0.00086 -0.00009  +0.01328     5.0     4.3
+B19   (0x3f800000, 0x3f880000) (0x3f800000, 0x3f800000)  +0.01201   0.00086 -0.00127  +0.01328     5.0     4.3
+B22   (0x3f800000, 0x3fc00000) (0x3f800000, 0x3f800000)  +0.02814   0.00086 +0.01486  +0.01328     5.0     4.3
+PAIR  (0x3f800000, 0x3f800c00) (0x3f800000, 0x3f804400)  +0.00133   0.00000 +0.00133  +0.00000     0.0     0.0
+
+M12's held fp32 mantissa bit: gamma_B +0.01328 (se 0.00086), gamma_A +0.00303 (se 0.00086); one price a side at every position and beside every partner; M10: 0.
+
+THE KINDS PASS (levels above 1.0 x 1.0)
+kind                           key                                      M12    M12 se       M10
+1.0 x 1.0                      fp32.ones                           +0.00000   0.00000  +0.00000
+4.0 x 4.0                      fp32.e178_v4                        -0.08057   0.00857  +0.00097
+5.0 x 5.0                      fp32.e178_v5                        -0.05433   0.00686  +0.01090
+pi x pi (tile)                 fp32.pi                             +0.12888   0.01200  +0.01472
+BALL (1.0, 0x3fffffff)         fp32.e182_a1_b3fffffff              +0.38007   0.01979  +0.07462
+AALL (0x3fffffff, 1.0)         fp32.e182_a3fffffff_b1              +0.14425   0.01975  +0.07462
+lq_h0                          fp32.lq_h0                          +0.17247   0.00914  +0.03137
+aq_h0                          fp32.aq_h0                          +0.07002   0.01116  +0.03066
+pi x pi (the tie, built-in)    anchor_pi (the host's built-in --v  +0.12888   0.01200  +0.01472
+
+EVERY KIND (levels above fp32 zeros; the fallback's fifteen)
+key                                  P10=M10       M12    M12 se    pc A    pc B
+fp32.aq_h0                           8.26205   8.40413   0.01768  20.000   7.000
+fp32.e178_v4                         8.23236   8.25354   0.02157   2.000   2.000
+fp32.e178_v5                         8.24229   8.27978   0.02052   3.000   3.000
+fp32.e182_a1_b3fffffff               8.30602   8.71418   0.02218   7.000  30.000
+fp32.e182_a3fffffff_b1               8.30602   8.47837   0.02212  30.000   7.000
+fp32.e186_a1_b3fc00000               8.24625   8.36225   0.01718   7.000   8.000
+fp32.e188_a1_b3f800010               8.23312   8.34912   0.01718   7.000   8.000
+fp32.e188_a1_b3f800020               8.23138   8.34738   0.01718   7.000   8.000
+fp32.e188_a1_b3f800400               8.23130   8.34730   0.01718   7.000   8.000
+fp32.e188_a1_b3f800c00               8.23310   8.36238   0.01699   7.000   9.000
+fp32.e188_a1_b3f804400               8.23177   8.36105   0.01699   7.000   9.000
+fp32.e188_a1_b3f880000               8.23013   8.34613   0.01718   7.000   8.000
+fp32.lq_h0                           8.26276   8.50659   0.01712   7.000  17.625
+fp32.ones                            8.23139   8.33411   0.01742   7.000   7.000
+fp32.pi                              8.24612   8.46299   0.01799  14.000  14.000
+
+Checks: {"aall_is_e186_r4": {"M10_w": true, "M12_se_w": true, "M12_w": true, "first": true, "second": true}, "bench": {"check_mismatch_all_zero": true, "fp32.e178_v4": {"against": "tools/claims-v3/e178/bench/counts-e178.json", "mean_equal": true, "points_equal": true}, "fp32.e182_a1_b3fffffff": {"against": "tools/claims-v3/m12/bench/counts-m12-e186.json", "mean_equal": true, "points_equal": true}, "fp32.e182_a3fffffff_b1": {"against": "tools/claims-v3/e182/bench/counts-e182.json", "mean_equal": true, "points_equal": true}, "fp32.e186_a1_b3fc00000": {"against": "tools/claims-v3/m12/bench/counts-m12-e186.json", "mean_equal": true, "points_equal": true}, "fp32.ones": {"against": "tools/claims-v3/e178/bench/counts-e178.json", "mean_equal": true, "points_equal": true}, "fp32.zeros": {"against": "tools/claims-v3/e178/bench/counts-e178.json", "mean_equal": true, "points_equal": true}}, "e186_kinds_reproduced": {"equal": 4, "keys": ["fp32.e182_a1_b3fffffff", "fp32.e182_a3fffffff_b1", "fp32.e186_a1_b3fc00000", "fp32.ones"], "of": 4}}
