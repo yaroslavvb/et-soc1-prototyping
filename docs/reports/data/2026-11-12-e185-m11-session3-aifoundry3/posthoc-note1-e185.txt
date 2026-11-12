@@ -1,0 +1,86 @@
+E185's data README, dated note 1, and note M1's dated note 1: post hoc figures from committed files (posthoc_note1_e185.py)
+inputs: README.md, README.md.dated-note-M1.md and arm-m1-e185.txt (as text), scored-m11.json, logs/config-session-*.json.time, tools/claims-v3/e185/arms-e185-e181.json, tools/claims-v3/e185/rb/s11_a3_launch_e185_v2.sh (as text), tools/claims-v3/e186/rb/s11_a3_session_e186.sh (as text), docs/reports/data/2026-11-09-e186-one-number-r3-aifoundry3/logs/session.log and docs/reports/data/2026-11-08-e184-sensor-validation/raw/aifoundry3/logs/session-S-t1794133299.log (their session-end lines)
+
+## 0. The lines the notes cite (each found by its anchor on its first line; the lines' text is not copied)
+README.md lines 39-39 (two tries: the launch row (the rest gate's reading)): anchor '| launch (step 10, `rb/s11_a3_launch_e185_v2.sh`) |' FOUND on line 39
+README.md lines 40-40 (two tries: the T0 row): anchor '| T0 (session start) |' FOUND on line 40
+README.md lines 44-44 (two tries: the session-end row): anchor '| session end |' FOUND on line 44
+README.md lines 56-60 (the rest gate did not see E186): anchor '- **The rest gate did not see E186.**' FOUND on line 56
+README.md lines 78-78 (the answer: E185-RF): anchor '| **E185-RF**' FOUND on line 78
+README.md lines 79-79 (the answer: E185-BF): anchor '| **E185-BF**' FOUND on line 79
+README.md lines 80-80 (the answer: E185-RB): anchor '| **E185-RB**' FOUND on line 80
+README.md lines 82-82 (the answer: E185-C on F): anchor '| **E185-C on F**' FOUND on line 82
+README.md lines 83-83 (the answer: E185-C on B): anchor '| E185-C on B, reported' FOUND on line 83
+README.md lines 91-92 (each hold: the sign convention): anchor "**Each hold** (A10's reading; e = R" FOUND on line 91
+README.md lines 103-106 (each hold: the post hoc paragraph): anchor "Each arm's mean miss by kind, reported" FOUND on line 103
+README.md lines 106-106 (each hold: the frozen chain's sentence, its second line): anchor 'runs warm on L1, L2 and S2' FOUND on line 106
+README.md lines 116-116 (M11's readings: the pooled HM-CAL row): anchor '| **HM-CAL** and **HM-CAL-I8**, pooled' FOUND on line 116
+README.md lines 136-136 (the readings, labelled: card-minutes): anchor '| card-minutes | **102.6** of the 105 cap' FOUND on line 136
+README.md lines 207-208 (what it does: E181's held-out ranking): anchor "E181's held-out ranking" FOUND on line 207
+README.md.dated-note-M1.md lines 1-1 (the title (its clause after the anchor is set aside)): anchor 'both versions read alike;' FOUND on line 1; the line runs 103 more characters after it
+README.md.dated-note-M1.md lines 7-9 (the words are the reader's own): anchor '**Reported, never a rule:**' FOUND on line 7
+README.md.dated-note-M1.md lines 33-40 (the table): anchor "| hold | the model's rise |" FOUND on line 33
+README.md.dated-note-M1.md lines 42-43 (over the six rises): anchor '- **Over the six rises:**' FOUND on line 42
+README.md.dated-note-M1.md lines 44-46 (beside it): anchor '- **Beside it, as M1-4 sets them**' FOUND on line 44
+README.md.dated-note-M1.md lines 47-48 (the post hoc bullet (set aside)): anchor '- *Post hoc, deciding nothing:*' FOUND on line 47
+arm-m1-e185.txt lines 19-19 (v3's summary line): anchor 'v3 over the 6 rises read:' FOUND on line 19
+arm-m1-e185.txt lines 20-20 (v3's beside line): anchor "beside: E185-BEST's rms" FOUND on line 20
+arm-m1-e185.txt lines 34-34 (v4's summary line): anchor 'v4 over the 6 rises read:' FOUND on line 34
+arm-m1-e185.txt lines 35-35 (v4's beside line): anchor "beside: E185-BEST's rms" FOUND on line 35
+arm-m1-e185.txt lines 36-36 (v4 reads as v3): anchor 'v4 reads exactly as v3' FOUND on line 36
+README.md: 218 lines
+README.md.dated-note-M1.md: 58 lines
+arm-m1-e185.txt: 37 lines
+
+## 1. E181's held-out rms on both readings (README lines 207-208; the verifier's fault 1)
+the README prints Rl 0.198, B 0.231, F 0.296 C, and the frozen chain 0.21 on E185 against 0.30 on E181
+two-pass, A10's reading (arms-e185-e181.json > two_pass > held_out > rms; A1-1's label 'held out; the reading chosen by A10 after both readings were seen'): F 0.2963, B 0.2312, Rl 0.1978 (n 5); to 3 decimals Rl 0.198, B 0.231, F 0.296: the README figures; F to 2 decimals 0.30; order Rl < B < F
+one-pass, the stated reading (> held_out > rms; A1-1's label 'held out; the reading stated at 20:03 PST'): F 0.2934, B 0.2630, Rl 0.1948 (n 5); to 3 decimals Rl 0.195, B 0.263, F 0.293: not the README figures; F to 2 decimals 0.29; order Rl < B < F
+E185's frozen chain, blind on A10's reading (scored-m11.json > E185 > rules > E185-BEST > rms_C > F): 0.2146, below E181's F on both readings: True
+A1-1's label ('chosen by A10 after both readings were seen') occurs on 0 README line(s) and 0 note M1 line(s)
+
+## 2. Each D: the scorer's D_C against the subtraction of the printed rms (README lines 78-80; the verifier's nit 4)
+E185-RF, A10's reading (registered): README 0.2158 - 0.2146 = +0.0013; the printed operands subtract to +0.0012 (NOT the printed D); the scorer's D_C +0.0013 (= the printed D); NOT RESOLVED
+E185-RF, the stated reading's arm (reported, A1-1): README 0.2010 - 0.2226 = -0.0217; the printed operands subtract to -0.0216 (NOT the printed D); the scorer's D_C -0.0217 (= the printed D); NOT RESOLVED
+E185-BF, A10's reading (registered): README 0.2578 - 0.2146 = +0.0432; the printed operands subtract to +0.0432 (the same); the scorer's D_C +0.0432 (= the printed D); WORSE
+E185-BF, the stated reading's arm (reported, A1-1): README 0.2853 - 0.2226 = +0.0627; the printed operands subtract to +0.0627 (the same); the scorer's D_C +0.0627 (= the printed D); WORSE
+E185-RB, A10's reading (registered): README 0.2158 - 0.2578 = -0.0420; the printed operands subtract to -0.0420 (the same); the scorer's D_C -0.0420 (= the printed D); BETTER
+E185-RB, the stated reading's arm (reported, A1-1): README 0.2010 - 0.2853 = -0.0843; the printed operands subtract to -0.0843 (the same); the scorer's D_C -0.0843 (= the printed D); BETTER
+a desk check, A10's reading: the rms of the six per-hold misses as the score prints them (4 decimals): F 0.21454, B 0.25781, Rl 0.21581; D RF +0.00127, BF +0.04327, RB -0.04200; tau 0.0361
+
+## 3. Each hold's misses, e = R - P (README lines 91-106; the verifier's nit 5): e > 0, the die rose more than the arm predicted (the arm under-predicts); e < 0, less (the arm over-predicts)
+H_E  fp32.randn    R 11.1224; e_F +0.0632 (F under-predicts), e_B -0.2329 (B over-predicts), e_Rl +0.0652 (Rl under-predicts)
+L1   int8.full     R 10.5009; e_F +0.2638 (F under-predicts), e_B -0.0103 (B over-predicts), e_Rl -0.1998 (Rl over-predicts)
+L2   int8.full     R 10.4266; e_F +0.1962 (F under-predicts), e_B -0.0777 (B over-predicts), e_Rl -0.2651 (Rl over-predicts)
+H_E2 fp32.randn    R 10.6302; e_F -0.2075 (F over-predicts), e_B -0.4977 (B over-predicts), e_Rl -0.1807 (Rl over-predicts)
+S    int8.neg_ones R 4.1902; e_F +0.0301 (F under-predicts), e_B -0.0813 (B over-predicts), e_Rl -0.3121 (Rl over-predicts)
+S2   int8.neg_ones R 2.4615; e_F +0.3466 (F under-predicts), e_B +0.2900 (B under-predicts), e_Rl +0.1869 (Rl under-predicts)
+F under-predicts L1, L2 and S2: True
+F within 0.07 C on H_E and S: True
+B over-predicts H_E and H_E2: True
+Rl over-predicts L1, L2 and S: True
+Rl within 0.19 C on H_E and H_E2: True
+
+## 4. E185-C as the scorer printed it (README lines 82-83; the verifier's nit 6). Its rule (E185.md section 6): THE SHAPE MISSES if the 95% interval excludes 0 and |mean| >= 0.05 C; THE SHAPE HOLDS if it lies inside +-0.10 C; else NOT RESOLVED. The F line governs (A1-2); B and Rl are reported
+A10 F : mean +0.0063 C, 95% [-0.2387, +0.2513], n 4: NOT RESOLVED; nearer end 0.2387 C from 0
+A10 B : mean +0.2503 C, 95% [-0.0014, +0.5021], n 4: NOT RESOLVED; nearer end 0.0014 C from 0
+A10 Rl: mean +0.1756 C, 95% [-0.1303, +0.4816], n 4: NOT RESOLVED; nearer end 0.1303 C from 0
+stated F : mean +0.0053 C, 95% [-0.2370, +0.2477], n 4: NOT RESOLVED; nearer end 0.2370 C from 0
+stated B : mean +0.2195 C, 95% [-0.0287, +0.4677], n 4: NOT RESOLVED; nearer end 0.0287 C from 0
+stated Rl: mean +0.1434 C, 95% [-0.1631, +0.4500], n 4: NOT RESOLVED; nearer end 0.1631 C from 0
+A10's B line: |mean| 0.2503 >= 0.05, and its lower end lies 0.0014 C below 0, so it reads NOT RESOLVED by that margin
+
+## 5. The card-minutes (README lines 40, 44 and 136; the verifier's nit 7)
+the session collected: config reads 2026-11-12T04:32:45-08:00 to 2026-11-12T06:15:21-08:00: 102.6 card-minutes, against the cap of 105 per session from T0 (E185.md section 8)
+the first try (README lines 40 and 44): T0 03:24:56 PST (T1794482696 = 2026-11-12 03:24:56 PST) to its session end 03:31:32 PST: 6.6 card-minutes, no hold (the README prints 6.6)
+card 0 carried E185 for 109.2 minutes in all; README line 136 prints both figures: True
+
+## 6. Step 10 v2's rest rule against the session logs on the box (README lines 39 and 56-60; the verifier's fault 3)
+tools/claims-v3/e185/rb/s11_a3_launch_e185_v2.sh line 51: 4 patterns: build/e17[0-9]/session.log build/e18[0-4]/session.log build/e18[0-9]/session-*.log build/e185/T[0-9]*/session.log
+tools/claims-v3/e186/rb/s11_a3_session_e186.sh line 39 names E186's log as build/e186/T$T0/session.log; E186's T0 1794256853 (its log's first line)
+E186's session log build/e186/T1794256853/session.log: v2's patterns matching it: NONE; the proposed build/e18[0-9]/T[0-9]*/session.log: matches
+E184 arm S's session log build/e184/session-S-t1794133299.log: v2's patterns matching it: build/e18[0-9]/session-*.log; the proposed build/e18[0-9]/T[0-9]*/session.log: no match
+E185's first try's session log build/e185/T1794482696/session.log: v2's patterns matching it: build/e185/T[0-9]*/session.log; the proposed build/e18[0-9]/T[0-9]*/session.log: matches
+E184 arm S's session end 2026-11-08 02:22:24 PST (its committed log's last 'session end' line) to the first try's launch 2026-11-12 03:24:55 PST: 5822.52 minutes (5822 whole)
+E186's session end 2026-11-09 14:19:08 PST (its committed log's last 'session end' line) to the first try's launch 2026-11-12 03:24:55 PST: 3665.78 minutes (3665 whole)
+README line 39 prints 5,822 minutes (E184 arm S); line 59 prints about 3,666 (E186); both over the rule's 40 minutes and A7-4's hour
