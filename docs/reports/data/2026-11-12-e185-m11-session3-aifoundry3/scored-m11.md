@@ -1,0 +1,38 @@
+# M11 on aifoundry3 (3 session(s)), score_m11_v5.py
+
+- blind: every registration and amendment commit (A1-A9) precedes every session's first launch record
+- S1:p17620: H_E P None e None NOT SCORED ['not run']; Z P None e None NOT SCORED ['not run']; L1 P None e None NOT SCORED ['not run']; S P None e None NOT SCORED ['not run']; L2 P None e None NOT SCORED ['not run']
+- S2:p18120: H_E P 14.127 e -0.039 scored; Z P 0.705 e 0.345 scored; L1 P 9.485 e 0.253 scored; S P 3.471 e -0.008 scored; L2 P 8.242 e 0.496 scored
+- S3:p18520: H_E P 11.28 e -0.158 scored; Z P None e None NOT SCORED ['not run']; L1 P 10.237 e 0.264 scored; S P 4.16 e 0.03 scored; L2 P 10.231 e 0.196 scored
+- HM-LG: NOT SEPARATED (k 2); A1-4: nothing: NOT SEPARATED (arm retired)
+- HM-E144: REPEATS; N2 False
+- HM-CAL: NOT RESOLVED (D -0.0418, tau 0.051); A2-3: nothing from A2: NOT RESOLVED; HM-CAL-AG: NOT SCORED (X2 None, point None)
+- HM-CAL-I8: BETTER (D -0.1991, tau 0.0884); A4-3: nothing from A4: one session (a candidate); HM-I8-AG: NOT SCORED (X2 None, point None); A2's line on L2: rms 0.3666 C over 1
+- M11 carries: nothing: the chain unscaled stays M11's primary
+- S1:p17620 start gate (pre-A6 G0 (that kit's own line)): passed False; room 53.5821 C, F0 None C, residue None C, less None = None C; excluded: the start gate did not pass (pre-A6 G0 (that kit's own line)): room 53.582 C > 53.0 C
+- S2:p18120 start gate (A6-2 with A8-4): passed True; room 50.8165 C, F0 50.3032 C, residue 0.5134 C, less 0.414 = 0.0994 C
+- S2:p18120 FL5(c), reported: PASS (rests 0.3231 against FL1 0.3166 W/C, diff 0.0065, 6962 samples at degrees [52, 60]); beside on the 34 codes: PASS (diff -0.0018); degrees 52-58: PASS (diff 0.0086)
+- S3:p18520 start gate (A6-2 with A8-4): passed True; room 52.0977 C, F0 51.973 C, residue 0.1247 C, less 0.414 = -0.2893 C
+- S3:p18520 FL5(c), reported: PASS (rests 0.322 against FL1 0.3139 W/C, diff 0.0081, 15529 samples at degrees [52, 59]); beside on the 34 codes: PASS (diff -0.0009); degrees 52-58: PASS (diff 0.0113)
+- S3:p18520 A6-5 host, reported: NVMe composite 36.85 -> 37.85 C, coretemp 2-9 31.8654 -> 31.625 C
+- A9's arm (the chain over the smoke and the measured pass), SCORED (reported); reported (A9): the chain over the smoke and the measured pass; never a verdict, an entry or what M11 carries
+  - S2:p18120: H_E delta e 0.14, Z delta e 0.0, L1 delta e 0.0, S delta e 0.0, L2 delta e 0.0; gap 2.517 s (SCORED)
+  - S3:p18520: H_E delta e 0.221, Z delta e None, L1 delta e 0.0, S delta e 0.0, L2 delta e 0.0; gap 2.564 s (SCORED)
+  - on the arm: HM-E144 REPEATS; HM-HE N2 False; HM-CAL BETTER (RMS_c 0.2449, RMS_u 0.3215)
+  - S1:p17620: the arm not read (the session did not pass its start gate)
+- A10's reading (SCORED): S1:p17620: excluded: the session did not pass its start gate; S2:p18120: the chain over the smoke and the measured pass (A9-1); S3:p18520: the chain over the smoke and the measured pass (A9-1)
+  - HM-LG NOT SEPARATED; A1-4 nothing: NOT SEPARATED; HM-E144 REPEATS; HM-CAL BETTER; HM-CAL-I8 BETTER
+- E185's rules (SCORED; the chain over the smoke and the measured pass (A10); blind True):
+  - E185-RF: NOT RESOLVED {"D_C": 0.0013, "rms_x_C": 0.2158, "rms_y_C": 0.2146}
+  - E185-BF: WORSE {"D_C": 0.0432, "rms_x_C": 0.2578, "rms_y_C": 0.2146}
+  - E185-RB: BETTER {"D_C": -0.042, "rms_x_C": 0.2158, "rms_y_C": 0.2578}
+  - E185-BEST: NOT SEPARATED (F, Rl) {"rms_C": {"F": 0.2146, "B": 0.2578, "Rl": 0.2158}}
+  - E185-C on F: {"verdict": "NOT RESOLVED", "n": 4, "mean_d_C": 0.0063, "ci95_C": [-0.2387, 0.2513]}
+  - E185-C on B: {"verdict": "NOT RESOLVED", "n": 4, "mean_d_C": 0.2503, "ci95_C": [-0.0014, 0.5021]}
+  - E185-C on Rl: {"verdict": "NOT RESOLVED", "n": 4, "mean_d_C": 0.1756, "ci95_C": [-0.1303, 0.4816]}
+  - H_E fp32.randn: R 11.1224, e F 0.0632 / B -0.2329 / Rl 0.0652; cool {'e_F_C': 0.272, 'e_B_C': 0.2259, 'e_Rl_C': 0.2245}; rail share 0.8325; scored True, rail True
+  - L1 int8.full: R 10.5009, e F 0.2638 / B -0.0103 / Rl -0.1998; cool {'e_F_C': 0.2741, 'e_B_C': 0.236, 'e_Rl_C': 0.1953}; rail share 0.8749; scored True, rail True
+  - L2 int8.full: R 10.4266, e F 0.1962 / B -0.0777 / Rl -0.2651; cool {'e_F_C': 0.033, 'e_B_C': -0.0029, 'e_Rl_C': -0.0464}; rail share 0.8743; scored True, rail True
+  - H_E2 fp32.randn: R 10.6302, e F -0.2075 / B -0.4977 / Rl -0.1807; cool {'e_F_C': -0.2382, 'e_B_C': -0.2762, 'e_Rl_C': -0.2513}; rail share 0.833; scored True, rail True
+  - S int8.neg_ones: R 4.1902, e F 0.0301 / B -0.0813 / Rl -0.3121; cool None; rail share 0.9041; scored True, rail True
+  - S2 int8.neg_ones: R 2.4615, e F 0.3466 / B 0.29 / Rl 0.1869; cool None; rail share 0.9058; scored True, rail True
