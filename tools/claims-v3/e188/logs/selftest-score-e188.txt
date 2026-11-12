@@ -1,0 +1,21 @@
+PASS A1 the scale route: from two of E186's committed fp32 trains' anchors, passes kept [18611, 18614], s 1.0109206649843068 from ['fp32.randn']; from E186's committed anchors' reduction 1.008733231104833 (E186's scored 1.008733231104833)
+PASS A2 E182's reduce_train via E188's import, on E186's committed blocks: S23 +0.154496 [+0.149135, +0.159856] equal True; B15-B7 +0.139814 [+0.135529, +0.144098] equal True
+PASS A3 the trains' measured rate over forecast-e188.json's fp32 rate, on E186's committed fp32 trains (reported): S23 1.0016 (76), B15-B7 1.0016 (76), B23-B15 1.0016 (76), A15-A7 1.0016 (76), A23-A15 1.0017 (76)
+PASS A4 e188_stats.py's self-check: e188_stats self-check PASS
+PASS A5 E186's committed SIZE and WHICH words re-made by e186_stats' size_band and which (E188's calls): 10 rules, 0 differ []
+PASS A6 the pairing check on E186's committed fp32 train blocks: S23 1064 of 1064 paired (['c-log-p18611.jsonl.gz']); B15-B7 1064 of 1064 paired (['c-log-p18614.jsonl.gz'])
+PASS B1 M12's world, FULL: {'E188-AALL': 'M12', 'E188-B04': 'M12', 'E188-B05': 'M12', 'E188-B10': 'M12', 'E188-B19': 'M12', 'E188-B22': 'M12', 'E188-BPOS': 'FLAT', 'E188-C': 'PASS', 'E188-GA23': 'POSITIVE', 'E188-GB1': 'POSITIVE', 'E188-LV': 'NOT SCORED', 'E188-M': 'M12', 'E188-PAIR': 'BOTH', 'E188-SCHED': 'PASS', 'E188-TR-N': 'AS FORECAST'}; GB1 PASS/AGREES, GA23 PASS/DIFFERS LOW; s 1.0037972998982105; z against M12 {B05 -0.4, PAIR +0.3, B19 -0.5, AALL -0.1, B10 -0.5, B22 +1.7, B04 -0.4}; kinds-pass contrasts 7 kinds, segments [6]
+PASS B2 M10's world: {'E188-AALL': 'M10', 'E188-B04': 'NEITHER', 'E188-B05': 'NEITHER', 'E188-B10': 'M10', 'E188-B19': 'M10', 'E188-B22': 'M10', 'E188-BPOS': 'FLAT', 'E188-C': 'PASS', 'E188-GA23': 'NOT RESOLVED', 'E188-GB1': 'NOT RESOLVED', 'E188-LV': 'NOT SCORED', 'E188-M': 'NEITHER', 'E188-PAIR': 'NEITHER', 'E188-SCHED': 'PASS', 'E188-TR-N': 'AS FORECAST'}; z against M10 {B05 -2.0, PAIR -2.3, B19 -0.3, AALL -1.3, B10 +0.3, B22 +1.6, B04 -2.1}; E188-M's Q, M12 516.3, M10 18.2 (word NEITHER, reported)
+PASS B3 the one-bit B price moved with the place (POS-6): BPOS VARIES (Q 51.532414722580626)
+PASS B4 noise at 3 times: TR-N FAILS (ratio 2.877946077875935)
+PASS B5 B19 cut to 10 processes: B19 NOT SCORED (5 units, fewer than 8), GB1 over ['B04', 'B05', 'B10', 'B22'], E188-M over 6
+PASS B6 a C FAIL in B10: C FAIL, B10 NOT SCORED, GB1 over ['B04', 'B05', 'B19', 'B22']
+PASS B7 no anchors: s 0.9960385312053273 from the session's kinds passes (full); no anchors and no kinds pass: s read False, used 1.0, s unread (1 used); the train words ['M12', 'BOTH', 'M12', 'M12', 'M12', 'M12', 'M12']
+PASS B8 the fallback: LV M12 BETTER (-0.14780366638451994), trains NOT SCORED, SCHED PASS (no train block read (quote it so: vacuous)), s 0.9952127843333736
+PASS B9 the C-session list: ['e188-smoke/p18801', 'e188/p18810', 'e188/p18816', 'e188/p18820', 'e188/p18830']
+PASS B10 the smoke gate's train part (B05): a good smoke (0, "SMOKE-GATE (train) PASS {'bad': []}"); one launch off the schedule (1, "SMOKE-GATE (train) FAIL {'bad': ['train process 0 (SFFS): launches [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], kinds SSSSFSSFFSSFFS against SSSFFSSFFSSFFS',")
+PASS B13 the pairing check: a PAIR C record of the other tiles: PAIR NOT SCORED, SCHED FAIL ['PAIR'], C PASS; a B04 launch off the schedule: B04 NOT SCORED, SCHED ['B04']
+PASS B14 the C-session gate without a finished check of C: rc 4, scored file written False
+PASS B11 the exact copy-back: exact rc 0 'COPY-BACK EXACT 6 files (every manifest line read back, and nothing el'; one byte rc 4 'COPY-BACK DIFFERS: build/claims-v3/aifoundry3/e188/p18810/train.jsonl:'; extra rc 4 'COPY-BACK EXTRA: files the session's manifest does not list: e188/p188'; no manifest rc 4 'COPY-BACK NO-MANIFEST: the session's MANIFEST.sha256 is not in the cop'; unnamed block rc 4 'COPY-BACK DIFFERS: e188/p18811: a block directory the manifest does no'
+PASS B12 the images: all 15 hold their words (no problem; lq_h0's B words 8); a changed B word caught in 15 of 15; a 2,047-byte image caught
+SELFTEST-SCORE-E188 20 of 20 PASS

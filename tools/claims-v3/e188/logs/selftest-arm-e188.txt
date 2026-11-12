@@ -1,0 +1,15 @@
+PASS R1 a FULL session: v8 {'kinds_pass': {'not covered': 6, 'read': 2}, 'trains': {'read': 7}}; v9 {'kinds_pass': {'read': 8}, 'trains': {'read': 7}}; labels as frozen; no summary key
+PASS R2 a train NOT SCORED: v8 B19 not read, v9 {'not read': 1, 'read': 6}
+PASS R3 a NaN mean: v9 B05 not read; NaN in the json False
+PASS R4 the model's file off its pin: rc 2, nothing written
+PASS R5 no trains: rc 3
+PASS R6 the fallback's scored file: v9 trains {'not read': 7}, kinds pass {'not run': 8}
+PASS G1 before the data commit: rc 16: ARMS NOT READ: docs/reports/data/2026-11-13-e188-one-number-r4-aifoundry3/scored-e188.json is not tracked at H
+PASS G2 --out inside the repository: rc 16
+PASS G3 --out already written: rc 16
+PASS G4 after the data commit: rc 0: ARMS READ: october-forecast-model v8 and v9 read on the committed docs/reports/data/2026-1; the out directory ['arm.json', 'arm.txt', 'old.json']
+PASS G5 the committed scored file edited on disk: rc 16
+PASS G6 the kit's list off the sha256 given: rc 16
+PASS G7 the reader changed on disk: rc 16: ARMS NOT READ: the kit's list has 1 entry not OK: ['tools/claims-v3/e188/arm_read_e188.py'
+PASS G8 --reg-override without E188_GATE_DESKTEST=1: rc 10
+SELFTEST-ARM-E188 14 of 14 PASS

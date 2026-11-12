@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+"""E188 (Q165, the kit; E186's check_e186.py, itself E182's check_e182.py, ported): refuse unless every reused file, every E188 card file, E182's files the box calls,
+the registration's files (its kinds list among them), the train host's build inputs, the pinned watcher files and every tile E188 runs are
+byte-identical to harness-e188.json (card_code_unchanged_sha256, e188_card_files_sha256, e182_files_called_sha256, registration_sha256,
+train_host_build_inputs_sha256, watcher_sha256, tiles_sha256) and, on the box, every binary the run executes is byte-identical to
+harness.box_binaries_sha256 (E178's four, which E182 and E186 ran: E78's sparsity_host, the kernel, the C-logging host, ettelem). With
+the trains (the default), also the train host: its patched source build/e188host/src/host/main.cpp equals harness.train_host_source_sha256
+(the source E182 registered and E182 and E186 ran), its build record build/e188host/SHA256 names that source and the binary
+build/e188host/b/host/sparsity_host, and the binary hashes as that record says. The train change itself is read from the binary's
+behaviour by train_check_e188.sh (build_host_e188.sh and block_e188.sh run it; E183's kit note 4's lesson): no string is grepped from
+any binary here or anywhere in E188's kit.
+
+    python3 tools/claims-v3/e188/check_e188.py [--tree <top of the tree>] [--desk] [--no-trains]   # exit 0 "HARNESS OK", or exit 9
+
+--desk (or V3_DRY set, a dry run that never opens a device) skips the binaries and the train host (the Intel has none). session_e188.sh
+runs it on the box before any device opens. Standard library only.
+SPDX-License-Identifier: Apache-2.0
+"""
+import hashlib
+import json
+import os
+import sys
+
+sys.dont_write_bytecode = True
+HERE = os.path.dirname(os.path.abspath(__file__))
+KEYS = ("card_code_unchanged_sha256", "e188_card_files_sha256", "e182_files_called_sha256", "registration_sha256",
+        "train_host_build_inputs_sha256", "watcher_sha256", "tiles_sha256")
+TRHOST = "build/e188host/b/host/sparsity_host"
+TRSRC = "build/e188host/src/host/main.cpp"
+
+
+def sha(p):
+    return hashlib.sha256(open(p, "rb").read()).hexdigest()
+
+
+def check(top, box=True, trains=True):
+    h = json.load(open(os.path.join(HERE, "harness-e188.json")))
+    want = {}
+    for k in KEYS:
+        want.update(h[k])
+    if box:
+        want.update(h["box_binaries_sha256"])
+        if trains:
+            want.update(h["train_host_source_sha256"])
+    bad = []
+    for rel, w in want.items():
+        p = os.path.join(top, rel)
+        have = sha(p) if os.path.exists(p) else "missing"
+        if have != w:
+            bad.append(f"{rel}: {have} != registered {w}")
+    if box and trains:
+        rec = os.path.join(top, "build/e188host/SHA256")
+        got = {}
+        if os.path.exists(rec):
+            for line in open(rec):
+                if line.strip():
+                    hh, pth = line.split(None, 1)
+                    got[os.path.relpath(pth.strip(), top) if os.path.isabs(pth.strip()) else pth.strip()] = hh
+        if got.get(TRSRC) != h["train_host_source_sha256"][TRSRC]:
+            bad.append(f"build/e188host/SHA256 does not record the registered patched source ({got.get(TRSRC)})")
+        p = os.path.join(top, TRHOST)
+        if not os.path.exists(p):
+            bad.append(f"{TRHOST}: missing (build_host_e188.sh, the runbook's step 6)")
+        elif got.get(TRHOST) != sha(p):
+            bad.append(f"{TRHOST}: sha256 {sha(p)} is not its build record's {got.get(TRHOST)}")
+        n_extra = 2
+    else:
+        n_extra = 0
+    return bad, len(want) + n_extra
+
+
+def main():
+    top = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
+    if "--tree" in sys.argv:
+        top = sys.argv[sys.argv.index("--tree") + 1]
+    desk = "--desk" in sys.argv or bool(os.environ.get("V3_DRY"))
+    trains = "--no-trains" not in sys.argv
+    bad, n = check(top, box=not desk, trains=trains)
+    if bad:
+        print("HARNESS DIFFERS - refusing:\n  " + "\n  ".join(bad))
+        sys.exit(9)
+    print(f"HARNESS OK: {n} files match harness-e188.json" + (" (desk or dry run: binaries and the train host not checked)" if desk else "")
+          + (" (the trains off: the train host not checked)" if not trains and not desk else ""))
+
+
+if __name__ == "__main__":
+    main()

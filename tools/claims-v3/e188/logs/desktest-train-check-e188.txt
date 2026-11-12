@@ -1,0 +1,132 @@
+compilers: g++-13 (Homebrew GCC 13.2.0) 13.2.0; Apple clang version 21.0.0 (clang-2100.1.1.101)
+
+== 1. the three sources
+-> PASS (the committed host source is the pinned 0f53a7d5...)
+patched 37ca98adf1e677d7b8087b28e932dcbb05f5a0dd37c42be2215a7c503c72e5b8; ccheck 5bd029ca1bc0a3f63573015d400b9e7b2d8c2e84de12a722f58bc84057edf79f; e78 0f53a7d505155156c933e2d9a64d38803ca4e0cea3e20242e0aaafbf35e82284
+-> PASS (the patched source is the pinned 37ca98ad... (harness-e186.json's and harness-e182.json's))
+
+== 2. twelve builds (each: the compiler, its flag, the mock headers, the source and the recording mock)
+g++-13 -std=c++17 -O2 -I<mock headers> -I<src-patched> <src-patched>/host/main.cpp <mock_rt_e188> -o host-patched-gcc13-O2: rc 0; sha256 d4057cef961ad803f03a8cf592e66baecd02972db8d073a4a7a9adac0c598523; 4 lines on stderr
+-> PASS (host-patched-gcc13-O2 built)
+g++-13 -std=c++17 -O3 -I<mock headers> -I<src-patched> <src-patched>/host/main.cpp <mock_rt_e188> -o host-patched-gcc13-O3: rc 0; sha256 9152699650ee778638808cd2287d28d52fcdde1673df7d471361122ba243b56c; 4 lines on stderr
+-> PASS (host-patched-gcc13-O3 built)
+clang++ -std=c++17 -O1 -I<mock headers> -I<src-patched> <src-patched>/host/main.cpp <mock_rt_e188> -o host-patched-clang-O1: rc 0; sha256 5a5148518e1e96b699ad53cb8357091d83f349959a2a6402a10579db4208fdb2; 0 lines on stderr
+-> PASS (host-patched-clang-O1 built)
+clang++ -std=c++17 -O2 -I<mock headers> -I<src-patched> <src-patched>/host/main.cpp <mock_rt_e188> -o host-patched-clang-O2: rc 0; sha256 7df9359a70b999372759b8074b9253b829b629d887677b8402daddaf13ad1026; 0 lines on stderr
+-> PASS (host-patched-clang-O2 built)
+g++-13 -std=c++17 -O2 -I<mock headers> -I<src-ccheck> <src-ccheck>/host/main.cpp <mock_rt_e188> -o host-ccheck-gcc13-O2: rc 0; sha256 2b34df6b9d118f57a2db77f823f173b5ed1f4034bdf76b3fdb397b7b4a61261f; 4 lines on stderr
+-> PASS (host-ccheck-gcc13-O2 built)
+g++-13 -std=c++17 -O3 -I<mock headers> -I<src-ccheck> <src-ccheck>/host/main.cpp <mock_rt_e188> -o host-ccheck-gcc13-O3: rc 0; sha256 f67dc56ca05148a43f704060a453b93abd2029706e9bbcbb213908e1915dd7d1; 4 lines on stderr
+-> PASS (host-ccheck-gcc13-O3 built)
+clang++ -std=c++17 -O1 -I<mock headers> -I<src-ccheck> <src-ccheck>/host/main.cpp <mock_rt_e188> -o host-ccheck-clang-O1: rc 0; sha256 70889574c018b02463a211a0b7c2fbaa41f86aaa1e55027867c538cc54015f7f; 0 lines on stderr
+-> PASS (host-ccheck-clang-O1 built)
+clang++ -std=c++17 -O2 -I<mock headers> -I<src-ccheck> <src-ccheck>/host/main.cpp <mock_rt_e188> -o host-ccheck-clang-O2: rc 0; sha256 1d13e2c8a4dbea802717f9f23abdaffc8eb13d5f99cab4872e1b6b5ef5ad674f; 0 lines on stderr
+-> PASS (host-ccheck-clang-O2 built)
+g++-13 -std=c++17 -O2 -I<mock headers> -I<src-e78> <src-e78>/host/main.cpp <mock_rt_e188> -o host-e78-gcc13-O2: rc 0; sha256 ef8615434811917cd0bef6d5d8f9ccb1f3dc5b1859998695c05a46dd16ac54df; 4 lines on stderr
+-> PASS (host-e78-gcc13-O2 built)
+g++-13 -std=c++17 -O3 -I<mock headers> -I<src-e78> <src-e78>/host/main.cpp <mock_rt_e188> -o host-e78-gcc13-O3: rc 0; sha256 48fb69a96f1b75ab6eabd5b00599c4e2c6f472fa7c237df7f9b94e78993213d4; 4 lines on stderr
+-> PASS (host-e78-gcc13-O3 built)
+clang++ -std=c++17 -O1 -I<mock headers> -I<src-e78> <src-e78>/host/main.cpp <mock_rt_e188> -o host-e78-clang-O1: rc 0; sha256 48603fe561466a73a9317da0cc7cae43d511bdddae4dfbf28c3e9807572d1cbb; 0 lines on stderr
+-> PASS (host-e78-clang-O1 built)
+clang++ -std=c++17 -O2 -I<mock headers> -I<src-e78> <src-e78>/host/main.cpp <mock_rt_e188> -o host-e78-clang-O2: rc 0; sha256 10405650f659e7e11bd5834389335559acecd5bc446e47fdac97808840b69114; 0 lines on stderr
+-> PASS (host-e78-clang-O2 built)
+
+== 3. on each binary: OLD (reported), NEW with the device record, and the CONTROL
+-- host-patched-gcc13-O2
+OLD (E186's greps, reported): every string found
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-gcc13-O2 accepts --values-b, --abba, --launches, --c-log and --c-poison and stops at the empty --kernel (rc 1, before any device call, nothing written); --values-b, --abba, --launches and --c-log each need a value (rc 2)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-gcc13-O2: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-gcc13-O2 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 1: FAIL: E182: a train needs --launches; device record: 8 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,unloadCode,destroyStream)
+-> PASS (CONTROL on host-patched-gcc13-O2 reaches the device layer, the runtime and the kernel load before its refusal)
+-- host-patched-gcc13-O3
+OLD (E186's greps, reported): every string found
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-gcc13-O3 accepts --values-b, --abba, --launches, --c-log and --c-poison and stops at the empty --kernel (rc 1, before any device call, nothing written); --values-b, --abba, --launches and --c-log each need a value (rc 2)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-gcc13-O3: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-gcc13-O3 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 1: FAIL: E182: a train needs --launches; device record: 8 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,unloadCode,destroyStream)
+-> PASS (CONTROL on host-patched-gcc13-O3 reaches the device layer, the runtime and the kernel load before its refusal)
+-- host-patched-clang-O1
+OLD (E186's greps, reported): every string found
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-clang-O1 accepts --values-b, --abba, --launches, --c-log and --c-poison and stops at the empty --kernel (rc 1, before any device call, nothing written); --values-b, --abba, --launches and --c-log each need a value (rc 2)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-clang-O1: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-clang-O1 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 1: FAIL: E182: a train needs --launches; device record: 8 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,unloadCode,destroyStream)
+-> PASS (CONTROL on host-patched-clang-O1 reaches the device layer, the runtime and the kernel load before its refusal)
+-- host-patched-clang-O2
+OLD (E186's greps, reported): every string found
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-clang-O2 accepts --values-b, --abba, --launches, --c-log and --c-poison and stops at the empty --kernel (rc 1, before any device call, nothing written); --values-b, --abba, --launches and --c-log each need a value (rc 2)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-clang-O2: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-clang-O2 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 1: FAIL: E182: a train needs --launches; device record: 8 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,unloadCode,destroyStream)
+-> PASS (CONTROL on host-patched-clang-O2 reaches the device layer, the runtime and the kernel load before its refusal)
+-- host-ccheck-gcc13-O2
+OLD (E186's greps, reported): not found: --values-b --abba --launches
+TRAIN-CHANGE MISSING: <scratch>/bin/host-ccheck-gcc13-O2; the options were refused, rc 2: unknown option --values-b (see the comment at the top of hos; --values-b alone: unknown option (rc 2); --abba alone: unknown option (rc 2); --launches alone: unknown option (rc 2)
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-ccheck-gcc13-O2: TRAIN-CHANGE MISSING (unknown option --values-b))
+-> PASS (NEW on host-ccheck-gcc13-O2 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 2: unknown option --values-b (see the comment at the top of host/main.cpp); device record: 0 lines ()
+-> PASS (CONTROL on host-ccheck-gcc13-O2: unknown option, no device call)
+-- host-ccheck-gcc13-O3
+OLD (E186's greps, reported): not found: --values-b --abba --launches
+TRAIN-CHANGE MISSING: <scratch>/bin/host-ccheck-gcc13-O3; the options were refused, rc 2: unknown option --values-b (see the comment at the top of hos; --values-b alone: unknown option (rc 2); --abba alone: unknown option (rc 2); --launches alone: unknown option (rc 2)
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-ccheck-gcc13-O3: TRAIN-CHANGE MISSING (unknown option --values-b))
+-> PASS (NEW on host-ccheck-gcc13-O3 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 2: unknown option --values-b (see the comment at the top of host/main.cpp); device record: 0 lines ()
+-> PASS (CONTROL on host-ccheck-gcc13-O3: unknown option, no device call)
+-- host-ccheck-clang-O1
+OLD (E186's greps, reported): not found: --values-b --abba --launches
+TRAIN-CHANGE MISSING: <scratch>/bin/host-ccheck-clang-O1; the options were refused, rc 2: unknown option --values-b (see the comment at the top of hos; --values-b alone: unknown option (rc 2); --abba alone: unknown option (rc 2); --launches alone: unknown option (rc 2)
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-ccheck-clang-O1: TRAIN-CHANGE MISSING (unknown option --values-b))
+-> PASS (NEW on host-ccheck-clang-O1 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 2: unknown option --values-b (see the comment at the top of host/main.cpp); device record: 0 lines ()
+-> PASS (CONTROL on host-ccheck-clang-O1: unknown option, no device call)
+-- host-ccheck-clang-O2
+OLD (E186's greps, reported): not found: --values-b --abba --launches file:
+TRAIN-CHANGE MISSING: <scratch>/bin/host-ccheck-clang-O2; the options were refused, rc 2: unknown option --values-b (see the comment at the top of hos; --values-b alone: unknown option (rc 2); --abba alone: unknown option (rc 2); --launches alone: unknown option (rc 2)
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-ccheck-clang-O2: TRAIN-CHANGE MISSING (unknown option --values-b))
+-> PASS (NEW on host-ccheck-clang-O2 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 2: unknown option --values-b (see the comment at the top of host/main.cpp); device record: 0 lines ()
+-> PASS (CONTROL on host-ccheck-clang-O2: unknown option, no device call)
+-- host-e78-gcc13-O2
+OLD (E186's greps, reported): not found: --c-log --c-poison --values-b --abba --launches
+TRAIN-CHANGE MISSING: <scratch>/bin/host-e78-gcc13-O2; the options were refused, rc 2: unknown option --values-b (see the comment at the top of hos; --values-b alone: unknown option (rc 2); --abba alone: unknown option (rc 2); --launches alone: unknown option (rc 2); --c-log alone: unknown option (rc 2)
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-e78-gcc13-O2: TRAIN-CHANGE MISSING (unknown option --values-b))
+-> PASS (NEW on host-e78-gcc13-O2 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 2: unknown option --values-b (see the comment at the top of host/main.cpp); device record: 0 lines ()
+-> PASS (CONTROL on host-e78-gcc13-O2: unknown option, no device call)
+-- host-e78-gcc13-O3
+OLD (E186's greps, reported): not found: --c-log --c-poison --values-b --abba --launches
+TRAIN-CHANGE MISSING: <scratch>/bin/host-e78-gcc13-O3; the options were refused, rc 2: unknown option --values-b (see the comment at the top of hos; --values-b alone: unknown option (rc 2); --abba alone: unknown option (rc 2); --launches alone: unknown option (rc 2); --c-log alone: unknown option (rc 2)
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-e78-gcc13-O3: TRAIN-CHANGE MISSING (unknown option --values-b))
+-> PASS (NEW on host-e78-gcc13-O3 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 2: unknown option --values-b (see the comment at the top of host/main.cpp); device record: 0 lines ()
+-> PASS (CONTROL on host-e78-gcc13-O3: unknown option, no device call)
+-- host-e78-clang-O1
+OLD (E186's greps, reported): not found: --c-log --c-poison --values-b --abba --launches
+TRAIN-CHANGE MISSING: <scratch>/bin/host-e78-clang-O1; the options were refused, rc 2: unknown option --values-b (see the comment at the top of hos; --values-b alone: unknown option (rc 2); --abba alone: unknown option (rc 2); --launches alone: unknown option (rc 2); --c-log alone: unknown option (rc 2)
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-e78-clang-O1: TRAIN-CHANGE MISSING (unknown option --values-b))
+-> PASS (NEW on host-e78-clang-O1 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 2: unknown option --values-b (see the comment at the top of host/main.cpp); device record: 0 lines ()
+-> PASS (CONTROL on host-e78-clang-O1: unknown option, no device call)
+-- host-e78-clang-O2
+OLD (E186's greps, reported): not found: --c-log --c-poison --values-b --abba --launches file:
+TRAIN-CHANGE MISSING: <scratch>/bin/host-e78-clang-O2; the options were refused, rc 2: unknown option --values-b (see the comment at the top of hos; --values-b alone: unknown option (rc 2); --abba alone: unknown option (rc 2); --launches alone: unknown option (rc 2); --c-log alone: unknown option (rc 2)
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-e78-clang-O2: TRAIN-CHANGE MISSING (unknown option --values-b))
+-> PASS (NEW on host-e78-clang-O2 opened no device (the record is empty))
+CONTROL (a train without --launches) rc 2: unknown option --values-b (see the comment at the top of host/main.cpp); device record: 0 lines ()
+-> PASS (CONTROL on host-e78-clang-O2: unknown option, no device call)
+
+DESKTEST-TRAIN-CHECK-E188 PASS (50 of 50)

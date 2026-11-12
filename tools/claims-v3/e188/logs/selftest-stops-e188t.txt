@@ -1,0 +1,18 @@
+   K1: rc 6, host runs 0, records 0, marks 0, 0.1 s; STOP (6): train 18810 process 0: <case dir>/out/STOP exists
+PASS K1 board 66 W before the first process: exit 6, the board-power stop in STOP, the host never ran
+   K2: rc 6, host runs 0, records 0, marks 0, 0.1 s; STOP (6): train 18810 process 0: <case dir>/out/STOP exists
+PASS K2 minshire[0] 71 C: exit 6, the die stop in STOP, the host never ran
+   K3: rc 5, host runs 0, records 0, marks 0, 0.3 s; STOP (5): train 18810 process 0: the newest telemetry line is 10.0 s old: the sampler is gone
+PASS K3 the newest line 10 s old: exit 5 (EXIT_STALL), the host never ran
+   K4: rc 5, host runs 0, records 0, marks 0, 0.1 s; STOP (5): train 18810 process 0: no telemetry line
+PASS K4 no telemetry line: exit 5, the host never ran
+   K5: rc 3, host runs 0, records 0, marks 0, 0.3 s; STOP (3): train 18810 process 0: another user on this card: ['4242:31337:sparsity_host']
+PASS K5 another uid's sparsity_host (stand-in ps): exit 3 (EXIT_OTHERS), the host never ran
+   K6: rc 2, host runs 0, records 0, marks 0, 0.3 s; STOP (2): train 18810 process 0: <case dir>/out/STOP exists
+PASS K6 the block's STOP file already there: exit 2 (EXIT_STOP), the host never ran
+   K7: rc 6, host runs 1, records 14, marks 1, 1.2 s; STOP (6): train 18810 process 1: <case dir>/out/STOP exists
+PASS K7 hot while process 0 runs: the watcher writes STOP, the check before process 1 ends the train (exit 6); the host ran once
+   K8: rc 0, host runs 2, records 28, marks 2, 1.6 s; 
+PASS K8 cool throughout, two processes: exit 0, the host ran twice, 28 launch records and 2 marks, no STOP
+
+SELFTEST-STOPS-E188T 8 of 8 PASS
