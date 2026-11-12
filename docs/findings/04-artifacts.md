@@ -1499,6 +1499,18 @@ These commits built **no new space**: Q161's three commits add 386 files and edi
 
 Two of the three carry "Q161" in their subjects; the data commit's subject names E186 and the owner's go (A2). **The hash lists** (every tracked file whose name holds SHA256SUMS; the only misses, every time, are E85's code list, whose 17 entries match their files under `tools/claims-v3/hlc`, `hlk` and `hm`): 163 lists, 5,747 of 5,764 entries OK at `c7786e5d` (the fix pass's count and the critic's), the 17 not OK E85's code list alone. E186's data is in these two commits; no E183 or E185 datum is in any ref.
 
+## Q163 published no new page: E185's data, note M1's reading and the data's dated notes (12 November 2026)
+
+These commits built **no new space**: Q163's three commits add 62 files and edit none (`190bad0d` to `6fc09747`, over `52e3f68a`). The table gives each commit with git's own time (PST, Thu 12 Nov), its lane, the files it holds and their count. The short names are the ones [05-claims.md](05-claims.md), "Q163", uses. *(Recorded by Q164's records, Thu 12 Nov 2026.)*
+
+| Commit (git's time, PST) | Round | The files (where) | Files |
+|---|---|---|---|
+| `190bad0d` (06:27:38) | Q163, E185's card lane | [`docs/reports/data/2026-11-12-e185-m11-session3-aifoundry3/`](../reports/data/2026-11-12-e185-m11-session3-aifoundry3/README.md): step 14's collection and score as it left them (50 files: 30 under `aifoundry3/`, the session's pass directories as the box wrote them; 4 under `ccheck/`, the check of C; 13 under `logs/`; and the scorer's `scored-m11.json`, `scored-m11.md` and `scored-m11-lines.jsonl`), `README.md` and `SHA256SUMS` (50 entries, sha256 `c4edeb2f…`) | 52 |
+| `265dfd4c` (06:28:51) | Q163, E185's card lane | in the same directory: [`README.md.dated-note-M1.md`](../reports/data/2026-11-12-e185-m11-session3-aifoundry3/README.md.dated-note-M1.md), `arm-m1-e185.json`, `arm-m1-e185.txt` and `SHA256SUMS-m1` (3 entries, sha256 `16278873…`) | 4 |
+| `6fc09747` (07:34:28) | Q163, the fix pass | in the same directory: [`README.md.dated-note-1.md`](../reports/data/2026-11-12-e185-m11-session3-aifoundry3/README.md.dated-note-1.md), `README.md.dated-note-M1.md.dated-note-1.md`, `posthoc_note1_e185.py`, `posthoc-note1-e185.txt`, `posthoc-note1-e185.json` and `SHA256SUMS-note1` (9 entries, sha256 `1e553658…`) | 6 |
+
+Each subject names E185; none names Q163. **The hash lists** (every tracked file whose name holds SHA256SUMS; the only misses, every time, are E85's code list, whose 17 entries match their files under `tools/claims-v3/hlc`, `hlk` and `hm`): 166 lists, 5,809 of 5,826 entries OK at `6fc09747` (the fix pass's count and the critic's), the 17 not OK E85's code list alone. The data directory holds 62 files, every one but `SHA256SUMS-note1` pinned by one of its three lists (50, 3 and 9 OK). E185's data is in these three commits; no E183 datum is in any ref.
+
 ## The camera and the details panel (30 September)
 
 For Q74–Q76: the memory levels and the chip diagram (the pages of 28 and 27 September) jumped in the middle of their

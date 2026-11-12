@@ -5062,7 +5062,7 @@ Each claim is labelled **blind** (measured on a run whose rules and forecasts we
 
 ### Not run
 
-- **E183 and E185:** registered and kitted, not run, no datum in any ref; day 2 (E185, then E183) is set for Tue 10 Nov 2026 on the owner's fresh approval for aifoundry3. E186's running first changes no input of any of their rules (A2-3).
+- **E183 and E185:** registered and kitted, not run, no datum in any ref; day 2 (E185, then E183) is set for Tue 10 Nov 2026 on the owner's fresh approval for aifoundry3. E186's running first changes no input of any of their rules (A2-3). *(dated, Thu 12 Nov 2026, Q164's records: day 2 ran on Thu 12 Nov, not Tue 10 Nov: E185 ran, blind; E183 did not run, by its registered SKIP; section "Q163")*
 - **E187:** reserved for E186's reserve trains, not registered.
 
 ### Wording, quoted only as corrected
@@ -5126,7 +5126,89 @@ records; every earlier word stays as written.
   day 2's lines 1–4 and 6 read as stated, and the check v2, E185's step 2 v5 and E183's step 2 v4 each read 0, with no box call; 163
   lists, 5,764 entries, 5,747 OK. Neither file this fix edits (02 and 05) lies in any of the day's perimeters (the check v1's 139 paths
   and v2's 598; E186's history checks' 60 and 506), and none of the 2,598 tracked list files names one.
-- **Not yet done:** the check of day 2's readiness at the final head; day 2 on the owner's fresh approval for aifoundry3.
+- **Not yet done:** the check of day 2's readiness at the final head; day 2 on the owner's fresh approval for aifoundry3. *(dated, Thu 12 Nov 2026, Q164's records: both done: the readiness check read day 2 READY WITH GAPS at `52e3f68a`, and day 2 ran on Thu 12 Nov (02, Q162 and Q163; section "Q163", below))*
+
+*(Dated, Thu 12 Nov 2026, Q164's records: Q162's close.)* Q162 ran from about 17:27 to 19:52 PST on Mon 9 Nov, desk only, 0 card-minutes. Each line below is a dated clause of these records; every earlier word stays as written.
+
+- **The character counts:** these records' commit `8ef1e29a` added 13,118 characters to this file (the records lane's own return said 13,063; the lane's own gate and the verifier read 13,118); the fix `52e3f68a` added 699 to 02 and 3,049 here, insert-only.
+- **The readiness check** (19:32–19:52 PST; desk checks of code, reported, post hoc to the commits they read, no datum existing): **day 2 READY WITH GAPS at `52e3f68a`**. Every rc 0, on a scratch clone 19:42:57–19:43:43 and for real 19:43:56–19:44:48 PST, with 0 box calls: day 2's lines 1–4 and 6 as stated; the check v2 0; E185's step 2 v5 0 and 0; E183's step 2 v4 0; the gates' dry lines for the two october-forecast-model readers 0 and 0; beside them, lines 7–8 and E186's later anchor line true.
+- **The counts at `52e3f68a`:** 163 lists named SHA256SUMS, 5,764 entries, 5,747 OK, E85's 17 matching under `tools/claims-v3/{hlc,hlk,hm}`; 2,598 tracked list files in all (163 named SHA256SUMS, 2,427 `.sha256` lists and 8 frozen-sha256 maps, the 8 maps all OK); the day's paths, the check v1's 139 and the check v2's 598, hold no records file.
+- **Not read by a verifier then:** `52e3f68a` and the owner's private pages as fixed; Q164's verifier reads them.
+- **Carried:** 03's E186 heading gains a dated clause (insert-only); later perimeter scripts should match `SHA256SUMS` anywhere in a file name (the next kit's hygiene).
+
+## Q163: day 2 on aifoundry3, E185 blind on its later try and E183 not run by its registered SKIP (Thu 12 Nov 2026, week 46; on the owner's go of Wed 11 Nov 2026 about 21:24 PST)
+
+Each claim is labelled **blind** (measured on a run whose rules and forecasts were committed before its first datum), **registered** (committed before any datum of its run), **held out** (read on rows its fit never used), **reported** (an arm read beside a rule, never a verdict), **post hoc** (read on data that existed first, deciding nothing) or **not run**. No committed verdict changes; M11, M10, M12 and every frozen file stay as committed. Short names: `D5/` is `docs/reports/data/2026-11-12-e185-m11-session3-aifoundry3/`, `X5/` `tools/claims-v3/e185/` and `X3/` `tools/claims-v3/e183/`. The owner's words of Wed 11 Nov are in 02's Q163 row. 🛑 **To carry from here:** (134) **october-forecast-model's E185 arm only as `D5/arm-m1-e185.txt` commits it**, named by its file, with no figure, word or summary of it in these records, and never the two passages of note M1 that its dated note 1 sets aside; (135) **E181's held-out figures always with A1-1's label**: "Rl 0.198, B 0.231, F 0.296 °C; held out; the reading chosen by A10 after both readings were seen", and "Rl 0.195, B 0.263, F 0.293 °C; held out; the reading stated at 20:03 PST"; (136) **each D as the scorer's `D_C`** (+0.0013, +0.0432 and −0.0420 °C on A10's reading), never a subtraction of the printed rms; (137) **"the frozen chain under-predicts L1, L2 and S2"**, never the README's backwards word for it; (138) **E185-C from its F line**; B's and Rl's lines only as printed, reported, never a finding about the cool-down; (139) **"102.6 of the 105 cap for the session collected; 109.2 on card 0 for E185 in all, with the first try's 6.6 (no hold)"**, the cap being a session's; (140) **the first try is "G0-REFUSED, not a failed prediction and not E185 data"**; (141) **the pooled HM-CAL and HM-CAL-I8** printed with E185 are E181's, never E185's (A1-3); (142) **E183's rules read NOT RUN** (its registered SKIP), never "failed"; (143) **the release** is 06:39:50 PST by the channel's own edit time (the lane's save, 06:39:52), with E183's clause kept by the one-post rule.
+
+### Blind, measured on 12 November (E185; aifoundry3 card 0 at 600 MHz pinned)
+
+| What | Reading | Forecast, frozen first | Verify at |
+|---|---|---|---|
+| **E185-BEST**, heat over minutes on six 10-minute holds (room 52.098 °C, the warm pattern) | **NOT SEPARATED (F, Rl)**: rms F 0.2146, B 0.2578, Rl 0.2158 °C, on the measured watts | the frozen chain (M11), the board gain G_B 1.02678 and the rail-driven chain G_Rl 1.19380 on it, registered before T0 (`98fe28b7`, A1 `df4e6763`; A10 `5e708747`) | `D5/scored-m11.json` › `E185` › `rules`, `D5/scored-m11.md` |
+| **E185-RF**, the rail-driven chain against the frozen chain | NOT RESOLVED, D_C +0.0013 °C (τ 0.0361) | the rule's τ = σ_c / √6 | |
+| **E185-BF**, the board gain against the frozen chain | **WORSE**, D_C +0.0432 | | |
+| **E185-RB**, the rail-driven chain against the board gain | **BETTER**, D_C −0.0420 | | |
+| **E185-C on F**, the cool-down's shape (governs, A1-2) | NOT RESOLVED: n 4, d̄ +0.0063 °C [−0.2387, +0.2513]; nothing follows | E185.md section 6 | |
+| **M11 at k = 2** | HM-LG NOT SEPARATED; HM-E144 REPEATS (H_E 0.57%); FL5(c) PASS, 0.3220 against FL1's 0.3139 W/°C | M11's registration and A1–A10 | `D5/scored-m11.json` |
+| **What M11 carries** | nothing changes: the frozen chain stays primary | E185.md section 6's table | |
+
+### Reported, never verdicts
+
+- **The stated reading's arm** (A1-1), the same words: RF NOT RESOLVED (−0.0217), BF WORSE (+0.0627), RB BETTER (−0.0843), BEST NOT SEPARATED (F, Rl) (F 0.2226, B 0.2853, Rl 0.2010 °C), C on F NOT RESOLVED (+0.0053).
+- **E185-C on B and on Rl** (A1-2), only as printed: B +0.2503 [−0.0014, +0.5021], Rl +0.1756 [−0.1303, +0.4816], both NOT RESOLVED; never a finding about the cool-down.
+- **A9's arm:** Δe(H_E) +0.221 °C.
+- **october-forecast-model's arm** (note M1, frozen and committed before T0), read after the data commit through the day-2 check v2's gate: it stands as `D5/arm-m1-e185.txt` commits it, never as a verdict.
+
+### Post hoc
+
+- **Each hold's e_F** on the measured watts: H_E +0.063, L1 +0.264, L2 +0.196, H_E2 −0.208, S +0.030, S2 +0.347 °C (`D5/scored-m11.json` › `E185` › `holds`); per kind, the mean misses F / B / Rl: fp32 −0.07 / −0.37 / −0.06, int8.full +0.23 / −0.04 / −0.23, int8.neg_ones +0.19 / +0.10 / −0.06 °C, so no arm reads every kind.
+- **The rest-rule gap:** step 10 v2 read 5,822 minutes since E184 arm S's end where the true rest since E186's end was 3,665.8 minutes (`D5/posthoc-note1-e185.txt`, section 6); both far over the 40-minute gate and A7-4's hour.
+- **E185-C on B's grid:** with the registered reader's 0.2 s grid moved by 0.1 s (the data verifier's code; a sensitivity, deciding nothing), B's line reads THE SHAPE MISSES [+0.014, +0.518] while every registered word stays.
+- **The critic's finding 3:** E185-C's power rested on d's sd at about σ_c/2 (0.044 °C, A1-2, from three committed windows); E185's own four d's (about +0.21, +0.01, −0.16 and −0.03 °C) have sd 0.154 °C, about 3.5 times that, so one session could not resolve a 0.1 °C shape at E185's own noise; a next heat registration states its power on this spread.
+- **The critic's finding 4:** the two start-gate residues, an hour apart, read 1.024 and 0.125 °C against about 0.53 predicted, with A8's committed sd of 0.128 °C, about z +3.9, then −3.2: the morning's drift was far wider than the residue model's. Why is open; a hint, not evidence: the host's NVMe read 37.85 °C in the first try's start window and 36.85 °C an hour later.
+
+### Not run
+
+- **E183:** not run on Thu 12 Nov 2026, by its registered SKIP (03, E183): two train-host builds ended TRAIN-HOST-BUILD-FAILED at the build's own check, a fault of the kit's check and not of the build; 0 card-minutes; every rule NOT RUN (E183-B, -C, -MECH, -HT, -X, -J, -TR N and H), never "failed"; notes M1 and M2 stand unread and stay blind; no E183 datum in any ref. E180's +0.0097 W per result 1-bit [+0.0027, +0.0167] stays the untested blind number.
+- **E187:** reserved for E186's reserve trains, not registered.
+
+### Wording, quoted only as corrected
+
+- **E181's held-out figures:** "Rl 0.198, B 0.231, F 0.296 °C; held out; the reading chosen by A10 after both readings were seen", and "Rl 0.195, B 0.263, F 0.293 °C; held out; the reading stated at 20:03 PST" (the data's dated note 1, section 1).
+- **Each D:** the scorer's `D_C`, +0.0013, +0.0432 and −0.0420 °C on A10's reading and −0.0217, +0.0627 and −0.0843 in the stated reading's arm, never a subtraction of the printed rms, two of whose six differences are one off in the last digit.
+- **Under-predicts:** the frozen chain under-predicts L1, L2 and S2 (+0.26, +0.20 and +0.35 °C); the README's own word there reads backwards beside its "over-predicts".
+- **The card-minutes:** "102.6 of the 105 cap for the session collected; 109.2 on card 0 for E185 in all, with the first try's 6.6 (no hold)".
+- **The first try:** "G0-REFUSED, not a failed prediction and not E185 data".
+- **The post:** E183.md section 7 says that on a SKIP "the day's post drops E183's clause"; the lane appended " — released" to E183's clause instead, the one-post rule's form for the last release, every word kept. That is right by the rule, though the post's last text names "for 1.5 h, until ~08:06 PST" for a box released at 06:39 (the critic's finding 5); it is not edited again.
+
+### The data verifier's and the critic's findings, one line each
+
+- **The data verifier** (about 06:45–07:12 PST): holds with fixes. 3 minor: the README quoted E181's held-out figures without A1-1's label; note M1's title clause and post hoc bullet summed october-forecast-model's arm up as a score, the class E186's data note 1 set aside; step 10 v2's rest rule misses E186's T0-named log. 4 nits: each D shown as a subtraction of rounded operands; a word for the frozen chain's misses that read backwards; E185-C on B's margin; 109.2 card-minutes against a cap enforced per session. The fix pass answered all seven in `6fc09747`, new files only.
+- **The critic** (about 07:39–08:0x PST): THE DAY HOLDS, with 2 minor findings and 3 nits of its own, none blocking. (1) concerns a card lane's uncommitted summary, which no record takes; (2) confirms E183's kit defect independently on the real host (03, E183) and adds that a check searching for another text is no safer, since whether a short text survives depends on the code around it; (3) and (4) are the post hoc lines above; (5) is the post's line above. It re-ran `score_e185.sh`, note M1's reader (through the gate and by its own command line) and the fix's post hoc script, each byte for byte, and E183's scorer and reader self-tests (23 of 23, 19 of 19); its own telemetry count found 0 samples at a stop line; its one look at 07:42:16 found the card free, with no session of ours.
+
+### The counts
+
+At `6fc09747`: 166 lists, 5,826 entries, 5,809 OK; the 17 others are E85's code list, 17 of 17 matching under `tools/claims-v3/{hlc,hlk,hm}`. `D5/SHA256SUMS` 50 of 50 (`c4edeb2f…`), `D5/SHA256SUMS-m1` 3 of 3 (`16278873…`), `D5/SHA256SUMS-note1` 9 of 9 (`1e553658…`). Since `52e3f68a`: 3 commits, 62 files added, none edited. E185's data is in `190bad0d`, `265dfd4c` and `6fc09747`; no E183 datum is in any ref.
+
+### The go lines, and E185's anchor line for later runs
+
+- **Day 2's lines 1–4 are unchanged** since `e8e9f4e1` and true at `6fc09747` (the critic's check): commit `e8e9f4e1c5c0407e7e29268c378d3c26d899433c`; `SHA256SUMS-e185-kit-note4` `d96616c1…`, 20 of 20 OK; `SHA256SUMS-e183-kit-note3` `3b472e38…`, 19 of 19 OK. Line 6's E185 half is superseded by E185's data; its E183 half, `git log --all --oneline -- 'docs/reports/data/*-e183-*'`, prints nothing.
+- **E185's step 2 v5 is spent:** E185 ran and its data is committed. E183's next day runs `check_day2_v2.py tree --pull` by hand and inside E183's step 2 (`rb/s03_desk_e183_v4.sh` as it stands, or the step 2 of E183's next kit note once it lands); its own anchor lines come from that note.
+- **For any later run that reads E185's data**, the anchor line is:
+
+```
+git merge-base --is-ancestor 6fc097473da749b69eb2602e310a720988cf3006 HEAD    (exit 0)
+(cd docs/reports/data/2026-11-12-e185-m11-session3-aifoundry3 && shasum -a 256 -c SHA256SUMS)    50 of 50 OK; the list's own sha256 c4edeb2f9f4a86abdf4c31a463a369622ad4fd61afadeb4a47fe9bcefbebf6ad
+(cd docs/reports/data/2026-11-12-e185-m11-session3-aifoundry3 && shasum -a 256 -c SHA256SUMS-m1)    3 of 3 OK; its own sha256 16278873318a733ba983be39f2637a4350ee7058ee569d1828ce289b082d92ba
+(cd docs/reports/data/2026-11-12-e185-m11-session3-aifoundry3 && shasum -a 256 -c SHA256SUMS-note1)    9 of 9 OK; its own sha256 1e553658f714ee04f1d5aa54bfec1b3e3adb9df0b7e2ef3721c9455de8f47880
+```
+
+### Disclosures
+
+- **Process, Q163**, none safety-related, one line per lane: the claim: thirty-five bounded local waits during its background wait, and its first load-guard reader took the tier from the wrong line, fixed before any check ran; the card lanes: box steps and waits ran outside the round's local slot, our own box login is written into each run's output directory outside the repository by the kit's design and masked in the lanes' copies, and E185's step 9 ran twice; the data verifier: none of its own; the fix pass: sub-second read-only peeks and edits of its own drafts outside the slot; the critic: its one look ran in its own output directory, not a run's (a departure from the letter of "that run's"), and about a dozen sub-second read-only peeks ran outside the slot. No stop fired, nothing was set and every device command was a read. Nothing of ours was left running on the box; E185's first try's files and E183's build records stay there, read-only, not copied.
+- **These records' own gate** (desk checks of code): this commit was made only after the same commit, in a scratch clone never pushed, read day 2's lines 1–4 as stated and line 6's E183 half printing nothing, and the check v2 (`check_day2_v2.py tree --pull`) and E183's step 2 v4 each 0, with no box call; after it, the same for real on the lab clone. None of the seven files these records edit lies in any of the perimeters (the day-2 check v1's 139 paths and v2's 598; E186's history checks' 60 and 506), and no tracked hash list names one.
+- **A link left as moved, once more:** the entry these records move from the agents file's changelog, of 3 November on Q139's records, carries the same link to `docs/agent-changelog-archive.md`, and it stays as written.
+- **Not yet done:** a verifier of these records, and a fix pass if it finds faults; E183's kit note (in progress beside these records), its verifier and a check of its readiness; E183's next day on the owner's go with a fresh approval for aifoundry3.
 
 ## Ridge points (derived; no card time)
 
