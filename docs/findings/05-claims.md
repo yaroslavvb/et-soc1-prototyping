@@ -5208,7 +5208,36 @@ git merge-base --is-ancestor 6fc097473da749b69eb2602e310a720988cf3006 HEAD    (e
 - **Process, Q163**, none safety-related, one line per lane: the claim: thirty-five bounded local waits during its background wait, and its first load-guard reader took the tier from the wrong line, fixed before any check ran; the card lanes: box steps and waits ran outside the round's local slot, our own box login is written into each run's output directory outside the repository by the kit's design and masked in the lanes' copies, and E185's step 9 ran twice; the data verifier: none of its own; the fix pass: sub-second read-only peeks and edits of its own drafts outside the slot; the critic: its one look ran in its own output directory, not a run's (a departure from the letter of "that run's"), and about a dozen sub-second read-only peeks ran outside the slot. No stop fired, nothing was set and every device command was a read. Nothing of ours was left running on the box; E185's first try's files and E183's build records stay there, read-only, not copied.
 - **These records' own gate** (desk checks of code): this commit was made only after the same commit, in a scratch clone never pushed, read day 2's lines 1–4 as stated and line 6's E183 half printing nothing, and the check v2 (`check_day2_v2.py tree --pull`) and E183's step 2 v4 each 0, with no box call; after it, the same for real on the lab clone. None of the seven files these records edit lies in any of the perimeters (the day-2 check v1's 139 paths and v2's 598; E186's history checks' 60 and 506), and no tracked hash list names one.
 - **A link left as moved, once more:** the entry these records move from the agents file's changelog, of 3 November on Q139's records, carries the same link to `docs/agent-changelog-archive.md`, and it stays as written.
-- **Not yet done:** a verifier of these records, and a fix pass if it finds faults; E183's kit note (in progress beside these records), its verifier and a check of its readiness; E183's next day on the owner's go with a fresh approval for aifoundry3.
+- **Not yet done:** a verifier of these records, and a fix pass if it finds faults; E183's kit note (in progress beside these records), its verifier and a check of its readiness; E183's next day on the owner's go with a fresh approval for aifoundry3. *(dated, Thu 12 Nov 2026, after these records' verifier: the verifier is done, about 08:59–09:32 PST; it held these records with fixes, one minor fault and three nits, none in a measured number, a registered verdict, a frozen file or one of the perimeters, answered in the dated paragraph below)*
+
+*(Dated, Thu 12 Nov 2026, after these records' verifier; Q164's fix.)* The verifier (about 08:59–09:32 PST, desk only, 0 card-minutes)
+re-read these records' commit `d5c9fa26` against `6fc09747` character by character, and Q162's fix `52e3f68a` against `8ef1e29a`;
+re-derived the verdicts and figures they quote from `D5/scored-m11.json` and the committed data; read the kinds page and the owner's
+private pages; and re-ran the checks for E183's next day on a scratch clone and then for real at `d5c9fa26`, each reading as stated
+(desk checks of code). It held these records with fixes: one minor fault and three nits, none in a measured number, a registered
+verdict, a frozen file or one of the perimeters; it found no fault in Q162's fix. Each line below is a dated clause of these records;
+every earlier word stays as written.
+
+- **The commits' subjects** (the minor fault): 04's section on Q163's commits said each commit's subject names E185 and none names
+  Q163; `6fc09747`'s subject ends "(Q163)". A dated clause there now says so.
+- **The approval's lapse** (a nit): 02's Q163 row said this approval "lapsed about 09:20 PST Thu", in a commit made at 08:36 PST,
+  before that time; a dated clause there now reads it as an estimate of when it lapses, about 12 h after the go.
+- **The changes that are not insertions** (a nit, on the owner's private page and in the records lane's own return, in no file
+  here): `d5c9fa26` replaced four Q index counters (02's, the findings README's and two in `AGENT.md`) and the end date of `AGENT.md`'s
+  index row (9 November became 12 November), and moved the agents file's oldest changelog entry verbatim to
+  `docs/agent-changelog-archive.md`; every other change is an insertion. Those two places had said three counters.
+- **The last nit** concerns one item on the owner's private page alone, and is answered there.
+- **The verifier's re-runs** (desk checks of code, on a scratch clone, then for real at `d5c9fa26` at 09:13:32–09:14:03 PST, with a
+  stand-in window written that day in a scratch output directory and stand-in box commands that refuse every call): day 2's lines 1
+  and 2 read 0, line 3 as stated, line 4 20 of 20 and 19 of 19, line 6's E183 half nothing; the check v2 by hand
+  (`check_day2_v2.py tree --pull`) 0; E183's step 2 v4 0; 166 lists, 5,826 entries, 5,809 OK (the 17 others E85's code list); 0 box
+  calls.
+- **This fix's own checks** (desk checks of code): before this commit the same commit was made in a scratch clone, never pushed, where
+  day 2's lines 1–4 read as stated and line 6's E183 half printed nothing, and the check v2 and E183's step 2 v4 each read 0, with no
+  box call; after it, the same for real on the lab clone. None of the three files this fix edits (02, 04 and 05) lies in any of the
+  perimeters (the day-2 check v1's 139 paths and v2's 598; E186's history checks' 60 and 506), and no tracked hash list names one.
+- **Not yet done:** E183's kit note, its verifier and a check of its readiness; E183's next day on the owner's go with a fresh approval
+  for aifoundry3.
 
 ## Ridge points (derived; no card time)
 
