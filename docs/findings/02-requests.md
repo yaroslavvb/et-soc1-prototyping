@@ -4,7 +4,9 @@ The work in this directory was driven by a sequence of requests from the repo ow
 session on aifoundry2 (18–24 September 2026); Q43 comes from a separate session and is listed in the order it was
 recorded; Q44–Q60 are the requests of 25–27 September, in the order of their first commit, Q61–Q66 are of 28 September, and Q67-Q69 of 29 September. Each is recorded here
 because scope decisions explain why some questions were answered thoroughly and others were left open. Cite as
-**Q1**...**Q172**.
+**Q1**...**Q172**. A lane may cite its number in committed files before its row is written here, as Q168–Q171 were
+on 13 November 2026; before taking the next number, find the highest one cited anywhere:
+`git grep -h -o -w -E 'Q1[0-9]{2}' origin/main | sort -u | tail -1`.
 
 | ID | Date | Request (condensed) | Produced |
 |---|---|---|---|
