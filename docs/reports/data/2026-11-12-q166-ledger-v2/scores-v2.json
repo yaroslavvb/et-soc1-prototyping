@@ -1,0 +1,2247 @@
+{
+ "what": "load ledger v2's frozen predictions scored against the committed measurements (Q166, calc-a)",
+ "frozen_v2_sha256": "59ff911705137e5486efcb15c482919e3d257f800193bcc9f1d78ee7283753ce",
+ "freeze_hashes": [
+  "214cf7a49c1edae206ae34133bb6e2dc1f99a414e367b4617b2607f451cd2886  tools/ledger/ledger_v2.py",
+  "da11d12f051d38596e22240dd36fa5689eead561f6fc269418cb5f2b4304d1d1  tools/ledger/freeze_ledger_v2.py",
+  "6e4a9ec6724b00d90d94cf53d0fa3f3207a92321669e666f02afdcddfd28f85e  tools/ledger/loads_ledger_v2.py",
+  "59ff911705137e5486efcb15c482919e3d257f800193bcc9f1d78ee7283753ce  docs/reports/data/2026-11-12-q166-ledger-v2/frozen-v2.json",
+  "1bce023ff9575f0b7e4999caa422729b3466a99c9601eab78a673c3cce06289b  docs/reports/data/2026-11-12-q166-ledger-v2/predictions-v2.json",
+  "fc20f92dbada5c54924e3c49d847fc2aafe539dd361f5cd4d82b8f984fdc340c  docs/reports/data/2026-11-12-q166-ledger-v2/FREEZE.md"
+ ],
+ "summary": {
+  "E39": {
+   "rms_w_six": 0.6877619078425169,
+   "bias_w_six": 0.264626049523209,
+   "v1_rms_w_six_recomputed": 1.1045178382492065,
+   "v1_rms_w_committed": 1.1045178382492065,
+   "endpoint_crosscheck_rms_w": 0.7171562512338049,
+   "slopes_inside_measured_ci99": 1,
+   "label": "held out, not blind",
+   "seconds": "the loop's 546 cycles an op, the same given or forecast"
+  },
+  "E37": {
+   "depends_on_awake_rule": "its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule",
+   "posthoc_without_awake_rule": {
+    "rms_w_given": 2.3954902789679413,
+    "j_per_op_error_pct_given": [
+     27.98572983645246,
+     27.28333732447398,
+     27.57833504217091
+    ],
+    "source": "posthoc-v2.json awake_rule_e37"
+   },
+   "posthoc_j_total_per_op_error_pct_t0_at_die_start": {
+    "aifoundry2": 2.349961096177893,
+    "aifoundry3": 3.2900128458333846,
+    "aifoundry1-c1": 1.3984009299534064
+   },
+   "posthoc_bytes_per_op_zeroing_the_miss": {
+    "aifoundry2": 1773.2662506631195,
+    "aifoundry3": 1790.3240053445566,
+    "aifoundry1-c1": 1781.931639740037
+   },
+   "rms_w_given": 1.1686275218625926,
+   "bias_w_given": 1.167009230413095,
+   "rms_w_forecast": 0.45147267278909026,
+   "bias_w_forecast": 0.4508603287786291,
+   "v1_rms_w_committed": 2.137538448450322,
+   "v1_rms_w_recomputed": 2.137538448450322,
+   "j_per_op_error_pct_given": [
+    13.952977391208995,
+    12.950549349650414,
+    13.463203807584694
+   ],
+   "j_per_op_error_pct_forecast": [
+    13.952977391209018,
+    12.950549349650439,
+    13.463203807584694
+   ],
+   "j_total_per_op_error_pct_given": [
+    3.382323865836287,
+    3.665369368928725,
+    1.3204039105114336
+   ],
+   "j_total_per_op_error_pct_forecast": [
+    10.120536057272277,
+    9.371117907922754,
+    7.5201969768486
+   ],
+   "label": "held out, not blind; post hoc for the awake rule"
+  },
+  "E59": {
+   "rms_w_given": 0.7498437727048779,
+   "bias_w_given": -0.7203506193447198,
+   "v1_rms_w_committed": 3.017983375161594,
+   "v1_rms_w_recomputed": 3.0179833751615943,
+   "j_per_solve_error_pct_given": [
+    -1.667798466345223,
+    -2.4711821368450475,
+    -3.3099659234524177,
+    -2.906751555712167
+   ],
+   "j_per_solve_error_pct_forecast": [
+    -4.891826224043656,
+    -2.452512818842957,
+    -4.5761266485049275,
+    -4.497761626708576
+   ],
+   "j_total_per_solve_error_pct_given": [
+    -2.1072265816820535,
+    -1.7383620954584675,
+    -0.941703962233994,
+    -0.6855878369684627
+   ],
+   "j_total_per_solve_error_pct_forecast": [
+    -14.359255887241224,
+    -1.8195155773561593,
+    -5.999533647265152,
+    -5.960103367414097
+   ],
+   "label": "held out, not blind",
+   "reductions": "W is scored against each record's board.catalogue.over_idle_w (the energy catalogue's cross-check) and J against its board.j_per_solve (the headline); for one run the two differ by 1.3-4.8% (posthoc-v2.json e59_reductions)",
+   "posthoc_op_cycles_priced_once": {
+    "j_per_solve_error_pct_given": [
+     -5.945721635130842,
+     -7.214335387757959,
+     -7.808922197583056,
+     -6.070315033348848
+    ],
+    "double_count_share_pct_given": [
+     4.350480414415896,
+     4.863335119644478,
+     4.652967926941575,
+     3.258273390092553
+    ],
+    "source": "posthoc-v2.json e59_double_count"
+   },
+   "terms_v1_lacked_pct_given": {
+    "L1 (512,4,0.3,448)": 29.63681695219037,
+    "L2 (512,4,0.4,1850)": 21.24965189773258,
+    "(256,5,0.4,1925) first half": 23.707623726085306,
+    "(256,5,0.4,1925) second half": 37.40987658290466
+   }
+  },
+  "E101": {
+   "error_pct_loop_cells": [
+    -6.392914179714071,
+    0.6944308653259263,
+    -1.4906681538161575,
+    1.7454660734523302,
+    3.0151297196403033,
+    2.6542120949271446,
+    -2.7944099201959407
+   ],
+   "rms_pct_loop_cells": 3.175011927255135,
+   "loop_cells_label": "held out by price: M10's kernel term on a session M10 never saw (7 cells)",
+   "error_pct_dram_arm": [
+    18.569568871986288,
+    5.718128959535123
+   ],
+   "dram_arm_label": "post hoc for the awake rule (2 cells, mmp64)",
+   "dram_arm_posthoc": {
+    "mmp64 fp32 zeros": {
+     "measured_w": 6.59691693131028,
+     "with_rule_w": 7.8219359642976665,
+     "with_rule_error_pct": 18.569568871986288,
+     "without_rule_w": 8.9696274347473,
+     "without_rule_error_pct": 35.96696044747304
+    },
+    "mmp64 fp32 random": {
+     "measured_w": 10.761080560507951,
+     "with_rule_w": 11.37641302439726,
+     "with_rule_error_pct": 5.718128959535123,
+     "without_rule_w": 12.524104494846895,
+     "without_rule_error_pct": 16.383335524957033
+    }
+   },
+   "error_pct_in_sample_cells": [
+    -0.9599698536845042,
+    -0.11956857886936206,
+    -1.3360317577049958,
+    1.5532975060161196,
+    0.30756994202615434,
+    2.6890119051731793,
+    -8.181514688525436
+   ],
+   "rms_pct_in_sample": 3.3678335482024773,
+   "first_reported_rms_pct_nine_cells_superseded": 7.056051713535638,
+   "first_reported_note": "the first scorer pooled the loop's 7 cells with the DRAM arm's 2 as 'held out by price' (7.1% rms); the DRAM arm is post hoc for the awake rule (fix-q166)"
+  },
+  "E136": {
+   "error_pct": [
+    -3.270608897759034,
+    1.724502389330686,
+    -11.482925026939618
+   ],
+   "label": "held out, not blind; differences only",
+   "posthoc_corrected_error_pct": {
+    "fp32": -2.6369361461757532,
+    "fp16": 2.449894365497572,
+    "int8": -9.638125686755272
+   },
+   "correction": "dated, post hoc: the L3 row's share of random minus zeros is not zero (posthoc-v2.json)"
+  },
+  "E86": {
+   "rms_w": 0.1791309667369612,
+   "n": 12,
+   "label": "M10 held out by kind (M10 was fitted on these rows, each kind left out)"
+  },
+  "E95": {
+   "rms_w": 0.14484913110554615,
+   "n": 33,
+   "label": "M10 held out by kind (M10 was fitted on these rows, each kind left out)"
+  },
+  "not_scored": []
+ },
+ "rows": [
+  {
+   "load": "E39",
+   "name": "slope, aifoundry2",
+   "quantity": "W over idle per unit of useful-slot fraction",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 14.974,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.json ABLB-3c per_card.aifoundry2",
+   "forecast": 15.675965265724319,
+   "forecast_band": [
+    13.165738211255265,
+    18.90328148731001
+   ],
+   "error": 0.7019652657243185,
+   "error_pct": 4.68789412130572,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 15.589350673922203,
+   "v1_error": 0.6153506739222028,
+   "v1_error_pct": 4.109460891693621,
+   "measured_ci99": [
+    14.801,
+    15.147
+   ],
+   "inside_measured_ci99": false
+  },
+  {
+   "load": "E39",
+   "name": "intercept, aifoundry2",
+   "quantity": "W over idle at zero useful slots",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 2.3,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.json ABLB-3c per_card.aifoundry2",
+   "forecast": 2.1669921915238377,
+   "forecast_band": [
+    1.7851660176771562,
+    2.70008545885919
+   ],
+   "error": -0.13300780847616211,
+   "error_pct": -5.782948194615744,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 0.6886356299614628,
+   "v1_error": -1.6113643700385372,
+   "v1_error_pct": -70.05932043645815
+  },
+  {
+   "load": "E39",
+   "name": "slope, aifoundry3",
+   "quantity": "W over idle per unit of useful-slot fraction",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 14.496,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.json ABLB-3c per_card.aifoundry3",
+   "forecast": 14.577280261237956,
+   "forecast_band": [
+    13.124609429903124,
+    16.280974717556205
+   ],
+   "error": 0.08128026123795529,
+   "error_pct": 0.5607082039042169,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 13.890894266532042,
+   "v1_error": -0.6051057334679584,
+   "v1_error_pct": -4.174294518956667,
+   "measured_ci99": [
+    12.993,
+    15.998
+   ],
+   "inside_measured_ci99": true
+  },
+  {
+   "load": "E39",
+   "name": "intercept, aifoundry3",
+   "quantity": "W over idle at zero useful slots",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 0.925,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.json ABLB-3c per_card.aifoundry3",
+   "forecast": 2.0777047237875372,
+   "forecast_band": [
+    1.9832135663699502,
+    2.233277890361536
+   ],
+   "error": 1.1527047237875372,
+   "error_pct": 124.61672689594997,
+   "inside_band": false,
+   "label": "held out, not blind",
+   "v1_forecast": 0.8429592005916374,
+   "v1_error": -0.08204079940836262,
+   "v1_error_pct": -8.869275611714878
+  },
+  {
+   "load": "E39",
+   "name": "slope, aifoundry1-c1",
+   "quantity": "W over idle per unit of useful-slot fraction",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 15.782,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.json ABLB-3c per_card.aifoundry1-c1",
+   "forecast": 14.978287275275893,
+   "forecast_band": [
+    12.788173848575742,
+    18.103797542139624
+   ],
+   "error": -0.8037127247241074,
+   "error_pct": -5.092591083031982,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 14.424846971311709,
+   "v1_error": -1.3571530286882911,
+   "v1_error_pct": -8.59937288485801,
+   "measured_ci99": [
+    15.328,
+    16.237
+   ],
+   "inside_measured_ci99": false
+  },
+  {
+   "load": "E39",
+   "name": "intercept, aifoundry1-c1",
+   "quantity": "W over idle at zero useful slots",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 1.476,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/ablb.json ABLB-3c per_card.aifoundry1-c1",
+   "forecast": 2.0645265795897125,
+   "forecast_band": [
+    1.8561573146454193,
+    2.4403942107781225
+   ],
+   "error": 0.5885265795897126,
+   "error_pct": 39.873074497948004,
+   "inside_band": false,
+   "label": "held out, not blind",
+   "v1_forecast": 0.016596573795703524,
+   "v1_error": -1.4594034262042965,
+   "v1_error_pct": -98.8755708810499
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry2",
+   "quantity": "W over the pre-launch idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 8.78283,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry2['fp32-tensor-DRAM'].mean",
+   "forecast": 10.008296284208322,
+   "forecast_band": [
+    8.678465082443951,
+    11.811669669515652
+   ],
+   "error": 1.2254662842083217,
+   "error_pct": 13.952977391209004,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +28.0% (posthoc-v2.json awake_rule_e37)",
+   "v1_forecast": 10.775085057687711,
+   "v1_error": 1.9922550576877107,
+   "v1_error_pct": 22.68352066119589,
+   "measured_ci99": [
+    8.0669,
+    9.49876
+   ],
+   "label_frozen": "held out, not blind",
+   "without_awake_rule_w": 11.240769075794898
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry2, J an op",
+   "quantity": "J over idle per op",
+   "unit": "nJ",
+   "seconds": "given",
+   "measured": 218.23769394953618,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry2['fp32-tensor-DRAM'].mean / measured rate",
+   "forecast": 248.68835004541086,
+   "forecast_band": [
+    215.64441149539945,
+    293.4989690531157
+   ],
+   "error": 30.450656095874677,
+   "error_pct": 13.952977391209002,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +28.0% an op (posthoc-v2.json awake_rule_e37)",
+   "j_total_measured_nj": 1052.8643142637209,
+   "j_total_forecast_nj": 1088.4755952399362,
+   "rest_w_forecast": 33.79667589604087,
+   "rest_w_measured": 33.58899,
+   "label_frozen": "held out, not blind",
+   "j_total_error_pct_posthoc_t0_at_die_start": 2.349961096177893
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry2",
+   "quantity": "W over the pre-launch idle",
+   "unit": "W",
+   "seconds": "forecast",
+   "measured": 8.78283,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry2['fp32-tensor-DRAM'].mean",
+   "forecast": 9.22866923996642,
+   "forecast_band": [
+    8.00242933283709,
+    10.891563304705462
+   ],
+   "error": 0.4458392399664195,
+   "error_pct": 5.076259474069514,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +19.1% (posthoc-v2.json awake_rule_e37)",
+   "measured_ci99": [
+    8.0669,
+    9.49876
+   ],
+   "label_frozen": "held out, not blind",
+   "without_awake_rule_w": 10.464702989880635
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry2, J an op",
+   "quantity": "J over idle per op",
+   "unit": "nJ",
+   "seconds": "forecast",
+   "measured": 218.23769394953618,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry2['fp32-tensor-DRAM'].mean / measured rate",
+   "forecast": 248.6883500454109,
+   "forecast_band": [
+    215.6444114953995,
+    293.4989690531156
+   ],
+   "error": 30.450656095874734,
+   "error_pct": 13.952977391209027,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +29.2% an op (posthoc-v2.json awake_rule_e37)",
+   "j_total_measured_nj": 1052.8643142637209,
+   "j_total_forecast_nj": 1159.4198268229331,
+   "rest_w_forecast": 33.79667589604087,
+   "rest_w_measured": 33.58899,
+   "label_frozen": "held out, not blind",
+   "j_total_error_pct_posthoc_t0_at_die_start": 9.004111103719355
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry3",
+   "quantity": "W over the pre-launch idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 8.35519,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry3['fp32-tensor-DRAM'].mean",
+   "forecast": 9.437233004207057,
+   "forecast_band": [
+    8.287143142420199,
+    10.817315478573843
+   ],
+   "error": 1.0820430042070566,
+   "error_pct": 12.950549349650416,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +27.3% (posthoc-v2.json awake_rule_e37)",
+   "v1_forecast": 10.357581931307763,
+   "v1_error": 2.0023919313077627,
+   "v1_error_pct": 23.965845555968958,
+   "measured_ci99": [
+    8.19703,
+    8.51335
+   ],
+   "label_frozen": "held out, not blind",
+   "without_awake_rule_w": 10.634764671800717
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry3, J an op",
+   "quantity": "J over idle per op",
+   "unit": "nJ",
+   "seconds": "given",
+   "measured": 209.47277266523437,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry3['fp32-tensor-DRAM'].mean / measured rate",
+   "forecast": 236.60064746332657,
+   "forecast_band": [
+    207.7667714936994,
+    271.20066283249326
+   ],
+   "error": 27.127874798092193,
+   "error_pct": 12.95054934965041,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +27.3% an op (posthoc-v2.json awake_rule_e37)",
+   "j_total_measured_nj": 862.5827433480468,
+   "j_total_forecast_nj": 894.1995870043912,
+   "rest_w_forecast": 26.229490418999895,
+   "rest_w_measured": 26.05044,
+   "label_frozen": "held out, not blind",
+   "j_total_error_pct_posthoc_t0_at_die_start": 3.2900128458333846
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry3",
+   "quantity": "W over the pre-launch idle",
+   "unit": "W",
+   "seconds": "forecast",
+   "measured": 8.35519,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry3['fp32-tensor-DRAM'].mean",
+   "forecast": 8.780102151959387,
+   "forecast_band": [
+    7.710095035899001,
+    10.064087097299554
+   ],
+   "error": 0.42491215195938636,
+   "error_pct": 5.085607292705329,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +19.5% (posthoc-v2.json awake_rule_e37)",
+   "measured_ci99": [
+    8.19703,
+    8.51335
+   ],
+   "label_frozen": "held out, not blind",
+   "without_awake_rule_w": 9.980698166491054
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry3, J an op",
+   "quantity": "J over idle per op",
+   "unit": "nJ",
+   "seconds": "forecast",
+   "measured": 209.47277266523437,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry3['fp32-tensor-DRAM'].mean / measured rate",
+   "forecast": 236.60064746332662,
+   "forecast_band": [
+    207.7667714936994,
+    271.20066283249326
+   ],
+   "error": 27.12787479809225,
+   "error_pct": 12.950549349650439,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +28.4% an op (posthoc-v2.json awake_rule_e37)",
+   "j_total_measured_nj": 862.5827433480468,
+   "j_total_forecast_nj": 943.416389280587,
+   "rest_w_forecast": 26.229490418999895,
+   "rest_w_measured": 26.05044,
+   "label_frozen": "held out, not blind",
+   "j_total_error_pct_posthoc_t0_at_die_start": 8.968636587663587
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry1-c1",
+   "quantity": "W over the pre-launch idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 8.86504,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry1-c1['fp32-tensor-DRAM'].mean",
+   "forecast": 10.058558402823907,
+   "forecast_band": [
+    8.680131793573391,
+    12.025291387602351
+   ],
+   "error": 1.1935184028239068,
+   "error_pct": 13.4632038075847,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +27.6% (posthoc-v2.json awake_rule_e37)",
+   "v1_forecast": 11.258480660296707,
+   "v1_error": 2.393440660296706,
+   "v1_error_pct": 26.998644792315726,
+   "measured_ci99": [
+    8.47312,
+    9.25696
+   ],
+   "label_frozen": "held out, not blind",
+   "without_awake_rule_w": 11.309870432822468
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry1-c1, J an op",
+   "quantity": "J over idle per op",
+   "unit": "nJ",
+   "seconds": "given",
+   "measured": 221.9869791190104,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry1-c1['fp32-tensor-DRAM'].mean / measured rate",
+   "forecast": 251.87353854410327,
+   "forecast_band": [
+    217.3567446069318,
+    301.12194735271345
+   ],
+   "error": 29.886559425092855,
+   "error_pct": 13.463203807584696,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +27.6% an op (posthoc-v2.json awake_rule_e37)",
+   "j_total_measured_nj": 1265.9345709484376,
+   "j_total_forecast_nj": 1282.6500205277569,
+   "rest_w_forecast": 41.16401232229671,
+   "rest_w_measured": 41.69,
+   "label_frozen": "held out, not blind",
+   "j_total_error_pct_posthoc_t0_at_die_start": 1.3984009299534064
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry1-c1",
+   "quantity": "W over the pre-launch idle",
+   "unit": "W",
+   "seconds": "forecast",
+   "measured": 8.86504,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry1-c1['fp32-tensor-DRAM'].mean",
+   "forecast": 9.346869594410082,
+   "forecast_band": [
+    8.065972944397862,
+    11.1744472650421
+   ],
+   "error": 0.48182959441008144,
+   "error_pct": 5.435165486112656,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +19.6% (posthoc-v2.json awake_rule_e37)",
+   "measured_ci99": [
+    8.47312,
+    9.25696
+   ],
+   "label_frozen": "held out, not blind",
+   "without_awake_rule_w": 10.601439297461726
+  },
+  {
+   "load": "E37",
+   "name": "aifoundry1-c1, J an op",
+   "quantity": "J over idle per op",
+   "unit": "nJ",
+   "seconds": "forecast",
+   "measured": 221.9869791190104,
+   "measured_source": "docs/reports/data/2026-09-25-claims-v3/results/mmb.json MMB-c per_card.aifoundry1-c1['fp32-tensor-DRAM'].mean / measured rate",
+   "forecast": 251.87353854410327,
+   "forecast_band": [
+    217.35674460693184,
+    301.12194735271345
+   ],
+   "error": 29.886559425092855,
+   "error_pct": 13.463203807584696,
+   "inside_band": true,
+   "label": "held out, not blind; its forecast depends on the awake rule (a hart's time priced once), which was set during the build after arithmetic that put v2 beside E101's DRAM arm, the same benchmark streaming from DRAM: post hoc for that rule; without the rule it reads +28.7% an op (posthoc-v2.json awake_rule_e37)",
+   "j_total_measured_nj": 1265.9345709484376,
+   "j_total_forecast_nj": 1361.135344281783,
+   "rest_w_forecast": 41.16401232229671,
+   "rest_w_measured": 41.69,
+   "label_frozen": "held out, not blind",
+   "j_total_error_pct_posthoc_t0_at_die_start": 7.60395564651934
+  },
+  {
+   "load": "E59",
+   "name": "L1 (512,4,0.3,448)",
+   "quantity": "W over idle, leak-corrected",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 12.73731,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l1/energy.json board.catalogue.over_idle_w",
+   "forecast": 11.95096291045832,
+   "forecast_band": [
+    9.580550313725361,
+    21.06762888304738
+   ],
+   "error": -0.78634708954168,
+   "error_pct": -6.173572673835212,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 9.804366811158616,
+   "v1_error": -2.932943188841385,
+   "v1_error_pct": -23.026394025436964
+  },
+  {
+   "load": "E59",
+   "name": "L1 (512,4,0.3,448)",
+   "quantity": "J a solve over idle",
+   "unit": "J",
+   "seconds": "given",
+   "measured": 1.66008,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l1/energy.json board.j_per_solve",
+   "forecast": 1.6323932112198962,
+   "forecast_band": [
+    1.3086163356920804,
+    2.877647150514658
+   ],
+   "error": -0.027686788780103777,
+   "error_pct": -1.667798466345223,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 1.3391931282401026,
+   "v1_error": -0.3208868717598974,
+   "v1_error_pct": -19.329602896239784
+  },
+  {
+   "load": "E59",
+   "name": "L1 (512,4,0.3,448)",
+   "quantity": "J a solve with the card at rest",
+   "unit": "J",
+   "seconds": "given",
+   "measured": 5.00456,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l1/energy.json board.j_per_solve_total",
+   "forecast": 4.899102581383772,
+   "forecast_band": [
+    4.475482489401057,
+    6.37510444071979
+   ],
+   "error": -0.10545741861622737,
+   "error_pct": -2.1072265816820535,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E59",
+   "name": "L1 (512,4,0.3,448)",
+   "quantity": "J a solve over idle",
+   "unit": "J",
+   "seconds": "forecast",
+   "measured": 1.66008,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l1/energy.json board.j_per_solve",
+   "forecast": 1.578871771219896,
+   "forecast_band": [
+    1.2631905756920807,
+    2.7912932305146585
+   ],
+   "error": -0.08120822878010392,
+   "error_pct": -4.891826224043656,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E59",
+   "name": "L1 (512,4,0.3,448)",
+   "quantity": "J a solve with the card at rest",
+   "unit": "J",
+   "seconds": "forecast",
+   "measured": 5.00456,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l1/energy.json board.j_per_solve_total",
+   "forecast": 4.28594242356948,
+   "forecast_band": [
+    3.883275536480687,
+    5.71252627366901
+   ],
+   "error": -0.7186175764305194,
+   "error_pct": -14.359255887241224,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E59",
+   "name": "L2 (512,4,0.4,1850)",
+   "quantity": "W over idle, leak-corrected",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 14.65611,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l2/energy.json board.catalogue.over_idle_w",
+   "forecast": 14.115677463101633,
+   "forecast_band": [
+    11.752688323802237,
+    21.84593570984084
+   ],
+   "error": -0.5404325368983667,
+   "error_pct": -3.687421402393723,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 12.68873227526675,
+   "v1_error": -1.9673777247332502,
+   "v1_error_pct": -13.42360097415515
+  },
+  {
+   "load": "E59",
+   "name": "L2 (512,4,0.4,1850)",
+   "quantity": "J a solve over idle",
+   "unit": "J",
+   "seconds": "given",
+   "measured": 6.19562,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l2/energy.json board.j_per_solve",
+   "forecast": 6.042514945293201,
+   "forecast_band": [
+    5.030987356404475,
+    9.351615844559149
+   ],
+   "error": -0.15310505470679914,
+   "error_pct": -2.4711821368450475,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 5.431587806714931,
+   "v1_error": -0.7640321932850691,
+   "v1_error_pct": -12.331811719974258
+  },
+  {
+   "load": "E59",
+   "name": "L2 (512,4,0.4,1850)",
+   "quantity": "J a solve with the card at rest",
+   "unit": "J",
+   "seconds": "given",
+   "measured": 16.6034,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l2/energy.json board.j_per_solve_total",
+   "forecast": 16.31477278784265,
+   "forecast_band": [
+    14.976608902654482,
+    20.338370325122956
+   ],
+   "error": -0.2886272121573512,
+   "error_pct": -1.7383620954584675,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E59",
+   "name": "L2 (512,4,0.4,1850)",
+   "quantity": "J a solve over idle",
+   "unit": "J",
+   "seconds": "forecast",
+   "measured": 6.19562,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l2/energy.json board.j_per_solve",
+   "forecast": 6.043671625293202,
+   "forecast_band": [
+    5.031969076404476,
+    9.35348208455915
+   ],
+   "error": -0.151948374706798,
+   "error_pct": -2.452512818842957,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E59",
+   "name": "L2 (512,4,0.4,1850)",
+   "quantity": "J a solve with the card at rest",
+   "unit": "J",
+   "seconds": "forecast",
+   "measured": 16.6034,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-l2/energy.json board.j_per_solve_total",
+   "forecast": 16.301298550629248,
+   "forecast_band": [
+    14.963251166540738,
+    20.32539475467323
+   ],
+   "error": -0.30210144937075256,
+   "error_pct": -1.8195155773561593,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E59",
+   "name": "(256,5,0.4,1925) first half",
+   "quantity": "W over idle, leak-corrected",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 13.91582,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h0/energy.json board.catalogue.over_idle_w",
+   "forecast": 12.883334558065867,
+   "forecast_band": [
+    10.663084018227785,
+    20.424460805980203
+   ],
+   "error": -1.0324854419341332,
+   "error_pct": -7.419508458244884,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 11.182037751616209,
+   "v1_error": -2.7337822483837915,
+   "v1_error_pct": -19.6451394771116
+  },
+  {
+   "load": "E59",
+   "name": "(256,5,0.4,1925) first half",
+   "quantity": "J a solve over idle",
+   "unit": "J",
+   "seconds": "given",
+   "measured": 12.60488,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h0/energy.json board.j_per_solve",
+   "forecast": 12.18766276730793,
+   "forecast_band": [
+    10.087300883781534,
+    19.321584748533887
+   ],
+   "error": -0.4172172326920691,
+   "error_pct": -3.3099659234524177,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 10.57803211769578,
+   "v1_error": -2.026847882304219,
+   "v1_error_pct": -16.079866546164812
+  },
+  {
+   "load": "E59",
+   "name": "(256,5,0.4,1925) first half",
+   "quantity": "J a solve with the card at rest",
+   "unit": "J",
+   "seconds": "given",
+   "measured": 35.67016,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h0/energy.json board.j_per_solve_total",
+   "forecast": 35.3342526899448,
+   "forecast_band": [
+    32.55465353774387,
+    43.88459608177861
+   ],
+   "error": -0.33590731005520524,
+   "error_pct": -0.941703962233994,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E59",
+   "name": "(256,5,0.4,1925) first half",
+   "quantity": "J a solve over idle",
+   "unit": "J",
+   "seconds": "forecast",
+   "measured": 12.60488,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h0/energy.json board.j_per_solve",
+   "forecast": 12.028064727307932,
+   "forecast_band": [
+    9.951843723781534,
+    19.064082028533885
+   ],
+   "error": -0.5768152726920679,
+   "error_pct": -4.5761266485049275,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E59",
+   "name": "(256,5,0.4,1925) first half",
+   "quantity": "J a solve with the card at rest",
+   "unit": "J",
+   "seconds": "forecast",
+   "measured": 35.67016,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h0/energy.json board.j_per_solve_total",
+   "forecast": 33.53011674876669,
+   "forecast_band": [
+    30.811391409462395,
+    41.935787096370134
+   ],
+   "error": -2.1400432512333154,
+   "error_pct": -5.999533647265152,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E59",
+   "name": "(256,5,0.4,1925) second half",
+   "quantity": "W over idle, leak-corrected",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 10.4561,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h1/energy.json board.catalogue.over_idle_w",
+   "forecast": 9.9339625909953,
+   "forecast_band": [
+    7.746736838138234,
+    19.152108038347777
+   ],
+   "error": -0.5221374090046993,
+   "error_pct": -4.993615296379141,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 6.395730759563722,
+   "v1_error": -4.060369240436278,
+   "v1_error_pct": -38.83254024384119
+  },
+  {
+   "load": "E59",
+   "name": "(256,5,0.4,1925) second half",
+   "quantity": "J a solve over idle",
+   "unit": "J",
+   "seconds": "given",
+   "measured": 15.8177,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h1/energy.json board.j_per_solve",
+   "forecast": 15.357918759172117,
+   "forecast_band": [
+    11.976464972462987,
+    29.609183306815975
+   ],
+   "error": -0.4597812408278834,
+   "error_pct": -2.906751555712167,
+   "inside_band": true,
+   "label": "held out, not blind",
+   "v1_forecast": 9.888266480463392,
+   "v1_error": -5.929433519536609,
+   "v1_error_pct": -37.48606636575867
+  },
+  {
+   "load": "E59",
+   "name": "(256,5,0.4,1925) second half",
+   "quantity": "J a solve with the card at rest",
+   "unit": "J",
+   "seconds": "given",
+   "measured": 53.39798,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h1/energy.json board.j_per_solve_total",
+   "forecast": 53.031889943933145,
+   "forecast_band": [
+    48.602734192596046,
+    69.61345667818296
+   ],
+   "error": -0.3660900560668523,
+   "error_pct": -0.6855878369684627,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E59",
+   "name": "(256,5,0.4,1925) second half",
+   "quantity": "J a solve over idle",
+   "unit": "J",
+   "seconds": "forecast",
+   "measured": 15.8177,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h1/energy.json board.j_per_solve",
+   "forecast": 15.106257559172118,
+   "forecast_band": [
+    11.762870172462987,
+    29.20314170681598
+   ],
+   "error": -0.7114424408278825,
+   "error_pct": -4.497761626708576,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E59",
+   "name": "(256,5,0.4,1925) second half",
+   "quantity": "J a solve with the card at rest",
+   "unit": "J",
+   "seconds": "forecast",
+   "measured": 53.39798,
+   "measured_source": "workloads/sparseparity/data/2026-09-29-aifoundry3-m5-energy/energy/aifoundry3-1136-f5h1/energy.json board.j_per_solve_total",
+   "forecast": 50.21540519588889,
+   "forecast_band": [
+    45.881648049132814,
+    66.56943501661277
+   ],
+   "error": -3.1825748041111055,
+   "error_pct": -5.960103367414097,
+   "inside_band": true,
+   "label": "held out, not blind"
+  },
+  {
+   "load": "E101",
+   "name": "res fp32 zeros",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 2.1299062900232637,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.fp32.zeros.S",
+   "forecast": 1.9937432087937446,
+   "forecast_band": [
+    1.9343363043100614,
+    2.0531501132774275
+   ],
+   "error": -0.13616308122951915,
+   "error_pct": -6.392914179714071,
+   "inside_band": false,
+   "label": "the loop: M10's kernel term on a session M10 never saw",
+   "measured_ci95": 0.07351706200133196
+  },
+  {
+   "load": "E101",
+   "name": "mm16 fp32 zeros",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 4.599039135889591,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.mm16.fp32.zeros.S",
+   "forecast": 4.554889746625898,
+   "forecast_band": [
+    4.2438659144759345,
+    4.865913578775864
+   ],
+   "error": -0.044149389263692385,
+   "error_pct": -0.9599698536845042,
+   "inside_band": true,
+   "label": "in sample for the l2_stream price (E101's own post hoc path cost)",
+   "measured_ci95": 0.1301708529477677
+  },
+  {
+   "load": "E101",
+   "name": "res fp32 random",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 26.42675157675318,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.fp32.randn.S",
+   "forecast": 26.61026709640516,
+   "forecast_band": [
+    26.14503388121639,
+    27.075500311593935
+   ],
+   "error": 0.18351551965197999,
+   "error_pct": 0.6944308653259263,
+   "inside_band": true,
+   "label": "the loop: M10's kernel term on a session M10 never saw",
+   "measured_ci95": 0.09451356865306386
+  },
+  {
+   "load": "E101",
+   "name": "mm16 fp32 random",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 36.45197760330902,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.mm16.fp32.randn.S",
+   "forecast": 36.40839249171896,
+   "forecast_band": [
+    35.03390657157824,
+    37.78287841185969
+   ],
+   "error": -0.04358511159005474,
+   "error_pct": -0.11956857886936206,
+   "inside_band": true,
+   "label": "in sample for the l2_stream price (E101's own post hoc path cost)",
+   "measured_ci95": 0.09427518722831699
+  },
+  {
+   "load": "E101",
+   "name": "res fp16 zeros",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 2.025372607098983,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.fp16.zeros.S",
+   "forecast": 1.9951810226488425,
+   "forecast_band": [
+    1.9431596609735018,
+    2.047202384324183
+   ],
+   "error": -0.030191584450140585,
+   "error_pct": -1.4906681538161575,
+   "inside_band": true,
+   "label": "the loop: M10's kernel term on a session M10 never saw",
+   "measured_ci95": 0.20588066264014968
+  },
+  {
+   "load": "E101",
+   "name": "mm16 fp16 zeros",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 4.618072680937814,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.mm16.fp16.zeros.S",
+   "forecast": 4.556373763326587,
+   "forecast_band": [
+    4.25297280171189,
+    4.859774724941284
+   ],
+   "error": -0.0616989176112277,
+   "error_pct": -1.3360317577049958,
+   "inside_band": true,
+   "label": "in sample for the l2_stream price (E101's own post hoc path cost)",
+   "measured_ci95": 0.08676410900063462
+  },
+  {
+   "load": "E101",
+   "name": "res fp16 random",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 23.781660762861435,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.fp16.randn.S",
+   "forecast": 24.196761583180706,
+   "forecast_band": [
+    23.84811035864147,
+    24.545412807719945
+   ],
+   "error": 0.415100820319271,
+   "error_pct": 1.7454660734523302,
+   "inside_band": false,
+   "label": "the loop: M10's kernel term on a session M10 never saw",
+   "measured_ci95": 0.2057424470353454
+  },
+  {
+   "load": "E101",
+   "name": "mm16 fp16 random",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 33.398552285736685,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.mm16.fp16.randn.S",
+   "forecast": 33.91733116543652,
+   "forecast_band": [
+    32.66317349259285,
+    35.1714888382802
+   ],
+   "error": 0.5187788796998376,
+   "error_pct": 1.5532975060161196,
+   "inside_band": true,
+   "label": "in sample for the l2_stream price (E101's own post hoc path cost)",
+   "measured_ci95": 0.2559791076171911
+  },
+  {
+   "load": "E101",
+   "name": "res int8 zeros",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 2.5375656290023265,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.int8.zeros.S",
+   "forecast": 2.614076524437753,
+   "forecast_band": [
+    2.5856622762688346,
+    2.6424907726066715
+   ],
+   "error": 0.07651089543542655,
+   "error_pct": 3.0151297196403033,
+   "inside_band": false,
+   "label": "the loop: M10's kernel term on a session M10 never saw",
+   "measured_ci95": 0.082761933622788
+  },
+  {
+   "load": "E101",
+   "name": "mm16 int8 zeros",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 7.654742407668783,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.mm16.int8.zeros.S",
+   "forecast": 7.678286094454301,
+   "forecast_band": [
+    7.174787156409035,
+    8.181785032499567
+   ],
+   "error": 0.023543686785518325,
+   "error_pct": 0.30756994202615434,
+   "inside_band": true,
+   "label": "in sample for the l2_stream price (E101's own post hoc path cost)",
+   "measured_ci95": 0.17052221709123155
+  },
+  {
+   "load": "E101",
+   "name": "res int8 random",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 9.655684635641288,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.int8.full.S",
+   "forecast": 9.911966985088501,
+   "forecast_band": [
+    9.5722822926405,
+    10.251651677536504
+   ],
+   "error": 0.25628234944721306,
+   "error_pct": 2.6542120949271446,
+   "inside_band": true,
+   "label": "the loop: M10's kernel term on a session M10 never saw",
+   "measured_ci95": 0.11639122929246164
+  },
+  {
+   "load": "E101",
+   "name": "mm16 int8 random",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 27.386440733552895,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.mm16.int8.full.S",
+   "forecast": 28.12286538528133,
+   "forecast_band": [
+    26.049715454552484,
+    30.196015316010175
+   ],
+   "error": 0.7364246517284343,
+   "error_pct": 2.6890119051731793,
+   "inside_band": true,
+   "label": "in sample for the l2_stream price (E101's own post hoc path cost)",
+   "measured_ci95": 0.25935174697806185
+  },
+  {
+   "load": "E101",
+   "name": "res fp32 e37",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 16.441384974123732,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.res.fp32.e37.S",
+   "forecast": 15.981945281389214,
+   "forecast_band": [
+    14.979384724292206,
+    16.79106769735345
+   ],
+   "error": -0.45943969273451835,
+   "error_pct": -2.7944099201959407,
+   "inside_band": true,
+   "label": "the loop: M10's kernel term on a session M10 never saw",
+   "measured_ci95": 0.14121376996770954
+  },
+  {
+   "load": "E101",
+   "name": "mm16 fp32 e37",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 22.659394948247467,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.mm16.fp32.e37.S",
+   "forecast": 20.80551322222561,
+   "forecast_band": [
+    19.33973602906656,
+    22.07163631483942
+   ],
+   "error": -1.8538817260218572,
+   "error_pct": -8.181514688525436,
+   "inside_band": false,
+   "label": "in sample for the l2_stream price (E101's own post hoc path cost)",
+   "measured_ci95": 0.19014224462473941
+  },
+  {
+   "load": "E101",
+   "name": "mmp64 fp32 zeros",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 6.59691693131028,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.mmp64.fp32.zeros.S",
+   "forecast": 7.8219359642976665,
+   "forecast_band": [
+    6.967208177466981,
+    8.599153236006021
+   ],
+   "error": 1.2250190329873867,
+   "error_pct": 18.569568871986288,
+   "inside_band": false,
+   "label": "post hoc for the awake rule (set during the build after arithmetic that put v2 beside this arm); without the rule +36.0%; the catalogue's DRAM row held out (posthoc-v2.json awake_rule_e101_dram)",
+   "measured_ci95": 0.20677775339758564,
+   "label_frozen": "held out for every price it uses (the catalogue's DRAM row; E101 in sample for w_set only through phi of random and zeros, where w_set cancels)",
+   "without_awake_rule_w": 8.9696274347473
+  },
+  {
+   "load": "E101",
+   "name": "mmp64 fp32 random",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 10.761080560507951,
+   "measured_source": "docs/reports/data/2026-11-01-e101-real-matmul/e101.json items.mmp64.fp32.randn.S",
+   "forecast": 11.37641302439726,
+   "forecast_band": [
+    10.212536497118776,
+    12.435986289782797
+   ],
+   "error": 0.6153324638893096,
+   "error_pct": 5.718128959535123,
+   "inside_band": true,
+   "label": "post hoc for the awake rule (set during the build after arithmetic that put v2 beside this arm); without the rule +16.4%; the catalogue's DRAM row held out (posthoc-v2.json awake_rule_e101_dram)",
+   "measured_ci95": 0.3485042421542518,
+   "label_frozen": "held out for every price it uses (the catalogue's DRAM row; E101 in sample for w_set only through phi of random and zeros, where w_set cancels)",
+   "without_awake_rule_w": 12.524104494846895
+  },
+  {
+   "load": "E136",
+   "name": "g4k fp32, random over zeros, burst at 800 MHz",
+   "quantity": "W, random minus zeros, burst at 800 MHz",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 18.940000000000005,
+   "measured_source": "docs/reports/data/2026-11-02-e136-large-gemm/results.json cells.g4k-fp32-randn and g4k-fp32-zeros .burst_p800_w_runs (one run each)",
+   "forecast": 18.320546674764444,
+   "forecast_band": [
+    14.486919018930188,
+    22.125310573400245
+   ],
+   "error": -0.6194533252355612,
+   "error_pct": -3.270608897759034,
+   "inside_band": true,
+   "label": "held out, not blind; differences only; aifoundry2's D carried from aifoundry3 by E38's card scale. DATED CORRECTION (fix-q166, Thu 12 Nov 2026, post hoc): the frozen label said the L3 row's share of the difference is zero by construction; it is -0.120 W (its zeros column is aifoundry3's 13.5 pJ/B, its random column aifoundry2's 12.3); without it the forecast reads 18.441 W, -2.6% (posthoc-v2.json e136_l3_correction)",
+   "label_frozen": "held out, not blind; differences only; aifoundry2's D carried from aifoundry3 by E38's card scale; the L3 row has no zeros/random split, so its share of the difference is zero by construction",
+   "corrected_w_posthoc": 18.440564293914317,
+   "corrected_error_pct_posthoc": -2.6369361461757532
+  },
+  {
+   "load": "E136",
+   "name": "g4k fp16, random over zeros, burst at 800 MHz",
+   "quantity": "W, random minus zeros, burst at 800 MHz",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 16.53,
+   "measured_source": "docs/reports/data/2026-11-02-e136-large-gemm/results.json cells.g4k-fp16-randn and g4k-fp16-zeros .burst_p800_w_runs (one run each)",
+   "forecast": 16.815060244956364,
+   "forecast_band": [
+    13.356837303993697,
+    20.245126027201152
+   ],
+   "error": 0.2850602449563624,
+   "error_pct": 1.724502389330686,
+   "inside_band": true,
+   "label": "held out, not blind; differences only; aifoundry2's D carried from aifoundry3 by E38's card scale. DATED CORRECTION (fix-q166, Thu 12 Nov 2026, post hoc): the frozen label said the L3 row's share of the difference is zero by construction; it is -0.120 W (its zeros column is aifoundry3's 13.5 pJ/B, its random column aifoundry2's 12.3); without it the forecast reads 16.935 W, +2.4% (posthoc-v2.json e136_l3_correction)",
+   "label_frozen": "held out, not blind; differences only; aifoundry2's D carried from aifoundry3 by E38's card scale; the L3 row has no zeros/random split, so its share of the difference is zero by construction",
+   "corrected_w_posthoc": 16.93496753861675,
+   "corrected_error_pct_posthoc": 2.449894365497572
+  },
+  {
+   "load": "E136",
+   "name": "g4k int8, random over zeros, burst at 800 MHz",
+   "quantity": "W, random minus zeros, burst at 800 MHz",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 6.5,
+   "measured_source": "docs/reports/data/2026-11-02-e136-large-gemm/results.json cells.g4k-int8-full and g4k-int8-zeros .burst_p800_w_runs (one run each)",
+   "forecast": 5.753609873248925,
+   "forecast_band": [
+    2.476421359990743,
+    9.012590331802297
+   ],
+   "error": -0.7463901267510753,
+   "error_pct": -11.482925026939618,
+   "inside_band": true,
+   "label": "held out, not blind; differences only; aifoundry2's D carried from aifoundry3 by E38's card scale. DATED CORRECTION (fix-q166, Thu 12 Nov 2026, post hoc): the frozen label said the L3 row's share of the difference is zero by construction; it is -0.120 W (its zeros column is aifoundry3's 13.5 pJ/B, its random column aifoundry2's 12.3); without it the forecast reads 5.874 W, -9.6% (posthoc-v2.json e136_l3_correction)",
+   "label_frozen": "held out, not blind; differences only; aifoundry2's D carried from aifoundry3 by E38's card scale; the L3 row has no zeros/random split, so its share of the difference is zero by construction",
+   "corrected_w_posthoc": 5.873521830360907,
+   "corrected_error_pct_posthoc": -9.638125686755272
+  },
+  {
+   "load": "E86",
+   "name": "fp16.nn_like",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 19.50507490079365,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.fp16.nn_like.S",
+   "forecast": 19.11375882543645,
+   "forecast_band": [
+    18.766499841584466,
+    19.461017809288432
+   ],
+   "error": -0.3913160753572029,
+   "error_pct": -2.0062269811703235,
+   "inside_band": false,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.15746980348606868
+  },
+  {
+   "load": "E86",
+   "name": "fp16.real:l0_mlp_up",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 23.85110912698412,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.fp16.real_l0_mlp_up.S",
+   "forecast": 23.926182118635467,
+   "forecast_band": [
+    23.578923134783484,
+    24.27344110248745
+   ],
+   "error": 0.0750729916513464,
+   "error_pct": 0.31475681592690397,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.058961434670432925
+  },
+  {
+   "load": "E86",
+   "name": "fp16.real:l6_attn_qk",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 23.33418353174603,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.fp16.real_l6_attn_qk.S",
+   "forecast": 23.248094203568307,
+   "forecast_band": [
+    22.900835219716324,
+    23.59535318742029
+   ],
+   "error": -0.08608932817772441,
+   "error_pct": -0.36894082049453475,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.085292511296364
+  },
+  {
+   "load": "E86",
+   "name": "fp16.real:l6_mlp_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 23.92345833333333,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.fp16.real_l6_mlp_down.S",
+   "forecast": 23.98636439911688,
+   "forecast_band": [
+    23.639105415264897,
+    24.333623382968863
+   ],
+   "error": 0.06290606578355096,
+   "error_pct": 0.26294720816305184,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.3210407966022075
+  },
+  {
+   "load": "E86",
+   "name": "fp32.nn_like",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 14.923203869047615,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.fp32.nn_like.S",
+   "forecast": 15.026772581549809,
+   "forecast_band": [
+    14.563387503056154,
+    15.490157660043467
+   ],
+   "error": 0.10356871250219335,
+   "error_pct": 0.6940112418956252,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.3474841923273115
+  },
+  {
+   "load": "E86",
+   "name": "fp32.real:l0_mlp_up",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 26.374179563492063,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.fp32.real_l0_mlp_up.S",
+   "forecast": 26.432211691429558,
+   "forecast_band": [
+    25.968826612935903,
+    26.895596769923216
+   ],
+   "error": 0.05803212793749424,
+   "error_pct": 0.22003386986044512,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.8350549157923772
+  },
+  {
+   "load": "E86",
+   "name": "fp32.real:l6_attn_qk",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 26.27003075396825,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.fp32.real_l6_attn_qk.S",
+   "forecast": 26.066242519121705,
+   "forecast_band": [
+    25.60285744062805,
+    26.52962759761536
+   ],
+   "error": -0.20378823484654518,
+   "error_pct": -0.7757441807172674,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.1331231315400949
+  },
+  {
+   "load": "E86",
+   "name": "fp32.real:l6_mlp_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 26.567167162698418,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.fp32.real_l6_mlp_down.S",
+   "forecast": 26.403870493059955,
+   "forecast_band": [
+    25.9404854145663,
+    26.867255571553613
+   ],
+   "error": -0.1632966696384628,
+   "error_pct": -0.61465593466713,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.1946113790898063
+  },
+  {
+   "load": "E86",
+   "name": "int8.gauss_q",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 9.125672619047624,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.int8.gauss_q.S",
+   "forecast": 9.40540890720314,
+   "forecast_band": [
+    9.066870472537381,
+    9.743947341868902
+   ],
+   "error": 0.279736288155517,
+   "error_pct": 3.0653772037760314,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.31771121779657474
+  },
+  {
+   "load": "E86",
+   "name": "int8.real:l0_mlp_up",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 8.835599206349208,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.int8.real_l0_mlp_up.S",
+   "forecast": 8.927950488810335,
+   "forecast_band": [
+    8.589412054144576,
+    9.266488923476095
+   ],
+   "error": 0.09235128246112723,
+   "error_pct": 1.0452181035414572,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.7211335109415227
+  },
+  {
+   "load": "E86",
+   "name": "int8.real:l6_attn_qk",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 8.18172100970018,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.int8.real_l6_attn_qk.S",
+   "forecast": 8.238464306645321,
+   "forecast_band": [
+    7.899925871979563,
+    8.577002741311082
+   ],
+   "error": 0.05674329694514135,
+   "error_pct": 0.6935374217461947,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.14941222489437894
+  },
+  {
+   "load": "E86",
+   "name": "int8.real:l6_mlp_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 8.295884137426906,
+   "measured_source": "docs/reports/data/2026-10-31-e86-real-tensors-energy/e86.json items.int8.real_l6_mlp_down.S",
+   "forecast": 8.089410256774,
+   "forecast_band": [
+    7.750871822108241,
+    8.427948691439758
+   ],
+   "error": -0.20647388065290606,
+   "error_pct": -2.4888713153719024,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.1952173264829839
+  },
+  {
+   "load": "E95",
+   "name": "fp16.real2:bert_l6_up",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 23.72014740325866,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp16.r2_bert_l6_up.S",
+   "forecast": 24.03051891034242,
+   "forecast_band": [
+    23.683259926490436,
+    24.377777894194402
+   ],
+   "error": 0.31037150708375805,
+   "error_pct": 1.3084720841200144,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.25561183698733975
+  },
+  {
+   "load": "E95",
+   "name": "fp16.real2:gpt2_l6_attn_qk_fp16fwd",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 23.202801680244416,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp16.r2_gpt2_l6_attn_qk_fp16fwd.S",
+   "forecast": 23.203571443226917,
+   "forecast_band": [
+    22.856312459374934,
+    23.5508304270789
+   ],
+   "error": 0.0007697629825003105,
+   "error_pct": 0.003317543256665037,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.1583661800779933
+  },
+  {
+   "load": "E95",
+   "name": "fp16.real2:gpt2_l6_mlp_down_fp16fwd",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 23.782125254582496,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp16.r2_gpt2_l6_mlp_down_fp16fwd.S",
+   "forecast": 23.966250400267967,
+   "forecast_band": [
+    23.618991416415984,
+    24.31350938411995
+   ],
+   "error": 0.18412514568547067,
+   "error_pct": 0.7742165332763615,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.09814069671659026
+  },
+  {
+   "load": "E95",
+   "name": "fp16.real2:gpt2_l9_attn_qk",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 22.983747114731855,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp16.r2_gpt2_l9_attn_qk.S",
+   "forecast": 22.94990943635507,
+   "forecast_band": [
+    22.60265045250309,
+    23.297168420207058
+   ],
+   "error": -0.0338376783767842,
+   "error_pct": -0.14722437645989986,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.2904240990470368
+  },
+  {
+   "load": "E95",
+   "name": "fp16.real2:resnet18_l3c1",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 15.980275458248482,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp16.r2_resnet18_l3c1.S",
+   "forecast": 16.104756576934754,
+   "forecast_band": [
+    15.75749759308277,
+    16.452015560786737
+   ],
+   "error": 0.12448111868627265,
+   "error_pct": 0.7789672900914839,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.07091857589458996
+  },
+  {
+   "load": "E95",
+   "name": "fp16.real2:t5small_l0_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 5.600566446028515,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp16.r2_t5small_l0_down.S",
+   "forecast": 5.533858127628897,
+   "forecast_band": [
+    5.186599143776913,
+    5.881117111480882
+   ],
+   "error": -0.066708318399618,
+   "error_pct": -1.1910994904260501,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.12423113941310865
+  },
+  {
+   "load": "E95",
+   "name": "fp16.real2:vgg16_fc2",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 12.024849032586568,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp16.r2_vgg16_fc2.S",
+   "forecast": 12.288009396127372,
+   "forecast_band": [
+    11.940750412275387,
+    12.635268379979355
+   ],
+   "error": 0.26316036354080374,
+   "error_pct": 2.1884712467296352,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.1334630602971701
+  },
+  {
+   "load": "E95",
+   "name": "fp16.real2:vit_l5_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 23.609668788187392,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp16.r2_vit_l5_down.S",
+   "forecast": 23.766280528559555,
+   "forecast_band": [
+    23.419021544707572,
+    24.11353951241154
+   ],
+   "error": 0.1566117403721634,
+   "error_pct": 0.6633373037851376,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.25657164717183534
+  },
+  {
+   "load": "E95",
+   "name": "fp16.real:l6_attn_qk",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 23.14016878818739,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp16.real_l6_attn_qk.S",
+   "forecast": 23.248094203568307,
+   "forecast_band": [
+    22.900835219716324,
+    23.59535318742029
+   ],
+   "error": 0.10792541538091882,
+   "error_pct": 0.46639856592581413,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.23560156036929564
+  },
+  {
+   "load": "E95",
+   "name": "fp16.real:l6_mlp_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 23.845551680244412,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp16.real_l6_mlp_down.S",
+   "forecast": 23.98636439911688,
+   "forecast_band": [
+    23.639105415264897,
+    24.333623382968863
+   ],
+   "error": 0.1408127188724677,
+   "error_pct": 0.590519861988047,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.08761905335031017
+  },
+  {
+   "load": "E95",
+   "name": "fp32.real2:bert_l6_up",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 26.25073370672099,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp32.r2_bert_l6_up.S",
+   "forecast": 26.378676174779898,
+   "forecast_band": [
+    25.91529109628624,
+    26.842061253273556
+   ],
+   "error": 0.12794246805890808,
+   "error_pct": 0.48738625551693016,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.19874030744246884
+  },
+  {
+   "load": "E95",
+   "name": "fp32.real2:gpt2_l3_mlp_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 26.372227087576395,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp32.r2_gpt2_l3_mlp_down.S",
+   "forecast": 26.450680675159518,
+   "forecast_band": [
+    25.98729559666586,
+    26.91406575365318
+   ],
+   "error": 0.07845358758312315,
+   "error_pct": 0.29748563639542447,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.30766585885446546
+  },
+  {
+   "load": "E95",
+   "name": "fp32.real2:gpt2_l6_mlp_down_bf16fwd",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 19.805920315682297,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp32.r2_gpt2_l6_mlp_down_bf16fwd.S",
+   "forecast": 19.99395299349697,
+   "forecast_band": [
+    19.53056791500331,
+    20.45733807199063
+   ],
+   "error": 0.1880326778146717,
+   "error_pct": 0.9493761199563533,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.13419108925882145
+  },
+  {
+   "load": "E95",
+   "name": "fp32.real2:gpt2_l9_attn_qk",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 25.616300152749503,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp32.r2_gpt2_l9_attn_qk.S",
+   "forecast": 25.869899044095913,
+   "forecast_band": [
+    25.406513965602258,
+    26.333284122589568
+   ],
+   "error": 0.2535988913464102,
+   "error_pct": 0.9899903180170632,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.7931591114885089
+  },
+  {
+   "load": "E95",
+   "name": "fp32.real2:resnet18_l2c1",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 21.657794551934842,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp32.r2_resnet18_l2c1.S",
+   "forecast": 21.911804321126947,
+   "forecast_band": [
+    21.448419242633292,
+    22.375189399620606
+   ],
+   "error": 0.2540097691921055,
+   "error_pct": 1.1728330351596812,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.2053643966044682
+  },
+  {
+   "load": "E95",
+   "name": "fp32.real2:resnet18_l3c1",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 16.0797968431772,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp32.r2_resnet18_l3c1.S",
+   "forecast": 16.306668886181452,
+   "forecast_band": [
+    15.843283807687795,
+    16.77005396467511
+   ],
+   "error": 0.2268720430042528,
+   "error_pct": 1.4109136154945678,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.24177089666294221
+  },
+  {
+   "load": "E95",
+   "name": "fp32.real2:t5small_l0_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 3.6368892566191455,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp32.r2_t5small_l0_down.S",
+   "forecast": 3.7087061019004643,
+   "forecast_band": [
+    3.245321023406807,
+    4.172091180394121
+   ],
+   "error": 0.07181684528131882,
+   "error_pct": 1.974677814305509,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.19722732705504908
+  },
+  {
+   "load": "E95",
+   "name": "fp32.real2:t5small_l0_up",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 23.671801680244407,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp32.r2_t5small_l0_up.S",
+   "forecast": 23.907708834880275,
+   "forecast_band": [
+    23.444323756386616,
+    24.371093913373933
+   ],
+   "error": 0.23590715463586776,
+   "error_pct": 0.9965745650562245,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.17919824263362227
+  },
+  {
+   "load": "E95",
+   "name": "fp32.real2:vgg16_fc2",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 9.822788321363493,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp32.r2_vgg16_fc2.S",
+   "forecast": 9.957827370194156,
+   "forecast_band": [
+    9.4944422917005,
+    10.421212448687813
+   ],
+   "error": 0.13503904883066298,
+   "error_pct": 1.374752711884952,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.24194284528336749
+  },
+  {
+   "load": "E95",
+   "name": "fp32.real2:vit_l11_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 21.92269410500115,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp32.r2_vit_l11_down.S",
+   "forecast": 21.94331465184863,
+   "forecast_band": [
+    21.479929573354976,
+    22.40669973034229
+   ],
+   "error": 0.020620546847482046,
+   "error_pct": 0.09406027721190505,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 1.0023014953510783
+  },
+  {
+   "load": "E95",
+   "name": "fp32.real2:vit_l5_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 26.42632942973525,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.fp32.r2_vit_l5_down.S",
+   "forecast": 26.463425554967987,
+   "forecast_band": [
+    26.000040476474332,
+    26.926810633461645
+   ],
+   "error": 0.0370961252327362,
+   "error_pct": 0.1403756254964231,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.13957135111370045
+  },
+  {
+   "load": "E95",
+   "name": "int8.real2:gpt2_l11_down_asym",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 6.552712067209781,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.r2_gpt2_l11_down_asym.S",
+   "forecast": 6.666502247880046,
+   "forecast_band": [
+    6.327963813214287,
+    7.005040682545805
+   ],
+   "error": 0.11379018067026436,
+   "error_pct": 1.7365356436105013,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.580762196051069
+  },
+  {
+   "load": "E95",
+   "name": "int8.real2:gpt2_l11_down_maxabs",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 4.8588912084181946,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.r2_gpt2_l11_down_maxabs.S",
+   "forecast": 4.989274291734144,
+   "forecast_band": [
+    4.650735857068385,
+    5.3278127263999036
+   ],
+   "error": 0.13038308331594983,
+   "error_pct": 2.683391698296449,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.32331988731590605
+  },
+  {
+   "load": "E95",
+   "name": "int8.real2:gpt2_l11_down_p999",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 8.025337067209776,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.r2_gpt2_l11_down_p999.S",
+   "forecast": 7.994778594002417,
+   "forecast_band": [
+    7.656240159336658,
+    8.333317028668176
+   ],
+   "error": -0.030558473207358716,
+   "error_pct": -0.3807749500293972,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.23796449685056656
+  },
+  {
+   "load": "E95",
+   "name": "int8.real2:gpt2_l6_down_p999",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 8.302204684317724,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.r2_gpt2_l6_down_p999.S",
+   "forecast": 8.215695134915428,
+   "forecast_band": [
+    7.877156700249669,
+    8.554233569581188
+   ],
+   "error": -0.0865095494022956,
+   "error_pct": -1.0420069450432365,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.651409837365631
+  },
+  {
+   "load": "E95",
+   "name": "int8.real2:gpt2_l6_down_p9999",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 8.154204175152753,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.r2_gpt2_l6_down_p9999.S",
+   "forecast": 8.106245614947076,
+   "forecast_band": [
+    7.7677071802813185,
+    8.444784049612835
+   ],
+   "error": -0.0479585602056769,
+   "error_pct": -0.5881451969502407,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.2654918952307827
+  },
+  {
+   "load": "E95",
+   "name": "int8.real2:gpt2_l6_down_per_token",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 8.105087067209777,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.r2_gpt2_l6_down_per_token.S",
+   "forecast": 8.183652695912977,
+   "forecast_band": [
+    7.845114261247217,
+    8.522191130578735
+   ],
+   "error": 0.07856562870320083,
+   "error_pct": 0.969337257597746,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.7021920724907765
+  },
+  {
+   "load": "E95",
+   "name": "int8.real2:resnet18_l3c1",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 6.911778513238293,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.r2_resnet18_l3c1.S",
+   "forecast": 6.989118741295499,
+   "forecast_band": [
+    6.65058030662974,
+    7.3276571759612565
+   ],
+   "error": 0.07734022805720642,
+   "error_pct": 1.118962766371562,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.21125429666311912
+  },
+  {
+   "load": "E95",
+   "name": "int8.real2:t5small_l0_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 4.712386357951903,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.r2_t5small_l0_down.S",
+   "forecast": 4.732029903633432,
+   "forecast_band": [
+    4.393491468967673,
+    5.070568338299191
+   ],
+   "error": 0.019643545681528707,
+   "error_pct": 0.41684921798445623,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.13229977908526153
+  },
+  {
+   "load": "E95",
+   "name": "int8.real2:vgg16_fc2",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 6.475536405295309,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.r2_vgg16_fc2.S",
+   "forecast": 6.436074967638234,
+   "forecast_band": [
+    6.097536532972475,
+    6.774613402303992
+   ],
+   "error": -0.039461437657075216,
+   "error_pct": -0.609392569004878,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.06626209398715233
+  },
+  {
+   "load": "E95",
+   "name": "int8.real2:vgg16_fc2_asym",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 7.27202851323829,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.r2_vgg16_fc2_asym.S",
+   "forecast": 7.0953742712655465,
+   "forecast_band": [
+    6.7568358365997865,
+    7.433912705931304
+   ],
+   "error": -0.17665424197274326,
+   "error_pct": -2.429229226083958,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.17664800652168505
+  },
+  {
+   "load": "E95",
+   "name": "int8.real2:vit_l11_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 5.459786405295314,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.r2_vit_l11_down.S",
+   "forecast": 5.369726574941336,
+   "forecast_band": [
+    5.031188140275577,
+    5.7082650096070955
+   ],
+   "error": -0.09005983035397769,
+   "error_pct": -1.649511971139216,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.19030682448640499
+  },
+  {
+   "load": "E95",
+   "name": "int8.real:l6_mlp_down",
+   "quantity": "S, W over idle",
+   "unit": "W",
+   "seconds": "given",
+   "measured": 8.141272233537004,
+   "measured_source": "docs/reports/data/2026-11-01-e95-real-tensors-energy/e95.json items.int8.real_l6_mlp_down.S",
+   "forecast": 8.089410256774,
+   "forecast_band": [
+    7.750871822108241,
+    8.427948691439758
+   ],
+   "error": -0.051861976763003526,
+   "error_pct": -0.6370254583720254,
+   "inside_band": true,
+   "label": "held out by kind (M10 was fitted on these rows, each predicted with its own kind left out, and its session's own random anchors setting the float scale)",
+   "measured_ci95": 0.46777070306018614
+  }
+ ]
+}

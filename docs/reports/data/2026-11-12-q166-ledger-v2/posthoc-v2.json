@@ -1,0 +1,372 @@
+{
+ "what": "the load ledger v2's dated corrections, every one post hoc (tools/ledger/posthoc_ledger_v2.py)",
+ "label": "post hoc (fix-q166, Thu 12 Nov 2026): a variant chosen after the frozen scores were seen",
+ "frozen_v2_sha256": "59ff911705137e5486efcb15c482919e3d257f800193bcc9f1d78ee7283753ce",
+ "awake_rule_e37": {
+  "what": "E37 (mmbench fp32 from DRAM) with and without the awake rule; the rule prices none of a hart's wait inside its own DRAM loads (2,048 B at the probe's 0.124 B a minion-cycle), so only c - 546 - 16,556 cycles an op, none on these runs, are priced as awake; without it all c - 546 are",
+  "label": "post hoc (fix-q166, Thu 12 Nov 2026): a variant chosen after the frozen scores were seen",
+  "per_card": {
+   "aifoundry2": {
+    "given_rule": {
+     "w_over_idle_with_heat": 10.008296284208322,
+     "w_error_pct": 13.952977391209004,
+     "j_per_op_error_pct": 13.952977391208995,
+     "j_total_per_op_error_pct": 3.382323865836287
+    },
+    "given_no_rule": {
+     "w_over_idle_with_heat": 11.240769075794898,
+     "w_error_pct": 27.985729836452453,
+     "j_per_op_error_pct": 27.98572983645246,
+     "j_total_per_op_error_pct": 6.291032511314765
+    },
+    "forecast_rule": {
+     "w_over_idle_with_heat": 9.22866923996642,
+     "w_error_pct": 5.076259474069514,
+     "j_per_op_error_pct": 13.952977391209018,
+     "j_total_per_op_error_pct": 10.120536057272277
+    },
+    "forecast_no_rule": {
+     "w_over_idle_with_heat": 10.464702989880635,
+     "w_error_pct": 19.149556462787444,
+     "j_per_op_error_pct": 29.215169836981232,
+     "j_total_per_op_error_pct": 13.284083001408776
+    }
+   },
+   "aifoundry3": {
+    "given_rule": {
+     "w_over_idle_with_heat": 9.437233004207057,
+     "w_error_pct": 12.950549349650416,
+     "j_per_op_error_pct": 12.950549349650414,
+     "j_total_per_op_error_pct": 3.665369368928725
+    },
+    "given_no_rule": {
+     "w_over_idle_with_heat": 10.634764671800717,
+     "w_error_pct": 27.28333732447397,
+     "j_per_op_error_pct": 27.28333732447398,
+     "j_total_per_op_error_pct": 7.145996427911972
+    },
+    "forecast_rule": {
+     "w_over_idle_with_heat": 8.780102151959387,
+     "w_error_pct": 5.085607292705329,
+     "j_per_op_error_pct": 12.950549349650439,
+     "j_total_per_op_error_pct": 9.371117907922754
+    },
+    "forecast_no_rule": {
+     "w_over_idle_with_heat": 9.980698166491054,
+     "w_error_pct": 19.455071237052103,
+     "j_per_op_error_pct": 28.39546981200407,
+     "j_total_per_op_error_pct": 13.121819319228155
+    }
+   },
+   "aifoundry1-c1": {
+    "given_rule": {
+     "w_over_idle_with_heat": 10.058558402823907,
+     "w_error_pct": 13.4632038075847,
+     "j_per_op_error_pct": 13.463203807584694,
+     "j_total_per_op_error_pct": 1.3204039105114336
+    },
+    "given_no_rule": {
+     "w_over_idle_with_heat": 11.309870432822468,
+     "w_error_pct": 27.578335042170902,
+     "j_per_op_error_pct": 27.57833504217091,
+     "j_total_per_op_error_pct": 3.7955518482809567
+    },
+    "forecast_rule": {
+     "w_over_idle_with_heat": 9.346869594410082,
+     "w_error_pct": 5.435165486112656,
+     "j_per_op_error_pct": 13.463203807584694,
+     "j_total_per_op_error_pct": 7.5201969768486
+    },
+    "forecast_no_rule": {
+     "w_over_idle_with_heat": 10.601439297461726,
+     "w_error_pct": 19.58704413586092,
+     "j_per_op_error_pct": 28.69263398956785,
+     "j_total_per_op_error_pct": 10.190741946064094
+    }
+   }
+  },
+  "j_per_op_error_pct_given_rule": [
+   13.952977391208995,
+   12.950549349650414,
+   13.463203807584694
+  ],
+  "j_per_op_error_pct_given_no_rule": [
+   27.98572983645246,
+   27.28333732447398,
+   27.57833504217091
+  ],
+  "rms_w_given_rule": 1.1686275218625926,
+  "rms_w_given_no_rule": 2.3954902789679413,
+  "cards": [
+   "aifoundry2",
+   "aifoundry3",
+   "aifoundry1-c1"
+  ]
+ },
+ "e37_die_start": {
+  "what": "E37's frozen T0 is the run's mean die (die_c_mean), itself raised by the run, and the ledger adds the forecast rise on top; here T0 is the run's starting die (die_c_start)",
+  "label": "post hoc (fix-q166, Thu 12 Nov 2026): a variant chosen after the frozen scores were seen",
+  "j_total_per_op_error_pct_given": {
+   "aifoundry2": 2.349961096177893,
+   "aifoundry3": 3.2900128458333846,
+   "aifoundry1-c1": 1.3984009299534064
+  },
+  "j_total_per_op_error_pct_forecast": {
+   "aifoundry2": 9.004111103719355,
+   "aifoundry3": 8.968636587663587,
+   "aifoundry1-c1": 7.60395564651934
+  },
+  "die_c": {
+   "aifoundry2": [
+    76.25,
+    76.94068
+   ],
+   "aifoundry3": [
+    58.5,
+    58.84746
+   ],
+   "aifoundry1-c1": [
+    71.0,
+    70.94915
+   ]
+  }
+ },
+ "e37_bytes": {
+  "what": "E37's residual (+13-14% an op) is the DRAM row's price OR the byte count: 2,048 B an op is assumed (bracket 1,024-2,048); the measured cycles move fewer bytes at 76 GB/s, and this many bytes an op would zero the given-seconds miss with every other input frozen",
+  "label": "post hoc (fix-q166, Thu 12 Nov 2026): a variant chosen after the frozen scores were seen",
+  "bytes_per_op_zeroing_the_miss": {
+   "aifoundry2": 1773.2662506631195,
+   "aifoundry3": 1790.3240053445566,
+   "aifoundry1-c1": 1781.931639740037
+  },
+  "bytes_per_op_at_76_gb_s": {
+   "aifoundry2": 1888.464736328125,
+   "aifoundry3": 1905.39421875,
+   "aifoundry1-c1": 1903.0946744791668
+  },
+  "gb_s_if_2048_b_an_op": {
+   "aifoundry2": 82.42038996324462,
+   "aifoundry3": 81.6880824284804,
+   "aifoundry1-c1": 81.78678763976747
+  }
+ },
+ "awake_rule_e101_dram": {
+  "what": "E101's DRAM arm (mmp64, the benchmark streaming from DRAM): the awake rule was set during the build after arithmetic that put v2 beside these two cells, so they are post hoc for it",
+  "label": "post hoc (fix-q166, Thu 12 Nov 2026): a variant chosen after the frozen scores were seen",
+  "cells": {
+   "mmp64 fp32 zeros": {
+    "measured_w": 6.59691693131028,
+    "with_rule_w": 7.8219359642976665,
+    "with_rule_error_pct": 18.569568871986288,
+    "without_rule_w": 8.9696274347473,
+    "without_rule_error_pct": 35.96696044747304
+   },
+   "mmp64 fp32 random": {
+    "measured_w": 10.761080560507951,
+    "with_rule_w": 11.37641302439726,
+    "with_rule_error_pct": 5.718128959535123,
+    "without_rule_w": 12.524104494846895,
+    "without_rule_error_pct": 16.383335524957033
+   }
+  }
+ },
+ "e136_l3_correction": {
+  "what": "the frozen label said the L3 row's share of random minus zeros is zero by construction; it is not: its zeros column is aifoundry3's 13.5 pJ/B and aifoundry2's random column 12.3, so every difference carries a spurious l3_share_w; corrected = frozen minus it",
+  "label": "post hoc (fix-q166, Thu 12 Nov 2026): a variant chosen after the frozen scores were seen",
+  "per_format": {
+   "fp32": {
+    "measured_w": 18.940000000000005,
+    "frozen_w": 18.320546674764444,
+    "frozen_error_pct": -3.270608897759034,
+    "l3_share_w": -0.12001761914987275,
+    "corrected_w": 18.440564293914317,
+    "corrected_error_pct": -2.6369361461757532
+   },
+   "fp16": {
+    "measured_w": 16.53,
+    "frozen_w": 16.815060244956364,
+    "frozen_error_pct": 1.724502389330686,
+    "l3_share_w": -0.1199072936603851,
+    "corrected_w": 16.93496753861675,
+    "corrected_error_pct": 2.449894365497572
+   },
+   "int8": {
+    "measured_w": 6.5,
+    "frozen_w": 5.753609873248925,
+    "frozen_error_pct": -11.482925026939618,
+    "l3_share_w": -0.11991195711198244,
+    "corrected_w": 5.873521830360907,
+    "corrected_error_pct": -9.638125686755272
+   }
+  }
+ },
+ "e59_double_count": {
+  "what": "each sparse-parity op's cycles are inside the tensor price (the int8 loop's cycles an op) and inside the scratchpad-load price (2 KB at the probe's 4 B a minion-cycle), while hart 0 spends only C_OP_str (1 + KAPPA_T U) on the op: the excess was priced twice; here it is priced once",
+  "label": "post hoc (fix-q166, Thu 12 Nov 2026): a variant chosen after the frozen scores were seen",
+  "awake_pj_per_hart_cycle": 1.9368489583333333,
+  "per_run": {
+   "L1 (512,4,0.3,448)": {
+    "overlap_cycles_per_op": 447.20890425886455,
+    "loop_cycles_per_op": 319.0777200520991,
+    "scp_load_cycles_per_op": 511.91668022782744,
+    "hart0_cycles_per_op": 383.78549602106204,
+    "given": {
+     "double_count_j": 0.0710169469403763,
+     "double_count_share_pct": 4.350480414415896,
+     "j_over_idle_error_pct_frozen": -1.667798466345223,
+     "j_over_idle_error_pct_once": -5.945721635130842,
+     "j_total_error_pct_frozen": -2.1072265816820535,
+     "j_total_error_pct_once": -3.579111803022484
+    },
+    "forecast": {
+     "double_count_j": 0.0710169469403763,
+     "double_count_share_pct": 4.497955327018477,
+     "j_over_idle_error_pct_frozen": -4.891826224043656,
+     "j_over_idle_error_pct_once": -9.169749392829274,
+     "j_total_error_pct_frozen": -14.359255887241224,
+     "j_total_error_pct_once": -15.831141108581674
+    }
+   },
+   "L2 (512,4,0.4,1850)": {
+    "overlap_cycles_per_op": 446.6840203721846,
+    "loop_cycles_per_op": 319.0777200520991,
+    "scp_load_cycles_per_op": 511.91668022782744,
+    "hart0_cycles_per_op": 384.310379907742,
+    "given": {
+     "double_count_j": 0.2938677514442105,
+     "double_count_share_pct": 4.863335119644478,
+     "j_over_idle_error_pct_frozen": -2.4711821368450475,
+     "j_over_idle_error_pct_once": -7.214335387757959,
+     "j_total_error_pct_frozen": -1.7383620954584675,
+     "j_total_error_pct_once": -3.5741932955765714
+    },
+    "forecast": {
+     "double_count_j": 0.2938677514442123,
+     "double_count_share_pct": 4.862404340671895,
+     "j_over_idle_error_pct_frozen": -2.452512818842957,
+     "j_over_idle_error_pct_once": -7.195666069755897,
+     "j_total_error_pct_frozen": -1.8195155773561593,
+     "j_total_error_pct_once": -3.6553467774742523
+    }
+   },
+   "(256,5,0.4,1925) first half": {
+    "overlap_cycles_per_op": 447.00941015800856,
+    "loop_cycles_per_op": 319.0777200520991,
+    "scp_load_cycles_per_op": 511.91668022782744,
+    "hart0_cycles_per_op": 383.98499012191803,
+    "given": {
+     "double_count_j": 0.567088039606638,
+     "double_count_share_pct": 4.652967926941575,
+     "j_over_idle_error_pct_frozen": -3.3099659234524177,
+     "j_over_idle_error_pct_once": -7.808922197583056,
+     "j_total_error_pct_frozen": -0.941703962233994,
+     "j_total_error_pct_once": -2.584955857096736
+    },
+    "forecast": {
+     "double_count_j": 0.5670880396066416,
+     "double_count_share_pct": 4.714707248948806,
+     "j_over_idle_error_pct_frozen": -4.5761266485049275,
+     "j_over_idle_error_pct_once": -9.075082922635595,
+     "j_total_error_pct_frozen": -5.999533647265152,
+     "j_total_error_pct_once": -7.642785542127913
+    }
+   },
+   "(256,5,0.4,1925) second half": {
+    "overlap_cycles_per_op": 449.2917342161426,
+    "loop_cycles_per_op": 319.0777200520991,
+    "scp_load_cycles_per_op": 511.91668022782744,
+    "hart0_cycles_per_op": 381.702666063784,
+    "given": {
+     "double_count_j": 0.5004029802021375,
+     "double_count_share_pct": 3.258273390092553,
+     "j_over_idle_error_pct_frozen": -2.906751555712167,
+     "j_over_idle_error_pct_once": -6.070315033348848,
+     "j_total_error_pct_frozen": -0.6855878369684627,
+     "j_total_error_pct_once": -1.6542085919120009
+    },
+    "forecast": {
+     "double_count_j": 0.5004029802021375,
+     "double_count_share_pct": 3.3125542725723363,
+     "j_over_idle_error_pct_frozen": -4.497761626708576,
+     "j_over_idle_error_pct_once": -7.661325104345258,
+     "j_total_error_pct_frozen": -5.960103367414097,
+     "j_total_error_pct_once": -6.928724122357634
+    }
+   }
+  }
+ },
+ "e59_terms_v1_lacked": {
+  "what": "the share of each run's joules over idle, given its seconds, in hart 1's generation, the epilogue and set-up and the awake time (the terms v1 had none of); desk arithmetic of the frozen ledger",
+  "label": "desk arithmetic of the frozen predictions",
+  "pct": {
+   "L1 (512,4,0.3,448)": 29.63681695219037,
+   "L2 (512,4,0.4,1850)": 21.24965189773258,
+   "(256,5,0.4,1925) first half": 23.707623726085306,
+   "(256,5,0.4,1925) second half": 37.40987658290466
+  },
+  "range_pct": [
+   21.24965189773258,
+   37.40987658290466
+  ]
+ },
+ "e59_reductions": {
+  "what": "E59's watts are scored against the record's catalogue cross-check and its joules against the record's headline; the two reductions of one run are this far apart, so W and J errors of one forecast differ",
+  "label": "reported (the records' own two reductions)",
+  "per_run": {
+   "L1 (512,4,0.3,448)": {
+    "w_scored_against": "board.catalogue.over_idle_w (the energy catalogue's cross-check)",
+    "j_scored_against": "board.j_per_solve (the run's headline)",
+    "catalogue_w_times_t_j": 1.739801096278853,
+    "catalogue_j_per_solve": 1.7398,
+    "headline_j": 1.66008,
+    "apart_pct": 4.80224424599134,
+    "catalogue_j_apart_pct": 4.80217820827912
+   },
+   "L2 (512,4,0.4,1850)": {
+    "w_scored_against": "board.catalogue.over_idle_w (the energy catalogue's cross-check)",
+    "j_scored_against": "board.j_per_solve (the run's headline)",
+    "catalogue_w_times_t_j": 6.273858548153729,
+    "catalogue_j_per_solve": 6.27386,
+    "headline_j": 6.19562,
+    "apart_pct": 1.2628041770432874,
+    "catalogue_j_apart_pct": 1.2628276104732068
+   },
+   "(256,5,0.4,1925) first half": {
+    "w_scored_against": "board.catalogue.over_idle_w (the energy catalogue's cross-check)",
+    "j_scored_against": "board.j_per_solve (the run's headline)",
+    "catalogue_w_times_t_j": 13.164396261399325,
+    "catalogue_j_per_solve": 13.16436,
+    "headline_j": 12.60488,
+    "apart_pct": 4.438886061583495,
+    "catalogue_j_apart_pct": 4.438598384117903
+   },
+   "(256,5,0.4,1925) second half": {
+    "w_scored_against": "board.catalogue.over_idle_w (the energy catalogue's cross-check)",
+    "j_scored_against": "board.j_per_solve (the run's headline)",
+    "catalogue_w_times_t_j": 16.16514385541796,
+    "catalogue_j_per_solve": 16.16513,
+    "headline_j": 15.8177,
+    "apart_pct": 2.1965510498868914,
+    "catalogue_j_apart_pct": 2.1964634554960645
+   }
+  }
+ },
+ "nits": {
+  "aifoundry3_rest_law_step_at_band_edge_w": {
+   "edge_c": 52,
+   "footing_law_w": 24.034726800366638,
+   "exponential_law_w": 23.785645600898167,
+   "step_w": 0.24908119946847052,
+   "at_51_c_the_e59_l1_l2_start": {
+    "footing_law_extended_w": 23.760503491375104,
+    "exponential_law_used_w": 23.470990334005247,
+    "difference_w": 0.28951315736985705
+   }
+  },
+  "e136_l2_side_path_if_priced_w": {
+   "fp32": 0.7030877155504104,
+   "fp16": 0.7024414063091493,
+   "int8": 0.7024687257606872
+  }
+ }
+}
