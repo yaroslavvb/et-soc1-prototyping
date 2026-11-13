@@ -1,0 +1,1693 @@
+{
+ "model": "load ledger v2 (Q166, calc-a): the joined load model revived by its retirement note's recipe",
+ "frozen_pst": "Thu 12 Nov 2026 15:51:57 PST",
+ "repo_head_at_freeze": "726a6b64794b6c00f41b4c320a4d26a9af69a457",
+ "form": "J_total = P_idle(card, T0) t + k_leak(card, T0) dT t + J_over_idle; J_over_idle = sum_ops (Z_f + D_kind)/R_f v2 + sum_class cycles r_issue e_class v2 + awake_cycles e_awake v2 + sum_paths bytes (z + (r - z) phi) + mesh bytes hops p_hop; phi = w_set rho/0.5 + (1 - w_set) tau/0.5; dT = k_rise P_over_idle; v2 = (V/V600)^2. See tools/ledger/ledger_v2.py.",
+ "constants": {
+  "w_set": {
+   "value": 0.7,
+   "unit": "share",
+   "source": "docs/reports/data/2026-11-01-e101-real-matmul/README.md R5 and R5b (the benchmark arm): a constant costs the path +2.09 / +1.74 / +2.43 W over zeros against random's +6.78 / +6.33 / +11.66 W (fp32 / fp16 / int8); the constants carry 7/32, 4/16 and 1/8 set bits and change none, so w_set = (ratio) / (rho / 0.5) = 0.703 / 0.550 / 0.834",
+   "label": "post hoc (E101's measurements; E101 is IN SAMPLE for this term)",
+   "band": [
+    0.55,
+    0.83
+   ],
+   "note": "the mean of the three formats; band their range"
+  },
+  "issue_rate": {
+   "value": 0.37,
+   "unit": "instructions per hart-cycle",
+   "source": "docs/energy-manual/03a-every-instruction.md, 'issue per hart per cycle' of the vector-integer class with both harts issuing (0.361-0.374)",
+   "label": "measured (rate); its use for an epilogue or a generator's busy cycles is a hand choice",
+   "band": [
+    0.25,
+    0.6
+   ],
+   "note": "band a hand choice: a lone hart may issue faster, a store-bound one slower"
+  },
+  "awake_pj_per_hart_cycle": {
+   "value": 1.9368489583333333,
+   "unit": "pJ per hart-cycle",
+   "source": "docs/energy-manual/02-awake.md and 07-composition.md \u00a77.3: 1,024 minions stalled on one contended atomic draw 1.19 W [1.01-1.41] over idle (E23); per hart-cycle at 600 MHz",
+   "label": "measured (the stalled-minion figure); its use for a waiting hart a hand choice",
+   "band": [
+    1.6438802083333333,
+    3.1249999999999996
+   ],
+   "note": "band from the stalled figure's low end to the one-hart addi loop's 1.92 W (02-awake.md, aifoundry2)"
+  },
+  "k_rise_c_per_w": {
+   "value": 0.12,
+   "unit": "C per W",
+   "source": "docs/reports/data/2026-11-04-q142m-m10/m10.json heat_4p5s.coef S|aifoundry3 0.1198, S|aifoundry1-c1 0.1194 C per W over idle (M10's 4.5 s window law)",
+   "label": "registered law (M10), carried to aifoundry2 by hand",
+   "band": [
+    0.09,
+    0.2
+   ],
+   "note": "band a hand choice: the scored runs last 5-7 s, longer than the 4.5 s window"
+  },
+  "dram_bandwidth_gb_s": {
+   "value": 76.0,
+   "unit": "GB/s",
+   "source": "docs/energy-manual/04-bytes-memory.md \u00a74.1, tensor load from DRAM, 76 GB/s",
+   "label": "measured",
+   "band": [
+    70.0,
+    82.0
+   ],
+   "note": "band a hand choice; used only to forecast a DRAM-bound load's seconds"
+  },
+  "card_scale_a3_over_a2": {
+   "value": 0.963,
+   "unit": "ratio",
+   "source": "docs/findings/05-claims.md (E38): aifoundry3 switches 0.958-0.969 of aifoundry2 at a matched die temperature; tools/ettelem/load_model.py CARDS['aifoundry3']['scale']",
+   "label": "measured (E38)",
+   "band": [
+    0.958,
+    0.969
+   ],
+   "note": "M10 has no aifoundry2 family; v2 carries M10's aifoundry3 D to aifoundry2 by this ratio"
+  }
+ },
+ "awake_rule": "a hart's time is priced once. The catalogue's per-byte and per-op prices were measured with their issuing harts awake for the whole transfer (e_i = (P - P_idle) / rate), so a hart's cycles blocked on its own tensor op or its own loads and stores are inside those prices up to the probe's own time per byte; its instruction-bound cycles (an epilogue, a tile's set-up, a generator's work beyond its stores) are priced as issue; only the rest of a running hart's time, waiting on another hart or the host, is priced as awake",
+ "probe_rates_b_per_minion_cycle": {
+  "scp_load": 4.000651041666667,
+  "scp_store": 2.001953125,
+  "dram_load": 0.12369791666666667,
+  "dram_store": 0.12369791666666667,
+  "source": "docs/energy-manual/04-bytes-memory.md \u00a74.1, the GB/s column (2,458 / 1,230 / 76 / 76 over the chip), per minion-cycle at 600 MHz: the time the catalogue's own probe took per byte"
+ },
+ "leak_slope_band_rel": [
+  0.8,
+  1.25
+ ],
+ "leak_slope_band_how": "a hand choice: the committed estimators of one card's slope spread about this much (aifoundry3 at 58 C: 0.30-0.38 W/C, the footing-law README's table)",
+ "zeros_anchor": {
+  "fp32": {
+   "a3": {
+    "Z_w": 1.9858230735486515,
+    "Z_band_w": [
+     1.9266521627054372,
+     2.0449939843918656
+    ],
+    "rate_ops_per_s": 1120802524.1242237,
+    "source": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp32.zeros.S (mean, ci95), .rate (E78, 600 MHz, six passes)"
+   },
+   "c1": {
+    "Z_w": 1.8410125313283217,
+    "Z_band_w": [
+     1.7275674655073692,
+     1.9544575971492741
+    ],
+    "rate_ops_per_s": 1120821914.164552,
+    "source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp32.zeros.S (mean, ci95), .rate (E82, 600 MHz, six passes)"
+   },
+   "a2": {
+    "Z_w": 2.0,
+    "Z_band_w": [
+     1.7,
+     2.3
+    ],
+    "rate_ops_per_s": 1125274725.2747252,
+    "source": "docs/findings/10-data-dependent-power.md (21 Sep, aifoundry2: zeros 38.29 W board, idle 36.29 W before each launch; the same two numbers tools/ettelem/score_load_predictions.py MEAS14 and IDLE21 carry); band +-0.30 W, a hand choice wider than the runs' own 0.03 W spread (that file, line 27), for a session days before E39's and E37's",
+    "label": "reported (an earlier campaign; not E39's or E37's record)"
+   }
+  },
+  "fp16": {
+   "a3": {
+    "Z_w": 1.9872138279205274,
+    "Z_band_w": [
+     1.9354001989339977,
+     2.039027456907057
+    ],
+    "rate_ops_per_s": 1120779204.174801,
+    "source": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.fp16.zeros.S (mean, ci95), .rate (E78, 600 MHz, six passes)"
+   },
+   "c1": {
+    "Z_w": 1.8725380952380983,
+    "Z_band_w": [
+     1.8060104666184258,
+     1.9390657238577709
+    ],
+    "rate_ops_per_s": 1120853839.8342946,
+    "source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.fp16.zeros.S (mean, ci95), .rate (E82, 600 MHz, six passes)"
+   },
+   "a2": {
+    "Z_w": 1.9872138279205274,
+    "Z_band_w": [
+     1.9354001989339977,
+     2.039027456907057
+    ],
+    "rate_ops_per_s": 1125274725.2747252,
+    "source": "a PLACEHOLDER (aifoundry3's E78 anchor): used only where it cancels, E136's random minus zeros",
+    "label": "placeholder"
+   }
+  },
+  "int8": {
+   "a3": {
+    "Z_w": 2.605255386405539,
+    "Z_band_w": [
+     2.5769370214301066,
+     2.633573751380972
+    ],
+    "rate_ops_per_s": 1925549674.542242,
+    "source": "docs/reports/data/2026-10-31-e78-kinds-energy-matrix/e78.json items.int8.zeros.S (mean, ci95), .rate (E78, 600 MHz, six passes)"
+   },
+   "c1": {
+    "Z_w": 2.40154285714286,
+    "Z_band_w": [
+     2.3414053813217834,
+     2.4616803329639363
+    ],
+    "rate_ops_per_s": 1924791716.7897308,
+    "source": "docs/reports/data/2026-10-31-e82-kinds-aifoundry1/e82.json items.int8.zeros.S (mean, ci95), .rate (E82, 600 MHz, six passes)"
+   },
+   "a2": {
+    "Z_w": 2.605255386405539,
+    "Z_band_w": [
+     2.5769370214301066,
+     2.633573751380972
+    ],
+    "rate_ops_per_s": 1932075471.6981132,
+    "source": "a PLACEHOLDER (aifoundry3's E78 anchor): used only where it cancels, E136's random minus zeros",
+    "label": "placeholder"
+   }
+  }
+ },
+ "kinds": {
+  "fp32.small_int": {
+   "a3": {
+    "D_w": 13.932634007579878,
+    "D_band_w": [
+     12.993227028285691,
+     14.679371277820499
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.s:signs",
+      "rows": [
+       "E90",
+       "E92",
+       "E122"
+      ],
+      "heldout_pred_w": 13.397441195936134
+     },
+     {
+      "m10_kind": "fp32.pow2",
+      "rows": [
+       "E78"
+      ],
+      "heldout_pred_w": 14.125303716633445
+     },
+     {
+      "m10_kind": "fp32.smallint",
+      "rows": [
+       "E78",
+       "E123",
+       "E123",
+       "E123",
+       "E123"
+      ],
+      "heldout_pred_w": 14.275157110170056
+     }
+    ],
+    "how": "small-integer fp32 operands, the class of E39's host default (random non-zero integers in [-3, 3]) and E37's mmbench fill ({-2, -1, 1, 2}); M10 has no row of either fill, so v2 takes the mean of M10's held-out predictions for its three nearest kinds (+-1 signs, powers of two, integers -8..7), their spread as part of the band (a hand choice, stated)",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   },
+   "c1": {
+    "D_w": 13.356676946779006,
+    "D_band_w": [
+     12.446004202166774,
+     14.031027549597328
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.s:signs",
+      "rows": [
+       "E106",
+       "E108",
+       "E128"
+      ],
+      "heldout_pred_w": 12.84727006928101
+     },
+     {
+      "m10_kind": "fp32.pow2",
+      "rows": [
+       "E82"
+      ],
+      "heldout_pred_w": 13.592999088572917
+     },
+     {
+      "m10_kind": "fp32.smallint",
+      "rows": [
+       "E82"
+      ],
+      "heldout_pred_w": 13.629761682483092
+     }
+    ],
+    "how": "small-integer fp32 operands, the class of E39's host default (random non-zero integers in [-3, 3]) and E37's mmbench fill ({-2, -1, 1, 2}); M10 has no row of either fill, so v2 takes the mean of M10's held-out predictions for its three nearest kinds (+-1 signs, powers of two, integers -8..7), their spread as part of the band (a hand choice, stated)",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.401 W, m10.json families.*.interval_pool_by_format_card['fp32|c1'])"
+   },
+   "a2": {
+    "D_w": 14.467948086791152,
+    "D_band_w": [
+     13.408903021966658,
+     15.322934527996345
+    ],
+    "how": "small-integer fp32 operands, the class of E39's host default (random non-zero integers in [-3, 3]) and E37's mmbench fill ({-2, -1, 1, 2}); M10 has no row of either fill, so v2 takes the mean of M10's held-out predictions for its three nearest kinds (+-1 signs, powers of two, integers -8..7), their spread as part of the band (a hand choice, stated); aifoundry2 = aifoundry3 / 0.963 (E38's card scale, band 0.958-0.969)",
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.s:signs",
+      "rows": [
+       "E90",
+       "E92",
+       "E122"
+      ],
+      "heldout_pred_w": 13.397441195936134
+     },
+     {
+      "m10_kind": "fp32.pow2",
+      "rows": [
+       "E78"
+      ],
+      "heldout_pred_w": 14.125303716633445
+     },
+     {
+      "m10_kind": "fp32.smallint",
+      "rows": [
+       "E78",
+       "E123",
+       "E123",
+       "E123",
+       "E123"
+      ],
+      "heldout_pred_w": 14.275157110170056
+     }
+    ]
+   }
+  },
+  "int8.pm1": {
+   "a3": {
+    "D_w": 5.585496335151298,
+    "D_band_w": [
+     5.275276265460971,
+     5.895716404841624
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.s:signs",
+      "rows": [
+       "E90"
+      ],
+      "heldout_pred_w": 5.585496335151298
+     }
+    ],
+    "how": "random +-1 bytes (0x01, 0xFF): sparse parity's operands; M10's held-out prediction for E90's int8 signs tile",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "fp32.randn": {
+   "a3": {
+    "D_w": 24.518734865638066,
+    "D_band_w": [
+     24.114520697987622,
+     24.92294903328851
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.randn",
+      "rows": [
+       "E78"
+      ],
+      "heldout_pred_w": 24.518734865638066
+     }
+    ],
+    "how": "random normal fp32",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   },
+   "c1": {
+    "D_w": 23.7038954053968,
+    "D_band_w": [
+     23.302629538282567,
+     24.105161272511033
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.randn",
+      "rows": [
+       "E82",
+       "E94",
+       "E94",
+       "E94",
+       "E94"
+      ],
+      "heldout_pred_w": 23.7038954053968
+     }
+    ],
+    "how": "random normal fp32",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.401 W, m10.json families.*.interval_pool_by_format_card['fp32|c1'])"
+   },
+   "a2": {
+    "D_w": 25.46078386878304,
+    "D_band_w": [
+     24.885986272433048,
+     26.015604418881537
+    ],
+    "how": "random normal fp32; aifoundry2 = aifoundry3 / 0.963 (E38's card scale, band 0.958-0.969)",
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.randn",
+      "rows": [
+       "E78"
+      ],
+      "heldout_pred_w": 24.518734865638066
+     }
+    ]
+   }
+  },
+  "fp16.randn": {
+   "a3": {
+    "D_w": 22.112924787650016,
+    "D_band_w": [
+     21.817479432784562,
+     22.40837014251547
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.randn",
+      "rows": [
+       "E78"
+      ],
+      "heldout_pred_w": 22.112924787650016
+     }
+    ],
+    "how": "random normal fp16",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   },
+   "c1": {
+    "D_w": 21.236120504037196,
+    "D_band_w": [
+     20.905667460624414,
+     21.566573547449977
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.randn",
+      "rows": [
+       "E82",
+       "E94",
+       "E94",
+       "E94",
+       "E94"
+      ],
+      "heldout_pred_w": 21.236120504037196
+     }
+    ],
+    "how": "random normal fp16",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.330 W, m10.json families.*.interval_pool_by_format_card['fp16|c1'])"
+   },
+   "a2": {
+    "D_w": 22.96253872030116,
+    "D_band_w": [
+     22.51545865096446,
+     23.390783029765625
+    ],
+    "how": "random normal fp16; aifoundry2 = aifoundry3 / 0.963 (E38's card scale, band 0.958-0.969)",
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.randn",
+      "rows": [
+       "E78"
+      ],
+      "heldout_pred_w": 22.112924787650016
+     }
+    ]
+   }
+  },
+  "int8.full": {
+   "a3": {
+    "D_w": 7.2732639057295145,
+    "D_band_w": [
+     6.963043836039188,
+     7.583483975419841
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.full",
+      "rows": [
+       "E78"
+      ],
+      "heldout_pred_w": 7.2732639057295145
+     }
+    ],
+    "how": "random int8 over the full range",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   },
+   "c1": {
+    "D_w": 7.023916012532702,
+    "D_band_w": [
+     6.685764426544893,
+     7.362067598520511
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.full",
+      "rows": [
+       "E82",
+       "E94",
+       "E94",
+       "E94",
+       "E94"
+      ],
+      "heldout_pred_w": 7.023916012532702
+     }
+    ],
+    "how": "random int8 over the full range",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.338 W, m10.json families.*.interval_pool_by_format_card['int8|c1'])"
+   },
+   "a2": {
+    "D_w": 7.55271433616772,
+    "D_band_w": [
+     7.185803752362423,
+     7.915954045323425
+    ],
+    "how": "random int8 over the full range; aifoundry2 = aifoundry3 / 0.963 (E38's card scale, band 0.958-0.969)",
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.full",
+      "rows": [
+       "E78"
+      ],
+      "heldout_pred_w": 7.2732639057295145
+     }
+    ]
+   }
+  },
+  "fp32.zeros": {
+   "a2": {
+    "D_w": 0.0,
+    "D_band_w": [
+     0.0,
+     0.0
+    ],
+    "how": "zeros: D is over the type's own zeros"
+   },
+   "a3": {
+    "D_w": 0.0,
+    "D_band_w": [
+     0.0,
+     0.0
+    ],
+    "how": "zeros: D is over the type's own zeros"
+   },
+   "c1": {
+    "D_w": 0.0,
+    "D_band_w": [
+     0.0,
+     0.0
+    ],
+    "how": "zeros: D is over the type's own zeros"
+   }
+  },
+  "fp16.zeros": {
+   "a2": {
+    "D_w": 0.0,
+    "D_band_w": [
+     0.0,
+     0.0
+    ],
+    "how": "zeros"
+   },
+   "a3": {
+    "D_w": 0.0,
+    "D_band_w": [
+     0.0,
+     0.0
+    ],
+    "how": "zeros"
+   },
+   "c1": {
+    "D_w": 0.0,
+    "D_band_w": [
+     0.0,
+     0.0
+    ],
+    "how": "zeros"
+   }
+  },
+  "int8.zeros": {
+   "a2": {
+    "D_w": 0.0,
+    "D_band_w": [
+     0.0,
+     0.0
+    ],
+    "how": "zeros"
+   },
+   "a3": {
+    "D_w": 0.0,
+    "D_band_w": [
+     0.0,
+     0.0
+    ],
+    "how": "zeros"
+   },
+   "c1": {
+    "D_w": 0.0,
+    "D_band_w": [
+     0.0,
+     0.0
+    ],
+    "how": "zeros"
+   }
+  },
+  "fp16.nn_like": {
+   "a3": {
+    "D_w": 17.12654499751592,
+    "D_band_w": [
+     16.831099642650468,
+     17.421990352381375
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.nn_like",
+      "rows": [
+       "E78",
+       "E86",
+       "E90",
+       "E90",
+       "E90",
+       "E90"
+      ],
+      "heldout_pred_w": 17.12654499751592
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp16.real2:bert_l6_up": {
+   "a3": {
+    "D_w": 22.04330508242189,
+    "D_band_w": [
+     21.74785972755644,
+     22.338750437287345
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.real2:bert_l6_up",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 22.04330508242189
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp16.real2:gpt2_l6_attn_qk_fp16fwd": {
+   "a3": {
+    "D_w": 21.21635761530639,
+    "D_band_w": [
+     20.920912260440936,
+     21.511802970171843
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.real2:gpt2_l6_attn_qk_fp16fwd",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 21.21635761530639
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp16.real2:gpt2_l6_mlp_down_fp16fwd": {
+   "a3": {
+    "D_w": 21.97903657234744,
+    "D_band_w": [
+     21.683591217481986,
+     22.274481927212893
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.real2:gpt2_l6_mlp_down_fp16fwd",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 21.97903657234744
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp16.real2:gpt2_l9_attn_qk": {
+   "a3": {
+    "D_w": 20.962695608434547,
+    "D_band_w": [
+     20.667250253569094,
+     21.2581409633
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.real2:gpt2_l9_attn_qk",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 20.962695608434547
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp16.real2:resnet18_l3c1": {
+   "a3": {
+    "D_w": 14.117542749014227,
+    "D_band_w": [
+     13.822097394148772,
+     14.412988103879682
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.real2:resnet18_l3c1",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 14.117542749014227
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp16.real2:t5small_l0_down": {
+   "a3": {
+    "D_w": 3.5466442997083703,
+    "D_band_w": [
+     3.2511989448429155,
+     3.842089654573825
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.real2:t5small_l0_down",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 3.5466442997083703
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp16.real2:vgg16_fc2": {
+   "a3": {
+    "D_w": 10.300795568206842,
+    "D_band_w": [
+     10.005350213341387,
+     10.596240923072298
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.real2:vgg16_fc2",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 10.300795568206842
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp16.real2:vit_l5_down": {
+   "a3": {
+    "D_w": 21.779066700639028,
+    "D_band_w": [
+     21.483621345773575,
+     22.07451205550448
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.real2:vit_l5_down",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 21.779066700639028
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp16.real:l0_mlp_up": {
+   "a3": {
+    "D_w": 21.93896829071494,
+    "D_band_w": [
+     21.643522935849486,
+     22.234413645580393
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.real:l0_mlp_up",
+      "rows": [
+       "E86"
+      ],
+      "heldout_pred_w": 21.93896829071494
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp16.real:l6_attn_qk": {
+   "a3": {
+    "D_w": 21.26088037564778,
+    "D_band_w": [
+     20.965435020782326,
+     21.556325730513233
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.real:l6_attn_qk",
+      "rows": [
+       "E86",
+       "E95"
+      ],
+      "heldout_pred_w": 21.26088037564778
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp16.real:l6_mlp_down": {
+   "a3": {
+    "D_w": 21.999150571196353,
+    "D_band_w": [
+     21.7037052163309,
+     22.294595926061806
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp16.real:l6_mlp_down",
+      "rows": [
+       "E86",
+       "E95"
+      ],
+      "heldout_pred_w": 21.999150571196353
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.295 W, m10.json families.*.interval_pool_by_format_card['fp16|a3'])"
+   }
+  },
+  "fp32.nn_like": {
+   "a3": {
+    "D_w": 13.040949508001159,
+    "D_band_w": [
+     12.636735340350716,
+     13.445163675651601
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.nn_like",
+      "rows": [
+       "E78",
+       "E86",
+       "E123",
+       "E123",
+       "E123",
+       "E123",
+       "E123",
+       "E123",
+       "E123",
+       "E123",
+       "E123"
+      ],
+      "heldout_pred_w": 13.040949508001159
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real2:bert_l6_up": {
+   "a3": {
+    "D_w": 24.392853101231246,
+    "D_band_w": [
+     23.988638933580802,
+     24.79706726888169
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real2:bert_l6_up",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 24.392853101231246
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real2:gpt2_l3_mlp_down": {
+   "a3": {
+    "D_w": 24.464857601610866,
+    "D_band_w": [
+     24.060643433960422,
+     24.86907176926131
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real2:gpt2_l3_mlp_down",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 24.464857601610866
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real2:gpt2_l6_mlp_down_bf16fwd": {
+   "a3": {
+    "D_w": 18.008129919948317,
+    "D_band_w": [
+     17.603915752297873,
+     18.41234408759876
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real2:gpt2_l6_mlp_down_bf16fwd",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 18.008129919948317
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real2:gpt2_l9_attn_qk": {
+   "a3": {
+    "D_w": 23.88407597054726,
+    "D_band_w": [
+     23.47986180289682,
+     24.288290138197702
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real2:gpt2_l9_attn_qk",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 23.88407597054726
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real2:resnet18_l2c1": {
+   "a3": {
+    "D_w": 19.925981247578296,
+    "D_band_w": [
+     19.521767079927855,
+     20.330195415228737
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real2:resnet18_l2c1",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 19.925981247578296
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real2:resnet18_l3c1": {
+   "a3": {
+    "D_w": 14.3208458126328,
+    "D_band_w": [
+     13.916631644982358,
+     14.725059980283243
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real2:resnet18_l3c1",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 14.3208458126328
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real2:t5small_l0_down": {
+   "a3": {
+    "D_w": 1.7228830283518124,
+    "D_band_w": [
+     1.31866886070137,
+     2.127097196002255
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real2:t5small_l0_down",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 1.7228830283518124
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real2:t5small_l0_up": {
+   "a3": {
+    "D_w": 21.921885761331623,
+    "D_band_w": [
+     21.51767159368118,
+     22.326099928982067
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real2:t5small_l0_up",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 21.921885761331623
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real2:vgg16_fc2": {
+   "a3": {
+    "D_w": 7.972004296645505,
+    "D_band_w": [
+     7.567790128995062,
+     8.376218464295947
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real2:vgg16_fc2",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 7.972004296645505
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real2:vit_l11_down": {
+   "a3": {
+    "D_w": 19.95749157829998,
+    "D_band_w": [
+     19.553277410649535,
+     20.361705745950424
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real2:vit_l11_down",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 19.95749157829998
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real2:vit_l5_down": {
+   "a3": {
+    "D_w": 24.477602481419336,
+    "D_band_w": [
+     24.073388313768895,
+     24.881816649069776
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real2:vit_l5_down",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 24.477602481419336
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real:l0_mlp_up": {
+   "a3": {
+    "D_w": 24.446388617880906,
+    "D_band_w": [
+     24.042174450230462,
+     24.85060278553135
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real:l0_mlp_up",
+      "rows": [
+       "E86"
+      ],
+      "heldout_pred_w": 24.446388617880906
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real:l6_attn_qk": {
+   "a3": {
+    "D_w": 24.080419445573053,
+    "D_band_w": [
+     23.676205277922612,
+     24.484633613223494
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real:l6_attn_qk",
+      "rows": [
+       "E86"
+      ],
+      "heldout_pred_w": 24.080419445573053
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "fp32.real:l6_mlp_down": {
+   "a3": {
+    "D_w": 24.418047419511304,
+    "D_band_w": [
+     24.01383325186086,
+     24.822261587161748
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "fp32.real:l6_mlp_down",
+      "rows": [
+       "E86"
+      ],
+      "heldout_pred_w": 24.418047419511304
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.404 W, m10.json families.*.interval_pool_by_format_card['fp32|a3'])"
+   }
+  },
+  "int8.gauss_q": {
+   "a3": {
+    "D_w": 6.800153520797602,
+    "D_band_w": [
+     6.489933451107276,
+     7.110373590487929
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.gauss_q",
+      "rows": [
+       "E78",
+       "E86"
+      ],
+      "heldout_pred_w": 6.800153520797602
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real2:gpt2_l11_down_asym": {
+   "a3": {
+    "D_w": 4.0612468614745065,
+    "D_band_w": [
+     3.75102679178418,
+     4.371466931164833
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real2:gpt2_l11_down_asym",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 4.0612468614745065
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real2:gpt2_l11_down_maxabs": {
+   "a3": {
+    "D_w": 2.384018905328605,
+    "D_band_w": [
+     2.0737988356382786,
+     2.6942389750189317
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real2:gpt2_l11_down_maxabs",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 2.384018905328605
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real2:gpt2_l11_down_p999": {
+   "a3": {
+    "D_w": 5.389523207596878,
+    "D_band_w": [
+     5.079303137906551,
+     5.6997432772872045
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real2:gpt2_l11_down_p999",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 5.389523207596878
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real2:gpt2_l6_down_p999": {
+   "a3": {
+    "D_w": 5.610439748509889,
+    "D_band_w": [
+     5.300219678819563,
+     5.920659818200216
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real2:gpt2_l6_down_p999",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 5.610439748509889
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real2:gpt2_l6_down_p9999": {
+   "a3": {
+    "D_w": 5.5009902285415375,
+    "D_band_w": [
+     5.190770158851211,
+     5.811210298231864
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real2:gpt2_l6_down_p9999",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 5.5009902285415375
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real2:gpt2_l6_down_per_token": {
+   "a3": {
+    "D_w": 5.578397309507437,
+    "D_band_w": [
+     5.268177239817111,
+     5.888617379197764
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real2:gpt2_l6_down_per_token",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 5.578397309507437
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real2:resnet18_l3c1": {
+   "a3": {
+    "D_w": 4.383863354889959,
+    "D_band_w": [
+     4.0736432851996325,
+     4.694083424580286
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real2:resnet18_l3c1",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 4.383863354889959
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real2:t5small_l0_down": {
+   "a3": {
+    "D_w": 2.1267745172278927,
+    "D_band_w": [
+     1.8165544475375661,
+     2.4369945869182192
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real2:t5small_l0_down",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 2.1267745172278927
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real2:vgg16_fc2": {
+   "a3": {
+    "D_w": 3.8308195812326944,
+    "D_band_w": [
+     3.520599511542368,
+     4.1410396509230205
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real2:vgg16_fc2",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 3.8308195812326944
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real2:vgg16_fc2_asym": {
+   "a3": {
+    "D_w": 4.490118884860006,
+    "D_band_w": [
+     4.17989881516968,
+     4.800338954550333
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real2:vgg16_fc2_asym",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 4.490118884860006
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real2:vit_l11_down": {
+   "a3": {
+    "D_w": 2.764471188535797,
+    "D_band_w": [
+     2.4542511188454705,
+     3.0746912582261237
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real2:vit_l11_down",
+      "rows": [
+       "E95"
+      ],
+      "heldout_pred_w": 2.764471188535797
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real:l0_mlp_up": {
+   "a3": {
+    "D_w": 6.322695102404795,
+    "D_band_w": [
+     6.012475032714469,
+     6.632915172095122
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real:l0_mlp_up",
+      "rows": [
+       "E86"
+      ],
+      "heldout_pred_w": 6.322695102404795
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real:l6_attn_qk": {
+   "a3": {
+    "D_w": 5.633208920239783,
+    "D_band_w": [
+     5.322988850549456,
+     5.943428989930109
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real:l6_attn_qk",
+      "rows": [
+       "E86"
+      ],
+      "heldout_pred_w": 5.633208920239783
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  },
+  "int8.real:l6_mlp_down": {
+   "a3": {
+    "D_w": 5.48415487036846,
+    "D_band_w": [
+     5.173934800678134,
+     5.794374940058787
+    ],
+    "m10_kinds": [
+     {
+      "m10_kind": "int8.real:l6_mlp_down",
+      "rows": [
+       "E86",
+       "E95"
+      ],
+      "heldout_pred_w": 5.48415487036846
+     }
+    ],
+    "how": "the kind's own M10 rows, held out by kind",
+    "band_how": "spread of the kinds' held-out means, widened by M10's band k x rms (0.310 W, m10.json families.*.interval_pool_by_format_card['int8|a3'])"
+   }
+  }
+ },
+ "m10_variant": {
+  "float": "B+a+b",
+  "int8": "B"
+ },
+ "m10_bands": {
+  "fp16|a3": {
+   "rms_w": 0.14757737902009388,
+   "band_k": 2.0019691149632597,
+   "half_w": 0.29544535486545487,
+   "n": 133
+  },
+  "fp16|c1": {
+   "rms_w": 0.1650640067036434,
+   "band_k": 2.0019691149632597,
+   "half_w": 0.33045304341278253,
+   "n": 154
+  },
+  "fp32|a3": {
+   "rms_w": 0.20190829350424852,
+   "band_k": 2.0019691149632597,
+   "half_w": 0.4042141676504425,
+   "n": 260
+  },
+  "fp32|c1": {
+   "rms_w": 0.20043559319425303,
+   "band_k": 2.0019691149632597,
+   "half_w": 0.4012658671142347,
+   "n": 190
+  },
+  "int8|a3": {
+   "rms_w": 0.16963277933030768,
+   "band_k": 1.8287743142277253,
+   "half_w": 0.3102200696903265,
+   "n": 114
+  },
+  "int8|c1": {
+   "rms_w": 0.18490613267969472,
+   "band_k": 1.8287743142277253,
+   "half_w": 0.3381515859878095,
+   "n": 108
+  }
+ },
+ "instr_classes": {
+  "vec_int": {
+   "random_pj": {
+    "a2": 19.671712,
+    "a3": 19.538792,
+    "c1": 18.896348
+   },
+   "band_pj": [
+    13.022367,
+    50.03883
+   ],
+   "n_instructions": 27,
+   "source": "docs/reports/data/2026-09-23-energy-manual/catalogue.json combined.<op>/random/h2 per_card means, median over the vector-integer class of docs/energy-manual/03a-every-instruction.md (27 instructions); band from the class's zeros median to its dearest random row (fmul.pi)",
+   "label": "measured (three passes on each of three cards, 26 Sep); class median a hand choice"
+  }
+ },
+ "mem_paths": {
+  "scp_load": {
+   "zeros_pj": 2.12,
+   "random_pj": {
+    "a2": 4.16,
+    "a3": 4.14,
+    "c1": 4.98
+   },
+   "rel_band": [
+    0.875,
+    1.135
+   ],
+   "source": "docs/energy-manual/04-bytes-memory.md \u00a74.1, 'Tensor load from the shire's own scratchpad' (zeros 2.12 [1.85-2.46], random 4.43 [4.06-5.03]; per card random)",
+   "label": "measured (the version-3 check, three passes on each of three cards, 26 Sep)"
+  },
+  "scp_store": {
+   "zeros_pj": 4.65,
+   "random_pj": {
+    "a2": 8.03,
+    "a3": 7.87,
+    "c1": 9.84
+   },
+   "rel_band": [
+    0.914,
+    1.164
+   ],
+   "source": "docs/energy-manual/04-bytes-memory.md \u00a74.1, 'Tensor store into the shire's own scratchpad' (zeros 4.65 [4.25-5.25], random 8.58 [7.84-9.99])",
+   "label": "measured (the version-3 check, three passes on each of three cards, 26 Sep)"
+  },
+  "dram_load": {
+   "zeros_pj": 94.6,
+   "random_pj": {
+    "a2": 134.8,
+    "a3": 127.3,
+    "c1": 135.8
+   },
+   "rel_band": [
+    0.89,
+    1.1
+   ],
+   "source": "docs/energy-manual/04-bytes-memory.md \u00a74.1, 'Tensor load from DRAM' (zeros 94.6 [86.2-105.7], random 132.6 [117.9-145.4]); 76 GB/s",
+   "label": "measured (the version-3 check, three passes on each of three cards, 26 Sep)"
+  },
+  "dram_store": {
+   "zeros_pj": 94.4,
+   "random_pj": {
+    "a2": 136.4,
+    "a3": 132.4,
+    "c1": 156.9
+   },
+   "rel_band": [
+    0.88,
+    1.11
+   ],
+   "source": "docs/energy-manual/04-bytes-memory.md \u00a74.1, 'Tensor store to DRAM'",
+   "label": "measured (the version-3 check, three passes on each of three cards, 26 Sep)"
+  },
+  "l3_load": {
+   "zeros_pj": 13.5,
+   "random_pj": {
+    "a2": 12.3,
+    "a3": 13.5,
+    "c1": 18.4
+   },
+   "rel_band": [
+    0.48,
+    1.39
+   ],
+   "source": "docs/energy-manual/04-bytes-memory.md \u00a74.2, L3 (contents not set: no zeros/random split, so both columns carry the level's own figure; a2's zeros entry is a3's); bar [7.1-20.5]",
+   "note": "unsplit",
+   "label": "measured (the version-3 check, three passes on each of three cards, 26 Sep)"
+  },
+  "l2_stream": {
+   "zeros_pj": 1.0498046875,
+   "random_pj": {
+    "a2": 3.777928743961353,
+    "a3": 3.759765625,
+    "c1": 4.5226166213768115
+   },
+   "rel_band": [
+    0.9,
+    1.1
+   ],
+   "source": "docs/reports/data/2026-11-01-e101-real-matmul/README.md, the POST HOC path cost in the benchmark (mm16) arm: zeros 2.07/2.18/2.19 and random 7.93/7.65/7.53 nJ per 2 KB op (fp32/fp16/int8; posthoc-path.json); means 2.15 and 7.70 nJ; a3 only, carried to the other cards by \u00a74.1's scratchpad-load ratio",
+   "label": "post hoc (E101): E101 is IN SAMPLE wherever this price is used"
+  }
+ },
+ "mesh_hop": {
+  "zeros_pj": 0.65,
+  "random_pj": 1.8,
+  "rel_band": [
+   0.92,
+   1.06
+  ],
+  "source": "docs/energy-manual/README.md, row 4.3 (from 04a-fine-grain.md): one mesh hop costs 1.7-1.9 pJ/B on random data and 0.6-0.7 on zeros, fitted over 1-8 hops",
+  "label": "measured"
+ },
+ "idle_laws": {
+  "aifoundry2": {
+   "quad": {
+    "a": 0.005804086519119737,
+    "b": -0.3351545020373176,
+    "c": 25.186366251351085
+   },
+   "quad_band_c": [
+    49,
+    62
+   ],
+   "quad_rms_w": 0.020181698054462287,
+   "quad_source": "docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry2_idle.quad_w (the footing law, FL1-FL6, registered c14e5f35)",
+   "exp": {
+    "B": 15.373164326550883,
+    "A80": 20.41305588932413,
+    "T_L": 29.833333333333332,
+    "source": "docs/reports/data/2026-10-27-e66-idle-long/e66-split.json verdicts.L2b/L2a/L1 means (E66: 18 cycles, 47-88 C)"
+   },
+   "rest_band_w": 0.5,
+   "rest_band_how": "a hand choice: a card's idle moves a few tenths of a watt from day to day about any committed law (01-at-rest.md: aifoundry3 +1.01 W, card 1 +10.1 W above aifoundry2's law; the footing law's fit rms 0.02-0.03 W)"
+  },
+  "aifoundry3": {
+   "quad": {
+    "a": 0.005899869459451479,
+    "b": -0.33346324533196703,
+    "c": 25.421568539272126
+   },
+   "quad_band_c": [
+    52,
+    66
+   ],
+   "quad_rms_w": 0.030602324901322794,
+   "quad_source": "docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)",
+   "exp": {
+    "B": 12.3,
+    "A80": 25.0,
+    "T_L": 36.0,
+    "source": "docs/energy-manual/01-at-rest.md, 'Confidence': aifoundry3 12.3 W + 25.0 W e^((T-80)/36)"
+   },
+   "rest_band_w": 0.5,
+   "rest_band_how": "a hand choice: a card's idle moves a few tenths of a watt from day to day about any committed law (01-at-rest.md: aifoundry3 +1.01 W, card 1 +10.1 W above aifoundry2's law; the footing law's fit rms 0.02-0.03 W)"
+  },
+  "aifoundry1-c1": {
+   "quad": {
+    "a": 0.01016842856255774,
+    "b": -0.7038226670865997,
+    "c": 39.707665367843745
+   },
+   "quad_band_c": [
+    56,
+    70
+   ],
+   "quad_rms_w": 0.026646145544835857,
+   "quad_source": "docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)",
+   "exp": {
+    "B": 14.1,
+    "A80": 34.8,
+    "T_L": 36.0,
+    "source": "docs/energy-manual/01-at-rest.md, 'Confidence': aifoundry1 card 1 14.1 W + 34.8 W e^((T-80)/36)"
+   },
+   "rest_band_w": 0.5,
+   "rest_band_how": "a hand choice: a card's idle moves a few tenths of a watt from day to day about any committed law (01-at-rest.md: aifoundry3 +1.01 W, card 1 +10.1 W above aifoundry2's law; the footing law's fit rms 0.02-0.03 W)"
+  }
+ },
+ "volts": {
+  "aifoundry2": {
+   "600": 0.5174,
+   "800": 0.6174109375
+  },
+  "aifoundry3": {
+   "600": 0.521775
+  },
+  "aifoundry1-c1": {
+   "600": 0.499
+  },
+  "source": "aifoundry2: tools/claims-v3/hpl/surface_hpl.py:31 (E64), as tools/ettelem/load_model.py CARDS carries it; aifoundry3: E60 hl.json v_mean via load_model.CARDS; card 1: the energy manual's catalogue median reading, 0.499 V (README) - used at 600 MHz only, where v2 = 1, so E39's own busy_mv (v1's held-out leak) is not read"
+ },
+ "cycle_model": {
+  "FITTED": {
+   "H_TILE": 3139,
+   "H_TILE_res": 3097,
+   "C_OP_str": 378.2,
+   "D_OUT_str": 56.99,
+   "C_OP_res": 256,
+   "D_OUT_res": 1.871e-08,
+   "A_RES": 2.429,
+   "E_OUT": 1606,
+   "KAPPA_T": 0.02297,
+   "G_TILE": 2081,
+   "G_SLICE": 2108,
+   "G_K": 570.3,
+   "KAPPA_G": 0.2356,
+   "SIG_I": 0.8657,
+   "SIG_T": 0.1291,
+   "SIG_GI": 0.7577,
+   "SIG_GT": 0.3517,
+   "SYNC": 1460,
+   "POLL": 17.02
+  },
+  "source": "workloads/sparseparity/tools/cycle_model.py FITTED (fitted to 29 Sep's card records: 33 runs of the same kernel, M1-M3; rms 1.8% of a minion's cycles; held out +5.0% / +7.5%)",
+  "variant_b": "variant b = --variant m1 --cost fit --gen inc (E59's energy runs): M1's epilogue whole (E_OUT per output tile), incremental generation as variant_constants() states it: G_TILE/2 and G_SLICE + G_K/8 per slice"
+ },
+ "held_out_leaks": {
+  "v1's three, gone": "hop_pj_per_byte 1.753 (E43): no scored load reads a mesh term; CARDS c1 volts 0.4979 (E39's own record): v2 reads card 1's kernel term from M10's card-1 rows and its volts only at 600 MHz, where they cancel; E59_CYCLES_IDEAL 280.35 (E37's record): v2 prices a tensor op per op, so no duty is needed",
+  "v2's own, named": [
+   "E39's and E37's die temperatures and E37's cycles per op are read from their own records as OPERATING POINTS (inputs), as v1 read them; no price comes from them",
+   "E59's op, tile and row-tile counts, the planner's U and the host's model_s are read from E59's own plan.json (desk numbers the host wrote before each launch); its measured seconds feed only the 'given its measured seconds' score",
+   "the sparse-parity cycle constants were fitted on the same kernel's earlier runs of the same day (M1-M3), not on E59's energy runs",
+   "E101 is in sample for w_set and the l2_stream price; E86's and E95's kernel terms come from M10 held out by kind but with each session's own random anchors (M10's term a)"
+  ]
+ }
+}
