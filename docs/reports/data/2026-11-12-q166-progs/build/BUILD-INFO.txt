@@ -1,0 +1,30 @@
+# workloads/ledger as built for Q166(c) on aifoundry3 (host CPU only; no device), read Thu 12 Nov 2026 17:12 PST
+# built: cmake -S src/ledger -B build-p -DCMAKE_PREFIX_PATH=<the profiling simulator's shadow prefix> -Wno-dev; cmake --build build-p -j4
+# the source tarball is this lane's workloads/ledger/ at the time of the build (its files are the landed ones, see LAND.md)
+source tar sha256 9766784106e321749d4f29d56bdd4b3d774652b492a931b66b40dbcf4351f65a
+kernel ELF sha256 78708041a22c28bd4c4fff59c1a0f7373f03a6b71d22decd559bc050db6890db
+kernel .text sha256 5e00e45ad0ae204781a451de8f1c807e74719a137ef28e1d517933f6b7d97e40
+kernel .text bytes 4032
+host sha256 38f79e7d34a247c333911f8f3e32b08cfd1263a739d094997071c780062246d7
+disassembly sha256 8f986c2812e5c99c35b5f6f446798589661d6cfd79d42524c0098bd51e405e0a
+profiling libsw-sysemu.a sha256 4504bd0a585e33e55def57f8f7898d416f3077b1ecbc41a37748311f44ae9508
+profiling sys_emu sha256 ce4469ea430ff3134a6c9f03d9be308dff7a38d1be111691e7f993b5a63e333b
+counter tools sha256:
+139f411b7478db62ed3b9608737c09308950bb439193fca56bef62bfdd8f035b  count_kernel.py
+e116e907e300362515d95ec9017b07d6e67026e44a961542e54bb93cc1d434ef  run_counted.sh
+riscv gcc: riscv64-unknown-elf-gcc (g1b306039a) 15.1.0
+host g++: g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake: cmake version 3.28.3
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_C_FLAGS:STRING=--specs=nano.specs -mcmodel=medany -march=rv64imfc -mabi=lp64f -mno-strict-align -mno-riscv-attribute                         -fstack-usage -Wall -Wextra                         -Wdouble-promotion -Wformat -Wnull-dereference -Wswitch-enum -Wshadow -Wstack-protector                         -Wpointer-arith -Wundef -Wbad-function-cast -Wcast-qual -Wcast-align -Wconversion -Wlogical-op                         -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wno-main
+CMAKE_C_FLAGS_RELEASE:STRING=-O3 -O3 -DNDEBUG
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+CMAKE_PREFIX_PATH:UNINITIALIZED=~/q166-counter-b/official/prefix
+  Entry point address:               0x8005801000
+  Flags:                             0x3, RVC, single-float ABI
+# against the installed ET tree (-DCMAKE_PREFIX_PATH=/opt/et, build-i), Thu 12 Nov 2026 17:33 PST: the kernel a card would run
+# build-i rc=0
+# build-p ELF 78708041a22c28bd4c4fff59c1a0f7373f03a6b71d22decd559bc050db6890db .text 5e00e45ad0ae204781a451de8f1c807e74719a137ef28e1d517933f6b7d97e40 host 38f79e7d34a247c333911f8f3e32b08cfd1263a739d094997071c780062246d7
+# build-i ELF 78708041a22c28bd4c4fff59c1a0f7373f03a6b71d22decd559bc050db6890db .text 5e00e45ad0ae204781a451de8f1c807e74719a137ef28e1d517933f6b7d97e40 host 605ca150f1f38ddfda109dc90771ff80e4896c544d868ed028391d10db2aa0ee
+# build-i host --selftest: SELFTEST PASS
+# build-i host links no profiling emulator (profiling_dump symbols: 0)

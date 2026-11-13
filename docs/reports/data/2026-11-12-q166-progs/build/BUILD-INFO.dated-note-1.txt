@@ -1,0 +1,19 @@
+BUILD-INFO, dated note 1 (Thu 12 Nov 2026, Q166's fix lane, on its verifier's findings)
+
+Five sources changed after the build recorded in BUILD-INFO.txt: comments and licence lines in four, and two host
+behaviours in host/main.cpp (the sort's work area pre-filled with 0x5A as the copy's destination is; an --expect mismatch
+named in first_mismatch). Rebuilt on aifoundry3 against /opt/et (cmake 3.28.3, riscv64-unknown-elf-gcc 15.1.0), 19:20 PST:
+  kernel ELF sha256 78708041a22c28bd4c4fff59c1a0f7373f03a6b71d22decd559bc050db6890db (byte-identical to the first build's)
+  .text sha256      5e00e45ad0ae204781a451de8f1c807e74719a137ef28e1d517933f6b7d97e40
+  ledger_host --selftest: SELFTEST PASS
+  in the simulator (runs-fixq166/): the sort PASS sorted and shuffled with the pre-filled work area; SHA-256 PASS;
+  an altered --expect digest: FAIL, first_mismatch "participant 2 (--expect)"; the right one: PASS
+
+The changed sources (sha256, before -> after):
+  workloads/ledger/ledger_args.h  0b915b5a151c997d1d4505d92dfe4cdf3f8c5c091c5c1bd28509583b811161b9 -> c7403a151fd3fdefb13266a5e6dccf479cfbeef94a91948769a63b692e31d81f
+  workloads/ledger/kernel/crt.S  dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4 -> 0cabc8f78c6134c91a98e8bbc0fdcd289080c58bf7bdf08cae238aa1013b9835
+  workloads/ledger/kernel/sections.ld  b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09 -> cf7fc16036b6a84b4a7ae265c88d2d0cf4972496ca07dfdca4dc4802eea9abff
+  workloads/ledger/host/Constants.h.in  c464f57f54f0efd6d5659483c9121a0299bf86d82eacacc66938c8226f7ceebb -> 9561e2cf259e2cc222e45cd641f1ef4d4e63cf1ab5d5c29dac8e4e4c07923381
+  workloads/ledger/host/main.cpp  6d6669fd7109cec39ce9fcde06159aba1a77da0fb7d27bc32d0aa6948504fa46 -> 5383150f70d16fa5377f58aa9476e059abde541669515cd41a1126a4c2bbbfd9
+
+SPDX-License-Identifier: Apache-2.0

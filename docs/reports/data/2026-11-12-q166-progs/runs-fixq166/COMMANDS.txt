@@ -1,0 +1,10 @@
+fix-q166, Thu 12 Nov 2026 (aifoundry3, host CPU, --sysemu and --selftest only; its own box folder ~/q166-fix-q166):
+  build-ledger-i: cmake -S workloads/ledger (the fixed sources) -DCMAKE_PREFIX_PATH=/opt/et; kernel ELF 78708041... = progs-c's
+  ledger_host --selftest                                                       SELFTEST PASS
+  o-shuf-r1-prefill:   ledger_host --sysemu --prog sort --shires 0x1 --keys 512 --reps 1 --order shuffled
+  o-sorted-r1-prefill: ledger_host --sysemu --prog sort --shires 0x1 --keys 512 --reps 1 --order sorted
+  s-b256-r1-digests:   ledger_host --sysemu --prog sha256 --shires 0x1 --block 256 --repeat 1 --digests-out s-b256-r1.digests
+  s-b256-r1-expectbad: the same with --expect s-b256-r1.expect-bad (participant 2's digest, first hex digit changed)
+  s-b256-r1-expectgood: the same with --expect s-b256-r1.digests
+  recount-o-shuf-r1, recount-s-b256-r2: progs-c's own build-p host and ledger.dis, the fixed tools/counter/run_counted.sh
+  p2-new-s0-nbuf1: sparse parity's never-run instance, slice 0/20000, --nbuf 1 (counter-b's build-spp-o host), counted

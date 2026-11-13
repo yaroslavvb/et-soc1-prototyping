@@ -1,0 +1,1110 @@
+{
+ "card": "aifoundry3",
+ "catalogue": "docs/reports/data/2026-09-23-energy-manual/catalogue.json",
+ "die_start_band_c": [
+  52.0,
+  60.0
+ ],
+ "die_start_c": 55.0,
+ "f_mhz": 600,
+ "frozen_v2": "docs/reports/data/2026-11-12-q166-ledger-v2/frozen-v2.json",
+ "frozen_v2_model": "load ledger v2 (Q166, calc-a): the joined load model revived by its retirement note's recipe",
+ "label": "estimate, UNFROZEN (nothing registered); counts: simulator, exact for 64 participants, scaled to the card configuration by arithmetic",
+ "programs": {
+  "copy-random": {
+   "by_class_total": {
+    "branch_not_taken": 104448.0,
+    "branch_taken": 58725376.0,
+    "int_muldiv": 14336.0,
+    "jump": 77824.0,
+    "load": 469943296.0,
+    "mask_broadcast": 28672.0,
+    "scalar_int": 117903360.0,
+    "store": 469856256.0,
+    "system": 6144.0
+   },
+   "bytes_counted": {
+    "card_total": {
+     "read_bytes": 15150292992.0,
+     "write_bytes": 15062188032.0
+    },
+    "fixed_per_participant": {
+     "read_bytes": 228.0,
+     "write_bytes": 216.0
+    },
+    "label": "counted (simulator log: every load and store's bytes, any address region); which level served them is not counted (no cache model) and is bracketed in the byte terms",
+    "per_unit_per_participant": {
+     "read_bytes": 1.0078125,
+     "write_bytes": 1.001953125
+    }
+   },
+   "cases": [
+    "c-v32-rand-p1",
+    "c-v32-rand-p2"
+   ],
+   "config": {
+    "args": "--prog copy --bytes 1G --passes 14 --data random --width 32",
+    "bytes": 1073741824,
+    "data": "random",
+    "participants": 2048,
+    "passes": 14,
+    "prog": "copy"
+   },
+   "fixed_per_participant": {
+    "@jump": 38.0,
+    "@not_taken": 51.0,
+    "@taken": 2.5,
+    "add": 38.0,
+    "addi": 30.0,
+    "and": 15.0,
+    "andi": 5.0,
+    "auipc": 1.0,
+    "csrr": 2.0,
+    "ecall": 1.0,
+    "ld": 80.5,
+    "li": 27.5,
+    "lui": 13.0,
+    "lw": 8.0,
+    "mov.m.x": 14.0,
+    "mul": 7.0,
+    "mv": 34.0,
+    "not": 2.0,
+    "sd": 36.0,
+    "seqz": 1.0,
+    "sext.w": 4.0,
+    "sll": 2.0,
+    "slli": 15.0,
+    "sltiu": 2.0,
+    "srl": 2.0,
+    "srli": 16.0,
+    "srliw": 1.0,
+    "sub": 17.5,
+    "sw": 10.0
+   },
+   "heat": {
+    "band": [
+     0.10662464745563982,
+     0.8339870253606892
+    ],
+    "die_rise_c": 1.2470651876476382,
+    "j": 0.25798409405104433,
+    "k_leak_w_per_c": 0.31552239520769565
+   },
+   "instructions_total": 1116659712.0,
+   "j_over_idle": 6.813676249542282,
+   "j_over_idle_band": [
+    6.360899795551842,
+    7.80127276672527
+   ],
+   "j_total": 23.415888664026173,
+   "j_total_band": [
+    19.57060172995352,
+    29.123773455479025
+   ],
+   "loop_body": {
+    "function": "copy_v32",
+    "pcs": [
+     "0x8005801022",
+     "0x800580106a"
+    ]
+   },
+   "per_pass_per_participant": {
+    "@jump": 2.0,
+    "@not_taken": 3.0,
+    "add": 1.0,
+    "addi": 1.0,
+    "ld": 4.0,
+    "li": 1.0,
+    "mov.m.x": 1.0,
+    "mv": 2.0,
+    "sd": 1.0,
+    "sub": 1.0
+   },
+   "per_unit_per_participant": {
+    "@taken": 0.00390625,
+    "add": 0.00390625,
+    "addi": 0.00390625,
+    "flw.ps": 0.03125,
+    "fsw.ps": 0.03125
+   },
+   "rest": {
+    "band": [
+     13.103077286946037,
+     20.488513663393068
+    ],
+    "j": 16.344228320432848,
+    "law": "footing law (quadratic, inside its band)",
+    "w": 24.928195160854663
+   },
+   "seconds": {
+    "band": [
+     0.5567550198518518,
+     0.7545495663781676
+    ],
+    "how": "stores at the write-back path's 27 GB/s (energy manual 4.1) and, at the high end, the loads' bytes at 76 GB/s on top (frozen-v2 dram_bandwidth_gb_s)",
+    "instruction_bound_s": 0.0010845479423203898,
+    "point": 0.6556522931150097
+   },
+   "sim": {
+    "c-v32-rand-p1": {
+     "cycles_span_mean": 559,
+     "hart0_cycles_mean": 352.0,
+     "instructions": 35776,
+     "killed": 0,
+     "not_taken": 768,
+     "taken": 1184
+    },
+    "c-v32-rand-p2": {
+     "cycles_span_mean": 880,
+     "hart0_cycles_mean": 673.0,
+     "instructions": 56320,
+     "killed": 0,
+     "not_taken": 960,
+     "taken": 2208
+    }
+   },
+   "terms": {
+    "DRAM reads, 32 B vector loads (tensor-load DRAM row by analogy; 4.2 memhier DRAM inside the band)": {
+     "band": [
+      1.5874199126015998,
+      2.1857088569344003
+     ],
+     "bytes": 15032385536,
+     "j": 1.9136226787328001,
+     "pj_per_byte": [
+      127.3,
+      105.6,
+      145.4
+     ]
+    },
+    "DRAM writes, fsw.ps through the L1 (the write-back path, 4.1)": {
+     "band": [
+      4.771279169126399,
+      5.6115895205888
+     ],
+     "bytes": 15032385536,
+     "j": 4.8975512076287995,
+     "pj_per_byte": [
+      325.8,
+      317.4,
+      373.3
+     ]
+    },
+    "instructions (loop and set-up; the moves are inside the byte prices)": {
+     "band": [
+      0.0022007138238433273,
+      0.003974389202069415
+     ],
+     "count": 176897024.0,
+     "j": 0.002502363180682241
+    }
+   },
+   "unit": "byte copied",
+   "units_per_participant": 7340032.0,
+   "w_over_idle": 10.392209897063651
+  },
+  "copy-zeros": {
+   "by_class_total": {
+    "branch_not_taken": 104448.0,
+    "branch_taken": 58725376.0,
+    "int_muldiv": 14336.0,
+    "jump": 77824.0,
+    "load": 469943296.0,
+    "mask_broadcast": 28672.0,
+    "scalar_int": 117903360.0,
+    "store": 469856256.0,
+    "system": 6144.0
+   },
+   "bytes_counted": {
+    "card_total": {
+     "read_bytes": 15150292992.0,
+     "write_bytes": 15062188032.0
+    },
+    "fixed_per_participant": {
+     "read_bytes": 228.0,
+     "write_bytes": 216.0
+    },
+    "label": "counted (simulator log: every load and store's bytes, any address region); which level served them is not counted (no cache model) and is bracketed in the byte terms",
+    "per_unit_per_participant": {
+     "read_bytes": 1.0078125,
+     "write_bytes": 1.001953125
+    }
+   },
+   "cases": [
+    "c-v32-zero-p1",
+    "c-v32-zero-p2"
+   ],
+   "config": {
+    "args": "--prog copy --bytes 1G --passes 14 --data zeros --width 32",
+    "bytes": 1073741824,
+    "data": "zeros",
+    "participants": 2048,
+    "passes": 14,
+    "prog": "copy"
+   },
+   "fixed_per_participant": {
+    "@jump": 38.0,
+    "@not_taken": 51.0,
+    "@taken": 2.5,
+    "add": 38.0,
+    "addi": 30.0,
+    "and": 15.0,
+    "andi": 5.0,
+    "auipc": 1.0,
+    "csrr": 2.0,
+    "ecall": 1.0,
+    "ld": 80.5,
+    "li": 27.5,
+    "lui": 13.0,
+    "lw": 8.0,
+    "mov.m.x": 14.0,
+    "mul": 7.0,
+    "mv": 34.0,
+    "not": 2.0,
+    "sd": 36.0,
+    "seqz": 1.0,
+    "sext.w": 4.0,
+    "sll": 2.0,
+    "slli": 15.0,
+    "sltiu": 2.0,
+    "srl": 2.0,
+    "srli": 16.0,
+    "srliw": 1.0,
+    "sub": 17.5,
+    "sw": 10.0
+   },
+   "heat": {
+    "band": [
+     0.07275846620062053,
+     0.6488581273887342
+    ],
+    "die_rise_c": 0.941397433457694,
+    "j": 0.1947496942567078,
+    "k_leak_w_per_c": 0.31552239520769565
+   },
+   "instructions_total": 1116659712.0,
+   "j_over_idle": 5.143578216492682,
+   "j_over_idle_band": [
+    4.340547179513443,
+    6.069541952978068
+   ],
+   "j_total": 21.682556231182236,
+   "j_total_band": [
+    17.5163829326601,
+    27.20691374375987
+   ],
+   "loop_body": {
+    "function": "copy_v32",
+    "pcs": [
+     "0x8005801022",
+     "0x800580106a"
+    ]
+   },
+   "per_pass_per_participant": {
+    "@jump": 2.0,
+    "@not_taken": 3.0,
+    "add": 1.0,
+    "addi": 1.0,
+    "ld": 4.0,
+    "li": 1.0,
+    "mov.m.x": 1.0,
+    "mv": 2.0,
+    "sd": 1.0,
+    "sub": 1.0
+   },
+   "per_unit_per_participant": {
+    "@taken": 0.00390625,
+    "add": 0.00390625,
+    "addi": 0.00390625,
+    "flw.ps": 0.03125,
+    "fsw.ps": 0.03125
+   },
+   "rest": {
+    "band": [
+     13.103077286946037,
+     20.488513663393068
+    ],
+    "j": 16.344228320432848,
+    "law": "footing law (quadratic, inside its band)",
+    "w": 24.928195160854663
+   },
+   "seconds": {
+    "band": [
+     0.5567550198518518,
+     0.7545495663781676
+    ],
+    "how": "stores at the write-back path's 27 GB/s (energy manual 4.1) and, at the high end, the loads' bytes at 76 GB/s on top (frozen-v2 dram_bandwidth_gb_s)",
+    "instruction_bound_s": 0.0010845479423203898,
+    "point": 0.6556522931150097
+   },
+   "sim": {
+    "c-v32-zero-p1": {
+     "cycles_span_mean": 559,
+     "hart0_cycles_mean": 352.0,
+     "instructions": 35776,
+     "killed": 0,
+     "not_taken": 768,
+     "taken": 1184
+    },
+    "c-v32-zero-p2": {
+     "cycles_span_mean": 880,
+     "hart0_cycles_mean": 673.0,
+     "instructions": 56320,
+     "killed": 0,
+     "not_taken": 960,
+     "taken": 2208
+    }
+   },
+   "terms": {
+    "DRAM reads, 32 B vector loads (tensor-load DRAM row by analogy; 4.2 memhier DRAM inside the band)": {
+     "band": [
+      1.2957916332032,
+      1.7227113824255997
+     ],
+     "bytes": 15032385536,
+     "j": 1.4220636717055999,
+     "pj_per_byte": [
+      94.6,
+      86.2,
+      114.6
+     ]
+    },
+    "DRAM writes, fsw.ps through the L1 (the write-back path, 4.1)": {
+     "band": [
+      3.0425548324864,
+      4.342856181350399
+     ],
+     "bytes": 15032385536,
+     "j": 3.7190121816064,
+     "pj_per_byte": [
+      247.4,
+      202.4,
+      288.9
+     ]
+    },
+    "instructions (loop and set-up; the moves are inside the byte prices)": {
+     "band": [
+      0.0022007138238433273,
+      0.003974389202069415
+     ],
+     "count": 176897024.0,
+     "j": 0.002502363180682241
+    }
+   },
+   "unit": "byte copied",
+   "units_per_participant": 7340032.0,
+   "w_over_idle": 7.84497861214745
+  },
+  "sha256": {
+   "by_class_total": {
+    "branch_not_taken": 117987328.0,
+    "branch_taken": 3617729536.0,
+    "int_muldiv": 16384.0,
+    "jump": 157315072.0,
+    "load": 11534873600.0,
+    "scalar_int": 220131303424.0,
+    "store": 4404314112.0,
+    "system": 6144.0
+   },
+   "bytes_counted": {
+    "card_total": {
+     "read_bytes": 48656457728.0,
+     "write_bytes": 20134264832.0
+    },
+    "fixed_per_participant": {
+     "read_bytes": 1236.0,
+     "write_bytes": 784.0
+    },
+    "label": "counted (simulator log: every load and store's bytes, any address region); which level served them is not counted (no cache model) and is bracketed in the byte terms",
+    "per_unit_per_participant": {
+     "read_bytes": 928.0,
+     "write_bytes": 384.0
+    }
+   },
+   "cases": [
+    "sha-b256-r1",
+    "s-b256-r2"
+   ],
+   "config": {
+    "args": "--prog sha256 --block 2048 --repeat 800",
+    "block": 2048,
+    "participants": 2048,
+    "prog": "sha256",
+    "repeat": 800
+   },
+   "fixed_per_participant": {
+    "@jump": 14.0,
+    "@not_taken": 11.0,
+    "@taken": 69.5,
+    "add": 24.0,
+    "addi": 168.0,
+    "addiw": 6.0,
+    "addw": 1176.0,
+    "and": 307.0,
+    "andi": 5.0,
+    "auipc": 3.0,
+    "csrr": 2.0,
+    "ecall": 1.0,
+    "ld": 46.5,
+    "li": 14.5,
+    "lui": 25.0,
+    "lw": 216.0,
+    "mul": 8.0,
+    "mv": 529.0,
+    "not": 66.0,
+    "or": 54.0,
+    "sd": 52.0,
+    "seqz": 1.0,
+    "sext.w": 4.0,
+    "sll": 2.0,
+    "slli": 17.0,
+    "slliw": 612.0,
+    "sltiu": 2.0,
+    "srai": 1.0,
+    "srl": 2.0,
+    "srli": 18.0,
+    "srliw": 708.0,
+    "sub": 3.5,
+    "sw": 92.0,
+    "xor": 640.0
+   },
+   "heat": {
+    "band": [
+     0.029717396513661058,
+     0.6636752415285795
+    ],
+    "die_rise_c": 0.4849033120599041,
+    "j": 0.08726504693031623,
+    "k_leak_w_per_c": 0.31552239520769565
+   },
+   "instructions_total": 239963545600.0,
+   "j_over_idle": 2.304776888945109,
+   "j_over_idle_band": [
+    2.1272443097739338,
+    5.173877234860636
+   ],
+   "j_total": 16.61028132362868,
+   "j_total_band": [
+    15.580411635725346,
+    31.022842939100798
+   ],
+   "loop_body": null,
+   "per_pass_per_participant": null,
+   "per_unit_per_participant": {
+    "@jump": 3.0,
+    "@not_taken": 2.25,
+    "@taken": 69.0,
+    "addi": 140.25,
+    "addiw": 6.0,
+    "addw": 1176.0,
+    "and": 288.0,
+    "auipc": 2.0,
+    "ld": 12.0,
+    "li": 2.0,
+    "lui": 2.0,
+    "lw": 208.0,
+    "mv": 518.25,
+    "not": 64.0,
+    "or": 48.0,
+    "sd": 12.0,
+    "slliw": 608.0,
+    "srliw": 704.0,
+    "sw": 72.0,
+    "xor": 640.0
+   },
+   "rest": {
+    "band": [
+     13.423449929437751,
+     25.18529046271158
+    ],
+    "j": 14.218239387753254,
+    "law": "footing law (quadratic, inside its band)",
+    "w": 24.928195160854663
+   },
+   "seconds": {
+    "band": [
+     0.5703677821842671,
+     0.927522138011454
+    ],
+    "how": "hart-cycles = sum of 1 / issue rate (catalogue, both harts issuing), per participant; high: one-cycle integer ops at the in-place rows' rate; L2 stalls not modelled (no cache model)",
+    "point": 0.5703677821842671
+   },
+   "sim": {
+    "s-b256-r2": {
+     "cycles_span_mean": 41514,
+     "hart0_cycles_mean": 41307.0,
+     "instructions": 2656896,
+     "killed": 0,
+     "not_taken": 1856,
+     "taken": 39776
+    },
+    "sha-b256-r1": {
+     "cycles_span_mean": 23207,
+     "hart0_cycles_mean": 23000.0,
+     "instructions": 1485248,
+     "killed": 0,
+     "not_taken": 1280,
+     "taken": 22112
+    }
+   },
+   "terms": {
+    "bytes past the L1 (bracketed: the message line a compression; up to 8 more lines of W and K)": {
+     "band": [
+      0.0,
+      0.150692954112
+     ],
+     "j": 0.009495904256,
+     "lines_high": 471859200,
+     "lines_point": 52428800
+    },
+    "instructions (catalogue rows, random column; branches by outcome)": {
+     "band": [
+      2.1272443097739338,
+      5.0231842807486355
+     ],
+     "count": 239963545600.0,
+     "j": 2.295280984689109
+    }
+   },
+   "unit": "message block (one compression)",
+   "units_per_participant": 25600,
+   "w_over_idle": 4.040860933832534
+  },
+  "sort-shuffled": {
+   "by_class_total": {
+    "branch_not_taken": 29899706624.0,
+    "branch_taken": 20423651840.0,
+    "int_muldiv": 12288.0,
+    "jump": 2399392384.0,
+    "load": 27129617280.0,
+    "scalar_int": 124528915456.0,
+    "store": 14957645824.0,
+    "system": 6144.0
+   },
+   "bytes_counted": {
+    "card_total": {
+     "read_bytes": 111725854208.0,
+     "write_bytes": 63037947904.0
+    },
+    "fixed_per_participant": {
+     "read_bytes": 2296.0,
+     "write_bytes": 248.0
+    },
+    "label": "counted (simulator log: every load and store's bytes, any address region); which level served them is not counted (no cache model) and is bracketed in the byte terms",
+    "per_unit_per_participant": {
+     "read_bytes": 36367.5625,
+     "write_bytes": 20520.0
+    }
+   },
+   "cases": [
+    "o-shuf-r1",
+    "o-shuf-r2"
+   ],
+   "config": {
+    "args": "--prog sort --keys 512 --reps 1500 --order shuffled",
+    "keys": 512,
+    "order": "shuffled",
+    "participants": 2048,
+    "prog": "sort",
+    "reps": 1500
+   },
+   "fixed_per_participant": {
+    "@jump": 8.0,
+    "@not_taken": 13.0,
+    "@taken": 767.5,
+    "add": 27.0,
+    "addi": 529.0,
+    "addw": 511.0,
+    "and": 15.0,
+    "andi": 6.0,
+    "auipc": 1.0,
+    "csrr": 2.0,
+    "ecall": 1.0,
+    "ld": 26.5,
+    "li": 15.5,
+    "lui": 13.0,
+    "lw": 521.0,
+    "mul": 6.0,
+    "mv": 12.0,
+    "not": 2.0,
+    "sd": 24.0,
+    "seqz": 2.0,
+    "sext.w": 5.0,
+    "sll": 2.0,
+    "slli": 20.0,
+    "sltiu": 2.0,
+    "srl": 2.0,
+    "srli": 16.0,
+    "srliw": 1.0,
+    "sub": 4.5,
+    "sw": 14.0,
+    "xor": 511.0
+   },
+   "heat": {
+    "band": [
+     0.03880467867556273,
+     0.48752047947723925
+    ],
+    "die_rise_c": 0.4388046213999053,
+    "j": 0.10381524102699653,
+    "k_leak_w_per_c": 0.31552239520769565
+   },
+   "instructions_total": 219338947840.0,
+   "j_over_idle": 2.741887807959959,
+   "j_over_idle_band": [
+    2.169302058600715,
+    4.866581959900843
+   ],
+   "j_total": 21.537479129540863,
+   "j_total_band": [
+    19.855025843568367,
+    31.211275184040247
+   ],
+   "loop_body": null,
+   "per_pass_per_participant": null,
+   "per_unit_per_participant": {
+    "@jump": 781.046875,
+    "@not_taken": 9732.96875,
+    "@taken": 6647.8125,
+    "add": 11243.96875,
+    "addi": 14205.890625,
+    "andi": 2.0,
+    "ld": 261.0,
+    "li": 12.0,
+    "lw": 8569.890625,
+    "mv": 4580.984375,
+    "or": 1.0,
+    "sd": 261.0,
+    "slli": 9977.78125,
+    "srli": 1.0,
+    "sub": 511.0,
+    "sw": 4608.0
+   },
+   "rest": {
+    "band": [
+     17.64691910629209,
+     25.85717274466216
+    ],
+    "j": 18.691776080553907,
+    "law": "footing law (quadratic, inside its band)",
+    "w": 24.928195160854663
+   },
+   "seconds": {
+    "band": [
+     0.7498246848574921,
+     0.9522661722948577
+    ],
+    "how": "hart-cycles = sum of 1 / issue rate (catalogue, both harts issuing), per participant; high: one-cycle integer ops at the in-place rows' rate; L2 stalls not modelled (no cache model)",
+    "point": 0.7498246848574921
+   },
+   "sim": {
+    "o-shuf-r1": {
+     "cycles_span_mean": 74477.34375,
+     "hart0_cycles_mean": 74272.4,
+     "instructions": 4766550,
+     "killed": 0,
+     "not_taken": 623742,
+     "taken": 474580
+    },
+    "o-shuf-r2": {
+     "cycles_span_mean": 145874.6875,
+     "hart0_cycles_mean": 145651.8,
+     "instructions": 9335980,
+     "killed": 0,
+     "not_taken": 1246652,
+     "taken": 900040
+    }
+   },
+   "terms": {
+    "bytes past the L1 (bracketed: every key read and written once a level at the L2)": {
+     "band": [
+      0.0,
+      0.9418309631999999
+     ],
+     "bytes_point": 125829120000,
+     "j": 0.3560964096
+    },
+    "instructions (catalogue rows, random column; branches by outcome)": {
+     "band": [
+      2.169302058600715,
+      3.924750996700843
+     ],
+     "count": 219338947840.0,
+     "j": 2.385791398359959
+    }
+   },
+   "unit": "sort of 512 keys",
+   "units_per_participant": 1500,
+   "w_over_idle": 3.656705178332544
+  },
+  "sort-sorted": {
+   "by_class_total": {
+    "branch_not_taken": 19221530624.0,
+    "branch_taken": 19235363840.0,
+    "int_muldiv": 12288.0,
+    "jump": 1618960384.0,
+    "load": 20070497280.0,
+    "scalar_int": 96006547456.0,
+    "store": 12991565824.0,
+    "system": 6144.0
+   },
+   "bytes_counted": {
+    "card_total": {
+     "read_bytes": 91353694208.0,
+     "write_bytes": 63037947904.0
+    },
+    "fixed_per_participant": {
+     "read_bytes": 2296.0,
+     "write_bytes": 248.0
+    },
+    "label": "counted (simulator log: every load and store's bytes, any address region); which level served them is not counted (no cache model) and is bracketed in the byte terms",
+    "per_unit_per_participant": {
+     "read_bytes": 29736.0,
+     "write_bytes": 20520.0
+    }
+   },
+   "cases": [
+    "o-sorted-r1",
+    "o-sorted-r2"
+   ],
+   "config": {
+    "args": "--prog sort --keys 512 --reps 1500 --order sorted",
+    "keys": 512,
+    "order": "sorted",
+    "participants": 2048,
+    "prog": "sort",
+    "reps": 1500
+   },
+   "fixed_per_participant": {
+    "@jump": 8.0,
+    "@not_taken": 13.0,
+    "@taken": 767.5,
+    "add": 27.0,
+    "addi": 529.0,
+    "addw": 511.0,
+    "and": 15.0,
+    "andi": 6.0,
+    "auipc": 1.0,
+    "csrr": 2.0,
+    "ecall": 1.0,
+    "ld": 26.5,
+    "li": 15.5,
+    "lui": 13.0,
+    "lw": 521.0,
+    "mul": 6.0,
+    "mv": 12.0,
+    "not": 2.0,
+    "sd": 24.0,
+    "seqz": 2.0,
+    "sext.w": 5.0,
+    "sll": 2.0,
+    "slli": 20.0,
+    "sltiu": 2.0,
+    "srl": 2.0,
+    "srli": 16.0,
+    "srliw": 1.0,
+    "sub": 4.5,
+    "sw": 14.0,
+    "xor": 511.0
+   },
+   "heat": {
+    "band": [
+     0.031231429653061873,
+     0.3988371475384695
+    ],
+    "die_rise_c": 0.4396331053037076,
+    "j": 0.08557576002864482,
+    "k_leak_w_per_c": 0.31552239520769565
+   },
+   "instructions_total": 169144483840.0,
+   "j_over_idle": 2.2601607505629344,
+   "j_over_idle_band": [
+    1.7224445189555475,
+    4.03561139195111
+   ],
+   "j_total": 17.724486001082628,
+   "j_total_band": [
+    16.2727642923303,
+    25.422345813172758
+   ],
+   "loop_body": null,
+   "per_pass_per_participant": null,
+   "per_unit_per_participant": {
+    "@jump": 527.0,
+    "@not_taken": 6257.0,
+    "@taken": 6261.0,
+    "add": 7706.0,
+    "addi": 11299.0,
+    "andi": 64.0,
+    "ld": 901.0,
+    "li": 12.0,
+    "lw": 5632.0,
+    "mv": 4933.0,
+    "or": 32.0,
+    "sd": 901.0,
+    "slli": 6662.0,
+    "srli": 32.0,
+    "sub": 511.0,
+    "sw": 3328.0
+   },
+   "rest": {
+    "band": [
+     14.519088343721693,
+     20.987897273683178
+    ],
+    "j": 15.378749490491048,
+    "law": "footing law (quadratic, inside its band)",
+    "w": 24.928195160854663
+   },
+   "seconds": {
+    "band": [
+     0.6169218987277773,
+     0.7729408314934119
+    ],
+    "how": "hart-cycles = sum of 1 / issue rate (catalogue, both harts issuing), per participant; high: one-cycle integer ops at the in-place rows' rate; L2 stalls not modelled (no cache model)",
+    "point": 0.6169218987277773
+   },
+   "sim": {
+    "o-sorted-r1": {
+     "cycles_span_mean": 58138,
+     "hart0_cycles_mean": 57803.0,
+     "instructions": 3720832,
+     "killed": 0,
+     "not_taken": 401280,
+     "taken": 449824
+    },
+    "o-sorted-r2": {
+     "cycles_span_mean": 113196,
+     "hart0_cycles_mean": 112989.0,
+     "instructions": 7244544,
+     "killed": 0,
+     "not_taken": 801728,
+     "taken": 850528
+    }
+   },
+   "terms": {
+    "bytes past the L1 (bracketed: every key read and written once a level at the L2)": {
+     "band": [
+      0.0,
+      0.9418309631999999
+     ],
+     "bytes_point": 125829120000,
+     "j": 0.3560964096
+    },
+    "instructions (catalogue rows, random column; branches by outcome)": {
+     "band": [
+      1.7224445189555475,
+      3.09378042875111
+     ],
+     "count": 169144483840.0,
+     "j": 1.9040643409629343
+    }
+   },
+   "unit": "sort of 512 keys",
+   "units_per_participant": 1500,
+   "w_over_idle": 3.66360921086423
+  },
+  "sparse-parity": {
+   "config": "--mode tensor --shires 0xffffffff --per-shire 32 --variant m1 --cost fit --gen inc (variant b, energy.sh's ALL and CB)",
+   "counter_slices": {
+    "fit_residual_max_fraction": {
+     "atomic_local": 0.0,
+     "branch_not_taken": 0.2327239264632532,
+     "branch_taken": 0.13264233020219107,
+     "float_int_xfer": 0.0024864689949008235,
+     "int_muldiv": 0.0037662342389673986,
+     "jump": 0.0002466236138218306,
+     "load": 0.10139513022995839,
+     "mask_broadcast": 0.00013955918578770248,
+     "scalar_int": 0.06812941398732153,
+     "store": 0.14513804630748786,
+     "store_past_l1": 0.00023946360153259496,
+     "sync": 0.0632807141607256,
+     "system": 0.02068506244371804,
+     "tensor": 0.0022650067459560504,
+     "vector_int": 0.0
+    },
+    "int8_ops_counted_over_planned": 1.0173684210526315,
+    "label": "counted (simulator log of harts 0 and 1 of one minion, three 1/20000 slices; spin loops inside wait_count left out, as tools/counter/card_compare_sparseparity.py does) and scaled by least squares to the plan's output and row tiles: an estimate of the whole solve's work instructions",
+    "per_op_work_instructions": 111.3612518459349,
+    "per_solve_work_by_class": {
+     "atomic_local": 3317074.0,
+     "branch_not_taken": 869702364.7697151,
+     "branch_taken": 1817412359.3502192,
+     "float_int_xfer": 766852891.4318961,
+     "int_muldiv": 424143972.2908587,
+     "jump": 563966405.0713357,
+     "load": 5551483906.546361,
+     "mask_broadcast": 1540897694.8544736,
+     "scalar_int": 19062434600.39972,
+     "store": 1318713614.6792524,
+     "store_past_l1": 1486405006.6819923,
+     "sync": 64510.90824897627,
+     "system": 6841864.383615428,
+     "tensor": 2177515994.785081,
+     "vector_int": 10830268846.0
+    },
+    "per_solve_work_hart0": 26524071454.09913,
+    "per_solve_work_hart1": 19895949652.05364,
+    "per_solve_work_instructions": 46420021106.15277,
+    "rates": {
+     "hart0_work_per_output_tile": 1648.5273851295563,
+     "hart0_work_per_row_tile": 1195.0922258798494,
+     "hart1_work_per_row_tile": 11996.084291187739
+    },
+    "slices": [
+     {
+      "hart0_instructions": 1536007,
+      "hart0_spin": 271,
+      "hart1_instructions": 1442424,
+      "hart1_spin": 995588,
+      "ops": 25704,
+      "oracle": "exact, all 1 minions",
+      "output_tiles": 918.0,
+      "row_tiles": 27,
+      "run": "p2-new-s0",
+      "status": "PASS"
+     },
+     {
+      "hart0_instructions": 1438914,
+      "hart0_spin": 681,
+      "hart1_instructions": 1410479,
+      "hart1_spin": 625522,
+      "ops": 22848,
+      "oracle": "exact, all 1 minions",
+      "output_tiles": 816.0,
+      "row_tiles": 68,
+      "run": "p2-new-s10000",
+      "status": "PASS"
+     },
+     {
+      "hart0_instructions": 1909956,
+      "hart0_spin": 1441129,
+      "hart1_instructions": 1907803,
+      "hart1_spin": 8618,
+      "ops": 4648,
+      "oracle": "exact, all 1 minions",
+      "output_tiles": 166.0,
+      "row_tiles": 166,
+      "run": "p2-new-s19999",
+      "status": "PASS"
+     }
+    ]
+   },
+   "counts": {
+    "S": 28,
+    "ops": 416841768,
+    "output_tiles": 14887206,
+    "row_tiles": 1658537
+   },
+   "instance": {
+    "eta": 0.39,
+    "k": 4,
+    "m": 1792,
+    "n": 544,
+    "seed": 3
+   },
+   "label": "estimate, UNFROZEN: the ledger v2 (frozen 59ff9117...) on a load built as its E59 loads are, at the --dry plan's forecast seconds; a new instance, so neither held out nor blind yet",
+   "ledger_v2": {
+    "heat_j": 0.27814769580614457,
+    "j_over_idle": 7.3462216953741954,
+    "j_over_idle_band": [
+     6.1273900107607995,
+     11.291142692194192
+    ],
+    "j_total": 20.45593349647383,
+    "j_total_band": [
+     18.840783287679113,
+     25.27072939420593
+    ],
+    "rest_w": 24.928195160854663,
+    "terms": {
+     "awake": {
+      "band": [
+       0.5294163970988357,
+       1.0064153291383806
+      ],
+      "j": 0.6237678342055589
+     },
+     "bytes:dram_load:X copy-in": {
+      "band": [
+       0.0035456637239295995,
+       0.004460827240038399
+      ],
+      "j": 0.00402214486016
+     },
+     "bytes:l2_stream:X reads": {
+      "band": [
+       0.030442692824085935,
+       0.039068272114626566
+      ],
+      "j": 0.0347313196584375
+     },
+     "bytes:scp_load:A and B tiles": {
+      "band": [
+       3.1113603120983035,
+       4.1728869707334075
+      ],
+      "j": 3.6205075212042237
+     },
+     "bytes:scp_store:staged rows": {
+      "band": [
+       0.34381083386917477,
+       0.45032741798264586
+      ],
+      "j": 0.38190274367078403
+     },
+     "instr:vec_int:epilogue (hart 0)": {
+      "band": [
+       0.07783746404484569,
+       0.7178226135333732
+      ],
+      "j": 0.17284553793284924
+     },
+     "instr:vec_int:row generation beyond its stores (hart 1)": {
+      "band": [
+       0.31418542109825887,
+       2.8974402349092188
+      ],
+      "j": 0.6976787949964484
+     },
+     "instr:vec_int:row-tile set-up (hart 0)": {
+      "band": [
+       0.016949091315832745,
+       0.1563057221177866
+      ],
+      "j": 0.03763707928961089
+     },
+     "tensor:int8:int8.pm1:0": {
+      "band": [
+       1.6998421346875323,
+       1.8464153044247142
+      ],
+      "j": 1.7731287195561232
+     }
+    },
+    "w_over_idle": 14.271685557152423
+   },
+   "plan": {
+    "S": 28,
+    "candidates": 3608976376,
+    "dump_tiles": 14887206,
+    "est_s": 0.669164,
+    "guard_s": 0.784738,
+    "model_U": 0.714643,
+    "model_s": 0.514741,
+    "nbuf": 1,
+    "ops": 416841768,
+    "scp_layout_kb": 2104,
+    "stage": "scp",
+    "work_tiles": 1658537
+   },
+   "port_matches_plan": true,
+   "seconds": {
+    "how": "the host's --dry model_s (the fitted cycle model; held out +5.0% and +7.5% on the 29 Sep runs, README)",
+    "point": 0.514741
+   }
+  }
+ },
+ "schema": "ledger-progs-estimate/1"
+}
