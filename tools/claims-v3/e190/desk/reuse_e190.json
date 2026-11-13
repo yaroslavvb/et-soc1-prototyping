@@ -1,0 +1,247 @@
+{
+ "what": "E190 desk: the 8,192^3 GEMM's reuse per L2-sized block and where its missing lines are served (E136's models, unchanged; models and arithmetic, not measurements)",
+ "model": "tools/claims-v3/e136/desk/reuse_e136.py (imported)",
+ "shapes": {
+  "g4k": {
+   "blocks": [
+    4,
+    8,
+    8
+   ],
+   "arm": "gemmL4x8x8",
+   "L2": {
+    "first_pass_missing_lines_per_op": 192.0,
+    "steady_missing_lines_per_op": 192.0,
+    "lines_per_op": 192.0
+   },
+   "L3": {
+    "32MB": {
+     "A_in_L3": 0.658,
+     "B_in_L3": 0.5
+    },
+    "28MB": {
+     "A_in_L3": 0.2205,
+     "B_in_L3": 0.5
+    },
+    "24MB": {
+     "A_in_L3": 0.0,
+     "B_in_L3": 0.5
+    }
+   },
+   "lines_per_shire_op": {
+    "32MB": {
+     "n_L3": 106.112,
+     "n_fresh": 85.888,
+     "dram_GB_per_gemm": 0.519
+    },
+    "28MB": {
+     "n_L3": 78.112,
+     "n_fresh": 113.888,
+     "dram_GB_per_gemm": 0.754
+    },
+    "24MB": {
+     "n_L3": 64.0,
+     "n_fresh": 128.0,
+     "dram_GB_per_gemm": 0.872
+    }
+   },
+   "arithmetic": {
+    "A_panel_MB": 16.0,
+    "B_panel_MB": 8.0,
+    "C_block_MB": 2.0,
+    "A_reuse_distance_MB": 26.0,
+    "B_reuse_distance_r_MB": 17.0,
+    "B_reuse_distance_mb_MB": 208.0,
+    "ops_per_minion": 16384,
+    "unique_bytes_per_op_step": 65536,
+    "dram_bytes_nothing_reused_GB": 1.140850688,
+    "footprint_MB": {
+     "A": 64.0,
+     "B": 64.0,
+     "C": 64.0
+    }
+   },
+   "tie_with_e136_committed": true
+  },
+  "fp32": {
+   "blocks": [
+    8,
+    16,
+    16
+   ],
+   "arm": "gemmL8x16x16",
+   "L2": {
+    "first_pass_missing_lines_per_op": 192.0,
+    "steady_missing_lines_per_op": 192.0,
+    "lines_per_op": 192.0
+   },
+   "L3": {
+    "32MB": {
+     "A_in_L3": 0.0,
+     "B_in_L3": 0.0
+    },
+    "28MB": {
+     "A_in_L3": 0.0,
+     "B_in_L3": 0.0
+    },
+    "24MB": {
+     "A_in_L3": 0.0,
+     "B_in_L3": 0.0
+    }
+   },
+   "lines_per_shire_op": {
+    "32MB": {
+     "n_L3": 0.0,
+     "n_fresh": 192.0,
+     "dram_GB_per_gemm": 8.858
+    },
+    "28MB": {
+     "n_L3": 0.0,
+     "n_fresh": 192.0,
+     "dram_GB_per_gemm": 8.858
+    },
+    "24MB": {
+     "n_L3": 0.0,
+     "n_fresh": 192.0,
+     "dram_GB_per_gemm": 8.858
+    }
+   },
+   "arithmetic": {
+    "A_panel_MB": 32.0,
+    "B_panel_MB": 16.0,
+    "C_block_MB": 2.0,
+    "A_reuse_distance_MB": 50.0,
+    "B_reuse_distance_r_MB": 33.0,
+    "B_reuse_distance_mb_MB": 800.0,
+    "ops_per_minion": 131072,
+    "unique_bytes_per_op_step": 65536,
+    "dram_bytes_nothing_reused_GB": 8.858370048,
+    "footprint_MB": {
+     "A": 256.0,
+     "B": 256.0,
+     "C": 256.0
+    }
+   }
+  },
+  "fp16": {
+   "blocks": [
+    8,
+    16,
+    8
+   ],
+   "arm": "gemmL8x16x8",
+   "L2": {
+    "first_pass_missing_lines_per_op": 192.0,
+    "steady_missing_lines_per_op": 192.0,
+    "lines_per_op": 192.0
+   },
+   "L3": {
+    "32MB": {
+     "A_in_L3": 0.705,
+     "B_in_L3": 0.5
+    },
+    "28MB": {
+     "A_in_L3": 0.2362,
+     "B_in_L3": 0.5
+    },
+    "24MB": {
+     "A_in_L3": 0.0,
+     "B_in_L3": 0.5
+    }
+   },
+   "lines_per_shire_op": {
+    "32MB": {
+     "n_L3": 109.12,
+     "n_fresh": 82.88,
+     "dram_GB_per_gemm": 1.976
+    },
+    "28MB": {
+     "n_L3": 79.117,
+     "n_fresh": 112.883,
+     "dram_GB_per_gemm": 2.982
+    },
+    "24MB": {
+     "n_L3": 64.0,
+     "n_fresh": 128.0,
+     "dram_GB_per_gemm": 3.49
+    }
+   },
+   "arithmetic": {
+    "A_panel_MB": 16.0,
+    "B_panel_MB": 8.0,
+    "C_block_MB": 2.0,
+    "A_reuse_distance_MB": 26.0,
+    "B_reuse_distance_r_MB": 17.0,
+    "B_reuse_distance_mb_MB": 416.0,
+    "ops_per_minion": 65536,
+    "unique_bytes_per_op_step": 65536,
+    "dram_bytes_nothing_reused_GB": 4.563402752,
+    "footprint_MB": {
+     "A": 128.0,
+     "B": 128.0,
+     "C": 256.0
+    }
+   }
+  },
+  "int8": {
+   "blocks": [
+    8,
+    16,
+    4
+   ],
+   "arm": "gemmL8x16x4",
+   "L2": {
+    "first_pass_missing_lines_per_op": 192.0,
+    "steady_missing_lines_per_op": 192.0,
+    "lines_per_op": 192.0
+   },
+   "L3": {
+    "32MB": {
+     "A_in_L3": 0.9375,
+     "B_in_L3": 0.5
+    },
+    "28MB": {
+     "A_in_L3": 0.9375,
+     "B_in_L3": 0.5
+    },
+    "24MB": {
+     "A_in_L3": 0.9375,
+     "B_in_L3": 0.5
+    }
+   },
+   "lines_per_shire_op": {
+    "32MB": {
+     "n_L3": 124.0,
+     "n_fresh": 68.0,
+     "dram_GB_per_gemm": 0.872
+    },
+    "28MB": {
+     "n_L3": 124.0,
+     "n_fresh": 68.0,
+     "dram_GB_per_gemm": 0.872
+    },
+    "24MB": {
+     "n_L3": 124.0,
+     "n_fresh": 68.0,
+     "dram_GB_per_gemm": 0.872
+    }
+   },
+   "arithmetic": {
+    "A_panel_MB": 8.0,
+    "B_panel_MB": 4.0,
+    "C_block_MB": 2.0,
+    "A_reuse_distance_MB": 14.0,
+    "B_reuse_distance_r_MB": 9.0,
+    "B_reuse_distance_mb_MB": 224.0,
+    "ops_per_minion": 32768,
+    "unique_bytes_per_op_step": 65536,
+    "dram_bytes_nothing_reused_GB": 2.415919104,
+    "footprint_MB": {
+     "A": 64.0,
+     "B": 64.0,
+     "C": 256.0
+    }
+   }
+  }
+ }
+}

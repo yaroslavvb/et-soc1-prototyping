@@ -1,0 +1,34 @@
+E190 (Q169) desk: the 8,192^3 GEMM's own reuse, per L2-sized block, and where each missing line is served, by E136's desk model UNCHANGED
+(tools/claims-v3/e136/desk/reuse_e136.py, imported: shire_ops, l2_model, l3_model). No card. Standard library only.
+
+g4k: gemmL4x8x8; M x N x K 4096x4096x4096; ops per minion a GEMM 16384; footprint A 64 MB, B 64 MB, C 64 MB
+  per C block: A panel 16 MB, B panel 8 MB, C 2 MB; reuse distance of A (next C block) 26 MB, of B (second row tile) 17 MB, of B (next mb) 208 MB; the L3 is 32 MB (E107: 26 MB served, 40 MB not)
+  L2 (one shire, model): missing lines per op, first pass 192.0, steady 192.0 of 192.0
+  L3 at 32MB (model): A requests found 0.6580, B 0.5000; lines a shire-op from the L3 106.1, fresh 85.9; DRAM 0.52 GB a GEMM
+  L3 at 28MB (model): A requests found 0.2205, B 0.5000; lines a shire-op from the L3 78.1, fresh 113.9; DRAM 0.75 GB a GEMM
+  L3 at 24MB (model): A requests found 0.0000, B 0.5000; lines a shire-op from the L3 64.0, fresh 128.0; DRAM 0.87 GB a GEMM
+  DRAM if nothing were reused from the L3: 1.14 GB a GEMM (64 KB of distinct A and B tiles an op step, B read twice a C block)
+
+fp32: gemmL8x16x16; M x N x K 8192x8192x8192; ops per minion a GEMM 131072; footprint A 256 MB, B 256 MB, C 256 MB
+  per C block: A panel 32 MB, B panel 16 MB, C 2 MB; reuse distance of A (next C block) 50 MB, of B (second row tile) 33 MB, of B (next mb) 800 MB; the L3 is 32 MB (E107: 26 MB served, 40 MB not)
+  L2 (one shire, model): missing lines per op, first pass 192.0, steady 192.0 of 192.0
+  L3 at 32MB (model): A requests found 0.0000, B 0.0000; lines a shire-op from the L3 0.0, fresh 192.0; DRAM 8.86 GB a GEMM
+  L3 at 28MB (model): A requests found 0.0000, B 0.0000; lines a shire-op from the L3 0.0, fresh 192.0; DRAM 8.86 GB a GEMM
+  L3 at 24MB (model): A requests found 0.0000, B 0.0000; lines a shire-op from the L3 0.0, fresh 192.0; DRAM 8.86 GB a GEMM
+  DRAM if nothing were reused from the L3: 8.86 GB a GEMM (64 KB of distinct A and B tiles an op step, B read twice a C block)
+
+fp16: gemmL8x16x8; M x N x K 8192x8192x8192; ops per minion a GEMM 65536; footprint A 128 MB, B 128 MB, C 256 MB
+  per C block: A panel 16 MB, B panel 8 MB, C 2 MB; reuse distance of A (next C block) 26 MB, of B (second row tile) 17 MB, of B (next mb) 416 MB; the L3 is 32 MB (E107: 26 MB served, 40 MB not)
+  L2 (one shire, model): missing lines per op, first pass 192.0, steady 192.0 of 192.0
+  L3 at 32MB (model): A requests found 0.7050, B 0.5000; lines a shire-op from the L3 109.1, fresh 82.9; DRAM 1.98 GB a GEMM
+  L3 at 28MB (model): A requests found 0.2362, B 0.5000; lines a shire-op from the L3 79.1, fresh 112.9; DRAM 2.98 GB a GEMM
+  L3 at 24MB (model): A requests found 0.0000, B 0.5000; lines a shire-op from the L3 64.0, fresh 128.0; DRAM 3.49 GB a GEMM
+  DRAM if nothing were reused from the L3: 4.56 GB a GEMM (64 KB of distinct A and B tiles an op step, B read twice a C block)
+
+int8: gemmL8x16x4; M x N x K 8192x8192x8192; ops per minion a GEMM 32768; footprint A 64 MB, B 64 MB, C 256 MB
+  per C block: A panel 8 MB, B panel 4 MB, C 2 MB; reuse distance of A (next C block) 14 MB, of B (second row tile) 9 MB, of B (next mb) 224 MB; the L3 is 32 MB (E107: 26 MB served, 40 MB not)
+  L2 (one shire, model): missing lines per op, first pass 192.0, steady 192.0 of 192.0
+  L3 at 32MB (model): A requests found 0.9375, B 0.5000; lines a shire-op from the L3 124.0, fresh 68.0; DRAM 0.87 GB a GEMM
+  L3 at 28MB (model): A requests found 0.9375, B 0.5000; lines a shire-op from the L3 124.0, fresh 68.0; DRAM 0.87 GB a GEMM
+  L3 at 24MB (model): A requests found 0.9375, B 0.5000; lines a shire-op from the L3 124.0, fresh 68.0; DRAM 0.87 GB a GEMM
+  DRAM if nothing were reused from the L3: 2.42 GB a GEMM (64 KB of distinct A and B tiles an op step, B read twice a C block)

@@ -1,0 +1,91 @@
+{
+ "formats": {
+  "fp16": {
+   "S1": "PASS",
+   "anchor": "g4k (gemmL4x8x8; E136, its replicate E146 D8)",
+   "err_j_over_given": -2.220446049250313e-16,
+   "err_j_rest_given": -1.1102230246251565e-16,
+   "pass": true,
+   "per_run": [
+    {
+     "err_j_over_given": -0.006273989700301019,
+     "err_j_rest_given": -0.003451402312084295,
+     "session": "E136"
+    },
+    {
+     "err_j_over_given": 0.006273989700301019,
+     "err_j_rest_given": 0.0034147098572565593,
+     "session": "E146 D8"
+    }
+   ],
+   "runs": [
+    [
+     "E136",
+     51.95,
+     52.0
+    ],
+    [
+     "E146 D8",
+     52.87,
+     54.0
+    ]
+   ]
+  },
+  "fp32": {
+   "S1": "PASS",
+   "anchor": "g4k (gemmL4x8x8; E136, its replicate E146 D8)",
+   "err_j_over_given": -2.220446049250313e-16,
+   "err_j_rest_given": 0.0,
+   "pass": true,
+   "per_run": [
+    {
+     "err_j_over_given": -0.005284925756851577,
+     "err_j_rest_given": -0.0030557012183923815,
+     "session": "E136"
+    },
+    {
+     "err_j_over_given": 0.005284925756851466,
+     "err_j_rest_given": 0.002963116544297595,
+     "session": "E146 D8"
+    }
+   ],
+   "runs": [
+    [
+     "E136",
+     52.84,
+     48.0
+    ],
+    [
+     "E146 D8",
+     54.82,
+     54.0
+    ]
+   ]
+  },
+  "int8": {
+   "S1": "PASS",
+   "anchor": "D4 (gemmL4x8x4; E146), KB 4 as E190's int8; sustained heating from E136's g4k int8",
+   "err_j_over_given": 0.0,
+   "err_j_rest_given": 0.0,
+   "pass": true,
+   "per_run": [
+    {
+     "err_j_over_given": 0.0,
+     "err_j_rest_given": 0.0,
+     "session": "E146 D4"
+    }
+   ],
+   "runs": [
+    [
+     "E146 D4",
+     42.16,
+     53.5
+    ]
+   ]
+  }
+ },
+ "interpreter": "/usr/bin/python3",
+ "selftest": "e136",
+ "verdict": "PASS",
+ "version": "3.12.3"
+}

@@ -1,0 +1,40 @@
+arm A: aifoundry2, card 0, /dev/et0_*, lock /run/lock/etsoc-shire0.lock; estimate 33.2 card-minutes (target 30, rule 35, cap 40)
+   0 SMOKE 30 s rest reading; one 2 s process per format (fp32, fp16, int8 random), each with its check of C; R0's cycles-per-op tie; the board and die stop test  ~82 s, cum 2.37 min
+   1 P1    burst fp32: 1 x 6 s (one process ~7.92 s)  ~42 s, cum 3.06 min
+   2 P1    burst fp16: 1 x 6 s (one process ~7.19 s)  ~41 s, cum 3.75 min
+   3 P1    burst int8: 1 x 6 s (one process ~6.86 s)  ~41 s, cum 4.43 min
+   4 S1    sus   fp32: 12 x 6 s (one process ~7.92 s)  ~233 s, cum 8.31 min
+   5 P2    burst int8: 1 x 6 s (one process ~6.86 s)  ~41 s, cum 8.99 min
+   6 P2    burst fp32: 1 x 6 s (one process ~7.92 s)  ~42 s, cum 9.69 min
+   7 P2    burst fp16: 1 x 6 s (one process ~7.19 s)  ~41 s, cum 10.37 min
+   8 S2    sus   fp16: 12 x 6 s (one process ~7.19 s)  ~224 s, cum 14.11 min
+   9 P3    burst fp16: 1 x 6 s (one process ~7.19 s)  ~41 s, cum 14.79 min
+  10 P3    burst int8: 1 x 6 s (one process ~6.86 s)  ~41 s, cum 15.47 min
+  11 P3    burst fp32: 1 x 6 s (one process ~7.92 s)  ~42 s, cum 16.17 min
+  12 S3    sus   int8: 12 x 6 s (one process ~6.86 s)  ~220 s, cum 19.84 min
+  13 P4    burst fp32: 1 x 6 s (one process ~7.92 s)  ~42 s, cum 20.54 min
+  14 P4    burst fp16: 1 x 6 s (one process ~7.19 s)  ~41 s, cum 21.22 min
+  15 P4    burst int8: 1 x 6 s (one process ~6.86 s)  ~41 s, cum 21.9 min
+  16 S4    sus   fp32: 12 x 6 s (one process ~7.92 s)  ~233 s, cum 25.78 min
+  17 S5    sus   fp16: 12 x 6 s (one process ~7.19 s)  ~224 s, cum 29.51 min
+  18 S6    sus   int8: 12 x 6 s (one process ~6.86 s)  ~220 s, cum 33.18 min
+arm B: aifoundry1, card 1: ET_DEVICES=1 / V3_DEVICE=1, lock /run/lock/etsoc-shire1.lock; estimate 25.2 card-minutes (target 30, rule 35, cap 40)
+   0 SMOKE 30 s rest reading; one 2 s process per format (fp32, fp16, int8 random), each with its check of C; R0's cycles-per-op tie; the board and die stop test  ~82 s, cum 2.37 min
+   1 P1    burst fp32: 1 x 6 s (one process ~7.92 s)  ~32 s, cum 2.9 min
+   2 P1    burst fp16: 1 x 6 s (one process ~7.19 s)  ~31 s, cum 3.42 min
+   3 P1    burst int8: 1 x 6 s (one process ~6.86 s)  ~31 s, cum 3.93 min
+   4 S1    sus   fp32: 12 x 6 s (one process ~7.92 s)  ~173 s, cum 6.81 min
+   5 P2    burst int8: 1 x 6 s (one process ~6.86 s)  ~31 s, cum 7.32 min
+   6 P2    burst fp32: 1 x 6 s (one process ~7.92 s)  ~32 s, cum 7.86 min
+   7 P2    burst fp16: 1 x 6 s (one process ~7.19 s)  ~31 s, cum 8.37 min
+   8 S2    sus   fp16: 12 x 6 s (one process ~7.19 s)  ~164 s, cum 11.11 min
+   9 P3    burst fp16: 1 x 6 s (one process ~7.19 s)  ~31 s, cum 11.63 min
+  10 P3    burst int8: 1 x 6 s (one process ~6.86 s)  ~31 s, cum 12.14 min
+  11 P3    burst fp32: 1 x 6 s (one process ~7.92 s)  ~32 s, cum 12.67 min
+  12 S3    sus   int8: 12 x 6 s (one process ~6.86 s)  ~160 s, cum 15.34 min
+  13 P4    burst fp32: 1 x 6 s (one process ~7.92 s)  ~32 s, cum 15.87 min
+  14 P4    burst fp16: 1 x 6 s (one process ~7.19 s)  ~31 s, cum 16.39 min
+  15 P4    burst int8: 1 x 6 s (one process ~6.86 s)  ~31 s, cum 16.9 min
+  16 S4    sus   fp32: 12 x 6 s (one process ~7.92 s)  ~173 s, cum 19.78 min
+  17 S5    sus   fp16: 12 x 6 s (one process ~7.19 s)  ~164 s, cum 22.51 min
+  18 S6    sus   int8: 12 x 6 s (one process ~6.86 s)  ~160 s, cum 25.18 min

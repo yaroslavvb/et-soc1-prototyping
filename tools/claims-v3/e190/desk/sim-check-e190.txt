@@ -1,0 +1,35 @@
+E190 (Q169) desk check of code: E136's rgm136 UNCHANGED, built and run in the simulator at reduced sizes with E190's tiling. No card.
+
+Where and how: aifoundry2, Fri 13 Nov 2026 11:56:34-11:59:38 PST, as one job in a shared CPU slot at nice 10, inside a bubblewrap sandbox with
+a private /dev holding no /dev/et* node (checked at the start: "ls: cannot access '/dev/et*'") and an empty /run/lock (0 entries), every
+command under prlimit --as=4294967296 (4 GB). Interpreter of the host program: none (C++); the box's /opt/et (the lab's install) for the toolchain,
+the runtime and sys_emu. <clone> is a scratch clone of the lab repo at f9632ee3; <build> a scratch build directory.
+
+Source: tools/claims-v3/e136/rgm136 at f9632ee3 (tree 30da3ec36d2085b9e8c441387fb945029d3caaf6), no file changed.
+  cmake -S <clone>/tools/claims-v3/e136/rgm136 -B <build> -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev     rc 0
+  cmake --build <build> -j2                                                                          rc 0
+  sha256 <build>/kernel/sparsity.elf  aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0
+           E136's build record (tools/claims-v3/e136/logs/build.txt): aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0  IDENTICAL
+  sha256 <build>/host/sparsity_host   48c5b2388ac107d3ea77cc8ff86119466195eae379fb965138c0a3453466de7a
+           E136's: 76475508f8e88983edfe16bcc8757dd23094877a31c78c302f6003993ee5fe74  differs, as expected: the host compiles its build path into
+           its defaults (host/Constants.h.in: KERNEL_ELF and the simulator's paths), and this build directory is not E136's.
+
+Runs (the unchanged host with --sysemu; one shire, 32 minions; one pass, the simulator's own single launch; the host's check of C: 32 sampled
+C tiles spread over all four C blocks, each against the host's reference summed over the tile row's whole K):
+  sparsity_host --sysemu --test fma --type fp32 --pattern none --values gemmL2x2x16:randn:<clone>/tools/claims-v3/kinds/tiles/fp32/randn.bin
+                --shires 0x1 --per-shire 32 --seed 1 --kernel <build>/kernel/sparsity.elf
+      rc 0 after 73 s; launch -1: iters (ops a minion) 4096, passes 1, cycles_per_op 46.695
+      check: words 8192, exact 0, within 8192, result approx, ok true
+  ... --type fp16 --values gemmL2x2x8:randn:<clone>/tools/claims-v3/kinds/tiles/fp16/randn.bin (same flags)
+      rc 0 after 65 s; launch -1: iters 2048, passes 1, cycles_per_op 46.765
+      check: words 8192, exact 0, within 8192, result approx, ok true
+  ... --type int8 --values gemmL2x2x4:randn:<clone>/tools/claims-v3/kinds/tiles/int8/full.bin (same flags)
+      rc 0 after 43 s; launch -1: iters 1024, passes 1, cycles_per_op 46.904
+      check: words 8192, exact 8192, within 8192, result exact, ok true
+
+What this checks: the unchanged host parses a two-digit block count (KB 16) and E190's three K tilings (KB 16 fp32, 8 fp16, 4 int8, i.e. 8,192
+elements of K at full size); the kernel accumulates a C tile over KB x 32 ops (512 in fp32) and walks MB x NB = 2 x 2 C blocks; A 64 / 32 / 16 MB,
+B 32 / 16 / 8 MB, C 8 MB moved to and from the simulated card; ops a minion = MB x NB x 2 x KB x 32 in each format.
+What it does not check: the full 8,192^3 size (never run in the simulator: A and B 512 / 256 / 128 MB, C 256 MB, 768 MB in all in fp32); the
+runtime's 256 MB allocations and DMAs on silicon; aifoundry1's own build (its /opt/et is a fork build: the kit builds there); time, power, any
+card. The simulator is functional only: its cycles say nothing about a card's speed.

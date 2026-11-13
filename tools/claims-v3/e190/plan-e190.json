@@ -1,0 +1,720 @@
+{
+ "experiment": "E190",
+ "request": "Q169",
+ "what": "the registered plan; the kit implements it, a departure is a dated amendment before the data",
+ "arms": {
+  "A": {
+   "host": "aifoundry2",
+   "card": "card 0, /dev/et0_*, lock /run/lock/etsoc-shire0.lock",
+   "clock": "its own governor, nothing set",
+   "gate": {
+    "burst_die_max_c": 55,
+    "sus_die_max_c": 57,
+    "max_wait_s": 300
+   },
+   "stops": {
+    "board_w": 85.0,
+    "board_samples": 3,
+    "die_c": 80.0,
+    "watcher_keys": "board_cap_w, cap_consecutive, abs_stop_c (the keys run_hpl.py's watcher reads; E146's finding)"
+   },
+   "line_w": 82.0,
+   "predicted_peak_w": {
+    "point_w": 58.75583854203189,
+    "band_top_w": 64.47909654983155,
+    "line_w": 82.0,
+    "under_line": true,
+    "how": "the highest P_work (point, and its band's top) over the arm's cells, + 4 W for the 10 Hz peak above a window's mean (E136: +1.8 W burst, +2.8 W sustained on g4k random)"
+   }
+  },
+  "B": {
+   "host": "aifoundry1",
+   "card": "card 1: ET_DEVICES=1 / V3_DEVICE=1, lock /run/lock/etsoc-shire1.lock",
+   "clock": "as found (600 MHz in every sample since September); nothing set",
+   "gate": {
+    "burst_die_max_c": "min(63, the session's rest die + 3)",
+    "sus_die_max_c": "min(64, the session's rest die + 4)",
+    "max_wait_s": 300
+   },
+   "stops": {
+    "board_w": 75.0,
+    "board_samples": 3,
+    "die_c": 80.0,
+    "watcher_keys": "as arm A"
+   },
+   "line_w": 70.0,
+   "predicted_peak_w": {
+    "point_w": 53.92008982104933,
+    "band_top_w": 61.49733067198352,
+    "line_w": 70.0,
+    "under_line": true,
+    "how": "the highest P_work (point, and its band's top) over the arm's cells, + 4 W for the 10 Hz peak above a window's mean (E136: +1.8 W burst, +2.8 W sustained on g4k random)"
+   },
+   "rule": "never two of our sessions on aifoundry1 at once"
+  }
+ },
+ "kind": "random, E136's: fp32 and fp16 --values gemmL...:randn:<format>/randn.bin, int8 :randn:int8/full.bin; --seed 1; rgm105's generator (std::mt19937_64 seeded 1; fp32 normal(0, 1) floats, fp16 the same rounded to half, int8 uniform -128..127); pair 0 is the file's; at most 8,192 distinct 1 KB tiles a pool, repeated (8 MB period)",
+ "runs_per_cell": {
+  "burst": 4,
+  "sus": 2
+ },
+ "order": [
+  [
+   "SMOKE",
+   null,
+   null
+  ],
+  [
+   "P1",
+   "burst",
+   "fp32"
+  ],
+  [
+   "P1",
+   "burst",
+   "fp16"
+  ],
+  [
+   "P1",
+   "burst",
+   "int8"
+  ],
+  [
+   "S1",
+   "sus",
+   "fp32"
+  ],
+  [
+   "P2",
+   "burst",
+   "int8"
+  ],
+  [
+   "P2",
+   "burst",
+   "fp32"
+  ],
+  [
+   "P2",
+   "burst",
+   "fp16"
+  ],
+  [
+   "S2",
+   "sus",
+   "fp16"
+  ],
+  [
+   "P3",
+   "burst",
+   "fp16"
+  ],
+  [
+   "P3",
+   "burst",
+   "int8"
+  ],
+  [
+   "P3",
+   "burst",
+   "fp32"
+  ],
+  [
+   "S3",
+   "sus",
+   "int8"
+  ],
+  [
+   "P4",
+   "burst",
+   "fp32"
+  ],
+  [
+   "P4",
+   "burst",
+   "fp16"
+  ],
+  [
+   "P4",
+   "burst",
+   "int8"
+  ],
+  [
+   "S4",
+   "sus",
+   "fp32"
+  ],
+  [
+   "S5",
+   "sus",
+   "fp16"
+  ],
+  [
+   "S6",
+   "sus",
+   "int8"
+  ]
+ ],
+ "budget": {
+  "plan_target_min": 30.0,
+  "budget_rule_min": 35.0,
+  "cap_min": 40.0,
+  "rule": "no run starts once the arm's card time (first device access to now) passes 35 min, so S6, S5, S4 go first (they are last); a started run is never cut except by a stop; at 40 min the session ends"
+ },
+ "process": {
+  "seconds_burst": 6.0,
+  "sus_processes": 12,
+  "seconds_sus_proc": 6.0,
+  "budget_s": 7.5,
+  "timeout_s": 10,
+  "est_s": {
+   "fp32": 7.92,
+   "fp16": 7.19,
+   "int8": 6.86
+  },
+  "how": "setup 0.167 s + 0.95 ms a MB of A and B (E136: g2k 0.178, g4k 0.288 s); the loop's overshoot and the check launch at the slow end of a GEMM each; tail 0.05 s + 1.5 ms a MB of C (E136 g4k: 0.12-0.23 s for 64 MB). Desk estimates; the smoke measures them first."
+ },
+ "arms_est": {
+  "A": {
+   "rows": [
+    {
+     "i": 0,
+     "block": "SMOKE",
+     "what": "30 s rest reading; one 2 s process per format (fp32, fp16, int8 random), each with its check of C; R0's cycles-per-op tie; the board and die stop tests on live samples first (the kit's)",
+     "est_s": 82.0,
+     "cum_min": 2.37
+    },
+    {
+     "i": 1,
+     "block": "P1",
+     "kind": "burst",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.92,
+     "est_s": 41.9,
+     "cum_min": 3.06
+    },
+    {
+     "i": 2,
+     "block": "P1",
+     "kind": "burst",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.19,
+     "est_s": 41.2,
+     "cum_min": 3.75
+    },
+    {
+     "i": 3,
+     "block": "P1",
+     "kind": "burst",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 6.86,
+     "est_s": 40.9,
+     "cum_min": 4.43
+    },
+    {
+     "i": 4,
+     "block": "S1",
+     "kind": "sus",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 7.92,
+     "est_s": 232.6,
+     "cum_min": 8.31
+    },
+    {
+     "i": 5,
+     "block": "P2",
+     "kind": "burst",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 6.86,
+     "est_s": 40.9,
+     "cum_min": 8.99
+    },
+    {
+     "i": 6,
+     "block": "P2",
+     "kind": "burst",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.92,
+     "est_s": 41.9,
+     "cum_min": 9.69
+    },
+    {
+     "i": 7,
+     "block": "P2",
+     "kind": "burst",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.19,
+     "est_s": 41.2,
+     "cum_min": 10.37
+    },
+    {
+     "i": 8,
+     "block": "S2",
+     "kind": "sus",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 7.19,
+     "est_s": 223.8,
+     "cum_min": 14.11
+    },
+    {
+     "i": 9,
+     "block": "P3",
+     "kind": "burst",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.19,
+     "est_s": 41.2,
+     "cum_min": 14.79
+    },
+    {
+     "i": 10,
+     "block": "P3",
+     "kind": "burst",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 6.86,
+     "est_s": 40.9,
+     "cum_min": 15.47
+    },
+    {
+     "i": 11,
+     "block": "P3",
+     "kind": "burst",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.92,
+     "est_s": 41.9,
+     "cum_min": 16.17
+    },
+    {
+     "i": 12,
+     "block": "S3",
+     "kind": "sus",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 6.86,
+     "est_s": 220.0,
+     "cum_min": 19.84
+    },
+    {
+     "i": 13,
+     "block": "P4",
+     "kind": "burst",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.92,
+     "est_s": 41.9,
+     "cum_min": 20.54
+    },
+    {
+     "i": 14,
+     "block": "P4",
+     "kind": "burst",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.19,
+     "est_s": 41.2,
+     "cum_min": 21.22
+    },
+    {
+     "i": 15,
+     "block": "P4",
+     "kind": "burst",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 6.86,
+     "est_s": 40.9,
+     "cum_min": 21.9
+    },
+    {
+     "i": 16,
+     "block": "S4",
+     "kind": "sus",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 7.92,
+     "est_s": 232.6,
+     "cum_min": 25.78
+    },
+    {
+     "i": 17,
+     "block": "S5",
+     "kind": "sus",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 7.19,
+     "est_s": 223.8,
+     "cum_min": 29.51
+    },
+    {
+     "i": 18,
+     "block": "S6",
+     "kind": "sus",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 6.86,
+     "est_s": 220.0,
+     "cum_min": 33.18
+    }
+   ],
+   "est_card_min": 33.2
+  },
+  "B": {
+   "rows": [
+    {
+     "i": 0,
+     "block": "SMOKE",
+     "what": "30 s rest reading; one 2 s process per format (fp32, fp16, int8 random), each with its check of C; R0's cycles-per-op tie; the board and die stop tests on live samples first (the kit's)",
+     "est_s": 82.0,
+     "cum_min": 2.37
+    },
+    {
+     "i": 1,
+     "block": "P1",
+     "kind": "burst",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.92,
+     "est_s": 31.9,
+     "cum_min": 2.9
+    },
+    {
+     "i": 2,
+     "block": "P1",
+     "kind": "burst",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.19,
+     "est_s": 31.2,
+     "cum_min": 3.42
+    },
+    {
+     "i": 3,
+     "block": "P1",
+     "kind": "burst",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 6.86,
+     "est_s": 30.9,
+     "cum_min": 3.93
+    },
+    {
+     "i": 4,
+     "block": "S1",
+     "kind": "sus",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 7.92,
+     "est_s": 172.6,
+     "cum_min": 6.81
+    },
+    {
+     "i": 5,
+     "block": "P2",
+     "kind": "burst",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 6.86,
+     "est_s": 30.9,
+     "cum_min": 7.32
+    },
+    {
+     "i": 6,
+     "block": "P2",
+     "kind": "burst",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.92,
+     "est_s": 31.9,
+     "cum_min": 7.86
+    },
+    {
+     "i": 7,
+     "block": "P2",
+     "kind": "burst",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.19,
+     "est_s": 31.2,
+     "cum_min": 8.37
+    },
+    {
+     "i": 8,
+     "block": "S2",
+     "kind": "sus",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 7.19,
+     "est_s": 163.8,
+     "cum_min": 11.11
+    },
+    {
+     "i": 9,
+     "block": "P3",
+     "kind": "burst",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.19,
+     "est_s": 31.2,
+     "cum_min": 11.63
+    },
+    {
+     "i": 10,
+     "block": "P3",
+     "kind": "burst",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 6.86,
+     "est_s": 30.9,
+     "cum_min": 12.14
+    },
+    {
+     "i": 11,
+     "block": "P3",
+     "kind": "burst",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.92,
+     "est_s": 31.9,
+     "cum_min": 12.67
+    },
+    {
+     "i": 12,
+     "block": "S3",
+     "kind": "sus",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 6.86,
+     "est_s": 160.0,
+     "cum_min": 15.34
+    },
+    {
+     "i": 13,
+     "block": "P4",
+     "kind": "burst",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.92,
+     "est_s": 31.9,
+     "cum_min": 15.87
+    },
+    {
+     "i": 14,
+     "block": "P4",
+     "kind": "burst",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 7.19,
+     "est_s": 31.2,
+     "cum_min": 16.39
+    },
+    {
+     "i": 15,
+     "block": "P4",
+     "kind": "burst",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 1,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "proc_est_s": 6.86,
+     "est_s": 30.9,
+     "cum_min": 16.9
+    },
+    {
+     "i": 16,
+     "block": "S4",
+     "kind": "sus",
+     "format": "fp32",
+     "values": "gemmL8x16x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 7.92,
+     "est_s": 172.6,
+     "cum_min": 19.78
+    },
+    {
+     "i": 17,
+     "block": "S5",
+     "kind": "sus",
+     "format": "fp16",
+     "values": "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 7.19,
+     "est_s": 163.8,
+     "cum_min": 22.51
+    },
+    {
+     "i": 18,
+     "block": "S6",
+     "kind": "sus",
+     "format": "int8",
+     "values": "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+     "processes": 12,
+     "seconds": 6.0,
+     "budget_s": 7.5,
+     "timeout_s": 10,
+     "window_s": 40.0,
+     "proc_est_s": 6.86,
+     "est_s": 160.0,
+     "cum_min": 25.18
+    }
+   ],
+   "est_card_min": 25.2
+  }
+ },
+ "reads_only": "dmcmd_audit GO with every send site READ; no statistics reset, no firmware-revisions query, no set of any kind, no reset, no power cycle; et-who, who, uptime and ps read before each session; the card's lock held for the session; timeout 10 a process; the owner waived the day's Discord post (his words, Fri 13 Nov 2026 ~11:30 PST)"
+}

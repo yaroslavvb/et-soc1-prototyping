@@ -1,0 +1,39 @@
+E190 frozen forecasts (no E190 datum exists). Informed by E136's measured results; blind to every 8,192^3 datum and to card 1's GEMM behaviour.
+law tie (E136's power law, parametrized, at g4k P1 against predictions-e136.json): worst |diff| 0.0000
+
+seconds a GEMM: T an op (us), point [band]; t a GEMM (s); X = T600 / T800
+  fp32: anchor g4k (gemmL4x8x8; E136, its replicate E146 D8); lines a shire-op [106.112, 85.888] -> [0.0, 192.0] (L3, fresh)
+    800 MHz: T 2.9590 [2.1074, 3.1610] (anchor measured 2.1726); t 0.3878 s [0.2762, 0.4143]
+    600 MHz: T 3.1442 [2.2951, 3.3847] (anchor measured 2.3661); t 0.4121 s [0.3008, 0.4436]
+    X 1.0626; 2.83 TFLOPS-equivalent at 800, 2.67 at 600
+  fp16: anchor g4k (gemmL4x8x8; E136, its replicate E146 D8); lines a shire-op [106.112, 85.888] -> [109.12, 82.88] (L3, fresh)
+    800 MHz: T 2.1524 [2.0847, 2.6064] (anchor measured 2.1746); t 0.1411 s [0.1366, 0.1708]
+    600 MHz: T 2.3419 [2.2677, 2.8109] (anchor measured 2.3640); t 0.1535 s [0.1486, 0.1842]
+    X 1.0880; 7.79 TFLOPS-equivalent at 800, 7.16 at 600
+  int8: anchor D4 (gemmL4x8x4; E146), KB 4 as E190's int8; sustained heating from E136's g4k int8; lines a shire-op [120.0, 72.0] -> [124.0, 68.0] (L3, fresh)
+    800 MHz: T 2.0764 [2.0096, 2.1664] (anchor measured 2.1033); t 0.0680 s [0.0659, 0.0710]
+    600 MHz: T 2.2446 [2.1714, 2.3385] (anchor measured 2.2703); t 0.0736 s [0.0712, 0.0766]
+    X 1.0810; 16.16 TFLOPS-equivalent at 800, 14.95 at 600
+
+cells: arm.format.block: clock MHz; t s; W over idle; P at rest; J over idle; J with the card at rest; die C  (point [band])
+  A.fp32.burst    800.0 MHz; t 0.3878 [0.2762, 0.4143]; W 25.79 [23.79, 32.65]; rest 22.94 [21.40, 24.81]; J_over 10.002 [6.571, 13.526]; J_rest 18.898 [12.483, 23.805]; die 53.9 [50.9, 56.9]
+  A.fp32.sus      800.0 MHz; t 0.3878 [0.2762, 0.4143]; W 28.81 [26.81, 35.67]; rest 22.94 [21.40, 24.81]; J_over 11.174 [7.406, 14.778]; J_rest 20.071 [13.318, 25.058]; die 59.6 [56.6, 62.6]
+  B.fp32.burst    600.0 MHz; t 0.4121 [0.3008, 0.4436]; W 12.51 [9.87, 18.13]; rest 33.09 [31.68, 35.66]; J_over 5.154 [2.969, 8.042]; J_rest 18.792 [12.500, 23.861]; die 59.5 [58.9, 65.6]
+  B.fp32.sus      600.0 MHz; t 0.4121 [0.3008, 0.4436]; W 14.98 [11.11, 21.84]; rest 33.09 [31.68, 35.66]; J_over 6.173 [3.341, 9.689]; J_rest 19.811 [12.872, 25.508]; die 65.2 [62.6, 72.3]
+  A.fp16.burst    800.0 MHz; t 0.1411 [0.1366, 0.1708]; W 28.84 [24.99, 30.84]; rest 22.94 [21.40, 24.81]; J_over 4.068 [3.414, 5.267]; J_rest 7.303 [6.338, 9.505]; die 54.4 [51.4, 57.4]
+  A.fp16.sus      800.0 MHz; t 0.1411 [0.1366, 0.1708]; W 31.82 [27.97, 33.82]; rest 22.94 [21.40, 24.81]; J_over 4.488 [3.821, 5.776]; J_rest 7.724 [6.745, 10.014]; die 60.9 [57.9, 63.9]
+  B.fp16.burst    600.0 MHz; t 0.1535 [0.1486, 0.1842]; W 14.05 [10.19, 16.71]; rest 33.09 [31.68, 35.66]; J_over 2.156 [1.515, 3.079]; J_rest 7.235 [6.223, 9.648]; die 59.7 [58.9, 65.3]
+  B.fp16.sus      600.0 MHz; t 0.1535 [0.1486, 0.1842]; W 16.83 [11.58, 20.88]; rest 33.09 [31.68, 35.66]; J_over 2.583 [1.721, 3.847]; J_rest 7.662 [6.430, 10.416]; die 65.8 [62.9, 73.3]
+  A.int8.burst    800.0 MHz; t 0.0680 [0.0659, 0.0710]; W 18.32 [16.29, 20.32]; rest 22.94 [21.40, 24.81]; J_over 1.247 [1.073, 1.443]; J_rest 2.807 [2.482, 3.204]; die 52.9 [49.9, 55.9]
+  A.int8.sus      800.0 MHz; t 0.0680 [0.0659, 0.0710]; W 19.18 [17.15, 21.18]; rest 22.94 [21.40, 24.81]; J_over 1.305 [1.130, 1.504]; J_rest 2.866 [2.539, 3.265]; die 55.6 [52.6, 58.6]
+  B.int8.burst    600.0 MHz; t 0.0736 [0.0712, 0.0766]; W 7.21 [4.87, 9.60]; rest 33.09 [31.68, 35.66]; J_over 0.530 [0.347, 0.736]; J_rest 2.964 [2.601, 3.468]; die 58.9 [58.4, 63.9]
+  B.int8.sus      600.0 MHz; t 0.0736 [0.0712, 0.0766]; W 8.63 [5.59, 11.74]; rest 33.09 [31.68, 35.66]; J_over 0.635 [0.398, 0.899]; J_rest 3.069 [2.652, 3.632]; die 63.0 [61.5, 68.8]
+
+the ledger v2 arm (REPORTED), card 1 at 600 MHz, 58 C, the frozen seconds: J over idle with heat [band of J over idle]; J total
+  fp32: 10.632 J [9.227, 10.820] (W 25.80); total 24.270 J [22.974, 25.950]
+  fp16: 3.344 J [2.834, 3.444] (W 21.79); total 8.423 J [7.933, 9.009]
+  int8: 0.991 J [0.782, 1.066] (W 13.47); total 3.425 J [3.206, 3.663]
+
+predicted peaks against each arm's line
+  arm A: 58.8 W at the point, 64.5 W at the bands' top, line 82 W: UNDER
+  arm B: 53.9 W at the point, 61.5 W at the bands' top, line 70 W: UNDER
