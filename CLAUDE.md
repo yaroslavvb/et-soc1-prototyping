@@ -26,6 +26,29 @@ scratchpad** (`/tmp/claude-<uid>/…`, for throwaway files only): results, data,
 screenshots and test runs. Every boot clears `/tmp`; the power cycle of 30 September lost about 19 GB of our working
 files that way. Subagent briefs name the persistent directory; long runs log under the home directory (AGENT.md §7).
 
+## Where the work lands
+
+The owner's rule of 13 November 2026, for every session wherever it runs (a lab machine, a Mac, a cloud runner, or
+spacesheep's own page agent): *"There's the GitHub https://github.com/yaroslavvb/et-soc1-prototyping which is the main
+source of truth and a couple of hubs which they all should be aware of"*.
+
+- **The source of truth is this repository on GitHub, <https://github.com/yaroslavvb/et-soc1-prototyping>, at
+  `origin/main`.** Fetch before you start, and commit what you produce here: a result that is only on a lab machine, in
+  a scratchpad or on a page does not exist for the next session. A push needs a GitHub key; where there is none, it is
+  a person's step (AGENT.md §4). On a lab machine the checkout is `~/claude/et-soc1-prototyping`; `~/nekko` on
+  aifoundry1 and aifoundry3 is a copy without git.
+- **The hubs.** The owner's two hubs, the AI Foundry hub (everything about the lab, by week) and the Horace Hub (the
+  Horace project, from speed down to atoms), are private and are written from his own machines. They draw on this
+  repository, so a pushed commit is how your work reaches them; never copy a private page onto a lab machine. The
+  public faces are built from files here: the
+  [lab dashboard](https://spacesheep.dev/@yaroslavvb/aifoundry-lab-dashboard), with its Worklog, and the reports hub,
+  [Limits of observability](https://spacesheep.dev/@yaroslavvb/et-soc1-limits-of-observability).
+- **A published page is a copy of a file here** ([`docs/reports/MIRROR.md`](docs/reports/MIRROR.md)). An edit made only
+  on spacesheep, by hand or by its page agent, is lost at the next deploy: change the file, rebuild, deploy, and run
+  `python3 scripts/check-mirror.py --only <slug>`.
+
+[`AGENTS.md`](AGENTS.md) is a link to this file, for Codex, Antigravity and the other agents that read that name.
+
 ## Where am I?
 
 | You are on | ET tooling | Build and run |
@@ -98,3 +121,15 @@ files that way. Subagent briefs name the persistent directory; long runs log und
   shire's scratchpad faults, and a global atomic through a scratchpad address is a bus error. Never spin on one
   global atomic from many shires (it stops the home shire's memory path): use a credit-release barrier. The full
   list is in `docs/findings/14-card-behaviour.md`, "Traps".
+
+## Changelog
+
+*Every edit to this file adds one line here, newest first (the owner's rule of 10 October 2026 for agent instruction
+files). It starts on 13 November 2026; earlier changes are in `git log -- CLAUDE.md`.*
+
+- **2026-11-13 (Fri, week 46, Q168)** — Added "Where the work lands": GitHub's `origin/main` is the source of truth,
+  the owner's two private hubs (the AI Foundry hub and the Horace Hub) and the public pages draw on it, and a page
+  changed only on spacesheep is lost at the next deploy; `AGENTS.md`, new, is a link to this file. *Why:* preference —
+  the owner's ask of Fri 13 Nov 2026 about 11:55 PST, *"make sure that all of the sessions in all locations are aware of
+  the main change locations"*; constraint — Codex and Antigravity read `AGENTS.md`, not this file, and this repository
+  had none; re-check: `readlink AGENTS.md` prints `CLAUDE.md`.
