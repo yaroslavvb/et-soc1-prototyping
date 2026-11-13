@@ -8782,7 +8782,7 @@ The given-seconds forecast is a frozen formula the scorer evaluates at each pass
 
 **Not run; 0 card-minutes; no E189 datum is in any ref.** It needs the owner's go: the day, aifoundry3 card 0 at 600 MHz as found, reads only, about 95 card-minutes (cap 110), and the day's post or its waiver. E188 waits for its verdict.
 
-**Report:** the kinds page (A25), section 11 (a dated clause, applied from the owner's desk machine).
+**Report:** the kinds page (A25), section 11 (a dated clause, applied from the owner's desk machine). *(dated, Fri 13 Nov 2026, after Q168's records verifier: not applied yet: the clause is written for a session on the owner's desk machine to apply, and at these records and their fix it is not on the page)*
 
 **Lane lessons from E78–E83, recorded for the next registration.** (1) A heat column read from a 2 s window over a
 whole-degree die reading resolves a kind only above about 12 W of switching on these cards: register a longer window,
