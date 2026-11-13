@@ -127,7 +127,7 @@ source of truth and a couple of hubs which they all should be aware of"*.
 *Every edit to this file adds one line here, newest first (the owner's rule of 10 October 2026 for agent instruction
 files). It starts on 13 November 2026; earlier changes are in `git log -- CLAUDE.md`.*
 
-- **2026-11-13 (Fri, week 46, Q168)** — Added "Where the work lands": GitHub's `origin/main` is the source of truth,
+- **2026-11-13 (Fri, week 46, Q172)** — Added "Where the work lands": GitHub's `origin/main` is the source of truth,
   the owner's two private hubs (the AI Foundry hub and the Horace Hub) and the public pages draw on it, and a page
   changed only on spacesheep is lost at the next deploy; `AGENTS.md`, new, is a link to this file. *Why:* preference —
   the owner's ask of Fri 13 Nov 2026 about 11:55 PST, *"make sure that all of the sessions in all locations are aware of
