@@ -1,0 +1,46 @@
+E191 dated note 1's checks: desk reads of committed records (nothing measured)
+
+== Part 1: aifoundry1's config reads by card (docs/reports/data)
+card 0: 418 config dicts in 41 files, 4 session folders: 2026-10-31-e84-speed-aifoundry1-card0, 2026-11-01-e114-card0-replicates, 2026-11-04-e170-blind7-card0, 2026-11-05-e174-blind8-card0
+   minion_mv 519, tdp_w 65, temp_threshold_c 65, minion_mhz 600: 418 dicts in 41 files
+   minion_mv values: [519]
+   power_state_name: {'low_power': 418}
+   'PCIe target: /dev/et0_mgmt' x6 in 2 session folders: 2026-10-31-e84-speed-aifoundry1-card0, 2026-11-01-e114-card0-replicates
+   'Physical device ID': {'0': 6}
+card 1: 933 config dicts in 473 files, 27 session folders: 2026-09-25-claims-v3, 2026-09-28-heat-placement, 2026-10-31-e82-kinds-aifoundry1, 2026-10-31-e88-result-path, 2026-10-31-e91-real-tensors-aifoundry1, 2026-11-01-e102-balanced-bit-prices, 2026-11-01-e103-model-blind-test, 2026-11-01-e104-c-readback, 2026-11-01-e106-held-signs, 2026-11-01-e108-sign-located, 2026-11-01-e112-real-replicates, 2026-11-01-e124-int8-zeros-replicate, 2026-11-01-e93-zero-gate-silicon, 2026-11-01-e94-tile-spread, 2026-11-02-e128-fp16-signs, 2026-11-02-e129-int8-noissue, 2026-11-02-e131-real-tiles-card1, 2026-11-02-e137-fp16-sign-rest, 2026-11-02-e142-blind5-card1, 2026-11-02-e145-int8-b-card1, 2026-11-02-e148-int8-excess, 2026-11-03-e155-int8-floor-rows, 2026-11-03-e156-memory-images-card1, 2026-11-03-e157-blind6-card1, 2026-11-04-e164-blind7-card1, 2026-11-05-e172-blind8-card1, 2026-11-08-e184-sensor-validation
+   minion_mv 499, tdp_w 65, temp_threshold_c 65, minion_mhz 600: 924 dicts in 466 files
+   minion_mv 500, tdp_w 65, temp_threshold_c 65, minion_mhz 600: 9 dicts in 9 files
+   minion_mv values: [499, 500]
+   power_state_name: {'low_power': 64, 'managed_power': 869}
+   'PCIe target: /dev/et1_mgmt' x38 in 8 session folders: 2026-09-25-claims-v3, 2026-09-29-pcie2, 2026-11-02-e142-blind5-card1, 2026-11-02-e145-int8-b-card1, 2026-11-03-e157-blind6-card1, 2026-11-04-e164-blind7-card1, 2026-11-05-e172-blind8-card1, 2026-11-08-e184-sensor-validation
+   'PCIe target: /dev/et1_ops' x2401 in 5 session folders: 2026-09-25-claims-v3, 2026-09-27-pcie, 2026-09-29-memp2, 2026-09-29-nocr, 2026-09-29-pcie2
+   'Physical device ID': {'1': 2427}
+   files holding minion_mv 500: 2026-11-02-e128-fp16-signs/aifoundry1-c1/e128/e128-smoke-p12801/config_start.json, 2026-11-02-e128-fp16-signs/aifoundry1-c1/e128/readback-p12802/config_start.json, 2026-11-02-e129-int8-noissue/aifoundry1-c1/e129-smoke/p12901/config_end.json, 2026-11-02-e129-int8-noissue/aifoundry1-c1/e129-smoke/p12901/config_start.json, 2026-11-02-e129-int8-noissue/aifoundry1-c1/e129/p12910/config_start.json, 2026-11-02-e131-real-tiles-card1/logs/config-session-start.json, 2026-11-02-e131-real-tiles-card1/logs/launch.txt, 2026-11-02-e131-real-tiles-card1/logs/session.log, 2026-11-02-e131-real-tiles-card1/readme-numbers.txt
+
+== Part 2: E184 arm B, each telemetry file's first 5 s (idle), against card 1's law as frozen
+   the law: P(54) 31.001 W, P(55) 31.477 W, P(56) 32.182 W, P(57) 32.627 W
+   p18432: board 31.07 W, die 54.00 C (6 samples); the law there 31.00 W; residual +0.07 W
+   p18431: board 31.03 W, die 54.00 C (50 samples); the law there 31.00 W; residual +0.03 W
+   p18440: board 31.31 W, die 54.36 C (50 samples); the law there 31.17 W; residual +0.14 W
+   p18441: board 32.28 W, die 57.00 C (49 samples); the law there 32.63 W; residual -0.34 W
+   p18442: board 32.23 W, die 56.66 C (50 samples); the law there 32.47 W; residual -0.24 W
+   p18443: board 31.82 W, die 55.74 C (50 samples); the law there 31.84 W; residual -0.02 W
+   p18444: board 31.53 W, die 55.00 C (50 samples); the law there 31.48 W; residual +0.06 W
+   first-5-s board means 31.03-32.28 W, at one decimal 31.0-32.3 W; the largest |residual| 0.34 W
+
+== Part 3: temp_c.minshire's outer entries on card 1 reading (46, 65)
+   E137: 8 files; (46, 65) in 19335 of 19335 samples
+   E145: 18 files; (46, 65) in 26916 of 26916 samples
+   E184 arm B: 7 files; (46, 65) in 3062 of 9418 samples
+      p18432 (in the session's order): (46, 65) in 6 of 6; since_reset_ms 0 or more in 0
+      p18431 (in the session's order): (46, 65) in 275 of 275; since_reset_ms 0 or more in 0
+      p18440 (in the session's order): (46, 65) in 2781 of 2781; since_reset_ms 0 or more in 0
+      p18441 (in the session's order): (46, 65) in 0 of 2670; since_reset_ms 0 or more in 2670
+      p18442 (in the session's order): (46, 65) in 0 of 774; since_reset_ms 0 or more in 0
+      p18443 (in the session's order): (46, 65) in 0 of 1457; since_reset_ms 0 or more in 0
+      p18444 (in the session's order): (46, 65) in 0 of 1455; since_reset_ms 0 or more in 0
+
+== Part 4: E191.md's references to E189.md by section
+   20 references to 16 sections: 3 x1, 4 x2, 4.3 x2, 5.1 x2, 5.2 x1, 6 x1, 7 x1, 8.1 x1, 8.2 x1, 8.3 x2, 8.4 x1, 9 x1, 11 x1, 12 x1, 14 x1, 15 x1
+
+NOTE1 CHECKS DONE
