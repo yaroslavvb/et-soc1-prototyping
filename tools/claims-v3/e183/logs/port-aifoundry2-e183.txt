@@ -1,0 +1,80 @@
+E183 kit note 5 (Q168, port-e183): E183's card day orchestrated from aifoundry2 instead of the Intel, read at the desk on aifoundry2, Fri 13 Nov 2026 11:15-11:50 PST, in a scratch clone of the lab at f9632ee39a35b194e4cf71f82fc9f2c523b946c0 (GitHub main). No box call, no card, no device: every run of a built binary, runner or stand-in box went through the round's slot and a no-device sandbox (a private /dev without /dev/et*, an empty /run/lock). Desk checks of code; nothing here is measured.
+
+== the desk's tools (aifoundry2 / the Intel, as the committed logs name them)
+bash 5.2.21 / 3.2; GNU sed 4.9, GNU coreutils 9.4 (date, timeout, stat, mktemp), gawk 5.2.1 / the BSD tools; rsync 3.2.7 / 3.5.1; OpenSSH 9.6p1;
+git 2.43.0; shasum 6.04 (perl) and sha256sum; flock (util-linux 2.39.3) in place of the Intel's lockf; /usr/bin/python3 3.12.3 with numpy 1.26.4 /
+3.9.6; g++-13 13.3.0 (Ubuntu) / Homebrew GCC 13.2.0; clang 18.1.3 (Ubuntu) / Apple clang 21.0.0. GNU date as gdate: a one-line shim on PATH.
+
+== the orchestrator side's files, read for macOS-only forms (38 files: check_day2 v1/v2; E183's rb_e183, s02, s03 v1-v5, s06, s07, s08 v2, s10 v2,
+s11 v2, the rest rule, s20, s22 v2; k6's rb_common, s05 look, s09 reads; v3.1's rb_run.py and nopath_q142s.py; the desk readers and their imports)
+lockf, gdate, gsed, gtimeout, Homebrew or Mac paths, date -v/-j/-r <epoch>, stat -f, sed -i '', mktemp -t, md5, sysctl, sw_vers: 0 lines
+GNU-only forms (date -d): 3 lines, all inside scripts sent to the box (s10 v2's dry pass, the rest rule, k6's guard text)
+Python: standard library and the kit's own modules only; compiled under 3.12.3 with SyntaxWarning as an error: 36 files, 0 warnings
+
+== the kit's desk tests here, against the Intel's committed logs
+rb/selftest_rest_e183.sh        SELFTEST-REST-E183 PASS (13 of 13); output identical
+rb/list_steps_e183_v5.sh        14 steps listed, 0 exited non-zero; identical but the run's own dates
+rb/selftest_rb_e183_v3.sh       SELFTEST-RB-E183-V3 PASS (31 of 31); differences: rsync's own version line (3.2.7), case R8's sender path
+                                (this desk's scratch sits under a /home path, which step 5a's own scrub rewrites), dates, scratch commit hashes,
+                                the order of a stand-in job's output lines
+dry_intel_e183_v2.sh            DRY-INTEL-E183-V2 PASS (29 of 29); differences: binary hashes and times. It says "Intel only"; it runs here.
+desk/desktest_train_check_e183.sh  DESKTEST-TRAIN-CHECK-E183 PASS (42 of 42) on real g++-13 13.3.0 and clang 18.1.3 builds: v1's grep fails both
+                                GCC builds of the patched host and passes both clang builds, as on the Intel; the new check passes all four
+                                patched builds and fails all four unpatched, with no device call. Differences: compilers and hashes; the GCC
+                                builds' late exceptions now exit 1 with the refusal printed (the Mac's GCC crashed, rc 139), so the critic's
+                                form leaves 14 mock device calls (10 plus 4 on the way out)
+rb/selftest_rb_e183_v2.sh       SELFTEST-RB-E183-V2 7 of 8 FAIL: its case P2 shortens a list with BSD sed's `sed -i ''`, which GNU sed reads as
+                                an empty script and a file named '$d'; the list stays whole. A desk test of note 1's, superseded; nothing on
+                                the card day runs it. Note 5's selftest_collect_e183_v3.sh carries it with the portable form.
+
+== the desk readers under /usr/bin/python3 3.12.3 (KIT.md names /usr/bin/python3 3.9 for them)
+selftest_score_e183.py 14 of 14 PASS, selftest_score_e183_v2.py 23 of 23 PASS, loopcmp_e183.py --selftest 4 of 4 PASS, note1_checks_e183.py: each
+output identical to its committed log. selftest_arm_m1_e183.py 19 of 19 PASS, one printed number different in its last digits (case R2's
+refusal text: a mean 0.06648931623931596 under 3.9, 0.06648931623931628 under 3.12, both against a file moved by 1e-6). check_day2_v2.py m1
+e183: its dry line rc 0; the gate with no data refuses (16).
+
+== step 0, the anchor lines, step 1 and step 2 v5 in the scratch clone (stand-in window; never his go)
+step 0, check_day2_v2.py tree --pull under flock -w 600 -E 75 on the round's lab-git lock: rc 0, DAY2-CHECK-V2 OK at f9632ee39a35 (72 files
+added since 6860643c in the day's 156 directories, none a shadowing module for this python's search path; 0 untracked)
+anchor lines: 1 rc 0; 2 rc 0; 3 a10782bd... and ea878cda..., as stated; 4 44 of 44 OK; 5 rc 0, 3b472e38..., 19 of 19 OK; 6 0 lines
+step 1, s02_window_e183.sh 2026-11-13 12:45 14:00 (a stand-in): rc 0, E183-FULL and E183-SHORT fit
+step 2 v5, under flock on a scratch RB_GITLOCK: first run 16, "the desk check failed: pull" (step 2 v2's own git pull: ssh to github.com port 22
+timed out after 136 s); run again: rc 0, "note 4's 44 among them", HARNESS OK 87, notes M1 25 of 25 and M2 9 of 9 reported (6 min 10 s: one
+of its pulls stalled about 6 minutes and then answered)
+
+== GitHub over ssh from aifoundry2, 11:24-11:43 PST (git ls-remote; GitHub only, no lab box)
+port 22, git's default ssh: 7 of 12 answered (about 1 s); 5 failed (connect timed out at 133-137 s, or killed at the 150 s bound)
+port 22, ssh -o ConnectTimeout=10 -o ConnectionAttempts=3: 4 of 12 answered; 8 failed (banner-exchange timeouts at 10 s, connect timeouts at 32 s,
+one kill at 150 s)
+HTTPS through an environment-only rewrite (GIT_CONFIG_COUNT=1, GIT_CONFIG_KEY_0=url.https://github.com/.insteadOf, GIT_CONFIG_VALUE_0=git@github.com:):
+10 of 10 answered (0.3 s), and a git pull --ff-only answered "Already up to date."
+
+== step 11's desk-path gate (k6's rb_nopath: v3.1's nopath_q142s.py with --forbid the lab clone and RB_OUT), on committed aifoundry3 data here
+E180's vector add (E183's parent; 100 files): 2 files HIT "this user's home"; E185's session 3 (62 files): 8 files HIT "this user's home".
+The same with HOME set elsewhere: 0 hits each. The desk's home here is /home/<login>, and the box account on aifoundry3 has the same login, so
+every path aifoundry3 writes (<home>/aifoundry/...) reads as the desk's own. Step 11 v2 would stop (16) on E183's day before the data commit.
+
+== note 5
+rb/selftest_nopath_e183.sh       SELFTEST-NOPATH-E183 PASS (14 of 14)
+rb/selftest_collect_e183_v3.sh   SELFTEST-COLLECT-E183-V3 9 of 9 PASS (C0: step 11 v2 stops at the gate, 16; C1: step 11 v3 collects and scores, 0)
+rb/list_steps_e183_v6.sh         14 steps listed, 0 exited non-zero
+
+== fix-note5 (Q170), Fri 13 Nov 2026 12:20-12:45 PST, on aifoundry2, after the verifier verify-note5 (holds with fixes: one minor fault, seven nits)
+note 5 re-made on GitHub main 50430114 (five commits after f9632ee3: other lanes' registrations and records, none under tools/claims-v3/e183/):
+14 new files where port-e183's commit had 12 (rb/nopath_spell_e183.py and CARD-LANE-BRIEF.md.dated-note-4.md added); the list 24 entries.
+the gate: the desk's home read from the account database; HOME refused (10) when set but empty, not absolute, or not resolving to it; an
+entry named as the box's tree refused (16); each entry forbidden by name under each spelling of the home; then rb/nopath_spell_e183.py (a
+path written from the home with '.', '..' or '//' that resolves outside the box's tree; an entry left out by name read as a whole path
+component). Step 11 v3 checks the gate's inputs right after the window, before any copy (nopath_desk_ready).
+verify-note5's 62 stand-in cases (its lines) and 16 new ones, each run as step 11 runs it, beside v2's gate (rb_nopath) and port-e183's: 78 of
+78 as the cases want. The 14 where port-e183's gate did not do what the verifier's case wanted now stop: the home followed by '..', '.' or
+'/', the tree followed by '..', /home//<login> and /home/./<login>; HOME empty, missing, a subdirectory, a link; a link entry and names that
+begin the tree. Two cases that wanted a pass are refusals by design: HOME empty (10, any output) and an entry named as the tree (16).
+the committed aifoundry3 data, both halves of the gate, 0 hits each: E163 (507 files), E166 (50), E171 (447), E176 (59), E178 (359), E180
+(100), E181 (59), E182 (472), E186 (383), E185 (62); k6's rb_nopath here: 34, 8, 24, 7, 24, 2, 11, 59, 71 and 8 files hit. Every path in them
+written from the home is canonical and inside the box's tree; the only paths holding the login that are not canonical are URLs.
+rb/selftest_nopath_e183.sh       SELFTEST-NOPATH-E183 PASS (37 of 37)
+rb/selftest_collect_e183_v3.sh   SELFTEST-COLLECT-E183-V3 11 of 11 PASS (C0: step 11 v2 stops at the gate, 16; C1a: step 11 v3 refuses an
+                                 empty HOME before any copy, 10; C1b: a desk path written through '/./' stops it at the spelling check, 16;
+                                 C1: step 11 v3 collects and scores, 0)
+rb/list_steps_e183_v6.sh         14 steps listed, 0 exited non-zero

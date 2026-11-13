@@ -1,0 +1,101 @@
+E183 kit note 5 (Q168 port-e183; revised before the land by Q170 fix-note5): rb/selftest_nopath_e183.sh <scratch dir under the desk's home>, on aifoundry2 (Ubuntu 24.04; bash 5.2.21, GNU coreutils 9.4, rsync 3.2.7, /usr/bin/python3 3.12.3) through the round's slot and its no-device sandbox, Fri 13 Nov 2026 12:45 PST
+
+the desk's home: under /home/ (the box account's shape); box tree aifoundry; 74 entries, 0 links; the entry the cases below write under: <home>/<an entry>
+
+== G1/G2: committed aifoundry3 data with the box's own paths
+-- 2026-11-06-e180-vector-add-aifoundry3: 100 files, 2 naming <home>/aifoundry/
+rb_nopath (step 11 v2's gate): rc 16; HIT lines 2:  2 this user's home;
+-> PASS (G1 v2's gate stops on 2026-11-06-e180-vector-add-aifoundry3 here (this user's home))
+nopath_desk (step 11 v3's gate): rc 0; HIT lines 0; nopath_spell: 0 hit(s): CLEAN
+-> PASS (G2 v3's gate passes 2026-11-06-e180-vector-add-aifoundry3 (nopath and the spelling check))
+-- 2026-11-12-e185-m11-session3-aifoundry3: 62 files, 8 naming <home>/aifoundry/
+rb_nopath (step 11 v2's gate): rc 16; HIT lines 8:  8 this user's home;
+-> PASS (G1 v2's gate stops on 2026-11-12-e185-m11-session3-aifoundry3 here (this user's home))
+nopath_desk (step 11 v3's gate): rc 0; HIT lines 0; nopath_spell: 0 hit(s): CLEAN
+-> PASS (G2 v3's gate passes 2026-11-12-e185-m11-session3-aifoundry3 (nopath and the spelling check))
+-- 2026-11-09-e186-one-number-r3-aifoundry3: 383 files, 71 naming <home>/aifoundry/
+rb_nopath (step 11 v2's gate): rc 16; HIT lines 71:  71 this user's home;
+-> PASS (G1 v2's gate stops on 2026-11-09-e186-one-number-r3-aifoundry3 here (this user's home))
+nopath_desk (step 11 v3's gate): rc 0; HIT lines 0; nopath_spell: 0 hit(s): CLEAN
+-> PASS (G2 v3's gate passes 2026-11-09-e186-one-number-r3-aifoundry3 (nopath and the spelling check))
+
+== G3-G9: stand-in outputs
+nopath_desk: rc 0; HIT lines 0
+-> PASS (G3 aifoundry3's own tree path passes v3's gate)
+(rb_nopath on the same: rc 16)
+nopath_desk: rc 16;  1 the forbidden path <home>/<an entry>;
+-> PASS (G4 a path under a real desk home entry stops v3's gate, on that entry's needle)
+nopath_desk: rc 16;  1 the forbidden path <home>/<an entry>; 1 the forbidden path <repo>;
+-> PASS (G5 the lab clone's path stops v3's gate)
+nopath_desk: rc 16;  1 the forbidden path <home>/<an entry>; 1 the forbidden path <scratch>/out;
+-> PASS (G6 RB_OUT's path stops v3's gate)
+nopath_desk: rc 16;  1 a Mac home path;
+-> PASS (G7 a Mac home path stops v3's gate)
+nopath_desk: rc 16; HIT lines 1
+-> PASS (G8 the session scratch root stops v3's gate)
+nopath_desk: rc 16; 1 MISSING
+-> PASS (G9 an output that is not there stops v3's gate)
+
+== G10: a desk whose account home is not under /home/
+nopath_desk with the account's home and HOME outside /home/: rc 0; the note 5 line 0 times
+-> PASS (G10 elsewhere nopath_desk is k6's rb_nopath (no note 5 line), and the box path passes)
+
+== G11: step 11 v3 against v2
+ 3 <; 17 >;
+the early check at line 39; RAW made at line 58; the first copy at line 103
+-> PASS (G11 v3 is v2 with exactly three lines replaced and two added (the source line, the early check before any copy), and comment lines)
+
+== G12: step 11 v3's dry listing
+rc 0; 21 lines; 1 naming note 5's gate, 1 its early check; ssh or rsync run: 0
+-> PASS (G12 step 11 v3's dry listing exits 0 and names note 5's early check and gate)
+
+== G13-G19: the desk's home, or the box's tree, followed by '..', '.' or '/' (the spelling check)
+nopath_desk: rc 16;  1 a path under the desk's home written with '.', '..' or '//', outside the box's tree;
+-> PASS (G13 the home followed by '..' stops v3's gate (16))
+nopath_desk: rc 16;  1 a path under the desk's home written with '.', '..' or '//', outside the box's tree;
+-> PASS (G14 the home followed by '.' stops v3's gate (16))
+nopath_desk: rc 16;  1 a path under the desk's home written with '.', '..' or '//', outside the box's tree;
+-> PASS (G15 the home followed by '/' stops v3's gate (16))
+nopath_desk: rc 16;  1 a path under the desk's home written with '.', '..' or '//', outside the box's tree;
+-> PASS (G16 the box's tree followed by '..' stops v3's gate (16))
+nopath_desk: rc 16;  1 a path under the desk's home written with '.', '..' or '//', outside the box's tree;
+-> PASS (G17 a deeper climb out of the box's tree stops v3's gate (16))
+nopath_desk: rc 0; 
+-> PASS (G18 a climb that stays in the box's tree passes v3's gate (0))
+nopath_desk: rc 16;  1 a path under the desk's home written with '.', '..' or '//', outside the box's tree;
+-> PASS (G19a the home's own directory written with '//' stops v3's gate (16))
+nopath_desk: rc 16;  1 a path under the desk's home written with '.', '..' or '//', outside the box's tree;
+-> PASS (G19b the home's own directory written with '/./' stops v3's gate (16))
+
+== G20/G21: stand-in homes with entries the gate cannot forbid by name
+nopath_desk: rc 16;  1 a path under an entry of the desk's home the gate leaves out by name (a link, or a name that begins the box's tree);; read as whole path components instead: a aif lnk-inside(link) lnk-system(link)
+-> PASS (G20a a path under an entry left out by name (a) stops v3's gate (16))
+nopath_desk: rc 16;  1 a path under an entry of the desk's home the gate leaves out by name (a link, or a name that begins the box's tree);; read as whole path components instead: a aif lnk-inside(link) lnk-system(link)
+-> PASS (G20b a path under an entry left out by name (aif) stops v3's gate (16))
+nopath_desk: rc 16;  1 a path under an entry of the desk's home the gate leaves out by name (a link, or a name that begins the box's tree);; read as whole path components instead: a aif lnk-inside(link) lnk-system(link)
+-> PASS (G20c a path under an entry left out by name (lnk-system) stops v3's gate (16))
+nopath_desk: rc 16;  1 a path under an entry of the desk's home the gate leaves out by name (a link, or a name that begins the box's tree);; read as whole path components instead: a aif lnk-inside(link) lnk-system(link)
+-> PASS (G20d a path under an entry left out by name (lnk-inside) stops v3's gate (16))
+nopath_desk: rc 0; HIT lines 0
+-> PASS (G20e the box tree's form passes beside those entries (0))
+an entry named as the box's tree: nopath_desk_ready rc 16, nopath_desk rc 16
+-> PASS (G21 an entry named as the box's tree: the early check and the gate refuse (16))
+
+== G22: HOME
+HOME empty: nopath_desk_ready rc 10: the desk-path gate (note 5): HOME is set but empty: set it to this account's home (the acc
+-> PASS (G22 HOME empty: the early check refuses (10))
+HOME relative: nopath_desk_ready rc 10: the desk-path gate (note 5): HOME is not an absolute path: set it to this account's home a
+-> PASS (G22 HOME relative: the early check refuses (10))
+HOME missing: nopath_desk_ready rc 10: the desk-path gate (note 5): HOME does not resolve to this account's home (the account dat
+-> PASS (G22 HOME missing: the early check refuses (10))
+HOME a subdirectory: nopath_desk_ready rc 10: the desk-path gate (note 5): HOME does not resolve to this account's home (the account dat
+-> PASS (G22 HOME a subdirectory: the early check refuses (10))
+HOME unset: nopath_desk_ready rc 0
+-> PASS (G22 HOME unset: the early check passes (the account database's home))
+HOME a link to the home: nopath_desk on a desk path written through it: rc 16;  1 the forbidden path <a link dir>/home/<an entry>;
+-> PASS (G22 HOME a link to the home: a desk path written through it stops v3's gate (16))
+HOME a link to the home: nopath_desk on the box's tree path: rc 0
+-> PASS (G22 HOME a link to the home: the box's tree path passes (0))
+
+SELFTEST-NOPATH-E183 PASS (37 of 37)
+# exit 0
