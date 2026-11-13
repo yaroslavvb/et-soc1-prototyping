@@ -1,0 +1,27 @@
+The first runs' counts (counter-b, Thu 12 Nov 2026 15:5x-16:2x PST, count_kernel.py before fix-q166) against the same
+cases run again by fix-q166 (19:12-19:20 PST, the same binaries and arguments, the fixed count_kernel.py): every field of
+the first counts files is identical; the re-runs add outside_kernel, by_csr, branch_direction_changes, branch_changes_per_pc
+and the class gather_scatter_past_l1 (0 here). The records differ only in timing fields (cycles by 128, the fixcyc
+carry; hart 0's wait and copy cycles by up to 1,664; the status word's launch-epoch bits), the profiles in their cycle
+column and in landings outside the kernel. Desk check of code (scripts kept with fix-q166's scratch).
+
+c0-tensor        differences in old fields: 0; new top-level ['outside_kernel']; new per-hart ['branch_changes_per_pc', 'branch_direction_changes', 'by_csr']; new classes ['gather_scatter_past_l1']
+c0-scalar        differences in old fields: 0; new top-level ['outside_kernel']; new per-hart ['branch_changes_per_pc', 'branch_direction_changes', 'by_csr']; new classes ['gather_scatter_past_l1']
+s4-tensor        differences in old fields: 0; new top-level ['outside_kernel']; new per-hart ['branch_changes_per_pc', 'branch_direction_changes', 'by_csr']; new classes ['gather_scatter_past_l1']
+k4-2shires       differences in old fields: 0; new top-level ['outside_kernel']; new per-hart ['branch_changes_per_pc', 'branch_direction_changes', 'by_csr']; new classes ['gather_scatter_past_l1']
+l1b-s0           differences in old fields: 0; new top-level ['outside_kernel']; new per-hart ['branch_changes_per_pc', 'branch_direction_changes', 'by_csr']; new classes ['gather_scatter_past_l1']
+l1b-s10000       differences in old fields: 0; new top-level ['outside_kernel']; new per-hart ['branch_changes_per_pc', 'branch_direction_changes', 'by_csr']; new classes ['gather_scatter_past_l1']
+l1b-s19999       differences in old fields: 0; new top-level ['outside_kernel']; new per-hart ['branch_changes_per_pc', 'branch_direction_changes', 'by_csr']; new classes ['gather_scatter_past_l1']
+inst-c0-tensor   differences in old fields: 0; new top-level ['outside_kernel']; new per-hart ['branch_changes_per_pc', 'branch_direction_changes', 'by_csr']; new classes ['gather_scatter_past_l1']
+inst-s4-tensor   differences in old fields: 0; new top-level ['outside_kernel']; new per-hart ['branch_changes_per_pc', 'branch_direction_changes', 'by_csr']; new classes ['gather_scatter_past_l1']
+
+first runs' counts-log.json sha256 (counter-b's staged copies):
+f0a7d898db7126fd2d6a4b1f3743739a178532288a0cf008a4e0b9f9b632fcab  runs/c0-scalar/counts-log.json
+a905e5d4ded249d072383626bd1ad9444bf7a54bb65752df88c43f2399f08e17  runs/c0-tensor/counts-log.json
+2e7c1349ced812f5837ba065848796a905942a01ecea778e78047b972a53a71e  runs/k4-2shires/counts-log.json
+692145548384795365d61c58e7aa673ccdc0316978d52cec005056c630f78f14  runs/l1b-s0/counts-log.json
+44ad1febf85ebfa8064264540113564f3f9bdda2f923a2a352c5d6c659858beb  runs/l1b-s10000/counts-log.json
+38a2447ca62c85001c1ee8c4dca2fff18c540b0f07c57093293ee19a63cf34fa  runs/l1b-s19999/counts-log.json
+562d100f1f2b8c8b08b2c9744539c1353a523c786b1d705d06d2e9b7dbeeb31d  runs/s4-tensor/counts-log.json
+a905e5d4ded249d072383626bd1ad9444bf7a54bb65752df88c43f2399f08e17  runs-installed/c0-tensor/counts-log.json
+562d100f1f2b8c8b08b2c9744539c1353a523c786b1d705d06d2e9b7dbeeb31d  runs-installed/s4-tensor/counts-log.json

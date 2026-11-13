@@ -1,0 +1,137 @@
+{
+ "what": "the profile route (count_kernel.py count --prof) against the log of the same run, per run, with default flags and with --assume-no-wait; the offset found by --pc-offset auto in every run (fix-q166, Thu 12 Nov 2026)",
+ "label": "desk check of code against the simulator's own log",
+ "runs": [
+  {
+   "run": "c0-tensor",
+   "default": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.6321246218905843,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "62 of 62",
+    "unresolved_runs": 298
+   },
+   "assume_no_wait": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.6815705568892093,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "62 of 62",
+    "unresolved_runs": 238
+   }
+  },
+  {
+   "run": "c0-scalar",
+   "default": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.6793667891731875,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "63 of 63",
+    "unresolved_runs": 84
+   },
+   "assume_no_wait": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.6793667891731875,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "63 of 63",
+    "unresolved_runs": 84
+   }
+  },
+  {
+   "run": "s4-tensor",
+   "default": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.5928138183963172,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "62 of 62",
+    "unresolved_runs": 362
+   },
+   "assume_no_wait": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.7244912352692253,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "62 of 62",
+    "unresolved_runs": 257
+   }
+  },
+  {
+   "run": "k4-2shires",
+   "default": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.5670182861997224,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "120 of 120",
+    "unresolved_runs": 1358
+   },
+   "assume_no_wait": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.6661970440151181,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "120 of 120",
+    "unresolved_runs": 1038
+   }
+  },
+  {
+   "run": "l1b-s0",
+   "default": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.7650636757912305,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "0 of 0",
+    "unresolved_runs": 192
+   },
+   "assume_no_wait": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.9157436544468327,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "0 of 0",
+    "unresolved_runs": 155
+   }
+  },
+  {
+   "run": "l1b-s10000",
+   "default": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.7888894396949936,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "0 of 0",
+    "unresolved_runs": 216
+   },
+   "assume_no_wait": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.9318593761970644,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "0 of 0",
+    "unresolved_runs": 179
+   }
+  },
+  {
+   "run": "l1b-s19999",
+   "default": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.6334474857029065,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "0 of 0",
+    "unresolved_runs": 197
+   },
+   "assume_no_wait": {
+    "pc_offset": "0x335000",
+    "working_harts_resolved_fraction": 0.9027797644590664,
+    "pcs_above_log": 0,
+    "idle_harts_exact": "0 of 0",
+    "unresolved_runs": 135
+   }
+  }
+ ],
+ "range_working_harts_resolved": {
+  "default": [
+   0.5670182861997224,
+   0.7888894396949936
+  ],
+  "assume_no_wait": [
+   0.6661970440151181,
+   0.9318593761970644
+  ]
+ },
+ "pcs_above_log_all_runs": 0,
+ "note": "a lower bound shown by this check, not proved: the profile's no-wait equation does not hold the FP/vector stall (insn_util.h require_fp_active), so it is checked against the log, here 0 PCs above it in 7 runs x 2 flags"
+}

@@ -1,0 +1,12271 @@
+{
+ "schema": "ledger-counts/1",
+ "tool": "tools/counter/count_kernel.py",
+ "label": "c0-scalar",
+ "inputs": {
+  "dis": "sparseparity.dis",
+  "dis_sha256": "7339a082c44e74ecba72205ae6593ced3b9e764bec5633ed0b04c68efbd0d0a5",
+  "mode": "profile",
+  "prof": "prof.txt.gz",
+  "prof_sha256": "fc5415585315614d1d622791ebd1780c141e2186614d8a25f847189d5d37fbfb",
+  "assume_no_wait": true
+ },
+ "classes": {
+  "scalar_int": "03a: Scalar integer, one cycle (and the compressed forms)",
+  "int_muldiv": "03a: Scalar integer multiply and divide",
+  "scalar_float": "03a: Scalar float",
+  "float_int_xfer": "03a: Between the float and integer register files",
+  "vector_float": "03a: Vector float, 8 lanes",
+  "vector_int": "03a: Vector integer, 8 lanes",
+  "transcendental": "03a: Transcendental unit, 8 lanes",
+  "mask_broadcast": "03a: Masks and broadcasts (and the mask-register moves)",
+  "load": "03a: Loads and stores that hit the L1 (loads; the level each one reached is 04's question)",
+  "store": "03a: Loads and stores that hit the L1 (stores)",
+  "load_past_l1": "03a: Loads and stores that bypass the L1 (flwl.ps to the L2, flwg.ps to the home L3)",
+  "store_past_l1": "03a: Loads and stores that bypass the L1 (fswl.ps, fswg.ps)",
+  "gather_scatter": "03a: Gathers, scatters and packed atomics, from the L1 (E48); 04 section 4.4 by level",
+  "gather_scatter_past_l1": "04 section 4.4: gathers and scatters that bypass the L1 (fgwl.ps and fscwl.ps to the L2, fgwg.ps and fscwg.ps to the home), 27x or more the L1 form",
+  "branch_taken": "03a: Branches and jumps (a conditional branch taken)",
+  "branch_not_taken": "03a: Branches and jumps (a conditional branch not taken)",
+  "jump": "03a: Branches and jumps (jal, jalr: calls, returns, jumps)",
+  "atomic_local": "03a: Atomics on a private line (amo*l: at the shire's L2)",
+  "atomic_global": "03a: Atomics on a private line (amo*g: at the line's home); 06 for shared lines",
+  "atomic_packed": "03a: Gathers, scatters and packed atomics (famo*.pi)",
+  "atomic_std": "no row: standard RISC-V A-extension forms (lr, sc, amo*.w/d without l or g)",
+  "tensor": "03 section 3.2 (TensorFMA by format) and 04 (tensor loads and stores by level)",
+  "cache_op": "no row of its own: cache-control CSR writes (evict, flush, prefetch, lock)",
+  "sync": "06: credit counters, the fast local barrier, stall (fcc, fccnb, flb, stall)",
+  "system": "03a: System (fence, csrr, ecall and the other CSR accesses)",
+  "trap": "03a: the thirteen instructions that trap in U-mode (no energy; the kernel ends)",
+  "unknown": "not classified: the table below has no rule for it"
+ },
+ "harts": {
+  "0": {
+   "instructions": 350664,
+   "compressed_instructions": 149856,
+   "by_class": {
+    "scalar_int": 258479,
+    "int_muldiv": 4990,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 45413,
+    "store": 15941,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 15761,
+    "branch_not_taken": 10044,
+    "jump": 31,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 5,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "add": 84379,
+    "srli": 59553,
+    "ld": 40438,
+    "and": 39680,
+    "addi": 19947,
+    "sd": 15669,
+    "bne": 14884,
+    "mv": 10023,
+    "andi": 9934,
+    "sub": 9921,
+    "xor": 9920,
+    "beqz": 5436,
+    "li": 5040,
+    "mul": 4990,
+    "lw": 4968,
+    "slliw": 4962,
+    "subw": 4960,
+    "bge": 4960,
+    "bltu": 471,
+    "sw": 270,
+    "slli": 140,
+    "bnez": 34,
+    "j": 28,
+    "bgeu": 16,
+    "lwu": 5,
+    "lui": 5,
+    "csrr": 4,
+    "xori": 4,
+    "beq": 4,
+    "sltiu": 3,
+    "or": 3,
+    "lhu": 2,
+    "sb": 2,
+    "jal": 2,
+    "ecall": 1,
+    "snez": 1,
+    "zext.b": 1,
+    "ret": 1,
+    "srliw": 1,
+    "srl": 1,
+    "auipc": 1
+   },
+   "by_csr": {
+    "csrr hpmcounter3": 2,
+    "csrr hartid": 1,
+    "csrr tensor_error": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [
+    {
+     "landing": "0x8005801108",
+     "end": "0x8005801116",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801108",
+     "end": "0x8005801122",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801108",
+     "end": "0x800580112e",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801108",
+     "end": "0x800580113a",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801108",
+     "end": "0x8005801146",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801108",
+     "end": "0x8005801152",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801108",
+     "end": "0x80058011ce",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801108",
+     "end": "0x80058011d2",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801108",
+     "end": "0x80058011e0",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801108",
+     "end": "0x80058011fe",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801108",
+     "end": "0x8005801218",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801108",
+     "end": "0x8005801258",
+     "landings": 3,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013fe",
+     "end": "0x800580140e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013fe",
+     "end": "0x8005801416",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013fe",
+     "end": "0x800580141e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013fe",
+     "end": "0x8005801426",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013fe",
+     "end": "0x800580142e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013fe",
+     "end": "0x8005801436",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013fe",
+     "end": "0x800580143e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013fe",
+     "end": "0x8005801446",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580140a",
+     "end": "0x800580140e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580140a",
+     "end": "0x8005801416",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580140a",
+     "end": "0x800580141e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580140a",
+     "end": "0x8005801426",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580140a",
+     "end": "0x800580142e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580140a",
+     "end": "0x8005801436",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580140a",
+     "end": "0x800580143e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580140a",
+     "end": "0x8005801446",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013ba",
+     "end": "0x80058013ca",
+     "landings": 4960,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013ba",
+     "end": "0x80058013e4",
+     "landings": 4960,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013ba",
+     "end": "0x80058013fc",
+     "landings": 4960,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013b6",
+     "end": "0x80058013ca",
+     "landings": 4272,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013b6",
+     "end": "0x80058013e4",
+     "landings": 4272,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013b6",
+     "end": "0x80058013fc",
+     "landings": 4272,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x80058012fe",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x800580130e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x8005801318",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x8005801322",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x800580132e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x800580133a",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x800580134c",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x80058013ae",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x80058013b2",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x80058013ca",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x80058013e4",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058012d0",
+     "end": "0x80058013fc",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801390",
+     "end": "0x80058013ae",
+     "landings": 112,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801390",
+     "end": "0x80058013b2",
+     "landings": 112,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801390",
+     "end": "0x80058013ca",
+     "landings": 112,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801390",
+     "end": "0x80058013e4",
+     "landings": 112,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801390",
+     "end": "0x80058013fc",
+     "landings": 112,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801344",
+     "end": "0x800580134c",
+     "landings": 930,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801344",
+     "end": "0x80058013ae",
+     "landings": 930,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801344",
+     "end": "0x80058013b2",
+     "landings": 930,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801344",
+     "end": "0x80058013ca",
+     "landings": 930,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801344",
+     "end": "0x80058013e4",
+     "landings": 930,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x8005801344",
+     "end": "0x80058013fc",
+     "landings": 930,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058011d6",
+     "end": "0x80058011e0",
+     "landings": 480,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058011d6",
+     "end": "0x80058011fe",
+     "landings": 480,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058011d6",
+     "end": "0x8005801218",
+     "landings": 480,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058011d6",
+     "end": "0x8005801258",
+     "landings": 480,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058011ca",
+     "end": "0x80058011ce",
+     "landings": 450,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058011ca",
+     "end": "0x80058011d2",
+     "landings": 450,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058011ca",
+     "end": "0x80058011e0",
+     "landings": 450,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058011ca",
+     "end": "0x80058011fe",
+     "landings": 450,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058011ca",
+     "end": "0x8005801218",
+     "landings": 450,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058011ca",
+     "end": "0x8005801258",
+     "landings": 450,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x80058012fe",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x800580130e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x8005801318",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x8005801322",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x800580132e",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x800580133a",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x800580134c",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x80058013ae",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x80058013b2",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x80058013ca",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x80058013e4",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x800580127e",
+     "end": "0x80058013fc",
+     "landings": 465,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013ae",
+     "end": "0x80058013ae",
+     "landings": 8655,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013ae",
+     "end": "0x80058013b2",
+     "landings": 8655,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013ae",
+     "end": "0x80058013ca",
+     "landings": 8655,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013ae",
+     "end": "0x80058013e4",
+     "landings": 8655,
+     "fn": "run_scalar.constprop.0"
+    },
+    {
+     "landing": "0x80058013ae",
+     "end": "0x80058013fc",
+     "landings": 8655,
+     "fn": "run_scalar.constprop.0"
+    }
+   ],
+   "cycles_emulated_in_region": 516163,
+   "shire": 0,
+   "minion": 0,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x8005801016": [
+     1,
+     0
+    ],
+    "0x800580101a": [
+     1,
+     0
+    ],
+    "0x800580101e": [
+     1,
+     0
+    ],
+    "0x8005801020": [
+     1,
+     0
+    ],
+    "0x8005801022": [
+     1,
+     0
+    ],
+    "0x8005801024": [
+     1,
+     0
+    ],
+    "0x8005801028": [
+     1,
+     0
+    ],
+    "0x800580102a": [
+     1,
+     0
+    ],
+    "0x800580102e": [
+     1,
+     0
+    ],
+    "0x8005801032": [
+     1,
+     0
+    ],
+    "0x8005801036": [
+     1,
+     0
+    ],
+    "0x8005801038": [
+     1,
+     0
+    ],
+    "0x800580103a": [
+     1,
+     0
+    ],
+    "0x800580103c": [
+     1,
+     0
+    ],
+    "0x8005801040": [
+     1,
+     0
+    ],
+    "0x8005801044": [
+     1,
+     0
+    ],
+    "0x8005801048": [
+     1,
+     0
+    ],
+    "0x800580104c": [
+     1,
+     0
+    ],
+    "0x8005801050": [
+     1,
+     0
+    ],
+    "0x8005801054": [
+     1,
+     0
+    ],
+    "0x8005801058": [
+     1,
+     0
+    ],
+    "0x800580105a": [
+     1,
+     0
+    ],
+    "0x800580105c": [
+     1,
+     0
+    ],
+    "0x8005801060": [
+     1,
+     0
+    ],
+    "0x8005801064": [
+     1,
+     0
+    ],
+    "0x8005801068": [
+     1,
+     0
+    ],
+    "0x800580106c": [
+     1,
+     0
+    ],
+    "0x8005801070": [
+     1,
+     0
+    ],
+    "0x8005801072": [
+     1,
+     0
+    ],
+    "0x8005801076": [
+     1,
+     0
+    ],
+    "0x800580107a": [
+     1,
+     0
+    ],
+    "0x800580107c": [
+     1,
+     0
+    ],
+    "0x800580107e": [
+     1,
+     0
+    ],
+    "0x8005801080": [
+     1,
+     0
+    ],
+    "0x8005801084": [
+     1,
+     0
+    ],
+    "0x8005801088": [
+     1,
+     0
+    ],
+    "0x800580108c": [
+     1,
+     0
+    ],
+    "0x8005801090": [
+     1,
+     0
+    ],
+    "0x8005801094": [
+     1,
+     0
+    ],
+    "0x8005801096": [
+     1,
+     0
+    ],
+    "0x8005801098": [
+     1,
+     0
+    ],
+    "0x800580109a": [
+     1,
+     0
+    ],
+    "0x800580109c": [
+     1,
+     0
+    ],
+    "0x800580109e": [
+     1,
+     0
+    ],
+    "0x80058010a2": [
+     1,
+     0
+    ],
+    "0x80058010a4": [
+     1,
+     0
+    ],
+    "0x80058010a8": [
+     1,
+     0
+    ],
+    "0x80058010aa": [
+     1,
+     0
+    ],
+    "0x80058010ae": [
+     1,
+     0
+    ],
+    "0x80058010b0": [
+     1,
+     0
+    ],
+    "0x80058010b2": [
+     1,
+     0
+    ],
+    "0x80058010b4": [
+     1,
+     0
+    ],
+    "0x80058010b8": [
+     1,
+     0
+    ],
+    "0x80058010bc": [
+     1,
+     0
+    ],
+    "0x80058010be": [
+     1,
+     0
+    ],
+    "0x80058010c2": [
+     1,
+     0
+    ],
+    "0x80058010c6": [
+     1,
+     0
+    ],
+    "0x80058010c8": [
+     1,
+     0
+    ],
+    "0x80058010cc": [
+     1,
+     0
+    ],
+    "0x80058010d0": [
+     1,
+     0
+    ],
+    "0x80058010d4": [
+     1,
+     0
+    ],
+    "0x80058010d6": [
+     1,
+     0
+    ],
+    "0x80058010da": [
+     1,
+     0
+    ],
+    "0x80058010de": [
+     1,
+     0
+    ],
+    "0x80058010e2": [
+     1,
+     0
+    ],
+    "0x80058010e4": [
+     1,
+     0
+    ],
+    "0x80058010e6": [
+     1,
+     0
+    ],
+    "0x80058010ea": [
+     1,
+     0
+    ],
+    "0x80058010ec": [
+     1,
+     0
+    ],
+    "0x80058010ee": [
+     1,
+     0
+    ],
+    "0x80058010f0": [
+     1,
+     0
+    ],
+    "0x80058010f2": [
+     1,
+     0
+    ],
+    "0x80058010f4": [
+     1,
+     0
+    ],
+    "0x80058010f6": [
+     1,
+     0
+    ],
+    "0x80058010f8": [
+     1,
+     0
+    ],
+    "0x80058010fa": [
+     1,
+     0
+    ],
+    "0x80058010fe": [
+     1,
+     0
+    ],
+    "0x8005801100": [
+     1,
+     0
+    ],
+    "0x8005801102": [
+     1,
+     0
+    ],
+    "0x8005801106": [
+     1,
+     0
+    ],
+    "0x8005801108": [
+     1,
+     0
+    ],
+    "0x800580110c": [
+     1,
+     0
+    ],
+    "0x800580110e": [
+     1,
+     0
+    ],
+    "0x8005801110": [
+     1,
+     0
+    ],
+    "0x8005801114": [
+     1,
+     0
+    ],
+    "0x8005801116": [
+     1,
+     0
+    ],
+    "0x8005801118": [
+     1,
+     0
+    ],
+    "0x800580111c": [
+     1,
+     0
+    ],
+    "0x800580111e": [
+     1,
+     0
+    ],
+    "0x8005801120": [
+     1,
+     0
+    ],
+    "0x8005801122": [
+     1,
+     0
+    ],
+    "0x8005801126": [
+     1,
+     0
+    ],
+    "0x800580112a": [
+     1,
+     0
+    ],
+    "0x800580112c": [
+     1,
+     0
+    ],
+    "0x800580112e": [
+     1,
+     1
+    ],
+    "0x800580115c": [
+     4,
+     0
+    ],
+    "0x8005801160": [
+     4,
+     0
+    ],
+    "0x8005801162": [
+     4,
+     0
+    ],
+    "0x8005801166": [
+     4,
+     0
+    ],
+    "0x800580116a": [
+     4,
+     0
+    ],
+    "0x800580116e": [
+     4,
+     0
+    ],
+    "0x8005801170": [
+     4,
+     0
+    ],
+    "0x8005801174": [
+     4,
+     0
+    ],
+    "0x8005801176": [
+     4,
+     0
+    ],
+    "0x8005801178": [
+     4,
+     0
+    ],
+    "0x800580117a": [
+     4,
+     0
+    ],
+    "0x800580117c": [
+     4,
+     0
+    ],
+    "0x800580117e": [
+     4,
+     0
+    ],
+    "0x8005801180": [
+     4,
+     0
+    ],
+    "0x8005801182": [
+     30,
+     0
+    ],
+    "0x8005801184": [
+     30,
+     0
+    ],
+    "0x8005801186": [
+     30,
+     0
+    ],
+    "0x8005801188": [
+     30,
+     0
+    ],
+    "0x800580118a": [
+     30,
+     0
+    ],
+    "0x800580118c": [
+     30,
+     0
+    ],
+    "0x800580118e": [
+     30,
+     0
+    ],
+    "0x8005801192": [
+     30,
+     0
+    ],
+    "0x8005801194": [
+     30,
+     0
+    ],
+    "0x8005801198": [
+     30,
+     0
+    ],
+    "0x800580119a": [
+     30,
+     0
+    ],
+    "0x800580119e": [
+     30,
+     0
+    ],
+    "0x80058011a0": [
+     30,
+     0
+    ],
+    "0x80058011a2": [
+     30,
+     0
+    ],
+    "0x80058011a4": [
+     30,
+     0
+    ],
+    "0x80058011a6": [
+     30,
+     0
+    ],
+    "0x80058011a8": [
+     30,
+     0
+    ],
+    "0x80058011aa": [
+     30,
+     0
+    ],
+    "0x80058011ac": [
+     30,
+     0
+    ],
+    "0x80058011ae": [
+     30,
+     0
+    ],
+    "0x80058011b0": [
+     30,
+     0
+    ],
+    "0x80058011b2": [
+     30,
+     0
+    ],
+    "0x80058011b6": [
+     30,
+     0
+    ],
+    "0x80058011b8": [
+     30,
+     0
+    ],
+    "0x80058011ba": [
+     30,
+     0
+    ],
+    "0x80058011be": [
+     30,
+     0
+    ],
+    "0x80058011c0": [
+     30,
+     0
+    ],
+    "0x80058011c2": [
+     30,
+     0
+    ],
+    "0x80058011c4": [
+     30,
+     0
+    ],
+    "0x80058011c6": [
+     30,
+     0
+    ],
+    "0x80058011ca": [
+     30,
+     0
+    ],
+    "0x80058011cc": [
+     30,
+     0
+    ],
+    "0x80058011ce": [
+     30,
+     30
+    ],
+    "0x80058013fe": [
+     435,
+     0
+    ],
+    "0x8005801402": [
+     435,
+     435
+    ],
+    "0x800580141a": [
+     435,
+     0
+    ],
+    "0x800580141e": [
+     435,
+     435
+    ],
+    "0x8005801448": [
+     4960,
+     0
+    ],
+    "0x800580144c": [
+     4960,
+     0
+    ],
+    "0x800580144e": [
+     4960,
+     0
+    ],
+    "0x8005801450": [
+     4960,
+     0
+    ],
+    "0x8005801452": [
+     9920,
+     0
+    ],
+    "0x8005801456": [
+     9920,
+     0
+    ],
+    "0x800580145a": [
+     9920,
+     0
+    ],
+    "0x800580145c": [
+     9920,
+     0
+    ],
+    "0x800580145e": [
+     9920,
+     0
+    ],
+    "0x8005801462": [
+     9920,
+     0
+    ],
+    "0x8005801466": [
+     9920,
+     0
+    ],
+    "0x800580146a": [
+     9920,
+     0
+    ],
+    "0x800580146e": [
+     9920,
+     0
+    ],
+    "0x8005801472": [
+     9920,
+     0
+    ],
+    "0x8005801476": [
+     9920,
+     0
+    ],
+    "0x800580147a": [
+     9920,
+     0
+    ],
+    "0x800580147c": [
+     9920,
+     0
+    ],
+    "0x8005801480": [
+     9920,
+     0
+    ],
+    "0x8005801482": [
+     9920,
+     0
+    ],
+    "0x8005801486": [
+     9920,
+     0
+    ],
+    "0x800580148a": [
+     9920,
+     0
+    ],
+    "0x800580148c": [
+     9920,
+     0
+    ],
+    "0x8005801490": [
+     9920,
+     0
+    ],
+    "0x8005801492": [
+     9920,
+     0
+    ],
+    "0x8005801496": [
+     9920,
+     0
+    ],
+    "0x8005801498": [
+     9920,
+     0
+    ],
+    "0x800580149c": [
+     9920,
+     0
+    ],
+    "0x800580149e": [
+     9920,
+     4960
+    ],
+    "0x80058014a2": [
+     4960,
+     0
+    ],
+    "0x80058014a4": [
+     4960,
+     0
+    ],
+    "0x80058014a8": [
+     4960,
+     0
+    ],
+    "0x80058014ac": [
+     4960,
+     0
+    ],
+    "0x80058014b0": [
+     4960,
+     0
+    ],
+    "0x80058014b2": [
+     4960,
+     0
+    ],
+    "0x80058014b6": [
+     4960,
+     0
+    ],
+    "0x80058014b8": [
+     4960,
+     0
+    ],
+    "0x80058014ba": [
+     4960,
+     0
+    ],
+    "0x80058014bc": [
+     4960,
+     0
+    ],
+    "0x80058014be": [
+     4960,
+     0
+    ],
+    "0x80058014c0": [
+     4960,
+     0
+    ],
+    "0x80058014c2": [
+     4960,
+     0
+    ],
+    "0x80058014c4": [
+     4960,
+     0
+    ],
+    "0x80058014c8": [
+     4960,
+     0
+    ],
+    "0x80058014ca": [
+     4960,
+     0
+    ],
+    "0x80058014cc": [
+     4960,
+     4948
+    ],
+    "0x80058014d0": [
+     12,
+     0
+    ],
+    "0x80058014d4": [
+     12,
+     0
+    ],
+    "0x80058014d6": [
+     12,
+     0
+    ],
+    "0x80058014da": [
+     12,
+     0
+    ],
+    "0x80058014dc": [
+     4948,
+     4948
+    ],
+    "0x80058014f4": [
+     15,
+     0
+    ],
+    "0x80058014f6": [
+     15,
+     0
+    ],
+    "0x80058014fa": [
+     15,
+     0
+    ],
+    "0x80058014fc": [
+     15,
+     0
+    ],
+    "0x80058014fe": [
+     15,
+     0
+    ],
+    "0x8005801500": [
+     15,
+     0
+    ],
+    "0x8005801502": [
+     15,
+     0
+    ],
+    "0x8005801506": [
+     15,
+     0
+    ],
+    "0x800580150a": [
+     15,
+     0
+    ],
+    "0x800580150e": [
+     15,
+     0
+    ],
+    "0x8005801512": [
+     15,
+     0
+    ],
+    "0x8005801516": [
+     15,
+     0
+    ],
+    "0x800580151a": [
+     15,
+     0
+    ],
+    "0x800580151e": [
+     15,
+     0
+    ],
+    "0x8005801522": [
+     15,
+     0
+    ],
+    "0x8005801526": [
+     15,
+     0
+    ],
+    "0x800580152a": [
+     15,
+     0
+    ],
+    "0x800580152e": [
+     15,
+     0
+    ],
+    "0x8005801532": [
+     15,
+     0
+    ],
+    "0x8005801536": [
+     15,
+     0
+    ],
+    "0x800580153a": [
+     15,
+     0
+    ],
+    "0x800580153e": [
+     15,
+     0
+    ],
+    "0x8005801542": [
+     15,
+     0
+    ],
+    "0x8005801544": [
+     15,
+     0
+    ],
+    "0x8005801548": [
+     15,
+     0
+    ],
+    "0x800580154c": [
+     15,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     0
+    ],
+    "0x800580b5de": [
+     1,
+     0
+    ],
+    "0x800580b5e2": [
+     1,
+     0
+    ],
+    "0x800580b5e6": [
+     1,
+     0
+    ],
+    "0x800580b5ea": [
+     1,
+     0
+    ],
+    "0x800580b5ee": [
+     1,
+     0
+    ],
+    "0x800580b5f2": [
+     1,
+     0
+    ],
+    "0x800580b5f6": [
+     1,
+     0
+    ],
+    "0x800580b5fa": [
+     1,
+     0
+    ],
+    "0x800580b5fe": [
+     1,
+     0
+    ],
+    "0x800580b600": [
+     1,
+     1
+    ],
+    "0x800580b60a": [
+     1,
+     0
+    ],
+    "0x800580b60e": [
+     1,
+     0
+    ],
+    "0x800580b612": [
+     1,
+     0
+    ],
+    "0x800580b616": [
+     1,
+     0
+    ],
+    "0x800580b618": [
+     1,
+     0
+    ],
+    "0x800580b61c": [
+     1,
+     0
+    ],
+    "0x800580b620": [
+     1,
+     0
+    ],
+    "0x800580b624": [
+     1,
+     0
+    ],
+    "0x800580b628": [
+     1,
+     0
+    ],
+    "0x800580b62a": [
+     1,
+     0
+    ],
+    "0x800580b62e": [
+     1,
+     0
+    ],
+    "0x800580b630": [
+     1,
+     0
+    ],
+    "0x800580b632": [
+     1,
+     0
+    ],
+    "0x800580b636": [
+     1,
+     0
+    ],
+    "0x800580b63a": [
+     1,
+     0
+    ],
+    "0x800580b63c": [
+     1,
+     0
+    ],
+    "0x800580b63e": [
+     1,
+     0
+    ],
+    "0x800580b640": [
+     1,
+     0
+    ],
+    "0x800580b642": [
+     1,
+     0
+    ],
+    "0x800580b646": [
+     1,
+     0
+    ],
+    "0x800580b64a": [
+     1,
+     0
+    ],
+    "0x800580b64e": [
+     1,
+     0
+    ],
+    "0x800580b652": [
+     1,
+     0
+    ],
+    "0x800580b656": [
+     1,
+     0
+    ],
+    "0x800580b65a": [
+     1,
+     0
+    ],
+    "0x800580b65e": [
+     1,
+     0
+    ],
+    "0x800580b662": [
+     1,
+     0
+    ],
+    "0x800580b666": [
+     1,
+     0
+    ],
+    "0x800580b66a": [
+     1,
+     0
+    ],
+    "0x800580b66e": [
+     1,
+     0
+    ],
+    "0x800580b672": [
+     1,
+     0
+    ],
+    "0x800580b676": [
+     1,
+     0
+    ],
+    "0x800580b678": [
+     1,
+     0
+    ],
+    "0x800580b67c": [
+     1,
+     0
+    ],
+    "0x800580b680": [
+     1,
+     0
+    ],
+    "0x800580b684": [
+     1,
+     0
+    ],
+    "0x800580b686": [
+     1,
+     0
+    ],
+    "0x800580b68a": [
+     1,
+     1
+    ],
+    "0x800580b6a4": [
+     1,
+     0
+    ],
+    "0x800580b6a8": [
+     1,
+     1
+    ],
+    "0x800580b6ae": [
+     1,
+     0
+    ],
+    "0x800580b6b0": [
+     1,
+     0
+    ],
+    "0x800580b6b4": [
+     1,
+     0
+    ],
+    "0x800580b6b6": [
+     1,
+     0
+    ],
+    "0x800580b6ba": [
+     1,
+     0
+    ],
+    "0x800580b6be": [
+     1,
+     0
+    ],
+    "0x800580b6c2": [
+     1,
+     0
+    ],
+    "0x800580b6c4": [
+     1,
+     0
+    ],
+    "0x800580b6c8": [
+     1,
+     0
+    ],
+    "0x800580b6cc": [
+     1,
+     0
+    ],
+    "0x800580b6d0": [
+     1,
+     0
+    ],
+    "0x800580b6d4": [
+     1,
+     0
+    ],
+    "0x800580b6d8": [
+     1,
+     0
+    ],
+    "0x800580b6dc": [
+     1,
+     0
+    ],
+    "0x800580b6de": [
+     1,
+     0
+    ],
+    "0x800580b6e0": [
+     1,
+     0
+    ],
+    "0x800580b6e2": [
+     1,
+     0
+    ],
+    "0x800580b6e4": [
+     1,
+     0
+    ],
+    "0x800580b6e6": [
+     1,
+     0
+    ],
+    "0x800580b6ea": [
+     1,
+     0
+    ],
+    "0x800580b6ee": [
+     1,
+     0
+    ],
+    "0x800580b6f2": [
+     1,
+     0
+    ],
+    "0x800580b6f6": [
+     1,
+     0
+    ],
+    "0x800580b6fa": [
+     1,
+     0
+    ],
+    "0x800580b6fc": [
+     1,
+     0
+    ],
+    "0x800580b700": [
+     1,
+     0
+    ],
+    "0x800580b702": [
+     1,
+     0
+    ],
+    "0x800580b706": [
+     1,
+     0
+    ],
+    "0x800580b708": [
+     1,
+     0
+    ],
+    "0x800580b70c": [
+     1,
+     0
+    ],
+    "0x800580b710": [
+     1,
+     0
+    ],
+    "0x800580b714": [
+     1,
+     0
+    ],
+    "0x800580b716": [
+     1,
+     0
+    ],
+    "0x800580b718": [
+     1,
+     0
+    ],
+    "0x800580b71c": [
+     1,
+     0
+    ],
+    "0x800580b71e": [
+     1,
+     0
+    ],
+    "0x800580b722": [
+     1,
+     0
+    ],
+    "0x800580b75e": [
+     1,
+     0
+    ],
+    "0x800580b760": [
+     1,
+     0
+    ],
+    "0x800580b764": [
+     1,
+     0
+    ],
+    "0x800580b768": [
+     1,
+     0
+    ],
+    "0x800580b76c": [
+     1,
+     0
+    ],
+    "0x800580b770": [
+     1,
+     0
+    ],
+    "0x800580b774": [
+     1,
+     0
+    ],
+    "0x800580b776": [
+     1,
+     0
+    ],
+    "0x800580b77a": [
+     1,
+     0
+    ],
+    "0x800580b77c": [
+     1,
+     0
+    ],
+    "0x800580b780": [
+     1,
+     0
+    ],
+    "0x800580b782": [
+     1,
+     0
+    ],
+    "0x800580b786": [
+     1,
+     0
+    ],
+    "0x800580b78a": [
+     1,
+     0
+    ],
+    "0x800580b78c": [
+     1,
+     0
+    ],
+    "0x800580b790": [
+     1,
+     0
+    ],
+    "0x800580b792": [
+     1,
+     0
+    ],
+    "0x800580b794": [
+     1,
+     0
+    ],
+    "0x800580b798": [
+     1,
+     0
+    ],
+    "0x800580b79c": [
+     1,
+     0
+    ],
+    "0x800580b7a0": [
+     1,
+     0
+    ],
+    "0x800580b7a2": [
+     1,
+     0
+    ],
+    "0x800580b7a6": [
+     1,
+     0
+    ],
+    "0x800580b7a8": [
+     1,
+     1
+    ],
+    "0x800580b83c": [
+     1,
+     0
+    ],
+    "0x800580b83e": [
+     1,
+     0
+    ],
+    "0x800580b840": [
+     1,
+     0
+    ],
+    "0x800580b842": [
+     1,
+     0
+    ],
+    "0x800580b846": [
+     1,
+     0
+    ],
+    "0x800580b848": [
+     1,
+     0
+    ],
+    "0x800580b84a": [
+     1,
+     0
+    ],
+    "0x800580b84c": [
+     1,
+     0
+    ],
+    "0x800580b84e": [
+     1,
+     0
+    ],
+    "0x800580b850": [
+     1,
+     0
+    ],
+    "0x800580b854": [
+     1,
+     0
+    ],
+    "0x800580b856": [
+     1,
+     0
+    ],
+    "0x800580b858": [
+     1,
+     0
+    ],
+    "0x800580b85a": [
+     1,
+     0
+    ],
+    "0x800580b85e": [
+     1,
+     0
+    ],
+    "0x800580b862": [
+     1,
+     0
+    ],
+    "0x800580b866": [
+     1,
+     0
+    ],
+    "0x800580b86a": [
+     1,
+     0
+    ],
+    "0x800580b86e": [
+     1,
+     0
+    ],
+    "0x800580b870": [
+     1,
+     0
+    ],
+    "0x800580b872": [
+     1,
+     0
+    ],
+    "0x800580b874": [
+     1,
+     0
+    ],
+    "0x800580b876": [
+     1,
+     0
+    ],
+    "0x800580b878": [
+     1,
+     0
+    ],
+    "0x800580b87a": [
+     1,
+     0
+    ]
+   }
+  },
+  "1": {
+   "instructions": 38,
+   "compressed_instructions": 14,
+   "by_class": {
+    "scalar_int": 22,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 5,
+    "store": 1,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 5,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "ld": 5,
+    "addi": 5,
+    "andi": 5,
+    "li": 4,
+    "beqz": 3,
+    "mv": 2,
+    "srli": 2,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "sd": 1,
+    "bnez": 1,
+    "auipc": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 38,
+   "shire": 0,
+   "minion": 0,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     0
+    ],
+    "0x800580b5de": [
+     1,
+     0
+    ],
+    "0x800580b5e2": [
+     1,
+     0
+    ],
+    "0x800580b5e6": [
+     1,
+     0
+    ],
+    "0x800580b5ea": [
+     1,
+     0
+    ],
+    "0x800580b5ee": [
+     1,
+     0
+    ],
+    "0x800580b5f2": [
+     1,
+     0
+    ],
+    "0x800580b5f6": [
+     1,
+     0
+    ],
+    "0x800580b5fa": [
+     1,
+     0
+    ],
+    "0x800580b5fe": [
+     1,
+     0
+    ],
+    "0x800580b600": [
+     1,
+     0
+    ],
+    "0x800580b602": [
+     1,
+     0
+    ],
+    "0x800580b604": [
+     1,
+     0
+    ],
+    "0x800580b606": [
+     1,
+     1
+    ],
+    "0x800580b718": [
+     1,
+     0
+    ],
+    "0x800580b71c": [
+     1,
+     0
+    ],
+    "0x800580b71e": [
+     1,
+     0
+    ],
+    "0x800580b722": [
+     1,
+     0
+    ]
+   }
+  },
+  "2": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 1,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "3": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 1,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "4": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 2,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "5": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 2,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "6": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 3,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "7": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 3,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "8": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 4,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "9": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 4,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "10": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 5,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "11": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 5,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "12": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 6,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "13": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 6,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "14": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 7,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "15": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 7,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "16": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 8,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "17": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 8,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "18": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 9,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "19": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 9,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "20": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 10,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "21": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 10,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "22": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 11,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "23": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 11,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "24": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 12,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "25": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 12,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "26": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 13,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "27": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 13,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "28": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 14,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "29": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 14,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "30": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 15,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "31": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 15,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "32": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 16,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "33": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 16,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "34": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 17,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "35": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 17,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "36": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 18,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "37": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 18,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "38": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 19,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "39": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 19,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "40": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 20,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "41": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 20,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "42": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 21,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "43": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 21,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "44": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 22,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "45": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 22,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "46": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 23,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "47": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 23,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "48": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 24,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "49": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 24,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "50": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 25,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "51": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 25,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "52": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 26,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "53": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 26,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "54": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 27,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "55": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 27,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "56": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 28,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "57": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 28,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "58": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 29,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "59": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 29,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "60": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 30,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "61": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 30,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "62": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1,
+    "ret": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1,
+    "mv": 1,
+    "ecall": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 31,
+   "hart": 0,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  },
+  "63": {
+   "instructions": 23,
+   "compressed_instructions": 10,
+   "by_class": {
+    "scalar_int": 14,
+    "int_muldiv": 0,
+    "scalar_float": 0,
+    "float_int_xfer": 0,
+    "vector_float": 0,
+    "vector_int": 0,
+    "transcendental": 0,
+    "mask_broadcast": 0,
+    "load": 2,
+    "store": 0,
+    "load_past_l1": 0,
+    "store_past_l1": 0,
+    "gather_scatter": 0,
+    "gather_scatter_past_l1": 0,
+    "branch_taken": 1,
+    "branch_not_taken": 2,
+    "jump": 2,
+    "atomic_local": 0,
+    "atomic_global": 0,
+    "atomic_packed": 0,
+    "atomic_std": 0,
+    "tensor": 0,
+    "cache_op": 0,
+    "sync": 0,
+    "system": 2,
+    "trap": 0,
+    "unknown": 0
+   },
+   "by_mnemonic": {
+    "li": 4,
+    "ld": 2,
+    "andi": 2,
+    "srli": 2,
+    "mv": 1,
+    "ecall": 1,
+    "ret": 1,
+    "auipc": 1,
+    "addi": 1,
+    "jal": 1,
+    "csrr": 1,
+    "srliw": 1,
+    "bltu": 1,
+    "srl": 1,
+    "beqz": 1,
+    "slli": 1,
+    "bgeu": 1
+   },
+   "by_csr": {
+    "csrr hartid": 1
+   },
+   "tensor": {},
+   "tensor_format_source": {},
+   "traps": {},
+   "unknown": {},
+   "unresolved": [],
+   "cycles_emulated_in_region": 23,
+   "shire": 0,
+   "minion": 31,
+   "hart": 1,
+   "per_pc": {
+    "0x8005801000": [
+     1,
+     0
+    ],
+    "0x8005801004": [
+     1,
+     0
+    ],
+    "0x8005801008": [
+     1,
+     0
+    ],
+    "0x800580100c": [
+     1,
+     0
+    ],
+    "0x800580100e": [
+     1,
+     0
+    ],
+    "0x8005801010": [
+     1,
+     0
+    ],
+    "0x8005801012": [
+     1,
+     0
+    ],
+    "0x800580b5b0": [
+     1,
+     0
+    ],
+    "0x800580b5b4": [
+     1,
+     0
+    ],
+    "0x800580b5b6": [
+     1,
+     0
+    ],
+    "0x800580b5ba": [
+     1,
+     0
+    ],
+    "0x800580b5be": [
+     1,
+     0
+    ],
+    "0x800580b5c0": [
+     1,
+     0
+    ],
+    "0x800580b5c4": [
+     1,
+     0
+    ],
+    "0x800580b5c6": [
+     1,
+     0
+    ],
+    "0x800580b5ca": [
+     1,
+     0
+    ],
+    "0x800580b5ce": [
+     1,
+     0
+    ],
+    "0x800580b5d2": [
+     1,
+     0
+    ],
+    "0x800580b5d4": [
+     1,
+     0
+    ],
+    "0x800580b5d8": [
+     1,
+     0
+    ],
+    "0x800580b5da": [
+     1,
+     1
+    ],
+    "0x800580b724": [
+     1,
+     0
+    ],
+    "0x800580b726": [
+     1,
+     0
+    ]
+   }
+  }
+ },
+ "kernel": {
+  "text_vma": "0x8005801000",
+  "pc_offset": "0x335000",
+  "pc_range": [
+   "0x8005b36000",
+   "0x8005b40976"
+  ]
+ },
+ "total": {
+  "instructions": 352128,
+  "compressed_instructions": 150490,
+  "by_class": {
+   "scalar_int": 259369,
+   "int_muldiv": 4990,
+   "scalar_float": 0,
+   "float_int_xfer": 0,
+   "vector_float": 0,
+   "vector_int": 0,
+   "transcendental": 0,
+   "mask_broadcast": 0,
+   "load": 45542,
+   "store": 15942,
+   "load_past_l1": 0,
+   "store_past_l1": 0,
+   "gather_scatter": 0,
+   "gather_scatter_past_l1": 0,
+   "branch_taken": 15824,
+   "branch_not_taken": 10173,
+   "jump": 157,
+   "atomic_local": 0,
+   "atomic_global": 0,
+   "atomic_packed": 0,
+   "atomic_std": 0,
+   "tensor": 0,
+   "cache_op": 0,
+   "sync": 0,
+   "system": 131,
+   "trap": 0,
+   "unknown": 0
+  },
+  "by_mnemonic": {
+   "add": 84379,
+   "srli": 59679,
+   "ld": 40567,
+   "and": 39680,
+   "addi": 20014,
+   "sd": 15670,
+   "bne": 14884,
+   "mv": 10087,
+   "andi": 10063,
+   "sub": 9921,
+   "xor": 9920,
+   "beqz": 5501,
+   "li": 5292,
+   "mul": 4990,
+   "lw": 4968,
+   "slliw": 4962,
+   "subw": 4960,
+   "bge": 4960,
+   "bltu": 534,
+   "sw": 270,
+   "slli": 203,
+   "bnez": 35,
+   "j": 28,
+   "bgeu": 79,
+   "lwu": 5,
+   "lui": 5,
+   "csrr": 67,
+   "xori": 4,
+   "beq": 4,
+   "sltiu": 3,
+   "or": 3,
+   "lhu": 2,
+   "sb": 2,
+   "jal": 65,
+   "ecall": 64,
+   "snez": 1,
+   "zext.b": 1,
+   "ret": 64,
+   "srliw": 64,
+   "srl": 64,
+   "auipc": 64
+  },
+  "by_csr": {
+   "csrr hpmcounter3": 2,
+   "csrr hartid": 64,
+   "csrr tensor_error": 1
+  },
+  "tensor": {},
+  "traps": {},
+  "unknown": {},
+  "harts": 64
+ },
+ "checks": {
+  "unknown_mnemonics": [],
+  "traps_executed": [],
+  "unresolved_runs": 84
+ }
+}
