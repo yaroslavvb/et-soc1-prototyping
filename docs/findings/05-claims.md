@@ -5237,7 +5237,89 @@ every earlier word stays as written.
   box call; after it, the same for real on the lab clone. None of the three files this fix edits (02, 04 and 05) lies in any of the
   perimeters (the day-2 check v1's 139 paths and v2's 598; E186's history checks' 60 and 506), and no tracked hash list names one.
 - **Not yet done:** E183's kit note, its verifier and a check of its readiness; E183's next day on the owner's go with a fresh approval
-  for aifoundry3.
+  for aifoundry3. *(dated, Thu 12 Nov 2026, Q165's records: the kit note, its verifier, its fix pass and the readiness check are done; E183's next day is Fri 13 Nov 2026 or later: section "Q164 and Q165", below)*
+
+## Q164 and Q165: E183's kit note 4 landed, E183 READY WITH GAPS for Fri 13 Nov 2026 or later; E188 registered and kitted; E185's first try copied and read post hoc (Thu 12 Nov 2026, week 46; on the owner's message of about 10:50 PST)
+
+Each claim is labelled **registered** (committed before any datum of its run), **blind**, **held out**, **reported** (an arm read beside a rule, never a verdict), **post hoc** (read on data that existed first, deciding nothing), **not run**, or **a desk check of code** (a test of committed code, deciding nothing measured). No committed verdict changes; M10, M11, M12 and every frozen file stay as committed. Short names: `X3/` is `tools/claims-v3/e183/` and `X8/` `tools/claims-v3/e188/`. The owner's words are in 02's Q164 and Q166 rows. 🛑 **To carry from here:** (144) **E183's next day is a Pacific date of Fri 13 Nov 2026 or later**, never Thu 12 Nov (step 6 v2's NO-THIRD-BUILD, its registered SKIP); (145) **the earlier suggestion of a check, "the host refuses `--operands-b` without `--launches`, with no device opened", is not safe and is quoted only as corrected:** that refusal is the patched host's `main.cpp` line 392, after the session's constructor (line 604, which opens the device layer, line 149) and after the run has copied the F image (lines 382–383), and the desk record shows ten device calls before it; kit note 4 reads `--list` and an empty kernel name instead, both before the constructor; (146) **"E183 FULL first" on a shared day is a preference**, within E183.md section 7 ("may go first or follow any run"); (147) **E183's rules read NOT RUN**, never "failed"; (148) **october-forecast-model's E188 arms only by their committed files** (`X8/ofm-e188.json`, `X8/arm_read_e188.py`, `X8/rb/check_arms_e188.py`), with no reading here; (149) **the passage of E188.md section 2 that its dated note 1 sets aside is repeated nowhere in these records**; (150) **E188-C's and E188-SCHED's FAIL means "not PASS"** (dated note 1, section 3); (151) **the read of E185's first try is post hoc and decides nothing**; the try stays G0-REFUSED, not a failed prediction and not E185 data.
+
+### Registered, before any datum
+
+- **E183's kit dated note 4** (`24b9b99e`, 11:14:03 PST; `X3/KIT.md.dated-note-4.md`, `X3/CARD-LANE-BRIEF.md.dated-note-3.md`): the runbook's gates, namely the train change read from the built host's behaviour (`X3/train_check_e183.sh`), the rest rule (40 minutes, `X3/rb/rest_rule_e183.sh`), step 5a's place (once a day, before any build; a second run refused) and its refusal, and step 2 v5's pins (`SHA256SUMS-e183-kit-note4`, 44 entries; step 2 v5 itself outside the list). No rule, forecast, threshold, plan, cap or stop of E183.md changed; notes M1 and M2 stay blind, and october-forecast-model v8 and v9 equal v7 on the vector add, so they need no note there.
+- **E188** (`878b6f63`, 12:53:42 PST): its set, kinds, lines, rules, plan and power as `X8/E188.md` registers them (sections 0 and 3–7, 12 and 13), the lines in `X8/forecast-e188.json`, M12 (as frozen) and M10 the blind arms, and one tier line as a bare sha256. **Its dated amendment A1** (`6e6d23dc`, 16:23:33 PST): A1-1, october-forecast-model's readings are written outside the repository, never committed, and public records name the arms by their files; A1-2, a stop in the smoke's train processes is a failed smoke train gate (no train that day, none retried, the fallback under the live stops, every train rule NOT SCORED, E188-LV the reading). **Its kit** (`726a6b64`, 14:34:31) and **the kit's dated note 1** (`16b41cf2`, 16:24:28): on E188's day step 2 is `X8/rb/s03_desk_e188_v2.sh` and step 9 is `X8/rb/s11_a3_session_e188_v2.sh`, never their v1 alone; the rest rule v2 counts a session cut mid-queue as ended at its run's latest write.
+
+### Desk checks of code (reported, deciding nothing measured)
+
+- **E183's kit note 4:** the train check on eight fresh real builds, 42 of 42 (the patched host and E180's, each with g++-13 at -O2 and -O3 and clang++ at -O1 and -O2): both GCC builds of the patched host pass where the old binary search fails them, and E180's host fails as the negative control, each run with an empty device record; the rest rule 13 of 13; the runbook 31 of 31, with the real copy tool in remote mode; the dry pass 29 of 29; the dry listing 14 steps, none failing; the command audit GO.
+- **E183's readiness at `24b9b99e`** (11:20–11:50 PST; on a scratch clone and then for real on the lab clone; stand-in box commands, 0 calls; a stand-in window written that day in a scratch output directory only): **READY WITH GAPS for a Pacific day of Fri 13 Nov 2026 or later**. E183's anchor lines 1–6 read as stated; the check v2 (`check_day2_v2.py tree --pull`) 0; step 2 v4 0 and v5 0; the reader's gate refused with no data, as it must; 167 lists, 5,870 entries, 5,853 OK. Its gaps: no second adversarial read of the fix pass's 11 changed files; the box's compiler unknown until step 5a; the box steps rehearsed only against stand-ins; "no device before the session" resting on the patched source.
+- **E188's kit:** the train check 50 of 50 on twelve real builds, the host test 29 of 29, the stops 8 of 8, the scorer's self-test 20 of 20, the arms' gate 14 of 14, the rest rule 20 of 20, the runbook 21 of 21, a dry pass with no device opened, the dry listing 19 steps with no box call, the command audit GO; after its fix pass, the rest rule v2 32 of 32, the runbook v2 16 of 16 (its first run read 15 of 16, fixed before the commit) and the dry listing v2 19 steps.
+
+### Post hoc, deciding nothing: E185's first try, read from a copy
+
+**The copy:** one bounded, read-only copy of E185's first try's files from aifoundry3 (a probe and one copy, 12:12:31–12:12:33 PST, both exit 0, no other call; nothing written or moved on the box): 45 files, 518,608 bytes, and the 41 files the try's own session manifest names match it once its two moved-aside names are mapped. Its scrub found no other user's login. **It is not committed:** the copy as made carries our own box login in its paths, and a masked copy would no longer match the manifest byte for byte, so it stays outside the repository; the try is G0-REFUSED, not E185 data, and no hold ran. **The read**, against E185's committed later try (`190bad0d`), with A8's residue code unchanged: both tries' R0 rests decayed and neither rose (the 34-sensor mean fell at −0.232 °C/min [−0.364, −0.100] in the first and −0.408 [−0.546, −0.270] in the later); both ran the same smoke (9 launches at the same offsets, 84.1 s, the board at 30.00 against 29.96 W) and began R0 at the same temperature (54.075 against 54.058 °C over its first 10 s); yet through R0 the first try's die drew away warmer, the first less the later growing from +0.017 to +0.765 °C at +0.176 °C/min [+0.155, +0.197], alike on all 34 sensors (+0.696 °C at the room window, sd 0.005), with no board power beyond E97's leakage law (+0.0039 W; its slope −0.0026 W/min [−0.0076, +0.0023]). Read so, the card was warmed from outside its own power, by its surroundings or its cooling; what warmed it cannot be told from these files (no inlet or fan reading; the host not read during R0). The two start-gate residues, 1.024 and 0.125 °C, are those section "Q163" already gives. No rule, threshold, cap or stop changes, and E185's committed verdicts stand; a rule for such drift needs its own registration before any datum.
+
+### Not run
+
+- **E183:** not run; its next day is Fri 13 Nov 2026 or later, on the owner's go with a fresh approval for aifoundry3.
+- **E188:** registered and kitted, not run; it needs the owner's go; on a day it shares with E183 it runs after E183's collection.
+- **E187:** reserved for E186's reserve trains, not registered.
+
+### Wording, quoted only as corrected
+
+- **The suggested check:** item (145) above.
+- **The kit note's list:** two earlier sha256 of the kit note's list and step 2 (`05bf81bb…`, `f16bd35d…`) were never committed; the committed ones are `a10782bd…` and `ea878cda…`.
+- **The first records' commit:** `d5c9fa26` is insert-only bar four Q index counters, the agents file's index-row date end and one moved entry, as section "Q163"'s dated paragraph says.
+- **"E183 FULL first":** a preference (item 146).
+- **E188's FAIL word:** "not PASS" (item 150); when no train block is read, E188-SCHED's PASS is vacuous, quoted in the scorer's own words.
+
+### The verifiers' findings, one line each
+
+- **E183's kit note's verifier:** holds with fixes, three minor faults and four nits, none blocking, each answered before the land: (1) step 5a stopped with no marker when none of its records is on the box, since the copy tool's broken-pipe line read as an error (fixed: such a box reads COPIED WITH GAPS, 0 files); (2) the go did not exclude Thu 12 Nov, when step 6 v2 refuses a third build start (answered: the next day is Fri 13 Nov 2026 or later); (3) the land's order could leave untracked modules in the lab clone if it stopped (fixed: the scan runs on scratch copies before the copy, and a stopped land is undone); the nits: the train check writes four temporary files, not two, all removed (a records line); the rest rule read any upper-case marker word in a line as a dry block (fixed: only the kits' own markers); step 5a could run twice (fixed: it refuses a second run); and "E183 FULL first" (a preference).
+- **E188's verifier:** holds with fixes, six minor faults, none blocking: (1) a passage of E188.md section 2 went beyond what its section 1 item 4 allows (answered by dated note 1); (2) section 8 said the arms' readings go beside the data, where the kit writes them outside the repository (answered by A1-1); (3) the rest rule could count a session cut mid-queue as ended early (fixed by the kit's dated note 1); (4) a die stop in the smoke's train processes sent the session to the fallback, inherited from E182 and E186 (answered by A1-2, read so before any datum); (5) a non-finite telemetry sample trips no stop, inherited from E153 and E171 (a records line in the kit's dated note 1; its code change is left to a later kit note, since it means re-kitting the pinned box files); (6) the FAIL word of E188-C and E188-SCHED was not spelled out (dated note 1). It re-derived every train's M12 increment and se from the committed model, 7 of 7 to the last bit, and found no E188 datum in any ref, GitHub's branches included.
+
+### The counts
+
+At `16b41cf2`: 171 lists, 6,008 entries, 5,991 OK; the 17 others are E85's code list, 17 of 17 matching under `tools/claims-v3/{hlc,hlk,hm}`. Since `6fc09747`: seven commits, 131 files added (32 + 21 + 63 + 3 + 12) and only the records files edited. No E183 or E188 datum is in any ref.
+
+### The go lines
+
+- **E183's anchor lines 1–6** (`X3/KIT.md.dated-note-4.md`; true at `24b9b99e` and at this commit), run from the lab clone's top after `check_day2_v2.py tree --pull` and before E183's step 1:
+
+```
+git merge-base --is-ancestor 24b9b99eccd67244d750eaab622e77366d999093 HEAD    (exit 0)
+git diff --quiet 24b9b99eccd67244d750eaab622e77366d999093 -- tools/claims-v3/e183/SHA256SUMS-e183-kit-note4 tools/claims-v3/e183/rb/s03_desk_e183_v5.sh    (exit 0)
+shasum -a 256 tools/claims-v3/e183/SHA256SUMS-e183-kit-note4    a10782bd39462081319db91fd9fb2e9cb597ea56adc6d5fe2752c85069077c64
+shasum -a 256 tools/claims-v3/e183/rb/s03_desk_e183_v5.sh    ea878cdafca7251ebd1a475fa0dd7d738115a5a077c82c8c89e687af19d9079f
+shasum -a 256 -c tools/claims-v3/e183/SHA256SUMS-e183-kit-note4    44 of 44 OK
+git merge-base --is-ancestor e8e9f4e1c5c0407e7e29268c378d3c26d899433c HEAD    (exit 0); SHA256SUMS-e183-kit-note3 reads 3b472e387e24dd41eff814a60b6dd5da0ad11daeea147c8a4b76f30bf3515c22, 19 of 19 OK
+git log --all --oneline -- 'docs/reports/data/*e183*'    prints nothing
+```
+
+  **E183's next day, in order:** 0 the check v2 by hand and the anchor lines; 1 the window (`X3/rb/s02_window_e183.sh`); 2 step 2 v5 (`X3/rb/s03_desk_e183_v5.sh`, which runs v4 inside; never v4 alone); 4 the look before 3 the day's one post; 5a the read-only copy of the earlier day's build records (`X3/rb/s06_a3_records_e183.sh`, once a day); 5 the sync; 6 the build v2, with its train check; 7 the reads; 8 the dry pass v2; 9 the session v2, FULL, after the rest rule; 10 the wait; 11 the release, the collection v2, the data commit and the reader's gate.
+- **E188's anchor lines 1–9** (the kit's 1–6 and its dated note 1's 7–9; true at `16b41cf2` and at this commit):
+
+```
+git merge-base --is-ancestor 726a6b64794b6c00f41b4c320a4d26a9af69a457 HEAD    (exit 0)
+git diff --quiet 726a6b64794b6c00f41b4c320a4d26a9af69a457 -- tools/claims-v3/e188/SHA256SUMS-e188-kit tools/claims-v3/e188/rb/s03_desk_e188.sh    (exit 0)
+shasum -a 256 tools/claims-v3/e188/SHA256SUMS-e188-kit    e9bb2836479f97ae686207571925836e4aa76575e2790cbb52dc25b984be1024
+shasum -a 256 tools/claims-v3/e188/rb/s03_desk_e188.sh    6255d92d3a79ff182501314cd7a02ec2fc48862dce7c36b459def9d0f5c6ba6c
+shasum -a 256 -c tools/claims-v3/e188/SHA256SUMS-e188-kit    106 of 106 OK
+git merge-base --is-ancestor 878b6f6302f4b40d57c9577e3cb46b00cd741592 HEAD    (exit 0); SHA256SUMS-e188-registration reads b098561b055e9d85b87ea7e501105fda2f84234699a2b50b7ee8724fa0b9970e, 20 of 20 OK
+git log --all --oneline -- 'docs/reports/data/*e188*'    prints nothing
+git merge-base --is-ancestor 16b41cf28c0553845dd6387fad2a062aa928f71c HEAD    (exit 0)
+git diff --quiet 16b41cf28c0553845dd6387fad2a062aa928f71c -- tools/claims-v3/e188/SHA256SUMS-e188-a1 tools/claims-v3/e188/SHA256SUMS-e188-kit-note1 tools/claims-v3/e188/rb/s03_desk_e188_v2.sh    (exit 0)
+shasum -a 256 tools/claims-v3/e188/SHA256SUMS-e188-a1    63f7076376bbd13e5394bfc8c94cbf4905de8968851e9158e1a7ba34c982a4a2 (2 of 2 OK)
+shasum -a 256 tools/claims-v3/e188/SHA256SUMS-e188-kit-note1    994e8e92f9ef22df65630ee8e108a9bb53a55a18a633c1e6f654029bd7b3a3c2 (10 of 10 OK)
+shasum -a 256 tools/claims-v3/e188/rb/s03_desk_e188_v2.sh    4cc73a3f9976b65efd744c3f042b623cf29421cce356baecc8847d743f462b96
+```
+
+  **E188's day, in order** (`X8/KIT.md` section 3 with its dated note 1, and the brief with its dated note 1): 0 the anchor lines by hand; 1 the window; 2 step 2 v2; 4 the look before 3 the post; 5 the sync; 6 the build, with the train change read from the built host's behaviour; 7 the reads; 8 the dry pass; 9 the session v2 (FULL, or PASSES in the fallback), refused within 40 minutes of our last real session on the box; 10 the wait; 11 the release and the collection; 12 the data commit; 13 after it only, the reported arms' gate, its outputs outside the repository.
+
+### Disclosures
+
+- **Process, Q164 and Q165**, none safety-related: the kit note's lanes ran short scripts outside the round's local slot (disclosed in their own results); the readiness check made a cosmetic error in its own scratch summary; E188's registration lane's first bench attempt stopped at once for a missing option, before any count, and two of its inputs on a desk machine were copied again and checked by sha256; E188's kit lane had one command refused by the desk's safety check and one script refused by bash before it ran, neither touching the lab clone; E188's fix pass's runbook test read 15 of 16 at first (a missing tool on the stand-in), fixed and re-run on the final bytes; the copy lane's seven sub-second reads ran outside the slot, and it deleted an unused reference copy. Only the copy lane reached a lab box, once, read-only.
+- **These records' own gate** (desk checks of code): this commit was made only after the same commit, in a scratch clone never pushed, read the check v2 (`check_day2_v2.py tree --pull`) 0, E183's anchor lines 1–6 as stated and its step 2 v5 0, and E188's anchor lines 1–9 as stated and its step 2 v2 0, with no box call; after it, the same for real on the lab clone. None of the seven files these records edit lies in any perimeter, and no tracked hash list names one.
+- **Not yet done:** a verifier of these records, and a fix pass if it finds faults; a verifier of the first records' fix (`b881d56d`); a check of the next card day's readiness; a second adversarial read of E183's kit note's fix pass, and a first of E188's fix pass (`6e6d23dc`, `16b41cf2`); kit hygiene on the box (the first try's files, E183's build records, E186's and E184's leftovers), after a desk copy of each.
 
 ## Ridge points (derived; no card time)
 
