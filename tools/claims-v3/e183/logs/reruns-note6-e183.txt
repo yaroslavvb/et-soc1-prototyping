@@ -1,0 +1,300 @@
+E183's kit dated note 6: note 4's desk tests re-run on aifoundry2 on note 6's bytes as fixed before the land (lane fix-n6, Q173), each inside
+the round's CPU slot and a no-device sandbox; /usr/bin/python3 3.12.3; g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; Ubuntu clang version 18.1.3 (1ubuntu1)
+clone HEAD d7c83b3e75a5 (note 6's local commit on GitHub main 1915b88ffb1b) with fix-n6's changes in the work tree; GNU date on PATH as gdate (a shim to /usr/bin/date)
+
+################ bash tools/claims-v3/e183/rb/selftest_rb_e183_v3.sh <scratch>   (2026-11-13 15:11:01 PST to 15:11:15 PST, rc 0)
+scratch repository: 1117 files committed
+
+== A. the dry listing v5: every step exits 0; the look before the post; step 5a before step 5 and step 6; no ssh or rsync call
+dry listing: 14 steps listed, 0 exited non-zero
+-> PASS (A the dry listing v5: 0 steps failing, no call; the look, the post, step 5a, step 5, step 6 in that order)
+
+== K. step 2 v5 with no window in RB_OUT
+[s03_desk_v5_e183] STOP: no window in RB_OUT: run s02_window_e183.sh first (kit v5: s02 before s03)
+-> PASS (K step 2 v5 refuses without step 1's window)
+
+== R0. step 6 v2's start before step 5a: refused, no call
+[s08_a3_build_v2_e183] STOP: no copy of aifoundry3's E183 build records in RB_OUT: run step 5a (rb/s06_a3_records_e183.sh) first; this build rewrites the cmake log, the inputs and tree checks and the 
+-> PASS (R0 no build before the records' copy)
+
+== R1. step 5a on the stand-in box: one probe, ONE rsync, all 11 records, the compiler line, the box unchanged
+[s06_a3_records_e183] the box's compiler, from build/enercat-e183-cmake.log: -- The C compiler identification is GNU 11.4.0;-- The CXX compiler identification is GNU 11.4.0;
+[s06_a3_records_e183] RECORDS COPIED: 11 files of E183's build records into RB_OUT/box-records-e183/ (RECORDS-COPIED lists them and their sha256); nothing on the box was written or moved
+-> PASS (R1 the records copied read-only (11 files at the box's own bytes), the compiler named, the box's build/ unchanged)
+
+== R2. two records absent on the box: COPIED WITH GAPS, the two named
+[s06_a3_records_e183] COPIED WITH GAPS: 9 files of E183's build records into RB_OUT/box-records-e183/ (RECORDS-COPIED lists them and their sha256); not on the box: build/e183-inputs.txt build/q141k/jobs/a3-build-e183.pid
+-> PASS (R2 a partial copy names its gaps and writes the marker)
+
+== R3. a login link at the probe: 11, the lock file appended, no rsync
+[s06_a3_records_e183] STOP: aifoundry3 printed a login link at the probe (lock file appended; link in RB_LINKS): nothing else was called
+-> PASS (R3 a login link stops the copy before it starts)
+
+== R4. the rsync failing otherwise: 14, no marker
+[s06_a3_records_e183] STOP: the records' copy exited 14: rsync exited 12, and only its 23 (a partial transfer) can mean records not on the box; not copied, and not named missing by the box's rsync: bu
+-> PASS (R4 a failed copy writes no marker)
+
+== R5. remote mode, all 11 records on the box: one probe, one transport, 11 files at the box's bytes, the box unchanged
+[s06_a3_records_e183] RECORDS COPIED: 11 files of E183's build records into RB_OUT/box-records-e183/ (RECORDS-COPIED lists them and their sha256); nothing on the box was written or moved
+-> PASS (R5 remote mode: the whole copy, read-only)
+
+== R6. remote mode, two records absent: rsync's 23, each named missing by the box's own rsync: COPIED WITH GAPS
+rsync: [sender] link_stat "<box>/aifoundry3/aifoundry/build/e183-inputs.txt" failed: No such file or directory (2)
+rsync: [sender] link_stat "<box>/aifoundry3/aifoundry/build/q141k/jobs/a3-build-e183.pid" failed: No such file or directory (2)
+[s06_a3_records_e183] rsync's code 23: the box's own rsync names each of these records missing (one 'link_stat ... No such file or directory' line each): build/e183-inputs.txt build/q141k/jobs/a3-buil
+[s06_a3_records_e183] COPIED WITH GAPS: 9 files of E183's build records into RB_OUT/box-records-e183/ (RECORDS-COPIED lists them and their sha256); not on the box: build/e183-inputs.txt build/q141k/jo
+-> PASS (R6 a partial copy, its gaps proven by the box's rsync)
+
+== R7. remote mode, EVERY record absent (verify-kit183's MR4): COPIED WITH GAPS, 0 files, the marker written
+rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1887) [Receiver=3.2.7]
+rsync: [Receiver] write error: Broken pipe (32)
+[s06_a3_records_e183] rsync's code 23: the box's own rsync names each of these records missing (one 'link_stat ... No such file or directory' line each): build/e183-build-logs build/e183-build-attempt
+[s06_a3_records_e183] COPIED WITH GAPS: 0 files of E183's build records into RB_OUT/box-records-e183/ (RECORDS-COPIED lists them and their sha256); not on the box: build/e183-build-logs build/e183-bui
+   (reported) rsync's own lines: receiver's 'write error: Broken pipe' 1; sender's link_stat 10
+-> PASS (R7 nothing on the box: COPIED WITH GAPS (0 files), the marker written, so step 6 v2 can build)
+
+== R8. remote mode, a record on the box that cannot be read: 14, no marker (a gap the box's rsync did not name missing)
+[s06_a3_records_e183] STOP: the records' copy exited 14: not copied, and not named missing by the box's rsync: build/e183-tree-check.txt; other lines: rsync: [sender] send_files failed to open "<scratch path>
+-> PASS (R8 a record present but not copied is never read as a gap)
+
+== R9. remote mode, the box's whole tree missing: 14, no marker (rsync's change_dir line, no record named missing)
+[s06_a3_records_e183] STOP: the records' copy exited 14: not copied, and not named missing by the box's rsync: build/e183-build-logs build/e183-build-attempts.txt build/enercat-e183-cmake.log build/e183-inputs.txt build/e183-inputs-build.tx
+-> PASS (R9 no tree on the box: a failed copy, never COPIED WITH GAPS)
+
+== R10. step 5a again in an RB_OUT that already holds RECORDS-COPIED: 16, no call, the marker unchanged
+[s06_a3_records_e183] STOP: RB_OUT/box-records-e183/RECORDS-COPIED is already here (E183's build records copied from aifoundry3:aifoundry/ by s06_a3_records_e183.sh, 2026-11-13 15:11:04 PST; rsync rc 0): step 5a copies once a day, before st
+-> PASS (R10 a second run never overwrites the day's copy)
+
+== R11. remote mode, a login link during the copy's transport (not at the probe): 11, the lock file appended, no marker
+[s06_a3_records_e183] STOP: a login check is needed on aifoundry3 (appended to the lock file; the link is in RB_LINKS): approve, then run this step again
+-> PASS (R11 a link mid-copy stops it)
+-> PASS (R5-R11 the stand-in box's build/ as before them)
+
+== B1. step 5 (v1, unchanged) syncs E183's directory with note 4's files; step 6 V1 with GCC -O2: the host lacks the train change
+[s07_a3_sync_e183] synced to aifoundry3:aifoundry/ every file of harness-e183.json (80 files, in 50 paths)
+E183-BUILD-ATTEMPT 1 today (the day's start 1)
+[s08_a3_build_e183] STOP: the train host's build failed on aifoundry3 (the lines above; build 1 of at most 2 today): run this step's start once more (the one re-run), then its wait; if that build does not read TRAIN-HOST
+the host lacks the train change
+TRAIN-HOST-BUILD-FAILED rc=1
+-> PASS (B1 the sync carries note 4's 8 files; v1's build of a GCC -O2 host fails its own grep (one re-run asked))
+
+== B2. the re-run, by step 6 v2: TRAIN-CHANGE OK, then the four checks
+BUILD INPUTS OK: 40 files match harness-e183.json (37 of workloads/enercat, E180's generator and its text, the patch)
+E183-BUILD-ATTEMPT 2 today (the day's start 2)
+e183_common rc=0
+harness_e183_v2 rc=0
+HARNESS OK: 127 files (v1's check: HARNESS OK: 120 files; note 4's 7 box files at their pins)
+preflight_e183_v2 rc=0 dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+[s08_a3_build_v2_e183] aifoundry3: the train host built by the detached job a3-build-e183 (build v2: TRAIN-CHANGE OK, read from the host's behaviour); BUILD INPUTS OK 40, HARNESS OK with the binaries, the build tree and 
+TRAIN-CHANGE OK: build/enercat-e183/host/enercat_host accepts --operands-b, --abba and --launches and stops at the empty --kernel (rc 1, before any device call); --list names E180's fadd.ps.acc and fadd.pi.acc (rc 0)
+TRAIN-HOST-BUILT rc=0
+-> PASS (B2 build v2 of the same GCC -O2 host passes (TRAIN-CHANGE OK in its log), HARNESS OK 127, preflight v2 GO; two builds; no device record)
+
+== B3. a third start: refused (a good build today)
+-> PASS (B3 no second build after a good one)
+
+== D. step 8 v2 (the dry pass) on that box: block v2 on the GCC -O2 host, the start gate of session v2
+E183 dry 18301 --smoke rc=0
+E183 dry 18302 --stoptest rc=0
+E183 dry 18310 rc=0
+E183 start gate rc=8 (want 8)
+-> PASS (D job a3-dry-e183 rc 0: 18310 0, the smoke 0, the start gate 8; no network call from the box; no device record)
+
+== S1. step 9 v2's rest rule: E185's form (build/e185/T1794600000/session.log) ending 10 minutes ago
+REFUSED: 10 minutes since E185's session end (2026-11-13 15:01:13 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (S1 under 40 minutes after E185's end: refused, nothing launched)
+
+== S2. step 9 v2's rest rule: E186's form (build/e186/T1794600100/session.log) ending 15 minutes ago
+REFUSED: 15 minutes since E186's session end (2026-11-13 14:56:13 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (S2 under 40 minutes after E186's end: refused, nothing launched)
+
+== S3. step 9 v2's rest rule: E184's form (build/e184/session-S-t1794600200.log) ending 20 minutes ago
+REFUSED: 20 minutes since E184's session end (2026-11-13 14:51:13 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (S3 under 40 minutes after E184's end: refused, nothing launched)
+
+== S4. all three ended 41 minutes ago or more: the rest line, then the next gate (the dry pass made yesterday's for this case)
+rest: 41 minutes since E185's session end (2026-11-13 14:30:13 PST; dry sessions and blocks that opened no device skipped)
+REFUSED: E183's dry pass (s10_a3_dry_e183.sh) has not ended rc 0 today
+[s11_a3_session_v2_e183] STOP: e183 refused on the box: REFUSED: E183's dry pass (s10_a3_dry_e183.sh) has not ended rc 0 today
+-> PASS (S4 the rest rule passes (41 minutes) and the launch's next gate refuses: nothing launched)
+
+== P. step 2 v5's own checks on a scratch repository (step 2 v4 a stand-in there; a stand-in note 4 list pinned in v5's copy)
+P's repository: 485 files; the stand-in note 4 list: 25 entries
+[s03_desk_v5_e183] reported; tools/claims-v3/e183/SHA256SUMS-e183-a1: a list this step does not know (reported, never a gate; 5 lines); tools/claims-v3/e183/SHA256SUMS-e183-kit-note5: a list this step does not know (reported, never a gate; 24 lines); tools/cla
+[s03_desk_v5_e183] desk check v5: step 2 v4 passed, then on the same HEAD ac8b93ac3ec8 E183's lists by SHA256SUMS anywhere in a name: the six gate lists at their counts, own bytes and entries (note 4's 25 among them), the brief's count and bytes, notes M1's an
+-> PASS (P1 step 2 v5 passes at its pins)
+[s03_desk_v5_e183] reported; tools/claims-v3/e183/SHA256SUMS-e183-a1: a list this step does not know (reported, never a gate; 5 lines); tools/claims-v3/e183/SHA256SUMS-e183-kit-note5: a list this step does not know (reported, never a gate; 24 lines); tools/cla
+[s03_desk_v5_e183] STOP: the desk check failed: SHA256SUMS-e183-kit-note4(24 OK of 25; pinned 25 and its own bytes, own d2494a1e359e)
+-> PASS (P2 a changed entry in note 4's list: refused)
+[s03_desk_v5_e183] reported; tools/claims-v3/e183/SHA256SUMS-e183-a1: a list this step does not know (reported, never a gate; 5 lines); tools/claims-v3/e183/SHA256SUMS-e183-kit-note5: a list this step does not know (reported, never a gate; 24 lines); tools/cla
+[s03_desk_v5_e183] STOP: the desk check failed: SHA256SUMS-e183-kit-note4(24 OK of 24; pinned 25 and its own bytes, own a27db1aacb71)
+-> PASS (P3 note 4's list one line short: refused)
+[s03_desk_v5_e183] reported; tools/claims-v3/e183/SHA256SUMS-e183-a1: a list this step does not know (reported, never a gate; 5 lines); tools/claims-v3/e183/SHA256SUMS-e183-kit-note5: a list this step does not know (reported, never a gate; 24 lines); tools/cla
+[s03_desk_v5_e183] STOP: the desk check failed: SHA256SUMS-e183-kit-note3(18 OK of 18; pinned 19 and its own bytes, own 6e3bc52593e7)
+-> PASS (P4 kit note 3's list one line short: refused)
+[s03_desk_v5_e183] reported; tools/claims-v3/e183/SHA256SUMS-e183-a1: a list this step does not know (reported, never a gate; 5 lines); tools/claims-v3/e183/SHA256SUMS-e183-kit-note5: a list this step does not know (reported, never a gate; 24 lines); tools/cla
+[s03_desk_v5_e183] desk check v5: step 2 v4 passed, then on the same HEAD 5c87612f810c E183's lists by SHA256SUMS anywhere in a name: the six gate lists at their counts, own bytes and entries (note 4's 25 among them), the brief's count and bytes, notes M1's an
+-> PASS (P5 SHA256SUMS in the middle of a name is found; unknown, reported, never a gate)
+[s03_desk_v5_e183] reported; tools/claims-v3/e183/SHA256SUMS-e183-a1: a list this step does not know (reported, never a gate; 5 lines); tools/claims-v3/e183/SHA256SUMS-e183-kit-note5: a list this step does not know (reported, never a gate; 24 lines); tools/cla
+[s03_desk_v5_e183] desk check v5: step 2 v4 passed, then on the same HEAD 534f087db84c E183's lists by SHA256SUMS anywhere in a name: the six gate lists at their counts, own bytes and entries (note 4's 25 among them), the brief's count and bytes, notes M1's an
+-> PASS (P6 note M1's list changed: reported, never a gate)
+[s03_desk_v5_e183] STOP: step 2 v4 exited 16 (its STOP line above names why)
+-> PASS (P7 step 2 v4's 16 stops v5 before its own checks)
+
+== Z. no process of this test left running; the device record
+-> PASS (Z nothing left running; no device record in any case)
+
+SELFTEST-RB-E183-V3 PASS (31 of 31)
+
+################ bash tools/claims-v3/e183/rb/selftest_rest_e183.sh <scratch>   (2026-11-13 15:11:15 PST to 15:11:16 PST, rc 0)
+== RS1 E184's form (build/e184/session-S-t<T0>.log)
+    REFUSED: 30 minutes since E184's session end (2026-11-08 02:22:24 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (30 minutes after E184's end: REFUSED)
+    rest: 41 minutes since E184's session end (2026-11-08 02:22:24 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (41 minutes after: rest 41)
+== RS2 E185's form (build/e185/T<T0>/session.log)
+    REFUSED: 39 minutes since E185's session end (2026-11-12 06:15:21 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (39 minutes after E185's end: REFUSED)
+    rest: 40 minutes since E185's session end (2026-11-12 06:15:21 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (40 minutes after: rest 40 (the gate's edge passes))
+== RS3 E186's form (build/e186/T<T0>/session.log)
+    REFUSED: 10 minutes since E186's session end (2026-11-09 14:19:08 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (10 minutes after E186's end: REFUSED, naming E186)
+   E185's step 10 v2 rest lines (50-89, committed, unchanged) on the same tree, the same now:
+    rest: no real session of ours in build/e17x, e18x (session.log and session-*.log) or e185/T*/session.log
+-> PASS (E185's v2 lines are blind to E186's form (verify-e185d's finding, reproduced))
+== RS4 every form at once (E182, E183's own, E184, E185, E186)
+    rest: 104 minutes since E185's session end (2026-11-12 06:15:21 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (the latest end of all five forms is E185's: rest 104)
+== RS5 dry and no-device logs only, each ending 5 minutes before now
+    rest: no real session of ours in build/e*/session.log, session-*.log or T*/session*.log
+-> PASS (dry logs and a block that opened no device do not count)
+== RS6 a real E186-form session cut without its 'session end'
+    note: E186's last real session block has no 'session end': counted as ended at 2026-11-12 07:40:00 PST
+    REFUSED: 20 minutes since E186's last real session line (its block has no session end: counted as ended at its last line) (2026-11-12 07:40:00 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (a cut session counts as ended at its last line: REFUSED)
+== RS7 no session log at all
+    rest: no real session of ours in build/e*/session.log, session-*.log or T*/session*.log
+-> PASS (no log: rest reads none)
+== RS8 a REAL session whose lines carry the words DRY and DESK: inside them (not as markers), ended 10 minutes before now
+    REFUSED: 10 minutes since E185's session end (2026-11-12 07:50:00 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (the kits' markers only: a real block with DRY inside a line counts, REFUSED)
+   E185's step 10 v2 rest lines (any DRY or DESK: in a line marks a dry block) on the same tree, the same now:
+    rest: no real session of ours in build/e17x, e18x (session.log and session-*.log) or e185/T*/session.log
+-> PASS (E185's v2 reading skips that real session (verify-kit183's nit, reproduced))
+== RS9 every dry marker the kits write, inside logs named as real ones, each dry block ending 5 minutes before now; one real block 50 minutes before
+    rest: 50 minutes since E171's session end (2026-11-12 07:10:00 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (every kit's dry marker skips its block (E171's DRY config and DRY:, E172's '; DRY)', E176's DESK:, E181's ' DRY' start and untimed DRY lines): rest 50)
+
+SELFTEST-REST-E183 PASS (13 of 13)
+
+################ bash tools/claims-v3/e183/desk/desktest_train_check_e183.sh <scratch>   (2026-11-13 15:11:16 PST to 15:11:32 PST, rc 0)
+compilers: g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; Ubuntu clang version 18.1.3 (1ubuntu1)
+
+== 1. the two trees (E180's generator, unchanged; the patch on one)
+patched <scratch>/src-patched/host/main.cpp sha256 9b8f1a088a7a83c00af64387c80f0f92b0522dcb89ce3a330853ca8e00b0c5f1
+patched host/main.cpp sha256 9b8f1a088a7a83c00af64387c80f0f92b0522dcb89ce3a330853ca8e00b0c5f1; E180's (unpatched) 3cad4adc16534b845cc142f78a28907192b62fe21081e282d6df67342200359c
+-> PASS (the patched source is the pinned 9b8f1a08...)
+-> PASS (the unpatched source is E180's, the committed 3cad4adc...)
+
+== 2. eight builds (each: the compiler, its flag, E184's stubs, the tree, main.cpp and the recording mock)
+g++-13 -std=c++17 -O2 -I<stubs> -I<src-patched> <src-patched>/host/main.cpp <mock v2> -o host-patched-gcc13-O2: rc 0; sha256 31216f528f865de546d2fb3c5de47a7b77d491d6e490665feb1067be6cab8dd8; 0 lines on stderr
+-> PASS (host-patched-gcc13-O2 built)
+g++-13 -std=c++17 -O3 -I<stubs> -I<src-patched> <src-patched>/host/main.cpp <mock v2> -o host-patched-gcc13-O3: rc 0; sha256 3d04e140bdd91a0ca4e055e1ac94183b6eaa40e0311a0c7fbf59b574da242689; 0 lines on stderr
+-> PASS (host-patched-gcc13-O3 built)
+clang++ -std=c++17 -O1 -I<stubs> -I<src-patched> <src-patched>/host/main.cpp <mock v2> -o host-patched-clang-O1: rc 0; sha256 7fc788c7ac5efe7a55ac2ae8bd1809efe2808a9f604a16f86542c164cf80e264; 0 lines on stderr
+-> PASS (host-patched-clang-O1 built)
+clang++ -std=c++17 -O2 -I<stubs> -I<src-patched> <src-patched>/host/main.cpp <mock v2> -o host-patched-clang-O2: rc 0; sha256 496d47944ed2c1dabcb9b6722b638ad582693cead55467b93e6101302eab0143; 0 lines on stderr
+-> PASS (host-patched-clang-O2 built)
+g++-13 -std=c++17 -O2 -I<stubs> -I<src-unpatched> <src-unpatched>/host/main.cpp <mock v2> -o host-unpatched-gcc13-O2: rc 0; sha256 567eba9c8033edd0d73f1517a23305171592c44b8ae78fe6fa8c142059b5db49; 0 lines on stderr
+-> PASS (host-unpatched-gcc13-O2 built)
+g++-13 -std=c++17 -O3 -I<stubs> -I<src-unpatched> <src-unpatched>/host/main.cpp <mock v2> -o host-unpatched-gcc13-O3: rc 0; sha256 19b3666e2f63ec9c97fd07a7f1a7f8ce06620269667d1fbcf33833c1d49ede5f; 0 lines on stderr
+-> PASS (host-unpatched-gcc13-O3 built)
+clang++ -std=c++17 -O1 -I<stubs> -I<src-unpatched> <src-unpatched>/host/main.cpp <mock v2> -o host-unpatched-clang-O1: rc 0; sha256 4bee596f4abce3a5a2da801abe4f7bd130144d4c9bf08d73dc743631543f6652; 0 lines on stderr
+-> PASS (host-unpatched-clang-O1 built)
+clang++ -std=c++17 -O2 -I<stubs> -I<src-unpatched> <src-unpatched>/host/main.cpp <mock v2> -o host-unpatched-clang-O2: rc 0; sha256 d5cefb39130a284e6f0a18337164fe87b05d00bffc12dda5182a6c551af5cfaa; 0 lines on stderr
+-> PASS (host-unpatched-clang-O2 built)
+
+== 3. on each binary: the OLD grep, the NEW check with the device record, and the CONTROL
+-- host-patched-gcc13-O2
+OLD line 68 (= block line 48): fail ('--operands-b' yes, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-patched-gcc13-O2 reads fail)
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-gcc13-O2 accepts --operands-b, --abba and --launches and stops at the empty --kernel (rc 1, before any device call); --list names E180's fadd.ps.acc and fadd.pi.acc (rc 0)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-gcc13-O2: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-gcc13-O2 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 1: FAIL: E183: a train needs --launches; device record: 14 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,mallocDevice,mallocDevice,memcpyHostToDevice,waitForStream,freeDevice,freeDevice,unloadCode,destroyStream)
+-> PASS (CONTROL on host-patched-gcc13-O2 reaches the device layer, the kernel load and the operand copy before its refusal)
+toolchain note (reported): an unknown --pattern, thrown in run() after Session is built, exits 1: FAIL: unknown --pattern nosuch
+-- host-patched-gcc13-O3
+OLD line 68 (= block line 48): fail ('--operands-b' yes, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-patched-gcc13-O3 reads fail)
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-gcc13-O3 accepts --operands-b, --abba and --launches and stops at the empty --kernel (rc 1, before any device call); --list names E180's fadd.ps.acc and fadd.pi.acc (rc 0)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-gcc13-O3: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-gcc13-O3 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 1: FAIL: E183: a train needs --launches; device record: 14 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,mallocDevice,mallocDevice,memcpyHostToDevice,waitForStream,freeDevice,freeDevice,unloadCode,destroyStream)
+-> PASS (CONTROL on host-patched-gcc13-O3 reaches the device layer, the kernel load and the operand copy before its refusal)
+toolchain note (reported): an unknown --pattern, thrown in run() after Session is built, exits 1: FAIL: unknown --pattern nosuch
+-- host-patched-clang-O1
+OLD line 68 (= block line 48): pass ('--operands-b' yes, 'train_kind' yes); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-patched-clang-O1 reads pass)
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-clang-O1 accepts --operands-b, --abba and --launches and stops at the empty --kernel (rc 1, before any device call); --list names E180's fadd.ps.acc and fadd.pi.acc (rc 0)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-clang-O1: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-clang-O1 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 1: FAIL: E183: a train needs --launches; device record: 14 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,mallocDevice,mallocDevice,memcpyHostToDevice,waitForStream,freeDevice,freeDevice,unloadCode,destroyStream)
+-> PASS (CONTROL on host-patched-clang-O1 reaches the device layer, the kernel load and the operand copy before its refusal)
+toolchain note (reported): an unknown --pattern, thrown in run() after Session is built, exits 1: FAIL: unknown --pattern nosuch
+-- host-patched-clang-O2
+OLD line 68 (= block line 48): pass ('--operands-b' yes, 'train_kind' yes); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-patched-clang-O2 reads pass)
+TRAIN-CHANGE OK: <scratch>/bin/host-patched-clang-O2 accepts --operands-b, --abba and --launches and stops at the empty --kernel (rc 1, before any device call); --list names E180's fadd.ps.acc and fadd.pi.acc (rc 0)
+NEW rc 0; device record lines after it: 0
+-> PASS (NEW on host-patched-clang-O2: TRAIN-CHANGE OK)
+-> PASS (NEW on host-patched-clang-O2 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 1: FAIL: E183: a train needs --launches; device record: 14 lines (createPcieDeviceLayer,IRuntime::create,getDevices,createStream,loadCode,waitForEvent,mallocDevice,mallocDevice,memcpyHostToDevice,waitForStream,freeDevice,freeDevice,unloadCode,destroyStream)
+-> PASS (CONTROL on host-patched-clang-O2 reaches the device layer, the kernel load and the operand copy before its refusal)
+toolchain note (reported): an unknown --pattern, thrown in run() after Session is built, exits 1: FAIL: unknown --pattern nosuch
+-- host-unpatched-gcc13-O2
+OLD line 68 (= block line 48): fail ('--operands-b' no, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-unpatched-gcc13-O2 reads fail)
+TRAIN-CHANGE MISSING: <scratch>/bin/host-unpatched-gcc13-O2; the options were refused, rc 2: unknown option --operands-b
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-unpatched-gcc13-O2: TRAIN-CHANGE MISSING (unknown option --operands-b))
+-> PASS (NEW on host-unpatched-gcc13-O2 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 2: unknown option --operands-b; device record: 0 lines ()
+-> PASS (CONTROL on host-unpatched-gcc13-O2: unknown option, no device call)
+-- host-unpatched-gcc13-O3
+OLD line 68 (= block line 48): fail ('--operands-b' no, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-unpatched-gcc13-O3 reads fail)
+TRAIN-CHANGE MISSING: <scratch>/bin/host-unpatched-gcc13-O3; the options were refused, rc 2: unknown option --operands-b
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-unpatched-gcc13-O3: TRAIN-CHANGE MISSING (unknown option --operands-b))
+-> PASS (NEW on host-unpatched-gcc13-O3 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 2: unknown option --operands-b; device record: 0 lines ()
+-> PASS (CONTROL on host-unpatched-gcc13-O3: unknown option, no device call)
+-- host-unpatched-clang-O1
+OLD line 68 (= block line 48): fail ('--operands-b' no, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-unpatched-clang-O1 reads fail)
+TRAIN-CHANGE MISSING: <scratch>/bin/host-unpatched-clang-O1; the options were refused, rc 2: unknown option --operands-b
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-unpatched-clang-O1: TRAIN-CHANGE MISSING (unknown option --operands-b))
+-> PASS (NEW on host-unpatched-clang-O1 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 2: unknown option --operands-b; device record: 0 lines ()
+-> PASS (CONTROL on host-unpatched-clang-O1: unknown option, no device call)
+-- host-unpatched-clang-O2
+OLD line 68 (= block line 48): fail ('--operands-b' no, 'train_kind' no); reported: line 69's 'fadd.ps.acc' yes, block line 49's 'file:' yes
+-> PASS (OLD on host-unpatched-clang-O2 reads fail)
+TRAIN-CHANGE MISSING: <scratch>/bin/host-unpatched-clang-O2; the options were refused, rc 2: unknown option --operands-b
+NEW rc 1; device record lines after it: 0
+-> PASS (NEW on host-unpatched-clang-O2: TRAIN-CHANGE MISSING (unknown option --operands-b))
+-> PASS (NEW on host-unpatched-clang-O2 opened no device (the record is empty))
+CONTROL (--operands-b without --launches) rc 2: unknown option --operands-b; device record: 0 lines ()
+-> PASS (CONTROL on host-unpatched-clang-O2: unknown option, no device call)
+
+== K. reported: the kernel path block_e183.sh line 50 greps, with a box-like KERNEL_ELF (E184's stub Constants.h names "x")
+host-k-gcc13-O2: compile rc 0; line 50's grep reads '/opt/desk-stand-in/aifoundry/build/enercat-e183/kernel/enercat.elf'
+host-k-clang-O2: compile rc 0; line 50's grep reads '/opt/desk-stand-in/aifoundry/build/enercat-e183/kernel/enercat.elf'
+
+DESKTEST-TRAIN-CHECK-E183 PASS (42 of 42)

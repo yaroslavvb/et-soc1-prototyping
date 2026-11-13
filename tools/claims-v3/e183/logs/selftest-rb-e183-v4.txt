@@ -1,0 +1,63 @@
+scratch repository: 1117 files committed
+
+== V. the dry listing v7: every step exits 0, in note 6's order; no ssh or rsync call
+dry listing: 13 steps listed, 0 exited non-zero
+-> PASS (V the dry listing v7: 0 failing, no call; the look, the post's line, 5a, 5b, 5, step 6 not run, 8 v3, 9 v3, 10 v2, 11 v3)
+
+== B. the stand-in box made ready: the window, step 5 (the sync), step 5a, step 6 v2
+HARNESS OK: 127 files (v1's check: HARNESS OK: 120 files; note 4's 7 box files at their pins)
+preflight_e183_v2 rc=0 dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+TRAIN-HOST-BUILT rc=0
+-> PASS (B the sync carries note 6's files; step 5a; step 6 v2 builds the host)
+
+== D. step 8 v3 (the dry pass of note 6's files) on that box
+E183 dry 18301 --smoke rc=0
+E183 dry 18302 --stoptest rc=0
+E183 dry 18310 rc=0
+E183 start gate rc=8 (want 8)
+-> PASS (D job a3-dry-e183-v3 rc 0 (18310, the smoke, the stop test, the start gate 8); no a3-dry-e183; no network; no device record)
+
+== G1. step 9 v3 with the first session's smoke and stop test in the data root
+REFUSED: 2 earlier entr(ies) in E183's data root (build/claims-v3/aifoundry3/e183, e183-smoke, e183-stoptest): move them aside first (step 5b, s06b_a3_aside_e183.sh)
+-> PASS (G1 refused while the data root holds the first session's directories; nothing launched)
+
+== G2. after an aside, but step 8 v3's job not ended today (step 8 v2's job only)
+REFUSED: E183's dry pass v3 (s10_a3_dry_e183_v3.sh, job a3-dry-e183-v3) has not ended rc 0 today
+-> PASS (G2 refused without today's dry pass v3 (v2's does not count); nothing launched)
+
+== G3. every note 6 gate passing; the build's job made yesterday's for this case
+REFUSED: E183's train host (s08_a3_build_e183.sh) was not built today
+-> PASS (G3 the data root and the dry pass v3 pass; refused at the build's gate; nothing launched)
+
+== G4. the rest rule kept: a session log of ours ending 10 minutes ago
+REFUSED: 10 minutes since E185's session end (2026-11-13 14:58:46 PST): E183 starts on a rested card, at least 40 minutes after our last real session there (the kit's dated note 4)
+-> PASS (G4 refused under 40 minutes; nothing launched)
+
+== G5 (fix-n6). an operator's stop left on the box: build/e183/STOP, then build/claims-v3/STOP; every other gate passing
+REFUSED: build/e183/STOP exists on the box (an operator's stop: queue v3 reads it before every item, so the session would end after its smoke with no train): read it and report: nothing launched
+REFUSED: build/claims-v3/STOP exists on the box (an operator's stop: queue v3 reads it before every item, so the session would end after its smoke with no train): read it and report: nothing launched
+-> PASS (G5 refused while either operator's stop exists (the rest rule read and passed first); nothing launched)
+
+== L (verify-n6's case, carried by fix-n6). step 9 v3's launch path end to end, every gate passing; the launch's USER is not the login, so session v3 stops at its USER gate before any device; then step 10 v2
+rest: 50 minutes since E185's session end (2026-11-13 14:18:46 PST; dry sessions and blocks that opened no device skipped)
+LAUNCHED e183 T0=1794611326 2026-11-13 15:08:51 PST (plan FULL; gates: latest start 2026-11-13 15:38 PST, deadline 2026-11-13 23:59 PST)
+[s11_a3_session_v3_e183] e183 launched on aifoundry3, T0 1794611326 (plan FULL); wait with s20_wait_e183_v2.sh (bounded), and read its smoke gate before counting it as started
+-- the stand-in box's session log for T0 1794611326:
+session start (T0 1794611326 = 15:08:46 PST), kit note 6; plan FULL
+USER is 'desk-not-the-login', not this login: D1's holder rule (others_d1_e180.sh) reads it, and without it reads no holder line: no device opened
+session end (T0 1794611326)
+2026-11-13 15:08:46 PST USER is 'desk-not-the-login', not this login: D1's holder rule (others_d1_e180.sh) reads it, and without it reads no holder line: no device opened
+RUN-ENDED e183
+GATE-STOPPED e183
+[s20_wait_v2_e183] STOP: e183 ended at a gate (a smoke or stop test, or no go): read the lines above
+-> PASS (L step 9 v3 launches session v3 (LAUNCHED, its T0 in RB_OUT), the session stops at its USER gate (no device), step 10 v2 reads RUN-ENDED and GATE-STOPPED (16))
+
+== G6 (fix-n6). step 9 v3 again from the same RB_OUT, which now holds L's T0: one RB_OUT, one session
+[s11_a3_session_v3_e183] STOP: this RB_OUT already holds a session's T0 (t0-e183.txt: 1794611326): one RB_OUT, one session; amendment A1's second session runs in a new RB_OUT: nothing called
+-> PASS (G6 refused at the desk before any call; nothing launched)
+
+== Z. no process of this test left; no network call from the box; the device record
+processes left: 0; box network calls: 0; device record lines: 0
+-> PASS (Z)
+
+SELFTEST-RB-E183-V4 PASS (11 of 11): step 8 v3 and step 9 v3 on a stand-in aifoundry3, its launch path included, and the dry listing v7

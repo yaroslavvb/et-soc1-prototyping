@@ -1,0 +1,72 @@
+
+== A1. the copy exact and the box the same: the two directories moved aside, nothing removed
+[s06b_a3_aside_e183] the desk's copy is exact: 11 files of build/claims-v3/aifoundry3/e183-smoke/p18301 and 8 of build/claims-v3/aifoundry3/e183-stoptest/p18302 at the box manifest's sha256 (the first
+ASIDE-DONE: 19 files of the first session's smoke and stop-path test moved to build/claims-v3/aifoundry3/e183-aside-2026-11-13-t1794604458, each at the copy's sha256; nothing removed
+[s06b_a3_aside_e183] ASIDE-DONE: 19 files of the first session's smoke and stop-path test moved to build/claims-v3/aifoundry3/e183-aside-2026-11-13-t1794604458, each at the copy's sha256; nothing remo
+moved: 1; every file at its sha256 under the aside: 1; box files 21 then 21; box bytes 9faf60b4ede40843 then 9faf60b4ede40843; remote calls 1
+-> PASS (A1 ASIDE-DONE)
+
+== A2. the step again
+[s06b_a3_aside_e183] the desk's copy is exact: 11 files of build/claims-v3/aifoundry3/e183-smoke/p18301 and 8 of build/claims-v3/aifoundry3/e183-stoptest/p18302 at the box manifest's sha256 (the first
+ASIDE-ALREADY: the two directories are already at build/claims-v3/aifoundry3/e183-aside-2026-11-13-t1794604458, their 19 files at the copy's sha256: nothing moved
+[s06b_a3_aside_e183] ASIDE-ALREADY: the two directories are already at build/claims-v3/aifoundry3/e183-aside-2026-11-13-t1794604458, their 19 files at the copy's sha256: nothing moved
+-> PASS (A2 ASIDE-ALREADY, nothing moved)
+
+== A3. one byte of one box file differs
+[s06b_a3_aside_e183] the desk's copy is exact: 11 files of build/claims-v3/aifoundry3/e183-smoke/p18301 and 8 of build/claims-v3/aifoundry3/e183-stoptest/p18302 at the box manifest's sha256 (the first
+ASIDE-DIFFERS: the box's files are not the copy's: nothing moved
+[s06b_a3_aside_e183] STOP: ASIDE-DIFFERS: the box's files are not the copy's: nothing moved
+-> PASS (A3 ASIDE-DIFFERS, nothing moved)
+
+== A4. one more file on the box under p18301
+[s06b_a3_aside_e183] the desk's copy is exact: 11 files of build/claims-v3/aifoundry3/e183-smoke/p18301 and 8 of build/claims-v3/aifoundry3/e183-stoptest/p18302 at the box manifest's sha256 (the first
+ASIDE-DIFFERS: the box's files are not the copy's: nothing moved
+[s06b_a3_aside_e183] STOP: ASIDE-DIFFERS: the box's files are not the copy's: nothing moved
+-> PASS (A4 ASIDE-DIFFERS, nothing moved)
+
+== A5. a symbolic link on the box under p18302
+[s06b_a3_aside_e183] the desk's copy is exact: 11 files of build/claims-v3/aifoundry3/e183-smoke/p18301 and 8 of build/claims-v3/aifoundry3/e183-stoptest/p18302 at the box manifest's sha256 (the first
+ASIDE-DIFFERS: the box's files are not the copy's: nothing moved
+[s06b_a3_aside_e183] STOP: ASIDE-DIFFERS: the box's files are not the copy's: nothing moved
+-> PASS (A5 ASIDE-DIFFERS (a link is not a file of the copy), nothing moved)
+
+== A6. the desk's copy differs from its manifest
+[s06b_a3_aside_e183] STOP: the desk's copy is not exact against its box manifest; differs from the manifest: build/claims-v3/aifoundry3/e183-smoke/p18301/run.log: nothing called, nothing moved
+-> PASS (A6 16 before any call)
+
+== A7. a file in the copy that the manifest does not list
+[s06b_a3_aside_e183] STOP: the desk's copy is not exact against its box manifest; in the copy but not the manifest: build/claims-v3/aifoundry3/e183-stoptest/p18302/board/stray.txt : nothing called, no
+-> PASS (A7 16 before any call)
+
+== A8. a card session of ours running on the box
+[s06b_a3_aside_e183] the desk's copy is exact: 11 files of build/claims-v3/aifoundry3/e183-smoke/p18301 and 8 of build/claims-v3/aifoundry3/e183-stoptest/p18302 at the box manifest's sha256 (the first
+REFUSED: a card session of ours runs on aifoundry3: nothing moved
+[s06b_a3_aside_e183] STOP: refused on the box: REFUSED: a card session of ours runs on aifoundry3: nothing moved
+-> PASS (A8 REFUSED, nothing moved)
+
+== A9. the aside name already exists beside the two directories
+[s06b_a3_aside_e183] the desk's copy is exact: 11 files of build/claims-v3/aifoundry3/e183-smoke/p18301 and 8 of build/claims-v3/aifoundry3/e183-stoptest/p18302 at the box manifest's sha256 (the first
+ASIDE-EXISTS: build/claims-v3/aifoundry3/e183-aside-2026-11-13-t1794604458 already exists beside the two directories: nothing moved
+[s06b_a3_aside_e183] STOP: ASIDE-EXISTS: build/claims-v3/aifoundry3/e183-aside-2026-11-13-t1794604458 already exists beside the two directories: nothing moved
+-> PASS (A9 ASIDE-EXISTS, nothing moved)
+
+== A10. a login link at the probe
+[s06b_a3_aside_e183] the desk's copy is exact: 11 files of build/claims-v3/aifoundry3/e183-smoke/p18301 and 8 of build/claims-v3/aifoundry3/e183-stoptest/p18302 at the box manifest's sha256 (the first
+[s06b_a3_aside_e183] STOP: aifoundry3 printed a login link at the probe (lock file appended; link in RB_LINKS): nothing else was called
+-> PASS (A10 11, the lock file appended, no remote call)
+
+== A11. no copy given
+[s06b_a3_aside_e183] STOP: usage: s06b_a3_aside_e183.sh <the first session's read-only copy> [<its box manifest>]: the copy or its manifest is not there
+-> PASS (A11 10, no call)
+
+== A12. the dry listing
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (move the first session's smoke and stop-path test aside, after the copy's list matches the box's): ssh -o BatchMode=
+mv -T -- "$D1" "$A/e183-smoke/p18301" || { echo "ASIDE-FAILED: mv $D1: nothing moved"; exit 3; }
+mv -T -- "$D2" "$A/e183-stoptest/p18302" || { echo "ASIDE-FAILED: mv $D2 (after $D1 moved to $A/e183-smoke/p18301)"; exit 3; }
+-> PASS (A12 the listing carries the copy's list, exit 0, no call)
+
+== Z. another run's files untouched; no rsync or scp; no stand-in left
+-> PASS (Z)
+
+SELFTEST-ASIDE-E183 PASS (13 of 13): step 5b moves the first session's two directories aside only when the desk's copy and the box agree file by file

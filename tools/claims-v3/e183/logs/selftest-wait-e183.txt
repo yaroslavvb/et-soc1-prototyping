@@ -1,0 +1,87 @@
+
+== W0. step 10 v1 with session_e183_v2.sh running and no session end (Fri 13 Nov 2026's reading)
+visible in this namespace: 1 stand-in(s): session_e183_v2.sh 
+RUN-GONE e183: no session process and no session end for T0 1794611335
+[s20_wait_e183] STOP: e183 is not running and recorded no end for its T0: read the box's logs before anything else
+-> PASS (W0 v1 reads RUN-GONE for a running session v2)
+
+== W1. step 10 v2, the same
+RUN-RUNNING e183 after 15 s
+[s20_wait_v2_e183] e183 still runs: call again
+-> PASS (W1 v2 reads RUN-RUNNING)
+
+== W2. step 10 v2 with session_e183.sh running alone
+visible in this namespace: 1 stand-in(s): session_e183.sh 
+RUN-RUNNING e183 after 15 s
+[s20_wait_v2_e183] e183 still runs: call again
+-> PASS (W2 v2 reads RUN-RUNNING for session_e183.sh)
+
+== W3. step 10 v2 with session_e183_v3.sh running alone
+visible in this namespace: 1 stand-in(s): session_e183_v3.sh 
+RUN-RUNNING e183 after 15 s
+[s20_wait_v2_e183] e183 still runs: call again
+-> PASS (W3 v2 reads RUN-RUNNING for session_e183_v3.sh)
+
+== W4. step 10 v2 with session_e183_v10.sh running alone
+visible in this namespace: 1 stand-in(s): session_e183_v10.sh 
+RUN-RUNNING e183 after 15 s
+[s20_wait_v2_e183] e183 still runs: call again
+-> PASS (W4 v2 reads RUN-RUNNING for session_e183_v10.sh)
+
+== W5. step 10 v2 with queue_e183.sh running alone
+visible in this namespace: 1 stand-in(s): queue_e183.sh 
+RUN-RUNNING e183 after 15 s
+[s20_wait_v2_e183] e183 still runs: call again
+-> PASS (W5 v2 reads RUN-RUNNING for queue_e183.sh)
+
+== W6. step 10 v2 with queue_e183_v2.sh running alone
+visible in this namespace: 1 stand-in(s): queue_e183_v2.sh 
+RUN-RUNNING e183 after 15 s
+[s20_wait_v2_e183] e183 still runs: call again
+-> PASS (W6 v2 reads RUN-RUNNING for queue_e183_v2.sh)
+
+== W7. step 10 v2 with queue_e183_v3.sh running alone
+visible in this namespace: 1 stand-in(s): queue_e183_v3.sh 
+RUN-RUNNING e183 after 15 s
+[s20_wait_v2_e183] e183 still runs: call again
+-> PASS (W7 v2 reads RUN-RUNNING for queue_e183_v3.sh)
+
+== W8. step 10 v2 with only names that are not E183's session running
+visible in this namespace: 3 stand-in(s): session_e185_v2.sh session_e1830.sh block_e183_v3.sh 
+RUN-GONE e183: no session process and no session end for T0 1794611335
+[s20_wait_v2_e183] STOP: e183 is not running and recorded no end for its T0: read the box's logs before anything else
+-> PASS (W8 v2 reads RUN-GONE (another run's session, a longer name, a block))
+
+== W9. step 10 v2 with nothing running and no session end
+visible in this namespace: 0 stand-in(s): 
+RUN-GONE e183: no session process and no session end for T0 1794611335
+[s20_wait_v2_e183] STOP: e183 is not running and recorded no end for its T0: read the box's logs before anything else
+-> PASS (W9 v2 reads RUN-GONE)
+
+== W10. step 10 v2 after the log's session end
+RUN-ENDED e183
+[s20_wait_v2_e183] e183 has ended (its own T0's log says so)
+-> PASS (W10 v2 reads RUN-ENDED (0))
+
+== W11. step 10 v2 with a gate line before the session end
+RUN-ENDED e183
+GATE-STOPPED e183
+[s20_wait_v2_e183] STOP: e183 ended at a gate (a smoke or stop test, or no go): read the lines above
+-> PASS (W11 v2 reads RUN-ENDED and GATE-STOPPED (16))
+
+== W12. step 10 v2's dry listing
+pgrep -u "$(id -u)" -f "(session|queue)_e183(_v[0-9]+)?\.sh" > /dev/null || { sleep 2; ended || { gone=1; break; }; }     # note 6
+-> PASS (W12 the listing shows the new pattern and makes no call)
+
+== W13. step 10 v2 is v1 with two lines changed, and its header
+< rb_init s20_wait
+> rb_init s20_wait_v2
+<   pgrep -u "$(id -u)" -f "session_e183\.sh" > /dev/null || { sleep 2; ended || { gone=1; break; }; }
+>   pgrep -u "$(id -u)" -f "(session|queue)_e183(_v[0-9]+)?\.sh" > /dev/null || { sleep 2; ended || { gone=1; break; }; }     # note 6
+-> PASS (W13 two lines out, two in)
+
+== Z. no stand-in left; no rsync or scp; the lock file untouched
+stand-ins left: 0; lock file lines: 0; rsync or scp calls: 0; ssh calls: 24
+-> PASS (Z)
+
+SELFTEST-WAIT-E183 PASS (15 of 15): step 10 v2 reads every session and queue version of E183; v1 misreads session v2 as gone

@@ -1,0 +1,135 @@
+
+== 0a. the sandbox: no /dev/et*, the hostname aifoundry3, a private PID namespace, the card lock the sandbox's own
+processes visible: 7; hostname aifoundry3; /dev/et* nodes 0; /run/lock: etsoc-shire0.lock 
+-> PASS (0a the sandbox)
+
+== 0b. the train host by build_host_e183_v2.sh's REAL path (the stand-in cmake: g++-13 -O2, E184's stubs, the recording mock)
+BUILD TREE OK: 38 files at their pins, and nothing else
+{"build/enercat-e183/host/enercat_host": "182a5fd93ee30dd0e4bb652aa1c47be907e543c2120546cc4353c325beffa30f", "build/enercat-e183/kernel/enercat.elf": "10d2c5073b4158d8f248a6fe34c79f273ffbdfd7978c85871d2c1d80f2cf1700"}
+TRAIN-CHANGE OK: build/enercat-e183/host/enercat_host accepts --operands-b, --abba and --launches and stops at the empty --kernel (rc 1, before any device call); --list names E180's fadd.ps.acc and fadd.pi.acc (rc 0)
+BUILD OK: build/enercat-e183
+device record lines after the build (its train check): 0
+-> PASS (0b BUILD OK on the real path, TRAIN-CHANGE OK, no device call)
+
+== 0c. harness v3 with the binaries (the real path's form) and the preflight v3
+HARNESS OK: 132 files (v2's check: HARNESS OK: 127 files (v1's check: HARNESS OK: 120 files; note 4's 7 box files at their pins); note 6's 5 box files at their pins)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS (0c HARNESS OK with the binaries; dmcmd_audit GO)
+
+== N1. THE NEGATIVE CONTROL: session_e183_v2.sh (block v2, check_e183.py block on the smoke) on the real path
+session start (T0 1794611495 = 15:11:35 PST), kit note 4; plan FULL
+p18302 ends: ok stop-path test: board and die stops fired before a run and in the watcher
+stop-path test rc=0
+p18301 begins (die 50 C) -> <tree>/build/claims-v3/aifoundry3/e183-smoke/p18301
+smoke rc=1
+smoke gate failed (stop test rc 0, smoke rc 1, gate 0): no train block runs
+session end (T0 1794611495)
+check.err's last line: KeyError: 'block 18301 is not a planned train block (18310-18315)'
+the smoke's block.json: {"exp":"e183-smoke","pass":18301,"card":"aifoundry3","t0_ms":1794611499218,"t1_ms":1794611552949,"die_c_start":50,"die_c_end":50,"status":"fail","note":"post-block check crashed: KeyError: 'block 18301 is not a planned train block (18310-18315)'"}
+host processes that reached the device layer: 6 (the smoke's 4 bursts and 2 train processes)
+-> PASS (N1 session v2 stops at its smoke gate on the KeyError, as aifoundry3 did)
+
+== N2. the same smoke under V3_DRY: block v2 never runs the post-block check there
+2026-11-13T15:12:33 [aifoundry3] e183-smoke p18301 ends: ok dry run (runner rc 0)
+-> PASS (N2 the dry smoke reads rc 0 (the check is skipped), no device call)
+
+== W. without an aside: block v3's stop test writes into the earlier p18302, and its smoke moves the earlier p18301 inside e183-smoke/
+e183-stoptest holds: p18302 ; its block.json t0_ms 1794611495380 then 1794611553567
+e183-smoke holds: p18301 p18301.attempt-<epoch> 
+-> PASS (W the earlier stop test is overwritten in place and the earlier smoke kept inside e183-smoke/: an aside is needed)
+
+== P. THE REAL PATH: session_e183_v3.sh, V3_DRY unset; the operator's stop once block 18310 has begun
+session start (T0 1794611612 = 15:13:32 PST), kit note 6; plan FULL
+files (v2's check: HARNESS OK: 127 files (v1's check: HARNESS OK: 120 files; note 4's 7 box files at their pins); note 6's 5 box files at their pins)
+dmcmd_audit preflight rc=0 (dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none))
+an ET-SoC-1 device node or card lock.
+config config-t1794611612-start.json: {"tdp_w":0,"temp_threshold_c":65,"power_state":0,"power_state_name":"max_power","minion_mhz":600,"minion_mv":523}
+p18302 begins (die 50 C) -> <tree>/build/claims-v3/aifoundry3/e183-stoptest/p18302
+p18302: 0 bursts, 0 train processes, <= 1 min; idle 600 MHz
+p18302 ends: ok stop-path test: board and die stops fired before a run and in the watcher
+stop-path test rc=0
+p18301 begins (die 50 C) -> <tree>/build/claims-v3/aifoundry3/e183-smoke/p18301
+p18301: 4 bursts, 2 train processes, <= 1 min; idle 600 MHz
+p18301 ends: ok smoke: no post-block check (check_e183.py block reads a train block only, note 6); its gate is check_e183.py smoke, run by the session next
+smoke rc=0
+bursts, rates 4.6811e+11-4.6811e+11 a second; 2 train processes of 13 launches by the schedule, at 600 MHz
+smoke gate passed: queue starts (plan FULL)
+queue: 15:20:09 e183: done, 1 items, at T0+397 s
+config config-t1794611612-end.json: {"tdp_w":0,"temp_threshold_c":65,"power_state":0,"power_state_name":"max_power","minion_mhz":600,"minion_mv":523}
+an ET-SoC-1 device node or card lock.
+session end (T0 1794611612)
+-- the queue:
+15:14:29 e183: plan FULL, items 18310 18311 18312 18313 18314 18315; budget 3900 s from the anchor (15:13:32), reserve 60 s, last end 16:17:32, deadline 2026-11-13 17:13:32
+15:14:29 p18310 starts at T0+57 s (projected 382 s: plan 352 s x 100% + 30 s)
+2026-11-13T15:14:31 [aifoundry3] e183 p18310 begins (die 50 C) -> <tree>/build/claims-v3/aifoundry3/e183/p18310
+2026-11-13T15:14:32 [aifoundry3] e183 p18310: 4 bursts, 52 train processes, <= 6 min; idle 600 MHz
+2026-11-13T15:19:59 [aifoundry3] e183 p18310 ends: ok 4/4 anchors, 52/52 train processes; die 50.0 C at most, board 30.20 W at most
+15:19:59 p18310 rc=0 (330 s)
+15:20:09 STOP: stopping before p18311
+15:20:09 e183: done, 1 items, at T0+397 s
+-- block 18310: block.json {"exp":"e183","pass":18310,"card":"aifoundry3","t0_ms":1794611670115,"t1_ms":1794611999625,"die_c_start":50,"die_c_end":50,"status":"ok","note":"4/4 anchors, 52/52 train processes; die 50.0 C at most, board 30.20 W at most"}
+   check.json: ok 52 of 52 processes good; 4 anchors; 0 train faults; 0 train samples off 600 MHz
+   anchor launch records 32; train launch records 676
+-- the smoke: block.json {"exp":"e183-smoke","pass":18301,"card":"aifoundry3","t0_ms":1794611616267,"t1_ms":1794611669733,"die_c_start":50,"die_c_end":50,"status":"ok","note":"smoke: no post-block check (check_e183.py block reads a train block only, note 6); its gate is check_e183.py smoke, run by the session next"}; check.err present: no
+-- the stop test: board: both fired; die: both fired
+-- calls: config reads under the card lock 2; block locks 3; D1 holder reads 68; 10 Hz samplers 3; host runs under timeout 10 62
+-- host processes that reached the device layer: 62 (want 62: the smoke's 4 + 2, the block's 4 anchors + 52)
+-> PASS (P1 session v3 ran its real path: harness, preflight, config reads, stop test, smoke, gate, queue, closing read)
+-> PASS (P2 block 18310's post-block check ran on the real path: ok, 52 of 52 processes, 676 launch records, 4 anchors)
+-> PASS (P3 the smoke reads ok with no post-block check (its gate decides); the stop test fired both stops)
+-> PASS (P4 the real calls: 2 locked config reads, 3 block locks, D1 before every run, 3 samplers, 62 host runs, 62 device-layer opens)
+
+== A1. D1's other-user rule on the real path: another user's holder line on card 0
+others present: procs=[] holders=[otheruser:4242 ]
+-> PASS (A1 block v3 exits 3 before anything, no device call)
+
+== A2. the card lock held by another process (the real block_begin; under V3_DRY lib.sh takes no lock)
+card lock /run/lock/etsoc-shire0.lock is held by another process: not starting
+-> PASS (A2 block v3 exits 3 at the card lock, no device call)
+
+== A3. a live stop on the real path (the stand-in board at 66 W, over E171's 65 W)
+block.json: {"exp":"e183","pass":18312,"card":"aifoundry3","t0_ms":1794612010254,"t1_ms":1794612023663,"die_c_start":50,"die_c_end":50,"status":"stop","note":"a live stop fired: {'pass': 18312, 'where': 'e183/fadd.ps/zeros/h2@b18312-open', 'why': 'board 66.18 W >= 65 W', 
+-> PASS (A3 the runner's check before the first burst stops the block (exit 5, stop.json), no host run)
+
+== A3b. a live stop DURING a launch (the stand-in board crosses 65 W 17 s after the sampler starts, inside the first anchor burst)
+15:20:43 STOP e183/fadd.ps/zeros/h2@b18315-open: board 65.85 W >= 65 W
+block.json: {"exp":"e183","pass":18315,"card":"aifoundry3","t0_ms":1794612023939,"t1_ms":1794612044237,"die_c_start":50,"die_c_end":50,"status":"stop","note":"a live stop fired: {'pass': 18315, 'where': 'e183/fad; host processes that reached the device layer: 1
+-> PASS (A3b the in-run watcher stops the burst in flight (its host SIGTERMed), the block reads stop, exit 5)
+
+== A4. the sampler stalls on the real path (it writes 30 lines, then nothing)
+block.json: {"exp":"e183","pass":18313,"card":"aifoundry3","t0_ms":1794612044485,"t1_ms":1794612065704,"die_c_start":50,"die_c_end":50,"status":"fail","note":"the sampler stopped writing: runner stopped the block; no data (telemetry lines 30, anchor launches 8, 0 of 52 tr
+-> PASS (A4 the runner exits 4 at the next check, the block reads fail, one anchor ran)
+
+== A5. the runner's own check of the registration's list (real path) against --dry, with one registered file changed
+refusing: the registration's files differ from its list: changed tools/claims-v3/e183/E183.md
+-> PASS (A5 the real runner refuses (2) before any host run; the dry runner reads rc 0)
+
+== A6-A7. the harness with the binaries (real path) against a changed host binary: the session (9) and the block's preflight (2)
+harness check failed: no device opened
+preflight: harness: HARNESS FAULTS: v2's check: HARNESS FAULTS: v1's check: HARNESS FAULTS: binary build/enercat-e183/host/enercat_host differs from BUILD-E183.json
+-> PASS (A6-A7 the session stops (9) and the block refuses (2) before any device call; the harness without the binaries passes)
+
+== A8. the session's start gate on the real path (a past latest start)
+session start (T0 1794612067 = 15:21:07 PST), kit note 6; plan FULL
+no new card session after 2026-11-13 15:20:07 PST: no device opened
+session end (T0 1794612067)
+-> PASS (A8 exit 8 with the real log, no device opened)
+
+== A9. lib.sh's skip of a train block whose block.json exists (block 18310 again after P)
+e183 p18310 already done
+-> PASS (A9 'already done', exit 0, no device call)
+
+== A11. lib.sh's ours_running on the real path: a device process of ours still running (a stand-in named ettelem)
+one of our own device processes on this card is still running
+-> PASS (A11 block v3 exits 3 beside our own leftover device process, no device call)
+
+== A10. USER unset (the sandbox's own environment had none): D1's holder read sees no line; session v3 refuses before any device
+D1 once with another user's holder line: USER set, runner exit 3 (check-others rc 0: 2026-11-13T15:21:09 [aifoundry3] others present: procs=[] holders=[othe); USER unset, exit 0 (check-others rc 1: tools/claims-v3/e180/others_d1_e180.sh: line 22: USER: unbound variable)
+USER is '', not this login: D1's holder rule (others_d1_e180.sh) reads it, and without it reads no holder line: no device opened
+-> PASS (A10 D1 fails open without USER (exit 0 against 3); session v3's USER gate stops it first (exit 8, no device opened))
+
+== Z. no process of this test left; no network call; no /dev/et* through the run
+processes left: 0; network calls: 0; /dev/et* nodes: 0; device record: 7291 lines, 76 device-layer opens
+-> PASS (Z)
+
+DESKTEST-REALPATH-E183 PASS (22 of 22): the session's real path at the desk (V3_DRY unset), a real GCC -O2 train host on the recording mock, no card
