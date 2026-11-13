@@ -1,0 +1,95 @@
+E191 frozen forecasts (REGISTERED; per launch on aifoundry1 card 1 at 600 MHz; forecast die 55 C, band 52-60)
+
+configuration   seconds point [two-sided band]     J over idle [band]       J with the card at rest [band]
+copy-zeros      0.6557 [0.5568, 0.7546]           5.143 [4.341, 6.070]    26.080 [20.925, 33.158]
+copy-random     0.6557 [0.5568, 0.7546]           6.941 [6.361, 7.801]    27.982 [22.997, 35.173]
+sha256          0.5702 [0.3848, 0.9448]           2.246 [2.127, 5.158]    20.324 [13.542, 39.363]
+sort-sorted     0.7399 [0.6007, 1.0136]           2.620 [2.067, 4.835]    26.062 [19.882, 40.876]
+sort-shuffled   0.8993 [0.7148, 1.2288]           3.183 [2.603, 5.830]    31.676 [23.806, 49.538]
+sparse-parity   0.5147 [0.4633, 0.6692]           8.132 [6.702, 12.855]    24.805 [20.623, 37.657]
+
+split by ledger term (J a launch, point [band])
+  copy-zeros:
+    tensor ops                   0.0000 [0.0000, 0.0000]
+    instructions by class        0.0024 [0.0022, 0.0040]
+    awake, not issuing           0.0000 [0.0000, 0.0000]
+    bytes: L1                    0.0000 [0.0000, 0.0000]
+    bytes: L2                    0.0000 [0.0000, 0.0000]
+    bytes: scratchpad            0.0000 [0.0000, 0.0000]
+    bytes: DRAM read             1.4221 [1.2958, 1.7227]
+    bytes: DRAM write-back       3.7190 [3.0425, 4.3429]
+    mesh                         0.0000 [0.0000, 0.0000]
+    the card at rest             20.6383 [16.4733, 26.0958]
+    the run's own leakage rise   0.2979 [0.1113, 0.9927]
+  copy-random:
+    tensor ops                   0.0000 [0.0000, 0.0000]
+    instructions by class        0.0024 [0.0022, 0.0040]
+    awake, not issuing           0.0000 [0.0000, 0.0000]
+    bytes: L1                    0.0000 [0.0000, 0.0000]
+    bytes: L2                    0.0000 [0.0000, 0.0000]
+    bytes: scratchpad            0.0000 [0.0000, 0.0000]
+    bytes: DRAM read             2.0414 [1.5874, 2.1857]
+    bytes: DRAM write-back       4.8975 [4.7713, 5.6116]
+    mesh                         0.0000 [0.0000, 0.0000]
+    the card at rest             20.6383 [16.4733, 26.0958]
+    the run's own leakage rise   0.4021 [0.1631, 1.2759]
+  sha256:
+    tensor ops                   0.0000 [0.0000, 0.0000]
+    instructions by class        2.2364 [2.1272, 5.0076]
+    awake, not issuing           0.0000 [0.0000, 0.0000]
+    bytes: L1                    0.0000 [0.0000, 0.0000]
+    bytes: L2                    0.0095 [0.0000, 0.1507]
+    bytes: scratchpad            0.0000 [0.0000, 0.0000]
+    bytes: DRAM read             0.0000 [0.0000, 0.0000]
+    bytes: DRAM write-back       0.0000 [0.0000, 0.0000]
+    mesh                         0.0000 [0.0000, 0.0000]
+    the card at rest             17.9477 [11.3845, 32.6757]
+    the run's own leakage rise   0.1301 [0.0301, 1.5285]
+  sort-sorted:
+    tensor ops                   0.0000 [0.0000, 0.0000]
+    instructions by class        2.1924 [2.0669, 3.7047]
+    awake, not issuing           0.0000 [0.0000, 0.0000]
+    bytes: L1                    0.0000 [0.0000, 0.0000]
+    bytes: L2                    0.4273 [0.0000, 1.1302]
+    bytes: scratchpad            0.0000 [0.0000, 0.0000]
+    bytes: DRAM read             0.0000 [0.0000, 0.0000]
+    bytes: DRAM write-back       0.0000 [0.0000, 0.0000]
+    mesh                         0.0000 [0.0000, 0.0000]
+    the card at rest             23.2906 [17.7723, 35.0562]
+    the run's own leakage rise   0.1517 [0.0426, 0.9846]
+  sort-shuffled:
+    tensor ops                   0.0000 [0.0000, 0.0000]
+    instructions by class        2.7553 [2.6031, 4.6995]
+    awake, not issuing           0.0000 [0.0000, 0.0000]
+    bytes: L1                    0.0000 [0.0000, 0.0000]
+    bytes: L2                    0.4273 [0.0000, 1.1302]
+    bytes: scratchpad            0.0000 [0.0000, 0.0000]
+    bytes: DRAM read             0.0000 [0.0000, 0.0000]
+    bytes: DRAM write-back       0.0000 [0.0000, 0.0000]
+    mesh                         0.0000 [0.0000, 0.0000]
+    the card at rest             28.3087 [21.1500, 42.4987]
+    the run's own leakage rise   0.1844 [0.0526, 1.2094]
+  sparse-parity:
+    tensor ops                   1.7297 [1.6495, 1.8099]
+    instructions by class        0.8783 [0.4090, 3.7716]
+    awake, not issuing           0.6238 [0.5294, 1.0064]
+    bytes: L1                    0.0000 [0.0000, 0.0000]
+    bytes: L2                    0.0419 [0.0366, 0.0472]
+    bytes: scratchpad            4.8537 [4.1772, 5.6223]
+    bytes: DRAM read             0.0043 [0.0038, 0.0048]
+    bytes: DRAM write-back       0.0000 [0.0000, 0.0000]
+    mesh                         0.0000 [0.0000, 0.0000]
+    the card at rest             16.2027 [15.9454, 16.4601]
+    the run's own leakage rise   0.4710 [0.2365, 1.4798]
+
+sparse parity's registered arms (reported; the day's verdict is the primary's)
+  v2.1  J over idle 7.771 [6.395, 12.273]; J with the card at rest 24.424 [20.307, 37.001]
+  v2c   J over idle 7.757 [6.727, 9.920]; J with the card at rest 24.409 [20.649, 34.343]
+
+per unit (reported)
+  copy-zeros      0.367389 J over idle a GiB copied; 1.86283 J with the card at rest
+  copy-random     0.495808 J over idle a GiB copied; 1.99869 J with the card at rest
+  sha256          4.2836e-08 J over idle a 64 B block (one compression); 3.8763e-07 J with the card at rest
+  sort-sorted     7.10635e-07 J over idle a sort of 512 keys; 7.06978e-06 J with the card at rest
+  sort-shuffled   8.63355e-07 J over idle a sort of 512 keys; 8.59258e-06 J with the card at rest
+  sparse-parity   8.13168 J over idle a solve; 24.8054 J with the card at rest

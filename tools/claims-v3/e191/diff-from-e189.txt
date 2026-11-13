@@ -1,0 +1,706 @@
+E191's code against E189's: the unified diffs (diff -u) of the four code files, E189's side as E189's re-made
+registration holds them (its list SHA256SUMS-e189-registration, sha256 bf1b1bbb4c2b34fcabf5b437cf98d602841315342a239303a11eb2eb72c79058).
+E191.md section 3 reads them hunk by hunk. Written by reg-e191 (Q171), Fri 13 Nov 2026.
+
+== forecast: e189 sha256 dc1273e74f3383944d422071f8889677d492028ad02acc91a50e1d22dcb7f0af -> e191 sha256 794999c48a9ae5911dc67ba454ab9cafddf7f6d011be1a7f258cdf4f7ff746ad; lines changed 170
+== plan: e189 sha256 bba6860c459346d8cf3810329b9d9959141803c0aed4b91134c75807f86f5c5b -> e191 sha256 3bc1a4ecd1071d21933696bd6e305663f1b76af98bbdfdaa6e581fca9892866c; lines changed 52
+== score: e189 sha256 a18bda08e8ed0d6827e482f5a824ee4f55a0a8eee38f927b71e19860bc52382b -> e191 sha256 359389ddf756d8d7120ce4d720fdafc75f849264606e15c9f59a9577f0316399; lines changed 58
+== stub: e189 sha256 29df8e48cc31e19baf507419a564e330064601d1db6c8c52aee7e3f0a8c68788 -> e191 sha256 fb854a4f79e10c627833cbe435f89174975f9aeeabafe5abf01e289687347dd0; lines changed 23
+
+--- tools/claims-v3/e189/forecast_e189.py
++++ tools/claims-v3/e191/forecast_e191.py
+@@ -1,8 +1,28 @@
+ #!/usr/bin/env python3
+-"""E189's frozen forecasts: four programs' joules, forecast before the card (the blind day; E189.md).
++"""E191's frozen forecasts: the blind day's four programs on a second card, aifoundry1 card 1 (E191.md).
+ 
+-    python3 -I -B tools/claims-v3/e189/forecast_e189.py [--out DIR]     # writes forecast-e189.json and .txt
+-    python3 -I -B tools/claims-v3/e189/forecast_e189.py --check         # recomputes and compares with the committed files
++    python3 -I -B tools/claims-v3/e191/forecast_e191.py [--out DIR]     # writes forecast-e191.json and .txt
++    python3 -I -B tools/claims-v3/e191/forecast_e191.py --check         # recomputes and compares with the committed files
++
++THE CARD SWITCHED (E191.md section 3). This file is E189's forecast code (tools/claims-v3/e189/forecast_e189.py, sha256
++dc1273e7..., in E189's re-made registration list bf1b1bbb...) with the card 'aifoundry3' (key 'a3') switched to
++'aifoundry1-c1' (key 'c1') at every card-keyed input the frozen predictor reads, and nothing else changed:
++ a. card 1's idle law, leak slope and rest band (frozen-v2.json idle_laws) in given() and in the card at rest;
++ b. the ledger v2's own card-1 prices for sparse parity (the load's card), and in its arms (v2.1's int8 loop rate, v2c's
++    vector-integer price and catalogue rows);
++ c. the energy catalogue's card-1 column for the plain programs (its per-card means and card 1's measured issue rates):
++    ledger_estimate.py's Catalogue takes the card as an argument, and its estimate() is handed card 1's (CatCard below);
++ d. the copy's DRAM-read price on random bytes, which ledger_estimate.py looks up at frozen-v2.json's 'a3' key: card 1's
++    key ('c1');
++ e. card 1's starting die, 55 C forecast in a 52-60 C band (E191.md section 5: card 1's own latest records).
++Where the frozen predictor fixes aifoundry3 where no argument reaches, the switch is made here and checked:
++ledger_estimate.py's rest_and_heat() sets its card inside, so rest_and_heat_card() is that function with its card as a
++parameter (build() checks that at 'aifoundry3' it returns exactly what rest_and_heat() returns); sparse parity's load is
++rebuilt at aifoundry3 first and checked to reproduce ledger_estimate.py's prediction exactly, then its card is switched.
++ONE INPUT HAS NO CARD-1 ENTRY: sparse parity's operand kind, int8.pm1 (M10 priced it on aifoundry3 only), is carried
++from aifoundry3 unchanged, its band unchanged (carried() below). What carries no card stays as frozen:
++ledger_estimate.py's literal prices (the copy's write-back path, the DRAM-read bands, the L2 price for SHA-256 and the
++sort), the band rules' literals below, the counts and the seconds models.
+ 
+ THE PREDICTOR (E189.md section 3), unchanged: the load ledger v2 as frozen (commit 06d60fa2, frozen-v2.json sha256
+ 59ff9117...), through workloads/ledger/ledger_estimate.py as committed at 46a16bd0 (sha256 pinned in PINS below), which
+@@ -19,7 +39,7 @@
+  4. every forecast split by ledger term, each term with its band; the instruction term split by class with
+     ledger_estimate.py's own price_counts() on each class's counts (recorded from estimate()'s own call);
+  5. the given-seconds forecast as a frozen function of the measured kernel seconds t_k, the measured wall seconds a
+-    launch t_w and the measured starting die T0 (given() below; score_e189.py calls it, never refits);
++    launch t_w and the measured starting die T0 (given() below; score_e191.py calls it, never refits);
+  6. the registered arms beside the primary: v2.1 (sparse parity's op cycles priced once, posthoc_ledger_v2.py's rule)
+     and v2c (sparse parity's hart work from the counter's counts); both equal the primary on the five plain configurations;
+  7. the counters arm's expectations (reported only; E189.md section 7).
+@@ -41,10 +61,11 @@
+ REPO = os.path.normpath(os.path.join(HERE, "..", "..", ".."))
+ F_HZ = 600e6
+ N_MIN = 1024
+-T0_FORECAST, T0_BAND = 55.0, (52.0, 60.0)
++CARD, CK = "aifoundry1-c1", "c1"          # the card switched (E191.md section 3); E189's: "aifoundry3", "a3"
++T0_FORECAST, T0_BAND = 55.0, (52.0, 60.0)  # card 1's starting die (E191.md section 5); E189's numbers, by card 1's records
+ SIG = 6                                   # significant digits in the written files
+-INTERPRETER = ("named: python3 3.13.11 wrote the files; /usr/bin/python3 3.9.6 gives the same bytes (--check passes under "
+-               "both; floats rounded to 6 significant digits, so Python 3.12's sum() change cannot show)")
++INTERPRETER = ("named: /usr/bin/python3 3.12.3 wrote the files (aifoundry2, the only python3 on that box; --check passes "
++               "under it); floats rounded to 6 significant digits, so Python 3.12's sum() change cannot show")
+ PROGS = "docs/reports/data/2026-11-12-q166-progs"
+ PINS = {
+     "workloads/ledger/ledger_estimate.py": "e3670e78da97107c067512450e57698680be4a1def1a0d01a232d4f360eef2f2",
+@@ -68,7 +89,7 @@
+ H1_OVER_H2 = ("add", 0.581, 0.3727)       # the one row the catalogue measured both ways: add, one hart / both harts
+ SPP_FAST = 0.90                           # sparse parity's fast end: model_s x 0.90 (the model's held-out misses 5.0, 7.5%)
+ CONFIG_ORDER = ["copy-zeros", "copy-random", "sha256", "sort-sorted", "sort-shuffled", "sparse-parity"]
+-# v2c: one catalogue row per counted class (aifoundry3's random mean; the row's band), E189.md section 6.2
++# v2c: one catalogue row per counted class (the card's random mean, card 1's column here; the row's band), E189.md 6.2
+ V2C_ROWS = {"scalar_int": "add", "load": "lw", "store": "sw", "branch_taken": "beq_taken",
+             "branch_not_taken": "bne_nottaken", "jump": "jal", "mask_broadcast": "fbci.pi", "float_int_xfer": "fmv.x.w",
+             "int_muldiv": "mul", "system": "csrr_fccnb", "sync": "fence", "atomic_local": "amoaddl.w"}
+@@ -126,10 +147,24 @@
+ ZERO = {"j": 0.0, "band": [0.0, 0.0]}
+ 
+ 
++# ---------------------------------------------------------------- the card switch's one carried input
++def carried(F):
++    """frozen-v2.json has no card-1 price for sparse parity's operand kind, int8.pm1 (M10 priced it on aifoundry3 only,
++    from E90's signs tile). For the card switched, it is carried from aifoundry3 unchanged, its band unchanged (E191.md
++    section 3). Returns F itself when nothing is missing; never edits F; every other input stays card 1's own."""
++    k = F["kinds"]["int8.pm1"]
++    if CK in k:
++        return F
++    G = dict(F)
++    G["kinds"] = dict(F["kinds"])
++    G["kinds"]["int8.pm1"] = dict(k, **{CK: dict(k["a3"], carried_from="a3: frozen-v2.json has no card-1 entry")})
++    return G
++
++
+ # ---------------------------------------------------------------- the frozen given-seconds function
+ def given(rec, t_k, t_w, T0, F, LV, arm="primary"):
+     """The frozen forecast of one launch at the measured kernel seconds t_k, wall seconds a launch t_w and starting die
+-    T0 (E189.md section 5.2). Plain programs: their joules over idle are counts times prices (no seconds in them; the
++    T0 (E191.md section 5.2). Plain programs: their joules over idle are counts times prices (no seconds in them; the
+     awake rule leaves no waiting hart: E189.md 5.2); sparse parity: ledger_v2.predict() on the frozen load with its awake
+     hart-cycles from t_k. Both: the card at rest P_idle(T0) t_w and the run's own leakage rise k_leak(T0) k_rise J_over,
+     with ledger_v2's own bands. Returns j_over_idle, its band, j_total, its band and the parts."""
+@@ -140,14 +175,14 @@
+         j_over, band = a["j_over_idle"], a["j_over_idle_band"]
+         t = t_w
+         p_over = j_over / t
+-        kl = LV.leak_slope(F, "aifoundry3", T0)
++        kl = LV.leak_slope(F, CARD, T0)
+         kr = LV._c(F, "k_rise_c_per_w")
+         kr_lo, kr_hi = LV._cb(F, "k_rise_c_per_w")
+         kb = F["leak_slope_band_rel"]
+         heat = kl * kr * p_over * t
+         heat_band = [kl * kb[0] * kr_lo * band[0], kl * kb[1] * kr_hi * band[1]]
+-        p_rest, law = LV.idle_w(F, "aifoundry3", T0)
+-        rb = F["idle_laws"]["aifoundry3"]["rest_band_w"]
++        p_rest, law = LV.idle_w(F, CARD, T0)
++        rb = F["idle_laws"][CARD]["rest_band_w"]
+         rest, rest_band = p_rest * t, [(p_rest - rb) * t, (p_rest + rb) * t]
+         return {"j_over_idle": j_over, "j_over_idle_band": list(band), "rest_j": rest, "rest_band": rest_band,
+                 "heat_j": heat, "heat_band": heat_band, "j_total": rest + heat + j_over,
+@@ -165,7 +200,8 @@
+     """Sparse parity, one arm, at (t_k, t_w, T0): ledger_v2.predict() on the arm's frozen load, its awake hart-cycles
+     from t_k (each hart's cycles N f t_k beyond its busy cycles, less the arm's overlap for v2.1, floored at 0); for v2c
+     its counted instructions' joules added to J over idle, and the run's own rise recomputed on the new J over idle with
+-    predict()'s own formula (k_leak(T0) k_rise P_over t, band k_leak kb k_rise_band J_band)."""
++    predict()'s own formula (k_leak(T0) k_rise P_over t, band k_leak kb k_rise_band J_band). The frozen constants pass
++    through carried() (int8.pm1 on card 1; a load on any other card is untouched by it)."""
+     load = copy.deepcopy(arm["load"])
+     per_hart = N_MIN * F_HZ * t_k
+     aw = max(0.0, per_hart - arm["hart0_busy_cycles"]) + max(0.0, per_hart - arm["hart1_busy_cycles"])
+@@ -173,7 +209,7 @@
+     load["awake_hart_cycles"] = aw
+     load["seconds"] = t_w
+     load["die_start_c"] = T0
+-    pr = LV.predict(load, F)
++    pr = LV.predict(load, carried(F))
+     pr["awake_hart_cycles_used"] = aw
+     j = arm.get("counted_instr_j")
+     if j:
+@@ -195,6 +231,26 @@
+     return pr
+ 
+ 
++def rest_and_heat_card(ledger_v2, F, t, t_band, j_over, j_over_band, t0, t0_band, card=CARD):
++    """ledger_estimate.py's rest_and_heat() (46a16bd0), its card a parameter: that function sets card = "aifoundry3"
++    inside, and this copy differs from it only there (build() checks that at "aifoundry3" both return the same)."""
++    p_rest, law = ledger_v2.idle_w(F, card, t0)
++    rb = F["idle_laws"][card]["rest_band_w"]
++    lo_t0 = min(ledger_v2.idle_w(F, card, x)[0] for x in t0_band)
++    hi_t0 = max(ledger_v2.idle_w(F, card, x)[0] for x in t0_band)
++    rest = {"w": p_rest, "law": law, "j": p_rest * t, "band": [(lo_t0 - rb) * t_band[0], (hi_t0 + rb) * t_band[1]]}
++    kr = ledger_v2._c(F, "k_rise_c_per_w")
++    kr_lo, kr_hi = ledger_v2._cb(F, "k_rise_c_per_w")
++    kl = ledger_v2.leak_slope(F, card, t0)
++    kb = F["leak_slope_band_rel"]
++    p_over = j_over / t
++    heat_j = kl * kr * p_over * t
++    heat_band = [kl * kb[0] * kr_lo * (j_over_band[0] / t_band[1]) * t_band[0],
++                 kl * kb[1] * kr_hi * (j_over_band[1] / t_band[0]) * t_band[1]]
++    heat = {"k_leak_w_per_c": kl, "die_rise_c": kr * p_over, "j": heat_j, "band": heat_band}
++    return rest, heat
++
++
+ # ---------------------------------------------------------------- building the forecasts
+ def class_split(le, cat, counts, orig_pc):
+     """The instruction term split by the counter's classes (ledger_estimate.by_class_total's map), each class priced by
+@@ -249,7 +305,8 @@
+     terms["instructions by class"] = term(ins["j"], ins["band"], count=ins["count"],
+                                           by_class={c: {"j": v["j"], "band": v["band"], "count": v["count"]}
+                                                     for c, v in cls.items()},
+-                                          note=("catalogue rows, random column, aifoundry3's mean; branches by outcome; "
++                                          note=(f"catalogue rows, random column, {CARD}'s mean (card 1's column); branches "
++                                                "by outcome; "
+                                                 + ("the copy's vector loads and stores are inside the DRAM byte prices "
+                                                    "and not priced again" if prog == "copy" else
+                                                    "loads and stores at their L1-hit rows")))
+@@ -276,11 +333,11 @@
+                                                           "16 MiB) are written back at the kernel's end: not priced")
+     terms["mesh"] = dict(ZERO, note="not priced: the DRAM paths' prices include their mesh crossings")
+     # the card at rest and the run's own rise, carried over the two-sided seconds band and the 52-60 C die band, by
+-    # ledger_estimate.py's own rest_and_heat()
+-    rest, heat = le.rest_and_heat(LV, F, point, t_band, r["j_over_idle"], r["j_over_idle_band"], T0_FORECAST, T0_BAND)
++    # ledger_estimate.py's own rest_and_heat() with the card switched (rest_and_heat_card)
++    rest, heat = rest_and_heat_card(LV, F, point, t_band, r["j_over_idle"], r["j_over_idle_band"], T0_FORECAST, T0_BAND)
+     terms["the card at rest"] = term(rest["j"], rest["band"], w=rest["w"], law=rest["law"],
+-                                     note="aifoundry3's footing law at the forecast die 55 C (band 52-60 C) times the "
+-                                          "seconds (band: their two-sided band), +-0.5 W")
++                                     note=f"{CARD}'s idle law (frozen-v2.json idle_laws) at the forecast die 55 C "
++                                          "(band 52-60 C) times the seconds (band: their two-sided band), +-0.5 W")
+     terms["the run's own leakage rise"] = term(heat["j"], heat["band"], k_leak_w_per_c=heat["k_leak_w_per_c"],
+                                                die_rise_c=heat["die_rise_c"],
+                                                note="k_leak(55 C) x k_rise x P_over_idle x t (M10's 4.5 s window law)")
+@@ -303,7 +360,8 @@
+ 
+ def spp_record(r, le, LV, F, cc, ck):
+     """Sparse parity: the ledger v2's load as ledger_estimate.sparse_parity() builds it, made again here from the same
+-    pieces (checked to reproduce its prediction exactly), with its seconds band and its arms."""
++    pieces (checked to reproduce its prediction exactly, at aifoundry3, as it builds it), then the card switched, with
++    its seconds band and its arms."""
+     import loads_ledger_v2 as L  # noqa: E402  (pinned; ledger_estimate imports it the same way)
+     plan = r["plan"]
+     n, k, m = r["instance"]["n"], r["instance"]["k"], r["instance"]["m"]
+@@ -338,6 +396,7 @@
+     if not (pr["j_over_idle"] == v["j_over_idle"] and pr["j_total"] == v["j_total"]
+             and pr["j_over_idle_band"] == v["j_over_idle_band"] and pr["j_total_band"] == v["j_total_band"]):
+         sys.exit("refused: the rebuilt sparse-parity load does not reproduce ledger_estimate.py's prediction exactly")
++    load["card"] = CARD                          # the card switched, after the check (E191.md section 3)
+     base = {"kind": "spp", "load": load, "hart0_busy_cycles": hart0_busy, "hart1_busy_cycles": hart1_busy}
+     t_band = [SPP_FAST * t, plan["est_s"]]
+ 
+@@ -362,7 +421,7 @@
+ 
+     p0, prim_sum = summarize(base)
+     # ---- v2.1: the op cycles priced once (posthoc_ledger_v2.py e59_double_count's rule, applied to this instance)
+-    loop_int8 = N_MIN * F_HZ / F["zeros_anchor"]["int8"]["a3"]["rate_ops_per_s"]
++    loop_int8 = N_MIN * F_HZ / F["zeros_anchor"]["int8"][CK]["rate_ops_per_s"]
+     scp_cyc = 2048.0 / F["probe_rates_b_per_minion_cycle"]["scp_load"]
+     over = max(0.0, loop_int8 + scp_cyc - cy["C_OP_str"] * (1.0 + cy["KAPPA_T"] * U))
+     v21 = dict(copy.deepcopy(base), awake_overlap_hart_cycles=over * ops)
+@@ -394,7 +453,7 @@
+         tot = per_hart["hart0"][c] + per_hart["hart1"][c]
+         if abs(tot - fit[c]) > 1e-6 * max(1.0, abs(fit[c])):
+             sys.exit(f"refused: the per-hart fit does not add up to ledger_estimate's for class {c}")
+-    cat = le.Catalogue(os.path.join(REPO, le.CAT_REL))
++    cat = le.Catalogue(os.path.join(REPO, le.CAT_REL), CARD)
+     rows_used = {}
+     jc = [0.0, 0.0, 0.0]
+     busy_c = {"hart0": 0.0, "hart1": 0.0}
+@@ -403,7 +462,7 @@
+         if c in V2C_PRICED_ELSEWHERE:
+             continue
+         if c == "vector_int":
+-            e = F["instr_classes"]["vec_int"]["random_pj"]["a3"]
++            e = F["instr_classes"]["vec_int"]["random_pj"][CK]
+             elo, ehi = F["instr_classes"]["vec_int"]["band_pj"]
+             rate, row = LV._c(F, "issue_rate"), "frozen-v2.json instr_classes.vec_int at issue_rate 0.37"
+         else:
+@@ -490,12 +549,12 @@
+ def build(args):
+     nfiles = check_pins()
+     sys.path.insert(0, os.path.join(REPO, "tools", "ledger"))
+-    le = load_module("ledger_estimate_e189", "workloads/ledger/ledger_estimate.py")
++    le = load_module("ledger_estimate_e191", "workloads/ledger/ledger_estimate.py")
+     import ledger_v2 as LV  # noqa: E402  (pinned)
+-    cc = load_module("ledger_card_compare_e189", "tools/counter/card_compare_sparseparity.py")
++    cc = load_module("ledger_card_compare_e191", "tools/counter/card_compare_sparseparity.py")
+     ck = cc.load_counter()
+     F = LV.load_frozen(os.path.join(REPO, "docs/reports/data/2026-11-12-q166-ledger-v2/frozen-v2.json"))
+-    cat = le.Catalogue(os.path.join(REPO, le.CAT_REL))
++    cat = le.Catalogue(os.path.join(REPO, le.CAT_REL), CARD)
+     # the dated change: the sort at 1,800 sorts a launch
+     for k in ("sort-sorted", "sort-shuffled"):
+         le.CARD[k]["reps"] = SORT_REPS
+@@ -507,21 +566,60 @@
+         calls.append(dict(counts))
+         return orig_pc(cat_, counts, data, inplace_hi)
+     le.price_counts = rec_pc
++    cat_cls = le.Catalogue
++
++    class CatCard(cat_cls):                     # the card switched inside estimate(): its Catalogue(path) is card 1's
++        def __init__(self, path, card=CARD):
++            super().__init__(path, card)
++    le.Catalogue = CatCard
+     ea = argparse.Namespace(runs=os.path.join(REPO, PROGS, "runs"), repo=REPO,
+                             dis=os.path.join(REPO, PROGS, "kernel", "ledger.dis.gz"), t0=T0_FORECAST,
+                             spp_dry=os.path.join(REPO, PROGS, "runs", "p2-dry", "new-dry.json"),
+                             spp_slices=",".join(os.path.join(REPO, d) for d in SPP_SLICES), spp_sites=None, spp_dis=None,
+                             out=None)
+     res = le.estimate(ea)
++    le.Catalogue = cat_cls
+     le.price_counts = orig_pc
+     plain = [k for k in le.CARD]
+     if len(calls) != len(plain):
+         sys.exit(f"refused: estimate() priced {len(calls)} count sets, expected {len(plain)}")
+-    out = {"schema": "e189-forecast/1", "experiment": "E189",
+-           "what": "the blind day: four programs' (six configurations') joules a launch, forecast before the card; "
+-                   "REGISTERED, frozen before any E189 datum",
+-           "card": "aifoundry3 card 0, 600 MHz as found", "f_mhz": 600, "die_start_forecast_c": T0_FORECAST,
+-           "die_start_band_c": list(T0_BAND),
++    # the card switched in the copy's one card-keyed byte price: ledger_estimate.py reads the DRAM-read price on random
++    # bytes at frozen-v2.json mem_paths.dram_load.random_pj['a3']; card 1's is its CK entry (its literal bands and the
++    # write-back path's literal prices carry no card and stay)
++    rr = res["programs"]["copy-random"]
++    k_rd = [kk for kk in rr["terms"] if kk.startswith("DRAM reads")][0]
++    p_a3, p_cd = F["mem_paths"]["dram_load"]["random_pj"]["a3"], F["mem_paths"]["dram_load"]["random_pj"][CK]
++    if rr["terms"][k_rd]["pj_per_byte"][0] != p_a3:
++        sys.exit("refused: the copy's DRAM-read price is not the 'a3' lookup this switch replaces")
++    rr["terms"][k_rd]["pj_per_byte"] = (p_cd,) + tuple(rr["terms"][k_rd]["pj_per_byte"][1:])
++    rr["terms"][k_rd]["j"] = rr["terms"][k_rd]["bytes"] * p_cd * 1e-12
++    rr["j_over_idle"] = sum(v["j"] for v in rr["terms"].values())
++    rr["j_over_idle_band"] = [sum(v["band"][0] for v in rr["terms"].values()),
++                              sum(v["band"][1] for v in rr["terms"].values())]
++    # rest_and_heat_card() at aifoundry3 is ledger_estimate.py's rest_and_heat(), exactly (a check of the copy)
++    for k in plain:
++        r = res["programs"][k]
++        a_ = le.rest_and_heat(LV, F, r["seconds"]["point"], r["seconds"]["band"], r["j_over_idle"], r["j_over_idle_band"],
++                              T0_FORECAST, T0_BAND)
++        b_ = rest_and_heat_card(LV, F, r["seconds"]["point"], r["seconds"]["band"], r["j_over_idle"],
++                                r["j_over_idle_band"], T0_FORECAST, T0_BAND, card="aifoundry3")
++        if a_ != b_:
++            sys.exit(f"refused: rest_and_heat_card() at aifoundry3 differs from ledger_estimate.rest_and_heat() for {k}")
++    out = {"schema": "e191-forecast/1", "experiment": "E191",
++           "what": "the blind day on a second card: four programs' (six configurations') joules a launch on aifoundry1 "
++                   "card 1, forecast before the card; REGISTERED, frozen before any E189 or E191 datum",
++           "card": "aifoundry1 card 1 (the ledger's card 'aifoundry1-c1'), 600 MHz as found", "f_mhz": 600,
++           "die_start_forecast_c": T0_FORECAST, "die_start_band_c": list(T0_BAND),
++           "card_switch": {"from": "aifoundry3 (key a3), E189's", "to": f"{CARD} (key {CK})",
++                           "what": "every card-keyed input the frozen predictor reads is card 1's: the idle law, leak "
++                                   "slope and rest band; the ledger v2's prices for sparse parity and its arms; the "
++                                   "catalogue's card-1 column (means and issue rates) for the plain programs; the "
++                                   "copy's DRAM-read price on random bytes; nothing else changed (E191.md section 3)",
++                           "carried_from_aifoundry3": {"kinds.int8.pm1": "no card-1 entry in frozen-v2.json: "
++                                                                          "aifoundry3's D and band, unchanged"},
++                           "card_less_literals_kept": ["ledger_estimate.py's DRAM-read bands and zeros price, the "
++                                                       "write-back path's prices and bands, the L2 price and band",
++                                                       "the band rules' literals (H1_OVER_H2, L2_LINES_PER_S, SPP_FAST)"]},
+            "predictor": {"ledger_v2": "commit 06d60fa2; frozen-v2.json sha256 " + PINS[
+                "docs/reports/data/2026-11-12-q166-ledger-v2/frozen-v2.json"],
+                "ledger_estimate": "workloads/ledger/ledger_estimate.py at 46a16bd0, sha256 " + PINS[
+@@ -580,7 +678,7 @@
+ 
+ 
+ def text(out):
+-    L = ["E189 frozen forecasts (REGISTERED; per launch on aifoundry3 card 0 at 600 MHz; forecast die 55 C, band 52-60)",
++    L = ["E191 frozen forecasts (REGISTERED; per launch on aifoundry1 card 1 at 600 MHz; forecast die 55 C, band 52-60)",
+          "", f"{'configuration':15s} {'seconds point [two-sided band]':34s} {'J over idle [band]':24s} "
+              f"{'J with the card at rest [band]':30s}"]
+     for k, r in out["configs"].items():
+@@ -612,7 +710,7 @@
+ 
+ def main(argv):
+     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+-    ap.add_argument("--out", default=HERE, help="where to write forecast-e189.json and .txt (default: this folder)")
++    ap.add_argument("--out", default=HERE, help="where to write forecast-e191.json and .txt (default: this folder)")
+     ap.add_argument("--check", action="store_true", help="recompute and compare with the committed files byte for byte")
+     a = ap.parse_args(argv)
+     out = build(a)
+@@ -620,16 +718,16 @@
+     tx = text(out)
+     if a.check:
+         ok = True
+-        for name, body in (("forecast-e189.json", js), ("forecast-e189.txt", tx)):
++        for name, body in (("forecast-e191.json", js), ("forecast-e191.txt", tx)):
+             have = open(os.path.join(HERE, name)).read()
+             same = have == body
+             ok &= same
+             print(f"{name}: {'identical' if same else 'DIFFERS'} (sha256 {hashlib.sha256(body.encode()).hexdigest()})")
+         print("FORECAST CHECK " + ("PASS" if ok else "FAIL"))
+         return 0 if ok else 1
+-    with open(os.path.join(a.out, "forecast-e189.json"), "w") as f:
++    with open(os.path.join(a.out, "forecast-e191.json"), "w") as f:
+         f.write(js)
+-    with open(os.path.join(a.out, "forecast-e189.txt"), "w") as f:
++    with open(os.path.join(a.out, "forecast-e191.txt"), "w") as f:
+         f.write(tx)
+     print(tx)
+     return 0
+--- tools/claims-v3/e189/plan_e189.py
++++ tools/claims-v3/e191/plan_e191.py
+@@ -1,10 +1,13 @@
+ #!/usr/bin/env python3
+-"""E189's session plan: launches a burst (K), the pass order, the card-minute arithmetic, the window, the stops.
++"""E191's session plan: launches a burst (K), the pass order, the card-minute arithmetic, the window, the stops.
+ 
+-    python3 -I -B tools/claims-v3/e189/plan_e189.py            # writes plan-e189.json beside this file
+-    python3 -I -B tools/claims-v3/e189/plan_e189.py --check    # recomputes and compares byte for byte
++    python3 -I -B tools/claims-v3/e191/plan_e191.py            # writes plan-e191.json beside this file
++    python3 -I -B tools/claims-v3/e191/plan_e191.py --check    # recomputes and compares byte for byte
+ 
+-Everything here is arithmetic on the frozen forecast (forecast-e189.json) and on the two hosts' own guard rules
++E189's plan code (tools/claims-v3/e189/plan_e189.py, sha256 bba6860c..., in E189's re-made registration list bf1b1bbb...)
++with E191's seed, its own forecast file and card 1's selection, window, die gate and stops (E191.md sections 9-11);
++the K rule, the card-minute arithmetic and the cap are E189's.
++Everything here is arithmetic on the frozen forecast (forecast-e191.json) and on the two hosts' own guard rules
+ (workloads/ledger/host/main.cpp modelSeconds() and its launch rule; workloads/sparseparity/energy.sh's fit rule). The
+ order is a seeded shuffle written out in full: the kit's runner reads the list and never shuffles. Standard library
+ only. SPDX-License-Identifier: Apache-2.0
+@@ -17,7 +20,7 @@
+ import sys
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+-SEED = 189
++SEED = 191
+ ORDER = ["copy-zeros", "copy-random", "sha256", "sort-sorted", "sort-shuffled", "sparse-parity"]
+ GiB = 1 << 30
+ LEDGER_BUDGET_S, TARGET_S, GAP_S = 9.5, 6.0, 0.010
+@@ -48,7 +51,7 @@
+ 
+ 
+ def plan(fc):
+-    out = {"schema": "e189-plan/1", "seed": SEED, "configs": {}}
++    out = {"schema": "e191-plan/1", "seed": SEED, "configs": {}}
+     for key in ORDER:
+         s = fc["configs"][key]["seconds"]
+         pt, hi = s["point"], s["band"][1]
+@@ -60,7 +63,8 @@
+             want = max(1, round(TARGET_S / (pt + SPP_PER_EXTRA_S)))
+             k = min(fit, want)
+             out["configs"][key] = {
+-                "host": "workloads/sparseparity build (kernel .text 3e14be32...), through E189's own runner",
++                "host": "workloads/sparseparity build (kernel .text 3e14be32...), through E191's runner (to be made "
++                        "from E189's kit, with card 1's selection)",
+                 "args": ARGS[key], "launches_K": k, "reps_flag": f"--reps {k}",
+                 "rule": "energy.sh's fit rule at the band's slow end: the host starts a launch only while "
+                         "floor(min(timeout, budget - elapsed - 0.5)) >= max(1, 1.25 guard + 0.5)",
+@@ -76,7 +80,8 @@
+         k = min(k_guard, k_target)
+         end_hi = s0 + k * (hi + GAP_S) + AFTER_S[key]
+         out["configs"][key] = {
+-            "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E189's own runner",
++            "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E191's runner (to be made from "
++                    "E189's kit, with card 1's selection)",
+             "args": ARGS[key] + f" --launches {k}", "launches_K": k,
+             "rule": "main.cpp: a launch starts only while 9.5 s - elapsed >= the guard's model + 0.5 s; K = the most "
+                     "that start at the band's slow end, capped at energy.sh's 6 s target at the point",
+@@ -102,7 +107,7 @@
+             "the closing reads (ettelem config: TDP and threshold), release"]
+     out["order"] = {"rounds": rounds, "sequence": seq,
+                     "rule": "four independent passes a configuration, one host process each; each round holds every "
+-                            "configuration once, shuffled by random.Random(189); written out here, never re-drawn"}
++                            "configuration once, shuffled by random.Random(191); written out here, never re-drawn"}
+     per_pass_min_s = {k: 8.0 + (SETUP_S.get(k, SPP_FIRST_S) + v["burst_s_at_point"] + AFTER_S.get(k, 0.5)) + 10.0 + 3.0 + 5.0
+                       for k, v in out["configs"].items()}
+     passes_min = 4 * sum(per_pass_min_s.values()) / 60.0
+@@ -116,13 +121,24 @@
+                                 "the die gate's waits (heat carries over) and the sampler's retries"},
+         "rule": "about 95 card-minutes, cap 110: no pass starts after 108 card-minutes from the first card command; "
+                 "the session ends by 110"}
++    out["card"] = {"which": "aifoundry1 card 1 (the ledger's card 'aifoundry1-c1'), 600 MHz as found; nothing set, "
++                            "reads only",
++                   "select": "ET_DEVICES=1 for every process that opens a device (V3_DEVICE=1 in claims-v3 runners)",
++                   "lock": "/run/lock/etsoc-shire1.lock, held for the session (flock -n), never card 0's",
++                   "config_read": "ettelem config through the kit's guard at the start and the end, holding card 1's "
++                                  "lock under timeout 10: expected TDP 65 W, threshold 65 C, 600 MHz (as E137, 2 Nov 2026, "
++                                  "and E184 arm B, 8 Nov 2026, read it); a different start reading stops the session "
++                                  "before its first launch (a gate: no data); the end reading is reported",
++                   "processes": "one host process at a time on the card, under timeout 10"}
+     out["window"] = {
+-        "alone": "from his go at G (a fresh approval in hand): last start G+1:30, last end G+3:30, inside one Pacific "
+-                 "day and at least 30 minutes before the approval lapses; the post 'for 2 h'",
+-        "after_E183": "E183 first (its own window, G+1:15 / G+2:30); E189's first card command at least 40 minutes "
+-                      "after E183's session end (or after that run's latest file write, if it ended without "
+-                      "'session end'); E189's last start G+3:00, last end G+5:00; the day's ONE post 'for 4 h'",
+-        "one_session": "never two sessions of ours on aifoundry3 at once"}
++        "alone": "from his go at G (box access as the kit says on the day): last start G+1:30, last end G+3:30, inside "
++                 "one Pacific day; the day's post as the lab's rule stands that day (the owner waived it for Fri 13 Nov "
++                 "2026, his words about 11:30 PST)",
++        "after_E189": "E191's kit is made from E189's after E189's real day; E191 runs on another box (aifoundry1), so "
++                      "E189's and E183's sessions on aifoundry3 do not gate it beyond its go",
++        "one_session": "never two sessions of ours on aifoundry1 at once, on either card (the runners count device "
++                       "openers and the driver's use count across both cards): any other session of ours there, on "
++                       "card 0 or card 1, goes before or after E191, never beside it"}
+     out["die_gate"] = {"rule": "a pass starts only when minshire[0] reads 60 C or less (waits up to 10 minutes, then the "
+                                "pass is skipped, no data); a die below 52 C does not block (the pass is scored given "
+                                "its own T0 and labelled 'T0 below the forecast band')", "band_c": [52, 60]}
+@@ -138,13 +154,13 @@
+     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+     ap.add_argument("--check", action="store_true")
+     a = ap.parse_args(argv)
+-    fc = json.load(open(os.path.join(HERE, "forecast-e189.json")))
++    fc = json.load(open(os.path.join(HERE, "forecast-e191.json")))
+     js = json.dumps(plan(fc), indent=1, sort_keys=True) + "\n"
+     if a.check:
+-        same = open(os.path.join(HERE, "plan-e189.json")).read() == js
++        same = open(os.path.join(HERE, "plan-e191.json")).read() == js
+         print("PLAN CHECK " + ("PASS" if same else "FAIL"))
+         return 0 if same else 1
+-    open(os.path.join(HERE, "plan-e189.json"), "w").write(js)
++    open(os.path.join(HERE, "plan-e191.json"), "w").write(js)
+     p = json.loads(js)
+     for k, v in p["configs"].items():
+         print(f"{k:14s} K {v['launches_K']:2d}  burst {v['burst_s_at_point']:.2f} s at the point, "
+--- tools/claims-v3/e189/score_e189.py
++++ tools/claims-v3/e191/score_e191.py
+@@ -1,15 +1,15 @@
+ #!/usr/bin/env python3
+-"""E189's frozen scorer: the blind day's six configurations scored against the frozen forecasts (E189.md section 8).
++"""E191's frozen scorer: the blind day's six configurations scored against the frozen forecasts (E191.md section 8).
+ 
+-    python3 -I -B tools/claims-v3/e189/score_e189.py DATA [--out FILE]   # score a day's data folder
+-    python3 -I -B tools/claims-v3/e189/score_e189.py --selftest-e59        # reproduce scores-v2.json's E59 rows
+-    /usr/bin/python3 -I -B tools/claims-v3/e189/score_e189.py --selftest-stub OUT   # a stub card (needs numpy)
++    python3 -I -B tools/claims-v3/e191/score_e191.py DATA [--out FILE]   # score a day's data folder
++    python3 -I -B tools/claims-v3/e191/score_e191.py --selftest-e59        # reproduce scores-v2.json's E59 rows
++    /usr/bin/python3 -I -B tools/claims-v3/e191/score_e191.py --selftest-stub OUT   # a stub card (needs numpy)
+ 
+-It refuses unless every file of SHA256SUMS-e189-registration matches (the forecasts, this file, given()'s module). It
+-never refits: each pass's given-seconds forecast is forecast_e189.given() evaluated at that pass's measured kernel
++It refuses unless every file of SHA256SUMS-e191-registration matches (the forecasts, this file, given()'s module). It
++never refits: each pass's given-seconds forecast is forecast_e191.given() evaluated at that pass's measured kernel
+ seconds t_k, wall seconds a launch t_w and starting die T0; the seconds forecast is the frozen point and band.
+ 
+-DATA's form (E189.md section 8.1; the kit's runner writes it): DATA/passes/<config>/p<k>/ with
++DATA's form (E191.md section 8.1; the kit's runner writes it): DATA/passes/<config>/p<k>/ with
+   energy.json     workloads/sparseparity/tools/energy_reduce.py's output for that pass (the reducer unchanged);
+   host.json       what the reducer read (sparse parity: its host's own line; the ledger programs: the runner's adapter
+                   of the ledger host's line into the reducer's fields: reps_done, reps_requested, launch_s,
+@@ -36,17 +36,17 @@
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ REPO = os.path.normpath(os.path.join(HERE, "..", "..", ".."))
+ F_HZ = 600e6
+-SUMS = os.path.join(HERE, "SHA256SUMS-e189-registration")
++SUMS = os.path.join(HERE, "SHA256SUMS-e191-registration")
+ ORDER = ["copy-zeros", "copy-random", "sha256", "sort-sorted", "sort-shuffled", "sparse-parity"]
+-# the registered rules (E189.md section 8.3): words and thresholds as frozen
++# the registered rules (E191.md section 8.3): words and thresholds as frozen
+ RULES = {
+-    "E189-S1": {"words": "score 1, given the measured seconds: J over idle a launch within 10% on at least 5 of the 6 "
++    "E191-S1": {"words": "score 1, given the measured seconds: J over idle a launch within 10% on at least 5 of the 6 "
+                          "configurations, and the rms of the six errors at most 10%", "tol": 0.10, "need": 5, "rms": 0.10},
+-    "E189-S1T": {"words": "score 1, given the measured seconds: J with the card at rest a launch within 5% on at least "
++    "E191-S1T": {"words": "score 1, given the measured seconds: J with the card at rest a launch within 5% on at least "
+                           "5 of 6", "tol": 0.05, "need": 5},
+-    "E189-S2": {"words": "score 2, with the seconds forecast: the measured kernel seconds inside the frozen two-sided "
++    "E191-S2": {"words": "score 2, with the seconds forecast: the measured kernel seconds inside the frozen two-sided "
+                          "band and within 15% of the point, on at least 5 of 6", "tol": 0.15, "need": 5},
+-    "E189-S2T": {"words": "score 2, with the seconds forecast: J with the card at rest a launch, at the forecast "
++    "E191-S2T": {"words": "score 2, with the seconds forecast: J with the card at rest a launch, at the forecast "
+                           "seconds and die, within 15% on at least 5 of 6", "tol": 0.15, "need": 5},
+ }
+ MIN_PASSES = 2          # a configuration with fewer good passes reads NO DATA (never a failed prediction)
+@@ -58,7 +58,7 @@
+ 
+ def check_frozen():
+     if not os.path.exists(SUMS):
+-        sys.exit("refused: no SHA256SUMS-e189-registration beside this file")
++        sys.exit("refused: no SHA256SUMS-e191-registration beside this file")
+     bad, n = [], 0
+     for ln in open(SUMS):
+         if not ln.strip():
+@@ -71,14 +71,14 @@
+         if sha(os.path.join(REPO, p)) != h:
+             bad.append(p)
+     if bad:
+-        sys.exit("refused: frozen files differ from SHA256SUMS-e189-registration: " + ", ".join(bad))
++        sys.exit("refused: frozen files differ from SHA256SUMS-e191-registration: " + ", ".join(bad))
+     return n
+ 
+ 
+ def modules():
+     sys.path.insert(0, os.path.join(REPO, "tools", "ledger"))
+     import ledger_v2 as LV  # noqa: E402
+-    spec = importlib.util.spec_from_file_location("forecast_e189", os.path.join(HERE, "forecast_e189.py"))
++    spec = importlib.util.spec_from_file_location("forecast_e191", os.path.join(HERE, "forecast_e191.py"))
+     FC = importlib.util.module_from_spec(spec)
+     spec.loader.exec_module(FC)
+     F = LV.load_frozen(os.path.join(REPO, "docs", "reports", "data", "2026-11-12-q166-ledger-v2", "frozen-v2.json"))
+@@ -110,7 +110,7 @@
+ 
+ # ---------------------------------------------------------------- one pass
+ def read_pass(d, cfg):
+-    """A pass's measured values and its validity (E189.md section 8.2). Returns (record, why_not) ."""
++    """A pass's measured values and its validity (E191.md section 8.2). Returns (record, why_not) ."""
+     try:
+         en = json.load(open(os.path.join(d, "energy.json")))
+     except (OSError, ValueError):
+@@ -203,16 +203,16 @@
+            "reported_heat_crosscheck": {
+                "what": "the reducer's uncorrected J a launch (all of the leakage's rise in it) beside the given-seconds "
+                        "J over idle plus the ledger's own rise term (REPORTED, not scored: the headline's leakage "
+-                       "correction reads whole degrees, so a low-power burst can keep part of its rise; E189.md 12)",
++                       "correction reads whole degrees, so a low-power burst can keep part of its rise; E191.md 12)",
+                "measured_raw_mean": mean([p["j_raw"] for p in passes if p.get("j_raw") is not None]),
+                "given_j_over_plus_heat_mean": mean([FC.given(rec, p["t_k"], p["t_w"], p["T0"], F, LV, arm=arm)["j_over_idle"]
+                                                     + FC.given(rec, p["t_k"], p["t_w"], p["T0"], F, LV, arm=arm)["heat_j"]
+                                                     for p in passes])},
+            "flags": sorted(set(f for r in rows for f in r["flags"]))}
+-    out["ok_S1"] = abs(out["e_j_over"]) <= RULES["E189-S1"]["tol"]
+-    out["ok_S1T"] = abs(out["e_j_total"]) <= RULES["E189-S1T"]["tol"]
+-    out["ok_S2"] = out["t_inside_band"] and abs(tk / s["point"] - 1.0) <= RULES["E189-S2"]["tol"]
+-    out["ok_S2T"] = abs(out["e_j_total_forecast"]) <= RULES["E189-S2T"]["tol"]
++    out["ok_S1"] = abs(out["e_j_over"]) <= RULES["E191-S1"]["tol"]
++    out["ok_S1T"] = abs(out["e_j_total"]) <= RULES["E191-S1T"]["tol"]
++    out["ok_S2"] = out["t_inside_band"] and abs(tk / s["point"] - 1.0) <= RULES["E191-S2"]["tol"]
++    out["ok_S2T"] = abs(out["e_j_total_forecast"]) <= RULES["E191-S2T"]["tol"]
+     if key == "sparse-parity":
+         sc = rec["terms"]["bytes: scratchpad"]
+         out["rail_crosscheck"] = {"what": "the scratchpad term beside the SRAM rail over idle (E59's cross-check; "
+@@ -235,7 +235,7 @@
+     else:
+         v = "NOT DECIDED"
+     out = {"rule": name, "words": r["words"], "scored": len(sc), "within": npass, "outside": nfail, "verdict": v}
+-    if name == "E189-S1" and sc:
++    if name == "E191-S1" and sc:
+         rr = rms([c["e_j_over"] for c in sc])
+         out["rms_e_j_over"] = rr
+         if v == "PASS" and rr > r["rms"]:
+@@ -247,7 +247,7 @@
+ 
+ 
+ def score_day(data, LV, FC, F, fc):
+-    res = {"what": "E189 scored by the frozen scorer (score_e189.py); every number labelled as E189.md section 8 says",
++    res = {"what": "E191 scored by the frozen scorer (score_e191.py); every number labelled as E191.md section 8 says",
+            "configs": {}, "rules": {}, "arms": {}, "not_used": []}
+     by = {}
+     for key in ORDER:
+@@ -278,7 +278,7 @@
+ # ---------------------------------------------------------------- self-test 1: E59 (scores-v2.json's rows)
+ def selftest_e59(LV, FC, F):
+     """Reproduce scores-v2.json's 20 E59 rows from predictions-v2.json and E59's committed energy.json records, with the
+-    row form of tools/ledger/score_ledger_v2.py; then evaluate forecast_e189's sparse-parity evaluator (spp_eval, which
++    row form of tools/ledger/score_ledger_v2.py; then evaluate forecast_e191's sparse-parity evaluator (spp_eval, which
+     given() calls) on each E59 load at E59's own measured seconds and die and compare it with predictions-v2.json's
+     frozen given-seconds prediction."""
+     D = os.path.join(REPO, "docs", "reports", "data", "2026-11-12-q166-ledger-v2")
+@@ -345,9 +345,9 @@
+ 
+ # ---------------------------------------------------------------- self-test 2: a stub card
+ def selftest_stub(out_dir, LV, FC, F, fc):
+-    """Stub passes made by stub_e189.py (a simulated card in simulated time with energy_stub.py's 'alt' laws, which break
++    """Stub passes made by stub_e191.py (a simulated card in simulated time with energy_stub.py's 'alt' laws, which break
+     the reducer's own), reduced by the unchanged reducer, then scored. Each scenario's verdicts are stated first."""
+-    spec = importlib.util.spec_from_file_location("stub_e189", os.path.join(HERE, "stub_e189.py"))
++    spec = importlib.util.spec_from_file_location("stub_e191", os.path.join(HERE, "stub_e191.py"))
+     ST = importlib.util.module_from_spec(spec)
+     spec.loader.exec_module(ST)
+     scenarios = ST.SCENARIOS
+@@ -370,7 +370,7 @@
+                 for k, c in res["configs"].items()}
+         results.append({"scenario": sc["name"], "what": sc["what"], "expected": sc["expect"], "got": got,
+                         "errors": errs, "verdict": "PASS" if ok else "FAIL"})
+-    return {"selftest": "stub card", "card": "energy_stub.py CARDS['alt'] laws, simulated time (stub_e189.py)",
++    return {"selftest": "stub card", "card": "energy_stub.py CARDS['alt'] laws, simulated time (stub_e191.py)",
+             "scenarios": results, "verdict": "PASS" if all(r["verdict"] == "PASS" for r in results) else "FAIL"}
+ 
+ 
+@@ -383,7 +383,7 @@
+     a = ap.parse_args(argv)
+     n = check_frozen()
+     LV, FC, F = modules()
+-    fc = json.load(open(os.path.join(HERE, "forecast-e189.json")))
++    fc = json.load(open(os.path.join(HERE, "forecast-e191.json")))
+     if a.selftest_e59:
+         r = selftest_e59(LV, FC, F)
+         r["frozen_files_checked"] = n
+--- tools/claims-v3/e189/stub_e189.py
++++ tools/claims-v3/e191/stub_e191.py
+@@ -1,13 +1,14 @@
+ #!/usr/bin/env python3
+-"""E189's stub card for the scorer's self-test (score_e189.py --selftest-stub): a day's data folder made with no device.
++"""E191's stub card for the scorer's self-test (score_e191.py --selftest-stub): a day's data folder made with no device.
+ 
+ Each pass is energy.sh's form (idle 8 s, ONE burst of K launches, idle 10 s) on a simulated card in SIMULATED time, with
+ workloads/sparseparity/tools/energy_stub.py's 'alt' laws, the ones that break the reducer's own: another leakage law
+ (20 W e^((T-80)/40)), 11-thermal-model.md's thermal chain, the SP's board average with gain 1.01 and tau 0.8 s, the
+ rails with tau 1.3 s, board_w a pass late, the idle die at 55.7 C, the card's power 5 ms after the host's launch mark
+ and 3 ms before its end. Only the base power differs from energy_stub.py: it is set so the card's idle equals the
+-ledger's footing law at the die reading (so a correct forecast can pass). The telemetry, host.json, host-raw.json,
+-run.json and pass.json follow E189.md section 8.1; the reducer (energy_reduce.py, unchanged) then writes energy.json.
++ledger's idle law for card 1 (aifoundry1-c1: E191's card; E189's stub used aifoundry3's) at the die reading (so a
++correct forecast can pass). The telemetry, host.json, host-raw.json,
++run.json and pass.json follow E191.md section 8.1; the reducer (energy_reduce.py, unchanged) then writes energy.json.
+ 
+ The injected energy is chosen per scenario from the frozen forecast itself: dynamic power p during each launch of d s
+ so that p (d - 5 ms - 3 ms) = the forecast's given-seconds J over idle at t_k = d (times the scenario's factor).
+@@ -34,23 +35,23 @@
+ SCENARIOS = [
+     {"name": "A-as-forecast", "what": "every configuration, 4 passes, at the forecast's point seconds and energy",
+      "passes": {k: [{}] * 4 for k in ALL},
+-     "expect": {"verdicts": {"E189-S1": "PASS", "E189-S1T": "PASS", "E189-S2": "PASS", "E189-S2T": "PASS"}}},
++     "expect": {"verdicts": {"E191-S1": "PASS", "E191-S1T": "PASS", "E191-S2": "PASS", "E191-S2T": "PASS"}}},
+     {"name": "B-two-energies-off", "what": "copy-random and sha256 add 25% more energy over idle than forecast",
+      "passes": dict({k: [{}] * 2 for k in ALL}, **{"copy-random": [{"factor": 1.25}] * 2, "sha256": [{"factor": 1.25}] * 2}),
+-     "expect": {"verdicts": {"E189-S1": "FAIL", "E189-S1T": "PASS", "E189-S2": "PASS", "E189-S2T": "PASS"}}},
++     "expect": {"verdicts": {"E191-S1": "FAIL", "E191-S1T": "PASS", "E191-S2": "PASS", "E191-S2T": "PASS"}}},
+     {"name": "C-a-failed-build", "what": "sort-shuffled has no pass (a failed build: no data); the rest as forecast",
+      "passes": dict({k: [{}] * 2 for k in ALL}, **{"sort-shuffled": []}),
+-     "expect": {"verdicts": {"E189-S1": "PASS", "E189-S1T": "PASS", "E189-S2": "PASS", "E189-S2T": "PASS"},
++     "expect": {"verdicts": {"E191-S1": "PASS", "E191-S1T": "PASS", "E191-S2": "PASS", "E191-S2T": "PASS"},
+                 "no_data": ["sort-shuffled"]}},
+     {"name": "D-two-slow", "what": "sort-sorted and sparse parity run 30% longer than the point; their energy follows "
+                                    "the given-seconds forecast (so score 1 holds, score 2 does not)",
+      "passes": dict({k: [{}] * 2 for k in ALL}, **{"sort-sorted": [{"slow": 1.30}] * 2, "sparse-parity": [{"slow": 1.30}] * 2}),
+-     "expect": {"verdicts": {"E189-S1": "PASS", "E189-S1T": "PASS", "E189-S2": "FAIL", "E189-S2T": "FAIL"}}},
++     "expect": {"verdicts": {"E191-S1": "PASS", "E191-S1T": "PASS", "E191-S2": "FAIL", "E191-S2T": "FAIL"}}},
+     {"name": "E-short-and-set-aside", "what": "copy-zeros' first pass cut short by the budget (6 of 8 launches, scored, "
+                                               "flagged); sparse parity's passes set aside but one (off 600 MHz: NO DATA)",
+      "passes": dict({k: [{}] * 2 for k in ALL}, **{"copy-zeros": [{"short": 6}, {}],
+                                                     "sparse-parity": [{"set_aside": "a sample off 600 MHz"}] * 3 + [{}]}),
+-     "expect": {"verdicts": {"E189-S1": "PASS", "E189-S1T": "PASS", "E189-S2": "PASS", "E189-S2T": "PASS"},
++     "expect": {"verdicts": {"E191-S1": "PASS", "E191-S1T": "PASS", "E191-S2": "PASS", "E191-S2T": "PASS"},
+                 "no_data": ["sparse-parity"], "short_flagged": ["copy-zeros"]}},
+ ]
+ 
+@@ -64,10 +65,10 @@
+ 
+ def simulate(path, lo, d, n, p_dyn, t_end, F, LV, seed):
+     """Telemetry at 10 Hz from t = 0 to t_end (s, simulated), launches at lo + i (d + GAP), i < n, power p_dyn."""
+-    ES = _mod("energy_stub_e189", "workloads/sparseparity/tools/energy_stub.py")
++    ES = _mod("energy_stub_e191", "workloads/sparseparity/tools/energy_stub.py")
+     C = ES.CARDS["alt"]
+     a80, tl, stages, t_idle = C["a_leak_80"], C["t_l"], C["thermal"], C["t_idle"]
+-    law_idle = LV.idle_w(F, "aifoundry3", float(round(t_idle)))[0]
++    law_idle = LV.idle_w(F, "aifoundry1-c1", float(round(t_idle)))[0]  # card 1's idle law (E191)
+     p_base = law_idle / C["avg_gain"] - a80 * math.exp((t_idle - 80.0) / tl)
+     sp_pass = ES.sp_pass_s(EVERY)
+     e0, e1 = C["edge_s"]
+@@ -154,7 +155,7 @@
+ 
+ 
+ def make_day(d, sc, fc, F, LV, FC):
+-    ER = _mod("energy_reduce_e189", "workloads/sparseparity/tools/energy_reduce.py")
++    ER = _mod("energy_reduce_e191", "workloads/sparseparity/tools/energy_reduce.py")
+     for key in ALL:
+         for k, spec in enumerate(sc["passes"].get(key, []), start=1):
+             make_pass(os.path.join(d, "passes", key, f"p{k}"), key, k, spec, fc["configs"][key], F, LV, FC, ER)
