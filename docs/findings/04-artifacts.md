@@ -1527,6 +1527,21 @@ These two rounds built **no new space**: what they made is in this repository, i
 
 By round: Q164, 32 files in its kit note, besides its records; Q165, 99 (21 + 63 + 3 + 12). The four E188 commits carry "Q165" in their subjects; `24b9b99e`'s names E183 and no Q number; the records' two name Q164. **The hash lists** at `16b41cf2` (every tracked file whose name holds SHA256SUMS): 171 lists, 6,008 entries, 5,991 OK, the 17 others E85's code list, whose entries match their files under `tools/claims-v3/hlc`, `hlk` and `hm`. No file of E185's first try entered this repository (05, "Q164 and Q165"), and no E183 or E188 datum is in any ref.
 
+## Q166 published no new page: the load ledger v2, the counter and the blind day's four programs (12 November 2026)
+
+This round built **no new space**: what it made is in this repository, in **four commits that add 291 files and edit none** (`06d60fa2` to `46a16bd0`), besides Q165's records and their fix (`7ea49400`, `5a94c5e7`), which edit only the records files. The table gives each commit with git's own time (PST, Thu 12 Nov), its round, what it holds and its file count, in git's order; the folders' counts follow. The ledger's chart is a file in its data folder, not a page. *(Recorded by Q167's records, Thu 12 Nov 2026.)*
+
+| Commit (git's time, PST) | Round | What (where) | Files |
+|---|---|---|---|
+| `7ea49400` (16:51:14) | Q165 | Q164's close and Q165's records: 02–05, the findings README, `AGENT.md` and `docs/agent-changelog-archive.md` | 7 edited, insert-only bar the Q index counters and one moved entry |
+| `5a94c5e7` (18:12:10) | Q165 | those records after their verifier: dated clauses in 02 and 05 | 2 edited, insert-only |
+| `06d60fa2` (20:09:27) | Q166 | the load ledger v2's freeze ([`tools/ledger/`](../../tools/ledger/README.md): `ledger_v2.py`, `freeze_ledger_v2.py`, `loads_ledger_v2.py`; [`docs/reports/data/2026-11-12-q166-ledger-v2/`](../reports/data/2026-11-12-q166-ledger-v2/FREEZE.md): `FREEZE.md`, `frozen-v2.json`, `predictions-v2.json`, `SHA256SUMS-freeze` (6 entries)) | 7 |
+| `80eb3bdf` (20:10:00) | Q166 | its scores with dated corrections: `score_ledger_v2.py`, `posthoc_ledger_v2.py`, `chart_ledger_v2.py` and `tools/ledger/README.md`; in the data folder [`README.md`](../reports/data/2026-11-12-q166-ledger-v2/README.md), `FREEZE.md.dated-note-1.md`, `scores-v2.json`, `posthoc-v2.json`, `chart-data-v2.json`, `chart-v2.html` and `SHA256SUMS` (17 entries) | 11 |
+| `69e85905` (20:12:05) | Q166 | the counter ([`tools/counter/`](../../tools/counter/README.md): `count_kernel.py`, `run_counted.sh`, `build_profiling_sysemu.sh`, `validate_sparseparity.py`, `card_compare_sparseparity.py`, `test_count_kernel.py`, `README.md`) and its validation on sparse parity ([`docs/reports/data/2026-11-12-q166-counter-sparseparity/`](../reports/data/2026-11-12-q166-counter-sparseparity/README.md): the simulator's runs with both builds, the build facts, the kernel's disassembly and address map, the tensor-store runs, `validation.json`, `card-compare-l1b.json`; `SHA256SUMS`, 86 entries) | 94 (7 + 87) |
+| `46a16bd0` (20:14:23) | Q166 | the blind day's programs ([`workloads/ledger/`](../../workloads/ledger/README.md): the kernel, the host, `ledger_args.h`, `ledger_desk.py`, `ledger_estimate.py`, `spp_never_ran.py`) and their runs ([`docs/reports/data/2026-11-12-q166-progs/`](../reports/data/2026-11-12-q166-progs/README.md): the simulator's runs and the fix pass's, the digests, the build facts, `estimates.json`, `estimates.txt` and the never-ran survey; `SHA256SUMS`, 165 entries) | 179 (13 + 166) |
+
+By folder: `tools/ledger/` 7, the ledger's data 11, `tools/counter/` 7, the counter's data 87, `workloads/ledger/` 13, the programs' data 166. The four Q166 commits carry "Q166" in their subjects. **The hash lists** at `46a16bd0` (every tracked file whose name holds SHA256SUMS): 175 lists, 6,282 entries, 6,265 OK, the 17 others E85's code list, as before; Q166's four lists, 6, 17, 86 and 165 entries, all OK. No E183, E188 or E189 datum is in any ref.
+
 ## The camera and the details panel (30 September)
 
 For Q74–Q76: the memory levels and the chip diagram (the pages of 28 and 27 September) jumped in the middle of their
