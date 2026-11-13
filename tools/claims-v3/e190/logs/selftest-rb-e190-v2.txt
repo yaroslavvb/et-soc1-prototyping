@@ -1,0 +1,97 @@
+scratch repository: a shared sparse clone of the lab clone's HEAD, note 1 as one stand-in commit 28067ef1259e; note 1's stand-in list 38 files
+
+== A: the dry listing v2
+-> PASS (the dry listing: dry listing: 23 steps listed, 0 exited non-zero, 0 box calls)
+
+== K: step 2 v2 with no window
+-> PASS ([s03_desk_v2_e190] STOP: no window in RB_OUT: run s02_window_e190.sh with his go's day, last start and last end first)
+
+== W1: a window written for E189
+-> PASS ([s03_desk_v2_e190] STOP: RB_OUT's window was written for e189, not E190: one RB_OUT per runbook)
+
+== W3: step 1 for another day
+-> PASS ([s02_window_e190] STOP: the window's day 2026-11-12 is not today (Pacific): a window serves the day )
+
+== G: step 2 v2 without RB_GITLOCK
+-> PASS ([s03_desk_v2_e190] STOP: RB_GITLOCK is not set (the lab-git lock every commit to the shared lab clon)
+
+== N: step 2 v2 inside the lab-git lock (nested)
+-> PASS ([s03_desk_v2_e190] STOP: the desk check failed: pull pull(rc 14; a nested lab-git lock exits 75))
+
+== P1: step 2 v2 on the scratch repository
+-> PASS ([s03_desk_v2_e190] desk check v2: the window written today for E190; pulled under the lab-git lock, HEAD 28067ef1259e descends from the registration 508d48d9a889 (subtree 4d4f7440), the kit 241726bd1474 and note 1 28067ef1259e, the paths clean, HISTORY OK, the)
+
+== P2: the registration's list one line short
+-> PASS ([s03_desk_v2_e190] STOP: the desk check failed: status history SHA256SUMS-e190-registration(15 OK of 15; pinned 16; its own bytes differ from the pin))
+
+== P3: the kit's list one line short
+-> PASS ([s03_desk_v2_e190] STOP: the desk check failed: status history SHA256SUMS-e190-kit(55 OK of 55; pinned 56; its own bytes differ from the pin))
+
+== P4: note 1's list one line short
+-> PASS ([s03_desk_v2_e190] STOP: the desk check failed: status history SHA256SUMS-e190-kit-note1(37 OK of 37; pinned 38; its own bytes differ from the pin))
+
+== H1: a committed edit of a registration file
+-> PASS ([s03_desk_v2_e190] STOP: the desk check failed: history SHA256SUMS-e190-registration(15 OK of 16; pinned 16))
+
+== H2: a committed shadowing addition (tools/claims-v3/e190/json.py)
+-> PASS (HISTORY FAIL: a shadowing addition (a standard-library module's name): tools/claims-v3/e190/json.py)
+
+== O: the look on both stand-in boxes (k6's s05)
+-> PASS (aifoundry2: HOLDER-RULE: FREE after 0 s of polls; aifoundry1: HOLDER-RULE: FREE after 0 s of polls)
+
+== OL: E190's ours_live: a v2 session counted by its own script's name, never by a command string, and not by the v1 name
+-> PASS (before: 0 0 0; a shell whose command string names session_e190_v2.sh: 0 0 0; a session_e190_v2.sh run as a script (v2 name, v1 name, any): 1 0 1; after it ended: 0 0 0)
+
+== SA: step 5 v2, arm A (the git tree)
+-> PASS (TREE-LACKS-NOTE1 HEAD 508d48d9a889 does not hold note 1's commit 28067ef1259e yet; [s07_sync_v2_e190] aifoundry2's tree holds note 1's commit; HARNESS OK (v2) there (nothing copied))
+
+== L1: a login link on a read (step 5 v2, arm B's first read)
+-> PASS ([s07_sync_v2_e190] STOP: a login check is needed on aifoundry1 (appended to the lock file; the link is in RB_LINKS): approve, then run this step again)
+
+== L2: a read that hangs (the read class's bound 3 s for this call)
+-> PASS ([s07_sync_v2_e190] STOP: a call to aifoundry1 ran past its bound and was killed: run this step again)
+
+== SB: step 5 v2, arm B (the rsync)
+-> PASS ([s07_sync_v2_e190] synced to aifoundry1:nekko/ (27 paths); the rsync sent 27 files' contents there; HARNESS OK (v2) on the box)
+
+== T: NO-THIRD-BUILD on aifoundry1, v1 and v2 starts counted together
+-> PASS ([s08_build_v2_e190] STOP: NO-THIRD-BUILD: 2 builds were started on aifoundry1 today (Pacific): no session of arm B today)
+
+== U: the negative control: arm B's source changed on the box
+-> PASS (RGM-BUILD-FAILED: rgm136's sources are not harness-e190-v2.json's)
+
+== BB: the ET_DEVICES gate: arm B's second start on the stand-in aifoundry1 (this desk's stock device layer)
+-> PASS (ETDEVICES host no; /opt/et/lib/libdeviceLayer.a no; CMakeCache deviceLayer_DIR from /opt/et yes)
+
+== X: a third start that day
+-> PASS ([s08_build_v2_e190] STOP: NO-THIRD-BUILD: 2 builds were started on aifoundry1 today (Pacific): no session of arm B today)
+
+== BA: step 6 v2, arm A: the real build v2
+-> PASS ([s08_build_v2_e190] built today on aifoundry2 by the build v2: rgm136 into build/e190rgm (the kernel at the registration's pin; the host read by its behaviour);)
+
+== L3: a cut wait (ssh's 255)
+-> PASS ([s08_build_v2_e190] STOP: no reading: the wait came back without the build's verdict line (a cut wait is not a failed build): wait again)
+
+== D: step 8 v2 on both stand-in boxes
+-> PASS (E190-DRY-V2 arm A rc=0 runs=4; E190-DRY-V2 arm B rc=0 runs=4)
+
+== RS: the rest rule through step 9 v2 (a session of ours ended 10 minutes ago on aifoundry2)
+-> PASS (REFUSED: 10 minutes since E185's session end (2026-11-13 14:54:34 PST): E190 starts on a rested card, at least 40 minutes after our last rea)
+
+== LA: ended 45 minutes ago: step 9 v2 launches the REAL session v2, which stops at its box check
+-> PASS (2026-11-13 15:04:35 PST the box or the build is not the registered one (build/ettelem-hpl/ettelem: sha256 None, want 77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5): no device opened)
+
+== WV / WG: step 10 v2 counts a running session_e190_v2.sh by its name (never a false RUN-GONE); with none running: RUN-GONE
+-> PASS (with a session_e190_v2.sh running: RUN-RUNNING e190 arm A after 15 s; with none: RUN-GONE e190 arm A: no session process and no session end)
+
+== C: step 11 v2 (arm A) and step 12
+-> PASS (COLLECTED docs/reports/data/2026-11-13-e190-large-gemm: arms A; 8 files in SHA256SUMS; the scrub clean; data-e190.json written)
+
+== C2: one byte of a box file changed after the manifest
+-> PASS ([s22_collect_v2_e190] STOP: the copy is not exact (the lines above): commit nothing; copy again into a new RB_OUT/e190-raw/A)
+
+== Z: nothing of this test left running
+-> PASS (processes whose working directory is under the scratch directory (the stand-in boxes' jobs, sessions, builds))
+
+box calls the stand-ins served: 69 (all to the stand-in boxes; no lab box was reached)
+SELFTEST-RB-E190-V2 31 of 31 PASS

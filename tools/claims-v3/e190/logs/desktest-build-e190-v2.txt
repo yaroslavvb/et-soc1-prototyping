@@ -1,0 +1,40 @@
+desktest_build_e190_v2 on aifoundry2, 2026-11-13 14:53:35 PST; /dev/et*: ls: cannot access '/dev/et*': No such file or directory; /run/lock entries: 0
+toolchain: riscv64-unknown-elf-gcc () 15.1.0; c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; cmake version 3.28.3
+
+== B1: the build v2 as committed
+COMPILER kernel: riscv64-unknown-elf-gcc () 15.1.0; host: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+KERNEL aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0 (pin aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0); .text 61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763
+HOST 03f9f176b6592a51e955feb8968107c8602557f78220f24ad3cdb2c99225fcb0
+HOSTCHECK unknown-option: rc 2, 'unknown option --no-such-option': ok
+HOSTCHECK zero-shires: rc 2, 'bad --shires / --per-shire': ok
+HOSTCHECK no-kernel: rc 1, 'cannot read kernel': ok
+HOSTCHECK unknown-test: rc 2, '--test must be fma, tload, gemv, diverge or spin': ok
+ETDEVICES host no; /opt/et/lib/libdeviceLayer.a no; CMakeCache deviceLayer_DIR from /opt/et yes
+RGM-BUILT rc=0
+-> PASS (KERNEL aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0 (pin aace138caf807)
+
+== B2: one rgm136 source changed, the harness v2 as committed
+-> PASS (RGM-BUILD-FAILED: rgm136's sources are not harness-e190-v2.json's)
+
+== B3: the kernel's source changed and the harness v2 re-made to it
+KERNEL 70d93c767dba4fc1bef5c96d9f3d8644d28bf9443056d948af7538f1c0ce7be8 (pin aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0); .text 8d1248ee8d
+RGM-BUILD-FAILED: the kernel ELF 70d93c767dba4fc1bef5c96d9f3d8644d28bf9443056d948af7538f1c0ce7be8 is not the registration's pin aace138caf8071cc7679134211045a89
+-> PASS (RGM-BUILD-FAILED: the kernel ELF 70d93c767dba4fc1bef5c96d9f3d8644d28bf9443056d948af7538f1c0ce7be8 is not the registration's pin aace138caf80)
+
+== B4: the v2 runner's box check on the B1 build (a stand-in reader file: it must stop there, and only there)
+BOXCHECK build/ettelem-hpl/ettelem: sha256 f5f8eeae987b3e68b4592b2c02ba1dd277eba1fbfa716c3c829c7dbb513a2773, want 77a46171c915d3a92898af9ffe04d92b86b65f4d36bc29d58f5c086f8accfeb5
+-> PASS (the box check stops at the reader's pin only)
+
+== B5: the build v2 under the hostname aifoundry1 on this desk's stock device layer (the ET_DEVICES gate)
+this desk's /opt/et/lib/libdeviceLayer.a: ET_DEVICES 0
+0 time(s)
+== E190 build v2 on aifoundry1, 2026-11-13 14:53:42 PST, into build/e190rgm
+HOSTCHECK unknown-option: rc 2, 'unknown option --no-such-option': ok
+HOSTCHECK zero-shires: rc 2, 'bad --shires / --per-shire': ok
+HOSTCHECK no-kernel: rc 1, 'cannot read kernel': ok
+HOSTCHECK unknown-test: rc 2, '--test must be fma, tload, gemv, diverge or spin': ok
+ETDEVICES host no; /opt/et/lib/libdeviceLayer.a no; CMakeCache deviceLayer_DIR from /opt/et yes
+RGM-BUILD-FAILED: ET_DEVICES: the host has no ET_DEVICES (built against a device layer that ignores it: it would open card 0)
+-> PASS (RGM-BUILD-FAILED: ET_DEVICES: the host has no ET_DEVICES (built against a device layer that ignores it: it would open card 0))
+
+DESKTEST-BUILD-E190-V2 5 of 5 PASS
