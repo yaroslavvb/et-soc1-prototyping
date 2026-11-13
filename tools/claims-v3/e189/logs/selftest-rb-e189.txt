@@ -1,0 +1,112 @@
+# E189's runbook desk test (fake ssh and rsync, a stand-in box; no box), run Fri 13 Nov 2026 13:17 PST on aifoundry2 (Linux, Python 3.12.3), inside a sandbox with no /dev/et* and an empty /run/lock (/dev/et* visible: 0)
+scratch repository: a shared sparse clone at the registration fea1d199f498, the kit as one stand-in commit 4b91d9c26e77; the kit list's stand-in 44 files
+
+== A. the dry listing
+dry listing: 13 steps listed, 0 exited non-zero, 0 box calls
+-> PASS (A every step 0, no call to the stand-ins, the look before the post)
+
+== K, W1-W3, G. the window rule and the lab-git lock
+-> PASS (K, W1-W3, G each refused (10) before any call)
+
+== N. step 2 run inside the lab-git lock (nested): its pull cannot take the lock
+   (the outer lock taken with flock; the step's own pull waits 2 s for it with flock, then exits 75)
+[s03_desk_e189] STOP: the desk check failed: pull pull(rc 14; a nested lab-git lock exits 75)
+-> PASS (N a nested step 2 stops with 16 naming its pull (never run step 2 inside the lock; outer lock by flock))
+
+== P1. step 2 on the scratch repository
+[s03_desk_e189] desk check: the window written today for E189; pulled under the lab-git lock, HEAD 4b91d9c26e77 descends from 46a16bd0 and the registration fea1d199f498 (subtree 993e549a), the paths clean, HISTORY OK, the lists at their pinned counts and bytes (10; 165; 17, 6; 86) and the kit's (44), lists not pinned (reported): none; the harness re-made and at its sha256, the host check's lines, 
+-> PASS (P1 step 2 passes at every pin, HISTORY OK, the registration found by its content)
+
+== P2-P4, H1. a short registration list; a short kit list; an unknown list; an edited registration file
+-> PASS (P2-P4, H1: each pin refused and named; the unknown list reported; the edit refused by the history check)
+
+== H2-H4. the shadow cases: an added tools/ledger/struct.py; the 3.9 way; an added package and copy.py
+HISTORY FAIL: a shadowing addition: tools/ledger/struct.py (as struct)
+HISTORY FAIL: a shadowing addition: tools/ledger/struct.py (as struct)
+HISTORY FAIL: a shadowing addition: tools/ledger/ast/__init__.py (as ast), workloads/ledger/copy.py (as copy)
+-> PASS (H2-H4 each shadowing addition refused (step 2: 16 by the history check; the 3.9 way too); the tree clean again after)
+
+== H5-H8. the folders the first fix missed: the reducer's, tools/claims-v3/ and v3.1/, the lab clone's top; files not committed
+[s03_desk_e189] STOP: the desk check failed: history
+HISTORY FAIL: a shadowing addition: workloads/sparseparity/tools/json.py (as json)
+HISTORY FAIL: a shadowing addition: workloads/sparseparity/tools/json.py (as json)
+-> PASS (H5 an added json.py in the reducer's folder: step 2 stops with 16 by the history check, which names it (the 3.9 way too))
+HISTORY FAIL: a shadowing addition: tools/claims-v3/q141k-runbook/v3.1/subprocess.py (as subprocess), tools/claims-v3/re.py (as re)
+-> PASS (H6 an added re.py in tools/claims-v3/ and subprocess.py in v3.1/: HISTORY FAIL naming both)
+HISTORY FAIL: a shadowing addition: _strptime.py (as _strptime)
+-> PASS (H7 an added _strptime.py at the lab clone's top: HISTORY FAIL naming it)
+HISTORY FAIL: a shadowing file not committed: _strptime.py (as _strptime), tools/claims-v3/re.py (as re), workloads/sparseparity/tools/gzip.py (as gzip)
+HISTORY OK: 59 files added since 46a16bd0 on E189's paths, none changed or removed; the registration fea1d199f498; the k
+-> PASS (H8 the same names not committed (two untracked, one staged as new): HISTORY FAIL naming all three; the tree clean again after)
+
+== S. step 5 (the sync), then step 6 start and wait on the stand-in box
+LEDGER kernel: ELF sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef, .text sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef
+LEDGER host: HOST-BEHAVIOUR OK ledger (10 checks)
+LEDGER-BUILT rc=0
+SPP kernel: ELF sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f, .text sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f
+SPP host: HOST-BEHAVIOUR OK spp (3 checks)
+SPP-BUILT rc=0
+    LEDGER kernel: ELF sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef, .text sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef
+    LEDGER host: HOST-BEHAVIOUR OK ledger (10 checks)
+    LEDGER-BUILT rc=0
+    SPP kernel: ELF sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f, .text sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f
+    SPP host: HOST-BEHAVIOUR OK spp (3 checks)
+    SPP-BUILT rc=0
+[s08_a3_build_e189] built today on aifoundry3: ledger,spp (the other program, if any, is SKIPPED today); harness, preflight GO and self-check read on the box
+-> PASS (S synced, built (after 0 calls of 17), both hosts read OK by behaviour, the checks on the box)
+
+== X. a second start after both built today
+-> PASS (X refused)
+
+== U. the negative control through the runbook: a fresh day, the ledger host with its budget refusal at 9.9 s
+LEDGER kernel: ELF sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef, .text sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef
+LEDGER host: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+LEDGER-BUILD-FAILED: the host's behaviour: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+SPP kernel: ELF sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f, .text sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f
+SPP host: HOST-BEHAVIOUR OK spp (3 checks)
+SPP-BUILT rc=0
+    LEDGER kernel: ELF sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef, .text sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef
+    LEDGER host: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+    LEDGER-BUILD-FAILED: the host's behaviour: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+    SPP kernel: ELF sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f, .text sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f
+    SPP host: HOST-BEHAVIOUR OK spp (3 checks)
+    SPP-BUILT rc=0
+-> PASS (U the mutant refused by its behaviour (L4), sparse parity built, e189-built.txt 'spp')
+
+== T. NO-THIRD-BUILD: two starts recorded today
+[s08_a3_build_e189] STOP: NO-THIRD-BUILD: 2 builds were started on aifoundry3 today (Pacific): the programs not built today are SKIPPED (E189.md section 12: no data, never a failed prediction); go on with what step 6's wait recorded, or no session
+-> PASS (T a third start the same Pacific day refused with 16)
+   (rebuilt both for the later cases: rc 0, ledger,spp)
+
+== L1-L3. the kits' form: a login link, a hang, a cut wait
+13:18:10 aifoundry3 needs a check
+-> PASS (L1 a login link: 11 and the lock line, nothing retried; L2 a hang killed at its bound: 13; L3 a cut wait: 14, no reading)
+
+== D. step 8, the box's dry pass (run_e189.py --dry on the stand-in box)
+2026-11-13 13:18:15 PST DRY smoke gate passed: queue starts (plan FULL)
+2026-11-13 13:18:15 PST DRY smoke gate passed: queue starts (plan FULL)
+E189-DRY rc=0 passes=6
+[s10_a3_dry_e189] the dry pass ended rc 0: E189-DRY rc=0 passes=6
+-> PASS (D the dry pass ran six passes and ended rc 0)
+
+== RS. the rest rule through step 9: an E185-form session ended 10 minutes ago on the box
+[s11_a3_session_e189] STOP: e189 refused on the box: REFUSED: 10 minutes since E185's session end (2026-11-13 13:08:45 PST): E189 starts on a rested card, at least 40 minutes after our last real session there (E189.md section 13; the kit)
+-> PASS (RS refused (10) naming E185, nothing launched)
+
+== LA. step 9 launches the REAL session (it stops at a gate before any launch: on a Mac at the card lock, in a Linux sandbox at its start config; no device); step 10 reads the gate
+rest: 45 minutes since E183's session end (2026-11-13 12:33:46 PST; dry sessions and blocks that opened no device skipped)
+LAUNCHED e189 T0 1794604726 2026-11-13 13:18:51 PST (programs ledger,spp; last start 2026-11-13 23:58 PST, last end 2026-11-13 23:59 PST; package counter: not read)
+-> PASS (LA launched after 45 minutes' rest; the session stopped at a gate before any launch, with its manifest, no smoke run; step 10 reads the gate (16))
+
+== C, C2. step 11 on that session; then one byte changed after the manifest
+COPY-BACK EXACT: every file of the box's MANIFEST.sha256 at its sha256, nothing else but runner.rc
+COLLECTED docs/reports/data/2026-11-13-e189-blind-day-aifoundry3: 0 passes reduced; 9 files in SHA256SUMS; the scrub clean (no /home/ path)
+HISTORY OK: 59 files added since 46a16bd0 on E189's paths, none changed or removed; the registration fea1d199f498; the kit 4b91d9c26e77: nothing under tools/claims-v3/e189 changed since; nothing untra
+-> PASS (C collected exactly, the data directory written, no desk or box home path in it)
+-> PASS (C2 a changed byte: not exact, 16, nothing written)
+
+== Z. no process of this test left running
+-> PASS (Z nothing left)
+
+SELFTEST-RB-E189 21 of 21 PASS
+rc 0

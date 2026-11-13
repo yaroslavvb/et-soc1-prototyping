@@ -1,0 +1,108 @@
+# E189's runner desk test, run Fri 13 Nov 2026 11:40 PST on aifoundry2 (Linux, Python 3.12.3), inside a sandbox with no /dev/et* and an empty /run/lock (/dev/et* visible: 0)
+== R1 plain dry session (doubles)
+   [r1] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (six passes in 8.1's form, the stop-path test and the smoke passed, DRY marks)
+-> PASS (a pass's telemetry spans its idle brackets)
+== R2 the board line on a live sample during a pass
+   [r2] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: board 66.0 W at or above 65 W: the queue ended after the running process
+   the stopped pass copy-zeros/p1: 500 ms from its host's end to its end (its idle after: 500 ms)
+-> PASS (the running process finished (its line kept), its idle after whole, the queue ended, the pass flagged, the closing read)
+== R3 the die line on a live sample during a pass
+   [r3] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: minshire[0] 70 C at or above 70 C: the queue ended after the running process
+   the stopped pass copy-zeros/p1: 500 ms from its host's end to its end (its idle after: 500 ms)
+-> PASS (the running process finished (its line kept), its idle after whole, the queue ended, the pass flagged, the closing read)
+== R4 the clock line, ONE sample off 600 MHz during a pass: that pass set aside, the session goes on
+   [r4] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 1: copy-zeros p1 done: host rc 0, status PASS, SET ASIDE: a sample off 600 MHz (800 MHz at t_ms 1794598874884)
+-> PASS (one pass set aside, six passes ran, no stop)
+== R5 the clock line, a SECOND sample off 600 MHz in a pass: the session stops
+   [r5] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 1: copy-zeros p1 done: host rc 0, status PASS, SET ASIDE: a sample off 600 MHz (800 MHz at t_ms 1794598885437), a stop line tripped during this pass: a second sample off 600 MHz in a pass (800 MHz) | DRY STOP: a second sample off 600 MHz in a pass (800 MHz): the queue ended after the running process
+-> PASS (the pass set aside and the queue stopped)
+== R6 the die gate: 62 C for 3 s from the first pass's first launch; the bound 2 s
+   [r6] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 2: copy-random p1 skipped by the die gate (minshire[0] 62 C after 2 s): no data
+-> PASS (a pass skipped by the die gate (no data), later passes ran, no stop)
+== R7 the cap (6 s on the desk; 108 card-minutes on the box)
+   [r7] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 5: sort-shuffled p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)): no data | DRY pass 6: sparse-parity p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)): no data | DRY idle anchor 3: not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1))
+-> PASS (passes after the cap not started)
+== R8 the start config is not TDP 0 W
+   [r8] rc 16; DRY config start: {"tdp_w": 5, "temp_threshold_c": 65, "power_state": "FULL", "minion_mhz": 600, "noc_mhz": 1000, "fake": true}: not TDP 0 W / 65 C / 600 MHz: the gate, no launch
+-> PASS (the gate, rc 16)
+== R9 a holder of another login
+   [r9] rc 16; DRY a holder or a foreign device process (1 holder line(s) of another login, 0 other users' device process(es)): no device opened
+-> PASS (no device opened, rc 16)
+== R10 a failed smoke run
+   [r10] rc 16; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate failed: copy-64m-random: rc 1, status FAIL
+-> PASS (smoke gate failed, no pass)
+== R11 a burst the budget cuts short
+   [r11] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (host.json says 'reps: 6 of 8 done' (SHORT, scored))
+== R12 a FAILED RUN in a pass
+   [r12] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (reps_consistent bad, problems name the checks (the reducer fails it: not a datum))
+== R13 card 0's lock held by another process
+-> PASS (no device opened, rc 16)
+== R14 only sparse parity built today
+   [r14] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (five ledger passes SKIPPED, sparse parity's ran, its smoke alone)
+== R15 the desk's overrides and V3_DRY are refused without --dry
+-> PASS (rc 2 each, nothing started)
+== R16 a sampler that never starts: the stop path cannot be shown, no launch
+   [r16] rc 16; 
+-> PASS (no launch, rc 16)
+== R18 THE END BOUND, the closing: a sampler that ignores its first SIGTERM; the desk's cap 6 s, end bound 20 s
+   [r18] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 5: sort-shuffled p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)): no data | DRY pass 6: sparse-parity p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)): no data | DRY idle anchor 3: not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)) | DRY the sampler did not stop within 2 s of SIGTERM: SIGTERM once more
+   from the first card command to the close: 9.2 s (the end bound 20 s)
+-> PASS (the closing bounded: the second SIGTERM, the closing read, closed by the bound)
+== R19 THE END BOUND, the die gate: 62 C from the first pass's first launch on, the 10-minute wait, the desk's cap 8 s
+   [r19] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 2: copy-random p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333); the die gate read 62 C after 5 s): no data | DRY pass 3: sha256 p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333)): no data | DRY pass 4: sort-sorted p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333)): no data | DRY pass 5: sort-shuffled p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333)): no data | DRY pass 6: sparse-parity p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333)): no data | DRY idle anchor 3: not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333))
+   from the first card command to the close: 8.1 s; the session's wall time 8 s
+-> PASS (the die gate stopped waiting at the cap; the session closed within 60 s, not 10 minutes)
+== E2E energy_stub's alt sampler, the registered 8 s / 10 s idles, then the reducer (unchanged) and the scorer (frozen)
+   [e2e] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL)
+   COPY-BACK EXACT: every file of the box's MANIFEST.sha256 at its sha256, nothing else but runner.rc
+   COLLECTED 2026-11-13-e189-blind-day-aifoundry3: 6 passes reduced; 84 files in SHA256SUMS; the scrub clean (no /home/ path)
+   files holding the stand-in box home after the scrub: 0
+   copy-zeros/p1: reduced 5.2065 J a launch over idle, injected 5.0808 (8 launches): +2.5% against TOL 12.8%: within; ok True, hard []
+   sha256/p1: reduced 2.3152 J a launch over idle, injected 2.2725 (9 launches): +1.9% against TOL 22.3%: within; ok True, hard []
+   sparse-parity/p1: reduced 7.182 J a launch over idle, injected 7.2321 (9 launches): -0.7% against TOL 8.8%: within; ok True, hard []
+   copy-zeros/p2: reduced 4.8501 J a launch over idle, injected 5.0808 (8 launches): -4.5% against TOL 12.8%: within; ok True, hard []
+   sha256/p2: reduced 2.0068 J a launch over idle, injected 2.2725 (9 launches): -11.7% against TOL 22.3%: within; ok True, hard []
+   sparse-parity/p2: reduced 7.0487 J a launch over idle, injected 7.2321 (9 launches): -2.5% against TOL 8.8%: within; ok True, hard []
+   scored copy-zeros: e_j_over +2.3%, e_j_total +5.8%, t_k/point 1.0000, e_j_total_forecast +4.3%
+   scored sha256: e_j_over +6.7%, e_j_total +6.4%, t_k/point 1.0000, e_j_total_forecast +4.7%
+   scored sparse-parity: e_j_over +3.2%, e_j_total +5.4%, t_k/point 1.0000, e_j_total_forecast +4.0%
+   scorer rc 0; scored ['copy-zeros', 'sha256', 'sparse-parity']; NO DATA ['copy-random', 'sort-shuffled', 'sort-sorted']; verdicts {'E189-S1': 'NOT DECIDED', 'E189-S1T': 'FAIL', 'E189-S2': 'NOT DECIDED', 'E189-S2T': 'NOT DECIDED'}
+-> PASS (every pass reduced (flagged DRY), the scorer read three configurations and three NO DATA)
+-> PASS (each pass's reduced J over idle within TOL of the energy the alt card injected (fault 1))
+-> PASS (the verdict words: S1 and S2 NOT DECIDED (as injected: 3 scored, all within; 3 NO DATA); S1T and S2T words only)
+== R2E the board line during copy-zeros/p2 on the alt card; reduced and scored
+   [r2e] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: board 66.0 W at or above 65 W: the queue ended after the running process
+   passes run ['copy-zeros/p1', 'sha256/p1', 'sparse-parity/p1', 'copy-zeros/p2']; the stopped pass copy-zeros/p2: 10000 ms from its host's end to its end; flags ['a stop line tripped during this pass: board 66.0 W at or above 65 W']
+   COPY-BACK EXACT: every file of the box's MANIFEST.sha256 at its sha256, nothing else but runner.rc
+   COLLECTED 2026-11-13-e189-blind-day-aifoundry3: 4 passes reduced; 68 files in SHA256SUMS; the scrub clean (no /home/ path)
+   files holding the stand-in box home after the scrub: 0
+   copy-zeros/p1: reduced 5.217 J a launch over idle, injected 5.0808 (8 launches): +2.7% against TOL 12.8%: within; ok True, hard []
+   sha256/p1: reduced 2.3104 J a launch over idle, injected 2.2725 (9 launches): +1.7% against TOL 22.3%: within; ok True, hard []
+   sparse-parity/p1: reduced 7.1484 J a launch over idle, injected 7.2321 (9 launches): -1.2% against TOL 8.8%: within; ok True, hard []
+   copy-zeros/p2: reduced 4.8388 J a launch over idle, injected 5.0808 (8 launches): -4.8% against TOL 12.8%: within; ok True, hard []
+   scorer rc 0; scored ['copy-zeros']; copy-zeros's scored passes [1, 2]; not used []
+-> PASS (r2e: the process finished, its pass flagged and its 10 s after whole, the queue ended after it)
+-> PASS (r2e: every pass reduced within TOL, the stopped one with no cut-tail flag, and scored on its configuration's two passes)
+   the cut tail (151 of 246 samples kept): reducer rc 0, J over idle a launch 4.35736, flags ['telemetry ends 5.5 s before the long window does (SP average and rails understated)']
+   the whole pass 4.83877 J a launch; cut where the first kit cut it 4.35736: 9.9% lower
+-> PASS (THE CUT TAIL (control): the pass cut 0.5 s after its host is flagged and reads more than 3% low)
+== R3E the die line during sha256/p2 on the alt card; reduced and scored
+   [r3e] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: minshire[0] 70 C at or above 70 C: the queue ended after the running process
+   passes run ['copy-zeros/p1', 'sha256/p1', 'sparse-parity/p1', 'copy-zeros/p2', 'sha256/p2']; the stopped pass sha256/p2: 10000 ms from its host's end to its end; flags ['a stop line tripped during this pass: minshire[0] 70 C at or above 70 C']
+   COPY-BACK EXACT: every file of the box's MANIFEST.sha256 at its sha256, nothing else but runner.rc
+   COLLECTED 2026-11-13-e189-blind-day-aifoundry3: 5 passes reduced; 76 files in SHA256SUMS; the scrub clean (no /home/ path)
+   files holding the stand-in box home after the scrub: 0
+   copy-zeros/p1: reduced 5.207 J a launch over idle, injected 5.0808 (8 launches): +2.5% against TOL 12.8%: within; ok True, hard []
+   sha256/p1: reduced 2.2895 J a launch over idle, injected 2.2725 (9 launches): +0.7% against TOL 22.3%: within; ok True, hard []
+   sparse-parity/p1: reduced 7.1903 J a launch over idle, injected 7.2321 (9 launches): -0.6% against TOL 8.8%: within; ok True, hard []
+   copy-zeros/p2: reduced 4.83 J a launch over idle, injected 5.0808 (8 launches): -4.9% against TOL 12.8%: within; ok True, hard []
+   sha256/p2: reduced 1.9447 J a launch over idle, injected 2.2725 (9 launches): -14.4% against TOL 22.3%: within; ok True, hard []
+   scorer rc 0; scored ['copy-zeros', 'sha256']; sha256's scored passes [1, 2]; not used []
+-> PASS (r3e: the process finished, its pass flagged and its 10 s after whole, the queue ended after it)
+-> PASS (r3e: every pass reduced within TOL, the stopped one with no cut-tail flag, and scored on its configuration's two passes)
+SELFTEST-RUN-E189 27 of 27 PASS
+rc 0

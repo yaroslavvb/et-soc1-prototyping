@@ -1,0 +1,133 @@
+# E189's hosts desk test on real builds, run Fri 13 Nov 2026 11:51 PST on aifoundry2 (Linux, Python 3.12.3), inside a sandbox with no /dev/et* and an empty /run/lock (/dev/et* visible: 0)
+compilers: g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; Ubuntu clang version 18.1.3 (1ubuntu1)
+== 1. the sources and the four negative controls
+-> PASS (the ledger host's source is the pinned 5383150f... (46a16bd0))
+-> PASS (sparse parity's host source is the pinned faf4a30c...)
+negative controls written: l-budget, l-model, l-expect, s-margin (one line each)
+
+== 2. four builds of each source
+-> PASS (24 of 24 builds and spp_selftest built)
+
+== 3. the host check on every build (the device record on)
+   ledger g13O2: HOST-BEHAVIOUR OK ledger (10 checks)
+-> PASS (ledger (g13O2) reads OK)
+-> PASS (ledger (g13O2): no device call recorded)
+   l-budget g13O2: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+-> PASS (negative control l-budget (g13O2) reads FAIL)
+-> PASS (l-budget (g13O2): no device call recorded)
+   l-model g13O2: HOST-BEHAVIOUR FAIL ledger: L2 copy-zeros --dry rc 0: '{"ledger":1,"prog":"copy","device":"dry","participants":2048,"shire_mask":"0xffffffff","minion_mask":"0x0","harts":2,"se'; L2 copy-random --dry rc 0: '{"ledger":1,"prog":"copy","device":"dry","participants":2048,"shire_mask":"0xffffffff","minion_mask":"0x0","harts":2,"se'
+-> PASS (negative control l-model (g13O2) reads FAIL)
+-> PASS (l-model (g13O2): no device call recorded)
+   l-expect g13O2: HOST-BEHAVIOUR FAIL ledger: L6 rc 0: ''
+-> PASS (negative control l-expect (g13O2) reads FAIL)
+-> PASS (l-expect (g13O2): no device call recorded)
+   spp g13O2: HOST-BEHAVIOUR OK spp (3 checks)
+-> PASS (spp (g13O2) reads OK)
+-> PASS (spp (g13O2): no device call recorded)
+   s-margin g13O2: HOST-BEHAVIOUR FAIL spp: S1 --dry rc 0: '{"workload":"sparseparity","device":"none","mode":"tensor","n":544,"k":4,"eta":0.39,"m":1792,"seed":3,"S":28,"candidates'
+-> PASS (negative control s-margin (g13O2) reads FAIL)
+-> PASS (s-margin (g13O2): no device call recorded)
+-> PASS (the ledger host (g13O2) read as the spp program reads FAIL)
+-> PASS (cross ledger (g13O2): no device call recorded)
+-> PASS (the spp host (g13O2) read as the ledger program reads FAIL)
+-> PASS (cross spp (g13O2): no device call recorded)
+   reported only (energy.sh's binary grep, never used by this kit): 'launch_epoch_ms' found in spp-g13O2
+   ledger g13O3: HOST-BEHAVIOUR OK ledger (10 checks)
+-> PASS (ledger (g13O3) reads OK)
+-> PASS (ledger (g13O3): no device call recorded)
+   l-budget g13O3: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+-> PASS (negative control l-budget (g13O3) reads FAIL)
+-> PASS (l-budget (g13O3): no device call recorded)
+   l-model g13O3: HOST-BEHAVIOUR FAIL ledger: L2 copy-zeros --dry rc 0: '{"ledger":1,"prog":"copy","device":"dry","participants":2048,"shire_mask":"0xffffffff","minion_mask":"0x0","harts":2,"se'; L2 copy-random --dry rc 0: '{"ledger":1,"prog":"copy","device":"dry","participants":2048,"shire_mask":"0xffffffff","minion_mask":"0x0","harts":2,"se'
+-> PASS (negative control l-model (g13O3) reads FAIL)
+-> PASS (l-model (g13O3): no device call recorded)
+   l-expect g13O3: HOST-BEHAVIOUR FAIL ledger: L6 rc 0: ''
+-> PASS (negative control l-expect (g13O3) reads FAIL)
+-> PASS (l-expect (g13O3): no device call recorded)
+   spp g13O3: HOST-BEHAVIOUR OK spp (3 checks)
+-> PASS (spp (g13O3) reads OK)
+-> PASS (spp (g13O3): no device call recorded)
+   s-margin g13O3: HOST-BEHAVIOUR FAIL spp: S1 --dry rc 0: '{"workload":"sparseparity","device":"none","mode":"tensor","n":544,"k":4,"eta":0.39,"m":1792,"seed":3,"S":28,"candidates'
+-> PASS (negative control s-margin (g13O3) reads FAIL)
+-> PASS (s-margin (g13O3): no device call recorded)
+-> PASS (the ledger host (g13O3) read as the spp program reads FAIL)
+-> PASS (cross ledger (g13O3): no device call recorded)
+-> PASS (the spp host (g13O3) read as the ledger program reads FAIL)
+-> PASS (cross spp (g13O3): no device call recorded)
+   reported only (energy.sh's binary grep, never used by this kit): 'launch_epoch_ms' found in spp-g13O3
+   ledger clangO1: HOST-BEHAVIOUR OK ledger (10 checks)
+-> PASS (ledger (clangO1) reads OK)
+-> PASS (ledger (clangO1): no device call recorded)
+   l-budget clangO1: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+-> PASS (negative control l-budget (clangO1) reads FAIL)
+-> PASS (l-budget (clangO1): no device call recorded)
+   l-model clangO1: HOST-BEHAVIOUR FAIL ledger: L2 copy-zeros --dry rc 0: '{"ledger":1,"prog":"copy","device":"dry","participants":2048,"shire_mask":"0xffffffff","minion_mask":"0x0","harts":2,"se'; L2 copy-random --dry rc 0: '{"ledger":1,"prog":"copy","device":"dry","participants":2048,"shire_mask":"0xffffffff","minion_mask":"0x0","harts":2,"se'
+-> PASS (negative control l-model (clangO1) reads FAIL)
+-> PASS (l-model (clangO1): no device call recorded)
+   l-expect clangO1: HOST-BEHAVIOUR FAIL ledger: L6 rc 0: ''
+-> PASS (negative control l-expect (clangO1) reads FAIL)
+-> PASS (l-expect (clangO1): no device call recorded)
+   spp clangO1: HOST-BEHAVIOUR OK spp (3 checks)
+-> PASS (spp (clangO1) reads OK)
+-> PASS (spp (clangO1): no device call recorded)
+   s-margin clangO1: HOST-BEHAVIOUR FAIL spp: S1 --dry rc 0: '{"workload":"sparseparity","device":"none","mode":"tensor","n":544,"k":4,"eta":0.39,"m":1792,"seed":3,"S":28,"candidates'
+-> PASS (negative control s-margin (clangO1) reads FAIL)
+-> PASS (s-margin (clangO1): no device call recorded)
+-> PASS (the ledger host (clangO1) read as the spp program reads FAIL)
+-> PASS (cross ledger (clangO1): no device call recorded)
+-> PASS (the spp host (clangO1) read as the ledger program reads FAIL)
+-> PASS (cross spp (clangO1): no device call recorded)
+   reported only (energy.sh's binary grep, never used by this kit): 'launch_epoch_ms' found in spp-clangO1
+   ledger clangO2: HOST-BEHAVIOUR OK ledger (10 checks)
+-> PASS (ledger (clangO2) reads OK)
+-> PASS (ledger (clangO2): no device call recorded)
+   l-budget clangO2: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+-> PASS (negative control l-budget (clangO2) reads FAIL)
+-> PASS (l-budget (clangO2): no device call recorded)
+   l-model clangO2: HOST-BEHAVIOUR FAIL ledger: L2 copy-zeros --dry rc 0: '{"ledger":1,"prog":"copy","device":"dry","participants":2048,"shire_mask":"0xffffffff","minion_mask":"0x0","harts":2,"se'; L2 copy-random --dry rc 0: '{"ledger":1,"prog":"copy","device":"dry","participants":2048,"shire_mask":"0xffffffff","minion_mask":"0x0","harts":2,"se'
+-> PASS (negative control l-model (clangO2) reads FAIL)
+-> PASS (l-model (clangO2): no device call recorded)
+   l-expect clangO2: HOST-BEHAVIOUR FAIL ledger: L6 rc 0: ''
+-> PASS (negative control l-expect (clangO2) reads FAIL)
+-> PASS (l-expect (clangO2): no device call recorded)
+   spp clangO2: HOST-BEHAVIOUR OK spp (3 checks)
+-> PASS (spp (clangO2) reads OK)
+-> PASS (spp (clangO2): no device call recorded)
+   s-margin clangO2: HOST-BEHAVIOUR FAIL spp: S1 --dry rc 0: '{"workload":"sparseparity","device":"none","mode":"tensor","n":544,"k":4,"eta":0.39,"m":1792,"seed":3,"S":28,"candidates'
+-> PASS (negative control s-margin (clangO2) reads FAIL)
+-> PASS (s-margin (clangO2): no device call recorded)
+-> PASS (the ledger host (clangO2) read as the spp program reads FAIL)
+-> PASS (cross ledger (clangO2): no device call recorded)
+-> PASS (the spp host (clangO2) read as the ledger program reads FAIL)
+-> PASS (cross spp (clangO2): no device call recorded)
+   reported only (energy.sh's binary grep, never used by this kit): 'launch_epoch_ms' found in spp-clangO2
+
+binaries (sha256, reported):
+  62f8dfe0b9f9adb4964f564d5602db2e239c2bfe9c3c266e5a6125379f91742a  l-budget-clangO1
+  2047f05236713de91e04e3e82c792169bfb8cc6c5a4d53322ec1f5189e273469  l-budget-clangO2
+  8bc721a66fe03acb83c25be32d66ed84b386bc28e22721646e02294912b2ced5  l-budget-g13O2
+  ef0b8693aea51cc724ec38a4d04f6b3d93542d19387d60509b8758c669755bc7  l-budget-g13O3
+  3227c4191133cde7e9c72d27c31d382c7c8294f9c7659c3c7b6910872eb34df2  ledger-clangO1
+  183269ee2b0a0cb86290dae7dfc9a80f67c91778e00f6d5fff29f473b3926e86  ledger-clangO2
+  75fd6d26f6758b98f2034651e8c931aac6f0771fead031b68fc45900b22ea51e  ledger-g13O2
+  b1752c12b2da33363f8a93d2521f009f368955c9214bd654fcb222bd1f882e9e  ledger-g13O3
+  93bd4b02260629bc159fe41665b24ed1b4a523b21a39b68acd738c1036f585e1  l-expect-clangO1
+  27aab07fcf8674df5c5ba5c496b2f3c6e69abce39ed96c88a9e1ff63c0b77aae  l-expect-clangO2
+  b7d5da5d5bc5184f0f34b65bf543574fcfd3bd29b522824c69e6a6504ce61bed  l-expect-g13O2
+  55af21bb56e54f854c8346949b814e72aeba49b7f578b5e3a3d8c05c7560effd  l-expect-g13O3
+  d27375bd91350e72ab49e47cc7d81165855559eacca51cde337d2e22502a1597  l-model-clangO1
+  31c39d98682f6726b25a9dbe065da0bec328659c5f67d6b75731a1999aefa686  l-model-clangO2
+  502e670be78c2a420fb5fbfd4597425e7648af635d551d9eeca201e0331c784a  l-model-g13O2
+  9a7788da40d1c57d807a118bafdd35c2d9d569e0fbb9145e5a0e0f5ff85747c0  l-model-g13O3
+  49dcead421cc6a8e274cbb0a5fef3f247d611a77d89239f34fe611b8b4e6754f  s-margin-clangO1
+  33905c25bda18f6c8873b4d4bc3ebe87be9fd3583fbf65a08d158b335ed741e2  s-margin-clangO2
+  b43d3577b6265c4e9f1e5eee5a05b567e597c09907d094bc54fd333258107e3d  s-margin-g13O2
+  6cd216196e46b1544fce33da5e3f4732bb1cb1d417ecbcd392da755f91ce2226  s-margin-g13O3
+  60feaffceb9bec1aef099e1eac37e0668e6b7c5a46baa8e7d1d720a7566ea6ff  spp-clangO1
+  46351671c88474452149a80741299788b2c421b9474452e173719444c8e73544  spp-clangO2
+  26f1c4a8db26e68dff66354d273d2764f9f7d14c80bec21ebae524563c945acd  spp-g13O2
+  710f8f3788bed9b10de385eeac4b5885707fd6df123e55eb25434eb1514d3820  spp-g13O3
+  842b7c8147e14c01762dd1c720da7707f10c2118515bce92e062e745b25da070  spp_selftest
+
+DESKTEST-HOSTS-E189 67 of 67 PASS
+rc 0

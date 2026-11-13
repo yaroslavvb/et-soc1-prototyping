@@ -1,0 +1,62 @@
+# E189's rest-rule desk test, run Fri 13 Nov 2026 13:15 PST on aifoundry2 (Linux, Python 3.12.3), inside a sandbox with no /dev/et* and an empty /run/lock (/dev/et* visible: 0)
+== RS1 E184's form (build/e184/session-S-t<T0>.log, committed)
+    REFUSED: 30 minutes since E184's session end (2026-11-08 02:22:24 PST): E189 starts on a rested card, at least 40 minutes after our last real session there (E189.md section 13; the kit)
+-> PASS (30 minutes after E184's end: REFUSED)
+    rest: 41 minutes since E184's session end (2026-11-08 02:22:24 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (41 minutes after: rest 41)
+== RS2 E185's form (build/e185/T<T0>/session.log, committed)
+    REFUSED: 39 minutes since E185's session end (2026-11-12 06:15:21 PST): E189 starts on a rested card, at least 40 minutes after our last real session there (E189.md section 13; the kit)
+-> PASS (39 minutes after E185's end: REFUSED)
+    rest: 40 minutes since E185's session end (2026-11-12 06:15:21 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (40 minutes after: rest 40 (the gate's edge))
+== RS3 E186's form (build/e186/T<T0>/session.log, committed)
+    REFUSED: 10 minutes since E186's session end (2026-11-09 14:19:08 PST): E189 starts on a rested card, at least 40 minutes after our last real session there (E189.md section 13; the kit)
+-> PASS (10 minutes after E186's end: REFUSED naming E186)
+== RS4 E183's form (build/e183/session-t<T0>.log, as its kit note 4 writes it)
+    REFUSED: 39 minutes since E183's session end (2026-11-13 08:00:00 PST): E189 starts on a rested card, at least 40 minutes after our last real session there (E189.md section 13; the kit)
+-> PASS (39 minutes after E183's end: REFUSED naming E183)
+    rest: 40 minutes since E183's session end (2026-11-13 08:00:00 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (40 minutes after: rest 40)
+== RS5 E188's form (build/e188/T<T0>/session.log, session_e188.sh's words) and its dry form
+    REFUSED: 15 minutes since E188's session end (2026-11-13 11:35:00 PST): E189 starts on a rested card, at least 40 minutes after our last real session there (E189.md section 13; the kit)
+-> PASS (15 minutes after E188's end: REFUSED naming E188)
+    rest: 45 minutes since E188's session end (2026-11-13 11:35:00 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (45 minutes after: rest 45; its dry session 5 minutes back does not count)
+== RS6 E189's own form (build/e189/T<T0>/session.log, run_e189.py's words) and its dry session
+    REFUSED: 20 minutes since E189's session end (2026-11-13 14:40:00 PST): E189 starts on a rested card, at least 40 minutes after our last real session there (E189.md section 13; the kit)
+-> PASS (20 minutes after E189's end: REFUSED naming E189)
+    rest: 40 minutes since E189's session end (2026-11-13 14:40:00 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (40 minutes after: rest 40; E189's dry session (run_e189.py --dry's own log) 5 minutes back does not count)
+== RS7 E189 cut mid-queue: its log silent since pass 3 at 08:03, a later pass's files written at 09:25
+    note: E189's last real session block has no 'session end': counted as ended at 2026-11-13 09:25:00 PST (the latest write of E189's files outside the dry paths)
+    REFUSED: 10 minutes since E189's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026-11-13 09:25:00 PST (the latest write of E189's files outside the dry paths)): E189 starts on a rested card, at least 40 minutes after our last real session there (E189.md section 13; the kit)
+-> PASS (the cut E189 session ends at its run's latest write (09:25): REFUSED, 10 minutes)
+    note: E189's last real session block has no 'session end': counted as ended at 2026-11-13 09:25:00 PST (the latest write of E189's files outside the dry paths)
+    rest: 40 minutes since E189's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026-11-13 09:25:00 PST (the latest write of E189's files outside the dry paths); dry sessions and blocks that opened no device skipped)
+-> PASS (40 minutes after the run's latest write: rest 40)
+== RS8 E188 cut mid-queue (E188 v2's case V2): its queue and a train block written after its last log line
+    note: E188's last real session block has no 'session end': counted as ended at 2026-11-13 09:25:00 PST (the latest write of E188's files outside the dry paths)
+    REFUSED: 10 minutes since E188's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026-11-13 09:25:00 PST (the latest write of E188's files outside the dry paths)): E189 starts on a rested card, at least 40 minutes after our last real session there (E189.md section 13; the kit)
+-> PASS (the cut E188 session: REFUSED, 10 minutes)
+== RS9 energy.sh's form (~/nekko/build/sparseparity-energy/<host>-<preset>-<time>/), and its dry folder
+    REFUSED: 20 minutes since energy.sh's run (2026-11-13 09:00:00 PST (the latest write of an energy.sh run's folder, aifoundry3-l2-20261113-090000)): E189 starts on a rested card, at least 40 minutes after our last real session there (E189.md section 13; the kit)
+-> PASS (20 minutes after an energy.sh run's latest write: REFUSED naming energy.sh)
+    rest: 40 minutes since energy.sh's run (2026-11-13 09:00:00 PST (the latest write of an energy.sh run's folder, aifoundry3-l2-20261113-090000); dry sessions and blocks that opened no device skipped)
+-> PASS (40 minutes after: rest 40; the -dry folder written at 09:30 does not count)
+== RS10 E183 then E189 the same day: E189 waits 40 minutes after E183's end
+    REFUSED: 20 minutes since E183's session end (2026-11-13 08:10:00 PST): E189 starts on a rested card, at least 40 minutes after our last real session there (E189.md section 13; the kit)
+-> PASS (20 minutes after E183's end on a shared day: REFUSED naming E183)
+    rest: 40 minutes since E183's session end (2026-11-13 08:10:00 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (40 minutes after E183's end: rest 40)
+== RS11 every form at once (E182, E183, E184, E185, E186, E188, E189, energy.sh): the latest end wins
+    rest: 50 minutes since E189's session end (2026-11-13 12:40:00 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (the latest end of all eight forms is E189's: rest 50)
+== RS12 dry and no-device logs only, each ending 5 minutes before now
+    rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders
+-> PASS (an E189 session that opened no device, E189's and E183's dry logs: none counts)
+== RS13 no session log at all
+    rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders
+-> PASS (no log: rest reads none)
+
+SELFTEST-REST-E189 21 of 21 PASS
+rc 0
