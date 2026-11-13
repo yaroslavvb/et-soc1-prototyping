@@ -1,0 +1,59 @@
+# E190 kit checks (Q169, kit-e190), 2026-11-13 13:16:49 PST, aifoundry2, /usr/bin/python3 3.12.3
+# HEAD 504301143c41 (the kit's files uncommitted on it)
+## e190_common.py (the self-check)
+E190-COMMON SELF-CHECK PASS
+rc 0
+## check_e190.py --check (harness-e190.json re-made)
+harness-e190.json re-made: equal (25 files)
+CHECK PASS
+rc 0
+## check_e190.py --box (every harness file at its sha256 here)
+HARNESS OK: 25 files at harness-e190.json's sha256
+rc 0
+## forecast_e190.py --check (the registration's, unchanged)
+forecast_e190 --check: recomputed == committed: True; law tie 0.0000 (<= 0.011: True); peaks under the lines: True; given() at the points reproduces the frozen J (worst 1.1e-14 J): True
+PASS
+rc 0
+## plan_e190.py --check (the registration's, unchanged)
+plan_e190 --check: recomputed == committed: True; each arm's estimate under the 40 min cap: True; peaks under the lines: A 64.5 <= 82 W, B 61.5 <= 70 W
+PASS
+rc 0
+## score_e190.py --selftest-stub (the registration's scorer, unchanged)
+selftest-stub (/usr/bin/python3 3.12.3): A PASS, B PASS, C PASS, D PASS, E PASS
+PASS
+rc 0
+## sha256sum -c SHA256SUMS-e190-registration (the registration's list)
+16
+rc 0
+## bash -n on every shell file of the kit
+ok tools/claims-v3/e190/build_e190.sh
+ok tools/claims-v3/e190/ettelem_guard_e190.sh
+ok tools/claims-v3/e190/preflight_e190.sh
+ok tools/claims-v3/e190/session_e190.sh
+ok tools/claims-v3/e190/rb/list_steps_e190.sh
+ok tools/claims-v3/e190/rb/rb_e190.sh
+ok tools/claims-v3/e190/rb/rest_rule_e190.sh
+ok tools/claims-v3/e190/rb/s02_window_e190.sh
+ok tools/claims-v3/e190/rb/s03_desk_e190.sh
+ok tools/claims-v3/e190/rb/s07_sync_e190.sh
+ok tools/claims-v3/e190/rb/s08_build_e190.sh
+ok tools/claims-v3/e190/rb/s10_dry_e190.sh
+ok tools/claims-v3/e190/rb/s11_session_e190.sh
+ok tools/claims-v3/e190/rb/s20_wait_e190.sh
+ok tools/claims-v3/e190/rb/s22_collect_e190.sh
+ok tools/claims-v3/e190/rb/s23_data_e190.sh
+ok tools/claims-v3/e190/rb/s24_score_e190.sh
+ok tools/claims-v3/e190/rb/selftest_rb_e190.sh
+ok tools/claims-v3/e190/desk/desktest_build_e190.sh
+## python3 -m py_compile on every Python file of the kit (to a scratch cache)
+ok tools/claims-v3/e190/check_e190.py
+ok tools/claims-v3/e190/collect_e190.py
+ok tools/claims-v3/e190/e190_common.py
+ok tools/claims-v3/e190/fake_card_e190.py
+ok tools/claims-v3/e190/forecast_e190.py
+ok tools/claims-v3/e190/plan_e190.py
+ok tools/claims-v3/e190/reduce_e190.py
+ok tools/claims-v3/e190/run_e190.py
+ok tools/claims-v3/e190/score_e190.py
+ok tools/claims-v3/e190/selftest_run_e190.py
+ok tools/claims-v3/e190/rb/check_history_e190.py

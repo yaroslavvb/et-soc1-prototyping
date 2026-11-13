@@ -1,0 +1,45 @@
+# kit-e190's build of E136's rgm136 (unchanged, the registration's subtree 30da3ec3...) on aifoundry1, Fri 13 Nov 2026, in a new folder of ours
+# (~/e190-q169-desk), BUILDS ONLY: nothing built there was run; no device, no lock. Every call bounded, ssh -o BatchMode=yes -o ConnectTimeout=10.
+# The desk's own paths below are written <desk>; the box's home ~.
+2026-11-13 12:36:44 PST
+== probe
+probe rc 0
+== the folder must be new
+ls: cannot access 'e190-q169-desk': No such file or directory
+mkdir rc 0
+== source: tools/claims-v3/e136/rgm136 at 504301143c41b9a4a510ee4d1142e44368571a4c (subtree 30da3ec36d2085b9e8c441387fb945029d3caaf6)
+d28f0926b6f0275542e2e023717195f456c676e8bec8123b6836e94d48c9b972  <desk>/rgm136.tar
+untar rc 0
+== local source list (to compare with the box's)
+local source sha256 list: 6b98761fc0e448af0b71a73c69df612fd1e5fd364c2ce0e8107f50a23f38d85d
+== the build (builds only; nothing run)
+remote build call rc 0
+== 2026-11-13 12:36:44 PST on aifoundry1; load: 0.57 0.71 0.75
+== source files: 10
+== source sha256 list: 6b98761fc0e448af0b71a73c69df612fd1e5fd364c2ce0e8107f50a23f38d85d
+== toolchain
+riscv64-unknown-elf-gcc () 15.1.0
+c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 3.28.3
+-rw-r--r-- 1 root root 12470496 May 10  2026 /opt/et/lib/libetrt.so
+d2412f178ba5434cdb602c41abac8b8ff60169027b95880b0aa2a5790c0172bc  /opt/et/lib/libetrt.so
+cmake rc 0
+build rc 0
+~/e190-q169-desk/cmake.log:-- The C compiler identification is GNU 13.3.0
+~/e190-q169-desk/cmake.log:-- The CXX compiler identification is GNU 13.3.0
+~/e190-q169-desk/build/CMakeCache.txt:CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+~/e190-q169-desk/build/CMakeCache.txt:CMAKE_C_COMPILER:FILEPATH=/usr/bin/cc
+[ 80%] Completed 'sparsity_kernel'
+[ 80%] Built target sparsity_kernel
+[ 90%] Building CXX object host/CMakeFiles/sparsity_host.dir/main.cpp.o
+[100%] Linking CXX executable sparsity_host
+[100%] Built target sparsity_host
+== built (sha256; NOT run)
+aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0  ~/e190-q169-desk/build/kernel/sparsity.elf
+c53c0c44d0b88b0f65dd473f0e488b7a2261269bc3ee7486ed9777c4c3b1c062  ~/e190-q169-desk/build/host/sparsity_host
+TEXT 61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763
+-rwxr-xr-x 1 <login> <login> 3676120 Nov 13 12:36 ~/e190-q169-desk/build/host/sparsity_host
+-rwxr-xr-x 1 <login> <login>   20256 Nov 13 12:36 ~/e190-q169-desk/build/kernel/sparsity.elf
+== disk: 654K
+REMOTE-BUILD-DONE
+2026-11-13 12:36:48 PST
