@@ -5460,7 +5460,66 @@ At `46a16bd0`: 175 lists, 6,282 entries, 6,265 OK; the 17 others are E85's code 
 - **E188's runbook desk test v2** (a nit): its stand-in box's window ends at the test's start plus 3 h, capped at 23:59 the same Pacific day, and step 9 v2 needs 6,000 s before the window's last end for FULL, so from about 22:19 PST to midnight every FULL step-9 case stops at the window before the rule it tests (the verifier's re-run at 22:41–22:48 PST read 11 of 16 for that reason; the committed 16 of 16 came from an afternoon run); A2-2 says it runs from 00:00 to about 22:00 PST, and E188's readiness check re-runs it in daytime.
 - **The others** (two minor faults and two nits) concern the owner's private pages and their source files alone; they are answered or tracked there.
 - **This fix's own checks** (desk checks of code): before this commit the same commit was made in a scratch clone, never pushed, where the check v2 (`check_day2_v2.py tree --pull`) read 0, E183's anchor lines 1–6 read as stated and its step 2 v5 0, and E188's anchor lines 1–9 read as stated and its step 2 v2 0 (its v1 inside reports `SHA256SUMS-e188-a2` among the lists it does not pin, never as a gate), with no box call; after it, the same for real on the lab clone. The four files it adds are additions on their paths and shadow no module; 177 lists, 6,284 entries, 6,267 OK (the 17 others E85's code list).
-- **Not yet done:** E189's registration, kit, verifier, fix and readiness check; E188's readiness check (A2 pinned, and the runbook's desk test v2 re-run in daytime); the tidy of Q166's box folders, on the owner's word.
+- **Not yet done:** E189's registration, kit, verifier, fix and readiness check; E188's readiness check (A2 pinned, and the runbook's desk test v2 re-run in daytime); the tidy of Q166's box folders, on the owner's word. *(dated, Fri 13 Nov 2026, Q168's records: E189's registration, kit, verifiers, fixes, land and readiness check are done, its card day is not: "Q167's close and Q168", below.)*
+
+## Q167's close and Q168: E189, the blind day, registered, re-made before any datum, kitted, read by two verifiers, fixed twice and landed, not run; E183's card day from aifoundry2; the round's session moved to a lab box (Fri 13 Nov 2026, week 46; on the owner's message of about 11:03 PST)
+
+Each claim is labelled **registered** (committed before any datum of its run), **a desk check of code** (a test of committed code, deciding nothing measured) or **a desk timing** (a stopwatch at the desk, never a card's); **nothing in this section is measured**, no post hoc reading was made, and no committed verdict changes. Short name: `E189/` is `tools/claims-v3/e189/`. The owner's words are in 02's Q168 row. 🛑 **To carry from here:** (157) **E189's forecasts are its frozen file's** (`E189/forecast-e189.txt`), never Q166's unfrozen estimates: the sort's are at 1,800 sorts a launch, 2.712 and 3.290 J over idle, where Q166's estimates at 1,500 sorts read 2.26 and 2.74; (158) **E189-S2 decides on its ratio**, 0.85 ≤ mean t_k / point ≤ 1.15, and the e_t printed beside it decides nothing; (159) **"never run" in E189's files means never on a card**: Q166 ran slices of the instance in the simulator; (160) **E189's go carries its seven anchor lines** (03, E189) and the owner's route for the day's post; (161) **on a lab box every desk test runs where it cannot open that box's card, and every check names its interpreter** (AGENT.md §7).
+
+### Registered, before any datum
+
+- **E189's registration** (`c86940c1`, 13:43:55 PST; 11 files; `E189/SHA256SUMS-e189-registration` sha256 `bf1b1bbb4c2b34fcabf5b437cf98d602841315342a239303a11eb2eb72c79058`, 10 of 10; subtree `993e549a675e36edd049cd82e3e73c455bcf77a3`): the six configurations' seconds, joules over idle and joules with the card at rest a launch, each a point with a two-sided band and split by ledger term (03, E189, its table); the given-seconds forecast as a frozen formula; arms v2.1 (sparse parity 6.986 J over idle, 20.082 J at rest) and v2c (6.955 and 20.049 J), the primary's on the other five configurations; K = 8, 8, 9, 8, 7 and 9 launches a pass; 24 passes in an order drawn with seed 189; the rules S1, S1T, S2 and S2T (03); about 95 card-minutes, cap 110; live stops at 65 W and 70 °C; reads only.
+- **Re-made before any datum:** E189.md alone changed against its first freeze (made in a scratch clone on Thu 12 Nov at 21:36 PST, never pushed), with its list: S2's ratio named, SHA-256's and sparse parity's fast ends kept with the reason, "never run" read as never on a card. Every other file of the registration is the first freeze's bytes.
+
+### Desk checks of code (reported, deciding nothing measured)
+
+- **The kit as landed** (`b42dc95c`; its logs in `E189/logs/`, run on aifoundry2 under `/usr/bin/python3` 3.12.3, in the sandbox of AGENT.md §7): the hosts on real g++-13 13.3.0 and clang 18.1.3 builds 67 of 67; the runner 27 of 27, the end-to-end case's reduced joules over idle within each tolerance of what the stub card injected (+2.5, +1.9, −0.7, −4.5, −11.7 and −2.5%, against 12.8, 22.3 and 8.8% for the copy, SHA-256 and sparse parity), and a stopped pass reduced and scored with its 10 s after (−4.8% and −14.4%) where the same pass cut as the first kit cut it reads 9.9% low and flagged; the rest rule 21 of 21; the runbook 21 of 21, its cases H2–H8 refusing a shadowing module added, or left uncommitted, in the folders the day's Python puts first; the dry listing 13 steps, 0 non-zero, 0 box calls; the command audit GO (11 send sites, each a read).
+- **The registration's checks under 3.12.3:** the forecast and plan checks PASS; the E59 self-test PASS, its output the committed file's bytes, as under the desk machine's 3.13.11 and 3.9.6.
+- **The landing** (13:36–13:49 PST): each file checked against its table before its commit (11 of 11, 46 of 46), every file mode 644, both messages as written; the seven anchor lines true at `b42dc95c` (13:46 PST), and E183's (note 4's 1–6, note 5's 1–5) and E188's (1–9) still true there.
+- **The readiness check** (13:51–14:20 PST): READY WITH GAPS, as 03 gives it; beside the kit's tests, the scorer's step after the data commit on its real path with a committed stand-in (each exit code as designed), the runner's reads on real card output (5 config reads and 5,299 samples, every field the stops read present), and both rest rules on the day's E183 session log.
+- **E183 from aifoundry2:** note 4's desk tests read the desk machine's counts there (03, E183); note 5's own tests, as committed: the desk-path gate 37 of 37, the collection 11 of 11, the dry listing v6 14 steps.
+
+### Desk timings (never a card's)
+
+- **SHA-256's host-side check** of its messages takes about 0.3–0.4 s at g++-13 -O2 on aifoundry2, the margin `KIT.md` states for the process's end under `timeout 10` at the band's slow end; **a full session's telemetry** (46.5 MB) gzips at level 9 in 0.32 s.
+
+### Not run
+
+- **E189:** 0 card-minutes; no E189 datum in any ref; it needs the owner's go.
+- **E188:** waits for E189's verdict; driven from aifoundry2 its step 2 v2 stops until its desk side is ported (AGENT.md §7).
+- **E183:** this round ran none of it. Its session of 13 November (Q170's card lane, its report before any verifier) stopped at its smoke gate after about 1.0 card-minute by a kit defect, every rule NOT RUN, nothing collected or committed; its records come with Q170's.
+
+### Wording, quoted only as corrected
+
+- **S2's "within 15% of the point"** is the ratio 0.85 ≤ mean t_k / point ≤ 1.15 (E189.md 8.3, re-made); the e_t beside it decides nothing.
+- **"Never run"** in E189's files is never on a card; four simulator runs of three 1/20,000 slices exist (`KIT.md` section 10's dated sentence).
+- **`KIT.md` section 4's "well under a second"** for the session's end leaves out the runner's level-9 gzip of the telemetry, a desk timing of 0.32 s for a full session (`KIT.md` section 4 as landed).
+- **E189.md's Status sentence** changed beside the three stated changes, citing the records' fix's "not yet done"; no number or rule moves (`KIT.md` section 10).
+
+### The verifiers' findings, one line each
+
+- **E189's first verifier** (Thu 23:22 to Fri 00:07 PST): holds with fixes, four minor faults (the end-to-end case could not check joules; a stop during a pass skipped its 10 s after; S2's two readings; SHA-256's fast end under 0.5 s) and five nits; answered in the re-made E189.md (the last two faults and one nit) and in the kit (the first two and four nits).
+- **E189's second verifier** (12:14–12:55 PST): holds with fixes, one minor fault (the history check blind to a shadowing module in the reducer's folder) and four nits; all five answered in the kit, the registration unchanged.
+- **The readiness check:** one minor latent finding (a host stuck past the runner's 30 s bound is left running while the next pass starts: a watch by hand on the day, a kit note later) and four nits, none in a rule.
+- **Note 5's verifier** (Q170): one minor fault and seven nits, answered before its land (`KIT.md.dated-note-5.md`, section 11).
+
+### The counts
+
+At `b42dc95c`: 184 lists, 6,459 entries, 6,442 OK; the 17 others are E85's code list, as before. Since `f9632ee3`: ten commits on GitHub main; Q168's two add 57 files (11 + 46) and note 5 adds 14, none edited; the other seven are other rounds' (04). No E189 datum and no E183 datum is in any ref.
+
+### The go lines
+
+- **E189's anchor lines 1–7** (03, E189) are read before its step 1; the owner's go names the day, aifoundry3 card 0 at 600 MHz as found, reads only, about 95 card-minutes (cap 110), the day's post or its waiver, and whether the host's package counter may be read (default no).
+- **E183's** are its note 6's once that note lands (Q173); **E188's** 1–9 stand.
+
+### Disclosures
+
+- **Where it ran:** the round's session moved from the desk machine to aifoundry2 at about 10:00 PST, and its lanes ran there, desk only: no card, card lock, device command, box call or post. Every desk test that ran a built host, a runner or a stand-in session ran in the sandbox of AGENT.md §7, with no `/dev/et*` inside at any look.
+- **The stopped fix pass:** Q167's E189 fix pass was stopped by the account's weekly limit at 00:35 PST Fri; its scratch clone, with one local commit (the re-made registration, never pushed), stayed on the desk machine; this round re-made it from the carried files, byte for byte.
+- **Process,** none safety-related: the lanes ran short Python heredocs and one-liners outside script files (about 25 in the first fix pass, a few in others) and sub-second reads outside the round's CPU slot; a few read-only git reads of the lab clone ran outside its lock; one lane rewrote another lane's result file in the round's private folder by mistake (the same size; its bytes not proven equal); the runbook desk tests' case that runs the real runner did so inside the sandbox, as designed, with no device present.
+- **Interpreters:** every check of this round ran under aifoundry2's `/usr/bin/python3` 3.12.3, where the kits name 3.9 or 3.13; the self-tests' verdicts are the same, one printed mean of E183's arm M1 differs in its last digits, and E188's forecast check fails there (AGENT.md §7).
+- **These records' own gate** (desk checks of code): this commit was made only after the same commit, in a scratch clone never pushed, read E189's anchor lines 1–7 as stated and its step 2 0 (16 when nested inside its own lock), E183's note-4 lines 1–6 and note-5 lines 1–5 as stated and its step 2 v6 0, E188's lines 1–9 as stated, the day-2 check v2 (`check_day2_v2.py tree`) 0, E189's and E188's history checks OK, and the hash lists 184, 6,459 and 6,442 as at `b42dc95c`, each run in the sandbox of AGENT.md §7 with no box call; after it, the same anchor reads for real on the lab clone. None of the seven files it edits lies in a day's paths (the day-2 check v2's 598 for E185 and for E183, E188's 898, E189's 28 paths and folders), and none of the 2,627 tracked hash lists names one.
+- **Not yet done:** a verifier of these records and a fix pass if it finds faults; E189's card day, on the owner's go; E183's note 6 and its second session (Q173); E188's Linux port before its day; the owner's private pages' entries for Q167's close and Q168, written for a session on his desk machine to apply.
 
 ## Ridge points (derived; no card time)
 
