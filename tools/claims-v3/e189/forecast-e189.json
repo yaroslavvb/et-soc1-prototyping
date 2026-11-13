@@ -1,0 +1,2025 @@
+{
+ "card": "aifoundry3 card 0, 600 MHz as found",
+ "configs": {
+  "copy-random": {
+   "arms": {
+    "v2.1": {
+     "same_as": "primary",
+     "why": "no tensor op in this program"
+    },
+    "v2c": {
+     "same_as": "primary",
+     "why": "its hart work is already the counter's counts at the catalogue's rows"
+    }
+   },
+   "config_args": "--prog copy --bytes 1G --passes 14 --data random --width 32",
+   "counts": {
+    "by_class_total": {
+     "branch_not_taken": 104448.0,
+     "branch_taken": 58725400.0,
+     "int_muldiv": 14336.0,
+     "jump": 77824.0,
+     "load": 469943000.0,
+     "mask_broadcast": 28672.0,
+     "scalar_int": 117903000.0,
+     "store": 469856000.0,
+     "system": 6144.0
+    },
+    "bytes_counted_card_total": {
+     "read_bytes": 15150300000.0,
+     "write_bytes": 15062200000.0
+    },
+    "instructions_total": 1116660000.0,
+    "per_participant_instructions": 545244.0,
+    "per_unit_per_participant_instructions": 0.0742188,
+    "unit": "byte copied",
+    "units_per_participant": 7340030.0
+   },
+   "j_over_idle": 6.81368,
+   "j_over_idle_band": [
+    6.3609,
+    7.80127
+   ],
+   "j_total": 23.4159,
+   "j_total_band": [
+    19.5706,
+    29.1238
+   ],
+   "per_unit": {
+    "j_over_idle": 0.486691,
+    "j_total": 1.67256,
+    "unit": "GiB copied",
+    "units_a_launch": 14.0
+   },
+   "primary": {
+    "j_over_idle": 6.81368,
+    "j_over_idle_band": [
+     6.3609,
+     7.80127
+    ],
+    "kind": "plain"
+   },
+   "seconds": {
+    "band": [
+     0.556755,
+     0.75455
+    ],
+    "fast_how": "progs-c's low end, kept: the stores alone at the write-back path's 27 GB/s (energy manual 4.1)",
+    "l2_wait_s": 0.0,
+    "point": 0.655652,
+    "point_how": "stores at the write-back path's 27 GB/s (energy manual 4.1) and, at the high end, the loads' bytes at 76 GB/s on top (frozen-v2 dram_bandwidth_gb_s)",
+    "q166_band": [
+     0.556755,
+     0.75455
+    ],
+    "slow_how": "progs-c's high end, kept: the stores at 27 GB/s plus the loads' bytes at 76 GB/s, unoverlapped"
+   },
+   "terms": {
+    "awake, not issuing": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "0 by the frozen awake rule: every hart issues its own work; no hart waits on another (frozen-v2.json awake_rule)"
+    },
+    "bytes: DRAM read": {
+     "band": [
+      1.58742,
+      2.18571
+     ],
+     "bytes": 15032385536,
+     "j": 1.91362,
+     "note": "32 B vector loads, at the tensor-load DRAM row by analogy (04 4.1)",
+     "pj_per_byte": [
+      127.3,
+      105.6,
+      145.4
+     ]
+    },
+    "bytes: DRAM write-back": {
+     "band": [
+      4.77128,
+      5.61159
+     ],
+     "bytes": 15032385536,
+     "j": 4.89755,
+     "note": "fsw.ps through the L1, the write-back path (04 4.1)",
+     "pj_per_byte": [
+      325.8,
+      317.4,
+      373.3
+     ]
+    },
+    "bytes: L1": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "inside the DRAM paths' prices (measured end to end)"
+    },
+    "bytes: L2": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "inside the DRAM paths' prices"
+    },
+    "bytes: scratchpad": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "none"
+    },
+    "instructions by class": {
+     "band": [
+      0.00220071,
+      0.00397439
+     ],
+     "by_class": {
+      "branch_not_taken": {
+       "band": [
+        6.24371e-07,
+        7.65317e-07
+       ],
+       "count": 104448.0,
+       "j": 6.79671e-07
+      },
+      "branch_taken": {
+       "band": [
+        0.00119103,
+        0.00152601
+       ],
+       "count": 58725400.0,
+       "j": 0.00140497
+      },
+      "int_muldiv": {
+       "band": [
+        5.72344e-07,
+        6.78995e-07
+       ],
+       "count": 14336.0,
+       "j": 6.01383e-07
+      },
+      "jump": {
+       "band": [
+        1.48241e-06,
+        1.91853e-06
+       ],
+       "count": 77824.0,
+       "j": 1.70131e-06
+      },
+      "load": {
+       "band": [
+        1.74171e-07,
+        1.9018e-07
+       ],
+       "count": 16384.0,
+       "j": 1.85562e-07
+      },
+      "mask_broadcast": {
+       "band": [
+        2.58596e-07,
+        3.45375e-07
+       ],
+       "count": 28672.0,
+       "j": 2.86729e-07
+      },
+      "scalar_int": {
+       "band": [
+        0.00100626,
+        0.00244412
+       ],
+       "count": 117903000.0,
+       "j": 0.00109362
+      },
+      "store": {
+       "band": [
+        2.79063e-07,
+        3.1229e-07
+       ],
+       "count": 20480.0,
+       "j": 2.86146e-07
+      },
+      "system": {
+       "band": [
+        3.67742e-08,
+        4.58297e-08
+       ],
+       "count": 6144.0,
+       "j": 4.12607e-08
+      }
+     },
+     "count": 176897000.0,
+     "j": 0.00250236,
+     "note": "catalogue rows, random column, aifoundry3's mean; branches by outcome; the copy's vector loads and stores are inside the DRAM byte prices and not priced again"
+    },
+    "mesh": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "not priced: the DRAM paths' prices include their mesh crossings"
+    },
+    "tensor ops": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "none in this program"
+    },
+    "the card at rest": {
+     "band": [
+      13.1031,
+      20.4885
+     ],
+     "j": 16.3442,
+     "law": "footing law (quadratic, inside its band)",
+     "note": "aifoundry3's footing law at the forecast die 55 C (band 52-60 C) times the seconds (band: their two-sided band), +-0.5 W",
+     "w": 24.9282
+    },
+    "the run's own leakage rise": {
+     "band": [
+      0.106625,
+      0.833987
+     ],
+     "die_rise_c": 1.24707,
+     "j": 0.257984,
+     "k_leak_w_per_c": 0.315522,
+     "note": "k_leak(55 C) x k_rise x P_over_idle x t (M10's 4.5 s window law)"
+    }
+   },
+   "w_over_idle": 10.3922
+  },
+  "copy-zeros": {
+   "arms": {
+    "v2.1": {
+     "same_as": "primary",
+     "why": "no tensor op in this program"
+    },
+    "v2c": {
+     "same_as": "primary",
+     "why": "its hart work is already the counter's counts at the catalogue's rows"
+    }
+   },
+   "config_args": "--prog copy --bytes 1G --passes 14 --data zeros --width 32",
+   "counts": {
+    "by_class_total": {
+     "branch_not_taken": 104448.0,
+     "branch_taken": 58725400.0,
+     "int_muldiv": 14336.0,
+     "jump": 77824.0,
+     "load": 469943000.0,
+     "mask_broadcast": 28672.0,
+     "scalar_int": 117903000.0,
+     "store": 469856000.0,
+     "system": 6144.0
+    },
+    "bytes_counted_card_total": {
+     "read_bytes": 15150300000.0,
+     "write_bytes": 15062200000.0
+    },
+    "instructions_total": 1116660000.0,
+    "per_participant_instructions": 545244.0,
+    "per_unit_per_participant_instructions": 0.0742188,
+    "unit": "byte copied",
+    "units_per_participant": 7340030.0
+   },
+   "j_over_idle": 5.14358,
+   "j_over_idle_band": [
+    4.34055,
+    6.06954
+   ],
+   "j_total": 21.6826,
+   "j_total_band": [
+    17.5164,
+    27.2069
+   ],
+   "per_unit": {
+    "j_over_idle": 0.367398,
+    "j_total": 1.54875,
+    "unit": "GiB copied",
+    "units_a_launch": 14.0
+   },
+   "primary": {
+    "j_over_idle": 5.14358,
+    "j_over_idle_band": [
+     4.34055,
+     6.06954
+    ],
+    "kind": "plain"
+   },
+   "seconds": {
+    "band": [
+     0.556755,
+     0.75455
+    ],
+    "fast_how": "progs-c's low end, kept: the stores alone at the write-back path's 27 GB/s (energy manual 4.1)",
+    "l2_wait_s": 0.0,
+    "point": 0.655652,
+    "point_how": "stores at the write-back path's 27 GB/s (energy manual 4.1) and, at the high end, the loads' bytes at 76 GB/s on top (frozen-v2 dram_bandwidth_gb_s)",
+    "q166_band": [
+     0.556755,
+     0.75455
+    ],
+    "slow_how": "progs-c's high end, kept: the stores at 27 GB/s plus the loads' bytes at 76 GB/s, unoverlapped"
+   },
+   "terms": {
+    "awake, not issuing": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "0 by the frozen awake rule: every hart issues its own work; no hart waits on another (frozen-v2.json awake_rule)"
+    },
+    "bytes: DRAM read": {
+     "band": [
+      1.29579,
+      1.72271
+     ],
+     "bytes": 15032385536,
+     "j": 1.42206,
+     "note": "32 B vector loads, at the tensor-load DRAM row by analogy (04 4.1)",
+     "pj_per_byte": [
+      94.6,
+      86.2,
+      114.6
+     ]
+    },
+    "bytes: DRAM write-back": {
+     "band": [
+      3.04255,
+      4.34286
+     ],
+     "bytes": 15032385536,
+     "j": 3.71901,
+     "note": "fsw.ps through the L1, the write-back path (04 4.1)",
+     "pj_per_byte": [
+      247.4,
+      202.4,
+      288.9
+     ]
+    },
+    "bytes: L1": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "inside the DRAM paths' prices (measured end to end)"
+    },
+    "bytes: L2": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "inside the DRAM paths' prices"
+    },
+    "bytes: scratchpad": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "none"
+    },
+    "instructions by class": {
+     "band": [
+      0.00220071,
+      0.00397439
+     ],
+     "by_class": {
+      "branch_not_taken": {
+       "band": [
+        6.24371e-07,
+        7.65317e-07
+       ],
+       "count": 104448.0,
+       "j": 6.79671e-07
+      },
+      "branch_taken": {
+       "band": [
+        0.00119103,
+        0.00152601
+       ],
+       "count": 58725400.0,
+       "j": 0.00140497
+      },
+      "int_muldiv": {
+       "band": [
+        5.72344e-07,
+        6.78995e-07
+       ],
+       "count": 14336.0,
+       "j": 6.01383e-07
+      },
+      "jump": {
+       "band": [
+        1.48241e-06,
+        1.91853e-06
+       ],
+       "count": 77824.0,
+       "j": 1.70131e-06
+      },
+      "load": {
+       "band": [
+        1.74171e-07,
+        1.9018e-07
+       ],
+       "count": 16384.0,
+       "j": 1.85562e-07
+      },
+      "mask_broadcast": {
+       "band": [
+        2.58596e-07,
+        3.45375e-07
+       ],
+       "count": 28672.0,
+       "j": 2.86729e-07
+      },
+      "scalar_int": {
+       "band": [
+        0.00100626,
+        0.00244412
+       ],
+       "count": 117903000.0,
+       "j": 0.00109362
+      },
+      "store": {
+       "band": [
+        2.79063e-07,
+        3.1229e-07
+       ],
+       "count": 20480.0,
+       "j": 2.86146e-07
+      },
+      "system": {
+       "band": [
+        3.67742e-08,
+        4.58297e-08
+       ],
+       "count": 6144.0,
+       "j": 4.12607e-08
+      }
+     },
+     "count": 176897000.0,
+     "j": 0.00250236,
+     "note": "catalogue rows, random column, aifoundry3's mean; branches by outcome; the copy's vector loads and stores are inside the DRAM byte prices and not priced again"
+    },
+    "mesh": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "not priced: the DRAM paths' prices include their mesh crossings"
+    },
+    "tensor ops": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "none in this program"
+    },
+    "the card at rest": {
+     "band": [
+      13.1031,
+      20.4885
+     ],
+     "j": 16.3442,
+     "law": "footing law (quadratic, inside its band)",
+     "note": "aifoundry3's footing law at the forecast die 55 C (band 52-60 C) times the seconds (band: their two-sided band), +-0.5 W",
+     "w": 24.9282
+    },
+    "the run's own leakage rise": {
+     "band": [
+      0.0727585,
+      0.648858
+     ],
+     "die_rise_c": 0.941397,
+     "j": 0.19475,
+     "k_leak_w_per_c": 0.315522,
+     "note": "k_leak(55 C) x k_rise x P_over_idle x t (M10's 4.5 s window law)"
+    }
+   },
+   "w_over_idle": 7.84498
+  },
+  "sha256": {
+   "arms": {
+    "v2.1": {
+     "same_as": "primary",
+     "why": "no tensor op in this program"
+    },
+    "v2c": {
+     "same_as": "primary",
+     "why": "its hart work is already the counter's counts at the catalogue's rows"
+    }
+   },
+   "config_args": "--prog sha256 --block 2048 --repeat 800",
+   "counts": {
+    "by_class_total": {
+     "branch_not_taken": 117987000.0,
+     "branch_taken": 3617730000.0,
+     "int_muldiv": 16384.0,
+     "jump": 157315000.0,
+     "load": 11534900000.0,
+     "scalar_int": 220131000000.0,
+     "store": 4404310000.0,
+     "system": 6144.0
+    },
+    "bytes_counted_card_total": {
+     "read_bytes": 48656500000.0,
+     "write_bytes": 20134300000.0
+    },
+    "instructions_total": 239964000000.0,
+    "per_participant_instructions": 117170000.0,
+    "per_unit_per_participant_instructions": 4576.75,
+    "unit": "message block (one compression)",
+    "units_per_participant": 25600
+   },
+   "j_over_idle": 2.30478,
+   "j_over_idle_band": [
+    2.12724,
+    5.17388
+   ],
+   "j_total": 16.6103,
+   "j_total_band": [
+    11.2052,
+    31.8285
+   ],
+   "per_unit": {
+    "j_over_idle": 4.39584e-08,
+    "j_total": 3.16804e-07,
+    "unit": "64 B block (one compression)",
+    "units_a_launch": 52430800.0
+   },
+   "primary": {
+    "j_over_idle": 2.30478,
+    "j_over_idle_band": [
+     2.12724,
+     5.17388
+    ],
+    "kind": "plain"
+   },
+   "seconds": {
+    "band": [
+     0.384891,
+     0.944743
+    ],
+    "fast_how": "every instruction but the taken branches and jumps at a lone hart's rate, by the one row the catalogue measured both ways (add: 0.581 a hart-cycle alone, 0.3727 with both harts; x 0.6415), the taken branches and jumps at their both-harts rate (Q166 verify-progs fault 1's bound)",
+    "l2_wait_s": 0.0172211,
+    "point": 0.570368,
+    "point_how": "hart-cycles = sum of 1 / issue rate (catalogue, both harts issuing), per participant; high: one-cycle integer ops at the in-place rows' rate; L2 stalls not modelled (no cache model)",
+    "q166_band": [
+     0.570368,
+     0.927522
+    ],
+    "slow_how": "progs-c's high end (every one-cycle integer op at the in-place rows' rate) plus every line past the L1 (the bytes term's high count) waited for at the L2's line rate, 27.4 G lines/s over the chip (energy manual 04, E48), unoverlapped: +0.0172 s"
+   },
+   "terms": {
+    "awake, not issuing": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "0 by the frozen awake rule: every hart issues its own work; no hart waits on another (frozen-v2.json awake_rule)"
+    },
+    "bytes: DRAM read": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "the inputs' first reads (4 MiB or less a launch): not priced"
+    },
+    "bytes: DRAM write-back": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "the outputs (64 B a hart, or the sort's work area, 16 MiB) are written back at the kernel's end: not priced"
+    },
+    "bytes: L1": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "inside the load and store rows (L1 hits)"
+    },
+    "bytes: L2": {
+     "band": [
+      0.0,
+      0.150693
+     ],
+     "j": 0.0094959,
+     "note": "bytes past the L1 at the L2's price (04 4.2, by analogy with tensor loads), bracketed: 0 to the high count"
+    },
+    "bytes: scratchpad": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "none"
+    },
+    "instructions by class": {
+     "band": [
+      2.12724,
+      5.02318
+     ],
+     "by_class": {
+      "branch_not_taken": {
+       "band": [
+        0.000705306,
+        0.000864523
+       ],
+       "count": 117987000.0,
+       "j": 0.000767776
+      },
+      "branch_taken": {
+       "band": [
+        0.0733722,
+        0.0940087
+       ],
+       "count": 3617730000.0,
+       "j": 0.0865518
+      },
+      "int_muldiv": {
+       "band": [
+        6.54108e-07,
+        7.75994e-07
+       ],
+       "count": 16384.0,
+       "j": 6.87295e-07
+      },
+      "jump": {
+       "band": [
+        0.00299657,
+        0.00387816
+       ],
+       "count": 157315000.0,
+       "j": 0.00343907
+      },
+      "load": {
+       "band": [
+        0.122772,
+        0.134429
+       ],
+       "count": 11534900000.0,
+       "j": 0.13073
+      },
+      "scalar_int": {
+       "band": [
+        1.86717,
+        4.72286
+       ],
+       "count": 220131000000.0,
+       "j": 2.01181
+      },
+      "store": {
+       "band": [
+        0.0602222,
+        0.0671401
+       ],
+       "count": 4404310000.0,
+       "j": 0.0619777
+      },
+      "system": {
+       "band": [
+        3.67742e-08,
+        4.58297e-08
+       ],
+       "count": 6144.0,
+       "j": 4.12607e-08
+      }
+     },
+     "count": 239964000000.0,
+     "j": 2.29528,
+     "note": "catalogue rows, random column, aifoundry3's mean; branches by outcome; loads and stores at their L1-hit rows"
+    },
+    "mesh": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "not priced: the DRAM paths' prices include their mesh crossings"
+    },
+    "tensor ops": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "none in this program"
+    },
+    "the card at rest": {
+     "band": [
+      9.05831,
+      25.6529
+     ],
+     "j": 14.2182,
+     "law": "footing law (quadratic, inside its band)",
+     "note": "aifoundry3's footing law at the forecast die 55 C (band 52-60 C) times the seconds (band: their two-sided band), +-0.5 W",
+     "w": 24.9282
+    },
+    "the run's own leakage rise": {
+     "band": [
+      0.0196881,
+      1.00176
+     ],
+     "die_rise_c": 0.484903,
+     "j": 0.087265,
+     "k_leak_w_per_c": 0.315522,
+     "note": "k_leak(55 C) x k_rise x P_over_idle x t (M10's 4.5 s window law)"
+    }
+   },
+   "w_over_idle": 4.04086
+  },
+  "sort-shuffled": {
+   "arms": {
+    "v2.1": {
+     "same_as": "primary",
+     "why": "no tensor op in this program"
+    },
+    "v2c": {
+     "same_as": "primary",
+     "why": "its hart work is already the counter's counts at the catalogue's rows"
+    }
+   },
+   "config_args": "--prog sort --keys 512 --reps 1800 --order shuffled",
+   "counts": {
+    "by_class_total": {
+     "branch_not_taken": 35879600000.0,
+     "branch_taken": 24508100000.0,
+     "int_muldiv": 12288.0,
+     "jump": 2879270000.0,
+     "load": 32555300000.0,
+     "scalar_int": 149434000000.0,
+     "store": 17949200000.0,
+     "system": 6144.0
+    },
+    "bytes_counted_card_total": {
+     "read_bytes": 134070000000.0,
+     "write_bytes": 75645400000.0
+    },
+    "instructions_total": 263205000000.0,
+    "per_participant_instructions": 128518000.0,
+    "per_unit_per_participant_instructions": 71397.3,
+    "unit": "sort of 512 keys",
+    "units_per_participant": 1800
+   },
+   "j_over_idle": 3.29025,
+   "j_over_idle_band": [
+    2.60315,
+    5.83987
+   ],
+   "j_total": 25.8448,
+   "j_total_band": [
+    19.4676,
+    39.9979
+   ],
+   "per_unit": {
+    "j_over_idle": 8.92537e-07,
+    "j_total": 7.01085e-06,
+    "unit": "sort of 512 keys",
+    "units_a_launch": 3686400.0
+   },
+   "primary": {
+    "j_over_idle": 3.29025,
+    "j_over_idle_band": [
+     2.60315,
+     5.83987
+    ],
+    "kind": "plain"
+   },
+   "seconds": {
+    "band": [
+     0.715116,
+     1.22882
+    ],
+    "fast_how": "every instruction but the taken branches and jumps at a lone hart's rate, by the one row the catalogue measured both ways (add: 0.581 a hart-cycle alone, 0.3727 with both harts; x 0.6415), the taken branches and jumps at their both-harts rate (Q166 verify-progs fault 1's bound)",
+    "l2_wait_s": 0.0861057,
+    "point": 0.899783,
+    "point_how": "hart-cycles = sum of 1 / issue rate (catalogue, both harts issuing), per participant; high: one-cycle integer ops at the in-place rows' rate; L2 stalls not modelled (no cache model)",
+    "q166_band": [
+     0.899783,
+     1.14271
+    ],
+    "slow_how": "progs-c's high end (every one-cycle integer op at the in-place rows' rate) plus every line past the L1 (the bytes term's high count) waited for at the L2's line rate, 27.4 G lines/s over the chip (energy manual 04, E48), unoverlapped: +0.0861 s"
+   },
+   "terms": {
+    "awake, not issuing": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "0 by the frozen awake rule: every hart issues its own work; no hart waits on another (frozen-v2.json awake_rule)"
+    },
+    "bytes: DRAM read": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "the inputs' first reads (4 MiB or less a launch): not priced"
+    },
+    "bytes: DRAM write-back": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "the outputs (64 B a hart, or the sort's work area, 16 MiB) are written back at the kernel's end: not priced"
+    },
+    "bytes: L1": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "inside the load and store rows (L1 hits)"
+    },
+    "bytes: L2": {
+     "band": [
+      0.0,
+      1.1302
+     ],
+     "j": 0.427316,
+     "note": "bytes past the L1 at the L2's price (04 4.2, by analogy with tensor loads), bracketed: 0 to the high count"
+    },
+    "bytes: scratchpad": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "none"
+    },
+    "instructions by class": {
+     "band": [
+      2.60315,
+      4.70968
+     ],
+     "by_class": {
+      "branch_not_taken": {
+       "band": [
+        0.214482,
+        0.262899
+       ],
+       "count": 35879600000.0,
+       "j": 0.233479
+      },
+      "branch_taken": {
+       "band": [
+        0.497055,
+        0.636856
+       ],
+       "count": 24508100000.0,
+       "j": 0.586339
+      },
+      "int_muldiv": {
+       "band": [
+        4.90581e-07,
+        5.81995e-07
+       ],
+       "count": 12288.0,
+       "j": 5.15471e-07
+      },
+      "jump": {
+       "band": [
+        0.0548449,
+        0.0709802
+       ],
+       "count": 2879270000.0,
+       "j": 0.0629438
+      },
+      "load": {
+       "band": [
+        0.346311,
+        0.378712
+       ],
+       "count": 32555300000.0,
+       "j": 0.36885
+      },
+      "scalar_int": {
+       "band": [
+        1.24556,
+        3.08656
+       ],
+       "count": 149434000000.0,
+       "j": 1.35986
+      },
+      "store": {
+       "band": [
+        0.244896,
+        0.273669
+       ],
+       "count": 17949200000.0,
+       "j": 0.251459
+      },
+      "system": {
+       "band": [
+        3.67742e-08,
+        4.58297e-08
+       ],
+       "count": 6144.0,
+       "j": 4.12607e-08
+      }
+     },
+     "count": 263205000000.0,
+     "j": 2.86293,
+     "note": "catalogue rows, random column, aifoundry3's mean; branches by outcome; loads and stores at their L1-hit rows"
+    },
+    "mesh": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "not priced: the DRAM paths' prices include their mesh crossings"
+    },
+    "tensor ops": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "none in this program"
+    },
+    "the card at rest": {
+     "band": [
+      16.8301,
+      33.3665
+     ],
+     "j": 22.43,
+     "law": "footing law (quadratic, inside its band)",
+     "note": "aifoundry3's footing law at the forecast die 55 C (band 52-60 C) times the seconds (band: their two-sided band), +-0.5 W",
+     "w": 24.9282
+    },
+    "the run's own leakage rise": {
+     "band": [
+      0.0344152,
+      0.791561
+     ],
+     "die_rise_c": 0.438806,
+     "j": 0.124578,
+     "k_leak_w_per_c": 0.315522,
+     "note": "k_leak(55 C) x k_rise x P_over_idle x t (M10's 4.5 s window law)"
+    }
+   },
+   "w_over_idle": 3.65671
+  },
+  "sort-sorted": {
+   "arms": {
+    "v2.1": {
+     "same_as": "primary",
+     "why": "no tensor op in this program"
+    },
+    "v2c": {
+     "same_as": "primary",
+     "why": "its hart work is already the counter's counts at the catalogue's rows"
+    }
+   },
+   "config_args": "--prog sort --keys 512 --reps 1800 --order sorted",
+   "counts": {
+    "by_class_total": {
+     "branch_not_taken": 23065800000.0,
+     "branch_taken": 23082100000.0,
+     "int_muldiv": 12288.0,
+     "jump": 1942750000.0,
+     "load": 24084400000.0,
+     "scalar_int": 115207000000.0,
+     "store": 15589900000.0,
+     "system": 6144.0
+    },
+    "bytes_counted_card_total": {
+     "read_bytes": 109623000000.0,
+     "write_bytes": 75645400000.0
+    },
+    "instructions_total": 202972000000.0,
+    "per_participant_instructions": 99107500.0,
+    "per_unit_per_participant_instructions": 55058.0,
+    "unit": "sort of 512 keys",
+    "units_per_participant": 1800
+   },
+   "j_over_idle": 2.71218,
+   "j_over_idle_band": [
+    2.06692,
+    4.84271
+   ],
+   "j_total": 21.2692,
+   "j_total_band": [
+    16.2371,
+    33.0104
+   ],
+   "per_unit": {
+    "j_over_idle": 7.35725e-07,
+    "j_total": 5.76964e-06,
+    "unit": "sort of 512 keys",
+    "units_a_launch": 3686400.0
+   },
+   "primary": {
+    "j_over_idle": 2.71218,
+    "j_over_idle_band": [
+     2.06692,
+     4.84271
+    ],
+    "kind": "plain"
+   },
+   "seconds": {
+    "band": [
+     0.600915,
+     1.01363
+    ],
+    "fast_how": "every instruction but the taken branches and jumps at a lone hart's rate, by the one row the catalogue measured both ways (add: 0.581 a hart-cycle alone, 0.3727 with both harts; x 0.6415), the taken branches and jumps at their both-harts rate (Q166 verify-progs fault 1's bound)",
+    "l2_wait_s": 0.0861057,
+    "point": 0.7403,
+    "point_how": "hart-cycles = sum of 1 / issue rate (catalogue, both harts issuing), per participant; high: one-cycle integer ops at the in-place rows' rate; L2 stalls not modelled (no cache model)",
+    "q166_band": [
+     0.7403,
+     0.927521
+    ],
+    "slow_how": "progs-c's high end (every one-cycle integer op at the in-place rows' rate) plus every line past the L1 (the bytes term's high count) waited for at the L2's line rate, 27.4 G lines/s over the chip (energy manual 04, E48), unoverlapped: +0.0861 s"
+   },
+   "terms": {
+    "awake, not issuing": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "0 by the frozen awake rule: every hart issues its own work; no hart waits on another (frozen-v2.json awake_rule)"
+    },
+    "bytes: DRAM read": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "the inputs' first reads (4 MiB or less a launch): not priced"
+    },
+    "bytes: DRAM write-back": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "the outputs (64 B a hart, or the sort's work area, 16 MiB) are written back at the kernel's end: not priced"
+    },
+    "bytes: L1": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "inside the load and store rows (L1 hits)"
+    },
+    "bytes: L2": {
+     "band": [
+      0.0,
+      1.1302
+     ],
+     "j": 0.427316,
+     "note": "bytes past the L1 at the L2's price (04 4.2, by analogy with tensor loads), bracketed: 0 to the high count"
+    },
+    "bytes: scratchpad": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "none"
+    },
+    "instructions by class": {
+     "band": [
+      2.06692,
+      3.71251
+     ],
+     "by_class": {
+      "branch_not_taken": {
+       "band": [
+        0.137883,
+        0.169009
+       ],
+       "count": 23065800000.0,
+       "j": 0.150096
+      },
+      "branch_taken": {
+       "band": [
+        0.468135,
+        0.599802
+       ],
+       "count": 23082100000.0,
+       "j": 0.552224
+      },
+      "int_muldiv": {
+       "band": [
+        4.90581e-07,
+        5.81995e-07
+       ],
+       "count": 12288.0,
+       "j": 5.15471e-07
+      },
+      "jump": {
+       "band": [
+        0.0370059,
+        0.047893
+       ],
+       "count": 1942750000.0,
+       "j": 0.0424705
+      },
+      "load": {
+       "band": [
+        0.256823,
+        0.282392
+       ],
+       "count": 24084400000.0,
+       "j": 0.273238
+      },
+      "scalar_int": {
+       "band": [
+        0.95354,
+        2.37579
+       ],
+       "count": 115207000000.0,
+       "j": 1.04668
+      },
+      "store": {
+       "band": [
+        0.21353,
+        0.237621
+       ],
+       "count": 15589900000.0,
+       "j": 0.220148
+      },
+      "system": {
+       "band": [
+        3.67742e-08,
+        4.58297e-08
+       ],
+       "count": 6144.0,
+       "j": 4.12607e-08
+      }
+     },
+     "count": 202972000000.0,
+     "j": 2.28486,
+     "note": "catalogue rows, random column, aifoundry3's mean; branches by outcome; loads and stores at their L1-hit rows"
+    },
+    "mesh": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "not priced: the DRAM paths' prices include their mesh crossings"
+    },
+    "tensor ops": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "none in this program"
+    },
+    "the card at rest": {
+     "band": [
+      14.1424,
+      27.5233
+     ],
+     "j": 18.4543,
+     "law": "footing law (quadratic, inside its band)",
+     "note": "aifoundry3's footing law at the forecast die 55 C (band 52-60 C) times the seconds (band: their two-sided band), +-0.5 W",
+     "w": 24.9282
+    },
+    "the run's own leakage rise": {
+     "band": [
+      0.0278369,
+      0.644353
+     ],
+     "die_rise_c": 0.439634,
+     "j": 0.10269,
+     "k_leak_w_per_c": 0.315522,
+     "note": "k_leak(55 C) x k_rise x P_over_idle x t (M10's 4.5 s window law)"
+    }
+   },
+   "w_over_idle": 3.66362
+  },
+  "sparse-parity": {
+   "arms": {
+    "v2.1": {
+     "awake_overlap_hart_cycles": 186156000000.0,
+     "hart0_busy_cycles": 190201000000.0,
+     "hart1_busy_cycles": 120260000000.0,
+     "kind": "spp",
+     "load": {
+      "awake_hart_cycles": 322053000000.0,
+      "bytes": [
+       {
+        "bytes": 853692000000.0,
+        "path": "scp_load",
+        "rho": 0.5625,
+        "tau": 0.4375,
+        "what": "A and B tiles"
+       },
+       {
+        "bytes": 47553600000.0,
+        "path": "scp_store",
+        "rho": 0.5625,
+        "tau": 0.4375,
+        "what": "staged rows"
+       },
+       {
+        "bytes": 31195100.0,
+        "path": "dram_load",
+        "rho": 0.5625,
+        "tau": 0.4375,
+        "what": "X copy-in"
+       },
+       {
+        "bytes": 8916290000.0,
+        "path": "l2_stream",
+        "rho": 0.5625,
+        "tau": 0.4375,
+        "what": "X reads"
+       }
+      ],
+      "card": "aifoundry3",
+      "die_start_c": 55.0,
+      "f_mhz": 600.0,
+      "instr": [
+       {
+        "class": "vec_int",
+        "hart_cycles": 23908852836,
+        "what": "epilogue (hart 0)"
+       },
+       {
+        "class": "vec_int",
+        "hart_cycles": 5206147643,
+        "what": "row-tile set-up (hart 0)"
+       },
+       {
+        "class": "vec_int",
+        "hart_cycles": 96506400000.0,
+        "what": "row generation beyond its stores (hart 1)"
+       }
+      ],
+      "seconds": 0.514741,
+      "tensor": [
+       {
+        "format": "int8",
+        "kind": "int8.pm1",
+        "ops": 416841768
+       }
+      ],
+      "work_unit": "solve (one launch)",
+      "work_units": 1
+     },
+     "loop_cycles_per_op": 319.078,
+     "overlap_cycles_per_op": 446.586,
+     "scp_load_cycles_per_op": 511.917,
+     "summary": {
+      "j_over_idle": 6.98567,
+      "j_over_idle_at_band_ends": [
+       6.86316,
+       7.35319
+      ],
+      "j_over_idle_band": [
+       5.71739,
+       11.3024
+      ],
+      "j_over_idle_band_at_point": [
+       5.82137,
+       10.7094
+      ],
+      "j_total": 20.0817,
+      "j_total_band": [
+       16.7356,
+       30.5306
+      ],
+      "w_over_idle": 13.5712
+     }
+    },
+    "v2c": {
+     "by_class": {
+      "atomic_local": {
+       "band": [
+        0.000944326,
+        0.00150504
+       ],
+       "count": 3317070.0,
+       "j": 0.00117386
+      },
+      "branch_not_taken": {
+       "band": [
+        0.00519892,
+        0.00637253
+       ],
+       "count": 869702000.0,
+       "j": 0.00565939
+      },
+      "branch_taken": {
+       "band": [
+        0.0368595,
+        0.0472265
+       ],
+       "count": 1817410000.0,
+       "j": 0.0434804
+      },
+      "float_int_xfer": {
+       "band": [
+        0.0111935,
+        0.0142484
+       ],
+       "count": 766853000.0,
+       "j": 0.0119341
+      },
+      "int_muldiv": {
+       "band": [
+        0.0169333,
+        0.0200887
+       ],
+       "count": 424144000.0,
+       "j": 0.0177925
+      },
+      "jump": {
+       "band": [
+        0.0107426,
+        0.013903
+       ],
+       "count": 563966000.0,
+       "j": 0.0123289
+      },
+      "load": {
+       "band": [
+        0.0590155,
+        0.0644399
+       ],
+       "count": 5551480000.0,
+       "j": 0.0628751
+      },
+      "mask_broadcast": {
+       "band": [
+        0.0138975,
+        0.0185612
+       ],
+       "count": 1540900000.0,
+       "j": 0.0154095
+      },
+      "scalar_int": {
+       "band": [
+        0.177551,
+        0.19629
+       ],
+       "count": 19062400000.0,
+       "j": 0.18311
+      },
+      "store": {
+       "band": [
+        0.0179689,
+        0.0201085
+       ],
+       "count": 1318710000.0,
+       "j": 0.018425
+      },
+      "sync": {
+       "band": [
+        2.52843e-07,
+        3.51927e-07
+       ],
+       "count": 64510.9,
+       "j": 2.90093e-07
+      },
+      "system": {
+       "band": [
+        4.80189e-05,
+        5.78906e-05
+       ],
+       "count": 6841860.0,
+       "j": 5.35376e-05
+      },
+      "vector_int": {
+       "band": [
+        0.141036,
+        0.541934
+       ],
+       "count": 10830300000.0,
+       "j": 0.21161
+      }
+     },
+     "counted_instr_j": [
+      0.583852,
+      0.491389,
+      0.944736
+     ],
+     "counted_per_hart_by_class": {
+      "hart0": {
+       "atomic_local": 1658540.0,
+       "branch_not_taken": 473223000.0,
+       "branch_taken": 1308380000.0,
+       "float_int_xfer": 766834000.0,
+       "int_muldiv": 424125000.0,
+       "jump": 488646000.0,
+       "load": 3850610000.0,
+       "mask_broadcast": 54753200.0,
+       "scalar_int": 14137900000.0,
+       "store": 921262000.0,
+       "store_past_l1": 0.0,
+       "sync": 64510.9,
+       "system": 5126140.0,
+       "tensor": 2177520000.0,
+       "vector_int": 1913970000.0
+      },
+      "hart1": {
+       "atomic_local": 1658540.0,
+       "branch_not_taken": 396479000.0,
+       "branch_taken": 509031000.0,
+       "float_int_xfer": 19063.6,
+       "int_muldiv": 19063.6,
+       "jump": 75320500.0,
+       "load": 1700870000.0,
+       "mask_broadcast": 1486140000.0,
+       "scalar_int": 4924540000.0,
+       "store": 397452000.0,
+       "store_past_l1": 1486410000.0,
+       "sync": 0.0,
+       "system": 1715730.0,
+       "tensor": 0.0,
+       "vector_int": 8916290000.0
+      }
+     },
+     "hart0_busy_cycles": 263261000000.0,
+     "hart1_busy_cycles": 81989400000.0,
+     "kind": "spp",
+     "load": {
+      "awake_hart_cycles": 322053000000.0,
+      "bytes": [
+       {
+        "bytes": 853692000000.0,
+        "path": "scp_load",
+        "rho": 0.5625,
+        "tau": 0.4375,
+        "what": "A and B tiles"
+       },
+       {
+        "bytes": 47553600000.0,
+        "path": "scp_store",
+        "rho": 0.5625,
+        "tau": 0.4375,
+        "what": "staged rows"
+       },
+       {
+        "bytes": 31195100.0,
+        "path": "dram_load",
+        "rho": 0.5625,
+        "tau": 0.4375,
+        "what": "X copy-in"
+       },
+       {
+        "bytes": 8916290000.0,
+        "path": "l2_stream",
+        "rho": 0.5625,
+        "tau": 0.4375,
+        "what": "X reads"
+       }
+      ],
+      "card": "aifoundry3",
+      "die_start_c": 55.0,
+      "f_mhz": 600.0,
+      "instr": [],
+      "seconds": 0.514741,
+      "tensor": [
+       {
+        "format": "int8",
+        "kind": "int8.pm1",
+        "ops": 416841768
+       }
+      ],
+      "work_unit": "solve (one launch)",
+      "work_units": 1
+     },
+     "priced_elsewhere": {
+      "store_past_l1": "the staged rows' scratchpad-store bytes (fswg.ps)",
+      "tensor": "the tensor term (M10's kernel term) and the scratchpad-load bytes"
+     },
+     "rows": {
+      "atomic_local": {
+       "band_pj": [
+        284.686,
+        453.726
+       ],
+       "pj": 353.885,
+       "rate_per_hart_cycle": 0.0109,
+       "row": "amoaddl.w"
+      },
+      "branch_not_taken": {
+       "band_pj": [
+        5.97781,
+        7.32726
+       ],
+       "pj": 6.50727,
+       "rate_per_hart_cycle": 0.374771,
+       "row": "bne_nottaken"
+      },
+      "branch_taken": {
+       "band_pj": [
+        20.2813,
+        25.9856
+       ],
+       "pj": 23.9243,
+       "rate_per_hart_cycle": 0.0579337,
+       "row": "beq_taken"
+      },
+      "float_int_xfer": {
+       "band_pj": [
+        14.5967,
+        18.5804
+       ],
+       "pj": 15.5625,
+       "rate_per_hart_cycle": 0.148492,
+       "row": "fmv.x.w"
+      },
+      "int_muldiv": {
+       "band_pj": [
+        39.9236,
+        47.3629
+       ],
+       "pj": 41.9492,
+       "rate_per_hart_cycle": 0.0454503,
+       "row": "mul"
+      },
+      "jump": {
+       "band_pj": [
+        19.0482,
+        24.6522
+       ],
+       "pj": 21.861,
+       "rate_per_hart_cycle": 0.05795,
+       "row": "jal"
+      },
+      "load": {
+       "band_pj": [
+        10.6306,
+        11.6077
+       ],
+       "pj": 11.3258,
+       "rate_per_hart_cycle": 0.372533,
+       "row": "lw"
+      },
+      "mask_broadcast": {
+       "band_pj": [
+        9.01911,
+        12.0457
+       ],
+       "pj": 10.0003,
+       "rate_per_hart_cycle": 0.373012,
+       "row": "fbci.pi"
+      },
+      "scalar_int": {
+       "band_pj": [
+        9.31417,
+        10.2972
+       ],
+       "pj": 9.60578,
+       "rate_per_hart_cycle": 0.372658,
+       "row": "add"
+      },
+      "store": {
+       "band_pj": [
+        13.6261,
+        15.2485
+       ],
+       "pj": 13.972,
+       "rate_per_hart_cycle": 0.373188,
+       "row": "sw"
+      },
+      "sync": {
+       "band_pj": [
+        3.91939,
+        5.45531
+       ],
+       "pj": 4.49681,
+       "rate_per_hart_cycle": 0.376029,
+       "row": "fence"
+      },
+      "system": {
+       "band_pj": [
+        7.01839,
+        8.46123
+       ],
+       "pj": 7.825,
+       "rate_per_hart_cycle": 0.1509,
+       "row": "csrr_fccnb"
+      },
+      "vector_int": {
+       "band_pj": [
+        13.0224,
+        50.0388
+       ],
+       "pj": 19.5388,
+       "rate_per_hart_cycle": 0.37,
+       "row": "frozen-v2.json instr_classes.vec_int at issue_rate 0.37"
+      }
+     },
+     "summary": {
+      "j_over_idle": 6.95453,
+      "j_over_idle_at_band_ends": [
+       6.83202,
+       7.32206
+      ],
+      "j_over_idle_band": [
+       6.04864,
+       8.94858
+      ],
+      "j_over_idle_band_at_point": [
+       6.15262,
+       8.35559
+      ],
+      "j_total": 20.0494,
+      "j_total_band": [
+       17.0735,
+       27.9564
+      ],
+      "w_over_idle": 13.5107
+     }
+    }
+   },
+   "config_args": "--mode tensor --shires 0xffffffff --per-shire 32 --variant m1 --cost fit --gen inc (variant b, energy.sh's ALL and CB)",
+   "counts": {
+    "S": 28,
+    "U_planner": 0.714643,
+    "counted_by_class": {
+     "atomic_local": 3317070.0,
+     "branch_not_taken": 869702000.0,
+     "branch_taken": 1817410000.0,
+     "float_int_xfer": 766853000.0,
+     "int_muldiv": 424144000.0,
+     "jump": 563966000.0,
+     "load": 5551480000.0,
+     "mask_broadcast": 1540900000.0,
+     "scalar_int": 19062400000.0,
+     "store": 1318710000.0,
+     "store_past_l1": 1486410000.0,
+     "sync": 64510.9,
+     "system": 6841860.0,
+     "tensor": 2177520000.0,
+     "vector_int": 10830300000.0
+    },
+    "counted_work_hart0": 26524100000.0,
+    "counted_work_hart1": 19895900000.0,
+    "counted_work_instructions_per_solve": 46420000000.0,
+    "hart0_busy_cycles": 190201000000.0,
+    "hart1_busy_cycles": 120260000000.0,
+    "ops": 416841768,
+    "output_tiles": 14887206,
+    "row_tiles": 1658537
+   },
+   "instance": {
+    "eta": 0.39,
+    "k": 4,
+    "m": 1792,
+    "n": 544,
+    "seed": 3
+   },
+   "j_over_idle": 7.34622,
+   "j_over_idle_band": [
+    6.02341,
+    11.8841
+   ],
+   "j_over_idle_band_at_point": [
+    6.12739,
+    11.2911
+   ],
+   "j_total": 20.4559,
+   "j_total_band": [
+    17.0478,
+    31.1669
+   ],
+   "per_unit": {
+    "j_over_idle": 7.34622,
+    "j_total": 20.4559,
+    "unit": "solve",
+    "units_a_launch": 1.0
+   },
+   "plan": {
+    "S": 28,
+    "candidates": 3608976376,
+    "dump_tiles": 14887206,
+    "est_s": 0.669164,
+    "guard_s": 0.784738,
+    "model_U": 0.714643,
+    "model_s": 0.514741,
+    "nbuf": 1,
+    "ops": 416841768,
+    "scp_layout_kb": 2104,
+    "stage": "scp",
+    "work_tiles": 1658537
+   },
+   "primary": {
+    "hart0_busy_cycles": 190201000000.0,
+    "hart1_busy_cycles": 120260000000.0,
+    "kind": "spp",
+    "load": {
+     "awake_hart_cycles": 322053000000.0,
+     "bytes": [
+      {
+       "bytes": 853692000000.0,
+       "path": "scp_load",
+       "rho": 0.5625,
+       "tau": 0.4375,
+       "what": "A and B tiles"
+      },
+      {
+       "bytes": 47553600000.0,
+       "path": "scp_store",
+       "rho": 0.5625,
+       "tau": 0.4375,
+       "what": "staged rows"
+      },
+      {
+       "bytes": 31195100.0,
+       "path": "dram_load",
+       "rho": 0.5625,
+       "tau": 0.4375,
+       "what": "X copy-in"
+      },
+      {
+       "bytes": 8916290000.0,
+       "path": "l2_stream",
+       "rho": 0.5625,
+       "tau": 0.4375,
+       "what": "X reads"
+      }
+     ],
+     "card": "aifoundry3",
+     "die_start_c": 55.0,
+     "f_mhz": 600.0,
+     "instr": [
+      {
+       "class": "vec_int",
+       "hart_cycles": 23908852836,
+       "what": "epilogue (hart 0)"
+      },
+      {
+       "class": "vec_int",
+       "hart_cycles": 5206147643,
+       "what": "row-tile set-up (hart 0)"
+      },
+      {
+       "class": "vec_int",
+       "hart_cycles": 96506400000.0,
+       "what": "row generation beyond its stores (hart 1)"
+      }
+     ],
+     "seconds": 0.514741,
+     "tensor": [
+      {
+       "format": "int8",
+       "kind": "int8.pm1",
+       "ops": 416841768
+      }
+     ],
+     "work_unit": "solve (one launch)",
+     "work_units": 1
+    }
+   },
+   "seconds": {
+    "band": [
+     0.463267,
+     0.669164
+    ],
+    "fast_how": "model_s x 0.90: the cycle model's held-out misses are 5.0% and 7.5% (workloads/sparseparity/README.md), and on E59 it never read long by more than 0.12% (L2)",
+    "point": 0.514741,
+    "point_how": "the host's --dry model_s (the fitted cycle model)",
+    "q166_band": null,
+    "slow_how": "est_s, the host's own x1.3 margin (covers E59's worst short reading, L1's -16.6%)"
+   },
+   "terms": {
+    "awake, not issuing": {
+     "band": [
+      0.529416,
+      1.00642
+     ],
+     "hart_cycles": 322053000000.0,
+     "j": 0.623768,
+     "note": "each running hart's cycles beyond its busy cycles (waits on the other hart), at the stalled-minion price; this term follows t_k"
+    },
+    "bytes: DRAM read": {
+     "band": [
+      0.00354566,
+      0.00446083
+     ],
+     "bytes": 31195100.0,
+     "j": 0.00402214,
+     "note": "X copied into each shire, once"
+    },
+    "bytes: DRAM write-back": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "the results only (kilobytes): not priced"
+    },
+    "bytes: L1": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "inside the scratchpad and L2 prices"
+    },
+    "bytes: L2": {
+     "band": [
+      0.0304427,
+      0.0390683
+     ],
+     "bytes": 8916290000.0,
+     "j": 0.0347313,
+     "note": "hart 1's reads of X (l2_stream)"
+    },
+    "bytes: scratchpad": {
+     "band": [
+      3.45517,
+      4.62321
+     ],
+     "j": 4.00241,
+     "parts": {
+      "scp_load (A and B tiles, 2 KB an op)": {
+       "band": [
+        3.11136,
+        4.17289
+       ],
+       "bytes": 853692000000.0,
+       "j": 3.62051,
+       "path": "scp_load",
+       "phi": 1.05,
+       "pj_per_byte": 4.241
+      },
+      "scp_store (staged rows, S KB a row tile)": {
+       "band": [
+        0.343811,
+        0.450327
+       ],
+       "bytes": 47553600000.0,
+       "j": 0.381903,
+       "path": "scp_store",
+       "phi": 1.05,
+       "pj_per_byte": 8.031
+      }
+     }
+    },
+    "instructions by class": {
+     "band": [
+      0.408972,
+      3.77157
+     ],
+     "by_activity": {
+      "epilogue (hart 0)": {
+       "band": [
+        0.0778375,
+        0.717823
+       ],
+       "hart_cycles": 23908852836,
+       "j": 0.172846
+      },
+      "row generation beyond its stores (hart 1)": {
+       "band": [
+        0.314185,
+        2.89744
+       ],
+       "hart_cycles": 96506400000.0,
+       "j": 0.697679
+      },
+      "row-tile set-up (hart 0)": {
+       "band": [
+        0.0169491,
+        0.156306
+       ],
+       "hart_cycles": 5206147643,
+       "j": 0.0376371
+      }
+     },
+     "j": 0.908161,
+     "note": "the vector-integer class (frozen-v2.json instr_classes.vec_int) at issue rate 0.37, for the cycle model's busy cycles: hart 0's epilogue and row-tile set-up, hart 1's generation beyond its stores"
+    },
+    "mesh": {
+     "band": [
+      0.0,
+      0.0
+     ],
+     "j": 0.0,
+     "note": "not priced (v2's sparse-parity load has no mesh row)"
+    },
+    "tensor ops": {
+     "band": [
+      1.69984,
+      1.84642
+     ],
+     "j": 1.77313,
+     "note": "M10's kernel term: the int8 zeros anchor plus M10's D for int8.pm1, per op",
+     "ops": 416841768
+    },
+    "the card at rest": {
+     "band": [
+      12.5742,
+      13.0889
+     ],
+     "j": 12.8316,
+     "law": "footing law (quadratic, inside its band)",
+     "note": "at the forecast seconds and 55 C; the total's band below carries the seconds' band and the 52-60 C die band",
+     "w": 24.9282
+    },
+    "the run's own leakage rise": {
+     "band": [
+      0.1392,
+      0.890652
+     ],
+     "die_rise_c": 1.7126,
+     "j": 0.278148,
+     "k_leak_w_per_c": 0.315522
+    }
+   },
+   "w_over_idle": 14.2717
+  }
+ },
+ "counters_arm_expectations": {
+  "copy-random": {
+   "dram_lines_read": 234881000.0,
+   "dram_lines_written": 234881000.0,
+   "label": "counted (simulator, 64 participants) and scaled; the firmware's work outside the kernel (about 1,560 instructions a hart) is not in it",
+   "retired_instructions_per_participant": 545244.0
+  },
+  "copy-zeros": {
+   "dram_lines_read": 234881000.0,
+   "dram_lines_written": 234881000.0,
+   "label": "counted (simulator, 64 participants) and scaled; the firmware's work outside the kernel (about 1,560 instructions a hart) is not in it",
+   "retired_instructions_per_participant": 545244.0
+  },
+  "sha256": {
+   "label": "counted (simulator, 64 participants) and scaled; the firmware's work outside the kernel (about 1,560 instructions a hart) is not in it",
+   "retired_instructions_per_participant": 117170000.0
+  },
+  "sort-shuffled": {
+   "label": "counted (simulator, 64 participants) and scaled; the firmware's work outside the kernel (about 1,560 instructions a hart) is not in it",
+   "retired_instructions_per_participant": 128518000.0
+  },
+  "sort-sorted": {
+   "label": "counted (simulator, 64 participants) and scaled; the firmware's work outside the kernel (about 1,560 instructions a hart) is not in it",
+   "retired_instructions_per_participant": 99107500.0
+  },
+  "sparse-parity": {
+   "label": "counted on three slices and scaled by least squares (spin loops left out, so the card's retired count reads higher by its spins)",
+   "work_instructions_hart0_per_minion": 25902400.0,
+   "work_instructions_hart1_per_minion": 19429600.0
+  }
+ },
+ "dated_change": {
+  "how": "ledger_estimate.py's own CARD entries given reps 1800 before estimate() runs; the counts per sort are the simulator's exact difference of two runs, scaled by arithmetic (the label 'scaled')",
+  "what": "the sort at 1800 sorts a launch (Q166 proposed 1,500)",
+  "when": "Thu 12 Nov 2026, reg-e189, before any E189 datum",
+  "why": "so the two-sided seconds band's fast end stays at 0.5 s or more (critic-q166's blind-day design 1(d); verify-progs fault 1)"
+ },
+ "die_start_band_c": [
+  52.0,
+  60.0
+ ],
+ "die_start_forecast_c": 55.0,
+ "experiment": "E189",
+ "f_mhz": 600,
+ "predictor": {
+  "interpreter": "named: python3 3.13.11 wrote the files; /usr/bin/python3 3.9.6 gives the same bytes (--check passes under both; floats rounded to 6 significant digits, so Python 3.12's sum() change cannot show)",
+  "ledger_estimate": "workloads/ledger/ledger_estimate.py at 46a16bd0, sha256 e3670e78da97107c067512450e57698680be4a1def1a0d01a232d4f360eef2f2",
+  "ledger_v2": "commit 06d60fa2; frozen-v2.json sha256 59ff911705137e5486efcb15c482919e3d257f800193bcc9f1d78ee7283753ce",
+  "pins": {
+   "docs/reports/data/2026-09-23-energy-manual/catalogue.json": "1186a9764838330369bc87f90f9ed4aed03d9d1373fd3185a8f107cf2eb1a7ae",
+   "docs/reports/data/2026-11-12-q166-counter-sparseparity/kernel/all-addr2line.txt.gz": "0e2ba1e96405112211f8111dae44e4e3dcb03f5ea5206afc710b075ced54ef76",
+   "docs/reports/data/2026-11-12-q166-counter-sparseparity/kernel/sparseparity.dis": "7339a082c44e74ecba72205ae6593ced3b9e764bec5633ed0b04c68efbd0d0a5",
+   "docs/reports/data/2026-11-12-q166-ledger-v2/frozen-v2.json": "59ff911705137e5486efcb15c482919e3d257f800193bcc9f1d78ee7283753ce",
+   "docs/reports/data/2026-11-12-q166-progs/SHA256SUMS": "96493d9f5e19915057ebe3112bdac568460499920e2beb0e7c1b792a9b8a54b4",
+   "docs/reports/data/2026-11-12-q166-progs/digests/expect-card-b2048-r800.txt": "d6ca60ee9a1d6b06e4ad330e64a776c69214258f9acfca8265c72d912586d7d9",
+   "docs/reports/data/2026-11-12-q166-progs/runs/p2-dry/new-dry.json": "4dc766230b27af63019e4a00ea09a682de3ed02903f6c193a6e3caca6426fafd",
+   "tools/counter/card_compare_sparseparity.py": "0de98e8e1b83badb8e18dec10273c40588f318f6173b9e766bc615470dbc51cf",
+   "tools/counter/count_kernel.py": "089f354c12912026e70e0ee0c718454d1b079292e456c830d9b590c66111bff2",
+   "tools/ledger/ledger_v2.py": "214cf7a49c1edae206ae34133bb6e2dc1f99a414e367b4617b2607f451cd2886",
+   "tools/ledger/loads_ledger_v2.py": "6e4a9ec6724b00d90d94cf53d0fa3f3207a92321669e666f02afdcddfd28f85e",
+   "workloads/ledger/ledger_estimate.py": "e3670e78da97107c067512450e57698680be4a1def1a0d01a232d4f360eef2f2"
+  },
+  "progs_files_checked": 165
+ },
+ "schema": "e189-forecast/1",
+ "what": "the blind day: four programs' (six configurations') joules a launch, forecast before the card; REGISTERED, frozen before any E189 datum"
+}

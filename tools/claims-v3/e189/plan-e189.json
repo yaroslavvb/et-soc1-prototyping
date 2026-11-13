@@ -1,0 +1,207 @@
+{
+ "card_minutes": {
+  "a_checks_look_dry_stoppath_smoke": 12,
+  "b_three_idle_anchors": 6,
+  "c_24_passes": 50,
+  "c_arithmetic": {
+   "24_passes_without_the_gate_min": 13.1154196,
+   "die_gate_and_sampler_retries_allowance_min": 36.884580400000004,
+   "how": "a pass = 8 s idle + the host process (set-up, K launches, its checks) + 10 s idle + the sampler's start and stop (3 s) + bookkeeping (5 s); the rest of the 50 minutes is the die gate's waits (heat carries over) and the sampler's retries",
+   "per_pass_without_the_die_gate_s": {
+    "copy-random": 33.825216,
+    "copy-zeros": 33.825216,
+    "sha256": 31.923312,
+    "sort-shuffled": 32.868481,
+    "sort-sorted": 32.5024,
+    "sparse-parity": 31.786669
+   }
+  },
+  "cap": 110,
+  "d_counters_arm": 6,
+  "e_margin": 20,
+  "rule": "about 95 card-minutes, cap 110: no pass starts after 108 card-minutes from the first card command; the session ends by 110",
+  "total": 94
+ },
+ "configs": {
+  "copy-random": {
+   "args": "--prog copy --bytes 1G --passes 14 --data random --width 32 --launches 8",
+   "burst_s_at_point": 5.325216,
+   "burst_s_at_slow_end": 6.1164000000000005,
+   "guard_model_s": 1.5032385536,
+   "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E189's own runner",
+   "k_guard_at_slow_end": 8,
+   "k_target_at_point": 9,
+   "last_start_s": 7.4967614464,
+   "launches_K": 8,
+   "process_end_s_at_slow_end": 8.6164,
+   "process_end_under_10_s": true,
+   "rule": "main.cpp: a launch starts only while 9.5 s - elapsed >= the guard's model + 0.5 s; K = the most that start at the band's slow end, capped at energy.sh's 6 s target at the point",
+   "setup_s": 1.5
+  },
+  "copy-zeros": {
+   "args": "--prog copy --bytes 1G --passes 14 --data zeros --width 32 --launches 8",
+   "burst_s_at_point": 5.325216,
+   "burst_s_at_slow_end": 6.1164000000000005,
+   "guard_model_s": 1.5032385536,
+   "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E189's own runner",
+   "k_guard_at_slow_end": 8,
+   "k_target_at_point": 9,
+   "last_start_s": 7.4967614464,
+   "launches_K": 8,
+   "process_end_s_at_slow_end": 8.6164,
+   "process_end_under_10_s": true,
+   "rule": "main.cpp: a launch starts only while 9.5 s - elapsed >= the guard's model + 0.5 s; K = the most that start at the band's slow end, capped at energy.sh's 6 s target at the point",
+   "setup_s": 1.5
+  },
+  "sha256": {
+   "args": "--prog sha256 --block 2048 --repeat 800 --expect docs/reports/data/2026-11-12-q166-progs/digests/expect-card-b2048-r800.txt --launches 9",
+   "burst_s_at_point": 5.223312,
+   "burst_s_at_slow_end": 8.592687,
+   "guard_model_s": 0.76803,
+   "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E189's own runner",
+   "k_guard_at_slow_end": 9,
+   "k_target_at_point": 10,
+   "last_start_s": 8.23197,
+   "launches_K": 9,
+   "process_end_s_at_slow_end": 9.292687,
+   "process_end_under_10_s": true,
+   "rule": "main.cpp: a launch starts only while 9.5 s - elapsed >= the guard's model + 0.5 s; K = the most that start at the band's slow end, capped at energy.sh's 6 s target at the point",
+   "setup_s": 0.4
+  },
+  "sort-shuffled": {
+   "args": "--prog sort --keys 512 --reps 1800 --order shuffled --launches 7",
+   "burst_s_at_point": 6.368481,
+   "burst_s_at_slow_end": 8.67174,
+   "guard_model_s": 1.142784,
+   "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E189's own runner",
+   "k_guard_at_slow_end": 7,
+   "k_target_at_point": 7,
+   "last_start_s": 7.857215999999999,
+   "launches_K": 7,
+   "process_end_s_at_slow_end": 9.17174,
+   "process_end_under_10_s": true,
+   "rule": "main.cpp: a launch starts only while 9.5 s - elapsed >= the guard's model + 0.5 s; K = the most that start at the band's slow end, capped at energy.sh's 6 s target at the point",
+   "setup_s": 0.3
+  },
+  "sort-sorted": {
+   "args": "--prog sort --keys 512 --reps 1800 --order sorted --launches 8",
+   "burst_s_at_point": 6.0024,
+   "burst_s_at_slow_end": 8.18904,
+   "guard_model_s": 1.142784,
+   "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E189's own runner",
+   "k_guard_at_slow_end": 8,
+   "k_target_at_point": 8,
+   "last_start_s": 7.857215999999999,
+   "launches_K": 8,
+   "process_end_s_at_slow_end": 8.68904,
+   "process_end_under_10_s": true,
+   "rule": "main.cpp: a launch starts only while 9.5 s - elapsed >= the guard's model + 0.5 s; K = the most that start at the band's slow end, capped at energy.sh's 6 s target at the point",
+   "setup_s": 0.3
+  },
+  "sparse-parity": {
+   "args": "--mode tensor --shires 0xffffffff --per-shire 32 --n 544 --k 4 --eta 0.39 --m 1792 --seed 3 --variant m1 --cost fit --gen inc --oracle sample --oracle-work 3e8 --budget 9",
+   "burst_s_at_point": 4.686669,
+   "burst_s_at_slow_end": 6.0764759999999995,
+   "first_s": 0.6,
+   "fit_at_slow_end": 9,
+   "guard_s": 0.784738,
+   "host": "workloads/sparseparity build (kernel .text 3e14be32...), through E189's own runner",
+   "last_start_s": 6.5,
+   "launches_K": 9,
+   "need_s": 2,
+   "reps_flag": "--reps 9",
+   "rule": "energy.sh's fit rule at the band's slow end: the host starts a launch only while floor(min(timeout, budget - elapsed - 0.5)) >= max(1, 1.25 guard + 0.5)",
+   "want_at_point": 12
+  }
+ },
+ "die_gate": {
+  "band_c": [
+   52,
+   60
+  ],
+  "rule": "a pass starts only when minshire[0] reads 60 C or less (waits up to 10 minutes, then the pass is skipped, no data); a die below 52 C does not block (the pass is scored given its own T0 and labelled 'T0 below the forecast band')"
+ },
+ "order": {
+  "rounds": [
+   [
+    "sparse-parity",
+    "copy-zeros",
+    "sort-shuffled",
+    "copy-random",
+    "sha256",
+    "sort-sorted"
+   ],
+   [
+    "copy-random",
+    "sparse-parity",
+    "sha256",
+    "sort-shuffled",
+    "copy-zeros",
+    "sort-sorted"
+   ],
+   [
+    "copy-zeros",
+    "sha256",
+    "sort-sorted",
+    "sparse-parity",
+    "copy-random",
+    "sort-shuffled"
+   ],
+   [
+    "copy-random",
+    "sort-shuffled",
+    "sha256",
+    "sparse-parity",
+    "sort-sorted",
+    "copy-zeros"
+   ]
+  ],
+  "rule": "four independent passes a configuration, one host process each; each round holds every configuration once, shuffled by random.Random(189); written out here, never re-drawn",
+  "sequence": [
+   "stop-path test",
+   "smoke (ramped)",
+   "idle anchor 1 (2 min)",
+   "pass 1: sparse-parity p1",
+   "pass 2: copy-zeros p1",
+   "pass 3: sort-shuffled p1",
+   "pass 4: copy-random p1",
+   "pass 5: sha256 p1",
+   "pass 6: sort-sorted p1",
+   "pass 7: copy-random p2",
+   "pass 8: sparse-parity p2",
+   "pass 9: sha256 p2",
+   "pass 10: sort-shuffled p2",
+   "pass 11: copy-zeros p2",
+   "pass 12: sort-sorted p2",
+   "idle anchor 2 (2 min)",
+   "pass 13: copy-zeros p3",
+   "pass 14: sha256 p3",
+   "pass 15: sort-sorted p3",
+   "pass 16: sparse-parity p3",
+   "pass 17: copy-random p3",
+   "pass 18: sort-shuffled p3",
+   "pass 19: copy-random p4",
+   "pass 20: sort-shuffled p4",
+   "pass 21: sha256 p4",
+   "pass 22: sparse-parity p4",
+   "pass 23: sort-sorted p4",
+   "pass 24: copy-zeros p4",
+   "idle anchor 3 (2 min)",
+   "the counters arm (6 launches; only if its desk test passed; REPORTED)",
+   "the closing reads (ettelem config: TDP and threshold), release"
+  ]
+ },
+ "schema": "e189-plan/1",
+ "seed": 189,
+ "stops": {
+  "board_w": 65.0,
+  "clock": "every sample must read 600 MHz: the first sample off it sets its pass aside; a second one (any pass) stops the session",
+  "minshire0_c": 70.0,
+  "rule": "a live sample at or above 65 W board or 70 C on minshire[0] ends the queue: the running process finishes (never killed), no further pass starts, the closing reads, release"
+ },
+ "window": {
+  "after_E183": "E183 first (its own window, G+1:15 / G+2:30); E189's first card command at least 40 minutes after E183's session end (or after that run's latest file write, if it ended without 'session end'); E189's last start G+3:00, last end G+5:00; the day's ONE post 'for 4 h'",
+  "alone": "from his go at G (a fresh approval in hand): last start G+1:30, last end G+3:30, inside one Pacific day and at least 30 minutes before the approval lapses; the post 'for 2 h'",
+  "one_session": "never two sessions of ours on aifoundry3 at once"
+ }
+}
