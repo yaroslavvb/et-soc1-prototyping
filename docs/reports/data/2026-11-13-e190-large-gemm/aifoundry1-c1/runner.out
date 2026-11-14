@@ -1,0 +1,50 @@
+2026-11-13 16:08:44 PST session start (T0 1794614924 = 16:08:44 PST; arm B, aifoundry1 card 1; its files in T1794614924-B)
+2026-11-13 16:08:44 PST the box and the build: the host, build/e190rgm (the kernel at the registration's pin, the host as built today), the reader at its pin, the tiles
+2026-11-13 16:08:44 PST config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 499} (read, nothing set); the card's identity: PCIe target /dev/et1_mgmt, physical device ID 1, minion_mv 499 below 510
+2026-11-13 16:08:45 PST sampler started (attempt 1, pid 1283062, every 100 ms)
+2026-11-13 16:08:45 PST stop-path test passed: board tripped in 0.3 s, its file touched, start refused; die tripped in 0.1 s, its file touched, start refused
+2026-11-13 16:08:45 PST the identity read: et-who {"other_off_card": 0, "other_on_card": 0, "ours_off_card": 0, "ours_on_card": 2, "ours_on_mgmt": 1} (counts by card), the sampler holds ['/dev/et1_mgmt']: card 1 only
+2026-11-13 16:08:45 PST smoke: 30 s at rest (the session's rest reading)
+2026-11-13 16:09:15 PST smoke rest: 299 samples, board 29.81 W, die 51 C; gates {'burst': 54.0, 'sus': 55.0}
+2026-11-13 16:09:19 PST smoke fp32: rc 0, 9 launches, check approx, cycles an op 1451.152 (0.77 of the point); the host's card: its own (stderr ['/dev/et1_ops'] [1], held ['/dev/et1_ops']); the board 16.26 W over the rest on 29 samples (at least 2 W): ok
+2026-11-13 16:09:23 PST smoke fp16: rc 0, 7 launches, check approx, cycles an op 1394.763 (0.99 of the point); the host's card: its own (stderr ['/dev/et1_ops'] [1], held ['/dev/et1_ops']); the board 16.58 W over the rest on 26 samples (at least 2 W): ok
+2026-11-13 16:09:25 PST smoke int8: rc 0, 7 launches, check exact, cycles an op 1363.326 (1.01 of the point); the host's card: its own (stderr ['/dev/et1_ops'] [1], held ['/dev/et1_ops']); the board 10.33 W over the rest on 25 samples (at least 2 W): ok
+2026-11-13 16:09:25 PST smoke gate passed: the runs start
+2026-11-13 16:09:26 PST run 01-P1-burst-fp32: 1 x 6 s fp32 (gate 54.0 C, die 54 C after 0 s)
+2026-11-13 16:09:47 PST run 01-P1-burst-fp32 done: 1 process(es), rc [0], checks ['approx']
+2026-11-13 16:09:47 PST run 02-P1-burst-fp16: 1 x 6 s fp16 (gate 54.0 C, die 54 C after 0 s)
+2026-11-13 16:10:09 PST run 02-P1-burst-fp16 done: 1 process(es), rc [0], checks ['approx']
+2026-11-13 16:10:09 PST run 03-P1-burst-int8: 1 x 6 s int8 (gate 54.0 C, die 54 C after 0 s)
+2026-11-13 16:10:30 PST run 03-P1-burst-int8 done: 1 process(es), rc [0], checks ['exact']
+2026-11-13 16:10:30 PST run 04-S1-sus-fp32: 12 x 6 s fp32 (gate 55.0 C, die 54 C after 0 s)
+2026-11-13 16:12:20 PST run 04-S1-sus-fp32 done: 12 process(es), rc [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], checks ['approx']
+2026-11-13 16:13:04 PST run 05-P2-burst-int8: 1 x 6 s int8 (gate 54.0 C, die 54 C after 44 s)
+2026-11-13 16:13:25 PST run 05-P2-burst-int8 done: 1 process(es), rc [0], checks ['exact']
+2026-11-13 16:13:26 PST run 06-P2-burst-fp32: 1 x 6 s fp32 (gate 54.0 C, die 54 C after 1 s)
+2026-11-13 16:13:48 PST run 06-P2-burst-fp32 done: 1 process(es), rc [0], checks ['approx']
+2026-11-13 16:13:56 PST run 07-P2-burst-fp16: 1 x 6 s fp16 (gate 54.0 C, die 54 C after 8 s)
+2026-11-13 16:14:17 PST run 07-P2-burst-fp16 done: 1 process(es), rc [0], checks ['approx']
+2026-11-13 16:14:17 PST run 08-S2-sus-fp16: 12 x 6 s fp16 (gate 55.0 C, die 55 C after 0 s)
+2026-11-13 16:16:03 PST run 08-S2-sus-fp16 done: 12 process(es), rc [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], checks ['approx']
+2026-11-13 16:16:44 PST run 09-P3-burst-fp16: 1 x 6 s fp16 (gate 54.0 C, die 54 C after 41 s)
+2026-11-13 16:17:05 PST run 09-P3-burst-fp16 done: 1 process(es), rc [0], checks ['approx']
+2026-11-13 16:17:10 PST run 10-P3-burst-int8: 1 x 6 s int8 (gate 54.0 C, die 54 C after 5 s)
+2026-11-13 16:17:31 PST run 10-P3-burst-int8 done: 1 process(es), rc [0], checks ['exact']
+2026-11-13 16:17:31 PST run 11-P3-burst-fp32: 1 x 6 s fp32 (gate 54.0 C, die 54 C after 0 s)
+2026-11-13 16:17:53 PST run 11-P3-burst-fp32 done: 1 process(es), rc [0], checks ['approx']
+2026-11-13 16:17:53 PST run 12-S3-sus-int8: 12 x 6 s int8 (gate 55.0 C, die 55 C after 0 s)
+2026-11-13 16:19:35 PST run 12-S3-sus-int8 done: 12 process(es), rc [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], checks ['exact']
+2026-11-13 16:19:58 PST run 13-P4-burst-fp32: 1 x 6 s fp32 (gate 54.0 C, die 54 C after 23 s)
+2026-11-13 16:20:20 PST run 13-P4-burst-fp32 done: 1 process(es), rc [0], checks ['approx']
+2026-11-13 16:20:28 PST run 14-P4-burst-fp16: 1 x 6 s fp16 (gate 54.0 C, die 54 C after 8 s)
+2026-11-13 16:20:50 PST run 14-P4-burst-fp16 done: 1 process(es), rc [0], checks ['approx']
+2026-11-13 16:20:58 PST run 15-P4-burst-int8: 1 x 6 s int8 (gate 54.0 C, die 54 C after 8 s)
+2026-11-13 16:21:20 PST run 15-P4-burst-int8 done: 1 process(es), rc [0], checks ['exact']
+2026-11-13 16:21:20 PST run 16-S4-sus-fp32: 12 x 6 s fp32 (gate 55.0 C, die 54 C after 0 s)
+2026-11-13 16:23:12 PST run 16-S4-sus-fp32 done: 12 process(es), rc [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], checks ['approx']
+2026-11-13 16:23:49 PST run 17-S5-sus-fp16: 12 x 6 s fp16 (gate 55.0 C, die 55 C after 36 s)
+2026-11-13 16:25:39 PST run 17-S5-sus-fp16 done: 12 process(es), rc [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], checks ['approx']
+2026-11-13 16:26:17 PST run 18-S6-sus-int8: 12 x 6 s int8 (gate 55.0 C, die 55 C after 38 s)
+2026-11-13 16:27:55 PST run 18-S6-sus-int8 done: 12 process(es), rc [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], checks ['exact']
+2026-11-13 16:27:55 PST config end: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 1, "power_state_name": "managed_power", "minion_mhz": 600, "minion_mv": 499}
+2026-11-13 16:27:55 PST session end (T0 1794614924)

@@ -1,0 +1,67 @@
+{
+ "name": "proc",
+ "argv": [
+  "~/claude/et-soc1-prototyping/build/e190rgm/host/sparsity_host",
+  "--test",
+  "fma",
+  "--type",
+  "fp16",
+  "--pattern",
+  "none",
+  "--values",
+  "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+  "--shires",
+  "0xffffffff",
+  "--per-shire",
+  "32",
+  "--seconds",
+  "2",
+  "--budget",
+  "3.5",
+  "--seed",
+  "1",
+  "--kernel",
+  "~/claude/et-soc1-prototyping/build/e190rgm/kernel/sparsity.elf",
+  "--stop-file",
+  "~/claude/et-soc1-prototyping/build/e190/T1794614878-A/STOP"
+ ],
+ "rc": 0,
+ "t0_ms": 1794614913805,
+ "t1_ms": 1794614917279,
+ "n_launch": 7,
+ "launches_ok": true,
+ "check": "approx",
+ "check_ok": true,
+ "check_cycles_per_op": 1695.958,
+ "stopped_by_file": false,
+ "launch_window_ms": [
+  1794614914384,
+  1794614916855
+ ],
+ "ident": {
+  "stderr_targets": [
+   "/dev/et0_ops"
+  ],
+  "stderr_ids": [
+   0
+  ],
+  "nodes_held": [
+   "/dev/et0_ops"
+  ],
+  "wrong": [],
+  "right": true,
+  "polls": 36,
+  "tripped": null
+ },
+ "cycles_point": 1721.929413056284,
+ "cycles_ratio": 0.984917260336365,
+ "identity_ok": true,
+ "board_rise": {
+  "ok": true,
+  "rise_w": 27.88,
+  "samples": 25,
+  "rest_w": 21.96,
+  "min_w": 2.0
+ },
+ "good": true
+}

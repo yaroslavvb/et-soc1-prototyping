@@ -1,0 +1,85 @@
+{
+ "i": 5,
+ "block": "P2",
+ "kind": "burst",
+ "format": "int8",
+ "rep": 2,
+ "cell": "int8.burst",
+ "arm": "B",
+ "run": "05-P2-burst-int8",
+ "gate": {
+  "c": 54.0,
+  "die": 54,
+  "waited_s": 44.0
+ },
+ "rest": {
+  "t0_ms": 1794615184586,
+  "t1_ms": 1794615194586
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "~/nekko/build/e190rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "int8",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL8x16x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "~/nekko/build/e190rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "~/nekko/build/e190/T1794614924-B/STOP"
+   ],
+   "rc": 0,
+   "t0_ms": 1794615194587,
+   "t1_ms": 1794615201671,
+   "n_launch": 16,
+   "launches_ok": true,
+   "check": "exact",
+   "check_ok": true,
+   "check_cycles_per_op": 1364.858,
+   "stopped_by_file": false,
+   "launch_window_ms": [
+    1794615194908,
+    1794615201390
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et1_ops"
+    ],
+    "stderr_ids": [
+     1
+    ],
+    "nodes_held": [
+     "/dev/et1_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 72,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1794615194587,
+  "t1_ms": 1794615201671
+ },
+ "tail_end_ms": 1794615205671,
+ "stop": null
+}

@@ -1,0 +1,85 @@
+{
+ "i": 14,
+ "block": "P4",
+ "kind": "burst",
+ "format": "fp16",
+ "rep": 4,
+ "cell": "fp16.burst",
+ "arm": "A",
+ "run": "14-P4-burst-fp16",
+ "gate": {
+  "c": 55.0,
+  "die": 55,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1794615507857,
+  "t1_ms": 1794615517857
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "~/claude/et-soc1-prototyping/build/e190rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp16",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL8x16x8:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "~/claude/et-soc1-prototyping/build/e190rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "~/claude/et-soc1-prototyping/build/e190/T1794614878-A/STOP"
+   ],
+   "rc": 0,
+   "t0_ms": 1794615517858,
+   "t1_ms": 1794615525489,
+   "n_launch": 17,
+   "launches_ok": true,
+   "check": "approx",
+   "check_ok": true,
+   "check_cycles_per_op": 1700.893,
+   "stopped_by_file": false,
+   "launch_window_ms": [
+    1794615518390,
+    1794615525099
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et0_ops"
+    ],
+    "stderr_ids": [
+     0
+    ],
+    "nodes_held": [
+     "/dev/et0_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 77,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1794615517858,
+  "t1_ms": 1794615525489
+ },
+ "tail_end_ms": 1794615529489,
+ "stop": null
+}
