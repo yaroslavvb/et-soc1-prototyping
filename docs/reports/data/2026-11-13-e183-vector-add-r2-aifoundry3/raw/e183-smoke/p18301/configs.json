@@ -1,0 +1,76 @@
+{
+ "host": "aifoundry3",
+ "hostname": "aifoundry3",
+ "pass": 18301,
+ "smoke": true,
+ "train": "T5",
+ "lead_s": 3.0,
+ "gap_s": 4.5,
+ "stop_w": 65.0,
+ "stop_c": 70.0,
+ "host_bin": "build/enercat-e183/host/enercat_host",
+ "cfgs": [
+  {
+   "cfg": "e183/fadd.ps/zeros/h2@smoke",
+   "kind": "fadd.ps/zeros",
+   "args": [
+    "--pattern",
+    "fadd.ps",
+    "--operands",
+    "zeros",
+    "--harts",
+    "2"
+   ],
+   "burst_s": 1.0
+  },
+  {
+   "cfg": "e183/fadd.ps/random/h2@smoke",
+   "kind": "fadd.ps/random",
+   "args": [
+    "--pattern",
+    "fadd.ps",
+    "--operands",
+    "random",
+    "--harts",
+    "2"
+   ],
+   "burst_s": 1.0
+  },
+  {
+   "cfg": "e183/fadd.ps/f_5/h2@smoke",
+   "kind": "fadd.ps/f_5",
+   "args": [
+    "--pattern",
+    "fadd.ps",
+    "--operands",
+    "file:tools/claims-v3/e180/images/f_5.bin",
+    "--harts",
+    "2"
+   ],
+   "burst_s": 1.0
+  },
+  {
+   "cfg": "e183/fadd.ps/f_4/h2@smoke",
+   "kind": "fadd.ps/f_4",
+   "args": [
+    "--pattern",
+    "fadd.ps",
+    "--operands",
+    "file:tools/claims-v3/e180/images/f_4.bin",
+    "--harts",
+    "2"
+   ],
+   "burst_s": 1.0
+  }
+ ],
+ "processes": [
+  {
+   "process": 0,
+   "orientation": "SFFS"
+  },
+  {
+   "process": 1,
+   "orientation": "FSSF"
+  }
+ ]
+}
