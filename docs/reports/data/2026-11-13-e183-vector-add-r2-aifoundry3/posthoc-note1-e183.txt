@@ -1,0 +1,116 @@
+# posthoc_note1_e183.py: E183's data README, dated note 1 (post hoc, deciding nothing)
+
+## 0. The cited lines: 35 of 35 anchors found on their lines
+  OK  README.md:61  the trains' half-widths as printed
+  OK  README.md:62  T2's printed half-width
+  OK  README.md:96  the anchors' item
+  OK  README.md:97  the anchors against RA5
+  OK  README.md:98  the anchors by block
+  OK  README.md:103  the carry-over's divisor as printed
+  OK  README.md:104  the carry-over figures, continued
+  OK  README.md:108  october-forecast-model's arms, grouped with note M2
+  OK  README.md:109  read through the day-2 check v2's gate
+  OK  README.md:161  the build logs' folder as printed
+  OK  tools/claims-v3/e183/E183.md:236  section 5.3: the carry-over reading
+  OK  tools/claims-v3/e183/E183.md:237  section 5.3: its divisor
+  OK  tools/claims-v3/e183/E183.md:371  section 11: the first-order carry-over
+  OK  tools/claims-v3/e183/E183.md.dated-note-M2.md:124  M2-4: when its scoring runs
+  OK  tools/claims-v3/e183/score_e183.py:151  the kit's carry-over figure
+  OK  tools/claims-v3/e183/reduce_e183_v2.py:65  the trains' samples: the dip rule
+  OK  tools/claims-v3/e183/reduce_e183_v2.py:130  the anchors: every sample, the catalogue's formula
+  OK  tools/claims-v3/e182/e182_stats.py:19  the 170 ms lag
+  OK  tools/claims-v3/e182/e182_stats.py:20  the dip threshold
+  OK  tools/claims-v3/e182/e182_stats.py:110  the dip rule
+  OK  workloads/enercat/analyze_catalogue.py:28  the leak law's constants
+  OK  workloads/enercat/analyze_catalogue.py:59  the busy window
+  OK  workloads/enercat/analyze_catalogue.py:62  the idle window before
+  OK  workloads/enercat/analyze_catalogue.py:63  the idle window after
+  OK  workloads/enercat/analyze_catalogue.py:74  the leak correction
+  OK  docs/reports/data/2026-10-31-e82-kinds-aifoundry1/README.md:304  E82 A2's dip definition
+  OK  tools/claims-v3/lib.sh:100  hold10: timeout 10
+  OK  tools/claims-v3/lib.sh:179  block_begin
+  OK  tools/claims-v3/lib.sh:183  block_begin: the card's lock file
+  OK  tools/claims-v3/lib.sh:184  block_begin: only when the lock file exists, not on a dry pass
+  OK  tools/claims-v3/lib.sh:185  block_begin: flock -n, else exit 3
+  OK  tools/claims-v3/lib.sh:189  block_begin: code.sha256 written at the block's start
+  OK  tools/claims-v3/e183/run_e183.py:290  the anchor bursts: timeout 10
+  OK  tools/claims-v3/e183/run_e183.py:312  the train processes: timeout 10
+  OK  tools/claims-v3/e183/session_e183_v3.sh:57  the config reads: card lock and timeout 10
+
+## 1. The anchors: fadd.ps random - fadd.ps zeros, each block's open and close (W)
+  the formula re-written here equals reduced-e183.json's readings within 1e-9: True
+  block train side : every sample (registered) | dips dropped (E82 A2) | dip samples in the busy windows: random, zeros
+  18310 T3 open :   6.373 |   8.375 | 4, 0
+  18310 T3 close:   8.930 |   8.570 | 0, 1
+  18311 T1 open :   8.438 |   8.438 | 0, 0
+  18311 T1 close:   8.717 |   8.717 | 0, 0
+  18312 T4 open :   9.124 |   8.570 | 0, 2
+  18312 T4 close:   8.684 |   8.684 | 0, 0
+  18313 T6 open :   8.550 |   8.550 | 0, 0
+  18313 T6 close:   8.648 |   8.648 | 0, 0
+  18314 T2 open :   8.521 |   8.521 | 0, 0
+  18314 T2 close:   8.812 |   8.812 | 0, 0
+  18315 T5 open :   8.509 |   8.509 | 0, 0
+  18315 T5 close:   8.614 |   8.614 | 0, 0
+  12 readings, every sample (registered): mean 8.493, sd 0.695, min 6.373, 95% [8.052, 8.935] (t multiplier 2.200985, the committed reading's hw/se); E180's RA5 mean 8.455 inside it; intervals overlap: AGREES
+  12 readings, dips dropped (post hoc): mean 8.584, sd 0.121, min 8.375, 95% [8.507, 8.661] (t multiplier 2.200985, the committed reading's hw/se); E180's RA5 mean 8.455 below it; intervals overlap: AGREES
+  the committed reading (scored-e183.json): mean 8.493 [8.052, 8.935], RA5 mean inside, overlap AGREES; RA5 [8.342, 8.568]
+  T3's opening random burst: each dip sample (E82 A2's rule) with the card's own readings
+    +0.824 s after the burst's start, 20 ms into its launch 3 of 8: board 24.70 W (2 samples before 43.16, 2 after 43.42); clock 600 MHz; minion die 521 mV; service processor's board average 31.25 / 34.33 / 35.65 W and minion rail average 11.799 / 14.916 / 16.039 W (2 before / here / 2 after); its launch's rate 4.6098e+11/s
+    +0.924 s after the burst's start, 120 ms into its launch 3 of 8: board 24.70 W (2 samples before 43.20, 2 after 43.52); clock 600 MHz; minion die 521 mV; service processor's board average 33.00 / 34.33 / 36.71 W and minion rail average 13.422 / 14.916 / 17.149 W (2 before / here / 2 after); its launch's rate 4.6098e+11/s
+    +2.825 s after the burst's start, 13 ms into its launch 8 of 8: board 35.30 W (2 samples before 43.57, 2 after 43.58); clock 600 MHz; minion die 522 mV; service processor's board average 41.71 / 42.19 / 42.40 W and minion rail average 21.982 / 22.419 / 22.594 W (2 before / here / 2 after); its launch's rate 4.5751e+11/s
+    +2.925 s after the burst's start, 113 ms into its launch 8 of 8: board 35.30 W (2 samples before 43.77, 2 after 43.53); clock 600 MHz; minion die 521 mV; service processor's board average 41.99 / 42.19 / 42.56 W and minion rail average 22.202 / 22.419 / 22.747 W (2 before / here / 2 after); its launch's rate 4.5751e+11/s
+    the burst's eight launch rates: 4.5955e+11 4.5948e+11 4.6098e+11 4.6024e+11 4.5787e+11 4.5928e+11 4.5936e+11 4.5751e+11; block 18310's other 30 anchor launches: 4.5557e+11-4.6187e+11/s
+
+## 2. The trains: the samples the dip rule drops in each block, and where they fall
+  18310 T3: 3489 samples (in time order: True), 34 dropped (reduced-e183.json: 34); inside a launch's reading window 0, in a launch's first 170 ms 13, in an anchor's busy window 5, elsewhere 16
+  18311 T1: 3488 samples (in time order: True), 26 dropped (reduced-e183.json: 26); inside a launch's reading window 0, in a launch's first 170 ms 12, in an anchor's busy window 0, elsewhere 14
+  18312 T4: 3490 samples (in time order: True), 42 dropped (reduced-e183.json: 42); inside a launch's reading window 0, in a launch's first 170 ms 26, in an anchor's busy window 2, elsewhere 14
+  18313 T6: 3488 samples (in time order: True), 23 dropped (reduced-e183.json: 23); inside a launch's reading window 0, in a launch's first 170 ms 7, in an anchor's busy window 0, elsewhere 16
+  18314 T2: 3491 samples (in time order: True), 30 dropped (reduced-e183.json: 30); inside a launch's reading window 0, in a launch's first 170 ms 12, in an anchor's busy window 0, elsewhere 18
+  18315 T5: 12083 samples (in time order: True), 123 dropped (reduced-e183.json: 123); inside a launch's reading window 0, in a launch's first 170 ms 78, in an anchor's busy window 0, elsewhere 45
+  all six: 278 dropped; inside a reading window 0
+
+## 3. README line 108: which versions were read through the gate
+  note M1's freeze lines name v3, v4; its reader's two outputs name v3, v4
+  note M2 registers v5, v6, v7; files in this directory (before this note) that name one of them: 0
+  note M2's M2-4 (line 124) places their scoring in a later records round: True
+
+## 4. The trains' half-widths (W): scored-e183.json against README lines 61-62
+  T3: 0.010679 -> 0.0107; README 0.0107: same
+  T1: 0.011739 -> 0.0117; README 0.0117: same
+  T4: 0.013771 -> 0.0138; README 0.0138: same
+  T6: 0.014915 -> 0.0149; README 0.0149: same
+  T2: 0.014948 -> 0.0149; README 0.0150: DIFFERS
+  T5: 0.005903 -> 0.0059; README 0.0059: same
+
+## 5. The build records' committed paths (SHA256SUMS, 105 entries)
+  logs/e183-build-attempts.txt
+  logs/e183-build-host.txt
+  logs/e183-build-logs/e183-build-host-start1.txt
+  an entry under e183-build-logs/2026-11-13/: False
+
+## 6. The carry-over reading: SFFS mean(L3 - L2) less FSSF's, and its divisor
+  T3: SFFS +0.01541 (n 78), FSSF +0.00673 (n 78), difference +0.00868, estimate +0.04866; over twice the estimate +0.089 (scored-e183.json +0.089, equal: True; README +0.089: same); over the estimate alone +0.178
+  T1: SFFS +0.01442 (n 78), FSSF +0.00863 (n 78), difference +0.00579, estimate +0.05741; over twice the estimate +0.050 (scored-e183.json +0.050, equal: True; README +0.050: same); over the estimate alone +0.101
+  T4: SFFS +0.00581 (n 78), FSSF +0.02179 (n 78), difference -0.01598, estimate +0.01760; over twice the estimate -0.454 (scored-e183.json -0.454, equal: True; README -0.454: same); over the estimate alone -0.908
+  T6: SFFS +0.01669 (n 78), FSSF +0.01169 (n 78), difference +0.00500, estimate +0.03508; over twice the estimate +0.071 (scored-e183.json +0.071, equal: True; README +0.071: same); over the estimate alone +0.143
+  T2: SFFS +0.00246 (n 78), FSSF +0.00186 (n 78), difference +0.00060, estimate +0.02605; over twice the estimate +0.011 (scored-e183.json +0.011, equal: True; README +0.011: same); over the estimate alone +0.023
+  T5: SFFS +0.00658 (n 303), FSSF +0.00740 (n 303), difference -0.00082, estimate +0.01116; over twice the estimate -0.037 (scored-e183.json -0.037, equal: True; README -0.037: same); over the estimate alone -0.073
+
+## 7. The card lock and timeout 10 in the code each block pinned (a desk read of code; the session's files print neither)
+  tools/claims-v3/lib.sh: sha256 033d07762548c4ab..., pinned at these bytes in 6 of 6 blocks' code.sha256
+  tools/claims-v3/e183/block_e183_v3.sh: sha256 6751990936ab8464..., pinned at these bytes in 6 of 6 blocks' code.sha256
+  tools/claims-v3/e183/run_e183.py: sha256 6ef506947698aa5d..., pinned at these bytes in 6 of 6 blocks' code.sha256
+  tools/claims-v3/e183/session_e183_v3.sh: sha256 d882dbb8d52b24ca..., pinned at these bytes in 6 of 6 blocks' code.sha256
+  OK  tools/claims-v3/lib.sh:100  hold10: timeout 10
+  OK  tools/claims-v3/lib.sh:179  block_begin
+  OK  tools/claims-v3/lib.sh:183  block_begin: the card's lock file
+  OK  tools/claims-v3/lib.sh:184  block_begin: only when the lock file exists, not on a dry pass
+  OK  tools/claims-v3/lib.sh:185  block_begin: flock -n, else exit 3
+  OK  tools/claims-v3/lib.sh:189  block_begin: code.sha256 written at the block's start
+  OK  tools/claims-v3/e183/run_e183.py:290  the anchor bursts: timeout 10
+  OK  tools/claims-v3/e183/run_e183.py:312  the train processes: timeout 10
+  OK  tools/claims-v3/e183/session_e183_v3.sh:57  the config reads: card lock and timeout 10
+
+SPDX-License-Identifier: Apache-2.0
