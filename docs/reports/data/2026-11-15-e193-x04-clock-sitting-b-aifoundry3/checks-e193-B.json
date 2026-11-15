@@ -1,0 +1,86 @@
+{
+ "checks": {
+  "1 spin2": {
+   "catalogue_scaled_w": 2.418,
+   "measured_w": 2.517624501887145,
+   "pass": true,
+   "verdict": "PASS"
+  },
+  "2 faddps_p1": {
+   "catalogue_scaled_w": 9.892875,
+   "measured_w": 8.785437342259282,
+   "pass": true,
+   "verdict": "PASS"
+  },
+  "2 fsgnjs_p1": {
+   "catalogue_scaled_w": 5.9306874999999994,
+   "measured_w": 4.625256990893593,
+   "pass": false,
+   "verdict": "FAIL"
+  },
+  "3 anchor drift": {
+   "boundaries": 8,
+   "flagged": [
+    "3/C",
+    "8/C"
+   ],
+   "verdict": "FLAGGED"
+  },
+  "4 device ok": {
+   "dropped_device": 0,
+   "runs": 135,
+   "trains": 0,
+   "trains_not_ok": 0,
+   "verdict": "REPORTED"
+  },
+  "5 clock": {
+   "dropped_clock": 0,
+   "verdict": "REPORTED"
+  },
+  "6 duty linear": {
+   "verdict": "NOT COMPUTED",
+   "why": "the duty line needs three of its four arms"
+  },
+  "7 nulls": {
+   "fadds_p16-faddps_p16": {
+    "ci95_w": [
+     -0.11892279737381857,
+     0.06012188845027262
+    ],
+    "w": -0.029400454461772974
+   },
+   "verdict": "REPORTED"
+  },
+  "8 dip rule": {
+   "by_pass": {
+    "0": 0,
+    "1": 0,
+    "2": 2,
+    "3": 0,
+    "4": 0,
+    "5": 0,
+    "6": 0,
+    "7": 3,
+    "8": 0
+   },
+   "by_window": {
+    "busy": 5,
+    "busy_readings": 4746,
+    "idle_after": 0,
+    "idle_after_readings": 3734,
+    "idle_before": 0,
+    "idle_before_readings": 3635
+   },
+   "dropped_readings": 5,
+   "measured_passes_dropped": 5,
+   "note": "readings more than 4 W below their window's median, counted in every window the registered reducer evaluates; a reading inside two windows counts in each; pass 0 (the warm-up) is counted in by_pass and left out of measured_passes_dropped",
+   "verdict": "REPORTED"
+  },
+  "9 stall2": {
+   "verdict": "NOT COMPUTED",
+   "why": "needs spin2 and tr_tk_stall2 (sitting A)"
+  }
+ },
+ "schema": "e193-checks/1",
+ "x04_json": "x04-e193-B.json"
+}
