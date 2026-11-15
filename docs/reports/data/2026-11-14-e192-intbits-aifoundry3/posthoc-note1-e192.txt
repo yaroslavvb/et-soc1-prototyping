@@ -1,0 +1,81 @@
+E192's data README, dated note 1: post hoc readings of committed files (decides nothing; scores nothing)
+interpreter: python 3.12.3
+
+0. anchors
+  SHA256SUMS: 27 of 27 entries OK; with README.md and SHA256SUMS the data commit's 29 files
+  README.md sha256 b913cf2f110099eeb30584567f023b9cf88bf72c0e68d9e8ed0dc185083c29b1
+  SHA256SUMS sha256 bd86728e33535d38b0968d620c358417d504f223ca488902c35e2a211d3ac47f
+  tools/claims-v3/e192/SHA256SUMS-e192-registration: 30 of 30 entries OK (list sha256 dd0a89635800818cd17c429be2d02c9710a434364f4196e6fd1a0f8e2dd74326)
+  tools/claims-v3/e192/SHA256SUMS-e192-kit: 35 of 35 entries OK (list sha256 c89e91b967ae19dd238c6863ddb485e21d6e978fabf2224d34edffd1df04f09f)
+  read as text, each pinned by one of the two lists: E192.md yes, KIT.md yes, session_e192.sh yes, collect_e192.py yes, s11_a3_session_e192.sh yes, dmcmd-audit-e192.txt yes, check_e192.py yes, main.cpp yes, intbits_args.h yes
+  docs/reports/data/2026-11-14-e189-blind-day-aifoundry3/session/session.log at its directory's SHA256SUMS: yes
+
+1. the rest, and step 7's config read
+  E189's session end: 2026-11-14 20:27:30 PST (docs/reports/data/2026-11-14-e189-blind-day-aifoundry3/session/session.log line 67)
+  the rest opens (+40 min): 2026-11-14 21:07:30 PST
+  step 7's config read, as README.md gives it: 20:58:58 PST (line 72; line 97: et-who clean at 20:58:58)
+    1888 s (31 min 28 s) after E189's session end
+    its commands by the kit's audit (tools/claims-v3/e192/logs/dmcmd-audit-e192.txt, lines 12, 13, 14, 15, 16, 41, 42, 43, 44, 45): 5, GET_ASIC_FREQUENCIES READ; GET_ASIC_VOLTAGE READ; GET_MODULE_POWER_STATE READ; GET_MODULE_STATIC_TDP_LEVEL READ; GET_MODULE_TEMPERATURE_THRESHOLDS READ
+  the session's first card command (the probe): T0 1794719257 = 2026-11-14 21:07:37 PST (session/first-card-command.txt; session/session.log line 4: 21:07:37 PST, the cap at 22:12:37 PST, 3900 s)
+    2407 s (40 min 07 s) after E189's session end; 519 s (8 min 39 s) after step 7's read
+  as run (the rest to the session's first card command): met, 7 s past the 40 minutes
+  if step 7's read counted as E192's first card command: 512 s (8 min 32 s) short of the 40 minutes
+  E192's session end: 2026-11-14 22:07:08 PST (session/session.log line 8); card time 3571 s by line 7 (3571 s by the clock), cap 3900 s
+  from step 7's read to the session's end: 4090 s (no registered rule counts this span)
+  the die at the session's first sample (2026-11-14 21:07:38.022 PST): 49 C; the session's lowest: 49 C
+  the next session of ours on the card rests until 2026-11-14 22:47:08 PST
+  tools/claims-v3/e192/E192.md:
+    line 16: a departure is a dated amendment
+    line 130: reads only: the session's chain
+    line 206: check 2: L1 data misses 0
+    line 207: check 3: I-cache misses per iteration equal
+    line 254: the cap from the session's first card command
+    line 256: the rest: E192's first card command
+    line 257: the rest: the next session after E192's end
+    line 265: section 11: a gate before the sampler
+    line 277: section 12: with the rest between
+    line 394: section 17: the rest rule read on the box
+  tools/claims-v3/e192/KIT.md:
+    line 67: the first card command, the per-sensor probe
+    line 68: the session's card time and its cap count from it
+    line 126: the audit covers k6's step 7 config read
+    line 164: step 7: the reads
+    line 166: step 9: the session, the rest rule
+    line 177: the rest rule: no E192 session starts within 40 minutes
+    line 189: the cap: from the first card command (the probe
+    line 291: section 7: the rest before E192's first card command
+  README.md:
+    line 72: the config read before the session
+    line 81: the rest row
+    line 97: step 7's reads
+    line 106: the rest line read at step 9
+    line 128: COPY EXACT
+    line 129: 26 files at the box's sha256
+    line 150: step 7's read the only other management command
+
+2. the launch output
+  box-manifest.txt: 26 box files; 25 here as files at the box's sha256 (the telemetry through its gzip); 0 here but different
+  not a file here: build/e192/launch-T1794719257.out (box-manifest.txt line 21), sha256 8a53b9241e3e16ebf7be4a3cb6ffb11317740befe37e6deb2b5729968664c2f1; the same sha256 in the box's manifest: build/e192/T1794719257/session.log (line 19); here: session/session.log (1098 bytes, 8 lines)
+    session_e192.sh say() tees each line to the log and stdout: line 53
+    rb/s11_a3_session_e192.sh: stdout and stderr to build/e192/launch-T<T0>.out: line [37, 39]
+    collect_e192.py assemble: the session directory: line 111
+    collect_e192.py assemble: the build record: line 137
+    collect_e192.py assemble: box-manifest.txt: line [146]
+
+3. the sizes behind registered checks 2 and 3 (post hoc; the verdicts are the kit's checker's)
+  run/runs.jsonl: 3240 launches in passes 0-8 (324 runs), and the smoke's 15; measured passes 1-8 without the burn-ins: 2720 launches
+  L1 data misses (check 2: 0 on every run): launches reading 0: 0 of 3240; runs whose launches all read 0: 0 of 324
+    a launch: 8096 to 8585 (mean 8314.79568; 64.9593412 a neighbourhood of 128); the 32 arms' means: 8281.4 to 8329.65556 (passes 0-8), 8282.4875 to 8333.225 (measured passes)
+    per iteration (summed misses over summed iterations, passes 0-8): 2.26345974e-05
+  iterations a launch, summed over the 1,024 participants: 367348381 to 367349284; the window of every launch (cycles): 240000000
+  instruction-cache misses (check 3: per iteration equal across arms), measured passes without the burn-ins:
+    the arms' means a launch: 4612.725 to 4621.1625 in 30 arms; xor.a.f2 4480.6375, xor.z 4480.575
+    single launches: 4484 to 4638 in those 30 arms (22 of 2560 below 4,600); 4480 to 4485 in xor.a.f2 and xor.z
+    36.0205969 a neighbourhood a launch; per iteration, all those launches: 1.25511081e-05
+    check 3's quantity (each arm's mean over its runs of misses / iterations): 1.21970656e-05 (xor.z) to 1.25797617e-05 (add.cr.l0); spread 3.82696018e-07, 0.0313760726 of the lowest
+    main.cpp: the counters are neighbourhood sums, each neighbourhood counted once: line 399
+    main.cpp: iters summed over the participants: line 392
+    intbits_args.h: icm before and after the loop: line 49
+    intbits_args.h: l1m before and after the loop: line 50
+    check_e192.py: check 3, no threshold registered: line 10
+    check_e192.py: check 3, EQUAL means identical: line 11
