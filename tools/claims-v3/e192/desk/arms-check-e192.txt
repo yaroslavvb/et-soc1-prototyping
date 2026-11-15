@@ -1,0 +1,51 @@
+# E192 desk check of code (reg-e192, Q176), Fri 13 Nov 2026 PST, on aifoundry2: the built host's arm table (desk/arm-table-e192.jsonl) against request.md, arms.txt, the reducer's controls and an independent derivation
+# Nothing here is measured and nothing is a forecast. Paths are relative to the lane's scratch folder (work/: its copy of
+# proposal/src and its build; scripts/: the desk scripts, committed here as desk/*.py). Python: /usr/bin/python3 3.12.3, -I -B.
+
+# command: /usr/bin/python3 -I -B desk/compare_arms_e192.py proposal/request.md desk/arm-table-e192.jsonl proposal/src/arms.txt proposal/src/reduce_intbits.py
+
+request.md table rows parsed: 32
+host --list --json arms: 32
+OK   the same 32 arms in the same order (request.md table vs host list)
+OK   nop          nop nop  A  0 B  0 R  0 C  0 enc 0
+OK   add.same     same add  A  0 B  0 R  0 C  0 enc 0
+OK   add.z        pair add  A  0 B  0 R  0 C  0 enc 6
+OK   xor.z        pair xor  A  0 B  0 R  0 C  0 enc 6
+OK   and.z        pair and  A  0 B  0 R  0 C  0 enc 6
+OK   add.a.f0     pair add  A 16 B  0 R 16 C  0 enc 6
+OK   add.a.f1     pair add  A 16 B  0 R 16 C  0 enc 6
+OK   add.a.f2     pair add  A 16 B  0 R 16 C  0 enc 6
+OK   add.a.f3     pair add  A 16 B  0 R 16 C  0 enc 6
+OK   add.a.f2.k4  pair add  A  4 B  0 R  4 C  0 enc 6
+OK   add.a.f2.k8  pair add  A  8 B  0 R  8 C  0 enc 6
+OK   add.a.f12    pair add  A 32 B  0 R 32 C  0 enc 6
+OK   add.a.all    pair add  A 64 B  0 R 64 C  0 enc 6
+OK   add.b.f0     pair add  A  0 B 16 R 16 C  0 enc 6
+OK   add.b.f2     pair add  A  0 B 16 R 16 C  0 enc 6
+OK   add.s.f0     pair add  A 16 B 16 R  0 C  0 enc 6
+OK   add.s.f2     pair add  A 16 B 16 R  0 C  0 enc 6
+OK   xor.a.f2     pair xor  A 16 B  0 R 16 C  0 enc 6
+OK   and.a.f1     pair and  A 16 B  0 R  0 C  0 enc 6
+OK   and.a.f2     pair and  A 16 B  0 R  0 C  0 enc 6
+OK   and.a.f3     pair and  A 16 B  0 R  0 C  0 enc 6
+OK   add.cr.l0    pair add  A  1 B  1 R  0 C  0 enc 6
+OK   add.cr.l8    pair add  A  9 B  1 R  0 C  8 enc 6
+OK   add.cr.l16   pair add  A 17 B  1 R  0 C 16 enc 6
+OK   add.cr.l24   pair add  A 25 B  1 R  0 C 24 enc 6
+OK   add.cr.l31   pair add  A 32 B  1 R  0 C 31 enc 6
+OK   add.crb.l0   pair add  A  0 B  1 R  1 C  0 enc 6
+OK   add.crb.l8   pair add  A  0 B  1 R  9 C  8 enc 6
+OK   add.crb.l16  pair add  A  0 B  1 R 17 C 16 enc 6
+OK   add.crb.l24  pair add  A  0 B  1 R 25 C 24 enc 6
+OK   add.crb.l31  pair add  A  0 B  1 R 32 C 31 enc 6
+OK   add.ripple   pair add  A  0 B  1 R 64 C 63 enc 6
+cells compared: 224 (7 a row: form, op, port A, port B, result, carry, enc)
+OK   arms.txt anchor is add.a.f2 (['add.a.f2'])
+OK   arms.txt lists the 32 arms of the table (32)
+OK   the reducer control_of() equals request.md control column for all 32 arms
+OK   this mt19937_64 gives the C++ standard's 10000th output for the default seed 5489 (9981545732273789042)
+OK   every arm's four source values re-derived independently (mt19937_64 seed 1; section 2): 32 of 32 equal
+background (seed 1): X = 0x2245bd5fbb686f68, Y = 0x00aa020000109006 (Y = second draw & ~X), popcount X 35, Y 10
+OK   design claims checked on all 32 arms: r0/r1 and the four counts recomputed from the values; outside the carry arms the two sources' ones are disjoint in both instructions (so add = xor and the and is 0); carry arms move only bits 16-47; cr arms hold the result, crb arms hold port A
+OK   add.a.f2.k4 flips bits 32-35, .k8 bits 32-39, add.a.f12 bits 16-47 (section 2)
+RESULT: ALL HOLD (0 failing checks)

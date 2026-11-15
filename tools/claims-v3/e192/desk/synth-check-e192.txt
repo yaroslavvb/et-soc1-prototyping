@@ -1,0 +1,477 @@
+# E192 desk check of code (reg-e192, Q176), Fri 13 Nov 2026 PST, on aifoundry2: the registered reducer (proposal/src/reduce_intbits.py, unchanged) on three synthetic sessions with injected ARBITRARY TEST VALUES (scripts/s13_synth.sh)
+# Nothing here is measured and nothing is a forecast. Paths are relative to the lane's scratch folder (work/: its copy of
+# proposal/src and its build; scripts/: the desk scripts, committed here as desk/*.py). Python: /usr/bin/python3 3.12.3, -I -B.
+
+2026-11-13 16:39:02 PST
+interpreter: Python 3.12.3 (/usr/bin/python3); numpy 1.26.4
+reducer: proposal/src/reduce_intbits.py sha256 715fddaa36c1ca81889b20f39a649254479cb1db68d797c8a9876e0c0677d0b7
+generator: synth_session_e192.py sha256 679d780d5792ea17770b013b79318706c9b282e3d9028facf75830d21ff945c9
+comparator: synth_compare_e192.py sha256 452ec57c55eae2bb1d629ba3b7af372c28d1b5db7dc9c936c743af6d1da5fd7b
+
+================ synthetic session: exact (generator args: --noise 0 --trise 0) ================
+synthetic session written: 3255 runs lines, 327 segments, telemetry 3452 s at 10 Hz, pvt True
+the reducer (unchanged; python3 -I -B reduce_intbits.py <dir> --out <dir>/intbits.json): rc 0; stdout 57 lines; stderr 0 lines
+-- its own printout:
+add.a.all         6.357 pJ over idle   vs add.z          1.792 +- 0.000   pJ  dips 4
+add.a.f0          5.013 pJ over idle   vs add.z          0.448 +- 0.000   pJ  dips 4
+add.a.f1          5.013 pJ over idle   vs add.z          0.448 +- 0.000   pJ  dips 7
+add.a.f12         5.461 pJ over idle   vs add.z          0.896 +- 0.000   pJ  dips 6
+add.a.f2          5.013 pJ over idle   vs add.z          0.448 +- 0.000   pJ  dips 5
+add.a.f2.k4       4.677 pJ over idle   vs add.z          0.112 +- 0.000   pJ  dips 6
+add.a.f2.k8       4.789 pJ over idle   vs add.z          0.224 +- 0.000   pJ  dips 6
+add.a.f3          5.013 pJ over idle   vs add.z          0.448 +- 0.000   pJ  dips 3
+add.b.f0          5.045 pJ over idle   vs add.z          0.480 +- 0.000   pJ  dips 6
+add.b.f2          5.045 pJ over idle   vs add.z          0.480 +- 0.000   pJ  dips 5
+add.cr.l0         4.589 pJ over idle   vs add.z          0.024 +- 0.000   pJ  dips 3
+add.cr.l16        4.877 pJ over idle   vs add.cr.l0      0.288 +- 0.000   pJ  dips 5
+add.cr.l24        5.021 pJ over idle   vs add.cr.l0      0.432 +- 0.000   pJ  dips 4
+add.cr.l31        5.147 pJ over idle   vs add.cr.l0      0.558 +- 0.000   pJ  dips 4
+add.cr.l8         4.733 pJ over idle   vs add.cr.l0      0.144 +- 0.000   pJ  dips 5
+add.crb.l0        4.595 pJ over idle   vs add.z          0.030 +- 0.000   pJ  dips 5
+add.crb.l16       4.979 pJ over idle   vs add.crb.l0     0.384 +- 0.000   pJ  dips 4
+add.crb.l24       5.171 pJ over idle   vs add.crb.l0     0.576 +- 0.000   pJ  dips 4
+add.crb.l31       5.339 pJ over idle   vs add.crb.l0     0.744 +- 0.000   pJ  dips 7
+add.crb.l8        4.787 pJ over idle   vs add.crb.l0     0.192 +- 0.000   pJ  dips 5
+add.ripple        6.107 pJ over idle   vs add.z          1.542 +- 0.000   pJ  dips 4
+add.s.f0          4.949 pJ over idle   vs add.z          0.384 +- 0.000   pJ  dips 5
+add.s.f2          4.949 pJ over idle   vs add.z          0.384 +- 0.000   pJ  dips 2
+add.same          4.459 pJ over idle   vs nop            0.504 +- 0.000   pJ  dips 3
+add.z             4.565 pJ over idle   vs add.same       0.106 +- 0.000   pJ  dips 4
+and.a.f1          4.711 pJ over idle   vs and.z          0.176 +- 0.000   pJ  dips 5
+and.a.f2          4.711 pJ over idle   vs and.z          0.176 +- 0.000   pJ  dips 6
+and.a.f3          4.711 pJ over idle   vs and.z          0.176 +- 0.000   pJ  dips 6
+and.z             4.535 pJ over idle   vs add.z         -0.030 +- 0.000   pJ  dips 5
+nop               3.955 pJ over idle   vs -                  - +- -       pJ  dips 7
+xor.a.f2          4.991 pJ over idle   vs xor.z          0.448 +- 0.000   pJ  dips 4
+xor.z             4.543 pJ over idle   vs add.z         -0.022 +- 0.000   pJ  dips 6
+hamming_f2_slope_fJ                         28.000 +- 0.000
+hamming_f2_quad_fJ                           0.000 +- 0.000
+add_f0_fJ_per_bit                           28.000 +- 0.000
+add_f1_fJ_per_bit                           28.000 +- 0.000
+add_f2_fJ_per_bit                           28.000 +- 0.000
+add_f3_fJ_per_bit                           28.000 +- 0.000
+add_f12_fJ_per_bit                          28.000 +- 0.000
+additivity_all_minus_fields_pJ               0.000 +- 0.000
+f12_minus_f1_f2_pJ                           0.000 +- 0.000
+and_f1_fJ_per_bit                           11.000 +- 0.000
+and_f2_fJ_per_bit                           11.000 +- 0.000
+and_f3_fJ_per_bit                           11.000 +- 0.000
+and12_fJ_per_bit                            11.000 +- 0.000
+d12_a12_minus_and12_fJ_per_bit              17.000 +- 0.000
+add_f2_minus_f3_fJ_per_bit                   0.000 +- 0.000
+and_f2_minus_f3_fJ_per_bit                   0.000 +- 0.000
+S_cr_fJ_per_position                        18.000 +- 0.000
+S_crb_fJ_per_position                       24.000 +- 0.000
+S_cr_quad_fJ                                 0.000 +- 0.000
+S_crb_quad_fJ                               -0.000 +- 0.000
+C1_carry_fJ_per_position                     7.000 +- 0.000
+C2_fJ_per_bit                                0.000 +- 0.000
+C3_fJ_per_bit                               11.000 +- 0.000
+ripple_minus_add_z_pJ                        1.542 +- 0.000
+beta W/C {"board": 0.0, "rail": 0.0, "sum_dT2": 0.0}
+-- set beside the injected values:
+synthetic session: pvt codes True; passes [['synthbox', 0], ['synthbox', 1], ['synthbox', 2], ['synthbox', 3], ['synthbox', 4], ['synthbox', 5], ['synthbox', 6], ['synthbox', 7], ['synthbox', 8]] (warm-up ['synthbox', 0])
+runs reduced: 324 (324 ok); roles ['anchor_first', 'anchor_last', 'arm', 'burnin']
+per-run fields the registered sanity checks read (used passes): rate spread across arm runs 0.0000%; retired/body 1.011719-1.011719 (259/256 = 1.011719); l1d_miss total 0; icache_miss per run [1280]; mhz [600.0]; V_rail 0.5220-0.5220 V; board dips 173; off-protocol 0
+beta (W per C), fitted: board 0.0000, rail 0.0000; injected slope 0.290 (rail x 0.79)
+
+arm            inj pJ |    board pJ/idle        rail/0.79 | control        inj d  contrast (corr)
+add.a.all      6.4050 |   6.3567 +- 0.0000   5.9722 +- 0.0022 | add.z         1.7920 1.7920 +- 0.0000
+add.a.f0       5.0610 |   5.0127 +- 0.0000   4.6278 +- 0.0028 | add.z         0.4480 0.4480 +- 0.0000
+add.a.f1       5.0610 |   5.0127 +- 0.0000   4.6272 +- 0.0024 | add.z         0.4480 0.4480 +- 0.0000
+add.a.f12      5.5090 |   5.4607 +- 0.0000   5.0789 +- 0.0027 | add.z         0.8960 0.8960 +- 0.0000
+add.a.f2       5.0610 |   5.0127 +- 0.0000   4.6269 +- 0.0026 | add.z         0.4480 0.4480 +- 0.0000
+add.a.f2.k4    4.7250 |   4.6767 +- 0.0000   4.2958 +- 0.0028 | add.z         0.1120 0.1120 +- 0.0000
+add.a.f2.k8    4.8370 |   4.7887 +- 0.0000   4.4017 +- 0.0048 | add.z         0.2240 0.2240 +- 0.0000
+add.a.f3       5.0610 |   5.0127 +- 0.0000   4.6274 +- 0.0051 | add.z         0.4480 0.4480 +- 0.0000
+add.b.f0       5.0930 |   5.0447 +- 0.0000   4.6603 +- 0.0025 | add.z         0.4800 0.4800 +- 0.0000
+add.b.f2       5.0930 |   5.0447 +- 0.0000   4.6582 +- 0.0032 | add.z         0.4800 0.4800 +- 0.0000
+add.cr.l0      4.6370 |   4.5887 +- 0.0000   4.2082 +- 0.0046 | add.z         0.0240 0.0240 +- 0.0000
+add.cr.l16     4.9250 |   4.8767 +- 0.0000   4.4956 +- 0.0027 | add.cr.l0     0.2880 0.2880 +- 0.0000
+add.cr.l24     5.0690 |   5.0207 +- 0.0000   4.6375 +- 0.0045 | add.cr.l0     0.4320 0.4320 +- 0.0000
+add.cr.l31     5.1950 |   5.1467 +- 0.0000   4.7609 +- 0.0036 | add.cr.l0     0.5580 0.5580 +- 0.0000
+add.cr.l8      4.7810 |   4.7327 +- 0.0000   4.3480 +- 0.0038 | add.cr.l0     0.1440 0.1440 +- 0.0000
+add.crb.l0     4.6430 |   4.5947 +- 0.0000   4.2107 +- 0.0023 | add.z         0.0300 0.0300 +- 0.0000
+add.crb.l16    5.0270 |   4.9787 +- 0.0000   4.5990 +- 0.0020 | add.crb.l0    0.3840 0.3840 +- 0.0000
+add.crb.l24    5.2190 |   5.1707 +- 0.0000   4.7891 +- 0.0037 | add.crb.l0    0.5760 0.5760 +- 0.0000
+add.crb.l31    5.3870 |   5.3387 +- 0.0000   4.9560 +- 0.0030 | add.crb.l0    0.7440 0.7440 +- 0.0000
+add.crb.l8     4.8350 |   4.7867 +- 0.0000   4.4037 +- 0.0036 | add.crb.l0    0.1920 0.1920 +- 0.0000
+add.ripple     6.1550 |   6.1067 +- 0.0000   5.7207 +- 0.0030 | add.z         1.5420 1.5420 +- 0.0000
+add.s.f0       4.9970 |   4.9487 +- 0.0000   4.5618 +- 0.0034 | add.z         0.3840 0.3840 +- 0.0000
+add.s.f2       4.9970 |   4.9487 +- 0.0000   4.5659 +- 0.0037 | add.z         0.3840 0.3840 +- 0.0000
+add.same       4.5070 |   4.4587 +- 0.0000   4.0728 +- 0.0042 | nop           0.5040 0.5040 +- 0.0000
+add.z          4.6130 |   4.5647 +- 0.0000   4.1783 +- 0.0036 | add.same      0.1060 0.1060 +- 0.0000
+and.a.f1       4.7590 |   4.7107 +- 0.0000   4.3261 +- 0.0032 | and.z         0.1760 0.1760 +- 0.0000
+and.a.f2       4.7590 |   4.7107 +- 0.0000   4.3263 +- 0.0037 | and.z         0.1760 0.1760 +- 0.0000
+and.a.f3       4.7590 |   4.7107 +- 0.0000   4.3215 +- 0.0027 | and.z         0.1760 0.1760 +- 0.0000
+and.z          4.5830 |   4.5347 +- 0.0000   4.1476 +- 0.0042 | add.z        -0.0300 -0.0300 +- 0.0000
+nop            4.0030 |   3.9547 +- 0.0000   3.5696 +- 0.0037 | -                  -                -
+xor.a.f2       5.0390 |   4.9907 +- 0.0000   4.6037 +- 0.0035 | xor.z         0.4480 0.4480 +- 0.0000
+xor.z          4.5910 |   4.5427 +- 0.0000   4.1540 +- 0.0028 | add.z        -0.0220 -0.0220 +- 0.0000
+
+ladders, board (registered names; corrected to the control chain's temperature, the primary):
+  C1_carry_fJ_per_position              injected    7.0000  reduced    7.0000 +-  0.0000  diff  -0.0000 (-3.0 SE)  ok  [measured]
+  C2_fJ_per_bit                         injected    0.0000  reduced    0.0000 +-  0.0000  diff  +0.0000 (+0.5 SE)  ok  [bound |x| < 8.136e-06]
+  C3_fJ_per_bit                         injected   11.0000  reduced   11.0000 +-  0.0000  diff  -0.0000 (-4.0 SE)  ok  [measured]
+  S_cr_fJ_per_position                  injected   18.0000  reduced   18.0000 +-  0.0000  diff  -0.0000 (-5.4 SE)  ok  [measured]
+  S_cr_quad_fJ                          injected    0.0000  reduced    0.0000 +-  0.0000  diff  +0.0000 (+0.8 SE)  ok  [bound |x| < 6.118e-07]
+  S_crb_fJ_per_position                 injected   24.0000  reduced   24.0000 +-  0.0000  diff  -0.0000 (-4.4 SE)  ok  [measured]
+  S_crb_quad_fJ                         injected    0.0000  reduced   -0.0000 +-  0.0000  diff  -0.0000 (-0.6 SE)  ok  [bound |x| < 5.052e-07]
+  add_f0_fJ_per_bit                     injected   28.0000  reduced   28.0000 +-  0.0000  diff  -0.0000 (-56.7 SE)  ok  [measured]
+  add_f12_fJ_per_bit                    injected   28.0000  reduced   28.0000 +-  0.0000  diff  -0.0000 (-6.5 SE)  ok  [measured]
+  add_f1_fJ_per_bit                     injected   28.0000  reduced   28.0000 +-  0.0000  diff  -0.0000 (-3.4 SE)  ok  [measured]
+  add_f2_fJ_per_bit                     injected   28.0000  reduced   28.0000 +-  0.0000  diff  -0.0000 (-3.4 SE)  ok  [measured]
+  add_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced    0.0000 +-  0.0000  diff  +0.0000 (+0.0 SE)  ok  [bound |x| < 7.08e-06]
+  add_f3_fJ_per_bit                     injected   28.0000  reduced   28.0000 +-  0.0000  diff  -0.0000 (-3.4 SE)  ok  [measured]
+  additivity_all_minus_fields_pJ        injected   -0.0000  reduced    0.0000 +-  0.0000  diff  +0.0000 (+0.3 SE)  ok  [bound |x| < 2.673e-07]
+  and12_fJ_per_bit                      injected   11.0000  reduced   11.0000 +-  0.0000  diff  -0.0000 (-1.6 SE)  ok  [measured]
+  and_f1_fJ_per_bit                     injected   11.0000  reduced   11.0000 +-  0.0000  diff  -0.0000 (-1.4 SE)  ok  [measured]
+  and_f2_fJ_per_bit                     injected   11.0000  reduced   11.0000 +-  0.0000  diff  -0.0000 (-1.4 SE)  ok  [measured]
+  and_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced    0.0000 +-  0.0000  diff  +0.0000 (+0.0 SE)  ok  [bound |x| < 6.666e-06]
+  and_f3_fJ_per_bit                     injected   11.0000  reduced   11.0000 +-  0.0000  diff  -0.0000 (-56.9 SE)  ok  [measured]
+  d12_a12_minus_and12_fJ_per_bit        injected   17.0000  reduced   17.0000 +-  0.0000  diff  -0.0000 (-2.1 SE)  ok  [measured]
+  f12_minus_f1_f2_pJ                    injected   -0.0000  reduced    0.0000 +-  0.0000  diff  +0.0000 (+0.4 SE)  ok  [bound |x| < 2.128e-07]
+  hamming_f2_quad_fJ                    injected    0.0000  reduced    0.0000 +-  0.0000  diff  +0.0000 (+0.7 SE)  ok  [bound |x| < 2.4e-06]
+  hamming_f2_slope_fJ                   injected   28.0000  reduced   28.0000 +-  0.0000  diff  -0.0000 (-3.3 SE)  ok  [measured]
+  ripple_minus_add_z_pJ                 injected    1.5420  reduced    1.5420 +-  0.0000  diff  -0.0000 (-17.3 SE)  ok  [measured]
+ladders, rail / 0.79 (registered names; corrected to the control chain's temperature, the primary):
+  C1_carry_fJ_per_position              injected    7.0000  reduced    6.8985 +-  0.0717  diff  -0.1015 (-1.4 SE)  ok  [measured]
+  C2_fJ_per_bit                         injected    0.0000  reduced    0.1756 +-  0.1928  diff  +0.1756 (+0.9 SE)  ok  [bound |x| < 0.4434]
+  C3_fJ_per_bit                         injected   11.0000  reduced   10.9874 +-  0.1062  diff  -0.0126 (-0.1 SE)  ok  [measured]
+  S_cr_fJ_per_position                  injected   18.0000  reduced   17.8860 +-  0.1239  diff  -0.1140 (-0.9 SE)  ok  [measured]
+  S_cr_quad_fJ                          injected    0.0000  reduced   -0.0032 +-  0.0157  diff  -0.0032 (-0.2 SE)  ok  [bound |x| < 0.02729]
+  S_crb_fJ_per_position                 injected   24.0000  reduced   24.0531 +-  0.0584  diff  +0.0531 (+0.9 SE)  ok  [measured]
+  S_crb_quad_fJ                         injected    0.0000  reduced   -0.0109 +-  0.0081  diff  -0.0109 (-1.3 SE)  ok  [bound |x| < 0.02143]
+  add_f0_fJ_per_bit                     injected   28.0000  reduced   28.0934 +-  0.2381  diff  +0.0934 (+0.4 SE)  ok  [measured]
+  add_f12_fJ_per_bit                    injected   28.0000  reduced   28.1421 +-  0.1319  diff  +0.1421 (+1.1 SE)  ok  [measured]
+  add_f1_fJ_per_bit                     injected   28.0000  reduced   28.0582 +-  0.1480  diff  +0.0582 (+0.4 SE)  ok  [measured]
+  add_f2_fJ_per_bit                     injected   28.0000  reduced   28.0368 +-  0.2512  diff  +0.0368 (+0.1 SE)  ok  [measured]
+  add_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced   -0.0324 +-  0.3703  diff  -0.0324 (-0.1 SE)  ok  [bound |x| < 0.6107]
+  add_f3_fJ_per_bit                     injected   28.0000  reduced   28.0692 +-  0.2323  diff  +0.0692 (+0.3 SE)  ok  [measured]
+  additivity_all_minus_fields_pJ        injected   -0.0000  reduced   -0.0023 +-  0.0064  diff  -0.0023 (-0.4 SE)  ok  [bound |x| < 0.01197]
+  and12_fJ_per_bit                      injected   11.0000  reduced   11.1631 +-  0.2416  diff  +0.1631 (+0.7 SE)  ok  [measured]
+  and_f1_fJ_per_bit                     injected   11.0000  reduced   11.1579 +-  0.2422  diff  +0.1579 (+0.7 SE)  ok  [measured]
+  and_f2_fJ_per_bit                     injected   11.0000  reduced   11.1683 +-  0.2769  diff  +0.1683 (+0.6 SE)  ok  [measured]
+  and_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced    0.3017 +-  0.1303  diff  +0.3017 (+2.3 SE)  ok  [measured]
+  and_f3_fJ_per_bit                     injected   11.0000  reduced   10.8666 +-  0.1864  diff  -0.1334 (-0.7 SE)  ok  [measured]
+  d12_a12_minus_and12_fJ_per_bit        injected   17.0000  reduced   16.9790 +-  0.2681  diff  -0.0210 (-0.1 SE)  ok  [measured]
+  f12_minus_f1_f2_pJ                    injected   -0.0000  reduced    0.0030 +-  0.0034  diff  +0.0030 (+0.9 SE)  ok  [bound |x| < 0.007735]
+  hamming_f2_quad_fJ                    injected    0.0000  reduced   -0.0203 +-  0.0497  diff  -0.0203 (-0.4 SE)  ok  [bound |x| < 0.09457]
+  hamming_f2_slope_fJ                   injected   28.0000  reduced   27.9159 +-  0.2231  diff  -0.0841 (-0.4 SE)  ok  [measured]
+  ripple_minus_add_z_pJ                 injected    1.5420  reduced    1.5424 +-  0.0029  diff  +0.0004 (+0.1 SE)  ok  [measured]
+
+SYNTH CHECK (noise-free, exact to 0.5 fJ / 0.005 pJ): CONSISTENT (0 ladder values outside the tolerance)
+compare rc 0
+
+================ synthetic session: noisy (generator args: defaults) ================
+synthetic session written: 3255 runs lines, 327 segments, telemetry 3452 s at 10 Hz, pvt True
+the reducer (unchanged; python3 -I -B reduce_intbits.py <dir> --out <dir>/intbits.json): rc 0; stdout 57 lines; stderr 0 lines
+-- its own printout:
+add.a.all         6.367 pJ over idle   vs add.z          1.790 +- 0.037   pJ  dips 4
+add.a.f0          5.011 pJ over idle   vs add.z          0.434 +- 0.039   pJ  dips 4
+add.a.f1          5.055 pJ over idle   vs add.z          0.489 +- 0.037   pJ  dips 7
+add.a.f12         5.461 pJ over idle   vs add.z          0.893 +- 0.041   pJ  dips 6
+add.a.f2          4.938 pJ over idle   vs add.z          0.370 +- 0.028   pJ  dips 5
+add.a.f2.k4       4.687 pJ over idle   vs add.z          0.111 +- 0.037   pJ  dips 6
+add.a.f2.k8       4.753 pJ over idle   vs add.z          0.184 +- 0.038   pJ  dips 6
+add.a.f3          4.992 pJ over idle   vs add.z          0.423 +- 0.049   pJ  dips 3
+add.b.f0          5.028 pJ over idle   vs add.z          0.454 +- 0.021   pJ  dips 6
+add.b.f2          5.013 pJ over idle   vs add.z          0.447 +- 0.039   pJ  dips 5
+add.cr.l0         4.609 pJ over idle   vs add.z          0.041 +- 0.045   pJ  dips 3
+add.cr.l16        4.891 pJ over idle   vs add.cr.l0      0.275 +- 0.035   pJ  dips 5
+add.cr.l24        5.018 pJ over idle   vs add.cr.l0      0.401 +- 0.024   pJ  dips 4
+add.cr.l31        5.141 pJ over idle   vs add.cr.l0      0.531 +- 0.034   pJ  dips 4
+add.cr.l8         4.725 pJ over idle   vs add.cr.l0      0.107 +- 0.052   pJ  dips 5
+add.crb.l0        4.601 pJ over idle   vs add.z          0.026 +- 0.041   pJ  dips 5
+add.crb.l16       4.990 pJ over idle   vs add.crb.l0     0.393 +- 0.036   pJ  dips 4
+add.crb.l24       5.161 pJ over idle   vs add.crb.l0     0.558 +- 0.025   pJ  dips 4
+add.crb.l31       5.345 pJ over idle   vs add.crb.l0     0.743 +- 0.047   pJ  dips 7
+add.crb.l8        4.811 pJ over idle   vs add.crb.l0     0.210 +- 0.023   pJ  dips 5
+add.ripple        6.067 pJ over idle   vs add.z          1.491 +- 0.037   pJ  dips 4
+add.s.f0          4.907 pJ over idle   vs add.z          0.337 +- 0.029   pJ  dips 5
+add.s.f2          4.938 pJ over idle   vs add.z          0.365 +- 0.031   pJ  dips 2
+add.same          4.459 pJ over idle   vs nop            0.498 +- 0.048   pJ  dips 3
+add.z             4.579 pJ over idle   vs add.same       0.112 +- 0.027   pJ  dips 4
+and.a.f1          4.667 pJ over idle   vs and.z          0.123 +- 0.041   pJ  dips 5
+and.a.f2          4.718 pJ over idle   vs and.z          0.184 +- 0.033   pJ  dips 6
+and.a.f3          4.670 pJ over idle   vs and.z          0.130 +- 0.028   pJ  dips 6
+and.z             4.537 pJ over idle   vs add.z         -0.035 +- 0.033   pJ  dips 5
+nop               3.964 pJ over idle   vs -                  - +- -       pJ  dips 6
+xor.a.f2          5.003 pJ over idle   vs xor.z          0.476 +- 0.034   pJ  dips 4
+xor.z             4.524 pJ over idle   vs add.z         -0.040 +- 0.030   pJ  dips 6
+hamming_f2_slope_fJ                         22.698 +- 1.767
+hamming_f2_quad_fJ                          -0.092 +- 0.436
+add_f0_fJ_per_bit                           27.114 +- 2.425
+add_f1_fJ_per_bit                           30.556 +- 2.339
+add_f2_fJ_per_bit                           23.104 +- 1.774
+add_f3_fJ_per_bit                           26.409 +- 3.051
+add_f12_fJ_per_bit                          27.919 +- 1.285
+additivity_all_minus_fields_pJ               0.075 +- 0.091
+f12_minus_f1_f2_pJ                           0.035 +- 0.021
+and_f1_fJ_per_bit                            7.713 +- 2.536
+and_f2_fJ_per_bit                           11.513 +- 2.046
+and_f3_fJ_per_bit                            8.115 +- 1.774
+and12_fJ_per_bit                             9.613 +- 1.856
+d12_a12_minus_and12_fJ_per_bit              18.306 +- 1.377
+add_f2_minus_f3_fJ_per_bit                  -3.305 +- 3.062
+and_f2_minus_f3_fJ_per_bit                   3.398 +- 2.953
+S_cr_fJ_per_position                        17.371 +- 0.867
+S_crb_fJ_per_position                       23.499 +- 1.507
+S_cr_quad_fJ                                 0.048 +- 0.142
+S_crb_quad_fJ                               -0.032 +- 0.118
+C1_carry_fJ_per_position                     6.475 +- 0.921
+C2_fJ_per_bit                               -1.283 +- 2.221
+C3_fJ_per_bit                               10.896 +- 1.251
+ripple_minus_add_z_pJ                        1.491 +- 0.037
+beta W/C {"board": 0.3085482492857908, "rail": 0.2150033870690665, "sum_dT2": 16.050424566393662}
+-- set beside the injected values:
+synthetic session: pvt codes True; passes [['synthbox', 0], ['synthbox', 1], ['synthbox', 2], ['synthbox', 3], ['synthbox', 4], ['synthbox', 5], ['synthbox', 6], ['synthbox', 7], ['synthbox', 8]] (warm-up ['synthbox', 0])
+runs reduced: 324 (324 ok); roles ['anchor_first', 'anchor_last', 'arm', 'burnin']
+per-run fields the registered sanity checks read (used passes): rate spread across arm runs 0.0000%; retired/body 1.011719-1.011719 (259/256 = 1.011719); l1d_miss total 0; icache_miss per run [1280]; mhz [600.0]; V_rail 0.5214-0.5226 V; board dips 172; off-protocol 0
+beta (W per C), fitted: board 0.3085, rail 0.2150; injected slope 0.290 (rail x 0.79)
+
+arm            inj pJ |    board pJ/idle        rail/0.79 | control        inj d  contrast (corr)
+add.a.all      6.4050 |   6.3667 +- 0.0356   6.0203 +- 0.0284 | add.z         1.7920 1.7897 +- 0.0369
+add.a.f0       5.0610 |   5.0107 +- 0.0456   4.6485 +- 0.0463 | add.z         0.4480 0.4338 +- 0.0388
+add.a.f1       5.0610 |   5.0547 +- 0.0349   4.6195 +- 0.0244 | add.z         0.4480 0.4889 +- 0.0374
+add.a.f12      5.5090 |   5.4614 +- 0.0293   5.0755 +- 0.0492 | add.z         0.8960 0.8934 +- 0.0411
+add.a.f2       5.0610 |   4.9376 +- 0.0527   4.5742 +- 0.0370 | add.z         0.4480 0.3697 +- 0.0284
+add.a.f2.k4    4.7250 |   4.6865 +- 0.0497   4.3189 +- 0.0431 | add.z         0.1120 0.1110 +- 0.0366
+add.a.f2.k8    4.8370 |   4.7530 +- 0.0340   4.3929 +- 0.0351 | add.z         0.2240 0.1837 +- 0.0376
+add.a.f3       5.0610 |   4.9921 +- 0.0309   4.6326 +- 0.0309 | add.z         0.4480 0.4225 +- 0.0488
+add.b.f0       5.0930 |   5.0281 +- 0.0436   4.6593 +- 0.0330 | add.z         0.4800 0.4543 +- 0.0212
+add.b.f2       5.0930 |   5.0132 +- 0.0387   4.6467 +- 0.0497 | add.z         0.4800 0.4469 +- 0.0388
+add.cr.l0      4.6370 |   4.6093 +- 0.0263   4.2307 +- 0.0274 | add.z         0.0240 0.0407 +- 0.0451
+add.cr.l16     4.9250 |   4.8907 +- 0.0406   4.4899 +- 0.0433 | add.cr.l0     0.2880 0.2745 +- 0.0349
+add.cr.l24     5.0690 |   5.0177 +- 0.0263   4.6640 +- 0.0308 | add.cr.l0     0.4320 0.4009 +- 0.0240
+add.cr.l31     5.1950 |   5.1414 +- 0.0324   4.7621 +- 0.0328 | add.cr.l0     0.5580 0.5307 +- 0.0342
+add.cr.l8      4.7810 |   4.7247 +- 0.0577   4.3921 +- 0.0299 | add.cr.l0     0.1440 0.1069 +- 0.0523
+add.crb.l0     4.6430 |   4.6006 +- 0.0355   4.2334 +- 0.0373 | add.z         0.0300 0.0262 +- 0.0415
+add.crb.l16    5.0270 |   4.9903 +- 0.0451   4.6173 +- 0.0266 | add.crb.l0    0.3840 0.3934 +- 0.0364
+add.crb.l24    5.2190 |   5.1609 +- 0.0384   4.7707 +- 0.0433 | add.crb.l0    0.5760 0.5581 +- 0.0252
+add.crb.l31    5.3870 |   5.3451 +- 0.0570   4.9808 +- 0.0428 | add.crb.l0    0.7440 0.7429 +- 0.0469
+add.crb.l8     4.8350 |   4.8114 +- 0.0389   4.4516 +- 0.0410 | add.crb.l0    0.1920 0.2103 +- 0.0226
+add.ripple     6.1550 |   6.0670 +- 0.0243   5.7018 +- 0.0422 | add.z         1.5420 1.4909 +- 0.0371
+add.s.f0       4.9970 |   4.9071 +- 0.0566   4.5611 +- 0.0367 | add.z         0.3840 0.3372 +- 0.0291
+add.s.f2       4.9970 |   4.9382 +- 0.0417   4.5637 +- 0.0396 | add.z         0.3840 0.3649 +- 0.0312
+add.same       4.5070 |   4.4585 +- 0.0485   4.1124 +- 0.0338 | nop           0.5040 0.4981 +- 0.0484
+add.z          4.6130 |   4.5789 +- 0.0565   4.1784 +- 0.0373 | add.same      0.1060 0.1124 +- 0.0273
+and.a.f1       4.7590 |   4.6674 +- 0.0295   4.3441 +- 0.0261 | and.z         0.1760 0.1234 +- 0.0406
+and.a.f2       4.7590 |   4.7177 +- 0.0385   4.3141 +- 0.0205 | and.z         0.1760 0.1842 +- 0.0327
+and.a.f3       4.7590 |   4.6699 +- 0.0342   4.3336 +- 0.0296 | and.z         0.1760 0.1298 +- 0.0284
+and.z          4.5830 |   4.5373 +- 0.0387   4.1618 +- 0.0277 | add.z        -0.0300 -0.0355 +- 0.0332
+nop            4.0030 |   3.9636 +- 0.0595   3.5842 +- 0.0280 | -                  -                -
+xor.a.f2       5.0390 |   5.0034 +- 0.0460   4.6190 +- 0.0317 | xor.z         0.4480 0.4755 +- 0.0343
+xor.z          4.5910 |   4.5235 +- 0.0523   4.1466 +- 0.0387 | add.z        -0.0220 -0.0397 +- 0.0303
+
+ladders, board (registered names; corrected to the control chain's temperature, the primary):
+  C1_carry_fJ_per_position              injected    7.0000  reduced    6.4755 +-  0.9208  diff  -0.5245 (-0.6 SE)  ok  [measured]
+  C2_fJ_per_bit                         injected    0.0000  reduced   -1.2825 +-  2.2213  diff  -1.2825 (-0.6 SE)  ok  [bound |x| < 5.725]
+  C3_fJ_per_bit                         injected   11.0000  reduced   10.8956 +-  1.2513  diff  -0.1044 (-0.1 SE)  ok  [measured]
+  S_cr_fJ_per_position                  injected   18.0000  reduced   17.3711 +-  0.8668  diff  -0.6289 (-0.7 SE)  ok  [measured]
+  S_cr_quad_fJ                          injected    0.0000  reduced    0.0482 +-  0.1420  diff  +0.0482 (+0.3 SE)  ok  [bound |x| < 0.3321]
+  S_crb_fJ_per_position                 injected   24.0000  reduced   23.4993 +-  1.5071  diff  -0.5007 (-0.3 SE)  ok  [measured]
+  S_crb_quad_fJ                         injected    0.0000  reduced   -0.0320 +-  0.1180  diff  -0.0320 (-0.3 SE)  ok  [bound |x| < 0.2681]
+  add_f0_fJ_per_bit                     injected   28.0000  reduced   27.1142 +-  2.4252  diff  -0.8858 (-0.4 SE)  ok  [measured]
+  add_f12_fJ_per_bit                    injected   28.0000  reduced   27.9195 +-  1.2854  diff  -0.0805 (-0.1 SE)  ok  [measured]
+  add_f1_fJ_per_bit                     injected   28.0000  reduced   30.5561 +-  2.3385  diff  +2.5561 (+1.1 SE)  ok  [measured]
+  add_f2_fJ_per_bit                     injected   28.0000  reduced   23.1039 +-  1.7740  diff  -4.8961 (-2.8 SE)  ok  [measured]
+  add_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced   -3.3047 +-  3.0617  diff  -3.3047 (-1.1 SE)  ok  [bound |x| < 9.428]
+  add_f3_fJ_per_bit                     injected   28.0000  reduced   26.4086 +-  3.0510  diff  -1.5914 (-0.5 SE)  ok  [measured]
+  additivity_all_minus_fields_pJ        injected   -0.0000  reduced    0.0748 +-  0.0913  diff  +0.0748 (+0.8 SE)  ok  [bound |x| < 0.2574]
+  and12_fJ_per_bit                      injected   11.0000  reduced    9.6131 +-  1.8561  diff  -1.3869 (-0.7 SE)  ok  [measured]
+  and_f1_fJ_per_bit                     injected   11.0000  reduced    7.7128 +-  2.5358  diff  -3.2872 (-1.3 SE)  ok  [measured]
+  and_f2_fJ_per_bit                     injected   11.0000  reduced   11.5134 +-  2.0464  diff  +0.5134 (+0.3 SE)  ok  [measured]
+  and_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced    3.3984 +-  2.9526  diff  +3.3984 (+1.2 SE)  ok  [bound |x| < 9.304]
+  and_f3_fJ_per_bit                     injected   11.0000  reduced    8.1150 +-  1.7739  diff  -2.8850 (-1.6 SE)  ok  [measured]
+  d12_a12_minus_and12_fJ_per_bit        injected   17.0000  reduced   18.3064 +-  1.3767  diff  +1.3064 (+0.9 SE)  ok  [measured]
+  f12_minus_f1_f2_pJ                    injected   -0.0000  reduced    0.0349 +-  0.0210  diff  +0.0349 (+1.7 SE)  ok  [bound |x| < 0.07696]
+  hamming_f2_quad_fJ                    injected    0.0000  reduced   -0.0924 +-  0.4359  diff  -0.0924 (-0.2 SE)  ok  [bound |x| < 0.9643]
+  hamming_f2_slope_fJ                   injected   28.0000  reduced   22.6981 +-  1.7671  diff  -5.3019 (-3.0 SE)  ok  [measured]
+  ripple_minus_add_z_pJ                 injected    1.5420  reduced    1.4909 +-  0.0371  diff  -0.0511 (-1.4 SE)  ok  [measured]
+ladders, rail / 0.79 (registered names; corrected to the control chain's temperature, the primary):
+  C1_carry_fJ_per_position              injected    7.0000  reduced    5.7624 +-  0.5087  diff  -1.2376 (-2.4 SE)  ok  [measured]
+  C2_fJ_per_bit                         injected    0.0000  reduced   -1.0021 +-  1.7351  diff  -1.0021 (-0.6 SE)  ok  [bound |x| < 3.533]
+  C3_fJ_per_bit                         injected   11.0000  reduced   11.3130 +-  0.8157  diff  +0.3130 (+0.4 SE)  ok  [measured]
+  S_cr_fJ_per_position                  injected   18.0000  reduced   17.0753 +-  0.8905  diff  -0.9247 (-1.0 SE)  ok  [measured]
+  S_cr_quad_fJ                          injected    0.0000  reduced    0.0412 +-  0.0671  diff  +0.0412 (+0.6 SE)  ok  [bound |x| < 0.1385]
+  S_crb_fJ_per_position                 injected   24.0000  reduced   23.1202 +-  0.7749  diff  -0.8798 (-1.1 SE)  ok  [measured]
+  S_crb_quad_fJ                         injected    0.0000  reduced   -0.0052 +-  0.0875  diff  -0.0052 (-0.1 SE)  ok  [bound |x| < 0.1424]
+  add_f0_fJ_per_bit                     injected   28.0000  reduced   29.6368 +-  1.8864  diff  +1.6368 (+0.9 SE)  ok  [measured]
+  add_f12_fJ_per_bit                    injected   28.0000  reduced   28.6708 +-  0.8080  diff  +0.6708 (+0.8 SE)  ok  [measured]
+  add_f1_fJ_per_bit                     injected   28.0000  reduced   29.0806 +-  0.9592  diff  +1.0806 (+1.1 SE)  ok  [measured]
+  add_f2_fJ_per_bit                     injected   28.0000  reduced   26.0090 +-  1.4268  diff  -1.9910 (-1.4 SE)  ok  [measured]
+  add_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced   -3.4621 +-  1.9580  diff  -3.4621 (-1.8 SE)  ok  [bound |x| < 5.829]
+  add_f3_fJ_per_bit                     injected   28.0000  reduced   29.4712 +-  1.4360  diff  +1.4712 (+1.0 SE)  ok  [measured]
+  additivity_all_minus_fields_pJ        injected   -0.0000  reduced    0.0187 +-  0.0412  diff  +0.0187 (+0.5 SE)  ok  [bound |x| < 0.07992]
+  and12_fJ_per_bit                      injected   11.0000  reduced   10.3109 +-  1.1024  diff  -0.6891 (-0.6 SE)  ok  [measured]
+  and_f1_fJ_per_bit                     injected   11.0000  reduced   10.6381 +-  0.8300  diff  -0.3619 (-0.4 SE)  ok  [measured]
+  and_f2_fJ_per_bit                     injected   11.0000  reduced    9.9837 +-  1.5242  diff  -1.0163 (-0.7 SE)  ok  [measured]
+  and_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced   -0.4911 +-  1.7973  diff  -0.4911 (-0.3 SE)  ok  [bound |x| < 3.228]
+  and_f3_fJ_per_bit                     injected   11.0000  reduced   10.4748 +-  1.0612  diff  -0.5252 (-0.5 SE)  ok  [measured]
+  d12_a12_minus_and12_fJ_per_bit        injected   17.0000  reduced   18.3599 +-  1.5449  diff  +1.3599 (+0.9 SE)  ok  [measured]
+  f12_minus_f1_f2_pJ                    injected   -0.0000  reduced    0.0360 +-  0.0261  diff  +0.0360 (+1.4 SE)  ok  [bound |x| < 0.06966]
+  hamming_f2_quad_fJ                    injected    0.0000  reduced   -0.5178 +-  0.3387  diff  -0.5178 (-1.5 SE)  ok  [bound |x| < 0.9442]
+  hamming_f2_slope_fJ                   injected   28.0000  reduced   25.2677 +-  1.5792  diff  -2.7323 (-1.7 SE)  ok  [measured]
+  ripple_minus_add_z_pJ                 injected    1.5420  reduced    1.5291 +-  0.0252  diff  -0.0129 (-0.5 SE)  ok  [measured]
+
+SYNTH CHECK (5 SE + 0.5 fJ / 0.02 pJ): CONSISTENT (0 ladder values outside the tolerance; 1 beyond 3 SE of 48)
+compare rc 0
+
+================ synthetic session: noisy-nopvt (generator args: --no-pvt) ================
+synthetic session written: 3255 runs lines, 327 segments, telemetry 3452 s at 10 Hz, pvt False
+the reducer (unchanged; python3 -I -B reduce_intbits.py <dir> --out <dir>/intbits.json): rc 0; stdout 57 lines; stderr 0 lines
+-- its own printout:
+add.a.all         6.441 pJ over idle   vs add.z          1.792 +- 0.058   pJ  dips 4
+add.a.f0          5.131 pJ over idle   vs add.z          0.482 +- 0.060   pJ  dips 4
+add.a.f1          5.135 pJ over idle   vs add.z          0.485 +- 0.075   pJ  dips 7
+add.a.f12         5.629 pJ over idle   vs add.z          0.980 +- 0.063   pJ  dips 6
+add.a.f2          5.067 pJ over idle   vs add.z          0.476 +- 0.049   pJ  dips 5
+add.a.f2.k4       4.747 pJ over idle   vs add.z          0.098 +- 0.071   pJ  dips 6
+add.a.f2.k8       4.914 pJ over idle   vs add.z          0.265 +- 0.034   pJ  dips 6
+add.a.f3          5.148 pJ over idle   vs add.z          0.499 +- 0.057   pJ  dips 3
+add.b.f0          5.140 pJ over idle   vs add.z          0.491 +- 0.081   pJ  dips 6
+add.b.f2          5.177 pJ over idle   vs add.z          0.528 +- 0.053   pJ  dips 5
+add.cr.l0         4.732 pJ over idle   vs add.z          0.083 +- 0.055   pJ  dips 3
+add.cr.l16        4.970 pJ over idle   vs add.cr.l0      0.238 +- 0.052   pJ  dips 5
+add.cr.l24        5.113 pJ over idle   vs add.cr.l0      0.381 +- 0.047   pJ  dips 4
+add.cr.l31        5.308 pJ over idle   vs add.cr.l0      0.576 +- 0.046   pJ  dips 4
+add.cr.l8         4.771 pJ over idle   vs add.cr.l0      0.039 +- 0.046   pJ  dips 5
+add.crb.l0        4.720 pJ over idle   vs add.z          0.071 +- 0.050   pJ  dips 5
+add.crb.l16       5.122 pJ over idle   vs add.crb.l0     0.403 +- 0.054   pJ  dips 4
+add.crb.l24       5.225 pJ over idle   vs add.crb.l0     0.505 +- 0.047   pJ  dips 4
+add.crb.l31       5.456 pJ over idle   vs add.crb.l0     0.737 +- 0.042   pJ  dips 7
+add.crb.l8        4.858 pJ over idle   vs add.crb.l0     0.138 +- 0.045   pJ  dips 5
+add.ripple        6.177 pJ over idle   vs add.z          1.527 +- 0.057   pJ  dips 4
+add.s.f0          5.085 pJ over idle   vs add.z          0.435 +- 0.053   pJ  dips 5
+add.s.f2          5.064 pJ over idle   vs add.z          0.415 +- 0.071   pJ  dips 2
+add.same          4.689 pJ over idle   vs nop            0.643 +- 0.088   pJ  dips 3
+add.z             4.705 pJ over idle   vs add.same       0.016 +- 0.092   pJ  dips 4
+and.a.f1          4.814 pJ over idle   vs and.z          0.167 +- 0.077   pJ  dips 5
+and.a.f2          4.837 pJ over idle   vs and.z          0.189 +- 0.070   pJ  dips 6
+and.a.f3          4.769 pJ over idle   vs and.z          0.121 +- 0.089   pJ  dips 6
+and.z             4.648 pJ over idle   vs add.z         -0.001 +- 0.082   pJ  dips 5
+nop               3.990 pJ over idle   vs -                  - +- -       pJ  dips 6
+xor.a.f2          5.163 pJ over idle   vs xor.z          0.464 +- 0.060   pJ  dips 4
+xor.z             4.698 pJ over idle   vs add.z          0.049 +- 0.057   pJ  dips 6
+hamming_f2_slope_fJ                         30.407 +- 2.607
+hamming_f2_quad_fJ                          -0.188 +- 0.361
+add_f0_fJ_per_bit                           30.096 +- 3.769
+add_f1_fJ_per_bit                           30.339 +- 4.694
+add_f2_fJ_per_bit                           29.753 +- 3.089
+add_f3_fJ_per_bit                           31.161 +- 3.585
+add_f12_fJ_per_bit                          30.618 +- 1.978
+additivity_all_minus_fields_pJ              -0.150 +- 0.164
+f12_minus_f1_f2_pJ                           0.018 +- 0.090
+and_f1_fJ_per_bit                           10.407 +- 4.817
+and_f2_fJ_per_bit                           11.794 +- 4.405
+and_f3_fJ_per_bit                            7.556 +- 5.556
+and12_fJ_per_bit                            11.101 +- 4.465
+d12_a12_minus_and12_fJ_per_bit              19.518 +- 4.662
+add_f2_minus_f3_fJ_per_bit                  -1.408 +- 3.343
+and_f2_minus_f3_fJ_per_bit                   4.238 +- 2.823
+S_cr_fJ_per_position                        19.097 +- 1.400
+S_crb_fJ_per_position                       23.559 +- 1.001
+S_cr_quad_fJ                                 0.357 +- 0.114
+S_crb_quad_fJ                                0.079 +- 0.188
+C1_carry_fJ_per_position                     6.019 +- 1.263
+C2_fJ_per_bit                               -1.977 +- 4.939
+C3_fJ_per_bit                               13.078 +- 1.417
+ripple_minus_add_z_pJ                        1.527 +- 0.057
+beta W/C {"board": 0.09934521765899533, "rail": 0.05533019147612586, "sum_dT2": 16.375}
+-- set beside the injected values:
+synthetic session: pvt codes False; passes [['synthbox', 0], ['synthbox', 1], ['synthbox', 2], ['synthbox', 3], ['synthbox', 4], ['synthbox', 5], ['synthbox', 6], ['synthbox', 7], ['synthbox', 8]] (warm-up ['synthbox', 0])
+runs reduced: 324 (324 ok); roles ['anchor_first', 'anchor_last', 'arm', 'burnin']
+per-run fields the registered sanity checks read (used passes): rate spread across arm runs 0.0000%; retired/body 1.011719-1.011719 (259/256 = 1.011719); l1d_miss total 0; icache_miss per run [1280]; mhz [600.0]; V_rail 0.5216-0.5226 V; board dips 172; off-protocol 0
+beta (W per C), fitted: board 0.0993, rail 0.0553; injected slope 0.290 (rail x 0.79)
+
+arm            inj pJ |    board pJ/idle        rail/0.79 | control        inj d  contrast (corr)
+add.a.all      6.4050 |   6.4413 +- 0.0778   6.0708 +- 0.0840 | add.z         1.7920 1.7920 +- 0.0585
+add.a.f0       5.0610 |   5.1308 +- 0.0776   4.7115 +- 0.0788 | add.z         0.4480 0.4815 +- 0.0603
+add.a.f1       5.0610 |   5.1347 +- 0.0557   4.7922 +- 0.0714 | add.z         0.4480 0.4854 +- 0.0751
+add.a.f12      5.5090 |   5.6290 +- 0.0899   5.2093 +- 0.0530 | add.z         0.8960 0.9798 +- 0.0633
+add.a.f2       5.0610 |   5.0672 +- 0.0730   4.6675 +- 0.0680 | add.z         0.4480 0.4760 +- 0.0494
+add.a.f2.k4    4.7250 |   4.7468 +- 0.0701   4.3905 +- 0.0693 | add.z         0.1120 0.0976 +- 0.0710
+add.a.f2.k8    4.8370 |   4.9145 +- 0.0922   4.5163 +- 0.0881 | add.z         0.2240 0.2653 +- 0.0341
+add.a.f3       5.0610 |   5.1478 +- 0.0720   4.7749 +- 0.0895 | add.z         0.4480 0.4986 +- 0.0574
+add.b.f0       5.0930 |   5.1398 +- 0.0580   4.7501 +- 0.0592 | add.z         0.4800 0.4906 +- 0.0813
+add.b.f2       5.0930 |   5.1773 +- 0.0621   4.8011 +- 0.0776 | add.z         0.4800 0.5280 +- 0.0533
+add.cr.l0      4.6370 |   4.7322 +- 0.0584   4.3842 +- 0.0532 | add.z         0.0240 0.0829 +- 0.0554
+add.cr.l16     4.9250 |   4.9697 +- 0.0626   4.5723 +- 0.0756 | add.cr.l0     0.2880 0.2376 +- 0.0525
+add.cr.l24     5.0690 |   5.1133 +- 0.0752   4.7554 +- 0.0770 | add.cr.l0     0.4320 0.3811 +- 0.0466
+add.cr.l31     5.1950 |   5.3081 +- 0.0783   4.8961 +- 0.0792 | add.cr.l0     0.5580 0.5759 +- 0.0457
+add.cr.l8      4.7810 |   4.7707 +- 0.0757   4.4474 +- 0.0853 | add.cr.l0     0.1440 0.0385 +- 0.0463
+add.crb.l0     4.6430 |   4.7198 +- 0.0637   4.3169 +- 0.0633 | add.z         0.0300 0.0705 +- 0.0497
+add.crb.l16    5.0270 |   5.1223 +- 0.0836   4.7302 +- 0.0803 | add.crb.l0    0.3840 0.4026 +- 0.0544
+add.crb.l24    5.2190 |   5.2250 +- 0.0618   4.8886 +- 0.0775 | add.crb.l0    0.5760 0.5053 +- 0.0474
+add.crb.l31    5.3870 |   5.4564 +- 0.0638   5.0716 +- 0.0698 | add.crb.l0    0.7440 0.7366 +- 0.0420
+add.crb.l8     4.8350 |   4.8579 +- 0.0715   4.5134 +- 0.0792 | add.crb.l0    0.1920 0.1381 +- 0.0450
+add.ripple     6.1550 |   6.1766 +- 0.0378   5.8082 +- 0.0597 | add.z         1.5420 1.5273 +- 0.0566
+add.s.f0       4.9970 |   5.0846 +- 0.0735   4.7020 +- 0.0707 | add.z         0.3840 0.4354 +- 0.0532
+add.s.f2       4.9970 |   5.0638 +- 0.0788   4.6903 +- 0.0744 | add.z         0.3840 0.4146 +- 0.0708
+add.same       4.5070 |   4.6888 +- 0.0494   4.3008 +- 0.0570 | nop           0.5040 0.6427 +- 0.0876
+add.z          4.6130 |   4.7052 +- 0.0649   4.3284 +- 0.0492 | add.same      0.1060 0.0164 +- 0.0919
+and.a.f1       4.7590 |   4.8145 +- 0.0895   4.4091 +- 0.0879 | and.z         0.1760 0.1665 +- 0.0771
+and.a.f2       4.7590 |   4.8367 +- 0.0750   4.4606 +- 0.0736 | and.z         0.1760 0.1887 +- 0.0705
+and.a.f3       4.7590 |   4.7689 +- 0.0755   4.4008 +- 0.0775 | and.z         0.1760 0.1209 +- 0.0889
+and.z          4.5830 |   4.6480 +- 0.0881   4.2763 +- 0.0933 | add.z        -0.0300 -0.0013 +- 0.0819
+nop            4.0030 |   3.9901 +- 0.0672   3.6630 +- 0.0748 | -                  -                -
+xor.a.f2       5.0390 |   5.1626 +- 0.0453   4.7699 +- 0.0590 | xor.z         0.4480 0.4643 +- 0.0601
+xor.z          4.5910 |   4.6983 +- 0.0924   4.3626 +- 0.0865 | add.z        -0.0220 0.0491 +- 0.0566
+
+ladders, board (registered names; corrected to the control chain's temperature, the primary):
+  C1_carry_fJ_per_position              injected    7.0000  reduced    6.0190 +-  1.2626  diff  -0.9810 (-0.8 SE)  ok  [measured]
+  C2_fJ_per_bit                         injected    0.0000  reduced   -1.9774 +-  4.9389  diff  -1.9774 (-0.4 SE)  ok  [bound |x| < 11.86]
+  C3_fJ_per_bit                         injected   11.0000  reduced   13.0781 +-  1.4172  diff  +2.0781 (+1.5 SE)  ok  [measured]
+  S_cr_fJ_per_position                  injected   18.0000  reduced   19.0971 +-  1.3996  diff  +1.0971 (+0.8 SE)  ok  [measured]
+  S_cr_quad_fJ                          injected    0.0000  reduced    0.3568 +-  0.1137  diff  +0.3568 (+3.1 SE)  ok  [measured]
+  S_crb_fJ_per_position                 injected   24.0000  reduced   23.5591 +-  1.0013  diff  -0.4409 (-0.4 SE)  ok  [measured]
+  S_crb_quad_fJ                         injected    0.0000  reduced    0.0789 +-  0.1876  diff  +0.0789 (+0.4 SE)  ok  [bound |x| < 0.4541]
+  add_f0_fJ_per_bit                     injected   28.0000  reduced   30.0960 +-  3.7686  diff  +2.0960 (+0.6 SE)  ok  [measured]
+  add_f12_fJ_per_bit                    injected   28.0000  reduced   30.6182 +-  1.9777  diff  +2.6182 (+1.3 SE)  ok  [measured]
+  add_f1_fJ_per_bit                     injected   28.0000  reduced   30.3385 +-  4.6945  diff  +2.3385 (+0.5 SE)  ok  [measured]
+  add_f2_fJ_per_bit                     injected   28.0000  reduced   29.7530 +-  3.0890  diff  +1.7530 (+0.6 SE)  ok  [measured]
+  add_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced   -1.4085 +-  3.3435  diff  -1.4085 (-0.4 SE)  ok  [bound |x| < 8.095]
+  add_f3_fJ_per_bit                     injected   28.0000  reduced   31.1615 +-  3.5848  diff  +3.1615 (+0.9 SE)  ok  [measured]
+  additivity_all_minus_fields_pJ        injected   -0.0000  reduced   -0.1496 +-  0.1636  diff  -0.1496 (-0.9 SE)  ok  [bound |x| < 0.4768]
+  and12_fJ_per_bit                      injected   11.0000  reduced   11.1007 +-  4.4648  diff  +0.1007 (+0.0 SE)  ok  [measured]
+  and_f1_fJ_per_bit                     injected   11.0000  reduced   10.4072 +-  4.8167  diff  -0.5928 (-0.1 SE)  ok  [measured]
+  and_f2_fJ_per_bit                     injected   11.0000  reduced   11.7941 +-  4.4048  diff  +0.7941 (+0.2 SE)  ok  [measured]
+  and_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced    4.2379 +-  2.8230  diff  +4.2379 (+1.5 SE)  ok  [bound |x| < 9.884]
+  and_f3_fJ_per_bit                     injected   11.0000  reduced    7.5562 +-  5.5558  diff  -3.4438 (-0.6 SE)  ok  [bound |x| < 18.67]
+  d12_a12_minus_and12_fJ_per_bit        injected   17.0000  reduced   19.5176 +-  4.6622  diff  +2.5176 (+0.5 SE)  ok  [measured]
+  f12_minus_f1_f2_pJ                    injected   -0.0000  reduced    0.0183 +-  0.0901  diff  +0.0183 (+0.2 SE)  ok  [bound |x| < 0.1986]
+  hamming_f2_quad_fJ                    injected    0.0000  reduced   -0.1875 +-  0.3611  diff  -0.1875 (-0.5 SE)  ok  [bound |x| < 0.9098]
+  hamming_f2_slope_fJ                   injected   28.0000  reduced   30.4074 +-  2.6071  diff  +2.4074 (+0.9 SE)  ok  [measured]
+  ripple_minus_add_z_pJ                 injected    1.5420  reduced    1.5273 +-  0.0566  diff  -0.0147 (-0.3 SE)  ok  [measured]
+ladders, rail / 0.79 (registered names; corrected to the control chain's temperature, the primary):
+  C1_carry_fJ_per_position              injected    7.0000  reduced    5.8576 +-  1.3015  diff  -1.1424 (-0.9 SE)  ok  [measured]
+  C2_fJ_per_bit                         injected    0.0000  reduced   -1.2629 +-  5.2714  diff  -1.2629 (-0.2 SE)  ok  [bound |x| < 9.327]
+  C3_fJ_per_bit                         injected   11.0000  reduced   11.1758 +-  1.1319  diff  +0.1758 (+0.2 SE)  ok  [measured]
+  S_cr_fJ_per_position                  injected   18.0000  reduced   17.0334 +-  1.3486  diff  -0.9666 (-0.7 SE)  ok  [measured]
+  S_cr_quad_fJ                          injected    0.0000  reduced    0.3028 +-  0.1644  diff  +0.3028 (+1.8 SE)  ok  [bound |x| < 0.499]
+  S_crb_fJ_per_position                 injected   24.0000  reduced   24.1596 +-  1.3625  diff  +0.1596 (+0.1 SE)  ok  [measured]
+  S_crb_quad_fJ                         injected    0.0000  reduced   -0.0481 +-  0.1720  diff  -0.0481 (-0.3 SE)  ok  [bound |x| < 0.3097]
+  add_f0_fJ_per_bit                     injected   28.0000  reduced   27.8410 +-  2.7273  diff  -0.1590 (-0.1 SE)  ok  [measured]
+  add_f12_fJ_per_bit                    injected   28.0000  reduced   29.4778 +-  1.0684  diff  +1.4778 (+1.4 SE)  ok  [measured]
+  add_f1_fJ_per_bit                     injected   28.0000  reduced   32.8869 +-  2.4223  diff  +4.8869 (+2.0 SE)  ok  [measured]
+  add_f2_fJ_per_bit                     injected   28.0000  reduced   29.1307 +-  1.7226  diff  +1.1307 (+0.7 SE)  ok  [measured]
+  add_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced   -2.6755 +-  2.9396  diff  -2.6755 (-0.9 SE)  ok  [bound |x| < 6.758]
+  add_f3_fJ_per_bit                     injected   28.0000  reduced   31.8062 +-  2.9230  diff  +3.8062 (+1.3 SE)  ok  [measured]
+  additivity_all_minus_fields_pJ        injected   -0.0000  reduced   -0.1418 +-  0.1059  diff  -0.1418 (-1.3 SE)  ok  [bound |x| < 0.2794]
+  and12_fJ_per_bit                      injected   11.0000  reduced    9.9129 +-  4.8110  diff  -1.0871 (-0.2 SE)  ok  [measured]
+  and_f1_fJ_per_bit                     injected   11.0000  reduced    8.3039 +-  5.4400  diff  -2.6961 (-0.5 SE)  ok  [bound |x| < 15.16]
+  and_f2_fJ_per_bit                     injected   11.0000  reduced   11.5219 +-  4.6244  diff  +0.5219 (+0.1 SE)  ok  [measured]
+  and_f2_minus_f3_fJ_per_bit            injected    0.0000  reduced    3.7366 +-  2.7723  diff  +3.7366 (+1.3 SE)  ok  [bound |x| < 7.332]
+  and_f3_fJ_per_bit                     injected   11.0000  reduced    7.7853 +-  3.9554  diff  -3.2147 (-0.8 SE)  ok  [bound |x| < 12.4]
+  d12_a12_minus_and12_fJ_per_bit        injected   17.0000  reduced   19.5649 +-  4.7210  diff  +2.5649 (+0.5 SE)  ok  [measured]
+  f12_minus_f1_f2_pJ                    injected   -0.0000  reduced   -0.0490 +-  0.0316  diff  -0.0490 (-1.5 SE)  ok  [bound |x| < 0.08866]
+  hamming_f2_quad_fJ                    injected    0.0000  reduced   -0.2415 +-  0.4264  diff  -0.2415 (-0.6 SE)  ok  [bound |x| < 0.8645]
+  hamming_f2_slope_fJ                   injected   28.0000  reduced   29.0820 +-  2.4060  diff  +1.0820 (+0.4 SE)  ok  [measured]
+  ripple_minus_add_z_pJ                 injected    1.5420  reduced    1.5422 +-  0.0243  diff  +0.0002 (+0.0 SE)  ok  [measured]
+
+SYNTH CHECK (5 SE + 0.5 fJ / 0.02 pJ): CONSISTENT (0 ladder values outside the tolerance; 1 beyond 3 SE of 48)
+compare rc 0
+
+S13 SYNTH: ALL THREE CONSISTENT
+2026-11-13 16:39:11 PST

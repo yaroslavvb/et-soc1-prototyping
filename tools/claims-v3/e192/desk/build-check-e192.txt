@@ -1,0 +1,152 @@
+# E192 desk check of code (reg-e192, Q176), Fri 13 Nov 2026 PST, on aifoundry2: the build with this box's /opt/et, check_elf.py, the kernel's hashes and the loop-order check
+# Nothing here is measured and nothing is a forecast. Paths are relative to the lane's scratch folder (work/: its copy of
+# proposal/src and its build; scripts/: the desk scripts, committed here as desk/*.py). Python: /usr/bin/python3 3.12.3, -I -B.
+
+## the build (scripts/s10_build.sh, run in the round's CPU slot under a 4 GB address-space limit)
+2026-11-13 16:30:06 PST
+nice: 10
+ulimit -v (KiB): 4194304
+cmake version 3.28.3
+riscv64-unknown-elf-gcc () 15.1.0
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+configure rc 0 (log logs/build-configure.txt, 24 lines)
+build rc 0 (log logs/build-make.txt, 49 lines)
+CMake Warning:
+-rwxrwxr-x 1 <login> <login> 3633848 Nov 13 16:30 work/build/host/intbits_host
+-rwxrwxr-x 1 <login> <login>   25712 Nov 13 16:30 work/build/kernel/intbits.elf
+a987904b6cd322bff51e5913e3fe2af709f24e1d2dabf82c4138b552c0b4d6ea  kernel/intbits.elf
+f943314727297f7b366c0da0246e3e2c7b3835a5573b038803466421eb705d76  host/intbits_host
+2026-11-13 16:30:08 PST
+
+## its configure log
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found g3log: /opt/et/include  
+-- Found Unwind: /usr/include/x86_64-linux-gnu (found suitable version "1.6.2", minimum required is "1.6.2") 
+-- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.83.0/BoostConfig.cmake (found version "1.83.0")  
+-- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1") 
+-- Checking for module 'libcap'
+--   Found libcap, version 2.66
+-- Configuring done (0.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: work/build
+
+## its build log
+[ 10%] Creating directories for 'intbits_kernel'
+[ 20%] No download step for 'intbits_kernel'
+[ 30%] No update step for 'intbits_kernel'
+[ 40%] No patch step for 'intbits_kernel'
+[ 50%] Performing configure step for 'intbits_kernel'
+-- The C compiler identification is GNU 15.1.0
+-- The CXX compiler identification is GNU 15.1.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /opt/et/bin/riscv64-unknown-elf-gcc
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /opt/et/bin/riscv64-unknown-elf-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/et/bin/riscv64-unknown-elf-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    CMAKE_INSTALL_LIBDIR
+
+
+-- Build files have been written to: work/build/kernel
+[ 60%] Performing build step for 'intbits_kernel'
+[ 40%] Building C object CMakeFiles/intbits.elf.dir/intbits.c.obj
+[ 40%] Building ASM object CMakeFiles/intbits.elf.dir/crt.S.obj
+[ 60%] Linking C executable intbits.elf
+[ 60%] Built target intbits.elf
+gmake[5]: Circular CMakeFiles/intbits.map <- intbits.map dependency dropped.
+gmake[5]: Circular CMakeFiles/intbits.lst <- intbits.lst dependency dropped.
+gmake[5]: Circular intbits.lst <- intbits.lst dependency dropped.
+gmake[5]: Circular CMakeFiles/intbits.bin <- intbits.bin dependency dropped.
+gmake[5]: Circular intbits.bin <- intbits.bin dependency dropped.
+[100%] Built target intbits.map
+[100%] Generating intbits.bin
+[100%] Generating intbits.lst
+[100%] Built target intbits.bin
+[100%] Built target intbits.lst
+[ 70%] No install step for 'intbits_kernel'
+[ 80%] Completed 'intbits_kernel'
+[ 80%] Built target intbits_kernel
+[ 90%] Building CXX object host/CMakeFiles/intbits_host.dir/main.cpp.o
+[100%] Linking CXX executable intbits_host
+[100%] Built target intbits_host
+
+## check_elf.py, hashes, loop order (scripts/s11_elf_checks.sh)
+2026-11-13 16:30:45 PST
+interpreter: Python 3.12.3 (/usr/bin/python3)
+== check_elf.py (the proposal's, from this lane's copy of src)
+OK  loop at 0x8005801100: 259 instructions, encodings [4] bytes, aligned64 True, body: or t0,t1,t2 ; or t5,t3,t4
+OK  loop at 0x80058015c0: 259 instructions, encodings [4] bytes, aligned64 True, body: xor t0,t1,t2 ; xor t0,t3,t4
+OK  loop at 0x8005801a40: 259 instructions, encodings [4] bytes, aligned64 True, body: sub t0,t1,t2 ; sub t0,t3,t4
+OK  loop at 0x8005801ec0: 259 instructions, encodings [4] bytes, aligned64 True, body: and t0,t1,t2 ; and t0,t3,t4
+OK  loop at 0x8005802340: 259 instructions, encodings [4] bytes, aligned64 True, body: or t0,t1,t2 ; or t0,t3,t4
+OK  loop at 0x80058027c0: 259 instructions, encodings [4] bytes, aligned64 True, body: add t0,t1,t2 ; add t5,t3,t4
+OK  loop at 0x8005802c40: 259 instructions, encodings [4] bytes, aligned64 True, body: xor t0,t1,t2 ; xor t5,t3,t4
+OK  loop at 0x80058030c0: 259 instructions, encodings [4] bytes, aligned64 True, body: sub t0,t1,t2 ; sub t5,t3,t4
+OK  loop at 0x8005803540: 259 instructions, encodings [4] bytes, aligned64 True, body: and t0,t1,t2 ; and t5,t3,t4
+OK  loop at 0x80058039c0: 259 instructions, encodings [4] bytes, aligned64 True, body: sub t0,t1,t2
+OK  loop at 0x8005803e40: 259 instructions, encodings [4] bytes, aligned64 True, body: and t0,t1,t2
+OK  loop at 0x80058042c0: 259 instructions, encodings [4] bytes, aligned64 True, body: or t0,t1,t2
+OK  loop at 0x8005804740: 259 instructions, encodings [4] bytes, aligned64 True, body: add t0,t1,t2 ; add t0,t3,t4
+OK  loop at 0x8005804bc0: 259 instructions, encodings [4] bytes, aligned64 True, body: add t0,t1,t2
+OK  loop at 0x8005805040: 259 instructions, encodings [4] bytes, aligned64 True, body: xor t0,t1,t2
+OK  loop at 0x80058054c0: 259 instructions, encodings [4] bytes, aligned64 True, body: nop 
+loops 16, bad 0
+check_elf rc 0
+== sha256
+a987904b6cd322bff51e5913e3fe2af709f24e1d2dabf82c4138b552c0b4d6ea  work/build/kernel/intbits.elf
+aafdba4b7bce846c7ef18c41f3dbf2c776581179c20f39634bc168c23ca1e42f  work/intbits.text.bin
+  Class:                             ELF64
+  Machine:                           RISC-V
+  Entry point address:               0x8005801000
+  Flags:                             0x3, RVC, single-float ABI
+ [ 1] .text PROGBITS 0000008005801000 001000 00491e 00 AX 0 0 64
+ [ 2] .rodata PROGBITS 0000008005805920 005920 0000c0 00 A 0 0 4
+ [ 3] .bss NOBITS 00000080058059e0 000000 000000 00 WA 0 0 1
+ [ 0] GCC: () 15.1.0
+== the proposal's stated kernel ELF sha256 (request.md section 2): 50cb1d64... (prefix only)
+this build: DIFFERENT (a987904b...) - toolchains differ; reported, not judged
+== loop order check (this lane's script)
+OK  loop at 0x8005801100: 259 instructions, form split, op or, head mod 64 = 0
+OK  loop at 0x80058015c0: 259 instructions, form pair, op xor, head mod 64 = 0
+OK  loop at 0x8005801a40: 259 instructions, form pair, op sub, head mod 64 = 0
+OK  loop at 0x8005801ec0: 259 instructions, form pair, op and, head mod 64 = 0
+OK  loop at 0x8005802340: 259 instructions, form pair, op or, head mod 64 = 0
+OK  loop at 0x80058027c0: 259 instructions, form split, op add, head mod 64 = 0
+OK  loop at 0x8005802c40: 259 instructions, form split, op xor, head mod 64 = 0
+OK  loop at 0x80058030c0: 259 instructions, form split, op sub, head mod 64 = 0
+OK  loop at 0x8005803540: 259 instructions, form split, op and, head mod 64 = 0
+OK  loop at 0x80058039c0: 259 instructions, form same, op sub, head mod 64 = 0
+OK  loop at 0x8005803e40: 259 instructions, form same, op and, head mod 64 = 0
+OK  loop at 0x80058042c0: 259 instructions, form same, op or, head mod 64 = 0
+OK  loop at 0x8005804740: 259 instructions, form pair, op add, head mod 64 = 0
+OK  loop at 0x8005804bc0: 259 instructions, form same, op add, head mod 64 = 0
+OK  loop at 0x8005805040: 259 instructions, form same, op xor, head mod 64 = 0
+OK  loop at 0x80058054c0: 259 instructions, form nop, op nop, head mod 64 = 0
+loops 16; forms x ops found 16 of 16; missing none; duplicated none; unexpected none; bad 0
+loop order rc 0
+2026-11-13 16:30:45 PST

@@ -1,0 +1,32 @@
+nop              nop   nop  portA  0 portB  0 result  0 carry  0 cell  0 enc  0  the no-op sled: 32-bit nop
+add.same         same  add  portA  0 portB  0 result  0 carry  0 cell  0 enc  0  one add repeated, constant sources
+add.z            pair  add  portA  0 portB  0 result  0 carry  0 cell  0 enc  6  two adds alternating, equal sources: the add ladders' zero rung
+xor.z            pair  xor  portA  0 portB  0 result  0 carry  0 cell  0 enc  6  two xors alternating, equal sources: the xor arm's zero rung
+and.z            pair  and  portA  0 portB  0 result  0 carry  0 cell  0 enc  6  two ands alternating, equal sources: the and arms' zero rung
+add.a.f0         pair  add  portA 16 portB  0 result 16 carry  0 cell 16 enc  6  port A and the result change in the masked bits; port B held
+add.a.f1         pair  add  portA 16 portB  0 result 16 carry  0 cell 16 enc  6  port A and the result change in the masked bits; port B held
+add.a.f2         pair  add  portA 16 portB  0 result 16 carry  0 cell 16 enc  6  port A and the result change in the masked bits; port B held
+add.a.f3         pair  add  portA 16 portB  0 result 16 carry  0 cell 16 enc  6  port A and the result change in the masked bits; port B held
+add.a.f2.k4      pair  add  portA  4 portB  0 result  4 carry  0 cell  4 enc  6  port A and the result change in the masked bits; port B held
+add.a.f2.k8      pair  add  portA  8 portB  0 result  8 carry  0 cell  8 enc  6  port A and the result change in the masked bits; port B held
+add.a.f12        pair  add  portA 32 portB  0 result 32 carry  0 cell 32 enc  6  port A and the result change in the masked bits; port B held
+add.a.all        pair  add  portA 64 portB  0 result 64 carry  0 cell 64 enc  6  port A and the result change in the masked bits; port B held
+add.b.f0         pair  add  portA  0 portB 16 result 16 carry  0 cell 16 enc  6  port B and the result change in the masked bits; port A held
+add.b.f2         pair  add  portA  0 portB 16 result 16 carry  0 cell 16 enc  6  port B and the result change in the masked bits; port A held
+add.s.f0         pair  add  portA 16 portB 16 result  0 carry  0 cell  0 enc  6  the masked bits move from port A to port B; result constant
+add.s.f2         pair  add  portA 16 portB 16 result  0 carry  0 cell  0 enc  6  the masked bits move from port A to port B; result constant
+xor.a.f2         pair  xor  portA 16 portB  0 result 16 carry  0 cell 16 enc  6  port A and the result change in the masked bits; port B held
+and.a.f1         pair  and  portA 16 portB  0 result  0 carry  0 cell  0 enc  6  port A and the result change in the masked bits; port B held
+and.a.f2         pair  and  portA 16 portB  0 result  0 carry  0 cell  0 enc  6  port A and the result change in the masked bits; port B held
+and.a.f3         pair  and  portA 16 portB  0 result  0 carry  0 cell  0 enc  6  port A and the result change in the masked bits; port B held
+add.cr.l0        pair  add  portA  1 portB  1 result  0 carry  0 cell  0 enc  6  result-held carry ladder: A = run of L ones from bit s plus one at bit s, B = one at bit s+L plus 0
+add.cr.l8        pair  add  portA  9 portB  1 result  0 carry  8 cell  0 enc  6  result-held carry ladder: A = run of L ones from bit s plus one at bit s, B = one at bit s+L plus 0
+add.cr.l16       pair  add  portA 17 portB  1 result  0 carry 16 cell  0 enc  6  result-held carry ladder: A = run of L ones from bit s plus one at bit s, B = one at bit s+L plus 0
+add.cr.l24       pair  add  portA 25 portB  1 result  0 carry 24 cell  0 enc  6  result-held carry ladder: A = run of L ones from bit s plus one at bit s, B = one at bit s+L plus 0
+add.cr.l31       pair  add  portA 32 portB  1 result  0 carry 31 cell  0 enc  6  result-held carry ladder: A = run of L ones from bit s plus one at bit s, B = one at bit s+L plus 0
+add.crb.l0       pair  add  portA  0 portB  1 result  1 carry  0 cell  1 enc  6  port-held carry ladder: A = run of L ones from bit s in both, B = 0 then one at bit s
+add.crb.l8       pair  add  portA  0 portB  1 result  9 carry  8 cell  9 enc  6  port-held carry ladder: A = run of L ones from bit s in both, B = 0 then one at bit s
+add.crb.l16      pair  add  portA  0 portB  1 result 17 carry 16 cell 17 enc  6  port-held carry ladder: A = run of L ones from bit s in both, B = 0 then one at bit s
+add.crb.l24      pair  add  portA  0 portB  1 result 25 carry 24 cell 25 enc  6  port-held carry ladder: A = run of L ones from bit s in both, B = 0 then one at bit s
+add.crb.l31      pair  add  portA  0 portB  1 result 32 carry 31 cell 32 enc  6  port-held carry ladder: A = run of L ones from bit s in both, B = 0 then one at bit s
+add.ripple       pair  add  portA  0 portB  1 result 64 carry 63 cell 64 enc  6  all ones plus zero, then all ones plus one: a carry through every position, every result bit flips

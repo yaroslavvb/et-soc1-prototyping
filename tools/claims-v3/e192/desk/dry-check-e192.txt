@@ -1,0 +1,33 @@
+# E192 desk check of code (reg-e192, Q176), Fri 13 Nov 2026 PST, on aifoundry2: the reference session's DRY mode (DRY=1 bash run_session.sh OUT 9), counted, and the order draw (scripts/s14_dry_order.sh, inside the no-device sandbox)
+# Nothing here is measured and nothing is a forecast. Paths are relative to the lane's scratch folder (work/: its copy of
+# proposal/src and its build; scripts/: the desk scripts, committed here as desk/*.py). Python: /usr/bin/python3 3.12.3, -I -B.
+
+2026-11-13 16:40:35 PST
+hostname here: aifoundry2
+== DRY session (noheater): rc 0; device calls 327 (host 327, heater 0); idle marks 20; passes 8 gaps
+   per pass (host calls a block): 3 36 36 36 36 36 36 36 36 36 
+   --seconds values:  3 --seconds 2; 324 --seconds 4;
+   --window values:  327 --window 240000000;
+   --stop-file present on every device call: yes
+   files written in the dry OUT: work/dry-noheater/session.log 
+== DRY session (heater): rc 0; device calls 328 (host 327, heater 1); idle marks 20; passes 8 gaps
+   per pass (host calls a block): 3 36 36 36 36 36 36 36 36 36 
+   --seconds values:  4 --seconds 2; 324 --seconds 4;
+   --window values:  327 --window 240000000;
+   --stop-file present on every device call: yes
+   files written in the dry OUT: work/dry-heater/session.log 
+== order on aifoundry3 (run_block.py's draw, written out)
+host 'aifoundry3'; anchor add.a.f2; 32 arms shuffled a pass (the anchor's arm among them: True); 36 runs a pass with the two burn-ins and the two anchors
+smoke block (pass -1): nop, add.a.f2, add.cr.l31 (run_block.py SMOKE_ARMS; 2 s each; no burn-in, no anchor)
+pass 0 (the registered warm-up): burnin:add.a.f2 burnin:add.a.f2 anchor_first:add.a.f2 add.cr.l0 xor.a.f2 add.a.f1 add.crb.l31 add.a.f12 add.cr.l31 add.ripple add.crb.l8 add.b.f0 add.a.f3 add.crb.l0 add.a.f2 add.crb.l24 add.a.f2.k8 add.s.f2 add.a.f0 and.a.f1 add.crb.l16 and.a.f2 add.a.all add.cr.l16 add.s.f0 and.z add.z add.same add.cr.l8 and.a.f3 add.a.f2.k4 xor.z add.cr.l24 nop add.b.f2 anchor_last:add.a.f2
+pass 1: burnin:add.a.f2 burnin:add.a.f2 anchor_first:add.a.f2 xor.a.f2 add.s.f0 add.same add.b.f2 add.a.f2.k8 add.s.f2 xor.z add.cr.l0 add.z add.cr.l31 add.a.f2.k4 nop add.a.all add.a.f1 add.a.f3 and.a.f1 and.a.f3 add.crb.l8 add.crb.l31 and.z add.a.f12 add.ripple add.crb.l24 add.cr.l8 and.a.f2 add.cr.l16 add.crb.l0 add.crb.l16 add.a.f0 add.cr.l24 add.b.f0 add.a.f2 anchor_last:add.a.f2
+pass 2: burnin:add.a.f2 burnin:add.a.f2 anchor_first:add.a.f2 add.same add.crb.l0 add.a.f2.k8 add.cr.l16 add.cr.l24 xor.a.f2 add.cr.l31 add.crb.l31 add.b.f2 add.z and.a.f3 add.cr.l8 nop add.cr.l0 add.crb.l8 add.ripple add.a.f1 add.crb.l16 add.a.f12 add.b.f0 and.z and.a.f2 add.crb.l24 add.a.f2 add.a.f2.k4 add.a.f3 add.s.f2 and.a.f1 add.a.f0 xor.z add.a.all add.s.f0 anchor_last:add.a.f2
+pass 3: burnin:add.a.f2 burnin:add.a.f2 anchor_first:add.a.f2 add.cr.l24 add.s.f0 xor.z add.a.f3 xor.a.f2 add.s.f2 nop add.crb.l8 add.a.f12 add.cr.l0 and.a.f2 add.a.f0 add.crb.l24 add.a.all add.z add.crb.l16 and.a.f1 add.a.f2.k4 add.b.f0 add.b.f2 add.same add.ripple add.crb.l31 add.cr.l16 add.a.f2 and.z add.cr.l31 add.cr.l8 add.a.f1 add.crb.l0 and.a.f3 add.a.f2.k8 anchor_last:add.a.f2
+pass 4: burnin:add.a.f2 burnin:add.a.f2 anchor_first:add.a.f2 add.a.f0 nop add.a.f2 add.cr.l31 add.crb.l16 and.a.f2 add.a.all add.crb.l24 add.cr.l24 add.cr.l16 add.s.f2 add.same add.ripple add.crb.l8 xor.a.f2 add.z add.a.f1 add.cr.l8 add.b.f0 add.a.f2.k8 and.z add.cr.l0 add.crb.l0 xor.z add.crb.l31 add.s.f0 add.a.f2.k4 add.a.f12 and.a.f3 add.a.f3 and.a.f1 add.b.f2 anchor_last:add.a.f2
+pass 5: burnin:add.a.f2 burnin:add.a.f2 anchor_first:add.a.f2 add.a.f2 add.crb.l16 add.s.f2 add.a.f1 and.z and.a.f1 and.a.f3 add.z add.same add.crb.l24 add.crb.l8 nop add.cr.l0 add.b.f2 add.cr.l31 add.a.f3 add.a.f12 add.crb.l0 add.a.f2.k4 add.cr.l8 add.crb.l31 add.cr.l16 and.a.f2 xor.z add.ripple add.a.f0 add.cr.l24 add.s.f0 add.a.f2.k8 xor.a.f2 add.b.f0 add.a.all anchor_last:add.a.f2
+pass 6: burnin:add.a.f2 burnin:add.a.f2 anchor_first:add.a.f2 add.cr.l0 add.a.f2.k8 add.crb.l16 add.crb.l0 and.a.f1 add.crb.l8 add.s.f0 and.z add.a.f3 add.s.f2 add.a.f12 add.b.f2 add.crb.l31 add.b.f0 add.a.all xor.a.f2 add.cr.l31 add.cr.l8 add.a.f1 add.a.f0 add.ripple add.cr.l16 add.a.f2.k4 xor.z add.z add.same and.a.f2 add.crb.l24 nop add.cr.l24 add.a.f2 and.a.f3 anchor_last:add.a.f2
+pass 7: burnin:add.a.f2 burnin:add.a.f2 anchor_first:add.a.f2 xor.a.f2 add.cr.l0 add.b.f2 add.cr.l8 add.crb.l8 add.crb.l24 and.a.f2 add.z add.s.f2 add.a.all add.a.f0 add.same add.a.f3 add.cr.l16 and.a.f1 and.z xor.z add.crb.l0 nop add.a.f1 add.a.f2 add.ripple add.a.f2.k8 add.cr.l31 add.a.f2.k4 add.b.f0 add.crb.l31 add.cr.l24 add.crb.l16 add.s.f0 and.a.f3 add.a.f12 anchor_last:add.a.f2
+pass 8: burnin:add.a.f2 burnin:add.a.f2 anchor_first:add.a.f2 xor.a.f2 add.cr.l31 add.cr.l0 add.crb.l0 add.cr.l16 xor.z add.a.f3 and.z add.same add.z and.a.f3 nop add.b.f0 add.a.f12 add.a.f2.k8 add.s.f0 add.cr.l24 add.s.f2 add.cr.l8 add.crb.l24 and.a.f2 add.crb.l16 add.a.all add.b.f2 add.a.f2.k4 add.a.f1 and.a.f1 add.crb.l31 add.a.f0 add.a.f2 add.crb.l8 add.ripple anchor_last:add.a.f2
+== the same draw for this host's name (as the DRY session above used), pass 1, against the DRY listing's pass 1
+pass 1 order: order_e192.py == the DRY listing (32 arms)
+2026-11-13 16:40:36 PST
