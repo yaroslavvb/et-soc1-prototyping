@@ -1,0 +1,44 @@
+E193 sitting B's data README, dated note 1: post hoc readings of committed files (decides nothing; scores nothing)
+data directory: 2026-11-15-e193-x04-clock-sitting-b-aifoundry3
+interpreter: python 3.12.3
+
+0. anchors
+  SHA256SUMS: 28 of 28 entries OK; with README.md and SHA256SUMS the data commit's 30 files
+  README.md sha256 b18f25baba311c086f7df75eb6fea8989b11693fcae33f0b6ebcf0f54a0a2f68
+  SHA256SUMS sha256 7717b426c27a92ba1995dc492b4d975a5cb5411ec4f2cd8953ec1611b07f5209
+  sitting A's session/session.log at its directory's SHA256SUMS (../2026-11-15-e193-x04-clock-sitting-a-aifoundry3/SHA256SUMS): yes
+
+1. the moments the README calls a first card command, the look, and the card-minutes
+  the session's first card command, its holder check: T0 1794772131 = 11:48:51 PST (session/first-card-command.txt; session/session.log line 6, and line 1's T0 1794772131)
+  k6's step 7 config read, as README.md gives it: 11:48:35 PST (line 77); 16 s before the holder check
+  k6's look (step 4), as README.md gives it: 11:22:29 PST (line 113); 1582 s before the holder check
+  the main run's end: 12:16:41 PST (session/session.log line 13); the session's end: 12:16:41 PST (line 15)
+  card-minutes to the session's end: from the holder check 27.83 (1670 s); from step 7's read 28.10 (1686 s); from the look 54.20 (3252 s); the cap 50
+  the runner's deadline as set: 12:36:51 PST (epoch 1794775011; session/session.log line 8) = the holder check + 2880 s (the cap 3000 s - 120 s: yes); the main run ended 20 min 10 s before it
+  had it counted from step 7's read: 12:36:35 PST (16 s earlier); the main run ended 19 min 54 s before that
+  sitting A's session end: 11:08:22 PST (../2026-11-15-e193-x04-clock-sitting-a-aifoundry3/session/session.log line 15); the rest opens 11:48:22 PST
+    to the look (11:22:29): 847 s (14 min 07 s), 14 whole minutes (under 40)
+    to step 7's read (11:48:35): 2413 s (40 min 13 s), 40 whole minutes (40 or more)
+    to the holder check (11:48:51): 2429 s (40 min 29 s), 40 whole minutes (40 or more)
+
+2. the peaks in each runner call's telemetry (board_w; the die = temp_c.minshire[0]; the clock = mhz.minion)
+  smoke/telemetry.jsonl.gz: 1035 samples, 1035 at 600 MHz, 11:48:51.339 to 11:50:34.898 PST
+    board max 32.19 W: 2 samples, first 11:50:19.574, last 11:50:19.674 PST
+    board min 22.47 W: 2 samples, first 11:49:22.393, last 11:49:22.493 PST
+    die max 50 C: 41 samples, first 11:50:18.173, last 11:50:26.986 PST
+    die min 49 C: 994 samples, first 11:48:51.339, last 11:50:34.898 PST
+  x04/telemetry.jsonl.gz: 15638 samples, 15638 at 600 MHz, 11:50:35.185 to 12:16:40.945 PST
+    board max 32.84 W: 2 samples, first 12:16:10.100, last 12:16:10.200 PST
+    board min 22.60 W: 2 samples, first 11:50:53.917, last 11:50:54.017 PST
+    die max 52 C: 1338 samples, first 11:52:45.957, last 12:16:23.218 PST
+    die min 49 C: 506 samples, first 11:50:35.185, last 11:51:37.376 PST
+
+3. the device output files against runs.jsonl and run.log
+  smoke/device-stdout.txt: 5 lines, 5 X04 lines; each equals exactly one record of smoke/runs.jsonl (57 records): yes; they are its last 5: yes; one device process: yes (pass, block, position, label [[0, 'C', 2, 'spin2']])
+  smoke/run.log: 10 device-process lines; the last: 'pass 0 block C spin2: 5 launches, exit 0'; its last line: 'done'
+  smoke/device-stderr.txt: 47 lines, 3686 bytes, 1 'PCIe target:' line (the device layer's report as one device process opens the ops node)
+  x04/device-stdout.txt: 10 lines, 10 X04 lines; each equals exactly one record of x04/runs.jsonl (1350 records): yes; they are its last 10: yes; one device process: yes (pass, block, position, label [[8, 'C', 14, 'spin2']])
+  x04/run.log: 135 device-process lines; the last: 'pass 8 block C spin2: 10 launches, exit 0'; its last line: 'done'
+  x04/device-stderr.txt: 47 lines, 3686 bytes, 1 'PCIe target:' line (the device layer's report as one device process opens the ops node)
+
+end
