@@ -1585,7 +1585,7 @@ These rounds built **no new space**: what they made is in this repository. Since
 | `4e964246` (Sat 23:09:13) | Q179 | E192's data, dated note 1; its record comes with Q179's records | 5 |
 | `117312b1` (Sat 23:28:16) | Q179 | E192's data, dated note 2 (the registered reducer's and checker's outputs); its record comes with Q179's records | 6 |
 
-By folder, in Q169–Q177's own commits: `tools/claims-v3/e190/` 105 (17 + 38 + 40 + 10), `tools/claims-v3/e191/` 16, `tools/claims-v3/e183/` 28, `tools/claims-v3/e192/` 68, `tools/claims-v3/e193/` 65, E190's data 439, E183's data 116, E189's data 239. **The hash lists** at `4e964246`, these records' base (every tracked file whose name holds SHA256SUMS; paths read from the top, or beside the list where that reads more): 203 lists, 7,522 entries, 7,505 OK, the 17 others E85's code list, as before. No E191 and no E193 datum is in any ref.
+By folder, in Q169–Q177's own commits: `tools/claims-v3/e190/` 105 (17 + 38 + 40 + 10), `tools/claims-v3/e191/` 16, `tools/claims-v3/e183/` 28 *(dated, Sun 15 Nov 2026, after Q177's records verifier: 42 with Q170's `9ae55d39`, 14 + 28; with it the folders sum to 1,090, the files of these rounds' 20 commits)*, `tools/claims-v3/e192/` 68, `tools/claims-v3/e193/` 65, E190's data 439, E183's data 116, E189's data 239. **The hash lists** at `4e964246`, these records' base (every tracked file whose name holds SHA256SUMS; paths read from the top, or beside the list where that reads more): 203 lists, 7,522 entries, 7,505 OK, the 17 others E85's code list, as before. No E191 and no E193 datum is in any ref.
 
 ## The camera and the details panel (30 September)
 
