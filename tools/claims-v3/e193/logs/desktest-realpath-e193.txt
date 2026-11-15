@@ -1,0 +1,519 @@
+E193 real-path desk test, 2026-11-14 20:26:09 PST, /usr/bin/python3 3.12.3; the stand-in box's root holds the harness's files copied from the clone; the session, the runner, E128's guard, the checker and the collector are the kit's own files at their sha256
+   39 synced files; harness-e193.json 958c020325b827ab...; session_e193.sh 5c151f11b5367cb4...; run_x04.py 26d0886225618288...
+   [H3] sitting A: exit 3 after 636 s; session dir T1794716771
+     | session start (T0 1794716771 = 20:26:11 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:24:11 PST (epoch 1794720251: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794716771/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 1; stop: card not free for 10 minutes (pass 0 block D): lock:etsoc-shire0.lock otheruser 4244 00:03 someone-elses-block.sh
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: card not free for 10 minutes (pass 0 block D): lock:etsoc-shire0.lock otheruser 4244 00:03 someone-elses-block.sh; the runn
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794716771)
+   [PA] sitting A: exit 1 after 710 s; session dir T1794716772
+     | session start (T0 1794716772 = 20:26:12 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:24:12 PST (epoch 1794720252: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794716772/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 0; no stop: done
+     | SMOKE GO: 10 of 10 device processes exit 0 as registered, 57 launches all ok, the train 12 of 12 (3 a segment); telemetry 1093 samples, every one at 600 MHz, board max 35.27 W, die max 53 C (below eve
+     | main run start: run_x04.py build/e193/T1794716772/x04 --blocks S,D,W,T (9 passes, pass 0 the registered warm-up)
+     | main run stopped: runner rc 1; stop: stop file; the passes done stand (E193.md 11)
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794716772)
+-> PASS (PA exit: session exit 1, want 1)
+-> PASS (PA no gate: no GATE-STOP line (0))
+-> PASS (PA end: 'session end', MANIFEST.sha256 verifying (26 files) and session.rc 1)
+-> PASS (PA nothing left: processes of the case left: [])
+-> PASS (PA control: while the main run ran, the driver's scan saw 6 processes of the case (the session, the runner, its sampler ...): its later empty scans mean the case's processes ended, not a blind scan)
+-> PASS (PA deadline: deadline 1794720252 = first card command 1794716772 + 3,480 s)
+-> PASS (PA order: harness, preflight, binaries, first card command, start config, SMOKE GO, main run, its stop, closing config: all in the log)
+-> PASS (PA passes: smoke 10 calls; main pass 0 26, pass 1 26, pass 2 0 calls; every exit 0)
+-> PASS (PA records: 624 launch records, every one ok with rc 0, host aifoundry3)
+-> PASS (PA idle: idle_ref once, idle_down waits 4, card_busy 0 (the sampler exempt by its pid))
+-> PASS (PA calls: et-who --check 14 (the session's 1, then before each block), samplers 2 (each ended by SIGTERM), host calls 62 under timeout -k 1 10, config reads 2 under flock -n and timeout 10)
+-> PASS (PA card 0: both config reads ran with ET_DEVICES=0; the session counted one ops node, /dev/et0_ops, before its first card read)
+-> PASS (PA collected: COLLECTED data-PA: sitting A; 29 files in SHA256SUMS; the scrub clean (no /home/ path, no login); card-minutes 11.82; session rc 1)
+-> PASS (PA box bytes: the collected runs.jsonl and the unpacked telemetry equal the box's manifest)
+-> PASS (PA reduced: the registered reducer (98bbc174...) rc 0: 16 arms and 6 trains reduced (want 16 and 6), each with [1] measured passes (want 1), the anchor spin2 5 runs (want 5))
+-> PASS (PA checks: CHECKS READ: 1 FAIL, 2 NOT COMPUTED, 2 NOT COMPUTED, 3 PASS, 4 REPORTED, 5 REPORTED, 6 FAIL, 7 REPORTED, 8 REPORTED, 9 REPORTED)
+   reducer's table (stand-in watts, not a measurement):
+     | arm             n  board W     se minion W pJ/wmc rail slots/c/h
+     | duty100         1    1.121  0.000    1.171       1.977    0.3900
+     | duty33          1    0.930  0.000    0.519       0.877    0.1287
+     | duty33f         1    0.928  0.000    0.561       0.947    0.1286
+     | duty33k         1    0.928  0.000    0.557       0.941    0.1283
+     | duty67          1    1.469  0.000    0.813       1.373    0.2613
+     | spin2           5    1.251  0.001    0.767       1.295    0.3900
+     | tk              1    0.298  0.000    0.169       0.000    0.0000
+     | tk_l100         1    0.300  0.000    0.167       0.000    0.0000
+     | tk_l200         1    0.302  0.000    0.116       0.000    0.0000
+     | tk_s11          1    0.101  0.000    0.053       0.000    0.0000
+     | tk_s2           1    0.019  0.000    0.006       0.000    0.0000
+     | tk_s21          1    0.194  0.000    0.107       0.000    0.0000
+     | w15             1    0.607  0.000    0.356       1.244    0.3900
+     | w23             1    0.930  0.000    0.544       1.238    0.3900
+     | w7              1    0.282  0.000    0.109       0.812    0.3900
+     | wait2           1    0.398  0.000    0.166       0.281    0.0000
+     | tr_faddps_fadds     1 B-A board  -0.981 +- 0.000 W, minion   1.611 W
+     | tr_packed_spread    1 B-A board   0.011 +- 0.000 W, minion   0.109 W
+     | tr_spin1_spin2      1 B-A board   0.645 +- 0.000 W, minion   0.233 W
+     | tr_spread_cluster   1 B-A board  -0.008 +- 0.000 W, minion   0.497 W
+     | tr_tk_spin1         1 B-A board   0.307 +- 0.000 W, minion   0.316 W
+     | tr_tk_stall2        1 B-A board   0.679 +- 0.000 W, minion   0.161 W
+     | fit tk_shires: slope 0.009293, intercept -0.000368 W
+     | fit tk_launches: slope 0.0001468, intercept 0.2989 W
+     | fit duty: slope 0.8122, intercept 0.5735 W
+     | fit workers: slope 0.04039, intercept 8.879e-05 W
+   [K1] sitting A: exit 3 after 33 s; session dir T1794717483
+     | session start (T0 1794717483 = 20:38:03 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:36:03 PST (epoch 1794720963: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794717483/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 1; stop: board above 65 W on three samples in a row
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: board above 65 W on three samples in a row; the runner's log does not end 'done'; the calls are not the registered smoke's:
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794717483)
+-> PASS (K1 exit: session exit 3, want 3)
+-> PASS (K1 gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: board above 65 W on three samples in a row; the runner's log does not end 'done'; th)
+-> PASS (K1 end: 'session end', MANIFEST.sha256 verifying (20 files) and session.rc 3)
+-> PASS (K1 nothing left: processes of the case left: [])
+-> PASS (K1 stop line: stop: board above 65 W on three samples in a row; no main run)
+   [K2] sitting A: exit 3 after 33 s; session dir T1794717517
+     | session start (T0 1794717517 = 20:38:37 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:36:37 PST (epoch 1794720997: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794717517/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 1; stop: die reading 70 C
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: die reading 70 C; the runner's log does not end 'done'; the calls are not the registered smoke's: [('S', 'spin2')] against 
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794717517)
+-> PASS (K2 exit: session exit 3, want 3)
+-> PASS (K2 gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: die reading 70 C; the runner's log does not end 'done'; the calls are not the regist)
+-> PASS (K2 end: 'session end', MANIFEST.sha256 verifying (20 files) and session.rc 3)
+-> PASS (K2 nothing left: processes of the case left: [])
+-> PASS (K2 stop line: stop: die reading 70 C; no main run)
+   [K3] sitting A: exit 3 after 33 s; session dir T1794717551
+     | session start (T0 1794717551 = 20:39:11 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:37:11 PST (epoch 1794721031: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794717551/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 1; stop: minion clock 500, not 600 MHz, on three samples in a row
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: minion clock 500, not 600 MHz, on three samples in a row; the runner's log does not end 'done'; the calls are not the regis
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794717551)
+-> PASS (K3 exit: session exit 3, want 3)
+-> PASS (K3 gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: minion clock 500, not 600 MHz, on three samples in a row; the runner's log does not )
+-> PASS (K3 end: 'session end', MANIFEST.sha256 verifying (20 files) and session.rc 3)
+-> PASS (K3 nothing left: processes of the case left: [])
+-> PASS (K3 stop line: stop: minion clock 500, not 600 MHz, on three samples in a row; no main run)
+   [K4] sitting A: exit 3 after 41 s; session dir T1794717585
+     | session start (T0 1794717585 = 20:39:45 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:37:45 PST (epoch 1794721065: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794717585/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 1; stop: telemetry not growing for 5 s
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: telemetry not growing for 5 s; the runner's log does not end 'done'; the calls are not the registered smoke's: [('S', 'spin
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794717585)
+-> PASS (K4 exit: session exit 3, want 3)
+-> PASS (K4 gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: telemetry not growing for 5 s; the runner's log does not end 'done'; the calls are n)
+-> PASS (K4 end: 'session end', MANIFEST.sha256 verifying (20 files) and session.rc 3)
+-> PASS (K4 nothing left: processes of the case left: [])
+-> PASS (K4 stop line: stop: telemetry not growing for 5 s; no main run)
+   [K5] sitting A: exit 3 after 34 s; session dir T1794717627
+     | session start (T0 1794717627 = 20:40:27 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:38:27 PST (epoch 1794721107: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794717627/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 1; stop: tk: device process exit 1 (a launch that did not finish: tell the lab admin)
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: tk: device process exit 1 (a launch that did not finish: tell the lab admin); the runner's log does not end 'done'; the cal
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794717627)
+-> PASS (K5 exit: session exit 3, want 3)
+-> PASS (K5 gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: tk: device process exit 1 (a launch that did not finish: tell the lab admin); the ru)
+-> PASS (K5 end: 'session end', MANIFEST.sha256 verifying (21 files) and session.rc 3)
+-> PASS (K5 nothing left: processes of the case left: [])
+-> PASS (K5 stop line: stop: tk: device process exit 1 (a launch that did not finish: tell the lab admin); no main run)
+   [K6] sitting A: exit 3 after 46 s; session dir T1794717662
+     | session start (T0 1794717662 = 20:41:02 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:39:02 PST (epoch 1794721142: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794717662/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 1; stop: three device processes returned an incomplete launch
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: three device processes returned an incomplete launch; the runner's log does not end 'done'; the calls are not the registere
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794717662)
+-> PASS (K6 exit: session exit 3, want 3)
+-> PASS (K6 gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: three device processes returned an incomplete launch; the runner's log does not end )
+-> PASS (K6 end: 'session end', MANIFEST.sha256 verifying (20 files) and session.rc 3)
+-> PASS (K6 nothing left: processes of the case left: [])
+-> PASS (K6 stop line: stop: three device processes returned an incomplete launch; no main run)
+   [K7] sitting A: exit 3 after 43 s; session dir T1794717709
+     | session start (T0 1794717709 = 20:41:49 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:39:49 PST (epoch 1794721189: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794717709/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 1; stop: tk: device process killed by timeout (tell the lab admin)
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: tk: device process killed by timeout (tell the lab admin); the runner's log does not end 'done'; the calls are not the regi
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794717709)
+-> PASS (K7 exit: session exit 3, want 3)
+-> PASS (K7 gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: tk: device process killed by timeout (tell the lab admin); the runner's log does not)
+-> PASS (K7 end: 'session end', MANIFEST.sha256 verifying (21 files) and session.rc 3)
+-> PASS (K7 nothing left: processes of the case left: [])
+-> PASS (K7 stop line: stop: tk: device process killed by timeout (tell the lab admin); no main run)
+   [K3N] sitting A: exit 3 after 59 s; session dir T1794717753
+     | session start (T0 1794717753 = 20:42:33 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:40:33 PST (epoch 1794721233: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794717753/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 1; stop: stop file
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; the runner's log does not end 'done'; the calls are not the registered smoke's: [('S', 'spin2'), ('S', 'tk'), ('D', 'spin2'), ('D', 
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794717753)
+-> PASS (K3N exit: session exit 3, want 3)
+-> PASS (K3N gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; the runner's log does not end 'done'; the calls are not the registered smoke's: [('S', 'spin2)
+-> PASS (K3N end: 'session end', MANIFEST.sha256 verifying (19 files) and session.rc 3)
+-> PASS (K3N nothing left: processes of the case left: [])
+-> PASS (K3N no stop: stop: stop file (not the clock line); incomplete events 0)
+   [K6N] sitting A: exit 3 after 57 s; session dir T1794717813
+     | session start (T0 1794717813 = 20:43:33 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:41:33 PST (epoch 1794721293: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794717813/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 1; stop: stop file
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; the runner's log does not end 'done'; the calls are not the registered smoke's: [('S', 'spin2'), ('S', 'tk'), ('D', 'spin2'), ('D', 
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794717813)
+-> PASS (K6N exit: session exit 3, want 3)
+-> PASS (K6N gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; the runner's log does not end 'done'; the calls are not the registered smoke's: [('S', 'spin2)
+-> PASS (K6N end: 'session end', MANIFEST.sha256 verifying (19 files) and session.rc 3)
+-> PASS (K6N nothing left: processes of the case left: [])
+-> PASS (K6N no stop: stop: stop file (not the incomplete line); incomplete events 1)
+   [K6S] sitting A: exit 3 after 109 s; session dir T1794717871
+     | session start (T0 1794717871 = 20:44:31 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:42:31 PST (epoch 1794721351: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794717871/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 0; no stop: done
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: tr_tk_spin1 (block T) had 11 launches; tr_tk_spin1 (block T): a launch not ok, or a record with an exit other than 0; tr_tk_spin1: segments {0: 3, 1: 3, 
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794717871)
+-> PASS (K6S exit: session exit 3, want 3)
+-> PASS (K6S gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: tr_tk_spin1 (block T) had 11 launches; tr_tk_spin1 (block T): a launch not ok, or a record with an exit other than)
+-> PASS (K6S end: 'session end', MANIFEST.sha256 verifying (18 files) and session.rc 3)
+-> PASS (K6S nothing left: processes of the case left: [])
+-> PASS (K6S short train: the runner's short_train event and its '(short train: dropped)'; the gate names the train)
+   [H1] sitting A: exit 3 after 0 s; session dir T1794717982
+     | session start (T0 1794717982 = 20:46:22 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | GATE-STOP: the card is held: et-who --check lists 1 holder line(s) (no device opened)
+     | session end (T0 1794717982)
+-> PASS (H1 exit: session exit 3, want 3)
+-> PASS (H1 gate: GATE-STOP: the card is held: et-who --check lists 1 holder line(s) (no device opened))
+-> PASS (H1 end: 'session end', MANIFEST.sha256 verifying (6 files) and session.rc 3)
+-> PASS (H1 nothing left: processes of the case left: [])
+-> PASS (H1 nothing opened: no config read, no sampler, no host call)
+   [H2] sitting A: exit 3 after 66 s; session dir T1794717983
+     | session start (T0 1794717983 = 20:46:23 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:44:23 PST (epoch 1794721463: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794717983/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 1; stop: stop file
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; the runner's log does not end 'done'; the calls are not the registered smoke's: [('S', 'spin2'), ('S', 'tk')] against [('S', 'spin2'
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794717983)
+-> PASS (H2 exit: session exit 3, want 3)
+-> PASS (H2 gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; the runner's log does not end 'done'; the calls are not the registered smoke's: [('S', 'spin2)
+-> PASS (H2 end: 'session end', MANIFEST.sha256 verifying (19 files) and session.rc 3)
+-> PASS (H2 nothing left: processes of the case left: [])
+-> PASS (H2 holder read: the runner read the other holder's line at its next block, waited, then the stop file)
+   [L1] sitting A: exit 3 after 0 s; session dir T1794718050
+     | session start (T0 1794718050 = 20:47:30 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | GATE-STOP: no start config read came back (the card lock held, or the guard refused): : no main run
+     | session end (T0 1794718050)
+-> PASS (L1 exit: session exit 3, want 3)
+-> PASS (L1 gate: GATE-STOP: no start config read came back (the card lock held, or the guard refused): : no main run)
+-> PASS (L1 end: 'session end', MANIFEST.sha256 verifying (8 files) and session.rc 3)
+-> PASS (L1 nothing left: processes of the case left: [])
+-> PASS (L1 no smoke: no smoke, no host call)
+   [L2] sitting A: exit 1 after 144 s; session dir T1794718051
+     | session start (T0 1794718051 = 20:47:31 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:45:31 PST (epoch 1794721531: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794718051/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 0; no stop: done
+     | SMOKE GO: 10 of 10 device processes exit 0 as registered, 57 launches all ok, the train 12 of 12 (3 a segment); telemetry 1093 samples, every one at 600 MHz, board max 35.27 W, die max 53 C (below eve
+     | main run start: run_x04.py build/e193/T1794718051/x04 --blocks S,D,W,T (9 passes, pass 0 the registered warm-up)
+     | main run stopped: runner rc 1; stop: stop file; the passes done stand (E193.md 11)
+     | closing config read: none came back ()
+     | session end (T0 1794718051)
+-> PASS (L2 exit: session exit 1, want 1)
+-> PASS (L2 no gate: no GATE-STOP line (0))
+-> PASS (L2 end: 'session end', MANIFEST.sha256 verifying (23 files) and session.rc 1)
+-> PASS (L2 nothing left: processes of the case left: [])
+-> PASS (L2 lock read: the main runner's flock failed at its first holder check (et-who saw no holder: the lock's holder is outside the case's namespace), it waited, the operator's stop ended it; the closing read found the lock held, reported)
+   [G1] sitting A: exit 3 after 108 s; session dir T1794718196
+     | session start (T0 1794718196 = 20:49:56 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:47:56 PST (epoch 1794721676: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794718196/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 0; no stop: done
+     | GATE-STOP: the smoke gate failed: SMOKE NO-GO: spin2 (block S) exited 3; spin2 (block S): a launch not ok, or a record with an exit other than 0: no main run
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794718196)
+-> PASS (G1 exit: session exit 3, want 3)
+-> PASS (G1 gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: spin2 (block S) exited 3; spin2 (block S): a launch not ok, or a record with an exit other than 0: no main run)
+-> PASS (G1 end: 'session end', MANIFEST.sha256 verifying (18 files) and session.rc 3)
+-> PASS (G1 nothing left: processes of the case left: [])
+-> PASS (G1 no main: no main run; the closing config read after the gate stop)
+   [G2] sitting A: exit 3 after 0 s; session dir T1794718305
+     | session start (T0 1794718305 = 20:51:45 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | GATE-STOP: the start config is not TDP 0 W / 65 C / 600 MHz as found: {"tdp_w":5,"temp_threshold_c":65,"power_state":"managed_power","minion_mhz":600}: no main run
+     | session end (T0 1794718305)
+-> PASS (G2 exit: session exit 3, want 3)
+-> PASS (G2 gate: GATE-STOP: the start config is not TDP 0 W / 65 C / 600 MHz as found: {"tdp_w":5,"temp_threshold_c":65,"power_state":"managed_power","minion_mhz":600}: no main r)
+-> PASS (G2 end: 'session end', MANIFEST.sha256 verifying (8 files) and session.rc 3)
+-> PASS (G2 nothing left: processes of the case left: [])
+-> PASS (G2 no smoke: no smoke)
+   [N2] sitting A: exit 3 after 0 s; session dir T1794718306
+     | session start (T0 1794718306 = 20:51:46 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | GATE-STOP: the host shows ops node(s) [/dev/et0_ops /dev/et1_ops], not exactly /dev/et0_ops: E193 runs on one card, card 0 (E193.md 3) (no device opened)
+     | session end (T0 1794718306)
+-> PASS (N2 exit: session exit 3, want 3)
+-> PASS (N2 gate: GATE-STOP: the host shows ops node(s) [/dev/et0_ops /dev/et1_ops], not exactly /dev/et0_ops: E193 runs on one card, card 0 (E193.md 3) (no device opened))
+-> PASS (N2 end: 'session end', MANIFEST.sha256 verifying (6 files) and session.rc 3)
+-> PASS (N2 nothing left: processes of the case left: [])
+-> PASS (N2 one card: the holder check ran, then the session's own count of ops nodes stopped it: no config read, no sampler, no smoke, no host call)
+   [N0] sitting A: exit 3 after 0 s; session dir T1794718307
+     | session start (T0 1794718307 = 20:51:47 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | GATE-STOP: the host shows ops node(s) [none], not exactly /dev/et0_ops: E193 runs on one card, card 0 (E193.md 3) (no device opened)
+     | session end (T0 1794718307)
+-> PASS (N0 exit: session exit 3, want 3)
+-> PASS (N0 gate: GATE-STOP: the host shows ops node(s) [none], not exactly /dev/et0_ops: E193 runs on one card, card 0 (E193.md 3) (no device opened))
+-> PASS (N0 end: 'session end', MANIFEST.sha256 verifying (6 files) and session.rc 3)
+-> PASS (N0 nothing left: processes of the case left: [])
+-> PASS (N0 one card: the holder check ran, then the session's own count of ops nodes stopped it: no config read, no sampler, no smoke, no host call)
+   [D1] sitting A: exit 1 after 217 s; session dir T1794718308
+     | session start (T0 1794718308 = 20:51:48 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 20:55:18 PST (epoch 1794718518: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794718308/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 0; no stop: done
+     | SMOKE GO: 10 of 10 device processes exit 0 as registered, 57 launches all ok, the train 12 of 12 (3 a segment); telemetry 1093 samples, every one at 600 MHz, board max 35.27 W, die max 53 C (below eve
+     | main run start: run_x04.py build/e193/T1794718308/x04 --blocks S,D,W,T (9 passes, pass 0 the registered warm-up)
+     | main run stopped: runner rc 1; stop: deadline; the passes done stand (E193.md 11)
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794718308)
+-> PASS (D1 exit: session exit 1, want 1)
+-> PASS (D1 no gate: no GATE-STOP line (0))
+-> PASS (D1 end: 'session end', MANIFEST.sha256 verifying (25 files) and session.rc 1)
+-> PASS (D1 nothing left: processes of the case left: [])
+-> PASS (D1 deadline: deadline 1794718518 = the last end - 180 s; the main run stopped at it after 9 calls)
+   [PB] sitting B: exit 0 after 1807 s; session dir T1794716770
+     | session start (T0 1794716770 = 20:26:10 PST; E193 sitting B, blocks C, cap 50 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:14:10 PST (epoch 1794719650: the first card command + 3000 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794716770/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 0; no stop: done
+     | SMOKE GO: 10 of 10 device processes exit 0 as registered, 57 launches all ok, the train 12 of 12 (3 a segment); telemetry 1093 samples, every one at 600 MHz, board max 35.27 W, die max 53 C (below eve
+     | main run start: run_x04.py build/e193/T1794716770/x04 --blocks C (9 passes, pass 0 the registered warm-up)
+     | main run end: runner rc 0, every pass (no stop: done)
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794716770)
+   [T1] sitting A: exit 1 after 145 s; session dir T1794718526
+     | session start (T0 1794718526 = 20:55:26 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:53:26 PST (epoch 1794722006: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794718526/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 0; no stop: done
+     | SMOKE GO: 10 of 10 device processes exit 0 as registered, 57 launches all ok, the train 12 of 12 (3 a segment); telemetry 1093 samples, every one at 600 MHz, board max 35.27 W, die max 53 C (below eve
+     | main run start: run_x04.py build/e193/T1794718526/x04 --blocks S,D,W,T (9 passes, pass 0 the registered warm-up)
+     | main run stopped: runner rc 143; stop: signal 15; the passes done stand (E193.md 11)
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794718526)
+-> PASS (T1 exit: session exit 1, want 1)
+-> PASS (T1 no gate: no GATE-STOP line (0))
+-> PASS (T1 end: 'session end', MANIFEST.sha256 verifying (25 files) and session.rc 1)
+-> PASS (T1 nothing left: processes of the case left: [])
+-> PASS (T1 sent: SIGTERM sent to the main runner (pid 250871) while a launch ran)
+-> PASS (T1 signal: rc 143, 'signal 15'; the runner ended the device process, then its sampler (SIGTERM))
+   [X1] sitting A: exit 4 after 155 s; session dir T1794718672
+     | session start (T0 1794718672 = 20:57:52 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:55:52 PST (epoch 1794722152: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794718672/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 0; no stop: done
+     | SMOKE GO: 10 of 10 device processes exit 0 as registered, 57 launches all ok, the train 12 of 12 (3 a segment); telemetry 1093 samples, every one at 600 MHz, board max 35.27 W, die max 53 C (below eve
+     | main run start: run_x04.py build/e193/T1794718672/x04 --blocks S,D,W,T (9 passes, pass 0 the registered warm-up)
+     | main run ended without a registered stop: runner rc 1; no stop recorded (the runner's log does not end 'done'): a crash, not a registered stop (E193.md 11 has no row for it): reported, nothing killed;
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794718672)
+-> PASS (X1 exit: session exit 4, want 4)
+-> PASS (X1 no gate: no GATE-STOP line (0))
+-> PASS (X1 end: 'session end', MANIFEST.sha256 verifying (25 files) and session.rc 4)
+-> PASS (X1 nothing left: processes of the case left: [])
+-> PASS (X1 crash read: the runner raised on the malformed X04 line (a traceback in runner.out, no STOPPED), its sampler ended by SIGTERM; the session wrote 'main run ended without a registered stop', never 'main run stopped', made the closing read, exit 4)
+-> PASS (X1 collected: the collector on the crash: rc 0; facts session_rc 4, its crash line kept)
+   [O1] sitting A: exit 3 after 1 s; session dir T1794718828
+     | session start (T0 1794718828 = 21:00:28 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | GATE-STOP: a device process of ours is running (1) (no device opened)
+     | session end (T0 1794718828)
+-> PASS (O1 exit: session exit 3, want 3)
+-> PASS (O1 gate: GATE-STOP: a device process of ours is running (1) (no device opened))
+-> PASS (O1 end: 'session end', MANIFEST.sha256 verifying (6 files) and session.rc 3)
+-> PASS (O1 nothing left: processes of the case left: [])
+   [B1] sitting A: exit 3 after 0 s; session dir T1794718830
+     | session start (T0 1794718830 = 21:00:30 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | GATE-STOP: harness-e193.json reads 958c020325b827ab5ef05b160b7e534ef85cf9efcbdedc6641375bc50f29539a, not the launch's 0000000000000000000000000000000000000000000000000000000000000000 (no device opened
+     | session end (T0 1794718830)
+-> PASS (B1 exit: session exit 3, want 3)
+-> PASS (B1 gate: GATE-STOP: harness-e193.json reads 958c020325b827ab5ef05b160b7e534ef85cf9efcbdedc6641375bc50f29539a, not the launch's 0000000000000000000000000000000000000000000)
+-> PASS (B1 end: 'session end', MANIFEST.sha256 verifying (1 files) and session.rc 3)
+-> PASS (B1 nothing left: processes of the case left: [])
+   [B2] sitting A: exit 3 after 0 s; session dir T1794718831
+     | session start (T0 1794718831 = 21:00:31 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | GATE-STOP: the harness check failed: HARNESS FAIL: differs tools/claims-v3/e193/check_e193.py (no device opened)
+     | session end (T0 1794718831)
+-> PASS (B2 exit: session exit 3, want 3)
+-> PASS (B2 gate: GATE-STOP: the harness check failed: HARNESS FAIL: differs tools/claims-v3/e193/check_e193.py (no device opened))
+-> PASS (B2 end: 'session end', MANIFEST.sha256 verifying (2 files) and session.rc 3)
+-> PASS (B2 nothing left: processes of the case left: [])
+   [B3] sitting A: exit 3 after 0 s; session dir T1794718832
+     | session start (T0 1794718832 = 21:00:32 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | GATE-STOP: the host or the kernel is not the one today's build recorded (build/claims-v3/aifoundry3/e193/build/x04clock-built.txt) (no device opened)
+     | session end (T0 1794718832)
+-> PASS (B3 exit: session exit 3, want 3)
+-> PASS (B3 gate: GATE-STOP: the host or the kernel is not the one today's build recorded (build/claims-v3/aifoundry3/e193/build/x04clock-built.txt) (no device opened))
+-> PASS (B3 end: 'session end', MANIFEST.sha256 verifying (3 files) and session.rc 3)
+-> PASS (B3 nothing left: processes of the case left: [])
+   [B4] sitting A: exit 3 after 0 s; session dir T1794718833
+     | session start (T0 1794718833 = 21:00:33 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | GATE-STOP: this is aifoundry2, not aifoundry3: E193 runs on aifoundry3 card 0 only (E193.md 3) (no device opened)
+     | session end (T0 1794718833)
+-> PASS (B4 exit: session exit 3, want 3)
+-> PASS (B4 gate: GATE-STOP: this is aifoundry2, not aifoundry3: E193 runs on aifoundry3 card 0 only (E193.md 3) (no device opened))
+-> PASS (B4 end: 'session end', MANIFEST.sha256 verifying (1 files) and session.rc 3)
+-> PASS (B4 nothing left: processes of the case left: [])
+   [S1] sitting A: exit 3 after 3 s; session dir T1794718834
+     | session start (T0 1794718834 = 21:00:34 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:58:34 PST (epoch 1794722314: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | GATE-STOP: the operator's stop file (build/e193/T1794718834/STOP) is present before the smoke: no main run
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794718834)
+-> PASS (S1 exit: session exit 3, want 3)
+-> PASS (S1 gate: GATE-STOP: the operator's stop file (build/e193/T1794718834/STOP) is present before the smoke: no main run)
+-> PASS (S1 end: 'session end', MANIFEST.sha256 verifying (11 files) and session.rc 3)
+-> PASS (S1 nothing left: processes of the case left: [])
+-> PASS (S1 no smoke: no smoke)
+-> PASS (S1 cap start: first-card-command.txt 1794718834 stamped before the holder check began (1794718834.185: et-who then waited 3 s))
+   [S1B] sitting A: exit 3 after 110 s; session dir T1794718838
+     | session start (T0 1794718838 = 21:00:38 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 21:58:38 PST (epoch 1794722318: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794718838/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 0; no stop: done
+     | SMOKE GO: 10 of 10 device processes exit 0 as registered, 57 launches all ok, the train 12 of 12 (3 a segment); telemetry 1093 samples, every one at 600 MHz, board max 35.27 W, die max 53 C (below eve
+     | GATE-STOP: the operator's stop file (build/e193/T1794718838/STOP) is present before the main run: no main run
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794718838)
+-> PASS (S1B exit: session exit 3, want 3)
+-> PASS (S1B gate: GATE-STOP: the operator's stop file (build/e193/T1794718838/STOP) is present before the main run: no main run)
+-> PASS (S1B end: 'session end', MANIFEST.sha256 verifying (19 files) and session.rc 3)
+-> PASS (S1B nothing left: processes of the case left: [])
+-> PASS (S1B smoke whole: the session's stop file does not stop the running smoke (its own is smoke/STOP): the smoke ran its 10 calls, no main run)
+   [S2] sitting A: exit 1 after 110 s; session dir T1794718949
+     | session start (T0 1794718949 = 21:02:29 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193)
+     | the first card command (the holder check): free (et-who --check exit 0; other users' device processes 0, ours 0); the one ops node /dev/et0_ops; the cap counts from the holder check's start
+     | start config read: TDP 0 W, 65 C, minion 600 MHz as found (config-start.json)
+     | the runner's deadline: 22:00:29 PST (epoch 1794722429: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | smoke start: run_x04.py build/e193/T1794718949/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | smoke end: runner rc 0; no stop: done
+     | SMOKE GO: 10 of 10 device processes exit 0 as registered, 57 launches all ok, the train 12 of 12 (3 a segment); telemetry 1093 samples, every one at 600 MHz, board max 35.27 W, die max 53 C (below eve
+     | main run start: run_x04.py build/e193/T1794718949/x04 --blocks S,D,W,T (9 passes, pass 0 the registered warm-up)
+     | main run stopped: runner rc 1; stop: stop file; the passes done stand (E193.md 11)
+     | closing config read: TDP 0 W, 65 C, minion 600 MHz, as at the start (config-end.json)
+     | session end (T0 1794718949)
+-> PASS (S2 exit: session exit 1, want 1)
+-> PASS (S2 no gate: no GATE-STOP line (0))
+-> PASS (S2 end: 'session end', MANIFEST.sha256 verifying (23 files) and session.rc 1)
+-> PASS (S2 nothing left: processes of the case left: [])
+-> PASS (S2 runner's stop: the main runner stopped before its sampler and any call)
+   [Y1] sitting A: exit 0 after 0 s; session dir T1794719060-dry
+     | DRY session start (T0 1794719060 = 21:04:20 PST; E193 sitting A, blocks S,D,W,T, cap 60 card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193; DRY)
+     | DRY lib.sh's two ps rules and et-who --check (the holder check: the first card command; the cap counts from its start)
+     | DRY ET_DEVICES=0 flock -n /run/lock/etsoc-shire0.lock timeout 10 build/claims-v3/aifoundry3/e193/tools/claims-v3/e128/ettelem_guard.sh config (the start config read; gate: TDP 0 W, 65 C, minion 600 MH
+     | DRY the runner's deadline: 22:02:20 PST (epoch 1794722540: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+     | DRY smoke start: run_x04.py build/e193/T1794719060-dry/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes)
+     | DRY smoke end: runner rc 0; no stop: done
+     | DRY main run start: run_x04.py build/e193/T1794719060-dry/x04 --blocks S,D,W,T (9 passes, pass 0 the registered warm-up)
+     | DRY main run end: runner rc 0; listed 234 device calls
+     | DRY ET_DEVICES=0 flock -n /run/lock/etsoc-shire0.lock timeout 10 build/claims-v3/aifoundry3/e193/tools/claims-v3/e128/ettelem_guard.sh config (the closing config read, reported)
+     | DRY session end (T0 1794719060)
+-> PASS (Y1 dry: exit 0, 16 log lines all 'DRY ', the manifest, no stand-in called)
+-> PASS (Y1 listings: LISTING SAME: dry-e193-smoke-all.txt, 10 device calls, 28 lines (the host's path written a / LISTING SAME: dry-e193-A.txt, 234 device calls, 523 lines (the host's path written as the )
+   [Y2] sitting A: exit 2 after 0 s; session dir T1794719061-dry
+-> PASS (Y2 refused: exit 2: DRY must be 1 or unset (it is '2'))
+   [Y3] sitting A: exit 2 after 0 s; session dir T1794719062
+-> PASS (Y3 refused: exit 2: E193_LAST_END_EPOCH must be the window's last end, epoch seconds)
+-> PASS (H3 exit: session exit 3, want 3)
+-> PASS (H3 gate: GATE-STOP: the smoke gate failed: SMOKE NO-GO: the runner exited 1; STOPPED: card not free for 10 minutes (pass 0 block D): lock:etsoc-shire0.lock otheruser 4244)
+-> PASS (H3 end: 'session end', MANIFEST.sha256 verifying (20 files) and session.rc 3)
+-> PASS (H3 nothing left: processes of the case left: [])
+-> PASS (H3 ten minutes: stop: card not free for 10 minutes (pass 0 block D): lock:etsoc-shire0.lock otheruser 4244 00:03 someone-elses-block.sh (polled every 30 s: 20 waits))
+-> PASS (PB exit: session exit 0, want 0)
+-> PASS (PB no gate: no GATE-STOP line (0))
+-> PASS (PB end: 'session end', MANIFEST.sha256 verifying (25 files) and session.rc 0)
+-> PASS (PB nothing left: processes of the case left: [])
+-> PASS (PB deadline: deadline = first card command + 2,880 s)
+-> PASS (PB passes: calls a pass [15, 15, 15, 15, 15, 15, 15, 15, 15]; 'main run end: runner rc 0, every pass'; the runner's 'done')
+-> PASS (PB pass gaps: 8 pass gaps of 30 s, lock released)
+-> PASS (PB collected: COLLECTED data-PB: sitting B; 28 files in SHA256SUMS; the scrub clean (no /home/ path, no login); card-minutes 30.1; session rc 0)
+-> PASS (PB box bytes: the collected runs.jsonl and the unpacked telemetry equal the box's manifest)
+-> PASS (PB reduced: the registered reducer (98bbc174...) rc 0: 14 arms and 0 trains reduced (want 14 and 0), each with [8] measured passes (want 8), the anchor spin2 16 runs (want 16))
+-> PASS (PB checks: CHECKS READ: 1 FAIL, 2 FAIL, 2 FAIL, 3 PASS, 4 REPORTED, 5 REPORTED, 6 NOT COMPUTED, 7 REPORTED, 8 REPORTED, 9 NOT COMPUTED)
+   reducer's table (stand-in watts, not a measurement):
+     | arm             n  board W     se minion W pJ/wmc rail slots/c/h
+     | faddps_p1       8    4.372  0.000    3.230       5.457    0.3900
+     | faddps_p16      8    1.500  0.001    0.846       1.430    0.3900
+     | faddps_p2       8    2.372  0.000    1.974       3.335    0.3900
+     | faddps_p4       8    1.372  0.000    1.266       2.138    0.3900
+     | faddps_p8       8    1.751  0.000    0.995       1.681    0.3900
+     | faddpsm1_p1     8    1.749  0.001    0.968       1.635    0.3900
+     | faddpsm2_p1     8    1.372  0.000    1.317       2.225    0.3900
+     | faddpsm4_p1     8    2.372  0.000    1.931       3.263    0.3900
+     | fadds_p16       8    1.438  0.000    0.830       1.402    0.3900
+     | fsgnjs_p1       8    2.372  0.000    1.969       3.326    0.3900
+     | fsgnjs_p2       8    1.372  0.000    1.284       2.168    0.3900
+     | fsgnjs_p4       8    1.745  0.006    1.006       1.700    0.3900
+     | fsgnjs_p8       8    1.500  0.000    0.852       1.438    0.3900
+     | spin2          16    1.246  0.003    0.775       1.309    0.3900
+     | fit ladder_faddps: slope 6.741e-12, intercept 1.067 W
+     | fit ladder_fsgnjs: slope 1.956e-12, intercept 1.324 W
+     | fit mask_lanes: slope 0.4161, intercept 0.9059 W
+-> PASS (AUDIT: 25 dry-flag branches in the session and the runner, each with a row whose cases passed)
+
+DESKTEST-REALPATH-E193 180 of 180 PASS

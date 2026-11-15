@@ -1,0 +1,30 @@
+# E193's dry-branch audit (Q177, lane kit-e193; its line numbers and rows re-made by fix-e193): every line of session_e193.sh and proposal/src/run_x04.py that branches on a dry flag
+# (DRYF; a.dry), what the dry path does there, what the real path does, and the real-path desk test's cases that run it
+# (desk/desktest_realpath_e193.py; NOT-ON-PATH: the session never takes that branch: it passes --sampler, never --telemetry).
+# The desk test reads the files' own lines and fails if a dry-flag line has no row, a row's text differs, or a named case failed.
+# file	line	text	dry path	real path	cases
+proposal/src/run_x04.py	222	if not a.dry and bool(a.sampler) == bool(a.telemetry):	the sampler argument rule skipped	exactly one of --sampler and --telemetry: the session passes --sampler	PA
+proposal/src/run_x04.py	224	if not a.dry and a.telemetry and a.telemetry_pid <= 0:	skipped	--telemetry needs --telemetry-pid: the session never passes --telemetry (writes_file and the telemetry-pid exemption are not on its path)	NOT-ON-PATH,PA
+proposal/src/run_x04.py	260	if a.dry:	say() also prints to stdout	say() writes run.log only	Y1,PA
+proposal/src/run_x04.py	275	if a.dry:	the device call printed (DRY ET_DEVICES=...)	the host under timeout -k 1 10, its output to files, its exit read (0, 3, 1, 124)	PA,PB,K5,K6,K6N,K7,G1,X1
+proposal/src/run_x04.py	331	if a.dry:	check_live returns nothing	the live stops on new samples: the board (3 in a row), the die, the clock (3 in a row), a stalled sampler	K1,K2,K3,K3N,K4,PA
+proposal/src/run_x04.py	406	if a.dry:	the holder check and the lock printed	et-who --check (the sampler exempt by its pid), then flock on the lock file opened read-only; a holder or a held lock: wait, poll 30 s, the stop file, or the runner's own stop after 10 minutes	PA,PB,H2,H3,L2
+proposal/src/run_x04.py	442	if a.dry or state["idle_ref"] is None:	idle-down skipped	waits until the die is at most the idle reference + 2 C (at most 30 s), logged	PA,PB
+proposal/src/run_x04.py	486	if a.dry:	the one-card rule printed	the one-card rule, the stop file and the deadline before anything (on the session's path the session's own count of ops nodes has already stopped two nodes or none: N2, N0)	S2,PA
+proposal/src/run_x04.py	500	if not a.dry:	no sampler, no idle reference	the sampler started through E128's guard, 20 s of idle, the idle reference, a first live check	PA,PB,T1
+proposal/src/run_x04.py	533	if not a.dry:	no gap	the 5 s gap before each run	PA,PB
+proposal/src/run_x04.py	576	if a.dry:	the pass gap printed	30 s between passes, the lock closed, live checks each second	PA,PB
+proposal/src/run_x04.py	585	if not a.dry:	no closing idle	gap + 3 s of idle after the last run (a whole session's end)	PB
+session_e193.sh	56	DRYF=	DRYF starts empty: the real path unless DRY=1	the real path: every case but Y1	PA,PB,Y1
+session_e193.sh	57	case "${DRY-}" in "") ;; 1) DRYF=1 ;; *) echo "DRY must be 1 or unset (it is '${DRY}')"; exit 2 ;; esac	DRY=1: the dry path; any other value refused before anything	DRY unset: the real path; DRY=2 refused (exit 2)	Y1,Y2,PA
+session_e193.sh	61	if [ -z "$DRYF" ]; then	no window's last end needed	E193_LAST_END_EPOCH required, else refused (exit 2)	Y3,PA,D1
+session_e193.sh	64	SD=build/e193/T$T0; [ -n "$DRYF" ] && SD=$SD-dry	build/e193/T<T0>-dry (the rest rules skip it)	build/e193/T<T0> (steps 10 and 11 and every rest rule read it)	Y1,PA
+session_e193.sh	68	say() { echo "$(date '+%Y-%m-%d %H:%M:%S %Z') ${DRYF:+DRY }$*" >> "$LOG"; }	every log line begins DRY (the rest rules' dry marker)	no marker	Y1,PA
+session_e193.sh	97	if [ -n "$DRYF" ]; then	the closing config read printed	the closing config read through the guard, under flock -n and timeout 10: after the main run, and after a gate stop that followed a good start read; none, when the lock is held	PA,PB,G1,L2,Y1
+session_e193.sh	111	say "session start (T0 $T0 = $(date -d @"$T0" '+%H:%M:%S %Z' 2>/dev/null); E193 sitting $SIT, blocks $BLOCKS, cap $((CAP_S / 60)) card-minutes; the proposal's runner as committed, driven with the box's tools; kit-e193${DRYF:+; DRY})"	the session start line ends '; DRY)'	no marker	Y1,PA
+session_e193.sh	136	if [ -n "$DRYF" ]; then	the holder check, the count of ops nodes and the start config read printed, not run	the cap's start stamped, the two ps rules, et-who --check (the first card command), the count of ops nodes (exactly /dev/et0_ops, else GATE-STOP with no device opened), the config read under flock -n and timeout 10 through E128's guard with ET_DEVICES=0, the TDP 0 W / 65 C / 600 MHz gate	Y1,PA,H1,L1,G2,O1,N2,N0,S1
+session_e193.sh	168	if [ -z "$DRYF" ] && [ $((LAST_END - 180)) -lt "$DEADLINE" ]; then DEADLINE=$((LAST_END - 180)); fi	the deadline never clipped	clipped to the window's last end - 180 s	D1,PA
+session_e193.sh	172	[ -n "$DRYF" ] && COMMON+=(--dry)	--dry to both runner calls	the runner's real path, both calls	Y1,PA,PB
+session_e193.sh	180	if [ -n "$DRYF" ]; then	the smoke gate printed and skipped	check_e193.py smoke: SMOKE GO, or GATE-STOP	PA,PB,G1,K1,K6S
+session_e193.sh	195	if [ -n "$DRYF" ]; then	the main run's dry line	rc 0: 'main run end ... every pass'; a registered stop: 'main run stopped' with the stop's reason; a non-zero exit with no stop recorded: 'main run ended without a registered stop' (a crash, never read as a stop)	PB,PA,D1,T1,S2,L2,X1
+session_e193.sh	208	rc=0; [ -z "$DRYF" ] && [ "$mrc" -ne 0 ] && rc=1	exit 0	exit 1 when the main run stopped, 0 when it ran every pass (4 for a crash: the next line)	PA,PB,X1

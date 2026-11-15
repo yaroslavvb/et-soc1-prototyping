@@ -1,0 +1,156 @@
+E193 runbook desk test, 2026-11-14 21:12:53 PST, Python 3.12.3, cmake version 3.28.3; scratch outside the repository
+scratch repository: a shared sparse clone at the registration 48da7fc2f766, the kit as one stand-in commit 45a2f2c73e31 (its files from the clone, the kit committed there at 6a80a30951a0); the kit list's stand-in 33 files; upstream e193-desktest-registration
+
+== A. the dry listing
+dry listing: 25 steps listed, 0 exited non-zero, 0 box calls
+-> PASS (A every step 0, no call to the stand-ins)
+
+== W1-W5, G. the window rule and the lab-git lock
+-> PASS (W1-W5, G each refused (10) before any call)
+
+== N. step 2 run inside the lab-git lock (nested): its pull cannot take the lock
+[s03_desk_e193] STOP: the desk check failed: pull pull(rc 14; a nested lab-git lock exits 75)
+-> PASS (N a nested step 2 stops with 16 naming its pull (never run step 2 inside the lock))
+
+== P1. step 2 on the scratch repository
+[s03_desk_e193] desk check for sitting A: the window written today for E193; pulled under the lab-git lock, HEAD 45a2f2c73e31 descends from 49a4152e, the registration 48da7fc2f766 (subtree 03ae7f5a) and the kit 45a2f2c73e31; the paths clean, HISTORY OK, the lists at their pinned counts and bytes (29; the kit's 33), lists not pinned (reported): none; the harness re-made and at its sha256, the preflight GO, the kit's desk tests' logs; E193 data paths in any ref: 0 (sitting A's: 0)
+-> PASS (P1 step 2 passes at every pin, HISTORY OK, the registration and the kit found by their content)
+
+== P2-P4, H1-H3. a short registration list; a short kit list; an unknown list; an edited registration file; shadows
+HISTORY FAIL: a shadowing addition: tools/claims-v3/json.py (as json)
+HISTORY FAIL: a shadowing file not committed: tools/claims-v3/e183/rb/re.py (as re)
+-> PASS (P2-P4, H1-H3: each pin refused and named; the unknown list reported; the edit and the shadows refused by the history check; clean again after)
+
+== D1-D3. no E193 datum in any ref
+[s03_desk_e193] STOP: the desk check failed: e193-datum(1 paths before sitting A)
+[s03_desk_e193] STOP: the desk check failed: e193-datum(1 paths besides sitting A's before sitting B)
+-> PASS (D1 an E193 datum before sitting A: 16; D2 sitting A's own before sitting B: 0; D3 a sitting-B path before sitting B: 16)
+-> PASS (D4 a gate stop's record committed before sitting A: 0 (no datum: E193.md 11's 'no sitting: no data'))
+
+== S, B. the sync, then THE REAL BUILD on the stand-in box
+[s07_a3_sync_e193] synced to aifoundry3:aifoundry/build/claims-v3/aifoundry3/e193/ (39 paths); the rsync sent 39 files' contents there
+    COMPILER cmake: cmake version 3.28.3
+    COMPILER riscv gcc: riscv64-unknown-elf-gcc () 15.1.0
+    COMPILER host c++: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+    COMPILER Python 3.12.3
+    COMPILER warnings in the build's output: 0
+    ELF kernel sha256 01a3776755f5c684f5a71a38f13a550ea8c4aae5658c46cb003f846aea71b531: SAME AS the desk build's (E193.md 16.5), DIFFERENT FROM request.md's (reported, never a gate)
+    ELF .text sha256 fd7207275661c23f33a99dd2a1c16b54e92e09b75cdb828258b09849ee9d643e (68358 B): SAME AS the desk build's .text (reported, never a gate)
+    ELF path strings in the kernel: 0
+    BODIES CHECK PASS
+    HOST-REFUSAL ok: --kernel <unreadable> --budget 9.6 -> exit 1, 'FAIL: --budget must be in (0, 9.5] seconds'
+    HOST-REFUSAL ok: --kernel <unreadable> --no-such-option -> exit 2, 'unknown option --no-such-option'
+    HOST-REFUSAL ok: --kernel <unreadable> (alone) -> exit 1, 'FAIL: cannot read kernel /nonexistent-e193/x04clock.elf'
+    HOST-BEHAVIOUR OK: three refusals before the device layer, as main.cpp writes them
+    LISTING SAME: dry-e193-smoke-all.txt, 10 device calls, 28 lines (the host's path written as the registration's)
+    LISTING SAME: dry-e193-A.txt, 234 device calls, 523 lines (the host's path written as the registration's)
+    LISTING SAME: dry-e193-B.txt, 135 device calls, 298 lines (the host's path written as the registration's)
+    SAMPLER the box's build/ettelem/ettelem, sha256 027e6af6d2440ebda1ce7e6cf0426a92a2a89d51a6a76d65cbb9d2d434fd1001 (not run here)
+    HOST x04clock_host sha256 842ab353293c1cfa987311dd0cb3cd8541923873dfef03a77550615338631f2c
+    X04-BUILT rc=0
+[s08_a3_build_e193] built today on aifoundry3: x04clock (X04-BUILT: the bodies check, the host's behaviour, the listing SAME x3); record, harness and preflight GO read on the box
+-> PASS (S the sync, HARNESS OK in E193's root on the box; B the real build: BODIES CHECK PASS, HOST-BEHAVIOUR OK, LISTING SAME x3, X04-BUILT; B2 a second start refused (10))
+
+== B3. NO-THIRD-BUILD
+[s08_a3_build_e193] STOP: NO-THIRD-BUILD: 2 builds were started on aifoundry3 today (Pacific): no E193 sitting today (E193.md 11: no data, never a failed check)
+-> PASS (B3 a third start the same day refused (16))
+
+== SD, NB. the sync with a synced file not committed; steps 8 and 9 with no build today
+[s07_a3_sync_e193] STOP: the synced paths have uncommitted changes: sync only the pushed commit
+[s10_a3_dry_e193] STOP: x04clock was not built today (RB_OUT/e193-built.txt, step 6's wait): run step 6 first
+[s11_a3_session_e193] STOP: x04clock was not built today (RB_OUT/e193-built.txt, step 6's wait): run step 6 first
+-> PASS (SD a synced file changed and not committed: the sync refused (16), nothing synced; NB no build today: step 8 and step 9 refused (10))
+
+== L1-L3. a login link; a hang; a cut wait
+[s05_look_k6] STOP: a login check is needed on aifoundry3 (appended to the lock file; the link is in RB_LINKS): approve, then run this step again
+[s09_a3_reads_k6] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again
+[s08_a3_build_e193] STOP: no reading: the wait came back without the build's verdict line (a cut wait is not a failed build): wait again
+-> PASS (L1 a login link: 11 and the lock line; L2 a hang killed at its bound: 13; L3 a cut wait: 14, no reading)
+
+== R, Y. k6's reads and the dry pass on the stand-in box
+[s09_a3_reads_k6] aifoundry3: manifest kept on the box (build/q141k/), config TDP 0 W / 65 C / 600 MHz, et-who clean
+LISTING SAME: dry-e193-smoke-all.txt, 10 device calls, 28 lines (the host's path written as the registration's)
+LISTING SAME: dry-e193-A.txt, 234 device calls, 523 lines (the host's path written as the registration's)
+E193-DRY sitting A rc=0 smoke=0 main=0 calls=10+234 manifest=written
+[s10_a3_dry_e193] the dry pass ended rc 0: E193-DRY sitting A rc=0 smoke=0 main=0 calls=10+234 manifest=written
+-> PASS (R the look FREE and k6's reads (TDP 0 W / 65 C / 600 MHz, et-who clean); Y the dry pass: the session with DRY=1, both listings SAME)
+
+== RS, BA. the rest rule through step 9; sitting B before sitting A
+[s11_a3_session_e193] STOP: e193-A refused on the box: REFUSED: 10 minutes since E192's session end (2026-11-14 21:03:32 PST): E193 sitting A starts on a rested card, at least 40 minutes after our last real session there (E193.md 6; the kit)
+[s11_a3_session_e193] STOP: e193-B refused on the box: REFUSED: no E193 sitting A on this box whose main run started and ended: B never runs before A (E193.md 6)
+-> PASS (RS an E192 session ended 10 minutes ago: step 9 refused (10), nothing launched; BA sitting B with no sitting A: 10)
+[s11_a3_session_e193] STOP: e193-B refused on the box: REFUSED: E193 sitting A's main run ended without a registered stop (a crash: build/e193/T1794716712): no further sitting before a dated note decides whether its passes are reduced (CARD-LANE-BRIEF.md section 3)
+[s11_a3_session_e193] STOP: e193-A refused on the box: REFUSED: E193 sitting A ended at its smoke gate today (build/e193/T1794716662): no sitting that day (E193.md 11)
+-> PASS (BC sitting B after a crashed sitting A: 10, nothing launched; SG sitting A again on the day its smoke gate failed: 10 ('no sitting that day'), nothing launched)
+
+== LA. step 9 launches THE REAL session_e193.sh; the wait finds it by its real script name
+rest: 45 minutes since E192's session end (2026-11-14 20:28:32 PST; dry sessions and blocks that opened no device skipped)
+LAUNCHED e193-A T0 1794719615 2026-11-14 21:13:40 PST (sitting A; last start 2026-11-14 23:50 PST, last end 2026-11-14 23:59 PST)
+2026-11-14 21:14:01 PST GATE-STOP: the host shows ops node(s) [none], not exactly /dev/et0_ops: E193 runs on one card, card 0 (E193.md 3) (no device opened)
+RUN-ENDED e193-A
+MANIFEST-WRITTEN 6 files
+GATE-STOPPED e193-A
+-> PASS (LA launched past the rest; RUN-RUNNING by its real name; a second launch refused while it runs; then GATE-STOPPED at the session's own count of ops nodes (none here), before any card read, the manifest written)
+
+== C, C2, C3, C4, C5. step 11 on that session
+COPY-BACK EXACT: every file of the box's MANIFEST.sha256 (6) at its sha256, nothing else but session.rc
+COLLECTED docs/reports/gate-stops/2026-11-14-e193-x04-clock-sitting-a-T1794719615-aifoundry3: sitting A; 9 files in SHA256SUMS; the scrub clean (no /home/ path, no login); card-minutes 0.43; session rc 3
+[s22_collect_e193] collected the gate stop's record docs/reports/gate-stops/2026-11-14-e193-x04-clock-sitting-a-T1794719615-aifoundry3 (no sitting, no data: E193.md 11): write its README in DATA-README-FORM-e193.md's gate-stop form, commit 
+[s22_collect_e193] STOP: docs/reports/gate-stops/2026-11-14-e193-x04-clock-sitting-a-T1794719615-aifoundry3 exists already: never merge into an earlier copy
+[s22_collect_e193] STOP: RB_OUT/e193-raw/T1794719615 exists already: never merge into an earlier copy (a new RB_OUT, or move it aside)
+[s22_collect_e193] STOP: the box's session log does not say clearly how the session ended (ENDED-AT UNCLEAR (a GATE-STOP line: 1; a main run start: 1; session.rc: 3)): read the box (read-only) first; nothing copied
+-> PASS (C COPY-BACK EXACT, COLLECTED into the gate stop's record (docs/reports/gate-stops/, nothing under docs/reports/data), the desk-path gate (E183 note 5) clean, HISTORY OK; C2 again: refused (10); C3 a changed box file: NOT EXACT (16); C4 its raw copy there: refused (10); C5 a gate line beside a main run: refused (16), nothing copied)
+
+== RT. the retry: sitting A launched again after its gate stop
+rest: 45 minutes since E192's session end (2026-11-14 20:28:32 PST; dry sessions and blocks that opened no device skipped)
+LAUNCHED e193-A T0 1794719654 2026-11-14 21:14:19 PST (sitting A; last start 2026-11-14 23:50 PST, last end 2026-11-14 23:59 PST)
+2026-11-14 21:14:14 PST GATE-STOP: the host shows ops node(s) [none], not exactly /dev/et0_ops: E193 runs on one card, card 0 (E193.md 3) (no device opened)
+-> PASS (RT a gate-stopped sitting A launched again (a new T0; the rest rule skips a session that opened no device); its wait reads GATE-STOPPED (16))
+
+== WR. the wait on the real-path desk test's own sessions
+   RUN-ENDED e193-A
+   MANIFEST-WRITTEN 26 files
+   MAIN-STOPPED e193-A
+   [s20_wait_e193] e193-A's main run ended at a registered stop (the lines above): the passes done stand (E193.md 11)
+   [s20_wait_e193] e193-A has ended (MANIFEST-WRITTEN 26 files)
+   RUN-ENDED e193-B
+   MANIFEST-WRITTEN 25 files
+   [s20_wait_e193] e193-B has ended (MANIFEST-WRITTEN 25 files)
+   RUN-ENDED e193-A
+   MANIFEST-WRITTEN 18 files
+   GATE-STOPPED e193-A
+   2026-11-14 21:00:27 PST main run ended without a registered stop: runner rc 1; no stop recorded (the runner's log does not end 'done'): a crash, not a registered stop (E193.md 11 has no row for it): r
+   RUN-ENDED e193-A
+   MANIFEST-WRITTEN 25 files
+   MAIN-CRASHED e193-A
+   [s20_wait_e193] STOP: e193-A's main run ended WITHOUT a registered stop (a crash: the lines above; E193.md 11 lists no such end): kill nothing; collect it (step 11, its data directory) and report it; 
+-> PASS (WR the real sessions: A (two passes, the operator's stop) RUN-ENDED with its registered stop (0); B whole (0); a smoke gate stop (16); X1's crash of the main run: MAIN-CRASHED, never a registered stop (16))
+
+== CR. step 11 on the real-path sitting A session, its data committed in the scratch repository, then step 13
+COPY-BACK EXACT: every file of the box's MANIFEST.sha256 (26) at its sha256, nothing else but session.rc
+COLLECTED docs/reports/data/2026-11-14-e193-x04-clock-sitting-a-aifoundry3: sitting A; 29 files in SHA256SUMS; the scrub clean (no /home/ path, no login); card-minutes 11.82; session rc 1
+[s24_reduce_e193] STOP: docs/reports/data/2026-11-14-e193-x04-clock-sitting-a-aifoundry3 is not committed: commit it first (the reduction runs after the data commit)
+x04/STOP: OK
+[s24_reduce_e193] x04/runs.jsonl and the unpacked x04/telemetry.jsonl equal the box's manifest's sha256
+CHECKS READ: 1 FAIL, 2 NOT COMPUTED, 2 NOT COMPUTED, 3 PASS, 4 REPORTED, 5 REPORTED, 6 FAIL, 7 REPORTED, 8 REPORTED, 9 REPORTED
+[s24_reduce_e193] reduced sitting A: RB_OUT/x04-e193-A.json and checks-e193-A.json (CHECKS READ: 1 FAIL, 2 NOT COMPUTED, 2 NOT COMPUTED, 3 PASS, 4 REPORTED, 5 REPORTED, 6 FAIL, 7 REPORTED, 8 REPORTED, 9 REPORTED); the records lane commits them beside the data
+-> PASS (CR step 13 before the data commit refused (10); the real session collected; after its data commit the registered reducer and the checker ran (x04-e193-A.json, checks-e193-A.json))
+
+== CR3-CR5. step 13 on a changed data directory; the data README form's own re-make commands
+   the form's re-make commands (5 lines after its first, which sets D and R):
+     | (cd "$D" && shasum -a 256 -c SHA256SUMS)
+     | mkdir -p "$R/x04" && cp "$D/x04/runs.jsonl" "$R/x04/" && gzip -dc "$D/x04/telemetry.jsonl.gz" > "$R/x04/telemetry.jsonl"
+     | for p in runs.jsonl telemetry.jsonl; do [ "$(awk -v p="x04/$p" '$2 == p {print $1}' "$D/session/MANIFEST.sha256")" = "$(shasum -a 256 "$R/x04/$p" | cut -d' ' -f1)" ] && echo "x04/$p: the box's bytes" || echo "x04/$p: not the box's bytes"; done
+     | /usr/bin/python3 -I -B tools/claims-v3/e193/proposal/src/reduce_x04.py "$R/x04" --out "$R/x04.json"
+     | /usr/bin/python3 -I -B tools/claims-v3/e193/check_e193.py checks "$R/x04.json" "$R/x04" --out "$R/checks.json"
+x04/runs.jsonl: the box's bytes
+x04/telemetry.jsonl: the box's bytes
+CHECKS READ: 1 FAIL, 2 NOT COMPUTED, 2 NOT COMPUTED, 3 PASS, 4 REPORTED, 5 REPORTED, 6 FAIL, 7 REPORTED, 8 REPORTED, 9 REPORTED
+[s24_reduce_e193] STOP: docs/reports/data/2026-11-14-e193-x04-clock-sitting-a-aifoundry3 has uncommitted changes: the reduction reads the committed data only
+[s24_reduce_e193] STOP: the data's SHA256SUMS does not read every entry OK
+-> PASS (CR3 a data file changed, not committed: step 13 refused (16); CR4 a committed change SHA256SUMS does not hold: 16; CR5 the README form's own commands on the committed data: rc 0, the box's bytes, the checker's reading, x04.json the same as step 13's byte for byte)
+
+== Z. nothing of this test left on the stand-in box
+-> PASS (Z no session, runner or stand-in of this test left running on the stand-in box)
+
+SELFTEST-RB-E193 21 of 21 PASS

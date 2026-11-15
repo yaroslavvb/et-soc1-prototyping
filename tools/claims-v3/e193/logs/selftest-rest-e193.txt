@@ -1,0 +1,53 @@
+E193 rest rule desk test, 2026-11-14 21:08:44 PST, GNU date; rest_rule_e193.sh sha256 e23cf4da599341ab...
+
+== R1 no session of ours
+   rule: exit 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders
+-> PASS (R1 none: rest)
+
+== R2/R3 E183's form
+   rule: exit 3: REFUSED: 10 minutes since E183's session end (2026-11-14 20:58:44 PST): E193 sitting A starts on a rested card, at least 40 minutes after our last real session there (E193.md 6; the kit)
+-> PASS (R2 E183 10 min: REFUSED)
+   rule: exit 0: rest: 45 minutes since E183's session end (2026-11-14 20:23:44 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R3 E183 45 min: rest)
+
+== R4 E189's form
+   rule: exit 3: REFUSED: 20 minutes since E189's session end (2026-11-14 20:48:44 PST): E193 sitting A starts on a rested card, at least 40 minutes after our last real session there (E193.md 6; the kit)
+-> PASS (R4 E189 20 min: REFUSED)
+
+== R5/R6 E192's form
+   rule: exit 3: REFUSED: 39 minutes since E192's session end (2026-11-14 20:29:44 PST): E193 sitting A starts on a rested card, at least 40 minutes after our last real session there (E193.md 6; the kit)
+-> PASS (R5 E192 39 min: REFUSED)
+   rule: exit 0: rest: 41 minutes since E192's session end (2026-11-14 20:27:44 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R6 E192 41 min: rest)
+
+== R7/R8 E193's own first sitting, read by sitting B
+   rule: exit 3: REFUSED: 15 minutes since E193's session end (2026-11-14 20:53:44 PST): E193 sitting B starts on a rested card, at least 40 minutes after our last real session there (E193.md 6; the kit)
+-> PASS (R7 E193 A 15 min: sitting B REFUSED)
+   rule: exit 0: rest: 40 minutes since E193's session end (2026-11-14 20:28:44 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R8 E193 A 40 min: rest)
+
+== R9 a dry pass skipped
+   rule: exit 0: rest: 50 minutes since E193's session end (2026-11-14 20:18:44 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R9 dry skipped: rest 50)
+
+== R10 a gate stop before the first card command skipped
+   rule: exit 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders
+-> PASS (R10 no device opened: skipped)
+
+== R11 a cut sitting counted at its run's latest write
+   rule: exit 3: REFUSED: 5 minutes since E193's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026-11-14 21:03:44 PST (the latest write of E193's files outside the dry paths)): E193 sitting
+-> PASS (R11 cut: REFUSED at the latest write)
+
+== R12 energy.sh's folder
+   rule: exit 3: REFUSED: 10 minutes since energy.sh's run (2026-11-14 20:58:44 PST (the latest write of an energy.sh run's folder, aifoundry3-m4-20261114)): E193 sitting A starts on a rested card, at least 40 minutes after our last real session t
+-> PASS (R12 energy.sh 10 min: REFUSED)
+
+== R13 the newest wins
+   rule: exit 3: REFUSED: 30 minutes since E189's session end (2026-11-14 20:38:44 PST): E193 sitting A starts on a rested card, at least 40 minutes after our last real session there (E193.md 6; the kit)
+-> PASS (R13 newest (E189 30 min): REFUSED)
+
+== R14 the real-path desk test's own sitting A log
+   rule: exit 3: REFUSED: 30 minutes since E193's session end (2026-11-14 20:38:01 PST): E193 sitting B starts on a rested card, at least 40 minutes after our last real session there (E193.md 6; the kit)
+-> PASS (R14 the real-path log (T1794716772), ended 30 minutes ago: exit 3)
+
+SELFTEST-REST-E193 14 of 14 PASS

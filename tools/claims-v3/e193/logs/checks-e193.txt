@@ -1,0 +1,29 @@
+E193 kit checks, 2026-11-14 21:08:45 PST, Python 3.12.3 (numpy 1.26.4)
+
+== the harness
+CHECK PASS: harness-e193.json re-made equals the committed one (38 files)
+HARNESS OK: 38 files at their sha256 under the root
+harness-e193.json sha256 958c020325b827ab5ef05b160b7e534ef85cf9efcbdedc6641375bc50f29539a
+
+== the history check's shadow names (rb/check_history_e193.py names)
+SHADOW NAMES: 300 standard-library names from sys.stdlib_module_names (Python 3.12.3); with the day's own 18; json True, re True, subprocess True, _strptime True; read in 8 folders: (the top), tools/claims-v3/, tools/claims-v3/e193/, tools/claims-v3/e193/proposal/src/, tools/claims-v3/e193/rb/, tools/claims-v3/q141k-runbook/v3.1/, tools/claims-v3/e183/rb/, tools/claims-v3/e193/desk/
+
+== the preflight's verdict
+dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+
+== the checker on the registration's synthetic sessions (arbitrary test values; the registered reducer unchanged)
+session A exact: reducer rc 0, checker rc 0; 1 spin2 PASS; 2 faddps_p1 NOT COMPUTED; 2 fsgnjs_p1 NOT COMPUTED; 3 anchor drift PASS; 4 device ok REPORTED; 5 clock REPORTED; 6 duty linear PASS; 7 nulls REPORTED; 8 dip rule REPORTED; 9 stall2 REPORTED
+   check 8: 0 readings dropped in all (0 in the measured passes); by window {'busy': 0, 'idle_after': 0, 'idle_before': 0, 'train_segment': 0}
+   check 9: divides a hart-cycle 0.0200 against spin2's 0.3900: a stalled pipeline
+session A realistic: reducer rc 0, checker rc 0; 1 spin2 PASS; 2 faddps_p1 NOT COMPUTED; 2 fsgnjs_p1 NOT COMPUTED; 3 anchor drift FLAGGED; 4 device ok REPORTED; 5 clock REPORTED; 6 duty linear PASS; 7 nulls REPORTED; 8 dip rule REPORTED; 9 stall2 REPORTED
+   check 8: 167 readings dropped in all (147 in the measured passes); by window {'busy': 133, 'idle_after': 0, 'idle_before': 0, 'train_segment': 34}
+   check 9: divides a hart-cycle 0.0200 against spin2's 0.3900: a stalled pipeline
+session B exact: reducer rc 0, checker rc 0; 1 spin2 PASS; 2 faddps_p1 FAIL; 2 fsgnjs_p1 PASS; 3 anchor drift PASS; 4 device ok REPORTED; 5 clock REPORTED; 6 duty linear NOT COMPUTED; 7 nulls REPORTED; 8 dip rule REPORTED; 9 stall2 NOT COMPUTED
+   check 8: 0 readings dropped in all (0 in the measured passes); by window {'busy': 0, 'idle_after': 0, 'idle_before': 0}
+   check 9: NOT COMPUTED (needs spin2 and tr_tk_stall2 (sitting A))
+session B realistic: reducer rc 0, checker rc 0; 1 spin2 PASS; 2 faddps_p1 FAIL; 2 fsgnjs_p1 PASS; 3 anchor drift FLAGGED; 4 device ok REPORTED; 5 clock REPORTED; 6 duty linear NOT COMPUTED; 7 nulls REPORTED; 8 dip rule REPORTED; 9 stall2 NOT COMPUTED
+   check 8: 137 readings dropped in all (130 in the measured passes); by window {'busy': 137, 'idle_after': 0, 'idle_before': 0}
+   check 9: NOT COMPUTED (needs spin2 and tr_tk_stall2 (sitting A))
+
+CHECKS LOG DONE 2026-11-14 21:08:50 PST
