@@ -1,0 +1,594 @@
+# E191 kit note 2: desk/realpath_e191_v2.sh, run 2026-11-15 12:38:24 PST on aifoundry2 inside the round's CPU slot and a no-device sandbox (W/nodev.sh: /dev/et* 0, /run/lock entries 0); /usr/bin/python3 3.12.3; bubblewrap 0.9.0; the scratch clone at 96ef447ce326 (GitHub main) with the note's files as fixed after its verifier (fix-n2e191)
+== hostname aifoundry1 (a private UTS namespace), a private PID namespace
+rc 0
+realpath_e191_v2 (/usr/bin/python3 3.12.3), 2026-11-15 12:38:24 PST; /dev/et*: none; /run/lock entries: 0; processes visible: 2
+realpath_e191: hostname 'aifoundry1' (the namespace's); the runner is the stand-in tree's: True
+2026-11-15 12:38:24 PST session start (T0 1794775104 = 12:38:24 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP1)
+2026-11-15 12:38:24 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:38:24 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:38:24 PST sampler started (attempt 1, pid 17, every 100 ms)
+2026-11-15 12:38:24 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:38:24 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:38:24 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:38:25 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:25 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:25 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:25 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:25 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:25 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:25 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:25 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:38:25 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:38:26 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:38:27 PST pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:38:27 PST pass 2: copy-random p1 (K 8; die 55 C)
+2026-11-15 12:38:29 PST pass 2: copy-random p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:38:29 PST pass 3: sha256 p1 (K 9; die 55 C)
+2026-11-15 12:38:31 PST pass 3: sha256 p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:38:31 PST pass 4: sort-sorted p1 (K 8; die 55 C)
+2026-11-15 12:38:32 PST pass 4: sort-sorted p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:38:32 PST pass 5: sort-shuffled p1 (K 7; die 55 C)
+2026-11-15 12:38:34 PST pass 5: sort-shuffled p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:38:34 PST pass 6: sparse-parity p1 (K 9; die 55 C)
+2026-11-15 12:38:36 PST pass 6: sparse-parity p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:38:36 PST idle anchor 3: 0.5 s, nothing running but the sampler
+2026-11-15 12:38:36 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:38:36 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:38:36 PST session end (T0 1794775104)
+   [RP1] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL)
+   RP1: the sampler's process name(s) while it ran: ['ettelem']
+RP1: PASS - rc 0; passes ['PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS']; identity {'ids': [1], 'minion_mv': 499, 'targets': ['/dev/et1_mgmt'], 'why': ''}, et-who {'other_on_card0': 0, 'other_on_card1': 0, 'ours_elsewhere': 0, 'ours_on_card0': 0, 'ours_on_card1': 2, 'ours_on_mgmt': 1}, the sampler ['/dev/et1_mgmt'] named ['ettelem']; 25 commands, each the real one, each ET_DEVICES=1
+2026-11-15 12:38:37 PST session start (T0 1794775117 = 12:38:37 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP2)
+2026-11-15 12:38:37 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:38:37 PST card 1's lock is held: no device opened
+2026-11-15 12:38:37 PST session end (T0 1794775117)
+   [RP2] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | card 1's lock is held: no device opened
+RP2: PASS - rc 16
+2026-11-15 12:38:37 PST session start (T0 1794775117 = 12:38:37 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP3)
+2026-11-15 12:38:37 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:38:37 PST a holder or a foreign device process (1 device process(es) of ours besides the sampler): no device opened
+2026-11-15 12:38:37 PST session end (T0 1794775117)
+   [RP3] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | a holder or a foreign device process (1 device process(es) of ours besides the sampler): no device opened
+RP3: PASS - rc 16
+2026-11-15 12:38:37 PST session start (T0 1794775117 = 12:38:37 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP4)
+2026-11-15 12:38:37 PST the box check: the reader build/ettelem/ettelem is not at its pin 8008f96f056a: no device opened
+2026-11-15 12:38:37 PST session end (T0 1794775117)
+   [RP4] rc 16; the box check: the reader build/ettelem/ettelem is not at its pin 8008f96f056a: no device opened
+RP4: PASS - rc 16; nothing started True
+2026-11-15 12:38:37 PST session start (T0 1794775117 = 12:38:37 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP5)
+2026-11-15 12:38:37 PST the box check: ledger's build record is not build_e191.sh's BUILT of today (build_e189.sh, BUILT, 2026-11-15); spp's build record is not build_e191.sh's BUILT of today (build_e189.sh, BUILT, 2026-11-15): no device opened
+2026-11-15 12:38:37 PST session end (T0 1794775117)
+   [RP5] rc 16; the box check: ledger's build record is not build_e191.sh's BUILT of today (build_e189.sh, BUILT, 2026-11-15); spp's build record is not build_e191.sh's BUILT of today (build_e
+2026-11-15 12:38:37 PST session start (T0 1794775117 = 12:38:37 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP6)
+2026-11-15 12:38:37 PST the box check: ledger's build record has no passing ET_DEVICES reading (not a gate on aifoundry2 (E191 runs on aifoundry1): no: the host has no ET_DEVICES); spp's build record has no passing ET_DEVICES reading (not a gate on aifoundry2 (E191 runs on aifoundry1): no: the host has no ET_DEVICES): no device opened
+2026-11-15 12:38:37 PST session end (T0 1794775117)
+   [RP6] rc 16; the box check: ledger's build record has no passing ET_DEVICES reading (not a gate on aifoundry2 (E191 runs on aifoundry1): no: the host has no ET_DEVICES); spp's build record 
+RP5: PASS - rc 16
+RP6: PASS - rc 16
+2026-11-15 12:38:37 PST session start (T0 1794775117 = 12:38:37 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP7)
+2026-11-15 12:38:37 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:38:37 PST config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519, "fake": true}: IDENTITY GATE FAILED: PCIe target /dev/et0_mgmt, not /dev/et1_mgmt; Physical device ID [0], not 1; minion_mv 519, not below 510 (card 1 read 499 or 500 in every committed read; card 0 519): the gate, no launch
+2026-11-15 12:38:37 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 519; its identity NOT card 1: PCIe target /dev/et0_mgmt, not /dev/et1_mgmt; Physical device ID [0], not 1; minion_mv 519, not below 510 (card 1 read 499 or 500 in every committed read; card 0 519)
+2026-11-15 12:38:37 PST session end (T0 1794775117)
+   [RP7] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519, "fake": true}: IDENTITY GATE FAILED:
+RP7: PASS - rc 16; started ['ettelem config', 'ettelem config']
+2026-11-15 12:38:37 PST session start (T0 1794775117 = 12:38:37 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP8)
+2026-11-15 12:38:37 PST the box check: ET_DEVICES is not 1 in the session's environment: no device opened
+2026-11-15 12:38:37 PST session end (T0 1794775117)
+   [RP8] rc 16; the box check: ET_DEVICES is not 1 in the session's environment: no device opened
+   the guard: unset rc 97 ('ettelem_guard_e191: refused (ET_DEVICES is 'unset', not 1: E191 opens card 1 onl'), reader started False; 0 rc 97, reader started False; 1 rc 0 (card 1), reader started True
+RP8: PASS - the guard refused unset and 0 (97, no reader started), passed 1; the session without ET_DEVICES rc 16
+2026-11-15 12:38:37 PST session start (T0 1794775117 = 12:38:37 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP9)
+2026-11-15 12:38:37 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:38:37 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:38:37 PST sampler started (attempt 1, pid 164, every 100 ms)
+2026-11-15 12:38:38 PST identity (b): IDENTITY GATE FAILED: no holder line of ours on /dev/et1_mgmt (the sampler's) with the sampler running; 1 holder line(s) of ours on card 0 (a /dev/et0_ node or lock:etsoc-shire0.lock); the sampler does not hold /dev/et1_mgmt (it holds ['/dev/et0_mgmt']); the sampler holds another card's node(s) ['/dev/et0_mgmt']: the gate, no launch
+2026-11-15 12:38:38 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:38:38 PST session end (T0 1794775117)
+   [RP9] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | identity (b): IDENTITY GATE FAILED: no holder line of ours on /dev/et1_mgmt (the sampler's) with the sampler running; 1 holder line(s) of ours on card 0 (a /dev/et0_ node or lo
+RP9: PASS - rc 16
+2026-11-15 12:38:38 PST session start (T0 1794775118 = 12:38:38 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP10)
+2026-11-15 12:38:38 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:38:38 PST a holder or a foreign device process (1 holder line(s) of another login): no device opened
+2026-11-15 12:38:38 PST session end (T0 1794775118)
+   [RP10] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | a holder or a foreign device process (1 holder line(s) of another login): no device opened
+2026-11-15 12:38:38 PST session start (T0 1794775118 = 12:38:38 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP11)
+2026-11-15 12:38:38 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:38:38 PST a holder or a foreign device process (1 holder line(s) of ours off card 1 (card 0's nodes or lock)): no device opened
+2026-11-15 12:38:38 PST session end (T0 1794775118)
+   [RP11] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | a holder or a foreign device process (1 holder line(s) of ours off card 1 (card 0's nodes or lock)): no device opened
+RP10: PASS - rc 16
+RP11: PASS - rc 16
+2026-11-15 12:38:38 PST session start (T0 1794775118 = 12:38:38 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP12)
+2026-11-15 12:38:38 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:38:38 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:38:38 PST sampler started (attempt 1, pid 202, every 100 ms)
+2026-11-15 12:38:38 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:38:38 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:38:38 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:38:39 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: ANOTHER CARD: stderr PCIe target /dev/et0_ops; stderr Physical device ID 0; the host's line: 1 runtime line(s) dropped (Opening device 0)
+2026-11-15 12:38:39 PST smoke gate failed: copy-64m-random: the host's card: ANOTHER CARD: stderr PCIe target /dev/et0_ops; stderr Physical device ID 0
+2026-11-15 12:38:39 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:38:39 PST session end (T0 1794775118)
+   [RP12] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate failed: copy-64m-random: the host's card: ANOTHER CARD: stderr PCIe target /dev/et0_ops; stderr Physical device ID 0
+RP12: PASS - rc 16; smoke processes ['copy-64m-random', 'ledger-selftest']
+2026-11-15 12:38:39 PST session start (T0 1794775119 = 12:38:39 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP13)
+2026-11-15 12:38:39 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:38:39 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:38:39 PST sampler started (attempt 1, pid 236, every 100 ms)
+2026-11-15 12:38:39 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:38:39 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:38:39 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:38:39 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:40 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:40 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:40 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:40 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:40 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:40 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:38:40 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:38:40 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:38:40 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:38:51 PST pass 1: copy-zeros p1: the host's line was not read (the host's last line does not parse once the runtime lines are dropped (Expecting ',' delimiter: line 1 column 221 (char 220); it begins '{"ledger":1,"prog":"copy","device":"card'))
+2026-11-15 12:38:51 PST pass 1: copy-zeros p1 done: host rc 124, status None, reading FAILED RUN (not a datum), the host's line was not read: the host's last line does not parse once the runtime lines are dropped (Expecting ',' delimiter: line 1 column 221 (char 220); it begins '{"ledger":1,"prog":"copy","device":"card')
+2026-11-15 12:38:52 PST pass 2: copy-random p1 (K 8; die 55 C)
+2026-11-15 12:38:53 PST pass 2: copy-random p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:38:53 PST pass 3: sha256 p1 (K 9; die 55 C)
+2026-11-15 12:38:55 PST pass 3: sha256 p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:38:55 PST pass 4: sort-sorted p1 (K 8; die 55 C)
+2026-11-15 12:38:56 PST pass 4: sort-sorted p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:38:57 PST pass 5: sort-shuffled p1 (K 7; die 55 C)
+2026-11-15 12:38:58 PST pass 5: sort-shuffled p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:38:58 PST pass 6: sparse-parity p1 (K 9; die 55 C)
+2026-11-15 12:39:00 PST pass 6: sparse-parity p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:00 PST idle anchor 3: 0.5 s, nothing running but the sampler
+2026-11-15 12:39:00 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:39:00 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:39:00 PST session end (T0 1794775119)
+   [RP13] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL)
+RP13: PASS - rc 0; pass 1's host rc 124 after 10.04 s (the real timeout 10); passes 6
+2026-11-15 12:39:00 PST session start (T0 1794775140 = 12:39:00 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP14)
+2026-11-15 12:39:00 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:39:01 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:39:01 PST sampler started (attempt 1, pid 331, every 100 ms)
+2026-11-15 12:39:01 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:39:01 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:39:01 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:39:01 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:01 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:02 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:02 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:02 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:02 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:02 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:02 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:39:02 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:39:03 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:39:15 PST BOUND: the host process (pid 368) outlived the runner's 12 s bound: `timeout 10` did not end it; nothing is killed; the queue stops
+2026-11-15 12:39:16 PST pass 1: copy-zeros p1: the host's line was not read (the host's last line does not parse once the runtime lines are dropped (Expecting ',' delimiter: line 1 column 221 (char 220); it begins '{"ledger":1,"prog":"copy","device":"card'))
+2026-11-15 12:39:16 PST pass 1: copy-zeros p1 done: host rc None, status None, reading BOUND (no reading: the host did not end), a stop line tripped during this pass: BOUND: the host process (pid 368) outlived the runner's 12 s bound: `timeout 10` did not end it; nothing is killed; the queue stops; the host's line was not read: the host's last line does not parse once the runtime lines are dropped (Expecting ',' delimiter: line 1 column 221 (char 220); it begins '{"ledger":1,"prog":"copy","device":"card'); BOUND: the host outlived the runner's 12 s bound (nothing killed)
+2026-11-15 12:39:16 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:39:16 PST STOP: BOUND: the host process (pid 368) outlived the runner's 12 s bound: `timeout 10` did not end it; nothing is killed; the queue stops: the queue ended after the running process
+2026-11-15 12:39:16 PST after the BOUND: card 1's lock stays held while our host (pid 368) runs; its end is polled every 1 s, nothing is killed, at most until 14:28:41 PST
+2026-11-15 12:39:20 PST the host past the bound (pid 368) has ended (rc 124, 4 s into the wait); card 1's lock was held until then
+2026-11-15 12:39:20 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:39:20 PST session end (T0 1794775140)
+   [RP14] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL) | BOUND: the host process (pid 368) outlived the runner's 12 s bound: `timeout 10` did not end it; nothing is killed; the queue stops | pass 1: copy-zeros p1 done: host rc None, status None, reading BOUND (no reading: the host did not end), a stop line tripped during this pass: BOUND: the host process (pid 368) | STOP: BOUND: the host process (pid 368) outlived the runner's 12 s bound: `timeout 10` did not end it; nothing is killed; the queue stops: the queue ended after the running pro | after the BOUND: card 1's lock stays held while our host (pid 368) runs; its end is polled every 1 s, nothing is killed, at most until 14:28:41 PST
+RP14: PASS - rc 0 after 19.3 s; passes 1; while the stuck host ran (alive True) a flock -n on card 1's lock read rc 1 (1 = held); its end polled, the closing read after it; alive when the session returned: False
+2026-11-15 12:39:20 PST session start (T0 1794775160 = 12:39:20 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP15)
+2026-11-15 12:39:20 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:39:20 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:39:20 PST sampler started (attempt 1, pid 393, every 100 ms)
+2026-11-15 12:39:20 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:39:20 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:39:21 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:39:21 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:21 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:21 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:21 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:21 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:21 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:21 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:21 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:39:21 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:39:22 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:39:23 PST pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:23 PST pass 2: copy-random p1 (K 8; die 56 C)
+2026-11-15 12:39:25 PST pass 2: copy-random p1 done: host rc 0, status PASS, reading PASS, the sampler was not live during this pass: no live sample for 2.67 s between its start and its end (2.17 s in the host's span, 0 live sample(s) in it): the live stop lines read nothing then (reported; the scoring stays as registered)
+2026-11-15 12:39:25 PST the sampler is not live (alive True, last live sample 2.7 s ago): restarting it
+2026-11-15 12:39:25 PST sampler started (attempt 1, pid 440, every 100 ms)
+2026-11-15 12:39:25 PST pass 3: sha256 p1 (K 9; die 55 C)
+2026-11-15 12:39:27 PST pass 3: sha256 p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:27 PST pass 4: sort-sorted p1 (K 8; die 55 C)
+2026-11-15 12:39:29 PST pass 4: sort-sorted p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:29 PST pass 5: sort-shuffled p1 (K 7; die 55 C)
+2026-11-15 12:39:30 PST pass 5: sort-shuffled p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:30 PST pass 6: sparse-parity p1 (K 9; die 55 C)
+2026-11-15 12:39:32 PST pass 6: sparse-parity p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:32 PST idle anchor 3: 0.5 s, nothing running but the sampler
+2026-11-15 12:39:32 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:39:33 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:39:33 PST session end (T0 1794775160)
+   [RP15] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL)
+RP15: PASS - rc 0; passes 6; the last sample's age at each host start [0.01, 1.56, 0.06, 0.0, 0.1, 0.04]
+2026-11-15 12:39:33 PST session start (T0 1794775173 = 12:39:33 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP16)
+2026-11-15 12:39:33 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:39:33 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:39:33 PST sampler started (attempt 1, pid 495, every 100 ms)
+2026-11-15 12:39:33 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:39:33 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:39:33 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:39:33 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:33 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:33 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:34 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:34 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:34 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:34 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:34 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:39:34 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:39:34 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:39:36 PST pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:36 PST STOP before pass 2: 1 holder line(s) of ours off card 1 (card 0's nodes or lock)
+2026-11-15 12:39:36 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:39:36 PST STOP: a holder or a foreign device process: 1 holder line(s) of ours off card 1 (card 0's nodes or lock): the queue ended after the running process
+2026-11-15 12:39:36 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:39:36 PST session end (T0 1794775173)
+   [RP16] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL) | STOP before pass 2: 1 holder line(s) of ours off card 1 (card 0's nodes or lock) | STOP: a holder or a foreign device process: 1 holder line(s) of ours off card 1 (card 0's nodes or lock): the queue ended after the running process
+RP16: PASS - rc 0; passes 1
+2026-11-15 12:39:36 PST session start (T0 1794775176 = 12:39:36 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP17)
+2026-11-15 12:39:36 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:39:36 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:39:36 PST sampler started (attempt 1, pid 559, every 100 ms)
+2026-11-15 12:39:37 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:39:37 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:39:37 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:39:37 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:37 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:37 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:37 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:37 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:37 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:37 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:37 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:39:37 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:39:38 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:39:40 PST pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:40 PST STOP before pass 2: 1 holder line(s) of another login
+2026-11-15 12:39:40 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:39:40 PST STOP: a holder or a foreign device process: 1 holder line(s) of another login: the queue ended after the running process
+2026-11-15 12:39:40 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:39:40 PST session end (T0 1794775176)
+   [RP17] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL) | STOP before pass 2: 1 holder line(s) of another login | STOP: a holder or a foreign device process: 1 holder line(s) of another login: the queue ended after the running process
+RP17: PASS - rc 0; passes 1
+2026-11-15 12:39:40 PST session start (T0 1794775180 = 12:39:40 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP18)
+2026-11-15 12:39:40 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:39:40 PST a holder or a foreign device process (et-who unreadable (rc 1, nothing on its stdout)): no device opened
+2026-11-15 12:39:40 PST session end (T0 1794775180)
+   [RP18] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | a holder or a foreign device process (et-who unreadable (rc 1, nothing on its stdout)): no device opened
+RP18: PASS - rc 16; nothing started True
+2026-11-15 12:39:40 PST session start (T0 1794775180 = 12:39:40 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP19)
+2026-11-15 12:39:40 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:39:40 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:39:40 PST sampler started (attempt 1, pid 625, every 100 ms)
+2026-11-15 12:39:40 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:39:41 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:39:41 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:39:41 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:41 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:41 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:41 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:41 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:41 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:41 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:41 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:39:41 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:39:42 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:39:43 PST pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:43 PST STOP before pass 2: et-who unreadable (rc 1, nothing on its stdout)
+2026-11-15 12:39:43 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:39:43 PST STOP: a holder or a foreign device process: et-who unreadable (rc 1, nothing on its stdout): the queue ended after the running process
+2026-11-15 12:39:43 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:39:43 PST session end (T0 1794775180)
+   [RP19] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL) | STOP before pass 2: et-who unreadable (rc 1, nothing on its stdout) | STOP: a holder or a foreign device process: et-who unreadable (rc 1, nothing on its stdout): the queue ended after the running process
+RP19: PASS - rc 0; passes 1
+2026-11-15 12:39:44 PST session start (T0 1794775184 = 12:39:44 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP20)
+2026-11-15 12:39:44 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:39:44 PST a holder or a foreign device process (1 device process(es) of ours besides the sampler): no device opened
+2026-11-15 12:39:44 PST session end (T0 1794775184)
+   [RP20] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | a holder or a foreign device process (1 device process(es) of ours besides the sampler): no device opened
+RP20: PASS - its comm 'sparseparity_ho'; rc 16
+2026-11-15 12:39:44 PST session start (T0 1794775184 = 12:39:44 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP21)
+2026-11-15 12:39:44 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:39:44 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:39:44 PST sampler started (attempt 1, pid 693, every 100 ms)
+2026-11-15 12:39:44 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:39:45 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:39:45 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:39:45 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:45 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:45 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:45 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:45 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:45 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:45 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:45 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:39:45 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:39:46 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:39:47 PST pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:47 PST STOP asked: an early stop was asked for (the stop file (STOP in the session's directory)): no further process starts; the running one (if any) ends by itself, then the closing
+2026-11-15 12:39:47 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:39:47 PST STOP: an early stop was asked for (the stop file (STOP in the session's directory)): the queue ended after the running process
+2026-11-15 12:39:47 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:39:47 PST session end (T0 1794775184)
+   [RP21] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL) | STOP asked: an early stop was asked for (the stop file (STOP in the session's directory)): no further process starts; the running one (if any) ends by itself, then the closing | STOP: an early stop was asked for (the stop file (STOP in the session's directory)): the queue ended after the running process
+RP21: PASS - rc 0; passes ['copy-zeros/p1']; early_stop an early stop was asked for (the stop file (STOP in the session's directory))
+2026-11-15 12:39:47 PST session start (T0 1794775187 = 12:39:47 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP22)
+2026-11-15 12:39:47 PST the box check: spp's kernel is not the one its build record names (THE KERNEL GATE passed that one at the build): no device opened
+2026-11-15 12:39:47 PST session end (T0 1794775187)
+   [RP22] rc 16; the box check: spp's kernel is not the one its build record names (THE KERNEL GATE passed that one at the build): no device opened
+RP22: PASS - rc 16; a kernel changed after its build record was written: refused at the box check, nothing started True
+2026-11-15 12:39:47 PST session start (T0 1794775187 = 12:39:47 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP23)
+2026-11-15 12:39:47 PST the box check: ledger's build record carries no passing kernel gate line ('not read'); spp's build record carries no passing kernel gate line ('not read'): no device opened
+2026-11-15 12:39:47 PST session end (T0 1794775187)
+   [RP23] rc 16; the box check: ledger's build record carries no passing kernel gate line ('not read'); spp's build record carries no passing kernel gate line ('not read'): no device opened
+RP23: PASS - rc 16; a build record without the kernel gate's OK line: refused at the box check
+2026-11-15 12:39:47 PST session start (T0 1794775187 = 12:39:47 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP24)
+2026-11-15 12:39:47 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:39:47 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:39:48 PST sampler started (attempt 1, pid 754, every 100 ms)
+2026-11-15 12:39:48 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:39:48 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:39:48 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:39:48 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:48 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:48 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:48 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:48 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:49 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:49 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:39:49 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:39:49 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:39:49 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:39:51 PST pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:51 PST pass 2: copy-random p1 (K 8; die 56 C)
+2026-11-15 12:39:53 PST pass 2: copy-random p1 done: host rc 0, status PASS, reading PASS, the sampler was not live during this pass: no live sample for 2.68 s between its start and its end (2.18 s in the host's span, 0 live sample(s) in it): the live stop lines read nothing then (reported; the scoring stays as registered)
+2026-11-15 12:39:53 PST the sampler is not live (alive True, last live sample 2.7 s ago, 26 line(s) since without a stop line's reading): restarting it
+2026-11-15 12:39:53 PST sampler started (attempt 1, pid 801, every 100 ms)
+2026-11-15 12:39:53 PST pass 3: sha256 p1 (K 9; die 55 C)
+2026-11-15 12:39:54 PST pass 3: sha256 p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:54 PST pass 4: sort-sorted p1 (K 8; die 55 C)
+2026-11-15 12:39:56 PST pass 4: sort-sorted p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:56 PST pass 5: sort-shuffled p1 (K 7; die 55 C)
+2026-11-15 12:39:58 PST pass 5: sort-shuffled p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:58 PST pass 6: sparse-parity p1 (K 9; die 55 C)
+2026-11-15 12:39:59 PST pass 6: sparse-parity p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:39:59 PST idle anchor 3: 0.5 s, nothing running but the sampler
+2026-11-15 12:40:00 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:40:00 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:40:00 PST session end (T0 1794775187)
+   [RP24] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL)
+RP24: PASS - rc 0; lines without board_w 26: the sampler restarted through the guard; (pass, age at host start, largest live-sample gap, flagged, sampler_live) [('copy-zeros/p1', 0.02, 1.03, False, True), ('copy-random/p1', 1.56, 2.68, True, False), ('sha256/p1', 0.06, 0.1, False, True), ('sort-sorted/p1', 0.1, 0.1, False, True), ('sort-shuffled/p1', 0.09, 0.1, False, True), ('sparse-parity/p1', 0.04, 0.1, False, True)]
+2026-11-15 12:40:00 PST session start (T0 1794775200 = 12:40:00 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RP25)
+2026-11-15 12:40:00 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:40:00 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:40:00 PST sampler started (attempt 1, pid 856, every 100 ms)
+2026-11-15 12:40:00 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:40:00 PST STOP asked: an early stop was asked for (the stop file (STOP in the session's directory)): no further process starts; the running one (if any) ends by itself, then the closing
+2026-11-15 12:40:00 PST an early stop was asked for (the stop file (STOP in the session's directory)) before the stop-path test: the gate, no launch
+2026-11-15 12:40:01 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:40:01 PST session end (T0 1794775200)
+   [RP25] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | STOP asked: an early stop was asked for (the stop file (STOP in the session's directory)): no further process starts; the running one (if any) ends by itself, then the closing | an early stop was asked for (the stop file (STOP in the session's directory)) before the stop-path test: the gate, no launch
+RP25: PASS - rc 16; the stop file written as the start config read was logged: an early stop at the gate, never 'stop-path test failed'
+2026-11-15 12:40:01 PST session start (T0 1794775201 = 12:40:01 PST; plan FULL; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RPS1)
+2026-11-15 12:40:01 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:40:01 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:40:01 PST sampler started (attempt 1, pid 884, every 100 ms)
+2026-11-15 12:40:01 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:40:01 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:40:01 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:40:01 PST smoke copy-64m-random: rc 0, FAILED (0.1 s); the host's card: card 1
+2026-11-15 12:40:01 PST smoke gate failed: copy-64m-random: rc 0, status None
+2026-11-15 12:40:02 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:40:02 PST session end (T0 1794775201)
+   [RPS1] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate failed: copy-64m-random: rc 0, status None
+RPS1: PASS - v1's runner on aifoundry1's form: rc 16; its smoke stdout.txt holds the split line True; smoke.json status None; passes 0 (the day's stop, reproduced on the real path)
+2026-11-15 12:40:02 PST session start (T0 1794775202 = 12:40:02 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RPS2)
+2026-11-15 12:40:02 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:40:02 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:40:02 PST sampler started (attempt 1, pid 918, every 100 ms)
+2026-11-15 12:40:02 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:40:02 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:40:02 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:40:02 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: no runtime line
+2026-11-15 12:40:03 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: no runtime line
+2026-11-15 12:40:03 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: no runtime line
+2026-11-15 12:40:03 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: no runtime line
+2026-11-15 12:40:03 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: no runtime line
+2026-11-15 12:40:03 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: no runtime line
+2026-11-15 12:40:03 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: no runtime line
+2026-11-15 12:40:03 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:40:03 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:40:04 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:40:05 PST pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:05 PST pass 2: copy-random p1 (K 8; die 55 C)
+2026-11-15 12:40:07 PST pass 2: copy-random p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:07 PST pass 3: sha256 p1 (K 9; die 55 C)
+2026-11-15 12:40:08 PST pass 3: sha256 p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:08 PST pass 4: sort-sorted p1 (K 8; die 55 C)
+2026-11-15 12:40:10 PST pass 4: sort-sorted p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:10 PST pass 5: sort-shuffled p1 (K 7; die 55 C)
+2026-11-15 12:40:12 PST pass 5: sort-shuffled p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:12 PST pass 6: sparse-parity p1 (K 9; die 55 C)
+2026-11-15 12:40:13 PST pass 6: sparse-parity p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:13 PST idle anchor 3: 0.5 s, nothing running but the sampler
+2026-11-15 12:40:14 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:40:14 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:40:14 PST session end (T0 1794775202)
+   [RPS2] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL)
+RPS2: PASS - E191_FAKE_RUNTIME=none: rc 0; passes ['PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS']; the ledger passes' dropped lines [[]]
+2026-11-15 12:40:14 PST session start (T0 1794775214 = 12:40:14 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RPS3)
+2026-11-15 12:40:14 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:40:14 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:40:14 PST sampler started (attempt 1, pid 1012, every 100 ms)
+2026-11-15 12:40:14 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:40:15 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:40:15 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:40:15 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:15 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:15 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:15 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:15 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:15 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:15 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:15 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:40:15 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:40:16 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:40:18 PST pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:18 PST pass 2: copy-random p1 (K 8; die 55 C)
+2026-11-15 12:40:19 PST pass 2: copy-random p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:19 PST pass 3: sha256 p1 (K 9; die 55 C)
+2026-11-15 12:40:21 PST pass 3: sha256 p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:21 PST pass 4: sort-sorted p1 (K 8; die 55 C)
+2026-11-15 12:40:23 PST pass 4: sort-sorted p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:23 PST pass 5: sort-shuffled p1 (K 7; die 55 C)
+2026-11-15 12:40:24 PST pass 5: sort-shuffled p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:24 PST pass 6: sparse-parity p1 (K 9; die 55 C)
+2026-11-15 12:40:26 PST pass 6: sparse-parity p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:26 PST idle anchor 3: 0.5 s, nothing running but the sampler
+2026-11-15 12:40:26 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:40:26 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:40:26 PST session end (T0 1794775214)
+   [RPS3] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL)
+RPS3: PASS - E191_FAKE_RUNTIME=line: rc 0; passes ['PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS']; the ledger passes' dropped lines [['Opening device 1']]
+2026-11-15 12:40:26 PST session start (T0 1794775226 = 12:40:26 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RPS4)
+2026-11-15 12:40:26 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:40:27 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:40:27 PST sampler started (attempt 1, pid 1106, every 100 ms)
+2026-11-15 12:40:27 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:40:27 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:40:27 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:40:27 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 2 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:27 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 2 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:27 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 2 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:27 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 2 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:28 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 2 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:28 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 2 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:28 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:28 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:40:28 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:40:28 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:40:30 PST pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:30 PST pass 2: copy-random p1 (K 8; die 55 C)
+2026-11-15 12:40:32 PST pass 2: copy-random p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:32 PST pass 3: sha256 p1 (K 9; die 55 C)
+2026-11-15 12:40:33 PST pass 3: sha256 p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:33 PST pass 4: sort-sorted p1 (K 8; die 55 C)
+2026-11-15 12:40:35 PST pass 4: sort-sorted p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:35 PST pass 5: sort-shuffled p1 (K 7; die 55 C)
+2026-11-15 12:40:37 PST pass 5: sort-shuffled p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:37 PST pass 6: sparse-parity p1 (K 9; die 55 C)
+2026-11-15 12:40:38 PST pass 6: sparse-parity p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:38 PST idle anchor 3: 0.5 s, nothing running but the sampler
+2026-11-15 12:40:39 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:40:39 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:40:39 PST session end (T0 1794775226)
+   [RPS4] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL)
+RPS4: PASS - E191_FAKE_RUNTIME=twice: rc 0; passes ['PASS', 'PASS', 'PASS', 'PASS', 'PASS', 'PASS']; the ledger passes' dropped lines [['Opening device 1', 'Opening device 1']]
+2026-11-15 12:40:39 PST session start (T0 1794775239 = 12:40:39 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RPS5)
+2026-11-15 12:40:39 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:40:39 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:40:39 PST sampler started (attempt 1, pid 1200, every 100 ms)
+2026-11-15 12:40:39 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:40:40 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:40:40 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:40:40 PST smoke copy-64m-random: rc 0, FAILED (0.1 s); the host's card: card 1; the host's line: no runtime line; NOT READ: the host's last line does not parse once the runtime lines are dropped (Expecting ',' delimiter: line 1 column 218 (char 217); it begins '{"ledger":1,"prog":"copy","device":"card')
+2026-11-15 12:40:40 PST smoke gate failed: copy-64m-random: rc 0, status None (the host's line was not read: the host's last line does not parse once the runtime lines are dropped (Expecting ',' delimiter: line 1 column 218 (char 217); it begins '{"ledger":1,"prog":"copy","device":"card'))
+2026-11-15 12:40:40 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:40:40 PST session end (T0 1794775239)
+   [RPS5] rc 16; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate failed: copy-64m-random: rc 0, status None (the host's line was not read: the host's last line does not parse once the runtime lines are dropped (Expecting ',' delim
+RPS5: PASS - an unknown text inside the line: rc 16; the line not read, the smoke gate failed safe; the raw stdout kept (True); passes 0
+2026-11-15 12:40:40 PST session start (T0 1794775240 = 12:40:40 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RPS6)
+2026-11-15 12:40:40 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:40:40 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:40:40 PST sampler started (attempt 1, pid 1234, every 100 ms)
+2026-11-15 12:40:40 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:40:40 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:40:40 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:40:41 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:41 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:41 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:41 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:41 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:41 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:41 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:41 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:40:41 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:40:42 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:40:43 PST pass 1: copy-zeros p1 done: host rc 1, status FAIL, reading FAILED RUN (not a datum)
+2026-11-15 12:40:43 PST pass 2: copy-random p1 (K 8; die 55 C)
+2026-11-15 12:40:45 PST pass 2: copy-random p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:45 PST pass 3: sha256 p1 (K 9; die 55 C)
+2026-11-15 12:40:46 PST pass 3: sha256 p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:46 PST pass 4: sort-sorted p1 (K 8; die 55 C)
+2026-11-15 12:40:48 PST pass 4: sort-sorted p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:48 PST pass 5: sort-shuffled p1 (K 7; die 55 C)
+2026-11-15 12:40:50 PST pass 5: sort-shuffled p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:50 PST pass 6: sparse-parity p1 (K 9; die 55 C)
+2026-11-15 12:40:51 PST pass 6: sparse-parity p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:51 PST idle anchor 3: 0.5 s, nothing running but the sampler
+2026-11-15 12:40:52 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:40:52 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:40:52 PST session end (T0 1794775240)
+   [RPS6] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL)
+RPS6: PASS - a failed host in pass 1: rc 0; its status read FAIL, its reading FAILED RUN (not a datum); the rest ['PASS', 'PASS', 'PASS', 'PASS', 'PASS']
+2026-11-15 12:40:52 PST session start (T0 1794775252 = 12:40:52 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry1/RPS7)
+2026-11-15 12:40:52 PST the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's sha256 with the kernel gate's OK
+2026-11-15 12:40:52 PST config start: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499 (read, nothing set); identity (a): /dev/et1_mgmt, device ID 1, minion_mv below 510
+2026-11-15 12:40:52 PST sampler started (attempt 1, pid 1328, every 100 ms)
+2026-11-15 12:40:52 PST identity (b): et-who with the sampler running: ours on card 1 2 (on /dev/et1_mgmt 1), ours on card 0 0, another login's 0; the sampler holds /dev/et1_mgmt only
+2026-11-15 12:40:53 PST stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; clock tripped in 0.2 s, start refused
+2026-11-15 12:40:53 PST smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test)
+2026-11-15 12:40:53 PST smoke copy-64m-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:53 PST smoke copy-64m-zeros: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:53 PST smoke copy-1g-random: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:53 PST smoke sha256-b2048-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:53 PST smoke sort-shuffled-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:53 PST smoke sort-sorted-r1: rc 0, ok (0.1 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:53 PST smoke sparse-parity-r1: rc 0, ok (0.2 s); the host's card: card 1; the host's line: 1 runtime line(s) dropped (Opening device 1)
+2026-11-15 12:40:53 PST smoke gate passed: queue starts (plan FULL)
+2026-11-15 12:40:53 PST idle anchor 1: 0.5 s, nothing running but the sampler
+2026-11-15 12:40:54 PST pass 1: copy-zeros p1 (K 8; die 55 C)
+2026-11-15 12:40:55 PST pass 1: copy-zeros p1: the host's line was not read (the host's last line does not parse once the runtime lines are dropped (Expecting ',' delimiter: line 1 column 221 (char 220); it begins '{"ledger":1,"prog":"copy","device":"card'))
+2026-11-15 12:40:55 PST pass 1: copy-zeros p1 done: host rc 134, status None, reading FAILED RUN (not a datum), the host's line was not read: the host's last line does not parse once the runtime lines are dropped (Expecting ',' delimiter: line 1 column 221 (char 220); it begins '{"ledger":1,"prog":"copy","device":"card')
+2026-11-15 12:40:55 PST pass 2: copy-random p1 (K 8; die 55 C)
+2026-11-15 12:40:57 PST pass 2: copy-random p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:57 PST pass 3: sha256 p1 (K 9; die 55 C)
+2026-11-15 12:40:58 PST pass 3: sha256 p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:40:58 PST pass 4: sort-sorted p1 (K 8; die 55 C)
+2026-11-15 12:41:00 PST pass 4: sort-sorted p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:41:00 PST pass 5: sort-shuffled p1 (K 7; die 55 C)
+2026-11-15 12:41:02 PST pass 5: sort-shuffled p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:41:02 PST pass 6: sparse-parity p1 (K 9; die 55 C)
+2026-11-15 12:41:03 PST pass 6: sparse-parity p1 done: host rc 0, status PASS, reading PASS
+2026-11-15 12:41:03 PST idle anchor 3: 0.5 s, nothing running but the sampler
+2026-11-15 12:41:04 PST the counters arm: DROPPED by E189's kit (its KIT.md section 5; E191.md 7): not run
+2026-11-15 12:41:04 PST config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 499; its identity card 1
+2026-11-15 12:41:04 PST session end (T0 1794775252)
+   [RPS7] rc 0; the box check: aifoundry1, ET_DEVICES=1, the reader at its pin, today's builds by build_e191.sh with the ET_DEVICES reading passed, each host and kernel at its build record's s | smoke gate passed: queue starts (plan FULL)
+RPS7: PASS - a host that died after it opened the card in pass 1: rc 0; its reading FAILED RUN (not a datum), flagged ["the host's line was not read: the host's"]; the rest ['PASS', 'PASS', 'PASS', 'PASS', 'PASS']
+RPS8: PASS - RP1's passes: copy-zeros ok, copy-random ok, sha256 ok, sort-sorted ok, sort-shuffled ok, sparse-parity ok (stdout.txt raw with the runtime line, the reassembled line in host-raw.json / sparse parity's host.json read by the frozen scorer's reader as PASS, run.json's host_line); 7 device-opening smoke records each with its dropped runtime line
+REALPATH-E191-V2 aifoundry1: 33 of 33 PASS
+== hostname aifoundry2 (a private UTS namespace), a private PID namespace
+rc 0
+realpath_e191_v2 (/usr/bin/python3 3.12.3), 2026-11-15 12:41:06 PST; /dev/et*: none; /run/lock entries: 0; processes visible: 2
+realpath_e191: hostname 'aifoundry2' (the namespace's); the runner is the stand-in tree's: True
+2026-11-15 12:41:06 PST session start (T0 1794775266 = 12:41:06 PST; plan FULL; kit note 2; programs ledger+spp; aifoundry1 card 1, ET_DEVICES=1; its files in <scratch>/aifoundry2/RW1)
+2026-11-15 12:41:06 PST the box check: this host is 'aifoundry2', not aifoundry1: no device opened
+2026-11-15 12:41:06 PST session end (T0 1794775266)
+   [RW1] rc 16; the box check: this host is 'aifoundry2', not aifoundry1: no device opened
+RW1: PASS - rc 16; the guard rc 97 ('ettelem_guard_e191: refused (box 'aifoundry2': E191 runs on aifoundry1 card 1 only): not i'), the reader started False
+REALPATH-E191-V2 aifoundry2: 1 of 1 PASS
+REALPATH-E191-V2 34 of 34 PASS
+rc 0
+# ended 2026-11-15 12:41:06 PST

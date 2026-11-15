@@ -1,0 +1,31 @@
+# E191 kit note 2: preflight_e191_v2.sh (dmcmd_audit on the second session's files), run 2026-11-15 12:38:23 PST on aifoundry2 inside the round's CPU slot and a no-device sandbox (W/nodev.sh: /dev/et* 0, /run/lock entries 0); /usr/bin/python3 3.12.3; the scratch clone at 96ef447ce326 (GitHub main) with the note's files as fixed after its verifier (fix-n2e191)
+dmcmd_audit: GO (16 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e191/run_e191_v2.py:224: ettelem config (wrapper call record): GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e191/run_e191_v2.py:224: ettelem config (wrapper call record): GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e191/run_e191_v2.py:224: ettelem config (wrapper call record): GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e191/run_e191_v2.py:224: ettelem config (wrapper call record): GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e191/run_e191_v2.py:224: ettelem config (wrapper call record): GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+tools/claims-v3/e191/ettelem_guard_e191.sh:27: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e191/ettelem_guard_e191.sh:27: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e191/ettelem_guard_e191.sh:27: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e191/ettelem_guard_e191.sh:27: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e191/ettelem_guard_e191.sh:27: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e191/ettelem_guard_e191.sh:40: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e191/ettelem_guard_e191.sh:40: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e191/ettelem_guard_e191.sh:40: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e191/ettelem_guard_e191.sh:40: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e191/ettelem_guard_e191.sh:40: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e191/ettelem_guard_e191.sh:40: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+note: tools/claims-v3/e191/run_e191_v2.py:220: 'config' goes through tools/claims-v3/e191/ettelem_guard_e191.sh, which is scanned: its own lines are what it sends
+note: tools/claims-v3/e191/run_e191_v2.py:228: 'sample' goes through tools/claims-v3/e191/ettelem_guard_e191.sh, which is scanned: its own lines are what it sends
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      3 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      3 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      2 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      2 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      2 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+rc 0

@@ -1,0 +1,20 @@
+# E191 kit note 2: desk/checks_e191_v2.sh (the quick set v2), run 2026-11-15 12:59:50 PST on aifoundry2 inside the round's CPU slot and a no-device sandbox (W/nodev.sh: /dev/et* 0, /run/lock entries 0); /usr/bin/python3 3.12.3; the scratch clone at 96ef447ce326 (GitHub main) with the note's files as fixed after its verifier (fix-n2e191)
+checks_e191_v2: 2026-11-15 12:59:50 PST on aifoundry2, Python 3.12.3 at /usr/bin/python3, GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)
+PASS python: every .py under tools/claims-v3/e191 compiles (in memory)
+PASS shell: every .sh under tools/claims-v3/e191 parses (bash -n)
+PASS common-v2: E191-COMMON-V2 SELF-CHECK PASS
+PASS common: E191-COMMON SELF-CHECK PASS
+PASS ident: E191-IDENT SELF-CHECK PASS
+PASS harness-v2-check: CHECK PASS (v2)
+PASS harness-v2-box: HARNESS-V2 OK: 49 files
+PASS harness-v1-box: HARNESS OK: 42 files
+PASS harness-v1-check: CHECK PASS
+PASS preflight-v2: dmcmd_audit: GO (16 send site(s), 0 disallowed; allow-list: none)
+PASS runner-v2-reader: RUNNER-V2 READER OK: last_json calls 0; imports e191_common_v2 True; host_result calls 2 (the smoke, each pass), config_json 1
+PASS doubles-form: DOUBLES-FORM OK: the double's keys in the real host's order True (the double adds 'fake' after them); the runtime line after the same 10 bytes ('"width":32') True; its line read PASS, dropped ['Opening device 1']
+PASS drylisting-v2: DRYLISTING-CHECK-E191 PASS: 2 device-opening line(s), each with ET_DEVICES=1; no line names card 0, unsets ET_DEVICES or runs dev_mngt_service or et-powertop
+PASS history-names: SHADOW NAMES: 300 standard-library names from sys.stdlib_module_names (Python 3.12.3); with the day's own 38; struct True, ast True, copy True, gzip True, json True, re True, subprocess True, _strptime True; read in 10 f
+PASS no-shadow: NO SHADOW: note 2's 9 new Python files (check_e191_v2, dryaudit_e191_v2, drylisting_check_e191_v2, e191_common_v2, fake_card_e191_v2, realbytes_e191, realpath_e191_v2, run_e191_v2, selftest_run_e191_v2) against 300 stand
+PASS never-ran: NEVER RAN (by the committed record)
+CHECKS-E191-V2 16 of 16 PASS
+rc 0

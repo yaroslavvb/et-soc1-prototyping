@@ -1,0 +1,70 @@
+# E191 kit note 2: desk/dryaudit_e191_v2.py, run 2026-11-15 12:59:50 PST on aifoundry2 inside the round's CPU slot and a no-device sandbox (W/nodev.sh: /dev/et* 0, /run/lock entries 0); /usr/bin/python3 3.12.3; the scratch clone at 96ef447ce326 (GitHub main) with the note's files as fixed after its verifier (fix-n2e191)
+dryaudit_e191_v2 (/usr/bin/python3 3.12.3): run_e191_v2.py; part 1, every line that reads the dry flag; part 2, every line that reads a device process's standard output (each case must read PASS in its committed log)
+PART 1: the dry flag
+  line  156 [__init__] self.dry = a.dry
+      real path: the flag itself (no branch); cases rp:RP1: COVERED
+  line  189 [__init__] if self.dry:
+      real path: the doubles' environment (schedule, stand-in nodes and lock, the alt card) is NOT set: the real nodes, lock and card; cases rp:RP1: COVERED
+  line  198 [__init__] self.watch_dir = self.dev_dir if self.dry else None
+      real path: the watch reads the cards' nodes where they are (/dev on the box; e191_ident.DEV_DIR): the sampler's fds and every host's tree; cases rp:RP1, rp:RP9, rp:RP12: COVERED
+  line  202 [say] w = ("DRY " + words) if self.dry and not words.startswith("session start") else words
+      real path: no DRY mark on any line (the rest rule counts the session); cases rp:RP1: COVERED
+  line  210 [record] self.cmd_log.write(json.dumps({"kind": kind, "real": real_argv, "used": used_argv, "dry": self.d
+      real path: each command recorded with its real form (used equals real); cases rp:RP1: COVERED
+  line  223 [cmd_config] c = self.fake() + ["config"] if self.dry else self.real_config()
+      real path: the config read through E191's guard under `timeout 10` (its hostname and ET_DEVICES rules), its stderr kept; cases rp:RP1, rp:RP7, rp:RP8, rp:RW1: COVERED
+  line  231 [cmd_sampler] c = (self.fake() + ["sample", "--seconds", str(int(seconds)), "--every-ms", str(C.EVERY_MS)]) if
+      real path: the sampler through the guard; its own fds read for the identity; cases rp:RP1, rp:RP9: COVERED
+  line  237 [cmd_etwho] c = self.fake() + ["etwho"] if self.dry else ["timeout", "20", "et-who"]
+      real path: et-who under `timeout 20` (PATH's et-who); cases rp:RP1, rp:RP10, rp:RP11: COVERED
+  line  243 [host_cmd] if self.dry:
+      real path: ONE host process under the real `timeout 10`, watched (stderr block, held nodes), the runner's bound; cases rp:RP1, rp:RP12, rp:RP13, rp:RP14: COVERED
+  line  290 [our_device_procs] if self.dry:
+      real path: the real ps read of our own device processes, the sampler's tree left out; cases rp:RP3: COVERED
+  line  316 [foreign] if not self.dry:
+      real path: the real ps read: other users' device processes (a positive count needs a second login: not made on the desk) and our own (RP3); cases rp:RP1, rp:RP3: COVERED
+  line  843 [one_pass] run = {"preset": cfg, "card": "aifoundry1 card 1", "et_devices": self.env.get("ET_DEVICES"), "dr
+      real path: bookkeeping in run.json / pass.json / queue.json; cases rp:RP1: COVERED
+  line  844 [one_pass] "lock": C.LOCK if not self.dry else "DRY",
+      real path: run.json names the card's lock; cases rp:RP1: COVERED
+  line  849 [one_pass] "host_cpu_ext_s": cpu, "identity": wres, "stub_card": self.a.double if self.dry else None,
+      real path: run.json names no stub card; cases rp:RP1: COVERED
+  line  866 [one_pass] "t_end_ms": t_end, "host_rc": rc, "host_status": j.get("status"), "reading": rd, "dry": self.dry
+      real path: bookkeeping in pass.json; cases rp:RP1: COVERED
+  line  897 [run] tag = " DRY" if self.dry else ""
+      real path: the session start line has no DRY tag (the rest rule counts it); cases rp:RP1: COVERED
+  line  901 [run] result = {"t0": a.t0, "dry": self.dry, "programs": self.programs, "queue": self.queue, "card": "
+      real path: bookkeeping in run.json / pass.json / queue.json; cases rp:RP1: COVERED
+  line  907 [run] if not self.dry:
+      real path: THE BOX CHECK: aifoundry1, ET_DEVICES=1, the reader at its pin, today's build records, hosts and (fix-e191k2) kernels at their records' sha256 with the kernel gate's OK line; cases rp:RP1, rp:RP4, rp:RP5, rp:RP6, rp:RP8, rp:RW1, rp:RP22, rp:RP23: COVERED
+  line  914 [run] lockp = os.path.join(self.out, "dry.lock") if self.dry else C.LOCK
+      real path: card 1's lock (e191_common.LOCK), flock -n, held to the end; cases rp:RP1, rp:RP2: COVERED
+  line 1032 [run] if self.dry and self.device_opened:
+      real path: no dry check (the real path's commands are recorded in commands.jsonl; RP1 reads each real, each ET_DEVICES=1); cases rp:RP1: COVERED
+  line 1090 [main] if not a.dry:
+      real path: main(): the desk's overrides and V3_DRY refused without --dry; the registered session through session_e191.sh; cases run:R15, rb:LA2: COVERED
+PART 2: the standard output (kit note 2; section 116's lesson)
+  line  136 [pacific_day] return subprocess.run(["date", "+%F"], env=dict(os.environ, TZ="America/Los_Angeles"), capture_o
+      reads: the date command's output (the Pacific day for the box check; no device); cases rp:RP1, rp:RP5: COVERED
+  line  293 [our_device_procs] ps = subprocess.run(["ps", "-eo", "uid=,pid=,comm="], capture_output=True, text=True).stdout.spl
+      reads: ps's lines (the device processes of ours and of other users; no device); cases rp:RP3, rp:RP20: COVERED
+  line  307 [foreign] lines = w.stdout.splitlines()
+      reads: et-who's lines before the first card command and before each pass (it opens no device; an answer it cannot read refuses, finding 3); cases rp:RP10, rp:RP11, rp:RP17, rp:RP18, rp:RP19: COVERED
+  line  317 [foreign] ps = subprocess.run(["ps", "-eo", "uid=,pid=,comm="], capture_output=True, text=True).stdout.spl
+      reads: ps's lines (the device processes of ours and of other users; no device); cases rp:RP3, rp:RP20: COVERED
+  line  330 [_reader] for raw in proc.stdout:
+      reads: the sampler's lines: only a line that begins with '{' and parses is a sample (v1's code, unchanged); the reader's own 'Opening device 1' line, printed whole before its samples (e142's committed telemetry.jsonl.raw holds it first), is skipped; cases rp:RP1, rp:RP24, rbytes:RB10: COVERED
+  line  557 [config] j = C.config_json(r.stdout)
+      reads: the config read: the runtime lines dropped, then v1's last line beginning with '{' (E170's committed aifoundry1 config read, 'Opening device 0' then its line, read the same as v1 read it); cases rbytes:RB5, rp:RP1, rp:RP7: COVERED
+  line  648 [identity_read] lines = r.stdout.splitlines()
+      reads: et-who's lines in the identity read (b); cases rp:RP1, rp:RP9: COVERED
+  line  707 [smoke] j, hl = {}, {"reader": "the self-test's lines (no device, no runtime line)", "runtime_lines": C.
+      reads: the self-test's record (no device: no runtime line); cases rbytes:RB9, rp:RP1: COVERED
+  line  709 [smoke] j, hl = C.host_result(text, kind, argv)
+      reads: THE SMOKE: each device-opening host's line reassembled and verified (the day's committed bytes read PASS; every split offset; truly failed hosts read FAILED; v1's runner on the split stand-ins reproduces the day's stop); cases rbytes:RB1, rbytes:RB3, rbytes:RB6, rbytes:RB7, rbytes:RB8, rp:RP1, rp:RPS1, rp:RPS5, rp:RP12, run:S2: COVERED
+  line  711 [smoke] good = rc == 0 and "SELFTEST PASS" in C.drop_runtime(text)[0]
+      reads: the self-test's lines read once the runtime lines drop; cases rbytes:RB9, rp:RP1: COVERED
+  line  814 [one_pass] j, hl = C.host_result(text, C.PROGRAM[cfg], argv)
+      reads: EVERY PASS: the host's line reassembled and verified; host-raw.json / host.json written from it (the frozen scorer's and the reducer's readers read the verified dict); a line not read is a FAILED RUN, flagged; cases rbytes:RB2, rbytes:RB4, rbytes:RB7, rp:RP1, rp:RPS2, rp:RPS3, rp:RPS4, rp:RPS6, rp:RPS7, rp:RPS8, run:S1, run:S4: COVERED
+DRY-AUDIT-E191-V2 32 of 32 COVERED (part 1: 21 of 21; part 2: 11 of 11)
+rc 0
