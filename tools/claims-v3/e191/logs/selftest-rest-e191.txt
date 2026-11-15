@@ -1,0 +1,45 @@
+== RA1 E190 arm B's committed form (build/e190/T1794614924-B/session.log)
+    REFUSED: 30 minutes since E190's session end (2026-11-13 16:27:55 PST): E191 starts on a rested card, at least 40 minutes after our last real session on aifoundry1, either card (the kit)
+    rest: 41 minutes since E190's session end (2026-11-13 16:27:55 PST; dry sessions and blocks that opened no device skipped; every tree of ours on aifoundry1 read)
+-> PASS (RA1 30 minutes REFUSED naming E190; 41 minutes rest 41)
+== RA2 E184 arm B's committed form (session-B-t<T0>.log) and its dry log
+    REFUSED: 39 minutes since E184's session end (2026-11-08 00:32:29 PST): E191 starts on a rested card, at least 40 minutes after our last real session on aifoundry1, either card (the kit)
+    rest: 40 minutes since E184's session end (2026-11-08 00:32:29 PST; dry sessions and blocks that opened no device skipped; every tree of ours on aifoundry1 read)
+-> PASS (RA2 39 minutes REFUSED naming E184; 40 minutes rest 40; its dry log not counted)
+== RA3 E164's and E172's committed forms (build/e164/session.log, build/e172/session.log)
+    REFUSED: 10 minutes since E164's session end (2026-11-04 15:17:53 PST): E191 starts on a rested card, at least 40 minutes after our last real session on aifoundry1, either card (the kit)
+    rest: 50 minutes since E172's session end (2026-11-05 12:33:55 PST; dry sessions and blocks that opened no device skipped; every tree of ours on aifoundry1 read)
+-> PASS (RA3 E164 10 minutes REFUSED; with E172 later, rest 50 naming E172)
+== RA4 E191's own form, and its dry session
+    REFUSED: 20 minutes since E191's session end (2026-11-15 10:00:00 PST): E191 starts on a rested card, at least 40 minutes after our last real session on aifoundry1, either card (the kit)
+    rest: 40 minutes since E191's session end (2026-11-15 10:00:00 PST; dry sessions and blocks that opened no device skipped; every tree of ours on aifoundry1 read)
+-> PASS (RA4 20 minutes REFUSED naming E191; 40 minutes rest 40; its dry session 5 minutes back not counted)
+== RA5 E191 cut mid-queue: a later pass's files written after its log fell silent
+    note: E191's last real session block has no 'session end': counted as ended at 2026-11-15 09:25:00 PST (the latest write of E191's files outside the dry paths)
+    REFUSED: 10 minutes since E191's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026-11-15 09:25:00 PST (the latest write of E191's files outside the dry paths)): E191 starts on a rested card, at least 40 minutes after our last real session on aifoundry1, either card (the kit)
+    note: E191's last real session block has no 'session end': counted as ended at 2026-11-15 09:25:00 PST (the latest write of E191's files outside the dry paths)
+    rest: 40 minutes since E191's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026-11-15 09:25:00 PST (the latest write of E191's files outside the dry paths); dry sessions and blocks that opened no device skipped; every tree of ours on aifoundry1 read)
+-> PASS (RA5 counted at the run's latest write: REFUSED at 09:35, rest 40 at 10:05)
+== RA6 E191 stopped at the box check (no device opened) / at the identity gate (its config read opened the device)
+    rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders, in any tree of ours on aifoundry1
+    REFUSED: 10 minutes since E191's session end (2026-11-15 11:10:03 PST): E191 starts on a rested card, at least 40 minutes after our last real session on aifoundry1, either card (the kit)
+-> PASS (RA6 a session that opened no device skipped; one stopped at the identity gate counted (REFUSED))
+== RA7 another tree of ours (~/aifoundry), and a tree that is a symlink to ~/nekko
+    REFUSED: 10 minutes since E191's session end (2026-11-15 12:50:00 PST): E191 starts on a rested card, at least 40 minutes after our last real session on aifoundry1, either card (the kit)
+    rest: 45 minutes since E191's session end (2026-11-15 12:20:00 PST; dry sessions and blocks that opened no device skipped; every tree of ours on aifoundry1 read)
+-> PASS (RA7 a session in ~/aifoundry counted (REFUSED); a symlinked tree read once (rest 45))
+== RA8 either card: a session of ours on card 0
+    REFUSED: 10 minutes since E192's session end (2026-11-15 14:30:00 PST): E191 starts on a rested card, at least 40 minutes after our last real session on aifoundry1, either card (the kit)
+-> PASS (RA8 a session of ours on card 0 starts the 40 minutes too (REFUSED naming E192))
+== RA9 lib.sh's block trees on aifoundry1: E170 cut, a block file written later
+    note: E170's last real session block has no 'session end': counted as ended at 2026-11-15 09:25:00 PST (the latest write of E170's files outside the dry paths)
+    REFUSED: 10 minutes since E170's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026-11-15 09:25:00 PST (the latest write of E170's files outside the dry paths)): E191 starts on a rested card, at least 40 minutes after our last real session on aifoundry1, either card (the kit)
+-> PASS (RA9 the block tree build/claims-v3/aifoundry1-c1/<run>-* read: REFUSED at 09:35 naming E170)
+== RA10 energy.sh's form in ~/nekko
+    REFUSED: 20 minutes since energy.sh's run (2026-11-15 09:00:00 PST (the latest write of an energy.sh run's folder, aifoundry1-x-0900)): E191 starts on a rested card, at least 40 minutes after our last real session on aifoundry1, either card (the kit)
+-> PASS (RA10 energy.sh's folder 20 minutes back: REFUSED naming energy.sh)
+== RA11 no session log at all
+    rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders, in any tree of ours on aifoundry1
+-> PASS (RA11 'rest: no real session of ours')
+
+SELFTEST-REST-E191 11 of 11 PASS

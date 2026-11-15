@@ -1,0 +1,41 @@
+realbuild_e191: 2026-11-15 01:45:50 PST on aifoundry2, Python 3.12.3 at /usr/bin/python3; riscv riscv64-unknown-elf-gcc () 15.1.0; cmake version 3.28.3
+   K1: COMPILER host: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+   K1: COMPILER riscv: riscv64-unknown-elf-gcc () 15.1.0
+   K1: COMPILER cmake: cmake version 3.28.3
+   K1: HARNESS OK: 42 files
+   K1: LEDGER kernel: ELF sha256 2b2eb281c45408ea7a43307e65bd68ec0470c662752f0d474cd58579076db65a, .text sha256 5e00e45ad0ae204781a451de8f1c807e74719a137ef28e1d517933f6b7d97e40
+   K1: LEDGER KERNEL OK ledger: .text 5e00e45ad0ae2047... the registered (E189.md 4); ELF 2b2eb281c45408ea... the '() 15.1.0' toolchain's pin (built on aifoundry2, Sat 14 Nov 2026)
+   K1: LEDGER host: HOST-BEHAVIOUR OK ledger (10 checks)
+   K1: LEDGER ETDEVICES: no: the host has no ET_DEVICES; /opt/et/lib/libdeviceLayer.a has no ET_DEVICES
+   K1: LEDGER-BUILT rc=0
+   K1: SPP kernel: ELF sha256 6ee70c925ef377f27b3941600be72b848206804633ee56c95550e96782f78814, .text sha256 3e14be325df307751f424372d0a1dccad244b3ffe0e46e43d82baefb300cb820
+   K1: SPP KERNEL OK spp: .text 3e14be325df30775... the registered (E189.md 4); ELF 6ee70c925ef377f2... the '() 15.1.0' toolchain's pin (built on aifoundry2, Sat 14 Nov 2026)
+   K1: SPP host: HOST-BEHAVIOUR OK spp (3 checks)
+   K1: SPP ETDEVICES: no: the host has no ET_DEVICES; /opt/et/lib/libdeviceLayer.a has no ET_DEVICES
+   K1: SPP-BUILT rc=0
+   K1: E191-BUILD rc=0 (2 of 2 programs built)
+-> PASS (K1 the real build (no stand-in): both kernels through the gate by the '() 15.1.0' pin, both BUILT, E191-BUILD rc=0, the records carry the gate's line)
+   K2: HARNESS OK: 46 files
+-> PASS (K2 check_e191.py --box --built ledger,spp on the built tree (step 6's own read))
+   K3: KERNEL OK ledger: .text 5e00e45ad0ae2047... the registered (E189.md 4); ELF 045073f757acccad... none of the pinned (the difference lies in sections the card never loads); its loadable identity 2ef2747f3c0fc65c... the pinned one
+   K3: KERNEL OK spp: .text 3e14be325df30775... the registered (E189.md 4); ELF dc719e1696c42fdb... none of the pinned (the difference lies in sections the card never loads); its loadable identity 2dd06a909660cf53... the pinned one
+-> PASS (K3 aifoundry3's .comment written in: each ELF none of the pinned, each KERNEL OK by its loadable identity)
+   K4: KERNEL OK ledger: .text 5e00e45ad0ae2047... the registered (E189.md 4); ELF 238fb281eb5ef59f... none of the pinned (the difference lies in sections the card never loads); its loadable identity 2ef2747f3c0fc65c... the pinned one
+-> PASS (K4 a .debug_str byte changed: KERNEL OK (the card never loads it))
+   K5: KERNEL FAILED ledger: .text the registered, but the ELF f29de72515265ff4f6de8c80d6afa09c811f257209e05992c6970a188be1d0c1 is none of the pinned and its loadable identity 68b4b8570245c1e9d3de6c1e7370cb83db903f086049b8473cba6f4dfb173156 is not the pinned 2ef2747f3c0fc65c0d808de4e690e7655cf1d7bb1b93dac5fc9dc006d2b0010b
+-> PASS (K5 a .rodata byte changed: KERNEL FAILED by the loadable identity (the .text still the registered))
+   K6: KERNEL FAILED spp: .text sha256 9ee3727241ba5c74900211af07b1a4deb0fe3d8f814f3628935ad8f8b9e7ce59 is not the registered 3e14be325df307751f424372d0a1dccad244b3ffe0e46e43d82baefb300cb820 (E189.md 4); ELF 43a8758b2eb02b3c7e8b653ccce037f0e009882d16d203c260ab45a38e40d919
+-> PASS (K6 a .text byte changed: KERNEL FAILED, the .text not the registered)
+   K7: KERNEL FAILED spp: .text the registered, but the ELF 1ddb9a9bf64593761a3535666abf9a23bd38ad6c2e1f421ae6c9e500742419a2 is none of the pinned and its loadable identity 87f4853a5e1803a5d2ce5eb1ff41f15e1f34e0686e7248fd68782df4a16a4719 is not the pinned 2dd06a909660cf53fa4c9b5b870bc003b373c202b8a3601a2de3ede1021536d9
+-> PASS (K7 the entry point moved: KERNEL FAILED by the loadable identity)
+   K8: the ALLOC sections (.text a976 8005801000;.rodata 120 800580b980;.sdata 8 800580baa0;.bss 0 800580baa8;) against sparseparity.hdr: same; the program headers (LOAD GNU_STACK ) against sparseparity.phdr: same; the symbols (17) against sparseparity.nm: same
+-> PASS (K8 sparse parity's sections, every program header (LOAD, GNU_STACK) and symbols equal E189's committed records of the kernel E189 ran)
+   K9 ok.ok
+-> PASS (K9 the registered .text (hostcheck-e189.json, E189.md 4), E189's ELF pins, ELF_ALSO and LOAD_SHA256 as built in K1)
+   K10 stack-flags: KERNEL FAILED spp: .text the registered, but the ELF 4898e105aab2f947fda9dc4c0657e938d60b6f55c354ad5317f18f25f214c9ea is none of the pinned and its loadable identity a83e5e2f89f76f1d6eebafc27dd3e9b152e7cfd1b4bd
+   K10 stack-tls: KERNEL FAILED spp: .text the registered, but the ELF e9e23809f59de6468060577c5501d08dd5ab8d714b3c2327a403453b412c91f1 is none of the pinned and its loadable identity aefb0127f15a4e83ba3f49443f49ca1c02a389a210a785
+   K10 osabi: KERNEL FAILED spp: .text the registered, but the ELF 19a9fb050b08d585700ca7ad63bab5b0b81bccfb30a8c4b8501615d5748684f9 is none of the pinned and its loadable identity 411862d67a11928800d85eb527c091001dd2f975eaddae4da7
+   K10 version: KERNEL FAILED spp: .text the registered, but the ELF 48eeb52e48a0e3afc012ec4ddb523034f686cb3a69b322dfe7ad37354e51d550 is none of the pinned and its loadable identity 91ef266093a80209b924ff59b6e75255712eb9535f37bed6
+   K10 sdata-entsize: KERNEL FAILED spp: .text the registered, but the ELF 57686a131e5e49bf7059f4d230f1da8ee1ae5380ab6a9fc3d8b4563c57e83e96 is none of the pinned and its loadable identity 0bbc90ce2c3ad26343090ac1e2ea9f0281deb0e1dc
+-> PASS (K10 the GNU_STACK header's flags, its type (PT_TLS), the OS/ABI byte, e_version and an allocated section's entry size: each refused by the loadable identity's second form)
+REALBUILD-E191 10 of 10 PASS

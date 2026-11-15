@@ -1,0 +1,149 @@
+selftest_rb_e191: 2026-11-15 01:46:13 PST, processes visible: 7
+scratch repository: a shared sparse clone at a65734ad24a7 (the commit before E191's kit), the kit as one stand-in commit c0244a23bcd9, its own upstream; the kit list's stand-in 54 files
+
+== A. the dry listing, and the runbook's command lines (note 1, item 4)
+dry listing: 13 steps listed, 0 exited non-zero, 0 box calls
+DRYLISTING-CHECK-E191 PASS: 2 device-opening line(s), each with ET_DEVICES=1; no line names card 0, unsets ET_DEVICES or runs dev_mngt_service or et-powertop
+-> PASS (A every step 0, no call to the stand-ins; every device-opening line of the runbook carries ET_DEVICES=1, none of card 0)
+
+== K, W1-W3, G. the window rule and the lab-git lock
+-> PASS (K, W1-W3, G each refused (10) before any call)
+
+== N. step 2 run inside the lab-git lock (nested): its pull cannot take the lock
+[s03_desk_e191] STOP: the desk check failed: pull pull(rc 14; a nested lab-git lock exits 75)
+-> PASS (N a nested step 2 stops with 16 naming its pull)
+
+== P1. step 2 on the scratch repository
+[s03_desk_e191] desk check: the window written today for E191; pulled under the lab-git lock, HEAD c0244a23bcd9 descends from 46a16bd0, E191's registration 300d76e4c9ab (subtree 766e2463) and note 1, and E189's registration and kit; the paths clean, HISTORY OK, the lists at their pinned counts and bytes (11; 3; 10; 55; 165; 17, 6; 86) and the kit's (54), E189.md the cited text, lists not pinned (reported): none; the harness re-made and at its sha256, PLANS SAME, the host check's lines, both self
+-> PASS (P1 step 2 passes at every pin, HISTORY OK, PLANS SAME, the never-run check (a), (b), (c))
+
+== P2-P4, H1-H4. a short registration list; a short kit list; an unknown list; an edited registration file; shadows; E191 data in a ref
+-> PASS (P2-P4, H1-H4: each pin refused and named; the unknown list reported; the edit, the shadow, E189's file and E191 data refused)
+
+== LK, LK2. the look, both cards
+both cards: et-who rc 0; card 1 holder lines: ours 0, another login's 0; card 0 holder lines: ours 0, another login's 0; other lines: ours 0, another login's 0; our device processes 0, other users' device processes 0; our sessions or queues 0, runbook jobs 0; 
+HOLDER-RULE-BOTH-CARDS: FREE after 0 s of polls
+    both cards: et-who rc 0; card 1 holder lines: ours 0, another login's 0; card 0 holder lines: ours 0, another login's 0; other lines: ours 0, another login's 0; our device processes 0, other users' device processes 0; our sessions or queues 0, runbook jobs
+[s05_look_e191] aifoundry1: FREE on both cards (nothing of ours on either; card 0 not opened)
+both cards: et-who rc 1; card 1 holder lines: ours 0, another login's 0; card 0 holder lines: ours 0, another login's 1; other lines: ours 0, another login's 0; our device processes 0, other users' device processes 0; our sessions or queues 0, runbook jobs 0; 
+    both cards: et-who rc 1; card 1 holder lines: ours 0, another login's 0; card 0 holder lines: ours 0, another login's 1; other lines: ours 0, another login's 0; our device processes 0, other users' device processes 0; our sessions or queues 0, runbook jobs
+[s05_look_e191] STOP: aifoundry1 booted after E82's firmware read: its firmware build is not carried by continuity: no launch on aifoundry1
+-> PASS (LK FREE on both cards, our login written; LK2 another login on card 0 only: HELD (17); LK3 a boot after E82's firmware read: 16)
+
+== S. step 5 (the sync), then step 6 start and wait on the stand-in box
+<scratch>/s5.txt:HARNESS OK: 42 files
+<scratch>/s5.txt:HARNESS OK: 42 files
+<scratch>/s5.txt:[s07_a1_sync_e191] synced to aifoundry1:nekko/ (43 paths); the rsync sent 43 files' contents there; HARNESS OK on the box
+<scratch>/s6b.txt:HARNESS OK: 42 files
+<scratch>/s6b.txt:LEDGER kernel: ELF sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef, .text sha256 fc232be1aa8b510171a88
+<scratch>/s6b.txt:LEDGER KERNEL OK ledger: .text fc232be1aa8b5101... the registered (E189.md 4); ELF fc232be1aa8b5101... a desk-test stand-in pi
+<scratch>/s6b.txt:LEDGER host: HOST-BEHAVIOUR OK ledger (10 checks)
+<scratch>/s6b.txt:LEDGER ETDEVICES: yes: the host and <scratch>/devi
+<scratch>/s6b.txt:LEDGER-BUILT rc=0
+<scratch>/s6b.txt:SPP kernel: ELF sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f, .text sha256 9bdd9f0b90f150afc23796dc
+<scratch>/s6b.txt:SPP KERNEL OK spp: .text 9bdd9f0b90f150af... the registered (E189.md 4); ELF 9bdd9f0b90f150af... a desk-test stand-in pin
+<scratch>/s6b.txt:SPP host: HOST-BEHAVIOUR OK spp (3 checks)
+<scratch>/s6b.txt:SPP ETDEVICES: yes: the host and <scratch>/devicel
+<scratch>/s6b.txt:SPP-BUILT rc=0
+<scratch>/s6b.txt:    LEDGER kernel: ELF sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef, .text sha256 fc232be1aa8b51017
+<scratch>/s6b.txt:    LEDGER KERNEL OK ledger: .text fc232be1aa8b5101... the registered (E189.md 4); ELF fc232be1aa8b5101... a desk-test stand-i
+<scratch>/s6b.txt:    LEDGER host: HOST-BEHAVIOUR OK ledger (10 checks)
+<scratch>/s6b.txt:    LEDGER ETDEVICES: yes: the host and <scratch>/
+<scratch>/s6b.txt:    LEDGER-BUILT rc=0
+<scratch>/s6b.txt:    SPP kernel: ELF sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f, .text sha256 9bdd9f0b90f150afc237
+<scratch>/s6b.txt:    SPP KERNEL OK spp: .text 9bdd9f0b90f150af... the registered (E189.md 4); ELF 9bdd9f0b90f150af... a desk-test stand-in pin
+<scratch>/s6b.txt:    SPP host: HOST-BEHAVIOUR OK spp (3 checks)
+<scratch>/s6b.txt:    SPP ETDEVICES: yes: the host and <scratch>/dev
+<scratch>/s6b.txt:    SPP-BUILT rc=0
+<scratch>/s6b.txt:HARNESS OK: 46 files
+<scratch>/s6b.txt:[s08_a1_build_e191] built today on aifoundry1: ledger,spp (the other program, if any, is SKIPPED today); the build records (ET
+-> PASS (S synced (the harness read on the box), built (after 0 calls of 17): both hosts by behaviour and the ET_DEVICES reading, the records and checks on the box)
+
+== X. a second start after both built today
+-> PASS (X refused)
+
+== U. the negative control through the runbook: a fresh day, the ledger host with its budget refusal at 9.9 s
+LEDGER kernel: ELF sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef, .text sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef
+LEDGER KERNEL OK ledger: .text fc232be1aa8b5101... the registered (E189.md 4); ELF fc232be1aa8b5101... a desk-test stand-in pin
+LEDGER host: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+LEDGER-BUILD-FAILED: the host's behaviour: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+SPP kernel: ELF sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f, .text sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f
+SPP KERNEL OK spp: .text 9bdd9f0b90f150af... the registered (E189.md 4); ELF 9bdd9f0b90f150af... a desk-test stand-in pin
+SPP host: HOST-BEHAVIOUR OK spp (3 checks)
+SPP ETDEVICES: yes: the host and <scratch>/devicelayer-standin.a carry ET_DEVICES; the device layer came from /opt/et
+SPP-BUILT rc=0
+    LEDGER kernel: ELF sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef, .text sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef
+    LEDGER KERNEL OK ledger: .text fc232be1aa8b5101... the registered (E189.md 4); ELF fc232be1aa8b5101... a desk-test stand-in pin
+    LEDGER host: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+    LEDGER-BUILD-FAILED: the host's behaviour: HOST-BEHAVIOUR FAIL ledger: L4 rc 0: ''
+    SPP kernel: ELF sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f, .text sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f
+    SPP KERNEL OK spp: .text 9bdd9f0b90f150af... the registered (E189.md 4); ELF 9bdd9f0b90f150af... a desk-test stand-in pin
+    SPP host: HOST-BEHAVIOUR OK spp (3 checks)
+    SPP ETDEVICES: yes: the host and <scratch>/devicelayer-standin.a carry ET_DEVICES; the device layer came from /opt/et
+    SPP-BUILT rc=0
+-> PASS (U the mutant refused by its behaviour (L4), sparse parity built)
+
+== U2. THE ET_DEVICES GATE through the runbook: a fresh day, both hosts against the stock device layer
+LEDGER ETDEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt)
+LEDGER-BUILD-FAILED: ET_DEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt) (a host that ignored ET_DEVICES would open card 0)
+SPP ETDEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt)
+SPP-BUILD-FAILED: ET_DEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt) (a host that ignored ET_DEVICES would open card 0)
+    LEDGER ETDEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt)
+    LEDGER-BUILD-FAILED: ET_DEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt) (a host that ignored ET_DEVICES would open card 0)
+    SPP ETDEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt)
+    SPP-BUILD-FAILED: ET_DEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt) (a host that ignored ET_DEVICES would open card 0)
+[s08_a1_build_e191] STOP: neither program built (the lines above): run start once more if this was today's first build (one re-run); after a second, NO-THIRD-BUILD: no session today
+-> PASS (U2 both hosts refused by the ET_DEVICES reading on aifoundry1: step 6's wait 16, neither built)
+
+== T. NO-THIRD-BUILD: two starts recorded today
+[s08_a1_build_e191] STOP: NO-THIRD-BUILD: 2 builds were started on aifoundry1 today (Pacific): the programs not built today are SKIPPED (E191.md 12: no data, never a failed prediction); go on with what step 6's wait recorded, or no session
+-> PASS (T a third start the same Pacific day refused with 16)
+   (rebuilt both for the later cases: rc 0, ledger,spp)
+
+== L1-L3. the kits' form: a login link, a hang, a cut wait
+01:47:43 aifoundry1 needs a check
+-> PASS (L1 a login link: 11 and the lock line, nothing retried; L2 a hang killed at its bound: 13; L3 a cut wait: 14, no reading)
+
+== R. step 7, the reads (ET_DEVICES=1, card 1's lock): the stand-in box has no reader
+[s09_a1_reads_e191] STOP: no config read came back (card 1's lock was held, or the guard refused, or our own live collector held the management node for a moment): read the output above; if the look (step 4) reads FREE again, run this step ONCE more; a second time: no session
+-> PASS (R no config line from the stand-in box: 16, nothing launched)
+
+== D. step 8, the box's dry pass (run_e191.py --dry on the stand-in box)
+2026-11-15 01:47:48 PST DRY smoke gate passed: queue starts (plan FULL)
+2026-11-15 01:48:10 PST DRY the device-command check: 16 device-opening command(s), each with ET_DEVICES=1; none names card 0, unsets ET_DEVICES or calls dev_mngt_service or et-powertop; the lock card 1's: ok
+2026-11-15 01:47:48 PST DRY smoke gate passed: queue starts (plan FULL)
+2026-11-15 01:48:10 PST DRY the device-command check: 16 device-opening command(s), each with ET_DEVICES=1; none names card 0, unsets ET_DEVICES or calls dev_mngt_service or et-powertop; the lock card 1's: ok
+E191-DRY rc=0 passes=6 dry-check=1 identity-lines=2
+[s10_a1_dry_e191] the dry pass ended rc 0: E191-DRY rc=0 passes=6 dry-check=1 identity-lines=2
+-> PASS (D the dry pass ran six passes, its dry check and identity lines, rc 0)
+
+== RS. the rest rule through step 9: an E190-form session (arm B's committed log) ended 10 minutes ago on the box
+[s11_a1_session_e191] STOP: e191 refused on the box: REFUSED: 10 minutes since E190's session end (2026-11-15 01:38:18 PST): E191 starts on a rested card, at least 40 minutes after our last real session on aifoundry1, either card (the kit)
+-> PASS (RS refused (10) naming E190, nothing launched)
+
+== LA. step 9 launches the REAL session (the box check stops it before any device: this desk is not aifoundry1); step 10 reads the gate
+rest: 45 minutes since E184's session end (2026-11-15 01:03:19 PST; dry sessions and blocks that opened no device skipped; every tree of ours on aifoundry1 read)
+LAUNCHED e191 T0 1794736099 2026-11-15 01:48:24 PST (programs ledger,spp; last start 2026-11-15 23:58 PST, last end 2026-11-15 23:59 PST; package counter: not read)
+2026-11-15 01:48:19 PST the box check: this host is 'aifoundry2', not aifoundry1; no reader build/ettelem/ettelem: no device opened
+MANIFEST-WRITTEN 6 files
+GATE-STOPPED e191
+-> PASS (LA launched after 45 minutes' rest; the real session stopped at its box check before any device, with its manifest; step 10 reads the gate (16))
+
+== WT1-WT3. step 10 on a stand-in session_e191.sh: running (identity pass lines, no end), ended, BOUND
+-> PASS (WT1 running by its own script (17, no gate stop, the SHORT reading shown); WT2 ended with its manifest (0); WT3 BOUND (16))
+
+== C, C2. step 11 on the LA session; then one byte changed after the manifest
+COPY-BACK EXACT: every file of the box's MANIFEST.sha256 at its sha256, nothing else but runner.rc
+COLLECTED docs/reports/data/2026-11-15-e191-blind-day-aifoundry1-c1: 0 passes reduced; 8 files in SHA256SUMS (and FILES.txt); the scrub clean (no /home/ path, no box login)
+HISTORY OK: 131 files added since 46a16bd0 on E191's paths, none changed or removed; E191's registration 300d76e4c9ab; E191's note 1 8c8f825f9adf; E191's kit c0244a23bcd9; E189's registration c86940c1e2c7; E189's kit b42
+-> PASS (C collected exactly, SHA256SUMS and FILES.txt written, no home path and no box login in it)
+
+== SC0-SC3. step 13's real path: before the data commit, a worktree change, a committed byte change, committed and clean
+[s24_score_e191] scored: {"E191-S1":"NOTDECIDED","E191-S1T":"NOTDECIDED","E191-S2":"NOTDECIDED","E191-S2T":"NOTDECIDED"} (RB_OUT/scores-e191.json; the records lane commits it beside the data)
+-> PASS (SC0 not committed 10; SC1 a worktree change 16; SC2 a committed byte change 16; SC3 committed and clean: scored, scores-e191.json)
+-> PASS (C2 a changed byte: not exact, 16, nothing written)
+
+== Z. no process of this test left running
+-> PASS (Z nothing left)
+
+SELFTEST-RB-E191 21 of 21 PASS

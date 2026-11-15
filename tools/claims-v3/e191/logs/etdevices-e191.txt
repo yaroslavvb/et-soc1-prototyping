@@ -1,0 +1,37 @@
+etdevices_test_e191: 2026-11-15 01:45:17 PST on aifoundry2, g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+   E1: yes: the host and <scratch>/lib-yes.a carry ET_DEVICES; the device layer came from /opt/et
+   E2: no: the host has no ET_DEVICES
+   E3: no: <scratch>/lib-no.a has no ET_DEVICES
+   E4: no: the build did not take its device layer from /opt/et (CMakeCache.txt)
+   E5: no: /opt/et/lib/libdeviceLayer.a has no ET_DEVICES
+-> PASS (E1 the host, the device layer and the cache: yes)
+-> PASS (E2 a host without ET_DEVICES: no)
+-> PASS (E3 a device layer without ET_DEVICES: no)
+-> PASS (E4 the device layer from elsewhere: no)
+-> PASS (E5 a stand-in library without RB_DESKTEST=1 is ignored)
+   B1: LEDGER kernel: ELF sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef, .text sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef
+   B1: LEDGER KERNEL OK ledger: .text fc232be1aa8b5101... the registered (E189.md 4); ELF fc232be1aa8b5101... a desk-test stand-in pin
+   B1: LEDGER host: HOST-BEHAVIOUR OK ledger (10 checks)
+   B1: LEDGER ETDEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt)
+   B1: LEDGER-BUILD-FAILED: ET_DEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt) (a host that ignored ET_DEVICES would open card 0)
+   B1: SPP kernel: ELF sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f, .text sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f
+   B1: SPP KERNEL OK spp: .text 9bdd9f0b90f150af... the registered (E189.md 4); ELF 9bdd9f0b90f150af... a desk-test stand-in pin
+   B1: SPP host: HOST-BEHAVIOUR OK spp (3 checks)
+   B1: SPP ETDEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt)
+   B1: SPP-BUILD-FAILED: ET_DEVICES: no: the host has no ET_DEVICES; the build did not take its device layer from /opt/et (CMakeCache.txt) (a host that ignored ET_DEVICES would open card 0)
+   B1: E191-BUILD rc=1 (no program built)
+-> PASS (B1 aifoundry1, the stock device layer: both hosts refused by the ET_DEVICES reading, E191-BUILD rc=1, the records BUILD-FAILED)
+   B2: LEDGER kernel: ELF sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef, .text sha256 fc232be1aa8b510171a880faf224e06b6c8d1149718843c89328203dadd6fbef
+   B2: LEDGER KERNEL OK ledger: .text fc232be1aa8b5101... the registered (E189.md 4); ELF fc232be1aa8b5101... a desk-test stand-in pin
+   B2: LEDGER host: HOST-BEHAVIOUR OK ledger (10 checks)
+   B2: LEDGER ETDEVICES: yes: the host and <scratch>/lib-yes.a carry ET_DEVICES; the device layer came from /opt/et
+   B2: LEDGER-BUILT rc=0
+   B2: SPP kernel: ELF sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f, .text sha256 9bdd9f0b90f150afc23796dc2f7d269cfc1b8cc83e61ca118c1ce4041f8e672f
+   B2: SPP KERNEL OK spp: .text 9bdd9f0b90f150af... the registered (E189.md 4); ELF 9bdd9f0b90f150af... a desk-test stand-in pin
+   B2: SPP host: HOST-BEHAVIOUR OK spp (3 checks)
+   B2: SPP ETDEVICES: yes: the host and <scratch>/lib-yes.a carry ET_DEVICES; the device layer came from /opt/et
+   B2: SPP-BUILT rc=0
+   B2: E191-BUILD rc=0 (2 of 2 programs built)
+-> PASS (B2 aifoundry1, the stand-in device layer that carries ET_DEVICES: both BUILT, their behaviour read OK, records et_devices yes)
+-> PASS (B3 aifoundry2: BUILT, the reading recorded as not a gate (the runner refuses such a record on aifoundry1: RP6))
+ETDEVICES-E191 8 of 8 PASS

@@ -1,0 +1,13 @@
+selftest_wait_e191 (/usr/bin/python3 3.12.3), 2026-11-15 01:46:02 PST
+step 10's GATE-STOPPED pattern, read from rb/s20_wait_e191.sh: stop-path test failed|smoke gate failed|no device opened|the gate, no launch|would not start
+   G1: the dry session rc 0, 32 lines; RP1's real-path log 32 lines; identity and box-check pass lines 5; pattern hits []
+-> PASS (G1 no line of a whole E191 session (dry, and the real path's RP1, identity pass lines among them) reads as a gate stop)
+   G2: 14 gate-stop sentences in run_e191.py, 16 gate-stop lines in the real-path log; not matched: []
+-> PASS (G2 every gate-stop sentence of the runner and every real-path gate-stop line reads as a gate stop)
+   G3: E189's real session 67 lines, E190 arm B's 50 lines (2 identity lines); hits []
+-> PASS (G3 no line of E189's or E190 arm B's committed real session reads as a gate stop)
+-> PASS (B1 the runner's BOUND line is BOUND-SEEN's and no gate stop's)
+   N1: {'counted-real': '1', 'counted-dashc': '0', 'counted-grep': '0', 'counted-step9': '0 0', 'counted-dry': '0'} (stderr '')
+-> PASS (N1 the session counted by its own script; a -c string, a grep, the desk's step 9 script and a dry run not counted)
+-> PASS (N2 step 9 launches session_e191.sh by that name, step 10 looks for that name, and the runner is its child (no exec))
+SELFTEST-WAIT-E191 6 of 6 PASS
