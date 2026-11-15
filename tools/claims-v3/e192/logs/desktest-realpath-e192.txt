@@ -1,0 +1,522 @@
+# E192 kit (Q176; written by lane kit-e192, re-made by lane fix-e192 before the land): the real-path desk test, bash W/slot.sh bash W/nodev.sh bash tools/claims-v3/e192/desk/desktest_realpath_e192.sh <scratch>
+# run 2026-11-14 18:29:24 PST on aifoundry2 (Ubuntu 24.04; bash 5.2.21(1)-release; rsync version 3.2.7 protocol v; /usr/bin/python3 3.12.3, numpy 1.26.4); paths masked as <lab clone>, <scratch>, <lane folder>, <W>, /home/<login>; nothing measured, no card, no device
+
+inside the sandbox: hostname aifoundry3; /dev/et*: -rw-rw-r-- /dev/et0_mgmt -rw-rw-r-- /dev/et0_ops ; processes visible: 5
+E192 real-path desk test (kit-e192), 2026-11-14 18:29:24 PST; Python 3.12.3; the scratch <scratch>
+
+== 0 the sandbox and the stand-in box
+-> PASS (0a the host's name is aifoundry3 in the sandbox)
+-> PASS (0b /dev holds only et0_ops and et0_mgmt, each a regular file (no device node))
+-> PASS (0c a private PID namespace (few processes visible))
+-> PASS (0d the box copy's preflight: the plain chain GO (the stock table), the per-sensor chain GO (E144's table))
+
+== D-dry
+   rc 0 in 0.8 s; outd box/aifoundry/build/e192/T1794709764-dry; calls {}; stop -
+   | 2026-11-14 18:29:24 PST DRY checked: host aifoundry3; USER the login; the registration's list dd0a89635800 and its seven session files; the kit's list and its four session files; the host, the sampler, the heater; dmcmd_
+   | 2026-11-14 18:29:24 PST DRY would run: the free check (et-who --check; other users' device processes; a probe of /run/lock/etsoc-shire0.lock, read-only, never created)
+   | 2026-11-14 18:29:24 PST DRY would run, the first card command: flock -n /run/lock/etsoc-shire0.lock timeout 10 python3 -B build/claims-v3/aifoundry3/e192/tools/claims-v3/e89/pvt_sample.py --probe (SAMPLER pvt if it answe
+   | 2026-11-14 18:29:24 PST DRY would run: gate_e192.py beside the session (the smoke gate; the cap, 3900 s from the first card command; a pass starts only if it can end inside it)
+   | 2026-11-14 18:29:24 PST DRY the reference session's DRY mode: rc 0; E192-DRY OK: 328 device calls (327 host, 1 heater), every one under timeout 10 with --stop-file; the smoke 3 runs at 2 s; passes 0-8 36 runs each at 4 s
+   | 2026-11-14 18:29:24 PST DRY session end (T0 1794709764)
+-> PASS (D1 --dry: rc 0, the dry listing 328 device calls in the registered order)
+-> PASS (D2 the dry log: the T<T0>-dry directory, 'session start (...; DRY)', every line DRY (every rest rule skips it))
+-> PASS (D3 no stand-in tool was called (nothing opened))
+-> PASS (D4 MANIFEST.sha256 written last and exact)
+
+== P-realpath
+   rc 0 in 606.3 s; outd box/aifoundry/build/e192/T1794709765; calls {'heater': 3, 'etwho': 5, 'host': 75, 'pvt': 4, 'ps': 5}; stop desk test: by hand, in the gap after pass 1
+   | 2026-11-14 18:29:25 PST the first card command at 18:29:25 PST; the cap at 19:34:25 PST (3900 s)
+   | 2026-11-14 18:29:25 PST running: run_session.sh (pid 207), gate_e192.py (pid 206)
+   | 2026-11-14 18:39:31 PST run_session.sh rc 0; the last lines of its log: [18:39:22] STOP: {"by": "hand", "why": "desk test: by hand, in the gap after pass 1", "t_ms": 1794710332411} [18:39:30] session done (rc 0): 735 lau
+   | 2026-11-14 18:39:31 PST STOP: {"by": "hand", "why": "desk test: by hand, in the gap after pass 1", "t_ms": 1794710332411}
+   | 2026-11-14 18:39:31 PST passes complete: 2 of 9 (pass 0 the registered warm-up); launches recorded 735; card time 606 s from the first card command (cap 3900 s)
+   | 2026-11-14 18:39:31 PST session end (T0 1794709765)
+-> PASS (P1 rc 0 (a stop by hand between passes ends the session normally))
+-> PASS (P2 the per-sensor probe answered: SAMPLER=pvt)
+-> PASS (P3 the first card command is the probe, under the card lock; then ONE sampler for the session)
+-> PASS (P4 the session's sampler: --seconds 6000 --every-ms 100)
+-> PASS (P5 the sampler stopped by SIGTERM (never killed), once)
+-> PASS (P6 the kit's smoke gate read the smoke's three runs' INTBITS lines: GO)
+-> PASS (P7 the smoke's heater check: the heater ran (exit 0, its board level read) and stayed below 70 W)
+-> PASS (P8.0 pass 0: 36 runs in the registered order for aifoundry3)
+-> PASS (P9.0 pass 0: every run 8 or more INTBITS lines (4 s of 0.4 s launches), every launch ok)
+-> PASS (P8.1 pass 1: 36 runs in the registered order for aifoundry3)
+-> PASS (P9.1 pass 1: every run 8 or more INTBITS lines (4 s of 0.4 s launches), every launch ok)
+-> PASS (P10 the approach ran (heater launches, the wait, the quiet): most launches on protocol)
+-> PASS (P11 75 host processes (smoke 3, passes 36 each), every one with the card lock held)
+-> PASS (P12 every host run --window 240000000, --seconds 2 (smoke) or 4, --stop-file)
+-> PASS (P13 the heater ran under the card lock (the check and the approach))
+-> PASS (P14 the stop by hand was honoured after the gap: 2 passes complete)
+-> PASS (P15 the cap read before passes 0 and 1, each within it (pass 2's read is moot once the stop by hand exists: the gate sees it and ends))
+-> PASS (P16 session end, MANIFEST exact, wrapper.rc 0)
+-> PASS (P17 et-who before anything (no holder) and with the sampler (our own holder only))
+-> PASS (P18 the registered reducer reads the real path's files (stand-in numbers): rc 0)
+-> PASS (P19 the section 7 checker reads them: rc 0)
+
+== FB-real-pvt-sample
+   rc 8 in 44.8 s; outd box/aifoundry/build/e192/T1794710371; calls {'heater': 1, 'etwho': 3, 'sampler': 2, 'host': 3, 'ps': 3}; stop desk test: by hand after the smoke gate
+   | 2026-11-14 18:39:32 PST running: run_session.sh (pid 1189), gate_e192.py (pid 1188)
+   | 2026-11-14 18:40:16 PST run_session.sh rc 8; the last lines of its log: [18:40:08] smoke: exit 8 (block stopped), no pass runs [18:40:16] session done (rc 8): 15 launches recorded 
+   | 2026-11-14 18:40:16 PST STOP: {"by": "hand", "why": "desk test: by hand after the smoke gate", "t_ms": 1794710407888}
+   | 2026-11-14 18:40:16 PST stopped before any pass completed: rc 8; {"by": "hand", "why": "desk test: by hand after the smoke gate", "t_ms": 1794710407888}
+   | 2026-11-14 18:40:16 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 44 s from the first card command (cap 3900 s)
+   | 2026-11-14 18:40:16 PST session end (T0 1794710371)
+-> PASS (FB1 the real pvt_sample.py's probe cannot open a card here: the plain sampler, the fallback)
+-> PASS (FB2 the plain sampler: ettelem sample --seconds 6000 --every-ms 100, no statistics reset)
+-> PASS (FB3 the stop by hand after the smoke: rc 8, no pass ran, 3 host runs)
+
+== FE-plain-by-go
+   rc 8 in 44.6 s; outd box/aifoundry/build/e192/T1794710416; calls {'heater': 1, 'etwho': 3, 'sampler': 2, 'host': 3, 'ps': 3}; stop desk test: by hand after the smoke gate
+   | 2026-11-14 18:40:17 PST running: run_session.sh (pid 1406), gate_e192.py (pid 1405)
+   | 2026-11-14 18:41:01 PST run_session.sh rc 8; the last lines of its log: [18:40:52] smoke: exit 8 (block stopped), no pass runs [18:41:00] session done (rc 8): 15 launches recorded 
+   | 2026-11-14 18:41:01 PST STOP: {"by": "hand", "why": "desk test: by hand after the smoke gate", "t_ms": 1794710452534}
+   | 2026-11-14 18:41:01 PST stopped before any pass completed: rc 8; {"by": "hand", "why": "desk test: by hand after the smoke gate", "t_ms": 1794710452534}
+   | 2026-11-14 18:41:01 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 44 s from the first card command (cap 3900 s)
+   | 2026-11-14 18:41:01 PST session end (T0 1794710416)
+-> PASS (FE1 E192_SAMPLER=ettelem: no probe, the plain sampler)
+
+== H1-holder-at-start
+   rc 3 in 0.4 s; outd box/aifoundry/build/e192/T1794710461; calls {'etwho': 1}; stop -
+   | 2026-11-14 18:41:01 PST session start (T0 1794710461 = 18:41:01 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 18:41:01 PST checked: host aifoundry3; USER the login; the registration's list dd0a89635800 and its seven session files; the kit's list and its four session files; the host, the sampler, the heater; dmcmd_audi
+   | 2026-11-14 18:41:01 PST the card is not free: et-who --check exit 1 (1 holder lines) (no device opened)
+-> PASS (H1 a holder at the start: exit 3, nothing opened)
+
+== H2-foreign-process
+   rc 3 in 0.6 s; outd box/aifoundry/build/e192/T1794710462; calls {'etwho': 1, 'ps': 1}; stop -
+   | 2026-11-14 18:41:01 PST session start (T0 1794710462 = 18:41:02 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 18:41:02 PST checked: host aifoundry3; USER the login; the registration's list dd0a89635800 and its seven session files; the kit's list and its four session files; the host, the sampler, the heater; dmcmd_audi
+   | 2026-11-14 18:41:02 PST the card is not free: 1 device process(es) of another user (no device opened)
+-> PASS (H2 another user's device process: exit 3, nothing opened)
+
+== H3-lock-held-at-start
+   rc 3 in 0.6 s; outd box/aifoundry/build/e192/T1794710463; calls {'etwho': 1, 'ps': 1}; stop -
+   | 2026-11-14 18:41:02 PST session start (T0 1794710463 = 18:41:03 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 18:41:02 PST checked: host aifoundry3; USER the login; the registration's list dd0a89635800 and its seven session files; the kit's list and its four session files; the host, the sampler, the heater; dmcmd_audi
+   | 2026-11-14 18:41:02 PST the card is not free: the card lock is held (probe exit 75) (no device opened)
+-> PASS (H3 the card lock held at the start: exit 3, nothing opened)
+
+== H4-holder-between-passes
+   rc 3 in 256.0 s; outd box/aifoundry/build/e192/T1794710464; calls {'heater': 13, 'etwho': 5, 'host': 39, 'pvt': 4, 'ps': 4}; stop -
+   | 2026-11-14 18:41:03 PST sampler: pvt (its probe answered with 34 sensors on every tick)
+   | 2026-11-14 18:41:03 PST the first card command at 18:41:03 PST; the cap at 19:46:03 PST (3900 s)
+   | 2026-11-14 18:41:03 PST running: run_session.sh (pid 1814), gate_e192.py (pid 1813)
+   | 2026-11-14 18:45:18 PST run_session.sh rc 3; the last lines of its log: [18:45:09] pass 1: the card is not free, stopping [18:45:18] session done (rc 3): 375 launches recorded 
+   | 2026-11-14 18:45:18 PST passes complete: 1 of 9 (pass 0 the registered warm-up); launches recorded 375; card time 255 s from the first card command (cap 3900 s)
+   | 2026-11-14 18:45:18 PST session end (T0 1794710464)
+-> PASS (H4 a holder between passes: the session stops before pass 1 (exit 3))
+-> PASS (H4b no device process after pass 0's end)
+
+== L-lock-taken-after-sampler
+   rc 75 in 19.8 s; outd box/aifoundry/build/e192/T1794710719; calls {'etwho': 3, 'pvt': 4, 'ps': 3}; stop -
+   | 2026-11-14 18:45:19 PST the first card command at 18:45:19 PST; the cap at 19:50:19 PST (3900 s)
+   | 2026-11-14 18:45:19 PST running: run_session.sh (pid 2367), gate_e192.py (pid 2366)
+   | 2026-11-14 18:45:38 PST run_session.sh rc 75; the last lines of its log: [18:45:29] smoke: exit 75 (card lock busy), no pass runs [18:45:37] session done (rc 75): 0 launches recorded 
+   | 2026-11-14 18:45:38 PST stopped before any pass completed: rc 75
+   | 2026-11-14 18:45:38 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 19 s from the first card command (cap 3900 s)
+   | 2026-11-14 18:45:38 PST session end (T0 1794710719)
+-> PASS (L the card lock taken after the sampler started: the smoke's lock busy, exit 75, nothing run)
+-> PASS (Lb the sampler still stopped by SIGTERM)
+
+== S1-board-stop
+   rc 8 in 80.9 s; outd box/aifoundry/build/e192/T1794710738; calls {'heater': 2, 'etwho': 4, 'host': 6, 'pvt': 4, 'ps': 4}; stop board 85.90 W above 80 W on 3 distinct readings in a row
+   | 2026-11-14 18:45:39 PST running: run_session.sh (pid 2546), gate_e192.py (pid 2545)
+   | 2026-11-14 18:46:59 PST run_session.sh rc 8; the last lines of its log: [18:46:50] pass 0: exit 8 (block stopped), stopping [18:46:58] session done (rc 8): 36 launches recorded 
+   | 2026-11-14 18:46:59 PST STOP: {"by": "stopwatch", "why": "board 85.90 W above 80 W on 3 distinct readings in a row", "t_ms": 1794710810658}
+   | 2026-11-14 18:46:59 PST stopped before any pass completed: rc 8; {"by": "stopwatch", "why": "board 85.90 W above 80 W on 3 distinct readings in a row", "t_ms": 1794710810658}
+   | 2026-11-14 18:46:59 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 36; card time 80 s from the first card command (cap 3900 s)
+   | 2026-11-14 18:46:59 PST session end (T0 1794710738)
+-> PASS (S1 board above 80 W on 3 distinct readings: stopwatch writes STOP)
+-> PASS (S1b the host saw the stop file and launched nothing after it; the block exits 8)
+-> PASS (S1c no device process after the stop; no pass complete)
+
+== S2-die-stop
+   rc 6 in 82.9 s; outd box/aifoundry/build/e192/T1794710819; calls {'heater': 2, 'etwho': 4, 'host': 6, 'pvt': 4, 'ps': 4}; stop die reading 70 C at or above 70 C
+   | 2026-11-14 18:47:00 PST running: run_session.sh (pid 2832), gate_e192.py (pid 2831)
+   | 2026-11-14 18:48:22 PST run_session.sh rc 6; the last lines of its log: [18:48:13] pass 0: exit 6 (block stopped), stopping [18:48:21] session done (rc 6): 41 launches recorded 
+   | 2026-11-14 18:48:22 PST STOP: {"by": "stopwatch", "why": "die reading 70 C at or above 70 C", "t_ms": 1794710893319}
+   | 2026-11-14 18:48:22 PST stopped before any pass completed: rc 6; {"by": "stopwatch", "why": "die reading 70 C at or above 70 C", "t_ms": 1794710893319}
+   | 2026-11-14 18:48:22 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 41; card time 82 s from the first card command (cap 3900 s)
+   | 2026-11-14 18:48:22 PST session end (T0 1794710819)
+-> PASS (S2 a die reading at or above 70 C stops the session (stopwatch or the block))
+
+== S3-sampler-quiet
+   rc 4 in 59.9 s; outd box/aifoundry/build/e192/T1794710902; calls {'heater': 1, 'etwho': 4, 'host': 3, 'pvt': 5, 'ps': 4}; stop newest telemetry line 5.3 s old
+   | 2026-11-14 18:48:23 PST running: run_session.sh (pid 3120), gate_e192.py (pid 3119)
+   | 2026-11-14 18:49:22 PST run_session.sh rc 4; the last lines of its log: [18:49:13] pass 0: exit 4 (block stopped), stopping [18:49:21] session done (rc 4): 15 launches recorded 
+   | 2026-11-14 18:49:22 PST STOP: {"by": "run_block", "pass": 0, "why": "newest telemetry line 5.3 s old", "t_ms": 1794710953562}
+   | 2026-11-14 18:49:22 PST stopped before any pass completed: rc 4; {"by": "run_block", "pass": 0, "why": "newest telemetry line 5.3 s old", "t_ms": 1794710953562}
+   | 2026-11-14 18:49:22 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 59 s from the first card command (cap 3900 s)
+   | 2026-11-14 18:49:22 PST session end (T0 1794710902)
+-> PASS (S3 the sampler gone quiet: a stale-telemetry stop (the block's 5 s or stopwatch's 10 s))
+-> PASS (S3b the quiet sampler still ended by SIGTERM)
+
+== HC-heater-check
+   rc 9 in 32.8 s; outd box/aifoundry/build/e192/T1794710962; calls {'heater': 1, 'etwho': 3, 'pvt': 4, 'ps': 3}; stop heater board reading 73.91 W above the 70 W ceiling
+   | 2026-11-14 18:49:23 PST running: run_session.sh (pid 3377), gate_e192.py (pid 3376)
+   | 2026-11-14 18:49:55 PST run_session.sh rc 9; the last lines of its log: [18:49:46] smoke: exit 9 (block stopped), no pass runs [18:49:54] session done (rc 9): 0 launches recorded 
+   | 2026-11-14 18:49:55 PST STOP: {"by": "run_block", "pass": -1, "why": "heater board reading 73.91 W above the 70 W ceiling", "t_ms": 1794710986284}
+   | 2026-11-14 18:49:55 PST stopped before any pass completed: rc 9; {"by": "run_block", "pass": -1, "why": "heater board reading 73.91 W above the 70 W ceiling", "t_ms": 1794710986284}
+   | 2026-11-14 18:49:55 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 33 s from the first card command (cap 3900 s)
+   | 2026-11-14 18:49:55 PST session end (T0 1794710962)
+-> PASS (HC the smoke's heater check above 70 W: exit 9, no host run)
+
+== G1-smoke-gate
+   rc 8 in 44.8 s; outd box/aifoundry/build/e192/T1794710995; calls {'heater': 1, 'etwho': 3, 'host': 3, 'pvt': 4, 'ps': 3}; stop smoke gate: add.a.f2: 5 of 5 lines not ok, check_bad on 5 lines
+   | 2026-11-14 18:49:55 PST running: run_session.sh (pid 3579), gate_e192.py (pid 3578)
+   | 2026-11-14 18:50:39 PST run_session.sh rc 8; the last lines of its log: [18:50:31] smoke: exit 8 (block stopped), no pass runs [18:50:39] session done (rc 8): 15 launches recorded 
+   | 2026-11-14 18:50:39 PST STOP: {"by": "gate_e192", "why": "smoke gate: add.a.f2: 5 of 5 lines not ok, check_bad on 5 lines", "t_ms": 1794711031218}
+   | 2026-11-14 18:50:39 PST stopped before any pass completed: rc 8; {"by": "gate_e192", "why": "smoke gate: add.a.f2: 5 of 5 lines not ok, check_bad on 5 lines", "t_ms": 1794711031218}
+   | 2026-11-14 18:50:39 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 44 s from the first card command (cap 3900 s)
+   | 2026-11-14 18:50:39 PST session end (T0 1794710995)
+-> PASS (G1 a smoke run with check_bad: the kit's smoke gate writes STOP, exit 8)
+-> PASS (G1b no pass-0 device process (3 smoke runs, the heater check only))
+
+== N1-reference-alone
+   rc 8 in 63.1 s; outd direct/N1-reference-alone; calls {'heater': 2, 'etwho': 3, 'sampler': 2, 'host': 3, 'ps': 3}; stop desk test: the negative control is stopped by hand once pass 0 has begun
+-> PASS (N1 THE NEGATIVE CONTROL: the reference session alone runs into pass 0 after the same failed smoke run)
+
+== G2a-cap-before-pass0
+   rc 8 in 53.8 s; outd box/aifoundry/build/e192/T1794711103; calls {'heater': 1, 'etwho': 4, 'host': 3, 'pvt': 4, 'ps': 4}; stop cap: pass 0 could end after the cap (400 s needed: D0 400 s; 255 s left of 300)
+   | 2026-11-14 18:51:43 PST running: run_session.sh (pid 3880), gate_e192.py (pid 3879)
+   | 2026-11-14 18:52:36 PST run_session.sh rc 8; the last lines of its log: [18:52:28] pass 0: exit 8 (block stopped), stopping [18:52:36] session done (rc 8): 15 launches recorded 
+   | 2026-11-14 18:52:36 PST STOP: {"by": "gate_e192", "why": "cap: pass 0 could end after the cap (400 s needed: D0 400 s; 255 s left of 300)", "t_ms": 1794711148128}
+   | 2026-11-14 18:52:36 PST stopped before any pass completed: rc 8; {"by": "gate_e192", "why": "cap: pass 0 could end after the cap (400 s needed: D0 400 s; 255 s left of 300)", "t_ms": 1794711148128}
+   | 2026-11-14 18:52:36 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 53 s from the first card command (cap 300 s)
+   | 2026-11-14 18:52:36 PST session end (T0 1794711103)
+-> PASS (G2a the cap read before pass 0 (D0 400 s, cap 300 s): STOP, no pass-0 device process)
+
+== G2b-cap-hard
+   rc 8 in 78.9 s; outd box/aifoundry/build/e192/T1794711157; calls {'heater': 2, 'etwho': 4, 'host': 5, 'pvt': 4, 'ps': 4}; stop cap: 30 s before the cap (100 s from the first card command): the run in flight finishes, no more
+   | 2026-11-14 18:52:37 PST running: run_session.sh (pid 4131), gate_e192.py (pid 4130)
+   | 2026-11-14 18:53:55 PST run_session.sh rc 8; the last lines of its log: [18:53:47] pass 0: exit 8 (block stopped), stopping [18:53:55] session done (rc 8): 35 launches recorded 
+   | 2026-11-14 18:53:55 PST STOP: {"by": "gate_e192", "why": "cap: 30 s before the cap (100 s from the first card command): the run in flight finishes, no more", "t_ms": 1794711227247}
+   | 2026-11-14 18:53:55 PST stopped before any pass completed: rc 8; {"by": "gate_e192", "why": "cap: 30 s before the cap (100 s from the first card command): the run in flight finishes, no more", "t_ms": 1794711227247}
+   | 2026-11-14 18:53:55 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 35; card time 78 s from the first card command (cap 100 s)
+   | 2026-11-14 18:53:55 PST session end (T0 1794711157)
+-> PASS (G2b 30 s before the cap mid-pass: STOP, the run in flight finishes, exit 8)
+-> PASS (G2c the session ended inside its cap (first card command to the manifest))
+
+== G2d-cap-between-passes
+   rc 0 in 256.0 s; outd box/aifoundry/build/e192/T1794711235; calls {'heater': 13, 'etwho': 4, 'host': 39, 'pvt': 4, 'ps': 4}; stop cap: pass 1 could end after the cap (266 s needed: the longest pass so far 176 s + 60 s; 113 s left of 330)
+   | 2026-11-14 18:53:56 PST the first card command at 18:53:56 PST; the cap at 18:59:26 PST (330 s)
+   | 2026-11-14 18:53:56 PST running: run_session.sh (pid 4413), gate_e192.py (pid 4412)
+   | 2026-11-14 18:58:11 PST run_session.sh rc 0; the last lines of its log: [18:58:02] STOP: {"by": "gate_e192", "why": "cap: pass 1 could end after the cap (266 s needed: the longest pass so far 176 s + 60 s; 113 s left of 
+   | 2026-11-14 18:58:11 PST STOP: {"by": "gate_e192", "why": "cap: pass 1 could end after the cap (266 s needed: the longest pass so far 176 s + 60 s; 113 s left of 330)", "t_ms": 1794711452979}
+   | 2026-11-14 18:58:11 PST passes complete: 1 of 9 (pass 0 the registered warm-up); launches recorded 375; card time 255 s from the first card command (cap 330 s)
+   | 2026-11-14 18:58:11 PST session end (T0 1794711235)
+-> PASS (G2d the cap before pass 1 from the measured pass: STOP in the gap, 1 pass complete)
+
+== G4-gate-dies
+   rc 8 in 45.8 s; outd box/aifoundry/build/e192/T1794711491; calls {'heater': 1, 'etwho': 3, 'host': 3, 'pvt': 4, 'ps': 3}; stop the kit's gate watcher is gone
+   | 2026-11-14 18:58:48 PST the gate watcher is gone: STOP written
+   | 2026-11-14 18:58:57 PST run_session.sh rc 8; the last lines of its log: [18:58:48] smoke: exit 8 (block stopped), no pass runs [18:58:56] session done (rc 8): 15 launches recorded 
+   | 2026-11-14 18:58:57 PST STOP: {"by": "session_e192", "why": "the kit's gate watcher is gone", "t_ms": 1794711528595}
+   | 2026-11-14 18:58:57 PST stopped before any pass completed: rc 8; {"by": "session_e192", "why": "the kit's gate watcher is gone", "t_ms": 1794711528595}
+   | 2026-11-14 18:58:57 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 45 s from the first card command (cap 3900 s)
+   | 2026-11-14 18:58:57 PST session end (T0 1794711491)
+-> PASS (G4 the gate watcher killed: the wrapper writes STOP, exit 8)
+
+== T-signal
+   rc 8 in 74.9 s; outd box/aifoundry/build/e192/T1794711537; calls {'heater': 2, 'etwho': 4, 'host': 5, 'pvt': 4, 'ps': 4}; stop a signal to the wrapper: the run in flight finishes
+   | 2026-11-14 19:00:03 PST signal: STOP written; waiting for the session to end
+   | 2026-11-14 19:00:12 PST run_session.sh rc 8; the last lines of its log: [19:00:03] pass 0: exit 8 (block stopped), stopping [19:00:11] session done (rc 8): 27 launches recorded 
+   | 2026-11-14 19:00:12 PST STOP: {"by": "session_e192", "why": "a signal to the wrapper: the run in flight finishes", "t_ms": 1794711603508}
+   | 2026-11-14 19:00:12 PST stopped before any pass completed: rc 8; {"by": "session_e192", "why": "a signal to the wrapper: the run in flight finishes", "t_ms": 1794711603508}
+   | 2026-11-14 19:00:12 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 27; card time 74 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:00:12 PST session end (T0 1794711537)
+-> PASS (T SIGTERM to the wrapper: STOP, the run in flight finishes, session end, manifest, the sampler by SIGTERM)
+
+== R1-hostname
+   rc 2 in 0.2 s; outd box/aifoundry/build/e192/T1794711612; calls {}; stop -
+   | 2026-11-14 19:00:12 PST session start (T0 1794711612 = 19:00:12 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:12 PST refused: this host is 'aifoundry9' (Python reads 'aifoundry9'), not aifoundry3: the registered order is drawn on 'aifoundry3|<pass>' (no device opened)
+-> PASS (R1 another host's name: refused before anything)
+
+== R2-user
+   rc 2 in 0.2 s; outd box/aifoundry/build/e192/T1794711613; calls {}; stop -
+   | 2026-11-14 19:00:12 PST session start (T0 1794711613 = 19:00:13 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:12 PST refused: USER is not this login (E183 kit note 6's carried rule) (no device opened)
+-> PASS (R2 USER not the login: refused)
+
+== R3-desk-variable
+   rc 2 in 0.2 s; outd box/aifoundry/build/e192/T1794711614; calls {}; stop -
+   | 2026-11-14 19:00:13 PST session start (T0 1794711614 = 19:00:14 PST; E192, the proposal's reference session as committed, kit-e192)
+   | 2026-11-14 19:00:13 PST refused: E192_CAP_S is a desk-test variable, read only with E192_DESKTEST=1 (the card day never sets it) (no device opened)
+-> PASS (R3 a desk-test variable without E192_DESKTEST=1: refused)
+
+== R4-pin
+   rc 2 in 0.2 s; outd box/aifoundry/build/e192/T1794711615; calls {}; stop -
+   | 2026-11-14 19:00:13 PST session start (T0 1794711615 = 19:00:15 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:13 PST refused: a registered session file is off its sha256 (tools/claims-v3/e192/proposal/src/run_block.py: FAILED
+   | sha256sum: WARNING: 1 computed checksum did NOT match) (no device opened)
+-> PASS (R4 a registered session file one byte longer: refused)
+
+== R5-kitlist
+   rc 2 in 0.2 s; outd box/aifoundry/build/e192/T1794711616; calls {}; stop -
+   | 2026-11-14 19:00:13 PST session start (T0 1794711616 = 19:00:16 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:13 PST refused: the kit's list is not at the sha256 the runbook passed (E192_KITLIST_SHA256) (no device opened)
+-> PASS (R5 the kit's list off the runbook's sha256: refused)
+
+== R6-deadline
+   rc 2 in 0.4 s; outd box/aifoundry/build/e192/T1794711617; calls {}; stop -
+   | 2026-11-14 19:00:13 PST session start (T0 1794711617 = 19:00:17 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:14 PST checked: host aifoundry3; USER the login; the registration's list dd0a89635800 and its seven session files; the kit's list and its four session files; the host, the sampler, the heater; dmcmd_audi
+   | 2026-11-14 19:00:14 PST refused: the session would not start: its cap (3900 s) passes the window's last end (no device opened)
+-> PASS (R6 the cap passes the window's last end: refused)
+
+== R7-no-lock-file
+   rc 2 in 0.4 s; outd box/aifoundry/build/e192/T1794711618; calls {'etwho': 1, 'ps': 1}; stop -
+   | 2026-11-14 19:00:14 PST session start (T0 1794711618 = 19:00:18 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:14 PST checked: host aifoundry3; USER the login; the registration's list dd0a89635800 and its seven session files; the kit's list and its four session files; the host, the sampler, the heater; dmcmd_audi
+   | 2026-11-14 19:00:14 PST refused: no card lock file /run/lock/etsoc-shire0.lock (the host makes it at boot; never created here) (no device opened)
+-> PASS (R7 no card lock file (never created by the session): refused)
+
+== R8-sampler-word
+   rc 2 in 0.2 s; outd box/aifoundry/build/e192/T1794711619; calls {}; stop -
+   | 2026-11-14 19:00:14 PST session start (T0 1794711619 = 19:00:19 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:14 PST refused: E192_SAMPLER may only be 'ettelem' (his go's choice of the plain sampler), not 'pvt' (no device opened)
+-> PASS (R8 E192_SAMPLER other than ettelem: refused)
+
+== R9-no-deadline
+   rc 2 in 0.4 s; outd box/aifoundry/build/e192/T1794711620; calls {}; stop -
+   | 2026-11-14 19:00:14 PST session start (T0 1794711620 = 19:00:20 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:15 PST checked: host aifoundry3; USER the login; the registration's list dd0a89635800 and its seven session files; the kit's list and its four session files; the host, the sampler, the heater; dmcmd_audi
+   | 2026-11-14 19:00:15 PST refused: no E192_DEADLINE_EPOCH (the window's last end) (no device opened)
+-> PASS (R9 no deadline variable (the window's last end): refused before anything)
+
+== W1-two-cards-pvt
+   rc 2 in 0.4 s; outd box/aifoundry/build/e192/T1794711621; calls {}; stop -
+   | 2026-11-14 19:00:15 PST session start (T0 1794711621 = 19:00:21 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:15 PST refused: the card nodes here are '/dev/et0_ops /dev/et1_ops' and '/dev/et0_mgmt /dev/et1_mgmt', not exactly /dev/et0_ops and /dev/et0_mgmt: one card only, counted before anything opens a node (E19
+-> PASS (W1 two cards, the per-sensor path: the wrapper refuses at its node count (exit 2), before the free check and before any card command)
+
+== W2-two-cards-plain
+   rc 2 in 0.4 s; outd box/aifoundry/build/e192/T1794711622; calls {}; stop -
+   | 2026-11-14 19:00:15 PST session start (T0 1794711622 = 19:00:22 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:15 PST refused: the card nodes here are '/dev/et0_ops /dev/et1_ops' and '/dev/et0_mgmt /dev/et1_mgmt', not exactly /dev/et0_ops and /dev/et0_mgmt: one card only, counted before anything opens a node (E19
+-> PASS (W2 two cards, the plain sampler by the go: the wrapper refuses at its node count (exit 2), before the free check and before any card command)
+
+== F0-no-card-node
+   rc 2 in 0.4 s; outd box/aifoundry/build/e192/T1794711623; calls {}; stop -
+   | 2026-11-14 19:00:15 PST session start (T0 1794711623 = 19:00:23 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:16 PST refused: the card nodes here are '' and '', not exactly /dev/et0_ops and /dev/et0_mgmt: one card only, counted before anything opens a node (E192.md section 3) (no device opened)
+-> PASS (F0 no card node: the wrapper refuses at its node count (exit 2), before the free check and before any card command)
+
+== FM-no-mgmt-node
+   rc 2 in 0.4 s; outd box/aifoundry/build/e192/T1794711624; calls {}; stop -
+   | 2026-11-14 19:00:16 PST session start (T0 1794711624 = 19:00:24 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:16 PST refused: the card nodes here are '/dev/et0_ops' and '', not exactly /dev/et0_ops and /dev/et0_mgmt: one card only, counted before anything opens a node (E192.md section 3) (no device opened)
+-> PASS (FM et0_ops without et0_mgmt: the wrapper refuses at its node count (exit 2), before the free check and before any card command)
+
+== F0d-alone-no-node
+   rc 2 in 0.2 s; outd direct/F0d-alone-no-node; calls {}; stop -
+-> PASS (F0d the reference session alone: 'refused: no /dev/et*_ops node on this host' (exit 2), before its free check, nothing opened)
+
+== W1d-alone-two-cards
+   rc 2 in 0.2 s; outd direct/W1d-alone-two-cards; calls {}; stop -
+-> PASS (W1d the reference session alone: 'refused: 2 cards on this host and ET_DEVICES unset' (exit 2), before its free check, nothing opened)
+
+== WXd-alone-devices-word
+   rc 2 in 0.2 s; outd direct/WXd-alone-devices-word; calls {}; stop -
+-> PASS (WXd the reference session alone: 'refused: ET_DEVICES must be one card index' (exit 2), before its free check, nothing opened)
+
+== W5d-alone-devices-1
+   rc 2 in 0.2 s; outd direct/W5d-alone-devices-1; calls {}; stop -
+-> PASS (W5d the reference session alone: 'refused: no /dev/et1_ops' (exit 2), before its free check, nothing opened)
+
+== NLd-alone-no-lock-file
+   rc 2 in 0.2 s; outd direct/NLd-alone-no-lock-file; calls {}; stop -
+-> PASS (NLd the reference session alone with no lock file: refused (exit 2), nothing opened)
+
+== B7-holder-after-probe
+   rc 3 in 1.8 s; outd box/aifoundry/build/e192/T1794711630; calls {'etwho': 2, 'pvt': 2, 'ps': 1}; stop -
+   | 2026-11-14 19:00:18 PST running: run_session.sh (pid 6078), gate_e192.py (pid 6077)
+   | 2026-11-14 19:00:19 PST run_session.sh exited (rc 3) before its own end marker (its EXIT trap writes SESSION_DONE): the wrapper wrote run/SESSION_DONE, so the gate ends now
+   | 2026-11-14 19:00:19 PST run_session.sh rc 3; the last lines of its log: [19:00:18] held: /dev/et0_ops otheruser 4242 foo_host; [19:00:18] the card is not free: nothing opened 
+   | 2026-11-14 19:00:19 PST stopped before any pass completed: rc 3
+   | 2026-11-14 19:00:19 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 1 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:00:19 PST session end (T0 1794711630)
+-> PASS (B7 a holder after the wrapper's free check and probe: run_session.sh's own free check refuses (exit 3) after the wrapper's probe; no sampler, heater or host)
+-> PASS (B7b THE FIX: the wrapper writes run/SESSION_DONE, the gate ends at it, the session ends at once (2 s; card time 1 s; no STOP))
+-> PASS (B7c 'stopped before any pass completed'; step 10 reads it ended and stopped (16: still collected); the manifest exact)
+
+== B7e-etwho-fails-after-probe
+   rc 3 in 1.8 s; outd box/aifoundry/build/e192/T1794711631; calls {'etwho': 2, 'pvt': 2, 'ps': 1}; stop -
+   | 2026-11-14 19:00:20 PST running: run_session.sh (pid 6212), gate_e192.py (pid 6211)
+   | 2026-11-14 19:00:21 PST run_session.sh exited (rc 3) before its own end marker (its EXIT trap writes SESSION_DONE): the wrapper wrote run/SESSION_DONE, so the gate ends now
+   | 2026-11-14 19:00:21 PST run_session.sh rc 3; the last lines of its log: [19:00:20] et-who --check failed (exit 2) [19:00:20] the card is not free: nothing opened 
+   | 2026-11-14 19:00:21 PST stopped before any pass completed: rc 3
+   | 2026-11-14 19:00:21 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 2 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:00:21 PST session end (T0 1794711631)
+-> PASS (B7e et-who failing at run_session.sh's check: run_session.sh's own free check refuses (exit 3) after the wrapper's probe; no sampler, heater or host)
+-> PASS (B7eb THE FIX: the wrapper writes run/SESSION_DONE, the gate ends at it, the session ends at once (2 s; card time 2 s; no STOP))
+-> PASS (B7ec 'stopped before any pass completed'; step 10 reads it ended and stopped (16: still collected); the manifest exact)
+
+== B7p-foreign-process-after-probe
+   rc 3 in 1.8 s; outd box/aifoundry/build/e192/T1794711632; calls {'etwho': 2, 'pvt': 2, 'ps': 2}; stop -
+   | 2026-11-14 19:00:21 PST running: run_session.sh (pid 6341), gate_e192.py (pid 6340)
+   | 2026-11-14 19:00:22 PST run_session.sh exited (rc 3) before its own end marker (its EXIT trap writes SESSION_DONE): the wrapper wrote run/SESSION_DONE, so the gate ends now
+   | 2026-11-14 19:00:22 PST run_session.sh rc 3; the last lines of its log: [19:00:21] another user's device process: 4242:99999:foo_host  [19:00:21] the card is not free: nothing opened 
+   | 2026-11-14 19:00:23 PST stopped before any pass completed: rc 3
+   | 2026-11-14 19:00:23 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 1 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:00:23 PST session end (T0 1794711632)
+-> PASS (B7p another user's device process at run_session.sh's check: run_session.sh's own free check refuses (exit 3) after the wrapper's probe; no sampler, heater or host)
+-> PASS (B7pb THE FIX: the wrapper writes run/SESSION_DONE, the gate ends at it, the session ends at once (2 s; card time 1 s; no STOP))
+-> PASS (B7pc 'stopped before any pass completed'; step 10 reads it ended and stopped (16: still collected); the manifest exact)
+
+== B7l-lock-taken-after-probe
+   rc 3 in 1.8 s; outd box/aifoundry/build/e192/T1794711633; calls {'etwho': 3, 'pvt': 2, 'ps': 2}; stop -
+   | 2026-11-14 19:00:23 PST running: run_session.sh (pid 6476), gate_e192.py (pid 6475)
+   | 2026-11-14 19:00:24 PST run_session.sh exited (rc 3) before its own end marker (its EXIT trap writes SESSION_DONE): the wrapper wrote run/SESSION_DONE, so the gate ends now
+   | 2026-11-14 19:00:24 PST run_session.sh rc 3; the last lines of its log: [19:00:23] card lock /run/lock/etsoc-shire0.lock held by another process (probe exit 75) [19:00:23] the card is not free: nothing opened 
+   | 2026-11-14 19:00:24 PST stopped before any pass completed: rc 3
+   | 2026-11-14 19:00:24 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 1 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:00:24 PST session end (T0 1794711633)
+-> PASS (B7l the card lock taken between run_session.sh's et-who and its lock probe: run_session.sh's own free check refuses (exit 3) after the wrapper's probe; no sampler, heater or host)
+-> PASS (B7lb THE FIX: the wrapper writes run/SESSION_DONE, the gate ends at it, the session ends at once (2 s; card time 1 s; no STOP))
+-> PASS (B7lc 'stopped before any pass completed'; step 10 reads it ended and stopped (16: still collected); the manifest exact)
+-> PASS (B7ld the stand-in's holder held the lock for the case and is ended after it)
+
+== H5-lock-before-probe
+   rc 3 in 0.8 s; outd box/aifoundry/build/e192/T1794711634; calls {'sha256sum': 1, 'etwho': 1, 'ps': 1}; stop -
+   | 2026-11-14 19:00:25 PST session start (T0 1794711634 = 19:00:34 PST; E192, the proposal's reference session as committed, kit-e192 DESKTEST)
+   | 2026-11-14 19:00:25 PST checked: host aifoundry3; USER the login; the registration's list dd0a89635800 and its seven session files; the kit's list and its four session files; the host, the sampler, the heater; dmcmd_audi
+   | 2026-11-14 19:00:25 PST the card is not free: the card lock was taken before the probe (flock exit 75) (no device opened)
+-> PASS (H5 the card lock taken between the wrapper's own lock probe and its probe's flock: exit 3, the probe never ran, no first card command)
+
+== FP-pvt-off-its-pin
+   rc 8 in 44.6 s; outd box/aifoundry/build/e192/T1794711635; calls {'heater': 1, 'etwho': 3, 'sampler': 2, 'host': 3, 'ps': 3}; stop desk test: by hand after the smoke gate
+   | 2026-11-14 19:00:26 PST running: run_session.sh (pid 6684), gate_e192.py (pid 6683)
+   | 2026-11-14 19:01:10 PST run_session.sh rc 8; the last lines of its log: [19:01:02] smoke: exit 8 (block stopped), no pass runs [19:01:10] session done (rc 8): 15 launches recorded 
+   | 2026-11-14 19:01:10 PST STOP: {"by": "hand", "why": "desk test: by hand after the smoke gate", "t_ms": 1794711661740}
+   | 2026-11-14 19:01:10 PST stopped before any pass completed: rc 8; {"by": "hand", "why": "desk test: by hand after the smoke gate", "t_ms": 1794711661740}
+   | 2026-11-14 19:01:10 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 44 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:01:10 PST session end (T0 1794711635)
+-> PASS (FP the per-sensor sampler off its reviewed sha256: no probe, the plain sampler (the fallback))
+
+== FN-pvt-chain-no-go
+   rc 8 in 44.6 s; outd box/aifoundry/build/e192/T1794711670; calls {'heater': 1, 'etwho': 3, 'sampler': 2, 'host': 3, 'ps': 3}; stop desk test: by hand after the smoke gate
+   | 2026-11-14 19:01:10 PST running: run_session.sh (pid 6899), gate_e192.py (pid 6898)
+   | 2026-11-14 19:01:54 PST run_session.sh rc 8; the last lines of its log: [19:01:46] smoke: exit 8 (block stopped), no pass runs [19:01:54] session done (rc 8): 15 launches recorded 
+   | 2026-11-14 19:01:55 PST STOP: {"by": "hand", "why": "desk test: by hand after the smoke gate", "t_ms": 1794711706385}
+   | 2026-11-14 19:01:55 PST stopped before any pass completed: rc 8; {"by": "hand", "why": "desk test: by hand after the smoke gate", "t_ms": 1794711706385}
+   | 2026-11-14 19:01:55 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 44 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:01:55 PST session end (T0 1794711670)
+-> PASS (FN the per-sensor chain NO-GO (the box copy of E144's table replaced by the stock table, then restored): no probe, the plain sampler)
+
+== B1-heater-check-exit
+   rc 8 in 42.8 s; outd box/aifoundry/build/e192/T1794711715; calls {'heater': 1, 'etwho': 3, 'host': 3, 'pvt': 4, 'ps': 3}; stop smoke gate: the heater check's launch exited 1
+   | 2026-11-14 19:01:55 PST running: run_session.sh (pid 7120), gate_e192.py (pid 7119)
+   | 2026-11-14 19:02:37 PST run_session.sh rc 8; the last lines of its log: [19:02:29] smoke: exit 8 (block stopped), no pass runs [19:02:37] session done (rc 8): 15 launches recorded 
+   | 2026-11-14 19:02:37 PST STOP: {"by": "gate_e192", "why": "smoke gate: the heater check's launch exited 1", "t_ms": 1794711749101}
+   | 2026-11-14 19:02:37 PST stopped before any pass completed: rc 8; {"by": "gate_e192", "why": "smoke gate: the heater check's launch exited 1", "t_ms": 1794711749101}
+   | 2026-11-14 19:02:37 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 42 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:02:37 PST session end (T0 1794711715)
+-> PASS (B1 the smoke's heater launch exits 1 (its level read on idle, under 70 W): the kit's gate stops, no pass)
+-> PASS (B1b step 10 reads it ended and stopped before any pass (16: still collected))
+
+== B2-smoke-participants
+   rc 8 in 44.8 s; outd box/aifoundry/build/e192/T1794711758; calls {'heater': 1, 'etwho': 3, 'host': 3, 'pvt': 4, 'ps': 3}; stop smoke gate: nop: participants [1023]; add.a.f2: participants [1023]; add.cr.l31: participants [1023]
+   | 2026-11-14 19:02:38 PST running: run_session.sh (pid 7341), gate_e192.py (pid 7340)
+   | 2026-11-14 19:03:22 PST run_session.sh rc 8; the last lines of its log: [19:03:14] smoke: exit 8 (block stopped), no pass runs [19:03:22] session done (rc 8): 15 launches recorded 
+   | 2026-11-14 19:03:22 PST STOP: {"by": "gate_e192", "why": "smoke gate: nop: participants [1023]; add.a.f2: participants [1023]; add.cr.l31: participants [1023]", "t_ms": 1794711793945}
+   | 2026-11-14 19:03:22 PST stopped before any pass completed: rc 8; {"by": "gate_e192", "why": "smoke gate: nop: participants [1023]; add.a.f2: participants [1023]; add.cr.l31: participants [1023]", "t_ms": 1794711793945}
+   | 2026-11-14 19:03:22 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 44 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:03:22 PST session end (T0 1794711758)
+-> PASS (B2 the smoke's launches with 1,023 participants: the gate stops, no pass)
+
+== B3-smoke-host-exit
+   rc 8 in 44.8 s; outd box/aifoundry/build/e192/T1794711802; calls {'heater': 1, 'etwho': 3, 'host': 3, 'pvt': 4, 'ps': 3}; stop smoke gate: nop: exit 1
+   | 2026-11-14 19:03:23 PST running: run_session.sh (pid 7564), gate_e192.py (pid 7563)
+   | 2026-11-14 19:04:07 PST run_session.sh rc 8; the last lines of its log: [19:03:59] smoke: exit 8 (block stopped), no pass runs [19:04:07] session done (rc 8): 15 launches recorded 
+   | 2026-11-14 19:04:07 PST STOP: {"by": "gate_e192", "why": "smoke gate: nop: exit 1", "t_ms": 1794711838778}
+   | 2026-11-14 19:04:07 PST stopped before any pass completed: rc 8; {"by": "gate_e192", "why": "smoke gate: nop: exit 1", "t_ms": 1794711838778}
+   | 2026-11-14 19:04:07 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 44 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:04:07 PST session end (T0 1794711802)
+-> PASS (B3 the smoke's first host process exits 1 (its lines all ok): the gate stops, no pass)
+
+== B4-smoke-two-lines
+   rc 8 in 41.8 s; outd box/aifoundry/build/e192/T1794711847; calls {'heater': 1, 'etwho': 3, 'host': 3, 'pvt': 4, 'ps': 3}; stop smoke gate: nop: 2 INTBITS lines (< 3); add.a.f2: 2 INTBITS lines (< 3); add.cr.l31: 2 INTBITS lines (< 3)
+   | 2026-11-14 19:04:08 PST running: run_session.sh (pid 7787), gate_e192.py (pid 7786)
+   | 2026-11-14 19:04:49 PST run_session.sh rc 8; the last lines of its log: [19:04:40] smoke: exit 8 (block stopped), no pass runs [19:04:48] session done (rc 8): 6 launches recorded 
+   | 2026-11-14 19:04:49 PST STOP: {"by": "gate_e192", "why": "smoke gate: nop: 2 INTBITS lines (< 3); add.a.f2: 2 INTBITS lines (< 3); add.cr.l31: 2 INTBITS lines (< 3)", "t_ms": 1794711880114}
+   | 2026-11-14 19:04:49 PST stopped before any pass completed: rc 8; {"by": "gate_e192", "why": "smoke gate: nop: 2 INTBITS lines (< 3); add.a.f2: 2 INTBITS lines (< 3); add.cr.l31: 2 INTBITS lines (< 3)", "t_ms": 1794711880
+   | 2026-11-14 19:04:49 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 6; card time 41 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:04:49 PST session end (T0 1794711847)
+-> PASS (B4 the smoke's runs with 2 INTBITS lines each: the gate stops, no pass)
+
+== G5 the gate alone on a smoke written in another order, and its control
+-> PASS (G5 the gate alone, the smoke's three runs in another order: STOP)
+-> PASS (G5b its control, the registered order: GO, no STOP, the gate ends at SESSION_DONE)
+
+== HB-heater-check-no-board
+   rc 4 in 32.8 s; outd box/aifoundry/build/e192/T1794711894; calls {'heater': 1, 'etwho': 3, 'pvt': 4, 'ps': 3}; stop no board reading during the heater check
+   | 2026-11-14 19:04:55 PST running: run_session.sh (pid 8009), gate_e192.py (pid 8008)
+   | 2026-11-14 19:05:27 PST run_session.sh rc 4; the last lines of its log: [19:05:18] smoke: exit 4 (block stopped), no pass runs [19:05:26] session done (rc 4): 0 launches recorded 
+   | 2026-11-14 19:05:27 PST STOP: {"by": "run_block", "pass": -1, "why": "no board reading during the heater check", "t_ms": 1794711918442}
+   | 2026-11-14 19:05:27 PST stopped before any pass completed: rc 4; {"by": "run_block", "pass": -1, "why": "no board reading during the heater check", "t_ms": 1794711918442}
+   | 2026-11-14 19:05:27 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 32 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:05:27 PST session end (T0 1794711894)
+-> PASS (HB the smoke's heater check with no board reading in the telemetry: the block's stale stop (exit 4), no host run)
+
+== B8-holder-after-sampler
+   rc 3 in 19.8 s; outd box/aifoundry/build/e192/T1794711927; calls {'etwho': 3, 'pvt': 4, 'ps': 2}; stop -
+   | 2026-11-14 19:05:28 PST the first card command at 19:05:27 PST; the cap at 20:10:27 PST (3900 s)
+   | 2026-11-14 19:05:28 PST running: run_session.sh (pid 8211), gate_e192.py (pid 8210)
+   | 2026-11-14 19:05:47 PST run_session.sh rc 3; the last lines of its log: [19:05:38] the card is not free after the sampler started: no block runs [19:05:46] session done (rc 3): 0 launches recorded 
+   | 2026-11-14 19:05:47 PST stopped before any pass completed: rc 3
+   | 2026-11-14 19:05:47 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 20 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:05:47 PST session end (T0 1794711927)
+-> PASS (B8 a holder right after the sampler starts: no block runs (exit 3), the sampler by SIGTERM, SESSION_DONE the reference's own (its EXIT trap))
+
+== B9-sampler-silent
+   rc 4 in 29.6 s; outd box/aifoundry/build/e192/T1794711947; calls {'etwho': 3, 'sampler': 3, 'pvt': 3, 'ps': 3}; stop no telemetry line
+   | 2026-11-14 19:05:57 PST running: run_session.sh (pid 8385), gate_e192.py (pid 8384)
+   | 2026-11-14 19:06:16 PST run_session.sh rc 4; the last lines of its log: [19:06:07] smoke: exit 4 (block stopped), no pass runs [19:06:15] session done (rc 4): 0 launches recorded 
+   | 2026-11-14 19:06:16 PST STOP: {"by": "run_block", "pass": -1, "why": "no telemetry line", "t_ms": 1794711967873}
+   | 2026-11-14 19:06:16 PST stopped before any pass completed: rc 4; {"by": "run_block", "pass": -1, "why": "no telemetry line", "t_ms": 1794711967873}
+   | 2026-11-14 19:06:16 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 29 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:06:16 PST session end (T0 1794711947)
+-> PASS (B9 a sampler that never writes: the smoke's first reading stops (exit 4), no host run)
+
+== B5-block-crash
+   rc 1 in 70.9 s; outd box/aifoundry/build/e192/T1794711976; calls {'heater': 2, 'etwho': 4, 'host': 6, 'pvt': 4, 'ps': 4}; stop -
+   | 2026-11-14 19:06:17 PST the first card command at 19:06:17 PST; the cap at 20:11:17 PST (3900 s)
+   | 2026-11-14 19:06:17 PST running: run_session.sh (pid 8570), gate_e192.py (pid 8569)
+   | 2026-11-14 19:07:27 PST run_session.sh rc 1; the last lines of its log: [19:07:18] pass 0: exit 1 (block stopped), stopping [19:07:26] session done (rc 1): 35 launches recorded 
+   | 2026-11-14 19:07:27 PST stopped before any pass completed: rc 1
+   | 2026-11-14 19:07:27 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 35; card time 70 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:07:27 PST session end (T0 1794711976)
+-> PASS (B5 a malformed INTBITS line in pass 0 (run_block.py raises): the block ends (exit 1), the session stops, the sampler by SIGTERM, the manifest exact)
+-> PASS (B5b no device process after the crash; 'stopped before any pass completed')
+   rest rule after B5: rc 3: REFUSED: 0 minutes since E192's session end (2026-11-14 19:07:27 PST): E192 starts on a rested card, its first card command at least 40 minutes after our last real session there (E192.md section 10; the kit)
+-> PASS (B5c the rest rule counts the crashed session (its probe and sampler ran): REFUSED)
+
+== B11-stop-inside-pass0
+   rc 8 in 66.9 s; outd box/aifoundry/build/e192/T1794712047; calls {'heater': 2, 'etwho': 4, 'host': 5, 'pvt': 4, 'ps': 4}; stop desk test: by hand, inside pass 0
+   | 2026-11-14 19:07:28 PST running: run_session.sh (pid 9223), gate_e192.py (pid 9222)
+   | 2026-11-14 19:08:34 PST run_session.sh rc 8; the last lines of its log: [19:08:25] pass 0: exit 8 (block stopped), stopping [19:08:33] session done (rc 8): 27 launches recorded 
+   | 2026-11-14 19:08:34 PST STOP: {"by": "hand", "why": "desk test: by hand, inside pass 0", "t_ms": 1794712105600}
+   | 2026-11-14 19:08:34 PST stopped before any pass completed: rc 8; {"by": "hand", "why": "desk test: by hand, inside pass 0", "t_ms": 1794712105600}
+   | 2026-11-14 19:08:34 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 27; card time 66 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:08:34 PST session end (T0 1794712047)
+-> PASS (B11 a stop by hand inside pass 0: exit 8, 0 passes complete, step 10 reads 16 (still collected))
+
+== B10-foreign-process-between-passes
+   rc 3 in 256.0 s; outd box/aifoundry/build/e192/T1794712114; calls {'heater': 13, 'etwho': 5, 'host': 39, 'pvt': 4, 'ps': 5}; stop -
+   | 2026-11-14 19:08:35 PST sampler: pvt (its probe answered with 34 sensors on every tick)
+   | 2026-11-14 19:08:35 PST the first card command at 19:08:35 PST; the cap at 20:13:35 PST (3900 s)
+   | 2026-11-14 19:08:35 PST running: run_session.sh (pid 9493), gate_e192.py (pid 9492)
+   | 2026-11-14 19:12:50 PST run_session.sh rc 3; the last lines of its log: [19:12:41] pass 1: the card is not free, stopping [19:12:49] session done (rc 3): 375 launches recorded 
+   | 2026-11-14 19:12:50 PST passes complete: 1 of 9 (pass 0 the registered warm-up); launches recorded 375; card time 255 s from the first card command (cap 3900 s)
+   | 2026-11-14 19:12:50 PST session end (T0 1794712114)
+-> PASS (B10 another user's device process after pass 0: the session stops before pass 1 (exit 3); step 10 reads it ended (0))
+
+== Z
+-> PASS (Z1 no process of the test left)
+-> PASS (Z2 no network call (ssh, rsync, scp))
+-> PASS (Z3 no /dev/et* but the test's own two regular files, through the run)
+
+DESKTEST-REALPATH-E192 108 of 108 PASS
+exit 0

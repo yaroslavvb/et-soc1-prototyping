@@ -1,0 +1,64 @@
+# E192 kit (Q176; written by lane kit-e192, re-made by lane fix-e192 before the land): the rest-rule test, rb/selftest_rest_e192.sh <scratch> <the P case's session.log> <the B7 case's> <the W1 case's>, each from the real-path test's final run
+# run 2026-11-14 19:19:06 PST on aifoundry2 (Ubuntu 24.04; bash 5.2.21(1)-release; rsync version 3.2.7 protocol v; /usr/bin/python3 3.12.3, numpy 1.26.4); paths masked as <lab clone>, <scratch>, <lane folder>, <W>, /home/<login>; nothing measured, no card, no device
+
+E192 rest-rule desk test, 2026-11-14 19:19:06 PST; the rule: rest_rule_e192.sh b5d09261580ea7d5...
+== R0
+   rc 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders 
+-> PASS (R0 no session log: no real session, exit 0)
+== R1
+   rc 3: REFUSED: 10 minutes since E183's session end (2026-11-14 19:09:06 PST): E192 starts on a rested card, its first card command at least 40 minutes after our last real session there (E192.md section 10; the kit) 
+-> PASS (R1 E183's form ended 10 min ago: REFUSED)
+== R2
+   rc 0: rest: 45 minutes since E183's session end (2026-11-14 18:34:06 PST; dry sessions and blocks that opened no device skipped) 
+-> PASS (R2 E183's form ended 45 min ago: rest 45)
+== R3
+   rc 3: REFUSED: 20 minutes since E189's session end (2026-11-14 18:59:06 PST): E192 starts on a rested card, its first card command at least 40 minutes after our last real session there (E192.md section 10; the kit) 
+-> PASS (R3 E189's form ended 20 min ago: REFUSED)
+== R4
+   rc 3: REFUSED: 39 minutes since E190's session end (2026-11-14 18:40:06 PST): E192 starts on a rested card, its first card command at least 40 minutes after our last real session there (E192.md section 10; the kit) 
+-> PASS (R4 E190's form (T<T0>-A) ended 39 min ago: REFUSED)
+== R5
+   rc 0: rest: 41 minutes since E190's session end (2026-11-14 18:38:06 PST; dry sessions and blocks that opened no device skipped) 
+-> PASS (R5 E190's form ended 41 min ago: rest 41)
+== R6
+   rc 3: REFUSED: 5 minutes since E192's session end (2026-11-14 19:14:06 PST): E192 starts on a rested card, its first card command at least 40 minutes after our last real session there (E192.md section 10; the kit) 
+-> PASS (R6 E192's own form ended 5 min ago (an E185 session 50 min ago beside): REFUSED naming E192)
+== R7
+   rc 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders 
+-> PASS (R7 E192's dry pass a minute ago: skipped)
+== R8
+   rc 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders 
+-> PASS (R8 an E192 refusal ('no device opened') 2 min ago: skipped)
+== R9
+   rc 3: note: E192's last real session block has no 'session end': counted as ended at 2026-11-14 19:09:06 PST (the latest write of E192's files outside the dry paths) REFUSED: 10 minutes since E192's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026
+-> PASS (R9 a cut E192 session, its run written 10 min ago: REFUSED at its latest write)
+== R10
+   rc 0: note: E192's last real session block has no 'session end': counted as ended at 2026-11-14 18:34:06 PST (the latest write of E192's files outside the dry paths) rest: 45 minutes since E192's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026-11
+-> PASS (R10 the same, latest write 45 min ago: rest 45, with the note)
+== R11
+   the real log: T0 1794709765, its session end line '2026-11-14 18:39:31 PST session end (T0 1794709765)', 39 minutes ago
+   rc 3: REFUSED: 39 minutes since E192's session end (2026-11-14 18:39:31 PST): E192 starts on a rested card, its first card command at least 40 minutes after our last real session there (E192.md section 10; the kit) 
+-> PASS (R11 the real wrapper's log: REFUSED, 39 minutes since its session end line)
+== R12
+   rc 0: rest: 41 minutes since E192's session end (2026-11-14 18:38:06 PST; dry sessions and blocks that opened no device skipped) 
+-> PASS (R12 E192 41 min ago, E178 60 min ago: rest 41)
+== R13
+   rc 3: REFUSED: 10 minutes since energy.sh's run (2026-11-14 19:09:06 PST (the latest write of an energy.sh run's folder, run-a)): E192 starts on a rested card, its first card command at least 40 minutes after our last real session there (E192.md section 10; the kit) 
+-> PASS (R13 an energy.sh run's folder in ~/aifoundry written 10 min ago: REFUSED naming energy.sh)
+== R14
+   rc 0: rest: 45 minutes since energy.sh's run (2026-11-14 18:34:06 PST (the latest write of an energy.sh run's folder, run-b); dry sessions and blocks that opened no device skipped) 
+-> PASS (R14 an energy.sh run's folder in ~/nekko written 45 min ago: rest 45)
+== R15
+   rc 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders 
+-> PASS (R15 an energy.sh dry folder in ~/claude/et-soc1-prototyping a minute ago: skipped)
+== R16
+   the real log: T0 1794711630; wrapper-written marker: 1; its session end line 18 minutes ago
+   rc 3: REFUSED: 18 minutes since E192's session end (2026-11-14 19:00:19 PST): E192 starts on a rested card, its first card command at least 40 minutes after our last real session there (E192.md section 10; the kit) 
+-> PASS (R16 the real log of an early exit after the probe (B7): counted, REFUSED, 18 minutes since its session end line)
+== R17
+   the real log: T0 1794711621; its refusal: 1 line(s) 'no device opened'
+   rc 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders 
+-> PASS (R17 the real log of a refusal at the node count (W1), alone: skipped)
+
+SELFTEST-REST-E192 18 of 18 PASS
+rc 0

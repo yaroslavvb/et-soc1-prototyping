@@ -1,0 +1,47 @@
+# E192 kit (Q176; written by lane kit-e192, re-made by lane fix-e192 before the land): the dry pass's reader, the section 7 checker, the history check's names
+# run 2026-11-14 19:18:50 PST on aifoundry2 (Ubuntu 24.04; bash 5.2.21(1)-release; rsync version 3.2.7 protocol v; /usr/bin/python3 3.12.3, numpy 1.26.4); paths masked as <lab clone>, <scratch>, <lane folder>, <W>, /home/<login>; nothing measured, no card, no device
+
+== 1. drycheck_e192.py on the reference session's DRY mode (DRY=1 bash run_session.sh OUT 9, the heater named; in a sandbox named aifoundry3), then two negative controls (one host run removed; two runs swapped)
+hostname here: aifoundry3 (the order's draw needs aifoundry3: this runs in a sandbox named so)
+dry rc 0
+E192-DRY OK: 328 device calls (327 host, 1 heater), every one under timeout 10 with --stop-file; the smoke 3 runs at 2 s; passes 0-8 36 runs each at 4 s in the registered order for aifoundry3; 20 marked idles; 8 lock releases with the 30 s gap
+drycheck rc 0
+FINDING: pass 4: 36 runs (35 host calls), not 36
+FINDING: pass 4: the order differs from the registered order for aifoundry3 (first at run 2)
+E192-DRY FAIL: 3 finding(s); 327 device calls (326 host, 1 heater)
+neg1 rc 16
+FINDING: pass 5: the order differs from the registered order for aifoundry3 (first at run 10)
+E192-DRY FAIL: 1 finding(s); 328 device calls (327 host, 1 heater)
+neg2 rc 16
+
+== 2. check_e192.py on the registration's synthetic session (desk/synth_session_e192.py, seed 192, noise 1: injected arbitrary test values, not a forecast and not a measurement), reduced by the registered reducer unchanged; then with faults injected (a check_bad launch, a 601 MHz sample and a rail sample 10 mV off in one window, one arm 1.5% slower)
+== 2026-11-14 19:13:09 PST; Python Python 3.12.3; numpy 1.26.4
+synth rc 0
+reduce rc 0
+check 1: PASS {"launches": 3240, "check_bad_launches": 0, "participants_not_1024": 0, "runs": 324, "runs_ret_over_body_outside_0.1pct": 0, "ret_over_body_range": [1.01171875, 1.01171875]}
+check 2: PASS {"board_window_samples": 6482, "off_600_MHz": 0, "rail_mv_samples": 5212, "rail_mv_beyond_3mV": 0, "runs_with_l1d_misses": 0}
+check 3: EQUAL {"min": 1.4199575603084376e-07, "max": 1.4199575603084376e-07, "spread": 0.0, "note": "no threshold is registered: EQUAL means identical"}
+check 4: PASS {"median_rate": 561751362648.7163, "slower_arms": [], "faster_arms": [], "max_abs_dev": 1.4509407675333819e-08, "runs_off_protocol": 0}
+check 5: PASS {}
+check 6: PASS {}
+check 7: REPORTED {"xor.z_vs_add.z_pJ_board": {"mean": -0.0396502002287038, "se": 0.030292446383513093, "n": 8, "reading": "bound |x| < 0.1002"}, "and.z_vs_add.z_pJ_board": {"mean": -0.0354799456811381, "se": 0.033222538076775186, "n": 8, "reading": "bound |x| < 0.1019"}, "xor.z_vs_add.z_pJ_rail": {"mean": -0.0023245
+check 8: REPORTED {"arms_with_electrons_rail": 31, "arms_with_electrons_12V": 31}
+CHECKS-E192: 1 PASS; 2 PASS; 3 EQUAL; 4 PASS; 5 PASS; 6 PASS; 7 REPORTED; 8 REPORTED
+checker rc 0
+reduce (faults) rc 0
+check 1: FAIL {"launches": 3240, "check_bad_launches": 1, "participants_not_1024": 0, "runs": 324, "runs_ret_over_body_outside_0.1pct": 0, "ret_over_body_range": [1.01171875, 1.01171875]}
+check 2: FAIL {"board_window_samples": 6482, "off_600_MHz": 1, "rail_mv_samples": 5222, "rail_mv_beyond_3mV": 1, "runs_with_l1d_misses": 0}
+check 3: EQUAL {"min": 1.4199575603084376e-07, "max": 1.4199575603084376e-07, "spread": 0.0, "note": "no threshold is registered: EQUAL means identical"}
+check 4: FAIL {"median_rate": 561751362648.7163, "slower_arms": ["add.a.f0"], "faster_arms": [], "max_abs_dev": 0.02838221483965442, "runs_off_protocol": 0}
+check 5: PASS {}
+check 6: PASS {}
+check 7: REPORTED {"xor.z_vs_add.z_pJ_board": {"mean": -0.03977205677629558, "se": 0.030323546685360664, "n": 8, "reading": "bound |x| < 0.1004"}, "and.z_vs_add.z_pJ_board": {"mean": -0.03552634456567971, "se": 0.033210373344623824, "n": 8, "reading": "bound |x| < 0.1019"}, "xor.z_vs_add.z_pJ_rail": {"mean": -0.00224
+check 8: REPORTED {"arms_with_electrons_rail": 31, "arms_with_electrons_12V": 31}
+CHECKS-E192: 1 FAIL; 2 FAIL; 3 EQUAL; 4 FAIL; 5 PASS; 6 PASS; 7 REPORTED; 8 REPORTED
+checker (faults) rc 0
+
+== 3. the history check's shadow names, and NO-DATUM at this clone's refs (before the kit's commit is re-made)
+SHADOW NAMES: 300 standard-library names from sys.stdlib_module_names (Python 3.12.3); with the day's own 25; json True, re True, subprocess True, socket True, random True; read in 6 folders: tools/claims-v3/, tools/claims-v3/e192/proposal/src/, tools/claims-v3/e89/, tools/claims-v3/q141k-runbook/v3.1/, tools/claims-v3/e178/, tools/claims-v3/e164/
+rc 0
+NO-DATUM OK: 5 refs read; 0 commits touch docs/reports/data/*e192*; no ref's tip holds an e192 data folder
+rc 0
