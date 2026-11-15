@@ -1,0 +1,523 @@
+26 runs a pass x 9 passes, about 42 card-minutes (lock held), about 46 minutes of wall time, blocks ['S', 'D', 'W', 'T'], card 0, lock /run/lock/etsoc-shire0.lock
+DRY count /dev/et*_ops: need exactly /dev/et0_ops
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (session start)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 0 block S spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l200 --arm tk --t1 off --window 120000000
+pass 0 block S tk_l200: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s2 --arm tk --t1 off --shires 0x3
+pass 0 block S tk_s2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s21 --arm tk --t1 off --shires 0x1fffff
+pass 0 block S tk_s21: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l100 --arm tk --t1 off --window 60000000
+pass 0 block S tk_l100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s11 --arm tk --t1 off --shires 0x7ff
+pass 0 block S tk_s11: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk --arm tk --t1 off
+pass 0 block S tk: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 0 block D)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 0 block D spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty67 --arm duty --t1 same --duty-pct 67
+pass 0 block D duty67: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33 --arm duty --t1 same --duty-pct 33
+pass 0 block D duty33: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33k --arm duty --t1 same --duty-pct 33 --period 1024
+pass 0 block D duty33k: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33f --arm duty --t1 same --duty-pct 33 --period 4096
+pass 0 block D duty33f: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label wait2 --arm wait --t1 same
+pass 0 block D wait2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty100 --arm duty --t1 same --duty-pct 100
+pass 0 block D duty100: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 0 block W)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 0 block W spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w7 --arm spin --t1 same --minions 0x7f00
+pass 0 block W w7: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w23 --arm spin --t1 same --minions 0x7fffff00
+pass 0 block W w23: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w15 --arm spin --t1 same --minions 0x7fff00
+pass 0 block W w15: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 0 block T)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 0 block T spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_faddps_fadds --seg-launches 3 --arm mix --cls fadd_ps --every 1 --t1 same --then --cls fadd_s --then --cls fadd_s --then
+pass 0 block T tr_faddps_fadds: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_spin1 --seg-launches 3 --arm tk --t1 off --then --arm spin --t1 off --then --arm spin --t1 off --then
+pass 0 block T tr_tk_spin1: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_stall2 --seg-launches 3 --arm tk --t1 off --then --arm stall --t1 same --then --arm stall --t1 same --then
+pass 0 block T tr_tk_stall2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_packed_spread --seg-launches 3 --arm spin --t1 same --minions 0xff00 --then --minions 0x03070700 --then --minions 0x03070700 --then
+pass 0 block T tr_packed_spread: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spin1_spin2 --seg-launches 3 --arm spin --t1 off --then --t1 same --then --t1 same --then
+pass 0 block T tr_spin1_spin2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spread_cluster --seg-launches 3 --arm mix --cls fadd_ps --every 8 --t1 same --then --cluster --then --cluster --then
+pass 0 block T tr_spread_cluster: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 0 block T spin2: 0 launches, exit 0
+pass 0 done: 30 s with the lock released, nothing launched
+DRY pass gap 30 s, lock released and closed
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 1 block S)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 1 block S spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s2 --arm tk --t1 off --shires 0x3
+pass 1 block S tk_s2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s11 --arm tk --t1 off --shires 0x7ff
+pass 1 block S tk_s11: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s21 --arm tk --t1 off --shires 0x1fffff
+pass 1 block S tk_s21: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk --arm tk --t1 off
+pass 1 block S tk: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l100 --arm tk --t1 off --window 60000000
+pass 1 block S tk_l100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l200 --arm tk --t1 off --window 120000000
+pass 1 block S tk_l200: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 1 block D)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 1 block D spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33 --arm duty --t1 same --duty-pct 33
+pass 1 block D duty33: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33k --arm duty --t1 same --duty-pct 33 --period 1024
+pass 1 block D duty33k: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label wait2 --arm wait --t1 same
+pass 1 block D wait2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty67 --arm duty --t1 same --duty-pct 67
+pass 1 block D duty67: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty100 --arm duty --t1 same --duty-pct 100
+pass 1 block D duty100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33f --arm duty --t1 same --duty-pct 33 --period 4096
+pass 1 block D duty33f: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 1 block W)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 1 block W spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w23 --arm spin --t1 same --minions 0x7fffff00
+pass 1 block W w23: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w15 --arm spin --t1 same --minions 0x7fff00
+pass 1 block W w15: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w7 --arm spin --t1 same --minions 0x7f00
+pass 1 block W w7: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 1 block T)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 1 block T spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spread_cluster --seg-launches 3 --arm mix --cls fadd_ps --every 8 --t1 same --then --cluster --then --cluster --then
+pass 1 block T tr_spread_cluster: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_packed_spread --seg-launches 3 --arm spin --t1 same --minions 0xff00 --then --minions 0x03070700 --then --minions 0x03070700 --then
+pass 1 block T tr_packed_spread: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_spin1 --seg-launches 3 --arm tk --t1 off --then --arm spin --t1 off --then --arm spin --t1 off --then
+pass 1 block T tr_tk_spin1: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_faddps_fadds --seg-launches 3 --arm mix --cls fadd_ps --every 1 --t1 same --then --cls fadd_s --then --cls fadd_s --then
+pass 1 block T tr_faddps_fadds: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_stall2 --seg-launches 3 --arm tk --t1 off --then --arm stall --t1 same --then --arm stall --t1 same --then
+pass 1 block T tr_tk_stall2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spin1_spin2 --seg-launches 3 --arm spin --t1 off --then --t1 same --then --t1 same --then
+pass 1 block T tr_spin1_spin2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 1 block T spin2: 0 launches, exit 0
+pass 1 done: 30 s with the lock released, nothing launched
+DRY pass gap 30 s, lock released and closed
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 2 block S)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 2 block S spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk --arm tk --t1 off
+pass 2 block S tk: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s11 --arm tk --t1 off --shires 0x7ff
+pass 2 block S tk_s11: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l200 --arm tk --t1 off --window 120000000
+pass 2 block S tk_l200: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l100 --arm tk --t1 off --window 60000000
+pass 2 block S tk_l100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s21 --arm tk --t1 off --shires 0x1fffff
+pass 2 block S tk_s21: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s2 --arm tk --t1 off --shires 0x3
+pass 2 block S tk_s2: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 2 block D)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 2 block D spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33k --arm duty --t1 same --duty-pct 33 --period 1024
+pass 2 block D duty33k: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33 --arm duty --t1 same --duty-pct 33
+pass 2 block D duty33: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label wait2 --arm wait --t1 same
+pass 2 block D wait2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty100 --arm duty --t1 same --duty-pct 100
+pass 2 block D duty100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty67 --arm duty --t1 same --duty-pct 67
+pass 2 block D duty67: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33f --arm duty --t1 same --duty-pct 33 --period 4096
+pass 2 block D duty33f: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 2 block W)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 2 block W spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w15 --arm spin --t1 same --minions 0x7fff00
+pass 2 block W w15: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w7 --arm spin --t1 same --minions 0x7f00
+pass 2 block W w7: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w23 --arm spin --t1 same --minions 0x7fffff00
+pass 2 block W w23: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 2 block T)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 2 block T spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spread_cluster --seg-launches 3 --arm mix --cls fadd_ps --every 8 --t1 same --then --cluster --then --cluster --then
+pass 2 block T tr_spread_cluster: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spin1_spin2 --seg-launches 3 --arm spin --t1 off --then --t1 same --then --t1 same --then
+pass 2 block T tr_spin1_spin2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_stall2 --seg-launches 3 --arm tk --t1 off --then --arm stall --t1 same --then --arm stall --t1 same --then
+pass 2 block T tr_tk_stall2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_spin1 --seg-launches 3 --arm tk --t1 off --then --arm spin --t1 off --then --arm spin --t1 off --then
+pass 2 block T tr_tk_spin1: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_faddps_fadds --seg-launches 3 --arm mix --cls fadd_ps --every 1 --t1 same --then --cls fadd_s --then --cls fadd_s --then
+pass 2 block T tr_faddps_fadds: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_packed_spread --seg-launches 3 --arm spin --t1 same --minions 0xff00 --then --minions 0x03070700 --then --minions 0x03070700 --then
+pass 2 block T tr_packed_spread: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 2 block T spin2: 0 launches, exit 0
+pass 2 done: 30 s with the lock released, nothing launched
+DRY pass gap 30 s, lock released and closed
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 3 block S)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 3 block S spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l200 --arm tk --t1 off --window 120000000
+pass 3 block S tk_l200: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk --arm tk --t1 off
+pass 3 block S tk: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l100 --arm tk --t1 off --window 60000000
+pass 3 block S tk_l100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s11 --arm tk --t1 off --shires 0x7ff
+pass 3 block S tk_s11: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s2 --arm tk --t1 off --shires 0x3
+pass 3 block S tk_s2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s21 --arm tk --t1 off --shires 0x1fffff
+pass 3 block S tk_s21: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 3 block D)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 3 block D spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33 --arm duty --t1 same --duty-pct 33
+pass 3 block D duty33: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty67 --arm duty --t1 same --duty-pct 67
+pass 3 block D duty67: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33f --arm duty --t1 same --duty-pct 33 --period 4096
+pass 3 block D duty33f: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label wait2 --arm wait --t1 same
+pass 3 block D wait2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33k --arm duty --t1 same --duty-pct 33 --period 1024
+pass 3 block D duty33k: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty100 --arm duty --t1 same --duty-pct 100
+pass 3 block D duty100: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 3 block W)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 3 block W spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w7 --arm spin --t1 same --minions 0x7f00
+pass 3 block W w7: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w23 --arm spin --t1 same --minions 0x7fffff00
+pass 3 block W w23: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w15 --arm spin --t1 same --minions 0x7fff00
+pass 3 block W w15: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 3 block T)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 3 block T spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_faddps_fadds --seg-launches 3 --arm mix --cls fadd_ps --every 1 --t1 same --then --cls fadd_s --then --cls fadd_s --then
+pass 3 block T tr_faddps_fadds: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_stall2 --seg-launches 3 --arm tk --t1 off --then --arm stall --t1 same --then --arm stall --t1 same --then
+pass 3 block T tr_tk_stall2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spread_cluster --seg-launches 3 --arm mix --cls fadd_ps --every 8 --t1 same --then --cluster --then --cluster --then
+pass 3 block T tr_spread_cluster: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_packed_spread --seg-launches 3 --arm spin --t1 same --minions 0xff00 --then --minions 0x03070700 --then --minions 0x03070700 --then
+pass 3 block T tr_packed_spread: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_spin1 --seg-launches 3 --arm tk --t1 off --then --arm spin --t1 off --then --arm spin --t1 off --then
+pass 3 block T tr_tk_spin1: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spin1_spin2 --seg-launches 3 --arm spin --t1 off --then --t1 same --then --t1 same --then
+pass 3 block T tr_spin1_spin2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 3 block T spin2: 0 launches, exit 0
+pass 3 done: 30 s with the lock released, nothing launched
+DRY pass gap 30 s, lock released and closed
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 4 block S)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 4 block S spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk --arm tk --t1 off
+pass 4 block S tk: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s11 --arm tk --t1 off --shires 0x7ff
+pass 4 block S tk_s11: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s2 --arm tk --t1 off --shires 0x3
+pass 4 block S tk_s2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l100 --arm tk --t1 off --window 60000000
+pass 4 block S tk_l100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l200 --arm tk --t1 off --window 120000000
+pass 4 block S tk_l200: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s21 --arm tk --t1 off --shires 0x1fffff
+pass 4 block S tk_s21: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 4 block D)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 4 block D spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty67 --arm duty --t1 same --duty-pct 67
+pass 4 block D duty67: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty100 --arm duty --t1 same --duty-pct 100
+pass 4 block D duty100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33k --arm duty --t1 same --duty-pct 33 --period 1024
+pass 4 block D duty33k: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33 --arm duty --t1 same --duty-pct 33
+pass 4 block D duty33: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label wait2 --arm wait --t1 same
+pass 4 block D wait2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33f --arm duty --t1 same --duty-pct 33 --period 4096
+pass 4 block D duty33f: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 4 block W)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 4 block W spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w7 --arm spin --t1 same --minions 0x7f00
+pass 4 block W w7: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w23 --arm spin --t1 same --minions 0x7fffff00
+pass 4 block W w23: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w15 --arm spin --t1 same --minions 0x7fff00
+pass 4 block W w15: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 4 block T)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 4 block T spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_stall2 --seg-launches 3 --arm tk --t1 off --then --arm stall --t1 same --then --arm stall --t1 same --then
+pass 4 block T tr_tk_stall2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spread_cluster --seg-launches 3 --arm mix --cls fadd_ps --every 8 --t1 same --then --cluster --then --cluster --then
+pass 4 block T tr_spread_cluster: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spin1_spin2 --seg-launches 3 --arm spin --t1 off --then --t1 same --then --t1 same --then
+pass 4 block T tr_spin1_spin2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_spin1 --seg-launches 3 --arm tk --t1 off --then --arm spin --t1 off --then --arm spin --t1 off --then
+pass 4 block T tr_tk_spin1: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_packed_spread --seg-launches 3 --arm spin --t1 same --minions 0xff00 --then --minions 0x03070700 --then --minions 0x03070700 --then
+pass 4 block T tr_packed_spread: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_faddps_fadds --seg-launches 3 --arm mix --cls fadd_ps --every 1 --t1 same --then --cls fadd_s --then --cls fadd_s --then
+pass 4 block T tr_faddps_fadds: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 4 block T spin2: 0 launches, exit 0
+pass 4 done: 30 s with the lock released, nothing launched
+DRY pass gap 30 s, lock released and closed
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 5 block S)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 5 block S spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l100 --arm tk --t1 off --window 60000000
+pass 5 block S tk_l100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s11 --arm tk --t1 off --shires 0x7ff
+pass 5 block S tk_s11: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s21 --arm tk --t1 off --shires 0x1fffff
+pass 5 block S tk_s21: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s2 --arm tk --t1 off --shires 0x3
+pass 5 block S tk_s2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk --arm tk --t1 off
+pass 5 block S tk: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l200 --arm tk --t1 off --window 120000000
+pass 5 block S tk_l200: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 5 block D)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 5 block D spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty100 --arm duty --t1 same --duty-pct 100
+pass 5 block D duty100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label wait2 --arm wait --t1 same
+pass 5 block D wait2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33k --arm duty --t1 same --duty-pct 33 --period 1024
+pass 5 block D duty33k: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33 --arm duty --t1 same --duty-pct 33
+pass 5 block D duty33: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33f --arm duty --t1 same --duty-pct 33 --period 4096
+pass 5 block D duty33f: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty67 --arm duty --t1 same --duty-pct 67
+pass 5 block D duty67: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 5 block W)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 5 block W spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w15 --arm spin --t1 same --minions 0x7fff00
+pass 5 block W w15: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w7 --arm spin --t1 same --minions 0x7f00
+pass 5 block W w7: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w23 --arm spin --t1 same --minions 0x7fffff00
+pass 5 block W w23: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 5 block T)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 5 block T spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_packed_spread --seg-launches 3 --arm spin --t1 same --minions 0xff00 --then --minions 0x03070700 --then --minions 0x03070700 --then
+pass 5 block T tr_packed_spread: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_stall2 --seg-launches 3 --arm tk --t1 off --then --arm stall --t1 same --then --arm stall --t1 same --then
+pass 5 block T tr_tk_stall2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_spin1 --seg-launches 3 --arm tk --t1 off --then --arm spin --t1 off --then --arm spin --t1 off --then
+pass 5 block T tr_tk_spin1: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spread_cluster --seg-launches 3 --arm mix --cls fadd_ps --every 8 --t1 same --then --cluster --then --cluster --then
+pass 5 block T tr_spread_cluster: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_faddps_fadds --seg-launches 3 --arm mix --cls fadd_ps --every 1 --t1 same --then --cls fadd_s --then --cls fadd_s --then
+pass 5 block T tr_faddps_fadds: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spin1_spin2 --seg-launches 3 --arm spin --t1 off --then --t1 same --then --t1 same --then
+pass 5 block T tr_spin1_spin2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 5 block T spin2: 0 launches, exit 0
+pass 5 done: 30 s with the lock released, nothing launched
+DRY pass gap 30 s, lock released and closed
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 6 block S)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 6 block S spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk --arm tk --t1 off
+pass 6 block S tk: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s11 --arm tk --t1 off --shires 0x7ff
+pass 6 block S tk_s11: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l200 --arm tk --t1 off --window 120000000
+pass 6 block S tk_l200: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s2 --arm tk --t1 off --shires 0x3
+pass 6 block S tk_s2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l100 --arm tk --t1 off --window 60000000
+pass 6 block S tk_l100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s21 --arm tk --t1 off --shires 0x1fffff
+pass 6 block S tk_s21: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 6 block D)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 6 block D spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label wait2 --arm wait --t1 same
+pass 6 block D wait2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33k --arm duty --t1 same --duty-pct 33 --period 1024
+pass 6 block D duty33k: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33f --arm duty --t1 same --duty-pct 33 --period 4096
+pass 6 block D duty33f: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33 --arm duty --t1 same --duty-pct 33
+pass 6 block D duty33: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty100 --arm duty --t1 same --duty-pct 100
+pass 6 block D duty100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty67 --arm duty --t1 same --duty-pct 67
+pass 6 block D duty67: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 6 block W)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 6 block W spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w23 --arm spin --t1 same --minions 0x7fffff00
+pass 6 block W w23: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w15 --arm spin --t1 same --minions 0x7fff00
+pass 6 block W w15: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w7 --arm spin --t1 same --minions 0x7f00
+pass 6 block W w7: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 6 block T)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 6 block T spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_packed_spread --seg-launches 3 --arm spin --t1 same --minions 0xff00 --then --minions 0x03070700 --then --minions 0x03070700 --then
+pass 6 block T tr_packed_spread: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_stall2 --seg-launches 3 --arm tk --t1 off --then --arm stall --t1 same --then --arm stall --t1 same --then
+pass 6 block T tr_tk_stall2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spin1_spin2 --seg-launches 3 --arm spin --t1 off --then --t1 same --then --t1 same --then
+pass 6 block T tr_spin1_spin2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_spin1 --seg-launches 3 --arm tk --t1 off --then --arm spin --t1 off --then --arm spin --t1 off --then
+pass 6 block T tr_tk_spin1: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_faddps_fadds --seg-launches 3 --arm mix --cls fadd_ps --every 1 --t1 same --then --cls fadd_s --then --cls fadd_s --then
+pass 6 block T tr_faddps_fadds: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spread_cluster --seg-launches 3 --arm mix --cls fadd_ps --every 8 --t1 same --then --cluster --then --cluster --then
+pass 6 block T tr_spread_cluster: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 6 block T spin2: 0 launches, exit 0
+pass 6 done: 30 s with the lock released, nothing launched
+DRY pass gap 30 s, lock released and closed
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 7 block S)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 7 block S spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s11 --arm tk --t1 off --shires 0x7ff
+pass 7 block S tk_s11: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s2 --arm tk --t1 off --shires 0x3
+pass 7 block S tk_s2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l100 --arm tk --t1 off --window 60000000
+pass 7 block S tk_l100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l200 --arm tk --t1 off --window 120000000
+pass 7 block S tk_l200: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk --arm tk --t1 off
+pass 7 block S tk: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s21 --arm tk --t1 off --shires 0x1fffff
+pass 7 block S tk_s21: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 7 block D)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 7 block D spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label wait2 --arm wait --t1 same
+pass 7 block D wait2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33 --arm duty --t1 same --duty-pct 33
+pass 7 block D duty33: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty100 --arm duty --t1 same --duty-pct 100
+pass 7 block D duty100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33f --arm duty --t1 same --duty-pct 33 --period 4096
+pass 7 block D duty33f: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty67 --arm duty --t1 same --duty-pct 67
+pass 7 block D duty67: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33k --arm duty --t1 same --duty-pct 33 --period 1024
+pass 7 block D duty33k: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 7 block W)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 7 block W spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w7 --arm spin --t1 same --minions 0x7f00
+pass 7 block W w7: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w23 --arm spin --t1 same --minions 0x7fffff00
+pass 7 block W w23: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w15 --arm spin --t1 same --minions 0x7fff00
+pass 7 block W w15: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 7 block T)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 7 block T spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_faddps_fadds --seg-launches 3 --arm mix --cls fadd_ps --every 1 --t1 same --then --cls fadd_s --then --cls fadd_s --then
+pass 7 block T tr_faddps_fadds: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_packed_spread --seg-launches 3 --arm spin --t1 same --minions 0xff00 --then --minions 0x03070700 --then --minions 0x03070700 --then
+pass 7 block T tr_packed_spread: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spread_cluster --seg-launches 3 --arm mix --cls fadd_ps --every 8 --t1 same --then --cluster --then --cluster --then
+pass 7 block T tr_spread_cluster: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_stall2 --seg-launches 3 --arm tk --t1 off --then --arm stall --t1 same --then --arm stall --t1 same --then
+pass 7 block T tr_tk_stall2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spin1_spin2 --seg-launches 3 --arm spin --t1 off --then --t1 same --then --t1 same --then
+pass 7 block T tr_spin1_spin2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_spin1 --seg-launches 3 --arm tk --t1 off --then --arm spin --t1 off --then --arm spin --t1 off --then
+pass 7 block T tr_tk_spin1: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 7 block T spin2: 0 launches, exit 0
+pass 7 done: 30 s with the lock released, nothing launched
+DRY pass gap 30 s, lock released and closed
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 8 block S)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 8 block S spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s21 --arm tk --t1 off --shires 0x1fffff
+pass 8 block S tk_s21: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk --arm tk --t1 off
+pass 8 block S tk: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s11 --arm tk --t1 off --shires 0x7ff
+pass 8 block S tk_s11: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l100 --arm tk --t1 off --window 60000000
+pass 8 block S tk_l100: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_s2 --arm tk --t1 off --shires 0x3
+pass 8 block S tk_s2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tk_l200 --arm tk --t1 off --window 120000000
+pass 8 block S tk_l200: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 8 block D)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 8 block D spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty67 --arm duty --t1 same --duty-pct 67
+pass 8 block D duty67: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label wait2 --arm wait --t1 same
+pass 8 block D wait2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33k --arm duty --t1 same --duty-pct 33 --period 1024
+pass 8 block D duty33k: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33f --arm duty --t1 same --duty-pct 33 --period 4096
+pass 8 block D duty33f: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty33 --arm duty --t1 same --duty-pct 33
+pass 8 block D duty33: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label duty100 --arm duty --t1 same --duty-pct 100
+pass 8 block D duty100: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 8 block W)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 8 block W spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w7 --arm spin --t1 same --minions 0x7f00
+pass 8 block W w7: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w15 --arm spin --t1 same --minions 0x7fff00
+pass 8 block W w15: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label w23 --arm spin --t1 same --minions 0x7fffff00
+pass 8 block W w23: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 8 block T)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 8 block T spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_spin1 --seg-launches 3 --arm tk --t1 off --then --arm spin --t1 off --then --arm spin --t1 off --then
+pass 8 block T tr_tk_spin1: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_packed_spread --seg-launches 3 --arm spin --t1 same --minions 0xff00 --then --minions 0x03070700 --then --minions 0x03070700 --then
+pass 8 block T tr_packed_spread: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_tk_stall2 --seg-launches 3 --arm tk --t1 off --then --arm stall --t1 same --then --arm stall --t1 same --then
+pass 8 block T tr_tk_stall2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spin1_spin2 --seg-launches 3 --arm spin --t1 off --then --t1 same --then --t1 same --then
+pass 8 block T tr_spin1_spin2: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_faddps_fadds --seg-launches 3 --arm mix --cls fadd_ps --every 1 --t1 same --then --cls fadd_s --then --cls fadd_s --then
+pass 8 block T tr_faddps_fadds: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label tr_spread_cluster --seg-launches 3 --arm mix --cls fadd_ps --every 8 --t1 same --then --cluster --then --cluster --then
+pass 8 block T tr_spread_cluster: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label spin2 --arm spin --t1 same
+pass 8 block T spin2: 0 launches, exit 0
+done

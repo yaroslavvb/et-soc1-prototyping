@@ -1,0 +1,23 @@
+8 runs a pass x 1 passes, about 1 card-minutes (lock held), about 2 minutes of wall time, blocks ['S', 'D', 'W', 'T'], card 0, lock /run/lock/etsoc-shire0.lock
+DRY count /dev/et*_ops: need exactly /dev/et0_ops
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (session start)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 2.0 --label spin2 --arm spin --t1 same
+pass 0 block S spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 2.0 --label tk --arm tk --t1 off
+pass 0 block S tk: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 0 block D)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 2.0 --label spin2 --arm spin --t1 same
+pass 0 block D spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 2.0 --label duty33 --arm duty --t1 same --duty-pct 33
+pass 0 block D duty33: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 0 block W)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 2.0 --label spin2 --arm spin --t1 same
+pass 0 block W spin2: 0 launches, exit 0
+DRY et-who --check; flock -n /run/lock/etsoc-shire0.lock (pass 0 block T)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 2.0 --label spin2 --arm spin --t1 same
+pass 0 block T spin2: 0 launches, exit 0
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 2.0 --label tr_tk_spin1 --seg-launches 3 --arm tk --t1 off --then --arm spin --t1 off --then --arm spin --t1 off --then
+pass 0 block T tr_tk_spin1: 0 launches, exit 0 (short train: dropped)
+DRY ET_DEVICES=0 timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 2.0 --label spin2 --arm spin --t1 same
+pass 0 block T spin2: 0 launches, exit 0
+done

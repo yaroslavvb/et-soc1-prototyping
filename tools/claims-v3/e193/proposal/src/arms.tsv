@@ -1,0 +1,38 @@
+# x04clock arms. name<TAB>block<TAB>host options (card scale: 0.4 s launches at 600 MHz, credit period 65,536 cycles)
+# Blocks: anchor (run at every block boundary), S (the firmware's waits), D (duty), W (workers a shire),
+# T (A B B A trains in one device process: 3 launches a segment), C (instruction classes at equal issue).
+spin2	anchor	--arm spin --t1 same
+tk_s2	S	--arm tk --t1 off --shires 0x3
+tk_s11	S	--arm tk --t1 off --shires 0x7ff
+tk_s21	S	--arm tk --t1 off --shires 0x1fffff
+tk	S	--arm tk --t1 off
+tk_l100	S	--arm tk --t1 off --window 60000000
+tk_l200	S	--arm tk --t1 off --window 120000000
+wait2	D	--arm wait --t1 same
+duty33	D	--arm duty --t1 same --duty-pct 33
+duty67	D	--arm duty --t1 same --duty-pct 67
+duty100	D	--arm duty --t1 same --duty-pct 100
+duty33f	D	--arm duty --t1 same --duty-pct 33 --period 4096
+duty33k	D	--arm duty --t1 same --duty-pct 33 --period 1024
+w7	W	--arm spin --t1 same --minions 0x7f00
+w15	W	--arm spin --t1 same --minions 0x7fff00
+w23	W	--arm spin --t1 same --minions 0x7fffff00
+tr_tk_spin1	T	--seg-launches 3 --arm tk --t1 off --then --arm spin --t1 off --then --arm spin --t1 off --then
+tr_spin1_spin2	T	--seg-launches 3 --arm spin --t1 off --then --t1 same --then --t1 same --then
+tr_tk_stall2	T	--seg-launches 3 --arm tk --t1 off --then --arm stall --t1 same --then --arm stall --t1 same --then
+tr_faddps_fadds	T	--seg-launches 3 --arm mix --cls fadd_ps --every 1 --t1 same --then --cls fadd_s --then --cls fadd_s --then
+tr_packed_spread	T	--seg-launches 3 --arm spin --t1 same --minions 0xff00 --then --minions 0x03070700 --then --minions 0x03070700 --then
+tr_spread_cluster	T	--seg-launches 3 --arm mix --cls fadd_ps --every 8 --t1 same --then --cluster --then --cluster --then
+faddps_p1	C	--arm mix --cls fadd_ps --every 1 --t1 same
+faddps_p2	C	--arm mix --cls fadd_ps --every 2 --t1 same
+faddps_p4	C	--arm mix --cls fadd_ps --every 4 --t1 same
+faddps_p8	C	--arm mix --cls fadd_ps --every 8 --t1 same
+faddps_p16	C	--arm mix --cls fadd_ps --every 16 --t1 same
+fsgnjs_p1	C	--arm mix --cls fsgnj_s --every 1 --t1 same
+fsgnjs_p2	C	--arm mix --cls fsgnj_s --every 2 --t1 same
+fsgnjs_p4	C	--arm mix --cls fsgnj_s --every 4 --t1 same
+fsgnjs_p8	C	--arm mix --cls fsgnj_s --every 8 --t1 same
+fadds_p16	C	--arm mix --cls fadd_s --every 16 --t1 same
+faddpsm1_p1	C	--arm mix --cls fadd_ps --every 1 --mask 0x01 --t1 same
+faddpsm2_p1	C	--arm mix --cls fadd_ps --every 1 --mask 0x03 --t1 same
+faddpsm4_p1	C	--arm mix --cls fadd_ps --every 1 --mask 0x0f --t1 same

@@ -1,0 +1,178 @@
+R: request.md section 2: 17 rows, 35 arms (spin2, tk_s2, tk_s11, tk_s21, tk, tk_l100, tk_l200, wait2, duty33, duty67, duty100, duty33f, duty33k, w7, w15, w23, tr_tk_spin1, tr_spin1_spin2, tr_tk_stall2, tr_faddps_fadds, tr_packed_spread, tr_spread_cluster, faddps_p1, faddps_p2, faddps_p4, faddps_p8, faddps_p16, fsgnjs_p1, fsgnjs_p2, fsgnjs_p4, fsgnjs_p8, fadds_p16, faddpsm1_p1, faddpsm2_p1, faddpsm4_p1)
+T: arms.tsv: 35 arms
+D: session A 234 runs over 9 passes (26 a pass); session B 135 runs over 9 passes (15 a pass)
+
+1. names and blocks (R / T / D):
+  spin2              R anchor T anchor D C,D,S,T,W  OK
+  tk_s2              R S      T S      D S          OK
+  tk_s11             R S      T S      D S          OK
+  tk_s21             R S      T S      D S          OK
+  tk                 R S      T S      D S          OK
+  tk_l100            R S      T S      D S          OK
+  tk_l200            R S      T S      D S          OK
+  wait2              R D      T D      D D          OK
+  duty33             R D      T D      D D          OK
+  duty67             R D      T D      D D          OK
+  duty100            R D      T D      D D          OK
+  duty33f            R D      T D      D D          OK
+  duty33k            R D      T D      D D          OK
+  w7                 R W      T W      D W          OK
+  w15                R W      T W      D W          OK
+  w23                R W      T W      D W          OK
+  tr_tk_spin1        R T      T T      D T          OK
+  tr_spin1_spin2     R T      T T      D T          OK
+  tr_tk_stall2       R T      T T      D T          OK
+  tr_faddps_fadds    R T      T T      D T          OK
+  tr_packed_spread   R T      T T      D T          OK
+  tr_spread_cluster  R T      T T      D T          OK
+  faddps_p1          R C      T C      D C          OK
+  faddps_p2          R C      T C      D C          OK
+  faddps_p4          R C      T C      D C          OK
+  faddps_p8          R C      T C      D C          OK
+  faddps_p16         R C      T C      D C          OK
+  fsgnjs_p1          R C      T C      D C          OK
+  fsgnjs_p2          R C      T C      D C          OK
+  fsgnjs_p4          R C      T C      D C          OK
+  fsgnjs_p8          R C      T C      D C          OK
+  fadds_p16          R C      T C      D C          OK
+  faddpsm1_p1        R C      T C      D C          OK
+  faddpsm2_p1        R C      T C      D C          OK
+  faddpsm4_p1        R C      T C      D C          OK
+  arms: 35, of which the anchor 1, trains 6; the other arms 28
+
+2. every dry call = the runner's defaults + arms.tsv's options:
+  35 of 35 arms
+
+3. what every worker does: R's words against the host's reading of T's options (H):
+  spin2              OK    spin cls none P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  tk_s2              OK    tk cls none P 1 lanes 8 t1 off harts 0 shires 2 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  tk_s11             OK    tk cls none P 1 lanes 8 t1 off harts 0 shires 11 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  tk_s21             OK    tk cls none P 1 lanes 8 t1 off harts 0 shires 21 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  tk                 OK    tk cls none P 1 lanes 8 t1 off harts 0 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  tk_l100            OK    tk cls none P 1 lanes 8 t1 off harts 0 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 59965440 cycles (0.100 s) period 65536 duty 50 cluster 0
+  tk_l200            OK    tk cls none P 1 lanes 8 t1 off harts 0 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 119996416 cycles (0.200 s) period 65536 duty 50 cluster 0
+  wait2              OK    wait cls none P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  duty33             OK    duty cls none P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 33 cluster 0
+  duty67             OK    duty cls none P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 67 cluster 0
+  duty100            OK    duty cls none P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 100 cluster 0
+  duty33f            OK    duty cls none P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239996928 cycles (0.400 s) period 4096 duty 33 cluster 0
+  duty33k            OK    duty cls none P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 240000000 cycles (0.400 s) period 1024 duty 33 cluster 0
+  w7                 OK    spin cls none P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 7 (by nbhd [0, 7, 0, 0]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  w15                OK    spin cls none P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 15 (by nbhd [0, 8, 7, 0]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  w23                OK    spin cls none P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 23 (by nbhd [0, 8, 8, 7]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  tr_tk_spin1        OK    A tk/none 0h, B spin/none 1h; segments 4, 3 launches each, A B B A: True
+  tr_spin1_spin2     OK    A spin/none 1h, B spin/none 2h; segments 4, 3 launches each, A B B A: True
+  tr_tk_stall2       OK    A tk/none 0h, B stall/none 2h; segments 4, 3 launches each, A B B A: True
+  tr_faddps_fadds    OK    A mix/fadd_ps 2h, B mix/fadd_s 2h; segments 4, 3 launches each, A B B A: True
+  tr_packed_spread   OK    A spin/none 2h, B spin/none 2h; segments 4, 3 launches each, A B B A: True
+  tr_spread_cluster  OK    A mix/fadd_ps 2h, B mix/fadd_ps 2h; segments 4, 3 launches each, A B B A: True
+  faddps_p1          OK    mix cls fadd_ps P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  faddps_p2          OK    mix cls fadd_ps P 2 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  faddps_p4          OK    mix cls fadd_ps P 4 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  faddps_p8          OK    mix cls fadd_ps P 8 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  faddps_p16         OK    mix cls fadd_ps P 16 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  fsgnjs_p1          OK    mix cls fsgnj_s P 1 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  fsgnjs_p2          OK    mix cls fsgnj_s P 2 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  fsgnjs_p4          OK    mix cls fsgnj_s P 4 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  fsgnjs_p8          OK    mix cls fsgnj_s P 8 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  fadds_p16          OK    mix cls fadd_s P 16 lanes 8 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  faddpsm1_p1        OK    mix cls fadd_ps P 1 lanes 1 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  faddpsm2_p1        OK    mix cls fadd_ps P 1 lanes 2 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  faddpsm4_p1        OK    mix cls fadd_ps P 1 lanes 4 t1 same harts 2 shires 32 workers/shire 31 (by nbhd [7, 8, 8, 8]) window 239992832 cycles (0.400 s) period 65536 duty 50 cluster 0
+  35 of 35 arms as request.md's row says
+
+4. request.md's host-option cells, the shorthand expanded, against arms.tsv:
+  spin2              SAME  R: --arm spin --t1 same
+  tk_s2              SAME  R: --arm tk --t1 off --shires 0x3
+  tk_s11             SAME  R: --arm tk --t1 off --shires 0x7ff
+  tk_s21             SAME  R: --arm tk --t1 off --shires 0x1fffff
+  tk                 SAME  R: --arm tk --t1 off
+  tk_l100            SAME  R: --arm tk --t1 off --window 60000000
+  tk_l200            SAME  R: --arm tk --t1 off --window 120000000
+  wait2              SAME  R: --arm wait --t1 same
+  duty33             SAME  R: --arm duty --t1 same --duty-pct 33
+  duty67             SAME  R: --arm duty --t1 same --duty-pct 67
+  duty100            SAME  R: --arm duty --t1 same --duty-pct 100
+  duty33f            SAME  R: --arm duty --t1 same --duty-pct 33 --period 4096
+  duty33k            SAME  R: --arm duty --t1 same --duty-pct 33 --period 1024
+  w7                 SAME  R: --arm spin --t1 same --minions 0x7f00
+  w15                SAME  R: --arm spin --t1 same --minions 0x7fff00
+  w23                SAME  R: --arm spin --t1 same --minions 0x7fffff00
+  tr_tk_spin1        (a train: its cell gives part of the options; checked by meaning in 3)
+  tr_spin1_spin2     (a train: its cell gives part of the options; checked by meaning in 3)
+  tr_tk_stall2       (a train: its cell gives part of the options; checked by meaning in 3)
+  tr_faddps_fadds    (a train: its cell gives part of the options; checked by meaning in 3)
+  tr_packed_spread   (a train: its cell gives part of the options; checked by meaning in 3)
+  tr_spread_cluster  (a train: its cell gives part of the options; checked by meaning in 3)
+  faddps_p1          SAME  R: --arm mix --cls fadd_ps --every 1 --t1 same
+  faddps_p2          SAME  R: --arm mix --cls fadd_ps --every 2 --t1 same
+  faddps_p4          SAME  R: --arm mix --cls fadd_ps --every 4 --t1 same
+  faddps_p8          SAME  R: --arm mix --cls fadd_ps --every 8 --t1 same
+  faddps_p16         SAME  R: --arm mix --cls fadd_ps --every 16 --t1 same
+  fsgnjs_p1          SAME  R: --arm mix --cls fsgnj_s --every 1 --t1 same
+  fsgnjs_p2          SAME  R: --arm mix --cls fsgnj_s --every 2 --t1 same
+  fsgnjs_p4          SAME  R: --arm mix --cls fsgnj_s --every 4 --t1 same
+  fsgnjs_p8          SAME  R: --arm mix --cls fsgnj_s --every 8 --t1 same
+  fadds_p16          SAME  R: --arm mix --cls fadd_s --every 16 --t1 same
+  faddpsm1_p1        SAME  R: --arm mix --cls fadd_ps --every 1 --mask 0x01 --t1 same
+  faddpsm2_p1        SAME  R: --arm mix --cls fadd_ps --every 1 --mask 0x03 --t1 same
+  faddpsm4_p1        SAME  R: --arm mix --cls fadd_ps --every 1 --mask 0x0f --t1 same
+  29 of 29 arms with a full cell: the same request to the card
+
+5. the ladders of request.md section 2 are made of arms that exist:
+  tk over shires         OK  tk_s2, tk_s11, tk_s21, tk
+  tk over launch length  OK  tk_l100, tk_l200, tk
+  duty                   OK  wait2, duty33, duty67, duty100
+  workers                OK  w7, w15, w23, spin2
+  fadd.ps density        OK  spin2, faddps_p16, faddps_p8, faddps_p4, faddps_p2, faddps_p1
+  fsgnj.s density        OK  spin2, fsgnjs_p8, fsgnjs_p4, fsgnjs_p2, fsgnjs_p1
+  mask lanes             OK  faddpsm1_p1, faddpsm2_p1, faddpsm4_p1, faddps_p1
+
+6. the order the runner draws (seed 1113: random.Random(1113 * 100 + pass * 10 + block index)), from the dry listings:
+  session A pass 0 block S: spin2 tk_l200 tk_s2 tk_s21 tk_l100 tk_s11 tk
+  session A pass 0 block D: spin2 duty67 duty33 duty33k duty33f wait2 duty100
+  session A pass 0 block W: spin2 w7 w23 w15
+  session A pass 0 block T: spin2 tr_faddps_fadds tr_tk_spin1 tr_tk_stall2 tr_packed_spread tr_spin1_spin2 tr_spread_cluster spin2
+  session A pass 1 block S: spin2 tk_s2 tk_s11 tk_s21 tk tk_l100 tk_l200
+  session A pass 1 block D: spin2 duty33 duty33k wait2 duty67 duty100 duty33f
+  session A pass 1 block W: spin2 w23 w15 w7
+  session A pass 1 block T: spin2 tr_spread_cluster tr_packed_spread tr_tk_spin1 tr_faddps_fadds tr_tk_stall2 tr_spin1_spin2 spin2
+  session A pass 2 block S: spin2 tk tk_s11 tk_l200 tk_l100 tk_s21 tk_s2
+  session A pass 2 block D: spin2 duty33k duty33 wait2 duty100 duty67 duty33f
+  session A pass 2 block W: spin2 w15 w7 w23
+  session A pass 2 block T: spin2 tr_spread_cluster tr_spin1_spin2 tr_tk_stall2 tr_tk_spin1 tr_faddps_fadds tr_packed_spread spin2
+  session A pass 3 block S: spin2 tk_l200 tk tk_l100 tk_s11 tk_s2 tk_s21
+  session A pass 3 block D: spin2 duty33 duty67 duty33f wait2 duty33k duty100
+  session A pass 3 block W: spin2 w7 w23 w15
+  session A pass 3 block T: spin2 tr_faddps_fadds tr_tk_stall2 tr_spread_cluster tr_packed_spread tr_tk_spin1 tr_spin1_spin2 spin2
+  session A pass 4 block S: spin2 tk tk_s11 tk_s2 tk_l100 tk_l200 tk_s21
+  session A pass 4 block D: spin2 duty67 duty100 duty33k duty33 wait2 duty33f
+  session A pass 4 block W: spin2 w7 w23 w15
+  session A pass 4 block T: spin2 tr_tk_stall2 tr_spread_cluster tr_spin1_spin2 tr_tk_spin1 tr_packed_spread tr_faddps_fadds spin2
+  session A pass 5 block S: spin2 tk_l100 tk_s11 tk_s21 tk_s2 tk tk_l200
+  session A pass 5 block D: spin2 duty100 wait2 duty33k duty33 duty33f duty67
+  session A pass 5 block W: spin2 w15 w7 w23
+  session A pass 5 block T: spin2 tr_packed_spread tr_tk_stall2 tr_tk_spin1 tr_spread_cluster tr_faddps_fadds tr_spin1_spin2 spin2
+  session A pass 6 block S: spin2 tk tk_s11 tk_l200 tk_s2 tk_l100 tk_s21
+  session A pass 6 block D: spin2 wait2 duty33k duty33f duty33 duty100 duty67
+  session A pass 6 block W: spin2 w23 w15 w7
+  session A pass 6 block T: spin2 tr_packed_spread tr_tk_stall2 tr_spin1_spin2 tr_tk_spin1 tr_faddps_fadds tr_spread_cluster spin2
+  session A pass 7 block S: spin2 tk_s11 tk_s2 tk_l100 tk_l200 tk tk_s21
+  session A pass 7 block D: spin2 wait2 duty33 duty100 duty33f duty67 duty33k
+  session A pass 7 block W: spin2 w7 w23 w15
+  session A pass 7 block T: spin2 tr_faddps_fadds tr_packed_spread tr_spread_cluster tr_tk_stall2 tr_spin1_spin2 tr_tk_spin1 spin2
+  session A pass 8 block S: spin2 tk_s21 tk tk_s11 tk_l100 tk_s2 tk_l200
+  session A pass 8 block D: spin2 duty67 wait2 duty33k duty33f duty33 duty100
+  session A pass 8 block W: spin2 w7 w15 w23
+  session A pass 8 block T: spin2 tr_tk_spin1 tr_packed_spread tr_tk_stall2 tr_spin1_spin2 tr_faddps_fadds tr_spread_cluster spin2
+  session B pass 0 block C: spin2 faddps_p16 fsgnjs_p8 fsgnjs_p2 faddpsm1_p1 fadds_p16 fsgnjs_p1 faddpsm4_p1 faddps_p8 faddps_p1 faddps_p2 faddpsm2_p1 faddps_p4 fsgnjs_p4 spin2
+  session B pass 1 block C: spin2 faddpsm1_p1 faddps_p8 faddps_p1 faddps_p16 faddps_p4 fsgnjs_p1 faddps_p2 fsgnjs_p4 faddpsm4_p1 fsgnjs_p2 fadds_p16 fsgnjs_p8 faddpsm2_p1 spin2
+  session B pass 2 block C: spin2 faddps_p2 faddps_p4 faddpsm4_p1 fadds_p16 faddpsm1_p1 fsgnjs_p2 faddpsm2_p1 fsgnjs_p8 fsgnjs_p4 faddps_p8 faddps_p16 fsgnjs_p1 faddps_p1 spin2
+  session B pass 3 block C: spin2 fadds_p16 fsgnjs_p2 fsgnjs_p1 faddps_p2 fsgnjs_p8 faddpsm4_p1 fsgnjs_p4 faddps_p8 faddps_p4 faddps_p1 faddpsm1_p1 faddpsm2_p1 faddps_p16 spin2
+  session B pass 4 block C: spin2 faddps_p2 fsgnjs_p4 faddpsm1_p1 faddps_p1 faddps_p4 fsgnjs_p2 fadds_p16 faddps_p16 faddps_p8 faddpsm2_p1 fsgnjs_p8 faddpsm4_p1 fsgnjs_p1 spin2
+  session B pass 5 block C: spin2 faddpsm2_p1 fadds_p16 faddps_p4 faddps_p16 faddpsm4_p1 faddps_p1 fsgnjs_p1 faddps_p8 fsgnjs_p2 faddps_p2 fsgnjs_p8 fsgnjs_p4 faddpsm1_p1 spin2
+  session B pass 6 block C: spin2 faddps_p16 faddps_p4 faddpsm4_p1 fadds_p16 faddps_p2 faddps_p8 fsgnjs_p4 fsgnjs_p2 faddps_p1 faddpsm1_p1 fsgnjs_p8 faddpsm2_p1 fsgnjs_p1 spin2
+  session B pass 7 block C: spin2 faddpsm1_p1 faddps_p1 faddps_p2 faddpsm2_p1 faddpsm4_p1 fsgnjs_p2 faddps_p8 faddps_p4 fsgnjs_p8 fsgnjs_p1 fadds_p16 fsgnjs_p4 faddps_p16 spin2
+  session B pass 8 block C: spin2 faddps_p4 faddps_p8 faddps_p16 faddpsm1_p1 fsgnjs_p8 fsgnjs_p4 fadds_p16 fsgnjs_p2 faddpsm4_p1 fsgnjs_p1 faddps_p2 faddps_p1 faddpsm2_p1 spin2
+
+ARMS CHECK PASS (0 problems)

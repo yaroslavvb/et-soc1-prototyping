@@ -1,0 +1,35 @@
+E193 desk check of code: the build of proposal/src (a byte-identical copy) on aifoundry2, Sat 14 Nov 2026, with this box's
+lab toolchain (/opt/et), through the round's CPU slot at nice 10, -j4, a 4 GB address-space cap. Nothing built was run.
+
+command: cmake -S <copy of src> -B <build> -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev ; cmake --build <build> -j4
+cmake: cmake version 3.28.3
+host c++: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+riscv gcc: riscv64-unknown-elf-gcc () 15.1.0
+configure rc 0
+build rc 0
+compiler warnings from the sources: 0
+CMake warnings: 1 ("Manually-specified variables were not used by the project: CMAKE_INSTALL_LIBDIR", the kernel's sub-build)
+make notes: 5 "Circular ... dependency dropped" lines from the SDK's add_riscv_executable targets (.map, .lst, .bin)
+
+products (sha256, bytes, name):
+  01a3776755f5c684f5a71a38f13a550ea8c4aae5658c46cb003f846aea71b531  75744  x04clock.elf
+  dae3766a0a51b4dcac68248ff1c2ae503a9520e86c870193a69fa74a9105a714  3618088  x04clock_host (carries its kernel's absolute build path by design: Constants.h)
+kernel .text: sha256 fd7207275661c23f33a99dd2a1c16b54e92e09b75cdb828258b09849ee9d643e, 68358 B
+kernel .rodata: sha256 562a893dc09d4ca346782acf3b3ee28996b31b9da416bd5a18ac1d9ef4e98a01, 536 B
+kernel .comment: GCC: () 15.1.0
+kernel entry: 0x8005801000
+path strings in the kernel ELF: 0
+
+request.md section 10 states the kernel ELF's sha256 as bd5770bab12f2b39379960b434af2dfe5cf46f2e75278a26580d5694c03be2ec
+(its designer's build, "byte-identical to the one built with the simulator's device layer added").
+ELF: DIFFERENT (reported, not judged: a different toolchain or SDK build can differ)
+
+host dynamic libraries:
+  libetrt.so
+  libglog.so.1
+  libg3log.so.2
+  libstdc++.so.6
+  libm.so.6
+  libgcc_s.so.1
+  libc.so.6
+  ld-linux-x86-64.so.2
