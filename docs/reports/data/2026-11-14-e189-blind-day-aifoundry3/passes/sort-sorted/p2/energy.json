@@ -1,0 +1,223 @@
+{
+ "dir": "docs/reports/data/2026-11-14-e189-blind-day-aifoundry3/passes/sort-sorted/p2",
+ "run": {
+  "preset": "sort-sorted",
+  "card": "aifoundry3",
+  "dry": false,
+  "lock": "/run/lock/etsoc-shire0.lock",
+  "build": "build/e189ledger",
+  "host_args": "--card --prog sort --keys 512 --reps 1800 --order sorted --launches 8 --kernel build/e189ledger/kernel/ledger.elf",
+  "reps_planned": 8,
+  "idle_before_s": 8.0,
+  "idle_after_s": 10.0,
+  "every_ms": 100,
+  "sampler": "bash tools/claims-v3/e128/ettelem_guard.sh sample --seconds 7800 --every-ms 100",
+  "sampler_t0_ms": 1794715905090,
+  "host_t0_ms": 1794716305509,
+  "host_t1_ms": 1794716310282,
+  "end_ms": 1794716320282,
+  "host_rc": 0,
+  "foreign": null,
+  "rapl": "not read: his go did not allow it",
+  "rapl_uj": [
+   null,
+   null
+  ],
+  "host_cpu_ext_s": [
+   0.057,
+   0.302
+  ],
+  "stub_card": null
+ },
+ "flags": [
+  "1 of 24 busy board_w readings at idle (a pass between launches; 0.0 expected): the catalogue value is about 4% low in this run; the SP average (the headline) does not alias them",
+  "the host has no host_cpu_s: its share uses the whole process's CPU time (an upper bound)"
+ ],
+ "hard": [],
+ "host": {
+  "status": "PASS",
+  "reps_requested": 8,
+  "reps_done": 8,
+  "reps_consistent": "ok",
+  "stop_reason": "",
+  "open_s": null,
+  "setup_s": null,
+  "device_held_s": null,
+  "process_s": null,
+  "launch_epoch_ms": [
+   1794716305724,
+   1794716310210
+  ]
+ },
+ "instance": {},
+ "slice": "0/1",
+ "variant": null,
+ "plan": {
+  "ops": null,
+  "candidates": null,
+  "model_s": null,
+  "guard_s": null,
+  "timeout_s": null,
+  "coverage": null
+ },
+ "result": {
+  "solved": null,
+  "unique": null,
+  "answer": null
+ },
+ "kernel_clock_mhz_est": null,
+ "window": {
+  "source": "host launch_epoch_ms",
+  "lo_ms": 1794716305724,
+  "hi_ms": 1794716310210,
+  "wall_s": 4.486,
+  "board_edges_minus_host_s": [
+   0.191,
+   0.109
+  ]
+ },
+ "solves": 8,
+ "solves_per_s": 1.78333,
+ "launch_s_mean": 0.55966,
+ "launch_s_min": 0.5595,
+ "launch_s_max": 0.5597,
+ "solves_per_s_kernel": 1.78679,
+ "board": {
+  "headline": "the SP's board average over the long window above the before bracket, less the leakage law on the measured die temperature",
+  "j_per_solve": 3.49908,
+  "j_per_solve_raw": 3.57907,
+  "j_per_solve_sp_avg_ramp": 3.52323,
+  "sp_avg_idle_w": 23.50531,
+  "sp_avg_late_w": 23.5595,
+  "leak_slope_w_per_c": 0.29063,
+  "leak_rise_j_per_solve": 0.07064,
+  "j_per_solve_total": 16.75033,
+  "catalogue": {
+   "note": "the energy catalogue's method (analyze_catalogue.py): a cross-check; one run moves by one SP pass of its step per busy reading at idle",
+   "idle_w": 23.50734,
+   "idle_before_w": 23.4325,
+   "idle_after_w": 23.58219,
+   "busy_w": 29.50333,
+   "over_idle_raw_w": 5.99599,
+   "over_idle_w": 5.8544,
+   "leak_correction_w": 0.14159,
+   "leak_slope_w_per_c": 0.29063,
+   "j_per_solve": 3.28285,
+   "j_per_solve_raw": 3.36225,
+   "j_per_solve_integral": 3.40992,
+   "j_per_solve_integral_raw": 3.48991,
+   "j_per_solve_total": 16.54399,
+   "busy_readings": 24,
+   "busy_readings_at_idle": 1,
+   "busy_readings_at_idle_expected": 0.04655,
+   "gap_share": 0.00194,
+   "one_pass_j_per_solve": 0.14636
+  },
+  "windows_s": {
+   "busy": [
+    0.5,
+    0.0
+   ],
+   "before": [
+    -3.5,
+    -0.3
+   ],
+   "after": [
+    2.3,
+    5.5
+   ],
+   "integral": [
+    -1.0,
+    2.3
+   ],
+   "long": [
+    -1.0,
+    6.0
+   ],
+   "late": [
+    6.0,
+    8.0
+   ]
+  }
+ },
+ "rails": {
+  "minion_w": {
+   "idle_w": 6.75087,
+   "late_minus_idle_w": 0.01262,
+   "j_per_solve": 2.34176,
+   "j_per_solve_raw": 2.35477,
+   "over_idle_w_plateau": 4.15491,
+   "j_per_solve_plateau": 2.32987
+  },
+  "sram_w": {
+   "idle_w": 1.89491,
+   "late_minus_idle_w": 0.01669,
+   "j_per_solve": 0.93974,
+   "j_per_solve_raw": 0.95695,
+   "over_idle_w_plateau": 1.68724,
+   "j_per_solve_plateau": 0.94612
+  },
+  "noc_w": {
+   "idle_w": 2.10184,
+   "late_minus_idle_w": 0.00366,
+   "j_per_solve": 0.03003,
+   "j_per_solve_raw": 0.0338,
+   "over_idle_w_plateau": 0.04754,
+   "j_per_solve_plateau": 0.02666
+  },
+  "unmetered": {
+   "j_per_solve": 0.18754,
+   "j_per_solve_raw": 0.23355,
+   "note": "the headline minus the three rails (a small difference of two larger numbers: +-15%)"
+  }
+ },
+ "die_c": {
+  "before": 51.0,
+  "busy": 51.48718,
+  "idle_brackets": 51.0,
+  "after": 51.0,
+  "max_avg": 52.0,
+  "max_high": 87.0,
+  "busy_start": 51.0,
+  "busy_end": 52.0
+ },
+ "meter": {
+  "samples": 237,
+  "busy": 39,
+  "before": 32,
+  "after": 32,
+  "sample_period_ms": 99.9999,
+  "took_ms_median": 21.0,
+  "took_ms_max": 23.0,
+  "board_refresh_s": 0.2,
+  "minion_mhz_busy": [
+   600
+  ]
+ },
+ "cpu": null,
+ "rapl": "not read: his go did not allow it",
+ "host_share": {
+  "cpu_s_burst": 0.359,
+  "source": "energy.sh's CPU time of the whole host process (an upper bound for the burst)",
+  "busy_cores_mean": 0.08003,
+  "host_cpu_s": null,
+  "host_cpu_ext_s": [
+   0.057,
+   0.302
+  ],
+  "assumed_idle_w": [
+   10.0,
+   20.0
+  ],
+  "assumed_core_w": [
+   10.0,
+   38.5
+  ],
+  "j_per_solve": [
+   6.05625,
+   12.94269
+  ],
+  "note": "assumed package power (RAPL is root-only): idle over the burst + per busy core-second"
+ },
+ "ok": true
+}
