@@ -1,0 +1,72 @@
+E189's data README, dated note 1: post hoc readings of committed files (decides nothing; scores nothing)
+interpreter: python 3.12.3
+
+0. anchors
+  SHA256SUMS: 228 of 228 entries OK; with README.md and SHA256SUMS the data commit's 230 files
+  README.md sha256 74430bed85d48da75faebaa1390fe8e86e41c1d1136e98cb95c0eb40bcd1442a
+  SHA256SUMS sha256 d3fb68b5bf0f7e937a803c3976cc75c6b725dc3e22314cb412b2f2d10358925f
+  tools/claims-v3/e189/SHA256SUMS-e189-registration: 10 of 10 entries OK (list sha256 bf1b1bbb4c2b34fcabf5b437cf98d602841315342a239303a11eb2eb72c79058)
+
+1. sparse parity's host.rec
+  passes/sparse-parity/p1/host.rec: 131072 bytes = 2048 records of 64 bytes (remainder 0); sha256 44895b2eb7fd61c9...; in SHA256SUMS True; in the box's MANIFEST.sha256 True
+  passes/sparse-parity/p2/host.rec: 131072 bytes = 2048 records of 64 bytes (remainder 0); sha256 f8c0c12b7c61961e...; in SHA256SUMS True; in the box's MANIFEST.sha256 True
+  passes/sparse-parity/p3/host.rec: 131072 bytes = 2048 records of 64 bytes (remainder 0); sha256 739f916aa15cf50f...; in SHA256SUMS True; in the box's MANIFEST.sha256 True
+  passes/sparse-parity/p4/host.rec: 131072 bytes = 2048 records of 64 bytes (remainder 0); sha256 ea83fd4066c5bff8...; in SHA256SUMS True; in the box's MANIFEST.sha256 True
+  README.md: lines naming host.rec: none
+  README.md: the Files table's passes row: [137]
+  tools/claims-v3/e189/E189.md: lines naming host.rec: none
+  tools/claims-v3/e189/collect_e189.py: lines naming host.rec: [11]
+  tools/claims-v3/e189/e189_common.py: lines naming host.rec: [78]
+  workloads/sparseparity/sparseparity_args.h: SppRecord is 64 bytes: [165]
+  workloads/sparseparity/sparseparity_args.h: SPP_HARTS: [61]
+  workloads/sparseparity/host/main.cpp: the records read back after each launch: [1228]
+  workloads/sparseparity/host/main.cpp: --records-out writes them: [1279]
+
+2. the reducer's flags of one busy board reading at idle (energy.json > flags; the catalogue cross-check, not the headline)
+  copy-random/p2: 1 of 36 busy readings at idle: about 3% low
+  copy-random/p4: 1 of 38 busy readings at idle: about 3% low
+  sort-sorted/p2: 1 of 24 busy readings at idle: about 4% low
+  sort-sorted/p3: 1 of 21 busy readings at idle: about 5% low
+  sparse-parity/p4: 1 of 27 busy readings at idle: about 3% low
+  5 flags; the shares read 3-5%; README.md says 'about 3-4% low' on line(s) [61]
+
+3. the scrub (collect_e189.py's step 4 replaces the box's home path by '~' in every text file and every .gz's text)
+  the box's MANIFEST.sha256 (written on the box before the copy-back): 178 of 178 files at their listed sha256 in this directory (passes/ here, the rest under session/); not matching: none
+  the data commit's 52 files outside that list: {"MANIFEST.sha256": 1, "README.md": 1, "SHA256SUMS": 1, "energy.json": 24, "energy.txt": 24, "runner.rc": 1}
+  of those, the files holding '~': {"README.md": 1}
+  files of the data commit holding a home-directory path (the text inside every .gz included): none
+  session/runner.rc: '0\n'
+  README.md says 'the box's home path became `~`' on line(s) [124]
+  tools/claims-v3/e189/run_e189.py writes MANIFEST.sha256 (on the box, last) on line(s) [606]
+
+4. the session's times (session/queue.json, session/session.log) and the window's two readings
+  first card command 2026-11-14 20:11:45.076 PST; close 2026-11-14 20:27:30.247 PST; the cap's end bound 2026-11-14 22:01:45.076 PST
+  pass 1 started 2026-11-14 20:13:50 (session.log line 15); pass 24 started 2026-11-14 20:25:03 (line 62); session end 2026-11-14 20:27:30 (line 67)
+  as run (README.md departure 6): G 20:04:17; G+1:30 = 21:34:17, G+3:30 = 23:34:17; written 21:35 / 23:35 (rounded up 43 s; step 1 wrote them at 20:09:04); pass 24 started 1:09:14 before G+1:30; the session ended 3:06:47 before G+3:30
+  by the letter of E189.md section 13 (G = his go, about 14:50:00, README.md departure 1): last start about 16:20:00, last end about 18:20:00; the first card command came 3:51:45 after that last start, and the session ended 2:07:30 after that last end
+
+5. README.md's departures and notes (heading line 84)
+  1. The go. (line 86)
+  2. The host's package counter: not read (line 90)
+  3. The fresh network-access approval for aifoundry3 that E189.md section 13 names: nothing to name. (line 92)
+  4. The post: waived. (line 95)
+  5. The day moved. (line 99)
+  6. G and the window. (line 102)
+  7. The desk. (line 107)
+  8. Notes, not departures. (line 109)
+
+6. S1T's margin on the starting die (post hoc; delta = 0 is the registered reading)
+  read by the frozen scorer's read_pass: {"copy-zeros": 4, "copy-random": 4, "sha256": 4, "sort-sorted": 4, "sort-shuffled": 4, "sparse-parity": 4}; T0 (die_c.before) 49.0-51.0 C; the footing law's band [52, 66] C; the rest law at delta 0: {"exponential law (outside the footing band)": 24}
+  registered (delta 0): S1T PASS, 6 of 6 within 5%; e_j_total copy-zeros -0.008009, copy-random -0.022412, sha256 -0.025326, sort-sorted -0.045547, sort-shuffled -0.039549, sparse-parity -0.018840
+  copy-zeros: |e_j_total| passes 5% at a uniform delta of -4.197 C below and +4.772 C above
+  copy-random: |e_j_total| passes 5% at a uniform delta of -2.914 C below and none between -5 and +5 C above
+  sha256: |e_j_total| passes 5% at a uniform delta of -2.423 C below and none between -5 and +5 C above
+  sort-sorted: |e_j_total| passes 5% at a uniform delta of -0.428 C below and none between -5 and +5 C above
+  sort-shuffled: |e_j_total| passes 5% at a uniform delta of -0.997 C below and none between -5 and +5 C above
+  sparse-parity: |e_j_total| passes 5% at a uniform delta of -4.029 C below and none between -5 and +5 C above
+  S1T's word changes from PASS at a uniform delta of -0.997 C below and none between -5 and +5 C above
+  delta -1.0 C: S1T FAIL, 4 of 6 within; copy-zeros -0.018463, copy-random -0.032131, sha256 -0.035710, sort-sorted -0.055879, sort-shuffled -0.050027, sparse-parity -0.026901
+  delta -0.5 C: S1T PASS, 5 of 6 within; copy-zeros -0.013272, copy-random -0.027305, sha256 -0.030554, sort-sorted -0.050749, sort-shuffled -0.044824, sparse-parity -0.022898
+  delta +0.5 C: S1T PASS, 6 of 6 within; copy-zeros -0.002672, copy-random -0.017450, sha256 -0.020025, sort-sorted -0.040272, sort-shuffled -0.034200, sparse-parity -0.014724
+  delta +1.0 C: S1T PASS, 6 of 6 within; copy-zeros +0.006523, copy-random -0.010736, sha256 -0.010862, sort-sorted -0.031109, sort-shuffled -0.022998, sparse-parity -0.009373
+SPDX-License-Identifier: Apache-2.0
