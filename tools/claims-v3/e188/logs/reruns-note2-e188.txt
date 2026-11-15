@@ -1,0 +1,33 @@
+desk: Linux x86_64; /usr/bin/python3 3.12.3; g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; Ubuntu clang version 18.1.3 (1ubuntu1)
+
+== the committed tests that refuse without gdate, through desk/gnudate_e188.sh
+rc 0: SELFTEST-REST-E188 PASS (20 of 20)
+-> PASS (rb/selftest_rest_e188.sh: 20 of 20)
+rc 0: SELFTEST-REST-E188-V2 PASS (32 of 32)
+-> PASS (rb/selftest_rest_e188_v2.sh: 32 of 32)
+rc 0: DRY-INTEL-E188 PASS: no device opened (V3_DRY=1, stub binaries that refuse, a real train host whose runs record no device call), no ssh
+-> PASS (dry_intel_e188.sh: PASS)
+
+== the scorer's self-test: as committed, then with sum() as before 3.12
+rc 1: SELFTEST-SCORE-E188 18 of 20 PASS: A1 the scale route: from 
+its failing cases: A1 A2 
+with sum() as before 3.12: rc 0: SELFTEST-SCORE-E188 20 of 20 PASS
+-> PASS (selftest_score_e188.py under 3.12.3: 18 of 20, exactly A1 and A2 (last-digit equality of reductions of E186's committed data); with sum() as before 3.12, 20 of 20)
+
+== the others, as committed
+rc 0: SELFTEST-ARM-E188 14 of 14 PASS
+-> PASS (selftest_arm_e188.py: 14 of 14)
+rc 0: SELFTEST-STOPS-E188T 8 of 8 PASS
+-> PASS (selftest_stops_e188t.py: 8 of 8)
+rc 0: DESKTEST-HOST-E188 29 of 29 PASS
+-> PASS (desktest_host_e188.sh: 29 of 29)
+rc 0: DESKTEST-TRAIN-CHECK-E188 PASS (50 of 50)
+-> PASS (desk/desktest_train_check_e188.sh: 50 of 50)
+rc 0: dry listing: 19 steps listed, 0 exited non-zero
+-> PASS (rb/list_steps_e188_v2.sh: 19 steps, 0 non-zero)
+
+== the runbook desk test v2, as committed (its port is rb/selftest_rb_e188_v3.sh)
+rc 1: SELFTEST-RB-E188-V2 12 of 16 FAIL; its failing cases: P1 P2-P5 P6-P7 S1 
+-> PASS (rb/selftest_rb_e188_v2.sh on Linux: 12 of 16, failing exactly P1, P2-P5, P6-P7 (BSD sed; step 2 v1's lockf and forecast byte check) and S1 (Homebrew's GCC))
+
+RERUNS-NOTE2-E188 PASS (10 of 10): E188's committed desk tests on this desk (Linux, Python 3.12.3), each as note 2 says it reads here

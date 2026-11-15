@@ -1,0 +1,80 @@
+interpreter /usr/bin/python3 3.12.3; numpy 1.26.4; C library glibc 2.39; Linux x86_64
+
+== F1. this desk: the check on the committed tree
+forecast_tol_e188: /usr/bin/python3 3.12.3; tolerance on each float |committed - recomputed| <= 1e-12 x max(1, |committed|, |recomputed|); every other value, the .txt and kinds-e188.json exact
+pins: the registration's list at 20 entries and b098561b055e..., and its lines for 5 files: OK
+kinds-e188.json bytes exact; the 6 new tiles' bytes exact; forecast-e188.txt bytes exact
+forecast-e188.json bytes: differ in 16 lines (forecast_e188.py check reads CHECK FAIL)
+forecast-e188.json values: 0 exact value(s) differ; 16 float(s) differ, 0 outside the tolerance
+  within  kinds/fp32.e188_a1_b3f800c00/M10_w: committed 8.233099847174708 recomputed 8.23309984717471 |diff| 1.776e-15 tol 8.233e-12 ulps 1
+  within  kinds/fp32.e188_a1_b3f800c00/M12_w: committed 8.362381027259591 recomputed 8.362381027259593 |diff| 1.776e-15 tol 8.362e-12 ulps 1
+  within  kinds/fp32.e188_a1_b3f800c00/P10_w: committed 8.233099847174708 recomputed 8.23309984717471 |diff| 1.776e-15 tol 8.233e-12 ulps 1
+  within  trains/B04/measured_noise/power_excludes_0_if_M10: committed 0.07854489904839684 recomputed 0.07854489904839679 |diff| 5.551e-17 tol 1.000e-12 ulps 4
+  within  trains/B04/registered_noise/power_excludes_0_if_M10: committed 0.0917570108365875 recomputed 0.09175701083658744 |diff| 5.551e-17 tol 1.000e-12 ulps 4
+  within  trains/B05/measured_noise/power_excludes_0_if_M12: committed 0.9901557557279208 recomputed 0.9901557557279207 |diff| 1.110e-16 tol 1.000e-12 ulps 1
+  within  trains/B05/registered_noise/power_excludes_0_if_M12: committed 0.9989926213997505 recomputed 0.9989926213997506 |diff| 1.110e-16 tol 1.000e-12 ulps 1
+  within  trains/B10/measured_noise/power_excludes_0_if_M10: committed 0.04284427106322952 recomputed 0.04284427106322958 |diff| 5.551e-17 tol 1.000e-12 ulps 8
+  within  trains/B10/registered_noise/power_excludes_0_if_M10: committed 0.04153672027822458 recomputed 0.041536720278224526 |diff| 5.551e-17 tol 1.000e-12 ulps 8
+  within  trains/B22/measured_noise/power_excludes_0_if_M12: committed 0.9999999999994912 recomputed 0.9999999999994911 |diff| 1.110e-16 tol 1.000e-12 ulps 1
+  within  trains/PAIR/M10_w: committed 0.0013285762528241207 recomputed 0.001328576252825897 |diff| 1.776e-15 tol 1.000e-12 ulps 8192
+  within  trains/PAIR/M12_w: committed 0.0013285762528241207 recomputed 0.001328576252825897 |diff| 1.776e-15 tol 1.000e-12 ulps 8192
+  within  trains/PAIR/measured_noise/power_excludes_0_if_M10: committed 0.06374873750080379 recomputed 0.06374873750086085 |diff| 5.707e-14 tol 1.000e-12 ulps 4112
+  within  trains/PAIR/measured_noise/power_excludes_0_if_M12: committed 0.06374873750080379 recomputed 0.06374873750086085 |diff| 5.707e-14 tol 1.000e-12 ulps 4112
+  within  trains/PAIR/registered_noise/power_excludes_0_if_M10: committed 0.07082337673112105 recomputed 0.07082337673120159 |diff| 8.055e-14 tol 1.000e-12 ulps 5804
+  within  trains/PAIR/registered_noise/power_excludes_0_if_M12: committed 0.07082337673112105 recomputed 0.07082337673120159 |diff| 8.055e-14 tol 1.000e-12 ulps 5804
+  largest |diff|/tol: 0.0805 at trains/PAIR/registered_noise/power_excludes_0_if_M10
+FORECAST-TOL-E188 PASS: the committed forecast re-made within the tolerance (16 float(s) differ in their last digits, the largest |diff|/tol 0.0805; bytes not exact); every other value, the .txt and the kinds exact; the registration's pins OK
+-> PASS (F1 forecast_tol_e188.py reads PASS on the committed tree here)
+native: 16 float(s) differ, 0 exact value(s) differ; bytes exact: False
+
+== F2. the mechanism: sum() as before 3.12 (plain left-to-right addition)
+  still differs: trains/B04/measured_noise/power_excludes_0_if_M10: committed 0.07854489904839684 recomputed 0.07854489904839679 ulps 4
+  still differs: trains/B04/registered_noise/power_excludes_0_if_M10: committed 0.0917570108365875 recomputed 0.09175701083658744 ulps 4
+  still differs: trains/B05/measured_noise/power_excludes_0_if_M12: committed 0.9901557557279208 recomputed 0.9901557557279207 ulps 1
+  still differs: trains/B05/registered_noise/power_excludes_0_if_M12: committed 0.9989926213997505 recomputed 0.9989926213997506 ulps 1
+  still differs: trains/B10/measured_noise/power_excludes_0_if_M10: committed 0.04284427106322952 recomputed 0.04284427106322958 ulps 8
+  still differs: trains/B10/registered_noise/power_excludes_0_if_M10: committed 0.04153672027822458 recomputed 0.041536720278224526 ulps 8
+  still differs: trains/B22/measured_noise/power_excludes_0_if_M12: committed 0.9999999999994912 recomputed 0.9999999999994911 ulps 1
+  still differs: trains/PAIR/registered_noise/power_excludes_0_if_M10: committed 0.07082337673112105 recomputed 0.07082337673112116 ulps 8
+  still differs: trains/PAIR/registered_noise/power_excludes_0_if_M12: committed 0.07082337673112105 recomputed 0.07082337673112116 ulps 8
+  under the old summation: 9 float(s) differ (max 8 ulps), all of them power values: True; explained by sum() alone: 7: kinds/fp32.e188_a1_b3f800c00/M10_w, kinds/fp32.e188_a1_b3f800c00/M12_w, kinds/fp32.e188_a1_b3f800c00/P10_w, trains/PAIR/M10_w, trains/PAIR/M12_w, trains/PAIR/measured_noise/power_excludes_0_if_M10, trains/PAIR/measured_noise/power_excludes_0_if_M12
+  in both readings (sum's change beside erf's): trains/B04/measured_noise/power_excludes_0_if_M10, trains/B04/registered_noise/power_excludes_0_if_M10, trains/B05/measured_noise/power_excludes_0_if_M12, trains/B05/registered_noise/power_excludes_0_if_M12, trains/B10/measured_noise/power_excludes_0_if_M10, trains/B10/registered_noise/power_excludes_0_if_M10, trains/B22/measured_noise/power_excludes_0_if_M12, trains/PAIR/registered_noise/power_excludes_0_if_M10, trains/PAIR/registered_noise/power_excludes_0_if_M12
+-> PASS (F2 under the old summation only power values (math.erf) still differ, by at most 16 units in the last place, every other float byte-identical (so erf's arguments are the committed ones), the .txt exact)
+
+== F3. the comparator alone, on the committed file's own values
+  the committed file holds 317 floats and 200 strings, integers and booleans
+-> PASS (F3a every float moved by half its tolerance at once (317 of 317 move at all; the rest are too large to move by that much): none outside)
+-> PASS (F3b each of the 317 floats alone moved by twice its tolerance: that float outside, every time (0 misses))
+-> PASS (F3c each of the 200 strings (every sha256 among them), integers and booleans alone changed: an exact difference, every time (0 misses))
+  watt figures (a path component ending in _w): 182, the largest magnitude 8.7142 W
+-> PASS (F3d each of the 182 watt figures moved by 5e-6 W (half of the .txt's last printed place, 1e-5 W): outside every time (0 misses), by at least 5.74e+05 times its tolerance)
+
+== F4. real changes of the inputs, recomputed (one input number changed in memory; the files' bytes and sha256 unchanged)
+  the fp32 rate x (1 + 1e-9): forecast() itself refuses (its assertion that E186's kinds keep their lines to the last bit): True
+-> PASS (F4 the fp32 rate x (1 + 1e-9): the recomputation stops at forecast()'s own exact check against E186's frozen kinds (a FAIL))
+  M12's gamma_B x (1 + 1e-9): forecast() itself refuses (the same assertion, on M12's lines): True
+-> PASS (F4 M12's gamma_B x (1 + 1e-9): the recomputation stops at forecast()'s own exact check (a FAIL))
+  B05's F tile (E188's own tile, no E186 line), its adder net count x (1 + 1e-06): 23 float(s) differ, 9 outside the tolerance, the largest |diff|/tol 2.7e+04; exact differences 0
+-> PASS (F4 B05's F tile's adder net count x (1 + 1e-06): outside the tolerance (no string changed: the float comparison alone))
+  B05's F tile (E188's own tile, no E186 line), its adder net count x (1 + 1e-09): 23 float(s) differ, 6 outside the tolerance, the largest |diff|/tol 27; exact differences 0
+-> PASS (F4 B05's F tile's adder net count x (1 + 1e-09): outside the tolerance (no string changed: the float comparison alone))
+  B05's F tile (E188's own tile, no E186 line), its adder net count x (1 + 1e-10): 23 float(s) differ, 1 outside the tolerance, the largest |diff|/tol 2.7; exact differences 0
+  B05's F tile (E188's own tile, no E186 line), its adder net count x (1 + 1e-11): 23 float(s) differ, 0 outside the tolerance, the largest |diff|/tol 0.271; exact differences 0
+  B05's F tile (E188's own tile, no E186 line), its adder net count x (1 + 1e-12): 23 float(s) differ, 0 outside the tolerance, the largest |diff|/tol 0.0805; exact differences 0
+  B05's F tile (E188's own tile, no E186 line), its adder net count x (1 + 1e-13): 16 float(s) differ, 0 outside the tolerance, the largest |diff|/tol 0.0805; exact differences 0
+  B05's F tile (E188's own tile, no E186 line), its adder net count x (1 + 1e-14): 16 float(s) differ, 0 outside the tolerance, the largest |diff|/tol 0.0805; exact differences 0
+  the comparator's resolution on that count: 1e-10 relative is the smallest change of these it still sees
+-> PASS (F4 the float comparison sees a change of that count down to 1e-10 relative)
+  the registered train half-width (candidates_m12.HW_TRAIN, a code constant) x (1 + 1e-9): 44 float(s) differ, 31 outside
+-> PASS (F4 the registered half-width x (1 + 1e-9): outside the tolerance)
+  E182's measured train se x (1 + 1e-9): 44 float(s) differ, 31 outside
+-> PASS (F4 E182's measured train se x (1 + 1e-9): outside the tolerance)
+
+== F5. the pins, on scratch copies of the six files they read
+  intact copies: OK
+  the list one line short: ['tools/claims-v3/e188/SHA256SUMS-e188-registration: 19 entries, own sha256 103e642d2464... (pinned 20, b098561b055e...)']
+  forecast-e188.json one byte added: ["tools/claims-v3/e188/forecast-e188.json: its sha256 ecf254fff1c9... is not the registration's 2a5dd92e95c8..."]
+  forecast-e188.json and its list line rewritten together: ['tools/claims-v3/e188/SHA256SUMS-e188-registration: 20 entries, own sha256 f1c2147b17e9... (pinned 20, b098561b055e...)']
+-> PASS (F5 the pins refuse a short list, a changed forecast, and a forecast rewritten with its list line (the list's own bytes); the intact copies pass)
+
+SELFTEST-FORECAST-TOL-E188 PASS (14 of 14)

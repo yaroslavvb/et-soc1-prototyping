@@ -1,0 +1,104 @@
+
+== 0a. the sandbox: no /dev/et*, the hostname aifoundry3, a private PID namespace, the card lock the sandbox's own
+processes visible: 7; hostname aifoundry3; /dev/et* nodes 0; /run/lock: etsoc-shire0.lock 
+-> PASS (0a the sandbox)
+
+== 0b. the builds on the recording mock: the accum engine, E78's host, the C-logging host, and the train host by build_host_e188.sh's REAL path
+13e4e588281a73c1e5927ce1975dccab764dc0f7dd51317f1c4a03d6dcc10a1e  <tree>/build/e188host/b/host/sparsity_ho
+TRAIN-CHANGE OK: <tree>/build/e188host/b/host/sparsity_host accepts --values-b, --abba, --launches, --c-lo
+BUILD OK: build/e188host/b/host/sparsity_host
+accum rc 0; E78's host rc 0; the C-logging host rc 0; build_host_e188.sh rc 0; device record lines after the builds: 0
+-> PASS (0b the three hosts built; the train host by its real build path, TRAIN-CHANGE OK read from its behaviour, no device call)
+
+== 0c. the tree's harness pins the four stand-in binaries; check_e188.py with the binaries (79) and without (72); the preflight
+the tree's harness-e188.json pins its four stand-in binaries
+HARNESS OK: 79 files match harness-e188.json
+HARNESS OK: 72 files match harness-e188.json (desk or dry run: binaries and the train host not checked)
+dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+-> PASS (0c HARNESS OK 79 with the binaries, 72 without; dmcmd_audit GO)
+
+== P. THE REAL PATH: session_e188.sh FULL with the trains, V3_DRY unset; the operator's stop written first, so the queue stops before its first block
+session start (budget anchor T0 12:29:13 PST; plan FULL; trains yes; its files in build/e188/T1794774553)
+dmcmd_audit preflight rc=0 (dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none))
+config config-session-start.json: {"tdp_w":0,"temp_threshold_c":65,"power_state":0,"power_state_name":"max_power","minion_mhz":600,"minion_mv":523}
+stop-path test (die): run_e188 exit 6
+stop-path test (board): run_e188 exit 6
+stop-path test (watch): run_e188 exit 6
+stop-path test rc=0
+block 18801 (smoke): target 200 preheat 0 quiet 0.2 burnin 0 fma 2 s, die cap 70 C
+p18801 begins (die 50 C) -> <tree>/build/claims-v3/aifoundry3/e188-smoke/p18801
+smoke: the train's two processes, run_e188t exit 0
+p18801 ends: ok pass 18801 (smoke)
+smoke rc=0
+smoke gate passed: queue starts (plan FULL)
+queue: 12:31:13 e188: done, 0 items, at T0+120 s
+config config-session-end.json: {"tdp_w":0,"temp_threshold_c":65,"power_state":0,"power_state_name":"max_power","minion_mhz":600,"minion_mv":523}
+session end
+-- the queue:
+12:31:13 e188: plan FULL, items 18820 18810 18811 18812 18813 18814 18815 18816 18821; budget 6000 s from the anchor (12:29:13), reserve 60 s, last end 14:08:13, deadline 2026-11-15 15:29:13; first es
+12:31:13 STOP: stopping before p18820
+12:31:13 e188: done, 0 items, at T0+120 s
+-- the stop-path test: die:rc=6 board:rc=6 watch:rc=6 ; STOP files 3
+-- the smoke: block.json {"exp":"e188-smoke","pass":18801,"card":"aifoundry3","t0_ms":1794774567121,"t1_ms":1794774673324,"die_c_start":50,"die_c_end":50,"status":"ok","note":"pass 18801 (smoke)"}; train.rc 0
+   kinds launch records 73; train launch records 28; C log lines 133
+-- blocks.txt: build/claims-v3/aifoundry3/e188-stoptest/p18802 build/claims-v3/aifoundry3/e188-smoke/p18801 ; MANIFEST.sha256 63 files (34 of the smoke's, 18 of the stop test's)
+-- calls: locked config reads 2; block locks 2; D1 holder reads 4; 10 Hz samplers 2; host runs through the wrapper under timeout 10 15; et-who 2; host processes that reached the mock device layer 15
+-> PASS (P1 the session's real path: harness with the binaries, the train host's behaviour, the preflight, the locked config reads, the stop-path test, the smoke, its gates, the queue's stop, the closing read)
+-> PASS (P2 both smoke gates ran on the real smoke and passed (never run under V3_DRY); the stop-path test's three stops fired (6 each); the smoke's 13 kinds items and 2 B05 processes (28 launch records))
+-> PASS (P3 the real session's own files: LAST_T0, blocks.txt naming both blocks, MANIFEST.sha256 over the session's files and both blocks' (every line reads back), no dry directory)
+-> PASS (P4 the real calls: 2 config reads under the card lock and timeout 10, 2 block locks, D1's holder read twice a block (before anything, and after the card lock; the runners read ps before every run, card 0 having no ET_DEVICES), 2 samplers at 10 Hz, 15 host runs (13 kinds items, 2 train processes) through the wrapper under timeout 10, each reaching the mock device layer, et-who at both ends)
+
+== P6. the smoke gate's clock check bites: P's smoke copied, every launch record's clock moved 1% off 0.6 GHz
+SMOKE-GATE (kinds) FAIL {'bad': ['anchor_pi: clock [0.6057, 0.6058, 0.6059] GHz outside 0.595-0.605', 'fp32.zeros: clock [0.6057, 0.6059] GHz outside 0.595-0.60
+-> PASS (P6 the kinds gate fails on a clock 1% off 600 MHz (its clock check reads the launch records))
+
+== P5. step 10 (unchanged) on that real passing session, through a stand-in ssh that serves this tree as aifoundry3's ~/aifoundry
+E188 stop-path test (watch): the watcher wrote STOP: E188 watcher board-power stop: board_w 30.19 W >= 1.0 W (sample t_ms 1794774559843, read 0.053 s after it w
+12:31:13 STOP: stopping before p18820
+RUN-ENDED e188
+MANIFEST-WRITTEN 63 files
+[s20_wait_e188] e188 has ended (MANIFEST-WRITTEN 63 files)
+-> PASS (P5 step 10 reads the real passing session RUN-ENDED with its manifest (0), no GATE-STOPPED)
+
+== A1. D1's other-user rule on the real path: another user's holder line on card 0
+others present: procs=[] holders=[otheruser:4242 ]
+-> PASS (A1 the block exits 3 before anything, no device call)
+
+== A2. the card lock held by another process (the real block_begin; under V3_DRY lib.sh takes no lock)
+card lock /run/lock/etsoc-shire0.lock is held by another process: not starting
+-> PASS (A2 the block exits 3 at the card lock, no device call)
+
+== A3. a live board stop on the real path (the stand-in board at 66 W, over the registered 65 W)
+pass 18801 anchor_pi: <tree>/build/claims-v3/aifoundry3/e188-smoke/p18801/STOP exists
+12:31:20 [aifoundry3] STOP (8): pass 18801 anchor_pi: <tree>/build/claims-v3/aifoundry
+block.json: {"exp":"e188-smoke","pass":18801,"card":"aifoundry3","t0_ms":1794774676058,"t1_ms":1794774686516,"die_c_start":50,"die_c_end":50,"status":"failed","note":"run_e188 or run_e188t exit 8 (smoke)"}; host processes that reached the device layer: 0
+-> PASS (A3 a board stop at 65 W before the first launch (the watcher's STOP, exit 8, or the runner's own, 6): the block fails (1), no host run)
+
+== A4. the sampler stalls on the real path (it writes 40 lines, then nothing)
+block.json: {"exp":"e188-smoke","pass":18801,"card":"aifoundry3","t0_ms":1794774686702,"t1_ms":1794774704312,"die_c_start":50,"die_c_end":50,"status":"failed","note":"run_e188 or run_e188t exit 4 (smoke)"}
+-> PASS (A4 the runner stops at its stale check, the block fails (1))
+
+== A6. a changed C-logging host binary: the session (9) and the block's preflight (2); the harness without the binaries passes
+harness check failed: no device opened
+preflight: check_e188.py (every file and binary against harness-e188.json): HARNESS DIFFERS - refusing:
+-> PASS (A6 the session stops (9, no device opened) and the block refuses (2) before any device call; the harness without the binaries passes)
+
+== A8. the session's start gate on the real path (a past latest start)
+session start (budget anchor T0 12:31:46 PST; plan FULL; trains yes; its files in build/e188/T1794774706)
+no new card session after 2026-11-15 12:30:46 PST: no device opened
+session end
+-> PASS (A8 exit 8 with the real log, no device opened)
+
+== A9. lib.sh's skip of a block whose block.json reads ok (P's smoke put back)
+e188-smoke p18801 already done
+-> PASS (A9 'already done', exit 0, no device call)
+
+== A10. D1 and USER (E183's kit note 6, section 6, carried): another user's holder line, USER set and then unset (block 18809: no E188 block, refused after D1)
+USER set: exit 3 (others present: procs=[] holders=[otheruser:4242 ]); USER unset: exit 2 (block 18809 is no E188 block on aifoundry3 (trains 18810-18816, FULL's kinds passes 18820-18829, the fallback')
+-> PASS (A10 block_e188.sh's D1 reads another user's holder with USER set (3) and none without it (on to the block check, 2): a carried gap, reported (no device call either way))
+
+== Z. no process of this test left; no network call; no /dev/et* through the run
+processes left: 0; network calls: 0; /dev/et* nodes: 0; device record: 1515 lines, 16 device-layer opens
+-> PASS (Z)
+
+DESKTEST-REALPATH-E188 PASS (18 of 18): the session's real path at the desk (V3_DRY unset), every binary a real build on the recording mock, no card

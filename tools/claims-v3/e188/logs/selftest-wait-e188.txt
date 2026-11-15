@@ -1,0 +1,54 @@
+
+== W0. step 9's launch line (v2, and v1) starts bash tools/claims-v3/e188/session_e188.sh from the tree's top
+setsid nohup bash tools/claims-v3/e188/session_e188.sh
+pgrep -u "$(id -u)" -f "session_$RUN\.sh"
+-> PASS (W0 the launch line starts session_e188.sh by that name; step 10's pattern is session_$RUN\.sh with RUN=e188)
+
+== W1. the REAL session_e188.sh, launched with step 9 v2's words, held at its harness check
+held at its harness check: yes
+visible in this namespace: 1 process(es) by the names; by step 10's pattern 'session_e188\.sh': bash tools/claims-v3/e188/session_e188.sh;
+session start (budget anchor T0 12:28:32 PST; plan FULL; trains yes; its files in build/e188/T1794774512)
+RUN-RUNNING e188 after 15 s
+[s20_wait_e188] e188 still runs: call again
+-> PASS (W1 the real pgrep lists exactly 'bash tools/claims-v3/e188/session_e188.sh'; step 10 reads RUN-RUNNING (17))
+
+== W2. released: the session stops at its harness check, writes its session end and its manifest
+harness check failed: no device opened
+session end
+RUN-ENDED e188
+MANIFEST-WRITTEN 1 files
+GATE-STOPPED e188
+[s20_wait_e188] STOP: e188 ended at a gate (a smoke or stop test, or no go): read the lines above; step 11 still collects it
+-> PASS (W2 step 10 reads RUN-ENDED, MANIFEST-WRITTEN and GATE-STOPPED (16) for a session that stopped at a gate; no session process left)
+
+== W3. a second real session, held, then killed with SIGKILL before its session end
+visible in this namespace: 1 process(es) by the names; by step 10's pattern 'session_e188\.sh': bash tools/claims-v3/e188/session_e188.sh;
+after SIGKILL: 0 process(es) by the pattern; session end in its log: 0
+RUN-GONE e188: no session process and no session end
+RUN-RUNNING e188 after 2 s
+[s20_wait_e188] STOP: e188 is not running and recorded no end: read the box's logs before anything else
+-> PASS (W3 step 10 reads RUN-GONE (14): no session process and no session end)
+
+== W4. only other names running, launched the same way, beside a log with no session end
+visible in this namespace: 4 process(es) by the names; by step 10's pattern 'session_e188\.sh': 
+RUN-GONE e188: no session process and no session end
+RUN-RUNNING e188 after 2 s
+[s20_wait_e188] STOP: e188 is not running and recorded no end: read the box's logs before anything else
+-> PASS (W4 step 10 reads RUN-GONE (14) with session_e1880.sh, session_e186.sh, queue_e188.sh and block_e188.sh running: it follows the session alone)
+
+== W5. E190's lesson (a desk read of code): step 10's GATE-STOPPED pattern against every line the session writes, and the session's files
+step 10's GATE-STOPPED pattern: smoke gate failed|stop-path test failed|no device opened
+session_e188.sh: 10 stop_now messages and 2 gate lines, every one matched: True; 12 other say lines, none matched: True
+the text files harness-e188.json names: 51 read (of 73); lines outside comments holding a phrase of the pattern: tools/claims-v3/e188/session_e188.sh 12; in any file but session_e188.sh: 0
+W5-RESULT OK
+-> PASS (W5 the GATE-STOPPED pattern reads every stop line of session_e188.sh and none of its other lines; no other file the session runs prints any of its phrases)
+
+== W6. step 10's dry listing
+pgrep -u "$(id -u)" -f "session_$RUN\.sh" > /dev/null || { sleep 2; ended || { echo "RUN-GONE $RUN: no session process and no session end"; 
+-> PASS (W6 the listing shows the pattern with RUN=e188 and makes no call)
+
+== Z. no stand-in left in this namespace; no rsync or scp; the lock file untouched
+processes by those names left: 0; lock file lines: 0; rsync or scp calls: 0; ssh calls: 8
+-> PASS (Z)
+
+SELFTEST-WAIT-E188 PASS (8 of 8): step 10 reads the real session_e188.sh running (17), gone (14) and stopped at a gate (16); its gate pattern reads no passing line

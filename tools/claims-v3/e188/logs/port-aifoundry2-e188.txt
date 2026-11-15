@@ -1,0 +1,63 @@
+E188's port to aifoundry2: the record (Q182, lane port-e188, Sun 15 Nov 2026, 11:24 PST by the clock), desk only
+GitHub main at the read: 74addea91ccb; E188's committed files read as committed (none edited)
+
+== 1. the desk
+Linux x86_64; /usr/bin/python3 3.12.3 (numpy 1.26.4); date (GNU coreutils) 9.4; flock from util-linux 2.39.3; sed (GNU sed) 4.9; rsync  version 3.2.7  protocol version 3
+g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; Ubuntu clang version 18.1.3 (1ubuntu1); /usr/bin/lockf: absent; gdate: absent; shasum: present
+
+== 2. the macOS-only forms in E188's committed kit (every .sh and .py under tools/claims-v3/e188 but logs/, read by grep)
+  tools/claims-v3/e188/desk/desktest_train_check_e188.sh: 1 line(s) outside comments
+  tools/claims-v3/e188/dry_intel_e188.sh: 4 line(s) outside comments
+  tools/claims-v3/e188/rb/fake_cmake_gcc_e188.sh: 2 line(s) outside comments
+  tools/claims-v3/e188/rb/rb_e188.sh: 2 line(s) outside comments
+  tools/claims-v3/e188/rb/selftest_rb_e188.sh: 20 line(s) outside comments
+  tools/claims-v3/e188/rb/selftest_rb_e188_v2.sh: 26 line(s) outside comments
+  tools/claims-v3/e188/rb/selftest_rest_e188.sh: 2 line(s) outside comments
+  tools/claims-v3/e188/rb/selftest_rest_e188_v2.sh: 2 line(s) outside comments
+  (comment lines naming them are left out; bench/bench_e188.sh is the registration's bench on the mini, not a card day's file)
+
+== 3. step 2 v2 (rb/s03_desk_e188_v2.sh, as committed) for real on this desk, on a scratch copy of this clone at GitHub main
+step 2 v2 exit 16; its STOP lines:
+  aifoundry3/e186-stoptest/p18602/STOP.board: OK
+  aifoundry3/e186-stoptest/p18602/STOP.die: OK
+  aifoundry3/e186-stoptest/p18602/STOP.watch: OK
+  [s03_desk_e188] STOP: the desk check failed: pull forecast
+  [s03_desk_v2_e188] STOP: step 2 v1 exited 16 (its STOP line above names why)
+its pull, as the runbook log records it:
+  2026-11-15 11:24:18 PST step=s03_desk_e188 class=copy host=github bound=600s secs=0 rc=14 status=fail (not started: [Errno 2] No such file or directory: '/usr/bin/lockf')
+its plan and forecast checks, as the runbook log records them (the forecast's is forecast_e188.py check, a byte comparison):
+  rc 0 (the program exit 0): the registration's plan re-made (plan_e188.py --check)
+  rc 14 (the program exit 1): the registration's forecast lines re-made (forecast_e188.py check)
+
+== 4. the forecast under /usr/bin/python3 3.12.3: forecast_tol_e188.py (note 2) on this clone
+  forecast_tol_e188: /usr/bin/python3 3.12.3; tolerance on each float |committed - recomputed| <= 1e-12 x max(1, |committed|, |recomputed|); every other value, the .txt and kinds-e188.json exact
+  pins: the registration's list at 20 entries and b098561b055e..., and its lines for 5 files: OK
+  kinds-e188.json bytes exact; the 6 new tiles' bytes exact; forecast-e188.txt bytes exact
+  forecast-e188.json bytes: differ in 16 lines (forecast_e188.py check reads CHECK FAIL)
+  forecast-e188.json values: 0 exact value(s) differ; 16 float(s) differ, 0 outside the tolerance
+    within  kinds/fp32.e188_a1_b3f800c00/M10_w: committed 8.233099847174708 recomputed 8.23309984717471 |diff| 1.776e-15 tol 8.233e-12 ulps 1
+    within  kinds/fp32.e188_a1_b3f800c00/M12_w: committed 8.362381027259591 recomputed 8.362381027259593 |diff| 1.776e-15 tol 8.362e-12 ulps 1
+    within  kinds/fp32.e188_a1_b3f800c00/P10_w: committed 8.233099847174708 recomputed 8.23309984717471 |diff| 1.776e-15 tol 8.233e-12 ulps 1
+    within  trains/B04/measured_noise/power_excludes_0_if_M10: committed 0.07854489904839684 recomputed 0.07854489904839679 |diff| 5.551e-17 tol 1.000e-12 ulps 4
+    within  trains/B04/registered_noise/power_excludes_0_if_M10: committed 0.0917570108365875 recomputed 0.09175701083658744 |diff| 5.551e-17 tol 1.000e-12 ulps 4
+    within  trains/B05/measured_noise/power_excludes_0_if_M12: committed 0.9901557557279208 recomputed 0.9901557557279207 |diff| 1.110e-16 tol 1.000e-12 ulps 1
+    within  trains/B05/registered_noise/power_excludes_0_if_M12: committed 0.9989926213997505 recomputed 0.9989926213997506 |diff| 1.110e-16 tol 1.000e-12 ulps 1
+    within  trains/B10/measured_noise/power_excludes_0_if_M10: committed 0.04284427106322952 recomputed 0.04284427106322958 |diff| 5.551e-17 tol 1.000e-12 ulps 8
+    within  trains/B10/registered_noise/power_excludes_0_if_M10: committed 0.04153672027822458 recomputed 0.041536720278224526 |diff| 5.551e-17 tol 1.000e-12 ulps 8
+    within  trains/B22/measured_noise/power_excludes_0_if_M12: committed 0.9999999999994912 recomputed 0.9999999999994911 |diff| 1.110e-16 tol 1.000e-12 ulps 1
+    within  trains/PAIR/M10_w: committed 0.0013285762528241207 recomputed 0.001328576252825897 |diff| 1.776e-15 tol 1.000e-12 ulps 8192
+    within  trains/PAIR/M12_w: committed 0.0013285762528241207 recomputed 0.001328576252825897 |diff| 1.776e-15 tol 1.000e-12 ulps 8192
+    within  trains/PAIR/measured_noise/power_excludes_0_if_M10: committed 0.06374873750080379 recomputed 0.06374873750086085 |diff| 5.707e-14 tol 1.000e-12 ulps 4112
+    within  trains/PAIR/measured_noise/power_excludes_0_if_M12: committed 0.06374873750080379 recomputed 0.06374873750086085 |diff| 5.707e-14 tol 1.000e-12 ulps 4112
+    within  trains/PAIR/registered_noise/power_excludes_0_if_M10: committed 0.07082337673112105 recomputed 0.07082337673120159 |diff| 8.055e-14 tol 1.000e-12 ulps 5804
+    within  trains/PAIR/registered_noise/power_excludes_0_if_M12: committed 0.07082337673112105 recomputed 0.07082337673120159 |diff| 8.055e-14 tol 1.000e-12 ulps 5804
+    largest |diff|/tol: 0.0805 at trains/PAIR/registered_noise/power_excludes_0_if_M10
+  FORECAST-TOL-E188 PASS: the committed forecast re-made within the tolerance (16 float(s) differ in their last digits, the largest |diff|/tol 0.0805; bytes not exact); every other value, the .txt and the kinds exact; the registra
+
+== 5. step 11's desk-path gate on aifoundry2, on E186's committed collection (E188's parent form: the same layout aifoundry3 writes)
+k6's rb_nopath's call (step 11 v1's gate): nopath_q142s.py --forbid <the lab clone> --forbid <RB_OUT> docs/reports/data/2026-11-09-e186-one-number-r3-aifoundry3: exit 3; hit lines 71; files 71; what each hit names: 71 this user's home
+step 11 v2's gate (note 2: E183's nopath_desk, unchanged) on the same directory: exit 0; 1 pass line; hit lines 0
+  [port_record_gate] the desk-path gate's inputs (note 5): HOME is this account's home, and no entry of it is named 'aifoundry' (the box's tree)
+  [port_record_gate] the desk-path gate (note 5): the desk's home has the box account's shape, so its 77 entries are forbidden one by one (1 spelling(s) of the home); left out by name: (names not printed)
+
+PORT-RECORD-E188 written

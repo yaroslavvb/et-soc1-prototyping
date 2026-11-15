@@ -1,0 +1,143 @@
+note 2's stand-ins: SHA256SUMS-e188-kit-note2 23 entries, pinned in the scratch copy of step 2 v3; the kit list (106), note 1's (2, 10) and A2's real
+scratch repository: 18283 files committed (12436 of them by the closure trace beside tools/claims-v3 and the workload), with an origin; the kit list real (106 files); note 2's list a stand-in (23)
+
+== A. the dry listing v3 (FULL and the fallback, the look before the post): every step exits 0, no ssh or rsync call
+dry listing: 19 steps listed, 0 exited non-zero, 0 box calls
+-> PASS (A the dry listing v3: 0 failing, no call (0 box calls), the look before the post, step 6 three times, step 2 v3 once with its pull's lock tool, step 11 v2 twice with its exact copy-back, its early check and its gate, step 9 v2 on both paths with the rest rule v2's lines)
+
+== D2 (note 2). step 2 v3, step 11 v2 and the dry listing v3 against the committed versions they come from (their code lines, comments aside)
+step 2 v3 against v1: 7 lines out, 25 in (0 in that neither carry 'note 2' nor belong to note 2's two added blocks); step 11 v2 against v1: 5 out, 11 in; the dry listing v3 against v2: 5 out, 10 in
+-> PASS (D2 step 2 v3 is v1's code but 7 lines out and 25 in, every one note 2's; step 11 v2 is v1's but 5 out and 11 in; the dry listing v3 is v2's but 5 out and 10 in)
+
+== K. step 2 with no window in RB_OUT (step 1 not run)
+[s03_desk_v3_e188] STOP: no window in RB_OUT: run s02_window_e188.sh with his go's day, last start and last end first
+-> PASS (K step 2 refuses without step 1's window, before any call)
+
+== W1-W3. the window rule: a window written yesterday, one written for another runbook, and step 1 with a day not today
+[s03_desk_v3_e188] STOP: RB_OUT's window was not written today (Pacific): run s02_window_e188.sh with his go's day, last start and last end first
+[s03_desk_v3_e188] STOP: RB_OUT's window was written for e186, not E188: one RB_OUT per runbook
+[s02_window_e188] STOP: the window's day 2026-11-16 is not today (Pacific): a window serves the day it is written
+-> PASS (W1-W3 a window not written today, one for another runbook, and a window for another day are each refused (10))
+
+== G. step 2 with no RB_GITLOCK (the lab-git lock)
+[s03_desk_v3_e188] STOP: RB_GITLOCK is not set (the lab-git lock every commit to the shared lab clone takes; a path outside the repo)
+-> PASS (G step 2 refuses a pull without the lab-git lock)
+
+== N (note 2). step 2 v3 run inside the lab-git lock (nested): its pull cannot take the lock
+   (the outer lock taken with flock; the step's own pull waits 2 s for it with flock, then exits 75)
+[s03_desk_v3_e188] STOP: the desk check failed: pull
+-> PASS (N a nested step 2 v3 stops with 16 naming its pull, the lock tool's exit 75 in the runbook log (never run step 2 inside the lock; outer lock by flock))
+
+== P1. step 2 v3 on the scratch repository (every listed file, an origin, the kit list real at 106, note 2's list a stand-in at 23)
+aifoundry3/e186-stoptest/p18602/STOP.board: OK
+aifoundry3/e186-stoptest/p18602/STOP.die: OK
+aifoundry3/e186-stoptest/p18602/STOP.watch: OK
+-> PASS (P1 step 2 v3 passes the intact tree: v1's pins and the kit's, its pull under the lab-git lock by flock, HISTORY OK, the forecast within its tolerance (FORECAST-TOL-E188 PASS), note 1's, A2's and note 2's lists at their pins)
+
+== P2-P5. a pinned list one line short; a file and its line rewritten together; the kit's list one line short; an unknown list
+[s03_desk_v3_e188] STOP: the desk check failed: history SHA256SUMS-e188-registration(19 OK of 19; pinned 20; its own bytes differ from the pin) harness-rebuild items harness forecast
+[s03_desk_v3_e188] STOP: the desk check failed: history SHA256SUMS-e188-registration(20 OK of 20; pinned 20; its own bytes differ from the pin) harness-rebuild items harness forecast
+[s03_desk_v3_e188] STOP: the desk check failed: history SHA256SUMS-e188-kit(105 OK of 105; pinned 106; its own bytes differ from the pin)
+aifoundry3/e186-stoptest/p18602/STOP.watch: OK
+-> PASS (P2-P5 each pin refused (16) and named: a short list, a rewritten list (count kept, bytes not), the kit's short list; an unknown list reported (0))
+
+== P6-P7 (note 1, on step 2 v3). note 1's pins: note 1's kit list one line short; a file of the amendment A1 and its line rewritten together (each committed, then taken as the anchor, so the history check cannot see it)
+[s03_desk_v3_e188] STOP: the desk check failed: SHA256SUMS-e188-kit-note1(9 OK of 9; pinned 10; its own bytes differ from the pin)
+[s03_desk_v3_e188] STOP: the desk check failed: SHA256SUMS-e188-a1(2 OK of 2; pinned 2; its own bytes differ from the pin)
+-> PASS (P6-P7 the history check passes (the change lies before the anchor), and step 2 v3 refuses (16) at note 1's pins, naming the list)
+
+== P8-P9, F1 (note 2). A2's list one line short; note 2's list one line short; the forecast's last digit and its registration line rewritten together (each committed, then taken as the anchor)
+[s03_desk_v3_e188] STOP: the desk check failed: SHA256SUMS-e188-a2(0 OK of 0; pinned 1; its own bytes differ from the pin)
+[s03_desk_v3_e188] STOP: the desk check failed: SHA256SUMS-e188-kit-note2(22 OK of 22; pinned 23; its own bytes differ from the pin)
+[s03_desk_v3_e188] STOP: the desk check failed: SHA256SUMS-e188-registration(20 OK of 20; pinned 20; its own bytes differ from the pin) harness-rebuild items harness forecast
+-> PASS (P8-P9, F1 step 2 v3 refuses (16): A2's short list and note 2's short list, each named against its pin; a forecast edited in its last digit with its list line rewritten, at the registration's pin and at the forecast check's own pins (the float comparison alone would admit a last-digit edit: the bytes are pinned))
+
+== H1. a committed edit of a kit file (score_e188.py): the history check refuses it
+[s03_desk_v3_e188] STOP: the desk check failed: history SHA256SUMS-e188-kit(105 OK of 106; pinned 106)
+-> PASS (H1 refused (16) by the history check, naming the file)
+
+== T (fix-port188, on verify-port188's finding 1). the lab's top: a module _strptime.py committed there (a working copy of the standard library's, which writes a marker when imported): step 1 runs it, the history check passes it, the top's check alone and step 2 v3 refuse it; then an untracked json.py there: step 2 v3 refuses it, and nothing in step 2 v3 imports it
+   step 1 on that tree: rc 0; the shadow's marker written: 1 (why the brief reads the top's check right before step 1)
+TOP REFUSED: _strptime.py (shadows the module '_strptime' the system python finds) (the lab's top: 6 entries, 1 module files or packages (_strptime.py); tools/claims-v3/e183/rb/: 47 entries, 1 module 
+[s03_desk_v3_e188] STOP: the desk check failed: top
+[s03_desk_v3_e188] STOP: the desk check failed: top
+[s03_desk_v3_e188] STOP: the desk check failed: top
+-> PASS (T a committed _strptime.py at the top runs in step 1 (rc 0, its marker written) and passes the history check (HISTORY OK); check_top_e188.py alone refuses it (16) and step 2 v3 stops (16, 'top'); an untracked json.py there: step 2 v3 stops (16, TOP REFUSED naming it) and no step-2 process imported it; an untracked re.py in tools/claims-v3/e183/rb/ (step 11 v2's nopath_spell_e183.py runs there): HISTORY OK, and step 2 v3 stops (16, TOP REFUSED naming it); the dry listing names the check 3 times (step 2 v3 once, step 11 v2 on both paths))
+
+== S1. step 5 on a clean stand-in box, its stand-in binaries and pins, then step 6 start and wait (the GCC -O2 stand-in cmake)
+[s07_a3_sync_e188] synced to aifoundry3:aifoundry/ (46 paths); the rsync sent 145 files' contents there, 9 of them under workloads/sparsity/
+the stand-in box's harness-e188.json now pins its 4 stand-in binaries
+JOB-STARTED a3-build-e188 2026-11-15 12:55:09 PST pid 3995347
+[s08_a3_build_e188] the train host's build runs on aifoundry3 as the detached job a3-build-e188 (its own bound 500 s): run this step's wait, again while it says 17
+check_e188 rc=0
+E188-BUILD-ATTEMPT 1 today (the day's start 1)
+e188_common rc=0
+HARNESS OK: 79 files match harness-e188.json
+NOTE1 FILES OK: 10 files match harness-e182-note1.json (8 build inputs, 2 box files)
+preflight_e188 rc=0 dmcmd_audit: GO (32 send site(s), 0 disallowed; allow-list: none)
+[s08_a3_build_e188] aifoundry3: the train host built by the detached job a3-build-e188; NOTE1 FILES OK 10, HARNESS OK 79, TRAIN-CHANGE OK (its behaviour), preflight_e188 GO, e188_common verified, each in its own bounded 
+TRAIN-CHANGE OK: build/e188host/b/host/sparsity_host accepts --values-b, --abba, --launches, --c-log and --c-poison and stops at the empty --kernel (rc 1, before any device call, nothing written); --values-b, --abba, --l
+TRAIN-CHANGE OK: <scratch>/box/aifoundry3/aifoundry/build/e188host/b/host/sparsity_host accepts --values-b, --abba, --launches, --c-log and --c-poison and stops a
+train_check_e188 rc=0
+TRAIN-HOST-BUILT rc=0
+-> PASS (S1 the sync, the build job (g++-13 -O2), then the five checks, each in its own 60 s read (6 with the one before the build); TRAIN-CHANGE OK from the host's behaviour; HARNESS OK 79; one build counted)
+
+== D. step 8, the trains' dry job, on the box step 6 left
+E188 dry 18810 rc=0
+E188 dry 18811 rc=0
+E188 dry 18820 rc=0
+E188 dry 18801 --smoke rc=0
+E188 start gate rc=8 (want 8)
+E188 dry 18810 rc=0
+E188 dry 18811 rc=0
+E188 dry 18820 rc=0
+E188 dry 18801 --smoke rc=0
+E188 start gate rc=8 (want 8)
+-> PASS (D the dry job rc 0: 18810, 18811, the kinds pass 18820, the smoke, the start gate's 8; no network or device-tool call on the box)
+
+== O. a card session of ours on the box: step 5, step 6's start, step 8's start and step 9's launch each refused
+[s11_a3_session_v2_e188] STOP: e188 refused on the box: REFUSED: a card session of ours already runs on aifoundry3 (one at a time)
+-> PASS (O beside a session of ours: step 5 refused (10), step 6 refused (10), step 8's job refused on the box (14, JOB-REFUSED), step 9 refused (10))
+
+== RS. the rest rule through step 9: a real E185-form session log ended 10 minutes ago, then only an E183-form log ended 45 minutes ago
+[s11_a3_session_v2_e188] STOP: e188 refused on the box: REFUSED: 10 minutes since E185's session end (2026-11-15 12:46:16 PST): E188 starts on a rested card, at least 40 minutes after our last real session there (E188.md section 6; the kit)
+-> PASS (RS step 9 v2 refused (10) 10 minutes after an E185-form session's end, naming E185, nothing launched)
+
+== RS3 (note 1). THE REST RULE v2 through step 9 v2: an E188-form session on the box cut mid-queue (its log silent since 'queue starts' 95 minutes ago; its queue and a train block written 10 minutes ago)
+[s11_a3_session_v2_e188] STOP: e188 refused on the box: REFUSED: 10 minutes since E188's last real session activity (no 'session end': the latest of its last line and its run's latest write, note 1) (2026-11-15 12:46:16 PST (the latest write of E188's files outside the dry paths)): E188 starts on a rested card, at least 40 minut
+-> PASS (RS3 step 9 v2 refused (10) 10 minutes after the cut E188 session's last write (not 95 minutes after its last log line), naming E188, nothing launched)
+
+== L. step 9 FULL yes (an E183-form session ended 45 minutes ago; the committed binaries' pins put back by step 5): the session stops at its own harness check
+rest: 45 minutes since E183's session end (2026-11-15 12:11:16 PST; dry sessions and blocks that opened no device skipped)
+LAUNCHED e188 T0 1794776176 2026-11-15 12:56:21 PST (plan FULL, trains yes; gates: latest start 2026-11-15 13:25 PST, deadline 2026-11-15 15:55 PST)
+[s11_a3_session_v2_e188] e188 launched on aifoundry3 (plan FULL, trains yes, T0 1794776176); wait with s20_wait_e188.sh (bounded), and read its smoke gate before counting it as started
+[s20_wait_e188] STOP: e188 ended at a gate (a smoke or stop test, or no go): read the lines above; step 11 still collects it
+-> PASS (L the launch (0) with the rest rule's line naming E183's end; the session stops at its harness check, no device opened, its manifest written; step 10 reads a gate stop (16) with the manifest)
+
+== C. step 11 v2 on a session staged on the box: the copies by name, COPY-BACK EXACT, then the C gate (14, by design)
+COPY-BACK EXACT 6 files (every manifest line read back, and nothing else)
+STOPTEST-OK e188-stoptest/p18802: no launch record and no C record
+[s22_collect_v2_e188] STOP: E188: a session that must carry a C log has no finished check of C (the lines above): nothing is scored as registered. Read the collector's output, remove what it wrote, th
+[s22_collect_v2_e188] STOP: build/e188-raw already holds files (an earlier collection): the exact copy-back needs empty directories: move build/e188-raw aside first (never merge into it)
+[s22_collect_v2_e188] STOP: COPY-BACK DIFFERS: build/claims-v3/aifoundry3/e188/p18810/train.jsonl: copied with other bytes: the copy is not the session's; nothing is scored; move build/e188-raw aside, read the box (read-only), then collect again
+[s22_collect_v2_e188] STOP: 10 more minutes would pass the round's last end (2026-11-15 13:01 PST): not started
+-> PASS (C COPY-BACK EXACT (6 files), the history check OK before any scoring, the day's step-6 record copied (5 entries), then the C gate (14, by design); C2 a used output refused (10); C3 a changed box file: COPY-BACK DIFFERS (16); C4 the last end 5 minutes away: refused (16) before any call)
+
+== C0 (note 2). step 11 v2 with HOME set but empty: refused (10) before any copy
+[s22_collect_v2_e188] STOP: the desk-path gate (note 5): HOME is set but empty: set it to this account's home (the account database's) and run this step again
+-> PASS (C0 step 11 v2 refuses an empty HOME (10) before any copy: no rsync, no raw copy)
+
+== C5 (note 2). the desk-path gate end to end on this desk's shape: a scored output naming aifoundry3's own tree under the desk's home
+[s22_collect_e188] STOP: a desk path reached what this step wrote (the HIT lines above): commit nothing; fix the route, remove the outputs, collect again
+[s22_collect_v2_e188] E188 collected and scored: build/e188-out/2026-11-15-e188-one-number-r4-aifoundry3 (the data directory is docs/reports/data/2026-11-15-e18
+[s22_collect_v2_e188] STOP: a desk path reached what this step wrote (the HIT lines above): commit nothing; fix the route, remove the outputs, collect again
+-> PASS (C5 on a desk whose home has the box account's shape: step 11 v1 stops at k6's gate (16, this user's home); step 11 v2 collects the same session (0, E183's gate, the box's tree left out); a desk path beside it stops step 11 v2 (16))
+
+== T11 (fix-port188, on verify-port188's finding 1). step 11 v2 on C5's staged session with an untracked json.py at the lab's top (the collector's scripts on stdin read the top first)
+[s22_collect_v2_e188] STOP: TOP REFUSED: json.py (shadows the module 'json' the system python finds) (the lab's top: 7 entries, 1 module files or packages (json.py); tools/claims-v3/e183/rb/: 47 entries, 1 module files or packages (nopath_spell_e183.py); the n
+-> PASS (T11 step 11 v2 copies back (COPY-BACK EXACT) and reads HISTORY OK, then stops (16) at the top's check naming json.py, before any scoring: no collector output, and no process of the step imported the module)
+
+== Z. no process of this test left running
+-> PASS (Z nothing left running)
+
+SELFTEST-RB-E188-V3 23 of 23 PASS
