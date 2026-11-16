@@ -1,0 +1,8 @@
+(544,4,0.39,1792): 9 solves in 3.731 s (2.412/s; kernel 0.4134 s each, 2.419/s)
+  J per solve over idle (the SP's board average, the law on the die temperature): 12.737 (uncorrected 13.522, ramp baseline 13.168; the leakage's rise 0.368); board total per solve, idle included, 22.392 J
+  catalogue method (cross-check): 13.056 J (uncorrected 13.369, integral 13.097; 3 of 21 busy readings at idle, 0.1 expected, one pass = 0.700 J per solve); board 54.85 W in the burst, idle 22.61 W: +32.25 W, +31.49 W leakage-corrected (+0.75 W at 0.282 W/C)
+  die 48.0 C before, 51.5 C busy (max 54), 48.9 C brackets
+  rails, J per solve: minion 6.433, SRAM 5.515, NoC 0.072 (ramp baseline: upper bounds), unmetered 0.717 (the headline minus the rails)
+  host: 0.112 CPU s over the burst (0.03 cores busy on average; host_cpu_s.burst (getrusage over launch_epoch_ms)); its package, assumed, 4.27-8.77 J per solve
+  RAPL on the host: not read: his go did not allow it
+  NOT OK: minion clock in busy samples: [600, 700, 800] MHz (the governor moved it) | 3 of 21 busy board_w readings at idle (a pass between launches; 0.1 expected): the catalogue value is about 14% low in this run; the SP average (the headline) does not alias them; the board's edges are +1.11 / -0.02 s off the host's launch times
