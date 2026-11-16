@@ -1,0 +1,73 @@
+{
+ "arm": "Z-dram",
+ "ran": true,
+ "argv": [
+  "build/e202mnist/host/mnistmlp_host",
+  "--card",
+  "--images",
+  "build/e202files/mnist/train-images-idx3-ubyte",
+  "--weights",
+  "build/e202files/files/mnist-int8-random.mlpw",
+  "--expect",
+  "build/e202files/files/expect-random-train.mlpe",
+  "--split",
+  "train",
+  "--passes",
+  "1",
+  "--stage",
+  "dram",
+  "--pins",
+  "build/e202files/files/PINS-SHA256SUMS",
+  "--kernel",
+  "build/e202mnist/kernel/mnistmlp.elf",
+  "--out",
+  "build/e202/T1794860688/smoke/Z-dram/host-raw.json",
+  "--debug-logits",
+  "--expect-logits",
+  "build/e202files/files/logits-random-train.mlpl",
+  "--labels-out",
+  "build/e202/T1794860688/smoke/Z-dram/labels.bin"
+ ],
+ "rc": 0,
+ "t0_ms": 1794860811532,
+ "t1_ms": 1794860812146,
+ "host_cpu_ext_s": [
+  0.245,
+  0.286
+ ],
+ "die_start_c": 50,
+ "die_gate_wait_s": 0.0,
+ "result_read": "the host's own --out file",
+ "status": "PASS",
+ "core_status": "PASS",
+ "logits_status": "PASS",
+ "tensor_error_or": 0,
+ "first_mismatch": "",
+ "accuracy": null,
+ "work_cycles_max": 19844695,
+ "copy_cycles_max": 7783,
+ "core_pass": true,
+ "R": 96,
+ "R_predicted_s": {
+  "16": 0.4879,
+  "32": 0.9757,
+  "48": 1.4553,
+  "64": 1.9431,
+  "80": 2.4227,
+  "96": 2.9106
+ },
+ "R_why": "",
+ "R_registered_rule": 96,
+ "R_host_cap": {
+  "96": {
+   "predicted_s": 2.9106,
+   "host_timeout_s": 8,
+   "cap_s": 7.5,
+   "host_guard_s": 4.8701,
+   "host_would_refuse": false
+  }
+ },
+ "budget_left_s": 9.012,
+ "off_clock": [],
+ "did_not_finish": false
+}

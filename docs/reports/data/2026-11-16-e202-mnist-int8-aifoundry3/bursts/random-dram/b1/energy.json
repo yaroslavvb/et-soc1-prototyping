@@ -1,0 +1,223 @@
+{
+ "dir": "docs/reports/data/2026-11-16-e202-mnist-int8-aifoundry3/bursts/random-dram/b1",
+ "run": {
+  "preset": "random-dram",
+  "card": "aifoundry3",
+  "dry": false,
+  "lock": "/run/lock/etsoc-shire0.lock",
+  "build": "build/e202mnist",
+  "host_args": "--card --images build/e202files/mnist/train-images-idx3-ubyte --weights build/e202files/files/mnist-int8-random.mlpw --expect build/e202files/files/expect-random-train.mlpe --split train --passes 96 --stage dram --pins build/e202files/files/PINS-SHA256SUMS --kernel build/e202mnist/kernel/mnistmlp.elf --out build/e202/T1794860688/bursts/random-dram/b1/host-raw.json",
+  "reps_planned": 1,
+  "passes_R": 96,
+  "idle_before_s": 8.0,
+  "idle_after_s": 10.0,
+  "every_ms": 100,
+  "sampler": "bash tools/claims-v3/e128/ettelem_guard.sh sample --seconds 3300 --every-ms 100",
+  "sampler_t0_ms": 1794860688532,
+  "host_t0_ms": 1794861014074,
+  "host_t1_ms": 1794861017494,
+  "end_ms": 1794861027494,
+  "host_rc": 0,
+  "foreign": null,
+  "rapl": "not read: the lab's default (E202.md 10)",
+  "rapl_uj": [
+   null,
+   null
+  ],
+  "host_cpu_ext_s": [
+   0.269,
+   0.316
+  ],
+  "stub_card": null
+ },
+ "flags": [
+  "the host has no host_cpu_s: its share uses the whole process's CPU time (an upper bound)"
+ ],
+ "hard": [],
+ "host": {
+  "status": "PASS",
+  "reps_requested": 1,
+  "reps_done": 1,
+  "reps_consistent": "ok",
+  "stop_reason": "",
+  "open_s": null,
+  "setup_s": null,
+  "device_held_s": null,
+  "process_s": null,
+  "launch_epoch_ms": [
+   1794861014557,
+   1794861017399
+  ]
+ },
+ "instance": {},
+ "slice": "0/1",
+ "variant": null,
+ "plan": {
+  "ops": null,
+  "candidates": null,
+  "model_s": null,
+  "guard_s": null,
+  "timeout_s": null,
+  "coverage": null
+ },
+ "result": {
+  "solved": null,
+  "unique": null,
+  "answer": null
+ },
+ "kernel_clock_mhz_est": null,
+ "window": {
+  "source": "host launch_epoch_ms",
+  "lo_ms": 1794861014557,
+  "hi_ms": 1794861017399,
+  "wall_s": 2.842,
+  "board_edges_minus_host_s": [
+   0.093,
+   -0.046
+  ]
+ },
+ "solves": 1,
+ "solves_per_s": 0.35186,
+ "launch_s_mean": 2.84168,
+ "launch_s_min": 2.84168,
+ "launch_s_max": 2.84168,
+ "solves_per_s_kernel": 0.3519,
+ "board": {
+  "headline": "the SP's board average over the long window above the before bracket, less the leakage law on the measured die temperature",
+  "j_per_solve": 38.25309,
+  "j_per_solve_raw": 41.75185,
+  "j_per_solve_sp_avg_ramp": 40.76529,
+  "sp_avg_idle_w": 24.61406,
+  "sp_avg_late_w": 24.747,
+  "leak_slope_w_per_c": 0.29644,
+  "leak_rise_j_per_solve": 1.45196,
+  "j_per_solve_total": 109.65821,
+  "catalogue": {
+   "note": "the energy catalogue's method (analyze_catalogue.py): a cross-check; one run moves by one SP pass of its step per busy reading at idle",
+   "idle_w": 24.67484,
+   "idle_before_w": 24.56312,
+   "idle_after_w": 24.78656,
+   "busy_w": 39.21522,
+   "over_idle_raw_w": 14.54037,
+   "over_idle_w": 14.11857,
+   "leak_correction_w": 0.42181,
+   "leak_slope_w_per_c": 0.29851,
+   "j_per_solve": 40.12497,
+   "j_per_solve_raw": 41.32374,
+   "j_per_solve_integral": 40.04769,
+   "j_per_solve_integral_raw": 42.44961,
+   "j_per_solve_total": 111.44965,
+   "busy_readings": 15,
+   "busy_readings_at_idle": 0,
+   "busy_readings_at_idle_expected": 0.00169,
+   "gap_share": 0.00011,
+   "one_pass_j_per_solve": 2.82371
+  },
+  "windows_s": {
+   "busy": [
+    0.5,
+    0.0
+   ],
+   "before": [
+    -3.5,
+    -0.3
+   ],
+   "after": [
+    2.3,
+    5.5
+   ],
+   "integral": [
+    -1.0,
+    2.3
+   ],
+   "long": [
+    -1.0,
+    6.0
+   ],
+   "late": [
+    6.0,
+    8.0
+   ]
+  }
+ },
+ "rails": {
+  "minion_w": {
+   "idle_w": 7.67694,
+   "late_minus_idle_w": 0.07701,
+   "j_per_solve": 16.98267,
+   "j_per_solve_raw": 17.5542,
+   "over_idle_w_plateau": 5.98253,
+   "j_per_solve_plateau": 17.00236
+  },
+  "sram_w": {
+   "idle_w": 1.94216,
+   "late_minus_idle_w": 0.02569,
+   "j_per_solve": 18.66619,
+   "j_per_solve_raw": 18.85687,
+   "over_idle_w_plateau": 6.55098,
+   "j_per_solve_plateau": 18.61788
+  },
+  "noc_w": {
+   "idle_w": 2.14328,
+   "late_minus_idle_w": 0.02357,
+   "j_per_solve": 1.66406,
+   "j_per_solve_raw": 1.83897,
+   "over_idle_w_plateau": 0.58009,
+   "j_per_solve_plateau": 1.6486
+  },
+  "unmetered": {
+   "j_per_solve": 0.94015,
+   "j_per_solve_raw": 3.5018,
+   "note": "the headline minus the three rails (a small difference of two larger numbers: +-15%)"
+  }
+ },
+ "die_c": {
+  "before": 51.0,
+  "busy": 52.91304,
+  "idle_brackets": 51.5,
+  "after": 52.0,
+  "max_avg": 53.0,
+  "max_high": 87.0,
+  "busy_start": 52.0,
+  "busy_end": 53.0
+ },
+ "meter": {
+  "samples": 224,
+  "busy": 23,
+  "before": 32,
+  "after": 32,
+  "sample_period_ms": 99.9999,
+  "took_ms_median": 22.0,
+  "took_ms_max": 23.0,
+  "board_refresh_s": 0.2,
+  "minion_mhz_busy": [
+   600
+  ]
+ },
+ "cpu": null,
+ "rapl": "not read: the lab's default (E202.md 10)",
+ "host_share": {
+  "cpu_s_burst": 0.585,
+  "source": "energy.sh's CPU time of the whole host process (an upper bound for the burst)",
+  "busy_cores_mean": 0.20584,
+  "host_cpu_s": null,
+  "host_cpu_ext_s": [
+   0.269,
+   0.316
+  ],
+  "assumed_idle_w": [
+   10.0,
+   20.0
+  ],
+  "assumed_core_w": [
+   10.0,
+   38.5
+  ],
+  "j_per_solve": [
+   34.27,
+   79.3625
+  ],
+  "note": "assumed package power (RAPL is root-only): idle over the burst + per busy core-second"
+ },
+ "ok": true
+}
