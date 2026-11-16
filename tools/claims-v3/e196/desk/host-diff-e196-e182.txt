@@ -1,0 +1,1338 @@
+--- a/e182-train-host/main.cpp
++++ b/proposal/src/host/main.cpp
+@@ -1,24 +1,44 @@
+-// Sparse-compute probes on ET-SoC-1 (see ../README.md). Every measurement prints one line
+-//   SPARSITY {json}
++// x14_host: the resident fp32 TensorFMA loop of the public lab repo's workloads/sparsity (`--test fma`), card only,
++// with the arms of request 1113-x14-zeroshare. Every launch prints one line
++//   X14 {json}
++// and every read-back of C (after the first launch of a process and after its last) one line
++//   X14CHECK {json}
+ //
+-//   sparsity_host [--sysemu] --test fma --type fp32|fp16|int8 --pattern elem|col|row|pair|none
+-//                 [--sweep 0,0.5,0.9] [--b-sparsity S] [--b-stream] [--row-mask 0xFFFF] [--iters N]
+-//   sparsity_host [--sysemu] --test tload --where dram|l2|scp [--masks 0xFFFF,0xFF,0x1,0] [--iters N]
+-//   sparsity_host [--sysemu] --test gemv [--sweep 0,0.9,0.99] [--gemv dense|masked|skip] [--iters N]
+-//   sparsity_host [--sysemu] --test diverge --variant static|refill|scalar [--alpha 1.5] [--mean-k 64]
+-//                 [--items N] [--harts 1|2]
+-//   sparsity_host [--sysemu] --test spin
+-// Common: [--shires MASK] [--per-shire N] [--seconds T] [--seed S] [--budget S]
++//   x14_host --values file:<tiles>|zeros|ones|pi|randn [--row-mask 0xMMMM] [--zero-rows 0xMMMM] [--live-rows 0xMMMM]
++//            [--label NAME] [--seconds T] [--iters N] [--shires MASK] [--per-shire N] [--seed S] [--budget S]
++//            [--stop-file PATH] [--dump-tiles FILE]
++//   an A B B A train in one process (the lab's E182 method, with a second row mask as well as second tiles):
++//   x14_host <the F kind's options as above> [--values-b file:<tiles>] [--row-mask-b 0xMMMM|none] [--label-b NAME]
++//            [--zero-rows-b 0xMMMM|none] [--live-rows-b 0xMMMM|none] --abba SFFS|FSSF --launches N
+ //
+-// Inputs are small integers, so every fp32, fp16 and int8 result is exact and is checked on the host.
+-// With --seconds T a test repeats its launch for about T seconds (for the power logger).
+-// The card is shared: the device is open only while measuring, and --budget (default 8 s on silicon)
+-// stops further launches.
++// The kernel is the lab's sparsity kernel, unchanged (kernel/sparsity.c): hart 0 of every participating minion
++// loads A into L1 scratchpad lines 0-15 and B into lines 16-31, then repeats one 16 x 16 x 16 TensorFMA32, the first
++// op of a launch with MUL set; with --row-mask the control word carries the MSK bit and tensor_mask holds the mask
++// (PRM 9.4: a row whose bit is clear issues no micro-op). This host is the lab's sparsity host with the other probes
++// and the simulator option removed, plus: --label (echoed in every record); the read-back of C after the first
++// (calibration) launch of the process and after its last launch only, so that every launch in between is the same
++// for every arm: --zero-rows counts the 32-bit words of the named rows that are not zero (+0.0 or -0.0;
++// `zero_rows_bad` must be 0) and --live-rows counts the named rows whose 16 words are all zero (`live_rows_zero` must
++// be 0); the train; and the one-card rule below.
++//
++// The train: F is the kind of --values/--row-mask, S the kind of --values-b/--row-mask-b (each defaults to F's). Both
++// tile sets are copied to the card once, and each launch points the kernel at one kind's tiles and mask. The
++// calibration launch (launch -1) and launch 0 take the order's first letter; launch n >= 1 takes letter (n - 1) mod 4
++// of SFFS or FSSF; the process stops after exactly --launches launches after the calibration launch (or earlier, at
++// the budget or the stop file: the records show it). Every record carries its kind.
++//
++// The card is shared: the device is open only while measuring; no launch starts unless it can end inside --budget
++// seconds of holding the device (8 by default, at most 9), so the process ends under `timeout 10`; --seconds T
++// repeats launches of about 0.5 s for T seconds; nothing more is launched once --stop-file exists.
++// One card only: before anything is opened the host counts the card nodes (/dev/et<N>_ops). With one node it runs;
++// with several it runs only when the device selection variable names one of them and the linked device layer reads
++// that variable (the same test the lab's kits make on a binary); otherwise it refuses. After opening, the runtime must
++// list exactly one device. The variable's name is assembled at run time, so this program's own text never contains it
++// and a check of the binary for the name sees only the device layer's. (This rule follows request 1113-x01-intbits.)
+ #include <g3log/loglevels.hpp>
+ #include <runtime/IRuntime.h>
+ #include <runtime/Types.h>
+ #include <device-layer/IDeviceLayer.h>
+-#include <sw-sysemu/SysEmuOptions.h>
+ 
+ #include <algorithm>
+ #include <chrono>
+@@ -29,6 +49,7 @@
+ #include <cstring>
+ #include <filesystem>
+ #include <fstream>
++#include <iterator>
+ #include <limits>
+ #include <map>
+ #include <random>
+@@ -42,9 +63,8 @@
+ 
+ // libetrt's thread-pool workers log at the custom levels VERBOSE_HIGH/MID/LOW, which only logging::LoggerDefault
+ // registers with g3log. Left unregistered, the first log call from several new workers inserts the level into g3log's
+-// level map from all of them at once and can corrupt it: aifoundry3's host crash about 1.08 s into 1 launch in 100
+-// (docs/findings/14-card-behaviour.md, "Traps"). Registering them, disabled as the map's default would leave them,
+-// before the runtime starts any thread removes the race.
++// level map from all of them at once and can corrupt it (the lab's card-behaviour notes, "Traps": a host crash in about
++// 1 launch in 100). Registering them before the runtime starts any thread removes the race.
+ static void registerRuntimeLogLevels() {
+   const LEVELS levels[] = {LEVELS(g3::kDebugValue - 100, "VERBOSE_HIGH"), LEVELS(g3::kDebugValue - 99, "VERBOSE_MID"),
+                            LEVELS(g3::kDebugValue - 98, "VERBOSE_LOW")};
+@@ -75,111 +95,93 @@
+   return data;
+ }
+ 
+-std::vector<double> parseDoubles(const std::string& s) {
+-  std::vector<double> out;
+-  std::stringstream ss(s);
+-  for (std::string item; std::getline(ss, item, ',');) {
+-    if (!item.empty()) {
+-      out.push_back(std::atof(item.c_str()));
+-    }
+-  }
+-  return out;
+-}
+-
+-std::vector<uint64_t> parseInts(const std::string& s) {
+-  std::vector<uint64_t> out;
+-  std::stringstream ss(s);
+-  for (std::string item; std::getline(ss, item, ',');) {
+-    if (!item.empty()) {
+-      out.push_back(std::strtoull(item.c_str(), nullptr, 0));
+-    }
+-  }
+-  return out;
+-}
+-
+-uint16_t toHalf(int v) {  // exact for |v| <= 2048
+-  if (v == 0) {
+-    return 0;
+-  }
+-  const uint16_t sign = v < 0 ? 0x8000 : 0;
+-  unsigned m = unsigned(std::abs(v));
+-  int e = 0;
+-  while ((m >> e) > 1) {
+-    ++e;
+-  }
+-  const unsigned frac = (m << (10 - e)) & 0x3FF;  // e <= 10
+-  return uint16_t(sign | ((e + 15) << 10) | frac);
+-}
+-
+ struct Options {
+-  bool sysemu = false;
+-  std::string simArgs;
+-  std::string test;
+-  std::string type = "fp32";
+-  std::string pattern = "elem";
+-  std::string values = "small";  // fp32 operand values for --test fma; see fillValues()
+-  std::string dumpTiles;         // --test fma: write the A and B tiles (2 x 1024 bytes) here
+-  std::string cLog;              // Q139(k), --test fma: append each launch's C (tools/claims-v3/ccheck) here
+-  bool cPoison = false;          // Q139(k), with --c-log: poison the C buffer before each launch
+-  std::string valuesB;           // E182, --test fma: the second kind's tiles (file:); with it the process is an A B B A train
+-  std::string abba = "SFFS";     // E182: SFFS or FSSF (F = the --values kind, S = the --values-b kind)
+-  uint64_t launches = 0;         // E182, with --values-b: exactly this many launches after the calibration launch
+-  std::string stopFile;          // --seconds loops end early once this file exists (a runner's temperature cap)
+-  std::string sweep = "0";
+-  double bSparsity = 0;
+-  bool bStream = false;
+-  int64_t rowMask = -1;
+-  std::string where = "dram";
+-  std::string masks = "0xFFFF,0x7FFF,0xFF,0xF,0x3,0x1,0x0";
+-  std::string gemv = "skip";
+-  bool gemvTree = false;
+-  std::string variant = "refill";
+-  double alpha = 0;  // 0: every item has the same k
+-  double meanK = 64;
+-  uint64_t kmax = 1u << 20;
+-  uint64_t items = 1024;
+-  uint64_t harts = 1;
++  std::string values = "randn";  // file:<path> or a built-in fp32 pattern (zeros, ones, pi, randn)
++  std::string label;
++  std::string dumpTiles;
++  std::string stopFile;
++  int64_t rowMask = -1;   // -1: no MSK bit
++  int64_t zeroRows = -1;  // -1: no read-back check of rows that must be +0.0
++  int64_t liveRows = -1;  // -1: no read-back check of rows that must hold a non-zero word
++  // the train's second kind (S); unset: S = F
++  std::string valuesB, labelB;
++  int64_t rowMaskB = -2;  // -2: as F's; -1: no MSK bit
++  int64_t zeroRowsB = -2, liveRowsB = -2;
++  std::string abba;
++  uint64_t launches = 0;
+   uint64_t iters = 0;
+-  uint64_t shireMask = 1;
+-  uint64_t perShire = 1;
++  uint64_t shireMask = 0xFFFFFFFFull;
++  uint64_t perShire = 32;
+   double seconds = 0;
+   uint64_t seed = 1;
+-  double budget = -1;
++  double budget = 8.0;
+   std::string kernel = KERNEL_ELF;
+ };
+ 
++// ------------------------------------------------------------------------------------------ one card only
++
++// The device selection variable's name, assembled at run time (see the header).
++std::string selVarName() {
++  const char rev[] = "SECIVED_TE";
++  return std::string(std::rbegin(rev) + 1, std::rend(rev));
++}
++
++// The card nodes present, by index (/dev/et<N>_ops).
++std::vector<int> cardNodes() {
++  std::vector<int> v;
++  std::error_code ec;
++  for (const auto& e : fs::directory_iterator("/dev", ec)) {
++    const std::string n = e.path().filename().string();
++    if (n.size() < 7 || n.compare(0, 2, "et") != 0 || n.compare(n.size() - 4, 4, "_ops") != 0) continue;
++    const std::string d = n.substr(2, n.size() - 6);
++    if (d.empty() || d.find_first_not_of("0123456789") != std::string::npos) continue;
++    v.push_back(std::stoi(d));
++  }
++  std::sort(v.begin(), v.end());
++  return v;
++}
++
++// Whether this program's binary (the device layer is linked into it) carries the selection variable's name.
++bool layerReadsSelection() {
++  std::ifstream f("/proc/self/exe", std::ios::binary);
++  if (!f) return false;
++  const std::string bin((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
++  return bin.find(selVarName()) != std::string::npos;
++}
++
++// Refuses (throws) unless exactly one card will be opened. Runs before any device is opened.
++void checkOneCard() {
++  const auto nodes = cardNodes();
++  if (nodes.empty()) throw std::runtime_error("no card node /dev/et<N>_ops on this host");
++  const std::string var = selVarName();
++  const char* sel = std::getenv(var.c_str());
++  if (sel && *sel) {
++    const std::string s(sel);
++    if (s.find_first_not_of("0123456789") != std::string::npos)
++      throw std::runtime_error(var + " must be one card index, not '" + s + "'");
++    if (std::find(nodes.begin(), nodes.end(), std::stoi(s)) == nodes.end())
++      throw std::runtime_error(var + "=" + s + ": no such card node");
++  }
++  if (nodes.size() > 1) {
++    if (!(sel && *sel))
++      throw std::runtime_error(std::to_string(nodes.size()) + " cards on this host and " + var +
++                               " unset: refusing to open every card");
++    if (!layerReadsSelection())
++      throw std::runtime_error("the linked device layer does not read " + var + ": it would open every card");
++  }
++}
++
++// ------------------------------------------------------------------------------------------ the session
++
+ class Session {
+ public:
+   Session(const Options& o, const std::vector<std::byte>& elf) : o_(o), tOpen_(Clock::now()) {
+-    if (o.sysemu) {
+-      emu::SysEmuOptions s;
+-      s.bootromTrampolineToBL2ElfPath = BOOTROM_TRAMPOLINE_TO_BL2_ELF;
+-      s.spBL2ElfPath = BL2_ELF;
+-      s.masterMinionElfPath = MASTER_MINION_ELF;
+-      s.machineMinionElfPath = MACHINE_MINION_ELF;
+-      s.workerMinionElfPath = WORKER_MINION_ELF;
+-      s.executablePath = fs::path(SYSEMU_INSTALL_DIR) / "sys_emu";
+-      s.runDir = fs::current_path();
+-      s.maxCycles = std::numeric_limits<uint64_t>::max();
+-      s.minionShiresMask = 0x1FFFFFFFFu;
+-      s.puUart0Path = s.runDir + "/pu_uart0_tx.log";
+-      s.puUart1Path = s.runDir + "/pu_uart1_tx.log";
+-      s.spUart0Path = s.runDir + "/spio_uart0_tx.log";
+-      s.spUart1Path = s.runDir + "/spio_uart1_tx.log";
+-      s.startGdb = false;
+-      std::istringstream extra(o.simArgs);
+-      for (std::string arg; extra >> arg;) {
+-        s.additionalOptions.push_back(arg);
+-      }
+-      dl_ = dev::IDeviceLayer::createSysEmuDeviceLayer(s, 1);
+-    } else {
+-      // Ops node only: the power logger needs /dev/et0_mgmt, which allows one opener.
+-      dl_ = dev::IDeviceLayer::createPcieDeviceLayer(true, false);
+-    }
++    // Ops node only: the power logger needs /dev/et0_mgmt, which allows one opener.
++    dl_ = dev::IDeviceLayer::createPcieDeviceLayer(true, false);
+     rt_ = rt::IRuntime::create(dl_);
+     const auto devices = rt_->getDevices();
+-    if (devices.empty()) {
+-      throw std::runtime_error("no ET devices found");
++    if (devices.size() != 1) {
++      throw std::runtime_error("the runtime lists " + std::to_string(devices.size()) + " devices, not one");
+     }
+     dev_ = devices[0];
+     stream_ = rt_->createStream(dev_);
+@@ -198,8 +200,8 @@
+     std::fprintf(stderr, "device held for %.2f s\n", secondsSince(tOpen_));
+   }
+ 
+-  bool overBudget() const {
+-    return secondsSince(tOpen_) > o_.budget;
++  double held() const {
++    return secondsSince(tOpen_);
+   }
+ 
+   // Device buffers are kept by name and grown as needed, so repeated launches reuse them.
+@@ -239,7 +241,7 @@
+     rt::KernelLaunchOptions opts;
+     opts.setShireMask(a.shire_mask);
+     opts.setBarrier(true);
+-    const int timeoutS = o_.sysemu ? 3600 : 6;
++    const int timeoutS = 6;
+     L.t0Ms = epochMs();
+     const auto t0 = Clock::now();
+     rt_->kernelLaunch(stream_, kernel_, reinterpret_cast<const std::byte*>(&a), sizeof(a), opts);
+@@ -277,15 +279,13 @@
+   std::map<std::string, std::pair<size_t, std::byte*>> buffers_;
+ };
+ 
+-// Hart IDs that run: hart 0 (and 1 when `harts` is 2) of minions 0..perShire-1 of every shire in the mask.
+-std::vector<uint64_t> participants(uint64_t shireMask, uint64_t perShire, uint64_t harts) {
++// Hart IDs that run: hart 0 of minions 0..perShire-1 of every shire in the mask.
++std::vector<uint64_t> participants(uint64_t shireMask, uint64_t perShire) {
+   std::vector<uint64_t> out;
+   for (uint64_t s = 0; s < 32; ++s) {
+     if ((shireMask >> s) & 1) {
+       for (uint64_t m = 0; m < perShire; ++m) {
+-        for (uint64_t t = 0; t < harts; ++t) {
+-          out.push_back(s * 64 + m * 2 + t);
+-        }
++        out.push_back(s * 64 + m * 2);
+       }
+     }
+   }
+@@ -293,7 +293,7 @@
+ }
+ 
+ struct Summary {
+-  uint64_t reported = 0, bad = 0, cmax = 0;
++  uint64_t reported = 0, bad = 0, cmax = 0, ops = 0;
+   double cmean = 0;
+   uint64_t tensorErrors = 0;
+ };
+@@ -310,781 +310,198 @@
+     ++s.reported;
+     s.cmax = std::max<uint64_t>(s.cmax, r.cycles);
+     sum += double(r.cycles);
++    s.ops += r.count;
+     s.tensorErrors += r.tensor_error != 0;
+   }
+   s.cmean = s.reported ? sum / double(s.reported) : 0;
+   return s;
+ }
+ 
+-/* ------------------------------------------------------------------------------------------ fma */
+-
+-struct Tiles {
+-  std::vector<uint8_t> a = std::vector<uint8_t>(SP_TILE_BYTES), b = std::vector<uint8_t>(SP_TILE_BYTES);
+-  int A[16][64] = {};  // A[i][k], k < K
+-  int B[64][16] = {};  // B[k][j]
+-  int K = 16, E = 1;
+-  uint64_t nnzA = 0;
+-  uint64_t zeroPairsOneSided = 0;  // fp16: (a1, a2) pairs with exactly one zero
+-};
+-
+-// Random small nonzero integer in [-3, 3] \ {0}.
+-int smallNonzero(std::mt19937_64& rng) {
+-  static const int v[] = {-3, -2, -1, 1, 2, 3};
+-  return v[rng() % 6];
+-}
+-
+-Tiles makeTiles(uint64_t type, const std::string& pattern, double s, double bs, std::mt19937_64& rng) {
+-  Tiles t;
+-  t.E = type == SP_FP32 ? 1 : type == SP_FP16 ? 2 : 4;
+-  t.K = 16 * t.E;
+-  std::uniform_real_distribution<double> u(0, 1);
+-  // Which A elements are zero.
+-  std::vector<bool> zeroCol(t.K), zeroRow(16);
+-  for (int k = 0; k < t.K; ++k) {
+-    zeroCol[k] = u(rng) < s;
+-  }
+-  for (int i = 0; i < 16; ++i) {
+-    zeroRow[i] = u(rng) < s;
+-  }
+-  for (int i = 0; i < 16; ++i) {
+-    for (int k = 0; k < t.K; ++k) {
+-      bool z = false;
+-      if (pattern == "elem") {
+-        z = u(rng) < s;
+-      } else if (pattern == "col") {
+-        z = zeroCol[k];
+-      } else if (pattern == "row") {
+-        z = zeroRow[i];
+-      } else if (pattern == "pair") {  // fp16: zero exactly one element of a fraction s of the (2k, 2k+1) pairs
+-        z = (k % 2 == 1) && u(rng) < s;
+-      }
+-      t.A[i][k] = z ? 0 : smallNonzero(rng);
+-      t.nnzA += t.A[i][k] != 0;
+-    }
+-    if (t.E == 2) {
+-      for (int k = 0; k < t.K; k += 2) {
+-        t.zeroPairsOneSided += (t.A[i][k] == 0) != (t.A[i][k + 1] == 0);
+-      }
+-    }
+-  }
+-  for (int k = 0; k < t.K; ++k) {
+-    for (int j = 0; j < 16; ++j) {
+-      t.B[k][j] = u(rng) < bs ? 0 : smallNonzero(rng);
+-    }
+-  }
+-  // Pack A: row i = line i; B: line p, column j, element e -> bytes (j*E + e) * size.
+-  const int size = type == SP_FP32 ? 4 : type == SP_FP16 ? 2 : 1;
+-  auto store = [&](std::vector<uint8_t>& buf, size_t off, int v) {
+-    if (type == SP_FP32) {
+-      const float f = float(v);
+-      std::memcpy(&buf[off], &f, 4);
+-    } else if (type == SP_FP16) {
+-      const uint16_t h = toHalf(v);
+-      std::memcpy(&buf[off], &h, 2);
+-    } else {
+-      buf[off] = uint8_t(int8_t(v));
+-    }
+-  };
+-  for (int i = 0; i < 16; ++i) {
+-    for (int k = 0; k < t.K; ++k) {
+-      store(t.a, size_t(i * 64 + k * size), t.A[i][k]);
+-    }
+-  }
+-  for (int p = 0; p < 16; ++p) {
+-    for (int j = 0; j < 16; ++j) {
+-      for (int e = 0; e < t.E; ++e) {
+-        store(t.b, size_t(p * 64 + (j * t.E + e) * size), t.B[p * t.E + e][j]);
+-      }
+-    }
+-  }
+-  return t;
+-}
+-
+-// Overwrites the fp32 A and B tiles with a value pattern, for the data-dependent power experiment
+-// (docs/reports: horace-experiment). Results are not checked for these: only time and power matter.
+-//   zeros ones twos pi        every element the same constant
+-//   checker                   1, 0, 1, 0, ...
+-//   ternary                   -1, 0, 1 at random
+-//   onebit                    the smallest normal float (bit pattern 0x00800000: a single set bit)
+-//   uniform randn             random in [0, 1) / standard normal: every mantissa bit is busy
+-//   sparse75 sparse50         randn with 75% / 50% of the elements zeroed
+-//   signs pow2 mant           one field of the word random: +-1 / 2^-8..2^8 / [1, 2)
+-//   a_randn_b_ones, a_ones_b_randn   one operand random, the other constant
+-//   file:<path>               custom tiles: raw A then raw B, 1,024 bytes each (tools/ettelem/make_tiles.py)
+-// --dump-tiles <file> writes the A and B tiles, so that rtl-sim/fma_toggle can replay the exact operands.
+-// IEEE half from a float that is zero or within half's normal range (|f| in [6.2e-5, 65504]); smaller values flush to zero.
+-uint16_t halfFromFloat(float f) {
+-  uint32_t b;
+-  std::memcpy(&b, &f, 4);
+-  const uint32_t sign = (b >> 16) & 0x8000u;
+-  const int32_t exp = int32_t((b >> 23) & 0xFF) - 127 + 15;
+-  const uint32_t man = (b >> 13) & 0x3FFu;
+-  if (exp <= 0) return uint16_t(sign);
+-  if (exp >= 31) return uint16_t(sign | 0x7BFFu);
+-  return uint16_t(sign | (uint32_t(exp) << 10) | man);
+-}
++/* ------------------------------------------------------------------------------------------ tiles */
+ 
+-void fillValues(Tiles& t, uint64_t type, const std::string& mode, std::mt19937_64& rng) {
+-  std::normal_distribution<float> n(0.f, 1.f);
+-  std::uniform_real_distribution<float> u(0.f, 1.f);
++// The fp32 A and B tiles (16 lines of 64 B each): a file (raw A then raw B, 1,024 bytes each, the layout of the lab
++// host's --values file:) or a constant. The arms run files (the lab's own tile files for its kinds); the built-in
++// randn here (std::mt19937_64(seed), a standard normal per element) is for the heater, and its values are not the
++// lab host's built-in randn (that one draws its small-integer tiles from the same generator first).
++void makeTiles(const Options& o, const std::string& mode, std::vector<uint8_t>& a, std::vector<uint8_t>& b) {
++  a.assign(SP_TILE_BYTES, 0);
++  b.assign(SP_TILE_BYTES, 0);
+   if (mode.rfind("file:", 0) == 0) {
+-    // Custom operands: the raw A tile then the raw B tile, 1,024 bytes each, in the layout of the chosen type
+-    // (fp32: 16 lines of 16 floats; tools/ettelem/make_tiles.py writes them).
+     std::ifstream f(mode.substr(5), std::ios::binary);
+-    f.read(reinterpret_cast<char*>(t.a.data()), std::streamsize(t.a.size()));
+-    f.read(reinterpret_cast<char*>(t.b.data()), std::streamsize(t.b.size()));
++    f.read(reinterpret_cast<char*>(a.data()), std::streamsize(a.size()));
++    f.read(reinterpret_cast<char*>(b.data()), std::streamsize(b.size()));
+     if (!f) throw std::runtime_error("cannot read 2 x 1024 bytes of tiles from " + mode.substr(5));
+     return;
+   }
+-  if (type != SP_FP32) {
+-    // fp16 and int8 tiles (the precision comparison): every element slot of A and B gets the pattern.
+-    // int8 "randn" is uniform over -128..127; "uniform" over 0..127.
+-    const size_t size = type == SP_FP16 ? 2 : 1;
+-    for (auto* buf : {&t.a, &t.b}) {
+-      for (size_t off = 0; off + size <= buf->size(); off += size) {
+-        float f;
+-        int q;
+-        if (mode == "zeros") { f = 0.f; q = 0; }
+-        else if (mode == "ones") { f = 1.f; q = 1; }
+-        else if (mode == "uniform") { f = u(rng); q = int(rng() % 128); }
+-        else if (mode == "randn") { f = n(rng); q = int(rng() % 256) - 128; }
+-        else throw std::runtime_error("--values " + mode + " is fp32 only; fp16 and int8 take zeros, ones, uniform, randn");
+-        if (type == SP_FP16) {
+-          const uint16_t h = halfFromFloat(f);
+-          std::memcpy(&(*buf)[off], &h, 2);
+-        } else {
+-          (*buf)[off] = uint8_t(int8_t(q));
+-        }
+-      }
+-    }
+-    return;
+-  }
+-  size_t idx = 0;
+-  auto value = [&](bool isB) -> float {
+-    ++idx;
++  std::mt19937_64 rng(o.seed);
++  std::normal_distribution<float> n(0.f, 1.f);
++  auto value = [&]() -> float {
+     if (mode == "zeros") return 0.f;
+     if (mode == "ones") return 1.f;
+-    if (mode == "twos") return 2.f;
+     if (mode == "pi") return 3.14159274f;
+-    if (mode == "checker") return float(idx & 1);
+-    if (mode == "ternary") return float(int(rng() % 3) - 1);
+-    if (mode == "onebit") { const uint32_t b = 0x00800000u; float f; std::memcpy(&f, &b, 4); return f; }
+-    if (mode == "uniform") return u(rng);
+     if (mode == "randn") return n(rng);
+-    if (mode == "sparse75") return (rng() % 4) ? 0.f : n(rng);
+-    if (mode == "sparse50") return (rng() % 2) ? 0.f : n(rng);
+-    // One field of the fp32 word random, the others fixed: sign only, exponent only, mantissa only.
+-    if (mode == "signs") return (rng() % 2) ? 1.f : -1.f;
+-    if (mode == "pow2") return std::ldexp(1.f, int(rng() % 17) - 8);
+-    if (mode == "mant") return 1.f + u(rng);
+-    // One operand random, the other constant.
+-    if (mode == "a_randn_b_ones") return isB ? 1.f : n(rng);
+-    if (mode == "a_ones_b_randn") return isB ? n(rng) : 1.f;
+-    throw std::runtime_error("unknown --values " + mode);
++    throw std::runtime_error("unknown --values " + mode + " (file:<path>, zeros, ones, pi, randn)");
+   };
+-  for (auto* buf : {&t.a, &t.b}) {
++  for (auto* buf : {&a, &b}) {
+     for (size_t off = 0; off + 4 <= buf->size(); off += 4) {
+-      const float f = value(buf == &t.b);
++      const float f = value();
+       std::memcpy(&(*buf)[off], &f, 4);
+     }
+   }
+ }
+ 
+-// C[i][j] after `iters` ops; `literal` applies the fp16 pseudo-code as written in PRM 9.4 (the 2-term update
+-// happens only when all four of a1, a2, b1, b2 are nonzero), except on the first op (MUL), which always multiplies.
+-int64_t expectC(const Tiles& t, uint64_t type, uint64_t iters, int i, int j, bool literal, uint32_t rowMask) {
+-  if (!((rowMask >> i) & 1)) {
+-    return 0;  // masked rows: MUL zeroes them on the first op, and no later op touches them
+-  }
+-  int64_t first = 0, rest = 0;
+-  for (int k = 0; k < t.K; k += (type == SP_FP16 ? 2 : 1)) {
+-    if (type == SP_FP16) {
+-      const int64_t p = int64_t(t.A[i][k]) * t.B[k][j] + int64_t(t.A[i][k + 1]) * t.B[k + 1][j];
+-      const bool all = t.A[i][k] && t.A[i][k + 1] && t.B[k][j] && t.B[k + 1][j];
+-      const int64_t kept = (!literal || all) ? p : 0;
+-      first += k == 0 ? p : kept;  // the first op's k = 0 step multiplies (MUL); later steps accumulate
+-      rest += kept;
+-    } else {
+-      const int64_t p = int64_t(t.A[i][k]) * t.B[k][j];
+-      first += p;
+-      rest += p;
+-    }
+-  }
+-  return first + int64_t(iters - 1) * rest;
+-}
++// One read-back of C over every participant: the words of the rows in `zeroRows` that are not zero, and the rows in
++// `liveRows` whose 16 words are all zero (a word is zero when its magnitude bits are: +0.0 or -0.0; a zero A times a
++// negative B leaves -0.0); a mask < 0: not counted, reported as -1.
++struct CCheck {
++  long long zeroBad = -1, liveZero = -1;
++};
+ 
+-// Checks the C tiles of every participant; returns "math", "prm-literal", "both" (they agree) or "wrong".
+-// fp32 and fp16 sums are exact only while they stay below 2^24; longer runs return "unchecked" (the short sweeps
+-// check them). int8 accumulates in int32, whose wraparound is exact, so it is compared modulo 2^32.
+-std::string checkC(Session& dev, const Tiles& t, uint64_t type, uint64_t iters, const std::vector<uint64_t>& harts,
+-                   uint32_t rowMask) {
+-  if (type != SP_INT8) {
+-    int64_t biggest = 0;
+-    for (int i = 0; i < 16; ++i) {
+-      for (int j = 0; j < 16; ++j) {
+-        biggest = std::max<int64_t>(biggest, std::llabs(expectC(t, type, iters, i, j, false, rowMask)));
+-        biggest = std::max<int64_t>(biggest, std::llabs(expectC(t, type, iters, i, j, true, rowMask)));
+-      }
+-    }
+-    // Partial sums can exceed the final value by at most one op's worth of |products|.
+-    if (biggest + 16 * 64 * 9 >= (int64_t(1) << 24)) {
+-      return "unchecked";
+-    }
+-  }
++CCheck checkC(Session& dev, const std::vector<uint64_t>& harts, int64_t zeroRows, int64_t liveRows) {
++  CCheck r;
++  if (zeroRows < 0 && liveRows < 0) return r;
+   std::vector<uint32_t> c(SP_MINIONS * 256);
+   dev.get("out", c.data(), c.size() * 4);
+-  bool math = true, literal = true;
++  if (zeroRows >= 0) r.zeroBad = 0;
++  if (liveRows >= 0) r.liveZero = 0;
+   for (uint64_t h : harts) {
+     const uint64_t m = h >> 1;
+     for (int i = 0; i < 16; ++i) {
+-      for (int j = 0; j < 16; ++j) {
+-        const uint32_t w = c[m * 256 + i * 16 + j];
+-        if (type == SP_INT8) {
+-          math &= w == uint32_t(uint64_t(expectC(t, type, iters, i, j, false, rowMask)));
+-          literal &= w == uint32_t(uint64_t(expectC(t, type, iters, i, j, true, rowMask)));
+-        } else {
+-          float f;
+-          std::memcpy(&f, &w, 4);
+-          const int64_t got = std::llround(double(f));
+-          math &= got == expectC(t, type, iters, i, j, false, rowMask);
+-          literal &= got == expectC(t, type, iters, i, j, true, rowMask);
+-        }
+-      }
+-    }
+-  }
+-  return math && literal ? "both" : math ? "math" : literal ? "prm-literal" : "wrong";
+-}
+-
+-// Q139(k) (tools/claims-v3/ccheck): the C log. One JSON line per launch, appended: the launch's own iters and window, and
+-// each distinct 1,024-byte C among the participating minions with how many hold it (minions listed for groups of <= 64);
+-// the A and B tiles once per sweep point. The check runs at the desk (ccheck.py) against the bench's arithmetic.
+-constexpr uint32_t CC_POISON = 0x7FBADBADu;  // a NaN payload the tensor unit does not write on finite operands
+-
+-std::string ccHex(const uint8_t* p, size_t n) {
+-  static const char* d = "0123456789abcdef";
+-  std::string s(2 * n, '0');
+-  for (size_t i = 0; i < n; ++i) {
+-    s[2 * i] = d[p[i] >> 4];
+-    s[2 * i + 1] = d[p[i] & 15];
+-  }
+-  return s;
+-}
+-
+-uint64_t ccFnv(const Tiles& t) {  // FNV-1a over A then B, pairing a launch's C with its tiles
+-  uint64_t h = 1469598103934665603ull;
+-  for (const auto* v : {&t.a, &t.b}) {
+-    for (uint8_t x : *v) {
+-      h ^= x;
+-      h *= 1099511628211ull;
++      int nz = 0;
++      for (int j = 0; j < 16; ++j) nz += (c[m * 256 + i * 16 + j] & 0x7FFFFFFFu) != 0u;   // +0.0 and -0.0 are zero
++      if (zeroRows >= 0 && ((zeroRows >> i) & 1)) r.zeroBad += nz;
++      if (liveRows >= 0 && ((liveRows >> i) & 1)) r.liveZero += nz == 0;
+     }
+   }
+-  return h;
+-}
+-
+-std::string ccJson(const std::string& s) {
+-  std::string o;
+-  for (char c : s) {
+-    if (c == '"' || c == '\\') o += '\\';
+-    o += c;
+-  }
+-  return o;
+-}
+-
+-void ccLogTiles(const Options& o, const Tiles& t, double s) {
+-  std::ofstream f(o.cLog, std::ios::app);
+-  char fnv[24];
+-  std::snprintf(fnv, sizeof fnv, "%016llx", (unsigned long long)ccFnv(t));
+-  f << "{\"ccheck\":1,\"kind\":\"tiles\",\"type\":\"" << o.type << "\",\"values\":\"" << ccJson(o.values)
+-    << "\",\"kernel\":\"" << ccJson(o.kernel) << "\",\"sweep\":" << s << ",\"fnv\":\"" << fnv << "\",\"a\":\""
+-    << ccHex(t.a.data(), t.a.size()) << "\",\"b\":\"" << ccHex(t.b.data(), t.b.size()) << "\"}\n";
++  return r;
+ }
+ 
+-void ccLogLaunch(const Options& o, Session& dev, const Tiles& t, const SpArgs& a, uint64_t iters, int launchNo,
+-                 const Session::Launch& L, const std::vector<uint64_t>& harts, double s) {
+-  std::map<std::string, std::vector<uint64_t>> groups;
+-  if (L.ok) {
+-    std::vector<uint8_t> c(size_t(SP_MINIONS) * SP_TILE_BYTES);
+-    dev.get("out", c.data(), c.size());
+-    for (uint64_t h : harts) {
+-      const uint64_t m = h >> 1;
+-      groups[std::string(reinterpret_cast<const char*>(&c[m * SP_TILE_BYTES]), SP_TILE_BYTES)].push_back(m);
+-    }
+-  }
+-  char head[640];
+-  std::snprintf(head, sizeof head,
+-                "{\"ccheck\":1,\"kind\":\"c\",\"type\":\"%s\",\"sweep\":%.4f,\"launch\":%d,\"iters\":%llu,\"t_start_ms\":%lld,"
+-                "\"t_end_ms\":%lld,\"ok\":%s,\"participants\":%zu,\"poison\":%s,\"use_mask\":%llu,\"row_mask\":\"0x%04llx\","
+-                "\"b_stream\":%llu,\"fnv\":\"%016llx\",\"groups\":[",
+-                o.type.c_str(), s, launchNo, (unsigned long long)iters, L.t0Ms, L.t1Ms, L.ok ? "true" : "false",
+-                harts.size(), o.cPoison ? "true" : "false", (unsigned long long)a.use_mask,
+-                (unsigned long long)(a.mask & 0xFFFF), (unsigned long long)a.b_stream, (unsigned long long)ccFnv(t));
+-  std::ofstream f(o.cLog, std::ios::app);
+-  f << head;
+-  bool first = true;
+-  for (const auto& [bytes, ms] : groups) {
+-    f << (first ? "" : ",") << "{\"count\":" << ms.size() << ",\"first_minion\":" << ms.front() << ",\"minions\":[";
+-    if (ms.size() <= 64) {
+-      for (size_t i = 0; i < ms.size(); ++i) f << (i ? "," : "") << ms[i];
+-    }
+-    f << "],\"hex\":\"" << ccHex(reinterpret_cast<const uint8_t*>(bytes.data()), bytes.size()) << "\"}";
+-    first = false;
+-  }
+-  f << "]}\n";
++// A 16-bit mask, or "none" (-1).
++int64_t maskOrNone(const std::string& v) {
++  return v == "none" ? -1 : std::strtoll(v.c_str(), nullptr, 0);
+ }
+ 
+-uint64_t typeOf(const std::string& s) {
+-  if (s == "fp32") return SP_FP32;
+-  if (s == "fp16") return SP_FP16;
+-  if (s == "int8") return SP_INT8;
+-  throw std::runtime_error("--type must be fp32, fp16 or int8");
++std::string hex16(int64_t m) {
++  if (m < 0) return "none";
++  char t[8];
++  std::snprintf(t, sizeof t, "0x%04llx", (unsigned long long)(m & 0xFFFF));
++  return t;
+ }
+ 
+-// Repeats `one(iters)` for about --seconds after a calibration launch (only on silicon).
+-template <typename F>
+-void repeatFor(const Options& o, Session& dev, uint64_t iters, F one) {
+-  const double wall = one(iters, -1);
+-  if (o.sysemu || o.seconds <= 0) {
+-    return;
+-  }
+-  iters = std::max<uint64_t>(1, uint64_t(double(iters) * 0.5 / std::max(wall, 1e-4)));
+-  double spent = 0;
+-  for (int n = 0; spent < o.seconds; ++n) {
+-    if (o.launches > 0 && uint64_t(n) >= o.launches) {
+-      break;  // E182
+-    }
+-    if (dev.overBudget()) {
+-      std::fprintf(stderr, "stopping: device-time budget of %.1f s used\n", o.budget);
+-      break;
+-    }
+-    if (!o.stopFile.empty() && fs::exists(o.stopFile)) {
+-      std::fprintf(stderr, "stopping: %s exists\n", o.stopFile.c_str());
+-      break;
+-    }
+-    spent += one(iters, n);
+-  }
+-}
++struct Kind {
++  std::string label, values;
++  int64_t rowMask, zeroRows, liveRows;
++  uint64_t aTile = 0, bTile = 0;
++};
+ 
+-int testFma(const Options& o, Session& dev) {
+-  const uint64_t type = typeOf(o.type);
+-  const auto harts = participants(o.shireMask, o.perShire, 1);
+-  std::mt19937_64 rng(o.seed);
+-  int bad = 0;
+-  for (double s : parseDoubles(o.sweep)) {
+-    Tiles t = makeTiles(type, o.pattern, s, o.bSparsity, rng);
+-    const bool rawValues = o.values != "small";
+-    if (rawValues) {
+-      fillValues(t, type, o.values, rng);
+-    }
++int run(const Options& o, Session& dev) {
++  const auto harts = participants(o.shireMask, o.perShire);
++  const bool train = !o.abba.empty();
++  Kind F{o.label, o.values, o.rowMask, o.zeroRows, o.liveRows};
++  Kind S = F;
++  if (train) {
++    if (!o.valuesB.empty()) S.values = o.valuesB;
++    if (!o.labelB.empty()) S.label = o.labelB;
++    if (o.rowMaskB != -2) S.rowMask = o.rowMaskB;
++    if (o.zeroRowsB != -2) S.zeroRows = o.zeroRowsB;
++    if (o.liveRowsB != -2) S.liveRows = o.liveRowsB;
++  }
++  std::vector<uint8_t> ta, tb;
++  makeTiles(o, F.values, ta, tb);
++  if (!o.dumpTiles.empty()) {
++    std::ofstream f(o.dumpTiles, std::ios::binary);
++    f.write(reinterpret_cast<const char*>(ta.data()), std::streamsize(ta.size()));
++    f.write(reinterpret_cast<const char*>(tb.data()), std::streamsize(tb.size()));
++  }
++  F.aTile = dev.put("a", ta.data(), ta.size());
++  F.bTile = dev.put("b", tb.data(), tb.size());
++  if (train) {
++    std::vector<uint8_t> sa, sb;
++    makeTiles(o, S.values, sa, sb);
+     if (!o.dumpTiles.empty()) {
+-      std::ofstream f(o.dumpTiles, std::ios::binary);
+-      f.write(reinterpret_cast<const char*>(t.a.data()), std::streamsize(t.a.size()));
+-      f.write(reinterpret_cast<const char*>(t.b.data()), std::streamsize(t.b.size()));
+-    }
+-    Tiles t2 = t;  // E182: the S kind's tiles (the same layout); used only when --values-b is given
+-    const bool train = !o.valuesB.empty();
+-    if (train) {
+-      if (o.values.rfind("file:", 0) != 0 || o.valuesB.rfind("file:", 0) != 0) {
+-        throw std::runtime_error("E182: a train takes --values file: and --values-b file:");
+-      }
+-      if (o.abba != "SFFS" && o.abba != "FSSF") {
+-        throw std::runtime_error("E182: --abba is SFFS or FSSF");
+-      }
+-      if (o.launches == 0) {
+-        throw std::runtime_error("E182: a train needs --launches");
+-      }
+-      fillValues(t2, type, o.valuesB, rng);
+-      if (!o.dumpTiles.empty()) {
+-        std::ofstream f(o.dumpTiles + ".S", std::ios::binary);
+-        f.write(reinterpret_cast<const char*>(t2.a.data()), std::streamsize(t2.a.size()));
+-        f.write(reinterpret_cast<const char*>(t2.b.data()), std::streamsize(t2.b.size()));
+-      }
+-    }
+-    SpArgs a{};
+-    a.mode = SP_FMA;
+-    a.shire_mask = o.shireMask;
+-    a.per_shire = o.perShire;
+-    a.type = type;
+-    a.a_tile = dev.put("a", t.a.data(), t.a.size());
+-    a.b_tile = dev.put("b", t.b.data(), t.b.size());
+-    const uint64_t aF = a.a_tile, bF = a.b_tile;  // E182
+-    const uint64_t aS = train ? dev.put("a2", t2.a.data(), t2.a.size()) : 0;
+-    const uint64_t bS = train ? dev.put("b2", t2.b.data(), t2.b.size()) : 0;
+-    a.out = dev.put("out", nullptr, SP_MINIONS * SP_TILE_BYTES);
+-    a.b_stream = o.bStream;
+-    a.use_mask = o.rowMask >= 0;
+-    a.mask = o.rowMask >= 0 ? uint64_t(o.rowMask) & 0xFFFF : 0xFFFF;
+-    if (!o.cLog.empty()) {
+-      ccLogTiles(o, t, s);
+-      if (train) {  // E182
+-        Options oS = o;
+-        oS.values = o.valuesB;
+-        ccLogTiles(oS, t2, s);
+-      }
+-    }
+-    auto one = [&](uint64_t iters, int launchNo) -> double {
+-      a.iters = iters;
+-      const Tiles* tl = &t;  // E182: the tiles this launch runs
+-      std::string trainField;
+-      if (train) {
+-        const char c = launchNo < 1 ? o.abba[0] : o.abba[size_t((launchNo - 1) % 4)];
+-        tl = c == 'F' ? &t : &t2;
+-        a.a_tile = c == 'F' ? aF : aS;
+-        a.b_tile = c == 'F' ? bF : bS;
+-        trainField = std::string(",\"train_kind\":\"") + c + "\",\"train_values\":\"" + (c == 'F' ? o.values : o.valuesB) +
+-                     "\",\"abba\":\"" + o.abba + "\"";
+-      }
+-      if (!o.cLog.empty() && o.cPoison) {
+-        static const std::vector<uint32_t> poison(size_t(SP_MINIONS) * 256, CC_POISON);
+-        dev.put("out", poison.data(), poison.size() * 4);
+-      }
+-      const auto L = dev.launch(a);
+-      const Summary sm = summarize(L, harts);
+-      const std::string check =
+-        !L.ok ? "no-result" : rawValues ? "unchecked" : checkC(dev, t, type, iters, harts, uint32_t(a.mask));
+-      const bool ok = L.ok && sm.bad == 0 && sm.tensorErrors == 0 && check != "wrong";
+-      bad += !ok;
+-      std::printf("SPARSITY {\"test\":\"fma\",\"type\":\"%s\",\"pattern\":\"%s\",\"values\":\"%s\",\"sparsity\":%.4f,\"b_sparsity\":%.4f,"
+-                  "\"b_stream\":%d,\"row_mask\":\"0x%04llx\",\"nnz_a\":%llu,\"a_elems\":%d,\"fp16_one_sided_pairs\":%llu,"
+-                  "\"minions\":%zu,\"shire_mask\":\"0x%llx\",\"iters\":%llu,\"launch\":%d,\"cycles_max\":%llu,"
+-                  "\"cycles_mean\":%.1f,\"cycles_per_op\":%.3f,\"wall_s\":%.6f,\"t_start_ms\":%lld,\"t_end_ms\":%lld,"
+-                  "\"ghz\":%.4f,\"tensor_errors\":%llu,\"result\":\"%s\",\"ok\":%s%s}\n",
+-                  o.type.c_str(), o.pattern.c_str(), o.values.c_str(), s, o.bSparsity, int(o.bStream),
+-                  (unsigned long long)a.mask,
+-                  (unsigned long long)t.nnzA, 16 * t.K, (unsigned long long)t.zeroPairsOneSided, harts.size(),
+-                  (unsigned long long)o.shireMask, (unsigned long long)iters, launchNo, (unsigned long long)sm.cmax,
+-                  sm.cmean, sm.cmean / double(iters), L.wallS, L.t0Ms, L.t1Ms, L.ghz,
+-                  (unsigned long long)sm.tensorErrors, check.c_str(), ok ? "true" : "false", trainField.c_str());
+-      std::fflush(stdout);
+-      if (!o.cLog.empty()) {
+-        ccLogLaunch(o, dev, *tl, a, iters, launchNo, L, harts, s);
+-      }
+-      return L.wallS;
+-    };
+-    repeatFor(o, dev, o.iters ? o.iters : (o.sysemu ? 4 : 20000), one);
+-    if (dev.overBudget()) {
+-      break;
+-    }
+-  }
+-  return bad ? 1 : 0;
+-}
+-
+-/* ------------------------------------------------------------------------------------------ tload */
+-
+-int testTload(const Options& o, Session& dev) {
+-  const auto harts = participants(o.shireMask, o.perShire, 1);
+-  SpArgs a{};
+-  a.mode = SP_TLOAD;
+-  a.shire_mask = o.shireMask;
+-  a.per_shire = o.perShire;
+-  a.use_mask = 1;
+-  if (o.where == "scp") {
+-    a.src_bytes = 64 * 1024;  // 32 minions x 64 KB = 2 MB of the 2.5 MB scratchpad
+-    a.src = SP_SCP_LOCAL(0);
+-  } else if (o.where == "l2") {
+-    a.src_bytes = 8 * 1024;  // stays in the 512 KB shire L2
+-    a.src = dev.put("src", nullptr, SP_MINIONS * a.src_bytes);
+-  } else {
+-    // Streaming from DRAM: the minions together must cover more than the 32 MB L3 (and each shire more than its
+-    // L2), so a lone minion gets 64 MB. The kernel indexes the buffer by minion ID.
+-    a.src_bytes = std::max<uint64_t>(256 * 1024, (64ull << 20) / harts.size());
+-    a.src = dev.put("src", nullptr, ((harts.back() >> 1) + 1) * a.src_bytes);
+-  }
+-  int bad = 0;
+-  for (uint64_t m : parseInts(o.masks)) {
+-    a.mask = m & 0xFFFF;
+-    auto one = [&](uint64_t iters, int launchNo) -> double {
+-      a.iters = iters;
+-      const auto L = dev.launch(a);
+-      const Summary sm = summarize(L, harts);
+-      const bool ok = L.ok && sm.bad == 0 && sm.tensorErrors == 0;
+-      bad += !ok;
+-      const double lines = double(__builtin_popcountll(a.mask));
+-      std::printf("SPARSITY {\"test\":\"tload\",\"where\":\"%s\",\"mask\":\"0x%04llx\",\"lines\":%.0f,\"src_bytes\":%llu,"
+-                  "\"minions\":%zu,\"shire_mask\":\"0x%llx\",\"iters\":%llu,\"launch\":%d,\"cycles_max\":%llu,"
+-                  "\"cycles_mean\":%.1f,\"cycles_per_load\":%.3f,\"bytes_requested\":%.0f,\"wall_s\":%.6f,"
+-                  "\"gbps_wall\":%.3f,\"t_start_ms\":%lld,\"t_end_ms\":%lld,\"ghz\":%.4f,\"tensor_errors\":%llu,\"ok\":%s}\n",
+-                  o.where.c_str(), (unsigned long long)a.mask, lines, (unsigned long long)a.src_bytes, harts.size(),
+-                  (unsigned long long)o.shireMask, (unsigned long long)iters, launchNo, (unsigned long long)sm.cmax,
+-                  sm.cmean, sm.cmean / double(iters), lines * 64 * double(iters) * double(harts.size()), L.wallS,
+-                  L.wallS > 0 ? lines * 64 * double(iters) * double(harts.size()) / L.wallS / 1e9 : 0.0, L.t0Ms,
+-                  L.t1Ms, L.ghz, (unsigned long long)sm.tensorErrors, ok ? "true" : "false");
+-      std::fflush(stdout);
+-      return L.wallS;
+-    };
+-    repeatFor(o, dev, o.iters ? o.iters : (o.sysemu ? 8 : 20000), one);
+-    if (dev.overBudget()) {
+-      break;
+-    }
+-  }
+-  return bad ? 1 : 0;
+-}
+-
+-/* ------------------------------------------------------------------------------------------ gemv */
+-
+-int testGemv(const Options& o, Session& dev) {
+-  if (o.perShire != 32) {
+-    throw std::runtime_error("--test gemv needs --per-shire 32 (all minions of a shire share the reduction)");
+-  }
+-  const auto harts = participants(o.shireMask, 32, 1);
+-  std::mt19937_64 rng(o.seed);
+-  std::uniform_real_distribution<double> u(0, 1);
+-  // W (N x K) as small integers; slabs of W^T per minion: minion m = 32 s + j covers block 2s + j/16 and
+-  // k in [256 (j%16), +256); line k of its slab holds W[16 block + 0..15][k].
+-  std::vector<int8_t> W(size_t(SP_GEMV_N) * SP_GEMV_K);
+-  for (auto& w : W) {
+-    w = int8_t(smallNonzero(rng));
+-  }
+-  std::vector<float> slabs(size_t(SP_MINIONS) * SP_GEMV_SLAB_LINES * 16);
+-  for (uint64_t m = 0; m < SP_MINIONS; ++m) {
+-    const uint64_t s = m / 32, j = m % 32, block = 2 * s + j / 16, k0 = 256 * (j % 16);
+-    for (uint64_t k = 0; k < 256; ++k) {
+-      for (uint64_t c = 0; c < 16; ++c) {
+-        slabs[(m * 256 + k) * 16 + c] = float(W[(block * 16 + c) * SP_GEMV_K + k0 + k]);
+-      }
+-    }
+-  }
+-  SpArgs a{};
+-  a.mode = SP_GEMV;
+-  a.shire_mask = o.shireMask;
+-  a.per_shire = 32;
+-  a.w = dev.put("w", slabs.data(), slabs.size() * 4);
+-  a.out = dev.put("out", nullptr, SP_MINIONS * 64);  // y, or one partial row per minion
+-  a.gemv_flags = (o.gemv == "dense" ? 0 : o.gemv == "masked" ? SP_GEMV_MASKED_LOADS
+-                                                               : SP_GEMV_MASKED_LOADS | SP_GEMV_SKIP_EMPTY) |
+-                 (o.gemvTree ? SP_GEMV_TREE : 0);
+-
+-  int bad = 0;
+-  for (double s : parseDoubles(o.sweep)) {
+-    std::vector<float> x(SP_GEMV_K);
+-    std::vector<uint16_t> xmask(SP_GEMV_K / 16, 0);
+-    uint64_t nnz = 0;
+-    for (uint64_t k = 0; k < SP_GEMV_K; ++k) {
+-      x[k] = u(rng) < s ? 0.0f : float(smallNonzero(rng));
+-      if (x[k] != 0) {
+-        xmask[k / 16] |= uint16_t(1u << (k % 16));
+-        ++nnz;
+-      }
+-    }
+-    a.x = dev.put("x", x.data(), x.size() * 4);
+-    a.xmask = dev.put("xmask", xmask.data(), xmask.size() * 2);
+-    std::vector<double> yref(SP_GEMV_N, 0);
+-    for (uint64_t n = 0; n < SP_GEMV_N; ++n) {
+-      for (uint64_t k = 0; k < SP_GEMV_K; ++k) {
+-        yref[n] += double(W[n * SP_GEMV_K + k]) * x[k];
+-      }
+-    }
+-    auto one = [&](uint64_t iters, int launchNo) -> double {
+-      a.iters = iters;
+-      std::vector<float> junk(SP_MINIONS * 16, -12345.0f);
+-      dev.put("out", junk.data(), junk.size() * 4);
+-      const auto L = dev.launch(a);
+-      const Summary sm = summarize(L, harts);
+-      std::vector<float> got(SP_MINIONS * 16);
+-      dev.get("out", got.data(), got.size() * 4);
+-      std::vector<double> y(SP_GEMV_N, 0);
+-      if (o.gemvTree) {
+-        for (uint64_t n = 0; n < SP_GEMV_N; ++n) {
+-          y[n] = got[n];
+-        }
+-      } else {  // add the 16 partial rows of each block
+-        for (uint64_t m = 0; m < SP_MINIONS; ++m) {
+-          const uint64_t block = 2 * (m / 32) + (m % 32) / 16;
+-          for (uint64_t c = 0; c < 16; ++c) {
+-            y[block * 16 + c] += got[m * 16 + c];
+-          }
+-        }
+-      }
+-      // A block's time is its slowest minion's, from the barrier at the start of each layer (with the tree, the
+-      // root finishes last).
+-      uint64_t wrong = 0, timeouts = 0;
+-      std::vector<double> blockCycles(SP_MINIONS / 16, -1);
+-      double slices = 0, lines = 0;
+-      for (uint64_t h : harts) {
+-        const uint64_t m = h >> 1, sh = m / 32, j = m % 32, block = 2 * sh + j / 16;
+-        const auto& r = L.res[h];
+-        timeouts += r.magic == SP_MAGIC && r.count != iters;  // a barrier gave up
+-        slices += double(r.aux);
+-        lines += double(r.aux2);
+-        blockCycles[block] = std::max(blockCycles[block], double(r.cycles));
+-        if (j % 16 == 0) {
+-          for (uint64_t c = 0; c < 16; ++c) {
+-            wrong += y[block * 16 + c] != yref[block * 16 + c];
+-          }
+-        }
+-      }
+-      double rootSum = 0, rootMax = 0;
+-      uint64_t roots = 0;
+-      for (double c : blockCycles) {
+-        if (c >= 0) {
+-          rootSum += c;
+-          rootMax = std::max(rootMax, c);
+-          ++roots;
+-        }
+-      }
+-      const bool ok = L.ok && sm.bad == 0 && sm.tensorErrors == 0 && wrong == 0 && timeouts == 0;
+-      bad += !ok;
+-      std::printf("SPARSITY {\"test\":\"gemv\",\"gemv\":\"%s\",\"reduce\":\"%s\",\"layer_time\":\"block-max\",\"timeouts\":%llu,\"sparsity\":%.4f,\"nnz\":%llu,\"shire_mask\":\"0x%llx\","
+-                  "\"minions\":%zu,\"iters\":%llu,\"launch\":%d,\"cycles_per_layer_mean\":%.1f,"
+-                  "\"cycles_per_layer_max\":%.1f,\"slices_per_minion\":%.2f,\"lines_per_minion\":%.2f,\"wall_s\":%.6f,"
+-                  "\"t_start_ms\":%lld,\"t_end_ms\":%lld,\"ghz\":%.4f,\"wrong\":%llu,\"tensor_errors\":%llu,\"ok\":%s}\n",
+-                  o.gemv.c_str(), o.gemvTree ? "tree" : "host", (unsigned long long)timeouts, s,
+-                  (unsigned long long)nnz, (unsigned long long)o.shireMask, harts.size(),
+-                  (unsigned long long)iters, launchNo, roots ? rootSum / double(roots) / double(iters) : 0.0,
+-                  rootMax / double(iters), slices / double(harts.size()), lines / double(harts.size()), L.wallS,
+-                  L.t0Ms, L.t1Ms, L.ghz, (unsigned long long)wrong, (unsigned long long)sm.tensorErrors,
+-                  ok ? "true" : "false");
+-      std::fflush(stdout);
+-      return L.wallS;
+-    };
+-    repeatFor(o, dev, o.iters ? o.iters : (o.sysemu ? 2 : 2000), one);
+-    if (dev.overBudget()) {
+-      break;
+-    }
+-  }
+-  return bad ? 1 : 0;
+-}
+-
+-/* ------------------------------------------------------------------------------------------ diverge */
+-
+-// Pareto(alpha) with minimum xmin, rounded up and capped at kmax; alpha <= 0 gives the constant mean.
+-std::vector<uint32_t> drawK(size_t n, double alpha, double mean, uint64_t kmax, std::mt19937_64& rng) {
+-  std::vector<uint32_t> k(n);
+-  std::uniform_real_distribution<double> u(std::numeric_limits<double>::min(), 1.0);
+-  const double xmin = alpha > 1 ? mean * (alpha - 1) / alpha : mean;
+-  for (auto& v : k) {
+-    const double x = alpha > 0 ? xmin * std::pow(u(rng), -1.0 / alpha) : mean;
+-    v = uint32_t(std::min<double>(double(kmax), std::max(1.0, std::ceil(x))));
+-  }
+-  return k;
+-}
+-
+-// SIMT model on the same items: groups of `w` consecutive items run for as long as their longest item.
+-double groupEfficiency(const std::vector<uint32_t>& k, size_t w) {
+-  double useful = 0, spent = 0;
+-  for (size_t g = 0; g < k.size(); g += w) {
+-    uint32_t mx = 0;
+-    for (size_t i = g; i < std::min(k.size(), g + w); ++i) {
+-      useful += k[i];
+-      mx = std::max(mx, k[i]);
+-    }
+-    spent += double(mx) * double(w);
+-  }
+-  return spent > 0 ? useful / spent : 0;
+-}
+-
+-int testDiverge(const Options& o, Session& dev) {
+-  const uint64_t variant = o.variant == "static" ? SP_DIV_STATIC : o.variant == "refill" ? SP_DIV_REFILL
+-                                                                                         : SP_DIV_SCALAR;
+-  if (o.harts < 1 || o.harts > 2) {
+-    throw std::runtime_error("--harts must be 1 or 2");
+-  }
+-  const auto harts = participants(o.shireMask, o.perShire, o.harts);
+-  std::mt19937_64 rng(o.seed);
+-  // --items per hart on average; every hart takes chunks from one shared queue.
+-  const size_t total = (harts.size() * o.items + SP_DIV_CHUNK - 1) / SP_DIV_CHUNK * SP_DIV_CHUNK;
+-  const auto k = drawK(total, o.alpha, o.meanK, o.kmax, rng);
+-  SpArgs a{};
+-  a.mode = SP_DIVERGE;
+-  a.shire_mask = o.shireMask;
+-  a.per_shire = o.perShire;
+-  a.items = dev.put("items", k.data(), k.size() * 4);
+-  a.out = dev.put("out", nullptr, k.size() * 4);
+-  a.n_items = total;
+-  a.variant = variant;
+-  a.harts = o.harts;
+-  a.iters = 1;
+-  double kmean = 0;
+-  uint32_t kmx = 0;
+-  for (uint32_t v : k) {
+-    kmean += v;
+-    kmx = std::max(kmx, v);
+-  }
+-  kmean /= double(k.size());
+-  int bad = 0;
+-  double spent = 0;
+-  for (int launchNo = 0;; ++launchNo) {
+-    const uint64_t zero[8] = {};
+-    a.counter = dev.put("counter", zero, sizeof(zero));
+-    std::vector<uint32_t> junk(k.size(), 0xFFFFFFFFu);
+-    dev.put("out", junk.data(), junk.size() * 4);
+-    const auto L = dev.launch(a);
+-    std::vector<uint32_t> out(k.size());
+-    dev.get("out", out.data(), out.size() * 4);
+-    uint64_t wrong = 0;
+-    for (size_t i = 0; i < k.size(); ++i) {
+-      float f;
+-      std::memcpy(&f, &out[i], 4);
+-      wrong += f != float(k[i]);
+-    }
+-    double useful = 0, iters = 0, refills = 0, chunks = 0, cycMax = 0, cycSum = 0;
+-    uint64_t reported = 0;
+-    for (uint64_t h : harts) {
+-      const auto& r = L.res[h];
+-      if (r.magic != SP_MAGIC) {
+-        continue;
+-      }
+-      ++reported;
+-      useful += double(r.count);
+-      iters += double(r.aux);
+-      refills += double(r.aux2 & 0xFFFFFFFFu);
+-      chunks += double(r.aux2 >> 32);
+-      cycMax = std::max(cycMax, double(r.cycles));
+-      cycSum += double(r.cycles);
+-    }
+-    double kSum = 0;
+-    for (uint32_t v : k) {
+-      kSum += v;
+-    }
+-    const bool ok = L.ok && reported == harts.size() && wrong == 0 && useful == kSum &&
+-                    chunks == double(total / SP_DIV_CHUNK);
+-    bad += !ok;
+-    const double laneSlots = variant == SP_DIV_SCALAR ? iters : 8 * iters;
+-    const size_t minions = harts.size() / o.harts;
+-    std::printf("SPARSITY {\"test\":\"diverge\",\"variant\":\"%s\",\"alpha\":%.3f,\"mean_k_target\":%.1f,"
+-                "\"mean_k\":%.2f,\"max_k\":%u,\"items\":%zu,\"chunk\":%u,\"chains\":%u,\"harts\":%zu,\"minions\":%zu,"
+-                "\"harts_per_minion\":%llu,\"launch\":%d,\"useful_lane_iters\":%.0f,\"loop_iters\":%.0f,"
+-                "\"refills\":%.0f,\"chunks\":%.0f,\"lane_efficiency\":%.4f,\"cycles_max\":%.0f,\"cycles_mean\":%.0f,"
+-                "\"fma_per_cycle_per_minion\":%.4f,\"simt8_efficiency\":%.4f,\"simt32_efficiency\":%.4f,\"wall_s\":%.6f,"
+-                "\"t_start_ms\":%lld,\"t_end_ms\":%lld,\"ghz\":%.4f,\"wrong\":%llu,\"ok\":%s}\n",
+-                o.variant.c_str(), o.alpha, o.meanK, kmean, kmx, k.size(), (unsigned)SP_DIV_CHUNK,
+-                (unsigned)SP_DIV_CHAINS, harts.size(), minions, (unsigned long long)o.harts, launchNo, useful, iters,
+-                refills, chunks, laneSlots > 0 ? useful / laneSlots : 0.0, cycMax,
+-                reported ? cycSum / double(reported) : 0.0,
+-                cycMax > 0 ? double(SP_DIV_CHAINS) * useful / double(minions) / cycMax : 0.0, groupEfficiency(k, 8),
+-                groupEfficiency(k, 32), L.wallS, L.t0Ms, L.t1Ms, L.ghz, (unsigned long long)wrong,
+-                ok ? "true" : "false");
+-    std::fflush(stdout);
+-    spent += L.wallS;
+-    if (o.sysemu || o.seconds <= 0 || spent >= o.seconds || dev.overBudget()) {
+-      break;
++      std::ofstream f(o.dumpTiles + ".S", std::ios::binary);
++      f.write(reinterpret_cast<const char*>(sa.data()), std::streamsize(sa.size()));
++      f.write(reinterpret_cast<const char*>(sb.data()), std::streamsize(sb.size()));
+     }
++    S.aTile = dev.put("a2", sa.data(), sa.size());
++    S.bTile = dev.put("b2", sb.data(), sb.size());
+   }
+-  return bad ? 1 : 0;
+-}
+-
+-/* ------------------------------------------------------------------------------------------ spin */
+-
+-int testSpin(const Options& o, Session& dev) {
+-  const auto harts = participants(o.shireMask, o.perShire, 1);
+   SpArgs a{};
+-  a.mode = SP_SPIN;
++  a.mode = SP_FMA;
+   a.shire_mask = o.shireMask;
+   a.per_shire = o.perShire;
++  a.type = SP_FP32;
++  a.out = dev.put("out", nullptr, SP_MINIONS * SP_TILE_BYTES);
++  a.b_stream = 0;
++  // the kind of launch n (n = -1: the calibration launch)
++  auto kindOf = [&](int n) -> char {
++    if (!train) return 'F';
++    return n < 1 ? o.abba[0] : o.abba[size_t((n - 1) % 4)];
++  };
+   int bad = 0;
+   auto one = [&](uint64_t iters, int launchNo) -> double {
++    const char k = kindOf(launchNo);
++    const Kind& K = k == 'S' ? S : F;
++    a.a_tile = K.aTile;
++    a.b_tile = K.bTile;
++    a.use_mask = K.rowMask >= 0;
++    a.mask = K.rowMask >= 0 ? uint64_t(K.rowMask) & 0xFFFF : 0xFFFF;
+     a.iters = iters;
+     const auto L = dev.launch(a);
+     const Summary sm = summarize(L, harts);
+-    const bool ok = L.ok && sm.bad == 0;
++    const bool ok = L.ok && sm.bad == 0 && sm.tensorErrors == 0;
+     bad += !ok;
+-    std::printf("SPARSITY {\"test\":\"spin\",\"minions\":%zu,\"shire_mask\":\"0x%llx\",\"iters\":%llu,\"launch\":%d,"
+-                "\"cycles_max\":%llu,\"wall_s\":%.6f,\"t_start_ms\":%lld,\"t_end_ms\":%lld,\"ghz\":%.4f,\"ok\":%s}\n",
++    std::printf("X14 {\"label\":\"%s\",\"values\":\"%s\",\"row_mask\":\"%s\",\"kind\":\"%c\",\"abba\":\"%s\","
++                "\"minions\":%zu,\"shire_mask\":\"0x%llx\",\"iters\":%llu,\"launch\":%d,\"ops\":%llu,"
++                "\"cycles_max\":%llu,\"cycles_mean\":%.1f,\"cycles_per_op\":%.3f,\"wall_s\":%.6f,\"t_start_ms\":%lld,"
++                "\"t_end_ms\":%lld,\"ghz\":%.4f,\"tensor_errors\":%llu,\"ok\":%s}\n",
++                K.label.c_str(), K.values.c_str(), hex16(K.rowMask).c_str(), train ? k : '-', train ? o.abba.c_str() : "",
+                 harts.size(), (unsigned long long)o.shireMask, (unsigned long long)iters, launchNo,
+-                (unsigned long long)sm.cmax, L.wallS, L.t0Ms, L.t1Ms, L.ghz, ok ? "true" : "false");
++                (unsigned long long)sm.ops, (unsigned long long)sm.cmax, sm.cmean,
++                iters ? sm.cmean / double(iters) : 0.0, L.wallS, L.t0Ms, L.t1Ms, L.ghz,
++                (unsigned long long)sm.tensorErrors, ok ? "true" : "false");
++    std::fflush(stdout);
++    return L.ok ? L.wallS : -1.0;
++  };
++  // the read-back after a launch (only after the first and the last launch of the process)
++  auto check = [&](int launchNo) {
++    const char k = kindOf(launchNo);
++    const Kind& K = k == 'S' ? S : F;
++    const CCheck c = checkC(dev, harts, K.zeroRows, K.liveRows);
++    const bool ok = c.zeroBad <= 0 && c.liveZero <= 0;
++    bad += !ok;
++    std::printf("X14CHECK {\"label\":\"%s\",\"kind\":\"%c\",\"after_launch\":%d,\"zero_rows\":\"%s\","
++                "\"live_rows\":\"%s\",\"zero_rows_bad\":%lld,\"live_rows_zero\":%lld,\"ok\":%s}\n",
++                K.label.c_str(), train ? k : '-', launchNo, hex16(K.zeroRows).c_str(), hex16(K.liveRows).c_str(),
++                c.zeroBad, c.liveZero, ok ? "true" : "false");
+     std::fflush(stdout);
+-    return L.wallS;
+   };
+-  repeatFor(o, dev, o.iters ? o.iters : (o.sysemu ? 100 : 2000000), one);
++  // A calibration launch, then launches of about 0.5 s: for --seconds, or exactly --launches of them in a train; no
++  // launch starts unless it can end inside --budget seconds of holding the device.
++  uint64_t iters = o.iters ? o.iters : 20000;
++  double wall = one(iters, -1);
++  if (wall < 0) return 1;
++  check(-1);
++  int last = -1;
++  if (o.seconds > 0 || train) {
++    iters = std::max<uint64_t>(1, uint64_t(double(iters) * 0.5 / std::max(wall, 1e-4)));
++    double spent = 0;
++    for (int n = 0; train ? uint64_t(n) < o.launches : spent < o.seconds; ++n) {
++      if (dev.held() + 1.2 * wall > o.budget || dev.held() + 0.7 > o.budget) {
++        std::fprintf(stderr, "stopping: the next launch would end after the %.1f s budget\n", o.budget);
++        break;
++      }
++      if (!o.stopFile.empty() && fs::exists(o.stopFile)) {
++        std::fprintf(stderr, "stopping: %s exists\n", o.stopFile.c_str());
++        break;
++      }
++      wall = one(iters, n);
++      if (wall < 0) break;
++      last = n;
++      spent += wall;
++    }
++  }
++  if (last >= 0) check(last);
+   return bad ? 1 : 0;
+ }
+ 
+@@ -1102,33 +519,20 @@
+       }
+       return argv[++i];
+     };
+-    if (a == "--sysemu") o.sysemu = true;
+-    else if (a == "--sim-args") o.simArgs = next();
+-    else if (a == "--test") o.test = next();
+-    else if (a == "--type") o.type = next();
+-    else if (a == "--pattern") o.pattern = next();
+-    else if (a == "--values") o.values = next();
++    if (a == "--values") o.values = next();
++    else if (a == "--label") o.label = next();
+     else if (a == "--dump-tiles") o.dumpTiles = next();
+-    else if (a == "--c-log") o.cLog = next();
+-    else if (a == "--c-poison") o.cPoison = true;
++    else if (a == "--stop-file") o.stopFile = next();
++    else if (a == "--row-mask") o.rowMask = std::strtoll(next().c_str(), nullptr, 0);
++    else if (a == "--zero-rows") o.zeroRows = std::strtoll(next().c_str(), nullptr, 0);
++    else if (a == "--live-rows") o.liveRows = std::strtoll(next().c_str(), nullptr, 0);
+     else if (a == "--values-b") o.valuesB = next();
++    else if (a == "--label-b") o.labelB = next();
++    else if (a == "--row-mask-b") o.rowMaskB = maskOrNone(next());
++    else if (a == "--zero-rows-b") o.zeroRowsB = maskOrNone(next());
++    else if (a == "--live-rows-b") o.liveRowsB = maskOrNone(next());
+     else if (a == "--abba") o.abba = next();
+     else if (a == "--launches") o.launches = std::strtoull(next().c_str(), nullptr, 0);
+-    else if (a == "--stop-file") o.stopFile = next();
+-    else if (a == "--sweep") o.sweep = next();
+-    else if (a == "--b-sparsity") o.bSparsity = std::atof(next().c_str());
+-    else if (a == "--b-stream") o.bStream = true;
+-    else if (a == "--row-mask") o.rowMask = std::strtoll(next().c_str(), nullptr, 0);
+-    else if (a == "--where") o.where = next();
+-    else if (a == "--masks") o.masks = next();
+-    else if (a == "--gemv") o.gemv = next();
+-    else if (a == "--gemv-tree") o.gemvTree = true;
+-    else if (a == "--variant") o.variant = next();
+-    else if (a == "--alpha") o.alpha = std::atof(next().c_str());
+-    else if (a == "--mean-k") o.meanK = std::atof(next().c_str());
+-    else if (a == "--kmax") o.kmax = std::strtoull(next().c_str(), nullptr, 0);
+-    else if (a == "--items") o.items = std::strtoull(next().c_str(), nullptr, 0);
+-    else if (a == "--harts") o.harts = std::strtoull(next().c_str(), nullptr, 0);
+     else if (a == "--iters") o.iters = std::strtoull(next().c_str(), nullptr, 0);
+     else if (a == "--shires") o.shireMask = std::strtoull(next().c_str(), nullptr, 0);
+     else if (a == "--per-shire") o.perShire = std::strtoull(next().c_str(), nullptr, 0);
+@@ -1141,29 +545,44 @@
+       return 2;
+     }
+   }
+-  if (o.budget < 0) {
+-    o.budget = o.sysemu ? 1e9 : 8.0;  // the simulator is private; a real card is shared
++  if (o.budget <= 0 || o.budget > 9.0) {
++    std::fprintf(stderr, "--budget must be in (0, 9] seconds\n");
++    return 2;
+   }
+   if (o.shireMask == 0 || (o.shireMask >> 32) || o.perShire == 0 || o.perShire > 32) {
+     std::fprintf(stderr, "bad --shires / --per-shire\n");
+     return 2;
+   }
++  if (o.rowMask > 0xFFFF || o.zeroRows > 0xFFFF || o.liveRows > 0xFFFF || o.rowMaskB > 0xFFFF ||
++      o.zeroRowsB > 0xFFFF || o.liveRowsB > 0xFFFF) {
++    std::fprintf(stderr, "row masks are 16-bit masks\n");
++    return 2;
++  }
++  const bool trainOpt = !o.valuesB.empty() || !o.labelB.empty() || o.rowMaskB != -2 || o.zeroRowsB != -2 ||
++                        o.liveRowsB != -2 || o.launches > 0 || !o.abba.empty();
++  if (trainOpt) {
++    if (o.abba != "SFFS" && o.abba != "FSSF") {
++      std::fprintf(stderr, "a train needs --abba SFFS or FSSF\n");
++      return 2;
++    }
++    if (o.launches == 0 || o.launches > 16) {
++      std::fprintf(stderr, "a train needs --launches N (1..16)\n");
++      return 2;
++    }
++    if (o.seconds > 0) {
++      std::fprintf(stderr, "a train takes --launches, not --seconds\n");
++      return 2;
++    }
++  }
+   const auto elf = readFile(o.kernel);
+   if (elf.empty()) {
+     std::fprintf(stderr, "cannot read kernel %s\n", o.kernel.c_str());
+     return 1;
+   }
+   try {
+-    if (o.test != "fma" && o.test != "tload" && o.test != "gemv" && o.test != "diverge" && o.test != "spin") {
+-      std::fprintf(stderr, "--test must be fma, tload, gemv, diverge or spin\n");
+-      return 2;
+-    }
++    checkOneCard();
+     Session dev(o, elf);
+-    if (o.test == "fma") return testFma(o, dev);
+-    if (o.test == "tload") return testTload(o, dev);
+-    if (o.test == "gemv") return testGemv(o, dev);
+-    if (o.test == "diverge") return testDiverge(o, dev);
+-    return testSpin(o, dev);
++    return run(o, dev);
+   } catch (const std::exception& e) {
+     std::fprintf(stderr, "FAIL: %s\n", e.what());
+     return 1;

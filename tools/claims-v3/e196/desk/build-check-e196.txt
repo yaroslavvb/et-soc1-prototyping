@@ -1,0 +1,56 @@
+# E196 desk check: the builds (Q185, lane reg-e196, Sun 15 Nov 2026, aifoundry2; desk checks of code, nothing measured)
+# From step 10's log; local paths replaced (<work> = this lane's desk folder). Builds from COPIES only, each in a folder of
+# this lane's own, inside the round's CPU slot (nice 10), -j4: the proposal's src/ (byte for byte proposal/src) and the lab's
+# workloads/sparsity at GitHub main e8a85229.
+2026-11-15 14:38:10 PST
+load: 1.08 1.61 1.15
+toolchain: riscv64-unknown-elf-gcc () 15.1.0; host: g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; cmake version 3.28.3
+lab copy files: 13
+x14 configure rc 0
+x14 build rc 0
+x14 warnings in the build log (lines with 'warning'): 1
+CMake Warning:
+x14 configure-log warnings: 0
+lab configure rc 0
+lab build rc 0
+lab warnings in the build log (lines with 'warning'): 1
+CMake Warning:
+lab configure-log warnings: 0
+-- products (sha256  bytes  path):
+990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24  18552  build-x14/kernel/sparsity.elf
+b6ba058d57802f56373ed58d3a57b3aaae292d12d1d8e877f469ef79aad2e65e  3619848  build-x14/host/x14_host
+990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24  18552  build-lab/kernel/sparsity.elf
+5ff242b219225777796bd425fb764ac982f84cffcbf13746ebf952f658936776  3642832  build-lab/host/sparsity_host
+-- the two kernel ELFs byte for byte: IDENTICAL
+x14 kernel .text: 8444 B, sha256 8798e43c4869a124690bc652d574d5ab78d686faa70293cbcff658d24c30a399
+x14 kernel .comment: GCC: () 15.1.0
+x14 kernel sections: Name 0] 1] 2] 3] 4] 5] 6] 7] 8] 9] .debug_aranges .debug_rnglists .debug_line .debug_str .debug_line_str .debug_frame .symtab .strtab .shstrtab
+x14 kernel entry: 0x8005801000
+x14 kernel paths embedded (strings with /home, /tmp, /opt): 0
+lab kernel .text: 8444 B, sha256 8798e43c4869a124690bc652d574d5ab78d686faa70293cbcff658d24c30a399
+lab kernel .comment: GCC: () 15.1.0
+lab kernel sections: Name 0] 1] 2] 3] 4] 5] 6] 7] 8] 9] .debug_aranges .debug_rnglists .debug_line .debug_str .debug_line_str .debug_frame .symtab .strtab .shstrtab
+lab kernel entry: 0x8005801000
+lab kernel paths embedded (strings with /home, /tmp, /opt): 0
+-- the request's stated kernel sha256: abbdbe40976f7413e9c246e0992dcf52a56885ab69e1746351f9903cb8f7de46
+   this box's x14 kernel:            990807f483cd57aa413083c52e647079b86022768562d5810080852f7fd6ea24
+-- run_fma's loop in the x14 kernel (objdump, the TensorFMA loop and its head address mod 32):
+1251:  8005801fce:	80161073          	csrw	tensor_fma,a2
+1257:  8005801fe0:	80159073          	csrw	tensor_fma,a1
+1263:  8005801ff4:	80131073          	csrw	tensor_fma,t1
+1449:  8005802290:	80131073          	csrw	tensor_fma,t1
+1774:  8005802684:	80179073          	csrw	tensor_fma,a5
+1786:  80058026aa:	80179073          	csrw	tensor_fma,a5
+2698:  8005802fea:	80179073          	csrw	tensor_fma,a5
+2711:  8005803012:	80179073          	csrw	tensor_fma,a5
+2026-11-15 14:38:15 PST
+
+# host compile flags of x14_host (CMake's flags.make):
+CXX_FLAGS = -O2 -Wall -Wextra
+# compiler diagnostics (lines with 'warning:') in the x14 build log: 0; in the lab build log: 0
+# the one CMake warning in each (configure of the kernel sub-build):
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    CMAKE_INSTALL_LIBDIR
+

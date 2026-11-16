@@ -1,0 +1,52 @@
+# E196 desk check: the request's own tile and table checks (request.md section 9; BUILD.md), step 11, /usr/bin/python3 -I -B
+# make_x14.py from this lane's copy of src/, the lab's five tiles read from the scratch clone at GitHub main e8a85229.
+2026-11-15 14:40:56 PST
+python: Python 3.12.3 at /usr/bin/python3
+{"arms": 31, "trains": 2, "tiles": 8, "out": "<work>/gen"}
+make rc 0
+{"arms": 31, "trains": 2, "tiles": 8, "problems": []}
+check rc 0
+gen/arms.json: IDENTICAL to src/arms.json
+tiles compared 13, differ 0; gen tiles 13
+-- the five lab tiles' sha256 in arms.json against the clone's kinds.json:
+  a_zeros_b_randn  arms.json 1c0546e56600fb5a  kinds.json 1c0546e56600fb5a  EQUAL
+  ones             arms.json fef951e6c76ad6a0  kinds.json fef951e6c76ad6a0  EQUAL
+  randn            arms.json 34b2add3eb5b7b3c  kinds.json 34b2add3eb5b7b3c  EQUAL
+  sparse50         arms.json 43ababfe5f3fed09  kinds.json 43ababfe5f3fed09  EQUAL
+  zeros            arms.json e5a00aa9991ac8a5  kinds.json e5a00aa9991ac8a5  EQUAL
+-- make_x14.py --list:
+I.Z.m0000   I  lab:zeros            0x0000  None       zero tile, 0 rows issued: the floor every tile shares
+I.Z.m000F   I  lab:zeros            0x000F  I.Z.m0000  zero tile, 4 rows issued
+I.Z.m00FF   I  lab:zeros            0x00FF  I.Z.m0000  zero tile, 8 rows issued
+I.Z.m0FFF   I  lab:zeros            0x0FFF  I.Z.m0000  zero tile, 12 rows issued
+I.Z.full    I  lab:zeros            None    I.Z.m0000  zero tile, every row (the lab's E78 zeros item)
+I.H.m0000   I  h.bin                0x0000  I.Z.m0000  held live tile, 0 rows issued
+I.H.m000F   I  h.bin                0x000F  I.H.m0000  held live tile, 4 rows issued
+I.H.m00FF   I  h.bin                0x00FF  I.H.m0000  held live tile, 8 rows issued
+I.H.m0FFF   I  h.bin                0x0FFF  I.H.m0000  held live tile, 12 rows issued
+I.H.full    I  h.bin                None    I.H.m0000  held live tile, every row, no MSK bit
+I.H.mFFFF   I  h.bin                0xFFFF  I.H.full   held live tile, every row, MSK bit set: equals I.H.full?
+I.H.m5555   I  h.bin                0x5555  I.H.m00FF  held live tile, 8 rows in groups of 1 row
+I.H.m3333   I  h.bin                0x3333  I.H.m00FF  held live tile, 8 rows in groups of 2 rows
+I.H.m0F0F   I  h.bin                0x0F0F  I.H.m00FF  held live tile, 8 rows in groups of 4 rows
+I.R.m0000   I  lab:randn            0x0000  I.Z.m0000  random tile, 0 rows issued
+I.R.m00FF   I  lab:randn            0x00FF  I.R.m0000  random tile, 8 rows issued
+I.R.full    I  lab:randn            None    I.R.m0000  random tile, every row (the lab's E78 randn item)
+F.B0        F  fb0.bin              None    I.Z.full   A = 1.0, B held (per-lane base words): the B fields' zero
+F.Bs        F  fbs.bin              None    F.B0       B's sign field flips every micro-op, A = 1.0
+F.Be        F  fbe.bin              None    F.B0       B's exponent field (8 bits) flips every micro-op, A = 1.0
+F.A0        F  fa0.bin              None    I.Z.full   B = 1.0, A held (one base word): the A fields' zero
+F.Ae        F  fae.bin              None    F.A0       A's exponent field (8 bits) flips every second micro-op, B = 1.0
+Z.a50       Z  za50.bin             None    I.R.full   the random tile with half of A's elements +0.0
+Z.b50       Z  zb50.bin             None    I.R.full   the random tile with half of B's elements +0.0
+Z.ab50      Z  lab:sparse50         None    I.R.full   the lab's sparse50 tile: half of each side +0.0
+Z.a0        Z  lab:a_zeros_b_randn  None    I.Z.full   the lab's tile with A all +0.0 and B random, every row
+Z.a0.m0000  Z  lab:a_zeros_b_randn  0x0000  I.Z.m0000  the same tile with nothing issued
+K.ones      K  lab:ones             None    I.Z.full   the lab's ones tile (E78)
+K.pi        K  builtin:pi           None    None       the host's built-in pi: the block anchor, first and last
+T.Z.m1111   T  lab:zeros            0x1111  I.Z.m000F  zero tile, 4 rows in groups of 1 row (train only)
+T.Z.m5555   T  lab:zeros            0x5555  I.Z.m00FF  zero tile, 8 rows in groups of 1 row (train only)
+T1          F T.Z.m1111  S I.Z.m000F  24 processes x 13 launches: zero tile, 4 rows: spread evenly against packed
+T2          F T.Z.m5555  S I.Z.m00FF  24 processes x 13 launches: zero tile, 8 rows: spread evenly against packed
+list rc 0
+2026-11-15 14:40:57 PST

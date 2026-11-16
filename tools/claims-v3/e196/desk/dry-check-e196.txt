@@ -1,0 +1,994 @@
+# E196 desk check: the reference session's dry listing (DRY=1 run_session.sh OUT 6), step 12, inside the round's slot and the
+# no-device sandbox (bubblewrap: a private /dev without the card's nodes, an empty /run/lock); run_session.sh unchanged.
+# Counts, then the full listing with paths replaced: <work>/build-x14/host/x14_host is H (also the heater: the reference's
+# default), <work>/dryN/gen is GEN. The hostname here is aifoundry2, so the pass order below is that host's draw; E196's
+# registered order for aifoundry3 is order-e196-aifoundry3.txt.
+2026-11-15 14:41:20 PST
+hostname: aifoundry2; /dev/et* visible here: 0; /run/lock entries: 0
+dry6: run_session.sh rc 0
+dry6: DRY device lines 251; of them x14_host runs with --seconds 4: 196, --seconds 2: 5, train processes (--abba): 50
+dry6: heater lines (label heater): 1; approach lines: 200; idle lines: 18
+dry6: device lines without 'timeout 10 ': 0; without --stop-file: 0
+dry6: the plan line: [14:41:21] the pass plan: PLAN runs=32 arms=28 dropped=- orphaned=-
+dry6cut: run_session.sh rc 0
+dry6cut: DRY device lines 233; of them x14_host runs with --seconds 4: 178, --seconds 2: 5, train processes (--abba): 50
+dry6cut: heater lines (label heater): 1; approach lines: 182; idle lines: 18
+dry6cut: device lines without 'timeout 10 ': 0; without --stop-file: 0
+dry6cut: the plan line: [14:41:23] the pass plan: PLAN runs=29 arms=25 dropped=F.Ae,Z.b50,I.H.mFFFF orphaned=-
+-- the dry listing's pass orders (this box's hostname), arm labels in run order, pass 0..5:
+
+K.pi K.pi 
+K.pi K.pi 
+K.pi K.pi K.pi I.H.m0000 I.Z.m0000 I.H.full I.H.mFFFF K.ones I.Z.m00FF Z.ab50 Z.a0 I.H.m000F I.Z.full F.Bs I.R.m00FF I.H.m5555 I.H.m0F0F I.H.m3333 Z.a0.m0000 F.Be I.Z.m0FFF F.Ae I.R.full Z.a50 F.B0 I.Z.m000F I.H.m00FF I.R.m0000 Z.b50 I.H.m0FFF F.A0 K.pi 
+K.pi K.pi K.pi Z.a0.m0000 I.R.m00FF I.H.mFFFF I.H.m0000 I.H.m3333 Z.b50 K.ones I.R.m0000 Z.ab50 I.Z.full I.Z.m000F F.Ae I.H.m000F F.Bs I.H.m00FF I.R.full Z.a50 F.B0 F.A0 Z.a0 I.Z.m0FFF I.H.m5555 F.Be I.Z.m0000 I.H.full I.Z.m00FF I.H.m0FFF I.H.m0F0F K.pi 
+K.pi K.pi K.pi I.H.m0000 I.H.m0FFF I.H.m00FF I.H.m0F0F F.Bs K.ones I.H.m000F I.H.m3333 I.H.m5555 Z.a50 F.Be I.R.full I.Z.m0000 Z.a0.m0000 I.Z.m000F Z.a0 I.Z.full Z.ab50 F.A0 I.H.mFFFF F.B0 I.R.m00FF I.Z.m0FFF F.Ae I.R.m0000 I.Z.m00FF I.H.full Z.b50 K.pi 
+K.pi K.pi K.pi Z.a0 I.R.m0000 I.H.full I.Z.full I.H.m0FFF Z.ab50 I.H.m00FF Z.a0.m0000 I.Z.m000F I.H.m0000 I.Z.m0FFF F.Ae K.ones F.B0 I.H.mFFFF I.H.m000F F.A0 I.H.m3333 I.H.m0F0F F.Bs I.R.m00FF Z.a50 I.Z.m00FF F.Be Z.b50 I.R.full I.H.m5555 I.Z.m0000 K.pi 
+K.pi K.pi K.pi F.Be I.H.m5555 I.Z.m0000 Z.ab50 I.H.m0000 I.H.full Z.b50 Z.a0 F.A0 I.H.m3333 I.Z.full I.R.m00FF I.Z.m00FF K.ones I.Z.m000F Z.a50 I.H.m000F I.R.full Z.a0.m0000 F.Bs I.H.m0FFF I.H.m00FF I.Z.m0FFF I.H.m0F0F I.R.m0000 F.B0 F.Ae I.H.mFFFF K.pi 
+K.pi K.pi K.pi F.Ae I.Z.full Z.ab50 I.H.mFFFF F.Be Z.a0 I.Z.m0FFF I.H.m5555 I.H.m000F I.Z.m00FF I.H.m3333 K.ones F.A0 Z.a0.m0000 Z.b50 I.H.m00FF I.H.m0000 I.R.full I.R.m0000 I.Z.m0000 I.H.full Z.a50 F.Bs I.H.m0F0F I.Z.m000F I.H.m0FFF I.R.m00FF F.B0 K.pi 
+2026-11-15 14:41:23 PST
+
+## the full listing, 6 passes, every arm (251 device calls)
+[14:41:21] the pass plan: PLAN runs=32 arms=28 dropped=- orphaned=-
+[14:41:21] DRY: holder check (et-who --check, other users' device processes), card lock probe (/run/lock/etsoc-shire0.lock), device nodes
+[14:41:21] DRY: config read ($ETTELEM config, under the card lock, timeout 10) -> config-start.json
+[14:41:21] DRY: sampler (ettelem) for at most 3899 s (first line within 10 s, up to 6 starts), stopwatch
+[14:41:21] DRY: stopwatch running; holder check (our sampler only); smoke block (heater: H)
+DRY: idle 10 s (before)
+DRY: timeout 10 H --values randn --label heater --seconds 2 --seed 1 --stop-file OUT/STOP
+DRY: approach: no preheat, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 2 --stop-file OUT/STOP
+DRY: approach: no preheat, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 2 --stop-file OUT/STOP
+DRY: approach: no preheat, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 2 --stop-file OUT/STOP
+DRY: approach: no preheat, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 2 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass -1: 5 runs
+DRY: smoke gate
+[14:41:21] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (train 252 s)
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 101: train T1, 24 processes
+[14:41:21] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (train 252 s)
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 102: train T2, 24 processes
+[14:41:21] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 355 s)
+DRY: plan: 28 arms, dropped -
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.mFFFF --row-mask 0xFFFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fae.bin --label F.Ae --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/zb50.bin --label Z.b50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 0: 32 runs
+[14:41:21] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 355 s)
+DRY: plan: 28 arms, dropped -
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.mFFFF --row-mask 0xFFFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/zb50.bin --label Z.b50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fae.bin --label F.Ae --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 1: 32 runs
+[14:41:21] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 355 s)
+DRY: plan: 28 arms, dropped -
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.mFFFF --row-mask 0xFFFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fae.bin --label F.Ae --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/zb50.bin --label Z.b50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 2: 32 runs
+[14:41:21] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 355 s)
+DRY: plan: 28 arms, dropped -
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fae.bin --label F.Ae --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.mFFFF --row-mask 0xFFFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/zb50.bin --label Z.b50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 3: 32 runs
+[14:41:21] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 355 s)
+DRY: plan: 28 arms, dropped -
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/zb50.bin --label Z.b50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fae.bin --label F.Ae --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.mFFFF --row-mask 0xFFFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 4: 32 runs
+[14:41:21] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 355 s)
+DRY: plan: 28 arms, dropped -
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fae.bin --label F.Ae --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.mFFFF --row-mask 0xFFFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/zb50.bin --label Z.b50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 5: 32 runs
+[14:41:21] DRY: sampler stopped (SIGTERM); after exit 3 or a signal no config read (config-end.json says why); otherwise holder check (et-who --check exit 0, no other user's device process, card lock probe), then config read -> config-end.json
+
+## the full listing, 6 passes, the cut order DROP_ARMS=F.Ae,Z.b50,I.H.mFFFF (233 device calls)
+[14:41:23] the pass plan: PLAN runs=29 arms=25 dropped=F.Ae,Z.b50,I.H.mFFFF orphaned=-
+[14:41:23] DRY: holder check (et-who --check, other users' device processes), card lock probe (/run/lock/etsoc-shire0.lock), device nodes
+[14:41:23] DRY: config read ($ETTELEM config, under the card lock, timeout 10) -> config-start.json
+[14:41:23] DRY: sampler (ettelem) for at most 3898 s (first line within 10 s, up to 6 starts), stopwatch
+[14:41:23] DRY: stopwatch running; holder check (our sampler only); smoke block (heater: H)
+DRY: idle 10 s (before)
+DRY: timeout 10 H --values randn --label heater --seconds 2 --seed 1 --stop-file OUT/STOP
+DRY: approach: no preheat, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 2 --stop-file OUT/STOP
+DRY: approach: no preheat, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 2 --stop-file OUT/STOP
+DRY: approach: no preheat, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 2 --stop-file OUT/STOP
+DRY: approach: no preheat, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 2 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass -1: 5 runs
+DRY: smoke gate
+[14:41:23] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (train 252 s)
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 101: train T1, 24 processes
+[14:41:23] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (train 252 s)
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 102: train T2, 24 processes
+[14:41:23] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 324 s)
+DRY: plan: 25 arms, dropped F.Ae,Z.b50,I.H.mFFFF
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 0: 29 runs
+[14:41:23] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 324 s)
+DRY: plan: 25 arms, dropped F.Ae,Z.b50,I.H.mFFFF
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 1: 29 runs
+[14:41:23] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 324 s)
+DRY: plan: 25 arms, dropped F.Ae,Z.b50,I.H.mFFFF
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 2: 29 runs
+[14:41:23] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 324 s)
+DRY: plan: 25 arms, dropped F.Ae,Z.b50,I.H.mFFFF
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 3: 29 runs
+[14:41:23] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 324 s)
+DRY: plan: 25 arms, dropped F.Ae,Z.b50,I.H.mFFFF
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 4: 29 runs
+[14:41:23] DRY: card lock released; gap 30 s; STOP file; stopwatch running; holder check; card lock taken; deadline check (pass 324 s)
+DRY: plan: 25 arms, dropped F.Ae,Z.b50,I.H.mFFFF
+DRY: idle 10 s (before)
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fb0.bin --label F.B0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_sparse50.bin --label Z.ab50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/za50.bin --label Z.a50 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m3333 --row-mask 0x3333 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0F0F --row-mask 0x0F0F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_ones.bin --label K.ones --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.full --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fa0.bin --label F.A0 --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbe.bin --label F.Be --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.m0000 --row-mask 0x0000 --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_zeros.bin --label I.Z.m000F --row-mask 0x000F --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/h.bin --label I.H.m0FFF --row-mask 0x0FFF --zero-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values file:GEN/tiles/fbs.bin --label F.Bs --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: approach: heat to 59 C with the heater, idle to 58 C, 2 s quiet
+DRY: timeout 10 H --values pi --label K.pi --live-rows 0xFFFF --seconds 4 --stop-file OUT/STOP
+DRY: idle 10 s (after)
+pass 5: 29 runs
+[14:41:23] DRY: sampler stopped (SIGTERM); after exit 3 or a signal no config read (config-end.json says why); otherwise holder check (et-who --check exit 0, no other user's device process, card lock probe), then config read -> config-end.json

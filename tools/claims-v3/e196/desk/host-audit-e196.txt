@@ -1,0 +1,96 @@
+# E196 desk check: the host change audited (step 13, inside the round's slot and the no-device sandbox; desk checks of code).
+# The diffs themselves: host-diff-e196-lab.txt (against the lab's committed host source), host-diff-e196-e182.txt (against E182's
+# train host as the lab's own patch_host_e182.py makes it from that source), build-files-diff-e196.txt (the three build files).
+2026-11-15 14:57:13 PST
+lab host source sha256 0f53a7d505155156c933e2d9a64d38803ca4e0cea3e20242e0aaafbf35e82284 (1034 lines)
+x14 host source sha256 b91a2c767e39cdad1172d4a33048c79e42dc9ae9dc9fa20479e8426ee1b494cb (590 lines)
+patched <work>/audit/e182_main.cpp sha256 37ca98adf1e677d7b8087b28e932dcbb05f5a0dd37c42be2215a7c503c72e5b8
+patch_host_e182 rc 0
+E182 train host source (made here) sha256 37ca98adf1e677d7b8087b28e932dcbb05f5a0dd37c42be2215a7c503c72e5b8 (1171 lines)
+diff vs the lab's host: rc 1 (724 lines removed, 291 added)
+diff vs E182's train host: rc 1 (853 lines removed, 289 added)
+  CMakeLists.txt: differs from the lab's (16 changed lines)
+  host/CMakeLists.txt: differs from the lab's (22 changed lines)
+  host/Constants.h.in: differs from the lab's (6 changed lines)
+  kernel/CMakeLists.txt: IDENTICAL to the lab's
+  kernel/sparsity.c: IDENTICAL to the lab's
+  kernel/crt.S: IDENTICAL to the lab's
+  kernel/sections.ld: IDENTICAL to the lab's
+  sparsity_args.h: IDENTICAL to the lab's
+-- device-call inventory (name: count) per source:
+  the lab's host (workloads/sparsity/host/main.cpp): dev::IDeviceLayer::createPcieDeviceLayer:1 dev::IDeviceLayer::createSysEmuDeviceLayer:1 emu::SysEmuOptions:1 _mgmt:1 rt_->abortStream:1 rt_->createStream:1 rt_->destroyStream:1 rt_->freeDevice:2 rt_->getDevices:1 rt_->kernelLaunch:1 rt_->loadCode:1 rt_->mallocDevice:1 rt_->memcpyDeviceToHost:1 rt_->memcpyHostToDevice:1 rt_->retrieveStreamErrors:1 rt_->unloadCode:1 rt_->waitForEvent:2 rt_->waitForStream:3 
+  E182's train host (made here): dev::IDeviceLayer::createPcieDeviceLayer:1 dev::IDeviceLayer::createSysEmuDeviceLayer:1 emu::SysEmuOptions:1 _mgmt:1 rt_->abortStream:1 rt_->createStream:1 rt_->destroyStream:1 rt_->freeDevice:2 rt_->getDevices:1 rt_->kernelLaunch:1 rt_->loadCode:1 rt_->mallocDevice:1 rt_->memcpyDeviceToHost:1 rt_->memcpyHostToDevice:1 rt_->retrieveStreamErrors:1 rt_->unloadCode:1 rt_->waitForEvent:2 rt_->waitForStream:3 
+  the request's host (proposal/src/host/main.cpp): dev::IDeviceLayer::createPcieDeviceLayer:1 _mgmt:1 rt_->abortStream:1 rt_->createStream:1 rt_->destroyStream:1 rt_->freeDevice:2 rt_->getDevices:1 rt_->kernelLaunch:1 rt_->loadCode:1 rt_->mallocDevice:1 rt_->memcpyDeviceToHost:1 rt_->memcpyHostToDevice:1 rt_->retrieveStreamErrors:1 rt_->unloadCode:1 rt_->waitForEvent:2 rt_->waitForStream:3 
+  (_mgmt is one comment line in each, "Ops node only: the power logger needs /dev/et0_mgmt", not an open)
+  calls in the request's host not in the lab's host: none
+  calls in the lab's host not in the request's: dev::IDeviceLayer::createSysEmuDeviceLayer
+  the device layer as constructed: lab: createPcieDeviceLayer(true, false); request: createPcieDeviceLayer(true, false)
+-- dmcmd_audit (the lab's, from the clone at GitHub main) on the request's src/ copy:
+  rc 3
+NO-GO <work>/src/run_session.sh:184: ettelem config: VARIANT_UNRESOLVED: VARIANT_UNRESOLVED
+NO-GO <work>/src/run_session.sh:212: ettelem sample: VARIANT_UNRESOLVED: VARIANT_UNRESOLVED
+dmcmd_audit: NO-GO (13 send site(s), 2 disallowed; allow-list: none)
+<work>/src/run_session.sh:184: ettelem config: VARIANT_UNRESOLVED [UNCLASSIFIED, pmic unknown] NO-GO: VARIANT_UNRESOLVED - binary from '$ETTELEM' ('$ETTELEM': no binary path the checker can see): which build runs is not visible; its sends are listed as the reviewed variants'
+<work>/src/run_session.sh:184: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+<work>/src/run_session.sh:184: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+<work>/src/run_session.sh:184: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+<work>/src/run_session.sh:184: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+<work>/src/run_session.sh:184: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+<work>/src/run_session.sh:212: ettelem sample: VARIANT_UNRESOLVED [UNCLASSIFIED, pmic unknown] NO-GO: VARIANT_UNRESOLVED - binary from '$ETTELEM' ('$ETTELEM': no binary path the checker can see): which build runs is not visible; its sends are listed as the reviewed variants'
+<work>/src/run_session.sh:212: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+<work>/src/run_session.sh:212: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+<work>/src/run_session.sh:212: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+<work>/src/run_session.sh:212: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+<work>/src/run_session.sh:212: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+<work>/src/run_session.sh:212: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem/ettelem-dv2/ettelem-e118/ettelem-e77/ettelem-hp
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      2 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      2 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+  VARIANT_UNRESOLVED                         UNCLASSIFIED pmic unknown   2 site(s)  NO-GO
+-- dmcmd_audit on the request's host and kernel alone (src/host, src/kernel, sparsity_args.h):
+  rc 0
+dmcmd_audit: GO (0 send site(s), 0 disallowed; allow-list: none)
+summary:
+-- dmcmd_audit on the lab's sparsity workload:
+  rc 0
+dmcmd_audit: GO (10 send site(s), 0 disallowed; allow-list: none)
+workloads/sparsity/run_energy.py:53: dev_mngt_service -m: WRAPPER [WRAPPER, pmic -] CHECK (a person reads the wrapper) - command from 'cmd': classified at the call sites that name it
+workloads/sparsity/run_energy.py:64: dev_mngt_service -m: WRAPPER [WRAPPER, pmic -] CHECK (a person reads the wrapper) - command from 'cmd': classified at the call sites that name it
+workloads/sparsity/run_energy.py:69: name: GET_MODULE_POWER [READ, pmic none] ok
+workloads/sparsity/run_energy.py:70: name: GET_ASIC_FREQUENCIES [READ, pmic none] ok
+workloads/sparsity/run_energy.py:71: name: GET_ASIC_VOLTAGE [READ, pmic read] ok
+workloads/sparsity/run_energy.py:104: name: GET_ASIC_FREQUENCIES [READ, pmic none] ok
+workloads/sparsity/run_energy.py:104: name: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok
+workloads/sparsity/run_energy.py:131: name: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok
+workloads/sparsity/run_lab.sh:54: name: GET_ASIC_FREQUENCIES [READ, pmic none] ok
+workloads/sparsity/run_lab.sh:55: name: GET_MODULE_POWER [READ, pmic none] ok
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      3 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      1 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      2 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      2 site(s)  ok
+  WRAPPER                                    WRAPPER      pmic -         2 site(s)  CHECK (a person reads the wrapper)
+-- the selection variable's name (ET_DEVICES):
+  in the request's host source: 0 line(s); in run_session.sh: 9 line(s)
+  in this box's built x14_host: 0; in this box's built lab sparsity_host: 0
+-- refusal paths of the request's host, in the sandbox (no /dev/et*: 0 nodes; /run/lock entries 0):
+  [budget 10] rc 2: --budget must be in (0, 9] seconds 
+  [a train without --abba] rc 2: a train needs --abba SFFS or FSSF 
+  [--abba XXXX] rc 2: a train needs --abba SFFS or FSSF 
+  [a train with --seconds] rc 2: a train takes --launches, not --seconds 
+  [--launches 17] rc 2: a train needs --launches N (1..16) 
+  [--row-mask 0x10000] rc 2: row masks are 16-bit masks 
+  [--per-shire 33] rc 2: bad --shires / --per-shire 
+  [an unknown option] rc 2: unknown option --test (see the comment at the top of host/main.cpp) 
+  [a well-formed run, no card node] rc 1: FAIL: no card node /dev/et<N>_ops on this host 
+  [a well-formed train process, no card node] rc 1: FAIL: no card node /dev/et<N>_ops on this host 
+  [the lab host given --label] rc 2: unknown option --label (see the comment at the top of host/main.cpp) 
+  device nodes created by any of these: 0
+2026-11-15 14:57:13 PST

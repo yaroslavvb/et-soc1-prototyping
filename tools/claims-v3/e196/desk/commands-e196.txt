@@ -1,0 +1,42 @@
+# the lab's unchanged sparsity host, one 4 s run of each pass arm (under timeout 10):
+I.Z.m0000   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_zeros.bin --row-mask 0x0000 --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.Z.m000F   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_zeros.bin --row-mask 0x000F --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.Z.m00FF   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_zeros.bin --row-mask 0x00FF --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.Z.m0FFF   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_zeros.bin --row-mask 0x0FFF --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.Z.full    sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_zeros.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.H.m0000   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/h.bin --row-mask 0x0000 --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.H.m000F   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/h.bin --row-mask 0x000F --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.H.m00FF   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/h.bin --row-mask 0x00FF --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.H.m0FFF   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/h.bin --row-mask 0x0FFF --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.H.full    sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/h.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.H.mFFFF   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/h.bin --row-mask 0xFFFF --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.H.m5555   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/h.bin --row-mask 0x5555 --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.H.m3333   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/h.bin --row-mask 0x3333 --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.H.m0F0F   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/h.bin --row-mask 0x0F0F --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.R.m0000   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_randn.bin --row-mask 0x0000 --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.R.m00FF   sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_randn.bin --row-mask 0x00FF --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+I.R.full    sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_randn.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+F.B0        sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/fb0.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+F.Bs        sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/fbs.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+F.Be        sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/fbe.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+F.A0        sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/fa0.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+F.Ae        sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/fae.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+Z.a50       sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/za50.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+Z.b50       sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/zb50.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+Z.ab50      sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_sparse50.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+Z.a0        sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_a_zeros_b_randn.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+Z.a0.m0000  sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_a_zeros_b_randn.bin --row-mask 0x0000 --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+K.ones      sparsity_host --test fma --type fp32 --pattern none --values file:GEN/tiles/lab_ones.bin --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+K.pi        sparsity_host --test fma --type fp32 --pattern none --values pi --shires 0xffffffff --per-shire 32 --seconds 4 --stop-file OUT/STOP
+# the lab's E78 heater (the approach, every run; under timeout 10):
+heater      sparsity_host --test fma --type fp32 --pattern none --values randn --shires 0xffffffff --per-shire 32 --seconds 2 --seed 1 --stop-file OUT/STOP
+# the request's host (x14_host), the train processes (make_x14.train_args; defaults: all 1,024 minions):
+T1 SFFS   x14_host --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+T1 FSSF   x14_host --values file:GEN/tiles/lab_zeros.bin --label T.Z.m1111 --row-mask 0x1111 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m000F --row-mask-b 0x000F --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+T2 SFFS   x14_host --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba SFFS --launches 13 --stop-file OUT/STOP
+T2 FSSF   x14_host --values file:GEN/tiles/lab_zeros.bin --label T.Z.m5555 --row-mask 0x5555 --zero-rows 0xFFFF --values-b file:GEN/tiles/lab_zeros.bin --label-b I.Z.m00FF --row-mask-b 0x00FF --zero-rows-b 0xFFFF --live-rows-b none --abba FSSF --launches 13 --stop-file OUT/STOP
+# the request's host, the smoke's premise runs (2 s each, make_x14.host_args):
+I.H.m00FF   x14_host --values file:GEN/tiles/h.bin --label I.H.m00FF --row-mask 0x00FF --zero-rows 0xFFFF --seconds 2 --stop-file OUT/STOP
+I.R.m00FF   x14_host --values file:GEN/tiles/lab_randn.bin --label I.R.m00FF --row-mask 0x00FF --zero-rows 0xFF00 --live-rows 0x00FF --seconds 2 --stop-file OUT/STOP
+Z.a0        x14_host --values file:GEN/tiles/lab_a_zeros_b_randn.bin --label Z.a0 --zero-rows 0xFFFF --seconds 2 --stop-file OUT/STOP
+I.R.full    x14_host --values file:GEN/tiles/lab_randn.bin --label I.R.full --live-rows 0xFFFF --seconds 2 --stop-file OUT/STOP

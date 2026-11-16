@@ -1,0 +1,60 @@
+--- a/proposal/src/reduce_x14.py
++++ b/reduce_e196.py
+@@ -1,5 +1,17 @@
+ #!/usr/bin/env python3
+-"""The registered reduction of request 1113-x14-zeroshare (standard library only).
++"""E196's registered reduction (Q185, lane reg-e196, Sun 15 Nov 2026, before any datum): the proposal's reduce_x14.py
++(request 1113-x14-zeroshare, sha256 c86892e134b5a037770db99c38201d7cce9bc5eb066884096347241d474eaabc, committed byte for
++byte as proposal/src/reduce_x14.py) with ONE change, registered in E196.md section 7:
++
++    --readback-none-ok   a run all of whose launch records carry "readback": "none" (a run of the lab's unchanged
++                         sparsity host, which reads no C back on file tiles: E196's pass runs and train-block anchors)
++                         is not set aside for the C read-back gate; every other gate applies as written; the output then
++                         carries "readback_gate" (how many runs it exempted). Without the flag this program is
++                         reduce_x14.py: the same output, byte for byte (E196's desk check).
++
++Every other line below is reduce_x14.py's.
++
++The registered reduction of request 1113-x14-zeroshare (standard library only).
+ 
+     python3 -B reduce_x14.py OUT [--gen DIR] [--json x14.json] [--leak 0.1994] [--rail-tau 1.05] [--rail-delay 0.26]
+                              [--drop-pass0] [--min-passes 5]
+@@ -123,6 +135,9 @@
+     parser.add_argument("--rail-delay", type=float, default=0.26, help="the rail reading's delay, s (one meter pass)")
+     parser.add_argument("--drop-pass0", action="store_true")
+     parser.add_argument("--min-passes", type=int, default=5)
++    parser.add_argument("--readback-none-ok", action="store_true",
++                        help="E196: a run whose launch records all carry readback 'none' (the lab's unchanged host) is not "
++                             "set aside for the C read-back gate")
+     a = parser.parse_args()
+     gen = a.gen or os.path.join(a.out, "gen")
+     manifest = json.load(open(os.path.join(gen, "arms.json")))
+@@ -187,6 +202,7 @@
+             continue
+         runs.setdefault((r["pass"], r["seq"]), []).append(r)
+     per_run, set_aside = [], []
++    exempt = []   # E196: runs of the lab's unchanged host, not set aside for the C read-back gate (with --readback-none-ok)
+     for (p, seq), rs in sorted(runs.items()):
+         arm = rs[0]["arm"]
+         t0 = min(x["t_start_ms"] for x in rs) / 1000.0
+@@ -233,7 +249,9 @@
+         if any(not x.get("ok", False) for x in rs):
+             why.append("a launch not ok")
+         cs = chk.get((p, seq), [])
+-        if len(cs) < 2 or not all(c.get("ok") for c in cs):
++        if a.readback_none_ok and all(x.get("readback") == "none" for x in rs):
++            exempt.append([p, seq, arm])   # E196 (registered): the lab's unchanged host reads no C back on file tiles
++        elif len(cs) < 2 or not all(c.get("ok") for c in cs):
+             why.append("C read-back: %s" % [(c.get("zero_rows_bad"), c.get("live_rows_zero")) for c in cs])
+         apr = rs[0].get("approach", {})
+         if apr and not apr.get("on_protocol", True):
+@@ -299,6 +317,9 @@
+ 
+     res = {"request": "1113-x14-zeroshare", "passes": keep, "set_aside": set_aside, "dips_dropped": dropped,
+            "leak_W_per_C": a.leak, "arms": {}, "derived": {}, "trains": {}, "sensitivity": {}}
++    if a.readback_none_ok:   # E196: which runs the C read-back gate did not apply to (the lab's unchanged host)
++        res["readback_gate"] = {"rule": "E196: runs whose launch records carry readback 'none' are not set aside for the C "
++                                        "read-back gate", "exempt_runs": len(exempt), "exempt": exempt}
+     rows = lambda arm: bin(int(table[arm]["row_mask"], 16)).count("1") if table[arm]["row_mask"] else 16
+     uops = lambda arm: table[arm]["counts"]["issued_uops"]
+ 

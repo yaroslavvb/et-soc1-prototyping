@@ -1,0 +1,870 @@
+# E196 desk check: the reduction on synthetic sessions (step 14; arbitrary test values, NOT a forecast and NOT a measurement;
+# no device, no simulator; /usr/bin/python3 3.12.3 -I -B). R14 = proposal/src/reduce_x14.py run unchanged; R196 = reduce_e196.py.
+2026-11-15 14:50:55 PST
+python: Python 3.12.3; reduce_x14.py sha256 c86892e134b5a037770db99c38201d7cce9bc5eb066884096347241d474eaabc; reduce_e196.py sha256 c58c6690016f18e5dac62ba620086f3cefda812cab9e93d2a929cb1aa207f3f7
+session x14e: rc 0 {"samples": 29196, "pass_launches": 1512, "train_launches": 672, "checks": 432, "passes": 5, "pass_host": "x14", "dips": 0}
+session labe: rc 0 {"samples": 29196, "pass_launches": 1512, "train_launches": 672, "checks": 104, "passes": 5, "pass_host": "lab", "dips": 0}
+session labn: rc 0 {"samples": 29196, "pass_launches": 1512, "train_launches": 672, "checks": 104, "passes": 5, "pass_host": "lab", "dips": 40}
+session x14n: rc 0 {"samples": 29196, "pass_launches": 1512, "train_launches": 672, "checks": 432, "passes": 5, "pass_host": "x14", "dips": 40}
+session labc: rc 0 {"samples": 27316, "pass_launches": 1377, "train_launches": 672, "checks": 104, "passes": 5, "pass_host": "lab", "dips": 0}
+session x14t: rc 0 {"samples": 29196, "pass_launches": 1512, "train_launches": 672, "checks": 432, "passes": 5, "pass_host": "x14", "dips": 0}
+-- the two exact sessions differ only where the registered form says (telemetry, runs' fields but 'readback', trains):
+  telemetry.jsonl: SAME
+  train.jsonl: SAME
+  marks.jsonl: SAME
+  runs.jsonl: 1512 and 1512 launch records; equal but the readback field: True; labe records marked readback none: 1476 (smoke runs unmarked: 36)
+  checks.jsonl: x14e 432 (pass runs 320, train-block anchors 8, smoke 8, train processes 96); labe 104 (pass runs 0, anchors 0, smoke 8, train processes 96)
+reduce a_R14_x14e (reduce_x14.py x14e ): rc 0
+reduce b_R196_x14e (reduce_e196.py x14e ): rc 0
+reduce c_R14_labe (reduce_x14.py labe ): rc 0
+reduce d_R196f_labe (reduce_e196.py labe --readback-none-ok): rc 0
+reduce e_R196_labe (reduce_e196.py labe ): rc 0
+reduce f_R196f_labn (reduce_e196.py labn --readback-none-ok): rc 0
+reduce g_R14_x14n (reduce_x14.py x14n ): rc 0
+reduce h_R196f_labc (reduce_e196.py labc --readback-none-ok): rc 0
+reduce i_R196f_x14e (reduce_e196.py x14e --readback-none-ok): rc 0
+reduce j_R14_x14t (reduce_x14.py x14t ): rc 0
+== (1) without the flag, reduce_e196.py is reduce_x14.py: x14e SAME bytes; labe SAME bytes; printed lines: x14e SAME, labe SAME
+== (2) the reference form, reduce_x14.py unchanged, exact (a):
+== the run's bookkeeping: passes kept [0, 1, 2, 3, 4]; set aside 0 run(s); dips dropped 0 (injected 0); readback_gate absent
+VERDICT: CONSISTENT (125 checks, 0 off)
+== (3) E196's form on reduce_x14.py unchanged (c): what the read-back gate does to runs of the unchanged host:
+  runs set aside: 154 ({'C read-back': 154}); passes kept: []; arms with an S: 0; trains: {'T1': (12, True, None), 'T2': (12, True, None)}
+== (4) E196's form, reduce_e196.py --readback-none-ok, exact (d):
+== the run's bookkeeping: passes kept [0, 1, 2, 3, 4]; set aside 0 run(s); dips dropped 0 (injected 0); readback_gate {"rule": "E196: runs whose launch records carry readback 'none' are not set aside for the C read-back gate", "exempt_runs": 154}
+VERDICT: CONSISTENT (125 checks, 0 off)
+  (d) against (a), key arms         EQUAL
+  (d) against (a), key derived      EQUAL
+  (d) against (a), key trains       EQUAL
+  (d) against (a), key sensitivity  EQUAL
+  (d) against (a), key passes       EQUAL
+  (d) against (a), key dips_dropped EQUAL
+  (d) readback_gate: 154 runs exempt; (a) has no readback_gate key: True
+== (5) the flag on the reference form (i) changes nothing (no record is marked): SAME but the readback_gate key (0 exempt); exempt 0
+== (6) E196's form with noise, 40 dips and a launch fault (f), tolerance 4 SE + 0.02 W:
+== the run's bookkeeping: passes kept [0, 1, 2, 3, 4]; set aside 1 run(s); dips dropped 39 (injected 40); readback_gate {"rule": "E196: runs whose launch records carry readback 'none' are not set aside for the C read-back gate", "exempt_runs": 154}
+     set aside: pass 1 seq 3 I.R.full: ['a launch not ok']
+VERDICT: CONSISTENT (125 checks, 0 off)
+== (7) the reference form with noise, dips, the launch fault and a read-back fault, reduce_x14.py unchanged (g):
+== the run's bookkeeping: passes kept [0, 1, 2, 3, 4]; set aside 2 run(s); dips dropped 39 (injected 40); readback_gate absent
+     set aside: pass 1 seq 3 I.R.full: ['a launch not ok']
+     set aside: pass 2 seq 30 I.H.m00FF: ['C read-back: [(0, 0), (3, 0)]']
+VERDICT: CONSISTENT (125 checks, 0 off)
+== (8) E196's form with the cut order (h), exact:
+== the run's bookkeeping: passes kept [0, 1, 2, 3, 4]; set aside 0 run(s); dips dropped 0 (injected 0); readback_gate {"rule": "E196: runs whose launch records carry readback 'none' are not set aside for the C read-back gate", "exempt_runs": 139}
+VERDICT: CONSISTENT (118 checks, 0 off)
+  derived quantities empty under the cut: 6: field_F.Ae_electrons_per_operand_flip_rail, field_F.Ae_fJ_per_flip_all_board, field_F.Ae_fJ_per_operand_flip_board, msk_null_I.H.mFFFF_minus_I.H.full_pJ_per_op, r_from_Z.b50, share_Z.b50
+  arms empty: ['F.Ae', 'I.H.mFFFF', 'Z.b50']
+== (9) the readers' millisecond edge, shown (j): the reference form with the board dropping to idle exactly at each
+   process's last launch end (no 5 ms meter hold), reduce_x14.py unchanged, exact; only the trains can move:
+  train T1 D_W (F - S)                                         got +0.028469 want +0.030000 diff -1.53e-03 se 1.53e-03 OFF
+  train T2 D_W (F - S)                                         got -0.020000 want -0.020000 diff -7.08e-16 se 3.11e-16 ok
+VERDICT: NOT CONSISTENT (125 checks, 1 off): train T1 D_W (F - S)
+-- the printed summary of (d), first lines:
+passes kept [0, 1, 2, 3, 4]; runs 154 kept, 0 set aside; 0 dips dropped -> <synth>/d_R196f_labe.json
+ladder_H_step_I.H.m0000_to_I.H.m000F_W                   mean=2.4 se=0 n=5 provisional=0
+ladder_H_step_I.H.m000F_to_I.H.m00FF_W                   mean=2.4 se=0 n=5 provisional=0
+ladder_H_step_I.H.m00FF_to_I.H.m0FFF_W                   mean=2.4 se=0 n=5 provisional=0
+ladder_H_step_I.H.m0FFF_to_I.H.full_W                    mean=2.4 se=0 n=5 provisional=0
+ladder_H_slope_pJ_per_issued_uop                         mean=16.67 se=4.887e-07 n=5 provisional=0
+ladder_H_slope_W_per_row                                 mean=0.6 se=0 n=5 provisional=0
+ladder_Z_step_I.Z.m0000_to_I.Z.m000F_W                   mean=0.4 se=0 n=5 provisional=0
+ladder_Z_step_I.Z.m000F_to_I.Z.m00FF_W                   mean=0.4 se=0 n=5 provisional=0
+ladder_Z_step_I.Z.m00FF_to_I.Z.m0FFF_W                   mean=0.4 se=0 n=5 provisional=0
+ladder_Z_step_I.Z.m0FFF_to_I.Z.full_W                    mean=0.4 se=0 n=5 provisional=0
+ladder_Z_slope_pJ_per_issued_uop                         mean=2.778 se=1.051e-07 n=5 provisional=0
+2026-11-15 14:51:01 PST
+
+## the comparison, run (a), line by line
+== per pass arm
+  arm I.Z.m0000 S_W                                            got +0.400000 want +0.400000 diff -1.44e-15 se 0.00e+00 ok
+  arm I.Z.m000F S_W                                            got +0.800000 want +0.800000 diff +6.66e-16 se 0.00e+00 ok
+  arm I.Z.m000F D_W                                            got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  arm I.Z.m000F D_bracketed_W                                  got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  arm I.Z.m00FF S_W                                            got +1.200000 want +1.200000 diff -6.66e-16 se 0.00e+00 ok
+  arm I.Z.m00FF D_W                                            got +0.800000 want +0.800000 diff +7.77e-16 se 0.00e+00 ok
+  arm I.Z.m00FF D_bracketed_W                                  got +0.800000 want +0.800000 diff +7.77e-16 se 0.00e+00 ok
+  arm I.Z.m0FFF S_W                                            got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.Z.m0FFF D_W                                            got +1.200000 want +1.200000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.Z.m0FFF D_bracketed_W                                  got +1.200000 want +1.200000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.Z.full S_W                                             got +2.000000 want +2.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.Z.full D_W                                             got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.Z.full D_bracketed_W                                   got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.H.m0000 S_W                                            got +0.400000 want +0.400000 diff -1.44e-15 se 0.00e+00 ok
+  arm I.H.m0000 D_W                                            got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.m0000 D_bracketed_W                                  got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.m000F S_W                                            got +2.800000 want +2.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m000F D_W                                            got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  arm I.H.m000F D_bracketed_W                                  got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  arm I.H.m00FF S_W                                            got +5.200000 want +5.200000 diff -8.88e-16 se 0.00e+00 ok
+  arm I.H.m00FF D_W                                            got +4.800000 want +4.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m00FF D_bracketed_W                                  got +4.800000 want +4.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m0FFF S_W                                            got +7.600000 want +7.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m0FFF D_W                                            got +7.200000 want +7.200000 diff +3.55e-15 se 0.00e+00 ok
+  arm I.H.m0FFF D_bracketed_W                                  got +7.200000 want +7.200000 diff +3.55e-15 se 0.00e+00 ok
+  arm I.H.full S_W                                             got +10.000000 want +10.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.full D_W                                             got +9.600000 want +9.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.full D_bracketed_W                                   got +9.600000 want +9.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.mFFFF S_W                                            got +10.013000 want +10.013000 diff -1.78e-15 se 0.00e+00 ok
+  arm I.H.mFFFF D_W                                            got +0.013000 want +0.013000 diff -1.78e-15 se 0.00e+00 ok
+  arm I.H.mFFFF D_bracketed_W                                  got +0.013000 want +0.013000 diff -1.78e-15 se 0.00e+00 ok
+  arm I.H.m5555 S_W                                            got +5.231000 want +5.231000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m5555 D_W                                            got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.H.m5555 D_bracketed_W                                  got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.H.m3333 S_W                                            got +5.217000 want +5.217000 diff -4.44e-15 se 0.00e+00 ok
+  arm I.H.m3333 D_W                                            got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.H.m3333 D_bracketed_W                                  got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.H.m0F0F S_W                                            got +5.207000 want +5.207000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m0F0F D_W                                            got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m0F0F D_bracketed_W                                  got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.R.m0000 S_W                                            got +0.850000 want +0.850000 diff +1.44e-15 se 0.00e+00 ok
+  arm I.R.m0000 D_W                                            got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  arm I.R.m0000 D_bracketed_W                                  got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  arm I.R.m00FF S_W                                            got +12.050000 want +12.050000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.R.m00FF D_W                                            got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  arm I.R.m00FF D_bracketed_W                                  got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  arm I.R.full S_W                                             got +23.250000 want +23.250000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.R.full D_W                                             got +22.400000 want +22.400000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.R.full D_bracketed_W                                   got +22.400000 want +22.400000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.B0 S_W                                                 got +10.160000 want +10.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.B0 D_W                                                 got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.B0 D_bracketed_W                                       got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Bs S_W                                                 got +10.480000 want +10.480000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Bs D_W                                                 got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.Bs D_bracketed_W                                       got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.Be S_W                                                 got +11.760000 want +11.760000 diff -1.78e-15 se 0.00e+00 ok
+  arm F.Be D_W                                                 got +1.600000 want +1.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm F.Be D_bracketed_W                                       got +1.600000 want +1.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm F.A0 S_W                                                 got +10.160000 want +10.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.A0 D_W                                                 got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.A0 D_bracketed_W                                       got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Ae S_W                                                 got +10.960000 want +10.960000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.Ae D_W                                                 got +0.800000 want +0.800000 diff +3.55e-15 se 0.00e+00 ok
+  arm F.Ae D_bracketed_W                                       got +0.800000 want +0.800000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.a50 S_W                                                got +11.250000 want +11.250000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a50 D_W                                                got -12.000000 want -12.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a50 D_bracketed_W                                      got -12.000000 want -12.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.b50 S_W                                                got +11.090000 want +11.090000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.b50 D_W                                                got -12.160000 want -12.160000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.b50 D_bracketed_W                                      got -12.160000 want -12.160000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.ab50 S_W                                               got +9.650000 want +9.650000 diff -1.78e-15 se 0.00e+00 ok
+  arm Z.ab50 D_W                                               got -13.600000 want -13.600000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.ab50 D_bracketed_W                                     got -13.600000 want -13.600000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a0 S_W                                                 got +2.380000 want +2.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0 D_W                                                 got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0 D_bracketed_W                                       got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 S_W                                           got +0.620000 want +0.620000 diff -2.55e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 D_W                                           got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 D_bracketed_W                                 got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  arm K.ones S_W                                               got +10.320000 want +10.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.ones D_W                                               got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.ones D_bracketed_W                                     got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.pi S_W                                                 got +10.640000 want +10.640000 diff +0.00e+00 se 0.00e+00 ok
+== derived (W forms, against the injected levels)
+  ladder_H_step_I.H.m0000_to_I.H.m000F_W                       got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m000F_to_I.H.m00FF_W                       got +2.400000 want +2.400000 diff -1.78e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m00FF_to_I.H.m0FFF_W                       got +2.400000 want +2.400000 diff +2.66e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m0FFF_to_I.H.full_W                        got +2.400000 want +2.400000 diff -1.78e-15 se 0.00e+00 ok
+  ladder_H_slope_W_per_row                                     got +0.600000 want +0.600000 diff +1.11e-16 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m0000_to_I.Z.m000F_W                       got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m000F_to_I.Z.m00FF_W                       got +0.400000 want +0.400000 diff -1.33e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m00FF_to_I.Z.m0FFF_W                       got +0.400000 want +0.400000 diff +2.00e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m0FFF_to_I.Z.full_W                        got +0.400000 want +0.400000 diff -1.33e-15 se 0.00e+00 ok
+  ladder_Z_slope_W_per_row                                     got +0.100000 want +0.100000 diff +8.33e-17 se 0.00e+00 ok
+  ladder_R_step_I.R.m0000_to_I.R.m00FF_W                       got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  ladder_R_step_I.R.m00FF_to_I.R.full_W                        got +11.200000 want +11.200000 diff +3.55e-15 se 0.00e+00 ok
+  ladder_R_slope_W_per_row                                     got +1.400000 want +1.400000 diff +0.00e+00 se 0.00e+00 ok
+  held_ladder_middle_step_ratio                                got +1.000000 want +1.000000 diff +1.89e-15 se 0.00e+00 ok
+  zero_ladder_first_step_ratio                                 got +1.000000 want +1.000000 diff +8.66e-15 se 0.00e+00 ok
+  spread_I.H.m0F0F_minus_I.H.m00FF_W                           got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  spread_I.H.m3333_minus_I.H.m00FF_W                           got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  spread_I.H.m5555_minus_I.H.m00FF_W                           got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  mask0_I.H.m0000_minus_zero_W                                 got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  mask0_I.R.m0000_minus_zero_W                                 got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  mask0_Z.a0.m0000_minus_zero_W                                got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  b_through_gated_micro_ops_W                                  got +0.160000 want +0.160000 diff +3.77e-15 se 0.00e+00 ok
+  share_Z.a50                                                  got +0.435294 want +0.435294 diff +5.55e-17 se 0.00e+00 ok
+  r_from_Z.a50                                                 got -0.129412 want -0.129412 diff +0.00e+00 se 0.00e+00 ok
+  share_Z.b50                                                  got +0.427765 want +0.427765 diff +1.67e-16 se 0.00e+00 ok
+  r_from_Z.b50                                                 got -0.144471 want -0.144471 diff +3.33e-16 se 0.00e+00 ok
+  share_Z.ab50                                                 got +0.360000 want +0.360000 diff -1.11e-16 se 0.00e+00 ok
+  r_from_Z.ab50                                                got +0.173308 want +0.173308 diff -1.39e-16 se 0.00e+00 ok
+  tie_zeros_S_W                                                got +2.000000 want +2.000000 diff +0.00e+00 se 0.00e+00 ok
+  tie_pi_S_W                                                   got +10.640000 want +10.640000 diff +0.00e+00 se 0.00e+00 ok
+  tie_ones_D_W                                                 got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  tie_random_D_W                                               got +21.250000 want +21.250000 diff +0.00e+00 se 0.00e+00 ok
+  tie_a_zero_D_W                                               got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  tie_sparse50_D_W                                             got +7.650000 want +7.650000 diff -1.78e-15 se 0.00e+00 ok
+  tie_b_sign_D_W                                               got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+== derived in pJ: consistency with the output's own per-arm S and ops_per_s means
+  msk_null (pJ per op, from the per-arm means)                 got +11.598929 want +11.598929 diff -1.13e-11 se 2.14e-04 ok
+  lanes_clock_plus_accumulator_writes_per_mac_board_pJ         got +1.742660 want +1.742660 diff +6.22e-15 se 5.62e-08 ok
+  data_part_per_issued_mac_random_board_pJ                     got +2.886280 want +2.886280 diff +1.02e-14 se 1.16e-07 ok
+== trains
+  train T1 D_W (F - S)                                         got +0.030000 want +0.030000 diff -1.72e-15 se 1.83e-16 ok
+  train T1                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift 0.0
+  train T2 D_W (F - S)                                         got -0.020000 want -0.020000 diff -7.08e-16 se 3.11e-16 ok
+  train T2                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift 0.0
+== the run's bookkeeping: passes kept [0, 1, 2, 3, 4]; set aside 0 run(s); dips dropped 0 (injected 0); readback_gate absent
+VERDICT: CONSISTENT (125 checks, 0 off)
+
+## the comparison, run (d), line by line
+== per pass arm
+  arm I.Z.m0000 S_W                                            got +0.400000 want +0.400000 diff -1.44e-15 se 0.00e+00 ok
+  arm I.Z.m000F S_W                                            got +0.800000 want +0.800000 diff +6.66e-16 se 0.00e+00 ok
+  arm I.Z.m000F D_W                                            got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  arm I.Z.m000F D_bracketed_W                                  got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  arm I.Z.m00FF S_W                                            got +1.200000 want +1.200000 diff -6.66e-16 se 0.00e+00 ok
+  arm I.Z.m00FF D_W                                            got +0.800000 want +0.800000 diff +7.77e-16 se 0.00e+00 ok
+  arm I.Z.m00FF D_bracketed_W                                  got +0.800000 want +0.800000 diff +7.77e-16 se 0.00e+00 ok
+  arm I.Z.m0FFF S_W                                            got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.Z.m0FFF D_W                                            got +1.200000 want +1.200000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.Z.m0FFF D_bracketed_W                                  got +1.200000 want +1.200000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.Z.full S_W                                             got +2.000000 want +2.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.Z.full D_W                                             got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.Z.full D_bracketed_W                                   got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.H.m0000 S_W                                            got +0.400000 want +0.400000 diff -1.44e-15 se 0.00e+00 ok
+  arm I.H.m0000 D_W                                            got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.m0000 D_bracketed_W                                  got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.m000F S_W                                            got +2.800000 want +2.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m000F D_W                                            got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  arm I.H.m000F D_bracketed_W                                  got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  arm I.H.m00FF S_W                                            got +5.200000 want +5.200000 diff -8.88e-16 se 0.00e+00 ok
+  arm I.H.m00FF D_W                                            got +4.800000 want +4.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m00FF D_bracketed_W                                  got +4.800000 want +4.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m0FFF S_W                                            got +7.600000 want +7.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m0FFF D_W                                            got +7.200000 want +7.200000 diff +3.55e-15 se 0.00e+00 ok
+  arm I.H.m0FFF D_bracketed_W                                  got +7.200000 want +7.200000 diff +3.55e-15 se 0.00e+00 ok
+  arm I.H.full S_W                                             got +10.000000 want +10.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.full D_W                                             got +9.600000 want +9.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.full D_bracketed_W                                   got +9.600000 want +9.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.mFFFF S_W                                            got +10.013000 want +10.013000 diff -1.78e-15 se 0.00e+00 ok
+  arm I.H.mFFFF D_W                                            got +0.013000 want +0.013000 diff -1.78e-15 se 0.00e+00 ok
+  arm I.H.mFFFF D_bracketed_W                                  got +0.013000 want +0.013000 diff -1.78e-15 se 0.00e+00 ok
+  arm I.H.m5555 S_W                                            got +5.231000 want +5.231000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m5555 D_W                                            got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.H.m5555 D_bracketed_W                                  got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.H.m3333 S_W                                            got +5.217000 want +5.217000 diff -4.44e-15 se 0.00e+00 ok
+  arm I.H.m3333 D_W                                            got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.H.m3333 D_bracketed_W                                  got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.H.m0F0F S_W                                            got +5.207000 want +5.207000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m0F0F D_W                                            got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m0F0F D_bracketed_W                                  got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.R.m0000 S_W                                            got +0.850000 want +0.850000 diff +1.44e-15 se 0.00e+00 ok
+  arm I.R.m0000 D_W                                            got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  arm I.R.m0000 D_bracketed_W                                  got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  arm I.R.m00FF S_W                                            got +12.050000 want +12.050000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.R.m00FF D_W                                            got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  arm I.R.m00FF D_bracketed_W                                  got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  arm I.R.full S_W                                             got +23.250000 want +23.250000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.R.full D_W                                             got +22.400000 want +22.400000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.R.full D_bracketed_W                                   got +22.400000 want +22.400000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.B0 S_W                                                 got +10.160000 want +10.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.B0 D_W                                                 got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.B0 D_bracketed_W                                       got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Bs S_W                                                 got +10.480000 want +10.480000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Bs D_W                                                 got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.Bs D_bracketed_W                                       got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.Be S_W                                                 got +11.760000 want +11.760000 diff -1.78e-15 se 0.00e+00 ok
+  arm F.Be D_W                                                 got +1.600000 want +1.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm F.Be D_bracketed_W                                       got +1.600000 want +1.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm F.A0 S_W                                                 got +10.160000 want +10.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.A0 D_W                                                 got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.A0 D_bracketed_W                                       got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Ae S_W                                                 got +10.960000 want +10.960000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.Ae D_W                                                 got +0.800000 want +0.800000 diff +3.55e-15 se 0.00e+00 ok
+  arm F.Ae D_bracketed_W                                       got +0.800000 want +0.800000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.a50 S_W                                                got +11.250000 want +11.250000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a50 D_W                                                got -12.000000 want -12.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a50 D_bracketed_W                                      got -12.000000 want -12.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.b50 S_W                                                got +11.090000 want +11.090000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.b50 D_W                                                got -12.160000 want -12.160000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.b50 D_bracketed_W                                      got -12.160000 want -12.160000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.ab50 S_W                                               got +9.650000 want +9.650000 diff -1.78e-15 se 0.00e+00 ok
+  arm Z.ab50 D_W                                               got -13.600000 want -13.600000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.ab50 D_bracketed_W                                     got -13.600000 want -13.600000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a0 S_W                                                 got +2.380000 want +2.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0 D_W                                                 got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0 D_bracketed_W                                       got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 S_W                                           got +0.620000 want +0.620000 diff -2.55e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 D_W                                           got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 D_bracketed_W                                 got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  arm K.ones S_W                                               got +10.320000 want +10.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.ones D_W                                               got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.ones D_bracketed_W                                     got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.pi S_W                                                 got +10.640000 want +10.640000 diff +0.00e+00 se 0.00e+00 ok
+== derived (W forms, against the injected levels)
+  ladder_H_step_I.H.m0000_to_I.H.m000F_W                       got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m000F_to_I.H.m00FF_W                       got +2.400000 want +2.400000 diff -1.78e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m00FF_to_I.H.m0FFF_W                       got +2.400000 want +2.400000 diff +2.66e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m0FFF_to_I.H.full_W                        got +2.400000 want +2.400000 diff -1.78e-15 se 0.00e+00 ok
+  ladder_H_slope_W_per_row                                     got +0.600000 want +0.600000 diff +1.11e-16 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m0000_to_I.Z.m000F_W                       got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m000F_to_I.Z.m00FF_W                       got +0.400000 want +0.400000 diff -1.33e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m00FF_to_I.Z.m0FFF_W                       got +0.400000 want +0.400000 diff +2.00e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m0FFF_to_I.Z.full_W                        got +0.400000 want +0.400000 diff -1.33e-15 se 0.00e+00 ok
+  ladder_Z_slope_W_per_row                                     got +0.100000 want +0.100000 diff +8.33e-17 se 0.00e+00 ok
+  ladder_R_step_I.R.m0000_to_I.R.m00FF_W                       got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  ladder_R_step_I.R.m00FF_to_I.R.full_W                        got +11.200000 want +11.200000 diff +3.55e-15 se 0.00e+00 ok
+  ladder_R_slope_W_per_row                                     got +1.400000 want +1.400000 diff +0.00e+00 se 0.00e+00 ok
+  held_ladder_middle_step_ratio                                got +1.000000 want +1.000000 diff +1.89e-15 se 0.00e+00 ok
+  zero_ladder_first_step_ratio                                 got +1.000000 want +1.000000 diff +8.66e-15 se 0.00e+00 ok
+  spread_I.H.m0F0F_minus_I.H.m00FF_W                           got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  spread_I.H.m3333_minus_I.H.m00FF_W                           got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  spread_I.H.m5555_minus_I.H.m00FF_W                           got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  mask0_I.H.m0000_minus_zero_W                                 got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  mask0_I.R.m0000_minus_zero_W                                 got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  mask0_Z.a0.m0000_minus_zero_W                                got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  b_through_gated_micro_ops_W                                  got +0.160000 want +0.160000 diff +3.77e-15 se 0.00e+00 ok
+  share_Z.a50                                                  got +0.435294 want +0.435294 diff +5.55e-17 se 0.00e+00 ok
+  r_from_Z.a50                                                 got -0.129412 want -0.129412 diff +0.00e+00 se 0.00e+00 ok
+  share_Z.b50                                                  got +0.427765 want +0.427765 diff +1.67e-16 se 0.00e+00 ok
+  r_from_Z.b50                                                 got -0.144471 want -0.144471 diff +3.33e-16 se 0.00e+00 ok
+  share_Z.ab50                                                 got +0.360000 want +0.360000 diff -1.11e-16 se 0.00e+00 ok
+  r_from_Z.ab50                                                got +0.173308 want +0.173308 diff -1.39e-16 se 0.00e+00 ok
+  tie_zeros_S_W                                                got +2.000000 want +2.000000 diff +0.00e+00 se 0.00e+00 ok
+  tie_pi_S_W                                                   got +10.640000 want +10.640000 diff +0.00e+00 se 0.00e+00 ok
+  tie_ones_D_W                                                 got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  tie_random_D_W                                               got +21.250000 want +21.250000 diff +0.00e+00 se 0.00e+00 ok
+  tie_a_zero_D_W                                               got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  tie_sparse50_D_W                                             got +7.650000 want +7.650000 diff -1.78e-15 se 0.00e+00 ok
+  tie_b_sign_D_W                                               got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+== derived in pJ: consistency with the output's own per-arm S and ops_per_s means
+  msk_null (pJ per op, from the per-arm means)                 got +11.598929 want +11.598929 diff -1.13e-11 se 2.14e-04 ok
+  lanes_clock_plus_accumulator_writes_per_mac_board_pJ         got +1.742660 want +1.742660 diff +6.22e-15 se 5.62e-08 ok
+  data_part_per_issued_mac_random_board_pJ                     got +2.886280 want +2.886280 diff +1.02e-14 se 1.16e-07 ok
+== trains
+  train T1 D_W (F - S)                                         got +0.030000 want +0.030000 diff -1.72e-15 se 1.83e-16 ok
+  train T1                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift 0.0
+  train T2 D_W (F - S)                                         got -0.020000 want -0.020000 diff -7.08e-16 se 3.11e-16 ok
+  train T2                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift 0.0
+== the run's bookkeeping: passes kept [0, 1, 2, 3, 4]; set aside 0 run(s); dips dropped 0 (injected 0); readback_gate {"rule": "E196: runs whose launch records carry readback 'none' are not set aside for the C read-back gate", "exempt_runs": 154}
+VERDICT: CONSISTENT (125 checks, 0 off)
+
+## the comparison, run (f), line by line
+== per pass arm
+  arm I.Z.m0000 S_W                                            got +0.401022 want +0.400000 diff +1.02e-03 se 5.96e-03 ok
+  arm I.Z.m000F S_W                                            got +0.789450 want +0.800000 diff -1.06e-02 se 4.90e-03 ok
+  arm I.Z.m000F D_W                                            got +0.401106 want +0.400000 diff +1.11e-03 se 6.26e-03 ok
+  arm I.Z.m000F D_bracketed_W                                  got +0.388428 want +0.400000 diff -1.16e-02 se 9.24e-03 ok
+  arm I.Z.m00FF S_W                                            got +1.205466 want +1.200000 diff +5.47e-03 se 7.86e-03 ok
+  arm I.Z.m00FF D_W                                            got +0.802800 want +0.800000 diff +2.80e-03 se 6.41e-03 ok
+  arm I.Z.m00FF D_bracketed_W                                  got +0.804444 want +0.800000 diff +4.44e-03 se 1.20e-02 ok
+  arm I.Z.m0FFF S_W                                            got +1.597726 want +1.600000 diff -2.27e-03 se 3.14e-03 ok
+  arm I.Z.m0FFF D_W                                            got +1.196363 want +1.200000 diff -3.64e-03 se 7.36e-03 ok
+  arm I.Z.m0FFF D_bracketed_W                                  got +1.196704 want +1.200000 diff -3.30e-03 se 6.09e-03 ok
+  arm I.Z.full S_W                                             got +2.004373 want +2.000000 diff +4.37e-03 se 1.48e-03 ok
+  arm I.Z.full D_W                                             got +1.600018 want +1.600000 diff +1.81e-05 se 7.68e-03 ok
+  arm I.Z.full D_bracketed_W                                   got +1.603351 want +1.600000 diff +3.35e-03 se 6.40e-03 ok
+  arm I.H.m0000 S_W                                            got +0.395485 want +0.400000 diff -4.52e-03 se 8.54e-03 ok
+  arm I.H.m0000 D_W                                            got -0.002537 want +0.000000 diff -2.54e-03 se 7.68e-03 ok
+  arm I.H.m0000 D_bracketed_W                                  got -0.005538 want +0.000000 diff -5.54e-03 se 1.43e-02 ok
+  arm I.H.m000F S_W                                            got +2.798939 want +2.800000 diff -1.06e-03 se 4.77e-03 ok
+  arm I.H.m000F D_W                                            got +2.399384 want +2.400000 diff -6.16e-04 se 5.09e-03 ok
+  arm I.H.m000F D_bracketed_W                                  got +2.403454 want +2.400000 diff +3.45e-03 se 1.02e-02 ok
+  arm I.H.m00FF S_W                                            got +5.197901 want +5.200000 diff -2.10e-03 se 5.14e-03 ok
+  arm I.H.m00FF D_W                                            got +4.801488 want +4.800000 diff +1.49e-03 se 5.79e-03 ok
+  arm I.H.m00FF D_bracketed_W                                  got +4.802416 want +4.800000 diff +2.42e-03 se 7.02e-03 ok
+  arm I.H.m0FFF S_W                                            got +7.589166 want +7.600000 diff -1.08e-02 se 3.66e-03 ok
+  arm I.H.m0FFF D_W                                            got +7.198262 want +7.200000 diff -1.74e-03 se 4.99e-03 ok
+  arm I.H.m0FFF D_bracketed_W                                  got +7.193682 want +7.200000 diff -6.32e-03 se 9.94e-03 ok
+  arm I.H.full S_W                                             got +10.002897 want +10.000000 diff +2.90e-03 se 7.26e-03 ok
+  arm I.H.full D_W                                             got +9.605175 want +9.600000 diff +5.18e-03 se 7.37e-03 ok
+  arm I.H.full D_bracketed_W                                   got +9.607412 want +9.600000 diff +7.41e-03 se 1.40e-02 ok
+  arm I.H.mFFFF S_W                                            got +10.009036 want +10.013000 diff -3.96e-03 se 6.35e-03 ok
+  arm I.H.mFFFF D_W                                            got +0.007087 want +0.013000 diff -5.91e-03 se 4.94e-03 ok
+  arm I.H.mFFFF D_bracketed_W                                  got +0.006139 want +0.013000 diff -6.86e-03 se 9.70e-03 ok
+  arm I.H.m5555 S_W                                            got +5.235404 want +5.231000 diff +4.40e-03 se 1.26e-02 ok
+  arm I.H.m5555 D_W                                            got +0.028309 want +0.031000 diff -2.69e-03 se 6.35e-03 ok
+  arm I.H.m5555 D_bracketed_W                                  got +0.037503 want +0.031000 diff +6.50e-03 se 1.46e-02 ok
+  arm I.H.m3333 S_W                                            got +5.218110 want +5.217000 diff +1.11e-03 se 8.11e-03 ok
+  arm I.H.m3333 D_W                                            got +0.018824 want +0.017000 diff +1.82e-03 se 3.60e-03 ok
+  arm I.H.m3333 D_bracketed_W                                  got +0.020209 want +0.017000 diff +3.21e-03 se 1.05e-02 ok
+  arm I.H.m0F0F S_W                                            got +5.189155 want +5.207000 diff -1.78e-02 se 5.90e-03 ok
+  arm I.H.m0F0F D_W                                            got -0.004534 want +0.007000 diff -1.15e-02 se 2.71e-03 ok
+  arm I.H.m0F0F D_bracketed_W                                  got -0.008746 want +0.007000 diff -1.57e-02 se 3.25e-03 ok
+  arm I.R.m0000 S_W                                            got +0.846812 want +0.850000 diff -3.19e-03 se 2.86e-03 ok
+  arm I.R.m0000 D_W                                            got +0.447046 want +0.450000 diff -2.95e-03 se 7.28e-03 ok
+  arm I.R.m0000 D_bracketed_W                                  got +0.445790 want +0.450000 diff -4.21e-03 se 7.87e-03 ok
+  arm I.R.m00FF S_W                                            got +12.048557 want +12.050000 diff -1.44e-03 se 2.85e-03 ok
+  arm I.R.m00FF D_W                                            got +11.203499 want +11.200000 diff +3.50e-03 se 7.38e-03 ok
+  arm I.R.m00FF D_bracketed_W                                  got +11.201745 want +11.200000 diff +1.75e-03 se 4.88e-03 ok
+  arm I.R.full S_W                                             got +23.236488 want +23.250000 diff -1.35e-02 se 1.09e-02 ok
+  arm I.R.full D_W                                             got +22.396817 want +22.400000 diff -3.18e-03 se 5.96e-03 ok
+  arm I.R.full D_bracketed_W                                   got +22.391290 want +22.400000 diff -8.71e-03 se 9.06e-03 ok
+  arm F.B0 S_W                                                 got +10.158995 want +10.160000 diff -1.00e-03 se 1.14e-02 ok
+  arm F.B0 D_W                                                 got +8.163053 want +8.160000 diff +3.05e-03 se 8.97e-03 ok
+  arm F.B0 D_bracketed_W                                       got +8.154622 want +8.160000 diff -5.38e-03 se 1.01e-02 ok
+  arm F.Bs S_W                                                 got +10.483850 want +10.480000 diff +3.85e-03 se 6.95e-03 ok
+  arm F.Bs D_W                                                 got +0.314396 want +0.320000 diff -5.60e-03 se 8.87e-03 ok
+  arm F.Bs D_bracketed_W                                       got +0.324855 want +0.320000 diff +4.85e-03 se 1.15e-02 ok
+  arm F.Be S_W                                                 got +11.755534 want +11.760000 diff -4.47e-03 se 5.15e-03 ok
+  arm F.Be D_W                                                 got +1.593945 want +1.600000 diff -6.05e-03 se 7.08e-03 ok
+  arm F.Be D_bracketed_W                                       got +1.596539 want +1.600000 diff -3.46e-03 se 1.19e-02 ok
+  arm F.A0 S_W                                                 got +10.178601 want +10.160000 diff +1.86e-02 se 4.95e-03 ok
+  arm F.A0 D_W                                                 got +8.167908 want +8.160000 diff +7.91e-03 se 5.24e-03 ok
+  arm F.A0 D_bracketed_W                                       got +8.174227 want +8.160000 diff +1.42e-02 se 5.09e-03 ok
+  arm F.Ae S_W                                                 got +10.946099 want +10.960000 diff -1.39e-02 se 9.48e-03 ok
+  arm F.Ae D_W                                                 got +0.787130 want +0.800000 diff -1.29e-02 se 5.28e-03 ok
+  arm F.Ae D_bracketed_W                                       got +0.767498 want +0.800000 diff -3.25e-02 se 1.23e-02 ok
+  arm Z.a50 S_W                                                got +11.239218 want +11.250000 diff -1.08e-02 se 8.65e-03 ok
+  arm Z.a50 D_W                                                got -12.001371 want -12.000000 diff -1.37e-03 se 3.69e-03 ok
+  arm Z.a50 D_bracketed_W                                      got -11.989751 want -12.000000 diff +1.02e-02 se 9.51e-03 ok
+  arm Z.b50 S_W                                                got +11.100498 want +11.090000 diff +1.05e-02 se 5.14e-03 ok
+  arm Z.b50 D_W                                                got -12.154787 want -12.160000 diff +5.21e-03 se 7.62e-03 ok
+  arm Z.b50 D_bracketed_W                                      got -12.133630 want -12.160000 diff +2.64e-02 se 1.56e-02 ok
+  arm Z.ab50 S_W                                               got +9.640687 want +9.650000 diff -9.31e-03 se 7.80e-03 ok
+  arm Z.ab50 D_W                                               got -13.592163 want -13.600000 diff +7.84e-03 se 3.80e-03 ok
+  arm Z.ab50 D_bracketed_W                                     got -13.591115 want -13.600000 diff +8.88e-03 se 1.63e-02 ok
+  arm Z.a0 S_W                                                 got +2.377185 want +2.380000 diff -2.82e-03 se 7.08e-03 ok
+  arm Z.a0 D_W                                                 got +0.382246 want +0.380000 diff +2.25e-03 se 6.79e-03 ok
+  arm Z.a0 D_bracketed_W                                       got +0.372811 want +0.380000 diff -7.19e-03 se 7.72e-03 ok
+  arm Z.a0.m0000 S_W                                           got +0.618522 want +0.620000 diff -1.48e-03 se 7.65e-03 ok
+  arm Z.a0.m0000 D_W                                           got +0.224293 want +0.220000 diff +4.29e-03 se 5.87e-03 ok
+  arm Z.a0.m0000 D_bracketed_W                                 got +0.217500 want +0.220000 diff -2.50e-03 se 8.01e-03 ok
+  arm K.ones S_W                                               got +10.304597 want +10.320000 diff -1.54e-02 se 4.75e-03 ok
+  arm K.ones D_W                                               got +8.309956 want +8.320000 diff -1.00e-02 se 6.83e-03 ok
+  arm K.ones D_bracketed_W                                     got +8.300224 want +8.320000 diff -1.98e-02 se 3.78e-03 ok
+  arm K.pi S_W                                                 got +10.638084 want +10.640000 diff -1.92e-03 se 5.03e-03 ok
+== derived (W forms, against the injected levels)
+  ladder_H_step_I.H.m0000_to_I.H.m000F_W                       got +2.399384 want +2.400000 diff -6.16e-04 se 5.09e-03 ok
+  ladder_H_step_I.H.m000F_to_I.H.m00FF_W                       got +2.402104 want +2.400000 diff +2.10e-03 se 5.10e-03 ok
+  ladder_H_step_I.H.m00FF_to_I.H.m0FFF_W                       got +2.396774 want +2.400000 diff -3.23e-03 se 2.38e-03 ok
+  ladder_H_step_I.H.m0FFF_to_I.H.full_W                        got +2.406913 want +2.400000 diff +6.91e-03 se 4.91e-03 ok
+  ladder_H_slope_W_per_row                                     got +0.599860 want +0.600000 diff -1.40e-04 se 4.75e-04 ok
+  ladder_Z_step_I.Z.m0000_to_I.Z.m000F_W                       got +0.401106 want +0.400000 diff +1.11e-03 se 6.26e-03 ok
+  ladder_Z_step_I.Z.m000F_to_I.Z.m00FF_W                       got +0.401694 want +0.400000 diff +1.69e-03 se 2.72e-03 ok
+  ladder_Z_step_I.Z.m00FF_to_I.Z.m0FFF_W                       got +0.393563 want +0.400000 diff -6.44e-03 se 3.69e-03 ok
+  ladder_Z_step_I.Z.m0FFF_to_I.Z.full_W                        got +0.403655 want +0.400000 diff +3.66e-03 se 4.19e-03 ok
+  ladder_Z_slope_W_per_row                                     got +0.099407 want +0.100000 diff -5.93e-04 se 7.25e-04 ok
+  ladder_R_step_I.R.m0000_to_I.R.m00FF_W                       got +11.203499 want +11.200000 diff +3.50e-03 se 7.38e-03 ok
+  ladder_R_step_I.R.m00FF_to_I.R.full_W                        got +11.193534 want +11.200000 diff -6.47e-03 se 9.78e-03 ok
+  ladder_R_slope_W_per_row                                     got +1.399801 want +1.400000 diff -1.99e-04 se 3.72e-04 ok
+  held_ladder_middle_step_ratio                                got +0.997805 want +1.000000 diff -2.19e-03 se 2.92e-03 ok
+  zero_ladder_first_step_ratio                                 got +0.998782 want +1.000000 diff -1.22e-03 se 1.80e-02 ok
+  spread_I.H.m0F0F_minus_I.H.m00FF_W                           got -0.004534 want +0.007000 diff -1.15e-02 se 2.71e-03 ok
+  spread_I.H.m3333_minus_I.H.m00FF_W                           got +0.018824 want +0.017000 diff +1.82e-03 se 3.60e-03 ok
+  spread_I.H.m5555_minus_I.H.m00FF_W                           got +0.028309 want +0.031000 diff -2.69e-03 se 6.35e-03 ok
+  mask0_I.H.m0000_minus_zero_W                                 got -0.002537 want +0.000000 diff -2.54e-03 se 7.68e-03 ok
+  mask0_I.R.m0000_minus_zero_W                                 got +0.447046 want +0.450000 diff -2.95e-03 se 7.28e-03 ok
+  mask0_Z.a0.m0000_minus_zero_W                                got +0.224293 want +0.220000 diff +4.29e-03 se 5.87e-03 ok
+  b_through_gated_micro_ops_W                                  got +0.157953 want +0.160000 diff -2.05e-03 se 1.21e-02 ok
+  share_Z.a50                                                  got +0.435326 want +0.435294 diff +3.14e-05 se 2.28e-04 ok
+  r_from_Z.a50                                                 got -0.129349 want -0.129412 diff +6.28e-05 se 4.56e-04 ok
+  share_Z.b50                                                  got +0.428550 want +0.427765 diff +7.85e-04 se 4.71e-04 ok
+  r_from_Z.b50                                                 got -0.142901 want -0.144471 diff +1.57e-03 se 9.41e-04 ok
+  share_Z.ab50                                                 got +0.359907 want +0.360000 diff -9.26e-05 se 4.81e-04 ok
+  r_from_Z.ab50                                                got +0.173189 want +0.173308 diff -1.20e-04 se 6.21e-04 ok
+  tie_zeros_S_W                                                got +2.004373 want +2.000000 diff +4.37e-03 se 1.48e-03 ok
+  tie_pi_S_W                                                   got +10.638084 want +10.640000 diff -1.92e-03 se 5.03e-03 ok
+  tie_ones_D_W                                                 got +8.309956 want +8.320000 diff -1.00e-02 se 6.83e-03 ok
+  tie_random_D_W                                               got +21.239821 want +21.250000 diff -1.02e-02 se 7.25e-03 ok
+  tie_a_zero_D_W                                               got +0.382246 want +0.380000 diff +2.25e-03 se 6.79e-03 ok
+  tie_sparse50_D_W                                             got +7.648672 want +7.650000 diff -1.33e-03 se 2.99e-03 ok
+  tie_b_sign_D_W                                               got +0.314396 want +0.320000 diff -5.60e-03 se 8.87e-03 ok
+== derived in pJ: consistency with the output's own per-arm S and ops_per_s means
+  msk_null (pJ per op, from the per-arm means)                 got +5.476874 want +5.476875 diff -7.89e-07 se 8.66e+00 ok
+  lanes_clock_plus_accumulator_writes_per_mac_board_pJ         got +1.742338 want +1.742338 diff +1.21e-10 se 1.75e-03 ok
+  data_part_per_issued_mac_random_board_pJ                     got +2.882011 want +2.882706 diff -6.95e-04 se 3.24e-03 ok
+== trains
+  train T1 D_W (F - S)                                         got +0.032107 want +0.030000 diff +2.11e-03 se 1.99e-03 ok
+  train T1                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift -0.04924438421051747
+  train T2 D_W (F - S)                                         got -0.019350 want -0.020000 diff +6.50e-04 se 2.53e-03 ok
+  train T2                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift 0.004720450000000653
+== the run's bookkeeping: passes kept [0, 1, 2, 3, 4]; set aside 1 run(s); dips dropped 39 (injected 40); readback_gate {"rule": "E196: runs whose launch records carry readback 'none' are not set aside for the C read-back gate", "exempt_runs": 154}
+     set aside: pass 1 seq 3 I.R.full: ['a launch not ok']
+VERDICT: CONSISTENT (125 checks, 0 off)
+
+## the comparison, run (g), line by line
+== per pass arm
+  arm I.Z.m0000 S_W                                            got +0.401022 want +0.400000 diff +1.02e-03 se 5.96e-03 ok
+  arm I.Z.m000F S_W                                            got +0.789450 want +0.800000 diff -1.06e-02 se 4.90e-03 ok
+  arm I.Z.m000F D_W                                            got +0.401106 want +0.400000 diff +1.11e-03 se 6.26e-03 ok
+  arm I.Z.m000F D_bracketed_W                                  got +0.388428 want +0.400000 diff -1.16e-02 se 9.24e-03 ok
+  arm I.Z.m00FF S_W                                            got +1.205466 want +1.200000 diff +5.47e-03 se 7.86e-03 ok
+  arm I.Z.m00FF D_W                                            got +0.802800 want +0.800000 diff +2.80e-03 se 6.41e-03 ok
+  arm I.Z.m00FF D_bracketed_W                                  got +0.804444 want +0.800000 diff +4.44e-03 se 1.20e-02 ok
+  arm I.Z.m0FFF S_W                                            got +1.597726 want +1.600000 diff -2.27e-03 se 3.14e-03 ok
+  arm I.Z.m0FFF D_W                                            got +1.196363 want +1.200000 diff -3.64e-03 se 7.36e-03 ok
+  arm I.Z.m0FFF D_bracketed_W                                  got +1.196704 want +1.200000 diff -3.30e-03 se 6.09e-03 ok
+  arm I.Z.full S_W                                             got +2.004373 want +2.000000 diff +4.37e-03 se 1.48e-03 ok
+  arm I.Z.full D_W                                             got +1.600018 want +1.600000 diff +1.81e-05 se 7.68e-03 ok
+  arm I.Z.full D_bracketed_W                                   got +1.603351 want +1.600000 diff +3.35e-03 se 6.40e-03 ok
+  arm I.H.m0000 S_W                                            got +0.395485 want +0.400000 diff -4.52e-03 se 8.54e-03 ok
+  arm I.H.m0000 D_W                                            got -0.002537 want +0.000000 diff -2.54e-03 se 7.68e-03 ok
+  arm I.H.m0000 D_bracketed_W                                  got -0.005538 want +0.000000 diff -5.54e-03 se 1.43e-02 ok
+  arm I.H.m000F S_W                                            got +2.798939 want +2.800000 diff -1.06e-03 se 4.77e-03 ok
+  arm I.H.m000F D_W                                            got +2.399384 want +2.400000 diff -6.16e-04 se 5.09e-03 ok
+  arm I.H.m000F D_bracketed_W                                  got +2.403454 want +2.400000 diff +3.45e-03 se 1.02e-02 ok
+  arm I.H.m00FF S_W                                            got +5.199294 want +5.200000 diff -7.06e-04 se 6.39e-03 ok
+  arm I.H.m00FF D_W                                            got +4.797154 want +4.800000 diff -2.85e-03 se 4.96e-03 ok
+  arm I.H.m00FF D_bracketed_W                                  got +4.800340 want +4.800000 diff +3.40e-04 se 8.66e-03 ok
+  arm I.H.m0FFF S_W                                            got +7.589166 want +7.600000 diff -1.08e-02 se 3.66e-03 ok
+  arm I.H.m0FFF D_W                                            got +7.198262 want +7.200000 diff -1.74e-03 se 4.99e-03 ok
+  arm I.H.m0FFF D_bracketed_W                                  got +7.193682 want +7.200000 diff -6.32e-03 se 9.94e-03 ok
+  arm I.H.full S_W                                             got +10.002897 want +10.000000 diff +2.90e-03 se 7.26e-03 ok
+  arm I.H.full D_W                                             got +9.605175 want +9.600000 diff +5.18e-03 se 7.37e-03 ok
+  arm I.H.full D_bracketed_W                                   got +9.607412 want +9.600000 diff +7.41e-03 se 1.40e-02 ok
+  arm I.H.mFFFF S_W                                            got +10.009036 want +10.013000 diff -3.96e-03 se 6.35e-03 ok
+  arm I.H.mFFFF D_W                                            got +0.007087 want +0.013000 diff -5.91e-03 se 4.94e-03 ok
+  arm I.H.mFFFF D_bracketed_W                                  got +0.006139 want +0.013000 diff -6.86e-03 se 9.70e-03 ok
+  arm I.H.m5555 S_W                                            got +5.235404 want +5.231000 diff +4.40e-03 se 1.26e-02 ok
+  arm I.H.m5555 D_W                                            got +0.029654 want +0.031000 diff -1.35e-03 se 8.01e-03 ok
+  arm I.H.m5555 D_bracketed_W                                  got +0.030467 want +0.031000 diff -5.33e-04 se 1.65e-02 ok
+  arm I.H.m3333 S_W                                            got +5.218110 want +5.217000 diff +1.11e-03 se 8.11e-03 ok
+  arm I.H.m3333 D_W                                            got +0.019772 want +0.017000 diff +2.77e-03 se 4.49e-03 ok
+  arm I.H.m3333 D_bracketed_W                                  got +0.014345 want +0.017000 diff -2.66e-03 se 1.13e-02 ok
+  arm I.H.m0F0F S_W                                            got +5.189155 want +5.207000 diff -1.78e-02 se 5.90e-03 ok
+  arm I.H.m0F0F D_W                                            got -0.003295 want +0.007000 diff -1.03e-02 se 3.12e-03 ok
+  arm I.H.m0F0F D_bracketed_W                                  got -0.010406 want +0.007000 diff -1.74e-02 se 3.61e-03 ok
+  arm I.R.m0000 S_W                                            got +0.846812 want +0.850000 diff -3.19e-03 se 2.86e-03 ok
+  arm I.R.m0000 D_W                                            got +0.447046 want +0.450000 diff -2.95e-03 se 7.28e-03 ok
+  arm I.R.m0000 D_bracketed_W                                  got +0.445790 want +0.450000 diff -4.21e-03 se 7.87e-03 ok
+  arm I.R.m00FF S_W                                            got +12.048557 want +12.050000 diff -1.44e-03 se 2.85e-03 ok
+  arm I.R.m00FF D_W                                            got +11.203499 want +11.200000 diff +3.50e-03 se 7.38e-03 ok
+  arm I.R.m00FF D_bracketed_W                                  got +11.201745 want +11.200000 diff +1.75e-03 se 4.88e-03 ok
+  arm I.R.full S_W                                             got +23.236488 want +23.250000 diff -1.35e-02 se 1.09e-02 ok
+  arm I.R.full D_W                                             got +22.396817 want +22.400000 diff -3.18e-03 se 5.96e-03 ok
+  arm I.R.full D_bracketed_W                                   got +22.391290 want +22.400000 diff -8.71e-03 se 9.06e-03 ok
+  arm F.B0 S_W                                                 got +10.158995 want +10.160000 diff -1.00e-03 se 1.14e-02 ok
+  arm F.B0 D_W                                                 got +8.163053 want +8.160000 diff +3.05e-03 se 8.97e-03 ok
+  arm F.B0 D_bracketed_W                                       got +8.154622 want +8.160000 diff -5.38e-03 se 1.01e-02 ok
+  arm F.Bs S_W                                                 got +10.483850 want +10.480000 diff +3.85e-03 se 6.95e-03 ok
+  arm F.Bs D_W                                                 got +0.314396 want +0.320000 diff -5.60e-03 se 8.87e-03 ok
+  arm F.Bs D_bracketed_W                                       got +0.324855 want +0.320000 diff +4.85e-03 se 1.15e-02 ok
+  arm F.Be S_W                                                 got +11.755534 want +11.760000 diff -4.47e-03 se 5.15e-03 ok
+  arm F.Be D_W                                                 got +1.593945 want +1.600000 diff -6.05e-03 se 7.08e-03 ok
+  arm F.Be D_bracketed_W                                       got +1.596539 want +1.600000 diff -3.46e-03 se 1.19e-02 ok
+  arm F.A0 S_W                                                 got +10.178601 want +10.160000 diff +1.86e-02 se 4.95e-03 ok
+  arm F.A0 D_W                                                 got +8.167908 want +8.160000 diff +7.91e-03 se 5.24e-03 ok
+  arm F.A0 D_bracketed_W                                       got +8.174227 want +8.160000 diff +1.42e-02 se 5.09e-03 ok
+  arm F.Ae S_W                                                 got +10.946099 want +10.960000 diff -1.39e-02 se 9.48e-03 ok
+  arm F.Ae D_W                                                 got +0.787130 want +0.800000 diff -1.29e-02 se 5.28e-03 ok
+  arm F.Ae D_bracketed_W                                       got +0.767498 want +0.800000 diff -3.25e-02 se 1.23e-02 ok
+  arm Z.a50 S_W                                                got +11.239218 want +11.250000 diff -1.08e-02 se 8.65e-03 ok
+  arm Z.a50 D_W                                                got -12.001371 want -12.000000 diff -1.37e-03 se 3.69e-03 ok
+  arm Z.a50 D_bracketed_W                                      got -11.989751 want -12.000000 diff +1.02e-02 se 9.51e-03 ok
+  arm Z.b50 S_W                                                got +11.100498 want +11.090000 diff +1.05e-02 se 5.14e-03 ok
+  arm Z.b50 D_W                                                got -12.154787 want -12.160000 diff +5.21e-03 se 7.62e-03 ok
+  arm Z.b50 D_bracketed_W                                      got -12.133630 want -12.160000 diff +2.64e-02 se 1.56e-02 ok
+  arm Z.ab50 S_W                                               got +9.640687 want +9.650000 diff -9.31e-03 se 7.80e-03 ok
+  arm Z.ab50 D_W                                               got -13.592163 want -13.600000 diff +7.84e-03 se 3.80e-03 ok
+  arm Z.ab50 D_bracketed_W                                     got -13.591115 want -13.600000 diff +8.88e-03 se 1.63e-02 ok
+  arm Z.a0 S_W                                                 got +2.377185 want +2.380000 diff -2.82e-03 se 7.08e-03 ok
+  arm Z.a0 D_W                                                 got +0.382246 want +0.380000 diff +2.25e-03 se 6.79e-03 ok
+  arm Z.a0 D_bracketed_W                                       got +0.372811 want +0.380000 diff -7.19e-03 se 7.72e-03 ok
+  arm Z.a0.m0000 S_W                                           got +0.618522 want +0.620000 diff -1.48e-03 se 7.65e-03 ok
+  arm Z.a0.m0000 D_W                                           got +0.224293 want +0.220000 diff +4.29e-03 se 5.87e-03 ok
+  arm Z.a0.m0000 D_bracketed_W                                 got +0.217500 want +0.220000 diff -2.50e-03 se 8.01e-03 ok
+  arm K.ones S_W                                               got +10.304597 want +10.320000 diff -1.54e-02 se 4.75e-03 ok
+  arm K.ones D_W                                               got +8.309956 want +8.320000 diff -1.00e-02 se 6.83e-03 ok
+  arm K.ones D_bracketed_W                                     got +8.300224 want +8.320000 diff -1.98e-02 se 3.78e-03 ok
+  arm K.pi S_W                                                 got +10.638084 want +10.640000 diff -1.92e-03 se 5.03e-03 ok
+== derived (W forms, against the injected levels)
+  ladder_H_step_I.H.m0000_to_I.H.m000F_W                       got +2.399384 want +2.400000 diff -6.16e-04 se 5.09e-03 ok
+  ladder_H_step_I.H.m000F_to_I.H.m00FF_W                       got +2.398675 want +2.400000 diff -1.33e-03 se 4.88e-03 ok
+  ladder_H_step_I.H.m00FF_to_I.H.m0FFF_W                       got +2.397105 want +2.400000 diff -2.90e-03 se 3.05e-03 ok
+  ladder_H_step_I.H.m0FFF_to_I.H.full_W                        got +2.406913 want +2.400000 diff +6.91e-03 se 4.91e-03 ok
+  ladder_H_slope_W_per_row                                     got +0.599472 want +0.600000 diff -5.28e-04 se 3.55e-04 ok
+  ladder_Z_step_I.Z.m0000_to_I.Z.m000F_W                       got +0.401106 want +0.400000 diff +1.11e-03 se 6.26e-03 ok
+  ladder_Z_step_I.Z.m000F_to_I.Z.m00FF_W                       got +0.401694 want +0.400000 diff +1.69e-03 se 2.72e-03 ok
+  ladder_Z_step_I.Z.m00FF_to_I.Z.m0FFF_W                       got +0.393563 want +0.400000 diff -6.44e-03 se 3.69e-03 ok
+  ladder_Z_step_I.Z.m0FFF_to_I.Z.full_W                        got +0.403655 want +0.400000 diff +3.66e-03 se 4.19e-03 ok
+  ladder_Z_slope_W_per_row                                     got +0.099407 want +0.100000 diff -5.93e-04 se 7.25e-04 ok
+  ladder_R_step_I.R.m0000_to_I.R.m00FF_W                       got +11.203499 want +11.200000 diff +3.50e-03 se 7.38e-03 ok
+  ladder_R_step_I.R.m00FF_to_I.R.full_W                        got +11.193534 want +11.200000 diff -6.47e-03 se 9.78e-03 ok
+  ladder_R_slope_W_per_row                                     got +1.399801 want +1.400000 diff -1.99e-04 se 3.72e-04 ok
+  held_ladder_middle_step_ratio                                got +0.999364 want +1.000000 diff -6.36e-04 se 3.19e-03 ok
+  zero_ladder_first_step_ratio                                 got +0.998782 want +1.000000 diff -1.22e-03 se 1.80e-02 ok
+  spread_I.H.m0F0F_minus_I.H.m00FF_W                           got -0.003295 want +0.007000 diff -1.03e-02 se 3.12e-03 ok
+  spread_I.H.m3333_minus_I.H.m00FF_W                           got +0.019772 want +0.017000 diff +2.77e-03 se 4.49e-03 ok
+  spread_I.H.m5555_minus_I.H.m00FF_W                           got +0.029654 want +0.031000 diff -1.35e-03 se 8.01e-03 ok
+  mask0_I.H.m0000_minus_zero_W                                 got -0.002537 want +0.000000 diff -2.54e-03 se 7.68e-03 ok
+  mask0_I.R.m0000_minus_zero_W                                 got +0.447046 want +0.450000 diff -2.95e-03 se 7.28e-03 ok
+  mask0_Z.a0.m0000_minus_zero_W                                got +0.224293 want +0.220000 diff +4.29e-03 se 5.87e-03 ok
+  b_through_gated_micro_ops_W                                  got +0.157953 want +0.160000 diff -2.05e-03 se 1.21e-02 ok
+  share_Z.a50                                                  got +0.435326 want +0.435294 diff +3.14e-05 se 2.28e-04 ok
+  r_from_Z.a50                                                 got -0.129349 want -0.129412 diff +6.28e-05 se 4.56e-04 ok
+  share_Z.b50                                                  got +0.428550 want +0.427765 diff +7.85e-04 se 4.71e-04 ok
+  r_from_Z.b50                                                 got -0.142901 want -0.144471 diff +1.57e-03 se 9.41e-04 ok
+  share_Z.ab50                                                 got +0.359907 want +0.360000 diff -9.26e-05 se 4.81e-04 ok
+  r_from_Z.ab50                                                got +0.173189 want +0.173308 diff -1.20e-04 se 6.21e-04 ok
+  tie_zeros_S_W                                                got +2.004373 want +2.000000 diff +4.37e-03 se 1.48e-03 ok
+  tie_pi_S_W                                                   got +10.638084 want +10.640000 diff -1.92e-03 se 5.03e-03 ok
+  tie_ones_D_W                                                 got +8.309956 want +8.320000 diff -1.00e-02 se 6.83e-03 ok
+  tie_random_D_W                                               got +21.239821 want +21.250000 diff -1.02e-02 se 7.25e-03 ok
+  tie_a_zero_D_W                                               got +0.382246 want +0.380000 diff +2.25e-03 se 6.79e-03 ok
+  tie_sparse50_D_W                                             got +7.648672 want +7.650000 diff -1.33e-03 se 2.99e-03 ok
+  tie_b_sign_D_W                                               got +0.314396 want +0.320000 diff -5.60e-03 se 8.87e-03 ok
+== derived in pJ: consistency with the output's own per-arm S and ops_per_s means
+  msk_null (pJ per op, from the per-arm means)                 got +5.476874 want +5.476875 diff -7.89e-07 se 8.66e+00 ok
+  lanes_clock_plus_accumulator_writes_per_mac_board_pJ         got +1.742338 want +1.742338 diff +1.21e-10 se 1.75e-03 ok
+  data_part_per_issued_mac_random_board_pJ                     got +2.882011 want +2.882706 diff -6.95e-04 se 3.24e-03 ok
+== trains
+  train T1 D_W (F - S)                                         got +0.032107 want +0.030000 diff +2.11e-03 se 1.99e-03 ok
+  train T1                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift -0.04924438421051747
+  train T2 D_W (F - S)                                         got -0.019350 want -0.020000 diff +6.50e-04 se 2.53e-03 ok
+  train T2                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift 0.004720450000000653
+== the run's bookkeeping: passes kept [0, 1, 2, 3, 4]; set aside 2 run(s); dips dropped 39 (injected 40); readback_gate absent
+     set aside: pass 1 seq 3 I.R.full: ['a launch not ok']
+     set aside: pass 2 seq 30 I.H.m00FF: ['C read-back: [(0, 0), (3, 0)]']
+VERDICT: CONSISTENT (125 checks, 0 off)
+
+## the comparison, run (h), line by line
+== per pass arm
+  arm I.Z.m0000 S_W                                            got +0.400000 want +0.400000 diff -1.44e-15 se 0.00e+00 ok
+  arm I.Z.m000F S_W                                            got +0.800000 want +0.800000 diff +6.66e-16 se 0.00e+00 ok
+  arm I.Z.m000F D_W                                            got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  arm I.Z.m000F D_bracketed_W                                  got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  arm I.Z.m00FF S_W                                            got +1.200000 want +1.200000 diff -6.66e-16 se 0.00e+00 ok
+  arm I.Z.m00FF D_W                                            got +0.800000 want +0.800000 diff +7.77e-16 se 0.00e+00 ok
+  arm I.Z.m00FF D_bracketed_W                                  got +0.800000 want +0.800000 diff +7.77e-16 se 0.00e+00 ok
+  arm I.Z.m0FFF S_W                                            got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.Z.m0FFF D_W                                            got +1.200000 want +1.200000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.Z.m0FFF D_bracketed_W                                  got +1.200000 want +1.200000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.Z.full S_W                                             got +2.000000 want +2.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.Z.full D_W                                             got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.Z.full D_bracketed_W                                   got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.H.m0000 S_W                                            got +0.400000 want +0.400000 diff -1.44e-15 se 0.00e+00 ok
+  arm I.H.m0000 D_W                                            got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.m0000 D_bracketed_W                                  got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.m000F S_W                                            got +2.800000 want +2.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m000F D_W                                            got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  arm I.H.m000F D_bracketed_W                                  got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  arm I.H.m00FF S_W                                            got +5.200000 want +5.200000 diff -8.88e-16 se 0.00e+00 ok
+  arm I.H.m00FF D_W                                            got +4.800000 want +4.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m00FF D_bracketed_W                                  got +4.800000 want +4.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m0FFF S_W                                            got +7.600000 want +7.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m0FFF D_W                                            got +7.200000 want +7.200000 diff +3.55e-15 se 0.00e+00 ok
+  arm I.H.m0FFF D_bracketed_W                                  got +7.200000 want +7.200000 diff +3.55e-15 se 0.00e+00 ok
+  arm I.H.full S_W                                             got +10.000000 want +10.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.full D_W                                             got +9.600000 want +9.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.full D_bracketed_W                                   got +9.600000 want +9.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.mFFFF S_W                                            empty, as expected
+  arm I.H.m5555 S_W                                            got +5.231000 want +5.231000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m5555 D_W                                            got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.H.m5555 D_bracketed_W                                  got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.H.m3333 S_W                                            got +5.217000 want +5.217000 diff -4.44e-15 se 0.00e+00 ok
+  arm I.H.m3333 D_W                                            got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.H.m3333 D_bracketed_W                                  got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.H.m0F0F S_W                                            got +5.207000 want +5.207000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m0F0F D_W                                            got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m0F0F D_bracketed_W                                  got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.R.m0000 S_W                                            got +0.850000 want +0.850000 diff +1.44e-15 se 0.00e+00 ok
+  arm I.R.m0000 D_W                                            got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  arm I.R.m0000 D_bracketed_W                                  got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  arm I.R.m00FF S_W                                            got +12.050000 want +12.050000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.R.m00FF D_W                                            got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  arm I.R.m00FF D_bracketed_W                                  got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  arm I.R.full S_W                                             got +23.250000 want +23.250000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.R.full D_W                                             got +22.400000 want +22.400000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.R.full D_bracketed_W                                   got +22.400000 want +22.400000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.B0 S_W                                                 got +10.160000 want +10.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.B0 D_W                                                 got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.B0 D_bracketed_W                                       got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Bs S_W                                                 got +10.480000 want +10.480000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Bs D_W                                                 got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.Bs D_bracketed_W                                       got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.Be S_W                                                 got +11.760000 want +11.760000 diff -1.78e-15 se 0.00e+00 ok
+  arm F.Be D_W                                                 got +1.600000 want +1.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm F.Be D_bracketed_W                                       got +1.600000 want +1.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm F.A0 S_W                                                 got +10.160000 want +10.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.A0 D_W                                                 got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.A0 D_bracketed_W                                       got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Ae S_W                                                 empty, as expected
+  arm Z.a50 S_W                                                got +11.250000 want +11.250000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a50 D_W                                                got -12.000000 want -12.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a50 D_bracketed_W                                      got -12.000000 want -12.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.b50 S_W                                                empty, as expected
+  arm Z.ab50 S_W                                               got +9.650000 want +9.650000 diff -1.78e-15 se 0.00e+00 ok
+  arm Z.ab50 D_W                                               got -13.600000 want -13.600000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.ab50 D_bracketed_W                                     got -13.600000 want -13.600000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a0 S_W                                                 got +2.380000 want +2.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0 D_W                                                 got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0 D_bracketed_W                                       got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 S_W                                           got +0.620000 want +0.620000 diff -2.55e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 D_W                                           got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 D_bracketed_W                                 got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  arm K.ones S_W                                               got +10.320000 want +10.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.ones D_W                                               got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.ones D_bracketed_W                                     got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.pi S_W                                                 got +10.640000 want +10.640000 diff +0.00e+00 se 0.00e+00 ok
+== derived (W forms, against the injected levels)
+  ladder_H_step_I.H.m0000_to_I.H.m000F_W                       got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m000F_to_I.H.m00FF_W                       got +2.400000 want +2.400000 diff -1.78e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m00FF_to_I.H.m0FFF_W                       got +2.400000 want +2.400000 diff +2.66e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m0FFF_to_I.H.full_W                        got +2.400000 want +2.400000 diff -1.78e-15 se 0.00e+00 ok
+  ladder_H_slope_W_per_row                                     got +0.600000 want +0.600000 diff +1.11e-16 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m0000_to_I.Z.m000F_W                       got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m000F_to_I.Z.m00FF_W                       got +0.400000 want +0.400000 diff -1.33e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m00FF_to_I.Z.m0FFF_W                       got +0.400000 want +0.400000 diff +2.00e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m0FFF_to_I.Z.full_W                        got +0.400000 want +0.400000 diff -1.33e-15 se 0.00e+00 ok
+  ladder_Z_slope_W_per_row                                     got +0.100000 want +0.100000 diff +8.33e-17 se 0.00e+00 ok
+  ladder_R_step_I.R.m0000_to_I.R.m00FF_W                       got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  ladder_R_step_I.R.m00FF_to_I.R.full_W                        got +11.200000 want +11.200000 diff +3.55e-15 se 0.00e+00 ok
+  ladder_R_slope_W_per_row                                     got +1.400000 want +1.400000 diff +0.00e+00 se 0.00e+00 ok
+  held_ladder_middle_step_ratio                                got +1.000000 want +1.000000 diff +1.89e-15 se 0.00e+00 ok
+  zero_ladder_first_step_ratio                                 got +1.000000 want +1.000000 diff +8.66e-15 se 0.00e+00 ok
+  spread_I.H.m0F0F_minus_I.H.m00FF_W                           got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  spread_I.H.m3333_minus_I.H.m00FF_W                           got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  spread_I.H.m5555_minus_I.H.m00FF_W                           got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  mask0_I.H.m0000_minus_zero_W                                 got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  mask0_I.R.m0000_minus_zero_W                                 got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  mask0_Z.a0.m0000_minus_zero_W                                got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  b_through_gated_micro_ops_W                                  got +0.160000 want +0.160000 diff +3.77e-15 se 0.00e+00 ok
+  share_Z.a50                                                  got +0.435294 want +0.435294 diff +5.55e-17 se 0.00e+00 ok
+  r_from_Z.a50                                                 got -0.129412 want -0.129412 diff +0.00e+00 se 0.00e+00 ok
+  share_Z.b50                                                  empty, as expected
+  r_from_Z.b50                                                 empty, as expected
+  share_Z.ab50                                                 got +0.360000 want +0.360000 diff -1.11e-16 se 0.00e+00 ok
+  r_from_Z.ab50                                                got +0.173308 want +0.173308 diff -1.39e-16 se 0.00e+00 ok
+  tie_zeros_S_W                                                got +2.000000 want +2.000000 diff +0.00e+00 se 0.00e+00 ok
+  tie_pi_S_W                                                   got +10.640000 want +10.640000 diff +0.00e+00 se 0.00e+00 ok
+  tie_ones_D_W                                                 got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  tie_random_D_W                                               got +21.250000 want +21.250000 diff +0.00e+00 se 0.00e+00 ok
+  tie_a_zero_D_W                                               got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  tie_sparse50_D_W                                             got +7.650000 want +7.650000 diff -1.78e-15 se 0.00e+00 ok
+  tie_b_sign_D_W                                               got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+== derived in pJ: consistency with the output's own per-arm S and ops_per_s means
+  lanes_clock_plus_accumulator_writes_per_mac_board_pJ         got +1.742660 want +1.742660 diff +6.22e-15 se 6.30e-08 ok
+  data_part_per_issued_mac_random_board_pJ                     got +2.886280 want +2.886280 diff +9.77e-15 se 8.46e-08 ok
+== trains
+  train T1 D_W (F - S)                                         got +0.030000 want +0.030000 diff -1.72e-15 se 1.83e-16 ok
+  train T1                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift 0.0
+  train T2 D_W (F - S)                                         got -0.020000 want -0.020000 diff -7.08e-16 se 3.11e-16 ok
+  train T2                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift 0.0
+== the run's bookkeeping: passes kept [0, 1, 2, 3, 4]; set aside 0 run(s); dips dropped 0 (injected 0); readback_gate {"rule": "E196: runs whose launch records carry readback 'none' are not set aside for the C read-back gate", "exempt_runs": 139}
+VERDICT: CONSISTENT (118 checks, 0 off)
+
+## the comparison, run (j), line by line
+== per pass arm
+  arm I.Z.m0000 S_W                                            got +0.400000 want +0.400000 diff -1.44e-15 se 0.00e+00 ok
+  arm I.Z.m000F S_W                                            got +0.800000 want +0.800000 diff +6.66e-16 se 0.00e+00 ok
+  arm I.Z.m000F D_W                                            got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  arm I.Z.m000F D_bracketed_W                                  got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  arm I.Z.m00FF S_W                                            got +1.200000 want +1.200000 diff -6.66e-16 se 0.00e+00 ok
+  arm I.Z.m00FF D_W                                            got +0.800000 want +0.800000 diff +7.77e-16 se 0.00e+00 ok
+  arm I.Z.m00FF D_bracketed_W                                  got +0.800000 want +0.800000 diff +7.77e-16 se 0.00e+00 ok
+  arm I.Z.m0FFF S_W                                            got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.Z.m0FFF D_W                                            got +1.200000 want +1.200000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.Z.m0FFF D_bracketed_W                                  got +1.200000 want +1.200000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.Z.full S_W                                             got +2.000000 want +2.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.Z.full D_W                                             got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.Z.full D_bracketed_W                                   got +1.600000 want +1.600000 diff +1.33e-15 se 0.00e+00 ok
+  arm I.H.m0000 S_W                                            got +0.400000 want +0.400000 diff -1.44e-15 se 0.00e+00 ok
+  arm I.H.m0000 D_W                                            got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.m0000 D_bracketed_W                                  got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.m000F S_W                                            got +2.800000 want +2.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m000F D_W                                            got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  arm I.H.m000F D_bracketed_W                                  got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  arm I.H.m00FF S_W                                            got +5.200000 want +5.200000 diff -8.88e-16 se 0.00e+00 ok
+  arm I.H.m00FF D_W                                            got +4.800000 want +4.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m00FF D_bracketed_W                                  got +4.800000 want +4.800000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m0FFF S_W                                            got +7.600000 want +7.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m0FFF D_W                                            got +7.200000 want +7.200000 diff +3.55e-15 se 0.00e+00 ok
+  arm I.H.m0FFF D_bracketed_W                                  got +7.200000 want +7.200000 diff +3.55e-15 se 0.00e+00 ok
+  arm I.H.full S_W                                             got +10.000000 want +10.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.H.full D_W                                             got +9.600000 want +9.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.full D_bracketed_W                                   got +9.600000 want +9.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.mFFFF S_W                                            got +10.013000 want +10.013000 diff -1.78e-15 se 0.00e+00 ok
+  arm I.H.mFFFF D_W                                            got +0.013000 want +0.013000 diff -1.78e-15 se 0.00e+00 ok
+  arm I.H.mFFFF D_bracketed_W                                  got +0.013000 want +0.013000 diff -1.78e-15 se 0.00e+00 ok
+  arm I.H.m5555 S_W                                            got +5.231000 want +5.231000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m5555 D_W                                            got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.H.m5555 D_bracketed_W                                  got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  arm I.H.m3333 S_W                                            got +5.217000 want +5.217000 diff -4.44e-15 se 0.00e+00 ok
+  arm I.H.m3333 D_W                                            got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.H.m3333 D_bracketed_W                                  got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.H.m0F0F S_W                                            got +5.207000 want +5.207000 diff +8.88e-16 se 0.00e+00 ok
+  arm I.H.m0F0F D_W                                            got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.H.m0F0F D_bracketed_W                                  got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  arm I.R.m0000 S_W                                            got +0.850000 want +0.850000 diff +1.44e-15 se 0.00e+00 ok
+  arm I.R.m0000 D_W                                            got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  arm I.R.m0000 D_bracketed_W                                  got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  arm I.R.m00FF S_W                                            got +12.050000 want +12.050000 diff -3.55e-15 se 0.00e+00 ok
+  arm I.R.m00FF D_W                                            got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  arm I.R.m00FF D_bracketed_W                                  got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  arm I.R.full S_W                                             got +23.250000 want +23.250000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.R.full D_W                                             got +22.400000 want +22.400000 diff +0.00e+00 se 0.00e+00 ok
+  arm I.R.full D_bracketed_W                                   got +22.400000 want +22.400000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.B0 S_W                                                 got +10.160000 want +10.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.B0 D_W                                                 got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.B0 D_bracketed_W                                       got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Bs S_W                                                 got +10.480000 want +10.480000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Bs D_W                                                 got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.Bs D_bracketed_W                                       got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.Be S_W                                                 got +11.760000 want +11.760000 diff -1.78e-15 se 0.00e+00 ok
+  arm F.Be D_W                                                 got +1.600000 want +1.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm F.Be D_bracketed_W                                       got +1.600000 want +1.600000 diff +1.78e-15 se 0.00e+00 ok
+  arm F.A0 S_W                                                 got +10.160000 want +10.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.A0 D_W                                                 got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.A0 D_bracketed_W                                       got +8.160000 want +8.160000 diff -3.55e-15 se 0.00e+00 ok
+  arm F.Ae S_W                                                 got +10.960000 want +10.960000 diff +0.00e+00 se 0.00e+00 ok
+  arm F.Ae D_W                                                 got +0.800000 want +0.800000 diff +3.55e-15 se 0.00e+00 ok
+  arm F.Ae D_bracketed_W                                       got +0.800000 want +0.800000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.a50 S_W                                                got +11.250000 want +11.250000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a50 D_W                                                got -12.000000 want -12.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a50 D_bracketed_W                                      got -12.000000 want -12.000000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.b50 S_W                                                got +11.090000 want +11.090000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.b50 D_W                                                got -12.160000 want -12.160000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.b50 D_bracketed_W                                      got -12.160000 want -12.160000 diff +3.55e-15 se 0.00e+00 ok
+  arm Z.ab50 S_W                                               got +9.650000 want +9.650000 diff -1.78e-15 se 0.00e+00 ok
+  arm Z.ab50 D_W                                               got -13.600000 want -13.600000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.ab50 D_bracketed_W                                     got -13.600000 want -13.600000 diff +0.00e+00 se 0.00e+00 ok
+  arm Z.a0 S_W                                                 got +2.380000 want +2.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0 D_W                                                 got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0 D_bracketed_W                                       got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 S_W                                           got +0.620000 want +0.620000 diff -2.55e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 D_W                                           got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  arm Z.a0.m0000 D_bracketed_W                                 got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  arm K.ones S_W                                               got +10.320000 want +10.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.ones D_W                                               got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.ones D_bracketed_W                                     got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  arm K.pi S_W                                                 got +10.640000 want +10.640000 diff +0.00e+00 se 0.00e+00 ok
+== derived (W forms, against the injected levels)
+  ladder_H_step_I.H.m0000_to_I.H.m000F_W                       got +2.400000 want +2.400000 diff +2.22e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m000F_to_I.H.m00FF_W                       got +2.400000 want +2.400000 diff -1.78e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m00FF_to_I.H.m0FFF_W                       got +2.400000 want +2.400000 diff +2.66e-15 se 0.00e+00 ok
+  ladder_H_step_I.H.m0FFF_to_I.H.full_W                        got +2.400000 want +2.400000 diff -1.78e-15 se 0.00e+00 ok
+  ladder_H_slope_W_per_row                                     got +0.600000 want +0.600000 diff +1.11e-16 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m0000_to_I.Z.m000F_W                       got +0.400000 want +0.400000 diff +2.11e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m000F_to_I.Z.m00FF_W                       got +0.400000 want +0.400000 diff -1.33e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m00FF_to_I.Z.m0FFF_W                       got +0.400000 want +0.400000 diff +2.00e-15 se 0.00e+00 ok
+  ladder_Z_step_I.Z.m0FFF_to_I.Z.full_W                        got +0.400000 want +0.400000 diff -1.33e-15 se 0.00e+00 ok
+  ladder_Z_slope_W_per_row                                     got +0.100000 want +0.100000 diff +8.33e-17 se 0.00e+00 ok
+  ladder_R_step_I.R.m0000_to_I.R.m00FF_W                       got +11.200000 want +11.200000 diff -5.33e-15 se 0.00e+00 ok
+  ladder_R_step_I.R.m00FF_to_I.R.full_W                        got +11.200000 want +11.200000 diff +3.55e-15 se 0.00e+00 ok
+  ladder_R_slope_W_per_row                                     got +1.400000 want +1.400000 diff +0.00e+00 se 0.00e+00 ok
+  held_ladder_middle_step_ratio                                got +1.000000 want +1.000000 diff +1.89e-15 se 0.00e+00 ok
+  zero_ladder_first_step_ratio                                 got +1.000000 want +1.000000 diff +8.66e-15 se 0.00e+00 ok
+  spread_I.H.m0F0F_minus_I.H.m00FF_W                           got +0.007000 want +0.007000 diff +1.78e-15 se 0.00e+00 ok
+  spread_I.H.m3333_minus_I.H.m00FF_W                           got +0.017000 want +0.017000 diff -3.55e-15 se 0.00e+00 ok
+  spread_I.H.m5555_minus_I.H.m00FF_W                           got +0.031000 want +0.031000 diff +2.66e-15 se 0.00e+00 ok
+  mask0_I.H.m0000_minus_zero_W                                 got +0.000000 want +0.000000 diff +0.00e+00 se 0.00e+00 ok
+  mask0_I.R.m0000_minus_zero_W                                 got +0.450000 want +0.450000 diff +2.89e-15 se 0.00e+00 ok
+  mask0_Z.a0.m0000_minus_zero_W                                got +0.220000 want +0.220000 diff -1.11e-15 se 0.00e+00 ok
+  b_through_gated_micro_ops_W                                  got +0.160000 want +0.160000 diff +3.77e-15 se 0.00e+00 ok
+  share_Z.a50                                                  got +0.435294 want +0.435294 diff +5.55e-17 se 0.00e+00 ok
+  r_from_Z.a50                                                 got -0.129412 want -0.129412 diff +0.00e+00 se 0.00e+00 ok
+  share_Z.b50                                                  got +0.427765 want +0.427765 diff +1.67e-16 se 0.00e+00 ok
+  r_from_Z.b50                                                 got -0.144471 want -0.144471 diff +3.33e-16 se 0.00e+00 ok
+  share_Z.ab50                                                 got +0.360000 want +0.360000 diff -1.11e-16 se 0.00e+00 ok
+  r_from_Z.ab50                                                got +0.173308 want +0.173308 diff -1.39e-16 se 0.00e+00 ok
+  tie_zeros_S_W                                                got +2.000000 want +2.000000 diff +0.00e+00 se 0.00e+00 ok
+  tie_pi_S_W                                                   got +10.640000 want +10.640000 diff +0.00e+00 se 0.00e+00 ok
+  tie_ones_D_W                                                 got +8.320000 want +8.320000 diff +0.00e+00 se 0.00e+00 ok
+  tie_random_D_W                                               got +21.250000 want +21.250000 diff +0.00e+00 se 0.00e+00 ok
+  tie_a_zero_D_W                                               got +0.380000 want +0.380000 diff +2.66e-15 se 0.00e+00 ok
+  tie_sparse50_D_W                                             got +7.650000 want +7.650000 diff -1.78e-15 se 0.00e+00 ok
+  tie_b_sign_D_W                                               got +0.320000 want +0.320000 diff +0.00e+00 se 0.00e+00 ok
+== derived in pJ: consistency with the output's own per-arm S and ops_per_s means
+  msk_null (pJ per op, from the per-arm means)                 got +11.598929 want +11.598929 diff -1.13e-11 se 2.14e-04 ok
+  lanes_clock_plus_accumulator_writes_per_mac_board_pJ         got +1.742660 want +1.742660 diff +6.22e-15 se 5.62e-08 ok
+  data_part_per_issued_mac_random_board_pJ                     got +2.886280 want +2.886280 diff +1.02e-14 se 1.16e-07 ok
+== trains
+  train T1 D_W (F - S)                                         got +0.028469 want +0.030000 diff -1.53e-03 se 1.53e-03 OFF
+  train T1                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift 0.0
+  train T2 D_W (F - S)                                         got -0.020000 want -0.020000 diff -7.08e-16 se 3.11e-16 ok
+  train T2                                                     units 12, scored True, processes with a value 24 of 24, excluded 0, anchor drift 0.0
+== the run's bookkeeping: passes kept [0, 1, 2, 3, 4]; set aside 0 run(s); dips dropped 0 (injected 0); readback_gate absent
+VERDICT: NOT CONSISTENT (125 checks, 1 off): train T1 D_W (F - S)
