@@ -1,0 +1,22 @@
+# regfile: the registered train plan. Blocks A, B, C, D are the first sitting (plan full; plan short runs the rows
+# with SHORT = 1); block E is an optional second sitting (plan ext). Run the blocks in this order and the trains of
+# a block in this order. A train is PROCESSES device processes back to back, each 13 launches of 0.4 s (launch 0
+# settles; then three quads), orientations alternating from FIRST; every process reads D(F) - D(S). A train that
+# appears in two blocks is one train: its units pool.
+# block	train	F	S	processes	first	short	role
+A	T2	rot.x0	rot2.x0	18	FSSF	1	check for T1: the same two forms on an image where no write changes a cell (designed difference 0)
+A	T1	rot.x64	rot2.x64	134	SFFS	1	cells: every write changes 64 stored bits (F) or none (S); same source, port and result stream, same field changes
+B	T3	res.k64	res.k0	18	SFFS	1	the result path: 64 result bits change per instruction, sources fixed, destinations hold
+B	T5	resf.k0	resz.k0	52	SFFS	1	one register write (x5, value unchanged) against a write to x0
+B	T6	wn2.z	wn1.z	18	FSSF	0	two destinations in turn (one field bit apart) against one destination
+B	T4	res.k32	res.k0	18	FSSF	0	the same at 32 bits (linearity of T3)
+C	T8	rd2i.d64	rd2i.e0	18	SFFS	1	bits 24:20 of an immediate instruction name two registers that differ in 64 bits (F) or hold zero (S)
+C	T10	rd2r.d64	rd2r.e0	18	FSSF	1	the two registers read as the second operand, result held at zero by and with x0
+C	T9	rd2i.e64	rd2i.e0	26	FSSF	0	the same two named registers both all ones (F) or both zero (S): no bit changes, ones held
+C	T11	rd1u.d64	rd1u.e0	18	FSSF	0	bits 19:15 of an upper-immediate instruction name the two registers
+D	T13	idx1.z	idx0.z	26	FSSF	1	the second source field changes in 1 bit against not at all (zero contents)
+D	T12	idx5.z	idx1.z	18	FSSF	1	the second source field changes in 5 bits against 1 (zero contents)
+D	T15	idx3.z	idx1.z	18	SFFS	0	the second source field changes in 3 bits against 1 (zero contents): the field ladder 0, 1, 3, 5
+E	T1	rot.x64	rot2.x64	230	SFFS	0	more of T1 in a second sitting (pooled with block A by unit)
+E	T7	wn8.z	wn2.z	18	SFFS	0	eight destinations in turn against two, one field bit per step (bounded)
+E	T14	rn8.z	idx1.z	18	FSSF	0	eight source registers in turn against two, one field bit per step (bounded)
