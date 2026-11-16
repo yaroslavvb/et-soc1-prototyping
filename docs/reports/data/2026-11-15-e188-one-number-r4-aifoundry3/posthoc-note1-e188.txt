@@ -1,0 +1,136 @@
+E188's data README, dated note 1: post hoc readings from committed files (posthoc_note1_e188.py)
+
+0. Inputs
+  SHA256SUMS: 350 of 350 entries OK; README.md 90b64fbb0feceb7b98d9e1c523233dc2f2fa6e44335d5251ff4f70d42df2dfc5; SHA256SUMS c895393250fa32d7b10a8c42c492aee439a8609adac0e7f0085d3d13320bbbc5
+  tools/claims-v3/kinds/run_e78.py: f3efd7838686dbd158c8f45a82ab59f4beda68479d792d73a36265e48784bb73
+  tools/claims-v3/kinds/reduce_e78.py: 6a158ceedc000fae884762d7e273231bfd4e4f42c09bf0b0723afc2da6c05d39
+  tools/claims-v3/e188/score_e188.py: 16d9f846a23008e2533f9014c621266d3ba6a86b2bfae4d0311c9ee14840a954
+  tools/claims-v3/e188/pairing_e188.py: f3e59cc7d0e1b81452bed11f3538ccc2e54a2eba9a046c12b601b50c557de491
+  tools/claims-v3/e188/forecast_e188.py: 9185d6546216f1774e920fc8b60f9d21cf369865706cf71fe1f373ddeae4fc8c
+  tools/claims-v3/ccheck/ccheck.py: 2f806fe6080baeea33558ddd49fded16f2ebcb8c02f494217dfd32cc033c0a22
+  tools/claims-v3/ccheck/patch_host_ccheck.py: 05a8c867f9c408c59437c30333d02f9252ee54d3d5bd2743e49a5b99a358c3ee
+  tools/claims-v3/e186/KIT.md.dated-note-2.md: aade400d3565d76676879a22f44a8e4534d4b0289cc148308c10b9ad1b01c5f2
+
+1. README.md's lines cited (line numbers in its committed bytes)
+  go_words_15_05_27: [21]
+  booking_15_10_41: [28, 58]
+  launched_15_15_19: [29]
+  step11_16_40_45: [30]
+  c_8744: [107]
+  config_same_at_close: [112]
+  anchors_at_band: [135]
+  never_sent_fw_query: [185]
+  scan_pubscan_message: [196]
+  scan_tiers_message: [198]
+
+2. The config reads: 24 files (each block's config_start.json and config_end.json, and the session's two)
+  minion_mhz: {"600": 24}
+  minion_mv: {"522": 1, "523": 23}
+  power_state: {"0": 24}
+  power_state_name: {"max_power": 24}
+  tdp_w: {"0": 24}
+  temp_threshold_c: {"65": 24}
+  a field with more than one value: minion_mv {"522": ["aifoundry3/e188/p18811/config_end.json"], "523": ["aifoundry3/e188-smoke/p18801/config_start.json", "aifoundry3/e188-smoke/p18801/config_end.json", "aifoundry3/e188-stoptest/p18802/config_start.json", "aifoundry3/e188-stoptest/p18802/config_end.json", "aifoundry3/e188/p18810/config_start.json", "aifoundry3/e188/p18810/config_end.json", "aifoundry3/e188/p18811/config_start.json", "aifoundry3/e188/p18812/config_start.json", "aifoundry3/e188/p18812/config_end.json", "aifoundry3/e188/p18813/config_start.json", "aifoundry3/e188/p18813/config_end.json", "aifoundry3/e188/p18814/config_start.json", "aifoundry3/e188/p18814/config_end.json", "aifoundry3/e188/p18815/config_start.json", "aifoundry3/e188/p18815/config_end.json", "aifoundry3/e188/p18816/config_start.json", "aifoundry3/e188/p18816/config_end.json", "aifoundry3/e188/p18820/config_start.json", "aifoundry3/e188/p18820/config_end.json", "aifoundry3/e188/p18821/config_start.json", "aifoundry3/e188/p18821/config_end.json", "logs/config-session-start.json", "logs/config-session-end.json"]}
+  the session's reads at 2026-11-15T15:15:14-08:00 and 2026-11-15T16:40:25-08:00: minion_mv 523 and 523
+  aifoundry3/e188-smoke/p18801/config_end.json: 523 mV (block.json closes at 15:16:33 PST)
+  aifoundry3/e188-stoptest/p18802/config_end.json: 523 mV (block.json closes at 15:15:28 PST)
+  aifoundry3/e188/p18810/config_end.json: 523 mV (block.json closes at 15:33:27 PST)
+  aifoundry3/e188/p18811/config_end.json: 522 mV (block.json closes at 15:43:27 PST)
+  aifoundry3/e188/p18812/config_end.json: 523 mV (block.json closes at 15:53:33 PST)
+  aifoundry3/e188/p18813/config_end.json: 523 mV (block.json closes at 16:03:34 PST)
+  aifoundry3/e188/p18814/config_end.json: 523 mV (block.json closes at 16:13:40 PST)
+  aifoundry3/e188/p18815/config_end.json: 523 mV (block.json closes at 16:23:42 PST)
+  aifoundry3/e188/p18816/config_end.json: 523 mV (block.json closes at 16:33:48 PST)
+  aifoundry3/e188/p18820/config_end.json: 523 mV (block.json closes at 15:23:23 PST)
+  aifoundry3/e188/p18821/config_end.json: 523 mV (block.json closes at 16:40:15 PST)
+
+3. The recorded quiet: the runner's starting value, and each train's closing anchor runner a1
+  run_e78.py: the starting value on line(s) [147], the recorded quiet on [229]; reduce_e78.py: prev_end_ms read on [150], idle_after_prev_ms on [177], the quiet gate on [274], the idle gate on [297] (800 ms on [44])
+  run marks with a recorded quiet of 1,000 s or more: 8
+    aifoundry3/e188-smoke/p18801/marks.jsonl #0 anchor_pi: quiet 3600.01 s, heats 0, start 49.0 C (hot 49.0), run start 15:15:33.068, prev_end 14:15:33.060 (+1 h = 15:15:33.060)
+    aifoundry3/e188/p18810/a1/marks.jsonl #0 fp32.randn: quiet 3625.67 s, heats 0, start 58.0 C (hot 62.0), run start 15:32:57.067, prev_end 14:32:31.400 (+1 h = 15:32:31.400)
+    aifoundry3/e188/p18811/a1/marks.jsonl #0 fp32.randn: quiet 3623.66 s, heats 0, start 58.0 C (hot 62.0), run start 15:42:56.302, prev_end 14:42:32.638 (+1 h = 15:42:32.638)
+    aifoundry3/e188/p18812/a1/marks.jsonl #0 fp32.randn: quiet 3629.58 s, heats 0, start 58.0 C (hot 62.0), run start 15:53:02.126, prev_end 14:52:32.548 (+1 h = 15:52:32.548)
+    aifoundry3/e188/p18813/a1/marks.jsonl #0 fp32.randn: quiet 3626.36 s, heats 0, start 58.0 C (hot 62.0), run start 16:03:04.689, prev_end 15:02:38.334 (+1 h = 16:02:38.334)
+    aifoundry3/e188/p18814/a1/marks.jsonl #0 fp32.randn: quiet 3629.47 s, heats 0, start 58.0 C (hot 62.0), run start 16:13:09.121, prev_end 15:12:39.646 (+1 h = 16:12:39.646)
+    aifoundry3/e188/p18815/a1/marks.jsonl #0 fp32.randn: quiet 3625.95 s, heats 0, start 58.0 C (hot 62.0), run start 16:23:11.450, prev_end 15:22:45.497 (+1 h = 16:22:45.497)
+    aifoundry3/e188/p18816/a1/marks.jsonl #0 fp32.randn: quiet 3630.48 s, heats 0, start 58.0 C (hot 63.0), run start 16:33:17.457, prev_end 15:32:46.974 (+1 h = 16:32:46.974)
+  B05 (p18810): the train's last process ended 15:32:31.363; a1 started about 15:32:31.400 (+0.037 s; prev_end + 1 h); its first run fp32.randn started 15:32:57.067, first launch 15:32:57.267; heats 0, heaters before it 0, start 58.0 C (hot 62.0); quiet recorded 3625.67 s; measured 25.704 s to the run's start, 25.904 s to its first launch; quiet gate (at least 2.0 - 0.05 s) pass recorded / pass measured; idle_after_prev_ms 3624667 recorded / 24704 measured (gate 800: pass / pass); runs-anchors.csv: idle_after_prev_ms 3624667, idle_ok True, fail 0
+  PAIR (p18811): the train's last process ended 15:42:32.601; a1 started about 15:42:32.638 (+0.037 s; prev_end + 1 h); its first run fp32.randn started 15:42:56.302, first launch 15:42:56.495; heats 0, heaters before it 0, start 58.0 C (hot 62.0); quiet recorded 3623.66 s; measured 23.701 s to the run's start, 23.894 s to its first launch; quiet gate (at least 2.0 - 0.05 s) pass recorded / pass measured; idle_after_prev_ms 3622657 recorded / 22694 measured (gate 800: pass / pass); runs-anchors.csv: idle_after_prev_ms 3622657, idle_ok True, fail 0
+  B19 (p18812): the train's last process ended 15:52:32.506; a1 started about 15:52:32.548 (+0.042 s; prev_end + 1 h); its first run fp32.randn started 15:53:02.126, first launch 15:53:02.319; heats 0, heaters before it 0, start 58.0 C (hot 62.0); quiet recorded 3629.58 s; measured 29.620 s to the run's start, 29.813 s to its first launch; quiet gate (at least 2.0 - 0.05 s) pass recorded / pass measured; idle_after_prev_ms 3628571 recorded / 28613 measured (gate 800: pass / pass); runs-anchors.csv: idle_after_prev_ms 3628571, idle_ok True, fail 0
+  AALL (p18813): the train's last process ended 16:02:38.296; a1 started about 16:02:38.334 (+0.038 s; prev_end + 1 h); its first run fp32.randn started 16:03:04.689, first launch 16:03:04.882; heats 0, heaters before it 0, start 58.0 C (hot 62.0); quiet recorded 3626.36 s; measured 26.393 s to the run's start, 26.586 s to its first launch; quiet gate (at least 2.0 - 0.05 s) pass recorded / pass measured; idle_after_prev_ms 3625348 recorded / 25386 measured (gate 800: pass / pass); runs-anchors.csv: idle_after_prev_ms 3625348, idle_ok True, fail 0
+  B10 (p18814): the train's last process ended 16:12:39.609; a1 started about 16:12:39.646 (+0.037 s; prev_end + 1 h); its first run fp32.randn started 16:13:09.121, first launch 16:13:09.315; heats 0, heaters before it 0, start 58.0 C (hot 62.0); quiet recorded 3629.47 s; measured 29.512 s to the run's start, 29.706 s to its first launch; quiet gate (at least 2.0 - 0.05 s) pass recorded / pass measured; idle_after_prev_ms 3628469 recorded / 28506 measured (gate 800: pass / pass); runs-anchors.csv: idle_after_prev_ms 3628469, idle_ok True, fail 0
+  B22 (p18815): the train's last process ended 16:22:45.459; a1 started about 16:22:45.497 (+0.038 s; prev_end + 1 h); its first run fp32.randn started 16:23:11.450, first launch 16:23:11.643; heats 0, heaters before it 0, start 58.0 C (hot 62.0); quiet recorded 3625.95 s; measured 25.991 s to the run's start, 26.184 s to its first launch; quiet gate (at least 2.0 - 0.05 s) pass recorded / pass measured; idle_after_prev_ms 3624946 recorded / 24984 measured (gate 800: pass / pass); runs-anchors.csv: idle_after_prev_ms 3624946, idle_ok True, fail 0
+  B04 (p18816): the train's last process ended 16:32:46.936; a1 started about 16:32:46.974 (+0.038 s; prev_end + 1 h); its first run fp32.randn started 16:33:17.457, first launch 16:33:17.649; heats 0, heaters before it 0, start 58.0 C (hot 63.0); quiet recorded 3630.48 s; measured 30.521 s to the run's start, 30.713 s to its first launch; quiet gate (at least 2.0 - 0.05 s) pass recorded / pass measured; idle_after_prev_ms 3629475 recorded / 29513 measured (gate 800: pass / pass); runs-anchors.csv: idle_after_prev_ms 3629475, idle_ok True, fail 0
+  ranges: recorded quiet 3623.66-3630.48 s; measured 23.701-30.521 s to the run's start, 23.894-30.713 s to the first launch; the runner started 0.037-0.042 s after the train's last process end
+  every gate passes under both the recorded and the measured previous end: True
+
+4. E188-C's coverage: the check of C judged 8744 launches ({"PASS": 8744}; 8744 distinct start-end keys)
+  scorer: kept kinds passes: 870 records, {"PASS": 870}
+  scorer: trains (train records): 7448 records, {"PASS": 7448}
+  scorer: trains' anchors (a0, a1): 280 records, {"PASS": 280}
+  smoke: kinds items: 78 records, {"PASS": 78}
+  smoke: train processes: 28 records, {"PASS": 28}
+  burn-ins (C launches inside a burnin mark): 40 records, {"PASS": 40}
+  the kit scorer's set (score_e188.py c_status, line(s) [128]): 8598 launches (scored-e188.json's c_status counts 7728 in the seven train blocks: the train records and their anchors; the kinds passes' 870 are its kept passes' item records); the smoke 106; the burn-ins 40; named by none 0; in all 8744
+  E188-C as scored: PASS
+
+5. The C-logging host's hash (FNV-1a's form: each byte xored in, then a multiply by 1099511628211, mod 2^64)
+  offset basis as used 1469598103934665603 (patch_host_ccheck.py line(s) [46], ccheck.py [85], pairing_e188.py [43]; named 'FNV-1a 64' on pairing_e188.py line(s) [15, 42]; E186's kit note 2 names the basis on line(s) [48]); the standard basis 14695981039346656037
+  c-log-p18801.jsonl.gz: 17 tiles records ([2048] bytes each, A then B): 17 equal under the host's basis, 0 under the standard; C records 106, 106 with the hash of a tiles record of their log
+  c-log-p18810.jsonl.gz: 156 tiles records ([2048] bytes each, A then B): 156 equal under the host's basis, 0 under the standard; C records 1104, 1104 with the hash of a tiles record of their log
+  c-log-p18811.jsonl.gz: 156 tiles records ([2048] bytes each, A then B): 156 equal under the host's basis, 0 under the standard; C records 1104, 1104 with the hash of a tiles record of their log
+  c-log-p18812.jsonl.gz: 156 tiles records ([2048] bytes each, A then B): 156 equal under the host's basis, 0 under the standard; C records 1104, 1104 with the hash of a tiles record of their log
+  c-log-p18813.jsonl.gz: 156 tiles records ([2048] bytes each, A then B): 156 equal under the host's basis, 0 under the standard; C records 1104, 1104 with the hash of a tiles record of their log
+  c-log-p18814.jsonl.gz: 156 tiles records ([2048] bytes each, A then B): 156 equal under the host's basis, 0 under the standard; C records 1104, 1104 with the hash of a tiles record of their log
+  c-log-p18815.jsonl.gz: 156 tiles records ([2048] bytes each, A then B): 156 equal under the host's basis, 0 under the standard; C records 1104, 1104 with the hash of a tiles record of their log
+  c-log-p18816.jsonl.gz: 156 tiles records ([2048] bytes each, A then B): 156 equal under the host's basis, 0 under the standard; C records 1104, 1104 with the hash of a tiles record of their log
+  c-log-p18820.jsonl.gz: 46 tiles records ([2048] bytes each, A then B): 46 equal under the host's basis, 0 under the standard; C records 460, 460 with the hash of a tiles record of their log
+  c-log-p18821.jsonl.gz: 45 tiles records ([2048] bytes each, A then B): 45 equal under the host's basis, 0 under the standard; C records 450, 450 with the hash of a tiles record of their log
+  in all: 1200 tiles records, 1200 under the host's basis, 0 under the standard; the seven train logs 1092, 1092, 0; C records 8744, 8744 paired to a tiles record of their log
+
+6. The window under two readings of G (form (a): last start G+1:30, last end G+3:30, each rounded up to the whole minute)
+  times: steps 5 15:13:54, 6 ended 15:14:03, 8 ended 15:14:51, 9 15:15:19, 11 16:40:45 (README); T0 15:15:14; the first runner line 15:15:19 (session.log); the queue's last start 16:33:58 (p18821, projected 410 s), its deadline as run 2026-11-15 18:41:00 (queue.out); the session's end 16:40:25
+  G = his words, 15:05:27: last start 16:36, last end 18:36; every gate holds: True (the queue's last item projected to end 16:40:48)
+    steps 5, 6, 8, 9 at or before the last start: yes
+    the session's start (T0) at or before the last start: yes
+    step 9: launch + 100 min within the last end: yes
+    the queue's last item: start + projected within the last end: yes
+    the session's end within the last end: yes
+    step 11: start + 10 min within the last end: yes
+  G = the booking, 15:10:41 (as run): last start 16:41, last end 18:41; every gate holds: True (the queue's last item projected to end 16:40:48)
+    steps 5, 6, 8, 9 at or before the last start: yes
+    the session's start (T0) at or before the last start: yes
+    step 9: launch + 100 min within the last end: yes
+    the queue's last item: start + projected within the last end: yes
+    the session's end within the last end: yes
+    step 11: start + 10 min within the last end: yes
+
+7. Margins at the session's s, and the range of s over which every word that takes s holds (post hoc; deciding nothing)
+  s = 1.013768875192206; at it this arithmetic gives the kit's words: True (31 words and sub-words; largest figure difference 4.547e-13); forecast_e188.lines_at on line(s) [182]
+  E188-B05 SIZE M12: -0.00232
+  E188-B05 SIZE M10: -0.01590
+  E188-PAIR SIZE M12: +0.00402
+  E188-PAIR SIZE M10: +0.00402
+  E188-B19 SIZE M12: -0.00099
+  E188-B19 SIZE M10: -0.01456
+  E188-AALL SIZE M12: +0.01596
+  E188-AALL SIZE M10: -0.08802
+  E188-B10 SIZE M12: +0.00395
+  E188-B10 SIZE M10: -0.00961
+  E188-B22 SIZE M12: +0.00052
+  E188-B22 SIZE M10: -0.01309
+  E188-B04 SIZE M12: +0.00609
+  E188-B04 SIZE M10: -0.00743
+  E188-GB1 SIZE M12: -0.00099
+  E188-GB1 REPEAT (overlap; negative = the gap): -0.00057
+  E188-GA23 SIZE M12: +0.00069
+  E188-GA23 REPEAT (overlap; negative = the gap): +0.00040
+  E188-BPOS (point - Q): +3.62149
+  E188-M M12 (point - Q): -5.74607
+  E188-M M10 (point - Q): -1901.61940
+  every word and sub-word holds for s in [0.97905, 1.16630] (step 1e-05; every train's rate ratio as measured)
+  first change below: at s 0.97904: E188-B22: M12 -> NEITHER; E188-B22 SIZE M12: PASS -> FAIL LOW
+  first change above: at s 1.16631: E188-GA23 REPEAT: AGREES -> DIFFERS LOW
+  at s = 1 (rate ratios as measured), words that change: none
+SPDX-License-Identifier: Apache-2.0
