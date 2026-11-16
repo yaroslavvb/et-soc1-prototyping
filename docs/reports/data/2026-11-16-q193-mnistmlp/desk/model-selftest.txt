@@ -1,0 +1,13 @@
+MODEL-SELFTEST float64 product == int64 product (K 1792, extremes included) OK
+MODEL-SELFTEST largest |acc| = 1792 x 255 x 128 is exact                OK
+MODEL-SELFTEST B-tile interleave: line p, bytes 4j..4j+3 = Q[64t+4p+x, 16c+j] OK
+MODEL-SELFTEST splitmix64 vectorised == scalar (4 KiB, layer-1 seed)    OK
+MODEL-SELFTEST splitmix64(0) first output 0xE220A8397B1DCDAF            OK
+MODEL-SELFTEST argmax takes the first maximum (7 at 1 and 2 -> 1; all equal -> 0) OK
+MODEL-SELFTEST requant: floor of the signed product, clamp 0..255       OK
+MODEL-SELFTEST requant: -1 x M -> floor(-M / 2^32) = -1 -> 0            OK
+MODEL-SELFTEST MLPW round trip                                          OK
+MODEL-SELFTEST MLPE layout (64 B header, labels, checksums)             OK
+MODEL-SELFTEST MLPL layout (64 B header, int32 tiles)                   OK
+MODEL-SELFTEST checksum wraps mod 2^32 (160 x -1 -> 2^32 - 160)         OK
+MODEL-SELFTEST PASS

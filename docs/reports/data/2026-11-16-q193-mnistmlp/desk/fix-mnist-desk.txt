@@ -1,0 +1,50 @@
+start 2026-11-16 02:20:04 PST load 0.26 0.68 0.92; Python 3.12.3; numpy 1.26.4
+== 02:20:04 1 host --selftest
+SELFTEST sha256(abc)                                  OK
+SELFTEST splitmix64(0) first output                   OK
+SELFTEST B-tile interleave vs direct product          OK
+SELFTEST 449 chunks, 10,892 tiles                     OK
+SELFTEST scp resident layout fits 360 tiles a shire   OK
+SELFTEST requant: -1 x M floors below 0 -> 0          OK
+SELFTEST requant: exact 2^32 / M steps                OK
+SELFTEST requant: saturates at 255                    OK
+SELFTEST PASS
+host selftest rc 0
+== 02:20:04 2 model self-tests
+MODEL-SELFTEST checksum wraps mod 2^32 (160 x -1 -> 2^32 - 160)         OK
+MODEL-SELFTEST PASS
+model selftest rc 0
+== 02:20:05 3 host --ref against the model (4 groups each) and compare-ref
+host --ref trained train rc 0: "pins":"OK" "ref_groups":4,"ref_label_mismatches":0,"ref_checksum_mismatches":0,"ref_logit_tiles_checked":4,"ref_logit_tile_mismatches":0,"first_mismatch":"","status":"PASS"}
+compare-ref trained train rc 0: {"groups": 4, "images": 64, "labels_equal": true, "checksums_equal": true, "c5_equal": true, "arithmetic": "int64 (exact_int)", "status": "EQUAL"}
+  ref-trained-train.mlpr = the committed one
+host --ref trained test rc 0: "pins":"OK" "ref_groups":4,"ref_label_mismatches":0,"ref_checksum_mismatches":0,"ref_logit_tiles_checked":4,"ref_logit_tile_mismatches":0,"first_mismatch":"","status":"PASS"}
+compare-ref trained test rc 0: {"groups": 4, "images": 64, "labels_equal": true, "checksums_equal": true, "c5_equal": true, "arithmetic": "int64 (exact_int)", "status": "EQUAL"}
+  ref-trained-test.mlpr = the committed one
+host --ref random train rc 0: "pins":"OK" "ref_groups":4,"ref_label_mismatches":0,"ref_checksum_mismatches":0,"ref_logit_tiles_checked":4,"ref_logit_tile_mismatches":0,"first_mismatch":"","status":"PASS"}
+compare-ref random train rc 0: {"groups": 4, "images": 64, "labels_equal": true, "checksums_equal": true, "c5_equal": true, "arithmetic": "int64 (exact_int)", "status": "EQUAL"}
+  ref-random-train.mlpr = the committed one
+host --ref random test rc 0: "pins":"OK" "ref_groups":4,"ref_label_mismatches":0,"ref_checksum_mismatches":0,"ref_logit_tiles_checked":4,"ref_logit_tile_mismatches":0,"first_mismatch":"","status":"PASS"}
+compare-ref random test rc 0: {"groups": 4, "images": 64, "labels_equal": true, "checksums_equal": true, "c5_equal": true, "arithmetic": "int64 (exact_int)", "status": "EQUAL"}
+  ref-random-test.mlpr = the committed one
+== 02:20:12 4 negative control (trained weights against the random expected file: must FAIL, exit 1)
+negative control rc 1 (want 1): "ref_label_mismatches":27,"ref_checksum_mismatches":2,"ref_logit_tiles_checked":0,"ref_logit_tile_mismatches":0,"first_mismatch":"group 0 label","status":"FAIL"}
+== 02:20:12 5 --dry plans of the planned launches
+dry train R=1 rc 0 (0.29 s 185404 KB): "groups":3750,"passes":1 "rounds":118 "model_s":0.0573193 "status":"DRY"
+dry train R=16 rc 0 (0.28 s 185324 KB): "groups":60000,"passes":16 "rounds":1875 "model_s":0.81796 "status":"DRY"
+dry train R=96 rc 0 (0.27 s 185392 KB): "groups":360000,"passes":96 "rounds":11250 "model_s":4.8701 "status":"DRY"
+dry test R=1 rc 0 (0.09 s 68024 KB): "groups":625,"passes":1 "rounds":20 "model_s":0.0158298 "status":"DRY"
+== 02:20:13 6 counts_scale.py on the nine runs' counts (S0a, S0b, S0c, S0r, S1, S2 committed; S3, S3x, S1b this lane's)
+== derivation_checks: 18 harts, 0 unequal
+  train_R1: groups 3750, rounds 118, slots 3776, padding 26, busiest shire 4 rounds (22 shires), TensorIMA8A32 issued 41,128,192
+  train_R16: groups 60000, rounds 1875, slots 60000, padding 0, busiest shire 59 rounds (19 shires), TensorIMA8A32 issued 653,520,000
+  train_R96: groups 360000, rounds 11250, slots 360000, padding 0, busiest shire 352 rounds (18 shires), TensorIMA8A32 issued 3,921,120,000
+  test_R1: groups 625, rounds 20, slots 640, padding 15, busiest shire 1 rounds (20 shires), TensorIMA8A32 issued 6,970,880
+counts_scale rc 0
+  train_R1: host plan groups 3750 rounds 118; accounting rounds 118 slots 3776 padding 26 busiest 4: SAME
+  train_R16: host plan groups 60000 rounds 1875; accounting rounds 1875 slots 60000 padding 0 busiest 59: SAME
+  train_R96: host plan groups 360000 rounds 11250; accounting rounds 11250 slots 360000 padding 0 busiest 352: SAME
+  test_R1: host plan groups 625 rounds 20; accounting rounds 20 slots 640 padding 15 busiest 1: SAME
+PLANS = ACCOUNTING
+end 2026-11-16 02:20:13 PST
+DESK PASS

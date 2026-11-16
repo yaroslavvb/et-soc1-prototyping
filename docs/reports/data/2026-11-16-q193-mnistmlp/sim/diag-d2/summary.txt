@@ -1,0 +1,25 @@
+Log-free rerun of the FINAL build in S0b's configuration (dram, shire 0, 2 minions, 2 groups, trained weights; -vpurf_warn; the default checkers: memory coherence, L1/L2 scratchpad, FLB, TensorStore), aifoundry3, Mon 16 Nov 2026 00:29 PST.
+Elapsed (wall clock) time (h:mm:ss or m:ss): 0:38.58
+Maximum resident set size (kbytes): 323048
+"status":"PASS"
+
+sysemu.log, its warning, fatal and error lines:
+warning lines: 240, fatal: 0, error: 0
+by shire tag:
+      9 WARN EMU: [VPURF-Checker]  S0
+     27 WARN EMU: [VPURF-Checker]  S254
+    204 WARN EMU: [VPURF-Checker]  S32
+warnings naming a kernel-range PC (0x8005...):
+0
+non-VPURF warnings:
+
+the shire-0 lines (hart 62 = minion 31, idle in this run, in the worker firmware's code at 0x8000c07xxx, not the kernel):
+26092615: WARN EMU: [VPURF-Checker] [H62 S0:N3:C7:T0] 0x8000c07114 (0x00085007) writes f0 at cycle 26092614
+26092615: WARN EMU: [VPURF-Checker] [H62 S0:N3:C7:T0] 0x8000c07118 (0x00055027) reads f0
+26092615: WARN EMU: [VPURF-Checker] [H62 S0:N3:C7:T0] VPURF workaround required for type A
+26092682: WARN EMU: [VPURF-Checker] [H62 S0:N3:C7:T0] 0x8000c07206 (0x0005d007) writes f0 at cycle 26092681
+26092682: WARN EMU: [VPURF-Checker] [H62 S0:N3:C7:T0] 0x8000c0720a (0x0007d027) reads f0
+26092682: WARN EMU: [VPURF-Checker] [H62 S0:N3:C7:T0] VPURF workaround required for type A
+26092687: WARN EMU: [VPURF-Checker] [H62 S0:N3:C7:T0] 0x8000c07206 (0x0005d007) writes f0 at cycle 26092686
+26092687: WARN EMU: [VPURF-Checker] [H62 S0:N3:C7:T0] 0x8000c0720a (0x0007d027) reads f0
+26092687: WARN EMU: [VPURF-Checker] [H62 S0:N3:C7:T0] VPURF workaround required for type A

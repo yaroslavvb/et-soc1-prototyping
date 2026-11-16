@@ -1,0 +1,61 @@
+# E202 mnistmlp build facts (Q193, lanes mnist-kernel and fix-mnist), Mon 16 Nov 2026 Pacific
+
+## The committed sources (sha256), as fixed by lane fix-mnist
+bc8583a6998132c5fb127d6bf37f8a8ecd50f3f3f8869c37e23c5e3cfec026f0  workloads/mnistmlp/mnistmlp_args.h
+459e9f1956262a0192fa51386a7c594a032acda79612317bfb70e571a4369ba5  workloads/mnistmlp/kernel/mnistmlp.c
+31a2ca090e5802350cfb969c1f8453eab094cf29af312a528b7df768f8547bea  workloads/mnistmlp/kernel/crt.S
+64ed5be7e4ef27f10a27b4f3868bc9604612d81a1be907fa9bcef0e7a0ff5352  workloads/mnistmlp/kernel/sections.ld
+ebf44584ba4b2945939d1e078406a8b767563376b91c266edb0947d37a48932b  workloads/mnistmlp/kernel/CMakeLists.txt
+157726fd0ee791c625fd5aad4992e627574eb0b40a5933a0245a081cfd675381  workloads/mnistmlp/host/main.cpp
+3af0d4c1015e31bf8285a3959c2f3e8bde5813041b907129e6d93a5a723e5a59  workloads/mnistmlp/host/CMakeLists.txt
+a2d45b23322cc133e888ec3cd6fee05c028b0da8275046527e63bab1d01de3f0  workloads/mnistmlp/host/Constants.h.in
+49ca7dbea0674ea1403d505896ed43cc6d402f39755efdb7647070ce59d97d0a  workloads/mnistmlp/CMakeLists.txt
+
+## Their builds (fix-mnist; nice 10, -j4; no device opened)
+aifoundry2, 01:34:29-01:34:31 PST, inside a CPU slot: riscv64-unknown-elf-gcc () 15.1.0, cmake 3.28.3, g++ 13.3.0
+kernel ELF   5bab536543306c37101f1d9d2d0eba9ad64b2c64047e2f93c03051c607d402c8  12408 B  (= mnist-kernel's build below)
+kernel .text ace7bcb04536329f1d75135446049c442b9f4b65f726083f7623b959b279d82d  7160 B  (= mnist-kernel's build below)
+host         d430c0f766b4feeb77addb293ad35c86e1ce69756666959128ca775d21230bc1
+disassembly: equal to mnistmlp.dis here past its header lines
+aifoundry3, 01:59:55-01:59:58 PST, this lane's own folder: GCC (g1b306039a) 15.1.0
+0f74ff0d35d1114dddb92ade81b5d549b837fa2512093908adf60d40358a0a19  BUILD/kernel/mnistmlp.elf  (= mnist-kernel's build below)
+ace7bcb04536329f1d75135446049c442b9f4b65f726083f7623b959b279d82d  BUILD/kernel/mnistmlp.text.bin
+a48aa1bd6a5c6718882ff32f84dd793b0cf045e2360e7f93dac2e9c6e4d8b6a5  BUILD/host/mnistmlp_host  (ran S3, S3x and S1b)
+
+## mnist-kernel's build (the sources before the fixes: mnistmlp_args.h differed in a header comment, host/main.cpp
+## in the two status fields; the kernel's bytes are the same). S0a, S0b, S0c, S0r, S1 and S2 ran its aifoundry3 host.
+### Sources (sha256)
+605c679ae45aadbaa6988340d4a31c9a5559a15dc9db1c3ca37ff8e7a49d4e0f  workloads/mnistmlp/mnistmlp_args.h
+459e9f1956262a0192fa51386a7c594a032acda79612317bfb70e571a4369ba5  workloads/mnistmlp/kernel/mnistmlp.c
+31a2ca090e5802350cfb969c1f8453eab094cf29af312a528b7df768f8547bea  workloads/mnistmlp/kernel/crt.S
+64ed5be7e4ef27f10a27b4f3868bc9604612d81a1be907fa9bcef0e7a0ff5352  workloads/mnistmlp/kernel/sections.ld
+ebf44584ba4b2945939d1e078406a8b767563376b91c266edb0947d37a48932b  workloads/mnistmlp/kernel/CMakeLists.txt
+1f3b3c9e7bdf4b2d48ecec146b4cf267d5be0381b301c8f58b49552f1bb392f3  workloads/mnistmlp/host/main.cpp
+3af0d4c1015e31bf8285a3959c2f3e8bde5813041b907129e6d93a5a723e5a59  workloads/mnistmlp/host/CMakeLists.txt
+a2d45b23322cc133e888ec3cd6fee05c028b0da8275046527e63bab1d01de3f0  workloads/mnistmlp/host/Constants.h.in
+49ca7dbea0674ea1403d505896ed43cc6d402f39755efdb7647070ce59d97d0a  workloads/mnistmlp/CMakeLists.txt
+
+### aifoundry2 (the desk build; cmake -S workloads/mnistmlp -B BUILD -DCMAKE_PREFIX_PATH=/opt/et; nice -n 10 cmake --build -j4 inside a CPU slot)
+riscv64-unknown-elf-gcc () 15.1.0
+cmake version 3.28.3
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+kernel ELF   5bab536543306c37101f1d9d2d0eba9ad64b2c64047e2f93c03051c607d402c8  12408 B
+kernel .text ace7bcb04536329f1d75135446049c442b9f4b65f726083f7623b959b279d82d  7160 B
+kernel .rodata: empty
+host         9ec003af2ceb1d8f6e9c3126315e0f80f77cfb71237c48391273d63401bc49f0
+
+### aifoundry3 (the simulator's box; the same sources, its own toolchain; no device opened)
+0f74ff0d35d1114dddb92ade81b5d549b837fa2512093908adf60d40358a0a19  BUILD/kernel/mnistmlp.elf
+ace7bcb04536329f1d75135446049c442b9f4b65f726083f7623b959b279d82d  BUILD/kernel/mnistmlp.text.bin
+ee8005cd7847212d1838a1e3b728a084d980edd5b7c1af23ef9ac6797cb1f63e  BUILD/host/mnistmlp_host
+  [     0]  GCC: (g1b306039a) 15.1.0
+
+## Disassembly checks (aifoundry2 build)
+the 13 trapping instructions (fdiv.s fsqrt.s fdiv.ps fsqrt.ps frsq.ps fsin.ps fdiv.pi fdivu.pi frem.pi fremu.pi fcvt.l.s fcvt.s.l, csrr cycle): 0 found
+calls: 3 (entry_point, run, epi_out: no library call)
+stack frames (bytes): sp,sp,-1200 sp,sp,-1056 sp,sp,-224  of the 4,160 B a hart has
+fswg.ps: 16; tensor_store: 1 (the debug logits only); hpmcounter3 reads: 28
+epi_out prologue f-register saves: 0
+
+## The first build (TensorStore activations), kept for the record: stopped in the simulator (README.md section 3)
+kernel .text 95d3a146f49d450080ce75892fbd69ab65ef644ce8cebae5c7aa1ecce28c29a5 (both boxes)
