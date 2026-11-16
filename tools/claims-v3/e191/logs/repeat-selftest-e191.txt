@@ -1,0 +1,29 @@
+# E191 kit note 3: repeat_e191.py --selftest, run 2026-11-15 21:55:16 PST on aifoundry2 inside the round's CPU slot and a no-device sandbox (W/nodev.sh: /dev/et* 0, /run/lock entries 0); /usr/bin/python3 3.12.3; the lane a2-e191's scratch clone at b7af9be54992 (GitHub main) with the note's files; its input the frozen scorer's output on the committed second-session record (score_e191.py docs/reports/data/2026-11-15-e191-blind-day-aifoundry1-c1-s2 --out <scratch>/scores-e191-s2.json: sha256 23484c4f546595a728f0c7ffe59e9414d125473108f06891e5dd53283d62ecb8, byte for byte the record's committed scores-e191.json (f74c81e3); words {"E191-S1":"FAIL","E191-S1T":"PASS","E191-S2":"FAIL","E191-S2T":"FAIL"})
+PASS RS1: the second session beside itself: 60 differences, all zero; 6 compared
+PASS RS2: known moves read back exactly; the registered S1T stays the second session's while the third's word reads FAIL
+PASS RS3: sparse parity NO DATA: no difference; five compared
+PASS RS4: refused: S3_SCORES: configurations missing: sha256
+PASS RS5: refused: S3_SCORES: rules missing: E191-S2T
+PASS RS6: no 'verdict' key on the third session's side; the second session's rules carry 'registered_verdict'
+PASS RS7: the text's last line
+PASS RS8: S1's spread equals the frozen scorer's e_j_over_pass_sd for every configuration
+REPEAT-E191 SELFTEST 8 of 8 PASS (the second session's scores sha256 23484c4f546595a728f0c7ffe59e9414d125473108f06891e5dd53283d62ecb8)
+rc 0
+# the same output set beside itself (repeat_e191.py <s2> <s2>), its text, for the form of the reading:
+E191 repeat reading: REPORTED (E191.md's dated amendment A2): the third session's frozen-scorer output beside the second session's; E191's registered verdicts are the second session's and stand; nothing here is a verdict or replaces one
+inputs: second session scores-e191-s2.json sha256 23484c4f546595a728f0c7ffe59e9414d125473108f06891e5dd53283d62ecb8; third session scores-e191-s2.json sha256 23484c4f546595a728f0c7ffe59e9414d125473108f06891e5dd53283d62ecb8
+configuration | passes 2nd/3rd | S1 error 2nd, 3rd, difference (points), over the combined SE | S1T error 2nd, 3rd, difference, over the combined SE | S2 ratio (mean t_k / point) 2nd, 3rd | S2T error 2nd, 3rd, difference | J over idle, J at rest, t_k: 3rd/2nd - 1 | T0 mean 2nd, 3rd (C)
+copy-zeros | 4/4 | -14.44%, -14.44%, +0.00, +0.00 | -3.25%, -3.25%, +0.00, +0.00 | 1.3840, 1.3840 | -21.66%, -21.66%, +0.00 | +0.00%, +0.00%, +0.00% | 50.59, 50.59
+copy-random | 4/4 | -15.93%, -15.93%, +0.00, +0.00 | -4.00%, -4.00%, +0.00, +0.00 | 1.3837, 1.3837 | -21.36%, -21.36%, +0.00 | +0.00%, +0.00%, +0.00% | 50.75, 50.75
+sha256 | 4/4 | -10.54%, -10.54%, +0.00, +0.00 | -2.33%, -2.33%, +0.00, +0.00 | 0.7570, 0.7570 | +30.52%, +30.52%, +0.00 | +0.00%, +0.00%, +0.00% | 51.00, 51.00
+sort-sorted | 4/4 | -25.30%, -25.30%, +0.00, +0.00 | -5.22%, -5.22%, +0.00, +0.00 | 0.7559, 0.7559 | +27.82%, +27.82%, +0.00 | +0.00%, +0.00%, +0.00% | 50.75, 50.75
+sort-shuffled | 4/4 | -19.03%, -19.03%, +0.00, +0.00 | -4.22%, -4.22%, +0.00, +0.00 | 0.7719, 0.7719 | +26.94%, +26.94%, +0.00 | +0.00%, +0.00%, +0.00% | 50.75, 50.75
+sparse-parity | 4/4 | -6.49%, -6.49%, +0.00, +0.00 | -2.47%, -2.47%, +0.00, +0.00 | 0.9965, 0.9965 | +1.63%, +1.63%, +0.00 | +0.00%, +0.00%, +0.00% | 51.00, 51.00
+E191-S1: the registered verdict (the second session's, it stands) FAIL (1 of 6 within, rms 0.1642); the third session's word, REPORTED FAIL (1 of 6 within, rms 0.1642)
+E191-S1T: the registered verdict (the second session's, it stands) PASS (5 of 6 within); the third session's word, REPORTED PASS (5 of 6 within)
+E191-S2: the registered verdict (the second session's, it stands) FAIL (1 of 6 within); the third session's word, REPORTED FAIL (1 of 6 within)
+E191-S2T: the registered verdict (the second session's, it stands) FAIL (1 of 6 within); the third session's word, REPORTED FAIL (1 of 6 within)
+arm v2.1 (REPORTED in both): second session E191-S1 FAIL, E191-S1T PASS, E191-S2 FAIL, E191-S2T FAIL; third session E191-S1 FAIL, E191-S1T PASS, E191-S2 FAIL, E191-S2T FAIL
+arm v2c (REPORTED in both): second session E191-S1 FAIL, E191-S1T PASS, E191-S2 FAIL, E191-S2T FAIL; third session E191-S1 FAIL, E191-S1T PASS, E191-S2 FAIL, E191-S2T FAIL
+REPEAT-E191 REPORTED: 6 configurations compared, 0 with NO DATA in a session; the registered verdicts stand: E191-S1 FAIL, E191-S1T PASS, E191-S2 FAIL, E191-S2T FAIL
+rc 0
