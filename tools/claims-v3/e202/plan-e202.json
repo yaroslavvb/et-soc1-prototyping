@@ -1,0 +1,160 @@
+{
+ "R_rule": {
+  "allowed": [
+   16,
+   32,
+   48,
+   64,
+   80,
+   96
+  ],
+  "at_the_forecast": {
+   "random-dram": {
+    "launch_s_R96": {
+     "band": [
+      2.26615,
+      4.58445
+     ],
+     "point": 3.00034
+    }
+   },
+   "random-scp": {
+    "launch_s_R96": {
+     "band": [
+      2.26615,
+      4.58461
+     ],
+     "point": 3.00049
+    }
+   },
+   "trained-dram": {
+    "launch_s_R96": {
+     "band": [
+      2.26615,
+      4.58445
+     ],
+     "point": 3.00034
+    }
+   },
+   "trained-scp": {
+    "launch_s_R96": {
+     "band": [
+      2.26615,
+      4.58461
+     ],
+     "point": 3.00049
+    }
+   }
+  },
+  "busiest_rounds": {
+   "1": 4,
+   "16": 59,
+   "32": 118,
+   "48": 176,
+   "64": 235,
+   "80": 293,
+   "96": 352
+  },
+  "ceiling_kernel_s": 6,
+  "default": 96,
+  "words": "per arm, from that arm's R = 1 smoke: t_round = work_cycles.max / 4 (the busiest shire's rounds at R = 1) / 600 MHz; predicted kernel seconds of R passes = busiest(R) x t_round + copy_cycles_max / 600 MHz; R = 96 if that is at most 6 s, else the largest allowed R that is; no burst for the arm if none is"
+ },
+ "_what": "E202's plan (plan_e202.py), frozen with the registration; the kit runs it, never re-draws it",
+ "bursts": {
+  "coop4": "NOT BUILT: no arm (the design's REPORTED coop4 arm is dropped)",
+  "form": "each burst: the die gate, 8 s at rest, ONE host process (one launch of R passes, under timeout 10, never -k), 10 s at rest; the sampler at 10 Hz throughout (no statistics reset)",
+  "reported": {
+   "K": 2,
+   "configs": "the dram pair, only when the scp pair is scored",
+   "order": [
+    "trained",
+    "random",
+    "random",
+    "trained"
+   ]
+  },
+  "scored": {
+   "K": 4,
+   "configs": "the scored pair's trained (T) and random (Z) configurations",
+   "order": [
+    "trained",
+    "random",
+    "random",
+    "trained",
+    "trained",
+    "random",
+    "random",
+    "trained"
+   ]
+  }
+ },
+ "card": "aifoundry3 card 0 (/dev/et0_*, /run/lock/etsoc-shire0.lock) at its pinned 600 MHz, reads only, nothing set",
+ "card_time_minutes": {
+  "at_the_point": {
+   "8 scored and 4 REPORTED bursts at the point (24.0 s each), no die-gate wait": 4.8,
+   "fixed parts (checks, smoke, anchors, closing)": 12.0
+  },
+  "cap": 35.0,
+  "last_start": 33.0,
+  "parts": {
+   "4 REPORTED bursts (the dram pair, when the scp pair is scored)": 5.71,
+   "8 scored bursts at the slow end (25.6 s each) plus the die gate's waits (1 minute each, allowed)": 11.41,
+   "checks, the look, the dry listing, the stop-path test": 4,
+   "closing reads and release": 2.0,
+   "smoke: five R = 1 processes (T-scp, Z-scp, T-dram, Z-dram with --debug-logits; T-scp on the test split)": 2.0,
+   "two idle anchors of 2 minutes (start, end)": 4
+  },
+  "total_about": 29.1,
+  "total_at_the_point": 16.8,
+  "words": "no burst starts after 33 card-minutes from the first card command; the session ends by 35"
+ },
+ "die_gate": {
+  "below_c": 52.0,
+  "below_means": "not a block: scored given its own T0 and labelled so",
+  "start_at_or_below_c": 60.0,
+  "wait_s_max": 600
+ },
+ "package_counter": "not read (the lab's default)",
+ "post": "waived: the owner's standing words of Sun 15 Nov 2026 10:22:36 PST",
+ "predicted_peak": {
+  "board_w_band_top_max": 61.9851,
+  "board_w_point_max": 42.0427,
+  "plan_stands": true,
+  "rule": "plan_e202.py refuses (exit 3) unless every configuration's band-top board watts lie under the 65 W stop",
+  "stop_w": 65.0
+ },
+ "smoke": {
+  "accuracy_expected": "the ACC launch's labels equal the model's expected file (its core check); the trained network's test accuracy is then the model's, 98.49% (desk, measured)",
+  "gate": "an arm's smoke passes when its host result reads core_status PASS (every record, label line, checksum, discard line and operation count; tensor_error 0); a logits_status FAIL with core_status PASS is a debug-path defect, recorded, not a gate failure; the scored pair is scp when T-scp and Z-scp both pass, else dram when T-dram and Z-dram both pass (the registered fallback), else no burst runs (no data, never a failed forecast)",
+  "processes": [
+   {
+    "args": "--card --stage scp --passes 1 --split train --debug-logits --weights trained",
+    "arm": "T-scp"
+   },
+   {
+    "args": "--card --stage scp --passes 1 --split train --debug-logits --weights random",
+    "arm": "Z-scp"
+   },
+   {
+    "args": "--card --stage dram --passes 1 --split train --debug-logits --weights trained",
+    "arm": "T-dram"
+   },
+   {
+    "args": "--card --stage dram --passes 1 --split train --debug-logits --weights random",
+    "arm": "Z-dram"
+   },
+   {
+    "args": "--card --stage scp --passes 1 --split test --weights trained --true-labels (on-card test accuracy)",
+    "arm": "ACC"
+   }
+  ]
+ },
+ "stops": {
+  "board_w_at_or_above": 65.0,
+  "clock": "every sample 600 MHz: the first sample off it sets its burst aside, a second stops the session",
+  "die_minshire_c_at_or_above": 70.0,
+  "stale_telemetry_s": 1.0,
+  "words": "a stop ends the queue: the running process finishes (a device process is never killed), nothing further starts, the closing reads, release"
+ },
+ "window": "G = the card lane's booking of aifoundry3 on its day; last start G + 1:30, last end G + 3:30, both rounded up to the minute, inside that Pacific day; G at 20:29:00 PST or earlier; after E201 and its 40-minute rest; one session of ours on aifoundry3 at a time"
+}
