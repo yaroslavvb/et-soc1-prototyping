@@ -1,0 +1,88 @@
+{
+ "what": "MM1-v0: the spec prototype frozen (desk, post hoc fits; not MM1-v1, which the build lane freezes after refitting)",
+ "python": "3.12.3",
+ "numpy": "1.26.4",
+ "time": {
+  "form": "MAXAB over op classes",
+  "Tc": "E119 c1 law, floored at the RTL law (529 / 270 cycles)",
+  "c3": 446.49332,
+  "m3": 0.812,
+  "cF": 219.50012,
+  "mF": 2.35874,
+  "kA": 0.83979,
+  "retention": {
+   "x50_MB": 50.722,
+   "s_MB": 8.745,
+   "form": "1/(1+exp((d-x50)/s)) on design B closed-form stack distances"
+  },
+  "collapse": "far-B (B_r0) retention x 0.15 when MB = 1, NB in {4, 8}, KB >= 4, footprint > 32 MB (design A rule)",
+  "loeo": {
+   "n": 769,
+   "rms_pct": 5.54,
+   "bias_pct": 0.36,
+   "worst_pct": 20.1
+  },
+  "loeo_gemmL": {
+   "n": 363,
+   "rms_pct": 6.75,
+   "bias_pct": -0.72,
+   "worst_pct": 20.1
+  },
+  "loeo_carm": {
+   "n": 406,
+   "rms_pct": 4.16,
+   "bias_pct": 1.31,
+   "worst_pct": 15.3
+  },
+  "loco": {
+   "aifoundry1 card 1": {
+    "n": 18,
+    "rms_pct": 5.36,
+    "bias_pct": -4.4,
+    "worst_pct": -6.8
+   },
+   "aifoundry2 card 0": {
+    "n": 485,
+    "rms_pct": 11.83,
+    "bias_pct": -4.75,
+    "worst_pct": -23.9
+   },
+   "aifoundry3 card 0": {
+    "n": 266,
+    "rms_pct": 3.86,
+    "bias_pct": 1.54,
+    "worst_pct": 13.2
+   }
+  }
+ },
+ "energy": {
+  "form": "E3: P_aw(card) n/1024 + g (B(f)-B(600)) + rate s_V [e_res + sum_l n_l/32 (b_l + d_l phi)]",
+  "theta": {
+   "b2": 49.354624843480366,
+   "d2": 496.7001693768499,
+   "b3": 244.54588002832102,
+   "d3": 962.636374841195,
+   "bF": 890.617526416979,
+   "dF": 1339.0341372104765,
+   "g": 0.8168889440478345,
+   "Paw|aifoundry1 card 1": 3.6600984154540948,
+   "Paw|aifoundry2 card 0": 2.0259651490002173,
+   "Paw|aifoundry3 card 0": 1.3898955267399864
+  },
+  "units": "b, d: pJ a line a shire-op; P_aw: W at 1,024 minions; g: share of B(f) - B(600)",
+  "in_sample": {
+   "n": 682,
+   "rms_pct": 4.91,
+   "bias_pct": -0.33
+  },
+  "e_res_source": "ledger v2 frozen anchors (OUT/mm-models/work/tables.json from frozen-v2.json); aifoundry2 fp16/int8 placeholders"
+ },
+ "switches": {
+  "kappa_fin_edges_per_J_at_0p517V": {
+   "central": 1.8675427978557844e+16,
+   "low": 1.227736468960747e+16,
+   "high": 4.857621440536013e+16
+  },
+  "counted": "design C switch_table.json fin_edges_per_mac (lo zero delay, hi timed)"
+ }
+}

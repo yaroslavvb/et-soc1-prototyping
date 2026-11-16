@@ -1,0 +1,2893 @@
+{
+ "python": "3.12.3",
+ "levels": {
+  "tile loop (one resident 16x16xK TensorFM": 17793,
+  "tile stream (TensorLoads per op, no C st": 201,
+  "GEMM (M x N x K with loads and C stores)": 985,
+  "baseline (no tensor op)": 21,
+  "GEMV (matrix-vector via one-row TensorFM": 93,
+  "contrast (A B B A train)": 25,
+  "whole program (sparse parity solver)": 5,
+  "TensorLoad probe (no FMA)": 36
+ },
+ "gemm_points": 985,
+ "gemm_arm_format": {
+  "gemm1|fp16": {
+   "n": 36,
+   "kinds": [
+    "constant / one number|ones",
+    "random|randn",
+    "real tensors|gpt2_l9_attn_qk",
+    "real tensors|real",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemm1|fp32": {
+   "n": 43,
+   "kinds": [
+    "constant / one number|ones",
+    "random|randn",
+    "real tensors|gpt2_l9_attn_qk",
+    "real tensors|real",
+    "sparse (random with zeros)|sparse25",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemm1|int8": {
+   "n": 35,
+   "kinds": [
+    "constant / one number|ones",
+    "random|full",
+    "random|randn",
+    "real tensors|gpt2_l6_down_p999",
+    "real tensors|real",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemm16|fp16": {
+   "n": 8,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemm16|fp32": {
+   "n": 8,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemm16|int8": {
+   "n": 8,
+   "kinds": [
+    "random|full",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmL1x10x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x11x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x12x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x13x2|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x13x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x1x6|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x1x8|fp16": {
+   "n": 5,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x1x8|fp32": {
+   "n": 4,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x1x8|int8": {
+   "n": 4,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x2x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x2x2|int8": {
+   "n": 1,
+   "kinds": [
+    "random|randn"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x2x4|fp16": {
+   "n": 5,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x2x4|fp32": {
+   "n": 8,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x2x4|int8": {
+   "n": 5,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x2x6|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x3x3|fp32": {
+   "n": 3,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x3x4|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x3x4|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x3x4|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x3x6|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x4x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x4x4|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x4x4|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x4x4|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x4x6|fp32": {
+   "n": 5,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x4x8|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x4x8|fp32": {
+   "n": 5,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x4x8|int8": {
+   "n": 2,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x5x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x5x4|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x5x4|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x5x4|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x5x6|fp32": {
+   "n": 5,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x5x8|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x5x8|fp32": {
+   "n": 6,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x5x8|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x6x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x6x4|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x6x4|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x6x4|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x6x6|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x6x6|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x7x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x7x4|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x7x4|fp32": {
+   "n": 5,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x7x4|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x7x5|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x7x5|fp32": {
+   "n": 5,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x7x5|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x8x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x8x4|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x8x4|fp32": {
+   "n": 5,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x8x4|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x8x5|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x8x5|fp32": {
+   "n": 6,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x8x5|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL1x9x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x2x1|fp16": {
+   "n": 4,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x2x1|fp32": {
+   "n": 5,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x2x1|int8": {
+   "n": 4,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x2x2|fp16": {
+   "n": 6,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x2x2|fp32": {
+   "n": 10,
+   "kinds": [
+    "random|randn",
+    "real tensors|gpt2_l9_attn_qk",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x2x2|int8": {
+   "n": 7,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x4x8|fp32": {
+   "n": 3,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x4x8|int8": {
+   "n": 2,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x6x3|fp16": {
+   "n": 2,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x6x3|fp32": {
+   "n": 5,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x6x3|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x8x3|fp16": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x8x3|fp32": {
+   "n": 5,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL2x8x3|int8": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL3x3x2|fp32": {
+   "n": 3,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL3x3x2|int8": {
+   "n": 5,
+   "kinds": [
+    "real tensors|int8.real_smol_w8a8_down",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL3x4x6|fp16": {
+   "n": 5,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL3x4x6|fp32": {
+   "n": 8,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL3x4x6|int8": {
+   "n": 6,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL3x5x3|fp32": {
+   "n": 3,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x2x4|fp32": {
+   "n": 3,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x2x4|int8": {
+   "n": 1,
+   "kinds": [
+    "random|randn"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x1|fp16": {
+   "n": 4,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x1|fp32": {
+   "n": 4,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x1|int8": {
+   "n": 5,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x2|fp16": {
+   "n": 4,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x2|fp32": {
+   "n": 7,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x2|int8": {
+   "n": 4,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x4|fp16": {
+   "n": 4,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x4|fp32": {
+   "n": 7,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x4|int8": {
+   "n": 4,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x8|fp16": {
+   "n": 12,
+   "kinds": [
+    "random|randn",
+    "real tensors|gpt2_l9_attn_qk",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x8|fp32": {
+   "n": 13,
+   "kinds": [
+    "random|randn",
+    "real tensors|gpt2_l9_attn_qk",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL4x8x8|int8": {
+   "n": 12,
+   "kinds": [
+    "random|randn",
+    "real tensors|gpt2_l6_down_p999",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL8x16x16|fp32": {
+   "n": 12,
+   "kinds": [
+    "random|randn"
+   ],
+   "cards": [
+    "aifoundry1 card 1|1024",
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL8x16x4|int8": {
+   "n": 12,
+   "kinds": [
+    "random|full (uniform -128..127)"
+   ],
+   "cards": [
+    "aifoundry1 card 1|1024",
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmL8x16x8|fp16": {
+   "n": 12,
+   "kinds": [
+    "random|randn"
+   ],
+   "cards": [
+    "aifoundry1 card 1|1024",
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmc1|fp16": {
+   "n": 26,
+   "kinds": [
+    "constant / one number|ones",
+    "random|randn",
+    "real tensors|real",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc1|fp32": {
+   "n": 33,
+   "kinds": [
+    "constant / one number|ones",
+    "random|randn",
+    "real tensors|real",
+    "sparse (random with zeros)|sparse25",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry2 card 0|512",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc1|int8": {
+   "n": 29,
+   "kinds": [
+    "constant / one number|ones",
+    "random|full",
+    "random|randn",
+    "real tensors|real",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16|fp16": {
+   "n": 15,
+   "kinds": [
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16|fp32": {
+   "n": 19,
+   "kinds": [
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16|int8": {
+   "n": 15,
+   "kinds": [
+    "random|full",
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r2|fp16": {
+   "n": 10,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r2|fp32": {
+   "n": 12,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r2|int8": {
+   "n": 9,
+   "kinds": [
+    "random|full",
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r32|fp16": {
+   "n": 7,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r32|fp32": {
+   "n": 8,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r32|int8": {
+   "n": 8,
+   "kinds": [
+    "random|full",
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r4|fp16": {
+   "n": 12,
+   "kinds": [
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r4|fp32": {
+   "n": 16,
+   "kinds": [
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r4|int8": {
+   "n": 13,
+   "kinds": [
+    "random|full",
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r8|fp16": {
+   "n": 9,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r8|fp32": {
+   "n": 12,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16r8|int8": {
+   "n": 9,
+   "kinds": [
+    "random|full",
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16s|fp16": {
+   "n": 10,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16s|fp32": {
+   "n": 11,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc16s|int8": {
+   "n": 9,
+   "kinds": [
+    "random|full",
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc4s|fp16": {
+   "n": 10,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc4s|fp32": {
+   "n": 12,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc4s|int8": {
+   "n": 10,
+   "kinds": [
+    "random|full",
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc8|fp16": {
+   "n": 12,
+   "kinds": [
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc8|fp32": {
+   "n": 13,
+   "kinds": [
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc8|int8": {
+   "n": 13,
+   "kinds": [
+    "random|full",
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc8s|fp16": {
+   "n": 13,
+   "kinds": [
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc8s|fp32": {
+   "n": 18,
+   "kinds": [
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmc8s|int8": {
+   "n": 13,
+   "kinds": [
+    "random|full",
+    "random|randn",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmh1|fp32": {
+   "n": 1,
+   "kinds": [
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024"
+   ]
+  },
+  "gemmnc1|fp16": {
+   "n": 4,
+   "kinds": [
+    "random|randn"
+   ],
+   "cards": [
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmnc1|fp32": {
+   "n": 4,
+   "kinds": [
+    "random|randn"
+   ],
+   "cards": [
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmnc1|int8": {
+   "n": 4,
+   "kinds": [
+    "random|full"
+   ],
+   "cards": [
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmv1|fp16": {
+   "n": 14,
+   "kinds": [
+    "constant / one number|ones",
+    "random|randn",
+    "real tensors|real",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmv1|fp32": {
+   "n": 22,
+   "kinds": [
+    "constant / one number|ones",
+    "random|randn",
+    "real tensors|real",
+    "sparse (random with zeros)|sparse25",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmv1|int8": {
+   "n": 15,
+   "kinds": [
+    "constant / one number|ones",
+    "random|full",
+    "random|randn",
+    "real tensors|real",
+    "sparse (random with zeros)|sparse50",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmv16|fp16": {
+   "n": 4,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmv16|fp32": {
+   "n": 6,
+   "kinds": [
+    "random|randn",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry2 card 0|1024",
+    "aifoundry3 card 0|1024"
+   ]
+  },
+  "gemmv16|int8": {
+   "n": 4,
+   "kinds": [
+    "random|full",
+    "zeros|zeros"
+   ],
+   "cards": [
+    "aifoundry3 card 0|1024"
+   ]
+  }
+ },
+ "kinds_on_gemm": {
+  "zeros": 466,
+  "random": 341,
+  "constant / one number": 37,
+  "real tensors": 41,
+  "sparse (random with zeros)": 100
+ },
+ "names_on_gemm": {
+  "zeros": 466,
+  "randn": 279,
+  "sparse50": 92,
+  "full": 50,
+  "ones": 37,
+  "real": 24,
+  "full (uniform -128..127)": 12,
+  "gpt2_l9_attn_qk": 11,
+  "sparse25": 8,
+  "gpt2_l6_down_p999": 5,
+  "int8.real_smol_w8a8_down": 1
+ },
+ "gemmL_shapes_measured": [
+  "gemmL1x1x6",
+  "gemmL1x1x8",
+  "gemmL1x2x2",
+  "gemmL1x2x4",
+  "gemmL1x2x6",
+  "gemmL1x3x3",
+  "gemmL1x3x4",
+  "gemmL1x3x6",
+  "gemmL1x4x2",
+  "gemmL1x4x4",
+  "gemmL1x4x6",
+  "gemmL1x4x8",
+  "gemmL1x5x2",
+  "gemmL1x5x4",
+  "gemmL1x5x6",
+  "gemmL1x5x8",
+  "gemmL1x6x2",
+  "gemmL1x6x4",
+  "gemmL1x6x6",
+  "gemmL1x7x2",
+  "gemmL1x7x4",
+  "gemmL1x7x5",
+  "gemmL1x8x2",
+  "gemmL1x8x4",
+  "gemmL1x8x5",
+  "gemmL1x9x2",
+  "gemmL1x10x2",
+  "gemmL1x11x2",
+  "gemmL1x12x2",
+  "gemmL1x13x2",
+  "gemmL2x2x1",
+  "gemmL2x2x2",
+  "gemmL2x4x8",
+  "gemmL2x6x3",
+  "gemmL2x8x3",
+  "gemmL3x3x2",
+  "gemmL3x4x6",
+  "gemmL3x5x3",
+  "gemmL4x2x4",
+  "gemmL4x8x1",
+  "gemmL4x8x2",
+  "gemmL4x8x4",
+  "gemmL4x8x8",
+  "gemmL8x16x4",
+  "gemmL8x16x8",
+  "gemmL8x16x16"
+ ],
+ "gemmL_shapes_e206": [
+  "gemmL1x1x1",
+  "gemmL1x1x2",
+  "gemmL1x1x4",
+  "gemmL1x1x8",
+  "gemmL1x1x16",
+  "gemmL1x1x32",
+  "gemmL1x2x1",
+  "gemmL1x2x2",
+  "gemmL1x4x4",
+  "gemmL1x15x4",
+  "gemmL1x16x4",
+  "gemmL1x16x16",
+  "gemmL2x1x4",
+  "gemmL2x2x4",
+  "gemmL2x4x1",
+  "gemmL2x4x2",
+  "gemmL2x4x4",
+  "gemmL2x4x8",
+  "gemmL2x4x16",
+  "gemmL2x8x4",
+  "gemmL2x16x4",
+  "gemmL3x5x7",
+  "gemmL3x6x3",
+  "gemmL3x6x6",
+  "gemmL4x4x4",
+  "gemmL4x8x2",
+  "gemmL4x8x4",
+  "gemmL4x8x8",
+  "gemmL6x12x3",
+  "gemmL6x12x6",
+  "gemmL6x12x12",
+  "gemmL8x1x4",
+  "gemmL8x1x16",
+  "gemmL8x4x4",
+  "gemmL8x16x1",
+  "gemmL8x16x4",
+  "gemmL8x16x8",
+  "gemmL8x16x16"
+ ],
+ "e206_masks": [
+  "0x1",
+  "0x11111111",
+  "0xf",
+  "0xff",
+  "0xffff",
+  "0xffffffff"
+ ],
+ "e206_kinds": [
+  "random",
+  "real",
+  "sparse50",
+  "zeros"
+ ],
+ "e206_points": [
+  {
+   "id": "p001",
+   "group": "star",
+   "arm": "gemmL2x4x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p002",
+   "group": "star",
+   "arm": "gemmL2x4x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p003",
+   "group": "star",
+   "arm": "gemmL2x4x4",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p004",
+   "group": "star",
+   "arm": "gemmL1x4x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p005",
+   "group": "star",
+   "arm": "gemmL1x4x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p006",
+   "group": "star",
+   "arm": "gemmL4x4x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p007",
+   "group": "star",
+   "arm": "gemmL4x4x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p008",
+   "group": "star",
+   "arm": "gemmL8x4x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p009",
+   "group": "star",
+   "arm": "gemmL8x4x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p010",
+   "group": "star",
+   "arm": "gemmL8x4x4",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p011",
+   "group": "star",
+   "arm": "gemmL2x1x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p012",
+   "group": "star",
+   "arm": "gemmL2x1x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p013",
+   "group": "star",
+   "arm": "gemmL2x2x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p014",
+   "group": "star",
+   "arm": "gemmL2x2x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p015",
+   "group": "star",
+   "arm": "gemmL2x8x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p016",
+   "group": "star",
+   "arm": "gemmL2x8x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p017",
+   "group": "star",
+   "arm": "gemmL2x16x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p018",
+   "group": "star",
+   "arm": "gemmL2x16x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p019",
+   "group": "star",
+   "arm": "gemmL2x16x4",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p020",
+   "group": "star",
+   "arm": "gemmL2x4x1",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p021",
+   "group": "star",
+   "arm": "gemmL2x4x1",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p022",
+   "group": "star",
+   "arm": "gemmL2x4x2",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p023",
+   "group": "star",
+   "arm": "gemmL2x4x2",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p024",
+   "group": "star",
+   "arm": "gemmL2x4x8",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p025",
+   "group": "star",
+   "arm": "gemmL2x4x8",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p026",
+   "group": "star",
+   "arm": "gemmL2x4x16",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p027",
+   "group": "star",
+   "arm": "gemmL2x4x16",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p028",
+   "group": "star",
+   "arm": "gemmL2x4x16",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p029",
+   "group": "kladder",
+   "arm": "gemmL1x1x1",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "False"
+  },
+  {
+   "id": "p030",
+   "group": "kladder",
+   "arm": "gemmL1x1x1",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p031",
+   "group": "kladder",
+   "arm": "gemmL1x1x1",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "False"
+  },
+  {
+   "id": "p032",
+   "group": "kladder",
+   "arm": "gemmL1x1x2",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p033",
+   "group": "kladder",
+   "arm": "gemmL1x1x2",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p034",
+   "group": "kladder",
+   "arm": "gemmL1x1x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p035",
+   "group": "kladder",
+   "arm": "gemmL1x1x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p036",
+   "group": "kladder",
+   "arm": "gemmL1x1x4",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p037",
+   "group": "kladder",
+   "arm": "gemmL1x1x8",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p038",
+   "group": "kladder",
+   "arm": "gemmL1x1x8",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p039",
+   "group": "kladder",
+   "arm": "gemmL1x1x16",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p040",
+   "group": "kladder",
+   "arm": "gemmL1x1x16",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p041",
+   "group": "kladder",
+   "arm": "gemmL1x1x32",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p042",
+   "group": "kladder",
+   "arm": "gemmL1x1x32",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p043",
+   "group": "kladder",
+   "arm": "gemmL1x1x32",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p044",
+   "group": "square",
+   "arm": "gemmL1x2x2",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p045",
+   "group": "square",
+   "arm": "gemmL1x2x1",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p046",
+   "group": "square",
+   "arm": "gemmL2x4x2",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p047",
+   "group": "square",
+   "arm": "gemmL3x6x6",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p048",
+   "group": "square",
+   "arm": "gemmL3x6x3",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p049",
+   "group": "square",
+   "arm": "gemmL4x8x8",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p050",
+   "group": "square",
+   "arm": "gemmL4x8x4",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p051",
+   "group": "square",
+   "arm": "gemmL4x8x2",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p052",
+   "group": "square",
+   "arm": "gemmL6x12x12",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p053",
+   "group": "square",
+   "arm": "gemmL6x12x6",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p054",
+   "group": "square",
+   "arm": "gemmL6x12x3",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p055",
+   "group": "square",
+   "arm": "gemmL8x16x16",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p056",
+   "group": "square",
+   "arm": "gemmL8x16x8",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p057",
+   "group": "square",
+   "arm": "gemmL8x16x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p058",
+   "group": "extreme",
+   "arm": "gemmL8x1x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p059",
+   "group": "extreme",
+   "arm": "gemmL8x1x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p060",
+   "group": "extreme",
+   "arm": "gemmL1x16x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p061",
+   "group": "extreme",
+   "arm": "gemmL1x16x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p062",
+   "group": "extreme",
+   "arm": "gemmL1x15x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p063",
+   "group": "extreme",
+   "arm": "gemmL1x15x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p064",
+   "group": "extreme",
+   "arm": "gemmL8x16x1",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p065",
+   "group": "extreme",
+   "arm": "gemmL8x16x1",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p066",
+   "group": "extreme",
+   "arm": "gemmL8x1x16",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p067",
+   "group": "extreme",
+   "arm": "gemmL1x16x16",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p068",
+   "group": "extreme",
+   "arm": "gemmL3x5x7",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p069",
+   "group": "extreme",
+   "arm": "gemmL3x5x7",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p070",
+   "group": "extreme",
+   "arm": "gemmL3x5x7",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p071",
+   "group": "anchor",
+   "arm": "gemmc1",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "False"
+  },
+  {
+   "id": "p072",
+   "group": "anchor",
+   "arm": "gemmc1",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "False"
+  },
+  {
+   "id": "p073",
+   "group": "anchor",
+   "arm": "gemmc1",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p074",
+   "group": "anchor",
+   "arm": "gemmc8s",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p075",
+   "group": "anchor",
+   "arm": "gemmc8s",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p076",
+   "group": "anchor",
+   "arm": "gemmc8s",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p077",
+   "group": "anchor",
+   "arm": "gemmc16s",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p078",
+   "group": "anchor",
+   "arm": "gemmc16s",
+   "fmt": "fp16",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p079",
+   "group": "anchor",
+   "arm": "gemmc16s",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p080",
+   "group": "zeros",
+   "arm": "gemmL1x1x1",
+   "fmt": "fp32",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p081",
+   "group": "zeros",
+   "arm": "gemmL1x1x1",
+   "fmt": "int8",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p082",
+   "group": "zeros",
+   "arm": "gemmL1x1x4",
+   "fmt": "fp32",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p083",
+   "group": "zeros",
+   "arm": "gemmL1x1x4",
+   "fmt": "fp16",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p084",
+   "group": "zeros",
+   "arm": "gemmL1x1x32",
+   "fmt": "fp32",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p085",
+   "group": "zeros",
+   "arm": "gemmL1x1x32",
+   "fmt": "int8",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p086",
+   "group": "zeros",
+   "arm": "gemmL2x4x4",
+   "fmt": "fp32",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p087",
+   "group": "zeros",
+   "arm": "gemmL2x4x4",
+   "fmt": "fp16",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p088",
+   "group": "zeros",
+   "arm": "gemmL2x4x4",
+   "fmt": "int8",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p089",
+   "group": "zeros",
+   "arm": "gemmL8x16x16",
+   "fmt": "fp32",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p090",
+   "group": "zeros",
+   "arm": "gemmL8x16x4",
+   "fmt": "int8",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p091",
+   "group": "zeros",
+   "arm": "gemmL8x16x1",
+   "fmt": "fp32",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p092",
+   "group": "zeros",
+   "arm": "gemmc1",
+   "fmt": "fp32",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p093",
+   "group": "zeros",
+   "arm": "gemmc16s",
+   "fmt": "fp32",
+   "kind": "zeros",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p094",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0x1",
+   "minions": "32",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p095",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0x1",
+   "minions": "32",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p096",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xf",
+   "minions": "128",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p097",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xf",
+   "minions": "128",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p098",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xff",
+   "minions": "256",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p099",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xff",
+   "minions": "256",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p100",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0x11111111",
+   "minions": "256",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p101",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0x11111111",
+   "minions": "256",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p102",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffff",
+   "minions": "512",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p103",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffff",
+   "minions": "512",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p104",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p105",
+   "group": "subset",
+   "arm": "gemmL4x8x4",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p106",
+   "group": "subset",
+   "arm": "gemmL1x1x1",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0x1",
+   "minions": "32",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p107",
+   "group": "subset",
+   "arm": "gemmL1x1x1",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0x1",
+   "minions": "32",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p108",
+   "group": "subset",
+   "arm": "gemmL1x1x1",
+   "fmt": "fp32",
+   "kind": "random",
+   "mask": "0xff",
+   "minions": "256",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p109",
+   "group": "subset",
+   "arm": "gemmL1x1x1",
+   "fmt": "int8",
+   "kind": "random",
+   "mask": "0xff",
+   "minions": "256",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p110",
+   "group": "kinds",
+   "arm": "gemmL1x1x1",
+   "fmt": "fp32",
+   "kind": "real",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "False"
+  },
+  {
+   "id": "p111",
+   "group": "kinds",
+   "arm": "gemmL2x4x4",
+   "fmt": "fp32",
+   "kind": "real",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p112",
+   "group": "kinds",
+   "arm": "gemmL1x1x1",
+   "fmt": "fp16",
+   "kind": "real",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "False"
+  },
+  {
+   "id": "p113",
+   "group": "kinds",
+   "arm": "gemmL2x4x2",
+   "fmt": "fp16",
+   "kind": "real",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p114",
+   "group": "kinds",
+   "arm": "gemmL1x1x1",
+   "fmt": "int8",
+   "kind": "real",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p115",
+   "group": "kinds",
+   "arm": "gemmL2x4x1",
+   "fmt": "int8",
+   "kind": "real",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p116",
+   "group": "kinds",
+   "arm": "gemmL1x1x1",
+   "fmt": "fp32",
+   "kind": "sparse50",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p117",
+   "group": "kinds",
+   "arm": "gemmL2x4x4",
+   "fmt": "fp32",
+   "kind": "sparse50",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p118",
+   "group": "kinds",
+   "arm": "gemmL1x1x1",
+   "fmt": "int8",
+   "kind": "sparse50",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  },
+  {
+   "id": "p119",
+   "group": "kinds",
+   "arm": "gemmL2x4x1",
+   "fmt": "int8",
+   "kind": "sparse50",
+   "mask": "0xffffffff",
+   "minions": "1024",
+   "A": "True",
+   "B": "True"
+  }
+ ]
+}
