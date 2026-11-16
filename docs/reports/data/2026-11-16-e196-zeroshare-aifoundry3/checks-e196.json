@@ -1,0 +1,233 @@
+{
+ "checker": "check_e196.py (kit-e196), E196.md section 8",
+ "checks": [
+  {
+   "n": 1,
+   "name": "the ties",
+   "pairs": [
+    {
+     "pair": "derived.tie_zeros_S_W",
+     "e196_mean": 1.914120000000001,
+     "e196_half_width": 0.040184062928518394,
+     "reference": 1.986,
+     "reference_half_width": 0.059,
+     "source": "E78 fp32 zeros S over idle",
+     "reading": "REPRODUCES",
+     "difference": -0.07187999999999906
+    },
+    {
+     "pair": "derived.tie_random_D_W",
+     "e196_mean": 24.69843428571428,
+     "e196_half_width": 0.09377049697070206,
+     "reference": 24.725,
+     "reference_half_width": 0.082,
+     "source": "E78 randn D",
+     "reading": "REPRODUCES",
+     "difference": -0.026565714285720077
+    },
+    {
+     "pair": "derived.tie_ones_D_W",
+     "e196_mean": 8.375150601503758,
+     "e196_half_width": 0.11775564051769827,
+     "reference": 8.257,
+     "reference_half_width": 0.221,
+     "source": "E78 ones D",
+     "reading": "REPRODUCES",
+     "difference": 0.11815060150375878
+    },
+    {
+     "pair": "derived.tie_sparse50_D_W",
+     "e196_mean": 7.274603759398497,
+     "e196_half_width": 0.09770989651373174,
+     "reference": 7.302,
+     "reference_half_width": 0.063,
+     "source": "E78 sparse50 D",
+     "reading": "REPRODUCES",
+     "difference": -0.027396240601502697
+    },
+    {
+     "pair": "derived.tie_a_zero_D_W",
+     "e196_mean": 0.825214285714284,
+     "e196_half_width": 0.06655963009817734,
+     "reference": 0.81,
+     "reference_half_width": 0.065,
+     "source": "E78 a_zeros_b_randn D",
+     "reading": "REPRODUCES",
+     "difference": 0.01521428571428396
+    },
+    {
+     "pair": "derived.tie_pi_S_W",
+     "e196_mean": 10.399674732664995,
+     "e196_half_width": 0.08315054091657537,
+     "reference": 10.398,
+     "reference_half_width": 0.08,
+     "source": "E78 built-in pi S over idle",
+     "reading": "REPRODUCES",
+     "difference": 0.001674732664994849
+    },
+    {
+     "pair": "derived.tie_b_sign_D_W",
+     "e196_mean": 0.5850782706766873,
+     "e196_half_width": 0.0951105871237431,
+     "reference": 0.563,
+     "reference_half_width": 0.024,
+     "source": "E65 bit 31 (a DIFFERS is the transfer's size, never a failure)",
+     "reading": "REPRODUCES",
+     "difference": 0.022078270676687328
+    },
+    {
+     "pair": "arms.I.Z.m0000.S_W",
+     "e196_mean": 0.322234603174604,
+     "e196_half_width": 0.09943702880095856,
+     "reference": 0.376,
+     "reference_half_width": 0.089,
+     "source": "E109 fp32 loop, no micro-op issued (three passes, labelled there)",
+     "reading": "REPRODUCES",
+     "difference": -0.053765396825395995
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "name": "the MSK bit alone",
+   "reading": "EQUAL",
+   "msk_null_pJ_per_op": {
+    "mean": -18.974271882528097,
+    "se": 34.75478403451226,
+    "ci95": [
+     -104.01922841497961,
+     66.07068464992341
+    ],
+    "n": 7,
+    "provisional": false
+   },
+   "I.H.mFFFF_D_W": {
+    "mean": -0.030722857142859335,
+    "se": 0.03784947761571319,
+    "ci95": [
+     -0.12334052886850952,
+     0.06189481458279084
+    ],
+    "n": 7,
+    "provisional": false
+   },
+   "cycles_per_op_mFFFF_full": [
+    546.0009841269841,
+    546.001
+   ],
+   "at_unequal_rate": false
+  },
+  {
+   "n": 3,
+   "name": "the held ladder's middle steps",
+   "reading": "STRAIGHT",
+   "ratio": {
+    "mean": 0.990915859099549,
+    "se": 0.02068570148948232,
+    "ci95": [
+     0.9402979475547858,
+     1.0415337706443122
+    ],
+    "n": 7,
+    "provisional": false
+   },
+   "step_4_to_8": {
+    "mean": 2.439235714285713,
+    "se": 0.04499629782957066,
+    "ci95": [
+     2.3291297734967533,
+     2.5493416550746724
+    ],
+    "n": 7,
+    "provisional": false
+   },
+   "step_8_to_12": {
+    "mean": 2.4120728571428622,
+    "se": 0.02292839336824492,
+    "ci95": [
+     2.355967078570767,
+     2.4681786357149575
+    ],
+    "n": 7,
+    "provisional": false
+   }
+  },
+  {
+   "n": 4,
+   "name": "the read-backs",
+   "reading": "PASS",
+   "x14check_records": 108,
+   "not_ok": [],
+   "at_full_plan": 108,
+   "pass_runs": "not made (the lab's unchanged host reads no C back on file tiles)"
+  },
+  {
+   "n": 5,
+   "name": "cycles per op",
+   "reading": "PASS",
+   "kept_runs": 209,
+   "train_launches": 672,
+   "deviations": [],
+   "n_deviations": 0
+  },
+  {
+   "n": 6,
+   "name": "the trains' anchors and carry-over",
+   "trains": [
+    {
+     "train": "T1",
+     "anchor_drift_W": -0.12350000000000705,
+     "reading": "AGREE",
+     "carry_over_L2_minus_L3": {
+      "mean_W": -0.0068981481481471055,
+      "ci95_W": [
+       -0.029636260206013437,
+       0.015839963909719226
+      ],
+      "units": 12
+     },
+     "carry_over_reading": "REPORTED"
+    },
+    {
+     "train": "T2",
+     "anchor_drift_W": 0.07349999999999568,
+     "reading": "AGREE",
+     "carry_over_L2_minus_L3": {
+      "mean_W": 0.011805555555556168,
+      "ci95_W": [
+       -0.009345011186633641,
+       0.03295612229774598
+      ],
+      "units": 12
+     },
+     "carry_over_reading": "REPORTED"
+    }
+   ]
+  }
+ ],
+ "reported": {
+  "samples_off_600_MHz": 0,
+  "samples": 28783,
+  "runs_set_aside": 1,
+  "set_aside_reasons": {
+   "approach off": 1
+  },
+  "passes_kept": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "passes_kept_n": 7,
+  "provisional": false,
+  "dips_dropped": 68,
+  "runs_off_protocol": 1,
+  "readback_gate_exempt": 214,
+  "unchanged_host_runs_in_records": 214,
+  "unreadable_host_outputs": [],
+  "runtime_lines_dropped": 0
+ }
+}
