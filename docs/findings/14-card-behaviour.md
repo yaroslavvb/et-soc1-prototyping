@@ -510,6 +510,14 @@ operating-point changes is one candidate).
   he has not yet been asked about" did not hold: the session had put E117's outage risk to the owner at 16:04 PST on 1
   November, before that note was written, and put it again at 18:57 (the [Horace
   hub](https://spacesheep.dev/@yaroslavvb/horace-hub)'s record). E117 stays not run, awaiting his acceptance.
+- **Dated note, Sun 15 Nov 2026 (week 46), Q188, on the 1 November note's sentence on the firmware-revisions query:**
+  the owner ruled it a read, *"Firmware revisions query was a false positive. It should have never been forbidden.
+  Reading operations and firmware are always allowed."* (15:07:01 PST). Its two PMIC writes select which answer the PMIC
+  returns. From the source (et-platform `836a4ab`), nothing persistent changes on the service processor's side, and BL2
+  makes the same read itself at every boot (`common/main.c:189`, from `:240`); the PMIC's side, whose firmware is not
+  public, rests on the owner's ruling ([`dmcmd_table_v2.json`](../../tools/claims-v3/dmcmd_table_v2.json), id 14).
+  Uptime continuity still carries a card's identity between boots; after a boot
+  [`tools/claims-v3/fwgate/`](../../tools/claims-v3/fwgate/README.md) reads it again.
 - **Dated note, Sun 1 Nov 2026 (week 44), Q134(a): since it started on 26 Oct, aifoundry2's service processor has not entered
   POWER_SAFE.** Raw throttle-residency state 3 read 0 µs at all 712 committed reads, from 11 sessions (E69, 27 Oct 14:20:45
   PDT, to E77, 1 Nov 17:59:25 PST), while raw 2 rose monotonically from 1,095.9 to 4,717.6 s under one service-processor
@@ -840,6 +848,16 @@ it is the owner's call (the lab rules below).
   `DM_CMD_GET_MODULE_CURRENT_TEMPERATURE` overwrites the governor's RAM temperature input with the same integer mean the
   governor's own update writes (benign, E126's verifier); and the stock `ettelem` cannot set the SP's log level back to its
   boot default, WARNING.
+- **Dated note, Sun 15 Nov 2026 (week 46), Q188, on the two notes above:** the firmware-revisions query and
+  `DM_CMD_GET_FRU` are reads by the owner's rulings of that day (*"Firmware revisions query was a false positive. It
+  should have never been forbidden. Reading operations and firmware are always allowed."*, 15:07:01 PST; *"Yeah, fix the
+  corresponding guards. I don't want to modify firmware, but commands which read firmware should be fine."*, 15:09:49
+  PST). Each writes only a PMIC command or select register to fetch its answer, and never an update, slot, data-byte
+  write or commit (et-platform `836a4ab`, `driver/pmic_controller.c:2531-2600` and `:2412-2445`).
+  [`dmcmd_table_v2.json`](../../tools/claims-v3/dmcmd_table_v2.json) classes both READ with pmic "read", and
+  [`dmcmd_audit_v2.py`](../../tools/claims-v3/dmcmd_audit_v2.py) reads it; every write keeps its class and stays NO-GO
+  without its own ruling. The sends listed above (E69 to E114, the version-3 check, the aifoundry1 fix) were therefore
+  reads.
 - **The hottest shire on aifoundry1's card 1 is a latch** (dated, Mon 2 Nov 2026; E131 C3). `max(temp_c.minshire)` there is
   the PVT's high-water latch, 65 °C in all 24,157 of E131's samples and since at least E112(b) (1 November), set before
   those sessions, while the shire mean peaked at 62 °C. Give the shire mean beside any "hottest shire" maximum on that card.
@@ -1567,6 +1585,13 @@ through E60's `hl/block.sh` heater. Two things about this card and this protocol
   lab's rule allows no PMIC command but the samplers' statistics reset. Take a card's identity by its module uptime
   (`DM_CMD_GET_MODULE_UPTIME`, a RAM read) and its unbroken continuity, as E77, E118 and E120 did; read the firmware release
   only when the owner allows that command.
+  **Dated note, Sun 15 Nov 2026 (week 46), Q188:** the owner allows that command, *"Firmware revisions query was a false
+  positive. It should have never been forbidden. Reading operations and firmware are always allowed."* (15:07:01 PST).
+  It is a READ in [`dmcmd_table_v2.json`](../../tools/claims-v3/dmcmd_table_v2.json) (id 14), and a good first query
+  again, with `timeout 10` and the card's lock as for every device-opening process; on aifoundry1 the tool opens both
+  cards' nodes, so both locks are held and the owner's word comes first. After a reboot
+  [`tools/claims-v3/fwgate/`](../../tools/claims-v3/fwgate/README.md) reads it and compares the seven fields with the
+  box's record.
 - **The three hosts' toolchains generate identical code** (checked 2026-09-25). The same sources give kernel ELFs
   with different md5s on the three hosts, but only the `.comment` section (the compiler's version string)
   differs. Compare and record the `.text` hash, not the file's. One real difference: an LTO object compiled on

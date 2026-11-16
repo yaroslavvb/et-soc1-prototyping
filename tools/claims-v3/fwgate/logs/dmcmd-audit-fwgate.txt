@@ -1,0 +1,25 @@
+# Q188 (fix-guards2, resumed in Q191), Sun 15 Nov 2026 21:59:24 PST, aifoundry2, Python 3.12.3 (/usr/bin/python3); on GitHub main b7af9be5 with this round's files; card nodes visible: 0
+# v2, no allow-list: /usr/bin/python3 -B tools/claims-v3/dmcmd_audit_v2.py tools/claims-v3/fwgate/
+dmcmd_audit: GO (2 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/fwgate/fwgate.py:69: name: GET_MODULE_FIRMWARE_REVISIONS [READ, pmic read] ok
+tools/claims-v3/fwgate/tests/test_fwgate.py:715: name: GET_MODULE_FIRMWARE_REVISIONS [READ, pmic read] ok
+summary:
+  GET_MODULE_FIRMWARE_REVISIONS              READ         pmic read      2 site(s)  ok
+rc 0
+# v2 with --deny-pmic-read
+NO-GO tools/claims-v3/fwgate/fwgate.py:69: name: GET_MODULE_FIRMWARE_REVISIONS: PMIC read denied (--deny-pmic-read)
+NO-GO tools/claims-v3/fwgate/tests/test_fwgate.py:715: name: GET_MODULE_FIRMWARE_REVISIONS: PMIC read denied (--deny-pmic-read)
+dmcmd_audit: NO-GO (2 send site(s), 2 disallowed; allow-list: none)
+rc 3
+# v1 (dmcmd_audit.py, unchanged)
+NO-GO tools/claims-v3/fwgate/fwgate.py:69: name: GET_MODULE_FIRMWARE_REVISIONS: WRITE not in the allow-list
+NO-GO tools/claims-v3/fwgate/tests/test_fwgate.py:715: name: GET_MODULE_FIRMWARE_REVISIONS: WRITE not in the allow-list
+dmcmd_audit: NO-GO (2 send site(s), 2 disallowed; allow-list: none)
+rc 3
+# v2 on the generator and the audit's own files
+dmcmd_audit: GO (0 send site(s), 0 disallowed; allow-list: none)
+rc 0
+# v1 on v2's audit and its tests (v1 skips only its own two files; finding 9's side effect)
+NO-GO tools/claims-v3/test_dmcmd_audit_v2.py:260: name: SET_FRU: WRITE not in the allow-list
+dmcmd_audit: NO-GO (42 send site(s), 30 disallowed; allow-list: none)
+rc 3

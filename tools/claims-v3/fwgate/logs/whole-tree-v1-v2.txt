@@ -1,0 +1,23 @@
+# Q188 (fix-guards2, resumed in Q191), Sun 15 Nov 2026 21:59:25 PST, aifoundry2, Python 3.12.3 (/usr/bin/python3); on GitHub main b7af9be5 with this round's files; card nodes visible: 0
+# v1 and v2 audits over every code file under tools/, scripts/ and workloads/ (git ls-files, survey-guards' filter: not .md .txt .json .jsonl .log .csv .html .gz .bin .sha256 or SHA256SUMS*) at GitHub main b7af9be5 with this round's files, each file audited alone, records compared (fix-guards' whole_tree_diff.py, kept with the round's working files, outside this repository)
+{
+ "files": 3509,
+ "missing": 0,
+ "same": 3497,
+ "differ_only_reclassified": 10,
+ "differ_otherwise": [
+  "tools/claims-v3/dmcmd_audit_v2.py",
+  "tools/claims-v3/test_dmcmd_audit_v2.py"
+ ],
+ "rc_changes": [
+  "tools/claims-v3/e114/run_e114.sh: v1 rc 3 -> v2 rc 0",
+  "tools/claims-v3/fwgate/fwgate.py: v1 rc 3 -> v2 rc 0",
+  "tools/claims-v3/fwgate/tests/test_fwgate.py: v1 rc 3 -> v2 rc 0",
+  "tools/claims-v3/hlp/run_e79.sh: v1 rc 3 -> v2 rc 0",
+  "tools/claims-v3/kspeed/e84/run_e84.sh: v1 rc 3 -> v2 rc 0"
+ ],
+ "sites_14_71": 10
+}
+# The two files under differ_otherwise are v2's own audit and tests, which v2 skips (its own-files set: v1's two files and
+# its own two) and v1 does not: v1 lists their command sites, v2 none. The other differences are the class, pmic and verdict
+# of firmware-revisions query sites only (no GET_FRU site exists).

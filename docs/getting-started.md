@@ -605,5 +605,15 @@ read, never by sending the query again: under the owner's rules of 2 November 20
 every device command is classified before a run's first launch and a write outside the allowed statistics reset is
 NO-GO ([the audit](reports/data/2026-11-02-q136w-write-audit/README.md)).*
 
+*Dated note, Sun 15 Nov 2026 (week 46), added by Q188 without editing the note above: the owner ruled that the query is
+a read, "Firmware revisions query was a false positive. It should have never been forbidden. Reading operations and
+firmware are always allowed." (15:07:01 PST), and said of the guards, "Yeah, fix the corresponding guards. I don't want
+to modify firmware, but commands which read firmware should be fine." (15:09:49 PST). Re-check a card's firmware by its
+uptime continuity while its box has not booted since the card's last committed read, and after a boot by sending the
+query again through [`tools/claims-v3/fwgate/`](../tools/claims-v3/fwgate/README.md), which compares the answer field by
+field with the box's record. The audit's v2 ([`dmcmd_audit_v2.py`](../tools/claims-v3/dmcmd_audit_v2.py),
+[`dmcmd_table_v2.json`](../tools/claims-v3/dmcmd_table_v2.json)) classes it READ; every command that writes firmware or
+card state stays NO-GO without its own ruling.*
+
 `UPSTREAM_LATEST=1 scripts/clone-upstream.sh` and `TOOLCHAIN_REF=et scripts/provision-vm.sh` build the branch tips
 instead of the pins.

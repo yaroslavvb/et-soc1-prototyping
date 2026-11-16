@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+"""fwgate's desk-test stand-in for the vendor CLI (Q188, Sun 15 Nov 2026). It opens no device, and its name is no device
+tool's name. It appends one JSON line to $FWGATE_STANDIN_LOG: its arguments, its working directory, what its standard
+input is, and, for each lock file in $FWGATE_STANDIN_LOCKS (colon-separated), whether it could take it ("free"), not
+("held"), or found none ("missing": it never makes one). If $FWGATE_STANDIN_DUMP names a file, it writes that file in its
+working directory (as the real tool may dump the SP trace). If $FWGATE_STANDIN_SLEEP is set, it then waits that many
+seconds (so that two reads overlap in a test). Then it writes $FWGATE_STANDIN_OUT's bytes to its standard output and exits
+$FWGATE_STANDIN_RC (0)."""
+import fcntl
+import json
+import os
+import sys
+import time
+
+locks = {}
+for path in [p for p in os.environ.get("FWGATE_STANDIN_LOCKS", "").split(":") if p]:
+    try:
+        fd = os.open(path, os.O_RDONLY)
+    except FileNotFoundError:
+        locks[os.path.basename(path)] = "missing"
+        continue
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        locks[os.path.basename(path)] = "free"
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    except OSError:
+        locks[os.path.basename(path)] = "held"
+    os.close(fd)
+entry = {"argv": sys.argv[1:], "cwd": os.getcwd(), "stdin": os.path.realpath("/proc/self/fd/0"), "locks": locks}
+with open(os.environ["FWGATE_STANDIN_LOG"], "a") as f:
+    f.write(json.dumps(entry, sort_keys=True) + "\n")
+if os.environ.get("FWGATE_STANDIN_DUMP"):
+    with open(os.environ["FWGATE_STANDIN_DUMP"], "w") as f:
+        f.write("a stand-in's dump\n")
+if os.environ.get("FWGATE_STANDIN_SLEEP"):
+    time.sleep(float(os.environ["FWGATE_STANDIN_SLEEP"]))
+if os.environ.get("FWGATE_STANDIN_OUT"):
+    with open(os.environ["FWGATE_STANDIN_OUT"], "rb") as f:
+        sys.stdout.buffer.write(f.read())
+sys.stdout.flush()
+sys.exit(int(os.environ.get("FWGATE_STANDIN_RC", "0")))

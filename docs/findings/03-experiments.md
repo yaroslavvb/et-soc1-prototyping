@@ -9032,6 +9032,15 @@ when another lane had edited the post meanwhile, and kept each from erasing anot
 behind its own saved edits, though each of its dry runs opened on the expected text; rebuild from the edit box, or wait a minute
 after another lane's edit.
 
+*Dated note, Sun 15 Nov 2026 (week 46), Q188, on lessons (34) and (51): the owner ruled the firmware-revisions query a
+read ("Firmware revisions query was a false positive. It should have never been forbidden. Reading operations and
+firmware are always allowed.", 15:07:01 PST; "Yeah, fix the corresponding guards. I don't want to modify firmware, but
+commands which read firmware should be fine.", 15:09:49 PST). Lesson (34) now reads: take a card's identity by uptime
+continuity between boots, and after a boot read it again through `tools/claims-v3/fwgate/`. Lesson (51) stands for every
+other command: classify each before the first launch, from the source of the build the card reports; a command named GET
+can still write, but these two, the query and `GET_FRU`, write only a PMIC command or select register to fetch their
+answers and are READ in `tools/claims-v3/dmcmd_table_v2.json`.*
+
 **Lane lessons from E135, recorded for the next registration.** (60) A cloud GPU's container may refuse to set the
 board's power limit: on Modal `nvidia-smi -pl` answered "Insufficient Permissions" (exit 4), so E135's registered
 lower-cap arm could not run. Try the set in the declared smoke, before freezing an arm on it, or rent a host with root

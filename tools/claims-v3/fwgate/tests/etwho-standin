@@ -1,0 +1,7 @@
+#!/bin/sh
+# fwgate's desk-test stand-in for et-who (Q188, Sun 15 Nov 2026): logs its call to $FWGATE_STANDIN_ETWHO_LOG, prints one
+# holder line when told to say "held" (exit 1), and exits $FWGATE_STANDIN_ETWHO_RC (default 0, "nobody holds anything").
+echo "et-who $*" >> "${FWGATE_STANDIN_ETWHO_LOG:-/dev/null}"
+rc=${FWGATE_STANDIN_ETWHO_RC:-0}
+[ "$rc" = 1 ] && echo "lock:etsoc-shire0.lock 4242 another-user"
+exit "$rc"
