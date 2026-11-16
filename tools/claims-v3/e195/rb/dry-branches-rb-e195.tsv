@@ -1,0 +1,64 @@
+# E195's kit: THE AUDIT of every line of the runbook that reads RB_DRY (made by rb/drybranches_rb_e195.py from the files' own
+# lines; rb/selftest_rb_e195.sh checks the files against it at its end: a line without a row, a row whose text differs or a named
+# case that did not pass fails its case AUDIT-RB). Q191, lane fix-e195, verify-e195's nit 7.
+# file	line	function	text (prefix)	under the dry listing	on the real path	cases that ran the real branch
+tools/claims-v3/e195/rb/rb_e195.sh	44	rb_init	[ -n "${RB_DRY:-}" ] && echo "=== [$RB_STEP] dry listing: nothing belo	the step's dry-listing banner	no banner	P1,S,B,RT
+tools/claims-v3/e195/rb/rb_e195.sh	49	e195_window	if [ -n "${RB_DRY:-}" ]; then echo "--- gate: RB_OUT's window.env writ	the window gate named, the window read	window.env written today (Pacific), naming today and E195, else 10	K,P1
+tools/claims-v3/e195/rb/rb_e195.sh	66	e195_pull	if [ -n "${RB_DRY:-}" ]; then	the pull printed, RB_RC 0	RB_GITLOCK required and outside the repo; git pull --ff-only under the lab-git lock (a nested lock exits 75)	K,N,P1
+tools/claims-v3/e195/rb/rb_e195.sh	83	e195_harness_sha	[ -n "${RB_DRY:-}" ] && { echo "<harness-e195.json's sha256>"; return 	a placeholder	the lab clone's harness-e195.json sha256 (steps 8 and 9 pass it)	DR,RS
+tools/claims-v3/e195/rb/s02_window_e195.sh	16	-	[ -n "${RB_DRY:-}" ] || [ "$day" = "$(TZ=America/Los_Angeles date +%F)	any day (a sample)	the window's day must be today (Pacific), else 10	K,P1
+tools/claims-v3/e195/rb/s03_desk_e195.sh	39	-	[ -z "${RB_DRY:-}" ] && [ "${RB_RC:-0}" -ne 0 ] && bad="$bad pull(rc $	no pull status read	a failed or nested pull is a stop (16)	N,P1
+tools/claims-v3/e195/rb/s03_desk_e195.sh	48	-	[ -n "${RB_DRY:-}" ] && continue	the commits by content not checked	the registration's and the kit's commits found by content, ancestors of HEAD, the registration's subtree pinned	P1,P2
+tools/claims-v3/e195/rb/s03_desk_e195.sh	62	-	[ -z "${RB_DRY:-}" ] && [ -s "$RB_CAP" ] && bad="$bad paths-not-clean"	not read	E195's paths and the day's tools clean, else 16	P1
+tools/claims-v3/e195/rb/s03_desk_e195.sh	70	-	if [ -z "${RB_DRY:-}" ]; then	the lists' own sha256 and counts not compared	each list at its pinned sha256 and count, else 16	P1,P2
+tools/claims-v3/e195/rb/s03_desk_e195.sh	75	-	[ -z "${RB_DRY:-}" ] && { [ "$RB_RC" -eq 0 ] && [ "$(grep -c ': OK$' "	the entries not counted	every entry OK, at the pinned count, else 16	P1,P2
+tools/claims-v3/e195/rb/s03_desk_e195.sh	79	-	if [ -z "${RB_DRY:-}" ]; then	lists not pinned not read	every other SHA256SUMS file under e195 read and reported (never a gate)	P1
+tools/claims-v3/e195/rb/s03_desk_e195.sh	88	-	[ -z "${RB_DRY:-}" ] && { [ "$(rb_val '^([0-9]+)$')" = 1 ] || bad="$ba	not read	the freeze line on exactly one line of E195.md, else 16	P1
+tools/claims-v3/e195/rb/s03_desk_e195.sh	95	-	[ -n "${RB_DRY:-}" ] || { rm -rf "${RB_OUT:?}/drylisting"; mkdir -p "$	no scratch made	RB_OUT/drylisting made afresh for the listing check	P1
+tools/claims-v3/e195/rb/s03_desk_e195.sh	100	-	[ -z "${RB_DRY:-}" ] && [ -s "$RB_CAP" ] && bad="$bad E195-datum-in-a-	not read	no docs/reports/data/*e195* path in any commit of any ref, else 16	P1,P2
+tools/claims-v3/e195/rb/s03_desk_e195.sh	102	-	[ -z "${RB_DRY:-}" ] && { rb_has '^NO-DATUM OK' || bad="$bad E195-datu	not read	check_history_e195.py nodatum reads NO-DATUM OK, else 16	P1,P2
+tools/claims-v3/e195/rb/s03_desk_e195.sh	111	-	[ -z "${RB_DRY:-}" ] && { [ "$(rb_val '^([0-9]+)$')" = 1 ] || bad="$ba	not read	each desk test's committed log holds its PASS line once, else 16	P1
+tools/claims-v3/e195/rb/s03_desk_e195.sh	115	-	[ -z "${RB_DRY:-}" ] && [ "$h0" != "$h1" ] && bad="$bad HEAD-moved"	not compared	HEAD unchanged across the checks, else 16	P1
+tools/claims-v3/e195/rb/s07_a3_sync_e195.sh	35	-	[ -n "${RB_DRY:-}" ] || rb_has '^NOT-BESIDE-OURS: ' || rb_die $RB_E_FA	not read	the read before the sync answered (no session or job of ours on the box), else 14	S
+tools/claims-v3/e195/rb/s07_a3_sync_e195.sh	37	-	if [ -n "${RB_DRY:-}" ]; then	a placeholder for the sync list	the sync list from harness_e195.py --list (at least 50 paths, else 10)	S
+tools/claims-v3/e195/rb/s07_a3_sync_e195.sh	44	-	[ -z "${RB_DRY:-}" ] && [ -s "$RB_CAP" ] && rb_die $RB_E_GATE "the syn	not read	the synced paths have no uncommitted change, else 16	S
+tools/claims-v3/e195/rb/s07_a3_sync_e195.sh	46	-	[ -n "${RB_DRY:-}" ] || rb_has '^CHECK PASS' || rb_die $RB_E_GATE "har	not read	harness-e195.json re-made from the lab clone's files, else 16	S
+tools/claims-v3/e195/rb/s07_a3_sync_e195.sh	48	-	[ -n "${RB_DRY:-}" ] || rb_has '^HARNESS OK: ' || rb_die $RB_E_GATE "a	not read	every harness file at its sha256 in the lab clone, else 16	S
+tools/claims-v3/e195/rb/s07_a3_sync_e195.sh	65	-	[ -n "${RB_DRY:-}" ] || rb_has '^HARNESS OK: ' || rb_die $RB_E_GATE "t	not read	the box's copies all at their pins (HARNESS OK on the box), else 16	S
+tools/claims-v3/e195/rb/s08_a3_build_e195.sh	41	-	if [ -z "${RB_DRY:-}" ]; then	the day's build count not read	the count of today's builds read; built today: 10 (run the wait); a third start: NO-THIRD-BUILD	B,X
+tools/claims-v3/e195/rb/s08_a3_build_e195.sh	71	-	[ -n "${RB_DRY:-}" ] && { rb_say "then: the verdict line; the box's pi	the wait's verdict named, exit 0	the verdict line, the box's pins and tools read, RB_OUT/e195-built.txt	B
+tools/claims-v3/e195/rb/s09_a3_reads_e195.sh	20	-	[ -n "${RB_DRY:-}" ] || {	the rest's answer not read	the rest read first: REFUSED stops with 10 and no config read; no answer stops with 14	RT
+tools/claims-v3/e195/rb/s09_a3_reads_e195.sh	26	-	if [ -n "${RB_DRY:-}" ]; then	k6's step 7 named before its own listing	no line; k6's step 7 runs (exec)	RT
+tools/claims-v3/e195/rb/s10_a3_dry_e195.sh	18	-	[ -n "${RB_DRY:-}" ] || [ -n "$(e195_built)" ] || rb_die $RB_E_USAGE "	the build record not needed	today's build record (RB_OUT/e195-built.txt), else 10	DR
+tools/claims-v3/e195/rb/s10_a3_dry_e195.sh	40	-	[ -n "${RB_DRY:-}" ] && exit 0	exit 0 after the listing	the dry pass's job started and its verdict read	DR
+tools/claims-v3/e195/rb/s11_a3_session_e195.sh	26	-	[ -n "${RB_DRY:-}" ] || [ -n "$(e195_built)" ] || rb_die $RB_E_USAGE "	the build record not needed	today's build record, else 10	RS
+tools/claims-v3/e195/rb/s11_a3_session_e195.sh	28	-	[ -n "${RB_DRY:-}" ] || [ -n "$HS" ] || rb_die $RB_E_USAGE "no harness	the harness sha256 not needed	the lab clone's harness-e195.json present, else 10	RS
+tools/claims-v3/e195/rb/s11_a3_session_e195.sh	30	-	if [ -z "${RB_DRY:-}" ] && [ -f "$RB_OUT/e195-T0.txt" ]; then	no relaunch read	an earlier launch from this RB_OUT: its one relaunch, or no third launch (10)	SD
+tools/claims-v3/e195/rb/s11_a3_session_e195.sh	75	-	[ -n "${RB_DRY:-}" ] && exit 0	exit 0 after the listing	the launch read: LAUNCHED (the T0 recorded), or the box's refusal (10)	RS,SD
+tools/claims-v3/e195/rb/s20_wait_e195.sh	22	-	[ -n "${RB_DRY:-}" ] || [ -n "$want" ] || rb_die $RB_E_USAGE "RB_OUT h	no T0 needed	RB_OUT's e195-T0.txt names the run, else 10	W1r,W2r
+tools/claims-v3/e195/rb/s20_wait_e195.sh	51	-	[ -n "${RB_DRY:-}" ] && exit 0	exit 0 after the listing	the wait's verdict: RUN-RUNNING 17, RUN-ENDED 0, GATE-STOPPED or MAIN-CRASHED 16, RUN-GONE 14	W1r,W2r,WN,GS
+tools/claims-v3/e195/rb/s22_collect_e195.sh	32	-	[ -n "$T0" ] || [ -n "${RB_DRY:-}" ] || rb_die $RB_E_USAGE "no T0 reco	no T0 needed	the T0 step 9 recorded, else 10	C,C2,GS
+tools/claims-v3/e195/rb/s22_collect_e195.sh	36	-	[ -n "${RB_DRY:-}" ] && own=${own:-LOGIN}	a placeholder login	the box login the look recorded, else 10	C,C2,GS
+tools/claims-v3/e195/rb/s22_collect_e195.sh	38	-	if [ -z "${RB_DRY:-}" ]; then	no folders checked	RB_OUT's copy-back and output folders new, else 10	C,C2,GS
+tools/claims-v3/e195/rb/s22_collect_e195.sh	65	-	if [ -z "${RB_DRY:-}" ]; then	the box's answer not read	the session's directory on the box (HAVE), its SUM and ABSENT lines kept	C,C2,GS
+tools/claims-v3/e195/rb/s22_collect_e195.sh	82	-	rb_has '^ASSEMBLED ' || [ -n "${RB_DRY:-}" ] || rb_die $RB_E_FAIL "the	not read	the data directory or the gate stop's record assembled, else 14	C,GS
+tools/claims-v3/e195/rb/s24_reduce_e195.sh	24	-	[ -n "${RB_DRY:-}" ] || [ "$(grep -c . "$RB_CAP")" = 3 ] || rb_die $RB	not read	the data directory committed, else 10	R
+tools/claims-v3/e195/rb/s24_reduce_e195.sh	26	-	[ -z "${RB_DRY:-}" ] && [ -s "$RB_CAP" ] && rb_die $RB_E_USAGE "$D has	not read	no uncommitted change in it, else 10	R
+tools/claims-v3/e195/rb/s24_reduce_e195.sh	28	-	[ -z "${RB_DRY:-}" ] && [ "$RB_RC" -ne 0 ] && rb_die $RB_E_USAGE "$D's	not read	its SHA256SUMS holds, else 10	R
+tools/claims-v3/e195/rb/s24_reduce_e195.sh	30	-	[ -n "${RB_DRY:-}" ] || rb_has '^999232f2c1c95439b3ba4dc8135aba8d31eec	not read	the reducer at its registered sha256, else 10	R
+tools/claims-v3/e195/rb/s24_reduce_e195.sh	33	-	if [ -z "${RB_DRY:-}" ]; then	no input folder made	the reducer's input folder made new; the main passes (block.json ok) linked in	R
+tools/claims-v3/e195/rb/s24_reduce_e195.sh	61	-	rb_has '^LEFTOVER-E195: ' || [ -n "${RB_DRY:-}" ] || rb_die $RB_E_FAIL	not read	the leftover checker ran, else 14	R
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	52	rb_say	rb_say() { if [ -n "${RB_DRY:-}" ]; then echo "[$RB_STEP] (dry listing	'(dry listing; a real run would say:)'	the plain line	P1,S,B,RT
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	71	rb_init	[ -n "${RB_DRY:-}" ] && echo "=== [$RB_STEP] dry listing: nothing belo	k6's banner (k6's own steps 4 and 7)	no banner	L1,RT
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	105	rb_probe	if [ -n "${RB_DRY:-}" ]; then echo "--- probe $1, hard-killed at 15 s:	the probe printed	the 15 s hard-killed probe (ssh true)	S,B,RT,DR,RS,L1
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	118	rb_remote	if [ -n "${RB_DRY:-}" ]; then	the remote script printed in full	the script over ssh bash -s at its class's bound; a login link 11, a hang 13, a cut 14	S,B,RT,DR,RS,W1r,C,L1
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	150	rb_local	if [ -n "${RB_DRY:-}" ]; then	the command printed	the command run at its class's bound, its output captured	P1,P2,C,R
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	162	rb_has	[ -n "${RB_DRY:-}" ] && return 0	always true	grep in the last call's output	P1,S,B,RT
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	166	rb_val	[ -n "${RB_DRY:-}" ] && { echo DRY; return 0; }	DRY	the first match in the last call's output	P1,B
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	170	rb_refused	[ -n "${RB_DRY:-}" ] && return 0	never stops	a box's REFUSED stops the step with 10	S,B,RT,C
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	176	rb_identity_stop	[ -n "${RB_DRY:-}" ] && return 0	never stops	a box's IDENTITY-STOP stops with 16 (read by rb_launched before a refusal)	RS,SD
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	182	rb_launched	[ -n "${RB_DRY:-}" ] && return 0	always launched	LAUNCHED <run>, or the identity stop (16), the box's refusal (10), else 14	RS,SD
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	197	rb_need_start	if [ -n "${RB_DRY:-}" ]; then echo "--- gate: now <= the round's last 	the gate named	now <= the window's last start, else 13	S,B,DR,RS
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	201	rb_need_end	if [ -n "${RB_DRY:-}" ]; then echo "--- gate: now + $(($1 / 60)) min <	the gate named	now + the cap <= the window's last end, else 13	RS
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	355	rb_job_wait	[ -n "${RB_DRY:-}" ] && return 0	no verdict read	the job's verdict: done rc 0, done non-zero or lost 14, still running 17	B,DR,L1
+tools/claims-v3/q141k-runbook/k6/rb_common.sh	371	rb_nopath	if [ -n "${RB_DRY:-}" ]; then rb_disp "--- gate: no desk path (the lab	the gate named	nopath_q142s.py over what the step wrote	NOT ON E195'S DAY: no E195 step calls rb_nopath (step 11 uses E183's desk-path gate)

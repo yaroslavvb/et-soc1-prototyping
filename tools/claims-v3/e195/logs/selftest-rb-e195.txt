@@ -1,0 +1,191 @@
+E195 runbook desk test (kit-e195), 2026-11-15 22:40:56 PST; bash 5.2.21(1)-release; rsync  version 3.2.7  protocol version 3; Python Python 3.12.3; host name aifoundry3
+scratch repository: a shared sparse clone at the registration f1c35f5e210d, the kit as one stand-in commit b04d061b7d13; the kit list's stand-in 48 files
+RB_LOCK: a copy of the given lock file of checks, 70 lines
+
+== A. the dry listing
+dry listing: 13 steps listed, 0 exited non-zero, 0 box calls
+-> PASS (A every step 0, no call to the stand-ins)
+
+== K, W1-W3, G. the window rule; RB_GITLOCK required
+-> PASS (K, W1-W3, G each refused (10) before any call)
+
+== N. step 2 run inside the lab-git lock (nested)
+[s03_desk_e195] STOP: the desk check failed: pull pull(rc 14; a nested lab-git lock exits 75)
+-> PASS (N a nested step 2 stops with 16 naming its pull)
+
+== P1. step 2 on the scratch repository
+[s03_desk_e195] desk check: the window written today for E195; pulled under the lab-git lock; HEAD b04d061b7d13 descends from e8a85229, the registration f1c35f5e210d (subtree 7b9aa484) and the kit b04d061b7d13; the paths clean; HISTORY OK; the lists at their pinned counts and bytes (41; the kit's 48), lists not pinned (reported): none; the freeze line; the harness re-made and at its sha256; PORT CHECK PASS; DRYLISTING-E195 PASS; no E195 datum in any ref; the preflight GO; the kit's desk tests' logs
+-> PASS (P1 step 2 passes at every pin, HISTORY OK, the freeze line, the harness, the ports, the dry listing, no E195 datum, the preflight GO)
+
+== P2, P3, H1, H2, H3, D1. a short list; the kit's list short; an edited registered file; two shadows; an E195 datum in a ref
+HISTORY FAIL: a shadowing addition: tools/claims-v3/e195/json.py (as json)
+HISTORY FAIL: a shadowing file not committed: tools/claims-v3/random.py (as random)
+-> PASS (P2, P3, H1, H2, H3, D1 each refused and named)
+
+== S. step 5, the sync
+[s07_a3_sync_e195] synced to aifoundry3:aifoundry/build/claims-v3/aifoundry3/e195/ (59 paths; the rsync sent 59 files' contents); the box's copies at their pins (HARNESS OK)
+-> PASS (S E195's files in E195's root at their pins (HARNESS OK on the box); another run's file untouched; nothing outside E195's root)
+
+== B, X, T. step 6: a real build, the wait, the box's pins and tools; a second start; NO-THIRD-BUILD
+generator: CHECK OK: 31 arms from this host's bytes (numpy 1.26.4); manifest.json and counts.json byte-equal to gen-e195-noms/
+heater: 30f2dc0f45549214...; its parser with the registered arguments and an unknown option: exit 2, 'unknown option --no-such-option-e195'
+X09MEM-BUILT 2026-11-15 22:41:23 PST on aifoundry3
+kernel 7c5faea8db181f8761754fe8af222f751624187f3a12bbe30254d84be6226fa6
+kernel_text 007a355d2da5b420648a80f8a0d8304e172ecba3fdc94903fb6ca4ae67a12f2e
+kernel_disassembly b59a6caf9abec79ba8feb3adc4fa190831fc018428d782febafdfe868ebe25ce
+registration_desk_build (aifoundry2, E195.md section 17 item 5) kernel_elf 7c5faea8db181f8761754fe8af222f751624187f3a12bbe30254d84be6226fa6 text 007a355d2da5b420648a80f8a0d8304e172ecba3fdc94903fb6ca4ae67a12f2e disassembl
+generator CHECK OK: 31 arms from this host's bytes (numpy 1.26.4); manifest.json and counts.json byte-equal to gen-e195-noms/
+X09MEM-BUILT rc=0 kernel 7c5faea8db18 text 007a355d2da5 host 5e2e0ab4b556
+    generator: CHECK OK: 31 arms from this host's bytes (numpy 1.26.4); manifest.json and counts.json byte-equal to gen-e195-noms/
+    heater: 30f2dc0f45549214...; its parser with the registered arguments and an unknown option: exit 2, 'unknown option --no-such-option-e195'
+    X09MEM-BUILT 2026-11-15 22:41:23 PST on aifoundry3
+    kernel 7c5faea8db181f8761754fe8af222f751624187f3a12bbe30254d84be6226fa6
+    kernel_text 007a355d2da5b420648a80f8a0d8304e172ecba3fdc94903fb6ca4ae67a12f2e
+    kernel_disassembly b59a6caf9abec79ba8feb3adc4fa190831fc018428d782febafdfe868ebe25ce
+    generator CHECK OK: 31 arms from this host's bytes (numpy 1.26.4); manifest.json and counts.json byte-equal to gen-e195-noms/
+    X09MEM-BUILT rc=0 kernel 7c5faea8db18 text 007a355d2da5 host 5e2e0ab4b556
+BOXCHECK-E195 OK: E195's root at its pins, aifoundry3, one card node and its lock file, et-who --check answers, today's record, the two tools linked
+[s08_a3_build_e195] built today on aifoundry3 (the kernel and the host; hashes in RB_OUT/e195-built.txt); the box's pins and tools read OK
+   (the first wait, bounded at 2 s: exit 0)
+-> PASS (B the build job: started; the bounded wait 17 while it runs (or 0); then 0 with X09MEM-BUILT (the generator's check from the host's bytes), the box's pins and tools OK)
+-> PASS (X a second start after a build: 10; T a third start: NO-THIRD-BUILD 16)
+
+== L1, L2, L3. the login check; a hang; a cut wait
+   RB_LOCK: 1 line appended ('22:41:26 aifoundry3 needs a check'); its first 70 lines kept: 1
+-> PASS (L1 a login link: 11, one line appended to RB_LOCK and the rest kept; L2 a hang: 13; L3 a cut wait: 14)
+
+== RT. step 7's rest gate before its config read
+<scratch>/rt1.txt:REFUSED: 10 minutes since E188's session end (2026-11-15 22:31:30 PST): E195's first card command comes on a rested card, at least 40 minutes after our la
+<scratch>/rt1.txt:[s09_a3_reads_e195] STOP: the rest has not run: REFUSED: 10 minutes since E188's session end (2026-11-15 22:31:30 PST): E195's first card command comes on
+<scratch>/rt2.txt:rest: 45 minutes since E188's session end (2026-11-15 21:56:30 PST; dry sessions and blocks that opened no device skipped)
+<scratch>/rt2.txt:REST-OK: the rest has run on aifoundry3
+<scratch>/rt2.txt:[s09_a3_reads_e195] rest: 45 minutes since E188's session end (2026-11-15 21:56:30 PST; dry sessions and blocks that opened no device skipped): k6's reads
+<scratch>/rt2.txt:[s09_a3_reads_k6] aifoundry3: manifest kept on the box (build/q141k/), config TDP 0 W / 65 C / 600 MHz, et-who clean
+-> PASS (RT the rest 10 min old: 10, no config read sent; 45 min old: the rest open, k6's reads ran (one config read through the guard))
+
+== DR. step 8, the box's dry pass
+2026-11-15 22:44:47 PST DRY E195-DRY OK: 288 device calls (the smoke's 8 and 35 for each of the 8 passes: 288), each run by the runner under timeout 10, in the kit's committed order for aifoundry3, the listing equal call for call
+E195-DRY-PASS rc=0 T0=1794811290
+[s10_a3_dry_e195] the dry pass ended rc 0: E195-DRY OK: 288 device calls
+-> PASS (DR the dry pass on the stand-in box: 0, E195-DRY OK)
+
+== RS, SF, LA. the rest rule and a left stop file through step 9; then the launch
+<scratch>/rs.txt:REFUSED: 10 minutes since E193's session end (2026-11-15 22:34:52 PST): E195's first card command comes on a rested card, at least 40 minutes after our last real session there
+<scratch>/rs.txt:[s11_a3_session_e195] STOP: e195 refused on the box: REFUSED: 10 minutes since E193's session end (2026-11-15 22:34:52 PST): E195's first card command comes on a rested card, 
+<scratch>/sf.txt:REFUSED: build/claims-v3/aifoundry3/e195/build/x09-STOP exists in E195's root (a stop file left from before: a dated note moves it aside first)
+<scratch>/sf.txt:[s11_a3_session_e195] STOP: e195 refused on the box: REFUSED: build/claims-v3/aifoundry3/e195/build/x09-STOP exists in E195's root (a stop file left from before: a dated note 
+<scratch>/la.txt:rest: 45 minutes since E193's session end (2026-11-15 21:59:52 PST; dry sessions and blocks that opened no device skipped)
+<scratch>/la.txt:LAUNCHED e195 T0 1794811492 2026-11-15 22:44:57 PST (last start 2026-11-15 23:58 PST, last end 2026-11-15 23:59 PST; X9_DEADLINE 23:14:52 PST: the earlier of the last end and 
+-> PASS (RS a session 10 min ago: refused (10); SF a stop file left: refused (10); LA launched)
+-> PASS (W1r step 10 while the real session_e195.sh runs: RUN-RUNNING (17))
+2026-11-15 22:52:33 PST queue end: build/claims-v3/aifoundry3/e195/build/x09-STOP exists: stopping before p912; passes complete: 2 of 8 (910 the warm-up)
+RUN-ENDED e195
+MANIFEST-WRITTEN 49 files
+SESSION-RC 1
+[s20_wait_e195] e195 has ended (MANIFEST-WRITTEN 49 files; passes complete: 2 of 8; session.rc 1)
+-> PASS (W2r step 10 after the stop by hand: RUN-ENDED, MANIFEST-WRITTEN, 2 passes complete)
+
+== WN. a decoy session_e1950.sh, and a session log with no end
+-> PASS (WN a decoy named session_e1950.sh: RUN-GONE (14), the pattern matches the real name only)
+
+== SD. a second launch the same day after the session that opened the card
+-> PASS (SD a second launch after a session that opened the card: refused (10))
+
+== C. step 11, the collection
+SUM 53d77818434f31dffe30209896d7f19e94a8b6e7a185d97dd1b1ffe903ba2c14 build/e195/T1794811492/stopfile-x09-STOP.txt
+COPY EXACT: 60 files at the box's sha256, nothing else; the session's own MANIFEST.sha256 holds for its 49 files
+ASSEMBLED 2026-11-15-e195-x09-dramtoggle-aifoundry3: 63 files; session.rc 1; passes p901,p910,p911 (block ok: p901,p910,p911); card-minutes 7.7; build/claims-v3/aifoundry3/e195/build/x09-STOP exists: stopping before p912; passes complete: 2 of 8 (910 the warm-
+SCRUB-CHECK OK: no holder line, process entry or /home path names another account
+[s22_collect_e195] E195 COLLECTED: <scratch>/out-p/e195-out/2026-11-15-e195-x09-dramtoggle-aifoundry3 (it is docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/), T0 1794811492, the c
+-> PASS (C COPY EXACT, the gates, the data directory and its SHA256SUMS, our login masked: 0)
+
+== R. the data directory committed (in the scratch repository), then step 13
+<scratch>/r.txt:LEFTOVER-E195: headline passes [911]; 0 pass-direction(s) with a zero-filled term of 2
+<scratch>/r.txt:[s24_reduce_e195] reduced (the registered reducer, Python 3.12.3, on 2 main passes, --warmup 910): RB_OUT/x09-e195.json and .txt; what it leaves: RB_OUT/leftover-e195.json and .txt; commit them in a dated note with t
+<scratch>/out-p/leftover-e195.txt:LEFTOVER-E195: headline passes [911]; 0 pass-direction(s) with a zero-filled term of 2
+-> PASS (R the registered reducer on the committed main passes (--warmup 910, never --forecast), then the leftover checker: 0)
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/SHA256SUMS' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/box-manifest.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/build/build-attempts.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/build/build-logs/2026-11-15-start1.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/build/x09mem-built.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/build/x09mem/arm-table.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/build/x09mem/arm-table.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/build/x09mem/check_elf.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/build/x09mem/loops.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/build/x09mem/make-check.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/facts-e195.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/launch.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p901/block.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p901/code.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p901/configs.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p901/gen.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p901/manifest.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p901/marks.jsonl' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p901/run.log' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p901/runs.jsonl' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p901/telemetry.jsonl.gz' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p901/text.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p910/block.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p910/code.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p910/configs.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p910/gen.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p910/manifest.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p910/marks.jsonl' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p910/run.log' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p910/runs.jsonl' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p910/telemetry.jsonl.gz' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p910/text.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p911/block.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p911/code.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p911/configs.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p911/gen.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p911/manifest.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p911/marks.jsonl' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p911/run.log' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p911/runs.jsonl' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p911/telemetry.jsonl.gz' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/passes/p911/text.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/MANIFEST.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/config-session-end.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/config-session-end.json.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/config-session-start.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/config-session-start.json.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/etwho-check-end.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/etwho-end.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/etwho-start.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/first-card-command.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/harness.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/hashes.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/passes.log' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/preflight.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/session-end.time' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/session.log' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/session.rc' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/smoke-gate.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/smoke-peak.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/smoke.log' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/stopfile-x09-STOP.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-15-e195-x09-dramtoggle-aifoundry3/session/watch.log' not uptodate; will not remove from working tree.
+
+== C2. one byte of a box file changed after the session's manifest
+-> PASS (C2 the session's own manifest no longer holds: COPY NOT EXACT, 16)
+
+== GS. a gate stop collected as its record, from a new RB_OUT
+<scratch>/gs1.txt:2026-11-15 22:52:44 PST GATE-STOP: the card is held: et-who --check lists 1 holder line(s) (no device opened)
+<scratch>/gs1.txt:GATE-STOPPED e195
+<scratch>/gs1.txt:[s20_wait_e195] STOP: e195 stopped at a gate before any pass (the lines above): step 11 collects it as a gate stop's record
+<scratch>/gs2.txt:ASSEMBLED gate-stops/2026-11-15-e195-x09-dramtoggle-T1794811964-aifoundry3: 20 files; session.rc 3; passes none (block ok: none); card-minutes 0.0; the ca
+<scratch>/gs2.txt:[s22_collect_e195] E195 COLLECTED: <scratch>/out-g/e195-out/gate-stops/2026-11-15-e195
+-> PASS (GS step 10: GATE-STOPPED (16); step 11: its gate stop's record under gate-stops/, never a data directory)
+
+== Z
+<repo>/tools/claims-v3/e195/rb/selftest_rb_e195.sh: line 350: /proc/9924/cmdline: No such file or directory
+<repo>/tools/claims-v3/e195/rb/selftest_rb_e195.sh: line 350: /proc/9925/cmdline: No such file or directory
+-> PASS (Z no process of this test left ())
+
+== AUDIT-RB the runbook's dry branches (rb/dry-branches-rb-e195.tsv) against the files, with this run's results
+AUDIT-RB-E195 OK: 60 lines of the runbook read RB_DRY (rb_e195.sh, the ten steps, k6's rb_common.sh), each with a row whose cases passed in this run (21 ok lines read), but the one no E195 step reaches
+-> PASS (AUDIT-RB every line of the runbook that reads RB_DRY has a row whose cases passed in this run)
+
+SELFTEST-RB-E195 22 of 22 PASS

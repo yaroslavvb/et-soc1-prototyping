@@ -1,0 +1,69 @@
+E195 rest rule desk test, 2026-11-15 22:53:08 PST, GNU date; rest_rule_e195.sh sha256 622ded02e9f63f73...
+
+== R1 no session of ours
+   rule: exit 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders
+-> PASS (R1 none: rest)
+
+== R2/R3 E183's form
+   rule: exit 3: REFUSED: 10 minutes since E183's session end (2026-11-15 22:43:08 PST): E195's first card command comes on a rested card, at least 40 minutes after our last real session there (E195.md 6; the kit)
+-> PASS (R2 E183 10 min: REFUSED)
+   rule: exit 0: rest: 45 minutes since E183's session end (2026-11-15 22:08:08 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R3 E183 45 min: rest)
+
+== R4 E189's form
+   rule: exit 3: REFUSED: 20 minutes since E189's session end (2026-11-15 22:33:08 PST): E195's first card command comes on a rested card, at least 40 minutes after our last real session there (E195.md 6; the kit)
+-> PASS (R4 E189 20 min: REFUSED)
+
+== R5/R6 E192's form
+   rule: exit 3: REFUSED: 39 minutes since E192's session end (2026-11-15 22:14:08 PST): E195's first card command comes on a rested card, at least 40 minutes after our last real session there (E195.md 6; the kit)
+-> PASS (R5 E192 39 min: REFUSED)
+   rule: exit 0: rest: 41 minutes since E192's session end (2026-11-15 22:12:08 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R6 E192 41 min: rest)
+
+== R7/R8 E193's form
+   rule: exit 3: REFUSED: 15 minutes since E193's session end (2026-11-15 22:38:08 PST): E195's first card command comes on a rested card, at least 40 minutes after our last real session there (E195.md 6; the kit)
+-> PASS (R7 E193 15 min: REFUSED)
+   rule: exit 0: rest: 40 minutes since E193's session end (2026-11-15 22:13:08 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R8 E193 40 min: rest)
+
+== R9 E188's form
+   rule: exit 3: REFUSED: 25 minutes since E188's session end (2026-11-15 22:28:08 PST): E195's first card command comes on a rested card, at least 40 minutes after our last real session there (E195.md 6; the kit)
+-> PASS (R9 E188 25 min: REFUSED)
+
+== R10 E195's own earlier session
+   rule: exit 3: REFUSED: 5 minutes since E195's session end (2026-11-15 22:48:08 PST): E195's first card command comes on a rested card, at least 40 minutes after our last real session there (E195.md 6; the kit)
+-> PASS (R10 E195 5 min: REFUSED)
+
+== R11 a dry pass skipped
+   rule: exit 0: rest: 50 minutes since E193's session end (2026-11-15 22:03:08 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R11 dry skipped: rest 50)
+
+== R12 a refusal and a gate stop before the first card read skipped
+   rule: exit 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders
+-> PASS (R12 no device opened (a gate stop and a refusal): skipped)
+
+== R13 a cut E195 session counted at its run's latest write in E195's root
+   rule: exit 3: REFUSED: 5 minutes since E195's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026-11-15 22:48:08 PST (the latest write of E195's files outside the dry paths)): E195's first
+-> PASS (R13 cut: REFUSED at the latest write of its data folder)
+
+== R14 energy.sh's folder
+   rule: exit 3: REFUSED: 10 minutes since energy.sh's run (2026-11-15 22:43:08 PST (the latest write of an energy.sh run's folder, aifoundry3-m4-20261114)): E195's first card command comes on a rested card, at least 40 minutes after our last real
+-> PASS (R14 energy.sh 10 min: REFUSED)
+
+== R15 the newest wins
+   rule: exit 3: REFUSED: 30 minutes since E189's session end (2026-11-15 22:23:08 PST): E195's first card command comes on a rested card, at least 40 minutes after our last real session there (E195.md 6; the kit)
+-> PASS (R15 newest (E189 30 min): REFUSED)
+
+== R17 a session that ran, the phrase inside a tool's text copied into its closing line: counted
+   rule: exit 3: REFUSED: 11 minutes since E195's session end (2026-11-15 22:42:08 PST): E195's first card command comes on a rested card, at least 40 minutes after our last real session there (E195.md 6; the kit)
+-> PASS (R17 the phrase inside a copied tool text: the session that ran is counted (REFUSED))
+
+== R18 another kit's no-device ending (E183's form): now counted
+   rule: exit 3: REFUSED: 6 minutes since E183's session end (2026-11-15 22:47:08 PST): E195's first card command comes on a rested card, at least 40 minutes after our last real session there (E195.md 6; the kit)
+-> PASS (R18 E183's ending form counted (the safe direction: it only delays a launch))
+
+== R16 the real-path desk test's own P log
+   rule: exit 3: REFUSED: 14 minutes since E195's session end (2026-11-15 22:38:18 PST): E195's first card command comes on a rested card, at least 40 minutes after our last real session there (E195.md 6; the kit)
+-> PASS (R16 the real-path log (T1794810495), ended 14 minutes ago: exit 3)
+
+SELFTEST-REST-E195 18 of 18 PASS
