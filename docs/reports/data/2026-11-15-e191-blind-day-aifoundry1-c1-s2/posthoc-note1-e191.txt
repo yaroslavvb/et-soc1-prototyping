@@ -1,0 +1,69 @@
+E191's second-session data README, dated note 1: post hoc and reported readings of committed files (decides nothing; scores nothing)
+interpreter: python 3.12.3
+
+0. anchors
+  SHA256SUMS: 257 of 257 entries OK; with FILES.txt, README.md and SHA256SUMS the data commit's 260 files
+  README.md sha256 51f2e970c18a3ea5cbc4d358ad3e796758ac24c0a2320ea0eb1565f234eaf643
+  SHA256SUMS sha256 594f5ff613b85b20f82aee398cdd3c1e81d0ef13989fdcbae1bbd1e3ea80c0dc
+  FILES.txt sha256 43802758184119f0c205e0f731290f82f6a94c4ba841c84a813b2b9b349b74bd
+  tools/claims-v3/e191/SHA256SUMS-e191-registration: 11 of 11 entries OK (list sha256 e458fa827536b099b66af1352e2060950eb722bc755de51d810e78cb6015f5d3)
+  tools/claims-v3/e189/SHA256SUMS-e189-registration: 10 of 10 entries OK (list sha256 bf1b1bbb4c2b34fcabf5b437cf98d602841315342a239303a11eb2eb72c79058)
+
+1. the scrub (collect_e191.py's step 4 puts '~' for the box's home path and a placeholder for the box login, in every text file and every .gz's text)
+  the box's MANIFEST.sha256 (written on the box, last, before the copy-back): 207 of 207 files at their listed sha256 in this directory (passes/ here, the rest under session/); not matching: none
+  the data commit's 53 files outside that list: {"FILES.txt": 1, "MANIFEST.sha256": 1, "README.md": 1, "SHA256SUMS": 1, "energy.json": 24, "energy.txt": 24, "runner.rc": 1}
+  of those, the files holding '~': {"README.md": 1}
+  files of the data commit holding the login placeholder: {"README.md": 1}
+  files of the data commit holding a home-directory path (the text inside all 25 .gz files included): none
+  session/runner.rc: '0\n'
+  README.md says the scrub ran and the box's home path became '~' on line(s) [201]
+  tools/claims-v3/e191/collect_e191.py: the home path replaced on line(s) [74], the login on line(s) [76], its COLLECTED line printed on line(s) [180]
+  tools/claims-v3/e191/run_e191_v2.py writes MANIFEST.sha256 (on the box, last) on line(s) [1067]
+
+2. S1T's margin on the starting die (post hoc; delta = 0 is the registered reading)
+  read by the frozen scorer's read_pass: {"copy-zeros": 4, "copy-random": 4, "sha256": 4, "sort-sorted": 4, "sort-shuffled": 4, "sparse-parity": 4}; T0 (die_c.before) 50.0-52.0 C; card 1's footing law's band [56, 70] C; the rest law at delta 0: {"exponential law (outside the footing band)": 24}
+  registered (delta 0): S1T PASS, 5 of 6 within 5% (the frozen scorer's own run: PASS, 5 of 6; e_j_total equal to it within 0.0e+00); e_j_total copy-zeros -0.032464, copy-random -0.039969, sha256 -0.023319, sort-sorted -0.052190, sort-shuffled -0.042172, sparse-parity -0.024699
+  copy-zeros: within 5% at delta 0: True; changes: lower side at -1.506 C (inside to outside)
+  copy-random: within 5% at delta 0: True; changes: lower side at -0.904 C (inside to outside)
+  sha256: within 5% at delta 0: True; changes: lower side at -2.251 C (inside to outside)
+  sort-sorted: within 5% at delta 0: False; changes: upper side at +0.182 C (outside to inside)
+  sort-shuffled: within 5% at delta 0: True; changes: lower side at -0.650 C (inside to outside)
+  sparse-parity: within 5% at delta 0: True; changes: lower side at -2.741 C (inside to outside)
+  S1T's word changes: lower side at -0.650 C (PASS to FAIL)
+  the count within changes: lower side at -0.650 C (5 to 4); lower side at -0.904 C (4 to 3); lower side at -1.506 C (3 to 2); lower side at -2.251 C (2 to 1); lower side at -2.741 C (1 to 0); upper side at +0.182 C (5 to 6)
+  delta -1.0 C: S1T FAIL, 3 of 6 within; copy-zeros -0.044187, copy-random -0.051055, sha256 -0.035378, sort-sorted -0.064010, sort-shuffled -0.054148, sparse-parity -0.034152
+  delta -0.9 C: S1T FAIL, 4 of 6 within; copy-zeros -0.043029, copy-random -0.049960, sha256 -0.034187, sort-sorted -0.062842, sort-shuffled -0.052966, sparse-parity -0.033219
+  delta -0.7 C: S1T FAIL, 4 of 6 within; copy-zeros -0.040704, copy-random -0.047761, sha256 -0.031796, sort-sorted -0.060498, sort-shuffled -0.050590, sparse-parity -0.031344
+  delta -0.5 C: S1T PASS, 5 of 6 within; copy-zeros -0.038366, copy-random -0.045550, sha256 -0.029391, sort-sorted -0.058141, sort-shuffled -0.048202, sparse-parity -0.029458
+  delta +0.2 C: S1T PASS, 6 of 6 within; copy-zeros -0.030080, copy-random -0.037714, sha256 -0.020867, sort-sorted -0.049786, sort-shuffled -0.039737, sparse-parity -0.022776
+  delta +0.5 C: S1T PASS, 6 of 6 within; copy-zeros -0.026479, copy-random -0.034309, sha256 -0.017163, sort-sorted -0.046156, sort-shuffled -0.036058, sparse-parity -0.019872
+  delta +1.0 C: S1T PASS, 6 of 6 within; copy-zeros -0.020411, copy-random -0.028570, sha256 -0.010921, sort-sorted -0.040037, sort-shuffled -0.029859, sparse-parity -0.014979
+  post hoc, a law the registration does not use (the footing law carried down to 40 C; rest law {"footing law (quadratic, inside its band)": 24}): S1T PASS, 6 of 6 within; copy-zeros -0.016540, copy-random -0.026062, sha256 -0.007977, sort-sorted -0.036234, sort-shuffled -0.025968, sparse-parity -0.015762
+
+3. E191.md 8.4's reported readings (REPORTED: desk arithmetic from the frozen scorer's measured means; deciding nothing)
+  section 6's reading (E191.md line(s) [201]): E189's frozen J over idle (aifoundry3's prices) beside card 1's measured J over idle and E191's own given J over idle
+  copy-zeros: measured 6.01163 J; E189's 5.14358 (-14.4395%); E191's given 5.14344 (-14.4419%; its frozen point 5.14344, -14.4419%); nearer: E189's (aifoundry3's prices) by 0.0023%
+  copy-random: measured 8.25666 J; E189's 6.81368 (-17.4766%); E191's given 6.94131 (-15.9308%; its frozen point 6.94131, -15.9308%); nearer: E191's own (card 1's prices) by 1.5458%
+  sha256: measured 2.51065 J; E189's 2.30478 (-8.2000%); E191's given 2.24593 (-10.5440%; its frozen point 2.24593, -10.5440%); nearer: E189's (aifoundry3's prices) by 2.3440%
+  sort-sorted: measured 3.50703 J; E189's 2.71218 (-22.6644%); E191's given 2.61968 (-25.3020%; its frozen point 2.61968, -25.3020%); nearer: E189's (aifoundry3's prices) by 2.6376%
+  sort-shuffled: measured 3.93060 J; E189's 3.29025 (-16.2913%); E191's given 3.18267 (-19.0283%; its frozen point 3.18267, -19.0283%); nearer: E189's (aifoundry3's prices) by 2.7370%
+  sparse-parity: measured 8.69120 J; E189's 7.34622 (-15.4752%); E191's given 8.12737 (-6.4874%; its frozen point 8.13168, -6.4378%); nearer: E191's own (card 1's prices) by 8.9878%
+  section 3's literals (E191.md line(s) {'write-back': [88], 'l2': [89]}): the frozen term scaled by card 1's row over the frozen literal
+  copy-random (write-back): frozen term 4.897550 J (1.503238e+10 B implied); +0.647896 J (+9.334% of the frozen J over idle); error -15.9308% as registered, -8.0839% with card 1's row
+  sha256 (l2): frozen term 0.009496 J (3.355442e+09 B implied); +0.003456 J (+0.154% of the frozen J over idle); error -10.5440% as registered, -10.4063% with card 1's row
+  sort-sorted (l2): frozen term 0.427316 J (1.509951e+11 B implied); +0.155525 J (+5.937% of the frozen J over idle); error -25.3020% as registered, -20.8673% with card 1's row
+  sort-shuffled (l2): frozen term 0.427316 J (1.509951e+11 B implied); +0.155525 J (+4.887% of the frozen J over idle); error -19.0283% as registered, -15.0715% with card 1's row
+  the frozen bands' coverage: J over idle inside for 5 of 6, J with the card at rest for 4 of 6, the mean t_k for 2 of 6
+  copy-zeros: J over idle 6.01163 in [4.34055, 6.06953]: True; J at rest 33.28934 in [20.9251, 33.158]: False; mean t_k 0.907397 s in [0.556755, 0.75455]: False
+  copy-random: J over idle 8.25666 in [6.3609, 7.80126]: False; J at rest 35.58322 in [22.9973, 35.173]: False; mean t_k 0.907200 s in [0.556755, 0.75455]: False
+  sha256: J over idle 2.51065 in [2.12724, 5.15831]: True; J at rest 15.57101 in [13.5419, 39.3626]: True; mean t_k 0.431619 s in [0.384768, 0.944804]: True
+  sort-sorted: J over idle 3.50703 in [2.06692, 4.83488]: True; J at rest 20.38883 in [19.8818, 40.8757]: True; mean t_k 0.559301 s in [0.600658, 1.01363]: False
+  sort-shuffled: J over idle 3.93060 in [2.60315, 5.8297]: True; J at rest 24.95266 in [23.8058, 49.5378]: True; mean t_k 0.694154 s in [0.714816, 1.22883]: False
+  sparse-parity: J over idle 8.69120 in [6.70151, 12.8551]: True; J at rest 24.40809 in [20.6229, 37.6575]: True; mean t_k 0.512928 s in [0.463267, 0.669164]: True
+
+4. README.md's lines cited, and the reducer's grid step (arithmetic)
+  the commit message's scan ('... message read 0 lines and 0 sanitizer hits'): line(s) [208]
+  the window file's RB_GO_EPOCH ('... is the moment step 1 wrote it, not his go'): line(s) [166]
+  workloads/sparseparity/tools/energy_reduce.py: integrate() on line(s) [136], its grid by numpy's arange on line(s) [140], its sum times the nominal step on line(s) [141]
+  at the session's T0 1794780355 s the float spacing is 2.384186e-07 s; fl(T0 + 0.005) - T0 = 0.005000114440917969 s (+2.289e-05 relative to 5 ms; one spacing lower: -2.480e-05)
+SPDX-License-Identifier: Apache-2.0
