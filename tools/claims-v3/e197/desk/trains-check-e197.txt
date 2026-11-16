@@ -1,0 +1,53 @@
+# E197 registration desk check: the trains, cell by cell (reg-e197, Q185; desk check of code)
+
+/usr/bin/python3 -I -B desk/compare_trains_e197.py proposal/request.md desk/host-list-e197.jsonl proposal/src/trains.tsv \
+    proposal/src/reduce_regfile.py desk/dry-e197-full.txt desk/dry-e197-short.txt desk/dry-e197-ext.txt
+
+(run at the desk on the lane's copies of the same bytes; rc 0)
+
+```
+1. request.md section 2 train table: 15 rows
+   trains.tsv: 16 rows
+   T2   F rot.x0    S rot2.x0   processes  18 +   0 (second sitting)  block(s) A  first FSSF  short 1
+   T1   F rot.x64   S rot2.x64  processes 134 + 230 (second sitting)  block(s) A,E  first SFFS,SFFS  short 1,0
+   T3   F res.k64   S res.k0    processes  18 +   0 (second sitting)  block(s) B  first SFFS  short 1
+   T5   F resf.k0   S resz.k0   processes  52 +   0 (second sitting)  block(s) B  first SFFS  short 1
+   T6   F wn2.z     S wn1.z     processes  18 +   0 (second sitting)  block(s) B  first FSSF  short 0
+   T4   F res.k32   S res.k0    processes  18 +   0 (second sitting)  block(s) B  first FSSF  short 0
+   T8   F rd2i.d64  S rd2i.e0   processes  18 +   0 (second sitting)  block(s) C  first SFFS  short 1
+   T10  F rd2r.d64  S rd2r.e0   processes  18 +   0 (second sitting)  block(s) C  first FSSF  short 1
+   T9   F rd2i.e64  S rd2i.e0   processes  26 +   0 (second sitting)  block(s) C  first FSSF  short 0
+   T11  F rd1u.d64  S rd1u.e0   processes  18 +   0 (second sitting)  block(s) C  first FSSF  short 0
+   T13  F idx1.z    S idx0.z    processes  26 +   0 (second sitting)  block(s) D  first FSSF  short 1
+   T12  F idx5.z    S idx1.z    processes  18 +   0 (second sitting)  block(s) D  first FSSF  short 1
+   T15  F idx3.z    S idx1.z    processes  18 +   0 (second sitting)  block(s) D  first SFFS  short 0
+   T7   F wn8.z     S wn2.z     processes   0 +  18 (second sitting)  block(s) E  first SFFS  short 0
+   T14  F rn8.z     S idx1.z    processes   0 +  18 (second sitting)  block(s) E  first FSSF  short 0
+   blocks and order (A, B, C, D; E), short flags: checked; request.md against trains.tsv: 78 of 78 cells equal
+2. the host's kind table: 34 kinds
+   T2   rot.x0    - rot2.x0   F - S: none                               request.md: none (every count equal)  EQUAL
+   T1   rot.x64   - rot2.x64  F - S: cell +64                           request.md: cell +64  EQUAL
+   T3   res.k64   - res.k0    F - S: res +64                            request.md: res +64  EQUAL
+   T5   resf.k0   - resz.k0   F - S: writes +1                          request.md: one write to x5 (value unchanged) against x0  EQUAL
+   T6   wn2.z     - wn1.z     F - S: iw +1, enc +1                      request.md: iw +1  EQUAL
+   T4   res.k32   - res.k0    F - S: res +32                            request.md: res +32  EQUAL
+   T8   rd2i.d64  - rd2i.e0   F - S: f2 +64, h2 +32                     request.md: f2 +64 (if the named register is read); h2 +32  EQUAL
+   T10  rd2r.d64  - rd2r.e0   F - S: f2 +64, a2 +64, h2 +32             request.md: f2 +64, a2 +64; h2 +32  EQUAL
+   T9   rd2i.e64  - rd2i.e0   F - S: h2 +64                             request.md: h2 +64 held ones; f2 0  EQUAL
+   T11  rd1u.d64  - rd1u.e0   F - S: f1 +64, h1 +32                     request.md: f1 +64 (if read); h1 +32  EQUAL
+   T13  idx1.z    - idx0.z    F - S: i2 +1, enc +1                      request.md: i2 +1 (and a change of register)  EQUAL
+   T12  idx5.z    - idx1.z    F - S: i2 +4, enc +4                      request.md: i2 +4  EQUAL
+   T15  idx3.z    - idx1.z    F - S: i2 +2, enc +2                      request.md: i2 +2  EQUAL
+   T7   wn8.z     - wn2.z     F - S: none                               request.md: 0 (one field bit a step in both)  EQUAL
+   T14  rn8.z     - idx1.z    F - S: none                               request.md: 0 (one field bit a step in both)  EQUAL
+   designed changes: 15 of 15 trains as request.md says (enc reported beside: it equals the field counts' sum)
+3. request.md section 6 lists 34 kinds; the host table 34; the same set: True
+   kinds the plan and the anchors use: 25, all in the host table: True
+4. derived prices: request.md 21, the reducer 21; equal 21 of 21; only in the reducer: none
+   BOUNDED prices: reducer ('order', 'lin_result', 'lin_field', 'dest_n8', 'read_n8'); request.md ('order', 'lin_result', 'lin_field', 'dest_n8', 'read_n8'); equal True
+5. dry full : 429 device calls (request.md 429), timeout form(s) ['timeout 10'], events 465 expected 465, sequence SAME, calls without the registered window or stop file 0
+5. dry short: 331 device calls (request.md 331), timeout form(s) ['timeout 10'], events 367 expected 367, sequence SAME, calls without the registered window or stop file 0
+5. dry ext  : 277 device calls (request.md 277), timeout form(s) ['timeout 10'], events 289 expected 289, sequence SAME, calls without the registered window or stop file 0
+TRAINS CHECK PASS
+```
+

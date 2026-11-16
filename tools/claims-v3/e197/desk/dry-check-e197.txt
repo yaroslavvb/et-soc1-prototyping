@@ -1,0 +1,16 @@
+# E197 registration desk check: the reference session's dry listings (reg-e197, Q185; desk checks of code)
+
+DRY=1 H=build/host/regfile_host bash run_session.sh out-<plan> <plan>, inside the no-device sandbox (no /dev/et*, an empty
+/run/lock), from two copies of src: one with the proposal's src/run_trains.py, one with the lab's lab/run_trains.py (departure D1).
+The dry mode opens nothing: no sampler, no lock, no holder check, no host run; it wrote only session.log into each OUT.
+
+full  plan: proposal runner 474 lines, 429 device calls, timeout form ['timeout -k 1 10']; lab runner 474 lines, 429 device calls, timeout form ['timeout 10'];
+       the two listings line for line equal once "timeout -k 1 10" reads "timeout 10" (clock stamps aside): True
+short plan: proposal runner 376 lines, 331 device calls, timeout form ['timeout -k 1 10']; lab runner 376 lines, 331 device calls, timeout form ['timeout 10'];
+       the two listings line for line equal once "timeout -k 1 10" reads "timeout 10" (clock stamps aside): True
+ext   plan: proposal runner 292 lines, 277 device calls, timeout form ['timeout -k 1 10']; lab runner 292 lines, 277 device calls, timeout form ['timeout 10'];
+       the two listings line for line equal once "timeout -k 1 10" reads "timeout 10" (clock stamps aside): True
+
+request.md section 8 gives 429 device calls for the full plan, 331 for the short, 277 for the second sitting.
+The listings committed are the lab runner's: desk/dry-e197-full.txt, dry-e197-short.txt, dry-e197-ext.txt.
+sha256 of the runners used: proposal 4b251daefe096a993687c1ebbed9e82a8ed2e479c8d813592a9d403c36412941, lab 91c46f4e8a28a2505af1f9e0bb029d1935da59e26915a80bfadd19abd638c40d

@@ -1,0 +1,350 @@
+# E197 registration desk check: the registered reducer on synthetic sessions (reg-e197, Q185; desk check of code)
+
+THE INJECTED VALUES ARE ARBITRARY TEST VALUES: NOT A FORECAST AND NOT A MEASUREMENT (desk/synth_session_e197.py).
+
+bash slot.sh bash s09_synth_inner.sh: desk/synth_session_e197.py writes four sessions in the reference scripts' forms; the
+registered reducer, proposal/src/reduce_regfile.py, runs unchanged on each (no --prediction); desk/synth_compare_e197.py sets its
+output beside what was put in. Paths are the lane's relative ones (src/ is a byte-for-byte copy of proposal/src/).
+
+```
+2026-11-15 14:44:56 PST
+reducer: f325bd0e3e916b81ee12304db7b47d79ad6daa5172ded19952f0ef1b0565eb87 src/reduce_regfile.py; python Python 3.12.3
+synthetic exact session (full plan): 5427 launch records, 28285 samples, 2828.5 s, faults none
+synth exact rc 0
+synthetic noisy session (full plan): 5427 launch records, 28285 samples, 2828.5 s, faults {'clock_t': 1795002069150}
+synth noisy rc 0
+synthetic stop session (full plan): 5427 launch records, 28285 samples, 2828.5 s, faults {'stop_t': 1795002123100}
+synth stop rc 0
+synthetic exact session (ext plan): 3541 launch records, 17215 samples, 1721.5 s, faults none
+synth ext rc 0
+== reduce exact:
+reduce exact rc 0
+T2   rot.x0    - rot2.x0   units   9  D +0.0000 W  [+0.0000, +0.0000]  NOT RESOLVED  F/S 1.00000  dropped 
+T1   rot.x64   - rot2.x64  units  67  D +0.0500 W  [+0.0500, +0.0500]  POSITIVE  F/S 1.00000  dropped 
+T3   res.k64   - res.k0    units   9  D +0.7000 W  [+0.7000, +0.7000]  POSITIVE  F/S 1.00000  dropped 
+T5   resf.k0   - resz.k0   units  26  D +0.0300 W  [+0.0300, +0.0300]  POSITIVE  F/S 1.00000  dropped 
+T6   wn2.z     - wn1.z     units   9  D +0.1500 W  [+0.1500, +0.1500]  POSITIVE  F/S 1.00000  dropped 
+T4   res.k32   - res.k0    units   9  D +0.3500 W  [+0.3500, +0.3500]  POSITIVE  F/S 1.00000  dropped 
+T8   rd2i.d64  - rd2i.e0   units   9  D +0.4000 W  [+0.4000, +0.4000]  POSITIVE  F/S 1.00000  dropped 
+T10  rd2r.d64  - rd2r.e0   units   9  D +0.9000 W  [+0.9000, +0.9000]  POSITIVE  F/S 1.00000  dropped 
+T9   rd2i.e64  - rd2i.e0   units  13  D +0.0500 W  [+0.0500, +0.0500]  POSITIVE  F/S 1.00000  dropped 
+T11  rd1u.d64  - rd1u.e0   units   9  D +0.6000 W  [+0.6000, +0.6000]  POSITIVE  F/S 1.00000  dropped 
+T13  idx1.z    - idx0.z    units  13  D +0.2500 W  [+0.2500, +0.2500]  POSITIVE  F/S 1.00000  dropped 
+T12  idx5.z    - idx1.z    units   9  D +0.6400 W  [+0.6400, +0.6400]  POSITIVE  F/S 1.00000  dropped 
+T15  idx3.z    - idx1.z    units   9  D +0.3200 W  [+0.3200, +0.3200]  POSITIVE  F/S 1.00000  dropped 
+T7   wn8.z     - wn2.z     units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped   (NOT SCORED: not run)
+T14  rn8.z     - idx1.z    units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped   (NOT SCORED: not run)
+cell           +0.0014 pJ [+0.0014, +0.0014] per bit board  POSITIVE
+cell_ctrl      +0.0014 pJ [+0.0014, +0.0014] per bit board  POSITIVE
+order          +0.0000 pJ [+0.0000, +0.0000] per instr board  BOUNDED
+result_bit     +0.0202 pJ [+0.0202, +0.0202] per bit board  POSITIVE
+result_bit32   +0.0202 pJ [+0.0202, +0.0202] per bit board  POSITIVE
+lin_result     -0.0000 pJ [-0.0000, -0.0000] per instr board  NEGATIVE
+write          +0.0555 pJ [+0.0555, +0.0555] per instr board  POSITIVE
+dest_switch    +0.2777 pJ [+0.2777, +0.2777] per instr board  POSITIVE
+dest_n8        - per instr board  NOT SCORED
+read2_field    +0.0116 pJ [+0.0116, +0.0116] per bit board  POSITIVE
+read2_net      +0.0108 pJ [+0.0108, +0.0108] per bit board  POSITIVE
+held_one       +0.0007 pJ [+0.0007, +0.0007] per bit board  POSITIVE
+read2_operand  +0.0260 pJ [+0.0260, +0.0260] per bit board  POSITIVE
+operand_path   +0.0145 pJ [+0.0145, +0.0145] per bit board  POSITIVE
+read1_field    +0.0174 pJ [+0.0174, +0.0174] per bit board  POSITIVE
+field_bit      +0.2962 pJ [+0.2962, +0.2962] per bit board  POSITIVE
+field_bit3     +0.2962 pJ [+0.2962, +0.2962] per bit board  POSITIVE
+lin_field      +0.0000 pJ [+0.0000, +0.0000] per instr board  BOUNDED
+field_first    +0.4629 pJ [+0.4629, +0.4629] per instr board  POSITIVE
+field_base     +0.1666 pJ [+0.1666, +0.1666] per instr board  POSITIVE
+read_n8        - per instr board  NOT SCORED
+cell reading: cell (order (T2) reads BOUNDED); train gain 1.000
+== reduce noisy:
+reduce noisy rc 0
+T2   rot.x0    - rot2.x0   units   9  D -0.0014 W  [-0.0097, +0.0068]  NOT RESOLVED  F/S 1.00000  dropped 
+T1   rot.x64   - rot2.x64  units  67  D +0.0490 W  [+0.0449, +0.0531]  POSITIVE  F/S 1.00000  dropped 
+T3   res.k64   - res.k0    units   9  D +0.6987 W  [+0.6902, +0.7072]  POSITIVE  F/S 1.00000  dropped 
+T5   resf.k0   - resz.k0   units  26  D +0.0315 W  [+0.0242, +0.0388]  POSITIVE  F/S 1.00000  dropped 
+T6   wn2.z     - wn1.z     units   8  D +0.1596 W  [+0.1436, +0.1755]  POSITIVE  F/S 1.00000  dropped {'launch not ok': 1}
+T4   res.k32   - res.k0    units   9  D +0.3447 W  [+0.3303, +0.3591]  POSITIVE  F/S 1.00000  dropped 
+T8   rd2i.d64  - rd2i.e0   units   9  D +0.3895 W  [+0.3710, +0.4080]  POSITIVE  F/S 1.00000  dropped 
+T10  rd2r.d64  - rd2r.e0   units   9  D +0.8886 W  [+0.8760, +0.9011]  POSITIVE  F/S 1.00000  dropped 
+T9   rd2i.e64  - rd2i.e0   units  12  D +0.0500 W  [+0.0427, +0.0574]  POSITIVE  F/S 1.00000  dropped {'clock': 1}
+T11  rd1u.d64  - rd1u.e0   units   9  D +0.5983 W  [-, -]  NOT SCORED  F/S 0.99700  dropped   (NOT SCORED: rate ratio F/S 0.99700)
+T13  idx1.z    - idx0.z    units  13  D +0.2516 W  [+0.2448, +0.2583]  POSITIVE  F/S 1.00000  dropped 
+T12  idx5.z    - idx1.z    units   9  D +0.6402 W  [+0.6273, +0.6531]  POSITIVE  F/S 1.00000  dropped 
+T15  idx3.z    - idx1.z    units   9  D +0.3241 W  [+0.3116, +0.3366]  POSITIVE  F/S 1.00000  dropped 
+T7   wn8.z     - wn2.z     units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped   (NOT SCORED: not run)
+T14  rn8.z     - idx1.z    units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped   (NOT SCORED: not run)
+cell           +0.0014 pJ [+0.0013, +0.0015] per bit board  POSITIVE
+cell_ctrl      +0.0015 pJ [+0.0012, +0.0017] per bit board  POSITIVE
+order          -0.0027 pJ [-0.0180, +0.0127] per instr board  BOUNDED
+result_bit     +0.0202 pJ [+0.0200, +0.0205] per bit board  POSITIVE
+result_bit32   +0.0199 pJ [+0.0191, +0.0208] per bit board  POSITIVE
+lin_result     -0.0087 pJ [-0.0358, +0.0185] per instr board  BOUNDED
+write          +0.0583 pJ [+0.0449, +0.0718] per instr board  POSITIVE
+dest_switch    +0.2954 pJ [+0.2659, +0.3249] per instr board  POSITIVE
+dest_n8        - per instr board  NOT SCORED
+read2_field    +0.0113 pJ [+0.0107, +0.0118] per bit board  POSITIVE
+read2_net      +0.0105 pJ [+0.0100, +0.0111] per bit board  POSITIVE
+held_one       +0.0007 pJ [+0.0006, +0.0008] per bit board  POSITIVE
+read2_operand  +0.0257 pJ [+0.0253, +0.0261] per bit board  POSITIVE
+operand_path   +0.0144 pJ [+0.0138, +0.0150] per bit board  POSITIVE
+read1_field    - per bit board  NOT SCORED
+field_bit      +0.2963 pJ [+0.2903, +0.3023] per bit board  POSITIVE
+field_bit3     +0.3000 pJ [+0.2884, +0.3116] per bit board  POSITIVE
+lin_field      +0.0074 pJ [-0.0172, +0.0321] per instr board  BOUNDED
+field_first    +0.4658 pJ [+0.4533, +0.4782] per instr board  POSITIVE
+field_base     +0.1694 pJ [+0.1562, +0.1827] per instr board  POSITIVE
+read_n8        - per instr board  NOT SCORED
+cell reading: cell (order (T2) reads BOUNDED); train gain 0.980
+== reduce stop:
+reduce stop rc 0
+T2   rot.x0    - rot2.x0   units   9  D +0.0000 W  [+0.0000, +0.0000]  NOT RESOLVED  F/S 1.00000  dropped 
+T1   rot.x64   - rot2.x64  units  67  D +0.0500 W  [+0.0500, +0.0500]  POSITIVE  F/S 1.00000  dropped 
+T3   res.k64   - res.k0    units   9  D +0.7000 W  [+0.7000, +0.7000]  POSITIVE  F/S 1.00000  dropped 
+T5   resf.k0   - resz.k0   units  26  D +0.0300 W  [+0.0300, +0.0300]  POSITIVE  F/S 1.00000  dropped 
+T6   wn2.z     - wn1.z     units   9  D +0.1500 W  [+0.1500, +0.1500]  POSITIVE  F/S 1.00000  dropped 
+T4   res.k32   - res.k0    units   9  D +0.3500 W  [+0.3500, +0.3500]  POSITIVE  F/S 1.00000  dropped 
+T8   rd2i.d64  - rd2i.e0   units   9  D +0.4000 W  [+0.4000, +0.4000]  POSITIVE  F/S 1.00000  dropped 
+T10  rd2r.d64  - rd2r.e0   units   9  D +0.9000 W  [+0.9000, +0.9000]  POSITIVE  F/S 1.00000  dropped 
+T9   rd2i.e64  - rd2i.e0   units   6  D +0.0500 W  [-, -]  NOT SCORED  F/S 1.00000  dropped {'stop': 14}  (NOT SCORED: 6 units)
+T11  rd1u.d64  - rd1u.e0   units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped {'stop': 18}  (NOT SCORED: 0 units)
+T13  idx1.z    - idx0.z    units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped {'stop': 26}  (NOT SCORED: 0 units)
+T12  idx5.z    - idx1.z    units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped {'stop': 18}  (NOT SCORED: 0 units)
+T15  idx3.z    - idx1.z    units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped {'stop': 18}  (NOT SCORED: 0 units)
+T7   wn8.z     - wn2.z     units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped   (NOT SCORED: not run)
+T14  rn8.z     - idx1.z    units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped   (NOT SCORED: not run)
+cell           +0.0014 pJ [+0.0014, +0.0014] per bit board  POSITIVE
+cell_ctrl      +0.0014 pJ [+0.0014, +0.0014] per bit board  POSITIVE
+order          +0.0000 pJ [+0.0000, +0.0000] per instr board  BOUNDED
+result_bit     +0.0202 pJ [+0.0202, +0.0202] per bit board  POSITIVE
+result_bit32   +0.0202 pJ [+0.0202, +0.0202] per bit board  POSITIVE
+lin_result     -0.0000 pJ [-0.0000, -0.0000] per instr board  NEGATIVE
+write          +0.0555 pJ [+0.0555, +0.0555] per instr board  POSITIVE
+dest_switch    +0.2777 pJ [+0.2777, +0.2777] per instr board  POSITIVE
+dest_n8        - per instr board  NOT SCORED
+read2_field    +0.0116 pJ [+0.0116, +0.0116] per bit board  POSITIVE
+read2_net      - per bit board  NOT SCORED
+held_one       - per bit board  NOT SCORED
+read2_operand  +0.0260 pJ [+0.0260, +0.0260] per bit board  POSITIVE
+operand_path   +0.0145 pJ [+0.0145, +0.0145] per bit board  POSITIVE
+read1_field    - per bit board  NOT SCORED
+field_bit      - per bit board  NOT SCORED
+field_bit3     - per bit board  NOT SCORED
+lin_field      - per instr board  NOT SCORED
+field_first    - per instr board  NOT SCORED
+field_base     - per instr board  NOT SCORED
+read_n8        - per instr board  NOT SCORED
+cell reading: cell (order (T2) reads BOUNDED); train gain 1.000
+== reduce pooled (exact + ext):
+reduce pooled rc 0
+T2   rot.x0    - rot2.x0   units   9  D +0.0000 W  [+0.0000, +0.0000]  NOT RESOLVED  F/S 1.00000  dropped 
+T1   rot.x64   - rot2.x64  units 182  D +0.0500 W  [+0.0500, +0.0500]  POSITIVE  F/S 1.00000  dropped 
+T3   res.k64   - res.k0    units   9  D +0.7000 W  [+0.7000, +0.7000]  POSITIVE  F/S 1.00000  dropped 
+T5   resf.k0   - resz.k0   units  26  D +0.0300 W  [+0.0300, +0.0300]  POSITIVE  F/S 1.00000  dropped 
+T6   wn2.z     - wn1.z     units   9  D +0.1500 W  [+0.1500, +0.1500]  POSITIVE  F/S 1.00000  dropped 
+T4   res.k32   - res.k0    units   9  D +0.3500 W  [+0.3500, +0.3500]  POSITIVE  F/S 1.00000  dropped 
+T8   rd2i.d64  - rd2i.e0   units   9  D +0.4000 W  [+0.4000, +0.4000]  POSITIVE  F/S 1.00000  dropped 
+T10  rd2r.d64  - rd2r.e0   units   9  D +0.9000 W  [+0.9000, +0.9000]  POSITIVE  F/S 1.00000  dropped 
+T9   rd2i.e64  - rd2i.e0   units  13  D +0.0500 W  [+0.0500, +0.0500]  POSITIVE  F/S 1.00000  dropped 
+T11  rd1u.d64  - rd1u.e0   units   9  D +0.6000 W  [+0.6000, +0.6000]  POSITIVE  F/S 1.00000  dropped 
+T13  idx1.z    - idx0.z    units  13  D +0.2500 W  [+0.2500, +0.2500]  POSITIVE  F/S 1.00000  dropped 
+T12  idx5.z    - idx1.z    units   9  D +0.6400 W  [+0.6400, +0.6400]  POSITIVE  F/S 1.00000  dropped 
+T15  idx3.z    - idx1.z    units   9  D +0.3200 W  [+0.3200, +0.3200]  POSITIVE  F/S 1.00000  dropped 
+T7   wn8.z     - wn2.z     units   9  D +0.0000 W  [+0.0000, +0.0000]  NOT RESOLVED  F/S 1.00000  dropped 
+T14  rn8.z     - idx1.z    units   9  D +0.0000 W  [+0.0000, +0.0000]  NOT RESOLVED  F/S 1.00000  dropped 
+cell           +0.0014 pJ [+0.0014, +0.0014] per bit board  POSITIVE
+cell_ctrl      +0.0014 pJ [+0.0014, +0.0014] per bit board  POSITIVE
+order          +0.0000 pJ [+0.0000, +0.0000] per instr board  BOUNDED
+result_bit     +0.0202 pJ [+0.0202, +0.0202] per bit board  POSITIVE
+result_bit32   +0.0202 pJ [+0.0202, +0.0202] per bit board  POSITIVE
+lin_result     -0.0000 pJ [-0.0000, -0.0000] per instr board  NEGATIVE
+write          +0.0555 pJ [+0.0555, +0.0555] per instr board  POSITIVE
+dest_switch    +0.2777 pJ [+0.2777, +0.2777] per instr board  POSITIVE
+dest_n8        +0.0000 pJ [+0.0000, +0.0000] per instr board  BOUNDED
+read2_field    +0.0116 pJ [+0.0116, +0.0116] per bit board  POSITIVE
+read2_net      +0.0108 pJ [+0.0108, +0.0108] per bit board  POSITIVE
+held_one       +0.0007 pJ [+0.0007, +0.0007] per bit board  POSITIVE
+read2_operand  +0.0260 pJ [+0.0260, +0.0260] per bit board  POSITIVE
+operand_path   +0.0145 pJ [+0.0145, +0.0145] per bit board  POSITIVE
+read1_field    +0.0174 pJ [+0.0174, +0.0174] per bit board  POSITIVE
+field_bit      +0.2962 pJ [+0.2962, +0.2962] per bit board  POSITIVE
+field_bit3     +0.2962 pJ [+0.2962, +0.2962] per bit board  POSITIVE
+lin_field      +0.0000 pJ [+0.0000, +0.0000] per instr board  BOUNDED
+field_first    +0.4629 pJ [+0.4629, +0.4629] per instr board  POSITIVE
+field_base     +0.1666 pJ [+0.1666, +0.1666] per instr board  POSITIVE
+read_n8        +0.0000 pJ [+0.0000, +0.0000] per instr board  BOUNDED
+cell reading: cell (order (T2) reads BOUNDED); train gain 1.000
+== compare exact:
+mode exact; sessions 1; injected (ARBITRARY TEST VALUES): ARBITRARY TEST VALUES: not a forecast and not a measurement
+T2   units   9  D +0.000000  injected +0.0000  NOT RESOLVED  F/S 1.000000  dropped  
+T1   units  67  D +0.050000  injected +0.0500  POSITIVE  F/S 1.000000  dropped  
+T3   units   9  D +0.700000  injected +0.7000  POSITIVE  F/S 1.000000  dropped  
+T5   units  26  D +0.030000  injected +0.0300  POSITIVE  F/S 1.000000  dropped  
+T6   units   9  D +0.150000  injected +0.1500  POSITIVE  F/S 1.000000  dropped  
+T4   units   9  D +0.350000  injected +0.3500  POSITIVE  F/S 1.000000  dropped  
+T8   units   9  D +0.400000  injected +0.4000  POSITIVE  F/S 1.000000  dropped  
+T10  units   9  D +0.900000  injected +0.9000  POSITIVE  F/S 1.000000  dropped  
+T9   units  13  D +0.050000  injected +0.0500  POSITIVE  F/S 1.000000  dropped  
+T11  units   9  D +0.600000  injected +0.6000  POSITIVE  F/S 1.000000  dropped  
+T13  units  13  D +0.250000  injected +0.2500  POSITIVE  F/S 1.000000  dropped  
+T12  units   9  D +0.640000  injected +0.6400  POSITIVE  F/S 1.000000  dropped  
+T15  units   9  D +0.320000  injected +0.3200  POSITIVE  F/S 1.000000  dropped  
+T7   units   0  D    -      injected +0.0000  NOT SCORED  F/S -  dropped  NOT SCORED: not run
+T14  units   0  D    -      injected +0.0000  NOT SCORED  F/S -  dropped  NOT SCORED: not run
+derived (board pJ per unit; injected combination over the rate):
+  cell           +0.001446 pJ  injected +0.001446 pJ  POSITIVE
+  cell_ctrl      +0.001446 pJ  injected +0.001446 pJ  POSITIVE
+  order          +0.000000 pJ  injected +0.000000 pJ  BOUNDED
+  result_bit     +0.020250 pJ  injected +0.020250 pJ  POSITIVE
+  result_bit32   +0.020250 pJ  injected +0.020250 pJ  POSITIVE
+  lin_result     -0.000000 pJ  injected +0.000000 pJ  NEGATIVE
+  note: lin_result reads NEGATIVE on a zero-width interval at -1.8e-15 W, a rounding residue of a noise-free session (the sign of 0 to 1e-12 W); accepted as the zero it is
+  write          +0.055542 pJ  injected +0.055542 pJ  POSITIVE
+  dest_switch    +0.277710 pJ  injected +0.277710 pJ  POSITIVE
+  dest_n8            -       injected +0.000000 pJ  NOT SCORED
+  read2_field    +0.011571 pJ  injected +0.011571 pJ  POSITIVE
+  read2_net      +0.010848 pJ  injected +0.010848 pJ  POSITIVE
+  held_one       +0.000723 pJ  injected +0.000723 pJ  POSITIVE
+  read2_operand  +0.026035 pJ  injected +0.026035 pJ  POSITIVE
+  operand_path   +0.014464 pJ  injected +0.014464 pJ  POSITIVE
+  read1_field    +0.017357 pJ  injected +0.017357 pJ  POSITIVE
+  field_bit      +0.296224 pJ  injected +0.296224 pJ  POSITIVE
+  field_bit3     +0.296224 pJ  injected +0.296224 pJ  POSITIVE
+  lin_field      +0.000000 pJ  injected +0.000000 pJ  BOUNDED
+  field_first    +0.462850 pJ  injected +0.462850 pJ  POSITIVE
+  field_base     +0.166626 pJ  injected +0.166626 pJ  POSITIVE
+  read_n8            -       injected +0.000000 pJ  NOT SCORED
+train gain 1.0; rail share 0.6003541066774218 (injected 0.60); v_rail 0.523; cell reading {'read': 'cell', 'why': 'order (T2) reads BOUNDED'}; stops [{'session': 'exact', 't_ms': None, 'from': None}]; dips [0] of samples [28285]
+CONSISTENT
+compare exact rc 0
+== compare noisy:
+mode noisy; sessions 1; injected (ARBITRARY TEST VALUES): ARBITRARY TEST VALUES: not a forecast and not a measurement
+T2   units   9  D -0.001434  injected +0.0000  NOT RESOLVED  F/S 1.000000  dropped  
+T1   units  67  D +0.048995  injected +0.0500  POSITIVE  F/S 1.000000  dropped  
+T3   units   9  D +0.698721  injected +0.7000  POSITIVE  F/S 1.000000  dropped  
+T5   units  26  D +0.031504  injected +0.0300  POSITIVE  F/S 1.000000  dropped  
+T6   units   8  D +0.159554  injected +0.1500  POSITIVE  F/S 1.000000  dropped {'launch not ok': 1} 
+T4   units   9  D +0.344687  injected +0.3500  POSITIVE  F/S 1.000000  dropped  
+T8   units   9  D +0.389507  injected +0.4000  POSITIVE  F/S 1.000000  dropped  
+T10  units   9  D +0.888563  injected +0.9000  POSITIVE  F/S 1.000000  dropped  
+T9   units  12  D +0.050044  injected +0.0500  POSITIVE  F/S 1.000000  dropped {'clock': 1} 
+T11  units   9  D +0.598325  injected +0.6000  NOT SCORED  F/S 0.996999  dropped  NOT SCORED: rate ratio F/S 0.99700
+T13  units  13  D +0.251567  injected +0.2500  POSITIVE  F/S 1.000000  dropped  
+T12  units   9  D +0.640190  injected +0.6400  POSITIVE  F/S 1.000000  dropped  
+T15  units   9  D +0.324118  injected +0.3200  POSITIVE  F/S 1.000000  dropped  
+T7   units   0  D    -      injected +0.0000  NOT SCORED  F/S -  dropped  NOT SCORED: not run
+T14  units   0  D    -      injected +0.0000  NOT SCORED  F/S -  dropped  NOT SCORED: not run
+rail voltage samples off 3 mV in the trains' spans (off, of): {'T1': [260, 6968]}
+derived (board pJ per unit; injected combination over the rate):
+  cell           +0.001417 pJ  injected +0.001446 pJ  POSITIVE
+  cell_ctrl      +0.001459 pJ  injected +0.001446 pJ  POSITIVE
+  order          -0.002655 pJ  injected +0.000000 pJ  BOUNDED
+  result_bit     +0.020213 pJ  injected +0.020250 pJ  POSITIVE
+  result_bit32   +0.019942 pJ  injected +0.020250 pJ  POSITIVE
+  lin_result     -0.008652 pJ  injected +0.000000 pJ  BOUNDED
+  write          +0.058326 pJ  injected +0.055542 pJ  POSITIVE
+  dest_switch    +0.295399 pJ  injected +0.277710 pJ  POSITIVE
+  dest_n8            -       injected +0.000000 pJ  NOT SCORED
+  read2_field    +0.011268 pJ  injected +0.011571 pJ  POSITIVE
+  read2_net      +0.010544 pJ  injected +0.010848 pJ  POSITIVE
+  held_one       +0.000724 pJ  injected +0.000723 pJ  POSITIVE
+  read2_operand  +0.025704 pJ  injected +0.026035 pJ  POSITIVE
+  operand_path   +0.014437 pJ  injected +0.014464 pJ  POSITIVE
+  read1_field        -       injected +0.017357 pJ  NOT SCORED
+  field_bit      +0.296312 pJ  injected +0.296224 pJ  POSITIVE
+  field_bit3     +0.300036 pJ  injected +0.296224 pJ  POSITIVE
+  lin_field      +0.007448 pJ  injected +0.000000 pJ  BOUNDED
+  field_first    +0.465751 pJ  injected +0.462850 pJ  POSITIVE
+  field_base     +0.169439 pJ  injected +0.166626 pJ  POSITIVE
+  read_n8            -       injected +0.000000 pJ  NOT SCORED
+train gain 0.9796799227076454; rail share 0.5949660098176686 (injected 0.60); v_rail 0.523; cell reading {'read': 'cell', 'why': 'order (T2) reads BOUNDED'}; stops [{'session': 'noisy', 't_ms': None, 'from': None}]; dips [98] of samples [28285]
+CONSISTENT
+compare noisy rc 0
+== compare stop:
+mode stop; sessions 1; injected (ARBITRARY TEST VALUES): ARBITRARY TEST VALUES: not a forecast and not a measurement
+T2   units   9  D +0.000000  injected +0.0000  NOT RESOLVED  F/S 1.000000  dropped  
+T1   units  67  D +0.050000  injected +0.0500  POSITIVE  F/S 1.000000  dropped  
+T3   units   9  D +0.700000  injected +0.7000  POSITIVE  F/S 1.000000  dropped  
+T5   units  26  D +0.030000  injected +0.0300  POSITIVE  F/S 1.000000  dropped  
+T6   units   9  D +0.150000  injected +0.1500  POSITIVE  F/S 1.000000  dropped  
+T4   units   9  D +0.350000  injected +0.3500  POSITIVE  F/S 1.000000  dropped  
+T8   units   9  D +0.400000  injected +0.4000  POSITIVE  F/S 1.000000  dropped  
+T10  units   9  D +0.900000  injected +0.9000  POSITIVE  F/S 1.000000  dropped  
+T9   units   6  D +0.050000  injected +0.0500  NOT SCORED  F/S 1.000000  dropped {'stop': 14} NOT SCORED: 6 units
+T11  units   0  D    -      injected +0.6000  NOT SCORED  F/S -  dropped {'stop': 18} NOT SCORED: 0 units
+T13  units   0  D    -      injected +0.2500  NOT SCORED  F/S -  dropped {'stop': 26} NOT SCORED: 0 units
+T12  units   0  D    -      injected +0.6400  NOT SCORED  F/S -  dropped {'stop': 18} NOT SCORED: 0 units
+T15  units   0  D    -      injected +0.3200  NOT SCORED  F/S -  dropped {'stop': 18} NOT SCORED: 0 units
+T7   units   0  D    -      injected +0.0000  NOT SCORED  F/S -  dropped  NOT SCORED: not run
+T14  units   0  D    -      injected +0.0000  NOT SCORED  F/S -  dropped  NOT SCORED: not run
+derived (board pJ per unit; injected combination over the rate):
+  cell           +0.001446 pJ  injected +0.001446 pJ  POSITIVE
+  cell_ctrl      +0.001446 pJ  injected +0.001446 pJ  POSITIVE
+  order          +0.000000 pJ  injected +0.000000 pJ  BOUNDED
+  result_bit     +0.020250 pJ  injected +0.020250 pJ  POSITIVE
+  result_bit32   +0.020250 pJ  injected +0.020250 pJ  POSITIVE
+  lin_result     -0.000000 pJ  injected +0.000000 pJ  NEGATIVE
+  note: lin_result reads NEGATIVE on a zero-width interval at -1.8e-15 W, a rounding residue of a noise-free session (the sign of 0 to 1e-12 W); accepted as the zero it is
+  write          +0.055542 pJ  injected +0.055542 pJ  POSITIVE
+  dest_switch    +0.277710 pJ  injected +0.277710 pJ  POSITIVE
+  dest_n8            -       injected +0.000000 pJ  NOT SCORED
+  read2_field    +0.011571 pJ  injected +0.011571 pJ  POSITIVE
+  read2_net          -       injected +0.010848 pJ  NOT SCORED
+  held_one           -       injected +0.000723 pJ  NOT SCORED
+  read2_operand  +0.026035 pJ  injected +0.026035 pJ  POSITIVE
+  operand_path   +0.014464 pJ  injected +0.014464 pJ  POSITIVE
+  read1_field        -       injected +0.017357 pJ  NOT SCORED
+  field_bit          -       injected +0.296224 pJ  NOT SCORED
+  field_bit3         -       injected +0.296224 pJ  NOT SCORED
+  lin_field          -       injected +0.000000 pJ  NOT SCORED
+  field_first        -       injected +0.462850 pJ  NOT SCORED
+  field_base         -       injected +0.166626 pJ  NOT SCORED
+  read_n8            -       injected +0.000000 pJ  NOT SCORED
+train gain 1.0; rail share 0.6003541066774218 (injected 0.60); v_rail 0.523; cell reading {'read': 'cell', 'why': 'order (T2) reads BOUNDED'}; stops [{'session': 'stop', 't_ms': 1795002123100.0, 'from': 'stop_seen mark'}]; dips [0] of samples [28285]
+CONSISTENT
+compare stop rc 0
+== compare pooled:
+mode pooled; sessions 2; injected (ARBITRARY TEST VALUES): ARBITRARY TEST VALUES: not a forecast and not a measurement
+T2   units   9  D +0.000000  injected +0.0000  NOT RESOLVED  F/S 1.000000  dropped  
+T1   units 182  D +0.050000  injected +0.0500  POSITIVE  F/S 1.000000  dropped  
+T3   units   9  D +0.700000  injected +0.7000  POSITIVE  F/S 1.000000  dropped  
+T5   units  26  D +0.030000  injected +0.0300  POSITIVE  F/S 1.000000  dropped  
+T6   units   9  D +0.150000  injected +0.1500  POSITIVE  F/S 1.000000  dropped  
+T4   units   9  D +0.350000  injected +0.3500  POSITIVE  F/S 1.000000  dropped  
+T8   units   9  D +0.400000  injected +0.4000  POSITIVE  F/S 1.000000  dropped  
+T10  units   9  D +0.900000  injected +0.9000  POSITIVE  F/S 1.000000  dropped  
+T9   units  13  D +0.050000  injected +0.0500  POSITIVE  F/S 1.000000  dropped  
+T11  units   9  D +0.600000  injected +0.6000  POSITIVE  F/S 1.000000  dropped  
+T13  units  13  D +0.250000  injected +0.2500  POSITIVE  F/S 1.000000  dropped  
+T12  units   9  D +0.640000  injected +0.6400  POSITIVE  F/S 1.000000  dropped  
+T15  units   9  D +0.320000  injected +0.3200  POSITIVE  F/S 1.000000  dropped  
+T7   units   9  D +0.000000  injected +0.0000  NOT RESOLVED  F/S 1.000000  dropped  
+T14  units   9  D +0.000000  injected +0.0000  NOT RESOLVED  F/S 1.000000  dropped  
+derived (board pJ per unit; injected combination over the rate):
+  cell           +0.001446 pJ  injected +0.001446 pJ  POSITIVE
+  cell_ctrl      +0.001446 pJ  injected +0.001446 pJ  POSITIVE
+  order          +0.000000 pJ  injected +0.000000 pJ  BOUNDED
+  result_bit     +0.020250 pJ  injected +0.020250 pJ  POSITIVE
+  result_bit32   +0.020250 pJ  injected +0.020250 pJ  POSITIVE
+  lin_result     -0.000000 pJ  injected +0.000000 pJ  NEGATIVE
+  note: lin_result reads NEGATIVE on a zero-width interval at -1.8e-15 W, a rounding residue of a noise-free session (the sign of 0 to 1e-12 W); accepted as the zero it is
+  write          +0.055542 pJ  injected +0.055542 pJ  POSITIVE
+  dest_switch    +0.277710 pJ  injected +0.277710 pJ  POSITIVE
+  dest_n8        +0.000000 pJ  injected +0.000000 pJ  BOUNDED
+  read2_field    +0.011571 pJ  injected +0.011571 pJ  POSITIVE
+  read2_net      +0.010848 pJ  injected +0.010848 pJ  POSITIVE
+  held_one       +0.000723 pJ  injected +0.000723 pJ  POSITIVE
+  read2_operand  +0.026035 pJ  injected +0.026035 pJ  POSITIVE
+  operand_path   +0.014464 pJ  injected +0.014464 pJ  POSITIVE
+  read1_field    +0.017357 pJ  injected +0.017357 pJ  POSITIVE
+  field_bit      +0.296224 pJ  injected +0.296224 pJ  POSITIVE
+  field_bit3     +0.296224 pJ  injected +0.296224 pJ  POSITIVE
+  lin_field      +0.000000 pJ  injected +0.000000 pJ  BOUNDED
+  field_first    +0.462850 pJ  injected +0.462850 pJ  POSITIVE
+  field_base     +0.166626 pJ  injected +0.166626 pJ  POSITIVE
+  read_n8        +0.000000 pJ  injected +0.000000 pJ  BOUNDED
+train gain 1.0; rail share 0.6003541066774218 (injected 0.60); v_rail 0.523; cell reading {'read': 'cell', 'why': 'order (T2) reads BOUNDED'}; stops [{'session': 'exact', 't_ms': None, 'from': None}, {'session': 'ext', 't_ms': None, 'from': None}]; dips [0, 0] of samples [28285, 17215]
+CONSISTENT
+compare pooled rc 0
+2026-11-15 14:45:04 PST
+```
+

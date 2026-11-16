@@ -1,0 +1,177 @@
+# E197 registration desk check: the build on aifoundry2 and the request's own checks (reg-e197, Q185; desk checks of code)
+
+Built from a copy of proposal/src (byte for byte the relay folder's src/, SHA256SUMS-e197-registration) in a folder of the lane's
+own, exactly as src/BUILD.md writes it: cmake -S <copy> -B <build> -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev; cmake --build <build> -j4;
+through the round's CPU slot at nice 10, under a 4 GB address-space cap. Nothing here opened a device: check_elf.py reads the
+disassembly, make_images.py is pure Python, and the host ran only --list (in the no-device sandbox, desk/host-list-e197.*).
+
+## The build (bash slot.sh bash s05_build_inner.sh)
+
+```
+2026-11-15 14:35:14 PST
+uptime:  14:35:14 up 1 day, 21:41,  2 users,  load average: 2.31, 2.02, 1.16
+cmake: cmake version 3.28.3
+host c++: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+riscv gcc: riscv64-unknown-elf-gcc () 15.1.0
+configure rc 0
+build rc 0
+-- warnings in the configure log: 0
+-- warnings in the build log: 1
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    CMAKE_INSTALL_LIBDIR
+-- errors in the build log: 0
+-- products:
+feafba8d819cb4cb53e5db82f3d726ded67008ab279c9933e22e25dabad1c464  18896  work/build/kernel/regfile.elf
+e8ebac7a944048525f25cd4b1c213088bce806c789e4226d485fd39bbeb9103f  3639776  work/build/host/regfile_host
+2026-11-15 14:35:16 PST
+```
+
+## The request's checks and the products (bash slot.sh bash s06_elf.sh)
+
+```
+2026-11-15 14:36:04 PST
+python: Python 3.12.3 (/usr/bin/python3)
+-- make_images.py --check . :
+check: 34 kinds, 17 forms, OK; kinds sha256 5a0eb032b4d073222639b985141e0cbac18f1e7f7dc2e0b9c9062fd5534be4f7
+rc 0
+-- check_elf.py build/kernel/regfile.elf :
+rc 0
+OK  loop at 0x8005801100: 131 instructions, encodings [4] bytes, aligned64 True, form nop, tail and 29 words after the branch as registered True
+OK  loop at 0x8005801480: 131 instructions, encodings [4] bytes, aligned64 True, form rot, tail and 29 words after the branch as registered True
+OK  loop at 0x80058017c0: 131 instructions, encodings [4] bytes, aligned64 True, form rot2, tail and 29 words after the branch as registered True
+OK  loop at 0x8005801ac0: 131 instructions, encodings [4] bytes, aligned64 True, form res, tail and 29 words after the branch as registered True
+OK  loop at 0x8005801d80: 131 instructions, encodings [4] bytes, aligned64 True, form resf, tail and 29 words after the branch as registered True
+OK  loop at 0x8005802040: 131 instructions, encodings [4] bytes, aligned64 True, form resz, tail and 29 words after the branch as registered True
+OK  loop at 0x8005802300: 131 instructions, encodings [4] bytes, aligned64 True, form rd2i, tail and 29 words after the branch as registered True
+OK  loop at 0x80058025c0: 131 instructions, encodings [4] bytes, aligned64 True, form rd2r, tail and 29 words after the branch as registered True
+OK  loop at 0x8005802880: 131 instructions, encodings [4] bytes, aligned64 True, form rd1u, tail and 29 words after the branch as registered True
+OK  loop at 0x8005802b40: 131 instructions, encodings [4] bytes, aligned64 True, form idx0, tail and 29 words after the branch as registered True
+OK  loop at 0x8005802e00: 131 instructions, encodings [4] bytes, aligned64 True, form idx1, tail and 29 words after the branch as registered True
+OK  loop at 0x80058030c0: 131 instructions, encodings [4] bytes, aligned64 True, form idx3, tail and 29 words after the branch as registered True
+OK  loop at 0x8005803380: 131 instructions, encodings [4] bytes, aligned64 True, form idx5, tail and 29 words after the branch as registered True
+OK  loop at 0x8005803680: 131 instructions, encodings [4] bytes, aligned64 True, form rn8, tail and 29 words after the branch as registered True
+OK  loop at 0x8005803940: 131 instructions, encodings [4] bytes, aligned64 True, form wn1, tail and 29 words after the branch as registered True
+OK  loop at 0x8005803c00: 131 instructions, encodings [4] bytes, aligned64 True, form wn2, tail and 29 words after the branch as registered True
+OK  loop at 0x8005803ec0: 131 instructions, encodings [4] bytes, aligned64 True, form wn8, tail and 29 words after the branch as registered True
+loops 17 (forms 17), frame 00150513 c03026f3 dfc6ece3, bad 0
+-- make_images.py --frame :
+rc 0
+fetched-bit changes per loop iteration (131 instructions), F - S, aligned blocks of 8 .. 64 bytes; "+" with the block after the branch
+T2   rot   - rot2   8B    -4  8B+   -4 16B    +0 16B+   +0 32B    +4 32B+   +4 64B    +0 64B+   +0
+T1   rot   - rot2   8B    -4  8B+   -4 16B    +0 16B+   +0 32B    +4 32B+   +4 64B    +0 64B+   +0
+T3   res   - res    8B    +0  8B+   +0 16B    +0 16B+   +0 32B    +0 32B+   +0 64B    +0 64B+   +0
+T5   resf  - resz   8B    +0  8B+   +0 16B    +0 16B+   +0 32B    +0 32B+   +0 64B    +0 64B+   +0
+T6   wn2   - wn1    8B    +0  8B+   +0 16B    +0 16B+   +2 32B    +4 32B+   +6 64B   +12 64B+  +14
+T4   res   - res    8B    +0  8B+   +0 16B    +0 16B+   +0 32B    +0 32B+   +0 64B    +0 64B+   +0
+T8   rd2i  - rd2i   8B    +0  8B+   +0 16B    +0 16B+   +0 32B    +0 32B+   +0 64B    +0 64B+   +0
+T10  rd2r  - rd2r   8B    +0  8B+   +0 16B    +0 16B+   +0 32B    +0 32B+   +0 64B    +0 64B+   +0
+T9   rd2i  - rd2i   8B    +0  8B+   +0 16B    +0 16B+   +0 32B    +0 32B+   +0 64B    +0 64B+   +0
+T11  rd1u  - rd1u   8B    +0  8B+   +0 16B    +0 16B+   +0 32B    +0 32B+   +0 64B    +0 64B+   +0
+T13  idx1  - idx0   8B    +0  8B+   +0 16B    +0 16B+   +2 32B    +4 32B+   +6 64B   +12 64B+  +14
+T12  idx5  - idx1   8B    +0  8B+   +0 16B    +0 16B+   +0 32B    +0 32B+   +0 64B    +0 64B+   +0
+T15  idx3  - idx1   8B    +2  8B+   +2 16B    +4 16B+   +2 32B    +4 32B+   +2 64B    +4 64B+   +2
+T7   wn8   - wn2    8B  +252  8B+ +252 16B  +242 16B+ +244 32B    -4 32B+   -2 64B    -4 64B+   -2
+T14  rn8   - idx1   8B  +252  8B+ +252 16B  +246 16B+ +246 32B    +0 32B+   +0 64B    +0 64B+   +0
+make_images --list rc 0 (35 lines)
+make_images --json rc 0 (19223 B)
+kind            f1     f2     a1     a2    res   cell     i1     i2     iw    enc     h1     h2
+rot.x64      64.00   0.00  64.00   0.00  64.00  64.00   2.00   0.00   2.00   4.00  32.00   0.00
+rot2.x64     64.00   0.00  64.00   0.00  64.00   0.00   2.00   0.00   2.00   4.00  32.00   0.00
+rot.x0        0.00   0.00   0.00   0.00   0.00   0.00   2.00   0.00   2.00   4.00  32.00   0.00
+rot2.x0       0.00   0.00   0.00   0.00   0.00   0.00   2.00   0.00   2.00   4.00  32.00   0.00
+res.k0        0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   2.00   3.00  32.00  32.00
+res.k32       0.00   0.00   0.00   0.00  32.00   0.00   0.00   0.00   2.00   3.00  32.00  32.00
+res.k64       0.00   0.00   0.00   0.00  64.00   0.00   0.00   0.00   2.00   3.00  32.00  32.00
+resf.k0       0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00  32.00  32.00
+resf.k32      0.00   0.00   0.00   0.00  32.00  32.00   0.00   0.00   0.00   1.00  32.00  32.00
+resf.k64      0.00   0.00   0.00   0.00  64.00  64.00   0.00   0.00   0.00   1.00  32.00  32.00
+resz.k0       0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00  32.00  32.00
+resz.k32      0.00   0.00   0.00   0.00  32.00   0.00   0.00   0.00   0.00   1.00  32.00  32.00
+resz.k64      0.00   0.00   0.00   0.00  64.00   0.00   0.00   0.00   0.00   1.00  32.00  32.00
+rd2i.d64      0.00  64.00   0.00   0.00   0.00   0.00   0.00   4.00   0.00   4.00   0.00  32.00
+rd2i.e32      0.00   0.00   0.00   0.00   0.00   0.00   0.00   4.00   0.00   4.00   0.00  32.00
+rd2i.e0       0.00   0.00   0.00   0.00   0.00   0.00   0.00   4.00   0.00   4.00   0.00   0.00
+rd2i.e64      0.00   0.00   0.00   0.00   0.00   0.00   0.00   4.00   0.00   4.00   0.00  64.00
+rd2r.d64      0.00  64.00   0.00  64.00   0.00   0.00   0.00   4.00   0.00   4.00   0.00  32.00
+rd2r.e32      0.00   0.00   0.00   0.00   0.00   0.00   0.00   4.00   0.00   4.00   0.00  32.00
+rd2r.e0       0.00   0.00   0.00   0.00   0.00   0.00   0.00   4.00   0.00   4.00   0.00   0.00
+rd2r.e64      0.00   0.00   0.00   0.00   0.00   0.00   0.00   4.00   0.00   4.00   0.00  64.00
+rd1u.d64     64.00   0.00   0.00   0.00   4.00   4.00   4.00   0.00   0.00   4.00  32.00   0.00
+rd1u.e32      0.00   0.00   0.00   0.00   4.00   4.00   4.00   0.00   0.00   4.00  32.00   0.00
+rd1u.e0       0.00   0.00   0.00   0.00   4.00   4.00   4.00   0.00   0.00   4.00   0.00   0.00
+rd1u.e64      0.00   0.00   0.00   0.00   4.00   4.00   4.00   0.00   0.00   4.00  64.00   0.00
+idx0.z        0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00
+idx1.z        0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00   0.00   1.00   0.00   0.00
+idx3.z        0.00   0.00   0.00   0.00   0.00   0.00   0.00   3.00   0.00   3.00   0.00   0.00
+idx5.z        0.00   0.00   0.00   0.00   0.00   0.00   0.00   5.00   0.00   5.00   0.00   0.00
+rn8.z         0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00   0.00   1.00   0.00   0.00
+wn1.z         0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00
+wn2.z         0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00   1.00   0.00   0.00
+wn8.z         0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00   1.00   0.00   0.00
+nop.z         0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00
+-- the kernel ELF:
+sha256 feafba8d819cb4cb53e5db82f3d726ded67008ab279c9933e22e25dabad1c464 (18896 B)
+request.md and src/ state no kernel ELF sha256 (searched for 40-64 hex digits: none; the request says its ELF is 'the registered one')
+kernel .text: sha256 ce8c93c6a79781dd4fb295bdf221a8befad33fd359f1c5caf608650cf2e919bb, 12696 B
+kernel .rodata: sha256 4d2b792c037de8f7bb057b25302282f5421d570c9fe68a7529583290bb1a81ee, 72 B
+kernel .comment: GCC: () 15.1.0
+kernel entry: 0x8005801000
+kernel sections:
+  Name Type Address Size
+  0] NULL 0000000000000000 000000
+  1] .text PROGBITS 001000
+  2] .rodata PROGBITS 004198
+  3] .bss NOBITS 000000
+  4] .sbss PROGBITS 0041e0
+  5] .comment PROGBITS 0041e0
+  6] .symtab SYMTAB 0041f0
+  7] .strtab STRTAB 0046a0
+  8] .shstrtab STRTAB 00474c
+path strings in the kernel ELF: 0
+-- loop heads (from check_elf's lines) mod 32 and mod 64:
+  0x8005801100 mod32 0 mod64 0
+  0x8005801480 mod32 0 mod64 0
+  0x80058017c0 mod32 0 mod64 0
+  0x8005801ac0 mod32 0 mod64 0
+  0x8005801d80 mod32 0 mod64 0
+  0x8005802040 mod32 0 mod64 0
+  0x8005802300 mod32 0 mod64 0
+  0x80058025c0 mod32 0 mod64 0
+  0x8005802880 mod32 0 mod64 0
+  0x8005802b40 mod32 0 mod64 0
+  0x8005802e00 mod32 0 mod64 0
+  0x80058030c0 mod32 0 mod64 0
+  0x8005803380 mod32 0 mod64 0
+  0x8005803680 mod32 0 mod64 0
+  0x8005803940 mod32 0 mod64 0
+  0x8005803c00 mod32 0 mod64 0
+  0x8005803ec0 mod32 0 mod64 0
+-- the host binary:
+sha256 e8ebac7a944048525f25cd4b1c213088bce806c789e4226d485fd39bbeb9103f (3639776 B)
+dynamic libraries:
+  libetrt.so
+  libglog.so.1
+  libg3log.so.2
+  libstdc++.so.6
+  libm.so.6
+  libgcc_s.so.1
+  libc.so.6
+  ld-linux-x86-64.so.2
+path strings naming a home: 1 (Constants.h's KERNEL_ELF is the build tree's absolute path, by design)
+grep -aqw ET_DEVICES: not in the host binary (the host's own text assembles the name; this box's device layer carries none)
+reversed literal SECIVED_TE in the host binary: 0 line(s)
+signal-related dynamic symbols the host imports:
+signal-handler installers linked into the host (g3log crash handler names, demangled):
+  (nm on the host: 8858 symbols)
+2026-11-15 14:36:05 PST
+```
+
+## The host's kind table against make_images.py's (desk/host-list-e197.jsonl against make_images.py --json)
+
+kinds in make_images.py: 34; in the host table: 34; designed counts equal for 34 of 34 kinds; register images equal for 34 of 34
+make_images.py --json body 128, frame words 00150513 c03026f3 dfc6ece3
+

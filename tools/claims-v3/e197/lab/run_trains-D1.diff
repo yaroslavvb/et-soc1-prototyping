@@ -1,0 +1,11 @@
+--- a/tools/claims-v3/e197/proposal/src/run_trains.py
++++ b/tools/claims-v3/e197/lab/run_trains.py
+@@ -45,7 +45,7 @@
+ ANCHORS = ["nop.z", "res.k0", "res.k64"]
+ SMOKE_TRAIN = "T8"
+ PROC_S = 6.2   # one train process: 13 launches of 0.4 s plus the device opening and closing, rounded up
+-TIMEOUT = ["timeout", "-k", "1", "10"]   # every device process: TERM at 10 s, then KILL 1 s later if it is still there
++TIMEOUT = ["timeout", "10"]   # every device process: TERM at 10 s, never a KILL (E197 departure D1: the lab drops -k 1)
+ PROC_MAX_S = 11.0  # the longest a device process can live under TIMEOUT
+ GRACE_S = 5.0  # after a signal: the time a device process in flight has to see OUT/STOP and end by itself
+ EXIT_STALE, EXIT_FAIL, EXIT_HOT, EXIT_SMOKE, EXIT_STOP = 4, 5, 6, 7, 8
