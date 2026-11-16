@@ -1,0 +1,85 @@
+E198 runbook desk test, 2026-11-16 00:59:33 PST, Python 3.12.3, cmake version 3.28.3, bubblewrap 0.9.0; in its sandbox (two-card stand-in nodes, pid namespace)
+scratch repository: at the registration f049c805e70d, the kit as one stand-in commit 47e07ddc858a; the stand-in reader's pin cf1898b75b4cfbf6 in the scratch's harness; KITPIN 46 entries
+
+== A. the dry listing on the scratch
+dry listing: 26 steps listed, 0 exited non-zero, 0 box calls
+-> PASS (A every step 0, no call to the stand-ins)
+
+== W1-W6. THE WINDOW FROM G
+-> PASS (W1-W6 G 09:00:00 -> 10:30/12:30; 20:29:00 -> 23:59; 20:29:30 and 21:00:00 refused; no window, a wrong sitting refused)
+
+== P1, SE, D1. step 2 on the scratch: the lists, the history, the sealed note, an E198 datum
+tools/claims-v3/e191/ettelem_guard_e191.sh:40: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+[s03_desk_e198] desk check for sitting A: the window written today for E198; pulled under the lab-git lock, HEAD 47e07ddc858a descends from f74c81e3, the registration f049c805e70d (subtree 5434394b) and the kit 47e07ddc858a; the paths clean, HISTORY OK, the li
+-> PASS (P1 step 2 holds; SE the sealed note accepted and reported; D1 an E198 datum before sitting A: 16)
+
+== SC. the committed sealed note changed by a later commit (added before the land, fix-e198: verify-e198's finding 2)
+tools/claims-v3/e191/ettelem_guard_e191.sh:40: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+[s03_desk_e198] STOP: the desk check failed: history
+-> PASS (SC a committed sealed note changed by a later commit: step 2 refuses (16); the history check names the change (M) and its commit)
+
+== LK, LKH, RG. the look on both cards
+-> PASS (LK FREE on both cards; LKH a card-0 holder of another login: HELD; RG booted after E82's read: the reboot gate)
+
+== SY. step 5: the sync
+[s07_a1_sync_e198] synced to aifoundry1:nekko/build/claims-v3/aifoundry1/e198/ (50 paths; the rsync sent 50 files' contents there); the tree's E191 guard (0 sent); HARNESS OK and TREE OK on the box
+-> PASS (SY synced into E198's root and the tree's E191 guard; HARNESS OK and TREE OK on the box)
+
+== BU. step 6: THE REAL BUILD on the stand-in box
+    ELF kernel sha256 01a3776755f5c684f5a71a38f13a550ea8c4aae5658c46cb003f846aea71b531: SAME AS E193's desk build's, DIFFERENT FROM request.md's (reported, never a gate)
+    ELF .text sha256 fd7207275661c23f33a99dd2a1c16b54e92e09b75cdb828258b09849ee9d643e (68358 B): SAME AS E193's registered .text (fd7207275661..., 68358 B): the kernel gate
+    ELF path strings in the kernel: 0
+    BODIES CHECK PASS
+    HOST-REFUSAL ok: --kernel <unreadable> --budget 9.6 -> exit 1, 'FAIL: --budget must be in (0, 9.5] seconds'
+    HOST-REFUSAL ok: --kernel <unreadable> --no-such-option -> exit 2, 'unknown option --no-such-option'
+    HOST-REFUSAL ok: --kernel <unreadable> (alone) -> exit 1, 'FAIL: cannot read kernel /nonexistent-e198/x04clock.elf'
+    HOST-BEHAVIOUR OK: three refusals before the device layer, as main.cpp writes them
+    LISTING SAME: dry-e193-smoke-all.txt, 10 device calls, 28 lines (mapped: card and lock line 1, device prefix 10, holder check and lock 5, host 10, ops node 1)
+    LISTING SAME: dry-e193-A.txt, 234 device calls, 523 lines (mapped: card and lock line 1, device prefix 234, holder check and lock 36, host 234, ops node 1)
+    LISTING SAME: dry-e193-B.txt, 135 device calls, 298 lines (mapped: card and lock line 1, device prefix 135, holder check and lock 9, host 135, ops node 1)
+    ETDEVICES no: /opt/et/lib/libdeviceLayer.a has no ET_DEVICES (reported)
+    READER build/ettelem/ettelem sha256 cf1898b75b4cfbf6822bc5f443ca0149c6428754bf5204d092731c126c1adf6a, at its pin in harness-e198.json's tree (not run here); TREE OK: build/ettelem/ettelem cf1898b7
+    HOST x04clock_host sha256 a91db7db041b1e6a976406f95b04225a1750a4f03c40c21ccae93504860717e2
+    X04-BUILT rc=0
+-> PASS (BU the real build: X04-BUILT (the kernel gate, the bodies, the refusals, the listing SAME x3))
+
+== R0, R1. STEP 7 BEFORE AND AFTER THE REST OPENS
+[s09_a1_reads_e198] aifoundry1 card 1: manifest kept on the box (build/q141k/), config TDP 65 W / 65 C / 600 MHz, minion_mv 499, identity /dev/et1_mgmt and device ID 1 (read, nothing set); both cards free
+-> PASS (R0 the rest not open: 17, no config read; R1 45 minutes back: card 1's config and identity read)
+
+== DP. step 8: the dry pass on the box
+LISTING SAME: dry-e193-smoke-all.txt, 10 device calls, 28 lines (mapped: card and lock line 1, device prefix 10, holder check and lock 5, host 10, ops node 1)
+LISTING SAME: dry-e193-A.txt, 234 device calls, 523 lines (mapped: card and lock line 1, device prefix 234, holder check and lock 36, host 234, ops node 1)
+E198-DRY sitting A rc=0 smoke=0 main=0 calls=10+234 manifest=written
+[s10_a1_dry_e198] the dry pass ended rc 0: E198-DRY sitting A rc=0 smoke=0 main=0 calls=10+234 manifest=written
+-> PASS (DP the dry pass: the session with DRY=1 on the box, both listings SAME)
+
+== BA. step 9 for sitting B with no sitting A whose main run started
+-> PASS (BA sitting B before any sitting A: 10, nothing launched)
+
+== BW, BD. step 9 for B after a sitting A with a watch hit, or with a device process that did not finish (added before the land, fix-e198: verify-e198's finding 3)
+[s11_a1_session_e198] STOP: e198-B refused on the box: REFUSED: an earlier E198 sitting had a watch hit (a process of the sitting held a card node other than card 1's: build/e198/T1794000100): no further E198 sitting before a dated note (CARD-LANE-BRIEF.md sec
+[s11_a1_session_e198] STOP: e198-B refused on the box: REFUSED: an earlier E198 sitting stopped on a device process that did not finish or on three incomplete launches (build/e198/T1794000200): the day stops, the owner and the lab admin are told, and no furthe
+-> PASS (BW a watch hit in sitting A: step 9 for B refuses (10); BD a device process that did not finish in A: 10; nothing launched)
+
+== L4, L4N. THE WAIT FINDS THE SESSION BY ITS REAL SCRIPT NAME
+[s11_a1_session_e198] E198 sitting A launched on aifoundry1 (T0 1794819598); wait with s20_wait_e198.sh A (bounded)
+-> PASS (L4 the real session found running by its real name (17), then its own gate stop read (16); L4N another name: RUN-GONE (14))
+
+== C. step 11 on the gate-stopped session
+[s22_collect_e198] collected the gate stop's record docs/reports/gate-stops/2026-11-16-e198-x04-clock-sitting-a-T1794819598-aifoundry1-c1 (no sitting, no data: E198.md 13): write its README in DATA-README-FORM-e198.md's gate-stop form, commit it through commit
+-> PASS (C its gate stop's record, k6's desk-path gate clean)
+
+== RS. step 9 right after L4's session: THE REST RULE
+-> PASS (RS the rest rule right after L4's session: 10, nothing launched)
+
+== CR. step 13 on the real-path test's collected sitting
+[s24_reduce_e198] x04/runs.jsonl and the unpacked x04/telemetry.jsonl equal the box's manifest's sha256
+[s24_reduce_e198] reduced sitting B: RB_OUT/x04-e198-B.json and checks-e198-B.json (CHECKS READ: 1 FAIL, 2 FAIL, 2 FAIL, 3 PASS, 4 REPORTED, 5 REPORTED, 6 NOT COMPUTED, 7 REPORTED, 8 REPORTED, 9 NOT COMPUTED); the records lane commits them beside the data
+[s24_reduce_e198] scored: RB_OUT/scores-e198.json and scores-e198.txt (the records lane commits them beside the data)
+-> PASS (CR the registered reducer and E193's checker on the committed data, then the transport scorer)
+
+== Z. nothing of this test left on the stand-in box
+-> PASS (Z no process left on the stand-in box)
+
+SELFTEST-RB-E198 16 of 16 PASS
