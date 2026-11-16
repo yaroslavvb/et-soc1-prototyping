@@ -1,0 +1,24 @@
+E200 desk check: the predicted peak on aifoundry2 card 0 (desk arithmetic of committed records; a safety estimate, not a forecast)
+interpreter: /usr/bin/python3 3.12.3
+  5932e41a13dbc1833938b10cbc40ca850723029e60c231f1908426ef38ee8c35  tools/claims-v3/e197/E197.md
+  59ff911705137e5486efcb15c482919e3d257f800193bcc9f1d78ee7283753ce  docs/reports/data/2026-11-12-q166-ledger-v2/frozen-v2.json
+  542567e70e02b56db717b2a6e0b0fdafb7e011ee2bd8c9b857b88db1ac949018  tools/claims-v3/e136/predictions-e136.json
+  da11d12f051d38596e22240dd36fa5689eead561f6fc269418cb5f2b4304d1d1  tools/ledger/freeze_ledger_v2.py
+  c5d94d67dfebb10e04ade2c381cc44b9b32f1e91f096727c40367d76a81de763  docs/findings/14-card-behaviour.md
+  47bb72352e1ba1d0780adb84074a565a331d0dc986cd4312d694a4784b98d387  tools/claims-v3/e190/E190.md
+  bb79abaf29aa0acbf1c111cccd41b82a8fdfa6b0c751c5b0fef73a7f8f2ef828  docs/reports/data/2026-11-13-e190-large-gemm/README.md
+  a84e52139d87c8a83906e7533430498d399300a4b8dfdff508d7fa2b823ef0a1  tools/claims-v3/e194/desk/climb-e190.txt
+
+E197.md 9 (quoted): E192's busiest scalar arm on aifoundry3, 8.912 pJ over idle at 2.34e11 instructions a second, at 2.4 times that rate: 5.0050 W over idle ("about 5 W"); its bound: a board under 35 W over an idle near 24 W, 11.0 W over idle
+v2(800) = (V800 / V600)^2 = (0.6174109375 / 0.5174)^2 = 1.423953 (the frozen ledger's aifoundry2 volts); the rate x 4/3 at 800 MHz (cycle-bound loop): W over idle x 1.898605
+E38's card scale (aifoundry3 switches 0.958-0.969 of aifoundry2): x 1.0384 at its point (1/0.963), x 1.0438 at its band's end (1/0.958)
+aifoundry2's idle (the frozen footing law, 49-62 C, rest band +-0.5 W): 24.310 W at 55 C, 26.718 W at 62 C; E190 arm A's measured rest 21.96 W at a die of 46 C
+E136's busy base on this card (relation B): 25.456 W at 600 MHz, 33.610 W at 800 MHz: 8.154 W the frozen ledger does not hold
+  the point                                                                                9.50 W over idle -> board  33.81 W; die by the sustained line about 57.8 C
+  the point with the card scale                                                            9.87 W over idle -> board  34.18 W; die by the sustained line about 57.9 C
+  the point with E136's base                                                              18.02 W over idle -> board  42.33 W; die by the sustained line about 61.8 C
+  the top: E197's bound, the scale's end, the idle at 62 C plus its band, E136's base     29.95 W over idle -> board  57.17 W; die by the sustained line about 68.7 C
+All under E189's 65 W line (margin 7.8 W at the top), aifoundry2's 82 W predicted-peak line (E190.md 3) and its 85 W stop. The die at the points stays under the governor's 65 C thermal test; only the stacked top passes it (68.7 C), where THE CLOCK RULE sets the stepped processes aside, under the 70 C stop.
+E190 arm A's measured sustained cells on this card (README, REPORTED): fp32 board 57.25 W over a 23.30 W rest, die 51.0 -> 62.8 C (last 40 s of 95 s); fp16 board 58.09 W over a 24.45 W rest, die 55.3 -> 64.6 C (last 40 s of 95 s); int8 board 44.44 W over a 24.34 W rest, die 54.8 -> 59.2 C (last 40 s of 95 s)
+
+PEAKS UNDER THE LINES

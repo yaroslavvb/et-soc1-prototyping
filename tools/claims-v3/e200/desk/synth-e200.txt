@@ -1,0 +1,44 @@
+E200 desk check: reduce_e200.py and E197's reduce_regfile.py on synthetic governed sessions (arbitrary test values)
+interpreter: /usr/bin/python3 3.12.3
+  f325bd0e3e916b81ee12304db7b47d79ad6daa5172ded19952f0ef1b0565eb87  tools/claims-v3/e197/proposal/src/reduce_regfile.py
+  10a4403430b20686050ccfc7ae1af3db2107f6ccc56511bfc00a6c8056c147ef  tools/claims-v3/e200/reduce_e200.py
+  29ad1e87c86f025a3d292ce057c0ccc72b1268c8fd44f906b791cb94afa72f59  tools/claims-v3/e200/desk/synth_session_e200.py
+  6c6d723177ad8046c476fd0a02a27134a7141118efcac6e0af44f8ff8742e6d8  tools/claims-v3/e197/proposal/src/trains.tsv
+  f92503552e13d152ef6a1308234bc3ae378c20d9fa144d9f7867595d1687a149  tools/claims-v3/e197/desk/host-list-e197.jsonl
+  a84e52139d87c8a83906e7533430498d399300a4b8dfdff508d7fa2b823ef0a1  tools/claims-v3/e194/desk/climb-e190.txt
+gen gov-full       rc 0: synthetic governor session (full plan): 5413 launch records, 400 train processes, 29093 samples, 2909.3 s, planted none
+E200 on gov-full rc 0
+    T2   rot.x0    - rot2.x0   units   9  D +0.0000 W  [+0.0000, +0.0000]  NOT RESOLVED  F/S 1.00000  dropped 
+    T1   rot.x64   - rot2.x64  units  67  D +0.0500 W  [+0.0500, +0.0500]  POSITIVE  F/S 1.00000  dropped 
+    T3   res.k64   - res.k0    units   9  D +0.7000 W  [+0.7000, +0.7000]  POSITIVE  F/S 1.00000  dropped 
+    T5   resf.k0   - resz.k0   units  26  D +0.0300 W  [+0.0300, +0.0300]  POSITIVE  F/S 1.00000  dropped 
+    T6   wn2.z     - wn1.z     units   9  D +0.1500 W  [+0.1500, +0.1500]  POSITIVE  F/S 1.00000  dropped 
+    T4   res.k32   - res.k0    units   9  D +0.3500 W  [+0.3500, +0.3500]  POSITIVE  F/S 1.00000  dropped 
+    T8   rd2i.d64  - rd2i.e0   units   9  D +0.4000 W  [+0.4000, +0.4000]  POSITIVE  F/S 1.00000  dropped 
+    T10  rd2r.d64  - rd2r.e0   units   9  D +0.9000 W  [+0.9000, +0.9000]  POSITIVE  F/S 1.00000  dropped 
+    T9   rd2i.e64  - rd2i.e0   units  13  D +0.0500 W  [+0.0500, +0.0500]  POSITIVE  F/S 1.00000  dropped 
+    T11  rd1u.d64  - rd1u.e0   units   9  D +0.6000 W  [+0.6000, +0.6000]  POSITIVE  F/S 1.00000  dropped 
+    T13  idx1.z    - idx0.z    units  13  D +0.2500 W  [+0.2500, +0.2500]  POSITIVE  F/S 1.00000  dropped 
+    T12  idx5.z    - idx1.z    units   9  D +0.6400 W  [+0.6400, +0.6400]  POSITIVE  F/S 1.00000  dropped 
+    T15  idx3.z    - idx1.z    units   9  D +0.3200 W  [+0.3200, +0.3200]  POSITIVE  F/S 1.00000  dropped 
+    T7   wn8.z     - wn2.z     units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped   (NOT SCORED: not run)
+    T14  rn8.z     - idx1.z    units   0  D    -    W  [-, -]  NOT SCORED  F/S -  dropped   (NOT SCORED: not run)
+    cell           +0.0014 pJ [+0.0014, +0.0014] per bit board  POSITIVE
+    cell_ctrl      +0.0014 pJ [+0.0014, +0.0014] per bit board  POSITIVE
+    cell reading: cell (order (T2) reads BOUNDED); train gain 1.000
+    e200 gov-full: median clock 800.0 MHz (ok); train processes judged 400, kept by the clock 400, set aside: median 0, samples after 1.5 s 0, no last launch 0, own count 0; launches asked 5200, before 2.0 s not read 2000, read 3200, unmatched 0; anchor groups 24, board windows moved 24, off 800 MHz after 1.5 s 0; samples 29093 (0 without a clock, 9518 off 800 MHz)
+  G1  PASS  max |D - injected| 4.48e-15 W over 13 trains; units T1 67, T5 26; kept by the clock 400 of 400 judged; launches not read before 2.0 s 2000, read 3200, unmatched 0; gain 1.000000000; rail share 0.7133, its 8 per-block shares 0.25-0.82 (injected 0.60; REPORTED)
+  G2  PASS  E197 unchanged: 393 of 400 train processes dropped for clock (98.2 %); trains scored: none; session clock [800.0] MHz
+  G3  PASS  gain with E197's anchor window 0.8035 (E200's 1.000000); trains' D identical to G1
+gen faults-full    rc 0: synthetic faults session (full plan): 5410 launch records, 400 train processes, 29120 samples, 2912.0 s, planted {'t5_700_at_ms': 1795021296138, 't6_own600_proc': 7, 't8_climb_1450_proc': 3, 't10_nofield_at_ms': 1795022026036, 't9_climb_1600_proc': 5}
+  F1  PASS  set aside: after 1.5 s 2, own count 1; clock drops by train {'T5': 1, 'T6': 1, 'T9': 1}; samples without a clock 1; max |D - injected| 4.03e-15 W; planted {'t5_700_at_ms': 1795021296138, 't6_own600_proc': 7, 't8_climb_1450_proc': 3, 't10_nofield_at_ms': 1795022026036, 't9_climb_1600_proc': 5}
+gen noisy-full     rc 0: synthetic noisy session (full plan): 5409 launch records, 400 train processes, 29083 samples, 2908.3 s, planted none
+  J1  PASS  z = (D - injected) / se by train: T1 -0.06, T2 -2.31, T3 +0.80, T4 -2.96, T5 +0.87, T6 -1.39, T8 -1.58, T9 +0.21, T10 -1.67, T11 -2.21, T12 -1.29, T13 +0.24, T15 -0.31; zero by design (REPORTED): {'order': 'NEGATIVE', 'lin_result': 'BOUNDED', 'lin_field': 'BOUNDED'}
+gen nogov-full     rc 0: synthetic nogov session (full plan): 5376 launch records, 400 train processes, 35231 samples, 3523.1 s, planted none
+  Z1  PASS  E200: median clock 600.0 MHz, 400 of 400 processes set aside, no train scored; E197 unchanged scores them at 600 MHz: D / injected [0.5]
+  C1  PASS  16 prices positive in both, ratios [1.5]; 5 without a ratio; rate ratio 1.333333333
+gen gov-ext        rc 0: synthetic governor session (ext plan): 3537 launch records, 266 train processes, 17752 samples, 1775.2 s, planted none
+  P1  PASS  T1 units 182; T7 9, T14 9 units; max |D - injected| 4.48e-15 W; order BOUNDED, dest_n8 BOUNDED, read_n8 BOUNDED
+  R1  PASS  --prediction: exit 2 (REFUSED: E200 never runs the reducer with a forecast (E200.md sections 0 and 6)); E197's reducer one byte longer: exit 3 (REFUSED: <scratch>/alt/tools/claims-v3/e197/proposal/src/reduce_regfile.py has sha256 669a9c5c4b093cd015d2c6dfcd87da3193e97eefb5875534f5861883f6ef1723, not E197's registered f325bd0e3e916b81ee12304db7b47d79ad6daa5172ded19952f0ef1b0565eb87)
+
+SYNTH-E200 PASS (9 of 9 as stated before the run)

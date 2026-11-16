@@ -1,0 +1,108 @@
+E200 desk check: the governor's climb on aifoundry2 card 0, re-read from E190 arm A's committed records (a desk read of measured records; nothing here is an E200 datum)
+interpreter: /usr/bin/python3 3.12.3
+  d20a6cd3e146e58d2fd251b26fdb2bc4f7c536850c3e15f47291db26af6a11b3  docs/reports/data/2026-11-13-e190-large-gemm/aifoundry2/telemetry.jsonl.gz
+  telemetry samples: 10173
+
+per process (run, proc: A first 800 MHz sample after lo, B the climb's last sample off 800 MHz, C samples off 800 MHz from lo + 1.5 s to hi, D first launch at >= 790 MHz by its own count, E the gap after the previous process's launches; seconds):
+  01-P1-burst-fp32     proc-00 A  0.441  B  0.341  C  0             D  0.620  E      -
+  02-P1-burst-fp16     proc-00 A  0.580  B  0.480  C  0             D  1.031  E      -
+  03-P1-burst-int8     proc-00 A  1.222  B  1.122  C  0             D  1.409  E      -
+  04-S1-sus-fp32       proc-00 A  0.721  B  0.621  C  0             D  0.930  E      -
+  04-S1-sus-fp32       proc-01 A  0.803  B  0.703  C  0             D  0.949  E  0.978
+  04-S1-sus-fp32       proc-02 A  0.968  B  0.868  C  0             D  1.246  E  0.982
+  04-S1-sus-fp32       proc-03 A  1.138  B  1.038  C  0             D  1.256  E  0.982
+  04-S1-sus-fp32       proc-04 A  1.164  B  1.064  C  0             D  1.261  E  1.002
+  04-S1-sus-fp32       proc-05 A  0.341  B  0.241  C  0             D  0.608  E  1.038
+  04-S1-sus-fp32       proc-06 A  0.455  B  0.355  C  0             D  0.621  E  0.975
+  04-S1-sus-fp32       proc-07 A  0.665  B  0.565  C  0             D  0.929  E  0.959
+  04-S1-sus-fp32       proc-08 A  0.981  B  0.881  C  0             D  1.250  E  0.965
+  04-S1-sus-fp32       proc-09 A  1.157  B  1.056  C  0             D  1.260  E  0.976
+  04-S1-sus-fp32       proc-10 A  1.223  B  1.123  C  0             D  1.268  E  0.949
+  04-S1-sus-fp32       proc-11 A  0.486  B  0.386  C  0             D  0.621  E  0.975
+  05-P2-burst-int8     proc-00 A  1.291  B  1.191  C  0             D  1.411  E      -
+  06-P2-burst-fp32     proc-00 A  0.700  B  0.600  C  0             D  0.931  E      -
+  07-P2-burst-fp16     proc-00 A  0.439  B  0.339  C  0             D  0.596  E      -
+  08-S2-sus-fp16       proc-00 A  0.867  B  0.767  C  0             D  1.047  E      -
+  08-S2-sus-fp16       proc-01 A  1.153  B  1.053  C  0             D  1.497  E  0.921
+  08-S2-sus-fp16       proc-02 A  0.511  B  0.411  C  0             D  0.602  E  0.931
+  08-S2-sus-fp16       proc-03 A  0.889  B  0.789  C  0             D  1.050  E  0.956
+  08-S2-sus-fp16       proc-04 A  1.210  B  1.110  C  0             D  1.505  E  0.907
+  08-S2-sus-fp16       proc-05 A  0.672  B  0.572  C  0             D  1.036  E  0.931
+  08-S2-sus-fp16       proc-06 A  1.082  B  0.982  C  0             D  1.065  E  0.932
+  08-S2-sus-fp16       proc-07 A  0.402  B  0.302  C  0             D  0.593  E  0.970
+  08-S2-sus-fp16       proc-08 A  0.724  B  0.624  C  0             D  1.042  E  0.939
+  08-S2-sus-fp16       proc-09 A  1.091  B  0.991  C  0             D  1.491  E  0.959
+  08-S2-sus-fp16       proc-10 A  0.560  B  0.460  C  8 [700]       D  0.599  E  0.928
+  08-S2-sus-fp16       proc-11 A  0.815  B  0.715  C 13 [700]       D  1.043  E  0.955
+  09-P3-burst-fp16     proc-00 A  0.513  B  0.413  C  0             D  0.600  E      -
+  10-P3-burst-int8     proc-00 A  0.585  B  0.485  C  0             D  0.945  E      -
+  11-P3-burst-fp32     proc-00 A  1.030  B  0.930  C  0             D  1.250  E      -
+  12-S3-sus-int8       proc-00 A  0.401  B  0.301  C  0             D  0.515  E      -
+  12-S3-sus-int8       proc-01 A  0.072  B      -  C  0             D  0.000  E  0.615
+  12-S3-sus-int8       proc-02 A  0.076  B      -  C  0             D  0.000  E  0.643
+  12-S3-sus-int8       proc-03 A  1.309  B  1.209  C  0             D  1.416  E  0.616
+  12-S3-sus-int8       proc-04 A  1.223  B  1.123  C  0             D  1.408  E  0.605
+  12-S3-sus-int8       proc-05 A  1.094  B  0.994  C  0             D  1.400  E  0.575
+  12-S3-sus-int8       proc-06 A  1.060  B  0.960  C  0             D  1.398  E  0.571
+  12-S3-sus-int8       proc-07 A  1.012  B  0.912  C  0             D  1.392  E  0.603
+  12-S3-sus-int8       proc-08 A  1.091  B  0.991  C  0             D  1.399  E  0.574
+  12-S3-sus-int8       proc-09 A  0.811  B  0.711  C  0             D  0.964  E  0.618
+  12-S3-sus-int8       proc-10 A  0.873  B  0.773  C  0             D  0.966  E  0.599
+  12-S3-sus-int8       proc-11 A  0.855  B  0.755  C  0             D  0.965  E  0.602
+  13-P4-burst-fp32     proc-00 A  0.888  B  0.788  C  0             D  0.942  E      -
+  14-P4-burst-fp16     proc-00 A  1.134  B  1.034  C  0             D  1.495  E      -
+  15-P4-burst-int8     proc-00 A  0.651  B  0.551  C  0             D  0.942  E      -
+  16-S4-sus-fp32       proc-00 A  1.043  B  0.943  C  0             D  1.253  E      -
+  16-S4-sus-fp32       proc-01 A  1.313  B  1.213  C  0             D  1.569  E  0.971
+  16-S4-sus-fp32       proc-02 A  0.384  B  0.284  C  0             D  0.614  E  0.961
+  16-S4-sus-fp32       proc-03 A  0.708  B  0.608  C  0             D  0.931  E  0.964
+  16-S4-sus-fp32       proc-04 A  0.907  B  0.807  C  0             D  0.944  E  0.974
+  16-S4-sus-fp32       proc-05 A  0.982  B  0.882  C  0             D  1.250  E  0.962
+  16-S4-sus-fp32       proc-06 A  1.129  B  1.029  C  0             D  1.256  E  0.984
+  16-S4-sus-fp32       proc-07 A  0.316  B  0.216  C  0             D  0.609  E  0.957
+  16-S4-sus-fp32       proc-08 A  0.635  B  0.535  C  0             D  0.926  E  0.974
+  16-S4-sus-fp32       proc-09 A  0.849  B  0.749  C  0             D  0.939  E  0.968
+  16-S4-sus-fp32       proc-10 A  0.922  B  0.822  C  0             D  1.244  E  0.985
+  16-S4-sus-fp32       proc-11 A  1.123  B  1.023  C  4 [700]       D  1.257  E  0.957
+  17-S5-sus-fp16       proc-00 A  1.325  B  1.225  C  0             D  1.507  E      -
+  17-S5-sus-fp16       proc-01 A  0.598  B  0.498  C  0             D  0.604  E  0.924
+  17-S5-sus-fp16       proc-02 A  1.113  B  1.012  C  0             D  1.489  E  0.940
+  17-S5-sus-fp16       proc-03 A  0.469  B  0.369  C  0             D  0.595  E  0.947
+  17-S5-sus-fp16       proc-04 A  0.787  B  0.687  C  0             D  1.047  E  0.934
+  17-S5-sus-fp16       proc-05 A  1.031  B  0.931  C  0             D  1.061  E  1.085
+  17-S5-sus-fp16       proc-06 A  0.367  B  0.267  C  0             D  0.590  E  0.962
+  17-S5-sus-fp16       proc-07 A  0.783  B  0.683  C  8 [700]       D  1.042  E  0.944
+  17-S5-sus-fp16       proc-08 A  1.077  B  0.977  C 10 [700]       D  1.488  E  0.998
+  17-S5-sus-fp16       proc-09 A  0.819  B  0.719  C 15 [700]       D  1.046  E  0.929
+  17-S5-sus-fp16       proc-10 A  0.633  B  0.533  C 18 [700]       D  1.030  E  0.960
+  17-S5-sus-fp16       proc-11 A  1.257  B  1.157  C 20 [600, 700]  D  1.501  E  0.950
+  18-S6-sus-int8       proc-00 A  1.000  B  0.899  C  0             D  1.394  E      -
+  18-S6-sus-int8       proc-01 A  0.966  B  0.866  C  0             D  1.390  E  0.598
+  18-S6-sus-int8       proc-02 A  1.034  B  0.934  C  0             D  1.390  E  0.584
+  18-S6-sus-int8       proc-03 A  0.992  B  0.891  C  0             D  1.390  E  0.605
+  18-S6-sus-int8       proc-04 A  0.862  B  0.762  C  0             D  0.963  E  0.590
+  18-S6-sus-int8       proc-05 A  0.837  B  0.737  C  0             D  0.961  E  0.579
+  18-S6-sus-int8       proc-06 A  0.818  B  0.718  C  0             D  0.961  E  0.593
+  18-S6-sus-int8       proc-07 A  0.792  B  0.692  C 13 [600, 700]  D  0.963  E  0.598
+  18-S6-sus-int8       proc-08 A  0.063  B      -  C  0             D  0.000  E  0.604
+  18-S6-sus-int8       proc-09 A  0.014  B      -  C  0             D  0.000  E  0.621
+  18-S6-sus-int8       proc-10 A  0.070  B      -  C  0             D  0.000  E  0.615
+  18-S6-sus-int8       proc-11 A  0.059  B      -  C  0             D  0.000  E  0.582
+
+  A, the first 800 MHz sample (E194's climb): n 84; min 0.014, median 0.852, mean 0.804, p95 1.252, max 1.325 s
+  B, the climb's last off-800 sample: n 78; min 0.216, median 0.770, mean 0.761, p95 1.162, max 1.225 s
+  D, the first launch at >= 790 MHz by its own count: n 84; min 0.000, median 1.039, mean 1.000, p95 1.497, max 1.569 s
+  E, the gap between back-to-back processes' launch windows: n 66; min 0.571, median 0.942, mean 0.841, p95 0.995, max 1.085 s
+  processes whose launch window began off 800 MHz (a sample at 600 or 700 MHz before the first 800 MHz sample): 78 of 84
+  C, processes with a sample off 800 MHz from lo + 1.5 s to hi (THE CLOCK RULE would set them aside): 9 of 84 (bursts 0 of 12, sustained 9 of 72)
+    08-S2-sus-fp16 proc-10: 8 samples, values [700], the first at 4.363 s after lo
+    08-S2-sus-fp16 proc-11: 13 samples, values [700], the first at 3.316 s after lo
+    16-S4-sus-fp32 proc-11: 4 samples, values [700], the first at 5.527 s after lo
+    17-S5-sus-fp16 proc-07: 8 samples, values [700], the first at 4.685 s after lo
+    17-S5-sus-fp16 proc-08: 10 samples, values [700], the first at 3.679 s after lo
+    17-S5-sus-fp16 proc-09: 15 samples, values [700], the first at 3.120 s after lo
+    17-S5-sus-fp16 proc-10: 18 samples, values [700], the first at 2.534 s after lo
+    17-S5-sus-fp16 proc-11: 20 samples, values [600, 700], the first at 2.558 s after lo
+    18-S6-sus-int8 proc-07: 13 samples, values [600, 700], the first at 3.494 s after lo
+
+CLIMB-E200 DONE

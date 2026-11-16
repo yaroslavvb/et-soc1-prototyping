@@ -1,0 +1,18 @@
+--- a/tools/claims-v3/e197/lab/run_trains.py
++++ b/run_trains.py
+@@ -238,13 +238,13 @@
+ 
+     def anchor(kind, secs, role):
+         idle(4.5, "before " + kind)
+-        cmd = TIMEOUT + [a.host_bin, "--kind", kind, "--seconds", "%g" % secs, "--window", "240000000",
++        cmd = TIMEOUT + [a.host_bin, "--kind", kind, "--seconds", "%g" % secs, "--window", "320000000",
+                          "--stop-file", stop_file]
+         device(cmd, "anchor", {"kind_run": kind, "role": role})
+ 
+     def train_proc(t, j, orient, label=None):
+         cmd = TIMEOUT + [a.host_bin, "--train", "%s,%s" % (t["F"], t["S"]), "--orient", orient,
+-                         "--launches", "13", "--window", "240000000", "--stop-file", stop_file]
++                         "--launches", "13", "--window", "320000000", "--stop-file", stop_file]
+         info = {"train": label or t["train"], "proc": j, "orient": orient, "F": t["F"], "S": t["S"]}
+         if label:
+             info["of"] = t["train"]

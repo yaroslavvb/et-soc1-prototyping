@@ -1,0 +1,51 @@
+E200 desk check: the window and THE CLOCK RULE, from committed code and records (desk check of code; desk arithmetic)
+interpreter: /usr/bin/python3 3.12.3
+  f325bd0e3e916b81ee12304db7b47d79ad6daa5172ded19952f0ef1b0565eb87  tools/claims-v3/e197/proposal/src/reduce_regfile.py  (pinned)
+  66846b26acfdb3af3a14aed48a00acc27a8fe5ad9feb690b2a5634995bfe3b57  tools/claims-v3/e197/proposal/src/host/main.cpp
+  91c46f4e8a28a2505af1f9e0bb029d1935da59e26915a80bfadd19abd638c40d  tools/claims-v3/e197/lab/run_trains.py  (pinned)
+  cfb92917db27e119bb217717793c1c3b3dfbc65a010c1dfa907467c94098e2ae  docs/reports/data/2026-11-14-e192-intbits-aifoundry3/run/runs.jsonl
+  07b0c5862e31fea615469093a79cbffda1770af4070c557f8d71f1ed2a32b3d6  docs/reports/data/2026-11-14-e192-intbits-aifoundry3/run/stderr.txt
+  a84e52139d87c8a83906e7533430498d399300a4b8dfdff508d7fa2b823ef0a1  tools/claims-v3/e194/desk/climb-e190.txt
+
+1. E197's launch reading (its reading(), LAG_MS 170 ms: the board samples in [start + 170 ms, end], at least 2) on a 10 Hz sample grid, every phase of the grid against the launch start (0-99 ms, 1 ms steps)
+  240,000,000 cycles at 600 MHz (E197 on aifoundry3)             400.3 ms: a reading in 100 of 100 phases; a quad complete 1.0000; a process with a value 1.0000; a unit 1.00000; T1's expected units of 67 pairs 67.00
+  240,000,000 cycles at 800 MHz (E197's window on aifoundry2)    300.3 ms: a reading in  31 of 100 phases; a quad complete 0.0092; a process with a value 0.0275; a unit 0.00075; T1's expected units of 67 pairs 0.05
+  320,000,000 cycles at 800 MHz (E200's window W1)               400.3 ms: a reading in 100 of 100 phases; a quad complete 1.0000; a process with a value 1.0000; a unit 1.00000; T1's expected units of 67 pairs 67.00
+  320,000,000 cycles at 600 MHz (inside a climb)                 533.6 ms: a reading in 100 of 100 phases; a quad complete 1.0000; a process with a value 1.0000; a unit 1.00000; T1's expected units of 67 pairs 67.00
+  The launch spans: E192's committed launches (240,000,000 cycles at 600 MHz on aifoundry3) read wall_s 0.4003 s: the same cycles take 0.3003 s at 800 MHz, 320,000,000 take 0.4003 s.
+
+2. The host's launch budget (E197's host/main.cpp launchFits(): "secondsSince(tOpen_) + double(o_.window) / 0.5e9 + 1.0 <= o_.budget"; --budget 8.5 s by default, at most 9; --window default 240000000, at most 1200000000)
+   the device's opening on this host family (E192's committed stderr, 706 processes): "device ready in" median 0.18 s, max 0.43 s
+   E197 at 600 MHz (240M)                   device ready 0.18 s: launch 12 starts at 4.980 s; launchFits needs 6.460 <= 8.5: fits (margin +2.040 s); the process ends near 5.43 s, under timeout 10
+   E197 at 600 MHz (240M)                   device ready 0.43 s: launch 12 starts at 5.230 s; launchFits needs 6.710 <= 8.5: fits (margin +1.790 s); the process ends near 5.68 s, under timeout 10
+   E197's window at 800 MHz (240M)          device ready 0.18 s: launch 12 starts at 3.780 s; launchFits needs 5.260 <= 8.5: fits (margin +3.240 s); the process ends near 4.13 s, under timeout 10
+   E197's window at 800 MHz (240M)          device ready 0.43 s: launch 12 starts at 4.030 s; launchFits needs 5.510 <= 8.5: fits (margin +2.990 s); the process ends near 4.38 s, under timeout 10
+   E200 at 800 MHz from the start (320M)    device ready 0.18 s: launch 12 starts at 4.980 s; launchFits needs 6.620 <= 8.5: fits (margin +1.880 s); the process ends near 5.43 s, under timeout 10
+   E200 at 800 MHz from the start (320M)    device ready 0.43 s: launch 12 starts at 5.230 s; launchFits needs 6.870 <= 8.5: fits (margin +1.630 s); the process ends near 5.68 s, under timeout 10
+   E200 with a climb of 1.5 s (320M)        device ready 0.18 s: launch 12 starts at 5.355 s; launchFits needs 6.995 <= 8.5: fits (margin +1.505 s); the process ends near 5.81 s, under timeout 10
+   E200 with a climb of 1.5 s (320M)        device ready 0.43 s: launch 12 starts at 5.605 s; launchFits needs 7.245 <= 8.5: fits (margin +1.255 s); the process ends near 6.06 s, under timeout 10
+   E200 at 600 MHz throughout (320M)        device ready 0.18 s: launch 12 starts at 6.580 s; launchFits needs 8.220 <= 8.5: fits (margin +0.280 s); the process ends near 7.16 s, under timeout 10
+   E200 at 600 MHz throughout (320M)        device ready 0.43 s: launch 12 starts at 6.830 s; launchFits needs 8.470 <= 8.5: fits (margin +0.030 s); the process ends near 7.41 s, under timeout 10
+
+3. E197's lab runner: "--window", "240000000" on 2 lines (the anchors' and the trains' host calls; W1 changes both and nothing else); PROC_S 6.2 s (a train process, for the deadline); PROC_MAX_S 11.0 s (timeout 10 plus 1 s)
+
+4. A launch's own count, cycles_max / wall_s, on E192's 3255 committed launches (the same host family, 240,000,000 cycles at 600 MHz on aifoundry3): min 597.911, median 599.554, max 599.704 MHz, i.e. 0.99652-0.99951 of the clock; at 800 MHz that is 797.2-799.6 MHz, inside THE CLOCK RULE's 780-810 MHz; a launch at 700 MHz would read about 699 MHz and one at 600 MHz about 600, outside
+   E190 arm A on aifoundry2 (E194's committed read of its telemetry): 84 processes; the climb from the launch window's start to the first 800 MHz sample: min 0.014, median 0.852, mean 0.804, max 1.325 s; above 1.0 s 28, above 1.5 s 0
+   samples off 800 MHz after the climb: bursts 0 of 12 processes; sustained runs (twelve 6 s processes back to back) 9 of 72 (E194's read: 8 of them at a shire mean of 66 C, the governor's thermal test)
+   the climb's cost in a train process under W1 (the cycles run at 600 MHz before it take 4/3 as long): 0.25 x c: mean 0.201 s, max 0.331 s a process
+   a climb at 0.000 s: launches 0-4 start at 0.000, 0.400, 0.800, 1.200, 1.600 s, launch 5 at 2.000 s, the last ends at 5.200 s; nothing is read before 2.0 s, so quads 2 and 3 (launches 5-12) are read and quad 1 never
+   a climb at 0.852 s: launches 0-4 start at 0.000, 0.533, 1.013, 1.413, 1.813 s, launch 5 at 2.213 s, the last ends at 5.413 s; nothing is read before 2.0 s, so quads 2 and 3 (launches 5-12) are read and quad 1 never
+   a climb at 1.325 s: launches 0-4 start at 0.000, 0.533, 1.067, 1.531, 1.931 s, launch 5 at 2.331 s, the last ends at 5.531 s; nothing is read before 2.0 s, so quads 2 and 3 (launches 5-12) are read and quad 1 never
+   a climb at 1.500 s: launches 0-4 start at 0.000, 0.533, 1.067, 1.575, 1.975 s, launch 5 at 2.375 s, the last ends at 5.575 s; nothing is read before 2.0 s, so quads 2 and 3 (launches 5-12) are read and quad 1 never
+   checked for every climb from 0 to 1.500 s in 1 ms steps: launch 4 starts before 2.0 s and launch 5 at or after it
+   (E190's climbs short enough that quad 1 would hold no 600 MHz sample, about c <= 0.533 s: 19 of 84; E200 does not read quad 1 in any process, so the board meter's pass after the step never reaches a read launch)
+
+5. Card time (E197.md 10: "400 processes x 5.7 s + 24 bursts x 8.2 s + 80 s of block idles + 90 s of gaps + about 35 s of smoke + the session's 18 s of sampler margins is 2,700 s"), with W1 the launches last as E197's; the climb adds its cost to each device process (the anchors' bursts are bounded in time and change little)
+   sitting 1, full plan   E197 45.0 min; E200 at the mean climb 46.3 min, at the longest 47.2 min; cap 50 min
+   sitting 1, short plan  E197 35.7 min; E200 at the mean climb 36.7 min, at the longest 37.4 min; cap 40 min
+   sitting 2 (ext)        E197 27.3 min; E200 at the mean climb 28.2 min, at the longest 28.8 min; cap 35 min
+   T15 (block D's last train, 18 processes), E197 (5.7 s a process): starts about 2555 s after the sampler; the runner needs 2696 s <= its deadline about 2790 s (the cap - 120 s - 90 s from step 7): starts (+94 s)
+   T15 (block D's last train, 18 processes), E200 at the mean climb: starts about 2632 s after the sampler; the runner needs 2773 s <= its deadline about 2790 s (the cap - 120 s - 90 s from step 7): starts (+17 s)
+   T15 (block D's last train, 18 processes), E200 at the longest climb: starts about 2681 s after the sampler; the runner needs 2823 s <= its deadline about 2790 s (the cap - 120 s - 90 s from step 7): NOT STARTED (-33 s)
+
+CLOCK-WINDOW DONE
