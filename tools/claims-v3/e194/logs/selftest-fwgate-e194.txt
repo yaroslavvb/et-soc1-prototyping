@@ -1,0 +1,81 @@
+selftest_fwgate_e194: 2026-11-15 22:39:31 PST, processes visible: 7
+scratch repository: a shared sparse clone at d5beec9bf0f0 (the commit before the amendment), the amendment as one stand-in commit 6a1c72840374 (11 files in its stand-in list), its own upstream
+
+== G1. the record, as committed
+FWGATE-E194 the record: docs/reports/data/2026-11-15-e194-fwread-aifoundry2 (fwread-e194's data commit 15cb0fcbfb11, the read at 2026-11-15 15:22:02 PST); E69's statements: tools/claims-v3/knob/CHANGE-RECORD.md lines 67-69, docs/reports/data/2026-10-27-e69-gov
+FWGATE-E194   its list: 8 of 8 OK; SHA256SUMS sha256 daa088c8af93, README.md sha256 96fb19c558c2 (pinned daa088c8af93, 96fb19c558c2)
+FWGATE-E194   git: HEAD 6a1c72840374, the record's tree 6d1c38022ef0, uncommitted paths there 0
+FWGATE-E194   the record's comparison re-run: rc 0, VERDICT: EQUAL
+FWGATE-E194   the gate's own reading of the raw output: release=1.4.0 BL1=0.22.0 BL2=0.22.0 PMIC=1.5.0 Master Minion=0.25.1 Worker Minion=0.25.1 Machine Minion=0.25.1 (E69's: release 1.4.0, BL1 0.22.0, BL2 0.22.0, PMIC 1.5.0, minions 0.25.1)
+FWGATE-E194 RECORD EQUAL: the firmware read of record of aifoundry2 card 0 (2026-11-15 15:22:02 PST, 15cb0fcbfb11) is there as committed and reads EQUAL to E69's in all seven fields (its comparison re-run and the gate's own reading)
+-> PASS (G1 the record as committed reads EQUAL, by its comparison re-run and the gate's own reading of all seven fields)
+
+== B1-B6. the boot rule, by the box lines themselves
+   this boot 01; after the read 160; at the read's second 160; one second before 01; unreadable 160; another box 160 (rc then the count of ok lines)
+-> PASS (B1 this boot ok; B2 after the read STOP; B3 at its second STOP; B4 a second before ok; B5 unreadable STOP; B6 another box STOP)
+
+== D1. a DIFFERENT record: the read's PMIC field 1.5.0 -> 1.5.1, committed
+FWGATE-E194 RECORD REFUSED: list(SHA256SUMS 7 OK of 8; pinned 8 of 8) tree(HEAD's tree for the record 13c83afdd6d3, not 6d1c38022ef0 as committed) compare(rc 1) compare-verdict(VERDICT: DIFFERENT (fields: PMIC)) compare-bytes(the re-run does not reproduce comparison.txt) DIFFERENT(PMIC reads 1.5.1, E69's 1.5.0)
+-> PASS (D1 refused, naming the DIFFERENT field, the list, the tree and the comparison's rc 1)
+
+== D2. the same change made consistent: its SHA256SUMS and comparison.txt re-made from the changed read
+FWGATE-E194 RECORD REFUSED: list-bytes(SHA256SUMS a9786a33, pinned daa088c8) tree(HEAD's tree for the record 37ee879ea95f, not 6d1c38022ef0 as committed) compare(rc 1) compare-verdict(VERDICT: DIFFERENT (fields: PMIC)) DIFFERENT(PMIC reads 1.5.1, E69's 1.5.0)
+-> PASS (D2 refused: DIFFERENT by the gate's own reading, the list's bytes off their pin, the tree not as committed (its list itself reads OK))
+
+== D3. E69's own statement changed (CHANGE-RECORD.md's PMIC 1.5.0 -> 1.5.1), committed
+FWGATE-E194 RECORD REFUSED: e69-change-record(9a723c8c, pinned 7faefb6a) compare(rc 2) compare-verdict(PARSE-FAILED: E69's two statements disagree: {'release': '1.4.0', 'BL1': '0.22.0) compare-bytes(the re-run does not reproduce comparison.txt)
+-> PASS (D3 refused: E69's statement off its pin; the comparison cannot parse two statements that disagree)
+
+== M1, M2, U1. a missing record (its directory removed in a commit; one file gone from the worktree); an uncommitted edit
+FWGATE-E194 RECORD REFUSED: missing(the record's directory docs/reports/data/2026-11-15-e194-fwread-aifoundry2 is not there)
+FWGATE-E194 RECORD REFUSED: missing(fwread.stderr)
+FWGATE-E194 RECORD REFUSED: readme-bytes(README.md d11c0b76, pinned 96fb19c5) uncommitted(1 path(s) in the record's directory)
+-> PASS (M1 the directory gone: refused (missing); M2 one file gone: refused (missing); U1 an uncommitted README edit: refused (its bytes, uncommitted))
+
+== K6. the v2 launch's guard text against k6's
+-> PASS (K6 k6's three lines byte for byte, k6's E69 block absent, E194's boot rule present)
+
+== LK1-LK4. the v2 look
+identity: the host booted 2026-11-13 16:53:28, before E194's firmware read of record of 2026-11-15 15:22:02 PST (EQUAL to E69's; E194.md A1): ok
+HOLDER-RULE-ONE-CARD: FREE after 0 s of polls
+    identity: the host booted 2026-11-13 16:53:28, before E194's firmware read of record of 2026-11-15 15:22:02 PST (EQUAL to E69's; E194.md A1): ok
+[s05_look_v2_e194] aifoundry2: FREE (nothing holds card 0; no device process of anyone's; no session or job of ours); the identity by E194's firmware gate: ok
+[s05_look_v2_e194] STOP: aifoundry2 did not boot before E194's firmware read of record (2026-11-15 15:22:02 PST; E194.md A1): identity: the host aifoundry2 booted '2026-11-15 15:30:00', NOT before E194's firmware read of record of 2026-11-15 15:22:02 PST (E194.md A1): STOP: no launch on aifoundry2 (the card may have restarted since the read: a new read of record and a dated note first)
+[s05_look_v2_e194] STOP: E194's firmware gate refuses (E194.md A1): FWGATE-E194 RECORD REFUSED: list(SHA256SUMS 7 OK of 8; pinned 8 of 8) tree(HEAD's tree for the record 13c83afdd6d3, not 6d1c38022ef0 as committed) compare(rc 1) compare-verdict(VERDICT: DIFFERENT (fields: PMIC)) compare-bytes(the re-run does not reproduce comparison.txt) DIFFERENT(PMIC reads 1.5.1, E69's 1.5.0): nothing reaches th
+[s05_look_v2_e194] STOP: E194's firmware gate refuses (E194.md A1): FWGATE-E194 RECORD REFUSED: missing(the record's directory docs/reports/data/2026-11-15-e194-fwread-aifoundry2 is not there): nothing reaches the box
+-> PASS (LK1 FREE with the identity ok; LK2 a boot after the read: 16; LK3 the DIFFERENT record: 16 before any box call; LK4 the record missing: 16 before any box call)
+
+== IS1-IS3, LA1. the v2 session step
+[s11_session_v2_e194] STOP: IDENTITY-STOP: aifoundry2 booted '2026-11-15 15:30:00', not before E194's firmware read of record of 2026-11-15 15:22:02 PST (E194.md A1): its firmware identity is not carried by that read: nothing launched (E194's firmware gate, E194.md A1; nothing launched)
+[s11_session_v2_e194] STOP: E194's firmware gate refuses (E194.md A1): FWGATE-E194 RECORD REFUSED: list(SHA256SUMS 7 OK of 8; pinned 8 of 8) tree(HEAD's tree for the record 13c83afdd6d3, not 6d1c38022ef0 as committed) compare(rc 1) compare-verdict(VERDICT: DIFFERENT (fields: PMIC)) compare-bytes(the re-run does not reproduce comparison.txt) DIFFERENT(PMIC reads 1.5.1, E69's 1.5.0): nothing reaches
+[s11_session_v2_e194] STOP: E194's firmware gate refuses (E194.md A1): FWGATE-E194 RECORD REFUSED: missing(the record's directory docs/reports/data/2026-11-15-e194-fwread-aifoundry2 is not there): nothing reaches the box
+-> PASS (IS1 IDENTITY-STOP, nothing launched; IS2 the DIFFERENT record and IS3 the record missing: 16 before any box call, nothing launched)
+identity: aifoundry2 booted 2026-11-13 16:53:28, before E194's firmware read of record of 2026-11-15 15:22:02 PST (EQUAL to E69's; E194.md A1): ok
+rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log, runs/*/run.log, run/run.log or energy.sh's folders, in any tree of ours on aifoundry2
+quiet desk: P2 0 (0 device-named process(es) of ours, 0 session or queue script(s) of ours) (read 1)
+LAUNCHED e194 T0 1794811179 2026-11-15 22:39:44 PST (programs ledger,spp; last start 2026-11-15 23:58 PST, last end 2026-11-15 23:59 PST; package counter: not read)
+-> PASS (LA1 past the gate (identity ok), the rest, the dry pass, the build and the P2 count: LAUNCHED, the stand-in session ran)
+
+== P1-P4. step 2 v2
+[s03_desk_v2_e194] desk check v2: the window written today for E194; pulled under the lab-git lock, HEAD 6a1c72840374 descends from 46a16bd0, E194's registration b6ef1ad31cfd, its kit and its dated amendment A1, E191's registration and E189's registration and kit; the paths clean, HISTORY OK, the lists at their pinned counts and bytes (17; 1; 11; 3; 10; 55; 165; 17, 6; 86), the kit's (78), the amendment's (11) and the firmware read's (8), E194.md and E189.md the registered and cited texts, lists not pinned (reported): none; the harness re-made and at its sha256, PLANS SAME, the host check's lines, both self-checks, the plan and forecast re-made, the E59 self-test, NEVER RAN with E189's and b
+[s03_desk_v2_e194] STOP: the desk check failed: e194-data(2 commit(s) name a docs/reports/data/*e194* path; want exactly 15cb0fcbfb11) e194-data-paths(1 of 11 path(s) outside the firmware read's directory)
+[s03_desk_v2_e194] STOP: the desk check failed: SHA256SUMS(7 OK of 8; pinned 8) e194-data(2 commit(s) name a docs/reports/data/*e194* path; want exactly 15cb0fcbfb11) fwgate-record
+[s03_desk_v2_e194] STOP: the desk check failed: SHA256SUMS-e194-amendment-A1(10 OK of 10; pinned 11; its own bytes differ from the pin)
+-> PASS (P1 step 2 v2 passes at every pin, the read of record the only E194 data, the gate's record EQUAL; P2 a second E194 data commit: 16; P3 the DIFFERENT record: 16 (its list, the gate); P4 the amendment's list short: 16)
+
+== N1-N3. step 2 v2's never-run check and E191's third-session folders (A1-8)
+NEVER RAN with E189's and both of E191's data folders left out, and E191's third-session folders at HEAD (1: 2026-11-16-e191-blind-day-aifoundry1-c1-s3)
+[s03_desk_v2_e194] STOP: the desk check failed: never-ran
+[s03_desk_v2_e194] STOP: the desk check failed: never-ran
+   files in the worktree: N1 269 (after its reset 0), N2 269 (after its reset 0; status lines 0), N3 269 (uncommitted)
+-> PASS (N1 a stand-in third-session folder at HEAD: 0, left out and named (the check's line, the last line); N2 a folder of another form (-s4) at HEAD: 16 (never-ran); N3 the third-session form in the worktree, not at HEAD (nothing else there): 16 (never-ran))
+
+== DL. the v2 dry listing
+dry listing: 13 steps listed, 0 exited non-zero, 0 box calls beyond aifoundry2
+DRYLISTING-CHECK-E194 PASS: 2 device-opening line(s), each after an unset of ET_DEVICES and V3_DEVICE; no line names another card or an ET_DEVICES setting, or runs dev_mngt_service or et-powertop; every call to aifoundry2 alone
+-> PASS (DL every step 0, no call to the stand-ins, every printed call to aifoundry2 alone, the listing check PASS; the gate's record named in steps 2, 4 and 9)
+
+== Z. no process of this test left running
+-> PASS (Z nothing left)
+
+SELFTEST-FWGATE-E194 14 of 14 PASS
