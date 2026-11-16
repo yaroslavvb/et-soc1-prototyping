@@ -1,0 +1,282 @@
+{
+ "card": {
+  "config_read": "ettelem config through the kit's guard at the start and the end, holding the card's lock under timeout 10: expected TDP 65 W, threshold 65 C and 600 MHz at rest (as E190 arm A read it, Fri 13 Nov 2026: 65 W, 65 C, 600 MHz, 519 mV, low_power); a different TDP, threshold or rest clock at the start stops the session before its first launch (a gate: no data, and the governor is not touched); the end reading is reported",
+  "governor": "as found: under load it climbs to 800 MHz (the forecast's clock) while the shires' mean is at most 65 C and the board's ~1 s average under the TDP; nothing of it is set, reset or read beyond ettelem config and ettelem sample",
+  "lock": "/run/lock/etsoc-shire0.lock, held for the session (flock -n)",
+  "processes": "one host process at a time on the card, under timeout 10",
+  "select": "the box's one card: /dev/et0_mgmt and /dev/et0_ops",
+  "which": "aifoundry2 card 0 (the ledger's card 'aifoundry2'), its own governor as found; nothing set, reads only; the box this round's orchestration runs on"
+ },
+ "card_minutes": {
+  "a_checks_look_dry_stoppath_smoke": 12,
+  "b_three_idle_anchors": 6,
+  "c_24_passes": 50,
+  "c_arithmetic": {
+   "24_passes_without_the_gate_min": 12.748642199999999,
+   "die_gate_and_sampler_retries_allowance_min": 37.2513578,
+   "how": "a pass = 8 s idle + the host process (set-up, K launches, its checks) + 10 s idle + the sampler's start and stop (3 s) + bookkeeping (5 s); the rest of the 50 minutes is the die gate's waits (heat carries over) and the sampler's retries",
+   "per_pass_without_the_die_gate_s": {
+    "copy-random": 33.825216,
+    "copy-zeros": 33.825216,
+    "sha256": 30.639668999999998,
+    "sort-shuffled": 31.2915,
+    "sort-sorted": 31.019528,
+    "sparse-parity": 30.628504
+   }
+  },
+  "cap": 110,
+  "d_counters_arm": 6,
+  "d_note": "E189's kit dropped the counters arm (its KIT.md section 5): its 6 card-minutes go unused",
+  "e_margin": 20,
+  "rule": "about 95 card-minutes, cap 110 (E189's): no pass starts after 108 card-minutes from the first card command; the session ends by 110. The clock shortens every cycle-bound burst (x 600/800) and changes no step, so the estimate and the cap stand",
+  "total": 94
+ },
+ "clock_rule": {
+  "climb_allowance_s": 1.5,
+  "evidence": "E190 arm A (13 Nov 2026), 84 processes: the first 800 MHz sample came 0.014-1.325 s after the launch window's start (median 0.852 s); in its 12 burst processes no sample left 800 MHz after it (desk/climb-e190.txt)",
+  "forecast_mhz": 800,
+  "pass_counts_if": [
+   "every busy sample (the reducer's window [lo + 0.5 s, hi]) at or after lo + 1.5 s reads 800 MHz",
+   "the burst's last launch ran at 800 MHz by its own count: its slowest minion's cycles over its wall seconds read 780-810 MHz"
+  ],
+  "reducer_line": "the reducer's hard line 'minion clock in busy samples' is read by this rule, not as a failure; every other hard check stands",
+  "t_k": "the last launch's slowest-minion cycles over 800 MHz"
+ },
+ "configs": {
+  "copy-random": {
+   "all_k_start_at_slow_end": true,
+   "args": "--prog copy --bytes 1G --passes 14 --data random --width 32 --launches 8",
+   "burst_s_at_point": 5.325216,
+   "burst_s_at_slow_end": 6.1164000000000005,
+   "guard_model_s": 1.5032385536,
+   "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E194's runner (to be made from E189's kit, with aifoundry2's clock rule)",
+   "k_from": "E189.md section 4, kept (E194.md section 4)",
+   "k_guard_at_slow_end": 8,
+   "k_rule_at_e194_bands_reported": 8,
+   "k_target_at_point": 9,
+   "last_start_s": 7.4967614464,
+   "launches_K": 8,
+   "process_end_s_at_slow_end": 8.6164,
+   "process_end_under_10_s": true,
+   "rule_e189": "main.cpp: a launch starts only while 9.5 s - elapsed >= the guard's model + 0.5 s; E189's K = the most that start at the band's slow end, capped at energy.sh's 6 s target at the point",
+   "setup_s": 1.5
+  },
+  "copy-zeros": {
+   "all_k_start_at_slow_end": true,
+   "args": "--prog copy --bytes 1G --passes 14 --data zeros --width 32 --launches 8",
+   "burst_s_at_point": 5.325216,
+   "burst_s_at_slow_end": 6.1164000000000005,
+   "guard_model_s": 1.5032385536,
+   "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E194's runner (to be made from E189's kit, with aifoundry2's clock rule)",
+   "k_from": "E189.md section 4, kept (E194.md section 4)",
+   "k_guard_at_slow_end": 8,
+   "k_rule_at_e194_bands_reported": 8,
+   "k_target_at_point": 9,
+   "last_start_s": 7.4967614464,
+   "launches_K": 8,
+   "process_end_s_at_slow_end": 8.6164,
+   "process_end_under_10_s": true,
+   "rule_e189": "main.cpp: a launch starts only while 9.5 s - elapsed >= the guard's model + 0.5 s; E189's K = the most that start at the band's slow end, capped at energy.sh's 6 s target at the point",
+   "setup_s": 1.5
+  },
+  "sha256": {
+   "all_k_start_at_slow_end": true,
+   "args": "--prog sha256 --block 2048 --repeat 800 --expect docs/reports/data/2026-11-12-q166-progs/digests/expect-card-b2048-r800.txt --launches 9",
+   "burst_s_at_point": 3.939669,
+   "burst_s_at_slow_end": 6.5093760000000005,
+   "guard_model_s": 0.76803,
+   "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E194's runner (to be made from E189's kit, with aifoundry2's clock rule)",
+   "k_from": "E189.md section 4, kept (E194.md section 4)",
+   "k_guard_at_slow_end": 11,
+   "k_rule_at_e194_bands_reported": 11,
+   "k_target_at_point": 14,
+   "last_start_s": 8.23197,
+   "launches_K": 9,
+   "process_end_s_at_slow_end": 7.209376000000001,
+   "process_end_under_10_s": true,
+   "rule_e189": "main.cpp: a launch starts only while 9.5 s - elapsed >= the guard's model + 0.5 s; E189's K = the most that start at the band's slow end, capped at energy.sh's 6 s target at the point",
+   "setup_s": 0.4
+  },
+  "sort-shuffled": {
+   "all_k_start_at_slow_end": true,
+   "args": "--prog sort --keys 512 --reps 1800 --order shuffled --launches 7",
+   "burst_s_at_point": 4.7915,
+   "burst_s_at_slow_end": 6.673786,
+   "guard_model_s": 1.142784,
+   "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E194's runner (to be made from E189's kit, with aifoundry2's clock rule)",
+   "k_from": "E189.md section 4, kept (E194.md section 4)",
+   "k_guard_at_slow_end": 8,
+   "k_rule_at_e194_bands_reported": 8,
+   "k_target_at_point": 9,
+   "last_start_s": 7.857215999999999,
+   "launches_K": 7,
+   "process_end_s_at_slow_end": 7.173786,
+   "process_end_under_10_s": true,
+   "rule_e189": "main.cpp: a launch starts only while 9.5 s - elapsed >= the guard's model + 0.5 s; E189's K = the most that start at the band's slow end, capped at energy.sh's 6 s target at the point",
+   "setup_s": 0.3
+  },
+  "sort-sorted": {
+   "all_k_start_at_slow_end": true,
+   "args": "--prog sort --keys 512 --reps 1800 --order sorted --launches 8",
+   "burst_s_at_point": 4.519528,
+   "burst_s_at_slow_end": 6.335536,
+   "guard_model_s": 1.142784,
+   "host": "workloads/ledger build (kernel .text 5e00e45a...), --card, through E194's runner (to be made from E189's kit, with aifoundry2's clock rule)",
+   "k_from": "E189.md section 4, kept (E194.md section 4)",
+   "k_guard_at_slow_end": 10,
+   "k_rule_at_e194_bands_reported": 10,
+   "k_target_at_point": 11,
+   "last_start_s": 7.857215999999999,
+   "launches_K": 8,
+   "process_end_s_at_slow_end": 6.835536,
+   "process_end_under_10_s": true,
+   "rule_e189": "main.cpp: a launch starts only while 9.5 s - elapsed >= the guard's model + 0.5 s; E189's K = the most that start at the band's slow end, capped at energy.sh's 6 s target at the point",
+   "setup_s": 0.3
+  },
+  "sparse-parity": {
+   "all_k_start_at_slow_end": true,
+   "args": "--mode tensor --shires 0xffffffff --per-shire 32 --n 544 --k 4 --eta 0.39 --m 1792 --seed 3 --variant m1 --cost fit --gen inc --oracle sample --oracle-work 3e8 --budget 9",
+   "burst_s_at_point": 3.5285040000000003,
+   "burst_s_at_slow_end": 4.570857,
+   "first_s": 0.6,
+   "fit_at_slow_end": 12,
+   "guard_s": 0.784738,
+   "host": "workloads/sparseparity build (kernel .text 3e14be32...), through E194's runner (to be made from E189's kit, with aifoundry2's clock rule)",
+   "k_from": "E189.md section 4, kept (E194.md section 4)",
+   "k_rule_at_e194_bands_reported": 12,
+   "last_start_s": 6.5,
+   "launches_K": 9,
+   "need_s": 2,
+   "reps_flag": "--reps 9",
+   "rule_e189": "energy.sh's fit rule at the band's slow end: the host starts a launch only while floor(min(timeout, budget - elapsed - 0.5)) >= max(1, 1.25 guard + 0.5)",
+   "want_at_point": 15
+  }
+ },
+ "die_gate": {
+  "band_c": [
+   46,
+   57
+  ],
+  "gate_c": 57.0,
+  "rule": "a pass starts only when minshire[0] reads 57 C or less (waits up to 10 minutes, then the pass is skipped, no data); a die below 46 C does not block (the pass is scored given its own T0 and labelled 'T0 below the forecast band')",
+  "why": "stricter than E189's 60 C for the clock: the governor steps down when the shires' mean passes 65 C; E136's burst law (die_max = die_start + 0.1445 (P - 21.5)) puts the hottest burst's rise at about 5 C at its predicted board power with E136's base"
+ },
+ "order": {
+  "rounds": [
+   [
+    "sparse-parity",
+    "sha256",
+    "sort-sorted",
+    "copy-random",
+    "copy-zeros",
+    "sort-shuffled"
+   ],
+   [
+    "copy-zeros",
+    "copy-random",
+    "sparse-parity",
+    "sort-shuffled",
+    "sort-sorted",
+    "sha256"
+   ],
+   [
+    "sparse-parity",
+    "copy-zeros",
+    "sort-shuffled",
+    "copy-random",
+    "sha256",
+    "sort-sorted"
+   ],
+   [
+    "sort-shuffled",
+    "sha256",
+    "copy-zeros",
+    "sort-sorted",
+    "copy-random",
+    "sparse-parity"
+   ]
+  ],
+  "rule": "four independent passes a configuration, one host process each; each round holds every configuration once, shuffled by random.Random(194); written out here, never re-drawn",
+  "sequence": [
+   "stop-path test",
+   "smoke (ramped)",
+   "idle anchor 1 (2 min)",
+   "pass 1: sparse-parity p1",
+   "pass 2: sha256 p1",
+   "pass 3: sort-sorted p1",
+   "pass 4: copy-random p1",
+   "pass 5: copy-zeros p1",
+   "pass 6: sort-shuffled p1",
+   "pass 7: copy-zeros p2",
+   "pass 8: copy-random p2",
+   "pass 9: sparse-parity p2",
+   "pass 10: sort-shuffled p2",
+   "pass 11: sort-sorted p2",
+   "pass 12: sha256 p2",
+   "idle anchor 2 (2 min)",
+   "pass 13: sparse-parity p3",
+   "pass 14: copy-zeros p3",
+   "pass 15: sort-shuffled p3",
+   "pass 16: copy-random p3",
+   "pass 17: sha256 p3",
+   "pass 18: sort-sorted p3",
+   "pass 19: sort-shuffled p4",
+   "pass 20: sha256 p4",
+   "pass 21: copy-zeros p4",
+   "pass 22: sort-sorted p4",
+   "pass 23: copy-random p4",
+   "pass 24: sparse-parity p4",
+   "idle anchor 3 (2 min)",
+   "the counters arm: not run (E189's kit dropped it, its KIT.md section 5)",
+   "the closing reads (ettelem config: TDP, threshold, clock at rest), release"
+  ]
+ },
+ "peaks": {
+  "at_bands_top_w": 68.52552759180762,
+  "at_bands_top_with_e136_base_w": 76.67947759180761,
+  "at_points_by_config_w": {
+   "copy-random": 35.26085766168638,
+   "copy-zeros": 32.44270205188118,
+   "sha256": 32.789780666337805,
+   "sort-shuffled": 31.496327301704962,
+   "sort-sorted": 31.449949356814503,
+   "sparse-parity": 47.86467015148061
+  },
+  "at_points_w": 47.86467015148061,
+  "at_points_with_e136_base_w": 56.01862015148061,
+  "e136_base_difference_w": 8.15395,
+  "how": "points: P_idle(55 C) + W over idle + its rise at the point; bands' top: P_idle(57 C) + 0.5 W + the largest W over idle a band allows + its rise at k_leak(57 C) x 1.25 x 0.20 C a W; E136's base difference (B(800) - B(600)) added to both as an outside term",
+  "line_w": 82.0,
+  "rest_at_die_band_top_w": 25.440036735844007,
+  "rise_at_bands_top_w": 3.2515579159722434,
+  "under_the_line": true,
+  "w_over_idle_band_top_by_config": {
+   "copy-random": 14.014835969142622,
+   "copy-zeros": 10.904437319826496,
+   "sha256": 24.43560624432696,
+   "sort-shuffled": 14.312185004047617,
+   "sort-sorted": 13.963951165371808,
+   "sparse-parity": 39.833932939991364
+  }
+ },
+ "schema": "e194-plan/1",
+ "seed": 194,
+ "stops": {
+  "aifoundry2_lines": {
+   "board_w_above": 85.0,
+   "consecutive_samples": 3,
+   "die_c": 80.0,
+   "rule": "E190 arm A's lines on this card, kept beside E189's: board above 85 W on 3 samples in a row, or the shires' mean or the latch minshire[2] at or above 80 C, ends the queue the same way (E189's lines bind first; minshire[2] read 70 C throughout E190 arm A, so it is never read against the 70 C line)"
+  },
+  "board_w": 65.0,
+  "clock": "the governor's climb: in each burst the samples from its first launch's start + 1.5 s to its last launch's end must read 800 MHz; the first pass with one off it is set aside; a second such pass (any configuration) stops the session (the card is not at the forecast's clock)",
+  "minshire0_c": 70.0,
+  "rule": "E189's runner's lines: a live sample at or above 65 W board or 70 C on minshire[0] ends the queue: the running process finishes (never killed), no further pass starts, the closing reads, release"
+ },
+ "window": {
+  "alone": "from his go at G: last start G+1:30, last end G+3:30, inside one Pacific day (E189.md 13's form)",
+  "one_session": "never two sessions of ours on aifoundry2's card at once; the rest rule of E189's kit (40 minutes after a session of ours on the same card) holds",
+  "post": "none: the owner's standing waiver, his words Sun 15 Nov 2026 10:22:36 PST, 'don't worry about discord post, just use the machines, nobody is using them'; every other etiquette check stays (et-who, who, uptime, ps before; the card's lock held for the run; timeout 10 a process)",
+  "quiet_desk": "the session runs on the round's orchestrating box: from the look before step 0 to the copy-back, the round's quiet-desk flag for aifoundry2 is held and no lane of ours starts on aifoundry2 a process whose name matches _host$, ^ettelem$, ^dev_mngt_servi, ^et-powertop$, ^mmbench_launch or ^sys_emu$, nor a script named session_eNNN*.sh or queue_eNNN* (E190's card-lane brief, dated note 1, section 4: a stand-in or built host of another lane is read as a foreign holder and stops the session)"
+ }
+}

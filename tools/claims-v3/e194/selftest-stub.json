@@ -1,0 +1,382 @@
+{
+ "card": "energy_stub.py CARDS['alt'] laws, simulated time (stub_e194.py)",
+ "frozen_files_checked": 15,
+ "scenarios": [
+  {
+   "errors": {
+    "copy-random": {
+     "e_j_over": -0.0264,
+     "e_j_total": -0.0046,
+     "e_t": 0.0
+    },
+    "copy-zeros": {
+     "e_j_over": -0.0304,
+     "e_j_total": -0.0049,
+     "e_t": 0.0
+    },
+    "sha256": {
+     "e_j_over": -0.0269,
+     "e_j_total": -0.0033,
+     "e_t": 0.0
+    },
+    "sort-shuffled": {
+     "e_j_over": -0.0296,
+     "e_j_total": -0.004,
+     "e_t": 0.0
+    },
+    "sort-sorted": {
+     "e_j_over": -0.0322,
+     "e_j_total": -0.0043,
+     "e_t": 0.0
+    },
+    "sparse-parity": {
+     "e_j_over": -0.0041,
+     "e_j_total": 0.0043,
+     "e_t": 0.0
+    }
+   },
+   "expected": {
+    "verdicts": {
+     "E194-S1": "PASS",
+     "E194-S1T": "PASS",
+     "E194-S2": "PASS",
+     "E194-S2T": "PASS"
+    }
+   },
+   "got": {
+    "no_data": [],
+    "set_aside_by_the_clock": [],
+    "short_flagged": [],
+    "verdicts": {
+     "E194-S1": "PASS",
+     "E194-S1T": "PASS",
+     "E194-S2": "PASS",
+     "E194-S2T": "PASS"
+    }
+   },
+   "not_used": [],
+   "scenario": "A-as-forecast",
+   "verdict": "PASS",
+   "what": "every configuration, 4 passes, at the forecast's point seconds and energy"
+  },
+  {
+   "errors": {
+    "copy-random": {
+     "e_j_over": -0.2135,
+     "e_j_total": -0.0751,
+     "e_t": 0.0
+    },
+    "copy-zeros": {
+     "e_j_over": -0.0304,
+     "e_j_total": -0.0049,
+     "e_t": 0.0
+    },
+    "sha256": {
+     "e_j_over": -0.2193,
+     "e_j_total": -0.0627,
+     "e_t": 0.0
+    },
+    "sort-shuffled": {
+     "e_j_over": -0.0296,
+     "e_j_total": -0.004,
+     "e_t": 0.0
+    },
+    "sort-sorted": {
+     "e_j_over": -0.0322,
+     "e_j_total": -0.0043,
+     "e_t": 0.0
+    },
+    "sparse-parity": {
+     "e_j_over": -0.0041,
+     "e_j_total": 0.0043,
+     "e_t": 0.0
+    }
+   },
+   "expected": {
+    "verdicts": {
+     "E194-S1": "FAIL",
+     "E194-S1T": "FAIL",
+     "E194-S2": "PASS",
+     "E194-S2T": "PASS"
+    }
+   },
+   "got": {
+    "no_data": [],
+    "set_aside_by_the_clock": [],
+    "short_flagged": [],
+    "verdicts": {
+     "E194-S1": "FAIL",
+     "E194-S1T": "FAIL",
+     "E194-S2": "PASS",
+     "E194-S2T": "PASS"
+    }
+   },
+   "not_used": [],
+   "scenario": "B-two-energies-off",
+   "verdict": "PASS",
+   "what": "copy-random and sha256 add 25% more energy over idle than forecast; at aifoundry2's 800 MHz shares (J over idle 30% and 25% of J with the card at rest) the same excess moves J with the card at rest by about 7.5% and 6.2%, beyond S1T's 5%, so S1T fails too (E191's card 1, with its larger rest, kept it under 5%; E194.md 8.5 states the correction of this expectation)"
+  },
+  {
+   "errors": {
+    "copy-random": {
+     "e_j_over": -0.0264,
+     "e_j_total": -0.0046,
+     "e_t": 0.0
+    },
+    "copy-zeros": {
+     "e_j_over": -0.0304,
+     "e_j_total": -0.0049,
+     "e_t": 0.0
+    },
+    "sha256": {
+     "e_j_over": -0.0269,
+     "e_j_total": -0.0033,
+     "e_t": 0.0
+    },
+    "sort-shuffled": {
+     "e_j_over": null,
+     "e_j_total": null,
+     "e_t": null
+    },
+    "sort-sorted": {
+     "e_j_over": -0.0322,
+     "e_j_total": -0.0043,
+     "e_t": 0.0
+    },
+    "sparse-parity": {
+     "e_j_over": -0.0041,
+     "e_j_total": 0.0043,
+     "e_t": 0.0
+    }
+   },
+   "expected": {
+    "no_data": [
+     "sort-shuffled"
+    ],
+    "verdicts": {
+     "E194-S1": "PASS",
+     "E194-S1T": "PASS",
+     "E194-S2": "PASS",
+     "E194-S2T": "PASS"
+    }
+   },
+   "got": {
+    "no_data": [
+     "sort-shuffled"
+    ],
+    "set_aside_by_the_clock": [],
+    "short_flagged": [],
+    "verdicts": {
+     "E194-S1": "PASS",
+     "E194-S1T": "PASS",
+     "E194-S2": "PASS",
+     "E194-S2T": "PASS"
+    }
+   },
+   "not_used": [],
+   "scenario": "C-a-failed-build",
+   "verdict": "PASS",
+   "what": "sort-shuffled has no pass (a failed build: no data); the rest as forecast"
+  },
+  {
+   "errors": {
+    "copy-random": {
+     "e_j_over": -0.0264,
+     "e_j_total": -0.0046,
+     "e_t": 0.0
+    },
+    "copy-zeros": {
+     "e_j_over": -0.0304,
+     "e_j_total": -0.0049,
+     "e_t": 0.0
+    },
+    "sha256": {
+     "e_j_over": -0.0269,
+     "e_j_total": -0.0033,
+     "e_t": 0.0
+    },
+    "sort-shuffled": {
+     "e_j_over": -0.0296,
+     "e_j_total": -0.004,
+     "e_t": 0.0
+    },
+    "sort-sorted": {
+     "e_j_over": -0.0365,
+     "e_j_total": -0.0039,
+     "e_t": -0.2308
+    },
+    "sparse-parity": {
+     "e_j_over": -0.0087,
+     "e_j_total": -0.0008,
+     "e_t": -0.2308
+    }
+   },
+   "expected": {
+    "verdicts": {
+     "E194-S1": "PASS",
+     "E194-S1T": "PASS",
+     "E194-S2": "FAIL",
+     "E194-S2T": "FAIL"
+    }
+   },
+   "got": {
+    "no_data": [],
+    "set_aside_by_the_clock": [],
+    "short_flagged": [],
+    "verdicts": {
+     "E194-S1": "PASS",
+     "E194-S1T": "PASS",
+     "E194-S2": "FAIL",
+     "E194-S2T": "FAIL"
+    }
+   },
+   "not_used": [],
+   "scenario": "D-two-slow",
+   "verdict": "PASS",
+   "what": "sort-sorted and sparse parity run 30% longer than the point; their energy follows the given-seconds forecast (so score 1 holds, score 2 does not)"
+  },
+  {
+   "errors": {
+    "copy-random": {
+     "e_j_over": -0.0264,
+     "e_j_total": -0.0046,
+     "e_t": 0.0
+    },
+    "copy-zeros": {
+     "e_j_over": -0.033,
+     "e_j_total": -0.0049,
+     "e_t": 0.0
+    },
+    "sha256": {
+     "e_j_over": -0.0269,
+     "e_j_total": -0.0033,
+     "e_t": 0.0
+    },
+    "sort-shuffled": {
+     "e_j_over": -0.0296,
+     "e_j_total": -0.004,
+     "e_t": 0.0
+    },
+    "sort-sorted": {
+     "e_j_over": -0.0322,
+     "e_j_total": -0.0043,
+     "e_t": 0.0
+    },
+    "sparse-parity": {
+     "e_j_over": null,
+     "e_j_total": null,
+     "e_t": null
+    }
+   },
+   "expected": {
+    "no_data": [
+     "sparse-parity"
+    ],
+    "short_flagged": [
+     "copy-zeros"
+    ],
+    "verdicts": {
+     "E194-S1": "PASS",
+     "E194-S1T": "PASS",
+     "E194-S2": "PASS",
+     "E194-S2T": "PASS"
+    }
+   },
+   "got": {
+    "no_data": [
+     "sparse-parity"
+    ],
+    "set_aside_by_the_clock": [],
+    "short_flagged": [
+     "copy-zeros"
+    ],
+    "verdicts": {
+     "E194-S1": "PASS",
+     "E194-S1T": "PASS",
+     "E194-S2": "PASS",
+     "E194-S2T": "PASS"
+    }
+   },
+   "not_used": [
+    "sparse-parity/p1: set aside by the runner: a pass off 800 MHz after its climb",
+    "sparse-parity/p2: set aside by the runner: a pass off 800 MHz after its climb",
+    "sparse-parity/p3: set aside by the runner: a pass off 800 MHz after its climb"
+   ],
+   "scenario": "E-short-and-set-aside",
+   "verdict": "PASS",
+   "what": "copy-zeros' first pass cut short by the budget (6 of 8 launches, scored, flagged); sparse parity's passes set aside by the runner but one (a pass off 800 MHz after its climb: NO DATA)"
+  },
+  {
+   "errors": {
+    "copy-random": {
+     "e_j_over": -0.0264,
+     "e_j_total": -0.0046,
+     "e_t": 0.0
+    },
+    "copy-zeros": {
+     "e_j_over": -0.0304,
+     "e_j_total": -0.0049,
+     "e_t": 0.0
+    },
+    "sha256": {
+     "e_j_over": -0.0269,
+     "e_j_total": -0.0033,
+     "e_t": 0.0
+    },
+    "sort-shuffled": {
+     "e_j_over": -0.0296,
+     "e_j_total": -0.004,
+     "e_t": 0.0
+    },
+    "sort-sorted": {
+     "e_j_over": -0.0322,
+     "e_j_total": -0.0043,
+     "e_t": 0.0
+    },
+    "sparse-parity": {
+     "e_j_over": -0.0041,
+     "e_j_total": 0.0043,
+     "e_t": 0.0
+    }
+   },
+   "expected": {
+    "set_aside_by_the_clock": [
+     "copy-zeros/p1",
+     "copy-zeros/p3",
+     "sparse-parity/p1"
+    ],
+    "verdicts": {
+     "E194-S1": "PASS",
+     "E194-S1T": "PASS",
+     "E194-S2": "PASS",
+     "E194-S2T": "PASS"
+    }
+   },
+   "got": {
+    "no_data": [],
+    "set_aside_by_the_clock": [
+     "copy-zeros/p1",
+     "copy-zeros/p3",
+     "sparse-parity/p1"
+    ],
+    "short_flagged": [],
+    "verdicts": {
+     "E194-S1": "PASS",
+     "E194-S1T": "PASS",
+     "E194-S2": "PASS",
+     "E194-S2T": "PASS"
+    }
+   },
+   "not_used": [
+    "copy-zeros/p1: the clock: 28 of 38 busy samples after the climb read [700] MHz, not 800",
+    "copy-zeros/p3: the clock: 38 of 38 busy samples after the climb read [600] MHz, not 800",
+    "sparse-parity/p1: the clock: the last launch ran at 600.0 MHz by its own count (cycles over its wall seconds)"
+   ],
+   "scenario": "F-the-clock-rule",
+   "verdict": "PASS",
+   "what": "THE CLOCK RULE (E194.md 8.2): copy-zeros p1 steps to 700 MHz 2.5 s into its burst (set aside), p2 climbs late, at 1.4 s (counts), p3 stays at 600 MHz throughout (set aside: the reducer passes it, the rule does not), p4 as forecast; sparse parity p1's last launch ran at 600 MHz by its own count (set aside), p2 and p3 as forecast; the rest as forecast"
+  }
+ ],
+ "selftest": "stub card",
+ "verdict": "PASS"
+}
