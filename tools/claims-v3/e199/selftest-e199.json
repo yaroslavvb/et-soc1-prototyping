@@ -1,0 +1,1587 @@
+{
+ "what": "E199's scorer self-tests on E192's own reducer output and stand-ins made from it (desk check of code; nothing measured)",
+ "forecast_sha256": "deb4a7d114a3549b0f4da888cba06409b5cd0589de2e10b8e257f17cd413314a",
+ "intbits_e192_sha256": "0a675627f60ebad0002052c7f70c5042744a415a423a889b90c3b71f80a386c5",
+ "forecast_equals_its_builder": true,
+ "cases": [
+  {
+   "case": "SELF: E192 against itself (aifoundry3 card 0 as card 1)",
+   "stand_in": [
+    "self"
+   ],
+   "expected": {
+    "E199-T1": "PASS",
+    "E199-T2": "PASS",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "got": {
+    "E199-T1": "PASS",
+    "E199-T2": "PASS",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.008922323611706608,
+     "scale_holds": true
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": true
+    }
+   }
+  },
+  {
+   "case": "SHIFTED x1.25: every price 25% higher",
+   "stand_in": [
+    "scale",
+    1.25
+   ],
+   "expected": {
+    "E199-T1": "FAIL",
+    "E199-T2": "FAIL",
+    "E199-T1L": "FAIL",
+    "E199-T2L": "FAIL",
+    "E199-T1R": "FAIL",
+    "E199-T2R": "FAIL",
+    "E199-T1RL": "FAIL",
+    "E199-T2RL": "FAIL"
+   },
+   "got": {
+    "E199-T1": "FAIL",
+    "E199-T2": "FAIL",
+    "E199-T1L": "FAIL",
+    "E199-T2L": "FAIL",
+    "E199-T1R": "FAIL",
+    "E199-T2R": "FAIL",
+    "E199-T1RL": "FAIL",
+    "E199-T2RL": "FAIL"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 31,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 16,
+      "miss": 15
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 16,
+      "miss": 15
+     },
+     "s_hat": 1.25,
+     "s_hat_se": 0.008922323611706608,
+     "scale_holds": false
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 14,
+      "miss": 10
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 14,
+      "miss": 10
+     },
+     "s_hat": 1.2500000000000002,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": false
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 10,
+      "miss": 21
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 11,
+      "miss": 20
+     },
+     "s_hat": 1.25,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": false
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 13,
+      "miss": 11
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 13,
+      "miss": 11
+     },
+     "s_hat": 1.25,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": false
+    }
+   }
+  },
+  {
+   "case": "SHIFTED x0.80: every price 20% lower",
+   "stand_in": [
+    "scale",
+    0.8
+   ],
+   "expected": {
+    "E199-T1": "FAIL",
+    "E199-T2": "FAIL",
+    "E199-T1L": "FAIL",
+    "E199-T2L": "FAIL",
+    "E199-T1R": "FAIL",
+    "E199-T2R": "FAIL",
+    "E199-T1RL": "FAIL",
+    "E199-T2RL": "FAIL"
+   },
+   "got": {
+    "E199-T1": "FAIL",
+    "E199-T2": "FAIL",
+    "E199-T1L": "FAIL",
+    "E199-T2L": "FAIL",
+    "E199-T1R": "FAIL",
+    "E199-T2R": "FAIL",
+    "E199-T1RL": "FAIL",
+    "E199-T2RL": "FAIL"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 31,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 17,
+      "miss": 14
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 20,
+      "miss": 11
+     },
+     "s_hat": 0.8,
+     "s_hat_se": 0.008922323611706608,
+     "scale_holds": false
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 15,
+      "miss": 9
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 17,
+      "miss": 7
+     },
+     "s_hat": 0.8,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": false
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 13,
+      "miss": 18
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 16,
+      "miss": 15
+     },
+     "s_hat": 0.7999999999999999,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": false
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 13,
+      "miss": 11
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 13,
+      "miss": 11
+     },
+     "s_hat": 0.8000000000000002,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": false
+    }
+   }
+  },
+  {
+   "case": "SHIFTED +3 combined SEs on every price",
+   "stand_in": [
+    "shift_sigma",
+    3.0
+   ],
+   "expected": {
+    "E199-T1": "FAIL",
+    "E199-T1L": "FAIL",
+    "E199-T1R": "FAIL",
+    "E199-T1RL": "FAIL"
+   },
+   "got": {
+    "E199-T1": "FAIL",
+    "E199-T2": "FAIL",
+    "E199-T1L": "FAIL",
+    "E199-T2L": "FAIL",
+    "E199-T1R": "FAIL",
+    "E199-T2R": "FAIL",
+    "E199-T1RL": "FAIL",
+    "E199-T2RL": "FAIL"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 31,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 0,
+      "miss": 31
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 4,
+      "miss": 27
+     },
+     "s_hat": 1.0953400239458382,
+     "s_hat_se": 0.020913211448220812,
+     "scale_holds": false
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 0,
+      "miss": 24
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 2,
+      "miss": 22
+     },
+     "s_hat": 1.0906530898514772,
+     "s_hat_se": 0.028188006965492413,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 0,
+      "miss": 31
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 11,
+      "miss": 20
+     },
+     "s_hat": 1.0445374994662353,
+     "s_hat_se": 0.009919082141745547,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 0,
+      "miss": 24
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 6,
+      "miss": 18
+     },
+     "s_hat": 1.0505137969865128,
+     "s_hat_se": 0.015086368950913111,
+     "scale_holds": true
+    }
+   }
+  },
+  {
+   "case": "SHIFTED +0.30 pJ on every family-A contrast",
+   "stand_in": [
+    "add_A",
+    0.3
+   ],
+   "expected": {
+    "E199-T1": "FAIL",
+    "E199-T2": "FAIL"
+   },
+   "got": {
+    "E199-T1": "FAIL",
+    "E199-T2": "FAIL",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 31,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 0,
+      "miss": 31
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 1,
+      "miss": 30
+     },
+     "s_hat": 1.1299586298302884,
+     "s_hat_se": 0.026941100602933754,
+     "scale_holds": false
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": true
+    }
+   }
+  },
+  {
+   "case": "SHIFTED x1.10: every price 10% higher (beyond the allowance)",
+   "stand_in": [
+    "scale",
+    1.1
+   ],
+   "expected": {
+    "E199-T2": "FAIL",
+    "E199-T2L": "FAIL",
+    "E199-T2R": "FAIL",
+    "E199-T2RL": "FAIL"
+   },
+   "got": {
+    "E199-T1": "FAIL",
+    "E199-T2": "FAIL",
+    "E199-T1L": "FAIL",
+    "E199-T2L": "FAIL",
+    "E199-T1R": "FAIL",
+    "E199-T2R": "FAIL",
+    "E199-T1RL": "FAIL",
+    "E199-T2RL": "FAIL"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 31,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 26,
+      "miss": 5
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 29,
+      "miss": 2
+     },
+     "s_hat": 1.1,
+     "s_hat_se": 0.008922323611706608,
+     "scale_holds": false
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 20,
+      "miss": 4
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 23,
+      "miss": 1
+     },
+     "s_hat": 1.1000000000000003,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": false
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 16,
+      "miss": 15
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 21,
+      "miss": 10
+     },
+     "s_hat": 1.0999999999999999,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": false
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 16,
+      "miss": 8
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 20,
+      "miss": 4
+     },
+     "s_hat": 1.1,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": false
+    }
+   }
+  },
+  {
+   "case": "EDGE: 4 family-A prices moved by 5 combined SEs (27 = K hold)",
+   "stand_in": [
+    "move_A",
+    4,
+    5.0
+   ],
+   "expected": {
+    "E199-T1": "PASS",
+    "E199-T1L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2": "PASS"
+   },
+   "got": {
+    "E199-T1": "PASS",
+    "E199-T2": "PASS",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 27,
+      "miss": 4
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 27,
+      "miss": 4
+     },
+     "s_hat": 1.049096095081255,
+     "s_hat_se": 0.01360191078607965,
+     "scale_holds": true
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": true
+    }
+   }
+  },
+  {
+   "case": "EDGE: 5 family-A prices moved by 5 combined SEs (5 = F miss)",
+   "stand_in": [
+    "move_A",
+    5,
+    5.0
+   ],
+   "expected": {
+    "E199-T1": "FAIL",
+    "E199-T1L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T1RL": "PASS"
+   },
+   "got": {
+    "E199-T1": "FAIL",
+    "E199-T2": "FAIL",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 31,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 26,
+      "miss": 5
+     },
+     "T2": {
+      "verdict": "FAIL",
+      "hold": 26,
+      "miss": 5
+     },
+     "s_hat": 1.056980785077137,
+     "s_hat_se": 0.01494899379110541,
+     "scale_holds": true
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": true
+    }
+   }
+  },
+  {
+   "case": "NOT DECIDED: 8 arms absent from card 1's file",
+   "stand_in": [
+    "drop_arms",
+    8
+   ],
+   "expected": {
+    "E199-T1": "NOT DECIDED",
+    "E199-T2": "NOT DECIDED",
+    "E199-T1R": "NOT DECIDED",
+    "E199-T2R": "NOT DECIDED",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "got": {
+    "E199-T1": "NOT DECIDED",
+    "E199-T2": "NOT DECIDED",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "NOT DECIDED",
+    "E199-T2R": "NOT DECIDED",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 23,
+     "T1": {
+      "verdict": "NOT DECIDED",
+      "hold": 23,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NOT DECIDED",
+      "hold": 23,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.01161359890890728,
+     "scale_holds": true
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 23,
+     "T1": {
+      "verdict": "NOT DECIDED",
+      "hold": 23,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NOT DECIDED",
+      "hold": 23,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.006964366914490661,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": true
+    }
+   }
+  },
+  {
+   "case": "NOT DECIDED: card 1's SE 4 x aifoundry3's on 10 family-A prices",
+   "stand_in": [
+    "se_A",
+    10,
+    4.0
+   ],
+   "expected": {
+    "E199-T1": "NOT DECIDED",
+    "E199-T2": "NOT DECIDED",
+    "E199-T1L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T1RL": "PASS"
+   },
+   "got": {
+    "E199-T1": "NOT DECIDED",
+    "E199-T2": "NOT DECIDED",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 21,
+     "T1": {
+      "verdict": "NOT DECIDED",
+      "hold": 21,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NOT DECIDED",
+      "hold": 21,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.012024577552381201,
+     "scale_holds": true
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": true
+    }
+   }
+  },
+  {
+   "case": "NOT DECIDED: one measured pass (no SE) on 6 family-A prices",
+   "stand_in": [
+    "one_pass_A",
+    6
+   ],
+   "expected": {
+    "E199-T1": "NOT DECIDED",
+    "E199-T2": "NOT DECIDED"
+   },
+   "got": {
+    "E199-T1": "NOT DECIDED",
+    "E199-T2": "NOT DECIDED",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 25,
+     "T1": {
+      "verdict": "NOT DECIDED",
+      "hold": 25,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NOT DECIDED",
+      "hold": 25,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.011527567919098937,
+     "scale_holds": true
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": true
+    }
+   }
+  },
+  {
+   "case": "NOT DECIDED: three measured passes (an SE) on 6 family-A prices (decided at 4)",
+   "stand_in": [
+    "passes_A",
+    6,
+    3
+   ],
+   "expected": {
+    "E199-T1": "NOT DECIDED",
+    "E199-T2": "NOT DECIDED",
+    "E199-T1L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T1RL": "PASS"
+   },
+   "got": {
+    "E199-T1": "NOT DECIDED",
+    "E199-T2": "NOT DECIDED",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 25,
+     "T1": {
+      "verdict": "NOT DECIDED",
+      "hold": 25,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NOT DECIDED",
+      "hold": 25,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.011527567919098937,
+     "scale_holds": true
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": true
+    }
+   }
+  },
+  {
+   "case": "DECIDED AT 4: four measured passes on the same 6 family-A prices",
+   "stand_in": [
+    "passes_A",
+    6,
+    4
+   ],
+   "expected": {
+    "E199-T1": "PASS",
+    "E199-T2": "PASS",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "got": {
+    "E199-T1": "PASS",
+    "E199-T2": "PASS",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.008922323611706608,
+     "scale_holds": true
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": true
+    }
+   }
+  },
+  {
+   "case": "NO DATA: every price with three measured passes (a session cut short before its fourth)",
+   "stand_in": [
+    "passes_all",
+    3
+   ],
+   "expected": {
+    "E199-T1": "NO DATA",
+    "E199-T2": "NO DATA",
+    "E199-T1L": "NO DATA",
+    "E199-T2L": "NO DATA",
+    "E199-T1R": "NO DATA",
+    "E199-T2R": "NO DATA",
+    "E199-T1RL": "NO DATA",
+    "E199-T2RL": "NO DATA"
+   },
+   "got": {
+    "E199-T1": "NO DATA",
+    "E199-T2": "NO DATA",
+    "E199-T1L": "NO DATA",
+    "E199-T2L": "NO DATA",
+    "E199-T1R": "NO DATA",
+    "E199-T2R": "NO DATA",
+    "E199-T1RL": "NO DATA",
+    "E199-T2RL": "NO DATA"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 0,
+     "T1": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": null,
+     "scale_holds": null
+    },
+    "B": {
+     "decided": 0,
+     "T1": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": null,
+     "scale_holds": null
+    },
+    "C": {
+     "decided": 0,
+     "T1": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": null,
+     "scale_holds": null
+    },
+    "D": {
+     "decided": 0,
+     "T1": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": null,
+     "scale_holds": null
+    }
+   }
+  },
+  {
+   "case": "NO DATA: an empty card-1 file",
+   "stand_in": [
+    "empty"
+   ],
+   "expected": {
+    "E199-T1": "NO DATA",
+    "E199-T2": "NO DATA",
+    "E199-T1L": "NO DATA",
+    "E199-T2L": "NO DATA",
+    "E199-T1R": "NO DATA",
+    "E199-T2R": "NO DATA",
+    "E199-T1RL": "NO DATA",
+    "E199-T2RL": "NO DATA"
+   },
+   "got": {
+    "E199-T1": "NO DATA",
+    "E199-T2": "NO DATA",
+    "E199-T1L": "NO DATA",
+    "E199-T2L": "NO DATA",
+    "E199-T1R": "NO DATA",
+    "E199-T2R": "NO DATA",
+    "E199-T1RL": "NO DATA",
+    "E199-T2RL": "NO DATA"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 0,
+     "T1": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": null,
+     "scale_holds": null
+    },
+    "B": {
+     "decided": 0,
+     "T1": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": null,
+     "scale_holds": null
+    },
+    "C": {
+     "decided": 0,
+     "T1": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": null,
+     "scale_holds": null
+    },
+    "D": {
+     "decided": 0,
+     "T1": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "T2": {
+      "verdict": "NO DATA",
+      "hold": 0,
+      "miss": 0
+     },
+     "s_hat": 1.0,
+     "s_hat_se": null,
+     "scale_holds": null
+    }
+   }
+  },
+  {
+   "case": "ALLOWANCE EDGE: every price x s_hi",
+   "stand_in": [
+    "scale",
+    1.03707
+   ],
+   "expected": {
+    "E199-T2": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "got": {
+    "E199-T1": "PASS",
+    "E199-T2": "PASS",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 30,
+      "miss": 1
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.03707,
+     "s_hat_se": 0.008922323611706608,
+     "scale_holds": true
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 23,
+      "miss": 1
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.0370700000000002,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 27,
+      "miss": 4
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 1.03707,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 21,
+      "miss": 3
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 1.03707,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": true
+    }
+   }
+  },
+  {
+   "case": "ALLOWANCE EDGE: every price x s_lo",
+   "stand_in": [
+    "scale",
+    0.943145
+   ],
+   "expected": {
+    "E199-T2": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T2R": "PASS",
+    "E199-T2RL": "PASS"
+   },
+   "got": {
+    "E199-T1": "PASS",
+    "E199-T2": "PASS",
+    "E199-T1L": "PASS",
+    "E199-T2L": "PASS",
+    "E199-T1R": "FAIL",
+    "E199-T2R": "PASS",
+    "E199-T1RL": "FAIL",
+    "E199-T2RL": "PASS"
+   },
+   "ok": true,
+   "mismatches": {},
+   "counts": {
+    "A": {
+     "decided": 31,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 29,
+      "miss": 2
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 0.9431450000000001,
+     "s_hat_se": 0.008922323611706608,
+     "scale_holds": true
+    },
+    "B": {
+     "decided": 24,
+     "T1": {
+      "verdict": "PASS",
+      "hold": 23,
+      "miss": 1
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 0.9431450000000002,
+     "s_hat_se": 0.011074860722185198,
+     "scale_holds": true
+    },
+    "C": {
+     "decided": 31,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 24,
+      "miss": 7
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 31,
+      "miss": 0
+     },
+     "s_hat": 0.9431449999999999,
+     "s_hat_se": 0.004205830811232052,
+     "scale_holds": true
+    },
+    "D": {
+     "decided": 24,
+     "T1": {
+      "verdict": "FAIL",
+      "hold": 20,
+      "miss": 4
+     },
+     "T2": {
+      "verdict": "PASS",
+      "hold": 24,
+      "miss": 0
+     },
+     "s_hat": 0.9431450000000001,
+     "s_hat_se": 0.006004014795991745,
+     "scale_holds": true
+    }
+   }
+  }
+ ],
+ "interpreter": "3.12.3",
+ "verdict": "PASS"
+}

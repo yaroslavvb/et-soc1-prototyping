@@ -1,0 +1,207 @@
+E199's forecast for aifoundry1 card 1 (REGISTERED; NOT blind to E192: it IS E192's measured prices on aifoundry3 card 0,
+copied exactly from intbits-e192.json at 0a675627...). mean +- SE over E192's 8 measured passes; reading as E192's reducer
+wrote it.
+
+family A (board; rules E199-T1, E199-T2; N 31, PASS at K >= 27 holding, FAIL at F >= 5 missing): per-arm contrast against its control in the same pass, pJ per instruction, board (the 12 V input), temperature-corrected (E192.md section 6's primary): THE HEADLINE FAMILY
+  add.a.all                              4.950937 +- 0.064913   n 8  measured  (vs add.z)
+  add.a.f0                               1.799034 +- 0.051356   n 8  measured  (vs add.z)
+  add.a.f1                               1.221014 +- 0.058033   n 8  measured  (vs add.z)
+  add.a.f12                              2.440834 +- 0.057984   n 8  measured  (vs add.z)
+  add.a.f2                               1.003782 +- 0.035832   n 8  measured  (vs add.z)
+  add.a.f2.k4                            0.249283 +- 0.046470   n 8  measured  (vs add.z)
+  add.a.f2.k8                            0.489377 +- 0.079028   n 8  measured  (vs add.z)
+  add.a.f3                               0.902287 +- 0.066552   n 8  measured  (vs add.z)
+  add.b.f0                               1.742885 +- 0.069633   n 8  measured  (vs add.z)
+  add.b.f2                               1.038265 +- 0.053989   n 8  measured  (vs add.z)
+  add.cr.l0                             -0.008991 +- 0.048935   n 8  bound |x| < 0.1069  (vs add.z)
+  add.cr.l16                             0.350528 +- 0.068742   n 8  measured  (vs add.cr.l0)
+  add.cr.l24                             0.386281 +- 0.071061   n 8  measured  (vs add.cr.l0)
+  add.cr.l31                             0.596759 +- 0.059018   n 8  measured  (vs add.cr.l0)
+  add.cr.l8                              0.143705 +- 0.079019   n 8  bound |x| < 0.3017  (vs add.cr.l0)
+  add.crb.l0                            -0.022989 +- 0.034469   n 8  bound |x| < 0.09193  (vs add.z)
+  add.crb.l16                            1.154404 +- 0.051149   n 8  measured  (vs add.crb.l0)
+  add.crb.l24                            1.670881 +- 0.040037   n 8  measured  (vs add.crb.l0)
+  add.crb.l31                            1.971704 +- 0.069912   n 8  measured  (vs add.crb.l0)
+  add.crb.l8                             0.649374 +- 0.035240   n 8  measured  (vs add.crb.l0)
+  add.ripple                             4.058935 +- 0.041542   n 8  measured  (vs add.z)
+  add.s.f0                               0.867157 +- 0.088283   n 8  measured  (vs add.z)
+  add.s.f2                               0.346450 +- 0.074834   n 8  measured  (vs add.z)
+  add.same                               0.311781 +- 0.040689   n 8  measured  (vs nop)
+  add.z                                  1.072913 +- 0.073230   n 8  measured  (vs add.same)
+  and.a.f1                               0.200537 +- 0.061777   n 8  measured  (vs and.z)
+  and.a.f2                               0.152315 +- 0.060599   n 8  measured  (vs and.z)
+  and.a.f3                               0.101809 +- 0.054232   n 8  bound |x| < 0.2103  (vs and.z)
+  and.z                                  0.075052 +- 0.058258   n 8  bound |x| < 0.1916  (vs add.z)
+  xor.a.f2                               1.225540 +- 0.068152   n 8  measured  (vs xor.z)
+  xor.z                                 -0.081608 +- 0.068731   n 8  bound |x| < 0.2191  (vs add.z)
+
+family B (board; rules E199-T1L, E199-T2L; N 24, PASS at K >= 21 holding, FAIL at F >= 4 missing): the 24 ladder quantities, fJ per bit or per position (pJ where named), board, temperature-corrected
+  hamming_f2_slope_fJ                   62.682606 +- 2.242268   n 8  measured
+  hamming_f2_quad_fJ                     0.151655 +- 0.951885   n 8  bound |x| < 2.055
+  add_f0_fJ_per_bit                    112.439631 +- 3.209739   n 8  measured
+  add_f1_fJ_per_bit                     76.313349 +- 3.627034   n 8  measured
+  add_f2_fJ_per_bit                     62.736374 +- 2.239473   n 8  measured
+  add_f3_fJ_per_bit                     56.392927 +- 4.159478   n 8  measured
+  add_f12_fJ_per_bit                    76.276061 +- 1.812008   n 8  measured
+  additivity_all_minus_fields_pJ         0.024820 +- 0.122911   n 8  bound |x| < 0.2706
+  f12_minus_f1_f2_pJ                     0.216038 +- 0.067880   n 8  measured
+  and_f1_fJ_per_bit                     12.533588 +- 3.861092   n 8  measured
+  and_f2_fJ_per_bit                      9.519674 +- 3.787448   n 8  measured
+  and_f3_fJ_per_bit                      6.363046 +- 3.389475   n 8  bound |x| < 13.14
+  and12_fJ_per_bit                      11.026631 +- 3.567357   n 8  measured
+  d12_a12_minus_and12_fJ_per_bit        65.249430 +- 4.601582   n 8  measured
+  add_f2_minus_f3_fJ_per_bit             6.343447 +- 4.244868   n 8  bound |x| < 14.83
+  and_f2_minus_f3_fJ_per_bit             3.156628 +- 2.403853   n 8  bound |x| < 7.964
+  S_cr_fJ_per_position                  18.376227 +- 1.197716   n 8  measured
+  S_crb_fJ_per_position                 63.792534 +- 2.092085   n 8  measured
+  S_cr_quad_fJ                          -0.014741 +- 0.245229   n 8  bound |x| < 0.5052
+  S_crb_quad_fJ                         -0.665756 +- 0.112785   n 8  measured
+  C1_carry_fJ_per_position               2.946350 +- 1.457705   n 8  measured
+  C2_fJ_per_bit                         -4.403246 +- 4.502518   n 8  bound |x| < 13.41
+  C3_fJ_per_bit                         15.429877 +- 1.422843   n 8  measured
+  ripple_minus_add_z_pJ                  4.058935 +- 0.041542   n 8  measured
+
+family C (rail; rules E199-T1R, E199-T2R; N 31, PASS at K >= 27 holding, FAIL at F >= 5 missing): per-arm contrast, pJ per instruction, the core (minion) rail, temperature-corrected, after E151's rail filter (section 6.5)
+  add.a.all                              4.612472 +- 0.021089   n 8  measured  (vs add.z)
+  add.a.f0                               1.573927 +- 0.029218   n 8  measured  (vs add.z)
+  add.a.f1                               1.136453 +- 0.038517   n 8  measured  (vs add.z)
+  add.a.f12                              2.206536 +- 0.017010   n 8  measured  (vs add.z)
+  add.a.f2                               0.975631 +- 0.024910   n 8  measured  (vs add.z)
+  add.a.f2.k4                            0.250599 +- 0.017725   n 8  measured  (vs add.z)
+  add.a.f2.k8                            0.532418 +- 0.029977   n 8  measured  (vs add.z)
+  add.a.f3                               0.816726 +- 0.022282   n 8  measured  (vs add.z)
+  add.b.f0                               1.553036 +- 0.040197   n 8  measured  (vs add.z)
+  add.b.f2                               0.955950 +- 0.019576   n 8  measured  (vs add.z)
+  add.cr.l0                              0.038642 +- 0.023350   n 8  bound |x| < 0.08534  (vs add.z)
+  add.cr.l16                             0.255048 +- 0.027949   n 8  measured  (vs add.cr.l0)
+  add.cr.l24                             0.352161 +- 0.035198   n 8  measured  (vs add.cr.l0)
+  add.cr.l31                             0.497389 +- 0.036521   n 8  measured  (vs add.cr.l0)
+  add.cr.l8                              0.120604 +- 0.030850   n 8  measured  (vs add.cr.l0)
+  add.crb.l0                             0.045228 +- 0.029956   n 8  bound |x| < 0.1051  (vs add.z)
+  add.crb.l16                            1.009055 +- 0.029906   n 8  measured  (vs add.crb.l0)
+  add.crb.l24                            1.377961 +- 0.017836   n 8  measured  (vs add.crb.l0)
+  add.crb.l31                            1.806417 +- 0.036427   n 8  measured  (vs add.crb.l0)
+  add.crb.l8                             0.513467 +- 0.039215   n 8  measured  (vs add.crb.l0)
+  add.ripple                             3.851462 +- 0.029819   n 8  measured  (vs add.z)
+  add.s.f0                               0.829291 +- 0.016921   n 8  measured  (vs add.z)
+  add.s.f2                               0.300233 +- 0.020192   n 8  measured  (vs add.z)
+  add.same                               0.247708 +- 0.016148   n 8  measured  (vs nop)
+  add.z                                  0.810099 +- 0.012135   n 8  measured  (vs add.same)
+  and.a.f1                               0.181248 +- 0.051207   n 8  measured  (vs and.z)
+  and.a.f2                               0.172908 +- 0.032149   n 8  measured  (vs and.z)
+  and.a.f3                               0.120675 +- 0.032958   n 8  measured  (vs and.z)
+  and.z                                  0.041181 +- 0.027928   n 8  bound |x| < 0.09704  (vs add.z)
+  xor.a.f2                               1.080799 +- 0.019180   n 8  measured  (vs xor.z)
+  xor.z                                  0.024001 +- 0.027837   n 8  bound |x| < 0.07968  (vs add.z)
+
+family D (rail; rules E199-T1RL, E199-T2RL; N 24, PASS at K >= 21 holding, FAIL at F >= 4 missing): the 24 ladder quantities, the core rail, temperature-corrected, after E151's rail filter (section 6.5)
+  hamming_f2_slope_fJ                   61.152168 +- 1.633340   n 8  measured
+  hamming_f2_quad_fJ                    -0.544860 +- 0.341626   n 8  bound |x| < 1.228
+  add_f0_fJ_per_bit                     98.370446 +- 1.826155   n 8  measured
+  add_f1_fJ_per_bit                     71.028305 +- 2.407293   n 8  measured
+  add_f2_fJ_per_bit                     60.976966 +- 1.556881   n 8  measured
+  add_f3_fJ_per_bit                     51.045398 +- 1.392651   n 8  measured
+  add_f12_fJ_per_bit                    68.954264 +- 0.531570   n 8  measured
+  additivity_all_minus_fields_pJ         0.109734 +- 0.049973   n 8  measured
+  f12_minus_f1_f2_pJ                     0.094452 +- 0.043907   n 8  measured
+  and_f1_fJ_per_bit                     11.328016 +- 3.200452   n 8  measured
+  and_f2_fJ_per_bit                     10.806771 +- 2.009328   n 8  measured
+  and_f3_fJ_per_bit                      7.542162 +- 2.059854   n 8  measured
+  and12_fJ_per_bit                      11.067394 +- 2.306122   n 8  measured
+  d12_a12_minus_and12_fJ_per_bit        57.886870 +- 2.370107   n 8  measured
+  add_f2_minus_f3_fJ_per_bit             9.931568 +- 2.557655   n 8  measured
+  and_f2_minus_f3_fJ_per_bit             3.264610 +- 2.569685   n 8  bound |x| < 8.404
+  S_cr_fJ_per_position                  15.700281 +- 0.783319   n 8  measured
+  S_crb_fJ_per_position                 57.413908 +- 0.518975   n 8  measured
+  S_cr_quad_fJ                           0.047342 +- 0.112415   n 8  bound |x| < 0.2722
+  S_crb_quad_fJ                         -0.229955 +- 0.102913   n 8  measured
+  C1_carry_fJ_per_position               2.079962 +- 0.513792   n 8  measured
+  C2_fJ_per_bit                         -2.552925 +- 2.351339   n 8  bound |x| < 7.256
+  C3_fJ_per_bit                         13.620319 +- 0.578866   n 8  measured
+  ripple_minus_add_z_pJ                  3.851462 +- 0.029819   n 8  measured
+
+reported R1 (board; N 32): per-arm energy over idle, pJ per instruction, board (E192.md 14: one shared bias; the idle footing is each card's own): REPORTED, scored by both rules, no verdict
+  add.a.all                              8.911770 +- 0.091858   n 8  measured
+  add.a.f0                               5.850610 +- 0.136683   n 8  measured
+  add.a.f1                               5.271849 +- 0.109171   n 8  measured
+  add.a.f12                              6.329208 +- 0.173159   n 8  measured
+  add.a.f2                               5.094131 +- 0.155926   n 8  measured
+  add.a.f2.k4                            4.212590 +- 0.105730   n 8  measured
+  add.a.f2.k8                            4.649157 +- 0.146371   n 8  measured
+  add.a.f3                               5.025756 +- 0.149161   n 8  measured
+  add.b.f0                               5.641165 +- 0.134949   n 8  measured
+  add.b.f2                               5.225831 +- 0.161207   n 8  measured
+  add.cr.l0                              4.364674 +- 0.121240   n 8  measured
+  add.cr.l16                             4.499041 +- 0.143076   n 8  measured
+  add.cr.l24                             4.468118 +- 0.180334   n 8  measured
+  add.cr.l31                             4.850799 +- 0.128342   n 8  measured
+  add.cr.l8                              4.220627 +- 0.103796   n 8  measured
+  add.crb.l0                             4.137011 +- 0.174256   n 8  measured
+  add.crb.l16                            5.258433 +- 0.160502   n 8  measured
+  add.crb.l24                            5.760544 +- 0.093302   n 8  measured
+  add.crb.l31                            5.830114 +- 0.152327   n 8  measured
+  add.crb.l8                             4.851224 +- 0.074843   n 8  measured
+  add.ripple                             7.914368 +- 0.087282   n 8  measured
+  add.s.f0                               4.934949 +- 0.171229   n 8  measured
+  add.s.f2                               4.672313 +- 0.068095   n 8  measured
+  add.same                               3.318154 +- 0.102669   n 8  measured
+  add.z                                  4.253952 +- 0.079352   n 8  measured
+  and.a.f1                               4.353335 +- 0.148785   n 8  measured
+  and.a.f2                               4.361591 +- 0.095702   n 8  measured
+  and.a.f3                               4.174792 +- 0.179576   n 8  measured
+  and.z                                  4.181717 +- 0.117221   n 8  measured
+  nop                                    2.933972 +- 0.087986   n 8  measured
+  xor.a.f2                               5.512180 +- 0.139846   n 8  measured
+  xor.z                                  4.065454 +- 0.143958   n 8  measured
+
+reported R2 (rail; N 32): per-arm energy over idle, pJ per instruction, core rail: REPORTED, scored by both rules, no verdict
+  add.a.all                              7.319041 +- 0.073727   n 8  measured
+  add.a.f0                               4.350468 +- 0.108016   n 8  measured
+  add.a.f1                               3.912474 +- 0.070887   n 8  measured
+  add.a.f12                              4.857192 +- 0.090956   n 8  measured
+  add.a.f2                               3.782087 +- 0.124359   n 8  measured
+  add.a.f2.k4                            2.959094 +- 0.059963   n 8  measured
+  add.a.f2.k8                            3.392439 +- 0.099748   n 8  measured
+  add.a.f3                               3.648747 +- 0.092698   n 8  measured
+  add.b.f0                               4.211358 +- 0.093347   n 8  measured
+  add.b.f2                               3.837404 +- 0.107336   n 8  measured
+  add.cr.l0                              3.063629 +- 0.064241   n 8  measured
+  add.cr.l16                             3.151967 +- 0.097755   n 8  measured
+  add.cr.l24                             3.197627 +- 0.130066   n 8  measured
+  add.cr.l31                             3.475705 +- 0.088892   n 8  measured
+  add.cr.l8                              2.962302 +- 0.079965   n 8  measured
+  add.crb.l0                             2.905409 +- 0.116166   n 8  measured
+  add.crb.l16                            3.889015 +- 0.120292   n 8  measured
+  add.crb.l24                            4.246864 +- 0.089400   n 8  measured
+  add.crb.l31                            4.496934 +- 0.076778   n 8  measured
+  add.crb.l8                             3.468905 +- 0.070432   n 8  measured
+  add.ripple                             6.476726 +- 0.056476   n 8  measured
+  add.s.f0                               3.618328 +- 0.137756   n 8  measured
+  add.s.f2                               3.288367 +- 0.065174   n 8  measured
+  add.same                               2.228320 +- 0.070492   n 8  measured
+  add.z                                  2.932690 +- 0.043506   n 8  measured
+  and.a.f1                               3.019182 +- 0.099628   n 8  measured
+  and.a.f2                               3.054398 +- 0.087400   n 8  measured
+  and.a.f3                               2.897047 +- 0.114584   n 8  measured
+  and.z                                  2.860247 +- 0.075521   n 8  measured
+  nop                                    1.924780 +- 0.072399   n 8  measured
+  xor.a.f2                               4.125594 +- 0.089947   n 8  measured
+  xor.z                                  2.874219 +- 0.088161   n 8  measured
+
+the scale allowance of rule T2: s in [0.943145, 1.03707] ([min, max] of the twelve named ratios and 1; each ratio card 1 over aifoundry3, 6 significant digits)
+  sha256           card 1 2.51065   aifoundry3 2.60308   ratio 0.964493  (1) the blind day: E191's second session (card 1) over E189 (aifoundry3), J over idle a launch, mean of 4 passes each
+  sort-sorted      card 1 3.50703   aifoundry3 3.38166   ratio 1.03707   (1) the blind day: E191's second session (card 1) over E189 (aifoundry3), J over idle a launch, mean of 4 passes each
+  sort-shuffled    card 1 3.9306    aifoundry3 4.12459   ratio 0.952967  (1) the blind day: E191's second session (card 1) over E189 (aifoundry3), J over idle a launch, mean of 4 passes each
+  add/random/h2    card 1 9.63754   aifoundry3 9.60578   ratio 1.00331   (2) the energy catalogue's per-card means (the three-card check, 25-26 Sep 2026), pJ an op
+  add/zeros/h2     card 1 6.13821   aifoundry3 6.0127    ratio 1.02087   (2) the energy catalogue's per-card means (the three-card check, 25-26 Sep 2026), pJ an op
+  xor/random/h2    card 1 9.28619   aifoundry3 9.45041   ratio 0.982623  (2) the energy catalogue's per-card means (the three-card check, 25-26 Sep 2026), pJ an op
+  xor/zeros/h2     card 1 5.88735   aifoundry3 5.97556   ratio 0.985238  (2) the energy catalogue's per-card means (the three-card check, 25-26 Sep 2026), pJ an op
+  and/random/h2    card 1 8.99594   aifoundry3 9.23782   ratio 0.973817  (2) the energy catalogue's per-card means (the three-card check, 25-26 Sep 2026), pJ an op
+  and/zeros/h2     card 1 6.52186   aifoundry3 6.33148   ratio 1.03007   (2) the energy catalogue's per-card means (the three-card check, 25-26 Sep 2026), pJ an op
+  nop/random/h2    card 1 5.26451   aifoundry3 5.35745   ratio 0.982653  (2) the energy catalogue's per-card means (the three-card check, 25-26 Sep 2026), pJ an op
+  nop/zeros/h2     card 1 4.92811   aifoundry3 5.22519   ratio 0.943145  (2) the energy catalogue's per-card means (the three-card check, 25-26 Sep 2026), pJ an op
+  add/random/h1    card 1 8.04926   aifoundry3 7.89144   ratio 1.02      (2) the energy catalogue's per-card means (the three-card check, 25-26 Sep 2026), pJ an op
+
+rules: z 2 (the lab's 95% interval, mean +- 2 SE (E192.md section 6: 'a contrast whose 95% interval (mean +- 2 SE) contains zero')); share 85%; SE ratio cap 3; decided at n >= 4 measured passes
+E192's section 7 checks on aifoundry3 (REPORTED beside card 1's, never a transport verdict): 1 PASS; 2 FAIL; 3 NOT EQUAL; 4 PASS; 5 FAIL; 6 FAIL; 7 REPORTED; 8 REPORTED
+FORECAST-E199 MADE
