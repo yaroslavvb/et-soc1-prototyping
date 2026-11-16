@@ -1,0 +1,17 @@
+# E196 (Q185, lane kit-e196, Sun 15 Nov 2026, before any E196 datum): THE AUDIT OF THE DRY BRANCHES on the session's path. Every line of
+# session_e196.sh that branches on DRY, of run_session_e196.sh that branches on ${DRY:-}, and of run_block_e196.py that branches on a.dry:
+# what the dry path does there, what the real path does, and the real-path desk test's cases that run the real branch
+# (desk/realpath_e196.py reads this table: every such line must have a row, each row's text must be the file's own line, and every case a
+# row names must have run and passed in the same run). Columns: file, line, the line's text (a fragment), under the dry path, on the real
+# path, the cases.
+session_e196.sh	44	OUTD=build/e196/T$T0; [ -n "$DRY" ] && OUTD=$OUTD-dry	the T<T0>-dry directory (every rest rule skips it)	build/e196/T<T0>	D, P
+session_e196.sh	48	say() { echo "$(date '+%Y-%m-%d %H:%M:%S %Z') ${DRY:+DRY }$*" | tee -a "$LOG"; }	every log line marked DRY	plain lines	D, P
+session_e196.sh	73	say "session start (T0 $T0 = $(date -d @"$T0" '+%H:%M:%S %Z' 2>/dev/null); E196, the lab port	"session start (...; DRY)"	"session start (...)"	D, P
+session_e196.sh	117	if [ -n "$DRY" ]; then	the port's DRY mode twice (full and cut), drycheck_e196.py, session end, the manifest	the window's last end; the first card command stamped; the free check; the cut order (M); DEADLINE and the end-stop; the port detached; the signal trap; SESSION_DONE; how it ended; the manifest	D, P, H1, H2, H3, CFG, X1, T, M41, M45, M39, R6
+run_session_e196.sh	111	if [ -n "${DRY:-}" ]; then	every device call listed, nothing opened (no et-who, lock, config read, sampler, stops)	the node count, the holder checks, the configuration read and its gate (S3), the sampler, stopwatch and stops_e196.py (S4), the smoke, the trains, the passes, the gaps, the deadline, the EXIT trap and its closing read	D, P, CFG, L, H4, S1, S3
+run_block_e196.py	259	if a.dry:	reading() returns the target	the newest telemetry line: stale, missing or hot stops	P, S2, S3
+run_block_e196.py	277	if a.dry:	device() prints the command	the process runs; its mark (rc, binary, set)	P, S1
+run_block_e196.py	315	if a.dry:	approach() returns a fixed record	heats on the lab's host to 59 C, idle to 58 C, the quiet; on_protocol	P
+run_block_e196.py	433	if a.dry:	smoke_gate() prints	the smoke gate on both sets (and K1)	P, G1, G2, G3, U1, U2
+run_block_e196.py	488	if a.dry:	idle() prints	the idle loop with its stop and telemetry checks, its mark	P, H4
+run_block_e196.py	530	if a.dry:	the pass's plan printed	the plan mark (its arms in run order, the dropped ones)	P, M41

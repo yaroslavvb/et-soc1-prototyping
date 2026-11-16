@@ -1,0 +1,58 @@
+# E196 (Q185, lane kit-e196, Sun 15 Nov 2026, PST, before any E196 datum): THE HOST CHANGE, AUDITED BY THE KIT (desk checks of code; nothing
+# measured; no device). Made by the kit lane's script from the tree at the kit's commit; every number below was computed by it.
+
+== 1. The two hosts, by sha256 (sources: registered, E196.md section 3)
+lab's unchanged sparsity host source  workloads/sparsity/host/main.cpp  0f53a7d505155156c933e2d9a64d38803ca4e0cea3e20242e0aaafbf35e82284  (1034 lines; unchanged since 27dce7f0 2026-09-25)
+the request's host source (x14_host)  tools/claims-v3/e196/proposal/src/host/main.cpp  b91a2c767e39cdad1172d4a33048c79e42dc9ae9dc9fa20479e8426ee1b494cb  (590 lines)
+registered: 0f53a7d505155156c933e2d9a64d38803ca4e0cea3e20242e0aaafbf35e82284 and b91a2c767e39cdad1172d4a33048c79e42dc9ae9dc9fa20479e8426ee1b494cb
+kernel side, kernel/sparsity.c: lab 92b174a8cd0fc06986a2184e833f3ba650d0fababa6f70c32fa7cf5debb64547; request 92b174a8cd0fc06986a2184e833f3ba650d0fababa6f70c32fa7cf5debb64547: IDENTICAL
+kernel side, kernel/crt.S: lab dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4; request dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4: IDENTICAL
+kernel side, kernel/sections.ld: lab b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09; request b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09: IDENTICAL
+kernel side, kernel/CMakeLists.txt: lab 061b87dfa8850f7f6714121f0313dee587fb85509db684693b5f38091ab10948; request 061b87dfa8850f7f6714121f0313dee587fb85509db684693b5f38091ab10948: IDENTICAL
+kernel side, sparsity_args.h: lab 2108470d021967b2dba8cd39c08c10c42e143b9d387c75e7ab5785a32777ef8d; request 2108470d021967b2dba8cd39c08c10c42e143b9d387c75e7ab5785a32777ef8d: IDENTICAL
+
+== 2. The exact diff of the request's host against the lab's committed source
+diff -u workloads/sparsity/host/main.cpp tools/claims-v3/e196/proposal/src/host/main.cpp: exit 1; lines removed 724, lines added 291, hunks 11
+the registration's copy of this diff: tools/claims-v3/e196/desk/host-diff-e196-lab.txt, sha256 5c869ebd1826d6b48b7bd635278b22298e49918f54001858e3a86b1669ee0375; the same diff body as this run's: 06024ce453eeca1b... vs 06024ce453eeca1b... (bodies from the third line: SAME )
+
+== 3. What it adds (options in each host's parser; read from the sources)
+options only in the request's host: --abba --label --label-b --launches --live-rows --live-rows-b --row-mask-b --values-b --zero-rows --zero-rows-b 
+options only in the lab's host:     --alpha --b-sparsity --b-stream --gemv --gemv-tree --harts --items --kmax --masks --mean-k --pattern --sim-args --sweep --sysemu --test --type --variant --where 
+options in both:                    --budget --dump-tiles --iters --kernel --per-shire --row-mask --seconds --seed --shires --stop-file --values 
+record lines: lab 'SPARSITY {' printf sites 5; request 'X14 {' 1, 'X14CHECK {' 1
+the second row mask: request's '--row-mask-b' parse sites 1; train kinds by --abba: 10 lines name abba
+read-backs of C: request's checkC sites 2 (after the calibration launch and the last launch only); lab's host reads C back only for --values small: 1 site
+
+== 4. Device commands: runtime calls and the device-command audit
+workloads/sparsity/host/main.cpp: runtime and device-layer calls:  1 createPcieDeviceLayer(true, false); 1 createSysEmuDeviceLayer; 1 IRuntime::create; 1 _mgmt;
+tools/claims-v3/e196/proposal/src/host/main.cpp: runtime and device-layer calls:  1 createPcieDeviceLayer(true, false); 1 IRuntime::create; 1 _mgmt;
+-- dmcmd_audit.py, the stock table, no --allow, on the two host sources and the kernel:
+dmcmd_audit: GO (0 send site(s), 0 disallowed; allow-list: none)
+summary:
+-- dmcmd_audit.py on the session's whole file set: preflight_e196.sh (logs/dmcmd-audit-e196.txt): E196-PREFLIGHT GO, 11 send sites, every one a READ
+   (E128's guard: 'ettelem config' 5 READs, 'ettelem sample' 6 READs; both hosts open the ops node only, createPcieDeviceLayer(true, false))
+
+== 5. Which host runs which arm (from the port's dry listing, line for line the registered commands: desk/commands-e196.txt)
+the lab's UNCHANGED sparsity host: the heater check and every heater launch (the lab's E78 heater), the smoke's first set (I.H.m00FF, I.R.m00FF,
+  Z.a0, I.R.full at 2 s), each train block's two K.pi anchors, and every pass run (two burn-ins, K.pi first and last, the 28 other arms);
+  every launch record of it carries "readback": "none" and "binary": "sparsity_host" (run_block_e196.py P3)
+the request's x14_host: the smoke's premise runs (the same four arms at 2 s, with read-backs of C), the smoke's two T1 processes, and the 48
+  train processes (T1: T.Z.m1111 against I.Z.m000F; T2: T.Z.m5555 against I.Z.m00FF); its records carry "binary": "x14_host"
+counts at the full plan (six passes): 201 device calls on the lab's host, 54 on the request's host, 255 in all (237 with the cut order)
+per arm: every pass arm of arms.json (29, K.pi included) runs on the lab's host only; T.Z.m1111 and T.Z.m5555 run on the request's host
+  only (inside the trains); I.Z.m000F and I.Z.m00FF run on both (as pass arms on the lab's host, as the trains' S kinds on the request's);
+  I.H.m00FF, I.R.m00FF, Z.a0, I.R.full run on both in the smoke (never reduced) and on the lab's host in the passes
+
+== 6. The binaries (each embeds its build folder's kernel path, so its sha256 is that build's alone; E196.md section 3)
+the registration's desk builds (aifoundry2): sparsity_host 5ff242b2..., x14_host b6ba058d...; rebuilt elsewhere 85f16f69..., 0025ba7b...
+the box's builds are recorded by step 6 (build/BUILD-E196.txt in E196's root) and checked by the session against that record before
+  anything opens; the gate is both kernels' .text, 8798e43c4869a124690bc652d574d5ab78d686faa70293cbcff658d24c30a399
+
+== 7. The predicted peak against aifoundry3's stops (registered: E196.md section 9)
+hottest load: random fp32 at full issue (I.R.full, and every heater launch: E78's random kind); predicted board about 54 W, die about 62 C
+  (E178 54.06 W / 62 C; E192 53.32 W / 61 C with this heater); the trains run on the zero tile, about 1-2 W over idle
+the stops on aifoundry3: the lab's 65 W (three samples in a row at or above) and 70 C (stops_e196.py); stopwatch.py's 80 W on three distinct
+  readings, 70 C, a quiet sampler; the block's 70 C and 5 s staleness; the smoke's heater ceiling 70 W
+margins at the predicted peak: 11 W to the 65 W stop, 26 W to stopwatch's 80 W, 16 W to the heater ceiling, 8 C to the 70 C stops
+note (the kit's): the heater ceiling (70 W) sits above the lab's 65 W stop, so on the card a heater at 65 W or more is stopped by the 65 W stop
+  first (the real-path desk test's case HC); both end the session before any smoke arm

@@ -1,0 +1,131 @@
+--- tools/claims-v3/e196/proposal/src/run_session.sh	2026-11-15 15:25:59.722513564 -0800
++++ tools/claims-v3/e196/run_session_e196.sh	2026-11-15 15:34:49.579867189 -0800
+@@ -1,4 +1,21 @@
+ #!/usr/bin/env bash
++# E196's LAB PORT of the proposal's run_session.sh (Q185, lane kit-e196, Sun 15 Nov 2026, PST, before any E196 datum): proposal/src/
++# run_session.sh (sha256 in SHA256SUMS-e196-registration) with E196.md's registered changes made code and nothing else changed; its diff
++# against that file is desk/port-diff-run_session-e196.txt. session_e196.sh (the kit's wrapper on aifoundry3) runs it. The changes:
++#   S1 the files: run_block_e196.py (the port, beside this file) and stops_e196.py; make_x14.py, arms.json and stopwatch.py from
++#      proposal/src at their registered sha256 (SRC);
++#   S2 THE HOSTS (E196.md section 3): LAB_H, the lab's unchanged sparsity host, required; it is the heater (HEATER defaults to it and must
++#      be the same file) and runs every pass run and anchor; H, the request's x14_host, runs the trains and the premise runs;
++#   S3 THE OPENING CONFIGURATION GATE (E196.md section 6, item 2): config-start.json must read "tdp_w":0 and "minion_mhz":600 (the card
++#      as found), else "GATE-STOP: ..." and exit 12 before the sampler (no data); the closing read is reported, never a gate;
++#   S4 THE LAB'S LIVE STOPS (E196.md section 9): stops_e196.py beside stopwatch.py (board at or above 65 W on three samples in a row; a
++#      die reading at or above 70 C; with STOPS_END_EPOCH, the cap's end-stop), started with it and checked with it before every block;
++#   S5 the one-card rule's binary check covers LAB_H too (a host with several card nodes only);
++#   S6 the DRY listing names the gate and the lab's stops.
++# Everything else below is run_session.sh's, line for line: the holder checks, the configuration reads, the sampler and its starts, the
++# smoke, the trains, the passes, the gaps, the deadline, the EXIT trap and its closing read.
++#
++# The proposal's head, unchanged:
+ # A session of x14 on one card: a holder check first (nothing is opened while anyone else holds the card); the
+ # opening configuration read (`$ETTELEM config`, read only, under the card lock, timeout 10); then one sampler for the
+ # whole session (started as the lab's lib.sh does: it must write its first line within 10 s, else it is stopped with
+@@ -48,6 +65,7 @@
+ set -u
+ out=${1:?out dir}; passes=${2:-6}; gen=${GEN:-$out/gen}
+ here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
++SRC=$here/proposal/src   # S1: the registered make_x14.py, arms.json and stopwatch.py
+ DEV=${ET_DEVICES:-0}
+ LOCK=${LOCK:-/run/lock/etsoc-shire$DEV.lock}
+ SAMPLER=${SAMPLER:-ettelem}
+@@ -60,9 +78,12 @@
+ SMOKE_S=90; TRAIN_S=252   # the smoke block (about 1 minute); a train block (24 processes of about 7.9 s, 2 anchor runs)
+ abspath() { case "$1" in /*) echo "$1" ;; *) echo "$PWD/$1" ;; esac; }
+ H=$(abspath "${H:-$here/build/host/x14_host}")
+-HEATER=$(abspath "${HEATER:-$H}")
+-export H
+-for f in "$H" "$HEATER"; do
++: "${LAB_H:?set LAB_H to the unchanged sparsity host of the lab (E196.md section 3): nothing opened}"   # S2
++LAB_H=$(abspath "$LAB_H")
++HEATER=$(abspath "${HEATER:-$LAB_H}")
++[ "$HEATER" = "$LAB_H" ] || { echo "refused: HEATER ($HEATER) is not LAB_H ($LAB_H): the lab's E78 heater is the lab's host: nothing opened"; exit 2; }
++export H LAB_H
++for f in "$H" "$HEATER" "$LAB_H"; do
+   [ -f "$f" ] && [ -x "$f" ] || { echo "refused: $f is not an executable file: nothing opened"; exit 2; }
+ done
+ fits() {   # a block of $1 seconds ends before the deadline
+@@ -71,14 +92,14 @@
+ fits "$SMOKE_S" || { echo "refused: the deadline ($DEADLINE) leaves no time for the smoke block: nothing opened"; exit 2; }
+ mkdir -p "$out"
+ TEL="$out/telemetry.jsonl"
+-blk=(python3 -B "$here/run_block.py" "$out" --gen "$gen" --tel "$TEL" --target "$TARGET" --preheat "$PREHEAT"
+-     --heater "$HEATER")
++blk=(python3 -B "$here/run_block_e196.py" "$out" --gen "$gen" --tel "$TEL" --target "$TARGET" --preheat "$PREHEAT"
++     --heater "$HEATER" --lab-host "$LAB_H" --host-bin "$H")   # S1, S2
+ [ -n "$DROP_ARMS" ] && blk+=(--drop "$DROP_ARMS")
+ LAB_TILES=${LAB_TILES:-${LAB_REPO:-.}/tools/claims-v3/kinds/tiles/fp32}
+-python3 -B "$here/make_x14.py" --lab-tiles "$LAB_TILES" --out "$gen" > /dev/null &&
+-  python3 -B "$here/make_x14.py" --lab-tiles "$LAB_TILES" --out "$gen" --check > "$out/gen_check.json" ||
++python3 -B "$SRC/make_x14.py" --lab-tiles "$LAB_TILES" --out "$gen" > /dev/null &&
++  python3 -B "$SRC/make_x14.py" --lab-tiles "$LAB_TILES" --out "$gen" --check > "$out/gen_check.json" ||
+   { echo "make_x14.py failed or its check did not pass: nothing opened"; exit 2; }
+-cmp -s "$gen/arms.json" "$here/arms.json" || { echo "the generated arm table differs from src/arms.json: nothing opened"; exit 2; }
++cmp -s "$gen/arms.json" "$SRC/arms.json" || { echo "the generated arm table differs from src/arms.json: nothing opened"; exit 2; }
+ plan=$("${blk[@]}" 0 --plan 2>&1) || { echo "$plan: nothing opened"; exit 2; }
+ nruns=${plan#*runs=}; nruns=${nruns%% *}
+ case "$nruns" in ''|*[!0-9]*) echo "no run count in the pass plan ($plan): nothing opened"; exit 2 ;; esac
+@@ -90,8 +111,10 @@
+ if [ -n "${DRY:-}" ]; then
+   say "DRY: holder check (et-who --check, other users' device processes), card lock probe ($LOCK), device nodes"
+   say "DRY: config read (\$ETTELEM config, under the card lock, timeout 10) -> config-start.json"
++  say "DRY: the opening configuration gate: config-start.json reads \"tdp_w\":0 and \"minion_mhz\":600, else GATE-STOP, exit 12, no sampler (S3)"
+   say "DRY: sampler ($SAMPLER) for at most $secs s (first line within 10 s, up to 6 starts), stopwatch"
+-  say "DRY: stopwatch running; holder check (our sampler only); smoke block (heater: $HEATER)"
++  say "DRY: the lab's live stops (stops_e196.py: board >= 65 W on 3 samples in a row, die >= 70 C${STOPS_END_EPOCH:+, the end-stop at the epoch $STOPS_END_EPOCH}) (S4)"
++  say "DRY: stopwatch running; holder check (our sampler only); smoke block (heater: $HEATER; the lab's host: $LAB_H; the request's host: $H)"
+   "${blk[@]}" -1 --smoke --dry
+   i=0
+   for t in $TRAINS; do
+@@ -117,7 +140,7 @@
+ if [ "$nodes" -gt 1 ]; then
+   [ -n "${ET_DEVICES:-}" ] || { say "refused: $nodes cards on this host and ET_DEVICES unset"; exit 2; }
+   # As the lab's kits check: a binary built against a device layer that ignores the selection opens every card.
+-  for f in "$H" "${ETTELEM:-}" "$HEATER"; do
++  for f in "$H" "${ETTELEM:-}" "$HEATER" "$LAB_H"; do   # S5
+     [ -n "$f" ] || continue
+     grep -aqw ET_DEVICES "$f" || { say "refused: $f does not honour ET_DEVICES: it would open every card"; exit 2; }
+   done
+@@ -195,8 +218,13 @@
+ }
+ : "${ETTELEM:?set ETTELEM to the sampler binary, which also reads the configuration}"
+ config_read "$out/config-start.json"
++# S3: the opening configuration gate (E196.md section 6, item 2): the card as found, TDP 0 W and 600 MHz, else no session
++if ! grep -q '"tdp_w":0,' "$out/config-start.json" 2>/dev/null || ! grep -q '"minion_mhz":600,' "$out/config-start.json" 2>/dev/null; then
++  say "GATE-STOP: the opening configuration read is not TDP 0 W and 600 MHz ($(head -c 200 "$out/config-start.json" 2>/dev/null)): no sampler, no block (no data)"
++  exit 12
++fi
+ 
+-S=; W=; rc=0; NOT_FREE=
++S=; W=; W2=; rc=0; NOT_FREE=
+ stop_sampler() {   # SIGTERM only: the sampler finishes its request and exits
+   [ -n "$S" ] || return 0
+   kill -TERM "$S" 2>/dev/null
+@@ -227,6 +255,7 @@
+   touch "$out/SESSION_DONE"
+   stop_sampler
+   if [ -n "$W" ]; then wait "$W" 2>/dev/null; fi
++  if [ -n "$W2" ]; then wait "$W2" 2>/dev/null; fi   # S4
+   [ -n "${CONFIG_END:-}" ] || return 0
+   if [ "$code" -eq 3 ] || [ -n "${NOT_FREE:-}" ]; then
+     config_skip "$out/config-end.json" "the session ended because the card was not free"
+@@ -243,12 +272,15 @@
+ : > "$TEL"
+ start_sampler || { say "the sampler did not start: nothing more opened"; exit 4; }
+ CONFIG_END=1
+-python3 -B "$here/stopwatch.py" "$TEL" "$out" 2>> "$out/stopwatch.err" < /dev/null &
++python3 -B "$SRC/stopwatch.py" "$TEL" "$out" 2>> "$out/stopwatch.err" < /dev/null &
+ W=$!
++python3 -B "$here/stops_e196.py" "$TEL" "$out" --board-w 65 --n 3 --max-c 70 ${STOPS_END_EPOCH:+--end-epoch "$STOPS_END_EPOCH"} \
++  2>> "$out/stops.err" < /dev/null &   # S4: the lab's live stops on aifoundry3
++W2=$!
+ sleep 5
+ watch_alive() {   # the live stops must be running before a block
+-  kill -0 "$W" 2>/dev/null && return 0
+-  say "the live stops (stopwatch.py) are not running: no block runs"; rc=5; return 1
++  kill -0 "$W" 2>/dev/null && kill -0 "$W2" 2>/dev/null && return 0   # S4: both
++  say "the live stops (stopwatch.py, stops_e196.py) are not running: no block runs"; rc=5; return 1
+ }
+ between() {   # the lock is free for GAP seconds: anyone else may take the card; then the checks
+   sleep "$GAP"

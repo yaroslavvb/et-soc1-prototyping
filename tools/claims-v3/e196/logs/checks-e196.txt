@@ -1,0 +1,18 @@
+# E196 checker and reader self-checks (kit-e196; re-run by fix-e196, Q191), 2026-11-16 01:59:36 PST; arbitrary test values, never a forecast
+== e196_lines.py self-check
+E196-LINES SELF-CHECK PASS (480 of 480)
+(rc 0)
+== the registration's synthetic session in E196's form (desk/synth_session_e196.py, 5 passes, seed 1, --pass-host lab), the registered reduction with --readback-none-ok, then check_e196.py
+(make_x14 rc 0)
+(synth rc 0)
+passes kept [0, 1, 2, 3, 4]; runs 154 kept, 0 set aside; 0 dips dropped -> <scratch>/fast-v3/synth/x14.json
+(reduce rc 0)
+check 1 (the ties): derived.tie_zeros_S_W REPRODUCES, derived.tie_random_D_W DIFFERS, derived.tie_ones_D_W REPRODUCES, derived.tie_sparse50_D_W DIFFERS, derived.tie_a_zero_D_W DIFFERS, derived.tie_pi_S_W DIFFERS, derived.tie_b_sign_D_W DIFFERS, arms.I.Z.m0000.S_W REPRODUCES
+check 2 (the MSK bit alone): DIFFERS
+check 3 (the held ladder's middle steps): BENT
+check 4 (the read-backs): PASS
+check 5 (cycles per op): PASS
+check 6 (the trains' anchors and carry-over): T1 AGREE, T2 AGREE
+CHECKS-E196: 1 3 of 8 REPRODUCE (0 not computed); 2 DIFFERS; 3 BENT; 4 PASS (104 of 104 ok; 108 at the full plan); 5 PASS (150 kept runs, 672 train launches, 0 deviations); 6 T1 AGREE T2 AGREE; reported: 5 passes kept; 0 runs set aside; 0 dips; 0 samples off 600 MHz; readback_gate 154 of 154 unchanged-host runs; 0 unreadable host outputs
+(check rc 0)
+== the drycheck on the port's own DRY listings is in logs/desktest-realpath-e196.txt (case D) and the runbook test (case DR)

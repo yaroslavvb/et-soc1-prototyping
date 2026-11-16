@@ -1,0 +1,383 @@
+start 2026-11-16 01:05:17 PST; load 0.90; tag v3
+(fix-e196, Q191: HEAD 9c58f242, the kit's files staged on it; status lines 48; tools/claims-v3/e196 files 98)
+inside the sandbox: hostname aifoundry3; /dev/et*: -rw-rw-r-- /dev/et0_mgmt -rw-rw-r-- /dev/et0_ops ; processes visible: 5
+E196 real-path desk test (kit-e196), 2026-11-16 01:06:17 PST; Python 3.12.3; the scratch <scratch>
+
+== 0 the sandbox and the stand-in box
+-> PASS (0a the host's name is aifoundry3 in the sandbox)
+-> PASS (0b /dev holds only et0_ops and et0_mgmt, regular files)
+-> PASS (0c a private PID namespace)
+-> PASS (0d the box copy's preflight: GO, every send site READ)
+-> PASS (ST1 three samples at exactly 65.0 W in a row: STOP (at or above))
+-> PASS (ST2 65.5, 65.5, 64.9, 65.5, 65.5: no stop (a sample below resets the run))
+-> PASS (ST3 two samples at 66 W: no stop)
+-> PASS (ST4 the die at 69 C: no stop)
+-> PASS (ST5 a die reading of 70 C: STOP)
+-> PASS (ST6 --end-epoch reached: the end-stop's STOP)
+-> PASS (ST7 SESSION_DONE before anything: it exits, no STOP)
+-> PASS (ST8 a STOP already written by another: not overwritten (the first writer's reason stands))
+
+== D-dry
+   rc 0 (session.rc 0) in 4.2 s; calls {}; stop -
+   | 2026-11-16 01:06:31 PST DRY session start (T0 1794819991 = 01:06:31 PST; E196, the lab port of the proposal's reference session, kit-e196; DRY)
+   | 2026-11-16 01:06:31 PST DRY checked: host aifoundry3; USER the login; the registration's list 467ede7827f5 and its six session files; the kit's list and its seven session files; the shared files; both hosts today's build (7 hashes
+   | 2026-11-16 01:06:31 PST DRY would run, the first card command: the free check (et-who --check; other users' device processes; a probe of /run/lock/etsoc-shire0.lock, read-only, never created)
+   | 2026-11-16 01:06:31 PST DRY would run: the cut order from M (the first card command to the earlier of the window's last end and the cap, 3600 s); DEADLINE = the first card command + 3480 s or the last end - 120 s; the end-stop at 
+   | 2026-11-16 01:06:35 PST DRY the port's DRY mode: rc 0; E196-DRY OK: 255 device calls (237 with the cut order), line for line the registered commands (desk/commands-e196.txt) in the written orders for aifoundry3 (passes 0-5): 201 o
+   | 2026-11-16 01:06:35 PST DRY session end (T0 1794819991)
+-> PASS (D1 --dry: rc 0; the listing 255 device calls (237 cut), line for line the registered commands)
+-> PASS (D2 the dry log: T<T0>-dry, 'session start (...; DRY)', every line DRY (every rest rule skips it))
+-> PASS (D3 no stand-in tool called (nothing opened))
+-> PASS (D4 MANIFEST.sha256 exact; session.rc 0)
+
+== P-realpath
+   rc 0 (session.rc 0) in 1081.4 s; calls {'lab': 89, 'x14': 54, 'etwho': 8, 'sampler': 4, 'ps': 8}; stop desk test: by hand, in the gap after pass 1
+   | 2026-11-16 01:06:35 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:04:35 PST; the end-stop 02:05:35 PST
+   | 2026-11-16 01:06:35 PST running: run_session_e196.sh (pid 364)
+   | 2026-11-16 01:24:36 PST run_session_e196.sh rc 0; the last lines of its log: [01:24:35] session done (rc 0): 643 pass launches, 700 train launches recorded [01:24:35] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power
+   | 2026-11-16 01:24:36 PST STOP: {"by": "hand", "why": "desk test: by hand, in the gap after pass 1", "t_ms": 1794821037699}
+   | 2026-11-16 01:24:36 PST unreadable host outputs: 1 process(es) wrote no record (marks.jsonl, kind host_lines)
+   | 2026-11-16 01:24:36 PST trains complete: 2 of 2; passes complete: 2 of 7 asked (pass 6 only if it fit); launch records 643 pass, 700 train; card time 1081 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:24:36 PST session end (T0 1794819995)
+-> PASS (P1 rc 0 (a stop by hand between blocks ends the session normally))
+-> PASS (P2 the first card command stamped; the cut order read at the start: M = 60, every arm)
+-> PASS (P3 the opening and closing configuration reads through E128's guard, each under the card lock; the opening reads TDP 0 W, 600 MHz)
+-> PASS (P4 one sampler, sample --seconds N --every-ms 100, stopped by SIGTERM once)
+-> PASS (P5 the smoke: the heater check on the lab's host (exit 0, below 70 W); SMOKE-GATE PASS)
+-> PASS (P6 the smoke's two sets: the four arms on the lab's host (readback none) and on the request's host (8 read-backs, all ok))
+-> PASS (P7 the smoke's T1 processes: SFFS then FSSF, 14 launch records each)
+-> PASS (P8 both trains: K.pi on the lab's host (readback none), 24 processes alternating SFFS and FSSF on the request's host, 14 launches each, 96 read-backs ok)
+-> PASS (P9.0 pass 0: the registered order for aifoundry3 (F.B0's unreadable run written as nothing), every run on the lab's host, ops = iters x minions, readback none)
+-> PASS (P9.1 pass 1: the registered order for aifoundry3, every run on the lab's host, ops = iters x minions, readback none)
+-> PASS (P10 the one unreadable host output (F.B0, pass 0: unknown text inside a line): no record written, a mark names it)
+-> PASS (P11 runtime lines INSIDE host lines (every 7th process of each host): 19 dropped over 19 processes, every one of those processes' records written)
+-> PASS (P12 every host process with the card lock held, --stop-file last (89 lab-host processes, 54 request-host processes))
+-> PASS (P13 the stop by hand honoured in the gap: trains 2 of 2, passes 2 of 7)
+-> PASS (P14 the closing configuration read made after the holder check)
+-> PASS (P15 session end; MANIFEST exact; step 10 reads RUN-ENDED)
+-> PASS (P16 the registered reduction reads the real path's files (stand-in numbers): rc 0; readback_gate 63 runs exempted; T1 12 units)
+-> PASS (P17 the section 8 checker reads them: rc 0; check 4 PASS 108 of 108)
+   rest rule after P: rc 3: REFUSED: 0 minutes since E196's session end (2026-11-16 01:24:36 PST): E196 starts on a rested card, its first card command at least 40 minutes after our last real session there (E196.md section 10; the kit)
+-> PASS (P18 the rest rule counts P's session (REFUSED: within 40 minutes of E196's session end))
+
+== H1-holder-at-start
+   rc 3 (session.rc 3) in 0.4 s; calls {'etwho': 1}; stop -
+   | 2026-11-16 01:24:37 PST session start (T0 1794821077 = 01:24:37 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:24:37 PST checked: host aifoundry3; USER the login; the registration's list 467ede7827f5 and its six session files; the kit's list and its seven session files; the shared files; both hosts today's build (7 hashes in 
+   | 2026-11-16 01:24:37 PST the card is not free: et-who --check exit 1 (1 holder lines) (no device opened)
+-> PASS (H1 a holder at the start: exit 3, nothing opened)
+   rest rule after H1: rc 3: REFUSED: 0 minutes since E196's session end (2026-11-16 01:24:36 PST): E196 starts on a rested card, its first card command at least 40 minutes after our last real session there (E196.md section 10; the kit)
+-> PASS (H1b the rest rule skips H1's refusal (no device opened) and still reads P's end)
+
+== H2-foreign-process
+   rc 3 (session.rc 3) in 0.4 s; calls {'etwho': 1, 'ps': 1}; stop -
+   | 2026-11-16 01:24:37 PST session start (T0 1794821078 = 01:24:38 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:24:37 PST checked: host aifoundry3; USER the login; the registration's list 467ede7827f5 and its six session files; the kit's list and its seven session files; the shared files; both hosts today's build (7 hashes in 
+   | 2026-11-16 01:24:37 PST the card is not free: 1 device process(es) of another user (no device opened)
+-> PASS (H2 another user's device process: exit 3, nothing opened)
+
+== H3-lock-held-at-start
+   rc 3 (session.rc 3) in 0.4 s; calls {'etwho': 1, 'ps': 1}; stop -
+   | 2026-11-16 01:24:38 PST session start (T0 1794821079 = 01:24:39 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:24:38 PST checked: host aifoundry3; USER the login; the registration's list 467ede7827f5 and its six session files; the kit's list and its seven session files; the shared files; both hosts today's build (7 hashes in 
+   | 2026-11-16 01:24:38 PST the card is not free: the card lock is held (probe exit 75) (no device opened)
+-> PASS (H3 the card lock held at the start: exit 3, nothing opened)
+
+== H4-holder-between-blocks
+   rc 1 (session.rc 1) in 204.6 s; calls {'lab': 9, 'x14': 30, 'etwho': 5, 'sampler': 3, 'ps': 4}; stop -
+   | 2026-11-16 01:24:38 PST the first card command at 01:24:38 PST; the cap at 02:24:38 PST (3600 s); the window's last end 03:24:38 PST
+   | 2026-11-16 01:24:38 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:22:38 PST; the end-stop 02:23:38 PST
+   | 2026-11-16 01:24:38 PST running: run_session_e196.sh (pid 2353)
+   | 2026-11-16 01:28:02 PST run_session_e196.sh rc 3; the last lines of its log: [01:28:02] session done (rc 3): 58 pass launches, 364 train launches recorded [01:28:02] config config-end.json: skipped: the session ended because the c
+   | 2026-11-16 01:28:02 PST session stopped: run_session_e196.sh rc 3; the blocks done stand (reduced as they stand)
+   | 2026-11-16 01:28:02 PST trains complete: 1 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 58 pass, 364 train; card time 204 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:28:02 PST session end (T0 1794821080)
+-> PASS (H4 a holder after train T1: the session stops before T2 (run_session rc 3); session.rc 1, T1's blocks stand)
+-> PASS (H4b no device process after T1's end)
+
+== CFG-config-gate
+   rc 3 (session.rc 3) in 2.4 s; calls {'etwho': 2, 'sampler': 1, 'ps': 2}; stop -
+   | 2026-11-16 01:28:03 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:26:03 PST; the end-stop 02:27:03 PST
+   | 2026-11-16 01:28:03 PST running: run_session_e196.sh (pid 2906)
+   | 2026-11-16 01:28:05 PST run_session_e196.sh exited (rc 12) before its own end marker: the wrapper wrote run/SESSION_DONE
+   | 2026-11-16 01:28:05 PST run_session_e196.sh rc 12; the last lines of its log: [01:28:04] config config-start.json: {"tdp_w":65,"temp_threshold_c":65,"power_state":0,"power_state_name":"max_power","minion_mhz":600,"minion_mv":523} 
+   | 2026-11-16 01:28:05 PST GATE-STOP: run_session_e196.sh rc 12 before any train or pass block (no data; E196.md section 11)
+   | 2026-11-16 01:28:05 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 0 pass, 0 train; card time 2 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:28:05 PST session end (T0 1794821283)
+-> PASS (CFG the opening configuration read at TDP 65 W: GATE-STOP (rc 12 in the port), no sampler, no block, session.rc 3)
+-> PASS (CFGb step 10 reads it GATE-STOPPED)
+
+== L-lock-after-sampler
+   rc 3 (session.rc 3) in 15.5 s; calls {'etwho': 4, 'sampler': 3, 'ps': 4}; stop -
+   | 2026-11-16 01:28:05 PST the first card command at 01:28:05 PST; the cap at 02:28:05 PST (3600 s); the window's last end 03:28:05 PST
+   | 2026-11-16 01:28:05 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:26:05 PST; the end-stop 02:27:05 PST
+   | 2026-11-16 01:28:05 PST running: run_session_e196.sh (pid 3092)
+   | 2026-11-16 01:28:20 PST run_session_e196.sh rc 75; the last lines of its log: [01:28:20] card lock /run/lock/etsoc-shire0.lock held by another process (probe exit 75) [01:28:20] config config-end.json: skipped: the card was not fr
+   | 2026-11-16 01:28:20 PST GATE-STOP: run_session_e196.sh rc 75 before any train or pass block (no data; E196.md section 11)
+   | 2026-11-16 01:28:20 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 0 pass, 0 train; card time 15 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:28:20 PST session end (T0 1794821285)
+-> PASS (L the card lock taken after the sampler started: the smoke's lock busy (75), nothing run, GATE-STOP)
+-> PASS (Lb the sampler still stopped by SIGTERM)
+
+== L2-lock-after-pass0
+   rc 1 (session.rc 1) in 570.8 s; calls {'lab': 51, 'x14': 54, 'etwho': 8, 'sampler': 3, 'ps': 8}; stop -
+   | 2026-11-16 01:28:21 PST the first card command at 01:28:21 PST; the cap at 02:28:21 PST (3600 s); the window's last end 03:28:20 PST
+   | 2026-11-16 01:28:21 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:26:21 PST; the end-stop 02:27:21 PST
+   | 2026-11-16 01:28:21 PST running: run_session_e196.sh (pid 3351)
+   | 2026-11-16 01:37:51 PST run_session_e196.sh rc 75; the last lines of its log: [01:37:51] card lock /run/lock/etsoc-shire0.lock held by another process (probe exit 75) [01:37:51] config config-end.json: skipped: the card was not fr
+   | 2026-11-16 01:37:51 PST session stopped: run_session_e196.sh rc 75; the blocks done stand (reduced as they stand)
+   | 2026-11-16 01:37:51 PST trains complete: 2 of 2; passes complete: 1 of 7 asked (pass 6 only if it fit); launch records 364 pass, 700 train; card time 570 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:37:51 PST session end (T0 1794821300)
+-> PASS (L2 the card lock taken in the gap after pass 0 (data written): pass 1's lock busy (75); session.rc 1, 'session stopped', the trains and pass 0 stand)
+-> PASS (L2b no device process after pass 0's end; MANIFEST exact; step 10 reads RUN-ENDED (the blocks done stand))
+
+== HC-heater-ceiling
+   rc 3 (session.rc 3) in 27.4 s; calls {'lab': 1, 'etwho': 4, 'sampler': 4, 'ps': 4}; stop board 72.30 W at or above 65 W on 3 samples in a row
+   | 2026-11-16 01:37:51 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:35:51 PST; the end-stop 02:36:51 PST
+   | 2026-11-16 01:37:51 PST running: run_session_e196.sh (pid 4468)
+   | 2026-11-16 01:38:19 PST run_session_e196.sh rc 9; the last lines of its log: [01:38:18] session done (rc 9): 0 pass launches, 0 train launches recorded [01:38:18] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power_sta
+   | 2026-11-16 01:38:19 PST STOP: {"by": "stops_e196", "why": "board 72.30 W at or above 65 W on 3 samples in a row", "t_ms": 1794821889066}
+   | 2026-11-16 01:38:19 PST GATE-STOP: run_session_e196.sh rc 9 before any train or pass block (no data; E196.md section 11); {"by": "stops_e196", "why": "board 72.30 W at or above 65 W on 3 samples in a row", "t_ms": 1794821889066}
+   | 2026-11-16 01:38:19 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 0 pass, 0 train; card time 27 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:38:19 PST session end (T0 1794821871)
+-> PASS (HC the smoke's heater at 72 W: the lab's 65 W stop writes STOP first and the heater check's 70 W ceiling ends the block (exit 9): no smoke arm, GATE-STOP)
+
+== HF-heater-fails
+   rc 3 (session.rc 3) in 26.4 s; calls {'lab': 1, 'etwho': 4, 'sampler': 4, 'ps': 4}; stop -
+   | 2026-11-16 01:38:19 PST the first card command at 01:38:19 PST; the cap at 02:38:19 PST (3600 s); the window's last end 03:38:19 PST
+   | 2026-11-16 01:38:19 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:36:19 PST; the end-stop 02:37:19 PST
+   | 2026-11-16 01:38:19 PST running: run_session_e196.sh (pid 4753)
+   | 2026-11-16 01:38:45 PST run_session_e196.sh rc 10; the last lines of its log: [01:38:45] session done (rc 10): 0 pass launches, 0 train launches recorded [01:38:45] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power_s
+   | 2026-11-16 01:38:45 PST GATE-STOP: run_session_e196.sh rc 10 before any train or pass block (no data; E196.md section 11)
+   | 2026-11-16 01:38:45 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 0 pass, 0 train; card time 26 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:38:45 PST session end (T0 1794821899)
+-> PASS (HF the heater check's launch fails (exit 1): the smoke gate fails at once, GATE-STOP)
+
+== G1-premise-readback
+   rc 3 (session.rc 3) in 84.5 s; calls {'lab': 5, 'x14': 6, 'etwho': 4, 'sampler': 4, 'ps': 4}; stop -
+   | 2026-11-16 01:38:45 PST the first card command at 01:38:45 PST; the cap at 02:38:45 PST (3600 s); the window's last end 03:38:45 PST
+   | 2026-11-16 01:38:45 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:36:45 PST; the end-stop 02:37:45 PST
+   | 2026-11-16 01:38:45 PST running: run_session_e196.sh (pid 5032)
+   | 2026-11-16 01:40:09 PST run_session_e196.sh rc 10; the last lines of its log: [01:40:08] session done (rc 10): 40 pass launches, 28 train launches recorded [01:40:09] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power
+   | 2026-11-16 01:40:09 PST GATE-STOP: run_session_e196.sh rc 10 before any train or pass block (no data; E196.md section 11)
+   | 2026-11-16 01:40:09 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 40 pass, 28 train; card time 84 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:40:09 PST session end (T0 1794821925)
+-> PASS (G1 a premise run's read-back not ok: SMOKE-GATE FAIL, no train, GATE-STOP)
+
+== G2-mask-not-acting
+   rc 3 (session.rc 3) in 84.5 s; calls {'lab': 5, 'x14': 6, 'etwho': 4, 'sampler': 4, 'ps': 4}; stop -
+   | 2026-11-16 01:40:10 PST the first card command at 01:40:10 PST; the cap at 02:40:10 PST (3600 s); the window's last end 03:40:10 PST
+   | 2026-11-16 01:40:10 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:38:10 PST; the end-stop 02:39:10 PST
+   | 2026-11-16 01:40:10 PST running: run_session_e196.sh (pid 5392)
+   | 2026-11-16 01:41:34 PST run_session_e196.sh rc 10; the last lines of its log: [01:41:33] session done (rc 10): 40 pass launches, 28 train launches recorded [01:41:33] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power
+   | 2026-11-16 01:41:34 PST GATE-STOP: run_session_e196.sh rc 10 before any train or pass block (no data; E196.md section 11)
+   | 2026-11-16 01:41:34 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 40 pass, 28 train; card time 84 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:41:34 PST session end (T0 1794822010)
+-> PASS (G2 a lab-host smoke run of a masked arm at 546 cycles: the registered 0.5 %% gate passes it (2.7 cycles wide), the kit's stop K1 (0.5 cycles) fails the smoke)
+
+== G3-tensor-error
+   rc 3 (session.rc 3) in 84.5 s; calls {'lab': 5, 'x14': 6, 'etwho': 4, 'sampler': 4, 'ps': 4}; stop -
+   | 2026-11-16 01:41:34 PST the first card command at 01:41:34 PST; the cap at 02:41:34 PST (3600 s); the window's last end 03:41:34 PST
+   | 2026-11-16 01:41:34 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:39:34 PST; the end-stop 02:40:34 PST
+   | 2026-11-16 01:41:34 PST running: run_session_e196.sh (pid 5752)
+   | 2026-11-16 01:42:58 PST run_session_e196.sh rc 10; the last lines of its log: [01:42:57] session done (rc 10): 40 pass launches, 28 train launches recorded [01:42:57] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power
+   | 2026-11-16 01:42:58 PST GATE-STOP: run_session_e196.sh rc 10 before any train or pass block (no data; E196.md section 11)
+   | 2026-11-16 01:42:58 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 40 pass, 28 train; card time 84 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:42:58 PST session end (T0 1794822094)
+-> PASS (G3 a lab-host smoke launch with a tensor error: SMOKE-GATE FAIL)
+
+== U1-unreadable-smoke
+   rc 3 (session.rc 3) in 84.5 s; calls {'lab': 5, 'x14': 6, 'etwho': 4, 'sampler': 4, 'ps': 4}; stop -
+   | 2026-11-16 01:42:59 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:40:59 PST; the end-stop 02:41:59 PST
+   | 2026-11-16 01:42:59 PST running: run_session_e196.sh (pid 6112)
+   | 2026-11-16 01:44:23 PST run_session_e196.sh rc 10; the last lines of its log: [01:44:22] session done (rc 10): 35 pass launches, 28 train launches recorded [01:44:22] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power
+   | 2026-11-16 01:44:23 PST unreadable host outputs: 1 process(es) wrote no record (marks.jsonl, kind host_lines)
+   | 2026-11-16 01:44:23 PST GATE-STOP: run_session_e196.sh rc 10 before any train or pass block (no data; E196.md section 11)
+   | 2026-11-16 01:44:23 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 35 pass, 28 train; card time 84 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:44:23 PST session end (T0 1794822178)
+-> PASS (U1 an unreadable lab-host smoke run: no record, SMOKE-GATE FAIL by name, GATE-STOP)
+
+== U2-split-every-line
+   rc 3 (session.rc 3) in 114.5 s; calls {'lab': 5, 'x14': 6, 'etwho': 4, 'sampler': 4, 'ps': 4}; stop desk test: by hand, after the smoke gate
+   | 2026-11-16 01:44:23 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:42:23 PST; the end-stop 02:43:23 PST
+   | 2026-11-16 01:44:23 PST running: run_session_e196.sh (pid 6475)
+   | 2026-11-16 01:46:17 PST run_session_e196.sh rc 0; the last lines of its log: [01:46:16] session done (rc 0): 40 pass launches, 28 train launches recorded [01:46:16] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power_s
+   | 2026-11-16 01:46:17 PST STOP: {"by": "hand", "why": "desk test: by hand, after the smoke gate", "t_ms": 1794822338747}
+   | 2026-11-16 01:46:17 PST GATE-STOP: run_session_e196.sh rc 0 before any train or pass block (no data; E196.md section 11); {"by": "hand", "why": "desk test: by hand, after the smoke gate", "t_ms": 1794822338747}
+   | 2026-11-16 01:46:17 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 40 pass, 28 train; card time 114 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:46:17 PST session end (T0 1794822263)
+-> PASS (U2 the runtime line inside a line of EVERY host process: every record read, SMOKE-GATE PASS (11 runtime lines dropped))
+-> PASS (U2b a stop by hand after the smoke gate: no train or pass ran, GATE-STOP (no data))
+
+== S1-lab-65W
+   rc 1 (session.rc 1) in 121.5 s; calls {'lab': 7, 'x14': 10, 'etwho': 5, 'sampler': 4, 'ps': 5}; stop board 66.56 W at or above 65 W on 3 samples in a row
+   | 2026-11-16 01:46:18 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:44:18 PST; the end-stop 02:45:18 PST
+   | 2026-11-16 01:46:18 PST running: run_session_e196.sh (pid 6880)
+   | 2026-11-16 01:48:19 PST run_session_e196.sh rc 8; the last lines of its log: [01:48:18] session done (rc 8): 49 pass launches, 74 train launches recorded [01:48:19] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power_s
+   | 2026-11-16 01:48:19 PST STOP: {"by": "stops_e196", "why": "board 66.56 W at or above 65 W on 3 samples in a row", "t_ms": 1794822490776}
+   | 2026-11-16 01:48:19 PST session stopped: run_session_e196.sh rc 8; stop: {"by": "stops_e196", "why": "board 66.56 W at or above 65 W on 3 samples in a row", "t_ms": 1794822490776}; the blocks done stand (reduced as they stand)
+   | 2026-11-16 01:48:19 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 49 pass, 74 train; card time 121 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:48:19 PST session end (T0 1794822377)
+-> PASS (S1 board at 66 W in train T1: the lab's 65 W stop (stops_e196.py) writes STOP before stopwatch's 80 W; session.rc 1)
+-> PASS (S1b no launch started after the stop (the host reads STOP before every launch); no device process after)
+
+== S2-die-70
+   rc 1 (session.rc 1) in 123.5 s; calls {'lab': 7, 'x14': 11, 'etwho': 5, 'sampler': 4, 'ps': 5}; stop die reading 70 C at or above 70 C
+   | 2026-11-16 01:48:19 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:46:19 PST; the end-stop 02:47:19 PST
+   | 2026-11-16 01:48:19 PST running: run_session_e196.sh (pid 7318)
+   | 2026-11-16 01:50:22 PST run_session_e196.sh rc 8; the last lines of its log: [01:50:22] session done (rc 8): 49 pass launches, 91 train launches recorded [01:50:22] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power_s
+   | 2026-11-16 01:50:22 PST STOP: {"by": "stops_e196", "why": "die reading 70 C at or above 70 C", "t_ms": 1794822614480}
+   | 2026-11-16 01:50:22 PST session stopped: run_session_e196.sh rc 8; stop: {"by": "stops_e196", "why": "die reading 70 C at or above 70 C", "t_ms": 1794822614480}; the blocks done stand (reduced as they stand)
+   | 2026-11-16 01:50:22 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 49 pass, 91 train; card time 123 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:50:22 PST session end (T0 1794822499)
+-> PASS (S2 a die reading at or above 70 C stops the session (the lab's stop, stopwatch or the block))
+
+== S3-sampler-quiet
+   rc 3 (session.rc 3) in 60.4 s; calls {'lab': 5, 'x14': 6, 'etwho': 4, 'sampler': 5, 'ps': 4}; stop newest telemetry line 5.1 s old
+   | 2026-11-16 01:50:23 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:48:23 PST; the end-stop 02:49:23 PST
+   | 2026-11-16 01:50:23 PST running: run_session_e196.sh (pid 7760)
+   | 2026-11-16 01:51:23 PST run_session_e196.sh rc 4; the last lines of its log: [01:51:22] session done (rc 4): 40 pass launches, 28 train launches recorded [01:51:22] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power_s
+   | 2026-11-16 01:51:23 PST STOP: {"by": "run_block", "pass": -1, "why": "newest telemetry line 5.1 s old", "t_ms": 1794822674676}
+   | 2026-11-16 01:51:23 PST GATE-STOP: run_session_e196.sh rc 4 before any train or pass block (no data; E196.md section 11); {"by": "run_block", "pass": -1, "why": "newest telemetry line 5.1 s old", "t_ms": 1794822674676}
+   | 2026-11-16 01:51:23 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 40 pass, 28 train; card time 60 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:51:23 PST session end (T0 1794822622)
+-> PASS (S3 the sampler gone quiet: a stale-telemetry stop)
+-> PASS (S3b the quiet sampler still ended by SIGTERM)
+
+== X1-crash
+   rc 4 (session.rc 4) in 121.6 s; calls {'lab': 7, 'x14': 9, 'etwho': 4, 'sampler': 3, 'ps': 4}; stop -
+   | 2026-11-16 01:51:23 PST the first card command at 01:51:23 PST; the cap at 02:51:23 PST (3600 s); the window's last end 03:51:23 PST
+   | 2026-11-16 01:51:23 PST the cut order: M = 60 minutes: M >= 53: every arm, passes 0-5 and pass 6 if it fits; DEADLINE 02:49:23 PST; the end-stop 02:50:23 PST
+   | 2026-11-16 01:51:23 PST running: run_session_e196.sh (pid 8101)
+   | 2026-11-16 01:53:24 PST run_session_e196.sh rc 137; the last lines of its log: [01:53:23] session done (rc 137): 49 pass launches, 70 train launches recorded [01:53:24] config config-end.json: skipped: the session was stopped by a
+   | 2026-11-16 01:53:24 PST session ended without a registered stop: run_session_e196.sh rc 137, no stop recorded (a crash: report it, kill nothing; a dated note decides whether its blocks are reduced)
+   | 2026-11-16 01:53:24 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 49 pass, 70 train; card time 121 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:53:24 PST session end (T0 1794822683)
+-> PASS (X1 the block killed from outside mid-train (no stop recorded): 'ended without a registered stop', session.rc 4, step 10 MAIN-CRASHED)
+-> PASS (X1b the sampler stopped by SIGTERM by the port's own trap)
+
+== T-signal
+   rc 1 (session.rc 1) in 122.5 s; calls {'lab': 7, 'x14': 10, 'etwho': 5, 'sampler': 4, 'ps': 5}; stop a signal to the wrapper: the run in flight finishes
+   | 2026-11-16 01:53:25 PST running: run_session_e196.sh (pid 8515)
+   | 2026-11-16 01:55:18 PST signal: STOP written; waiting for the session to end
+   | 2026-11-16 01:55:27 PST run_session_e196.sh rc 8; the last lines of its log: [01:55:26] session done (rc 8): 49 pass launches, 79 train launches recorded [01:55:26] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power_s
+   | 2026-11-16 01:55:27 PST STOP: {"by": "session_e196", "why": "a signal to the wrapper: the run in flight finishes", "t_ms": 1794822918316}
+   | 2026-11-16 01:55:27 PST session stopped: run_session_e196.sh rc 8; stop: {"by": "session_e196", "why": "a signal to the wrapper: the run in flight finishes", "t_ms": 1794822918316}; the blocks done stand (reduced as they stand)
+   | 2026-11-16 01:55:27 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 49 pass, 79 train; card time 122 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:55:27 PST session end (T0 1794822804)
+-> PASS (T SIGTERM to the wrapper mid-train: STOP, the run in flight finishes, the blocks done stand, session end, the sampler by SIGTERM)
+
+== M41-cut-order
+   rc 3 (session.rc 3) in 114.5 s; calls {'lab': 5, 'x14': 6, 'etwho': 4, 'sampler': 4, 'ps': 4}; stop desk test: by hand, after the smoke gate
+   | 2026-11-16 01:55:27 PST the cut order: M = 41 minutes: 40 <= M < 43: DROP_ARMS=F.Ae,Z.b50,I.H.mFFFF (left out of every pass), the trains stay, the passes that fit; DEADLINE 02:34:57 PST; the end-stop 02:35:57 PST
+   | 2026-11-16 01:55:27 PST running: run_session_e196.sh (pid 8960)
+   | 2026-11-16 01:57:21 PST run_session_e196.sh rc 0; the last lines of its log: [01:57:20] session done (rc 0): 40 pass launches, 28 train launches recorded [01:57:20] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power_s
+   | 2026-11-16 01:57:21 PST STOP: {"by": "hand", "why": "desk test: by hand, after the smoke gate", "t_ms": 1794823002802}
+   | 2026-11-16 01:57:21 PST GATE-STOP: run_session_e196.sh rc 0 before any train or pass block (no data; E196.md section 11); {"by": "hand", "why": "desk test: by hand, after the smoke gate", "t_ms": 1794823002802}
+   | 2026-11-16 01:57:21 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 40 pass, 28 train; card time 114 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:57:21 PST session end (T0 1794822927)
+-> PASS (M41 M = 41: the cut order, the three arms dropped from every pass (the port's plan line))
+
+== M45-five-passes
+   rc 3 (session.rc 3) in 114.5 s; calls {'lab': 5, 'x14': 6, 'etwho': 4, 'sampler': 4, 'ps': 4}; stop desk test: by hand, after the smoke gate
+   | 2026-11-16 01:57:22 PST the cut order: M = 45 minutes: 43 <= M < 53: every arm, the passes that fit (five expected); DEADLINE 02:40:52 PST; the end-stop 02:41:52 PST
+   | 2026-11-16 01:57:22 PST running: run_session_e196.sh (pid 9365)
+   | 2026-11-16 01:59:16 PST run_session_e196.sh rc 0; the last lines of its log: [01:59:15] session done (rc 0): 40 pass launches, 28 train launches recorded [01:59:15] config config-end.json: {"tdp_w":0,"temp_threshold_c":65,"power_s
+   | 2026-11-16 01:59:16 PST STOP: {"by": "hand", "why": "desk test: by hand, after the smoke gate", "t_ms": 1794823117698}
+   | 2026-11-16 01:59:16 PST GATE-STOP: run_session_e196.sh rc 0 before any train or pass block (no data; E196.md section 11); {"by": "hand", "why": "desk test: by hand, after the smoke gate", "t_ms": 1794823117698}
+   | 2026-11-16 01:59:16 PST trains complete: 0 of 2; passes complete: 0 of 7 asked (pass 6 only if it fit); launch records 40 pass, 28 train; card time 114 s from the first card command (cap 3600 s)
+   | 2026-11-16 01:59:16 PST session end (T0 1794823042)
+-> PASS (M45 M = 45: every arm, the passes that fit; DEADLINE = the last end - 2 minutes)
+
+== M39-no-session
+   rc 2 (session.rc 2) in 0.4 s; calls {'etwho': 1, 'ps': 1}; stop -
+   | 2026-11-16 01:59:16 PST session start (T0 1794823156 = 01:59:16 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:16 PST checked: host aifoundry3; USER the login; the registration's list 467ede7827f5 and its six session files; the kit's list and its seven session files; the shared files; both hosts today's build (7 hashes in 
+   | 2026-11-16 01:59:16 PST refused: the cut order: M = 39 minutes from the first card command to the earlier of the window's last end and the cap: M < 40, no session (E196.md section 6) (no device opened)
+-> PASS (M39 M = 39: no session, no device opened)
+
+== R1-hostname
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:16 PST session start (T0 1794823157 = 01:59:17 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:16 PST refused: this host is 'aifoundry9' (Python reads 'aifoundry9'), not aifoundry3: E196 runs on aifoundry3 card 0 (its order is aifoundry3's) (no device opened)
+-> PASS (R1 another host's name: refused before anything)
+
+== R2-user
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:17 PST session start (T0 1794823158 = 01:59:18 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:17 PST refused: USER is not this login (E183 kit note 6's carried rule) (no device opened)
+-> PASS (R2 USER not the login: refused)
+
+== R3-desktest-var
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:17 PST session start (T0 1794823159 = 01:59:19 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:17 PST refused: E196_CAP_S is a desk-test variable, read only with E196_DESKTEST=1 (the card day never sets it) (no device opened)
+-> PASS (R3 a desk-test variable without E196_DESKTEST=1: refused)
+
+== R4-registered-file
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:17 PST session start (T0 1794823160 = 01:59:20 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:17 PST refused: a registered session file is off its sha256 (tools/claims-v3/e196/proposal/src/make_x14.py: FAILED
+   | sha256sum: WARNING: 1 computed checksum did NOT match) (no device opened)
+-> PASS (R4 a registered file one byte longer: refused)
+
+== R5-kit-list
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:17 PST session start (T0 1794823161 = 01:59:21 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:17 PST refused: the kit's list is not at the sha256 the runbook passed (E196_KITLIST_SHA256) (no device opened)
+-> PASS (R5 the kit's list off the runbook's sha256: refused)
+
+== R6-no-deadline
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:17 PST session start (T0 1794823162 = 01:59:22 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:18 PST checked: host aifoundry3; USER the login; the registration's list 467ede7827f5 and its six session files; the kit's list and its seven session files; the shared files; both hosts today's build (7 hashes in 
+   | 2026-11-16 01:59:18 PST refused: no E196_DEADLINE_EPOCH (the window's last end) (no device opened)
+-> PASS (R6 no window last end: refused)
+
+== R7-build-record-old
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:18 PST session start (T0 1794823163 = 01:59:23 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:18 PST refused: no build record written today (build/claims-v3/aifoundry3/e196/build/BUILD-E196.txt: step 6) (no device opened)
+-> PASS (R7 the build record not from today: refused)
+
+== R8-host-not-recorded
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:18 PST session start (T0 1794823164 = 01:59:24 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:18 PST refused: build/claims-v3/aifoundry3/e196/build/x14/host/x14_host is not the binary today's build recorded (x14_host_sha256) (no device opened)
+-> PASS (R8 a host that is not today's recorded build: refused)
+
+== R9-text-not-registered
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:18 PST session start (T0 1794823165 = 01:59:25 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:18 PST refused: today's build record does not read E196-BUILT with both kernels' .text at 8798e43c... (E196.md section 11: no session) (no device opened)
+-> PASS (R9 a kernel .text other than 8798e43c... in today's record: refused (E196.md section 11))
+
+== W1-two-cards
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:18 PST session start (T0 1794823166 = 01:59:26 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:18 PST refused: the card nodes here are '/dev/et0_ops /dev/et1_ops' and '/dev/et0_mgmt /dev/et1_mgmt', not exactly /dev/et0_ops and /dev/et0_mgmt: one card only, counted before anything opens a node (no device ope
+-> PASS (W1 the node count (et0_ops,et1_ops,et0_mgmt,et1_mgmt): refused before anything)
+
+== W2-no-card
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:18 PST session start (T0 1794823167 = 01:59:27 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:19 PST refused: the card nodes here are '' and '', not exactly /dev/et0_ops and /dev/et0_mgmt: one card only, counted before anything opens a node (no device opened)
+-> PASS (W2 the node count (none): refused before anything)
+
+== W3-no-mgmt
+   rc 2 (session.rc 2) in 0.2 s; calls {}; stop -
+   | 2026-11-16 01:59:19 PST session start (T0 1794823168 = 01:59:28 PST; E196, the lab port of the proposal's reference session, kit-e196)
+   | 2026-11-16 01:59:19 PST refused: the card nodes here are '/dev/et0_ops' and '', not exactly /dev/et0_ops and /dev/et0_mgmt: one card only, counted before anything opens a node (no device opened)
+-> PASS (W3 the node count (et0_ops): refused before anything)
+-> PASS (W10 step 10's patterns read from rb/s20_wait_e196.sh: the session found by its real script's name (session_e196.sh), never the port's)
+-> PASS (Z1 no process of the test left)
+-> PASS (Z2 no network call (ssh, rsync, scp stand-ins never called))
+-> PASS (Z3 no /dev/et* but the test's two regular files)
+
+== AUDIT the dry branches (desk/dry-branches-e196.tsv)
+-> PASS (AUDIT1 every dry branch has a row (11 lines in the three files), each row's text the file's own line)
+-> PASS (AUDIT2 every case a row names ran and passed in this run)
+
+failed: none
+DESKTEST-REALPATH-E196 84 of 84 PASS
+end 2026-11-16 01:59:19 PST rc 0
