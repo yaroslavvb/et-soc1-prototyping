@@ -1,0 +1,110 @@
+{
+ "checks": {
+  "1 spin2": {
+   "catalogue_scaled_w": 2.418,
+   "measured_w": 2.488148437132234,
+   "pass": true,
+   "verdict": "PASS"
+  },
+  "2 faddps_p1": {
+   "verdict": "NOT COMPUTED",
+   "why": "faddps_p1 has no measured value"
+  },
+  "2 fsgnjs_p1": {
+   "verdict": "NOT COMPUTED",
+   "why": "fsgnjs_p1 has no measured value"
+  },
+  "3 anchor drift": {
+   "boundaries": 32,
+   "flagged": [
+    "1/D",
+    "2/S",
+    "2/W",
+    "2/T",
+    "3/S",
+    "3/D",
+    "5/D",
+    "5/T",
+    "6/S",
+    "6/D",
+    "6/T",
+    "7/S",
+    "7/D",
+    "8/T"
+   ],
+   "verdict": "FLAGGED"
+  },
+  "4 device ok": {
+   "dropped_device": 0,
+   "runs": 180,
+   "trains": 54,
+   "trains_not_ok": 0,
+   "verdict": "REPORTED"
+  },
+  "5 clock": {
+   "dropped_clock": 0,
+   "verdict": "REPORTED"
+  },
+  "6 duty linear": {
+   "residuals_w": [
+    0.04488425766844829,
+    -0.03176717399873252,
+    -0.07197218738161659,
+    0.058855103711898504
+   ],
+   "verdict": "FAIL"
+  },
+  "7 nulls": {
+   "duty33f-line": {
+    "w": -0.019727174264994818
+   },
+   "duty33k-line": {
+    "w": 0.12979647752365397
+   },
+   "verdict": "REPORTED",
+   "wait2-tk": {
+    "ci95_w": [
+     -0.028485856940721477,
+     0.05335925117091131
+    ],
+    "w": 0.012436697115094916
+   }
+  },
+  "8 dip rule": {
+   "by_pass": {
+    "0": 0,
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0,
+    "6": 0,
+    "7": 0,
+    "8": 0
+   },
+   "by_window": {
+    "busy": 0,
+    "busy_readings": 6332,
+    "idle_after": 0,
+    "idle_after_readings": 4506,
+    "idle_before": 0,
+    "idle_before_readings": 4481,
+    "train_segment": 0,
+    "train_segment_readings": 1522
+   },
+   "dropped_readings": 0,
+   "measured_passes_dropped": 0,
+   "note": "readings more than 4 W below their window's median, counted in every window the registered reducer evaluates; a reading inside two windows counts in each; pass 0 (the warm-up) is counted in by_pass and left out of measured_passes_dropped",
+   "verdict": "REPORTED"
+  },
+  "9 stall2": {
+   "divides_per_hart_cycle": 0.0070999999999999995,
+   "name": "a stalled pipeline",
+   "spin2_slots_per_hart_cycle": 0.34746425,
+   "threshold": "less than half of the session's spin2 rate (E193.md 8, the lab's reading)",
+   "verdict": "REPORTED"
+  }
+ },
+ "schema": "e193-checks/1",
+ "x04_json": "x04-e198-A.json"
+}
