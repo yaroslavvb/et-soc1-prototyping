@@ -1,0 +1,19 @@
+2026-11-16 07:24:46 PST session start (T0 1794842686 = 07:24:46 PST; E198 sitting A, blocks S,D,W,T, cap 60 card-minutes; the lab's runner copy on aifoundry1 card 1 in a private /dev; kit-e198 with amendment A1 (no kill path))
+2026-11-16 07:24:46 PST box aifoundry1, tree nekko, root build/claims-v3/aifoundry1/e198; Python 3.12.3
+2026-11-16 07:24:46 PST HARNESS OK: 51 files at their sha256 under the root, 3 executable
+2026-11-16 07:24:46 PST preflight: dmcmd_audit: GO (19 send site(s), 0 disallowed; allow-list: none)
+2026-11-16 07:24:46 PST binaries: host a4bd858c04a76143, kernel 01a3776755f5c684 (as built: X04-BUILT 2026-11-16 07:23:36 PST); reader 8008f96f056ae1c2, E191's guard 6fd26f51129dec42
+2026-11-16 07:24:46 PST the first card command (the holder check): free on both cards (et-who --check exit 0; other users' device processes 0, ours 0); the host's ops nodes /dev/et0_ops /dev/et1_ops; the cap counts from the holder check's start
+2026-11-16 07:24:46 PST the private /dev (privdev_e198.sh, a listing inside it, nothing opened): card nodes inside [et1_mgmt et1_ops], 16 entries; the box's real /run/lock, /proc and /sys
+2026-11-16 07:24:46 PST start config read (inside the private /dev): IDENT-A OK: TDP 65 W, 65 C, minion 600 MHz as found; PCIe target /dev/et1_mgmt and physical device ID 1 on its stderr; minion_mv within (450, 510)
+2026-11-16 07:24:56 PST identity read with the sampler running: IDENT-B OK: {"inside_lines": 1, "inside_same_as_outside": true, "other_on_card0": 0, "other_on_card1": 0, "ours_elsewhere": 0, "ours_on_card0": 0, "ours_on_card1": 1, "ours_on_mgmt": 1}; the sampler holds /dev/et1_mgmt and no card-0 node; the holder check from inside the private /dev lists the sampl; IDENT-INNER done: sampler rc 0, samples 100, inside holder check rc 1
+2026-11-16 07:24:56 PST the runner's deadline: 08:22:46 PST (epoch 1794846166: the first card command + 3600 s - 120 s, never past the window's last end - 180 s); no run starts after it
+2026-11-16 07:24:56 PST smoke start: run_x04_e198a1.py build/e198/T1794842686/smoke --smoke --blocks S,D,W,T,C (the five named arms, 10 device processes), in the private /dev
+2026-11-16 07:26:41 PST smoke end: runner rc 0; no stop: done
+2026-11-16 07:26:41 PST SMOKE GO: 10 of 10 device processes exit 0 as registered, 57 launches all ok, the train 12 of 12 (3 a segment); telemetry 1040 samples, every one at 600 MHz, board max 39.37 W, die max 54 C (below every stop); the host's runtime lines: {"device_processes": 10, "opening_text_left": 0, "other_lines": 0, "raw_unread": 0, "runtime_cards": [1], "runtime_lines_dropped": 10, "x04_lines": 57, "x04_not_at_start": 0}
+2026-11-16 07:26:41 PST main run start: run_x04_e198a1.py build/e198/T1794842686/x04 --blocks S,D,W,T (9 passes, pass 0 the registered warm-up), in the private /dev
+2026-11-16 08:08:04 PST main run end: runner rc 0, every pass (no stop: done)
+2026-11-16 08:08:04 PST the host's runtime lines in the main run: {"device_processes": 234, "opening_text_left": 0, "other_lines": 0, "raw_unread": 0, "runtime_cards": [1], "runtime_lines_dropped": 234, "x04_lines": 2808, "x04_not_at_start": 0}
+2026-11-16 08:08:04 PST closing config read: IDENT-A OK: TDP 65 W, 65 C, minion 600 MHz as found; PCIe target /dev/et1_mgmt and physical device ID 1 on its stderr; minion_mv within (450, 510) (reported; nothing was set by this session)
+2026-11-16 08:08:04 PST the warden: {"comms": ["ettelem", "x04clock_host"], "ended": "stop file", "held_mgmt": 3, "held_ops": 244, "nodes_seen": ["/dev/et1_mgmt", "/dev/et1_ops"], "processes_holding_a_card_node": 247, "requests_served": 42, "statuses": {"0": 2, "1": 40}, "watch_hits": []}
+2026-11-16 08:08:04 PST session end (T0 1794842686)
