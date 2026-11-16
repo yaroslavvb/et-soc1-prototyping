@@ -1,0 +1,163 @@
+{
+ "checks": [
+  {
+   "check": "the v2 inputs v3 imports are byte for byte as pinned (ledger_v2.py, ledger_estimate.py, frozen-v2.json, catalogue.json)",
+   "detail": "",
+   "pass": true
+  },
+  {
+   "check": "frozen-v3.json's sha256 is its freeze line (frozen-v3.json.sha256)",
+   "detail": "4b43f510fdf2f1df1f940303247a523b0b6fb409eb853161c7621b458635014b",
+   "pass": true
+  },
+  {
+   "check": "the data README carries the freeze line",
+   "detail": "4b43f510fdf2f1df1f940303247a523b0b6fb409eb853161c7621b458635014b",
+   "pass": true
+  },
+  {
+   "check": "frozen-v3.json recomputed from its committed sources is the same, byte for byte",
+   "detail": "",
+   "pass": true
+  },
+  {
+   "check": "every parent the freeze names is unchanged",
+   "detail": "",
+   "pass": true
+  },
+  {
+   "check": "the freeze pins what a new configuration's counts and lines are made from (the kernel's disassembly, ledger_desk.py) and every measured day it reads; every pinned SHA256SUMS still matches every file it lists",
+   "detail": "5 lists, 1164 files re-hashed; differ []; not pinned []",
+   "pass": true
+  },
+  {
+   "check": "tools/counter/test_l1_model.py",
+   "detail": "",
+   "pass": true
+  },
+  {
+   "check": "v3 with all seven rules off is v2: E189's, E191's and E194's frozen forecasts and scorers",
+   "detail": "291 numbers, worst relative difference 4.32e-06; failed []",
+   "pass": true
+  },
+  {
+   "check": "v2 + r1 alone changes seconds of the scalar programs only",
+   "detail": "seconds ['sha256', 'sort-sorted', 'sort-shuffled'], J over idle [], J at rest ['sha256', 'sort-sorted', 'sort-shuffled']",
+   "pass": true
+  },
+  {
+   "check": "v2 + r2 alone changes the copies' seconds only",
+   "detail": "seconds ['copy-zeros', 'copy-random'], J over idle [], J at rest ['copy-zeros', 'copy-random']",
+   "pass": true
+  },
+  {
+   "check": "v2 + r3 alone changes the scalar programs' J over idle only",
+   "detail": "seconds [], J over idle ['sha256', 'sort-sorted', 'sort-shuffled'], J at rest ['sha256', 'sort-sorted', 'sort-shuffled']",
+   "pass": true
+  },
+  {
+   "check": "v2 + r4 alone changes the copies' J over idle only",
+   "detail": "seconds [], J over idle ['copy-zeros', 'copy-random'], J at rest ['copy-zeros', 'copy-random']",
+   "pass": true
+  },
+  {
+   "check": "v2 + r5 alone changes J with the card at rest only",
+   "detail": "seconds [], J over idle [], J at rest ['copy-zeros', 'copy-random', 'sha256', 'sort-sorted', 'sort-shuffled']",
+   "pass": true
+  },
+  {
+   "check": "rule 6 changes nothing on aifoundry3 (its own column is aifoundry3's)",
+   "detail": "",
+   "pass": true
+  },
+  {
+   "check": "rule 6 changes card 1's line and copy prices (rules 3 and 4 read card 1's column)",
+   "detail": {
+    "copy-random": [
+     8.0039,
+     7.2283
+    ],
+    "copy-zeros": [
+     6.2618,
+     5.1503
+    ],
+    "sha256": [
+     2.621,
+     2.5598
+    ],
+    "sort-shuffled": [
+     4.1557,
+     3.933
+    ],
+    "sort-sorted": [
+     3.5927,
+     3.37
+    ]
+   },
+   "pass": true
+  },
+  {
+   "check": "rule 7 is zero for every pinned-card load (E189's and E191's programs, E201's shapes, sparse parity at 600 MHz, E59's loads)",
+   "detail": "27 of 27 loads",
+   "pass": true
+  },
+  {
+   "check": "rule 7 applies on aifoundry2 at 800 MHz (a registered busy-base relation, above its 600 MHz idle point)",
+   "detail": "",
+   "pass": true
+  },
+  {
+   "check": "the level rule: L1 for the 16-key sorts, L2 for the 512-key sorts (not refused) and the 4 MiB copy, DRAM for the 256 MiB and 1 GiB copies",
+   "detail": "{\"copy-dram-256m\": \"DRAM\", \"copy-l2-4m\": \"L2\", \"copy-random\": \"DRAM\", \"copy-zeros\": \"DRAM\", \"sha256\": \"L2\", \"sort-16-shuffled\": \"L1\", \"sort-16-sorted\": \"L1\", \"sort-256-shuffled\": \"L2\", \"sort-256-sorted\": \"L2\", \"sort-512-shuffled\": \"L2\", \"sort-64-shuffled\": \"L2\", \"sort-shuffled\": \"L2\", \"sort-sorted\": \"L2\"}",
+   "pass": true
+  },
+  {
+   "check": "no blind-day or E201-shaped program is outside v3",
+   "detail": "",
+   "pass": true
+  },
+  {
+   "check": "given() at a forecast's own seconds, wall seconds and die reproduces its J over idle and J at rest",
+   "detail": "",
+   "pass": true
+  },
+  {
+   "check": "every band holds its point (seconds, J over idle, J at rest)",
+   "detail": "18 of 18",
+   "pass": true
+  },
+  {
+   "check": "rule 4's byte rows at another clock: the points unscaled, the bands' high ends x (V/V600)^2 as rule 3's (aifoundry2's copies at 800 against 600 MHz)",
+   "detail": "4 of 4; (V800/V600)^2 1.4240",
+   "pass": true
+  },
+  {
+   "check": "sparse parity: v3 without rule 5 is v2 on a pinned card",
+   "detail": "",
+   "pass": true
+  },
+  {
+   "check": "two forecasts can both pass within th iff their ratio is at most (1+th)/(1-th): 1.105, 1.222, 1.353",
+   "detail": "",
+   "pass": true
+  },
+  {
+   "check": "rule 1's a-set holds only one-cycle rows (each within 0.5 hart-cycles of a after delta); mul and csrr issue at their own rows (a 1,000-instruction loop with 50 mul: 949 a + 50 x_mul + c_br)",
+   "detail": "widest inside (0.1404, 'andi'); x_mul 21.3186, x_csrr 5.9435; the loop 2977.5093 hart-cycles against 2977.5093 (+48% on mul at a)",
+   "pass": true
+  },
+  {
+   "check": "v3's numbers pinned: 30 POST HOC readings (in sample on E189 and E191's second session, E194 with rule 7) equal an independent re-derivation within 0.0001",
+   "detail": "worst absolute difference 1.23e-06",
+   "pass": true
+  },
+  {
+   "check": "S2 is E189's registered test (score_e189.py ok_S2: the mean t_k inside the two-sided band and within 15%): unit cases, and the in-sample six on both cards",
+   "detail": "unit [True, False, False, None]; (S2, of, S2-15) {'E189': (6, 6, 6), 'E191s2': (6, 6, 6)}",
+   "pass": true
+  }
+ ],
+ "frozen_v3_sha256": "4b43f510fdf2f1df1f940303247a523b0b6fb409eb853161c7621b458635014b",
+ "interpreter": "/usr/bin/python3 3.12.3",
+ "verdict": "SELFTEST PASS"
+}

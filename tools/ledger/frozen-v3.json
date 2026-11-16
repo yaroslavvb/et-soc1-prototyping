@@ -1,0 +1,551 @@
+{
+ "constants": {
+  "a_hart_cycles": {
+   "band": [
+    2.0,
+    2.0
+   ],
+   "label": "a priori",
+   "rule": "r1",
+   "source": "the catalogue's one-cycle rows (1/rate 2.66-2.70 hart-cycles with both harts) less their own measuring loop (workloads/enercat/kernel/enercat.c: 64 ops, then an increment, counter reads and a taken back edge): add's 1/rate 2.6834 less its loop's delta 0.6834; a lone hart's add row reads 1/rate 1.7212",
+   "unit": "hart-cycles an instruction, both harts of a minion issuing",
+   "value": 2.0
+  },
+  "a_set_mnemonics": {
+   "fixed_before_the_land": "Q193 verify-ledger3 finding 1: the first freeze took every mnemonic of the five programs, mul and csrr included, at a",
+   "label": "a priori (the catalogue's one-cycle rows)",
+   "outside": {
+    "csrr": {
+     "hart_cycles": 5.943482081785692,
+     "row": "csrr_fccnb"
+    },
+    "mul": {
+     "hart_cycles": 21.318615702131176,
+     "row": "mul"
+    }
+   },
+   "rule": "r1",
+   "source": "the mnemonics in the counts v2 priced for the blind day's five programs (programs_ledger_v3.py) whose own catalogue row (docs/reports/data/2026-09-23-energy-manual/catalogue.json: random column, both harts, aifoundry3's mean, through ledger_estimate.ALIAS) less the loop's delta is within 0.5 hart-cycles of a = 2.0, i.e. one minion cycle an instruction; these issue at a, taken branches and jumps at c_br, untaken branches at a, every other mnemonic (here csrr and mul) at its own catalogue row's 1/rate less delta, as the step-5 design prices a class outside the one-cycle rows",
+   "value": [
+    "add",
+    "addi",
+    "addiw",
+    "addw",
+    "and",
+    "andi",
+    "auipc",
+    "ecall",
+    "flw.ps",
+    "fsw.ps",
+    "ld",
+    "li",
+    "lui",
+    "lw",
+    "mov.m.x",
+    "mv",
+    "not",
+    "or",
+    "sd",
+    "seqz",
+    "sext.w",
+    "sll",
+    "slli",
+    "slliw",
+    "sltiu",
+    "srai",
+    "srl",
+    "srli",
+    "srliw",
+    "sub",
+    "sw",
+    "xor"
+   ],
+   "widest_inside": [
+    0.14040923890018586,
+    "andi"
+   ]
+  },
+  "c_br_hart_cycles": {
+   "a_priori": {
+    "how": "1 / (beq_taken/random/h2's issue rate on aifoundry3) less delta",
+    "value": 16.57769732339778
+   },
+   "band": [
+    12.0,
+    16.57769732339778
+   ],
+   "band_how": "the fast end 12.0: the leave-one-program-out low end less a margin (the design's); the slow end the a priori value",
+   "fit": {
+    "absolute_least_squares": 13.631526156197195,
+    "free_two_parameter_fit": {
+     "a": 2.0369315775207086,
+     "c_br": 13.249132243516467,
+     "note": "not used: it fails when SHA-256 is held out"
+    },
+    "how": "relative least squares of T - a (N - B - n_o) - O = c_br B over SHA-256 and both sorts on both cards: T the slowest minion's cycles (the mean over a configuration's passes), N and B a participant from the counts v2 priced, n_o the instructions outside the a-set and O their hart-cycles at the day's card's own catalogue rows less delta (as ledger_v3.t_hart_v3 prices them)",
+    "leave_one_program_out": {
+     "sha256": 13.540195582598002,
+     "sort-shuffled": 13.319771558528751,
+     "sort-sorted": 13.991522348249898
+    },
+    "per_card": {
+     "E189": 13.578580852081448,
+     "E191s2": 13.578542580730824
+    },
+    "rows": {
+     "E189/sha256": {
+      "B": 1843283.5,
+      "N": 117169700.0,
+      "O": 182.43588978062078,
+      "T": 258972410.25,
+      "n_o": 10.0
+     },
+     "E189/sort-shuffled": {
+      "B": 13372722.375,
+      "N": 128518298.75,
+      "O": 139.79865837635845,
+      "T": 416496709.75,
+      "n_o": 8.0
+     },
+     "E189/sort-sorted": {
+      "B": 12219175.5,
+      "N": 99107480.0,
+      "O": 139.79865837635845,
+      "T": 335578026.5,
+      "n_o": 8.0
+     },
+     "E191s2/sha256": {
+      "B": 1843283.5,
+      "N": 117169700.0,
+      "O": 182.45138201490548,
+      "T": 258971566,
+      "n_o": 10.0
+     },
+     "E191s2/sort-shuffled": {
+      "B": 13372722.375,
+      "N": 128518298.75,
+      "O": 139.81027755207197,
+      "T": 416492296.75,
+      "n_o": 8.0
+     },
+     "E191s2/sort-sorted": {
+      "B": 12219175.5,
+      "N": 99107480.0,
+      "O": 139.81027755207197,
+      "T": 335580393.5,
+      "n_o": 8.0
+     }
+    }
+   },
+   "label": "FITTED, POST HOC (E189 and E191's second session)",
+   "rule": "r1",
+   "unit": "hart-cycles a taken branch or jump, both harts issuing",
+   "value": 13.578561716392336
+  },
+  "dram_copy_rows": {
+   "label": "a priori (the catalogue, 26 Sep)",
+   "rule": "r4",
+   "source": "docs/reports/data/2026-09-23-energy-manual/catalogue.json: bursts of tload/dram/<data> and st_stream/dram/<data> on each card (their mean); bands the combined rows' lo and hi (every card)",
+   "unit": "pJ a byte; B/s",
+   "value": {
+    "aifoundry1-c1": {
+     "random": {
+      "b_wb_b_per_s": 26935158216.299946,
+      "p_tload_band": [
+       117.851645,
+       145.400875
+      ],
+      "p_tload_pj_b": 135.75906933333334,
+      "p_wb_band": [
+       317.416951,
+       373.269285
+      ],
+      "p_wb_pj_b": 368.88302600000003
+     },
+     "zeros": {
+      "b_wb_b_per_s": 26943263516.147293,
+      "p_tload_band": [
+       86.204772,
+       105.675454
+      ],
+      "p_tload_pj_b": 105.06945866666666,
+      "p_wb_band": [
+       202.369376,
+       288.877385
+      ],
+      "p_wb_pj_b": 283.67279866666667
+     }
+    },
+    "aifoundry2": {
+     "random": {
+      "b_wb_b_per_s": 26925988587.846127,
+      "p_tload_band": [
+       117.851645,
+       145.400875
+      ],
+      "p_tload_pj_b": 134.789912,
+      "p_wb_band": [
+       317.416951,
+       373.269285
+      ],
+      "p_wb_pj_b": 329.7414143333333
+     },
+     "zeros": {
+      "b_wb_b_per_s": 26931031415.455917,
+      "p_tload_band": [
+       86.204772,
+       105.675454
+      ],
+      "p_tload_pj_b": 90.90444833333333,
+      "p_wb_band": [
+       202.369376,
+       288.877385
+      ],
+      "p_wb_pj_b": 231.531764
+     }
+    },
+    "aifoundry3": {
+     "random": {
+      "b_wb_b_per_s": 26921242373.115284,
+      "p_tload_band": [
+       117.851645,
+       145.400875
+      ],
+      "p_tload_pj_b": 127.283117,
+      "p_wb_band": [
+       317.416951,
+       373.269285
+      ],
+      "p_wb_pj_b": 325.76983766666666
+     },
+     "zeros": {
+      "b_wb_b_per_s": 26932595569.539646,
+      "p_tload_band": [
+       86.204772,
+       105.675454
+      ],
+      "p_tload_pj_b": 87.93854066666667,
+      "p_wb_band": [
+       202.369376,
+       288.877385
+      ],
+      "p_wb_pj_b": 226.86046399999998
+     }
+    }
+   }
+  },
+  "dram_traffic_bytes_per_byte_copied": {
+   "label": "a priori (the L1's write-allocate)",
+   "rule": "r2",
+   "source": "a store through the L1 that misses fetches its line (facts-l1.json l1.write-policy): read + allocate + write back",
+   "value": 3
+  },
+  "forecast_die_c": {
+   "band": [
+    48.0,
+    60.0
+   ],
+   "label": "POST HOC (an input condition, not a price)",
+   "measured": {
+    "E189": {
+     "mean": 50.44921875,
+     "range": [
+      49.0,
+      51.0
+     ]
+    },
+    "E191s2": {
+     "mean": 50.807291666666664,
+     "range": [
+      50.0,
+      52.0
+     ]
+    },
+    "E191s3": {
+     "mean": 53.815104166666664,
+     "range": [
+      53.0,
+      54.9375
+     ]
+    },
+    "E194": {
+     "mean": 48.65625,
+     "range": [
+      47.0,
+      50.0
+     ]
+    }
+   },
+   "rule": "r5",
+   "source": "the blind days' measured starting dice (energy.json die_c.before over every pass)",
+   "unit": "C",
+   "value": 50.0
+  },
+  "governed_base_w": {
+   "label": "a priori numbers (E136's relation, registered before E194); rule 7's FORM is POST HOC",
+   "note": "no relation for aifoundry3 or card 1: both run pinned at 600 MHz, where rule 7 is zero",
+   "rule": "r7",
+   "source": "tools/claims-v3/e136/predictions-e136.json relation.B (E101's relation through E119, aifoundry2)",
+   "unit": "W, the card's busy base at each clock",
+   "value": {
+    "aifoundry2": {
+     "B": {
+      "600": 25.455614671708208,
+      "700": 28.243261128820862,
+      "800": 33.60956684526229
+     },
+     "f_idle_mhz": 600
+    }
+   }
+  },
+  "governor_climb_s": {
+   "band": [
+    0.014,
+    1.325
+   ],
+   "label": "a priori (E190 arm A, 84 processes)",
+   "rule": "r7",
+   "source": "tools/claims-v3/e194/desk/climb-e190.txt",
+   "unit": "s at the idle clock at each burst's start",
+   "value": 0.852
+  },
+  "l2_line_cycles_minion": {
+   "label": "a priori (E48, 26 Sep; the same on three cards)",
+   "note": "assumed clock-free (E48 measured them at 600 MHz only)",
+   "rule": "r2",
+   "source": "docs/reports/data/2026-09-23-energy-manual/manual.json gs.configs[gs/E/flw/dram-4K/rand/random/h2/mff/n1024].cpi_minion and [gs/E/fsw/dram-4K/rand/random/h2/mff/n1024].cpi_minion",
+   "unit": "minion-cycles a line at the L2 (both harts of a minion)",
+   "value": {
+    "alloc": 26.02,
+    "fill": 22.362
+   }
+  },
+  "launch_overhead_s": {
+   "label": "POST HOC (measured)",
+   "measured": {
+    "E189": {
+     "mean": 0.0014625994804883164,
+     "range": [
+      0.0008015519059827447,
+      0.002688334090000133
+     ]
+    },
+    "E191s2": {
+     "mean": 0.0017218001687576312,
+     "range": [
+      0.0011967810114474897,
+      0.002404091477629433
+     ]
+    }
+   },
+   "rule": "r5",
+   "source": "the blind days' passes: t_w = 1 / solves_per_s less t_k",
+   "unit": "s a launch (t_w - t_k)",
+   "value": 0.0015
+  },
+  "levels": {
+   "label": "a priori (the documented geometry)",
+   "rule": "r3",
+   "source": "docs/reports/data/2026-09-28-memory-levels/research/facts-l1.json l1.firmware-mode; docs/reports/data/2026-09-28-memory-levels/research/facts-l2.json l2.partition.default (0.5 MB L2, 1 MB L3 a shire, 32 MB in all); validated: the 512-key sorts' 6 KiB a hart (384 KiB a shire), E189, E191 and E194",
+   "value": {
+    "harts_per_shire": 64,
+    "l1_bytes_per_hart": 512,
+    "l2_bytes_per_shire": 524288,
+    "l2_validated_bytes_per_shire": 393216,
+    "l3_bytes_chip": 33554432
+   }
+  },
+  "line_prices_pj": {
+   "band": {
+    "e_r": [
+     301.38,
+     351.194
+    ],
+    "e_w": [
+     691.592,
+     829.49
+    ]
+   },
+   "label": "a priori (E48, 26 Sep)",
+   "rule": "r3",
+   "source": "docs/reports/data/2026-09-23-energy-manual/manual.json gs.configs: e_r = flw dram-4K less flw dram-512B, e_w = fsw dram-4K less fsw dram-512B, each card's own mean (pj_per_element; one line an element); band the three cards' range; dram_line_pj_b = flw dram-256K / 64 B, the loads' L1-fill path from DRAM (the other candidate for the copy's read path)",
+   "unit": "pJ a line past the L1",
+   "value": {
+    "aifoundry1-c1": {
+     "dram_line_pj_b": 153.1109375,
+     "e_r": 351.194,
+     "e_w": 829.49
+    },
+    "aifoundry2": {
+     "dram_line_pj_b": 143.1671875,
+     "e_r": 313.352,
+     "e_w": 723.0609999999999
+    },
+    "aifoundry3": {
+     "dram_line_pj_b": 136.5921875,
+     "e_r": 301.38,
+     "e_w": 691.592
+    }
+   }
+  },
+  "loop_delta_hart_cycles": {
+   "label": "a priori",
+   "rule": "r1",
+   "source": "docs/reports/data/2026-09-23-energy-manual/catalogue.json: 1 / (add/random/h2's issue rate on aifoundry3, the mean of its bursts) - 2.0",
+   "unit": "hart-cycles an op",
+   "value": 0.6834231534694428
+  },
+  "p_stall_w": {
+   "band": [
+    0.2918894009216569,
+    1.19
+   ],
+   "band_low_source": "E193's stall price, docs/reports/data/2026-11-15-e193-x04-clock-sitting-a-aifoundry3/x04-e193-A.json trains.tr_tk_stall2.contrast_board_w (0.2828 W on 992 workers) x 1,024 / 992",
+   "beside_it": {
+    "e193_spin2_w_per_1024": 2.53028793542288,
+    "note": "a spinning pair issues instructions: not a stall; REPORTED only, outside the band"
+   },
+   "label": "a priori",
+   "rule": "r4",
+   "source": "E23 (1,024 minions stalled on a contended atomic, 1.19 W): docs/reports/data/2026-11-12-q166-ledger-v2/frozen-v2.json constants.awake_pj_per_hart_cycle x 1,024 x 600 MHz, v2's own awake price",
+   "unit": "W over idle, 1,024 minions waiting, at 600 MHz",
+   "value": 1.19,
+   "why_e23_is_the_point": "it is the ledger v2's own awake price (no new number chosen after the blind days), and it measures a stall on the memory side, as a copy's harts wait on DRAM; E193's stall2 is a stalled pipeline with both harts idle (0.007 issue slots a cycle) and is the band's low end; post hoc the blind days' copies read -5.2/-3.2% (aifoundry3) and +4.2/-3.1% (card 1) at E23, -10.9/-7.4% and -1.1/-6.9% at E193's stall2"
+  },
+  "r_dram_b_per_s": {
+   "fit": {
+    "a_priori_fast_end": {
+     "aifoundry1-c1": 53870316432.59989,
+     "aifoundry2": 53851977175.69225,
+     "aifoundry3": 53842484746.23057
+    },
+    "how": "the mean over the two copies of 3 B a byte copied x 1 GiB x 14 / the mean t_k (the slowest minion's cycles / 600 MHz)"
+   },
+   "label": "FITTED, POST HOC (the blind days' copies; the default, for a card without its own, is their mean)",
+   "note": "no minion clock in it (E194, post hoc, read the same rate at 800 MHz)",
+   "rule": "r2",
+   "unit": "B/s of DRAM traffic at the slowest minion",
+   "value": {
+    "aifoundry1-c1": 49704887000.87767,
+    "aifoundry3": 49691489248.12845,
+    "default": 49698188124.50306
+   }
+  },
+  "r_dram_b_per_s_slow_factor": {
+   "label": "a hand choice (the design's)",
+   "rule": "r2",
+   "source": "the DRAM copy's seconds band's slow end: +10%; its fast end the copy's traffic at twice the store stream's rate, no skew",
+   "value": 1.1
+  },
+  "v2_literals": {
+   "label": "v2's own literals, kept",
+   "rule": "none (the rules-off path)",
+   "source": {
+    "die_band_c": "tools/claims-v3/e189/forecast_e189.py: T0_FORECAST, T0_BAND = 55.0, (52.0, 60.0)",
+    "forecast_die_c": "tools/claims-v3/e189/forecast_e189.py: T0_FORECAST, T0_BAND = 55.0, (52.0, 60.0)",
+    "h1_over_h2_add": "tools/claims-v3/e189/forecast_e189.py: H1_OVER_H2 = (\"add\", 0.581, 0.3727)",
+    "l2_lines_per_s": "tools/claims-v3/e189/forecast_e189.py: L2_LINES_PER_S = 27.4e9",
+    "l2_row_pj_b": "workloads/ledger/ledger_estimate.py: l2_pj = (2.83, 1.42, 4.99)",
+    "rd_random_band": "workloads/ledger/ledger_estimate.py: rd = (mp[\"dram_load\"][\"random_pj\"][\"a3\"], 105.6, 145.4)",
+    "rd_zeros_band": "workloads/ledger/ledger_estimate.py: rd = (mp[\"dram_load\"][\"zeros_pj\"], 86.2, 114.6)",
+    "sha256_thrash_lines_a_compression": "workloads/ledger/ledger_estimate.py: thrash = 8 * units_card * P",
+    "sort_high_factor": "workloads/ledger/ledger_estimate.py: nb * l2_pj[2] * 1.5",
+    "store_stream_gb_s": "workloads/ledger/ledger_estimate.py: bw_st = 27e9",
+    "wb_random": "workloads/ledger/ledger_estimate.py: wr = (325.8, 317.4, 373.3)",
+    "wb_zeros": "workloads/ledger/ledger_estimate.py: wr = (247.4, 202.4, 288.9)"
+   },
+   "value": {
+    "die_band_c": [
+     52.0,
+     60.0
+    ],
+    "forecast_die_c": 55.0,
+    "h1_over_h2_add": [
+     0.581,
+     0.3727
+    ],
+    "l2_lines_per_s": 27400000000.0,
+    "l2_row_pj_b": [
+     2.83,
+     1.42,
+     4.99
+    ],
+    "rd_random_band": [
+     105.6,
+     145.4
+    ],
+    "rd_zeros_band": [
+     86.2,
+     114.6
+    ],
+    "sha256_thrash_lines_a_compression": 8,
+    "sort_high_factor": 1.5,
+    "store_stream_gb_s": 27.0,
+    "wb_random": [
+     325.8,
+     317.4,
+     373.3
+    ],
+    "wb_zeros": [
+     247.4,
+     202.4,
+     288.9
+    ]
+   }
+  }
+ },
+ "fitted_on_the_blind_days": [
+  "c_br_hart_cycles",
+  "r_dram_b_per_s"
+ ],
+ "frozen_by": "tools/ledger/freeze_ledger_v3.py under /usr/bin/python3 3.12.3",
+ "frozen_pst": "Mon 16 Nov 2026 04:44 PST",
+ "model": "ledger v3 (Q193): ledger v2 with seven rules, each switchable; all seven off is v2",
+ "parents_sha256": {
+  "docs/reports/data/2026-09-23-energy-manual/catalogue.json": "1186a9764838330369bc87f90f9ed4aed03d9d1373fd3185a8f107cf2eb1a7ae",
+  "docs/reports/data/2026-09-23-energy-manual/manual.json": "89f72e1edbd2b818c44ba5f9518fb10da9b2f25b244413647ff3535409ef946c",
+  "docs/reports/data/2026-09-28-memory-levels/research/facts-l1.json": "841b1bd4a7f8c3e0cc0494581a02b57ae103e3407bce1a4cdf4df0c2cb5679e4",
+  "docs/reports/data/2026-09-28-memory-levels/research/facts-l2.json": "af6da4f3bc24c0fef3cb18fae3117fad6741a2369e9e15136beaa8caba9d25f0",
+  "docs/reports/data/2026-11-12-q166-ledger-v2/frozen-v2.json": "59ff911705137e5486efcb15c482919e3d257f800193bcc9f1d78ee7283753ce",
+  "docs/reports/data/2026-11-12-q166-progs/SHA256SUMS": "96493d9f5e19915057ebe3112bdac568460499920e2beb0e7c1b792a9b8a54b4",
+  "docs/reports/data/2026-11-12-q166-progs/kernel/ledger.dis.gz": "1a07ebfa4072ecf7d73a08f0924a71a3a6edcdae55d92acea6d0e39979b1bd06",
+  "docs/reports/data/2026-11-14-e189-blind-day-aifoundry3/SHA256SUMS": "d3fb68b5bf0f7e937a803c3976cc75c6b725dc3e22314cb412b2f2d10358925f",
+  "docs/reports/data/2026-11-15-e191-blind-day-aifoundry1-c1-s2/SHA256SUMS": "594f5ff613b85b20f82aee398cdd3c1e81d0ef13989fdcbae1bbd1e3ea80c0dc",
+  "docs/reports/data/2026-11-15-e193-x04-clock-sitting-a-aifoundry3/x04-e193-A.json": "e1e536e884f8b5dba2cc836b1bd648f7b5f5b8c7866ea5e1fbedd76b7818052e",
+  "docs/reports/data/2026-11-16-e191-blind-day-aifoundry1-c1-s3/SHA256SUMS": "1285ee68cf88bcbc3df8e73ae449f32a663f28067e1f053d4933f171c4f53060",
+  "docs/reports/data/2026-11-16-e194-blind-day-aifoundry2/SHA256SUMS": "ab533f9704e2fd6bc9affe251306f46b1f70016fd3e2a2f5082f0e96e6d33c6a",
+  "tools/claims-v3/e136/predictions-e136.json": "542567e70e02b56db717b2a6e0b0fdafb7e011ee2bd8c9b857b88db1ac949018",
+  "tools/claims-v3/e194/desk/climb-e190.txt": "a84e52139d87c8a83906e7533430498d399300a4b8dfdff508d7fa2b823ef0a1",
+  "tools/counter/l1_model.py": "099854150c299d154760e275f667a4f4508912fa7831e25d327f016ab777f8f9",
+  "tools/counter/ledger_interp.py": "9aad2cbede0c5aa4a6f4d5e625a5b85e5190809444e01dde41af1a11307ab06c",
+  "tools/ledger/freeze_ledger_v3.py": "a916e11922a4add4165dce3b8ff060b2041ad83999defb385f5519f7f203a04d",
+  "tools/ledger/ledger_v2.py": "214cf7a49c1edae206ae34133bb6e2dc1f99a414e367b4617b2607f451cd2886",
+  "tools/ledger/ledger_v3.py": "339aa642f5c68af519005406661747bf5b7c4473035bca5708b738caf27ac629",
+  "tools/ledger/measured_ledger_v3.py": "ae87efd54a03754a22db9eb981c4beffd584d86f979b96768263f50fc868caee",
+  "tools/ledger/programs_ledger_v3.py": "dc7b45817c09e6ba3cfba4a62de764094aa93943e51fce9b1dfc746319984c02",
+  "workloads/ledger/ledger_desk.py": "b9378ffa40af6ec56dd521bfa1a45c0a930847ad43d0c3dc762cec06620e8224",
+  "workloads/ledger/ledger_estimate.py": "e3670e78da97107c067512450e57698680be4a1def1a0d01a232d4f360eef2f2"
+ },
+ "post_hoc_choices": [
+  "the forecast die 50 C and the 1.5 ms a launch (input conditions read on the blind days)",
+  "the max() of rule 2 (not a sum): carried by the sorts, whose line time is hidden",
+  "the awake analog of rule 4 (E23's stall power as the point, E193's stall2 the band's low end)",
+  "rule 7's form: the climb's share of the burst's work done at the idle clock, without the base (chosen after E194's data; E194.md registered the base over each launch's whole seconds)",
+  "the structure of rules 1-4, chosen after the blind days named seconds and bytes by level"
+ ],
+ "rules": {
+  "r1": "seconds of scalar code: a (N - B) + c_br B (+ other classes at 1/rate - delta) hart-cycles",
+  "r2": "seconds of memory code: max(issue, L2 line time, DRAM traffic / R_dram)",
+  "r3": "bytes by level: lines past the L1 (L1 model) at the card's own E48 line prices; the level rule",
+  "r4": "the DRAM copy: the card's own catalogue DRAM rows + P_stall for its time past the store probe's own",
+  "r5": "the forecast die 50 C; wall seconds = seconds + 1.5 ms",
+  "r6": "card inputs: rules 2-4 read the card's own column (off: aifoundry3's)",
+  "r7": "a governed card above its idle clock: + (B(f) - B(f_idle)) for the time at f, the climb's share at f_idle (POST HOC form)"
+ },
+ "schema": "ledger-v3-frozen/1",
+ "supersedes": {
+  "frozen_pst": "Mon 16 Nov 2026 03:40 PST",
+  "sha256": "bd6e71cae962972437d5b2c7827f4dd9a43b613a89669e48afeba60c30ef2304",
+  "why": "re-frozen before the land, before any E201 datum, for the adversarial verify's findings (Q193 verify-ledger3): 1, rule 1's a-set held mul and csrr (now at their own rows, c_br refitted); 4, ledger_v3.py's citation; 5, the parents list; 7, the DRAM copy's byte-row bands at another clock (ledger_v3.py); the first freeze was never landed"
+ }
+}
