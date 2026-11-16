@@ -1,0 +1,1369 @@
+{
+ "e193_checks": {
+  "A": {
+   "checks": {
+    "1 spin2": {
+     "catalogue_scaled_w": 2.418,
+     "measured_w": 2.451216437440915,
+     "pass": true,
+     "verdict": "PASS"
+    },
+    "2 faddps_p1": {
+     "verdict": "NOT COMPUTED",
+     "why": "faddps_p1 has no measured value"
+    },
+    "2 fsgnjs_p1": {
+     "verdict": "NOT COMPUTED",
+     "why": "fsgnjs_p1 has no measured value"
+    },
+    "3 anchor drift": {
+     "boundaries": 32,
+     "flagged": [
+      "1/T",
+      "2/T",
+      "3/S",
+      "3/D",
+      "3/T",
+      "4/T",
+      "5/S",
+      "5/T",
+      "6/S",
+      "6/D",
+      "7/S",
+      "7/D",
+      "7/W",
+      "7/T",
+      "8/S",
+      "8/T"
+     ],
+     "verdict": "FLAGGED"
+    },
+    "4 device ok": {
+     "dropped_device": 0,
+     "runs": 180,
+     "trains": 54,
+     "trains_not_ok": 0,
+     "verdict": "REPORTED"
+    },
+    "5 clock": {
+     "dropped_clock": 0,
+     "verdict": "REPORTED"
+    },
+    "6 duty linear": {
+     "residuals_w": [
+      0.024870421726878852,
+      -0.0073471573064294304,
+      -0.060765624499515836,
+      0.043242360079063236
+     ],
+     "verdict": "FAIL"
+    },
+    "7 nulls": {
+     "duty33f-line": {
+      "w": 0.033483725469007575
+     },
+     "duty33k-line": {
+      "w": 0.11787709100766475
+     },
+     "verdict": "REPORTED",
+     "wait2-tk": {
+      "ci95_w": [
+       -0.038078976564136856,
+       0.041690241033969754
+      ],
+      "w": 0.0018056322349164489
+     }
+    },
+    "8 dip rule": {
+     "by_pass": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1,
+      "6": 0,
+      "7": 0,
+      "8": 0
+     },
+     "by_window": {
+      "busy": 0,
+      "busy_readings": 6328,
+      "idle_after": 0,
+      "idle_after_readings": 4497,
+      "idle_before": 0,
+      "idle_before_readings": 4469,
+      "train_segment": 1,
+      "train_segment_readings": 1524
+     },
+     "dropped_readings": 1,
+     "measured_passes_dropped": 1,
+     "note": "readings more than 4 W below their window's median, counted in every window the registered reducer evaluates; a reading inside two windows counts in each; pass 0 (the warm-up) is counted in by_pass and left out of measured_passes_dropped",
+     "verdict": "REPORTED"
+    },
+    "9 stall2": {
+     "divides_per_hart_cycle": 0.0070999999999999995,
+     "name": "a stalled pipeline",
+     "spin2_slots_per_hart_cycle": 0.34737399999999996,
+     "threshold": "less than half of the session's spin2 rate (E193.md 8, the lab's reading)",
+     "verdict": "REPORTED"
+    }
+   },
+   "schema": "e193-checks/1",
+   "x04_json": "x04-e193-A.json"
+  },
+  "B": {
+   "checks": {
+    "1 spin2": {
+     "catalogue_scaled_w": 2.418,
+     "measured_w": 2.517624501887145,
+     "pass": true,
+     "verdict": "PASS"
+    },
+    "2 faddps_p1": {
+     "catalogue_scaled_w": 9.892875,
+     "measured_w": 8.785437342259282,
+     "pass": true,
+     "verdict": "PASS"
+    },
+    "2 fsgnjs_p1": {
+     "catalogue_scaled_w": 5.9306874999999994,
+     "measured_w": 4.625256990893593,
+     "pass": false,
+     "verdict": "FAIL"
+    },
+    "3 anchor drift": {
+     "boundaries": 8,
+     "flagged": [
+      "3/C",
+      "8/C"
+     ],
+     "verdict": "FLAGGED"
+    },
+    "4 device ok": {
+     "dropped_device": 0,
+     "runs": 135,
+     "trains": 0,
+     "trains_not_ok": 0,
+     "verdict": "REPORTED"
+    },
+    "5 clock": {
+     "dropped_clock": 0,
+     "verdict": "REPORTED"
+    },
+    "6 duty linear": {
+     "verdict": "NOT COMPUTED",
+     "why": "the duty line needs three of its four arms"
+    },
+    "7 nulls": {
+     "fadds_p16-faddps_p16": {
+      "ci95_w": [
+       -0.11892279737381857,
+       0.06012188845027262
+      ],
+      "w": -0.029400454461772974
+     },
+     "verdict": "REPORTED"
+    },
+    "8 dip rule": {
+     "by_pass": {
+      "0": 0,
+      "1": 0,
+      "2": 2,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 3,
+      "8": 0
+     },
+     "by_window": {
+      "busy": 5,
+      "busy_readings": 4746,
+      "idle_after": 0,
+      "idle_after_readings": 3734,
+      "idle_before": 0,
+      "idle_before_readings": 3635
+     },
+     "dropped_readings": 5,
+     "measured_passes_dropped": 5,
+     "note": "readings more than 4 W below their window's median, counted in every window the registered reducer evaluates; a reading inside two windows counts in each; pass 0 (the warm-up) is counted in by_pass and left out of measured_passes_dropped",
+     "verdict": "REPORTED"
+    },
+    "9 stall2": {
+     "verdict": "NOT COMPUTED",
+     "why": "needs spin2 and tr_tk_stall2 (sitting A)"
+    }
+   },
+   "schema": "e193-checks/1",
+   "x04_json": "x04-e193-B.json"
+  }
+ },
+ "inputs": {
+  "docs/reports/data/2026-11-14-e189-blind-day-aifoundry3/SHA256SUMS": "d3fb68b5bf0f7e937a803c3976cc75c6b725dc3e22314cb412b2f2d10358925f",
+  "docs/reports/data/2026-11-15-e191-blind-day-aifoundry1-c1-s2/SHA256SUMS": "594f5ff613b85b20f82aee398cdd3c1e81d0ef13989fdcbae1bbd1e3ea80c0dc",
+  "docs/reports/data/2026-11-15-e193-x04-clock-sitting-a-aifoundry3/checks-e193-A.json": "095f8a8ee59ecc26b318f6420cc953f163f060999f7691a26bf5c97b803fac73",
+  "docs/reports/data/2026-11-15-e193-x04-clock-sitting-a-aifoundry3/x04-e193-A.json": "e1e536e884f8b5dba2cc836b1bd648f7b5f5b8c7866ea5e1fbedd76b7818052e",
+  "docs/reports/data/2026-11-15-e193-x04-clock-sitting-b-aifoundry3/checks-e193-B.json": "6fa307a9b04dcddeb69c0a0f53734db2ebfa72f33d4185ea935cc1c32c0752f3",
+  "docs/reports/data/2026-11-15-e193-x04-clock-sitting-b-aifoundry3/x04-e193-B.json": "75c23d05ea20c198a83bd0a19fc7086aa9e1db0528e9884563a7c8f165a0a74f"
+ },
+ "prices": [
+  {
+   "field": "board_w",
+   "id": "A/arm/duty100",
+   "key": "duty100",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.04813771442339935,
+   "sitting": "A",
+   "v3": 2.6177573164704198
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/duty33",
+   "key": "duty33",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.012036880981939248,
+   "sitting": "A",
+   "v3": 0.8902556547619063
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/duty33f",
+   "key": "duty33f",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.01608827573874932,
+   "sitting": "A",
+   "v3": 0.9948674085880169
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/duty33k",
+   "key": "duty33k",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.03667491590740166,
+   "sitting": "A",
+   "v3": 1.2948886583928547
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/duty67",
+   "key": "duty67",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.0345345922485133,
+   "sitting": "A",
+   "v3": 1.6904143164569354
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/spin2",
+   "key": "spin2",
+   "kind": "arm",
+   "n_a3": 40,
+   "se3": 0.0187168123796201,
+   "sitting": "A",
+   "v3": 2.451216437440915
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/tk",
+   "key": "tk",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.016711994590597704,
+   "sitting": "A",
+   "v3": 0.09054531022539794
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/tk_l100",
+   "key": "tk_l100",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.011385205128777345,
+   "sitting": "A",
+   "v3": 0.10027202380952582
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/tk_l200",
+   "key": "tk_l200",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.009727135244420863,
+   "sitting": "A",
+   "v3": 0.09076145833333316
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/tk_s11",
+   "key": "tk_s11",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.009712414301995723,
+   "sitting": "A",
+   "v3": 0.012868079244164313
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/tk_s2",
+   "key": "tk_s2",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.00881682896257229,
+   "sitting": "A",
+   "v3": -0.005524454365077869
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/tk_s21",
+   "key": "tk_s21",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.010151496278187606,
+   "sitting": "A",
+   "v3": 0.07502460317460358
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/w15",
+   "key": "w15",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.03410677904974608,
+   "sitting": "A",
+   "v3": 1.2325670906904644
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/w23",
+   "key": "w23",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.04097052006936246,
+   "sitting": "A",
+   "v3": 1.822129279664584
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/w7",
+   "key": "w7",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.03019117282905874,
+   "sitting": "A",
+   "v3": 0.6027555650220505
+  },
+  {
+   "field": "board_w",
+   "id": "A/arm/wait2",
+   "key": "wait2",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.011610462893188544,
+   "sitting": "A",
+   "v3": 0.09235094246031439
+  },
+  {
+   "field": "contrast_board_w",
+   "id": "A/train/tr_faddps_fadds",
+   "key": "tr_faddps_fadds",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.028089105432507415,
+   "sitting": "A",
+   "v3": -0.013981332603561825
+  },
+  {
+   "field": "contrast_board_w",
+   "id": "A/train/tr_packed_spread",
+   "key": "tr_packed_spread",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.0050467024421256895,
+   "sitting": "A",
+   "v3": 0.059107142857145245
+  },
+  {
+   "field": "contrast_board_w",
+   "id": "A/train/tr_spin1_spin2",
+   "key": "tr_spin1_spin2",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.02789002934126674,
+   "sitting": "A",
+   "v3": 0.8303215147321854
+  },
+  {
+   "field": "contrast_board_w",
+   "id": "A/train/tr_spread_cluster",
+   "key": "tr_spread_cluster",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.025183696726007638,
+   "sitting": "A",
+   "v3": -0.5055849128446788
+  },
+  {
+   "field": "contrast_board_w",
+   "id": "A/train/tr_tk_spin1",
+   "key": "tr_tk_spin1",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.0346500112896091,
+   "sitting": "A",
+   "v3": 1.5012983143759788
+  },
+  {
+   "field": "contrast_board_w",
+   "id": "A/train/tr_tk_stall2",
+   "key": "tr_tk_stall2",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.013158937191375045,
+   "sitting": "A",
+   "v3": 0.28276785714285513
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/faddps_p1",
+   "key": "faddps_p1",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.02341450866081069,
+   "sitting": "B",
+   "v3": 8.785437342259282
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/faddps_p16",
+   "key": "faddps_p16",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.0333204296612355,
+   "sitting": "B",
+   "v3": 2.401104185377016
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/faddps_p2",
+   "key": "faddps_p2",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.03164491191005097,
+   "sitting": "B",
+   "v3": 6.200465299141524
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/faddps_p4",
+   "key": "faddps_p4",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.038076971898130196,
+   "sitting": "B",
+   "v3": 4.260818062667645
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/faddps_p8",
+   "key": "faddps_p8",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.037866264881739026,
+   "sitting": "B",
+   "v3": 3.081245851555884
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/faddpsm1_p1",
+   "key": "faddpsm1_p1",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.02327851393180429,
+   "sitting": "B",
+   "v3": 8.454825833547492
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/faddpsm2_p1",
+   "key": "faddpsm2_p1",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.018687548425126117,
+   "sitting": "B",
+   "v3": 8.50825347353177
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/faddpsm4_p1",
+   "key": "faddpsm4_p1",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.0336617664633981,
+   "sitting": "B",
+   "v3": 8.57156539036126
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/fadds_p16",
+   "key": "fadds_p16",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.03123978180639053,
+   "sitting": "B",
+   "v3": 2.371703730915243
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/fsgnjs_p1",
+   "key": "fsgnjs_p1",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.03409444940924282,
+   "sitting": "B",
+   "v3": 4.625256990893593
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/fsgnjs_p2",
+   "key": "fsgnjs_p2",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.035142927849477326,
+   "sitting": "B",
+   "v3": 3.6958032016520432
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/fsgnjs_p4",
+   "key": "fsgnjs_p4",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.026135341722088378,
+   "sitting": "B",
+   "v3": 2.9022843187974874
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/fsgnjs_p8",
+   "key": "fsgnjs_p8",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.0158917499058497,
+   "sitting": "B",
+   "v3": 2.311733968169695
+  },
+  {
+   "field": "board_w",
+   "id": "B/arm/spin2",
+   "key": "spin2",
+   "kind": "arm",
+   "n_a3": 16,
+   "se3": 0.023266665831571522,
+   "sitting": "B",
+   "v3": 2.517624501887145
+  }
+ ],
+ "reported_fits": {
+  "A/fit/duty": {
+   "arms": [
+    "wait2",
+    "duty33",
+    "duty67",
+    "duty100"
+   ],
+   "board_w": [
+    0.09235094246031439,
+    0.8902556547619063,
+    1.6904143164569354,
+    2.6177573164704198
+   ],
+   "duty33f_pj_per_wake": 115.63914331621116,
+   "duty33f_residual_w": 0.033483725469007575,
+   "duty33k_pj_per_wake": 101.77355513612751,
+   "duty33k_residual_w": 0.11787709100766475,
+   "intercept_w": 0.06748052073343554,
+   "point_se_w": [
+    0.011610462893188544,
+    0.012036880981939248,
+    0.0345345922485133,
+    0.04813771442339935
+   ],
+   "residuals_w": [
+    0.024870421726878852,
+    -0.0073471573064294304,
+    -0.060765624499515836,
+    0.043242360079063236
+   ],
+   "slope_w": 2.5096255331247286,
+   "x": [
+    0.0,
+    0.3307753608568514,
+    0.6708966728301675,
+    0.9989675362190066
+   ]
+  },
+  "A/fit/tk_launches": {
+   "arms": [
+    "tk_l100",
+    "tk_l200",
+    "tk"
+   ],
+   "board_w": [
+    0.10027202380952582,
+    0.09076145833333316,
+    0.09054531022539794
+   ],
+   "intercept_w": 0.08573340451650449,
+   "point_se_w": [
+    0.011385205128777345,
+    0.009727135244420863,
+    0.016711994590597704
+   ],
+   "residuals_w": [
+    0.000658457374448862,
+    -0.0019617495395351098,
+    0.0013032921650863033
+   ],
+   "slope_w": 0.0014084890503422345,
+   "x": [
+    9.854646662109207,
+    4.9626252718580925,
+    2.491047795476028
+   ]
+  },
+  "A/fit/tk_shires": {
+   "arms": [
+    "tk_s2",
+    "tk_s11",
+    "tk_s21",
+    "tk"
+   ],
+   "board_w": [
+    -0.005524454365077869,
+    0.012868079244164313,
+    0.07502460317460358,
+    0.09054531022539794
+   ],
+   "intercept_w": -0.01441929485397413,
+   "point_se_w": [
+    0.00881682896257229,
+    0.009712414301995723,
+    0.010151496278187606,
+    0.016711994590597704
+   ],
+   "residuals_w": [
+    0.0019072429829876383,
+    -0.011144412184358984,
+    0.016074124216537165,
+    -0.006836955015165902
+   ],
+   "slope_w": 0.0034937987529543115,
+   "x": [
+    2.0,
+    11.0,
+    21.0,
+    32.0
+   ]
+  },
+  "A/fit/workers": {
+   "arms": [
+    "w7",
+    "w15",
+    "w23",
+    "spin2"
+   ],
+   "board_w": [
+    0.6027555650220505,
+    1.2325670906904644,
+    1.822129279664584,
+    2.451216437440915
+   ],
+   "intercept_w": 0.07011770172470873,
+   "point_se_w": [
+    0.03019117282905874,
+    0.03410677904974608,
+    0.04097052006936246,
+    0.0187168123796201
+   ],
+   "residuals_w": [
+    -0.004169807247845658,
+    0.012147237797496713,
+    -0.011785053851455007,
+    0.003807623301804508
+   ],
+   "slope_w": 0.07668681007788393,
+   "x": [
+    7.0,
+    15.0,
+    23.0,
+    31.0
+   ]
+  },
+  "B/fit/ladder_faddps": {
+   "arms": [
+    "faddps_p16",
+    "faddps_p8",
+    "faddps_p4",
+    "faddps_p2",
+    "faddps_p1"
+   ],
+   "board_w": [
+    2.401104185377016,
+    3.081245851555884,
+    4.260818062667645,
+    6.200465299141524,
+    8.785437342259282
+   ],
+   "intercept_w": 2.3456357421087635,
+   "per_op_pj_board": [
+    -4.533569028350916,
+    10.960849884058858,
+    16.959952278939948,
+    17.910126663108255,
+    15.220164766751413
+   ],
+   "per_op_pj_minion": [
+    -5.752245728065795,
+    9.564066571389693,
+    15.16694715328447,
+    15.667407627204131,
+    13.391144012087599
+   ],
+   "point_se_w": [
+    0.0333204296612355,
+    0.037866264881739026,
+    0.038076971898130196,
+    0.03164491191005097,
+    0.02341450866081069
+   ],
+   "residuals_w": [
+    -0.3636033944585404,
+    -0.10282655074773173,
+    0.23928255320831138,
+    0.5020010388417653,
+    -0.2748536468438143
+   ],
+   "slope_w": 1.6305234667013105e-11,
+   "x": [
+    25701674725.026287,
+    51421318203.47743,
+    102782928401.58012,
+    205628964357.9345,
+    411809788949.47516
+   ]
+  },
+  "B/fit/ladder_fsgnjs": {
+   "arms": [
+    "fsgnjs_p8",
+    "fsgnjs_p4",
+    "fsgnjs_p2",
+    "fsgnjs_p1"
+   ],
+   "board_w": [
+    2.311733968169695,
+    2.9022843187974874,
+    3.6958032016520432,
+    4.625256990893593
+   ],
+   "intercept_w": 2.191032331853652,
+   "per_op_pj_board": [
+    -3.9998787438671726,
+    3.7353862009512753,
+    5.721577893782307,
+    5.116882692738252
+   ],
+   "per_op_pj_minion": [
+    -4.623294691322323,
+    2.57858809013291,
+    4.940821932666739,
+    4.534617744200074
+   ],
+   "point_se_w": [
+    0.0158917499058497,
+    0.026135341722088378,
+    0.035142927849477326,
+    0.03409444940924282
+   ],
+   "residuals_w": [
+    -0.19729788972093099,
+    0.07507459753663692,
+    0.23263859448644375,
+    -0.11041530230214924
+   ],
+   "slope_w": 6.1778437395314025e-12,
+   "x": [
+    51474193819.783226,
+    102977254885.28679,
+    205918493401.13617,
+    411897754075.4542
+   ]
+  },
+  "B/fit/mask_lanes": {
+   "arms": [
+    "faddpsm1_p1",
+    "faddpsm2_p1",
+    "faddpsm4_p1",
+    "faddps_p1"
+   ],
+   "board_w": [
+    8.454825833547492,
+    8.50825347353177,
+    8.57156539036126,
+    8.785437342259282
+   ],
+   "intercept_w": 8.40513545367416,
+   "point_se_w": [
+    0.02327851393180429,
+    0.018687548425126117,
+    0.0336617664633981,
+    0.02341450866081069
+   ],
+   "residuals_w": [
+    0.0030543648731207185,
+    0.009845989857188542,
+    -0.02011412331374629,
+    0.007213768583431701
+   ],
+   "slope_w": 0.0466360150002115,
+   "x": [
+    1.0,
+    2.0,
+    4.0,
+    8.0
+   ]
+  }
+ },
+ "reported_rail": [
+  {
+   "field": "minion_w",
+   "id": "A/arm/duty100/minion",
+   "key": "duty100",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.011850339619269868,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 2.407298177661557
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/duty33/minion",
+   "key": "duty33",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.004967772246788746,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.7932211451605894
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/duty33f/minion",
+   "key": "duty33f",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.0032472349053263953,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.8776249928466503
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/duty33k/minion",
+   "key": "duty33k",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.0069708553577391115,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 1.1463890271845507
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/duty67/minion",
+   "key": "duty67",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.011633860762222831,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 1.5505931880879775
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/spin2/minion",
+   "key": "spin2",
+   "kind": "arm",
+   "n_a3": 40,
+   "se3": 0.005102992858812247,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 2.1601571004651516
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/tk/minion",
+   "key": "tk",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.002602963144944397,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.07359226702194252
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/tk_l100/minion",
+   "key": "tk_l100",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.003950325778462777,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.07982622110707005
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/tk_l200/minion",
+   "key": "tk_l200",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.004836195102800678,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.07887160361144419
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/tk_s11/minion",
+   "key": "tk_s11",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.002750928574844937,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.028476173123770442
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/tk_s2/minion",
+   "key": "tk_s2",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.0030705087926099404,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.007176317529962839
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/tk_s21/minion",
+   "key": "tk_s21",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.00490836308705904,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.04920862207563026
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/w15/minion",
+   "key": "w15",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.011184707348934321,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 1.0580941215429704
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/w23/minion",
+   "key": "w23",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.009255178656964118,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 1.6230596683910101
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/w7/minion",
+   "key": "w7",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.007482781114641194,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.5356973465054664
+  },
+  {
+   "field": "minion_w",
+   "id": "A/arm/wait2/minion",
+   "key": "wait2",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.0018848515393699121,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.07814150771829143
+  },
+  {
+   "field": "contrast_minion_w",
+   "id": "A/train/tr_faddps_fadds/minion",
+   "key": "tr_faddps_fadds",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.014995088100584452,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.05369096969998277
+  },
+  {
+   "field": "contrast_minion_w",
+   "id": "A/train/tr_packed_spread/minion",
+   "key": "tr_packed_spread",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.0039857798813729235,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.04472259629014863
+  },
+  {
+   "field": "contrast_minion_w",
+   "id": "A/train/tr_spin1_spin2/minion",
+   "key": "tr_spin1_spin2",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.0068957441988108355,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.8075422071991231
+  },
+  {
+   "field": "contrast_minion_w",
+   "id": "A/train/tr_spread_cluster/minion",
+   "key": "tr_spread_cluster",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.005814108839983075,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": -0.401731238862441
+  },
+  {
+   "field": "contrast_minion_w",
+   "id": "A/train/tr_tk_spin1/minion",
+   "key": "tr_tk_spin1",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.009278648901063714,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 1.2953839042526132
+  },
+  {
+   "field": "contrast_minion_w",
+   "id": "A/train/tr_tk_stall2/minion",
+   "key": "tr_tk_stall2",
+   "kind": "train",
+   "n_a3": 8,
+   "se3": 0.0031898810398213575,
+   "se_field": "minion_se",
+   "sitting": "A",
+   "v3": 0.2550024338568452
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/faddps_p1/minion",
+   "key": "faddps_p1",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.013186061762574109,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 7.677595541581052
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/faddps_p16/minion",
+   "key": "faddps_p16",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.013036734222532358,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 2.0151490035300608
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/faddps_p2/minion",
+   "key": "faddps_p2",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.013249724726052925,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 5.384664156726819
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/faddps_p4/minion",
+   "key": "faddps_p4",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.012257425414350667,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 3.721894595497817
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/faddps_p8/minion",
+   "key": "faddps_p8",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.011450808734483776,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 2.6547882626579007
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/faddpsm1_p1/minion",
+   "key": "faddpsm1_p1",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.009807107364075427,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 7.387910925666309
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/faddpsm2_p1/minion",
+   "key": "faddpsm2_p1",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.014929388887376367,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 7.439394212260053
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/faddpsm4_p1/minion",
+   "key": "faddpsm4_p1",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.011991353069242892,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 7.519058306703744
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/fadds_p16/minion",
+   "key": "fadds_p16",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.012304274835032864,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 2.007989857903195
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/fsgnjs_p1/minion",
+   "key": "fsgnjs_p1",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.011465839464556484,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 4.030790216597943
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/fsgnjs_p2/minion",
+   "key": "fsgnjs_p2",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.007841308763638383,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 3.1803979607092545
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/fsgnjs_p4/minion",
+   "key": "fsgnjs_p4",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.005773554230125793,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 2.4285272751730114
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/fsgnjs_p8/minion",
+   "key": "fsgnjs_p8",
+   "kind": "arm",
+   "n_a3": 8,
+   "se3": 0.005051822608884436,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 1.9250109851441297
+  },
+  {
+   "field": "minion_w",
+   "id": "B/arm/spin2/minion",
+   "key": "spin2",
+   "kind": "arm",
+   "n_a3": 16,
+   "se3": 0.007871231462836359,
+   "se_field": "minion_se",
+   "sitting": "B",
+   "v3": 2.16299135217123
+  }
+ ],
+ "rules": {
+  "decided_min": 18,
+  "fail_misses": 8,
+  "n_min": 4,
+  "registered_prices": 36,
+  "scale_band": [
+   0.952,
+   1.144
+  ],
+  "share": 0.8,
+  "sitting_decided_min": {
+   "A": 11,
+   "B": 7
+  },
+  "z": 1.96
+ },
+ "scale_source": {
+  "configs": {
+   "copy-random": {
+    "aifoundry3_j_over_mean": 7.467505,
+    "aifoundry3_j_over_passes": [
+     7.51086,
+     7.3002,
+     7.40755,
+     7.65141
+    ],
+    "card1_j_over_mean": 8.256662500000001,
+    "card1_j_over_passes": [
+     8.10461,
+     8.3327,
+     8.41566,
+     8.17368
+    ],
+    "ratio_card1_over_aifoundry3": 1.105678871323153
+   },
+   "copy-zeros": {
+    "aifoundry3_j_over_mean": 5.43098,
+    "aifoundry3_j_over_passes": [
+     5.32577,
+     5.52824,
+     5.39109,
+     5.47882
+    ],
+    "card1_j_over_mean": 6.0116325,
+    "card1_j_over_passes": [
+     5.93393,
+     6.10691,
+     6.12608,
+     5.87961
+    ],
+    "ratio_card1_over_aifoundry3": 1.1069148661935784
+   },
+   "sha256": {
+    "aifoundry3_j_over_mean": 2.60308,
+    "aifoundry3_j_over_passes": [
+     2.57374,
+     2.57626,
+     2.57047,
+     2.69185
+    ],
+    "card1_j_over_mean": 2.5106525,
+    "card1_j_over_passes": [
+     2.46709,
+     2.58672,
+     2.52163,
+     2.46717
+    ],
+    "ratio_card1_over_aifoundry3": 0.9644930236489082
+   },
+   "sort-shuffled": {
+    "aifoundry3_j_over_mean": 4.1245875,
+    "aifoundry3_j_over_passes": [
+     4.1027,
+     4.14216,
+     4.12941,
+     4.12408
+    ],
+    "card1_j_over_mean": 3.9305950000000003,
+    "card1_j_over_passes": [
+     3.75477,
+     3.80039,
+     4.08913,
+     4.07809
+    ],
+    "ratio_card1_over_aifoundry3": 0.9529668118326986
+   },
+   "sort-sorted": {
+    "aifoundry3_j_over_mean": 3.3816550000000003,
+    "aifoundry3_j_over_passes": [
+     3.33968,
+     3.49908,
+     3.35418,
+     3.33368
+    ],
+    "card1_j_over_mean": 3.5070275,
+    "card1_j_over_passes": [
+     3.45164,
+     3.61189,
+     3.41744,
+     3.54714
+    ],
+    "ratio_card1_over_aifoundry3": 1.037074302375612
+   },
+   "sparse-parity": {
+    "aifoundry3_j_over_mean": 7.5994575,
+    "aifoundry3_j_over_passes": [
+     7.4801,
+     7.514,
+     7.60529,
+     7.79844
+    ],
+    "card1_j_over_mean": 8.6912025,
+    "card1_j_over_passes": [
+     8.70867,
+     8.78767,
+     8.67053,
+     8.59794
+    ],
+    "ratio_card1_over_aifoundry3": 1.143660912637514
+   }
+  },
+  "ratio_max": 1.143660912637514,
+  "ratio_min": 0.9529668118326986,
+  "rounding": "the least ratio rounded down, the greatest rounded up, at the third decimal",
+  "s_hi": 1.144,
+  "s_lo": 0.952,
+  "what": "card-1 / aifoundry3 ratio of measured J over idle a launch (mean of each configuration's four passes' energy.json > board.j_per_solve), E189 (aifoundry3 card 0, fa9098c4) against E191's second session (aifoundry1 card 1, 7156ac15); the same six configurations, hosts, sizes and K, the same reducer"
+ },
+ "what": "E198 forecast 1 (the transport forecast): E193's committed reduced prices on aifoundry3 card 0 (registered reducer reduce_x04.py, run unchanged on E193's data commits fe08ed67 and 96ef447c; outputs committed in 37d2b9fd), frozen as aifoundry1 card 1's prediction before any card-1 X04 datum. Not a model: E193's measured result. Not blind to E193's data: it is this forecast."
+}

@@ -1,0 +1,55 @@
+1. THE BAND, A SECOND PATH (and a third for card 1: E191's frozen scorer output, scores-e191.json, f74c81e3)
+  copy-zeros     aifoundry3 5.430980 (E189 scorer) / 5.430980 (forecast)  card 1 6.011633 (energy.json) / 6.011633 (E191 scorer) / 6.011633 (forecast)  ratio 1.106915 / 1.106915  t_k 0.9071 / 0.9074 s
+  copy-random    aifoundry3 7.467505 (E189 scorer) / 7.467505 (forecast)  card 1 8.256663 (energy.json) / 8.256663 (E191 scorer) / 8.256663 (forecast)  ratio 1.105679 / 1.105679  t_k 0.9080 / 0.9072 s
+  sha256         aifoundry3 2.603080 (E189 scorer) / 2.603080 (forecast)  card 1 2.510652 (energy.json) / 2.510652 (E191 scorer) / 2.510652 (forecast)  ratio 0.964493 / 0.964493  t_k 0.4316 / 0.4316 s
+  sort-sorted    aifoundry3 3.381655 (E189 scorer) / 3.381655 (forecast)  card 1 3.507027 (energy.json) / 3.507027 (E191 scorer) / 3.507027 (forecast)  ratio 1.037074 / 1.037074  t_k 0.5593 / 0.5593 s
+  sort-shuffled  aifoundry3 4.124587 (E189 scorer) / 4.124587 (forecast)  card 1 3.930595 (energy.json) / 3.930595 (E191 scorer) / 3.930595 (forecast)  ratio 0.952967 / 0.952967  t_k 0.6942 / 0.6942 s
+  sparse-parity  aifoundry3 7.599457 (E189 scorer) / 7.599457 (forecast)  card 1 8.691202 (energy.json) / 8.691202 (E191 scorer) / 8.691202 (forecast)  ratio 1.143661 / 1.143661  t_k 0.5131 / 0.5129 s
+  least 0.95297 (sort-shuffled), greatest 1.14366 (sparse-parity); frozen band [0.952, 1.144]
+  REPORTED: the core-issue programs alone (SHA-256, the sorts): 0.9530 to 1.0371, median 0.9645
+  REPORTED: all six, median 1.0714, mean 1.0518
+BAND SECOND PATH AGREES
+2. REPORTED: THE ENERGY CATALOGUE (three-card check, 25-26 Sep 2026), card 1 / aifoundry3, W over idle at 600 MHz
+  nop/zeros/h2       spin2 (check 1)        aifoundry3 2.4960 W  card 1 2.3536 W  ratio 0.9430
+  fadd.ps/zeros/h2   faddps_p1 (check 2)    aifoundry3 10.2119 W  card 1 10.2034 W  ratio 0.9992
+  fsgnj.s/zeros/h2   fsgnjs_p1 (check 2)    aifoundry3 6.1224 W  card 1 6.0993 W  ratio 0.9962
+  fadd.s/zeros/h2    fadds_p16's class      aifoundry3 10.8130 W  card 1 10.3520 W  ratio 0.9574
+  every row both cards hold above 0.5 W on aifoundry3: 392 rows, median 0.9843, 10th-90th percentile 0.9476-1.1774, least 0.7880, greatest 1.4145
+  the minion rail's volts: aifoundry3 523 mV (E193 sitting A's start read), card 1 499 mV (E191's second session's); (card 1 / aifoundry3)^2 = 0.9103
+3. THE REDUCER'S LEAKAGE LAW ON CARD 1 (desk arithmetic; card 1's die assumed to move as aifoundry3's did)
+  card 1's idle law as frozen: {"quad": {"a": 0.01016842856255774, "b": -0.7038226670865997, "c": 39.707665367843745}, "quad_band_c": [56, 70], "exp": {"B": 14.1, "A80": 34.8, "T_L": 36.0, "source": "docs/energy-manual/01-at-rest.md, 'Confidence': aifoundry1 card 1 14.1 W + 34.8 W e^((T-80)/36)"}}
+  at 50 C: card 1's slope 0.4201 W/C, the reducer's (E17) 0.2808 W/C, left in the price 0.1393 W per C of rise
+  at 52 C: card 1's slope 0.4441 W/C, the reducer's (E17) 0.2968 W/C, left in the price 0.1473 W per C of rise
+  at 55 C: card 1's slope 0.4827 W/C, the reducer's (E17) 0.3226 W/C, left in the price 0.1601 W per C of rise
+  at 58 C: card 1's slope 0.4757 W/C, the reducer's (E17) 0.3506 W/C, left in the price 0.1251 W per C of rise
+  sitting A duty100      board 2.618 W, mean busy-minus-idle die +0.520 C -> +0.0724 W left at 50 C (+2.77% of the price)
+  sitting A spin2        board 2.451 W, mean busy-minus-idle die +0.409 C -> +0.0571 W left at 50 C (+2.33% of the price)
+  sitting A w23          board 1.822 W, mean busy-minus-idle die +0.364 C -> +0.0507 W left at 50 C (+2.78% of the price)
+  sitting A duty67       board 1.690 W, mean busy-minus-idle die +0.285 C -> +0.0398 W left at 50 C (+2.35% of the price)
+  sitting A duty33k      board 1.295 W, mean busy-minus-idle die +0.236 C -> +0.0328 W left at 50 C (+2.54% of the price)
+  sitting A w15          board 1.233 W, mean busy-minus-idle die +0.259 C -> +0.0361 W left at 50 C (+2.93% of the price)
+  sitting A duty33f      board 0.995 W, mean busy-minus-idle die +0.017 C -> +0.0024 W left at 50 C (+0.24% of the price)
+  sitting A duty33       board 0.890 W, mean busy-minus-idle die +0.000 C -> +0.0000 W left at 50 C (+0.00% of the price)
+  sitting A w7           board 0.603 W, mean busy-minus-idle die +0.105 C -> +0.0146 W left at 50 C (+2.43% of the price)
+  sitting A tk_l100      board 0.100 W, mean busy-minus-idle die +0.000 C -> +0.0000 W left at 50 C (+0.00% of the price)
+  sitting A wait2        board 0.092 W, mean busy-minus-idle die +0.000 C -> +0.0000 W left at 50 C (+0.00% of the price)
+  sitting A tk_l200      board 0.091 W, mean busy-minus-idle die +0.000 C -> +0.0000 W left at 50 C (+0.00% of the price)
+  sitting A tk           board 0.091 W, mean busy-minus-idle die -0.012 C -> -0.0017 W left at 50 C (-1.87% of the price)
+  sitting A tk_s21       board 0.075 W, mean busy-minus-idle die +0.000 C -> +0.0000 W left at 50 C (+0.00% of the price)
+  sitting A tk_s11       board 0.013 W, mean busy-minus-idle die +0.016 C -> +0.0023 W left at 50 C (+nan% of the price)
+  sitting A tk_s2        board -0.006 W, mean busy-minus-idle die +0.000 C -> +0.0000 W left at 50 C (+nan% of the price)
+  sitting B faddps_p1    board 8.785 W, mean busy-minus-idle die +0.809 C -> +0.1127 W left at 50 C (+1.28% of the price)
+  sitting B faddpsm4_p1  board 8.572 W, mean busy-minus-idle die +0.768 C -> +0.1070 W left at 50 C (+1.25% of the price)
+  sitting B faddpsm2_p1  board 8.508 W, mean busy-minus-idle die +0.825 C -> +0.1150 W left at 50 C (+1.35% of the price)
+  sitting B faddpsm1_p1  board 8.455 W, mean busy-minus-idle die +0.789 C -> +0.1100 W left at 50 C (+1.30% of the price)
+  sitting B faddps_p2    board 6.200 W, mean busy-minus-idle die +0.478 C -> +0.0667 W left at 50 C (+1.08% of the price)
+  sitting B fsgnjs_p1    board 4.625 W, mean busy-minus-idle die +0.412 C -> +0.0574 W left at 50 C (+1.24% of the price)
+  sitting B faddps_p4    board 4.261 W, mean busy-minus-idle die +0.396 C -> +0.0552 W left at 50 C (+1.30% of the price)
+  sitting B fsgnjs_p2    board 3.696 W, mean busy-minus-idle die +0.256 C -> +0.0356 W left at 50 C (+0.96% of the price)
+  sitting B faddps_p8    board 3.081 W, mean busy-minus-idle die +0.191 C -> +0.0266 W left at 50 C (+0.86% of the price)
+  sitting B fsgnjs_p4    board 2.902 W, mean busy-minus-idle die +0.049 C -> +0.0068 W left at 50 C (+0.23% of the price)
+  sitting B spin2        board 2.518 W, mean busy-minus-idle die +0.186 C -> +0.0259 W left at 50 C (+1.03% of the price)
+  sitting B faddps_p16   board 2.401 W, mean busy-minus-idle die +0.170 C -> +0.0237 W left at 50 C (+0.99% of the price)
+  sitting B fadds_p16    board 2.372 W, mean busy-minus-idle die +0.193 C -> +0.0269 W left at 50 C (+1.13% of the price)
+  sitting B fsgnjs_p8    board 2.312 W, mean busy-minus-idle die +0.052 C -> +0.0073 W left at 50 C (+0.32% of the price)
+SCALE DESK DONE
