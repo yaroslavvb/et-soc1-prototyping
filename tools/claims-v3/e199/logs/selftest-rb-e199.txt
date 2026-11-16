@@ -1,0 +1,167 @@
+# E199 kit (Q191, lane kit-e199; re-run by fix-e199 on the fixed registration and kit): selftest-rb, bash W/slot.sh bash W/nodev.sh bash tools/claims-v3/e199/rb/selftest_rb_e199.sh <scratch>
+# run 2026-11-16 02:09:42 PST on aifoundry2 (Ubuntu 24.04; 5.2.21(1)-release; bubblewrap 0.9.0; /usr/bin/python3 3.12.3); paths masked as <lab clone>, <scratch>; at the clone's HEAD c0434812 with the kit's files uncommitted
+E199 runbook desk test (kit-e199), 2026-11-16 02:09:42 PST; bash 5.2.21(1)-release; rsync  version 3.2.7  protocol version 3; Python Python 3.12.3; host name aifoundry1
+scratch repository: a shared sparse clone at the registration 0682cfd9f3f6, the kit as one stand-in commit c7332d770c01; the kit list's stand-in 46 files
+<lab clone>/tools/claims-v3/e199/rb/selftest_rb_e199.sh: line 156: : No such file or directory
+RB_LOCK: an empty file
+
+== A. the dry listing
+dry listing: 13 steps listed, 0 exited non-zero, 0 box calls
+-> PASS (A every step 0, no call to the stand-ins)
+
+== K, W1-W3, G. the window rule; RB_GITLOCK required
+-> PASS (K, W1-W3, G each refused (10) before any call)
+
+== N. step 2 run inside the lab-git lock (nested)
+[s03_desk_e199] STOP: the desk check failed: pull pull(rc 14; a nested lab-git lock exits 75)
+-> PASS (N a nested step 2 stops with 16 naming its pull)
+
+== P1. step 2 on the scratch repository
+[s03_desk_e199] desk check: the window written today for E199; pulled under the lab-git lock; HEAD c7332d770c01 descends from the registration 0682cfd9f3f6 (subtree 070b4e2d); the paths clean; HISTORY OK; the lists at their pinned counts and bytes (E199's 17; E192's 30 and its kit's 35; E199's kit 46; the shared 6), lists not pinned (reported): none; the two freeze lines; sealed card-1 freeze lines: E199.md line 2 1c5d8fa3efa054272451017538cd42018b589050493b9e504a5d5d90bc1009c3 (registered); the
+-> PASS (P1 step 2 passes at every pin, HISTORY OK, the two freeze lines (E199.md's line 2 printed), no later note (none), no E199 datum, the preflight GO)
+
+== SN1, SN2, SN3. THE SEALED CARD-1 NOTE outside the pinned subtree: committed; untracked; edited after its add
+<scratch>/sn1.txt:[s03_desk_e199] desk check: the window written today for E199; pulled under the lab-git lock; HEAD 73a33bccf10f descends from the registration 0682cf
+<scratch>/sn2.txt:[s03_desk_e199] STOP: the desk check failed: history sealed-note-untracked sealed-note-not-clean sealed-note-not-after-registration sealed-note-edite
+<scratch>/sn3.txt:[s03_desk_e199] STOP: the desk check failed: sealed-note-edited
+-> PASS (SN1 a committed note: step 2 passes and prints its sha256 as a sealed card-1 freeze line (and logs it); SN2 the note untracked: 16; SN3 edited after its add: 16 (a dated note is touched by one commit))
+
+== P2, P3, H1, H2, H3, D1. a short list; the kit's list short; an edited registered file; two shadows; an E199 datum in a ref
+HISTORY FAIL: a shadowing addition: tools/claims-v3/e192/proposal/src/json.py (as json)
+HISTORY FAIL: a shadowing file not committed: tools/claims-v3/e89/random.py (as random)
+-> PASS (P2, P3, H1, H2, H3, D1 each refused and named)
+
+== S. step 5, the sync
+[s07_a1_sync_e199] synced to aifoundry1:nekko/build/claims-v3/aifoundry1-c1/e199/ (39 paths; the rsync sent 39 files' contents); the box's copies at their pins
+-> PASS (S E199's files in E199's root at their pins; another run's file untouched; nothing outside E199's root)
+
+== B, X, T. step 6: a real build, the wait, the box's tools; a second start; NO-THIRD-BUILD
+kernel_elf_sha256 a987904b6cd322bff51e5913e3fe2af709f24e1d2dabf82c4138b552c0b4d6ea
+kernel_text_sha256 aafdba4b7bce846c7ef18c41f3dbf2c776581179c20f39634bc168c23ca1e42f
+e192_registration_desk_build (aifoundry2, E192.md section 16 item 5) kernel_elf a987904b6cd322bff51e5913e3fe2af709f24e1d2dabf82c4138b552c0b4d6ea text aafdba4b7bce846c7ef18c41f3dbf2c776581179c20f39634bc168c23ca1e42f
+e192_card_day_build (aifoundry3, 14 Nov 2026, a6e17e83) kernel_elf 2635bcd3b3fe4f09a19555e974017c8cd753e881035336c2b5e7ff2c279a6568 text aafdba4b7bce846c7ef18c41f3dbf2c776581179c20f39634bc168c23ca1e42f
+INTBITS-BUILT rc=0 kernel a987904b6cd3 text aafdba4b7bce host 309dbe3dca32
+    kernel_elf_sha256 a987904b6cd322bff51e5913e3fe2af709f24e1d2dabf82c4138b552c0b4d6ea
+    kernel_text_sha256 aafdba4b7bce846c7ef18c41f3dbf2c776581179c20f39634bc168c23ca1e42f
+    INTBITS-BUILT rc=0 kernel a987904b6cd3 text aafdba4b7bce host 309dbe3dca32
+kernel_elf_sha256 a987904b6cd322bff51e5913e3fe2af709f24e1d2dabf82c4138b552c0b4d6ea
+kernel_text_sha256 aafdba4b7bce846c7ef18c41f3dbf2c776581179c20f39634bc168c23ca1e42f
+e192_registration_desk_build (aifoundry2, E192.md section 16 item 5) kernel_elf a987904b6cd322bff51e5913e3fe2af709f24e1d2dabf82c4138b552c0b4d6ea text aafdba4b7bce846c7ef18c41f3dbf2c776581179c20f39634bc168c23ca1e42f
+e192_card_day_build (aifoundry3, 14 Nov 2026, a6e17e83) kernel_elf 2635bcd3b3fe4f09a19555e974017c8cd753e881035336c2b5e7ff2c279a6568 text aafdba4b7bce846c7ef18c41f3dbf2c776581179c20f39634bc168c23ca1e42f
+BOXCHECK-E199 OK: aifoundry1, its two cards' nodes and card 1's lock file, et-who --check answers, the reader at E191's pin, ET_DEVICES in the host, the reader and the heater (its parser), the per-sensor sampler and E191
+[s08_a1_build_e199] built today on aifoundry1 (the kernel and the host; hashes in RB_OUT/e199-built.txt); the box's tools and pins read OK
+   (the first wait, bounded at 2 s: exit 0)
+-> PASS (B the build job: started; the bounded wait 17 while it runs (or 0 once ended); then 0 with INTBITS-BUILT and the box's tools and pins OK)
+-> PASS (X a second start after a build: 10; T a third start: NO-THIRD-BUILD 16)
+
+== L1, L2, L3. the login check; a hang; a cut wait
+   RB_LOCK: 1 line appended ('02:10:19 aifoundry1 needs a check'); its first 0 lines kept: 1
+-> PASS (L1 a login link: 11, one line appended to RB_LOCK and the rest kept; L2 a hang: 13; L3 a cut wait: 14)
+
+== LK, RG. the look on aifoundry1 (both cards); THE REBOOT GATE
+<scratch>/lk.txt:HOLDER-RULE-BOTH-CARDS: FREE after 0 s of polls
+<scratch>/lk.txt:[s05_look_e199] aifoundry1: FREE on both cards (nothing of ours on either; card 0 not opened)
+<scratch>/rg1.txt:identity: the host booted 2026-11-13 16:53:28, AFTER E82's firmware read: STOP
+<scratch>/rg1.txt:HOLDER-RULE-BOTH-CARDS: FREE after 0 s of polls
+<scratch>/rg1.txt:[s05_look_e199] STOP: aifoundry1 booted after E82's firmware read: its firmware build is not carried by conti
+<scratch>/rg2.txt:IDENTITY-STOP: aifoundry1 booted '2026-11-13 16:53:28', not before E82's firmware read of 2026-10-31 13:45:24
+<scratch>/rg2.txt:[s11_a1_session_e199] STOP: IDENTITY-STOP: aifoundry1 booted '2026-11-13 16:53:28', not before E82's firmware
+-> PASS (LK the look: FREE on both cards, the box login recorded; RG a box booted after E82's firmware read: the look 16; step 9's guard IDENTITY-STOP 16, nothing launched)
+
+== R7a, R7b. step 7, the reads: refused before the rest opens (no config read sent); then card 1's read through E199's guard
+<scratch>/r7a.txt:REFUSED: 10 minutes since E191's session end (2026-11-16 02:00:23 PST): E199 starts on a rested card, its fir
+<scratch>/r7a.txt:[s09_a1_reads_e199] STOP: refused on the box: REFUSED: 10 minutes since E191's session end (2026-11-16 02:00:
+<scratch>/r7b.txt:IDENT-READ IDENT-A OK: /dev/et1_mgmt, physical device ID 1, minion_mv 499, TDP 65 W / 65 C / 600 MHz; runtime
+<scratch>/r7b.txt:IDENT PCIe target: /dev/et1_mgmt 
+<scratch>/r7b.txt:IDENT Physical device ID: 1 (0x1)
+<scratch>/r7b.txt:[s09_a1_reads_e199] aifoundry1 card 1, after the rest opened: manifest kept on the box (build/q141k/),  /dev/
+-> PASS (R7a step 7 before the rest opens: REFUSED (10), no config read sent; R7b after it: card 1's read OK through E199's guard (the runtime line dropped))
+
+== DR. step 8, the box's dry pass
+2026-11-16 02:10:24 PST DRY the reference session's DRY mode: rc 0; E199-DRY OK: 328 device calls (327 host, 1 heater), every one under timeout 10 with --stop-file; the smoke 3 runs at 2 s; passes 0-8 36 runs each at 4 s in the registered o
+E199-DRY-PASS rc=0 T0=1794823823
+[s10_a1_dry_e199] the dry pass ended rc 0: E199-DRY OK: 328 device calls (327 host, 1 heater), every one under timeout 10 with --stop-file
+-> PASS (DR the dry pass on the stand-in box: 0, E199-DRY OK)
+
+== RS, LA. the rest rule through step 9; then the launch
+<scratch>/rs.txt:REFUSED: 10 minutes since E189's session end (2026-11-16 02:00:25 PST): E199 starts on a rested card, its first card command at least 40 minutes after
+<scratch>/rs.txt:[s11_a1_session_e199] STOP: e199 refused on the box: REFUSED: 10 minutes since E189's session end (2026-11-16 02:00:25 PST): E199 starts on a rested c
+<scratch>/la.txt:rest: 45 minutes since E183's session end (2026-11-16 01:25:25 PST; dry sessions and blocks that opened no device skipped; every tree of ours on aifou
+<scratch>/la.txt:LAUNCHED e199 T0 1794823825 2026-11-16 02:10:30 PST (last start 2026-11-16 23:58 PST, last end 2026-11-16 23:59 PST; sampler: ettelem)
+-> PASS (RS a session 10 min ago: refused (10), nothing launched; LA 45 min ago: launched)
+-> PASS (W1r step 10 while the real session_e199.sh runs: RUN-RUNNING (17))
+2026-11-16 02:14:45 PST run_session.sh rc 0; the last lines of its log: [02:14:36] STOP: {"by": "hand", "why": "desk test: by hand after pass 0", "t_ms": 1794824047699} [02:14:44] session done (rc 0):
+2026-11-16 02:14:45 PST STOP: {"by": "hand", "why": "desk test: by hand after pass 0", "t_ms": 1794824047699}
+2026-11-16 02:14:45 PST passes complete: 1 of 9 (pass 0 the registered warm-up); launches recorded 375; card time 259 s from the first card command (cap 600 s)
+[02:14:36] STOP: {"by": "hand", "why": "desk test: by hand after pass 0", "t_ms": 1794824047699}
+RUN-ENDED e199
+MANIFEST-WRITTEN 25 files
+[s20_wait_e199] e199 has ended (MANIFEST-WRITTEN 25 files; passes complete: 1 of 9)
+-> PASS (W2r step 10 after the stop by hand: RUN-ENDED, MANIFEST-WRITTEN, 1 pass complete)
+
+== WN. a decoy session_e1990.sh that outlives the wait's bound, and a session log with no end
+-> PASS (WN a decoy named session_e1990.sh, alive past the wait's 40 s bound: RUN-GONE (14) within one loop (2 s): the pattern matches the real name only)
+
+== C. step 11, the collection
+SUM df47caa234a2d0026b49394aaa5fcd6c7f137d8d18c11dc4d708a0ef041429e5 build/e199/T1794823825/run/STOP
+COPY EXACT: 33 files at the box's sha256, nothing else; the session's own MANIFEST.sha256 holds for its 25 files
+ASSEMBLED 2026-11-16-e199-intbits-aifoundry1-c1: 35 files; sampler ettelem; passes complete 1; card time 259 s; stop hand
+SCRUB-CHECK OK: no holder line, process entry or /home path names another account
+[s22_collect_e199] E199 COLLECTED: <scratch>/out-p/e199-out/2026-11-16-e199-intbits-aifoundry1-c1 (the data directory is docs/reports/data/2026-11-16-e199-intbits-aifo
+-> PASS (C COPY EXACT, the gates, the data directory and its SHA256SUMS: 0)
+
+== R. the data directory committed (in the scratch repository), then step 13 (the reduction and the transport scorer)
+CHECKS-E192: 1 PASS; 2 FAIL; 3 NOT DECIDED; 4 NOT DECIDED; 5 NOT DECIDED; 6 NOT DECIDED; 7 REPORTED; 8 REPORTED
+E199-T1 (family A, board, per-arm contrasts (THE HEADLINE)): NO DATA - 0 of 31 decided, 0 hold, 0 miss (PASS at 27, FAIL at 5 misses)
+E199-T1L (family B, board ladders): NO DATA - 0 of 24 decided, 0 hold, 0 miss (PASS at 21, FAIL at 4 misses)
+E199-T1R (family C, core rail, per-arm contrasts): NO DATA - 0 of 31 decided, 0 hold, 0 miss (PASS at 27, FAIL at 5 misses)
+E199-T1RL (family D, core rail ladders): NO DATA - 0 of 24 decided, 0 hold, 0 miss (PASS at 21, FAIL at 4 misses)
+SCORES-E199: E199-T1 NO DATA; E199-T2 NO DATA; E199-T1L NO DATA; E199-T2L NO DATA; E199-T1R NO DATA; E199-T2R NO DATA; E199-T1RL NO DATA; E199-T2RL NO DATA
+[s24_score_e199] scored (Python 3.12.3): RB_OUT/intbits-e199.json (filtered, E151's rule), checks-e199.json (E192's section 7 checker, REPORTED beside E192's), scores-e199.json (); the unfiltered reduction beside it; a records lane commits them
+-> PASS (R step 13 on the committed data: E151's filter, E192's reducer, E192's checker, THE TRANSPORT SCORER, the unfiltered reduction: 0)
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/SHA256SUMS' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/box-manifest.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/build/build-attempts.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/build/build/intbits/BUILD-E199.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/build/build/intbits/arm-table.jsonl' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/build/build/intbits/check_elf.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/build/build/intbits/preflight.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/facts-e199.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/run/SESSION_DONE' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/run/STOP' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/run/gate.jsonl' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/run/marks.jsonl' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/run/runs.jsonl' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/run/sampler.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/run/session.log' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/run/stderr.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/run/stopwatch.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/run/telemetry.jsonl.gz' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/MANIFEST.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/config-end.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/config-end.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/config-start.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/config-start.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/dmcmd-preflight.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/etwho-before.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/first-card-command.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/gate.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/identity-a.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/identity-end.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/pins-kit.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/pins-registration.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/pins-shared.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/run_session.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/session.log' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-16-e199-intbits-aifoundry1-c1/session/wrapper.rc' not uptodate; will not remove from working tree.
+
+== C2. one byte of a box file changed after the session's manifest
+-> PASS (C2 the session's own manifest no longer holds: COPY NOT EXACT, 16)
+
+== Z
+<lab clone>/tools/claims-v3/e199/rb/selftest_rb_e199.sh: line 359: /proc/9453/cmdline: No such file or directory
+<lab clone>/tools/claims-v3/e199/rb/selftest_rb_e199.sh: line 359: /proc/9454/cmdline: No such file or directory
+-> PASS (Z no process of this test left ())
+
+SELFTEST-RB-E199 21 of 21 PASS
+exit 0

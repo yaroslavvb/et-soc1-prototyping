@@ -1,0 +1,54 @@
+# E199 kit (Q191, lane kit-e199; re-run by fix-e199 on the fixed registration and kit): the rest-rule desk test, bash tools/claims-v3/e199/rb/selftest_rest_e199.sh <scratch> <lab clone> <E199 real logs from the final real-path run: P, IA1, H1, D>
+# run 2026-11-16 02:30:52 PST on aifoundry2; paths masked
+E199 rest-rule desk test, 2026-11-16 02:30:52 PST; the rule: rest_rule_e199.sh 7085bb0e10040e04...; real logs: E190 B 4cbc25a149cc, E191 s1 05cfa4566ce6, E191 s2 13c716a8940b; E199's: given
+== R0
+   rc 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders, in any tree of ours on aifoundry1 
+-> PASS (R0 no session log: no real session, exit 0)
+== R1
+   rc 3: REFUSED: 10 minutes since E191's session end (2026-11-16 02:20:52 PST): E199 starts on a rested card, its first card command at least 40 minutes after our last real session on aifoundry1, either card (E199.md section 9; the kit) 
+-> PASS (R1 E191 s2's REAL log (build/e191/T<T0>/) ended 10 min ago: REFUSED)
+== R2
+   rc 0: rest: 45 minutes since E191's session end (2026-11-16 01:45:52 PST; dry sessions and blocks that opened no device skipped; every tree of ours on aifoundry1 read) 
+-> PASS (R2 the same 45 min ago: rest 45)
+== R3
+   rc 3: REFUSED: 20 minutes since E191's session end (2026-11-16 02:10:52 PST): E199 starts on a rested card, its first card command at least 40 minutes after our last real session on aifoundry1, either card (E199.md section 9; the kit) 
+-> PASS (R3 E191 s1's REAL log (stopped at its smoke gate after a card command) 20 min ago: counted, REFUSED)
+== R4
+   rc 3: REFUSED: 39 minutes since E190's session end (2026-11-16 01:51:52 PST): E199 starts on a rested card, its first card command at least 40 minutes after our last real session on aifoundry1, either card (E199.md section 9; the kit) 
+-> PASS (R4 E190 arm B's REAL log (build/e190/T<T0>-B/) 39 min ago: REFUSED)
+== R5
+   rc 0: rest: 41 minutes since E190's session end (2026-11-16 01:49:52 PST; dry sessions and blocks that opened no device skipped; every tree of ours on aifoundry1 read) 
+-> PASS (R5 the same 41 min ago: rest 41)
+== R6
+   rc 3: REFUSED: 5 minutes since E199's session end (2026-11-16 02:25:52 PST): E199 starts on a rested card, its first card command at least 40 minutes after our last real session on aifoundry1, either card (E199.md section 9; the kit) 
+-> PASS (R6 E199's own REAL wrapper log (the real-path test's full session) 5 min ago, E191's 50 min ago beside: REFUSED naming E199)
+== R7
+   rc 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders, in any tree of ours on aifoundry1 
+-> PASS (R7 E199's REAL dry-pass log a minute ago: skipped)
+== R8
+   rc 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders, in any tree of ours on aifoundry1 
+-> PASS (R8 E199's REAL refusal log ('no device opened') 2 min ago: skipped)
+== R9
+   rc 3: REFUSED: 10 minutes since E199's session end (2026-11-16 02:20:52 PST): E199 starts on a rested card, its first card command at least 40 minutes after our last real session on aifoundry1, either card (E199.md section 9; the kit) 
+-> PASS (R9 E199's REAL log of a session ended at the identity gate (a) 10 min ago: counted (a card command was sent), REFUSED)
+== R10
+   rc 3: note: E191's last real session block has no 'session end': counted as ended at 2026-11-16 02:20:52 PST (the latest write of E191's files outside the dry paths) REFUSED: 10 minutes since E191's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026
+-> PASS (R10 a cut E191 session (no end), its run written 10 min ago: REFUSED at its latest write)
+== R11
+   rc 0: note: E191's last real session block has no 'session end': counted as ended at 2026-11-16 01:45:52 PST (the latest write of E191's files outside the dry paths) rest: 45 minutes since E191's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026-11
+-> PASS (R11 the same, latest write 45 min ago: rest 45, with the note)
+== R12
+   rc 3: REFUSED: 10 minutes since E191's session end (2026-11-16 02:20:52 PST): E199 starts on a rested card, its first card command at least 40 minutes after our last real session on aifoundry1, either card (E199.md section 9; the kit) 
+-> PASS (R12 a log in ~/aifoundry (not the tree step 9 runs from) 10 min ago: REFUSED (every tree of ours read))
+== R13
+   rc 3: REFUSED: 10 minutes since energy.sh's run (2026-11-16 02:20:52 PST (the latest write of an energy.sh run's folder, run-a)): E199 starts on a rested card, its first card command at least 40 minutes after our last real session on aifoundry1, either card (E199.md section 9; the kit) 
+-> PASS (R13 an energy.sh run's folder in ~/nekko written 10 min ago: REFUSED)
+== R14
+   rc 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders, in any tree of ours on aifoundry1 
+-> PASS (R14 a dry energy.sh folder a minute ago: skipped)
+== R15
+   rc 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders, in any tree of ours on aifoundry1 
+-> PASS (R15 E191's dry directory (T<T0>-dry) a minute ago: skipped)
+
+SELFTEST-REST-E199 16 of 16 PASS
+exit 0

@@ -1,0 +1,388 @@
+# E199 kit (Q191, lane kit-e199; re-run by fix-e199 on the fixed registration and kit): realpath, bash W/slot.sh bash W/nodev.sh bash tools/claims-v3/e199/desk/desktest_realpath_e199.sh <scratch>
+# run 2026-11-16 02:08:53 PST on aifoundry2 (Ubuntu 24.04; 5.2.21(1)-release; bubblewrap 0.9.0; /usr/bin/python3 3.12.3); paths masked as <lab clone>, <scratch>; at the clone's HEAD c0434812 with the kit's files uncommitted
+inside the sandbox: hostname aifoundry1; /dev/et*: crw-rw-rw- /dev/et0_mgmt crw-rw-rw- /dev/et0_ops crw-rw-rw- /dev/et1_mgmt crw-rw-rw- /dev/et1_ops ; processes visible: 5
+E199 real-path desk test (kit-e199), 2026-11-16 02:08:53 PST; Python 3.12.3; the scratch <scratch>
+
+== 0 the sandbox and the stand-in aifoundry1
+-> PASS (0a the host's name is aifoundry1 in the sandbox)
+-> PASS (0b the private /dev holds aifoundry1's four node names, each a bind of /dev/null (a character node that is no card))
+-> PASS (0c a private PID namespace (few processes visible))
+-> PASS (0d the box copy's preflight: the plain chain GO (the stock table), the per-sensor chain GO (E144's table))
+-> PASS (0e the box copy's identity module self-check: card 1's forms pass, card 0's refused)
+-> PASS (0f IA0: the guard refuses a missing ET_DEVICES, ET_DEVICES=0 and any word but config (exit 97), the reader never started)
+-> PASS (0g the guard with ET_DEVICES=1 runs the reader's config (the runtime line first, card 1's block on stderr): IDENT-A OK)
+
+== D-dry
+   rc 0 in 1.0 s; outd box/nekko/build/e199/T1794823733-dry; calls {}; stop -
+   | 2026-11-16 02:08:54 PST DRY would run: the free check (et-who --check on both cards; other users' device processes; a probe of /run/lock/etsoc-shire1.lock, read-only, never created)
+   | 2026-11-16 02:08:54 PST DRY would run, the first card command: flock -n /run/lock/etsoc-shire1.lock timeout 10 bash build/claims-v3/aifoundry1-c1/e199/tools/claims-v3/e199/ettelem_guard_e199.sh config (ET_DEVICES=1; THE 
+   | 2026-11-16 02:08:54 PST DRY would run: flock -n /run/lock/etsoc-shire1.lock timeout 10 python3 -B build/claims-v3/aifoundry1-c1/e199/tools/claims-v3/e89/pvt_sample.py --probe (ET_DEVICES=1: card 1; SAMPLER pvt if it answ
+   | 2026-11-16 02:08:54 PST DRY would run: gate_e199.py beside the session (the smoke gate; the cap, 3900 s from the first card command; card 1's live stops 65 W / 70 C; THE IDENTITY GATE (b) within 8 s of the first sample; 
+   | 2026-11-16 02:08:54 PST DRY the reference session's DRY mode: rc 0; E199-DRY OK: 328 device calls (327 host, 1 heater), every one under timeout 10 with --stop-file; the smoke 3 runs at 2 s; passes 0-8 36 runs each at 4 s
+   | 2026-11-16 02:08:54 PST DRY session end (T0 1794823733)
+-> PASS (D1 --dry: rc 0, the dry listing 328 device calls in the registered order for aifoundry1)
+-> PASS (D2 the dry log: the T<T0>-dry directory, 'session start (...; DRY)', every line DRY (every rest rule skips it))
+-> PASS (D3 no stand-in tool was called (nothing opened))
+-> PASS (D4 MANIFEST.sha256 written last and exact)
+
+== P-realpath
+   rc 0 in 445.4 s; outd box/nekko/build/e199/T1794823734; calls {'heater': 3, 'etwho': 6, 'sampler': 2, 'host': 75, 'pvt': 4, 'ps': 5}; stop desk test: by hand, in the gap after pass 1
+   | 2026-11-16 02:16:19 PST the end config read: exit 0; IDENT-A OK: /dev/et1_mgmt, physical device ID 1, minion_mv 499, TDP 65 W / 65 C / 600 MHz; runtime lines dropped 1 (recorded, not a gate)
+   | 2026-11-16 02:16:19 PST run_session.sh rc 0; the last lines of its log: [02:16:11] STOP: {"by": "hand", "why": "desk test: by hand, in the gap after pass 1", "t_ms": 1794824141508} [02:16:19] session done (rc 0): 735 lau
+   | 2026-11-16 02:16:19 PST STOP: {"by": "hand", "why": "desk test: by hand, in the gap after pass 1", "t_ms": 1794824141508}
+   | 2026-11-16 02:16:19 PST identity (b): {"t_ms": 1794823735702, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:16:19 PST passes complete: 2 of 9 (pass 0 the registered warm-up); launches recorded 735; card time 444 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:16:19 PST session end (T0 1794823734)
+-> PASS (P1 rc 0 (a stop by hand between passes ends the session normally))
+-> PASS (P2 THE FIRST CARD COMMAND is the start config read under card 1's lock with ET_DEVICES=1: THE IDENTITY GATE (a) OK; the end read too)
+-> PASS (P3 the per-sensor probe under card 1's lock answered (SAMPLER=pvt); then ONE sampler, both on card 1, each holding /dev/et1_mgmt)
+-> PASS (P4 the session's sampler: --seconds 6000 --every-ms 100, ET_DEVICES=1)
+-> PASS (P5 the sampler stopped by SIGTERM (never killed), once)
+-> PASS (P6 THE IDENTITY GATE (b): with the sampler running and before the smoke's first launch, our holder lines on card 1 only, the sampler holding /dev/et1_mgmt)
+-> PASS (P7 the kit's smoke gate GO: the three runs' INTBITS lines, and each of the smoke's 4 device processes showed card 1's identity block)
+-> PASS (P8 the smoke's heater check: the heater ran (exit 0, its board level read) and stayed below card 1's 65 W line)
+-> PASS (P9.0 pass 0: 36 runs in the registered order for aifoundry1 (order-e199-aifoundry1.txt))
+-> PASS (P10.0 pass 0: every run 8 or more INTBITS lines, every launch ok)
+-> PASS (P9.1 pass 1: 36 runs in the registered order for aifoundry1 (order-e199-aifoundry1.txt))
+-> PASS (P10.1 pass 1: every run 8 or more INTBITS lines, every launch ok)
+-> PASS (P11 75 host processes (smoke 3, passes 36 each), every one with card 1's lock held and ET_DEVICES=1)
+-> PASS (P12 AIFOUNDRY1'S RUNTIME LINE ('Opening device 1' on each host's stdout before its first INTBITS line): every launch printed is a record (none lost, none broken))
+-> PASS (P13 the heater ran under card 1's lock with ET_DEVICES=1 (the check and the approach))
+-> PASS (P14 THE STOP PATH: the stop by hand was honoured after the gap: 2 passes complete)
+-> PASS (P15 the cap read before passes 0 and 1, each within it)
+-> PASS (P16 the end config read kept its stderr and named card 1 (recorded, not a gate))
+-> PASS (P17 session end, MANIFEST exact, wrapper.rc 0)
+-> PASS (P18 et-who before anything read no holder on either card; the gate ended at the stop)
+-> PASS (P19 E199's pipeline reads the real path's files (stand-in numbers): E151's rail filter (prefilter_e199.py), then E192's reducer, rc 0)
+   rest rule after P: rc 3: REFUSED: 0 minutes since E199's session end (2026-11-16 02:16:19 PST): E199 starts on a rested card, its first card command at least 40 minutes after our last real session on aifoundry1, either card (E199.md section 9; the kit)
+-> PASS (P20 the rest rule on the stand-in box right after P: REFUSED (E199's own session log counted))
+
+== FE-plain-by-go
+   rc 8 in 44.8 s; outd box/nekko/build/e199/T1794824180; calls {'heater': 1, 'etwho': 4, 'sampler': 4, 'host': 3, 'ps': 3}; stop desk test: by hand after the smoke gate
+   | 2026-11-16 02:17:05 PST run_session.sh rc 8; the last lines of its log: [02:16:56] smoke: exit 8 (block stopped), no pass runs [02:17:04] session done (rc 8): 15 launches recorded 
+   | 2026-11-16 02:17:05 PST STOP: {"by": "hand", "why": "desk test: by hand after the smoke gate", "t_ms": 1794824216263}
+   | 2026-11-16 02:17:05 PST identity (b): {"t_ms": 1794824181156, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:17:05 PST stopped before any pass completed: rc 8; {"by": "hand", "why": "desk test: by hand after the smoke gate", "t_ms": 1794824216263}
+   | 2026-11-16 02:17:05 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 45 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:17:05 PST session end (T0 1794824180)
+-> PASS (FE E199_SAMPLER=ettelem: no probe; the plain sampler on card 1 holding /dev/et1_mgmt)
+-> PASS (FEb identity (b) OK with the plain sampler; the stop by hand after the smoke: rc 8, 3 host runs)
+
+== H1-holder-card1-at-start
+   rc 3 in 0.6 s; outd box/nekko/build/e199/T1794824225; calls {'etwho': 1}; stop -
+   | 2026-11-16 02:17:05 PST session start (T0 1794824225 = 02:17:05 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:17:05 PST checked: host aifoundry1; USER the login; E192's registration list dd0a89635800 and its six session files; E199's registration list 4d05fe0a7e6c and its order; the kit's list and its six session f
+   | 2026-11-16 02:17:05 PST the card is not free: et-who --check exit 1 (holder lines by card: card 1 1, card 0 0, other 0; either card blocks) (no device opened)
+-> PASS (H1 a holder on card 1 at the start: exit 3, nothing opened (no config read))
+
+== H1b-holder-card0-at-start
+   rc 3 in 0.6 s; outd box/nekko/build/e199/T1794824226; calls {'etwho': 1}; stop -
+   | 2026-11-16 02:17:05 PST session start (T0 1794824226 = 02:17:06 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:17:06 PST checked: host aifoundry1; USER the login; E192's registration list dd0a89635800 and its six session files; E199's registration list 4d05fe0a7e6c and its order; the kit's list and its six session f
+   | 2026-11-16 02:17:06 PST the card is not free: et-who --check exit 1 (holder lines by card: card 1 0, card 0 1, other 0; either card blocks) (no device opened)
+-> PASS (H1b a second card's holder (another login on card 0) at the start: exit 3, nothing opened (either card blocks))
+
+== H2-foreign-process
+   rc 3 in 0.6 s; outd box/nekko/build/e199/T1794824227; calls {'etwho': 1, 'ps': 1}; stop -
+   | 2026-11-16 02:17:06 PST session start (T0 1794824227 = 02:17:07 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:17:06 PST checked: host aifoundry1; USER the login; E192's registration list dd0a89635800 and its six session files; E199's registration list 4d05fe0a7e6c and its order; the kit's list and its six session f
+   | 2026-11-16 02:17:06 PST the card is not free: 1 device process(es) of another user (no device opened)
+-> PASS (H2 another user's device process: exit 3, nothing opened)
+
+== H3-card1-lock-held
+   rc 3 in 0.6 s; outd box/nekko/build/e199/T1794824228; calls {'etwho': 1, 'ps': 1}; stop -
+   | 2026-11-16 02:17:07 PST session start (T0 1794824228 = 02:17:08 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:17:07 PST checked: host aifoundry1; USER the login; E192's registration list dd0a89635800 and its six session files; E199's registration list 4d05fe0a7e6c and its order; the kit's list and its six session f
+   | 2026-11-16 02:17:07 PST the card is not free: card 1's lock is held (probe exit 75) (no device opened)
+-> PASS (H3 card 1's lock held at the start: exit 3, nothing opened)
+
+== IA1-config-names-card0
+   rc 16 in 0.6 s; outd box/nekko/build/e199/T1794824229; calls {'etwho': 1, 'sampler': 1, 'ps': 1}; stop -
+   | 2026-11-16 02:17:07 PST session start (T0 1794824229 = 02:17:09 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:17:08 PST checked: host aifoundry1; USER the login; E192's registration list dd0a89635800 and its six session files; E199's registration list 4d05fe0a7e6c and its order; the kit's list and its six session f
+   | 2026-11-16 02:17:08 PST THE IDENTITY GATE (a) FAILED: the start config read exited 0; IDENT-A FAIL: PCIe target /dev/et0_mgmt, not /dev/et1_mgmt; Physical device ID [0], not 1; minion_mv 519, not below 510 (card 1 read 4
+   | 2026-11-16 02:17:08 PST stopped before any pass completed: the identity gate (a) (no launch; card time 0 s from the first card command)
+   | 2026-11-16 02:17:08 PST session end (T0 1794824229)
+-> PASS (IA1 the start config read names /dev/et0_mgmt and ID 0 (card 0's form): exit 16, no probe, no sampler, no launch)
+-> PASS (IA1b step 10 reads it ended and stopped before any pass (16), with s20's own pattern)
+
+== IA2-minion-mv-519
+   rc 16 in 0.6 s; outd box/nekko/build/e199/T1794824230; calls {'etwho': 1, 'sampler': 1, 'ps': 1}; stop -
+   | 2026-11-16 02:17:08 PST session start (T0 1794824230 = 02:17:10 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:17:08 PST checked: host aifoundry1; USER the login; E192's registration list dd0a89635800 and its six session files; E199's registration list 4d05fe0a7e6c and its order; the kit's list and its six session f
+   | 2026-11-16 02:17:08 PST THE IDENTITY GATE (a) FAILED: the start config read exited 0; IDENT-A FAIL: minion_mv 519, not below 510 (card 1 read 499 or 500 in every committed read; card 0 519) 
+   | 2026-11-16 02:17:08 PST stopped before any pass completed: the identity gate (a) (no launch; card time 0 s from the first card command)
+   | 2026-11-16 02:17:08 PST session end (T0 1794824230)
+-> PASS (IA2 card 1's block but minion_mv 519 (card 0's): exit 16, no launch)
+
+== IA3-config-split
+   rc 8 in 20.0 s; outd box/nekko/build/e199/T1794824231; calls {'etwho': 3, 'sampler': 2, 'pvt': 4, 'ps': 3}; stop desk test: by hand after the identity gate (a)
+   | 2026-11-16 02:17:28 PST the end config read: exit 0; IDENT-A OK: /dev/et1_mgmt, physical device ID 1, minion_mv 499, TDP 65 W / 65 C / 600 MHz; runtime lines dropped 1 (recorded, not a gate)
+   | 2026-11-16 02:17:28 PST run_session.sh rc 8; the last lines of its log: [02:17:19] smoke: exit 8 (block stopped), no pass runs [02:17:27] session done (rc 8): 0 launches recorded 
+   | 2026-11-16 02:17:28 PST STOP: {"by": "hand", "why": "desk test: by hand after the identity gate (a)", "t_ms": 1794824229578}
+   | 2026-11-16 02:17:28 PST stopped before any pass completed: rc 8; {"by": "hand", "why": "desk test: by hand after the identity gate (a)", "t_ms": 1794824229578}
+   | 2026-11-16 02:17:28 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 19 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:17:28 PST session end (T0 1794824231)
+-> PASS (IA3 the runtime line INSIDE the config's JSON line: dropped, the identity read OK)
+
+== IA4-config-busy-once
+   rc 8 in 23.0 s; outd box/nekko/build/e199/T1794824248; calls {'etwho': 3, 'sampler': 3, 'pvt': 4, 'ps': 3}; stop desk test: by hand after the identity gate (a)
+   | 2026-11-16 02:17:51 PST the end config read: exit 0; IDENT-A OK: /dev/et1_mgmt, physical device ID 1, minion_mv 499, TDP 65 W / 65 C / 600 MHz; runtime lines dropped 1 (recorded, not a gate)
+   | 2026-11-16 02:17:51 PST run_session.sh rc 8; the last lines of its log: [02:17:42] smoke: exit 8 (block stopped), no pass runs [02:17:50] session done (rc 8): 0 launches recorded 
+   | 2026-11-16 02:17:51 PST STOP: {"by": "hand", "why": "desk test: by hand after the identity gate (a)", "t_ms": 1794824252598}
+   | 2026-11-16 02:17:51 PST stopped before any pass completed: rc 8; {"by": "hand", "why": "desk test: by hand after the identity gate (a)", "t_ms": 1794824252598}
+   | 2026-11-16 02:17:51 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 22 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:17:51 PST session end (T0 1794824248)
+-> PASS (IA4 no config came back once (a busy node): ONE more read, then the identity read OK)
+
+== IA5-config-busy-twice
+   rc 16 in 3.8 s; outd box/nekko/build/e199/T1794824272; calls {'etwho': 1, 'sampler': 2, 'ps': 1}; stop -
+   | 2026-11-16 02:17:52 PST session start (T0 1794824272 = 02:17:52 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:17:52 PST checked: host aifoundry1; USER the login; E192's registration list dd0a89635800 and its six session files; E199's registration list 4d05fe0a7e6c and its order; the kit's list and its six session f
+   | 2026-11-16 02:17:52 PST the start config read exited 1 with no config: one more read in 3 s (a read, the same command)
+   | 2026-11-16 02:17:55 PST THE IDENTITY GATE (a) FAILED: the start config read exited 1; IDENT-A FAIL: no config JSON on the read's stdout; no 'PCIe target' line on the config read's stderr; no 'Physical device ID' line on 
+   | 2026-11-16 02:17:55 PST stopped before any pass completed: the identity gate (a) (no launch; card time 3 s from the first card command)
+   | 2026-11-16 02:17:55 PST session end (T0 1794824272)
+-> PASS (IA5 no config twice: exit 16, no launch)
+   rest rule after IA5: rc 3: REFUSED: 0 minutes since E199's session end (2026-11-16 02:17:55 PST): E199 starts on a rested card, its first card command at least 40 minutes after our last real session on aifoundry1, either card (E199.md section 9; the kit)
+-> PASS (IA5b the rest rule counts a session ended at the identity gate (a card command was sent))
+
+== IB1-ours-on-card0
+   rc 3 in 20.0 s; outd box/nekko/build/e199/T1794824275; calls {'etwho': 4, 'sampler': 2, 'pvt': 4, 'ps': 2}; stop identity gate (b): 1 holder line(s) of ours on card 0 (a /dev/et0_ node or lock:etsoc-shire0.lock)
+   | 2026-11-16 02:18:15 PST the end config read: exit 0; IDENT-A OK: /dev/et1_mgmt, physical device ID 1, minion_mv 499, TDP 65 W / 65 C / 600 MHz; runtime lines dropped 1 (recorded, not a gate)
+   | 2026-11-16 02:18:15 PST run_session.sh rc 3; the last lines of its log: [02:18:06] the card is not free after the sampler started: no block runs [02:18:14] session done (rc 3): 0 launches recorded 
+   | 2026-11-16 02:18:15 PST STOP: {"by": "gate_e199", "why": "identity gate (b): 1 holder line(s) of ours on card 0 (a /dev/et0_ node or lock:etsoc-shire0.lock)", "t_ms": 1794824276818}
+   | 2026-11-16 02:18:15 PST stopped before any pass completed: rc 3; {"by": "gate_e199", "why": "identity gate (b): 1 holder line(s) of ours on card 0 (a /dev/et0_ node or lock:etsoc-shire0.lock)", "t_ms": 1794824276818}
+   | 2026-11-16 02:18:15 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 19 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:18:15 PST session end (T0 1794824275)
+-> PASS (IB1 a holder line of ours on card 0 with the sampler running: the gate (b) STOPs before any launch)
+
+== IB2-second-card-holder
+   rc 3 in 20.0 s; outd box/nekko/build/e199/T1794824295; calls {'etwho': 4, 'sampler': 2, 'pvt': 4, 'ps': 2}; stop identity gate (b): 1 holder line(s) of another login (either card)
+   | 2026-11-16 02:18:35 PST the end config read: exit 0; IDENT-A OK: /dev/et1_mgmt, physical device ID 1, minion_mv 499, TDP 65 W / 65 C / 600 MHz; runtime lines dropped 1 (recorded, not a gate)
+   | 2026-11-16 02:18:35 PST run_session.sh rc 3; the last lines of its log: [02:18:26] the card is not free after the sampler started: no block runs [02:18:34] session done (rc 3): 0 launches recorded 
+   | 2026-11-16 02:18:35 PST STOP: {"by": "gate_e199", "why": "identity gate (b): 1 holder line(s) of another login (either card)", "t_ms": 1794824296812}
+   | 2026-11-16 02:18:35 PST stopped before any pass completed: rc 3; {"by": "gate_e199", "why": "identity gate (b): 1 holder line(s) of another login (either card)", "t_ms": 1794824296812}
+   | 2026-11-16 02:18:35 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 19 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:18:35 PST session end (T0 1794824295)
+-> PASS (IB2 a second card's holder (another login on card 0) with the sampler running: the gate (b) STOPs before any launch)
+
+== IB3-sampler-holds-nothing
+   rc 8 in 20.0 s; outd box/nekko/build/e199/T1794824315; calls {'etwho': 4, 'sampler': 2, 'pvt': 4, 'ps': 3}; stop identity gate (b): no holder line of ours on /dev/et1_mgmt (the sampler's) with the sampler running; the sampler does not hold /dev/et1_mgmt (it holds no card n
+   | 2026-11-16 02:18:55 PST the end config read: exit 0; IDENT-A OK: /dev/et1_mgmt, physical device ID 1, minion_mv 499, TDP 65 W / 65 C / 600 MHz; runtime lines dropped 1 (recorded, not a gate)
+   | 2026-11-16 02:18:55 PST run_session.sh rc 8; the last lines of its log: [02:18:46] smoke: exit 8 (block stopped), no pass runs [02:18:54] session done (rc 8): 0 launches recorded 
+   | 2026-11-16 02:18:55 PST STOP: {"by": "gate_e199", "why": "identity gate (b): no holder line of ours on /dev/et1_mgmt (the sampler's) with the sampler running; the sampler does not hold /dev/et1_mgmt (it holds no card nod
+   | 2026-11-16 02:18:55 PST stopped before any pass completed: rc 8; {"by": "gate_e199", "why": "identity gate (b): no holder line of ours on /dev/et1_mgmt (the sampler's) with the sampler running; the sampler does not hold 
+   | 2026-11-16 02:18:55 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 19 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:18:55 PST session end (T0 1794824315)
+-> PASS (IB3 no holder line of ours on /dev/et1_mgmt (the sampler holds nothing): the gate (b) STOPs, exit 8, no launch)
+-> PASS (IB3b step 10 reads it stopped before any pass (16))
+
+== W1-host-names-card0
+   rc 8 in 75.1 s; outd box/nekko/build/e199/T1794824335; calls {'heater': 2, 'etwho': 5, 'sampler': 2, 'host': 5, 'pvt': 4, 'ps': 4}; stop the watch: a device process of the session named another card on its stderr (/dev/et0_ops, Physical device ID 0)
+   | 2026-11-16 02:20:10 PST run_session.sh rc 8; the last lines of its log: [02:20:01] pass 0: exit 8 (block stopped), stopping [02:20:09] session done (rc 8): 26 launches recorded 
+   | 2026-11-16 02:20:10 PST STOP: {"by": "gate_e199", "why": "the watch: a device process of the session named another card on its stderr (/dev/et0_ops, Physical device ID 0)", "t_ms": 1794824401404}
+   | 2026-11-16 02:20:10 PST identity (b): {"t_ms": 1794824336840, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:20:10 PST stopped before any pass completed: rc 8; {"by": "gate_e199", "why": "the watch: a device process of the session named another card on its stderr (/dev/et0_ops, Physical device ID 0)", "t_ms": 1794
+   | 2026-11-16 02:20:10 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 26; card time 74 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:20:10 PST session end (T0 1794824335)
+-> PASS (W1 the 5th host process names card 0 on its stderr: the watch STOPs; no 6th host process; exit 8)
+
+== W2-host-holds-card0
+   rc 8 in 75.2 s; outd box/nekko/build/e199/T1794824410; calls {'heater': 2, 'etwho': 5, 'sampler': 2, 'host': 5, 'pvt': 4, 'ps': 4}; stop the watch: process 4032 (intbits_host) of the session holds /dev/et0_ops, not card 1's node
+   | 2026-11-16 02:21:26 PST run_session.sh rc 8; the last lines of its log: [02:21:17] pass 0: exit 8 (block stopped), stopping [02:21:25] session done (rc 8): 26 launches recorded 
+   | 2026-11-16 02:21:26 PST STOP: {"by": "gate_e199", "why": "the watch: process 4032 (intbits_host) of the session holds /dev/et0_ops, not card 1's node", "t_ms": 1794824476571}
+   | 2026-11-16 02:21:26 PST identity (b): {"t_ms": 1794824411964, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:21:26 PST stopped before any pass completed: rc 8; {"by": "gate_e199", "why": "the watch: process 4032 (intbits_host) of the session holds /dev/et0_ops, not card 1's node", "t_ms": 1794824476571}
+   | 2026-11-16 02:21:26 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 26; card time 74 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:21:26 PST session end (T0 1794824410)
+-> PASS (W2 the 5th host process holds /dev/et0_ops: the watch STOPs; no 6th host process)
+
+== W3-smoke-heater-names-card0
+   rc 8 in 32.4 s; outd box/nekko/build/e199/T1794824486; calls {'heater': 1, 'etwho': 4, 'sampler': 2, 'pvt': 4, 'ps': 3}; stop the watch: a device process of the session named another card on its stderr (/dev/et0_ops, Physical device ID 0)
+   | 2026-11-16 02:21:58 PST run_session.sh rc 8; the last lines of its log: [02:21:49] smoke: exit 8 (block stopped), no pass runs [02:21:57] session done (rc 8): 0 launches recorded 
+   | 2026-11-16 02:21:58 PST STOP: {"by": "gate_e199", "why": "the watch: a device process of the session named another card on its stderr (/dev/et0_ops, Physical device ID 0)", "t_ms": 1794824507536}
+   | 2026-11-16 02:21:58 PST identity (b): {"t_ms": 1794824487420, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:21:58 PST stopped before any pass completed: rc 8; {"by": "gate_e199", "why": "the watch: a device process of the session named another card on its stderr (/dev/et0_ops, Physical device ID 0)", "t_ms": 1794
+   | 2026-11-16 02:21:58 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 32 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:21:58 PST session end (T0 1794824486)
+-> PASS (W3 the smoke's heater check names card 0: the watch STOPs before any host run)
+
+== LS1-board-65
+   rc 8 in 69.7 s; outd box/nekko/build/e199/T1794824518; calls {'heater': 2, 'etwho': 5, 'sampler': 2, 'host': 4, 'pvt': 4, 'ps': 4}; stop card 1's live stop: board 66.722 W at or above 65 W (sample t_ms 1794824578638)
+   | 2026-11-16 02:23:08 PST run_session.sh rc 8; the last lines of its log: [02:22:59] pass 0: exit 8 (block stopped), stopping [02:23:07] session done (rc 8): 16 launches recorded 
+   | 2026-11-16 02:23:08 PST STOP: {"by": "gate_e199", "why": "card 1's live stop: board 66.722 W at or above 65 W (sample t_ms 1794824578638)", "t_ms": 1794824578658}
+   | 2026-11-16 02:23:08 PST identity (b): {"t_ms": 1794824519960, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:23:08 PST stopped before any pass completed: rc 8; {"by": "gate_e199", "why": "card 1's live stop: board 66.722 W at or above 65 W (sample t_ms 1794824578638)", "t_ms": 1794824578658}
+   | 2026-11-16 02:23:08 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 16; card time 68 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:23:08 PST session end (T0 1794824518)
+-> PASS (LS1 a board reading at or above 65 W (below stopwatch's 80 W): card 1's live stop; no device process after it; exit 8)
+
+== LS2-die-70
+   rc 6 in 71.4 s; outd box/nekko/build/e199/T1794824588; calls {'heater': 2, 'etwho': 5, 'sampler': 2, 'host': 4, 'pvt': 4, 'ps': 4}; stop card 1's live stop: minshire[0] 70 C at or above 70 C (sample t_ms 1794824650246)
+   | 2026-11-16 02:24:19 PST run_session.sh rc 6; the last lines of its log: [02:24:10] pass 0: exit 6 (block stopped), stopping [02:24:18] session done (rc 6): 21 launches recorded 
+   | 2026-11-16 02:24:19 PST STOP: {"by": "gate_e199", "why": "card 1's live stop: minshire[0] 70 C at or above 70 C (sample t_ms 1794824650246)", "t_ms": 1794824650266}
+   | 2026-11-16 02:24:19 PST identity (b): {"t_ms": 1794824589787, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:24:19 PST stopped before any pass completed: rc 6; {"by": "gate_e199", "why": "card 1's live stop: minshire[0] 70 C at or above 70 C (sample t_ms 1794824650246)", "t_ms": 1794824650266}
+   | 2026-11-16 02:24:19 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 21; card time 70 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:24:19 PST session end (T0 1794824588)
+-> PASS (LS2 minshire[0] at or above 70 C: a stop (card 1's line, stopwatch's or the block's), no device process after it)
+
+== S3-sampler-quiet
+   rc 4 in 60.0 s; outd box/nekko/build/e199/T1794824659; calls {'heater': 1, 'etwho': 5, 'sampler': 2, 'host': 3, 'pvt': 5, 'ps': 4}; stop newest telemetry line 5.4 s old
+   | 2026-11-16 02:25:19 PST run_session.sh rc 4; the last lines of its log: [02:25:10] pass 0: exit 4 (block stopped), stopping [02:25:18] session done (rc 4): 15 launches recorded 
+   | 2026-11-16 02:25:19 PST STOP: {"by": "run_block", "pass": 0, "why": "newest telemetry line 5.4 s old", "t_ms": 1794824710980}
+   | 2026-11-16 02:25:19 PST identity (b): {"t_ms": 1794824660734, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:25:19 PST stopped before any pass completed: rc 4; {"by": "run_block", "pass": 0, "why": "newest telemetry line 5.4 s old", "t_ms": 1794824710980}
+   | 2026-11-16 02:25:19 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 59 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:25:19 PST session end (T0 1794824659)
+-> PASS (S3 the sampler gone quiet: a stale-telemetry stop (the block's 5 s or stopwatch's 10 s), no device process after it)
+-> PASS (S3b the quiet sampler still ended by SIGTERM)
+
+== HC-heater-above-65
+   rc 8 in 32.0 s; outd box/nekko/build/e199/T1794824719; calls {'heater': 1, 'etwho': 4, 'sampler': 2, 'pvt': 4, 'ps': 3}; stop card 1's live stop: board 66.159 W at or above 65 W (sample t_ms 1794824740845)
+   | 2026-11-16 02:25:51 PST run_session.sh rc 8; the last lines of its log: [02:25:42] smoke: exit 8 (block stopped), no pass runs [02:25:50] session done (rc 8): 0 launches recorded 
+   | 2026-11-16 02:25:51 PST STOP: {"by": "gate_e199", "why": "card 1's live stop: board 66.159 W at or above 65 W (sample t_ms 1794824740845)", "t_ms": 1794824740905}
+   | 2026-11-16 02:25:51 PST identity (b): {"t_ms": 1794824720801, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:25:51 PST stopped before any pass completed: rc 8; {"by": "gate_e199", "why": "card 1's live stop: board 66.159 W at or above 65 W (sample t_ms 1794824740845)", "t_ms": 1794824740905}
+   | 2026-11-16 02:25:51 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 31 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:25:51 PST session end (T0 1794824719)
+-> PASS (HC the smoke's heater check reading 66 W (under the registered 70 W ceiling): card 1's 65 W live stop first, no host run (on card 1 the 65 W line binds before the 70 W ceiling))
+
+== G1-smoke-gate
+   rc 8 in 45.2 s; outd box/nekko/build/e199/T1794824751; calls {'heater': 1, 'etwho': 4, 'sampler': 2, 'host': 3, 'pvt': 4, 'ps': 3}; stop smoke gate: add.a.f2: 5 of 5 lines not ok, check_bad on 5 lines
+   | 2026-11-16 02:26:36 PST run_session.sh rc 8; the last lines of its log: [02:26:28] smoke: exit 8 (block stopped), no pass runs [02:26:36] session done (rc 8): 15 launches recorded 
+   | 2026-11-16 02:26:36 PST STOP: {"by": "gate_e199", "why": "smoke gate: add.a.f2: 5 of 5 lines not ok, check_bad on 5 lines", "t_ms": 1794824787898}
+   | 2026-11-16 02:26:36 PST identity (b): {"t_ms": 1794824752915, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:26:36 PST stopped before any pass completed: rc 8; {"by": "gate_e199", "why": "smoke gate: add.a.f2: 5 of 5 lines not ok, check_bad on 5 lines", "t_ms": 1794824787898}
+   | 2026-11-16 02:26:36 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 44 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:26:36 PST session end (T0 1794824751)
+-> PASS (G1 a smoke run with check_bad: the kit's smoke gate writes STOP, exit 8, no pass-0 device process)
+
+== G2a-cap-before-pass0
+   rc 8 in 54.0 s; outd box/nekko/build/e199/T1794824797; calls {'heater': 1, 'etwho': 5, 'sampler': 2, 'host': 3, 'pvt': 4, 'ps': 4}; stop cap: pass 0 could end after the cap (400 s needed: D0 400 s; 255 s left of 300)
+   | 2026-11-16 02:27:30 PST run_session.sh rc 8; the last lines of its log: [02:27:22] pass 0: exit 8 (block stopped), stopping [02:27:30] session done (rc 8): 15 launches recorded 
+   | 2026-11-16 02:27:30 PST STOP: {"by": "gate_e199", "why": "cap: pass 0 could end after the cap (400 s needed: D0 400 s; 255 s left of 300)", "t_ms": 1794824842207}
+   | 2026-11-16 02:27:30 PST identity (b): {"t_ms": 1794824798014, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:27:30 PST stopped before any pass completed: rc 8; {"by": "gate_e199", "why": "cap: pass 0 could end after the cap (400 s needed: D0 400 s; 255 s left of 300)", "t_ms": 1794824842207}
+   | 2026-11-16 02:27:30 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 53 s from the first card command (cap 300 s)
+   | 2026-11-16 02:27:30 PST session end (T0 1794824797)
+-> PASS (G2a the cap read before pass 0 (D0 400 s, cap 300 s): STOP, no pass-0 device process)
+
+== G4-gate-dies
+   rc 8 in 46.0 s; outd box/nekko/build/e199/T1794824851; calls {'heater': 1, 'etwho': 4, 'sampler': 2, 'host': 3, 'pvt': 4, 'ps': 3}; stop the kit's gate watcher is gone
+   | 2026-11-16 02:28:17 PST run_session.sh rc 8; the last lines of its log: [02:28:08] smoke: exit 8 (block stopped), no pass runs [02:28:16] session done (rc 8): 15 launches recorded 
+   | 2026-11-16 02:28:17 PST STOP: {"by": "session_e199", "why": "the kit's gate watcher is gone", "t_ms": 1794824887931}
+   | 2026-11-16 02:28:17 PST identity (b): {"t_ms": 1794824852053, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:28:17 PST stopped before any pass completed: rc 8; {"by": "session_e199", "why": "the kit's gate watcher is gone", "t_ms": 1794824887931}
+   | 2026-11-16 02:28:17 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 45 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:28:17 PST session end (T0 1794824851)
+-> PASS (G4 the gate watcher killed: the wrapper writes STOP, exit 8)
+
+== T-signal
+   rc 8 in 75.1 s; outd box/nekko/build/e199/T1794824897; calls {'heater': 2, 'etwho': 5, 'sampler': 2, 'host': 5, 'pvt': 4, 'ps': 4}; stop a signal to the wrapper: the run in flight finishes
+   | 2026-11-16 02:29:32 PST run_session.sh rc 8; the last lines of its log: [02:29:23] pass 0: exit 8 (block stopped), stopping [02:29:31] session done (rc 8): 27 launches recorded 
+   | 2026-11-16 02:29:32 PST STOP: {"by": "session_e199", "why": "a signal to the wrapper: the run in flight finishes", "t_ms": 1794824962986}
+   | 2026-11-16 02:29:32 PST identity (b): {"t_ms": 1794824898083, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:29:32 PST stopped before any pass completed: rc 8; {"by": "session_e199", "why": "a signal to the wrapper: the run in flight finishes", "t_ms": 1794824962986}
+   | 2026-11-16 02:29:32 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 27; card time 74 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:29:32 PST session end (T0 1794824897)
+-> PASS (T SIGTERM to the wrapper: STOP, the run in flight finishes, the end read, session end, manifest, the sampler by SIGTERM)
+
+== RT1-runtime-line-inside
+   rc 1 in 72.1 s; outd box/nekko/build/e199/T1794824972; calls {'heater': 2, 'etwho': 5, 'sampler': 2, 'host': 4, 'pvt': 4, 'ps': 4}; stop -
+   | 2026-11-16 02:30:44 PST the end config read: exit 0; IDENT-A OK: /dev/et1_mgmt, physical device ID 1, minion_mv 499, TDP 65 W / 65 C / 600 MHz; runtime lines dropped 1 (recorded, not a gate)
+   | 2026-11-16 02:30:44 PST run_session.sh rc 1; the last lines of its log: [02:30:35] pass 0: exit 1 (block stopped), stopping [02:30:43] session done (rc 1): 15 launches recorded 
+   | 2026-11-16 02:30:44 PST identity (b): {"t_ms": 1794824973151, "kind": "identity_b", "verdict": "OK", "counts": {"ours_on_mgmt": 1, "ours_on_card1": 1, "ours_on_card0": 0, "ours_elsewhere": 0, "other_on_card1": 0, "other_
+   | 2026-11-16 02:30:44 PST stopped before any pass completed: rc 1
+   | 2026-11-16 02:30:44 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 15; card time 72 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:30:44 PST session end (T0 1794824972)
+-> PASS (RT1 the runtime line INSIDE a host's first INTBITS line: run_block.py raises, the block and the session stop (rc 1); no record of that run, no wrong record)
+
+== B7-holder-at-run-session-check
+   rc 3 in 2.0 s; outd box/nekko/build/e199/T1794825044; calls {'etwho': 2, 'sampler': 2, 'pvt': 2, 'ps': 1}; stop -
+   | 2026-11-16 02:30:46 PST run_session.sh exited (rc 3) before its own end marker (its EXIT trap writes SESSION_DONE): the wrapper wrote run/SESSION_DONE, so the gate ends now
+   | 2026-11-16 02:30:46 PST the end config read: exit 0; IDENT-A OK: /dev/et1_mgmt, physical device ID 1, minion_mv 499, TDP 65 W / 65 C / 600 MHz; runtime lines dropped 1 (recorded, not a gate)
+   | 2026-11-16 02:30:46 PST run_session.sh rc 3; the last lines of its log: [02:30:45] held: /dev/et1_ops otheruser 4242 foo_host; [02:30:45] the card is not free: nothing opened 
+   | 2026-11-16 02:30:46 PST stopped before any pass completed: rc 3
+   | 2026-11-16 02:30:46 PST passes complete: 0 of 9 (pass 0 the registered warm-up); launches recorded 0; card time 2 s from the first card command (cap 3900 s)
+   | 2026-11-16 02:30:46 PST session end (T0 1794825044)
+-> PASS (B7 run_session.sh's own free check refuses after the first card command: the wrapper writes SESSION_DONE, the session ends at once)
+
+== R1-hostname
+   rc 2 in 0.2 s; outd box/nekko/build/e199/T1794825046; calls {}; stop -
+   | 2026-11-16 02:30:46 PST session start (T0 1794825046 = 02:30:46 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:30:46 PST refused: this host is 'aifoundry3' (Python reads 'aifoundry3'), not aifoundry1: the registered order is drawn on 'aifoundry1|<pass>' (no device opened)
+-> PASS (R1 another host's name (aifoundry3): refused before anything)
+
+== R2-desk-variable
+   rc 2 in 0.2 s; outd box/nekko/build/e199/T1794825047; calls {}; stop -
+   | 2026-11-16 02:30:46 PST session start (T0 1794825047 = 02:30:47 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199)
+   | 2026-11-16 02:30:46 PST refused: E199_CAP_S is a desk-test variable, read only with E199_DESKTEST=1 (the card day never sets it) (no device opened)
+-> PASS (R2 a desk-test variable without E199_DESKTEST=1: refused)
+
+== R3-kitlist
+   rc 2 in 0.2 s; outd box/nekko/build/e199/T1794825048; calls {}; stop -
+   | 2026-11-16 02:30:46 PST session start (T0 1794825048 = 02:30:48 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:30:46 PST refused: the kit's list is not at the sha256 the runbook passed (E199_KITLIST_SHA256) (no device opened)
+-> PASS (R3 the kit's list off the sha256 the runbook passed: refused)
+
+== R4-registered-file
+   rc 2 in 0.2 s; outd box/nekko/build/e199/T1794825049; calls {}; stop -
+   | 2026-11-16 02:30:46 PST session start (T0 1794825049 = 02:30:49 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:30:46 PST refused: a registered session file of E192's is off its sha256 (tools/claims-v3/e192/proposal/src/run_block.py: FAILED
+   | sha256sum: WARNING: 1 computed checksum did NOT match) (no device opened)
+-> PASS (R4 E192's run_block.py one byte longer: refused)
+
+== R5-reader-pin
+   rc 2 in 0.2 s; outd box/nekko/build/e199/T1794825050; calls {}; stop -
+   | 2026-11-16 02:30:47 PST session start (T0 1794825050 = 02:30:50 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:30:47 PST refused: the reader build/ettelem/ettelem is not at E191's pin 111111111111 (no device opened)
+-> PASS (R5 the reader off its pin: refused)
+
+== R6-heater-no-selection
+   rc 2 in 0.2 s; outd box/nekko/build/e199/T1794825051; calls {}; stop -
+   | 2026-11-16 02:30:47 PST session start (T0 1794825051 = 02:30:51 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:30:47 PST refused: build/sparsity/host/sparsity_host does not carry ET_DEVICES: on aifoundry1 it would open every card (run_session.sh would refuse it after the first card command) (no device opened)
+-> PASS (R6 the heater without ET_DEVICES: refused before anything (never after a card command))
+
+== R7-no-card1-lock-file
+   rc 2 in 0.6 s; outd box/nekko/build/e199/T1794825052; calls {}; stop -
+   | 2026-11-16 02:30:47 PST session start (T0 1794825052 = 02:30:52 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:30:47 PST refused: no card lock file /run/lock/etsoc-shire1.lock (the host makes it at boot; never created here) (no device opened)
+-> PASS (R7 no card 1 lock file: refused)
+
+== R8-no-deadline
+   rc 2 in 0.6 s; outd box/nekko/build/e199/T1794825053; calls {}; stop -
+   | 2026-11-16 02:30:48 PST session start (T0 1794825053 = 02:30:53 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:30:48 PST checked: host aifoundry1; USER the login; E192's registration list dd0a89635800 and its six session files; E199's registration list 4d05fe0a7e6c and its order; the kit's list and its six session f
+   | 2026-11-16 02:30:48 PST refused: no E199_DEADLINE_EPOCH (the window's last end) (no device opened)
+-> PASS (R8 no deadline: refused)
+
+== N1-card1-nodes-only
+   rc 2 in 0.6 s; outd box/nekko/build/e199/T1794825054; calls {}; stop -
+   | 2026-11-16 02:30:48 PST session start (T0 1794825054 = 02:30:54 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:30:49 PST refused: the card nodes here are '/dev/et1_ops' and '/dev/et1_mgmt', not exactly aifoundry1's two cards (/dev/et0_ops /dev/et1_ops, /dev/et0_mgmt /dev/et1_mgmt) (no device opened)
+-> PASS (N1 only card 1's two node names (a private /dev on the box): refused at the node count)
+
+== N2-three-nodes
+   rc 2 in 0.6 s; outd box/nekko/build/e199/T1794825055; calls {}; stop -
+   | 2026-11-16 02:30:49 PST session start (T0 1794825055 = 02:30:55 PST; E199, E192's reference session as committed on aifoundry1 card 1, kit-e199 DESKTEST)
+   | 2026-11-16 02:30:49 PST refused: the card nodes here are '/dev/et1_ops' and '/dev/et0_mgmt /dev/et1_mgmt', not exactly aifoundry1's two cards (/dev/et0_ops /dev/et1_ops, /dev/et0_mgmt /dev/et1_mgmt) (no device opened)
+-> PASS (N2 three node names (no /dev/et0_ops): refused at the node count)
+
+== N3-run-session-no-selection
+   rc 2 in 0.2 s; outd direct/N3-run-session-no-selection; calls {}; stop -
+-> PASS (N3 run_session.sh alone, two cards, ET_DEVICES unset: its own refusal (exit 2), nothing opened)
+
+== N4-run-session-host-ignores
+   rc 2 in 0.2 s; outd direct/N4-run-session-host-ignores; calls {}; stop -
+-> PASS (N4 run_session.sh alone, ET_DEVICES=1, a host binary without the selection: its refusal (line 65; E192's kit could not run it))
+
+== N5-run-session-et1-not-a-node
+   rc 2 in 0.2 s; outd direct/N5-run-session-et1-not-a-node; calls {}; stop -
+-> PASS (N5 run_session.sh alone, ET_DEVICES=1 with /dev/et1_ops not a character node: its refusal)
+-> PASS (Z no process of the test left; no network call)
+
+DESKTEST-REALPATH-E199 78 of 78 PASS
+exit 0

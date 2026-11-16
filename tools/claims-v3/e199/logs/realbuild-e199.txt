@@ -1,0 +1,36 @@
+# E199 kit (Q191, lane kit-e199; re-run by fix-e199 on the fixed registration and kit): realbuild, bash W/slot.sh bash W/nodev.sh bash tools/claims-v3/e199/desk/realbuild_e199.sh <scratch>
+# run 2026-11-16 02:09:31 PST on aifoundry2 (Ubuntu 24.04; 5.2.21(1)-release; bubblewrap 0.9.0; /usr/bin/python3 3.12.3); paths masked as <lab clone>, <scratch>; at the clone's HEAD c0434812 with the kit's files uncommitted
+E199 real-build desk test (kit-e199), 2026-11-16 02:09:31 PST; g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; cmake version 3.28.3; riscv64-unknown-elf-gcc () 15.1.0; /usr/bin/python3 3.12.3; /dev/et*: 0
+
+== RB1 as on the card day
+COMPILER g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; cmake version 3.28.3; riscv64-unknown-elf-gcc () 15.1.0
+loops 16, bad 0
+loops 16; forms x ops found 16 of 16; missing none; duplicated none; unexpected none; bad 0
+INTBITS-BUILD-FAILED rc=8: the selection: the host carries no ET_DEVICES;/opt/et/lib/libdeviceLayer.a carries no ET_DEVICES
+-> PASS (RB1 every gate before the selection passes on the real build (check_elf, loop_order 16 of 16, E192's arm table byte for byte); the selection fails on this desk (rc=8))
+
+== RB2 the desk-only override
+kernel_elf_sha256 a987904b6cd322bff51e5913e3fe2af709f24e1d2dabf82c4138b552c0b4d6ea
+kernel_text_sha256 aafdba4b7bce846c7ef18c41f3dbf2c776581179c20f39634bc168c23ca1e42f
+host_sha256 f42da7cd612a4fe10eea1a26c03b16ef775c00d9edfd9d629405cd48e7c364c3
+same_as_e192_desk_build elf yes text yes (reported, never judged)
+same_as_e192_card_day_build elf no text yes (reported, never judged)
+loop_order loops 16; forms x ops found 16 of 16; missing none; duplicated none; unexpected none; bad 0
+selection NOT JUDGED (the desk test's E199_SELECTION_REPORT_ONLY under RB_DESKTEST=1, never set on the card day): the host carries no ET_DEVICES;/opt/et/lib/libdeviceLayer.a carries no ET_DEVICES
+INTBITS-BUILT rc=0 kernel a987904b6cd3 text aafdba4b7bce host f42da7cd612a
+-> PASS (RB2 INTBITS-BUILT with the hashes recorded beside E192's, the selection NOT JUDGED, RB1's build moved aside (never removed))
+   reported, never judged: same_as_e192_desk_build elf yes text yes (reported, never judged) same_as_e192_card_day_build elf no text yes (reported, never judged) 
+
+== RB3 E192's arm table one byte off
+-> PASS (RB3 the --list against a changed table: rc=6)
+
+== RB4 the override without RB_DESKTEST=1
+-> PASS (RB4 E199_SELECTION_REPORT_ONLY alone does nothing: the selection judged, rc=8)
+
+== RB5 the box check's selection line on the desk build
+<scratch>/rb5a.txt:selection: ET_DEVICES in the host, the reader, the heater: no(NOT JUDGED: the desk's built
+<scratch>/rb5b.txt:selection: ET_DEVICES in the host, the reader, the heater: no no no
+-> PASS (RB5 the box check: the desk's built host NOT JUDGED only under the override; judged (a failure) without it)
+
+REALBUILD-E199 5 of 5 PASS
+exit 0

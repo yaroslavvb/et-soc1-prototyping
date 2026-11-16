@@ -1,0 +1,18 @@
+# E199 kit (Q191, lane kit-e199; re-run by fix-e199 on the fixed registration and kit): realbytes, bash W/slot.sh bash W/nodev.sh /usr/bin/python3 -I -B tools/claims-v3/e199/desk/realbytes_e199.py <scratch>
+# run 2026-11-16 02:08:54 PST on aifoundry2 (Ubuntu 24.04; 5.2.21(1)-release; bubblewrap 0.9.0; /usr/bin/python3 3.12.3); paths masked as <lab clone>, <scratch>; at the clone's HEAD c0434812 with the kit's files uncommitted
+E199 real-bytes desk test (kit-e199), 2026-11-16 02:09:24 PST; Python 3.12.3
+inputs: 1a4bc1e3's split smoke stdout (570 B, listed True; the runtime line at byte 217 inside the host's line: 'Opening device 1\n'); 7156ac15's sparse-parity stdout, a host.err, the config read, the telemetry (listed True); E192's runs.jsonl and stderr.txt (listed True); E170's card-0 config read
+-> PASS (RB0 run_block.py at its registered sha256 holds the reader's three statements verbatim (lines 216-218))
+-> PASS (RB1 E192's 3255 real aifoundry3 INTBITS records, re-made as lines: every one read back exactly)
+-> PASS (RB2 aifoundry1's real runtime line on its own line before the first INTBITS line: every record read, the runtime line skipped)
+-> PASS (RB3 the runtime line at every one of 662 byte offsets of a real INTBITS line: {'exact': 2, 'lost': 7, 'raise': 653, 'wrong': 0} (never a wrong record))
+-> PASS (RB4a the REAL run_block.py, a stand-in host printing the runtime line then 5 real lines (3 smoke runs): 15 records, each exactly the host's)
+-> PASS (RB4b the runtime line inside line 1 at offset 20: run_block.py raises (exit 1, JSONDecodeError), no record of the run, none wrong)
+-> PASS (RB4c the runtime line inside 'INTBITS ' (offset 4): that line lost, the other 4 read exactly in each run (12 records))
+-> PASS (RB4d 1a4bc1e3's and 7156ac15's committed stdout as a host's whole output: no record, no crash (run_block.py reports 0 launches))
+-> PASS (RB5 the gate's watch: E191's real card-1 host stderr names card 1 alone (no stop); E192's real aifoundry3 stderr (706 blocks) names card 0: refused)
+-> PASS (RB6 the identity gate (a): E191's real card-1 read with the runtime line first, and inside the JSON line: OK; E170's real card-0 read (minion_mv 519): refused; E192's aifoundry3 block: refused; card 1's real read with E170's real runtime line (Opening device 0): refused by that line alone)
+-> PASS (RB7 the telemetry readers on E191's real aifoundry1 samples: the runtime line on its own line skipped (400 read), inside a sample: that sample skipped (399), never a wrong one)
+
+REALBYTES-E199 11 of 11 PASS
+exit 0
