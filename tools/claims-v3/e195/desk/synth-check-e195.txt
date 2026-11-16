@@ -1,0 +1,137 @@
+=== synth_session_e195.py, then reduce_x09.py on p910-p917 (--warmup 910): its printout
+passes [910, 911, 912, 913, 914, 915, 916, 917], headline [911, 912, 914, 915, 916, 917], set aside {913: 'anchor drift +0.500 W'}, leak 0.4000 W/C (0 runs)
+R0_tie: NOT TIED  (outside +-12 % of E99: R.u2 553.5999999999966, R.u4 1027.1999999999919, R.u7 1353.5999999999988, R.u8 1436.799999999995, R.l08 758.4000000000011, R.a44 1334.4000000000024, R.rnd 1453.303662499288)
+R1_write_inversion: LIVE  (Q -0.161 W [-0.161, -0.161]; K -0.138 W [-0.138, -0.138]; a08-l08 over a44-u4 +0.125 [+0.125, +0.125])
+R1b_write_pin: TERMINATED  (pin +0.90 pJ [+0.90, +0.90] (TERMINATED at or above 0.7, SMALL below); from K +0.90 pJ [+0.90, +0.90])
+R2_pin_write_over_read: SAME  (write / read +0.75 [+0.75, +0.75], SAME inside 0.7-1.4)
+R3_one_write_over_read: WRITE HIGHER  (write / read +1.40 [+1.40, +1.40], SAME inside 0.75-1.33)
+R4_toggle_write_over_read: SAME  (write / read +1.17 [+1.17, +1.17], SAME inside 0.7-1.4)
+R5_path64_write: PAYS  (beyond the pin toggles, inside the line: +0.45 pJ a bit [+0.45, +0.45]; FREE inside +-0.25, PAYS above)
+R6_path256_write: BOTH DIRECTIONS  (+1.60 pJ a bit [+1.60, +1.60], low end >= 1.0)
+R7_channel_write: PAYS  (beyond the pin toggles, per designed k_chan bit: +0.80 pJ a bit [+0.80, +0.80]; FREE inside +-0.4, PAYS above)
+R8_rate_random: rd.rnd: PER LINE, wr.rnd: PER LINE  (paced / flat pJ a line: rd.rnd +1.000 [+1.000, +1.000]; wr.rnd +1.000 [+1.000, +1.000])
+R8b_rate_0x0F: rd.u4: PER LINE, wr.u4: PER LINE  (paced / flat pJ a line: rd.u4 +1.000 [+1.000, +1.000]; wr.u4 +1.000 [+1.000, +1.000])
+R9_zero_line_read: REPORTED  (zero line +3500 pJ [+3500, +3500]; any line +3581 pJ [+3581, +3581])
+R10_zero_line_write: REPORTED  (bracket: against the scratchpad store +2650 pJ [+2650, +2650], against storing nothing +2800 pJ [+2800, +2800]; any line +2713 pJ [+2711, +2714] to +2863 pJ [+2861, +2864])
+R11_closure_rd: REPORTED  (random lines less the priced terms +322 pJ [+322, +322])
+R11_closure_wr: REPORTED  (random lines less the priced terms -2 pJ [-2, -2])
+R12_ddr_rail: REPORTED  (W.p64x still, W.h256x still, W.tog moves, W.inv still, W.c44x still, W.rnd still, R.tog moves, R.rnd still, W.tie27 still, R.tie27 still)
+checks: PASS  (C1-C6 (a FAIL names what it touches; the data stand, read with it))
+sensitivity leak_0.2936: differs on nothing
+sensitivity leak_0.3803: differs on nothing
+sensitivity unfiltered: differs on ['R2_pin_write_over_read', 'R4_toggle_write_over_read', 'R8b_rate_0x0F']
+=== the same with p901 also given: its printout
+passes [901, 910, 911, 912, 913, 914, 915, 916, 917], headline [901, 911, 912, 914, 915, 916, 917], set aside {913: 'anchor drift +0.500 W'}, leak 0.4000 W/C (0 runs)
+R0_tie: NOT TIED  (outside +-12 % of E99: R.u2 553.5999999999966, R.u4 1027.1999999999919, R.u7 1353.5999999999988, R.u8 1436.799999999995, R.l08 758.4000000000011, R.a44 1334.4000000000024, R.rnd 1453.303662499288)
+R1_write_inversion: LIVE  (Q -0.161 W [-0.161, -0.161]; K -0.138 W [-0.138, -0.138]; a08-l08 over a44-u4 +0.125 [+0.125, +0.125])
+R1b_write_pin: TERMINATED  (pin +0.90 pJ [+0.90, +0.90] (TERMINATED at or above 0.7, SMALL below); from K +0.90 pJ [+0.90, +0.90])
+R2_pin_write_over_read: SAME  (write / read +0.75 [+0.75, +0.75], SAME inside 0.7-1.4)
+R3_one_write_over_read: WRITE HIGHER  (write / read +1.40 [+1.40, +1.40], SAME inside 0.75-1.33)
+R4_toggle_write_over_read: SAME  (write / read +1.17 [+1.17, +1.17], SAME inside 0.7-1.4)
+R5_path64_write: PAYS  (beyond the pin toggles, inside the line: +0.45 pJ a bit [+0.45, +0.45]; FREE inside +-0.25, PAYS above)
+R6_path256_write: BOTH DIRECTIONS  (+1.60 pJ a bit [+1.60, +1.60], low end >= 1.0)
+R7_channel_write: PAYS  (beyond the pin toggles, per designed k_chan bit: +0.80 pJ a bit [+0.80, +0.80]; FREE inside +-0.4, PAYS above)
+R8_rate_random: rd.rnd: PER LINE, wr.rnd: PER LINE  (paced / flat pJ a line: rd.rnd +1.000 [+1.000, +1.000]; wr.rnd +1.000 [+1.000, +1.000])
+R8b_rate_0x0F: rd.u4: PER LINE, wr.u4: PER LINE  (paced / flat pJ a line: rd.u4 +1.000 [+1.000, +1.000]; wr.u4 +1.000 [+1.000, +1.000])
+R9_zero_line_read: REPORTED  (zero line +3500 pJ [+3500, +3500]; any line +3581 pJ [+3581, +3581])
+R10_zero_line_write: REPORTED  (bracket: against the scratchpad store +2650 pJ [+2650, +2650], against storing nothing +2800 pJ [+2800, +2800]; any line +2713 pJ [+2711, +2714] to +2863 pJ [+2861, +2864])
+R11_closure_rd: REPORTED  (random lines less the priced terms +322 pJ [+322, +322])
+R11_closure_wr: REPORTED  (random lines less the priced terms -2 pJ [-2, -2])
+R12_ddr_rail: REPORTED  (W.p64x still, W.h256x still, W.tog moves, W.inv still, W.c44x still, W.rnd still, R.tog moves, R.rnd still, W.tie27 still, R.tie27 still)
+checks: PASS  (C1-C6 (a FAIL names what it touches; the data stand, read with it))
+sensitivity leak_0.2936: differs on nothing
+sensitivity leak_0.3803: differs on nothing
+sensitivity unfiltered: differs on ['R2_pin_write_over_read', 'R4_toggle_write_over_read', 'R8b_rate_0x0F']
+=== synth_compare_e195.py
+1. the passes and the gates
+  ok   headline [911, 912, 914, 915, 916, 917] (want 911, 912, 914-917)
+  ok   set aside {'913': 'anchor drift +0.500 W'} (want pass 913 on its 0.5 W anchor drift)
+  ok   warm-up 910
+  ok   gates {'runs': 264, 'failed': 1, 'by_reason': {'clock': 1, 'approach': 0, 'record': 0, 'participants': 0, 'voltage': 0, 'sampler': 0}} (want the one run off the clock, [912, 'x9_wr_u2'])
+  ok   leak 0.4 W/C from 0 runs; clock 600 (the die steady: no run warms, the auto slope falls back and corrects nothing)
+2. the registered prices (pJ), every pass's terms present
+  ok   rd.any_line: reducer 3581.300000000007, injected 3581.3
+  ok   rd.floor_fit: reducer 81.73968625988728, injected 81.7396863
+  ok   rd.floor_w1: reducer 81.2999999999987, injected 81.3
+  ok   rd.one_fit: reducer 2.496823980610969, injected 2.49682398
+  ok   rd.one_solve: reducer 2.500000000000007, injected 2.5
+  ok   rd.one_tie: reducer 2.500000000000007, injected 2.5
+  ok   rd.pin: reducer 1.19999999999996, injected 1.2
+  ok   rd.pin_K: reducer 1.2000000000000142, injected 1.2
+  ok   rd.pin_fit: reducer 1.1953147610550074, injected 1.19531476
+  ok   rd.pin_solve: reducer 1.1999999999999587, injected 1.2
+  ok   rd.rnd_less_floor_ones_pins_toggles: reducer 321.5407585930907, injected 321.540759
+  ok   rd.toggle: reducer 0.6000000000000197, injected 0.6
+  ok   rd.toggle_off: reducer 0.6000000000000197, injected 0.6
+  ok   rd.toggle_within_line: reducer 0.6193548387096978, injected 0.619354839
+  ok   rd.zero_line: reducer 3500.0000000000077, injected 3500
+  ok   wr.channel: reducer 0.7999999999999724, injected 0.8
+  ok   wr.channel_beyond_both_edges: reducer 0.37187499999997303, injected 0.371875
+  ok   wr.channel_mesh_rail: reducer 0.0, injected 0
+  ok   wr.channel_off: reducer 0.7999999999999724, injected 0.8
+  ok   wr.floor_fit: reducer 62.472656267391244, injected 62.4726563
+  ok   wr.inversion_toggle_ratio: reducer 0.1250000000000124, injected 0.125
+  ok   wr.one_fit: reducer 3.4954074520518055, injected 3.49540745
+  ok   wr.one_solve: reducer 3.4999999999999845, injected 3.5
+  ok   wr.one_tie: reducer 3.4999999999999845, injected 3.5
+  ok   wr.path256: reducer 1.600000000000003, injected 1.6
+  ok   wr.path256_both_edges: reducer 0.7578125000000032, injected 0.7578125
+  ok   wr.path256_off: reducer 1.600000000000003, injected 1.6
+  ok   wr.path64: reducer 0.4499999999999808, injected 0.45
+  ok   wr.path64_both_edges: reducer 0.3937499999999832, injected 0.39375
+  ok   wr.path64_off: reducer 0.4499999999999808, injected 0.45
+  ok   wr.pin: reducer 0.9000000000000542, injected 0.9
+  ok   wr.pin_K: reducer 0.8999999999999748, injected 0.9
+  ok   wr.pin_fit: reducer 0.893779791722691, injected 0.893779792
+  ok   wr.pin_solve: reducer 0.9000000000000682, injected 0.9
+  ok   wr.rnd_less_all_terms: reducer -2.049999999985886, injected -2.05
+  ok   wr.rnd_less_floor_ones_pins_toggles: reducer 508.3862696878032, injected 508.38627
+  ok   wr.scratchpad_store: reducer 149.99999999999386, injected 150
+  ok   wr.toggle: reducer 0.6999999999999832, injected 0.7
+  ok   wr.toggle_off: reducer 0.6999999999999832, injected 0.7
+  ok   wr.toggle_within_line: reducer 0.7225806451612727, injected 0.722580645
+  ok   wr.zero_line_nst: reducer 2799.999999999993, injected 2800
+  ok   wr.zero_line_scp: reducer 2649.9999999999995, injected 2650
+  ok   wr.floor_w1 in pass 912 (no one price there): reducer 65.55000000000115, injected floor + one one's price 65.55 (the missing term taken as 0)
+  ok   wr.floor_w1 in the other headline passes: [62.05], injected 62.05
+  ok   wr.floor_w1 mean over 6 passes: reducer 62.633333333334484, as coded 62.6333333 (the design's 62.05 + 3.5/6)
+  ok   wr.any_line_scp: reducer 2712.633333333334, as coded (zero line + that floor) 2712.63333
+  ok   wr.any_line_nst: reducer 2862.633333333328, as coded (zero line + that floor) 2862.63333
+3. one contrast's board, rails, off-rail value and electrons (R.u2: 128 ones, 128 high pins over zeros)
+  ok   R.u2 board 553.5999999999966 pJ a line, injected 553.6
+  ok   R.u2 rails {'minion': 0.0, 'sram': 79.99999999999926, 'noc': 160.00000000000014} (want NoC 160.0, SRAM 80.0, minion 0)
+  ok   R.u2 off the rails less the in-step losses 263.11999999999813, injected 263.12
+  ok   R.u2 electrons at 12 V 2.87942e+08
+  ok   R.u2 NoC electrons 2.06331e+09 = at the reducer's fixed 0.484 V (2.06331e+09), not at the telemetry's 490 mV (2.03804e+09)
+4. ratios and rate tests
+  ok   write/read pin: reducer 0.7500000000000702, injected 0.75
+  ok   write/read one: reducer 1.3999999999999897, injected 1.4
+  ok   write/read toggle: reducer 1.1666666666666003, injected 1.16666667
+  ok   rate test rd.u4: 1.000000000000005 (want 1: the same pJ a line paced)
+  ok   rate test rd.rnd: 0.9999999999999962 (want 1: the same pJ a line paced)
+  ok   rate test wr.u4: 1.000000000000005 (want 1: the same pJ a line paced)
+  ok   rate test wr.rnd: 1.0 (want 1: the same pJ a line paced)
+5. the verdicts the injected values imply
+  ok   R0_tie: NOT TIED (want NOT TIED)
+  ok   R1_write_inversion: LIVE (want LIVE)
+  ok   R1b_write_pin: TERMINATED (want TERMINATED)
+  ok   R2_pin_write_over_read: SAME (want SAME)
+  ok   R3_one_write_over_read: WRITE HIGHER (want WRITE HIGHER)
+  ok   R4_toggle_write_over_read: SAME (want SAME)
+  ok   R5_path64_write: PAYS (want PAYS)
+  ok   R6_path256_write: BOTH DIRECTIONS (want BOTH DIRECTIONS)
+  ok   R7_channel_write: PAYS (want PAYS)
+  ok   R8_rate_random: rd.rnd: PER LINE, wr.rnd: PER LINE (want rd.rnd: PER LINE, wr.rnd: PER LINE)
+  ok   R8b_rate_0x0F: rd.u4: PER LINE, wr.u4: PER LINE (want rd.u4: PER LINE, wr.u4: PER LINE)
+  ok   checks: PASS (want PASS)
+  ok   R12 classes: W.p64x still, W.h256x still, W.tog moves, W.inv still, W.c44x still, W.rnd still, R.tog moves, R.rnd still, W.tie27 still, R.tie27 still
+  ok   C1-C6: [('C1_instructions_per_access_flat', 'PASS'), ('C2_polls_per_slot_paced', 'PASS'), ('C3_late_slots_paced', 'PASS'), ('C4_rate_equal', 'PASS'), ('C5_l1_misses', 'PASS'), ('C6_memory_shire_counts', 'PASS')]
+6. the sensitivity arms
+  ok   leakage arms differ on [], []
+  (reported) the unfiltered arm, which keeps pass 915's 9 W dip in x9_rd_u4, differs on ['R2_pin_write_over_read', 'R4_toggle_write_over_read', 'R8b_rate_0x0F']
+7. the same session with the smoke pass p901 also given (--warmup 910)
+  ok   headline [901, 911, 912, 914, 915, 916, 917]: the smoke counts as a headline pass
+  (reported) every price the same with p901 given: True: no contrast has both its items in the smoke, but the minimum of 5 headline passes counts it
+
+80 hold, 0 fail
+SYNTH CHECK CONSISTENT

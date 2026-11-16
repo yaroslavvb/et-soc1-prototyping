@@ -1,0 +1,68 @@
+part 1, the pipeline:
+passes [10, 11, 12, 13, 14, 15, 16, 17], headline [11, 12, 14, 15, 16, 17], set aside {13: 'anchor drift +0.511 W'}, leak 0.2500 W/C (-1 runs)
+R0_tie: NOT TIED  (outside +-12 % of E99: R.rnd 2163.185564080708)
+R1_write_inversion: LIVE  (Q -0.124 W [-0.133, -0.114]; K -0.161 W [-0.171, -0.152]; a08-l08 over a44-u4 +0.143 [+0.118, +0.169])
+R1b_write_pin: TERMINATED  (pin +1.09 pJ [+1.07, +1.12] (TERMINATED at or above 0.7, SMALL below); from K +1.06 pJ [+1.00, +1.12])
+R2_pin_write_over_read: UNRESOLVED  (write / read +0.71 [+0.68, +0.74], SAME inside 0.7-1.4)
+R3_one_write_over_read: WRITE LOWER  (write / read +0.71 [+0.70, +0.73], SAME inside 0.75-1.33)
+R4_toggle_write_over_read: UNRESOLVED  (write / read +0.72 [+0.69, +0.76], SAME inside 0.7-1.4)
+R5_path64_write: PAYS  (beyond the pin toggles, inside the line: +0.50 pJ a bit [+0.48, +0.52]; FREE inside +-0.25, PAYS above)
+R6_path256_write: BOTH DIRECTIONS  (+1.71 pJ a bit [+1.69, +1.74], low end >= 1.0)
+R7_channel_write: PAYS  (beyond the pin toggles, per designed k_chan bit: +0.70 pJ a bit [+0.68, +0.72]; FREE inside +-0.4, PAYS above)
+R8_rate_random: rd.rnd: PER LINE, wr.rnd: PER LINE  (paced / flat pJ a line: rd.rnd +0.993 [+0.981, +1.005]; wr.rnd +1.003 [+0.993, +1.013])
+R8b_rate_0x0F: rd.u4: PER LINE, wr.u4: PER LINE  (paced / flat pJ a line: rd.u4 +0.987 [+0.966, +1.007]; wr.u4 +1.007 [+0.986, +1.028])
+R9_zero_line_read: REPORTED  (zero line +4002 pJ [+3968, +4035]; any line +4101 pJ [+4069, +4132])
+R10_zero_line_write: REPORTED  (bracket: against the scratchpad store +2977 pJ [+2955, +2999], against storing nothing +3064 pJ [+3053, +3075]; any line +3041 pJ [+3022, +3060] to +3128 pJ [+3119, +3136])
+R11_closure_rd: REPORTED  (random lines less the priced terms +715 pJ [+704, +726])
+R11_closure_wr: REPORTED  (random lines less the priced terms +13 pJ [+0, +25])
+R12_ddr_rail: REPORTED  (W.p64x moves, W.h256x still, W.tog moves, W.inv still, W.c44x still, W.rnd unresolved, R.tog moves, R.rnd moves, W.tie27 still, R.tie27 still)
+checks: PASS  (C1-C6 (a FAIL names what it touches; the data stand, read with it))
+sensitivity leak_0.2936: differs on nothing
+sensitivity leak_0.3803: differs on nothing
+sensitivity unfiltered: differs on nothing
+
+  rd.one_tie: 3.201511344430998 (given 3.2) ok
+  rd.pin: 1.5299598100109917 (given 1.5) ok
+  rd.pin_K: 1.5020667878135472 (given 1.5) ok
+  rd.toggle: 0.7893810830491647 (given 0.8) ok
+  wr.one_tie: 2.288865546218486 (given 2.304) ok
+  wr.pin: 1.0935624249699718 (given 1.08) ok
+  wr.pin_K: 1.0592830882352697 (given 1.08) ok
+  wr.toggle: 0.5692511379551869 (given 0.576) ok
+  wr.path64: 0.5026229241696755 (given 0.504) ok
+  wr.path256: 1.7087157128476482 (given 1.728) ok
+  wr.path256_off: 1.7143862226676976 (given 1.728) ok
+  wr.channel: 0.696715453759639 (given 0.72) ok
+  rd.floor_w1: 98.90431626741243 (given 95.0) ok
+  wr.floor_w1: 64.06783025710011 (given 68.39999999999999) ok
+  rd.zero_line: 4001.9444444444384 (given 4000.0) ok
+  wr.zero_line_scp: 2976.944444444449 (given 2960.0) ok
+  wr.zero_line_nst: 3063.750000000004 (given 3060.0) ok
+  rd.any_line: 4100.848760711851 (given 4095.0) ok
+  wr.inversion_toggle_ratio: 0.14342544224352857 (given 0.125) ok
+part 2, reachability (100 synthetic sessions a scenario, 7 headline passes):
+  S1 the request's sizing: R1_write_inversion -> LIVE: 1.00 ok
+  S1 the request's sizing: R1b_write_pin -> TERMINATED: 1.00 ok
+  S1 the request's sizing: R3_one_write_over_read -> SAME: 1.00 ok
+  S1 the request's sizing: R4_toggle_write_over_read -> SAME: 0.82 ok
+  S1 the request's sizing: R5_path64_write -> PAYS: 1.00 ok
+  S1 the request's sizing: R6_path256_write -> BOTH DIRECTIONS: 1.00 ok
+  S1 the request's sizing: R7_channel_write -> PAYS: 1.00 ok
+  S1 the request's sizing: R8_rate_random -> rd.rnd: PER LINE: 0.63 ok
+  S1 the request's sizing: R8_rate_random -> wr.rnd: PER LINE: 0.74 ok
+  S1 the request's sizing: R2_pin_write_over_read -> SAME: 0.52 ok
+  S2 write inversion off: R1_write_inversion -> OFF: 1.00 ok
+  S2 write inversion off: R1b_write_pin -> NOT SEPARABLE: 1.00 ok
+  S2 write inversion off: R2_pin_write_over_read -> NOT SEPARABLE: 1.00 ok
+  S2 write inversion off: R3_one_write_over_read -> NOT SEPARABLE: 1.00 ok
+  S3 written pins free: R1_write_inversion -> LIVE: 1.00 ok
+  S3 written pins free: R1b_write_pin -> SMALL: 1.00 ok
+  S4 wide paths and channel free on writes: R5_path64_write -> FREE: 0.97 ok
+  S4 wide paths and channel free on writes: R6_path256_write -> READS ONLY: 0.86 ok
+  S4 wide paths and channel free on writes: R7_channel_write -> FREE: 0.85 ok
+  S5 the paced data cost 1.25 times flat: R8_rate_random -> rd.rnd: RATE-DEPENDENT: 0.98 ok
+  S5 the paced data cost 1.25 times flat: R8_rate_random -> wr.rnd: RATE-DEPENDENT: 1.00 ok
+  S6 the write side 1.8 times the read side: R3_one_write_over_read -> WRITE HIGHER: 1.00 ok
+  S6 the write side 1.8 times the read side: R4_toggle_write_over_read -> WRITE HIGHER: 0.85 ok
+  S6 the write side 1.8 times the read side: R2_pin_write_over_read (reported): WRITE HIGHER 0.62, UNRESOLVED 0.38
+SELFTEST PASS

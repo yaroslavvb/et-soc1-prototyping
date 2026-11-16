@@ -1,0 +1,31 @@
+rd.z     rd     z              period 0     read, zeros: the control of every flat-out read
+rd.w1    rd     first:01       period 0     read, one bit a line: what a line that is not all zeros adds
+rd.u2    rd     b:03           period 0     read, every byte 0x03: 128 ones, 128 high pins a line
+rd.u4    rd     b:0f           period 0     read, every byte 0x0F: 256 ones, 256 high pins
+rd.u7    rd     b:7f           period 0     read, every byte 0x7F: 448 ones, 128 high pins (inverted)
+rd.u8    rd     b:ff           period 0     read, every byte 0xFF: 512 ones, 64 high pins (inverted)
+rd.l08   rd     alt:00:ff:1    period 0     read, byte lanes constant 0x00 and 0xFF: 256 ones, 32 high pins, no toggle
+rd.a44   rd     alt:0f:f0:2    period 0     read, beats alternate 0x0F/0xF0: 256 ones, 256 high, 512 pin toggles
+rd.rnd   rd     rnd            period 0     read, random lines
+wr.z     wr     z              period 0     write, zeros: the control of every flat-out write
+wr.w1    wr     first:01       period 0     write, one bit a line
+wr.u2    wr     b:03           period 0     write, every byte 0x03
+wr.u4    wr     b:0f           period 0     write, every byte 0x0F
+wr.u7    wr     b:7f           period 0     write, every byte 0x7F
+wr.u8    wr     b:ff           period 0     write, every byte 0xFF: 512 ones, 64 high pins if inverted, 512 if not
+wr.l08   wr     alt:00:ff:1    period 0     write, byte lanes constant 0x00 and 0xFF: 256 ones, no pin toggle
+wr.a08   wr     alt:00:ff:2    period 0     write, beats 0x0000/0xFFFF: l08's ones and pins, 64 toggles inverted, 512 not
+wr.a44   wr     alt:0f:f0:2    period 0     write, beats alternate 0x0F/0xF0: 512 pin toggles either way
+wr.p64   wr     alt:0f:f0:8    period 0     write, 8-byte pieces alternate 0x0F/0xF0
+wr.h256  wr     alt:0f:f0:32   period 0     write, the line's 32 B halves 0x0F and 0xF0
+wr.c44   wr     par:0f:f0      period 0     write, whole lines 0x0F or 0xF0 by minion parity: a channel's lines change
+wr.rnd   wr     rnd            period 0     write, random lines (each minion its own 512 B)
+rdh.z    rd     z              period 1024  paced read, zeros
+rdh.u4   rd     b:0f           period 1024  paced read, every byte 0x0F
+rdh.rnd  rd     rnd            period 1024  paced read, random lines
+rdh.l1   rdl1   z              period 1024  paced read loop on one L1 line: no memory traffic
+wrh.z    wr     z              period 8192  paced write, zeros
+wrh.u4   wr     b:0f           period 8192  paced write, every byte 0x0F
+wrh.rnd  wr     rnd            period 8192  paced write, random lines
+wrh.scp  wrscp  z              period 8192  paced write loop into the own scratchpad: no DRAM traffic
+wrh.nst  wrnst  z              period 8192  paced write loop with no store at all: no traffic

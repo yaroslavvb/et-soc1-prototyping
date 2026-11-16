@@ -1,0 +1,21 @@
+E195 desk check of code (Sun 15 Nov 2026, aifoundry2, inside the round's CPU slot and a private /dev with no card node):
+session_x09.sh's refusals before its device-command preflight, in a stand-in tree laid out as request.md section 8 says,
+and smoke_gate_x09.py on this lane's synthetic smoke pass (desk/synth_session_e195.py; arbitrary test values).
+
+2026-11-15 14:56:19 PST
+card nodes visible in this sandbox: 0; /run/lock entries: 0
+X9_ROOT unset: rc 8: refused, no device opened: X9_ROOT='' must be the absolute path of this tree (<tree>)
+no window: rc 8: refused, no device opened: X9_LATEST_START and X9_DEADLINE are required: the window of the day's go
+latest start passed: rc 8: refused, no device opened: no session starts after 2026-11-15 14:55:19 PST
+deadline too near: rc 8: refused, no device opened: the smoke (150 s) and the close would end after the deadline 2026-11-15 14:59:19 PST
+stop file present: rc 8: refused, no device opened: build/x09-STOP exists
+device-stage lines in the session log (et-who, config, watcher, smoke): 0
+-- smoke_gate_x09.py on the synthetic smoke pass p901 (arbitrary test values):
+smoke gate PASS: 60 runs, 640 telemetry samples
+gate rc 0
+2026-11-15 14:56:19 PST
+
+the block's refusals (block_x09.sh under V3_DRY=1, from step 18):
+X9_ROOT unset rc 2 : x09: X9_ROOT='' must be the absolute path of the tree lib.sh writes into (<tree>)
+X9_ROOT relative rc 2 : x09: X9_ROOT='.' must be the absolute path of the tree lib.sh writes into (<tree>)
+USER another name rc 2 : x09: USER is 'someoneelse', not this login (<login>): the holder checks compare with it
