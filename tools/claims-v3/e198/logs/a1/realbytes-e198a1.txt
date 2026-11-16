@@ -1,0 +1,36 @@
+# E198 A1: THE REAL-BYTES TEST, Mon 16 Nov 2026 05:32:18 PST, aifoundry2, /usr/bin/python3 3.12.3 (fix-a1e198, the working tree on 6622852d: A1 with the dated fix)
+-> PASS (RB0 the filter as the runner has it: E193's run_x04.py lines 540-542; the lab's copy run_x04_e198a1.py lines 560-562: the same three lines this test applies)
+-> PASS (RB0 the real runtime line: b'Opening device 1\n' at byte 217 of 1a4bc1e3's smoke stdout)
+-> PASS (RB1 smoke/a: fe08ed67 smoke: 3640 bytes, 5 X04 records, drop_runtime unchanged)
+-> PASS (RB1 x04/a: fe08ed67 x04: 7280 bytes, 10 X04 records, drop_runtime unchanged)
+-> PASS (RB1 smoke/b: 96ef447c smoke: 3640 bytes, 5 X04 records, drop_runtime unchanged)
+-> PASS (RB1 x04/b: 96ef447c x04: 7280 bytes, 10 X04 records, drop_runtime unchanged)
+-> PASS (RB2 guarded at every offset: 21840 of 21840 forms restored byte for byte and read as the original 30 records)
+-> PASS (RB2 unguarded (negative control): without the guard: offset 0 read in 30 of 30 lines; every other offset raises (21690) or loses the record (120))
+-> PASS (RB3 two runtime lines and the line around: dropped cards [0, 1, 0, 1]; restored True)
+-> PASS (RB4 aifoundry1's committed stdout.txt: 33 committed stdout.txt (1a4bc1e3, 7156ac15): each one host JSON line after the guard, nothing of the runtime text left (33); the 27 with the runtime line inside the ledger host's line are exactly the 27 that do not parse before it; the other 6 (sparse parity's form: the line at a line's start) parse either way)
+-> PASS (RB5 the config read's parse: card 1's form read as its JSON; the two committed aifoundry1 card-0 identity reads with 'Opening device 0' read as JSON lines [True, True])
+-> PASS (RB6 the runner's telemetry reader: 9493 of 9493 samples; the runtime line at the start: the same; inside the second sample: 9492 (one dropped by the reader's guard))
+-> PASS (RB6 aifoundry1's committed telemetry: 396 committed aifoundry1 telemetry files: 0 runtime lines)
+-> PASS (RB7 the reducer's telemetry expression: reduce_x04.py line 55 as applied; 15638 samples of E193's sitting B with and without the runtime line at the start)
+   ok   A1 card 1's config and stderr: pass (want pass)
+   ok   A2 card 0's stderr (PCIe target /dev/et0_mgmt, ID 0): refused (want refused) - PCIe target /dev/et0_mgmt, not /dev/et1_mgmt; Physical device ID [0], not 1
+   ok   A3 card 0's minion_mv 519: refused (want refused) - minion_mv 519, not below 510 (card 1 read 499 or 500 in every committed read; card 0 519)
+   ok   A4 a failed voltage read (0): refused (want refused) - minion_mv 0, not above 450 (a failed voltage read; card 1 read 499 or 500 in every committed read)
+   ok   A5 no stderr identity at all (ET_DEVICES missing: the guard refused, nothing came back): refused (want refused) - no config JSON came back
+   ok   A6 TDP 0 W (aifoundry3's form, not card 1 as found): refused (want refused) - tdp_w 0, not 65
+   ok   A7 a second PCIe target line naming card 0 beside card 1's: refused (want refused) - PCIe target /dev/et0_mgmt, /dev/et1_mgmt, not /dev/et1_mgmt
+   ok   B1 the sampler's line only, inside the same: pass (want pass)
+   ok   B2 our line on card 0's node: refused (want refused) - 1 holder line(s) of ours on card 0 (a /dev/et0_ node or lock:etsoc-shire0.lock)
+   ok   B3 another login's line on card 0 (a second card's holder): refused (want refused) - 1 holder line(s) of another login (either card)
+   ok   B4 another login's line on card 1: refused (want refused) - 1 holder line(s) of another login (either card)
+   ok   B5 card 0's lock held by us: refused (want refused) - 1 holder line(s) of ours on card 0 (a /dev/et0_ node or lock:etsoc-shire0.lock)
+   ok   B6 et-who unreadable (exit 2, sudo refused): refused (want refused) - et-who unreadable (rc 2); no holder line of ours on /dev/et1_mgmt (the sampler's) with the sampler running
+   ok   B7 no line on /dev/et1_mgmt (the sampler not seen): refused (want refused) - et-who unreadable (rc 0, but neither a holder line nor its no-holder sentence); no holder line of ours on /dev/et1_mgmt (the sampler's) with the sampl
+   ok   B8 the sampler holds card 0's node: refused (want refused) - the sampler does not hold /dev/et1_mgmt (it holds ['/dev/et0_mgmt']); the sampler holds another card's node(s) ['/dev/et0_mgmt']
+   ok   B9 the inside answer lacks the sampler's line: refused (want refused) - the holder check from inside the private /dev (exit 0, 0 holder line(s)) does not list the sampler's /dev/et1_mgmt line with its process ID
+   ok   B10 the inside answer failed (exit 2: no warden): refused (want refused) - the holder check from inside the private /dev (exit 2, 0 holder line(s)) does not list the sampler's /dev/et1_mgmt line with its process ID
+   E198-IDENT SELF-CHECK PASS: 17 of 17 as stated (card 1's stderr: the committed aifoundry1 bytes)
+-> PASS (RB8 the identity gate on the real card-1 stderr: E198-IDENT SELF-CHECK PASS: 17 of 17 as stated (card 1's stderr: the committed aifoundry1 bytes))
+-> PASS (RB9 every committed occurrence: 886 files at HEAD: 805 at a line's start, 53 inside a line, 119 quoted, 35 other; drop_runtime removed exactly the first two forms in 886 of 886 files)
+REALBYTES-E198-A1 16 of 16 PASS (python 3.12.3)

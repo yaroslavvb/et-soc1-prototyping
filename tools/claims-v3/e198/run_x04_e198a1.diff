@@ -1,0 +1,109 @@
+--- a/tools/claims-v3/e193/proposal/src/run_x04.py
++++ b/tools/claims-v3/e198/run_x04_e198a1.py
+@@ -26,7 +26,8 @@
+ 
+ Layout of one pass: the anchor arm (spin2) at every block boundary (first in each block, and once more at the end of
+ the pass), the block's arms in a seeded shuffled order between. Every run is one device process under
+-`timeout -k 1 10` after `--gap` seconds of idle: `--burst` seconds of 0.4 s launches, or, for a train (block T),
++`timeout 10` after `--gap` seconds of idle (E198 A1: TERM at 10 s, never a KILL): `--burst` seconds of 0.4 s
++launches, or, for a train (block T),
+ A B B A segments of three launches each. Pass 0 is the warm-up pass: run, kept, and set aside by the reduction. The
+ card lock is taken per block and released (the file closed) between blocks; between passes nothing is launched for
+ `--pass-gap` seconds with the lock released and closed (the session's sampler keeps the management node, so other
+@@ -44,7 +45,9 @@
+ 
+ Stops (registered; each touches OUT/STOPPED and the stop file with the reason and ends the session):
+   - a device process that exits with status 1 or any other unexpected status, or is killed by `timeout` (124/137);
+-    a launch that did not finish is also a call for the lab admin (a hung hart needs a card reset);
++    a launch that did not finish is also a call for the lab admin (a hung hart needs a card reset); E198 A1: a device process
++    still running END_WAIT_S after it started (its timeout's TERM came at 10 s) is the same stop: reported at once, never killed,
++    left running for the lab admin;
+   - three device processes in one session that exit with status 3 (a launch returned incomplete: nothing blocked);
+   - on the telemetry since the last check: board above 65 W on three samples in a row, die reading at or above
+     70 C, or a minion clock other than 600 MHz (or missing) on three samples in a row;
+@@ -55,8 +58,10 @@
+ "ok": false and "short_train": true, so the reduction drops it.
+ Stopped by SIGTERM, SIGINT or SIGHUP: the handler first sets all three to be ignored (a second signal cannot cut the
+ clean-up short), and the clean-up runs with them blocked. A device process still running is ended first: SIGTERM to
+-its `timeout`, which passes it on and kills the program 1 s later, and the runner waits for it (15 s, then once more
+-60 s) before it releases the card lock; then the sampler is stopped with SIGTERM and waited for. Children are started
++its `timeout`, which passes it on unless it has already passed on or sent a TERM (GNU timeout; E198 A1: no KILL follows),
++and the runner waits for it (15 s, then once more 60 s) before it releases the card lock; then the sampler is stopped
++with SIGTERM and waited for (E198 A1: also when the device process did not end, whose card lock then goes when this
++runner exits). Children are started
+ with the signals blocked, so none can start unrecorded.
+ --smoke runs one short pass (the anchor, tk, duty33, faddps_p1 and one train; 2 s bursts) and stops.
+ --dry opens nothing and prints every device call and every check it would make.
+@@ -86,6 +91,7 @@
+ BOARD_STOP_W, DIE_STOP_C, CLOCK_MHZ = 65.0, 70.0, 600.0
+ IN_A_ROW = 3          # board and clock stops need this many samples in a row
+ FREE_WAIT_S, FREE_POLL_S = 600, 30
++END_WAIT_S = 25       # E198 A1: a device process still running this long after it started (TERM at 10 s) is reported, never killed
+ SMOKE = ("spin2", "tk", "duty33", "faddps_p1", "tr_tk_spin1")
+ 
+ 
+@@ -269,7 +275,7 @@
+ 
+     def device(x, seconds):
+         # session defaults first, then the arm's own options (an arm's --window or --label wins)
+-        cmd = ["timeout", "-k", "1", "10", a.host, "--window", "240000000", "--seconds", str(seconds),
++        cmd = ["timeout", "10", a.host, "--window", "240000000", "--seconds", str(seconds),
+                "--label", x["arm"]]
+         cmd += x["args"]
+         if a.dry:
+@@ -279,7 +285,13 @@
+         so, se = os.path.join(a.out, "device-stdout.txt"), os.path.join(a.out, "device-stderr.txt")
+         with open(so, "w") as fo, open(se, "w") as fe:
+             p = start_child(kids, "device", cmd, env=env, stdout=fo, stderr=fe, stdin=subprocess.DEVNULL)
+-        rc = p.wait()
++        try:                                    # E198 A1: no KILL follows its timeout's TERM at 10 s
++            rc = p.wait(timeout=END_WAIT_S)
++        except subprocess.TimeoutExpired:       # still running: reported at once and left running for the lab admin
++            say("device process still running %d s after it started (its timeout's TERM came at 10 s; nothing is killed): "
++                "device process not ended: tell the lab admin" % END_WAIT_S)
++            event("device_not_ended", arm=x["arm"], seconds=END_WAIT_S)
++            return None, ""
+         kids["device"] = None
+         with open(so, errors="replace") as f:
+             out = f.read()
+@@ -291,8 +303,11 @@
+         return rc, out
+ 
+     def end_device():
+-        """End a device process still running (the runner was stopped by a signal): SIGTERM to its `timeout`, which
+-        passes it on and kills the program 1 s later; wait for it. True when no device process is left."""
++        """End a device process still running (the runner was stopped by a signal, or the process outlived its timeout's
++        TERM): SIGTERM to its `timeout` and wait for it (E198 A1: never a KILL). GNU timeout passes on only the first
++        TERM sent to it, and none once it has sent its own at 10 s, so a process that outlived that TERM gets nothing
++        more from here. True when no device process is left; False when one is still there: reported, and left for the
++        lab admin."""
+         p = kids.get("device")
+         if p is None:
+             return True
+@@ -465,11 +480,13 @@
+         return any(n.get(s, 0) != SEG_LAUNCHES for s in range(nseg))
+ 
+     def cleanup():
+-        """Idempotent. A running device process first (ended and waited for), then the lock, then the sampler."""
++        """Idempotent. A running device process first (ended and waited for), then the lock, then the sampler (E198 A1:
++        a device process not ended keeps the lock until this runner exits, and the sampler is stopped all the same)."""
+         if not end_device():
+             say("device process not ended: the card lock goes only when this runner exits")
+-            return
+-        release_card()
++            say("E198 A1: the sampler is stopped all the same (SIGTERM), so it does not hold the management node")
++        else:
++            release_card()
+         s = kids["sampler"]
+         if s is not None:
+             if s.poll() is None:
+@@ -536,6 +553,9 @@
+                         if r:
+                             return stop(r)
+                         rc, out = device(x, a.burst)
++                        if rc is None:                  # E198 A1: the device process did not end after its timeout's TERM
++                            return stop(f"{x['arm']}: device process not ended {END_WAIT_S} s after it started, its timeout's "
++                                        "TERM at 10 s (nothing killed: tell the lab admin)")
+                         recs = []
+                         for line in out.splitlines():
+                             if line.startswith("X04 {"):

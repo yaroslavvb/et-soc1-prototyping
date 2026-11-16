@@ -1,0 +1,163 @@
+# E198 A1: THE KILL AUDIT (grep and ast, no strace), Mon 16 Nov 2026 05:32:18 PST, aifoundry2, /usr/bin/python3 3.12.3 (fix-a1e198, the working tree on 6622852d: A1 with the dated fix)
+KILLAUDIT-E198-A1 (aifoundry2; python 3.12.3): 79 files on the A1 path, 49 more in E198's folder; Python files read as code (ast): 28 on the A1 path, 6 in the rest
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e193/desk/compare_arms_e193.py:61: [timeout -k] DEF = "timeout -k 1 10 build/x04clock/host/x04clock_host --window 240000000 --seconds 4.0 --label "
+  A1-PATH  NOTRUN       tools/claims-v3/e193/proposal/src/run_x04.py:29: [timeout -k] `timeout -k 1 10` after `--gap` seconds of idle: `--burst` seconds of 0.4 s launches, or, for a train (block T),
+  A1-PATH  NOTRUN       tools/claims-v3/e193/proposal/src/run_x04.py:272: ["timeout", "-k"] cmd = ["timeout", "-k", "1", "10", a.host, "--window", "240000000", "--seconds", str(seconds),
+  A1-PATH  NOTRUN       tools/claims-v3/e193/proposal/src/run_x04.py:382: [subprocess timeout] p = subprocess.run([a.holder_check, "--check"], capture_output=True, text=True, timeout=30,
+  A1-PATH  DOC          tools/claims-v3/e198/build_e198a1.sh:6: [timeout -k] # (check_e198.py's five exact mappings and A1's sixth, `timeout 10` for `timeout -k 1 10`; the listing must name no `timeout -k`); and the
+  A1-PATH  DOC          tools/claims-v3/e198/build_e198a1.sh:8: [timeout -k] # detached job under a plain `timeout 900` (never `timeout -k`), at most two starts a Pacific day. From E198's root:
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/check_e198a1.py:7: [timeout -k] 'DRY ET_DEVICES=0 timeout -k 1 10 ' (E193's runner wraps each device process in `timeout -k 1 10`; the lab's copy
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/check_e198a1.py:11: [timeout -k] listing itself must name no 'timeout -k' anywhere, and every one of its device calls must have taken rule 6 (a device call under any other
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/check_e198a1.py:29: [timeout -k] A1_TO = "DRY ET_DEVICES=0 timeout -k 1 10 "
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/check_e198a1.py:45: [timeout -k] k_in = [x for x in raw if "timeout -k" in x or "--kill-after" in x]
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/check_e198a1.py:49: [timeout -k] f"no 'timeout -k'; every device call under a plain 'timeout 10' (E198 A1)")
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/check_e198a1.py:52: [timeout -k] print(f"LISTING DIFFERS from {os.path.basename(registered)}: the listing names 'timeout -k' or '--kill-after' "
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:9: [KILL] running, end_device() sending SIGTERM and waiting, never a KILL) in the kit's private /dev, with every stand-in, sandbox and real byte of
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:11: [KILL] runner, listing check (check_e198a1.py) and build record ("a1 build_e198a1.sh"); this file sends NO KILL to anything: a stand-in holder is
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:12: [SIGKILL] ended with SIGTERM, and a case past its bound gets SIGTERM, never v1's SIGKILL. v1's cases, each as v1 states it (below), on A1's files:
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:20: [KILL] ends at the smoke gate (GATE-STOP, rc 3) and skips its closing config read. THE STRACE-FREE PROOF THAT NO KILL WAS SENT: the
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:22: [KILL] (a KILL aimed at the timeout would have ended both), its signal log holds TERMs only, and it writes its own end line ("ended by
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:23: [KILL] itself at 140 s"), which a process killed by a KILL could never write. K9 (the dated fix): the runner's clean-up stops its sampler
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:30: [timeout -k] HG2  a host that ends 1.5 s after its TERM (v1's `timeout -k 1 10` would have killed it at 11 s): it ends by itself at 11.5 s, the
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:32: [SIGKILL,kill -9/-KILL/-s/-n,timeout -k] KILLWORDS  the runner copy, the session and every file this test drives name no SIGKILL, `kill -9` or `timeout -k` (a grep of their
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:276: [--die-with-parent] "--unshare-uts", "--hostname", self.hostname, "--die-with-parent", "--chdir", self.b.tree, "--", PY, "-I", "-B",
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:288: [KILL,kill call] os.killpg(p.pid, signal.SIGTERM)     # A1: a case past its bound gets a TERM, never a KILL
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:513: [KILL] (the session has ended: a stand-in host the runner left running must be ALIVE, so no KILL reached it), then make the end knob (a
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:516: [KILL] left with a KILL when this returns, so it returns only after nothing is left (or after its bound, said so)."""
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:597: [KILL] ok("HG NO KILL: the host alive when the session ended", hp and f"the stand-in host pid {hp} alive: True" in left0,
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:600: [KILL] ok("HG NO KILL: TERMs only, and its own end line", terms and all(" TERM " in ln for ln in terms) and
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:606: [KILL] ok("HG NO KILL: the host's timeout and its wrapper alive when the session ended (finding 6)", len(tmo) == 1 and len(wrp) == 1,
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:640: [KILL] ok("HGE NO KILL: its own end line at 60 s, TERMs only", re.search(r"A1-HOST ended by itself at 6\d\.\d+ s \(its life of 60 s\)", hl) and
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:645: [KILL] """HG2: a host that ends 1.5 s after its TERM: the runner's timeout stop (124), as registered; no KILL at 11 s."""
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:655: [KILL] ok("HG2 NO KILL at 11 s: it ended by itself 1.5 s after its TERM", re.search(r"A1-HOST ended by itself at 11\.\d+ s \(1\.5 s after its first TERM\): 1
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:661: [SIGKILL,KILL,kill -9/-KILL/-s/-n,timeout -k,kill call] identity reads or the A1 stand-ins names SIGKILL, signal 9, `kill -9`, `kill -KILL`, `timeout -k` or `--kill-after`, or calls .kill()."""
+  A1-PATH  DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:662: [SIGKILL,KILL] pat = re.compile(r"SIGKILL|signal\.SIGKILL|\bkill\s+-(9|KILL|s\s*KILL|SIGKILL)\b|timeout\s+-k|--kill-after|\.kill\(\)|\"-k\"")
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:2: [KILL] """E198 dated amendment A1 (Q196, lane a1-e198, Mon 16 Nov 2026, before any E198 datum): THE KILL AUDIT, a grep and a code reading, no
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:3: [SIGKILL,kill -9/-KILL/-s/-n,timeout -k] strace. It shows that no code path of the lab's runner copy or of the kit names or arranges a SIGKILL, a `kill -9` or a `timeout -k` around
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:4: [SIGKILL] a device process (the orchestrator's standing ruling of Mon 16 Nov 2026 02:56:14 PST: no run of ours sends or arranges a SIGKILL to a
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:5: [kill -9/-KILL/-s/-n] device process; the lab's AGENT.md: "never kill -9"). The runtime half of the proof is the real-path test's HG cases (a stand-in host that
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:13: [SIGKILL,KILL,kill -9/-KILL/-s/-n,timeout -k] code file is matched against the kill patterns (SIGKILL; the word KILL; kill -9, -KILL, -s KILL or a computed -s; timeout -k,
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:14: [KILL,"timeout", "-k",kill call] --kill-after, -s KILL; "timeout", "-k" in a list; .kill(), os.kill(, os.killpg(; subprocess.run/communicate with timeout=, whose
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:15: [SIGKILL,KILL,--die-with-parent,pkill/killall] expiry sends the child a SIGKILL; bubblewrap's --die-with-parent, whose parent-death signal is a KILL; pkill, killall). EVERY HIT MUST
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:20: [kill call] 3. THE RUNNER COPY READ AS CODE (ast): the device command is the list literal ["timeout", "10", a.host, ...]; no call of .kill(),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:21: [kill call,subprocess timeout] os.kill() or os.killpg(); every .send_signal() sends signal.SIGTERM; the one subprocess.run(..., timeout=) is the holder check's.
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:22: [timeout -k] 4. The A1 steps' remote scripts and the A1 session name no `timeout -k` in any code line.
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:24: [SIGKILL,kill call,subprocess timeout] check_output with a timeout= keyword (their expiry sends the child a SIGKILL), every .communicate(timeout=), every .kill(), os.kill(),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:25: [kill call] os.killpg() or signal.pthread_kill() call, and every .send_signal() whose signal is not SIGTERM, SIGINT or SIGHUP. Each such call is
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:45: [SIGKILL] ("SIGKILL", re.compile(r"SIGKILL")),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:46: [KILL] ("KILL", re.compile(r"\bKILL\b")),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:47: [SIGKILL,KILL,kill -9/-KILL/-s/-n] ("kill -9/-KILL/-s/-n", re.compile(r"\bkill\s+-(9|KILL|SIGKILL|s\s*(9|KILL|SIGKILL|\"?\$\()|n\s*(9|KILL|SIGKILL|\"?\$))")),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:48: [KILL,timeout -k] ("timeout -k", re.compile(r"\btimeout\s+(-k|--kill-after|-s\s*(9|KILL)|--signal[= ](9|KILL))|-k 1\b")),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:50: [kill call] ("kill call", re.compile(r"\.kill\(\)|\bos\.kill\(|\bos\.killpg\(|\bkillpg\b|\bpthread_kill\(")),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:53: [--die-with-parent] ("--die-with-parent", re.compile(r"--die-with-parent")),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:54: [pkill/killall] ("pkill/killall", re.compile(r"\bpkill\b|\bkillall\b")),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:62: [KILL] (r"tools/claims-v3/e198/run_x04_e198a1\.py$", r"^`timeout 10` after|E198 A1: no KILL follows|E198 A1: never a KILL|TERM at 10 s, never a KILL|is the s
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:63: [KILL] "DOC", "the runner copy's own doc lines and comments saying no KILL is sent"),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:65: [KILL] "NOTDEV", "the runner's holder check (E193's line, unchanged): Python sends its child a KILL past 30 s; the child is holdercheck_e198.sh, which opens 
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:69: [KILL] "NOTDEV", "the warden's et-who (the box's holder listing: sudo et-holders, fuser on /proc): Python sends it a KILL past 25 s; it opens no device node"
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:70: [KILL] (r"tools/claims-v3/e198/x04host_e198\.sh$", r"^#", "DOC", "the host wrapper's header comment on the v1 runner's -k (A1 sends no KILL)"),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:73: [KILL] "have read; it signals no device process, and it can reach a KILL only if something outside E198's code killed the host"),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:74: [SIGKILL,--die-with-parent] (r"tools/claims-v3/e198/privdev_e198\.sh$", r"^# .*(--die-with-parent|SIGKILL)", "DOC", "a comment: the private /dev deliberately has no --die-with-pa
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:76: [KILL] (r"tools/claims-v3/e198/rb/list_steps_e198a1\.sh$", r"echo; echo \"################ inside the sitting", "DOC", "an echoed sentence of the dry listing
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:77: [timeout -k] (r"tools/claims-v3/e198/check_e198a1\.py$", r"timeout -k|--kill-after", "TEXT-MATCH",
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:78: [timeout -k] "the listing checker's doc and its text: it maps A1's `timeout 10` to E193's `timeout -k 1 10` text, and refuses a listing naming `timeout -k`"),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:79: [KILL] (r"tools/claims-v3/q141k-runbook/v3\.1/rb_run\.py$", r"TERM then KILL 2 s later|TERM, then KILL 10 s later", "DOC", "rb_run.py's docstring"),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:80: [SIGKILL,kill call] (r"tools/claims-v3/q141k-runbook/v3\.1/rb_run\.py$", r"def kill_tree|for sig in \(signal\.SIGTERM, signal\.SIGKILL\)|os\.killpg\(proc\.pid, sig\)|os\.
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:81: [KILL] "DESK", "k6's bounded runner on aifoundry2 ends a desk-side call past its bound or on a login link (TERM, then KILL): the ssh, rsync or git client "
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:82: [KILL] "and its children on the desk; no E198 device process runs on the desk, and the box side of a cut call gets no KILL (a launch has detached; a "
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:87: [--die-with-parent] "the A1 real-path test's own words and its sandboxes (bubblewrap's --die-with-parent ends a case's stand-ins only if the test itself dies; a case past
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:89: [--die-with-parent] (r"tools/claims-v3/e198/rb/selftest_rb_e198a1\.sh$", r".*", "DESKTEST", "the A1 runbook test's sandbox (bubblewrap --die-with-parent) and stand-ins, d
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:90: [KILL] (r"tools/claims-v3/e198/fake_card_e198a1\.py$", r".*", "DESKTEST", "the A1 stand-ins' doc (they send no KILL; the stand-in sampler's end knob is its o
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:96: [timeout -k] (r"tools/claims-v3/e193/desk/compare_arms_e193\.py$", r"DEF = \"timeout -k 1 10", "TEXT-MATCH", "E193's desk arms comparer's listing text; not run on 
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:97: [timeout -k] (r"tools/claims-v3/e198/rb/s08_a1_build_e198\.sh$", r"timeout -k 15 900", "NOTRUN",
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:98: [timeout -k] "v1's step 6 (`timeout -k 15 900` around the build job, whose tree runs the host's refusal checks): superseded by A1's step 6 (plain `timeout 900`), n
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:99: [timeout -k] (r"tools/claims-v3/e198/rb/s08_a1_build_e198a1\.sh$", r"^# .*timeout -k 15 900", "DOC", "v1's header kept below A1's (its job name and `timeout -k 15 
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:103: [SIGKILL] r"^#|^\s*#|\"\"\"|kill nothing|killed by timeout|SIGKILL and orphaning|never killed", "DOC", "v1 prose (comments, messages saying kill nothing)"),
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:163: [subprocess timeout] """Item 5: every Python file read as code. A timed subprocess call, a .communicate(timeout=), a kill call or a .send_signal() of
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:192: [kill call] elif f.endswith(".kill") or f in ("os.kill", "os.killpg", "signal.pthread_kill", "killpg", "pthread_kill"):
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:223: [kill call] if f.endswith(".kill") or f in ("os.kill", "os.killpg"):
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:254: [timeout -k] a1k = [r for r in rows if r[0] == "A1-PATH" and "timeout -k" in (r[6] if len(r) > 6 else "") and r[4] not in ("DOC", "TEXT-MATCH", "DESKTEST", "NOTRUN
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/killaudit_e198a1.py:267: [SIGKILL,kill -9/-KILL/-s/-n,timeout -k] f"of E198's folder, every one classified, none a SIGKILL, kill -9 or timeout -k around a device process; the Python files read as code: "
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:6: [timeout -k] K1-K3  the doc lines that describe the kill (the run's `timeout -k 1 10`, the stop list, the clean-up's "kills the program 1 s later");
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:8: [KILL] K5     each device process under a plain `timeout 10` (TERM at 10 s, never a KILL);
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:11: [KILL] K7     end_device()'s doc: SIGTERM to its timeout and a wait, never a KILL; a process that does not end is reported and left;
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:16: [KILL,timeout -k] the card's management node until its own --seconds end. Under E193's `-k 1` the KILL at 11 s ended such a process, end_device()
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:17: [KILL] returned True and the clean-up stopped the sampler; K9 keeps that sampler stop on the path the KILL used to take.
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:39: [timeout -k] ("K1", "`timeout -k 1 10` after `--gap` seconds of idle: `--burst` seconds of 0.4 s launches, or, for a train (block T),\n",
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:40: [KILL] "`timeout 10` after `--gap` seconds of idle (E198 A1: TERM at 10 s, never a KILL): `--burst` seconds of 0.4 s\n"
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:48: [KILL] "its `timeout`, which passes it on unless it has already passed on or sent a TERM (GNU timeout; E198 A1: no KILL follows),\n"
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:55: ["timeout", "-k"] ("K5", '        cmd = ["timeout", "-k", "1", "10", a.host, "--window", "240000000", "--seconds", str(seconds),\n',
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:58: [KILL] "        try:                                    # E198 A1: no KILL follows its timeout's TERM at 10 s\n"
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:69: [KILL] '        TERM): SIGTERM to its `timeout` and wait for it (E198 A1: never a KILL). GNU timeout passes on only the first\n'
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:160: [SIGKILL,timeout -k] banned = [ln for ln in new.splitlines() if "timeout\", \"-k" in ln or "-k 1" in ln or "SIGKILL" in ln or ".kill(" in ln]
+  A1-PATH  TEXT-MATCH   tools/claims-v3/e198/desk/make_runner_e198a1.py:169: [SIGKILL,timeout -k] print("RUNNER-A1 CHECK PASS: the copy is E193's runner with the kill path changed and nothing else; no 'timeout -k', SIGKILL or .kill( in it")
+  A1-PATH  DESKTEST     tools/claims-v3/e198/fake_card_e198a1.py:11: [KILL] a grace is given (the host that ends 1.5 s after its TERM, which v1's one-second KILL after the TERM would have ended at
+  A1-PATH  DESKTEST     tools/claims-v3/e198/fake_card_e198a1.py:12: [KILL] 11 s). Its start, every TERM and its own end go to STATE/a1-host.log; a process ended by a KILL cannot write that end
+  A1-PATH  DESKTEST     tools/claims-v3/e198/fake_card_e198a1.py:20: [KILL] desk tests bind /dev/null at the card nodes' paths inside a sandbox with no card. Nothing here sends a KILL to anything.
+  A1-PATH  DESKTEST     tools/claims-v3/e198/fake_card_e198a1.py:108: [kill call] os.kill(me, signal.SIGTERM)                        # to itself: fake_card_e198.py's sampler ends on it, as at its --seconds
+  A1-PATH  DOC          tools/claims-v3/e198/privdev_e198.sh:9: [--die-with-parent] # It opens no device itself: bubblewrap binds the two nodes (a mount, not an open). Not --die-with-parent: a runner whose session is
+  A1-PATH  DOC          tools/claims-v3/e198/privdev_e198.sh:10: [SIGKILL] # killed keeps its own deadline and clean-up (its sampler stopped with SIGTERM) instead of being killed with SIGKILL and orphaning its
+  A1-PATH  DOC          tools/claims-v3/e198/rb/list_steps_e198a1.sh:44: [KILL] echo; echo "################ inside the sitting (session_e198a1.sh $SIT, detached on the box; the lab's runner copy run_x04_e198a1.py: every device pr
+  A1-PATH  DOC          tools/claims-v3/e198/rb/s08_a1_build_e198a1.sh:5: [KILL,timeout -k] # PLAIN `timeout 900`, never `timeout -k` (v1's `timeout -k 15 900` would have sent a KILL to the build's process tree 15 s after its
+  A1-PATH  DOC          tools/claims-v3/e198/rb/s08_a1_build_e198a1.sh:6: [KILL] # TERM, and that tree runs the built host for its refusal checks: A1 sends no KILL anywhere on E198's path); and the two-a-day count reads
+  A1-PATH  DOC          tools/claims-v3/e198/rb/s08_a1_build_e198a1.sh:11: [timeout -k] # DETACHED JOB, a1-build-e198 (build_e198.sh under `timeout -k 15 900`: cmake with the box's /opt/et into build/x04clock under E198's
+  A1-PATH  DOC          tools/claims-v3/e198/rb/s10_a1_dry_e198a1.sh:5: [timeout -k] # one by check_e198a1.py drycmp (check_e198.py's five exact mappings and A1's sixth, `timeout 10` for `timeout -k 1 10`; the listing names no
+  A1-PATH  DOC          tools/claims-v3/e198/rb/s10_a1_dry_e198a1.sh:6: [timeout -k] # `timeout -k`). v1's header, read with these changes:
+  A1-PATH  DESKTEST     tools/claims-v3/e198/rb/selftest_rb_e198a1.sh:13: [timeout -k] #   KB   step 6 (A1)'s job on the box runs build_e198a1.sh under a PLAIN `timeout 900` (its job script read: no `timeout -k`);
+  A1-PATH  DESKTEST     tools/claims-v3/e198/rb/selftest_rb_e198a1.sh:84: [--die-with-parent] --proc /proc --unshare-pid --die-with-parent -- env E198_RB_INNER=1 bash "$SELF" "$S" "${2:-}"
+  A1-PATH  DESKTEST     tools/claims-v3/e198/rb/selftest_rb_e198a1.sh:295: [timeout -k] ok "$kb1/$kb2/$kb3" "1/0/1" "KB the build job's script on the box: build_e198a1.sh under 'timeout 900', no 'timeout -k'; the record names build_e198a1
+  A1-PATH  DOC          tools/claims-v3/e198/run_x04_e198a1.py:29: [KILL] `timeout 10` after `--gap` seconds of idle (E198 A1: TERM at 10 s, never a KILL): `--burst` seconds of 0.4 s
+  A1-PATH  DOC          tools/claims-v3/e198/run_x04_e198a1.py:61: [KILL] its `timeout`, which passes it on unless it has already passed on or sent a TERM (GNU timeout; E198 A1: no KILL follows),
+  A1-PATH  DOC          tools/claims-v3/e198/run_x04_e198a1.py:288: [KILL] try:                                    # E198 A1: no KILL follows its timeout's TERM at 10 s
+  A1-PATH  DOC          tools/claims-v3/e198/run_x04_e198a1.py:307: [KILL] TERM): SIGTERM to its `timeout` and wait for it (E198 A1: never a KILL). GNU timeout passes on only the first
+  A1-PATH  NOTDEV       tools/claims-v3/e198/run_x04_e198a1.py:397: [subprocess timeout] p = subprocess.run([a.holder_check, "--check"], capture_output=True, text=True, timeout=30,
+  A1-PATH  DOC          tools/claims-v3/e198/session_e198a1.sh:6: [KILL] #     changed and nothing else: each device process under a plain `timeout 10`, TERM at 10 s and never a KILL; one still running 25 s
+  A1-PATH  DOC          tools/claims-v3/e198/session_e198a1.sh:8: [KILL] #     SIGTERM to its timeout and waits, never a KILL); it is given E193's arms.tsv by --arms, the value E193's runner takes by default
+  A1-PATH  EXIST        tools/claims-v3/e198/warden_e198.py:48: [kill call] os.kill(pid, 0)
+  A1-PATH  NOTDEV       tools/claims-v3/e198/warden_e198.py:116: [subprocess timeout] p = subprocess.run([etwho, "--check"], capture_output=True, text=True, timeout=25, stdin=subprocess.DEVNULL)
+  A1-PATH  DOC          tools/claims-v3/e198/x04host_e198.sh:7: [timeout -k] # with the host's status. Its stderr is the host's (the runner's device-stderr.txt). Signals: the runner's `timeout -k 1 10` sends
+  A1-PATH  DOC          tools/claims-v3/e198/x04host_e198.sh:10: [timeout -k] # and the runner read the status they would have read without it; `-k 1` still kills the group a second later. A raw directory that
+  A1-PATH  SELF         tools/claims-v3/e198/x04host_e198.sh:25: [kill -9/-KILL/-s/-n] if [ "$rc" -gt 128 ] && [ "$rc" -lt 160 ]; then kill -s "$(kill -l $((rc - 128)))" "$$"; fi
+  A1-PATH  DOC          tools/claims-v3/q141k-runbook/v3.1/rb_run.py:21: [KILL] TERM then KILL 2 s later), appends "<HH:MM:SS> <host> needs a check" to the lock file $RB_LOCK, keeps the link in $RB_LINKS
+  A1-PATH  DOC          tools/claims-v3/q141k-runbook/v3.1/rb_run.py:23: [KILL] * a call past its bound is killed the same way (TERM, then KILL 10 s later; the probe 2 s later) and exits 13; a probe that
+  A1-PATH  NOTDEV       tools/claims-v3/q141k-runbook/v3.1/rb_run.py:68: [subprocess timeout] out = subprocess.run(["ps", "-A", "-o", "pid=,ppid=,pgid="], capture_output=True, text=True, timeout=10).stdout
+  A1-PATH  DESK         tools/claims-v3/q141k-runbook/v3.1/rb_run.py:102: [SIGKILL] for sig in (signal.SIGTERM, signal.SIGKILL):
+  A1-PATH  DESK         tools/claims-v3/q141k-runbook/v3.1/rb_run.py:104: [kill call] os.killpg(proc.pid, sig)
+  A1-PATH  DESK         tools/claims-v3/q141k-runbook/v3.1/rb_run.py:109: [kill call] os.kill(p, sig)
+  A1-PATH  EXIST        tools/claims-v3/q141k-runbook/v3.1/rb_run.py:124: [kill call] os.kill(pid, 0)
+  REST     NOTRUN       tools/claims-v3/e198/desk/desktest_realpath_e198.py:115: [kill call] h0.kill(); h0.wait(); h0 = None
+  REST     NOTRUN       tools/claims-v3/e198/desk/desktest_realpath_e198.py:122: [kill call] p.kill(); p.wait()
+  REST     NOTRUN       tools/claims-v3/e198/desk/desktest_realpath_e198.py:237: [--die-with-parent] "--unshare-uts", "--hostname", self.hostname, "--die-with-parent", "--chdir", self.b.tree, "--", PY, "-I", "-B",
+  REST     NOTRUN       tools/claims-v3/e198/desk/desktest_realpath_e198.py:248: [SIGKILL,kill call] os.killpg(p.pid, signal.SIGKILL)
+  REST     NOTRUN       tools/claims-v3/e198/desk/desktest_realpath_e198.py:490: [timeout -k] ("run_x04.py", '        if a.dry:\n            print(f"DRY ET_DEVICES', "the device call printed", "the host wrapper under timeout -k 1 10, its output
+  REST     NOTRUN       tools/claims-v3/e198/rb/s08_a1_build_e198.sh:4: [timeout -k] # DETACHED JOB, a1-build-e198 (build_e198.sh under `timeout -k 15 900`: cmake with the box's /opt/et into build/x04clock under E198's
+  REST     NOTRUN       tools/claims-v3/e198/rb/s08_a1_build_e198.sh:56: [timeout -k] timeout -k 15 900 bash "$ROOT/tools/claims-v3/e198/build_e198.sh" > "$L" 2>&1
+  REST     NOTRUN       tools/claims-v3/e198/rb/selftest_rb_e198.sh:62: [--die-with-parent] --proc /proc --unshare-pid --die-with-parent -- env E198_RB_INNER=1 bash "$SELF" "$S" "${2:-}"
+  AST-A1   NOTRUN       tools/claims-v3/e193/proposal/src/run_x04.py:382: [subprocess timeout (ast)] p = subprocess.run([a.holder_check, "--check"], capture_output=True, text=True, timeout=30, stdin=subprocess.DEVNULL)
+  AST-A1   DESKTEST     tools/claims-v3/e198/desk/desktest_realpath_e198a1.py:288: [kill call (ast)] os.killpg(p.pid, signal.SIGTERM) # A1: a case past its bound gets a TERM, never a KILL
+  AST-A1   DESKTEST     tools/claims-v3/e198/fake_card_e198a1.py:108: [kill call (ast)] os.kill(me, signal.SIGTERM) # to itself: fake_card_e198.py's sampler ends on it, as at its --seconds
+  AST-A1   NOTDEV       tools/claims-v3/e198/run_x04_e198a1.py:397: [subprocess timeout (ast)] p = subprocess.run([a.holder_check, "--check"], capture_output=True, text=True, timeout=30, stdin=subprocess.DEVNULL)
+  AST-A1   EXIST        tools/claims-v3/e198/warden_e198.py:48: [kill call (ast)] os.kill(pid, 0)
+  AST-A1   NOTDEV       tools/claims-v3/e198/warden_e198.py:116: [subprocess timeout (ast)] p = subprocess.run([etwho, "--check"], capture_output=True, text=True, timeout=25, stdin=subprocess.DEVNULL)
+  AST-A1   EXIST        tools/claims-v3/q141k-runbook/v3.1/rb_run.py:124: [kill call (ast)] os.kill(pid, 0)
+  AST-A1   NOTDEV       tools/claims-v3/q141k-runbook/v3.1/rb_run.py:68: [subprocess timeout (ast)] out = subprocess.run(["ps", "-A", "-o", "pid=,ppid=,pgid="], capture_output=True, text=True, timeout=10).stdout
+  AST-A1   DESK         tools/claims-v3/q141k-runbook/v3.1/rb_run.py:104: [kill call (ast)] os.killpg(proc.pid, sig)
+  AST-A1   DESK         tools/claims-v3/q141k-runbook/v3.1/rb_run.py:109: [kill call (ast)] os.kill(p, sig)
+  AST-REST NOTRUN       tools/claims-v3/e198/desk/desktest_realpath_e198.py:115: [kill call (ast)] h0.kill(); h0.wait(); h0 = None
+  AST-REST NOTRUN       tools/claims-v3/e198/desk/desktest_realpath_e198.py:122: [kill call (ast)] p.kill(); p.wait()
+  AST-REST NOTRUN       tools/claims-v3/e198/desk/desktest_realpath_e198.py:248: [kill call (ast)] os.killpg(p.pid, signal.SIGKILL)
+  class DESK: 5 hit(s) - k6's bounded runner on aifoundry2 ends a desk-side call past its bound or on a login link (TERM, then KILL): the ssh, rsync or git client and its children on the desk; no E198 device process runs on the desk, and the box side of a
+  class DESKTEST: 29 hit(s) - the A1 real-path test's own words and its sandboxes (bubblewrap's --die-with-parent ends a case's stand-ins only if the test itself dies; a case past its bound gets a TERM): stand-ins over /dev/null in the no-device sandbox, never
+  class DOC: 20 hit(s)
+  class EXIST: 4 hit(s) - signal 0: the warden reads whether the session is alive; nothing is sent
+  class NOTDEV: 6 hit(s) - the runner's holder check (E193's line, unchanged): Python sends its child a KILL past 30 s; the child is holdercheck_e198.sh, which opens no device node (it asks the warden outside) and ends by itself within 28 s, exit 2
+  class NOTRUN: 15 hit(s) - E193's runner: synced to the box as part of E193's registration, never run for E198 after A1 (the session, the build's listing and the desk tests run the lab's copy)
+  class SELF: 1 hit(s) - the host wrapper, after the host has ENDED, re-raises on its own process ($$) the signal the host died of, so timeout reads the status it would have read; it signals no device process, and it can reach a KILL only if something out
+  class TEXT-MATCH: 66 hit(s) - E193's desk arms comparer's listing text; not run on the A1 path
+  text files (never run) with a kill word: 18: E193.md 1, dry-e193-A.txt 234, dry-e193-B.txt 135, dry-e193-smoke-all.txt 10, dry-e193-smoke-default.txt 8, request.md 2, README.md 3, CARD-LANE-BRIEF-e198-a1.md 7, DATA-README-FORM-e198-a1.md 2, E198.md 1, E198.md.dated-amendment-A1.md 26, KIT.md 3, KIT.md.dated-note-A1.md 42, dry-branches-e198.tsv 1, dry-e198-A.txt 234, dry-e198-B.txt 135, dry-e198-smoke.txt 10, run_x04_e198a1.diff 6
+  runner (ast): the device command: ['timeout', '10', 'a.host'] ... (line 278)
+  runner (ast): line 316: p.send_signal(signal.SIGTERM)
+  runner (ast): line 493: s.send_signal(signal.SIGTERM)
+  runner (ast): line 324: p.send_signal(signal.SIGTERM)
+  runner (ast): subprocess calls with a timeout: [(397, "[a.holder_check, '--check']")]
+KILLAUDIT-E198-A1 PASS: 125 hit(s) on the A1 path and 8 in the rest of E198's folder, every one classified, none a SIGKILL, kill -9 or timeout -k around a device process; the Python files read as code: 10 AST hit(s) on the A1 path and 3 in the rest, every one classified; the runner copy read as code: the device command is ['timeout', '10', a.host, ...], no kill call, every send_signal a SIGTERM

@@ -1,0 +1,35 @@
+# E198's dry-branch audit after amendment A1 (Q196, lane a1-e198): every line of session_e198a1.sh (named session_e198.sh in
+# the rows) and of the lab's runner copy run_x04_e198a1.py (named run_x04.py in the rows) that branches on a dry flag (DRYF;
+# a.dry), what the dry path does there, what the real path does, and the real-path desk test's cases that run it
+# (desk/desktest_realpath_e198a1.py, which writes this file and fails if a dry-flag line has no row or a named case failed).
+# file	line	text	dry path	real path	cases
+run_x04.py	228	if not a.dry and bool(a.sampler) == bool(a.telemetry):	the sampler argument rule skipped	exactly one of --sampler and --telemetry: the session passes --sampler	PB2
+run_x04.py	230	if not a.dry and a.telemetry and a.telemetry_pid <= 0:	skipped	NOT ON THE SESSION'S PATH: --telemetry is never passed	NOT-ON-PATH,PB2
+run_x04.py	266	if a.dry:	say() also prints	say() writes run.log only	PB2,Y1
+run_x04.py	281	if a.dry:	the device call printed	the host wrapper under a plain timeout 10 (A1), its output to files, its exit read, at most 25 s waited	PB2,K1,X1,NWI,NWL,HG,HGE,HG2
+run_x04.py	346	if a.dry:	check_live returns nothing	the live stops on new samples	PB2,K1
+run_x04.py	421	if a.dry:	the holder check printed	the holder check through the warden, then the lock; a holder: wait and poll	PB2
+run_x04.py	457	if a.dry or state["idle_ref"] is None:	idle-down skipped	idle-down to the idle reference + 2 C	PB2
+run_x04.py	503	if a.dry:	the one-card rule printed	one_card() in the private /dev: one ops node, card 1's	PB2,NWL
+run_x04.py	517	if not a.dry:	no sampler	the sampler through the shim and E191's guard, 20 s of idle, the reference	PB2,K1
+run_x04.py	550	if not a.dry:	no gap	the 5 s gap	PB2
+run_x04.py	596	if a.dry:	the pass gap printed	30 s between passes, the lock closed	PB2
+run_x04.py	605	if not a.dry:	no closing idle	gap + 3 s after the last run	NWL
+session_e198.sh	40	DRYF=	the dry flag's default	unset: the real path	PB2,Y1
+session_e198.sh	41	case "${DRY-}" in "") ;; 1) DRYF=1 ;; *) echo "DRY must be 1 or unset (it is '${DRY}')"; e	DRY=1 sets the dry path	DRY unset: the real path; any other value refused	PB2,Y1
+session_e198.sh	45	if [ -z "$DRYF" ]; then	no window's last end needed	the window's last end required	PB2
+session_e198.sh	48	SD=build/e198/T$T0; [ -n "$DRYF" ] && SD=$SD-dry	the folder T<T0>-dry	the folder T<T0>	PB2,Y1
+session_e198.sh	52	say() { echo "$(date '+%Y-%m-%d %H:%M:%S %Z') ${DRYF:+DRY }$*" >> "$LOG"; }	every line 'DRY '	the plain line	PB2,Y1
+session_e198.sh	98	[ -z "$DRYF" ] || return 0	dne_check reads nothing	A1: the runner's 'device process not ended' line read; the session says so and skips its closing read	HG,HGE,PB2
+session_e198.sh	108	if [ -n "$DRYF" ]; then	the closing read printed	the closing config read inside the private /dev, identity (a) reported	PB2,K1,X1
+session_e198.sh	120	say "session start (T0 $T0 = $(date -d @"$T0" '+%H:%M:%S %Z' 2>/dev/null); E198 sitting $S	'; DRY' in the start line	the start line	PB2,Y1
+session_e198.sh	149	if [ -n "$DRYF" ]; then	the holder rules and the two-card box printed	ps rules, et-who --check, the two-card box	PB2,H0,NOC1
+session_e198.sh	174	if [ -n "$DRYF" ]; then	the start config read printed	the start config read inside the private /dev, identity (a)	PB2,IA0
+session_e198.sh	186	if [ -n "$DRYF" ]; then	the warden and identity (b) printed	the warden started; the identity sampler; identity (b)	PB2,IB0
+session_e198.sh	212	if [ -z "$DRYF" ] && [ $((LAST_END - 180)) -lt "$DEADLINE" ]; then DEADLINE=$((LAST_END - 	no clip	the deadline clipped by the last end - 180 s	PB2
+session_e198.sh	215	[ -n "$DRYF" ] && COMMON+=(--dry)	the runner's --dry	the runner's real path	PB2,Y1
+session_e198.sh	224	if [ -n "$DRYF" ]; then	the smoke gate printed	the watch, then E193's smoke gate	PB2,W1
+session_e198.sh	240	if [ -n "$DRYF" ]; then	the listing counted	rc 0, a registered stop, or a crash	PB2,K1,X1
+session_e198.sh	251	[ -z "$DRYF" ] && [ -e "$SD/holderd/WATCH-STOP" ] && say "the watch: $(head -n 1 "$SD/hold	skipped	the watch's line, if any	PB2,W1
+session_e198.sh	252	[ -z "$DRYF" ] && say "the host's runtime lines in the main run: $(env -u LD_LIBRARY_PATH 	skipped	the host's runtime lines counted	PB2
+session_e198.sh	256	rc=0; [ -z "$DRYF" ] && [ "$mrc" -ne 0 ] && rc=1	rc 0	rc 1 after a stop, 4 after a crash	PB2,K1,X1
