@@ -1,0 +1,36 @@
+selftest_quiet_e194: 2026-11-15 14:32:11 PST on aifoundry2
+-> PASS (QF1 raise with RB_QUIET unset, or naming a file inside the repo: refused (10), no flag)
+-> PASS (QF2 raised by the card lane (e194 <lane> <time>); check 0; again by it 0; by another lane 10, unchanged; another lane's flag never overwritten (10))
+-> PASS (QF3 lower by another lane refused (kept); by its owner 0 (gone); check 10; lower again 0)
+   QF4 s05_look_e194.sh: rc 10; [s05_look_e194] STOP: THE QUIET DESK FLAG is not raised (<scratch>/quiet-
+   QF4 s07_tree_e194.sh pull: rc 10; [s07_tree_e194] STOP: THE QUIET DESK FLAG is not raised (<scratch>/quiet-
+   QF4 s08_build_e194.sh start: rc 10; [s08_build_e194] STOP: THE QUIET DESK FLAG is not raised (<scratch>/quiet
+   QF4 s08_build_e194.sh wait: rc 10; [s08_build_e194] STOP: THE QUIET DESK FLAG is not raised (<scratch>/quiet
+   QF4 s09_reads_e194.sh: rc 10; [s09_reads_e194] STOP: THE QUIET DESK FLAG is not raised (<scratch>/quiet
+   QF4 s10_dry_e194.sh start: rc 10; [s10_dry_e194] STOP: THE QUIET DESK FLAG is not raised (<scratch>/quiet-f
+   QF4 s11_session_e194.sh FULL: rc 10; [s11_session_e194] STOP: THE QUIET DESK FLAG is not raised (<scratch>/qui
+   QF4 s22_collect_e194.sh: rc 10; [s22_collect_e194] STOP: THE QUIET DESK FLAG is not raised (<scratch>/qui
+-> PASS (QF4 every step from the look to the collection refuses (10) with the flag down, before any box call (0 calls))
+   QF5 s05_look_e194.sh: rc 12; [s05_look_e194] STOP: aifoundry2 did not answer the probe within 15 s (rc 12): nothing else was called
+   QF5 s09_reads_e194.sh: rc 12; [s09_reads_e194] STOP: aifoundry2 did not answer the probe within 15 s (rc 12): nothing else was called
+   QF5 s11_session_e194.sh FULL: rc 12; [s11_session_e194] STOP: aifoundry2 did not answer the probe within 15 s (rc 12): nothing else was called
+   QF5 s22_collect_e194.sh: rc 12; [s22_collect_e194] STOP: aifoundry2 did not answer the probe within 15 s (rc 12): nothing else was called
+-> PASS (QF5 with the flag up, the steps go past it and stop at their first box call (the stand-in ssh answers nothing: 12))
+   QF6 none:0
+   QF6 host:16
+   QF6 ettelem-wait:0
+   QF6 sysemu:16
+   QF6 session:16
+   QF6 notcounted:0
+      none: 14:32:11 P2 0 (0 device-named process(es) of ours, 0 session or queue script(s) of ours)
+      host: 14:32:12 P2 1 (1 device-named process(es) of ours, 0 session or queue script(s) of ours)
+      host: QUIET: the P2 count is not 0 after 1 read(s): no launch (wait, bounded, or no session)
+      ettelem: 14:32:14 P2 1 (1 device-named process(es) of ours, 0 session or queue script(s) of ours)
+      ettelem: 14:32:16 P2 0 (0 device-named process(es) of ours, 0 session or queue script(s) of ours)
+      sysemu: 14:32:16 P2 1 (1 device-named process(es) of ours, 0 session or queue script(s) of ours)
+      sysemu: QUIET: the P2 count is not 0 after 1 read(s): no launch (wait, bounded, or no session)
+      session: 14:32:17 P2 1 (0 device-named process(es) of ours, 1 session or queue script(s) of ours)
+      session: QUIET: the P2 count is not 0 after 1 read(s): no launch (wait, bounded, or no session)
+      notcounted: 14:32:18 P2 0 (0 device-named process(es) of ours, 0 session or queue script(s) of ours)
+-> PASS (QF6 the P2 count: 0 with nothing; a ledger_host 16; an ettelem that ends, read again with --wait: 0; sys_emu 16; session_e194.sh run by bash 16; a grep, a bash -c string and a --dry run not counted (0))
+SELFTEST-QUIET-E194 6 of 6 PASS

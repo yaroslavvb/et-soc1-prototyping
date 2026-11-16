@@ -1,0 +1,19 @@
+identity_e194 (/usr/bin/python3 3.12.3)
+   I1 E190 arm A config-start: targets/ids ([('0', 'mgmt')], [0]), minion_mv 519 -> passes
+   I1 E190 arm A config-end: targets/ids ([('0', 'mgmt')], [0]), minion_mv 519 -> passes
+-> PASS (I1 this card's committed config reads (E190 arm A, both ends) pass the gate)
+   I2 2026-11-13-e190-large-gemm/aifoundry1-c1 config-start: PCIe target /dev/et1_mgmt, not /dev/et0_mgmt alone; Physical device ID [1], not 0 alone
+   I2 2026-11-13-e190-large-gemm/aifoundry1-c1 config-end: PCIe target /dev/et1_mgmt, not /dev/et0_mgmt alone; Physical device ID [1], not 0 alone
+   I2 2026-11-15-e191-blind-day-aifoundry1-c1/session config-start: PCIe target /dev/et1_mgmt, not /dev/et0_mgmt alone; Physical device ID [1], not 0 alone
+   I2 2026-11-15-e191-blind-day-aifoundry1-c1/session config-end: PCIe target /dev/et1_mgmt, not /dev/et0_mgmt alone; Physical device ID [1], not 0 alone
+-> PASS (I2 a second card's committed reads (aifoundry1 card 1, E190 arm B and E191, both ends) refused, each naming the card (its 499 mV lies inside this one-card box's sanity band: the node and the ID refuse it))
+   I3 missing node: ["no 'PCIe target' line on the config read's stderr (the card cannot be ", "no 'PCIe target' line on the config read's stderr (the card cannot be ", "no 'PCIe target' line on the config read's stderr (the card cannot be "]; minion_mv 0 / 619: ['minion_mv 0, not between 450 and 600 (this card read 519 at rest; a fa', 'minion_mv 619, not between 450 and 600 (this card read 519 at rest; a ']
+-> PASS (I3 a missing node's forms (no block, the guard's refusal, a failed open) refused; minion_mv 0 and 619 refused)
+   I4 E189's committed aifoundry3 card 0 host block: targets/ids ([('0', 'ops')], [0]) -> wrong [], right True
+-> PASS (I4 another box's card 0 (E189's aifoundry3 host block) passes the card test: stated (the runner's box check tells boxes apart, by hostname, the reader's pin and the builds made there today))
+   I5 this card's host stderr files 87: right 87; a second card's 87: wrong 87
+-> PASS (I5 the hosts' committed stderr blocks: this card's 87 read right, nothing wrong; a second card's 87 read wrong, every one)
+-> PASS (I6 et-who with the sampler: card 0's lines pass; a second card's, another login's and a missing sampler line refused; the held nodes the same)
+   I7 stray reader ('1 holder line(s) of ours on /dev/et0_mgmt while no sampler of ours runs', {'other': 0, 'ours_off_card0': 0, 'ours_on_ops': 0, 'ours_on_mgmt': 1}, True); host ('1 holder line(s) of ours on /dev/et0_ops while no host of ours runs', {'other': 0, 'ours_off_card0': 0, 'ours_on_ops': 1, 'ours_on_mgmt': 0}, False); second card ("1 holder line(s) of ours off card 0 (another card's node or lock)", {'other': 0, 'ours_off_card0': 1, 'ours_on_ops': 0, 'ours_on_mgmt': 0}, False); another login ('1 holder line(s) of another login', {'other': 1, 'ours_off_card0': 0, 'ours_on_ops': 0, 'ours_on_mgmt': 0}, False)
+-> PASS (I7 only a stray reader of ours on /dev/et0_mgmt reads transient (re-read with the lock held); a host, a second card, another login refuse)
+IDENTITY-E194 7 of 7 PASS

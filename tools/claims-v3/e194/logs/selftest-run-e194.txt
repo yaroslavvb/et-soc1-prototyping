@@ -1,0 +1,256 @@
+== R1 plain dry session (doubles; THE CLOCK RULE at the desk's time scale)
+   [r1] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (six passes in 8.1's form, the stop-path test (four lines, the clock rule read) and the smoke passed, DRY marks)
+   identity: config {'ids': [0], 'minion_mv': 519, 'targets': ['/dev/et0_mgmt'], 'why': ''}; et-who {'other_off_card0': 0, 'other_on_card0': 0, 'ours_off_card0': 0, 'ours_on_card0': 2, 'ours_on_mgmt': 1}; sampler ['/dev/et0_mgmt']; smoke hosts [(), ('/dev/et0_ops',)]
+-> PASS (the identity gate (a) and (b) passed on card 0's forms; every device-opening host showed card 0 (smoke and passes))
+-> PASS (the dry check: 16 device-opening commands, each with ET_DEVICES and V3_DEVICE unset, nothing of another card)
+   THE CLOCK RULE per pass (pass, verdict, samples read): [('copy-zeros/p1', 'ok', 3), ('copy-random/p1', 'ok', 4), ('sha256/p1', 'ok', 3), ('sort-sorted/p1', 'ok', 3), ('sort-shuffled/p1', 'ok', 3), ('sparse-parity/p1', 'ok', 2)]
+-> PASS (THE CLOCK RULE: every pass's live samples from its burst's start + the climb to its end read 800 MHz; none set aside; the idle 600 MHz not checked)
+-> PASS (a pass's telemetry spans its idle brackets and reads both clocks ([600, 800]: 600 at rest and in the climb, 800 after it))
+-> PASS (every pass's sampler live (largest gap under 2 s), no flag; every host's line read whole)
+== R2 the board line on a live sample during a pass
+   [r2] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: board 66.0 W at or above 65 W: the queue ended after the running process
+   the stopped pass copy-zeros/p1: 500 ms from its host's end to its end (its idle after: 500 ms)
+-> PASS (the running process finished, its idle after whole, the queue ended, the pass flagged, the closing read)
+== R3 the die line on a live sample during a pass
+   [r3] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: minshire[0] 70 C at or above 70 C: the queue ended after the running process
+   the stopped pass copy-zeros/p1: 500 ms from its host's end to its end (its idle after: 500 ms)
+-> PASS (the running process finished, its idle after whole, the queue ended, the pass flagged, the closing read)
+== C5 aifoundry2's own lines: the latch minshire[2] at 80 C; a board of 86 W on 3 samples (E189's 65 W line binds first)
+   [c5a] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: minshire[0] 50 C or the latch minshire[2] 80 C at or above 80 C: the queue ended after the running process
+   [c5b] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: board 86.0 W at or above 65 W: the queue ended after the running process
+-> PASS (the latch at 80 C stops the queue on aifoundry2's line; 86 W stops it on E189's 65 W line first)
+== C1 THE CLOCK RULE: one pass steps to 700 MHz after its climb: set aside, the session goes on
+   [c1] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS, the clock off (4 samples), SET ASIDE: the clock: 1 of 4 live samples from the burst's start + 0.15 s to its end read [700] MHz, not 800
+-> PASS (one pass set aside by the clock (no data), six passes ran, no stop)
+== C2 a second pass off the clock (another configuration): the session stops
+   [c2] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS, the clock off (3 samples), SET ASIDE: the clock: 3 of 3 live samples from the burst's start + 0.15 s to its end read [700] MHz, not 800 | DRY pass 2: copy-random p1 done: host rc 0, status PASS, reading PASS, the clock off (4 samples), SET ASIDE: the clock: 3 of 4 live samples from the burst's start + 0.15 s to its end read [700] MHz, not 800 | DRY STOP: a second pass off 800 MHz after its climb (copy-zeros/p1, copy-random/p1): the card is not at the forecast's clock (E194.md 11) | DRY STOP: a second pass off 800 MHz after its climb (copy-zeros/p1, copy-random/p1): the card is not at the forecast's clock (E194.md 11): the queue ended after the running process
+-> PASS (both passes set aside, the second stopped the queue (the card is not at the forecast's clock), the closing read)
+== C3 a governor that climbs late in every pass (0.4 s against the desk's 0.15 s allowance)
+   [c3] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS, the clock off (4 samples), SET ASIDE: the clock: 3 of 4 live samples from the burst's start + 0.15 s to its end read [600] MHz, not 800 | DRY pass 2: copy-random p1 done: host rc 0, status PASS, reading PASS, the clock off (4 samples), SET ASIDE: the clock: 2 of 4 live samples from the burst's start + 0.15 s to its end read [600] MHz, not 800 | DRY STOP: a second pass off 800 MHz after its climb (copy-zeros/p1, copy-random/p1): the card is not at the forecast's clock (E194.md 11) | DRY STOP: a second pass off 800 MHz after its climb (copy-zeros/p1, copy-random/p1): the card is not at the forecast's clock (E194.md 11): the queue ended after the running process
+-> PASS (the first pass set aside (600 MHz after the allowance), the second stopped the session)
+== C4 bursts shorter than the clock window (the desk's climb set to 5 s): every pass flagged, none set aside
+   [c4] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (each pass flagged 'the clock: no live sample ...' (the scorer reads its telemetry), none set aside, the session went on)
+== R6 the die gate at 57 C: 58 C for 6 s from the first pass's first launch; the bound 2 s
+   [r6] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 2: copy-random p1 skipped by the die gate (minshire[0] 58 C after 2 s): no data | DRY pass 3: sha256 p1 skipped by the die gate (minshire[0] 58 C after 2 s): no data
+-> PASS (a pass skipped by the die gate at 58 C (no data), later passes ran, no stop)
+== R6L a die below the forecast band (44 C throughout)
+   [r6l] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (the pass ran and is labelled 'T0 below the forecast band' (its T0 44 C))
+== R7 the cap (6 s on the desk; 108 card-minutes on the box)
+   [r7] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 4: sort-sorted p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)): no data | DRY pass 5: sort-shuffled p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)): no data | DRY pass 6: sparse-parity p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)): no data | DRY idle anchor 3: not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1))
+-> PASS (passes after the cap not started)
+== R8 the start config is not TDP 65 W
+   [r8] rc 16; DRY config start: {"tdp_w": 0, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519, "fake": true}: not TDP 65 W / 65 C / 600 MHz: the gate, no launch
+-> PASS (the gate, rc 16)
+== R9 a holder of another login on card 0
+   [r9] rc 16; DRY a holder or a foreign device process (1 holder line(s) of another login): no device opened
+-> PASS (no device opened, rc 16)
+== R10 a failed smoke run
+   [r10] rc 16; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate failed: copy-64m-random: rc 1, status FAIL
+-> PASS (smoke gate failed, no pass)
+== R11 a burst the budget cuts short
+   [r11] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (host.json says 'reps: 6 of 8 done' (SHORT, scored) and the session log reads SHORT in words)
+== R12 a FAILED RUN in a pass
+   [r12] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (reps_consistent bad, problems name the checks (not a datum); the log reads FAILED RUN)
+== R13 card 0's lock held by another process
+-> PASS (no device opened, rc 16)
+== R14 only sparse parity built today
+   [r14] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (five ledger passes SKIPPED, sparse parity's ran, its smoke alone)
+== R15 the desk's overrides and V3_DRY are refused without --dry
+   [(2, 'refused: --idle-before change the registered session and are read with --dry onl'), (2, 'refused: V3_DRY is set but --dry is not'), (2, 'refused: --cap-end-s change the registered session and are read with --dry only'), (2, 'refused: --host-bound-s change the registered session and are read with --dry on'), (2, 'refused: --climb-s change the registered session and are read with --dry only')]
+-> PASS (rc 2 each (THE CLOCK RULE's --climb-s among them), nothing started)
+== R16 a sampler that never starts: the stop path cannot be shown, no launch
+   [r16] rc 16; 
+-> PASS (no launch, rc 16)
+== R18 THE END BOUND, the closing: a sampler that ignores its first SIGTERM; the desk's cap 6 s, end bound 20 s
+   [r18] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 4: sort-sorted p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)): no data | DRY pass 5: sort-shuffled p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)): no data | DRY pass 6: sparse-parity p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)): no data | DRY idle anchor 3: not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.1)) | DRY the sampler did not stop within 2 s of SIGTERM: SIGTERM once more
+-> PASS (the closing bounded: the second SIGTERM, the closing read, closed by the bound (8.9 s))
+== R19 THE END BOUND, the die gate: 58 C from the first pass's first launch on, the 10-minute wait, the desk's cap 8 s
+   [r19] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 2: copy-random p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333); the die gate read 58 C after 5 s): no data | DRY pass 3: sha256 p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333)): no data | DRY pass 4: sort-sorted p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333)): no data | DRY pass 5: sort-shuffled p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333)): no data | DRY pass 6: sparse-parity p1 not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333)): no data | DRY idle anchor 3: not started (the cap: 0.1 card-minutes since the first card command (no pass after 0.133333))
+-> PASS (the die gate stopped waiting at the cap; the session closed within 60 s (8.8 s), not 10 minutes)
+== I1 the start config read: card1
+   [i1] rc 16; DRY config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 499, "fake": true}: IDENTITY GATE FAILED: PCIe target /dev/et1_mgmt, not /dev/et0
+-> PASS (i1: the identity gate (a) refused it before the sampler and any host, rc 16)
+== I2 the start config read: mv0
+   [i2] rc 16; DRY config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 0, "fake": true}: IDENTITY GATE FAILED: minion_mv 0, not between 450 and 600 (thi
+-> PASS (i2: the identity gate (a) refused it before the sampler and any host, rc 16)
+== I3 the start config read: noident
+   [i3] rc 16; DRY config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519, "fake": true}: IDENTITY GATE FAILED: no 'PCIe target' line on the config rea
+-> PASS (i3: the identity gate (a) refused it before the sampler and any host, rc 16)
+== I4 the sampler holds a second card's node
+   [i4] rc 16; DRY identity (b): IDENTITY GATE FAILED: no holder line of ours on /dev/et0_mgmt (the sampler's) with the sampler running; 1 holder line(s) of ours off card 0 (another card's node or lock); the sampler does not hold /dev/
+-> PASS (the identity read (b) refused it before any host, rc 16)
+== I5 et-who before the first card command: ours1
+   [i5] rc 16; DRY a holder or a foreign device process (1 holder line(s) of ours off card 0 (another card's node or lock)): no device opened
+-> PASS (i5: refused before the first card command at the first read (not a stray reader: no re-read), rc 16)
+== I6 et-who before the first card command: other1
+   [i6] rc 16; DRY a holder or a foreign device process (1 holder line(s) of another login): no device opened
+-> PASS (i6: refused before the first card command at the first read (not a stray reader: no re-read), rc 16)
+== I7 et-who before the first card command: ops
+   [i7] rc 16; DRY a holder or a foreign device process (1 holder line(s) of ours on /dev/et0_ops while no host of ours runs): no device opened
+-> PASS (i7: refused before the first card command at the first read (not a stray reader: no re-read), rc 16)
+== I8 a host names and holds a second card in the smoke
+   [i8] rc 16; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate failed: copy-64m-random: the host's card: ANOTHER CARD: stderr PCIe target /dev/et1_ops; stderr Physical device ID 1
+-> PASS (the smoke gate failed at the first device-opening host; no second host, no pass, rc 16)
+== I9 a host names and holds a second card in a pass (the 8th device-opening host: pass 1)
+   [i9] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 1: copy-zeros p1 done: host rc 0, status PASS, reading PASS, the clock ok (4 samples), SET ASIDE: identity: the host named or held another card (holds /dev/et1_ops; stderr PCIe target /dev/et1_ops; stderr Physic | DRY STOP: identity: the host named or held another card (holds /dev/et1_ops; stderr PCIe target /dev/et1_ops; stderr Physical device ID 1): the queue ended after the running process
+-> PASS (that pass SET ASIDE by its identity, the session stopped after it, the closing read)
+== I10 a host that shows no card in a pass
+   [i10] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (flagged 'the host's card was not seen' (reported), the session went on)
+== H1 THE HOST'S LINE split by a runtime line in every ledger host (smoke and passes)
+   [h1] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (the smoke read ok and every pass PASS; each ledger host's line reassembled around the one runtime span, recorded (run.json, smoke.json, the log))
+== H2 a line split by a line no lab box printed (pass 1): fix-e194, 'none', a FAILED RUN
+   [h2] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (the pass read 'none', a FAILED RUN (never read around a span no lab box printed), the span named; the other passes PASS)
+== H3 a line split by the line 42 (pass 1): 'none', a FAILED RUN
+   [h3] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+   pass 1 copy-zeros/p1: reading FAILED RUN (not a datum); host_line none: a raw newline inside the object read (a foreign line's end inside the host's line, not at a dropped runtime line: a line; host-raw.json ''
+-> PASS (h3: the pass read 'none' (a raw newline inside the object read), a FAILED RUN with an empty host-raw.json, never a wrong head field; the other passes PASS)
+== H4 a line split by a lone brace line (pass 1): 'none', a FAILED RUN
+   [h4] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+   pass 1 copy-zeros/p1: reading FAILED RUN (not a datum); host_line none: the line is not the host's complete line for this command: no status; host-raw.json ''
+-> PASS (h4: the pass read 'none' (no status), a FAILED RUN with an empty host-raw.json, never a wrong head field; the other passes PASS)
+== T1 THE HOLDER RE-READ: a stray reader of ours on /dev/et0_mgmt at the first read only
+   [t1] rc 0; DRY the holder rule read a stray reader of ours (1 holder line(s) of ours on /dev/et0_mgmt while no sampler of ours runs) with card 0's lock held: read again in 2 s (1 of 3) | DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+-> PASS (read again with the lock held, clear, then the session ran (six passes))
+== T2 the stray reader stays
+   [t2] rc 16; DRY the holder rule read a stray reader of ours (1 holder line(s) of ours on /dev/et0_mgmt while no sampler of ours runs) with card 0's lock held: read again in 2 s (1 of 3) | DRY the holder rule read a stray reader of ours (1 holder line(s) of ours on /dev/et0_mgmt while no sampler of ours runs) with card 0's lock held: read again in 2 s (2 of 3) | DRY the holder rule read a stray reader of ours (1 holder line(s) of ours on /dev/et0_mgmt while no sampler of ours runs) with card 0's lock held: read again in 2 s (3 of 3) | DRY a holder or a foreign device process (1 holder line(s) of ours on /dev/et0_mgmt while no sampler of ours runs): no device opened
+-> PASS (refused after 3 re-reads (4 reads), no device opened, rc 16)
+== B1 THE 30 s BOUND: a host that ignores SIGTERM past the runner's bound (the desk's 2 s); card 0's lock held while it runs
+   [b1] rc 0; DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY BOUND: the host process (pid 430785) outlived the runner's 2 s bound: `timeout 10` did not end it; nothing is killed; the queue stops | DRY pass 1: copy-zeros p1 done: host rc None, status None, reading BOUND (no reading: the host did not end), the clock unread (0 samples), the host's line could not be read (no object beginning with ' | DRY STOP: BOUND: the host process (pid 430785) outlived the runner's 2 s bound: `timeout 10` did not end it; nothing is killed; the queue stops: the queue ended after the running process | DRY after the BOUND: card 0's lock stays held while our host (pid 430785) runs; its end is polled every 1 s, nothing is killed, at most until 16:26:02 PST | DRY the host past the bound (pid 430785) has ended (rc 124, 4 s into the wait); card 0's lock was held until then | DRY config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 519; its identity card 0
+   the session's wall time 9.2 s; the lock while the stuck host ran: HELD; bound records [{'argv': ['build/e194ledger/host/ledger_host', '--card', '--prog', 'copy', '--bytes', '1G', '--passes', '14', '--data', 'zeros', '--width', '32', '--launches', '8', '--kernel', 'build/e194ledger/kernel/ledger.elf'], 'pid': 430785, 't0_ms': 1794782184656, 'ended_ms': 1794782191160, 'rc': 124}]
+-> PASS (BOUND logged, the queue stopped after that pass, nothing killed, the closing read)
+-> PASS (finding 4: card 0's lock HELD while the stuck host ran; its end polled (nothing killed); the closing read only after it ended)
+== B2 THE BOUND WAIT'S OWN BOUND: the stuck host outlives the end bound less the closing's share (the desk's end bound 30 s)
+   [b2] rc 0; DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY BOUND: the host process (pid 431659) outlived the runner's 2 s bound: `timeout 10` did not end it; nothing is killed; the queue stops | DRY pass 1: copy-zeros p1 done: host rc None, status None, reading BOUND (no reading: the host did not end), the clock unread (0 samples), the host's line could not be read (no object beginning with ' | DRY STOP: BOUND: the host process (pid 431659) outlived the runner's 2 s bound: `timeout 10` did not end it; nothing is killed; the queue stops: the queue ended after the running process | DRY after the BOUND: card 0's lock stays held while our host (pid 431659) runs; its end is polled every 1 s, nothing is killed, at most until 14:36:41 PST | DRY the host past the bound (pid 431659) still runs at the end bound less the closing's share: card 0's lock is released with it running and the closing config read is not run beside it; reported (not | DRY config end: NOT RUN: our host past the runner's bound (pid 431659) still runs; nothing starts beside it (nothing killed)
+-> PASS (the lock released with the stuck host still running (recorded, reported), the closing config read not run beside it, rc 0)
+   the stand-in stuck host (pid 431659) ended by itself afterwards: True (never killed)
+== F1 the sampler hangs inside pass 1 (the schedule's 9th launch): restarted; every host on a live sample
+   [f1] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+   passes 6; the last sample's age at each pass's host start [0.01, 1.55, 0.06, 0.05, 0.09, 0.08]; at each smoke process [0.04, 0.09, 0.07, 0.0, 0.07, 0.04, 0.01]
+-> PASS (f1: the sampler restarted; every host process (smoke and passes) started on a sample under 2 s old)
+   fix-e191k2: (pass, largest live-sample gap s, flagged) [('copy-zeros/p1', 1.03, False), ('copy-random/p1', 2.67, True), ('sha256/p1', 0.1, False), ('sort-sorted/p1', 0.1, False), ('sort-shuffled/p1', 0.1, False), ('sparse-parity/p1', 0.1, False)]
+-> PASS (f1 (fix-e191k2, nit 2): each pass flagged 'the sampler was not live during this pass' exactly when its largest live-sample gap was 2 s or more; queue.json lists those passes)
+== F2 the sampler dies inside pass 1 (the schedule's 9th launch): restarted; every host on a live sample
+   [f2] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+   passes 6; the last sample's age at each pass's host start [0.1, 0.06, 0.1, 0.09, 0.04, 0.04]; at each smoke process [0.03, 0.09, 0.06, 0.1, 0.07, 0.04, 0.0]
+-> PASS (f2: the sampler restarted; every host process (smoke and passes) started on a sample under 2 s old)
+   fix-e191k2: (pass, largest live-sample gap s, flagged) [('copy-zeros/p1', 1.02, False), ('copy-random/p1', 0.1, False), ('sha256/p1', 0.1, False), ('sort-sorted/p1', 0.1, False), ('sort-shuffled/p1', 0.1, False), ('sparse-parity/p1', 0.1, False)]
+-> PASS (f2 (fix-e191k2, nit 2): each pass flagged 'the sampler was not live during this pass' exactly when its largest live-sample gap was 2 s or more; queue.json lists those passes)
+== F3 every sampler of the session silent from the schedule's 9th launch on: the restart fails, the queue stops
+   [f3] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: the sampler would not restart: the queue ended after the running process
+   passes 2; ages at host start [0.1, 1.54]; fix-e191k2: (pass, largest live-sample gap s, flagged) [('copy-zeros/p1', 1.02, False), ('copy-random/p1', 2.66, True)]
+-> PASS (no host started on a stale sample; 'the sampler would not restart' ended the queue; the closing; each pass flagged exactly when its largest live-sample gap was 2 s or more (fix-e191k2))
+== F4 (nit 1) the sampler keeps printing, but without board_w, from the schedule's 9th launch (once): those lines are not live
+   [f4] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+   passes 6; lines not live 26; ages at host start [0.0, 1.55, 0.05, 0.04, 0.09, 0.08]; (pass, gap, flagged) [('copy-zeros/p1', 1.02, False), ('copy-random/p1', 2.67, True), ('sha256/p1', 0.1, False), ('sort-sorted/p1', 0.1, False), ('sort-shuffled/p1', 0.1, False), ('sparse-parity/p1', 0.1, False)]
+-> PASS (F4: lines without board_w never kept the sampler live: it was restarted (SIGTERM), every host started on a live sample, each pass flagged exactly when its largest live-sample gap was 2 s or more (verify-e191k2's break case kept the session 'live' on them))
+== F5 (nit 1) every sampler of the session prints without board_w from the schedule's 9th launch: none counts as started
+   [f5] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: the sampler would not restart: the queue ended after the running process
+   passes 2; lines not live 626; ages at host start [0.1, 1.54]; (pass, gap, flagged) [('copy-zeros/p1', 1.02, False), ('copy-random/p1', 2.66, True)]
+-> PASS (F5: a sampler printing only lines without board_w never counts as started: 'the sampler would not restart' ended the queue)
+== F6 (nit 2) the sampler prints nothing for 3 s from the schedule's 9th launch (pass 1's 2nd), then prints again; idles 3 s
+   [f6] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+   passes 6; pass 1: ages at host start/end and pass end 0.09 / 0.51 / 0.0, largest gap 3.11 s; (pass, gap, flagged) [('copy-zeros/p1', 3.11, True), ('copy-random/p1', 0.1, False), ('sha256/p1', 0.1, False), ('sort-sorted/p1', 0.1, False), ('sort-shuffled/p1', 0.1, False), ('sparse-parity/p1', 0.1, False)]
+-> PASS (F6: the pass in which the sampler paused is flagged by its largest live-sample gap (its age at the host's end alone was under 2 s); no other pass is flagged; the session goes on)
+== F8 (fix-e194, nit 7) six sampler lines of other shapes inside pass 1 (the schedule's 9th launch): the reader lives on
+   [f8] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+   passes 6; lines not live 6; lines whose reading raised 0 []; sampler starts 1; (pass, gap, flagged) [('copy-zeros/p1', 0.1, False), ('copy-random/p1', 0.1, False), ('sha256/p1', 0.1, False), ('sort-sorted/p1', 0.1, False), ('sort-shuffled/p1', 0.1, False), ('sparse-parity/p1', 0.1, False)]
+-> PASS (F8: the six lines read as not live, none raised in the reader, the sampler never restarted, no pass flagged, six passes PASS)
+== F7 (nit 2) the sampler goes quiet at the schedule's 9th launch, with the REGISTERED 8 s / 10 s idles (the verifier's X9b)
+   [f7] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY pass 3: sha256 p1 not started (the cap: 0.7 card-minutes since the first card command (no pass after 0.5)): no data | DRY pass 4: sort-sorted p1 not started (the cap: 0.7 card-minutes since the first card command (no pass after 0.5)): no data | DRY pass 5: sort-shuffled p1 not started (the cap: 0.7 card-minutes since the first card command (no pass after 0.5)): no data | DRY pass 6: sparse-parity p1 not started (the cap: 0.7 card-minutes since the first card command (no pass after 0.5)): no data | DRY idle anchor 3: not started (the cap: 0.7 card-minutes since the first card command (no pass after 0.5))
+   passes 2; pass 1's host span: 2 live sample(s), gap 0.51 s; (pass, gap, flagged) [('copy-zeros/p1', 10.51, True), ('copy-random/p1', 0.1, False)]
+-> PASS (F7: with the registered idles the pass in which the sampler went quiet is flagged (X9b: no runner flag); the sampler restarted before pass 2, which is not flagged)
+== W1 et-who before the first card command: fail
+   [w1] rc 16; DRY a holder or a foreign device process (et-who unreadable (rc 1, nothing on its stdout)): no device opened
+-> PASS (w1: unreadable, refused before the first card command, rc 16)
+== W2 et-who before the first card command: garbled
+   [w2] rc 16; DRY a holder or a foreign device process (et-who unreadable (rc 0, but neither a holder line nor its no-holder sentence)): no device opened
+-> PASS (w2: unreadable, refused before the first card command, rc 16)
+== W3 et-who refused from its 4th call on (the holder rule before pass 2)
+   [w3] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP before pass 2: et-who unreadable (rc 1, nothing on its stdout) | DRY STOP: a holder or a foreign device process: et-who unreadable (rc 1, nothing on its stdout): the queue ended after the running process
+-> PASS (STOP before pass 2 (an unread holder rule is never 'no holder'), the closing read, rc 0)
+== W4 et-who refused at its 2nd call (the identity read, with the sampler running)
+   [w4] rc 16; DRY identity (b): IDENTITY GATE FAILED: et-who unreadable (rc 1, nothing on its stdout): the gate, no launch
+-> PASS (the identity gate (b) fails, rc 16, no host)
+== Q1 the stop file while pass 2's host runs
+   [q1] rc 0; DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY STOP asked: an early stop was asked for (the stop file (STOP in the session's directory)): no further process starts; the running one (if any) ends by itself, then the closing | DRY STOP: an early stop was asked for (the stop file (STOP in the session's directory)): the queue ended after the running process | DRY config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 519; its identity card 0
+-> PASS (q1: pass 2's host ended by itself and kept its idle after (500 ms), no further pass, the closing read, queue.json, the manifest, rc 0)
+== Q2 a SIGTERM to the runner while pass 2's host runs
+   [q2] rc 0; DRY smoke ledger-selftest: rc 0, ok (0.1 s); the host's card: no device (the self-test) | DRY STOP asked: an early stop was asked for (a SIGTERM to the runner): no further process starts; the running one (if any) ends by itself, then the closing | DRY STOP: an early stop was asked for (a SIGTERM to the runner): the queue ended after the running process | DRY config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 519; its identity card 0
+-> PASS (q2: pass 2's host ended by itself and kept its idle after (500 ms), no further pass, the closing read, queue.json, the manifest, rc 0)
+== Q3 the stop file present before the session
+-> PASS (no device opened, rc 16)
+== Q4 the stop file written 0 ms after the session log reads 'config start:' (verify-e191k2's break case; the stop-path test's three lines take 0.3 s or more)
+   [q4] rc 16; DRY STOP asked: an early stop was asked for (the stop file (STOP in the session's directory)): no further process starts; the running one (if any) ends by itself, then the closing | DRY an early stop was asked for (the stop file (STOP in the session's directory)) before the stop-path test: the gate, no launch | DRY config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 519; its identity card 0
+-> PASS (q4: an early stop at the gate, logged as one ('before the stop-path test: the gate, no ...'; step 10 reads GATE-STOPPED), never 'stop-path test failed'; no smoke, the closing read, queue.json's early_stop, rc 16)
+== Q5 the stop file written 50 ms after the session log reads 'identity (b): et-who with the sampler ru' (verify-e191k2's break case; the stop-path test's three lines take 0.3 s or more)
+   [q5] rc 16; DRY STOP asked: an early stop was asked for (the stop file (STOP in the session's directory)): no further process starts; the running one (if any) ends by itself, then the closing | DRY an early stop was asked for (the stop file (STOP in the session's directory)) during the stop-path test (its lines not read): the gate, no launch | DRY config end: TDP 65 W, threshold 65 C, minion 600 MHz, minion_mv 519; its identity card 0
+-> PASS (q5: an early stop at the gate, logged as one ('during the stop-path test (its lines not...'; step 10 reads GATE-STOPPED), never 'stop-path test failed'; no smoke, the closing read, queue.json's early_stop, rc 16)
+== D1 the dry check's refusals on recorded command lines (for this box: ET_DEVICES and V3_DEVICE unset, nothing of another card)
+   {'good': 'ok', 'ET_DEVICES set': 'FAILED', 'V3_DEVICE set': 'FAILED', 'etsoc-shire1': 'FAILED', '/dev/et1_': 'FAILED', 'ET_DEVICES=0 in a command': 'FAILED', 'V3_DEVICE=1 in a command': 'FAILED', 'dev_mngt_service': 'FAILED', 'et-powertop': 'FAILED', "a lock not card 0's": 'FAILED'}
+-> PASS (each forbidden form read FAILED; the good line ok)
+== E2E energy_stub's alt sampler under the doubles' clock, the registered 8 s / 10 s idles and 1.5 s climb, from a stand-in box tree
+   [e2e] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL)
+   COPY-BACK EXACT: every file of the box's MANIFEST.sha256 at its sha256, nothing else but runner.rc
+   BOX-TREE GATE: every path under the box's home in the 83 text files read lies in its tree ~/claude/et-soc1-prototyping/; no scratch root
+   COLLECTED 2026-11-15-e194-blind-day-aifoundry2: 6 passes reduced; 98 files in SHA256SUMS (and FILES.txt); the scrub clean (no /home/ path, no box login)
+   files holding the stand-in box home after the scrub: 0
+   copy-zeros/p1: reduced 5.2415 J a launch over idle, injected 5.0821 (8 launches): +3.1% against TOL 12.8%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   sha256/p1: reduced 3.4783 J a launch over idle, injected 3.4342 (9 launches): +1.3% against TOL 14.4%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   sparse-parity/p1: reduced 8.5203 J a launch over idle, injected 8.5922 (9 launches): -0.8% against TOL 7.4%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   copy-zeros/p2: reduced 4.7904 J a launch over idle, injected 5.0821 (8 launches): -5.7% against TOL 12.8%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   sha256/p2: reduced 3.5653 J a launch over idle, injected 3.4342 (9 launches): +3.8% against TOL 14.4%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   sparse-parity/p2: reduced 8.7175 J a launch over idle, injected 8.5922 (9 launches): +1.5% against TOL 7.4%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   scored copy-zeros: e_j_over +2.6%, e_j_total +3.6%, t_k/point 1.0000, e_j_total_forecast +2.2%
+   scored sha256: e_j_over -0.6%, e_j_total +3.7%, t_k/point 1.0000, e_j_total_forecast +1.5%
+   scored sparse-parity: e_j_over +1.8%, e_j_total +3.8%, t_k/point 1.0000, e_j_total_forecast +2.1%
+   scorer rc 0; scored ['copy-zeros', 'sha256', 'sparse-parity']; NO DATA ['copy-random', 'sort-shuffled', 'sort-sorted']; verdicts {'E194-S1': 'NOT DECIDED', 'E194-S1T': 'NOT DECIDED', 'E194-S2': 'NOT DECIDED', 'E194-S2T': 'NOT DECIDED'}; not used []
+   the reducer's clock line (read by THE CLOCK RULE, never a failure): 6 of 6 passes; any other hard line: none in a pass read ok
+-> PASS (from the box tree: every pass's clock ok (the registered 1.5 s climb), COPY-BACK EXACT and THE BOX-TREE GATE passed, every pass reduced (flagged DRY; no hard line but the clock line, as the scorer reads it), the frozen scorer (its clock rule) read three configurations and three NO DATA)
+-> PASS (each pass's reduced J over idle within TOL of the energy the alt card injected (fault 1))
+-> PASS (the verdict words: S1 and S2 NOT DECIDED (as injected: 3 scored, all within; 3 NO DATA); S1T and S2T words only)
+== BT THE BOX-TREE GATE: the same session with a desk path written in (the lab clone's form) and with a scratch root
+   bt1: rc 3; BOX-TREE GATE: a desk path in the session's files (1): session.log: <scratch>/boxhome/git/et-soc1-prototyping/t: nothing written; data written False
+   bt2: rc 3; BOX-TREE GATE: a desk path in the session's files (1): session.log: a session scratch root (/tmp/claude-...): nothing written; data written False
+-> PASS (COPY-BACK EXACT, then the box-tree gate refused a desk path under the home outside the box tree, and a scratch root: nothing written (exit 3))
+== R2E the board line during copy-zeros/p2 on the alt card; reduced and scored
+   [r2e] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: board 66.0 W at or above 65 W: the queue ended after the running process
+   passes run ['copy-zeros/p1', 'sha256/p1', 'sparse-parity/p1', 'copy-zeros/p2']; the stopped pass copy-zeros/p2: 10001 ms from its host's end to its end; flags ['a stop line tripped during this pass: board 66.0 W at or above 65 W']
+   COPY-BACK EXACT: every file of the box's MANIFEST.sha256 at its sha256, nothing else but runner.rc
+   BOX-TREE GATE: every path under the box's home in the 69 text files read lies in its tree ~/claude/et-soc1-prototyping/; no scratch root
+   COLLECTED 2026-11-15-e194-blind-day-aifoundry2: 4 passes reduced; 80 files in SHA256SUMS (and FILES.txt); the scrub clean (no /home/ path, no box login)
+   files holding the stand-in box home after the scrub: 0
+   copy-zeros/p1: reduced 5.1855 J a launch over idle, injected 5.0821 (8 launches): +2.0% against TOL 12.8%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   sha256/p1: reduced 3.4443 J a launch over idle, injected 3.4342 (9 launches): +0.3% against TOL 14.4%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   sparse-parity/p1: reduced 8.5362 J a launch over idle, injected 8.5922 (9 launches): -0.7% against TOL 7.4%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   copy-zeros/p2: reduced 4.8732 J a launch over idle, injected 5.0821 (8 launches): -4.1% against TOL 12.8%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   scorer rc 0; scored ['copy-zeros']; copy-zeros's scored passes [1, 2]; not used []
+-> PASS (r2e: the process finished, its pass flagged and its 10 s after whole, the queue ended after it)
+-> PASS (r2e: every pass reduced within TOL, the stopped one with no cut-tail flag, and scored on its configuration's two passes)
+   the cut tail (151 of 246 samples kept): reducer rc 1, J over idle a launch 4.39915, flags ['telemetry ends 5.5 s before the long window does (SP average and rails understated)']
+   the whole pass 4.87319 J a launch; cut where the first kit cut it 4.39915: 9.7% lower
+-> PASS (THE CUT TAIL (control): the pass cut 0.5 s after its host is flagged and reads more than 3% low)
+== R3E the die line during sha256/p2 on the alt card; reduced and scored
+   [r3e] rc 0; DRY stop-path test passed: board tripped in 0.1 s, start refused; die tripped in 0.1 s, start refused; board-85x3 tripped in 0.3 s, start refused; die-80-or-latch tripped in 0.1 s, start refused; the clock rule read the  | DRY smoke ledger-selftest: rc 0, ok (0.0 s); the host's card: no device (the self-test) | DRY smoke gate passed: queue starts (plan FULL) | DRY STOP: minshire[0] 70 C at or above 70 C: the queue ended after the running process
+   passes run ['copy-zeros/p1', 'sha256/p1', 'sparse-parity/p1', 'copy-zeros/p2', 'sha256/p2']; the stopped pass sha256/p2: 10000 ms from its host's end to its end; flags ['a stop line tripped during this pass: minshire[0] 70 C at or above 70 C']
+   COPY-BACK EXACT: every file of the box's MANIFEST.sha256 at its sha256, nothing else but runner.rc
+   BOX-TREE GATE: every path under the box's home in the 76 text files read lies in its tree ~/claude/et-soc1-prototyping/; no scratch root
+   COLLECTED 2026-11-15-e194-blind-day-aifoundry2: 5 passes reduced; 89 files in SHA256SUMS (and FILES.txt); the scrub clean (no /home/ path, no box login)
+   files holding the stand-in box home after the scrub: 0
+   copy-zeros/p1: reduced 5.1999 J a launch over idle, injected 5.0821 (8 launches): +2.3% against TOL 12.8%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   sha256/p1: reduced 3.4391 J a launch over idle, injected 3.4342 (9 launches): +0.1% against TOL 14.4%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   sparse-parity/p1: reduced 8.5207 J a launch over idle, injected 8.5922 (9 launches): -0.8% against TOL 7.4%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   copy-zeros/p2: reduced 4.8791 J a launch over idle, injected 5.0821 (8 launches): -4.0% against TOL 12.8%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   sha256/p2: reduced 3.4933 J a launch over idle, injected 3.4342 (9 launches): +1.7% against TOL 14.4%: within; ok False, hard ['minion clock in busy samples: [600, 800] MHz (the governor moved it)']
+   scorer rc 0; scored ['copy-zeros', 'sha256']; sha256's scored passes [1, 2]; not used []
+-> PASS (r3e: the process finished, its pass flagged and its 10 s after whole, the queue ended after it)
+-> PASS (r3e: every pass reduced within TOL, the stopped one with no cut-tail flag, and scored on its configuration's two passes)
+SELFTEST-RUN-E194 75 of 75 PASS

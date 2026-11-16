@@ -1,0 +1,44 @@
+dryaudit_e194 (/usr/bin/python3 3.12.3): every line of run_e194.py that reads the dry flag, the real path there, and the desk cases that ran it (each must read PASS in its committed log)
+  line  115 [__init__] self.dry = a.dry
+      real path: the flag itself (no branch); cases rp:RP1: COVERED
+  line  154 [__init__] if self.dry:
+      real path: the doubles' environment (schedule, stand-in nodes and lock, the alt card) is NOT set: the real nodes, lock and card; cases rp:RP1: COVERED
+  line  163 [__init__] self.watch_dir = self.dev_dir if self.dry else None
+      real path: the watch reads the card's nodes where they are (/dev on the box; e194_ident.DEV_DIR): the sampler's fds and every host's tree; cases rp:RP1, rp:RP9, rp:RP12: COVERED
+  line  167 [say] w = ("DRY " + words) if self.dry and not words.startswith("session start") else words
+      real path: no DRY mark on any line (the rest rule counts the session); cases rp:RP1: COVERED
+  line  175 [record] self.cmd_log.write(json.dumps({"kind": kind, "real": real_argv, "used": used_argv, "dry": self.d
+      real path: each command recorded with its real form (used equals real), ET_DEVICES and V3_DEVICE unset; cases rp:RP1: COVERED
+  line  189 [cmd_config] c = self.fake() + ["config"] if self.dry else self.real_config()
+      real path: the config read through E194's guard under `timeout 10` (its hostname and ET_DEVICES / V3_DEVICE rules), its stderr kept, its line read whole (host_json); cases rp:RP1, rp:RP7, rp:RP8, rp:RW1: COVERED
+  line  197 [cmd_sampler] c = (self.fake() + ["sample", "--seconds", str(int(seconds)), "--every-ms", str(C.EVERY_MS)]) if
+      real path: the sampler through the guard; its own fds read for the identity; cases rp:RP1, rp:RP9: COVERED
+  line  203 [cmd_etwho] c = self.fake() + ["etwho"] if self.dry else ["timeout", "20", "et-who"]
+      real path: et-who under `timeout 20` (PATH's et-who); cases rp:RP1, rp:RP10, rp:RP11, rp:RT1, rp:RT3: COVERED
+  line  209 [host_cmd] if self.dry:
+      real path: ONE host process under the real `timeout 10`, watched (stderr block, held nodes), the runner's bound; its line read from its whole stdout (host_json); cases rp:RP1, rp:RP12, rp:RP13, rp:RP14, rp:RH1, rp:RH2: COVERED
+  line  256 [our_device_procs] if self.dry:
+      real path: the real ps read of our own device processes, the sampler's tree left out (and the start's re-read of a stray one); cases rp:RP3, rp:RP20, rp:RT2: COVERED
+  line  285 [foreign_read] if not self.dry:
+      real path: the real ps read: other users' device processes (a positive count needs a second login: not made on the desk) and our own (RP3); cases rp:RP1, rp:RP3: COVERED
+  line  866 [one_pass] run = {"preset": cfg, "card": "aifoundry2 card 0", "et_devices": self.env.get("ET_DEVICES"), "dr
+      real path: bookkeeping in run.json / pass.json / queue.json; cases rp:RP1: COVERED
+  line  867 [one_pass] "lock": C.LOCK if not self.dry else "DRY",
+      real path: run.json names the card's lock; cases rp:RP1: COVERED
+  line  872 [one_pass] "host_cpu_ext_s": cpu, "identity": wres, "stub_card": self.a.double if self.dry else None,
+      real path: run.json names no stub card; cases rp:RP1: COVERED
+  line  890 [one_pass] "dry": self.dry}, fo, indent=1)
+      real path: bookkeeping in pass.json (THE CLOCK RULE's verdict beside it); cases rp:RP1, rp:RC1: COVERED
+  line  924 [run] tag = " DRY" if self.dry else ""
+      real path: the session start line has no DRY tag (the rest rule counts it); cases rp:RP1: COVERED
+  line  928 [run] result = {"t0": a.t0, "dry": self.dry, "programs": self.programs, "queue": self.queue, "card": "
+      real path: bookkeeping in run.json / pass.json / queue.json; cases rp:RP1: COVERED
+  line  934 [run] if not self.dry:
+      real path: THE BOX CHECK: aifoundry2, ET_DEVICES and V3_DEVICE unset, the reader at its pin, today's build records made on aifoundry2, hosts and kernels at their records' sha256 with the kernel gate's OK line; cases rp:RP1, rp:RP4, rp:RP5, rp:RP6, rp:RP8, rp:RW1, rp:RP22, rp:RP23: COVERED
+  line  941 [run] lockp = os.path.join(self.out, "dry.lock") if self.dry else C.LOCK
+      real path: card 0's lock (e194_common.LOCK), flock -n, held to the end (and while a host past the bound runs); cases rp:RP1, rp:RP2, rp:RP14: COVERED
+  line 1075 [run] if self.dry and self.device_opened:
+      real path: no dry check (the real path's commands are recorded in commands.jsonl; RP1 reads each real, each with ET_DEVICES and V3_DEVICE unset); cases rp:RP1: COVERED
+  line 1138 [main] if not a.dry:
+      real path: main(): the desk's overrides (--climb-s among them) and V3_DRY refused without --dry; the registered session through session_e194.sh; cases run:R15, rb:LA: COVERED
+DRY-AUDIT-E194 21 of 21 COVERED

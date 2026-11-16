@@ -1,0 +1,14 @@
+selftest_wait_e194 (/usr/bin/python3 3.12.3), 2026-11-15 14:50:16 PST
+step 10's GATE-STOPPED pattern, read from rb/s20_wait_e194.sh: stop-path test failed|smoke gate failed|no device opened|the gate, no launch|would not start
+   G1: the dry session rc 0, 33 lines; RP1's real-path log 32 lines; identity and box-check pass lines 18; pattern hits []
+-> PASS (G1 no line of a whole E194 session (dry, and the real path's RP1, identity, clock and holder re-read lines among them) reads as a gate stop)
+   G2: 14 gate-stop sentences in run_e194.py, 18 gate-stop lines in the real-path log; not matched: []
+-> PASS (G2 every gate-stop sentence of the runner and every real-path gate-stop line reads as a gate stop)
+   G3: E189's real session 67 lines, E190 arm A's on this card 50 lines (2 identity lines); hits []; E191's stop record: 1 gate-stop line(s): ['2026-11-15 10:14:56 PST smoke gate failed: copy-64m-random: rc 0, status None']
+-> PASS (G3 no line of E189's or E190 arm A's committed real session reads as a gate stop; E191's committed stop record does)
+-> PASS (G4 E194's clock, reassembly and holder re-read lines (in the runner's words) read as no gate stop)
+-> PASS (B1 the runner's BOUND line is BOUND-SEEN's and no gate stop's)
+   N1: {'counted-real': '1', 'counted-dashc': '0', 'counted-grep': '0', 'counted-step9': '0 0', 'counted-dry': '0'} (stderr '')
+-> PASS (N1 the session counted by its own script; a -c string, a grep, the desk's step 9 script and a dry run not counted)
+-> PASS (N2 step 9 launches session_e194.sh by that name, step 10 looks for that name, and the runner is its child (no exec))
+SELFTEST-WAIT-E194 7 of 7 PASS
